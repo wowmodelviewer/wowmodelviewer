@@ -72,17 +72,7 @@ bool CASCFolder::setConfig(core::GameConfig config)
 
 			addExtraEncryptionKeys();
 
-			if (CascOpenFile(hStorage, "Interface\\FrameXML\\Localization.lua", it->second, 0, &dummy))
-			{
-				CascCloseFile(dummy);
-				m_currentCascLocale = it->second;
-				LOG_INFO << "Locale succesfully set:" << m_currentConfig.locale;
-			}
-			else
-			{
-				LOG_ERROR << "Setting Locale" << m_currentConfig.locale << "for folder" << m_folder << "failed";
-				return false;
-			}
+			m_currentCascLocale = it->second;
 		}
 	}
 
