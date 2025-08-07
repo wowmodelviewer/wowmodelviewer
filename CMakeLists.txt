@@ -35,7 +35,7 @@ endif()
 add_subdirectory(ThirdParty/CxImage)
 
 # CascLib
-option(CASC_UNICODE ON)
+set(CASC_UNICODE ON CACHE BOOL "Use Unicode in CascLib" FORCE)
 set(CASC_BUILD_STATIC_LIB ON CACHE BOOL "Force Static library building")
 set(CASC_BUILD_SHARED_LIB OFF CACHE BOOL "Compile dynamically linked library")
 include_directories(ThirdParty/casclib/src)
