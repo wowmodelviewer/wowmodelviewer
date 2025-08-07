@@ -60,6 +60,18 @@ CreateDirectory $INSTDIR\games\wow
 SetOutPath $INSTDIR\games\wow\10.1
 File "${wmvroot}\bin_support\wow\10.1\*"
 
+CreateDirectory $INSTDIR\games\wow
+SetOutPath $INSTDIR\games\wow\11.0
+File "${wmvroot}\bin_support\wow\11.0\*"
+
+CreateDirectory $INSTDIR\games\wow
+SetOutPath $INSTDIR\games\wow\11.1
+File "${wmvroot}\bin_support\wow\11.1\*"
+
+CreateDirectory $INSTDIR\games\wow
+SetOutPath $INSTDIR\games\wow\11.2
+File "${wmvroot}\bin_support\wow\11.2\*"
+
 CreateDirectory $INSTDIR\localisation
 SetOutPath $INSTDIR\localisation
 File "${wmvroot}\bin_support\localisation\*.mo"
