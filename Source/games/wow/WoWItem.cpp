@@ -186,7 +186,7 @@ void WoWItem::unload()
 		const auto m = mergedModel_;
 		mergedModel_ = nullptr;
 		charModel_->unmergeModel(m);
-		delete mergedModel_;
+		delete m;
 	}
 }
 
