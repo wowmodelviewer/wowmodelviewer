@@ -23,6 +23,7 @@ void ExporterPlugin::exportGLTexture(GLuint id, std::wstring filename) const
 		CxImage* newImage = new CxImage(0);
 		newImage->CreateFromArray(pixels, width, height, 32, (width * 4), true);
 		newImage->Save(filename.c_str(), CXIMAGE_FORMAT_TGA);
+		delete newImage;
 	}
 	else
 	{
