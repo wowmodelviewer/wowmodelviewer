@@ -78,7 +78,6 @@ void wow::WoWFolder::addCustomFiles(const QString& path, bool bypassOriginalFile
 					removeChild(originalFile);
 					delete originalFile;
 					originalFile = nullptr;
-					addnewfile = true;
 				}
 				else
 				{
