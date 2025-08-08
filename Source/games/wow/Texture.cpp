@@ -68,7 +68,6 @@ void Texture::load()
 		*/
 		LOG_ERROR << __FILE__ << __FUNCTION__ << __LINE__ << "type=" << type;
 
-		const BYTE* buffer = nullptr;
 		unsigned char* buf = new unsigned char[sizes[0]];
 
 		file->seek(offsets[0]);
@@ -84,10 +83,8 @@ void Texture::load()
 		image = image.mirrored();
 		image = image.convertToFormat(QImage::Format_RGBA8888);
 
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, image.width(), image.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, buffer);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, image.width(), image.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, image.bits());
 
-		delete buffer;
-		buffer = nullptr;
 		delete [] buf;
 		buf = nullptr;
 	}
