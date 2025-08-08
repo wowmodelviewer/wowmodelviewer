@@ -40,6 +40,8 @@ public:
 		m_hPBuffer = nullptr;
 		m_hDC = nullptr;
 		m_hRC = nullptr;
+		canvas_hDC = nullptr;
+		canvas_hRC = nullptr;
 		m_texID = 0;
 
 		nWidth = 0;
