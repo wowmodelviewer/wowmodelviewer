@@ -1057,6 +1057,9 @@ bool WoWItem::queryItemInfo(const QString& query, sqlResult& result) const
 
 int WoWItem::getCustomModelId(size_t index) const
 {
+	if (!charModel_)
+		return 0;
+
 	sqlResult infos;
 	if (!queryItemInfo(QString("SELECT FileDataID FROM ItemDisplayInfo "
 		                   "LEFT JOIN ModelFileData ON %1 = ModelFileData.ModelResourcesID "
@@ -1079,7 +1082,7 @@ int WoWItem::getCustomModelId(size_t index) const
 	const auto charInfos = charModel_->infos;
 
 	auto classFilter = QString("ClassID = %1").arg(CLASS_ANY);
-	if (charModel_ && charModel_->cd.isDemonHunter())
+	if (charModel_->cd.isDemonHunter())
 		classFilter = QString("(ClassID = %1 OR ClassID = %2)").arg(CLASS_DEMONHUNTER).arg(CLASS_ANY);
 
 	// It looks like shoulders are always in pairs, with PositionIndex values 0 and 1.
@@ -1132,6 +1135,9 @@ int WoWItem::getCustomModelId(size_t index) const
 
 int WoWItem::getCustomTextureId(size_t index) const
 {
+	if (!charModel_)
+		return 0;
+
 	sqlResult infos;
 	if (!queryItemInfo(QString("SELECT FileDataID FROM ItemDisplayInfo "
 		                   "LEFT JOIN TextureFileData ON %1 = TextureFileData.MaterialResourcesID "
@@ -1155,7 +1161,7 @@ int WoWItem::getCustomTextureId(size_t index) const
 
 	QString classFilter = QString("ClassID = %1").arg(CLASS_ANY);
 
-	if (charModel_ && charModel_->cd.isDemonHunter())
+	if (charModel_->cd.isDemonHunter())
 		classFilter = QString("(ClassID = %1 OR ClassID = %2)").arg(CLASS_DEMONHUNTER).arg(CLASS_ANY);
 
 	// Order all queries by GenderIndex to ensure definite genders have priority over generic ones,
