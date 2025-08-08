@@ -689,11 +689,10 @@ uint32 WDC1File::readBitpackedValue(field_storage_info info, unsigned char* reco
 {
 	const unsigned int Size = (info.field_size_bits + (info.field_offset_bits & 7) + 7) / 8;
 	const unsigned int offset = info.field_offset_bits / 8;
-	unsigned char* v = new unsigned char[Size];
+	
+	uint32 result = 0;
+	memcpy(&result, recordOffset + offset, Size > 4 ? 4 : Size);
 
-	memcpy(v, recordOffset + offset, Size);
-
-	uint32 result = (*reinterpret_cast<unsigned int*>(v));
 	result = result >> (info.field_offset_bits & 7);
 	result = result & ((1ull << info.field_size_bits) - 1);
 	return result;
