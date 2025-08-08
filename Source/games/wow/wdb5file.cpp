@@ -278,6 +278,8 @@ std::vector<std::string> WDB5File::get(unsigned int recordIndex, const core::Tab
 				ss << (*reinterpret_cast<unsigned int*>(val) & mask);
 				result.push_back(ss.str());
 			}
+
+			delete[] val;
 		}
 	}
 
