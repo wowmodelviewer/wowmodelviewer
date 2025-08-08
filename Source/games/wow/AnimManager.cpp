@@ -15,14 +15,16 @@ AnimManager::AnimManager(WoWModel& m) : model(m)
 	animList[0].AnimID = 0;
 	animList[0].Loops = 0;
 
+	Frame = 0;
+	FrameSecondary = 0; // <-- Added initialization
+	FrameMouth = 0;     // <-- Added initialization
+
 	if (model.anims.size() > 0)
 	{
-		Frame = 0;
 		TotalFrames = model.anims[0].length;
 	}
 	else
 	{
-		Frame = 0;
 		TotalFrames = 0;
 	}
 	Speed = 1.0f;
