@@ -34,8 +34,9 @@ class Liquid
 public:
 	std::vector<GLuint> textures;
 
-	Liquid(int x, int y, glm::vec3 base, float tilesize = LQ_DEFAULT_TILESIZE):
-		xtiles(x), ytiles(y), pos(base), tilesize(tilesize), ydir(1.0f), shader(-1)
+	Liquid(int x, int y, glm::vec3 base, float tilesize = LQ_DEFAULT_TILESIZE) :
+		xtiles(x), ytiles(y), dlist(0), pos(base), tilesize(tilesize), ydir(1.0f), texRepeats(1.0f), type(0),
+		tmpflag(0), trans(false), shader(-1)
 	{
 	}
 

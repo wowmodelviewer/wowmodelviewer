@@ -9,7 +9,8 @@
 #define WDC3_READ_DEBUG 0
 #define WDC3_READ_DEBUG_FIRST_RECORDS 0
 
-WDC3File::WDC3File(const QString& file): WDB5File(file), m_sectionData(nullptr), m_palletData(nullptr)
+WDC3File::WDC3File(const QString& file) : WDB5File(file), m_sectionData(nullptr),
+										  m_palletData(nullptr), m_header(), m_sectionHeader()
 {
 }
 

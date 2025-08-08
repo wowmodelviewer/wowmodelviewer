@@ -9,7 +9,7 @@
 #define WDC1_READ_DEBUG 0
 #define WDC1_READ_DEBUG_FIRST_RECORDS 0
 
-WDC1File::WDC1File(const QString& file): WDB5File(file)
+WDC1File::WDC1File(const QString& file): WDB5File(file), m_header()
 {
 }
 

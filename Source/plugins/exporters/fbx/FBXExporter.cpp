@@ -34,8 +34,8 @@
 
 #include "util.h" // SLASH
 
-FBXExporter::FBXExporter():
-	m_p_manager(nullptr), m_p_scene(nullptr), m_p_model(nullptr), m_p_meshNode(nullptr)
+FBXExporter::FBXExporter() : m_p_manager(nullptr), m_p_scene(nullptr), m_p_model(nullptr),
+							 m_p_meshNode(nullptr), m_p_skeletonNode(nullptr)
 {
 	m_canExportAnimation = true;
 }

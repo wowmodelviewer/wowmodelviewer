@@ -150,9 +150,10 @@ public:
 
 	Liquid* lq;
 
-	MapChunk(): MapNode(0, 0, 0), nTextures(0), xbase(0), ybase(0), zbase(0), r(0), areaID(-1),
-	            haswater(false), visible(false), hasholes(false), shadow(0), blend(0),
-	            vertices(0), normals(0), strip(nullptr), striplen(0), lq(nullptr)
+	MapChunk()
+		: MapNode(0, 0, 0), nTextures(0), xbase(0), ybase(0), zbase(0), r(0), mBigAlpha(false), header{},
+		  areaID(-1), haswater(false), visible(false), hasholes(false), shadow(0), blend(0),
+		  vertices(0), normals(0), strip(nullptr), striplen(0), lq(nullptr), maptile(nullptr)
 	{
 		waterlevel[0] = 0;
 		waterlevel[1] = 0;

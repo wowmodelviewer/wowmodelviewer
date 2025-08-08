@@ -20,6 +20,9 @@ EnchantsDialog::EnchantsDialog(wxWindow* parent, CharControl* cc)
 
 	slot = nullptr;
 	effectsListbox = nullptr;
+	text1 = nullptr;
+	btnOK = nullptr;
+	btnCancel = nullptr;
 
 	Create(parent, -1, wxT("Weapon Enchants"), wxDefaultPosition, wxSize(200, 350), wxDEFAULT_DIALOG_STYLE);
 	wxDialog::Show(false);
