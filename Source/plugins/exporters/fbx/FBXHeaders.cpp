@@ -282,7 +282,7 @@ void FBXHeaders::storeRestPose(FbxScene* & l_scene, FbxNode* & l_SkeletonRoot)
 	// Not ready yet...
 	return;
 
-	if (l_SkeletonRoot == nullptr || l_SkeletonRoot == nullptr)
+	if (l_SkeletonRoot == nullptr)
 		return;
 	FbxString lNodeName;
 	FbxNode* lKFbxNode;
