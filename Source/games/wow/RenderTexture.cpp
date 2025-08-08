@@ -85,7 +85,7 @@ void RenderTexture::Init(int width, int height, bool fboMode)
 	}
 
 	// Find the (easiest) format to use
-	if (video.supportNPOT && video.supportTexRects && GL_TEXTURE_RECTANGLE_ARB)
+	if (video.supportNPOT && video.supportTexRects)
 	{
 		m_texFormat = GL_TEXTURE_RECTANGLE_ARB;
 	}
