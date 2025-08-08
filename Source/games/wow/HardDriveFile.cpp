@@ -38,23 +38,23 @@ bool HardDriveFile::isAlreadyOpened()
 
 bool HardDriveFile::getFileSize(unsigned long long& s)
 {
-	if (!file && !file->isOpen())
-		return false;
+    if (!file || !file->isOpen())
+        return false;
 
-	s = file->size();
-	return true;
+    s = file->size();
+    return true;
 }
 
 unsigned long HardDriveFile::readFile()
 {
-	if (!file && !file->isOpen())
-		return 0;
+    if (!file || !file->isOpen())
+        return 0;
 
-	const unsigned long s = file->read(reinterpret_cast<char*>(buffer), size);
-	file->close();
-	delete file;
-	file = nullptr;
-	return s;
+    const unsigned long s = file->read(reinterpret_cast<char*>(buffer), size);
+    file->close();
+    delete file;
+    file = nullptr;
+    return s;
 }
 
 bool HardDriveFile::doPostCloseOperation()
