@@ -282,10 +282,10 @@ WMO::WMO(QString name) :
 				fogs.push_back(fog);
 			}
 		}
-		else if (fourcc == "MFOG")
+		/*else if (fourcc == "MFOG")
 		{
 			// optional, Convex Volume Planes. Contains blocks of floating-point numbers.
-		}
+		}*/
 
 		f.seek(nextpos);
 	}
