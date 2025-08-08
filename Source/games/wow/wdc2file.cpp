@@ -620,16 +620,14 @@ std::vector<std::string> WDC2File::get(unsigned int recordIndex, const core::Tab
 			else if (field->type == "int64")
 			{
 				std::stringstream ss;
-				std::int64_t intValue;
-				std::memcpy(&intValue, &val, sizeof(std::int64_t));
+				std::int64_t intValue = static_cast<std::int64_t>(val);
 				ss << intValue;
 				result.push_back(ss.str());
 			}
 			else if (field->type == "uint64")
 			{
 				std::stringstream ss;
-				std::uint64_t uintValue;
-				std::memcpy(&uintValue, &val, sizeof(std::uint64_t));
+				std::uint64_t uintValue = static_cast<std::uint64_t>(val);
 				ss << uintValue;
 				result.push_back(ss.str());
 			}
