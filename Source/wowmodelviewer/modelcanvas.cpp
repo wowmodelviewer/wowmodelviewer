@@ -1830,7 +1830,7 @@ void ModelCanvas::displayDebugInfos() const
 		const auto right = camera.right();
 		title.Printf(
 			L"%s - FPS: %0.1f - Frame Time: %0.1f (ms) - Camera: Y=%0.1f P=%0.1f r=%0.1f LookAt: %0.1f/%0.1f/%0.1f Pos: %0.1f/%0.1f/%0.1f Right: %0.1f/%0.1f/%0.1f",
-			appTitle, fps, msPerFrame, camera.yaw(), camera.pitch(), camera.radius(), look.x, look.y, look.z, pos.x,
+			appTitle.c_str(), fps, msPerFrame, camera.yaw(), camera.pitch(), camera.radius(), look.x, look.y, look.z, pos.x,
 			pos.y, pos.z, right.x, right.y, right.z);
 
 		static_cast<wxTopLevelWindow*>(wxTheApp->GetTopWindow())->SetTitle(title);
