@@ -94,9 +94,9 @@ void ItemImporterDialog::OnImportButtonClicked(wxCommandEvent& event)
 	m_importedItem = nullptr;
 	if (m_URLname->IsEmpty())
 	{
-		wxMessageDialog* dial = new wxMessageDialog(nullptr, wxT("You must enter a URL before clicking Import !"),
+		wxMessageDialog dial(nullptr, wxT("You must enter a URL before clicking Import !"),
 		                                            wxT("No URL given"), wxOK | wxICON_WARNING);
-		dial->ShowModal();
+		dial.ShowModal();
 	}
 	else
 	{
@@ -121,11 +121,11 @@ void ItemImporterDialog::OnImportButtonClicked(wxCommandEvent& event)
 	}
 	else
 	{
-		wxMessageDialog* dial = new wxMessageDialog(
+		wxMessageDialog dial(
 			nullptr, wxT(
 				"The URL you entered cannot be reached. Please verify your syntax and check your network connection."),
 			wxT("URL Error"), wxOK | wxICON_WARNING);
-		dial->ShowModal();
+		dial.ShowModal();
 	}
 }
 
