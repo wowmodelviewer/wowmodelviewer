@@ -1029,28 +1029,41 @@ void AnimControl::OnButton(wxCommandEvent& event)
 	switch (event.GetId())
 	{
 	case ID_PLAY:
-		g_selModel->currentAnim = g_selModel->animManager->GetAnim();
-		g_selModel->animManager->Play();
+		if (g_selModel->animManager)
+		{
+			g_selModel->currentAnim = g_selModel->animManager->GetAnim();
+			g_selModel->animManager->Play();
+		}
 		break;
 	case ID_PAUSE:
-		g_selModel->animManager->Pause();
+		if (g_selModel->animManager)
+			g_selModel->animManager->Pause();
 		break;
 	case ID_STOP:
-		g_selModel->animManager->Stop();
+		if (g_selModel->animManager)
+			g_selModel->animManager->Stop();
 		break;
 	case ID_CLEARANIM:
-		g_selModel->animManager->Clear();
+		if (g_selModel->animManager)
+			g_selModel->animManager->Clear();
 		break;
 	case ID_ADDANIM:
-		g_selModel->animManager->AddAnim(selectedAnim, loopList->GetSelection());
+		if (g_selModel->animManager)
+			g_selModel->animManager->AddAnim(selectedAnim, loopList->GetSelection());
 		break;
 	case ID_PREVANIM:
-		g_selModel->animManager->PrevFrame();
-		SetAnimFrame(g_selModel->animManager->GetFrame());
+		if (g_selModel->animManager)
+		{
+			g_selModel->animManager->PrevFrame();
+			SetAnimFrame(g_selModel->animManager->GetFrame());
+		}
 		break;
 	case ID_NEXTANIM:
-		g_selModel->animManager->NextFrame();
-		SetAnimFrame(g_selModel->animManager->GetFrame());
+		if (g_selModel->animManager)
+		{
+			g_selModel->animManager->NextFrame();
+			SetAnimFrame(g_selModel->animManager->GetFrame());
+		}
 		break;
 	case ID_ANIM_SECONDARY_TEXT:
 		{
@@ -1059,7 +1072,8 @@ void AnimControl::OnButton(wxCommandEvent& event)
 				count = UPPER_BODY_BONES;
 			if (count > BONE_MAX)
 				count = BONE_MAX;
-			g_selModel->animManager->SetSecondaryCount(count);
+			if (g_selModel->animManager)
+				g_selModel->animManager->SetSecondaryCount(count);
 		}
 		break;
 	case ID_SHOW_BLP_SKINLIST:
@@ -1091,7 +1105,7 @@ void AnimControl::OnCheck(wxCommandEvent& event)
 		}
 		else
 		{
-			if (g_selModel)
+			if (g_selModel && g_selModel->animManager)
 				g_selModel->animManager->ClearSecondary();
 			animCList2->Enable(false);
 			animCList2->Show(false);
@@ -1121,7 +1135,8 @@ void AnimControl::OnCheck(wxCommandEvent& event)
 		}
 		else
 		{
-			g_selModel->animManager->SetCount(1);
+			if (g_selModel && g_selModel->animManager)
+				g_selModel->animManager->SetCount(1);
 		}
 	}
 }
@@ -1146,8 +1161,11 @@ void AnimControl::OnAnim(wxCommandEvent& event)
 			if (bOldStyle == true)
 			{
 				g_selModel->currentAnim = selectedAnim;
-				g_selModel->animManager->Stop();
-				g_selModel->animManager->SetAnim(0, selectedAnim, loopList->GetSelection());
+				if (g_selModel->animManager)
+				{
+					g_selModel->animManager->Stop();
+					g_selModel->animManager->SetAnim(0, selectedAnim, loopList->GetSelection());
+				}
 				if (bNextAnims && g_selModel)
 				{
 					int NextAnimation = selectedAnim;
@@ -1160,7 +1178,8 @@ void AnimControl::OnAnim(wxCommandEvent& event)
 							break;
 					}
 				}
-				g_selModel->animManager->Play();
+				if (g_selModel->animManager)
+					g_selModel->animManager->Play();
 
 				UpdateFrameSlider(g_selModel->anims[selectedAnim].length - 1,
 				                  g_selModel->anims[selectedAnim].playSpeed);
@@ -1175,7 +1194,8 @@ void AnimControl::OnAnim(wxCommandEvent& event)
 		const int last = val.Find(']');
 		selectedAnim2 = wxAtoi(val.Mid(first, last - first));
 
-		g_selModel->animManager->SetSecondary(selectedAnim2);
+		if (g_selModel && g_selModel->animManager)
+			g_selModel->animManager->SetSecondary(selectedAnim2);
 	}
 	else if (event.GetId() == ID_ANIM_MOUTH)
 	{
@@ -1185,7 +1205,8 @@ void AnimControl::OnAnim(wxCommandEvent& event)
 		selectedAnim3 = wxAtoi(val.Mid(first, last - first));
 
 		//canvas->g_selModel->animManager->SetSecondary(selectedAnim2);
-		g_selModel->animManager->SetMouth(event.GetSelection());
+		if (g_selModel && g_selModel->animManager)
+			g_selModel->animManager->SetMouth(event.GetSelection());
 	}
 }
 
@@ -1256,20 +1277,23 @@ void AnimControl::OnSliderUpdate(wxCommandEvent& event)
 
 void AnimControl::OnLoop(wxCommandEvent&)
 {
-	if (bOldStyle == true)
+	if (bOldStyle == true && g_selModel && g_selModel->animManager)
 	{
 		g_selModel->animManager->Stop();
 		g_selModel->animManager->SetAnim(0, selectedAnim, loopList->GetSelection());
-		if (bNextAnims && g_selModel)
+		if (bNextAnims)
 		{
 			int NextAnimation = selectedAnim;
 			for (size_t i = 1; i < 4; i++)
 			{
-				NextAnimation = g_selModel->anims[NextAnimation].NextAnimation;
-				if (NextAnimation >= 0)
-					g_selModel->animManager->AddAnim(NextAnimation, loopList->GetSelection());
-				else
-					break;
+				if (g_selModel)
+				{
+					NextAnimation = g_selModel->anims[NextAnimation].NextAnimation;
+					if (NextAnimation >= 0)
+						g_selModel->animManager->AddAnim(NextAnimation, loopList->GetSelection());
+					else
+						break;
+				}
 			}
 		}
 		g_selModel->animManager->Play();
@@ -1284,22 +1308,28 @@ void AnimControl::SetSkin(int num)
 		num = skinList->GetSelection(); // if we pass -1 to the func, we're redrawing the current skin
 	if (num < 0) // model not currently using a proper texture set, possibly custom
 	{
-		g_selModel->replaceParticleColors = false;
+		if (g_selModel)
+			g_selModel->replaceParticleColors = false;
 		return;
 	}
 	const TextureGroup* grp = static_cast<TextureGroup*>(skinList->GetClientData(num));
 
 	if (!grp) // invalid texture group
 	{
-		g_selModel->replaceParticleColors = false;
+		if (g_selModel)
+			g_selModel->replaceParticleColors = false;
 		return;
 	}
 
 	// creatureGeosetData defines geosets that are enabled only when
 	// specific displayIDs are selected from the menu.
 	const std::set<GeosetNum> cgd = grp->creatureGeosetData;
-	g_selModel->setCreatureGeosetData(cgd);
-	g_modelViewer->modelControl->UpdateGeosetSelection();
+	if (g_selModel)
+	{
+		g_selModel->setCreatureGeosetData(cgd);
+	}
+	if (g_modelViewer)
+		g_modelViewer->modelControl->UpdateGeosetSelection();
 
 	for (size_t i = 0; i < grp->count; i++)
 	{
@@ -1313,16 +1343,20 @@ void AnimControl::SetSkin(int num)
 		currTextures[i] = texname;
 
 		const int base = grp->base + i;
-		g_selModel->updateTextureList(tex, base);
+		if (g_selModel)
+			g_selModel->updateTextureList(tex, base);
 	}
 
-	if (grp->particleColInd && grp->PCRIndex > -1 && !g_modelViewer->modelControl->IsReplacingParticleColors())
+	if (g_selModel)
 	{
-		g_selModel->replaceParticleColors = true;
-		g_selModel->particleColorReplacements = PCRList[grp->PCRIndex];
+		if (grp->particleColInd && grp->PCRIndex > -1 && g_modelViewer && !g_modelViewer->modelControl->IsReplacingParticleColors())
+		{
+			g_selModel->replaceParticleColors = true;
+			g_selModel->particleColorReplacements = PCRList[grp->PCRIndex];
+		}
+		else
+			g_selModel->replaceParticleColors = false;
 	}
-	else
-		g_selModel->replaceParticleColors = false;
 
 	skinList->Select(num);
 
@@ -1348,10 +1382,14 @@ void AnimControl::SetSingleSkin(int num, int texnum)
 		return;
 	}
 
+	if (!grp)
+		return;
+
 	const int base = grp->base + texnum - 1;
 	GameFile* tex = grp->tex[0];
 	LOG_INFO << "SETSINGLESKIN skin = " << tex->fullname();
-	g_selModel->updateTextureList(tex, base);
+	if (g_selModel)
+		g_selModel->updateTextureList(tex, base);
 }
 
 int AnimControl::AddSkin(TextureGroup grp)
