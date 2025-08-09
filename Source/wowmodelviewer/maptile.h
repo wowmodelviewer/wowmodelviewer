@@ -277,7 +277,7 @@ void stripify2(V* in, V* out)
 			*out++ = overrow[col];
 			*out++ = nextrow[col];
 		}
-		if (row < 8) *out++ = overrow[8];
+		*out++ = overrow[8];
 		if (row < 7) *out++ = overrow[8]; // jump start
 	}
 }
