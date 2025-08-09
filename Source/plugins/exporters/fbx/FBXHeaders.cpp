@@ -343,10 +343,10 @@ void FBXHeaders::createAnimation(WoWModel* l_model, FbxScene*& l_scene, QString 
 	anim_stack->AddMember(anim_layer);
 
 	//LOG_INFO << "Animation length:" << cur_anim.length;
-	float timeInc = cur_anim.length / 60;
+	float timeInc = static_cast<float>(cur_anim.length) / 60.0f;
 	if (timeInc < 1.0f)
 	{
-		timeInc = cur_anim.length;
+		timeInc = static_cast<float>(cur_anim.length);
 	}
 	FbxTime::SetGlobalTimeMode(FbxTime::eFrames60);
 	//LOG_INFO << "Skeleton Bone count:" << skeleton.size();
