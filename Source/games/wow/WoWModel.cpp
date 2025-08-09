@@ -1226,7 +1226,7 @@ void WoWModel::setLOD(int index)
 
 	if (gamefile->isChunked())
 	{
-		const int numSkinFiles = sizeof(skinFileIDs);
+		const int numSkinFiles = static_cast<int>(skinFileIDs.size());
 		if (!numSkinFiles)
 		{
 			LOG_ERROR << "Attempt to set view level when no .skin files exist.";
