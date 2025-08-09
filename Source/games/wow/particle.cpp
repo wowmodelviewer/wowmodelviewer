@@ -67,9 +67,9 @@ void ParticleSystem::init(GameFile* f, M2ParticleDef& mta, std::vector<uint32>& 
 	cols = mta.cols;
 	if (cols == 0)
 		cols = 1;
-	ParticleType = 0;
+	ParticleType = mta.TextureTileRotation;
 	//order = mta.s2;
-	order = ParticleType > 0 ? -1 : 0;
+	order = mta.TextureTileRotation;
 
 	parent = &(model->bones[mta.bone]);
 
