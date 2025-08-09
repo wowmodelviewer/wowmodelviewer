@@ -183,11 +183,12 @@ void GeneralSettings::OnButton(wxCommandEvent& event)
 	{
 		wxDirDialog* customDirPicker = new wxDirDialog(this, _("Select the folder containing your custom files."),
 		                                               customDirectoryPath, 0);
-		const int i = customDirPicker->ShowModal();
-		if (i != wxID_OK)
-			return;
-		newCustomFolder = customDirPicker->GetPath();
-		customDirectoryPathDisplay->SetValue(newCustomFolder);
+		if (customDirPicker->ShowModal() == wxID_OK)
+		{
+			newCustomFolder = customDirPicker->GetPath();
+			customDirectoryPathDisplay->SetValue(newCustomFolder);
+		}
+		delete customDirPicker;
 	}
 
 	else if (id == ID_ERASE_CUSTOM_FOLDER)
