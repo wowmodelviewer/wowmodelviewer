@@ -89,6 +89,13 @@ WMO::WMO(QString name) :
 			// materials
 			// Materials used in this map object, 64 bytes per texture (BLP file), nMaterials entries.
 
+			if (!texbuf)
+			{
+				LOG_ERROR << "WMO " << name << " has no texture definitions (MOTX chunk).";
+				f.seek(nextpos);
+				continue;
+			}
+
 			for (size_t i = 0; i < nTextures; i++)
 			{
 				WMOMaterial* m = &mat[i];
