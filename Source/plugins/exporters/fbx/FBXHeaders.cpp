@@ -277,13 +277,12 @@ void FBXHeaders::storeBindPose(FbxScene* & l_scene, std::vector<FbxCluster*> l_b
 	l_scene->AddPose(pose);
 }
 
+/* Not ready yet...
 void FBXHeaders::storeRestPose(FbxScene* & l_scene, FbxNode* & l_SkeletonRoot)
 {
-	// Not ready yet...
-	return;
-
 	if (l_SkeletonRoot == nullptr)
 		return;
+
 	FbxString lNodeName;
 	FbxNode* lKFbxNode;
 	FbxMatrix lTransformMatrix;
@@ -301,7 +300,7 @@ void FBXHeaders::storeRestPose(FbxScene* & l_scene, FbxNode* & l_SkeletonRoot)
 
 	// Add the skeleton root node to the pose
 	lKFbxNode = l_SkeletonRoot;
-	pose->Add(lKFbxNode, lTransformMatrix, false /*it's a global matrix*/);
+	pose->Add(lKFbxNode, lTransformMatrix, false /*it's a global matrix);
 
 	// Set the lLimbNode1 node to the local position of (0, 40, 0)
 	// and local rotation of -90deg along the Z axis. This show that
@@ -312,7 +311,7 @@ void FBXHeaders::storeRestPose(FbxScene* & l_scene, FbxNode* & l_SkeletonRoot)
 
 	// Add the skeleton second node to the pose
 	lKFbxNode = lKFbxNode->GetChild(0);
-	pose->Add(lKFbxNode, lTransformMatrix, true /*it's a local matrix*/);
+	pose->Add(lKFbxNode, lTransformMatrix, true /*it's a local matrix);
 
 	// Set the lLimbNode2 node to the local position of (0, 40, 0)
 	// and local rotation of 45deg along the Z axis.
@@ -323,11 +322,11 @@ void FBXHeaders::storeRestPose(FbxScene* & l_scene, FbxNode* & l_SkeletonRoot)
 	// Add the skeleton second node to the pose
 	lKFbxNode = lKFbxNode->GetChild(0);
 	lNodeName = lKFbxNode->GetName();
-	pose->Add(lKFbxNode, lTransformMatrix, true /*it's a local matrix*/);
+	pose->Add(lKFbxNode, lTransformMatrix, true /*it's a local matrix);
 
 	// Now add the pose to the scene
 	l_scene->AddPose(pose);
-}
+}*/
 
 void FBXHeaders::createAnimation(WoWModel* l_model, FbxScene*& l_scene, QString animName, ModelAnimation cur_anim,
                                  std::map<int, FbxNode*>& skeleton)

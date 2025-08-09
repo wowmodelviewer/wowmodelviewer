@@ -115,7 +115,7 @@ bool FBXExporter::exportModel(Model* model, std::wstring target)
 		linkMeshAndSkeleton();
 
 		FBXHeaders::storeBindPose(m_p_scene, m_boneClusters, m_p_meshNode);
-		FBXHeaders::storeRestPose(m_p_scene, m_p_skeletonNode);
+		//FBXHeaders::storeRestPose(m_p_scene, m_p_skeletonNode);
 
 		for (const auto it : *m_p_model)
 		{
