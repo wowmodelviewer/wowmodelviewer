@@ -1782,9 +1782,9 @@ void ModelViewer::LoadWoW()
 	{
 		const wxString message = wxString::Format(
 			wxT("Fatal Error: Could not find any locale from your World of Warcraft folder"));
-		wxMessageDialog* dial = new wxMessageDialog(nullptr, message, wxT("World of Warcraft No locale found"),
+		wxMessageDialog dial(nullptr, message, wxT("World of Warcraft No locale found"),
 		                                            wxOK | wxICON_ERROR);
-		dial->ShowModal();
+		dial.ShowModal();
 		return;
 	}
 
@@ -1815,9 +1815,9 @@ void ModelViewer::LoadWoW()
 		const wxString message = wxString::Format(
 			wxT("Fatal Error: Could not load your World of Warcraft Data folder (error %d)."),
 			GAMEDIRECTORY.lastError());
-		wxMessageDialog* dial = new wxMessageDialog(nullptr, message, wxT("World of Warcraft Not Found"),
+		wxMessageDialog dial(nullptr, message, wxT("World of Warcraft Not Found"),
 		                                            wxOK | wxICON_ERROR);
-		dial->ShowModal();
+		dial.ShowModal();
 		return;
 	}
 
@@ -1829,9 +1829,9 @@ void ModelViewer::LoadWoW()
 			"This version of WoW Model Viewer is intended to be used with WoW Shadowlands(9.x.x) or above only\n"
 			"For older WoW versions support, please refer to this page to pick the right WoW Model Viewer version:\n"
 			"https://download.wowmodelviewer.net"));
-		wxMessageDialog* dial = new wxMessageDialog(nullptr, message, wxT("Wrong World of Warcraft version"),
+		wxMessageDialog dial(nullptr, message, wxT("Wrong World of Warcraft version"),
 		                                            wxOK | wxICON_ERROR);
-		dial->ShowModal();
+		dial.ShowModal();
 		return;
 	}
 
