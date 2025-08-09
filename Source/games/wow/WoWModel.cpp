@@ -4592,7 +4592,7 @@ std::ostream& operator<<(std::ostream& out, const WoWModel& m)
 		out << "      <vertexStart>" << geoset->vstart << "</vertexStart>" << endl;
 		out << "      <vertexEnd>" << geoset->vstart + geoset->vcount << "</vertexEnd>" << endl;
 		out << "      <tex>" << p->tex << "</tex>" << endl;
-		if (p->tex >= 0)
+		if (p->tex != ModelRenderPass::INVALID_TEX)
 			out << "      <texName>" << TEXTUREMANAGER.get(p->tex).toStdString() << "</texName>" << endl;
 		out << "      <useTex2>" << p->useTex2 << "</useTex2>" << endl;
 		out << "      <useEnvMap>" << p->useEnvMap << "</useEnvMap>" << endl;
