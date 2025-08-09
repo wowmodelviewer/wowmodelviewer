@@ -197,6 +197,9 @@ WMO::WMO(QString name) :
 			// coordinates in WMOs and models also have to be read as (X,Z,-Y) to work in my system. 
 			// But then again, the ADT files have the "correct" order of coordinates. Weird.
 
+			if (!ddnames)
+				continue;
+
 			nModels = static_cast<int>(size) / 0x28;
 			for (size_t i = 0; i < nModels; i++)
 			{
