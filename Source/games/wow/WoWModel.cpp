@@ -3983,7 +3983,10 @@ WoWModel* WoWModel::mergeModel(QString& name, int type, bool noRefresh)
 	WoWModel* m = new WoWModel(GAMEDIRECTORY.getFile(name), true);
 
 	if (!m->ok)
+	{
+		delete m;
 		return nullptr;
+	}
 
 	m->mergedModelType = type;
 	return mergeModel(m, type, noRefresh);
@@ -4000,7 +4003,10 @@ WoWModel* WoWModel::mergeModel(uint fileID, int type, bool noRefresh)
 	WoWModel* m = new WoWModel(GAMEDIRECTORY.getFile(fileID), true);
 
 	if (!m->ok)
+	{
+		delete m;
 		return nullptr;
+	}
 
 	m->mergedModelType = type;
 	return mergeModel(m, type, noRefresh);
