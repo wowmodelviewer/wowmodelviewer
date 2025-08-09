@@ -60,12 +60,14 @@ void UserSkins::LoadFile(const wxString& filename)
 			return;
 		}
 
-		const size_t numGroups = atoi(line.c_str());
-		if (numGroups < 0)
+		const int signedNumGroups = atoi(line.c_str());
+		if (signedNumGroups < 0)
 		{
 			LOG_ERROR << "UserSkins: negative number of groups specified in line" << lineNr;
 			return;
 		}
+
+		const size_t numGroups = signedNumGroups;
 		if (numGroups > SET_WARN_COUNT)
 			LOG_INFO << "UserSkins: very large number of groups (" << numGroups << ") specified in line" << lineNr;
 
