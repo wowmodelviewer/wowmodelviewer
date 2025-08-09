@@ -185,7 +185,7 @@ FilteredChoiceDialog::FilteredChoiceDialog(CharControl* dest, int type, wxWindow
 		sizerImport->Add(new wxButton(this, ID_IMPORT_NPC_BUTTON, wxT("Import from URL"), wxDefaultPosition,
 		                              wxSize(-1, -1)), 0, 0);
 	}
-	if (type == UPDATE_SINGLE_ITEM)
+	else if (type == UPDATE_SINGLE_ITEM)
 	{
 		sizerImport = new wxBoxSizer(wxHORIZONTAL);
 		sizerImport->Add(new wxButton(this, ID_IMPORT_ITEM_BUTTON, wxT("Import from URL"), wxDefaultPosition,
