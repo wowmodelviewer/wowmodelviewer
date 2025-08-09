@@ -309,10 +309,13 @@ void AnimControl::UpdateModel(WoWModel* m)
 			label << "]";
 			wxString StrName = label.str().c_str();
 
-			if (g_selModel->anims[i].animID == ANIM_STAND && useanim == -1)
+			if (g_selModel)
 			{
-				strStand = StrName;
-				useanim = i;
+				if (g_selModel->anims[i].animID == ANIM_STAND && useanim == -1)
+				{
+					strStand = StrName;
+					useanim = i;
+				}
 			}
 
 			animCList->Append(StrName);
@@ -337,6 +340,9 @@ void AnimControl::UpdateModel(WoWModel* m)
 			useanim = 0;
 		//return;
 
+		if (!g_selModel)
+			return;
+
 		g_selModel->currentAnim = useanim; // anim position in anims
 		animCList->Select(selectAnim); // anim position in selection
 		animCList->Show(true);
@@ -344,7 +350,7 @@ void AnimControl::UpdateModel(WoWModel* m)
 		UpdateFrameSlider(g_selModel->anims[useanim].length - 1, g_selModel->anims[useanim].playSpeed);
 
 		g_selModel->animManager->SetAnim(0, useanim, 0);
-		if (bNextAnims && g_selModel)
+		if (bNextAnims)
 		{
 			int NextAnimation = useanim;
 			for (size_t i = 1; i < 4; i++)
