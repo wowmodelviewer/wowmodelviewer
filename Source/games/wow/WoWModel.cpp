@@ -520,6 +520,7 @@ void WoWModel::initCommon()
 							       sizeof(uint32) * Sks1.nGlobalSequences);
 							for (uint i = 0; i < Sks1.nGlobalSequences; i++)
 								globalSequences.push_back(buffer[i]);
+							delete[] buffer;
 						}
 
 						parentFile->close();
