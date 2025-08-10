@@ -167,7 +167,7 @@ void WMOGroup::initDisplayList()
 			gf.read(vertices, size);
 			vmin = glm::vec3(9999999.0f, 9999999.0f, 9999999.0f);
 			vmax = glm::vec3(-9999999.0f, -9999999.0f, -9999999.0f);
-			rad = 0;
+			//rad = 0;
 			for (size_t i = 0; i < nVertices; i++)
 			{
 				glm::vec3 v(vertices[i].x, vertices[i].z, -vertices[i].y);
