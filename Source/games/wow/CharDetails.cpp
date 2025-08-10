@@ -195,7 +195,7 @@ void CharDetails::fillCustomizationMap()
 
 void CharDetails::fillCustomizationMapForOption(uint chrCustomizationOption)
 {
-	const auto parentOptions = getParentOptions(chrCustomizationOption);
+	//const auto parentOptions = getParentOptions(chrCustomizationOption);
 
 	auto& vals = choicesPerOptionMap_.at(chrCustomizationOption);
 	const auto curvals = vals;
