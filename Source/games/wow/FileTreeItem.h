@@ -24,6 +24,6 @@ public:
 
 	bool operator>(const FileTreeItem& i) const
 	{
-		return displayName < i.displayName;
+		return displayName > i.displayName;
 	}
 };
