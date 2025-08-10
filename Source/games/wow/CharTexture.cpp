@@ -179,7 +179,7 @@ QImage* CharTexture::gameFileToQImage(GameFile* file)
 	auto* tex = dynamic_cast<Texture*>(TEXTUREMANAGER.items[temptex]);
 
 	// Alfred 2009.07.03, tex width or height can't be zero
-	if (tex->w == 0 || tex->h == 0)
+	if (!tex || tex->w == 0 || tex->h == 0)
 	{
 		TEXTUREMANAGER.del(temptex);
 		return result;
