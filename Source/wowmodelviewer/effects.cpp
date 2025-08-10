@@ -86,7 +86,7 @@ void EnchantsDialog::OnClick(wxCommandEvent& event)
 						{
 							if ((enchant.models[k] != "") && (m->attLookup[k] >= 0))
 							{
-								att->addChild(enchant.models[k].c_str(), k, -1);
+								att->addChild(enchant.models[k], k, -1);
 							}
 						}
 						break;

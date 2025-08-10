@@ -21,7 +21,7 @@ void VersionManager::updateCurrentVersionInfo()
 {
 	// core version
 	QString appName = QString::fromStdWString(GLOBALSETTINGS.appName());
-	QString appVersion = QString::fromStdWString(GLOBALSETTINGS.appVersion().c_str());
+	QString appVersion = QString::fromStdWString(GLOBALSETTINGS.appVersion());
 	m_currentVersionsMap.insert(std::make_pair(appName, appVersion));
 
 	// init plugins infos
