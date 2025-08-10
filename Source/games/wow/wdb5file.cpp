@@ -219,6 +219,9 @@ std::vector<std::string> WDB5File::get(unsigned int recordIndex, const core::Tab
 	{
 		wow::FieldStructure* field = dynamic_cast<wow::FieldStructure*>(it);
 
+		if (!field)
+			continue;
+
 		if (field->isKey)
 		{
 			std::stringstream ss;
