@@ -515,7 +515,7 @@ std::vector<std::string> WDC2File::get(unsigned int recordIndex, const core::Tab
 
 		if (field->isRelationshipData)
 		{
-			std::stringstream ss;
+			//std::stringstream ss;
 			auto It = m_relationShipData.find(recordIndex);
 			if (It != m_relationShipData.end())
 				result.push_back(It->second);
