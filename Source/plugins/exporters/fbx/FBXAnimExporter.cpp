@@ -45,7 +45,7 @@ void FBXAnimExporter::run()
 
 	// LOG_INFO << "FBX Animation Thead Source Filename: " << qPrintable(srcfileName);
 	srcfileName = srcfileName.mid(0, srcfileName.lastIndexOf(".fbx"));
-	QString srcPath = srcfileName.mid(0, srcfileName.lastIndexOf(SLASH));
+	//QString srcPath = srcfileName.mid(0, srcfileName.lastIndexOf(SLASH));
 	const QString justfileName = srcfileName.mid(srcfileName.lastIndexOf(SLASH) + 1);
 	const QString anim_name = QString("%1 [%2]").arg(animationName).arg(curAnimation.Index);
 	QString file_name = QString("%1_%5/%2_%3_%4.fbx").arg(srcfileName).arg(justfileName).arg(animationName).

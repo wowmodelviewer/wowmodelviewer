@@ -351,7 +351,7 @@ void CharControl::RefreshEquipment()
 void CharControl::OnButton(wxCommandEvent& event)
 {
 	// This stores are equipment directory path in session
-	static wxString dir = cfgPath.BeforeLast(SLASH);
+	//static wxString dir = cfgPath.BeforeLast(SLASH);
 
 	//if (dir.Last() != '\\')
 	//  dir.Append('\\');

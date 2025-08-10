@@ -283,7 +283,7 @@ void CAnimationExporter::CreateGif()
 		CxImage* newImage2 = new CxImage(0);
 
 		g_canvas->RenderToBuffer();
-		wxString stat;
+		//wxString stat;
 
 		glReadPixels(0, 0, static_cast<GLsizei>(m_iWidth), static_cast<GLsizei>(m_iHeight), GL_BGRA_EXT, GL_UNSIGNED_BYTE, buffer);
 

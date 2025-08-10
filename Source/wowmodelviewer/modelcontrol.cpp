@@ -379,7 +379,7 @@ void ModelControl::Update()
 	*/
 
 	// Loop through all the geosets.
-	wxArrayString geosetItems;
+	//wxArrayString geosetItems;
 	//geosets->Clear();
 	// enum CharGeosets
 
