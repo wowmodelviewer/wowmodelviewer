@@ -226,7 +226,7 @@ bool core::TableStructure::create()
 	LOG_INFO << "Creating table" << name;
 	QString create = "CREATE TABLE " + name + " (";
 
-	std::list<QString> indexesToCreate;
+	std::vector<QString> indexesToCreate;
 
 	for (const auto& field : fields)
 	{
