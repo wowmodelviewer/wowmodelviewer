@@ -25,21 +25,28 @@ Plugin* Plugin::load(std::string path, core::GlobalSettings& settings, core::Gam
 	if (QObject* plugin = loader.instance())
 	{
 		newPlugin = dynamic_cast<Plugin*>(plugin);
-		const QJsonObject metaInfos = loader.metaData().value("MetaData").toObject();
-		newPlugin->setName(metaInfos.value("name").toString());
-		newPlugin->m_version = metaInfos.value("version").toString().toStdString();
-		newPlugin->m_coreVersionNeeded = metaInfos.value("coreVersion").toString().toStdString();
-		newPlugin->m_internalName = metaInfos.value("internalname").toString().toStdString();
-		newPlugin->m_category = metaInfos.value("category").toString().toStdString();
+		if (newPlugin)
+		{
+			const QJsonObject metaInfos = loader.metaData().value("MetaData").toObject();
+			newPlugin->setName(metaInfos.value("name").toString());
+			newPlugin->m_version = metaInfos.value("version").toString().toStdString();
+			newPlugin->m_coreVersionNeeded = metaInfos.value("coreVersion").toString().toStdString();
+			newPlugin->m_internalName = metaInfos.value("internalname").toString().toStdString();
+			newPlugin->m_category = metaInfos.value("category").toString().toStdString();
 
-		newPlugin->transmitSingletonsFromCore(settings, Game);
+			newPlugin->transmitSingletonsFromCore(settings, Game);
 
-		// waiting for the overall application being a Qt application, we start a QCoreApplication in a dedicated
-		// thread for each plugin, so that Qt event loop is accessible from plugins (see onExec slot that actually
-		// starts the app)
-		Plugin::thread = new QThread();
-		connect(Plugin::thread, SIGNAL(started()), newPlugin, SLOT(onExec()), Qt::DirectConnection);
-		Plugin::thread->start();
+			// waiting for the overall application being a Qt application, we start a QCoreApplication in a dedicated
+			// thread for each plugin, so that Qt event loop is accessible from plugins (see onExec slot that actually
+			// starts the app)
+			Plugin::thread = new QThread();
+			connect(Plugin::thread, SIGNAL(started()), newPlugin, SLOT(onExec()), Qt::DirectConnection);
+			Plugin::thread->start();
+		}
+		else
+		{
+			std::cout << "Unable to cast plugin " << path << " to Plugin type." << std::endl;
+		}
 
 		return newPlugin;
 	}
