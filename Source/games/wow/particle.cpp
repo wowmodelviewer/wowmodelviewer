@@ -553,7 +553,7 @@ Particle PlaneParticleEmitter::newParticle(size_t anim, size_t time, float w, fl
 	if (sys->flags == 1041)
 	{
 		// Trans Halo
-		p.pos = (sys->pos + glm::vec3(randfloat(-l, l), randfloat(-w, w), 0));
+		//p.pos = (sys->pos + glm::vec3(randfloat(-l, l), randfloat(-w, w), 0));
 		const float t = randfloat(0.0f, 2 * glm::pi<float>());
 		p.pos = glm::vec3(0.0f, sys->pos.y + 0.15f, sys->pos.z) + glm::vec3(cos(t) / 8, sin(t) / 8, 0.0f);
 		// Need to manually correct for the halo - why?
