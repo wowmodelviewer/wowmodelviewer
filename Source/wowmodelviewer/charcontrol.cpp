@@ -499,7 +499,7 @@ void CharControl::selectItem(ssize_t type, ssize_t slot, const wxChar* caption)
 				numbers.push_back(item.id);
 				quality.push_back(item.quality);
 
-				subclassesFound.insert(std::pair<int, int>(item.itemclass, item.subclass));
+				subclassesFound.emplace(item.itemclass, item.subclass);
 				cats.push_back(subclasslookup[std::pair<int, int>(item.itemclass, item.subclass)]);
 			}
 		}
@@ -511,7 +511,7 @@ void CharControl::selectItem(ssize_t type, ssize_t slot, const wxChar* caption)
 
 			if (item.itemclass > 0)
 			{
-				subclassesFound.insert(std::pair<int, int>(item.itemclass, item.subclass));
+				subclassesFound.emplace(item.itemclass, item.subclass);
 			}
 			cats.push_back(subclasslookup[std::pair<int, int>(item.itemclass, item.subclass)]);
 		}
