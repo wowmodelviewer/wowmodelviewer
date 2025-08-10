@@ -138,7 +138,6 @@ ItemRecord& ItemImporterDialog::getImportedItem()
 	{
 		result->id = m_importedItem->id;
 		result->model = m_importedItem->model;
-		result->type = m_importedItem->type;
 		result->itemclass = m_importedItem->itemclass;
 		result->subclass = m_importedItem->subclass;
 		result->type = m_importedItem->type;
