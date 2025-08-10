@@ -864,7 +864,11 @@ void CharControl::OnUpdateItem(int type, int id)
 				g_canvas->setModel(model);
 				if (charAtt)
 				{
-					model->scale_ = dynamic_cast<WoWModel*>(g_canvas->root->model())->scale_;
+					if (auto* rootModel = dynamic_cast<WoWModel*>(g_canvas->root->model()))
+						model->scale_ = rootModel->scale_;
+					else
+						model->scale_ = 1.0f;
+
 					charAtt->id = 0;
 				}
 				g_animControl->UpdateModel(model);
@@ -930,10 +934,13 @@ void CharControl::OnUpdateItem(int type, int id)
 				// possibly some formula that from both models that needs to be calculated.
 				// For "Taxi" mounts scale should be 1.0f I think, for now I'll ignore them
 				// I really have no idea!  
-				if (creaturemodels[id - 1].Mid(9, 9).IsSameAs(wxT("Kodobeast"), false))
-					dynamic_cast<WoWModel*>(charAtt->model())->scale_ = 2.25f;
-				else
-					dynamic_cast<WoWModel*>(charAtt->model())->scale_ = 1.0f;
+				if (auto* charAttModel = dynamic_cast<WoWModel*>(charAtt->model()))
+				{
+					if (creaturemodels[id - 1].Mid(9, 9).IsSameAs(wxT("Kodobeast"), false))
+						charAttModel->scale_ = 2.25f;
+					else
+						charAttModel->scale_ = 1.0f;
+				}
 			}
 			model->rot_ = model->pos_ = glm::vec3(0.0f, 0.0f, 0.0f);
 			m->rot_.x = 0.0f; // mounted characters look better from the side
