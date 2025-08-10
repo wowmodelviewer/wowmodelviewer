@@ -2,6 +2,7 @@
 
 #include <unordered_set>
 #include "Component.h"
+#include <vector>
 
 template <class DataType>
 class Container : public Component
@@ -104,21 +105,20 @@ template <class DataType>
 template <class ChildType>
 int Container<DataType>::removeAllChildrenOfType()
 {
-	typename std::list<DataType*>::iterator l_it;
-	std::list<DataType*> l_childrenToRemove;
-	for (l_it = m_children.begin(); l_it != m_children.end(); l_it++)
+	std::vector<DataType*> l_childrenToRemove;
+	for (auto& child : m_children)
 	{
-		if (dynamic_cast<ChildType*>(*l_it) != nullptr)
+		if (dynamic_cast<ChildType*>(child) != nullptr)
 		{
-			l_childrenToRemove.push_back(*l_it);
+			l_childrenToRemove.push_back(child);
 		}
 	}
 
 	const int l_result = l_childrenToRemove.size();
 
-	for (l_it = l_childrenToRemove.begin(); l_it != l_childrenToRemove.end(); l_it++)
+	for (auto& child : l_childrenToRemove)
 	{
-		removeChild(*l_it);
+		removeChild(child);
 	}
 
 	return l_result;
