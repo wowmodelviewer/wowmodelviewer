@@ -1788,8 +1788,6 @@ void MapChunk::draw()
 	//}
 	visible = true;
 
-	if (nTextures == 0) return;
-
 	if (!hasholes)
 	{
 		strip = maptile->mapstrip2;
