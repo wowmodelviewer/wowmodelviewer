@@ -198,7 +198,7 @@ void CharDetails::fillCustomizationMapForOption(uint chrCustomizationOption)
 	//const auto parentOptions = getParentOptions(chrCustomizationOption);
 
 	auto& vals = choicesPerOptionMap_.at(chrCustomizationOption);
-	const auto curvals = vals;
+	const auto originalVals = std::move(vals);
 	vals.clear();
 
 	// 1. fill direct values
@@ -236,7 +236,7 @@ void CharDetails::fillCustomizationMapForOption(uint chrCustomizationOption)
 	const auto last = std::unique(vals.begin(), vals.end());
 	vals.erase(last, vals.end());
 	*/
-	if (vals != curvals)
+	if (vals != originalVals)
 	{
 		LOG_INFO << __FUNCTION__ << chrCustomizationOption;
 		QString info;
