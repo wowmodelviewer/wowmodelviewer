@@ -169,9 +169,9 @@ public:
 			// TODO
 			if (!globals[seq])
 				return T();
-			if (globals[seq] == 0)
-				time = 0;
-			else
+			// if (globals[seq] == 0)
+			//	time = 0;
+			// else
 				time = globalTime % globals[seq];
 			anim = 0;
 		}
