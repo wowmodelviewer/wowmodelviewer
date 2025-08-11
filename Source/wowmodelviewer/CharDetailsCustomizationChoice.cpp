@@ -48,7 +48,7 @@ void CharDetailsCustomizationChoice::onChoice(wxCommandEvent& event)
 void CharDetailsCustomizationChoice::onEvent(Event* e)
 {
 	const auto* event = dynamic_cast<CharDetailsEvent*>(e);
-	if (event && (event->type() == CharDetailsEvent::CHOICE_LIST_CHANGED) && (event->getCustomizationOptionId() == ID_))
+	if (event && (event->type() == static_cast<Event::EventType>(CharDetailsEvent::CHOICE_LIST_CHANGED)) && (event->getCustomizationOptionId() == ID_))
 	{
 		const auto it = std::find(values_.begin(), values_.end(), details_.get(ID_));
 		if (it != values_.end())

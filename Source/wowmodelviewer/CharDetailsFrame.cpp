@@ -99,7 +99,7 @@ void CharDetailsFrame::onDHMode(wxCommandEvent& event)
 
 void CharDetailsFrame::onEvent(Event* event)
 {
-	if (event->type() == CharDetailsEvent::DH_MODE_CHANGED)
+	if (event->type() == static_cast<Event::EventType>(CharDetailsEvent::DH_MODE_CHANGED))
 	{
 		dhMode_->SetValue(model_->cd.isDemonHunter());
 		setModel(model_);
