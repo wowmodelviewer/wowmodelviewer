@@ -368,21 +368,18 @@ void ModelCanvas::LoadADT(wxString fn)
 	root->setModel(nullptr);
 	wxDELETE(adt);
 
-	if (!adt)
+	adt = new MapTile(fn);
+	if (adt->ok)
 	{
-		adt = new MapTile(fn);
-		if (adt->ok)
-		{
-			glm::vec3 vc = adt->topnode.vmax;
-			if (vc.y < 0) vc.y = 0;
-			adt->viewpos.y = vc.y + 50.0f;
-			adt->viewpos.x = adt->xbase;
-			adt->viewpos.z = adt->zbase;
-			root->setModel(adt);
-		}
-		else
-			wxDELETE(adt);
+		glm::vec3 vc = adt->topnode.vmax;
+		if (vc.y < 0) vc.y = 0;
+		adt->viewpos.y = vc.y + 50.0f;
+		adt->viewpos.x = adt->xbase;
+		adt->viewpos.z = adt->zbase;
+		root->setModel(adt);
 	}
+	else
+		wxDELETE(adt);
 }
 
 void ModelCanvas::LoadWMO(wxString fn)
