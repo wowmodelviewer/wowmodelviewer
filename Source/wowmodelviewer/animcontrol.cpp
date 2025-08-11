@@ -1,6 +1,7 @@
 #include "animcontrol.h"
 #include <wx/wx.h>
 #include <algorithm>
+#include <array>
 #include <wx/combobox.h>
 #include "logger/Logger.h"
 #include "FileTreeItem.h"
@@ -921,7 +922,7 @@ void AnimControl::SyncBLPSkinList()
 	BLPSkinList3->SetSelection(wxNOT_FOUND);
 
 	// Configure BLPSkinLists (single skin selectors) to show same skins as the main texture selector, if possible
-	std::vector<wxString> currTextures(3);
+	std::array<wxString, 3> currTextures;
 
 	const int sel = skinList->GetSelection();
 	if (sel < 0) // model not currently using a proper texture set, possibly custom
@@ -1308,7 +1309,7 @@ void AnimControl::OnLoop(wxCommandEvent&)
 
 void AnimControl::SetSkin(int num)
 {
-	std::vector<wxString> currTextures(3);
+	std::array<wxString, 3> currTextures;
 
 	if (num == -1)
 		num = skinList->GetSelection(); // if we pass -1 to the func, we're redrawing the current skin
