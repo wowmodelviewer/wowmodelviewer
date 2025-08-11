@@ -81,33 +81,30 @@ DBFile* wow::TableStructure::createDBFile()
 	if (!fileToOpen)
 		return nullptr;
 
-	if (fileToOpen)
+	if (fileToOpen->open(false))
 	{
-		if (fileToOpen->open(false))
-		{
-			char header[5];
+		char header[5];
 
-			fileToOpen->read(header, 4);
+		fileToOpen->read(header, 4);
 
-			if (strncmp(header, "WDB2", 4) == 0)
-				result = new WDB2File(fileToOpen->fullname());
-			else if (strncmp(header, "WDB5", 4) == 0)
-				result = new WDB5File(fileToOpen->fullname());
-			else if (strncmp(header, "WDB6", 4) == 0)
-				result = new WDB6File(fileToOpen->fullname());
-			else if (strncmp(header, "WDC1", 4) == 0)
-				result = new WDC1File(fileToOpen->fullname());
-			else if (strncmp(header, "WDC2", 4) == 0)
-				result = new WDC2File(fileToOpen->fullname());
-			else if (strncmp(header, "WDC3", 4) == 0)
-				result = new WDC3File(fileToOpen->fullname());
-			else if (strncmp(header, "WDC4", 4) == 0)
-				result = new WDC3File(fileToOpen->fullname());
-			else
-				LOG_ERROR << "Unsupported database file" << header[0] << header[1] << header[2] << header[3];
+		if (strncmp(header, "WDB2", 4) == 0)
+			result = new WDB2File(fileToOpen->fullname());
+		else if (strncmp(header, "WDB5", 4) == 0)
+			result = new WDB5File(fileToOpen->fullname());
+		else if (strncmp(header, "WDB6", 4) == 0)
+			result = new WDB6File(fileToOpen->fullname());
+		else if (strncmp(header, "WDC1", 4) == 0)
+			result = new WDC1File(fileToOpen->fullname());
+		else if (strncmp(header, "WDC2", 4) == 0)
+			result = new WDC2File(fileToOpen->fullname());
+		else if (strncmp(header, "WDC3", 4) == 0)
+			result = new WDC3File(fileToOpen->fullname());
+		else if (strncmp(header, "WDC4", 4) == 0)
+			result = new WDC3File(fileToOpen->fullname());
+		else
+			LOG_ERROR << "Unsupported database file" << header[0] << header[1] << header[2] << header[3];
 
-			fileToOpen->close();
-		}
+		fileToOpen->close();
 	}
 
 	return result;
