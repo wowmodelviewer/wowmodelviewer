@@ -509,7 +509,7 @@ void WMOGroup::drawDoodads(int doodadset)
 {
 	if (!visible) return;
 	if (nDoodads == 0) return;
-	if (doodadset < 0) return;
+	if (doodadset < 0) return;  // This already handles doodadset == -1
 
 	//setupFog();
 
@@ -527,18 +527,10 @@ void WMOGroup::drawDoodads(int doodadset)
 	{
 		const short dd = ddr[i];
 
-		bool inSet;
-		if (doodadset == -1)
-		{
-			inSet = false;
-		}
-		else
-		{
-			inSet = (((dd >= wmo->doodadsets[doodadset].start) && (dd < (wmo->doodadsets[doodadset].start + static_cast<int>(wmo->
-					doodadsets[doodadset].size))))
-				|| (wmo->includeDefaultDoodads && (dd >= wmo->doodadsets[0].start) && ((dd < (wmo->doodadsets[0].start +
-					static_cast<int>(wmo->doodadsets[0].size))))));
-		}
+		bool inSet = (((dd >= wmo->doodadsets[doodadset].start) && (dd < (wmo->doodadsets[doodadset].start + static_cast<int>(wmo->
+				doodadsets[doodadset].size))))
+			|| (wmo->includeDefaultDoodads && (dd >= wmo->doodadsets[0].start) && ((dd < (wmo->doodadsets[0].start +
+				static_cast<int>(wmo->doodadsets[0].size))))));
 
 		if (inSet)
 		{
