@@ -579,7 +579,7 @@ void WoWModel::initCommon()
 	normals = new glm::vec3[origVertices.size()];
 
 	uint i = 0;
-	for (auto ov_it = origVertices.begin(), ov_end = origVertices.end(); ov_it != ov_end; i++, ov_it++)
+	for (auto ov_it = origVertices.begin(), ov_end = origVertices.end(); ov_it != ov_end; i++, ++ov_it)
 	{
 		// Set the data for our vertices, normals from the model data
 		vertices[i] = ov_it->pos;

@@ -43,7 +43,7 @@ void Observable::detach(Observer* observer)
 
 void Observable::notify(Event& event)
 {
-	for (std::list<Observer*>::iterator l_it = m_observerList.begin(); l_it != m_observerList.end(); l_it++)
+	for (std::list<Observer*>::iterator l_it = m_observerList.begin(); l_it != m_observerList.end(); ++l_it)
 	{
 		(*l_it)->treatEvent(&event);
 	}
@@ -54,7 +54,7 @@ std::list<Observer*>::iterator Observable::observerAttached(Observer* observer)
 	std::list<Observer*>::iterator l_result = m_observerList.end();
 	if (observer != nullptr)
 	{
-		for (std::list<Observer*>::iterator l_it = m_observerList.begin(); l_it != m_observerList.end(); l_it++)
+		for (std::list<Observer*>::iterator l_it = m_observerList.begin(); l_it != m_observerList.end(); ++l_it)
 		{
 			if ((*l_it) == observer)
 			{

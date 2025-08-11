@@ -59,7 +59,7 @@ template <class DataType>
 Container<DataType>::~Container()
 {
 	typename std::unordered_set<DataType*>::iterator l_it;
-	for (l_it = m_children.begin(); l_it != m_children.end(); l_it++)
+	for (l_it = m_children.begin(); l_it != m_children.end(); ++l_it)
 	{
 		(*l_it)->unref();
 	}
@@ -156,7 +156,7 @@ Component* Container<DataType>::getChild(unsigned int index)
 		typename std::unordered_set<DataType*>::iterator l_it;
 		for (l_it = m_children.begin(); l_index < index; l_index++)
 		{
-			l_it++;
+			++l_it;
 		}
 		l_p_result = *l_it;
 	}
@@ -173,7 +173,7 @@ const Component* Container<DataType>::getChild(unsigned int index) const
 		typename std::unordered_set<DataType*>::const_iterator l_it;
 		for (l_it = m_children.begin(); l_index < index; l_index++)
 		{
-			l_it++;
+			++l_it;
 		}
 		l_p_result = *l_it;
 	}
