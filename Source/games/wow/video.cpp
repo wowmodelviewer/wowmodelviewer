@@ -305,6 +305,7 @@ void VideoSettings::EnumDisplayModes()
 	// This is where we do the grunt work of checking the caps
 	// find out how many pixel formats we have
 	std::vector<int> iAttributes;
+	iAttributes.reserve(12);
 	std::vector<int> results;
 
 	iAttributes.push_back(WGL_NUMBER_PIXEL_FORMATS_ARB);
@@ -470,6 +471,7 @@ bool VideoSettings::GetCompatibleWinMode(VideoCaps caps)
 	}
 
 	std::vector<int> iAttributes;
+	iAttributes.reserve(22);
 	std::vector<int> results;
 	unsigned int numformats;
 	const float fAtrributes[] = {0, 0};
@@ -636,6 +638,7 @@ void VideoSettings::SetMode()
 	unsigned int numFormats;
 	const float fAttributes[] = {0, 0};
 	std::vector<int> AttributeList;
+	AttributeList.reserve(22);
 
 	AttributeList.push_back(WGL_DRAW_TO_WINDOW_ARB);
 	AttributeList.push_back(GL_TRUE);
