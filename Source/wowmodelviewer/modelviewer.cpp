@@ -397,21 +397,13 @@ void ModelViewer::InitMenu()
 		charGlowMenu->AppendRadioItem(ID_CHAREYEGLOW_DEATHKNIGHT, _("Death Knight"));
 		if (charControl->model)
 		{
-			if (charControl->model->cd.eyeGlowType)
-			{
-				const size_t egt = charControl->model->cd.eyeGlowType;
-				if (egt == EGT_NONE)
-					charGlowMenu->Check(ID_CHAREYEGLOW_NONE, true);
-				else if (egt == EGT_DEATHKNIGHT)
-					charGlowMenu->Check(ID_CHAREYEGLOW_DEATHKNIGHT, true);
-				else
-					charGlowMenu->Check(ID_CHAREYEGLOW_DEFAULT, true);
-			}
+			const size_t egt = charControl->model->cd.eyeGlowType;
+			if (egt == EGT_NONE)
+				charGlowMenu->Check(ID_CHAREYEGLOW_NONE, true);
+			else if (egt == EGT_DEATHKNIGHT)
+				charGlowMenu->Check(ID_CHAREYEGLOW_DEATHKNIGHT, true);
 			else
-			{
-				charControl->model->cd.eyeGlowType = EGT_DEFAULT;
 				charGlowMenu->Check(ID_CHAREYEGLOW_DEFAULT, true);
-			}
 		}
 		charMenu->Append(ID_CHAREYEGLOW, _("Eye Glow"), charGlowMenu);
 
