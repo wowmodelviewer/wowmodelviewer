@@ -94,7 +94,7 @@ void WoWItem::setId(int id)
 		if (iteminfos.valid && !iteminfos.values.empty())
 			displayId_ = iteminfos.values[0][0].toInt();
 
-		const auto itemRcd = items.getById(id);
+		const auto& itemRcd = items.getById(id);
 		setName(itemRcd.name);
 		quality_ = itemRcd.quality;
 		type_ = itemRcd.type;
@@ -125,7 +125,7 @@ void WoWItem::setLevel(int level)
 		if (iteminfos.valid && !iteminfos.values.empty())
 			displayId_ = iteminfos.values[0][0].toInt();
 
-		const auto itemRcd = items.getById(id_);
+		const auto& itemRcd = items.getById(id_);
 		setName(itemRcd.name);
 		quality_ = itemRcd.quality;
 		type_ = itemRcd.type;
@@ -144,7 +144,7 @@ void WoWItem::setModifierId(int id)
 		if (iteminfos.valid && !iteminfos.values.empty())
 			displayId_ = iteminfos.values[0][0].toInt();
 
-		const auto itemRcd = items.getById(id_);
+		const auto& itemRcd = items.getById(id_);
 		setName(itemRcd.name);
 		quality_ = itemRcd.quality;
 		type_ = itemRcd.type;
@@ -1074,7 +1074,7 @@ int WoWItem::getCustomModelId(size_t index) const
 
 	// if there are multiple values, check by race and sex:
 	QStringList idList;
-	for (auto it : infos.values)
+	for (auto& it : infos.values)
 		idList << it[0];
 	auto idListStr = idList.join(", ");
 	idListStr = "(" + idListStr + ")";
@@ -1152,7 +1152,7 @@ int WoWItem::getCustomTextureId(size_t index) const
 
 	// if there are multiple values, check by race and sex:
 	QStringList idList;
-	for (auto it : infos.values)
+	for (auto& it : infos.values)
 		idList << it[0];
 	auto idListStr = idList.join(", ");
 	idListStr = "(" + idListStr + ")";

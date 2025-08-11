@@ -247,7 +247,7 @@ void FBXExporter::linkMeshAndSkeleton()
 
 	// define control points
 	int i = 0;
-	for (const auto it : m_p_model->origVertices)
+	for (const auto& it : m_p_model->origVertices)
 	{
 		for (size_t j = 0; j < 4; j++)
 		{

@@ -4280,7 +4280,7 @@ void WoWModel::refresh()
 
 	// reset char texture
 	tex.reset(infos.textureLayoutID);
-	for (const auto t : cd.textures)
+	for (const auto& t : cd.textures)
 	{
 		if (t.type != 1)
 		{

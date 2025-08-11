@@ -126,7 +126,7 @@ bool WDC3File::open()
 
 		uint fieldId = 0;
 		uint32 offset = 0;
-		for (auto it : m_fieldStorageInfo)
+		for (auto& it : m_fieldStorageInfo)
 		{
 			if ((it.storage_type == FIELD_COMPRESSION::BITPACKED_INDEXED ||
 					it.storage_type == FIELD_COMPRESSION::BITPACKED_INDEXED_ARRAY) &&
@@ -151,7 +151,7 @@ bool WDC3File::open()
 
 		uint fieldId = 0;
 		size_t offset = 0;
-		for (auto it : m_fieldStorageInfo)
+		for (auto& it : m_fieldStorageInfo)
 		{
 			if ((it.storage_type == FIELD_COMPRESSION::COMMON_DATA) && (it.additional_data_size != 0))
 			{

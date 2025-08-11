@@ -641,7 +641,7 @@ void CharDetails::refreshTextures()
 void CharDetails::refreshSkinnedModels()
 {
 	// first clean any previous merging
-	for (const auto m : models_)
+	for (const auto& m : models_)
 		model_->unmergeModel(m.first);
 
 	models_.clear();

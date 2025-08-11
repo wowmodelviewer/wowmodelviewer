@@ -285,7 +285,7 @@ bool WDC1File::open()
 	if (m_header.common_data_size > 0)
 	{
 		uint fieldId = 0;
-		for (auto it : m_fieldStorageInfo)
+		for (auto& it : m_fieldStorageInfo)
 		{
 			if ((it.storage_type == FIELD_COMPRESSION::COMMON_DATA) && (it.additional_data_size != 0))
 			{
@@ -327,7 +327,7 @@ bool WDC1File::open()
     LOG_INFO << "PALLET DATA";
 #endif
 		uint fieldId = 0;
-		for (auto it : m_fieldStorageInfo)
+		for (auto& it : m_fieldStorageInfo)
 		{
 			if ((it.storage_type == FIELD_COMPRESSION::BITPACKED_INDEXED ||
 					it.storage_type == FIELD_COMPRESSION::BITPACKED_INDEXED_ARRAY) &&

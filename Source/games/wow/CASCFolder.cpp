@@ -55,7 +55,7 @@ bool CASCFolder::setConfig(core::GameConfig config)
 	// set locale
 	if (!m_currentConfig.locale.isEmpty())
 	{
-		const auto it = locales.find(m_currentConfig.locale);
+		const auto& it = locales.find(m_currentConfig.locale);
 
 		if (it != locales.end())
 		{
@@ -150,7 +150,7 @@ void CASCFolder::initBuildInfo()
 		}
 	}
 
-	for (auto it : m_configs)
+	for (auto& it : m_configs)
 		LOG_INFO << "config" << it.locale << it.version;
 }
 
