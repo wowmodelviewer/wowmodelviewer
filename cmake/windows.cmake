@@ -10,3 +10,9 @@ add_definitions(-D_CRT_SECURE_NO_WARNINGS)
   
 # force Unicode compilation
 add_definitions(-DUNICODE -D_UNICODE)
+
+# Fix LNK4098 warning by ignoring conflicting LIBCMT
+if(MSVC)
+    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /NODEFAULTLIB:LIBCMT")
+    set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} /NODEFAULTLIB:LIBCMT")
+endif()
