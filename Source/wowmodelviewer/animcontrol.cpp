@@ -1173,7 +1173,7 @@ void AnimControl::OnAnim(wxCommandEvent& event)
 					g_selModel->animManager->Stop();
 					g_selModel->animManager->SetAnim(0, selectedAnim, loopList->GetSelection());
 				}
-				if (bNextAnims && g_selModel)
+				if (bNextAnims && g_selModel && g_selModel->animManager)
 				{
 					int NextAnimation = selectedAnim;
 					for (size_t i = 1; i < 4; i++)
@@ -1185,11 +1185,14 @@ void AnimControl::OnAnim(wxCommandEvent& event)
 							break;
 					}
 				}
-				if (g_selModel->animManager)
+				if (g_selModel && g_selModel->animManager)
 					g_selModel->animManager->Play();
 
-				UpdateFrameSlider(g_selModel->anims[selectedAnim].length - 1,
-				                  g_selModel->anims[selectedAnim].playSpeed);
+				if (g_selModel && selectedAnim >= 0 && selectedAnim < static_cast<int>(g_selModel->anims.size()))
+				{
+					UpdateFrameSlider(g_selModel->anims[selectedAnim].length - 1,
+						g_selModel->anims[selectedAnim].playSpeed);
+				}
 			}
 		}
 		//canvas->resetTime();
