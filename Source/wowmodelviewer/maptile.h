@@ -216,7 +216,7 @@ public:
 	void draw();
 	void drawWater();
 	void drawObjects();
-	void drawSky();
+	//void drawSky();
 	//void drawPortals();
 	void drawModels();
 

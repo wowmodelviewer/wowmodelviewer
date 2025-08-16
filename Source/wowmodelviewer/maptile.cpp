@@ -887,6 +887,7 @@ void MapTile::drawObjects()
 	}
 }
 
+/*
 void MapTile::drawSky()
 {
 	if (!ok) return;
@@ -896,7 +897,7 @@ void MapTile::drawSky()
 		//wmois[i].wmo->drawSkybox();
 		//if (gWorld->hadSky) break; // TODO
 	}
-}
+}*/
 
 /*
 void MapTile::drawPortals()
