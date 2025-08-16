@@ -77,7 +77,6 @@ void Plugin::onExec()
 		const char* argv[] = {"plugin.app", nullptr};
 		app = new QCoreApplication(argc, const_cast<char**>(argv));
 		app->exec();
-		if (app)
-			delete app;
+		delete app;  // Remove the unnecessary null check
 	}
 }
