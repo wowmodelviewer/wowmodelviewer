@@ -64,7 +64,7 @@ void FBXAnimExporter::run()
 	// LOG_INFO << "FBX Animation File Path: " << qPrintable(dir.absolutePath());
 
 	FbxManager* lSdkManager = FbxManager::Create();
-	if (!lSdkManager || lSdkManager == nullptr)
+	if (!lSdkManager)
 	{
 		LOG_ERROR << "Unable to create the FBX SDK manager for the animation exporter";
 		return;
