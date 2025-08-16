@@ -41,6 +41,13 @@ add_library(cximage STATIC
         xmemfile.cpp
 )
 
+# Suppress LNK4221 warnings for empty object files
+if(MSVC)
+    set_target_properties(cximage PROPERTIES
+        STATIC_LIBRARY_FLAGS "/ignore:4221"
+    )
+endif()
+
 set_property(TARGET cximage PROPERTY FOLDER "ThirdParty libraries")
 target_link_libraries(cximage ${CMAKE_SOURCE_DIR}/ThirdParty/lib/jpeg.lib
         ${CMAKE_SOURCE_DIR}/ThirdParty/lib/libpng.lib)
