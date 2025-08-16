@@ -24,23 +24,18 @@ GLuint TextureManager::add(GameFile* file)
 	}
 
 	// Else, create the texture
-
 	Texture* tex = new Texture(file);
-	if (tex)
-	{
-		// clear old texture memory from vid card
-		glDeleteTextures(1, &id);
-		// create new texture and put it in memory
-		glGenTextures(1, &id);
+	
+	// clear old texture memory from vid card
+	glDeleteTextures(1, &id);
+	// create new texture and put it in memory
+	glGenTextures(1, &id);
 
-		tex->id = id;
-		tex->load();
+	tex->id = id;
+	tex->load();
 
-		do_add(name, id, tex);
-		return id;
-	}
-
-	return 0;
+	do_add(name, id, tex);
+	return id;
 }
 
 //#define SAVE_BLP
