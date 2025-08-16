@@ -17,9 +17,3 @@ void ModelAttachment::setup() const
 	glMultMatrixf(glm::value_ptr(model->bones[bone].mat));
 	glTranslatef(pos.x, pos.y, pos.z);
 }
-
-void ModelAttachment::setupParticle() const
-{
-	glMultMatrixf(glm::value_ptr(model->bones[bone].mat));
-	glTranslatef(pos.x, pos.y, pos.z);
-}

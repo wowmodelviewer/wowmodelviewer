@@ -1902,7 +1902,7 @@ void WoWModel::setupAtt2(int id)
 {
 	const int l = attLookup[id];
 	if (l >= 0)
-		atts[l].setupParticle();
+		atts[l].setup();
 }
 
 // Draws the Bounding Volume, which is used for Collision detection.

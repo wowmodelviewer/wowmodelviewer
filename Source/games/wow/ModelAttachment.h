@@ -23,5 +23,4 @@ struct ModelAttachment
 
 	void init(ModelAttachmentDef& mad);
 	void setup() const;
-	void setupParticle() const;
 };
