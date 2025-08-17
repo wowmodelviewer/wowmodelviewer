@@ -158,6 +158,6 @@ void ImageControl::OnText(wxCommandEvent& event)
 	if (y > maxSize)
 	{
 		y = maxSize;
-		canvasHeight->SetValue(wxString::Format(wxT("%i"), x));
+		canvasHeight->SetValue(wxString::Format(wxT("%i"), y));
 	}
 }
