@@ -41,7 +41,8 @@ ImageControl::ImageControl(wxWindow* parent, wxWindowID id, ModelCanvas* cc)
 
 ImageControl::~ImageControl()
 {
-}
+	// Child controls are deleted automatically by wxWidgets.
+} //-V773
 
 void ImageControl::OnShow(wxAuiManager* m)
 {

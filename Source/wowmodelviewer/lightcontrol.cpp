@@ -128,6 +128,9 @@ LightControl::LightControl(wxWindow* parent, wxWindowID id)
 LightControl::~LightControl()
 {
 	/*
+	// wxWidgets automatically destroys all child controls when the parent window is destroyed.
+	// Explicitly calling Destroy() is not necessary and may cause double deletion.
+	// These calls are left here for reference.
 	//lblCol->Destroy();
 	lblDiff->Destroy();
 	lblAmb->Destroy();
@@ -160,7 +163,7 @@ LightControl::~LightControl()
 	directional->Destroy();
 	*/
 	wxDELETEA(lights);
-}
+} //-V773
 
 void LightControl::Init()
 {
