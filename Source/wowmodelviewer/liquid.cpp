@@ -260,6 +260,7 @@ void Liquid::initGeometry(GameFile& f)
 	*/
 }
 
+/*
 void Liquid::draw()
 {
 	return;
@@ -327,7 +328,7 @@ void Liquid::draw()
 		glDepthMask(GL_TRUE);
 		glDisable(GL_BLEND);
 	}
-}
+}*/
 
 void Liquid::initTextures(wxString basename, int first, int last)
 {

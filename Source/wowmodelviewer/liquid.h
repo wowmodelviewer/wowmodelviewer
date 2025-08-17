@@ -46,5 +46,5 @@ public:
 	void initFromTerrain(GameFile& f, int flags);
 	void initFromWMO(GameFile& f, WMOMaterial& mat, bool indoor);
 
-	void draw();
+	//void draw();
 };
