@@ -56,7 +56,8 @@ namespace WMVLog
 
 	private:
 		Logger();
-		Logger(Logger &);
+		Logger(const Logger&) = delete;
+		Logger& operator=(const Logger&) = delete;
 
 		static Logger *m_instance;
 	};
