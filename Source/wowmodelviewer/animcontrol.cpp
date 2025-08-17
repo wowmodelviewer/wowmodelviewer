@@ -601,7 +601,7 @@ bool AnimControl::UpdateCreatureModel(WoWModel* m)
 					{
 						cols.push_back(fromARGB(pcir.values[0][j].toInt()));
 					}
-					PCRList.push_back({
+					PCRList.push_back({ //-V823
 						{cols[0], cols[1], cols[2]}, {cols[3], cols[4], cols[5]}, {cols[6], cols[7], cols[8]}
 					});
 					grp.PCRIndex = numPCRs;
@@ -746,7 +746,7 @@ bool AnimControl::UpdateItemModel(WoWModel* m)
 					{
 						cols.push_back(fromARGB(pcir.values[0][j].toInt()));
 					}
-					PCRList.push_back({
+					PCRList.push_back({ //-V823
 						{cols[0], cols[1], cols[2]}, {cols[3], cols[4], cols[5]}, {cols[6], cols[7], cols[8]}
 					});
 					grp.PCRIndex = numPCRs;
@@ -797,7 +797,7 @@ bool AnimControl::UpdateItemModel(WoWModel* m)
 					{
 						cols.push_back(fromARGB(pcir.values[0][j].toInt()));
 					}
-					PCRList.push_back({
+					PCRList.push_back({ //-V823
 						{cols[0], cols[1], cols[2]}, {cols[3], cols[4], cols[5]}, {cols[6], cols[7], cols[8]}
 					});
 					grp.PCRIndex = numPCRs;
