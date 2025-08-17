@@ -96,10 +96,8 @@ class MapNode
 {
 public:
 	MapNode(int x, int y, int s)
-		: px(x), py(y), size(s), vmin(0), vmax(0), vcenter(0), mt(nullptr)
+		: px(x), py(y), size(s), vmin(0), vmax(0), vcenter(0), mt(nullptr), children{nullptr, nullptr, nullptr, nullptr}
 	{
-		for (auto& i : children)
-			i = nullptr;
 	}
 
 	virtual ~MapNode() = default;
@@ -152,19 +150,14 @@ public:
 
 	MapChunk()
 		: MapNode(0, 0, 0), nTextures(0), xbase(0), ybase(0), zbase(0), r(0), mBigAlpha(false), header{},
-		  areaID(-1), haswater(false), visible(false), hasholes(false), shadow(0), blend(0),
+		  areaID(-1), haswater(false), visible(false), hasholes(false),
+		  waterlevel{0, 0},
+		  textures{0, 0, 0, 0},
+		  alphamaps{0, 0, 0},
+		  shadow(0), blend(0),
+		  animated{0, 0, 0, 0},
 		  vertices(0), normals(0), strip(nullptr), striplen(0), lq(nullptr), maptile(nullptr)
 	{
-		waterlevel[0] = 0;
-		waterlevel[1] = 0;
-		for (unsigned int& texture : textures)
-		{
-			texture = 0;
-		}
-		for (unsigned int& alphamap : alphamaps)
-		{
-			alphamap = 0;
-		}
 	}
 
 	void init(MapTile* mt, GameFile& f, bool bigAlpha);

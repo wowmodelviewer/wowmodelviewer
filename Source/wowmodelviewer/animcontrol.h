@@ -31,12 +31,8 @@ public:
 	std::set<GeosetNum> creatureGeosetData;
 	// Defines which geosets are switched on for a particular display ID of a model
 
-	TextureGroup() : count(0), base(0)
+	TextureGroup() : count(0), base(0), tex{nullptr, nullptr, nullptr}
 	{
-		for (auto& i : tex)
-		{
-			i = nullptr;
-		}
 		particleColInd = 0;
 		PCRIndex = -1;
 		creatureGeosetData.clear();

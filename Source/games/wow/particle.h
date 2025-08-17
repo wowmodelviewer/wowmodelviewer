@@ -114,28 +114,24 @@ public:
 	// whether its ParticleColorIndex is set to 11, 12 or 13:
 	std::vector<particleColorSet> particleColorReplacements;
 
-	ParticleSystem(): mid(0), emitter(nullptr), rem(0)
-	{
-		multitexture = false;
-		particleColID = 0;
-		replaceParticleColors = false;
-		doNotTrail = false;
-		blend = 0;
-		order = 0;
-		ParticleType = 0;
-		manim = 0;
-		mtime = 0;
-		rows = 0;
-		cols = 0;
-		model = nullptr;
-		parent = nullptr;
-		texture = 0;
-		texture2 = 0;
-		texture3 = 0;
-		slowdown = 0;
-		rotation = 0;
-		tofs = 0;
-	}
+	ParticleSystem()
+    : mid(0), slowdown(0), rotation(0), pos(), tpos(),
+      texture(0), texture2(0), texture3(0),
+      emitter(nullptr), order(0), ParticleType(0),
+      manim(0), mtime(0), rows(0), cols(0),
+      tiles(), billboard(false), rem(0),
+      flags(0), EmitterType(0), parent(nullptr),
+      blend(0), model(nullptr), tofs(0),
+      enabled(), speed(), variation(), spread(), lat(), gravity(), lifespan(), rate(), areal(), areaw(),
+      multitexture(false), doNotTrail(false), particleColID(0), replaceParticleColors(false),
+      particleColorReplacements()
+{
+    // Optionally, initialize arrays and vectors if needed
+    for (int i = 0; i < 3; ++i) {
+        colors[i] = glm::vec4(0.0f);
+        sizes[i] = 0.0f;
+    }
+}
 
 	~ParticleSystem() { delete emitter; }
 
