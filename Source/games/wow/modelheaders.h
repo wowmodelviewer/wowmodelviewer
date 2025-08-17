@@ -283,6 +283,27 @@ public:
 		BoundingBox[1] = geo.BoundingBox[1];
 	}
 
+	// Copy assignment operator
+	ModelGeosetHD& operator=(const ModelGeosetHD& geo)
+	{
+		if (this != &geo) {
+			id = geo.id;
+			vstart = geo.vstart;
+			vcount = geo.vcount;
+			istart = geo.istart;
+			icount = geo.icount;
+			nSkinnedBones = geo.nSkinnedBones;
+			StartBones = geo.StartBones;
+			rootBone = geo.rootBone;
+			nBones = geo.nBones;
+			radius = geo.radius;
+			display = geo.display;
+			BoundingBox[0] = geo.BoundingBox[0];
+			BoundingBox[1] = geo.BoundingBox[1];
+		}
+		return *this;
+	}
+
 	uint32 id; // mesh part id?
 	uint16 vstart; // first vertex, Starting vertex number.
 	uint16 vcount; // num vertices, Number of vertices.
