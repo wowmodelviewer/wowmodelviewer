@@ -182,14 +182,6 @@ void CAnimationExporter::CreateGif()
 	if (video.supportPBO || video.supportVBO)
 	{
 		g_canvas->rt = new RenderTexture();
-
-		if (!g_canvas->rt)
-		{
-			LOG_ERROR << "RenderToTexture object is null!";
-			this->Show(false);
-			return;
-		}
-
 		g_canvas->rt->Init(0, 0, video.supportFBO);
 
 		m_iWidth = g_canvas->rt->nWidth;
@@ -481,13 +473,6 @@ void CAnimationExporter::CreateAvi(wxString fn)
 	{
 		// if either are supported use our 'RenderTexture' object.
 		g_canvas->rt = new RenderTexture();
-
-		if (!g_canvas->rt)
-		{
-			LOG_ERROR << "RenderToTexture object is null!";
-			Show(false);
-			return;
-		}
 
 		g_canvas->rt->Init(512, 512, video.supportFBO);
 
