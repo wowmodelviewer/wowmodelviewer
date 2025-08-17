@@ -9,7 +9,9 @@
 
 #include <vector>
 
-typedef void* HANDLE;
+#ifdef _WIN32
+#include <Windows.h>  // Include Windows headers for standard HANDLE definition
+#endif
 
 #include "GameFolder.h" // GameConfig
 
