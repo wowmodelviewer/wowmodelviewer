@@ -147,14 +147,6 @@ bool WowModelViewApp::OnInit()
 	// Now create our main frame.
 	frame = new ModelViewer();
 
-	if (!frame)
-	{
-		//this->Close();
-		if (splash)
-			splash->Show(false);
-		return false;
-	}
-
 	SetTopWindow(frame);
 	/*
 	There is a problem with drawing on surfaces that have previously not been showed.
