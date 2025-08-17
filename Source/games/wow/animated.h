@@ -411,7 +411,14 @@ public:
 		out << "      <anims>" << std::endl;
 		for (size_t j = 0; j < v.sizes; j++)
 		{
-			if (j != 0) continue; // only output walk animation
+			if (j != 0) 
+			{
+				// For global sequences, only process the first animation
+				if (v.seq > -1)
+					break;
+				continue; // only output walk animation for non-global sequences
+			}
+			
 			if (v.uses((unsigned int)j))
 			{
 				out << "    <anim id=\"" << j << "\" size=\"" << v.data[j].size() << "\">" << std::endl;
@@ -421,8 +428,6 @@ public:
 				}
 				out << "    </anim>" << std::endl;
 			}
-			if (v.seq > -1 && j > 0)
-				break;
 		}
 		out << "      </anims>" << std::endl;
 		return out;
