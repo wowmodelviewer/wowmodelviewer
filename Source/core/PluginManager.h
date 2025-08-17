@@ -34,7 +34,8 @@ public:
 
 private:
 	PluginManager();
-	PluginManager(PluginManager&);
+	PluginManager(const PluginManager&) = delete;
+	PluginManager& operator=(const PluginManager&) = delete;
 
 	static PluginManager* m_instance;
 };

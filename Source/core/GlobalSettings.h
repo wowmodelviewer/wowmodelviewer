@@ -42,7 +42,8 @@ namespace core
 
 	private:
 		GlobalSettings();
-		GlobalSettings(GlobalSettings&);
+		GlobalSettings(const GlobalSettings&) = delete;
+		GlobalSettings& operator=(const GlobalSettings&) = delete;
 
 		int m_versionMajorNumber;
 		int m_versionMinorNumber;

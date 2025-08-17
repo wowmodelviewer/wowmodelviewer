@@ -48,7 +48,8 @@ public:
 	// int fileDataId(std::string & filename);
 
 private:
-	CASCFolder(const CASCFolder&);
+	CASCFolder(const CASCFolder&) = delete;
+	CASCFolder& operator=(const CASCFolder&) = delete;
 
 	//void initLocales();
 	//void initVersion();
