@@ -58,6 +58,25 @@ public:
 		definedTexture = grp.definedTexture;
 	}
 
+	// copy assignment operator
+	TextureGroup& operator=(const TextureGroup& grp)
+	{
+		if (this != &grp)
+		{
+			for (size_t i = 0; i < num; i++)
+			{
+				tex[i] = grp.tex[i];
+			}
+			base = grp.base;
+			count = grp.count;
+			particleColInd = grp.particleColInd;
+			PCRIndex = grp.PCRIndex;
+			creatureGeosetData = grp.creatureGeosetData;
+			definedTexture = grp.definedTexture;
+		}
+		return *this;
+	}
+
 	bool operator<(const TextureGroup& grp) const
 	{
 		if (!definedTexture && grp.definedTexture)
