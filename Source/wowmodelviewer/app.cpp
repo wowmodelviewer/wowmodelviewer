@@ -112,7 +112,7 @@ bool WowModelViewApp::OnInit()
 		if (!bitmap)
 			wxMessageBox(_("Failed to load Splash Screen.\nPress OK to continue loading WMV."), _("Failure"));
 		else
-			splash = new wxSplashScreen(*bitmap,
+			new wxSplashScreen(*bitmap,
 			                            wxSPLASH_CENTRE_ON_SCREEN | wxSPLASH_TIMEOUT,
 			                            2000, nullptr, -1, wxDefaultPosition, wxDefaultSize,
 			                            wxBORDER_NONE);
