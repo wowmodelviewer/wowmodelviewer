@@ -341,16 +341,21 @@ static void DDSDecodeAlphaExplicit(unsigned int* pixel, ddsAlphaBlockExplicit_t*
 		unsigned short word = DDSLittleShort(alphaBlock->row[row]);
 
 		/* walk pixels */
-		for (int pix = 0; pix < 4; pix++)
-		{
-			/* zero the alpha bits of image pixel */
-			*pixel &= alphaZero;
-			color.a = static_cast<unsigned char>(word & 0x000F);
-			color.a = color.a | (color.a << 4);
-			*pixel |= *reinterpret_cast<unsigned int*>(&color);
-			word >>= 4; /* move next bits to lowest 4 */
-			pixel++; /* move to next pixel in the row */
-		}
+        for (int pix = 0; pix < 4; pix++)
+        {
+        /* zero the alpha bits of image pixel */
+        *pixel &= alphaZero;
+        color.a = static_cast<unsigned char>(word & 0x000F);
+        color.a = color.a | (color.a << 4);
+        // Avoid strict aliasing violation by constructing the uint32_t manually
+        unsigned int colorValue = (static_cast<unsigned int>(color.a) << 24) |
+        (static_cast<unsigned int>(color.r) << 16) |
+        (static_cast<unsigned int>(color.g) << 8) |
+        (static_cast<unsigned int>(color.b));
+        *pixel |= colorValue;
+        word >>= 4; /* move next bits to lowest 4 */
+        pixel++; /* move to next pixel in the row */
+        }
 	}
 }
 
