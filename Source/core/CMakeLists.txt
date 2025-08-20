@@ -23,7 +23,6 @@ set(src CharInfos.cpp
     NPCInfos.cpp
     Plugin.cpp
     PluginManager.cpp
-    VersionManager.cpp
     metaclasses/Component.cpp
     metaclasses/Event.cpp
     metaclasses/Observable.cpp
@@ -48,7 +47,6 @@ set(headers CharInfos.h
       NPCInfos.h
       Plugin.h
       PluginManager.h
-      VersionManager.h
       metaclasses/BaseIterator.h
       metaclasses/Component.h
       metaclasses/Container.h
