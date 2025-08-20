@@ -490,13 +490,22 @@ int DDSDecompressDXT1(unsigned char* src, int width, int height, unsigned char* 
 		/* 8 bytes per block */
 		ddsColorBlock_t* block = reinterpret_cast<ddsColorBlock_t*>(src + y * xBlocks * 8);
 
-		/* walk x */
-		for (int x = 0; x < xBlocks; x++, block++)
-		{
+        /* walk x */
+        for (int x = 0; x < xBlocks; x++, block++)
+        {
 			DDSGetColorBlockColors(block, colors);
+			// Avoid strict aliasing violation by copying color bytes to a uint32_t array
+			unsigned int colorInts[4];
+			for (int i = 0; i < 4; ++i)
+			{
+				colorInts[i] = (static_cast<unsigned int>(colors[i].a) << 24) |
+						   (static_cast<unsigned int>(colors[i].r) << 16) |
+						   (static_cast<unsigned int>(colors[i].g) << 8)  |
+						   (static_cast<unsigned int>(colors[i].b));
+			}
 			unsigned int* pixel = reinterpret_cast<unsigned int*>(dest + x * 16 + (y * 4) * width * 4);
-			DDSDecodeColorBlock(pixel, block, width, reinterpret_cast<unsigned int*>(colors));
-		}
+			DDSDecodeColorBlock(pixel, block, width, colorInts);
+        }
 	}
 
 	/* return ok */
