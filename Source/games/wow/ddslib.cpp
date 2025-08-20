@@ -452,18 +452,23 @@ static void DDSDecodeAlpha3BitLinear(unsigned int* pixel, ddsAlphaBlock3BitLinea
 	}
 
 	/* write out alpha values to the image bits */
-	for (row = 0; row < 4; row++, pixel += width - 4)
-	{
+    for (row = 0; row < 4; row++, pixel += width - 4)
+    {
 		for (pix = 0; pix < 4; pix++)
 		{
 			/* zero the alpha bits of image pixel */
 			*pixel &= alphaZero;
 
-			/* or the bits into the prev. nulled alpha */
-			*pixel |= *reinterpret_cast<unsigned int*>(&(aColors[row][pix]));
+			/* manually construct the uint32_t value to avoid strict aliasing violation */
+			const ddsColor_t& c = aColors[row][pix];
+			unsigned int colorValue = (static_cast<unsigned int>(c.a) << 24) |
+			(static_cast<unsigned int>(c.r) << 16) |
+			(static_cast<unsigned int>(c.g) << 8) |
+			(static_cast<unsigned int>(c.b));
+			*pixel |= colorValue;
 			pixel++;
 		}
-	}
+    }
 }
 
 /*
