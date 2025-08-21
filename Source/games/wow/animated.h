@@ -286,15 +286,7 @@ public:
 					data[j].push_back(Conv::conv(keys[i]));
 				break;
 			case INTERPOLATION_HERMITE:
-				for (size_t i = 0; i < pHeadKeys->nEntrys; i++)
-				{
-					data[j].push_back(Conv::conv(keys[i * 3]));
-					in[j].push_back(Conv::conv(keys[i * 3 + 1]));
-					out[j].push_back(Conv::conv(keys[i * 3 + 2]));
-				}
-				break;
-			//let's use same values like hermite?!?
-			case INTERPOLATION_BEZIER:
+			case INTERPOLATION_BEZIER: //let's use same values like hermite?!?
 				for (size_t i = 0; i < pHeadKeys->nEntrys; i++)
 				{
 					data[j].push_back(Conv::conv(keys[i * 3]));
@@ -382,14 +374,7 @@ public:
 					data[j].push_back(Conv::conv(keys[i]));
 				break;
 			case INTERPOLATION_HERMITE:
-				for (size_t i = 0; i < pHeadKeys->nEntrys; i++)
-				{
-					data[j].push_back(Conv::conv(keys[i * 3]));
-					in[j].push_back(Conv::conv(keys[i * 3 + 1]));
-					out[j].push_back(Conv::conv(keys[i * 3 + 2]));
-				}
-				break;
-			case INTERPOLATION_BEZIER:
+			case INTERPOLATION_BEZIER: //let's use same values like hermite?!?
 				for (size_t i = 0; i < pHeadKeys->nEntrys; i++)
 				{
 					data[j].push_back(Conv::conv(keys[i * 3]));
