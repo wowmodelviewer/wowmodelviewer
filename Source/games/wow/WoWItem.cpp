@@ -312,31 +312,12 @@ void WoWItem::load()
 				const auto modelid = result.values[0][0].toInt();
 				const auto position = result.values[0][1].toInt();
 
-				if (modelid == models[0])
+				// If the modelid matches models[0], use position to determine left/right
+				// Otherwise, swap the indices
+				if ((modelid == models[0] && position != 0) || (modelid != models[0] && position == 0))
 				{
-					if (position == 0)
-					{
-						leftIndex = 0;
-						rightIndex = 1;
-					}
-					else
-					{
-						leftIndex = 1;
-						rightIndex = 0;
-					}
-				}
-				else
-				{
-					if (position == 0)
-					{
-						leftIndex = 1;
-						rightIndex = 0;
-					}
-					else
-					{
-						leftIndex = 0;
-						rightIndex = 1;
-					}
+					leftIndex = 1;
+					rightIndex = 0;
 				}
 			}
 			else
