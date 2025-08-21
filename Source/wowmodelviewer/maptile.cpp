@@ -1104,7 +1104,7 @@ void MapChunk::init(MapTile* Mt, GameFile& f, bool bigAlpha)
 
 	while (f.getPos() < lastpos)
 	{
-		memset(fcc, 0, 4);
+		memset(fcc, 0, sizeof(fcc)); // Zero all 5 bytes
 		Size = 0;
 		f.read(fcc, 4);
 		f.read(&Size, 4);
