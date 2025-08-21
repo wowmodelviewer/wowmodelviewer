@@ -1015,10 +1015,16 @@ void WoWModel::initAnimated()
 					GameFile* fileToUse = skelFile;
 					if (parentFile)
 					{
-						parentFile->open();
-						parentFile->setChunk("SKB1");
-						skelFile->close();
-						fileToUse = parentFile;
+						if (parentFile->open())
+						{
+							parentFile->setChunk("SKB1");
+							skelFile->close();
+							fileToUse = parentFile;
+						}
+						else
+						{
+							LOG_ERROR << "Failed to open parentFile in WoWModel::initAnimated";
+						}
 					}
 
 					SKB1 skb1;
