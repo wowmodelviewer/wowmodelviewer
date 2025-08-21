@@ -37,6 +37,10 @@ void RaceInfos::init()
 		infos.sexID = race[3].toInt();
 		auto modelfileid = race[4].toInt();
 		infos.textureLayoutID = race[5].toInt();
+		if (infos.textureLayoutID <= 0)
+		{
+			LOG_WARNING << "Unexpected textureLayoutID (" << infos.textureLayoutID << ") for raceID " << infos.raceID << ", sexID " << infos.sexID;
+		}
 
 		// Get fallback display race ID (this is mostly for allied races and others that rely on
 		// item display info from other race models):
