@@ -5,6 +5,9 @@
 #include "logger/Logger.h"
 
 #include "glm/gtc/type_ptr.hpp"
+#include <cmath>
+
+constexpr float Epsilon = 1e-6f; // Add this near the top of the file
 
 enum
 {
@@ -163,7 +166,7 @@ void ParticleSystem::update(float dt)
 		colVals[1] = colors[1];
 		colVals[2] = colors[2];
 	}
-	if (!dt)
+	if (fabs(dt) < Epsilon)
 	{
 		// Animation is stopped, so no new/moved particles. Just update particle colour
 		// in case it changed (if someone selects a new skin while model stopped):
