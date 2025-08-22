@@ -765,29 +765,20 @@ void WoWItem::refresh()
 		{
 			if (isCustomizableTabard())
 			{
-				auto it = itemTextures_.find(CR_TABARD_1);
-				if (it != itemTextures_.end())
-					charModel_->tex.addLayer(it->second, CR_TORSO_UPPER, SLOT_LAYERS_[slot_]);
-
-				it = itemTextures_.find(CR_TABARD_2);
-				if (it != itemTextures_.end())
-					charModel_->tex.addLayer(it->second, CR_TORSO_LOWER, SLOT_LAYERS_[slot_]);
-
-				it = itemTextures_.find(CR_TABARD_3);
-				if (it != itemTextures_.end())
-					charModel_->tex.addLayer(it->second, CR_TORSO_UPPER, SLOT_LAYERS_[slot_]);
-
-				it = itemTextures_.find(CR_TABARD_4);
-				if (it != itemTextures_.end())
-					charModel_->tex.addLayer(it->second, CR_TORSO_LOWER, SLOT_LAYERS_[slot_]);
-
-				it = itemTextures_.find(CR_TABARD_5);
-				if (it != itemTextures_.end())
-					charModel_->tex.addLayer(it->second, CR_TORSO_UPPER, SLOT_LAYERS_[slot_]);
-
-				it = itemTextures_.find(CR_TABARD_6);
-				if (it != itemTextures_.end())
-					charModel_->tex.addLayer(it->second, CR_TORSO_LOWER, SLOT_LAYERS_[slot_]);
+				static const std::pair<CharRegions, CharRegions> tabardLayers[] = {
+					{CR_TABARD_1, CR_TORSO_UPPER},
+					{CR_TABARD_2, CR_TORSO_LOWER},
+					{CR_TABARD_3, CR_TORSO_UPPER},
+					{CR_TABARD_4, CR_TORSO_LOWER},
+					{CR_TABARD_5, CR_TORSO_UPPER},
+					{CR_TABARD_6, CR_TORSO_LOWER}
+				};
+				for (const auto& layer : tabardLayers)
+				{
+					auto it = itemTextures_.find(layer.first);
+					if (it != itemTextures_.end())
+						charModel_->tex.addLayer(it->second, layer.second, SLOT_LAYERS_[slot_]);
+				}
 			}
 			else
 			{
