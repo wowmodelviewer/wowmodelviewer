@@ -387,13 +387,13 @@ public:
 		}
 	}
 
-	friend std::ostream& operator<<(std::ostream& out, const Animated& v)
+	friend std::ostream& operator<<(std::ostream& outVal, const Animated& v)
 	{
 		if (v.sizes == 0)
-			return out;
-		out << "      <type>" << v.type << "</type>" << std::endl;
-		out << "      <seq>" << v.seq << "</seq>" << std::endl;
-		out << "      <anims>" << std::endl;
+			return outVal;
+		outVal << "      <type>" << v.type << "</type>" << std::endl;
+		outVal << "      <seq>" << v.seq << "</seq>" << std::endl;
+		outVal << "      <anims>" << std::endl;
 		for (size_t j = 0; j < v.sizes; j++)
 		{
 			if (j != 0) 
@@ -406,16 +406,16 @@ public:
 			
 			if (v.uses((unsigned int)j))
 			{
-				out << "    <anim id=\"" << j << "\" size=\"" << v.data[j].size() << "\">" << std::endl;
+				outVal << "    <anim id=\"" << j << "\" size=\"" << v.data[j].size() << "\">" << std::endl;
 				for (size_t k = 0; k < v.data[j].size(); k++)
 				{
 					//        out << "      <data time=\"" << v.times[j][k]  << "\">" << v.data[j][k] << "</data>" << std::endl;
 				}
-				out << "    </anim>" << std::endl;
+				outVal << "    </anim>" << std::endl;
 			}
 		}
-		out << "      </anims>" << std::endl;
-		return out;
+		outVal << "      </anims>" << std::endl;
+		return outVal;
 	}
 };
 
