@@ -732,7 +732,7 @@ else
 	if (GLOBALSETTINGS.bZeroParticle)
 		l_anim = 0;
 	p.maxlife = sys->lifespan.getValue(l_anim, time);
-	if (p.maxlife == 0)
+	if (fabs(p.maxlife) < Epsilon)
 		p.maxlife = 1;
 
 	p.origin = p.tpos;
