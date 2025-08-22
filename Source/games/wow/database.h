@@ -71,4 +71,16 @@ struct _DATABASE_API_ NPCRecord
 	NPCRecord(const NPCRecord& r): name(r.name), id(r.id), model(r.model), type(r.type)
 	{
 	}
+
+	NPCRecord& operator=(const NPCRecord& r)
+	{
+		if (this != &r)
+		{
+			name = r.name;
+			id = r.id;
+			model = r.model;
+			type = r.type;
+		}
+		return *this;
+	}
 };
