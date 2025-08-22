@@ -643,10 +643,10 @@ Particle SphereParticleEmitter::newParticle(size_t anim, size_t time, float w, f
 	// New
 	// Spread should never be zero for sphere particles ?
 	float t = 0;
-	if (spr == 0)
-		t = randfloat(-glm::pi<float>(), glm::pi<float>());
-	else
-		t = randfloat(-spr, spr);
+	if (fabs(spr) < Epsilon)
+    t = randfloat(-glm::pi<float>(), glm::pi<float>());
+else
+    t = randfloat(-spr, spr);
 
 	//Spread Calculation
 	glm::mat4 mrot;
