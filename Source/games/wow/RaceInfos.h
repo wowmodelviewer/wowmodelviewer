@@ -20,15 +20,15 @@ class _RACEINFOS_API_ RaceInfos
 {
 public:
 	int raceID = -1; // -1 means invalid race (default value)
-	int sexID; // 0 male / 1 female
-	int textureLayoutID;
-	bool isHD;
-	bool barefeet;
+	int sexID = 0; // 0 male / 1 female
+	int textureLayoutID = 0;
+	bool isHD = false;
+	bool barefeet = false;
 	std::string prefix;
-	int modelFallbackRaceID;
-	int modelFallbackSexID;
-	int textureFallbackRaceID;
-	int textureFallbackSexID;
+	int modelFallbackRaceID = -1;
+	int modelFallbackSexID = -1;
+	int textureFallbackRaceID = -1;
+	int textureFallbackSexID = -1;
 	std::vector<int> ChrModelID;
 
 	static void init();

@@ -3,27 +3,34 @@
 #include <QXmlStreamWriter>
 
 TabardDetails::TabardDetails()
+    : showCustom(false),
+      iconId(0),
+      iconColor(0),
+      borderId(0),
+      borderColor(0),
+      backgroundId(0),
+      tier(0)
 {
-	QString query = QString("SELECT DISTINCT Color FROM GuildTabardBackground");
-	sqlResult r = GAMEDATABASE.sqlQuery(query);
+    QString query = QString("SELECT DISTINCT Color FROM GuildTabardBackground");
+    sqlResult r = GAMEDATABASE.sqlQuery(query);
 
-	if (r.valid && !r.values.empty())
-		for (auto& v : r.values)
-			backgrounds.push_back(v[0].toInt());
+    if (r.valid && !r.values.empty())
+        for (auto& v : r.values)
+            backgrounds.push_back(v[0].toInt());
 
-	query = QString("SELECT DISTINCT EmblemID FROM GuildTabardEmblem");
-	r = GAMEDATABASE.sqlQuery(query);
+    query = QString("SELECT DISTINCT EmblemID FROM GuildTabardEmblem");
+    r = GAMEDATABASE.sqlQuery(query);
 
-	if (r.valid && !r.values.empty())
-		for (auto& v : r.values)
-			icons.push_back(v[0].toInt());
+    if (r.valid && !r.values.empty())
+        for (auto& v : r.values)
+            icons.push_back(v[0].toInt());
 
-	query = QString("SELECT DISTINCT BorderID FROM GuildTabardBorder");
-	r = GAMEDATABASE.sqlQuery(query);
+    query = QString("SELECT DISTINCT BorderID FROM GuildTabardBorder");
+    r = GAMEDATABASE.sqlQuery(query);
 
-	if (r.valid && !r.values.empty())
-		for (auto& v : r.values)
-			borders.push_back(v[0].toInt());
+    if (r.valid && !r.values.empty())
+        for (auto& v : r.values)
+            borders.push_back(v[0].toInt());
 }
 
 GameFile* TabardDetails::GetBackgroundTex(int slot)

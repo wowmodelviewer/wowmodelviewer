@@ -15,6 +15,16 @@ CAVIGenerator::CAVIGenerator()
 
 	// Default frame rate, only matters if writing to AVI
 	m_dwRate = 30;
+
+	// Initialize all members to safe defaults
+	m_pData = nullptr;
+	m_iWidth = 0;
+	m_iHeight = 0;
+	m_iCurFrame = 0;
+	m_iFirstFrame = 0;
+	m_iLastFrame = 0;
+	m_iMSPerFrame = 0;
+	memset(&m_pStreamInfo, 0, sizeof(m_pStreamInfo));
 }
 
 CAVIGenerator::~CAVIGenerator()

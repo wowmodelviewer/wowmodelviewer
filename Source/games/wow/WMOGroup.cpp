@@ -597,9 +597,33 @@ void WMOGroup::setupFog()
 }
 
 WMOGroup::WMOGroup() :
-	dl(0), ddr(nullptr), vertices(nullptr), normals(nullptr), texcoords(nullptr),
-	indices(nullptr), materials(nullptr), nTriangles(0), nVertices(0),
-	nIndices(0), nBatches(0)
+	dl(0),
+	ddr(nullptr),
+	vertices(nullptr),
+	normals(nullptr),
+	texcoords(nullptr),
+	indices(nullptr),
+	materials(nullptr),
+	nTriangles(0),
+	nVertices(0),
+	nIndices(0),
+	nBatches(0),
+	wmo(nullptr),
+	flags(0),
+	dl_light(0),
+	rad(0.0f),
+	num(0),
+	fog(-1),
+	ok(false),
+	visible(false),
+	nDoodads(0),           
+	cv(nullptr),           
+	batches(nullptr),      
+	VertexColors(nullptr), 
+	IndiceToVerts(nullptr),
+	indoor(false),
+	hascv(false),       
+	outdoorLights(false)
 {
 }
 

@@ -308,24 +308,35 @@ void MapTile::initDisplay()
 MapTile is ADT
 http://madx.dk/wowdev/wiki/index.php?title=ADT
 */
-MapTile::MapTile(wxString filename): nWMO(0), nMDX(0), topnode(0, 0, 16)
+MapTile::MapTile(wxString filename)
+    : nWMO(0)
+    , nMDX(0)
+    , topnode(0, 0, 16)
+    , x(0)
+    , z(0)
+    , ok(false)
+    , mBigAlpha(false)
+    , xbase(0.0f)
+    , zbase(0.0f)
+    , viewpos(0.0f)
+    , viewrot(0.0f)
 {
-	/*
-	x = atoi((char *)filename.Mid(filename.Len()-9, 2).c_str());
-	z = atoi((char *)filename.Mid(filename.Len()-6, 2).c_str());
-	xbase = x * TILESIZE;
-	zbase = z * TILESIZE;
-	// TODO: get bigAlpha from world
-	// mBigAlpha=bigAlpha;
-	viewpos.x = 14937.999f+200.0f;
-	viewpos.y = -260.0f+200.0f;
-	viewpos.z = 18400.0f;
-	viewrot.x = 0;
-	viewrot.y = 0;
-	viewrot.z = 0;
+    memset(mapstrip2, 0, sizeof(mapstrip2));
+    /*
+    x = atoi((char *)filename.Mid(filename.Len()-9, 2).c_str());
+    z = atoi((char *)filename.Mid(filename.Len()-6, 2).c_str());
+    xbase = x * TILESIZE;
+    zbase = z * TILESIZE;
+    // TODO: get bigAlpha from world
+    // mBigAlpha=bigAlpha;
+    viewpos.x = 14937.999f+200.0f;
+    viewpos.y = -260.0f+200.0f;
+    viewpos.z = 18400.0f;
+    viewrot.x = 0;
+    viewrot.y = 0;
+    viewrot.z = 0;
   
-  
-	LOG_INFO << "Loading tile" << filename.c_str();
+    LOG_INFO << "Loading tile" << filename.c_str();
 	initDisplay();
   
 	 // [FLOW] DON'T REMOVE i use this file extraction method to debug the adt format
