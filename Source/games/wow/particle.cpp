@@ -527,7 +527,7 @@ void CalcSpreadMatrix(float Spread1, float Spread2, float w, float l)
 	SpreadMat = SpreadMat * Temp;
 
 	Temp = glm::mat4(1.0f);
-	Temp[0][0] = c[1];
+	Temp[0][0] = c[1]; //-V525
 	Temp[1][0] = s[1];
 	Temp[1][1] = c[1];
 	Temp[0][1] = -s[1];
