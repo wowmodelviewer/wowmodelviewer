@@ -193,10 +193,10 @@ void ParticleSystem::update(float dt)
 		float flife = lifespan.getValue(l_manim, mtime);
 
 		float ftospawn;
-		if (flife)
-			ftospawn = (dt * frate / flife) + rem;
+		if (fabs(flife) > Epsilon)
+		    ftospawn = (dt * frate / flife) + rem;
 		else
-			ftospawn = rem;
+		    ftospawn = rem;
 		if (ftospawn < 1.0f)
 		{
 			rem = ftospawn;
