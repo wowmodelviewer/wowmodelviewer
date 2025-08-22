@@ -25,6 +25,7 @@ namespace WMVLog
 	private:
 		LogOutputFile();
 		LogOutputFile(const LogOutputFile&);
+		LogOutputFile& operator=(const LogOutputFile&) = delete;
 
 		mutable QMutex mutex;
 		QFile m_logFile;
