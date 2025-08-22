@@ -37,7 +37,7 @@ inline T interpolate(const float r, const T& v1, const T& v2)
 }
 
 template <class T>
-inline T interpolateHermite(const float r, const T& v1, const T& v2, const T& in, const T& out)
+inline T interpolateHermite(const float r, const T& v1, const T& v2, const T& in, const T& outVal)
 {
 	// basis functions
 	float h1 = 2.0f * r * r * r - 3.0f * r * r + 1.0f;
@@ -46,11 +46,11 @@ inline T interpolateHermite(const float r, const T& v1, const T& v2, const T& in
 	float h4 = r * r * r - r * r;
 
 	// interpolation
-	return static_cast<T>(v1 * h1 + v2 * h2 + in * h3 + out * h4);
+	return static_cast<T>(v1 * h1 + v2 * h2 + in * h3 + outVal * h4);
 }
 
 template <class T>
-inline T interpolateBezier(const float r, const T& v1, const T& v2, const T& in, const T& out)
+inline T interpolateBezier(const float r, const T& v1, const T& v2, const T& in, const T& outVal)
 {
 	const float InverseFactor = (1.0f - r);
 	const float FactorTimesTwo = r * r;
@@ -62,7 +62,7 @@ inline T interpolateBezier(const float r, const T& v1, const T& v2, const T& in,
 	float h4 = FactorTimesTwo * r;
 
 	// interpolation
-	return static_cast<T>(v1 * h1 + v2 * h2 + in * h3 + out * h4);
+	return static_cast<T>(v1 * h1 + v2 * h2 + in * h3 + outVal * h4);
 }
 
 // "linear" interpolation for quaternions should be slerp by default
