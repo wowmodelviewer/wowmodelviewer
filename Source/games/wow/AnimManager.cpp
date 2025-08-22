@@ -126,24 +126,24 @@ void AnimManager::Next()
 
 void AnimManager::Prev()
 {
-	if (CurLoop >= animList[PlayIndex].Loops)
-	{
-		PlayIndex--;
+    if (CurLoop >= animList[PlayIndex].Loops)
+    {
+        PlayIndex--;
 
-		if (PlayIndex < 0)
-		{
-			Stop();
-			return;
-		}
-		CurLoop = animList[PlayIndex].Loops;
-	}
-	else if (CurLoop < animList[PlayIndex].Loops)
-	{
-		CurLoop++;
-	}
+        if (PlayIndex < 0)
+        {
+            Stop();
+            return;
+        }
+        CurLoop = animList[PlayIndex].Loops;
+    }
+    else
+    {
+        CurLoop++;
+    }
 
-	Frame = model.anims[animList[PlayIndex].AnimID].length;
-	TotalFrames = GetFrameCount();
+    Frame = model.anims[animList[PlayIndex].AnimID].length;
+    TotalFrames = GetFrameCount();
 }
 
 int AnimManager::Tick(int time)
