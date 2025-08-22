@@ -480,6 +480,7 @@ void ModelViewer::InitMenu()
 	}
 	catch (...)
 	{
+		LOG_ERROR << "Exception occurred during menu initialization in ModelViewer::InitMenu()";
 	};
 
 	// Disable our "Character" menu, only accessible when a character model is being displayed
@@ -1199,6 +1200,7 @@ void ModelViewer::LoadItem(unsigned int id)
 	}
 	catch (...)
 	{
+		LOG_ERROR << "Exception occurred during menu initialization in ModelViewer::InitMenu()";
 	}
 
 	// wxAUI

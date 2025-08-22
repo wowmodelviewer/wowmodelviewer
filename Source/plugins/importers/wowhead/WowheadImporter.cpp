@@ -115,17 +115,20 @@ ItemRecord* WowheadImporter::importItem(QString urlToGrab) const
 
 QString WowheadImporter::extractSubString(QString& datas, QString beginPattern, QString endPattern) const
 {
-	QString result;
-	try
-	{
-		result = datas.mid(datas.indexOf(beginPattern, 0, Qt::CaseInsensitive) + beginPattern.length());
-		if (!endPattern.isEmpty())
-			result = result.mid(0, result.indexOf(endPattern, 0, Qt::CaseInsensitive));
-	}
-	catch (...)
-	{
-	}
-	return result;
+    QString result;
+    int beginIdx = datas.indexOf(beginPattern, 0, Qt::CaseInsensitive);
+    if (beginIdx == -1)
+        return result;
+
+    beginIdx += beginPattern.length();
+    result = datas.mid(beginIdx);
+
+    if (!endPattern.isEmpty()) {
+        int endIdx = result.indexOf(endPattern, 0, Qt::CaseInsensitive);
+        if (endIdx != -1)
+            result = result.mid(0, endIdx);
+    }
+    return result;
 }
 
 QByteArray WowheadImporter::getURLData(QString inputUrl) const

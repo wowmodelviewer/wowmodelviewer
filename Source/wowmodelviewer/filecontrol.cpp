@@ -96,9 +96,14 @@ FileControl::FileControl(wxWindow* parent, wxWindowID id)
 		choFilter = new wxChoice(this, ID_FILELIST_FILTER, wxPoint(10, 620), wxSize(130, 10), std::size(chos), chos);
 		choFilter->SetSelection(filterMode);
 	}
+	catch (const std::exception& ex)
+	{
+		LOG_ERROR << "Exception in FileControl constructor: " << ex.what();
+	}
 	catch (...)
 	{
-	};
+		LOG_ERROR << "Unknown exception in FileControl constructor.";
+	}
 }
 
 FileControl::~FileControl()
