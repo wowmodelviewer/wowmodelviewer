@@ -1719,12 +1719,12 @@ inline void WoWModel::drawModel()
 		glRotatef(rot_.z, 0.0f, 0.0f, 1.0f);
 	}
 
-
-	if (showModel && (alpha_ != 1.0f))
+	// Use epsilon-based comparison for floating point
+	if (showModel && glm::epsilonNotEqual(alpha_, 1.0f, 1e-6f))
 	{
 		glDisable(GL_COLOR_MATERIAL);
 
-		const float a[] = {1.0f, 1.0f, 1.0f, alpha_};
+		const float a[] = { 1.0f, 1.0f, 1.0f, alpha_ };
 		glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, a);
 
 		glEnable(GL_BLEND);
@@ -1788,7 +1788,8 @@ inline void WoWModel::drawModel()
 	if (video.supportVBO && animated)
 		glBindBufferARB(GL_ARRAY_BUFFER_ARB, 0);
 
-	if (showModel && (alpha_ != 1.0f))
+	// Use epsilon-based comparison for floating point
+	if (showModel && glm::epsilonNotEqual(alpha_, 1.0f, 1e-6f))
 	{
 		const float a[] = {1.0f, 1.0f, 1.0f, 1.0f};
 		glMaterialfv(GL_FRONT, GL_DIFFUSE, a);
