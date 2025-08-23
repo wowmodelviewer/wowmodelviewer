@@ -319,6 +319,14 @@ bool OBJExporter::exportModelVertices(WoWModel* model, QTextStream& file, int& c
 				triangles++;
 			}
 			file << "# " << triangles << " triangles in group" << "\n" << "\n";
+
+			// Check for potential overflow
+			if (triangles_total > UINT64_MAX - triangles)
+			{
+				LOG_ERROR << "Overflow detected in triangles_total!";
+				return false; // Handle overflow gracefully
+			}
+
 			triangles_total += triangles;
 		}
 	}
