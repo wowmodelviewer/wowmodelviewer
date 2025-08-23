@@ -393,7 +393,7 @@ void FileControl::ClearCanvas()
 	else if (modelviewer->isADT)
 	{
 		wxDELETE(modelviewer->canvas->adt);
-		modelviewer->canvas->adt = nullptr;
+		//modelviewer->canvas->adt = nullptr;
 	}
 
 #ifdef _DEBUG
