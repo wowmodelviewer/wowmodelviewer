@@ -606,16 +606,14 @@ std::vector<std::string> WDC3File::get(unsigned int recordIndex, const core::Tab
 			else if (field->type == "int16")
 			{
 				std::stringstream ss;
-				std::int16_t intValue;
-				std::memcpy(&intValue, &val, sizeof(std::int16_t));
+				std::int16_t intValue = static_cast<std::int16_t>(val & 0xFFFF);
 				ss << static_cast<int>(intValue);
 				result.push_back(ss.str());
 			}
 			else if (field->type == "uint16")
 			{
 				std::stringstream ss;
-				std::uint16_t uintValue;
-				std::memcpy(&uintValue, &val, sizeof(std::uint16_t));
+				std::uint16_t uintValue = static_cast<std::uint16_t>(val & 0xFFFF);
 				ss << static_cast<unsigned int>(uintValue);
 				result.push_back(ss.str());
 			}
@@ -661,7 +659,7 @@ std::vector<std::string> WDC3File::get(unsigned int recordIndex, const core::Tab
 			{
 				std::stringstream ss;
 				uint16_t value;
-				std::memcpy(&value, &val, sizeof(uint16_t));
+				value = static_cast<uint16_t>(val & 0xFFFF);
 				uint8_t byte = value & 0xFF;
 				ss << static_cast<unsigned int>(byte);
 				result.push_back(ss.str());
