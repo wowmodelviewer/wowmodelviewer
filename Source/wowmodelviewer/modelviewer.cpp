@@ -2154,7 +2154,7 @@ void ModelViewer::LoadChar(QString fn, bool equipmentOnly /* = false */)
 		{
 			//canvas->clearAttachments();
 			wxDELETE(canvas->wmo);
-			canvas->wmo = nullptr;
+			//canvas->wmo = nullptr;
 		}
 	}
 
