@@ -28,7 +28,7 @@ ItemRecord::ItemRecord(const std::vector<QString>& vals)
 		break;
 	case SHEATHETYPE_SHIELD: sheath = ATT_MIDDLE_BACK_SHEATH;
 		break;
-	default: sheath = SHEATHETYPE_NONE;
+	default: sheath = SHEATHETYPE_NONE; //-V1048
 	}
 	name = vals[1];
 }
