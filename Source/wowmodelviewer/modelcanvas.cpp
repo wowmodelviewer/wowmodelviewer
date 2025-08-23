@@ -487,49 +487,51 @@ void ModelCanvas::OnPaint(wxPaintEvent& WXUNUSED(event))
 
 inline void ModelCanvas::RenderGrid()
 {
-	int count = 0;
+    int count = 0;
 
-	const GLfloat white[] = {1.0f, 1.0f, 1.0f, 1.0f};
-	const GLfloat black[] = {0.0f, 0.0f, 0.0f, 1.0f};
+    const GLfloat white[] = {1.0f, 1.0f, 1.0f, 1.0f};
+    const GLfloat black[] = {0.0f, 0.0f, 0.0f, 1.0f};
 
-	glDisable(GL_TEXTURE_2D);
-	glDisable(GL_LIGHTING);
-	//glEnable(GL_COLOR);
+    glDisable(GL_TEXTURE_2D);
+    glDisable(GL_LIGHTING);
+    //glEnable(GL_COLOR);
 
-	glBegin(GL_QUADS);
+    glBegin(GL_QUADS);
 
-	for (float i = -20.0f; i <= 20.0f; i += 1.0f)
-	{
-		for (float j = -20.0f; j <= 20.0f; j += 1.0f)
-		{
-			if ((count % 2) == 0)
-			{
-				//glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, black);
-				glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, white);
-				glColor3f(1.0f, 1.0f, 1.0f);
-			}
-			else
-			{
-				//glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, black);  
-				glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, black);
-				glColor3f(0.2f, 0.2f, 0.2f);
-			}
+    // Use integer loop counters instead of floating-point variables
+    for (int i = -20; i <= 20; ++i)
+    {
+        for (int j = -20; j <= 20; ++j)
+        {
+            if ((count % 2) == 0)
+            {
+                //glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, black);
+                glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, white);
+                glColor3f(1.0f, 1.0f, 1.0f);
+            }
+            else
+            {
+                //glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, black);  
+                glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, black);
+                glColor3f(0.2f, 0.2f, 0.2f);
+            }
 
-			glNormal3f(0, 0, 1);
+            glNormal3f(0, 0, 1);
 
-			glVertex3f(j, i, 0);
-			glVertex3f(j, i + 1, 0);
-			glVertex3f(j + 1, i + 1, 0);
-			glVertex3f(j + 1, i, 0);
-			count++;
-		}
-	}
+            // Convert integer loop counters to float for OpenGL vertex functions
+            glVertex3f(static_cast<float>(j), static_cast<float>(i), 0.0f);
+            glVertex3f(static_cast<float>(j), static_cast<float>(i + 1), 0.0f);
+            glVertex3f(static_cast<float>(j + 1), static_cast<float>(i + 1), 0.0f);
+            glVertex3f(static_cast<float>(j + 1), static_cast<float>(i), 0.0f);
+            count++;
+        }
+    }
 
-	glEnd();
+    glEnd();
 
-	glEnable(GL_LIGHTING);
-	glEnable(GL_TEXTURE_2D);
-	//glDisable(GL_COLOR);
+    glEnable(GL_LIGHTING);
+    glEnable(GL_TEXTURE_2D);
+    //glDisable(GL_COLOR);
 }
 
 inline void ModelCanvas::RenderLight(Light* l)
