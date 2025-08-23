@@ -361,7 +361,7 @@ void FileControl::ClearCanvas()
 	{
 		//canvas->clearAttachments();
 		wxDELETE(modelviewer->canvas->wmo);
-		modelviewer->canvas->wmo = nullptr;
+		//modelviewer->canvas->wmo = nullptr;
 	}
 	else if (modelviewer->isModel)
 	{
