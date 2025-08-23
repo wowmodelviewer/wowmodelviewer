@@ -6,7 +6,7 @@ class NPCInfos;
 
 #include "Plugin.h"
 
-class ImporterPlugin : public Plugin
+class ImporterPlugin : public Plugin //-V1106
 {
 public:
 	ImporterPlugin() = default;

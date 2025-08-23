@@ -31,7 +31,7 @@
 #include "ImporterPlugin.h"
 #undef _IMPORTERPLUGIN_CPP_
 
-class ArmoryImporter final : public ImporterPlugin
+class ArmoryImporter final : public ImporterPlugin //-V1106
 {
 	Q_INTERFACES(ImporterPlugin)
 	Q_OBJECT

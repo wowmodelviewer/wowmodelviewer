@@ -37,7 +37,7 @@ class WoWModel;
 #include "ExporterPlugin.h"
 #undef _EXPORTERPLUGIN_CPP_
 
-class OBJExporter : public ExporterPlugin
+class OBJExporter : public ExporterPlugin //-V1106
 {
 	Q_INTERFACES(ExporterPlugin)
 	Q_OBJECT

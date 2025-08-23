@@ -17,7 +17,7 @@ class Model;
 #    define _EXPORTERPLUGIN_API_
 #endif
 
-class _EXPORTERPLUGIN_API_ ExporterPlugin : public Plugin
+class _EXPORTERPLUGIN_API_ ExporterPlugin : public Plugin //-V1106
 {
 public:
 	ExporterPlugin() : m_canExportAnimation(false)

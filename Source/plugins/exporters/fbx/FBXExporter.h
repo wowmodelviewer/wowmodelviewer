@@ -41,7 +41,7 @@ struct ModelAnimation;
 #include "ExporterPlugin.h"
 #undef _EXPORTERPLUGIN_CPP_
 
-class FBXExporter : public ExporterPlugin
+class FBXExporter : public ExporterPlugin //-V1106
 {
 	Q_INTERFACES(ExporterPlugin)
 	Q_OBJECT

@@ -31,7 +31,7 @@
 #include "ImporterPlugin.h"
 #undef _IMPORTERPLUGIN_CPP_
 
-class WowheadImporter : public ImporterPlugin
+class WowheadImporter : public ImporterPlugin //-V1106
 {
 	Q_INTERFACES(ImporterPlugin)
 	Q_OBJECT
