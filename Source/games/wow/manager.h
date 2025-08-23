@@ -78,9 +78,14 @@ public:
 				return;
 
 			doDelete(id);
-			names.erase(names.find(i->itemName()));
-			items.erase(items.find(id));
 
+			auto it = names.find(i->itemName());
+			if (it != names.end()) // Ensure the iterator is valid before erasing
+			{
+				names.erase(it);
+			}
+
+			items.erase(items.find(id));
 			delete i;
 		}
 	}
