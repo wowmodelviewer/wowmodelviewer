@@ -26,7 +26,7 @@ class _PLUGIN_API_ Plugin : public QObject, public Component
 	Q_OBJECT
 
 public:
-	Plugin();
+	Plugin(QObject* parent = nullptr);
 	~Plugin() = default;
 
 	// these fields are filled within json plugin informations and set by PluginManager
