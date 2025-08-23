@@ -1484,7 +1484,7 @@ void ModelViewer::OnToggleCommand(wxCommandEvent& event)
   */
 	case ID_OPENGL_DEBUG:
 		canvas->toggleOpenGLDebug();
-
+		break;
 	case ID_SAVE_TEMP1:
 		canvas->SaveSceneState(1);
 		break;
