@@ -1750,7 +1750,7 @@ void ModelCanvas::Screenshot(const wxString fn, int x, int y)
 	}
 
 	// Set back to normal
-	glPixelStorei(GL_PACK_ALIGNMENT, 4);
+	glPixelStorei(GL_PACK_ALIGNMENT, 4); //-V1020
 }
 
 // Save the scene state,  currently this is just position/rotation/field of view

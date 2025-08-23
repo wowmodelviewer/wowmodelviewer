@@ -399,7 +399,7 @@ void CAnimationExporter::CreateGif()
 	Show(false);
 
 	video.render = true;
-	g_canvas->InitView();
+	g_canvas->InitView(); //-V1020
 }
 
 void CAnimationExporter::OnButton(wxCommandEvent& event)
