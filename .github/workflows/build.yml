@@ -59,7 +59,7 @@ jobs:
 
       - name: Rename installer
         shell: pwsh
-        run: Rename-Item "bin\WMV_Installer.exe" "WMV_Installer_v0.10.0.${{ github.run_number }}.exe"
+        run: Rename-Item "bin\WMV_Installer.exe" "WMV_Installer_v0.11.0.${{ github.run_number }}.exe"
 
       - name: Upload installer artifact
         uses: actions/upload-artifact@v4
