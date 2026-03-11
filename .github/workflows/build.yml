@@ -64,7 +64,7 @@ jobs:
       - name: Upload installer artifact
         uses: actions/upload-artifact@v4
         with:
-          name: WMV_Installer_v0.10.0.${{ github.run_number }}
+          name: WMV_Installer_v0.11.0.${{ github.run_number }}
           path: bin\WMV_Installer_v*.exe
 
       - name: Notify Discord
