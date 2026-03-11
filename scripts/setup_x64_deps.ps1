@@ -26,7 +26,7 @@ $libsDst = Join-Path $RepoRoot "ThirdParty\libs\x64"; Ensure-Dir $libsDst
 Copy-Item "$src1\jpeg.lib" "$libDst\jpeg.lib" -Force
 Copy-Item "$src1\libpng16.lib" "$libDst\libpng.lib" -Force
 Copy-Item "$src1\zlib.lib" "$libDst\zlib.lib" -Force
-Copy-Item "$src1\glew32.lib" "$libsDst\glew32s.lib" -Force
+Copy-Item (Get-ChildItem "$src1\glew*.lib" | Select-Object -First 1).FullName "$libsDst\glew32s.lib" -Force
 Write-Step "Installing wxWidgets via vcpkg"
 $tmp2 = Join-Path $RepoRoot "out\vcpkg_wx"; Ensure-Dir $tmp2
 $j2 = "{""name"":""wmv-wx"",""version"":""1.0.0"",""builtin-baseline"":""$baseline"",""dependencies"":[{""name"":""wxwidgets"",""default-features"":false}]}"
