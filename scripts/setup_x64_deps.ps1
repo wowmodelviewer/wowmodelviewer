@@ -26,7 +26,10 @@ $libsDst = Join-Path $RepoRoot "ThirdParty\libs\x64"; Ensure-Dir $libsDst
 Copy-Item "$src1\jpeg.lib" "$libDst\jpeg.lib" -Force
 Copy-Item "$src1\libpng16.lib" "$libDst\libpng.lib" -Force
 Copy-Item "$src1\zlib.lib" "$libDst\zlib.lib" -Force
-Copy-Item (Get-ChildItem "$src1\glew*.lib" | Select-Object -First 1).FullName "$libsDst\glew32s.lib" -Force
+$glewLib = Get-ChildItem "$src1" -Filter "*.lib" | Where-Object { $_.Name -match "glew" } | Select-Object -First 1
+if (-not $glewLib) { Write-Host "Available libs:"; Get-ChildItem "$src1" -Filter "*.lib" | ForEach-Object { Write-Host "  $($_.Name)" }; throw "Could not find glew lib in $src1" }
+Write-Host "Found glew lib: $($glewLib.Name)"
+Copy-Item $glewLib.FullName "$libsDst\glew32s.lib" -Force
 Write-Step "Installing wxWidgets via vcpkg"
 $tmp2 = Join-Path $RepoRoot "out\vcpkg_wx"; Ensure-Dir $tmp2
 $j2 = "{""name"":""wmv-wx"",""version"":""1.0.0"",""builtin-baseline"":""$baseline"",""dependencies"":[{""name"":""wxwidgets"",""default-features"":false}]}"
