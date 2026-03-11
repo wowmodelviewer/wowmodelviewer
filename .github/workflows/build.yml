@@ -1,0 +1,74 @@
+name: Build
+
+on:
+  push:
+    branches: [ develop ]
+
+env:
+  VCPKG_BINARY_SOURCES: "clear;x-gha,readwrite"
+
+jobs:
+  build:
+    runs-on: windows-2025-vs2026  # VS 2026, public preview - matches local dev environment
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      # Required to enable vcpkg's built-in GitHub Actions binary cache backend.
+      # Packages built by vcpkg are stored per-package in the Actions cache so
+      # even a partial cache hit avoids rebuilding individual libraries.
+      - name: Export vcpkg binary cache environment variables
+        uses: actions/github-script@v7
+        with:
+          script: |
+            core.exportVariable('ACTIONS_CACHE_URL', process.env.ACTIONS_CACHE_URL || '');
+            core.exportVariable('ACTIONS_RUNTIME_TOKEN', process.env.ACTIONS_RUNTIME_TOKEN || '');
+
+      # Primary cache: the fully assembled ThirdParty tree.
+      # Cache is invalidated automatically when setup_x64_deps.ps1 changes.
+      # restore-keys lets a partial match seed the cache so only changed
+      # packages need to be rebuilt by vcpkg.
+      - name: Cache ThirdParty
+        uses: actions/cache@v4
+        with:
+          path: ThirdParty
+          key: ThirdParty-${{ runner.os }}-${{ hashFiles('scripts/setup_x64_deps.ps1') }}
+          restore-keys: |
+            ThirdParty-${{ runner.os }}-
+
+      - name: Set up MSVC x64 environment
+        uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: x64
+
+      - name: Install dependencies
+        shell: pwsh
+        run: |
+          $env:PATH = "$env:VCPKG_INSTALLATION_ROOT;$env:PATH"
+          .\scripts\setup_x64_deps.ps1 -RepoRoot ${{ github.workspace }}
+
+      - name: Configure
+        run: cmake --preset x64-Release -DBUILDNUMBER=${{ github.run_number }}
+
+      - name: Build
+        run: cmake --build --preset x64-Release
+
+      - name: Rename installer
+        shell: pwsh
+        run: Rename-Item "bin\WMV_Installer.exe" "WMV_Installer_v0.10.0.${{ github.run_number }}.exe"
+
+      - name: Upload installer artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: WMV_Installer_v0.10.0.${{ github.run_number }}
+          path: bin\WMV_Installer_v*.exe
+
+      - name: Notify Discord
+        if: always()
+        uses: sarisia/actions-status-discord@v1
+        with:
+          webhook: ${{ secrets.WEBHOOK_URL }}
+          status: ${{ job.status }}
