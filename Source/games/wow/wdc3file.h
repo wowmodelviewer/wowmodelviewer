@@ -65,6 +65,10 @@ public:
 
 	std::vector<std::string> get(unsigned int recordIndex, const core::TableStructure* structure) const;
 
+protected:
+	virtual void readWDC3Header();
+	header m_header;
+
 private:
 	enum FIELD_COMPRESSION
 	{
@@ -115,14 +119,11 @@ private:
 		uint32 val3;
 	};
 
-	void readWDC3Header();
-
 	bool readFieldValue(unsigned int recordIndex, unsigned int fieldIndex, uint arrayIndex, uint arraySize,
-	                    unsigned int& result) const;
+						unsigned int& result) const;
 	uint32 readBitpackedValue(field_storage_info info, unsigned char* recordOffset) const;
 	//int32 readSignedBitpackedValue(field_storage_info info, unsigned char* recordOffset) const;
 
-	header m_header;
 	section_header* m_sectionHeader;
 	std::vector<field_storage_info> m_fieldStorageInfo;
 
