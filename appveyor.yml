@@ -1,5 +1,5 @@
 version: 0.10.0.{build}
-image: Visual Studio 2017
+image: Visual Studio 2022
 
 clone_script:
 - cmd: >-
@@ -7,14 +7,14 @@ clone_script:
 
 before_build:
 - cmd: >-
-    cmake -B build -G "Visual Studio 15 2017" -DBUILDNUMBER=%APPVEYOR_BUILD_NUMBER%
+    call "C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Auxiliary\Build\vcvars64.bat" &&
+    cmake --preset x64-Release -DBUILDNUMBER=%APPVEYOR_BUILD_NUMBER%
 
 build_script:
 - cmd: >-
-    cmake --build build --config Release --target release
-    
-    cd C:\projects\wowmodelviewer\bin
-
+    call "C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Auxiliary\Build\vcvars64.bat" &&
+    cmake --build --preset x64-Release &&
+    cd C:\projects\wowmodelviewer\bin &&
     ren WMV_Installer.exe WMV_Installer_v%APPVEYOR_BUILD_VERSION%.exe
 
 test: off
