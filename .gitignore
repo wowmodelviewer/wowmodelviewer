@@ -9,6 +9,7 @@ Source/html/*
 Installers/Windows/NSIS/*.exe
 VisualStudio2013/*
 build
+out/
 .vs
 .vscode
 .idea/editor.xml
