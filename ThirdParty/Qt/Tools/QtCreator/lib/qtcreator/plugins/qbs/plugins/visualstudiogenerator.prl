@@ -1,4 +1,0 @@
-QMAKE_PRL_BUILD_DIR = C:/Users/qt/work/build/qt-creator_build/src/shared/qbs/src/plugins/generator/visualstudio
-QMAKE_PRO_INPUT = visualstudio.pro
-QMAKE_PRL_TARGET = visualstudiogenerator.lib
-QMAKE_PRL_CONFIG = lex yacc debug exceptions depend_includepath testcase_targets import_plugins import_qpa_plugin windows file_copies qmake_use qt warn_on link_prl flat debug_and_release debug_and_release_target precompile_header autogen_precompile_source embed_manifest_dll embed_manifest_exe shared no_plugin_manifest win32 msvc copy_dir_files qbs_no_dev_install qbs_enable_project_file_updates debug DebugBuild Debug build_pass c++11 force_debug_info separate_debug_info debug DebugBuild Debug build_pass c++14 create_prl debug DebugBuild Debug build_pass have_target dll no_plist exclusive_builds debug_info no_autoqmake thread moc resources

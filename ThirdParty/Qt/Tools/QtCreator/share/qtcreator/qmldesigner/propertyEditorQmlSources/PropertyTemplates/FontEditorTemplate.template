@@ -1,7 +1,0 @@
-
-FontSection {
-    anchors.left: parent.left
-    anchors.right: parent.right
-    caption: "%1"
-    fontName: "%2"
-}

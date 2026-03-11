@@ -1,17 +1,23 @@
 cmake_minimum_required(VERSION 3.16)
 project(WoWModelViewer)
 
+message(STATUS "=== Configuring WoWModelViewer ===")
+
 # Dependencies.
 # Qt5
-set(QT_LOCATION "${CMAKE_SOURCE_DIR}/ThirdParty/Qt/5.13.2/msvc2017")
+message(STATUS "Finding Qt5...")
+set(QT_LOCATION "${CMAKE_SOURCE_DIR}/ThirdParty/Qt/5.13.2/msvc2017_64")
 list(PREPEND CMAKE_PREFIX_PATH "${QT_LOCATION}/lib/cmake")
 find_package(Qt5 5.13.2 COMPONENTS Core Network Widgets Xml Gui REQUIRED)
+message(STATUS "  Qt5 found: ${Qt5_VERSION}")
 
 # WxWidgets
-set(wxWidgets_ROOT_DIR "${CMAKE_SOURCE_DIR}/ThirdParty/wxWidgets")
-set(wxWidgets_LIB_DIR "${CMAKE_SOURCE_DIR}/ThirdParty/wxWidgets/lib/vc_lib")
+message(STATUS "Finding wxWidgets...")
+set(wxWidgets_ROOT_DIR "${CMAKE_SOURCE_DIR}/ThirdParty/wxWidgets_x64")
+set(wxWidgets_LIB_DIR "${CMAKE_SOURCE_DIR}/ThirdParty/wxWidgets_x64/lib/vc_x64_lib")
 set(wxWidgets_USE_UNICODE ON)
-find_package(wxWidgets COMPONENTS net aui xml adv core base REQUIRED)
+find_package(wxWidgets COMPONENTS gl net aui xml adv core base REQUIRED)
+message(STATUS "  wxWidgets found: ${wxWidgets_LIBRARIES}")
 # Include WxWidgets headers
 include(${wxWidgets_USE_FILE})
 include_directories(${wxWidgets_INCLUDE_DIRS} "${CMAKE_SOURCE_DIR}/ThirdParty/include")
@@ -33,9 +39,11 @@ if(DEFINED BUILDNUMBER)
 endif()
 
 # add external libraries compilation
+message(STATUS "Adding CxImage...")
 add_subdirectory(ThirdParty/CxImage)
 
 # CascLib
+message(STATUS "Adding CascLib...")
 set(CASC_UNICODE ON CACHE BOOL "Use Unicode in CascLib" FORCE)
 set(CASC_BUILD_STATIC_LIB ON CACHE BOOL "Force Static library building")
 set(CASC_BUILD_SHARED_LIB OFF CACHE BOOL "Compile dynamically linked library")
@@ -47,6 +55,7 @@ add_subdirectory(ThirdParty/casclib)
 set_property(TARGET casc_static PROPERTY FOLDER "ThirdParty libraries")
 
 # Main source files.
+message(STATUS "Adding Source...")
 add_subdirectory(Source)
 
 add_custom_target(release

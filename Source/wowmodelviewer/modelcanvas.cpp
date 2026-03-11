@@ -19,13 +19,8 @@
 #include "glm/gtc/matrix_transform.hpp"
 #include "logger/Logger.h"
 
-#ifdef  _WINDOWS
-IMPLEMENT_CLASS(ModelCanvas, wxWindow)
-BEGIN_EVENT_TABLE(ModelCanvas, wxWindow)
-#else
 IMPLEMENT_CLASS(ModelCanvas, wxGLCanvas)
 BEGIN_EVENT_TABLE(ModelCanvas, wxGLCanvas)
-#endif
 	EVT_SIZE(ModelCanvas::OnSize)
 	EVT_PAINT(ModelCanvas::Render)
 	EVT_ERASE_BACKGROUND(ModelCanvas::OnEraseBackground)
@@ -61,6 +56,15 @@ namespace {
   int attrib[] = { WX_GL_RGBA, WX_GL_DOUBLEBUFFER, WX_GL_DEPTH_SIZE, 24, 0 };
 }
 #endif
+
+// GL attributes for the canvas — used on all platforms
+static const int glAttribs[] = {
+	WX_GL_RGBA,
+	WX_GL_DOUBLEBUFFER,
+	WX_GL_DEPTH_SIZE, 16,
+	WX_GL_MIN_ALPHA, 1,
+	0
+};
 
 void drawPoint(const glm::vec3& coord, const glm::vec3& color)
 {
@@ -111,9 +115,8 @@ void drawAxis(const glm::vec3& coord, float size, const glm::vec3& xcolor, const
 }
 
 ModelCanvas::ModelCanvas(wxWindow* parent, VideoCaps* caps)
-#ifndef _WINDOWS
-: wxGLCanvas(parent, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxNO_BORDER|wxCLIP_CHILDREN|wxFULL_REPAINT_ON_RESIZE, wxT("ModelCanvas"), attrib, wxNullPalette)
-#endif
+: wxGLCanvas(parent, wxID_ANY, glAttribs, wxDefaultPosition, wxDefaultSize,
+			 wxNO_BORDER | wxCLIP_CHILDREN | wxFULL_REPAINT_ON_RESIZE, wxT("ModelCanvas"))
 {
 	LOG_INFO << "Creating OpenGL Canvas...";
 
@@ -138,14 +141,6 @@ ModelCanvas::ModelCanvas(wxWindow* parent, VideoCaps* caps)
 
 	fogTex = 0;
 
-	/*
-	blurShader = NULL;
-	deathShader = NULL;
-	desaturateShader = NULL;
-	glowShader = NULL;
-	boxShader = NULL;
-	*/
-
 	lightType = LIGHT_DYNAMIC;
 
 	// Setup our default colour values.
@@ -160,37 +155,30 @@ ModelCanvas::ModelCanvas(wxWindow* parent, VideoCaps* caps)
 
 	openGLDebug_ = false;
 
-	//wxNO_BORDER|wxCLIP_CHILDREN|wxFULL_REPAINT_ON_RESIZE
-#ifdef _WINDOWS
-	if (!Create(parent, wxID_ANY, wxDefaultPosition, wxDefaultSize,
-	            wxNO_BORDER | wxCLIP_CHILDREN | wxFULL_REPAINT_ON_RESIZE, wxT("ModelCanvas")))
+	// Create the wxGLContext for this canvas
+	glContext_ = new wxGLContext(this);
+	if (!glContext_->IsOK())
 	{
-		LOG_ERROR << "Unable to create a window to handle our OpenGL rendering. Won't be able to continue.";
+		LOG_ERROR << "Unable to create an OpenGL context. Won't be able to continue.";
+		delete glContext_;
+		glContext_ = nullptr;
 		parent->Close();
 		return;
 	}
-	else
-#endif
-	{
-#ifndef  _LINUX // buggy
-		wxWindowBase::SetBackgroundStyle(wxBG_STYLE_CUSTOM);
-#endif
-		wxWindow::Show(true);
 
-		// Initiate the timer that handles our animation and setting the canvas to redraw
-		timer.SetOwner(this, ID_TIMER);
-		timer.Start(TIME_STEP);
+	wxWindowBase::SetBackgroundStyle(wxBG_STYLE_PAINT);
+	wxWindow::Show(true);
 
-		// Initiate our default OpenGL settings
-		LOG_INFO << "Initiating OpenGL...";
-#ifdef _WINDOWS
-		const wxDisplay disp(0);
-		const int bpp = disp.GetCurrentMode().bpp;
-		video.SetHandle(static_cast<HWND>(this->wxWindow::GetHandle()), bpp);
-#else
-    video.render = true;
-#endif
-	}
+	// Make context current and initialise GLEW / video capabilities
+	SetCurrent();
+	video.render = true;
+	video.Init();
+
+	// Initiate the timer that handles our animation and setting the canvas to redraw
+	timer.SetOwner(this, ID_TIMER);
+	timer.Start(TIME_STEP);
+
+	LOG_INFO << "OpenGL Canvas created successfully.";
 }
 
 ModelCanvas::~ModelCanvas()
@@ -221,11 +209,14 @@ ModelCanvas::~ModelCanvas()
 		wxDELETE(rt);
 	}
 #endif
+
+	delete glContext_;
+	glContext_ = nullptr;
 }
 
 void ModelCanvas::OnEraseBackground(wxEraseEvent& event)
 {
-	event.Skip();
+	// Do nothing — prevent wxWidgets from erasing the OpenGL canvas background.
 }
 
 void ModelCanvas::OnSize(wxSizeEvent& event)
@@ -474,7 +465,7 @@ void ModelCanvas::InitGL()
 
 void ModelCanvas::OnPaint(wxPaintEvent& WXUNUSED(event))
 {
-	if (video.render)
+	if (glContext_)
 	{
 		if (wmo)
 			RenderWMO();
@@ -745,6 +736,12 @@ void ModelCanvas::Render(wxPaintEvent& WXUNUSED(event))
 
 	if (!init)
 		InitGL();
+
+	if (!glContext_)
+		return;
+
+	// Ensure the OpenGL context is current before any GL calls.
+	SetCurrent();
 
 	if (openGLDebug_)
 		displayDebugInfos();
@@ -1482,7 +1479,7 @@ void ModelCanvas::RenderToBuffer()
 
 void ModelCanvas::OnTimer(wxTimerEvent& event)
 {
-	if (video.render && init)
+	if (glContext_ && video.render && init)
 	{
 		CheckMovement();
 		tick();
@@ -1792,20 +1789,13 @@ void ModelCanvas::LoadSceneState(int id)
 
 void ModelCanvas::SetCurrent()
 {
-#ifdef _WINDOWS
-	video.SetCurrent();
-#else
-  wxGLCanvas::SetCurrent();
-#endif
+	if (glContext_)
+		wxGLCanvas::SetCurrent(*glContext_);
 }
 
-void ModelCanvas::SwapBuffers()
+bool ModelCanvas::SwapBuffers()
 {
-#ifdef _WINDOWS
-	video.SwapBuffers();
-#else
-  wxGLCanvas::SwapBuffers();
-#endif
+	return wxGLCanvas::SwapBuffers();
 }
 
 void ModelCanvas::displayDebugInfos() const

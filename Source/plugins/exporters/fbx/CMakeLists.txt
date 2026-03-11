@@ -25,16 +25,23 @@ use_glew()
 use_core()
 use_wow()
 
+set(FBXSDK_LIB_DIR ${CMAKE_SOURCE_DIR}/ThirdParty/lib/x64)
+
 set(NAME fbxexporter)
 add_library(${NAME} SHARED ${src} ${headers} ${useful_files})
 set_property(TARGET ${NAME} PROPERTY FOLDER "plugins")
 
+# glm needs <cmath> which is not available transitively with WIN32_LEAN_AND_MEAN
+if(MSVC)
+  target_compile_options(${NAME} PRIVATE /FIcmath)
+endif()
+
 target_link_libraries(${NAME} Qt5::Core ${extralibs} 
-${CMAKE_SOURCE_DIR}/ThirdParty/lib/libfbxsdk.lib)
+${FBXSDK_LIB_DIR}/libfbxsdk.lib)
 
 set(BIN_DIR "${CMAKE_SOURCE_DIR}/bin/plugins/")
 
 if(WIN32)
   install(TARGETS ${NAME} RUNTIME DESTINATION ${BIN_DIR})
-  install(FILES "${CMAKE_SOURCE_DIR}/ThirdParty/lib/libfbxsdk.dll" DESTINATION "${CMAKE_SOURCE_DIR}/bin")
+  install(FILES "${FBXSDK_LIB_DIR}/libfbxsdk.dll" DESTINATION "${CMAKE_SOURCE_DIR}/bin")
 endif(WIN32)

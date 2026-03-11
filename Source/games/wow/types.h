@@ -10,6 +10,8 @@
 #endif
 
 #if defined(_WINDOWS)
+#include <BaseTsd.h>
+typedef SSIZE_T ssize_t;
 typedef __int8 int8;
 typedef __int16 int16;
 typedef __int32 int32;
@@ -18,7 +20,6 @@ typedef unsigned __int8 uint8;
 typedef unsigned __int16 uint16;
 typedef unsigned __int32 uint32;
 typedef unsigned __int64 uint64;
-typedef int ssize_t;
 #else
   #include <stdint.h>
   typedef uint8_t uint8;

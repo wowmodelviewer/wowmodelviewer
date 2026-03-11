@@ -2,17 +2,13 @@
   "version": 3,
   "configurePresets": [
     {
-      "name": "x86-Debug",
-      "displayName": "x86 Debug",
+      "name": "x64-Debug",
+      "displayName": "x64 Debug",
       "generator": "Ninja",
       "binaryDir": "${sourceDir}/out/build/${presetName}",
       "installDir": "${sourceDir}/out/install/${presetName}",
       "architecture": {
-        "value": "x86",
-        "strategy": "external"
-      },
-      "toolset": {
-        "value": "v141",
+        "value": "x64",
         "strategy": "external"
       },
       "cacheVariables": {
@@ -22,22 +18,18 @@
       "vendor": {
         "microsoft.com/VisualStudioSettings/CMake/1.0": {
           "hostOS": [ "Windows" ],
-          "intelliSenseMode": "windows-msvc-x86"
+          "intelliSenseMode": "windows-msvc-x64"
         }
       }
     },
     {
-      "name": "x86-Release",
-      "displayName": "x86 Release",
+      "name": "x64-Release",
+      "displayName": "x64 Release",
       "generator": "Ninja",
       "binaryDir": "${sourceDir}/out/build/${presetName}",
       "installDir": "${sourceDir}/out/install/${presetName}",
       "architecture": {
-        "value": "x86",
-        "strategy": "external"
-      },
-      "toolset": {
-        "value": "v141",
+        "value": "x64",
         "strategy": "external"
       },
       "cacheVariables": {
@@ -47,21 +39,21 @@
       "vendor": {
         "microsoft.com/VisualStudioSettings/CMake/1.0": {
           "hostOS": [ "Windows" ],
-          "intelliSenseMode": "windows-msvc-x86"
+          "intelliSenseMode": "windows-msvc-x64"
         }
       }
     }
   ],
   "buildPresets": [
     {
-      "name": "x86-Debug",
-      "displayName": "x86 Debug",
-      "configurePreset": "x86-Debug"
+      "name": "x64-Debug",
+      "displayName": "x64 Debug",
+      "configurePreset": "x64-Debug"
     },
     {
-      "name": "x86-Release",
-      "displayName": "x86 Release",
-      "configurePreset": "x86-Release",
+      "name": "x64-Release",
+      "displayName": "x64 Release",
+      "configurePreset": "x64-Release",
       "targets": ["release"]
     }
   ]

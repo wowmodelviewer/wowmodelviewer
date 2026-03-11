@@ -56,8 +56,8 @@ core::GlobalSettings::GlobalSettings()
 	  Oribos
 	 */
 
-	// platform 
-	m_platform = L"Windows 32 bits";
+	// platform
+	m_platform = L"Windows 64 bits";
 
 #if _BETAVERSION > 0
   m_isBetaVersion = true;

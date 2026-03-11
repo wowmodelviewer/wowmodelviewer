@@ -3,7 +3,6 @@
 #include <wx/filename.h>
 #include <wx/image.h>
 #include <wx/mstream.h>
-#include <wx/splash.h>
 #include <wx/stdpaths.h>
 #include <windows.h>
 #include "Game.h"
@@ -66,7 +65,7 @@ void WowModelViewApp::setInterfaceLocale()
 
 	if (wxFileExists(fn))
 	{
-		locale.Init(langIds[interfaceID], wxLOCALE_CONV_ENCODING);
+		locale.Init(langIds[interfaceID], wxLOCALE_DONT_LOAD_DEFAULT);
 
 		wxLocale::AddCatalogLookupPathPrefix(wxT("localisation"));
 		//wxLocale::AddCatalogLookupPathPrefix(wxT(".."));
@@ -87,37 +86,11 @@ bool WowModelViewApp::OnInit()
 
 	QCoreApplication::addLibraryPath(QLatin1String("./plugins"));
 	frame = nullptr;
-	wxSplashScreen* splash = nullptr;
 	{
 		wxLogNull logNo;
 
 		wxImage::AddHandler(new wxPNGHandler);
 		wxImage::AddHandler(new wxXPMHandler);
-
-		// Enable Randomly choosing between SPLASH and SPLASH2
-		const bool randomSplash2 = true;
-
-		wxString splashname = L"SPLASH";
-		if (randomSplash2 == true)
-		{
-			srand(time(nullptr));
-			const int randomchoice = rand() % 10; // Random number between 0-9
-			if (randomchoice >= 5)
-			{
-				splashname = L"SPLASH2";
-			}
-		}
-
-		const wxBitmap* bitmap = createBitmapFromResource(splashname);
-		if (!bitmap)
-			wxMessageBox(_("Failed to load Splash Screen.\nPress OK to continue loading WMV."), _("Failure"));
-		else
-			new wxSplashScreen(*bitmap,
-			                            wxSPLASH_CENTRE_ON_SCREEN | wxSPLASH_TIMEOUT,
-			                            2000, nullptr, -1, wxDefaultPosition, wxDefaultSize,
-			                            wxBORDER_NONE);
-		wxYield();
-		Sleep(1000); // let's our beautiful spash beeing displayed a few second :)
 	}
 
 	// Error & Logging settings

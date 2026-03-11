@@ -1,9 +1,0 @@
-{
-    "name":"qmltypes",
-    "searchPaths":[],
-    "installPaths":[],
-    "implicitImports":[],
-    "supportedImports":[
-        "QtQuick.tooling 1.1",
-        "QtQuick.tooling 1.0"]
-}

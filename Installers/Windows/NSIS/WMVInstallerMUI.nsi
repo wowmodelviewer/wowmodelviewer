@@ -21,7 +21,7 @@ RequestExecutionLevel admin
 !insertmacro MUI_PAGE_DIRECTORY
 #!define MUI_PAGE_HEADER_TEXT "Installation directory choice"
 # set desktop as install directory
-InstallDir $PROGRAMFILES32\WoWModelViewer
+InstallDir $PROGRAMFILES64\WoWModelViewer
 
 !insertmacro MUI_PAGE_INSTFILES 
 
@@ -100,11 +100,11 @@ WriteRegStr HKCU "Software\Microsoft\Windows NT\CurrentVersion\AppCompatFlags\la
 writeUninstaller $INSTDIR\uninstaller.exe
 
 # install vcredist package and launch if not found
-ReadRegDword $0 HKLM "SOFTWARE\Wow6432Node\Microsoft\DevDiv\vc\Servicing\12.0\RuntimeMinimum" "Install"
+ReadRegDword $0 HKLM "SOFTWARE\Microsoft\DevDiv\vc\Servicing\14.0\RuntimeMinimum" "Install"
 ${If} $0 == ""
-File "${wmvroot}\bin\vcredist_x86.exe"
-ExecWait '"$INSTDIR\vcredist_x86.exe" /install /quiet /norestart'
-Delete "$INSTDIR\vcredist_x86.exe"
+File "${wmvroot}\bin\vcredist_x64.exe"
+ExecWait '"$INSTDIR\vcredist_x64.exe" /install /quiet /norestart'
+Delete "$INSTDIR\vcredist_x64.exe"
 ${EndIf}
 
 sectionEnd

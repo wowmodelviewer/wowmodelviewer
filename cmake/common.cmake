@@ -18,7 +18,7 @@ endif()
 macro(use_glew)
   include_directories(${CMAKE_SOURCE_DIR}/ThirdParty)
   add_definitions(-DGLEW_STATIC)
-  list(APPEND extralibs opengl32 ${CMAKE_SOURCE_DIR}/ThirdParty/libs/glew32s.lib)
+  list(APPEND extralibs opengl32 ${CMAKE_SOURCE_DIR}/ThirdParty/libs/x64/glew32s.lib)
 endmacro()
 
 macro(use_cximage)

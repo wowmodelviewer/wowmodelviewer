@@ -540,13 +540,6 @@ void ModelViewer::InitObjects()
 
 	canvas = new ModelCanvas(this);
 
-	if (video.secondPass)
-	{
-		canvas->Destroy();
-		video.Release();
-		canvas = new ModelCanvas(this);
-	}
-
 	g_modelViewer = this;
 	g_animControl = animControl;
 	g_charControl = charControl;
@@ -872,10 +865,16 @@ void ModelViewer::LoadLayout()
 
 	SetPosition(wxPoint(posx, posy));
 
+	// Increment this whenever the default layout changes or a layout reset
+	// is needed (e.g. after the x86 → x64 migration).
+	const int currentLayoutVersion = 2;
+	const int savedLayoutVersion = config.value("Session/LayoutVersion", 0).toInt();
+
 	const wxString layout = config.value("Session/Layout", "").toString().toStdWString();
 
-	// if the layout data exists,  load it.
-	if (!layout.IsNull() // something goes wrong
+	// if the layout data exists and is from a compatible version, load it.
+	if (savedLayoutVersion == currentLayoutVersion
+		&& !layout.IsNull() // something goes wrong
 		&& !layout.IsEmpty() // empty value
 		&& !layout.EndsWith(L"canvas")) // old saving badly read by Qt, ignore
 	{
@@ -897,6 +896,10 @@ void ModelViewer::LoadLayout()
 			LOG_INFO << "GUI Layout loaded from previous session.";
 		}
 	}
+	else if (!layout.IsEmpty() && savedLayoutVersion != currentLayoutVersion)
+	{
+		LOG_INFO << "Discarding saved layout (version " << savedLayoutVersion << " != " << currentLayoutVersion << "). Using default layout.";
+	}
 
 	// Restore saved canvas size:
 	if (canvas)
@@ -912,6 +915,7 @@ void ModelViewer::SaveLayout()
 	QSettings config(QString::fromWCharArray(cfgPath.c_str()), QSettings::IniFormat);
 
 	config.setValue("Session/Layout", QString::fromWCharArray(interfaceManager.SavePerspective().c_str()));
+	config.setValue("Session/LayoutVersion", 2);
 
 	const wxPoint pos = GetPosition();
 	config.setValue("Session/PositionX", pos.x);

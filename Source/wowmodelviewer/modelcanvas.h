@@ -42,12 +42,7 @@ struct SceneState
 	float fov; // OpenGL Field of View
 };
 
-class ModelCanvas :
-#ifdef _WINDOWS
-	public wxWindow
-#else
-    public wxGLCanvas
-#endif
+class ModelCanvas : public wxGLCanvas
 {
 	DECLARE_CLASS(ModelCanvas)
 	DECLARE_EVENT_TABLE()
@@ -103,7 +98,7 @@ public:
 	void LoadSceneState(int id);
 
 	void SetCurrent();
-	void SwapBuffers();
+	bool SwapBuffers() override;
 
 	void setModel(WoWModel* m, bool keepPrevious = false);
 	WoWModel const* model() const { return model_; }
@@ -171,4 +166,6 @@ private:
 
 	WoWModel* model_;
 	bool openGLDebug_;
+
+	wxGLContext* glContext_;
 };

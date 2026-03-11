@@ -147,6 +147,11 @@ add_executable(${NAME} WIN32 ${src} ${headers} ${RES_FILES} ${useful_files} )
 
 set_property(TARGET ${NAME} PROPERTY FOLDER "executables")
 
+# Force-include glew.h before all source files to prevent gl.h ordering issues with wxWidgets 3.x
+if(MSVC)
+  target_compile_options(${NAME} PRIVATE /FIGL/glew.h)
+endif()
+
 set(BIN_DIR "${CMAKE_SOURCE_DIR}/bin/")
 
 target_link_libraries(${NAME}
@@ -156,10 +161,13 @@ target_link_libraries(${NAME}
   Qt5::Network
   Qt5::Widgets
   ${wxWidgets_LIBRARIES}
+  ${CMAKE_SOURCE_DIR}/ThirdParty/lib/x64/zlib.lib
+  ${CMAKE_SOURCE_DIR}/ThirdParty/wxWidgets_x64/lib/vc_x64_lib/nanosvg.lib
+  ${CMAKE_SOURCE_DIR}/ThirdParty/wxWidgets_x64/lib/vc_x64_lib/nanosvgrast.lib
 )
 
 install(TARGETS ${NAME} RUNTIME DESTINATION ${BIN_DIR})
-  
+
 # additional files needed to let WMV correctly works
 set(QT_BIN_DIR  ${QT_LOCATION}/bin)
 set(QT_FILES ${QT_BIN_DIR}/Qt5Core.dll
@@ -186,9 +194,9 @@ set(QT_PLUGIN_IMAGE_FILES ${QT_PLUGIN_DIR}/imageformats/qjpeg.dll
                           ${QT_PLUGIN_DIR}/imageformats/qtga.dll
                           ${QT_PLUGIN_DIR}/imageformats/qtgad.dll)
 
-set(EXTRA_FILES ${CMAKE_SOURCE_DIR}/bin_support/vcredist_x86.exe
-                ${CMAKE_SOURCE_DIR}/ThirdParty/lib/libssl-1_1.dll
-                ${CMAKE_SOURCE_DIR}/ThirdParty/lib/libcrypto-1_1.dll
+set(EXTRA_FILES ${CMAKE_SOURCE_DIR}/bin_support/vcredist_x64.exe
+                ${CMAKE_SOURCE_DIR}/ThirdParty/lib/libssl-3-x64.dll
+                ${CMAKE_SOURCE_DIR}/ThirdParty/lib/libcrypto-3-x64.dll
                 ${CMAKE_SOURCE_DIR}/bin_support/wow/listfile.csv
                 ${CMAKE_SOURCE_DIR}/bin_support/Encryption/extraEncryptionKeys.csv)
 

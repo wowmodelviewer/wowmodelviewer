@@ -49,6 +49,6 @@ if(MSVC)
 endif()
 
 set_property(TARGET cximage PROPERTY FOLDER "ThirdParty libraries")
-target_link_libraries(cximage ${CMAKE_SOURCE_DIR}/ThirdParty/lib/jpeg.lib
-        ${CMAKE_SOURCE_DIR}/ThirdParty/lib/libpng.lib)
+target_link_libraries(cximage ${CMAKE_SOURCE_DIR}/ThirdParty/lib/x64/jpeg.lib
+        ${CMAKE_SOURCE_DIR}/ThirdParty/lib/x64/libpng.lib)
 

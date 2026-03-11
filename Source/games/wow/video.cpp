@@ -717,6 +717,8 @@ void VideoSettings::SetMode()
 		if (!hRC)
 		{
 			LOG_ERROR << "Error: Failed To Create OpenGL Context.";
+			secondPass = true;
+			render = false;
 			return;
 		}
 
@@ -753,14 +755,15 @@ void VideoSettings::ResizeGLScene(int width, int height) // Resize And Initializ
 void VideoSettings::SwapBuffers()
 {
 #ifdef _WINDOWS
-	::SwapBuffers(hDC);
+	if (hDC)
+		::SwapBuffers(hDC);
 #endif
 }
 
 void VideoSettings::SetCurrent()
 {
 #ifdef _WINDOWS
-	if (!wglMakeCurrent(hDC, hRC))
+	if (!hDC || !hRC || !wglMakeCurrent(hDC, hRC))
 	{
 		// Try To Activate The Rendering Context
 		render = false;

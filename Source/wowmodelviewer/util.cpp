@@ -169,7 +169,7 @@ wxBitmap* getBitmapFromMemory(const char* t_data, const DWORD t_size, long type,
 {
 	wxMemoryInputStream a_is(t_data, t_size);
 
-	wxImage newImage(wxImage(a_is, type, -1));
+	wxImage newImage(wxImage(a_is, static_cast<wxBitmapType>(type), -1));
 
 	if ((width != 0) && (height != 0))
 		newImage.Rescale(width, height);

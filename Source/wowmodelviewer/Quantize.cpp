@@ -2,6 +2,7 @@
 #include <windows.h>
 #endif
 
+#include <cstdlib>
 #include "Quantize.h"
 
 CQuantizer::CQuantizer(UINT nMaxColors, UINT nColorBits)

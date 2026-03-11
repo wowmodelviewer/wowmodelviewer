@@ -1,1 +1,2 @@
 *.csv filter=lfs diff=lfs merge=lfs -text
+ThirdParty/wxWidgets_x64/lib/vc_x64_lib/*.lib filter=lfs diff=lfs merge=lfs -text

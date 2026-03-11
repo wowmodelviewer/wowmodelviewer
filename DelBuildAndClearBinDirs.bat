@@ -1,5 +1,16 @@
 @echo off
-rmdir /s /q build
+
+rem Remove CMake build output (new preset-based layout)
+if exist "out" (
+    echo Deleting out/ build directory...
+    rmdir /s /q out
+)
+
+rem Remove legacy build directory if present
+if exist "build" (
+    echo Deleting legacy build/ directory...
+    rmdir /s /q build
+)
 
 cd bin
 
