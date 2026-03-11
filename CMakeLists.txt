@@ -8,7 +8,8 @@ list(PREPEND CMAKE_PREFIX_PATH "${QT_LOCATION}/lib/cmake")
 find_package(Qt5 5.13.2 COMPONENTS Core Network Widgets Xml Gui REQUIRED)
 
 # WxWidgets
-list(PREPEND CMAKE_PREFIX_PATH "${CMAKE_SOURCE_DIR}/ThirdParty/wxWidgets")
+set(wxWidgets_ROOT_DIR "${CMAKE_SOURCE_DIR}/ThirdParty/wxWidgets")
+set(wxWidgets_LIB_DIR "${CMAKE_SOURCE_DIR}/ThirdParty/wxWidgets/lib/vc_lib")
 set(wxWidgets_USE_UNICODE ON)
 find_package(wxWidgets COMPONENTS net aui xml adv core base REQUIRED)
 # Include WxWidgets headers
@@ -41,6 +42,7 @@ set(CASC_BUILD_SHARED_LIB OFF CACHE BOOL "Compile dynamically linked library")
 include_directories(ThirdParty/casclib/src)
 set(CASCLIB_INSTALL_LOCATION ${CMAKE_BINARY_DIR}/casclib)
 set(CMAKE_INSTALL_PREFIX ${CASCLIB_INSTALL_LOCATION})
+set(CMAKE_POLICY_VERSION_MINIMUM 3.5)
 add_subdirectory(ThirdParty/casclib)
 set_property(TARGET casc_static PROPERTY FOLDER "ThirdParty libraries")
 

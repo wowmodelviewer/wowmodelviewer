@@ -16,6 +16,7 @@ class RibbonEmitter;
 
 #include "animated.h"
 
+#include <iostream>
 #include <list>
 #include "GL/glew.h"
 #include "glm/glm.hpp"

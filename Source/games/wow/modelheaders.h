@@ -2,6 +2,7 @@
 
 #pragma pack(push,1)
 
+#include <cstdint>
 #include "glm/glm.hpp"
 #include "types.h" // unit8, etC.
 

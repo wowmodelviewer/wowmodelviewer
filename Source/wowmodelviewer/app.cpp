@@ -267,7 +267,7 @@ bool WowModelViewApp::OnInit()
 	}
 
 #if defined(_WINDOWS)
-	if (displayConsole)
+	if (displayConsole || IsDebuggerPresent())
 	{
 		if (AllocConsole())
 		{
