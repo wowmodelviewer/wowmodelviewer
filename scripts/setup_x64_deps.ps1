@@ -15,11 +15,16 @@ $bundleJson = Join-Path $vcpkgRoot "vcpkg-bundle.json"
 if (Test-Path $bundleJson) { $baseline = (Get-Content $bundleJson | ConvertFrom-Json).embeddedsha }
 else { Push-Location $vcpkgRoot; $baseline = git rev-parse HEAD 2>$null; Pop-Location }
 if (-not $baseline) { throw "Could not determine vcpkg baseline." }
+$vcpkgOverlay = @()
+if ($env:CI -eq 'true') {
+    Write-Step "CI detected: using release-only triplet overlay (skipping debug builds)"
+    $vcpkgOverlay = @("--overlay-triplets", "$PSScriptRoot\vcpkg-triplets")
+}
 Write-Step "Installing core libs via vcpkg"
 $tmp1 = Join-Path $RepoRoot "out\vcpkg_setup"; Ensure-Dir $tmp1
 $j1 = "{""name"":""wmv"",""version"":""1.0.0"",""builtin-baseline"":""$baseline"",""dependencies"":[""zlib"",""libpng"",""libjpeg-turbo"",""glew""]}"
 Set-Content "$tmp1\vcpkg.json" -Encoding UTF8 -Value $ExecutionContext.InvokeCommand.ExpandString($j1)
-Push-Location $tmp1; & $vcpkgExe install --triplet x64-windows-static-md; Pop-Location
+Push-Location $tmp1; & $vcpkgExe install --triplet x64-windows-static-md @vcpkgOverlay; Pop-Location
 $src1 = "$tmp1\vcpkg_installed\x64-windows-static-md\lib"
 $libDst = Join-Path $RepoRoot "ThirdParty\lib\x64"; Ensure-Dir $libDst
 $libsDst = Join-Path $RepoRoot "ThirdParty\libs\x64"; Ensure-Dir $libsDst
@@ -34,7 +39,7 @@ Write-Step "Installing wxWidgets via vcpkg"
 $tmp2 = Join-Path $RepoRoot "out\vcpkg_wx"; Ensure-Dir $tmp2
 $j2 = "{""name"":""wmv-wx"",""version"":""1.0.0"",""builtin-baseline"":""$baseline"",""dependencies"":[{""name"":""wxwidgets"",""default-features"":false}]}"
 Set-Content "$tmp2\vcpkg.json" -Encoding UTF8 -Value $ExecutionContext.InvokeCommand.ExpandString($j2)
-Push-Location $tmp2; & $vcpkgExe install --triplet x64-windows-static-md; Pop-Location
+Push-Location $tmp2; & $vcpkgExe install --triplet x64-windows-static-md @vcpkgOverlay; Pop-Location
 $wxSrc = "$tmp2\vcpkg_installed\x64-windows-static-md"
 $wxDst = Join-Path $RepoRoot "ThirdParty\wxWidgets_x64"
 if (Test-Path $wxDst) { Remove-Item $wxDst -Recurse -Force }
@@ -52,7 +57,7 @@ Write-Step "Installing OpenSSL DLLs via vcpkg"
 $tmp3 = Join-Path $RepoRoot "out\vcpkg_ssl"; Ensure-Dir $tmp3
 $j3 = "{""name"":""wmv-ssl"",""version"":""1.0.0"",""builtin-baseline"":""$baseline"",""dependencies"":[""openssl""]}"
 Set-Content "$tmp3\vcpkg.json" -Encoding UTF8 -Value $ExecutionContext.InvokeCommand.ExpandString($j3)
-Push-Location $tmp3; & $vcpkgExe install --triplet x64-windows; Pop-Location
+Push-Location $tmp3; & $vcpkgExe install --triplet x64-windows @vcpkgOverlay; Pop-Location
 $sslBin = "$tmp3\vcpkg_installed\x64-windows\bin"
 Copy-Item "$sslBin\libssl-3-x64.dll" (Join-Path $RepoRoot "ThirdParty\lib\libssl-3-x64.dll") -Force
 Copy-Item "$sslBin\libcrypto-3-x64.dll" (Join-Path $RepoRoot "ThirdParty\lib\libcrypto-3-x64.dll") -Force
