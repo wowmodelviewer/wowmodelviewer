@@ -3,6 +3,7 @@ name: Build
 on:
   push:
     branches: [ develop ]
+  workflow_dispatch:
 
 env:
   VCPKG_BINARY_SOURCES: "clear;x-gha,readwrite"
