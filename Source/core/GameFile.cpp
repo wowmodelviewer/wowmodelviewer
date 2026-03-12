@@ -97,7 +97,7 @@ bool GameFile::setChunk(std::string chunkName, bool resetToStart)
 	bool result = false;
 
 	// save current pointer if a chunk is currently under reading
-	for (auto it : chunks)
+	for (auto& it : chunks)
 	{
 		if (it.magic == curChunk)
 		{
@@ -106,13 +106,14 @@ bool GameFile::setChunk(std::string chunkName, bool resetToStart)
 		}
 	}
 
-	for (auto it : chunks)
+	for (auto& it : chunks)
 	{
 		if (it.magic == chunkName)
 		{
 			buffer = originalBuffer + it.start;
 			pointer = (resetToStart ? 0 : it.pointer);
 			size = it.size;
+			curChunk = chunkName;
 			result = true;
 			eof = (pointer >= size);
 			break;

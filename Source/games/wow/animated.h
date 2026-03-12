@@ -322,19 +322,37 @@ public:
 			{
 				GameFile* animfile = it->second.first;
 				GameFile* skelfile = it->second.second;
-				skelfile->setChunk("SKB1");
-				pHeadTimes = reinterpret_cast<AnimationBlockHeader*>(skelfile->getBuffer() + b.ofsTimes + j * sizeof(
-					AnimationBlockHeader));
-				ptimes = reinterpret_cast<uint32*>(animfile->getBuffer() + pHeadTimes->ofsEntrys);
-				if (animfile->getSize() < pHeadTimes->ofsEntrys)
+				if (!animfile || !skelfile)
 					continue;
+				if (!skelfile->setChunk("SKB1"))
+					continue;
+				unsigned char* skelBuf = skelfile->getBuffer();
+				unsigned char* animBuf = animfile->getBuffer();
+				if (!skelBuf || !animBuf || skelfile->isEof() || animfile->isEof())
+					continue;
+				const size_t headerOffset = b.ofsTimes + j * sizeof(AnimationBlockHeader);
+				if (skelfile->getSize() < headerOffset + sizeof(AnimationBlockHeader))
+					continue;
+				pHeadTimes = reinterpret_cast<AnimationBlockHeader*>(skelBuf + headerOffset);
+				if (pHeadTimes->ofsEntrys >= animfile->getSize() || pHeadTimes->nEntrys > 10000)
+					continue;
+				const size_t dataSize = static_cast<size_t>(pHeadTimes->nEntrys) * sizeof(uint32);
+				if (dataSize > animfile->getSize() || pHeadTimes->ofsEntrys > animfile->getSize() - dataSize)
+					continue;
+				ptimes = reinterpret_cast<uint32*>(animBuf + pHeadTimes->ofsEntrys);
 			}
 			else
 			{
-				pHeadTimes = reinterpret_cast<AnimationBlockHeader*>(f.getBuffer() + b.ofsTimes + j * sizeof(AnimationBlockHeader));
-				ptimes = reinterpret_cast<uint32*>(f.getBuffer() + pHeadTimes->ofsEntrys);
-				if (f.getSize() < pHeadTimes->ofsEntrys)
+				const size_t headerOffset = b.ofsTimes + j * sizeof(AnimationBlockHeader);
+				if (f.getSize() < headerOffset + sizeof(AnimationBlockHeader))
 					continue;
+				pHeadTimes = reinterpret_cast<AnimationBlockHeader*>(f.getBuffer() + headerOffset);
+				if (pHeadTimes->ofsEntrys >= f.getSize() || pHeadTimes->nEntrys > 10000)
+					continue;
+				const size_t dataSize = static_cast<size_t>(pHeadTimes->nEntrys) * sizeof(uint32);
+				if (dataSize > f.getSize() || pHeadTimes->ofsEntrys > f.getSize() - dataSize)
+					continue;
+				ptimes = reinterpret_cast<uint32*>(f.getBuffer() + pHeadTimes->ofsEntrys);
 			}
 
 			for (size_t i = 0; i < pHeadTimes->nEntrys; i++)
@@ -351,19 +369,39 @@ public:
 			{
 				GameFile* animfile = it->second.first;
 				GameFile* skelfile = it->second.second;
-				skelfile->setChunk("SKB1");
-				pHeadKeys = reinterpret_cast<AnimationBlockHeader*>(skelfile->getBuffer() + b.ofsKeys + j * sizeof(
-					AnimationBlockHeader));
-				keys = reinterpret_cast<D*>(animfile->getBuffer() + pHeadKeys->ofsEntrys);
-				if (animfile->getSize() < pHeadKeys->ofsEntrys)
+				if (!animfile || !skelfile)
 					continue;
+				if (!skelfile->setChunk("SKB1"))
+					continue;
+				unsigned char* skelBuf = skelfile->getBuffer();
+				unsigned char* animBuf = animfile->getBuffer();
+				if (!skelBuf || !animBuf || skelfile->isEof() || animfile->isEof())
+					continue;
+				const size_t headerOffset = b.ofsKeys + j * sizeof(AnimationBlockHeader);
+				if (skelfile->getSize() < headerOffset + sizeof(AnimationBlockHeader))
+					continue;
+				pHeadKeys = reinterpret_cast<AnimationBlockHeader*>(skelBuf + headerOffset);
+				if (pHeadKeys->ofsEntrys >= animfile->getSize() || pHeadKeys->nEntrys > 10000)
+					continue;
+				const size_t multiplier = (type == INTERPOLATION_HERMITE || type == INTERPOLATION_BEZIER) ? 3 : 1;
+				const size_t dataSize = static_cast<size_t>(pHeadKeys->nEntrys) * multiplier * sizeof(D);
+				if (dataSize > animfile->getSize() || pHeadKeys->ofsEntrys > animfile->getSize() - dataSize)
+					continue;
+				keys = reinterpret_cast<D*>(animBuf + pHeadKeys->ofsEntrys);
 			}
 			else
 			{
-				pHeadKeys = reinterpret_cast<AnimationBlockHeader*>(f.getBuffer() + b.ofsKeys + j * sizeof(AnimationBlockHeader));
-				keys = reinterpret_cast<D*>(f.getBuffer() + pHeadKeys->ofsEntrys);
-				if (f.getSize() < pHeadKeys->ofsEntrys)
+				const size_t headerOffset = b.ofsKeys + j * sizeof(AnimationBlockHeader);
+				if (f.getSize() < headerOffset + sizeof(AnimationBlockHeader))
 					continue;
+				pHeadKeys = reinterpret_cast<AnimationBlockHeader*>(f.getBuffer() + headerOffset);
+				if (pHeadKeys->ofsEntrys >= f.getSize() || pHeadKeys->nEntrys > 10000)
+					continue;
+				const size_t multiplier = (type == INTERPOLATION_HERMITE || type == INTERPOLATION_BEZIER) ? 3 : 1;
+				const size_t dataSize = static_cast<size_t>(pHeadKeys->nEntrys) * multiplier * sizeof(D);
+				if (dataSize > f.getSize() || pHeadKeys->ofsEntrys > f.getSize() - dataSize)
+					continue;
+				keys = reinterpret_cast<D*>(f.getBuffer() + pHeadKeys->ofsEntrys);
 			}
 
 			switch (type)
