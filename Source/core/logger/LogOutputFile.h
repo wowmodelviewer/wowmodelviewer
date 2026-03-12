@@ -1,7 +1,7 @@
 #pragma once
 
-#include <QFile>
-#include <qmutex.h>
+#include <fstream>
+#include <mutex>
 #include "LogOutput.h"
 
 #ifdef _WIN32
@@ -27,7 +27,7 @@ namespace WMVLog
 		LogOutputFile(const LogOutputFile&);
 		LogOutputFile& operator=(const LogOutputFile&) = delete;
 
-		mutable QMutex mutex;
-		QFile m_logFile;
+		mutable std::mutex m_mutex;
+		std::ofstream m_logFile;
 	};
 }

@@ -1,16 +1,15 @@
 #include "LogOutputFile.h"
-#include <QTextStream>
 
 using namespace WMVLog;
 
-LogOutputFile::LogOutputFile(std::string fileName) : m_logFile(fileName.c_str())
+LogOutputFile::LogOutputFile(std::string fileName)
 {
-	m_logFile.open(QIODevice::WriteOnly | QIODevice::Text);
+	m_logFile.open(fileName, std::ios::out | std::ios::trunc);
 }
 
 void LogOutputFile::write(const QString& message)
 {
-	QMutexLocker locker(&mutex);
-	QTextStream out(&m_logFile);
-	out << message << "\n";
+	std::lock_guard<std::mutex> locker(m_mutex);
+	m_logFile << message.toStdString() << "\n";
+	m_logFile.flush();
 }
