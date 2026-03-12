@@ -46,11 +46,13 @@ if (Test-Path $wxDst) { Remove-Item $wxDst -Recurse -Force }
 Ensure-Dir "$wxDst\lib\vc_x64_lib"
 Copy-Item "$wxSrc\include" "$wxDst\include" -Recurse -Force
 Get-ChildItem "$wxSrc\lib" -Filter "wx*.lib" | ForEach-Object { Copy-Item $_.FullName "$wxDst\lib\vc_x64_lib\$($_.Name)" -Force }
-Get-ChildItem "$wxSrc\debug\lib" -Filter "wx*.lib" | ForEach-Object { Copy-Item $_.FullName "$wxDst\lib\vc_x64_lib\$($_.Name)" -Force }
+if (Test-Path "$wxSrc\debug\lib") {
+    Get-ChildItem "$wxSrc\debug\lib" -Filter "wx*.lib" | ForEach-Object { Copy-Item $_.FullName "$wxDst\lib\vc_x64_lib\$($_.Name)" -Force }
+    Copy-Item "$wxSrc\debug\lib\nanosvg.lib" "$wxDst\lib\vc_x64_lib\nanosvgd.lib" -Force
+    Copy-Item "$wxSrc\debug\lib\nanosvgrast.lib" "$wxDst\lib\vc_x64_lib\nanosvgrastd.lib" -Force
+}
 Copy-Item "$wxSrc\lib\nanosvg.lib" "$wxDst\lib\vc_x64_lib\nanosvg.lib" -Force
 Copy-Item "$wxSrc\lib\nanosvgrast.lib" "$wxDst\lib\vc_x64_lib\nanosvgrast.lib" -Force
-Copy-Item "$wxSrc\debug\lib\nanosvg.lib" "$wxDst\lib\vc_x64_lib\nanosvgd.lib" -Force
-Copy-Item "$wxSrc\debug\lib\nanosvgrast.lib" "$wxDst\lib\vc_x64_lib\nanosvgrastd.lib" -Force
 if (Test-Path "$wxSrc\lib\mswu") { Copy-Item "$wxSrc\lib\mswu" "$wxDst\lib\vc_x64_lib\mswu" -Recurse -Force }
 if (Test-Path "$wxSrc\lib\mswud") { Copy-Item "$wxSrc\lib\mswud" "$wxDst\lib\vc_x64_lib\mswud" -Recurse -Force }
 Write-Step "Installing OpenSSL DLLs via vcpkg"
