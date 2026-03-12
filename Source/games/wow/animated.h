@@ -10,6 +10,7 @@
 #include "GameFile.h"
 #include "modelheaders.h"
 #include "types.h"
+#include "logger/Logger.h"
 
 #ifdef _WIN32
 #    ifdef BUILDING_WOW_DLL
@@ -323,22 +324,48 @@ public:
 				GameFile* animfile = it->second.first;
 				GameFile* skelfile = it->second.second;
 				if (!animfile || !skelfile)
+				{
+					LOG_WARNING << "Animation data loading: null file pointer for animation index" << j;
 					continue;
+				}
 				if (!skelfile->setChunk("SKB1"))
+				{
+					LOG_WARNING << "Animation data loading: setChunk(SKB1) failed for" << skelfile->fullname();
 					continue;
+				}
 				unsigned char* skelBuf = skelfile->getBuffer();
 				unsigned char* animBuf = animfile->getBuffer();
 				if (!skelBuf || !animBuf || skelfile->isEof() || animfile->isEof())
+				{
+					LOG_WARNING << "Animation data loading: invalid buffer state - skelBuf:" << (void*)skelBuf 
+						<< "animBuf:" << (void*)animBuf 
+						<< "skelEof:" << skelfile->isEof() 
+						<< "animEof:" << animfile->isEof()
+						<< "for files:" << skelfile->fullname() << "/" << animfile->fullname();
 					continue;
+				}
 				const size_t headerOffset = b.ofsTimes + j * sizeof(AnimationBlockHeader);
 				if (skelfile->getSize() < headerOffset + sizeof(AnimationBlockHeader))
+				{
+					LOG_WARNING << "Animation data loading: header offset" << headerOffset << "out of bounds for" << skelfile->fullname();
 					continue;
+				}
 				pHeadTimes = reinterpret_cast<AnimationBlockHeader*>(skelBuf + headerOffset);
 				if (pHeadTimes->ofsEntrys >= animfile->getSize() || pHeadTimes->nEntrys > 10000)
+				{
+					LOG_WARNING << "Animation data loading: invalid header data - ofsEntrys:" << pHeadTimes->ofsEntrys 
+						<< "nEntrys:" << pHeadTimes->nEntrys 
+						<< "animSize:" << animfile->getSize()
+						<< "for" << animfile->fullname();
 					continue;
+				}
 				const size_t dataSize = static_cast<size_t>(pHeadTimes->nEntrys) * sizeof(uint32);
 				if (dataSize > animfile->getSize() || pHeadTimes->ofsEntrys > animfile->getSize() - dataSize)
+				{
+					LOG_WARNING << "Animation data loading: data size" << dataSize << "at offset" << pHeadTimes->ofsEntrys 
+						<< "exceeds file size" << animfile->getSize() << "for" << animfile->fullname();
 					continue;
+				}
 				ptimes = reinterpret_cast<uint32*>(animBuf + pHeadTimes->ofsEntrys);
 			}
 			else
@@ -370,23 +397,49 @@ public:
 				GameFile* animfile = it->second.first;
 				GameFile* skelfile = it->second.second;
 				if (!animfile || !skelfile)
+				{
+					LOG_WARNING << "Keyframe data loading: null file pointer for animation index" << j;
 					continue;
+				}
 				if (!skelfile->setChunk("SKB1"))
+				{
+					LOG_WARNING << "Keyframe data loading: setChunk(SKB1) failed for" << skelfile->fullname();
 					continue;
+				}
 				unsigned char* skelBuf = skelfile->getBuffer();
 				unsigned char* animBuf = animfile->getBuffer();
 				if (!skelBuf || !animBuf || skelfile->isEof() || animfile->isEof())
+				{
+					LOG_WARNING << "Keyframe data loading: invalid buffer state - skelBuf:" << (void*)skelBuf 
+						<< "animBuf:" << (void*)animBuf 
+						<< "skelEof:" << skelfile->isEof() 
+						<< "animEof:" << animfile->isEof()
+						<< "for files:" << skelfile->fullname() << "/" << animfile->fullname();
 					continue;
+				}
 				const size_t headerOffset = b.ofsKeys + j * sizeof(AnimationBlockHeader);
 				if (skelfile->getSize() < headerOffset + sizeof(AnimationBlockHeader))
+				{
+					LOG_WARNING << "Keyframe data loading: header offset" << headerOffset << "out of bounds for" << skelfile->fullname();
 					continue;
+				}
 				pHeadKeys = reinterpret_cast<AnimationBlockHeader*>(skelBuf + headerOffset);
 				if (pHeadKeys->ofsEntrys >= animfile->getSize() || pHeadKeys->nEntrys > 10000)
+				{
+					LOG_WARNING << "Keyframe data loading: invalid header data - ofsEntrys:" << pHeadKeys->ofsEntrys 
+						<< "nEntrys:" << pHeadKeys->nEntrys 
+						<< "animSize:" << animfile->getSize()
+						<< "for" << animfile->fullname();
 					continue;
+				}
 				const size_t multiplier = (type == INTERPOLATION_HERMITE || type == INTERPOLATION_BEZIER) ? 3 : 1;
 				const size_t dataSize = static_cast<size_t>(pHeadKeys->nEntrys) * multiplier * sizeof(D);
 				if (dataSize > animfile->getSize() || pHeadKeys->ofsEntrys > animfile->getSize() - dataSize)
+				{
+					LOG_WARNING << "Keyframe data loading: data size" << dataSize << "at offset" << pHeadKeys->ofsEntrys 
+						<< "exceeds file size" << animfile->getSize() << "for" << animfile->fullname();
 					continue;
+				}
 				keys = reinterpret_cast<D*>(animBuf + pHeadKeys->ofsEntrys);
 			}
 			else
