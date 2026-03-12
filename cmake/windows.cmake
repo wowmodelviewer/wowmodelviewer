@@ -3,6 +3,8 @@ message(STATUS "Using Windows version")
 add_definitions(-D_WINDOWS)
 # Prevent windows.h from including winsock.h (conflicts with winsock2.h used by wxWidgets 3.x)
 add_definitions(-DWIN32_LEAN_AND_MEAN)
+# Suppress C++17 std::byte injection into global namespace; conflicts with Windows SDK byte typedef
+add_definitions(-D_HAS_STD_BYTE=0)
 
 # disable some visual studio annoying warnings
 # warning on stl class dll exporting

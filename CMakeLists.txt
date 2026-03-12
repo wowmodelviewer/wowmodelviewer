@@ -1,6 +1,22 @@
-cmake_minimum_required(VERSION 3.16)
+cmake_minimum_required(VERSION 3.5)
+
+# Enable CMAKE_MSVC_RUNTIME_LIBRARY support (CMake 3.15+ policy).
+# Without this, FindWxWidgets' USE_FILE injects /MT and overrides the default.
+if(POLICY CMP0091)
+  cmake_policy(SET CMP0091 NEW)
+endif()
+
 project(WoWModelViewer)
 
+set(CMAKE_C_STANDARD 17)
+set(CMAKE_C_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+# Use dynamic CRT (/MD release, /MDd debug) to match vcpkg x64-windows-static-md libraries.
+if(MSVC)
+  set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL")
+endif()
 message(STATUS "=== Configuring WoWModelViewer ===")
 
 # Dependencies.
@@ -20,6 +36,14 @@ find_package(wxWidgets COMPONENTS gl net aui xml adv core base REQUIRED)
 message(STATUS "  wxWidgets found: ${wxWidgets_LIBRARIES}")
 # Include WxWidgets headers
 include(${wxWidgets_USE_FILE})
+# FindWxWidgets incorrectly injects /MT based on the vc_x64_lib directory name.
+# Strip it so our CMAKE_MSVC_RUNTIME_LIBRARY setting (/MDd, /MD) is not overridden.
+if(MSVC)
+  foreach(_f CMAKE_CXX_FLAGS CMAKE_C_FLAGS)
+    string(REGEX REPLACE "/M[Td]+" "" ${_f} "${${_f}}")
+    string(STRIP "${${_f}}" ${_f})
+  endforeach()
+endif()
 include_directories(${wxWidgets_INCLUDE_DIRS} "${CMAKE_SOURCE_DIR}/ThirdParty/include")
 
 

@@ -792,12 +792,13 @@ void CxImageGIF::compressLZW( int init_bits, CxFile* outfile)
     fcode = (long) (((long) c << MAXBITSCODES) + ent);
     register long i = (((code_int)c << hshift) ^ ent);    /* xor hashing */
 
+    long disp;
     if ( HashTabOf (i) == fcode ) {
       ent = CodeTabOf (i);
       continue;
     } else if ( (long)HashTabOf (i) < 0 )      /* empty slot */
       goto nomatch;
-    register long disp = HSIZE - i;           /* secondary hash (after G. Knott) */
+    disp = HSIZE - i;           /* secondary hash (after G. Knott) */
     if ( i == 0 )  disp = 1;
 probe:
     if ( (i -= disp) < 0 )  i += HSIZE;
