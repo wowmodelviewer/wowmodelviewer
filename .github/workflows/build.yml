@@ -49,6 +49,7 @@ jobs:
         shell: pwsh
         run: |
           $env:PATH = "$env:VCPKG_INSTALLATION_ROOT;$env:PATH"
+          $env:VCPKG_ROOT = $env:VCPKG_INSTALLATION_ROOT
           .\scripts\setup_x64_deps.ps1 -RepoRoot ${{ github.workspace }}
 
       - name: Configure
