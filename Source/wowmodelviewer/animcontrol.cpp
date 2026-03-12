@@ -62,7 +62,7 @@ AnimControl::AnimControl(wxWindow* parent, wxWindowID id)
 		wxT("5"), wxT("6"), wxT("7"), wxT("8"), wxT("9")
 	};
 
-	animCList = new wxComboBox(this, ID_ANIM, _("Animation"), wxPoint(10, 10), wxSize(190, -1), 0,
+	animCList = new wxComboBox(this, ID_ANIM, _("Animation"), wxPoint(10, 10), wxSize(260, -1), 0,
 							   nullptr, wxCB_READONLY | wxCB_SORT, wxDefaultValidator, wxT("Animation"));
 	animCList2 = new wxComboBox(this, ID_ANIM_SECONDARY, _("Secondary"), wxPoint(10, 95), wxSize(190, -1), 0,
 								nullptr, wxCB_READONLY | wxCB_SORT, wxDefaultValidator, wxT("Secondary"));
@@ -91,36 +91,36 @@ AnimControl::AnimControl(wxWindow* parent, wxWindowID id)
 	speedMouthSlider->SetTickFreq(10);
 	speedMouthSlider->Show(false);
 
-	loopList = new wxComboBox(this, ID_LOOPS, wxT("0"), wxPoint(330, 10), wxSize(40, -1), 10,
+	loopList = new wxComboBox(this, ID_LOOPS, wxT("0"), wxPoint(495, 10), wxSize(40, -1), 10,
 							  strLoops, wxCB_READONLY, wxDefaultValidator, wxT("Loops"));
-	btnAdd = new wxButton(this, ID_ADDANIM, _("Add"), wxPoint(380, 10), wxSize(45, -1));
+	btnAdd = new wxButton(this, ID_ADDANIM, _("Add"), wxPoint(545, 10), wxSize(45, -1));
 
-	skinList = new wxComboBox(this, ID_SKIN, _("Skin"), wxPoint(170, 10), wxSize(150, -1), 0, nullptr, wxCB_READONLY);
+	skinList = new wxComboBox(this, ID_SKIN, _("Skin"), wxPoint(275, 10), wxSize(210, -1), 0, nullptr, wxCB_READONLY);
 	skinList->Show(false);
 
-	BLPSkinsLabel = new wxStaticText(this, wxID_ANY, wxT("All skins in folder :"), wxPoint(600, 5), wxSize(150, 16));
+	BLPSkinsLabel = new wxStaticText(this, wxID_ANY, wxT("All skins in folder :"), wxPoint(730, 5), wxSize(150, 16));
 	BLPSkinsLabel->Show(false);
 
-	showBLPList = new wxButton(this, ID_SHOW_BLP_SKINLIST, _("Show skin list (LONG!)"), wxPoint(635, 25),
-	                           wxSize(150, 22));
+	showBLPList = new wxButton(this, ID_SHOW_BLP_SKINLIST, _("Show skin list (LONG!)"), wxPoint(760, 25),
+							   wxSize(150, 22));
 	showBLPList->Show(false);
 
-	BLPSkinLabel1 = new wxStaticText(this, wxID_ANY, wxT("Skin 1"), wxPoint(600, 29), wxSize(30, 16));
+	BLPSkinLabel1 = new wxStaticText(this, wxID_ANY, wxT("Skin 1"), wxPoint(730, 29), wxDefaultSize);
 	BLPSkinLabel1->Show(false);
-	BLPSkinList1 = new wxComboBox(this, ID_BLP_SKIN1, _("Skin"), wxPoint(635, 25), wxSize(150, 16), 0, nullptr,
-	                              wxCB_READONLY);
+	BLPSkinList1 = new wxComboBox(this, ID_BLP_SKIN1, _("Skin"), wxPoint(780, 25), wxSize(150, -1), 0, nullptr,
+								  wxCB_READONLY);
 	BLPSkinList1->Show(false);
 
-	BLPSkinLabel2 = new wxStaticText(this, wxID_ANY, wxT("Skin 2"), wxPoint(600, 59), wxSize(30, 16));
+	BLPSkinLabel2 = new wxStaticText(this, wxID_ANY, wxT("Skin 2"), wxPoint(730, 59), wxDefaultSize);
 	BLPSkinLabel2->Show(false);
-	BLPSkinList2 = new wxComboBox(this, ID_BLP_SKIN2, _("Skin"), wxPoint(635, 55), wxSize(150, 16), 0, nullptr,
-	                              wxCB_READONLY);
+	BLPSkinList2 = new wxComboBox(this, ID_BLP_SKIN2, _("Skin"), wxPoint(780, 55), wxSize(150, -1), 0, nullptr,
+								  wxCB_READONLY);
 	BLPSkinList2->Show(false);
 
-	BLPSkinLabel3 = new wxStaticText(this, wxID_ANY, wxT("Skin 3"), wxPoint(600, 89), wxSize(30, 16));
+	BLPSkinLabel3 = new wxStaticText(this, wxID_ANY, wxT("Skin 3"), wxPoint(730, 89), wxDefaultSize);
 	BLPSkinLabel3->Show(false);
-	BLPSkinList3 = new wxComboBox(this, ID_BLP_SKIN3, _("Skin"), wxPoint(635, 85), wxSize(150, 16), 0, nullptr,
-	                              wxCB_READONLY);
+	BLPSkinList3 = new wxComboBox(this, ID_BLP_SKIN3, _("Skin"), wxPoint(780, 85), wxSize(150, -1), 0, nullptr,
+								  wxCB_READONLY);
 	BLPSkinList3->Show(false);
 
 	defaultDoodads = true;
@@ -156,7 +156,7 @@ AnimControl::AnimControl(wxWindow* parent, wxWindowID id)
 	oldStyle = new wxCheckBox(this, ID_OLDSTYLE, _("Auto Animate"), wxPoint(175, 42), wxDefaultSize, 0);
 	bOldStyle = true;
 	oldStyle->SetValue(bOldStyle);
-	nextAnims = new wxCheckBox(this, ID_ANIM_NEXT, _("Next Animations"), wxPoint(430, 10), wxDefaultSize, 0);
+	nextAnims = new wxCheckBox(this, ID_ANIM_NEXT, _("Next Animations"), wxPoint(600, 10), wxDefaultSize, 0);
 	bNextAnims = false;
 	nextAnims->SetValue(bNextAnims);
 }
