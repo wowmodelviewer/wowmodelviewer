@@ -97,7 +97,7 @@ source_group("cmake" FILES ${cmake_files})
 set(common_files 
                  wowmodelviewer.json
                  ${CMAKE_SOURCE_DIR}/Installers/Windows/NSIS/WMVInstallerMUI.nsi
-                 ${CMAKE_SOURCE_DIR}/appveyor.yml
+                 ${CMAKE_SOURCE_DIR}/.github/workflows/build.yml
                  ${CMAKE_SOURCE_DIR}/bin_support/wow/listfile.csv
                  ${CMAKE_SOURCE_DIR}/bin_support/Encryption/extraEncryptionKeys.csv)
 
