@@ -335,13 +335,17 @@ public:
 				}
 				unsigned char* skelBuf = skelfile->getBuffer();
 				unsigned char* animBuf = animfile->getBuffer();
-				if (!skelBuf || !animBuf || skelfile->isEof() || animfile->isEof())
+				// Only log if files claim to be open (not EOF) but have null buffers - this is the crash case
+				if (!skelBuf || !animBuf)
 				{
-					LOG_WARNING << "Animation data loading: invalid buffer state - skelBuf:" << (void*)skelBuf 
-						<< "animBuf:" << (void*)animBuf 
-						<< "skelEof:" << skelfile->isEof() 
-						<< "animEof:" << animfile->isEof()
-						<< "for files:" << skelfile->fullname() << "/" << animfile->fullname();
+					if ((!skelBuf && !skelfile->isEof()) || (!animBuf && !animfile->isEof()))
+					{
+						LOG_WARNING << "Animation data loading: null buffer despite file not being EOF - skelBuf:" << (void*)skelBuf 
+							<< "animBuf:" << (void*)animBuf 
+							<< "skelEof:" << skelfile->isEof() 
+							<< "animEof:" << animfile->isEof()
+							<< "for files:" << skelfile->fullname() << "/" << animfile->fullname();
+					}
 					continue;
 				}
 				const size_t headerOffset = b.ofsTimes + j * sizeof(AnimationBlockHeader);
@@ -408,13 +412,17 @@ public:
 				}
 				unsigned char* skelBuf = skelfile->getBuffer();
 				unsigned char* animBuf = animfile->getBuffer();
-				if (!skelBuf || !animBuf || skelfile->isEof() || animfile->isEof())
+				// Only log if files claim to be open (not EOF) but have null buffers - this is the crash case
+				if (!skelBuf || !animBuf)
 				{
-					LOG_WARNING << "Keyframe data loading: invalid buffer state - skelBuf:" << (void*)skelBuf 
-						<< "animBuf:" << (void*)animBuf 
-						<< "skelEof:" << skelfile->isEof() 
-						<< "animEof:" << animfile->isEof()
-						<< "for files:" << skelfile->fullname() << "/" << animfile->fullname();
+					if ((!skelBuf && !skelfile->isEof()) || (!animBuf && !animfile->isEof()))
+					{
+						LOG_WARNING << "Keyframe data loading: null buffer despite file not being EOF - skelBuf:" << (void*)skelBuf 
+							<< "animBuf:" << (void*)animBuf 
+							<< "skelEof:" << skelfile->isEof() 
+							<< "animEof:" << animfile->isEof()
+							<< "for files:" << skelfile->fullname() << "/" << animfile->fullname();
+					}
 					continue;
 				}
 				const size_t headerOffset = b.ofsKeys + j * sizeof(AnimationBlockHeader);
