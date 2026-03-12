@@ -14,7 +14,7 @@ core::GlobalSettings* core::GlobalSettings::m_instance = nullptr;
 core::GlobalSettings::GlobalSettings()
 {
 	m_versionMajorNumber = 0;
-	m_versionMinorNumber = 10;
+	m_versionMinorNumber = 11;
 	m_versionRevNumber = 0;
 
 	m_appName = L"WoW Model Viewer";
