@@ -153,6 +153,7 @@ ModelCanvas::ModelCanvas(wxWindow* parent, VideoCaps* caps)
 	drawGrid = false;
 	useCamera = false;
 
+ debugInfosEnabled_ = true;
 	openGLDebug_ = false;
 
 	// Create the wxGLContext for this canvas
@@ -743,7 +744,7 @@ void ModelCanvas::Render(wxPaintEvent& WXUNUSED(event))
 	// Ensure the OpenGL context is current before any GL calls.
 	SetCurrent();
 
-	if (openGLDebug_)
+   if (debugInfosEnabled_)
 		displayDebugInfos();
 
 	int w = 0, h = 0;
@@ -1800,7 +1801,6 @@ bool ModelCanvas::SwapBuffers()
 
 void ModelCanvas::displayDebugInfos() const
 {
-	static wxString appTitle = GLOBALSETTINGS.appTitle();
 	static int frameCount = 0;
 
 	static DWORD previousTime = 0;
@@ -1813,16 +1813,17 @@ void ModelCanvas::displayDebugInfos() const
 		const auto fps = static_cast<double>(frameCount) / elapsedTime;
 		const auto msPerFrame = 1000.0 / fps;
 
-		wxString title;
+        wxString debugText;
 		const auto look = camera.lookAt();
 		const auto pos = camera.position();
 		const auto right = camera.right();
-		title.Printf(
-			L"%s - FPS: %0.1f - Frame Time: %0.1f (ms) - Camera: Y=%0.1f P=%0.1f r=%0.1f LookAt: %0.1f/%0.1f/%0.1f Pos: %0.1f/%0.1f/%0.1f Right: %0.1f/%0.1f/%0.1f",
-			appTitle.c_str(), fps, msPerFrame, camera.yaw(), camera.pitch(), camera.radius(), look.x, look.y, look.z, pos.x,
+        debugText.Printf(
+			L"FPS: %0.1f - Frame Time: %0.1f (ms) - Camera: Y=%0.1f P=%0.1f r=%0.1f LookAt: %0.1f/%0.1f/%0.1f Pos: %0.1f/%0.1f/%0.1f Right: %0.1f/%0.1f/%0.1f",
+			fps, msPerFrame, camera.yaw(), camera.pitch(), camera.radius(), look.x, look.y, look.z, pos.x,
 			pos.y, pos.z, right.x, right.y, right.z);
 
-		static_cast<wxTopLevelWindow*>(wxTheApp->GetTopWindow())->SetTitle(title);
+        if (g_modelViewer)
+			g_modelViewer->SetStatusText(debugText, 0);
 
 		frameCount = 0;
 	}
@@ -1834,8 +1835,8 @@ void ModelCanvas::toggleOpenGLDebug()
 {
 	openGLDebug_ = !openGLDebug_;
 
-	if (!openGLDebug_)
-		static_cast<wxTopLevelWindow*>(wxTheApp->GetTopWindow())->SetTitle(GLOBALSETTINGS.appTitle());
+   if (!openGLDebug_ && !debugInfosEnabled_ && g_modelViewer)
+		g_modelViewer->SetStatusText(wxEmptyString, 0);
 }
 
 void ModelCanvas::setModel(WoWModel* m, bool keepPrevious)

@@ -165,6 +165,7 @@ private:
 	OrbitCamera camera;
 
 	WoWModel* model_;
+  bool debugInfosEnabled_;
 	bool openGLDebug_;
 
 	wxGLContext* glContext_;
