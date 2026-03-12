@@ -74,4 +74,12 @@ target_link_libraries(${NAME} Qt5::Core Qt5::Network Qt5::Xml Qt5::Gui ${extrali
 
 set(BIN_DIR "${CMAKE_SOURCE_DIR}/bin/")
 
+# Copy DLL to bin directory after build
+add_custom_command(TARGET ${NAME} POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        $<TARGET_FILE:${NAME}>
+        ${BIN_DIR}
+    COMMENT "Copying ${NAME}.dll to ${BIN_DIR}"
+)
+
 install(TARGETS ${NAME} RUNTIME DESTINATION ${BIN_DIR})
