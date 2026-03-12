@@ -19,3 +19,4 @@ out/
 .idea/.name
 .idea/wowmodelviewer.iml
 aqtinstall.log
+.github/copilot-instructions.md
