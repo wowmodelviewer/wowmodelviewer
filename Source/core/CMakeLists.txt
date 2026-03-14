@@ -61,7 +61,6 @@ set(headers CharInfos.h
 source_group("Header Files" FILES ${headers})
 
 use_glew()
-use_cximage()
 use_sqlite()
 
 add_definitions(-DBUILDING_CORE_DLL)

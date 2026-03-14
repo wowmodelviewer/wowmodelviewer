@@ -1,11 +1,10 @@
 #include "AnimExporter.h"
+#include <memory>
+#include <QtGui/QImage>
 #include "Attachment.h"
 #include "enums.h"
 #include "globalvars.h"
-#include "Quantize.h"
 #include "logger/Logger.h"
-#include "ximage.h"
-#include "ximagif.h"
 
 IMPLEMENT_CLASS(CAnimationExporter, wxFrame)
 
@@ -65,7 +64,6 @@ void CAnimationExporter::Init(const wxString fn)
 	if (!g_canvas)
 		return;
 
-	m_pPal = nullptr;
 	m_fAnimSpeed = 0.0f;
 
 	m_bTransparent = false;
@@ -114,13 +112,11 @@ void CAnimationExporter::CreateGif()
 {
 	if (!g_canvas || !g_canvas->model() || !g_canvas->model()->animManager)
 	{
-		wxMessageBox(wxT("Unable to create animated GIF!"), wxT("Error"));
-		LOG_ERROR << "Unable to created animated GIF.  A required objects pointer was null!";
+		wxMessageBox(wxT("Unable to export animation!"), wxT("Error"));
+		LOG_ERROR << "Unable to export animation. A required object pointer was null!";
 		Show(false);
 		return;
 	}
-
-	// Our pointer array of images
 
 	// Reset the state of our GUI objects
 	btnStart->Enable(false);
@@ -148,9 +144,9 @@ void CAnimationExporter::CreateGif()
 	if (m_iTotalFrames > m_iTotalAnimFrames)
 	{
 		wxMessageBox(
-			wxT("Impossible to make a gif with more frames than the model animation.\nClosing gif exporter."),
+			wxT("Impossible to export with more frames than the model animation.\nClosing exporter."),
 			wxT("Error"));
-		LOG_ERROR << "Unable to make a gif with more frames than the model animation.";
+		LOG_ERROR << "Unable to export with more frames than the model animation.";
 		this->Show(false);
 		return;
 	}
@@ -168,7 +164,7 @@ void CAnimationExporter::CreateGif()
 		wxString(txtSizeX->GetValue()).ToLong(reinterpret_cast<long*>(&m_iNewWidth));
 		wxString(txtSizeY->GetValue()).ToLong(reinterpret_cast<long*>(&m_iNewHeight));
 
-		// Just a minor check,  final image size can not be smaller than 32x32 pixels.
+		// Just a minor check, final image size can not be smaller than 32x32 pixels.
 		if (m_iNewWidth < 32 || m_iNewHeight < 32)
 		{
 			m_iNewWidth = 32;
@@ -203,128 +199,46 @@ void CAnimationExporter::CreateGif()
 	g_canvas->model()->animManager->Stop();
 
 	// Size of our buffer to hold the pixel data
-	m_iSize = m_iWidth * m_iHeight * 4; // (width*height*bytesPerPixel)  
+	m_iSize = m_iWidth * m_iHeight * 4; // (width*height*bytesPerPixel)
 
-	// Create one frame to make our optimal colour palette from.
-	unsigned char* buffer = new unsigned char[m_iSize];
-	CxImage** gifImages = new CxImage*[m_iTotalFrames];
+	auto buffer = std::make_unique<unsigned char[]>(m_iSize);
 
-	for (unsigned int i = 0; i < m_iTotalFrames && !m_bPng; i++)
+	// PNG Sequence Export
+	for (unsigned int i = 0; i < m_iTotalFrames; i++)
 	{
 		lblCurFrame->SetLabel(wxString::Format(wxT("Current Frame: %i"), i));
 
 		this->Refresh();
 		this->Update();
 
-		CxImage* newImage = new CxImage(0);
-
 		g_canvas->RenderToBuffer();
 
-		glReadPixels(0, 0, static_cast<GLsizei>(m_iWidth), static_cast<GLsizei>(m_iHeight), GL_BGRA_EXT, GL_UNSIGNED_BYTE, buffer);
-		newImage->CreateFromArray(buffer, (DWORD)m_iWidth, (DWORD)m_iHeight, 32, (DWORD)(m_iWidth * 4), false);
+		glReadPixels(0, 0, static_cast<GLsizei>(m_iWidth), static_cast<GLsizei>(m_iHeight),
+			GL_BGRA_EXT, GL_UNSIGNED_BYTE, buffer.get());
 
-		// not needed due to the code just below, which fixes the issue with particles
-		//g_canvas->model()->animManager->SetTimeDiff(m_iTimeStep);
-		//g_canvas->model()->animManager->Tick(m_iTimeStep);
-
-		if (g_canvas->root)
-			g_canvas->root->tick(static_cast<float>(m_iTimeStep));
-		if (g_canvas->sky)
-			g_canvas->sky->tick(static_cast<float>(m_iTimeStep));
-
-
-#ifdef _WINDOWS
-		if (m_bGreyscale)
-			newImage->GrayScale();
-#endif //_WINDOWS
+		QImage frame(buffer.get(), static_cast<int>(m_iWidth), static_cast<int>(m_iHeight),
+			QImage::Format_ARGB32);
+		frame = frame.mirrored();
 
 		if (m_bShrink && m_iNewWidth != m_iWidth && m_iNewHeight != m_iHeight)
-			newImage->Resample((long)m_iNewWidth, (long)m_iNewHeight, 2);
+			frame = frame.scaled(static_cast<int>(m_iNewWidth), static_cast<int>(m_iNewHeight),
+				Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
 
-		// if (Optimise) {
-		if (!m_pPal)
-		{
-			CQuantizer q(256, 8);
-			q.ProcessImage((HANDLE)newImage->GetDIB());
-			m_pPal = static_cast<RGBQUAD*>(calloc(256 * sizeof(RGBQUAD), 1)); //This creates our gifs optimised global colour palette
-			q.SetColorTable(m_pPal);
-		}
+		if (m_bGreyscale)
+			frame = frame.convertToFormat(QImage::Format_Grayscale8);
 
-		newImage->DecreaseBpp(8, m_bDiffuse, m_pPal, 256);
-		newImage->SetCodecOption(2); // for LZW compression
+		if (!m_bTransparent)
+			frame = frame.convertToFormat(QImage::Format_RGB32);
 
-		if (m_bTransparent)
-			newImage->SetTransIndex(newImage->GetPixelIndex(0, 0));
+		wxString filen = m_strFilename;
+		filen << wxT("_") << i << wxT(".png");
+		frame.save(QString::fromWCharArray(filen.wc_str()));
 
-		newImage->SetFrameDelay((DWORD)m_iDelay);
-
-		gifImages[i] = newImage;
-
-		// All the memory that we allocate for newImage gets cleared at the end
-	}
-
-	//PNG Sequence Exporter, use if Checkbox is true
-	for (unsigned int i = 0; i < m_iTotalFrames && m_bPng; i++)
-	{
-		lblCurFrame->SetLabel(wxString::Format(wxT("Current Frame: %i"), i));
-
-		this->Refresh();
-		this->Update();
-
-		CxImage* newImage = new CxImage(0);
-		CxImage* newImage2 = new CxImage(0);
-
-		g_canvas->RenderToBuffer();
-		//wxString stat;
-
-		glReadPixels(0, 0, static_cast<GLsizei>(m_iWidth), static_cast<GLsizei>(m_iHeight), GL_BGRA_EXT, GL_UNSIGNED_BYTE, buffer);
-
-		newImage->CreateFromArray(buffer, (DWORD)m_iWidth, (DWORD)m_iHeight, 32, (DWORD)(m_iWidth * 4), false);
-
-		/*
-		 *Because Alpha Channel textures are a bit messed up in the OpenGL renders,
-		 *alpha channels will have to be 1-bit to "hide" any texture errors
-		 */
-		if (m_bTransparent)
-		{
-			newImage->AlphaSplit(newImage2); //split alpha to another cximage object
-			newImage2->Threshold(1); //convert 8bit alpha to 1bit
-			//newImage2->GrayScale(); //prepare conversion for application to alpha channel
-			newImage->AlphaSet(*newImage2); //apply mock 1-bit alpha channel
-		}
-		else
-		{
-			newImage->AlphaCreate();
-			newImage->IncreaseBpp(32);
-		}
-
-		// not needed due to the code just below, which fixes the issue with particles
-		//g_canvas->model()->animManager->SetTimeDiff(m_iTimeStep);
-		//g_canvas->model()->animManager->Tick(m_iTimeStep);
 		if (g_canvas->root)
 			g_canvas->root->tick(static_cast<float>(m_iTimeStep));
 		if (g_canvas->sky)
 			g_canvas->sky->tick(static_cast<float>(m_iTimeStep));
-
-
-#ifdef _WINDOWS
-		if (m_bGreyscale)
-			newImage->GrayScale();
-#endif //_WINDOWS
-
-		// if (Optimise) {
-
-		// Append PNG extension, save out PNG file with frame number
-		wxString filen = m_strFilename;
-		filen << wxT("_") << i << wxT(".png");
-		// @TODO : to repair
-		//  newImage->Save(filen.mb_str(), CXIMAGE_FORMAT_PNG);
-
-		//gifImages must not be empty
-		gifImages[i] = newImage;
-		// All the memory that we allocate for newImage gets cleared at the end
 	}
-	wxDELETEA(buffer);
 
 #ifdef _WINDOWS
 	if (video.supportPBO || video.supportVBO)
@@ -336,61 +250,8 @@ void CAnimationExporter::CreateGif()
 		wxDELETE(g_canvas->rt);
 	}
 #endif
-	if (!m_bPng)
-	{
-		// CREATE THE ACTUAL MULTI-IMAGE GIF ANIMATION
-		// ------------------------------------------------------
-		// Create the file and write all the data
-		// Open/Create the file that were going to save to
 
-		// Append GIF extension
-		wxString filen = m_strFilename;
-		filen << wxT(".gif");
-
-		FILE* hFile = nullptr;
-#if  defined(_WINDOWS)
-		fopen_s(&hFile, filen.mb_str(), "wb");
-#else
-  hFile = fopen(filen.mb_str(), "wb");
-#endif
-
-		// Set gif options
-		CxImageGIF multiImage;
-		multiImage.SetComment("Exported from WoW Model Viewer");
-		if (m_bTransparent)
-			multiImage.SetDisposalMethod(2);
-		else
-			multiImage.SetDisposalMethod(0);
-
-		multiImage.SetFrameDelay((DWORD)m_iDelay);
-		multiImage.SetCodecOption(2); // LZW
-		multiImage.SetLoops(0); // Set the animation to loop indefinately.
-
-		// Create/Compose the animated gif
-		multiImage.Encode(hFile, gifImages, static_cast<int>(m_iTotalFrames), false);
-
-		// ALL DONE, START THE CLEAN UP
-		// --------------------------------------------------------
-		// Close file
-		fclose(hFile);
-	}
-
-	// Free the memory used by all the images to create the GIF
-	for (unsigned int i = 0; i < m_iTotalFrames; i++)
-	{
-		gifImages[i]->Destroy();
-		wxDELETE(gifImages[i]);
-	}
-	wxDELETEA(gifImages);
-
-	// Free memory used by the colour palette
-	if (m_pPal)
-	{
-		free(m_pPal);
-		m_pPal = nullptr;
-	}
-
-	LOG_INFO << "GIF Animation successfully created.";
+	LOG_INFO << "PNG sequence successfully created.";
 
 	g_canvas->model()->animManager->SetSpeed(m_fAnimSpeed);
 	// Return the animation speed back to whatever it was previously set as

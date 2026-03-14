@@ -69,9 +69,9 @@ void ImageControl::OnShow(wxAuiManager* m)
 	wxString tmp = wxT("screenshot_");
 	tmp << ssCounter;
 	wxFileDialog dialog(this, wxT("Save screenshot"), wxEmptyString, tmp,
-	                    wxT(
-		                    "Bitmap Images (*.bmp)|*.bmp|TGA Images (*.tga)|*.tga|JPEG Images (*.jpg)|*.jpg|PNG Images (*.png)|*.png"),
-	                    wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
+						wxT(
+							"Bitmap Images (*.bmp)|*.bmp|JPEG Images (*.jpg)|*.jpg|PNG Images (*.png)|*.png"),
+						wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
 	dialog.SetFilterIndex(imgFormat);
 
 	if (dialog.ShowModal() == wxID_OK)

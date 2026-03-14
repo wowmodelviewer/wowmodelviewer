@@ -62,10 +62,6 @@ if(DEFINED BUILDNUMBER)
   add_definitions(-D_BUILDNUMBER=${BUILDNUMBER})
 endif()
 
-# add external libraries compilation
-message(STATUS "Adding CxImage...")
-add_subdirectory(ThirdParty/CxImage)
-
 # CascLib
 message(STATUS "Adding CascLib...")
 set(CASC_UNICODE ON CACHE BOOL "Use Unicode in CascLib" FORCE)

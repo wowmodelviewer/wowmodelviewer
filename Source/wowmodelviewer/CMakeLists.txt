@@ -34,7 +34,6 @@ set(src  AnimationExportChoiceDialog.cpp
          modelviewer.cpp
          NPCImporterDialog.cpp
          OrbitCamera.cpp
-         Quantize.cpp
          SettingsControl.cpp
          shaders.cpp
          UserSkins.cpp
@@ -67,8 +66,7 @@ set(headers AnimationExportChoiceDialog.h
             modelviewer.h
             NPCImporterDialog.h
             OrbitCamera.h
-            Quantize.h
-            resource1.h
+             resource1.h
             SettingsControl.h
             shaders.h
             UserSkins.h
@@ -80,7 +78,6 @@ source_group("Header Files" FILES ${headers})
 use_glew()
 use_core()
 use_wow()
-use_cximage()
 use_casclib()
 
 set(RES_FILES "wmv.rc")
@@ -162,6 +159,7 @@ target_link_libraries(${NAME}
   Qt5::Widgets
   ${wxWidgets_LIBRARIES}
   ${CMAKE_SOURCE_DIR}/ThirdParty/lib/x64/zlib.lib
+  ${CMAKE_SOURCE_DIR}/ThirdParty/lib/x64/libpng.lib
   ${CMAKE_SOURCE_DIR}/ThirdParty/wxWidgets_x64/lib/vc_x64_lib/nanosvg.lib
   ${CMAKE_SOURCE_DIR}/ThirdParty/wxWidgets_x64/lib/vc_x64_lib/nanosvgrast.lib
 )

@@ -7,8 +7,6 @@
 #include "AVIGenerator.h"
 #endif
 
-#include "ximage.h" // RGBQUAD
-
 // Credit goes out to the Warcraft3 Viewer
 class CAnimationExporter : public wxFrame
 {
@@ -28,7 +26,6 @@ private:
 
 	float m_fAnimSpeed; // Animation Speed
 	ssize_t m_iTimeStep; // frame difference between each frame
-	RGBQUAD* m_pPal;
 
 	wxString m_strFilename; // Filename to save our animated gif into.
 
@@ -40,8 +37,8 @@ private:
 
 public:
 	CAnimationExporter(wxWindow* parent, wxWindowID id, const wxString& title, const wxPoint& pos = wxDefaultPosition,
-	                   const wxSize& size = wxDefaultSize,
-	                   long style = wxDEFAULT_FRAME_STYLE | wxCAPTION | wxFRAME_NO_TASKBAR);
+					   const wxSize& size = wxDefaultSize,
+					   long style = wxDEFAULT_FRAME_STYLE | wxCAPTION | wxFRAME_NO_TASKBAR);
 	~CAnimationExporter();
 
 	// gui functions
