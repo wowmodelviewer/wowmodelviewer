@@ -349,8 +349,6 @@ void WowModelViewApp::LoadSettings()
 	customDirectoryPath = config.value("Settings/CustomDirPath", "").toString().toStdWString();
 	customFilesConflictPolicy = config.value("Settings/CustomFilesConflictPolicy", 0).toInt();
 	displayItemAndNPCId = config.value("Settings/displayItemAndNPCId", 0).toInt();
-	ssCounter = config.value("Settings/SSCounter", 100).toInt();
-	imgFormat = config.value("Settings/DefaultFormat", 1).toInt();
 
 	if (config.value("Unofficial/UseDoNotTrailInfo", false).toBool() == true)
 		ParticleSystem::useDoNotTrailInfo();
@@ -368,7 +366,5 @@ void WowModelViewApp::SaveSettings()
 	config.setValue("Settings/CustomDirPath", QString::fromWCharArray(customDirectoryPath.c_str()));
 	config.setValue("Settings/CustomFilesConflictPolicy", customFilesConflictPolicy);
 	config.setValue("Settings/displayItemAndNPCId", displayItemAndNPCId);
-	config.setValue("Settings/SSCounter", ssCounter);
-	config.setValue("Settings/DefaultFormat", imgFormat);
 	config.sync();
 }

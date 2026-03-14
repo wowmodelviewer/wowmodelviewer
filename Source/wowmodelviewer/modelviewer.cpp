@@ -5,7 +5,6 @@
 #include <wx/colordlg.h>
 #include <wx/colour.h>
 #include <wx/filedlg.h>
-#include <wx/filename.h>
 #include "Attachment.h"
 #include "app.h"
 #include "Bone.h"
@@ -44,8 +43,6 @@ BEGIN_EVENT_TABLE(ModelViewer, wxFrame)
 	EVT_MENU(ID_FILE_VIEWLOG, ModelViewer::OnViewLog)
 	EVT_MENU(ID_VIEW_NPC, ModelViewer::OnCharToggle)
 	EVT_MENU(ID_VIEW_ITEM, ModelViewer::OnCharToggle)
-	EVT_MENU(ID_FILE_SCREENSHOT, ModelViewer::OnSave)
-	EVT_MENU(ID_FILE_SCREENSHOTCONFIG, ModelViewer::OnSave)
 	EVT_MENU(ID_FILE_MODEL_INFO, ModelViewer::OnExportOther)
 	EVT_MENU(ID_FILE_RESETLAYOUT, ModelViewer::OnToggleCommand)
 	EVT_MENU(ID_FILE_EXIT, ModelViewer::OnExit)
@@ -98,9 +95,6 @@ BEGIN_EVENT_TABLE(ModelViewer, wxFrame)
 	EVT_MENU(ID_LT_DIRECTION, ModelViewer::OnLightMenu)
 	// Options
 	EVT_MENU(ID_DEFAULT_DOODADS, ModelViewer::OnToggleCommand)
-	EVT_MENU(ID_USE_ANTIALIAS, ModelViewer::OnToggleCommand)
-	EVT_MENU(ID_USE_HWACC, ModelViewer::OnToggleCommand)
-	EVT_MENU(ID_USE_ENVMAP, ModelViewer::OnToggleCommand)
 	EVT_MENU(ID_SHOW_SETTINGS, ModelViewer::OnToggleDock)
 	// char controls:
 	EVT_MENU(ID_LOAD_SET, ModelViewer::OnSetEquipment)
@@ -116,9 +110,7 @@ BEGIN_EVENT_TABLE(ModelViewer, wxFrame)
 	EVT_MENU(ID_CHAREYEGLOW_DEFAULT, ModelViewer::OnCharToggle)
 	EVT_MENU(ID_CHAREYEGLOW_DEATHKNIGHT, ModelViewer::OnCharToggle)
 	EVT_MENU(ID_MOUNT_CHARACTER, ModelViewer::OnMount)
-	EVT_MENU(ID_CHAR_RANDOMISE, ModelViewer::OnSetEquipment)
 	// About menu
-	EVT_MENU(ID_CHECKFORUPDATE, ModelViewer::OnCheckForUpdate)
 	EVT_MENU(ID_LANGUAGE, ModelViewer::OnLanguage)
 	EVT_MENU(ID_HELP, ModelViewer::OnAbout)
 	EVT_MENU(ID_ABOUT, ModelViewer::OnAbout)
@@ -152,7 +144,6 @@ ModelViewer::ModelViewer()
 	charControl = nullptr;
 	lightControl = nullptr;
 	modelControl = nullptr;
-	imageControl = nullptr;
 	settingsControl = nullptr;
 	modelbankControl = nullptr;
 	fileControl = nullptr;
@@ -164,9 +155,7 @@ ModelViewer::ModelViewer()
 	viewMenu = nullptr;
 	optMenu = nullptr;
 	lightMenu = nullptr;
-	exportMenu = nullptr;
 	fileMenu = nullptr;
-	camMenu = nullptr;
 
 	isWoWLoaded = false;
 	isModel = false;
@@ -257,13 +246,6 @@ void ModelViewer::InitMenu()
 	if (isWoWLoaded == true)
 		fileMenu->Enable(ID_LOAD_WOW, false);
 	fileMenu->Append(ID_FILE_VIEWLOG, _("View Log"));
-	fileMenu->AppendSeparator();
-	fileMenu->Append(ID_FILE_SCREENSHOT, _("Save Screenshot\tF12"));
-	fileMenu->Append(ID_FILE_SCREENSHOTCONFIG, _("Save Sized Screenshot\tCTRL+S"));
-
-	// deactivate sized screenshot (needs a backbuffer rendering)
-	//fileMenu->Enable(ID_FILE_SCREENSHOTCONFIG,false);
-
 	fileMenu->AppendSeparator();
 
 	// export menu
@@ -399,7 +381,6 @@ void ModelViewer::InitMenu()
 		charMenu->Append(ID_LOAD_START, _("Load Start Outfit"));
 		charMenu->AppendSeparator();
 		charMenu->Append(ID_MOUNT_CHARACTER, _("Mount / Dismount"));
-		charMenu->Append(ID_CHAR_RANDOMISE, _("Randomise Character\tF10"));
 
 		// Start out Disabled.
 		charMenu->Enable(ID_SHOW_UNDERWEAR, false);
@@ -412,7 +393,6 @@ void ModelViewer::InitMenu()
 		charMenu->Enable(ID_LOAD_SET, false);
 		charMenu->Enable(ID_LOAD_START, false);
 		charMenu->Enable(ID_MOUNT_CHARACTER, false);
-		charMenu->Enable(ID_CHAR_RANDOMISE, false);
 		charMenu->Enable(ID_AUTOHIDE_GEOSETS_FOR_HEAD_ITEMS, false);
 
 		// Options menu
@@ -427,7 +407,6 @@ void ModelViewer::InitMenu()
 		aboutMenu->Append(ID_HELP, _("Help"));
 		aboutMenu->Enable(ID_HELP, false);
 		aboutMenu->Append(ID_ABOUT, _("About"));
-		aboutMenu->AppendSeparator();
 
 		menuBar = new wxMenuBar();
 		menuBar->Append(fileMenu, _("&File"));
@@ -447,19 +426,16 @@ void ModelViewer::InitMenu()
 	// menuBar->EnableTop(2, false);
 
 	// Hotkeys / shortcuts
-	wxAcceleratorEntry entries[20];
+	wxAcceleratorEntry entries[17];
 	int keys = 0;
 	entries[keys++].Set(wxACCEL_CTRL, (int)'b', ID_SHOW_BOUNDS);
 	entries[keys++].Set(wxACCEL_CTRL, (int)'X', ID_FILE_EXIT);
-	entries[keys++].Set(wxACCEL_NORMAL, WXK_F12, ID_FILE_SCREENSHOT);
 	entries[keys++].Set(wxACCEL_CTRL, (int)'e', ID_SHOW_EARS);
 	entries[keys++].Set(wxACCEL_CTRL, (int)'h', ID_SHOW_HAIR);
 	entries[keys++].Set(wxACCEL_CTRL, (int)'f', ID_SHOW_FACIALHAIR);
 	entries[keys++].Set(wxACCEL_CTRL, (int)'z', ID_SHEATHE);
 	entries[keys++].Set(wxACCEL_CTRL, (int)'+', ID_ZOOM_IN);
 	entries[keys++].Set(wxACCEL_CTRL, (int)'-', ID_ZOOM_OUT);
-	entries[keys++].Set(wxACCEL_CTRL, (int)'s', ID_FILE_SCREENSHOTCONFIG);
-	entries[keys++].Set(wxACCEL_NORMAL, WXK_F10, ID_CHAR_RANDOMISE);
 	entries[keys++].Set(wxACCEL_NORMAL, WXK_F11, ID_OPENGL_DEBUG);
 
 	// Temporary saves
@@ -962,7 +938,6 @@ void ModelViewer::LoadModel(GameFile* file)
 		charMenu->Enable(ID_LOAD_SET, true);
 		charMenu->Enable(ID_LOAD_START, true);
 		charMenu->Enable(ID_MOUNT_CHARACTER, true);
-		charMenu->Enable(ID_CHAR_RANDOMISE, true);
 		charMenu->Enable(ID_AUTOHIDE_GEOSETS_FOR_HEAD_ITEMS, true);
 
 		charControl->UpdateModel(modelAtt);
@@ -981,7 +956,6 @@ void ModelViewer::LoadModel(GameFile* file)
 		charMenu->Enable(ID_LOAD_SET, false);
 		charMenu->Enable(ID_LOAD_START, false);
 		charMenu->Enable(ID_MOUNT_CHARACTER, false);
-		charMenu->Enable(ID_CHAR_RANDOMISE, false);
 		charMenu->Enable(ID_AUTOHIDE_GEOSETS_FOR_HEAD_ITEMS, false);
 	}
 
@@ -1123,7 +1097,6 @@ void ModelViewer::LoadItem(unsigned int id)
 		charMenu->Enable(ID_LOAD_SET, false);
 		charMenu->Enable(ID_LOAD_START, false);
 		charMenu->Enable(ID_MOUNT_CHARACTER, false);
-		charMenu->Enable(ID_CHAR_RANDOMISE, false);
 		charMenu->Enable(ID_AUTOHIDE_GEOSETS_FOR_HEAD_ITEMS, false);
 	}
 	catch (...)
@@ -1152,20 +1125,6 @@ void ModelViewer::OnExit(wxCommandEvent& event)
 void ModelViewer::OnClose(wxCloseEvent& event)
 {
 	Destroy();
-}
-
-// Called when the window is resized, minimised, etc
-void ModelViewer::OnSize(wxSizeEvent& event)
-{
-	/* // wxIFM stuff
-	if(!interfaceManager)
-	event.Skip();
-	else
-	interfaceManager->Update(IFM_DEFAULT_RECT);
-	*/
-
-	// wxAUI
-	//interfaceManager.Update(); // causes an error?
 }
 
 ModelViewer::~ModelViewer()
@@ -1770,51 +1729,6 @@ void ModelViewer::OnMount(wxCommandEvent& event)
 	charControl->selectMount();
 }
 
-void ModelViewer::OnSave(wxCommandEvent& event)
-{
-	static wxFileName dir = cfgPath;
-
-	if (!canvas || (!canvas->model() && !canvas->wmo))
-		return;
-
-	if (event.GetId() == ID_FILE_SCREENSHOT)
-	{
-		wxString tmp = wxT("screenshot_");
-		tmp << ssCounter;
-		wxFileDialog dialog(this, wxT("Save screenshot"), dir.GetPath(wxPATH_GET_VOLUME), tmp,
-							wxT(
-								"Bitmap Images (*.bmp)|*.bmp|JPEG Images (*.jpg)|*.jpg|PNG Images (*.png)|*.png"),
-							wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
-		dialog.SetFilterIndex(imgFormat);
-
-		if (dialog.ShowModal() == wxID_OK)
-		{
-			imgFormat = dialog.GetFilterIndex();
-			tmp = dialog.GetPath();
-			dialog.Show(false);
-			canvas->Screenshot(tmp);
-			dir.SetPath(tmp);
-			ssCounter++;
-		}
-
-		//canvas->InitView();
-	}
-	else if (event.GetId() == ID_FILE_SCREENSHOTCONFIG)
-	{
-		if (!imageControl)
-		{
-			imageControl = new ImageControl(this, ID_IMAGE_FRAME, canvas);
-
-			interfaceManager.AddPane(imageControl, wxAuiPaneInfo().
-			                                       Name(wxT("Screenshot")).Caption(wxT("Screenshot")).
-			                                       FloatingSize(wxSize(295, 145)).Float().Fixed().
-			                                       Dockable(false)); //.FloatingPosition(GetStartPosition())
-		}
-
-		imageControl->OnShow(&interfaceManager);
-	}
-}
-
 void ModelViewer::OnLanguage(wxCommandEvent& event)
 {
 	if (event.GetId() == ID_LANGUAGE)
@@ -1882,11 +1796,6 @@ void ModelViewer::OnAbout(wxCommandEvent& event)
 
 	// FIXME: Doesn't link on OSX
 	wxAboutBox(info);
-}
-
-void ModelViewer::OnCheckForUpdate(wxCommandEvent& event)
-{
-	wxExecute(L"UpdateManager.exe", wxEXEC_SYNC);
 }
 
 void ModelViewer::OnCanvasSize(wxCommandEvent& event)

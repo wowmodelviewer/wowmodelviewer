@@ -22,8 +22,6 @@ long langID = -1;
 wxString langName;
 long langOffset = -1;
 long interfaceID = 0;
-int ssCounter = 100; // ScreenShot Counter
-int imgFormat = 0;
 
 wxString locales[] = {
 	wxT("enUS"), wxT("koKR"), wxT("frFR"), wxT("deDE"), wxT("zhCN"), wxT("zhTW"), wxT("esES"), wxT("esMX"), wxT("ruRU")

@@ -13,7 +13,6 @@
 #include "charcontrol.h"
 #include "lightcontrol.h"
 #include "modelcontrol.h"
-#include "imagecontrol.h"
 #include "modelbankcontrol.h"
 #include "filecontrol.h"
 #include "glm/glm.hpp"
@@ -44,7 +43,6 @@ public:
 	CharControl* charControl;
 	LightControl* lightControl;
 	ModelControl* modelControl;
-	ImageControl* imageControl;
 	//SoundControl *soundControl;
 	SettingsControl* settingsControl;
 	ModelBankControl* modelbankControl;
@@ -53,7 +51,7 @@ public:
 
 	//wxWidget objects
 	wxMenuBar* menuBar;
-	wxMenu *fileMenu, *exportMenu, *camMenu, *charMenu, *charGlowMenu, *viewMenu, *optMenu, *lightMenu;
+	wxMenu *fileMenu, *charMenu, *charGlowMenu, *viewMenu, *optMenu, *lightMenu;
 	wxColourData bgDialogData;
 
 	// wxAUI - new docking lib (now part of wxWidgets 2.8.0)
@@ -88,7 +86,6 @@ public:
 	// Window GUI event related functions
 	//void OnIdle();
 	void OnClose(wxCloseEvent& event);
-	void OnSize(wxSizeEvent& event);
 	void OnExit(wxCommandEvent& event);
 	void UpdateCanvasStatus();
 	void SetCanvasSize(uint32 sizex, uint32 sizey);
@@ -105,10 +102,8 @@ public:
 	void OnCharToggle(wxCommandEvent& event);
 
 	void OnMount(wxCommandEvent& event);
-	void OnSave(wxCommandEvent& event);
 	void OnLanguage(wxCommandEvent& event);
 	void OnAbout(wxCommandEvent& event);
-	void OnCheckForUpdate(wxCommandEvent& event);
 	void OnCanvasSize(wxCommandEvent& event);
 	//void OnTest(wxCommandEvent& event);
 	void OnExport(wxCommandEvent& event);

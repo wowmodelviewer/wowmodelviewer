@@ -17,7 +17,6 @@ set(src  AnimationExportChoiceDialog.cpp
          ExportSettings.cpp
          filecontrol.cpp
          GeneralSettings.cpp
-         imagecontrol.cpp
          ItemImporterDialog.cpp
          itemselection.cpp
          lightcontrol.cpp
@@ -47,7 +46,6 @@ set(headers AnimationExportChoiceDialog.h
             ExportSettings.h
             filecontrol.h
             GeneralSettings.h
-            imagecontrol.h
             ItemImporterDialog.h
             itemselection.h
             lightcontrol.h

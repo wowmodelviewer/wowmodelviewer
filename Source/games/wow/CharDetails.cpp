@@ -133,7 +133,8 @@ void CharDetails::reset(WoWModel* model)
 
 	isNPC = false;
 
-	isDemonHunter_ = false;
+	// Auto-enable demon hunter mode for Night Elf and Blood Elf races
+	isDemonHunter_ = model_ && (model_->infos.raceID == RACE_NIGHTELF || model_->infos.raceID == RACE_BLOODELF);
 
 	refreshGeosets();
 	refreshTextures();

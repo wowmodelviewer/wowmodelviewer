@@ -26,10 +26,6 @@ private:
 	DECLARE_EVENT_TABLE()
 
 	wxFlexGridSizer* charCustomizationGS_;
-	wxCheckBox* dhMode_;
-
-	void onRandomise(wxCommandEvent& event);
-	void onDHMode(wxCommandEvent& event);
 
 	WoWModel* model_;
 };

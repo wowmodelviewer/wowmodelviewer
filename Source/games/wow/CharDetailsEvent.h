@@ -32,7 +32,6 @@ class CharDetailsEvent : public Event
 public:
 	enum EventType
 	{
-		DH_MODE_CHANGED = 0x10000000,
 		CHOICE_LIST_CHANGED = 0x10000001
 	};
 

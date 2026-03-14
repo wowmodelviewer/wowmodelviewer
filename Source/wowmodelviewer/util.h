@@ -25,8 +25,6 @@ extern long langID;
 extern wxString langName;
 extern long langOffset;
 extern long interfaceID;
-extern int ssCounter;
-extern int imgFormat;
 extern long versionID;
 extern wxString locales[];
 
