@@ -14,8 +14,6 @@
 #include "lightcontrol.h"
 #include "modelcontrol.h"
 #include "imagecontrol.h"
-#include "AnimExporter.h"
-#include "effects.h"
 #include "modelbankcontrol.h"
 #include "filecontrol.h"
 #include "glm/glm.hpp"
@@ -44,15 +42,12 @@ public:
 	AnimControl* animControl;
 	ModelCanvas* canvas;
 	CharControl* charControl;
-	EnchantsDialog* enchants;
 	LightControl* lightControl;
 	ModelControl* modelControl;
 	ImageControl* imageControl;
 	//SoundControl *soundControl;
 	SettingsControl* settingsControl;
 	ModelBankControl* modelbankControl;
-
-	CAnimationExporter* animExporter;
 
 	FileControl* fileControl;
 
@@ -85,9 +80,6 @@ public:
 	void LoadLayout();
 	void SaveLayout();
 	void ResetLayout();
-	// save + load character *.CHR files
-	void LoadChar(QString fn, bool equipmentOnly = false);
-	void SaveChar(QString fn, bool equipmentOnly = false);
 
 	void LoadModel(GameFile* f);
 	void LoadItem(unsigned int displayID);
@@ -105,7 +97,6 @@ public:
 	void OnToggleDock(wxCommandEvent& event);
 	void OnToggleCommand(wxCommandEvent& event);
 	void OnSetColor(wxCommandEvent& event);
-	void OnEffects(wxCommandEvent& event);
 	void OnLightMenu(wxCommandEvent& event);
 	void OnCamMenu(wxCommandEvent& event);
 
@@ -115,7 +106,6 @@ public:
 
 	void OnMount(wxCommandEvent& event);
 	void OnSave(wxCommandEvent& event);
-	void OnBackground(wxCommandEvent& event);
 	void OnLanguage(wxCommandEvent& event);
 	void OnAbout(wxCommandEvent& event);
 	void OnCheckForUpdate(wxCommandEvent& event);
@@ -126,7 +116,6 @@ public:
 
 	void UpdateControls();
 
-	void ImportArmoury(wxString strURL);
 	void ModelInfo();
 
 	glm::vec3 DoSetColor(const glm::vec3& defColor);

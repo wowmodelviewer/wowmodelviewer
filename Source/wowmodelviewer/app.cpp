@@ -233,10 +233,6 @@ bool WowModelViewApp::OnInit()
 			LOG_INFO << "Displaying console requested";
 			displayConsole = true;
 		}
-		else if (cmd.endsWith(".chr"))
-		{
-			frame->LoadChar(cmd);
-		}
 	}
 
 #if defined(_WINDOWS)
@@ -350,7 +346,6 @@ void WowModelViewApp::LoadSettings()
 
 	// Application settings
 	gamePath = config.value("Settings/Path", "").toString().toStdWString();
-	armoryPath = config.value("Settings/ArmoryPath", "").toString().toStdWString();
 	customDirectoryPath = config.value("Settings/CustomDirPath", "").toString().toStdWString();
 	customFilesConflictPolicy = config.value("Settings/CustomFilesConflictPolicy", 0).toInt();
 	displayItemAndNPCId = config.value("Settings/displayItemAndNPCId", 0).toInt();
@@ -370,7 +365,6 @@ void WowModelViewApp::SaveSettings()
 	config.setValue("Locale/LanguageName", QString::fromWCharArray(langName.c_str()));
 
 	config.setValue("Settings/Path", QString::fromWCharArray(gamePath.c_str()));
-	config.setValue("Settings/ArmoryPath", QString::fromWCharArray(armoryPath.c_str()));
 	config.setValue("Settings/CustomDirPath", QString::fromWCharArray(customDirectoryPath.c_str()));
 	config.setValue("Settings/CustomFilesConflictPolicy", customFilesConflictPolicy);
 	config.setValue("Settings/displayItemAndNPCId", displayItemAndNPCId);

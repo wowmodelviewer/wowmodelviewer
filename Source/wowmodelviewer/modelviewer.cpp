@@ -10,12 +10,10 @@
 #include "app.h"
 #include "Bone.h"
 #include "CASCFile.h"
-#include "CharInfos.h"
 #include "ExporterPlugin.h"
 #include "Game.h"
 #include "GlobalSettings.h"
 #include "globalvars.h"
-#include "ImporterPlugin.h"
 #include "MemoryUtils.h"
 #include "ModelRenderPass.h"
 #include "PluginManager.h"
@@ -26,9 +24,7 @@
 #include "WoWDatabase.h"
 #include "WoWFolder.h"
 #include "logger/Logger.h"
-#include <QFile>
 #include <QSettings>
-#include <QXmlStreamWriter>
 #include <fstream>
 
 // default colour values
@@ -50,8 +46,6 @@ BEGIN_EVENT_TABLE(ModelViewer, wxFrame)
 	EVT_MENU(ID_VIEW_ITEM, ModelViewer::OnCharToggle)
 	EVT_MENU(ID_FILE_SCREENSHOT, ModelViewer::OnSave)
 	EVT_MENU(ID_FILE_SCREENSHOTCONFIG, ModelViewer::OnSave)
-	EVT_MENU(ID_FILE_EXPORTGIF, ModelViewer::OnSave)
-	EVT_MENU(ID_FILE_EXPORTAVI, ModelViewer::OnSave)
 	EVT_MENU(ID_FILE_MODEL_INFO, ModelViewer::OnExportOther)
 	EVT_MENU(ID_FILE_RESETLAYOUT, ModelViewer::OnToggleCommand)
 	EVT_MENU(ID_FILE_EXIT, ModelViewer::OnExit)
@@ -67,9 +61,7 @@ BEGIN_EVENT_TABLE(ModelViewer, wxFrame)
 	//EVT_MENU(ID_SHOW_BONES, ModelViewer::OnToggleCommand)
 	EVT_MENU(ID_SHOW_BOUNDS, ModelViewer::OnToggleCommand)
 	//EVT_MENU(ID_SHOW_PARTICLES, ModelViewer::OnToggleCommand)
-	EVT_MENU(ID_BACKGROUND, ModelViewer::OnBackground)
 	EVT_MENU(ID_BG_COLOR, ModelViewer::OnSetColor)
-	EVT_MENU(ID_SKYBOX, ModelViewer::OnBackground)
 	EVT_MENU(ID_SHOW_GRID, ModelViewer::OnToggleCommand)
 	EVT_MENU(ID_USE_CAMERA, ModelViewer::OnToggleCommand)
 	// Cam
@@ -104,21 +96,13 @@ BEGIN_EVENT_TABLE(ModelViewer, wxFrame)
 	EVT_MENU(ID_LT_DIRECTIONAL, ModelViewer::OnLightMenu)
 	EVT_MENU(ID_LT_MODEL, ModelViewer::OnLightMenu)
 	EVT_MENU(ID_LT_DIRECTION, ModelViewer::OnLightMenu)
-	// Effects
-	EVT_MENU(ID_ENCHANTS, ModelViewer::OnEffects)
 	// Options
-	EVT_MENU(ID_SAVE_CHAR, ModelViewer::OnToggleCommand)
-	EVT_MENU(ID_LOAD_CHAR, ModelViewer::OnToggleCommand)
-	EVT_MENU(ID_IMPORT_CHAR, ModelViewer::OnToggleCommand)
 	EVT_MENU(ID_DEFAULT_DOODADS, ModelViewer::OnToggleCommand)
 	EVT_MENU(ID_USE_ANTIALIAS, ModelViewer::OnToggleCommand)
 	EVT_MENU(ID_USE_HWACC, ModelViewer::OnToggleCommand)
 	EVT_MENU(ID_USE_ENVMAP, ModelViewer::OnToggleCommand)
 	EVT_MENU(ID_SHOW_SETTINGS, ModelViewer::OnToggleDock)
 	// char controls:
-	EVT_MENU(ID_SAVE_EQUIPMENT, ModelViewer::OnToggleCommand)
-	EVT_MENU(ID_LOAD_EQUIPMENT, ModelViewer::OnToggleCommand)
-	EVT_MENU(ID_CLEAR_EQUIPMENT, ModelViewer::OnSetEquipment)
 	EVT_MENU(ID_LOAD_SET, ModelViewer::OnSetEquipment)
 	EVT_MENU(ID_LOAD_START, ModelViewer::OnSetEquipment)
 	EVT_MENU(ID_SHOW_UNDERWEAR, ModelViewer::OnCharToggle)
@@ -166,13 +150,11 @@ ModelViewer::ModelViewer()
 	animControl = nullptr;
 	canvas = nullptr;
 	charControl = nullptr;
-	enchants = nullptr;
 	lightControl = nullptr;
 	modelControl = nullptr;
 	imageControl = nullptr;
 	settingsControl = nullptr;
 	modelbankControl = nullptr;
-	animExporter = nullptr;
 	fileControl = nullptr;
 
 	//wxWidget objects
@@ -282,8 +264,6 @@ void ModelViewer::InitMenu()
 	// deactivate sized screenshot (needs a backbuffer rendering)
 	//fileMenu->Enable(ID_FILE_SCREENSHOTCONFIG,false);
 
-	fileMenu->Append(ID_FILE_EXPORTGIF, _("GIF/Sequence Export"));
-	fileMenu->Append(ID_FILE_EXPORTAVI, _("Export AVI"));
 	fileMenu->AppendSeparator();
 
 	// export menu
@@ -325,10 +305,6 @@ void ModelViewer::InitMenu()
 	if (canvas)
 	{
 		viewMenu->Append(ID_BG_COLOR, _("Background Color..."));
-		viewMenu->AppendCheckItem(ID_BACKGROUND, _("Load Background\tCTRL+L"));
-		viewMenu->Check(ID_BACKGROUND, canvas->drawBackground);
-		viewMenu->AppendCheckItem(ID_SKYBOX, _("Skybox"));
-		viewMenu->Check(ID_SKYBOX, canvas->drawSky);
 		viewMenu->AppendCheckItem(ID_SHOW_GRID, _("Show Grid"));
 		viewMenu->Check(ID_SHOW_GRID, canvas->drawGrid);
 
@@ -386,10 +362,6 @@ void ModelViewer::InitMenu()
 		lightMenu->AppendRadioItem(ID_LT_MODEL, _("Model lights only"));
 
 		charMenu = new wxMenu;
-		charMenu->Append(ID_LOAD_CHAR, _("Load Character\tF8"));
-		charMenu->Append(ID_IMPORT_CHAR, _("Import Armory Character"));
-		charMenu->Append(ID_SAVE_CHAR, _("Save Character\tF7"));
-		charMenu->AppendSeparator();
 
 		charGlowMenu = new wxMenu;
 		charGlowMenu->AppendRadioItem(ID_CHAREYEGLOW_NONE, _("None"));
@@ -423,10 +395,6 @@ void ModelViewer::InitMenu()
 		charMenu->Check(ID_SHEATHE, false);
 
 		charMenu->AppendSeparator();
-		charMenu->Append(ID_SAVE_EQUIPMENT, _("Save Equipment\tF5"));
-		charMenu->Append(ID_LOAD_EQUIPMENT, _("Load Equipment\tF6"));
-		charMenu->Append(ID_CLEAR_EQUIPMENT, _("Clear Equipment\tF9"));
-		charMenu->AppendSeparator();
 		charMenu->Append(ID_LOAD_SET, _("Load Item Set"));
 		charMenu->Append(ID_LOAD_START, _("Load Start Outfit"));
 		charMenu->AppendSeparator();
@@ -434,7 +402,6 @@ void ModelViewer::InitMenu()
 		charMenu->Append(ID_CHAR_RANDOMISE, _("Randomise Character\tF10"));
 
 		// Start out Disabled.
-		charMenu->Enable(ID_SAVE_CHAR, false);
 		charMenu->Enable(ID_SHOW_UNDERWEAR, false);
 		charMenu->Enable(ID_SHOW_EARS, false);
 		charMenu->Enable(ID_SHOW_HAIR, false);
@@ -442,17 +409,11 @@ void ModelViewer::InitMenu()
 		charMenu->Enable(ID_SHOW_FEET, false);
 		charMenu->Enable(ID_SHEATHE, false);
 		charMenu->Enable(ID_CHAREYEGLOW, false);
-		charMenu->Enable(ID_SAVE_EQUIPMENT, false);
-		charMenu->Enable(ID_LOAD_EQUIPMENT, false);
-		charMenu->Enable(ID_CLEAR_EQUIPMENT, false);
 		charMenu->Enable(ID_LOAD_SET, false);
 		charMenu->Enable(ID_LOAD_START, false);
 		charMenu->Enable(ID_MOUNT_CHARACTER, false);
 		charMenu->Enable(ID_CHAR_RANDOMISE, false);
 		charMenu->Enable(ID_AUTOHIDE_GEOSETS_FOR_HEAD_ITEMS, false);
-
-		wxMenu* effectsMenu = new wxMenu;
-		effectsMenu->Append(ID_ENCHANTS, _("Apply Enchants"));
 
 		// Options menu
 		optMenu = new wxMenu;
@@ -474,7 +435,6 @@ void ModelViewer::InitMenu()
 		menuBar->Append(charMenu, _("&Character"));
 		menuBar->Append(lightMenu, _("&Lighting"));
 		menuBar->Append(optMenu, _("&Options"));
-		menuBar->Append(effectsMenu, _("&Effects"));
 		menuBar->Append(aboutMenu, _("&About"));
 		SetMenuBar(menuBar);
 	}
@@ -487,12 +447,8 @@ void ModelViewer::InitMenu()
 	// menuBar->EnableTop(2, false);
 
 	// Hotkeys / shortcuts
-	wxAcceleratorEntry entries[26];
+	wxAcceleratorEntry entries[20];
 	int keys = 0;
-	entries[keys++].Set(wxACCEL_NORMAL, WXK_F5, ID_SAVE_EQUIPMENT);
-	entries[keys++].Set(wxACCEL_NORMAL, WXK_F6, ID_LOAD_EQUIPMENT);
-	entries[keys++].Set(wxACCEL_NORMAL, WXK_F7, ID_SAVE_CHAR);
-	entries[keys++].Set(wxACCEL_NORMAL, WXK_F8, ID_LOAD_CHAR);
 	entries[keys++].Set(wxACCEL_CTRL, (int)'b', ID_SHOW_BOUNDS);
 	entries[keys++].Set(wxACCEL_CTRL, (int)'X', ID_FILE_EXIT);
 	entries[keys++].Set(wxACCEL_NORMAL, WXK_F12, ID_FILE_SCREENSHOT);
@@ -500,11 +456,9 @@ void ModelViewer::InitMenu()
 	entries[keys++].Set(wxACCEL_CTRL, (int)'h', ID_SHOW_HAIR);
 	entries[keys++].Set(wxACCEL_CTRL, (int)'f', ID_SHOW_FACIALHAIR);
 	entries[keys++].Set(wxACCEL_CTRL, (int)'z', ID_SHEATHE);
-	entries[keys++].Set(wxACCEL_CTRL, (int)'l', ID_BACKGROUND);
 	entries[keys++].Set(wxACCEL_CTRL, (int)'+', ID_ZOOM_IN);
 	entries[keys++].Set(wxACCEL_CTRL, (int)'-', ID_ZOOM_OUT);
 	entries[keys++].Set(wxACCEL_CTRL, (int)'s', ID_FILE_SCREENSHOTCONFIG);
-	entries[keys++].Set(wxACCEL_NORMAL, WXK_F9, ID_CLEAR_EQUIPMENT);
 	entries[keys++].Set(wxACCEL_NORMAL, WXK_F10, ID_CHAR_RANDOMISE);
 	entries[keys++].Set(wxACCEL_NORMAL, WXK_F11, ID_OPENGL_DEBUG);
 
@@ -546,11 +500,6 @@ void ModelViewer::InitObjects()
 	g_canvas = canvas;
 
 	modelControl->animControl = animControl;
-
-	enchants = new EnchantsDialog(this, charControl);
-
-	animExporter = new CAnimationExporter(this, wxID_ANY, wxT("Animation Exporter"), wxDefaultPosition,
-	                                      wxSize(350, 220), wxCAPTION | wxSTAY_ON_TOP | wxFRAME_NO_TASKBAR);
 }
 
 void ModelViewer::InitDatabase()
@@ -772,14 +721,8 @@ void ModelViewer::LoadSession()
 		canvas->vecBGColor.y = bgCol.Green() / 255.0f;
 		canvas->vecBGColor.z = bgCol.Blue() / 255.0f;
 
-		// boolean vars
-		canvas->drawBackground = config.value("Session/DBackground", false).toBool();
-		bgImagePath = config.value("Session/BackgroundImage", false).toString().toStdWString();
-
-		if (!bgImagePath.IsEmpty())
-			canvas->LoadBackground(bgImagePath);
-	}
-}
+			}
+		}
 
 void ModelViewer::SaveSession()
 {
@@ -842,13 +785,6 @@ void ModelViewer::SaveSession()
 
 		config.setValue("Session/CanvasWidth", canvx);
 		config.setValue("Session/CanvasHeight", canvy);
-
-		config.setValue("Session/DBackground", canvas->drawBackground);
-
-		if (canvas->drawBackground)
-			config.setValue("Session/BackgroundImage", QString::fromWCharArray(bgImagePath.c_str()));
-		else
-			config.setValue("Session/BackgroundImage", "");
 
 		// model file
 		if (canvas->model())
@@ -1016,7 +952,6 @@ void ModelViewer::LoadModel(GameFile* file)
 		charMenu->Check(ID_SHOW_FACIALHAIR, true);
 		charGlowMenu->Check(ID_CHAREYEGLOW_DEFAULT, true);
 
-		charMenu->Enable(ID_SAVE_CHAR, true);
 		charMenu->Enable(ID_SHOW_UNDERWEAR, true);
 		charMenu->Enable(ID_SHOW_EARS, true);
 		charMenu->Enable(ID_SHOW_HAIR, true);
@@ -1024,9 +959,6 @@ void ModelViewer::LoadModel(GameFile* file)
 		charMenu->Enable(ID_SHOW_FEET, true);
 		charMenu->Enable(ID_SHEATHE, true);
 		charMenu->Enable(ID_CHAREYEGLOW, true);
-		charMenu->Enable(ID_SAVE_EQUIPMENT, true);
-		charMenu->Enable(ID_LOAD_EQUIPMENT, true);
-		charMenu->Enable(ID_CLEAR_EQUIPMENT, true);
 		charMenu->Enable(ID_LOAD_SET, true);
 		charMenu->Enable(ID_LOAD_START, true);
 		charMenu->Enable(ID_MOUNT_CHARACTER, true);
@@ -1039,7 +971,6 @@ void ModelViewer::LoadModel(GameFile* file)
 	{
 		charControl->UpdateModel(modelAtt);
 
-		charMenu->Enable(ID_SAVE_CHAR, false);
 		charMenu->Enable(ID_SHOW_UNDERWEAR, false);
 		charMenu->Enable(ID_SHOW_EARS, false);
 		charMenu->Enable(ID_SHOW_HAIR, false);
@@ -1047,9 +978,6 @@ void ModelViewer::LoadModel(GameFile* file)
 		charMenu->Enable(ID_SHOW_FEET, false);
 		charMenu->Enable(ID_SHEATHE, false);
 		charMenu->Enable(ID_CHAREYEGLOW, false);
-		charMenu->Enable(ID_SAVE_EQUIPMENT, false);
-		charMenu->Enable(ID_LOAD_EQUIPMENT, false);
-		charMenu->Enable(ID_CLEAR_EQUIPMENT, false);
 		charMenu->Enable(ID_LOAD_SET, false);
 		charMenu->Enable(ID_LOAD_START, false);
 		charMenu->Enable(ID_MOUNT_CHARACTER, false);
@@ -1185,7 +1113,6 @@ void ModelViewer::LoadItem(unsigned int id)
 			}
 		}
 
-		charMenu->Enable(ID_SAVE_CHAR, false);
 		charMenu->Enable(ID_SHOW_UNDERWEAR, false);
 		charMenu->Enable(ID_SHOW_EARS, false);
 		charMenu->Enable(ID_SHOW_HAIR, false);
@@ -1193,9 +1120,6 @@ void ModelViewer::LoadItem(unsigned int id)
 		charMenu->Enable(ID_SHOW_FEET, false);
 		charMenu->Enable(ID_SHEATHE, false);
 		charMenu->Enable(ID_CHAREYEGLOW, false);
-		charMenu->Enable(ID_SAVE_EQUIPMENT, false);
-		charMenu->Enable(ID_LOAD_EQUIPMENT, false);
-		charMenu->Enable(ID_CLEAR_EQUIPMENT, false);
 		charMenu->Enable(ID_LOAD_SET, false);
 		charMenu->Enable(ID_LOAD_START, false);
 		charMenu->Enable(ID_MOUNT_CHARACTER, false);
@@ -1264,12 +1188,6 @@ ModelViewer::~ModelViewer()
 	// Save our session and layout info
 	SaveSession();
 
-	if (animExporter)
-	{
-		animExporter->Destroy();
-		wxDELETE(animExporter);
-	}
-
 	if (canvas)
 	{
 		canvas->Disable();
@@ -1313,12 +1231,7 @@ ModelViewer::~ModelViewer()
 		modelControl = nullptr;
 	}
 
-	if (enchants)
-	{
-		enchants->Destroy();
-		enchants = nullptr;
 	}
-}
 
 // Menu button press events
 void ModelViewer::OnToggleDock(wxCommandEvent& event)
@@ -1399,82 +1312,6 @@ void ModelViewer::OnToggleCommand(wxCommandEvent& event)
 			canvas->wmo->updateModels();
 		}
 		animControl->defaultDoodads = event.IsChecked();
-		break;
-
-	case ID_SAVE_CHAR:
-		{
-			wxFileDialog saveDialog(this, wxT("Save character"), wxEmptyString, wxEmptyString,
-			                        wxT("Character files (*.chr)|*.chr"), wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
-			if (saveDialog.ShowModal() == wxID_OK)
-				SaveChar(QString::fromWCharArray(saveDialog.GetPath().c_str()));
-		}
-		break;
-	case ID_LOAD_CHAR:
-		{
-			wxFileDialog loadDialog(this, wxT("Load character"), wxEmptyString, wxEmptyString,
-			                        wxT("Character files (*.chr)|*.chr"), wxFD_OPEN | wxFD_FILE_MUST_EXIST);
-			if (loadDialog.ShowModal() == wxID_OK)
-			{
-				LOG_INFO << "Loading character from a save file:" << QString::fromWCharArray(
-					loadDialog.GetPath().c_str());
-				if (charControl->model) // if a model is already present, unload equipment
-				{
-					for (size_t i = 0; i < NUM_CHAR_SLOTS; i++)
-					{
-						WoWItem* item = charControl->model->getItem(static_cast<CharSlots>(i));
-						if (item)
-							item->setId(0);
-					}
-				}
-				LoadChar(QString::fromWCharArray(loadDialog.GetPath().c_str()));
-			}
-		}
-		fileControl->UpdateInterface();
-		break;
-
-	case ID_SAVE_EQUIPMENT:
-		{
-			wxFileDialog dialog(this, wxT("Save equipment"), wxEmptyString, wxEmptyString,
-			                    wxT("Equipment files (*.eq)|*.eq"), wxFD_SAVE | wxFD_OVERWRITE_PROMPT,
-			                    wxDefaultPosition);
-			if (dialog.ShowModal() == wxID_OK)
-				SaveChar(QString::fromWCharArray(dialog.GetPath().c_str()), true);
-			break;
-		}
-
-	case ID_LOAD_EQUIPMENT:
-		{
-			wxFileDialog loadDialog(this, wxT("Load equipment"), wxEmptyString, wxEmptyString,
-			                        wxT("Equipment files (*.eq)|*.eq"), wxFD_OPEN | wxFD_FILE_MUST_EXIST);
-			if (loadDialog.ShowModal() == wxID_OK)
-			{
-				LOG_INFO << "Loading equipment from a save file:" << QString::fromWCharArray(
-					loadDialog.GetPath().c_str());
-				if (charControl->model) // if a model is already present, unload equipment
-				{
-					for (size_t i = 0; i < NUM_CHAR_SLOTS; i++)
-					{
-						WoWItem* item = charControl->model->getItem(static_cast<CharSlots>(i));
-						if (item)
-							item->setId(0);
-					}
-				}
-				LoadChar(QString::fromWCharArray(loadDialog.GetPath().c_str()), true);
-			}
-			break;
-		}
-
-	case ID_IMPORT_CHAR:
-		{
-			wxTextEntryDialog dialog(this, wxT("Please paste in the URL to the character you wish to import."),
-			                         wxT("Please enter text"), armoryPath, wxOK | wxCANCEL | wxCENTRE,
-			                         wxDefaultPosition);
-			if (dialog.ShowModal() == wxID_OK)
-			{
-				armoryPath = dialog.GetValue();
-				ImportArmoury(armoryPath);
-			}
-		}
 		break;
 
 	/*
@@ -1700,19 +1537,7 @@ void ModelViewer::OnSetColor(wxCommandEvent& event)
 	if (id == ID_BG_COLOR)
 	{
 		canvas->vecBGColor = DoSetColor(canvas->vecBGColor);
-		canvas->drawBackground = false;
-		//} else if (id==ID_LT_COLOR) {
-		//  canvas->ltColor = DoSetColor(canvas->ltColor);
 	}
-}
-
-// Menu button press events
-void ModelViewer::OnEffects(wxCommandEvent& event)
-{
-	const int id = event.GetId();
-
-	if (id == ID_ENCHANTS)
-		enchants->Display();
 }
 
 glm::vec3 ModelViewer::DoSetColor(const glm::vec3& defColor)
@@ -1974,58 +1799,6 @@ void ModelViewer::OnSave(wxCommandEvent& event)
 
 		//canvas->InitView();
 	}
-	else if (event.GetId() == ID_FILE_EXPORTGIF)
-	{
-		if (canvas->wmo)
-			return;
-
-		if (!canvas->model())
-			return;
-
-		if (!video.supportFBO && !video.supportPBO)
-		{
-			wxMessageBox(
-				wxT(
-					"This function is currently disabled for video cards that don't\nsupport the FrameBufferObject or PixelBufferObject OpenGL extensions"),
-				wxT("Error"));
-			return;
-		}
-
-		wxFileDialog dialog(this, wxT("Save Animation"), dir.GetPath(wxPATH_GET_VOLUME), wxT("filename"),
-		                    wxT("Animation"), wxFD_SAVE | wxFD_OVERWRITE_PROMPT, wxDefaultPosition);
-
-		if (dialog.ShowModal() == wxID_OK)
-		{
-			// Save the folder location for next time
-			dir.SetPath(dialog.GetPath());
-
-			// Show our exporter window      
-			animExporter->Init(dialog.GetPath());
-			animExporter->Show(true);
-		}
-	}
-	else if (event.GetId() == ID_FILE_EXPORTAVI)
-	{
-		if (canvas->wmo && !canvas->model())
-			return;
-
-		if (!video.supportFBO && !video.supportPBO)
-		{
-			wxMessageBox(
-				wxT(
-					"This function is currently disabled for video cards that don't\nsupport the FrameBufferObject or PixelBufferObject OpenGL extensions"),
-				wxT("Error"));
-			return;
-		}
-
-		wxFileDialog dialog(this, wxT("Save AVI"), dir.GetPath(wxPATH_GET_VOLUME), wxT("animation.avi"),
-		                    wxT("animation (*.avi)|*.avi"), wxFD_SAVE | wxFD_OVERWRITE_PROMPT, wxDefaultPosition);
-
-		if (dialog.ShowModal() == wxID_OK)
-		{
-			animExporter->CreateAvi(dialog.GetPath());
-		}
-	}
 	else if (event.GetId() == ID_FILE_SCREENSHOTCONFIG)
 	{
 		if (!imageControl)
@@ -2040,305 +1813,6 @@ void ModelViewer::OnSave(wxCommandEvent& event)
 
 		imageControl->OnShow(&interfaceManager);
 	}
-}
-
-void ModelViewer::OnBackground(wxCommandEvent& event)
-{
-	static wxFileName dir = cfgPath;
-
-	const int id = event.GetId();
-
-	if (id == ID_BACKGROUND)
-	{
-		if (event.IsChecked())
-		{
-			wxFileDialog dialog(this, wxT("Load Background"), dir.GetPath(wxPATH_GET_VOLUME), wxEmptyString, wxT(
-				                    "All (*.bmp;*.jpg;*.png;*.avi)|*.bmp;*.jpg;*.png;*.avi|Bitmap Images (*.bmp)|*.bmp|Jpeg Images (*.jpg)|*.jpg|PNG Images (*.png)|*.png|AVI Video file(*.avi)|*.avi"));
-			if (dialog.ShowModal() == wxID_OK)
-			{
-				canvas->LoadBackground(dialog.GetPath());
-				dir.SetPath(dialog.GetPath());
-				viewMenu->Check(ID_BACKGROUND, canvas->drawBackground);
-			}
-			else
-			{
-				viewMenu->Check(ID_BACKGROUND, false);
-			}
-		}
-		else
-		{
-			canvas->drawBackground = false;
-		}
-	}
-	else if (id == ID_SKYBOX)
-	{
-		if (canvas->skyModel)
-		{
-			wxDELETE(canvas->skyModel);
-			canvas->sky->delChildren();
-		}
-		else
-		{
-			// List of skybox models, LightSkybox.dbc
-			wxArrayString skyboxes;
-
-			sqlResult skyboxesInfos = GAMEDATABASE.sqlQuery("SELECT DISTINCT name FROM LightSkybox");
-
-			if (skyboxesInfos.valid && !skyboxesInfos.values.empty())
-			{
-				for (auto& value : skyboxesInfos.values)
-				{
-					skyboxes.Add(value[0].replace(".mdx", ".m2").toStdWString());
-				}
-			}
-
-			skyboxes.Add(wxT("World\\Outland\\PassiveDoodads\\SkyBox\\OutlandSkyBox.m2"));
-			skyboxes.Sort();
-
-
-			wxSingleChoiceDialog skyDialog(this, wxT("Choose"), wxT("Select a Sky Box"), skyboxes);
-			if (skyDialog.ShowModal() == wxID_OK && skyDialog.GetStringSelection() != wxEmptyString)
-			{
-				canvas->skyModel = new WoWModel(
-					GAMEDIRECTORY.getFile(QString::fromWCharArray(skyDialog.GetStringSelection().c_str())), false);
-				canvas->sky->setModel(canvas->skyModel);
-			}
-		}
-
-		canvas->drawSky = event.IsChecked();
-	}
-}
-
-void ModelViewer::SaveChar(QString fn, bool equipmentOnly /*= false*/)
-{
-	QFile file(fn);
-	if (!file.open(QIODevice::WriteOnly | QIODevice::Text))
-	{
-		LOG_ERROR << "Fail to open" << fn;
-		return;
-	}
-
-	QXmlStreamWriter stream(&file);
-	stream.setAutoFormatting(true);
-	stream.writeStartDocument();
-	stream.writeStartElement("SavedCharacter");
-	stream.writeAttribute("version", "2.0");
-	// save model itself
-	WoWModel* m = const_cast<WoWModel*>(canvas->model());
-	if (!equipmentOnly)
-		m->save(stream);
-
-	// then save equipment
-	stream.writeStartElement("equipment");
-
-	for (const auto it : *m)
-		it->save(stream);
-
-	stream.writeEndElement(); // equipment
-
-	stream.writeEndElement(); // SavedCharacter
-	stream.writeEndDocument();
-
-	file.close();
-}
-
-void ModelViewer::LoadChar(QString fn, bool equipmentOnly /* = false */)
-{
-	QFile file(fn);
-	if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
-	{
-		LOG_ERROR << "Fail to open" << fn;
-		return;
-	}
-
-	if (!equipmentOnly)
-	{
-		// Clear the existing model
-		if (isWMO)
-		{
-			//canvas->clearAttachments();
-			wxDELETE(canvas->wmo);
-			//canvas->wmo = nullptr;
-		}
-	}
-
-	bool loadCharDetails = true;
-
-	QXmlStreamReader reader;
-	reader.setDevice(&file);
-	while (!reader.atEnd())
-	{
-		reader.readNext();
-		if (reader.hasError())
-		{
-			file.close();
-			file.open(QIODevice::ReadOnly | QIODevice::Text);
-			LOG_INFO << "Loading character from legacy file";
-			QTextStream in(&file);
-
-			std::vector<QString> values;
-			while (!in.atEnd())
-			{
-				QString line = in.readLine();
-				if (!line.isEmpty())
-					values.push_back(line);
-			}
-
-			unsigned int lineIndex = 0;
-
-			// modelname (if available)
-			if (values[lineIndex].contains("m2", Qt::CaseInsensitive))
-			{
-				LOG_INFO << "modelname" << values[lineIndex];
-
-				// Load the model
-				LoadModel(GAMEDIRECTORY.getFile(values[lineIndex]));
-				WoWModel* m = const_cast<WoWModel*>(canvas->model());
-				m->modelType = MT_CHAR;
-				lineIndex++;
-			}
-
-			// race and gender, we don't care
-			lineIndex++;
-
-			// character customization
-			QStringList multiVal = values[lineIndex].split(" ");
-			if (multiVal.size() >= 5)
-			{
-				LOG_INFO << "skin color" << multiVal[0];
-				charControl->model->cd.set(CharDetails::SKIN_COLOR, multiVal[0].toInt());
-
-				LOG_INFO << "face type" << multiVal[1];
-				charControl->model->cd.set(CharDetails::FACE, multiVal[1].toInt());
-
-				LOG_INFO << "hair color" << multiVal[2];
-				charControl->model->cd.set(CharDetails::FACIAL_CUSTOMIZATION_COLOR, multiVal[2].toInt());
-
-				LOG_INFO << "hair style" << multiVal[3];
-				charControl->model->cd.set(CharDetails::FACIAL_CUSTOMIZATION_STYLE, multiVal[3].toInt());
-
-				LOG_INFO << "facial hair" << multiVal[4];
-				charControl->model->cd.set(CharDetails::ADDITIONAL_FACIAL_CUSTOMIZATION, multiVal[4].toInt());
-			}
-
-			// eye glow (if present)
-			if (multiVal.size() >= 7)
-			{
-				LOG_INFO << "reading eyeglow from file:" << multiVal[6].toInt();
-				charControl->model->cd.eyeGlowType = static_cast<EyeGlowTypes>(multiVal[6].toInt());
-			}
-			else
-			{
-				// Otherwise, default to this value
-				LOG_INFO << "setting eye glow to default value";
-				charControl->model->cd.eyeGlowType = EGT_DEFAULT;
-			}
-
-			lineIndex++;
-
-			const CharSlots legacySlots[15] = {
-				CS_HEAD, NUM_CHAR_SLOTS, CS_SHOULDER, CS_BOOTS, CS_BELT, CS_SHIRT, CS_PANTS, CS_CHEST, CS_BRACERS,
-				CS_GLOVES, CS_HAND_RIGHT,
-				CS_HAND_LEFT, CS_CAPE, CS_TABARD, NUM_CHAR_SLOTS
-			};
-
-			for (unsigned int i = 0; i < 15 && lineIndex < values.size(); i++, lineIndex++)
-			{
-				LOG_INFO << "item" << i << "=>" << values[lineIndex].toInt();
-				WoWItem* item = charControl->model->getItem(legacySlots[i]);
-				if (item)
-					item->setId(values[lineIndex].toInt());
-			}
-
-			// read tabard customization (if needed)
-			if (lineIndex < values.size())
-			{
-				const WoWItem* tabard = charControl->model->getItem(CS_TABARD);
-				// 5976 is the ID value for the Guild Tabard, 69209 for the Illustrious Guild Tabard, and 69210 for the Renowned Guild Tabard
-				if (tabard && (tabard->id() == 5976 || tabard->id() == 69209 || tabard->id() == 69210))
-				{
-					LOG_INFO << "read custom tabard values" << values[lineIndex];
-					multiVal = values[lineIndex].split(" ");
-					if (multiVal.size() >= 5)
-					{
-						charControl->model->td.setBackground(multiVal[0].toInt());
-						charControl->model->td.setBorder(multiVal[1].toInt());
-						charControl->model->td.setBorderColor(multiVal[2].toInt());
-						charControl->model->td.setIcon(multiVal[3].toInt());
-						charControl->model->td.setIconColor(multiVal[4].toInt());
-						charControl->model->td.showCustom = true;
-					}
-				}
-			}
-		}
-
-		if (reader.isStartElement())
-		{
-			if (reader.name() == "SavedCharacter") // check file version
-			{
-				QString version = reader.attributes().value("version").toString();
-				if (version == "1.0" && !equipmentOnly)
-				{
-					loadCharDetails = false;
-					wxMessageBox(
-						wxT(
-							"You are loading a character file customized before Shadowlands. Character customization won't be applied."),
-						wxT("Character customization"), wxOK | wxICON_INFORMATION);
-				}
-			}
-
-			if (reader.name() == "model" && !equipmentOnly)
-			{
-				reader.readNext();
-				while (reader.isStartElement() == false)
-					reader.readNext();
-
-				if (reader.name() == "file")
-				{
-					const QString modelname = reader.attributes().value("name").toString();
-					LoadModel(GAMEDIRECTORY.getFile(modelname));
-					WoWModel* m = const_cast<WoWModel*>(canvas->model());
-					if (loadCharDetails)
-						m->load(fn);
-				}
-				else
-				{
-					LOG_ERROR << "Failed to find character filename in file";
-					return;
-				}
-			}
-
-			if (reader.name() == "equipment")
-			{
-				WoWModel* m = const_cast<WoWModel*>(canvas->model());
-				for (const auto it : *m)
-					it->load(fn);
-			}
-		}
-	}
-
-	charControl->RefreshModel();
-	charControl->RefreshEquipment();
-
-	charMenu->Enable(ID_SAVE_CHAR, true);
-	charMenu->Enable(ID_SHOW_UNDERWEAR, true);
-	charMenu->Enable(ID_SHOW_EARS, true);
-	charMenu->Enable(ID_SHOW_HAIR, true);
-	charMenu->Enable(ID_SHOW_FACIALHAIR, true);
-	charMenu->Enable(ID_SHOW_FEET, true);
-	charMenu->Enable(ID_SHEATHE, true);
-	charMenu->Enable(ID_CHAREYEGLOW, true);
-	charMenu->Enable(ID_SAVE_EQUIPMENT, true);
-	charMenu->Enable(ID_LOAD_EQUIPMENT, true);
-	charMenu->Enable(ID_CLEAR_EQUIPMENT, true);
-	charMenu->Enable(ID_LOAD_SET, true);
-	charMenu->Enable(ID_LOAD_START, true);
-	charMenu->Enable(ID_MOUNT_CHARACTER, true);
-	charMenu->Enable(ID_CHAR_RANDOMISE, true);
-	charMenu->Enable(ID_AUTOHIDE_GEOSETS_FOR_HEAD_ITEMS, true);
-
-	// Update interface docking components
-	interfaceManager.Update();
 }
 
 void ModelViewer::OnLanguage(wxCommandEvent& event)
@@ -2515,89 +1989,6 @@ void ModelViewer::UpdateControls()
 			it->refresh();
 	}
 	modelControl->RefreshModel(canvas->root);
-}
-
-void ModelViewer::ImportArmoury(wxString strURL)
-{
-	CharInfos* result = nullptr;
-
-	const QString url{strURL.utf8_str()};
-	LOG_INFO << "Importing character from the Armory:" << url;
-
-	for (const auto it : PLUGINMANAGER)
-	{
-		const auto* plugin = dynamic_cast<ImporterPlugin*>(it);
-		if (plugin && plugin->acceptURL(url))
-		{
-			result = plugin->importChar(url);
-		}
-	}
-
-	if (result)
-	{
-		if (!result->valid)
-		{
-			wxMessageBox(
-				wxT(
-					"Improperly Formatted URL.\nMake sure your link ends with /simple or /advanced and does not contains any special character."),
-				wxT("Bad Armory Link"));
-			return;
-		}
-
-		const auto sex = (result->gender == "Male") ? 0 : 1;
-
-		LoadModel(GAMEDIRECTORY.getFile(RaceInfos::getFileIDForRaceSex(result->raceId, sex)));
-
-		if (!g_canvas->model())
-			return;
-
-		if (result->hasTransmogGear == true)
-		{
-			LOG_INFO << "Transmogrified Gear was found. Switching items...";
-			wxMessageBox(
-				wxT(
-					"We found Transmogrified gear on your character. The items your character is wearing will be exchanged for the items they look like."),
-				wxT("Transmog Notice"));
-		}
-
-		// Update the model
-		for (const auto& customization : result->customizations)
-			g_charControl->model->cd.set(customization.first, customization.second);
-
-		g_charControl->model->cd.eyeGlowType = static_cast<EyeGlowTypes>(result->eyeGlowType);
-
-		if (result->customTabard)
-		{
-			g_charControl->model->td.showCustom = true;
-			g_charControl->model->td.setIconId(result->tabardIcon);
-			g_charControl->model->td.setIconColor(result->iconColor);
-			g_charControl->model->td.setBorderId(result->tabardBorder);
-			g_charControl->model->td.setBorderColor(result->borderColor);
-			g_charControl->model->td.setBackgroundId(result->background);
-			g_charControl->model->td.setTabardId(result->equipment[CS_TABARD]);
-		}
-
-		for (unsigned int i = 0; i < NUM_CHAR_SLOTS; i++)
-		{
-			WoWItem* item = g_charControl->model->getItem(static_cast<CharSlots>(i));
-			if (item)
-			{
-				item->setId(result->equipment[i]);
-				item->setModifierId(result->itemModifierIds[i]);
-			}
-		}
-
-		g_charControl->RefreshModel();
-		g_charControl->RefreshEquipment();
-
-		delete result;
-	}
-	else
-	{
-		LOG_ERROR << "There were errors gathering the Armory page.";
-		wxMessageBox(
-			wxT("There was an error when gathering the Armory data.\nPlease try again later."), wxT("Armory Error"));
-	}
 }
 
 void ModelViewer::OnExport(wxCommandEvent& event)

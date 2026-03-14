@@ -431,16 +431,12 @@ void FileControl::UpdateInterface()
 	{
 		// If it's an M2 file...
 		// Enable Controls for Characters
-		modelviewer->charMenu->Enable(ID_SAVE_CHAR, true);
 		modelviewer->charMenu->Enable(ID_SHOW_UNDERWEAR, true);
 		modelviewer->charMenu->Enable(ID_SHOW_EARS, true);
 		modelviewer->charMenu->Enable(ID_SHOW_HAIR, true);
 		modelviewer->charMenu->Enable(ID_SHOW_FACIALHAIR, true);
 		modelviewer->charMenu->Enable(ID_SHOW_FEET, true);
 		modelviewer->charMenu->Enable(ID_SHEATHE, true);
-		modelviewer->charMenu->Enable(ID_SAVE_EQUIPMENT, true);
-		modelviewer->charMenu->Enable(ID_LOAD_EQUIPMENT, true);
-		modelviewer->charMenu->Enable(ID_CLEAR_EQUIPMENT, true);
 		modelviewer->charMenu->Enable(ID_LOAD_SET, true);
 		modelviewer->charMenu->Enable(ID_LOAD_START, true);
 		modelviewer->charMenu->Enable(ID_MOUNT_CHARACTER, true);
@@ -449,16 +445,12 @@ void FileControl::UpdateInterface()
 	else if (modelviewer->isADT == true)
 	{
 		// If it's an ADT file...
-		modelviewer->charMenu->Enable(ID_SAVE_CHAR, false);
 		modelviewer->charMenu->Enable(ID_SHOW_UNDERWEAR, false);
 		modelviewer->charMenu->Enable(ID_SHOW_EARS, false);
 		modelviewer->charMenu->Enable(ID_SHOW_HAIR, false);
 		modelviewer->charMenu->Enable(ID_SHOW_FACIALHAIR, false);
 		modelviewer->charMenu->Enable(ID_SHOW_FEET, false);
 		modelviewer->charMenu->Enable(ID_SHEATHE, false);
-		modelviewer->charMenu->Enable(ID_SAVE_EQUIPMENT, false);
-		modelviewer->charMenu->Enable(ID_LOAD_EQUIPMENT, false);
-		modelviewer->charMenu->Enable(ID_CLEAR_EQUIPMENT, false);
 		modelviewer->charMenu->Enable(ID_LOAD_SET, false);
 		modelviewer->charMenu->Enable(ID_LOAD_START, false);
 		modelviewer->charMenu->Enable(ID_MOUNT_CHARACTER, false);
@@ -467,16 +459,12 @@ void FileControl::UpdateInterface()
 	else if (modelviewer->isWMO == true)
 	{
 		// If the object is a WMO file...
-		modelviewer->charMenu->Enable(ID_SAVE_CHAR, false);
 		modelviewer->charMenu->Enable(ID_SHOW_UNDERWEAR, false);
 		modelviewer->charMenu->Enable(ID_SHOW_EARS, false);
 		modelviewer->charMenu->Enable(ID_SHOW_HAIR, false);
 		modelviewer->charMenu->Enable(ID_SHOW_FACIALHAIR, false);
 		modelviewer->charMenu->Enable(ID_SHOW_FEET, false);
 		modelviewer->charMenu->Enable(ID_SHEATHE, false);
-		modelviewer->charMenu->Enable(ID_SAVE_EQUIPMENT, false);
-		modelviewer->charMenu->Enable(ID_LOAD_EQUIPMENT, false);
-		modelviewer->charMenu->Enable(ID_CLEAR_EQUIPMENT, false);
 		modelviewer->charMenu->Enable(ID_LOAD_SET, false);
 		modelviewer->charMenu->Enable(ID_LOAD_START, false);
 		modelviewer->charMenu->Enable(ID_MOUNT_CHARACTER, false);
@@ -485,16 +473,12 @@ void FileControl::UpdateInterface()
 	else
 	{
 		// If it's not a 3D file...
-		modelviewer->charMenu->Enable(ID_SAVE_CHAR, false);
 		modelviewer->charMenu->Enable(ID_SHOW_UNDERWEAR, false);
 		modelviewer->charMenu->Enable(ID_SHOW_EARS, false);
 		modelviewer->charMenu->Enable(ID_SHOW_HAIR, false);
 		modelviewer->charMenu->Enable(ID_SHOW_FACIALHAIR, false);
 		modelviewer->charMenu->Enable(ID_SHOW_FEET, false);
 		modelviewer->charMenu->Enable(ID_SHEATHE, false);
-		modelviewer->charMenu->Enable(ID_SAVE_EQUIPMENT, false);
-		modelviewer->charMenu->Enable(ID_LOAD_EQUIPMENT, false);
-		modelviewer->charMenu->Enable(ID_CLEAR_EQUIPMENT, false);
 		modelviewer->charMenu->Enable(ID_LOAD_SET, false);
 		modelviewer->charMenu->Enable(ID_LOAD_START, false);
 		modelviewer->charMenu->Enable(ID_MOUNT_CHARACTER, false);
@@ -595,10 +579,6 @@ void FileControl::OnTreeSelect(wxTreeEvent& event)
 		// For Graphics
 		const wxString val(data->file->fullname().toStdWString());
 		ExportPNG(val);
-		const wxFileName fn(val);
-		const wxString temp(wxGetCwd() + SLASH + wxT("Export") + SLASH + fn.GetName() + wxT(".png"));
-		modelviewer->canvas->LoadBackground(temp);
-		wxRemoveFile(temp);
 
 		UpdateInterface();
 	}

@@ -1,4 +1,6 @@
 #include "modelcanvas.h"
+#include <windows.h>
+#include <mmsystem.h>
 #include <QImage>
 #include <QImageWriter>
 #include <QImageReader>
@@ -128,14 +130,11 @@ ModelCanvas::ModelCanvas(wxWindow* parent, VideoCaps* caps)
 	lastTime = timeGetTime();
 
 	// Set all our pointers to null
-	skyModel = nullptr; // SkyBox Model
 	wmo = nullptr; // world map object model
 	adt = nullptr; // ADT
 	animControl = nullptr;
-	gifExporter = nullptr;
 	rt = nullptr; // RenderToTexture class
 	root = new Attachment(nullptr, nullptr, -1, -1);
-	sky = new Attachment(nullptr, nullptr, -1, -1);
 	model_ = nullptr;
 
 	fogTex = 0;
@@ -146,9 +145,6 @@ ModelCanvas::ModelCanvas(wxWindow* parent, VideoCaps* caps)
 	vecBGColor = glm::vec3(static_cast<float>(71.0 / 255), static_cast<float>(95.0 / 255), static_cast<float>(121.0 / 255));
 
 	drawLightDir = false;
-	drawBackground = false;
-	drawAVIBackground = false;
-	drawSky = false;
 	drawGrid = false;
 	useCamera = false;
 
@@ -183,11 +179,6 @@ ModelCanvas::ModelCanvas(wxWindow* parent, VideoCaps* caps)
 
 ModelCanvas::~ModelCanvas()
 {
-	// Release our avi engine
-#if defined(_WINDOWS)
-	cAvi.ReleaseEngine();
-#endif
-
 	// Clear remaining textures.
 	TEXTUREMANAGER.clear();
 
@@ -198,7 +189,6 @@ ModelCanvas::~ModelCanvas()
 	clearAttachments();
 
 	wxDELETE(root);
-	wxDELETE(sky);
 	//wxDELETE(wmo);
 	//wxDELETE(model);
 
@@ -386,9 +376,6 @@ void ModelCanvas::clearAttachments()
 {
 	if (root)
 		root->delChildren();
-
-	if (sky)
-		sky->delChildren();
 }
 
 void ModelCanvas::OnMouse(wxMouseEvent& event)
@@ -569,22 +556,6 @@ inline void ModelCanvas::RenderLight(Light* l)
 	glPopMatrix();
 }
 
-inline void ModelCanvas::RenderSkybox()
-{
-	// ************** SKYBOX *************
-	glPushMatrix(); // Save the current modelview matrix
-	glLoadIdentity(); // Reset it
-
-	const float fScale = 64.0f / skyModel->rad;
-
-	glTranslatef(0.0f, 0.0f, -5.0f); // Position the sky box
-	glScalef(fScale, fScale, fScale); // Scale it so it looks appropriate
-	sky->draw(); // Render the skybox
-
-	glPopMatrix(); // load the old modelview matrix that we saved previously
-	// ====================================
-}
-
 inline void ModelCanvas::RenderObjects()
 {
 	// ***************** MODEL RENDERING **********************
@@ -660,75 +631,6 @@ inline void ModelCanvas::RenderObjects()
 	// ========================================    
 }
 
-inline void ModelCanvas::RenderBackground()
-{
-	glMatrixMode(GL_PROJECTION);
-	glPushMatrix();
-	glLoadIdentity();
-
-	glMatrixMode(GL_MODELVIEW);
-	glPushMatrix();
-	glLoadIdentity();
-
-	//glOrtho(0, video.xRes, 0, video.yRes, -1.0, 1.0);
-	gluOrtho2D(0, 1, 0, 1);
-
-	// save previous state
-	const GLboolean texture2DState = glIsEnabled(GL_TEXTURE_2D);
-	const GLboolean depthTestState = glIsEnabled(GL_DEPTH_TEST);
-	const GLboolean lightningState = glIsEnabled(GL_LIGHTING);
-
-	glEnable(GL_TEXTURE_2D); // Enable 2D Texture Mapping
-	glDisable(GL_DEPTH_TEST);
-	glDisable(GL_LIGHTING);
-
-	glBindTexture(GL_TEXTURE_2D, uiBGTexture);
-
-#if defined(_WINDOWS)
-	// If its an AVI background, increment the frame
-	if (drawAVIBackground)
-		cAvi.GetFrame();
-#endif
-
-	glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
-
-	glBegin(GL_QUADS);
-	glTexCoord2f(0.0f, 0.0f);
-	glVertex2f(0, 0);
-	glTexCoord2f(1.0f, 0.0f);
-	glVertex2f(1, 0);
-	glTexCoord2f(1.0f, 1.0f);
-	glVertex2f(1, 1);
-	glTexCoord2f(0.0f, 1.0f);
-	glVertex2f(0, 1);
-	glEnd();
-
-	// ModelView
-	glPopMatrix();
-	// Projection
-	glMatrixMode(GL_PROJECTION);
-	glPopMatrix();
-
-	// restore state
-	if (texture2DState)
-		glEnable(GL_TEXTURE_2D);
-	else
-		glDisable(GL_TEXTURE_2D);
-
-	if (depthTestState)
-		glEnable(GL_DEPTH_TEST);
-	else
-		glDisable(GL_DEPTH_TEST);
-
-	if (lightningState)
-		glEnable(GL_LIGHTING);
-	else
-		glDisable(GL_LIGHTING);
-
-	// Set back to modelview for rendering
-	glMatrixMode(GL_MODELVIEW);
-}
-
 void ModelCanvas::Render(wxPaintEvent& WXUNUSED(event))
 {
 	// Set this window handler as the reference to draw to.
@@ -788,14 +690,6 @@ void ModelCanvas::Render(wxPaintEvent& WXUNUSED(event))
 			         glm::vec3(0.0, 0.0, 1.0));
 		}
 
-		// Draw the background image if any
-		if (drawBackground)
-			RenderBackground();
-
-		// render the skybox, if any
-		if (drawSky && skyModel && sky->model())
-			RenderSkybox();
-
 		if (drawGrid)
 			RenderGrid();
 	}
@@ -815,21 +709,6 @@ inline void ModelCanvas::RenderModel()
 		glClearColor(vecBGColor.x, vecBGColor.y, vecBGColor.z, 0.0f);
 
 	glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
-
-	// (re)set the view
-	//  InitView();
-
-	// If masking isn't enabled
-	if (!video.useMasking)
-	{
-		// Draw the background image if any
-		if (drawBackground)
-			RenderBackground();
-
-		// render the skybox, if any
-		if (drawSky && skyModel && sky->model())
-			RenderSkybox();
-	}
 
 	// camera.Setup();
 
@@ -1358,26 +1237,6 @@ void ModelCanvas::RenderToBuffer()
 
 	glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 
-	/*
-	if (rt) {
-	  video.ResizeGLScene(rt->nWidth, rt->nHeight);
-	} else {
-	  video.ResizeGLScene(video.xRes, video.yRes);
-	}
-	*/
-
-	// If masking isn't enabled
-	if (!video.useMasking)
-	{
-		// Draw the background image if any
-		if (drawBackground)
-			RenderBackground();
-
-		// render the skybox, if any
-		if (drawSky && skyModel && sky->model())
-			RenderSkybox();
-	}
-
 	// setup projection (use perspective camera)
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
@@ -1510,70 +1369,6 @@ void ModelCanvas::tick()
 		}
 
 		root->tick(ddt);
-	}
-
-	if (drawSky && sky && skyModel)
-	{
-		sky->tick(ddt);
-	}
-}
-
-void ModelCanvas::LoadBackground(wxString filename)
-{
-	if (!wxFile::Exists(filename))
-		return;
-
-	bgImagePath = filename;
-
-	// Get the file extension and load the file
-	wxString tmp = filename.AfterLast(wxT('.'));
-	tmp.MakeLower();
-
-	const GLuint texFormat = GL_TEXTURE_2D;
-
-	if (tmp == wxT("avi"))
-	{
-#ifdef _WINDOWS
-		cAvi.SetFileName(filename.c_str());
-		cAvi.InitEngineForRead();
-#endif
-
-		// Setup the OpenGL Texture stuff
-		glGenTextures(1, &uiBGTexture);
-		glBindTexture(texFormat, uiBGTexture);
-
-		glTexParameteri(texFormat, GL_TEXTURE_MIN_FILTER, GL_LINEAR); // Linear Filtering
-		glTexParameteri(texFormat, GL_TEXTURE_MAG_FILTER, GL_LINEAR); // Linear Filtering
-
-#ifndef _WINDOWS
-    cAvi.GetFrame();
-#endif
-		drawBackground = true;
-		drawAVIBackground = true;
-	}
-	else
-	{
-		QImage texture;
-
-		if (!texture.load(QString::fromWCharArray(filename.c_str())))
-		{
-			LOG_ERROR << "Failed to load texture" << QString::fromWCharArray(filename.c_str());
-			LOG_INFO << "Supported formats:" << QImageReader::supportedImageFormats();
-		}
-
-		texture = texture.mirrored();
-		texture = texture.convertToFormat(QImage::Format_RGBA8888);
-
-		// Setup the OpenGL Texture stuff
-		glGenTextures(1, &uiBGTexture);
-		glBindTexture(texFormat, uiBGTexture);
-
-		glTexParameteri(texFormat, GL_TEXTURE_MIN_FILTER, GL_LINEAR); // Linear Filtering
-		glTexParameteri(texFormat, GL_TEXTURE_MAG_FILTER, GL_LINEAR); // Linear Filtering
-
-		glTexImage2D(texFormat, 0, GL_RGBA, texture.width(), texture.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE,
-		             texture.bits());
-		drawBackground = true;
 	}
 }
 

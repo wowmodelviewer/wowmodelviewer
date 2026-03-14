@@ -9,8 +9,6 @@ enum ObjectID
 	ID_MODELVIEWERFRAME, // = 2000,
 	ID_FILE_SCREENSHOT,
 	ID_FILE_SCREENSHOTCONFIG,
-	ID_FILE_EXPORTGIF,
-	ID_FILE_EXPORTAVI,
 	ID_FILE_MODEL_INFO,
 	ID_EXPORT_MODEL,
 	ID_FILE_RESETLAYOUT,
@@ -65,9 +63,7 @@ enum ObjectID
 	ID_LT_SAVE,
 	ID_LT_LOAD,
 
-	ID_BACKGROUND,
 	ID_BG_COLOR,
-	ID_SKYBOX,
 	ID_SHOW_GRID,
 	ID_CANVASSIZE,
 
@@ -96,8 +92,6 @@ enum ObjectID
 	ID_ZOOM_OUT,
 	ID_OPENGL_DEBUG,
 
-	ID_ENCHANTS,
-
 	ID_DEFAULT_DOODADS,
 	ID_USE_ANTIALIAS,
 	ID_USE_ENVMAP,
@@ -120,20 +114,6 @@ enum ObjectID
 	ID_LOAD_TEMP2,
 	ID_LOAD_TEMP3,
 	ID_LOAD_TEMP4,
-
-	// -------------------------------------
-	// GIF Exporter frame
-	ID_GIF_FRAME, // = 3500,
-	ID_GIFSTART,
-	ID_GIFEXIT,
-	ID_GIFFILENAME,
-	ID_GIFCURFRAME,
-	ID_GIFTOTALFRAME,
-	ID_GIFTRANSPARENT,
-	ID_GIFDIFFUSE,
-	ID_GIFSHRINK,
-	ID_GIFGREYSCALE,
-	ID_PNGSEQ,
 
 	// ------------------------------------
 	// Anim Frame
@@ -231,12 +211,6 @@ enum ObjectID
 	ID_MODELBANK_DISPLAY,
 
 	// -----------------------------------------
-	// effects/enhants frame
-	ID_ENCHANTSFRAME, // = 3600,
-	ID_ENCHANTSOK,
-	ID_ENCHANTSCANCEL,
-
-	// -----------------------------------------
 	// Image Control Frame
 	ID_IMAGE_FRAME,
 	ID_IMAGE_FILENAME,
@@ -273,14 +247,6 @@ enum ObjectID
 	ID_CHAREYEGLOW_NONE,
 	ID_CHAREYEGLOW_DEFAULT,
 	ID_CHAREYEGLOW_DEATHKNIGHT,
-
-	ID_SAVE_EQUIPMENT,
-	ID_LOAD_EQUIPMENT,
-	ID_CLEAR_EQUIPMENT,
-
-	ID_SAVE_CHAR,
-	ID_LOAD_CHAR,
-	ID_IMPORT_CHAR, // From Blizzards Armory website
 
 	ID_LOAD_SET,
 	ID_LOAD_START,

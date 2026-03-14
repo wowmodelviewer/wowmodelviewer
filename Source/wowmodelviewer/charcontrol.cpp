@@ -9,6 +9,17 @@
 #include "itemselection.h"
 #include "modelviewer.h"
 #include "util.h"
+
+struct NumStringPair
+{
+	int id;
+	wxString name;
+
+	bool operator<(const NumStringPair& p) const
+	{
+		return name < p.name;
+	}
+};
 #include "WoWModel.h"
 #include "wow_enums.h"
 #include "logger/Logger.h"
@@ -357,17 +368,6 @@ void CharControl::OnButton(wxCommandEvent& event)
 	//  dir.Append('\\');
 	switch (event.GetId())
 	{
-	case ID_CLEAR_EQUIPMENT:
-		{
-			for (ssize_t i = 0; i < NUM_CHAR_SLOTS; i++)
-			{
-				WoWItem* item = model->getItem(static_cast<CharSlots>(i));
-				if (item)
-					item->setId(0);
-			}
-			RefreshEquipment();
-			break;
-		}
 	case ID_LOAD_SET:
 		{
 			selectSet();

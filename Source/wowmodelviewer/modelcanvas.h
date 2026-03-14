@@ -8,11 +8,6 @@
 #include <wx/glcanvas.h>
 #include <wx/window.h>
 #include <string>
-#include "AnimExporter.h"
-
-#if defined (_WINDOWS)
-#include "AVIGenerator.h"
-#endif
 
 #include "lightcontrol.h"
 #include "maptile.h"
@@ -26,7 +21,6 @@
 
 class Attachment;
 class AnimControl;
-class GifExporter;
 class LightControl;
 class ModelViewer;
 class ModelCanvas;
@@ -53,7 +47,6 @@ public:
 
 	// GUI Control Panels
 	AnimControl* animControl;
-	GifExporter* gifExporter;
 
 	RenderTexture* rt;
 
@@ -87,9 +80,7 @@ public:
 	void RenderLight(Light* l);
 
 	// Render sub routines
-	void RenderSkybox();
 	void RenderObjects();
-	void RenderBackground();
 	void RenderGrid();
 	//void GenerateShadowMap();
 
@@ -119,19 +110,17 @@ public:
 	// Various toggles
 	bool init;
 	bool initShaders;
-	bool drawLightDir, drawBackground, drawSky, drawGrid, drawAVIBackground;
+	bool drawLightDir, drawGrid;
 	bool useCamera; //, useLights;
 
 	int lightType; // MODEL / AMBIENCE / DYNAMIC
 	int ignoreMouse;
 
 	// Models / Attachments
-	WoWModel* skyModel;
 	WMO* wmo;
 	MapTile* adt;
 
 	Attachment* root;
-	Attachment* sky;
 
 	// Attachment related functions
 	void clearAttachments();
@@ -140,13 +129,6 @@ public:
 
 	// Background colour
 	glm::vec3 vecBGColor;
-
-	// Backgroun image stuff
-	GLuint uiBGTexture;
-	void LoadBackground(wxString filename);
-#if defined(_WINDOWS)
-	CAVIGenerator cAvi;
-#endif
 
 	void toggleOpenGLDebug();
 

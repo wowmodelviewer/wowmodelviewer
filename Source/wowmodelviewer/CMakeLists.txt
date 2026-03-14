@@ -9,14 +9,11 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 # add wmv source files compilation
 set(src  AnimationExportChoiceDialog.cpp
          animcontrol.cpp
-         AnimExporter.cpp
          app.cpp
-         AVIGenerator.cpp
          charcontrol.cpp
          CharDetailsCustomizationChoice.cpp
          CharDetailsFrame.cpp
          DisplaySettings.cpp
-         effects.cpp
          ExportSettings.cpp
          filecontrol.cpp
          GeneralSettings.cpp
@@ -41,14 +38,11 @@ set(src  AnimationExportChoiceDialog.cpp
 
 set(headers AnimationExportChoiceDialog.h
             animcontrol.h
-            AnimExporter.h
             app.h
-            AVIGenerator.h
             charcontrol.h
             CharDetailsCustomizationChoice.h
             CharDetailsFrame.h
             DisplaySettings.h
-            effects.h
             enums.h
             ExportSettings.h
             filecontrol.h
