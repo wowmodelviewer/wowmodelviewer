@@ -43,8 +43,6 @@ File "${wmvroot}\bin\extraEncryptionKeys.csv"
 File "${wmvroot}\bin\listfile.csv"
 
 CreateDirectory $INSTDIR\plugins
-SetOutPath $INSTDIR\plugins
-File "${wmvroot}\bin\plugins\*"
 SetOutPath $INSTDIR\plugins\imageformats
 File "${wmvroot}\bin\plugins\imageformats\*"
 

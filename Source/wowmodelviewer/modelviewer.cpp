@@ -15,7 +15,10 @@
 #include "globalvars.h"
 #include "MemoryUtils.h"
 #include "ModelRenderPass.h"
-#include "PluginManager.h"
+#include "ArmoryImporter.h"
+#include "FBXExporter.h"
+#include "OBJExporter.h"
+#include "WowheadImporter.h"
 #include "RaceInfos.h"
 #include "SettingsControl.h"
 #include "UserSkins.h"
@@ -24,7 +27,23 @@
 #include "WoWFolder.h"
 #include "logger/Logger.h"
 #include <QSettings>
+#include <QCoreApplication>
 #include <fstream>
+#include <thread>
+
+static void startQtEventLoop()
+{
+	if (QCoreApplication::instance() != nullptr)
+		return;
+
+	static std::thread qtThread([]() {
+		int argc = 1;
+		char* argv[] = {const_cast<char*>("wmv.app"), nullptr};
+		QCoreApplication app(argc, argv);
+		app.exec();
+	});
+	qtThread.detach();
+}
 
 // default colour values
 const static float def_ambience[4] = {1.0f, 1.0f, 1.0f, 1.0f};
@@ -137,7 +156,11 @@ ModelViewer::ModelViewer()
 : interfaceManager(0, wxAUI_MGR_ALLOW_FLOATING | wxAUI_MGR_VENETIAN_BLINDS_HINT)
 #endif
 {
-	PLUGINMANAGER.init("./plugins");
+	startQtEventLoop();
+	m_exporters.push_back(new OBJExporter());
+	m_exporters.push_back(new FBXExporter());
+	m_importers.push_back(new ArmoryImporter());
+	m_importers.push_back(new WowheadImporter());
 	// our main class objects
 	animControl = nullptr;
 	canvas = nullptr;
@@ -252,19 +275,14 @@ void ModelViewer::InitMenu()
 	wxMenu* ExportMenu = new wxMenu;
 	ExportMenu->Append(ID_FILE_MODEL_INFO, wxT("Export ModelInfo.xml"));
 
-	PluginManager::iterator it = PLUGINMANAGER.begin();
 	int subMenuId = 10000;
-	for (; it != PLUGINMANAGER.end(); ++it, subMenuId++)
+	for (const auto* exporter : m_exporters)
 	{
-		const ExporterPlugin* plugin = dynamic_cast<ExporterPlugin*>(*it);
-
-		if (plugin)
-		{
-			ExportMenu->Append(subMenuId, plugin->menuLabel());
-			Connect(subMenuId,
-			        wxEVT_COMMAND_MENU_SELECTED,
-			        wxCommandEventHandler(ModelViewer::OnExport));
-		}
+		ExportMenu->Append(subMenuId, exporter->menuLabel());
+		Connect(subMenuId,
+				wxEVT_COMMAND_MENU_SELECTED,
+				wxCommandEventHandler(ModelViewer::OnExport));
+		subMenuId++;
 	}
 	fileMenu->Append(ID_EXPORT_MODEL, wxT("Export Model"), ExportMenu);
 
@@ -1190,6 +1208,14 @@ ModelViewer::~ModelViewer()
 		modelControl = nullptr;
 	}
 
+	for (auto* e : m_exporters)
+		delete e;
+	m_exporters.clear();
+
+	for (auto* i : m_importers)
+		delete i;
+	m_importers.clear();
+
 	}
 
 // Menu button press events
@@ -1911,15 +1937,12 @@ void ModelViewer::OnExport(wxCommandEvent& event)
 
 	const std::wstring exporterLabel{fileMenu->GetLabel(event.GetId())};
 
-	PluginManager::iterator it = PLUGINMANAGER.begin();
-	for (; it != PLUGINMANAGER.end(); ++it)
+	for (auto* exporter : m_exporters)
 	{
-		ExporterPlugin* plugin = dynamic_cast<ExporterPlugin*>(*it);
-
-		if (plugin && plugin->menuLabel() == exporterLabel)
+		if (exporter->menuLabel() == exporterLabel)
 		{
-			wxFileDialog saveFileDialog(this, plugin->fileSaveTitle(), L"", L"",
-			                            plugin->fileSaveFilter(), wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
+			wxFileDialog saveFileDialog(this, exporter->fileSaveTitle(), L"", L"",
+										exporter->fileSaveFilter(), wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
 
 			if (saveFileDialog.ShowModal() == wxID_CANCEL)
 				return;
@@ -1930,7 +1953,7 @@ void ModelViewer::OnExport(wxCommandEvent& event)
 			// today, creating wxDialog in Qt plugins simply crashes, and no qt app in executed to raised a Qt pop up...
 
 			// if exporter supports animations, we have to chose which one to export
-			if (plugin->canExportAnimation())
+			if (exporter->canExportAnimation())
 			{
 				WoWModel* m = const_cast<WoWModel*>(canvas->model());
 				std::map<int, std::wstring> animsMap = m->getAnimsMap();
@@ -1960,12 +1983,12 @@ void ModelViewer::OnExport(wxCommandEvent& event)
 				for (unsigned int I = 0; I < selection.GetCount(); I++)
 					animsToExport.push_back(canvas->model()->anims[selection[I]].Index);
 
-				plugin->setAnimationsToExport(animsToExport);
+				exporter->setAnimationsToExport(animsToExport);
 			}
 
 			// END OF HACK
 			WoWModel* m = const_cast<WoWModel*>(canvas->model());
-			if (!plugin->exportModel(m, std::wstring(saveFileDialog.GetPath().c_str())))
+			if (!exporter->exportModel(m, std::wstring(saveFileDialog.GetPath().c_str())))
 			{
 				wxMessageBox(wxT("An error occurred during export."), wxT("Export Error"), wxOK | wxICON_ERROR);
 			}

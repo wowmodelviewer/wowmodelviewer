@@ -17,6 +17,11 @@
 #include "filecontrol.h"
 #include "glm/glm.hpp"
 
+#include <memory>
+#include <vector>
+
+class ExporterPlugin;
+class ImporterPlugin;
 class SettingsControl;
 
 namespace WMVLog
@@ -48,6 +53,9 @@ public:
 	ModelBankControl* modelbankControl;
 
 	FileControl* fileControl;
+
+	std::vector<ExporterPlugin*> m_exporters;
+	std::vector<ImporterPlugin*> m_importers;
 
 	//wxWidget objects
 	wxMenuBar* menuBar;

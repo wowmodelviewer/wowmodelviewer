@@ -1,7 +1,0 @@
-{
-  "name" : "OBJ exporter plugin",
-  "internalname" : "obj_exporter",
-  "category" : "exporter",
-  "version" : "0.3",
-  "coreVersion" : "0.8.5"
-}

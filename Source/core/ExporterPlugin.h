@@ -4,8 +4,9 @@
 #include <vector>
 #include "GL/glew.h"
 
+#include "logger/Logger.h"
+
 class Model;
-#include "Plugin.h"
 
 #ifdef _WIN32
 #    ifdef BUILDING_CORE_DLL
@@ -17,12 +18,11 @@ class Model;
 #    define _EXPORTERPLUGIN_API_
 #endif
 
-class _EXPORTERPLUGIN_API_ ExporterPlugin : public Plugin //-V1106
+class _EXPORTERPLUGIN_API_ ExporterPlugin
 {
 public:
-	ExporterPlugin() : m_canExportAnimation(false)
-	{
-	}
+	ExporterPlugin() = default;
+	virtual ~ExporterPlugin() = default;
 
 	virtual std::wstring menuLabel() const = 0;
 	virtual std::wstring fileSaveTitle() const = 0;
@@ -36,10 +36,6 @@ public:
 
 protected:
 	void exportGLTexture(GLuint id, std::wstring filename) const;
-	bool m_canExportAnimation;
+	bool m_canExportAnimation = false;
 	std::vector<int> m_animsToExport;
 };
-
-#ifdef _EXPORTERPLUGIN_CPP_
-Q_DECLARE_INTERFACE(ExporterPlugin, "wowmodelviewer.exporterplugin/1.0");
-#endif

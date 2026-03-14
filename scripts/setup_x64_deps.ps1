@@ -55,14 +55,14 @@ Copy-Item "$wxSrc\lib\nanosvg.lib" "$wxDst\lib\vc_x64_lib\nanosvg.lib" -Force
 Copy-Item "$wxSrc\lib\nanosvgrast.lib" "$wxDst\lib\vc_x64_lib\nanosvgrast.lib" -Force
 if (Test-Path "$wxSrc\lib\mswu") { Copy-Item "$wxSrc\lib\mswu" "$wxDst\lib\vc_x64_lib\mswu" -Recurse -Force }
 if (Test-Path "$wxSrc\lib\mswud") { Copy-Item "$wxSrc\lib\mswud" "$wxDst\lib\vc_x64_lib\mswud" -Recurse -Force }
-Write-Step "Installing OpenSSL DLLs via vcpkg"
+Write-Step "Installing OpenSSL 1.1.x DLLs via vcpkg (required by Qt 5.13.2)"
 $tmp3 = Join-Path $RepoRoot "out\vcpkg_ssl"; Ensure-Dir $tmp3
-$j3 = "{""name"":""wmv-ssl"",""version"":""1.0.0"",""builtin-baseline"":""$baseline"",""dependencies"":[""openssl""]}"
+$j3 = "{""name"":""wmv-ssl"",""version"":""1.0.0"",""builtin-baseline"":""$baseline"",""overrides"":[{""name"":""openssl"",""version"":""1.1.1n"",""port-version"":1}],""dependencies"":[""openssl""]}"
 Set-Content "$tmp3\vcpkg.json" -Encoding UTF8 -Value $ExecutionContext.InvokeCommand.ExpandString($j3)
 Push-Location $tmp3; & $vcpkgExe install --triplet x64-windows @vcpkgOverlay; Pop-Location
 $sslBin = "$tmp3\vcpkg_installed\x64-windows\bin"
-Copy-Item "$sslBin\libssl-3-x64.dll" (Join-Path $RepoRoot "ThirdParty\lib\libssl-3-x64.dll") -Force
-Copy-Item "$sslBin\libcrypto-3-x64.dll" (Join-Path $RepoRoot "ThirdParty\lib\libcrypto-3-x64.dll") -Force
+Copy-Item "$sslBin\libssl-1_1-x64.dll" (Join-Path $RepoRoot "ThirdParty\lib\libssl-1_1-x64.dll") -Force
+Copy-Item "$sslBin\libcrypto-1_1-x64.dll" (Join-Path $RepoRoot "ThirdParty\lib\libcrypto-1_1-x64.dll") -Force
 Write-Step "Installing Qt 5.13.2 msvc2017_64"
 $qtDst = Join-Path $RepoRoot "ThirdParty\Qt\5.13.2\msvc2017_64"
 if (Test-Path $qtDst) { Write-Host "  Already exists - skipping." }

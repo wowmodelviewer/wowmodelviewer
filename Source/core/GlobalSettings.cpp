@@ -1,6 +1,5 @@
 #include "GlobalSettings.h"
 #include <sstream>
-#include "Plugin.h"
 
 // if you need extra qualification on software version, move this to 1
 # define _BETAVERSION 0

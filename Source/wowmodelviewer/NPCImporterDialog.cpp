@@ -6,7 +6,8 @@
 #include <wx/textctrl.h>
 #include "ImporterPlugin.h"
 #include "NPCInfos.h"
-#include "PluginManager.h"
+#include "globalvars.h"
+#include "modelviewer.h"
 
 const int NPCimporterDialog::ID_BTN_IMPORT = wxNewId();
 
@@ -24,17 +25,17 @@ NPCimporterDialog::NPCimporterDialog(wxWindow* parent /* = NULL */, wxWindowID i
 
 	// up part : some explanation + url import choice
 	wxStaticBoxSizer* topSizer = new wxStaticBoxSizer(wxVERTICAL, this, _T("Import parameters"));
-	wxStaticText* explain = new wxStaticText(this, wxID_ANY, _T(
-		                                         "Paste a Wowhead link for the desired NPC in the field below and click 'Import'.\n"
-		                                         "Wait a few seconds for the import to complete, then click 'Display' to view the model."));
+	wxStaticText* explain = new wxStaticText(topSizer->GetStaticBox(), wxID_ANY, _T(
+												 "Paste a Wowhead link for the desired NPC in the field below and click 'Import'.\n"
+												 "Wait a few seconds for the import to complete, then click 'Display' to view the model."));
 	topSizer->Add(explain, 0, wxALL, 5);
-	wxStaticText* label = new wxStaticText(this, wxID_ANY, _T("URL :"));
+	wxStaticText* label = new wxStaticText(topSizer->GetStaticBox(), wxID_ANY, _T("URL :"));
 	topSizer->Add(label, 0, wxLEFT | wxRIGHT | wxTOP, 5);
 	wxBoxSizer* URLSizer = new wxBoxSizer(wxHORIZONTAL);
-	m_URLname = new wxTextCtrl(this, wxID_ANY, _T(""));
+	m_URLname = new wxTextCtrl(topSizer->GetStaticBox(), wxID_ANY, _T(""));
 	m_URLname->SetMinSize(wxSize(200, 10));
 	URLSizer->Add(m_URLname, 0, wxLEFT | wxRIGHT | wxBOTTOM | wxEXPAND, 5);
-	m_importBtn = new wxButton(this, ID_BTN_IMPORT, _("Import"));
+	m_importBtn = new wxButton(topSizer->GetStaticBox(), ID_BTN_IMPORT, _("Import"));
 	URLSizer->Add(m_importBtn, 0, wxLEFT | wxRIGHT | wxBOTTOM, 5);
 	topSizer->Add(URLSizer, 0, wxEXPAND);
 
@@ -43,31 +44,31 @@ NPCimporterDialog::NPCimporterDialog(wxWindow* parent /* = NULL */, wxWindowID i
 
 	// name
 	wxBoxSizer* nameSizer = new wxBoxSizer(wxHORIZONTAL);
-	wxStaticText* nameLabel = new wxStaticText(this, wxID_ANY, _T("Name :"));
+	wxStaticText* nameLabel = new wxStaticText(bottomSizer->GetStaticBox(), wxID_ANY, _T("Name :"));
 	nameSizer->Add(nameLabel, 0, wxLEFT | wxRIGHT | wxTOP, 5);
-	m_nameResult = new wxStaticText(this, wxID_ANY, _T("No URL"));
+	m_nameResult = new wxStaticText(bottomSizer->GetStaticBox(), wxID_ANY, _T("No URL"));
 	nameSizer->Add(m_nameResult, 0, wxALL, 5);
 	bottomSizer->Add(nameSizer, 0, wxEXPAND);
 
 	// type
 	wxBoxSizer* typeSizer = new wxBoxSizer(wxHORIZONTAL);
-	wxStaticText* typeLabel = new wxStaticText(this, wxID_ANY, _T("Type :"));
+	wxStaticText* typeLabel = new wxStaticText(bottomSizer->GetStaticBox(), wxID_ANY, _T("Type :"));
 	typeSizer->Add(typeLabel, 0, wxLEFT | wxRIGHT | wxTOP, 5);
-	m_typeResult = new wxStaticText(this, wxID_ANY, _T("No URL"));
+	m_typeResult = new wxStaticText(bottomSizer->GetStaticBox(), wxID_ANY, _T("No URL"));
 	typeSizer->Add(m_typeResult, 0, wxALL, 5);
 	bottomSizer->Add(typeSizer, 0, wxEXPAND);
 
 	// ids (id + display Id)
 	wxBoxSizer* idSizer = new wxBoxSizer(wxHORIZONTAL);
 	// id
-	wxStaticText* idLabel = new wxStaticText(this, wxID_ANY, _T("Id :"));
+	wxStaticText* idLabel = new wxStaticText(bottomSizer->GetStaticBox(), wxID_ANY, _T("Id :"));
 	idSizer->Add(idLabel, 0, wxLEFT | wxRIGHT | wxTOP, 5);
-	m_idResult = new wxStaticText(this, wxID_ANY, wxT("No URL"));
+	m_idResult = new wxStaticText(bottomSizer->GetStaticBox(), wxID_ANY, wxT("No URL"));
 	idSizer->Add(m_idResult, 0, wxALL, 5);
 	// didplay id
-	wxStaticText* displayIdLabel = new wxStaticText(this, wxID_ANY, _T("Display Id :"));
+	wxStaticText* displayIdLabel = new wxStaticText(bottomSizer->GetStaticBox(), wxID_ANY, _T("Display Id :"));
 	idSizer->Add(displayIdLabel, 0, wxLEFT | wxRIGHT | wxTOP, 5);
-	m_displayIdResult = new wxStaticText(this, wxID_ANY, _T("No URL"));
+	m_displayIdResult = new wxStaticText(bottomSizer->GetStaticBox(), wxID_ANY, _T("No URL"));
 	idSizer->Add(m_displayIdResult, 0, wxALL, 5);
 	bottomSizer->Add(idSizer, 0, wxEXPAND);
 
@@ -79,7 +80,7 @@ NPCimporterDialog::NPCimporterDialog(wxWindow* parent /* = NULL */, wxWindowID i
 	// main panel adds
 	mainsizer->Add(topSizer, 0, wxALL | wxEXPAND, 5);
 	mainsizer->Add(bottomSizer, 0, wxALL | wxEXPAND, 5);
-	mainsizer->Add(buttonsBox, 0, wxALIGN_RIGHT | wxALIGN_BOTTOM | wxALL, 5);
+	mainsizer->Add(buttonsBox, 0, wxALIGN_RIGHT | wxALL, 5);
 
 	SetSizer(mainsizer);
 	mainsizer->SetSizeHints(this);
@@ -98,10 +99,9 @@ void NPCimporterDialog::OnImportButtonClicked(wxCommandEvent& event)
 		const QString url{m_URLname->GetValue().utf8_str()};
 
 		const NPCInfos* result = nullptr;
-		for (const auto it : PLUGINMANAGER)
+		for (const auto* plugin : g_modelViewer->m_importers)
 		{
-			const ImporterPlugin* plugin = dynamic_cast<ImporterPlugin*>(it);
-			if (plugin && plugin->acceptURL(url))
+			if (plugin->acceptURL(url))
 			{
 				result = plugin->importNPC(url);
 			}

@@ -21,8 +21,6 @@ set(src CharInfos.cpp
     MemoryUtils.cpp
     Model.cpp
     NPCInfos.cpp
-    Plugin.cpp
-    PluginManager.cpp
     metaclasses/Component.cpp
     metaclasses/Event.cpp
     metaclasses/Observable.cpp
@@ -45,8 +43,6 @@ set(headers CharInfos.h
       MemoryUtils.h
       Model.h
       NPCInfos.h
-      Plugin.h
-      PluginManager.h
       metaclasses/BaseIterator.h
       metaclasses/Component.h
       metaclasses/Container.h

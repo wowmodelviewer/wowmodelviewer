@@ -72,6 +72,12 @@ use_core()
 use_wow()
 use_casclib()
 
+# Exporter/importer include directories (static libraries linked directly into the executable)
+include_directories(${CMAKE_SOURCE_DIR}/Source/exporters/obj)
+include_directories(${CMAKE_SOURCE_DIR}/Source/exporters/fbx)
+include_directories(${CMAKE_SOURCE_DIR}/Source/importers/armory)
+include_directories(${CMAKE_SOURCE_DIR}/Source/importers/wowhead)
+
 set(RES_FILES "wmv.rc")
 
 # extra useful files for visual studio project
@@ -145,6 +151,11 @@ set(BIN_DIR "${CMAKE_SOURCE_DIR}/bin/")
 
 target_link_libraries(${NAME}
   ${extralibs}
+  objexporter
+  fbxexporter
+  armory
+  wowhead
+  ${CMAKE_SOURCE_DIR}/ThirdParty/lib/x64/libfbxsdk.lib
   Qt5::Xml
   Qt5::Gui
   Qt5::Network
@@ -185,8 +196,8 @@ set(QT_PLUGIN_IMAGE_FILES ${QT_PLUGIN_DIR}/imageformats/qjpeg.dll
                           ${QT_PLUGIN_DIR}/imageformats/qtgad.dll)
 
 set(EXTRA_FILES ${CMAKE_SOURCE_DIR}/bin_support/vcredist_x64.exe
-                ${CMAKE_SOURCE_DIR}/ThirdParty/lib/libssl-3-x64.dll
-                ${CMAKE_SOURCE_DIR}/ThirdParty/lib/libcrypto-3-x64.dll
+                ${CMAKE_SOURCE_DIR}/ThirdParty/lib/libssl-1_1-x64.dll
+                ${CMAKE_SOURCE_DIR}/ThirdParty/lib/libcrypto-1_1-x64.dll
                 ${CMAKE_SOURCE_DIR}/bin_support/wow/listfile.csv
                 ${CMAKE_SOURCE_DIR}/bin_support/Encryption/extraEncryptionKeys.csv)
 
