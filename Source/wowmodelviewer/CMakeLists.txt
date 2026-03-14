@@ -82,8 +82,6 @@ set(RES_FILES "wmv.rc")
 
 # extra useful files for visual studio project
 set(cmake_files ${CMAKE_SOURCE_DIR}/cmake/common.cmake
-                ${CMAKE_SOURCE_DIR}/cmake/linux.cmake
-                ${CMAKE_SOURCE_DIR}/cmake/macos.cmake
                 ${CMAKE_SOURCE_DIR}/cmake/policies.cmake
                 ${CMAKE_SOURCE_DIR}/cmake/windows.cmake)
 

@@ -151,10 +151,6 @@ BEGIN_EVENT_TABLE(ModelViewer, wxFrame)
 END_EVENT_TABLE()
 
 ModelViewer::ModelViewer()
-#ifdef _LINUX
-// Transparency in interfaceManager crashes with Linux compositing
-: interfaceManager(0, wxAUI_MGR_ALLOW_FLOATING | wxAUI_MGR_VENETIAN_BLINDS_HINT)
-#endif
 {
 	startQtEventLoop();
 	m_exporters.push_back(new OBJExporter());
@@ -194,9 +190,7 @@ ModelViewer::ModelViewer()
 	{
 		wxTopLevelWindowMSW::SetIcon(wxICON(IDI_ICON1));
 		wxWindow::SetExtraStyle(wxWS_EX_VALIDATE_RECURSIVELY);
-#ifndef  _LINUX // buggy
-		wxWindowBase::SetBackgroundStyle(wxBG_STYLE_CUSTOM);
-#endif
+wxWindowBase::SetBackgroundStyle(wxBG_STYLE_CUSTOM);
 
 		InitObjects(); // create our canvas, anim control, character control, etc
 
@@ -820,10 +814,8 @@ void ModelViewer::LoadLayout()
 
 			// If character panel is showing,  hide it
 			interfaceManager.GetPane(charControl).Show(isChar);
-#ifndef  _LINUX // buggy
-			interfaceManager.Update();
-#endif
-			LOG_INFO << "GUI Layout loaded from previous session.";
+interfaceManager.Update();
+LOG_INFO << "GUI Layout loaded from previous session.";
 		}
 	}
 	else if (!layout.IsEmpty() && savedLayoutVersion != currentLayoutVersion)
@@ -1556,11 +1548,7 @@ void ModelViewer::OnViewLog(wxCommandEvent& event)
 	if (ID == ID_FILE_VIEWLOG)
 	{
 		wxString logPath = cfgPath.BeforeLast(SLASH) + SLASH + wxT("log.txt");
-#ifdef  _WINDOWS
-		wxExecute(wxT("notepad.exe ") + logPath);
-#elif  _MAC
-    wxExecute(wxT("/Applications/TextEdit.app/Contents/MacOS/TextEdit ")+logPath);
-#endif
+wxExecute(wxT("notepad.exe ") + logPath);
 	}
 }
 
@@ -1812,16 +1800,9 @@ void ModelViewer::OnAbout(wxCommandEvent& event)
 	wxIcon icon;
 	icon.CopyFromBitmap(*bitmap);
 
-#if defined (_LINUX)
-	//icon.LoadFile(wxT("../bin_support/icon/wmv_xpm"));
-#elif defined (_MAC)
-	//icon.LoadFile(wxT("../bin_support/icon/wmv.icns"));
-#endif
+info.SetIcon(icon);
 
-	info.SetIcon(icon);
-
-	// FIXME: Doesn't link on OSX
-	wxAboutBox(info);
+wxAboutBox(info);
 }
 
 void ModelViewer::OnCanvasSize(wxCommandEvent& event)

@@ -103,20 +103,6 @@ wxString getGamePath(bool noSet)
 		newPath.Append(SLASH);
 	if (!newPath.EndsWith(wxString(L"Data\\")))
 		newPath.Append(wxString(L"Data\\"));
-#elif _MAC // Mac OS X
-  newPath = wxT("/Applications/World of Warcraft/");
-  if (!wxFileExists(gamePath+wxT("Data/common.MPQ")) && !wxFileExists(gamePath+wxT("Data/art.MPQ")) )
-    newPath = wxDirSelector(wxT("Please select your World of Warcraft folder:"), newPath);
-  if (!newPath.IsEmpty() && newPath.Last() != SLASH)
-    newPath.Append(SLASH);
-  newPath.Append(wxT("Data/"));
-#else // Linux
-  newPath = wxT(".")+SLASH;
-  if (!wxFileExists(newPath+wxT("Wow.exe")))
-    newPath = wxDirSelector(wxT("Please select your World of Warcraft folder:"), newPath);
-  if (!newPath.IsEmpty() && newPath.Last() != SLASH)
-    newPath.Append(SLASH);
-  newPath.Append(wxT("Data/"));
 #endif
 	if (!noSet)
 		gamePath = newPath;

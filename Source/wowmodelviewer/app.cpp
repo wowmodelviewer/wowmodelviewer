@@ -148,14 +148,6 @@ bool WowModelViewApp::OnInit()
 		}
 	}
 	//
-#elif defined (_LINUX)
-	// This probably needs to be fixed...
-	//if (icon->LoadFile(wxT("../bin_support/icon/wmv_xpm")) == false)
-	//  wxMessageBox(wxT("Failed to load Icon"),wxT("Failure"));
-#elif defined (_MAC)
-	// Dunno what to do about Macs...
-	//if (icon->LoadFile(wxT("../bin_support/icon/wmv.icns")) == false)
-	//  wxMessageBox(wxT("Failed to load Icon"),wxT("Failure"));
 #endif
 	frame->SetIcon(*icon);
 
@@ -165,9 +157,7 @@ bool WowModelViewApp::OnInit()
 	g_charControl = frame->charControl;
 	g_fileControl = frame->fileControl;
 
-#ifndef  _LINUX // buggy
-	frame->interfaceManager.Update();
-#endif
+frame->interfaceManager.Update();
 
 	if (frame->canvas)
 	{
