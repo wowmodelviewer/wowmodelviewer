@@ -432,10 +432,10 @@ bool CharDetails::applyChrCustomizationElements(uint chrCustomizationOption, sql
 						"SELECT CollectionsFileDataID, GeosetType, GeosetID FROM ChrCustomizationSkinnedModel WHERE ID = %1")
 					.arg(elt[1].toUInt()));
 
-				if (vals.valid)
-					customizationElementsPerOption_[chrCustomizationOption].models.emplace_back(
-						vals.values[0][0].toInt(),
-						std::make_pair(vals.values[0][1].toInt(), vals.values[0][2].toInt()));
+				if (vals.valid && !vals.values.empty())
+						customizationElementsPerOption_[chrCustomizationOption].models.emplace_back(
+							vals.values[0][0].toInt(),
+							std::make_pair(vals.values[0][1].toInt(), vals.values[0][2].toInt()));
 			}
 			else if (elt[2].toUInt() != 0) // texture customization
 			{
@@ -447,10 +447,10 @@ bool CharDetails::applyChrCustomizationElements(uint chrCustomizationOption, sql
 					"AND ChrModelTextureLayer.CharComponentTextureLayoutsID = %1 "
 					"WHERE ChrCustomizationMaterial.ID = %2").arg(model_->infos.textureLayoutID).arg(elt[2].toUInt()));
 
-				if (vals.valid)
-				{
-					TextureCustomization t{};
-					t.layer = vals.values[0][0].toUInt();
+				if (vals.valid && !vals.values.empty())
+					{
+						TextureCustomization t{};
+						t.layer = vals.values[0][0].toUInt();
 					t.region = bitMaskToSectionType(vals.values[0][1].toInt());
 					t.type = vals.values[0][2].toUInt();
 					t.blendMode = vals.values[0][3].toUInt();

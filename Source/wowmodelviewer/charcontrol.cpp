@@ -936,10 +936,16 @@ void CharControl::OnUpdateItem(int type, int id)
 				// I really have no idea!  
 				if (auto* charAttModel = dynamic_cast<WoWModel*>(charAtt->model()))
 				{
-					if (creaturemodels[id - 1].Mid(9, 9).IsSameAs(wxT("Kodobeast"), false))
-						charAttModel->scale_ = 2.25f;
-					else
-						charAttModel->scale_ = 1.0f;
+					charAttModel->scale_ = 1.0f;
+					if (cats[id] == 1)
+					{
+						const auto creatureIdx = static_cast<size_t>(numbers[id]);
+						if (creatureIdx < creaturemodels.size() &&
+							creaturemodels[creatureIdx].Mid(9, 9).IsSameAs(wxT("Kodobeast"), false))
+						{
+							charAttModel->scale_ = 2.25f;
+						}
+					}
 				}
 			}
 			model->rot_ = model->pos_ = glm::vec3(0.0f, 0.0f, 0.0f);
@@ -953,7 +959,7 @@ void CharControl::OnUpdateItem(int type, int id)
 		return;
 
 	case UPDATE_NPC:
-		g_modelViewer->LoadNPC(npcs[id].id);
+		g_modelViewer->LoadNPC(numbers[id]);
 
 		break;
 

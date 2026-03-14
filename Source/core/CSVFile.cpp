@@ -63,6 +63,12 @@ std::vector<std::string> CSVFile::get(unsigned int recordIndex, const core::Tabl
 			if (it->name.toLower() == m_fields[fieldIndex])
 				break;
 
+		if (fieldIndex >= m_fields.size())
+		{
+			result.emplace_back();
+			continue;
+		}
+
 		result.push_back(m_values[recordIndex][fieldIndex]);
 	}
 

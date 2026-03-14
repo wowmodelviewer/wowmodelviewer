@@ -243,11 +243,11 @@ void FilteredChoiceDialog::OnImportNPC(wxCommandEvent& event)
 		const int modelid = dlg->getImportedId();
 		if (modelid != -1)
 		{
-			int id = 0;
+			// If NPC not in database, add it
 			bool found = false;
-			for (std::vector<NPCRecord>::iterator it = npcs.begin(); it != npcs.end(); ++it, id++)
+			for (const auto& npc : npcs)
 			{
-				if (it->id == modelid)
+				if (npc.id == modelid)
 				{
 					found = true;
 					break;
@@ -261,17 +261,16 @@ void FilteredChoiceDialog::OnImportNPC(wxCommandEvent& event)
 				if (rec.model > 0)
 				{
 					npcs.push_back(rec);
-					id = npcs.size() - 1;
 					const QString query = QString(
-						                      "INSERT INTO Creature(ID,CreatureType,DisplayID1,Name_Lang) VALUES (%1,%2,%3,\"%4\")")
-					                      .
-					                      arg(modelid).arg(rec.type).arg(rec.model).arg(rec.name);
+											  "INSERT INTO Creature(ID,CreatureType,DisplayID1,Name_Lang) VALUES (%1,%2,%3,\"%4\")")
+										  .
+										  arg(modelid).arg(rec.type).arg(rec.model).arg(rec.name);
 					GAMEDATABASE.sqlQuery(query);
 				}
 			}
 
-			if (cc)
-				cc->OnUpdateItem(UPDATE_NPC, id);
+			// Load NPC directly by creature ID (same pattern as OnImportItem)
+			g_modelViewer->LoadNPC(modelid);
 		}
 	}
 	dlg->Destroy();

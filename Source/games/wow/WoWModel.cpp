@@ -4372,28 +4372,27 @@ GLuint WoWModel::getGLTexture(uint16 Tex) const
 
 void WoWModel::restoreRawGeosets()
 {
+	const auto rawCount = rawGeosets.size();
+
+	// Only save display state for raw geosets (merged model geosets will be discarded)
 	std::vector<bool> geosetDisplayStatus;
+	geosetDisplayStatus.reserve(rawCount);
+	for (size_t i = 0; i < rawCount && i < geosets.size(); i++)
+		geosetDisplayStatus.push_back(geosets[i]->display);
 
 	for (const auto it : geosets)
-	{
-		geosetDisplayStatus.push_back(it->display);
 		delete it;
-	}
 
 	geosets.clear();
 
 	for (const auto it : rawGeosets)
 	{
-		ModelGeosetHD* geo = new ModelGeosetHD(*it);
+		auto* geo = new ModelGeosetHD(*it);
 		geosets.push_back(geo);
 	}
 
-	uint i = 0;
-	for (const auto it : geosetDisplayStatus)
-	{
-		geosets[i]->display = it;
-		i++;
-	}
+	for (size_t i = 0; i < geosetDisplayStatus.size(); i++)
+		geosets[i]->display = geosetDisplayStatus[i];
 }
 
 void WoWModel::hideAllGeosets()
