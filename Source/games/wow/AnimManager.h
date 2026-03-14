@@ -22,15 +22,7 @@ struct AnimInfo
 	size_t AnimID;
 };
 
-#ifdef _WIN32
-#  ifdef BUILDING_WOW_DLL
-#    define _ANIMMANAGER_API_ __declspec(dllexport)
-#  else
-#    define _ANIMMANAGER_API_ __declspec(dllimport)
-#  endif
-#else
-#  define _ANIMMANAGER_API_
-#endif
+#define _ANIMMANAGER_API_
 
 class WoWModel;
 

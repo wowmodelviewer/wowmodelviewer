@@ -4,15 +4,7 @@
 #include <mutex>
 #include "LogOutput.h"
 
-#ifdef _WIN32
-#    ifdef BUILDING_CORE_DLL
-#        define _LOGOUTPUTFILE_API_ __declspec(dllexport)
-#    else
-#        define _LOGOUTPUTFILE_API_ __declspec(dllimport)
-#    endif
-#else
-#    define _LOGOUTPUTFILE_API_
-#endif
+#define _LOGOUTPUTFILE_API_
 
 namespace WMVLog
 {

@@ -3,15 +3,7 @@
 #include "types.h"
 #include "wdc3file.h"
 
-#ifdef _WIN32
-#    ifdef BUILDING_WOW_DLL
-#        define _WDC5FILE_API_ __declspec(dllexport)
-#    else
-#        define _WDC5FILE_API_ __declspec(dllimport)
-#    endif
-#else
-#    define _WDC5FILE_API_
-#endif
+#define _WDC5FILE_API_
 
 // WDC5 was introduced in WoW 10.2.5 (Dragonflight).
 // It adds two fields immediately after magic[4] in the file header:

@@ -6,15 +6,7 @@
 #include "GameFile.h"
 #include "logger/Logger.h"
 
-#ifdef _WIN32
-#    ifdef BUILDING_WOW_DLL
-#        define _MANAGEDITEM_API_ __declspec(dllexport)
-#    else
-#        define _MANAGEDITEM_API_ __declspec(dllimport)
-#    endif
-#else
-#    define _MANAGEDITEM_API_
-#endif
+#define _MANAGEDITEM_API_
 
 class _MANAGEDITEM_API_ ManagedItem
 {

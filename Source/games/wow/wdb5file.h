@@ -5,15 +5,7 @@
 #include "types.h"
 #include "CASCFile.h"
 
-#ifdef _WIN32
-#    ifdef BUILDING_WOW_DLL
-#        define _WDB5FILE_API_ __declspec(dllexport)
-#    else
-#        define _WDB5FILE_API_ __declspec(dllimport)
-#    endif
-#else
-#    define _WDB5FILE_API_
-#endif
+#define _WDB5FILE_API_
 
 class _WDB5FILE_API_ WDB5File : public DBFile, public CASCFile
 {

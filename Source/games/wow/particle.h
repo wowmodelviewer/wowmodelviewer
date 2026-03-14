@@ -1,14 +1,6 @@
 #pragma once
 
-#ifdef _WIN32
-#    ifdef BUILDING_WOW_DLL
-#        define _PARTICLE_API_ __declspec(dllexport)
-#    else
-#        define _PARTICLE_API_ __declspec(dllimport)
-#    endif
-#else
-#    define _PARTICLE_API_
-#endif
+#define _PARTICLE_API_
 
 class WoWModel;
 class ParticleSystem;

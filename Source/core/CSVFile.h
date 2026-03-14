@@ -2,15 +2,7 @@
 
 #include "dbfile.h"
 
-#ifdef _WIN32
-#    ifdef BUILDING_CORE_DLL
-#        define _CSVFILE_API_ __declspec(dllexport)
-#    else
-#        define _CSVFILE_API_ __declspec(dllimport)
-#    endif
-#else
-#    define _CSVFILE_API_
-#endif
+#define _CSVFILE_API_
 
 class _CSVFILE_API_ CSVFile : public DBFile
 {

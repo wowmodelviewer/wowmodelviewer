@@ -1,14 +1,6 @@
 #pragma once
 
-#ifdef _WIN32
-#    ifdef BUILDING_WOW_DLL
-#        define _DISPLAYABLE_API_ __declspec(dllexport)
-#    else
-#        define _DISPLAYABLE_API_ __declspec(dllimport)
-#    endif
-#else
-#    define _DISPLAYABLE_API_
-#endif
+#define _DISPLAYABLE_API_
 
 class Attachment;
 

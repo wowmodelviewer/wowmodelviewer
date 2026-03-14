@@ -7,15 +7,7 @@ class GameFile;
 
 class QDomElement;
 
-#ifdef _WIN32
-#    ifdef BUILDING_WOW_DLL
-#        define _WOWDATABASE_API_ __declspec(dllexport)
-#    else
-#        define _WOWDATABASE_API_ __declspec(dllimport)
-#    endif
-#else
-#    define _WOWDATABASE_API_
-#endif
+#define _WOWDATABASE_API_
 
 namespace wow
 {

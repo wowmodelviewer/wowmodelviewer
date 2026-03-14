@@ -38,15 +38,7 @@ struct CharTextureComponent
 	}
 };
 
-#ifdef _WIN32
-#    ifdef BUILDING_WOW_DLL
-#        define _CHARTEXTURE_API_ __declspec(dllexport)
-#    else
-#        define _CHARTEXTURE_API_ __declspec(dllimport)
-#    endif
-#else
-#    define _CHARTEXTURE_API_
-#endif
+#define _CHARTEXTURE_API_
 
 class _CHARTEXTURE_API_ CharTexture
 {

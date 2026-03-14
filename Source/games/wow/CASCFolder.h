@@ -15,15 +15,7 @@
 
 #include "GameFolder.h" // GameConfig
 
-#ifdef _WIN32
-#    ifdef BUILDING_WOW_DLL
-#        define _CASCFOLDER_API_ __declspec(dllexport)
-#    else
-#        define _CASCFOLDER_API_ __declspec(dllimport)
-#    endif
-#else
-#    define _CASCFOLDER_API_
-#endif
+#define _CASCFOLDER_API_
 
 class _CASCFOLDER_API_ CASCFolder
 {

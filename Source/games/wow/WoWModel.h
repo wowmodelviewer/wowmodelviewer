@@ -40,15 +40,7 @@ class ModelRenderPass;
 class QXmlStreamWriter;
 class QXmlStreamReader;
 
-#ifdef _WIN32
-#    ifdef BUILDING_WOW_DLL
-#        define _WOWMODEL_API_ __declspec(dllexport)
-#    else
-#        define _WOWMODEL_API_ __declspec(dllimport)
-#    endif
-#else
-#    define _WOWMODEL_API_
-#endif
+#define _WOWMODEL_API_
 
 enum
 {

@@ -5,15 +5,7 @@
 
 class Observer;
 
-#ifdef _WIN32
-#    ifdef BUILDING_CORE_DLL
-#        define _OBSERVABLE_API_ __declspec(dllexport)
-#    else
-#        define _OBSERVABLE_API_ __declspec(dllimport)
-#    endif
-#else
-#    define _OBSERVABLE_API_
-#endif
+#define _OBSERVABLE_API_
 
 class _OBSERVABLE_API_ Observable
 {

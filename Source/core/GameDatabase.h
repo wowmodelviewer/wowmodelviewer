@@ -8,15 +8,7 @@ class GameFile;
 class QDomElement;
 #include <QString>
 
-#ifdef _WIN32
-#    ifdef BUILDING_CORE_DLL
-#        define _GAMEDATABASE_API_ __declspec(dllexport)
-#    else
-#        define _GAMEDATABASE_API_ __declspec(dllimport)
-#    endif
-#else
-#    define _GAMEDATABASE_API_
-#endif
+#define _GAMEDATABASE_API_
 
 class _GAMEDATABASE_API_ sqlResult
 {

@@ -8,15 +8,7 @@
 
 class Model;
 
-#ifdef _WIN32
-#    ifdef BUILDING_CORE_DLL
-#        define _EXPORTERPLUGIN_API_ __declspec(dllexport)
-#    else
-#        define _EXPORTERPLUGIN_API_ __declspec(dllimport)
-#    endif
-#else
-#    define _EXPORTERPLUGIN_API_
-#endif
+#define _EXPORTERPLUGIN_API_
 
 class _EXPORTERPLUGIN_API_ ExporterPlugin
 {

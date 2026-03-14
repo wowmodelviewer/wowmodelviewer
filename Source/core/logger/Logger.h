@@ -9,15 +9,7 @@ class QMessageLogContext;
 #include "../metaclasses/Container.h"
 #include "LogOutput.h"
 
-#ifdef _WIN32
-#    ifdef BUILDING_CORE_DLL
-#        define _LOGGER_API_ __declspec(dllexport)
-#    else
-#        define _LOGGER_API_ __declspec(dllimport)
-#    endif
-#else
-#    define _LOGGER_API_
-#endif
+#define _LOGGER_API_
 
 #define LOGGER WMVLog::Logger::instance()
 #define LOG_INFO LOGGER(WMVLog::Logger::INFO_LOG)

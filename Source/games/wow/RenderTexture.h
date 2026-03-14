@@ -3,15 +3,7 @@
 #include "GL/glew.h"
 #include "GL/wglew.h"
 
-#ifdef _WIN32
-#    ifdef BUILDING_WOW_DLL
-#        define _RENDERTEXTURE_API_ __declspec(dllexport)
-#    else
-#        define _RENDERTEXTURE_API_ __declspec(dllimport)
-#    endif
-#else
-#    define _RENDERTEXTURE_API_
-#endif
+#define _RENDERTEXTURE_API_
 
 class _RENDERTEXTURE_API_ RenderTexture
 {

@@ -5,15 +5,7 @@
 class Event;
 class Observable;
 
-#ifdef _WIN32
-#    ifdef BUILDING_CORE_DLL
-#        define _OBSERVER_API_ __declspec(dllexport)
-#    else
-#        define _OBSERVER_API_ __declspec(dllimport)
-#    endif
-#else
-#    define _OBSERVER_API_
-#endif
+#define _OBSERVER_API_
 
 class _OBSERVER_API_ Observer
 {

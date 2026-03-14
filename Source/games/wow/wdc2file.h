@@ -3,15 +3,7 @@
 #include "types.h"
 #include "wdb5file.h"
 
-#ifdef _WIN32
-#    ifdef BUILDING_WOW_DLL
-#        define _WDC2FILE_API_ __declspec(dllexport)
-#    else
-#        define _WDC2FILE_API_ __declspec(dllimport)
-#    endif
-#else
-#    define _WDC2FILE_API_
-#endif
+#define _WDC2FILE_API_
 
 class _WDC2FILE_API_ WDC2File : public WDB5File
 {

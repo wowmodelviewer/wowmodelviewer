@@ -5,15 +5,7 @@
 #include "GameFile.h"
 #include "GameFolder.h"
 
-#ifdef _WIN32
-#    ifdef BUILDING_WOW_DLL
-#        define _WOWFOLDER_API_ __declspec(dllexport)
-#    else
-#        define _WOWFOLDER_API_ __declspec(dllimport)
-#    endif
-#else
-#    define _WOWFOLDER_API_
-#endif
+#define _WOWFOLDER_API_
 
 namespace wow
 {

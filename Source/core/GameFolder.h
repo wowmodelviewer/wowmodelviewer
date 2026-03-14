@@ -5,15 +5,7 @@
 #include "GameFile.h"
 #include "metaclasses/Container.h"
 
-#ifdef _WIN32
-#    ifdef BUILDING_CORE_DLL
-#        define _GAMEFOLDER_API_ __declspec(dllexport)
-#    else
-#        define _GAMEFOLDER_API_ __declspec(dllimport)
-#    endif
-#else
-#    define _GAMEFOLDER_API_
-#endif
+#define _GAMEFOLDER_API_
 
 namespace core
 {

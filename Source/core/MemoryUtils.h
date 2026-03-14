@@ -2,15 +2,7 @@
 
 #include <QString>
 
-#ifdef _WIN32
-#    ifdef BUILDING_CORE_DLL
-#        define _MEMORYUTILS_API_ __declspec(dllexport)
-#    else
-#        define _MEMORYUTILS_API_ __declspec(dllimport)
-#    endif
-#else
-#    define _MEMORYUTILS_API_
-#endif
+#define _MEMORYUTILS_API_
 
 namespace core
 {
