@@ -121,7 +121,7 @@ public:
 
 	uint nbLights() const
 	{
-		return lights.size();
+		return static_cast<uint>(lights.size());
 	}
 
 	// Start, Mid and End colours, for cases where the model's particle colours are

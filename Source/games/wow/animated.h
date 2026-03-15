@@ -310,7 +310,7 @@ public:
 		{
 			uint32* ptimes;
 			AnimationBlockHeader* pHeadTimes;
-			auto it = modelData.animfiles.find(modelData.animIndexToAnimId.at(j));
+			auto it = modelData.animfiles.find(modelData.animIndexToAnimId.at(static_cast<uint>(j)));
 			if (it != modelData.animfiles.end())
 			{
 				GameFile* animfile = it->second.first;
@@ -387,7 +387,7 @@ public:
 		{
 			D* keys;
 			AnimationBlockHeader* pHeadKeys;
-			auto it = modelData.animfiles.find(modelData.animIndexToAnimId.at(j));
+			auto it = modelData.animfiles.find(modelData.animIndexToAnimId.at(static_cast<uint>(j)));
 			if (it != modelData.animfiles.end())
 			{
 				GameFile* animfile = it->second.first;

@@ -411,7 +411,7 @@ bool WDC3File::open()
 
 	if (copyTable.size() > 0)
 	{
-		uint nbEntries = copyTable.size();
+		const auto nbEntries = copyTable.size();
 
 		m_IDs.reserve(m_recordOffsets.size() + nbEntries);
 		m_recordOffsets.reserve(m_recordOffsets.size() + nbEntries);

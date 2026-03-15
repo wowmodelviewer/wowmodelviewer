@@ -78,12 +78,12 @@ GameFile* TabardDetails::GetIconTex(int slot)
 
 int TabardDetails::GetMaxBackground()
 {
-	return backgrounds.size();
+	return static_cast<int>(backgrounds.size());
 }
 
 int TabardDetails::GetMaxIcon()
 {
-	return icons.size();
+	return static_cast<int>(icons.size());
 }
 
 int TabardDetails::GetMaxIconColor(int icon)
@@ -101,7 +101,7 @@ int TabardDetails::GetMaxIconColor(int icon)
 
 int TabardDetails::GetMaxBorder()
 {
-	return borders.size();
+	return static_cast<int>(borders.size());
 }
 
 int TabardDetails::GetMaxBorderColor(int border)

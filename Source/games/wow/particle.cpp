@@ -49,11 +49,11 @@ void ParticleSystem::init(GameFile* f, M2ParticleDef& mta, std::vector<uint32>& 
 	glm::vec3 colors2[3];
 	memcpy(colors2, f->getBuffer() + mta.p.colors.ofsKeys, sizeof(glm::vec3) * 3);
 
-	for (size_t i = 0; i < 3; i++)
+	for (int i = 0; i < 3; i++)
 	{
 		const float opacity = *reinterpret_cast<short*>(f->getBuffer() + mta.p.opacity.ofsKeys + i * 2);
 		colors[i] = glm::vec4(colors2[i].x / 255.0f, colors2[i].y / 255.0f,
-		                      colors2[i].z / 255.0f, opacity / 32767.0f);
+							  colors2[i].z / 255.0f, opacity / 32767.0f);
 		sizes[i] = (*reinterpret_cast<float*>(f->getBuffer() + mta.p.sizes.ofsKeys + i * sizeof(glm::vec2))) * mta.p.scales[i];
 	}
 	mid = 0.5; // mid can't be 0 or 1, TODO, Alfred
@@ -776,7 +776,7 @@ void RibbonEmitter::setup(size_t anim, size_t time)
 	const glm::vec3 ntpos = glm::vec3(parent->mat * glm::vec4(pos, 1.0f));
 	glm::vec3 ntup = glm::vec3(parent->mat * (glm::vec4(pos, 1.f) + glm::vec4(0, 0, 1, 1)));
 	ntup -= ntpos;
-	glm::normalize(ntup);
+	ntup = glm::normalize(ntup);
 	const float dlen = (ntpos - tpos).length();
 
 	manim = anim;

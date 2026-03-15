@@ -12,5 +12,5 @@ DBFile::Iterator DBFile::begin()
 
 DBFile::Iterator DBFile::end()
 {
-	return Iterator(*this, recordCount);
+	return Iterator(*this, static_cast<unsigned int>(recordCount));
 }

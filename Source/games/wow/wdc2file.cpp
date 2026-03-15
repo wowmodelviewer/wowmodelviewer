@@ -114,7 +114,7 @@ bool WDC2File::open()
 #endif
 	}
 
-	uint32 palletBlockOffset = getPos();
+	uint32 palletBlockOffset = static_cast<uint32>(getPos());
 	uint32 commonBlockOffset = palletBlockOffset + m_header.pallet_data_size;
 
 	// only one secion used in dbc files so far, so no loop for now
@@ -123,7 +123,7 @@ bool WDC2File::open()
 	data = getPointer();
 
 	// compute various offset needed to read data in the file 
-	uint32 stringTableOffset = getPos() + recordSize * recordCount;
+	uint32 stringTableOffset = static_cast<uint32>(getPos() + recordSize * recordCount);
 
 	// embedded strings in fields instead of stringTable
 	if ((m_header.flags & 0x01) != 0)
@@ -135,7 +135,7 @@ bool WDC2File::open()
 	seek(stringTableOffset);
 	stringTable = getPointer();
 
-	uint32 IdBlockOffset = stringTableOffset + stringSize;
+	uint32 IdBlockOffset = static_cast<uint32>(stringTableOffset + stringSize);
 
 	uint32 copyBlockOffset = IdBlockOffset + sectionHeader[0].id_list_size;
 

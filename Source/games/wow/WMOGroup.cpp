@@ -364,9 +364,9 @@ void WMOGroup::initDisplayList()
 			for (size_t j = batch->vertexStart; j <= batch->vertexEnd; j++)
 			{
 				if (vertices[a] == vertices[j])
-				{
-					IndiceToVerts[batch->indexStart + i] = j;
-					break;
+					{
+						IndiceToVerts[batch->indexStart + i] = static_cast<uint32>(j);
+						break;
 				}
 			}
 		}

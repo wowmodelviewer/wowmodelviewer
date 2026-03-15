@@ -1346,7 +1346,7 @@ void WoWModel::setLOD(int index)
 			const int special = specialTextures[texlookup[Tex[j].textureid + k]];
 			if (special == 11 || special == 12 || special == 13)
 			{
-				texOffset = k;
+				texOffset = static_cast<uint>(k);
 				pass->specialTex = special;
 				if (texCount > 1)
 					LOG_INFO << "setLOD: texture unit" << j << "has" << texCount << "textures. Choosing texture" << k +
@@ -4060,9 +4060,9 @@ void WoWModel::refreshMerging()
 	uint mergeIndex = 0;
 	for (const auto modelsIt : mergedModels)
 	{
-		const uint nbVertices = origVertices.size();
-		const uint nbIndices = indices.size();
-		const uint nbGeosets = geosets.size();
+		const uint nbVertices = static_cast<uint>(origVertices.size());
+		const uint nbIndices = static_cast<uint>(indices.size());
+		const uint nbGeosets = static_cast<uint>(geosets.size());
 
 		// reinit merged model as well, just in case
 		modelsIt->origVertices = modelsIt->rawVertices;
@@ -4338,13 +4338,13 @@ void WoWModel::refresh()
 	replaceTextures[TEXTURE_SKIN] = charTex;
 
 	// Eye Glow Geosets are ID 1701, 1702, etc.
-	const size_t egt = cd.eyeGlowType;
+	const int egt = static_cast<int>(cd.eyeGlowType);
 	const int egtId = CG_EYEGLOW * 100 + egt + 1; // CG_EYEGLOW = 17
 	for (size_t i = 0; i < rawGeosets.size(); i++)
 	{
 		const int id = geosets[i]->id;
 		if ((int)(id / 100) == CG_EYEGLOW) // geosets 1700..1799
-			showGeoset(i, (id == egtId));
+			showGeoset(static_cast<uint>(i), (id == egtId));
 	}
 
 	// refresh merged models

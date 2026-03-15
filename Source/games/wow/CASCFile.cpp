@@ -97,7 +97,7 @@ size_t CASCFile::read(void* dest, size_t bytes)
 	else
 	{
 		unsigned long result = 0;
-		if (!CascReadFile(m_handle, dest, bytes, &result))
+		if (!CascReadFile(m_handle, dest, static_cast<DWORD>(bytes), &result))
 			LOG_ERROR << "Reading" << filepath << "failed." << "Error" << GetLastError();
 
 		return result;
@@ -112,7 +112,7 @@ void CASCFile::seek(size_t offset)
 	}
 	else
 	{
-		if (CascSetFilePointer(m_handle, offset, nullptr, FILE_BEGIN) == CASC_INVALID_POS)
+		if (CascSetFilePointer(m_handle, static_cast<LONG>(offset), nullptr, FILE_BEGIN) == CASC_INVALID_POS)
 			LOG_ERROR << "Seek in file" << filepath << "to position" << offset << "failed. Error" << GetLastError();
 	}
 }
