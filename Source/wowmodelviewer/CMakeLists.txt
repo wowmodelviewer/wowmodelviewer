@@ -188,9 +188,7 @@ set(QT_PLUGIN_SYS_FILES ${QT_PLUGIN_DIR}/platforms/qminimal.dll
                         ${QT_PLUGIN_DIR}/platforms/qwindows.dll
                         ${QT_PLUGIN_DIR}/platforms/qwindowsd.dll)
 
-set(QT_PLUGIN_IMAGE_FILES ${QT_PLUGIN_DIR}/imageformats/qjpeg.dll
-                          ${QT_PLUGIN_DIR}/imageformats/qjpegd.dll
-                          ${QT_PLUGIN_DIR}/imageformats/qtga.dll
+set(QT_PLUGIN_IMAGE_FILES ${QT_PLUGIN_DIR}/imageformats/qtga.dll
                           ${QT_PLUGIN_DIR}/imageformats/qtgad.dll)
 
 set(EXTRA_FILES ${CMAKE_SOURCE_DIR}/bin_support/vcredist_x64.exe
