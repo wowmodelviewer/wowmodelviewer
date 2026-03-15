@@ -39,8 +39,6 @@ setOutPath $INSTDIR
 !define wmvroot "..\..\..\"
 File "${wmvroot}\bin\wowmodelviewer.exe"
 File "${wmvroot}\bin\*.dll"
-File "${wmvroot}\bin\extraEncryptionKeys.csv"
-File "${wmvroot}\bin\listfile.csv"
 
 CreateDirectory $INSTDIR\plugins
 SetOutPath $INSTDIR\plugins\imageformats

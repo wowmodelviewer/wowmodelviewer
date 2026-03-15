@@ -125,5 +125,7 @@ public:
 
 	void OnGameToggle(wxCommandEvent& event);
 	void OnViewLog(wxCommandEvent& event);
+	void OnUpdateListfile(wxCommandEvent& event);
+	void OnUpdateEncryptionKeys(wxCommandEvent& event);
 	void LoadWoW();
 };

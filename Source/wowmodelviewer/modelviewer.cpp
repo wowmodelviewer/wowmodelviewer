@@ -28,6 +28,10 @@
 #include "logger/Logger.h"
 #include <QSettings>
 #include <QCoreApplication>
+#include <QFile>
+#include <QNetworkAccessManager>
+#include <QNetworkReply>
+#include <QNetworkRequest>
 #include <fstream>
 #include <thread>
 
@@ -60,6 +64,8 @@ BEGIN_EVENT_TABLE(ModelViewer, wxFrame)
 	// File menu
 	EVT_MENU(ID_LOAD_WOW, ModelViewer::OnGameToggle)
 	EVT_MENU(ID_FILE_VIEWLOG, ModelViewer::OnViewLog)
+	EVT_MENU(ID_FILE_UPDATE_LISTFILE, ModelViewer::OnUpdateListfile)
+	EVT_MENU(ID_FILE_UPDATE_ENCRYPTION_KEYS, ModelViewer::OnUpdateEncryptionKeys)
 	EVT_MENU(ID_VIEW_NPC, ModelViewer::OnCharToggle)
 	EVT_MENU(ID_VIEW_ITEM, ModelViewer::OnCharToggle)
 	EVT_MENU(ID_FILE_MODEL_INFO, ModelViewer::OnExportOther)
@@ -263,6 +269,9 @@ void ModelViewer::InitMenu()
 	if (isWoWLoaded == true)
 		fileMenu->Enable(ID_LOAD_WOW, false);
 	fileMenu->Append(ID_FILE_VIEWLOG, _("View Log"));
+	fileMenu->AppendSeparator();
+	fileMenu->Append(ID_FILE_UPDATE_LISTFILE, _("Update Listfile"));
+	fileMenu->Append(ID_FILE_UPDATE_ENCRYPTION_KEYS, _("Update Encryption Keys"));
 	fileMenu->AppendSeparator();
 
 	// export menu
@@ -1557,6 +1566,103 @@ void ModelViewer::OnGameToggle(wxCommandEvent& event)
 	const int ID = event.GetId();
 	if (ID == ID_LOAD_WOW)
 		LoadWoW();
+}
+
+void ModelViewer::OnUpdateListfile(wxCommandEvent& /*event*/)
+{
+	LOG_INFO << "Downloading latest listfile...";
+	SetStatusText(wxT("Downloading listfile..."));
+
+	const QUrl url("https://github.com/wowdev/wow-listfile/releases/latest/download/community-listfile.csv");
+	QNetworkAccessManager manager;
+	QNetworkRequest request(url);
+	request.setRawHeader("User-Agent", "WoWModelViewer");
+	request.setAttribute(QNetworkRequest::RedirectPolicyAttribute, QNetworkRequest::NoLessSafeRedirectPolicy);
+	QNetworkReply* response = manager.get(request);
+	QEventLoop eventLoop;
+	QObject::connect(response, &QNetworkReply::finished, &eventLoop, &QEventLoop::quit);
+	QObject::connect(response, &QNetworkReply::errorOccurred, &eventLoop, &QEventLoop::quit);
+	eventLoop.exec();
+
+	if (response->error() != QNetworkReply::NoError)
+	{
+		LOG_ERROR << "Failed to download listfile:" << response->errorString();
+		wxMessageBox(wxString::Format("Failed to download listfile:\n%s",
+			response->errorString().toStdWString()), wxT("Download Error"), wxOK | wxICON_ERROR);
+		response->deleteLater();
+		SetStatusText(wxT("Listfile update failed."));
+		return;
+	}
+
+	const QString destPath = QCoreApplication::applicationDirPath() + "/listfile.csv";
+	QFile file(destPath);
+	if (!file.open(QIODevice::WriteOnly))
+	{
+		LOG_ERROR << "Failed to write listfile to" << destPath;
+		wxMessageBox(wxT("Failed to write listfile.csv to disk."), wxT("File Error"), wxOK | wxICON_ERROR);
+		response->deleteLater();
+		SetStatusText(wxT("Listfile update failed."));
+		return;
+	}
+
+	file.write(response->readAll());
+	file.close();
+	response->deleteLater();
+
+	LOG_INFO << "Listfile updated successfully at" << destPath;
+	SetStatusText(wxT("Listfile updated successfully."));
+	wxMessageBox(wxT("Listfile updated successfully.\nRestart the application to use the new listfile."),
+		wxT("Update Complete"), wxOK | wxICON_INFORMATION);
+}
+
+void ModelViewer::OnUpdateEncryptionKeys(wxCommandEvent& /*event*/)
+{
+	LOG_INFO << "Downloading latest encryption keys...";
+	SetStatusText(wxT("Downloading encryption keys..."));
+
+	const QUrl url("https://raw.githubusercontent.com/wowdev/TACTKeys/master/WoW.txt");
+	QNetworkAccessManager manager;
+	QNetworkRequest request(url);
+	request.setRawHeader("User-Agent", "WoWModelViewer");
+	request.setAttribute(QNetworkRequest::RedirectPolicyAttribute, QNetworkRequest::NoLessSafeRedirectPolicy);
+	QNetworkReply* response = manager.get(request);
+	QEventLoop eventLoop;
+	QObject::connect(response, &QNetworkReply::finished, &eventLoop, &QEventLoop::quit);
+	QObject::connect(response, &QNetworkReply::errorOccurred, &eventLoop, &QEventLoop::quit);
+	eventLoop.exec();
+
+	if (response->error() != QNetworkReply::NoError)
+	{
+		LOG_ERROR << "Failed to download encryption keys:" << response->errorString();
+		wxMessageBox(wxString::Format("Failed to download encryption keys:\n%s",
+			response->errorString().toStdWString()), wxT("Download Error"), wxOK | wxICON_ERROR);
+		response->deleteLater();
+		SetStatusText(wxT("Encryption keys update failed."));
+		return;
+	}
+
+	// The source file uses spaces as separators; the app expects semicolons.
+	QString content = QString::fromUtf8(response->readAll());
+	response->deleteLater();
+	content.replace(' ', ';');
+
+	const QString destPath = QCoreApplication::applicationDirPath() + "/extraEncryptionKeys.csv";
+	QFile file(destPath);
+	if (!file.open(QIODevice::WriteOnly | QIODevice::Text))
+	{
+		LOG_ERROR << "Failed to write encryption keys to" << destPath;
+		wxMessageBox(wxT("Failed to write extraEncryptionKeys.csv to disk."), wxT("File Error"), wxOK | wxICON_ERROR);
+		SetStatusText(wxT("Encryption keys update failed."));
+		return;
+	}
+
+	file.write(content.toUtf8());
+	file.close();
+
+	LOG_INFO << "Encryption keys updated successfully at" << destPath;
+	SetStatusText(wxT("Encryption keys updated successfully."));
+	wxMessageBox(wxT("Encryption keys updated successfully.\nRestart the application to use the new keys."),
+		wxT("Update Complete"), wxOK | wxICON_INFORMATION);
 }
 
 void ModelViewer::LoadWoW()

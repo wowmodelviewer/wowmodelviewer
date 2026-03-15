@@ -90,9 +90,7 @@ source_group("cmake" FILES ${cmake_files})
 set(common_files 
                  wowmodelviewer.json
                  ${CMAKE_SOURCE_DIR}/Installers/Windows/NSIS/WMVInstallerMUI.nsi
-                 ${CMAKE_SOURCE_DIR}/.github/workflows/build.yml
-                 ${CMAKE_SOURCE_DIR}/bin_support/wow/listfile.csv
-                 ${CMAKE_SOURCE_DIR}/bin_support/Encryption/extraEncryptionKeys.csv)
+                 ${CMAKE_SOURCE_DIR}/.github/workflows/build.yml)
 
 set(wow9_2_files 
                  ${CMAKE_SOURCE_DIR}/bin_support/wow/9.2/database.xml
@@ -191,9 +189,7 @@ set(QT_PLUGIN_SYS_FILES ${QT_PLUGIN_DIR}/platforms/qminimal.dll
 set(QT_PLUGIN_TLS_FILES ${QT_PLUGIN_DIR}/tls/qschannelbackend.dll
                         ${QT_PLUGIN_DIR}/tls/qschannelbackendd.dll)
 
-set(EXTRA_FILES ${CMAKE_SOURCE_DIR}/bin_support/vcredist_x64.exe
-                ${CMAKE_SOURCE_DIR}/bin_support/wow/listfile.csv
-                ${CMAKE_SOURCE_DIR}/bin_support/Encryption/extraEncryptionKeys.csv)
+set(EXTRA_FILES ${CMAKE_SOURCE_DIR}/bin_support/vcredist_x64.exe)
 
 set(files ${QT_FILES} ${EXTRA_FILES})
 
