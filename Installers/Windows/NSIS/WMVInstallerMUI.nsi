@@ -53,9 +53,9 @@ CreateDirectory $INSTDIR\localisation
 SetOutPath $INSTDIR\localisation
 File "${wmvroot}\bin_support\localisation\*.mo"
 
-CreateDirectory $INSTDIR\platforms
-SetOutPath $INSTDIR\platforms
-File "${wmvroot}\bin\platforms\*.dll"
+CreateDirectory $INSTDIR\plugins\tls
+SetOutPath $INSTDIR\plugins\tls
+File "${wmvroot}\bin\plugins\tls\*"
 
 CreateDirectory $INSTDIR\
 

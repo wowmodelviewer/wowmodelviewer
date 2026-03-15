@@ -230,7 +230,7 @@ int ArmoryImporter::readJSONValues(ImportType type, const QString& url, QJsonObj
 			    "key": {
 			      "href": "https://eu.api.blizzard.com/data/wow/playable-class/9?namespace=static-9.0.1_36072-eu"
 			    },
-			    "name": "Démoniste",
+			    "name": "DÃ©moniste",
 			    "id": 9
 			  },
 			  "active_spec": {
@@ -302,7 +302,7 @@ int ArmoryImporter::readJSONValues(ImportType type, const QString& url, QJsonObj
 			      "id": 132394,
 			      "slot": {
 			        "type": "HEAD",
-			        "name": "Tête"
+			        "name": "TÃªte"
 			      },
 			      "enchant": 0,
 			      "item_appearance_modifier_id": 0,
@@ -313,7 +313,7 @@ int ArmoryImporter::readJSONValues(ImportType type, const QString& url, QJsonObj
 			      "id": 134309,
 			      "slot": {
 			        "type": "SHOULDER",
-			        "name": "Épaules"
+			        "name": "Ã‰paules"
 			      },
 			      "enchant": 0,
 			      "item_appearance_modifier_id": 0,
@@ -475,11 +475,11 @@ int ArmoryImporter::readJSONValues(ImportType type, const QString& url, QJsonObj
 			    },
 			    {
 			      "option": {
-			        "name": "Détails de la mâchoire",
+			        "name": "DÃ©tails de la mÃ¢choire",
 			        "id": 62
 			      },
 			      "choice": {
-			        "name": "Joues nécrosées",
+			        "name": "Joues nÃ©crosÃ©es",
 			        "id": 979,
 			        "display_order": 9
 			      }
@@ -496,7 +496,7 @@ int ArmoryImporter::readJSONValues(ImportType type, const QString& url, QJsonObj
 			    },
 			    {
 			      "option": {
-			        "name": "Détails du visage",
+			        "name": "DÃ©tails du visage",
 			        "id": 563
 			      },
 			      "choice": {

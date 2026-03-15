@@ -14,9 +14,6 @@ concurrency:
   group: build-${{ github.ref }}
   cancel-in-progress: true
 
-env:
-  VCPKG_BINARY_SOURCES: "clear;x-gha,readwrite"
-
 jobs:
   build:
     runs-on: windows-latest
@@ -27,17 +24,7 @@ jobs:
         with:
           submodules: recursive
 
-      # Required to enable vcpkg's built-in GitHub Actions binary cache backend.
-      # Packages built by vcpkg are stored per-package in the Actions cache so
-      # even a partial cache hit avoids rebuilding individual libraries.
-      - name: Export vcpkg binary cache environment variables
-        uses: actions/github-script@v8
-        with:
-          script: |
-            core.exportVariable('ACTIONS_CACHE_URL', process.env.ACTIONS_CACHE_URL || '');
-            core.exportVariable('ACTIONS_RUNTIME_TOKEN', process.env.ACTIONS_RUNTIME_TOKEN || '');
-
-      # Primary cache: the fully assembled ThirdParty tree.
+      # Primary cache:
       # Cache is invalidated automatically when setup_x64_deps.ps1 changes.
       # restore-keys lets a partial match seed the cache so only changed
       # packages need to be rebuilt by vcpkg.

@@ -156,23 +156,25 @@ set(QT_FILES ${QT_BIN_DIR}/Qt6Core.dll
              ${QT_BIN_DIR}/Qt6Xmld.dll)
 
 set(QT_PLUGIN_DIR ${QT_LOCATION}/plugins)
-set(QT_PLUGIN_SYS_FILES ${QT_PLUGIN_DIR}/platforms/qminimal.dll
-                        ${QT_PLUGIN_DIR}/platforms/qminimald.dll
-                        ${QT_PLUGIN_DIR}/platforms/qoffscreen.dll
-                        ${QT_PLUGIN_DIR}/platforms/qoffscreend.dll
-                        ${QT_PLUGIN_DIR}/platforms/qwindows.dll
-                        ${QT_PLUGIN_DIR}/platforms/qwindowsd.dll)
-
 set(QT_PLUGIN_TLS_FILES ${QT_PLUGIN_DIR}/tls/qschannelbackend.dll
                         ${QT_PLUGIN_DIR}/tls/qschannelbackendd.dll)
+
+set(QT_PLUGIN_IMG_FILES ${QT_PLUGIN_DIR}/imageformats/qgif.dll
+                        ${QT_PLUGIN_DIR}/imageformats/qgifd.dll
+                        ${QT_PLUGIN_DIR}/imageformats/qico.dll
+                        ${QT_PLUGIN_DIR}/imageformats/qicod.dll
+                        ${QT_PLUGIN_DIR}/imageformats/qjpeg.dll
+                        ${QT_PLUGIN_DIR}/imageformats/qjpegd.dll
+                        ${QT_PLUGIN_DIR}/imageformats/qsvg.dll
+                        ${QT_PLUGIN_DIR}/imageformats/qsvgd.dll)
 
 set(EXTRA_FILES ${CMAKE_SOURCE_DIR}/bin_support/vcredist_x64.exe)
 
 set(files ${QT_FILES} ${EXTRA_FILES})
 
 install(FILES ${files} DESTINATION ${BIN_DIR})
-install(FILES ${QT_PLUGIN_SYS_FILES} DESTINATION ${BIN_DIR}platforms)
 install(FILES ${QT_PLUGIN_TLS_FILES} DESTINATION ${BIN_DIR}plugins/tls)
+install(FILES ${QT_PLUGIN_IMG_FILES} DESTINATION ${BIN_DIR}plugins/imageformats)
 foreach(dir ${wow_version_dirs})
   if(IS_DIRECTORY ${dir})
     get_filename_component(ver ${dir} NAME)
