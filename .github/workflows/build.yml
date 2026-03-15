@@ -10,7 +10,7 @@ env:
 
 jobs:
   build:
-    runs-on: windows-2025-vs2026  # VS 2026, public preview - matches local dev environment
+    runs-on: windows-latest
 
     steps:
       - name: Checkout
