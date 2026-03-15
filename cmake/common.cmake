@@ -12,6 +12,8 @@ if(WIN32)
   include(${CMAKE_SOURCE_DIR}/cmake/windows.cmake)
 endif()
 
+# glm is a submodule; its headers live under ThirdParty/glm/glm/
+include_directories(${CMAKE_SOURCE_DIR}/ThirdParty/glm)
 # glm 1.0+ requires this for gtx/ experimental extensions
 add_definitions(-DGLM_ENABLE_EXPERIMENTAL)
 
