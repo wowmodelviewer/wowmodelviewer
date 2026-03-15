@@ -3,7 +3,16 @@ name: Build
 on:
   push:
     branches: [ develop ]
+    paths-ignore:
+      - '**.md'
+      - 'doc/**'
+      - '.gitignore'
+      - '.gitattributes'
   workflow_dispatch:
+
+concurrency:
+  group: build-${{ github.ref }}
+  cancel-in-progress: true
 
 env:
   VCPKG_BINARY_SOURCES: "clear;x-gha,readwrite"
