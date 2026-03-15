@@ -44,29 +44,10 @@ CreateDirectory $INSTDIR\plugins
 SetOutPath $INSTDIR\plugins\imageformats
 File "${wmvroot}\bin\plugins\imageformats\*"
 
-CreateDirectory $INSTDIR\games\wow
-SetOutPath $INSTDIR\games\wow\9.2
-File "${wmvroot}\bin_support\wow\9.2\*"
-
-CreateDirectory $INSTDIR\games\wow
-SetOutPath $INSTDIR\games\wow\10.0
-File "${wmvroot}\bin_support\wow\10.0\*"
-
-CreateDirectory $INSTDIR\games\wow
-SetOutPath $INSTDIR\games\wow\10.1
-File "${wmvroot}\bin_support\wow\10.1\*"
-
-CreateDirectory $INSTDIR\games\wow
-SetOutPath $INSTDIR\games\wow\11.0
-File "${wmvroot}\bin_support\wow\11.0\*"
-
-CreateDirectory $INSTDIR\games\wow
-SetOutPath $INSTDIR\games\wow\11.1
-File "${wmvroot}\bin_support\wow\11.1\*"
-
-CreateDirectory $INSTDIR\games\wow
-SetOutPath $INSTDIR\games\wow\11.2
-File "${wmvroot}\bin_support\wow\11.2\*"
+# Auto-include all WoW version directories and their files recursively.
+# To add a new version, just create a new folder under bin_support\wow\.
+SetOutPath $INSTDIR\games\wow
+File /r "${wmvroot}\bin_support\wow\*.*"
 
 CreateDirectory $INSTDIR\localisation
 SetOutPath $INSTDIR\localisation

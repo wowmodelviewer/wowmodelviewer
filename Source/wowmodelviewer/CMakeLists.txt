@@ -92,44 +92,21 @@ set(common_files
                  ${CMAKE_SOURCE_DIR}/Installers/Windows/NSIS/WMVInstallerMUI.nsi
                  ${CMAKE_SOURCE_DIR}/.github/workflows/build.yml)
 
-set(wow9_2_files 
-                 ${CMAKE_SOURCE_DIR}/bin_support/wow/9.2/database.xml
-                 ${CMAKE_SOURCE_DIR}/bin_support/wow/9.2/AnimationData.csv
-                 ${CMAKE_SOURCE_DIR}/bin_support/wow/9.2/ChrRacesCustomization.csv)
+# Auto-discover WoW version directories and their support files.
+# To add a new version, just create a new folder under bin_support/wow/ with the data files.
+file(GLOB wow_version_dirs LIST_DIRECTORIES true ${CMAKE_SOURCE_DIR}/bin_support/wow/*)
 
-set(wow10_0_files
-                 ${CMAKE_SOURCE_DIR}/bin_support/wow/10.0/database.xml
-                 ${CMAKE_SOURCE_DIR}/bin_support/wow/10.0/AnimationData.csv
-                 ${CMAKE_SOURCE_DIR}/bin_support/wow/10.0/ChrRacesCustomization.csv)
+set(all_wow_files "")
+foreach(dir ${wow_version_dirs})
+  if(IS_DIRECTORY ${dir})
+    get_filename_component(ver ${dir} NAME)
+    file(GLOB ver_files ${dir}/*)
+    source_group("wow${ver}" FILES ${ver_files})
+    list(APPEND all_wow_files ${ver_files})
+  endif()
+endforeach()
 
-set(wow10_1_files
-                 ${CMAKE_SOURCE_DIR}/bin_support/wow/10.1/database.xml
-                 ${CMAKE_SOURCE_DIR}/bin_support/wow/10.1/AnimationData.csv
-                 ${CMAKE_SOURCE_DIR}/bin_support/wow/10.1/ChrRacesCustomization.csv)
-				 
-set(wow11_0_files
-                 ${CMAKE_SOURCE_DIR}/bin_support/wow/11.0/database.xml
-                 ${CMAKE_SOURCE_DIR}/bin_support/wow/11.0/AnimationData.csv
-                 ${CMAKE_SOURCE_DIR}/bin_support/wow/11.0/ChrRacesCustomization.csv)
-				 
-set(wow11_1_files
-                 ${CMAKE_SOURCE_DIR}/bin_support/wow/11.1/database.xml
-                 ${CMAKE_SOURCE_DIR}/bin_support/wow/11.1/AnimationData.csv
-                 ${CMAKE_SOURCE_DIR}/bin_support/wow/11.1/ChrRacesCustomization.csv)
-				 
-set(wow11_2_files
-                 ${CMAKE_SOURCE_DIR}/bin_support/wow/11.2/database.xml
-                 ${CMAKE_SOURCE_DIR}/bin_support/wow/11.2/AnimationData.csv
-                 ${CMAKE_SOURCE_DIR}/bin_support/wow/11.2/ChrRacesCustomization.csv)
-
-source_group("wow9.2" FILES ${wow9_2_files})
-source_group("wow10.0" FILES ${wow10_0_files})
-source_group("wow10.1" FILES ${wow10_1_files})
-source_group("wow11.0" FILES ${wow11_0_files})
-source_group("wow11.1" FILES ${wow11_1_files})
-source_group("wow11.2" FILES ${wow11_2_files})
-
-set(useful_files ${common_files} ${cmake_files} ${wow9_2_files} ${wow10_0_files} ${wow10_1_files} ${wow11_0_files} ${wow11_1_files} ${wow11_2_files})
+set(useful_files ${common_files} ${cmake_files} ${all_wow_files})
 
 set_source_files_properties(${useful_files} PROPERTIES HEADER_FILE_ONLY TRUE)
 
@@ -196,9 +173,10 @@ set(files ${QT_FILES} ${EXTRA_FILES})
 install(FILES ${files} DESTINATION ${BIN_DIR})
 install(FILES ${QT_PLUGIN_SYS_FILES} DESTINATION ${BIN_DIR}platforms)
 install(FILES ${QT_PLUGIN_TLS_FILES} DESTINATION ${BIN_DIR}plugins/tls)
-install(FILES ${wow9_2_files} DESTINATION ${CMAKE_SOURCE_DIR}/bin/games/wow/9.2)
-install(FILES ${wow10_0_files} DESTINATION ${CMAKE_SOURCE_DIR}/bin/games/wow/10.0)
-install(FILES ${wow10_1_files} DESTINATION ${CMAKE_SOURCE_DIR}/bin/games/wow/10.1)
-install(FILES ${wow11_0_files} DESTINATION ${CMAKE_SOURCE_DIR}/bin/games/wow/11.0)
-install(FILES ${wow11_1_files} DESTINATION ${CMAKE_SOURCE_DIR}/bin/games/wow/11.1)
-install(FILES ${wow11_2_files} DESTINATION ${CMAKE_SOURCE_DIR}/bin/games/wow/11.2)
+foreach(dir ${wow_version_dirs})
+  if(IS_DIRECTORY ${dir})
+    get_filename_component(ver ${dir} NAME)
+    file(GLOB ver_files ${dir}/*)
+    install(FILES ${ver_files} DESTINATION ${CMAKE_SOURCE_DIR}/bin/games/wow/${ver})
+  endif()
+endforeach()
