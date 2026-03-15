@@ -38,7 +38,7 @@ class WXDLLIMPEXP_FWD_NET wxURL;
 class WXDLLIMPEXP_NET wxURLNativeImp : public wxObject
 {
 public:
-    virtual ~wxURLNativeImp() = default;
+    virtual ~wxURLNativeImp() { }
     virtual wxInputStream *GetInputStream(wxURL *owner) = 0;
 };
 #endif // wxUSE_URL_NATIVE

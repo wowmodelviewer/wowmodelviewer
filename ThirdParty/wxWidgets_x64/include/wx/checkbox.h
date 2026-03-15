@@ -2,6 +2,7 @@
 // Name:        wx/checkbox.h
 // Purpose:     wxCheckBox class interface
 // Author:      Vadim Zeitlin
+// Modified by:
 // Created:     07.09.00
 // Copyright:   (c) wxWidgets team
 // Licence:     wxWindows licence
@@ -48,7 +49,7 @@ extern WXDLLIMPEXP_DATA_CORE(const char) wxCheckBoxNameStr[];
 class WXDLLIMPEXP_CORE wxCheckBoxBase : public wxControl
 {
 public:
-    wxCheckBoxBase() = default;
+    wxCheckBoxBase() { }
 
     // set/get the checked status of the listbox
     virtual void SetValue(bool value) = 0;
@@ -96,39 +97,25 @@ public:
         return HasFlag(wxCHK_ALLOW_3RD_STATE_FOR_USER);
     }
 
-    virtual bool HasTransparentBackground() override { return true; }
+    virtual bool HasTransparentBackground() wxOVERRIDE { return true; }
 
     // This semi-private function is currently used to allow wxMSW checkbox to
     // blend in with its parent background colour without changing the
     // background colour of the checkbox itself under the other platforms.
     virtual void SetTransparentPartColour(const wxColour& WXUNUSED(col)) { }
 
-    // do the window-specific processing before processing the update event
-    // (mainly for deciding whether wxUpdateUIEvent::Is3State() is set)
-    virtual void DoPrepareUpdateWindowUI(wxUpdateUIEvent& event) const override
-        { event.Allow3rdState(Is3State()); }
-
     // wxCheckBox-specific processing after processing the update event
-    virtual void DoUpdateWindowUI(wxUpdateUIEvent& event) override
+    virtual void DoUpdateWindowUI(wxUpdateUIEvent& event) wxOVERRIDE
     {
         wxControl::DoUpdateWindowUI(event);
 
         if ( event.GetSetChecked() )
-        {
-            if ( Is3State() )
-            {
-                Set3StateValue(event.Get3StateValue());
-            }
-            else
-            {
-                SetValue(event.GetChecked());
-            }
-        }
+            SetValue(event.GetChecked());
     }
 
 protected:
     // choose the default border for this window
-    virtual wxBorder GetDefaultBorder() const override { return wxBORDER_NONE; }
+    virtual wxBorder GetDefaultBorder() const wxOVERRIDE { return wxBORDER_NONE; }
 
     virtual void DoSet3StateValue(wxCheckBoxState WXUNUSED(state)) { wxFAIL; }
 
@@ -180,15 +167,20 @@ private:
     wxDECLARE_NO_COPY_CLASS(wxCheckBoxBase);
 };
 
-// All still supported ports support 3 state checkboxes.
+// Most ports support 3 state checkboxes so define this by default.
 #define wxHAS_3STATE_CHECKBOX
 
 #if defined(__WXUNIVERSAL__)
     #include "wx/univ/checkbox.h"
 #elif defined(__WXMSW__)
     #include "wx/msw/checkbox.h"
-#elif defined(__WXGTK__)
+#elif defined(__WXMOTIF__)
+    #include "wx/motif/checkbox.h"
+#elif defined(__WXGTK20__)
     #include "wx/gtk/checkbox.h"
+#elif defined(__WXGTK__)
+    #undef wxHAS_3STATE_CHECKBOX
+    #include "wx/gtk1/checkbox.h"
 #elif defined(__WXMAC__)
     #include "wx/osx/checkbox.h"
 #elif defined(__WXQT__)

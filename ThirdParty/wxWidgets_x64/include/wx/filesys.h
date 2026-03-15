@@ -16,9 +16,7 @@
 #include "wx/stream.h"
 #include "wx/datetime.h"
 #include "wx/filename.h"
-#include "wx/list.h"
-
-#include <unordered_map>
+#include "wx/hashmap.h"
 
 class WXDLLIMPEXP_FWD_BASE wxFSFile;
 class WXDLLIMPEXP_FWD_BASE wxFileSystemHandler;
@@ -59,7 +57,7 @@ public:
     wxInputStream *DetachStream()
     {
         wxInputStream *stream = m_Stream;
-        m_Stream = nullptr;
+        m_Stream = NULL;
         return stream;
     }
 
@@ -115,7 +113,7 @@ public:
     virtual bool CanOpen(const wxString& location) = 0;
 
     // opens given file and returns pointer to input stream.
-    // Returns nullptr if opening failed.
+    // Returns NULL if opening failed.
     // The location is always absolute path.
     virtual wxFSFile* OpenFile(wxFileSystem& fs, const wxString& location) = 0;
 
@@ -167,12 +165,12 @@ enum wxFileSystemOpenFlags
     wxFS_SEEKABLE = 4   // Returned stream will be seekable
 };
 
-using wxFSHandlerHash = std::unordered_map<void*, wxFileSystemHandler*>;
+WX_DECLARE_VOIDPTR_HASH_MAP_WITH_DECL(wxFileSystemHandler*, wxFSHandlerHash, class WXDLLIMPEXP_BASE);
 
 class WXDLLIMPEXP_BASE wxFileSystem : public wxObject
 {
 public:
-    wxFileSystem() : wxObject() { m_FindFileHandler = nullptr;}
+    wxFileSystem() : wxObject() { m_FindFileHandler = NULL;}
     virtual ~wxFileSystem();
 
     // sets the current location. Every call to OpenFile is
@@ -186,7 +184,7 @@ public:
     wxString GetPath() const {return m_Path;}
 
     // opens given file and returns pointer to input stream.
-    // Returns nullptr if opening failed.
+    // Returns NULL if opening failed.
     // It first tries to open the file in relative scope
     // (based on ChangePathTo()'s value) and then as an absolute
     // path.
@@ -271,10 +269,10 @@ special characters :
 class WXDLLIMPEXP_BASE wxLocalFSHandler : public wxFileSystemHandler
 {
 public:
-    virtual bool CanOpen(const wxString& location) override;
-    virtual wxFSFile* OpenFile(wxFileSystem& fs, const wxString& location) override;
-    virtual wxString FindFirst(const wxString& spec, int flags = 0) override;
-    virtual wxString FindNext() override;
+    virtual bool CanOpen(const wxString& location) wxOVERRIDE;
+    virtual wxFSFile* OpenFile(wxFileSystem& fs, const wxString& location) wxOVERRIDE;
+    virtual wxString FindFirst(const wxString& spec, int flags = 0) wxOVERRIDE;
+    virtual wxString FindNext() wxOVERRIDE;
 
     // wxLocalFSHandler will prefix all filenames with 'root' before accessing
     // files on disk. This effectively makes 'root' the top-level directory

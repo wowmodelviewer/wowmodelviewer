@@ -2,6 +2,7 @@
 // Name:        wx/xtixml.h
 // Purpose:     xml streaming runtime metadata information (extended class info)
 // Author:      Stefan Csomor
+// Modified by:
 // Created:     27/07/03
 // Copyright:   (c) 2003 Stefan Csomor
 // Licence:     wxWindows licence
@@ -97,7 +98,7 @@ class WXDLLIMPEXP_XML wxObjectXmlReader: public wxObjectReader
 {
 public:
     wxObjectXmlReader(wxXmlNode *parent) { m_parent = parent; }
-    virtual ~wxObjectXmlReader() = default;
+    virtual ~wxObjectXmlReader() {}
 
     // Reads a component from XML.  The return value is the root object ID, which can
     // then be used to ask the readercallback about that object

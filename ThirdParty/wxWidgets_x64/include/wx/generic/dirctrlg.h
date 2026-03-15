@@ -5,6 +5,7 @@
 //              wxFile application, modified by Harm van der Heijden.
 //              Further modified for Windows.
 // Author:      Robert Roebling, Harm van der Heijden, Julian Smart et al
+// Modified by:
 // Created:     21/3/2000
 // Copyright:   (c) Robert Roebling, Harm van der Heijden, Julian Smart
 // Licence:     wxWindows licence
@@ -12,8 +13,6 @@
 
 #ifndef _WX_DIRCTRL_H_
 #define _WX_DIRCTRL_H_
-
-#include "wx/defs.h"
 
 #if wxUSE_DIRDLG || wxUSE_FILEDLG
 
@@ -61,7 +60,7 @@ class WXDLLIMPEXP_CORE wxDirItemData : public wxTreeItemData
 {
 public:
     wxDirItemData(const wxString& path, const wxString& name, bool isDir);
-    virtual ~wxDirItemData() = default;
+    virtual ~wxDirItemData(){}
     void SetNewDirName(const wxString& path);
 
     bool HasSubDirs() const;
@@ -177,7 +176,7 @@ public:
     virtual void CollapseTree();
 
     // overridden base class methods
-    virtual void SetFocus() override;
+    virtual void SetFocus() wxOVERRIDE;
 
 protected:
     virtual void ExpandRoot();
@@ -187,7 +186,7 @@ protected:
     virtual wxTreeItemId AppendItem (const wxTreeItemId & parent,
                 const wxString & text,
                 int image = -1, int selectedImage = -1,
-                wxTreeItemData * data = nullptr);
+                wxTreeItemData * data = NULL);
     //void FindChildFiles(wxTreeItemId id, int dirFlags, wxArrayString& filenames);
     virtual wxTreeCtrl* CreateTreeCtrl(wxWindow *parent, wxWindowID id, const wxPoint& pos, const wxSize& size, long treeStyle);
 
@@ -247,7 +246,7 @@ public:
 
     void Init();
 
-    virtual ~wxDirFilterListCtrl() = default;
+    virtual ~wxDirFilterListCtrl() {}
 
     //// Operations
     void FillFilterList(const wxString& filter, int defaultFilter);
@@ -306,7 +305,7 @@ public:
     const wxSize& GetSize() const { return m_size; }
     void SetSize(const wxSize& sz) { m_size = sz; }
 
-    bool IsOk() const { return m_smallImageList != nullptr; }
+    bool IsOk() const { return m_smallImageList != NULL; }
 
 protected:
     void Create(const wxSize& sz);  // create on first use

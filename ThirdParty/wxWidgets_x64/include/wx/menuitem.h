@@ -2,6 +2,7 @@
 // Name:        wx/menuitem.h
 // Purpose:     wxMenuItem class
 // Author:      Vadim Zeitlin
+// Modified by:
 // Created:     25.10.99
 // Copyright:   (c) 1999 Vadim Zeitlin <zeitlin@dptmaths.ens-cachan.fr>
 // Licence:     wxWindows licence
@@ -45,12 +46,12 @@ class WXDLLIMPEXP_CORE wxMenuItemBase : public wxObject
 {
 public:
     // creation
-    static wxMenuItem *New(wxMenu *parentMenu = nullptr,
+    static wxMenuItem *New(wxMenu *parentMenu = NULL,
                            int itemid = wxID_SEPARATOR,
                            const wxString& text = wxEmptyString,
                            const wxString& help = wxEmptyString,
                            wxItemKind kind = wxITEM_NORMAL,
-                           wxMenu *subMenu = nullptr);
+                           wxMenu *subMenu = NULL);
 
     // destruction: wxMenuItem will delete its submenu
     virtual ~wxMenuItemBase();
@@ -98,7 +99,7 @@ public:
     bool IsCheckable() const
         { return m_kind == wxITEM_CHECK || m_kind == wxITEM_RADIO; }
 
-    bool IsSubMenu() const { return m_subMenu != nullptr; }
+    bool IsSubMenu() const { return m_subMenu != NULL; }
     void SetSubMenu(wxMenu *menu) { m_subMenu = menu; }
     wxMenu *GetSubMenu() const { return m_subMenu; }
 
@@ -124,11 +125,11 @@ public:
     virtual wxBitmap GetBitmap() const;
 
 #if wxUSE_ACCEL
-    // extract the accelerator from the given menu string, return nullptr if none
+    // extract the accelerator from the given menu string, return NULL if none
     // found
     static wxAcceleratorEntry *GetAccelFromString(const wxString& label);
 
-    // get our accelerator or nullptr (caller must delete the pointer)
+    // get our accelerator or NULL (caller must delete the pointer)
     virtual wxAcceleratorEntry *GetAccel() const;
 
     // set the accel for this item - this may also be done indirectly with
@@ -144,12 +145,30 @@ public:
     virtual void ClearExtraAccels();
 #endif // wxUSE_ACCEL
 
+#if WXWIN_COMPATIBILITY_2_8
+    // compatibility only, use new functions in the new code
+    wxDEPRECATED( void SetName(const wxString& str) );
+    wxDEPRECATED( wxString GetName() const );
+
+    // Now use GetItemLabelText
+    wxDEPRECATED( wxString GetLabel() const ) ;
+
+    // Now use GetItemLabel
+    wxDEPRECATED( const wxString& GetText() const );
+
+    // Now use GetLabelText to strip the accelerators
+    wxDEPRECATED( static wxString GetLabelFromText(const wxString& text) );
+
+    // Now use SetItemLabel
+    wxDEPRECATED( virtual void SetText(const wxString& str) );
+#endif // WXWIN_COMPATIBILITY_2_8
+
     static wxMenuItem *New(wxMenu *parentMenu,
                            int itemid,
                            const wxString& text,
                            const wxString& help,
                            bool isCheckable,
-                           wxMenu *subMenu = nullptr)
+                           wxMenu *subMenu = NULL)
     {
         return New(parentMenu, itemid, text, help,
                    isCheckable ? wxITEM_CHECK : wxITEM_NORMAL, subMenu);
@@ -162,7 +181,7 @@ protected:
 
     wxWindowIDRef m_id;             // numeric id of the item >= 0 or wxID_ANY or wxID_SEPARATOR
     wxMenu       *m_parentMenu,     // the menu we belong to
-                 *m_subMenu;        // our sub menu or nullptr
+                 *m_subMenu;        // our sub menu or NULL
     wxString      m_text,           // label of the item
                   m_help;           // the help string for the item
     wxBitmapBundle m_bitmap;        // item bitmap, may be invalid
@@ -175,12 +194,12 @@ protected:
 #endif // wxUSE_ACCEL
 
     // this ctor is for the derived classes only, we're never created directly
-    wxMenuItemBase(wxMenu *parentMenu = nullptr,
+    wxMenuItemBase(wxMenu *parentMenu = NULL,
                    int itemid = wxID_SEPARATOR,
                    const wxString& text = wxEmptyString,
                    const wxString& help = wxEmptyString,
                    wxItemKind kind = wxITEM_NORMAL,
-                   wxMenu *subMenu = nullptr);
+                   wxMenu *subMenu = NULL);
 
 private:
     // and, if we have one ctor, compiler won't generate a default copy one, so
@@ -188,6 +207,17 @@ private:
     wxMenuItemBase(const wxMenuItemBase& item);
     wxMenuItemBase& operator=(const wxMenuItemBase& item);
 };
+
+#if WXWIN_COMPATIBILITY_2_8
+inline void wxMenuItemBase::SetName(const wxString &str)
+    { SetItemLabel(str); }
+inline wxString wxMenuItemBase::GetName() const
+    { return GetItemLabel(); }
+inline wxString wxMenuItemBase::GetLabel() const
+    { return GetLabelText(m_text); }
+inline const wxString& wxMenuItemBase::GetText() const { return m_text; }
+inline void wxMenuItemBase::SetText(const wxString& text) { SetItemLabel(text); }
+#endif // WXWIN_COMPATIBILITY_2_8
 
 // ----------------------------------------------------------------------------
 // include the real class declaration
@@ -200,8 +230,12 @@ private:
     #include "wx/univ/menuitem.h"
 #elif defined(__WXMSW__)
     #include "wx/msw/menuitem.h"
-#elif defined(__WXGTK__)
+#elif defined(__WXMOTIF__)
+    #include "wx/motif/menuitem.h"
+#elif defined(__WXGTK20__)
     #include "wx/gtk/menuitem.h"
+#elif defined(__WXGTK__)
+    #include "wx/gtk1/menuitem.h"
 #elif defined(__WXMAC__)
     #include "wx/osx/menuitem.h"
 #elif defined(__WXQT__)

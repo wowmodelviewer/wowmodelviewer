@@ -10,9 +10,6 @@
 #ifndef _WX_ITEMATTR_H_
 #define _WX_ITEMATTR_H_
 
-#include "wx/colour.h"
-#include "wx/font.h"
-
 // ----------------------------------------------------------------------------
 // wxItemAttr: a structure containing the visual attributes of an item
 // ----------------------------------------------------------------------------
@@ -21,7 +18,7 @@ class wxItemAttr
 {
 public:
     // ctors
-    wxItemAttr() = default;
+    wxItemAttr() { }
     wxItemAttr(const wxColour& colText,
                const wxColour& colBack,
                const wxFont& font)

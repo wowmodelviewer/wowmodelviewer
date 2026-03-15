@@ -25,7 +25,7 @@ class WXDLLIMPEXP_ADV wxAboutDialogInfo
 {
 public:
     // all fields are initially uninitialized
-    wxAboutDialogInfo() = default;
+    wxAboutDialogInfo() { }
 
     // accessors for various simply fields
     // -----------------------------------
@@ -161,7 +161,7 @@ private:
 };
 
 // functions to show the about dialog box
-WXDLLIMPEXP_ADV void wxAboutBox(const wxAboutDialogInfo& info, wxWindow* parent = nullptr);
+WXDLLIMPEXP_ADV void wxAboutBox(const wxAboutDialogInfo& info, wxWindow* parent = NULL);
 
 #endif // wxUSE_ABOUTDLG
 

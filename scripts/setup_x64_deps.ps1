@@ -37,7 +37,7 @@ Write-Host "Found glew lib: $($glewLib.Name)"
 Copy-Item $glewLib.FullName "$libsDst\glew32s.lib" -Force
 Write-Step "Installing wxWidgets via vcpkg"
 $tmp2 = Join-Path $RepoRoot "out\vcpkg_wx"; Ensure-Dir $tmp2
-$j2 = "{""name"":""wmv-wx"",""version"":""1.0.0"",""builtin-baseline"":""$baseline"",""dependencies"":[{""name"":""wxwidgets"",""default-features"":false}]}"
+$j2 = "{""name"":""wmv-wx"",""version"":""1.0.0"",""builtin-baseline"":""$baseline"",""overrides"":[{""name"":""wxwidgets"",""version"":""3.2.8.1""}],""dependencies"":[{""name"":""wxwidgets"",""default-features"":false}]}"
 Set-Content "$tmp2\vcpkg.json" -Encoding UTF8 -Value $ExecutionContext.InvokeCommand.ExpandString($j2)
 Push-Location $tmp2; & $vcpkgExe install --triplet x64-windows-static-md @vcpkgOverlay; Pop-Location
 $wxSrc = "$tmp2\vcpkg_installed\x64-windows-static-md"

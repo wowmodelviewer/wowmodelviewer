@@ -2,6 +2,7 @@
 // Name:        wx/platinfo.h
 // Purpose:     declaration of the wxPlatformInfo class
 // Author:      Francesco Montorsi
+// Modified by:
 // Created:     07.07.2006 (based on wxToolkitInfo)
 // Copyright:   (c) 2006 Francesco Montorsi
 // Licence:     wxWindows licence
@@ -11,8 +12,6 @@
 #define _WX_PLATINFO_H_
 
 #include "wx/string.h"
-
-class wxVersionInfo;
 
 // ----------------------------------------------------------------------------
 // wxPlatformInfo enums & structs
@@ -249,9 +248,6 @@ public:
     int GetToolkitMicroVersion() const
         { return m_tkVersionMicro; }
 
-    wxString GetPlatformDescription() const
-        { return m_platformDescription; }
-
     bool CheckToolkitVersion(int major, int minor, int micro = 0) const
     {
         return DoCheckVersion(GetToolkitMajorVersion(),
@@ -438,20 +434,13 @@ protected:
 
     // native CPU architecture family name, possibly empty if unknown
     wxString m_nativeCpuArch;
-
-    // e.g. compile-time version of toolkit, possibly empty
-    wxString m_platformDescription;
 };
 
-// Return true if running under Wine and fills the provided pointer with
-// its version in this case if it's non-null.
+// Returns true only for MSW programs running under Wine.
 #ifdef __WINDOWS__
-WXDLLIMPEXP_BASE bool wxIsRunningUnderWine(wxVersionInfo* ver = nullptr);
+WXDLLIMPEXP_BASE bool wxIsRunningUnderWine();
 #else // !__WINDOWS__
-inline bool wxIsRunningUnderWine(wxVersionInfo* WXUNUSED(ver) = nullptr)
-{
-    return false;
-}
+inline bool wxIsRunningUnderWine() { return false; }
 #endif // __WINDOWS__/!__WINDOWS__
 
 #endif // _WX_PLATINFO_H_

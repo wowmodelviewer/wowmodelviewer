@@ -2,6 +2,7 @@
 // Name:        wx/richtext/richtextxml.h
 // Purpose:     XML and HTML I/O for wxRichTextCtrl
 // Author:      Julian Smart
+// Modified by:
 // Created:     2005-09-30
 // Copyright:   (c) Julian Smart
 // Licence:     wxWindows licence
@@ -14,6 +15,7 @@
  * Includes
  */
 
+#include "wx/hashmap.h"
 #include "wx/richtext/richtextbuffer.h"
 #include "wx/richtext/richtextstyles.h"
 
@@ -163,7 +165,7 @@ public:
     @class wxRichTextXMLHandler
 
     Implements XML loading and saving. Two methods of saving are included:
-    writing directly to a text stream, and populating a wxXmlDocument
+    writing directly to a text stream, and populating an wxXmlDocument
     before writing it. The former method is considerably faster, so we favour
     that one, even though the code is a little less elegant.
  */
@@ -200,10 +202,10 @@ public:
     virtual wxRichTextObject* CreateObjectForXMLName(wxRichTextObject* parent, const wxString& name) const;
 
     /// Can we save using this handler?
-    virtual bool CanSave() const override { return true; }
+    virtual bool CanSave() const wxOVERRIDE { return true; }
 
     /// Can we load using this handler?
-    virtual bool CanLoad() const override { return true; }
+    virtual bool CanLoad() const wxOVERRIDE { return true; }
 
     /// Returns the XML helper object, implementing functionality
     /// that can be reused elsewhere.
@@ -215,20 +217,22 @@ public:
         Call with XML node name, C++ class name so that wxRTC can read in the node.
         If you add a custom object, call this.
     */
-    static void RegisterNodeName(const wxString& nodeName, const wxString& className);
+    static void RegisterNodeName(const wxString& nodeName, const wxString& className) { sm_nodeNameToClassMap[nodeName] = className; }
 
     /**
         Cleans up the mapping between node name and C++ class.
     */
-    static void ClearNodeToClassMap();
+    static void ClearNodeToClassMap() { sm_nodeNameToClassMap.clear(); }
 
 protected:
 #if wxUSE_STREAMS
-    virtual bool DoLoadFile(wxRichTextBuffer *buffer, wxInputStream& stream) override;
-    virtual bool DoSaveFile(wxRichTextBuffer *buffer, wxOutputStream& stream) override;
+    virtual bool DoLoadFile(wxRichTextBuffer *buffer, wxInputStream& stream) wxOVERRIDE;
+    virtual bool DoSaveFile(wxRichTextBuffer *buffer, wxOutputStream& stream) wxOVERRIDE;
 #endif
 
     wxRichTextXMLHelper m_helper;
+
+    static wxStringToStringHashMap sm_nodeNameToClassMap;
 };
 
 #endif

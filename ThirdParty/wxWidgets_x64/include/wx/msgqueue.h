@@ -22,7 +22,6 @@
 
 #include "wx/beforestd.h"
 #include <queue>
-#include <utility>
 #include "wx/afterstd.h"
 
 enum wxMessageQueueError
@@ -59,8 +58,6 @@ public:
     // Add a message to this queue and signal the threads waiting for messages.
     //
     // This method is safe to call from multiple threads in parallel.
-    //
-    // This overload relies on Message being copyable.
     wxMessageQueueError Post(const Message& msg)
     {
         wxMutexLocker locker(m_mutex);
@@ -68,20 +65,6 @@ public:
         wxCHECK( locker.IsOk(), wxMSGQUEUE_MISC_ERROR );
 
         m_messages.push(msg);
-
-        m_conditionNotEmpty.Signal();
-
-        return wxMSGQUEUE_NO_ERROR;
-    }
-
-    // Overload for move-only types.
-    wxMessageQueueError Post(Message&& msg)
-    {
-        wxMutexLocker locker(m_mutex);
-
-        wxCHECK( locker.IsOk(), wxMSGQUEUE_MISC_ERROR );
-
-        m_messages.push(std::move(msg));
 
         m_conditionNotEmpty.Signal();
 
@@ -134,7 +117,7 @@ public:
             wxASSERT(timeout > 0);
         }
 
-        msg = std::move(m_messages.front());
+        msg = m_messages.front();
         m_messages.pop();
 
         return wxMSGQUEUE_NO_ERROR;
@@ -157,7 +140,7 @@ public:
             wxCHECK( result == wxCOND_NO_ERROR, wxMSGQUEUE_MISC_ERROR );
         }
 
-        msg = std::move(m_messages.front());
+        msg = m_messages.front();
         m_messages.pop();
 
         return wxMSGQUEUE_NO_ERROR;

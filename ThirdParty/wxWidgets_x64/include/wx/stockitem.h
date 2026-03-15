@@ -2,6 +2,7 @@
 // Name:        wx/stockitem.h
 // Purpose:     stock items helpers (privateh header)
 // Author:      Vaclav Slavik
+// Modified by:
 // Created:     2004-08-15
 // Copyright:   (c) Vaclav Slavik, 2004
 // Licence:     wxWindows licence
@@ -69,7 +70,7 @@ WXDLLIMPEXP_CORE wxString wxGetStockHelpString(wxWindowID id,
                                           wxStockHelpStringClient client = wxSTOCK_MENU);
 
 
-#ifdef __WXGTK__
+#ifdef __WXGTK20__
 
 // Translates stock ID to GTK+'s stock item string identifier:
 WXDLLIMPEXP_CORE const char *wxGetStockGtkID(wxWindowID id);

@@ -2,6 +2,7 @@
 // Name:        wx/generic/combo.h
 // Purpose:     Generic wxComboCtrl
 // Author:      Jaakko Salli
+// Modified by:
 // Created:     Apr-30-2006
 // Copyright:   (c) Jaakko Salli
 // Licence:     wxWindows licence
@@ -67,7 +68,7 @@ public:
 
     void SetCustomPaintWidth( int width );
 
-    virtual bool IsKeyPopupToggle(const wxKeyEvent& event) const override;
+    virtual bool IsKeyPopupToggle(const wxKeyEvent& event) const wxOVERRIDE;
 
     static int GetFeatures() { return wxComboCtrlFeatures::All; }
 
@@ -83,18 +84,22 @@ protected:
     // Dummies for platform-specific wxTextEntry implementations
 #if defined(__WXUNIVERSAL__)
     // Looks like there's nothing we need to override here
+#elif defined(__WXMOTIF__)
+    virtual WXWidget GetTextWidget() const { return NULL; }
 #elif defined(__WXGTK__)
-    virtual GtkEditable *GetEditable() const override { return nullptr; }
-    virtual GtkEntry *GetEntry() const override { return nullptr; }
+#if defined(__WXGTK20__)
+    virtual GtkEditable *GetEditable() const wxOVERRIDE { return NULL; }
+    virtual GtkEntry *GetEntry() const wxOVERRIDE { return NULL; }
+#endif
 #elif defined(__WXOSX__)
-    virtual wxTextWidgetImpl * GetTextPeer() const override;
+    virtual wxTextWidgetImpl * GetTextPeer() const wxOVERRIDE;
 #endif
 
     // For better transparent background rendering
-    virtual bool HasTransparentBackground() override;
+    virtual bool HasTransparentBackground() wxOVERRIDE;
 
     // Mandatory virtuals
-    virtual void OnResize() override;
+    virtual void OnResize() wxOVERRIDE;
 
     // Event handlers
     void OnPaintEvent( wxPaintEvent& event );
@@ -132,7 +137,7 @@ public:
         (void)Create(parent, id, value, pos, size, style, validator, name);
     }
 
-    virtual ~wxComboCtrl() = default;
+    virtual ~wxComboCtrl() {}
 
 protected:
 

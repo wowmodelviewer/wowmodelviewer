@@ -2,6 +2,7 @@
 // Name:        wx/tooltip.h
 // Purpose:     wxToolTip base header
 // Author:      Robert Roebling
+// Modified by:
 // Created:
 // Copyright:   (c) Robert Roebling
 // Licence:     wxWindows licence
@@ -16,8 +17,12 @@
 
 #if defined(__WXMSW__)
 #include "wx/msw/tooltip.h"
-#elif defined(__WXGTK__)
+#elif defined(__WXMOTIF__)
+// #include "wx/motif/tooltip.h"
+#elif defined(__WXGTK20__)
 #include "wx/gtk/tooltip.h"
+#elif defined(__WXGTK__)
+#include "wx/gtk1/tooltip.h"
 #elif defined(__WXMAC__)
 #include "wx/osx/tooltip.h"
 #elif defined(__WXQT__)

@@ -2,6 +2,7 @@
 // Name:        wx/treectrl.h
 // Purpose:     wxTreeCtrl base header
 // Author:      Karsten Ballueder
+// Modified by:
 // Created:
 // Copyright:   (c) Karsten Ballueder
 // Licence:     wxWindows licence
@@ -56,22 +57,10 @@ public:
     unsigned int GetSpacing() const { return m_spacing; }
     void SetSpacing(unsigned int spacing) { m_spacing = spacing; }
 
-        // In addition to SetImages() inherited from wxWithImages, this class
-        // also provides SetStateImages() function which can be used to set the
-        // images showing an icon corresponding to an app-defined item state
-        // (for example, checked/unchecked).
-    virtual void SetStateImages(const wxVector<wxBitmapBundle>& images) = 0;
-
-        // Simple accessors similar to the inherited from wxWithImages
-        // HasImages() and GetImageCount() for normal images.
-    bool HasStateImages() const { return m_imagesState.HasImages(); }
-    int GetStateImageCount() const { return m_imagesState.GetImageCount(); }
-
-        // These functions parallel {Set,Get,Assign}ImageList() methods
-        // inherited from wxWithImages, but correspond to SetStateImages().
-        // As with the other functions using wxImageList, they still work but
-        // don't allow to define high resolution icons for high DPI screens, so
-        // SetStateImages() above should be preferred.
+        // In addition to {Set,Get,Assign}ImageList() methods inherited from
+        // wxWithImages, this control has similar functions for the state image
+        // list that can be used to show a state icon corresponding to an
+        // app-defined item state (for example, checked/unchecked).
     wxImageList *GetStateImageList() const
     {
         return m_imagesState.GetImageList();
@@ -192,7 +181,7 @@ public:
         // get the root tree item
     virtual wxTreeItemId GetRootItem() const = 0;
 
-        // get the item currently selected (may return nullptr if no selection)
+        // get the item currently selected (may return NULL if no selection)
     virtual wxTreeItemId GetSelection() const = 0;
 
         // get the items currently selected, return the number of such item
@@ -212,7 +201,7 @@ public:
     virtual void SetFocusedItem(const wxTreeItemId& item) = 0;
 
 
-        // get the parent of this item (may return nullptr if root)
+        // get the parent of this item (may return NULL if root)
     virtual wxTreeItemId GetItemParent(const wxTreeItemId& item) const = 0;
 
         // for this enumeration function you must pass in a "cookie" parameter
@@ -250,13 +239,13 @@ public:
         // add the root node to the tree
     virtual wxTreeItemId AddRoot(const wxString& text,
                                  int image = -1, int selImage = -1,
-                                 wxTreeItemData *data = nullptr) = 0;
+                                 wxTreeItemData *data = NULL) = 0;
 
         // insert a new item in as the first child of the parent
     wxTreeItemId PrependItem(const wxTreeItemId& parent,
                              const wxString& text,
                              int image = -1, int selImage = -1,
-                             wxTreeItemData *data = nullptr)
+                             wxTreeItemData *data = NULL)
     {
         return DoInsertItem(parent, 0u, text, image, selImage, data);
     }
@@ -266,7 +255,7 @@ public:
                             const wxTreeItemId& idPrevious,
                             const wxString& text,
                             int image = -1, int selImage = -1,
-                            wxTreeItemData *data = nullptr)
+                            wxTreeItemData *data = NULL)
     {
         return DoInsertAfter(parent, idPrevious, text, image, selImage, data);
     }
@@ -276,7 +265,7 @@ public:
                             size_t pos,
                             const wxString& text,
                             int image = -1, int selImage = -1,
-                            wxTreeItemData *data = nullptr)
+                            wxTreeItemData *data = NULL)
     {
         return DoInsertItem(parent, pos, text, image, selImage, data);
     }
@@ -285,7 +274,7 @@ public:
     wxTreeItemId AppendItem(const wxTreeItemId& parent,
                             const wxString& text,
                             int image = -1, int selImage = -1,
-                            wxTreeItemData *data = nullptr)
+                            wxTreeItemData *data = NULL)
     {
         return DoInsertItem(parent, (size_t)-1, text, image, selImage, data);
     }
@@ -346,7 +335,7 @@ public:
     virtual wxTextCtrl *EditLabel(const wxTreeItemId& item,
                       wxClassInfo* textCtrlClass = wxCLASSINFO(wxTextCtrl)) = 0;
         // returns the same pointer as StartEdit() if the item is being edited,
-        // nullptr otherwise (it's assumed that no more than one item may be
+        // NULL otherwise (it's assumed that no more than one item may be
         // edited simultaneously)
     virtual wxTextCtrl *GetEditControl() const = 0;
         // end editing and accept or discard the changes to item label
@@ -396,14 +385,14 @@ public:
     // implementation
     // --------------
 
-    virtual bool ShouldInheritColours() const override { return false; }
+    virtual bool ShouldInheritColours() const wxOVERRIDE { return false; }
 
     // hint whether to calculate best size quickly or accurately
     void SetQuickBestSize(bool q) { m_quickBestSize = q; }
     bool GetQuickBestSize() const { return m_quickBestSize; }
 
 protected:
-    virtual wxSize DoGetBestSize() const override;
+    virtual wxSize DoGetBestSize() const wxOVERRIDE;
 
     // common part of Get/SetItemState()
     virtual int DoGetItemState(const wxTreeItemId& item) const = 0;
@@ -426,7 +415,7 @@ protected:
                                        const wxTreeItemId& idPrevious,
                                        const wxString& text,
                                        int image = -1, int selImage = -1,
-                                       wxTreeItemData *data = nullptr) = 0;
+                                       wxTreeItemData *data = NULL) = 0;
 
     // real HitTest() implementation: again, can't be called just HitTest()
     // because it's overloaded and so the non-virtual overload would be hidden

@@ -37,29 +37,29 @@ public:
     {
     }
 
-    virtual void Save() const override
+    virtual void Save() const wxOVERRIDE
     {
         const wxTopLevelWindow * const tlw = Get();
 
         tlw->SaveGeometry(*this);
     }
 
-    virtual bool Restore() override
+    virtual bool Restore() wxOVERRIDE
     {
         wxTopLevelWindow * const tlw = Get();
 
         return tlw->RestoreToGeometry(*this);
     }
 
-    virtual wxString GetKind() const override { return wxASCII_STR(wxPERSIST_TLW_KIND); }
+    virtual wxString GetKind() const wxOVERRIDE { return wxASCII_STR(wxPERSIST_TLW_KIND); }
 
 private:
-    virtual bool SaveField(const wxString& name, int value) const override
+    virtual bool SaveField(const wxString& name, int value) const wxOVERRIDE
     {
         return SaveValue(name, value);
     }
 
-    virtual bool RestoreField(const wxString& name, int* value) override
+    virtual bool RestoreField(const wxString& name, int* value) wxOVERRIDE
     {
         return RestoreValue(name, value);
     }

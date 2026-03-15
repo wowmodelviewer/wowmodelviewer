@@ -51,16 +51,10 @@ enum wxURIFlags
 class WXDLLIMPEXP_BASE wxURI : public wxObject
 {
 public:
-    wxURI() = default;
-    wxURI(const wxString& uri) { Create(uri); }
+    wxURI();
+    wxURI(const wxString& uri);
 
-    wxURI(const wxURI& uri) = default;
-    wxURI& operator=(const wxURI& uri) = default;
-
-    wxURI(wxURI&& uri) = default;
-    wxURI& operator=(wxURI&& uri) = default;
-
-    ~wxURI() = default;
+    // default copy ctor, assignment operator and dtor are ok
 
     bool Create(const wxString& uri);
 
@@ -73,7 +67,6 @@ public:
     bool operator==(const wxURI& uri) const;
 
     // various accessors
-    bool IsEmpty() const { return m_fields == 0; }
 
     bool HasScheme() const      { return (m_fields & wxURI_SCHEME) != 0;   }
     bool HasUserInfo() const    { return (m_fields & wxURI_USERINFO) != 0; }
@@ -98,11 +91,6 @@ public:
     wxString GetUser() const;
     wxString GetPassword() const;
 
-    // Set username and password for the URI. This function is _not_ the exact
-    // counterpart of GetUserInfo() because it takes unescaped strings, unlike
-    // the latter, which returns them in the escaped form, hence it uses a
-    // deliberately different name.
-    void SetUserAndPassword(const wxString& user, const wxString& password = {});
 
     // combine all URI components into a single string
     //
@@ -174,8 +162,6 @@ protected:
     static bool IsAlpha(char c);
     static bool IsDigit(char c);
     static bool IsEndPath(char c);
-    static bool IsPCharNCNE(char c);
-    static bool IsPCharNE(char c);
 
     wxString m_scheme;
     wxString m_path;
@@ -186,10 +172,9 @@ protected:
     wxString m_server;
     wxString m_port;
 
-    wxURIHostType m_hostType = wxURI_REGNAME;
+    wxURIHostType m_hostType;
 
-    // This is a combination of wxURIFieldType flags.
-    unsigned m_fields = 0;
+    size_t m_fields;
 
     wxDECLARE_DYNAMIC_CLASS(wxURI);
 };

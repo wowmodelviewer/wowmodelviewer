@@ -2,6 +2,7 @@
 // Name:        wx/beforestd.h
 // Purpose:     #include before STL headers
 // Author:      Vadim Zeitlin
+// Modified by:
 // Created:     07/07/03
 // Copyright:   (c) 2003 Vadim Zeitlin <zeitlin@dptmaths.ens-cachan.fr>
 // Licence:     wxWindows licence

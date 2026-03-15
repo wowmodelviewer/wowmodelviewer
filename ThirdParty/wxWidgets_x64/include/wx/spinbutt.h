@@ -2,6 +2,7 @@
 // Name:        wx/spinbutt.h
 // Purpose:     wxSpinButtonBase class
 // Author:      Julian Smart, Vadim Zeitlin
+// Modified by:
 // Created:     23.07.99
 // Copyright:   (c) Julian Smart
 // Licence:     wxWindows licence
@@ -78,8 +79,12 @@ protected:
     #include "wx/univ/spinbutt.h"
 #elif defined(__WXMSW__)
     #include "wx/msw/spinbutt.h"
-#elif defined(__WXGTK__)
+#elif defined(__WXMOTIF__)
+    #include "wx/motif/spinbutt.h"
+#elif defined(__WXGTK20__)
     #include "wx/gtk/spinbutt.h"
+#elif defined(__WXGTK__)
+    #include "wx/gtk1/spinbutt.h"
 #elif defined(__WXMAC__)
     #include "wx/osx/spinbutt.h"
 #elif defined(__WXQT__)
@@ -107,7 +112,7 @@ public:
     int GetPosition() const { return m_commandInt; }
     void SetPosition(int pos) { m_commandInt = pos; }
 
-    wxNODISCARD virtual wxEvent *Clone() const override { return new wxSpinEvent(*this); }
+    virtual wxEvent *Clone() const wxOVERRIDE { return new wxSpinEvent(*this); }
 
 private:
     wxDECLARE_DYNAMIC_CLASS_NO_ASSIGN(wxSpinEvent);

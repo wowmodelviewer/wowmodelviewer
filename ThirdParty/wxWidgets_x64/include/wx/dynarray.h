@@ -2,6 +2,7 @@
 // Name:        wx/dynarray.h
 // Purpose:     auto-resizable (i.e. dynamic) array support
 // Author:      Vadim Zeitlin
+// Modified by:
 // Created:     12.09.97
 // Copyright:   (c) 1998 Vadim Zeitlin <zeitlin@dptmaths.ens-cachan.fr>
 // Licence:     wxWindows licence
@@ -14,7 +15,9 @@
 
 #include "wx/vector.h"
 
-#include <initializer_list>
+#ifdef wxHAVE_INITIALIZER_LIST
+    #include <initializer_list>
+#endif
 
 /*
   This header defines legacy dynamic arrays and object arrays (i.e. arrays
@@ -106,16 +109,19 @@ public:
         : base_vec(first, last)
     { }
 
+#ifdef wxHAVE_INITIALIZER_LIST
     template<typename U>
     wxBaseArray(std::initializer_list<U> list) : base_vec(list.begin(), list.end()) {}
-
-    wxBaseArray(const std::vector<T>& vec) : base_vec(vec) { }
-    wxBaseArray(std::vector<T>&& vec) : base_vec(std::move(vec)) { }
+#endif
 
     void Empty() { this->clear(); }
     void Clear() { this->clear(); }
     void Alloc(size_t uiSize) { this->reserve(uiSize); }
-    void Shrink() { this->shrink_to_fit(); }
+
+    void Shrink()
+    {
+        wxShrinkToFit(*this);
+    }
 
     size_t GetCount() const { return this->size(); }
     void SetCount(size_t n, T v = T()) { this->resize(n, v); }
@@ -259,7 +265,7 @@ public:
     }
 
 protected:
-    SCMPFUNC GetCompareFunction() const noexcept { return m_fnCompare; }
+    SCMPFUNC GetCompareFunction() const wxNOEXCEPT { return m_fnCompare; }
 
 private:
     SCMPFUNC m_fnCompare;
@@ -270,25 +276,12 @@ private:
 // _WX_DECLARE_OBJARRAY: an array for pointers to type T with owning semantics
 // ----------------------------------------------------------------------------
 
-// Trivial default implementation of the traits used by wxBaseObjectArray.
-// It can only be used if the class T is complete.
-template <typename T>
-class wxDefaultBaseObjectArrayTraits
-{
-public:
-    wxNODISCARD static T* Clone(const T& value) { return new T{value}; }
-    static void Free(T* p) { delete p; }
-};
-
 // This class must be able to be declared with incomplete types, so it doesn't
 // actually use type T in its definition, and relies on a helper template
 // parameter, which is declared by WX_DECLARE_OBJARRAY() and defined by
 // WX_DEFINE_OBJARRAY(), for providing a way to create and destroy objects of
 // type T
-//
-// If the class T happens to be complete, Traits can be left unspecified and a
-// trivial implementation using copy ctor directly is used.
-template <typename T, typename Traits = wxDefaultBaseObjectArrayTraits<T>>
+template <typename T, typename Traits>
 class wxBaseObjectArray : private wxBaseArray<T*>
 {
     typedef wxBaseArray<T*> base;
@@ -380,8 +373,8 @@ public:
         T* const pItem = Traits::Clone(item);
 
         const size_t nOldSize = size();
-        if ( pItem != nullptr )
-            base::insert(base::end(), nInsert, pItem);
+        if ( pItem != NULL )
+            base::insert(this->end(), nInsert, pItem);
 
         for ( size_t i = 1; i < nInsert; i++ )
             base::operator[](nOldSize + i) = Traits::Clone(item);
@@ -401,8 +394,8 @@ public:
             return;
 
         T* const pItem = Traits::Clone(item);
-        if ( pItem != nullptr )
-            base::insert(base::begin() + uiIndex, nInsert, pItem);
+        if ( pItem != NULL )
+            base::insert(this->begin() + uiIndex, nInsert, pItem);
 
         for ( size_t i = 1; i < nInsert; ++i )
             base::operator[](uiIndex + i) = Traits::Clone(item);
@@ -410,7 +403,7 @@ public:
 
     void Insert(const T* pItem, size_t uiIndex)
     {
-        base::insert(base::begin() + uiIndex, const_cast<T*>(pItem));
+        base::insert(this->begin() + uiIndex, const_cast<T*>(pItem));
     }
 
     void Empty() { DoEmpty(); base::clear(); }
@@ -420,7 +413,7 @@ public:
     {
         T* const p = base::operator[](uiIndex);
 
-        base::erase(base::begin() + uiIndex);
+        base::erase(this->begin() + uiIndex);
         return p;
     }
 
@@ -431,41 +424,10 @@ public:
         for ( size_t i = 0; i < nRemove; ++i )
             Traits::Free(base::operator[](uiIndex + i));
 
-        base::erase(base::begin() + uiIndex, base::begin() + uiIndex + nRemove);
+        base::erase(this->begin() + uiIndex, this->begin() + uiIndex + nRemove);
     }
 
     void Sort(CMPFUNC fCmp) { base::Sort(fCmp); }
-
-    void swap(wxBaseObjectArray& other) { base::swap(other); }
-
-    // Provide a way to iterate over the stored objects using range-based for.
-    class ObjectIterator
-    {
-    public:
-        using base_iter = typename base::const_iterator;
-
-        using value_type = T;
-        using reference = T&;
-        using pointer = T*;
-        using difference_type = typename std::iterator_traits<base_iter>::difference_type;
-        using iterator_category = std::random_access_iterator_tag;
-
-        ObjectIterator() = default;
-        ObjectIterator(base_iter const& it) : m_it(it) { }
-
-        bool operator==(ObjectIterator const& other) const { return m_it == other.m_it; }
-        bool operator!=(ObjectIterator const& other) const { return m_it != other.m_it; }
-
-        reference operator*() const { return **m_it; }
-        ObjectIterator& operator++() { ++m_it; return *this; }
-        ObjectIterator& operator--() { --m_it; return *this; }
-
-    private:
-        typename base::const_iterator m_it;
-    };
-
-    wxNODISCARD ObjectIterator begin() const { return base::begin(); }
-    wxNODISCARD ObjectIterator end() const { return base::end(); }
 
 private:
     void DoEmpty()
@@ -542,6 +504,14 @@ private:
 #define WX_DEFINE_USER_EXPORTED_TYPEARRAY_PTR(T, name, base, expdecl) \
     WX_DEFINE_TYPEARRAY_WITH_DECL_PTR(T, name, base, class expdecl)
 
+#ifdef wxHAVE_INITIALIZER_LIST
+    #define WX_DEFINE_CTOR_FROM_INIT_LIST(T, name, base, classdecl)                     \
+        template<typename U>                                                            \
+            name(std::initializer_list<U> list) : Base(list.begin(), list.end()) { }
+#else
+    #define WX_DEFINE_CTOR_FROM_INIT_LIST(T, name, base, classdecl)     // No support for initializer_list
+#endif
+
 // This is the only non-trivial macro, which actually defines the array class
 // with the given name containing the elements of the specified type.
 //
@@ -566,8 +536,7 @@ private:
         name(size_t n, Base::const_reference v) : Base(n, v) { }              \
         template <class InputIterator>                                        \
         name(InputIterator first, InputIterator last) : Base(first, last) { } \
-        template<typename U>                                                  \
-        name(std::initializer_list<U> list) : Base(list.begin(), list.end()) { } \
+        WX_DEFINE_CTOR_FROM_INIT_LIST(T, name, base, classdecl)               \
     }
 
 
@@ -694,7 +663,7 @@ private:
     classdecl wxObjectArrayTraitsFor##name                                    \
     {                                                                         \
     public:                                                                   \
-        wxNODISCARD static T* Clone(T const& item);                           \
+        static T* Clone(T const& item);                                       \
         static void Free(T* p);                                               \
     };                                                                        \
     typedef wxBaseObjectArray<T, wxObjectArrayTraitsFor##name>                \

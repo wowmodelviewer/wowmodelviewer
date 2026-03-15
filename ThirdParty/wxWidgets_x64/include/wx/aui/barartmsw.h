@@ -10,80 +10,77 @@
 #ifndef _WX_AUI_BARART_MSW_H_
 #define _WX_AUI_BARART_MSW_H_
 
-#include "wx/aui/auibar.h"
-
-#if wxUSE_AUI
-
 class WXDLLIMPEXP_AUI wxAuiMSWToolBarArt : public wxAuiGenericToolBarArt
 {
 public:
     wxAuiMSWToolBarArt();
 
-    wxNODISCARD virtual wxAuiToolBarArt* Clone() override;
+    virtual wxAuiToolBarArt* Clone() wxOVERRIDE;
 
     virtual void DrawBackground(
         wxDC& dc,
         wxWindow* wnd,
-        const wxRect& rect) override;
+        const wxRect& rect) wxOVERRIDE;
 
     virtual void DrawLabel(
         wxDC& dc,
         wxWindow* wnd,
         const wxAuiToolBarItem& item,
-        const wxRect& rect) override;
+        const wxRect& rect) wxOVERRIDE;
 
     virtual void DrawButton(
         wxDC& dc,
         wxWindow* wnd,
         const wxAuiToolBarItem& item,
-        const wxRect& rect) override;
+        const wxRect& rect) wxOVERRIDE;
 
     virtual void DrawDropDownButton(
         wxDC& dc,
         wxWindow* wnd,
         const wxAuiToolBarItem& item,
-        const wxRect& rect) override;
+        const wxRect& rect) wxOVERRIDE;
 
     virtual void DrawControlLabel(
         wxDC& dc,
         wxWindow* wnd,
         const wxAuiToolBarItem& item,
-        const wxRect& rect) override;
+        const wxRect& rect) wxOVERRIDE;
 
     virtual void DrawSeparator(
         wxDC& dc,
         wxWindow* wnd,
-        const wxRect& rect) override;
+        const wxRect& rect) wxOVERRIDE;
 
     virtual void DrawGripper(
         wxDC& dc,
         wxWindow* wnd,
-        const wxRect& rect) override;
+        const wxRect& rect) wxOVERRIDE;
 
     virtual void DrawOverflowButton(
         wxDC& dc,
         wxWindow* wnd,
         const wxRect& rect,
-        int state) override;
+        int state) wxOVERRIDE;
 
     virtual wxSize GetLabelSize(
-        wxReadOnlyDC& dc,
+        wxDC& dc,
         wxWindow* wnd,
-        const wxAuiToolBarItem& item) override;
+        const wxAuiToolBarItem& item) wxOVERRIDE;
 
     virtual wxSize GetToolSize(
-        wxReadOnlyDC& dc,
+        wxDC& dc,
         wxWindow* wnd,
-        const wxAuiToolBarItem& item) override;
+        const wxAuiToolBarItem& item) wxOVERRIDE;
+
+    virtual int GetElementSize(int element) wxOVERRIDE;
+    virtual void SetElementSize(int elementId, int size) wxOVERRIDE;
 
     virtual int ShowDropDown(wxWindow* wnd,
-        const wxAuiToolBarItemArray& items) override;
+        const wxAuiToolBarItemArray& items) wxOVERRIDE;
 
 private:
     bool m_themed;
     wxSize m_buttonSize;
 };
-
-#endif // wxUSE_AUI
 
 #endif // _WX_AUI_BARART_MSW_H_

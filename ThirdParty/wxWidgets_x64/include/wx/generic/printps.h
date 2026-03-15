@@ -3,6 +3,7 @@
 // Purpose:     wxPostScriptPrinter, wxPostScriptPrintPreview
 //              wxGenericPageSetupDialog
 // Author:      Julian Smart
+// Modified by:
 // Created:     01/02/97
 // Copyright:   (c) Julian Smart
 // Licence:     wxWindows licence
@@ -22,12 +23,12 @@
 class WXDLLIMPEXP_CORE wxPostScriptPrinter : public wxPrinterBase
 {
 public:
-    wxPostScriptPrinter(wxPrintDialogData *data = nullptr);
+    wxPostScriptPrinter(wxPrintDialogData *data = NULL);
     virtual ~wxPostScriptPrinter();
 
-    virtual bool Print(wxWindow *parent, wxPrintout *printout, bool prompt = true) override;
-    virtual wxDC* PrintDialog(wxWindow *parent) override;
-    virtual bool Setup(wxWindow *parent) override;
+    virtual bool Print(wxWindow *parent, wxPrintout *printout, bool prompt = true) wxOVERRIDE;
+    virtual wxDC* PrintDialog(wxWindow *parent) wxOVERRIDE;
+    virtual bool Setup(wxWindow *parent) wxOVERRIDE;
 
 private:
     wxDECLARE_DYNAMIC_CLASS(wxPostScriptPrinter);
@@ -42,16 +43,16 @@ class WXDLLIMPEXP_CORE wxPostScriptPrintPreview : public wxPrintPreviewBase
 {
 public:
     wxPostScriptPrintPreview(wxPrintout *printout,
-                             wxPrintout *printoutForPrinting = nullptr,
-                             wxPrintDialogData *data = nullptr);
+                             wxPrintout *printoutForPrinting = NULL,
+                             wxPrintDialogData *data = NULL);
     wxPostScriptPrintPreview(wxPrintout *printout,
                              wxPrintout *printoutForPrinting,
                              wxPrintData *data);
 
     virtual ~wxPostScriptPrintPreview();
 
-    virtual bool Print(bool interactive) override;
-    virtual void DetermineScaling() override;
+    virtual bool Print(bool interactive) wxOVERRIDE;
+    virtual void DetermineScaling() wxOVERRIDE;
 
 private:
     void Init(wxPrintout *printout, wxPrintout *printoutForPrinting);

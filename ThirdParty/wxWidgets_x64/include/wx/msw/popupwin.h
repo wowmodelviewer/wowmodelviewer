@@ -2,6 +2,7 @@
 // Name:        wx/msw/popupwin.h
 // Purpose:     wxPopupWindow class for wxMSW
 // Author:      Vadim Zeitlin
+// Modified by:
 // Created:     06.01.01
 // Copyright:   (c) 2001 Vadim Zeitlin <zeitlin@dptmaths.ens-cachan.fr>
 // Licence:     wxWindows licence
@@ -17,7 +18,7 @@
 class WXDLLIMPEXP_CORE wxPopupWindow : public wxPopupWindowBase
 {
 public:
-    wxPopupWindow() { m_owner = nullptr; }
+    wxPopupWindow() { m_owner = NULL; }
 
     wxPopupWindow(wxWindow *parent, int flags = wxBORDER_NONE)
         { (void)Create(parent, flags); }
@@ -26,14 +27,14 @@ public:
 
     virtual ~wxPopupWindow();
 
-    virtual void SetFocus() override;
-    virtual bool Show(bool show = true) override;
+    virtual void SetFocus() wxOVERRIDE;
+    virtual bool Show(bool show = true) wxOVERRIDE;
 
     // return the style to be used for the popup windows
-    virtual WXDWORD MSWGetStyle(long flags, WXDWORD *exstyle) const override;
+    virtual WXDWORD MSWGetStyle(long flags, WXDWORD *exstyle) const wxOVERRIDE;
 
     // get the HWND to be used as parent of this window with CreateWindow()
-    virtual WXHWND MSWGetParent() const override;
+    virtual WXHWND MSWGetParent() const wxOVERRIDE;
 
 
     // Implementation only from now on.

@@ -2,6 +2,7 @@
 // Name:        wx/msw/checkbox.h
 // Purpose:     wxCheckBox class
 // Author:      Julian Smart
+// Modified by:
 // Created:     01/02/97
 // Copyright:   (c) Julian Smart
 // Licence:     wxWindows licence
@@ -38,40 +39,38 @@ public:
                 const wxValidator& validator = wxDefaultValidator,
                 const wxString& name = wxASCII_STR(wxCheckBoxNameStr));
 
-    virtual void SetValue(bool value) override;
-    virtual bool GetValue() const override;
+    virtual void SetValue(bool value) wxOVERRIDE;
+    virtual bool GetValue() const wxOVERRIDE;
 
     // override some base class virtuals
-    virtual void SetLabel(const wxString& label) override;
+    virtual void SetLabel(const wxString& label) wxOVERRIDE;
 
-    virtual void SetTransparentPartColour(const wxColour& col) override
+    virtual void SetTransparentPartColour(const wxColour& col) wxOVERRIDE
     {
         SetBackgroundColour(col);
     }
 
-    virtual bool MSWCommand(WXUINT param, WXWORD id) override;
-    virtual void Command(wxCommandEvent& event) override;
+    virtual bool MSWCommand(WXUINT param, WXWORD id) wxOVERRIDE;
+    virtual void Command(wxCommandEvent& event) wxOVERRIDE;
 
     // returns true if the platform should explicitly apply a theme border
-    virtual bool CanApplyThemeBorder() const override { return false; }
+    virtual bool CanApplyThemeBorder() const wxOVERRIDE { return false; }
 
     // implementation only from now on
-    virtual WXDWORD MSWGetStyle(long flags, WXDWORD *exstyle = nullptr) const override;
+    virtual WXDWORD MSWGetStyle(long flags, WXDWORD *exstyle = NULL) const wxOVERRIDE;
 
 protected:
-    virtual wxSize DoGetBestClientSize() const override;
+    virtual wxSize DoGetBestClientSize() const wxOVERRIDE;
 
-    virtual bool MSWGetDarkModeSupport(MSWDarkModeSupport& support) const override;
-
-    virtual void DoSet3StateValue(wxCheckBoxState value) override;
-    virtual wxCheckBoxState DoGet3StateValue() const override;
+    virtual void DoSet3StateValue(wxCheckBoxState value) wxOVERRIDE;
+    virtual wxCheckBoxState DoGet3StateValue() const wxOVERRIDE;
 
     // Implement wxMSWOwnerDrawnButtonBase methods.
-    virtual int MSWGetButtonStyle() const override;
-    virtual void MSWOnButtonResetOwnerDrawn() override;
-    virtual int MSWGetButtonCheckedFlag() const override;
+    virtual int MSWGetButtonStyle() const wxOVERRIDE;
+    virtual void MSWOnButtonResetOwnerDrawn() wxOVERRIDE;
+    virtual int MSWGetButtonCheckedFlag() const wxOVERRIDE;
     virtual void
-        MSWDrawButtonBitmap(wxDC& dc, const wxRect& rect, int flags) override;
+        MSWDrawButtonBitmap(wxDC& dc, const wxRect& rect, int flags) wxOVERRIDE;
 
 private:
     // common part of all ctors

@@ -2,6 +2,7 @@
 // Name:        wx/palette.h
 // Purpose:     Common header and base class for wxPalette
 // Author:      Julian Smart
+// Modified by:
 // Created:
 // Copyright:   (c) Julian Smart
 // Licence:     wxWindows Licence
@@ -21,19 +22,23 @@
 class WXDLLIMPEXP_CORE wxPaletteBase: public wxGDIObject
 {
 public:
-    virtual ~wxPaletteBase() = default;
+    wxDECLARE_DEFAULT_COPY_AND_DEF(wxPaletteBase)
+
+    virtual ~wxPaletteBase() { }
 
     virtual int GetColoursCount() const { wxFAIL_MSG( wxT("not implemented") ); return 0; }
 };
 
 #if defined(__WXMSW__)
     #include "wx/msw/palette.h"
-#elif defined(__WXX11__)
+#elif defined(__WXX11__) || defined(__WXMOTIF__)
     #include "wx/x11/palette.h"
-#elif defined(__WXGTK__) || defined(__WXQT__)
+#elif defined(__WXGTK__)
     #include "wx/generic/paletteg.h"
 #elif defined(__WXMAC__)
     #include "wx/osx/palette.h"
+#elif defined(__WXQT__)
+    #include "wx/qt/palette.h"
 #endif
 
 #endif // wxUSE_PALETTE

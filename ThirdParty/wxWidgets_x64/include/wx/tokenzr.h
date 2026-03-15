@@ -128,7 +128,8 @@ protected:
 
     wxString m_string;              // the string we tokenize
     wxString::const_iterator m_stringEnd;
-    wxWCharBuffer m_delims;         // all possible delimiters
+    // FIXME-UTF8: use wxWcharBuffer
+    wxWxCharBuffer m_delims;        // all possible delimiters
     size_t m_delimsLen;
 
     wxString::const_iterator m_pos; // the current position in m_string

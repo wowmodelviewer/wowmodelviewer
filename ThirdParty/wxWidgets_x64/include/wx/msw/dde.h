@@ -2,6 +2,7 @@
 // Name:        wx/msw/dde.h
 // Purpose:     DDE class
 // Author:      Julian Smart
+// Modified by:
 // Created:     01/02/97
 // Copyright:   (c) Julian Smart
 // Licence:     wxWindows licence
@@ -48,18 +49,18 @@ public:
 
   // implement base class pure virtual methods
   virtual const void *Request(const wxString& item,
-                              size_t *size = nullptr,
-                              wxIPCFormat format = wxIPC_TEXT) override;
-  virtual bool StartAdvise(const wxString& item) override;
-  virtual bool StopAdvise(const wxString& item) override;
-  virtual bool Disconnect() override;
+                              size_t *size = NULL,
+                              wxIPCFormat format = wxIPC_TEXT) wxOVERRIDE;
+  virtual bool StartAdvise(const wxString& item) wxOVERRIDE;
+  virtual bool StopAdvise(const wxString& item) wxOVERRIDE;
+  virtual bool Disconnect() wxOVERRIDE;
 
 protected:
-  virtual bool DoExecute(const void *data, size_t size, wxIPCFormat format) override;
+  virtual bool DoExecute(const void *data, size_t size, wxIPCFormat format) wxOVERRIDE;
   virtual bool DoPoke(const wxString& item, const void *data, size_t size,
-                      wxIPCFormat format) override;
+                      wxIPCFormat format) wxOVERRIDE;
   virtual bool DoAdvise(const wxString& item, const void *data, size_t size,
-                        wxIPCFormat format) override;
+                        wxIPCFormat format) wxOVERRIDE;
 
 public:
   wxString      m_topicName;
@@ -78,10 +79,10 @@ class WXDLLIMPEXP_BASE wxDDEServer : public wxServerBase
 {
 public:
     wxDDEServer();
-    bool Create(const wxString& server_name) override;
+    bool Create(const wxString& server_name) wxOVERRIDE;
     virtual ~wxDDEServer();
 
-    virtual wxConnectionBase *OnAcceptConnection(const wxString& topic) override;
+    virtual wxConnectionBase *OnAcceptConnection(const wxString& topic) wxOVERRIDE;
 
     // Find/delete wxDDEConnection corresponding to the HCONV
     wxDDEConnection *FindConnection(WXHCONV conv);
@@ -106,15 +107,15 @@ public:
     wxDDEClient();
     virtual ~wxDDEClient();
 
-    bool ValidHost(const wxString& host) override;
+    bool ValidHost(const wxString& host) wxOVERRIDE;
 
-    // Call this to make a connection. Returns nullptr if cannot.
+    // Call this to make a connection. Returns NULL if cannot.
     virtual wxConnectionBase *MakeConnection(const wxString& host,
                                              const wxString& server,
-                                             const wxString& topic) override;
+                                             const wxString& topic) wxOVERRIDE;
 
     // Tailor this to return own connection.
-    virtual wxConnectionBase *OnMakeConnection() override;
+    virtual wxConnectionBase *OnMakeConnection() wxOVERRIDE;
 
     // Find/delete wxDDEConnection corresponding to the HCONV
     wxDDEConnection *FindConnection(WXHCONV conv);

@@ -2,6 +2,7 @@
 // Name:        wx/colordlg.h
 // Purpose:     wxColourDialog
 // Author:      Vadim Zeitlin
+// Modified by:
 // Created:     01/02/97
 // Copyright:   (c) wxWidgets team
 // Licence:     wxWindows licence
@@ -20,7 +21,7 @@
     #include "wx/msw/colordlg.h"
 #elif defined(__WXMAC__) && !defined(__WXUNIVERSAL__)
     #include "wx/osx/colordlg.h"
-#elif defined(__WXGTK__) && !defined(__WXUNIVERSAL__)
+#elif defined(__WXGTK20__) && !defined(__WXUNIVERSAL__)
     #include "wx/gtk/colordlg.h"
 #elif defined(__WXQT__)
     #include "wx/qt/colordlg.h"
@@ -56,7 +57,7 @@ public:
     wxColour GetColour() const { return m_colour; }
     void SetColour(const wxColour& colour) { m_colour = colour; }
 
-    wxNODISCARD virtual wxEvent *Clone() const override
+    virtual wxEvent *Clone() const wxOVERRIDE
     {
         return new wxColourDialogEvent(*this);
     }
@@ -77,10 +78,10 @@ wxDECLARE_EXPORTED_EVENT(WXDLLIMPEXP_CORE, wxEVT_COLOUR_CHANGED, wxColourDialogE
 
 
 // get the colour from user and return it
-WXDLLIMPEXP_CORE wxColour wxGetColourFromUser(wxWindow *parent = nullptr,
+WXDLLIMPEXP_CORE wxColour wxGetColourFromUser(wxWindow *parent = NULL,
                                               const wxColour& colInit = wxNullColour,
                                               const wxString& caption = wxEmptyString,
-                                              wxColourData *data = nullptr);
+                                              wxColourData *data = NULL);
 
 #endif // wxUSE_COLOURDLG
 

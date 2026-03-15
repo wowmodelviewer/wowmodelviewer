@@ -2,6 +2,7 @@
 // Name:        wx/iconbndl.h
 // Purpose:     wxIconBundle
 // Author:      Mattia barbon
+// Modified by:
 // Created:     23.03.02
 // Copyright:   (c) Mattia Barbon
 // Licence:     wxWindows licence
@@ -18,9 +19,7 @@
 
 class WXDLLIMPEXP_FWD_BASE wxInputStream;
 
-// This declaration is preserved solely for backwards compatibility, this type
-// is not used by wxWidgets itself.
-using wxIconArray = wxBaseArray<wxIcon>;
+WX_DECLARE_EXPORTED_OBJARRAY(wxIcon, wxIconArray);
 
 // Load icons of multiple sizes from files or resources (MSW-only).
 class WXDLLIMPEXP_CORE wxIconBundle : public wxGDIObject
@@ -111,9 +110,25 @@ public:
     // check if we have any icons at all
     bool IsEmpty() const { return GetIconCount() == 0; }
 
+#if WXWIN_COMPATIBILITY_2_8
+#if wxUSE_STREAMS && wxUSE_IMAGE && (wxUSE_FFILE || wxUSE_FILE)
+    wxDEPRECATED( void AddIcon(const wxString& file, long type)
+        {
+            AddIcon(file, (wxBitmapType)type);
+        }
+    )
+
+    wxDEPRECATED_CONSTRUCTOR( wxIconBundle (const wxString& file, long type)
+        {
+            AddIcon(file, (wxBitmapType)type);
+        }
+    )
+#endif // wxUSE_STREAMS && wxUSE_IMAGE && (wxUSE_FFILE || wxUSE_FILE)
+#endif // WXWIN_COMPATIBILITY_2_8
+
 protected:
-    virtual wxGDIRefData *CreateGDIRefData() const override;
-    wxNODISCARD virtual wxGDIRefData *CloneGDIRefData(const wxGDIRefData *data) const override;
+    virtual wxGDIRefData *CreateGDIRefData() const wxOVERRIDE;
+    virtual wxGDIRefData *CloneGDIRefData(const wxGDIRefData *data) const wxOVERRIDE;
 
 private:
     // delete all icons

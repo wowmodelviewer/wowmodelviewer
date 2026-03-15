@@ -2,6 +2,7 @@
 // Name:        wx/vlbox.h
 // Purpose:     wxVListBox is a virtual listbox with lines of variable height
 // Author:      Vadim Zeitlin
+// Modified by:
 // Created:     31.05.03
 // Copyright:   (c) 2003 Vadim Zeitlin <vadim@wxwidgets.org>
 // Licence:     wxWindows licence
@@ -30,7 +31,7 @@ extern WXDLLIMPEXP_DATA_CORE(const char) wxVListBoxNameStr[];
     It emits the same events as wxListBox and the same event macros may be used
     with it.
  */
-class WXDLLIMPEXP_CORE wxVListBox : public wxVScrolledCanvas
+class WXDLLIMPEXP_CORE wxVListBox : public wxVScrolledWindow
 {
 public:
     // constructors and such
@@ -76,7 +77,7 @@ public:
     size_t GetItemCount() const { return GetRowCount(); }
 
     // does this control use multiple selection?
-    bool HasMultipleSelection() const { return m_selStore != nullptr; }
+    bool HasMultipleSelection() const { return m_selStore != NULL; }
 
     // get the currently selected item or wxNOT_FOUND if there is no selection
     //
@@ -92,14 +93,8 @@ public:
     // is this item the current one?
     bool IsCurrent(size_t item) const { return item == (size_t)m_current; }
     #ifdef __WXUNIVERSAL__
-    bool IsCurrent() const { return wxVScrolledCanvas::IsCurrent(); }
+    bool IsCurrent() const { return wxVScrolledWindow::IsCurrent(); }
     #endif
-
-    // get current item
-    int GetCurrent() const { return m_current; }
-
-    // set current item
-    void SetCurrent(int current) { DoSetCurrent(current); }
 
     // is this item selected?
     bool IsSelected(size_t item) const;
@@ -139,7 +134,7 @@ public:
 
     // set the number of items to be shown in the control
     //
-    // this is just a synonym for wxVScrolledCanvas::SetRowCount()
+    // this is just a synonym for wxVScrolledWindow::SetRowCount()
     virtual void SetItemCount(size_t count);
 
     // delete all items from the control
@@ -199,7 +194,7 @@ public:
     void RefreshSelected();
 
 
-    virtual wxVisualAttributes GetDefaultAttributes() const override
+    virtual wxVisualAttributes GetDefaultAttributes() const wxOVERRIDE
     {
         return GetClassDefaultAttributes(GetWindowVariant());
     }
@@ -208,7 +203,7 @@ public:
     GetClassDefaultAttributes(wxWindowVariant variant = wxWINDOW_VARIANT_NORMAL);
 
 protected:
-    virtual wxBorder GetDefaultBorder() const override { return wxBORDER_THEME; }
+    virtual wxBorder GetDefaultBorder() const wxOVERRIDE { return wxBORDER_THEME; }
 
     // the derived class must implement this function to actually draw the item
     // with the given index on the provided DC
@@ -238,7 +233,7 @@ protected:
     // allows us to add borders to the items easily
     //
     // this function is not supposed to be overridden by the derived classes
-    virtual wxCoord OnGetRowHeight(size_t line) const override;
+    virtual wxCoord OnGetRowHeight(size_t line) const wxOVERRIDE;
 
 
     // event handlers
@@ -288,7 +283,7 @@ protected:
 private:
     // the current item or wxNOT_FOUND
     //
-    // if m_selStore == nullptr this is also the selected item, otherwise the
+    // if m_selStore == NULL this is also the selected item, otherwise the
     // selections are managed by m_selStore
     int m_current;
 
@@ -299,7 +294,7 @@ private:
     // always wxNOT_FOUND for single selection listboxes
     int m_anchor;
 
-    // the object managing our selected items if not nullptr
+    // the object managing our selected items if not NULL
     wxSelectionStore *m_selStore;
 
     // margins
@@ -311,70 +306,6 @@ private:
     wxDECLARE_EVENT_TABLE();
     wxDECLARE_NO_COPY_CLASS(wxVListBox);
     wxDECLARE_ABSTRACT_CLASS(wxVListBox);
-};
-
-extern WXDLLIMPEXP_DATA_CORE(const char) wxXRCPreviewVListBoxNameStr[];
-
-// ----------------------------------------------------------------------------
-// wxXRCPreviewVListBox
-// ----------------------------------------------------------------------------
-
-/*
-    GUI editors, e.g., wxFormBuilder, typically allow users to lay out
-    instances of controls.  However, wxVListBox is an abstract class, so a GUI
-    editor can only create instances of a subclass of wxVListBox.  Rather than
-    require every GUI editor to repeat the work of subclassing wxVListBox for
-    GUI editing, and because the user's intended subclass will not exist in GUI
-    editors, provide a class that GUI editors can use.  Also, the
-    wxVListBoxXmlHandler can create instances of this class when in
-    wxXRC_NO_SUBCLASSING mode;
- */
-class WXDLLIMPEXP_CORE wxXRCPreviewVListBox : public wxVListBox
-{
-public:
-    // default constructor, you must call Create() later
-    wxXRCPreviewVListBox() = default;
-
-    // normal constructor which calls Create() internally
-    wxXRCPreviewVListBox(wxWindow *parent,
-                            wxWindowID id = wxID_ANY,
-                            const wxPoint& pos = wxDefaultPosition,
-                            const wxSize& size = wxDefaultSize,
-                            long style = 0,
-                            const wxString& name = wxASCII_STR(wxXRCPreviewVListBoxNameStr))
-    {
-        (void)Create(parent, id, pos, size, style, name);
-    }
-
-    // really creates the control and sets the initial number of items in it
-    // (which may be changed later with SetItemCount())
-    //
-    // the only special style which may be specified here is wxLB_MULTIPLE
-    //
-    // returns true on success or false if the control couldn't be created
-    bool Create(wxWindow *parent,
-                wxWindowID id = wxID_ANY,
-                const wxPoint& pos = wxDefaultPosition,
-                const wxSize& size = wxDefaultSize,
-                long style = 0,
-                const wxString& name = wxASCII_STR(wxXRCPreviewVListBoxNameStr));
-
-protected:
-    // avoid defaulting to tiny window
-    wxSize DoGetBestClientSize() const override;
-
-    // the derived class must implement this function to actually draw the item
-    // with the given index on the provided DC
-    void OnDrawItem(wxDC& dc, const wxRect& rect, size_t n) const override;
-
-    // the derived class must implement this method to return the height of the
-    // specified item
-    wxCoord OnMeasureItem(size_t n) const override;
-
-private:
-    wxDECLARE_DYNAMIC_CLASS_NO_COPY(wxXRCPreviewVListBox);
-
-    wxString GetItem(size_t n) const;
 };
 
 #endif // _WX_VLBOX_H_

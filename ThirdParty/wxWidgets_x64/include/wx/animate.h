@@ -20,8 +20,6 @@
 #include "wx/timer.h"
 #include "wx/bmpbndl.h"
 
-#include <vector>
-
 class WXDLLIMPEXP_FWD_CORE wxAnimation;
 class wxAnimationImpl;
 
@@ -83,64 +81,6 @@ private:
 
 
 // ----------------------------------------------------------------------------
-// wxAnimationBundle is one or more animations in different resolutions
-// ----------------------------------------------------------------------------
-
-using wxAnimations = std::vector<wxAnimation>;
-
-// This class is conceptually similar to wxBitmapBundle but much simpler.
-class WXDLLIMPEXP_CORE wxAnimationBundle
-{
-public:
-    // Default ctor, call Add() later.
-    wxAnimationBundle() = default;
-
-    // Implicit ctor for backwards compatibility: this allows to pass a single
-    // wxAnimation to wxAnimationCtrl::SetAnimation(), just as before.
-    wxAnimationBundle(const wxAnimation& anim)
-    {
-        // Allow the animation to be invalid here, also for compatibility.
-        if ( anim.IsOk() )
-            m_animations.push_back(anim);
-    }
-
-    // Another implicit ctor for backwards compatibility: this one allows to
-    // create an animation from the given file.
-    wxAnimationBundle(const wxString& filename,
-                      wxAnimationType type = wxANIMATION_TYPE_ANY)
-    {
-        wxAnimation anim(filename, type);
-        if ( anim.IsOk() )
-            m_animations.push_back(anim);
-    }
-
-    wxAnimationBundle(const wxAnimationBundle&) = default;
-    wxAnimationBundle& operator=(const wxAnimationBundle&) = default;
-
-    ~wxAnimationBundle() = default;
-
-
-    // Add an animation in another, bigger, size.
-    void Add(const wxAnimation& anim);
-
-    void Add(const wxString& filename,
-             wxAnimationType type = wxANIMATION_TYPE_ANY)
-    {
-        Add(wxAnimation(filename, type));
-    }
-
-    // Check if this bundle contains any animations (if it has any, they must
-    // be valid).
-    bool IsOk() const { return !m_animations.empty(); }
-
-    // Just provide access to all the elements.
-    const wxAnimations& GetAll() const { return m_animations; }
-
-private:
-    wxAnimations m_animations;
-};
-
-// ----------------------------------------------------------------------------
 // wxAnimationCtrlBase
 // ----------------------------------------------------------------------------
 
@@ -154,7 +94,7 @@ private:
 class WXDLLIMPEXP_CORE wxAnimationCtrlBase : public wxControl
 {
 public:
-    wxAnimationCtrlBase() = default;
+    wxAnimationCtrlBase() { }
 
     // public API
     virtual bool LoadFile(const wxString& filename,
@@ -162,7 +102,7 @@ public:
     virtual bool Load(wxInputStream& stream,
                       wxAnimationType type = wxANIMATION_TYPE_ANY) = 0;
 
-    virtual void SetAnimation(const wxAnimationBundle& animations) = 0;
+    virtual void SetAnimation(const wxAnimation &anim) = 0;
     wxAnimation GetAnimation() const { return m_animation; }
 
     virtual bool Play() = 0;
@@ -190,10 +130,7 @@ protected:
     wxAnimationImpl* GetAnimImpl() const
         { return m_animation.GetImpl(); }
 
-    // All animations that we have.
-    wxAnimations m_animations;
-
-    // The animation being currently used, possibly invalid/empty.
+    // The associated animation, possibly invalid/empty.
     wxAnimation m_animation;
 
     // the inactive bitmap as it was set by the user
@@ -215,7 +152,7 @@ protected:
 // include the platform-specific version of the wxAnimationCtrl class
 // ----------------------------------------------------------------------------
 
-#if defined(__WXGTK__) && !defined(__WXUNIVERSAL__)
+#if defined(__WXGTK20__) && !defined(__WXUNIVERSAL__)
     #include "wx/gtk/animate.h"
 
     #define wxHAS_NATIVE_ANIMATIONCTRL
@@ -241,7 +178,7 @@ protected:
     private:
         wxDECLARE_DYNAMIC_CLASS(wxAnimationCtrl);
     };
-#endif // defined(__WXGTK__)
+#endif // defined(__WXGTK20__)
 
 #endif // wxUSE_ANIMATIONCTRL
 

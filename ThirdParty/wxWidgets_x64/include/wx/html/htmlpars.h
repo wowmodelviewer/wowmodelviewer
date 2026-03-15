@@ -14,13 +14,10 @@
 
 #include "wx/html/htmltag.h"
 #include "wx/filesys.h"
+#include "wx/hashmap.h"
+#include "wx/hashset.h"
 #include "wx/vector.h"
 #include "wx/fontenc.h"
-
-#include <memory>
-#include <stack>
-#include <unordered_map>
-#include <unordered_set>
 
 class WXDLLIMPEXP_FWD_BASE wxMBConv;
 class WXDLLIMPEXP_FWD_HTML wxHtmlParser;
@@ -30,7 +27,13 @@ class WXDLLIMPEXP_FWD_HTML wxHtmlEntitiesParser;
 class wxHtmlTextPieces;
 class wxHtmlParserState;
 
-using wxHtmlTagHandlersHash = std::unordered_map<wxString, wxHtmlTagHandler*>;
+WX_DECLARE_HASH_SET_WITH_DECL_PTR(wxHtmlTagHandler*,
+                                  wxPointerHash, wxPointerEqual,
+                                  wxHtmlTagHandlersSet,
+                                  class WXDLLIMPEXP_HTML);
+WX_DECLARE_STRING_HASH_MAP_WITH_DECL(wxHtmlTagHandler*,
+                                     wxHtmlTagHandlersHash,
+                                     class WXDLLIMPEXP_HTML);
 
 
 enum wxHtmlURLType
@@ -182,8 +185,9 @@ protected:
     // (see wxHtmlWinParser for details about filling it)
     // m_HandlersHash is for random access based on knowledge of tag name (BR, P, etc.)
     //      it may (and often does) contain more references to one object
-    // m_HandlersSet is set of all handlers and owns its elements.
-    std::unordered_set<std::unique_ptr<wxHtmlTagHandler>> m_HandlersSet;
+    // m_HandlersList is list of all handlers and it is guaranteed to contain
+    //      only one reference to each handler instance.
+    wxHtmlTagHandlersSet m_HandlersSet;
     wxHtmlTagHandlersHash m_HandlersHash;
 
     wxDECLARE_NO_COPY_CLASS(wxHtmlParser);
@@ -191,7 +195,7 @@ protected:
     // class for opening files (file system)
     wxFileSystem *m_FS;
     // handlers stack used by PushTagHandler and PopTagHandler
-    std::stack<std::unique_ptr<wxHtmlTagHandlersHash>> m_HandlersStack;
+    wxVector<wxHtmlTagHandlersHash*> m_HandlersStack;
 
     // entity parse
     wxHtmlEntitiesParser *m_entitiesParser;
@@ -214,7 +218,7 @@ class WXDLLIMPEXP_HTML wxHtmlTagHandler : public wxObject
     wxDECLARE_ABSTRACT_CLASS(wxHtmlTagHandler);
 
 public:
-    wxHtmlTagHandler() : wxObject () { m_Parser = nullptr; }
+    wxHtmlTagHandler() : wxObject () { m_Parser = NULL; }
 
     // Sets the parser.
     // NOTE : each _instance_ of handler is guaranteed to be called
@@ -266,8 +270,13 @@ public:
     wxHtmlEntitiesParser();
     virtual ~wxHtmlEntitiesParser();
 
-    // Obsolete, has no effect.
+    // Sets encoding of output string.
+    // Has no effect if wxUSE_UNICODE==1
+#if wxUSE_UNICODE
     void SetEncoding(wxFontEncoding WXUNUSED(encoding)) {}
+#else
+    void SetEncoding(wxFontEncoding encoding);
+#endif
 
     // Parses entities in input and replaces them with respective characters
     // (with respect to output encoding)
@@ -277,9 +286,18 @@ public:
     wxChar GetEntityChar(const wxString& entity) const;
 
     // Returns character that represents given Unicode code
+#if wxUSE_UNICODE
     wxChar GetCharForCode(unsigned code) const { return (wxChar)code; }
+#else
+    wxChar GetCharForCode(unsigned code) const;
+#endif
 
 protected:
+#if !wxUSE_UNICODE
+    wxMBConv *m_conv;
+    wxFontEncoding m_encoding;
+#endif
+
     wxDECLARE_NO_COPY_CLASS(wxHtmlEntitiesParser);
 };
 

@@ -32,6 +32,9 @@
    byte first (like Motorola and SPARC, unlike Intel and VAX).  */
 /* #undef WORDS_BIGENDIAN */
 
+/* Define this if your version of GTK+ is greater than 1.2.7 */
+/* #undef __WXGTK127__ */
+
 /* Define this if your version of GTK+ is greater than 2.0 */
 /* #undef __WXGTK20__ */
 
@@ -49,6 +52,15 @@
 
 /* Define this if your version of GTK+ is >= 3.90.0 */
 /* #undef __WXGTK4__ */
+
+/* Define this if you want to use GPE features */
+/* #undef __WXGPE__ */
+
+/* Define this if your version of Motif is greater than 2.0 */
+/* #undef __WXMOTIF20__ */
+
+/* Define this if you are using Lesstif */
+/* #undef __WXLESSTIF__ */
 
 /*
  * Define to 1 for Unix[-like] system
@@ -79,9 +91,19 @@
 /* #undef __VMS__ */
 
 /* #undef __IA64__ */
+/* #undef __ALPHA__ */
 
 /* NanoX (with wxX11) */
 #define wxUSE_NANOX 0
+
+/* PowerPC Darwin & Mac OS X */
+/* #undef __POWERPC__ */
+
+/* Hack to make IOGraphicsTypes.h not define Point conflicting with MacTypes */
+#undef __Point__
+
+/* MS-DOS with DJGPP */
+/* #undef __DOS__ */
 
 /* Stupid hack; __WINDOWS__ clashes with wx/defs.h */
 #ifndef __WINDOWS__
@@ -108,18 +130,15 @@
 #endif
 
 
-#define WXWIN_COMPATIBILITY_3_0 0
+#define WXWIN_COMPATIBILITY_2_8 0
 
-#define WXWIN_COMPATIBILITY_3_2 1
+#define WXWIN_COMPATIBILITY_3_0 1
 
 #define wxDIALOG_UNIT_COMPATIBILITY 0
 
+#define wxUSE_UNSAFE_WXSTRING_CONV 1
+
 #define wxUSE_REPRODUCIBLE_BUILD 0
-
-
-#define wxUSE_UNICODE_UTF8 0
-
-#define wxUSE_UTF8_LOCALE_ONLY 0
 
 
 
@@ -129,6 +148,21 @@
 
 #define wxUSE_DEBUGREPORT 1
 
+
+
+#define wxUSE_DEBUG_CONTEXT 0
+
+#define wxUSE_MEMORY_TRACING 0
+
+#define wxUSE_GLOBAL_MEMORY_OPERATORS 0
+
+#define wxUSE_DEBUG_NEW_ALWAYS 0
+
+
+
+#ifndef wxUSE_UNICODE
+    #define wxUSE_UNICODE 1
+#endif
 
 
 #define wxUSE_EXCEPTIONS 1
@@ -151,16 +185,25 @@
 
 #define wxUSE_PRINTF_POS_PARAMS 1
 
+#define wxUSE_COMPILER_TLS 1
+
+
+#define wxUSE_STL 0
+
+#define wxUSE_STD_DEFAULT 1
+
+#define wxUSE_STD_CONTAINERS_COMPATIBLY wxUSE_STD_DEFAULT
 
 #define wxUSE_STD_CONTAINERS 0
 
-#define wxUSE_STD_IOSTREAM 1
+#define wxUSE_STD_IOSTREAM  wxUSE_STD_DEFAULT
+
+#define wxUSE_STD_STRING  wxUSE_STD_DEFAULT
+
+#define wxUSE_STD_STRING_CONV_IN_WXSTRING wxUSE_STL
 
 
-#define wxUSE_UNSAFE_WXSTRING_CONV 1
-
-#define wxUSE_STD_STRING_CONV_IN_WXSTRING 0
-
+#define wxUSE_LONGLONG 1
 
 #define wxUSE_BASE64 1
 
@@ -281,8 +324,6 @@
 
 #define wxUSE_WEBVIEW 0
 
-#define wxUSE_WEBVIEW_CHROMIUM 0
-
 #ifdef __WXMSW__
 #define wxUSE_WEBVIEW_IE 1
 #else
@@ -305,7 +346,13 @@
 #define wxUSE_WEBVIEW_WEBKIT2 0
 #endif
 
+
+#if defined(_MSC_VER) || \
+    (defined(__MINGW32__) && (__GNUC__ > 4 || __GNUC_MINOR__ >= 8))
 #define wxUSE_GRAPHICS_CONTEXT 1
+#else
+#define wxUSE_GRAPHICS_CONTEXT 1
+#endif
 
 #define wxUSE_CAIRO 0
 
@@ -443,6 +490,8 @@
 #endif
 
 
+#define wxUSE_COMMON_DIALOGS 1
+
 #define wxUSE_BUSYINFO 1
 
 #define wxUSE_CHOICEDLG 1
@@ -578,8 +627,6 @@
 
 #define wxUSE_PALETTE 1
 
-#define wxUSE_LIBWEBP 1
-
 
 #define wxUSE_ALL_THEMES 0
 
@@ -596,10 +643,8 @@
 #define wxUSE_SELECT_DISPATCHER 0
 #define wxUSE_EPOLL_DISPATCHER 0
 
-/*
-   Use debug version of CEF in wxWebViewChromium.
- */
-/* #undef wxHAVE_CEF_DEBUG */
+#define wxUSE_UNICODE_UTF8 0
+#define wxUSE_UTF8_LOCALE_ONLY 0
 
 /*
    Use GStreamer for Unix.
@@ -628,7 +673,7 @@
 
 #define wxUSE_GRAPHICS_GDIPLUS wxUSE_GRAPHICS_CONTEXT
 
-#if defined(_MSC_VER)
+#if defined(_MSC_VER) && _MSC_VER >= 1600
     #define wxUSE_GRAPHICS_DIRECT2D wxUSE_GRAPHICS_CONTEXT
 #else
     #define wxUSE_GRAPHICS_DIRECT2D 1
@@ -643,7 +688,7 @@
 
 #define wxUSE_ACTIVEX 1
 
-#if defined(_MSC_VER)
+#if defined(_MSC_VER) && _MSC_VER >= 1700 && !defined(_USING_V110_SDK71_)
     #define wxUSE_WINRT 1
 #else
     #define wxUSE_WINRT 1
@@ -701,6 +746,67 @@
 /* #undef VA_LIST_IS_ARRAY */
 
 /*
+ * Define if you don't want variadic macros to be used even if they are
+ * supported by the compiler.
+ */
+/* #undef wxNO_VARIADIC_MACROS */
+
+/*
+ * Define if your compiler has std::wstring
+ */
+#define HAVE_STD_WSTRING 1
+/*
+ * Define if your compiler has compliant std::string::compare
+ */
+#define HAVE_STD_STRING_COMPARE 1
+/*
+ * Define if your compiler has <hash_map>
+ */
+/* #undef HAVE_HASH_MAP */
+/*
+ * Define if your compiler has <ext/hash_map>
+ */
+/* #undef HAVE_EXT_HASH_MAP */
+/*
+ * Define if your compiler has std::hash_map/hash_set
+ */
+/* #undef HAVE_STD_HASH_MAP */
+/*
+ * Define if your compiler has __gnu_cxx::hash_map/hash_set
+ */
+/* #undef HAVE_GNU_CXX_HASH_MAP */
+
+/*
+ * Define if your compiler has std::unordered_map
+ */
+#define HAVE_STD_UNORDERED_MAP 1
+
+/*
+ * Define if your compiler has std::unordered_set
+ */
+#define HAVE_STD_UNORDERED_SET 1
+
+/*
+ * Define if your compiler has std::tr1::unordered_map
+ */
+/* #undef HAVE_TR1_UNORDERED_MAP */
+
+/*
+ * Define if your compiler has std::tr1::unordered_set
+ */
+/* #undef HAVE_TR1_UNORDERED_SET */
+
+/*
+ * Define if your compiler has <tr1/type_traits>
+ */
+/* #undef HAVE_TR1_TYPE_TRAITS */
+
+/*
+ * Define if your compiler has <type_traits>
+ */
+#define HAVE_TYPE_TRAITS 1
+
+/*
  * Define if the compiler supports simple visibility declarations.
  */
 /* #undef HAVE_VISIBILITY */
@@ -715,6 +821,11 @@
  */
 /* #undef HAVE_BROKEN_LIBSTDCXX_VISIBILITY */
 
+/*
+ * On GNU systems use re_search instead of regexec, since the latter does a
+ * strlen on the search text affecting the performance of some operations.
+ */
+/* #undef HAVE_RE_SEARCH */
 /*
  * Use SDL for audio (Unix)
  */
@@ -779,6 +890,17 @@
 #define wxUSE_WEBKIT 0
 
 /*
+ * The const keyword is being introduced more in wxWindows.
+ * You can use this setting to maintain backward compatibility.
+ * If 0: will use const wherever possible.
+ * If 1: will use const only where necessary
+ *       for precompiled headers to work.
+ * If 2: will be totally backward compatible, but precompiled
+ *       headers may not work and program size will be larger.
+ */
+#define CONST_COMPATIBILITY 0
+
+/*
  * use the session manager to detect KDE/GNOME
  */
 #define wxUSE_DETECT_SM 0
@@ -795,6 +917,9 @@
 
 /* The type of statvfs(2) argument */
 /* #undef WX_STATFS_T */
+
+/* The signal handler prototype */
+#define wxTYPE_SA_HANDLER 
 
 /* gettimeofday() usually takes 2 arguments, but some really old systems might
  * have only one, in which case define WX_GETTIMEOFDAY_NO_TZ */
@@ -823,6 +948,9 @@
 
 /* Define if fsync() is available */
 /* #undef HAVE_FSYNC */
+
+/* Define if round() is available */
+#define HAVE_ROUND 1
 
 /* Define if you have ftime() */
 /* #undef HAVE_FTIME */
@@ -867,6 +995,9 @@
 /* define if you have statvfs function */
 /* #undef HAVE_STATVFS */
 
+/* Define if you have strtoull() and strtoll() */
+#define HAVE_STRTOULL 1
+
 /* Define if you have all functions to set thread priority */
 /* #undef HAVE_THREAD_PRIORITY_FUNCTIONS */
 
@@ -907,6 +1038,9 @@
 
 /* Define if you have wcsnlen() function */
 #define HAVE_WCSNLEN 1
+
+/* Define if you have wcstoull() and wcstoll() */
+#define HAVE_WCSTOULL 1
 
 /* The number of bytes in a wchar_t.  */
 #define SIZEOF_WCHAR_T 2
@@ -1136,6 +1270,9 @@
 /* When using an external jpeg library and the Windows headers already define
  * boolean, define to the type used by the jpeg library for boolean.  */
 /* #undef wxHACK_BOOLEAN */
+
+/* Define if the header pbt.h is missing.  */
+/* #undef NEED_PBT_H */
 
 #endif /* __WIN32__ */
 

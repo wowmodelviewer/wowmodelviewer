@@ -37,7 +37,7 @@ public:
 #endif // wxHAS_SYSTEM_THEMED_CONTROL/!wxHAS_SYSTEM_THEMED_CONTROL
     }
 
-    virtual ~wxSystemThemedControlBase() = default;
+    virtual ~wxSystemThemedControlBase() { }
 
 protected:
     // This method is virtual and can be overridden, e.g. composite controls do
@@ -65,7 +65,7 @@ class wxSystemThemedControl : public C,
                               public wxSystemThemedControlBase
 {
 public:
-    wxSystemThemedControl() = default;
+    wxSystemThemedControl() { }
 
     void EnableSystemTheme(bool enable = true)
     {

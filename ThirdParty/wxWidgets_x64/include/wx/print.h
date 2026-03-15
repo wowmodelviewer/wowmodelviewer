@@ -2,6 +2,7 @@
 // Name:        wx/print.h
 // Purpose:     Base header for printer classes
 // Author:      Julian Smart
+// Modified by:
 // Created:
 // Copyright:   (c) Julian Smart
 // Licence:     wxWindows Licence

@@ -11,7 +11,11 @@
 
 #if defined(_WINDOWS)
 #include <BaseTsd.h>
+#if !defined(HAVE_SSIZE_T) && !defined(_SSIZE_T_DEFINED)
 typedef SSIZE_T ssize_t;
+#endif
+#define _SSIZE_T_DEFINED
+#define HAVE_SSIZE_T
 typedef __int8 int8;
 typedef __int16 int16;
 typedef __int32 int32;

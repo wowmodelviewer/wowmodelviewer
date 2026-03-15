@@ -31,7 +31,7 @@ I STRONGLY recommend reading and understanding these macros!!
     class wxHTML_Handler_##name : public wxHtmlWinTagHandler              \
     {                                                                     \
         public:                                                           \
-            wxString GetSupportedTags() override {return wxT(tags);}
+            wxString GetSupportedTags() wxOVERRIDE {return wxT(tags);}
 
 
 
@@ -45,7 +45,7 @@ I STRONGLY recommend reading and understanding these macros!!
 
 #define TAG_HANDLER_PROC(varib)                                           \
         public:                                                           \
-            bool HandleTag(const wxHtmlTag& varib) override
+            bool HandleTag(const wxHtmlTag& varib) wxOVERRIDE
 
 
 
@@ -60,7 +60,7 @@ I STRONGLY recommend reading and understanding these macros!!
     {                                                                     \
         wxDECLARE_DYNAMIC_CLASS(wxHTML_Module##name );                    \
         public:                                                           \
-            void FillHandlersTable(wxHtmlWinParser *parser) override    \
+            void FillHandlersTable(wxHtmlWinParser *parser) wxOVERRIDE    \
                 {
 
 

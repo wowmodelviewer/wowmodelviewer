@@ -2,6 +2,7 @@
 // Name:        wx/msw/ole/activex.h
 // Purpose:     wxActiveXContainer class
 // Author:      Ryan Norton <wxprojects@comcast.net>
+// Modified by:
 // Created:     8/18/05
 // Copyright:   (c) Ryan Norton
 // Licence:     wxWindows licence
@@ -73,15 +74,15 @@ class wxAutoOleInterface
 public:
     typedef I Interface;
 
-    explicit wxAutoOleInterface(I *pInterface = nullptr) : m_interface(pInterface)
+    explicit wxAutoOleInterface(I *pInterface = NULL) : m_interface(pInterface)
         {}
-    wxAutoOleInterface(REFIID riid, IUnknown *pUnk) : m_interface(nullptr)
+    wxAutoOleInterface(REFIID riid, IUnknown *pUnk) : m_interface(NULL)
         { QueryInterface(riid, pUnk); }
-    wxAutoOleInterface(REFIID riid, IDispatch *pDispatch) : m_interface(nullptr)
+    wxAutoOleInterface(REFIID riid, IDispatch *pDispatch) : m_interface(NULL)
         { QueryInterface(riid, pDispatch); }
-    wxAutoOleInterface(REFCLSID clsid, REFIID riid) : m_interface(nullptr)
+    wxAutoOleInterface(REFCLSID clsid, REFIID riid) : m_interface(NULL)
         { CreateInstance(clsid, riid); }
-    wxAutoOleInterface(const wxAutoOleInterface& ti) : m_interface(nullptr)
+    wxAutoOleInterface(const wxAutoOleInterface& ti) : m_interface(NULL)
         { operator=(ti); }
 
     wxAutoOleInterface& operator=(const wxAutoOleInterface& ti)
@@ -106,13 +107,13 @@ public:
     {
         if ( m_interface )
             m_interface->Release();
-        m_interface = nullptr;
+        m_interface = NULL;
     }
 
     HRESULT QueryInterface(REFIID riid, IUnknown *pUnk)
     {
         Free();
-        wxASSERT(pUnk != nullptr);
+        wxASSERT(pUnk != NULL);
         return pUnk->QueryInterface(riid, (void **)&m_interface);
     }
 
@@ -122,7 +123,7 @@ public:
         return CoCreateInstance
                (
                    clsid,
-                   nullptr,
+                   NULL,
                    CLSCTX_ALL,
                    riid,
                    (void **)&m_interface
@@ -133,11 +134,17 @@ public:
     I* operator->() {return m_interface; }
     I** GetRef() {return &m_interface; }
     bool Ok() const { return IsOk(); }
-    bool IsOk() const { return m_interface != nullptr; }
+    bool IsOk() const { return m_interface != NULL; }
 
 protected:
     I *m_interface;
 };
+
+#if WXWIN_COMPATIBILITY_2_8
+// this macro is kept for compatibility with older wx versions
+#define WX_DECLARE_AUTOOLE(wxAutoOleInterfaceType, I) \
+    typedef wxAutoOleInterface<I> wxAutoOleInterfaceType;
+#endif // WXWIN_COMPATIBILITY_2_8
 
 typedef wxAutoOleInterface<IDispatch> wxAutoIDispatch;
 typedef wxAutoOleInterface<IOleClientSite> wxAutoIOleClientSite;
@@ -158,7 +165,7 @@ public:
     void OnPaint(wxPaintEvent&);
     void OnSetFocus(wxFocusEvent&);
     void OnKillFocus(wxFocusEvent&);
-    virtual bool MSWTranslateMessage(WXMSG* pMsg) override;
+    virtual bool MSWTranslateMessage(WXMSG* pMsg) wxOVERRIDE;
     virtual bool QueryClientSiteInterface(REFIID iid, void **_interface, const char *&desc);
 
 protected:
@@ -213,7 +220,7 @@ private:
     DISPID m_dispid;
 
 public:
-    wxNODISCARD virtual wxEvent *Clone() const override
+    virtual wxEvent *Clone() const wxOVERRIDE
     { return new wxActiveXEvent(*this); }
 
     size_t ParamCount() const;
@@ -247,7 +254,7 @@ typedef void (wxEvtHandler::*wxActiveXEventFunction)(wxActiveXEvent&);
 #define wxActiveXEventHandler(func) \
     wxEVENT_HANDLER_CAST( wxActiveXEventFunction, func )
 
-#define EVT_ACTIVEX(id, fn)     wxDECLARE_EVENT_TABLE_ENTRY(wxEVT_ACTIVEX, id, -1, wxActiveXEventHandler( fn ), nullptr ),
+#define EVT_ACTIVEX(id, fn)     wxDECLARE_EVENT_TABLE_ENTRY(wxEVT_ACTIVEX, id, -1, wxActiveXEventHandler( fn ), NULL ),
 
 #endif // wxUSE_ACTIVEX
 

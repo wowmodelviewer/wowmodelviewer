@@ -19,8 +19,7 @@
 #include "wx/evtloop.h"
 #include "wx/filename.h"
 #include "wx/dir.h"
-
-#include <unordered_map>
+#include "wx/hashmap.h"
 
 #define wxTRACE_FSWATCHER "fswatcher"
 
@@ -160,7 +159,7 @@ public:
         return m_changeType;
     }
 
-    wxNODISCARD virtual wxEvent* Clone() const override
+    virtual wxEvent* Clone() const wxOVERRIDE
     {
         wxFileSystemWatcherEvent* evt = new wxFileSystemWatcherEvent(*this);
         evt->m_errorMsg = m_errorMsg.Clone();
@@ -170,7 +169,7 @@ public:
         return evt;
     }
 
-    virtual wxEventCategory GetEventCategory() const override
+    virtual wxEventCategory GetEventCategory() const wxOVERRIDE
     {
         // TODO this has to be merged with "similar" categories and changed
         return wxEVT_CATEGORY_UNKNOWN;
@@ -280,7 +279,7 @@ protected:
     int m_refcount;
 };
 
-using wxFSWatchInfoMap = std::unordered_map<wxString, wxFSWatchInfo>;
+WX_DECLARE_STRING_HASH_MAP(wxFSWatchInfo, wxFSWatchInfoMap);
 
 /**
  * Encapsulation of platform-specific file system event mechanism

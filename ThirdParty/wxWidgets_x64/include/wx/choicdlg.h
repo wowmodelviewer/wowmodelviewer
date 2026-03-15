@@ -2,6 +2,7 @@
 // Name:        wx/choicdlg.h
 // Purpose:     Includes generic choice dialog file
 // Author:      Julian Smart
+// Modified by:
 // Created:
 // Copyright:   Julian Smart
 // Licence:     wxWindows licence

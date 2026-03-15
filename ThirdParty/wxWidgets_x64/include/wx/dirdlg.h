@@ -2,6 +2,7 @@
 // Name:        wx/dirdlg.h
 // Purpose:     wxDirDialog base class
 // Author:      Robert Roebling
+// Modified by:
 // Created:
 // Copyright:   (c) Robert Roebling
 // Licence:     wxWindows Licence
@@ -53,7 +54,7 @@ extern WXDLLIMPEXP_DATA_CORE(const char) wxDirSelectorPromptStr[];
 class WXDLLIMPEXP_CORE wxDirDialogBase : public wxDialog
 {
 public:
-    wxDirDialogBase() = default;
+    wxDirDialogBase() {}
     wxDirDialogBase(wxWindow *parent,
                     const wxString& title = wxASCII_STR(wxDirSelectorPromptStr),
                     const wxString& defaultPath = wxEmptyString,
@@ -65,7 +66,7 @@ public:
         Create(parent, title, defaultPath, style, pos, sz, name);
     }
 
-    virtual ~wxDirDialogBase() = default;
+    virtual ~wxDirDialogBase() {}
 
 
     bool Create(wxWindow *parent,
@@ -113,13 +114,17 @@ protected:
 #elif defined(__WXMSW__) && !wxUSE_OLE
     #include "wx/generic/dirdlgg.h"
     #define wxDirDialog wxGenericDirDialog
-#elif defined(__WXMSW__) || (defined(__WXQT__) && defined(__WINDOWS__))
-    #include "wx/msw/dirdlg.h"  // Native MSW or Qt under MSW
-#elif defined(__WXGTK__)
+#elif defined(__WXMSW__)
+    #include "wx/msw/dirdlg.h"  // Native MSW
+#elif defined(__WXGTK20__)
     #include "wx/gtk/dirdlg.h"  // Native GTK for gtk2.4
+#elif defined(__WXGTK__)
+    #include "wx/generic/dirdlgg.h"
+    #define wxDirDialog wxGenericDirDialog
 #elif defined(__WXMAC__)
     #include "wx/osx/dirdlg.h"      // Native Mac
-#elif defined(__WXX11__)
+#elif defined(__WXMOTIF__) || \
+      defined(__WXX11__)
     #include "wx/generic/dirdlgg.h"     // Other ports use generic implementation
     #define wxDirDialog wxGenericDirDialog
 #elif defined(__WXQT__)
@@ -135,7 +140,7 @@ wxDirSelector(const wxString& message = wxASCII_STR(wxDirSelectorPromptStr),
               const wxString& defaultPath = wxEmptyString,
               long style = wxDD_DEFAULT_STYLE,
               const wxPoint& pos = wxDefaultPosition,
-              wxWindow *parent = nullptr);
+              wxWindow *parent = NULL);
 
 #endif // wxUSE_DIRDLG
 

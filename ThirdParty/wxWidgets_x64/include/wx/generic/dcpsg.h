@@ -2,6 +2,7 @@
 // Name:        wx/generic/dcpsg.h
 // Purpose:     wxPostScriptDC class
 // Author:      Julian Smart and others
+// Modified by:
 // Copyright:   (c) Julian Smart and Robert Roebling
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
@@ -50,97 +51,97 @@ public:
     virtual ~wxPostScriptDCImpl();
 
     virtual bool Ok() const { return IsOk(); }
-    virtual bool IsOk() const override;
+    virtual bool IsOk() const wxOVERRIDE;
 
-    bool CanDrawBitmap() const override { return true; }
+    bool CanDrawBitmap() const wxOVERRIDE { return true; }
 
-    void Clear() override;
-    void SetFont( const wxFont& font ) override;
-    void SetPen( const wxPen& pen ) override;
-    void SetBrush( const wxBrush& brush ) override;
-    void SetLogicalFunction( wxRasterOperationMode function ) override;
-    void SetBackground( const wxBrush& brush ) override;
+    void Clear() wxOVERRIDE;
+    void SetFont( const wxFont& font ) wxOVERRIDE;
+    void SetPen( const wxPen& pen ) wxOVERRIDE;
+    void SetBrush( const wxBrush& brush ) wxOVERRIDE;
+    void SetLogicalFunction( wxRasterOperationMode function ) wxOVERRIDE;
+    void SetBackground( const wxBrush& brush ) wxOVERRIDE;
 
-    void DestroyClippingRegion() override;
+    void DestroyClippingRegion() wxOVERRIDE;
 
-    bool StartDoc(const wxString& message) override;
-    void EndDoc() override;
-    void StartPage() override;
-    void EndPage() override;
+    bool StartDoc(const wxString& message) wxOVERRIDE;
+    void EndDoc() wxOVERRIDE;
+    void StartPage() wxOVERRIDE;
+    void EndPage() wxOVERRIDE;
 
-    wxCoord GetCharHeight() const override;
-    wxCoord GetCharWidth() const override;
-    bool CanGetTextExtent() const override { return true; }
+    wxCoord GetCharHeight() const wxOVERRIDE;
+    wxCoord GetCharWidth() const wxOVERRIDE;
+    bool CanGetTextExtent() const wxOVERRIDE { return true; }
 
     // Resolution in pixels per logical inch
-    wxSize GetPPI() const override;
+    wxSize GetPPI() const wxOVERRIDE;
 
-    virtual wxSize FromDIP(const wxSize& sz) const override;
+    virtual wxSize FromDIP(const wxSize& sz) const wxOVERRIDE;
 
-    virtual wxSize ToDIP(const wxSize& sz) const override;
+    virtual wxSize ToDIP(const wxSize& sz) const wxOVERRIDE;
 
-    virtual void ComputeScaleAndOrigin() override;
+    virtual void ComputeScaleAndOrigin() wxOVERRIDE;
 
-    void SetBackgroundMode(int WXUNUSED(mode)) override { }
+    void SetBackgroundMode(int WXUNUSED(mode)) wxOVERRIDE { }
 #if wxUSE_PALETTE
-    void SetPalette(const wxPalette& WXUNUSED(palette)) override { }
+    void SetPalette(const wxPalette& WXUNUSED(palette)) wxOVERRIDE { }
 #endif
 
     void SetPrintData(const wxPrintData& data);
     wxPrintData& GetPrintData() { return m_printData; }
 
-    virtual int GetDepth() const override { return 24; }
+    virtual int GetDepth() const wxOVERRIDE { return 24; }
 
     void PsPrint( const wxString& psdata );
 
     // Overridden for wxPrinterDC Impl
 
-    virtual int GetResolution() const override;
-    virtual wxRect GetPaperRect() const override;
+    virtual int GetResolution() const wxOVERRIDE;
+    virtual wxRect GetPaperRect() const wxOVERRIDE;
 
-    virtual void* GetHandle() const override { return nullptr; }
+    virtual void* GetHandle() const wxOVERRIDE { return NULL; }
 
 protected:
     bool DoFloodFill(wxCoord x1, wxCoord y1, const wxColour &col,
-                     wxFloodFillStyle style = wxFLOOD_SURFACE) override;
-    bool DoGetPixel(wxCoord x1, wxCoord y1, wxColour *col) const override;
-    void DoDrawLine(wxCoord x1, wxCoord y1, wxCoord x2, wxCoord y2) override;
-    void DoCrossHair(wxCoord x, wxCoord y) override ;
-    void DoDrawArc(wxCoord x1,wxCoord y1,wxCoord x2,wxCoord y2,wxCoord xc,wxCoord yc) override;
-    void DoDrawEllipticArc(wxCoord x,wxCoord y,wxCoord w,wxCoord h,double sa,double ea) override;
-    void DoDrawPoint(wxCoord x, wxCoord y) override;
-    void DoDrawLines(int n, const wxPoint points[], wxCoord xoffset = 0, wxCoord yoffset = 0) override;
+                     wxFloodFillStyle style = wxFLOOD_SURFACE) wxOVERRIDE;
+    bool DoGetPixel(wxCoord x1, wxCoord y1, wxColour *col) const wxOVERRIDE;
+    void DoDrawLine(wxCoord x1, wxCoord y1, wxCoord x2, wxCoord y2) wxOVERRIDE;
+    void DoCrossHair(wxCoord x, wxCoord y) wxOVERRIDE ;
+    void DoDrawArc(wxCoord x1,wxCoord y1,wxCoord x2,wxCoord y2,wxCoord xc,wxCoord yc) wxOVERRIDE;
+    void DoDrawEllipticArc(wxCoord x,wxCoord y,wxCoord w,wxCoord h,double sa,double ea) wxOVERRIDE;
+    void DoDrawPoint(wxCoord x, wxCoord y) wxOVERRIDE;
+    void DoDrawLines(int n, const wxPoint points[], wxCoord xoffset = 0, wxCoord yoffset = 0) wxOVERRIDE;
     void DoDrawPolygon(int n, const wxPoint points[],
                        wxCoord xoffset = 0, wxCoord yoffset = 0,
-                       wxPolygonFillMode fillStyle = wxODDEVEN_RULE) override;
+                       wxPolygonFillMode fillStyle = wxODDEVEN_RULE) wxOVERRIDE;
     void DoDrawPolyPolygon(int n, const int count[], const wxPoint points[],
                            wxCoord xoffset = 0, wxCoord yoffset = 0,
-                           wxPolygonFillMode fillStyle = wxODDEVEN_RULE) override;
-    void DoDrawRectangle(wxCoord x, wxCoord y, wxCoord width, wxCoord height) override;
-    void DoDrawRoundedRectangle(wxCoord x, wxCoord y, wxCoord width, wxCoord height, double radius = 20) override;
-    void DoDrawEllipse(wxCoord x, wxCoord y, wxCoord width, wxCoord height) override;
+                           wxPolygonFillMode fillStyle = wxODDEVEN_RULE) wxOVERRIDE;
+    void DoDrawRectangle(wxCoord x, wxCoord y, wxCoord width, wxCoord height) wxOVERRIDE;
+    void DoDrawRoundedRectangle(wxCoord x, wxCoord y, wxCoord width, wxCoord height, double radius = 20) wxOVERRIDE;
+    void DoDrawEllipse(wxCoord x, wxCoord y, wxCoord width, wxCoord height) wxOVERRIDE;
 #if wxUSE_SPLINES
-    void DoDrawSpline(const wxPointList *points) override;
+    void DoDrawSpline(const wxPointList *points) wxOVERRIDE;
 #endif
     bool DoBlit(wxCoord xdest, wxCoord ydest, wxCoord width, wxCoord height,
                 wxDC *source, wxCoord xsrc, wxCoord ysrc,
                 wxRasterOperationMode rop = wxCOPY, bool useMask = false,
-                wxCoord xsrcMask = wxDefaultCoord, wxCoord ysrcMask = wxDefaultCoord) override;
-    void DoDrawIcon(const wxIcon& icon, wxCoord x, wxCoord y) override;
-    void DoDrawBitmap(const wxBitmap& bitmap, wxCoord x, wxCoord y, bool useMask = false) override;
-    void DoDrawText(const wxString& text, wxCoord x, wxCoord y) override;
-    void DoDrawRotatedText(const wxString& text, wxCoord x, wxCoord y, double angle) override;
-    void DoSetClippingRegion(wxCoord x, wxCoord y, wxCoord width, wxCoord height) override;
-    void DoSetDeviceClippingRegion( const wxRegion &WXUNUSED(clip)) override
+                wxCoord xsrcMask = wxDefaultCoord, wxCoord ysrcMask = wxDefaultCoord) wxOVERRIDE;
+    void DoDrawIcon(const wxIcon& icon, wxCoord x, wxCoord y) wxOVERRIDE;
+    void DoDrawBitmap(const wxBitmap& bitmap, wxCoord x, wxCoord y, bool useMask = false) wxOVERRIDE;
+    void DoDrawText(const wxString& text, wxCoord x, wxCoord y) wxOVERRIDE;
+    void DoDrawRotatedText(const wxString& text, wxCoord x, wxCoord y, double angle) wxOVERRIDE;
+    void DoSetClippingRegion(wxCoord x, wxCoord y, wxCoord width, wxCoord height) wxOVERRIDE;
+    void DoSetDeviceClippingRegion( const wxRegion &WXUNUSED(clip)) wxOVERRIDE
     {
         wxFAIL_MSG( "not implemented" );
     }
     void DoGetTextExtent(const wxString& string, wxCoord *x, wxCoord *y,
-                         wxCoord *descent = nullptr,
-                         wxCoord *externalLeading = nullptr,
-                         const wxFont *theFont = nullptr) const override;
-    void DoGetSize(int* width, int* height) const override;
-    void DoGetSizeMM(int *width, int *height) const override;
+                         wxCoord *descent = NULL,
+                         wxCoord *externalLeading = NULL,
+                         const wxFont *theFont = NULL) const wxOVERRIDE;
+    void DoGetSize(int* width, int* height) const wxOVERRIDE;
+    void DoGetSizeMM(int *width, int *height) const wxOVERRIDE;
 
     // Common part of DoDrawText() and DoDrawRotatedText()
     void DrawAnyText(const wxWX2MBbuf& textbuf, wxCoord testDescent, double lineHeight);

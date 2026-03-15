@@ -2,6 +2,7 @@
 // Name:        wx/ipcbase.h
 // Purpose:     Base classes for IPC
 // Author:      Julian Smart
+// Modified by:
 // Created:     4/1/98
 // Copyright:   (c) Julian Smart
 // Licence:     wxWindows licence
@@ -77,7 +78,7 @@ public:
       { return Execute(cs.AsString()); }
 
   virtual const void *Request(const wxString& item,
-                              size_t *size = nullptr,
+                              size_t *size = NULL,
                               wxIPCFormat format = wxIPC_TEXT) = 0;
 
   bool Poke(const wxString& item, const void *data, size_t size,
@@ -149,7 +150,7 @@ public:
                                 const wxString& WXUNUSED(item),
                                 size_t *size,
                                 wxIPCFormat WXUNUSED(format))
-      { *size = 0; return nullptr; }
+      { *size = 0; return NULL; }
 
   virtual bool OnPoke(const wxString& WXUNUSED(topic),
                       const wxString& WXUNUSED(item),
@@ -201,7 +202,7 @@ public:
 
 
   // return a buffer at least this size, reallocating buffer if needed
-  // returns nullptr if using an inadequate user buffer which can't be resized
+  // returns NULL if using an inadequate user buffer which can't be resized
   void *GetBufferAtLeast(size_t bytes);
 
 protected:
@@ -228,8 +229,8 @@ protected:
 class WXDLLIMPEXP_BASE wxServerBase : public wxObject
 {
 public:
-  wxServerBase() = default;
-  virtual ~wxServerBase() = default;
+  wxServerBase() { }
+  virtual ~wxServerBase() { }
 
   // Returns false on error (e.g. port number is already in use)
   virtual bool Create(const wxString& serverName) = 0;
@@ -243,12 +244,12 @@ public:
 class WXDLLIMPEXP_BASE wxClientBase : public wxObject
 {
 public:
-  wxClientBase() = default;
-  virtual ~wxClientBase() = default;
+  wxClientBase() { }
+  virtual ~wxClientBase() { }
 
   virtual bool ValidHost(const wxString& host) = 0;
 
-  // Call this to make a connection. Returns nullptr if cannot.
+  // Call this to make a connection. Returns NULL if cannot.
   virtual wxConnectionBase *MakeConnection(const wxString& host,
                                            const wxString& server,
                                            const wxString& topic) = 0;

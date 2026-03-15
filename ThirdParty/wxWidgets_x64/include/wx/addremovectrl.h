@@ -24,8 +24,8 @@ class WXDLLIMPEXP_CORE wxAddRemoveAdaptor
 {
 public:
     // Default ctor and trivial but virtual dtor.
-    wxAddRemoveAdaptor() = default;
-    virtual ~wxAddRemoveAdaptor() = default;
+    wxAddRemoveAdaptor() { }
+    virtual ~wxAddRemoveAdaptor() { }
 
     // Override to return the associated control.
     virtual wxWindow* GetItemsCtrl() const = 0;
@@ -90,13 +90,13 @@ public:
     void SetButtonsToolTips(const wxString& addtip, const wxString& removetip);
 
 protected:
-    virtual wxSize DoGetBestClientSize() const override;
+    virtual wxSize DoGetBestClientSize() const wxOVERRIDE;
 
 private:
     // Common part of all ctors.
     void Init()
     {
-        m_impl = nullptr;
+        m_impl = NULL;
     }
 
     class wxAddRemoveImpl* m_impl;

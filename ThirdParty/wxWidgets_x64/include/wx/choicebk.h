@@ -15,8 +15,9 @@
 
 #if wxUSE_CHOICEBOOK
 
-#include "wx/compositebookctrl.h"
+#include "wx/bookctrl.h"
 #include "wx/choice.h"
+#include "wx/containr.h"
 
 class WXDLLIMPEXP_FWD_CORE wxChoice;
 
@@ -35,10 +36,10 @@ wxDECLARE_EXPORTED_EVENT( WXDLLIMPEXP_CORE, wxEVT_CHOICEBOOK_PAGE_CHANGING, wxBo
 // wxChoicebook
 // ----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_CORE wxChoicebook : public wxCompositeBookCtrlBase
+class WXDLLIMPEXP_CORE wxChoicebook : public wxNavigationEnabled<wxBookCtrlBase>
 {
 public:
-    wxChoicebook() = default;
+    wxChoicebook() { }
 
     wxChoicebook(wxWindow *parent,
                  wxWindowID id,
@@ -59,37 +60,37 @@ public:
                 const wxString& name = wxEmptyString);
 
 
-    virtual bool SetPageText(size_t n, const wxString& strText) override;
-    virtual wxString GetPageText(size_t n) const override;
-    virtual int GetPageImage(size_t n) const override;
-    virtual bool SetPageImage(size_t n, int imageId) override;
+    virtual bool SetPageText(size_t n, const wxString& strText) wxOVERRIDE;
+    virtual wxString GetPageText(size_t n) const wxOVERRIDE;
+    virtual int GetPageImage(size_t n) const wxOVERRIDE;
+    virtual bool SetPageImage(size_t n, int imageId) wxOVERRIDE;
     virtual bool InsertPage(size_t n,
                             wxWindow *page,
                             const wxString& text,
                             bool bSelect = false,
-                            int imageId = NO_IMAGE) override;
-    virtual int SetSelection(size_t n) override
+                            int imageId = NO_IMAGE) wxOVERRIDE;
+    virtual int SetSelection(size_t n) wxOVERRIDE
         { return DoSetSelection(n, SetSelection_SendEvent); }
-    virtual int ChangeSelection(size_t n) override { return DoSetSelection(n); }
-    virtual void SetImageList(wxImageList *imageList) override;
+    virtual int ChangeSelection(size_t n) wxOVERRIDE { return DoSetSelection(n); }
+    virtual void SetImageList(wxImageList *imageList) wxOVERRIDE;
 
-    virtual bool DeleteAllPages() override;
+    virtual bool DeleteAllPages() wxOVERRIDE;
 
     // returns the choice control
     wxChoice* GetChoiceCtrl() const { return (wxChoice*)m_bookctrl; }
 
 protected:
-    virtual void DoSetWindowVariant(wxWindowVariant variant) override;
+    virtual void DoSetWindowVariant(wxWindowVariant variant) wxOVERRIDE;
 
-    virtual wxWindow *DoRemovePage(size_t page) override;
+    virtual wxWindow *DoRemovePage(size_t page) wxOVERRIDE;
 
-    void UpdateSelectedPage(size_t newsel) override
+    void UpdateSelectedPage(size_t newsel) wxOVERRIDE
     {
         GetChoiceCtrl()->Select(static_cast<int>(newsel));
     }
 
-    wxBookCtrlEvent* CreatePageChangingEvent() const override;
-    void MakeChangedEvent(wxBookCtrlEvent &event) override;
+    wxBookCtrlEvent* CreatePageChangingEvent() const wxOVERRIDE;
+    void MakeChangedEvent(wxBookCtrlEvent &event) wxOVERRIDE;
 
     // event handlers
     void OnChoiceSelected(wxCommandEvent& event);

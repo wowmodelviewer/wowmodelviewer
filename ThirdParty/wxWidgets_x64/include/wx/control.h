@@ -2,6 +2,7 @@
 // Name:        wx/control.h
 // Purpose:     wxControl common interface
 // Author:      Vadim Zeitlin
+// Modified by:
 // Created:     26.07.99
 // Copyright:   (c) wxWidgets team
 // Licence:     wxWindows licence
@@ -31,7 +32,7 @@ extern WXDLLIMPEXP_DATA_CORE(const char) wxControlNameStr[];
 class WXDLLIMPEXP_CORE wxControlBase : public wxWindow
 {
 public:
-    wxControlBase() = default;
+    wxControlBase() { }
 
     virtual ~wxControlBase();
 
@@ -47,7 +48,7 @@ public:
     int GetAlignment() const { return m_windowStyle & wxALIGN_MASK; }
 
     // set label with mnemonics
-    virtual void SetLabel(const wxString& label) override
+    virtual void SetLabel(const wxString& label) wxOVERRIDE
     {
         m_labelOrig = label;
 
@@ -58,7 +59,7 @@ public:
 
     // return the original string, as it was passed to SetLabel()
     // (i.e. with wx-style mnemonics)
-    virtual wxString GetLabel() const override { return m_labelOrig; }
+    virtual wxString GetLabel() const wxOVERRIDE { return m_labelOrig; }
 
     // set label text (mnemonics will be escaped)
     virtual void SetLabelText(const wxString& text)
@@ -95,7 +96,7 @@ public:
     // controls by default inherit the colours of their parents, if a
     // particular control class doesn't want to do it, it can override
     // ShouldInheritColours() to return false
-    virtual bool ShouldInheritColours() const override { return true; }
+    virtual bool ShouldInheritColours() const wxOVERRIDE { return true; }
 
 
     // WARNING: this doesn't work for all controls nor all platforms!
@@ -104,10 +105,10 @@ public:
     // if the button was clicked)
     virtual void Command(wxCommandEvent &event);
 
-    virtual bool SetFont(const wxFont& font) override;
+    virtual bool SetFont(const wxFont& font) wxOVERRIDE;
 
     // wxControl-specific processing after processing the update event
-    virtual void DoUpdateWindowUI(wxUpdateUIEvent& event) override;
+    virtual void DoUpdateWindowUI(wxUpdateUIEvent& event) wxOVERRIDE;
 
     wxSize GetSizeFromTextSize(int xlen, int ylen = -1) const
         { return DoGetSizeFromTextSize(xlen, ylen); }
@@ -139,14 +140,14 @@ public:
     // ------------------------------
 
     // replaces parts of the given (multiline) string with an ellipsis if needed
-    static wxString Ellipsize(const wxString& label, const wxReadOnlyDC& dc,
+    static wxString Ellipsize(const wxString& label, const wxDC& dc,
                               wxEllipsizeMode mode, int maxWidth,
                               int flags = wxELLIPSIZE_FLAGS_DEFAULT);
 
     // return the accel index in the string or -1 if none and puts the modified
-    // string into second parameter if non-null
+    // string into second parameter if non NULL
     static int FindAccelIndex(const wxString& label,
-                              wxString *labelOnly = nullptr);
+                              wxString *labelOnly = NULL);
 
     // this is a helper for the derived class GetClassDefaultAttributes()
     // implementation: it returns the right colours for the classes which
@@ -157,7 +158,7 @@ public:
 
 protected:
     // choose the default border for this window
-    virtual wxBorder GetDefaultBorder() const override;
+    virtual wxBorder GetDefaultBorder() const wxOVERRIDE;
 
     // creates the control (calls wxWindowBase::CreateBase inside) and adds it
     // to the list of parents children
@@ -204,8 +205,12 @@ protected:
     #include "wx/univ/control.h"
 #elif defined(__WXMSW__)
     #include "wx/msw/control.h"
-#elif defined(__WXGTK__)
+#elif defined(__WXMOTIF__)
+    #include "wx/motif/control.h"
+#elif defined(__WXGTK20__)
     #include "wx/gtk/control.h"
+#elif defined(__WXGTK__)
+    #include "wx/gtk1/control.h"
 #elif defined(__WXMAC__)
     #include "wx/osx/control.h"
 #elif defined(__WXQT__)

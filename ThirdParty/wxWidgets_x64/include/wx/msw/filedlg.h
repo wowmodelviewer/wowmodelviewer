@@ -2,6 +2,7 @@
 // Name:        wx/msw/filedlg.h
 // Purpose:     wxFileDialog class
 // Author:      Julian Smart
+// Modified by:
 // Created:     01/02/97
 // Copyright:   (c) Julian Smart
 // Licence:     wxWindows licence
@@ -19,7 +20,7 @@ class wxFileDialogMSWData;
 class WXDLLIMPEXP_CORE wxFileDialog: public wxFileDialogBase
 {
 public:
-    wxFileDialog() = default;
+    wxFileDialog() { m_data = NULL; }
     wxFileDialog(wxWindow *parent,
                  const wxString& message = wxASCII_STR(wxFileSelectorPromptStr),
                  const wxString& defaultDir = wxEmptyString,
@@ -31,19 +32,21 @@ public:
                  const wxString& name = wxASCII_STR(wxFileDialogNameStr));
     virtual ~wxFileDialog();
 
-    virtual void GetPaths(wxArrayString& paths) const override;
-    virtual void GetFilenames(wxArrayString& files) const override;
-    virtual bool AddShortcut(const wxString& directory, int flags = 0) override;
-    virtual bool SupportsExtraControl() const override { return true; }
+    virtual void GetPaths(wxArrayString& paths) const wxOVERRIDE;
+    virtual void GetFilenames(wxArrayString& files) const wxOVERRIDE;
+#if wxABI_VERSION >= 30201
+    bool AddShortcut(const wxString& directory, int flags = 0);
+#endif // wxABI_VERSION >= 3.2.1
+    virtual bool SupportsExtraControl() const wxOVERRIDE { return true; }
 
-    virtual int ShowModal() override;
+    virtual int ShowModal() wxOVERRIDE;
 
 protected:
 
-    virtual void DoMoveWindow(int x, int y, int width, int height) override;
-    virtual void DoCentre(int dir) override;
-    virtual void DoGetSize( int *width, int *height ) const override;
-    virtual void DoGetPosition( int *x, int *y ) const override;
+    virtual void DoMoveWindow(int x, int y, int width, int height) wxOVERRIDE;
+    virtual void DoCentre(int dir) wxOVERRIDE;
+    virtual void DoGetSize( int *width, int *height ) const wxOVERRIDE;
+    virtual void DoGetPosition( int *x, int *y ) const wxOVERRIDE;
 
 private:
     // Allow it to call MSWOnXXX() functions below.
@@ -79,16 +82,8 @@ private:
 
     // Extra data, possibly null if not needed, use MSWData() to access it if
     // it should be created on demand.
-    wxFileDialogMSWData* m_data = nullptr;
+    wxFileDialogMSWData* m_data;
 
-    // This class is also used as part of wxQt, provide the functions normally
-    // defined in the base wxWindow in wxMSW port in this case.
-#if defined(__WXQT__)
-    WXHWND GetHWND() const { return m_hWnd; }
-    void SetHWND(WXHWND hwnd) { m_hWnd = hwnd; }
-
-    WXHWND m_hWnd = nullptr;
-#endif // __WXQT__
 
     wxDECLARE_DYNAMIC_CLASS(wxFileDialog);
     wxDECLARE_NO_COPY_CLASS(wxFileDialog);

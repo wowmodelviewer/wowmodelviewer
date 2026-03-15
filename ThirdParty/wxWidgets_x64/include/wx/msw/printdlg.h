@@ -2,6 +2,7 @@
 // Name:        wx/msw/printdlg.h
 // Purpose:     wxPrintDialog, wxPageSetupDialog classes
 // Author:      Julian Smart
+// Modified by:
 // Created:     01/02/97
 // Copyright:   (c) Julian Smart
 // Licence:     wxWindows licence
@@ -30,13 +31,13 @@ public:
     wxWindowsPrintNativeData();
     virtual ~wxWindowsPrintNativeData();
 
-    virtual bool TransferTo( wxPrintData &data ) override;
-    virtual bool TransferFrom( const wxPrintData &data ) override;
+    virtual bool TransferTo( wxPrintData &data ) wxOVERRIDE;
+    virtual bool TransferFrom( const wxPrintData &data ) wxOVERRIDE;
 
-    virtual bool Ok() const override { return IsOk(); }
-    virtual bool IsOk() const override;
+    virtual bool Ok() const wxOVERRIDE { return IsOk(); }
+    virtual bool IsOk() const wxOVERRIDE;
 
-    void InitializeDevMode(const wxString &printerName = wxEmptyString, WinPrinter* printer = nullptr);
+    void InitializeDevMode(const wxString &printerName = wxEmptyString, WinPrinter* printer = NULL);
     void* GetDevMode() const { return m_devMode; }
     void SetDevMode(void* data) { m_devMode = data; }
     void* GetDevNames() const { return m_devNames; }
@@ -59,17 +60,17 @@ private:
 class WXDLLIMPEXP_CORE wxWindowsPrintDialog : public wxPrintDialogBase
 {
 public:
-    wxWindowsPrintDialog(wxWindow *parent, wxPrintDialogData* data = nullptr);
+    wxWindowsPrintDialog(wxWindow *parent, wxPrintDialogData* data = NULL);
     wxWindowsPrintDialog(wxWindow *parent, wxPrintData* data);
     virtual ~wxWindowsPrintDialog();
 
-    bool Create(wxWindow *parent, wxPrintDialogData* data = nullptr);
-    virtual int ShowModal() override;
+    bool Create(wxWindow *parent, wxPrintDialogData* data = NULL);
+    virtual int ShowModal() wxOVERRIDE;
 
-    wxPrintDialogData& GetPrintDialogData() override { return m_printDialogData; }
-    wxPrintData& GetPrintData() override { return m_printDialogData.GetPrintData(); }
+    wxPrintDialogData& GetPrintDialogData() wxOVERRIDE { return m_printDialogData; }
+    wxPrintData& GetPrintData() wxOVERRIDE { return m_printDialogData.GetPrintData(); }
 
-    virtual wxDC *GetPrintDC() override;
+    virtual wxDC *GetPrintDC() wxOVERRIDE;
 
 private:
     wxPrintDialogData m_printDialogData;
@@ -97,15 +98,15 @@ class WXDLLIMPEXP_CORE wxWindowsPageSetupDialog: public wxPageSetupDialogBase
 {
 public:
     wxWindowsPageSetupDialog();
-    wxWindowsPageSetupDialog(wxWindow *parent, wxPageSetupDialogData *data = nullptr);
+    wxWindowsPageSetupDialog(wxWindow *parent, wxPageSetupDialogData *data = NULL);
     virtual ~wxWindowsPageSetupDialog();
 
-    bool Create(wxWindow *parent, wxPageSetupDialogData *data = nullptr);
-    virtual int ShowModal() override;
+    bool Create(wxWindow *parent, wxPageSetupDialogData *data = NULL);
+    virtual int ShowModal() wxOVERRIDE;
     bool ConvertToNative( wxPageSetupDialogData &data );
     bool ConvertFromNative( wxPageSetupDialogData &data );
 
-    virtual wxPageSetupDialogData& GetPageSetupDialogData() override { return m_pageSetupData; }
+    virtual wxPageSetupDialogData& GetPageSetupDialogData() wxOVERRIDE { return m_pageSetupData; }
 
 private:
     wxPageSetupDialogData   m_pageSetupData;

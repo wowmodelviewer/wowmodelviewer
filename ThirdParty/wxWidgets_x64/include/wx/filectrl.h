@@ -3,6 +3,7 @@
 // Purpose:     Header for wxFileCtrlBase and other common functions used by
 //              platform-specific wxFileCtrl's
 // Author:      Diaa M. Sami
+// Modified by:
 // Created:     Jul-07-2007
 // Copyright:   (c) Diaa M. Sami
 // Licence:     wxWindows licence
@@ -32,7 +33,7 @@ extern WXDLLIMPEXP_DATA_CORE(const char) wxFileCtrlNameStr[]; // in filectrlcmn.
 class WXDLLIMPEXP_CORE wxFileCtrlBase
 {
 public:
-    virtual ~wxFileCtrlBase() = default;
+    virtual ~wxFileCtrlBase() {}
 
     virtual void SetWildcard( const wxString& wildCard ) = 0;
     virtual void SetFilterIndex( int filterindex ) = 0;
@@ -66,7 +67,7 @@ void wxGenerateFolderChangedEvent( wxFileCtrlBase *fileCtrl, wxWindow *wnd );
 void wxGenerateSelectionChangedEvent( wxFileCtrlBase *fileCtrl, wxWindow *wnd );
 void wxGenerateFileActivatedEvent( wxFileCtrlBase *fileCtrl, wxWindow *wnd, const wxString& filename = wxEmptyString );
 
-#if defined(__WXGTK__) && !defined(__WXUNIVERSAL__)
+#if defined(__WXGTK20__) && !defined(__WXUNIVERSAL__)
     #define wxFileCtrl wxGtkFileCtrl
     #include "wx/gtk/filectrl.h"
 #else
@@ -89,7 +90,7 @@ void wxGenerateFileActivatedEvent( wxFileCtrlBase *fileCtrl, wxWindow *wnd, cons
 class WXDLLIMPEXP_CORE wxFileCtrlEvent : public wxCommandEvent
 {
 public:
-    wxFileCtrlEvent() = default;
+    wxFileCtrlEvent() {}
     wxFileCtrlEvent( wxEventType type, wxObject *evtObject, int id )
             : wxCommandEvent( type, id )
     {
@@ -97,7 +98,7 @@ public:
     }
 
     // no need for the copy constructor as the default one will be fine.
-    wxNODISCARD virtual wxEvent *Clone() const override { return new wxFileCtrlEvent( *this ); }
+    virtual wxEvent *Clone() const wxOVERRIDE { return new wxFileCtrlEvent( *this ); }
 
     void SetFiles( const wxArrayString &files ) { m_files = files; }
     void SetDirectory( const wxString &directory ) { m_directory = directory; }

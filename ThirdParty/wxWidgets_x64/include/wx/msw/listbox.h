@@ -2,6 +2,7 @@
 // Name:        wx/msw/listbox.h
 // Purpose:     wxListBox class
 // Author:      Julian Smart
+// Modified by:
 // Created:     01/02/97
 // Copyright:   (c) Julian Smart
 // Licence:     wxWindows licence
@@ -40,7 +41,7 @@ public:
     wxListBox(wxWindow *parent, wxWindowID id,
             const wxPoint& pos = wxDefaultPosition,
             const wxSize& size = wxDefaultSize,
-            int n = 0, const wxString choices[] = nullptr,
+            int n = 0, const wxString choices[] = NULL,
             long style = 0,
             const wxValidator& validator = wxDefaultValidator,
             const wxString& name = wxASCII_STR(wxListBoxNameStr))
@@ -65,7 +66,7 @@ public:
     bool Create(wxWindow *parent, wxWindowID id,
                 const wxPoint& pos = wxDefaultPosition,
                 const wxSize& size = wxDefaultSize,
-                int n = 0, const wxString choices[] = nullptr,
+                int n = 0, const wxString choices[] = NULL,
                 long style = 0,
                 const wxValidator& validator = wxDefaultValidator,
                 const wxString& name = wxASCII_STR(wxListBoxNameStr));
@@ -79,31 +80,31 @@ public:
 
     virtual ~wxListBox();
 
-    virtual unsigned int GetCount() const override;
-    virtual wxString GetString(unsigned int n) const override;
-    virtual void SetString(unsigned int n, const wxString& s) override;
-    virtual int FindString(const wxString& s, bool bCase = false) const override;
+    virtual unsigned int GetCount() const wxOVERRIDE;
+    virtual wxString GetString(unsigned int n) const wxOVERRIDE;
+    virtual void SetString(unsigned int n, const wxString& s) wxOVERRIDE;
+    virtual int FindString(const wxString& s, bool bCase = false) const wxOVERRIDE;
 
-    virtual bool IsSelected(int n) const override;
-    virtual int GetSelection() const override;
-    virtual int GetSelections(wxArrayInt& aSelections) const override;
+    virtual bool IsSelected(int n) const wxOVERRIDE;
+    virtual int GetSelection() const wxOVERRIDE;
+    virtual int GetSelections(wxArrayInt& aSelections) const wxOVERRIDE;
 
     // return the index of the item at this position or wxNOT_FOUND
     int HitTest(const wxPoint& pt) const { return DoHitTestList(pt); }
     int HitTest(wxCoord x, wxCoord y) const { return DoHitTestList(wxPoint(x, y)); }
 
-    virtual void EnsureVisible(int n) override;
+    virtual void EnsureVisible(int n) wxOVERRIDE;
 
-    virtual int GetTopItem() const override;
-    virtual int GetCountPerPage() const override;
+    virtual int GetTopItem() const wxOVERRIDE;
+    virtual int GetCountPerPage() const wxOVERRIDE;
 
     // ownerdrawn wxListBox and wxCheckListBox support
 #if wxUSE_OWNER_DRAWN
     // override base class virtuals
-    virtual bool SetFont(const wxFont &font) override;
+    virtual bool SetFont(const wxFont &font) wxOVERRIDE;
 
-    bool MSWOnMeasure(WXMEASUREITEMSTRUCT *item) override;
-    bool MSWOnDraw(WXDRAWITEMSTRUCT *item) override;
+    bool MSWOnMeasure(WXMEASUREITEMSTRUCT *item) wxOVERRIDE;
+    bool MSWOnDraw(WXDRAWITEMSTRUCT *item) wxOVERRIDE;
 
     // plug-in for derived classes
     virtual wxOwnerDrawn *CreateLboxItem(size_t n);
@@ -132,17 +133,17 @@ public:
     virtual bool MSWSetTabStops(const wxVector<int>& tabStops);
 
     // Windows callbacks
-    bool MSWCommand(WXUINT param, WXWORD id) override;
-    WXDWORD MSWGetStyle(long style, WXDWORD *exstyle) const override;
+    bool MSWCommand(WXUINT param, WXWORD id) wxOVERRIDE;
+    WXDWORD MSWGetStyle(long style, WXDWORD *exstyle) const wxOVERRIDE;
 
     // under XP when using "transition effect for menus and tooltips" if we
     // return true for WM_PRINTCLIENT here then it causes noticeable slowdown
-    virtual bool MSWShouldPropagatePrintChild() override
+    virtual bool MSWShouldPropagatePrintChild() wxOVERRIDE
     {
         return false;
     }
 
-    virtual wxVisualAttributes GetDefaultAttributes() const override
+    virtual wxVisualAttributes GetDefaultAttributes() const wxOVERRIDE
     {
         return GetClassDefaultAttributes(GetWindowVariant());
     }
@@ -154,25 +155,25 @@ public:
     }
 
     // returns true if the platform should explicitly apply a theme border
-    virtual bool CanApplyThemeBorder() const override { return false; }
+    virtual bool CanApplyThemeBorder() const wxOVERRIDE { return false; }
 
-    virtual void OnInternalIdle() override;
+    virtual void OnInternalIdle() wxOVERRIDE;
 
 protected:
-    virtual wxSize DoGetBestClientSize() const override;
+    virtual wxSize DoGetBestClientSize() const wxOVERRIDE;
 
-    virtual void DoClear() override;
-    virtual void DoDeleteOneItem(unsigned int n) override;
+    virtual void DoClear() wxOVERRIDE;
+    virtual void DoDeleteOneItem(unsigned int n) wxOVERRIDE;
 
-    virtual void DoSetSelection(int n, bool select) override;
+    virtual void DoSetSelection(int n, bool select) wxOVERRIDE;
 
     virtual int DoInsertItems(const wxArrayStringsAdapter& items,
                               unsigned int pos,
-                              void **clientData, wxClientDataType type) override;
+                              void **clientData, wxClientDataType type) wxOVERRIDE;
 
-    virtual void DoSetFirstItem(int n) override;
-    virtual void DoSetItemClientData(unsigned int n, void* clientData) override;
-    virtual void* DoGetItemClientData(unsigned int n) const override;
+    virtual void DoSetFirstItem(int n) wxOVERRIDE;
+    virtual void DoSetItemClientData(unsigned int n, void* clientData) wxOVERRIDE;
+    virtual void* DoGetItemClientData(unsigned int n) const wxOVERRIDE;
 
     // this can't be called DoHitTest() because wxWindow already has this method
     virtual int DoHitTestList(const wxPoint& point) const;
@@ -184,7 +185,7 @@ protected:
         return wxSize(w, h);
     }
 
-    virtual void MSWUpdateFontOnDPIChange(const wxSize& newDPI) override;
+    virtual void MSWUpdateFontOnDPIChange(const wxSize& newDPI) wxOVERRIDE;
 
     // free memory (common part of Clear() and dtor)
     void Free();

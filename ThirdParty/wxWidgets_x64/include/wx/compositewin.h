@@ -48,7 +48,7 @@ public:
     //     it non-virtually and we need to do this to avoid infinite recursion,
     //     so we work around this by calling the method of this object itself
     //     manually in each function.
-    virtual bool SetForegroundColour(const wxColour& colour) override
+    virtual bool SetForegroundColour(const wxColour& colour) wxOVERRIDE
     {
         if ( !BaseWindowClass::SetForegroundColour(colour) )
             return false;
@@ -58,7 +58,7 @@ public:
         return true;
     }
 
-    virtual bool SetBackgroundColour(const wxColour& colour) override
+    virtual bool SetBackgroundColour(const wxColour& colour) wxOVERRIDE
     {
         if ( !BaseWindowClass::SetBackgroundColour(colour) )
             return false;
@@ -68,7 +68,7 @@ public:
         return true;
     }
 
-    virtual bool SetFont(const wxFont& font) override
+    virtual bool SetFont(const wxFont& font) wxOVERRIDE
     {
         if ( !BaseWindowClass::SetFont(font) )
             return false;
@@ -78,7 +78,7 @@ public:
         return true;
     }
 
-    virtual bool SetCursor(const wxCursor& cursor) override
+    virtual bool SetCursor(const wxCursor& cursor) wxOVERRIDE
     {
         if ( !BaseWindowClass::SetCursor(cursor) )
             return false;
@@ -88,7 +88,7 @@ public:
         return true;
     }
 
-    virtual void SetLayoutDirection(wxLayoutDirection dir) override
+    virtual void SetLayoutDirection(wxLayoutDirection dir) wxOVERRIDE
     {
         BaseWindowClass::SetLayoutDirection(dir);
 
@@ -107,7 +107,7 @@ public:
     }
 
 #if wxUSE_TOOLTIPS
-    virtual void DoSetToolTipText(const wxString &tip) override
+    virtual void DoSetToolTipText(const wxString &tip) wxOVERRIDE
     {
         BaseWindowClass::DoSetToolTipText(tip);
 
@@ -117,7 +117,7 @@ public:
         SetForAllParts(func, tip);
     }
 
-    virtual void DoSetToolTip(wxToolTip *tip) override
+    virtual void DoSetToolTip(wxToolTip *tip) wxOVERRIDE
     {
         BaseWindowClass::DoSetToolTip(tip);
 
@@ -132,20 +132,9 @@ protected:
     }
 
 private:
-    // It may happen that we the base class W already is a wxCompositeWindow
-    // and so already has GetCompositeWindowParts(). This actually works fine,
-    // as it just gets overridden by the most derived class, but triggers a
-    // warning, so disable this warning explicitly as we can't do anything else
-    // about it here (as actually using "override" here would result in an
-    // error for the first class in the hierarchy using wxCompositeWindow).
-    wxWARNING_SUPPRESS_MISSING_OVERRIDE()
-
     // Must be implemented by the derived class to return all children to which
     // the public methods we override should forward to.
     virtual wxWindowList GetCompositeWindowParts() const = 0;
-
-    wxWARNING_RESTORE_MISSING_OVERRIDE()
-
 
     template <class T, class TArg, class R>
     void SetForAllParts(R (wxWindowBase::*func)(TArg), T arg)
@@ -158,7 +147,7 @@ private:
         {
             wxWindow * const child = *i;
 
-            // Allow null elements in the list, this makes the code of derived
+            // Allow NULL elements in the list, this makes the code of derived
             // composite controls which may have optionally shown children
             // simpler and it doesn't cost us much here.
             if ( child )
@@ -174,9 +163,9 @@ template <class W>
 class wxCompositeWindow : public wxCompositeWindowSettersOnly<W>
 {
 public:
-    virtual void SetFocus() override
+    virtual void SetFocus() wxOVERRIDE
     {
-        wxSetFocusToChild(this, nullptr);
+        wxSetFocusToChild(this, NULL);
     }
 
 protected:

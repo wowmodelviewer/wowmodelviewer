@@ -2,6 +2,7 @@
 // Name:        wx/dragimag.h
 // Purpose:     wxDragImage base header
 // Author:      Julian Smart
+// Modified by:
 // Created:
 // Copyright:   (c) Julian Smart
 // Licence:     wxWindows Licence
@@ -9,8 +10,6 @@
 
 #ifndef _WX_DRAGIMAG_H_BASE_
 #define _WX_DRAGIMAG_H_BASE_
-
-#include "wx/defs.h"
 
 #if wxUSE_DRAGIMAGE
 
@@ -25,6 +24,10 @@ class WXDLLIMPEXP_FWD_CORE wxDC;
 #   else
 #       include "wx/msw/dragimag.h"
 #   endif
+
+#elif defined(__WXMOTIF__)
+#   include "wx/generic/dragimgg.h"
+#   define wxDragImage wxGenericDragImage
 
 #elif defined(__WXGTK__)
 #   include "wx/generic/dragimgg.h"

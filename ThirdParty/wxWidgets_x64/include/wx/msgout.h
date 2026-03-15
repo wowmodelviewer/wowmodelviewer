@@ -2,6 +2,7 @@
 // Name:        wx/msgout.h
 // Purpose:     wxMessageOutput class. Shows a message to the user
 // Author:      Mattia Barbon
+// Modified by:
 // Created:     17.07.02
 // Copyright:   (c) Mattia Barbon
 // Licence:     wxWindows licence
@@ -15,7 +16,8 @@
 // ----------------------------------------------------------------------------
 
 #include "wx/defs.h"
-#include "wx/string.h"
+#include "wx/chartype.h"
+#include "wx/strvararg.h"
 
 // ----------------------------------------------------------------------------
 // wxMessageOutput is a class abstracting formatted output target, i.e.
@@ -25,9 +27,9 @@
 class WXDLLIMPEXP_BASE wxMessageOutput
 {
 public:
-    virtual ~wxMessageOutput() = default;
+    virtual ~wxMessageOutput() { }
 
-    // gets the current wxMessageOutput object (may be null during
+    // gets the current wxMessageOutput object (may be NULL during
     // initialization or shutdown)
     static wxMessageOutput* Get();
 
@@ -35,27 +37,25 @@ public:
     static wxMessageOutput* Set(wxMessageOutput* msgout);
 
     // show a message to the user
-    template <typename FormatString, typename... Targs>
-    void Printf(FormatString format, Targs... args)
-    {
-        Output(wxString::Format(format, args...));
-    }
+    // void Printf(const wxString& format, ...) = 0;
+    WX_DEFINE_VARARG_FUNC_VOID(Printf, 1, (const wxFormatString&),
+                               DoPrintfWchar, DoPrintfUtf8)
 
     // called by DoPrintf() to output formatted string but can also be called
     // directly if no formatting is needed
     virtual void Output(const wxString& str) = 0;
 
+protected:
+#if !wxUSE_UTF8_LOCALE_ONLY
+    void DoPrintfWchar(const wxChar *format, ...);
+#endif
+#if wxUSE_UNICODE_UTF8
+    void DoPrintfUtf8(const char *format, ...);
+#endif
+
 private:
     static wxMessageOutput* ms_msgOut;
 };
-
-// This is equivalent to wxMessageOutput::Get()->Output() but doesn't crash if
-// there is no message output object (which shouldn't normally happen).
-inline void wxSafeMessageOutput(const wxString& str)
-{
-    if ( wxMessageOutput* msgOut = wxMessageOutput::Get() )
-        msgOut->Output(str);
-}
 
 // ----------------------------------------------------------------------------
 // helper mix-in for output targets that can use difference encodings
@@ -97,7 +97,7 @@ public:
     wxMessageOutputStderr(FILE *fp = stderr,
                           const wxMBConv &conv = wxConvWhateverWorks);
 
-    virtual void Output(const wxString& str) override;
+    virtual void Output(const wxString& str) wxOVERRIDE;
 
 protected:
     FILE *m_fp;
@@ -122,7 +122,7 @@ public:
     wxMessageOutputBest(wxMessageOutputFlags flags = wxMSGOUT_PREFER_STDERR)
         : m_flags(flags) { }
 
-    virtual void Output(const wxString& str) override;
+    virtual void Output(const wxString& str) wxOVERRIDE;
 
 private:
     wxMessageOutputFlags m_flags;
@@ -137,9 +137,9 @@ private:
 class WXDLLIMPEXP_CORE wxMessageOutputMessageBox : public wxMessageOutput
 {
 public:
-    wxMessageOutputMessageBox() = default;
+    wxMessageOutputMessageBox() { }
 
-    virtual void Output(const wxString& str) override;
+    virtual void Output(const wxString& str) wxOVERRIDE;
 };
 
 #endif // wxUSE_GUI && wxUSE_MSGDLG
@@ -151,9 +151,9 @@ public:
 class WXDLLIMPEXP_BASE wxMessageOutputDebug : public wxMessageOutputStderr
 {
 public:
-    wxMessageOutputDebug() = default;
+    wxMessageOutputDebug() { }
 
-    virtual void Output(const wxString& str) override;
+    virtual void Output(const wxString& str) wxOVERRIDE;
 };
 
 // ----------------------------------------------------------------------------
@@ -163,9 +163,9 @@ public:
 class WXDLLIMPEXP_BASE wxMessageOutputLog : public wxMessageOutput
 {
 public:
-    wxMessageOutputLog() = default;
+    wxMessageOutputLog() { }
 
-    virtual void Output(const wxString& str) override;
+    virtual void Output(const wxString& str) wxOVERRIDE;
 };
 
 #endif // _WX_MSGOUT_H_

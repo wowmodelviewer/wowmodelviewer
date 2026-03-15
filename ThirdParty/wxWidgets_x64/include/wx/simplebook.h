@@ -10,11 +10,31 @@
 #ifndef _WX_SIMPLEBOOK_H_
 #define _WX_SIMPLEBOOK_H_
 
-#include "wx/compositebookctrl.h"
+#include "wx/bookctrl.h"
 
 #if wxUSE_BOOKCTRL
 
+#include "wx/containr.h"
 #include "wx/vector.h"
+
+// Hack to work around problems with wxNavigationEnabled<wxBookCtrlBase> when
+// using wx as DLL: we want the compiler to see that it's already available in
+// the DLL by including some other DLL exported class using it as the base in
+// order to prevent it from generating a non-DLL-exported instantiation which
+// will conflict with the one in the DLL at the link-time.
+//
+// Find the first available class using wxNavigationEnabled<wxBookCtrlBase> as
+// base, any will do (except for wxAUI one, as this would create a dependency
+// on the AUI library that we can't have here).
+#if wxUSE_CHOICEBOOK
+    #include "wx/choicebk.h"
+#elif wxUSE_LISTBOOK
+    #include "wx/listbook.h"
+#elif wxUSE_TOOLBOOK
+    #include "wx/toolbook.h"
+#elif wxUSE_TREEBOOK
+    #include "wx/treebook.h"
+#endif
 
 // ----------------------------------------------------------------------------
 // wxSimplebook: a book control without any user-actionable controller.
@@ -22,7 +42,7 @@
 
 // NB: This class doesn't use DLL export declaration as it's fully inline.
 
-class wxSimplebook : public wxCompositeBookCtrlBase
+class wxSimplebook : public wxNavigationEnabled<wxBookCtrlBase>
 {
 public:
     wxSimplebook()
@@ -95,7 +115,7 @@ public:
                             wxWindow *page,
                             const wxString& text,
                             bool bSelect = false,
-                            int imageId = NO_IMAGE) override
+                            int imageId = NO_IMAGE) wxOVERRIDE
     {
         if ( !wxBookCtrlBase::InsertPage(n, page, text, bSelect, imageId) )
             return false;
@@ -108,19 +128,19 @@ public:
         return true;
     }
 
-    virtual int SetSelection(size_t n) override
+    virtual int SetSelection(size_t n) wxOVERRIDE
     {
         return DoSetSelection(n, SetSelection_SendEvent);
     }
 
-    virtual int ChangeSelection(size_t n) override
+    virtual int ChangeSelection(size_t n) wxOVERRIDE
     {
         return DoSetSelection(n);
     }
 
     // Neither labels nor images are supported but we still store the labels
     // just in case the user code attaches some importance to them.
-    virtual bool SetPageText(size_t n, const wxString& strText) override
+    virtual bool SetPageText(size_t n, const wxString& strText) wxOVERRIDE
     {
         wxCHECK_MSG( n < GetPageCount(), false, wxS("Invalid page") );
 
@@ -129,25 +149,25 @@ public:
         return true;
     }
 
-    virtual wxString GetPageText(size_t n) const override
+    virtual wxString GetPageText(size_t n) const wxOVERRIDE
     {
         wxCHECK_MSG( n < GetPageCount(), wxString(), wxS("Invalid page") );
 
         return m_pageTexts[n];
     }
 
-    virtual bool SetPageImage(size_t WXUNUSED(n), int WXUNUSED(imageId)) override
+    virtual bool SetPageImage(size_t WXUNUSED(n), int WXUNUSED(imageId)) wxOVERRIDE
     {
         return false;
     }
 
-    virtual int GetPageImage(size_t WXUNUSED(n)) const override
+    virtual int GetPageImage(size_t WXUNUSED(n)) const wxOVERRIDE
     {
         return NO_IMAGE;
     }
 
     // Override some wxWindow methods too.
-    virtual void SetFocus() override
+    virtual void SetFocus() wxOVERRIDE
     {
         wxWindow* const page = GetCurrentPage();
         if ( page )
@@ -155,24 +175,24 @@ public:
     }
 
 protected:
-    virtual void UpdateSelectedPage(size_t WXUNUSED(newsel)) override
+    virtual void UpdateSelectedPage(size_t WXUNUSED(newsel)) wxOVERRIDE
     {
         // Nothing to do here, but must be overridden to avoid the assert in
         // the base class version.
     }
 
-    virtual wxBookCtrlEvent* CreatePageChangingEvent() const override
+    virtual wxBookCtrlEvent* CreatePageChangingEvent() const wxOVERRIDE
     {
         return new wxBookCtrlEvent(wxEVT_BOOKCTRL_PAGE_CHANGING,
                                    GetId());
     }
 
-    virtual void MakeChangedEvent(wxBookCtrlEvent& event) override
+    virtual void MakeChangedEvent(wxBookCtrlEvent& event) wxOVERRIDE
     {
         event.SetEventType(wxEVT_BOOKCTRL_PAGE_CHANGED);
     }
 
-    virtual wxWindow *DoRemovePage(size_t page) override
+    virtual wxWindow *DoRemovePage(size_t page) wxOVERRIDE
     {
         wxWindow* const win = wxBookCtrlBase::DoRemovePage(page);
         if ( win )
@@ -185,24 +205,22 @@ protected:
         return win;
     }
 
-    virtual void DoSize() override
+    virtual void DoSize() wxOVERRIDE
     {
         wxWindow* const page = GetCurrentPage();
         if ( page )
             page->SetSize(GetPageRect());
     }
 
-    virtual void DoShowPage(wxWindow* page, bool show) override
+    virtual void DoShowPage(wxWindow* page, bool show) wxOVERRIDE
     {
         if ( show )
         {
             page->ShowWithEffect(m_showEffect, m_showTimeout);
 
             // Unlike simple Show(), ShowWithEffect() doesn't necessarily give
-            // focus to the window, but we do expect the new page to have focus
-            // if it's currently visible.
-            if ( page->IsShownOnScreen() )
-                page->SetFocus();
+            // focus to the window, but we do expect the new page to have focus.
+            page->SetFocus();
         }
         else
         {

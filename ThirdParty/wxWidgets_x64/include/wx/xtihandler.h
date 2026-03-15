@@ -68,7 +68,7 @@ public:
     // get the handler function pointer
     wxObjectEventFunction GetEventFunction() const { return m_eventFunction; }
 
-    // returns nullptr if this is the last handler of this class
+    // returns NULL if this is the last handler of this class
     wxHandlerInfo*     GetNext() const { return m_next; }
 
     // return the class this property is declared in
@@ -99,7 +99,7 @@ private:
     wxHandlerInfo *theClass::GetHandlersStatic()  \
     {                                             \
         typedef theClass class_t;                 \
-        static wxHandlerInfo* first = nullptr;
+        static wxHandlerInfo* first = NULL;
 
 #define wxEND_HANDLERS_TABLE()                    \
     return first; }

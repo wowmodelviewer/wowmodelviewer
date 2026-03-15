@@ -2,6 +2,7 @@
 // Name:        wx/msw/button.h
 // Purpose:     wxButton class
 // Author:      Julian Smart
+// Modified by:
 // Created:     01/02/97
 // Copyright:   (c) Julian Smart
 // Licence:     wxWindows licence
@@ -43,14 +44,14 @@ public:
 
     virtual ~wxButton();
 
-    virtual wxWindow *SetDefault() override;
+    virtual wxWindow *SetDefault() wxOVERRIDE;
 
     // implementation from now on
-    virtual void Command(wxCommandEvent& event) override;
-    virtual WXLRESULT MSWWindowProc(WXUINT nMsg, WXWPARAM wParam, WXLPARAM lParam) override;
-    virtual bool MSWCommand(WXUINT param, WXWORD id) override;
+    virtual void Command(wxCommandEvent& event) wxOVERRIDE;
+    virtual WXLRESULT MSWWindowProc(WXUINT nMsg, WXWPARAM wParam, WXLPARAM lParam) wxOVERRIDE;
+    virtual bool MSWCommand(WXUINT param, WXWORD id) wxOVERRIDE;
 
-    virtual WXDWORD MSWGetStyle(long style, WXDWORD *exstyle) const override;
+    virtual WXDWORD MSWGetStyle(long style, WXDWORD *exstyle) const wxOVERRIDE;
 
 protected:
     // send a notification event, return true if processed
@@ -63,8 +64,8 @@ protected:
     // set or unset BS_DEFPUSHBUTTON style
     static void SetDefaultStyle(wxButton *btn, bool on);
 
-    virtual bool DoGetAuthNeeded() const override;
-    virtual void DoSetAuthNeeded(bool show) override;
+    virtual bool DoGetAuthNeeded() const wxOVERRIDE;
+    virtual void DoSetAuthNeeded(bool show) wxOVERRIDE;
 
     // true if the UAC symbol is shown
     bool m_authNeeded;

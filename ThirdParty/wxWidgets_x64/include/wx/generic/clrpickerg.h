@@ -2,6 +2,7 @@
 // Name:        wx/generic/clrpickerg.h
 // Purpose:     wxGenericColourButton header
 // Author:      Francesco Montorsi (based on Vadim Zeitlin's code)
+// Modified by:
 // Created:     14/4/2006
 // Copyright:   (c) Vadim Zeitlin, Francesco Montorsi
 // Licence:     wxWindows Licence
@@ -24,7 +25,7 @@ class WXDLLIMPEXP_CORE wxGenericColourButton : public wxBitmapButton,
                                                public wxColourPickerWidgetBase
 {
 public:
-    wxGenericColourButton() = default;
+    wxGenericColourButton() {}
     wxGenericColourButton(wxWindow *parent,
                           wxWindowID id,
                           const wxColour& col = *wxBLACK,
@@ -37,7 +38,7 @@ public:
         Create(parent, id, col, pos, size, style, validator, name);
     }
 
-    virtual ~wxGenericColourButton() = default;
+    virtual ~wxGenericColourButton() {}
 
 
 public:     // API extensions specific for wxGenericColourButton
@@ -66,9 +67,9 @@ public:
 protected:
     wxBitmap    m_bitmap;
 
-    wxSize DoGetBestSize() const override;
+    wxSize DoGetBestSize() const wxOVERRIDE;
 
-    void UpdateColour() override;
+    void UpdateColour() wxOVERRIDE;
 
     void OnDPIChanged(wxDPIChangedEvent& event);
 

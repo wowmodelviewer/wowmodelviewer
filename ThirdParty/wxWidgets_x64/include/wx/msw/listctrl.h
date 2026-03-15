@@ -16,7 +16,7 @@
 #include "wx/vector.h"
 
 class wxMSWListItemData;
-class wxMSWHeaderCtrlCustomDraw;
+class wxMSWListHeaderCustomDraw;
 
 // define this symbol to indicate the availability of SetColumnsOrder() and
 // related functions
@@ -109,34 +109,34 @@ public:
     ////////////////////////////////////////////////////////////////////////////
 
     // Set the control colours
-    bool SetForegroundColour(const wxColour& col) override;
-    bool SetBackgroundColour(const wxColour& col) override;
+    bool SetForegroundColour(const wxColour& col) wxOVERRIDE;
+    bool SetBackgroundColour(const wxColour& col) wxOVERRIDE;
 
     // Header attributes
-    virtual bool SetHeaderAttr(const wxItemAttr& attr) override;
+    virtual bool SetHeaderAttr(const wxItemAttr& attr) wxOVERRIDE;
 
     // Gets information about this column
-    bool GetColumn(int col, wxListItem& item) const override;
+    bool GetColumn(int col, wxListItem& item) const wxOVERRIDE;
 
     // Sets information about this column
-    bool SetColumn(int col, const wxListItem& item) override;
+    bool SetColumn(int col, const wxListItem& item) wxOVERRIDE;
 
     // Gets the column width
-    int GetColumnWidth(int col) const override;
+    int GetColumnWidth(int col) const wxOVERRIDE;
 
     // Sets the column width
-    bool SetColumnWidth(int col, int width) override;
+    bool SetColumnWidth(int col, int width) wxOVERRIDE;
 
 
     // Gets the column order from its index or index from its order
-    int GetColumnOrder(int col) const override;
-    int GetColumnIndexFromOrder(int order) const override;
+    int GetColumnOrder(int col) const wxOVERRIDE;
+    int GetColumnIndexFromOrder(int order) const wxOVERRIDE;
 
     // Gets the column order for all columns
-    wxArrayInt GetColumnsOrder() const override;
+    wxArrayInt GetColumnsOrder() const wxOVERRIDE;
 
     // Sets the column order for all columns
-    bool SetColumnsOrder(const wxArrayInt& orders) override;
+    bool SetColumnsOrder(const wxArrayInt& orders) wxOVERRIDE;
 
 
     // Gets the number of items that can fit vertically in the
@@ -155,7 +155,7 @@ public:
     bool GetItem(wxListItem& info) const;
 
     // Check if the item is visible
-    bool IsVisible(long item) const override;
+    bool IsVisible(long item) const wxOVERRIDE;
 
     // Sets information about the item
     bool SetItem(wxListItem& info);
@@ -199,10 +199,10 @@ public:
     bool SetItemPosition(long item, const wxPoint& pos);
 
     // Gets the number of items in the list control
-    int GetItemCount() const override;
+    int GetItemCount() const wxOVERRIDE;
 
     // Gets the number of columns in the list control
-    int GetColumnCount() const override { return m_colCount; }
+    int GetColumnCount() const wxOVERRIDE { return m_colCount; }
 
     // get the horizontal and vertical components of the item spacing
     wxSize GetItemSpacing() const;
@@ -220,15 +220,15 @@ public:
     wxFont GetItemFont( long item ) const;
 
     // Checkbox state of an item
-    bool HasCheckBoxes() const override;
-    bool EnableCheckBoxes(bool enable = true) override;
-    bool IsItemChecked(long item) const override;
-    void CheckItem(long item, bool check) override;
+    bool HasCheckBoxes() const wxOVERRIDE;
+    bool EnableCheckBoxes(bool enable = true) wxOVERRIDE;
+    bool IsItemChecked(long item) const wxOVERRIDE;
+    void CheckItem(long item, bool check) wxOVERRIDE;
 
     // Sort indicator in header
-    void ShowSortIndicator(int idx, bool ascending = true) override;
-    int GetSortIndicator() const override;
-    bool IsAscendingSortIndicator() const override;
+    void ShowSortIndicator(int idx, bool ascending = true) wxOVERRIDE;
+    int GetSortIndicator() const wxOVERRIDE;
+    bool IsAscendingSortIndicator() const wxOVERRIDE;
 
     // Gets the number of selected items in the list control
     int GetSelectedItemCount() const;
@@ -247,7 +247,7 @@ public:
     void SetSingleStyle(long style, bool add = true);
 
     // Set the whole window style
-    void SetWindowStyleFlag(long style) override;
+    void SetWindowStyleFlag(long style) wxOVERRIDE;
 
     // Searches for an item, starting from 'item'.
     // item can be -1 to find the first item that matches the
@@ -272,10 +272,10 @@ public:
     bool DeleteAllItems();
 
     // Deletes a column
-    bool DeleteColumn(int col) override;
+    bool DeleteColumn(int col) wxOVERRIDE;
 
     // Deletes all columns
-    bool DeleteAllColumns() override;
+    bool DeleteAllColumns() wxOVERRIDE;
 
     // Clears items, and columns if there are any.
     void ClearAll();
@@ -304,7 +304,7 @@ public:
     // Determines which item (if any) is at the specified point,
     // giving details in 'flags' (see wxLIST_HITTEST_... flags above)
     // Request the subitem number as well at the given coordinate.
-    long HitTest(const wxPoint& point, int& flags, long* ptrSubItem = nullptr) const;
+    long HitTest(const wxPoint& point, int& flags, long* ptrSubItem = NULL) const;
 
     // Inserts an item, returning the index of the new item if successful,
     // -1 otherwise.
@@ -343,9 +343,9 @@ public:
     bool SortItems(wxListCtrlCompare fn, wxIntPtr data);
 
     // IMPLEMENTATION
-    virtual bool MSWCommand(WXUINT param, WXWORD id) override;
-    virtual bool MSWOnNotify(int idCtrl, WXLPARAM lParam, WXLPARAM *result) override;
-    virtual bool MSWShouldPreProcessMessage(WXMSG* msg) override;
+    virtual bool MSWCommand(WXUINT param, WXWORD id) wxOVERRIDE;
+    virtual bool MSWOnNotify(int idCtrl, WXLPARAM lParam, WXLPARAM *result) wxOVERRIDE;
+    virtual bool MSWShouldPreProcessMessage(WXMSG* msg) wxOVERRIDE;
 
 #if WXWIN_COMPATIBILITY_3_0
     // bring the control in sync with current m_windowStyle value
@@ -361,57 +361,56 @@ public:
     // Override SetDoubleBuffered() to do nothing, its implementation in the
     // base class is incompatible with the double buffering done by this native
     // control.
-    virtual bool IsDoubleBuffered() const override;
-    virtual void SetDoubleBuffered(bool on) override;
+    virtual bool IsDoubleBuffered() const wxOVERRIDE;
+    virtual void SetDoubleBuffered(bool on) wxOVERRIDE;
 
-    virtual bool ShouldInheritColours() const override { return false; }
+    virtual bool ShouldInheritColours() const wxOVERRIDE { return false; }
 
-    virtual wxVisualAttributes GetDefaultAttributes() const override;
+    virtual wxVisualAttributes GetDefaultAttributes() const wxOVERRIDE
+    {
+        return GetClassDefaultAttributes(GetWindowVariant());
+    }
 
     static wxVisualAttributes
     GetClassDefaultAttributes(wxWindowVariant variant = wxWINDOW_VARIANT_NORMAL);
 
     // convert our styles to Windows
-    virtual WXDWORD MSWGetStyle(long style, WXDWORD *exstyle) const override;
+    virtual WXDWORD MSWGetStyle(long style, WXDWORD *exstyle) const wxOVERRIDE;
 
     // special Windows message handling
     virtual WXLRESULT MSWWindowProc(WXUINT nMsg,
                                     WXWPARAM wParam,
-                                    WXLPARAM lParam) override;
+                                    WXLPARAM lParam) wxOVERRIDE;
 
 protected:
     // common part of all ctors
     void Init();
 
-    virtual bool MSWShouldSetDefaultFont() const override { return false; }
+    virtual bool MSWShouldSetDefaultFont() const wxOVERRIDE { return false; }
 
     // Implement constrained best size calculation.
-    virtual int DoGetBestClientHeight(int width) const override
+    virtual int DoGetBestClientHeight(int width) const wxOVERRIDE
         { return MSWGetBestViewRect(width, -1).y; }
-    virtual int DoGetBestClientWidth(int height) const override
+    virtual int DoGetBestClientWidth(int height) const wxOVERRIDE
         { return MSWGetBestViewRect(-1, height).x; }
 #if wxUSE_TOOLTIPS
-    virtual void DoSetToolTip(wxToolTip *tip) override;
+    virtual void DoSetToolTip(wxToolTip *tip) wxOVERRIDE;
 #endif // wxUSE_TOOLTIPS
 
-    virtual void MSWUpdateFontOnDPIChange(const wxSize& newDPI) override;
-
-    virtual bool MSWGetDarkModeSupport(MSWDarkModeSupport& support) const override;
-
-    virtual int MSWGetToolTipMessage() const override;
+    virtual void MSWUpdateFontOnDPIChange(const wxSize& newDPI) wxOVERRIDE;
 
     void OnDPIChanged(wxDPIChangedEvent& event);
 
     wxSize MSWGetBestViewRect(int x, int y) const;
 
     // Implement base class pure virtual methods.
-    long DoInsertColumn(long col, const wxListItem& info) override;
-    void DoUpdateImages(int which) override;
+    long DoInsertColumn(long col, const wxListItem& info) wxOVERRIDE;
+    void DoUpdateImages(int which) wxOVERRIDE;
 
     // free memory taken by all internal data
     void FreeAllInternalData();
 
-    // get the internal data object for this item (may return nullptr)
+    // get the internal data object for this item (may return NULL)
     wxMSWListItemData *MSWGetItemData(long item) const;
 
     // get the item attribute, either by querying it for virtual control, or by
@@ -442,13 +441,10 @@ private:
     // UpdateStyle()), only should be called if InReportView()
     void MSWSetExListStyles();
 
-    // Initialize the header control if it exists.
-    void MSWInitHeader();
-
     // initialize the (already created) m_textCtrl with the associated HWND
     void InitEditControl(WXHWND hWnd);
 
-    // destroy m_textCtrl if it's currently valid and reset it to nullptr
+    // destroy m_textCtrl if it's currently valid and reset it to NULL
     void DeleteEditControl();
 
     // Update all image lists that we have.
@@ -461,8 +457,8 @@ private:
     // Draw the sort arrow in the header.
     void DrawSortArrow();
 
-    // Object using for header custom drawing if necessary, may be null.
-    wxMSWHeaderCtrlCustomDraw* m_headerCustomDraw;
+    // Object using for header custom drawing if necessary, may be NULL.
+    wxMSWListHeaderCustomDraw* m_headerCustomDraw;
 
 
     wxDECLARE_DYNAMIC_CLASS(wxListCtrl);

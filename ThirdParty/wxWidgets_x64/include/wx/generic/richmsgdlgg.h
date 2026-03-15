@@ -23,19 +23,19 @@ public:
                                const wxString& caption = wxASCII_STR(wxMessageBoxCaptionStr),
                                long style = wxOK | wxCENTRE)
         : wxRichMessageDialogBase( parent, message, caption, style ),
-          m_checkBox(nullptr),
-          m_detailsPane(nullptr)
+          m_checkBox(NULL),
+          m_detailsPane(NULL)
     { }
 
-    virtual bool IsCheckBoxChecked() const override;
+    virtual bool IsCheckBoxChecked() const wxOVERRIDE;
 
 protected:
     wxCheckBox *m_checkBox;
     wxCollapsiblePane *m_detailsPane;
 
     // overrides methods in the base class
-    virtual void AddMessageDialogCheckBox(wxSizer *sizer) override;
-    virtual void AddMessageDialogDetails(wxSizer *sizer) override;
+    virtual void AddMessageDialogCheckBox(wxSizer *sizer) wxOVERRIDE;
+    virtual void AddMessageDialogDetails(wxSizer *sizer) wxOVERRIDE;
 
 private:
     void OnPaneChanged(wxCollapsiblePaneEvent& event);

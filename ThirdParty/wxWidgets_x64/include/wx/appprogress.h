@@ -12,13 +12,11 @@
 
 #include "wx/defs.h"
 
-class WXDLLIMPEXP_FWD_CORE wxWindow;
-
 class WXDLLIMPEXP_CORE wxAppProgressIndicatorBase
 {
 public:
-    wxAppProgressIndicatorBase() = default;
-    virtual ~wxAppProgressIndicatorBase() = default;
+    wxAppProgressIndicatorBase() {}
+    virtual ~wxAppProgressIndicatorBase() {}
 
     virtual bool IsAvailable() const = 0;
 
@@ -39,17 +37,17 @@ private:
     class wxAppProgressIndicator : public wxAppProgressIndicatorBase
     {
     public:
-        wxAppProgressIndicator(wxWindow* WXUNUSED(parent) = nullptr,
+        wxAppProgressIndicator(wxWindow* WXUNUSED(parent) = NULL,
                                int WXUNUSED(maxValue) = 100)
         {
         }
 
-        virtual bool IsAvailable() const override { return false; }
+        virtual bool IsAvailable() const wxOVERRIDE { return false; }
 
-        virtual void SetValue(int WXUNUSED(value)) override { }
-        virtual void SetRange(int WXUNUSED(range)) override { }
-        virtual void Pulse() override { }
-        virtual void Reset() override { }
+        virtual void SetValue(int WXUNUSED(value)) wxOVERRIDE { }
+        virtual void SetRange(int WXUNUSED(range)) wxOVERRIDE { }
+        virtual void Pulse() wxOVERRIDE { }
+        virtual void Reset() wxOVERRIDE { }
     };
 #endif
 

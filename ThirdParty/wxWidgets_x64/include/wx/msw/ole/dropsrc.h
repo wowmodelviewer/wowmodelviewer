@@ -2,6 +2,7 @@
 // Name:        wx/msw/ole/dropsrc.h
 // Purpose:     declaration of the wxDropSource class
 // Author:      Vadim Zeitlin
+// Modified by:
 // Created:     06.03.98
 // Copyright:   (c) 1998 Vadim Zeitlin <zeitlin@dptmaths.ens-cachan.fr>
 // Licence:     wxWindows licence
@@ -42,39 +43,32 @@ public:
     //
     // NB: the "wxWindow *win" parameter is unused and is here only for wxGTK
     //     compatibility, as well as both icon parameters
-    wxDropSource(wxWindow *win = nullptr,
-                 const wxCursorBundle& cursorCopy = {},
-                 const wxCursorBundle& cursorMove = {},
-                 const wxCursorBundle& cursorStop = {});
+    wxDropSource(wxWindow *win = NULL,
+                 const wxCursor &cursorCopy = wxNullCursor,
+                 const wxCursor &cursorMove = wxNullCursor,
+                 const wxCursor &cursorStop = wxNullCursor);
     wxDropSource(wxDataObject& data,
-                 wxWindow *win = nullptr,
-                 const wxCursorBundle& cursorCopy = {},
-                 const wxCursorBundle& cursorMove = {},
-                 const wxCursorBundle& cursorStop = {});
+                 wxWindow *win = NULL,
+                 const wxCursor &cursorCopy = wxNullCursor,
+                 const wxCursor &cursorMove = wxNullCursor,
+                 const wxCursor &cursorStop = wxNullCursor);
 
     virtual ~wxDropSource();
 
     // do it (call this in response to a mouse button press, for example)
     // params: if bAllowMove is false, data can be only copied
-    virtual wxDragResult DoDragDrop(int flags = wxDrag_CopyOnly) override;
+    virtual wxDragResult DoDragDrop(int flags = wxDrag_CopyOnly) wxOVERRIDE;
 
     // overridable: you may give some custom UI feedback during d&d operation
     // in this function (it's called on each mouse move, so it shouldn't be
     // too slow). Just return false if you want default feedback.
-    virtual bool GiveFeedback(wxDragResult effect) override;
+    virtual bool GiveFeedback(wxDragResult effect) wxOVERRIDE;
 
 protected:
     void Init();
 
 private:
-    // The window passed to the ctor.
-    wxWindow* const m_win;
-
     wxIDropSource *m_pIDropSource;  // the pointer to COM interface
-
-    // Last cursor used in GiveFeedback(): we need to keep it alive to ensure
-    // its HCURSOR remains valid.
-    wxCursor m_feedbackCursor;
 
     wxDECLARE_NO_COPY_CLASS(wxDropSource);
 };

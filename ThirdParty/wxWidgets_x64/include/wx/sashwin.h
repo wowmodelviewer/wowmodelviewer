@@ -2,6 +2,7 @@
 // Name:        wx/sashwin.h
 // Purpose:     Base header for wxSashWindow
 // Author:      Julian Smart
+// Modified by:
 // Created:
 // Copyright:   (c) Julian Smart
 // Licence:     wxWindows Licence

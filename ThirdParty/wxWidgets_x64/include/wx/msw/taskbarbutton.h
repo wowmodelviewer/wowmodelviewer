@@ -24,27 +24,27 @@ class WXDLLIMPEXP_CORE wxTaskBarButtonImpl : public wxTaskBarButton
 public:
     virtual ~wxTaskBarButtonImpl();
 
-    virtual void SetProgressRange(int range) override;
-    virtual void SetProgressValue(int value) override;
-    virtual void PulseProgress() override;
-    virtual void Show(bool show = true) override;
-    virtual void Hide() override;
-    virtual void SetThumbnailTooltip(const wxString& tooltip) override;
-    virtual void SetProgressState(wxTaskBarButtonState state) override;
+    virtual void SetProgressRange(int range) wxOVERRIDE;
+    virtual void SetProgressValue(int value) wxOVERRIDE;
+    virtual void PulseProgress() wxOVERRIDE;
+    virtual void Show(bool show = true) wxOVERRIDE;
+    virtual void Hide() wxOVERRIDE;
+    virtual void SetThumbnailTooltip(const wxString& tooltip) wxOVERRIDE;
+    virtual void SetProgressState(wxTaskBarButtonState state) wxOVERRIDE;
     virtual void SetOverlayIcon(const wxIcon& icon,
-        const wxString& description = wxString()) override;
-    virtual void SetThumbnailClip(const wxRect& rect) override;
-    virtual void SetThumbnailContents(const wxWindow *child) override;
+        const wxString& description = wxString()) wxOVERRIDE;
+    virtual void SetThumbnailClip(const wxRect& rect) wxOVERRIDE;
+    virtual void SetThumbnailContents(const wxWindow *child) wxOVERRIDE;
     virtual bool InsertThumbBarButton(size_t pos,
-                                      wxThumbBarButton *button) override;
-    virtual bool AppendThumbBarButton(wxThumbBarButton *button) override;
-    virtual bool AppendSeparatorInThumbBar() override;
+                                      wxThumbBarButton *button) wxOVERRIDE;
+    virtual bool AppendThumbBarButton(wxThumbBarButton *button) wxOVERRIDE;
+    virtual bool AppendSeparatorInThumbBar() wxOVERRIDE;
     virtual wxThumbBarButton* RemoveThumbBarButton(
-        wxThumbBarButton *button) override;
-    virtual wxThumbBarButton* RemoveThumbBarButton(int id) override;
+        wxThumbBarButton *button) wxOVERRIDE;
+    virtual wxThumbBarButton* RemoveThumbBarButton(int id) wxOVERRIDE;
     wxThumbBarButton* GetThumbBarButtonByIndex(size_t index);
     bool InitOrUpdateThumbBarButtons();
-    virtual void Realize() override;
+    virtual void Realize() wxOVERRIDE;
 
 private:
     // This ctor is only used by wxTaskBarButton::New()

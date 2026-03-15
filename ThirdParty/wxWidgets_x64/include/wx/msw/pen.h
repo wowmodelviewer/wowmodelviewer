@@ -21,38 +21,42 @@
 class WXDLLIMPEXP_CORE wxPen : public wxPenBase
 {
 public:
-    wxPen() = default;
+    wxPen() { }
     wxPen(const wxColour& col, int width = 1, wxPenStyle style = wxPENSTYLE_SOLID);
 
     wxPen(const wxBitmap& stipple, int width);
 
     wxPen(const wxPenInfo& info);
 
+    virtual ~wxPen() { }
+
+    wxDECLARE_DEFAULT_COPY(wxPen)
+
     bool operator==(const wxPen& pen) const;
     bool operator!=(const wxPen& pen) const { return !(*this == pen); }
 
     // Override in order to recreate the pen
-    void SetColour(const wxColour& col) override;
-    void SetColour(unsigned char r, unsigned char g, unsigned char b) override;
+    void SetColour(const wxColour& col) wxOVERRIDE;
+    void SetColour(unsigned char r, unsigned char g, unsigned char b) wxOVERRIDE;
 
-    void SetWidth(int width) override;
-    void SetStyle(wxPenStyle style) override;
-    void SetStipple(const wxBitmap& stipple) override;
-    void SetDashes(int nb_dashes, const wxDash *dash) override;
-    void SetJoin(wxPenJoin join) override;
-    void SetCap(wxPenCap cap) override;
-    void SetQuality(wxPenQuality quality) override;
+    void SetWidth(int width) wxOVERRIDE;
+    void SetStyle(wxPenStyle style) wxOVERRIDE;
+    void SetStipple(const wxBitmap& stipple) wxOVERRIDE;
+    void SetDashes(int nb_dashes, const wxDash *dash) wxOVERRIDE;
+    void SetJoin(wxPenJoin join) wxOVERRIDE;
+    void SetCap(wxPenCap cap) wxOVERRIDE;
+    void SetQuality(wxPenQuality quality) wxOVERRIDE;
 
-    wxColour GetColour() const override;
-    int GetWidth() const override;
-    wxPenStyle GetStyle() const override;
-    wxPenJoin GetJoin() const override;
-    wxPenCap GetCap() const override;
-    wxPenQuality GetQuality() const override;
-    int GetDashes(wxDash** ptr) const override;
+    wxColour GetColour() const wxOVERRIDE;
+    int GetWidth() const wxOVERRIDE;
+    wxPenStyle GetStyle() const wxOVERRIDE;
+    wxPenJoin GetJoin() const wxOVERRIDE;
+    wxPenCap GetCap() const wxOVERRIDE;
+    wxPenQuality GetQuality() const wxOVERRIDE;
+    int GetDashes(wxDash** ptr) const wxOVERRIDE;
     wxDash* GetDash() const;
     int GetDashCount() const;
-    wxBitmap* GetStipple() const override;
+    wxBitmap* GetStipple() const wxOVERRIDE;
 
 
     wxDEPRECATED_MSG("use wxPENSTYLE_XXX constants")
@@ -63,14 +67,14 @@ public:
 
 
     // internal: wxGDIObject methods
-    virtual bool RealizeResource() override;
-    virtual bool FreeResource(bool force = false) override;
-    virtual WXHANDLE GetResourceHandle() const override;
-    virtual bool IsFree() const override;
+    virtual bool RealizeResource() wxOVERRIDE;
+    virtual bool FreeResource(bool force = false) wxOVERRIDE;
+    virtual WXHANDLE GetResourceHandle() const wxOVERRIDE;
+    virtual bool IsFree() const wxOVERRIDE;
 
 protected:
-    virtual wxGDIRefData* CreateGDIRefData() const override;
-    wxNODISCARD virtual wxGDIRefData* CloneGDIRefData(const wxGDIRefData* data) const override;
+    virtual wxGDIRefData* CreateGDIRefData() const wxOVERRIDE;
+    virtual wxGDIRefData* CloneGDIRefData(const wxGDIRefData* data) const wxOVERRIDE;
 
     // same as FreeResource() + RealizeResource()
     bool Recreate();

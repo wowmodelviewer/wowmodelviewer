@@ -2,6 +2,7 @@
 // Name:        wx/msw/mimetype.h
 // Purpose:     classes and functions to manage MIME types
 // Author:      Vadim Zeitlin
+// Modified by:
 // Created:     23.09.98
 // Copyright:   (c) 1998 Vadim Zeitlin <zeitlin@dptmaths.ens-cachan.fr>
 // Licence:     wxWidgets licence (part of base library)
@@ -25,7 +26,7 @@ class WXDLLIMPEXP_BASE wxFileTypeImpl
 {
 public:
     // ctor
-    wxFileTypeImpl() = default;
+    wxFileTypeImpl() { }
 
     // one of these Init() function must be called (ctor can't take any
     // arguments because it's common)
@@ -118,7 +119,7 @@ class WXDLLIMPEXP_BASE wxMimeTypesManagerImpl
 public:
     // nothing to do here, we don't load any data but just go and fetch it from
     // the registry when asked for
-    wxMimeTypesManagerImpl() = default;
+    wxMimeTypesManagerImpl() { }
 
     // implement containing class functions
     wxFileType *GetFileTypeFromExtension(const wxString& ext);

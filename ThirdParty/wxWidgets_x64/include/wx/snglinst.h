@@ -3,6 +3,7 @@
 // Purpose:     wxSingleInstanceChecker can be used to restrict the number of
 //              simultaneously running copies of a program to one
 // Author:      Vadim Zeitlin
+// Modified by:
 // Created:     08.06.01
 // Copyright:   (c) 2001 Vadim Zeitlin <zeitlin@dptmaths.ens-cachan.fr>
 // Licence:     wxWindows licence
@@ -10,8 +11,6 @@
 
 #ifndef _WX_SNGLINST_H_
 #define _WX_SNGLINST_H_
-
-#include "wx/defs.h"
 
 #if wxUSE_SNGLINST_CHECKER
 
@@ -81,9 +80,9 @@ public:
 
 private:
     // common part of all ctors
-    void Init() { m_impl = nullptr; }
+    void Init() { m_impl = NULL; }
 
-    // do check if another instance is running, called only if m_impl != nullptr
+    // do check if another instance is running, called only if m_impl != NULL
     bool DoIsAnotherRunning() const;
 
     // the implementation details (platform specific)

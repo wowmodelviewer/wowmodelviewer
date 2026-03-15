@@ -2,6 +2,7 @@
 // Name:        wx/msw/dcprint.h
 // Purpose:     wxPrinterDC class
 // Author:      Julian Smart
+// Modified by:
 // Created:     01/02/97
 // Copyright:   (c) Julian Smart
 // Licence:     wxWindows licence
@@ -28,28 +29,28 @@ public:
     wxPrinterDCImpl( wxPrinterDC *owner, WXHDC theDC );
 
     // override some base class virtuals
-    virtual bool StartDoc(const wxString& message) override;
-    virtual void EndDoc() override;
-    virtual void StartPage() override;
-    virtual void EndPage() override;
+    virtual bool StartDoc(const wxString& message) wxOVERRIDE;
+    virtual void EndDoc() wxOVERRIDE;
+    virtual void StartPage() wxOVERRIDE;
+    virtual void EndPage() wxOVERRIDE;
 
-    virtual wxRect GetPaperRect() const override;
+    virtual wxRect GetPaperRect() const wxOVERRIDE;
 
-    virtual wxSize FromDIP(const wxSize& sz) const override;
+    virtual wxSize FromDIP(const wxSize& sz) const wxOVERRIDE;
 
-    virtual wxSize ToDIP(const wxSize& sz) const override;
+    virtual wxSize ToDIP(const wxSize& sz) const wxOVERRIDE;
 
-    void SetFont(const wxFont& font) override;
+    void SetFont(const wxFont& font) wxOVERRIDE;
 
 protected:
     virtual void DoDrawBitmap(const wxBitmap &bmp, wxCoord x, wxCoord y,
-                              bool useMask = false) override;
+                              bool useMask = false) wxOVERRIDE;
     virtual bool DoBlit(wxCoord xdest, wxCoord ydest,
                         wxCoord width, wxCoord height,
                         wxDC *source, wxCoord xsrc, wxCoord ysrc,
                         wxRasterOperationMode rop = wxCOPY, bool useMask = false,
-                        wxCoord xsrcMask = wxDefaultCoord, wxCoord ysrcMask = wxDefaultCoord) override;
-    virtual void DoGetSize(int *w, int *h) const override
+                        wxCoord xsrcMask = wxDefaultCoord, wxCoord ysrcMask = wxDefaultCoord) wxOVERRIDE;
+    virtual void DoGetSize(int *w, int *h) const wxOVERRIDE
     {
         GetDeviceSize(w, h);
     }

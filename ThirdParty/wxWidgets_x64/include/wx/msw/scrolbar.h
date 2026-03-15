@@ -2,6 +2,7 @@
 // Name:        wx/msw/scrolbar.h
 // Purpose:     wxScrollBar class
 // Author:      Julian Smart
+// Modified by:
 // Created:     01/02/97
 // Copyright:   (c) Julian Smart
 // Licence:     wxWindows licence
@@ -33,34 +34,34 @@ public:
             const wxValidator& validator = wxDefaultValidator,
             const wxString& name = wxASCII_STR(wxScrollBarNameStr));
 
-    int GetThumbPosition() const override;
-    int GetThumbSize() const override { return m_pageSize; }
-    int GetPageSize() const override { return m_viewSize; }
-    int GetRange() const override { return m_objectSize; }
+    int GetThumbPosition() const wxOVERRIDE;
+    int GetThumbSize() const wxOVERRIDE { return m_pageSize; }
+    int GetPageSize() const wxOVERRIDE { return m_viewSize; }
+    int GetRange() const wxOVERRIDE { return m_objectSize; }
 
-    virtual void SetThumbPosition(int viewStart) override;
+    virtual void SetThumbPosition(int viewStart) wxOVERRIDE;
     virtual void SetScrollbar(int position, int thumbSize, int range, int pageSize,
-            bool refresh = true) override;
+            bool refresh = true) wxOVERRIDE;
 
     // needed for RTTI
     void SetThumbSize( int s ) { SetScrollbar( GetThumbPosition() , s , GetRange() , GetPageSize() , true ) ; }
     void SetPageSize( int s ) { SetScrollbar( GetThumbPosition() , GetThumbSize() , GetRange() , s , true ) ; }
     void SetRange( int s ) { SetScrollbar( GetThumbPosition() , GetThumbSize() , s , GetPageSize() , true ) ; }
 
-    void Command(wxCommandEvent& event) override;
+    void Command(wxCommandEvent& event) wxOVERRIDE;
     virtual bool MSWOnScroll(int orientation, WXWORD wParam,
-                             WXWORD pos, WXHWND control) override;
+                             WXWORD pos, WXHWND control) wxOVERRIDE;
 
     // override wxControl version to not use solid background here
-    virtual WXHBRUSH MSWControlColor(WXHDC pDC, WXHWND hWnd) override;
+    virtual WXHBRUSH MSWControlColor(WXHDC pDC, WXHWND hWnd) wxOVERRIDE;
 
-    virtual WXDWORD MSWGetStyle(long style, WXDWORD *exstyle) const override;
+    virtual WXDWORD MSWGetStyle(long style, WXDWORD *exstyle) const wxOVERRIDE;
 
     // returns true if the platform should explicitly apply a theme border
-    virtual bool CanApplyThemeBorder() const override { return false; }
+    virtual bool CanApplyThemeBorder() const wxOVERRIDE { return false; }
 
 protected:
-    virtual wxSize DoGetBestSize() const override;
+    virtual wxSize DoGetBestSize() const wxOVERRIDE;
 
     int m_pageSize;
     int m_viewSize;

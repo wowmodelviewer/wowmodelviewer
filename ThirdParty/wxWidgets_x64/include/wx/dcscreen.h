@@ -2,6 +2,7 @@
 // Name:        wx/dcscreen.h
 // Purpose:     wxScreenDC base header
 // Author:      Julian Smart
+// Modified by:
 // Created:
 // Copyright:   (c) Julian Smart
 // Licence:     wxWindows Licence
@@ -13,7 +14,6 @@
 #include "wx/defs.h"
 #include "wx/dc.h"
 
-// This class is obsolete and doesn't work, don't use it.
 class WXDLLIMPEXP_CORE wxScreenDC : public wxDC
 {
 public:
@@ -21,7 +21,7 @@ public:
 
     static bool StartDrawingOnTop(wxWindow * WXUNUSED(window))
         { return true; }
-    static bool StartDrawingOnTop(wxRect * WXUNUSED(rect) =  nullptr)
+    static bool StartDrawingOnTop(wxRect * WXUNUSED(rect) =  NULL)
         { return true; }
     static bool EndDrawingOnTop()
         { return true; }

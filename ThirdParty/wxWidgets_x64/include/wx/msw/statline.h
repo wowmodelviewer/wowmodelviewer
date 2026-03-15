@@ -18,7 +18,7 @@ class WXDLLIMPEXP_CORE wxStaticLine : public wxStaticLineBase
 {
 public:
     // constructors and pseudo-constructors
-    wxStaticLine() = default;
+    wxStaticLine() { }
 
     wxStaticLine( wxWindow *parent,
                   wxWindowID id = wxID_ANY,
@@ -38,10 +38,10 @@ public:
                  const wxString &name = wxASCII_STR(wxStaticLineNameStr) );
 
     // overridden base class virtuals
-    virtual bool AcceptsFocus() const override { return false; }
+    virtual bool AcceptsFocus() const wxOVERRIDE { return false; }
 
     // usually overridden base class virtuals
-    virtual WXDWORD MSWGetStyle(long style, WXDWORD *exstyle) const override;
+    virtual WXDWORD MSWGetStyle(long style, WXDWORD *exstyle) const wxOVERRIDE;
 
     wxDECLARE_DYNAMIC_CLASS_NO_COPY(wxStaticLine);
 };

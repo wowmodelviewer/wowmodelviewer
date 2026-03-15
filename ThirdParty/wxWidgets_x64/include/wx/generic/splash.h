@@ -2,6 +2,7 @@
 // Name:        wx/generic/splash.h
 // Purpose:     Splash screen class
 // Author:      Julian Smart
+// Modified by:
 // Created:     28/6/2000
 // Copyright:   (c) Julian Smart
 // Licence:     wxWindows Licence
@@ -53,7 +54,7 @@ public:
     int GetTimeout() const { return m_milliseconds; }
 
     // Override wxEventFilter method to hide splash screen on any user input.
-    virtual int FilterEvent(wxEvent& event) override;
+    virtual int FilterEvent(wxEvent& event) wxOVERRIDE;
 
 protected:
     // Common part of all ctors.

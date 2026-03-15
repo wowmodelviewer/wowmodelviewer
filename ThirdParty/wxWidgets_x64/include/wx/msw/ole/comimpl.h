@@ -2,6 +2,7 @@
 // Name:        wx/msw/ole/comimpl.h
 // Purpose:     COM helper routines, COM debugging support &c
 // Author:      Vadim Zeitlin
+// Modified by:
 // Created:     19.02.1998
 // Copyright:   (c) 1998 Vadim Zeitlin <zeitlin@dptmaths.ens-cachan.fr>
 // Licence:     wxWindows licence
@@ -9,12 +10,6 @@
 
 #ifndef WX_COMIMPL_H
 #define WX_COMIMPL_H
-
-// DO NOT USE THIS HEADER.
-//
-// This header is only preserved for compatibility and the helpers defined here
-// are obsolete and shouldn't be used in any new code and don't work correctly
-// with classes inheriting from IUnknown more than once.
 
 #include "wx/defs.h"
 
@@ -26,15 +21,15 @@
 // General purpose functions and macros
 // ============================================================================
 
-// release the interface pointer (if non-null)
+// release the interface pointer (if !NULL)
 inline void ReleaseInterface(IUnknown *pIUnk)
 {
-  if ( pIUnk != nullptr )
+  if ( pIUnk != NULL )
     pIUnk->Release();
 }
 
-// release the interface pointer (if non-null) and set it to nullptr
-#define   RELEASE_AND_NULL(p)   if ( (p) != nullptr ) { p->Release(); p = nullptr; };
+// release the interface pointer (if !NULL) and make it NULL
+#define   RELEASE_AND_NULL(p)   if ( (p) != NULL ) { p->Release(); p = NULL; };
 
 // return true if the iid is in the array
 extern WXDLLIMPEXP_CORE bool IsIidFromList(REFIID riid, const IID *aIids[], size_t nCount);
@@ -90,9 +85,9 @@ private:
 
 #define   DECLARE_IUNKNOWN_METHODS                                            \
   public:                                                                     \
-    STDMETHODIMP          QueryInterface(REFIID, void **) override;         \
-    STDMETHODIMP_(ULONG)  AddRef() override;                                \
-    STDMETHODIMP_(ULONG)  Release() override;                               \
+    STDMETHODIMP          QueryInterface(REFIID, void **) wxOVERRIDE;         \
+    STDMETHODIMP_(ULONG)  AddRef() wxOVERRIDE;                                \
+    STDMETHODIMP_(ULONG)  Release() wxOVERRIDE;                               \
   private:                                                                    \
     static  const IID    *ms_aIids[];                                         \
     wxAutoULong           m_cRef
@@ -118,7 +113,7 @@ private:
       return S_OK;                                                            \
     }                                                                         \
     else {                                                                    \
-      *ppv = nullptr;                                                            \
+      *ppv = NULL;                                                            \
                                                                               \
       return (HRESULT) E_NOINTERFACE;                                         \
     }                                                                         \

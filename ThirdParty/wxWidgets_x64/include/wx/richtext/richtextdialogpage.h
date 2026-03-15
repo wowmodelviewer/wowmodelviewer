@@ -2,6 +2,7 @@
 // Name:        wx/richtext/richtextdialogpage.h
 // Purpose:     Formatting dialog page base class for wxRTC
 // Author:      Julian Smart
+// Modified by:
 // Created:     2010-11-14
 // Copyright:   (c) Julian Smart
 // Licence:     wxWindows Licence
@@ -24,7 +25,7 @@ class WXDLLIMPEXP_RICHTEXT wxRichTextDialogPage: public wxPanel
 {
 public:
     wxDECLARE_CLASS(wxRichTextDialogPage);
-    wxRichTextDialogPage() = default;
+    wxRichTextDialogPage() {}
     wxRichTextDialogPage(wxWindow* parent, wxWindowID id = wxID_ANY, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize, long style = 0)
     {
         Create(parent, id, pos, size, style);

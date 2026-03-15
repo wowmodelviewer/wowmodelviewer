@@ -2,6 +2,7 @@
 // Name:        wx/msw/ole/dataform.h
 // Purpose:     declaration of the wxDataFormat class
 // Author:      Vadim Zeitlin
+// Modified by:
 // Created:     19.10.99 (extracted from msw/ole/dataobj.h)
 // Copyright:   (c) 1998 Vadim Zeitlin <zeitlin@dptmaths.ens-cachan.fr>
 // Licence:     wxWindows licence

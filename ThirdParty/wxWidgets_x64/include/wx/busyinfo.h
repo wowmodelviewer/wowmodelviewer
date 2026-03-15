@@ -13,8 +13,8 @@
 
 #if wxUSE_BUSYINFO
 
-#include "wx/bmpbndl.h"
 #include "wx/colour.h"
+#include "wx/icon.h"
 
 class WXDLLIMPEXP_FWD_CORE wxWindow;
 
@@ -31,14 +31,14 @@ class wxBusyInfoFlags
 public:
     wxBusyInfoFlags()
     {
-        m_parent = nullptr;
+        m_parent = NULL;
         m_alpha = wxALPHA_OPAQUE;
     }
 
     wxBusyInfoFlags& Parent(wxWindow* parent)
         { m_parent = parent; return *this; }
 
-    wxBusyInfoFlags& Icon(const wxBitmapBundle& icon)
+    wxBusyInfoFlags& Icon(const wxIcon& icon)
         { m_icon = icon; return *this; }
     wxBusyInfoFlags& Title(const wxString& title)
         { m_title = title; return *this; }
@@ -58,7 +58,7 @@ public:
 private:
     wxWindow* m_parent;
 
-    wxBitmapBundle m_icon;
+    wxIcon m_icon;
     wxString m_title,
              m_text,
              m_label;

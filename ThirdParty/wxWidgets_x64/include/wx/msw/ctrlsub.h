@@ -17,7 +17,7 @@
 class WXDLLIMPEXP_CORE wxControlWithItems : public wxControlWithItemsBase
 {
 public:
-    wxControlWithItems() = default;
+    wxControlWithItems() { }
 
 protected:
     // preallocate memory for inserting the given new items into the control

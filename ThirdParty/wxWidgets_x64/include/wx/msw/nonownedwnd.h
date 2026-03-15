@@ -22,17 +22,17 @@ public:
     wxNonOwnedWindow();
     virtual ~wxNonOwnedWindow();
 
-    virtual bool Reparent(wxWindowBase* newParent) override;
-    virtual bool IsThisEnabled() const override;
+    virtual bool Reparent(wxWindowBase* newParent) wxOVERRIDE;
+    virtual bool IsThisEnabled() const wxOVERRIDE;
 
 protected:
-    virtual bool DoClearShape() override;
-    virtual bool DoSetRegionShape(const wxRegion& region) override;
+    virtual bool DoClearShape() wxOVERRIDE;
+    virtual bool DoSetRegionShape(const wxRegion& region) wxOVERRIDE;
 #if wxUSE_GRAPHICS_CONTEXT
-    virtual bool DoSetPathShape(const wxGraphicsPath& path) override;
+    virtual bool DoSetPathShape(const wxGraphicsPath& path) wxOVERRIDE;
 #endif // wxUSE_GRAPHICS_CONTEXT
 
-    virtual WXLRESULT MSWWindowProc(WXUINT message, WXWPARAM wParam, WXLPARAM lParam) override;
+    virtual WXLRESULT MSWWindowProc(WXUINT message, WXWPARAM wParam, WXLPARAM lParam) wxOVERRIDE;
 
 private:
     bool HandleDPIChange(const wxSize& newDPI, const wxRect& newRect);

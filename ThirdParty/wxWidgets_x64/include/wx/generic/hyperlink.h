@@ -45,28 +45,24 @@ public:
 
 
     // get/set
-    wxColour GetHoverColour() const override { return m_hoverColour; }
-    void SetHoverColour(const wxColour &colour) override { m_hoverColour = colour; }
+    wxColour GetHoverColour() const wxOVERRIDE { return m_hoverColour; }
+    void SetHoverColour(const wxColour &colour) wxOVERRIDE { m_hoverColour = colour; }
 
-    wxColour GetNormalColour() const override { return m_normalColour; }
-    void SetNormalColour(const wxColour &colour) override;
+    wxColour GetNormalColour() const wxOVERRIDE { return m_normalColour; }
+    void SetNormalColour(const wxColour &colour) wxOVERRIDE;
 
-    wxColour GetVisitedColour() const override { return m_visitedColour; }
-    void SetVisitedColour(const wxColour &colour) override;
+    wxColour GetVisitedColour() const wxOVERRIDE { return m_visitedColour; }
+    void SetVisitedColour(const wxColour &colour) wxOVERRIDE;
 
-    wxString GetURL() const override { return m_url; }
-    void SetURL (const wxString &url) override { m_url=url; }
+    wxString GetURL() const wxOVERRIDE { return m_url; }
+    void SetURL (const wxString &url) wxOVERRIDE { m_url=url; }
 
-    void SetVisited(bool visited = true) override { m_visited=visited; }
-    bool GetVisited() const override { return m_visited; }
+    void SetVisited(bool visited = true) wxOVERRIDE { m_visited=visited; }
+    bool GetVisited() const wxOVERRIDE { return m_visited; }
 
     // NOTE: also wxWindow::Set/GetLabel, wxWindow::Set/GetBackgroundColour,
     //       wxWindow::Get/SetFont, wxWindow::Get/SetCursor are important !
 
-    // overridden/inherited wxWindow methods
-    virtual wxVisualAttributes GetDefaultAttributes() const override;
-    static wxVisualAttributes
-    GetClassDefaultAttributes(wxWindowVariant variant = wxWINDOW_VARIANT_NORMAL);
 
 protected:
     // Helper used by this class itself and native MSW implementation that
@@ -114,7 +110,7 @@ protected:
 
     // Returns the best size for the window, which is the size needed
     // to display the text label.
-    virtual wxSize DoGetBestClientSize() const override;
+    virtual wxSize DoGetBestClientSize() const wxOVERRIDE;
 
     // creates a context menu with "Copy URL" menuitem
     virtual void DoContextMenu(const wxPoint &);

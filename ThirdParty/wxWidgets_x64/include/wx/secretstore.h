@@ -36,7 +36,7 @@ class WXDLLIMPEXP_BASE wxSecretValue
 {
 public:
     // Creates an empty secret value (not the same as an empty password).
-    wxSecretValue() : m_impl(nullptr) { }
+    wxSecretValue() : m_impl(NULL) { }
 
     // Creates a secret value from the given data.
     wxSecretValue(size_t size, const void *data)
@@ -57,7 +57,7 @@ public:
     ~wxSecretValue();
 
     // Check if a secret is not empty.
-    bool IsOk() const { return m_impl != nullptr; }
+    bool IsOk() const { return m_impl != NULL; }
 
     // Compare with another secret.
     bool operator==(const wxSecretValue& other) const;
@@ -92,6 +92,10 @@ private:
     // new heap-allocated object initialized with the given data.
     static wxSecretValueImpl*
     NewImpl(size_t size, const void *data, const char* contentType);
+
+    // This one is kept for ABI-compatibility only.
+    static wxSecretValueImpl*
+    NewImpl(size_t size, const void *data);
 
     // This ctor is only used by wxSecretStore and takes ownership of the
     // provided existing impl pointer.
@@ -129,7 +133,7 @@ public:
 
     // Check if this object is valid, i.e. can be used, and optionally fill in
     // the provided error message string if it isn't.
-    bool IsOk(wxString* errmsg = nullptr) const;
+    bool IsOk(wxString* errmsg = NULL) const;
 
 
     // Store a username/password combination.
@@ -225,7 +229,6 @@ private:
     void Init(size_t size, const void *data)
     {
         m_data = wxString::From8BitData(static_cast<const char*>(data), size);
-        m_valid = true;
     }
 
     wxString m_data;

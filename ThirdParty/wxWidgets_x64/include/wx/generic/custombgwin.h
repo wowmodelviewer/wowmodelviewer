@@ -20,7 +20,7 @@
 class wxCustomBackgroundWindowGenericBase : public wxCustomBackgroundWindowBase
 {
 public:
-    wxCustomBackgroundWindowGenericBase() = default;
+    wxCustomBackgroundWindowGenericBase() { }
 
 protected:
     void DoEraseBackground(wxEraseEvent& event, wxWindow* win)
@@ -58,10 +58,10 @@ class wxCustomBackgroundWindow : public W,
 public:
     typedef W BaseWindowClass;
 
-    wxCustomBackgroundWindow() = default;
+    wxCustomBackgroundWindow() { }
 
 protected:
-    virtual void DoSetBackgroundBitmap(const wxBitmap& bmp) override
+    virtual void DoSetBackgroundBitmap(const wxBitmap& bmp) wxOVERRIDE
     {
         m_bitmapBg = bmp;
 

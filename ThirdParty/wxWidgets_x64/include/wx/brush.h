@@ -2,6 +2,7 @@
 // Name:        wx/brush.h
 // Purpose:     Includes platform-specific wxBrush file
 // Author:      Julian Smart
+// Modified by:
 // Created:
 // Copyright:   Julian Smart
 // Licence:     wxWindows Licence
@@ -40,7 +41,8 @@ enum wxBrushStyle
 class WXDLLIMPEXP_CORE wxBrushBase: public wxGDIObject
 {
 public:
-    virtual ~wxBrushBase() = default;
+    wxDECLARE_DEFAULT_COPY_AND_DEF(wxBrushBase)
+    virtual ~wxBrushBase() { }
 
     virtual void SetColour(const wxColour& col) = 0;
     virtual void SetColour(unsigned char r, unsigned char g, unsigned char b) = 0;
@@ -70,10 +72,12 @@ public:
 
 #if defined(__WXMSW__)
     #include "wx/msw/brush.h"
-#elif defined(__WXX11__)
+#elif defined(__WXMOTIF__) || defined(__WXX11__)
     #include "wx/x11/brush.h"
-#elif defined(__WXGTK__)
+#elif defined(__WXGTK20__)
     #include "wx/gtk/brush.h"
+#elif defined(__WXGTK__)
+    #include "wx/gtk1/brush.h"
 #elif defined(__WXDFB__)
     #include "wx/dfb/brush.h"
 #elif defined(__WXMAC__)
@@ -102,8 +106,6 @@ extern WXDLLIMPEXP_DATA_CORE(wxBrushList*)   wxTheBrushList;
 // to compile without warnings which it would otherwise provoke from some
 // compilers as it compares elements of different enums
 
-#if WXWIN_COMPATIBILITY_3_2
-
 wxDEPRECATED_MSG("use wxBRUSHSTYLE_XXX constants only")
 inline bool operator==(wxBrushStyle s, wxDeprecatedGUIConstants t)
 {
@@ -115,7 +117,5 @@ inline bool operator!=(wxBrushStyle s, wxDeprecatedGUIConstants t)
 {
     return static_cast<int>(s) != static_cast<int>(t);
 }
-
-#endif // WXWIN_COMPATIBILITY_3_2
 
 #endif // _WX_BRUSH_H_BASE_

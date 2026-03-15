@@ -12,9 +12,13 @@
 #ifndef _WX_RTTIH__
 #define _WX_RTTIH__
 
-#include "wx/defs.h"
-
 #if !wxUSE_EXTENDED_RTTI     // XTI system is meant to replace these macros
+
+// ----------------------------------------------------------------------------
+// headers
+// ----------------------------------------------------------------------------
+
+#include "wx/memory.h"
 
 // ----------------------------------------------------------------------------
 // forward declarations
@@ -22,43 +26,11 @@
 
 class WXDLLIMPEXP_FWD_BASE wxObject;
 class WXDLLIMPEXP_FWD_BASE wxString;
+class WXDLLIMPEXP_FWD_BASE wxClassInfo;
 class WXDLLIMPEXP_FWD_BASE wxHashTable;
+class WXDLLIMPEXP_FWD_BASE wxObject;
 class WXDLLIMPEXP_FWD_BASE wxPluginLibrary;
 class WXDLLIMPEXP_FWD_BASE wxHashTable_Node;
-
-#define wxDECLARE_CLASS_INFO_ITERATORS()                                     \
-class WXDLLIMPEXP_BASE const_iterator                                    \
-    {                                                                        \
-    typedef wxHashTable_Node Node;                                       \
-    public:                                                                  \
-    typedef const wxClassInfo* value_type;                               \
-    typedef const value_type& const_reference;                           \
-    typedef const_iterator itor;                                         \
-    typedef value_type* ptr_type;                                        \
-    \
-    Node* m_node;                                                        \
-    wxHashTable* m_table;                                                \
-    public:                                                                  \
-    typedef const_reference reference_type;                              \
-    typedef ptr_type pointer_type;                                       \
-    \
-    const_iterator(Node* node, wxHashTable* table)                       \
-    : m_node(node), m_table(table) { }                               \
-    const_iterator() : m_node(nullptr), m_table(nullptr) { }                   \
-    value_type operator*() const;                                        \
-    itor& operator++();                                                  \
-    const itor operator++(int);                                          \
-    bool operator!=(const itor& it) const                                \
-            { return it.m_node != m_node; }                                  \
-            bool operator==(const itor& it) const                                \
-            { return it.m_node == m_node; }                                  \
-    };                                                                       \
-    \
-    static const_iterator begin_classinfo();                                 \
-    static const_iterator end_classinfo()
-
-// Compatibility macro not requiring semicolon after it, don't use.
-#define DECLARE_CLASS_INFO_ITERATORS() wxDECLARE_CLASS_INFO_ITERATORS();
 
 // ----------------------------------------------------------------------------
 // wxClassInfo
@@ -90,14 +62,14 @@ public:
     ~wxClassInfo();
 
     wxObject *CreateObject() const
-        { return m_objectConstructor ? (*m_objectConstructor)() : nullptr; }
-    bool IsDynamic() const { return (nullptr != m_objectConstructor); }
+        { return m_objectConstructor ? (*m_objectConstructor)() : NULL; }
+    bool IsDynamic() const { return (NULL != m_objectConstructor); }
 
     const wxChar       *GetClassName() const { return m_className; }
     const wxChar       *GetBaseClassName1() const
-        { return m_baseInfo1 ? m_baseInfo1->GetClassName() : nullptr; }
+        { return m_baseInfo1 ? m_baseInfo1->GetClassName() : NULL; }
     const wxChar       *GetBaseClassName2() const
-        { return m_baseInfo2 ? m_baseInfo2->GetClassName() : nullptr; }
+        { return m_baseInfo2 ? m_baseInfo2->GetClassName() : NULL; }
     const wxClassInfo  *GetBaseClass1() const { return m_baseInfo1; }
     const wxClassInfo  *GetBaseClass2() const { return m_baseInfo2; }
     int                 GetSize() const { return m_objectSize; }
@@ -204,7 +176,7 @@ WXDLLIMPEXP_BASE wxObject *wxCreateDynamicObject(const wxString& name);
         { return &name::ms_classInfo; }
 
 #define wxIMPLEMENT_CLASS_COMMON1(name, basename, func)                       \
-    wxIMPLEMENT_CLASS_COMMON(name, basename, nullptr, func)
+    wxIMPLEMENT_CLASS_COMMON(name, basename, NULL, func)
 
 #define wxIMPLEMENT_CLASS_COMMON2(name, basename1, basename2, func)           \
     wxIMPLEMENT_CLASS_COMMON(name, basename1, &basename2::ms_classInfo, func)
@@ -232,11 +204,11 @@ WXDLLIMPEXP_BASE wxObject *wxCreateDynamicObject(const wxString& name);
 
     // Single inheritance with one base class
 #define wxIMPLEMENT_ABSTRACT_CLASS(name, basename)                            \
-    wxIMPLEMENT_CLASS_COMMON1(name, basename, nullptr)
+    wxIMPLEMENT_CLASS_COMMON1(name, basename, NULL)
 
     // Multiple inheritance with two base classes
 #define wxIMPLEMENT_ABSTRACT_CLASS2(name, basename1, basename2)               \
-    wxIMPLEMENT_CLASS_COMMON2(name, basename1, basename2, nullptr)
+    wxIMPLEMENT_CLASS_COMMON2(name, basename1, basename2, NULL)
 
 // -----------------------------------
 // XTI-compatible macros

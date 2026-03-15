@@ -2,6 +2,7 @@
 // Name:        wx/stackwalk.h
 // Purpose:     wxStackWalker and related classes, common part
 // Author:      Vadim Zeitlin
+// Modified by:
 // Created:     2005-01-07
 // Copyright:   (c) 2004 Vadim Zeitlin <vadim@wxwidgets.org>
 // Licence:     wxWindows licence
@@ -32,7 +33,7 @@ private:
         { return const_cast<wxStackFrameBase *>(this); }
 
 public:
-    wxStackFrameBase(size_t level, void *address = nullptr)
+    wxStackFrameBase(size_t level, void *address = NULL)
     {
         m_level = level;
 
@@ -79,7 +80,7 @@ public:
 
     // get the name, type and value (in text form) of the given parameter
     //
-    // any pointer may be null
+    // any pointer may be NULL
     //
     // return true if at least some values could be retrieved
     virtual bool GetParam(size_t WXUNUSED(n),
@@ -93,7 +94,7 @@ public:
 
     // although this class is not supposed to be used polymorphically, give it
     // a virtual dtor to silence compiler warnings
-    virtual ~wxStackFrameBase() = default;
+    virtual ~wxStackFrameBase() { }
 
 protected:
     // hooks for derived classes to initialize some fields on demand
@@ -123,10 +124,10 @@ class WXDLLIMPEXP_BASE wxStackWalkerBase
 {
 public:
     // ctor does nothing, use Walk() to walk the stack
-    wxStackWalkerBase() = default;
+    wxStackWalkerBase() { }
 
     // dtor does nothing either but should be virtual
-    virtual ~wxStackWalkerBase() = default;
+    virtual ~wxStackWalkerBase() { }
 
     // enumerate stack frames from the current location, skipping the initial
     // number of them (this can be useful when Walk() is called from some known

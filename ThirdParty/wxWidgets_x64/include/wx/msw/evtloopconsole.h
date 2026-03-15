@@ -2,6 +2,7 @@
 // Name:        wx/msw/evtloopconsole.h
 // Purpose:     wxConsoleEventLoop class for Windows
 // Author:      Vadim Zeitlin
+// Modified by:
 // Created:     2004-07-31
 // Copyright:   (c) 2003-2004 Vadim Zeitlin <vadim@wxwidgets.org>
 // Licence:     wxWindows licence
@@ -17,8 +18,8 @@ public:
     virtual ~wxMSWEventLoopBase();
 
     // implement base class pure virtuals
-    virtual bool Pending() const override;
-    virtual void WakeUp() override;
+    virtual bool Pending() const wxOVERRIDE;
+    virtual void WakeUp() wxOVERRIDE;
 
 #if wxUSE_THREADS
     // MSW-specific method to wait for the termination of the specified (by its
@@ -53,17 +54,17 @@ private:
 class WXDLLIMPEXP_BASE wxConsoleEventLoop : public wxMSWEventLoopBase
 {
 public:
-    wxConsoleEventLoop() = default;
+    wxConsoleEventLoop() { }
 
     // override/implement base class virtuals
-    virtual bool Dispatch() override;
-    virtual int DispatchTimeout(unsigned long timeout) override;
+    virtual bool Dispatch() wxOVERRIDE;
+    virtual int DispatchTimeout(unsigned long timeout) wxOVERRIDE;
 
     // Windows-specific function to process a single message
     virtual void ProcessMessage(WXMSG *msg);
 
 protected:
-    virtual void DoYieldFor(long eventsToProcess) override;
+    virtual void DoYieldFor(long eventsToProcess) wxOVERRIDE;
 };
 
 #endif // wxUSE_CONSOLE_EVENTLOOP

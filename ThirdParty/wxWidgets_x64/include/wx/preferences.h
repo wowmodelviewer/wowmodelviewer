@@ -44,8 +44,8 @@ class wxPreferencesEditorImpl;
 class WXDLLIMPEXP_CORE wxPreferencesPage
 {
 public:
-    wxPreferencesPage() = default;
-    virtual ~wxPreferencesPage() = default;
+    wxPreferencesPage() {}
+    virtual ~wxPreferencesPage() {}
 
     // Name of the page, used e.g. for tabs
     virtual wxString GetName() const = 0;
@@ -81,9 +81,9 @@ public:
     wxStockPreferencesPage(Kind kind) : m_kind(kind) {}
     Kind GetKind() const { return m_kind; }
 
-    virtual wxString GetName() const override;
+    virtual wxString GetName() const wxOVERRIDE;
 #ifdef __WXOSX_COCOA__
-    virtual wxBitmapBundle GetIcon() const override;
+    virtual wxBitmapBundle GetIcon() const wxOVERRIDE;
 #endif
 
 private:

@@ -48,26 +48,26 @@ public:
 
 
     // overridden base class virtual methods
-    virtual void SetLabel(const wxString& label) override;
-    virtual bool SetFont(const wxFont &font) override;
+    virtual void SetLabel(const wxString& label) wxOVERRIDE;
+    virtual bool SetFont(const wxFont &font) wxOVERRIDE;
 
 protected:
-    virtual wxSize DoGetBestClientSize() const override;
+    virtual wxSize DoGetBestClientSize() const wxOVERRIDE;
 
-    virtual wxString WXGetVisibleLabel() const override { return m_label; }
-    virtual void WXSetVisibleLabel(const wxString& label) override;
+    virtual wxString WXGetVisibleLabel() const wxOVERRIDE { return m_label; }
+    virtual void WXSetVisibleLabel(const wxString& label) wxOVERRIDE;
 
-    void DoSetSize(int x, int y, int width, int height, int sizeFlags) override;
+    void DoSetSize(int x, int y, int width, int height, int sizeFlags) wxOVERRIDE;
 
 #if wxUSE_MARKUP
-    virtual bool DoSetLabelMarkup(const wxString& markup) override;
+    virtual bool DoSetLabelMarkup(const wxString& markup) wxOVERRIDE;
 #endif // wxUSE_MARKUP
 
 private:
     void Init()
     {
 #if wxUSE_MARKUP
-        m_markupText = nullptr;
+        m_markupText = NULL;
 #endif // wxUSE_MARKUP
     }
 
@@ -75,7 +75,7 @@ private:
 
     void DoDrawLabel(wxDC& dc, const wxRect& rect);
 
-    // These fields are only used if m_markupText == nullptr.
+    // These fields are only used if m_markupText == NULL.
     wxString m_label;
     int m_mnemonic;
 

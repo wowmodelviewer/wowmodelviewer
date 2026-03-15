@@ -2,6 +2,7 @@
 // Name:        wx/propgrid/editors.h
 // Purpose:     wxPropertyGrid editors
 // Author:      Jaakko Salli
+// Modified by:
 // Created:     2007-04-14
 // Copyright:   (c) Jaakko Salli
 // Licence:     wxWindows licence
@@ -16,10 +17,6 @@
 
 #include "wx/window.h"
 
-#include "wx/propgrid/propgriddefs.h"
-
-#include <vector>
-
 class WXDLLIMPEXP_FWD_CORE wxBitmapBundle;
 class WXDLLIMPEXP_FWD_PROPGRID wxPGCell;
 class WXDLLIMPEXP_FWD_PROPGRID wxPGProperty;
@@ -31,7 +28,7 @@ class WXDLLIMPEXP_FWD_PROPGRID wxPropertyGrid;
 class wxPGWindowList
 {
 public:
-    wxPGWindowList(wxWindow* primary, wxWindow* secondary = nullptr)
+    wxPGWindowList(wxWindow* primary, wxWindow* secondary = NULL)
         : m_primary(primary)
         , m_secondary(secondary)
     {
@@ -71,12 +68,12 @@ public:
     // Constructor.
     wxPGEditor()
         : wxObject()
-        , m_clientData(nullptr)
+        , m_clientData(NULL)
     {
     }
 
     // Destructor.
-    virtual ~wxPGEditor() = default;
+    virtual ~wxPGEditor();
 
     // Returns pointer to the name of the editor. For example,
     // wxPGEditor_TextCtrl has name "TextCtrl". If you don't need to access
@@ -196,7 +193,7 @@ wxString CLASSNAME::GetName() const \
 { \
     return wxS(#EDITOR); \
 } \
-wxPGEditor* wxPGEditor_##EDITOR = nullptr;
+wxPGEditor* wxPGEditor_##EDITOR = NULL;
 
 
 //
@@ -207,30 +204,30 @@ class WXDLLIMPEXP_PROPGRID wxPGTextCtrlEditor : public wxPGEditor
 {
     wxDECLARE_DYNAMIC_CLASS(wxPGTextCtrlEditor);
 public:
-    wxPGTextCtrlEditor() = default;
+    wxPGTextCtrlEditor() {}
     virtual ~wxPGTextCtrlEditor();
 
     virtual wxPGWindowList CreateControls(wxPropertyGrid* propgrid,
                                           wxPGProperty* property,
                                           const wxPoint& pos,
-                                          const wxSize& size) const override;
+                                          const wxSize& size) const wxOVERRIDE;
     virtual void UpdateControl( wxPGProperty* property,
-                                wxWindow* ctrl ) const override;
+                                wxWindow* ctrl ) const wxOVERRIDE;
     virtual bool OnEvent( wxPropertyGrid* propgrid,
                           wxPGProperty* property,
                           wxWindow* primaryCtrl,
-                          wxEvent& event ) const override;
+                          wxEvent& event ) const wxOVERRIDE;
     virtual bool GetValueFromControl( wxVariant& variant,
                                       wxPGProperty* property,
-                                      wxWindow* ctrl ) const override;
+                                      wxWindow* ctrl ) const wxOVERRIDE;
 
-    virtual wxString GetName() const override;
+    virtual wxString GetName() const wxOVERRIDE;
 
     //virtual wxPGCellRenderer* GetCellRenderer() const;
     virtual void SetControlStringValue( wxPGProperty* property,
                                         wxWindow* ctrl,
-                                        const wxString& txt ) const override;
-    virtual void OnFocus( wxPGProperty* property, wxWindow* wnd ) const override;
+                                        const wxString& txt ) const wxOVERRIDE;
+    virtual void OnFocus( wxPGProperty* property, wxWindow* wnd ) const wxOVERRIDE;
 
     // Provided so that, for example, ComboBox editor can use the same code
     // (multiple inheritance would get way too messy).
@@ -250,40 +247,40 @@ class WXDLLIMPEXP_PROPGRID wxPGChoiceEditor : public wxPGEditor
 {
     wxDECLARE_DYNAMIC_CLASS(wxPGChoiceEditor);
 public:
-    wxPGChoiceEditor() = default;
+    wxPGChoiceEditor() {}
     virtual ~wxPGChoiceEditor();
 
     virtual wxPGWindowList CreateControls(wxPropertyGrid* propgrid,
                                           wxPGProperty* property,
                                           const wxPoint& pos,
-                                          const wxSize& size) const override;
+                                          const wxSize& size) const wxOVERRIDE;
     virtual void UpdateControl( wxPGProperty* property,
-                                wxWindow* ctrl ) const override;
+                                wxWindow* ctrl ) const wxOVERRIDE;
     virtual bool OnEvent( wxPropertyGrid* propgrid,
                           wxPGProperty* property,
                           wxWindow* primaryCtrl,
-                          wxEvent& event ) const override;
+                          wxEvent& event ) const wxOVERRIDE;
     virtual bool GetValueFromControl( wxVariant& variant,
                                       wxPGProperty* property,
-                                      wxWindow* ctrl ) const override;
+                                      wxWindow* ctrl ) const wxOVERRIDE;
     virtual void SetValueToUnspecified( wxPGProperty* property,
-                                        wxWindow* ctrl ) const override;
-    virtual wxString GetName() const override;
+                                        wxWindow* ctrl ) const wxOVERRIDE;
+    virtual wxString GetName() const wxOVERRIDE;
 
     virtual void SetControlIntValue( wxPGProperty* property,
                                      wxWindow* ctrl,
-                                     int value ) const override;
+                                     int value ) const wxOVERRIDE;
     virtual void SetControlStringValue( wxPGProperty* property,
                                         wxWindow* ctrl,
-                                        const wxString& txt ) const override;
+                                        const wxString& txt ) const wxOVERRIDE;
 
     virtual int InsertItem( wxWindow* ctrl,
                             const wxString& label,
-                            int index ) const override;
-    virtual void DeleteItem( wxWindow* ctrl, int index ) const override;
-    virtual void SetItems(wxWindow* ctrl, const wxArrayString& labels) const override;
+                            int index ) const wxOVERRIDE;
+    virtual void DeleteItem( wxWindow* ctrl, int index ) const wxOVERRIDE;
+    virtual void SetItems(wxWindow* ctrl, const wxArrayString& labels) const wxOVERRIDE;
 
-    virtual bool CanContainCustomImage() const override;
+    virtual bool CanContainCustomImage() const wxOVERRIDE;
 
     // CreateControls calls this with CB_READONLY in extraStyle
     wxWindow* CreateControlsBase( wxPropertyGrid* propgrid,
@@ -299,26 +296,26 @@ class WXDLLIMPEXP_PROPGRID wxPGComboBoxEditor : public wxPGChoiceEditor
 {
     wxDECLARE_DYNAMIC_CLASS(wxPGComboBoxEditor);
 public:
-    wxPGComboBoxEditor() = default;
+    wxPGComboBoxEditor() {}
     virtual ~wxPGComboBoxEditor();
 
     virtual wxPGWindowList CreateControls(wxPropertyGrid* propgrid,
                                           wxPGProperty* property,
                                           const wxPoint& pos,
-                                          const wxSize& size) const override;
+                                          const wxSize& size) const wxOVERRIDE;
 
-    virtual wxString GetName() const override;
+    virtual wxString GetName() const wxOVERRIDE;
 
-    virtual void UpdateControl( wxPGProperty* property, wxWindow* ctrl ) const override;
+    virtual void UpdateControl( wxPGProperty* property, wxWindow* ctrl ) const wxOVERRIDE;
 
     virtual bool OnEvent( wxPropertyGrid* propgrid, wxPGProperty* property,
-        wxWindow* ctrl, wxEvent& event ) const override;
+        wxWindow* ctrl, wxEvent& event ) const wxOVERRIDE;
 
     virtual bool GetValueFromControl( wxVariant& variant,
                                       wxPGProperty* property,
-                                      wxWindow* ctrl ) const override;
+                                      wxWindow* ctrl ) const wxOVERRIDE;
 
-    virtual void OnFocus( wxPGProperty* property, wxWindow* wnd ) const override;
+    virtual void OnFocus( wxPGProperty* property, wxWindow* wnd ) const wxOVERRIDE;
 
 };
 
@@ -326,14 +323,14 @@ public:
 class WXDLLIMPEXP_PROPGRID wxPGChoiceAndButtonEditor : public wxPGChoiceEditor
 {
 public:
-    wxPGChoiceAndButtonEditor() = default;
+    wxPGChoiceAndButtonEditor() {}
     virtual ~wxPGChoiceAndButtonEditor();
-    virtual wxString GetName() const override;
+    virtual wxString GetName() const wxOVERRIDE;
 
     virtual wxPGWindowList CreateControls(wxPropertyGrid* propgrid,
                                           wxPGProperty* property,
                                           const wxPoint& pos,
-                                          const wxSize& size) const override;
+                                          const wxSize& size) const wxOVERRIDE;
 
     wxDECLARE_DYNAMIC_CLASS(wxPGChoiceAndButtonEditor);
 };
@@ -342,14 +339,14 @@ class WXDLLIMPEXP_PROPGRID
 wxPGTextCtrlAndButtonEditor : public wxPGTextCtrlEditor
 {
 public:
-    wxPGTextCtrlAndButtonEditor() = default;
+    wxPGTextCtrlAndButtonEditor() {}
     virtual ~wxPGTextCtrlAndButtonEditor();
-    virtual wxString GetName() const override;
+    virtual wxString GetName() const wxOVERRIDE;
 
     virtual wxPGWindowList CreateControls(wxPropertyGrid* propgrid,
                                           wxPGProperty* property,
                                           const wxPoint& pos,
-                                          const wxSize& size) const override;
+                                          const wxSize& size) const wxOVERRIDE;
 
     wxDECLARE_DYNAMIC_CLASS(wxPGTextCtrlAndButtonEditor);
 };
@@ -365,35 +362,35 @@ class WXDLLIMPEXP_PROPGRID wxPGCheckBoxEditor : public wxPGEditor
 {
     wxDECLARE_DYNAMIC_CLASS(wxPGCheckBoxEditor);
 public:
-    wxPGCheckBoxEditor() = default;
+    wxPGCheckBoxEditor() {}
     virtual ~wxPGCheckBoxEditor();
 
-    virtual wxString GetName() const override;
+    virtual wxString GetName() const wxOVERRIDE;
     virtual wxPGWindowList CreateControls(wxPropertyGrid* propgrid,
                                           wxPGProperty* property,
                                           const wxPoint& pos,
-                                          const wxSize& size) const override;
+                                          const wxSize& size) const wxOVERRIDE;
     virtual void UpdateControl( wxPGProperty* property,
-                                wxWindow* ctrl ) const override;
+                                wxWindow* ctrl ) const wxOVERRIDE;
     virtual bool OnEvent( wxPropertyGrid* propgrid,
                           wxPGProperty* property,
                           wxWindow* primaryCtrl,
-                          wxEvent& event ) const override;
+                          wxEvent& event ) const wxOVERRIDE;
     virtual bool GetValueFromControl( wxVariant& variant,
                                       wxPGProperty* property,
-                                      wxWindow* ctrl ) const override;
+                                      wxWindow* ctrl ) const wxOVERRIDE;
     virtual void SetValueToUnspecified( wxPGProperty* property,
-                                        wxWindow* ctrl ) const override;
+                                        wxWindow* ctrl ) const wxOVERRIDE;
 
     virtual void DrawValue( wxDC& dc,
                             const wxRect& rect,
                             wxPGProperty* property,
-                            const wxString& text ) const override;
+                            const wxString& text ) const wxOVERRIDE;
     //virtual wxPGCellRenderer* GetCellRenderer() const;
 
     virtual void SetControlIntValue( wxPGProperty* property,
                                      wxWindow* ctrl,
-                                     int value ) const override;
+                                     int value ) const wxOVERRIDE;
 };
 
 #endif
@@ -403,7 +400,7 @@ public:
 // Editor class registration macro (mostly for internal use)
 
 #define wxPGRegisterEditorClass(EDITOR) \
-    if ( wxPGEditor_##EDITOR == nullptr ) \
+    if ( wxPGEditor_##EDITOR == NULL ) \
     { \
         wxPGEditor_##EDITOR = wxPropertyGrid::RegisterEditorClass( \
                 new wxPG##EDITOR##Editor ); \
@@ -422,11 +419,11 @@ class WXDLLIMPEXP_PROPGRID wxPGEditorDialogAdapter : public wxObject
 public:
     wxPGEditorDialogAdapter()
         : wxObject()
-        , m_clientData(nullptr)
+        , m_clientData(NULL)
     {
     }
 
-    virtual ~wxPGEditorDialogAdapter() = default;
+    virtual ~wxPGEditorDialogAdapter() { }
 
     bool ShowDialog( wxPropertyGrid* propGrid, wxPGProperty* property );
 
@@ -461,7 +458,7 @@ class WXDLLIMPEXP_PROPGRID wxPGMultiButton : public wxWindow
 {
 public:
     wxPGMultiButton( wxPropertyGrid* pg, const wxSize& sz );
-    virtual ~wxPGMultiButton() = default;
+    virtual ~wxPGMultiButton() {}
 
     wxWindow* GetButton( unsigned int i ) { return m_buttons[i]; }
     const wxWindow* GetButton( unsigned int i ) const
@@ -473,9 +470,9 @@ public:
     // Returns number of buttons.
     unsigned int GetCount() const { return (unsigned int) m_buttons.size(); }
 
-    void Add( const wxString& label, int id = wxID_ANY );
+    void Add( const wxString& label, int id = -2 );
 #if wxUSE_BMPBUTTON
-    void Add( const wxBitmapBundle& bitmap, int id = wxID_ANY );
+    void Add( const wxBitmapBundle& bitmap, int id = -2 );
 #endif
 
     wxSize GetPrimarySize() const
@@ -489,7 +486,9 @@ protected:
 
     void DoAddButton( wxWindow* button, const wxSize& sz );
 
-    std::vector<wxWindow*> m_buttons;
+    int GenId( int id ) const;
+
+    wxVector<wxWindow*> m_buttons;
     wxSize          m_fullEditorSize;
     int             m_buttonsWidth;
 };

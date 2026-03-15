@@ -2,6 +2,7 @@
 // Name:        wx/socket.h
 // Purpose:     Socket handling classes
 // Authors:     Guilhem Lavaux, Guillermo Rodriguez Garcia
+// Modified by:
 // Created:     April 1997
 // Copyright:   (c) Guilhem Lavaux
 // Licence:     wxWindows licence
@@ -128,7 +129,7 @@ public:
 
     // state
     bool Ok() const { return IsOk(); }
-    bool IsOk() const { return m_impl != nullptr; }
+    bool IsOk() const { return m_impl != NULL; }
     bool Error() const { return LastError() != wxSOCKET_NOERROR; }
     bool IsClosed() const { return m_closed; }
     bool IsConnected() const { return m_connected; }
@@ -314,21 +315,6 @@ private:
 };
 
 
-// ----------------------------------------------------------------------------
-// wxSocketInitializer: trivial RAII helper for sockets initialization/shutdown
-// ----------------------------------------------------------------------------
-
-class wxSocketInitializer
-{
-public:
-    wxSocketInitializer() { wxSocketBase::Initialize(); }
-    ~wxSocketInitializer() { wxSocketBase::Shutdown(); }
-
-    wxSocketInitializer(const wxSocketInitializer&) = delete;
-    wxSocketInitializer& operator=(const wxSocketInitializer&) = delete;
-};
-
-
 // --------------------------------------------------------------------------
 // wxSocketServer
 // --------------------------------------------------------------------------
@@ -434,8 +420,8 @@ public:
         { return (wxSocketBase *) GetEventObject(); }
     void *GetClientData() const { return m_clientData; }
 
-    wxNODISCARD virtual wxEvent *Clone() const override { return new wxSocketEvent(*this); }
-    virtual wxEventCategory GetEventCategory() const override { return wxEVT_CATEGORY_SOCKET; }
+    virtual wxEvent *Clone() const wxOVERRIDE { return new wxSocketEvent(*this); }
+    virtual wxEventCategory GetEventCategory() const wxOVERRIDE { return wxEVT_CATEGORY_SOCKET; }
 
 public:
     wxSocketNotify  m_event;

@@ -4,6 +4,7 @@
 //              (file is fully loaded in memory) and which understands CR/LF
 //              differences between platforms.
 // Author:      Vadim Zeitlin
+// Modified by:
 // Created:     03.04.98
 // Copyright:   (c) 1998 Vadim Zeitlin <zeitlin@dptmaths.ens-cachan.fr>
 // Licence:     wxWindows licence
@@ -28,17 +29,17 @@ class WXDLLIMPEXP_BASE wxTextFile : public wxTextBuffer
 {
 public:
     // constructors
-    wxTextFile() = default;
+    wxTextFile() { }
     wxTextFile(const wxString& strFileName);
 
 protected:
     // implement the base class pure virtuals
-    virtual bool OnExists() const override;
+    virtual bool OnExists() const wxOVERRIDE;
     virtual bool OnOpen(const wxString &strBufferName,
-                        wxTextBufferOpenMode openMode) override;
-    virtual bool OnClose() override;
-    virtual bool OnRead(const wxMBConv& conv) override;
-    virtual bool OnWrite(wxTextFileType typeNew, const wxMBConv& conv) override;
+                        wxTextBufferOpenMode openMode) wxOVERRIDE;
+    virtual bool OnClose() wxOVERRIDE;
+    virtual bool OnRead(const wxMBConv& conv) wxOVERRIDE;
+    virtual bool OnWrite(wxTextFileType typeNew, const wxMBConv& conv) wxOVERRIDE;
 
 private:
 

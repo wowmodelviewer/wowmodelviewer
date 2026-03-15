@@ -27,18 +27,18 @@ public:
     // this class with void* you're strongly advised to make the derived class
     // ctor explicit as implicitly converting from any pointer is simply too
     // dangerous.
-    wxItemId(Type item = nullptr) : m_pItem(item) { }
+    wxItemId(Type item = NULL) : m_pItem(item) { }
 
     // Default copy ctor, assignment operator and dtor are ok.
 
-    bool IsOk() const { return m_pItem != nullptr; }
+    bool IsOk() const { return m_pItem != NULL; }
     Type GetID() const { return m_pItem; }
     operator Type() const { return m_pItem; }
 
     // This is used for implementation purposes only.
     Type operator->() const { return m_pItem; }
 
-    void Unset() { m_pItem = nullptr; }
+    void Unset() { m_pItem = NULL; }
 
     // This field is public *only* for compatibility with the old wxTreeItemId
     // implementation and must not be used in any new code.

@@ -11,8 +11,6 @@
 
 #include "wx/image.h"
 
-#include <vector>
-
 
 //-----------------------------------------------------------------------------
 // wxGIFHandler
@@ -28,6 +26,7 @@
 
 struct wxRGB;
 struct GifHashTableType;
+class WXDLLIMPEXP_FWD_CORE wxImageArray; // anidecod.h
 
 class WXDLLIMPEXP_CORE wxGIFHandler : public wxImageHandler
 {
@@ -38,22 +37,22 @@ public:
         m_extension = wxT("gif");
         m_type = wxBITMAP_TYPE_GIF;
         m_mime = wxT("image/gif");
-        m_hashTable = nullptr;
+        m_hashTable = NULL;
     }
 
 #if wxUSE_STREAMS
     virtual bool LoadFile(wxImage *image, wxInputStream& stream,
-                          bool verbose = true, int index = -1) override;
+                          bool verbose = true, int index = -1) wxOVERRIDE;
     virtual bool SaveFile(wxImage *image, wxOutputStream& stream,
-                          bool verbose=true) override;
+                          bool verbose=true) wxOVERRIDE;
 
     // Save animated gif
-    bool SaveAnimation(const std::vector<wxImage>& images, wxOutputStream *stream,
+    bool SaveAnimation(const wxImageArray& images, wxOutputStream *stream,
         bool verbose = true, int delayMilliSecs = 1000);
 
 protected:
-    virtual int DoGetImageCount(wxInputStream& stream) override;
-    virtual bool DoCanRead(wxInputStream& stream) override;
+    virtual int DoGetImageCount(wxInputStream& stream) wxOVERRIDE;
+    virtual bool DoCanRead(wxInputStream& stream) wxOVERRIDE;
 
     bool DoSaveFile(const wxImage&, wxOutputStream *, bool verbose,
         bool first, int delayMilliSecs, bool loop,

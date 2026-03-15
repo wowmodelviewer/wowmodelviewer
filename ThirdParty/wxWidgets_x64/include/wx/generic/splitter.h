@@ -2,6 +2,7 @@
 // Name:        wx/generic/splitter.h
 // Purpose:     wxSplitterWindow class
 // Author:      Julian Smart
+// Modified by:
 // Created:     01/02/97
 // Copyright:   (c) Julian Smart
 // Licence:     wxWindows licence
@@ -12,7 +13,6 @@
 
 #include "wx/window.h"                      // base class declaration
 #include "wx/containr.h"                    // wxControlContainer
-#include "wx/overlay.h"
 
 class WXDLLIMPEXP_FWD_CORE wxSplitterEvent;
 
@@ -118,10 +118,10 @@ public:
 
     // Removes the specified (or second) window from the view
     // Doesn't actually delete the window.
-    bool Unsplit(wxWindow *toRemove = nullptr);
+    bool Unsplit(wxWindow *toRemove = NULL);
 
     // Replaces one of the windows with another one (neither old nor new
-    // parameter should be null)
+    // parameter should be NULL)
     bool ReplaceWindow(wxWindow *winOld, wxWindow *winNew);
 
     // Make sure the child window sizes are updated. This is useful
@@ -130,7 +130,7 @@ public:
     void UpdateSize();
 
     // Is the window split?
-    bool IsSplit() const { return (m_windowTwo != nullptr); }
+    bool IsSplit() const { return (m_windowTwo != NULL); }
 
     // Sets the border size
     void SetBorderSize(int WXUNUSED(width)) { }
@@ -204,7 +204,7 @@ public:
     void OnDPIChanged(wxDPIChangedEvent& event);
 
     // In live mode, resize child windows in idle time
-    void OnInternalIdle() override;
+    void OnInternalIdle() wxOVERRIDE;
 
     // Draws the sash
     virtual void DrawSash(wxDC& dc);
@@ -219,21 +219,12 @@ public:
     virtual void SizeWindows();
 
 #ifdef __WXMAC__
-    virtual bool MacClipGrandChildren() const override { return true ; }
+    virtual bool MacClipGrandChildren() const wxOVERRIDE { return true ; }
 #endif
 
     // Sets the sash size: this doesn't do anything and shouldn't be used at
     // all any more.
     wxDEPRECATED_INLINE( void SetSashSize(int WXUNUSED(width)), return; )
-
-    // Get the sash position that was last used before Unsplit() was called.
-    // Horizontal and vertical components correspond to the split in the
-    // corresponding direction, and are 0 if the splitter hadn't been split in
-    // this direction at all.
-    wxPoint GetLastSplitPosition() const;
-
-    // Set the default initial sash position to use when the splitter is split.
-    void SetLastSplitPosition(const wxPoint& pos);
 
 protected:
     // event handlers
@@ -281,7 +272,7 @@ protected:
 
     // return the best size of the splitter equal to best sizes of its
     // subwindows
-    virtual wxSize DoGetBestSize() const override;
+    virtual wxSize DoGetBestSize() const wxOVERRIDE;
 
 
     wxSplitMode m_splitMode;
@@ -298,10 +289,9 @@ protected:
     wxPoint     m_ptStart;      // mouse position when dragging started
     int         m_sashStart;    // sash position when dragging started
     int         m_minimumPaneSize;
-    wxPoint     m_lastSplitPosition;
     wxCursor    m_sashCursorWE;
     wxCursor    m_sashCursorNS;
-    wxOverlay   m_overlay;
+    wxPen      *m_sashTrackerPen;
 
     // when in live mode, set this to true to resize children in idle
     bool        m_needUpdating:1;
@@ -326,7 +316,7 @@ class WXDLLIMPEXP_CORE wxSplitterEvent : public wxNotifyEvent
 {
 public:
     wxSplitterEvent(wxEventType type = wxEVT_NULL,
-                    wxSplitterWindow *splitter = nullptr)
+                    wxSplitterWindow *splitter = NULL)
         : wxNotifyEvent(type)
     {
         SetEventObject(splitter);
@@ -406,7 +396,7 @@ public:
         return m_data.pt.y;
     }
 
-    wxNODISCARD virtual wxEvent *Clone() const override { return new wxSplitterEvent(*this); }
+    virtual wxEvent *Clone() const wxOVERRIDE { return new wxSplitterEvent(*this); }
 
 private:
     friend class WXDLLIMPEXP_FWD_CORE wxSplitterWindow;

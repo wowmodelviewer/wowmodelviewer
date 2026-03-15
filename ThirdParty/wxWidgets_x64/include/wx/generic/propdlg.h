@@ -2,6 +2,7 @@
 // Name:        wx/generic/propdlg.h
 // Purpose:     wxPropertySheetDialog
 // Author:      Julian Smart
+// Modified by:
 // Created:     2005-03-12
 // Copyright:   (c) Julian Smart
 // Licence:     wxWindows licence
@@ -102,7 +103,7 @@ public:
     wxBookCtrlBase* GetBookCtrl() const { return m_bookCtrl; }
 
     // Override function in base
-    virtual wxWindow* GetContentWindow() const override;
+    virtual wxWindow* GetContentWindow() const wxOVERRIDE;
 
     // Set and get the inner sizer
     void SetInnerSizer(wxSizer* sizer) { m_innerSizer = sizer; }

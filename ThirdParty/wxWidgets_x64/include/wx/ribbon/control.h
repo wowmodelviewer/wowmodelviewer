@@ -2,6 +2,7 @@
 // Name:        wx/ribbon/control.h
 // Purpose:     Extension of wxControl with common ribbon methods
 // Author:      Peter Cawley
+// Modified by:
 // Created:     2009-06-05
 // Copyright:   (C) Peter Cawley
 // Licence:     wxWindows licence
@@ -68,7 +69,7 @@ protected:
                                        wxSize relative_to) const;
 
 private:
-    void Init() { m_art = nullptr; }
+    void Init() { m_art = NULL; }
 
 #ifndef SWIG
     wxDECLARE_CLASS(wxRibbonControl);

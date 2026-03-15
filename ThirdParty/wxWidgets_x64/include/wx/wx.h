@@ -2,6 +2,7 @@
 // Name:        wx/wx.h
 // Purpose:     wxWidgets central header including the most often used ones
 // Author:      Julian Smart
+// Modified by:
 // Created:     01/02/97
 // Copyright:   (c) Julian Smart
 // Licence:     wxWindows licence
@@ -24,6 +25,7 @@
 #include "wx/app.h"
 #include "wx/utils.h"
 #include "wx/stream.h"
+#include "wx/memory.h"
 #include "wx/math.h"
 #include "wx/stopwatch.h"
 #include "wx/timer.h"

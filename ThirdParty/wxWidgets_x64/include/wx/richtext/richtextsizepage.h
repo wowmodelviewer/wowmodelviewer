@@ -2,6 +2,7 @@
 // Name:        wx/richtext/richtextsizepage.h
 // Purpose:     Declares the rich text formatting dialog size page.
 // Author:      Julian Smart
+// Modified by:
 // Created:     20/10/2010 10:23:24
 // Copyright:   (c) Julian Smart
 // Licence:     wxWindows licence
@@ -72,8 +73,8 @@ public:
     wxRichTextAttr* GetAttributes();
 
     /// Data transfer
-    virtual bool TransferDataToWindow() override;
-    virtual bool TransferDataFromWindow() override;
+    virtual bool TransferDataToWindow() wxOVERRIDE;
+    virtual bool TransferDataFromWindow() wxOVERRIDE;
 
     /// Show/hide position controls
     static void ShowPositionControls(bool show) { sm_showPositionControls = show; }

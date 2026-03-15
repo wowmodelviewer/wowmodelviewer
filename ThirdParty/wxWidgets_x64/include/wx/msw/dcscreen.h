@@ -2,6 +2,7 @@
 // Name:        wx/msw/dcscreen.h
 // Purpose:     wxScreenDC class
 // Author:      Julian Smart
+// Modified by:
 // Created:     01/02/97
 // Copyright:   (c) Julian Smart
 // Licence:     wxWindows licence
@@ -20,7 +21,7 @@ public:
     wxScreenDCImpl( wxScreenDC *owner );
 
     // Return the size of the whole virtual screen (all monitors)
-    virtual void DoGetSize(int *w, int *h) const override;
+    virtual void DoGetSize(int *w, int *h) const wxOVERRIDE;
 
     wxDECLARE_CLASS(wxScreenDCImpl);
     wxDECLARE_NO_COPY_CLASS(wxScreenDCImpl);

@@ -69,7 +69,7 @@ class wxModalExpectation
 {
 public:
     wxModalExpectation() : m_isOptional(false) {}
-    virtual ~wxModalExpectation() = default;
+    virtual ~wxModalExpectation() {}
 
     wxString GetDescription() const
     {
@@ -167,7 +167,7 @@ public:
     }
 
 protected:
-    virtual int Invoke(wxDialog *dlg) const override
+    virtual int Invoke(wxDialog *dlg) const wxOVERRIDE
     {
         DialogType *t = dynamic_cast<DialogType*>(dlg);
         if ( t )
@@ -177,7 +177,7 @@ protected:
     }
 
     /// Returns description of the expected dialog (by default, its class).
-    virtual wxString GetDefaultDescription() const override
+    virtual wxString GetDefaultDescription() const wxOVERRIDE
     {
         return wxGetDialogClassDescription(wxCLASSINFO(T), typeid(T));
     }
@@ -224,7 +224,7 @@ public:
     }
 
 protected:
-    virtual int OnInvoked(T *WXUNUSED(dlg)) const override
+    virtual int OnInvoked(T *WXUNUSED(dlg)) const wxOVERRIDE
     {
         return m_id;
     }
@@ -243,7 +243,7 @@ public:
     }
 
 protected:
-    virtual wxString GetDefaultDescription() const override
+    virtual wxString GetDefaultDescription() const wxOVERRIDE
     {
         // It can be useful to show which buttons the expected message box was
         // supposed to have, in case there could have been several of them.
@@ -293,7 +293,7 @@ public:
     }
 
 protected:
-    virtual int OnInvoked(wxFileDialog *dlg) const override
+    virtual int OnInvoked(wxFileDialog *dlg) const wxOVERRIDE
     {
         dlg->SetPath(m_path);
         return m_id;
@@ -315,9 +315,9 @@ public:
     // wxTEST_DIALOG macro, otherwise it falls back to the location of this
     // line itself, which is not very useful, so normally you should provide
     // your own values.
-    wxTestingModalHook(const char* file = nullptr,
+    wxTestingModalHook(const char* file = NULL,
                        int line = 0,
-                       const char* func = nullptr)
+                       const char* func = NULL)
         : m_file(file), m_line(line), m_func(func)
     {
         Register();
@@ -355,7 +355,7 @@ public:
     }
 
 protected:
-    virtual int Enter(wxDialog *dlg) override
+    virtual int Enter(wxDialog *dlg) wxOVERRIDE
     {
         while ( !m_expectations.empty() )
         {
@@ -429,7 +429,7 @@ protected:
         wxFAIL_MSG_AT( msg,
                        m_file ? m_file : __FILE__,
                        m_line ? m_line : __LINE__,
-                       m_func ? m_func : __func__ );
+                       m_func ? m_func : __WXFUNCTION__ );
 #else // !__WXDEBUG__
         // We still need to report the failure somehow when wx asserts are
         // disabled.
@@ -437,7 +437,7 @@ protected:
                   msg,
                   wxASCII_STR(m_file ? m_file : __FILE__),
                   m_line ? m_line : __LINE__,
-                  wxASCII_STR(m_func ? m_func : __func__));
+                  wxASCII_STR(m_func ? m_func : __WXFUNCTION__));
 #endif // __WXDEBUG__/!__WXDEBUG__
     }
 
@@ -515,14 +515,16 @@ private:
           wxExpectModal<> for your dialog type and implement its OnInvoked()
           method.
  */
+#ifdef HAVE_VARIADIC_MACROS
+
 #define wxTEST_DIALOG(codeToRun, ...)                                          \
-    wxSTATEMENT_MACRO_BEGIN                                                    \
-        wxTEST_DIALOG_HOOK_CLASS wx_hook(__FILE__, __LINE__, __func__);        \
+    {                                                                          \
+        wxTEST_DIALOG_HOOK_CLASS wx_hook(__FILE__, __LINE__, __WXFUNCTION__);  \
         wxCALL_FOR_EACH(WX_TEST_IMPL_ADD_EXPECTATION, __VA_ARGS__)             \
         codeToRun;                                                             \
         wx_hook.CheckUnmetExpectations();                                      \
-    wxSTATEMENT_MACRO_END
-
+    }
+#endif /* HAVE_VARIADIC_MACROS */
 
 #endif // !WXBUILDING
 

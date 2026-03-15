@@ -2,6 +2,7 @@
 // Name:        wx/generic/bmpcbox.h
 // Purpose:     wxBitmapComboBox
 // Author:      Jaakko Salli
+// Modified by:
 // Created:     Aug-30-2006
 // Copyright:   (c) Jaakko Salli
 // Licence:     wxWindows licence
@@ -37,7 +38,7 @@ public:
                      const wxPoint& pos = wxDefaultPosition,
                      const wxSize& size = wxDefaultSize,
                      int n = 0,
-                     const wxString choices[] = nullptr,
+                     const wxString choices[] = NULL,
                      long style = 0,
                      const wxValidator& validator = wxDefaultValidator,
                      const wxString& name = wxASCII_STR(wxBitmapComboBoxNameStr))
@@ -83,7 +84,7 @@ public:
 
     virtual ~wxBitmapComboBox();
 
-    virtual wxString GetStringSelection() const override;
+    virtual wxString GetStringSelection() const wxOVERRIDE;
 
     // Adds item with image to the end of the combo box.
     int Append(const wxString& item, const wxBitmapBundle& bitmap = wxBitmapBundle());
@@ -99,30 +100,30 @@ public:
                unsigned int pos, wxClientData *clientData);
 
     // Sets the image for the given item.
-    virtual void SetItemBitmap(unsigned int n, const wxBitmapBundle& bitmap) override;
-    virtual bool SetFont(const wxFont& font) override;
+    virtual void SetItemBitmap(unsigned int n, const wxBitmapBundle& bitmap) wxOVERRIDE;
+    virtual bool SetFont(const wxFont& font) wxOVERRIDE;
 
 protected:
 
-    virtual void OnDrawBackground(wxDC& dc, const wxRect& rect, int item, int flags) const override;
-    virtual void OnDrawItem(wxDC& dc, const wxRect& rect, int item, int flags) const override;
-    virtual wxCoord OnMeasureItem(size_t item) const override;
-    virtual wxCoord OnMeasureItemWidth(size_t item) const override;
+    virtual void OnDrawBackground(wxDC& dc, const wxRect& rect, int item, int flags) const wxOVERRIDE;
+    virtual void OnDrawItem(wxDC& dc, const wxRect& rect, int item, int flags) const wxOVERRIDE;
+    virtual wxCoord OnMeasureItem(size_t item) const wxOVERRIDE;
+    virtual wxCoord OnMeasureItemWidth(size_t item) const wxOVERRIDE;
 
     // Event handlers
     void OnSize(wxSizeEvent& event);
 
-    virtual wxSize DoGetBestSize() const override;
+    virtual wxSize DoGetBestSize() const wxOVERRIDE;
 
-    virtual wxItemContainer* GetItemContainer() override { return this; }
-    virtual wxWindow* GetControl() override { return this; }
+    virtual wxItemContainer* GetItemContainer() wxOVERRIDE { return this; }
+    virtual wxWindow* GetControl() wxOVERRIDE { return this; }
 
     // wxItemContainer implementation
     virtual int DoInsertItems(const wxArrayStringsAdapter & items,
                               unsigned int pos,
-                              void **clientData, wxClientDataType type) override;
-    virtual void DoClear() override;
-    virtual void DoDeleteOneItem(unsigned int n) override;
+                              void **clientData, wxClientDataType type) wxOVERRIDE;
+    virtual void DoClear() wxOVERRIDE;
+    virtual void DoDeleteOneItem(unsigned int n) wxOVERRIDE;
 
 private:
     bool                m_inResize;

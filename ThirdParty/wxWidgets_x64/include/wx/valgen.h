@@ -16,7 +16,6 @@
 
 class WXDLLIMPEXP_FWD_BASE wxDateTime;
 class WXDLLIMPEXP_FWD_BASE wxFileName;
-class WXDLLIMPEXP_FWD_CORE wxColour;
 
 // ----------------------------------------------------------------------------
 // wxGenericValidator performs data transfer between many standard controls and
@@ -34,7 +33,6 @@ public:
         // wxCheckBox, wxRadioButton, wx(Bitmap)ToggleButton
     wxGenericValidator(bool* val);
         // wxChoice, wxGauge, wxRadioBox, wxScrollBar, wxSlider, wxSpinButton
-        // single-selection wxListBox
     wxGenericValidator(int* val);
         // wxComboBox, wxTextCtrl, wxButton, wxStaticText (read-only)
     wxGenericValidator(wxString* val);
@@ -50,35 +48,27 @@ public:
     wxGenericValidator(float* val);
         // wxTextCtrl
     wxGenericValidator(double* val);
-        // wxColourPickerCtrl
-    wxGenericValidator(wxColour* val);
-        // wxCheckBox
-    wxGenericValidator(wxCheckBoxState* val);
 
     wxGenericValidator(const wxGenericValidator& copyFrom);
 
-    virtual ~wxGenericValidator() = default;
+    virtual ~wxGenericValidator(){}
 
-    // Make a clone of this validator (or return nullptr) - currently necessary
+    // Make a clone of this validator (or return NULL) - currently necessary
     // if you're passing a reference to a validator.
     // Another possibility is to always pass a pointer to a new validator
     // (so the calling code can use a copy constructor of the relevant class).
-    wxNODISCARD virtual wxObject *Clone() const override { return new wxGenericValidator(*this); }
+    virtual wxObject *Clone() const wxOVERRIDE { return new wxGenericValidator(*this); }
     bool Copy(const wxGenericValidator& val);
 
     // Called when the value in the window must be validated: this is not used
     // by this class
-    virtual bool Validate(wxWindow * WXUNUSED(parent)) override { return true; }
+    virtual bool Validate(wxWindow * WXUNUSED(parent)) wxOVERRIDE { return true; }
 
     // Called to transfer data to the window
-    virtual bool TransferToWindow() override;
+    virtual bool TransferToWindow() wxOVERRIDE;
 
     // Called to transfer data to the window
-    virtual bool TransferFromWindow() override;
-
-    // Called when the validator is associated with a window, is used to check
-    // that the validator is not being associated with a wrong window.
-    virtual void SetWindow(wxWindow* win) override;
+    virtual bool TransferFromWindow() wxOVERRIDE;
 
 protected:
     void Initialize();
@@ -93,8 +83,6 @@ protected:
     wxFileName* m_pFileName;
     float*      m_pFloat;
     double*     m_pDouble;
-    wxColour*   m_pColour;
-    wxCheckBoxState* m_pCheckBoxState;
 
 private:
     wxDECLARE_CLASS(wxGenericValidator);

@@ -53,7 +53,7 @@ public:
 
     // we need to be able to create copies of the addresses polymorphically
     // (i.e. without knowing the exact address class)
-    wxNODISCARD virtual wxSockAddress *Clone() const = 0;
+    virtual wxSockAddress *Clone() const = 0;
 
 
     // implementation only, don't use
@@ -115,14 +115,14 @@ class WXDLLIMPEXP_NET wxIPV4address : public wxIPaddress
 {
 public:
     // implement wxSockAddress pure virtuals:
-    virtual Family Type() override { return IPV4; }
-    wxNODISCARD virtual wxSockAddress *Clone() const override { return new wxIPV4address(*this); }
+    virtual Family Type() wxOVERRIDE { return IPV4; }
+    virtual wxSockAddress *Clone() const wxOVERRIDE { return new wxIPV4address(*this); }
 
 
     // implement wxIPaddress pure virtuals:
-    virtual bool IsLocalHost() const override;
+    virtual bool IsLocalHost() const wxOVERRIDE;
 
-    virtual wxString IPAddress() const override;
+    virtual wxString IPAddress() const wxOVERRIDE;
 
 
     // IPv4-specific methods:
@@ -134,7 +134,7 @@ public:
     bool BroadcastAddress();
 
 private:
-    virtual void DoInitImpl() override;
+    virtual void DoInitImpl() wxOVERRIDE;
 
     wxDECLARE_DYNAMIC_CLASS(wxIPV4address);
 };
@@ -147,14 +147,14 @@ class WXDLLIMPEXP_NET wxIPV6address : public wxIPaddress
 {
 public:
     // implement wxSockAddress pure virtuals:
-    virtual Family Type() override { return IPV6; }
-    wxNODISCARD virtual wxSockAddress *Clone() const override { return new wxIPV6address(*this); }
+    virtual Family Type() wxOVERRIDE { return IPV6; }
+    virtual wxSockAddress *Clone() const wxOVERRIDE { return new wxIPV6address(*this); }
 
 
     // implement wxIPaddress pure virtuals:
-    virtual bool IsLocalHost() const override;
+    virtual bool IsLocalHost() const wxOVERRIDE;
 
-    virtual wxString IPAddress() const override;
+    virtual wxString IPAddress() const wxOVERRIDE;
 
     // IPv6-specific methods:
     bool Hostname(unsigned char addr[16]);
@@ -162,7 +162,7 @@ public:
     using wxIPaddress::Hostname;
 
 private:
-    virtual void DoInitImpl() override;
+    virtual void DoInitImpl() wxOVERRIDE;
 
     wxDECLARE_DYNAMIC_CLASS(wxIPV6address);
 };
@@ -183,8 +183,8 @@ public:
     void Filename(const wxString& name);
     wxString Filename() const;
 
-    virtual Family Type() override { return UNIX; }
-    wxNODISCARD virtual wxSockAddress *Clone() const override { return new wxUNIXaddress(*this); }
+    virtual Family Type() wxOVERRIDE { return UNIX; }
+    virtual wxSockAddress *Clone() const wxOVERRIDE { return new wxUNIXaddress(*this); }
 
 private:
     wxSockAddressImpl& GetUNIX();

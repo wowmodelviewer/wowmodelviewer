@@ -2,6 +2,7 @@
 // Name:        wx/generic/logg.h
 // Purpose:     Assorted wxLogXXX functions, and wxLog (sink for logs)
 // Author:      Vadim Zeitlin
+// Modified by:
 // Created:     29/01/98
 // Copyright:   (c) 1998 Vadim Zeitlin <zeitlin@dptmaths.ens-cachan.fr>
 // Licence:     wxWindows licence
@@ -32,7 +33,7 @@ public:
 
 protected:
     // implement sink function
-    virtual void DoLogText(const wxString& msg) override;
+    virtual void DoLogText(const wxString& msg) wxOVERRIDE;
 
 private:
     // the control we use
@@ -52,22 +53,16 @@ private:
 class WXDLLIMPEXP_CORE wxLogGui : public wxLog
 {
 public:
-    // ctor has a side effect of installing a custom modal hook flushing the
-    // logs before showing any modal dialog: we do this to avoid showing the
-    // log dialog while another modal dialog is showing or, even worse, only
-    // after it is dismissed
+    // ctor
     wxLogGui();
 
-    // dtor removes the modal hook
-    virtual ~wxLogGui();
-
     // show all messages that were logged since the last Flush()
-    virtual void Flush() override;
+    virtual void Flush() wxOVERRIDE;
 
 protected:
     virtual void DoLogRecord(wxLogLevel level,
                              const wxString& msg,
-                             const wxLogRecordInfo& info) override;
+                             const wxLogRecordInfo& info) wxOVERRIDE;
 
     // return the title to be used for the log dialog, depending on m_bErrors
     // and m_bWarnings values
@@ -117,7 +112,7 @@ private:
 class WXDLLIMPEXP_CORE wxLogWindow : public wxLogPassThrough
 {
 public:
-    wxLogWindow(wxWindow *pParent,        // the parent frame (can be null)
+    wxLogWindow(wxWindow *pParent,        // the parent frame (can be NULL)
                 const wxString& szTitle,  // the title of the frame
                 bool bShow = true,        // show window immediately?
                 bool bPassToOld = true);  // pass messages to the old target?
@@ -141,7 +136,7 @@ public:
     virtual void OnFrameDelete(wxFrame *frame);
 
 protected:
-    virtual void DoLogTextAtLevel(wxLogLevel level, const wxString& msg) override;
+    virtual void DoLogTextAtLevel(wxLogLevel level, const wxString& msg) wxOVERRIDE;
 
 private:
     wxLogFrame *m_pLogFrame;      // the log frame

@@ -116,12 +116,21 @@ typedef BOOL
 
 #endif // API_VERSION_NUMBER < 10/*}}}*/
 
-// wx-prefixed types map to Unicode ("W") version
-#define wxPSYM_ENUMERATESYMBOLS_CALLBACK PSYM_ENUMERATESYMBOLS_CALLBACKW
+// wx-prefixed types map to either the ANSI or Unicode ("W") version depending
+// on the build of wx itself.
+#ifdef UNICODE
+    #define wxPSYM_ENUMERATESYMBOLS_CALLBACK PSYM_ENUMERATESYMBOLS_CALLBACKW
+#else // !UNICODE
+    #define wxPSYM_ENUMERATESYMBOLS_CALLBACK PSYM_ENUMERATESYMBOLS_CALLBACK
+#endif // UNICODE/!UNICODE
 
 // This one could be already defined by wx/msw/stackwalk.h
 #ifndef wxSYMBOL_INFO
-    #define wxSYMBOL_INFO SYMBOL_INFOW
+    #ifdef UNICODE
+        #define wxSYMBOL_INFO SYMBOL_INFOW
+    #else // !UNICODE
+        #define wxSYMBOL_INFO SYMBOL_INFO
+    #endif // UNICODE/!UNICODE
 #endif // !defined(wxSYMBOL_INFO)
 
 typedef wxSYMBOL_INFO* wxPSYMBOL_INFO;
@@ -382,7 +391,7 @@ private:
     // dereference the given symbol, i.e. return symbol which is not a
     // pointer/reference any more
     //
-    // if ppData != nullptr, dereference the pointer as many times as we
+    // if ppData != NULL, dereference the pointer as many times as we
     // dereferenced the symbol
     //
     // return the tag of the dereferenced symbol

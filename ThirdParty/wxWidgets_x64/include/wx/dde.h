@@ -2,6 +2,7 @@
 // Name:        wx/dde.h
 // Purpose:     DDE base header
 // Author:      Julian Smart
+// Modified by:
 // Created:
 // Copyright:   (c) Julian Smart
 // Licence:     wxWindows Licence

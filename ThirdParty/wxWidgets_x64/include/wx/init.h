@@ -2,6 +2,7 @@
 // Name:        wx/init.h
 // Purpose:     wxWidgets initialization and finalization functions
 // Author:      Vadim Zeitlin
+// Modified by:
 // Created:     29.06.2003
 // Copyright:   (c) 2003 Vadim Zeitlin <vadim@wxwidgets.org>
 // Licence:     wxWindows licence
@@ -44,8 +45,12 @@ extern void WXDLLIMPEXP_BASE wxEntryCleanup();
 extern int WXDLLIMPEXP_BASE wxEntry(int& argc, wxChar **argv);
 
 // we overload wxEntry[Start]() to take "char **" pointers too
+#if wxUSE_UNICODE
+
 extern bool WXDLLIMPEXP_BASE wxEntryStart(int& argc, char **argv);
 extern int WXDLLIMPEXP_BASE wxEntry(int& argc, char **argv);
+
+#endif// wxUSE_UNICODE
 
 // Under Windows we define additional wxEntry() overloads with signature
 // compatible with WinMain() and not the traditional main().
@@ -63,7 +68,9 @@ extern int WXDLLIMPEXP_BASE wxEntry(int& argc, char **argv);
 // call to wxInitialize() must be matched by wxUninitialize())
 extern bool WXDLLIMPEXP_BASE wxInitialize();
 extern bool WXDLLIMPEXP_BASE wxInitialize(int& argc, wxChar **argv);
+#if wxUSE_UNICODE
 extern bool WXDLLIMPEXP_BASE wxInitialize(int& argc, char **argv);
+#endif
 
 // clean up -- the library can't be used any more after the last call to
 // wxUninitialize()
@@ -85,10 +92,12 @@ public:
         m_ok = wxInitialize(argc, argv);
     }
 
+#if wxUSE_UNICODE
     wxInitializer(int& argc, char **argv)
     {
         m_ok = wxInitialize(argc, argv);
     }
+#endif // wxUSE_UNICODE
 
     // has the initialization been successful? (explicit test)
     bool IsOk() const { return m_ok; }

@@ -2,6 +2,7 @@
 // Name:        wx/progdlg.h
 // Purpose:     Base header for wxProgressDialog
 // Author:      Julian Smart
+// Modified by:
 // Created:
 // Copyright:   (c) Julian Smart
 // Licence:     wxWindows Licence
@@ -46,7 +47,7 @@
     public:
         wxProgressDialog( const wxString& title, const wxString& message,
                           int maximum = 100,
-                          wxWindow *parent = nullptr,
+                          wxWindow *parent = NULL,
                           int style = wxPD_APP_MODAL | wxPD_AUTO_HIDE )
             : wxGenericProgressDialog( title, message, maximum,
                                        parent, style )

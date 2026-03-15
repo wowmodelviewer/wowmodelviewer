@@ -19,45 +19,45 @@ class WXDLLIMPEXP_CORE wxAnyButton : public wxAnyButtonBase
 public:
     wxAnyButton()
     {
-        m_imageData = nullptr;
+        m_imageData = NULL;
 #if wxUSE_MARKUP
-        m_markupText = nullptr;
+        m_markupText = NULL;
 #endif // wxUSE_MARKUP
     }
 
     virtual ~wxAnyButton();
 
     // overridden base class methods
-    virtual void SetLabel(const wxString& label) override;
-    virtual bool SetBackgroundColour(const wxColour &colour) override;
-    virtual bool SetForegroundColour(const wxColour &colour) override;
+    virtual void SetLabel(const wxString& label) wxOVERRIDE;
+    virtual bool SetBackgroundColour(const wxColour &colour) wxOVERRIDE;
+    virtual bool SetForegroundColour(const wxColour &colour) wxOVERRIDE;
 
     // implementation from now on
-    virtual WXLRESULT MSWWindowProc(WXUINT nMsg, WXWPARAM wParam, WXLPARAM lParam) override;
+    virtual WXLRESULT MSWWindowProc(WXUINT nMsg, WXWPARAM wParam, WXLPARAM lParam) wxOVERRIDE;
 
-    virtual bool MSWOnDraw(WXDRAWITEMSTRUCT *item) override;
+    virtual bool MSWOnDraw(WXDRAWITEMSTRUCT *item) wxOVERRIDE;
 
     // returns true if the platform should explicitly apply a theme border
-    virtual bool CanApplyThemeBorder() const override { return false; }
+    virtual bool CanApplyThemeBorder() const wxOVERRIDE { return false; }
 
 protected:
     // usually overridden base class virtuals
-    virtual wxSize DoGetBestSize() const override;
+    virtual wxSize DoGetBestSize() const wxOVERRIDE;
 
-    virtual wxBitmap DoGetBitmap(State which) const override;
-    virtual void DoSetBitmap(const wxBitmapBundle& bitmap, State which) override;
-    virtual wxSize DoGetBitmapMargins() const override;
-    virtual void DoSetBitmapMargins(wxCoord x, wxCoord y) override;
-    virtual void DoSetBitmapPosition(wxDirection dir) override;
+    virtual wxBitmap DoGetBitmap(State which) const wxOVERRIDE;
+    virtual void DoSetBitmap(const wxBitmapBundle& bitmap, State which) wxOVERRIDE;
+    virtual wxSize DoGetBitmapMargins() const wxOVERRIDE;
+    virtual void DoSetBitmapMargins(wxCoord x, wxCoord y) wxOVERRIDE;
+    virtual void DoSetBitmapPosition(wxDirection dir) wxOVERRIDE;
 
 #if wxUSE_MARKUP
-    virtual bool DoSetLabelMarkup(const wxString& markup) override;
+    virtual bool DoSetLabelMarkup(const wxString& markup) wxOVERRIDE;
 #endif // wxUSE_MARKUP
 
     // Increases the passed in size to account for the button image.
     //
     // Should only be called if we do have a button, i.e. if m_imageData is
-    // non-null.
+    // non-NULL.
     void AdjustForBitmapSize(wxSize& size) const;
 
     class wxButtonImageData *m_imageData;
@@ -68,7 +68,7 @@ protected:
 
     // Switches button into owner-drawn mode: this is used if we need to draw
     // something not supported by the native control, such as using non default
-    // colours or font.
+    // colours or a bitmap on pre-XP systems.
     void MakeOwnerDrawn();
     bool IsOwnerDrawn() const;
 

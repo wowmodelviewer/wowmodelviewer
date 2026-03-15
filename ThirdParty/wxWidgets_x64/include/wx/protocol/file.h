@@ -2,6 +2,7 @@
 // Name:        wx/protocol/file.h
 // Purpose:     File protocol
 // Author:      Guilhem Lavaux
+// Modified by:
 // Created:     1997
 // Copyright:   (c) 1997, 1998 Guilhem Lavaux
 // Licence:     wxWindows licence
@@ -22,10 +23,10 @@ public:
     wxFileProto();
     virtual ~wxFileProto();
 
-    bool Abort() override { return true; }
-    wxString GetContentType() const override { return wxEmptyString; }
+    bool Abort() wxOVERRIDE { return true; }
+    wxString GetContentType() const wxOVERRIDE { return wxEmptyString; }
 
-    wxInputStream *GetInputStream(const wxString& path) override;
+    wxInputStream *GetInputStream(const wxString& path) wxOVERRIDE;
 
 protected:
     wxDECLARE_DYNAMIC_CLASS_NO_COPY(wxFileProto);

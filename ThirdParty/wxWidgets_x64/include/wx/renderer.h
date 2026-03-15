@@ -2,6 +2,7 @@
 // Name:        wx/renderer.h
 // Purpose:     wxRendererNative class declaration
 // Author:      Vadim Zeitlin
+// Modified by:
 // Created:     20.07.2003
 // Copyright:   (c) 2003 Vadim Zeitlin <vadim@wxwidgets.org>
 // Licence:     wxWindows licence
@@ -23,19 +24,17 @@
 #ifndef _WX_RENDERER_H_
 #define _WX_RENDERER_H_
 
+class WXDLLIMPEXP_FWD_CORE wxDC;
+class WXDLLIMPEXP_FWD_CORE wxWindow;
+
 #include "wx/gdicmn.h" // for wxPoint, wxSize
 #include "wx/colour.h"
 #include "wx/font.h"
 #include "wx/bitmap.h"
 #include "wx/string.h"
 
-class WXDLLIMPEXP_FWD_CORE wxDC;
-class WXDLLIMPEXP_FWD_CORE wxReadOnlyDC;
-class WXDLLIMPEXP_FWD_CORE wxWindow;
-
 // some platforms have their own renderers, others use the generic one
-#if defined(__WXMSW__) || ( defined(__WXMAC__) && wxOSX_USE_COCOA_OR_CARBON ) || \
-    defined(__WXGTK__) || defined(__WXQT__)
+#if defined(__WXMSW__) || ( defined(__WXMAC__) && wxOSX_USE_COCOA_OR_CARBON ) || defined(__WXGTK__)
     #define wxHAS_NATIVE_RENDERER
 #else
     #undef wxHAS_NATIVE_RENDERER
@@ -193,7 +192,7 @@ public:
                                   const wxRect& rect,
                                   int flags = 0,
                                   wxHeaderSortIconType sortArrow = wxHDR_SORT_ICON_NONE,
-                                  wxHeaderButtonParams* params=nullptr) = 0;
+                                  wxHeaderButtonParams* params=NULL) = 0;
 
 
     // Draw the contents of a header control button (label, sort arrows, etc.)
@@ -203,7 +202,7 @@ public:
                                           const wxRect& rect,
                                           int flags = 0,
                                           wxHeaderSortIconType sortArrow = wxHDR_SORT_ICON_NONE,
-                                          wxHeaderButtonParams* params=nullptr) = 0;
+                                          wxHeaderButtonParams* params=NULL) = 0;
 
     // Returns the default height of a header button, either a fixed platform
     // height if available, or a generic height based on the window's font.
@@ -292,7 +291,7 @@ public:
                                     int flags = 0) = 0;
 
     // Returns the default size of a collapse button
-    virtual wxSize GetCollapseButtonSize(wxWindow *win, wxReadOnlyDC& dc) = 0;
+    virtual wxSize GetCollapseButtonSize(wxWindow *win, wxDC& dc) = 0;
 
     // draw rectangle indicating that an item in e.g. a list control
     // has been selected or focused
@@ -400,14 +399,14 @@ public:
 
 #if wxUSE_DYNLIB_CLASS
     // load the renderer from the specified DLL, the returned pointer must be
-    // deleted by caller if not null when it is not used any more
+    // deleted by caller if not NULL when it is not used any more
     static wxRendererNative *Load(const wxString& name);
 #endif // wxUSE_DYNLIB_CLASS
 
-    // set the renderer to use, passing nullptr reverts to using the default
+    // set the renderer to use, passing NULL reverts to using the default
     // renderer
     //
-    // return the previous renderer used with Set() or nullptr if none
+    // return the previous renderer used with Set() or NULL if none
     static wxRendererNative *Set(wxRendererNative *renderer);
 
 
@@ -442,7 +441,7 @@ public:
                                   const wxRect& rect,
                                   int flags = 0,
                                   wxHeaderSortIconType sortArrow = wxHDR_SORT_ICON_NONE,
-                                  wxHeaderButtonParams* params = nullptr) override
+                                  wxHeaderButtonParams* params = NULL) wxOVERRIDE
         { return m_rendererNative.DrawHeaderButton(win, dc, rect, flags, sortArrow, params); }
 
     virtual int  DrawHeaderButtonContents(wxWindow *win,
@@ -450,25 +449,25 @@ public:
                                           const wxRect& rect,
                                           int flags = 0,
                                           wxHeaderSortIconType sortArrow = wxHDR_SORT_ICON_NONE,
-                                          wxHeaderButtonParams* params = nullptr) override
+                                          wxHeaderButtonParams* params = NULL) wxOVERRIDE
         { return m_rendererNative.DrawHeaderButtonContents(win, dc, rect, flags, sortArrow, params); }
 
-    virtual int GetHeaderButtonHeight(wxWindow *win) override
+    virtual int GetHeaderButtonHeight(wxWindow *win) wxOVERRIDE
         { return m_rendererNative.GetHeaderButtonHeight(win); }
 
-    virtual int GetHeaderButtonMargin(wxWindow *win) override
+    virtual int GetHeaderButtonMargin(wxWindow *win) wxOVERRIDE
         { return m_rendererNative.GetHeaderButtonMargin(win); }
 
     virtual void DrawTreeItemButton(wxWindow *win,
                                     wxDC& dc,
                                     const wxRect& rect,
-                                    int flags = 0) override
+                                    int flags = 0) wxOVERRIDE
         { m_rendererNative.DrawTreeItemButton(win, dc, rect, flags); }
 
     virtual void DrawSplitterBorder(wxWindow *win,
                                     wxDC& dc,
                                     const wxRect& rect,
-                                    int flags = 0) override
+                                    int flags = 0) wxOVERRIDE
         { m_rendererNative.DrawSplitterBorder(win, dc, rect, flags); }
 
     virtual void DrawSplitterSash(wxWindow *win,
@@ -476,92 +475,92 @@ public:
                                   const wxSize& size,
                                   wxCoord position,
                                   wxOrientation orient,
-                                  int flags = 0) override
+                                  int flags = 0) wxOVERRIDE
         { m_rendererNative.DrawSplitterSash(win, dc, size,
                                             position, orient, flags); }
 
     virtual void DrawComboBoxDropButton(wxWindow *win,
                                         wxDC& dc,
                                         const wxRect& rect,
-                                        int flags = 0) override
+                                        int flags = 0) wxOVERRIDE
         { m_rendererNative.DrawComboBoxDropButton(win, dc, rect, flags); }
 
     virtual void DrawDropArrow(wxWindow *win,
                                wxDC& dc,
                                const wxRect& rect,
-                               int flags = 0) override
+                               int flags = 0) wxOVERRIDE
         { m_rendererNative.DrawDropArrow(win, dc, rect, flags); }
 
     virtual void DrawCheckBox(wxWindow *win,
                               wxDC& dc,
                               const wxRect& rect,
-                              int flags = 0) override
+                              int flags = 0) wxOVERRIDE
         { m_rendererNative.DrawCheckBox( win, dc, rect, flags ); }
 
     virtual void DrawCheckMark(wxWindow *win,
                               wxDC& dc,
                               const wxRect& rect,
-                              int flags = 0) override
+                              int flags = 0) wxOVERRIDE
         { m_rendererNative.DrawCheckMark( win, dc, rect, flags ); }
 
-    virtual wxSize GetCheckBoxSize(wxWindow *win, int flags = 0) override
+    virtual wxSize GetCheckBoxSize(wxWindow *win, int flags = 0) wxOVERRIDE
         { return m_rendererNative.GetCheckBoxSize(win, flags); }
 
-    virtual wxSize GetCheckMarkSize(wxWindow *win) override
+    virtual wxSize GetCheckMarkSize(wxWindow *win) wxOVERRIDE
         { return m_rendererNative.GetCheckMarkSize(win); }
 
-    virtual wxSize GetExpanderSize(wxWindow *win) override
+    virtual wxSize GetExpanderSize(wxWindow *win) wxOVERRIDE
         { return m_rendererNative.GetExpanderSize(win); }
 
     virtual void DrawPushButton(wxWindow *win,
                                 wxDC& dc,
                                 const wxRect& rect,
-                                int flags = 0) override
+                                int flags = 0) wxOVERRIDE
         { m_rendererNative.DrawPushButton( win, dc, rect, flags ); }
 
     virtual void DrawCollapseButton(wxWindow *win,
                                     wxDC& dc,
                                     const wxRect& rect,
-                                    int flags = 0) override
+                                    int flags = 0) wxOVERRIDE
         { m_rendererNative.DrawCollapseButton(win, dc, rect, flags); }
 
-    virtual wxSize GetCollapseButtonSize(wxWindow *win, wxReadOnlyDC& dc) override
+    virtual wxSize GetCollapseButtonSize(wxWindow *win, wxDC& dc) wxOVERRIDE
         { return m_rendererNative.GetCollapseButtonSize(win, dc); }
 
     virtual void DrawItemSelectionRect(wxWindow *win,
                                        wxDC& dc,
                                        const wxRect& rect,
-                                       int flags = 0) override
+                                       int flags = 0) wxOVERRIDE
         { m_rendererNative.DrawItemSelectionRect( win, dc, rect, flags ); }
 
     virtual void DrawFocusRect(wxWindow* win,
                                wxDC& dc,
                                const wxRect& rect,
-                               int flags = 0) override
+                               int flags = 0) wxOVERRIDE
         { m_rendererNative.DrawFocusRect( win, dc, rect, flags ); }
 
     virtual void DrawChoice(wxWindow* win,
                             wxDC& dc,
                             const wxRect& rect,
-                            int flags = 0) override
+                            int flags = 0) wxOVERRIDE
         { m_rendererNative.DrawChoice( win, dc, rect, flags); }
 
     virtual void DrawComboBox(wxWindow* win,
                               wxDC& dc,
                               const wxRect& rect,
-                              int flags = 0) override
+                              int flags = 0) wxOVERRIDE
         { m_rendererNative.DrawComboBox( win, dc, rect, flags); }
 
     virtual void DrawTextCtrl(wxWindow* win,
                               wxDC& dc,
                               const wxRect& rect,
-                              int flags = 0) override
+                              int flags = 0) wxOVERRIDE
         { m_rendererNative.DrawTextCtrl( win, dc, rect, flags); }
 
     virtual void DrawRadioBitmap(wxWindow* win,
                                  wxDC& dc,
                                  const wxRect& rect,
-                                 int flags = 0) override
+                                 int flags = 0) wxOVERRIDE
         { m_rendererNative.DrawRadioBitmap(win, dc, rect, flags); }
 
 #ifdef wxHAS_DRAW_TITLE_BAR_BITMAP
@@ -569,7 +568,7 @@ public:
                                     wxDC& dc,
                                     const wxRect& rect,
                                     wxTitleBarButton button,
-                                    int flags = 0) override
+                                    int flags = 0) wxOVERRIDE
         { m_rendererNative.DrawTitleBarBitmap(win, dc, rect, button, flags); }
 #endif // wxHAS_DRAW_TITLE_BAR_BITMAP
 
@@ -578,7 +577,7 @@ public:
                            const wxRect& rect,
                            int value,
                            int max,
-                           int flags = 0) override
+                           int flags = 0) wxOVERRIDE
         { m_rendererNative.DrawGauge(win, dc, rect, value, max, flags); }
 
     virtual void DrawItemText(wxWindow* win,
@@ -587,13 +586,13 @@ public:
                               const wxRect& rect,
                               int align = wxALIGN_LEFT | wxALIGN_TOP,
                               int flags = 0,
-                              wxEllipsizeMode ellipsizeMode = wxELLIPSIZE_END) override
+                              wxEllipsizeMode ellipsizeMode = wxELLIPSIZE_END) wxOVERRIDE
         { m_rendererNative.DrawItemText(win, dc, text, rect, align, flags, ellipsizeMode); }
 
-    virtual wxSplitterRenderParams GetSplitterParams(const wxWindow *win) override
+    virtual wxSplitterRenderParams GetSplitterParams(const wxWindow *win) wxOVERRIDE
         { return m_rendererNative.GetSplitterParams(win); }
 
-    virtual wxRendererVersion GetVersion() const override
+    virtual wxRendererVersion GetVersion() const wxOVERRIDE
         { return m_rendererNative.GetVersion(); }
 
 protected:

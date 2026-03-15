@@ -22,9 +22,7 @@ public:
     {
         Style_None              = 0x00,
         Style_WithThousandsSep  = 0x01,
-        Style_NoTrailingZeroes  = 0x02,     // Only for floating point numbers
-        Style_SignPlus          = 0x04,
-        Style_SignSpace         = 0x08,
+        Style_NoTrailingZeroes  = 0x02      // Only for floating point numbers
     };
 
     // Format a number as a string. By default, the thousands separator is
@@ -52,7 +50,7 @@ public:
     // Parse a string representing a number, possibly with thousands separator.
     //
     // Return true on success and stores the result in the provided location
-    // which must be a valid non-null pointer.
+    // which must be a valid non-NULL pointer.
     static bool FromString(wxString s, long *val);
 #ifdef wxHAS_LONG_LONG_T_DIFFERENT_FROM_LONG
     static bool FromString(wxString s, wxLongLong_t *val);
@@ -70,11 +68,6 @@ public:
     // function returns true.
     static bool GetThousandsSeparatorIfUsed(wxChar *sep);
 
-    // Remove trailing zeroes and, if there is nothing left after it, the
-    // decimal separator itself from a string representing a floating point
-    // number. Also used by ToString().
-    static void RemoveTrailingZeroes(wxString& s);
-
 private:
     // Post-process the string representing an integer.
     static wxString PostProcessIntString(wxString s, int style);
@@ -83,9 +76,10 @@ private:
     // the separators. This is used by ToString(Style_WithThousandsSep).
     static void AddThousandsSeparators(wxString& s);
 
-    // Add the sign prefix to a string representing a number without
-    // the prefix. This is used by ToString().
-    static void AddSignPrefix(wxString& s, int style);
+    // Remove trailing zeroes and, if there is nothing left after it, the
+    // decimal separator itself from a string representing a floating point
+    // number. Also used by ToString().
+    static void RemoveTrailingZeroes(wxString& s);
 
     // Remove all thousands separators from a string representing a number.
     static void RemoveThousandsSeparators(wxString& s);

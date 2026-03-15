@@ -21,6 +21,10 @@ public:
     wxAcceleratorTable();
     wxAcceleratorTable(int n, const wxAcceleratorEntry entries[]);
 
+    wxDECLARE_DEFAULT_COPY(wxAcceleratorTable)
+
+    virtual ~wxAcceleratorTable();
+
     bool Ok() const { return IsOk(); }
     bool IsOk() const;
 
@@ -37,8 +41,8 @@ public:
 
 protected:
     // ref counting code
-    virtual wxObjectRefData *CreateRefData() const override;
-    wxNODISCARD virtual wxObjectRefData *CloneRefData(const wxObjectRefData *data) const override;
+    virtual wxObjectRefData *CreateRefData() const wxOVERRIDE;
+    virtual wxObjectRefData *CloneRefData(const wxObjectRefData *data) const wxOVERRIDE;
 
 private:
     wxDECLARE_DYNAMIC_CLASS(wxAcceleratorTable);

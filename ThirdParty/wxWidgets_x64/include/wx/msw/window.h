@@ -54,7 +54,8 @@ public:
                 long style = 0,
                 const wxString& name = wxASCII_STR(wxPanelNameStr))
     {
-        return CreateUsingMSWClass(nullptr, parent, id, pos, size, style, name);
+        return CreateUsingMSWClass(GetMSWClassName(style),
+                                   parent, id, pos, size, style, name);
     }
 
     // Non-portable, MSW-specific Create() variant allowing to create the
@@ -70,80 +71,79 @@ public:
                              const wxString& name = wxASCII_STR(wxPanelNameStr));
 
     // implement base class pure virtuals
-    virtual void SetLabel(const wxString& label) override;
-    virtual wxString GetLabel() const override;
+    virtual void SetLabel(const wxString& label) wxOVERRIDE;
+    virtual wxString GetLabel() const wxOVERRIDE;
 
-    virtual void Raise() override;
-    virtual void Lower() override;
+    virtual void Raise() wxOVERRIDE;
+    virtual void Lower() wxOVERRIDE;
 
 #if wxUSE_DEFERRED_SIZING
-    virtual bool BeginRepositioningChildren() override;
-    virtual void EndRepositioningChildren() override;
+    virtual bool BeginRepositioningChildren() wxOVERRIDE;
+    virtual void EndRepositioningChildren() wxOVERRIDE;
 #endif // wxUSE_DEFERRED_SIZING
 
-    virtual bool Show(bool show = true) override;
+    virtual bool Show(bool show = true) wxOVERRIDE;
     virtual bool ShowWithEffect(wxShowEffect effect,
-                                unsigned timeout = 0) override
+                                unsigned timeout = 0) wxOVERRIDE
     {
         return MSWShowWithEffect(true, effect, timeout);
     }
     virtual bool HideWithEffect(wxShowEffect effect,
-                                unsigned timeout = 0) override
+                                unsigned timeout = 0) wxOVERRIDE
     {
         return MSWShowWithEffect(false, effect, timeout);
     }
 
-    virtual void SetFocus() override;
-    virtual void SetFocusFromKbd() override;
+    virtual void SetFocus() wxOVERRIDE;
+    virtual void SetFocusFromKbd() wxOVERRIDE;
 
-    virtual bool Reparent(wxWindowBase *newParent) override;
+    virtual bool Reparent(wxWindowBase *newParent) wxOVERRIDE;
 
-    virtual wxSize GetDPI() const override;
-    virtual double GetDPIScaleFactor() const override;
+    virtual wxSize GetDPI() const wxOVERRIDE;
+    virtual double GetDPIScaleFactor() const wxOVERRIDE;
 
-    virtual wxSize GetWindowBorderSize() const override;
+    virtual wxSize GetWindowBorderSize() const wxOVERRIDE;
 
-    virtual void WarpPointer(int x, int y) override;
-    virtual bool EnableTouchEvents(int eventsMask) override;
+    virtual void WarpPointer(int x, int y) wxOVERRIDE;
+    virtual bool EnableTouchEvents(int eventsMask) wxOVERRIDE;
 
     virtual void Refresh( bool eraseBackground = true,
-                          const wxRect *rect = nullptr ) override;
-    virtual void Update() override;
+                          const wxRect *rect = (const wxRect *) NULL ) wxOVERRIDE;
+    virtual void Update() wxOVERRIDE;
 
-    virtual void SetWindowStyleFlag(long style) override;
-    virtual void SetExtraStyle(long exStyle) override;
-    virtual bool SetFont( const wxFont &font ) override;
+    virtual void SetWindowStyleFlag(long style) wxOVERRIDE;
+    virtual void SetExtraStyle(long exStyle) wxOVERRIDE;
+    virtual bool SetCursor( const wxCursor &cursor ) wxOVERRIDE;
+    virtual bool SetFont( const wxFont &font ) wxOVERRIDE;
 
-    virtual bool IsTransparentBackgroundSupported(wxString* reason = nullptr) const override;
-
-    virtual int GetCharHeight() const override;
-    virtual int GetCharWidth() const override;
+    virtual int GetCharHeight() const wxOVERRIDE;
+    virtual int GetCharWidth() const wxOVERRIDE;
 
     virtual void SetScrollbar( int orient, int pos, int thumbVisible,
-                               int range, bool refresh = true ) override;
-    virtual void SetScrollPos( int orient, int pos, bool refresh = true ) override;
-    virtual int GetScrollPos( int orient ) const override;
-    virtual int GetScrollThumb( int orient ) const override;
-    virtual int GetScrollRange( int orient ) const override;
+                               int range, bool refresh = true ) wxOVERRIDE;
+    virtual void SetScrollPos( int orient, int pos, bool refresh = true ) wxOVERRIDE;
+    virtual int GetScrollPos( int orient ) const wxOVERRIDE;
+    virtual int GetScrollThumb( int orient ) const wxOVERRIDE;
+    virtual int GetScrollRange( int orient ) const wxOVERRIDE;
     virtual void ScrollWindow( int dx, int dy,
-                               const wxRect* rect = nullptr ) override;
+                               const wxRect* rect = NULL ) wxOVERRIDE;
 
-    virtual bool ScrollLines(int lines) override;
-    virtual bool ScrollPages(int pages) override;
+    virtual bool ScrollLines(int lines) wxOVERRIDE;
+    virtual bool ScrollPages(int pages) wxOVERRIDE;
 
-    virtual void SetLayoutDirection(wxLayoutDirection dir) override;
-    virtual wxLayoutDirection GetLayoutDirection() const override;
+    virtual void SetLayoutDirection(wxLayoutDirection dir) wxOVERRIDE;
+    virtual wxLayoutDirection GetLayoutDirection() const wxOVERRIDE;
     virtual wxCoord AdjustForLayoutDirection(wxCoord x,
                                              wxCoord width,
-                                             wxCoord widthTotal) const override;
+                                             wxCoord widthTotal) const wxOVERRIDE;
 
-    virtual void SetId(wxWindowID winid) override;
+    virtual void SetId(wxWindowID winid) wxOVERRIDE;
 
 #if wxUSE_DRAG_AND_DROP
-    virtual void SetDropTarget( wxDropTarget *dropTarget ) override;
+    virtual void SetDropTarget( wxDropTarget *dropTarget ) wxOVERRIDE;
 
     // Accept files for dragging
-    virtual void DragAcceptFiles(bool accept) override;
+    virtual void DragAcceptFiles(bool accept) wxOVERRIDE;
 #endif // wxUSE_DRAG_AND_DROP
 
 #ifndef __WXUNIVERSAL__
@@ -157,8 +157,8 @@ public:
 
 #if wxUSE_HOTKEY
     // install and deinstall a system wide hotkey
-    virtual bool RegisterHotKey(int hotkeyId, int modifiers, int keycode) override;
-    virtual bool UnregisterHotKey(int hotkeyId) override;
+    virtual bool RegisterHotKey(int hotkeyId, int modifiers, int keycode) wxOVERRIDE;
+    virtual bool UnregisterHotKey(int hotkeyId) wxOVERRIDE;
 #endif // wxUSE_HOTKEY
 
     // window handle stuff
@@ -166,10 +166,10 @@ public:
 
     WXHWND GetHWND() const { return m_hWnd; }
     void SetHWND(WXHWND hWnd) { m_hWnd = hWnd; }
-    virtual WXWidget GetHandle() const override { return GetHWND(); }
+    virtual WXWidget GetHandle() const wxOVERRIDE { return GetHWND(); }
 
-    void AssociateHandle(WXWidget handle) override;
-    void DissociateHandle() override;
+    void AssociateHandle(WXWidget handle) wxOVERRIDE;
+    void DissociateHandle() wxOVERRIDE;
 
     // returns the handle of the native window to focus when this wxWindow gets
     // focus  (i.e. in composite windows: by default, this is just the HWND for
@@ -207,8 +207,6 @@ public:
     // implementation from now on
     // ==========================
 
-    virtual void WXUpdateCursor() override;
-
     // event handlers
     // --------------
 
@@ -225,9 +223,9 @@ public:
     // return true if the window is of a standard (i.e. not wxWidgets') class
     //
     // to understand why does it work, look at SubclassWin() code and comments
-    bool IsOfStandardClass() const { return m_oldWndProc != nullptr; }
+    bool IsOfStandardClass() const { return m_oldWndProc != NULL; }
 
-    wxWindow *FindItem(long id, WXHWND hWnd = nullptr) const;
+    wxWindow *FindItem(long id, WXHWND hWnd = NULL) const;
     wxWindow *FindItemByHWND(WXHWND hWnd, bool controlOnly = false) const;
 
     // MSW only: true if this control is part of the main control
@@ -235,7 +233,7 @@ public:
 
 #if wxUSE_TOOLTIPS
     // MSW only: true if this window or any of its children have a tooltip
-    virtual bool HasToolTips() const { return GetToolTip() != nullptr; }
+    virtual bool HasToolTips() const { return GetToolTip() != NULL; }
 #endif // wxUSE_TOOLTIPS
 
     // translate wxWidgets style flags for this control into the Windows style
@@ -243,13 +241,13 @@ public:
     //
     // this is the function that should be overridden in the derived classes,
     // but you will mostly use MSWGetCreateWindowFlags() below
-    virtual WXDWORD MSWGetStyle(long flags, WXDWORD *exstyle = nullptr) const ;
+    virtual WXDWORD MSWGetStyle(long flags, WXDWORD *exstyle = NULL) const ;
 
     // get the MSW window flags corresponding to wxWidgets ones
     //
     // the functions returns the flags (WS_XXX) directly and puts the ext
-    // (WS_EX_XXX) flags into the provided pointer if not null
-    WXDWORD MSWGetCreateWindowFlags(WXDWORD *exflags = nullptr) const
+    // (WS_EX_XXX) flags into the provided pointer if not NULL
+    WXDWORD MSWGetCreateWindowFlags(WXDWORD *exflags = NULL) const
         { return MSWGetStyle(GetWindowStyle(), exflags); }
 
     // update the real underlying window style flags to correspond to the
@@ -271,7 +269,7 @@ public:
     //
     // returns true if the window has been created, false if creation failed
     bool MSWCreate(const wxChar *wclass,
-                   const wxChar *title = nullptr,
+                   const wxChar *title = NULL,
                    const wxPoint& pos = wxDefaultPosition,
                    const wxSize& size = wxDefaultSize,
                    WXDWORD style = 0,
@@ -289,14 +287,6 @@ public:
 
     // Setup background and foreground colours correctly
     virtual void SetupColours();
-
-    virtual wxVisualAttributes GetDefaultAttributes() const override
-    {
-        return GetClassDefaultAttributes(GetWindowVariant());
-    }
-
-    static wxVisualAttributes
-    GetClassDefaultAttributes(wxWindowVariant variant = wxWINDOW_VARIANT_NORMAL);
 
     // ------------------------------------------------------------------------
     // helpers for message handlers: these perform the same function as the
@@ -391,7 +381,6 @@ public:
     bool HandleRotateGesture(const wxPoint& pt, WXDWORD angleArgument, WXDWORD flags);
     bool HandleTwoFingerTap(const wxPoint& pt, WXDWORD flags);
     bool HandlePressAndTap(const wxPoint& pt, WXDWORD flags);
-    bool HandleTouch(WXWPARAM wParam, WXLPARAM lParam);
 
     bool HandleChar(WXWPARAM wParam, WXLPARAM lParam);
     bool HandleKeyDown(WXWPARAM wParam, WXLPARAM lParam);
@@ -412,7 +401,7 @@ public:
 
     // The main body of common window proc for all wxWindow objects. It tries
     // to handle the given message and returns true if it was handled (the
-    // appropriate return value is then put in result, which must be non-null)
+    // appropriate return value is then put in result, which must be non-NULL)
     // or false if it wasn't.
     //
     // This function should be overridden in any new code instead of
@@ -458,7 +447,7 @@ public:
     // This needs to be overridden for scrolled windows to ensure that the
     // scrolling of their associated DC is taken into account.
     //
-    // Both parameters must be non-null.
+    // Both parameters must be non-NULL.
     virtual void MSWAdjustBrushOrg(int* WXUNUSED(xOrg),
                                    int* WXUNUSED(yOrg)) const
     {
@@ -467,7 +456,7 @@ public:
     // The brush returned from here must remain valid at least until the next
     // event loop iteration. Returning 0, as is done by default, indicates
     // there is no custom background brush.
-    virtual WXHBRUSH MSWGetCustomBgBrush() { return nullptr; }
+    virtual WXHBRUSH MSWGetCustomBgBrush() { return NULL; }
 
     // this function should return the brush to paint the children controls
     // background or 0 if this window doesn't impose any particular background
@@ -476,7 +465,7 @@ public:
     // the hDC parameter is the DC background will be drawn on, it can be used
     // to call SetBrushOrgEx() on it if the returned brush is a bitmap one
     //
-    // child parameter is never null, it can be this window itself or one of
+    // child parameter is never NULL, it can be this window itself or one of
     // its (grand)children
     //
     // the base class version returns a solid brush if we have a non default
@@ -486,6 +475,21 @@ public:
     // return the background brush to use for painting the given window by
     // querying the parent windows via MSWGetBgBrushForChild() recursively
     WXHBRUSH MSWGetBgBrush(WXHDC hDC);
+
+    enum MSWThemeColour
+    {
+        ThemeColourText = 0,
+        ThemeColourBackground,
+        ThemeColourBorder
+    };
+
+    // returns a specific theme colour, or if that is not possible then
+    // wxSystemSettings::GetColour(fallback)
+    wxColour MSWGetThemeColour(const wchar_t *themeName,
+                               int themePart,
+                               int themeState,
+                               MSWThemeColour themeColour,
+                               wxSystemColour fallback) const;
 
     // gives the parent the possibility to draw its children background, e.g.
     // this is used by wxNotebook to do it using DrawThemeBackground()
@@ -521,8 +525,8 @@ public:
 
 #ifdef wxHAS_MSW_BACKGROUND_ERASE_HOOK
     // allows the child to hook into its parent WM_ERASEBKGND processing: call
-    // MSWSetEraseBgHook() with a non-null window to make parent call
-    // MSWEraseBgHook() on this window (don't forget to reset it to nullptr
+    // MSWSetEraseBgHook() with a non-NULL window to make parent call
+    // MSWEraseBgHook() on this window (don't forget to reset it to NULL
     // afterwards)
     //
     // this hack is used by wxToolBar, see comments there
@@ -550,20 +554,15 @@ public:
     // check if mouse is in the window
     bool IsMouseInWindow() const;
 
-    virtual void SetDoubleBuffered(bool on) override;
-    virtual bool IsDoubleBuffered() const override;
-
-    // Ensure that neither this window itself nor any of its parents use
-    // WS_EX_COMPOSITED: this is used by the native wxListCtrl which is
-    // incompatible with this style.
-    void MSWDisableComposited();
-
-    // This function is called for all child windows when compositing is
-    // disabled for their parent.
-    virtual void MSWOnDisabledComposited() { }
+    virtual void SetDoubleBuffered(bool on) wxOVERRIDE;
+    virtual bool IsDoubleBuffered() const wxOVERRIDE;
 
     // synthesize a wxEVT_LEAVE_WINDOW event and set m_mouseInWindow to false
     void GenerateMouseLeave();
+
+    // virtual function for implementing internal idle
+    // behaviour
+    virtual void OnInternalIdle() wxOVERRIDE;
 
 #if wxUSE_MENUS && !defined(__WXUNIVERSAL__)
     virtual bool HandleMenuSelect(WXWORD nItem, WXWORD nFlags, WXHMENU hMenu);
@@ -578,7 +577,7 @@ public:
     virtual wxMenu* MSWFindMenuFromHMENU(WXHMENU hMenu);
 #endif // wxUSE_MENUS && !__WXUNIVERSAL__
 
-    // Return the default button for the TLW containing this window or nullptr if
+    // Return the default button for the TLW containing this window or NULL if
     // none.
     static wxButton* MSWGetDefaultButtonFor(wxWindow* win);
 
@@ -603,28 +602,27 @@ public:
     bool MSWUpdateOnDPIChange(const wxSize& oldDPI, const wxSize& newDPI);
 
 protected:
-    virtual void WXAdjustFontToOwnPPI(wxFont& font) const override;
+    virtual void WXAdjustFontToOwnPPI(wxFont& font) const wxOVERRIDE;
 
     // Called from MSWUpdateOnDPIChange() specifically to update the control
     // font, as this may need to be done differently for some specific native
     // controls. The default version updates m_font of this window.
     virtual void MSWUpdateFontOnDPIChange(const wxSize& newDPI);
 
-    // Also called from MSWUpdateOnDPIChange() but, unlike the function above,
-    // this one is called after updating all the children and just before
-    // letting the application handle the given wxDPIChangedEvent (whose
-    // Scale() functions may be useful for the overridden versions).
-    virtual void
-    MSWBeforeDPIChangedEvent(const wxDPIChangedEvent& WXUNUSED(event))
-    {
-    }
+    // this allows you to implement standard control borders without
+    // repeating the code in different classes that are not derived from
+    // wxControl
+    virtual wxBorder GetDefaultBorderForControl() const wxOVERRIDE;
 
-    // Translate wxBORDER_THEME to a standard border style or return it as is
-    // if themed border should be used, depending on CanApplyThemeBorder().
-    wxBorder DoTranslateBorder(wxBorder border) const;
+    // choose the default border for this window
+    virtual wxBorder GetDefaultBorder() const wxOVERRIDE;
+
+    // Translate wxBORDER_THEME (and other border styles if necessary to the value
+    // that makes most sense for this Windows environment
+    virtual wxBorder TranslateBorder(wxBorder border) const;
 
 #if wxUSE_MENUS_NATIVE
-    virtual bool DoPopupMenu( wxMenu *menu, int x, int y ) override;
+    virtual bool DoPopupMenu( wxMenu *menu, int x, int y ) wxOVERRIDE;
 #endif // wxUSE_MENUS_NATIVE
 
     // the window handle
@@ -644,28 +642,28 @@ protected:
     // implement the base class pure virtuals
     virtual void DoGetTextExtent(const wxString& string,
                                  int *x, int *y,
-                                 int *descent = nullptr,
-                                 int *externalLeading = nullptr,
-                                 const wxFont *font = nullptr) const override;
+                                 int *descent = NULL,
+                                 int *externalLeading = NULL,
+                                 const wxFont *font = NULL) const wxOVERRIDE;
     static void MSWDoClientToScreen( WXHWND hWnd, int *x, int *y );
     static void MSWDoScreenToClient( WXHWND hWnd, int *x, int *y );
-    virtual void DoClientToScreen( int *x, int *y ) const override;
-    virtual void DoScreenToClient( int *x, int *y ) const override;
-    virtual void DoGetPosition( int *x, int *y ) const override;
-    virtual void DoGetSize( int *width, int *height ) const override;
-    virtual void DoGetClientSize( int *width, int *height ) const override;
+    virtual void DoClientToScreen( int *x, int *y ) const wxOVERRIDE;
+    virtual void DoScreenToClient( int *x, int *y ) const wxOVERRIDE;
+    virtual void DoGetPosition( int *x, int *y ) const wxOVERRIDE;
+    virtual void DoGetSize( int *width, int *height ) const wxOVERRIDE;
+    virtual void DoGetClientSize( int *width, int *height ) const wxOVERRIDE;
     virtual void DoSetSize(int x, int y,
                            int width, int height,
-                           int sizeFlags = wxSIZE_AUTO) override;
-    virtual void DoSetClientSize(int width, int height) override;
+                           int sizeFlags = wxSIZE_AUTO) wxOVERRIDE;
+    virtual void DoSetClientSize(int width, int height) wxOVERRIDE;
 
-    virtual void DoCaptureMouse() override;
-    virtual void DoReleaseMouse() override;
+    virtual void DoCaptureMouse() wxOVERRIDE;
+    virtual void DoReleaseMouse() wxOVERRIDE;
 
-    virtual void DoEnable(bool enable) override;
+    virtual void DoEnable(bool enable) wxOVERRIDE;
 
-    virtual void DoFreeze() override;
-    virtual void DoThaw() override;
+    virtual void DoFreeze() wxOVERRIDE;
+    virtual void DoThaw() wxOVERRIDE;
 
     // this simply moves/resizes the given HWND which is supposed to be our
     // sibling (this is useful for controls which are composite at MSW level
@@ -679,10 +677,10 @@ protected:
     // from both DoSetSize() and DoSetClientSize() and would usually just call
     // ::MoveWindow() except for composite controls which will want to arrange
     // themselves inside the given rectangle
-    virtual void DoMoveWindow(int x, int y, int width, int height) override;
+    virtual void DoMoveWindow(int x, int y, int width, int height) wxOVERRIDE;
 
 #if wxUSE_TOOLTIPS
-    virtual void DoSetToolTip( wxToolTip *tip ) override;
+    virtual void DoSetToolTip( wxToolTip *tip ) wxOVERRIDE;
 
     // process TTN_NEEDTEXT message properly (i.e. fixing the bugs in
     // comctl32.dll in our code -- see the function body for more info)
@@ -743,15 +741,12 @@ protected:
     // This is used by FindItem() and is overridden in wxControl, see there.
     virtual wxWindow* MSWFindItem(long WXUNUSED(id), WXHWND WXUNUSED(hWnd)) const
     {
-        return nullptr;
+        return NULL;
     }
 
 private:
     // common part of all ctors
     void Init();
-
-    // common part of UnsubclassWin() and DissociateHandle()
-    WXHWND DoDetachHWND();
 
     // the (non-virtual) handlers for the events
     bool HandleMove(int x, int y);
@@ -794,7 +789,7 @@ protected:
         m_pendingSize = wxDefaultSize;
     }
 
-    // current defer window position operation handle (may be null)
+    // current defer window position operation handle (may be NULL)
     WXHANDLE m_hDWP;
 
     // When deferred positioning is done these hold the pending changes, and

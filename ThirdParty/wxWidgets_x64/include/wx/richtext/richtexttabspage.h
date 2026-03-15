@@ -2,6 +2,7 @@
 // Name:        wx/richtext/richtexttabspage.h
 // Purpose:     Declares the rich text formatting dialog tabs page.
 // Author:      Julian Smart
+// Modified by:
 // Created:     10/4/2006 8:03:20 AM
 // Copyright:   (c) Julian Smart
 // Licence:     wxWindows licence
@@ -63,8 +64,8 @@ public:
     void Init();
 
     /// Transfer data from/to window
-    virtual bool TransferDataFromWindow() override;
-    virtual bool TransferDataToWindow() override;
+    virtual bool TransferDataFromWindow() wxOVERRIDE;
+    virtual bool TransferDataToWindow() wxOVERRIDE;
 
     /// Sorts the tab array
     virtual void SortTabs();

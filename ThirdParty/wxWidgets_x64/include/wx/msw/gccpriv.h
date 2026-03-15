@@ -25,7 +25,12 @@
         without them being defined, better give a clearer error right now.
      */
     #if !defined(UNICODE)
-        #error "UNICODE must be defined before including this header."
+        #ifndef wxUSE_UNICODE
+            #error "wxUSE_UNICODE must be defined before including this header."
+        #endif
+        #if wxUSE_UNICODE
+            #error "UNICODE must be defined before including this header."
+        #endif
     #endif
 
     /*

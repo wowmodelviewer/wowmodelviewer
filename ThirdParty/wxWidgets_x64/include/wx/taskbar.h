@@ -2,6 +2,7 @@
 // Name:        wx/taskbar.h
 // Purpose:     wxTaskBarIcon base header and class
 // Author:      Julian Smart
+// Modified by:
 // Created:
 // Copyright:   (c) Julian Smart
 // Licence:     wxWindows licence
@@ -41,9 +42,9 @@ enum wxTaskBarIconType
 class WXDLLIMPEXP_CORE wxTaskBarIconBase : public wxEvtHandler
 {
 public:
-    wxTaskBarIconBase() = default;
+    wxTaskBarIconBase() { }
 
-#if defined(__WXGTK__) || defined(__WXX11__) || defined(__WXQT__)
+#if defined(__WXGTK__) || defined(__WXX11__) || defined(__WXMOTIF__) || defined(__WXQT__)
     static bool IsAvailable();
 #else
     static bool IsAvailable() { return true; }
@@ -64,10 +65,10 @@ protected:
     // won't be called if GetPopupMenu() returns a non-null pointer.
 
     // creates menu to be displayed when user clicks on the icon
-    virtual wxMenu *CreatePopupMenu() { return nullptr; }
+    virtual wxMenu *CreatePopupMenu() { return NULL; }
 
     // same as CreatePopupMenu but the returned menu won't be destroyed
-    virtual wxMenu *GetPopupMenu() { return nullptr; }
+    virtual wxMenu *GetPopupMenu() { return NULL; }
 
 private:
     // default events handling, calls CreatePopupMenu:
@@ -84,9 +85,9 @@ private:
 
 #if defined(__WXMSW__)
     #include "wx/msw/taskbar.h"
-#elif defined(__WXGTK__)
+#elif defined(__WXGTK20__)
     #include "wx/gtk/taskbar.h"
-#elif defined(__WXX11__)
+#elif defined(__WXGTK__) || defined(__WXX11__) || defined(__WXMOTIF__)
     #include "wx/unix/taskbarx11.h"
 #elif defined (__WXMAC__)
     #include "wx/osx/taskbarosx.h"
@@ -107,7 +108,7 @@ public:
         SetEventObject(tbIcon);
     }
 
-    wxNODISCARD virtual wxEvent *Clone() const override { return new wxTaskBarIconEvent(*this); }
+    virtual wxEvent *Clone() const wxOVERRIDE { return new wxTaskBarIconEvent(*this); }
 
 private:
     wxDECLARE_NO_ASSIGN_DEF_COPY(wxTaskBarIconEvent);

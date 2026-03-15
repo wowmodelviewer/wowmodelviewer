@@ -19,8 +19,8 @@ class WXDLLIMPEXP_XRC wxActivityIndicatorXmlHandler : public wxXmlResourceHandle
 public:
     wxActivityIndicatorXmlHandler();
 
-    virtual wxObject *DoCreateResource() override;
-    virtual bool CanHandle(wxXmlNode *node) override;
+    virtual wxObject *DoCreateResource() wxOVERRIDE;
+    virtual bool CanHandle(wxXmlNode *node) wxOVERRIDE;
 
 private:
     wxDECLARE_DYNAMIC_CLASS(wxActivityIndicatorXmlHandler);

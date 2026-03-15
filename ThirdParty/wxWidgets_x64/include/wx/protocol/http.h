@@ -14,10 +14,9 @@
 
 #if wxUSE_PROTOCOL_HTTP
 
+#include "wx/hashmap.h"
 #include "wx/protocol/protocol.h"
 #include "wx/buffer.h"
-
-#include <unordered_map>
 
 class WXDLLIMPEXP_NET wxHTTP : public wxProtocol
 {
@@ -26,13 +25,13 @@ public:
     virtual ~wxHTTP();
 
     virtual bool Connect(const wxString& host, unsigned short port);
-    virtual bool Connect(const wxString& host) override { return Connect(host, 0); }
-    virtual bool Connect(const wxSockAddress& addr, bool wait = true) override;
-    bool Abort() override;
+    virtual bool Connect(const wxString& host) wxOVERRIDE { return Connect(host, 0); }
+    virtual bool Connect(const wxSockAddress& addr, bool wait = true) wxOVERRIDE;
+    bool Abort() wxOVERRIDE;
 
-    wxInputStream *GetInputStream(const wxString& path) override;
+    wxInputStream *GetInputStream(const wxString& path) wxOVERRIDE;
 
-    wxString GetContentType() const override;
+    wxString GetContentType() const wxOVERRIDE;
     wxString GetHeader(const wxString& header) const;
     int GetResponse() const { return m_http_response; }
 
@@ -52,13 +51,10 @@ public:
     wxDEPRECATED(void SetPostBuffer(const wxString& post_buf));
 
 protected:
-    using wxHeadersMap = std::unordered_map<wxString, wxString>;
-    typedef wxHeadersMap::iterator wxHeaderIterator;
-    typedef wxHeadersMap::const_iterator wxHeaderConstIterator;
-
-    using wxCookiesMap = std::unordered_map<wxString, wxString>;
-    typedef wxCookiesMap::iterator wxCookieIterator;
-    typedef wxCookiesMap::const_iterator wxCookieConstIterator;
+    typedef wxStringToStringHashMap::iterator wxHeaderIterator;
+    typedef wxStringToStringHashMap::const_iterator wxHeaderConstIterator;
+    typedef wxStringToStringHashMap::iterator wxCookieIterator;
+    typedef wxStringToStringHashMap::const_iterator wxCookieConstIterator;
 
     bool BuildRequest(const wxString& path, const wxString& method);
     void SendHeaders();
@@ -79,9 +75,9 @@ protected:
     // internal variables:
 
     wxString m_method;
-    wxCookiesMap m_cookies;
+    wxStringToStringHashMap m_cookies;
 
-    wxHeadersMap m_headers;
+    wxStringToStringHashMap m_headers;
     bool m_read,
          m_proxy_mode;
     wxSockAddress *m_addr;

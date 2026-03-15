@@ -21,15 +21,24 @@ extern long WXDLLIMPEXP_BASE wxGetLocalTime();
 // Get number of seconds since GMT 00:00:00, Jan 1st 1970.
 extern long WXDLLIMPEXP_BASE wxGetUTCTime();
 
-typedef wxLongLong wxMilliClock_t;
-inline long wxMilliClockToLong(wxLongLong ll) { return ll.ToLong(); }
+#if wxUSE_LONGLONG
+    typedef wxLongLong wxMilliClock_t;
+    inline long wxMilliClockToLong(wxLongLong ll) { return ll.ToLong(); }
+#else
+    typedef double wxMilliClock_t;
+    inline long wxMilliClockToLong(double d) { return wx_truncate_cast(long, d); }
+#endif // wxUSE_LONGLONG
 
 // Get number of milliseconds since local time 00:00:00 Jan 1st 1970
 extern wxMilliClock_t WXDLLIMPEXP_BASE wxGetLocalTimeMillis();
 
+#if wxUSE_LONGLONG
+
 // Get the number of milliseconds or microseconds since the Epoch.
 wxLongLong WXDLLIMPEXP_BASE wxGetUTCTimeMillis();
 wxLongLong WXDLLIMPEXP_BASE wxGetUTCTimeUSec();
+
+#endif // wxUSE_LONGLONG
 
 #define wxGetCurrentTime() wxGetLocalTime()
 
@@ -39,7 +48,7 @@ wxLongLong WXDLLIMPEXP_BASE wxGetUTCTimeUSec();
     #ifdef WX_GETTIMEOFDAY_NO_TZ
         #define wxGetTimeOfDay(tv)      gettimeofday(tv)
     #else
-        #define wxGetTimeOfDay(tv)      gettimeofday((tv), nullptr)
+        #define wxGetTimeOfDay(tv)      gettimeofday((tv), NULL)
     #endif
 #endif // HAVE_GETTIMEOFDAY
 

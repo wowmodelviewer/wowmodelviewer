@@ -2,6 +2,7 @@
 // Name:        wx/richtext/richtextstyles.h
 // Purpose:     Style management for wxRichTextCtrl
 // Author:      Julian Smart
+// Modified by:
 // Created:     2005-09-30
 // Copyright:   (c) Julian Smart
 // Licence:     wxWindows licence
@@ -59,7 +60,7 @@ public:
     wxRichTextStyleDefinition(const wxString& name = wxEmptyString) { Init(); m_name = name; }
 
     /// Destructor
-    virtual ~wxRichTextStyleDefinition() = default;
+    virtual ~wxRichTextStyleDefinition() {}
 
     /// Initialises members
     void Init() {}
@@ -77,7 +78,7 @@ public:
     bool operator ==(const wxRichTextStyleDefinition& def) const { return Eq(def); }
 
     /// Override to clone the object
-    wxNODISCARD virtual wxRichTextStyleDefinition* Clone() const = 0;
+    virtual wxRichTextStyleDefinition* Clone() const = 0;
 
     /// Sets and gets the name of the style
     void SetName(const wxString& name) { m_name = name; }
@@ -136,10 +137,10 @@ public:
         wxRichTextStyleDefinition(name) {}
 
     /// Destructor
-    virtual ~wxRichTextCharacterStyleDefinition() = default;
+    virtual ~wxRichTextCharacterStyleDefinition() {}
 
     /// Clones the object
-    wxNODISCARD virtual wxRichTextStyleDefinition* Clone() const override { return new wxRichTextCharacterStyleDefinition(*this); }
+    virtual wxRichTextStyleDefinition* Clone() const wxOVERRIDE { return new wxRichTextCharacterStyleDefinition(*this); }
 
 protected:
 };
@@ -161,7 +162,7 @@ public:
         wxRichTextStyleDefinition(name) {}
 
     // Destructor
-    virtual ~wxRichTextParagraphStyleDefinition() = default;
+    virtual ~wxRichTextParagraphStyleDefinition() {}
 
     /// Sets and gets the next style
     void SetNextStyle(const wxString& name) { m_nextStyle = name; }
@@ -177,7 +178,7 @@ public:
     bool operator ==(const wxRichTextParagraphStyleDefinition& def) const;
 
     /// Clones the object
-    wxNODISCARD virtual wxRichTextStyleDefinition* Clone() const override { return new wxRichTextParagraphStyleDefinition(*this); }
+    virtual wxRichTextStyleDefinition* Clone() const wxOVERRIDE { return new wxRichTextParagraphStyleDefinition(*this); }
 
 protected:
 
@@ -202,7 +203,7 @@ public:
         wxRichTextParagraphStyleDefinition(name) { Init(); }
 
     /// Destructor
-    virtual ~wxRichTextListStyleDefinition() = default;
+    virtual ~wxRichTextListStyleDefinition() {}
 
     /// Copies from def
     void Copy(const wxRichTextListStyleDefinition& def);
@@ -214,7 +215,7 @@ public:
     bool operator ==(const wxRichTextListStyleDefinition& def) const;
 
     /// Clones the object
-    wxNODISCARD virtual wxRichTextStyleDefinition* Clone() const override { return new wxRichTextListStyleDefinition(*this); }
+    virtual wxRichTextStyleDefinition* Clone() const wxOVERRIDE { return new wxRichTextListStyleDefinition(*this); }
 
     /// Sets/gets the attributes for the given level
     void SetLevelAttributes(int i, const wxRichTextAttr& attr);
@@ -229,15 +230,15 @@ public:
 
     /// Combine the base and list style with a paragraph style, using the given indent (from which
     /// an appropriate level is found)
-    wxRichTextAttr CombineWithParagraphStyle(int indent, const wxRichTextAttr& paraStyle, wxRichTextStyleSheet* styleSheet = nullptr);
+    wxRichTextAttr CombineWithParagraphStyle(int indent, const wxRichTextAttr& paraStyle, wxRichTextStyleSheet* styleSheet = NULL);
 
     /// Combine the base and list style, using the given indent (from which
     /// an appropriate level is found)
-    wxRichTextAttr GetCombinedStyle(int indent, wxRichTextStyleSheet* styleSheet = nullptr);
+    wxRichTextAttr GetCombinedStyle(int indent, wxRichTextStyleSheet* styleSheet = NULL);
 
     /// Combine the base and list style, using the given level from which
     /// an appropriate level is found)
-    wxRichTextAttr GetCombinedStyleForLevel(int level, wxRichTextStyleSheet* styleSheet = nullptr);
+    wxRichTextAttr GetCombinedStyleForLevel(int level, wxRichTextStyleSheet* styleSheet = NULL);
 
     /// Gets the number of available levels
     int GetLevelCount() const { return 10; }
@@ -268,7 +269,7 @@ public:
         wxRichTextStyleDefinition(name) {}
 
     // Destructor
-    virtual ~wxRichTextBoxStyleDefinition() = default;
+    virtual ~wxRichTextBoxStyleDefinition() {}
 
     /// Copies from def
     void Copy(const wxRichTextBoxStyleDefinition& def);
@@ -280,7 +281,7 @@ public:
     bool operator ==(const wxRichTextBoxStyleDefinition& def) const;
 
     /// Clones the object
-    wxNODISCARD virtual wxRichTextStyleDefinition* Clone() const override { return new wxRichTextBoxStyleDefinition(*this); }
+    virtual wxRichTextStyleDefinition* Clone() const wxOVERRIDE { return new wxRichTextBoxStyleDefinition(*this); }
 
 protected:
 };
@@ -486,8 +487,8 @@ public:
 
     void Init()
     {
-        m_styleSheet = nullptr;
-        m_richTextCtrl = nullptr;
+        m_styleSheet = NULL;
+        m_richTextCtrl = NULL;
         m_applyOnSelection = false;
         m_styleType = wxRICHTEXT_STYLE_PARAGRAPH;
         m_autoSetSelection = true;
@@ -532,7 +533,7 @@ public:
     void OnIdle(wxIdleEvent& event);
 
     /// Convert units in tends of a millimetre to device units
-    int ConvertTenthsMMToPixels(wxReadOnlyDC& dc, int units) const;
+    int ConvertTenthsMMToPixels(wxDC& dc, int units) const;
 
     /// Can we set the selection based on the editor caret position?
     /// Need to override this if being used in a combobox popup
@@ -552,7 +553,7 @@ public:
 
 protected:
     /// Returns the HTML for this item
-    virtual wxString OnGetItem(size_t n) const override;
+    virtual wxString OnGetItem(size_t n) const wxOVERRIDE;
 
 private:
 
@@ -594,8 +595,8 @@ public:
     /// Member initialisation
     void Init()
     {
-        m_styleListBox = nullptr;
-        m_styleChoice = nullptr;
+        m_styleListBox = NULL;
+        m_styleChoice = NULL;
         m_dontUpdate = false;
     }
 
@@ -652,23 +653,23 @@ private:
 class wxRichTextStyleComboPopup : public wxRichTextStyleListBox, public wxComboPopup
 {
 public:
-    virtual void Init() override
+    virtual void Init() wxOVERRIDE
     {
         m_itemHere = -1; // hot item in list
         m_value = -1;
     }
 
-    virtual bool Create( wxWindow* parent ) override;
+    virtual bool Create( wxWindow* parent ) wxOVERRIDE;
 
-    virtual wxWindow *GetControl() override { return this; }
+    virtual wxWindow *GetControl() wxOVERRIDE { return this; }
 
-    virtual void SetStringValue( const wxString& s ) override;
+    virtual void SetStringValue( const wxString& s ) wxOVERRIDE;
 
-    virtual wxString GetStringValue() const override;
+    virtual wxString GetStringValue() const wxOVERRIDE;
 
     /// Can we set the selection based on the editor caret position?
-    // virtual bool CanAutoSetSelection() { return ((m_combo == nullptr) || !m_combo->IsPopupShown()); }
-    virtual bool CanAutoSetSelection() override { return false; }
+    // virtual bool CanAutoSetSelection() { return ((m_combo == NULL) || !m_combo->IsPopupShown()); }
+    virtual bool CanAutoSetSelection() wxOVERRIDE { return false; }
 
     //
     // Popup event handlers
@@ -712,11 +713,11 @@ public:
         Create(parent, id, pos, size, style);
     }
 
-    virtual ~wxRichTextStyleComboCtrl() = default;
+    virtual ~wxRichTextStyleComboCtrl() {}
 
     void Init()
     {
-        m_stylePopup = nullptr;
+        m_stylePopup = NULL;
     }
 
     bool Create(wxWindow* parent, wxWindowID id = wxID_ANY, const wxPoint& pos = wxDefaultPosition,

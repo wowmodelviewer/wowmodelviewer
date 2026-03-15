@@ -2,6 +2,7 @@
 // Name:        wx/statusbr.h
 // Purpose:     wxStatusBar class interface
 // Author:      Vadim Zeitlin
+// Modified by:
 // Created:     05.02.00
 // Copyright:   (c) Vadim Zeitlin
 // Licence:     wxWindows licence
@@ -15,8 +16,8 @@
 #if wxUSE_STATUSBAR
 
 #include "wx/control.h"
+#include "wx/list.h"
 #include "wx/dynarray.h"
-#include "wx/weakref.h"
 
 extern WXDLLIMPEXP_DATA_CORE(const char) wxStatusBarNameStr[];
 
@@ -84,11 +85,6 @@ public:
     // really restored anything
     bool PopText();
 
-    // set/get the control (child of the wxStatusBar) that will be shown in
-    // this pane.
-    void SetFieldControl(wxWindow* win) { m_control = win; }
-    wxWindow* GetFieldControl() const { return m_control; }
-
 private:
     int m_nStyle;
     int m_nWidth;     // may be negative, indicating a variable-width field
@@ -102,14 +98,9 @@ private:
 
     // is the currently shown value shown with ellipsis in the status bar?
     bool m_bEllipsized;
-
-    // remember the control that will be shown in this pane. Updated by SetFieldControl().
-    wxWindowRef m_control;
 };
 
-// This is preserved for compatibility, but is not supposed to be used by the
-// application code, consider wxStatusBar::m_panes to be a std::vector instead.
-using wxStatusBarPaneArray = wxBaseArray<wxStatusBarPane>;
+WX_DECLARE_EXPORTED_OBJARRAY(wxStatusBarPane, wxStatusBarPaneArray);
 
 // ----------------------------------------------------------------------------
 // wxStatusBar: a window near the bottom of the frame used for status info
@@ -127,8 +118,8 @@ public:
 
     // set the number of fields and call SetStatusWidths(widths) if widths are
     // given
-    virtual void SetFieldsCount(int number = 1, const int *widths = nullptr);
-    int GetFieldsCount() const { return wxSsize(m_panes); }
+    virtual void SetFieldsCount(int number = 1, const int *widths = NULL);
+    int GetFieldsCount() const { return (int)m_panes.GetCount(); }
 
     // field text
     // ----------
@@ -154,7 +145,7 @@ public:
     virtual void SetStatusWidths(int n, const int widths[]);
 
     int GetStatusWidth(int n) const
-        { return m_panes.at(n).GetWidth(); }
+        { return m_panes[n].GetWidth(); }
 
     // field styles
     // ------------
@@ -163,7 +154,7 @@ public:
     virtual void SetStatusStyles(int n, const int styles[]);
 
     int GetStatusStyle(int n) const
-        { return m_panes.at(n).GetStyle(); }
+        { return m_panes[n].GetStyle(); }
 
     // geometry
     // --------
@@ -181,48 +172,37 @@ public:
     wxSize GetBorders() const
         { return wxSize(GetBorderX(), GetBorderY()); }
 
-    // controls
-    // --------
-
-    // Add a control (child of the wxStatusBar) to be shown at the specified
-    // field position #n. Note that you must delete the control to remove it
-    // from the status bar, as simply passing _nullptr_ will not do that.
-    bool AddFieldControl(int n, wxWindow* win);
-
     // miscellaneous
     // -------------
 
     const wxStatusBarPane& GetField(int n) const
-        { return m_panes.at(n); }
+        { return m_panes[n]; }
 
     // wxWindow overrides:
 
     // don't want status bars to accept the focus at all
-    virtual bool AcceptsFocus() const override { return false; }
+    virtual bool AcceptsFocus() const wxOVERRIDE { return false; }
 
     // the client size of a toplevel window doesn't include the status bar
-    virtual bool CanBeOutsideClientArea() const override { return true; }
+    virtual bool CanBeOutsideClientArea() const wxOVERRIDE { return true; }
 
 protected:
     // called after the status bar pane text changed and should update its
     // display
     virtual void DoUpdateStatusText(int number) = 0;
 
-    // Position the added controls (added by AddFieldControl()), if any, in
-    // their corresponding destination.
-    void OnSize(wxSizeEvent& event);
 
     // wxWindow overrides:
 
 #if wxUSE_TOOLTIPS
-   virtual void DoSetToolTip( wxToolTip *tip ) override
+   virtual void DoSetToolTip( wxToolTip *tip ) wxOVERRIDE
         {
             wxASSERT_MSG(!HasFlag(wxSTB_SHOW_TIPS),
                          "Do not set tooltip(s) manually when using wxSTB_SHOW_TIPS!");
             wxWindow::DoSetToolTip(tip);
         }
 #endif // wxUSE_TOOLTIPS
-    virtual wxBorder GetDefaultBorder() const override { return wxBORDER_NONE; }
+    virtual wxBorder GetDefaultBorder() const wxOVERRIDE { return wxBORDER_NONE; }
 
 
     // internal helpers & data:

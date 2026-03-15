@@ -2,6 +2,7 @@
 // Name:        wx/datectrl.h
 // Purpose:     implements wxDatePickerCtrl
 // Author:      Vadim Zeitlin
+// Modified by:
 // Created:     2005-01-09
 // Copyright:   (c) 2005 Vadim Zeitlin <vadim@wxwidgets.org>
 // Licence:     wxWindows licence
@@ -89,17 +90,13 @@ typedef wxDatePickerCtrlCommonBase<wxDateTimePickerCtrl> wxDatePickerCtrlBase;
     #include "wx/osx/datectrl.h"
 
     #define wxHAS_NATIVE_DATEPICKCTRL
-#elif defined(__WXQT__) && !defined(__WXUNIVERSAL__)
-    #include "wx/qt/datectrl.h"
-
-    #define wxHAS_NATIVE_DATEPICKCTRL
 #else
     #include "wx/generic/datectrl.h"
 
     class WXDLLIMPEXP_ADV wxDatePickerCtrl : public wxDatePickerCtrlGeneric
     {
     public:
-        wxDatePickerCtrl() = default;
+        wxDatePickerCtrl() { }
         wxDatePickerCtrl(wxWindow *parent,
                          wxWindowID id,
                          const wxDateTime& date = wxDefaultDateTime,

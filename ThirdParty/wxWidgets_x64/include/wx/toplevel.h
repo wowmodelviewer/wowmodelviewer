@@ -3,6 +3,7 @@
 // Purpose:     declares wxTopLevelWindow class, the base class for all
 //              top level windows (such as frames and dialogs)
 // Author:      Vadim Zeitlin, Vaclav Slavik
+// Modified by:
 // Created:     06.08.01
 // Copyright:   (c) 2001 Vadim Zeitlin <zeitlin@dptmaths.ens-cachan.fr>
 //                       Vaclav Slavik <vaclav@wxwidgets.org>
@@ -73,6 +74,13 @@ extern WXDLLIMPEXP_DATA_CORE(const char) wxFrameNameStr[];
 
 #define wxTINY_CAPTION          0x0080  // clashes with wxNO_DEFAULT
 #define wxRESIZE_BORDER         0x0040  // == wxCLOSE
+
+#if WXWIN_COMPATIBILITY_2_8
+    // HORIZ and VERT styles are equivalent anyhow so don't use different names
+    // for them
+    #define wxTINY_CAPTION_HORIZ    wxTINY_CAPTION
+    #define wxTINY_CAPTION_VERT     wxTINY_CAPTION
+#endif
 
 // default style
 #define wxDEFAULT_FRAME_STYLE \
@@ -232,14 +240,16 @@ public:
         { return m_winTmpDefault ? m_winTmpDefault : m_winDefault; }
 
     // set the permanent default item, return the old default
-    wxWindow *SetDefaultItem(wxWindow *win);
+    wxWindow *SetDefaultItem(wxWindow *win)
+        { wxWindow *old = GetDefaultItem(); m_winDefault = win; return old; }
 
-    // return the temporary default item, can be null
+    // return the temporary default item, can be NULL
     wxWindow *GetTmpDefaultItem() const { return m_winTmpDefault; }
 
-    // set a temporary default item, SetTmpDefaultItem(nullptr) should be called
+    // set a temporary default item, SetTmpDefaultItem(NULL) should be called
     // soon after a call to SetTmpDefaultItem(window), return the old default
-    wxWindow *SetTmpDefaultItem(wxWindow *win);
+    wxWindow *SetTmpDefaultItem(wxWindow *win)
+        { wxWindow *old = GetDefaultItem(); m_winTmpDefault = win; return old; }
 
 
     // Class for saving/restoring fields describing the window geometry.
@@ -252,7 +262,7 @@ public:
     class GeometrySerializer
     {
     public:
-        virtual ~GeometrySerializer() = default;
+        virtual ~GeometrySerializer() {}
 
         // If saving a field returns false, it's fatal error and SaveGeometry()
         // will return false.
@@ -274,15 +284,14 @@ public:
     // -------------------------------
 
     // override some base class virtuals
-    virtual bool Destroy() override;
-    virtual bool IsTopLevel() const override { return true; }
-    virtual bool IsTopNavigationDomain(NavigationKind kind) const override;
+    virtual bool Destroy() wxOVERRIDE;
+    virtual bool IsTopLevel() const wxOVERRIDE { return true; }
+    virtual bool IsTopNavigationDomain(NavigationKind kind) const wxOVERRIDE;
     virtual bool IsVisible() const { return IsShown(); }
 
     // override to do TLW-specific layout: we resize our unique child to fill
     // the entire client area
-    virtual bool Layout() override;
-    virtual void Fit() override;
+    virtual bool Layout() wxOVERRIDE;
 
     // event handlers
     void OnCloseWindow(wxCloseEvent& event);
@@ -296,11 +305,11 @@ public:
     void OnActivate(wxActivateEvent &WXUNUSED(event)) { }
 
     // do the window-specific processing after processing the update event
-    virtual void DoUpdateWindowUI(wxUpdateUIEvent& event) override ;
+    virtual void DoUpdateWindowUI(wxUpdateUIEvent& event) wxOVERRIDE ;
 
     // a different API for SetSizeHints
-    virtual void SetMinSize(const wxSize& minSize) override;
-    virtual void SetMaxSize(const wxSize& maxSize) override;
+    virtual void SetMinSize(const wxSize& minSize) wxOVERRIDE;
+    virtual void SetMaxSize(const wxSize& maxSize) wxOVERRIDE;
 
     virtual void OSXSetModified(bool modified) { m_modified = modified; }
     virtual bool OSXIsModified() const { return m_modified; }
@@ -310,20 +319,18 @@ public:
 protected:
     // the frame client to screen translation should take account of the
     // toolbar which may shift the origin of the client area
-    virtual void DoClientToScreen(int *x, int *y) const override;
-    virtual void DoScreenToClient(int *x, int *y) const override;
+    virtual void DoClientToScreen(int *x, int *y) const wxOVERRIDE;
+    virtual void DoScreenToClient(int *x, int *y) const wxOVERRIDE;
 
     // add support for wxCENTRE_ON_SCREEN
-    virtual void DoCentre(int dir) override;
+    virtual void DoCentre(int dir) wxOVERRIDE;
 
     // no need to do client to screen translation to get our position in screen
     // coordinates: this is already the case
-    virtual void DoGetScreenPosition(int *x, int *y) const override
+    virtual void DoGetScreenPosition(int *x, int *y) const wxOVERRIDE
     {
         DoGetPosition(x, y);
     }
-
-    virtual wxSize DoGetBestClientSize() const override;
 
     // test whether this window makes part of the frame
     // (menubar, toolbar and statusbar are excluded from automatic layout)
@@ -342,25 +349,22 @@ protected:
     static int WidthDefault(int w) { return w == wxDefaultCoord ? GetDefaultSize().x : w; }
     static int HeightDefault(int h) { return h == wxDefaultCoord ? GetDefaultSize().y : h; }
 
+    // Stub virtual functions for forward binary compatibility. DO NOT USE.
+    virtual void* WXReservedTLW1(void*);
+    virtual void* WXReservedTLW2(void*);
+    virtual void* WXReservedTLW3(void*);
+
 
     // the frame icon
     wxIconBundle m_icons;
 
-    // a default window (usually a button) or nullptr
+    // a default window (usually a button) or NULL
     wxWindowRef m_winDefault;
 
-    // a temporary override of m_winDefault, use the latter if nullptr
+    // a temporary override of m_winDefault, use the latter if NULL
     wxWindowRef m_winTmpDefault;
 
     bool m_modified;
-
-private:
-    // Return true if this window uses some automatic layout mechanism.
-    bool UsesAutoLayout() const;
-
-    // Return the only child of this window if it has exactly one or null
-    // pointer otherwise.
-    wxWindow* GetUniqueChild() const;
 
     wxDECLARE_NO_COPY_CLASS(wxTopLevelWindowBase);
     wxDECLARE_EVENT_TABLE();
@@ -371,8 +375,11 @@ private:
 #if defined(__WXMSW__)
     #include "wx/msw/toplevel.h"
     #define wxTopLevelWindowNative wxTopLevelWindowMSW
-#elif defined(__WXGTK__)
+#elif defined(__WXGTK20__)
     #include "wx/gtk/toplevel.h"
+    #define wxTopLevelWindowNative wxTopLevelWindowGTK
+#elif defined(__WXGTK__)
+    #include "wx/gtk1/toplevel.h"
     #define wxTopLevelWindowNative wxTopLevelWindowGTK
 #elif defined(__WXX11__)
     #include "wx/x11/toplevel.h"
@@ -383,6 +390,9 @@ private:
 #elif defined(__WXMAC__)
     #include "wx/osx/toplevel.h"
     #define wxTopLevelWindowNative wxTopLevelWindowMac
+#elif defined(__WXMOTIF__)
+    #include "wx/motif/toplevel.h"
+    #define wxTopLevelWindowNative wxTopLevelWindowMotif
 #elif defined(__WXQT__)
     #include "wx/qt/toplevel.h"
 #define wxTopLevelWindowNative wxTopLevelWindowQt
@@ -395,7 +405,7 @@ private:
     {
     public:
         // construction
-        wxTopLevelWindow() = default;
+        wxTopLevelWindow() { }
         wxTopLevelWindow(wxWindow *parent,
                    wxWindowID winid,
                    const wxString& title,

@@ -4,6 +4,7 @@
 //              sash on each edge, allowing it to be dragged. An event
 //              is generated when the sash is released.
 // Author:      Julian Smart
+// Modified by:
 // Created:     01/02/97
 // Copyright:   (c) Julian Smart
 // Licence:     wxWindows licence
@@ -11,8 +12,6 @@
 
 #ifndef _WX_SASHWIN_H_G_
 #define _WX_SASHWIN_H_G_
-
-#include "wx/defs.h"
 
 #if wxUSE_SASH
 
@@ -225,12 +224,12 @@ public:
     void SetDragStatus(wxSashDragStatus status) { m_dragStatus = status; }
     wxSashDragStatus GetDragStatus() const { return m_dragStatus; }
 
-    wxNODISCARD virtual wxEvent *Clone() const override { return new wxSashEvent(*this); }
+    virtual wxEvent *Clone() const wxOVERRIDE { return new wxSashEvent(*this); }
 
 private:
     wxSashEdgePosition  m_edge;
     wxRect              m_dragRect;
-    wxSashDragStatus    m_dragStatus = wxSASH_STATUS_OK;
+    wxSashDragStatus    m_dragStatus;
 
 private:
     wxDECLARE_DYNAMIC_CLASS_NO_ASSIGN(wxSashEvent);

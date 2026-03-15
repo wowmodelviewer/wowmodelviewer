@@ -2,6 +2,7 @@
 // Name:        wx/msw/palette.h
 // Purpose:     wxPalette class
 // Author:      Julian Smart
+// Modified by:
 // Created:     01/02/97
 // Copyright:   (c) Julian Smart
 // Licence:     wxWindows licence
@@ -15,7 +16,7 @@
 class WXDLLIMPEXP_CORE wxPalette : public wxPaletteBase
 {
 public:
-    wxPalette() = default;
+    wxPalette() { }
     wxPalette(int n,
               const unsigned char *red, const unsigned char *green, const unsigned char *blue)
     {
@@ -25,7 +26,7 @@ public:
     bool Create(int n,
                 const unsigned char *red, const unsigned char *green, const unsigned char *blue);
 
-    virtual int GetColoursCount() const override;
+    virtual int GetColoursCount() const wxOVERRIDE;
 
     int
     GetPixel(unsigned char red, unsigned char green, unsigned char blue) const;
@@ -39,8 +40,8 @@ public:
     void SetHPALETTE(WXHPALETTE pal);
 
 protected:
-    virtual wxGDIRefData *CreateGDIRefData() const override;
-    wxNODISCARD virtual wxGDIRefData *CloneGDIRefData(const wxGDIRefData *data) const override;
+    virtual wxGDIRefData *CreateGDIRefData() const wxOVERRIDE;
+    virtual wxGDIRefData *CloneGDIRefData(const wxGDIRefData *data) const wxOVERRIDE;
 
 private:
     wxDECLARE_DYNAMIC_CLASS(wxPalette);

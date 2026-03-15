@@ -2,6 +2,7 @@
 // Name:        wx/apptrait.h
 // Purpose:     declaration of wxAppTraits and derived classes
 // Author:      Vadim Zeitlin
+// Modified by:
 // Created:     19.06.2003
 // Copyright:   (c) 2003 Vadim Zeitlin <vadim@wxwidgets.org>
 // Licence:     wxWindows licence
@@ -39,7 +40,7 @@ class WXDLLIMPEXP_BASE wxAppTraitsBase
 {
 public:
     // needed since this class declares virtual members
-    virtual ~wxAppTraitsBase() = default;
+    virtual ~wxAppTraitsBase() { }
 
     // hooks for working with the global objects, may be overridden by the user
     // ------------------------------------------------------------------------
@@ -65,8 +66,8 @@ public:
 #endif // wxUSE_FONTMAP
 
     // get the renderer to use for drawing the generic controls (return value
-    // may be null in which case the default renderer for the current platform
-    // is used); this is used in GUI only and always returns nullptr in console
+    // may be NULL in which case the default renderer for the current platform
+    // is used); this is used in GUI only and always returns NULL in console
     //
     // NB: returned pointer will be deleted by the caller
     virtual wxRendererNative *CreateRenderer() = 0;
@@ -138,9 +139,9 @@ public:
     // runtime (not compile-time) version.
     // returns wxPORT_BASE for console applications and one of the remaining
     // wxPORT_* values for GUI applications.
-    virtual wxPortId GetToolkitVersion(int *majVer = nullptr,
-                                       int *minVer = nullptr,
-                                       int *microVer = nullptr) const = 0;
+    virtual wxPortId GetToolkitVersion(int *majVer = NULL,
+                                       int *minVer = NULL,
+                                       int *microVer = NULL) const = 0;
 
     // return true if the port is using wxUniversal for the GUI, false if not
     virtual bool IsUsingUniversalWidgets() const = 0;
@@ -171,9 +172,10 @@ public:
     virtual wxString GetAssertStackTrace();
 #endif // wxUSE_STACKWALKER
 
-    // Text to be appended to the description returned by wxGetLibraryVersionInfo().
-    // Currently used for getting compile-time versions of GTK+ and Qt.
-    virtual wxString GetPlatformDescription() const = 0;
+protected:
+    // Stub virtual functions for forward binary compatibility. DO NOT USE.
+    virtual void* WXReservedAppTraits1(void*);
+    virtual void* WXReservedAppTraits2(void*);
 
 private:
     static wxSocketManager *ms_manager;
@@ -209,27 +211,27 @@ class WXDLLIMPEXP_BASE wxConsoleAppTraitsBase : public wxAppTraits
 {
 public:
 #if !wxUSE_CONSOLE_EVENTLOOP
-    virtual wxEventLoopBase *CreateEventLoop() override { return nullptr; }
+    virtual wxEventLoopBase *CreateEventLoop() wxOVERRIDE { return NULL; }
 #endif // !wxUSE_CONSOLE_EVENTLOOP
 
 #if wxUSE_LOG
-    virtual wxLog *CreateLogTarget() override;
+    virtual wxLog *CreateLogTarget() wxOVERRIDE;
 #endif // wxUSE_LOG
-    virtual wxMessageOutput *CreateMessageOutput() override;
+    virtual wxMessageOutput *CreateMessageOutput() wxOVERRIDE;
 #if wxUSE_FONTMAP
-    virtual wxFontMapper *CreateFontMapper() override;
+    virtual wxFontMapper *CreateFontMapper() wxOVERRIDE;
 #endif // wxUSE_FONTMAP
-    virtual wxRendererNative *CreateRenderer() override;
+    virtual wxRendererNative *CreateRenderer() wxOVERRIDE;
 
-    virtual bool ShowAssertDialog(const wxString& msg) override;
-    virtual bool HasStderr() override;
+    virtual bool ShowAssertDialog(const wxString& msg) wxOVERRIDE;
+    virtual bool HasStderr() wxOVERRIDE;
     virtual bool SafeMessageBox(const wxString& text,
-                                const wxString& title) override;
+                                const wxString& title) wxOVERRIDE;
 
     // the GetToolkitVersion for console application is always the same
-    wxPortId GetToolkitVersion(int *verMaj = nullptr,
-                               int *verMin = nullptr,
-                               int *verMicro = nullptr) const override
+    wxPortId GetToolkitVersion(int *verMaj = NULL,
+                               int *verMin = NULL,
+                               int *verMicro = NULL) const wxOVERRIDE
     {
         // no toolkits (wxBase is for console applications without GUI support)
         // NB: zero means "no toolkit", -1 means "not initialized yet"
@@ -240,9 +242,8 @@ public:
         return wxPORT_BASE;
     }
 
-    virtual bool IsUsingUniversalWidgets() const override { return false; }
-    virtual wxString GetDesktopEnvironment() const override { return wxEmptyString; }
-    virtual wxString GetPlatformDescription() const override { return wxEmptyString; }
+    virtual bool IsUsingUniversalWidgets() const wxOVERRIDE { return false; }
+    virtual wxString GetDesktopEnvironment() const wxOVERRIDE { return wxEmptyString; }
 };
 
 // ----------------------------------------------------------------------------
@@ -255,25 +256,25 @@ class WXDLLIMPEXP_CORE wxGUIAppTraitsBase : public wxAppTraits
 {
 public:
 #if wxUSE_LOG
-    virtual wxLog *CreateLogTarget() override;
+    virtual wxLog *CreateLogTarget() wxOVERRIDE;
 #endif // wxUSE_LOG
-    virtual wxMessageOutput *CreateMessageOutput() override;
+    virtual wxMessageOutput *CreateMessageOutput() wxOVERRIDE;
 #if wxUSE_FONTMAP
-    virtual wxFontMapper *CreateFontMapper() override;
+    virtual wxFontMapper *CreateFontMapper() wxOVERRIDE;
 #endif // wxUSE_FONTMAP
-    virtual wxRendererNative *CreateRenderer() override;
+    virtual wxRendererNative *CreateRenderer() wxOVERRIDE;
 
-    virtual bool ShowAssertDialog(const wxString& msg) override;
-    virtual bool HasStderr() override;
+    virtual bool ShowAssertDialog(const wxString& msg) wxOVERRIDE;
+    virtual bool HasStderr() wxOVERRIDE;
 
     // Win32 has its own implementation using native message box directly in
     // the base class, don't override it.
 #ifndef __WIN32__
     virtual bool SafeMessageBox(const wxString& text,
-                                const wxString& title) override;
+                                const wxString& title) wxOVERRIDE;
 #endif // !__WIN32__
 
-    virtual bool IsUsingUniversalWidgets() const override
+    virtual bool IsUsingUniversalWidgets() const wxOVERRIDE
     {
     #ifdef __WXUNIVERSAL__
         return true;
@@ -282,8 +283,7 @@ public:
     #endif
     }
 
-    virtual wxString GetDesktopEnvironment() const override { return wxEmptyString; }
-    virtual wxString GetPlatformDescription() const override { return wxEmptyString; }
+    virtual wxString GetDesktopEnvironment() const wxOVERRIDE { return wxEmptyString; }
 };
 
 #endif // wxUSE_GUI

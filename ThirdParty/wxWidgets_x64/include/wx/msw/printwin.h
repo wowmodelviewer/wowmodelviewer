@@ -2,6 +2,7 @@
 // Name:        wx/msw/printwin.h
 // Purpose:     wxWindowsPrinter, wxWindowsPrintPreview classes
 // Author:      Julian Smart
+// Modified by:
 // Created:     01/02/97
 // Copyright:   (c) Julian Smart
 // Licence:     wxWindows licence
@@ -21,14 +22,14 @@ class WXDLLIMPEXP_CORE wxWindowsPrinter : public wxPrinterBase
     wxDECLARE_DYNAMIC_CLASS(wxWindowsPrinter);
 
 public:
-    wxWindowsPrinter(wxPrintDialogData *data = nullptr);
+    wxWindowsPrinter(wxPrintDialogData *data = NULL);
 
     virtual bool Print(wxWindow *parent,
                        wxPrintout *printout,
-                       bool prompt = true) override;
+                       bool prompt = true) wxOVERRIDE;
 
-    virtual wxDC *PrintDialog(wxWindow *parent) override;
-    virtual bool Setup(wxWindow *parent) override;
+    virtual wxDC *PrintDialog(wxWindow *parent) wxOVERRIDE;
+    virtual bool Setup(wxWindow *parent) wxOVERRIDE;
 
 private:
     wxDECLARE_NO_COPY_CLASS(wxWindowsPrinter);
@@ -43,19 +44,19 @@ class WXDLLIMPEXP_CORE wxWindowsPrintPreview : public wxPrintPreviewBase
 {
 public:
     wxWindowsPrintPreview(wxPrintout *printout,
-                          wxPrintout *printoutForPrinting = nullptr,
-                          wxPrintDialogData *data = nullptr);
+                          wxPrintout *printoutForPrinting = NULL,
+                          wxPrintDialogData *data = NULL);
     wxWindowsPrintPreview(wxPrintout *printout,
                           wxPrintout *printoutForPrinting,
                           wxPrintData *data);
     virtual ~wxWindowsPrintPreview();
 
-    virtual bool Print(bool interactive) override;
-    virtual void DetermineScaling() override;
+    virtual bool Print(bool interactive) wxOVERRIDE;
+    virtual void DetermineScaling() wxOVERRIDE;
 
 protected:
 #if wxUSE_ENH_METAFILE
-    virtual bool RenderPageIntoBitmap(wxBitmap& bmp, int pageNum) override;
+    virtual bool RenderPageIntoBitmap(wxBitmap& bmp, int pageNum) wxOVERRIDE;
 #endif
 
     wxDECLARE_DYNAMIC_CLASS_NO_COPY(wxWindowsPrintPreview);

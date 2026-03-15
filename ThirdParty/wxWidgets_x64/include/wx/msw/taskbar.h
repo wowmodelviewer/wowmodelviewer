@@ -29,9 +29,9 @@ public:
     bool IsIconInstalled() const { return m_iconAdded; }
 
     // Operations
-    bool SetIcon(const wxBitmapBundle& icon, const wxString& tooltip = wxEmptyString) override;
-    bool RemoveIcon() override;
-    bool PopupMenu(wxMenu *menu) override;
+    bool SetIcon(const wxBitmapBundle& icon, const wxString& tooltip = wxEmptyString) wxOVERRIDE;
+    bool RemoveIcon() wxOVERRIDE;
+    bool PopupMenu(wxMenu *menu) wxOVERRIDE;
 
     // MSW-specific class methods
 

@@ -2,6 +2,7 @@
 // Name:        wx/msw/icon.h
 // Purpose:     wxIcon class
 // Author:      Julian Smart
+// Modified by:
 // Created:     01/02/97
 // Copyright:   (c) Julian Smart
 // Licence:     wxWindows licence
@@ -25,10 +26,10 @@
 class WXDLLIMPEXP_CORE wxIconRefData : public wxGDIImageRefData
 {
 public:
-    wxIconRefData() = default;
+    wxIconRefData() { }
     virtual ~wxIconRefData() { Free(); }
 
-    virtual void Free() override;
+    virtual void Free() wxOVERRIDE;
 };
 
 // ---------------------------------------------------------------------------
@@ -40,7 +41,7 @@ class WXDLLIMPEXP_CORE wxIcon : public wxGDIImage
 public:
     // ctors
         // default
-    wxIcon() = default;
+    wxIcon() { }
 
         // from raw data
     wxIcon(const char bits[], int width, int height);
@@ -53,6 +54,10 @@ public:
            int desiredWidth = -1, int desiredHeight = -1);
 
     wxIcon(const wxIconLocation& loc);
+
+    virtual ~wxIcon();
+
+    wxDECLARE_DEFAULT_COPY(wxIcon)
 
     virtual bool LoadFile(const wxString& name,
                           wxBitmapType type = wxICON_DEFAULT_TYPE,
@@ -75,15 +80,13 @@ public:
     // ctors, assignment operators...), but it's ok to have such function
     void CopyFromBitmap(const wxBitmap& bmp);
 
-    wxDECLARE_VARIANT_OBJECT_EXPORTED(wxIcon, WXDLLIMPEXP_CORE);
-
 protected:
-    virtual wxGDIImageRefData *CreateData() const override
+    virtual wxGDIImageRefData *CreateData() const wxOVERRIDE
     {
         return new wxIconRefData;
     }
 
-    wxNODISCARD virtual wxObjectRefData *CloneRefData(const wxObjectRefData *data) const override;
+    virtual wxObjectRefData *CloneRefData(const wxObjectRefData *data) const wxOVERRIDE;
 
     // create from XPM data
     void CreateIconFromXpm(const char* const* data);

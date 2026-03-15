@@ -21,12 +21,8 @@
 
 class /*WXDLLIMPEXP_CORE*/ wxANIFrameInfo;      // private implementation detail
 
-// For compatibility purposes, provide wxImageArray class mimicking the legacy
-// dynamic array which used to be required by wxGIFHandler::SaveAnimation():
-// now we just take a vector of images there, but we want to keep the existing
-// code using wxImageArray working (and keep it declared here because this is
-// where it used to be, even if this doesn't make much sense).
-using wxImageArray = wxBaseArray<wxImage>;
+WX_DECLARE_EXPORTED_OBJARRAY(wxANIFrameInfo, wxANIFrameInfoArray);
+WX_DECLARE_EXPORTED_OBJARRAY(wxImage, wxImageArray);
 
 // --------------------------------------------------------------------------
 // wxANIDecoder class
@@ -40,37 +36,37 @@ public:
     ~wxANIDecoder();
 
 
-    virtual wxSize GetFrameSize(unsigned int frame) const override;
-    virtual wxPoint GetFramePosition(unsigned int frame) const override;
-    virtual wxAnimationDisposal GetDisposalMethod(unsigned int frame) const override;
-    virtual long GetDelay(unsigned int frame) const override;
-    virtual wxColour GetTransparentColour(unsigned int frame) const override;
+    virtual wxSize GetFrameSize(unsigned int frame) const wxOVERRIDE;
+    virtual wxPoint GetFramePosition(unsigned int frame) const wxOVERRIDE;
+    virtual wxAnimationDisposal GetDisposalMethod(unsigned int frame) const wxOVERRIDE;
+    virtual long GetDelay(unsigned int frame) const wxOVERRIDE;
+    virtual wxColour GetTransparentColour(unsigned int frame) const wxOVERRIDE;
 
     // implementation of wxAnimationDecoder's pure virtuals
 
-    virtual bool Load( wxInputStream& stream ) override;
+    virtual bool Load( wxInputStream& stream ) wxOVERRIDE;
 
-    bool ConvertToImage(unsigned int frame, wxImage *image) const override;
+    bool ConvertToImage(unsigned int frame, wxImage *image) const wxOVERRIDE;
 
-    wxNODISCARD wxAnimationDecoder *Clone() const override
+    wxAnimationDecoder *Clone() const wxOVERRIDE
         { return new wxANIDecoder; }
-    wxAnimationType GetType() const override
+    wxAnimationType GetType() const wxOVERRIDE
         { return wxANIMATION_TYPE_ANI; }
 
 protected:
     // wxAnimationDecoder pure virtual:
-    virtual bool DoCanRead( wxInputStream& stream ) const override;
+    virtual bool DoCanRead( wxInputStream& stream ) const wxOVERRIDE;
             // modifies current stream position (see wxAnimationDecoder::CanRead)
 
 private:
     // frames stored as wxImage(s): ANI files are meant to be used mostly for animated
     // cursors and thus they do not use any optimization to encode differences between
     // two frames: they are just a list of images to display sequentially.
-    std::vector<wxImage> m_images;
+    wxImageArray m_images;
 
     // the info about each image stored in m_images.
     // NB: m_info.GetCount() may differ from m_images.GetCount()!
-    std::vector<wxANIFrameInfo> m_info;
+    wxANIFrameInfoArray m_info;
 
     // this is the wxCURHandler used to load the ICON chunk of the ANI files
     static wxCURHandler sm_handler;

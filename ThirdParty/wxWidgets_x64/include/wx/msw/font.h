@@ -2,6 +2,7 @@
 // Name:        wx/msw/font.h
 // Purpose:     wxFont class
 // Author:      Julian Smart
+// Modified by:
 // Created:     01/02/97
 // Copyright:   (c) Julian Smart
 // Licence:     wxWindows licence
@@ -20,7 +21,7 @@ class WXDLLIMPEXP_CORE wxFont : public wxFontBase
 {
 public:
     // ctors and such
-    wxFont() = default;
+    wxFont() { }
 
     wxFont(const wxFontInfo& info);
 
@@ -64,7 +65,7 @@ public:
                      underlined, face, encoding);
     }
 
-    wxFont(const wxNativeFontInfo& info, WXHFONT hFont = nullptr)
+    wxFont(const wxNativeFontInfo& info, WXHFONT hFont = NULL)
     {
         Create(info, hFont);
     }
@@ -89,33 +90,37 @@ public:
                                              encoding));
     }
 
-    bool Create(const wxNativeFontInfo& info, WXHFONT hFont = nullptr);
+    bool Create(const wxNativeFontInfo& info, WXHFONT hFont = NULL);
+
+    virtual ~wxFont();
+
+    wxDECLARE_DEFAULT_COPY(wxFont)
 
     // implement base class pure virtuals
-    virtual double GetFractionalPointSize() const override;
-    virtual wxSize GetPixelSize() const override;
-    virtual bool IsUsingSizeInPixels() const override;
-    virtual wxFontStyle GetStyle() const override;
-    virtual int GetNumericWeight() const override;
-    virtual bool GetUnderlined() const override;
-    virtual bool GetStrikethrough() const override;
-    virtual wxString GetFaceName() const override;
-    virtual wxFontEncoding GetEncoding() const override;
-    virtual const wxNativeFontInfo *GetNativeFontInfo() const override;
+    virtual double GetFractionalPointSize() const wxOVERRIDE;
+    virtual wxSize GetPixelSize() const wxOVERRIDE;
+    virtual bool IsUsingSizeInPixels() const wxOVERRIDE;
+    virtual wxFontStyle GetStyle() const wxOVERRIDE;
+    virtual int GetNumericWeight() const wxOVERRIDE;
+    virtual bool GetUnderlined() const wxOVERRIDE;
+    virtual bool GetStrikethrough() const wxOVERRIDE;
+    virtual wxString GetFaceName() const wxOVERRIDE;
+    virtual wxFontEncoding GetEncoding() const wxOVERRIDE;
+    virtual const wxNativeFontInfo *GetNativeFontInfo() const wxOVERRIDE;
 
-    virtual void SetFractionalPointSize(double pointSize) override;
-    virtual void SetPixelSize(const wxSize& pixelSize) override;
-    virtual void SetFamily(wxFontFamily family) override;
-    virtual void SetStyle(wxFontStyle style) override;
-    virtual void SetNumericWeight(int weight) override;
-    virtual bool SetFaceName(const wxString& faceName) override;
-    virtual void SetUnderlined(bool underlined) override;
-    virtual void SetStrikethrough(bool strikethrough) override;
-    virtual void SetEncoding(wxFontEncoding encoding) override;
+    virtual void SetFractionalPointSize(double pointSize) wxOVERRIDE;
+    virtual void SetPixelSize(const wxSize& pixelSize) wxOVERRIDE;
+    virtual void SetFamily(wxFontFamily family) wxOVERRIDE;
+    virtual void SetStyle(wxFontStyle style) wxOVERRIDE;
+    virtual void SetNumericWeight(int weight) wxOVERRIDE;
+    virtual bool SetFaceName(const wxString& faceName) wxOVERRIDE;
+    virtual void SetUnderlined(bool underlined) wxOVERRIDE;
+    virtual void SetStrikethrough(bool strikethrough) wxOVERRIDE;
+    virtual void SetEncoding(wxFontEncoding encoding) wxOVERRIDE;
 
     wxDECLARE_COMMON_FONT_METHODS();
 
-    virtual bool IsFixedWidth() const override;
+    virtual bool IsFixedWidth() const wxOVERRIDE;
 
     // MSW needs to modify the font object when the DPI of the window it
     // is used with changes, this function can be used to do it.
@@ -151,10 +156,10 @@ public:
     // implementation only from now on
     // -------------------------------
 
-    virtual bool IsFree() const override;
-    virtual bool RealizeResource() override;
-    virtual WXHANDLE GetResourceHandle() const override;
-    virtual bool FreeResource(bool force = false) override;
+    virtual bool IsFree() const wxOVERRIDE;
+    virtual bool RealizeResource() wxOVERRIDE;
+    virtual WXHANDLE GetResourceHandle() const wxOVERRIDE;
+    virtual bool FreeResource(bool force = false) wxOVERRIDE;
 
     // for consistency with other wxMSW classes
     WXHFONT GetHFONT() const;
@@ -163,12 +168,12 @@ protected:
     // Common helper of overloaded Create() methods.
     bool DoCreate(const wxFontInfo& info);
 
-    virtual void DoSetNativeFontInfo(const wxNativeFontInfo& info) override;
-    virtual wxFontFamily DoGetFamily() const override;
+    virtual void DoSetNativeFontInfo(const wxNativeFontInfo& info) wxOVERRIDE;
+    virtual wxFontFamily DoGetFamily() const wxOVERRIDE;
 
     // implement wxObject virtuals which are used by AllocExclusive()
-    virtual wxGDIRefData *CreateGDIRefData() const override;
-    wxNODISCARD virtual wxGDIRefData *CloneGDIRefData(const wxGDIRefData *data) const override;
+    virtual wxGDIRefData *CreateGDIRefData() const wxOVERRIDE;
+    virtual wxGDIRefData *CloneGDIRefData(const wxGDIRefData *data) const wxOVERRIDE;
 
 private:
     wxDECLARE_DYNAMIC_CLASS(wxFont);

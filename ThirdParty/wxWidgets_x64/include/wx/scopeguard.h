@@ -2,6 +2,7 @@
 // Name:        wx/scopeguard.h
 // Purpose:     declares wxScopeGuard and related macros
 // Author:      Vadim Zeitlin
+// Modified by:
 // Created:     03.07.2003
 // Copyright:   (c) 2003 Vadim Zeitlin <vadim@wxwidgets.org>
 // Licence:     wxWindows licence
@@ -79,7 +80,7 @@ public:
     bool WasDismissed() const { return m_wasDismissed; }
 
 protected:
-    ~wxScopeGuardImplBase() = default;
+    ~wxScopeGuardImplBase() { }
 
     // must be mutable for copy ctor to work
     mutable bool m_wasDismissed;
@@ -399,7 +400,7 @@ public:
 
     ~VariableNullerImpl() { wxPrivateOnScopeExit(*this); }
 
-    void Execute() { m_var = nullptr; }
+    void Execute() { m_var = NULL; }
 
 private:
     T& m_var;

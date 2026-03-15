@@ -27,10 +27,10 @@
 class WXDLLIMPEXP_CORE wxFontEnumerator
 {
 public:
-    wxFontEnumerator() = default;
+    wxFontEnumerator() {}
 
     // virtual dtor for the base class
-    virtual ~wxFontEnumerator() = default;
+    virtual ~wxFontEnumerator() {}
 
     // start enumerating font facenames (either all of them or those which
     // support the given encoding) - will result in OnFacename() being

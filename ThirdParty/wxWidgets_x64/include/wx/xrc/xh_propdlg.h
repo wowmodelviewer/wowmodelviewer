@@ -22,8 +22,8 @@ class WXDLLIMPEXP_XRC wxPropertySheetDialogXmlHandler : public wxBookCtrlXmlHand
 
 public:
     wxPropertySheetDialogXmlHandler();
-    virtual wxObject *DoCreateResource() override;
-    virtual bool CanHandle(wxXmlNode *node) override;
+    virtual wxObject *DoCreateResource() wxOVERRIDE;
+    virtual bool CanHandle(wxXmlNode *node) wxOVERRIDE;
 
 private:
     wxPropertySheetDialog *m_dialog;

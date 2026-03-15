@@ -2,6 +2,7 @@
 // Name:        wx/msw/ole/droptgt.h
 // Purpose:     declaration of the wxDropTarget class
 // Author:      Vadim Zeitlin
+// Modified by:
 // Created:     06.03.98
 // Copyright:   (c) 1998 Vadim Zeitlin <zeitlin@dptmaths.ens-cachan.fr>
 // Licence:     wxWindows licence
@@ -34,7 +35,7 @@ class WXDLLIMPEXP_CORE wxDropTarget : public wxDropTargetBase
 {
 public:
     // ctor & dtor
-    wxDropTarget(wxDataObject *dataObject = nullptr);
+    wxDropTarget(wxDataObject *dataObject = NULL);
     virtual ~wxDropTarget();
 
     // normally called by wxWindow on window creation/destruction, but might be
@@ -43,8 +44,8 @@ public:
     void Revoke(WXHWND hwnd);
 
     // provide default implementation for base class pure virtuals
-    virtual bool OnDrop(wxCoord x, wxCoord y) override;
-    virtual bool GetData() override;
+    virtual bool OnDrop(wxCoord x, wxCoord y) wxOVERRIDE;
+    virtual bool GetData() wxOVERRIDE;
 
     // Can only be called during OnXXX methods.
     wxDataFormat GetMatchingPair();

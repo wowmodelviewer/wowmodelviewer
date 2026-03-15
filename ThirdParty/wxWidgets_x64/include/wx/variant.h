@@ -2,6 +2,7 @@
 // Name:        wx/variant.h
 // Purpose:     wxVariant class, container for any type
 // Author:      Julian Smart
+// Modified by:
 // Created:     10/09/98
 // Copyright:   (c) Julian Smart
 // Licence:     wxWindows licence
@@ -56,27 +57,27 @@ class WXDLLIMPEXP_BASE wxVariantData : public wxObjectRefData
 {
     friend class wxVariant;
 public:
-    wxVariantData() = default;
+    wxVariantData() { }
 
     // Override these to provide common functionality
     virtual bool Eq(wxVariantData& data) const = 0;
 
 #if wxUSE_STD_IOSTREAM
-    virtual bool Write(std::ostream& WXUNUSED(str)) const { return false; }
+    virtual bool Write(wxSTD ostream& WXUNUSED(str)) const { return false; }
 #endif
     virtual bool Write(wxString& WXUNUSED(str)) const { return false; }
 #if wxUSE_STD_IOSTREAM
-    virtual bool Read(std::istream& WXUNUSED(str)) { return false; }
+    virtual bool Read(wxSTD istream& WXUNUSED(str)) { return false; }
 #endif
     virtual bool Read(wxString& WXUNUSED(str)) { return false; }
     // What type is it? Return a string name.
     virtual wxString GetType() const = 0;
     // If it based on wxObject return the ClassInfo.
-    virtual wxClassInfo* GetValueClassInfo() { return nullptr; }
+    virtual wxClassInfo* GetValueClassInfo() { return NULL; }
 
     // Implement this to make wxVariant::UnShare work. Returns
     // a copy of the data.
-    wxNODISCARD virtual wxVariantData* Clone() const { return nullptr; }
+    virtual wxVariantData* Clone() const { return NULL; }
 
 #if wxUSE_ANY
     // Converts value to wxAny, if possible. Return true if successful.
@@ -87,7 +88,7 @@ protected:
     // Protected dtor should make some incompatible code
     // break more louder. That is, they should do data->DecRef()
     // instead of delete data.
-    virtual ~wxVariantData() = default;
+    virtual ~wxVariantData() { }
 };
 
 /*
@@ -142,7 +143,7 @@ public:
     // ensure that the data is exclusive to this variant, and not shared
     bool Unshare();
 
-    // Make null (i.e. delete the data)
+    // Make NULL (i.e. delete the data)
     void MakeNull();
 
     // Delete data and name
@@ -230,6 +231,7 @@ public:
     inline operator wxString () const {  return MakeString(); }
     wxString GetString() const;
 
+#if wxUSE_STD_STRING
 #ifndef wxNO_IMPLICIT_WXSTRING_ENCODING
     wxVariant(const std::string& val, const wxString& name = wxEmptyString);
     bool operator==(const std::string& value) const
@@ -241,14 +243,15 @@ public:
     operator std::string() const { return (operator wxString()).ToStdString(); }
 #endif // wxNO_IMPLICIT_WXSTRING_ENCODING
 
-    wxVariant(const std::wstring& val, const wxString& name = wxEmptyString);
-    bool operator==(const std::wstring& value) const
+    wxVariant(const wxStdWideString& val, const wxString& name = wxEmptyString);
+    bool operator==(const wxStdWideString& value) const
         { return operator==(wxString(value)); }
-    bool operator!=(const std::wstring& value) const
+    bool operator!=(const wxStdWideString& value) const
         { return operator!=(wxString(value)); }
-    wxVariant& operator=(const std::wstring& value)
+    wxVariant& operator=(const wxStdWideString& value)
         { return operator=(wxString(value)); }
-    operator std::wstring() const { return (operator wxString()).ToStdWstring(); }
+    operator wxStdWideString() const { return (operator wxString()).ToStdWstring(); }
+#endif // wxUSE_STD_STRING
 
     // wxUniChar
     wxVariant(const wxUniChar& val, const wxString& name = wxEmptyString);
@@ -295,6 +298,7 @@ public:
     void operator= (wxObject* value);
     wxObject* GetWxObjectPtr() const;
 
+#if wxUSE_LONGLONG
     // wxLongLong
     wxVariant(wxLongLong, const wxString& name = wxEmptyString);
     bool operator==(wxLongLong value) const;
@@ -310,6 +314,7 @@ public:
     void operator=(wxULongLong value);
     operator wxULongLong() const { return GetULongLong(); }
     wxULongLong GetULongLong() const;
+#endif
 
     // ------------------------------
     // list operations
@@ -357,8 +362,10 @@ public:
 #if wxUSE_DATETIME
     bool Convert(wxDateTime* value) const;
 #endif // wxUSE_DATETIME
+#if wxUSE_LONGLONG
     bool Convert(wxLongLong* value) const;
     bool Convert(wxULongLong* value) const;
+  #ifdef wxLongLong_t
     bool Convert(wxLongLong_t* value) const
     {
         wxLongLong temp;
@@ -375,11 +382,13 @@ public:
         *value = temp.GetValue();
         return true;
     }
+  #endif // wxLongLong_t
+#endif // wxUSE_LONGLONG
 
 // Attributes
 protected:
-    virtual wxObjectRefData *CreateRefData() const override;
-    wxNODISCARD virtual wxObjectRefData *CloneRefData(const wxObjectRefData *data) const override;
+    virtual wxObjectRefData *CreateRefData() const wxOVERRIDE;
+    virtual wxObjectRefData *CloneRefData(const wxObjectRefData *data) const wxOVERRIDE;
 
     wxString        m_name;
 
@@ -425,7 +434,7 @@ public:
     {
     }
 
-    virtual wxAnyValueType* GetAssociatedType() override
+    virtual wxAnyValueType* GetAssociatedType() wxOVERRIDE
     {
         return wxAnyValueTypeImpl<T>::GetInstance();
     }
@@ -433,7 +442,7 @@ private:
 };
 
 #define DECLARE_WXANY_CONVERSION() \
-virtual bool GetAsAny(wxAny* any) const override; \
+virtual bool GetAsAny(wxAny* any) const wxOVERRIDE; \
 static wxVariantData* VariantDataFactory(const wxAny& any);
 
 #define _REGISTER_WXANY_CONVERSION(T, CLASSNAME, FUNC) \
@@ -464,29 +473,13 @@ REGISTER_WXANY_CONVERSION(T, CLASSNAME)
 
 #endif // wxUSE_ANY/!wxUSE_ANY
 
-// Note: these macros must be used inside "classname" declaration.
-#define wxDECLARE_VARIANT_OBJECT(classname) \
-    wxDECLARE_VARIANT_OBJECT_EXPORTED(classname, wxEMPTY_PARAMETER_VALUE)
 
-#define wxDECLARE_VARIANT_OBJECT_EXPORTED(classname,expdecl) \
-    friend expdecl classname& operator<<(classname &object, const wxVariant &variant); \
-    friend expdecl wxVariant& operator<<(wxVariant &variant, const classname &object)
-
-// These macros are deprecated, consider using wxDECLARE_VARIANT_OBJECT() above
-// instead.
 #define DECLARE_VARIANT_OBJECT(classname) \
     DECLARE_VARIANT_OBJECT_EXPORTED(classname, wxEMPTY_PARAMETER_VALUE)
 
 #define DECLARE_VARIANT_OBJECT_EXPORTED(classname,expdecl) \
 expdecl classname& operator << ( classname &object, const wxVariant &variant ); \
 expdecl wxVariant& operator << ( wxVariant &variant, const classname &object );
-
-// These macros use "wx" prefix and require a semicolon after them for
-// consistency with the rest of wx macros, but are otherwise the same as the
-// older IMPLEMENT_VARIANT_XXX macros.
-#define wxIMPLEMENT_VARIANT_OBJECT(classname) \
-    IMPLEMENT_VARIANT_OBJECT_EXPORTED(classname, wxEMPTY_PARAMETER_VALUE) \
-    struct wxDummyVariantStructFwdDecl /* to force a semicolon */
 
 #define IMPLEMENT_VARIANT_OBJECT(classname) \
     IMPLEMENT_VARIANT_OBJECT_EXPORTED(classname, wxEMPTY_PARAMETER_VALUE)
@@ -495,17 +488,17 @@ expdecl wxVariant& operator << ( wxVariant &variant, const classname &object );
 class classname##VariantData: public wxVariantData \
 { \
 public:\
-    classname##VariantData() = default; \
+    classname##VariantData() {} \
     classname##VariantData( const classname &value ) : m_value(value) { } \
 \
     classname &GetValue() { return m_value; } \
 \
-    virtual bool Eq(wxVariantData& data) const override; \
+    virtual bool Eq(wxVariantData& data) const wxOVERRIDE; \
 \
-    virtual wxString GetType() const override; \
-    virtual wxClassInfo* GetValueClassInfo() override; \
+    virtual wxString GetType() const wxOVERRIDE; \
+    virtual wxClassInfo* GetValueClassInfo() wxOVERRIDE; \
 \
-    wxNODISCARD virtual wxVariantData* Clone() const override { return new classname##VariantData(m_value); } \
+    virtual wxVariantData* Clone() const wxOVERRIDE { return new classname##VariantData(m_value); } \
 \
     DECLARE_WXANY_CONVERSION() \
 protected:\
@@ -577,7 +570,7 @@ bool classname##VariantData::Eq(wxVariantData& data) const \
 
 #define wxGetVariantCast(var,classname) \
     ((classname*)(var.IsValueKindOf(&classname::ms_classInfo) ?\
-                  var.GetWxObjectPtr() : nullptr));
+                  var.GetWxObjectPtr() : NULL));
 
 // Replacement for using wxDynamicCast on a wxVariantData object
 #ifndef wxNO_RTTI
@@ -588,13 +581,6 @@ bool classname##VariantData::Eq(wxVariantData& data) const \
 
 extern wxVariant WXDLLIMPEXP_BASE wxNullVariant;
 
-#else // !wxUSE_VARIANT
-
-// Define these macros to allow using them without checking for wxUSE_VARIANT
-// and simply do nothing in them in this case.
-#define wxDECLARE_VARIANT_OBJECT(classname)
-#define wxDECLARE_VARIANT_OBJECT_EXPORTED(classname,expdecl)
-
-#endif // wxUSE_VARIANT/!wxUSE_VARIANT
+#endif // wxUSE_VARIANT
 
 #endif // _WX_VARIANT_H_

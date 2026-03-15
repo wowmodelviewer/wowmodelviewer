@@ -2,6 +2,7 @@
 // Name:        wx/aui/dockart.h
 // Purpose:     wxaui: wx advanced user interface - docking window manager
 // Author:      Benjamin I. Williams
+// Modified by:
 // Created:     2005-05-17
 // Copyright:   (C) Copyright 2005, Kirix Corporation, All Rights Reserved.
 // Licence:     wxWindows Library Licence, Version 3.1
@@ -22,9 +23,6 @@
 #include "wx/brush.h"
 #include "wx/bmpbndl.h"
 #include "wx/colour.h"
-#include "wx/font.h"
-
-class WXDLLIMPEXP_FWD_AUI wxAuiPaneInfo;
 
 // dock art provider code - a dock provider provides all drawing
 // functionality to the wxAui dock manager.  This allows the dock
@@ -34,17 +32,10 @@ class WXDLLIMPEXP_AUI wxAuiDockArt
 {
 public:
 
-    wxAuiDockArt() = default;
-    virtual ~wxAuiDockArt() = default;
+    wxAuiDockArt() { }
+    virtual ~wxAuiDockArt() { }
 
-    wxNODISCARD virtual wxAuiDockArt* Clone() = 0;
-
-    // This function should be used for querying metrics in the new code, as it
-    // will scale them by the DPI of the provided window if necessary. The
-    // older GetMetric() function is kept for compatibility and shouldn't be
-    // used outside of this class itself.
-    virtual int GetMetricForWindow(int id, wxWindow* window);
-
+    virtual wxAuiDockArt* Clone() = 0;
     virtual int GetMetric(int id) = 0;
     virtual void SetMetric(int id, int newVal) = 0;
     virtual void SetFont(int id, const wxFont& font) = 0;
@@ -102,46 +93,46 @@ public:
 
     wxAuiDefaultDockArt();
 
-    wxNODISCARD wxAuiDockArt* Clone() override;
-    int GetMetric(int metricId) override;
-    void SetMetric(int metricId, int newVal) override;
-    wxColour GetColour(int id) override;
-    void SetColour(int id, const wxColor& colour) override;
-    void SetFont(int id, const wxFont& font) override;
-    wxFont GetFont(int id) override;
+    wxAuiDockArt* Clone() wxOVERRIDE;
+    int GetMetric(int metricId) wxOVERRIDE;
+    void SetMetric(int metricId, int newVal) wxOVERRIDE;
+    wxColour GetColour(int id) wxOVERRIDE;
+    void SetColour(int id, const wxColor& colour) wxOVERRIDE;
+    void SetFont(int id, const wxFont& font) wxOVERRIDE;
+    wxFont GetFont(int id) wxOVERRIDE;
 
     void DrawSash(wxDC& dc,
                   wxWindow *window,
                   int orientation,
-                  const wxRect& rect) override;
+                  const wxRect& rect) wxOVERRIDE;
 
     void DrawBackground(wxDC& dc,
                   wxWindow *window,
                   int orientation,
-                  const wxRect& rect) override;
+                  const wxRect& rect) wxOVERRIDE;
 
     void DrawCaption(wxDC& dc,
                   wxWindow *window,
                   const wxString& text,
                   const wxRect& rect,
-                  wxAuiPaneInfo& pane) override;
+                  wxAuiPaneInfo& pane) wxOVERRIDE;
 
     void DrawGripper(wxDC& dc,
                   wxWindow *window,
                   const wxRect& rect,
-                  wxAuiPaneInfo& pane) override;
+                  wxAuiPaneInfo& pane) wxOVERRIDE;
 
     void DrawBorder(wxDC& dc,
                   wxWindow *window,
                   const wxRect& rect,
-                  wxAuiPaneInfo& pane) override;
+                  wxAuiPaneInfo& pane) wxOVERRIDE;
 
     void DrawPaneButton(wxDC& dc,
                   wxWindow *window,
                   int button,
                   int buttonState,
                   const wxRect& rect,
-                  wxAuiPaneInfo& pane) override;
+                  wxAuiPaneInfo& pane) wxOVERRIDE;
 
 #if WXWIN_COMPATIBILITY_3_0
     wxDEPRECATED_MSG("This is not intended for the public API")
@@ -150,7 +141,7 @@ public:
                   wxAuiPaneInfo& pane);
 #endif
 
-    virtual void UpdateColoursFromSystem() override;
+    virtual void UpdateColoursFromSystem() wxOVERRIDE;
 
 
 protected:

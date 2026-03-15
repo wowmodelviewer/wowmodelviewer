@@ -46,25 +46,25 @@ public:
                 const wxString& name = wxASCII_STR(wxHeaderCtrlNameStr));
 
     // Window style handling.
-    virtual void SetWindowStyleFlag(long style) override;
+    virtual void SetWindowStyleFlag(long style) wxOVERRIDE;
 
 protected:
     // Override wxWindow methods which must be implemented by a new control.
-    virtual wxSize DoGetBestSize() const override;
+    virtual wxSize DoGetBestSize() const wxOVERRIDE;
 
 private:
     // Implement base class pure virtuals.
-    virtual void DoSetCount(unsigned int count) override;
-    virtual unsigned int DoGetCount() const override;
-    virtual void DoUpdate(unsigned int idx) override;
+    virtual void DoSetCount(unsigned int count) wxOVERRIDE;
+    virtual unsigned int DoGetCount() const wxOVERRIDE;
+    virtual void DoUpdate(unsigned int idx) wxOVERRIDE;
 
-    virtual void DoScrollHorz(int dx) override;
+    virtual void DoScrollHorz(int dx) wxOVERRIDE;
 
-    virtual void DoSetColumnsOrder(const wxArrayInt& order) override;
-    virtual wxArrayInt DoGetColumnsOrder() const override;
+    virtual void DoSetColumnsOrder(const wxArrayInt& order) wxOVERRIDE;
+    virtual wxArrayInt DoGetColumnsOrder() const wxOVERRIDE;
 
     // Pure virtual method inherited from wxCompositeWindow.
-    virtual wxWindowList GetCompositeWindowParts() const override;
+    virtual wxWindowList GetCompositeWindowParts() const wxOVERRIDE;
 
     // Common part of all ctors.
     void Init();

@@ -2,6 +2,7 @@
 // Name:        wx/dialup.h
 // Purpose:     Network related wxWidgets classes and functions
 // Author:      Vadim Zeitlin
+// Modified by:
 // Created:     07.07.99
 // Copyright:   (c) Vadim Zeitlin
 // Licence:     wxWindows licence
@@ -9,8 +10,6 @@
 
 #ifndef _WX_DIALUP_H
 #define _WX_DIALUP_H
-
-#include "wx/defs.h"
 
 #if wxUSE_DIALUP_MANAGER
 
@@ -58,7 +57,7 @@ public:
     virtual bool IsOk() const = 0;
 
     // virtual dtor for any base class
-    virtual ~wxDialUpManager() = default;
+    virtual ~wxDialUpManager() { }
 
     // operations
     // ----------
@@ -177,7 +176,7 @@ public:
     bool IsOwnEvent() const { return m_id != 0; }
 
     // implement the base class pure virtual
-    wxNODISCARD virtual wxEvent *Clone() const override { return new wxDialUpEvent(*this); }
+    virtual wxEvent *Clone() const wxOVERRIDE { return new wxDialUpEvent(*this); }
 
 private:
     wxDECLARE_NO_ASSIGN_DEF_COPY(wxDialUpEvent);

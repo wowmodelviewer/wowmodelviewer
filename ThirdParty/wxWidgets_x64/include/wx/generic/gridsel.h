@@ -2,6 +2,7 @@
 // Name:        wx/generic/gridsel.h
 // Purpose:     wxGridSelection
 // Author:      Stefan Neis
+// Modified by:
 // Created:     20/02/2000
 // Copyright:   (c) Stefan Neis
 // Licence:     wxWindows licence
@@ -18,14 +19,6 @@
 
 #include "wx/vector.h"
 
-#include <memory>
-
-// Forward declaration
-namespace wxGridPrivate { class SelectionShape; }
-
-using wxSelectionShape = wxGridPrivate::SelectionShape;
-
-wxDEPRECATED_MSG("use wxGridBlockCoordsVector instead")
 typedef wxVector<wxGridBlockCoords> wxVectorGridBlockCoords;
 
 // Note: for all eventType arguments of the methods of this class wxEVT_NULL
@@ -116,22 +109,17 @@ public:
     wxArrayInt GetRowSelection() const;
     wxArrayInt GetColSelection() const;
 
-    const wxGridBlockCoordsVector& GetBlocks() const { return m_selection; }
+    wxVectorGridBlockCoords& GetBlocks() { return m_selection; }
 
     void EndSelecting();
     void CancelSelecting();
-
-    // Return the SelectionShape object. Call ComputeSelectionShape() if necessary.
-    const wxSelectionShape& GetSelectionShape(const wxRect& renderExtent);
-
-    void InvalidateSelectionShape();
 
 private:
     void SelectBlockNoEvent(const wxGridBlockCoords& block)
     {
         SelectBlock(block.GetTopRow(), block.GetLeftCol(),
                     block.GetBottomRow(), block.GetRightCol(),
-                    wxKeyboardState(), wxEVT_NULL);
+                    wxKeyboardState(), false);
     }
 
     // Really select the block and don't check for the current selection mode.
@@ -148,11 +136,8 @@ private:
     // We don't currently check if the new block is contained by several
     // existing blocks, as this would be more difficult and doesn't seem to be
     // really needed in practice.
-    void MergeOrAddBlock(wxGridBlockCoordsVector& blocks,
+    void MergeOrAddBlock(wxVectorGridBlockCoords& blocks,
                          const wxGridBlockCoords& block);
-
-    // Called each time the selection changed or scrolled to recompute m_selectionShape.
-    void ComputeSelectionShape(const wxRect& renderExtent = {});
 
     // All currently selected blocks. We expect there to be a relatively small
     // amount of them, even for very large grids, as each block must be
@@ -161,21 +146,10 @@ private:
     // Selection may be empty, but if it isn't, the last block is special, as
     // it is the current block, which is affected by operations such as
     // extending the current selection from keyboard.
-    wxGridBlockCoordsVector             m_selection;
+    wxVectorGridBlockCoords             m_selection;
 
     wxGrid                              *m_grid;
     wxGrid::wxGridSelectionModes        m_selectionMode;
-
-    // Used by wxGrid::DrawOverlaySelection() to draw a:
-    //
-    // - Simple rectangle (using wxDC::DrawRectangle() if it is empty and the bounding box is valid.
-    // - Simple polygon (using wxDC::DrawPolygon()) if it represents a simple polygon.
-    // - Poly-polygon (using wxDC::DrawPolyPolygon()) if it consists of multiple polygons.
-    //
-    std::unique_ptr<wxSelectionShape> m_selectionShape;
-
-    // See ComputeSelectionShape() definition for explanation.
-    bool m_updateHighlightedLabels = false;
 
     wxDECLARE_NO_COPY_CLASS(wxGridSelection);
 };

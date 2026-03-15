@@ -2,6 +2,7 @@
 // Name:        wx/msw/enhmeta.h
 // Purpose:     wxEnhMetaFile class for Win32
 // Author:      Vadim Zeitlin
+// Modified by:
 // Created:     13.01.00
 // Copyright:   (c) 2000 Vadim Zeitlin <zeitlin@dptmaths.ens-cachan.fr>
 // Licence:     wxWindows licence
@@ -39,10 +40,10 @@ public:
         { Free(); }
 
     // display the picture stored in the metafile on the given DC
-    bool Play(wxDC *dc, wxRect *rectBound = nullptr);
+    bool Play(wxDC *dc, wxRect *rectBound = NULL);
 
     // accessors
-    virtual bool IsOk() const override { return m_hMF != nullptr; }
+    virtual bool IsOk() const wxOVERRIDE { return m_hMF != NULL; }
 
     wxSize GetSize() const;
     int GetWidth() const { return GetSize().x; }
@@ -58,7 +59,7 @@ public:
     // Detach the HENHMETAFILE from this object, i.e. don't delete the handle
     // in the dtor -- the caller is now responsible for doing this, e.g. using
     // Free() method below.
-    WXHANDLE Detach() { WXHANDLE h = m_hMF; m_hMF = nullptr; return h; }
+    WXHANDLE Detach() { WXHANDLE h = m_hMF; m_hMF = NULL; return h; }
 
     // Destroy the given HENHMETAFILE object.
     static void Free(WXHANDLE handle);
@@ -74,8 +75,8 @@ protected:
 
     // we don't use these functions (but probably should) but have to implement
     // them as they're pure virtual in the base class
-    virtual wxGDIRefData *CreateGDIRefData() const override;
-    wxNODISCARD virtual wxGDIRefData *CloneGDIRefData(const wxGDIRefData *data) const override;
+    virtual wxGDIRefData *CreateGDIRefData() const wxOVERRIDE;
+    virtual wxGDIRefData *CloneGDIRefData(const wxGDIRefData *data) const wxOVERRIDE;
 
 private:
     wxString m_filename;
@@ -124,7 +125,7 @@ class WXDLLIMPEXP_CORE wxEnhMetaFileDataObject : public wxDataObject
 {
 public:
     // ctors
-    wxEnhMetaFileDataObject() = default;
+    wxEnhMetaFileDataObject() { }
     wxEnhMetaFileDataObject(const wxEnhMetaFile& metafile)
         : m_metafile(metafile) { }
 
@@ -136,13 +137,13 @@ public:
         { return m_metafile; }
 
     // implement base class pure virtuals
-    virtual wxDataFormat GetPreferredFormat(Direction dir) const override;
-    virtual size_t GetFormatCount(Direction dir) const override;
-    virtual void GetAllFormats(wxDataFormat *formats, Direction dir) const override;
-    virtual size_t GetDataSize(const wxDataFormat& format) const override;
-    virtual bool GetDataHere(const wxDataFormat& format, void *buf) const override;
+    virtual wxDataFormat GetPreferredFormat(Direction dir) const wxOVERRIDE;
+    virtual size_t GetFormatCount(Direction dir) const wxOVERRIDE;
+    virtual void GetAllFormats(wxDataFormat *formats, Direction dir) const wxOVERRIDE;
+    virtual size_t GetDataSize(const wxDataFormat& format) const wxOVERRIDE;
+    virtual bool GetDataHere(const wxDataFormat& format, void *buf) const wxOVERRIDE;
     virtual bool SetData(const wxDataFormat& format, size_t len,
-                         const void *buf) override;
+                         const void *buf) wxOVERRIDE;
 
 protected:
     wxEnhMetaFile m_metafile;
@@ -174,17 +175,17 @@ public:
         { return m_metafile; }
 
     // implement base class pure virtuals
-    virtual size_t GetDataSize() const override;
-    virtual bool GetDataHere(void *buf) const override;
-    virtual bool SetData(size_t len, const void *buf) override;
+    virtual size_t GetDataSize() const wxOVERRIDE;
+    virtual bool GetDataHere(void *buf) const wxOVERRIDE;
+    virtual bool SetData(size_t len, const void *buf) wxOVERRIDE;
 
-    virtual size_t GetDataSize(const wxDataFormat& WXUNUSED(format)) const override
+    virtual size_t GetDataSize(const wxDataFormat& WXUNUSED(format)) const wxOVERRIDE
         { return GetDataSize(); }
     virtual bool GetDataHere(const wxDataFormat& WXUNUSED(format),
-                             void *buf) const override
+                             void *buf) const wxOVERRIDE
         { return GetDataHere(buf); }
     virtual bool SetData(const wxDataFormat& WXUNUSED(format),
-                         size_t len, const void *buf) override
+                         size_t len, const void *buf) wxOVERRIDE
         { return SetData(len, buf); }
 
 protected:

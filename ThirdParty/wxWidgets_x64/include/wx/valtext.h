@@ -48,27 +48,27 @@ enum wxTextValidatorStyle
 class WXDLLIMPEXP_CORE wxTextValidator: public wxValidator
 {
 public:
-    wxTextValidator(long style = wxFILTER_NONE, wxString *val = nullptr);
+    wxTextValidator(long style = wxFILTER_NONE, wxString *val = NULL);
     wxTextValidator(const wxTextValidator& val);
 
-    virtual ~wxTextValidator() = default;
+    virtual ~wxTextValidator(){}
 
-    // Make a clone of this validator (or return nullptr) - currently necessary
+    // Make a clone of this validator (or return NULL) - currently necessary
     // if you're passing a reference to a validator.
     // Another possibility is to always pass a pointer to a new validator
     // (so the calling code can use a copy constructor of the relevant class).
-    wxNODISCARD virtual wxObject *Clone() const override { return new wxTextValidator(*this); }
+    virtual wxObject *Clone() const wxOVERRIDE { return new wxTextValidator(*this); }
     bool Copy(const wxTextValidator& val);
 
     // Called when the value in the window must be validated.
     // This function can pop up an error message.
-    virtual bool Validate(wxWindow *parent) override;
+    virtual bool Validate(wxWindow *parent) wxOVERRIDE;
 
     // Called to transfer data to the window
-    virtual bool TransferToWindow() override;
+    virtual bool TransferToWindow() wxOVERRIDE;
 
     // Called to transfer data from the window
-    virtual bool TransferFromWindow() override;
+    virtual bool TransferFromWindow() wxOVERRIDE;
 
     // Filter keystrokes
     void OnChar(wxKeyEvent& event);

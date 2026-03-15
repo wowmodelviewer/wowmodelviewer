@@ -2,6 +2,7 @@
 // Name:        wx/listctrl.h
 // Purpose:     wxListCtrl class
 // Author:      Vadim Zeitlin
+// Modified by:
 // Created:     04.12.99
 // Copyright:   (c) wxWidgets team
 // Licence:     wxWindows licence
@@ -41,7 +42,7 @@ extern WXDLLIMPEXP_DATA_CORE(const char) wxListCtrlNameStr[];
 class WXDLLIMPEXP_CORE wxListView : public wxListCtrl
 {
 public:
-    wxListView() = default;
+    wxListView() { }
     wxListView( wxWindow *parent,
                 wxWindowID winid = wxID_ANY,
                 const wxPoint& pos = wxDefaultPosition,

@@ -16,9 +16,7 @@
 #if wxUSE_STD_CONTAINERS
 
 #include <stack>
-
-template <typename T>
-using wxStack = std::stack<T>;
+#define wxStack std::stack
 
 #else // !wxUSE_STD_CONTAINERS
 
@@ -36,7 +34,7 @@ public:
     typedef typename container_type::size_type size_type;
     typedef typename container_type::value_type value_type;
 
-    wxStack() = default;
+    wxStack() { }
     explicit wxStack(const container_type& cont) : m_cont(cont) { }
 
     // Default copy ctor, assignment operator and dtor are ok.

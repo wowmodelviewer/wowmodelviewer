@@ -2,6 +2,7 @@
 // Name:        wx/filedlg.h
 // Purpose:     wxFileDialog base header
 // Author:      Robert Roebling
+// Modified by:
 // Created:     8/17/99
 // Copyright:   (c) Robert Roebling
 // Licence:     wxWindows licence
@@ -55,12 +56,16 @@ enum
 
 #define wxFD_DEFAULT_STYLE      wxFD_OPEN
 
+#if wxABI_VERSION >= 30201
+
 // Flags for wxFileDialog::AddShortcut().
 enum
 {
     wxFD_SHORTCUT_TOP       = 0x0001,
     wxFD_SHORTCUT_BOTTOM    = 0x0002
 };
+
+#endif // wxABI_VERSION >= 3.2.1
 
 extern WXDLLIMPEXP_DATA_CORE(const char) wxFileDialogNameStr[];
 extern WXDLLIMPEXP_DATA_CORE(const char) wxFileSelectorPromptStr[];
@@ -89,7 +94,7 @@ public:
         Create(parent, message, defaultDir, defaultFile, wildCard, style, pos, sz, name);
     }
 
-    virtual ~wxFileDialogBase() = default;
+    virtual ~wxFileDialogBase() {}
 
 
     bool Create(wxWindow *parent,
@@ -136,10 +141,13 @@ public:
         { return m_currentlySelectedFilterIndex; }
 
 
+#if defined(__WXUNIVERSAL__) || !(defined(__WXMSW__) || defined(__WXGTK20__))
+#if wxABI_VERSION >= 30201
     // Add a shortcut to the given directory in the sidebar containing such
     // shortcuts if supported.
-    virtual bool AddShortcut(const wxString& directory, int flags = 0);
-
+    bool AddShortcut(const wxString& directory, int flags = 0);
+#endif // wxABI_VERSION >= 3.2.1
+#endif // Platforms without native implementation.
 
     // A customize hook methods will be called by wxFileDialog later if this
     // function returns true, see its documentation for details.
@@ -209,17 +217,21 @@ protected:
     wxWindow* CreateExtraControlWithParent(wxWindow* parent) const;
     // returns true if control is created, also sets m_extraControl
     bool CreateExtraControl();
-    // destroy m_extraControl and reset it to nullptr
+    // destroy m_extraControl and reset it to NULL
     void DestroyExtraControl();
     // return true if SetExtraControlCreator() was called
     bool HasExtraControlCreator() const
-        { return m_extraControlCreator != nullptr; }
+        { return m_extraControlCreator != NULL; }
     // Helper function for native file dialog usage where no wx events
     // are processed.
     void UpdateExtraControlUI();
     // Helper function simply transferring data from custom controls if they
     // are used -- must be called if the dialog was accepted.
     void TransferDataFromExtraControl();
+
+    // Stub virtual functions for forward binary compatibility. DO NOT USE.
+    virtual void* WXReservedFileDialog1(void*);
+    virtual void* WXReservedFileDialog2(void*);
 
 private:
     ExtraControlCreatorFunction m_extraControlCreator;
@@ -242,7 +254,7 @@ wxFileSelector(const wxString& message = wxASCII_STR(wxFileSelectorPromptStr),
                const wxString& default_extension = wxEmptyString,
                const wxString& wildcard = wxASCII_STR(wxFileSelectorDefaultWildcardStr),
                int flags = 0,
-               wxWindow *parent = nullptr,
+               wxWindow *parent = NULL,
                int x = wxDefaultCoord, int y = wxDefaultCoord);
 
 // An extended version of wxFileSelector
@@ -250,10 +262,10 @@ WXDLLIMPEXP_CORE wxString
 wxFileSelectorEx(const wxString& message = wxASCII_STR(wxFileSelectorPromptStr),
                  const wxString& default_path = wxEmptyString,
                  const wxString& default_filename = wxEmptyString,
-                 int *indexDefaultExtension = nullptr,
+                 int *indexDefaultExtension = NULL,
                  const wxString& wildcard = wxASCII_STR(wxFileSelectorDefaultWildcardStr),
                  int flags = 0,
-                 wxWindow *parent = nullptr,
+                 wxWindow *parent = NULL,
                  int x = wxDefaultCoord, int y = wxDefaultCoord);
 
 // Ask for filename to load
@@ -261,26 +273,27 @@ WXDLLIMPEXP_CORE wxString
 wxLoadFileSelector(const wxString& what,
                    const wxString& extension,
                    const wxString& default_name = wxEmptyString,
-                   wxWindow *parent = nullptr);
+                   wxWindow *parent = NULL);
 
 // Ask for filename to save
 WXDLLIMPEXP_CORE wxString
 wxSaveFileSelector(const wxString& what,
                    const wxString& extension,
                    const wxString& default_name = wxEmptyString,
-                   wxWindow *parent = nullptr);
+                   wxWindow *parent = NULL);
 
 
 #if defined (__WXUNIVERSAL__)
     #define wxHAS_GENERIC_FILEDIALOG
     #include "wx/generic/filedlgg.h"
-#elif defined(__WXMSW__) || (defined(__WXQT__) && defined(__WINDOWS__))
-    // Note that we use wxMSW version in wxQt under Windows too because it
-    // provides functionality not available in the wxQt version (custom
-    // controls).
+#elif defined(__WXMSW__)
     #include "wx/msw/filedlg.h"
-#elif defined(__WXGTK__)
+#elif defined(__WXMOTIF__)
+    #include "wx/motif/filedlg.h"
+#elif defined(__WXGTK20__)
     #include "wx/gtk/filedlg.h"     // GTK+ > 2.4 has native version
+#elif defined(__WXGTK__)
+    #include "wx/gtk1/filedlg.h"
 #elif defined(__WXMAC__)
     #include "wx/osx/filedlg.h"
 #elif defined(__WXQT__)

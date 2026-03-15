@@ -22,8 +22,8 @@ class WXDLLIMPEXP_XRC wxBitmapButtonXmlHandler : public wxXmlResourceHandler
 
 public:
     wxBitmapButtonXmlHandler();
-    virtual wxObject *DoCreateResource() override;
-    virtual bool CanHandle(wxXmlNode *node) override;
+    virtual wxObject *DoCreateResource() wxOVERRIDE;
+    virtual bool CanHandle(wxXmlNode *node) wxOVERRIDE;
 
 private:
     typedef void (wxBitmapButton::*BitmapSetter)(const wxBitmapBundle&);
@@ -31,7 +31,7 @@ private:
     void SetBitmapIfSpecified(wxBitmapButton* button,
                               BitmapSetter setter,
                               const char* paramName,
-                              const char* paramNameAlt = nullptr);
+                              const char* paramNameAlt = NULL);
 };
 
 #endif // wxUSE_XRC && wxUSE_BMPBUTTON

@@ -27,7 +27,7 @@ public:
     }
 
     // Virtual dtor for the base class
-    virtual ~wxProtocolLog() = default;
+    virtual ~wxProtocolLog() { }
 
     // Called by wxProtocol-derived classes to actually log something
     virtual void LogRequest(const wxString& str)

@@ -13,7 +13,6 @@
 
 #include "wx/defs.h"
 #include "wx/gdiobj.h"
-#include "wx/variant.h"
 
 class WXDLLIMPEXP_FWD_CORE wxColour;
 
@@ -54,6 +53,15 @@ const unsigned char wxALPHA_OPAQUE = 0xff;
 #define wxTransparentColour wxColour(0, 0, 0, wxALPHA_TRANSPARENT)
 #define wxTransparentColor wxTransparentColour
 
+// ----------------------------------------------------------------------------
+// wxVariant support
+// ----------------------------------------------------------------------------
+
+#if wxUSE_VARIANT
+#include "wx/variant.h"
+DECLARE_VARIANT_OBJECT_EXPORTED(wxColour,WXDLLIMPEXP_CORE)
+#endif
+
 //-----------------------------------------------------------------------------
 // wxColourBase: this class has no data members, just some functions to avoid
 //               code redundancy in all native wxColour implementations
@@ -80,8 +88,9 @@ public:
     // type of a single colour component
     typedef unsigned char ChannelType;
 
-    wxColourBase() = default;
-    virtual ~wxColourBase() = default;
+    wxDECLARE_DEFAULT_COPY_AND_DEF(wxColourBase)
+
+    virtual ~wxColourBase() {}
 
 
     // Set() functions
@@ -126,15 +135,6 @@ public:
 
     virtual bool IsSolid() const
         { return true; }
-
-    bool IsTransparent() const
-        { return GetAlpha() == wxALPHA_TRANSPARENT; }
-
-    bool IsOpaque() const
-        { return GetAlpha() == wxALPHA_OPAQUE; }
-
-    bool IsTranslucent() const
-        { return GetAlpha() > wxALPHA_TRANSPARENT && GetAlpha() < wxALPHA_OPAQUE; }
 
     // implemented in colourcmn.cpp
     virtual wxString GetAsString(long flags = wxC2S_NAME | wxC2S_CSS_SYNTAX) const;
@@ -189,8 +189,6 @@ public:
     wxColour ChangeLightness(int ialpha) const;
     wxColour& MakeDisabled(unsigned char brightness = 255);
 
-    wxDECLARE_VARIANT_OBJECT_EXPORTED(wxColour, WXDLLIMPEXP_CORE);
-
 protected:
     // Some ports need Init() and while we don't, provide a stub so that the
     // ports which don't need it are not forced to define it
@@ -205,18 +203,18 @@ protected:
     // wxColour doesn't use reference counted data (at least not in all ports)
     // so provide stubs for the functions which need to be defined if we do use
     // them
-    virtual wxGDIRefData *CreateGDIRefData() const override
+    virtual wxGDIRefData *CreateGDIRefData() const wxOVERRIDE
     {
         wxFAIL_MSG( "must be overridden if used" );
 
-        return nullptr;
+        return NULL;
     }
 
-    wxNODISCARD virtual wxGDIRefData *CloneGDIRefData(const wxGDIRefData *WXUNUSED(data)) const override
+    virtual wxGDIRefData *CloneGDIRefData(const wxGDIRefData *WXUNUSED(data)) const wxOVERRIDE
     {
         wxFAIL_MSG( "must be overridden if used" );
 
-        return nullptr;
+        return NULL;
     }
 #endif
 };
@@ -230,8 +228,12 @@ WXDLLIMPEXP_CORE bool wxFromString(const wxString& str, wxColourBase* col);
 
 #if defined(__WXMSW__)
     #include "wx/msw/colour.h"
-#elif defined(__WXGTK__)
+#elif defined(__WXMOTIF__)
+    #include "wx/motif/colour.h"
+#elif defined(__WXGTK20__)
     #include "wx/gtk/colour.h"
+#elif defined(__WXGTK__)
+    #include "wx/gtk1/colour.h"
 #elif defined(__WXDFB__)
     #include "wx/generic/colour.h"
 #elif defined(__WXX11__)

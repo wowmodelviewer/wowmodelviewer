@@ -2,6 +2,7 @@
 // Name:        wx/recguard.h
 // Purpose:     declaration and implementation of wxRecursionGuard class
 // Author:      Vadim Zeitlin
+// Modified by:
 // Created:     14.08.2003
 // Copyright:   (c) 2003 Vadim Zeitlin <vadim@wxwidgets.org>
 // Licence:     wxWindows licence

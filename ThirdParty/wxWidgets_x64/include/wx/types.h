@@ -263,29 +263,41 @@ typedef wxUint32 wxDword;
     #define wxLongLongSuffix l
     #define wxLongLongFmtSpec "l"
     #define wxLongLongIsLong
-#else
-    #error "64-bit integer type must be available."
 #endif
 
-#define wxULongLong_t unsigned wxLongLong_t
 
-/*
-    wxLL() and wxULL() macros allow to define 64 bit constants in a
-    portable way.
- */
-#define wxLL(x) wxCONCAT(x, wxLongLongSuffix)
-#define wxULL(x) wxCONCAT(x, wxCONCAT(u, wxLongLongSuffix))
+#ifdef wxLongLong_t
+    #define wxULongLong_t unsigned wxLongLong_t
 
-typedef wxLongLong_t wxInt64;
-typedef wxULongLong_t wxUint64;
+    /*
+        wxLL() and wxULL() macros allow to define 64 bit constants in a
+        portable way.
+     */
+    #define wxLL(x) wxCONCAT(x, wxLongLongSuffix)
+    #define wxULL(x) wxCONCAT(x, wxCONCAT(u, wxLongLongSuffix))
 
-// These symbols are only defined for compatibility, don't use them.
-#define wxHAS_INT64 1
-#define wxUSE_LONGLONG 1
-#define wxUSE_LONGLONG_NATIVE 1
+    typedef wxLongLong_t wxInt64;
+    typedef wxULongLong_t wxUint64;
 
-#ifndef wxLongLongIsLong
-    #define wxHAS_LONG_LONG_T_DIFFERENT_FROM_LONG
+    #define wxHAS_INT64 1
+
+    #ifndef wxLongLongIsLong
+        #define wxHAS_LONG_LONG_T_DIFFERENT_FROM_LONG
+    #endif
+#elif wxUSE_LONGLONG
+    /*  these macros allow to define 64 bit constants in a portable way */
+    #define wxLL(x) wxLongLong(x)
+    #define wxULL(x) wxULongLong(x)
+
+    #define wxInt64 wxLongLong
+    #define wxUint64 wxULongLong
+
+    #define wxHAS_INT64 1
+
+#else /* !wxUSE_LONGLONG */
+
+    #define wxHAS_INT64 0
+
 #endif
 
 /*
@@ -316,14 +328,7 @@ typedef wxULongLong_t wxUint64;
         #include <sys/types.h>
     #endif
 #else /* !HAVE_SSIZE_T */
-    /* Under Windows use definitions compatible with SSIZE_T in windows.h */
-    #ifdef __WINDOWS__
-        #ifdef __WIN64__
-            typedef __int64 ssize_t;
-        #else
-            typedef long ssize_t;
-        #endif
-    #elif SIZEOF_SIZE_T == 4
+    #if SIZEOF_SIZE_T == 4
         typedef wxInt32 ssize_t;
     #elif SIZEOF_SIZE_T == 8
         typedef wxInt64 ssize_t;
@@ -336,9 +341,17 @@ typedef wxULongLong_t wxUint64;
 #endif
 
 /*
-    This macro is obsolete and defined only for compatibility, don't use.
+    We can't rely on Windows _W64 being defined as windows.h may not be
+    included so define our own equivalent: this should be used with types
+    like WXLPARAM or WXWPARAM which are 64 bit under Win64 to avoid warnings
+    each time we cast it to a pointer or a handle (which results in hundreds
+    of warnings as Win32 API often passes pointers in them)
  */
-#define wxW64
+#if defined(__VISUALC__) && (_MSC_VER < 1800)
+    #define wxW64 __w64
+#else
+    #define wxW64
+#endif
 
 /*
    Define signed and unsigned integral types big enough to contain all of long,
@@ -358,7 +371,7 @@ typedef wxULongLong_t wxUint64;
        to wxIntPtr (which we do often as this is what it is defined for) in 32
        bit build with MSVC.
      */
-    typedef ssize_t wxIntPtr;
+    typedef wxW64 ssize_t wxIntPtr;
     typedef size_t wxUIntPtr;
 #else
     /*
