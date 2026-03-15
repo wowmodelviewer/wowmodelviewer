@@ -1,10 +1,17 @@
 #include "GameDatabase.h"
 #include "dbfile.h"
 #include "CSVFile.h"
-#include <QDomElement>
-#include <QFile>
+#include <qdom.h>
+#include <qfile.h>
+#include <qiodevice.h>
+#include <qstring.h>
 #include "logger/Logger.h"
 #include "Game.h"
+
+#include <string>
+#include <vector>
+
+#include "sqlite3.h"
 
 core::GameDatabase::~GameDatabase()
 {
