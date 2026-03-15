@@ -1,10 +1,4 @@
-cmake_minimum_required(VERSION 3.5)
-
-# Enable CMAKE_MSVC_RUNTIME_LIBRARY support (CMake 3.15+ policy).
-# Without this, FindWxWidgets' USE_FILE injects /MT and overrides the default.
-if(POLICY CMP0091)
-  cmake_policy(SET CMP0091 NEW)
-endif()
+cmake_minimum_required(VERSION 3.16)
 
 project(WoWModelViewer)
 
@@ -74,7 +68,7 @@ set(CMAKE_INSTALL_PREFIX ${CASCLIB_INSTALL_LOCATION})
 # does not fall back to its bundled (older) copy.
 set(ZLIB_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/ThirdParty/include" CACHE PATH "" FORCE)
 set(ZLIB_LIBRARY "${CMAKE_SOURCE_DIR}/ThirdParty/lib/x64/zlib.lib" CACHE FILEPATH "" FORCE)
-set(CMAKE_POLICY_VERSION_MINIMUM 3.5)
+set(CMAKE_POLICY_VERSION_MINIMUM 3.16)
 add_subdirectory(ThirdParty/casclib)
 set_property(TARGET casc_static PROPERTY FOLDER "ThirdParty libraries")
 
