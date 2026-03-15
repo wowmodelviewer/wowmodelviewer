@@ -70,6 +70,10 @@ set(CASC_BUILD_SHARED_LIB OFF CACHE BOOL "Compile dynamically linked library")
 include_directories(ThirdParty/casclib/src)
 set(CASCLIB_INSTALL_LOCATION ${CMAKE_BINARY_DIR}/casclib)
 set(CMAKE_INSTALL_PREFIX ${CASCLIB_INSTALL_LOCATION})
+# Point CascLib's find_package(ZLIB) to our ThirdParty zlib 1.3.1 so it
+# does not fall back to its bundled (older) copy.
+set(ZLIB_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/ThirdParty/include" CACHE PATH "" FORCE)
+set(ZLIB_LIBRARY "${CMAKE_SOURCE_DIR}/ThirdParty/lib/x64/zlib.lib" CACHE FILEPATH "" FORCE)
 set(CMAKE_POLICY_VERSION_MINIMUM 3.5)
 add_subdirectory(ThirdParty/casclib)
 set_property(TARGET casc_static PROPERTY FOLDER "ThirdParty libraries")
