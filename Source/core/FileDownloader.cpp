@@ -12,8 +12,8 @@ void FileDownloader::get(QUrl url)
 	m_fileName = url.toString();
 	const QNetworkReply* reply = m_manager.get(request);
 	connect(reply, &QNetworkReply::finished, this, &FileDownloader::fileDownloaded);
-	connect(reply, SIGNAL(error(QNetworkReply::NetworkError)),
-	        this, SLOT(downloadError(QNetworkReply::NetworkError)));
+	connect(reply, &QNetworkReply::errorOccurred,
+			this, &FileDownloader::downloadError);
 }
 
 void FileDownloader::fileDownloaded()

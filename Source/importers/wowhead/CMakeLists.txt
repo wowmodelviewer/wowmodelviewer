@@ -16,4 +16,4 @@ set(NAME wowhead)
 add_library(${NAME} STATIC ${src} ${headers})
 set_property(TARGET ${NAME} PROPERTY FOLDER "importers")
 
-target_link_libraries(${NAME} Qt5::Core ${extralibs})
+target_link_libraries(${NAME} Qt6::Core ${extralibs})

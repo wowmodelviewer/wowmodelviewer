@@ -5,8 +5,6 @@ add_definitions(-D_WINDOWS)
 add_definitions(-DWIN32_LEAN_AND_MEAN)
 # Prevent windows.h from defining min/max macros (conflicts with glm and STL)
 add_definitions(-DNOMINMAX)
-# Suppress C++17 std::byte injection into global namespace; conflicts with Windows SDK byte typedef
-add_definitions(-D_HAS_STD_BYTE=0)
 
 # disable some visual studio annoying warnings
 # warning on stl class dll exporting

@@ -122,9 +122,10 @@ CharInfos* ArmoryImporter::importChar(QString url) const
 
 		for (const auto& item : Items)
 		{
-			const auto slot = armorySlotToCharSlot(item["internal_slot_id"].toInt());
-			result->equipment[slot] = item["id"].toInt();
-			result->itemModifierIds[slot] = item["item_appearance_modifier_id"].toInt();
+			const auto itemObj = item.toObject();
+			const auto slot = armorySlotToCharSlot(itemObj.value("internal_slot_id").toInt());
+			result->equipment[slot] = itemObj.value("id").toInt();
+			result->itemModifierIds[slot] = itemObj.value("item_appearance_modifier_id").toInt();
 		}
 
 
@@ -647,13 +648,12 @@ QByteArray ArmoryImporter::getURLData(const QString& inputUrl) const
 
 	// disable ssl handshake (error when communicating with server as certifcate is self signed)
 	auto sslConfiguration = request.sslConfiguration();
-	sslConfiguration.setProtocol(QSsl::AnyProtocol);
 	sslConfiguration.setPeerVerifyMode(QSslSocket::QueryPeer);
 	request.setSslConfiguration(sslConfiguration);
 	auto* response = manager.get(request);
 	QEventLoop eventLoop;
-	QObject::connect(response, SIGNAL(finished()), &eventLoop, SLOT(quit()));
-	QObject::connect(response, SIGNAL(error(QNetworkReply::NetworkError)), &eventLoop, SLOT(quit()));
+	QObject::connect(response, &QNetworkReply::finished, &eventLoop, &QEventLoop::quit);
+	QObject::connect(response, &QNetworkReply::errorOccurred, &eventLoop, &QEventLoop::quit);
 	eventLoop.exec();
 
 	auto htmldata = response->readAll(); // Source should be stored here

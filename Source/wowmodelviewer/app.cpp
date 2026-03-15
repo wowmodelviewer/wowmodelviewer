@@ -348,7 +348,7 @@ void WowModelViewApp::SaveSettings()
 	// Application Config Settings
 	QSettings config(QString::fromWCharArray(cfgPath.c_str()), QSettings::IniFormat);
 
-	config.setValue("Locale/LanguageID", langID);
+	config.setValue("Locale/LanguageID", static_cast<int>(langID));
 	config.setValue("Locale/LanguageName", QString::fromWCharArray(langName.c_str()));
 
 	config.setValue("Settings/Path", QString::fromWCharArray(gamePath.c_str()));

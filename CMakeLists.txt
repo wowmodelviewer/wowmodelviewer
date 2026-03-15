@@ -20,12 +20,12 @@ endif()
 message(STATUS "=== Configuring WoWModelViewer ===")
 
 # Dependencies.
-# Qt5
-message(STATUS "Finding Qt5...")
-set(QT_LOCATION "${CMAKE_SOURCE_DIR}/ThirdParty/Qt/5.13.2/msvc2017_64")
+# Qt6
+message(STATUS "Finding Qt6...")
+set(QT_LOCATION "${CMAKE_SOURCE_DIR}/ThirdParty/Qt/6.8.3/6.8.3/msvc2022_64")
 list(PREPEND CMAKE_PREFIX_PATH "${QT_LOCATION}/lib/cmake")
-find_package(Qt5 5.13.2 COMPONENTS Core Network Widgets Xml Gui REQUIRED)
-message(STATUS "  Qt5 found: ${Qt5_VERSION}")
+find_package(Qt6 6.8.3 COMPONENTS Core Network Widgets Xml Gui REQUIRED)
+message(STATUS "  Qt6 found: ${Qt6_VERSION}")
 
 # WxWidgets
 message(STATUS "Finding wxWidgets...")

@@ -215,8 +215,7 @@ bool OBJExporter::exportModelVertices(WoWModel* model, QTextStream& file, int& c
 				}
 				MakeModelFaceForwards(vert);
 				vert *= 1.0;
-				QString val;
-				val.sprintf("v %.06f %.06f %.06f", vert.x, vert.y, vert.z);
+				QString val = QString::asprintf("v %.06f %.06f %.06f", vert.x, vert.y, vert.z);
 				file << val << "\n";
 
 				vertics++;
@@ -239,8 +238,7 @@ bool OBJExporter::exportModelVertices(WoWModel* model, QTextStream& file, int& c
 			{
 				uint32 a = model->indices[b];
 				glm::vec2 tc = model->origVertices[a].texcoords;
-				QString val;
-				val.sprintf("vt %.06f %.06f", tc.x, 1 - tc.y);
+				QString val = QString::asprintf("vt %.06f %.06f", tc.x, 1 - tc.y);
 				file << val << "\n";
 				textures++;
 			}
@@ -259,8 +257,7 @@ bool OBJExporter::exportModelVertices(WoWModel* model, QTextStream& file, int& c
 			{
 				uint16 a = model->indices[b];
 				glm::vec3 n = model->origVertices[a].normal;
-				QString val;
-				val.sprintf("vn %.06f %.06f %.06f", n.x, n.y, n.z);
+				QString val = QString::asprintf("vn %.06f %.06f %.06f", n.x, n.y, n.z);
 				file << val << "\n";
 				normals++;
 			}
@@ -285,8 +282,7 @@ bool OBJExporter::exportModelVertices(WoWModel* model, QTextStream& file, int& c
 
 			int g = geoset->id;
 
-			QString val;
-			val.sprintf("Geoset_%03i", g);
+			QString val = QString::asprintf("Geoset_%03i", g);
 			QString matName = QString(model->modelname.c_str()) + "_" + val;
 			matName.replace("\\", "_");
 			QString partName = matName;
@@ -353,8 +349,7 @@ bool OBJExporter::exportModelMaterials(WoWModel* model, QTextStream& file, QStri
 			float amb = 0.25f;
 			glm::vec4 diff = p->ocol;
 
-			QString val;
-			val.sprintf("Geoset_%03i", model->geosets[p->geoIndex]->id);
+			QString val = QString::asprintf("Geoset_%03i", model->geosets[p->geoIndex]->id);
 			QString material = QString(model->modelname.c_str()) + "_" + val;
 			material.replace("\\", "_");
 			if (p->unlit == true)
@@ -373,14 +368,14 @@ bool OBJExporter::exportModelMaterials(WoWModel* model, QTextStream& file, QStri
 
 			file << "newmtl " << material << "\n";
 			file << "illum 2" << "\n";
-			val.sprintf("Kd %.06f %.06f %.06f", diff.x, diff.y, diff.z);
+			val = QString::asprintf("Kd %.06f %.06f %.06f", diff.x, diff.y, diff.z);
 			file << val << "\n";
-			val.sprintf("Ka %.06f %.06f %.06f", amb, amb, amb);
+			val = QString::asprintf("Ka %.06f %.06f %.06f", amb, amb, amb);
 			file << val << "\n";
-			val.sprintf("Ks %.06f %.06f %.06f", p->ecol.x, p->ecol.y, p->ecol.z);
+			val = QString::asprintf("Ks %.06f %.06f %.06f", p->ecol.x, p->ecol.y, p->ecol.z);
 			file << val << "\n";
 			file << "Ke 0.000000 0.000000 0.000000" << "\n";
-			val.sprintf("Ns %0.6f", 0.0f);
+			val = QString::asprintf("Ns %0.6f", 0.0f);
 			file << val << "\n";
 
 			file << "map_Kd " << tex << "\n";

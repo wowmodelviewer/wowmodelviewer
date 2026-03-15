@@ -148,8 +148,8 @@ QByteArray WowheadImporter::getURLData(QString inputUrl) const
 	request.setRawHeader("User-Agent", "WoWModelViewer");
 	QNetworkReply* response = manager.get(request);
 	QEventLoop eventLoop;
-	QObject::connect(response, SIGNAL(finished()), &eventLoop, SLOT(quit()));
-	QObject::connect(response, SIGNAL(error(QNetworkReply::NetworkError)), &eventLoop, SLOT(quit()));
+	QObject::connect(response, &QNetworkReply::finished, &eventLoop, &QEventLoop::quit);
+	QObject::connect(response, &QNetworkReply::errorOccurred, &eventLoop, &QEventLoop::quit);
 	eventLoop.exec();
 
 	QByteArray htmldata = response->readAll(); // Source should be stored here

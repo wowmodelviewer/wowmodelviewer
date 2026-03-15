@@ -697,7 +697,7 @@ void ModelViewer::LoadSession()
 	for (int i = 0; i < 16; i++)
 	{
 		wxColour custCol;
-		colStr = config.value(QString("Session/bgCustCol%1").arg(i), wxEmptyString).toString().toStdWString();
+		colStr = config.value(QString("Session/bgCustCol%1").arg(i), QString()).toString().toStdWString();
 		if ((colStr != wxEmptyString) && custCol.Set(colStr))
 			bgDialogData.SetCustomColour(i, custCol);
 	}

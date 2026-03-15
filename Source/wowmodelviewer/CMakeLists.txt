@@ -154,10 +154,10 @@ target_link_libraries(${NAME}
   armory
   wowhead
   ${CMAKE_SOURCE_DIR}/ThirdParty/lib/x64/libfbxsdk.lib
-  Qt5::Xml
-  Qt5::Gui
-  Qt5::Network
-  Qt5::Widgets
+  Qt6::Xml
+  Qt6::Gui
+  Qt6::Network
+  Qt6::Widgets
   ${wxWidgets_LIBRARIES}
   ${CMAKE_SOURCE_DIR}/ThirdParty/lib/x64/zlib.lib
   ${CMAKE_SOURCE_DIR}/ThirdParty/lib/x64/libpng.lib
@@ -169,16 +169,16 @@ install(TARGETS ${NAME} RUNTIME DESTINATION ${BIN_DIR})
 
 # additional files needed to let WMV correctly works
 set(QT_BIN_DIR  ${QT_LOCATION}/bin)
-set(QT_FILES ${QT_BIN_DIR}/Qt5Core.dll
-             ${QT_BIN_DIR}/Qt5Cored.dll
-             ${QT_BIN_DIR}/Qt5Gui.dll
-             ${QT_BIN_DIR}/Qt5Guid.dll
-             ${QT_BIN_DIR}/Qt5Network.dll
-             ${QT_BIN_DIR}/Qt5Networkd.dll
-             ${QT_BIN_DIR}/Qt5Widgets.dll
-             ${QT_BIN_DIR}/Qt5Widgetsd.dll
-             ${QT_BIN_DIR}/Qt5Xml.dll
-             ${QT_BIN_DIR}/Qt5Xmld.dll)
+set(QT_FILES ${QT_BIN_DIR}/Qt6Core.dll
+             ${QT_BIN_DIR}/Qt6Cored.dll
+             ${QT_BIN_DIR}/Qt6Gui.dll
+             ${QT_BIN_DIR}/Qt6Guid.dll
+             ${QT_BIN_DIR}/Qt6Network.dll
+             ${QT_BIN_DIR}/Qt6Networkd.dll
+             ${QT_BIN_DIR}/Qt6Widgets.dll
+             ${QT_BIN_DIR}/Qt6Widgetsd.dll
+             ${QT_BIN_DIR}/Qt6Xml.dll
+             ${QT_BIN_DIR}/Qt6Xmld.dll)
 
 set(QT_PLUGIN_DIR ${QT_LOCATION}/plugins)
 set(QT_PLUGIN_SYS_FILES ${QT_PLUGIN_DIR}/platforms/qminimal.dll
@@ -188,12 +188,10 @@ set(QT_PLUGIN_SYS_FILES ${QT_PLUGIN_DIR}/platforms/qminimal.dll
                         ${QT_PLUGIN_DIR}/platforms/qwindows.dll
                         ${QT_PLUGIN_DIR}/platforms/qwindowsd.dll)
 
-set(QT_PLUGIN_IMAGE_FILES ${QT_PLUGIN_DIR}/imageformats/qtga.dll
-                          ${QT_PLUGIN_DIR}/imageformats/qtgad.dll)
+set(QT_PLUGIN_TLS_FILES ${QT_PLUGIN_DIR}/tls/qschannelbackend.dll
+                        ${QT_PLUGIN_DIR}/tls/qschannelbackendd.dll)
 
 set(EXTRA_FILES ${CMAKE_SOURCE_DIR}/bin_support/vcredist_x64.exe
-                ${CMAKE_SOURCE_DIR}/ThirdParty/lib/libssl-1_1-x64.dll
-                ${CMAKE_SOURCE_DIR}/ThirdParty/lib/libcrypto-1_1-x64.dll
                 ${CMAKE_SOURCE_DIR}/bin_support/wow/listfile.csv
                 ${CMAKE_SOURCE_DIR}/bin_support/Encryption/extraEncryptionKeys.csv)
 
@@ -201,7 +199,7 @@ set(files ${QT_FILES} ${EXTRA_FILES})
 
 install(FILES ${files} DESTINATION ${BIN_DIR})
 install(FILES ${QT_PLUGIN_SYS_FILES} DESTINATION ${BIN_DIR}platforms)
-install(FILES ${QT_PLUGIN_IMAGE_FILES} DESTINATION ${BIN_DIR}plugins/imageformats)
+install(FILES ${QT_PLUGIN_TLS_FILES} DESTINATION ${BIN_DIR}plugins/tls)
 install(FILES ${wow9_2_files} DESTINATION ${CMAKE_SOURCE_DIR}/bin/games/wow/9.2)
 install(FILES ${wow10_0_files} DESTINATION ${CMAKE_SOURCE_DIR}/bin/games/wow/10.0)
 install(FILES ${wow10_1_files} DESTINATION ${CMAKE_SOURCE_DIR}/bin/games/wow/10.1)

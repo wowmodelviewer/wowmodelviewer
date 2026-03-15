@@ -1,6 +1,7 @@
 #pragma once
 
 #include <map>
+#include <GL/glew.h>
 #include <QString>
 // ReSharper disable once CppUnusedIncludeDirective
 #include "GameFile.h"

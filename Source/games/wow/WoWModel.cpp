@@ -1,6 +1,7 @@
 #include "WoWModel.h"
 #include <algorithm>
 #include <cassert>
+#include <ostream>
 #include <sstream>
 #include <vector>
 #include <map>
@@ -20,6 +21,8 @@
 #include "glm/gtc/epsilon.hpp"
 #include "glm/gtc/type_ptr.hpp"
 #include "glm/gtx/norm.hpp"
+
+using std::endl;
 
 #define GL_BUFFER_OFFSET(i) ((char *)(0) + (i))
 
