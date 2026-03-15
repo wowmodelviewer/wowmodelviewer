@@ -17,6 +17,7 @@ jobs:
         uses: actions/checkout@v6
         with:
           submodules: recursive
+          lfs: true
 
       # Required to enable vcpkg's built-in GitHub Actions binary cache backend.
       # Packages built by vcpkg are stored per-package in the Actions cache so
