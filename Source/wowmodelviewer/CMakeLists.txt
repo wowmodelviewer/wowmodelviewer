@@ -84,7 +84,6 @@ set(cmake_files ${CMAKE_SOURCE_DIR}/cmake/common.cmake
 source_group("cmake" FILES ${cmake_files})
 
 set(common_files 
-                 wowmodelviewer.json
                  ${CMAKE_SOURCE_DIR}/Installers/Windows/NSIS/WMVInstallerMUI.nsi
                  ${CMAKE_SOURCE_DIR}/.github/workflows/build.yml)
 
