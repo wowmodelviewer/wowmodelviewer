@@ -27,6 +27,7 @@
 #include "WoWDatabase.h"
 #include "WoWFolder.h"
 #include "logger/Logger.h"
+#include "string_utils.h"
 #include <QSettings>
 #include <QCoreApplication>
 #include <QNetworkAccessManager>
@@ -1918,12 +1919,12 @@ void ModelViewer::LoadWoW()
 	SetStatusText(wxString(GAMEDIRECTORY.locale().toStdWString()), 2);
 
 	// init file list
-	QStringList ver = GAMEDIRECTORY.version().split('.');
+	auto ver = core::split(GAMEDIRECTORY.version().toStdString(), '.');
 
-	const QString baseConfigFolder = "games/wow/" + ver[0] + "." + ver[1] + "/";
+	const std::string baseConfigFolder = "games/wow/" + ver[0] + "." + ver[1] + "/";
 
 	LOG_INFO << "Using following folder to read game info" << baseConfigFolder;
-	core::Game::instance().setConfigFolder(baseConfigFolder.toStdString());
+	core::Game::instance().setConfigFolder(baseConfigFolder);
 
 	// Range 5-50: Loading file list (heaviest operation)
 	loadProgress.Update(5, wxT("Loading file list... (5%)"));

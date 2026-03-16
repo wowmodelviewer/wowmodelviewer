@@ -9,11 +9,11 @@
 #include <map>
 #include <utility>
 #include <fstream>
+#include <regex>
 #include <string>
 
-#include <QRegularExpression>
-
 #include "CASCFile.h"
+#include "string_utils.h"
 #include "logger/Logger.h"
 
 CASCFolder::CASCFolder()
@@ -97,56 +97,53 @@ void CASCFolder::initBuildInfo()
 	if (!std::getline(file, stdline))
 		return;
 
-	QString line = QString::fromStdString(stdline);
-	QStringList headers = line.split('|');
+	auto headers = core::split(stdline, '|');
 	int activeIndex = 0;
 	int versionIndex = 0;
 	int tagIndex = 0;
 	int productIndex = 0;
-	for (int index = 0; index < headers.size(); index++)
+	for (int index = 0; index < static_cast<int>(headers.size()); index++)
 	{
-		if (headers[index].contains("Active", Qt::CaseInsensitive))
+		if (core::containsIgnoreCase(headers[index], "Active"))
 			activeIndex = index;
-		else if (headers[index].contains("Version", Qt::CaseInsensitive))
+		else if (core::containsIgnoreCase(headers[index], "Version"))
 			versionIndex = index;
-		else if (headers[index].contains("Tags", Qt::CaseInsensitive))
+		else if (core::containsIgnoreCase(headers[index], "Tags"))
 			tagIndex = index;
-		else if (headers[index].contains("Product", Qt::CaseInsensitive))
+		else if (core::containsIgnoreCase(headers[index], "Product"))
 			productIndex = index;
 	}
 
 	// now loop across file lines with actual values
+	const std::regex re(R"(^(\d+).(\d+).(\d+).(\d+)$)");
 	while (std::getline(file, stdline))
 	{
-		line = QString::fromStdString(stdline);
-		QString version;
-		QStringList values = line.split('|');
+		std::string version;
+		auto values = core::split(stdline, '|');
 
 		// if inactive config, skip it
 		if (values[activeIndex] == "0")
 			continue;
 
 		// grab version for this line
-		QRegularExpression re(R"(^(\d+).(\d+).(\d+).(\d+)$)");
-		QRegularExpressionMatch result = re.match(values[versionIndex]);
-		if (result.hasMatch())
-			version = result.captured(1) + "." + result.captured(2) + "." + result.captured(3) + "." + result.
-				captured(4);
+		std::smatch result;
+		if (std::regex_match(values[versionIndex], result, re))
+			version = result[1].str() + "." + result[2].str() + "." + result[3].str() + "." + result[4].str();
 
 		// grab product name for this line
-		const QString product = values[productIndex];
+		const std::string product = values[productIndex];
 
 		// grab locale(s) for this line
-		values = values[tagIndex].split(':');
-		for (const auto& value : values)
+		auto tagValues = core::split(values[tagIndex], ':');
+		for (const auto& value : tagValues)
 		{
-			if (value.contains("text?"))
+			if (value.find("text?") != std::string::npos)
 			{
-				QStringList tags = value.split(" ");
+				auto tags = core::split(value, ' ');
 				core::GameConfig config;
-				config.locale = tags[tags.size() - 2];
-				config.version = version;
-				config.product = product;
+				config.locale = QString::fromStdString(tags[tags.size() - 2]);
+				config.version = QString::fromStdString(version);
+				config.product = QString::fromStdString(product);
 				m_configs.push_back(config);
 			}
 		}
@@ -188,26 +185,25 @@ void CASCFolder::addExtraEncryptionKeys()
 {
 	std::ifstream tactKeys("extraEncryptionKeys.csv");
 
-	if (tactKeys.is_open())
+		if (tactKeys.is_open())
 	{
 		std::string stdline;
 		while (std::getline(tactKeys, stdline))
 		{
-			QString line = QString::fromStdString(stdline);
-			if (line.startsWith("##") || line.startsWith("\"##"))
+			if (stdline.starts_with("##") || stdline.starts_with("\"##"))
 				// ignore lines beginning with ##, useful for adding comments.
 				continue;
 
-			QStringList lineData = line.split(';');
+			auto lineData = core::split(stdline, ';');
 			if (lineData.size() != 2)
 				continue;
-			QString keyName = lineData.at(0);
-			QString keyValue = lineData.at(1);
-			if (keyName.isEmpty() || keyValue.isEmpty())
+			const std::string& keyName = lineData[0];
+			const std::string& keyValue = lineData[1];
+			if (keyName.empty() || keyValue.empty())
 				continue;
 
-			bool ok;
-			const bool ok2 = CascAddStringEncryptionKey(hStorage, keyName.toULongLong(&ok, 16), keyValue.toStdString().c_str());
+			const unsigned long long keyNameVal = std::stoull(keyName, nullptr, 16);
+			const bool ok2 = CascAddStringEncryptionKey(hStorage, keyNameVal, keyValue.c_str());
 			if (!ok2)
 				LOG_ERROR << "Failed to add TACT key from file, Name:" << keyName << ", Value:" << keyValue;
 		}

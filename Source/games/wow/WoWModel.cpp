@@ -17,6 +17,7 @@
 #include "ModelTransparency.h"
 #include "video.h"
 #include "logger/Logger.h"
+#include "string_utils.h"
 #include <QXmlStreamWriter>
 #include "glm/gtc/epsilon.hpp"
 #include "glm/gtc/type_ptr.hpp"
@@ -458,8 +459,11 @@ void WoWModel::initCommon()
 		model24500 = true;
 
 	modelname = tempname.toStdString();
-	QStringList list = tempname.split("\\");
-	setName(list[list.size() - 1].replace(".m2", "").toStdString());
+	auto list = core::split(modelname, '\\');
+	auto lastName = list[list.size() - 1];
+	if (auto pos = lastName.find(".m2"); pos != std::string::npos)
+		lastName.erase(pos, 3);
+	setName(lastName);
 
 	// Error check
 	// 10 1 0 0 = WoW 5.0 models (as of 15464)

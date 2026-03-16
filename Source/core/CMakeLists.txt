@@ -43,6 +43,7 @@ set(headers CharInfos.h
       MemoryUtils.h
       Model.h
       NPCInfos.h
+      string_utils.h
       metaclasses/BaseIterator.h
       metaclasses/Component.h
       metaclasses/Container.h

@@ -2,9 +2,9 @@
 #include <filesystem>
 #include <fstream>
 #include <string>
-#include <QRegularExpression>
 #include "CASCFile.h"
 #include "Game.h"
+#include "string_utils.h"
 #include "HardDriveFile.h"
 #include "logger/Logger.h"
 
@@ -38,11 +38,11 @@ void wow::WoWFolder::initFromListfile(const QString& filename)
 	while (std::getline(file, stdline))
 	{
 		QString line = QString::fromStdString(stdline).toLower();
-		QStringList lineData = line.split(';');
+		auto lineData = core::split(line.toStdString(), ';');
 		if (lineData.size() < 2)
 			continue;
-		int id = lineData.at(0).toInt();
-		QString fileName = lineData.at(1);
+		int id = std::stoi(lineData[0]);
+		QString fileName = QString::fromStdString(lineData[1]);
 		// Add the file to the name-ID mappings even if it can't be found in CASC,
 		// as it could be a custom file added by the user:
 		m_idNameMap[id] = fileName;
@@ -165,8 +165,8 @@ QString wow::WoWFolder::version()
 
 int wow::WoWFolder::majorVersion()
 {
-	auto v = m_CASCFolder.version().split(QLatin1Char('.'));
-	return v[0].toInt();
+	auto v = core::split(m_CASCFolder.version().toStdString(), '.');
+	return std::stoi(v[0]);
 }
 
 QString wow::WoWFolder::locale()

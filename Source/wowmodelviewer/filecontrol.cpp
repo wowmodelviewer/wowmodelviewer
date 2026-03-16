@@ -1,4 +1,5 @@
 #include "logger/Logger.h"
+#include "string_utils.h"
 #include <wx/filename.h>
 #include <wx/msgdlg.h>
 #include <QImage>
@@ -161,22 +162,22 @@ void FileControl::Init(ModelViewer* mv, std::function<void(int, int)> progressCa
 
 		beautifyFileName(name);
 
-		QStringList Items = name.split("\\");
+		auto Items = core::split(name.toStdString(), '\\');
 		TreeStackItem* curparent = &root;
-		for (int i = 0; i < Items.size() - 1; i++)
+		for (int i = 0; i < static_cast<int>(Items.size()) - 1; i++)
 		{
-			TreeStackItem* child = curparent->getChildByName(Items[i]);
+			TreeStackItem* child = curparent->getChildByName(QString::fromStdString(Items[i]));
 			if (!child)
 			{
 				child = new TreeStackItem();
-				child->setName(Items[i].toStdString());
+				child->setName(Items[i]);
 				curparent->addChild(child);
 			}
 			curparent = child;
 		}
 		TreeStackItem* child = new TreeStackItem();
 		child->file = *it;
-		child->setName(Items[Items.size() - 1].toStdString());
+		child->setName(Items[Items.size() - 1]);
 		curparent->addChild(child);
 
 		if (progressCallback && ++count % 200 == 0)
