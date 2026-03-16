@@ -1,7 +1,5 @@
 #include "HardDriveFile.h"
 
-#include <QFile>
-
 #include "logger/Logger.h"
 
 HardDriveFile::HardDriveFile(QString path, QString real, int id)
@@ -16,11 +14,13 @@ HardDriveFile::~HardDriveFile()
 
 bool HardDriveFile::openFile()
 {
-	file = new QFile(realpath);
+	file = new std::ifstream(realpath.toStdWString(), std::ios::binary);
 
-	if (!file->open(QIODevice::ReadOnly))
+	if (!file->is_open())
 	{
 		LOG_ERROR << "Opening" << filepath << "failed.";
+		delete file;
+		file = nullptr;
 		return false;
 	}
 
@@ -38,23 +38,28 @@ bool HardDriveFile::isAlreadyOpened()
 
 bool HardDriveFile::getFileSize(unsigned long long& s)
 {
-    if (!file || !file->isOpen())
-        return false;
+	if (!file || !file->is_open())
+		return false;
 
-    s = file->size();
-    return true;
+	const auto cur = file->tellg();
+	file->seekg(0, std::ios::end);
+	s = static_cast<unsigned long long>(file->tellg());
+	file->seekg(cur);
+	return true;
 }
 
 unsigned long HardDriveFile::readFile()
 {
-    if (!file || !file->isOpen())
-        return 0;
+	if (!file || !file->is_open())
+		return 0;
 
-    const unsigned long s = file->read(reinterpret_cast<char*>(buffer), size);
-    file->close();
-    delete file;
-    file = nullptr;
-    return s;
+	file->seekg(0, std::ios::beg);
+	file->read(reinterpret_cast<char*>(buffer), size);
+	const unsigned long s = static_cast<unsigned long>(file->gcount());
+	file->close();
+	delete file;
+	file = nullptr;
+	return s;
 }
 
 bool HardDriveFile::doPostCloseOperation()

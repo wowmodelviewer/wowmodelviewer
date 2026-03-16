@@ -6,7 +6,8 @@
 #include "WoWModel.h"
 #include "logger/Logger.h"
 
-#include <QFile>
+#include <fstream>
+#include <sstream>
 #include <QXmlStreamReader>
 
 std::multimap<uint, int> CharDetails::LINKED_OPTIONS_MAP_ =
@@ -69,15 +70,18 @@ void CharDetails::save(QXmlStreamWriter& stream)
 
 void CharDetails::load(QString& f)
 {
-	QFile file(f);
-	if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
+	std::ifstream file(f.toStdWString());
+	if (!file.is_open())
 	{
 		LOG_ERROR << "Fail to open" << f;
 		return;
 	}
 
-	QXmlStreamReader reader;
-	reader.setDevice(&file);
+	std::ostringstream ss;
+	ss << file.rdbuf();
+	const QByteArray data = QByteArray::fromStdString(ss.str());
+
+	QXmlStreamReader reader(data);
 
 	while (!reader.atEnd())
 	{

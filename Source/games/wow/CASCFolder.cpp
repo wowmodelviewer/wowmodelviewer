@@ -8,8 +8,9 @@
 #include <locale>
 #include <map>
 #include <utility>
+#include <fstream>
+#include <string>
 
-#include <QFile>
 #include <QRegularExpression>
 
 #include "CASCFile.h"
@@ -83,19 +84,20 @@ void CASCFolder::initBuildInfo()
 	const QString buildinfofile = m_folder + "\\..\\.build.info";
 	LOG_INFO << "buildinfofile : " << buildinfofile;
 
-	QFile file(buildinfofile);
-	if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
+	std::ifstream file(buildinfofile.toStdWString());
+	if (!file.is_open())
 	{
 		LOG_ERROR << "Fail to open .build.info to grab game config info";
 		return;
 	}
 
-	QTextStream in(&file);
-	QString line;
+	std::string stdline;
 
 	// read first line and grab VERSION index
-	line = in.readLine();
+	if (!std::getline(file, stdline))
+		return;
 
+	QString line = QString::fromStdString(stdline);
 	QStringList headers = line.split('|');
 	int activeIndex = 0;
 	int versionIndex = 0;
@@ -114,8 +116,9 @@ void CASCFolder::initBuildInfo()
 	}
 
 	// now loop across file lines with actual values
-	while (in.readLineInto(&line))
+	while (std::getline(file, stdline))
 	{
+		line = QString::fromStdString(stdline);
 		QString version;
 		QStringList values = line.split('|');
 
@@ -183,14 +186,14 @@ bool CASCFolder::closeFile(HANDLE file)
 
 void CASCFolder::addExtraEncryptionKeys()
 {
-	QFile tactKeys("extraEncryptionKeys.csv");
+	std::ifstream tactKeys("extraEncryptionKeys.csv");
 
-	if (tactKeys.open(QIODevice::ReadOnly | QIODevice::Text))
+	if (tactKeys.is_open())
 	{
-		QTextStream in(&tactKeys);
-		while (!in.atEnd())
+		std::string stdline;
+		while (std::getline(tactKeys, stdline))
 		{
-			QString line = in.readLine();
+			QString line = QString::fromStdString(stdline);
 			if (line.startsWith("##") || line.startsWith("\"##"))
 				// ignore lines beginning with ##, useful for adding comments.
 				continue;

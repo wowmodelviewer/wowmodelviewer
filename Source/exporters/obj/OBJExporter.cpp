@@ -25,7 +25,8 @@
 
 #include "OBJExporter.h"
 
-#include <QFileInfo>
+#include <cstdio>
+#include <filesystem>
 
 #include "glm/glm.hpp"
 
@@ -72,44 +73,49 @@ bool OBJExporter::exportModel(Model* m, std::wstring target)
 	if (!model)
 		return false;
 
-	// prepare obj file
-	const QString targetFile = QString::fromStdWString(target);
+	namespace fs = std::filesystem;
 
-	QFile file(targetFile);
-	if (!file.open(QIODevice::WriteOnly | QIODevice::Text))
+	// prepare obj file
+	const fs::path targetPath(target);
+
+	std::ofstream file(targetPath);
+	if (!file.is_open())
 	{
-		LOG_ERROR << "Unable to open" << targetFile;
+		LOG_ERROR << "Unable to open" << QString::fromStdWString(target);
 		return false;
 	}
 
-	LOG_INFO << "Exporting" << model->modelname.c_str() << "in" << targetFile;
+	LOG_INFO << "Exporting" << model->modelname.c_str() << "in" << QString::fromStdWString(target);
 
 	// prepare mtl file
-	QString matFilename = QFileInfo(targetFile).completeBaseName();
-	matFilename += ".mtl";
-	matFilename = QFileInfo(targetFile).absolutePath() + "/" + matFilename;
+	const fs::path matPath = targetPath.parent_path() / (targetPath.stem().wstring() + L".mtl");
 
-	LOG_INFO << "Exporting" << model->modelname.c_str() << "materials in" << matFilename;
+	LOG_INFO << "Exporting" << model->modelname.c_str() << "materials in" << QString::fromStdWString(matPath.wstring());
 
-	QFile matFile(matFilename);
-	if (!matFile.open(QIODevice::WriteOnly | QIODevice::Text))
+	std::ofstream matFile(matPath);
+	if (!matFile.is_open())
 	{
-		LOG_ERROR << "Unable to open" << matFilename;
+		LOG_ERROR << "Unable to open" << QString::fromStdWString(matPath.wstring());
 		return false;
 	}
 
-	QTextStream obj(&file);
-	QTextStream mtl(&matFile);
+	std::ofstream& obj = file;
+	std::ofstream& mtl = matFile;
 
-	obj << "# Wavefront OBJ exported by " << QString::fromStdWString(GLOBALSETTINGS.appName()) << " " <<
-		QString::fromStdWString(GLOBALSETTINGS.appVersion()) << "\n";
+	obj << "# Wavefront OBJ exported by ";
+	{
+		std::wstring appName = GLOBALSETTINGS.appName();
+		std::wstring appVer = GLOBALSETTINGS.appVersion();
+		obj << QString::fromStdWString(appName).toStdString() << " "
+			<< QString::fromStdWString(appVer).toStdString() << "\n";
+	}
 	obj << "\n";
-	obj << "mtllib " << QFileInfo(matFile).fileName() << "\n";
+	obj << "mtllib " << matPath.filename().string() << "\n";
 	obj << "\n";
 
 
 	mtl << "#" << "\n";
-	mtl << "# mtl file for " << QFileInfo(targetFile).fileName() << " obj file" << "\n";
+	mtl << "# mtl file for " << targetPath.filename().string() << " obj file" << "\n";
 	mtl << "#" << "\n";
 	mtl << "\n";
 
@@ -122,7 +128,7 @@ bool OBJExporter::exportModel(Model* m, std::wstring target)
 		return false;
 	}
 
-	if (!exportModelMaterials(model, mtl, matFilename))
+	if (!exportModelMaterials(model, mtl, matPath.string()))
 	{
 		LOG_ERROR << "Error during materials export for model" << model->modelname.c_str();
 		return false;
@@ -132,14 +138,14 @@ bool OBJExporter::exportModel(Model* m, std::wstring target)
 	if (!GLOBALSETTINGS.bInitPoseOnlyExport)
 	{
 		for (WoWModel::iterator it = model->begin();
-		     it != model->end();
-		     ++it)
+			 it != model->end();
+			 ++it)
 		{
 			std::map<POSITION_SLOTS, WoWModel*> itemModels = (*it)->models();
 			if (!itemModels.empty())
 			{
 				obj << "# " << "\n";
-					obj << "# " << QString::fromStdString((*it)->name()) << "\n";
+					obj << "# " << (*it)->name() << "\n";
 					obj << "# " << "\n";
 				for (const auto& It : itemModels)
 				{
@@ -162,7 +168,7 @@ bool OBJExporter::exportModel(Model* m, std::wstring target)
 						return false;
 					}
 
-					if (!exportModelMaterials(itemModel, mtl, matFilename))
+					if (!exportModelMaterials(itemModel, mtl, matPath.string()))
 					{
 						LOG_ERROR << "Error during materials export for model" << itemModel->modelname.c_str();
 						return false;
@@ -178,12 +184,13 @@ bool OBJExporter::exportModel(Model* m, std::wstring target)
 	return true;
 }
 
-bool OBJExporter::exportModelVertices(WoWModel* model, QTextStream& file, int& counter, glm::mat4 mat,
-                                      glm::vec3 pos) const
+bool OBJExporter::exportModelVertices(WoWModel* model, std::ofstream& file, int& counter, glm::mat4 mat,
+									  glm::vec3 pos) const
 {
 	bool vertMsg = false;
 	// output all the vertice data
 	int vertics = 0;
+	char buf[128];
 	for (size_t i = 0; i < model->passes.size(); i++)
 	{
 		ModelRenderPass* p = model->passes[i];
@@ -215,8 +222,8 @@ bool OBJExporter::exportModelVertices(WoWModel* model, QTextStream& file, int& c
 				}
 				MakeModelFaceForwards(vert);
 				vert *= 1.0;
-				QString val = QString::asprintf("v %.06f %.06f %.06f", vert.x, vert.y, vert.z);
-				file << val << "\n";
+				snprintf(buf, sizeof(buf), "v %.06f %.06f %.06f", vert.x, vert.y, vert.z);
+				file << buf << "\n";
 
 				vertics++;
 			}
@@ -238,8 +245,8 @@ bool OBJExporter::exportModelVertices(WoWModel* model, QTextStream& file, int& c
 			{
 				uint32 a = model->indices[b];
 				glm::vec2 tc = model->origVertices[a].texcoords;
-				QString val = QString::asprintf("vt %.06f %.06f", tc.x, 1 - tc.y);
-				file << val << "\n";
+				snprintf(buf, sizeof(buf), "vt %.06f %.06f", tc.x, 1 - tc.y);
+				file << buf << "\n";
 				textures++;
 			}
 		}
@@ -257,8 +264,8 @@ bool OBJExporter::exportModelVertices(WoWModel* model, QTextStream& file, int& c
 			{
 				uint16 a = model->indices[b];
 				glm::vec3 n = model->origVertices[a].normal;
-				QString val = QString::asprintf("vn %.06f %.06f %.06f", n.x, n.y, n.z);
-				file << val << "\n";
+				snprintf(buf, sizeof(buf), "vn %.06f %.06f %.06f", n.x, n.y, n.z);
+				file << buf << "\n";
 				normals++;
 			}
 		}
@@ -282,10 +289,11 @@ bool OBJExporter::exportModelVertices(WoWModel* model, QTextStream& file, int& c
 
 			int g = geoset->id;
 
-			QString val = QString::asprintf("Geoset_%03i", g);
-			QString matName = QString(model->modelname.c_str()) + "_" + val;
-			matName.replace("\\", "_");
-			QString partName = matName;
+			snprintf(buf, sizeof(buf), "Geoset_%03i", g);
+			std::string val(buf);
+			std::string matName = model->modelname + "_" + val;
+			std::replace(matName.begin(), matName.end(), '\\', '_');
+			std::string partName = matName;
 
 			if (p->unlit == true)
 				matName = matName + "_Lum";
@@ -299,7 +307,7 @@ bool OBJExporter::exportModelVertices(WoWModel* model, QTextStream& file, int& c
 			QString cgGroupName = WoWModel::getCGGroupName(static_cast<CharGeosets>(mesh));
 
 			if ((model->modelType == MT_CHAR) && (cgGroupName != ""))
-				partName += QString("-%1").arg(cgGroupName);
+				partName += "-" + cgGroupName.toStdString();
 
 			file << "g " << partName << "\n";
 			file << "usemtl " << matName << "\n";
@@ -308,11 +316,11 @@ bool OBJExporter::exportModelVertices(WoWModel* model, QTextStream& file, int& c
 			for (size_t k = 0; k < geoset->icount; k += 3)
 			{
 				file << "f ";
-				file << QString("%1/%1/%1 ").arg(counter);
+				file << counter << "/" << counter << "/" << counter << " ";
 				counter++;
-				file << QString("%1/%1/%1 ").arg(counter);
+				file << counter << "/" << counter << "/" << counter << " ";
 				counter++;
-				file << QString("%1/%1/%1\n").arg(counter);
+				file << counter << "/" << counter << "/" << counter << "\n";
 				counter++;
 				triangles++;
 			}
@@ -332,9 +340,12 @@ bool OBJExporter::exportModelVertices(WoWModel* model, QTextStream& file, int& c
 	return true;
 }
 
-bool OBJExporter::exportModelMaterials(WoWModel* model, QTextStream& file, QString mtlFile) const
+bool OBJExporter::exportModelMaterials(WoWModel* model, std::ofstream& file, std::string mtlFile) const
 {
+	namespace fs = std::filesystem;
+
 	std::map<std::wstring, GLuint> texToExport;
+	char buf[128];
 
 	for (size_t i = 0; i < model->passes.size(); i++)
 	{
@@ -343,15 +354,16 @@ bool OBJExporter::exportModelMaterials(WoWModel* model, QTextStream& file, QStri
 		if (p->init())
 		{
 			QString tex = model->getNameForTex(p->tex);
-			QString texfile = QFileInfo(tex).completeBaseName();
-			tex = QFileInfo(mtlFile).completeBaseName() + "_" + texfile + ".png";
+			std::string texStem = fs::path(tex.toStdString()).stem().string();
+			std::string mtlStem = fs::path(mtlFile).stem().string();
+			std::string texFile = mtlStem + "_" + texStem + ".png";
 
 			float amb = 0.25f;
 			glm::vec4 diff = p->ocol;
 
-			QString val = QString::asprintf("Geoset_%03i", model->geosets[p->geoIndex]->id);
-			QString material = QString(model->modelname.c_str()) + "_" + val;
-			material.replace("\\", "_");
+			snprintf(buf, sizeof(buf), "Geoset_%03i", model->geosets[p->geoIndex]->id);
+			std::string material = model->modelname + "_" + buf;
+			std::replace(material.begin(), material.end(), '\\', '_');
 			if (p->unlit == true)
 			{
 				// Add Lum, just in case there's a non-luminous surface with the same name.
@@ -368,19 +380,19 @@ bool OBJExporter::exportModelMaterials(WoWModel* model, QTextStream& file, QStri
 
 			file << "newmtl " << material << "\n";
 			file << "illum 2" << "\n";
-			val = QString::asprintf("Kd %.06f %.06f %.06f", diff.x, diff.y, diff.z);
-			file << val << "\n";
-			val = QString::asprintf("Ka %.06f %.06f %.06f", amb, amb, amb);
-			file << val << "\n";
-			val = QString::asprintf("Ks %.06f %.06f %.06f", p->ecol.x, p->ecol.y, p->ecol.z);
-			file << val << "\n";
+			snprintf(buf, sizeof(buf), "Kd %.06f %.06f %.06f", diff.x, diff.y, diff.z);
+			file << buf << "\n";
+			snprintf(buf, sizeof(buf), "Ka %.06f %.06f %.06f", amb, amb, amb);
+			file << buf << "\n";
+			snprintf(buf, sizeof(buf), "Ks %.06f %.06f %.06f", p->ecol.x, p->ecol.y, p->ecol.z);
+			file << buf << "\n";
 			file << "Ke 0.000000 0.000000 0.000000" << "\n";
-			val = QString::asprintf("Ns %0.6f", 0.0f);
-			file << val << "\n";
+			snprintf(buf, sizeof(buf), "Ns %0.6f", 0.0f);
+			file << buf << "\n";
 
-			file << "map_Kd " << tex << "\n";
-			tex = QFileInfo(mtlFile).absolutePath() + "\\" + tex;
-			texToExport[tex.toStdWString()] = model->getGLTexture(p->tex);
+			file << "map_Kd " << texFile << "\n";
+			std::string fullTexPath = fs::path(mtlFile).parent_path().string() + "\\" + texFile;
+			texToExport[QString::fromStdString(fullTexPath).toStdWString()] = model->getGLTexture(p->tex);
 		}
 	}
 

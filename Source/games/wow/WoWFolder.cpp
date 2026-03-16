@@ -1,7 +1,7 @@
 #include "WoWFolder.h"
-#include <QDir>
-#include <QDirIterator>
-#include <QFile>
+#include <filesystem>
+#include <fstream>
+#include <string>
 #include <QRegularExpression>
 #include "CASCFile.h"
 #include "Game.h"
@@ -19,21 +19,25 @@ void wow::WoWFolder::init()
 
 void wow::WoWFolder::initFromListfile(const QString& filename)
 {
-	QFile file(QString::fromStdString(core::Game::instance().configFolder()) + filename);
-	if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
+	const std::string fullPath = core::Game::instance().configFolder() + filename.toStdString();
+	std::ifstream file(fullPath);
+	if (!file.is_open())
 	{
 		LOG_ERROR << "Failed to open" << filename;
 		return;
 	}
 
-	QTextStream in(&file);
-	const qint64 totalSize = file.size();
+	// Get total file size for progress tracking
+	file.seekg(0, std::ios::end);
+	const auto totalSize = file.tellg();
+	file.seekg(0, std::ios::beg);
 	int lineCount = 0;
 
 	LOG_INFO << "WoWFolder - Starting to build object hierarchy";
-	while (!in.atEnd())
+	std::string stdline;
+	while (std::getline(file, stdline))
 	{
-		QString line = in.readLine().toLower();
+		QString line = QString::fromStdString(stdline).toLower();
 		QStringList lineData = line.split(';');
 		if (lineData.size() < 2)
 			continue;
@@ -50,7 +54,7 @@ void wow::WoWFolder::initFromListfile(const QString& filename)
 			addChild(File);
 		}
 		if (m_progressCallback && ++lineCount % 500 == 0 && totalSize > 0)
-			m_progressCallback(static_cast<int>(file.pos()), static_cast<int>(totalSize));
+			m_progressCallback(static_cast<int>(file.tellg()), static_cast<int>(totalSize));
 	}
 	LOG_INFO << "WoWFolder - Hierarchy creation done";
 }
@@ -58,52 +62,53 @@ void wow::WoWFolder::initFromListfile(const QString& filename)
 void wow::WoWFolder::addCustomFiles(const QString& path, bool bypassOriginalFiles)
 {
 	LOG_INFO << "Add customFiles from folder" << path;
-	QDirIterator dirIt(path, QDirIterator::Subdirectories);
+	namespace fs = std::filesystem;
 
-	while (dirIt.hasNext())
+	std::error_code ec;
+	for (const auto& entry : fs::recursive_directory_iterator(path.toStdWString(), ec))
 	{
-		dirIt.next();
-		QString filePath = dirIt.filePath().toLower();
+		if (!entry.is_regular_file())
+			continue;
 
-		if (QFileInfo(filePath).isFile())
+		QString filePath = QString::fromStdWString(entry.path().wstring()).toLower();
+		QString absPath = filePath;
+
+		QString toRemove = path;
+		toRemove += "\\";
+		filePath.replace(0, toRemove.size(), "");
+
+		GameFile* originalFile = GameFolder::getFile(filePath);
+		bool addnewfile = true;
+		int originalId = -1;
+		if (originalFile)
 		{
-			QString toRemove = path;
-			toRemove += "\\";
-			filePath.replace(0, toRemove.size(), "");
-
-			GameFile* originalFile = GameFolder::getFile(filePath);
-			bool addnewfile = true;
-			int originalId = -1;
-			if (originalFile)
+			if (bypassOriginalFiles)
 			{
-				if (bypassOriginalFiles)
-				{
-					originalId = originalFile->fileDataId();
-					removeChild(originalFile);
-					delete originalFile;
-					originalFile = nullptr;
-				}
-				else
-				{
-					addnewfile = false;
-				}
+				originalId = originalFile->fileDataId();
+				removeChild(originalFile);
+				delete originalFile;
+				originalFile = nullptr;
 			}
 			else
 			{
-				// Even though the file wasn't found in the game database, it's possible to assign it
-				// a specific ID in the listfile (useful in some situations) :
-				auto it = m_nameIdMap.find(filePath);
-				if (it != m_nameIdMap.end())
-					originalId = it->second;
+				addnewfile = false;
 			}
-			if (addnewfile)
-			{
-				LOG_INFO << "Add custom file" << filePath << "(ID:" << originalId << ")from hard drive location" <<
-					dirIt.filePath();
-				HardDriveFile* file = new HardDriveFile(filePath, dirIt.filePath(), originalId);
-				file->setName(filePath.mid(filePath.lastIndexOf("/") + 1).toStdString());
-				addChild(file);
-			}
+		}
+		else
+		{
+			// Even though the file wasn't found in the game database, it's possible to assign it
+			// a specific ID in the listfile (useful in some situations) :
+			auto it = m_nameIdMap.find(filePath);
+			if (it != m_nameIdMap.end())
+				originalId = it->second;
+		}
+		if (addnewfile)
+		{
+			LOG_INFO << "Add custom file" << filePath << "(ID:" << originalId << ")from hard drive location" <<
+				absPath;
+			HardDriveFile* file = new HardDriveFile(filePath, absPath, originalId);
+			file->setName(filePath.mid(filePath.lastIndexOf("/") + 1).toStdString());
+			addChild(file);
 		}
 	}
 }

@@ -9,7 +9,7 @@
 
 #include "CASCFile.h"
 
-class QFile;
+#include <fstream>
 
 #define _HARDDRIVEFILE_API_
 
@@ -29,5 +29,5 @@ protected:
 private:
 	bool opened;
 	QString realpath;
-	QFile* file;
+	std::ifstream* file;
 };

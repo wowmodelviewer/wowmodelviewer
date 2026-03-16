@@ -29,12 +29,10 @@
 #include "logger/Logger.h"
 #include <QSettings>
 #include <QCoreApplication>
-#include <QDateTime>
-#include <QFile>
-#include <QFileInfo>
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
 #include <QNetworkRequest>
+#include <filesystem>
 #include <fstream>
 #include <thread>
 
@@ -1624,8 +1622,8 @@ bool ModelViewer::DownloadListfile()
 	}
 
 	const QString destPath = QCoreApplication::applicationDirPath() + "/listfile.csv";
-	QFile file(destPath);
-	if (!file.open(QIODevice::WriteOnly))
+	std::ofstream file(destPath.toStdWString(), std::ios::binary);
+	if (!file.is_open())
 	{
 		LOG_ERROR << "Failed to write listfile to" << destPath;
 		wxMessageBox(wxT("Failed to write listfile.csv to disk."), wxT("File Error"), wxOK | wxICON_ERROR);
@@ -1634,7 +1632,8 @@ bool ModelViewer::DownloadListfile()
 		return false;
 	}
 
-	file.write(response->readAll());
+	const QByteArray data = response->readAll();
+	file.write(data.constData(), data.size());
 	file.close();
 	response->deleteLater();
 
@@ -1708,8 +1707,8 @@ bool ModelViewer::DownloadEncryptionKeys()
 	content.replace(' ', ';');
 
 	const QString destPath = QCoreApplication::applicationDirPath() + "/extraEncryptionKeys.csv";
-	QFile file(destPath);
-	if (!file.open(QIODevice::WriteOnly | QIODevice::Text))
+	std::ofstream file(destPath.toStdWString());
+	if (!file.is_open())
 	{
 		LOG_ERROR << "Failed to write encryption keys to" << destPath;
 		wxMessageBox(wxT("Failed to write extraEncryptionKeys.csv to disk."), wxT("File Error"), wxOK | wxICON_ERROR);
@@ -1717,7 +1716,8 @@ bool ModelViewer::DownloadEncryptionKeys()
 		return false;
 	}
 
-	file.write(content.toUtf8());
+	const QByteArray utf8Data = content.toUtf8();
+	file.write(utf8Data.constData(), utf8Data.size());
 	file.close();
 
 	LOG_INFO << "Encryption keys updated successfully at" << destPath;
@@ -1740,21 +1740,37 @@ void ModelViewer::OnUpdateEncryptionKeys(wxCommandEvent& /*event*/)
 
 bool ModelViewer::CheckAndUpdateSupportFiles()
 {
+	namespace fs = std::filesystem;
+
 	const QString appDir = QCoreApplication::applicationDirPath();
-	const QString listfilePath = appDir + "/listfile.csv";
-	const QString keysPath = appDir + "/extraEncryptionKeys.csv";
+	const fs::path listfilePath = fs::path(appDir.toStdWString()) / "listfile.csv";
+	const fs::path keysPath = fs::path(appDir.toStdWString()) / "extraEncryptionKeys.csv";
 
-	const QFileInfo listfileInfo(listfilePath);
-	const QFileInfo keysInfo(keysPath);
+	std::error_code ec;
+	const bool listfileExists = fs::exists(listfilePath, ec);
+	const bool keysExists = fs::exists(keysPath, ec);
+	const auto listfileSize = listfileExists ? fs::file_size(listfilePath, ec) : 0;
+	const auto keysSize = keysExists ? fs::file_size(keysPath, ec) : 0;
 
-	const bool listfileMissing = !listfileInfo.exists() || listfileInfo.size() == 0;
-	const bool keysMissing = !keysInfo.exists() || keysInfo.size() == 0;
+	const bool listfileMissing = !listfileExists || listfileSize == 0;
+	const bool keysMissing = !keysExists || keysSize == 0;
 
 	// Check freshness (older than 7 days)
 	constexpr int maxAgeDays = 7;
-	const QDateTime now = QDateTime::currentDateTime();
-	const bool listfileOutdated = !listfileMissing && listfileInfo.lastModified().daysTo(now) > maxAgeDays;
-	const bool keysOutdated = !keysMissing && keysInfo.lastModified().daysTo(now) > maxAgeDays;
+	using namespace std::chrono;
+	const auto now = file_clock::now();
+
+	auto daysSinceModified = [&](const fs::path& p) -> long long {
+		const auto lwt = fs::last_write_time(p, ec);
+		if (ec)
+			return 0;
+		return duration_cast<hours>(now - lwt).count() / 24;
+	};
+
+	const long long listfileDays = !listfileMissing ? daysSinceModified(listfilePath) : 0;
+	const long long keysDays = !keysMissing ? daysSinceModified(keysPath) : 0;
+	const bool listfileOutdated = !listfileMissing && listfileDays > maxAgeDays;
+	const bool keysOutdated = !keysMissing && keysDays > maxAgeDays;
 
 	if (listfileMissing || keysMissing)
 	{
@@ -1786,10 +1802,10 @@ bool ModelViewer::CheckAndUpdateSupportFiles()
 		wxString message = wxT("The following files may be out of date:\n\n");
 		if (listfileOutdated)
 			message += wxString::Format(wxT("  - listfile.csv (last updated %lld days ago)\n"),
-				listfileInfo.lastModified().daysTo(now));
+				listfileDays);
 		if (keysOutdated)
 			message += wxString::Format(wxT("  - extraEncryptionKeys.csv (last updated %lld days ago)\n"),
-				keysInfo.lastModified().daysTo(now));
+				keysDays);
 		message += wxT("\nWould you like to update them now?");
 
 		if (wxMessageBox(message, wxT("Files May Be Outdated"), wxYES_NO | wxICON_QUESTION) == wxYES)

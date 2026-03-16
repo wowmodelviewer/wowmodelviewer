@@ -1,6 +1,7 @@
 #include "WoWItem.h"
 
-#include <QFile>
+#include <fstream>
+#include <sstream>
 #include <QRegularExpression>
 #include <QString>
 #include <QXmlStreamWriter>
@@ -832,15 +833,18 @@ void WoWItem::save(QXmlStreamWriter& stream) const
 
 void WoWItem::load(QString& f)
 {
-	QFile file(f);
-	if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
+	std::ifstream file(f.toStdWString());
+	if (!file.is_open())
 	{
 		LOG_ERROR << "Fail to open" << f;
 		return;
 	}
 
-	QXmlStreamReader reader;
-	reader.setDevice(&file);
+	std::ostringstream ss;
+	ss << file.rdbuf();
+	const QByteArray data = QByteArray::fromStdString(ss.str());
+
+	QXmlStreamReader reader(data);
 
 	auto nbValuesRead = 0;
 	while (!reader.atEnd() && nbValuesRead != 3)

@@ -30,8 +30,9 @@ class WoWModel;
 
 // Other libraries
 #include "glm/glm.hpp"
+#include <fstream>
+#include <string>
 #include <QString>
-#include <QTextStream>
 
 #include "ExporterPlugin.h"
 
@@ -50,7 +51,7 @@ public:
 	bool exportModel(Model*, std::wstring file);
 
 private:
-	bool exportModelVertices(WoWModel* model, QTextStream& file, int& counter, glm::mat4 m = glm::mat4(1.0),
-	                         glm::vec3 pos = glm::vec3(0.0f)) const;
-	bool exportModelMaterials(WoWModel* model, QTextStream& file, QString mtlFile) const;
+	bool exportModelVertices(WoWModel* model, std::ofstream& file, int& counter, glm::mat4 m = glm::mat4(1.0),
+							 glm::vec3 pos = glm::vec3(0.0f)) const;
+	bool exportModelMaterials(WoWModel* model, std::ofstream& file, std::string mtlFile) const;
 };
