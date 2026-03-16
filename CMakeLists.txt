@@ -61,9 +61,10 @@ endif()
 message(STATUS "=== Configuring WoWModelViewer ===")
 
 # Auto-install third-party dependencies on a fresh clone.
-# Uses Qt6Config.cmake as a sentinel – if absent, runs the full setup script.
+# Uses Qt6Config.cmake and fbxsdk.h as sentinels – if absent, runs the full setup script.
 set(_qt6_sentinel "${CMAKE_SOURCE_DIR}/ThirdParty/Qt/6.8.3/6.8.3/msvc2022_64/lib/cmake/Qt6/Qt6Config.cmake")
-if(WIN32 AND NOT EXISTS "${_qt6_sentinel}")
+set(_fbx_sentinel "${CMAKE_SOURCE_DIR}/ThirdParty/include/fbxsdk.h")
+if(WIN32 AND (NOT EXISTS "${_qt6_sentinel}" OR NOT EXISTS "${_fbx_sentinel}"))
   message(STATUS "Dependencies not found – running scripts/setup_x64_deps.ps1 ...")
   execute_process(
     COMMAND powershell.exe -ExecutionPolicy Bypass

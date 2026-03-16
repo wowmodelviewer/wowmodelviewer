@@ -93,6 +93,46 @@ else {
     }
     if (!(Test-Path $qtDst)) { Write-Warning "Qt download failed - expected path not found: $qtDst" }
 }
+Write-Step "Installing FBX SDK 2020.3.9"
+$fbxIncDst = Join-Path $RepoRoot "ThirdParty\include"
+$fbxLibDst = Join-Path $RepoRoot "ThirdParty\lib\x64"
+if (Test-Path "$fbxIncDst\fbxsdk.h") { Write-Host "  Already exists - skipping." }
+else {
+    $fbxTmp = Join-Path $RepoRoot "out\fbx_download"; Ensure-Dir $fbxTmp
+    $fbxExe = Join-Path $fbxTmp "fbx202039_fbxsdk_vs2022_win.exe"
+    if (!(Test-Path $fbxExe)) {
+        Write-Host "  Downloading FBX SDK 2020.3.9 (~115 MB) ..."
+        Invoke-WebRequest -Uri "https://damassets.autodesk.net/content/dam/autodesk/www/files/fbx202039_fbxsdk_vs2022_win.exe" -OutFile $fbxExe -UseBasicParsing
+    }
+    # Extract the NSIS installer with 7-Zip
+    $fbxExtract = Join-Path $fbxTmp "extracted"; Ensure-Dir $fbxExtract
+    Write-Host "  Extracting FBX SDK ..."
+    & $7zExe x $fbxExe -o"$fbxExtract" -aoa -bd | Out-Null
+    if ($LASTEXITCODE -ne 0) { throw "7z extraction failed for FBX SDK installer" }
+    # Locate the include dir inside the extraction (may be nested under $INSTDIR or similar)
+    $fbxIncSrc = Get-ChildItem $fbxExtract -Recurse -Directory -Filter "include" |
+                 Where-Object { Test-Path (Join-Path $_.FullName "fbxsdk.h") } |
+                 Select-Object -First 1
+    if (-not $fbxIncSrc) { throw "Could not find fbxsdk.h in extracted FBX SDK" }
+    $fbxRoot = $fbxIncSrc.Parent.FullName
+    Write-Host "  FBX SDK root: $fbxRoot"
+    # Copy headers
+    Ensure-Dir $fbxIncDst
+    Copy-Item "$fbxRoot\include\fbxsdk.h" "$fbxIncDst\fbxsdk.h" -Force
+    if (Test-Path "$fbxIncDst\fbxsdk") { Remove-Item "$fbxIncDst\fbxsdk" -Recurse -Force }
+    Copy-Item "$fbxRoot\include\fbxsdk" "$fbxIncDst\fbxsdk" -Recurse -Force
+    # Copy release dynamic library (lib + dll)
+    Ensure-Dir $fbxLibDst
+    $fbxLibFile = Get-ChildItem $fbxRoot -Recurse -Filter "libfbxsdk.lib" |
+                  Where-Object { $_.FullName -match "x64[\\/]release" } |
+                  Select-Object -First 1
+    if (-not $fbxLibFile) { throw "Could not find libfbxsdk.lib under x64/release in extracted FBX SDK" }
+    $fbxRelDir = $fbxLibFile.DirectoryName
+    Write-Host "  FBX lib dir: $fbxRelDir"
+    Copy-Item "$fbxRelDir\libfbxsdk.lib" "$fbxLibDst\libfbxsdk.lib" -Force
+    Copy-Item "$fbxRelDir\libfbxsdk.dll" "$fbxLibDst\libfbxsdk.dll" -Force
+    Write-Host "  FBX SDK 2020.3.9 installed."
+}
 Write-Step "Downloading vcredist_x64.exe"
 $vcredistDst = Join-Path $RepoRoot "bin_support\vcredist_x64.exe"
 if (Test-Path $vcredistDst) { Write-Host "  Already exists - skipping." }

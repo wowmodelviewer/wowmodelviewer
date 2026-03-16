@@ -38,6 +38,8 @@ jobs:
             ThirdParty/lib/x64
             ThirdParty/libs/x64
             ThirdParty/GL
+            ThirdParty/include/fbxsdk.h
+            ThirdParty/include/fbxsdk
           key: ThirdParty-${{ runner.os }}-${{ hashFiles('scripts/setup_x64_deps.ps1') }}
           restore-keys: |
             ThirdParty-${{ runner.os }}-
