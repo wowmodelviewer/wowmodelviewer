@@ -121,7 +121,7 @@ if(DEFINED BUILDNUMBER)
   add_definitions(-D_BUILDNUMBER=${BUILDNUMBER})
 endif()
 
-# glad2 — OpenGL loader generator (replaces GLEW)
+# glad2 — OpenGL loader generator
 message(STATUS "Adding glad2...")
 add_subdirectory(ThirdParty/glad/cmake)
 glad_add_library(glad_gl

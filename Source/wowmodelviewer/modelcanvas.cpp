@@ -165,7 +165,7 @@ ModelCanvas::ModelCanvas(wxWindow* parent, VideoCaps* caps)
 	wxWindowBase::SetBackgroundStyle(wxBG_STYLE_PAINT);
 	wxWindow::Show(true);
 
-	// Make context current and initialise GLEW / video capabilities
+	// Make context current and initialise glad2 / video capabilities
 	SetCurrent();
 	video.render = true;
 	video.Init();
