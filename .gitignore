@@ -31,3 +31,5 @@ ThirdParty/include/fbxsdk.h
 ThirdParty/include/fbxsdk/
 ThirdParty/lib/x64/libfbxsdk.lib
 ThirdParty/lib/x64/libfbxsdk.dll
+bin_support/vcredist_x64.exe
+bin_support/vcredist_x86.exe
