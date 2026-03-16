@@ -133,8 +133,9 @@ set(CMAKE_INSTALL_PREFIX ${CASCLIB_INSTALL_LOCATION})
 # does not fall back to its bundled (older) copy.
 set(ZLIB_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/ThirdParty/include" CACHE PATH "" FORCE)
 set(ZLIB_LIBRARY "${CMAKE_SOURCE_DIR}/ThirdParty/lib/x64/zlib.lib" CACHE FILEPATH "" FORCE)
-set(CMAKE_POLICY_VERSION_MINIMUM 3.16)
+set(CMAKE_POLICY_VERSION_MINIMUM 3.5 CACHE STRING "" FORCE)
 add_subdirectory(ThirdParty/casclib)
+unset(CMAKE_POLICY_VERSION_MINIMUM CACHE)
 set_property(TARGET casc_static PROPERTY FOLDER "ThirdParty libraries")
 
 # Main source files.

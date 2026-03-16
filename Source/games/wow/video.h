@@ -2,6 +2,7 @@
 
 #include <vector>
 #include "GL/glew.h"
+#include <GL/glu.h>
 #include "GL/wglew.h"
 
 #define _VIDEO_API_
