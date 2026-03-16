@@ -17,6 +17,7 @@
 #include "filecontrol.h"
 #include "glm/glm.hpp"
 
+#include <functional>
 #include <memory>
 #include <vector>
 
@@ -77,7 +78,7 @@ public:
 	void InitMenu();
 	void InitObjects();
 	void InitDocking();
-	void InitDatabase();
+	void InitDatabase(std::function<void(int, int)> progressCallback = nullptr);
 
 	// Save and load various settings between sessions
 	void LoadSession();
@@ -127,5 +128,8 @@ public:
 	void OnViewLog(wxCommandEvent& event);
 	void OnUpdateListfile(wxCommandEvent& event);
 	void OnUpdateEncryptionKeys(wxCommandEvent& event);
+	bool DownloadListfile();
+	bool DownloadEncryptionKeys();
+	bool CheckAndUpdateSupportFiles();
 	void LoadWoW();
 };

@@ -5,6 +5,7 @@
 #include <wx/colordlg.h>
 #include <wx/colour.h>
 #include <wx/filedlg.h>
+#include <wx/progdlg.h>
 #include "Attachment.h"
 #include "app.h"
 #include "Bone.h"
@@ -28,7 +29,9 @@
 #include "logger/Logger.h"
 #include <QSettings>
 #include <QCoreApplication>
+#include <QDateTime>
 #include <QFile>
+#include <QFileInfo>
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
 #include <QNetworkRequest>
@@ -499,13 +502,12 @@ void ModelViewer::InitObjects()
 	modelControl->animControl = animControl;
 }
 
-void ModelViewer::InitDatabase()
+void ModelViewer::InitDatabase(std::function<void(int, int)> progressCallback)
 {
 	LOG_INFO << "Initializing Databases...";
 	SetStatusText(wxT("Initializing Databases..."));
-	wxBusyCursor busyCursor;
-	wxWindowDisabler disableAll;
-	wxBusyInfo info(_T("Please wait during game database analysis..."), this);
+
+	if (progressCallback) progressCallback(0, 100);
 
 	if (!GAMEDATABASE.initFromXML("database.xml"))
 	{
@@ -519,11 +521,17 @@ void ModelViewer::InitDatabase()
 		LOG_INFO << "Initializing succeeded.";
 	}
 
+	if (progressCallback) progressCallback(15, 100);
+
 	// init texture regions
 	CharTexture::initRegions();
 
+	if (progressCallback) progressCallback(20, 100);
+
 	// init Race informations
 	RaceInfos::init();
+
+	if (progressCallback) progressCallback(25, 100);
 
 	LOG_INFO << "Initializing Databases...";
 	SetStatusText(wxT("Initializing Databases..."));
@@ -535,11 +543,15 @@ void ModelViewer::InitDatabase()
 		if (npc.valid && !npc.empty())
 		{
 			LOG_INFO << "Found" << npc.values.size() << "NPCs";
+			int count = 0;
+			const int total = static_cast<int>(npc.values.size());
 			for (const auto& value : npc.values)
 			{
 				NPCRecord rec(value);
 				if (rec.model != 0)
 					npcs.push_back(rec);
+				if (progressCallback && ++count % 500 == 0)
+					progressCallback(25 + count * 30 / total, 100);
 			}
 		}
 		else
@@ -550,6 +562,8 @@ void ModelViewer::InitDatabase()
 		}
 	}
 
+	if (progressCallback) progressCallback(55, 100);
+
 	{
 		sqlResult item = GAMEDATABASE.sqlQuery(
 			"SELECT Item.ID, ItemSparse.Display_Lang, Item.InventoryType, Item.ClassID, Item.SubclassID, Item.SheathType FROM Item LEFT JOIN ItemSparse ON Item.ID = ItemSparse.ID WHERE Item.InventoryType !=0 AND ItemSparse.Display_Lang != \"\"");
@@ -557,10 +571,14 @@ void ModelViewer::InitDatabase()
 		if (item.valid && !item.empty())
 		{
 			LOG_INFO << "Found" << item.values.size() << "items";
+			int count = 0;
+			const int total = static_cast<int>(item.values.size());
 			for (const auto& value : item.values)
 			{
 				ItemRecord rec(value);
 				items.items.push_back(rec);
+				if (progressCallback && ++count % 500 == 0)
+					progressCallback(55 + count * 40 / total, 100);
 			}
 		}
 		else
@@ -571,6 +589,7 @@ void ModelViewer::InitDatabase()
 		}
 	}
 
+	if (progressCallback) progressCallback(100, 100);
 	LOG_INFO << "Finished initiating database files.";
 	SetStatusText(wxT("Finished initiating database files."));;
 }
@@ -1568,10 +1587,14 @@ void ModelViewer::OnGameToggle(wxCommandEvent& event)
 		LoadWoW();
 }
 
-void ModelViewer::OnUpdateListfile(wxCommandEvent& /*event*/)
+bool ModelViewer::DownloadListfile()
 {
 	LOG_INFO << "Downloading latest listfile...";
 	SetStatusText(wxT("Downloading listfile..."));
+
+	wxProgressDialog progressDlg(wxT("Downloading Listfile"),
+		wxT("Connecting..."), 100, this,
+		wxPD_APP_MODAL | wxPD_AUTO_HIDE | wxPD_SMOOTH);
 
 	const QUrl url("https://github.com/wowdev/wow-listfile/releases/latest/download/community-listfile.csv");
 	QNetworkAccessManager manager;
@@ -1579,6 +1602,22 @@ void ModelViewer::OnUpdateListfile(wxCommandEvent& /*event*/)
 	request.setRawHeader("User-Agent", "WoWModelViewer");
 	request.setAttribute(QNetworkRequest::RedirectPolicyAttribute, QNetworkRequest::NoLessSafeRedirectPolicy);
 	QNetworkReply* response = manager.get(request);
+
+	QObject::connect(response, &QNetworkReply::downloadProgress,
+		[&progressDlg](qint64 received, qint64 total) {
+			if (total > 0)
+			{
+				const int percent = static_cast<int>(received * 100 / total);
+				progressDlg.Update(percent,
+					wxString::Format("Downloaded %lld / %lld KB", received / 1024, total / 1024));
+			}
+			else
+			{
+				progressDlg.Pulse(
+					wxString::Format("Downloaded %lld KB", received / 1024));
+			}
+		});
+
 	QEventLoop eventLoop;
 	QObject::connect(response, &QNetworkReply::finished, &eventLoop, &QEventLoop::quit);
 	QObject::connect(response, &QNetworkReply::errorOccurred, &eventLoop, &QEventLoop::quit);
@@ -1591,7 +1630,7 @@ void ModelViewer::OnUpdateListfile(wxCommandEvent& /*event*/)
 			response->errorString().toStdWString()), wxT("Download Error"), wxOK | wxICON_ERROR);
 		response->deleteLater();
 		SetStatusText(wxT("Listfile update failed."));
-		return;
+		return false;
 	}
 
 	const QString destPath = QCoreApplication::applicationDirPath() + "/listfile.csv";
@@ -1602,7 +1641,7 @@ void ModelViewer::OnUpdateListfile(wxCommandEvent& /*event*/)
 		wxMessageBox(wxT("Failed to write listfile.csv to disk."), wxT("File Error"), wxOK | wxICON_ERROR);
 		response->deleteLater();
 		SetStatusText(wxT("Listfile update failed."));
-		return;
+		return false;
 	}
 
 	file.write(response->readAll());
@@ -1611,14 +1650,30 @@ void ModelViewer::OnUpdateListfile(wxCommandEvent& /*event*/)
 
 	LOG_INFO << "Listfile updated successfully at" << destPath;
 	SetStatusText(wxT("Listfile updated successfully."));
-	wxMessageBox(wxT("Listfile updated successfully.\nRestart the application to use the new listfile."),
-		wxT("Update Complete"), wxOK | wxICON_INFORMATION);
+	return true;
 }
 
-void ModelViewer::OnUpdateEncryptionKeys(wxCommandEvent& /*event*/)
+void ModelViewer::OnUpdateListfile(wxCommandEvent& /*event*/)
+{
+	if (DownloadListfile())
+	{
+		if (isWoWLoaded)
+			wxMessageBox(wxT("Listfile updated successfully.\nRestart the application to use the new listfile."),
+				wxT("Update Complete"), wxOK | wxICON_INFORMATION);
+		else
+			wxMessageBox(wxT("Listfile updated successfully."),
+				wxT("Update Complete"), wxOK | wxICON_INFORMATION);
+	}
+}
+
+bool ModelViewer::DownloadEncryptionKeys()
 {
 	LOG_INFO << "Downloading latest encryption keys...";
 	SetStatusText(wxT("Downloading encryption keys..."));
+
+	wxProgressDialog progressDlg(wxT("Downloading Encryption Keys"),
+		wxT("Connecting..."), 100, this,
+		wxPD_APP_MODAL | wxPD_AUTO_HIDE | wxPD_SMOOTH);
 
 	const QUrl url("https://raw.githubusercontent.com/wowdev/TACTKeys/master/WoW.txt");
 	QNetworkAccessManager manager;
@@ -1626,6 +1681,22 @@ void ModelViewer::OnUpdateEncryptionKeys(wxCommandEvent& /*event*/)
 	request.setRawHeader("User-Agent", "WoWModelViewer");
 	request.setAttribute(QNetworkRequest::RedirectPolicyAttribute, QNetworkRequest::NoLessSafeRedirectPolicy);
 	QNetworkReply* response = manager.get(request);
+
+	QObject::connect(response, &QNetworkReply::downloadProgress,
+		[&progressDlg](qint64 received, qint64 total) {
+			if (total > 0)
+			{
+				const int percent = static_cast<int>(received * 100 / total);
+				progressDlg.Update(percent,
+					wxString::Format("Downloaded %lld / %lld bytes", received, total));
+			}
+			else
+			{
+				progressDlg.Pulse(
+					wxString::Format("Downloaded %lld bytes", received));
+			}
+		});
+
 	QEventLoop eventLoop;
 	QObject::connect(response, &QNetworkReply::finished, &eventLoop, &QEventLoop::quit);
 	QObject::connect(response, &QNetworkReply::errorOccurred, &eventLoop, &QEventLoop::quit);
@@ -1638,7 +1709,7 @@ void ModelViewer::OnUpdateEncryptionKeys(wxCommandEvent& /*event*/)
 			response->errorString().toStdWString()), wxT("Download Error"), wxOK | wxICON_ERROR);
 		response->deleteLater();
 		SetStatusText(wxT("Encryption keys update failed."));
-		return;
+		return false;
 	}
 
 	// The source file uses spaces as separators; the app expects semicolons.
@@ -1653,7 +1724,7 @@ void ModelViewer::OnUpdateEncryptionKeys(wxCommandEvent& /*event*/)
 		LOG_ERROR << "Failed to write encryption keys to" << destPath;
 		wxMessageBox(wxT("Failed to write extraEncryptionKeys.csv to disk."), wxT("File Error"), wxOK | wxICON_ERROR);
 		SetStatusText(wxT("Encryption keys update failed."));
-		return;
+		return false;
 	}
 
 	file.write(content.toUtf8());
@@ -1661,12 +1732,93 @@ void ModelViewer::OnUpdateEncryptionKeys(wxCommandEvent& /*event*/)
 
 	LOG_INFO << "Encryption keys updated successfully at" << destPath;
 	SetStatusText(wxT("Encryption keys updated successfully."));
-	wxMessageBox(wxT("Encryption keys updated successfully.\nRestart the application to use the new keys."),
-		wxT("Update Complete"), wxOK | wxICON_INFORMATION);
+	return true;
+}
+
+void ModelViewer::OnUpdateEncryptionKeys(wxCommandEvent& /*event*/)
+{
+	if (DownloadEncryptionKeys())
+	{
+		if (isWoWLoaded)
+			wxMessageBox(wxT("Encryption keys updated successfully.\nRestart the application to use the new keys."),
+				wxT("Update Complete"), wxOK | wxICON_INFORMATION);
+		else
+			wxMessageBox(wxT("Encryption keys updated successfully."),
+				wxT("Update Complete"), wxOK | wxICON_INFORMATION);
+	}
+}
+
+bool ModelViewer::CheckAndUpdateSupportFiles()
+{
+	const QString appDir = QCoreApplication::applicationDirPath();
+	const QString listfilePath = appDir + "/listfile.csv";
+	const QString keysPath = appDir + "/extraEncryptionKeys.csv";
+
+	const QFileInfo listfileInfo(listfilePath);
+	const QFileInfo keysInfo(keysPath);
+
+	const bool listfileMissing = !listfileInfo.exists() || listfileInfo.size() == 0;
+	const bool keysMissing = !keysInfo.exists() || keysInfo.size() == 0;
+
+	// Check freshness (older than 7 days)
+	constexpr int maxAgeDays = 7;
+	const QDateTime now = QDateTime::currentDateTime();
+	const bool listfileOutdated = !listfileMissing && listfileInfo.lastModified().daysTo(now) > maxAgeDays;
+	const bool keysOutdated = !keysMissing && keysInfo.lastModified().daysTo(now) > maxAgeDays;
+
+	if (listfileMissing || keysMissing)
+	{
+		wxString message = wxT("The following required files are missing:\n\n");
+		if (listfileMissing)
+			message += wxT("  - listfile.csv\n");
+		if (keysMissing)
+			message += wxT("  - extraEncryptionKeys.csv\n");
+		message += wxT("\nWould you like to download them now?");
+
+		if (wxMessageBox(message, wxT("Missing Files"), wxYES_NO | wxICON_WARNING) == wxYES)
+		{
+			if (listfileMissing)
+				DownloadListfile();
+			if (keysMissing)
+				DownloadEncryptionKeys();
+		}
+		else if (listfileMissing)
+		{
+			wxMessageBox(wxT("The listfile is required for WoW Model Viewer to function correctly.\n"
+				"You can download it later from the File menu."),
+				wxT("Warning"), wxOK | wxICON_WARNING);
+			return false;
+		}
+	}
+
+	if (listfileOutdated || keysOutdated)
+	{
+		wxString message = wxT("The following files may be out of date:\n\n");
+		if (listfileOutdated)
+			message += wxString::Format(wxT("  - listfile.csv (last updated %lld days ago)\n"),
+				listfileInfo.lastModified().daysTo(now));
+		if (keysOutdated)
+			message += wxString::Format(wxT("  - extraEncryptionKeys.csv (last updated %lld days ago)\n"),
+				keysInfo.lastModified().daysTo(now));
+		message += wxT("\nWould you like to update them now?");
+
+		if (wxMessageBox(message, wxT("Files May Be Outdated"), wxYES_NO | wxICON_QUESTION) == wxYES)
+		{
+			if (listfileOutdated)
+				DownloadListfile();
+			if (keysOutdated)
+				DownloadEncryptionKeys();
+		}
+	}
+
+	return true;
 }
 
 void ModelViewer::LoadWoW()
 {
+	if (!CheckAndUpdateSupportFiles())
+		return;
+
 	fileControl->Disable();
 	if (gamePath.IsEmpty() || !wxDirExists(gamePath))
 	{
@@ -1712,13 +1864,28 @@ void ModelViewer::LoadWoW()
 			return;
 	}
 
+	wxProgressDialog loadProgress(wxT("Loading World of Warcraft"),
+		wxT("Opening CASC storage..."), 100, this,
+		wxPD_APP_MODAL | wxPD_AUTO_HIDE | wxPD_SMOOTH);
+
+	// Helper to map a sub-operation's (current, total) to an absolute progress range
+	auto mapProgress = [&loadProgress](int rangeStart, int rangeEnd, const wxString& msg) {
+		return [&loadProgress, rangeStart, rangeEnd, msg](int current, int total) {
+			if (total > 0)
+			{
+				const int progress = rangeStart + static_cast<int>(static_cast<int64_t>(current) * (rangeEnd - rangeStart) / total);
+				loadProgress.Update(progress, wxString::Format(wxT("%s (%d%%)"), msg, progress));
+			}
+		};
+	};
+
 	if (!GAMEDIRECTORY.setConfig(config))
 	{
 		const wxString message = wxString::Format(
 			wxT("Fatal Error: Could not load your World of Warcraft Data folder (error %d)."),
 			GAMEDIRECTORY.lastError());
 		wxMessageDialog dial(nullptr, message, wxT("World of Warcraft Not Found"),
-		                                            wxOK | wxICON_ERROR);
+													wxOK | wxICON_ERROR);
 		dial.ShowModal();
 		return;
 	}
@@ -1732,7 +1899,7 @@ void ModelViewer::LoadWoW()
 			"For older WoW versions support, please refer to this page to pick the right WoW Model Viewer version:\n"
 			"https://download.wowmodelviewer.net"));
 		wxMessageDialog dial(nullptr, message, wxT("Wrong World of Warcraft version"),
-		                                            wxOK | wxICON_ERROR);
+													wxOK | wxICON_ERROR);
 		dial.ShowModal();
 		return;
 	}
@@ -1752,42 +1919,41 @@ void ModelViewer::LoadWoW()
 	LOG_INFO << "Using following folder to read game info" << baseConfigFolder;
 	core::Game::instance().setConfigFolder(baseConfigFolder);
 
+	// Range 5-50: Loading file list (heaviest operation)
+	loadProgress.Update(5, wxT("Loading file list... (5%)"));
+	GAMEDIRECTORY.setProgressCallback(mapProgress(5, 50, wxT("Loading file list...")));
 	GAMEDIRECTORY.initFromListfile("../../../listfile.csv");
+	GAMEDIRECTORY.setProgressCallback(nullptr);
 
+	// Range 50-55: Loading custom files
+	loadProgress.Update(50, wxT("Loading custom files... (50%)"));
 	if (!customDirectoryPath.IsEmpty())
 		core::Game::instance().addCustomFiles(QString::fromWCharArray(customDirectoryPath.c_str()),
-		                                      customFilesConflictPolicy);
+											  customFilesConflictPolicy);
 
-	// init database
-	InitDatabase();
+	// Range 55-75: Initializing database
+	loadProgress.Update(55, wxT("Initializing database... (55%)"));
+	InitDatabase(mapProgress(55, 75, wxT("Initializing database...")));
 
-	/*
-	// Error check
-	if (!initDB)
-	{
-	wxMessageBox(wxT("Some DBC files could not be loaded.  These files are vital to being able to render models correctly.\nFile list has been disabled until you are able to correct this problem."), wxT("DBC Error"));
-	fileControl->Disable();
-	SetStatusText(wxT("Some DBC files could not be loaded."));
-	}
-	else
-	{
-	isWoWLoaded = true;
-	SetStatusText(wxT("Initializing WoW Done."));
-	fileMenu->Enable(ID_LOAD_WOW, false);
-	}
-	*/
-	//wxMessageBox(wxT("Database loading is not yet supported. Available functionalities are quite restricted in this alpha release."), wxT("No database support yet"));
+	// Range 75-80: Filtering files
+	loadProgress.Update(75, wxT("Filtering files... (75%)"));
+	GAMEDIRECTORY.setProgressCallback(mapProgress(75, 80, wxT("Filtering files...")));
 
-
+	// Range 80-97: Building file tree
 	SetStatusText(wxT("Initializing File Control..."));
-	fileControl->Init(this);
+	fileControl->Init(this, mapProgress(80, 97, wxT("Building file tree...")));
+	GAMEDIRECTORY.setProgressCallback(nullptr);
 
+	// Range 97-100: Character controls
+	loadProgress.Update(97, wxT("Initializing character controls... (97%)"));
 	if (charControl->Init() == false)
 	{
 		SetStatusText(wxT("Error Initializing the Character Controls."));
 	};
 	fileControl->Enable();
-	SetStatusText(wxT("File Control Initialized."));
+
+	loadProgress.Update(100, wxT("Done. (100%)"));
+	SetStatusText(wxT("World of Warcraft loaded successfully."));
 }
 
 void ModelViewer::OnCharToggle(wxCommandEvent& event)

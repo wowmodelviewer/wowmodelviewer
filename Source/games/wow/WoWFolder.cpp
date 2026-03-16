@@ -27,6 +27,8 @@ void wow::WoWFolder::initFromListfile(const QString& filename)
 	}
 
 	QTextStream in(&file);
+	const qint64 totalSize = file.size();
+	int lineCount = 0;
 
 	LOG_INFO << "WoWFolder - Starting to build object hierarchy";
 	while (!in.atEnd())
@@ -47,6 +49,8 @@ void wow::WoWFolder::initFromListfile(const QString& filename)
 			File->setName(line.mid(line.lastIndexOf('/') + 1));
 			addChild(File);
 		}
+		if (m_progressCallback && ++lineCount % 500 == 0 && totalSize > 0)
+			m_progressCallback(static_cast<int>(file.pos()), static_cast<int>(totalSize));
 	}
 	LOG_INFO << "WoWFolder - Hierarchy creation done";
 }

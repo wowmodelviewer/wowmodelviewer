@@ -255,6 +255,8 @@ frame->interfaceManager.Update();
 
 	LOG_INFO << "WoW Model Viewer successfully loaded!";
 
+	frame->CheckAndUpdateSupportFiles();
+
 	// Classic Mode?
 	if (wxMessageBox(_("Would you like to load World of Warcraft right now?"), _("Load World of Warcraft"), wxYES_NO) ==
 		wxYES)

@@ -1,5 +1,6 @@
 #pragma once
 
+#include <functional>
 #include "FileTreeItem.h"
 
 class ModelViewer;
@@ -27,7 +28,7 @@ public:
 	FileControl(wxWindow* parent, wxWindowID id);
 	~FileControl();
 
-	void Init(ModelViewer* mv = nullptr);
+	void Init(ModelViewer* mv = nullptr, std::function<void(int, int)> progressCallback = nullptr);
 	void OnTreeSelect(wxTreeEvent& event);
 	void OnTreeCollapsedOrExpanded(wxTreeEvent& event);
 	void OnButton(wxCommandEvent& event);

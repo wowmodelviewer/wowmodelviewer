@@ -39,12 +39,16 @@ void core::GameFolder::getFilteredFiles(std::set<GameFile*>& dest, QString& filt
 		LOG_ERROR << regex.errorString();
 		return;
 	}
+	int count = 0;
+	const int total = static_cast<int>(nbChildren());
 	for (auto it : *this)
 	{
 		if (it->name().contains(regex))
 		{
 			dest.insert(it);
 		}
+		if (m_progressCallback && ++count % 500 == 0)
+			m_progressCallback(count, total);
 	}
 }
 

@@ -134,7 +134,7 @@ bool filterSearch(QString s)
 	return true;
 }
 
-void FileControl::Init(ModelViewer* mv)
+void FileControl::Init(ModelViewer* mv, std::function<void(int, int)> progressCallback)
 {
 	if (modelviewer == nullptr)
 		modelviewer = mv;
@@ -150,6 +150,8 @@ void FileControl::Init(ModelViewer* mv)
 
 	LOG_INFO << "Initializing File Controls - Filtering done - files found" << files.size();
 	TreeStackItem root;
+	int count = 0;
+	const int total = static_cast<int>(files.size());
 	for (std::set<GameFile*>::iterator it = files.begin(); it != files.end(); ++it)
 	{
 		QString name = (*it)->fullname();
@@ -176,6 +178,9 @@ void FileControl::Init(ModelViewer* mv)
 		child->file = *it;
 		child->setName(Items[Items.size() - 1]);
 		curparent->addChild(child);
+
+		if (progressCallback && ++count % 200 == 0)
+			progressCallback(count, total);
 	}
 
 	LOG_INFO << "Initializing File Controls - File Hierarchy created";

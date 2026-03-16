@@ -1,5 +1,6 @@
 #pragma once
 
+#include <functional>
 #include <map>
 #include <set>
 #include "GameFile.h"
@@ -9,6 +10,8 @@
 
 namespace core
 {
+	using ProgressCallback = std::function<void(int, int)>;
+
 	class _GAMEFOLDER_API_ GameConfig
 	{
 	public:
@@ -55,6 +58,11 @@ namespace core
 		virtual void onChildRemoved(GameFile*) override;
 
 		QString path() { return m_path; }
+
+		void setProgressCallback(ProgressCallback cb) { m_progressCallback = std::move(cb); }
+
+	protected:
+		ProgressCallback m_progressCallback;
 
 	private:
 		std::map<QString, GameFile*> m_nameMap;
