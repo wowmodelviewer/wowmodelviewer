@@ -5,6 +5,58 @@ Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
 function Write-Step([string]$msg) { Write-Host "`n>>> $msg" -ForegroundColor Cyan }
 function Ensure-Dir([string]$path) { if (!(Test-Path $path)) { New-Item -ItemType Directory -Path $path -Force | Out-Null } }
+function Format-Size([long]$bytes) { if ($bytes -ge 1MB) { return "{0:N1} MB" -f ($bytes / 1MB) } else { return "{0:N0} KB" -f ($bytes / 1KB) } }
+function Format-Speed([double]$bps) { if ($bps -ge 1MB) { return "{0:N1} MB/s" -f ($bps / 1MB) } else { return "{0:N0} KB/s" -f ($bps / 1KB) } }
+function Download-WithProgress([string]$Uri, [string]$OutFile, [string]$Label) {
+    try { $consoleWidth = [Console]::WindowWidth } catch { $consoleWidth = 0 }
+    if ($consoleWidth -le 0) { $consoleWidth = 120 }
+    $request = [System.Net.HttpWebRequest]::Create($Uri)
+    $request.AllowAutoRedirect = $true
+    $response = $request.GetResponse()
+    $totalBytes = $response.ContentLength
+    $stream = $response.GetResponseStream()
+    $fileStream = [System.IO.File]::Create($OutFile)
+    $buffer = New-Object byte[] 65536
+    $downloaded = [long]0
+    $sw = [System.Diagnostics.Stopwatch]::StartNew()
+    $lastReport = [long]0
+    $barWidth = 50
+    try {
+        while (($bytesRead = $stream.Read($buffer, 0, $buffer.Length)) -gt 0) {
+            $fileStream.Write($buffer, 0, $bytesRead)
+            $downloaded += $bytesRead
+            if ($sw.ElapsedMilliseconds - $lastReport -ge 250) {
+                $lastReport = $sw.ElapsedMilliseconds
+                $elapsed = $sw.Elapsed.TotalSeconds
+                $speed = if ($elapsed -gt 0) { $downloaded / $elapsed } else { 0 }
+                if ($totalBytes -gt 0) {
+                    $pct = [int](($downloaded / $totalBytes) * 100)
+                    $filled = [int](($downloaded / $totalBytes) * $barWidth)
+                    $empty = $barWidth - $filled
+                    $bar = ('#' * $filled) + ('-' * $empty)
+                    $line = "  $Label  $(Format-Size $downloaded) / $(Format-Size $totalBytes)  $(Format-Speed $speed)  [$bar] $pct%"
+                } else {
+                    $line = "  $Label  $(Format-Size $downloaded)  $(Format-Speed $speed)"
+                }
+                [Console]::Write("`r$($line.PadRight($consoleWidth - 1))")
+            }
+        }
+    } finally {
+        $fileStream.Close()
+        $stream.Close()
+        $response.Close()
+    }
+    $elapsed = $sw.Elapsed.TotalSeconds
+    $speed = if ($elapsed -gt 0) { $downloaded / $elapsed } else { 0 }
+    if ($totalBytes -gt 0) {
+        $bar = '#' * $barWidth
+        $line = "  $Label  $(Format-Size $downloaded) / $(Format-Size $totalBytes)  $(Format-Speed $speed)  [$bar] 100%"
+    } else {
+        $line = "  $Label  $(Format-Size $downloaded)  $(Format-Speed $speed)"
+    }
+    [Console]::Write("`r$($line.PadRight($consoleWidth - 1))")
+    [Console]::WriteLine()
+}
 Write-Step "Checking prerequisites"
 $vcpkgCmd = Get-Command vcpkg -EA SilentlyContinue
 $vcpkgExe = if ($vcpkgCmd) { $vcpkgCmd.Source } else { $null }
@@ -78,7 +130,7 @@ else {
         $outFile = Join-Path $qtTmp $fileName
         if (!(Test-Path $outFile)) {
             Write-Host "  Downloading $($arc.Name)..."
-            Invoke-WebRequest -Uri $url -OutFile $outFile -UseBasicParsing
+                Download-WithProgress -Uri $url -OutFile $outFile -Label $arc.Name
         }
         Write-Host "  Extracting $($arc.Name)..."
         & $7zExe x $outFile -o"$qtDst" -aoa -bd | Out-Null
@@ -94,8 +146,8 @@ else {
     $fbxTmp = Join-Path $RepoRoot "out\fbx_download"; Ensure-Dir $fbxTmp
     $fbxExe = Join-Path $fbxTmp "fbx202039_fbxsdk_vs2022_win.exe"
     if (!(Test-Path $fbxExe)) {
-        Write-Host "  Downloading FBX SDK 2020.3.9 (~115 MB) ..."
-        Invoke-WebRequest -Uri "https://damassets.autodesk.net/content/dam/autodesk/www/files/fbx202039_fbxsdk_vs2022_win.exe" -OutFile $fbxExe -UseBasicParsing
+        Write-Host "  Downloading FBX SDK 2020.3.9 ..."
+        Download-WithProgress -Uri "https://damassets.autodesk.net/content/dam/autodesk/www/files/fbx202039_fbxsdk_vs2022_win.exe" -OutFile $fbxExe -Label "FBX SDK 2020.3.9"
     }
     # Extract the NSIS installer with 7-Zip
     $fbxExtract = Join-Path $fbxTmp "extracted"; Ensure-Dir $fbxExtract
@@ -130,7 +182,7 @@ Write-Step "Downloading vcredist_x64.exe"
 $vcredistDst = Join-Path $RepoRoot "bin_support\vcredist_x64.exe"
 if (Test-Path $vcredistDst) { Write-Host "  Already exists - skipping." }
 else {
-    try { Invoke-WebRequest -Uri "https://aka.ms/vs/17/release/vc_redist.x64.exe" -OutFile $vcredistDst -UseBasicParsing }
+    try { Download-WithProgress -Uri "https://aka.ms/vs/17/release/vc_redist.x64.exe" -OutFile $vcredistDst -Label "vcredist_x64.exe" }
     catch { Write-Warning "Failed to download vcredist_x64.exe: $_" }
 }
 Write-Step "Done! Open in Visual Studio, select x64-Debug or x64-Release, and build."
