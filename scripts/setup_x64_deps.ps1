@@ -66,7 +66,7 @@ Write-Step "Installing Qt 6.8.3 msvc2022_64"
 $qtDst = Join-Path $RepoRoot "ThirdParty\Qt\6.8.3\6.8.3\msvc2022_64"
 if (Test-Path $qtDst) { Write-Host "  Already exists - skipping." }
 else {
-    $qtOut = Join-Path $RepoRoot "ThirdParty\Qt\6.8.3"; Ensure-Dir $qtOut
+    Ensure-Dir $qtDst
     $qtTmp = Join-Path $RepoRoot "out\qt_download"; Ensure-Dir $qtTmp
     $qtBaseUrl = "https://download.qt.io/online/qtsdkrepository/windows_x86/desktop/qt6_683/qt6_683"
     $qtBuildTag = "6.8.3-0-202503201308"
@@ -88,7 +88,7 @@ else {
             Invoke-WebRequest -Uri $url -OutFile $outFile -UseBasicParsing
         }
         Write-Host "  Extracting $($arc.Name)..."
-        & $7zExe x $outFile -o"$qtOut" -aoa -bd | Out-Null
+        & $7zExe x $outFile -o"$qtDst" -aoa -bd | Out-Null
         if ($LASTEXITCODE -ne 0) { throw "7z extraction failed for $fileName" }
     }
     if (!(Test-Path $qtDst)) { Write-Warning "Qt download failed - expected path not found: $qtDst" }
