@@ -18,7 +18,6 @@ out/
 .idea/workspace.xml
 .idea/.name
 .idea/wowmodelviewer.iml
-aqtinstall.log
 ThirdParty/Qt/
 .github/copilot-instructions.md
 
@@ -27,3 +26,4 @@ ThirdParty/wxWidgets_x64/
 ThirdParty/lib/x64/libpng.lib
 ThirdParty/lib/x64/zlib.lib
 ThirdParty/libs/x64/glew32s.lib
+ThirdParty/GL/

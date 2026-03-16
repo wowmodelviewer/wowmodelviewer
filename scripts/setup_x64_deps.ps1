@@ -1,5 +1,5 @@
 #Requires -Version 5.1
-# setup_x64_deps.ps1 - Downloads x64 deps. Needs: VS C++ workload, Python 3, vcpkg
+# setup_x64_deps.ps1 - Downloads x64 deps. Needs: VS C++ workload, vcpkg, 7-Zip
 param([string]$RepoRoot = (Resolve-Path "$PSScriptRoot\..").Path)
 Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
@@ -8,8 +8,12 @@ function Ensure-Dir([string]$path) { if (!(Test-Path $path)) { New-Item -ItemTyp
 Write-Step "Checking prerequisites"
 $vcpkgExe = (Get-Command vcpkg -EA SilentlyContinue).Source
 if (-not $vcpkgExe) { throw "vcpkg not found. Open a VS Developer Command Prompt." }
-$pythonExe = (Get-Command python -EA SilentlyContinue).Source
-if (-not $pythonExe) { throw "python not found. Python 3 required for Qt download." }
+$7zExe = (Get-Command 7z -EA SilentlyContinue).Source
+if (-not $7zExe) {
+    $candidate = "$env:ProgramFiles\7-Zip\7z.exe"
+    if (Test-Path $candidate) { $7zExe = $candidate }
+    else { throw "7-Zip not found. Install from https://7-zip.org or ensure 7z is on PATH." }
+}
 $vcpkgRoot = Split-Path $vcpkgExe
 $bundleJson = Join-Path $vcpkgRoot "vcpkg-bundle.json"
 if (Test-Path $bundleJson) { $baseline = (Get-Content $bundleJson | ConvertFrom-Json).embeddedsha }
@@ -25,15 +29,19 @@ $tmp1 = Join-Path $RepoRoot "out\vcpkg_setup"; Ensure-Dir $tmp1
 $j1 = "{""name"":""wmv"",""version"":""1.0.0"",""builtin-baseline"":""$baseline"",""dependencies"":[""zlib"",""libpng"",""glew""]}"
 Set-Content "$tmp1\vcpkg.json" -Encoding UTF8 -Value $ExecutionContext.InvokeCommand.ExpandString($j1)
 Push-Location $tmp1; & $vcpkgExe install --triplet x64-windows-static-md @vcpkgOverlay; Pop-Location
-$src1 = "$tmp1\vcpkg_installed\x64-windows-static-md\lib"
+$src1 = "$tmp1\vcpkg_installed\x64-windows-static-md"
 $libDst = Join-Path $RepoRoot "ThirdParty\lib\x64"; Ensure-Dir $libDst
 $libsDst = Join-Path $RepoRoot "ThirdParty\libs\x64"; Ensure-Dir $libsDst
-Copy-Item "$src1\libpng16.lib" "$libDst\libpng.lib" -Force
-Copy-Item "$src1\zlib.lib" "$libDst\zlib.lib" -Force
-$glewLib = Get-ChildItem "$src1" -Filter "*.lib" | Where-Object { $_.Name -match "glew" } | Select-Object -First 1
-if (-not $glewLib) { Write-Host "Available libs:"; Get-ChildItem "$src1" -Filter "*.lib" | ForEach-Object { Write-Host "  $($_.Name)" }; throw "Could not find glew lib in $src1" }
+Copy-Item "$src1\lib\libpng16.lib" "$libDst\libpng.lib" -Force
+Copy-Item "$src1\lib\zlib.lib" "$libDst\zlib.lib" -Force
+$glewLib = Get-ChildItem "$src1\lib" -Filter "*.lib" | Where-Object { $_.Name -match "glew" } | Select-Object -First 1
+if (-not $glewLib) { Write-Host "Available libs:"; Get-ChildItem "$src1\lib" -Filter "*.lib" | ForEach-Object { Write-Host "  $($_.Name)" }; throw "Could not find glew lib in $src1\lib" }
 Write-Host "Found glew lib: $($glewLib.Name)"
 Copy-Item $glewLib.FullName "$libsDst\glew32s.lib" -Force
+$glDst = Join-Path $RepoRoot "ThirdParty\GL"; Ensure-Dir $glDst
+Copy-Item "$src1\include\GL\glew.h" "$glDst\glew.h" -Force
+Copy-Item "$src1\include\GL\wglew.h" "$glDst\wglew.h" -Force
+Copy-Item "$src1\include\GL\glxew.h" "$glDst\glxew.h" -Force
 Write-Step "Installing wxWidgets via vcpkg"
 $tmp2 = Join-Path $RepoRoot "out\vcpkg_wx"; Ensure-Dir $tmp2
 $j2 = "{""name"":""wmv-wx"",""version"":""1.0.0"",""builtin-baseline"":""$baseline"",""overrides"":[{""name"":""wxwidgets"",""version"":""3.2.8.1""}],""dependencies"":[{""name"":""wxwidgets"",""default-features"":false}]}"
@@ -58,10 +66,31 @@ Write-Step "Installing Qt 6.8.3 msvc2022_64"
 $qtDst = Join-Path $RepoRoot "ThirdParty\Qt\6.8.3\6.8.3\msvc2022_64"
 if (Test-Path $qtDst) { Write-Host "  Already exists - skipping." }
 else {
-    & $pythonExe -m pip show aqtinstall 2>&1 | Out-Null
-    if ($LASTEXITCODE -ne 0) { & $pythonExe -m pip install aqtinstall }
     $qtOut = Join-Path $RepoRoot "ThirdParty\Qt\6.8.3"; Ensure-Dir $qtOut
-    & $pythonExe -m aqt install-qt windows desktop 6.8.3 win64_msvc2022_64 -m qt5compat --outputdir $qtOut
+    $qtTmp = Join-Path $RepoRoot "out\qt_download"; Ensure-Dir $qtTmp
+    $qtBaseUrl = "https://download.qt.io/online/qtsdkrepository/windows_x86/desktop/qt6_683/qt6_683"
+    $qtBuildTag = "6.8.3-0-202503201308"
+    $qtPlatform = "Windows-Windows_11_23H2-MSVC2022-Windows-Windows_11_23H2-X86_64"
+    $qtArchives = @(
+        @{ Pkg = "qt.qt6.683.win64_msvc2022_64"; Name = "qtbase" },
+        @{ Pkg = "qt.qt6.683.win64_msvc2022_64"; Name = "qtsvg" },
+        @{ Pkg = "qt.qt6.683.win64_msvc2022_64"; Name = "qtdeclarative" },
+        @{ Pkg = "qt.qt6.683.win64_msvc2022_64"; Name = "qttools" },
+        @{ Pkg = "qt.qt6.683.win64_msvc2022_64"; Name = "qttranslations" },
+        @{ Pkg = "qt.qt6.683.addons.qt5compat.win64_msvc2022_64"; Name = "qt5compat" }
+    )
+    foreach ($arc in $qtArchives) {
+        $fileName = "${qtBuildTag}$($arc.Name)-${qtPlatform}.7z"
+        $url = "${qtBaseUrl}/$($arc.Pkg)/${fileName}"
+        $outFile = Join-Path $qtTmp $fileName
+        if (!(Test-Path $outFile)) {
+            Write-Host "  Downloading $($arc.Name)..."
+            Invoke-WebRequest -Uri $url -OutFile $outFile -UseBasicParsing
+        }
+        Write-Host "  Extracting $($arc.Name)..."
+        & $7zExe x $outFile -o"$qtOut" -aoa -bd | Out-Null
+        if ($LASTEXITCODE -ne 0) { throw "7z extraction failed for $fileName" }
+    }
     if (!(Test-Path $qtDst)) { Write-Warning "Qt download failed - expected path not found: $qtDst" }
 }
 Write-Step "Downloading vcredist_x64.exe"

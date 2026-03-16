@@ -28,10 +28,16 @@ jobs:
       # Cache is invalidated automatically when setup_x64_deps.ps1 changes.
       # restore-keys lets a partial match seed the cache so only changed
       # packages need to be rebuilt by vcpkg.
+      # Only cache generated artifacts — exclude git submodules (glm, casclib).
       - name: Cache ThirdParty
         uses: actions/cache@v5
         with:
-          path: ThirdParty
+          path: |
+            ThirdParty/Qt
+            ThirdParty/wxWidgets_x64
+            ThirdParty/lib/x64
+            ThirdParty/libs/x64
+            ThirdParty/GL
           key: ThirdParty-${{ runner.os }}-${{ hashFiles('scripts/setup_x64_deps.ps1') }}
           restore-keys: |
             ThirdParty-${{ runner.os }}-
