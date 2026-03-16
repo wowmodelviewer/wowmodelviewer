@@ -6,9 +6,11 @@ $ErrorActionPreference = "Stop"
 function Write-Step([string]$msg) { Write-Host "`n>>> $msg" -ForegroundColor Cyan }
 function Ensure-Dir([string]$path) { if (!(Test-Path $path)) { New-Item -ItemType Directory -Path $path -Force | Out-Null } }
 Write-Step "Checking prerequisites"
-$vcpkgExe = (Get-Command vcpkg -EA SilentlyContinue).Source
+$vcpkgCmd = Get-Command vcpkg -EA SilentlyContinue
+$vcpkgExe = if ($vcpkgCmd) { $vcpkgCmd.Source } else { $null }
 if (-not $vcpkgExe) { throw "vcpkg not found. Open a VS Developer Command Prompt." }
-$7zExe = (Get-Command 7z -EA SilentlyContinue).Source
+$7zCmd = Get-Command 7z -EA SilentlyContinue
+$7zExe = if ($7zCmd) { $7zCmd.Source } else { $null }
 if (-not $7zExe) {
     $candidate = "$env:ProgramFiles\7-Zip\7z.exe"
     if (Test-Path $candidate) { $7zExe = $candidate }
