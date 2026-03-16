@@ -78,7 +78,9 @@ set(headers animated.h
       RaceInfos.h
       RenderTexture.h
       TabardDetails.h
+      Texture.h
       TextureAnim.h
+      TextureManager.h
       types.h
       video.h
       wdb2file.h
