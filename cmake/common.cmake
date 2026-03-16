@@ -20,10 +20,8 @@ add_definitions(-DGLM_ENABLE_EXPERIMENTAL)
 ######################################
 # macro to be reused across projects #
 ######################################
-macro(use_glew)
-  include_directories(${CMAKE_SOURCE_DIR}/ThirdParty)
-  add_definitions(-DGLEW_STATIC)
-  list(APPEND extralibs opengl32 ${CMAKE_SOURCE_DIR}/ThirdParty/libs/x64/glew32s.lib)
+macro(use_glad)
+  list(APPEND extralibs glad_gl opengl32)
 endmacro()
 
 macro(use_wow)

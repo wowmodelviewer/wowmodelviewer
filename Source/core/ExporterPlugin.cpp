@@ -14,7 +14,7 @@ void ExporterPlugin::exportGLTexture(GLuint id, std::wstring filename) const
 
 	unsigned char* pixels = new unsigned char[width * height * 4];
 
-	glGetTexImage(GL_TEXTURE_2D, 0, GL_BGRA_EXT, GL_UNSIGNED_BYTE, pixels);
+	glGetTexImage(GL_TEXTURE_2D, 0, GL_BGRA, GL_UNSIGNED_BYTE, pixels);
 
 	const QImage texture(pixels, width, height, QImage::Format_ARGB32);
 	texture.save(QString::fromStdWString(filename));

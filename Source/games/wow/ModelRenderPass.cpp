@@ -8,7 +8,7 @@
 
 #include "logger/Logger.h"
 
-#include "GL/glew.h"
+#include <glad/gl.h>
 #include "glm/gtc/type_ptr.hpp"
 
 ModelRenderPass::ModelRenderPass(WoWModel* m, int geo):

@@ -3,7 +3,7 @@
 #include <string>
 
 #include "types.h"
-#include "GL/glew.h"
+#include <glad/gl.h>
 #include "glm/glm.hpp"
 
 class GameFile;

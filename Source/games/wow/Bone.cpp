@@ -1,6 +1,6 @@
 #include "Bone.h"
 
-#include "GL/glew.h"
+#include <glad/gl.h>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtx/quaternion.hpp>
 

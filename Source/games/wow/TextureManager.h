@@ -1,7 +1,7 @@
 #pragma once
 
 #include <vector>
-#include "Gl/glew.h"
+#include <glad/gl.h>
 #include "manager.h"
 
 #define _TEXTUREMANAGER_API_

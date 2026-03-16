@@ -2,36 +2,19 @@
 #include <string>
 #include "logger/Logger.h"
 #include <wx/string.h>
-#include "GL/wglew.h"
 
 bool supportShaders = false;
 static bool initedShaders = false;
 
 ShaderPair *terrainShaders[4] = {nullptr, nullptr, nullptr, nullptr}, *wmoShader = nullptr, *waterShaders[1] = {nullptr};
 
-// TODO
-bool isExtensionSupported(std::string s)
-{
-	return (glewIsSupported(s.c_str()) == GL_TRUE);
-}
-
 void OldinitShaders()
 {
 	if (initedShaders)
 		return;
-	supportShaders = isExtensionSupported("ARB_vertex_program") && isExtensionSupported("ARB_fragment_program");
+	supportShaders = GLAD_GL_ARB_vertex_program && GLAD_GL_ARB_fragment_program;
 	if (supportShaders)
 	{
-		// init extension stuff
-#if defined (_WINDOWS)
-		//glARB = () wglGetProcAddress("");
-		glProgramStringARB = (PFNGLPROGRAMSTRINGARBPROC)wglGetProcAddress("glProgramStringARB");
-		glBindProgramARB = (PFNGLBINDPROGRAMARBPROC)wglGetProcAddress("glBindProgramARB");
-		glDeleteProgramsARB = (PFNGLDELETEPROGRAMSARBPROC)wglGetProcAddress("glDeleteProgramsARB");
-		glGenProgramsARB = (PFNGLGENPROGRAMSARBPROC)wglGetProcAddress("glGenProgramsARB");
-		glProgramLocalParameter4fARB = (PFNGLPROGRAMLOCALPARAMETER4FARBPROC)wglGetProcAddress(
-			"glProgramLocalParameter4fARB");
-#endif
 		// init various shaders here
 		OldreloadShaders();
 	}

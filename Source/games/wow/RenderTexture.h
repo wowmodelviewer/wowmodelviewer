@@ -1,7 +1,7 @@
 #pragma once
 
-#include "GL/glew.h"
-#include "GL/wglew.h"
+#include <glad/gl.h>
+#include <glad/wgl.h>
 
 #define _RENDERTEXTURE_API_
 

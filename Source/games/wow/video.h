@@ -4,9 +4,11 @@
 #ifdef _WIN32
 #include <windows.h>
 #endif
-#include "GL/glew.h"
+#include <glad/gl.h>
 #include <GL/glu.h>
-#include "GL/wglew.h"
+#ifdef _WIN32
+#include <glad/wgl.h>
+#endif
 
 #define _VIDEO_API_
 

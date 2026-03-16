@@ -2,7 +2,7 @@
 #include "GameFile.h"
 #include "video.h"
 #include <QImage>
-#include "GL/glew.h"
+#include <glad/gl.h>
 #include "ddslib.h"
 
 Texture::Texture(GameFile* f) : ManagedItem(f->fullname()), w(0), h(0), id(0), compressed(false), file(f)

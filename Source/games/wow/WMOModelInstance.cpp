@@ -3,7 +3,7 @@
 #include "GameFile.h"
 #include "ModelManager.h"
 #include "WoWModel.h"
-#include "GL/glew.h"
+#include <glad/gl.h>
 #include "glm/gtx/quaternion.hpp"
 #include "glm/gtc/type_ptr.hpp"
 

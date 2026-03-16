@@ -16,7 +16,7 @@ set(headers FBXExporter.h
 
 source_group("Header Files" FILES ${headers})
 
-use_glew()
+use_glad()
 use_core()
 use_wow()
 

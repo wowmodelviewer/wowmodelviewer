@@ -3,7 +3,7 @@
 #include "enums.h"
 #include "logger/Logger.h"
 #include <wx/colordlg.h>
-#include "GL/glew.h"
+#include <glad/gl.h>
 
 extern const size_t MAX_LIGHTS;
 

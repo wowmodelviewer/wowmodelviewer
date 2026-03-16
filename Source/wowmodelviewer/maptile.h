@@ -10,7 +10,7 @@ enum
 	CHUNKS_IN_TILE = 16
 };
 
-#include "GL/glew.h"
+#include <glad/gl.h>
 #include "wmo.h"
 #include "WoWModel.h"
 #include "liquid.h"

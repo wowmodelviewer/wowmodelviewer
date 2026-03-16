@@ -1511,7 +1511,7 @@ void ModelCanvas::Screenshot(const wxString fn, int x, int y)
 
 	{
 		QImage image(screenSize[2], screenSize[3], QImage::Format_RGB32);
-		glReadPixels(0, 0, screenSize[2], screenSize[3], GL_BGRA_EXT, GL_UNSIGNED_BYTE, image.bits());
+		glReadPixels(0, 0, screenSize[2], screenSize[3], GL_BGRA, GL_UNSIGNED_BYTE, image.bits());
 		image.mirrored().save(QString::fromWCharArray(fn.c_str()));
 	}
 

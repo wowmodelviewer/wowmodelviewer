@@ -104,7 +104,7 @@ set(headers animated.h
 source_group("Header Files" FILES ${headers})
 
 use_core()
-use_glew()
+use_glad()
 use_casclib()
 
 set(NAME wow)

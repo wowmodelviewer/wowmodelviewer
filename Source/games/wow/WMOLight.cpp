@@ -1,7 +1,7 @@
 #include "WMOLight.h"
 #include <glm/gtc/type_ptr.hpp>
 #include "GameFile.h"
-#include "GL/glew.h"
+#include <glad/gl.h>
 
 void WMOLight::setup(GLint light)
 {

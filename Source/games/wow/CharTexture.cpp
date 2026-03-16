@@ -57,7 +57,7 @@ void CharTexture::compose(GLuint texID)
 
 	// good, upload this to video
 	glBindTexture(GL_TEXTURE_2D, texID);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, img.width(), img.height(), 0, GL_BGRA_EXT, GL_UNSIGNED_BYTE, img.bits());
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, img.width(), img.height(), 0, GL_BGRA, GL_UNSIGNED_BYTE, img.bits());
 	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR);
 }
@@ -187,7 +187,7 @@ QImage* CharTexture::gameFileToQImage(GameFile* file)
 
 	auto* tempbuf = static_cast<unsigned char*>(malloc(tex->w * tex->h * 4));
 
-	tex->getPixels(tempbuf, GL_BGRA_EXT);
+	tex->getPixels(tempbuf, GL_BGRA);
 	result = new QImage(tempbuf, tex->w, tex->h, QImage::Format_ARGB32, imageCleanUpHandler, tempbuf);
 
 	TEXTUREMANAGER.del(temptex);

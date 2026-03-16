@@ -113,23 +113,26 @@ bool VideoSettings::Init()
 	if (init)
 		return true;
 
-	glewExperimental = GL_TRUE;
-	const int glewErr = glewInit();
+	int gladVersion = gladLoaderLoadGL();
 
-	if (glewErr != GLEW_OK)
+	if (!gladVersion)
 	{
-		// problem: glewInit failed, something is seriously wrong
-		LOG_ERROR << "GLEW failed to initialize:" << glewGetErrorString(glewErr);
+		LOG_ERROR << "glad failed to initialize OpenGL loader.";
 		return false;
 	}
 	else
 	{
-		LOG_INFO << "GLEW successfully initiated.";
+		LOG_INFO << "glad successfully initiated (OpenGL " << GLAD_VERSION_MAJOR(gladVersion) << "." << GLAD_VERSION_MINOR(gladVersion) << ").";
 	}
+
+#ifdef _WINDOWS
+	if (hDC)
+		gladLoaderLoadWGL(hDC);
+#endif
 
 	// Now get some specifics on the card
 	// First up, the details
-	if (glewIsSupported("GL_EXT_texture_filter_anisotropic"))
+	if (GLAD_GL_EXT_texture_filter_anisotropic)
 		glGetIntegerv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, (GLint*)&AnisofilterLevel);
 	else
 		AnisofilterLevel = 0;
@@ -144,37 +147,33 @@ bool VideoSettings::Init()
 	if (supportOGL20)
 		supportNPOT = true;
 	else
-		supportNPOT = glewIsSupported("GL_ARB_texture_non_power_of_two") == GL_TRUE ? true : false;
+		supportNPOT = GLAD_GL_ARB_texture_non_power_of_two;
 
-	supportFragProg = glewIsSupported("GL_ARB_fragment_program") == GL_TRUE ? true : false;
-	supportVertexProg = glewIsSupported("GL_ARB_vertex_program") == GL_TRUE ? true : false;
-	supportGLSL = glewIsSupported("GL_ARB_shading_language_100") == GL_TRUE ? true : false;
+	supportFragProg = GLAD_GL_ARB_fragment_program;
+	supportVertexProg = GLAD_GL_ARB_vertex_program;
+	supportGLSL = GLAD_GL_ARB_shading_language_100;
 	supportShaders = (supportFragProg && supportVertexProg);
-	supportMultiTex = glewIsSupported("GL_ARB_multitexture") == GL_TRUE ? true : false;
-	supportDrawRangeElements = glewIsSupported("GL_EXT_draw_range_elements") == GL_TRUE ? true : false;
+	supportMultiTex = GLAD_GL_ARB_multitexture;
+	supportDrawRangeElements = GLAD_GL_EXT_draw_range_elements;
 #if WIP_DH_SUPPORT > 0
 	supportVBO = false;
 #else
-  supportVBO = glewIsSupported("GL_ARB_vertex_buffer_object") == GL_TRUE ? true : false;
+  supportVBO = GLAD_GL_ARB_vertex_buffer_object;
 #endif
-	supportCompression = glewIsSupported(
-		                     "GL_ARB_texture_compression GL_ARB_texture_cube_map GL_EXT_texture_compression_s3tc") ==
-	                     GL_TRUE
-		                     ? true
-		                     : false;
-	supportPointSprites = glewIsSupported("GL_ARB_point_sprite GL_ARB_point_parameters") == GL_TRUE ? true : false;
+	supportCompression = GLAD_GL_ARB_texture_compression && GLAD_GL_ARB_texture_cube_map && GLAD_GL_EXT_texture_compression_s3tc;
+	supportPointSprites = GLAD_GL_ARB_point_sprite && GLAD_GL_ARB_point_parameters;
 #ifdef _WINDOWS
-	supportPBO = wglewIsSupported("WGL_ARB_pbuffer WGL_ARB_render_texture") == GL_TRUE ? true : false;
-	supportAntiAlias = wglewIsSupported("WGL_ARB_multisample") == GL_TRUE ? true : false;
-	supportWGLPixelFormat = wglewIsSupported("WGL_ARB_pixel_format") == GL_TRUE ? true : false;
+	supportPBO = GLAD_WGL_ARB_pbuffer && GLAD_WGL_ARB_render_texture;
+	supportAntiAlias = GLAD_WGL_ARB_multisample;
+	supportWGLPixelFormat = GLAD_WGL_ARB_pixel_format;
 #endif
-	supportFBO = glewIsSupported("GL_EXT_framebuffer_object") == GL_TRUE ? true : false;
+	supportFBO = GLAD_GL_EXT_framebuffer_object;
 
 	// deactivate FBO for Intel cards, glReadPixels is known to be buggy for those cards...
 	if (strcmp(vendor, "Intel") == 0)
 		supportFBO = false;
 
-	supportTexRects = glewIsSupported("GL_ARB_texture_rectangle") == GL_TRUE ? true : false;
+	supportTexRects = GLAD_GL_ARB_texture_rectangle;
 
 	// Now output and log the info
 	LOG_INFO << "Video Renderer:" << renderer;
@@ -211,7 +210,7 @@ bool VideoSettings::Init()
 	// Max texture sizes
 	GLint texSize;
 	// Rectangle
-	if (glewIsSupported("GL_ARB_texture_rectangle"))
+	if (GLAD_GL_ARB_texture_rectangle)
 	{
 		glGetIntegerv(GL_MAX_RECTANGLE_TEXTURE_SIZE_ARB, &texSize);
 		LOG_INFO << "Max Rectangle Texture Size Supported:" << texSize;
@@ -363,7 +362,7 @@ void VideoSettings::EnumDisplayModes()
 	iAttributes.push_back(WGL_ALPHA_BITS_ARB);
 	iAttributes.push_back(WGL_ACCUM_BITS_ARB);
 
-	if (glewIsSupported("GL_ARB_multisample"))
+	if (GLAD_GL_ARB_multisample)
 	{
 		iAttributes.push_back(WGL_SAMPLE_BUFFERS_ARB);
 		iAttributes.push_back(WGL_SAMPLES_ARB);
@@ -389,7 +388,7 @@ void VideoSettings::EnumDisplayModes()
 			// so now we pull the infomation, fill a structure and shove it into our map
 			VideoCaps caps{};
 
-			if (glewIsSupported("GL_ARB_multisample"))
+			if (GLAD_GL_ARB_multisample)
 			{
 				caps.sampleBuffer = results[10];
 				caps.aaSamples = results[11];

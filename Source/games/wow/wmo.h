@@ -3,7 +3,7 @@
 #include <vector>
 #include <string>
 
-#include "GL/glew.h"
+#include <glad/gl.h>
 #include "glm/glm.hpp"
 
 #include "displayable.h"

@@ -1,6 +1,6 @@
 #include "TextureAnim.h"
 
-#include "GL/glew.h"
+#include <glad/gl.h>
 
 void TextureAnim::calc(ssize_t anim, size_t time)
 {

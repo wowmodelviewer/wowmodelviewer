@@ -36,8 +36,6 @@ jobs:
             ThirdParty/Qt
             ThirdParty/wxWidgets_x64
             ThirdParty/lib/x64
-            ThirdParty/libs/x64
-            ThirdParty/GL
             ThirdParty/include/fbxsdk.h
             ThirdParty/include/fbxsdk
           key: ThirdParty-${{ runner.os }}-${{ hashFiles('scripts/setup_x64_deps.ps1') }}
@@ -62,6 +60,14 @@ jobs:
           $env:PATH = "$env:VCPKG_INSTALLATION_ROOT;$env:PATH"
           $env:VCPKG_ROOT = $env:VCPKG_INSTALLATION_ROOT
           .\scripts\setup_x64_deps.ps1 -RepoRoot ${{ github.workspace }}
+
+      - name: Set up Python for glad2
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+
+      - name: Install glad2 Python dependencies
+        run: pip install jinja2
 
       - name: Configure
         run: cmake --preset x64-Release -DBUILDNUMBER=${{ github.run_number }}

@@ -11,7 +11,7 @@
 
 class GameFile;
 
-#include "GL/glew.h" // GLuint
+#include <glad/gl.h> // GLuint
 #include "glm/glm.hpp"
 
 struct ModelLight

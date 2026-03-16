@@ -67,7 +67,7 @@ set(headers AnimationExportChoiceDialog.h
 source_group("Header Files" FILES ${headers})
 
 # add external code usage
-use_glew()
+use_glad()
 use_core()
 use_wow()
 use_casclib()
@@ -115,9 +115,9 @@ add_executable(${NAME} WIN32 ${src} ${headers} ${RES_FILES} ${useful_files} )
 
 set_property(TARGET ${NAME} PROPERTY FOLDER "executables")
 
-# Force-include glew.h before all source files to prevent gl.h ordering issues with wxWidgets 3.x
+# Force-include glad/gl.h before all source files to prevent gl.h ordering issues with wxWidgets 3.x
 if(MSVC)
-  target_compile_options(${NAME} PRIVATE /FIGL/glew.h)
+  target_compile_options(${NAME} PRIVATE /FIglad/gl.h)
 endif()
 
 set(BIN_DIR "${CMAKE_SOURCE_DIR}/bin/")

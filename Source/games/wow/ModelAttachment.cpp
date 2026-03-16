@@ -2,7 +2,7 @@
 
 #include "Bone.h"
 #include "WoWModel.h"
-#include "GL/glew.h"
+#include <glad/gl.h>
 #include "glm/gtc/type_ptr.hpp"
 
 void ModelAttachment::init(ModelAttachmentDef& mad)

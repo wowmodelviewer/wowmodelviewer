@@ -121,6 +121,28 @@ if(DEFINED BUILDNUMBER)
   add_definitions(-D_BUILDNUMBER=${BUILDNUMBER})
 endif()
 
+# glad2 — OpenGL loader generator (replaces GLEW)
+message(STATUS "Adding glad2...")
+add_subdirectory(ThirdParty/glad/cmake)
+glad_add_library(glad_gl
+  REPRODUCIBLE
+  LOADER
+  API gl:compatibility=4.6
+  API wgl=1.0
+  EXTENSIONS
+    GL_ARB_fragment_program GL_ARB_vertex_program
+    GL_ARB_shading_language_100 GL_ARB_multitexture
+    GL_ARB_texture_non_power_of_two GL_ARB_vertex_buffer_object
+    GL_ARB_point_sprite GL_ARB_point_parameters
+    GL_ARB_texture_rectangle GL_ARB_multisample
+    GL_ARB_texture_compression GL_ARB_texture_cube_map
+    GL_EXT_texture_filter_anisotropic GL_EXT_draw_range_elements
+    GL_EXT_framebuffer_object GL_EXT_texture_compression_s3tc
+    WGL_ARB_pbuffer WGL_ARB_render_texture
+    WGL_ARB_multisample WGL_ARB_pixel_format
+)
+set_property(TARGET glad_gl PROPERTY FOLDER "ThirdParty libraries")
+
 # CascLib
 message(STATUS "Adding CascLib...")
 set(CASC_UNICODE ON CACHE BOOL "Use Unicode in CascLib" FORCE)

@@ -2,7 +2,7 @@
 #include "logger/Logger.h"
 #include "GameFile.h"
 #include "Texture.h"
-#include "GL/glew.h"
+#include <glad/gl.h>
 
 _TEXTUREMANAGER_API_ TextureManager TEXTUREMANAGER;
 

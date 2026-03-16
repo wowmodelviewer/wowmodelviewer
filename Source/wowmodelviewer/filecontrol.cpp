@@ -285,7 +285,7 @@ wxString FileControl::ExportPNG(wxString val)
 	}
 
 	unsigned char* tempbuf = static_cast<unsigned char*>(malloc(tex.w * tex.h * 4));
-	tex.getPixels(tempbuf, GL_BGRA_EXT);
+	tex.getPixels(tempbuf, GL_BGRA);
 
 	const QImage PNGFile(tempbuf, tex.w, tex.h, QImage::Format_RGBA8888);
 	PNGFile.save(QString::fromWCharArray(filename.c_str()));

@@ -56,7 +56,7 @@ set(headers CharInfos.h
 
 source_group("Header Files" FILES ${headers})
 
-use_glew()
+use_glad()
 use_sqlite()
 
 set(NAME core)

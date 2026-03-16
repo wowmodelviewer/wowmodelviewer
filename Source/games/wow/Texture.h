@@ -1,7 +1,7 @@
 #pragma once
 
 #include "manager.h"
-#include "GL/glew.h"
+#include <glad/gl.h>
 
 typedef GLuint TextureID;
 

@@ -28,22 +28,13 @@ if ($env:CI -eq 'true') {
 }
 Write-Step "Installing core libs via vcpkg"
 $tmp1 = Join-Path $RepoRoot "out\vcpkg_setup"; Ensure-Dir $tmp1
-$j1 = "{""name"":""wmv"",""version"":""1.0.0"",""builtin-baseline"":""$baseline"",""dependencies"":[""zlib"",""libpng"",""glew""]}"
+$j1 = "{""name"":""wmv"",""version"":""1.0.0"",""builtin-baseline"":""$baseline"",""dependencies"":[""zlib"",""libpng""]}"
 Set-Content "$tmp1\vcpkg.json" -Encoding UTF8 -Value $ExecutionContext.InvokeCommand.ExpandString($j1)
 Push-Location $tmp1; & $vcpkgExe install --triplet x64-windows-static-md @vcpkgOverlay; Pop-Location
 $src1 = "$tmp1\vcpkg_installed\x64-windows-static-md"
 $libDst = Join-Path $RepoRoot "ThirdParty\lib\x64"; Ensure-Dir $libDst
-$libsDst = Join-Path $RepoRoot "ThirdParty\libs\x64"; Ensure-Dir $libsDst
 Copy-Item "$src1\lib\libpng16.lib" "$libDst\libpng.lib" -Force
 Copy-Item "$src1\lib\zlib.lib" "$libDst\zlib.lib" -Force
-$glewLib = Get-ChildItem "$src1\lib" -Filter "*.lib" | Where-Object { $_.Name -match "glew" } | Select-Object -First 1
-if (-not $glewLib) { Write-Host "Available libs:"; Get-ChildItem "$src1\lib" -Filter "*.lib" | ForEach-Object { Write-Host "  $($_.Name)" }; throw "Could not find glew lib in $src1\lib" }
-Write-Host "Found glew lib: $($glewLib.Name)"
-Copy-Item $glewLib.FullName "$libsDst\glew32s.lib" -Force
-$glDst = Join-Path $RepoRoot "ThirdParty\GL"; Ensure-Dir $glDst
-Copy-Item "$src1\include\GL\glew.h" "$glDst\glew.h" -Force
-Copy-Item "$src1\include\GL\wglew.h" "$glDst\wglew.h" -Force
-Copy-Item "$src1\include\GL\glxew.h" "$glDst\glxew.h" -Force
 Write-Step "Installing wxWidgets via vcpkg"
 $tmp2 = Join-Path $RepoRoot "out\vcpkg_wx"; Ensure-Dir $tmp2
 $j2 = "{""name"":""wmv-wx"",""version"":""1.0.0"",""builtin-baseline"":""$baseline"",""overrides"":[{""name"":""wxwidgets"",""version"":""3.2.8.1""}],""dependencies"":[{""name"":""wxwidgets"",""default-features"":false}]}"

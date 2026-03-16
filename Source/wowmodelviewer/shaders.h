@@ -1,20 +1,8 @@
 #pragma once
 
-#if defined _WINDOWS
-#include "GL\glew.h"
-#endif
-
-// Shut up MSVC compiler "inconsistent dll linkage" warning
-#ifdef _MSC_VER
-#  pragma warning (disable : 4273)
-#endif
+#include <glad/gl.h>
 
 extern bool supportShaders;
-extern PFNGLPROGRAMSTRINGARBPROC glProgramStringARB;
-extern PFNGLBINDPROGRAMARBPROC glBindProgramARB;
-extern PFNGLDELETEPROGRAMSARBPROC glDeleteProgramsARB;
-extern PFNGLGENPROGRAMSARBPROC glGenProgramsARB;
-extern PFNGLPROGRAMLOCALPARAMETER4FARBPROC glProgramLocalParameter4fARB;
 
 void OldinitShaders();
 void OldreloadShaders();
