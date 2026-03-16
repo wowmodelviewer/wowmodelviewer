@@ -187,9 +187,7 @@ ModelViewer::ModelViewer()
 
 	isWoWLoaded = false;
 	isModel = false;
-	isWMO = false;
 	isChar = false;
-	isADT = false;
 	initDB = false;
 
 	//wxCAPTION|wxRESIZE_BORDER|wxSYSTEM_MENU
@@ -1014,7 +1012,6 @@ void ModelViewer::LoadNPC(unsigned int modelid)
 
 	isModel = true;
 	isChar = false;
-	isWMO = false;
 
 
 	QString query = QString("SELECT CreatureModelData.FileDataID, CreatureDisplayInfo.TextureVariationFileDataID1, "
@@ -1097,7 +1094,6 @@ void ModelViewer::LoadItem(unsigned int id)
 
 	isModel = true;
 	isChar = false;
-	isWMO = false;
 
 	try
 	{
@@ -1310,12 +1306,6 @@ void ModelViewer::OnToggleCommand(wxCommandEvent& event)
 		break;
 
 	case ID_DEFAULT_DOODADS:
-		// if we have a model...
-		if (canvas->wmo)
-		{
-			canvas->wmo->includeDefaultDoodads = event.IsChecked();
-			canvas->wmo->updateModels();
-		}
 		animControl->defaultDoodads = event.IsChecked();
 		break;
 

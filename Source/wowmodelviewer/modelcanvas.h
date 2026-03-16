@@ -10,12 +10,10 @@
 #include <string>
 
 #include "lightcontrol.h"
-#include "maptile.h"
 #include "OrbitCamera.h"
 #include "RenderTexture.h"
 #include "util.h"
 #include "video.h"
-#include "wmo.h"
 #include "WoWModel.h"
 #include "glm/glm.hpp"
 
@@ -73,10 +71,7 @@ public:
 	// Main render routines which call the sub routines
 	void RenderToTexture();
 	void RenderModel();
-	void RenderWMO();
-	void RenderADT();
 	void RenderToBuffer();
-	void RenderWMOToBuffer();
 	void RenderLight(Light* l);
 
 	// Render sub routines
@@ -103,8 +98,6 @@ public:
 
 	Attachment* LoadModel(GameFile*);
 
-	void LoadWMO(wxString fn);
-	void LoadADT(wxString fn);
 	//void TogglePause();
 
 	// Various toggles
@@ -117,9 +110,6 @@ public:
 	int ignoreMouse;
 
 	// Models / Attachments
-	WMO* wmo;
-	MapTile* adt;
-
 	Attachment* root;
 
 	// Attachment related functions

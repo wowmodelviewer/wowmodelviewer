@@ -4,9 +4,6 @@
 
 extern bool supportShaders;
 
-void OldinitShaders();
-void OldreloadShaders();
-
 class Shader
 {
 	GLenum target;
@@ -41,5 +38,3 @@ public:
 	void bind();
 	void unbind();
 };
-
-extern ShaderPair *terrainShaders[4], *wmoShader, *waterShaders[1];

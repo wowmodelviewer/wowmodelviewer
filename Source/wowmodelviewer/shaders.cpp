@@ -1,40 +1,8 @@
 #include "shaders.h"
 #include <string>
 #include "logger/Logger.h"
-#include <wx/string.h>
 
 bool supportShaders = false;
-static bool initedShaders = false;
-
-ShaderPair *terrainShaders[4] = {nullptr, nullptr, nullptr, nullptr}, *wmoShader = nullptr, *waterShaders[1] = {nullptr};
-
-void OldinitShaders()
-{
-	if (initedShaders)
-		return;
-	supportShaders = GLAD_GL_ARB_vertex_program && GLAD_GL_ARB_fragment_program;
-	if (supportShaders)
-	{
-		// init various shaders here
-		OldreloadShaders();
-	}
-	LOG_INFO << "Shaders" << (supportShaders ? "enabled" : "disabled");
-	initedShaders = true;
-}
-
-void OldreloadShaders()
-{
-	for (auto& terrainShader : terrainShaders) delete terrainShader;
-	delete wmoShader;
-	delete waterShaders[0];
-
-	terrainShaders[0] = new ShaderPair(nullptr, "shaders/terrain1.fs", true);
-	terrainShaders[1] = new ShaderPair(nullptr, "shaders/terrain2.fs", true);
-	terrainShaders[2] = new ShaderPair(nullptr, "shaders/terrain3.fs", true);
-	terrainShaders[3] = new ShaderPair(nullptr, "shaders/terrain4.fs", true);
-	wmoShader = new ShaderPair(nullptr, "shaders/wmospecular.fs", true);
-	waterShaders[0] = new ShaderPair(nullptr, "shaders/wateroutdoor.fs", true);
-}
 
 Shader::Shader(GLenum target, const char* program, bool fromFile): target(target), id(0)
 {

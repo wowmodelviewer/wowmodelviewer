@@ -14,7 +14,6 @@
 #include "GlobalSettings.h"
 #include "globalvars.h"
 #include "modelviewer.h"
-#include "shaders.h"
 #include "video.h"
 #include "glm/glm.hpp"
 #include "glm/gtc/matrix_transform.hpp"
@@ -130,8 +129,6 @@ ModelCanvas::ModelCanvas(wxWindow* parent, VideoCaps* caps)
 	lastTime = timeGetTime();
 
 	// Set all our pointers to null
-	wmo = nullptr; // world map object model
-	adt = nullptr; // ADT
 	animControl = nullptr;
 	rt = nullptr; // RenderToTexture class
 	root = new Attachment(nullptr, nullptr, -1, -1);
@@ -323,8 +320,6 @@ Attachment* ModelCanvas::LoadModel(GameFile* file)
 {
 	clearAttachments();
 	root->setModel(nullptr);
-	delete wmo;
-	wmo = nullptr;
 
 	// Create new one
 	model_ = new WoWModel(file, true);
@@ -340,36 +335,6 @@ Attachment* ModelCanvas::LoadModel(GameFile* file)
 	camera.reset(model_);
 
 	return att;
-}
-
-void ModelCanvas::LoadADT(wxString fn)
-{
-	OldinitShaders();
-
-	root->setModel(nullptr);
-	wxDELETE(adt);
-
-	adt = new MapTile(fn);
-	if (adt->ok)
-	{
-		glm::vec3 vc = adt->topnode.vmax;
-		if (vc.y < 0) vc.y = 0;
-		adt->viewpos.y = vc.y + 50.0f;
-		adt->viewpos.x = adt->xbase;
-		adt->viewpos.z = adt->zbase;
-		root->setModel(adt);
-	}
-	else
-		wxDELETE(adt);
-}
-
-void ModelCanvas::LoadWMO(wxString fn)
-{
-	if (!wmo)
-	{
-		wmo = new WMO(QString::fromWCharArray(fn.c_str()));
-		root->setModel(wmo);
-	}
 }
 
 void ModelCanvas::clearAttachments()
@@ -454,12 +419,8 @@ void ModelCanvas::OnPaint(wxPaintEvent& WXUNUSED(event))
 {
 	if (glContext_)
 	{
-		if (wmo)
-			RenderWMO();
-		else if (model_)
+		if (model_)
 			RenderModel();
-		else if (adt)
-			RenderADT();
 	}
 }
 
@@ -1016,166 +977,6 @@ inline void ModelCanvas::RenderToTexture()
 	*/
 }
 
-inline void ModelCanvas::RenderWMO()
-{
-	if (!init)
-		InitGL();
-
-	glClearColor(vecBGColor.x, vecBGColor.y, vecBGColor.z, 0.0f);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-	InitView();
-
-	// Lighting
-	// From what I can tell, WoW OpenGL only uses 4 g_modelViewer->lightControl->lights
-	for (size_t i = 0; i < 4; i++)
-	{
-		const GLuint light = GL_LIGHT0 + (GLuint)i;
-		glLightf(light, GL_CONSTANT_ATTENUATION, 0.0f);
-		glLightf(light, GL_LINEAR_ATTENUATION, 0.7f);
-		glLightf(light, GL_QUADRATIC_ATTENUATION, 0.03f);
-		glDisable(light);
-	}
-	glm::vec4 la = glm::vec4(0.35f, 0.35f, 0.35f, 1.0f);
-
-	glLightModelfv(GL_LIGHT_MODEL_AMBIENT, glm::value_ptr(la));
-	glColor3f(1.0f, 1.0f, 1.0f);
-
-
-	// --==--
-	// TODO: Possibly move this into the Model/Attachment/Displayable::draw() routine?
-	// View
-	if (model_)
-	{
-		glTranslatef(model_->pos_.x, model_->pos_.y, -model_->pos_.z);
-		glRotatef(model_->rot_.x, 1.0f, 0.0f, 0.0f);
-		glRotatef(model_->rot_.y, 0.0f, 1.0f, 0.0f);
-		glRotatef(model_->rot_.z, 0.0f, 0.0f, 1.0f);
-		// --==--
-	}
-
-	//camera.Setup();
-
-	glEnable(GL_TEXTURE_2D);
-	glEnable(GL_DEPTH_TEST);
-	glDisable(GL_CULL_FACE);
-	root->draw();
-	//root->drawParticles(true);
-
-	//glFlush();
-	//glFinish();
-	SwapBuffers();
-}
-
-inline void ModelCanvas::RenderADT()
-{
-	if (!init)
-		InitGL();
-
-	glClearColor(vecBGColor.x, vecBGColor.y, vecBGColor.z, 0.0f);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-	InitView();
-
-	// Lighting
-	// From what I can tell, WoW OpenGL only uses 4 g_modelViewer->lightControl->lights
-	for (size_t i = 0; i < 4; i++)
-	{
-		const GLuint light = GL_LIGHT0 + (GLuint)i;
-		glLightf(light, GL_CONSTANT_ATTENUATION, 0.0f);
-		glLightf(light, GL_LINEAR_ATTENUATION, 0.7f);
-		glLightf(light, GL_QUADRATIC_ATTENUATION, 0.03f);
-		glDisable(light);
-	}
-	glm::vec4 la = glm::vec4(0.35f, 0.35f, 0.35f, 1.0f);
-
-	glLightModelfv(GL_LIGHT_MODEL_AMBIENT, glm::value_ptr(la));
-	glColor3f(1.0f, 1.0f, 1.0f);
-	// --==--
-
-	/*
-	// TODO: Possibly move this into the Model/Attachment/Displayable::draw() routine?
-	// View
-	if (model) {
-	  glTranslatef(model->pos.x, model->pos.y, -model->pos.z);
-	  glRotatef(model->rot.x, 1.0f, 0.0f, 0.0f);
-	  glRotatef(model->rot.y, 0.0f, 1.0f, 0.0f);
-	  glRotatef(model->rot.z, 0.0f, 0.0f, 1.0f);
-	  // --==--
-	}
-	*/
-
-	// camera.Setup();
-
-
-	glEnable(GL_TEXTURE_2D);
-	glEnable(GL_DEPTH_TEST);
-	glDisable(GL_CULL_FACE);
-	root->draw();
-	//root->drawParticles(true);
-
-	//glFlush();
-	//glFinish();
-	SwapBuffers();
-
-	// cleanup
-	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-}
-
-inline void ModelCanvas::RenderWMOToBuffer()
-{
-	if (!rt)
-		return;
-
-	if (!init || video.supportFBO)
-		InitGL();
-
-	glClearColor(vecBGColor.x, vecBGColor.y, vecBGColor.z, 0.0f);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-	if (video.supportFBO && video.supportPBO)
-	{
-		glMatrixMode(GL_PROJECTION);
-		glLoadIdentity();
-		gluPerspective(45.0f, rt->nWidth / rt->nHeight, 3.0f, 1500.0f * 5);
-
-		glMatrixMode(GL_MODELVIEW);
-		glLoadIdentity();
-	}
-
-	// Lighting
-	// From what I can tell, WoW OpenGL only uses 4 g_modelViewer->lightControl->lights
-	for (size_t i = 0; i < 4; i++)
-	{
-		const GLuint light = GL_LIGHT0 + (GLuint)i;
-		glLightf(light, GL_CONSTANT_ATTENUATION, 0.0f);
-		glLightf(light, GL_LINEAR_ATTENUATION, 0.7f);
-		glLightf(light, GL_QUADRATIC_ATTENUATION, 0.03f);
-		glDisable(light);
-	}
-	glm::vec4 la = glm::vec4(0.35f, 0.35f, 0.35f, 1.0f);
-
-	glLightModelfv(GL_LIGHT_MODEL_AMBIENT, glm::value_ptr(la));
-	glColor3f(1.0f, 1.0f, 1.0f);
-	// --==--
-
-	// View
-	// TODO: Possibly move this into the Model/Attachment/Displayable::draw() routine?
-	if (model_)
-	{
-		glTranslatef(model_->pos_.x, model_->pos_.y, -model_->pos_.z);
-		glRotatef(model_->rot_.x, 1.0f, 0.0f, 0.0f);
-		glRotatef(model_->rot_.y, 0.0f, 1.0f, 0.0f);
-		glRotatef(model_->rot_.z, 0.0f, 0.0f, 1.0f);
-	}
-	// --==--
-
-	glEnable(GL_DEPTH_TEST);
-	glDisable(GL_CULL_FACE);
-	root->draw();
-	//root->drawParticles(true);
-}
-
 void ModelCanvas::RenderToBuffer()
 {
 	if (!init || !video.supportFBO)
@@ -1358,7 +1159,7 @@ void ModelCanvas::tick()
 
 	if (model_)
 	{
-		if (model_->animManager && !wmo)
+		if (model_->animManager)
 		{
 			if (model_->animManager->IsPaused())
 				ddt = 0;

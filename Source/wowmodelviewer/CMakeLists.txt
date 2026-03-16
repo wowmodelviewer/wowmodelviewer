@@ -20,10 +20,8 @@ set(src  AnimationExportChoiceDialog.cpp
          ItemImporterDialog.cpp
          itemselection.cpp
          lightcontrol.cpp
-         liquid.cpp
          LogStackWalker.cpp
          main.cpp
-         maptile.cpp
          modelbankcontrol.cpp
          modelcanvas.cpp
          modelcontrol.cpp
@@ -49,9 +47,7 @@ set(headers AnimationExportChoiceDialog.h
             ItemImporterDialog.h
             itemselection.h
             lightcontrol.h
-            liquid.h
             LogStackWalker.h
-            maptile.h
             modelbankcontrol.h
             modelcanvas.h
             modelcontrol.h

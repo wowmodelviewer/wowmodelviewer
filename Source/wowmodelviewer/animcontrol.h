@@ -156,7 +156,6 @@ public:
 	wxComboBox *skinList, *BLPSkinList1, *BLPSkinList2, *BLPSkinList3;
 
 	void UpdateModel(WoWModel* m);
-	void UpdateWMO(WMO* w, int group);
 
 	void OnButton(wxCommandEvent& event);
 	void OnCheck(wxCommandEvent& event);

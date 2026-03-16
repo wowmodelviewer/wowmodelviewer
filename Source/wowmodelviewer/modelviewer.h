@@ -70,8 +70,6 @@ public:
 	bool isWoWLoaded;
 	bool isModel;
 	bool isChar;
-	bool isWMO;
-	bool isADT;
 	bool initDB;
 
 	// Initialising related functions

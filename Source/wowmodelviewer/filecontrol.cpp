@@ -358,53 +358,39 @@ void FileControl::OnTreeMenu(wxTreeEvent& event)
 
 void FileControl::ClearCanvas()
 {
-	if (!modelviewer->isModel && !modelviewer->isWMO && !modelviewer->isADT)
+	if (!modelviewer->isModel)
 		return;
 
 	// Delete any previous models that were loaded.
-	if (modelviewer->isWMO)
-	{
-		//canvas->clearAttachments();
-		wxDELETE(modelviewer->canvas->wmo);
-		//modelviewer->canvas->wmo = nullptr;
-	}
-	else if (modelviewer->isModel)
-	{
-		modelviewer->canvas->clearAttachments();
+	modelviewer->canvas->clearAttachments();
 
-		// If it was a character model, no need to delete canvas->model, 
-		//it was just pointing to a model created as an attachment - just set back to NULL instead.
-		//canvas->model = NULL;
-		/*
-		    if (!modelviewer->isChar) { 
-		      
-		      modelviewer->canvas->model = NULL;
-		    } else{
-		      modelviewer->charControl->charAtt = NULL;
-		
-		      wxString rootfn(data->fn);
-		      if (rootfn.Last() != '2' && modelviewer->canvas->model) {
-		        modelviewer->canvas->model = NULL;
-		      }
-		    }
-		*/
-		if (modelviewer->isChar)
-		{
-			modelviewer->charControl->charAtt = nullptr;
+	// If it was a character model, no need to delete canvas->model, 
+	//it was just pointing to a model created as an attachment - just set back to NULL instead.
+	//canvas->model = NULL;
+	/*
+		if (!modelviewer->isChar) { 
+
+		  modelviewer->canvas->model = NULL;
+		} else{
+		  modelviewer->charControl->charAtt = NULL;
+
+		  wxString rootfn(data->fn);
+		  if (rootfn.Last() != '2' && modelviewer->canvas->model) {
+			modelviewer->canvas->model = NULL;
+		  }
 		}
-		//wxDELETE(modelviewer->canvas->model); // may memory leak
-		modelviewer->canvas->setModel(nullptr);
-	}
-	else if (modelviewer->isADT)
+	*/
+	if (modelviewer->isChar)
 	{
-		wxDELETE(modelviewer->canvas->adt);
-		//modelviewer->canvas->adt = nullptr;
+		modelviewer->charControl->charAtt = nullptr;
 	}
+	//wxDELETE(modelviewer->canvas->model); // may memory leak
+	modelviewer->canvas->setModel(nullptr);
 
 #ifdef _DEBUG
   GLenum err=glGetError();
   if (err)
-    LOG_ERROR << "An OpenGL error occured." << err;
+	LOG_ERROR << "An OpenGL error occured." << err;
   LOG_INFO << "Clearing textures from previous model...";
 #endif
 	// Texture clearing and debugging
@@ -413,13 +399,11 @@ void FileControl::ClearCanvas()
 #ifdef _DEBUG
   err = glGetError();
   if (err)
-    LOG_ERROR << "An OpenGL error occured." << err;
+	LOG_ERROR << "An OpenGL error occured." << err;
 #endif
 
 	modelviewer->isModel = false;
 	modelviewer->isChar = false;
-	modelviewer->isWMO = false;
-	modelviewer->isADT = false;
 }
 
 void FileControl::UpdateInterface()
@@ -447,37 +431,9 @@ void FileControl::UpdateInterface()
 		modelviewer->charMenu->Enable(ID_MOUNT_CHARACTER, true);
 		modelviewer->charMenu->Enable(ID_AUTOHIDE_GEOSETS_FOR_HEAD_ITEMS, true);
 	}
-	else if (modelviewer->isADT == true)
-	{
-		// If it's an ADT file...
-		modelviewer->charMenu->Enable(ID_SHOW_UNDERWEAR, false);
-		modelviewer->charMenu->Enable(ID_SHOW_EARS, false);
-		modelviewer->charMenu->Enable(ID_SHOW_HAIR, false);
-		modelviewer->charMenu->Enable(ID_SHOW_FACIALHAIR, false);
-		modelviewer->charMenu->Enable(ID_SHOW_FEET, false);
-		modelviewer->charMenu->Enable(ID_SHEATHE, false);
-		modelviewer->charMenu->Enable(ID_LOAD_SET, false);
-		modelviewer->charMenu->Enable(ID_LOAD_START, false);
-		modelviewer->charMenu->Enable(ID_MOUNT_CHARACTER, false);
-		modelviewer->charMenu->Enable(ID_AUTOHIDE_GEOSETS_FOR_HEAD_ITEMS, false);
-	}
-	else if (modelviewer->isWMO == true)
-	{
-		// If the object is a WMO file...
-		modelviewer->charMenu->Enable(ID_SHOW_UNDERWEAR, false);
-		modelviewer->charMenu->Enable(ID_SHOW_EARS, false);
-		modelviewer->charMenu->Enable(ID_SHOW_HAIR, false);
-		modelviewer->charMenu->Enable(ID_SHOW_FACIALHAIR, false);
-		modelviewer->charMenu->Enable(ID_SHOW_FEET, false);
-		modelviewer->charMenu->Enable(ID_SHEATHE, false);
-		modelviewer->charMenu->Enable(ID_LOAD_SET, false);
-		modelviewer->charMenu->Enable(ID_LOAD_START, false);
-		modelviewer->charMenu->Enable(ID_MOUNT_CHARACTER, false);
-		modelviewer->charMenu->Enable(ID_AUTOHIDE_GEOSETS_FOR_HEAD_ITEMS, false);
-	}
 	else
 	{
-		// If it's not a 3D file...
+		// If it's not a model file...
 		modelviewer->charMenu->Enable(ID_SHOW_UNDERWEAR, false);
 		modelviewer->charMenu->Enable(ID_SHOW_EARS, false);
 		modelviewer->charMenu->Enable(ID_SHOW_HAIR, false);
@@ -538,44 +494,8 @@ void FileControl::OnTreeSelect(wxTreeEvent& event)
 	}
 	else if (filterMode == FILE_FILTER_WMO)
 	{
-		ClearCanvas();
-
-		modelviewer->isWMO = true;
-		wxString rootfn(data->file->fullname().toStdWString());
-
-		//modelviewer->canvas->model->modelType = MT_WMO;
-
-		// if we have selected a non-root wmo, find the root filename
-		const char dash = rootfn[rootfn.length() - 8];
-		const char num = rootfn[rootfn.length() - 7];
-		const bool isroot = !((dash == '_') && (num >= '0') && (num <= '9'));
-		if (!isroot)
-		{
-			rootfn.erase(rootfn.length() - 8);
-			rootfn.append(wxT(".wmo"));
-		}
-
-		modelviewer->canvas->LoadWMO(rootfn);
-
-		int id = -1;
-		if (!isroot)
-		{
-			wchar_t idnum[4];
-			_tcsncpy(idnum, rootfn.c_str() + wcslen(rootfn.c_str()) - 7, 3);
-			//wxString(data->fn.Substr((data->fn.Length() - 7), 3)).ToLong(&id);
-			idnum[3] = 0;
-			swscanf(idnum, L"%d", &id);
-		}
-
-		LOG_INFO << __FUNCTION__ << "wmo =" << modelviewer->canvas->wmo;
-
-		modelviewer->canvas->wmo->loadGroup(id);
-		modelviewer->animControl->UpdateWMO(modelviewer->canvas->wmo, id);
-
-		// wxAUI
-		modelviewer->interfaceManager.GetPane(modelviewer->charControl).Show(false);
-
-		UpdateInterface();
+		// WMO loading is disabled; files remain visible in the list for reference.
+		return;
 	}
 	else if (filterMode == FILE_FILTER_IMAGE)
 	{
@@ -589,13 +509,8 @@ void FileControl::OnTreeSelect(wxTreeEvent& event)
 	}
 	else if (filterMode == FILE_FILTER_ADT)
 	{
-		ClearCanvas();
-
-		modelviewer->isADT = true;
-		const wxString rootfn(data->file->fullname().toStdWString());
-		modelviewer->canvas->LoadADT(rootfn);
-
-		UpdateInterface();
+		// ADT loading is disabled; files remain visible in the list for reference.
+		return;
 	}
 	else
 	{
