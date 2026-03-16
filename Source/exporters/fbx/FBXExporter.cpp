@@ -25,7 +25,9 @@
 
 #include "FBXExporter.h"
 
-#include <qthreadpool.h>
+#include <filesystem>
+#include <mutex>
+#include <QString>
 
 #include "FBXHeaders.h"
 #include "FBXAnimExporter.h"
@@ -89,15 +91,27 @@ bool FBXExporter::exportModel(Model* model, std::wstring target)
 
 	m_fileVersion = FBX_2014_00_COMPATIBLE;
 
-	if (FBXHeaders::createFBXHeaders(m_fileVersion, QString::fromWCharArray(m_filename.c_str()), m_p_manager, exporter,
-	                                 m_p_scene) == false)
+	if (FBXHeaders::createFBXHeaders(m_fileVersion, std::string(m_filename.begin(), m_filename.end()), m_p_manager, exporter,
+									 m_p_scene) == false)
 		return false;
 
 	// add some info to exported scene
 	FbxDocumentInfo* sceneInfo = FbxDocumentInfo::Create(m_p_manager, "SceneInfo");
-	sceneInfo->mTitle = m_p_model->name().mid(m_p_model->name().lastIndexOf('/') + 1).toStdString().c_str();
-	sceneInfo->mAuthor = QString::fromStdWString(GLOBALSETTINGS.appName()).toStdString().c_str();
-	sceneInfo->mRevision = QString::fromStdWString(GLOBALSETTINGS.appVersion()).toStdString().c_str();
+	{
+		std::string modelName = m_p_model->name();
+		auto sp = modelName.rfind('/');
+		if (sp != std::string::npos)
+			modelName = modelName.substr(sp + 1);
+		sceneInfo->mTitle = modelName.c_str();
+	}
+	{
+		std::wstring appName = GLOBALSETTINGS.appName();
+		sceneInfo->mAuthor = std::string(appName.begin(), appName.end()).c_str();
+	}
+	{
+		std::wstring appVer = GLOBALSETTINGS.appVersion();
+		sceneInfo->mRevision = std::string(appVer.begin(), appVer.end()).c_str();
+	}
 	m_p_scene->SetSceneInfo(sceneInfo);
 
 	// export main model mesh
@@ -327,15 +341,14 @@ bool FBXExporter::createAnimationFiles()
 
 	for (const auto it : m_animsToExport)
 	{
-		QMutexLocker locker(&m_mutex);
+		std::lock_guard<std::mutex> locker(m_mutex);
 		const ModelAnimation curAnimation = m_p_model->anims[it];
 		FBXAnimExporter* exporter = new FBXAnimExporter();
-		exporter->setValues(m_fileVersion, QString::fromWCharArray(m_filename.c_str()),
-		                    QString::fromWCharArray(animsMap[curAnimation.animID].c_str()), m_p_model, m_boneClusters,
-		                    m_p_meshNode, it);
-		exporter->setAutoDelete(true);
-		exporter->run(); // Remove this line before adding to the QThreadPool!
-		//QThreadPool::globalInstance()->start(exporter);   // Queue this exporter for threaded execution. Automatically starts the run() function of an FBXAnimExporter when a thread is free.
+		exporter->setValues(m_fileVersion, std::string(m_filename.begin(), m_filename.end()),
+							std::string(animsMap[curAnimation.animID].begin(), animsMap[curAnimation.animID].end()), m_p_model, m_boneClusters,
+							m_p_meshNode, it);
+		exporter->run();
+		delete exporter;
 	}
 
 	//QThreadPool::globalInstance()->waitForDone();   // Don't finish until all the threads have been processed.
@@ -351,7 +364,11 @@ void FBXExporter::createMaterials()
 		if (pass->init())
 		{
 			// Build material name.
-			FbxString mtrl_name = m_p_model->name().mid(m_p_model->name().lastIndexOf('/') + 1).toStdString().c_str();
+			std::string mn = m_p_model->name();
+			auto sp = mn.rfind('/');
+			if (sp != std::string::npos)
+				mn = mn.substr(sp + 1);
+			FbxString mtrl_name = mn.c_str();
 			mtrl_name.Append("_", 1);
 			char tmp[32];
 			_itoa(static_cast<int>(i), tmp, 10);
@@ -367,13 +384,16 @@ void FBXExporter::createMaterials()
 			QString tex_name = tex.mid(tex.lastIndexOf('/') + 1);
 			tex_name = tex_name.replace(".blp", ".png");
 
-			QString tex_fullpath_filename = QString::fromStdWString(m_filename);
-			tex_fullpath_filename = tex_fullpath_filename.left(tex_fullpath_filename.lastIndexOf('\\') + 1) + tex_name;
+			std::string filenameNarrow(m_filename.begin(), m_filename.end());
+			std::string tex_fullpath = filenameNarrow;
+			auto bsPos = tex_fullpath.rfind('\\');
+			if (bsPos != std::string::npos)
+				tex_fullpath = tex_fullpath.substr(0, bsPos + 1) + tex_name.toStdString();
 
-			m_texturesToExport[tex_fullpath_filename.toStdWString()] = m_p_model->getGLTexture(pass->tex);
+			m_texturesToExport[std::wstring(tex_fullpath.begin(), tex_fullpath.end())] = m_p_model->getGLTexture(pass->tex);
 
 			FbxFileTexture* texture = FbxFileTexture::Create(m_p_manager, tex_name.toStdString().c_str());
-			texture->SetFileName(tex_fullpath_filename.toStdString().c_str());
+			texture->SetFileName(tex_fullpath.c_str());
 			texture->SetTextureUse(FbxTexture::eStandard);
 			texture->SetMappingType(FbxTexture::eUV);
 			texture->SetMaterialUse(FbxFileTexture::eModelMaterial);
@@ -401,33 +421,38 @@ void FBXExporter::createMaterials()
 				{
 					ModelRenderPass* pass = model->passes[i];
 					if (pass->init())
-					{
-						// Build material name.
-						FbxString mtrl_name = model->name().mid(model->name().lastIndexOf('/') + 1).toStdString().
-						                             c_str();
-						mtrl_name.Append("_", 1);
-						char tmp[32];
-						_itoa(static_cast<int>(i), tmp, 10);
-						mtrl_name.Append(tmp, strlen(tmp));
+						{
+							// Build material name.
+							std::string mn2 = model->name();
+							auto sp2 = mn2.rfind('/');
+							if (sp2 != std::string::npos)
+								mn2 = mn2.substr(sp2 + 1);
+							FbxString mtrl_name = mn2.c_str();
+							mtrl_name.Append("_", 1);
+							char tmp[32];
+							_itoa(static_cast<int>(i), tmp, 10);
+							mtrl_name.Append(tmp, strlen(tmp));
 
-						// Create material.
-						FbxString shading_name = "Phong";
-						FbxSurfacePhong* material = FbxSurfacePhong::Create(m_p_manager, mtrl_name.Buffer());
-						material->Ambient.Set(FbxDouble3(0.7, 0.7, 0.7));
+							// Create material.
+							FbxString shading_name = "Phong";
+							FbxSurfacePhong* material = FbxSurfacePhong::Create(m_p_manager, mtrl_name.Buffer());
+							material->Ambient.Set(FbxDouble3(0.7, 0.7, 0.7));
 
-						QString tex = model->getNameForTex(pass->tex);
+							QString tex = model->getNameForTex(pass->tex);
 
-						QString tex_name = tex.mid(tex.lastIndexOf('/') + 1);
-						tex_name = tex_name.replace(".blp", ".png");
+							QString tex_name = tex.mid(tex.lastIndexOf('/') + 1);
+							tex_name = tex_name.replace(".blp", ".png");
 
-						QString tex_fullpath_filename = QString::fromStdWString(m_filename);
-						tex_fullpath_filename = tex_fullpath_filename.left(tex_fullpath_filename.lastIndexOf('\\') + 1)
-							+ tex_name;
+							std::string filenameNarrow2(m_filename.begin(), m_filename.end());
+							std::string tex_fullpath2 = filenameNarrow2;
+							auto bsPos2 = tex_fullpath2.rfind('\\');
+							if (bsPos2 != std::string::npos)
+								tex_fullpath2 = tex_fullpath2.substr(0, bsPos2 + 1) + tex_name.toStdString();
 
-						m_texturesToExport[tex_fullpath_filename.toStdWString()] = model->getGLTexture(pass->tex);
+							m_texturesToExport[std::wstring(tex_fullpath2.begin(), tex_fullpath2.end())] = model->getGLTexture(pass->tex);
 
-						FbxFileTexture* texture = FbxFileTexture::Create(m_p_manager, tex_name.toStdString().c_str());
-						texture->SetFileName(tex_fullpath_filename.toStdString().c_str());
+							FbxFileTexture* texture = FbxFileTexture::Create(m_p_manager, tex_name.toStdString().c_str());
+							texture->SetFileName(tex_fullpath2.c_str());
 						texture->SetTextureUse(FbxTexture::eStandard);
 						texture->SetMappingType(FbxTexture::eUV);
 						texture->SetMaterialUse(FbxFileTexture::eModelMaterial);

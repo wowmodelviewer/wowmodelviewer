@@ -139,8 +139,8 @@ bool OBJExporter::exportModel(Model* m, std::wstring target)
 			if (!itemModels.empty())
 			{
 				obj << "# " << "\n";
-				obj << "# " << (*it)->name() << "\n";
-				obj << "# " << "\n";
+					obj << "# " << QString::fromStdString((*it)->name()) << "\n";
+					obj << "# " << "\n";
 				for (const auto& It : itemModels)
 				{
 					WoWModel* itemModel = It.second;

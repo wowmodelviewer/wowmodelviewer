@@ -1,6 +1,6 @@
 #pragma once
 
-#include <QString>
+#include <string>
 
 #define _COMPONENT_API_
 
@@ -37,8 +37,8 @@ public:
 	void unref();
 
 	// Name management
-	void setName(const QString& name);
-	QString name() const;
+	void setName(const std::string& name);
+	std::string name() const;
 	virtual void onNameChanged();
 
 	// misc
@@ -54,7 +54,7 @@ private:
 
 	unsigned int m_refCounter;
 
-	QString m_name;
+	std::string m_name;
 };
 
 template <class DataType>

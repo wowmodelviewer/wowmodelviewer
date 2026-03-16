@@ -802,7 +802,7 @@ void ModelViewer::SaveSession()
 
 		// model file
 		if (canvas->model())
-			config.setValue("Session/Model", canvas->model()->name());
+			config.setValue("Session/Model", QString::fromStdString(canvas->model()->name()));
 	}
 }
 
@@ -942,7 +942,7 @@ void ModelViewer::LoadModel(GameFile* file)
 		return;
 	}
 
-	SetStatusText(canvas->model()->name().toStdWString());
+	SetStatusText(wxString::FromUTF8(canvas->model()->name()));
 	WoWModel* m = const_cast<WoWModel*>(canvas->model());
 	m->charModelDetails.isChar = isChar;
 

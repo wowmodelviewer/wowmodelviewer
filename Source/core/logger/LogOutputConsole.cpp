@@ -3,7 +3,7 @@
 
 using namespace WMVLog;
 
-void LogOutputConsole::write(const QString& message)
+void LogOutputConsole::write(const std::string& message)
 {
-	std::cout << message.toStdString() << std::endl;
+	std::cout << message << std::endl;
 }

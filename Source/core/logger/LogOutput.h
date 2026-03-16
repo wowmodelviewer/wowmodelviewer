@@ -1,6 +1,6 @@
 #pragma once
 
-#include <QString>
+#include <string>
 #include "../metaclasses/Component.h"
 
 namespace WMVLog
@@ -8,6 +8,6 @@ namespace WMVLog
 	class LogOutput : public Component
 	{
 	public:
-		virtual void write(const QString& message) = 0;
+		virtual void write(const std::string& message) = 0;
 	};
 }

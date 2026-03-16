@@ -25,32 +25,30 @@
 
 #pragma once
 
+#include <mutex>
+#include <string>
 #include <vector>
-
-#include <QString>
-#include <QRunnable>
-#include <QMutex>
 
 #include "fbxsdk.h"
 
 class WoWModel;
 struct ModelAnimation;
 
-class FBXAnimExporter : public QRunnable
+class FBXAnimExporter
 {
 public:
-	void run() override;
-	void setValues(FbxString fileVersion, QString fn, QString an, WoWModel* m, std::vector<FbxCluster*> bc,
-	               FbxNode* & meshnode, int aID, bool uan = false);
+	void run();
+	void setValues(FbxString fileVersion, std::string fn, std::string an, WoWModel* m, std::vector<FbxCluster*> bc,
+				   FbxNode* & meshnode, int aID, bool uan = false);
 
 private:
 	FbxString l_fileVersion;
-	QString srcfileName;
-	QString animationName;
+	std::string srcfileName;
+	std::string animationName;
 	WoWModel* l_model;
 	std::vector<FbxCluster*> l_boneClusters;
 	FbxNode* l_meshNode;
 	int animID;
 	bool useAltNaming = false;
-	mutable QMutex m_mutex;
+	mutable std::mutex m_mutex;
 };

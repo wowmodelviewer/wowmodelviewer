@@ -1,5 +1,7 @@
 #include "Logger.h"
 
+#include <windows.h>
+#include <QString>
 #ifdef min
   #undef min
 #endif
@@ -18,31 +20,30 @@ Logger::Logger()
 
 void Logger::init()
 {
-	qInstallMessageHandler(Logger::writeLog);
 }
 
-void Logger::writeLog(QtMsgType type, const QMessageLogContext& context, const QString& msg)
+void Logger::dispatchLog(int type, const std::string& msg)
 {
-	const QString message = Logger::formatLog(type, context, msg);
-	for (const auto it : LOGGER)
+	const std::string message = Logger::formatLog(type, msg);
+	for (const auto it : *this)
 		it->write(message);
 }
 
-QString Logger::formatLog(QtMsgType type, const QMessageLogContext& context, const QString& msg)
+std::string Logger::formatLog(int type, const std::string& msg)
 {
-	QString msgType;
+	std::string msgType;
 	switch (type)
 	{
-	case QtDebugMsg:
+	case INFO_LOG:
 		msgType = "INFO";
 		break;
-	case QtWarningMsg:
+	case WARNING_LOG:
 		msgType = "WARN";
 		break;
-	case QtCriticalMsg:
+	case ERROR_LOG:
 		msgType = "ERROR";
 		break;
-	case QtFatalMsg:
+	case FATAL_LOG:
 		msgType = "FATAL";
 		break;
 	default: ;
@@ -57,21 +58,66 @@ QString Logger::formatLog(QtMsgType type, const QMessageLogContext& context, con
 	ts << std::put_time(&tm_info, "%Y-%m-%d %H:%M:%S")
 	   << "." << std::setfill('0') << std::setw(3) << ms.count();
 
-	return msgType + "\t| " + QString::fromStdString(ts.str()) + "\t| " + msg;
+	return msgType + "\t| " + ts.str() + "\t| " + msg;
 }
 
-QDebug Logger::operator()(Logger::LogType type)
+LogStream Logger::operator()(Logger::LogType type)
 {
-	switch (type)
+	return LogStream(*this, static_cast<int>(type));
+}
+
+// --- LogStream implementation ---
+
+LogStream::LogStream(Logger& logger, int type)
+	: m_logger(&logger), m_type(type), m_active(true)
+{
+}
+
+LogStream::LogStream(LogStream&& other) noexcept
+	: m_logger(other.m_logger), m_type(other.m_type),
+	  m_stream(std::move(other.m_stream)), m_active(other.m_active)
+{
+	other.m_active = false;
+}
+
+LogStream::~LogStream()
+{
+	if (m_active && m_logger)
 	{
-	case INFO_LOG:
-		return QDebug(QtDebugMsg);
-	case WARNING_LOG:
-		return QDebug(QtWarningMsg);
-	case ERROR_LOG:
-		return QDebug(QtCriticalMsg);
-	case FATAL_LOG:
-		return QDebug(QtFatalMsg);
+		m_logger->dispatchLog(m_type, m_stream.str());
 	}
-	return QDebug(QtDebugMsg);
+}
+
+LogStream& LogStream::operator<<(const std::wstring& value)
+{
+	if (m_active)
+	{
+		// Convert wstring to UTF-8 string
+		if (!value.empty())
+		{
+			int size_needed = WideCharToMultiByte(CP_UTF8, 0, value.c_str(), static_cast<int>(value.size()), nullptr, 0, nullptr, nullptr);
+			std::string utf8(size_needed, 0);
+			WideCharToMultiByte(CP_UTF8, 0, value.c_str(), static_cast<int>(value.size()), &utf8[0], size_needed, nullptr, nullptr);
+			m_stream << utf8;
+		}
+	}
+	return *this;
+}
+
+LogStream& LogStream::operator<<(const wchar_t* value)
+{
+	if (m_active && value)
+	{
+		return *this << std::wstring(value);
+	}
+	return *this;
+}
+
+LogStream& LogStream::operator<<(const QString& value)
+{
+	if (m_active)
+	{
+		m_stream << value.toStdString();
+	}
+	return *this;
 }

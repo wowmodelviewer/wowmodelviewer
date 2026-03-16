@@ -30,6 +30,8 @@ class WoWModel;
 
 // Other libraries
 #include "glm/glm.hpp"
+#include <QString>
+#include <QTextStream>
 
 #include "ExporterPlugin.h"
 

@@ -311,7 +311,7 @@ void ModelControl::RefreshModel(Attachment* root)
 			m = dynamic_cast<WoWModel*>((*it)->model());
 			if (m)
 			{
-				wxString tmp = m->name().toStdWString();
+				wxString tmp = wxString::FromUTF8(m->name());
 				modelname->Append(tmp.AfterLast('\\'));
 			}
 		}
@@ -344,7 +344,7 @@ void ModelControl::UpdateModel(Attachment* a)
 		model = m;
 		att = a;
 
-		modelname->SetLabel(m->name().toStdWString());
+		modelname->SetLabel(wxString::FromUTF8(m->name()));
 
 		Update();
 	}

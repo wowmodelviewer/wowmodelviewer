@@ -2,6 +2,7 @@
 
 #include <string>
 #include <vector>
+#include <QString>
 #include "metaclasses/Component.h"
 
 #define _GAMEFILE_API_

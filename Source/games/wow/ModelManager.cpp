@@ -5,16 +5,17 @@
 int ModelManager::add(GameFile* file)
 {
 	int id;
-	if (names.find(file->name()) != names.end())
+	QString qname = QString::fromStdString(file->name());
+	if (names.find(qname) != names.end())
 	{
-		id = names[file->name()];
+		id = names[qname];
 		items[id]->addref();
 		return id;
 	}
 	// load new
 	WoWModel* model = new WoWModel(file);
 	id = nextID();
-	do_add(file->name(), id, model);
+	do_add(qname, id, model);
 	return id;
 }
 

@@ -43,13 +43,13 @@ void Component::setParentComponent(Component* a_p_parent)
 	onParentSet(m_p_parent);
 }
 
-void Component::setName(const QString& name)
+void Component::setName(const std::string& name)
 {
 	m_name = name;
 	onNameChanged();
 }
 
-QString Component::name() const
+std::string Component::name() const
 {
 	return m_name;
 }
@@ -96,5 +96,5 @@ void Component::copy(const Component& component, bool /* recursive*/)
 
 void Component::doPrint()
 {
-	std::cout << m_name.toStdString() << " (address : " << std::hex << this << ")" << std::endl;
+	std::cout << m_name << " (address : " << std::hex << this << ")" << std::endl;
 }

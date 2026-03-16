@@ -26,10 +26,9 @@
 #pragma once
 
 #include <map>
+#include <mutex>
 #include <string>
-
-#include <qlist.h>
-#include <qmutex.h>
+#include <vector>
 
 #include "fbxsdk.h"
 
@@ -66,9 +65,9 @@ private:
 	WoWModel* m_p_model;
 	FbxNode* m_p_meshNode;
 	FbxNode* m_p_skeletonNode;
-	QList<WoWModel*> m_p_attachedModels;
+	std::vector<WoWModel*> m_p_attachedModels;
 
-	mutable QMutex m_mutex;
+	mutable std::mutex m_mutex;
 	bool useAltAnimNaming = false;
 	FbxString m_fileVersion;
 	std::wstring m_filename;

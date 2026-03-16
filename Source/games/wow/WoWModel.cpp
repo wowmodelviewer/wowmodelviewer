@@ -459,7 +459,7 @@ void WoWModel::initCommon()
 
 	modelname = tempname.toStdString();
 	QStringList list = tempname.split("\\");
-	setName(list[list.size() - 1].replace(".m2", ""));
+	setName(list[list.size() - 1].replace(".m2", "").toStdString());
 
 	// Error check
 	// 10 1 0 0 = WoW 5.0 models (as of 15464)

@@ -1,6 +1,7 @@
 #include "CSVFile.h"
 #include "logger/Logger.h"
 #include <QFile>
+#include <QTextStream>
 #include "Game.h"
 
 CSVFile::CSVFile(QString file) : m_file(std::move(file))

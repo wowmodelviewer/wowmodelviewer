@@ -169,14 +169,14 @@ void FileControl::Init(ModelViewer* mv, std::function<void(int, int)> progressCa
 			if (!child)
 			{
 				child = new TreeStackItem();
-				child->setName(Items[i]);
+				child->setName(Items[i].toStdString());
 				curparent->addChild(child);
 			}
 			curparent = child;
 		}
 		TreeStackItem* child = new TreeStackItem();
 		child->file = *it;
-		child->setName(Items[Items.size() - 1]);
+		child->setName(Items[Items.size() - 1].toStdString());
 		curparent->addChild(child);
 
 		if (progressCallback && ++count % 200 == 0)
@@ -474,8 +474,8 @@ void FileControl::OnTreeSelect(wxTreeEvent& event)
 	{
 		wxString rootfn(data->file->fullname().toStdWString());
 		// Exit, if its the same model thats currently loaded
-		if (modelviewer->canvas->model() && !modelviewer->canvas->model()->name().isEmpty() && modelviewer->canvas->
-			model()->name().toStdWString() == std::wstring(rootfn.c_str()))
+		if (modelviewer->canvas->model() && !modelviewer->canvas->model()->name().empty() && wxString::FromUTF8(modelviewer->canvas->
+			model()->name()) == rootfn)
 			return; // clicked on the same model thats currently loaded, no need to load it again - exit
 
 		ClearCanvas();

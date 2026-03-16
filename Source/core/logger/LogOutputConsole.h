@@ -9,6 +9,6 @@ namespace WMVLog
 	class _LOGOUTPUTCONSOLE_API_ LogOutputConsole : public LogOutput
 	{
 	public:
-		void write(const QString& message);
+		void write(const std::string& message);
 	};
 }

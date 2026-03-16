@@ -323,7 +323,7 @@ void CharControl::RefreshEquipment()
 			const WoWItem* item = model->getItem(static_cast<CharSlots>(i));
 			if (item)
 			{
-				labels[i]->SetLabel(item->name().toStdWString());
+				labels[i]->SetLabel(wxString::FromUTF8(item->name()));
 				labels[i]->SetForegroundColour(ItemQualityColour(item->quality()));
 
 				// refresh level combo box
@@ -770,7 +770,7 @@ void CharControl::OnUpdateItem(int type, int id)
 			{
 				item->setId(numbers[id]);
 
-				labels[choosingSlot]->SetLabel(item->name().toStdWString());
+				labels[choosingSlot]->SetLabel(wxString::FromUTF8(item->name()));
 				labels[choosingSlot]->SetForegroundColour(ItemQualityColour(item->quality()));
 
 				// refresh level combo box
@@ -1089,7 +1089,7 @@ void CharControl::tryToEquipItem(int id)
 			if (item)
 			{
 				item->setId(id);
-				labels[itemSlot]->SetLabel(item->name().toStdWString());
+				labels[itemSlot]->SetLabel(wxString::FromUTF8(item->name()));
 				labels[itemSlot]->SetForegroundColour(ItemQualityColour(item->quality()));
 
 				// refresh level combo box

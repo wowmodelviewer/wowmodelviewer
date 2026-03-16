@@ -1,10 +1,9 @@
 #pragma once
 
-#include <QDebug>
-#include <QtGlobal>
-#include <QString>
+#include <sstream>
+#include <string>
 
-class QMessageLogContext;
+class QString;
 
 #include "../metaclasses/Container.h"
 #include "LogOutput.h"
@@ -19,6 +18,42 @@ class QMessageLogContext;
 
 namespace WMVLog
 {
+	class Logger;
+
+	class _LOGGER_API_ LogStream
+	{
+	public:
+		LogStream(Logger& logger, int type);
+		~LogStream();
+
+		LogStream(const LogStream&) = delete;
+		LogStream& operator=(const LogStream&) = delete;
+		LogStream(LogStream&& other) noexcept;
+
+		template <typename T>
+		LogStream& operator<<(const T& value)
+		{
+			if (m_active)
+				m_stream << value;
+			return *this;
+		}
+
+		// Overload for std::wstring
+		LogStream& operator<<(const std::wstring& value);
+
+		// Overload for const wchar_t*
+		LogStream& operator<<(const wchar_t* value);
+
+		// Overload for QString (transitional — will be removed when Qt is fully gone)
+		LogStream& operator<<(const QString& value);
+
+	private:
+		Logger* m_logger;
+		int m_type;
+		std::ostringstream m_stream;
+		bool m_active;
+	};
+
 	class _LOGGER_API_ Logger : public Container<LogOutput>
 	{
 	public:
@@ -40,11 +75,11 @@ namespace WMVLog
 
 		static void init();
 
-		static void writeLog(QtMsgType type, const QMessageLogContext &context, const QString &msg);
+		void dispatchLog(int type, const std::string& msg);
 
-		static QString formatLog(QtMsgType type, const QMessageLogContext &context, const QString &msg);
+		static std::string formatLog(int type, const std::string& msg);
 
-		QDebug operator()(Logger::LogType type);
+		LogStream operator()(Logger::LogType type);
 
 	private:
 		Logger();

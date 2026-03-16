@@ -5,18 +5,18 @@
 #include "sqlite3.h"
 #include "logger\Logger.h"
 
-void core::displayMemInfo(QString message, bool displaySQLiteSize)
+void core::displayMemInfo(std::string message, bool displaySQLiteSize)
 {
-	QString log = message + " Memory: " + QString::number(getMemoryUsed()) + " Mo";
+	std::string log = message + " Memory: " + std::to_string(getMemoryUsed()) + " Mo";
 
 	if (displaySQLiteSize)
 	{
 		log += " - SQLite: ";
-		log += QString::number(sqlite3_memory_used() / (1024 * 1024));
+		log += std::to_string(sqlite3_memory_used() / (1024 * 1024));
 		log += " Mo";
 	}
 
-	LOG_INFO << log;
+	LOG_INFO << log.c_str();
 }
 
 int core::getMemoryUsed()

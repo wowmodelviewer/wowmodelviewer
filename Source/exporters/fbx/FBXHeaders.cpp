@@ -25,8 +25,6 @@
 
 #include "FBXHeaders.h"
 
-#include <qthreadpool.h>
-
 #include "fbxsdk.h"
 #include "glm/gtc/quaternion.hpp"
 #include "glm/gtc/matrix_transform.hpp"
@@ -39,8 +37,8 @@
 
 #include "util.h" // SLASH
 
-bool FBXHeaders::createFBXHeaders(FbxString fileVersion, QString l_FileName, FbxManager* & l_Manager,
-                                  FbxExporter* & l_Exporter, FbxScene* & l_Scene)
+bool FBXHeaders::createFBXHeaders(FbxString fileVersion, std::string l_FileName, FbxManager* & l_Manager,
+								  FbxExporter* & l_Exporter, FbxScene* & l_Scene)
 {
 	//LOG_INFO << "Building FBX Header...";
 
@@ -48,7 +46,7 @@ bool FBXHeaders::createFBXHeaders(FbxString fileVersion, QString l_FileName, Fbx
 	l_Exporter = nullptr;
 	l_Exporter = FbxExporter::Create(l_Manager, "");
 
-	if (!l_Exporter->Initialize(l_FileName.toStdString().c_str(), -1, l_Manager->GetIOSettings()))
+	if (!l_Exporter->Initialize(l_FileName.c_str(), -1, l_Manager->GetIOSettings()))
 	{
 		LOG_ERROR << "Unable to create the FBX SDK exporter";
 		return false;
@@ -78,7 +76,11 @@ FbxNode* FBXHeaders::createMesh(FbxManager* & l_manager, FbxScene* & l_scene, Wo
                                 const glm::vec3& offset)
 {
 	// Create a node for the mesh.
-	FbxNode* meshNode = FbxNode::Create(l_manager, qPrintable((model->name().mid(model->name().lastIndexOf('/') + 1))));
+	std::string meshNodeName = model->name();
+	auto slashPos = meshNodeName.rfind('/');
+	if (slashPos != std::string::npos)
+		meshNodeName = meshNodeName.substr(slashPos + 1);
+	FbxNode* meshNode = FbxNode::Create(l_manager, meshNodeName.c_str());
 
 	// Create new Matrix Data
 	const auto m = glm::scale(glm::vec3(matrix[0][0], matrix[1][1], matrix[2][2]));
@@ -86,7 +88,7 @@ FbxNode* FBXHeaders::createMesh(FbxManager* & l_manager, FbxScene* & l_scene, Wo
 	// Create mesh.
 	const auto num_of_vertices = model->origVertices.size();
 	FbxMesh* mesh = FbxMesh::Create(
-		l_manager, model->name().mid(model->name().lastIndexOf('/') + 1).toStdString().c_str());
+		l_manager, meshNodeName.c_str());
 	mesh->InitControlPoints(static_cast<int>(num_of_vertices));
 	FbxVector4* vertices = mesh->GetControlPoints();
 
@@ -179,8 +181,13 @@ FbxNode* FBXHeaders::createMesh(FbxManager* & l_manager, FbxScene* & l_scene, Wo
 void FBXHeaders::createSkeleton(WoWModel* l_model, FbxScene*& l_scene, FbxNode*& l_skeletonNode,
                                 std::map<int, FbxNode*>& l_boneNodes)
 {
+	std::string skelName = l_model->name();
+	auto skelSlashPos = skelName.rfind('/');
+	if (skelSlashPos != std::string::npos)
+		skelName = skelName.substr(skelSlashPos + 1);
+	skelName += "_rig";
 	l_skeletonNode = FbxNode::Create(
-		l_scene, qPrintable((l_model->name().mid(l_model->name().lastIndexOf('/') + 1) + "_rig")));
+		l_scene, skelName.c_str());
 	FbxSkeleton* bone_group_skeleton_attribute = FbxSkeleton::Create(l_scene, "");
 	bone_group_skeleton_attribute->SetSkeletonType(FbxSkeleton::eRoot);
 	bone_group_skeleton_attribute->Size.Set(10.0 * SCALE_FACTOR);
@@ -328,8 +335,8 @@ void FBXHeaders::storeRestPose(FbxScene* & l_scene, FbxNode* & l_SkeletonRoot)
 	l_scene->AddPose(pose);
 }*/
 
-void FBXHeaders::createAnimation(WoWModel* l_model, FbxScene*& l_scene, QString animName, ModelAnimation cur_anim,
-                                 std::map<int, FbxNode*>& skeleton)
+void FBXHeaders::createAnimation(WoWModel* l_model, FbxScene*& l_scene, std::string animName, ModelAnimation cur_anim,
+								 std::map<int, FbxNode*>& skeleton)
 {
 	if (skeleton.empty())
 	{
@@ -338,8 +345,8 @@ void FBXHeaders::createAnimation(WoWModel* l_model, FbxScene*& l_scene, QString 
 	}
 
 	// Animation stack and layer.
-	FbxAnimStack* anim_stack = FbxAnimStack::Create(l_scene, qPrintable(animName));
-	FbxAnimLayer* anim_layer = FbxAnimLayer::Create(l_scene, qPrintable(animName));
+	FbxAnimStack* anim_stack = FbxAnimStack::Create(l_scene, animName.c_str());
+	FbxAnimLayer* anim_layer = FbxAnimLayer::Create(l_scene, animName.c_str());
 	anim_stack->AddMember(anim_layer);
 
 	//LOG_INFO << "Animation length:" << cur_anim.length;

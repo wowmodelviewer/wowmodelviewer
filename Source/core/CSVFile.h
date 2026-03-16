@@ -1,5 +1,6 @@
 #pragma once
 
+#include <QString>
 #include "dbfile.h"
 
 #define _CSVFILE_API_

@@ -24,44 +24,56 @@
  */
 
 #include "FBXAnimExporter.h"
+#include <filesystem>
+#include <mutex>
 #include <sstream>
-#include <qdir.h>
 #include <fbxsdk.h>
 #include <fbxsdk/fileio/fbxiosettings.h>
 #include "GlobalSettings.h"
 #include "FBXHeaders.h"
 #include "WoWModel.h"
-#include "util.h" // SLASH
 
 void FBXAnimExporter::run()
 {
-	QMutexLocker locker(&m_mutex);
+	std::lock_guard<std::mutex> locker(m_mutex);
 	const ModelAnimation curAnimation = l_model->anims[animID];
-	if (srcfileName.isNull() || srcfileName.isEmpty())
+	if (srcfileName.empty())
 	{
 		LOG_ERROR << "Unable to get FBX Animation Source Filename.";
 		return;
 	}
 
-	// LOG_INFO << "FBX Animation Thead Source Filename: " << qPrintable(srcfileName);
-	srcfileName = srcfileName.mid(0, srcfileName.lastIndexOf(".fbx"));
-	//QString srcPath = srcfileName.mid(0, srcfileName.lastIndexOf(SLASH));
-	const QString justfileName = srcfileName.mid(srcfileName.lastIndexOf(SLASH) + 1);
-	const QString anim_name = QString("%1 [%2]").arg(animationName).arg(curAnimation.Index);
-	QString file_name = QString("%1_%5/%2_%3_%4.fbx").arg(srcfileName).arg(justfileName).arg(animationName).
-	                                                  arg(curAnimation.Index).arg(wxT("Animations"));
+	// Remove .fbx extension
+	auto fbxPos = srcfileName.rfind(".fbx");
+	if (fbxPos != std::string::npos)
+		srcfileName = srcfileName.substr(0, fbxPos);
+
+	std::string justfileName = srcfileName;
+	auto slashPos = justfileName.rfind('\\');
+	if (slashPos == std::string::npos)
+		slashPos = justfileName.rfind('/');
+	if (slashPos != std::string::npos)
+		justfileName = justfileName.substr(slashPos + 1);
+
+	std::string anim_name = animationName + " [" + std::to_string(curAnimation.Index) + "]";
+	std::string file_name;
 	if (useAltNaming)
 	{
-		file_name = QString("%1_%5/%2_%4_%3.fbx").arg(srcfileName).arg(justfileName).arg(animationName).
-		                                          arg(curAnimation.Index).arg(wxT("Animations"));
+		file_name = srcfileName + "_Animations/" + justfileName + "_" +
+					std::to_string(curAnimation.Index) + "_" + animationName + ".fbx";
 	}
-	LOG_INFO << "FBX Animation Filename: " << qPrintable(file_name);
-	const QDir dir(file_name.mid(0, file_name.lastIndexOf('/')));
-	if (dir.exists() == false)
+	else
 	{
-		dir.mkpath(file_name.mid(0, file_name.lastIndexOf('/')));
+		file_name = srcfileName + "_Animations/" + justfileName + "_" +
+					animationName + "_" + std::to_string(curAnimation.Index) + ".fbx";
 	}
-	// LOG_INFO << "FBX Animation File Path: " << qPrintable(dir.absolutePath());
+	LOG_INFO << "FBX Animation Filename: " << file_name.c_str();
+	auto lastSlash = file_name.rfind('/');
+	if (lastSlash != std::string::npos)
+	{
+		std::string dirPath = file_name.substr(0, lastSlash);
+		std::filesystem::create_directories(dirPath);
+	}
 
 	FbxManager* lSdkManager = FbxManager::Create();
 	if (!lSdkManager)
@@ -90,30 +102,32 @@ void FBXAnimExporter::run()
 			lSdkManager->Destroy();
 		return;
 	}
-	//LOG_INFO << "Animated FBX headers were successfully created. Building scene info...";
 
 	FbxDocumentInfo* sceneInfo = FbxDocumentInfo::Create(lSdkManager, "SceneInfo");
-	sceneInfo->mTitle = qPrintable(QString("%1").arg(anim_name));
-	sceneInfo->mAuthor = qPrintable(QString::fromStdWString(GLOBALSETTINGS.appName()));
-	sceneInfo->mRevision = qPrintable(QString::fromStdWString(GLOBALSETTINGS.appVersion()));
+	sceneInfo->mTitle = anim_name.c_str();
+	{
+		std::wstring appName = GLOBALSETTINGS.appName();
+		std::string appNameUtf8(appName.begin(), appName.end());
+		sceneInfo->mAuthor = appNameUtf8.c_str();
+	}
+	{
+		std::wstring appVer = GLOBALSETTINGS.appVersion();
+		std::string appVerUtf8(appVer.begin(), appVer.end());
+		sceneInfo->mRevision = appVerUtf8.c_str();
+	}
 	l_animscene->SetSceneInfo(sceneInfo);
-	//LOG_INFO << "Scene Info added to animated scene...";
 
 	std::map<int, FbxNode*> l_boneNodes;
 	FbxNode* l_skeletonNode = nullptr;
 	FBXHeaders::createSkeleton(l_model, l_animscene, l_skeletonNode, l_boneNodes);
-	//LOG_INFO << "Skeleton created for animation...";
 
 	FbxNode* root_node = l_animscene->GetRootNode();
 	root_node->AddChild(l_skeletonNode);
-	//LOG_INFO << "Skeleton added to root node...";
 
 	FBXHeaders::storeBindPose(l_animscene, l_boneClusters, l_meshNode);
-	//LOG_INFO << "Skeleton successfully bound...";
 
 	// Add this animation to our new FBX file.
 	FBXHeaders::createAnimation(l_model, l_animscene, anim_name, curAnimation, l_boneNodes);
-	//LOG_INFO << "Animation successfully created...";
 
 	if (!exporter->Export(l_animscene))
 	{
@@ -122,18 +136,18 @@ void FBXAnimExporter::run()
 			lSdkManager->Destroy();
 		return;
 	}
-	LOG_INFO << "FBX Animation for" << qPrintable(anim_name) << "successfully exported!";
+	LOG_INFO << "FBX Animation for" << anim_name.c_str() << "successfully exported!";
 	if (lSdkManager)
 		lSdkManager->Destroy();
 }
 
-void FBXAnimExporter::setValues(FbxString fileVersion, QString fn, QString an, WoWModel* m, std::vector<FbxCluster*> bc,
-                                FbxNode* & meshnode, int aID, bool uan)
+void FBXAnimExporter::setValues(FbxString fileVersion, std::string fn, std::string an, WoWModel* m, std::vector<FbxCluster*> bc,
+								FbxNode* & meshnode, int aID, bool uan)
 {
-	QMutexLocker locker(&m_mutex);
+	std::lock_guard<std::mutex> locker(m_mutex);
 	l_fileVersion = fileVersion;
-	srcfileName = fn;
-	animationName = an;
+	srcfileName = std::move(fn);
+	animationName = std::move(an);
 	l_model = m;
 	l_boneClusters = bc;
 	l_meshNode = meshnode;

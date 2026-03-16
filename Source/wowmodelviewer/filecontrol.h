@@ -73,7 +73,7 @@ private:
 
 		void onChildAdded(TreeStackItem* child)
 		{
-			m_childrenMap[child->name()] = child;
+			m_childrenMap[QString::fromStdString(child->name())] = child;
 		}
 
 		void createTreeItems(wxTreeCtrl* tree)
@@ -81,8 +81,8 @@ private:
 			for (const auto& it : m_childrenMap)
 			{
 				TreeStackItem* child = it.second;
-				child->id = tree->AppendItem(id, it.second->name().toStdWString(), -1, -1,
-				                             ((it.second->file) ? new FileTreeData(it.second->file) : nullptr));
+				child->id = tree->AppendItem(id, wxString::FromUTF8(it.second->name()), -1, -1,
+											 ((it.second->file) ? new FileTreeData(it.second->file) : nullptr));
 				child->createTreeItems(tree);
 			}
 		}

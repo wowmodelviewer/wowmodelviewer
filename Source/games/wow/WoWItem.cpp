@@ -95,7 +95,7 @@ void WoWItem::setId(int id)
 			displayId_ = iteminfos.values[0][0].toInt();
 
 		const auto& itemRcd = items.getById(id);
-		setName(itemRcd.name);
+		setName(itemRcd.name.toStdString());
 		quality_ = itemRcd.quality;
 		type_ = itemRcd.type;
 		load();
@@ -126,7 +126,7 @@ void WoWItem::setLevel(int level)
 			displayId_ = iteminfos.values[0][0].toInt();
 
 		const auto& itemRcd = items.getById(id_);
-		setName(itemRcd.name);
+		setName(itemRcd.name.toStdString());
 		quality_ = itemRcd.quality;
 		type_ = itemRcd.type;
 		load();
@@ -145,7 +145,7 @@ void WoWItem::setModifierId(int id)
 			displayId_ = iteminfos.values[0][0].toInt();
 
 		const auto& itemRcd = items.getById(id_);
-		setName(itemRcd.name);
+		setName(itemRcd.name.toStdString());
 		quality_ = itemRcd.quality;
 		type_ = itemRcd.type;
 		load();

@@ -12,7 +12,7 @@ namespace WMVLog
 	{
 	public:
 		LogOutputFile(std::string fileName);
-		void write(const QString& message);
+		void write(const std::string& message);
 
 	private:
 		LogOutputFile();

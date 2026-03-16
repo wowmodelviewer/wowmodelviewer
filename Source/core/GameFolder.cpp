@@ -11,7 +11,7 @@ QString core::GameFolder::getFullPathForFile(QString file)
 	file = file.toLower();
 	for (const auto it : *this)
 	{
-		if (it->name() == file)
+		if (QString::fromStdString(it->name()) == file)
 			return it->fullname();
 	}
 
@@ -43,7 +43,7 @@ void core::GameFolder::getFilteredFiles(std::set<GameFile*>& dest, QString& filt
 	const int total = static_cast<int>(nbChildren());
 	for (auto it : *this)
 	{
-		if (it->name().contains(regex))
+		if (QString::fromStdString(it->name()).contains(regex))
 		{
 			dest.insert(it);
 		}

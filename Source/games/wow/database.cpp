@@ -1,4 +1,5 @@
 #include "database.h"
+#include <QStringList>
 
 #include "wow_enums.h"
 #include "logger/Logger.h"
