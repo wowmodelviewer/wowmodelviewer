@@ -124,7 +124,6 @@ target_link_libraries(${NAME}
   armory
   wowhead
   ${CMAKE_SOURCE_DIR}/ThirdParty/lib/x64/libfbxsdk.lib
-  Qt6::Xml
   Qt6::Gui
   Qt6::Network
   Qt6::Widgets

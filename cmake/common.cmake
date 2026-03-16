@@ -34,6 +34,7 @@ endmacro()
 
 macro(use_core)
   include_directories(${CMAKE_SOURCE_DIR}/Source/core)
+  include_directories(${CMAKE_SOURCE_DIR}/ThirdParty/pugixml/src)
   link_directories(${QT_LOCATION}/lib)
   list(APPEND extralibs core)
 endmacro()

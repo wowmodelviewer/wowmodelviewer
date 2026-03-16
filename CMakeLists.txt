@@ -83,7 +83,7 @@ endif()
 message(STATUS "Finding Qt6...")
 set(QT_LOCATION "${CMAKE_SOURCE_DIR}/ThirdParty/Qt/6.8.3/6.8.3/msvc2022_64")
 list(PREPEND CMAKE_PREFIX_PATH "${QT_LOCATION}/lib/cmake")
-find_package(Qt6 6.8.3 COMPONENTS Core Network Widgets Xml Gui REQUIRED)
+find_package(Qt6 6.8.3 COMPONENTS Core Network Widgets Gui REQUIRED)
 message(STATUS "  Qt6 found: ${Qt6_VERSION}")
 
 # WxWidgets
@@ -159,6 +159,11 @@ set(CMAKE_POLICY_VERSION_MINIMUM 3.5 CACHE STRING "" FORCE)
 add_subdirectory(ThirdParty/casclib)
 unset(CMAKE_POLICY_VERSION_MINIMUM CACHE)
 set_property(TARGET casc_static PROPERTY FOLDER "ThirdParty libraries")
+
+# pugixml — lightweight XML parser (replaces Qt Xml / QDom)
+message(STATUS "Adding pugixml...")
+add_subdirectory(ThirdParty/pugixml)
+set_property(TARGET pugixml-static PROPERTY FOLDER "ThirdParty libraries")
 
 # Main source files.
 message(STATUS "Adding Source...")

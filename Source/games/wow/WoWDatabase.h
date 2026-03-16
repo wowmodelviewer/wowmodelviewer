@@ -5,8 +5,6 @@
 class DBFile;
 class GameFile;
 
-class QDomElement;
-
 #define _WOWDATABASE_API_
 
 namespace wow
@@ -48,7 +46,7 @@ namespace wow
 		core::TableStructure* createTableStructure();
 		core::FieldStructure* createFieldStructure();
 
-		void readSpecificTableAttributes(QDomElement&, core::TableStructure*);
-		void readSpecificFieldAttributes(QDomElement&, core::FieldStructure*);
+		void readSpecificTableAttributes(const pugi::xml_node&, core::TableStructure*);
+		void readSpecificFieldAttributes(const pugi::xml_node&, core::FieldStructure*);
 	};
 }

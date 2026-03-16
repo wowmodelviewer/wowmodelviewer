@@ -1,10 +1,6 @@
 #include "GameDatabase.h"
 #include "dbfile.h"
 #include "CSVFile.h"
-#include <qdom.h>
-#include <qfile.h>
-#include <qiodevice.h>
-#include <QString>
 #include "logger/Logger.h"
 #include "Game.h"
 
@@ -140,90 +136,67 @@ void core::GameDatabase::logQueryTime(void* aDb, const char* aQueryStr, sqlite3_
 
 bool core::GameDatabase::readStructureFromXML(const std::string& file)
 {
-	QDomDocument doc;
+	pugi::xml_document doc;
+	const pugi::xml_parse_result parseResult = doc.load_file(file.c_str());
 
-	QFile f(QString::fromStdString(file));
-	f.open(QIODevice::ReadOnly);
-	doc.setContent(&f);
-	f.close();
+	if (!parseResult)
+	{
+		LOG_ERROR << "XML parse error:" << parseResult.description() << "at offset" << parseResult.offset;
+		return false;
+	}
 
-	const QDomElement docElem = doc.documentElement();
+	const pugi::xml_node docElem = doc.document_element();
 
-	QDomElement e = docElem.firstChildElement();
-
-	while (!e.isNull())
+	for (pugi::xml_node e = docElem.first_child(); e; e = e.next_sibling())
 	{
 		core::TableStructure* tblStruct = createTableStructure();
-		QDomElement child = e.firstChildElement();
-
-		QDomNamedNodeMap attributes = e.attributes();
-		QDomNode dbfile = attributes.namedItem("dbfile");
+		pugi::xml_node child = e.first_child();
 
 		// table values
-		tblStruct->name = attributes.namedItem("name").nodeValue().toStdString();
+		tblStruct->name = e.attribute("name").as_string();
 
-		if (!dbfile.isNull())
-			tblStruct->file = dbfile.nodeValue().toStdString();
+		const pugi::xml_attribute dbfile = e.attribute("dbfile");
+		if (dbfile)
+			tblStruct->file = dbfile.as_string();
 		else
 			tblStruct->file = tblStruct->name;
 
 		readSpecificTableAttributes(child, tblStruct);
 
 		int fieldId = 0;
-		while (!child.isNull())
+		for (; child; child = child.next_sibling(), fieldId++)
 		{
 			core::FieldStructure* fieldStruct = createFieldStructure();
 			fieldStruct->id = fieldId;
-			QDomNamedNodeMap Attributes = child.attributes();
 
 			// search if name and type are here
-			QDomNode name = Attributes.namedItem("name");
-			QDomNode type = Attributes.namedItem("type");
-			QDomNode key = Attributes.namedItem("primary");
-			QDomNode arraySize = Attributes.namedItem("arraySize");
-			QDomNode index = Attributes.namedItem("createIndex");
+			const pugi::xml_attribute name = child.attribute("name");
+			const pugi::xml_attribute type = child.attribute("type");
+			const pugi::xml_attribute key = child.attribute("primary");
+			const pugi::xml_attribute arraySize = child.attribute("arraySize");
+			const pugi::xml_attribute index = child.attribute("createIndex");
 
-			if (!name.isNull() && !type.isNull())
+			if (name && type)
 			{
-				fieldStruct->name = name.nodeValue().toStdString();
-				fieldStruct->type = type.nodeValue().toStdString();
+				fieldStruct->name = name.as_string();
+				fieldStruct->type = type.as_string();
 
-				if (!key.isNull())
+				if (key)
 					fieldStruct->isKey = true;
 
-				if (!index.isNull())
+				if (index)
 					fieldStruct->needIndex = true;
 
-				if (!arraySize.isNull())
-					fieldStruct->arraySize = arraySize.nodeValue().toUInt();
+				if (arraySize)
+					fieldStruct->arraySize = arraySize.as_uint();
 
 				readSpecificFieldAttributes(child, fieldStruct);
 
 				tblStruct->fields.push_back(fieldStruct);
 			}
-
-			fieldId++;
-			child = child.nextSiblingElement();
 		}
 
-		/*
-		LOG_INFO << "----------------------------";
-		LOG_INFO << "Table" << tblStruct->name.c_str() << "/ hash" << tblStruct->hash;
-		for (unsigned int i = 0; i < tblStruct->fields.size(); i++)
-		{
-		fieldStructure field = tblStruct->fields[i];
-		LOG_INFO << "fieldName =" << field.name.c_str()
-		<< "/ fieldType =" << field.type.c_str()
-		<< "/ is key ? =" << field.isKey
-		<< "/ need Index ? =" << field.needIndex
-		<< "/ pos =" << field.pos
-		<< "/ arraySize =" << field.arraySize;
-		}
-		LOG_INFO << "----------------------------";
-		*/
 		addTable(tblStruct);
-
-		e = e.nextSiblingElement();
 	}
 	return true;
 }

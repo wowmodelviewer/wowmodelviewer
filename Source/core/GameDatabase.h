@@ -3,10 +3,10 @@
 #include <string>
 #include <vector>
 #include "sqlite3.h"
+#include <pugixml.hpp>
 
 class DBFile;
 class GameFile;
-class QDomElement;
 
 #define _GAMEDATABASE_API_
 
@@ -90,8 +90,8 @@ namespace core
 		virtual core::TableStructure* createTableStructure() = 0;
 		virtual core::FieldStructure* createFieldStructure() = 0;
 
-		virtual void readSpecificTableAttributes(QDomElement&, core::TableStructure*) = 0;
-		virtual void readSpecificFieldAttributes(QDomElement&, core::FieldStructure*) = 0;
+		virtual void readSpecificTableAttributes(const pugi::xml_node&, core::TableStructure*) = 0;
+		virtual void readSpecificFieldAttributes(const pugi::xml_node&, core::FieldStructure*) = 0;
 
 	private:
 		static int treatQuery(void* NotUsed, int nbcols, char** values, char** cols);

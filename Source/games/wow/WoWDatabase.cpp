@@ -1,5 +1,4 @@
 #include "WoWDatabase.h"
-#include <QDomNamedNodeMap>
 #include "Game.h"
 #include "logger/Logger.h"
 #include "wdb2file.h"
@@ -26,40 +25,37 @@ core::FieldStructure* wow::WoWDatabase::createFieldStructure()
 	return new wow::FieldStructure;
 }
 
-void wow::WoWDatabase::readSpecificTableAttributes(QDomElement& e, core::TableStructure* tblStruct)
+void wow::WoWDatabase::readSpecificTableAttributes(const pugi::xml_node& e, core::TableStructure* tblStruct)
 {
 	wow::TableStructure* tbl = dynamic_cast<wow::TableStructure*>(tblStruct);
 
 	if (!tbl)
 		return;
 
-	const QDomNamedNodeMap attributes = e.attributes();
-	const QDomNode hash = attributes.namedItem("layoutHash");
+	const pugi::xml_attribute hash = e.attribute("layoutHash");
 
-	if (!hash.isNull())
-		tbl->hash = hash.nodeValue().toUInt();
+	if (hash)
+		tbl->hash = hash.as_uint();
 }
 
-void wow::WoWDatabase::readSpecificFieldAttributes(QDomElement& e, core::FieldStructure* fieldStruct)
+void wow::WoWDatabase::readSpecificFieldAttributes(const pugi::xml_node& e, core::FieldStructure* fieldStruct)
 {
 	wow::FieldStructure* field = dynamic_cast<wow::FieldStructure*>(fieldStruct);
 
 	if (!field)
 		return;
 
-	const QDomNamedNodeMap attributes = e.attributes();
+	const pugi::xml_attribute pos = e.attribute("pos");
+	const pugi::xml_attribute commonData = e.attribute("commonData");
+	const pugi::xml_attribute relationshipData = e.attribute("relationshipData");
 
-	const QDomNode pos = attributes.namedItem("pos");
-	const QDomNode commonData = attributes.namedItem("commonData");
-	const QDomNode relationshipData = attributes.namedItem("relationshipData");
+	if (pos)
+		field->pos = pos.as_int();
 
-	if (!pos.isNull())
-		field->pos = pos.nodeValue().toInt();
-
-	if (!commonData.isNull())
+	if (commonData)
 		field->isCommonData = true;
 
-	if (!relationshipData.isNull())
+	if (relationshipData)
 		field->isRelationshipData = true;
 }
 
