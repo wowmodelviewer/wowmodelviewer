@@ -257,15 +257,15 @@ void FilteredChoiceDialog::OnImportNPC(wxCommandEvent& event)
 			if (!found)
 			{
 				// npc is not present in current database
-				const NPCRecord rec(dlg->getNPCLine());
+				const NPCRecord rec(dlg->getNPCLine().toStdString());
 				if (rec.model > 0)
 				{
 					npcs.push_back(rec);
 					const QString query = QString(
 											  "INSERT INTO Creature(ID,CreatureType,DisplayID1,Name_Lang) VALUES (%1,%2,%3,\"%4\")")
 										  .
-										  arg(modelid).arg(rec.type).arg(rec.model).arg(rec.name);
-					GAMEDATABASE.sqlQuery(query);
+										  arg(modelid).arg(rec.type).arg(rec.model).arg(QString::fromStdString(rec.name));
+					GAMEDATABASE.sqlQuery(query.toStdString());
 				}
 			}
 

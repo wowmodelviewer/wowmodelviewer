@@ -10,7 +10,7 @@
 #include <vector>
 #include <map>
 
-#include <QString>
+#include <string>
 
 // wmv database
 class ItemDatabase;
@@ -25,10 +25,10 @@ _DATABASE_API_ extern std::vector<NPCRecord> npcs;
 
 struct _DATABASE_API_ ItemRecord
 {
-	QString name;
+	std::string name;
 	int id, itemclass, subclass, type, model, sheath, quality;
 
-	ItemRecord(const std::vector<QString>&);
+	ItemRecord(const std::vector<std::string>&);
 
 	ItemRecord(): id(0), itemclass(-1), subclass(-1), type(0), model(0), sheath(0), quality(0)
 	{
@@ -50,11 +50,11 @@ public:
 
 struct _DATABASE_API_ NPCRecord
 {
-	QString name;
+	std::string name;
 	int id, model, type;
 
-	NPCRecord(QString line);
-	NPCRecord(const std::vector<QString>&);
+	NPCRecord(const std::string& line);
+	NPCRecord(const std::vector<std::string>&);
 
 	NPCRecord(): id(0), model(0), type(0)
 	{

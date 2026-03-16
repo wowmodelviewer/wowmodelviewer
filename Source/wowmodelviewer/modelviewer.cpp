@@ -1021,42 +1021,42 @@ void ModelViewer::LoadNPC(unsigned int modelid)
 		"LEFT JOIN CreatureModelData ON CreatureDisplayInfo.modelID = CreatureModelData.ID "
 		"WHERE Creature.ID = %1;").arg(modelid);
 
-	sqlResult r = GAMEDATABASE.sqlQuery(query);
+	sqlResult r = GAMEDATABASE.sqlQuery(query.toStdString());
 
 	if (r.valid && !r.empty())
 	{
-		const int extraId = r.values[0][4].toInt();
+		const int extraId = std::stoi(r.values[0][4]);
 		// if npc is a simple one (no extra info CreatureDisplayInfoExtra)
 		if (extraId == 0)
 		{
-			LoadModel(GAMEDIRECTORY.getFile(r.values[0][0].toInt()));
+			LoadModel(GAMEDIRECTORY.getFile(std::stoi(r.values[0][0])));
 			WoWModel* m = const_cast<WoWModel*>(canvas->model());
 			m->modelType = MT_NORMAL;
-			animControl->SetSkinByDisplayID(r.values[0][5].toInt());
+			animControl->SetSkinByDisplayID(std::stoi(r.values[0][5]));
 		}
 		else
 		{
-			LoadModel(GAMEDIRECTORY.getFile(RaceInfos::getHDModelForFileID(r.values[0][0].toInt())));
+			LoadModel(GAMEDIRECTORY.getFile(RaceInfos::getHDModelForFileID(std::stoi(r.values[0][0]))));
 
 			query = QString(
 					"SELECT Skin, Face, HairStyle, HairColor, FacialHair FROM CreatureDisplayInfoExtra WHERE ID = %1").
-				arg(extraId);
+					arg(extraId);
 
-			r = GAMEDATABASE.sqlQuery(query);
+			r = GAMEDATABASE.sqlQuery(query.toStdString());
 
 			if (r.valid && !r.empty())
 			{
-				g_charControl->model->cd.set(CharDetails::SKIN_COLOR, r.values[0][0].toInt());
-				g_charControl->model->cd.set(CharDetails::FACE, r.values[0][1].toInt());
-				g_charControl->model->cd.set(CharDetails::FACIAL_CUSTOMIZATION_STYLE, r.values[0][2].toInt());
-				g_charControl->model->cd.set(CharDetails::FACIAL_CUSTOMIZATION_COLOR, r.values[0][3].toInt());
-				g_charControl->model->cd.set(CharDetails::ADDITIONAL_FACIAL_CUSTOMIZATION, r.values[0][4].toInt());
+				g_charControl->model->cd.set(CharDetails::SKIN_COLOR, std::stoi(r.values[0][0]));
+				g_charControl->model->cd.set(CharDetails::FACE, std::stoi(r.values[0][1]));
+				g_charControl->model->cd.set(CharDetails::FACIAL_CUSTOMIZATION_STYLE, std::stoi(r.values[0][2]));
+				g_charControl->model->cd.set(CharDetails::FACIAL_CUSTOMIZATION_COLOR, std::stoi(r.values[0][3]));
+				g_charControl->model->cd.set(CharDetails::ADDITIONAL_FACIAL_CUSTOMIZATION, std::stoi(r.values[0][4]));
 			}
 
 			query = QString("SELECT ItemDisplayInfoID, ItemSlot FROM NpcModelItemSlotDisplayInfo WHERE NpcModelID = %1")
 				.arg(extraId);
 
-			r = GAMEDATABASE.sqlQuery(query);
+			r = GAMEDATABASE.sqlQuery(query.toStdString());
 
 			if (r.valid && !r.empty())
 			{
@@ -1066,9 +1066,9 @@ void ModelViewer::LoadNPC(unsigned int modelid)
 				};
 				for (auto& value : r.values)
 				{
-					WoWItem* item = g_charControl->model->getItem(ItemTypeToInternal[value[1].toInt()]);
+					WoWItem* item = g_charControl->model->getItem(ItemTypeToInternal[std::stoi(value[1])]);
 					if (item)
-						item->setDisplayId(value[0].toInt());
+						item->setDisplayId(std::stoi(value[0]));
 				}
 			}
 
@@ -1104,20 +1104,20 @@ void ModelViewer::LoadItem(unsigned int id)
 			"WHERE ItemDisplayInfo.ID = (SELECT ItemDisplayInfoID FROM ItemAppearance WHERE ItemAppearance.ID = "
 			"(SELECT ItemAppearanceID FROM ItemModifiedAppearance WHERE ItemID = %1))").arg(id);
 
-		sqlResult itemInfos = GAMEDATABASE.sqlQuery(query);
+		sqlResult itemInfos = GAMEDATABASE.sqlQuery(query.toStdString());
 		// LOG_INFO << query;
 
 		if (itemInfos.valid && !itemInfos.empty())
 		{
 			if (itemInfos.values[0][0] != "" && itemInfos.values[0][1] != "")
 			{
-				LoadModel(GAMEDIRECTORY.getFile(itemInfos.values[0][0].toInt()));
+				LoadModel(GAMEDIRECTORY.getFile(std::stoi(itemInfos.values[0][0])));
 				TextureGroup grp;
 				grp.base = TEXTURE_OBJECT_SKIN;
 				grp.count = 1;
-				grp.tex[0] = GAMEDIRECTORY.getFile(itemInfos.values[0][1].toInt());
+				grp.tex[0] = GAMEDIRECTORY.getFile(std::stoi(itemInfos.values[0][1]));
 				if (grp.tex[0])
-					animControl->SetSkinByDisplayID(itemInfos.values[0][2].toInt());
+					animControl->SetSkinByDisplayID(std::stoi(itemInfos.values[0][2]));
 			}
 		}
 
@@ -1907,7 +1907,7 @@ void ModelViewer::LoadWoW()
 	const QString baseConfigFolder = "games/wow/" + ver[0] + "." + ver[1] + "/";
 
 	LOG_INFO << "Using following folder to read game info" << baseConfigFolder;
-	core::Game::instance().setConfigFolder(baseConfigFolder);
+	core::Game::instance().setConfigFolder(baseConfigFolder.toStdString());
 
 	// Range 5-50: Loading file list (heaviest operation)
 	loadProgress.Update(5, wxT("Loading file list... (5%)"));
@@ -1918,7 +1918,7 @@ void ModelViewer::LoadWoW()
 	// Range 50-55: Loading custom files
 	loadProgress.Update(50, wxT("Loading custom files... (50%)"));
 	if (!customDirectoryPath.IsEmpty())
-		core::Game::instance().addCustomFiles(QString::fromWCharArray(customDirectoryPath.c_str()),
+		core::Game::instance().addCustomFiles(QString::fromWCharArray(customDirectoryPath.c_str()).toStdString(),
 											  customFilesConflictPolicy);
 
 	// Range 55-75: Initializing database

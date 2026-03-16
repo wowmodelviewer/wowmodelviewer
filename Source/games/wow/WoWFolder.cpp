@@ -19,7 +19,7 @@ void wow::WoWFolder::init()
 
 void wow::WoWFolder::initFromListfile(const QString& filename)
 {
-	QFile file(core::Game::instance().configFolder() + filename);
+	QFile file(QString::fromStdString(core::Game::instance().configFolder()) + filename);
 	if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
 	{
 		LOG_ERROR << "Failed to open" << filename;

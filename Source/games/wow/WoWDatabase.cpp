@@ -10,7 +10,7 @@
 #include "wdc3file.h"
 #include "wdc5file.h"
 
-const std::vector<QString> POSSIBLE_DB_EXT = {".db2", ".dbc"};
+const std::vector<std::string> POSSIBLE_DB_EXT = {".db2", ".dbc"};
 
 wow::WoWDatabase::WoWDatabase()
 {
@@ -74,7 +74,7 @@ DBFile* wow::TableStructure::createDBFile()
 	// loop over possible extension to check if file exists
 	for (const auto& i : POSSIBLE_DB_EXT)
 	{
-		fileToOpen = GAMEDIRECTORY.getFile("DBFilesClient\\" + file + i);
+		fileToOpen = GAMEDIRECTORY.getFile(QString::fromStdString("DBFilesClient\\" + file + i));
 		if (fileToOpen)
 			break;
 	}

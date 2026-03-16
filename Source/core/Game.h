@@ -1,6 +1,6 @@
 #pragma once
 
-#include <QString>
+#include <string>
 #include "GameFolder.h"
 #include "GameDatabase.h"
 
@@ -23,13 +23,13 @@ namespace core
 
 		void init(core::GameFolder* folder, core::GameDatabase* db);
 		bool initDone() { return ((m_db != nullptr) && (m_folder != nullptr)); }
-		void addCustomFiles(const QString& path, bool bypassOriginalFiles);
+		void addCustomFiles(const std::string& path, bool bypassOriginalFiles);
 
 		core::GameFolder& folder() { return *m_folder; }
 		core::GameDatabase& database() { return *m_db; }
 
-		void setConfigFolder(const QString& folder) { m_configFolder = folder; }
-		QString configFolder() { return m_configFolder; }
+		void setConfigFolder(const std::string& folder) { m_configFolder = folder; }
+		std::string configFolder() { return m_configFolder; }
 
 	private:
 		// disable explicit construct and destruct
@@ -43,7 +43,7 @@ namespace core
 		core::GameFolder* m_folder;
 		core::GameDatabase* m_db;
 
-		QString m_configFolder;
+		std::string m_configFolder;
 
 		static Game* m_instance;
 	};

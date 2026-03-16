@@ -1,5 +1,5 @@
 #include "database.h"
-#include <QStringList>
+#include <sstream>
 
 #include "wow_enums.h"
 #include "logger/Logger.h"
@@ -7,19 +7,19 @@
 _DATABASE_API_ ItemDatabase items;
 _DATABASE_API_ std::vector<NPCRecord> npcs;
 
-ItemRecord::ItemRecord(const std::vector<QString>& vals)
+ItemRecord::ItemRecord(const std::vector<std::string>& vals)
 	: id(0), itemclass(0), subclass(0), type(0), model(0), sheath(0), quality(0)
 {
 	if (vals.size() < 6)
 		return;
 
-	id = vals[0].toInt();
-	type = vals[2].toInt();
-	itemclass = vals[3].toInt();
-	subclass = vals[4].toInt();
+	id = std::stoi(vals[0]);
+	type = std::stoi(vals[2]);
+	itemclass = std::stoi(vals[3]);
+	subclass = std::stoi(vals[4]);
 	model = 1;
 	quality = 0;
-	switch (vals[5].toInt())
+	switch (std::stoi(vals[5]))
 	{
 	case SHEATHETYPE_MAINHAND: sheath = ATT_LEFT_BACK_SHEATH;
 		break;
@@ -104,28 +104,32 @@ const ItemRecord& ItemDatabase::getById(int id)
 	return items[0];
 }
 
-NPCRecord::NPCRecord(QString line)
+NPCRecord::NPCRecord(const std::string& line)
 	: id(0), model(0), type(0)
 {
-	QStringList values = line.split(',');
+	std::vector<std::string> values;
+	std::istringstream stream(line);
+	std::string token;
+	while (std::getline(stream, token, ','))
+		values.push_back(token);
 
 	if (values.size() <= 3)
 		return;
 
-	id = values[0].toInt();
-	model = values[1].toInt();
-	type = values[2].toInt();
+	id = std::stoi(values[0]);
+	model = std::stoi(values[1]);
+	type = std::stoi(values[2]);
 	name = values[3];
 }
 
-NPCRecord::NPCRecord(const std::vector<QString>& vals)
+NPCRecord::NPCRecord(const std::vector<std::string>& vals)
 	: id(0), model(0), type(0)
 {
 	if (vals.size() < 4)
 		return;
 
-	id = vals[0].toInt();
-	model = vals[1].toInt();
-	type = vals[2].toInt();
+	id = std::stoi(vals[0]);
+	model = std::stoi(vals[1]);
+	type = std::stoi(vals[2]);
 	name = vals[3];
 }

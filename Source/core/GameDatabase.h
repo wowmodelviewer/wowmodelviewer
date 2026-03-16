@@ -1,12 +1,12 @@
 #pragma once
 
+#include <string>
 #include <vector>
 #include "sqlite3.h"
 
 class DBFile;
 class GameFile;
 class QDomElement;
-#include <QString>
 
 #define _GAMEDATABASE_API_
 
@@ -25,7 +25,7 @@ public:
 	bool empty() { return values.size() == 0; }
 	bool valid;
 	int nbcols;
-	std::vector<std::vector<QString>> values;
+	std::vector<std::vector<std::string>> values;
 };
 
 namespace core
@@ -35,8 +35,6 @@ namespace core
 	{
 	public:
 		FieldStructure() :
-			name(""),
-			type(""),
 			isKey(false),
 			needIndex(false),
 			arraySize(1),
@@ -48,8 +46,8 @@ namespace core
 		{
 		}
 
-		QString name;
-		QString type;
+		std::string name;
+		std::string type;
 		bool isKey;
 		bool needIndex;
 		unsigned int arraySize;
@@ -59,16 +57,12 @@ namespace core
 	class _GAMEDATABASE_API_ TableStructure
 	{
 	public:
-		TableStructure() :
-			name(""),
-			file("")
-		{
-		}
+		TableStructure() {}
 
 		virtual ~TableStructure();
 
-		QString name;
-		QString file;
+		std::string name;
+		std::string file;
 		std::vector<FieldStructure*> fields;
 
 		bool create();
@@ -83,9 +77,9 @@ namespace core
 		GameDatabase();
 		//GameDatabase(GameDatabase&);
 
-		bool initFromXML(const QString& file);
+		bool initFromXML(const std::string& file);
 
-		sqlResult sqlQuery(const QString& query);
+		sqlResult sqlQuery(const std::string& query);
 
 		void setFastMode() { m_fastMode = true; }
 
@@ -103,8 +97,8 @@ namespace core
 		static int treatQuery(void* NotUsed, int nbcols, char** values, char** cols);
 		static void logQueryTime(void* aDb, const char* aQueryStr, sqlite3_uint64 aTimeInNs);
 
-		bool createDatabaseFromXML(const QString& file);
-		bool readStructureFromXML(const QString& file);
+		bool createDatabaseFromXML(const std::string& file);
+		bool readStructureFromXML(const std::string& file);
 
 		sqlite3* m_db;
 

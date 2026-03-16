@@ -4,7 +4,7 @@
 #include <qdom.h>
 #include <qfile.h>
 #include <qiodevice.h>
-#include <qstring.h>
+#include <QString>
 #include "logger/Logger.h"
 #include "Game.h"
 
@@ -23,7 +23,7 @@ core::GameDatabase::GameDatabase() : m_db(nullptr), m_fastMode(false)
 {
 }
 
-bool core::GameDatabase::initFromXML(const QString& file)
+bool core::GameDatabase::initFromXML(const std::string& file)
 {
 	int rc;
 
@@ -47,12 +47,12 @@ bool core::GameDatabase::initFromXML(const QString& file)
 	return createDatabaseFromXML(core::Game::instance().configFolder() + file);
 }
 
-sqlResult core::GameDatabase::sqlQuery(const QString& query)
+sqlResult core::GameDatabase::sqlQuery(const std::string& query)
 {
 	sqlResult result;
 
 	char* zErrMsg = nullptr;
-	const int rc = sqlite3_exec(m_db, query.toStdString().c_str(), core::GameDatabase::treatQuery, (void*)&result, &zErrMsg);
+	const int rc = sqlite3_exec(m_db, query.c_str(), core::GameDatabase::treatQuery, (void*)&result, &zErrMsg);
 	if (rc != SQLITE_OK)
 	{
 		LOG_ERROR << "Querying in database" << query;
@@ -79,11 +79,11 @@ int core::GameDatabase::treatQuery(void* resultPtr, int nbcols, char** vals, cha
 	if (!r)
 		return 1;
 
-	std::vector<QString> values;
+	std::vector<std::string> values;
 	// update columns
 	for (int i = 0; i < nbcols; i++)
 	{
-		values.emplace_back(vals[i]);
+		values.emplace_back(vals[i] ? vals[i] : "");
 	}
 
 	r->values.push_back(values);
@@ -92,7 +92,7 @@ int core::GameDatabase::treatQuery(void* resultPtr, int nbcols, char** vals, cha
 	return 0;
 }
 
-bool core::GameDatabase::createDatabaseFromXML(const QString& file)
+bool core::GameDatabase::createDatabaseFromXML(const std::string& file)
 {
 	if (!readStructureFromXML(file))
 	{
@@ -138,11 +138,11 @@ void core::GameDatabase::logQueryTime(void* aDb, const char* aQueryStr, sqlite3_
 	}
 }
 
-bool core::GameDatabase::readStructureFromXML(const QString& file)
+bool core::GameDatabase::readStructureFromXML(const std::string& file)
 {
 	QDomDocument doc;
 
-	QFile f(file);
+	QFile f(QString::fromStdString(file));
 	f.open(QIODevice::ReadOnly);
 	doc.setContent(&f);
 	f.close();
@@ -160,10 +160,10 @@ bool core::GameDatabase::readStructureFromXML(const QString& file)
 		QDomNode dbfile = attributes.namedItem("dbfile");
 
 		// table values
-		tblStruct->name = attributes.namedItem("name").nodeValue();
+		tblStruct->name = attributes.namedItem("name").nodeValue().toStdString();
 
 		if (!dbfile.isNull())
-			tblStruct->file = dbfile.nodeValue();
+			tblStruct->file = dbfile.nodeValue().toStdString();
 		else
 			tblStruct->file = tblStruct->name;
 
@@ -185,8 +185,8 @@ bool core::GameDatabase::readStructureFromXML(const QString& file)
 
 			if (!name.isNull() && !type.isNull())
 			{
-				fieldStruct->name = name.nodeValue();
-				fieldStruct->type = type.nodeValue();
+				fieldStruct->name = name.nodeValue().toStdString();
+				fieldStruct->type = type.nodeValue().toStdString();
 
 				if (!key.isNull())
 					fieldStruct->isKey = true;
@@ -231,9 +231,9 @@ bool core::GameDatabase::readStructureFromXML(const QString& file)
 bool core::TableStructure::create()
 {
 	LOG_INFO << "Creating table" << name;
-	QString create = "CREATE TABLE " + name + " (";
+	std::string create = "CREATE TABLE " + name + " (";
 
-	std::vector<QString> indexesToCreate;
+	std::vector<std::string> indexesToCreate;
 
 	for (const auto& field : fields)
 	{
@@ -253,7 +253,7 @@ bool core::TableStructure::create()
 			for (unsigned int i = 1; i <= field->arraySize; i++)
 			{
 				create += field->name;
-				create += QString::number(i);
+				create += std::to_string(i);
 				create += " ";
 				create += field->type;
 				create += ",";
@@ -265,8 +265,8 @@ bool core::TableStructure::create()
 	}
 
 	// remove spurious "," at the end of string, if any
-	if (create.lastIndexOf(",") == create.length() - 1)
-		create.remove(create.length() - 1, 1);
+	if (!create.empty() && create.back() == ',')
+		create.pop_back();
 	create += ");";
 
 	//LOG_INFO << create;
@@ -280,7 +280,7 @@ bool core::TableStructure::create()
 		// create indexes
 		for (auto& it : indexesToCreate)
 		{
-			QString query = QString("CREATE INDEX %1_%2 ON %1(%2)").arg(name).arg(it);
+			std::string query = "CREATE INDEX " + name + "_" + it + " ON " + name + "(" + it + ")";
 			core::Game::instance().database().sqlQuery(query);
 		}
 	}
@@ -296,14 +296,14 @@ bool core::TableStructure::fill()
 	if (!dbc || !dbc->open())
 		return false;
 
-	QString query = "INSERT INTO ";
+	std::string query = "INSERT INTO ";
 	query += name;
 	query += "(";
 	const auto nbFields = fields.size();
 	int curfield = 0;
 	for (auto it = fields.begin(), itEnd = fields.end();
-	     it != itEnd;
-	     ++it, curfield++)
+		 it != itEnd;
+		 ++it, curfield++)
 	{
 		if ((*it)->arraySize == 1) // simple field
 		{
@@ -314,7 +314,7 @@ bool core::TableStructure::fill()
 			for (unsigned int i = 1; i <= (*it)->arraySize; i++)
 			{
 				query += (*it)->name;
-				query += QString::number(i);
+				query += std::to_string(i);
 				if (i != (*it)->arraySize)
 					query += ",";
 			}
@@ -325,7 +325,7 @@ bool core::TableStructure::fill()
 
 	query += ") VALUES";
 
-	const QString queryBase = query;
+	const std::string queryBase = query;
 	int record = 0;
 	const auto nbRecord = dbc->getRecordCount();
 
@@ -338,7 +338,7 @@ bool core::TableStructure::fill()
 			if (field == 0)
 				query += " (";
 			query += "\"";
-			query += QString::fromStdString(Fields[field]);
+			query += Fields[field];
 			query += "\"";
 			if (field != nbfield - 1)
 				query += ",";
@@ -377,7 +377,7 @@ bool core::TableStructure::fill()
 DBFile* core::TableStructure::createDBFile()
 {
 	DBFile* result = nullptr;
-	if (file.contains(".csv"))
+	if (file.find(".csv") != std::string::npos)
 		result = new CSVFile(file);
 
 	return result;

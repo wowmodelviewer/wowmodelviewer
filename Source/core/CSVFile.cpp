@@ -1,41 +1,51 @@
 #include "CSVFile.h"
 #include "logger/Logger.h"
-#include <QFile>
-#include <QTextStream>
+#include <fstream>
+#include <sstream>
+#include <algorithm>
 #include "Game.h"
 
-CSVFile::CSVFile(QString file) : m_file(std::move(file))
+CSVFile::CSVFile(std::string file) : m_file(std::move(file))
 {
+}
+
+static std::string toLower(std::string s)
+{
+	std::transform(s.begin(), s.end(), s.begin(), [](unsigned char c) { return std::tolower(c); });
+	return s;
+}
+
+static std::vector<std::string> splitString(const std::string& s, char delimiter)
+{
+	std::vector<std::string> tokens;
+	std::istringstream stream(s);
+	std::string token;
+	while (std::getline(stream, token, delimiter))
+		tokens.push_back(token);
+	return tokens;
 }
 
 bool CSVFile::open()
 {
-	QFile file(core::Game::instance().configFolder() + m_file);
-	if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
+	std::ifstream file(core::Game::instance().configFolder() + m_file);
+	if (!file.is_open())
 	{
 		LOG_ERROR << "Fail to open" << m_file;
 		return false;
 	}
 
-	QTextStream in(&file);
-
 	// read first line to gather fields' position
-	QStringList list = in.readLine().toLower().split(";");
+	std::string headerLine;
+	if (!std::getline(file, headerLine))
+		return false;
 
-	for (auto it : list)
-		m_fields.push_back(it);
+	m_fields = splitString(toLower(headerLine), ';');
 
-	while (!in.atEnd())
+	std::string line;
+	while (std::getline(file, line))
 	{
-		QStringList List = in.readLine().split(";");
-
-		std::vector<std::string> vals;
-
-		for (auto it : List)
-			vals.push_back(it.toStdString());
-
+		std::vector<std::string> vals = splitString(line, ';');
 		m_values.push_back(vals);
-
 		recordCount++;
 	}
 
@@ -61,7 +71,7 @@ std::vector<std::string> CSVFile::get(unsigned int recordIndex, const core::Tabl
 		uint fieldIndex = 0;
 
 		for (; fieldIndex < m_fields.size(); fieldIndex++)
-			if (it->name.toLower() == m_fields[fieldIndex])
+			if (toLower(it->name) == m_fields[fieldIndex])
 				break;
 
 		if (fieldIndex >= m_fields.size())

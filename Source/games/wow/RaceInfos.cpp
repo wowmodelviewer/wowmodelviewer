@@ -31,12 +31,12 @@ void RaceInfos::init()
 	for (auto& race : races.values)
 	{
 		RaceInfos infos;
-		infos.prefix = race[0].toStdString();
-		infos.raceID = race[1].toInt();
-		infos.barefeet = (race[2].toInt() & 0x2);
-		infos.sexID = race[3].toInt();
-		auto modelfileid = race[4].toInt();
-		infos.textureLayoutID = race[5].toInt();
+		infos.prefix = race[0];
+		infos.raceID = std::stoi(race[1]);
+		infos.barefeet = (std::stoi(race[2]) & 0x2);
+		infos.sexID = std::stoi(race[3]);
+		auto modelfileid = std::stoi(race[4]);
+		infos.textureLayoutID = std::stoi(race[5]);
 		if (infos.textureLayoutID <= 0)
 		{
 			LOG_WARNING << "Unexpected textureLayoutID (" << infos.textureLayoutID << ") for raceID " << infos.raceID << ", sexID " << infos.sexID;
@@ -46,20 +46,20 @@ void RaceInfos::init()
 		// item display info from other race models):
 		if (infos.sexID == GENDER_MALE)
 		{
-			infos.modelFallbackRaceID = race[6].toInt();
-			infos.modelFallbackSexID = race[7].toInt();
-			infos.textureFallbackRaceID = race[8].toInt();
-			infos.textureFallbackSexID = race[9].toInt();
+			infos.modelFallbackRaceID = std::stoi(race[6]);
+			infos.modelFallbackSexID = std::stoi(race[7]);
+			infos.textureFallbackRaceID = std::stoi(race[8]);
+			infos.textureFallbackSexID = std::stoi(race[9]);
 		}
 		else
 		{
-			infos.modelFallbackRaceID = race[10].toInt();
-			infos.modelFallbackSexID = race[11].toInt();
-			infos.textureFallbackRaceID = race[12].toInt();
-			infos.textureFallbackSexID = race[13].toInt();
+			infos.modelFallbackRaceID = std::stoi(race[10]);
+			infos.modelFallbackSexID = std::stoi(race[11]);
+			infos.textureFallbackRaceID = std::stoi(race[12]);
+			infos.textureFallbackSexID = std::stoi(race[13]);
 		}
 
-		infos.ChrModelID.push_back(race[14].toInt());
+		infos.ChrModelID.push_back(std::stoi(race[14]));
 
 		infos.isHD = GAMEDIRECTORY.getFile(modelfileid)->fullname().contains("_hd") ? true : false;
 
@@ -69,7 +69,7 @@ void RaceInfos::init()
 		}
 		else // if a race is already inserted, capture any additional ChrModelID
 		{
-			auto id = race[14].toInt();
+			auto id = std::stoi(race[14]);
 			if (std::find(RACES[modelfileid].ChrModelID.begin(), RACES[modelfileid].ChrModelID.end(), id) == RACES[
 				modelfileid].ChrModelID.end())
 				RACES[modelfileid].ChrModelID.push_back(id);

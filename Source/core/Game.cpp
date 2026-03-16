@@ -1,4 +1,5 @@
 #include "Game.h"
+#include <QString>
 
 core::Game* core::Game::m_instance = nullptr;
 
@@ -14,8 +15,8 @@ void core::Game::init(core::GameFolder* folder, core::GameDatabase* db)
 		m_folder->init();
 }
 
-void core::Game::addCustomFiles(const QString& path, bool bypassOriginalFiles)
+void core::Game::addCustomFiles(const std::string& path, bool bypassOriginalFiles)
 {
 	if (m_folder)
-		m_folder->addCustomFiles(path, bypassOriginalFiles);
+		m_folder->addCustomFiles(QString::fromStdString(path), bypassOriginalFiles);
 }

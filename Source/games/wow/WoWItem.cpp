@@ -54,7 +54,7 @@ void WoWItem::setId(int id)
 		const auto itemlevels = GAMEDATABASE.sqlQuery(
 			QString(
 				"SELECT OrderIndex, ItemAppearanceID, ItemAppearanceModifierID FROM ItemModifiedAppearance WHERE ItemID = %1")
-			.arg(id));
+			.arg(id).toStdString());
 
 		if (itemlevels.valid && !itemlevels.values.empty())
 		{
@@ -63,8 +63,8 @@ void WoWItem::setId(int id)
 			levelDisplayMap_.clear();
 			for (auto& value : itemlevels.values)
 			{
-				const auto curid = value[1].toInt();
-				modifierIdDisplayMap_[value[2].toInt()] = curid;
+				const auto curid = std::stoi(value[1]);
+				modifierIdDisplayMap_[std::stoi(value[2])] = curid;
 				// if display id is null (case when item's look doesn't change with level)
 				if (curid == 0)
 					continue;
@@ -89,13 +89,13 @@ void WoWItem::setId(int id)
 		}
 
 		const auto iteminfos = GAMEDATABASE.sqlQuery(QString("SELECT ItemDisplayInfoID FROM ItemAppearance WHERE ID = %1")
-			.arg(levelDisplayMap_[level_]));
+			.arg(levelDisplayMap_[level_]).toStdString());
 
 		if (iteminfos.valid && !iteminfos.values.empty())
-			displayId_ = iteminfos.values[0][0].toInt();
+			displayId_ = std::stoi(iteminfos.values[0][0]);
 
 		const auto& itemRcd = items.getById(id);
-		setName(itemRcd.name.toStdString());
+		setName(itemRcd.name);
 		quality_ = itemRcd.quality;
 		type_ = itemRcd.type;
 		load();
@@ -120,13 +120,13 @@ void WoWItem::setLevel(int level)
 		level_ = level;
 
 		const auto iteminfos = GAMEDATABASE.sqlQuery(QString("SELECT ItemDisplayInfoID FROM ItemAppearance WHERE ID = %1")
-			.arg(levelDisplayMap_[level_]));
+			.arg(levelDisplayMap_[level_]).toStdString());
 
 		if (iteminfos.valid && !iteminfos.values.empty())
-			displayId_ = iteminfos.values[0][0].toInt();
+			displayId_ = std::stoi(iteminfos.values[0][0]);
 
 		const auto& itemRcd = items.getById(id_);
-		setName(itemRcd.name.toStdString());
+		setName(itemRcd.name);
 		quality_ = itemRcd.quality;
 		type_ = itemRcd.type;
 		load();
@@ -139,13 +139,13 @@ void WoWItem::setModifierId(int id)
 	if (it != modifierIdDisplayMap_.end())
 	{
 		const auto iteminfos = GAMEDATABASE.sqlQuery(QString("SELECT ItemDisplayInfoID FROM ItemAppearance WHERE ID = %1")
-			.arg(it->second));
+			.arg(it->second).toStdString());
 
 		if (iteminfos.valid && !iteminfos.values.empty())
-			displayId_ = iteminfos.values[0][0].toInt();
+			displayId_ = std::stoi(iteminfos.values[0][0]);
 
 		const auto& itemRcd = items.getById(id_);
-		setName(itemRcd.name.toStdString());
+		setName(itemRcd.name);
 		quality_ = itemRcd.quality;
 		type_ = itemRcd.type;
 		load();
@@ -214,19 +214,19 @@ void WoWItem::load()
 		return;
 
 	const int geosetGroup[6] = {
-		iteminfos.values[0][0].toInt(), iteminfos.values[0][1].toInt(),
-		iteminfos.values[0][2].toInt(), iteminfos.values[0][3].toInt(),
-		iteminfos.values[0][4].toInt(), iteminfos.values[0][5].toInt()
+		std::stoi(iteminfos.values[0][0]), std::stoi(iteminfos.values[0][1]),
+		std::stoi(iteminfos.values[0][2]), std::stoi(iteminfos.values[0][3]),
+		std::stoi(iteminfos.values[0][4]), std::stoi(iteminfos.values[0][5])
 	};
 
 	const int attachmentGeosetGroup[6] =
 	{
-		iteminfos.values[0][6].toInt(), iteminfos.values[0][7].toInt(),
-		iteminfos.values[0][8].toInt(), iteminfos.values[0][9].toInt(),
-		iteminfos.values[0][10].toInt(), iteminfos.values[0][11].toInt()
+		std::stoi(iteminfos.values[0][6]), std::stoi(iteminfos.values[0][7]),
+		std::stoi(iteminfos.values[0][8]), std::stoi(iteminfos.values[0][9]),
+		std::stoi(iteminfos.values[0][10]), std::stoi(iteminfos.values[0][11])
 	};
 
-	displayFlags_ = iteminfos.values[0][12].toInt();
+	displayFlags_ = std::stoi(iteminfos.values[0][12]);
 
 	// query models
 	const int models[2] = {getCustomModelId(0), getCustomModelId(1)};
@@ -236,7 +236,7 @@ void WoWItem::load()
 
 	// query textures from ItemDisplayInfoMaterialRes (if relevant)
 	auto texinfos = GAMEDATABASE.sqlQuery(
-		QString("SELECT * FROM ItemDisplayInfoMaterialRes WHERE ItemDisplayInfoID = %1").arg(displayId_));
+		QString("SELECT * FROM ItemDisplayInfoMaterialRes WHERE ItemDisplayInfoID = %1").arg(displayId_).toStdString());
 	if (texinfos.valid && !texinfos.empty())
 	{
 		auto classFilter = QString("ComponentTextureFileData.ClassID = %1").arg(CLASS_ANY);
@@ -256,7 +256,7 @@ void WoWItem::load()
 		{
 			for (auto& value : iteminfos.values)
 			{
-				const auto tex = GAMEDIRECTORY.getFile(value[0].toInt());
+				const auto tex = GAMEDIRECTORY.getFile(std::stoi(value[0]));
 				if (tex)
 				{
 					auto texRegion = getRegionForTexture(tex);
@@ -303,14 +303,14 @@ void WoWItem::load()
 			const auto query = QString("SELECT ID, PositionIndex FROM ComponentModelFileData "
 				"WHERE ID IN (%1,%2)").arg(models[0]).arg(models[1]);
 
-			const auto result = GAMEDATABASE.sqlQuery(query);
+			const auto result = GAMEDATABASE.sqlQuery(query.toStdString());
 
 			auto leftIndex = 0;
 			auto rightIndex = 1;
 			if (result.valid && !result.values.empty())
 			{
-				const auto modelid = result.values[0][0].toInt();
-				const auto position = result.values[0][1].toInt();
+				const auto modelid = std::stoi(result.values[0][0]);
+				const auto position = std::stoi(result.values[0][1]);
 
 				// If the modelid matches models[0], use position to determine left/right
 				// Otherwise, swap the indices
@@ -1014,7 +1014,7 @@ CharRegions WoWItem::getRegionForTexture(GameFile* file) const
 
 bool WoWItem::queryItemInfo(const QString& query, sqlResult& result) const
 {
-	result = GAMEDATABASE.sqlQuery(query);
+	result = GAMEDATABASE.sqlQuery(query.toStdString());
 
 	if (!result.valid || result.values.empty())
 	{
@@ -1042,14 +1042,16 @@ int WoWItem::getCustomModelId(size_t index) const
 
 	// if there is only one result, return model id:
 	if (infos.values.size() == 1)
-		return infos.values[0][0].toInt();
+		return std::stoi(infos.values[0][0]);
 
 	// if there are multiple values, check by race and sex:
-	QStringList idList;
-	for (auto& it : infos.values)
-		idList << it[0];
-	auto idListStr = idList.join(", ");
-	idListStr = "(" + idListStr + ")";
+	std::string idListStr = "(";
+	for (size_t i = 0; i < infos.values.size(); i++)
+	{
+		if (i > 0) idListStr += ", ";
+		idListStr += infos.values[i][0];
+	}
+	idListStr += ")";
 
 	const auto charInfos = charModel_->infos;
 
@@ -1067,40 +1069,40 @@ int WoWItem::getCustomModelId(size_t index) const
 	// and ClassID descending to ensure Demon Hunter textures have priority over regular ones, for DHs only:
 	sqlResult iteminfos;
 	QString query = QString("SELECT ID, PositionIndex FROM ComponentModelFileData "
-		                "WHERE RaceID = %1 AND (GenderIndex = %2 OR GenderIndex = %3) "
-		                "AND ID IN %4 AND %5 "
-		                "ORDER BY GenderIndex, ClassID DESC, PositionIndex %6")
-	                .arg(charInfos.raceID).arg(charInfos.sexID).arg(GENDER_ANY).arg(idListStr).arg(classFilter).arg(
-		                positionSort);
+						"WHERE RaceID = %1 AND (GenderIndex = %2 OR GenderIndex = %3) "
+						"AND ID IN %4 AND %5 "
+						"ORDER BY GenderIndex, ClassID DESC, PositionIndex %6")
+					.arg(charInfos.raceID).arg(charInfos.sexID).arg(GENDER_ANY).arg(QString::fromStdString(idListStr)).arg(classFilter).arg(
+						positionSort);
 	if (queryItemInfo(query, iteminfos))
-		return iteminfos.values[0][0].toInt();
+		return std::stoi(iteminfos.values[0][0]);
 
 	// Failed to find model for that specific race and sex, so check fallback race:
 	if (charInfos.modelFallbackRaceID > 0)
 	{
 		query = QString("SELECT ID, PositionIndex FROM ComponentModelFileData "
-			        "WHERE RaceID = %1 AND (GenderIndex = %2 OR GenderIndex = %3) "
-			        "AND ID IN %4 AND %5 "
-			        "ORDER BY GenderIndex, ClassID DESC, PositionIndex %6")
-		        .arg(charInfos.modelFallbackRaceID).arg(charInfos.modelFallbackSexID).arg(GENDER_NONE).arg(idListStr).
-		        arg(classFilter).arg(positionSort);
+					"WHERE RaceID = %1 AND (GenderIndex = %2 OR GenderIndex = %3) "
+					"AND ID IN %4 AND %5 "
+					"ORDER BY GenderIndex, ClassID DESC, PositionIndex %6")
+				.arg(charInfos.modelFallbackRaceID).arg(charInfos.modelFallbackSexID).arg(GENDER_NONE).arg(QString::fromStdString(idListStr)).
+				arg(classFilter).arg(positionSort);
 
 		if (queryItemInfo(query, iteminfos))
-			return iteminfos.values[0][0].toInt();
+			return std::stoi(iteminfos.values[0][0]);
 	}
 
 	// We still didn't find the model, so check for RACE_ANY (race = 0) items:
 	// Note: currently all race = 0 entries are also gender = 2, but we probably
 	// shouldn't assume it will stay that way, so check for both gender values:
 	query = QString("SELECT ID, PositionIndex FROM ComponentModelFileData "
-		        "WHERE RaceID = %1 AND (GenderIndex = %2 OR GenderIndex = %3) "
-		        "AND ID IN %4 AND %5 "
-		        "ORDER BY GenderIndex, ClassID DESC, PositionIndex %6")
-	        .arg(RACE_ANY).arg(charInfos.modelFallbackSexID).arg(GENDER_NONE).arg(idListStr).arg(classFilter).arg(
-		        positionSort);
+				"WHERE RaceID = %1 AND (GenderIndex = %2 OR GenderIndex = %3) "
+				"AND ID IN %4 AND %5 "
+				"ORDER BY GenderIndex, ClassID DESC, PositionIndex %6")
+			.arg(RACE_ANY).arg(charInfos.modelFallbackSexID).arg(GENDER_NONE).arg(QString::fromStdString(idListStr)).arg(classFilter).arg(
+				positionSort);
 
 	if (queryItemInfo(query, iteminfos))
-		return iteminfos.values[0][0].toInt();
+		return std::stoi(iteminfos.values[0][0]);
 
 	return 0;
 }
@@ -1120,14 +1122,16 @@ int WoWItem::getCustomTextureId(size_t index) const
 
 	// if there is only one result, return texture id:
 	if (infos.values.size() == 1)
-		return infos.values[0][0].toInt();
+		return std::stoi(infos.values[0][0]);
 
 	// if there are multiple values, check by race and sex:
-	QStringList idList;
-	for (auto& it : infos.values)
-		idList << it[0];
-	auto idListStr = idList.join(", ");
-	idListStr = "(" + idListStr + ")";
+	std::string idListStr = "(";
+	for (size_t i = 0; i < infos.values.size(); i++)
+	{
+		if (i > 0) idListStr += ", ";
+		idListStr += infos.values[i][0];
+	}
+	idListStr += ")";
 
 	const auto charInfos = charModel_->infos;
 
@@ -1140,36 +1144,36 @@ int WoWItem::getCustomTextureId(size_t index) const
 	// and ClassID descending to ensure Demon Hunter textures have priority over regular ones, for DHs only:
 	sqlResult iteminfos;
 	QString query = QString("SELECT ID FROM ComponentTextureFileData "
-		                "WHERE RaceID = %1 AND (GenderIndex = %2 OR GenderIndex = %3) "
-		                "AND ID IN %4 AND %5 "
-		                "ORDER BY GenderIndex, ClassID DESC")
-	                .arg(charInfos.raceID).arg(charInfos.sexID).arg(GENDER_ANY).arg(idListStr).arg(classFilter);
+						"WHERE RaceID = %1 AND (GenderIndex = %2 OR GenderIndex = %3) "
+						"AND ID IN %4 AND %5 "
+						"ORDER BY GenderIndex, ClassID DESC")
+					.arg(charInfos.raceID).arg(charInfos.sexID).arg(GENDER_ANY).arg(QString::fromStdString(idListStr)).arg(classFilter);
 	if (queryItemInfo(query, iteminfos))
-		return iteminfos.values[0][0].toInt();
+		return std::stoi(iteminfos.values[0][0]);
 
 	// Failed to find model for that specific race and sex, so check fallback race:
 	if (charInfos.textureFallbackRaceID > 0)
 	{
 		query = QString("SELECT ID FROM ComponentTextureFileData "
-			        "WHERE RaceID = %1 AND (GenderIndex = %2 OR GenderIndex = %3) "
-			        "AND ID IN %4 AND %5 "
-			        "ORDER BY GenderIndex, ClassID DESC")
-		        .arg(charInfos.textureFallbackRaceID).arg(charInfos.textureFallbackSexID).arg(GENDER_ANY).arg(idListStr)
-		        .arg(classFilter);
+					"WHERE RaceID = %1 AND (GenderIndex = %2 OR GenderIndex = %3) "
+					"AND ID IN %4 AND %5 "
+					"ORDER BY GenderIndex, ClassID DESC")
+				.arg(charInfos.textureFallbackRaceID).arg(charInfos.textureFallbackSexID).arg(GENDER_ANY).arg(QString::fromStdString(idListStr))
+				.arg(classFilter);
 
 		if (queryItemInfo(query, iteminfos))
-			return iteminfos.values[0][0].toInt();
+			return std::stoi(iteminfos.values[0][0]);
 	}
 
 	// We still didn't find the model, so check for RACE_ANY (race = 0) items: 
 	query = QString("SELECT ID FROM ComponentTextureFileData "
-		        "WHERE RaceID = %1 AND (GenderIndex = %2 OR GenderIndex = %3) "
-		        "AND ID IN %4 AND %5 "
-		        "ORDER BY GenderIndex, ClassID DESC")
-	        .arg(RACE_ANY).arg(charInfos.sexID).arg(GENDER_ANY).arg(idListStr).arg(classFilter);
+				"WHERE RaceID = %1 AND (GenderIndex = %2 OR GenderIndex = %3) "
+				"AND ID IN %4 AND %5 "
+				"ORDER BY GenderIndex, ClassID DESC")
+			.arg(RACE_ANY).arg(charInfos.sexID).arg(GENDER_ANY).arg(QString::fromStdString(idListStr)).arg(classFilter);
 
 	if (queryItemInfo(query, iteminfos))
-		return iteminfos.values[0][0].toInt();
+		return std::stoi(iteminfos.values[0][0]);
 
 	return 0;
 }

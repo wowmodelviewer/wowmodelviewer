@@ -476,13 +476,13 @@ void CharControl::selectItem(ssize_t type, ssize_t slot, const wxChar* caption)
 		for (auto& value : itemClasses.values)
 		{
 			// first set verbose name
-			wxString name = value[3].toStdWString();
+			wxString name = wxString::FromUTF8(value[3]);
 			// if empty, fall back to normal one
 			if (name.IsEmpty())
-				name = value[2].toStdWString();
+				name = wxString::FromUTF8(value[2]);
 
 			catnames.Add(name);
-			subclasslookup[std::pair<int, int>(value[0].toInt(), value[1].toInt())] = static_cast<int>(catnames.size()) - 1;
+			subclasslookup[std::pair<int, int>(std::stoi(value[0]), std::stoi(value[1]))] = static_cast<int>(catnames.size()) - 1;
 		}
 	}
 
@@ -556,8 +556,8 @@ void CharControl::selectSet()
 		for (auto& value : itemSet.values)
 		{
 			NumStringPair p;
-			p.id = value[0].toInt();
-			p.name = value[1].toStdWString();
+			p.id = std::stoi(value[0]);
+			p.name = wxString::FromUTF8(value[1]);
 			Items.push_back(p);
 		}
 	}
@@ -593,14 +593,14 @@ void CharControl::selectStart()
 		"FROM CharStartOutfit AS CSO LEFT JOIN ChrClasses on CSO.classID = ChrClasses.ID "
 		"WHERE CSO.raceID=%1 AND CSO.sexID=%2").arg(infos.raceID).arg(infos.sexID);
 
-	sqlResult startOutfit = GAMEDATABASE.sqlQuery(query);
+	sqlResult startOutfit = GAMEDATABASE.sqlQuery(query.toStdString());
 
 	if (startOutfit.valid && !startOutfit.empty())
 	{
 		for (auto& value : startOutfit.values)
 		{
-			choices.Add(value[0].toStdWString());
-			numbers.push_back(value[1].toInt());
+			choices.Add(wxString::FromUTF8(value[0]));
+			numbers.push_back(std::stoi(value[1]));
 		}
 	}
 
@@ -639,8 +639,8 @@ void CharControl::selectMount()
 		for (auto& value : mountQuery.values)
 		{
 			NumStringPair p;
-			p.id = value[0].toInt();
-			p.name = value[1].toStdWString();
+			p.id = std::stoi(value[0]);
+			p.name = wxString::FromUTF8(value[1]);
 			mounts.push_back(p);
 		}
 	}
@@ -706,8 +706,8 @@ void CharControl::selectNPC(ssize_t type)
 	{
 		for (auto& value : npccats.values)
 		{
-			catnames.Add(value[1].toStdWString());
-			typeLookup[value[0].toInt()] = static_cast<int>(catnames.size()) - 1;
+			catnames.Add(wxString::FromUTF8(value[1]));
+			typeLookup[std::stoi(value[0])] = static_cast<int>(catnames.size()) - 1;
 		}
 	}
 
@@ -717,7 +717,7 @@ void CharControl::selectNPC(ssize_t type)
 	{
 		if (npc.model > 0)
 		{
-			QString NPCName = npc.name;
+			QString NPCName = QString::fromStdString(npc.name);
 
 			if (displayItemAndNPCId != 0)
 				NPCName += QString(" [%1]").arg(npc.id);
@@ -797,7 +797,7 @@ void CharControl::OnUpdateItem(int type, int id)
 				const QString query = QString("SELECT itemID1, itemID2, itemID3, itemID4, itemID5, "
 					"itemID6, itemID7,  itemID8 FROM ItemSet WHERE ID = %1").arg(id);
 
-				sqlResult itemSet = GAMEDATABASE.sqlQuery(query);
+				sqlResult itemSet = GAMEDATABASE.sqlQuery(query.toStdString());
 
 				if (itemSet.valid && !itemSet.empty())
 				{
@@ -807,7 +807,7 @@ void CharControl::OnUpdateItem(int type, int id)
 						it->setId(0);
 
 					for (unsigned i = 0; i < 8; i++)
-						tryToEquipItem(itemSet.values[0][i].toInt());
+						tryToEquipItem(std::stoi(itemSet.values[0][i]));
 
 					RefreshEquipment();
 					RefreshModel();
@@ -826,7 +826,7 @@ void CharControl::OnUpdateItem(int type, int id)
 				"CSO.iitem19, CSO.iitem20, CSO.iitem21, CSO.iitem22, CSO.iitem23, CSO.iitem24 "
 				"FROM CharStartOutfit AS CSO WHERE CSO.ID=%1").arg(id);
 
-			sqlResult startOutfit = GAMEDATABASE.sqlQuery(query);
+			sqlResult startOutfit = GAMEDATABASE.sqlQuery(query.toStdString());
 
 			if (startOutfit.valid && !startOutfit.empty())
 			{
@@ -836,7 +836,7 @@ void CharControl::OnUpdateItem(int type, int id)
 
 				for (unsigned i = 0; i < 24; i++)
 				{
-					tryToEquipItem(startOutfit.values[0][i].toInt());
+					tryToEquipItem(std::stoi(startOutfit.values[0][i]));
 				}
 
 				RefreshEquipment();
@@ -891,10 +891,10 @@ void CharControl::OnUpdateItem(int type, int id)
 					"LEFT JOIN CreatureModelData ON CreatureDisplayInfo.modelID = CreatureModelData.ID "
 					"WHERE CreatureDisplayInfo.ID = %1;").arg(morphID);
 
-				sqlResult mountQuery = GAMEDATABASE.sqlQuery(query);
+				sqlResult mountQuery = GAMEDATABASE.sqlQuery(query.toStdString());
 				if (!mountQuery.valid || mountQuery.empty())
 					break;
-				modelFile = GAMEDIRECTORY.getFile(mountQuery.values[0][0].toInt());
+				modelFile = GAMEDIRECTORY.getFile(std::stoi(mountQuery.values[0][0]));
 			}
 			else if (cats[id] == 1) // create mount from any old creature model file name
 			{
@@ -1119,7 +1119,7 @@ void CharControl::tryToEquipItem(int id)
 
 QString CharControl::getItemName(ItemRecord& item)
 {
-	QString result = item.name;
+	QString result = QString::fromStdString(item.name);
 
 	if (displayItemAndNPCId != 0)
 	{

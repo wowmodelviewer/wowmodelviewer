@@ -810,10 +810,10 @@ void WoWModel::initCommon()
 			"FROM CreatureModelData "
 			"WHERE FileDataID = %1")
 		.arg(gamefile->fileDataId());
-	sqlResult r = GAMEDATABASE.sqlQuery(query);
+	sqlResult r = GAMEDATABASE.sqlQuery(query.toStdString());
 	if (r.valid && !r.values.empty())
 	{
-		creatureGeosetDataID = r.values[0][0].toInt();
+		creatureGeosetDataID = std::stoi(r.values[0][0]);
 	}
 
 	gamefile->close();
@@ -4277,13 +4277,13 @@ void WoWModel::refresh()
 		                   .arg((infos.sexID == 0) ? "HelmetGeosetVis1" : "HelmetGeosetVis2")
 		                   .arg(headItemId);
 
-		const auto helmetInfos = GAMEDATABASE.sqlQuery(query);
+		const auto helmetInfos = GAMEDATABASE.sqlQuery(query.toStdString());
 
 		if (helmetInfos.valid && !helmetInfos.values.empty())
 		{
 			for (auto it : helmetInfos.values)
 			{
-				setGeosetGroupDisplay(static_cast<CharGeosets>(it[0].toInt()), 0);
+				setGeosetGroupDisplay(static_cast<CharGeosets>(std::stoi(it[0])), 0);
 			}
 		}
 	}
@@ -4504,9 +4504,9 @@ std::ostream& operator<<(std::ostream& out, const WoWModel& m)
 		out << "      <animID>" << m.anims[i].animID << "</animID>" << endl;
 		std::string strName;
 		QString query = QString("SELECT Name FROM AnimationData WHERE ID = %1").arg(m.anims[i].animID);
-		sqlResult anim = GAMEDATABASE.sqlQuery(query);
+		sqlResult anim = GAMEDATABASE.sqlQuery(query.toStdString());
 		if (anim.valid && !anim.empty())
-			strName = anim.values[0][0].toStdString();
+			strName = anim.values[0][0];
 		else
 			strName = "???";
 		out << "      <animName>" << strName << "</animName>" << endl;

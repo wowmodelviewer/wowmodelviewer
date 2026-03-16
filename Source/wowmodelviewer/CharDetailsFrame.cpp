@@ -47,12 +47,12 @@ void CharDetailsFrame::setModel(WoWModel* model)
 	const auto options = GAMEDATABASE.sqlQuery(
 		QString(
 			"SELECT ID FROM ChrCustomizationOption WHERE ChrModelID = %1 AND ChrCustomizationID != 0 ORDER BY OrderIndex")
-		.arg(infos.ChrModelID[0]));
+		.arg(infos.ChrModelID[0]).toStdString());
 
 	if (options.valid && !options.values.empty())
 	{
 		for (auto& option : options.values)
-			charCustomizationGS_->Add(new CharDetailsCustomizationChoice(this, model_->cd, option[0].toUInt()),
+			charCustomizationGS_->Add(new CharDetailsCustomizationChoice(this, model_->cd, std::stoi(option[0])),
 			                          wxSizerFlags(1).Align(wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL));
 	}
 

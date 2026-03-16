@@ -18,11 +18,11 @@ CharDetailsCustomizationChoice::CharDetailsCustomizationChoice(wxWindow* parent,
 
 	details_.attach(this);
 
-	const auto option = GAMEDATABASE.sqlQuery(QString("SELECT Name_Lang FROM ChrCustomizationOption WHERE ID = %1").arg(ID_));
+	const auto option = GAMEDATABASE.sqlQuery(QString("SELECT Name_Lang FROM ChrCustomizationOption WHERE ID = %1").arg(ID_).toStdString());
 
 	if (option.valid && !option.values.empty())
 	{
-		top->Add(new wxStaticText(this, wxID_ANY, option.values[0][0].toStdWString()),
+		top->Add(new wxStaticText(this, wxID_ANY, wxString::FromUTF8(option.values[0][0])),
 		         wxSizerFlags().Align(wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL).Border(wxRIGHT, 5));
 
 		choice_ = new wxChoice(this, wxID_ANY);
@@ -83,18 +83,18 @@ void CharDetailsCustomizationChoice::buildList()
 
 		LOG_INFO << query;
 
-		const auto choices = GAMEDATABASE.sqlQuery(query);
+		const auto choices = GAMEDATABASE.sqlQuery(query.toStdString());
 
 		if (choices.valid && !choices.values.empty())
 		{
 			for (auto v : choices.values)
 			{
-				if (!v[1].isEmpty())
-					choice_->Append(wxString(v[1].toStdString().c_str(), wxConvUTF8));
+				if (!v[1].empty())
+					choice_->Append(wxString::FromUTF8(v[1]));
 				else
-					choice_->Append(wxString::Format(wxT(" %i "), v[0].toInt()));
+					choice_->Append(wxString::Format(wxT(" %i "), std::stoi(v[0])));
 
-				values_.push_back(v[2].toUInt());
+				values_.push_back(std::stoi(v[2]));
 			}
 		}
 	}

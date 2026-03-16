@@ -450,7 +450,7 @@ bool AnimControl::UpdateCreatureModel(WoWModel* m)
 			.arg(m->gamefile->fileDataId());
 	}
 
-	sqlResult r = GAMEDATABASE.sqlQuery(query);
+	sqlResult r = GAMEDATABASE.sqlQuery(query.toStdString());
 	PCRList.clear();
 	if (r.valid && !r.values.empty())
 	{
@@ -460,15 +460,15 @@ bool AnimControl::UpdateCreatureModel(WoWModel* m)
 			int count = 0;
 			for (size_t skin = 0; skin < TextureGroup::num; skin++)
 			{
-				if (!r.values[i][skin].isEmpty())
+				if (!r.values[i][skin].empty())
 				{
-					GameFile* tex = GAMEDIRECTORY.getFile(r.values[i][skin].toInt());
+					GameFile* tex = GAMEDIRECTORY.getFile(std::stoi(r.values[i][skin]));
 					alreadyUsedTextures.insert(tex);
 					grp.tex[skin] = tex;
 					count++;
 				}
 			}
-			int cdi = r.values[i][4].toInt();
+			int cdi = std::stoi(r.values[i][4]);
 			grp.base = TEXTURE_GAMEOBJECT1;
 			grp.definedTexture = true;
 			grp.count = count;
@@ -483,7 +483,7 @@ bool AnimControl::UpdateCreatureModel(WoWModel* m)
 				// the group number, and the value of the four bits at
 				// that position represents the geoset. So 0x00200000
 				// means geoset 2 of group 600, therefore 602.
-				int cgd = r.values[i][5].toInt();
+				int cgd = std::stoi(r.values[i][5]);
 				for (int I = 0; I < 8; I++)
 				{
 					int geotype = 100 * (I + 1);
@@ -498,33 +498,33 @@ bool AnimControl::UpdateCreatureModel(WoWModel* m)
 						"FROM CreatureDisplayInfoGeosetData "
 						"WHERE CreatureDisplayInfoID = %1")
 					.arg(cdi);
-				sqlResult r2 = GAMEDATABASE.sqlQuery(query2);
+				sqlResult r2 = GAMEDATABASE.sqlQuery(query2.toStdString());
 				if (r2.valid && !r2.values.empty())
 				{
 					for (size_t j = 0; j < r2.values.size(); j++)
 					{
-						int geotype = 100 * (r2.values[j][0].toInt() + 1);
-						int geoid = r2.values[j][1].toInt();
+						int geotype = 100 * (std::stoi(r2.values[j][0]) + 1);
+						int geoid = std::stoi(r2.values[j][1]);
 						if (geoid > 0)
 							grp.creatureGeosetData.insert(geotype + geoid);
 					}
 				}
 			}
 
-			int pci = r.values[i][3].toInt(); // particleColorIndex, for replacing particle color
+			int pci = std::stoi(r.values[i][3]); // particleColorIndex, for replacing particle color
 			if (pci)
 			{
 				grp.particleColInd = pci;
 				QString pciquery = QString("SELECT StartColor1, MidColor1, EndColor1, "
 					"StartColor2, MidColor2, EndColor2, StartColor3, MidColor3, EndColor3 FROM ParticleColor "
 					"WHERE ID = %1;").arg(pci);
-				sqlResult pcir = GAMEDATABASE.sqlQuery(pciquery);
+				sqlResult pcir = GAMEDATABASE.sqlQuery(pciquery.toStdString());
 				if (pcir.valid && !pcir.empty())
 				{
 					std::vector<glm::vec4> cols;
 					for (size_t j = 0; j < pcir.values[0].size(); j++)
 					{
-						cols.push_back(fromARGB(pcir.values[0][j].toInt()));
+						cols.push_back(fromARGB(std::stoi(pcir.values[0][j])));
 					}
 					PCRList.push_back({ //-V823
 						{cols[0], cols[1], cols[2]}, {cols[3], cols[4], cols[5]}, {cols[6], cols[7], cols[8]}
@@ -642,7 +642,7 @@ bool AnimControl::UpdateItemModel(WoWModel* m)
 		"LEFT JOIN ModelFileData ON ItemDisplayInfo.ModelResourcesID1 = ModelFileData.ModelResourcesID "
 		"WHERE TextureFileData.FileDataID = %1").arg(m->gamefile->fileDataId());
 
-	sqlResult r = GAMEDATABASE.sqlQuery(query);
+	sqlResult r = GAMEDATABASE.sqlQuery(query.toStdString());
 
 	if (r.valid && !r.empty())
 	{
@@ -652,24 +652,24 @@ bool AnimControl::UpdateItemModel(WoWModel* m)
 			grp.base = TEXTURE_OBJECT_SKIN;
 			grp.definedTexture = true;
 			grp.count = 1;
-			GameFile* tex = GAMEDIRECTORY.getFile(r.values[i][0].toInt());
+			GameFile* tex = GAMEDIRECTORY.getFile(std::stoi(r.values[i][0]));
 			alreadyUsedTextures.insert(tex);
 			grp.tex[0] = tex;
-			int cdi = r.values[i][2].toInt();
-			int pci = r.values[i][1].toInt(); // particleColorIndex, for replacing particle color
+			int cdi = std::stoi(r.values[i][2]);
+			int pci = std::stoi(r.values[i][1]); // particleColorIndex, for replacing particle color
 			if (pci)
 			{
 				grp.particleColInd = pci;
 				QString pciquery = QString("SELECT Start1, Mid1, End1, "
 					"Start2, Mid2, End2, Start3, Mid3, End3 FROM ParticleColor "
 					"WHERE ID = %1;").arg(pci);
-				sqlResult pcir = GAMEDATABASE.sqlQuery(pciquery);
+				sqlResult pcir = GAMEDATABASE.sqlQuery(pciquery.toStdString());
 				if (pcir.valid && !pcir.empty())
 				{
 					std::vector<glm::vec4> cols;
 					for (size_t j = 0; j < pcir.values[0].size(); j++)
 					{
-						cols.push_back(fromARGB(pcir.values[0][j].toInt()));
+						cols.push_back(fromARGB(std::stoi(pcir.values[0][j])));
 					}
 					PCRList.push_back({ //-V823
 						{cols[0], cols[1], cols[2]}, {cols[3], cols[4], cols[5]}, {cols[6], cols[7], cols[8]}
@@ -693,7 +693,7 @@ bool AnimControl::UpdateItemModel(WoWModel* m)
 		"LEFT JOIN ModelFileData ON ItemDisplayInfo.ModelResourcesID1 = ModelFileData.ModelResourcesID "
 		"WHERE TextureFileData.FileDataID = %1").arg(m->gamefile->fileDataId());
 
-	r = GAMEDATABASE.sqlQuery(query);
+	r = GAMEDATABASE.sqlQuery(query.toStdString());
 
 	if (r.valid && !r.empty())
 	{
@@ -703,24 +703,24 @@ bool AnimControl::UpdateItemModel(WoWModel* m)
 			grp.base = TEXTURE_OBJECT_SKIN;
 			grp.definedTexture = true;
 			grp.count = 1;
-			GameFile* tex = GAMEDIRECTORY.getFile(r.values[i][0].toInt());
+			GameFile* tex = GAMEDIRECTORY.getFile(std::stoi(r.values[i][0]));
 			alreadyUsedTextures.insert(tex);
 			grp.tex[0] = tex;
-			int cdi = r.values[i][2].toInt();
-			int pci = r.values[i][1].toInt(); // particleColorIndex, for replacing particle color
+			int cdi = std::stoi(r.values[i][2]);
+			int pci = std::stoi(r.values[i][1]); // particleColorIndex, for replacing particle color
 			if (pci)
 			{
 				grp.particleColInd = pci;
 				QString pciquery = QString("SELECT StartColor1, MidColor1, EndColor1, "
 					"StartColor2, MidColor2, EndColor2, StartColor3, MidColor3, EndColor3 FROM ParticleColor "
 					"WHERE ID = %1;").arg(pci);
-				sqlResult pcir = GAMEDATABASE.sqlQuery(pciquery);
+				sqlResult pcir = GAMEDATABASE.sqlQuery(pciquery.toStdString());
 				if (pcir.valid && !pcir.empty())
 				{
 					std::vector<glm::vec4> cols;
 					for (size_t j = 0; j < pcir.values[0].size(); j++)
 					{
-						cols.push_back(fromARGB(pcir.values[0][j].toInt()));
+						cols.push_back(fromARGB(std::stoi(pcir.values[0][j])));
 					}
 					PCRList.push_back({ //-V823
 						{cols[0], cols[1], cols[2]}, {cols[3], cols[4], cols[5]}, {cols[6], cols[7], cols[8]}
