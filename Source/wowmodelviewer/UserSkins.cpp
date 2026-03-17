@@ -38,11 +38,11 @@ void UserSkins::LoadFile(const wxString& filename)
 
 	if (!in.is_open())
 	{
-		LOG_ERROR << "Failed to open '" << QString::fromWCharArray(filename.c_str()) << "' while loading user skins";
+		LOG_ERROR << "Failed to open '" << filename.c_str() << "' while loading user skins";
 		return;
 	}
 
-	LOG_INFO << "Loading user skins from " << QString::fromWCharArray(filename.c_str());
+	LOG_INFO << "Loading user skins from " << filename.c_str();
 	// parse the file
 	// See the comment at the end of this file for the exact format
 	std::string line;
@@ -55,7 +55,7 @@ void UserSkins::LoadFile(const wxString& filename)
 
 		if (!readline(in, line, lineNr))
 		{
-			LOG_ERROR << "UserSkins: unexpected EOF after '" << QString::fromWCharArray(model.c_str()) << "' (line" <<
+			LOG_ERROR << "UserSkins: unexpected EOF after '" << model.c_str() << "' (line" <<
 				lineNr << ")";
 			return;
 		}
@@ -94,7 +94,7 @@ void UserSkins::LoadFile(const wxString& filename)
 	}
 	// everything ok (-:
 	loaded = true;
-	LOG_INFO << "User skins" << QString::fromWCharArray(filename.c_str()) << "loaded";
+	LOG_INFO << "User skins" << filename.c_str() << "loaded";
 	in.close();
 }
 

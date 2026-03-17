@@ -262,7 +262,7 @@ void FileControl::Export(wxString val, int select)
 	}
 	else
 	{
-		LOG_ERROR << "Saving to" << QString::fromWCharArray(filename.c_str()) << "failed";
+		LOG_ERROR << "Saving to" << filename.c_str() << "failed";
 	}
 
 	f->close();

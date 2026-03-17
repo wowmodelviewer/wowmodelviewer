@@ -32,7 +32,6 @@ class WoWModel;
 #include "glm/glm.hpp"
 #include <fstream>
 #include <string>
-#include <QString>
 
 #include "ExporterPlugin.h"
 

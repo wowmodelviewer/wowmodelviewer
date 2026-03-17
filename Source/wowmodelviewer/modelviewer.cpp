@@ -703,7 +703,7 @@ void ModelViewer::ResetLayout()
 
 void ModelViewer::LoadSession()
 {
-	LOG_INFO << "Loading Session settings from:" << QString::fromWCharArray(cfgPath.c_str());
+	LOG_INFO << "Loading Session settings from:" << cfgPath.c_str();
 
 	const QSettings config(QString::fromWCharArray(cfgPath.c_str()), QSettings::IniFormat);
 
@@ -885,9 +885,8 @@ void ModelViewer::LoadModel(GameFile* file)
 	isModel = true;
 
 	// check if this is a character model
-	const QString fn = QString::fromStdString(file->fullname());
-	isChar = (fn.startsWith("char", Qt::CaseInsensitive) || fn.startsWith(
-		"alternate\\char", Qt::CaseInsensitive));
+	const std::string fn = file->fullname();
+	isChar = (core::startsWithIgnoreCase(fn, "char") || core::startsWithIgnoreCase(fn, "alternate\\char"));
 	Attachment* modelAtt;
 
 	if (isChar)
@@ -1936,7 +1935,7 @@ void ModelViewer::LoadWoW()
 	// Range 50-55: Loading custom files
 	loadProgress.Update(50, wxT("Loading custom files... (50%)"));
 	if (!customDirectoryPath.IsEmpty())
-		core::Game::instance().addCustomFiles(QString::fromWCharArray(customDirectoryPath.c_str()).toStdString(),
+		core::Game::instance().addCustomFiles(std::string(customDirectoryPath.ToUTF8()),
 											  customFilesConflictPolicy);
 
 	// Range 55-75: Initializing database
@@ -2151,7 +2150,7 @@ void ModelViewer::ModelInfo()
 
 	if (!xml.is_open())
 	{
-		LOG_ERROR << "Unable to open file '" << QString::fromWCharArray(fn.c_str()) << "'. Could not export model.";
+		LOG_ERROR << "Unable to open file '" << fn.c_str() << "'. Could not export model.";
 		return;
 	}
 

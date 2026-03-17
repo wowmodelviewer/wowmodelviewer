@@ -112,9 +112,9 @@ bool WowModelViewApp::OnInit()
 	LOGGER.addChild(new WMVLog::LogOutputFile("userSettings/log.txt"));
 
 	// Just a little header to start off the log file.
-	LOG_INFO << "Starting:" << QString::fromStdWString(GLOBALSETTINGS.appName())
-		<< QString::fromStdWString(GLOBALSETTINGS.appVersion())
-		<< QString::fromStdWString(GLOBALSETTINGS.buildName());
+	LOG_INFO << "Starting:" << GLOBALSETTINGS.appName()
+		<< GLOBALSETTINGS.appVersion()
+		<< GLOBALSETTINGS.buildName();
 
 	// Now create our main frame.
 	frame = new ModelViewer();
@@ -174,7 +174,7 @@ frame->interfaceManager.Update();
 	// Command arguments
 	for (int i = 0; i < argc; i++)
 	{
-		QString cmd = QString::fromWCharArray(argv[i]);
+		wxString cmd = argv[i];
 
 		if (cmd == "-m")
 		{

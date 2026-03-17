@@ -74,7 +74,7 @@ wxString getGamePath(bool noSet)
 		{
 			s = sizeof(path);
 			l = RegQueryValueEx(key, wxT("InstallPath"), nullptr, &t, reinterpret_cast<LPBYTE>(path), &s);
-			wxString spath = QString::fromLatin1(path).toStdWString();
+			wxString spath(path, wxConvISO8859_1);
 			if (l == ERROR_SUCCESS && wxDir::Exists(spath) && sNames.Index(spath) == wxNOT_FOUND)
 				sNames.Add(spath);
 			RegCloseKey(key);

@@ -81,21 +81,21 @@ bool OBJExporter::exportModel(Model* m, std::wstring target)
 	std::ofstream file(targetPath);
 	if (!file.is_open())
 	{
-		LOG_ERROR << "Unable to open" << QString::fromStdWString(target);
+		LOG_ERROR << "Unable to open" << target;
 		return false;
 	}
 
-	LOG_INFO << "Exporting" << model->modelname.c_str() << "in" << QString::fromStdWString(target);
+	LOG_INFO << "Exporting" << model->modelname.c_str() << "in" << target;
 
 	// prepare mtl file
 	const fs::path matPath = targetPath.parent_path() / (targetPath.stem().wstring() + L".mtl");
 
-	LOG_INFO << "Exporting" << model->modelname.c_str() << "materials in" << QString::fromStdWString(matPath.wstring());
+	LOG_INFO << "Exporting" << model->modelname.c_str() << "materials in" << matPath.wstring();
 
 	std::ofstream matFile(matPath);
 	if (!matFile.is_open())
 	{
-		LOG_ERROR << "Unable to open" << QString::fromStdWString(matPath.wstring());
+		LOG_ERROR << "Unable to open" << matPath.wstring();
 		return false;
 	}
 
@@ -106,8 +106,8 @@ bool OBJExporter::exportModel(Model* m, std::wstring target)
 	{
 		std::wstring appName = GLOBALSETTINGS.appName();
 		std::wstring appVer = GLOBALSETTINGS.appVersion();
-		obj << QString::fromStdWString(appName).toStdString() << " "
-			<< QString::fromStdWString(appVer).toStdString() << "\n";
+		obj << fs::path(appName).string() << " "
+			<< fs::path(appVer).string() << "\n";
 	}
 	obj << "\n";
 	obj << "mtllib " << matPath.filename().string() << "\n";
@@ -392,7 +392,7 @@ bool OBJExporter::exportModelMaterials(WoWModel* model, std::ofstream& file, std
 
 			file << "map_Kd " << texFile << "\n";
 			std::string fullTexPath = fs::path(mtlFile).parent_path().string() + "\\" + texFile;
-			texToExport[QString::fromStdString(fullTexPath).toStdWString()] = model->getGLTexture(p->tex);
+			texToExport[fs::path(fullTexPath).wstring()] = model->getGLTexture(p->tex);
 		}
 	}
 

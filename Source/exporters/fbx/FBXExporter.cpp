@@ -27,7 +27,6 @@
 
 #include <filesystem>
 #include <mutex>
-#include <QString>
 
 #include "FBXHeaders.h"
 #include "FBXAnimExporter.h"

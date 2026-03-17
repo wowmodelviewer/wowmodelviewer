@@ -1,5 +1,4 @@
 #include "Game.h"
-#include <QString>
 
 core::Game* core::Game::m_instance = nullptr;
 
