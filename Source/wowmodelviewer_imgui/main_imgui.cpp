@@ -60,9 +60,8 @@
 #include "WoWItem.h"
 
 #include <format>
-#include <set>
+#include <deque>
 #include <map>
-#include <regex>
 
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
@@ -156,13 +155,23 @@ struct FileBrowserNode
     std::string                              name;
     GameFile*                                file = nullptr; // non-null for leaf nodes
     std::map<std::string, FileBrowserNode*>  children;
-
-    ~FileBrowserNode()
-    {
-        for (auto& [k, v] : children)
-            delete v;
-    }
 };
+
+// Arena allocator: all tree nodes live in a deque and are freed in bulk.
+// std::deque never moves existing elements on push_back, so FileBrowserNode*
+// pointers stored in children maps remain valid as the pool grows.
+static std::deque<FileBrowserNode>  g_nodePool;
+
+static FileBrowserNode* allocNode()
+{
+    g_nodePool.emplace_back();
+    return &g_nodePool.back();
+}
+
+static void freeNodePool()
+{
+    g_nodePool.clear();
+}
 
 static const char* g_filterLabels[] = {
     "Models (*.m2)",
@@ -499,30 +508,32 @@ static void rebuildFileTree()
     if (!g_isWoWLoaded)
         return;
 
-    delete g_fileTreeRoot;
-    g_fileTreeRoot = new FileBrowserNode();
+    freeNodePool();
+    g_fileTreeRoot = allocNode();
     g_fileTreeRoot->name = "Root";
 
-    // Build regex filter: ^.*<search>.*\.<extension>
+    // Prepare filter strings (case-insensitive via pre-lowered comparison)
     std::string search = core::toLower(std::string(g_searchBuf));
-    // Trim whitespace
     auto s = search.find_first_not_of(" \t\r\n");
     auto e = search.find_last_not_of(" \t\r\n");
     search = (s == std::string::npos) ? "" : search.substr(s, e - s + 1);
 
-    std::string filterString = std::format("^.*{}.*\\.{}", search, g_filterExtensions[g_filterMode]);
-    std::set<GameFile*> files;
-    GAMEDIRECTORY.getFilteredFiles(files, filterString);
+    const std::string ext = std::string(".") + g_filterExtensions[g_filterMode];
 
-    g_fileTreeFileCount = static_cast<int>(files.size());
-
-    for (auto* gf : files)
+    // Direct iteration — no regex, just suffix + substring check
+    g_fileTreeFileCount = 0;
+    for (auto* gf : GAMEDIRECTORY)
     {
-        std::string fullname = gf->fullname();
-        // Append file data ID for display
-        std::string displayName = std::format("{} [{}]", fullname, gf->fileDataId());
+        const auto& fname = gf->fullname();   // already lowercase
+        if (!core::endsWithIgnoreCase(fname, ext))
+            continue;
+        if (!search.empty() && !core::containsIgnoreCase(fname, search))
+            continue;
 
-        // Beautify: lowercase, backslash separators, capitalize first chars
+        ++g_fileTreeFileCount;
+
+        // Build display name
+        std::string displayName = std::format("{} [{}]", fname, gf->fileDataId());
         std::transform(displayName.begin(), displayName.end(), displayName.begin(),
             [](unsigned char c) { return static_cast<char>(std::tolower(c)); });
         std::replace(displayName.begin(), displayName.end(), '/', '\\');
@@ -538,7 +549,7 @@ static void rebuildFileTree()
             auto it = cur->children.find(parts[i]);
             if (it == cur->children.end())
             {
-                auto* child = new FileBrowserNode();
+                auto* child = allocNode();
                 child->name = parts[i];
                 cur->children[parts[i]] = child;
                 cur = child;
@@ -550,7 +561,7 @@ static void rebuildFileTree()
         }
 
         // Add leaf node
-        auto* leaf = new FileBrowserNode();
+        auto* leaf = allocNode();
         leaf->name = parts.back();
         leaf->file = gf;
         cur->children[parts.back()] = leaf;
@@ -1159,7 +1170,7 @@ int main(int /*argc*/, char* /*argv*/[])
     }
 
     // ---- Cleanup ----
-    delete g_fileTreeRoot;
+    freeNodePool();
     g_fileTreeRoot = nullptr;
 
     if (g_root)

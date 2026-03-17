@@ -16,7 +16,7 @@ use_imgui()
 use_wow()   # brings in core, casclib, wow (video, Attachment, WoWModel, etc.)
 
 set(NAME wowmodelviewer_imgui)
-add_executable(${NAME} WIN32 ${src})
+add_executable(${NAME} ${src})
 
 set_property(TARGET ${NAME} PROPERTY FOLDER "executables")
 
@@ -34,11 +34,6 @@ target_link_libraries(${NAME}
   ${CMAKE_SOURCE_DIR}/ThirdParty/lib/x64/zlib.lib
   ${CMAKE_SOURCE_DIR}/ThirdParty/lib/x64/libpng.lib
 )
-
-# On MSVC, use main() instead of WinMain for the console-friendly entry point.
-if(MSVC)
-  set_target_properties(${NAME} PROPERTIES LINK_FLAGS "/ENTRY:mainCRTStartup")
-endif()
 
 set(BIN_DIR "${CMAKE_SOURCE_DIR}/bin/")
 install(TARGETS ${NAME} RUNTIME DESTINATION ${BIN_DIR})
