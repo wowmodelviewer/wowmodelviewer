@@ -7,7 +7,6 @@
 #include <string>
 #include <sstream>
 #include <vector>
-#include <QString>
 #include <wx/bitmap.h>
 #include <wx/string.h>
 

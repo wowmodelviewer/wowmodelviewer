@@ -1626,7 +1626,7 @@ bool ModelViewer::DownloadListfile()
 
 	if (response->error() != QNetworkReply::NoError)
 	{
-		LOG_ERROR << "Failed to download listfile:" << response->errorString();
+		LOG_ERROR << "Failed to download listfile:" << response->errorString().toStdString();
 		wxMessageBox(wxString::Format("Failed to download listfile:\n%s",
 			response->errorString().toStdWString()), wxT("Download Error"), wxOK | wxICON_ERROR);
 		response->deleteLater();
@@ -1706,7 +1706,7 @@ bool ModelViewer::DownloadEncryptionKeys()
 
 	if (response->error() != QNetworkReply::NoError)
 	{
-		LOG_ERROR << "Failed to download encryption keys:" << response->errorString();
+		LOG_ERROR << "Failed to download encryption keys:" << response->errorString().toStdString();
 		wxMessageBox(wxString::Format("Failed to download encryption keys:\n%s",
 			response->errorString().toStdWString()), wxT("Download Error"), wxOK | wxICON_ERROR);
 		response->deleteLater();

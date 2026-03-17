@@ -553,7 +553,7 @@ int ArmoryImporter::readJSONValues(ImportType type, const QString& url, QJsonObj
 				region = strList.at(0).mid(0, strList.at(0).indexOf("."));
 				realm = strList.at(strList.size() - 3);
 				charName = strList.at(strList.size() - 2).mid(0, strUrl.lastIndexOf("?") - 1);
-				LOG_INFO << "Battle Net, CharName: " << charName << " Realm: " << realm << " Region: " << region;
+				LOG_INFO << "Battle Net, CharName: " << charName.toStdString() << " Realm: " << realm.toStdString() << " Region: " << region.toStdString();
 			}
 			else if ((strUrl.indexOf("worldofwarcraft.com") != -1) || (url.indexOf("blizzard.com") != -1))
 			{
@@ -571,7 +571,7 @@ int ArmoryImporter::readJSONValues(ImportType type, const QString& url, QJsonObj
 
 				realm = strList.at(strList.size() - 2);
 				charName = strList.at(strList.size() - 1).mid(0, strUrl.lastIndexOf("?") - 1);
-				LOG_INFO << "WoW.com, CharName:" << charName << "Realm:" << realm << "Region:" << region;
+				LOG_INFO << "WoW.com, CharName:" << charName.toStdString() << "Realm:" << realm.toStdString() << "Region:" << region.toStdString();
 
 				// I don't believe these should be translated, as websites tend not to translate URLs...
 				// If so, change to region == tr("fr-fr")
@@ -592,9 +592,9 @@ int ArmoryImporter::readJSONValues(ImportType type, const QString& url, QJsonObj
 				return 2;
 			}
 
-			LOG_INFO << "Loading Battle.Net Armory. Region:" << qPrintable(region)
-				<< ", Realm:" << qPrintable(realm)
-				<< ", Character:" << qPrintable(charName);
+			LOG_INFO << "Loading Battle.Net Armory. Region:" << region.toStdString()
+				<< ", Realm:" << realm.toStdString()
+				<< ", Character:" << charName.toStdString();
 
 			apiPage = QString("https://wowmodelviewer.net/armory2.php?region=%1&realm=%2&char=%3").arg(region).
 				arg(realm).arg(charName);
@@ -627,7 +627,7 @@ int ArmoryImporter::readJSONValues(ImportType type, const QString& url, QJsonObj
 	LOG_INFO << "Final API Page:" << qPrintable(apiPage);
 
 	const auto bts = getURLData(apiPage);
-	LOG_INFO << bts;
+	LOG_INFO << bts.toStdString();
 	result = QJsonDocument::fromJson(bts).object();
 	return 0;
 }

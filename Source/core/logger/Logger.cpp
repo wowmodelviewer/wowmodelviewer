@@ -1,7 +1,6 @@
 #include "Logger.h"
 
 #include <windows.h>
-#include <QString>
 #ifdef min
   #undef min
 #endif
@@ -109,15 +108,6 @@ LogStream& LogStream::operator<<(const wchar_t* value)
 	if (m_active && value)
 	{
 		return *this << std::wstring(value);
-	}
-	return *this;
-}
-
-LogStream& LogStream::operator<<(const QString& value)
-{
-	if (m_active)
-	{
-		m_stream << value.toStdString();
 	}
 	return *this;
 }

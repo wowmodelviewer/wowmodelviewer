@@ -3,8 +3,6 @@
 #include <sstream>
 #include <string>
 
-class QString;
-
 #include "../metaclasses/Container.h"
 #include "LogOutput.h"
 
@@ -43,9 +41,6 @@ namespace WMVLog
 
 		// Overload for const wchar_t*
 		LogStream& operator<<(const wchar_t* value);
-
-		// Overload for QString (transitional — will be removed when Qt is fully gone)
-		LogStream& operator<<(const QString& value);
 
 	private:
 		Logger* m_logger;

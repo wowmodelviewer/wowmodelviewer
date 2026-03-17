@@ -99,7 +99,7 @@ ItemRecord* WowheadImporter::importItem(QString urlToGrab) const
 	QJsonParseError error;
 	const QJsonObject infos = QJsonDocument::fromJson(data.toUtf8(), &error).object();
 
-	LOG_INFO << error.errorString();
+	LOG_INFO << error.errorString().toStdString();
 
 	if (infos.count() != 0)
 	{
