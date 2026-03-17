@@ -12,7 +12,7 @@ set(src CharInfos.cpp
     CSVFile.cpp
     dbfile.cpp
     ExporterPlugin.cpp
-    FileDownloader.cpp
+    HttpClient.cpp
     Game.cpp
     GameDatabase.cpp
     GameFile.cpp
@@ -36,7 +36,7 @@ set(headers CharInfos.h
       CSVFile.h
       dbfile.h
       ExporterPlugin.h
-      FileDownloader.h
+      HttpClient.h
       Game.h
       IniFile.h
       GameDatabase.h
@@ -69,4 +69,4 @@ set(NAME core)
 add_library(${NAME} STATIC ${src} ${headers})
 set_property(TARGET ${NAME} PROPERTY FOLDER "libraries")
 
-target_link_libraries(${NAME} Qt6::Core Qt6::Network Qt6::Gui pugixml-static ${extralibs})
+target_link_libraries(${NAME} Qt6::Core Qt6::Gui pugixml-static winhttp ${extralibs})

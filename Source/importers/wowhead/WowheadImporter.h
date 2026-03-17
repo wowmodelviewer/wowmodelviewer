@@ -25,8 +25,7 @@
 
 #pragma once
 
-#include <QByteArray>
-#include <QString>
+#include <string>
 
 #include "ImporterPlugin.h"
 
@@ -45,6 +44,6 @@ public:
 	ItemRecord* importItem(const std::string& url) const;
 
 private:
-	QString extractSubString(QString& datas, QString beginPattern, QString endPattern = QString()) const;
-	QByteArray getURLData(QString inputUrl) const;
+	std::string extractSubString(const std::string& datas, const std::string& beginPattern, const std::string& endPattern = {}) const;
+	std::string getURLData(const std::string& inputUrl) const;
 };

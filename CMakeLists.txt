@@ -83,7 +83,7 @@ endif()
 message(STATUS "Finding Qt6...")
 set(QT_LOCATION "${CMAKE_SOURCE_DIR}/ThirdParty/Qt/6.8.3/6.8.3/msvc2022_64")
 list(PREPEND CMAKE_PREFIX_PATH "${QT_LOCATION}/lib/cmake")
-find_package(Qt6 6.8.3 COMPONENTS Core Network Widgets Gui REQUIRED)
+find_package(Qt6 6.8.3 COMPONENTS Core Widgets Gui REQUIRED)
 message(STATUS "  Qt6 found: ${Qt6_VERSION}")
 
 # WxWidgets

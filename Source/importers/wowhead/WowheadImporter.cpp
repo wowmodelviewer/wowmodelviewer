@@ -25,11 +25,10 @@
 
 #include "WowheadImporter.h"
 
-#include <QEventLoop>
-#include <QNetworkReply>
-#include <QNetworkRequest>
+#include <algorithm>
 #include <nlohmann/json.hpp>
 
+#include "HttpClient.h"
 #include "database.h" // ItemRecord
 #include "NPCInfos.h"
 #include "logger/Logger.h"
@@ -44,35 +43,36 @@ bool WowheadImporter::acceptURL(const std::string& url) const
 NPCInfos* WowheadImporter::importNPC(const std::string& urlToGrab) const
 {
 	// Get the HTML...
-	QString htmldata = QString(getURLData(QString::fromStdString(urlToGrab))).toUtf8();
-	if (htmldata.isNull() || htmldata.isEmpty())
+	std::string htmldata = getURLData(urlToGrab);
+	if (htmldata.empty())
 		return nullptr;
 
 	// let's go : finding name
 	// extract global infos
-	QString infos = extractSubString(htmldata, "(g_npcs[", ";");
+	std::string infos = extractSubString(htmldata, "(g_npcs[", ";");
 
 	// finding name
-	const QString NPCName = extractSubString(infos, "name\":\"", "\",");
+	const std::string NPCName = extractSubString(infos, "name\":\"", "\",");
 
 	// finding type
-	const int NPCType = extractSubString(infos, "type\":", "}").toInt();
+	const int NPCType = std::stoi(extractSubString(infos, "type\":", "}"));
 
 	// finding id
-	const int NPCId = extractSubString(infos, "id\":", ",").toInt();
+	const int NPCId = std::stoi(extractSubString(infos, "id\":", ","));
 
 	// display id
-	QString NPCDispIdstr = extractSubString(htmldata, "ModelViewer.show({");
+	std::string NPCDispIdstr = extractSubString(htmldata, "ModelViewer.show({");
 	NPCDispIdstr = extractSubString(NPCDispIdstr, "displayId&quot;:", "}");
 
-	if (NPCDispIdstr.indexOf(",") != -1) // comma at end of id
-		NPCDispIdstr = NPCDispIdstr.mid(0, NPCDispIdstr.indexOf(","));
+	auto commaPos = NPCDispIdstr.find(',');
+	if (commaPos != std::string::npos) // comma at end of id
+		NPCDispIdstr = NPCDispIdstr.substr(0, commaPos);
 
-	const int NPCDispId = NPCDispIdstr.toInt();
+	const int NPCDispId = std::stoi(NPCDispIdstr);
 
 	NPCInfos* result = new NPCInfos();
 
-	result->name = NPCName.toStdWString();
+	result->name = std::wstring(NPCName.begin(), NPCName.end());
 	result->type = NPCType;
 	result->id = NPCId;
 	result->displayId = NPCDispId;
@@ -85,17 +85,18 @@ ItemRecord* WowheadImporter::importItem(const std::string& urlToGrab) const
 	ItemRecord* result = nullptr;
 
 	// Get the HTML...
-	QString htmldata = QString(getURLData(QString::fromStdString(urlToGrab))).toUtf8();
-	if (htmldata.isNull() || htmldata.isEmpty())
+	std::string htmldata = getURLData(urlToGrab);
+	if (htmldata.empty())
 		return nullptr;
 
 	// let's go : finding name
 	// extract global infos
-	QString data = extractSubString(htmldata, "(g_items[", ";");
+	std::string data = extractSubString(htmldata, "(g_items[", ";");
 	data = extractSubString(data, "],");
-	data.chop(1);
+	if (!data.empty() && data.back() == ')')
+		data.pop_back();
 
-	const auto infos = nlohmann::json::parse(data.toStdString(), nullptr, false);
+	const auto infos = nlohmann::json::parse(data, nullptr, false);
 
 	if (infos.is_discarded())
 	{
@@ -117,43 +118,39 @@ ItemRecord* WowheadImporter::importItem(const std::string& urlToGrab) const
 	return result;
 }
 
-QString WowheadImporter::extractSubString(QString& datas, QString beginPattern, QString endPattern) const
+std::string WowheadImporter::extractSubString(const std::string& datas, const std::string& beginPattern, const std::string& endPattern) const
 {
-    QString result;
-    int beginIdx = datas.indexOf(beginPattern, 0, Qt::CaseInsensitive);
-    if (beginIdx == -1)
-        return result;
+	// Case-insensitive find helper
+	auto findCI = [](const std::string& haystack, const std::string& needle, size_t pos) -> size_t {
+		auto it = std::search(haystack.begin() + pos, haystack.end(),
+			needle.begin(), needle.end(),
+			[](char a, char b) { return std::tolower(static_cast<unsigned char>(a)) == std::tolower(static_cast<unsigned char>(b)); });
+		return (it == haystack.end()) ? std::string::npos : static_cast<size_t>(it - haystack.begin());
+	};
 
-    beginIdx += beginPattern.length();
-    result = datas.mid(beginIdx);
+	size_t beginIdx = findCI(datas, beginPattern, 0);
+	if (beginIdx == std::string::npos)
+		return {};
 
-    if (!endPattern.isEmpty()) {
-        int endIdx = result.indexOf(endPattern, 0, Qt::CaseInsensitive);
-        if (endIdx != -1)
-            result = result.mid(0, endIdx);
-    }
-    return result;
+	beginIdx += beginPattern.size();
+	std::string result = datas.substr(beginIdx);
+
+	if (!endPattern.empty())
+	{
+		size_t endIdx = findCI(result, endPattern, 0);
+		if (endIdx != std::string::npos)
+			result = result.substr(0, endIdx);
+	}
+	return result;
 }
 
-QByteArray WowheadImporter::getURLData(QString inputUrl) const
+std::string WowheadImporter::getURLData(const std::string& inputUrl) const
 {
-	const QUrl url = QString(inputUrl);
-
-	if (!url.errorString().isEmpty())
+	const auto resp = HttpClient::Get(inputUrl);
+	if (!resp.success)
 	{
-		return QByteArray();
+		LOG_ERROR << "HTTP request failed: " << resp.error;
+		return {};
 	}
-
-	QNetworkAccessManager manager;
-	QNetworkRequest request(url);
-	request.setRawHeader("User-Agent", "WoWModelViewer");
-	QNetworkReply* response = manager.get(request);
-	QEventLoop eventLoop;
-	QObject::connect(response, &QNetworkReply::finished, &eventLoop, &QEventLoop::quit);
-	QObject::connect(response, &QNetworkReply::errorOccurred, &eventLoop, &QEventLoop::quit);
-	eventLoop.exec();
-
-	QByteArray htmldata = response->readAll(); // Source should be stored here
-
-	return htmldata;
+	return resp.body;
 }

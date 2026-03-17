@@ -125,8 +125,8 @@ target_link_libraries(${NAME}
   wowhead
   ${CMAKE_SOURCE_DIR}/ThirdParty/lib/x64/libfbxsdk.lib
   Qt6::Gui
-  Qt6::Network
   Qt6::Widgets
+  winhttp
   ${wxWidgets_LIBRARIES}
   ${CMAKE_SOURCE_DIR}/ThirdParty/lib/x64/zlib.lib
   ${CMAKE_SOURCE_DIR}/ThirdParty/lib/x64/libpng.lib
@@ -142,16 +142,12 @@ set(QT_FILES ${QT_BIN_DIR}/Qt6Core.dll
              ${QT_BIN_DIR}/Qt6Cored.dll
              ${QT_BIN_DIR}/Qt6Gui.dll
              ${QT_BIN_DIR}/Qt6Guid.dll
-             ${QT_BIN_DIR}/Qt6Network.dll
-             ${QT_BIN_DIR}/Qt6Networkd.dll
              ${QT_BIN_DIR}/Qt6Widgets.dll
              ${QT_BIN_DIR}/Qt6Widgetsd.dll
              ${QT_BIN_DIR}/Qt6Xml.dll
              ${QT_BIN_DIR}/Qt6Xmld.dll)
 
 set(QT_PLUGIN_DIR ${QT_LOCATION}/plugins)
-set(QT_PLUGIN_TLS_FILES ${QT_PLUGIN_DIR}/tls/qschannelbackend.dll
-                        ${QT_PLUGIN_DIR}/tls/qschannelbackendd.dll)
 
 set(QT_PLUGIN_IMG_FILES ${QT_PLUGIN_DIR}/imageformats/qgif.dll
                         ${QT_PLUGIN_DIR}/imageformats/qgifd.dll
@@ -167,7 +163,6 @@ set(EXTRA_FILES ${CMAKE_SOURCE_DIR}/bin_support/vcredist_x64.exe)
 set(files ${QT_FILES} ${EXTRA_FILES})
 
 install(FILES ${files} DESTINATION ${BIN_DIR})
-install(FILES ${QT_PLUGIN_TLS_FILES} DESTINATION ${BIN_DIR}plugins/tls)
 install(FILES ${QT_PLUGIN_IMG_FILES} DESTINATION ${BIN_DIR}plugins/imageformats)
 foreach(dir ${wow_version_dirs})
   if(IS_DIRECTORY ${dir})

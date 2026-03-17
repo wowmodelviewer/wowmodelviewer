@@ -29,10 +29,8 @@
 #include "logger/Logger.h"
 #include "string_utils.h"
 #include "IniFile.h"
+#include "HttpClient.h"
 #include <QCoreApplication>
-#include <QNetworkAccessManager>
-#include <QNetworkReply>
-#include <QNetworkRequest>
 #include <filesystem>
 #include <format>
 #include <fstream>
@@ -1597,39 +1595,27 @@ bool ModelViewer::DownloadListfile()
 		wxT("Connecting..."), 100, this,
 		wxPD_APP_MODAL | wxPD_AUTO_HIDE | wxPD_SMOOTH);
 
-	const QUrl url("https://github.com/wowdev/wow-listfile/releases/latest/download/community-listfile.csv");
-	QNetworkAccessManager manager;
-	QNetworkRequest request(url);
-	request.setRawHeader("User-Agent", "WoWModelViewer");
-	request.setAttribute(QNetworkRequest::RedirectPolicyAttribute, QNetworkRequest::NoLessSafeRedirectPolicy);
-	QNetworkReply* response = manager.get(request);
-
-	QObject::connect(response, &QNetworkReply::downloadProgress,
-		[&progressDlg](qint64 received, qint64 total) {
+	const auto resp = HttpClient::Get(
+		"https://github.com/wowdev/wow-listfile/releases/latest/download/community-listfile.csv",
+		[&progressDlg](size_t received, size_t total) {
 			if (total > 0)
 			{
 				const int percent = static_cast<int>(received * 100 / total);
 				progressDlg.Update(percent,
-					wxString::Format("Downloaded %lld / %lld KB", received / 1024, total / 1024));
+					wxString::Format("Downloaded %zu / %zu KB", received / 1024, total / 1024));
 			}
 			else
 			{
 				progressDlg.Pulse(
-					wxString::Format("Downloaded %lld KB", received / 1024));
+					wxString::Format("Downloaded %zu KB", received / 1024));
 			}
 		});
 
-	QEventLoop eventLoop;
-	QObject::connect(response, &QNetworkReply::finished, &eventLoop, &QEventLoop::quit);
-	QObject::connect(response, &QNetworkReply::errorOccurred, &eventLoop, &QEventLoop::quit);
-	eventLoop.exec();
-
-	if (response->error() != QNetworkReply::NoError)
+	if (!resp.success)
 	{
-		LOG_ERROR << "Failed to download listfile:" << response->errorString().toStdString();
+		LOG_ERROR << "Failed to download listfile:" << resp.error;
 		wxMessageBox(wxString::Format("Failed to download listfile:\n%s",
-			response->errorString().toStdWString()), wxT("Download Error"), wxOK | wxICON_ERROR);
-		response->deleteLater();
+			wxString::FromUTF8(resp.error)), wxT("Download Error"), wxOK | wxICON_ERROR);
 		SetStatusText(wxT("Listfile update failed."));
 		return false;
 	}
@@ -1640,15 +1626,12 @@ bool ModelViewer::DownloadListfile()
 	{
 		LOG_ERROR << "Failed to write listfile to" << destPath.wstring();
 		wxMessageBox(wxT("Failed to write listfile.csv to disk."), wxT("File Error"), wxOK | wxICON_ERROR);
-		response->deleteLater();
 		SetStatusText(wxT("Listfile update failed."));
 		return false;
 	}
 
-	const QByteArray data = response->readAll();
-	file.write(data.constData(), data.size());
+	file.write(resp.body.data(), resp.body.size());
 	file.close();
-	response->deleteLater();
 
 	LOG_INFO << "Listfile updated successfully at" << destPath.wstring();
 	SetStatusText(wxT("Listfile updated successfully."));
@@ -1677,47 +1660,34 @@ bool ModelViewer::DownloadEncryptionKeys()
 		wxT("Connecting..."), 100, this,
 		wxPD_APP_MODAL | wxPD_AUTO_HIDE | wxPD_SMOOTH);
 
-	const QUrl url("https://raw.githubusercontent.com/wowdev/TACTKeys/master/WoW.txt");
-	QNetworkAccessManager manager;
-	QNetworkRequest request(url);
-	request.setRawHeader("User-Agent", "WoWModelViewer");
-	request.setAttribute(QNetworkRequest::RedirectPolicyAttribute, QNetworkRequest::NoLessSafeRedirectPolicy);
-	QNetworkReply* response = manager.get(request);
-
-	QObject::connect(response, &QNetworkReply::downloadProgress,
-		[&progressDlg](qint64 received, qint64 total) {
+	const auto resp = HttpClient::Get(
+		"https://raw.githubusercontent.com/wowdev/TACTKeys/master/WoW.txt",
+		[&progressDlg](size_t received, size_t total) {
 			if (total > 0)
 			{
 				const int percent = static_cast<int>(received * 100 / total);
 				progressDlg.Update(percent,
-					wxString::Format("Downloaded %lld / %lld bytes", received, total));
+					wxString::Format("Downloaded %zu / %zu bytes", received, total));
 			}
 			else
 			{
 				progressDlg.Pulse(
-					wxString::Format("Downloaded %lld bytes", received));
+					wxString::Format("Downloaded %zu bytes", received));
 			}
 		});
 
-	QEventLoop eventLoop;
-	QObject::connect(response, &QNetworkReply::finished, &eventLoop, &QEventLoop::quit);
-	QObject::connect(response, &QNetworkReply::errorOccurred, &eventLoop, &QEventLoop::quit);
-	eventLoop.exec();
-
-	if (response->error() != QNetworkReply::NoError)
+	if (!resp.success)
 	{
-		LOG_ERROR << "Failed to download encryption keys:" << response->errorString().toStdString();
+		LOG_ERROR << "Failed to download encryption keys:" << resp.error;
 		wxMessageBox(wxString::Format("Failed to download encryption keys:\n%s",
-			response->errorString().toStdWString()), wxT("Download Error"), wxOK | wxICON_ERROR);
-		response->deleteLater();
+			wxString::FromUTF8(resp.error)), wxT("Download Error"), wxOK | wxICON_ERROR);
 		SetStatusText(wxT("Encryption keys update failed."));
 		return false;
 	}
 
 	// The source file uses spaces as separators; the app expects semicolons.
-	QString content = QString::fromUtf8(response->readAll());
-	response->deleteLater();
-	content.replace(' ', ';');
+	std::string content = resp.body;
+	std::replace(content.begin(), content.end(), ' ', ';');
 
 	const auto destPath = getApplicationDirPath() / "extraEncryptionKeys.csv";
 	std::ofstream file(destPath);
@@ -1729,8 +1699,7 @@ bool ModelViewer::DownloadEncryptionKeys()
 		return false;
 	}
 
-	const QByteArray utf8Data = content.toUtf8();
-	file.write(utf8Data.constData(), utf8Data.size());
+	file.write(content.data(), content.size());
 	file.close();
 
 	LOG_INFO << "Encryption keys updated successfully at" << destPath.wstring();

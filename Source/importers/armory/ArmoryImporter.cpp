@@ -25,17 +25,16 @@
 
 #include "ArmoryImporter.h"
 
-#include <QEventLoop>
-#include <QNetworkReply>
-#include <QNetworkRequest>
-#include <QtWidgets/qmessagebox.h>
-
+#include "HttpClient.h"
 #include "logger/Logger.h"
 
 //#include "charcontrol.h"
 #include "CharInfos.h"
 #include "database.h" // ItemRecord
 #include "wow_enums.h"
+
+#include <sstream>
+#include <vector>
 
 ArmoryImporter::ArmoryImporter() = default;
 
@@ -88,7 +87,7 @@ CharInfos* ArmoryImporter::importChar(const std::string& url) const
 	auto* result = new CharInfos();
 	nlohmann::json root;
 
-	const auto readStatus = readJSONValues(CHARACTER, QString::fromStdString(url), root);
+	const auto readStatus = readJSONValues(CHARACTER, url, root);
 	// LOG_INFO << "JSON Read Status:" << readStatus << "Root Count:" << root.count();
 
 	if (readStatus == 0 && root.size() > 0)
@@ -157,7 +156,7 @@ ItemRecord* ArmoryImporter::importItem(const std::string& url) const
 	nlohmann::json root;
 	ItemRecord* result = nullptr;
 
-	if (readJSONValues(ITEM, QString::fromStdString(url), root) == 0 && root.size() != 0)
+	if (readJSONValues(ITEM, url, root) == 0 && root.size() != 0)
 	{
 		// No Gathering Errors Detected.
 		result = new ItemRecord();
@@ -175,9 +174,9 @@ ItemRecord* ArmoryImporter::importItem(const std::string& url) const
 	return result;
 }
 
-int ArmoryImporter::readJSONValues(ImportType type, const QString& url, nlohmann::json& result) const
+int ArmoryImporter::readJSONValues(ImportType type, const std::string& url, nlohmann::json& result) const
 {
-	QString apiPage;
+	std::string apiPage;
 	switch (type)
 	{
 	case CHARACTER:
@@ -185,375 +184,63 @@ int ArmoryImporter::readJSONValues(ImportType type, const QString& url, nlohmann
 			/*
 			blizzard's API is mostly RESTful, with data being returned as JSON arrays.
 			Full documentation available here: http://blizzard.github.com/api-wow-docs/
-			
+
 			Example: https://eu.api.blizzard.com/profile/wow/character/les-sentinelles/jeromnimo/appearance?namespace=profile-eu&locale=fr_FR
-			
+
 			This will give us all the information we need inside of a JSON array.
-			{
-			  "_links": {
-			    "self": {
-			      "href": "https://eu.api.blizzard.com/profile/wow/character/les-sentinelles/jeromnimo/appearance?namespace=profile-eu"
-			    }
-			  },
-			  "character": {
-			    "key": {
-			      "href": "https://eu.api.blizzard.com/profile/wow/character/les-sentinelles/jeromnimo?namespace=profile-eu"
-			    },
-			    "name": "Jeromnimo",
-			    "id": 82483610,
-			    "realm": {
-			      "key": {
-			        "href": "https://eu.api.blizzard.com/data/wow/realm/647?namespace=dynamic-eu"
-			      },
-			      "name": "Les Sentinelles",
-			      "id": 647,
-			      "slug": "les-sentinelles"
-			    }
-			  },
-			  "playable_race": {
-			    "key": {
-			      "href": "https://eu.api.blizzard.com/data/wow/playable-race/5?namespace=static-9.0.1_36072-eu"
-			    },
-			    "name": "Mort-vivant",
-			    "id": 5
-			  },
-			  "playable_class": {
-			    "key": {
-			      "href": "https://eu.api.blizzard.com/data/wow/playable-class/9?namespace=static-9.0.1_36072-eu"
-			    },
-			    "name": "Démoniste",
-			    "id": 9
-			  },
-			  "active_spec": {
-			    "key": {
-			      "href": "https://eu.api.blizzard.com/data/wow/playable-specialization/265?namespace=static-9.0.1_36072-eu"
-			    },
-			    "name": "Affliction",
-			    "id": 265
-			  },
-			  "gender": {
-			    "type": "MALE",
-			    "name": "Homme"
-			  },
-			  "faction": {
-			    "type": "HORDE",
-			    "name": "Horde"
-			  },
-			  "guild_crest": {
-			    "emblem": {
-			      "id": 126,
-			      "media": {
-			        "key": {
-			          "href": "https://eu.api.blizzard.com/data/wow/media/guild-crest/emblem/126?namespace=static-9.0.1_36072-eu"
-			        },
-			        "id": 126
-			      },
-			      "color": {
-			        "id": 14,
-			        "rgba": {
-			          "r": 177,
-			          "g": 184,
-			          "b": 177,
-			          "a": 1
-			        }
-			      }
-			    },
-			    "border": {
-			      "id": 0,
-			      "media": {
-			        "key": {
-			          "href": "https://eu.api.blizzard.com/data/wow/media/guild-crest/border/0?namespace=static-9.0.1_36072-eu"
-			        },
-			        "id": 0
-			      },
-			      "color": {
-			        "id": 0,
-			        "rgba": {
-			          "r": 103,
-			          "g": 0,
-			          "b": 33,
-			          "a": 1
-			        }
-			      }
-			    },
-			    "background": {
-			      "color": {
-			        "id": 44,
-			        "rgba": {
-			          "r": 79,
-			          "g": 35,
-			          "b": 0,
-			          "a": 1
-			        }
-			      }
-			    }
-			  },
-			  "items": [
-			    {
-			      "id": 132394,
-			      "slot": {
-			        "type": "HEAD",
-			        "name": "Tête"
-			      },
-			      "enchant": 0,
-			      "item_appearance_modifier_id": 0,
-			      "internal_slot_id": 0,
-			      "subclass": 1
-			    },
-			    {
-			      "id": 134309,
-			      "slot": {
-			        "type": "SHOULDER",
-			        "name": "Épaules"
-			      },
-			      "enchant": 0,
-			      "item_appearance_modifier_id": 0,
-			      "internal_slot_id": 2,
-			      "subclass": 1
-			    },
-			    {
-			      "id": 4333,
-			      "slot": {
-			        "type": "SHIRT",
-			        "name": "Chemise"
-			      },
-			      "enchant": 0,
-			      "item_appearance_modifier_id": 0,
-			      "internal_slot_id": 3,
-			      "subclass": 0
-			    },
-			    {
-			      "id": 134307,
-			      "slot": {
-			        "type": "CHEST",
-			        "name": "Torse"
-			      },
-			      "enchant": 0,
-			      "item_appearance_modifier_id": 0,
-			      "internal_slot_id": 4,
-			      "subclass": 1
-			    },
-			    {
-			      "id": 134303,
-			      "slot": {
-			        "type": "WAIST",
-			        "name": "Taille"
-			      },
-			      "enchant": 0,
-			      "item_appearance_modifier_id": 0,
-			      "internal_slot_id": 5,
-			      "subclass": 1
-			    },
-			    {
-			      "id": 134306,
-			      "slot": {
-			        "type": "LEGS",
-			        "name": "Jambes"
-			      },
-			      "enchant": 0,
-			      "item_appearance_modifier_id": 0,
-			      "internal_slot_id": 6,
-			      "subclass": 1
-			    },
-			    {
-			      "id": 134417,
-			      "slot": {
-			        "type": "FEET",
-			        "name": "Pieds"
-			      },
-			      "enchant": 0,
-			      "item_appearance_modifier_id": 3,
-			      "internal_slot_id": 7,
-			      "subclass": 1
-			    },
-			    {
-			      "id": 134178,
-			      "slot": {
-			        "type": "WRIST",
-			        "name": "Poignets"
-			      },
-			      "enchant": 0,
-			      "item_appearance_modifier_id": 0,
-			      "internal_slot_id": 8,
-			      "subclass": 1
-			    },
-			    {
-			      "id": 133609,
-			      "slot": {
-			        "type": "HANDS",
-			        "name": "Mains"
-			      },
-			      "enchant": 0,
-			      "item_appearance_modifier_id": 3,
-			      "internal_slot_id": 9,
-			      "subclass": 1
-			    },
-			    {
-			      "id": 134402,
-			      "slot": {
-			        "type": "BACK",
-			        "name": "Dos"
-			      },
-			      "enchant": 0,
-			      "item_appearance_modifier_id": 3,
-			      "internal_slot_id": 14,
-			      "subclass": 1
-			    },
-			    {
-			      "id": 128942,
-			      "slot": {
-			        "type": "MAIN_HAND",
-			        "name": "Main droite"
-			      },
-			      "enchant": 0,
-			      "item_appearance_modifier_id": 24,
-			      "internal_slot_id": 15,
-			      "subclass": 10
-			    },
-			    {
-			      "id": 140578,
-			      "slot": {
-			        "type": "TABARD",
-			        "name": "Tabard"
-			      },
-			      "enchant": 0,
-			      "item_appearance_modifier_id": 0,
-			      "internal_slot_id": 18,
-			      "subclass": 0
-			    }
-			  ],
-			  "customizations": [
-			    {
-			      "option": {
-			        "name": "Peau",
-			        "id": 58
-			      },
-			      "choice": {
-			        "id": 916,
-			        "display_order": 3
-			      }
-			    },
-			    {
-			      "option": {
-			        "name": "Visage",
-			        "id": 59
-			      },
-			      "choice": {
-			        "id": 924,
-			        "display_order": 4
-			      }
-			    },
-			    {
-			      "option": {
-			        "name": "Coiffure",
-			        "id": 60
-			      },
-			      "choice": {
-			        "name": "Iroquoise",
-			        "id": 941,
-			        "display_order": 1
-			      }
-			    },
-			    {
-			      "option": {
-			        "name": "Couleur des cheveux",
-			        "id": 61
-			      },
-			      "choice": {
-			        "id": 961,
-			        "display_order": 5
-			      }
-			    },
-			    {
-			      "option": {
-			        "name": "Détails de la mâchoire",
-			        "id": 62
-			      },
-			      "choice": {
-			        "name": "Joues nécrosées",
-			        "id": 979,
-			        "display_order": 9
-			      }
-			    },
-			    {
-			      "option": {
-			        "name": "Couleur des yeux",
-			        "id": 534
-			      },
-			      "choice": {
-			        "id": 5330,
-			        "display_order": 0
-			      }
-			    },
-			    {
-			      "option": {
-			        "name": "Détails du visage",
-			        "id": 563
-			      },
-			      "choice": {
-			        "name": "Aucun",
-			        "id": 6287,
-			        "display_order": 0
-			      }
-			    },
-			    {
-			      "option": {
-			        "name": "Type de peau",
-			        "id": 567
-			      },
-			      "choice": {
-			        "name": "Os apparents",
-			        "id": 6527,
-			        "display_order": 0
-			      }
-			    }
-			  ]
-			}
-			
+			(see JSON sample in previous version)
+
 			As you can see, this will give us almost all the data we need to properly rebuild the character.
-			
+
 			*/
 
 			const auto& strUrl(url);
 
-			QString region;
-			QString realm;
-			QString charName;
+			std::string region;
+			std::string realm;
+			std::string charName;
+
+			// Helper to split a string by a delimiter
+			auto splitString = [](const std::string& s, char delim) {
+				std::vector<std::string> tokens;
+				std::istringstream stream(s);
+				std::string token;
+				while (std::getline(stream, token, delim))
+					tokens.push_back(token);
+				return tokens;
+			};
 
 			// Seems to redirect to worldofwarcraft.com as of Sept 2018.
-			if (strUrl.indexOf("battle.net") != -1)
+			if (strUrl.find("battle.net") != std::string::npos)
 			{
 				// Import from http://us.battle.net/wow/en/character/steamwheedle-cartel/Kjasi/simple
 
-				if ((strUrl.indexOf("simple") == -1) &&
-					(strUrl.indexOf("advanced") == -1))
+				if ((strUrl.find("simple") == std::string::npos) &&
+					(strUrl.find("advanced") == std::string::npos))
 				{
-					// due to Qt plugin, this cause application crash
-					// temporary solution : cascade return value to main app to display the pop up (see modelviewer.cpp)
-					//wxMessageBox(tr("Improperly Formatted URL.\nMake sure your link ends in /simple or /advanced."),tr("Bad Armory Link"));
-
-					// Using a QMessageBox can easily fix this:
-					// QMessageBox msg(QMessageBox::Icon::Critical, tr("Bad Armory Link"), tr("Improperly Formatted URL.\n\nMake sure your link ends in /simple or /advanced."), QMessageBox::StandardButton::Ok);
-					// msg.exec();
 					LOG_ERROR << "Improperly Formatted URL. Lacks /simple and /advanced";
 					return 2;
 				}
 
-				const auto strList = strUrl.mid(7).split("/");
+				const auto strList = splitString(strUrl.substr(7), '/');
 
-				region = strList.at(0).mid(0, strList.at(0).indexOf("."));
+				auto dotPos = strList.at(0).find('.');
+				region = (dotPos != std::string::npos) ? strList.at(0).substr(0, dotPos) : strList.at(0);
 				realm = strList.at(strList.size() - 3);
-				charName = strList.at(strList.size() - 2).mid(0, strUrl.lastIndexOf("?") - 1);
-				LOG_INFO << "Battle Net, CharName: " << charName.toStdString() << " Realm: " << realm.toStdString() << " Region: " << region.toStdString();
+				auto qPos = strUrl.rfind('?');
+				charName = strList.at(strList.size() - 2);
+				if (qPos != std::string::npos)
+					charName = charName.substr(0, qPos - 1);
+				LOG_INFO << "Battle Net, CharName: " << charName << " Realm: " << realm << " Region: " << region;
 			}
-			else if ((strUrl.indexOf("worldofwarcraft.com") != -1) || (url.indexOf("blizzard.com") != -1))
+			else if ((strUrl.find("worldofwarcraft.com") != std::string::npos) || (url.find("blizzard.com") != std::string::npos))
 			{
 				// Import from https://worldofwarcraft.com/fr-fr/character/les-sentinelles/jeromnimo
 				// or (new form) https://worldofwarcraft.com/fr-fr/character/eu/les-sentinelles/jeromnimo
 				// or (new in 2023) https://worldofwarcraft.blizzard.com/en-gb/character/eu/silvermoon/n%C3%A1tnat
 
-				LOG_INFO << qPrintable(strUrl);
-				const auto strList = strUrl.mid(8).split("/");
+				LOG_INFO << strUrl;
+				const auto strList = splitString(strUrl.substr(8), '/');
 
 				if (strList.size() > 5) // new form
 					region = strList.at(3);
@@ -561,11 +248,13 @@ int ArmoryImporter::readJSONValues(ImportType type, const QString& url, nlohmann
 					region = strList.at(1);
 
 				realm = strList.at(strList.size() - 2);
-				charName = strList.at(strList.size() - 1).mid(0, strUrl.lastIndexOf("?") - 1);
-				LOG_INFO << "WoW.com, CharName:" << charName.toStdString() << "Realm:" << realm.toStdString() << "Region:" << region.toStdString();
+				charName = strList.at(strList.size() - 1);
+				auto qPos = charName.rfind('?');
+				if (qPos != std::string::npos)
+					charName = charName.substr(0, qPos);
+				LOG_INFO << "WoW.com, CharName:" << charName << "Realm:" << realm << "Region:" << region;
 
 				// I don't believe these should be translated, as websites tend not to translate URLs...
-				// If so, change to region == tr("fr-fr")
 				if ((region == "fr-fr") || (region == "en-gb"))
 					region = "eu";
 				else if (region == "en-us")
@@ -577,18 +266,15 @@ int ArmoryImporter::readJSONValues(ImportType type, const QString& url, nlohmann
 			}
 			else
 			{
-				// QMessageBox msg(QMessageBox::Icon::Critical, tr("Bad Armory Link"), tr("Improperly Formatted URL.\n\nThe domain should be worldofwarcraft.com"), QMessageBox::StandardButton::Ok);
-				// msg.exec();
 				LOG_ERROR << "Improperly Formatted URL. The domain should be worldofwarcraft.com or blizzard.com";
 				return 2;
 			}
 
-			LOG_INFO << "Loading Battle.Net Armory. Region:" << region.toStdString()
-				<< ", Realm:" << realm.toStdString()
-				<< ", Character:" << charName.toStdString();
+			LOG_INFO << "Loading Battle.Net Armory. Region:" << region
+				<< ", Realm:" << realm
+				<< ", Character:" << charName;
 
-			apiPage = QString("https://wowmodelviewer.net/armory2.php?region=%1&realm=%2&char=%3").arg(region).
-				arg(realm).arg(charName);
+			apiPage = "https://wowmodelviewer.net/armory2.php?region=" + region + "&realm=" + realm + "&char=" + charName;
 			break;
 		}
 	case ITEM:
@@ -602,11 +288,12 @@ int ArmoryImporter::readJSONValues(ImportType type, const QString& url, nlohmann
 			// for the sake of simplicity, only handle english name for now
 
 			const auto& strUrl(url);
-			const auto itemNumber = strUrl.mid(strUrl.lastIndexOf("/"));
+			auto lastSlash = strUrl.rfind('/');
+			const auto itemNumber = (lastSlash != std::string::npos) ? strUrl.substr(lastSlash) : strUrl;
 
-			LOG_INFO << "Loading Battle.Net Armory. Item: " << qPrintable(itemNumber);
+			LOG_INFO << "Loading Battle.Net Armory. Item: " << itemNumber;
 
-			apiPage = QString("https://wowmodelviewer.net/armory.php?item=%1").arg(itemNumber);
+			apiPage = "https://wowmodelviewer.net/armory.php?item=" + itemNumber;
 
 			break;
 		}
@@ -615,45 +302,25 @@ int ArmoryImporter::readJSONValues(ImportType type, const QString& url, nlohmann
 		return 3;
 	}
 
-	LOG_INFO << "Final API Page:" << qPrintable(apiPage);
+	LOG_INFO << "Final API Page:" << apiPage;
 
 	const auto bts = getURLData(apiPage);
-	LOG_INFO << bts.toStdString();
-	result = nlohmann::json::parse(bts.toStdString(), nullptr, false);
+	LOG_INFO << bts;
+	result = nlohmann::json::parse(bts, nullptr, false);
 	if (result.is_discarded())
 		return 1;
 	return 0;
 }
 
-QByteArray ArmoryImporter::getURLData(const QString& inputUrl) const
+std::string ArmoryImporter::getURLData(const std::string& inputUrl) const
 {
-	const QUrl url = QString(inputUrl);
-	// LOG_INFO << "Getting info from:" << qPrintable(url.toString());
-
-	if (!url.errorString().isEmpty())
+	const auto resp = HttpClient::Get(inputUrl);
+	if (!resp.success)
 	{
-		return QByteArray();
+		LOG_ERROR << "HTTP request failed: " << resp.error;
+		return {};
 	}
-
-	QNetworkAccessManager manager;
-	QNetworkRequest request(url);
-	request.setRawHeader("User-Agent", "WoWModelViewer");
-
-	// disable ssl handshake (error when communicating with server as certifcate is self signed)
-	auto sslConfiguration = request.sslConfiguration();
-	sslConfiguration.setPeerVerifyMode(QSslSocket::QueryPeer);
-	request.setSslConfiguration(sslConfiguration);
-	auto* response = manager.get(request);
-	QEventLoop eventLoop;
-	QObject::connect(response, &QNetworkReply::finished, &eventLoop, &QEventLoop::quit);
-	QObject::connect(response, &QNetworkReply::errorOccurred, &eventLoop, &QEventLoop::quit);
-	eventLoop.exec();
-
-	auto htmldata = response->readAll(); // Source should be stored here
-
-	//LOG_INFO << "Returning Response:" << qPrintable(htmldata);
-
-	return htmldata;
+	return resp.body;
 }
 
 bool ArmoryImporter::hasMember(const nlohmann::json& check, const std::string& lookfor)

@@ -16,42 +16,28 @@
 | If not, see <http://www.gnu.org/licenses/>.                            |
 \*----------------------------------------------------------------------*/
 
-/*
- * ArmoryImporter.h
- *
- *  Created on: 9 dec. 2013
- *   Copyright: 2013 , WoW Model Viewer (http://wowmodelviewer.net)
- */
-
 #pragma once
 
-#include <nlohmann/json.hpp>
+#include <functional>
 #include <string>
+#include <vector>
 
-#include "ImporterPlugin.h"
-
-class ArmoryImporter final : public ImporterPlugin //-V1106
+// Synchronous HTTP client using the Windows WinHTTP API.
+// Supports HTTPS via the OS certificate store (no OpenSSL required).
+namespace HttpClient
 {
-
-public:
-	ArmoryImporter();
-	~ArmoryImporter() = default;
-
-	bool acceptURL(const std::string& url) const override;
-
-	NPCInfos* importNPC(const std::string& url) const override { return nullptr; };
-	CharInfos* importChar(const std::string& url) const override;
-	ItemRecord* importItem(const std::string& url) const override;
-
-private:
-	enum ImportType
+	// Simple response structure
+	struct Response
 	{
-		CHARACTER,
-		ITEM
+		int statusCode = 0;
+		std::string body;
+		std::string error;
+		bool success = false;
 	};
 
-	int readJSONValues(ImportType type, const std::string& url, nlohmann::json& result) const;
-	std::string getURLData(const std::string& inputUrl) const;
-	static bool hasMember(const nlohmann::json& check, const std::string& lookfor);
-	static bool hasTransmog(const nlohmann::json& check);
-};
+	// Optional progress callback: (bytesReceived, totalBytes).  totalBytes may be 0 if unknown.
+	using ProgressCallback = std::function<void(size_t bytesReceived, size_t totalBytes)>;
+
+	// Perform a synchronous HTTP(S) GET.
+	Response Get(const std::string& url, const ProgressCallback& progress = nullptr);
+}
