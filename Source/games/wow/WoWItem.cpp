@@ -166,7 +166,7 @@ void WoWItem::unload()
 
 	// release textures and clear map
 	for (const auto& itemTexture : itemTextures_)
-		TEXTUREMANAGER.delbyname(QString::fromStdString(itemTexture.second->fullname()));
+		TEXTUREMANAGER.delbyname(itemTexture.second->fullname());
 
 	itemTextures_.clear();
 

@@ -253,7 +253,7 @@ void AnimControl::UpdateModel(WoWModel* m)
 	// Find any textures that exist for the model
 	bool res = false;
 
-	wxString fn = m->itemName().toStdWString();
+	wxString fn = wxString::FromUTF8(m->itemName());
 	fn = fn.Lower();
 
 	if (fn.substr(0, 4) != wxT("char"))
@@ -394,7 +394,7 @@ void AnimControl::SetSkinByDisplayID(int cdi)
 
 QString AnimControl::GetModelFolder(WoWModel* m)
 {
-	return QString(m->itemName().toStdString().c_str()).section('/', 0, -2) + '/';
+	return QString::fromStdString(m->itemName()).section('/', 0, -2) + '/';
 }
 
 glm::vec4 AnimControl::fromARGB(int color)
@@ -743,7 +743,8 @@ bool AnimControl::UpdateItemModel(WoWModel* m)
 	// get all blp files that correspond to the model
 	std::set<GameFile*> files;
 
-	QString filterString = m->itemName().mid(m->itemName().lastIndexOf("\\") + 1);
+	const QString itemNameQ = QString::fromStdString(m->itemName());
+	QString filterString = itemNameQ.mid(itemNameQ.lastIndexOf("\\") + 1);
 	filterString = "(?i)^.*" + filterString.left(filterString.lastIndexOf(".")) + ".*\\.blp";
 	GAMEDIRECTORY.getFilteredFiles(files, filterString);
 

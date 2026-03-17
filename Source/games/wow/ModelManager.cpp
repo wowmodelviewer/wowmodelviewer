@@ -5,7 +5,7 @@
 int ModelManager::add(GameFile* file)
 {
 	int id;
-	QString qname = QString::fromStdString(file->name());
+	const auto& qname = file->name();
 	if (names.find(qname) != names.end())
 	{
 		id = names[qname];

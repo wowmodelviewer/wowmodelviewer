@@ -427,7 +427,7 @@ void WoWModel::initCommon()
 		return;
 	}
 
-	setItemName(QString::fromStdString(gamefile->fullname()));
+	setItemName(gamefile->fullname());
 
 	initRaceInfos();
 	cd.reset(this);
@@ -4161,7 +4161,7 @@ void WoWModel::refreshMerging()
 		for (const auto it : modelsIt->textures)
 		{
 			if (it != ModelRenderPass::INVALID_TEX)
-				textures.push_back(TEXTUREMANAGER.add(GAMEDIRECTORY.getFile(TEXTUREMANAGER.get(it))));
+				textures.push_back(TEXTUREMANAGER.add(GAMEDIRECTORY.getFile(QString::fromStdString(TEXTUREMANAGER.get(it)))));
 			else
 				textures.push_back(ModelRenderPass::INVALID_TEX);
 		}
@@ -4359,7 +4359,7 @@ QString WoWModel::getNameForTex(uint16 Tex)
 	if (specialTextures[Tex] == TEXTURE_SKIN)
 		return "Body.blp";
 	else
-		return TEXTUREMANAGER.get(getGLTexture(Tex));
+		return QString::fromStdString(TEXTUREMANAGER.get(getGLTexture(Tex)));
 }
 
 GLuint WoWModel::getGLTexture(uint16 Tex) const
@@ -4609,7 +4609,7 @@ std::ostream& operator<<(std::ostream& out, const WoWModel& m)
 		out << "      <vertexEnd>" << geoset->vstart + geoset->vcount << "</vertexEnd>" << endl;
 		out << "      <tex>" << p->tex << "</tex>" << endl;
 		if (p->tex != ModelRenderPass::INVALID_TEX)
-			out << "      <texName>" << TEXTUREMANAGER.get(p->tex).toStdString() << "</texName>" << endl;
+			out << "      <texName>" << TEXTUREMANAGER.get(p->tex) << "</texName>" << endl;
 		out << "      <useTex2>" << p->useTex2 << "</useTex2>" << endl;
 		out << "      <useEnvMap>" << p->useEnvMap << "</useEnvMap>" << endl;
 		out << "      <cull>" << p->cull << "</cull>" << endl;
@@ -4809,7 +4809,7 @@ std::ostream& operator<<(std::ostream& out, const WoWModel& m)
 	{
 		const GLuint tex = m.getGLTexture(it->tex);
 		if (tex != ModelRenderPass::INVALID_TEX)
-			out << "    <TextureList id=\"" << tex << "\">" << TEXTUREMANAGER.get(tex).toStdString() << "</TextureList>"
+			out << "    <TextureList id=\"" << tex << "\">" << TEXTUREMANAGER.get(tex) << "</TextureList>"
 				<< endl;
 	}
 	out << "  </TextureLists>" << endl;

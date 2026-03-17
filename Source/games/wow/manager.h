@@ -1,8 +1,8 @@
 #pragma once
 
 #include <map>
+#include <string>
 #include <glad/gl.h>
-#include <QString>
 // ReSharper disable once CppUnusedIncludeDirective
 #include "GameFile.h"
 #include "logger/Logger.h"
@@ -12,10 +12,10 @@
 class _MANAGEDITEM_API_ ManagedItem
 {
 	int m_refcount;
-	QString m_itemName;
+	std::string m_itemName;
 
 public:
-	ManagedItem(QString n): m_refcount(0), m_itemName(std::move(n))
+	ManagedItem(std::string n): m_refcount(0), m_itemName(std::move(n))
 	{
 	}
 
@@ -33,8 +33,8 @@ public:
 		return --m_refcount == 0;
 	}
 
-	void setItemName(QString name) { m_itemName = name; }
-	QString itemName() { return m_itemName; }
+	void setItemName(std::string name) { m_itemName = std::move(name); }
+	const std::string& itemName() const { return m_itemName; }
 	int refCount() { return m_refcount; }
 };
 
@@ -42,7 +42,7 @@ template <class IDTYPE>
 class Manager
 {
 public:
-	std::map<QString, IDTYPE> names;
+	std::map<std::string, IDTYPE> names;
 	std::map<IDTYPE, ManagedItem*> items;
 
 	Manager() = default;
@@ -83,7 +83,7 @@ public:
 		}
 	}
 
-	void delbyname(QString name)
+	void delbyname(const std::string& name)
 	{
 		if (has(name))
 			del(get(name));
@@ -93,12 +93,12 @@ public:
 	{
 	}
 
-	bool has(QString name)
+	bool has(const std::string& name)
 	{
 		return (names.find(name) != names.end());
 	}
 
-	IDTYPE get(QString name)
+	IDTYPE get(const std::string& name)
 	{
 		auto it = names.find(name);
 		if (it != names.end())
@@ -107,9 +107,9 @@ public:
 		return 0;
 	}
 
-	QString get(IDTYPE id)
+	std::string get(IDTYPE id)
 	{
-		QString result = "";
+		std::string result;
 		for (auto const& it : names)
 		{
 			if (it.second == id)
@@ -142,7 +142,7 @@ public:
 	}
 
 protected:
-	void do_add(QString name, IDTYPE id, ManagedItem* item)
+	void do_add(const std::string& name, IDTYPE id, ManagedItem* item)
 	{
 		names[name] = id;
 		item->addref();
