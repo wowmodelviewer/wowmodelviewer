@@ -7,12 +7,12 @@
 
 #pragma once
 
-#include <QString>
+#include <string>
 
 class FileTreeItem
 {
 public:
-	QString displayName;
+	std::string displayName;
 
 	int color;
 
