@@ -101,5 +101,5 @@ set(NAME wow)
 add_library(${NAME} STATIC ${src} ${headers})
 set_property(TARGET ${NAME} PROPERTY FOLDER "libraries")
 
-target_link_libraries(${NAME} Qt6::Core Qt6::Gui pugixml-static ${extralibs} glu32)
+target_link_libraries(${NAME} pugixml-static ${extralibs} glu32)
 add_dependencies(${NAME} casc_static)

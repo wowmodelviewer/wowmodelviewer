@@ -18,4 +18,4 @@ set(NAME objexporter)
 add_library(${NAME} STATIC ${src} ${headers})
 set_property(TARGET ${NAME} PROPERTY FOLDER "exporters")
 
-target_link_libraries(${NAME} Qt6::Core ${extralibs})
+target_link_libraries(${NAME} ${extralibs})

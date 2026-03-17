@@ -69,4 +69,4 @@ set(NAME core)
 add_library(${NAME} STATIC ${src} ${headers})
 set_property(TARGET ${NAME} PROPERTY FOLDER "libraries")
 
-target_link_libraries(${NAME} Qt6::Core Qt6::Gui pugixml-static winhttp ${extralibs})
+target_link_libraries(${NAME} pugixml-static winhttp ${extralibs})

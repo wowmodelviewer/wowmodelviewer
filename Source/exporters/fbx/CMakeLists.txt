@@ -31,7 +31,7 @@ if(MSVC)
   target_compile_options(${NAME} PRIVATE /FIcmath)
 endif()
 
-target_link_libraries(${NAME} Qt6::Core ${extralibs}
+target_link_libraries(${NAME} ${extralibs}
   ${FBXSDK_LIB_DIR}/libfbxsdk.lib)
 
 if(WIN32)

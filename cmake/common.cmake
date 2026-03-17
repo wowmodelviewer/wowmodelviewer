@@ -28,7 +28,6 @@ macro(use_wow)
   use_core() # if you use wow lib, you are underneath using core lib
   use_casclib() # if you use wow lib, you are underneath using casc lib 
   include_directories(${CMAKE_SOURCE_DIR}/Source/games/wow)
-  link_directories(${QT_LOCATION}/lib)
   list(APPEND extralibs wow)
 endmacro()
 
@@ -36,7 +35,6 @@ macro(use_core)
   include_directories(${CMAKE_SOURCE_DIR}/Source/core)
   include_directories(${CMAKE_SOURCE_DIR}/ThirdParty/pugixml/src)
   include_directories(${CMAKE_SOURCE_DIR}/ThirdParty/stb)
-  link_directories(${QT_LOCATION}/lib)
   list(APPEND extralibs core)
 endmacro()
   

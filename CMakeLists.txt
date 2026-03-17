@@ -108,14 +108,11 @@ include_directories(${wxWidgets_INCLUDE_DIRS} "${CMAKE_SOURCE_DIR}/ThirdParty/in
 
 # Find includes in corresponding build directories
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
-# Instruct CMake to run moc automatically when needed.
-set(CMAKE_AUTOMOC ON)
 
 include(${CMAKE_SOURCE_DIR}/cmake/common.cmake)
 
 # group cmake auto targets  in a dedicated folder for Visual Studio
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
-set_property(GLOBAL PROPERTY AUTOGEN_TARGETS_FOLDER QTAutoMoc)
 
 if(DEFINED BUILDNUMBER)
   add_definitions(-D_BUILDNUMBER=${BUILDNUMBER})
