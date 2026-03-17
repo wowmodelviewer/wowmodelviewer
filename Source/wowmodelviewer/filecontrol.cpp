@@ -1,5 +1,6 @@
 #include "logger/Logger.h"
 #include "string_utils.h"
+#include <format>
 #include <wx/filename.h>
 #include <wx/msgdlg.h>
 #include "SoftwareImage.h"
@@ -43,10 +44,9 @@ All suffixs in MPQ:
 .rsrc .sbt .SIG .skin .test .tiff .toc .trs .TTF .txt .url .uvw .wav .wdl .wdt
 .wfx .what .wmo .wtf .xib .xml .xsd .zmp 
 */
-static QString content;
-static QString filterString;
+static std::string content;
 
-static QString filterStrings[] =
+static const char* filterStrings[] =
 {
 	"m2", "wmo", "adt", "wav", "ogg", "mp3",
 	"blp", "bls", "dbc", "db2", "lua", "xml", "skin"
@@ -60,19 +60,16 @@ static wxString chos[] =
 	wxT("XMLs (*.xml)"), wxT("SKINs (*.skin)")
 };
 
-void beautifyFileName(QString& file)
+void beautifyFileName(std::string& file)
 {
-	file = file.toLower().replace('/', '\\');
-	QString firstLetter{file[0]};
-	firstLetter = firstLetter.toUpper();
-	file[0] = firstLetter[0];
-	const int ret = file.indexOf('\\');
-	if (ret > -1)
-	{
-		firstLetter = file[ret + 1];
-		firstLetter = firstLetter.toUpper();
-		file[ret + 1] = firstLetter[0];
-	}
+	std::transform(file.begin(), file.end(), file.begin(),
+		[](unsigned char c) { return static_cast<char>(std::tolower(c)); });
+	std::replace(file.begin(), file.end(), '/', '\\');
+	if (!file.empty())
+		file[0] = static_cast<char>(std::toupper(static_cast<unsigned char>(file[0])));
+	const auto pos = file.find('\\');
+	if (pos != std::string::npos && pos + 1 < file.size())
+		file[pos + 1] = static_cast<char>(std::toupper(static_cast<unsigned char>(file[pos + 1])));
 }
 
 FileControl::FileControl(wxWindow* parent, wxWindowID id)
@@ -119,22 +116,6 @@ FileControl::~FileControl()
 	choFilter->Destroy();
 }
 
-bool filterSearch(QString s)
-{
-	if (s.length() < 4)
-		return false;
-
-	// filter suffix
-	if (!filterString.isEmpty() && !s.toLower().endsWith(filterString))
-		return false;
-
-	// filter text input
-	if (!content.isEmpty() && s.toLower().indexOf(content) == -1)
-		return false;
-
-	return true;
-}
-
 void FileControl::Init(ModelViewer* mv, std::function<void(int, int)> progressCallback)
 {
 	if (modelviewer == nullptr)
@@ -144,10 +125,15 @@ void FileControl::Init(ModelViewer* mv, std::function<void(int, int)> progressCa
 
 	// Gets the list of files that meet the filter criteria
 	// and puts them into an array to be processed into our file tree
-	content = QString(QString::fromWCharArray(txtContent->GetValue().c_str()).toLower().trimmed());
-	filterString = "^.*" + content + ".*\\." + filterStrings[filterMode];
+	content = core::toLower(std::string(txtContent->GetValue().ToUTF8()));
+	// trim content
+	auto start = content.find_first_not_of(" \t\r\n");
+	auto end = content.find_last_not_of(" \t\r\n");
+	content = (start == std::string::npos) ? "" : content.substr(start, end - start + 1);
+
+	std::string filterString = std::format("^.*{}.*\\.{}", content, filterStrings[filterMode]);
 	std::set<GameFile*> files;
-	GAMEDIRECTORY.getFilteredFiles(files, filterString.toStdString());
+	GAMEDIRECTORY.getFilteredFiles(files, filterString);
 
 	LOG_INFO << "Initializing File Controls - Filtering done - files found" << files.size();
 	TreeStackItem root;
@@ -155,18 +141,15 @@ void FileControl::Init(ModelViewer* mv, std::function<void(int, int)> progressCa
 	const int total = static_cast<int>(files.size());
 	for (std::set<GameFile*>::iterator it = files.begin(); it != files.end(); ++it)
 	{
-		QString name = QString::fromStdString((*it)->fullname());
-		name += " [";
-		name += QString::number((*it)->fileDataId());
-		name += "]";
+		std::string name = std::format("{} [{}]", (*it)->fullname(), (*it)->fileDataId());
 
 		beautifyFileName(name);
 
-		auto Items = core::split(name.toStdString(), '\\');
+		auto Items = core::split(name, '\\');
 		TreeStackItem* curparent = &root;
 		for (int i = 0; i < static_cast<int>(Items.size()) - 1; i++)
 		{
-			TreeStackItem* child = curparent->getChildByName(QString::fromStdString(Items[i]));
+			TreeStackItem* child = curparent->getChildByName(Items[i]);
 			if (!child)
 			{
 				child = new TreeStackItem();
@@ -191,7 +174,7 @@ void FileControl::Init(ModelViewer* mv, std::function<void(int, int)> progressCa
 
 	LOG_INFO << "Initializing File Controls - END";
 
-	if (content != "")
+	if (!content.empty())
 		fileTree->ExpandAll();
 }
 
@@ -248,7 +231,7 @@ void FileControl::Export(wxString val, int select)
 		filename = wxGetCwd() + SLASH + wxT("Export") + SLASH + fn.GetFullName();
 	}
 
-	LOG_INFO << "Saving to" << QString::fromWCharArray(filename.c_str());
+	LOG_INFO << "Saving to" << std::string(filename.ToUTF8());
 
 	if (!filename.empty())
 	{
@@ -480,7 +463,7 @@ void FileControl::OnTreeSelect(wxTreeEvent& event)
 			return; // clicked on the same model thats currently loaded, no need to load it again - exit
 
 		ClearCanvas();
-		LOG_INFO << "Selecting model in tree selector:" << QString::fromWCharArray(rootfn.c_str());
+		LOG_INFO << "Selecting model in tree selector:" << std::string(rootfn.ToUTF8());
 
 		// Check to make sure the selected item is a model (an *.m2 file).
 		modelviewer->isModel = (rootfn.Last() == '2');

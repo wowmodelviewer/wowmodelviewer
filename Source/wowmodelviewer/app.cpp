@@ -16,7 +16,7 @@
 #include "logger/LogOutputConsole.h"
 #include "logger/LogOutputFile.h"
 #include <QCoreApplication>
-#include <QSettings>
+#include "IniFile.h"
 
 /*  THIS IS OUR MAIN "START UP" FILE.
 App.cpp creates our wxApp class object.
@@ -317,45 +317,45 @@ void WowModelViewApp::OnUnhandledException()
 
 void WowModelViewApp::LoadSettings()
 {
-	const QSettings config(QString::fromWCharArray(cfgPath.c_str()), QSettings::IniFormat);
+	const core::IniFile config(std::wstring(cfgPath.c_str()));
 
 	// graphic settings
-	video.curCap.aaSamples = config.value("Graphics/FSAA", 0).toInt();
-	video.curCap.accum = config.value("Graphics/AccumulationBuffer", 0).toInt();
-	video.curCap.alpha = config.value("Graphics/AlphaBits", 0).toInt();
-	video.curCap.colour = config.value("Graphics/ColourBits", 24).toInt();
-	video.curCap.doubleBuffer = config.value("Graphics/DoubleBuffer", 1).toInt();
+	video.curCap.aaSamples = config.getInt("Graphics/FSAA", 0);
+	video.curCap.accum = config.getInt("Graphics/AccumulationBuffer", 0);
+	video.curCap.alpha = config.getInt("Graphics/AlphaBits", 0);
+	video.curCap.colour = config.getInt("Graphics/ColourBits", 24);
+	video.curCap.doubleBuffer = config.getInt("Graphics/DoubleBuffer", 1);
 #ifdef _WINDOWS
-	video.curCap.hwAcc = config.value("Graphics/HWAcceleration", WGL_FULL_ACCELERATION_ARB).toInt();
+	video.curCap.hwAcc = config.getInt("Graphics/HWAcceleration", WGL_FULL_ACCELERATION_ARB);
 #endif
-	video.curCap.sampleBuffer = config.value("Graphics/SampleBuffer", 0).toInt();
-	video.curCap.stencil = config.value("Graphics/StencilBuffer", 0).toInt();
-	video.curCap.zBuffer = config.value("Graphics/ZBuffer", 16).toInt();
+	video.curCap.sampleBuffer = config.getInt("Graphics/SampleBuffer", 0);
+	video.curCap.stencil = config.getInt("Graphics/StencilBuffer", 0);
+	video.curCap.zBuffer = config.getInt("Graphics/ZBuffer", 16);
 
 	// Application locale info
-	langID = config.value("Locale/LanguageID", 1).toInt();
-	langName = config.value("Locale/LanguageName", "").toString().toStdWString();
+	langID = config.getInt("Locale/LanguageID", 1);
+	langName = config.getWString("Locale/LanguageName");
 
 	// Application settings
-	gamePath = config.value("Settings/Path", "").toString().toStdWString();
-	customDirectoryPath = config.value("Settings/CustomDirPath", "").toString().toStdWString();
-	customFilesConflictPolicy = config.value("Settings/CustomFilesConflictPolicy", 0).toInt();
-	displayItemAndNPCId = config.value("Settings/displayItemAndNPCId", 0).toInt();
+	gamePath = config.getWString("Settings/Path");
+	customDirectoryPath = config.getWString("Settings/CustomDirPath");
+	customFilesConflictPolicy = config.getInt("Settings/CustomFilesConflictPolicy", 0);
+	displayItemAndNPCId = config.getInt("Settings/displayItemAndNPCId", 0);
 
-	if (config.value("Unofficial/UseDoNotTrailInfo", false).toBool() == true)
+	if (config.getBool("Unofficial/UseDoNotTrailInfo", false))
 		ParticleSystem::useDoNotTrailInfo();
 }
 
 void WowModelViewApp::SaveSettings()
 {
 	// Application Config Settings
-	QSettings config(QString::fromWCharArray(cfgPath.c_str()), QSettings::IniFormat);
+	core::IniFile config(std::wstring(cfgPath.c_str()));
 
 	config.setValue("Locale/LanguageID", static_cast<int>(langID));
-	config.setValue("Locale/LanguageName", QString::fromWCharArray(langName.c_str()));
+	config.setValue("Locale/LanguageName", std::wstring(langName.c_str()));
 
-	config.setValue("Settings/Path", QString::fromWCharArray(gamePath.c_str()));
-	config.setValue("Settings/CustomDirPath", QString::fromWCharArray(customDirectoryPath.c_str()));
+	config.setValue("Settings/Path", std::wstring(gamePath.c_str()));
+	config.setValue("Settings/CustomDirPath", std::wstring(customDirectoryPath.c_str()));
 	config.setValue("Settings/CustomFilesConflictPolicy", customFilesConflictPolicy);
 	config.setValue("Settings/displayItemAndNPCId", displayItemAndNPCId);
 	config.sync();

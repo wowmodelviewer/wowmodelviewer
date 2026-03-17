@@ -38,6 +38,7 @@ set(headers CharInfos.h
       ExporterPlugin.h
       FileDownloader.h
       Game.h
+      IniFile.h
       GameDatabase.h
       GameFile.h
       GameFolder.h

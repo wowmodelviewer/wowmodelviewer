@@ -28,7 +28,7 @@
 #include "WoWFolder.h"
 #include "logger/Logger.h"
 #include "string_utils.h"
-#include <QSettings>
+#include "IniFile.h"
 #include <QCoreApplication>
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
@@ -714,24 +714,24 @@ void ModelViewer::LoadSession()
 {
 	LOG_INFO << "Loading Session settings from:" << cfgPath.c_str();
 
-	const QSettings config(QString::fromWCharArray(cfgPath.c_str()), QSettings::IniFormat);
+	const core::IniFile config(std::wstring(cfgPath.c_str()));
 
 	// Application Config Settings
-	useRandomLooks = config.value("Session/RandomLooks", true).toBool();
-	GLOBALSETTINGS.bShowParticle = config.value("Session/ShowParticle", true).toBool();
-	GLOBALSETTINGS.bZeroParticle = config.value("Session/ZeroParticle", true).toBool();
-	GLOBALSETTINGS.bInitPoseOnlyExport = config.value("Session/InitPoseOnlyExport", false).toBool();
+	useRandomLooks = config.getBool("Session/RandomLooks", true);
+	GLOBALSETTINGS.bShowParticle = config.getBool("Session/ShowParticle", true);
+	GLOBALSETTINGS.bZeroParticle = config.getBool("Session/ZeroParticle", true);
+	GLOBALSETTINGS.bInitPoseOnlyExport = config.getBool("Session/InitPoseOnlyExport", false);
 
 	// Background and Custom Colours
 	wxColour bgCol;
-	wxString colStr = config.value("Session/bgCol", "#475F79").toString().toStdWString(); // #475F79 = (71, 95, 121)
+	wxString colStr = config.getWString("Session/bgCol", L"#475F79"); // #475F79 = (71, 95, 121)
 	if (!bgCol.Set(colStr))
 		bgCol = wxColour(71, 95, 121);
 	bgDialogData.SetColour(bgCol);
 	for (int i = 0; i < 16; i++)
 	{
 		wxColour custCol;
-		colStr = config.value(QString("Session/bgCustCol%1").arg(i), QString()).toString().toStdWString();
+		colStr = config.getWString(std::format("Session/bgCustCol{}", i));
 		if ((colStr != wxEmptyString) && custCol.Set(colStr))
 			bgDialogData.SetCustomColour(i, custCol);
 	}
@@ -748,7 +748,7 @@ void ModelViewer::LoadSession()
 
 void ModelViewer::SaveSession()
 {
-	QSettings config(QString::fromWCharArray(cfgPath.c_str()), QSettings::IniFormat);
+	core::IniFile config(std::wstring(cfgPath.c_str()));
 
 	config.setValue("Graphics/FSAA", video.curCap.aaSamples);
 	config.setValue("Graphics/AccumulationBuffer", video.curCap.accum);
@@ -769,14 +769,14 @@ void ModelViewer::SaveSession()
 
 	// Background and Custom Colours
 	wxColour bgCol = bgDialogData.GetColour();
-	config.setValue("Session/bgCol", QString::fromWCharArray(bgCol.GetAsString(wxC2S_HTML_SYNTAX).c_str()));
+	config.setValue("Session/bgCol", std::wstring(bgCol.GetAsString(wxC2S_HTML_SYNTAX).c_str()));
 	for (int i = 0; i < 16; i++)
 	{
 		bgCol = bgDialogData.GetCustomColour(i);
 		if (!bgCol.IsOk()) // skip undefined custom colours
 			continue;
-		config.setValue(QString("Session/bgCustCol%1").arg(i),
-		                QString::fromWCharArray(bgCol.GetAsString(wxC2S_HTML_SYNTAX).c_str()));
+		config.setValue(std::format("Session/bgCustCol{}", i),
+						std::wstring(bgCol.GetAsString(wxC2S_HTML_SYNTAX).c_str()));
 	}
 
 	if (canvas)
@@ -810,25 +810,27 @@ void ModelViewer::SaveSession()
 
 		// model file
 		if (canvas->model())
-			config.setValue("Session/Model", QString::fromStdString(canvas->model()->name()));
+			config.setValue("Session/Model", canvas->model()->name());
 	}
+
+	config.sync();
 }
 
 void ModelViewer::LoadLayout()
 {
-	const QSettings config(QString::fromWCharArray(cfgPath.c_str()), QSettings::IniFormat);
+	const core::IniFile config(std::wstring(cfgPath.c_str()));
 
-	const int posx = config.value("Session/PositionX", "").toInt();
-	const int posy = config.value("Session/PositionY", "").toInt();
+	const int posx = config.getInt("Session/PositionX", 0);
+	const int posy = config.getInt("Session/PositionY", 0);
 
 	SetPosition(wxPoint(posx, posy));
 
 	// Increment this whenever the default layout changes or a layout reset
 	// is needed (e.g. after the x86 → x64 migration).
 	const int currentLayoutVersion = 2;
-	const int savedLayoutVersion = config.value("Session/LayoutVersion", 0).toInt();
+	const int savedLayoutVersion = config.getInt("Session/LayoutVersion", 0);
 
-	const wxString layout = config.value("Session/Layout", "").toString().toStdWString();
+	const wxString layout = config.getWString("Session/Layout");
 
 	// if the layout data exists and is from a compatible version, load it.
 	if (savedLayoutVersion == currentLayoutVersion
@@ -860,23 +862,24 @@ LOG_INFO << "GUI Layout loaded from previous session.";
 	// Restore saved canvas size:
 	if (canvas)
 	{
-		const int canvx = config.value("Session/CanvasWidth", 800).toInt();
-		const int canvy = config.value("Session/CanvasHeight", 600).toInt();
+		const int canvx = config.getInt("Session/CanvasWidth", 800);
+		const int canvy = config.getInt("Session/CanvasHeight", 600);
 		SetCanvasSize(canvx, canvy);
 	}
 }
 
 void ModelViewer::SaveLayout()
 {
-	QSettings config(QString::fromWCharArray(cfgPath.c_str()), QSettings::IniFormat);
+	core::IniFile config(std::wstring(cfgPath.c_str()));
 
-	config.setValue("Session/Layout", QString::fromWCharArray(interfaceManager.SavePerspective().c_str()));
+	config.setValue("Session/Layout", std::wstring(interfaceManager.SavePerspective().c_str()));
 	config.setValue("Session/LayoutVersion", 2);
 
 	const wxPoint pos = GetPosition();
 	config.setValue("Session/PositionX", pos.x);
 	config.setValue("Session/PositionY", pos.y);
 
+	config.sync();
 	LOG_INFO << "GUI Layout was saved.";
 }
 

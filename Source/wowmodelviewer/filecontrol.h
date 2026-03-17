@@ -1,6 +1,7 @@
 #pragma once
 
 #include <functional>
+#include <string>
 #include "FileTreeItem.h"
 
 class ModelViewer;
@@ -61,9 +62,9 @@ private:
 		{
 		}
 
-		TreeStackItem* getChildByName(QString name)
+		TreeStackItem* getChildByName(const std::string& name)
 		{
-			const std::map<QString, TreeStackItem*>::iterator it = m_childrenMap.find(name);
+			const auto it = m_childrenMap.find(name);
 
 			if (it != m_childrenMap.end())
 				return it->second;
@@ -73,7 +74,7 @@ private:
 
 		void onChildAdded(TreeStackItem* child)
 		{
-			m_childrenMap[QString::fromStdString(child->name())] = child;
+			m_childrenMap[child->name()] = child;
 		}
 
 		void createTreeItems(wxTreeCtrl* tree)
@@ -88,6 +89,6 @@ private:
 		}
 
 	private:
-		std::map<QString, TreeStackItem*> m_childrenMap;
+		std::map<std::string, TreeStackItem*> m_childrenMap;
 	};
 };
