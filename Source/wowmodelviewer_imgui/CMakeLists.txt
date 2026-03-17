@@ -4,20 +4,35 @@ include(${CMAKE_SOURCE_DIR}/cmake/common.cmake)
 include_directories(.)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
-set(src main_imgui.cpp)
+# Include the wowmodelviewer directory for OrbitCamera.h
+include_directories(${CMAKE_SOURCE_DIR}/Source/wowmodelviewer)
+
+set(src main_imgui.cpp
+        ${CMAKE_SOURCE_DIR}/Source/wowmodelviewer/OrbitCamera.cpp)
 
 # External dependencies
 use_glad()
 use_imgui()
+use_wow()   # brings in core, casclib, wow (video, Attachment, WoWModel, etc.)
 
 set(NAME wowmodelviewer_imgui)
 add_executable(${NAME} WIN32 ${src})
 
 set_property(TARGET ${NAME} PROPERTY FOLDER "executables")
 
+# Force-include glad/gl.h before all source files (same as the wxWidgets target)
+if(MSVC)
+  target_compile_options(${NAME} PRIVATE /FIglad/gl.h)
+endif()
+
 target_link_libraries(${NAME}
   ${extralibs}
   opengl32
+  glu32
+  winhttp
+  pugixml-static
+  ${CMAKE_SOURCE_DIR}/ThirdParty/lib/x64/zlib.lib
+  ${CMAKE_SOURCE_DIR}/ThirdParty/lib/x64/libpng.lib
 )
 
 # On MSVC, use main() instead of WinMain for the console-friendly entry point.
