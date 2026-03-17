@@ -161,6 +161,40 @@ set(JSON_Install OFF CACHE INTERNAL "")
 add_subdirectory(ThirdParty/json)
 set_property(TARGET nlohmann_json PROPERTY FOLDER "ThirdParty libraries")
 
+# GLFW — cross-platform window/context/input library (replaces wxGLCanvas)
+message(STATUS "Adding GLFW...")
+set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
+set(GLFW_BUILD_TESTS    OFF CACHE BOOL "" FORCE)
+set(GLFW_BUILD_DOCS     OFF CACHE BOOL "" FORCE)
+set(GLFW_INSTALL        OFF CACHE BOOL "" FORCE)
+add_subdirectory(ThirdParty/glfw)
+set_property(TARGET glfw PROPERTY FOLDER "ThirdParty libraries")
+
+# Dear ImGui — immediate-mode GUI library (docking branch, replaces wxWidgets UI)
+message(STATUS "Adding Dear ImGui...")
+set(IMGUI_DIR "${CMAKE_SOURCE_DIR}/ThirdParty/imgui")
+add_library(imgui STATIC
+  ${IMGUI_DIR}/imgui.cpp
+  ${IMGUI_DIR}/imgui_demo.cpp
+  ${IMGUI_DIR}/imgui_draw.cpp
+  ${IMGUI_DIR}/imgui_tables.cpp
+  ${IMGUI_DIR}/imgui_widgets.cpp
+  ${IMGUI_DIR}/backends/imgui_impl_glfw.cpp
+  ${IMGUI_DIR}/backends/imgui_impl_opengl3.cpp
+)
+target_include_directories(imgui PUBLIC
+  ${IMGUI_DIR}
+  ${IMGUI_DIR}/backends
+)
+target_link_libraries(imgui PUBLIC glfw glad_gl)
+# Tell the OpenGL3 backend we supply our own loader (glad).
+# Force-include glad/gl.h so GL types and functions are available in the backend sources.
+target_compile_definitions(imgui PUBLIC IMGUI_IMPL_OPENGL_LOADER_CUSTOM)
+if(MSVC)
+  target_compile_options(imgui PRIVATE /FIglad/gl.h)
+endif()
+set_property(TARGET imgui PROPERTY FOLDER "ThirdParty libraries")
+
 # Main source files.
 message(STATUS "Adding Source...")
 add_subdirectory(Source)

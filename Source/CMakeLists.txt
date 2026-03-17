@@ -10,3 +10,6 @@ add_subdirectory(importers/wowhead)
 
 # then trigs executables compilation
 add_subdirectory(wowmodelviewer)
+
+# ImGui-based viewer (parallel migration target)
+add_subdirectory(wowmodelviewer_imgui)

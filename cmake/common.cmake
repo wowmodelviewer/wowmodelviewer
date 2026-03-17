@@ -47,3 +47,12 @@ endmacro()
 macro(use_sqlite)
   list(APPEND src sqlite3.c)
 endmacro()
+
+macro(use_glfw)
+  list(APPEND extralibs glfw)
+endmacro()
+
+macro(use_imgui)
+  use_glfw()
+  list(APPEND extralibs imgui)
+endmacro()
