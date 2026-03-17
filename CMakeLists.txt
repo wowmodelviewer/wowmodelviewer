@@ -177,10 +177,8 @@ message(STATUS "Adding Source...")
 add_subdirectory(Source)
 
 add_custom_target(release
-          COMMAND
-          "${CMAKE_COMMAND}" --build . --target clean --config Release
-          COMMAND
-          "${CMAKE_COMMAND}" --build . --target install --config Release
-                  COMMAND
-                  ${CMAKE_SOURCE_DIR}/Installers/NSIS/makensis.exe "${CMAKE_SOURCE_DIR}/Installers/Windows/NSIS/WMVInstallerMUI.nsi"
-          )
+  COMMAND "${CMAKE_COMMAND}" --build . --target clean   --config Release
+  COMMAND "${CMAKE_COMMAND}" --build . --target install  --config Release
+  COMMAND ${CMAKE_SOURCE_DIR}/Installers/NSIS/makensis.exe
+          "${CMAKE_SOURCE_DIR}/Installers/Windows/NSIS/WMVInstallerMUI.nsi"
+)

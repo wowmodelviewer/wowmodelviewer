@@ -143,9 +143,7 @@ set(QT_FILES ${QT_BIN_DIR}/Qt6Core.dll
              ${QT_BIN_DIR}/Qt6Gui.dll
              ${QT_BIN_DIR}/Qt6Guid.dll
              ${QT_BIN_DIR}/Qt6Widgets.dll
-             ${QT_BIN_DIR}/Qt6Widgetsd.dll
-             ${QT_BIN_DIR}/Qt6Xml.dll
-             ${QT_BIN_DIR}/Qt6Xmld.dll)
+             ${QT_BIN_DIR}/Qt6Widgetsd.dll)
 
 set(QT_PLUGIN_DIR ${QT_LOCATION}/plugins)
 

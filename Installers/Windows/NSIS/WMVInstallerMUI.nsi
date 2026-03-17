@@ -53,12 +53,6 @@ CreateDirectory $INSTDIR\localisation
 SetOutPath $INSTDIR\localisation
 File "${wmvroot}\bin_support\localisation\*.mo"
 
-CreateDirectory $INSTDIR\plugins\tls
-SetOutPath $INSTDIR\plugins\tls
-File "${wmvroot}\bin\plugins\tls\*"
-
-CreateDirectory $INSTDIR\
-
 CreateDirectory $INSTDIR\userSettings
 
 # create shortcuts
