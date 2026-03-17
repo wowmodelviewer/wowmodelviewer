@@ -1,6 +1,6 @@
 #include "ExporterPlugin.h"
 #include <string>
-#include <QtGui/QImage>
+#include "SoftwareImage.h"
 
 void ExporterPlugin::exportGLTexture(GLuint id, std::wstring filename) const
 {
@@ -16,8 +16,10 @@ void ExporterPlugin::exportGLTexture(GLuint id, std::wstring filename) const
 
 	glGetTexImage(GL_TEXTURE_2D, 0, GL_BGRA, GL_UNSIGNED_BYTE, pixels);
 
-	const QImage texture(pixels, width, height, QImage::Format_ARGB32);
-	texture.save(QString::fromStdWString(filename));
+	const SoftwareImage texture(pixels, width, height);
+	texture.savePNG(filename);
+
+	delete[] pixels;
 
 	glBindTexture(GL_TEXTURE_2D, 0);
 	glDisable(GL_TEXTURE_2D);

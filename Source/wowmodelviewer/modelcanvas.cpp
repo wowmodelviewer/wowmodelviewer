@@ -1,9 +1,7 @@
 #include "modelcanvas.h"
 #include <windows.h>
 #include <mmsystem.h>
-#include <QImage>
-#include <QImageWriter>
-#include <QImageReader>
+#include "SoftwareImage.h"
 #include <glm/gtc/type_ptr.hpp>
 #include <wx/display.h>
 #include <wx/file.h>
@@ -1308,12 +1306,12 @@ void ModelCanvas::Screenshot(const wxString fn, int x, int y)
 			RenderToBuffer();
 	}
 
-	LOG_INFO << "Saving screenshot in : " << QString::fromWCharArray(fn.c_str());
+	LOG_INFO << "Saving screenshot in : " << std::wstring(fn.c_str());
 
 	{
-		QImage image(screenSize[2], screenSize[3], QImage::Format_RGB32);
-		glReadPixels(0, 0, screenSize[2], screenSize[3], GL_BGRA, GL_UNSIGNED_BYTE, image.bits());
-		image.mirrored().save(QString::fromWCharArray(fn.c_str()));
+		SoftwareImage image(screenSize[2], screenSize[3]);
+		glReadPixels(0, 0, screenSize[2], screenSize[3], GL_BGRA, GL_UNSIGNED_BYTE, image.data());
+		image.mirrored().savePNG(std::wstring(fn.c_str()));
 	}
 
 	if (rt)

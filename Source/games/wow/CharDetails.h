@@ -7,9 +7,12 @@
 
 #pragma once
 
+#include <string>
+
 #include "CharTexture.h"
 #include "database.h"
 #include "RaceInfos.h"
+#include "types.h"
 #include "wow_enums.h"
 
 #include "metaclasses/Observable.h"
@@ -91,7 +94,7 @@ public:
 	class CustomizationParam
 	{
 	public:
-		QString name;
+		std::string name;
 		std::vector<int> possibleValues;
 		std::vector<int> flags;
 	};

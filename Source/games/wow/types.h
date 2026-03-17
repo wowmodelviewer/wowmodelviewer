@@ -24,6 +24,7 @@ typedef unsigned __int8 uint8;
 typedef unsigned __int16 uint16;
 typedef unsigned __int32 uint32;
 typedef unsigned __int64 uint64;
+typedef unsigned int uint;
 #else
   #include <stdint.h>
   typedef uint8_t uint8;
@@ -32,4 +33,5 @@ typedef unsigned __int64 uint64;
   typedef int16_t int16;
   typedef uint32_t uint32;
   typedef int32_t int32;
+  typedef unsigned int uint;
 #endif

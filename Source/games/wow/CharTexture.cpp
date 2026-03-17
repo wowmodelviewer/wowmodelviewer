@@ -3,8 +3,6 @@
 #include <map>
 #include <string>
 
-#include <QPainter>
-
 #include "Game.h"
 #include "GameFile.h"
 #include "Texture.h"
@@ -40,7 +38,7 @@ void CharTexture::compose(GLuint texID)
 
 	std::sort(m_components.begin(), m_components.end());
 
-	QImage img;
+	SoftwareImage img;
 
 #if DEBUG_TEXTURE > 1
   static auto baseidx = 0;
@@ -51,13 +49,13 @@ void CharTexture::compose(GLuint texID)
 	{
 		burnComponent(img, it);
 #if DEBUG_TEXTURE > 1
-    img.save(QString("./ComposedTexture%1_%2.png").arg(baseidx).arg(cmpidx++));
+	img.savePNG("./ComposedTexture" + std::to_string(baseidx) + "_" + std::to_string(cmpidx++) + ".png");
 #endif
 	}
 
 	// good, upload this to video
 	glBindTexture(GL_TEXTURE_2D, texID);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, img.width(), img.height(), 0, GL_BGRA, GL_UNSIGNED_BYTE, img.bits());
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, img.width(), img.height(), 0, GL_BGRA, GL_UNSIGNED_BYTE, img.data());
 	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR);
 }
@@ -104,7 +102,7 @@ void CharTexture::initRegions()
 	}
 }
 
-void CharTexture::burnComponent(QImage& destImage, CharTextureComponent& ct) const
+void CharTexture::burnComponent(SoftwareImage& destImage, CharTextureComponent& ct) const
 {
 	auto layoutInfos = CharTexture::LAYOUTS[layoutSizeId];
 
@@ -115,7 +113,7 @@ void CharTexture::burnComponent(QImage& destImage, CharTextureComponent& ct) con
 	if (!tmp)
 		return;
 
-	const auto newImage = tmp->scaled(coords.width, coords.height, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
+	const auto newImage = tmp->scaled(coords.width, coords.height);
 
 
 #if DEBUG_TEXTURE > 0
@@ -129,51 +127,26 @@ void CharTexture::burnComponent(QImage& destImage, CharTextureComponent& ct) con
 #endif
 
 #if DEBUG_TEXTURE > 1
-  newImage.save(QString("./tex__%1_%2_%3_%4_%5.png").arg(region, x, y, width, height));
+  newImage.savePNG("./tex__" + std::to_string(region) + "_" + std::to_string(x) + "_" + std::to_string(y) + "_" + std::to_string(width) + "_" + std::to_string(height) + ".png");
 #endif
 
 	if ((ct.region == LAYOUT_BASE_REGION
 			|| ct.region == 11) // Dracthyr dragon base section
 		&& ct.layer == 0)
 	{
-		destImage = newImage;
+		destImage.assign(newImage);
 	}
 	else
 	{
-		const auto destPos = QPoint(coords.xpos, coords.ypos);
-		QPainter painter(&destImage);
-
-		QPainter::CompositionMode mode = QPainter::CompositionMode_SourceOver;
-
-		switch (ct.blendMode)
-		{
-		case 4:
-			mode = QPainter::CompositionMode_Multiply;
-			break;
-		case 6:
-			mode = QPainter::CompositionMode_Overlay;
-			break;
-		default:
-			break;
-		}
-
-		painter.setCompositionMode(mode);
-
-		painter.drawImage(destPos, newImage);
-		painter.end();
+		destImage.composite(newImage, coords.xpos, coords.ypos, ct.blendMode);
 	}
 
 	delete tmp;
 }
 
-void imageCleanUpHandler(void* ptr)
+SoftwareImage* CharTexture::gameFileToQImage(GameFile* file)
 {
-	free(ptr);
-}
-
-QImage* CharTexture::gameFileToQImage(GameFile* file)
-{
-	QImage* result = nullptr;
+	SoftwareImage* result = nullptr;
 	const auto temptex = TEXTUREMANAGER.add(file);
 	auto* tex = dynamic_cast<Texture*>(TEXTUREMANAGER.items[temptex]);
 
@@ -187,8 +160,9 @@ QImage* CharTexture::gameFileToQImage(GameFile* file)
 	auto* tempbuf = static_cast<unsigned char*>(malloc(tex->w * tex->h * 4));
 
 	tex->getPixels(tempbuf, GL_BGRA);
-	result = new QImage(tempbuf, tex->w, tex->h, QImage::Format_ARGB32, imageCleanUpHandler, tempbuf);
+	result = new SoftwareImage(tempbuf, tex->w, tex->h);
 
+	free(tempbuf);
 	TEXTUREMANAGER.del(temptex);
 
 	return result;

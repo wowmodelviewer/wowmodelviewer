@@ -11,7 +11,7 @@
 
 #include <glad/gl.h>
 
-#include <QImage>
+#include "SoftwareImage.h"
 
 class GameFile;
 
@@ -58,8 +58,8 @@ public:
 	static void initRegions();
 
 private:
-	void burnComponent(QImage& destImage, CharTextureComponent&) const;
-	static QImage* gameFileToQImage(GameFile* file);
+	void burnComponent(SoftwareImage& destImage, CharTextureComponent&) const;
+	static SoftwareImage* gameFileToQImage(GameFile* file);
 	unsigned int layoutSizeId;
 	std::vector<CharTextureComponent> m_components;
 	static std::map<int, std::pair<LayoutSize, std::map<int, CharRegionCoords>>> LAYOUTS;

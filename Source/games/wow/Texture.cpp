@@ -1,7 +1,7 @@
 #include "Texture.h"
 #include "GameFile.h"
 #include "video.h"
-#include <QImage>
+#include "SoftwareImage.h"
 #include <glad/gl.h>
 #include "ddslib.h"
 
@@ -73,17 +73,20 @@ void Texture::load()
 		file->seek(offsets[0]);
 		file->read(buf, sizes[0]);
 
-		QImage image;
+		SoftwareImage image = SoftwareImage::loadFromMemory(buf, sizes[0]);
 
-		if (!image.loadFromData(buf, sizes[0], "jpg"))
+		if (image.empty())
 		{
 			LOG_ERROR << __FUNCTION__ << __LINE__ << "Failed to load texture";
 		}
+		else
+		{
+			// BLP JPEG textures need to be vertically flipped
+			SoftwareImage flipped = image.mirrored();
 
-		image = image.mirrored();
-		image = image.convertToFormat(QImage::Format_RGBA8888);
-
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, image.width(), image.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, image.bits());
+			// Upload as BGRA (our internal SoftwareImage format)
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, flipped.width(), flipped.height(), 0, GL_BGRA, GL_UNSIGNED_BYTE, flipped.data());
+		}
 
 		delete [] buf;
 		buf = nullptr;

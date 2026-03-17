@@ -4,6 +4,7 @@ include(${CMAKE_SOURCE_DIR}/cmake/common.cmake)
 message(STATUS "Building nextgen Core")
 
 include_directories(.)
+include_directories(${CMAKE_SOURCE_DIR}/ThirdParty/stb)
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
@@ -25,6 +26,8 @@ set(src CharInfos.cpp
     metaclasses/Event.cpp
     metaclasses/Observable.cpp
     metaclasses/Observer.cpp
+    SoftwareImage.cpp
+    stb_impl.cpp
     logger/Logger.cpp
     logger/LogOutputConsole.cpp
     logger/LogOutputFile.cpp)
@@ -43,6 +46,7 @@ set(headers CharInfos.h
       MemoryUtils.h
       Model.h
       NPCInfos.h
+      SoftwareImage.h
       string_utils.h
       metaclasses/BaseIterator.h
       metaclasses/Component.h
