@@ -860,7 +860,7 @@ void AnimControl::SyncBLPSkinList()
 		const GameFile* tex = grp->tex[i];
 		if (tex)
 		{
-			texname = tex->fullname().toStdWString();
+			texname = wxString::FromUTF8(tex->fullname());
 			texname = texname.AfterLast('/').BeforeLast('.');
 		}
 		currTextures[i] = texname;
@@ -874,7 +874,7 @@ void AnimControl::SyncBLPSkinList()
 		for (TextureSet::iterator it = BLPskins.begin(); it != BLPskins.end(); ++it)
 		{
 			const GameFile* tex = it->tex[0];
-			wxString texname = tex->fullname().toStdWString();
+			wxString texname = wxString::FromUTF8(tex->fullname());
 			texname = texname.AfterLast('/').BeforeLast('.');
 			if (texname == currTextures[0])
 				BLPSkinList1->SetSelection(num);
@@ -897,7 +897,7 @@ bool AnimControl::FillSkinSelector(TextureSet& skins)
 	for (std::set<TextureGroup>::iterator it = skins.begin(); it != skins.end(); ++it)
 	{
 		const GameFile* tex = it->tex[0];
-		wxString texname = tex->fullname().toStdWString();
+		wxString texname = wxString::FromUTF8(tex->fullname());
 		wxString selectorName = texname.AfterLast('/').BeforeLast('.');
 		if (it->definedTexture)
 			selectorName.MakeUpper();
@@ -925,7 +925,7 @@ bool AnimControl::FillBLPSkinSelector(TextureSet& skins, bool item)
 		for (TextureSet::iterator it = skins.begin(); it != skins.end(); ++it)
 		{
 			const GameFile* tex = it->tex[0];
-			wxString texname = tex->fullname().toStdWString();
+			wxString texname = wxString::FromUTF8(tex->fullname());
 			texname = texname.AfterLast('/').BeforeLast('.');
 			TextureGroup* grp = new TextureGroup(*it);
 
@@ -1266,7 +1266,7 @@ void AnimControl::SetSkin(int num)
 		GameFile* tex = grp->tex[i];
 		if (tex)
 		{
-			texname = tex->fullname().toStdWString();
+			texname = wxString::FromUTF8(tex->fullname());
 			texname = texname.AfterLast('/').BeforeLast('.');
 		}
 		currTextures[i] = texname;

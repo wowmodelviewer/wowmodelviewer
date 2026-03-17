@@ -79,8 +79,8 @@ public:
 			return false;
 		if (definedTexture && !grp.definedTexture)
 			return true;
-		QString texname1 = tex[0]->fullname();
-		QString texname2 = grp.tex[0]->fullname();
+		QString texname1 = QString::fromStdString(tex[0]->fullname());
+		QString texname2 = QString::fromStdString(grp.tex[0]->fullname());
 		texname1 = texname1.mid(texname1.lastIndexOf("/"));
 		texname2 = texname2.mid(texname2.lastIndexOf("/"));
 		if (texname1 != texname2)

@@ -661,7 +661,7 @@ void CharControl::selectMount()
 		{
 			for (std::vector<GameFile*>::iterator it = files.begin(); it != files.end(); ++it)
 			{
-				QString fn = (*it)->fullname();
+				QString fn = QString::fromStdString((*it)->fullname());
 				creaturemodels.push_back(wxString(fn.toStdWString()));
 			}
 			creaturemodels.Sort();

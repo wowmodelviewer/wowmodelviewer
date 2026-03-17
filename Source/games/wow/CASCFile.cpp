@@ -79,7 +79,7 @@ std::vector<std::string> KNOWN_CHUNKS =
 	*/
 };
 
-CASCFile::CASCFile(QString path, int id) : GameFile(path, id), m_handle(nullptr)
+CASCFile::CASCFile(std::string path, int id) : GameFile(std::move(path), id), m_handle(nullptr)
 {
 }
 
@@ -120,7 +120,7 @@ void CASCFile::seek(size_t offset)
 bool CASCFile::openFile()
 {
 	if ((m_fileDataId > 0 && GAMEDIRECTORY.openFile(m_fileDataId, &m_handle))
-		|| GAMEDIRECTORY.openFile(filepath.toStdString(), &m_handle))
+		|| GAMEDIRECTORY.openFile(filepath, &m_handle))
 	{
 		return true;
 	}

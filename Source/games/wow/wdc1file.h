@@ -35,7 +35,7 @@ public:
 		uint32 relationship_data_size;
 	};
 
-	explicit WDC1File(const QString& file);
+	explicit WDC1File(const std::string& file);
 	~WDC1File();
 
 	bool open();

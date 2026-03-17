@@ -48,7 +48,7 @@ public:
 		// Count of the number of deduplication entries (you can multiply by 8 to mimic the old 'copy_table_size' field
 	};
 
-	explicit WDC3File(const QString& file);
+	explicit WDC3File(const std::string& file);
 	~WDC3File();
 
 	bool open();

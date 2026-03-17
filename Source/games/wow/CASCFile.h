@@ -20,7 +20,7 @@ class CASCFolder;
 class _CASCFILE_API_ CASCFile : public GameFile
 {
 public:
-	CASCFile(QString path, int id = -1);
+	CASCFile(std::string path, int id = -1);
 	~CASCFile();
 
 	// re implemented from GameFile

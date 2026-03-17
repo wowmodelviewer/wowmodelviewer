@@ -17,7 +17,7 @@ public:
 		uint32 nonzero_column_table_size; // new in WDB6, size of new block called 'nonzero_column_table'
 	};
 
-	explicit WDB6File(const QString& file);
+	explicit WDB6File(const std::string& file);
 	~WDB6File();
 
 	bool open();

@@ -49,7 +49,7 @@ void wow::WoWFolder::initFromListfile(const QString& filename)
 		m_nameIdMap[fileName] = id;
 		if (m_CASCFolder.fileExists(id))
 		{
-			CASCFile* File = new CASCFile(fileName, id);
+			CASCFile* File = new CASCFile(fileName.toStdString(), id);
 			File->setName(line.mid(line.lastIndexOf('/') + 1).toStdString());
 			addChild(File);
 		}
@@ -106,7 +106,7 @@ void wow::WoWFolder::addCustomFiles(const QString& path, bool bypassOriginalFile
 		{
 			LOG_INFO << "Add custom file" << filePath << "(ID:" << originalId << ")from hard drive location" <<
 				absPath;
-			HardDriveFile* file = new HardDriveFile(filePath, absPath, originalId);
+			HardDriveFile* file = new HardDriveFile(filePath.toStdString(), absPath.toStdString(), originalId);
 			file->setName(filePath.mid(filePath.lastIndexOf("/") + 1).toStdString());
 			addChild(file);
 		}
@@ -135,7 +135,7 @@ GameFile* wow::WoWFolder::getFile(int id)
 		{
 			LOG_INFO << "Succesfully opened";
 			m_CASCFolder.closeFile(newfile);
-			CASCFile* file = new CASCFile(filename, id);
+			CASCFile* file = new CASCFile(filename.toStdString(), id);
 			file->setName(filename.toStdString());
 			addChild(file);
 			result = file;

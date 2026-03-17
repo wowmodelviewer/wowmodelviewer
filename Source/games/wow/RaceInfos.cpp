@@ -61,7 +61,7 @@ void RaceInfos::init()
 
 		infos.ChrModelID.push_back(std::stoi(race[14]));
 
-		infos.isHD = GAMEDIRECTORY.getFile(modelfileid)->fullname().contains("_hd") ? true : false;
+		infos.isHD = GAMEDIRECTORY.getFile(modelfileid)->fullname().find("_hd") != std::string::npos;
 
 		if (RACES.find(modelfileid) == RACES.end())
 		{

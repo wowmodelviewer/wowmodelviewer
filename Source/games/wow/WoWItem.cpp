@@ -166,7 +166,7 @@ void WoWItem::unload()
 
 	// release textures and clear map
 	for (const auto& itemTexture : itemTextures_)
-		TEXTUREMANAGER.delbyname(itemTexture.second->fullname());
+		TEXTUREMANAGER.delbyname(QString::fromStdString(itemTexture.second->fullname()));
 
 	itemTextures_.clear();
 
@@ -937,7 +937,7 @@ CharRegions WoWItem::getRegionForTexture(GameFile* file) const
 
 	if (file)
 	{
-		const auto fullname = file->fullname();
+		const QString fullname = QString::fromStdString(file->fullname());
 
 		if (fullname.contains("armlowertexture", Qt::CaseInsensitive))
 		{

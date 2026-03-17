@@ -12,7 +12,7 @@ QString core::GameFolder::getFullPathForFile(QString file)
 	for (const auto it : *this)
 	{
 		if (QString::fromStdString(it->name()) == file)
-			return it->fullname();
+			return QString::fromStdString(it->fullname());
 	}
 
 	return "";
@@ -22,8 +22,9 @@ void core::GameFolder::getFilesForFolder(std::vector<GameFile*>& fileNames, QStr
 {
 	for (auto file : *this)
 	{
-		if (file->fullname().startsWith(folderPath, Qt::CaseInsensitive) &&
-			(!extension.size() || file->fullname().endsWith(extension, Qt::CaseInsensitive)))
+		const QString fn = QString::fromStdString(file->fullname());
+		if (fn.startsWith(folderPath, Qt::CaseInsensitive) &&
+			(!extension.size() || fn.endsWith(extension, Qt::CaseInsensitive)))
 		{
 			fileNames.push_back(file);
 		}
@@ -67,10 +68,10 @@ GameFile* core::GameFolder::getFile(QString filename)
 
 void core::GameFolder::onChildAdded(GameFile* child)
 {
-	m_nameMap[child->fullname()] = child;
+	m_nameMap[QString::fromStdString(child->fullname())] = child;
 }
 
 void core::GameFolder::onChildRemoved(GameFile* child)
 {
-	m_nameMap.erase(child->fullname());
+	m_nameMap.erase(QString::fromStdString(child->fullname()));
 }

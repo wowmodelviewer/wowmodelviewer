@@ -155,7 +155,7 @@ void FileControl::Init(ModelViewer* mv, std::function<void(int, int)> progressCa
 	const int total = static_cast<int>(files.size());
 	for (std::set<GameFile*>::iterator it = files.begin(); it != files.end(); ++it)
 	{
-		QString name = (*it)->fullname();
+		QString name = QString::fromStdString((*it)->fullname());
 		name += " [";
 		name += QString::number((*it)->fileDataId());
 		name += "]";
@@ -303,7 +303,7 @@ wxString FileControl::ExportPNG(wxString val)
 void FileControl::OnPopupClick(wxCommandEvent& evt)
 {
 	const FileTreeData* data = static_cast<FileTreeData*>(static_cast<wxMenu*>(evt.GetEventObject())->GetClientData());
-	const wxString val(data->file->fullname().toStdWString());
+	const wxString val(wxString::FromUTF8(data->file->fullname()));
 
 	const int id = evt.GetId();
 	if (id == ID_FILELIST_SAVE)
@@ -346,7 +346,7 @@ void FileControl::OnTreeMenu(wxTreeEvent& event)
 	infoMenu.SetClientData(data);
 	infoMenu.Append(ID_FILELIST_SAVE, wxT("&Save..."), wxT("Save this object"));
 	// TODO: if is music, a Play option
-	wxString temp(tdata->file->fullname().toStdWString());
+	wxString temp(wxString::FromUTF8(tdata->file->fullname()));
 	temp.MakeLower();
 
 	// if is graphic, a View option
@@ -473,7 +473,7 @@ void FileControl::OnTreeSelect(wxTreeEvent& event)
 
 	if (filterMode == FILE_FILTER_MODEL)
 	{
-		wxString rootfn(data->file->fullname().toStdWString());
+		wxString rootfn(wxString::FromUTF8(data->file->fullname()));
 		// Exit, if its the same model thats currently loaded
 		if (modelviewer->canvas->model() && !modelviewer->canvas->model()->name().empty() && wxString::FromUTF8(modelviewer->canvas->
 			model()->name()) == rootfn)
@@ -503,7 +503,7 @@ void FileControl::OnTreeSelect(wxTreeEvent& event)
 		ClearCanvas();
 
 		// For Graphics
-		const wxString val(data->file->fullname().toStdWString());
+		const wxString val(wxString::FromUTF8(data->file->fullname()));
 		ExportPNG(val);
 
 		UpdateInterface();

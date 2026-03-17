@@ -2,7 +2,6 @@
 
 #include <string>
 #include <vector>
-#include <QString>
 #include "metaclasses/Component.h"
 
 #define _GAMEFILE_API_
@@ -10,7 +9,7 @@
 class _GAMEFILE_API_ GameFile : public Component
 {
 public:
-	GameFile(QString path, int id = -1)
+	GameFile(std::string path, int id = -1)
 		: eof(true), buffer(nullptr), pointer(0), size(0),
 		  filepath(std::move(path)), m_useMemoryBuffer(true), m_fileDataId(id),
 		  originalBuffer(nullptr), curChunk("")
@@ -30,8 +29,8 @@ public:
 	bool open(bool useMemoryBuffer = true);
 	bool close();
 
-	void setFullName(const QString& name) { filepath = name; }
-	QString fullname() const { return filepath; }
+	void setFullName(const std::string& name) { filepath = name; }
+	const std::string& fullname() const { return filepath; }
 	int fileDataId() { return m_fileDataId; }
 
 	void allocate(unsigned long long size);
@@ -51,7 +50,7 @@ protected:
 	bool eof;
 	unsigned char* buffer;
 	unsigned long long pointer, size;
-	QString filepath;
+	std::string filepath;
 	int m_fileDataId;
 
 	struct chunkHeader

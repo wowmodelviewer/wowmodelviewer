@@ -13,7 +13,7 @@
 class _WDC5FILE_API_ WDC5File : public WDC3File
 {
 public:
-	explicit WDC5File(const QString& file);
+	explicit WDC5File(const std::string& file);
 	~WDC5File() = default;
 
 protected:

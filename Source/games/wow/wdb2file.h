@@ -8,7 +8,7 @@
 class _WDB2FILE_API_ WDB2File : public DBFile, public CASCFile
 {
 public:
-	explicit WDB2File(const QString& file);
+	explicit WDB2File(const std::string& file);
 	~WDB2File();
 
 	bool open();

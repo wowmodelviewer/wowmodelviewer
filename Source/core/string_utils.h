@@ -45,4 +45,18 @@ namespace core
 			[](unsigned char a, unsigned char b) { return std::tolower(a) == std::tolower(b); });
 		return it != s.end();
 	}
+
+	inline bool startsWithIgnoreCase(const std::string& s, const std::string& prefix)
+	{
+		if (prefix.size() > s.size()) return false;
+		return std::equal(prefix.begin(), prefix.end(), s.begin(),
+			[](unsigned char a, unsigned char b) { return std::tolower(a) == std::tolower(b); });
+	}
+
+	inline bool endsWithIgnoreCase(const std::string& s, const std::string& suffix)
+	{
+		if (suffix.size() > s.size()) return false;
+		return std::equal(suffix.rbegin(), suffix.rend(), s.rbegin(),
+			[](unsigned char a, unsigned char b) { return std::tolower(a) == std::tolower(b); });
+	}
 }

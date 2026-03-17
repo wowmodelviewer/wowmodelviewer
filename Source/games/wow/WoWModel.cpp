@@ -427,13 +427,13 @@ void WoWModel::initCommon()
 		return;
 	}
 
-	setItemName(gamefile->fullname());
+	setItemName(QString::fromStdString(gamefile->fullname()));
 
 	initRaceInfos();
 	cd.reset(this);
 
 	// replace .MDX with .M2
-	QString tempname = gamefile->fullname();
+	QString tempname = QString::fromStdString(gamefile->fullname());
 	tempname.replace(".mdx", ".m2");
 
 	ok = true;

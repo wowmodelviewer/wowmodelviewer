@@ -1,12 +1,13 @@
 #include "wdb5file.h"
 #include "logger/Logger.h"
+#include <algorithm>
 #include <sstream>
 #include <bitset>
 #include "WoWDatabase.h"
 
 #define WDB5_READ_DEBUG 0
 
-WDB5File::WDB5File(const QString& file) : CASCFile(file), m_isSparseTable(false)
+WDB5File::WDB5File(const std::string& file) : CASCFile(file), m_isSparseTable(false)
 {
 }
 

@@ -1,9 +1,11 @@
 #include "wdb2file.h"
 #include "GameFile.h"
 #include "logger/Logger.h"
+#include <algorithm>
+#include <cassert>
 #include <sstream>
 
-WDB2File::WDB2File(const QString& file) : CASCFile(file)
+WDB2File::WDB2File(const std::string& file) : CASCFile(file)
 {
 }
 

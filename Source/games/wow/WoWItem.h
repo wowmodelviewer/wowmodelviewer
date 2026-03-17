@@ -21,6 +21,7 @@
 #include <map>
 #include <string>
 #include <vector>
+#include <QString>
 #include "WoWDatabase.h"
 #include "GameFile.h"
 #include "wow_enums.h"

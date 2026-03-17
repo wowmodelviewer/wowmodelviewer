@@ -32,7 +32,7 @@ public:
 		// new in WDB5 (and only after build 21737), this is the index of the field containing ID values; this is ignored if flags & 0x04 != 0
 	};
 
-	explicit WDB5File(const QString& file);
+	explicit WDB5File(const std::string& file);
 	~WDB5File();
 
 	virtual bool open();

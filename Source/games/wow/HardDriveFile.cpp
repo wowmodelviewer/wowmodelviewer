@@ -2,8 +2,8 @@
 
 #include "logger/Logger.h"
 
-HardDriveFile::HardDriveFile(QString path, QString real, int id)
-	: CASCFile(path, id), opened(false), realpath(std::move(real)), file(nullptr)
+HardDriveFile::HardDriveFile(std::string path, std::string real, int id)
+	: CASCFile(std::move(path), id), opened(false), realpath(std::move(real)), file(nullptr)
 {
 }
 
@@ -14,7 +14,7 @@ HardDriveFile::~HardDriveFile()
 
 bool HardDriveFile::openFile()
 {
-	file = new std::ifstream(realpath.toStdWString(), std::ios::binary);
+	file = new std::ifstream(realpath, std::ios::binary);
 
 	if (!file->is_open())
 	{

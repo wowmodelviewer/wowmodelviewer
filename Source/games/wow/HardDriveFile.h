@@ -16,7 +16,7 @@
 class _HARDDRIVEFILE_API_ HardDriveFile : public CASCFile
 {
 public:
-	HardDriveFile(QString path, QString realpath, int id = -1);
+	HardDriveFile(std::string path, std::string realpath, int id = -1);
 	~HardDriveFile();
 
 protected:
@@ -28,6 +28,6 @@ protected:
 
 private:
 	bool opened;
-	QString realpath;
+	std::string realpath;
 	std::ifstream* file;
 };

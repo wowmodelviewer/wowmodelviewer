@@ -1,6 +1,6 @@
 #include "wdc5file.h"
 
-WDC5File::WDC5File(const QString& file) : WDC3File(file)
+WDC5File::WDC5File(const std::string& file) : WDC3File(file)
 {
 }
 

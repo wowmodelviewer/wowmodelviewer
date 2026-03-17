@@ -7,7 +7,7 @@
 
 #define WDB6_READ_DEBUG 0
 
-WDB6File::WDB6File(const QString& file) : WDB5File(file), m_header()
+WDB6File::WDB6File(const std::string& file) : WDB5File(file), m_header()
 {
 }
 
