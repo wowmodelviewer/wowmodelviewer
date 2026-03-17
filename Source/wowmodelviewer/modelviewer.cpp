@@ -52,6 +52,14 @@ static void startQtEventLoop()
 	qtThread.detach();
 }
 
+// Return the directory containing the running executable (no trailing separator).
+static std::filesystem::path getApplicationDirPath()
+{
+	wchar_t buf[MAX_PATH]{};
+	GetModuleFileNameW(nullptr, buf, MAX_PATH);
+	return std::filesystem::path(buf).parent_path();
+}
+
 // default colour values
 const static float def_ambience[4] = {1.0f, 1.0f, 1.0f, 1.0f};
 const static float def_diffuse[4] = {1.0f, 1.0f, 1.0f, 1.0f};
@@ -1623,11 +1631,11 @@ bool ModelViewer::DownloadListfile()
 		return false;
 	}
 
-	const QString destPath = QCoreApplication::applicationDirPath() + "/listfile.csv";
-	std::ofstream file(destPath.toStdWString(), std::ios::binary);
+	const auto destPath = getApplicationDirPath() / "listfile.csv";
+	std::ofstream file(destPath, std::ios::binary);
 	if (!file.is_open())
 	{
-		LOG_ERROR << "Failed to write listfile to" << destPath;
+		LOG_ERROR << "Failed to write listfile to" << destPath.wstring();
 		wxMessageBox(wxT("Failed to write listfile.csv to disk."), wxT("File Error"), wxOK | wxICON_ERROR);
 		response->deleteLater();
 		SetStatusText(wxT("Listfile update failed."));
@@ -1639,7 +1647,7 @@ bool ModelViewer::DownloadListfile()
 	file.close();
 	response->deleteLater();
 
-	LOG_INFO << "Listfile updated successfully at" << destPath;
+	LOG_INFO << "Listfile updated successfully at" << destPath.wstring();
 	SetStatusText(wxT("Listfile updated successfully."));
 	return true;
 }
@@ -1708,11 +1716,11 @@ bool ModelViewer::DownloadEncryptionKeys()
 	response->deleteLater();
 	content.replace(' ', ';');
 
-	const QString destPath = QCoreApplication::applicationDirPath() + "/extraEncryptionKeys.csv";
-	std::ofstream file(destPath.toStdWString());
+	const auto destPath = getApplicationDirPath() / "extraEncryptionKeys.csv";
+	std::ofstream file(destPath);
 	if (!file.is_open())
 	{
-		LOG_ERROR << "Failed to write encryption keys to" << destPath;
+		LOG_ERROR << "Failed to write encryption keys to" << destPath.wstring();
 		wxMessageBox(wxT("Failed to write extraEncryptionKeys.csv to disk."), wxT("File Error"), wxOK | wxICON_ERROR);
 		SetStatusText(wxT("Encryption keys update failed."));
 		return false;
@@ -1722,7 +1730,7 @@ bool ModelViewer::DownloadEncryptionKeys()
 	file.write(utf8Data.constData(), utf8Data.size());
 	file.close();
 
-	LOG_INFO << "Encryption keys updated successfully at" << destPath;
+	LOG_INFO << "Encryption keys updated successfully at" << destPath.wstring();
 	SetStatusText(wxT("Encryption keys updated successfully."));
 	return true;
 }
@@ -1744,9 +1752,9 @@ bool ModelViewer::CheckAndUpdateSupportFiles()
 {
 	namespace fs = std::filesystem;
 
-	const QString appDir = QCoreApplication::applicationDirPath();
-	const fs::path listfilePath = fs::path(appDir.toStdWString()) / "listfile.csv";
-	const fs::path keysPath = fs::path(appDir.toStdWString()) / "extraEncryptionKeys.csv";
+	const fs::path appDir = getApplicationDirPath();
+	const fs::path listfilePath = appDir / "listfile.csv";
+	const fs::path keysPath = appDir / "extraEncryptionKeys.csv";
 
 	std::error_code ec;
 	const bool listfileExists = fs::exists(listfilePath, ec);
