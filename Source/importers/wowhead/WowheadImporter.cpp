@@ -37,15 +37,15 @@
 
 WowheadImporter::WowheadImporter() = default;
 
-bool WowheadImporter::acceptURL(QString url) const
+bool WowheadImporter::acceptURL(const std::string& url) const
 {
-	return (url.indexOf("wowhead") != -1);
+	return (url.find("wowhead") != std::string::npos);
 }
 
-NPCInfos* WowheadImporter::importNPC(QString urlToGrab) const
+NPCInfos* WowheadImporter::importNPC(const std::string& urlToGrab) const
 {
 	// Get the HTML...
-	QString htmldata = QString(getURLData(urlToGrab)).toUtf8();
+	QString htmldata = QString(getURLData(QString::fromStdString(urlToGrab))).toUtf8();
 	if (htmldata.isNull() || htmldata.isEmpty())
 		return nullptr;
 
@@ -81,12 +81,12 @@ NPCInfos* WowheadImporter::importNPC(QString urlToGrab) const
 	return result;
 }
 
-ItemRecord* WowheadImporter::importItem(QString urlToGrab) const
+ItemRecord* WowheadImporter::importItem(const std::string& urlToGrab) const
 {
 	ItemRecord* result = nullptr;
 
 	// Get the HTML...
-	QString htmldata = QString(getURLData(urlToGrab)).toUtf8();
+	QString htmldata = QString(getURLData(QString::fromStdString(urlToGrab))).toUtf8();
 	if (htmldata.isNull() || htmldata.isEmpty())
 		return nullptr;
 

@@ -46,10 +46,11 @@ enum
 	DEBUG_RESULTS = 0
 };
 
-bool ArmoryImporter::acceptURL(QString url) const
+bool ArmoryImporter::acceptURL(const std::string& url) const
 {
-	return ((url.indexOf("battle.net") != -1) || (url.indexOf("worldofwarcraft.com") != -1) || (url.
-		indexOf("blizzard.com") != -1));
+	return (url.find("battle.net") != std::string::npos) ||
+		(url.find("worldofwarcraft.com") != std::string::npos) ||
+		(url.find("blizzard.com") != std::string::npos);
 }
 
 CharSlots armorySlotToCharSlot(const int slot)
@@ -84,12 +85,12 @@ CharSlots armorySlotToCharSlot(const int slot)
 	return {};
 }
 
-CharInfos* ArmoryImporter::importChar(QString url) const
+CharInfos* ArmoryImporter::importChar(const std::string& url) const
 {
 	auto* result = new CharInfos();
 	QJsonObject root;
 
-	const auto readStatus = readJSONValues(CHARACTER, url, root);
+	const auto readStatus = readJSONValues(CHARACTER, QString::fromStdString(url), root);
 	// LOG_INFO << "JSON Read Status:" << readStatus << "Root Count:" << root.count();
 
 	if (readStatus == 0 && root.count() > 0)
@@ -161,12 +162,12 @@ CharInfos* ArmoryImporter::importChar(QString url) const
 	return result;
 }
 
-ItemRecord* ArmoryImporter::importItem(QString url) const
+ItemRecord* ArmoryImporter::importItem(const std::string& url) const
 {
 	QJsonObject root;
 	ItemRecord* result = nullptr;
 
-	if (readJSONValues(ITEM, url, root) == 0 && root.count() != 0)
+	if (readJSONValues(ITEM, QString::fromStdString(url), root) == 0 && root.count() != 0)
 	{
 		// No Gathering Errors Detected.
 		result = new ItemRecord();

@@ -27,6 +27,7 @@
 
 #include <QJsonObject>
 #include <QJsonValue>
+#include <QString>
 
 #include "ImporterPlugin.h"
 
@@ -37,11 +38,11 @@ public:
 	ArmoryImporter();
 	~ArmoryImporter() = default;
 
-	bool acceptURL(QString url) const override;
+	bool acceptURL(const std::string& url) const override;
 
-	NPCInfos* importNPC(QString url) const override { return nullptr; };
-	CharInfos* importChar(QString url) const override;
-	ItemRecord* importItem(QString url) const override;
+	NPCInfos* importNPC(const std::string& url) const override { return nullptr; };
+	CharInfos* importChar(const std::string& url) const override;
+	ItemRecord* importItem(const std::string& url) const override;
 
 private:
 	enum ImportType

@@ -96,7 +96,7 @@ void NPCimporterDialog::OnImportButtonClicked(wxCommandEvent& event)
 	}
 	else
 	{
-		const QString url{m_URLname->GetValue().utf8_str()};
+		const std::string url(m_URLname->GetValue().utf8_str());
 
 		const NPCInfos* result = nullptr;
 		for (const auto* plugin : g_modelViewer->m_importers)

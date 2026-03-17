@@ -25,6 +25,9 @@
 
 #pragma once
 
+#include <QByteArray>
+#include <QString>
+
 #include "ImporterPlugin.h"
 
 class WowheadImporter : public ImporterPlugin //-V1106
@@ -35,11 +38,11 @@ public:
 
 	~WowheadImporter() = default;
 
-	bool acceptURL(QString url) const;
+	bool acceptURL(const std::string& url) const;
 
-	NPCInfos* importNPC(QString url) const;
-	CharInfos* importChar(QString url) const { return nullptr; }
-	ItemRecord* importItem(QString url) const;
+	NPCInfos* importNPC(const std::string& url) const;
+	CharInfos* importChar(const std::string& url) const { return nullptr; }
+	ItemRecord* importItem(const std::string& url) const;
 
 private:
 	QString extractSubString(QString& datas, QString beginPattern, QString endPattern = QString()) const;
