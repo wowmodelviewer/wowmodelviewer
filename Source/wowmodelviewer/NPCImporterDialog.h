@@ -1,19 +1,19 @@
 #pragma once
 
+#include <string>
 #include <wx/dialog.h>
 class wxButton;
 class wxStaticText;
 class wxTextCtrl;
-#include <QString>
 
 class NPCimporterDialog : public wxDialog
 {
 public:
 	NPCimporterDialog(wxWindow* parent = nullptr, wxWindowID id = -1, const wxString& title = _("Import from URL"),
-	                  const wxPoint& position = wxDefaultPosition, const wxSize& size = wxSize(300, 300));
+					  const wxPoint& position = wxDefaultPosition, const wxSize& size = wxSize(300, 300));
 
 	int getImportedId();
-	QString getNPCLine();
+	std::string getNPCLine();
 
 private:
 	wxTextCtrl* m_URLname;

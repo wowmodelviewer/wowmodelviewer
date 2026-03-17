@@ -34,6 +34,7 @@
 #include <QNetworkReply>
 #include <QNetworkRequest>
 #include <filesystem>
+#include <format>
 #include <fstream>
 #include <thread>
 
@@ -1013,14 +1014,14 @@ void ModelViewer::LoadNPC(unsigned int modelid)
 	isChar = false;
 
 
-	QString query = QString("SELECT CreatureModelData.FileDataID, CreatureDisplayInfo.TextureVariationFileDataID1, "
+	std::string query = std::format("SELECT CreatureModelData.FileDataID, CreatureDisplayInfo.TextureVariationFileDataID1, "
 		"CreatureDisplayInfo.TextureVariationFileDataID2, CreatureDisplayInfo.TextureVariationFileDataID3, "
 		"CreatureDisplayInfo.ExtendedDisplayInfoID, CreatureDisplayInfo.ID FROM Creature "
 		"LEFT JOIN CreatureDisplayInfo ON Creature.DisplayID1 = CreatureDisplayInfo.ID "
 		"LEFT JOIN CreatureModelData ON CreatureDisplayInfo.modelID = CreatureModelData.ID "
-		"WHERE Creature.ID = %1;").arg(modelid);
+		"WHERE Creature.ID = {};", modelid);
 
-	sqlResult r = GAMEDATABASE.sqlQuery(query.toStdString());
+	sqlResult r = GAMEDATABASE.sqlQuery(query);
 
 	if (r.valid && !r.empty())
 	{
@@ -1037,11 +1038,11 @@ void ModelViewer::LoadNPC(unsigned int modelid)
 		{
 			LoadModel(GAMEDIRECTORY.getFile(RaceInfos::getHDModelForFileID(std::stoi(r.values[0][0]))));
 
-			query = QString(
-					"SELECT Skin, Face, HairStyle, HairColor, FacialHair FROM CreatureDisplayInfoExtra WHERE ID = %1").
-					arg(extraId);
+			query = std::format(
+					"SELECT Skin, Face, HairStyle, HairColor, FacialHair FROM CreatureDisplayInfoExtra WHERE ID = {}",
+					extraId);
 
-			r = GAMEDATABASE.sqlQuery(query.toStdString());
+			r = GAMEDATABASE.sqlQuery(query);
 
 			if (r.valid && !r.empty())
 			{
@@ -1052,10 +1053,10 @@ void ModelViewer::LoadNPC(unsigned int modelid)
 				g_charControl->model->cd.set(CharDetails::ADDITIONAL_FACIAL_CUSTOMIZATION, std::stoi(r.values[0][4]));
 			}
 
-			query = QString("SELECT ItemDisplayInfoID, ItemSlot FROM NpcModelItemSlotDisplayInfo WHERE NpcModelID = %1")
-				.arg(extraId);
+			query = std::format("SELECT ItemDisplayInfoID, ItemSlot FROM NpcModelItemSlotDisplayInfo WHERE NpcModelID = {}",
+				extraId);
 
-			r = GAMEDATABASE.sqlQuery(query.toStdString());
+			r = GAMEDATABASE.sqlQuery(query);
 
 			if (r.valid && !r.empty())
 			{
@@ -1096,14 +1097,14 @@ void ModelViewer::LoadItem(unsigned int id)
 
 	try
 	{
-		const QString query = QString(
+		const std::string query = std::format(
 			"SELECT ModelFileData.FileDataID, TextureFileData.FileDataID, ItemDisplayInfo.ID FROM ItemDisplayInfo "
 			"LEFT JOIN ModelFileData ON ItemDisplayInfo.ModelResourcesID1 = ModelFileData.ModelResourcesID "
 			"LEFT JOIN TextureFileData ON ItemDisplayInfo.ModelMaterialResourcesID1 = TextureFileData.MaterialResourcesID "
 			"WHERE ItemDisplayInfo.ID = (SELECT ItemDisplayInfoID FROM ItemAppearance WHERE ItemAppearance.ID = "
-			"(SELECT ItemAppearanceID FROM ItemModifiedAppearance WHERE ItemID = %1))").arg(id);
+			"(SELECT ItemAppearanceID FROM ItemModifiedAppearance WHERE ItemID = {}))", id);
 
-		sqlResult itemInfos = GAMEDATABASE.sqlQuery(query.toStdString());
+		sqlResult itemInfos = GAMEDATABASE.sqlQuery(query);
 		// LOG_INFO << query;
 
 		if (itemInfos.valid && !itemInfos.empty())

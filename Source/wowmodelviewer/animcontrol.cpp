@@ -499,11 +499,11 @@ bool AnimControl::UpdateCreatureModel(WoWModel* m)
 			}
 			else // BfA:
 			{
-				QString query2 = QString("SELECT GeosetIndex, GeosetValue "
+				std::string query2 = std::format("SELECT GeosetIndex, GeosetValue "
 						"FROM CreatureDisplayInfoGeosetData "
-						"WHERE CreatureDisplayInfoID = %1")
-					.arg(cdi);
-				sqlResult r2 = GAMEDATABASE.sqlQuery(query2.toStdString());
+						"WHERE CreatureDisplayInfoID = {}",
+					cdi);
+				sqlResult r2 = GAMEDATABASE.sqlQuery(query2);
 				if (r2.valid && !r2.values.empty())
 				{
 					for (size_t j = 0; j < r2.values.size(); j++)
@@ -520,10 +520,10 @@ bool AnimControl::UpdateCreatureModel(WoWModel* m)
 			if (pci)
 			{
 				grp.particleColInd = pci;
-				QString pciquery = QString("SELECT StartColor1, MidColor1, EndColor1, "
+				std::string pciquery = std::format("SELECT StartColor1, MidColor1, EndColor1, "
 					"StartColor2, MidColor2, EndColor2, StartColor3, MidColor3, EndColor3 FROM ParticleColor "
-					"WHERE ID = %1;").arg(pci);
-				sqlResult pcir = GAMEDATABASE.sqlQuery(pciquery.toStdString());
+					"WHERE ID = {};", pci);
+				sqlResult pcir = GAMEDATABASE.sqlQuery(pciquery);
 				if (pcir.valid && !pcir.empty())
 				{
 					std::vector<glm::vec4> cols;
@@ -641,13 +641,13 @@ bool AnimControl::UpdateItemModel(WoWModel* m)
 
 	// query textures for model1
 
-	QString query = QString(
+	std::string query = std::format(
 		"SELECT TextureFileData.FileDataID, ParticleColorID, ItemDisplayInfo.ID FROM ItemDisplayInfo "
 		"LEFT JOIN TextureFileData ON ModelMaterialResourcesID1 = TextureFileData.MaterialResourcesID "
 		"LEFT JOIN ModelFileData ON ItemDisplayInfo.ModelResourcesID1 = ModelFileData.ModelResourcesID "
-		"WHERE TextureFileData.FileDataID = %1").arg(m->gamefile->fileDataId());
+		"WHERE TextureFileData.FileDataID = {}", m->gamefile->fileDataId());
 
-	sqlResult r = GAMEDATABASE.sqlQuery(query.toStdString());
+	sqlResult r = GAMEDATABASE.sqlQuery(query);
 
 	if (r.valid && !r.empty())
 	{
@@ -665,10 +665,10 @@ bool AnimControl::UpdateItemModel(WoWModel* m)
 			if (pci)
 			{
 				grp.particleColInd = pci;
-				QString pciquery = QString("SELECT Start1, Mid1, End1, "
+				std::string pciquery = std::format("SELECT Start1, Mid1, End1, "
 					"Start2, Mid2, End2, Start3, Mid3, End3 FROM ParticleColor "
-					"WHERE ID = %1;").arg(pci);
-				sqlResult pcir = GAMEDATABASE.sqlQuery(pciquery.toStdString());
+					"WHERE ID = {};", pci);
+				sqlResult pcir = GAMEDATABASE.sqlQuery(pciquery);
 				if (pcir.valid && !pcir.empty())
 				{
 					std::vector<glm::vec4> cols;
@@ -693,12 +693,12 @@ bool AnimControl::UpdateItemModel(WoWModel* m)
 	}
 
 	// do the same for model2
-	query = QString("SELECT TextureFileData.FileDataID, ParticleColorID, ItemDisplayInfo.ID FROM ItemDisplayInfo "
+	query = std::format("SELECT TextureFileData.FileDataID, ParticleColorID, ItemDisplayInfo.ID FROM ItemDisplayInfo "
 		"LEFT JOIN TextureFileData ON ModelMaterialResourcesID2 = TextureFileData.MaterialResourcesID "
 		"LEFT JOIN ModelFileData ON ItemDisplayInfo.ModelResourcesID1 = ModelFileData.ModelResourcesID "
-		"WHERE TextureFileData.FileDataID = %1").arg(m->gamefile->fileDataId());
+		"WHERE TextureFileData.FileDataID = {}", m->gamefile->fileDataId());
 
-	r = GAMEDATABASE.sqlQuery(query.toStdString());
+	r = GAMEDATABASE.sqlQuery(query);
 
 	if (r.valid && !r.empty())
 	{
@@ -716,10 +716,10 @@ bool AnimControl::UpdateItemModel(WoWModel* m)
 			if (pci)
 			{
 				grp.particleColInd = pci;
-				QString pciquery = QString("SELECT StartColor1, MidColor1, EndColor1, "
+				std::string pciquery = std::format("SELECT StartColor1, MidColor1, EndColor1, "
 					"StartColor2, MidColor2, EndColor2, StartColor3, MidColor3, EndColor3 FROM ParticleColor "
-					"WHERE ID = %1;").arg(pci);
-				sqlResult pcir = GAMEDATABASE.sqlQuery(pciquery.toStdString());
+					"WHERE ID = {};", pci);
+				sqlResult pcir = GAMEDATABASE.sqlQuery(pciquery);
 				if (pcir.valid && !pcir.empty())
 				{
 					std::vector<glm::vec4> cols;

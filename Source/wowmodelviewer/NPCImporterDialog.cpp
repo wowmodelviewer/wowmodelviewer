@@ -136,18 +136,18 @@ int NPCimporterDialog::getImportedId()
 	return result;
 }
 
-QString NPCimporterDialog::getNPCLine()
+std::string NPCimporterDialog::getNPCLine()
 {
-	QString result = "";
+	std::string result;
 	if (m_idResult->GetLabel() != L"No URL") // successful import
 	{
-		result = QString::fromWCharArray(m_idResult->GetLabel().c_str());
+		result = std::string(m_idResult->GetLabel().ToUTF8());
 		result += ",";
-		result += QString::fromWCharArray(m_displayIdResult->GetLabel().c_str());
+		result += std::string(m_displayIdResult->GetLabel().ToUTF8());
 		result += ",";
-		result += QString::fromWCharArray(m_typeResult->GetLabel().c_str());
+		result += std::string(m_typeResult->GetLabel().ToUTF8());
 		result += ",";
-		result += QString::fromWCharArray(m_nameResult->GetLabel().c_str());
+		result += std::string(m_nameResult->GetLabel().ToUTF8());
 	}
 
 	return result;

@@ -70,7 +70,7 @@ public:
 	void selectNPC(ssize_t type);
 
 	const wxString selectCharModel();
-	static QString getItemName(ItemRecord&);
+	static std::string getItemName(ItemRecord&);
 
 	void onEvent(Event*) override;
 };

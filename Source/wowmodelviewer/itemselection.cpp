@@ -1,4 +1,5 @@
 #include "itemselection.h"
+#include <format>
 #include <wx/listctrl.h>
 #include "globalvars.h"
 #include "Game.h"
@@ -257,15 +258,14 @@ void FilteredChoiceDialog::OnImportNPC(wxCommandEvent& event)
 			if (!found)
 			{
 				// npc is not present in current database
-				const NPCRecord rec(dlg->getNPCLine().toStdString());
+				const NPCRecord rec(dlg->getNPCLine());
 				if (rec.model > 0)
 				{
 					npcs.push_back(rec);
-					const QString query = QString(
-											  "INSERT INTO Creature(ID,CreatureType,DisplayID1,Name_Lang) VALUES (%1,%2,%3,\"%4\")")
-										  .
-										  arg(modelid).arg(rec.type).arg(rec.model).arg(QString::fromStdString(rec.name));
-					GAMEDATABASE.sqlQuery(query.toStdString());
+					const std::string query = std::format(
+						"INSERT INTO Creature(ID,CreatureType,DisplayID1,Name_Lang) VALUES ({},{},{},\"{}\")",
+						modelid, rec.type, rec.model, rec.name);
+					GAMEDATABASE.sqlQuery(query);
 				}
 			}
 

@@ -1,4 +1,5 @@
 #include "charcontrol.h"
+#include <format>
 #include <wx/combobox.h>
 #include <wx/spinbutt.h>
 #include <wx/txtstrm.h>
@@ -495,7 +496,7 @@ void CharControl::selectItem(ssize_t type, ssize_t slot, const wxChar* caption)
 				item.type == IT_RIGHTHANDED || item.type == IT_OFFHAND || item.type == IT_GUN ||
 				item.type == IT_DAGGER)
 			{
-				choices.Add(getItemName(item).toStdWString());
+				choices.Add(wxString::FromUTF8(getItemName(item)));
 				numbers.push_back(item.id);
 				quality.push_back(item.quality);
 
@@ -505,7 +506,7 @@ void CharControl::selectItem(ssize_t type, ssize_t slot, const wxChar* caption)
 		}
 		else if (correctType((ssize_t)item.type, slot))
 		{
-			choices.Add(getItemName(item).toStdWString());
+			choices.Add(wxString::FromUTF8(getItemName(item)));
 			numbers.push_back(item.id);
 			quality.push_back(item.quality);
 
@@ -589,11 +590,11 @@ void CharControl::selectStart()
 
 	LOG_INFO << "race =" << infos.raceID << "sex = " << infos.sexID;
 
-	const QString query = QString("SELECT ChrClasses.Filename, CSO.ID "
+	const std::string query = std::format("SELECT ChrClasses.Filename, CSO.ID "
 		"FROM CharStartOutfit AS CSO LEFT JOIN ChrClasses on CSO.classID = ChrClasses.ID "
-		"WHERE CSO.raceID=%1 AND CSO.sexID=%2").arg(infos.raceID).arg(infos.sexID);
+		"WHERE CSO.raceID={} AND CSO.sexID={}", infos.raceID, infos.sexID);
 
-	sqlResult startOutfit = GAMEDATABASE.sqlQuery(query.toStdString());
+	sqlResult startOutfit = GAMEDATABASE.sqlQuery(query);
 
 	if (startOutfit.valid && !startOutfit.empty())
 	{
@@ -716,12 +717,12 @@ void CharControl::selectNPC(ssize_t type)
 	{
 		if (npc.model > 0)
 		{
-			QString NPCName = QString::fromStdString(npc.name);
+			std::string NPCName = npc.name;
 
 			if (displayItemAndNPCId != 0)
-				NPCName += QString(" [%1]").arg(npc.id);
+				NPCName += std::format(" [{}]", npc.id);
 
-			choices.Add(NPCName.toStdWString());
+			choices.Add(wxString::FromUTF8(NPCName));
 			numbers.push_back(npc.id);
 			quality.push_back(0);
 
@@ -793,10 +794,10 @@ void CharControl::OnUpdateItem(int type, int id)
 
 			if (id && model)
 			{
-				const QString query = QString("SELECT itemID1, itemID2, itemID3, itemID4, itemID5, "
-					"itemID6, itemID7,  itemID8 FROM ItemSet WHERE ID = %1").arg(id);
+				const std::string query = std::format("SELECT itemID1, itemID2, itemID3, itemID4, itemID5, "
+					"itemID6, itemID7,  itemID8 FROM ItemSet WHERE ID = {}", id);
 
-				sqlResult itemSet = GAMEDATABASE.sqlQuery(query.toStdString());
+				sqlResult itemSet = GAMEDATABASE.sqlQuery(query);
 
 				if (itemSet.valid && !itemSet.empty())
 				{
@@ -819,13 +820,13 @@ void CharControl::OnUpdateItem(int type, int id)
 
 		if (id && model)
 		{
-			const QString query = QString("SELECT CSO.iitem1, CSO.iitem2, CSO.iitem3, CSO.iitem4, CSO.iitem5,"
+			const std::string query = std::format("SELECT CSO.iitem1, CSO.iitem2, CSO.iitem3, CSO.iitem4, CSO.iitem5,"
 				"CSO.iitem6, CSO.iitem6, CSO.iitem7, CSO.iitem8, CSO.iitem9, CSO.iitem10, CSO.iitem11,"
 				"CSO.iitem12, CSO.iitem13, CSO.iitem14, CSO.iitem15, CSO.iitem16, CSO.iitem17, CSO.iitem18,"
 				"CSO.iitem19, CSO.iitem20, CSO.iitem21, CSO.iitem22, CSO.iitem23, CSO.iitem24 "
-				"FROM CharStartOutfit AS CSO WHERE CSO.ID=%1").arg(id);
+				"FROM CharStartOutfit AS CSO WHERE CSO.ID={}", id);
 
-			sqlResult startOutfit = GAMEDATABASE.sqlQuery(query.toStdString());
+			sqlResult startOutfit = GAMEDATABASE.sqlQuery(query);
 
 			if (startOutfit.valid && !startOutfit.empty())
 			{
@@ -884,13 +885,13 @@ void CharControl::OnUpdateItem(int type, int id)
 			{
 				morphID = numbers[id];
 				// Only dealing with Creature/ models (for now), so don't need to worry about CreatureDisplayInfoExtra
-				const QString query = QString(
+				const std::string query = std::format(
 					"SELECT CreatureModelData.FileDataID, CreatureDisplayInfo.TextureVariationFileDataID1, "
 					"CreatureDisplayInfo.TextureVariationFileDataID2, CreatureDisplayInfo.TextureVariationFileDataID3 FROM CreatureDisplayInfo "
 					"LEFT JOIN CreatureModelData ON CreatureDisplayInfo.modelID = CreatureModelData.ID "
-					"WHERE CreatureDisplayInfo.ID = %1;").arg(morphID);
+					"WHERE CreatureDisplayInfo.ID = {};", morphID);
 
-				sqlResult mountQuery = GAMEDATABASE.sqlQuery(query.toStdString());
+				sqlResult mountQuery = GAMEDATABASE.sqlQuery(query);
 				if (!mountQuery.valid || mountQuery.empty())
 					break;
 				modelFile = GAMEDIRECTORY.getFile(std::stoi(mountQuery.values[0][0]));
@@ -1116,13 +1117,13 @@ void CharControl::tryToEquipItem(int id)
 	}
 }
 
-QString CharControl::getItemName(ItemRecord& item)
+std::string CharControl::getItemName(ItemRecord& item)
 {
-	QString result = QString::fromStdString(item.name);
+	std::string result = item.name;
 
 	if (displayItemAndNPCId != 0)
 	{
-		result += QString(" [%1]").arg(item.id);
+		result += std::format(" [{}]", item.id);
 	}
 
 	return result;
