@@ -37,9 +37,6 @@ class CASCFile;
 class GameFile;
 class ModelRenderPass;
 
-class QXmlStreamWriter;
-class QXmlStreamReader;
-
 #define _WOWMODEL_API_
 
 enum
@@ -235,8 +232,8 @@ public:
 
 	std::map<int, std::wstring> getAnimsMap();
 
-	void save(QXmlStreamWriter&);
-	void load(QString&);
+	void save(pugi::xml_node& parentNode);
+	void load(const std::string& filepath);
 
 	static QString getCGGroupName(CharGeosets cg);
 

@@ -18,7 +18,6 @@
 #include "video.h"
 #include "logger/Logger.h"
 #include "string_utils.h"
-#include <QXmlStreamWriter>
 #include "glm/gtc/epsilon.hpp"
 #include "glm/gtc/type_ptr.hpp"
 #include "glm/gtx/norm.hpp"
@@ -3827,17 +3826,14 @@ std::map<int, std::wstring> WoWModel::getAnimsMap()
 	return result;
 }
 
-void WoWModel::save(QXmlStreamWriter& stream)
+void WoWModel::save(pugi::xml_node& parentNode)
 {
-	stream.writeStartElement("model");
-	stream.writeStartElement("file");
-	stream.writeAttribute("name", QString::fromStdString(modelname));
-	stream.writeEndElement();
-	cd.save(stream);
-	stream.writeEndElement(); // model
+	pugi::xml_node node = parentNode.append_child("model");
+	node.append_child("file").append_attribute("name") = modelname.c_str();
+	cd.save(node);
 }
 
-void WoWModel::load(QString& file)
+void WoWModel::load(const std::string& file)
 {
 	cd.load(file);
 }

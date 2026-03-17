@@ -8,7 +8,6 @@
 
 #include <fstream>
 #include <sstream>
-#include <QXmlStreamReader>
 
 std::multimap<uint, int> CharDetails::LINKED_OPTIONS_MAP_ =
 {
@@ -25,97 +24,73 @@ CharDetails::CharDetails():
 	refreshGeosets();
 }
 
-void CharDetails::save(QXmlStreamWriter& stream)
+void CharDetails::save(pugi::xml_node& parentNode)
 {
-	stream.writeStartElement("CharDetails");
+	pugi::xml_node node = parentNode.append_child("CharDetails");
 
 	for (const auto& opt : currentCustomization_)
 	{
-		stream.writeStartElement("customization");
-		stream.writeAttribute("id", QString::number(opt.first));
-		stream.writeAttribute("value", QString::number(opt.second));
-		stream.writeEndElement();
+		pugi::xml_node child = node.append_child("customization");
+		child.append_attribute("id") = opt.first;
+		child.append_attribute("value") = opt.second;
 	}
 
-	stream.writeStartElement("eyeGlowType");
-	stream.writeAttribute("value", QString::number((int)eyeGlowType));
-	stream.writeEndElement();
-
-	stream.writeStartElement("showUnderwear");
-	stream.writeAttribute("value", QString::number(showUnderwear));
-	stream.writeEndElement();
-
-	stream.writeStartElement("showEars");
-	stream.writeAttribute("value", QString::number(showEars));
-	stream.writeEndElement();
-
-	stream.writeStartElement("showHair");
-	stream.writeAttribute("value", QString::number(showHair));
-	stream.writeEndElement();
-
-	stream.writeStartElement("showFacialHair");
-	stream.writeAttribute("value", QString::number(showFacialHair));
-	stream.writeEndElement();
-
-	stream.writeStartElement("showFeet");
-	stream.writeAttribute("value", QString::number(showFeet));
-	stream.writeEndElement();
-
-	stream.writeStartElement("isDemonHunter");
-	stream.writeAttribute("value", QString::number(isDemonHunter_));
-	stream.writeEndElement();
-
-	stream.writeEndElement(); // CharDetails
+	node.append_child("eyeGlowType").append_attribute("value") = static_cast<int>(eyeGlowType);
+	node.append_child("showUnderwear").append_attribute("value") = showUnderwear ? 1 : 0;
+	node.append_child("showEars").append_attribute("value") = showEars ? 1 : 0;
+	node.append_child("showHair").append_attribute("value") = showHair ? 1 : 0;
+	node.append_child("showFacialHair").append_attribute("value") = showFacialHair ? 1 : 0;
+	node.append_child("showFeet").append_attribute("value") = showFeet ? 1 : 0;
+	node.append_child("isDemonHunter").append_attribute("value") = isDemonHunter_ ? 1 : 0;
 }
 
-void CharDetails::load(QString& f)
+void CharDetails::load(const std::string& f)
 {
-	std::ifstream file(f.toStdWString());
-	if (!file.is_open())
+	pugi::xml_document doc;
+	pugi::xml_parse_result result = doc.load_file(f.c_str());
+	if (!result)
 	{
-		LOG_ERROR << "Fail to open" << f;
+		LOG_ERROR << "Fail to open" << f.c_str();
 		return;
 	}
 
-	std::ostringstream ss;
-	ss << file.rdbuf();
-	const QByteArray data = QByteArray::fromStdString(ss.str());
+	pugi::xml_node charNode = doc.document_element();
+	// Navigate to CharDetails node if needed
+	if (std::string(charNode.name()) != "CharDetails")
+		charNode = charNode.child("CharDetails");
 
-	QXmlStreamReader reader(data);
+	if (!charNode)
+		charNode = doc.child("model").child("CharDetails");
 
-	while (!reader.atEnd())
+	if (!charNode)
 	{
-		if (reader.isStartElement())
+		LOG_ERROR << "CharDetails node not found in" << f.c_str();
+		return;
+	}
+
+	for (pugi::xml_node child = charNode.first_child(); child; child = child.next_sibling())
+	{
+		const std::string name = child.name();
+
+		if (name == "customization")
+			set(child.attribute("id").as_uint(), child.attribute("value").as_uint());
+		else if (name == "eyeGlowType")
+			eyeGlowType = static_cast<EyeGlowTypes>(child.attribute("value").as_uint());
+		else if (name == "showUnderwear")
+			showUnderwear = child.attribute("value").as_uint();
+		else if (name == "showEars")
+			showEars = child.attribute("value").as_uint();
+		else if (name == "showHair")
+			showHair = child.attribute("value").as_uint();
+		else if (name == "showFacialHair")
+			showFacialHair = child.attribute("value").as_uint();
+		else if (name == "showFeet")
+			showFeet = child.attribute("value").as_uint();
+		else if (name == "isDemonHunter")
 		{
-			if (reader.name() == "customization")
-				set(reader.attributes().value("id").toString().toUInt(),
-				    reader.attributes().value("value").toString().toUInt());
-
-			if (reader.name() == "eyeGlowType")
-				eyeGlowType = static_cast<EyeGlowTypes>(reader.attributes().value("value").toString().toUInt());
-
-			if (reader.name() == "showUnderwear")
-				showUnderwear = reader.attributes().value("value").toString().toUInt();
-
-			if (reader.name() == "showEars")
-				showEars = reader.attributes().value("value").toString().toUInt();
-
-			if (reader.name() == "showHair")
-				showHair = reader.attributes().value("value").toString().toUInt();
-
-			if (reader.name() == "showFacialHair")
-				showFacialHair = reader.attributes().value("value").toString().toUInt();
-
-			if (reader.name() == "showFeet")
-				showFeet = reader.attributes().value("value").toString().toUInt();
-
-			if (reader.name() == "isDemonHunter")
-			{
-				LOG_INFO << __FILE__ << __LINE__ << "reading demonHunter mode value";
-				setDemonHunterMode(reader.attributes().value("value").toString().toUInt());
-			}
+			LOG_INFO << __FILE__ << __LINE__ << "reading demonHunter mode value";
+			setDemonHunterMode(child.attribute("value").as_uint());
 		}
-		reader.readNext();
 	}
 }
 

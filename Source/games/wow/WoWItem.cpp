@@ -2,9 +2,7 @@
 
 #include <fstream>
 #include <sstream>
-#include <QRegularExpression>
 #include <QString>
-#include <QXmlStreamWriter>
 
 #include "Attachment.h"
 #include "database.h" // items
@@ -805,104 +803,75 @@ bool WoWItem::isCustomizableTabard() const
 		id_ == 69210); // Renowned Guild Tabard
 }
 
-void WoWItem::save(QXmlStreamWriter& stream) const
+void WoWItem::save(pugi::xml_node& parentNode) const
 {
-	stream.writeStartElement("item");
+	pugi::xml_node node = parentNode.append_child("item");
 
-	stream.writeStartElement("slot");
-	stream.writeAttribute("value", QString::number(slot_));
-	stream.writeEndElement();
-
-	stream.writeStartElement("id");
-	stream.writeAttribute("value", QString::number(id_));
-	stream.writeEndElement();
-
-	stream.writeStartElement("displayId");
-	stream.writeAttribute("value", QString::number(displayId_));
-	stream.writeEndElement();
-
-	stream.writeStartElement("level");
-	stream.writeAttribute("value", QString::number(level_));
-	stream.writeEndElement();
+	node.append_child("slot").append_attribute("value") = static_cast<int>(slot_);
+	node.append_child("id").append_attribute("value") = id_;
+	node.append_child("displayId").append_attribute("value") = displayId_;
+	node.append_child("level").append_attribute("value") = level_;
 
 	if (isCustomizableTabard())
-		charModel_->td.save(stream);
-
-	stream.writeEndElement(); // item
+		charModel_->td.save(node);
 }
 
-void WoWItem::load(QString& f)
+void WoWItem::load(const std::string& f)
 {
-	std::ifstream file(f.toStdWString());
-	if (!file.is_open())
+	pugi::xml_document doc;
+	pugi::xml_parse_result result = doc.load_file(f.c_str());
+	if (!result)
 	{
-		LOG_ERROR << "Fail to open" << f;
+		LOG_ERROR << "Fail to open" << f.c_str();
 		return;
 	}
 
-	std::ostringstream ss;
-	ss << file.rdbuf();
-	const QByteArray data = QByteArray::fromStdString(ss.str());
-
-	QXmlStreamReader reader(data);
-
-	auto nbValuesRead = 0;
-	while (!reader.atEnd() && nbValuesRead != 3)
+	// Find all item nodes and look for the matching slot
+	pugi::xml_node root = doc.document_element();
+	for (pugi::xml_node itemNode = root.child("item"); itemNode; itemNode = itemNode.next_sibling("item"))
 	{
-		if (reader.isStartElement())
+		pugi::xml_node slotNode = itemNode.child("slot");
+		if (!slotNode)
+			continue;
+
+		const auto slot = slotNode.attribute("value").as_uint();
+		if (slot != static_cast<unsigned int>(slot_))
+			continue;
+
+		pugi::xml_node idNode = itemNode.child("id");
+		if (idNode)
 		{
-			if (reader.name() == "slot")
+			const auto id = idNode.attribute("value").as_int();
+			if (id != -1)
+				setId(id);
+		}
+
+		pugi::xml_node displayIdNode = itemNode.child("displayId");
+		if (displayIdNode)
+		{
+			const auto id = displayIdNode.attribute("value").as_int();
+			if (id_ == -1)
+				setDisplayId(id);
+		}
+
+		pugi::xml_node levelNode = itemNode.child("level");
+		if (levelNode)
+		{
+			const auto level = levelNode.attribute("value").as_int();
+			setLevel(level);
+		}
+
+		if (isCustomizableTabard())
+		{
+			pugi::xml_node tabardNode = itemNode.child("TabardDetails");
+			if (tabardNode)
 			{
-				const auto slot = reader.attributes().value("value").toString().toUInt();
-
-				if (slot == slot_)
-				{
-					while (!reader.atEnd() && nbValuesRead != 3)
-					{
-						if (reader.isStartElement())
-						{
-							if (reader.name() == "id")
-							{
-								const auto id = reader.attributes().value("value").toString().toInt();
-								nbValuesRead++;
-								if (id != -1)
-									setId(id);
-							}
-
-							if (reader.name() == "displayId")
-							{
-								const auto id = reader.attributes().value("value").toString().toInt();
-								nbValuesRead++;
-								if (id_ == -1)
-									setDisplayId(id);
-							}
-
-							if (reader.name() == "level")
-							{
-								const auto level = reader.attributes().value("value").toString().toInt();
-								nbValuesRead++;
-								setLevel(level);
-							}
-						}
-						reader.readNext();
-					}
-				}
+				charModel_->td.load(tabardNode);
+				load(); // refresh tabard textures
 			}
 		}
-		reader.readNext();
-	}
 
-	if (isCustomizableTabard()) // look for extra tabard details
-	{
-		reader.readNext();
-		while (reader.isStartElement() == false)
-			reader.readNext();
-
-		if (reader.name() == "TabardDetails")
-		{
-			charModel_->td.load(reader);
-			load(); // refresh tabard textures
-		}
+		break; // found matching slot
 	}
 }
 

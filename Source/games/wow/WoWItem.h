@@ -26,10 +26,10 @@
 #include "wow_enums.h"
 #include "metaclasses/Component.h"
 
+#include "pugixml.hpp"
+
 class Attachment;
 class WoWModel;
-class QXmlStreamWriter;
-class QXmlStreamReader;
 
 #define _WOWITEM_API_
 
@@ -59,8 +59,8 @@ public:
 
 	std::map<POSITION_SLOTS, WoWModel*> models() const { return itemModels_; }
 
-	void save(QXmlStreamWriter&) const;
-	void load(QString&);
+	void save(pugi::xml_node& parentNode) const;
+	void load(const std::string& filepath);
 
 private:
 	void unload();

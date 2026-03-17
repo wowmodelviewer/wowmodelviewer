@@ -14,10 +14,10 @@
 
 #include "metaclasses/Observable.h"
 
+#include "pugixml.hpp"
+
 class sqlResult;
 class WoWModel;
-class QXmlStreamWriter;
-class QXmlStreamReader;
 
 #define _CHARDETAILS_API_
 
@@ -116,8 +116,8 @@ public:
 	std::vector<TextureCustomization> textures;
 
 	// save + load
-	void save(QXmlStreamWriter&);
-	void load(QString&);
+	void save(pugi::xml_node& parentNode);
+	void load(const std::string& filepath);
 
 	void reset(WoWModel* m = nullptr);
 	void randomise();

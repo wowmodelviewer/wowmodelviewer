@@ -2,10 +2,9 @@
 
 class GameFile;
 
-#include <QString>
-class QXmlStreamReader;
-class QXmlStreamWriter;
+#include "pugixml.hpp"
 
+#include <string>
 #include <vector>
 
 #define _TABARDDETAILS_API_
@@ -27,8 +26,8 @@ public:
 	int GetMaxBorderColor(int border);
 	int GetMaxBackground();
 
-	void save(QXmlStreamWriter&);
-	void load(QXmlStreamReader&);
+	void save(pugi::xml_node& parentNode);
+	void load(const pugi::xml_node& node);
 
 	int getIcon();
 	int getIconColor();
@@ -49,9 +48,9 @@ public:
 	void setBackgroundId(int id);
 
 private:
-	static const std::vector<QString> ICON_COLOR_VECTOR;
-	static const std::vector<QString> BORDER_COLOR_VECTOR;
-	static const std::vector<QString> BACKGROUND_COLOR_VECTOR;
+	static const std::vector<std::string> ICON_COLOR_VECTOR;
+	static const std::vector<std::string> BORDER_COLOR_VECTOR;
+	static const std::vector<std::string> BACKGROUND_COLOR_VECTOR;
 
 	int iconId;
 	int iconColor;

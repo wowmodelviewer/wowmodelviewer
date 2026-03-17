@@ -1,6 +1,5 @@
 #include "TabardDetails.h"
 #include "Game.h"
-#include <QXmlStreamWriter>
 
 TabardDetails::TabardDetails()
     : showCustom(false),
@@ -116,71 +115,33 @@ int TabardDetails::GetMaxBorderColor(int border)
 	return -1;
 }
 
-void TabardDetails::save(QXmlStreamWriter& stream)
+void TabardDetails::save(pugi::xml_node& parentNode)
 {
-	stream.writeStartElement("TabardDetails");
+	pugi::xml_node node = parentNode.append_child("TabardDetails");
 
-	stream.writeStartElement("Icon");
-	stream.writeAttribute("value", QString::number(iconId));
-	stream.writeEndElement();
-
-	stream.writeStartElement("IconColor");
-	stream.writeAttribute("value", QString::number(iconColor));
-	stream.writeEndElement();
-
-	stream.writeStartElement("Border");
-	stream.writeAttribute("value", QString::number(borderId));
-	stream.writeEndElement();
-
-	stream.writeStartElement("BorderColor");
-	stream.writeAttribute("value", QString::number(borderColor));
-	stream.writeEndElement();
-
-	stream.writeStartElement("Background");
-	stream.writeAttribute("value", QString::number(backgroundId));
-	stream.writeEndElement();
-
-	stream.writeEndElement(); // TabardDetails
+	node.append_child("Icon").append_attribute("value") = iconId;
+	node.append_child("IconColor").append_attribute("value") = iconColor;
+	node.append_child("Border").append_attribute("value") = borderId;
+	node.append_child("BorderColor").append_attribute("value") = borderColor;
+	node.append_child("Background").append_attribute("value") = backgroundId;
 }
 
-void TabardDetails::load(QXmlStreamReader& reader)
+void TabardDetails::load(const pugi::xml_node& node)
 {
-	int nbValuesRead = 0;
-	while (!reader.atEnd() && nbValuesRead != 5)
+	for (pugi::xml_node child = node.first_child(); child; child = child.next_sibling())
 	{
-		if (reader.isStartElement())
-		{
-			if (reader.name() == "Icon")
-			{
-				iconId = reader.attributes().value("value").toString().toInt();
-				nbValuesRead++;
-			}
+		const std::string name = child.name();
 
-			if (reader.name() == "IconColor")
-			{
-				iconColor = reader.attributes().value("value").toString().toInt();
-				nbValuesRead++;
-			}
-
-			if (reader.name() == "Border")
-			{
-				borderId = reader.attributes().value("value").toString().toInt();
-				nbValuesRead++;
-			}
-
-			if (reader.name() == "BorderColor")
-			{
-				borderColor = reader.attributes().value("value").toString().toInt();
-				nbValuesRead++;
-			}
-
-			if (reader.name() == "Background")
-			{
-				backgroundId = reader.attributes().value("value").toString().toInt();
-				nbValuesRead++;
-			}
-		}
-		reader.readNext();
+		if (name == "Icon")
+			iconId = child.attribute("value").as_int();
+		else if (name == "IconColor")
+			iconColor = child.attribute("value").as_int();
+		else if (name == "Border")
+			borderId = child.attribute("value").as_int();
+		else if (name == "BorderColor")
+			borderColor = child.attribute("value").as_int();
+		else if (name == "Background")
+			backgroundId = child.attribute("value").as_int();
 	}
 }
 
