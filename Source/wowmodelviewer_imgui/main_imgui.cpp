@@ -1,5 +1,5 @@
 // ============================================================================
-// WoW Model Viewer — ImGui / GLFW entry point (Phase 2 migration)
+// WoW Model Viewer — ImGui / GLFW entry point
 //
 // Replaces the wxWidgets WinMain ? wxEntry flow from main.cpp / app.cpp.
 // Initialises engine systems (GlobalSettings, Logger, video), creates an
@@ -7,9 +7,15 @@
 // displays it as an ImGui::Image() inside a dockable "3D Viewport" panel.
 // OrbitCamera input is wired to ImGui's mouse/keyboard state.
 //
-// Phase 2: Game loading (CascLib + GameDatabase) — reads Config.ini,
+// Game loading (CascLib + GameDatabase) — reads Config.ini,
 // opens the WoW game folder via an ImGui path dialog, initialises the
 // CASC storage, loads the listfile, and builds the in-memory database.
+//
+// File Browser — filterable tree view of CASC files with configurable
+// extension filter and text search. Clicking a .m2 file loads it.
+//
+// Model loading — creates WoWModel from GameFile, sets up character
+// equipment slots, and resets the camera to frame the model.
 // ============================================================================
 
 #ifdef _WIN32
@@ -40,7 +46,7 @@
 #include "WoWModel.h"
 #include "OrbitCamera.h"
 
-// Game loading (Phase 2)
+// Game loading
 #include "Game.h"
 #include "WoWFolder.h"
 #include "WoWDatabase.h"
@@ -50,6 +56,13 @@
 #include "RaceInfos.h"
 #include "database.h"
 #include "string_utils.h"
+#include "TextureManager.h"
+#include "WoWItem.h"
+
+#include <format>
+#include <set>
+#include <map>
+#include <regex>
 
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
@@ -136,6 +149,50 @@ static char         g_pathBuf[1024] = {};
 static bool                            g_showConfigPopup = false;
 static std::vector<core::GameConfig>   g_pendingConfigs;
 static int                             g_selectedConfig  = 0;
+
+// ---- File Browser state ---------------------------------------------------
+struct FileBrowserNode
+{
+    std::string                              name;
+    GameFile*                                file = nullptr; // non-null for leaf nodes
+    std::map<std::string, FileBrowserNode*>  children;
+
+    ~FileBrowserNode()
+    {
+        for (auto& [k, v] : children)
+            delete v;
+    }
+};
+
+static const char* g_filterLabels[] = {
+    "Models (*.m2)",
+    "WMOs (*.wmo)",
+    "ADTs (*.adt)",
+    "Sounds (*.wav)",
+    "OGGs (*.ogg)",
+    "MP3s (*.mp3)",
+    "Images (*.blp)",
+    "Shaders (*.bls)",
+    "DBCs (*.dbc)",
+    "DB2s (*.db2)",
+    "LUAs (*.lua)",
+    "XMLs (*.xml)",
+    "SKINs (*.skin)"
+};
+
+static const char* g_filterExtensions[] = {
+    "m2", "wmo", "adt", "wav", "ogg", "mp3",
+    "blp", "bls", "dbc", "db2", "lua", "xml", "skin"
+};
+
+static constexpr int          g_filterCount = sizeof(g_filterLabels) / sizeof(g_filterLabels[0]);
+static int                    g_filterMode  = 0; // index into g_filterLabels
+static char                   g_searchBuf[256] = {};
+static FileBrowserNode*       g_fileTreeRoot = nullptr;
+static bool                   g_fileTreeDirty = true; // needs rebuild
+static int                    g_fileTreeFileCount = 0;
+static bool                   g_isModel = false;
+static bool                   g_isChar  = false;
 
 // ---- Helpers --------------------------------------------------------------
 static std::filesystem::path getApplicationDirPath()
@@ -361,6 +418,7 @@ static void loadWoW(const core::GameConfig& config)
     g_loadStatus = "World of Warcraft loaded successfully.";
     g_isWoWLoaded = true;
     g_loadInProgress = false;
+    g_fileTreeDirty = true; // trigger initial file tree build
 
     LOG_INFO << "World of Warcraft loaded successfully. Version: "
              << GAMEDIRECTORY.version() << " Locale: " << GAMEDIRECTORY.locale();
@@ -433,6 +491,147 @@ static void beginLoadWoW()
         g_showConfigPopup = true;
         g_loadInProgress = false; // will resume after user picks
     }
+}
+
+// ---- Build file browser tree from CASC files ------------------------------
+static void rebuildFileTree()
+{
+    if (!g_isWoWLoaded)
+        return;
+
+    delete g_fileTreeRoot;
+    g_fileTreeRoot = new FileBrowserNode();
+    g_fileTreeRoot->name = "Root";
+
+    // Build regex filter: ^.*<search>.*\.<extension>
+    std::string search = core::toLower(std::string(g_searchBuf));
+    // Trim whitespace
+    auto s = search.find_first_not_of(" \t\r\n");
+    auto e = search.find_last_not_of(" \t\r\n");
+    search = (s == std::string::npos) ? "" : search.substr(s, e - s + 1);
+
+    std::string filterString = std::format("^.*{}.*\\.{}", search, g_filterExtensions[g_filterMode]);
+    std::set<GameFile*> files;
+    GAMEDIRECTORY.getFilteredFiles(files, filterString);
+
+    g_fileTreeFileCount = static_cast<int>(files.size());
+
+    for (auto* gf : files)
+    {
+        std::string fullname = gf->fullname();
+        // Append file data ID for display
+        std::string displayName = std::format("{} [{}]", fullname, gf->fileDataId());
+
+        // Beautify: lowercase, backslash separators, capitalize first chars
+        std::transform(displayName.begin(), displayName.end(), displayName.begin(),
+            [](unsigned char c) { return static_cast<char>(std::tolower(c)); });
+        std::replace(displayName.begin(), displayName.end(), '/', '\\');
+        if (!displayName.empty())
+            displayName[0] = static_cast<char>(std::toupper(static_cast<unsigned char>(displayName[0])));
+
+        auto parts = core::split(displayName, '\\');
+        FileBrowserNode* cur = g_fileTreeRoot;
+
+        // Build intermediate directory nodes
+        for (int i = 0; i < static_cast<int>(parts.size()) - 1; ++i)
+        {
+            auto it = cur->children.find(parts[i]);
+            if (it == cur->children.end())
+            {
+                auto* child = new FileBrowserNode();
+                child->name = parts[i];
+                cur->children[parts[i]] = child;
+                cur = child;
+            }
+            else
+            {
+                cur = it->second;
+            }
+        }
+
+        // Add leaf node
+        auto* leaf = new FileBrowserNode();
+        leaf->name = parts.back();
+        leaf->file = gf;
+        cur->children[parts.back()] = leaf;
+    }
+
+    g_fileTreeDirty = false;
+    LOG_INFO << "File tree rebuilt: " << g_fileTreeFileCount << " files matching filter.";
+}
+
+// ---- Clear current model --------------------------------------------------
+static void clearModel()
+{
+    if (g_root)
+    {
+        g_root->delChildren();
+        g_root->setModel(nullptr);
+    }
+
+    TEXTUREMANAGER.clear();
+    g_isModel = false;
+    g_isChar = false;
+}
+
+// ---- Load a model from GameFile (ported from ModelViewer::LoadModel) -------
+static void loadModel(GameFile* file)
+{
+    if (!file || !g_root)
+        return;
+
+    LOG_INFO << "Loading model: " << file->fullname();
+
+    clearModel();
+
+    auto* model = new WoWModel(file, true);
+    if (!model->ok)
+    {
+        LOG_ERROR << "Model is not OK: " << file->fullname();
+        delete model;
+        return;
+    }
+
+    g_root->addChild(model, 0, -1);
+
+    // Determine if this is a character model
+    const std::string fn = file->fullname();
+    g_isChar = (core::startsWithIgnoreCase(fn, "char") ||
+                core::startsWithIgnoreCase(fn, "alternate/char") ||
+                core::startsWithIgnoreCase(fn, "alternate\\char"));
+
+    if (g_isChar)
+    {
+        model->addChild(new WoWItem(CS_SHIRT));
+        model->addChild(new WoWItem(CS_HEAD));
+        model->addChild(new WoWItem(CS_SHOULDER));
+        model->addChild(new WoWItem(CS_PANTS));
+        model->addChild(new WoWItem(CS_BOOTS));
+        model->addChild(new WoWItem(CS_CHEST));
+        model->addChild(new WoWItem(CS_TABARD));
+        model->addChild(new WoWItem(CS_BELT));
+        model->addChild(new WoWItem(CS_BRACERS));
+        model->addChild(new WoWItem(CS_GLOVES));
+        model->addChild(new WoWItem(CS_HAND_RIGHT));
+        model->addChild(new WoWItem(CS_HAND_LEFT));
+        model->addChild(new WoWItem(CS_CAPE));
+        model->addChild(new WoWItem(CS_QUIVER));
+        model->modelType = MT_CHAR;
+        model->charModelDetails.isChar = true;
+    }
+    else
+    {
+        model->addChild(new WoWItem(CS_HAND_RIGHT));
+        model->addChild(new WoWItem(CS_HAND_LEFT));
+        model->modelType = MT_NORMAL;
+    }
+
+    g_isModel = true;
+
+    // Reset camera to frame the model
+    g_camera.reset(model);
+
+    LOG_INFO << "Model loaded: " << model->name();
 }
 
 // ---- Default lighting (replaces LightControl / wxWindow) ------------------
@@ -782,11 +981,66 @@ int main(int /*argc*/, char* /*argv*/[])
             }
             else
             {
-                ImGui::Text("WoW loaded: %s", GAMEDIRECTORY.version().c_str());
-                ImGui::Text("Locale: %s", GAMEDIRECTORY.locale().c_str());
-                ImGui::Text("Files: %u", GAMEDIRECTORY.nbChildren());
+                // ---- Filter options ----
+                ImGui::Text("Filter:");
+                ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
+                if (ImGui::Combo("##filter", &g_filterMode, g_filterLabels, g_filterCount))
+                    g_fileTreeDirty = true;
+
+                ImGui::Text("Search:");
+                ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x - 60.0f);
+                if (ImGui::InputText("##search", g_searchBuf, sizeof(g_searchBuf),
+                                     ImGuiInputTextFlags_EnterReturnsTrue))
+                    g_fileTreeDirty = true;
+                ImGui::SameLine();
+                if (ImGui::Button("Apply", ImVec2(-1, 0)))
+                    g_fileTreeDirty = true;
+
+                // Rebuild tree when filter changes
+                if (g_fileTreeDirty)
+                    rebuildFileTree();
+
                 ImGui::Separator();
-                ImGui::Text("File tree control will go here (Phase 3).");
+                ImGui::Text("Files: %d", g_fileTreeFileCount);
+                ImGui::Separator();
+
+                // ---- File tree ----
+                ImGui::BeginChild("FileTree", ImVec2(0, 0), ImGuiChildFlags_None, ImGuiWindowFlags_HorizontalScrollbar);
+                if (g_fileTreeRoot)
+                {
+                    // Recursive lambda to draw the tree
+                    std::function<void(FileBrowserNode*)> drawNode = [&](FileBrowserNode* node)
+                    {
+                        for (auto& [name, child] : node->children)
+                        {
+                            if (child->file)
+                            {
+                                // Leaf node (file)
+                                ImGuiTreeNodeFlags leafFlags =
+                                    ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen |
+                                    ImGuiTreeNodeFlags_SpanAvailWidth;
+                                ImGui::TreeNodeEx(child->name.c_str(), leafFlags);
+                                if (ImGui::IsItemClicked() && !ImGui::IsItemToggledOpen())
+                                {
+                                    loadModel(child->file);
+                                }
+                            }
+                            else
+                            {
+                                // Directory node
+                                bool open = ImGui::TreeNodeEx(child->name.c_str(),
+                                    ImGuiTreeNodeFlags_SpanAvailWidth);
+                                if (open)
+                                {
+                                    drawNode(child);
+                                    ImGui::TreePop();
+                                }
+                            }
+                        }
+                    };
+                    drawNode(g_fileTreeRoot);
+                }
+                ImGui::EndChild();
             }
         }
         ImGui::End();
@@ -905,6 +1159,9 @@ int main(int /*argc*/, char* /*argv*/[])
     }
 
     // ---- Cleanup ----
+    delete g_fileTreeRoot;
+    g_fileTreeRoot = nullptr;
+
     if (g_root)
     {
         g_root->delChildren();
