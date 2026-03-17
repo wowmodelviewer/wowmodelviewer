@@ -79,10 +79,12 @@ public:
 			return false;
 		if (definedTexture && !grp.definedTexture)
 			return true;
-		QString texname1 = QString::fromStdString(tex[0]->fullname());
-		QString texname2 = QString::fromStdString(grp.tex[0]->fullname());
-		texname1 = texname1.mid(texname1.lastIndexOf("/"));
-		texname2 = texname2.mid(texname2.lastIndexOf("/"));
+		std::string texname1 = tex[0]->fullname();
+		std::string texname2 = grp.tex[0]->fullname();
+		auto pos1 = texname1.rfind('/');
+		auto pos2 = texname2.rfind('/');
+		if (pos1 != std::string::npos) texname1 = texname1.substr(pos1);
+		if (pos2 != std::string::npos) texname2 = texname2.substr(pos2);
 		if (texname1 != texname2)
 			return texname1 < texname2;
 		for (size_t i = 0; i < num; i++)
@@ -174,11 +176,11 @@ public:
 	void SetSingleSkin(int num, int texnum);
 	void SetAnimSpeed(float speed);
 	void SetAnimFrame(size_t frame);
-	QString GetModelFolder(WoWModel* m);
+	std::string GetModelFolder(WoWModel* m);
 
 	bool defaultDoodads;
 	std::string oldname;
-	QString modelFolder;
+	std::string modelFolder;
 	bool modelFolderChanged, BLPListFilled;
 	std::map<int, TextureGroup> CDIToTexGp;
 	std::vector<particleColorReplacements> PCRList;

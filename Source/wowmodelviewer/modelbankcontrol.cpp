@@ -85,7 +85,7 @@ void ModelBankControl::LoadModel()
 
 	const ModelBank cd = bankList[val];
 
-	g_modelViewer->LoadModel(GAMEDIRECTORY.getFile(QString::fromWCharArray(cd.fileName.c_str())));
+	g_modelViewer->LoadModel(GAMEDIRECTORY.getFile(std::string(wxString(cd.fileName).ToUTF8())));
 
 	if (g_canvas->model())
 	{

@@ -8,6 +8,7 @@
 #include <locale>
 #include <map>
 #include <utility>
+#include <filesystem>
 #include <fstream>
 #include <regex>
 #include <string>
@@ -21,12 +22,12 @@ CASCFolder::CASCFolder()
 {
 }
 
-void CASCFolder::init(const QString& path)
+void CASCFolder::init(const std::string& path)
 {
 	m_folder = path;
 
-	if (m_folder.endsWith("\\"))
-		m_folder.remove(m_folder.size() - 1, 1);
+	if (!m_folder.empty() && m_folder.back() == '\\')
+		m_folder.pop_back();
 
 	initBuildInfo();
 }
@@ -36,7 +37,7 @@ bool CASCFolder::setConfig(core::GameConfig config)
 	m_currentConfig = config;
 
 	// init map based on CASCLib
-	std::map<QString, int> locales;
+	std::map<std::string, int> locales;
 	locales["frFR"] = CASC_LOCALE_FRFR;
 	locales["deDE"] = CASC_LOCALE_DEDE;
 	locales["esES"] = CASC_LOCALE_ESES;
@@ -54,16 +55,16 @@ bool CASCFolder::setConfig(core::GameConfig config)
 	locales["zhTW"] = CASC_LOCALE_ZHTW;
 
 	// set locale
-	if (!m_currentConfig.locale.isEmpty())
+	if (!m_currentConfig.locale.empty())
 	{
 		const auto& it = locales.find(m_currentConfig.locale);
 
 		if (it != locales.end())
 		{
-			const QString cascParams = m_folder + "*" + m_currentConfig.product;
+			const std::string cascParams = m_folder + "*" + m_currentConfig.product;
 			LOG_INFO << "Loading Game Folder:" << cascParams;
 			// locale found => try to open it
-			if (!CascOpenStorage(cascParams.toStdWString().c_str(), it->second, &hStorage))
+			if (!CascOpenStorage(std::filesystem::path(cascParams).wstring().c_str(), it->second, &hStorage))
 			{
 				m_openError = GetLastError();
 				LOG_ERROR << "CASCFolder: Opening" << cascParams << "failed." << "Error" << m_openError;
@@ -81,10 +82,10 @@ bool CASCFolder::setConfig(core::GameConfig config)
 
 void CASCFolder::initBuildInfo()
 {
-	const QString buildinfofile = m_folder + "\\..\\.build.info";
+	const std::string buildinfofile = m_folder + "\\..\\.build.info";
 	LOG_INFO << "buildinfofile : " << buildinfofile;
 
-	std::ifstream file(buildinfofile.toStdWString());
+	std::ifstream file(buildinfofile);
 	if (!file.is_open())
 	{
 		LOG_ERROR << "Fail to open .build.info to grab game config info";
@@ -141,9 +142,9 @@ void CASCFolder::initBuildInfo()
 			{
 				auto tags = core::split(value, ' ');
 				core::GameConfig config;
-				config.locale = QString::fromStdString(tags[tags.size() - 2]);
-				config.version = QString::fromStdString(version);
-				config.product = QString::fromStdString(product);
+				config.locale = tags[tags.size() - 2];
+				config.version = version;
+				config.product = product;
 				m_configs.push_back(config);
 			}
 		}

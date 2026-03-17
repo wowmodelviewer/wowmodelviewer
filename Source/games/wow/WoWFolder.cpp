@@ -1,5 +1,6 @@
 #include "WoWFolder.h"
 #include <filesystem>
+#include <format>
 #include <fstream>
 #include <string>
 #include "CASCFile.h"
@@ -8,7 +9,7 @@
 #include "HardDriveFile.h"
 #include "logger/Logger.h"
 
-wow::WoWFolder::WoWFolder(const QString& path) : GameFolder(path)
+wow::WoWFolder::WoWFolder(const std::string& path) : GameFolder(path)
 {
 }
 
@@ -17,9 +18,9 @@ void wow::WoWFolder::init()
 	m_CASCFolder.init(path());
 }
 
-void wow::WoWFolder::initFromListfile(const QString& filename)
+void wow::WoWFolder::initFromListfile(const std::string& filename)
 {
-	const std::string fullPath = core::Game::instance().configFolder() + filename.toStdString();
+	const std::string fullPath = core::Game::instance().configFolder() + filename;
 	std::ifstream file(fullPath);
 	if (!file.is_open())
 	{
@@ -37,20 +38,21 @@ void wow::WoWFolder::initFromListfile(const QString& filename)
 	std::string stdline;
 	while (std::getline(file, stdline))
 	{
-		QString line = QString::fromStdString(stdline).toLower();
-		auto lineData = core::split(line.toStdString(), ';');
+		std::string line = core::toLower(stdline);
+		auto lineData = core::split(line, ';');
 		if (lineData.size() < 2)
 			continue;
 		int id = std::stoi(lineData[0]);
-		QString fileName = QString::fromStdString(lineData[1]);
+		std::string fileName = lineData[1];
 		// Add the file to the name-ID mappings even if it can't be found in CASC,
 		// as it could be a custom file added by the user:
 		m_idNameMap[id] = fileName;
 		m_nameIdMap[fileName] = id;
 		if (m_CASCFolder.fileExists(id))
 		{
-			CASCFile* File = new CASCFile(fileName.toStdString(), id);
-			File->setName(line.mid(line.lastIndexOf('/') + 1).toStdString());
+			CASCFile* File = new CASCFile(fileName, id);
+			auto lastSlash = line.rfind('/');
+			File->setName(lastSlash != std::string::npos ? line.substr(lastSlash + 1) : line);
 			addChild(File);
 		}
 		if (m_progressCallback && ++lineCount % 500 == 0 && totalSize > 0)
@@ -59,23 +61,23 @@ void wow::WoWFolder::initFromListfile(const QString& filename)
 	LOG_INFO << "WoWFolder - Hierarchy creation done";
 }
 
-void wow::WoWFolder::addCustomFiles(const QString& path, bool bypassOriginalFiles)
+void wow::WoWFolder::addCustomFiles(const std::string& path, bool bypassOriginalFiles)
 {
 	LOG_INFO << "Add customFiles from folder" << path;
 	namespace fs = std::filesystem;
 
 	std::error_code ec;
-	for (const auto& entry : fs::recursive_directory_iterator(path.toStdWString(), ec))
+	for (const auto& entry : fs::recursive_directory_iterator(path, ec))
 	{
 		if (!entry.is_regular_file())
 			continue;
 
-		QString filePath = QString::fromStdWString(entry.path().wstring()).toLower();
-		QString absPath = filePath;
+		std::string filePath = core::toLower(entry.path().string());
+		std::string absPath = filePath;
 
-		QString toRemove = path;
-		toRemove += "\\";
-		filePath.replace(0, toRemove.size(), "");
+		std::string toRemove = path + "\\";
+		if (filePath.find(toRemove) == 0)
+			filePath.erase(0, toRemove.size());
 
 		GameFile* originalFile = GameFolder::getFile(filePath);
 		bool addnewfile = true;
@@ -106,8 +108,9 @@ void wow::WoWFolder::addCustomFiles(const QString& path, bool bypassOriginalFile
 		{
 			LOG_INFO << "Add custom file" << filePath << "(ID:" << originalId << ")from hard drive location" <<
 				absPath;
-			HardDriveFile* file = new HardDriveFile(filePath.toStdString(), absPath.toStdString(), originalId);
-			file->setName(filePath.mid(filePath.lastIndexOf("/") + 1).toStdString());
+			HardDriveFile* file = new HardDriveFile(filePath, absPath, originalId);
+			auto lastSlash = filePath.rfind('/');
+			file->setName(lastSlash != std::string::npos ? filePath.substr(lastSlash + 1) : filePath);
 			addChild(file);
 		}
 	}
@@ -127,7 +130,7 @@ GameFile* wow::WoWFolder::getFile(int id)
 	if (!result) // if not found, try to force open by id
 	{
 		// Build File########.unk filename needed for CASC lib to open file based on id
-		const QString filename = QString("File%1.unk").arg(id, 8, 16, QLatin1Char('0'));
+		const std::string filename = std::format("File{:08x}.unk", id);
 		LOG_INFO << "File with id" << id << "not found in listfile. Trying to open" << filename;
 
 		HANDLE newfile;
@@ -135,8 +138,8 @@ GameFile* wow::WoWFolder::getFile(int id)
 		{
 			LOG_INFO << "Succesfully opened";
 			m_CASCFolder.closeFile(newfile);
-			CASCFile* file = new CASCFile(filename.toStdString(), id);
-			file->setName(filename.toStdString());
+			CASCFile* file = new CASCFile(filename, id);
+			file->setName(filename);
 			addChild(file);
 			result = file;
 		}
@@ -152,24 +155,24 @@ bool wow::WoWFolder::openFile(int id, HANDLE* result)
 
 bool wow::WoWFolder::openFile(std::string file, HANDLE* result)
 {
-	const auto it = m_nameIdMap.find(QString::fromStdString(file));
+	const auto it = m_nameIdMap.find(file);
 	if (it == m_nameIdMap.end())
 		return false;
 	return m_CASCFolder.openFile(it->second, result);
 }
 
-QString wow::WoWFolder::version()
+std::string wow::WoWFolder::version()
 {
 	return m_CASCFolder.version();
 }
 
 int wow::WoWFolder::majorVersion()
 {
-	auto v = core::split(m_CASCFolder.version().toStdString(), '.');
+	auto v = core::split(version(), '.');
 	return std::stoi(v[0]);
 }
 
-QString wow::WoWFolder::locale()
+std::string wow::WoWFolder::locale()
 {
 	return m_CASCFolder.locale();
 }
@@ -201,15 +204,15 @@ void wow::WoWFolder::onChildRemoved(GameFile* child)
 	m_idMap.erase(child->fileDataId());
 }
 
-QString wow::WoWFolder::fileName(int id)
+std::string wow::WoWFolder::fileName(int id)
 {
 	const auto it = m_idNameMap.find(id);
 	if (it == m_idNameMap.end())
-		return QString();
+		return std::string();
 	return it->second;
 }
 
-int wow::WoWFolder::fileID(QString fileName)
+int wow::WoWFolder::fileID(const std::string& fileName)
 {
 	const auto it = m_nameIdMap.find(fileName);
 	if (it == m_nameIdMap.end())

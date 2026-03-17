@@ -656,13 +656,12 @@ void CharControl::selectMount()
 	if (creaturemodels.empty())
 	{
 		std::vector<GameFile*> files;
-		GAMEDIRECTORY.getFilesForFolder(files, QString("creature/"), QString("m2"));
+		GAMEDIRECTORY.getFilesForFolder(files, std::string("creature/"), std::string("m2"));
 		if (files.size())
 		{
 			for (std::vector<GameFile*>::iterator it = files.begin(); it != files.end(); ++it)
 			{
-				QString fn = QString::fromStdString((*it)->fullname());
-				creaturemodels.push_back(wxString(fn.toStdWString()));
+				creaturemodels.push_back(wxString::FromUTF8((*it)->fullname()));
 			}
 			creaturemodels.Sort();
 		}
@@ -898,7 +897,7 @@ void CharControl::OnUpdateItem(int type, int id)
 			}
 			else if (cats[id] == 1) // create mount from any old creature model file name
 			{
-				modelFile = GAMEDIRECTORY.getFile(QString::fromWCharArray(creaturemodels[numbers[id]].c_str()));
+				modelFile = GAMEDIRECTORY.getFile(std::string(creaturemodels[numbers[id]].ToUTF8()));
 				// that's it. No special textures or anything.
 			}
 			else

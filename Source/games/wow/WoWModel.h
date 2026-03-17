@@ -235,7 +235,7 @@ public:
 	void save(pugi::xml_node& parentNode);
 	void load(const std::string& filepath);
 
-	static QString getCGGroupName(CharGeosets cg);
+	static std::string getCGGroupName(CharGeosets cg);
 
 	// @TODO use geoset id instead of geoset index in vector
 	void showGeoset(uint geosetindex, bool value);
@@ -244,17 +244,17 @@ public:
 	void setGeosetGroupDisplay(CharGeosets group, int val);
 	void setCreatureGeosetData(std::set<GeosetNum> cgd);
 
-	WoWModel* mergeModel(QString& name, int type = 1, bool noRefresh = false);
+	WoWModel* mergeModel(std::string name, int type = 1, bool noRefresh = false);
 	WoWModel* mergeModel(uint fileID, int type = 1, bool noRefresh = false);
 	WoWModel* mergeModel(WoWModel* model, int type = 1, bool noRefresh = false);
-	void unmergeModel(QString& name);
+	void unmergeModel(std::string name);
 	void unmergeModel(uint fileID);
 	void unmergeModel(WoWModel* model);
 	WoWModel* getMergedModel(uint fileID);
 
 	void refresh();
 
-	QString getNameForTex(uint16 tex);
+	std::string getNameForTex(uint16 tex);
 	GLuint getGLTexture(uint16 tex) const;
 	void dumpTextureStatus();
 

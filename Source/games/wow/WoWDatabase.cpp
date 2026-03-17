@@ -70,7 +70,7 @@ DBFile* wow::TableStructure::createDBFile()
 	// loop over possible extension to check if file exists
 	for (const auto& i : POSSIBLE_DB_EXT)
 	{
-		fileToOpen = GAMEDIRECTORY.getFile(QString::fromStdString("DBFilesClient\\" + file + i));
+		fileToOpen = GAMEDIRECTORY.getFile("DBFilesClient\\" + file + i);
 		if (fileToOpen)
 			break;
 	}

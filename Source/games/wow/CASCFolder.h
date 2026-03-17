@@ -7,6 +7,7 @@
 
 #pragma once
 
+#include <string>
 #include <vector>
 
 #ifdef _WIN32
@@ -22,10 +23,10 @@ class _CASCFOLDER_API_ CASCFolder
 public:
 	CASCFolder();
 
-	void init(const QString& path);
+	void init(const std::string& path);
 
-	QString locale() { return m_currentConfig.locale; }
-	QString version() { return m_currentConfig.version; }
+	std::string locale() { return m_currentConfig.locale; }
+	std::string version() { return m_currentConfig.version; }
 
 	std::vector<core::GameConfig> configsFound() { return m_configs; }
 	bool setConfig(core::GameConfig config);
@@ -51,7 +52,7 @@ private:
 	int m_currentCascLocale;
 	core::GameConfig m_currentConfig;
 
-	QString m_folder;
+	std::string m_folder;
 	int m_openError;
 	HANDLE hStorage;
 

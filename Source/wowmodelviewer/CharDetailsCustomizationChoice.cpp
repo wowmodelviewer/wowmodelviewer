@@ -1,4 +1,5 @@
 #include "CharDetailsCustomizationChoice.h"
+#include <format>
 #include "CharDetails.h"
 #include "CharDetailsEvent.h"
 #include "Game.h"
@@ -18,7 +19,7 @@ CharDetailsCustomizationChoice::CharDetailsCustomizationChoice(wxWindow* parent,
 
 	details_.attach(this);
 
-	const auto option = GAMEDATABASE.sqlQuery(QString("SELECT Name_Lang FROM ChrCustomizationOption WHERE ID = %1").arg(ID_).toStdString());
+	const auto option = GAMEDATABASE.sqlQuery(std::format("SELECT Name_Lang FROM ChrCustomizationOption WHERE ID = {}", ID_));
 
 	if (option.valid && !option.values.empty())
 	{
@@ -71,19 +72,19 @@ void CharDetailsCustomizationChoice::buildList()
 		if (ids.empty())
 			return;
 
-		auto query = QString("SELECT OrderIndex,Name_Lang,ID FROM ChrCustomizationChoice WHERE ID IN (");
+		auto query = std::string("SELECT OrderIndex,Name_Lang,ID FROM ChrCustomizationChoice WHERE ID IN (");
 		for (const auto id : ids)
 		{
-			query += QString::number(id);
+			query += std::to_string(id);
 			query += ",";
 		}
 
-		query.chop(1);
+		query.pop_back();
 		query += ") ORDER BY OrderIndex";
 
-		LOG_INFO << query;
+		LOG_INFO << query.c_str();
 
-		const auto choices = GAMEDATABASE.sqlQuery(query.toStdString());
+		const auto choices = GAMEDATABASE.sqlQuery(query);
 
 		if (choices.valid && !choices.values.empty())
 		{

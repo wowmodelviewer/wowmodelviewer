@@ -12,38 +12,38 @@ namespace wow
 	class _WOWFOLDER_API_ WoWFolder : public core::GameFolder
 	{
 	public:
-		WoWFolder(const QString& path);
+		WoWFolder(const std::string& path);
 
 		virtual ~WoWFolder()
 		{
 		}
 
 		void init() override;
-		void initFromListfile(const QString& file) override;
-		void addCustomFiles(const QString& path, bool bypassOriginalFiles) override;
+		void initFromListfile(const std::string& file) override;
+		void addCustomFiles(const std::string& path, bool bypassOriginalFiles) override;
 
 		GameFile* getFile(int id) override;
 
 		bool openFile(int id, HANDLE* result) override;
 		bool openFile(std::string file, HANDLE* result) override;
 
-		QString version() override;
+		std::string version() override;
 		int majorVersion() override;
-		QString locale() override;
+		std::string locale() override;
 		bool setConfig(core::GameConfig config) override;
 		std::vector<core::GameConfig> configsFound() override;
 
 		int lastError() override;
 
-		void onChildAdded(GameFile*) override;
-		void onChildRemoved(GameFile*) override;
-		QString fileName(int id);
-		int fileID(QString fileName);
+			void onChildAdded(GameFile*) override;
+			void onChildRemoved(GameFile*) override;
+			std::string fileName(int id);
+			int fileID(const std::string& fileName);
 
-	private:
-		CASCFolder m_CASCFolder;
-		std::map<int, GameFile*> m_idMap;
-		std::map<int, QString> m_idNameMap;
-		std::map<QString, int> m_nameIdMap;
-	};
+		private:
+			CASCFolder m_CASCFolder;
+			std::map<int, GameFile*> m_idMap;
+			std::map<int, std::string> m_idNameMap;
+			std::map<std::string, int> m_nameIdMap;
+		};
 }

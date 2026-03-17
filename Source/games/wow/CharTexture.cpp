@@ -1,5 +1,6 @@
 #include "CharTexture.h"
 
+#include <algorithm>
 #include <map>
 #include <string>
 

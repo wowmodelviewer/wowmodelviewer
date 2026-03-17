@@ -64,7 +64,7 @@ bool WDB6File::open()
 			uint32 Size = 4;
 
 			// starting from 7.3 version, data in common data is stored in 4 bytes, not dynamic size anymore
-			if (!GAMEDIRECTORY.version().contains("7.3"))
+			if (GAMEDIRECTORY.version().find("7.3") == std::string::npos)
 			{
 				if (type == 1)
 					Size = 2;

@@ -1,50 +1,54 @@
 #include "GameFolder.h"
-#include <QRegularExpression>
+#include <regex>
+#include "string_utils.h"
 #include "logger/Logger.h"
 
-core::GameFolder::GameFolder(QString path) : m_path(std::move(path))
+core::GameFolder::GameFolder(std::string path) : m_path(std::move(path))
 {
 }
 
-QString core::GameFolder::getFullPathForFile(QString file)
+std::string core::GameFolder::getFullPathForFile(const std::string& file)
 {
-	file = file.toLower();
+	const std::string lower = core::toLower(file);
 	for (const auto it : *this)
 	{
-		if (QString::fromStdString(it->name()) == file)
-			return QString::fromStdString(it->fullname());
+		if (it->name() == lower)
+			return it->fullname();
 	}
 
 	return "";
 }
 
-void core::GameFolder::getFilesForFolder(std::vector<GameFile*>& fileNames, QString folderPath, QString extension)
+void core::GameFolder::getFilesForFolder(std::vector<GameFile*>& fileNames, const std::string& folderPath, const std::string& extension)
 {
 	for (auto file : *this)
 	{
-		const QString fn = QString::fromStdString(file->fullname());
-		if (fn.startsWith(folderPath, Qt::CaseInsensitive) &&
-			(!extension.size() || fn.endsWith(extension, Qt::CaseInsensitive)))
+		const auto& fn = file->fullname();
+		if (core::startsWithIgnoreCase(fn, folderPath) &&
+			(extension.empty() || core::endsWithIgnoreCase(fn, extension)))
 		{
 			fileNames.push_back(file);
 		}
 	}
 }
 
-void core::GameFolder::getFilteredFiles(std::set<GameFile*>& dest, QString& filter)
+void core::GameFolder::getFilteredFiles(std::set<GameFile*>& dest, const std::string& filter)
 {
-	const QRegularExpression regex(filter);
-
-	if (!regex.isValid())
+	std::regex regex;
+	try
 	{
-		LOG_ERROR << regex.errorString();
+		regex = std::regex(filter, std::regex_constants::icase);
+	}
+	catch (const std::regex_error& e)
+	{
+		LOG_ERROR << e.what();
 		return;
 	}
 	int count = 0;
 	const int total = static_cast<int>(nbChildren());
 	for (auto it : *this)
 	{
-		if (QString::fromStdString(it->name()).contains(regex))
+		if (std::regex_search(it->name(), regex))
 		{
 			dest.insert(it);
 		}
@@ -53,13 +57,14 @@ void core::GameFolder::getFilteredFiles(std::set<GameFile*>& dest, QString& filt
 	}
 }
 
-GameFile* core::GameFolder::getFile(QString filename)
+GameFile* core::GameFolder::getFile(const std::string& filename)
 {
-	filename = filename.toLower().replace('\\', '/');
+	std::string lower = core::toLower(filename);
+	std::replace(lower.begin(), lower.end(), '\\', '/');
 
 	GameFile* result = nullptr;
 
-	const auto it = m_nameMap.find(filename);
+	const auto it = m_nameMap.find(lower);
 	if (it != m_nameMap.end())
 		result = it->second;
 
@@ -68,10 +73,10 @@ GameFile* core::GameFolder::getFile(QString filename)
 
 void core::GameFolder::onChildAdded(GameFile* child)
 {
-	m_nameMap[QString::fromStdString(child->fullname())] = child;
+	m_nameMap[child->fullname()] = child;
 }
 
 void core::GameFolder::onChildRemoved(GameFile* child)
 {
-	m_nameMap.erase(QString::fromStdString(child->fullname()));
+	m_nameMap.erase(child->fullname());
 }

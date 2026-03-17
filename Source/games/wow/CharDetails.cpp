@@ -6,6 +6,7 @@
 #include "WoWModel.h"
 #include "logger/Logger.h"
 
+#include <format>
 #include <fstream>
 #include <sstream>
 
@@ -158,9 +159,8 @@ void CharDetails::fillCustomizationMap()
 		return;
 
 	const auto options = GAMEDATABASE.sqlQuery(
-		QString(
-			"SELECT ID FROM ChrCustomizationOption WHERE ChrModelID = %1 AND ChrCustomizationID != 0 ORDER BY OrderIndex")
-		.arg(infos.ChrModelID[0]).toStdString());
+		std::format("SELECT ID FROM ChrCustomizationOption WHERE ChrModelID = {} AND ChrCustomizationID != 0 ORDER BY OrderIndex",
+			infos.ChrModelID[0]));
 
 	if (options.valid)
 		for (auto& option : options.values)
@@ -183,8 +183,8 @@ void CharDetails::fillCustomizationMapForOption(uint chrCustomizationOption)
 
 	// 1. fill direct values
 	const auto choices = GAMEDATABASE.sqlQuery(
-		QString("SELECT ID FROM ChrCustomizationChoice WHERE ChrCustomizationOptionID = %1 ORDER BY OrderIndex").arg(
-			chrCustomizationOption).toStdString());
+		std::format("SELECT ID FROM ChrCustomizationChoice WHERE ChrCustomizationOptionID = {} ORDER BY OrderIndex",
+			chrCustomizationOption));
 	if (choices.valid)
 	{
 		LOG_INFO << __FUNCTION__ << "DIRECT values" << choices.values.size();
@@ -219,9 +219,9 @@ void CharDetails::fillCustomizationMapForOption(uint chrCustomizationOption)
 	if (vals != originalVals)
 	{
 		LOG_INFO << __FUNCTION__ << chrCustomizationOption;
-		QString info;
+		std::string info;
 		for (const auto& v : vals)
-			info += QString("%1 ").arg(v);
+			info += std::to_string(v) + " ";
 		LOG_INFO << info;
 
 		CharDetailsEvent event(this, CharDetailsEvent::CHOICE_LIST_CHANGED);
@@ -253,12 +253,12 @@ void CharDetails::set(uint chrCustomizationOptionID, uint chrCustomizationChoice
 	auto relatedChoiceId = 0;
 
 	// 1. First query direct elements (related choice id = 0)
-	auto query = QString("SELECT ChrCustomizationGeosetID, ChrCustomizationSkinnedModelID, ChrCustomizationMaterialID, "
+	auto query = std::format("SELECT ChrCustomizationGeosetID, ChrCustomizationSkinnedModelID, ChrCustomizationMaterialID, "
 			"ChrCustomizationBoneSetID, ChrCustomizationCondModelID, ChrCustomizationDisplayInfoID, ID FROM ChrCustomizationElement "
-			"WHERE ChrCustomizationChoiceID = %1 AND RelatedChrCustomizationChoiceID = %2").arg(choiceId)
-		.arg(relatedChoiceId);
+			"WHERE ChrCustomizationChoiceID = {} AND RelatedChrCustomizationChoiceID = {}", choiceId,
+			relatedChoiceId);
 
-	auto elements = GAMEDATABASE.sqlQuery(query.toStdString());
+	auto elements = GAMEDATABASE.sqlQuery(query);
 	if (!applyChrCustomizationElements(chrCustomizationOptionID, elements))
 	{
 		LOG_ERROR << __FUNCTION__ << "No direct customization entry found for chrCustomizationOptionID" <<
@@ -274,13 +274,13 @@ void CharDetails::set(uint chrCustomizationOptionID, uint chrCustomizationChoice
 			relatedChoiceId = currentCustomization_[option];
 
 			// query related ChrCustomizationElements
-			query = QString(
+			query = std::format(
 					"SELECT ChrCustomizationGeosetID, ChrCustomizationSkinnedModelID, ChrCustomizationMaterialID, "
 					"ChrCustomizationBoneSetID, ChrCustomizationCondModelID, ChrCustomizationDisplayInfoID, ID FROM ChrCustomizationElement "
-					"WHERE ChrCustomizationChoiceID = %1 AND RelatedChrCustomizationChoiceID = %2").arg(choiceId)
-				.arg(relatedChoiceId);
+					"WHERE ChrCustomizationChoiceID = {} AND RelatedChrCustomizationChoiceID = {}", choiceId,
+					relatedChoiceId);
 
-			elements = GAMEDATABASE.sqlQuery(query.toStdString());
+			elements = GAMEDATABASE.sqlQuery(query);
 
 			if (!applyChrCustomizationElements(option, elements))
 			{
@@ -302,12 +302,12 @@ void CharDetails::set(uint chrCustomizationOptionID, uint chrCustomizationChoice
 		fillCustomizationMapForOption(childOption);
 
 		// query related ChrCustomizationElements
-		query = QString("SELECT ChrCustomizationGeosetID, ChrCustomizationSkinnedModelID, ChrCustomizationMaterialID, "
+		query = std::format("SELECT ChrCustomizationGeosetID, ChrCustomizationSkinnedModelID, ChrCustomizationMaterialID, "
 				"ChrCustomizationBoneSetID, ChrCustomizationCondModelID, ChrCustomizationDisplayInfoID, ID FROM ChrCustomizationElement "
-				"WHERE ChrCustomizationChoiceID = %1 AND RelatedChrCustomizationChoiceID = %2").arg(choiceId)
-			.arg(relatedChoiceId);
+				"WHERE ChrCustomizationChoiceID = {} AND RelatedChrCustomizationChoiceID = {}", choiceId,
+				relatedChoiceId);
 
-		elements = GAMEDATABASE.sqlQuery(query.toStdString());
+		elements = GAMEDATABASE.sqlQuery(query);
 
 		if (!applyChrCustomizationElements(chrCustomizationOptionID, elements))
 		{
@@ -393,8 +393,8 @@ bool CharDetails::applyChrCustomizationElements(uint chrCustomizationOption, sql
 				LOG_INFO << "ChrCustomizationGeosetID based customization for" << elt[6] << "/" << elt[0];
 
 				auto vals = GAMEDATABASE.sqlQuery(
-					QString("SELECT GeosetType, GeosetID FROM ChrCustomizationGeoset WHERE ID = %1").arg(
-						std::stoi(elt[0])).toStdString());
+					std::format("SELECT GeosetType, GeosetID FROM ChrCustomizationGeoset WHERE ID = {}",
+						std::stoi(elt[0])));
 
 				if (vals.valid)
 				{
@@ -407,9 +407,9 @@ bool CharDetails::applyChrCustomizationElements(uint chrCustomizationOption, sql
 			{
 				LOG_INFO << "ChrCustomizationSkinnedModelID based customization for" << elt[6] << "/" << elt[1];
 				auto vals = GAMEDATABASE.sqlQuery(
-					QString(
-						"SELECT CollectionsFileDataID, GeosetType, GeosetID FROM ChrCustomizationSkinnedModel WHERE ID = %1")
-					.arg(std::stoi(elt[1])).toStdString());
+					std::format(
+						"SELECT CollectionsFileDataID, GeosetType, GeosetID FROM ChrCustomizationSkinnedModel WHERE ID = {}",
+						std::stoi(elt[1])));
 
 				if (vals.valid && !vals.values.empty())
 						customizationElementsPerOption_[chrCustomizationOption].models.emplace_back(
@@ -419,12 +419,12 @@ bool CharDetails::applyChrCustomizationElements(uint chrCustomizationOption, sql
 			else if (std::stoi(elt[2]) != 0) // texture customization
 			{
 				LOG_INFO << "ChrCustomizationMaterialID based customization for" << elt[6] << "/" << elt[2];
-				auto vals = GAMEDATABASE.sqlQuery(QString(
+				auto vals = GAMEDATABASE.sqlQuery(std::format(
 					"SELECT ChrModelTextureLayer.Layer, ChrModelTextureLayer.TextureSectionTypeBitMask, ChrModelTextureLayer.TextureType, ChrModelTextureLayer.BlendMode, FileDataID FROM ChrCustomizationMaterial "
 					"LEFT JOIN TextureFileData ON ChrCustomizationMaterial.MaterialResourcesID = TextureFileData.MaterialResourcesID "
 					"LEFT JOIN ChrModelTextureLayer ON ChrCustomizationMaterial.ChrModelTextureTargetID = ChrModelTextureLayer.ChrModelTextureTargetID1 "
-					"AND ChrModelTextureLayer.CharComponentTextureLayoutsID = %1 "
-					"WHERE ChrCustomizationMaterial.ID = %2").arg(model_->infos.textureLayoutID).arg(std::stoi(elt[2])).toStdString());
+					"AND ChrModelTextureLayer.CharComponentTextureLayoutsID = {} "
+					"WHERE ChrCustomizationMaterial.ID = {}", model_->infos.textureLayoutID, std::stoi(elt[2])));
 
 				if (vals.valid && !vals.values.empty())
 					{
@@ -510,11 +510,11 @@ void CharDetails::initLinkedOptionsMap()
 	for (const auto& c : choicesPerOptionMap_)
 	{
 		auto id = c.first;
-		const auto query = QString("SELECT DISTINCT ChrCustomizationOptionID FROM ChrCustomizationChoice WHERE ID IN "
+		const auto query = std::format("SELECT DISTINCT ChrCustomizationOptionID FROM ChrCustomizationChoice WHERE ID IN "
 			"(SELECT RelatedChrCustomizationChoiceID FROM ChrCustomizationElement WHERE ChrCustomizationChoiceID = "
-			"(SELECT ID FROM ChrCustomizationChoice WHERE ChrCustomizationOptionID = %1 AND OrderIndex = 1))").arg(id);
+			"(SELECT ID FROM ChrCustomizationChoice WHERE ChrCustomizationOptionID = {} AND OrderIndex = 1))", id);
 
-		auto link = GAMEDATABASE.sqlQuery(query.toStdString());
+		auto link = GAMEDATABASE.sqlQuery(query);
 
 		if (link.valid && !link.values.empty())
 		{

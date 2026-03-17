@@ -21,7 +21,6 @@
 #include <map>
 #include <string>
 #include <vector>
-#include <QString>
 #include "WoWDatabase.h"
 #include "GameFile.h"
 #include "wow_enums.h"
@@ -95,7 +94,7 @@ private:
 
 	CharRegions getRegionForTexture(GameFile* file) const;
 
-	bool queryItemInfo(const QString& query, sqlResult& result) const;
+	bool queryItemInfo(const std::string& query, sqlResult& result) const;
 
 	int getCustomModelId(size_t index) const;
 	int getCustomTextureId(size_t index) const;

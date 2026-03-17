@@ -1,6 +1,7 @@
 #include "wdc1file.h"
 #include "logger/Logger.h"
 #include "Game.h" // GAMEDIRECTORY Singleton
+#include <algorithm>
 #include <sstream>
 #include <bitset>
 #include <cstdint>

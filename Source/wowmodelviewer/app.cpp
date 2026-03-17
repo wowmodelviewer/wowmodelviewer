@@ -181,10 +181,10 @@ frame->interfaceManager.Update();
 			if (i + 1 < argc)
 			{
 				i++;
-				QString fn = QString::fromWCharArray(argv[i]);
+				std::string fn = std::string(wxString(argv[i]).ToUTF8());
 
 				// Error check
-				if (!fn.endsWith("2")) // Its not an M2 file, exit
+				if (fn.empty() || fn.back() != '2') // Its not an M2 file, exit
 					break;
 
 				// Load the model
@@ -196,9 +196,9 @@ frame->interfaceManager.Update();
 			if (i + 1 < argc)
 			{
 				i++;
-				QString fn = QString::fromWCharArray(argv[i]);
+				std::string fn = std::string(wxString(argv[i]).ToUTF8());
 
-				if (!fn.endsWith("2")) // Its not an M2 file, exit
+				if (fn.empty() || fn.back() != '2') // Its not an M2 file, exit
 					break;
 
 				// If its a character model, give it some skin.
@@ -206,14 +206,15 @@ frame->interfaceManager.Update();
 				frame->LoadModel(GAMEDIRECTORY.getFile(fn));
 
 				// Output the screenshot
-				fn = "ss_" + fn.replace('\\', '_') + ".png";
-				frame->canvas->Screenshot(fn.toStdWString());
+				std::replace(fn.begin(), fn.end(), '\\', '_');
+				std::wstring ssfn = wxString::FromUTF8("ss_" + fn + ".png").ToStdWstring();
+				frame->canvas->Screenshot(ssfn);
 			}
 		}
 		else if (cmd == "-dbfromfile")
 		{
 			LOG_INFO << "Read database from file";
-			core::Game::instance().init(new wow::WoWFolder(QString::fromWCharArray(gamePath.c_str())),
+			core::Game::instance().init(new wow::WoWFolder(std::string(wxString(gamePath).ToUTF8())),
 			                            new wow::WoWDatabase());
 			GAMEDATABASE.setFastMode();
 		}

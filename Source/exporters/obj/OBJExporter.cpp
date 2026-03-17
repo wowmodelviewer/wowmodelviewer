@@ -304,10 +304,10 @@ bool OBJExporter::exportModelVertices(WoWModel* model, std::ofstream& file, int&
 			// Part Names
 			int mesh = g / 100;
 
-			QString cgGroupName = WoWModel::getCGGroupName(static_cast<CharGeosets>(mesh));
+			std::string cgGroupName = WoWModel::getCGGroupName(static_cast<CharGeosets>(mesh));
 
 			if ((model->modelType == MT_CHAR) && (cgGroupName != ""))
-				partName += "-" + cgGroupName.toStdString();
+				partName += "-" + cgGroupName;
 
 			file << "g " << partName << "\n";
 			file << "usemtl " << matName << "\n";
@@ -353,8 +353,8 @@ bool OBJExporter::exportModelMaterials(WoWModel* model, std::ofstream& file, std
 
 		if (p->init())
 		{
-			QString tex = model->getNameForTex(p->tex);
-			std::string texStem = fs::path(tex.toStdString()).stem().string();
+			std::string tex = model->getNameForTex(p->tex);
+			std::string texStem = fs::path(tex).stem().string();
 			std::string mtlStem = fs::path(mtlFile).stem().string();
 			std::string texFile = mtlStem + "_" + texStem + ".png";
 

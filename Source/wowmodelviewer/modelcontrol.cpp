@@ -392,7 +392,7 @@ void ModelControl::Update()
 		size_t mesh = model->geosets[i]->id / 100;
 		if (geosetGroupsMap.find(mesh) == geosetGroupsMap.end())
 		{
-			wxString name = WoWModel::getCGGroupName(static_cast<CharGeosets>(mesh)).toStdWString().c_str();
+			wxString name = wxString::FromUTF8(WoWModel::getCGGroupName(static_cast<CharGeosets>(mesh)));
 			if (name != _T(""))
 				geosetGroupsMap[mesh] = clbGeosets->AppendItem(root, name);
 			else

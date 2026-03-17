@@ -18,5 +18,5 @@ void core::Game::init(core::GameFolder* folder, core::GameDatabase* db)
 void core::Game::addCustomFiles(const std::string& path, bool bypassOriginalFiles)
 {
 	if (m_folder)
-		m_folder->addCustomFiles(QString::fromStdString(path), bypassOriginalFiles);
+		m_folder->addCustomFiles(path, bypassOriginalFiles);
 }

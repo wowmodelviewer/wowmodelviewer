@@ -1834,7 +1834,7 @@ void ModelViewer::LoadWoW()
 	}
 
 	if (!core::Game::instance().initDone())
-		core::Game::instance().init(new wow::WoWFolder(QString::fromWCharArray(gamePath.c_str())),
+		core::Game::instance().init(new wow::WoWFolder(std::string(wxString(gamePath).ToUTF8())),
 		                            new wow::WoWDatabase());
 
 	// init game config
@@ -1859,10 +1859,10 @@ void ModelViewer::LoadWoW()
 		wxString* availableConfigs = new wxString[nbConfigs];
 		for (size_t i = 0; i < nbConfigs; i++)
 		{
-			QString label = configsFound[i].locale + " - " + configsFound[i].product;
+			std::string label = configsFound[i].locale + " - " + configsFound[i].product;
 			if (configsFound[i].version != "")
 				label = label + " (" + configsFound[i].version + ")";
-			availableConfigs[i] = wxString(label.toStdWString().c_str());
+			availableConfigs[i] = wxString::FromUTF8(label);
 		}
 
 		const long id = wxGetSingleChoiceIndex(_("Please select a locale:"), _("Locale"), nbConfigs, availableConfigs);
@@ -1913,14 +1913,14 @@ void ModelViewer::LoadWoW()
 	}
 
 	// init game version
-	SetStatusText(wxString(GAMEDIRECTORY.version().toStdWString()), 1);
+	SetStatusText(wxString::FromUTF8(GAMEDIRECTORY.version()), 1);
 
-	langName = GAMEDIRECTORY.locale().toStdWString();
+	langName = wxString::FromUTF8(GAMEDIRECTORY.locale()).ToStdWstring();
 
-	SetStatusText(wxString(GAMEDIRECTORY.locale().toStdWString()), 2);
+	SetStatusText(wxString::FromUTF8(GAMEDIRECTORY.locale()), 2);
 
 	// init file list
-	auto ver = core::split(GAMEDIRECTORY.version().toStdString(), '.');
+	auto ver = core::split(GAMEDIRECTORY.version(), '.');
 
 	const std::string baseConfigFolder = "games/wow/" + ver[0] + "." + ver[1] + "/";
 

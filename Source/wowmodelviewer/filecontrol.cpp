@@ -147,7 +147,7 @@ void FileControl::Init(ModelViewer* mv, std::function<void(int, int)> progressCa
 	content = QString(QString::fromWCharArray(txtContent->GetValue().c_str()).toLower().trimmed());
 	filterString = "^.*" + content + ".*\\." + filterStrings[filterMode];
 	std::set<GameFile*> files;
-	GAMEDIRECTORY.getFilteredFiles(files, filterString);
+	GAMEDIRECTORY.getFilteredFiles(files, filterString.toStdString());
 
 	LOG_INFO << "Initializing File Controls - Filtering done - files found" << files.size();
 	TreeStackItem root;
@@ -215,10 +215,10 @@ void FileControl::Export(wxString val, int select)
 	if (val.IsEmpty())
 		return;
 
-	GameFile* f = GAMEDIRECTORY.getFile(QString::fromWCharArray(val.c_str()));
+	GameFile* f = GAMEDIRECTORY.getFile(std::string(val.ToUTF8()));
 	if (!f)
 	{
-		LOG_ERROR << "Could not extract" << QString::fromWCharArray(val.c_str());
+		LOG_ERROR << "Could not extract" << std::string(val.ToUTF8());
 		return;
 	}
 
@@ -226,12 +226,12 @@ void FileControl::Export(wxString val, int select)
 
 	if (f->isEof())
 	{
-		LOG_ERROR << "Could not extract" << QString::fromWCharArray(val.c_str());
+		LOG_ERROR << "Could not extract" << std::string(val.ToUTF8());
 		f->close();
 		return;
 	}
 
-	LOG_INFO << "Saving" << QString::fromWCharArray(val.c_str());
+	LOG_INFO << "Saving" << std::string(val.ToUTF8());
 
 	const wxFileName fn(val);
 
@@ -277,7 +277,7 @@ wxString FileControl::ExportPNG(wxString val)
 	if (fn.GetExt().Lower() != wxT("blp"))
 		return _T("");
 
-	const TextureID temptex = TEXTUREMANAGER.add(GAMEDIRECTORY.getFile(QString::fromWCharArray(val.c_str())));
+	const TextureID temptex = TEXTUREMANAGER.add(GAMEDIRECTORY.getFile(std::string(val.ToUTF8())));
 	Texture& tex = *static_cast<Texture*>(TEXTUREMANAGER.items[temptex]);
 	if (tex.w == 0 || tex.h == 0)
 		return _T("");
@@ -489,7 +489,7 @@ void FileControl::OnTreeSelect(wxTreeEvent& event)
 		//if (wxGetKeyState(WXK_SHIFT)) 
 		//  canvas->AddModel(rootfn);
 		//else
-		modelviewer->LoadModel(GAMEDIRECTORY.getFile(QString::fromWCharArray(rootfn.c_str()))); // Load the model.
+		modelviewer->LoadModel(GAMEDIRECTORY.getFile(std::string(rootfn.ToUTF8()))); // Load the model.
 
 		UpdateInterface();
 	}

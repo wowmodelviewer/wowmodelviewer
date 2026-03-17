@@ -379,20 +379,24 @@ void FBXExporter::createMaterials()
 			FbxSurfacePhong* material = FbxSurfacePhong::Create(m_p_manager, mtrl_name.Buffer());
 			material->Ambient.Set(FbxDouble3(0.7, 0.7, 0.7));
 
-			QString tex = m_p_model->getNameForTex(pass->tex);
+			std::string tex = m_p_model->getNameForTex(pass->tex);
 
-			QString tex_name = tex.mid(tex.lastIndexOf('/') + 1);
-			tex_name = tex_name.replace(".blp", ".png");
+			std::string tex_name = tex;
+			auto slashPos = tex_name.rfind('/');
+			if (slashPos != std::string::npos)
+				tex_name = tex_name.substr(slashPos + 1);
+			if (auto blpPos = tex_name.find(".blp"); blpPos != std::string::npos)
+				tex_name.replace(blpPos, 4, ".png");
 
 			std::string filenameNarrow(m_filename.begin(), m_filename.end());
 			std::string tex_fullpath = filenameNarrow;
 			auto bsPos = tex_fullpath.rfind('\\');
 			if (bsPos != std::string::npos)
-				tex_fullpath = tex_fullpath.substr(0, bsPos + 1) + tex_name.toStdString();
+				tex_fullpath = tex_fullpath.substr(0, bsPos + 1) + tex_name;
 
 			m_texturesToExport[std::wstring(tex_fullpath.begin(), tex_fullpath.end())] = m_p_model->getGLTexture(pass->tex);
 
-			FbxFileTexture* texture = FbxFileTexture::Create(m_p_manager, tex_name.toStdString().c_str());
+			FbxFileTexture* texture = FbxFileTexture::Create(m_p_manager, tex_name.c_str());
 			texture->SetFileName(tex_fullpath.c_str());
 			texture->SetTextureUse(FbxTexture::eStandard);
 			texture->SetMappingType(FbxTexture::eUV);
@@ -438,20 +442,24 @@ void FBXExporter::createMaterials()
 							FbxSurfacePhong* material = FbxSurfacePhong::Create(m_p_manager, mtrl_name.Buffer());
 							material->Ambient.Set(FbxDouble3(0.7, 0.7, 0.7));
 
-							QString tex = model->getNameForTex(pass->tex);
+							std::string tex = model->getNameForTex(pass->tex);
 
-							QString tex_name = tex.mid(tex.lastIndexOf('/') + 1);
-							tex_name = tex_name.replace(".blp", ".png");
+							std::string tex_name = tex;
+							auto slashPos2 = tex_name.rfind('/');
+							if (slashPos2 != std::string::npos)
+								tex_name = tex_name.substr(slashPos2 + 1);
+							if (auto blpPos = tex_name.find(".blp"); blpPos != std::string::npos)
+								tex_name.replace(blpPos, 4, ".png");
 
 							std::string filenameNarrow2(m_filename.begin(), m_filename.end());
 							std::string tex_fullpath2 = filenameNarrow2;
 							auto bsPos2 = tex_fullpath2.rfind('\\');
 							if (bsPos2 != std::string::npos)
-								tex_fullpath2 = tex_fullpath2.substr(0, bsPos2 + 1) + tex_name.toStdString();
+								tex_fullpath2 = tex_fullpath2.substr(0, bsPos2 + 1) + tex_name;
 
 							m_texturesToExport[std::wstring(tex_fullpath2.begin(), tex_fullpath2.end())] = model->getGLTexture(pass->tex);
 
-							FbxFileTexture* texture = FbxFileTexture::Create(m_p_manager, tex_name.toStdString().c_str());
+							FbxFileTexture* texture = FbxFileTexture::Create(m_p_manager, tex_name.c_str());
 							texture->SetFileName(tex_fullpath2.c_str());
 						texture->SetTextureUse(FbxTexture::eStandard);
 						texture->SetMappingType(FbxTexture::eUV);

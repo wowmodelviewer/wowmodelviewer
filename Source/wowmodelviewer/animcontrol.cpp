@@ -2,6 +2,7 @@
 #include <wx/wx.h>
 #include <algorithm>
 #include <array>
+#include <format>
 #include <wx/combobox.h>
 #include "logger/Logger.h"
 #include "FileTreeItem.h"
@@ -220,7 +221,7 @@ void AnimControl::UpdateModel(WoWModel* m)
 
 	skinList->Clear();
 
-	const QString modelpath = GetModelFolder(m);
+	const std::string modelpath = GetModelFolder(m);
 	if (modelFolder != modelpath) // new model is in different folder to old
 	{
 		modelFolderChanged = true;
@@ -392,9 +393,13 @@ void AnimControl::SetSkinByDisplayID(int cdi)
 	LOG_ERROR << "No matching texture group found for cdi " << cdi;
 }
 
-QString AnimControl::GetModelFolder(WoWModel* m)
+std::string AnimControl::GetModelFolder(WoWModel* m)
 {
-	return QString::fromStdString(m->itemName()).section('/', 0, -2) + '/';
+	const auto& name = m->itemName();
+	auto pos = name.rfind('/');
+	if (pos != std::string::npos)
+		return name.substr(0, pos + 1);
+	return name;
 }
 
 glm::vec4 AnimControl::fromARGB(int color)
@@ -417,40 +422,40 @@ bool AnimControl::UpdateCreatureModel(WoWModel* m)
 	// see if this model has skins
 	LOG_INFO << "Searching skins for" << m->itemName();
 
-	QString query;
+	std::string query;
 
-	if (GAMEDIRECTORY.version().contains("7.3"))
+	if (GAMEDIRECTORY.version().find("7.3") != std::string::npos)
 	{
-		query = QString(
+		query = std::format(
 				"SELECT TextureVariationFileDataID1, TextureVariationFileDataID2, TextureVariationFileDataID3, ParticleColorID, "
 				"CreatureDisplayInfo.ID, CreatureGeosetData FROM CreatureDisplayInfo "
 				"LEFT JOIN CreatureModelData "
 				"ON CreatureDisplayInfo.ModelID = CreatureModelData.ID "
-				"WHERE CreatureModelData.FileDataID = %1")
-			.arg(m->gamefile->fileDataId());
+				"WHERE CreatureModelData.FileDataID = {}",
+				m->gamefile->fileDataId());
 	}
-	else if (GAMEDIRECTORY.version().contains("8.3") || GAMEDIRECTORY.version().contains("9.2"))
+	else if (GAMEDIRECTORY.version().find("8.3") != std::string::npos || GAMEDIRECTORY.version().find("9.2") != std::string::npos)
 	{
-		query = QString(
+		query = std::format(
 				"SELECT TextureVariationFileDataID1, TextureVariationFileDataID2, TextureVariationFileDataID3, ParticleColorID, "
 				"CreatureDisplayInfo.ID FROM CreatureDisplayInfo "
 				"LEFT JOIN CreatureModelData "
 				"ON CreatureDisplayInfo.ModelID = CreatureModelData.ID "
-				"WHERE CreatureModelData.FileDataID = %1")
-			.arg(m->gamefile->fileDataId());
+				"WHERE CreatureModelData.FileDataID = {}",
+				m->gamefile->fileDataId());
 	}
 	else
 	{
-		query = QString(
+		query = std::format(
 				"SELECT TextureVariationFileDataID1, TextureVariationFileDataID2, TextureVariationFileDataID3, TextureVariationFileDataID4, ParticleColorID, "
 				"CreatureDisplayInfo.ID FROM CreatureDisplayInfo "
 				"LEFT JOIN CreatureModelData "
 				"ON CreatureDisplayInfo.ModelID = CreatureModelData.ID "
-				"WHERE CreatureModelData.FileDataID = %1")
-			.arg(m->gamefile->fileDataId());
+				"WHERE CreatureModelData.FileDataID = {}",
+				m->gamefile->fileDataId());
 	}
 
-	sqlResult r = GAMEDATABASE.sqlQuery(query.toStdString());
+	sqlResult r = GAMEDATABASE.sqlQuery(query);
 	PCRList.clear();
 	if (r.valid && !r.values.empty())
 	{
@@ -476,7 +481,7 @@ bool AnimControl::UpdateCreatureModel(WoWModel* m)
 			// Configure geosets that are switched on only for certain displayIDs.
 			// This is handled differently in BfA (has its own table) compared
 			// to Legion (compressed into a single integer in CreatureDisplayInfo) :
-			if (GAMEDIRECTORY.version().contains("7.3"))
+			if (GAMEDIRECTORY.version().find("7.3") != std::string::npos)
 			{
 				// Geoset data is compressed into a single integer.
 				// The position of the hex digit (from right) represents
@@ -743,9 +748,13 @@ bool AnimControl::UpdateItemModel(WoWModel* m)
 	// get all blp files that correspond to the model
 	std::set<GameFile*> files;
 
-	const QString itemNameQ = QString::fromStdString(m->itemName());
-	QString filterString = itemNameQ.mid(itemNameQ.lastIndexOf("\\") + 1);
-	filterString = "(?i)^.*" + filterString.left(filterString.lastIndexOf(".")) + ".*\\.blp";
+	std::string itemName = m->itemName();
+	auto bsPos = itemName.rfind('\\');
+	std::string baseName = (bsPos != std::string::npos) ? itemName.substr(bsPos + 1) : itemName;
+	auto dotPos = baseName.rfind('.');
+	if (dotPos != std::string::npos)
+		baseName = baseName.substr(0, dotPos);
+	std::string filterString = "(?i)^.*" + baseName + ".*\\.blp";
 	GAMEDIRECTORY.getFilteredFiles(files, filterString);
 
 	if (files.size() != 0)

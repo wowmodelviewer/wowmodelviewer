@@ -1,6 +1,7 @@
 #include "WoWModel.h"
 #include <algorithm>
 #include <cassert>
+#include <format>
 #include <ostream>
 #include <sstream>
 #include <vector>
@@ -433,14 +434,15 @@ void WoWModel::initCommon()
 	cd.reset(this);
 
 	// replace .MDX with .M2
-	QString tempname = QString::fromStdString(gamefile->fullname());
-	tempname.replace(".mdx", ".m2");
+	std::string tempname = gamefile->fullname();
+	if (auto pos = tempname.find(".mdx"); pos != std::string::npos)
+		tempname.replace(pos, 4, ".m2");
 
 	ok = true;
 
 	memcpy(&header, gamefile->getBuffer(), sizeof(ModelHeader));
 
-	LOG_INFO << "Loading model:" << tempname << "size:" << gamefile->getSize();
+	LOG_INFO << "Loading model:" << tempname.c_str() << "size:" << gamefile->getSize();
 
 	// displayHeader(header);
 
@@ -457,7 +459,7 @@ void WoWModel::initCommon()
 	if (header.GlobalModelFlags & 0x200000)
 		model24500 = true;
 
-	modelname = tempname.toStdString();
+	modelname = tempname;
 	auto list = core::split(modelname, '\\');
 	auto lastName = list[list.size() - 1];
 	if (auto pos = lastName.find(".m2"); pos != std::string::npos)
@@ -474,7 +476,7 @@ void WoWModel::initCommon()
 
 	if (gamefile->getSize() < header.ofsParticleEmitters)
 	{
-		LOG_ERROR << "Unable to load the Model \"" << tempname << "\", appears to be corrupted.";
+		LOG_ERROR << "Unable to load the Model \"" << tempname.c_str() << "\", appears to be corrupted.";
 		gamefile->close();
 		return;
 	}
@@ -675,7 +677,7 @@ void WoWModel::initCommon()
 				}
 				else
 				{
-					QString texname(reinterpret_cast<char*>(gamefile->getBuffer() + texdef[I].nameOfs));
+					std::string texname(reinterpret_cast<char*>(gamefile->getBuffer() + texdef[I].nameOfs));
 					Tex = GAMEDIRECTORY.getFile(texname);
 				}
 				textures[I] = TEXTUREMANAGER.add(Tex);
@@ -809,11 +811,11 @@ void WoWModel::initCommon()
 	else
 		initStatic();
 
-	QString query = QString("SELECT CreatureGeosetDataID "
+	std::string query = std::format("SELECT CreatureGeosetDataID "
 			"FROM CreatureModelData "
-			"WHERE FileDataID = %1")
-		.arg(gamefile->fileDataId());
-	sqlResult r = GAMEDATABASE.sqlQuery(query.toStdString());
+			"WHERE FileDataID = {}",
+		gamefile->fileDataId());
+	sqlResult r = GAMEDATABASE.sqlQuery(query);
 	if (r.valid && !r.values.empty())
 	{
 		creatureGeosetDataID = std::stoi(r.values[0][0]);
@@ -926,10 +928,12 @@ void WoWModel::readAnimsFromFile(GameFile* f, std::vector<AFID>& afids, modelAni
 		}
 		else // else use file naming to get them
 		{
-			QString tempname = QString::fromStdString(modelname).replace(".m2", "");
-			tempname = QString("%1%2-%3.anim").arg(tempname).arg(anims[i].animID, 4, 10, QChar('0')).arg(
-				anims[i].subAnimID, 2, 10, QChar('0'));
-			Anim = GAMEDIRECTORY.getFile(tempname);
+			auto tempname = modelname;
+			auto mpos = tempname.rfind(".m2");
+			if (mpos == std::string::npos) mpos = tempname.rfind(".M2");
+			if (mpos != std::string::npos) tempname.erase(mpos);
+			auto animFileName = std::format("{}{:04d}-{:02d}.anim", tempname, anims[i].animID, anims[i].subAnimID);
+			Anim = GAMEDIRECTORY.getFile(animFileName);
 		}
 
 		if (Anim && Anim->open())
@@ -1268,13 +1272,16 @@ void WoWModel::setLOD(int index)
 	}
 	else
 	{
-		const QString tmpname = QString::fromStdString(modelname).replace(".m2", "", Qt::CaseInsensitive);
-		lodname = QString("%1%2.skin").arg(tmpname).arg(index, 2, 10, QChar('0')).toStdString(); // Lods: 00, 01, 02, 03
+		auto tmpname = modelname;
+		auto mpos = tmpname.rfind(".m2");
+		if (mpos == std::string::npos) mpos = tmpname.rfind(".M2");
+		if (mpos != std::string::npos) tmpname.erase(mpos);
+		lodname = std::format("{}{:02d}.skin", tmpname, index); // Lods: 00, 01, 02, 03
 
-		g = GAMEDIRECTORY.getFile(lodname.c_str());
+		g = GAMEDIRECTORY.getFile(lodname);
 		if (!g || !g->open())
 		{
-			LOG_ERROR << "Unable to load .skin file:" << lodname.c_str();
+			LOG_ERROR << "Unable to load .skin file:" << lodname;
 			return;
 		}
 	}
@@ -3848,11 +3855,11 @@ bool WoWModel::canSetTextureFromFile(int texnum)
 	return false;
 }
 
-QString WoWModel::getCGGroupName(CharGeosets cg)
+std::string WoWModel::getCGGroupName(CharGeosets cg)
 {
-	QString result = "";
+	std::string result = "";
 
-	static std::map<CharGeosets, QString> groups =
+	static std::map<CharGeosets, std::string> groups =
 	{
 		{CG_SKIN_OR_HAIR, "Skin or Hair"},
 		{CG_FACE_1, "Face 1"},
@@ -3980,13 +3987,13 @@ void WoWModel::setCreatureGeosetData(std::set<GeosetNum> cgd)
 	}
 }
 
-WoWModel* WoWModel::mergeModel(QString& name, int type, bool noRefresh)
+WoWModel* WoWModel::mergeModel(std::string name, int type, bool noRefresh)
 {
-	name = name.replace("\\", "/");
+	std::replace(name.begin(), name.end(), '\\', '/');
 
-	LOG_INFO << __FUNCTION__ << name;
+	LOG_INFO << __FUNCTION__ << name.c_str();
 	const auto it = std::find_if(std::begin(mergedModels), std::end(mergedModels),
-	                             [&](const WoWModel* m) { return m->gamefile->fullname() == name; });
+								 [&](const WoWModel* m) { return m->gamefile->fullname() == name; });
 
 	if (it != mergedModels.end())
 		return *it;
@@ -4161,7 +4168,7 @@ void WoWModel::refreshMerging()
 		for (const auto it : modelsIt->textures)
 		{
 			if (it != ModelRenderPass::INVALID_TEX)
-				textures.push_back(TEXTUREMANAGER.add(GAMEDIRECTORY.getFile(QString::fromStdString(TEXTUREMANAGER.get(it)))));
+				textures.push_back(TEXTUREMANAGER.add(GAMEDIRECTORY.getFile(TEXTUREMANAGER.get(it))));
 			else
 				textures.push_back(ModelRenderPass::INVALID_TEX);
 		}
@@ -4220,12 +4227,13 @@ void WoWModel::refreshMerging()
 	}
 }
 
-void WoWModel::unmergeModel(QString& name)
+void WoWModel::unmergeModel(std::string name)
 {
-	LOG_INFO << __FUNCTION__ << name;
+	std::replace(name.begin(), name.end(), '\\', '/');
+	LOG_INFO << __FUNCTION__ << name.c_str();
 	const auto it = std::find_if(std::begin(mergedModels),
-	                             std::end(mergedModels),
-	                             [&](const WoWModel* m) { return m->gamefile->fullname() == name.replace("\\", "/"); });
+								 std::end(mergedModels),
+								 [&](const WoWModel* m) { return m->gamefile->fullname() == name; });
 
 	if (it != mergedModels.end())
 	{
@@ -4270,14 +4278,14 @@ void WoWModel::refresh()
 
 	if (headItemId != -1 && cd.autoHideGeosetsForHeadItems)
 	{
-		const auto query = QString("SELECT HideGeosetGroup FROM HelmetGeosetData WHERE HelmetGeosetData.RaceID = %1 "
-			                   "AND HelmetGeosetData.HelmetGeosetVisDataID = (SELECT %2 FROM ItemDisplayInfo WHERE ItemDisplayInfo.ID = "
-			                   "(SELECT ItemDisplayInfoID FROM ItemAppearance WHERE ID = (SELECT ItemAppearanceID FROM ItemModifiedAppearance WHERE ItemID = %3)))")
-		                   .arg(infos.raceID)
-		                   .arg((infos.sexID == 0) ? "HelmetGeosetVis1" : "HelmetGeosetVis2")
-		                   .arg(headItemId);
+		const auto query = std::format("SELECT HideGeosetGroup FROM HelmetGeosetData WHERE HelmetGeosetData.RaceID = {} "
+							   "AND HelmetGeosetData.HelmetGeosetVisDataID = (SELECT {} FROM ItemDisplayInfo WHERE ItemDisplayInfo.ID = "
+							   "(SELECT ItemDisplayInfoID FROM ItemAppearance WHERE ID = (SELECT ItemAppearanceID FROM ItemModifiedAppearance WHERE ItemID = {})))",
+						   infos.raceID,
+						   (infos.sexID == 0) ? "HelmetGeosetVis1" : "HelmetGeosetVis2",
+						   headItemId);
 
-		const auto helmetInfos = GAMEDATABASE.sqlQuery(query.toStdString());
+		const auto helmetInfos = GAMEDATABASE.sqlQuery(query);
 
 		if (helmetInfos.valid && !helmetInfos.values.empty())
 		{
@@ -4354,12 +4362,12 @@ void WoWModel::refresh()
 	refreshMerging();
 }
 
-QString WoWModel::getNameForTex(uint16 Tex)
+std::string WoWModel::getNameForTex(uint16 Tex)
 {
 	if (specialTextures[Tex] == TEXTURE_SKIN)
 		return "Body.blp";
 	else
-		return QString::fromStdString(TEXTUREMANAGER.get(getGLTexture(Tex)));
+		return TEXTUREMANAGER.get(getGLTexture(Tex));
 }
 
 GLuint WoWModel::getGLTexture(uint16 Tex) const
@@ -4503,8 +4511,8 @@ std::ostream& operator<<(std::ostream& out, const WoWModel& m)
 		out << "    <Animation id=\"" << i << "\">" << endl;
 		out << "      <animID>" << m.anims[i].animID << "</animID>" << endl;
 		std::string strName;
-		QString query = QString("SELECT Name FROM AnimationData WHERE ID = %1").arg(m.anims[i].animID);
-		sqlResult anim = GAMEDATABASE.sqlQuery(query.toStdString());
+		std::string query = std::format("SELECT Name FROM AnimationData WHERE ID = {}", m.anims[i].animID);
+		sqlResult anim = GAMEDATABASE.sqlQuery(query);
 		if (anim.valid && !anim.empty())
 			strName = anim.values[0][0];
 		else

@@ -1,4 +1,5 @@
 #include "CharDetailsFrame.h"
+#include <format>
 #include <wx/sizer.h>
 #include "charcontrol.h"
 #include "CharDetailsCustomizationChoice.h"
@@ -45,9 +46,9 @@ void CharDetailsFrame::setModel(WoWModel* model)
 
 
 	const auto options = GAMEDATABASE.sqlQuery(
-		QString(
-			"SELECT ID FROM ChrCustomizationOption WHERE ChrModelID = %1 AND ChrCustomizationID != 0 ORDER BY OrderIndex")
-		.arg(infos.ChrModelID[0]).toStdString());
+		std::format(
+			"SELECT ID FROM ChrCustomizationOption WHERE ChrModelID = {} AND ChrCustomizationID != 0 ORDER BY OrderIndex",
+			infos.ChrModelID[0]));
 
 	if (options.valid && !options.values.empty())
 	{

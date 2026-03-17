@@ -68,7 +68,7 @@ std::vector<std::string> CSVFile::get(unsigned int recordIndex, const core::Tabl
 
 	for (const auto it : structure->fields)
 	{
-		uint fieldIndex = 0;
+		unsigned int fieldIndex = 0;
 
 		for (; fieldIndex < m_fields.size(); fieldIndex++)
 			if (toLower(it->name) == m_fields[fieldIndex])
