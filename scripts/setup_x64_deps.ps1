@@ -107,37 +107,6 @@ Copy-Item "$wxSrc\lib\nanosvg.lib" "$wxDst\lib\vc_x64_lib\nanosvg.lib" -Force
 Copy-Item "$wxSrc\lib\nanosvgrast.lib" "$wxDst\lib\vc_x64_lib\nanosvgrast.lib" -Force
 if (Test-Path "$wxSrc\lib\mswu") { Copy-Item "$wxSrc\lib\mswu" "$wxDst\lib\vc_x64_lib\mswu" -Recurse -Force }
 if (Test-Path "$wxSrc\lib\mswud") { Copy-Item "$wxSrc\lib\mswud" "$wxDst\lib\vc_x64_lib\mswud" -Recurse -Force }
-Write-Step "Installing Qt 6.8.3 msvc2022_64"
-$qtDst = Join-Path $RepoRoot "ThirdParty\Qt\6.8.3\6.8.3\msvc2022_64"
-if (Test-Path $qtDst) { Write-Host "  Already exists - skipping." }
-else {
-    Ensure-Dir $qtDst
-    $qtTmp = Join-Path $RepoRoot "out\qt_download"; Ensure-Dir $qtTmp
-    $qtBaseUrl = "https://download.qt.io/online/qtsdkrepository/windows_x86/desktop/qt6_683/qt6_683"
-    $qtBuildTag = "6.8.3-0-202503201308"
-    $qtPlatform = "Windows-Windows_11_23H2-MSVC2022-Windows-Windows_11_23H2-X86_64"
-    $qtArchives = @(
-        @{ Pkg = "qt.qt6.683.win64_msvc2022_64"; Name = "qtbase" },
-        @{ Pkg = "qt.qt6.683.win64_msvc2022_64"; Name = "qtsvg" },
-        @{ Pkg = "qt.qt6.683.win64_msvc2022_64"; Name = "qtdeclarative" },
-        @{ Pkg = "qt.qt6.683.win64_msvc2022_64"; Name = "qttools" },
-        @{ Pkg = "qt.qt6.683.win64_msvc2022_64"; Name = "qttranslations" },
-        @{ Pkg = "qt.qt6.683.addons.qt5compat.win64_msvc2022_64"; Name = "qt5compat" }
-    )
-    foreach ($arc in $qtArchives) {
-        $fileName = "${qtBuildTag}$($arc.Name)-${qtPlatform}.7z"
-        $url = "${qtBaseUrl}/$($arc.Pkg)/${fileName}"
-        $outFile = Join-Path $qtTmp $fileName
-        if (!(Test-Path $outFile)) {
-            Write-Host "  Downloading $($arc.Name)..."
-                Download-WithProgress -Uri $url -OutFile $outFile -Label $arc.Name
-        }
-        Write-Host "  Extracting $($arc.Name)..."
-        & $7zExe x $outFile -o"$qtDst" -aoa -bd | Out-Null
-        if ($LASTEXITCODE -ne 0) { throw "7z extraction failed for $fileName" }
-    }
-    if (!(Test-Path $qtDst)) { Write-Warning "Qt download failed - expected path not found: $qtDst" }
-}
 Write-Step "Installing FBX SDK 2020.3.9"
 $fbxIncDst = Join-Path $RepoRoot "ThirdParty\include"
 $fbxLibDst = Join-Path $RepoRoot "ThirdParty\lib\x64"

@@ -124,8 +124,6 @@ target_link_libraries(${NAME}
   armory
   wowhead
   ${CMAKE_SOURCE_DIR}/ThirdParty/lib/x64/libfbxsdk.lib
-  Qt6::Gui
-  Qt6::Widgets
   winhttp
   ${wxWidgets_LIBRARIES}
   ${CMAKE_SOURCE_DIR}/ThirdParty/lib/x64/zlib.lib
@@ -136,32 +134,10 @@ target_link_libraries(${NAME}
 
 install(TARGETS ${NAME} RUNTIME DESTINATION ${BIN_DIR})
 
-# additional files needed to let WMV correctly works
-set(QT_BIN_DIR  ${QT_LOCATION}/bin)
-set(QT_FILES ${QT_BIN_DIR}/Qt6Core.dll
-             ${QT_BIN_DIR}/Qt6Cored.dll
-             ${QT_BIN_DIR}/Qt6Gui.dll
-             ${QT_BIN_DIR}/Qt6Guid.dll
-             ${QT_BIN_DIR}/Qt6Widgets.dll
-             ${QT_BIN_DIR}/Qt6Widgetsd.dll)
-
-set(QT_PLUGIN_DIR ${QT_LOCATION}/plugins)
-
-set(QT_PLUGIN_IMG_FILES ${QT_PLUGIN_DIR}/imageformats/qgif.dll
-                        ${QT_PLUGIN_DIR}/imageformats/qgifd.dll
-                        ${QT_PLUGIN_DIR}/imageformats/qico.dll
-                        ${QT_PLUGIN_DIR}/imageformats/qicod.dll
-                        ${QT_PLUGIN_DIR}/imageformats/qjpeg.dll
-                        ${QT_PLUGIN_DIR}/imageformats/qjpegd.dll
-                        ${QT_PLUGIN_DIR}/imageformats/qsvg.dll
-                        ${QT_PLUGIN_DIR}/imageformats/qsvgd.dll)
-
+# additional files needed to let WMV correctly work
 set(EXTRA_FILES ${CMAKE_SOURCE_DIR}/bin_support/vcredist_x64.exe)
 
-set(files ${QT_FILES} ${EXTRA_FILES})
-
-install(FILES ${files} DESTINATION ${BIN_DIR})
-install(FILES ${QT_PLUGIN_IMG_FILES} DESTINATION ${BIN_DIR}plugins/imageformats)
+install(FILES ${EXTRA_FILES} DESTINATION ${BIN_DIR})
 foreach(dir ${wow_version_dirs})
   if(IS_DIRECTORY ${dir})
     get_filename_component(ver ${dir} NAME)

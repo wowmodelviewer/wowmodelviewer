@@ -40,11 +40,7 @@ setOutPath $INSTDIR
 File "${wmvroot}\bin\wowmodelviewer.exe"
 File "${wmvroot}\bin\*.dll"
 
-CreateDirectory $INSTDIR\plugins
-SetOutPath $INSTDIR\plugins\imageformats
-File "${wmvroot}\bin\plugins\imageformats\*"
-
-# Auto-include all WoW version directories and their files recursively.
+# Auto-include all WoW version directories
 # To add a new version, just create a new folder under bin_support\wow\.
 SetOutPath $INSTDIR\games\wow
 File /r "${wmvroot}\bin_support\wow\*.*"

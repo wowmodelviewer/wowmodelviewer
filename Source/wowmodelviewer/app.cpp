@@ -15,7 +15,6 @@
 #include "logger/Logger.h"
 #include "logger/LogOutputConsole.h"
 #include "logger/LogOutputFile.h"
-#include <QCoreApplication>
 #include "IniFile.h"
 
 /*  THIS IS OUR MAIN "START UP" FILE.
@@ -83,7 +82,6 @@ bool WowModelViewApp::OnInit()
 	GLOBALSETTINGS.bShowParticle = true;
 	GLOBALSETTINGS.bZeroParticle = true;
 
-	QCoreApplication::addLibraryPath(QLatin1String("./plugins"));
 	frame = nullptr;
 	{
 		wxLogNull logNo;

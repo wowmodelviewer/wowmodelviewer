@@ -30,27 +30,12 @@
 #include "string_utils.h"
 #include "IniFile.h"
 #include "HttpClient.h"
-#include <QCoreApplication>
 #include <filesystem>
 #include <format>
 #include <fstream>
 #include <thread>
 
-static void startQtEventLoop()
-{
-	if (QCoreApplication::instance() != nullptr)
-		return;
-
-	static std::thread qtThread([]() {
-		int argc = 1;
-		char* argv[] = {const_cast<char*>("wmv.app"), nullptr};
-		QCoreApplication app(argc, argv);
-		app.exec();
-	});
-	qtThread.detach();
-}
-
-// Return the directory containing the running executable (no trailing separator).
+// Return the directory
 static std::filesystem::path getApplicationDirPath()
 {
 	wchar_t buf[MAX_PATH]{};
@@ -167,7 +152,6 @@ END_EVENT_TABLE()
 
 ModelViewer::ModelViewer()
 {
-	startQtEventLoop();
 	m_exporters.push_back(new OBJExporter());
 	m_exporters.push_back(new FBXExporter());
 	m_importers.push_back(new ArmoryImporter());
