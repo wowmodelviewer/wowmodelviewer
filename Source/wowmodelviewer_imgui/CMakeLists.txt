@@ -42,3 +42,14 @@ endif()
 
 set(BIN_DIR "${CMAKE_SOURCE_DIR}/bin/")
 install(TARGETS ${NAME} RUNTIME DESTINATION ${BIN_DIR})
+
+# Install WoW version support files (database.xml, AnimationData.csv, etc.)
+# so the game loading code can find them at games/wow/X.Y/ relative to bin/.
+file(GLOB _wow_ver_dirs LIST_DIRECTORIES true ${CMAKE_SOURCE_DIR}/bin_support/wow/*)
+foreach(_dir ${_wow_ver_dirs})
+  if(IS_DIRECTORY ${_dir})
+    get_filename_component(_ver ${_dir} NAME)
+    file(GLOB _ver_files ${_dir}/*)
+    install(FILES ${_ver_files} DESTINATION ${CMAKE_SOURCE_DIR}/bin/games/wow/${_ver})
+  endif()
+endforeach()

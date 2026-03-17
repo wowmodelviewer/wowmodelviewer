@@ -1,11 +1,15 @@
 // ============================================================================
-// WoW Model Viewer — ImGui / GLFW entry point (Phase 1 migration)
+// WoW Model Viewer — ImGui / GLFW entry point (Phase 2 migration)
 //
 // Replaces the wxWidgets WinMain ? wxEntry flow from main.cpp / app.cpp.
 // Initialises engine systems (GlobalSettings, Logger, video), creates an
 // offscreen FBO for the 3-D viewport, renders the scene into that FBO, and
 // displays it as an ImGui::Image() inside a dockable "3D Viewport" panel.
 // OrbitCamera input is wired to ImGui's mouse/keyboard state.
+//
+// Phase 2: Game loading (CascLib + GameDatabase) — reads Config.ini,
+// opens the WoW game folder via an ImGui path dialog, initialises the
+// CASC storage, loads the listfile, and builds the in-memory database.
 // ============================================================================
 
 #ifdef _WIN32
@@ -21,6 +25,9 @@
 #include <cstdio>
 #include <string>
 #include <chrono>
+#include <filesystem>
+#include <fstream>
+#include <algorithm>
 
 // Engine (no wxWidgets dependencies)
 #include "GlobalSettings.h"
@@ -32,6 +39,17 @@
 #include "Attachment.h"
 #include "WoWModel.h"
 #include "OrbitCamera.h"
+
+// Game loading (Phase 2)
+#include "Game.h"
+#include "WoWFolder.h"
+#include "WoWDatabase.h"
+#include "IniFile.h"
+#include "HttpClient.h"
+#include "CharTexture.h"
+#include "RaceInfos.h"
+#include "database.h"
+#include "string_utils.h"
 
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
@@ -101,6 +119,321 @@ static glm::vec3    g_bgColor(71.0f / 255.0f, 95.0f / 255.0f, 121.0f / 255.0f);
 // Timing for animation tick
 static float        g_animTime   = 0.0f;
 static std::chrono::steady_clock::time_point g_lastTick;
+
+// ---- Game loading state (Phase 2) -----------------------------------------
+static std::string  g_gamePath;              // WoW Data folder path
+static std::string  g_cfgPath;               // userSettings/Config.ini
+static bool         g_isWoWLoaded  = false;
+static bool         g_initDB       = false;
+static std::string  g_loadStatus;            // status text shown in File Browser
+static float        g_loadProgress = 0.0f;   // 0..1 progress bar fraction
+static bool         g_loadInProgress = false;
+
+// ImGui folder-path input buffer
+static char         g_pathBuf[1024] = {};
+
+// Config selection state (ImGui modal replaces wxGetSingleChoiceIndex)
+static bool                            g_showConfigPopup = false;
+static std::vector<core::GameConfig>   g_pendingConfigs;
+static int                             g_selectedConfig  = 0;
+
+// ---- Helpers --------------------------------------------------------------
+static std::filesystem::path getApplicationDirPath()
+{
+#ifdef _WIN32
+    wchar_t buf[MAX_PATH]{};
+    GetModuleFileNameW(nullptr, buf, MAX_PATH);
+    return std::filesystem::path(buf).parent_path();
+#else
+    return std::filesystem::current_path();
+#endif
+}
+
+// ---- Config.ini reading/writing -------------------------------------------
+static void loadSettings()
+{
+    g_cfgPath = "userSettings/Config.ini";
+    const core::IniFile config(g_cfgPath);
+
+    g_gamePath = config.getString("Settings/Path");
+
+    LOG_INFO << "Settings loaded. Game path:" << g_gamePath;
+}
+
+static void saveSettings()
+{
+    core::IniFile config(g_cfgPath);
+    config.setValue("Settings/Path", g_gamePath);
+    config.sync();
+    LOG_INFO << "Settings saved.";
+}
+
+// ---- Support-file download (listfile.csv, extraEncryptionKeys.csv) --------
+static bool downloadFile(const std::string& url, const std::filesystem::path& dest,
+                          const std::string& label, bool replaceSeparators = false)
+{
+    LOG_INFO << "Downloading " << label << "...";
+    g_loadStatus = "Downloading " + label + "...";
+
+    const auto resp = HttpClient::Get(url);
+    if (!resp.success)
+    {
+        LOG_ERROR << "Failed to download " << label << ": " << resp.error;
+        g_loadStatus = "Failed to download " + label + ": " + resp.error;
+        return false;
+    }
+
+    std::string content = resp.body;
+    if (replaceSeparators)
+        std::replace(content.begin(), content.end(), ' ', ';');
+
+    std::ofstream file(dest, std::ios::binary);
+    if (!file.is_open())
+    {
+        LOG_ERROR << "Failed to write " << label << " to " << dest.string();
+        g_loadStatus = "Failed to write " + label;
+        return false;
+    }
+
+    file.write(content.data(), content.size());
+    file.close();
+    LOG_INFO << label << " saved to " << dest.string();
+    return true;
+}
+
+static bool checkAndDownloadSupportFiles()
+{
+    namespace fs = std::filesystem;
+
+    const fs::path appDir = getApplicationDirPath();
+    const fs::path listfilePath = appDir / "listfile.csv";
+    const fs::path keysPath = appDir / "extraEncryptionKeys.csv";
+
+    std::error_code ec;
+    const bool listfileMissing = !fs::exists(listfilePath, ec) || fs::file_size(listfilePath, ec) == 0;
+    const bool keysMissing = !fs::exists(keysPath, ec) || fs::file_size(keysPath, ec) == 0;
+
+    if (listfileMissing)
+    {
+        if (!downloadFile("https://github.com/wowdev/wow-listfile/releases/latest/download/community-listfile.csv",
+                          listfilePath, "listfile.csv"))
+            return false;
+    }
+
+    if (keysMissing)
+    {
+        if (!downloadFile("https://raw.githubusercontent.com/wowdev/TACTKeys/master/WoW.txt",
+                          keysPath, "extraEncryptionKeys.csv", true))
+            return false;
+    }
+
+    return true;
+}
+
+// ---- InitDatabase (ported from ModelViewer::InitDatabase) -----------------
+static void initDatabase()
+{
+    LOG_INFO << "Initializing Databases...";
+    g_loadStatus = "Initializing database...";
+
+    if (!GAMEDATABASE.initFromXML("database.xml"))
+    {
+        g_initDB = false;
+        LOG_ERROR << "Database initialization failed!";
+        g_loadStatus = "Database initialization failed!";
+        return;
+    }
+
+    LOG_INFO << "Database initialization succeeded.";
+    g_loadProgress = 0.60f;
+
+    CharTexture::initRegions();
+    g_loadProgress = 0.65f;
+
+    RaceInfos::init();
+    g_loadProgress = 0.70f;
+
+    g_initDB = true;
+
+    {
+        sqlResult npc = GAMEDATABASE.sqlQuery(
+            "SELECT ID, DisplayID1, CreatureType, Name_Lang From Creature;");
+
+        if (npc.valid && !npc.empty())
+        {
+            LOG_INFO << "Found " << npc.values.size() << " NPCs";
+            for (const auto& value : npc.values)
+            {
+                NPCRecord rec(value);
+                if (rec.model != 0)
+                    npcs.push_back(rec);
+            }
+        }
+        else
+        {
+            g_initDB = false;
+            LOG_ERROR << "Error during NPC detection from database.";
+            return;
+        }
+    }
+
+    g_loadProgress = 0.80f;
+
+    {
+        sqlResult item = GAMEDATABASE.sqlQuery(
+            "SELECT Item.ID, ItemSparse.Display_Lang, Item.InventoryType, "
+            "Item.ClassID, Item.SubclassID, Item.SheathType "
+            "FROM Item LEFT JOIN ItemSparse ON Item.ID = ItemSparse.ID "
+            "WHERE Item.InventoryType !=0 AND ItemSparse.Display_Lang != \"\"");
+
+        if (item.valid && !item.empty())
+        {
+            LOG_INFO << "Found " << item.values.size() << " items";
+            for (const auto& value : item.values)
+            {
+                ItemRecord rec(value);
+                items.items.push_back(rec);
+            }
+        }
+        else
+        {
+            g_initDB = false;
+            LOG_ERROR << "Error during Item detection from database.";
+            return;
+        }
+    }
+
+    g_loadProgress = 0.90f;
+    LOG_INFO << "Finished initiating database files.";
+}
+
+// ---- loadWoW (ported from ModelViewer::LoadWoW) ---------------------------
+// Called once the user has set g_gamePath (and optionally chosen a config).
+// This runs synchronously (blocks the frame), which is acceptable for now.
+static void loadWoW(const core::GameConfig& config)
+{
+    g_loadInProgress = true;
+    g_loadProgress = 0.0f;
+    g_loadStatus = "Opening CASC storage...";
+
+    if (!GAMEDIRECTORY.setConfig(config))
+    {
+        LOG_ERROR << "Could not load WoW Data folder (error "
+                  << GAMEDIRECTORY.lastError() << ").";
+        g_loadStatus = "Failed to open CASC storage (error "
+                       + std::to_string(GAMEDIRECTORY.lastError()) + ").";
+        g_loadInProgress = false;
+        return;
+    }
+
+    LOG_INFO << "Major version: " << GAMEDIRECTORY.majorVersion();
+    g_loadProgress = 0.05f;
+
+    // Set the config folder used for database.xml, listfile paths, etc.
+    auto ver = core::split(GAMEDIRECTORY.version(), '.');
+    const std::string baseConfigFolder = "games/wow/" + ver[0] + "." + ver[1] + "/";
+    LOG_INFO << "Using config folder: " << baseConfigFolder;
+    core::Game::instance().setConfigFolder(baseConfigFolder);
+
+    // Load file list from listfile.csv
+    g_loadStatus = "Loading file list...";
+    g_loadProgress = 0.10f;
+    GAMEDIRECTORY.setProgressCallback([](int current, int total) {
+        if (total > 0)
+            g_loadProgress = 0.10f + 0.40f * static_cast<float>(current) / static_cast<float>(total);
+    });
+    GAMEDIRECTORY.initFromListfile("../../../listfile.csv");
+    GAMEDIRECTORY.setProgressCallback(nullptr);
+    g_loadProgress = 0.50f;
+
+    // Init database
+    g_loadStatus = "Initializing database...";
+    g_loadProgress = 0.55f;
+    initDatabase();
+
+    if (!g_initDB)
+    {
+        g_loadInProgress = false;
+        return;
+    }
+
+    g_loadProgress = 1.0f;
+    g_loadStatus = "World of Warcraft loaded successfully.";
+    g_isWoWLoaded = true;
+    g_loadInProgress = false;
+
+    LOG_INFO << "World of Warcraft loaded successfully. Version: "
+             << GAMEDIRECTORY.version() << " Locale: " << GAMEDIRECTORY.locale();
+
+    saveSettings();
+}
+
+// Called when the user clicks "Load WoW" — kicks off the full init sequence.
+static void beginLoadWoW()
+{
+    if (g_isWoWLoaded || g_loadInProgress)
+        return;
+
+    g_loadInProgress = true;
+    g_loadProgress = 0.0f;
+    g_loadStatus = "Checking support files...";
+
+    if (!checkAndDownloadSupportFiles())
+    {
+        g_loadInProgress = false;
+        return;
+    }
+
+    // Validate game path
+    namespace fs = std::filesystem;
+    std::string path = g_gamePath;
+    if (path.empty() || !fs::is_directory(path))
+    {
+        g_loadStatus = "Please set a valid WoW Data folder path above.";
+        g_loadInProgress = false;
+        return;
+    }
+
+    // Ensure path ends with separator
+    if (path.back() != '/' && path.back() != '\\')
+        path += '\\';
+
+    // Ensure path points to the Data folder
+    {
+        std::string lower = core::toLower(path);
+        if (lower.find("data\\") == std::string::npos && lower.find("data/") == std::string::npos)
+            path += "Data\\";
+    }
+    g_gamePath = path;
+
+    // Init Game if needed
+    if (!core::Game::instance().initDone())
+        core::Game::instance().init(new wow::WoWFolder(g_gamePath), new wow::WoWDatabase());
+
+    // Check available configs
+    g_pendingConfigs = GAMEDIRECTORY.configsFound();
+
+    if (g_pendingConfigs.empty())
+    {
+        LOG_ERROR << "No locale found in WoW folder.";
+        g_loadStatus = "No locale found in the WoW folder.";
+        g_loadInProgress = false;
+        return;
+    }
+
+    if (g_pendingConfigs.size() == 1)
+    {
+        // Only one config — load immediately
+        loadWoW(g_pendingConfigs[0]);
+    }
+    else
+    {
+        // Multiple configs — show selection popup
+        g_selectedConfig = 0;
+        g_showConfigPopup = true;
+        g_loadInProgress = false; // will resume after user picks
+    }
+}
 
 // ---- Default lighting (replaces LightControl / wxWindow) ------------------
 static void setupDefaultLighting()
@@ -313,6 +646,10 @@ static void initEngine()
              << GLOBALSETTINGS.appVersion()
              << GLOBALSETTINGS.buildName();
     LOG_INFO << "==============================================";
+
+    loadSettings();
+    // Pre-fill the path input buffer from saved settings
+    strncpy_s(g_pathBuf, g_gamePath.c_str(), sizeof(g_pathBuf) - 1);
 }
 
 static void initGL()
@@ -423,11 +760,34 @@ int main(int /*argc*/, char* /*argv*/[])
         ImGui::End();
         ImGui::PopStyleVar();
 
-        // ===== File Browser placeholder =====
+        // ===== File Browser panel =====
         if (ImGui::Begin("File Browser"))
         {
-            ImGui::Text("FileControl tree will go here.");
-            ImGui::Text("(Game loading not yet ported — Phase 2)");
+            if (!g_isWoWLoaded)
+            {
+                if (g_loadInProgress)
+                {
+                    ImGui::Text("Loading...");
+                    ImGui::ProgressBar(g_loadProgress, ImVec2(-1, 0));
+                    ImGui::TextWrapped("%s", g_loadStatus.c_str());
+                }
+                else if (!g_loadStatus.empty())
+                {
+                    ImGui::TextWrapped("%s", g_loadStatus.c_str());
+                }
+                else
+                {
+                    ImGui::TextWrapped("Game not loaded. Use Settings panel to set the WoW path and click Load WoW.");
+                }
+            }
+            else
+            {
+                ImGui::Text("WoW loaded: %s", GAMEDIRECTORY.version().c_str());
+                ImGui::Text("Locale: %s", GAMEDIRECTORY.locale().c_str());
+                ImGui::Text("Files: %u", GAMEDIRECTORY.nbChildren());
+                ImGui::Separator();
+                ImGui::Text("File tree control will go here (Phase 3).");
+            }
         }
         ImGui::End();
 
@@ -441,6 +801,47 @@ int main(int /*argc*/, char* /*argv*/[])
         // ===== Settings panel =====
         if (ImGui::Begin("Settings"))
         {
+            // ---- Game loading section ----
+            ImGui::SeparatorText("World of Warcraft");
+
+            ImGui::Text("Game Data Path:");
+            ImGui::SetNextItemWidth(-1);
+            ImGui::InputText("##gamepath", g_pathBuf, sizeof(g_pathBuf));
+
+            if (g_isWoWLoaded)
+            {
+                ImGui::TextColored(ImVec4(0.4f, 1.0f, 0.4f, 1.0f), "Loaded: %s (%s)",
+                                   GAMEDIRECTORY.version().c_str(),
+                                   GAMEDIRECTORY.locale().c_str());
+            }
+            else
+            {
+                bool canLoad = !g_loadInProgress;
+                if (!canLoad)
+                    ImGui::BeginDisabled();
+
+                if (ImGui::Button("Load WoW", ImVec2(-1, 0)))
+                {
+                    g_gamePath = g_pathBuf;
+                    beginLoadWoW();
+                }
+
+                if (!canLoad)
+                    ImGui::EndDisabled();
+
+                if (g_loadInProgress)
+                {
+                    ImGui::ProgressBar(g_loadProgress);
+                    ImGui::TextWrapped("%s", g_loadStatus.c_str());
+                }
+                else if (!g_loadStatus.empty())
+                {
+                    ImGui::TextWrapped("%s", g_loadStatus.c_str());
+                }
+            }
+
+            // ---- Viewport section ----
+            ImGui::SeparatorText("Viewport");
             ImGui::Checkbox("Draw Grid", &g_drawGrid);
             ImGui::ColorEdit3("Background", &g_bgColor.x);
             if (ImGui::Button("Reset Camera"))
@@ -453,6 +854,40 @@ int main(int /*argc*/, char* /*argv*/[])
             ImGui::Text("GL_RENDERER: %s", glGetString(GL_RENDERER));
         }
         ImGui::End();
+
+        // ===== Config selection modal (multiple WoW installs) =====
+        if (g_showConfigPopup)
+            ImGui::OpenPopup("Select WoW Config");
+
+        if (ImGui::BeginPopupModal("Select WoW Config", nullptr, ImGuiWindowFlags_AlwaysAutoResize))
+        {
+            ImGui::Text("Multiple configurations found. Please select one:");
+            ImGui::Separator();
+
+            for (int i = 0; i < static_cast<int>(g_pendingConfigs.size()); ++i)
+            {
+                std::string label = g_pendingConfigs[i].locale + " - " + g_pendingConfigs[i].product;
+                if (!g_pendingConfigs[i].version.empty())
+                    label += " (" + g_pendingConfigs[i].version + ")";
+                ImGui::RadioButton(label.c_str(), &g_selectedConfig, i);
+            }
+
+            ImGui::Separator();
+            if (ImGui::Button("OK", ImVec2(120, 0)))
+            {
+                g_showConfigPopup = false;
+                ImGui::CloseCurrentPopup();
+                loadWoW(g_pendingConfigs[g_selectedConfig]);
+            }
+            ImGui::SameLine();
+            if (ImGui::Button("Cancel", ImVec2(120, 0)))
+            {
+                g_showConfigPopup = false;
+                g_loadStatus = "Load cancelled.";
+                ImGui::CloseCurrentPopup();
+            }
+            ImGui::EndPopup();
+        }
 
         if (show_demo_window)
             ImGui::ShowDemoWindow(&show_demo_window);
