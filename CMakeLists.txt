@@ -165,6 +165,13 @@ message(STATUS "Adding pugixml...")
 add_subdirectory(ThirdParty/pugixml)
 set_property(TARGET pugixml-static PROPERTY FOLDER "ThirdParty libraries")
 
+# nlohmann/json — header-only JSON library (replaces Qt JSON)
+message(STATUS "Adding nlohmann/json...")
+set(JSON_BuildTests OFF CACHE INTERNAL "")
+set(JSON_Install OFF CACHE INTERNAL "")
+add_subdirectory(ThirdParty/json)
+set_property(TARGET nlohmann_json PROPERTY FOLDER "ThirdParty libraries")
+
 # Main source files.
 message(STATUS "Adding Source...")
 add_subdirectory(Source)

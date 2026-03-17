@@ -25,8 +25,7 @@
 
 #pragma once
 
-#include <QJsonObject>
-#include <QJsonValue>
+#include <nlohmann/json.hpp>
 #include <QString>
 
 #include "ImporterPlugin.h"
@@ -51,8 +50,8 @@ private:
 		ITEM
 	};
 
-	int readJSONValues(ImportType type, const QString& url, QJsonObject& result) const;
+	int readJSONValues(ImportType type, const QString& url, nlohmann::json& result) const;
 	QByteArray getURLData(const QString& inputUrl) const;
-	static bool hasMember(const QJsonValueRef& check, const QString& lookfor);
-	static bool hasTransmog(const QJsonValueRef& check);
+	static bool hasMember(const nlohmann::json& check, const std::string& lookfor);
+	static bool hasTransmog(const nlohmann::json& check);
 };

@@ -26,10 +26,9 @@
 #include "WowheadImporter.h"
 
 #include <QEventLoop>
-#include <QJsonDocument>
-#include <QJsonObject>
 #include <QNetworkReply>
 #include <QNetworkRequest>
+#include <nlohmann/json.hpp>
 
 #include "database.h" // ItemRecord
 #include "NPCInfos.h"
@@ -96,21 +95,23 @@ ItemRecord* WowheadImporter::importItem(const std::string& urlToGrab) const
 	data = extractSubString(data, "],");
 	data.chop(1);
 
-	QJsonParseError error;
-	const QJsonObject infos = QJsonDocument::fromJson(data.toUtf8(), &error).object();
+	const auto infos = nlohmann::json::parse(data.toStdString(), nullptr, false);
 
-	LOG_INFO << error.errorString().toStdString();
+	if (infos.is_discarded())
+	{
+		LOG_INFO << "JSON parse error";
+	}
 
-	if (infos.count() != 0)
+	if (!infos.is_discarded() && infos.size() != 0)
 	{
 		result = new ItemRecord();
 
-		result->name = infos.value("name").toString().toUtf8();
-		result->type = infos.value("slot").toInt();
-		result->id = infos.value("id").toInt();
-		result->model = infos.value("displayid").toInt();
-		result->itemclass = infos.value("classs").toInt();
-		result->subclass = infos.value("subclass").toInt();
+		result->name = infos["name"].get<std::string>();
+		result->type = infos["slot"].get<int>();
+		result->id = infos["id"].get<int>();
+		result->model = infos["displayid"].get<int>();
+		result->itemclass = infos["classs"].get<int>();
+		result->subclass = infos["subclass"].get<int>();
 	}
 
 	return result;

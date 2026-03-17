@@ -28,8 +28,6 @@
 #include <QEventLoop>
 #include <QNetworkReply>
 #include <QNetworkRequest>
-#include <QJsonArray>
-#include <qjsondocument.h>
 #include <QtWidgets/qmessagebox.h>
 
 #include "logger/Logger.h"
@@ -88,12 +86,12 @@ CharSlots armorySlotToCharSlot(const int slot)
 CharInfos* ArmoryImporter::importChar(const std::string& url) const
 {
 	auto* result = new CharInfos();
-	QJsonObject root;
+	nlohmann::json root;
 
 	const auto readStatus = readJSONValues(CHARACTER, QString::fromStdString(url), root);
 	// LOG_INFO << "JSON Read Status:" << readStatus << "Root Count:" << root.count();
 
-	if (readStatus == 0 && root.count() > 0)
+	if (readStatus == 0 && root.size() > 0)
 	{
 		LOG_INFO << "Processing JSON Values...";
 
@@ -102,52 +100,44 @@ CharInfos* ArmoryImporter::importChar(const std::string& url) const
 		result->itemModifierIds.resize(NUM_CHAR_SLOTS);
 
 		// Gather Race & Gender
-		auto obj = root.value("playable_race").toObject();
-		result->raceId = obj.value("id").toInt();
-		obj = root.value("gender").toObject();
-		result->gender = obj.value("name").toString().toStdString();
+		result->raceId = root["playable_race"]["id"].get<int>();
+		result->gender = root["gender"]["name"].get<std::string>();
 
 		// Gather character customizations
-		const auto customizations = root.value("customizations").toArray();
-		for (const auto& customization : customizations)
+		for (const auto& customization : root["customizations"])
 		{
-			auto optionid = customization.toObject().value("option").toObject().value("id").toInt();
-			auto choiceid = customization.toObject().value("choice").toObject().value("id").toInt();
+			auto optionid = customization["option"]["id"].get<int>();
+			auto choiceid = customization["choice"]["id"].get<int>();
 			result->customizations.emplace_back(optionid, choiceid);
 		}
 
 
 		// Gather Items
 		result->hasTransmogGear = false;
-		const auto Items = root.value("items").toArray();
-
-		for (const auto& item : Items)
+		for (const auto& item : root["items"])
 		{
-			const auto itemObj = item.toObject();
-			const auto slot = armorySlotToCharSlot(itemObj.value("internal_slot_id").toInt());
-			result->equipment[slot] = itemObj.value("id").toInt();
-			result->itemModifierIds[slot] = itemObj.value("item_appearance_modifier_id").toInt();
+			const auto slot = armorySlotToCharSlot(item["internal_slot_id"].get<int>());
+			result->equipment[slot] = item["id"].get<int>();
+			result->itemModifierIds[slot] = item["item_appearance_modifier_id"].get<int>();
 		}
 
 
 		// Set proper eyeglow
-		if (root.value("class").toInt() == 6) // 6 = DEATH KNIGHT
+		if (root["class"].get<int>() == 6) // 6 = DEATH KNIGHT
 			result->eyeGlowType = EGT_DEATHKNIGHT;
 		else
 			result->eyeGlowType = EGT_DEFAULT;
 
 
 		// tabard (useful if guild tabard)
-		const auto guildTabard = root.value("guild_crest").toObject();
-
-		if (!guildTabard.isEmpty())
+		if (root.contains("guild_crest") && !root["guild_crest"].empty())
 		{
-			result->tabardIcon = guildTabard.value("emblem").toObject().value("id").toInt();
-			result->iconColor = guildTabard.value("emblem").toObject().value("color").toObject().value("id").toInt();
-			result->tabardBorder = guildTabard.value("border").toObject().value("id").toInt();
-			result->borderColor = guildTabard.value("border").toObject().value("color").toObject().value("id").toInt();
-			result->background = guildTabard.value("background").toObject().value("color").toObject().value("id").
-			                                 toInt();
+			const auto& guildTabard = root["guild_crest"];
+			result->tabardIcon = guildTabard["emblem"]["id"].get<int>();
+			result->iconColor = guildTabard["emblem"]["color"]["id"].get<int>();
+			result->tabardBorder = guildTabard["border"]["id"].get<int>();
+			result->borderColor = guildTabard["border"]["color"]["id"].get<int>();
+			result->background = guildTabard["background"]["color"]["id"].get<int>();
 
 			result->customTabard = true;
 		}
@@ -156,7 +146,7 @@ CharInfos* ArmoryImporter::importChar(const std::string& url) const
 	}
 	else
 	{
-		LOG_ERROR << "Bad JSON Results:" << readStatus << "Root Size:" << root.count();
+		LOG_ERROR << "Bad JSON Results:" << readStatus << "Root Size:" << root.size();
 	}
 
 	return result;
@@ -164,28 +154,28 @@ CharInfos* ArmoryImporter::importChar(const std::string& url) const
 
 ItemRecord* ArmoryImporter::importItem(const std::string& url) const
 {
-	QJsonObject root;
+	nlohmann::json root;
 	ItemRecord* result = nullptr;
 
-	if (readJSONValues(ITEM, QString::fromStdString(url), root) == 0 && root.count() != 0)
+	if (readJSONValues(ITEM, QString::fromStdString(url), root) == 0 && root.size() != 0)
 	{
 		// No Gathering Errors Detected.
 		result = new ItemRecord();
 
 		// Gather Race & Gender
-		result->id = root.value("id").toInt();
-		result->model = root.value("displayInfoId").toInt();
-		result->name = root.value("name").toString().toUtf8();
-		result->itemclass = root.value("itemClass").toInt();
-		result->subclass = root.value("itemSubClass").toInt();
-		result->quality = root.value("quality").toInt();
-		result->type = root.value("inventoryType").toInt();
+		result->id = root["id"].get<int>();
+		result->model = root["displayInfoId"].get<int>();
+		result->name = root["name"].get<std::string>();
+		result->itemclass = root["itemClass"].get<int>();
+		result->subclass = root["itemSubClass"].get<int>();
+		result->quality = root["quality"].get<int>();
+		result->type = root["inventoryType"].get<int>();
 	}
 
 	return result;
 }
 
-int ArmoryImporter::readJSONValues(ImportType type, const QString& url, QJsonObject& result) const
+int ArmoryImporter::readJSONValues(ImportType type, const QString& url, nlohmann::json& result) const
 {
 	QString apiPage;
 	switch (type)
@@ -629,7 +619,9 @@ int ArmoryImporter::readJSONValues(ImportType type, const QString& url, QJsonObj
 
 	const auto bts = getURLData(apiPage);
 	LOG_INFO << bts.toStdString();
-	result = QJsonDocument::fromJson(bts).object();
+	result = nlohmann::json::parse(bts.toStdString(), nullptr, false);
+	if (result.is_discarded())
+		return 1;
 	return 0;
 }
 
@@ -664,14 +656,12 @@ QByteArray ArmoryImporter::getURLData(const QString& inputUrl) const
 	return htmldata;
 }
 
-bool ArmoryImporter::hasMember(const QJsonValueRef& check, const QString& lookfor)
+bool ArmoryImporter::hasMember(const nlohmann::json& check, const std::string& lookfor)
 {
-	if (check.toObject().find(lookfor) != check.toObject().end())
-		return true;
-	return false;
+	return check.contains(lookfor);
 }
 
-bool ArmoryImporter::hasTransmog(const QJsonValueRef& check)
+bool ArmoryImporter::hasTransmog(const nlohmann::json& check)
 {
-	return hasMember(check.toObject()["tooltipParams"], "transmogItem");
+	return check.contains("tooltipParams") && check["tooltipParams"].contains("transmogItem");
 }

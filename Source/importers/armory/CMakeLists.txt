@@ -17,5 +17,5 @@ set(NAME armory)
 add_library(${NAME} STATIC ${src} ${headers})
 set_property(TARGET ${NAME} PROPERTY FOLDER "importers")
 
-target_link_libraries(${NAME} Qt6::Core ${extralibs})
+target_link_libraries(${NAME} Qt6::Core nlohmann_json::nlohmann_json ${extralibs})
     

@@ -11,3 +11,6 @@
 [submodule "ThirdParty/pugixml"]
 	path = ThirdParty/pugixml
 	url = https://github.com/zeux/pugixml.git
+[submodule "ThirdParty/json"]
+	path = ThirdParty/json
+	url = https://github.com/nlohmann/json.git
