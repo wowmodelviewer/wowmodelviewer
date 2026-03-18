@@ -41,11 +41,18 @@
     <field type="int32" name="CustomGeoFileDataID" pos="8" />
     <field type="int32" name="HdCustomGeoFileDataID" pos="9" />
   </table>
-  <table name="ChrClasses">
-    <field type="text" name="Filename" pos="1" />
+	<table name="ChrClasses">
+		<field type="text" name="Filename" pos="1" />
 	<field type="int32" name="ID" primary="yes" pos="10" />
-  </table>
-  <table name="ChrRaces">
+	</table>
+	<table name="CharStartOutfit">
+		<field type="int32" name="ID" primary="yes" />
+		<field type="uint8" name="classID" pos="0" />
+		<field type="uint8" name="sexID" pos="1" />
+		<field type="int32" name="iitem" arraySize="24" pos="5" />
+		<field type="int32" name="raceID" relationshipData="yes" />
+	</table>
+	<table name="ChrRaces">
     <field type="int32" name="ID" primary="yes" />
     <field type="text"  name="ClientPrefix" pos="0" />
     <field type="int32" name="Flags" pos="15" />

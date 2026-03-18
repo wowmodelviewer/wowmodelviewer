@@ -151,6 +151,7 @@ static std::string  g_gamePath;              // WoW Data folder path
 static std::string  g_cfgPath;               // userSettings/Config.ini
 static bool         g_isWoWLoaded  = false;
 static bool         g_initDB       = false;
+static bool         g_enableDbCache = false;
 static std::string  g_loadStatus;            // status text shown in File Browser
 static std::atomic<float> g_loadProgress{0.0f}; // 0..1 progress bar fraction (atomic for thread safety)
 static bool         g_loadInProgress = false;
@@ -287,6 +288,9 @@ struct StartOutfitEntry
 
 static std::vector<StartOutfitEntry> g_startOutfits;
 static bool                          g_startOutfitsBuilt = false;
+static char                          g_startOutfitSearchBuf[256] = {};
+static std::vector<size_t>           g_startOutfitFiltered; // indices into g_startOutfits
+static bool                          g_startOutfitFilterDirty = true;
 
 // ---- Light Control state --------------------------------------------------
 struct LightSettings
@@ -390,6 +394,7 @@ static void loadSettings()
     const core::IniFile config(g_cfgPath);
 
     g_gamePath = config.getString("Settings/Path");
+    g_enableDbCache = config.getBool("Settings/EnableDbCache", false);
     g_drawGrid = config.getBool("Viewport/DrawGrid", true);
     g_bgColor.x = static_cast<float>(config.getDouble("Viewport/BgR", 71.0 / 255.0));
     g_bgColor.y = static_cast<float>(config.getDouble("Viewport/BgG", 95.0 / 255.0));
@@ -402,6 +407,7 @@ static void saveSettings()
 {
     core::IniFile config(g_cfgPath);
     config.setValue("Settings/Path", g_gamePath);
+    config.setValue("Settings/EnableDbCache", g_enableDbCache);
     config.setValue("Viewport/DrawGrid", g_drawGrid);
     config.setValue("Viewport/BgR", static_cast<double>(g_bgColor.x));
     config.setValue("Viewport/BgG", static_cast<double>(g_bgColor.y));
@@ -504,8 +510,11 @@ static void initDatabase()
     const std::string currentVersion = GAMEDIRECTORY.version();
     bool cacheValid = false;
 
+    const bool enableDbCache = g_enableDbCache;
+
     std::error_code ec;
-    if (fs::exists(cachePath, ec) && fs::file_size(cachePath, ec) > 0 &&
+    if (enableDbCache &&
+        fs::exists(cachePath, ec) && fs::file_size(cachePath, ec) > 0 &&
         fs::exists(versionPath, ec))
     {
         std::ifstream vf(versionPath);
@@ -524,8 +533,11 @@ static void initDatabase()
         fs::remove(versionPath, ec);
     }
 
-    GAMEDATABASE.setCachePath(cachePath.string());
-    GAMEDATABASE.setFastMode();
+    if (enableDbCache)
+    {
+        GAMEDATABASE.setCachePath(cachePath.string());
+        GAMEDATABASE.setFastMode();
+    }
 
     if (!GAMEDATABASE.initFromXML("database.xml"))
     {
@@ -539,7 +551,7 @@ static void initDatabase()
     }
 
     // Write version marker so subsequent launches can reuse the cache.
-    if (!cacheValid)
+    if (enableDbCache && !cacheValid)
     {
         std::ofstream vf(versionPath, std::ios::trunc);
         vf << currentVersion;
@@ -1302,6 +1314,109 @@ static void tryToEquipItem(WoWModel* model, int id)
     }
 }
 
+// ---- Start Outfit helpers -------------------------------------------------
+static void buildStartOutfits(WoWModel* model)
+{
+    g_startOutfits.clear();
+    g_startOutfitsBuilt = false;
+    g_startOutfitFilterDirty = true;
+
+    if (!model) return;
+
+    const auto& infos = model->infos;
+    if (infos.raceID == -1)
+        return;
+
+    const std::string query = std::format(
+        "SELECT ChrClasses.Filename, CSO.ID "
+        "FROM CharStartOutfit AS CSO LEFT JOIN ChrClasses ON CSO.classID = ChrClasses.ID "
+        "WHERE CSO.raceID={} AND CSO.sexID={}", infos.raceID, infos.sexID);
+
+    sqlResult r = GAMEDATABASE.sqlQuery(query);
+    if (r.valid && !r.empty())
+    {
+        for (const auto& value : r.values)
+        {
+            StartOutfitEntry e;
+            e.name = value[0];
+            e.id = core::safeStoi(value[1]);
+            if (!e.name.empty() && e.id > 0)
+                g_startOutfits.push_back(e);
+        }
+    }
+
+    std::sort(g_startOutfits.begin(), g_startOutfits.end(),
+        [](const StartOutfitEntry& a, const StartOutfitEntry& b) { return a.name < b.name; });
+
+    g_startOutfitsBuilt = true;
+    g_startOutfitFilterDirty = true;
+    LOG_INFO << "Start outfits loaded: " << g_startOutfits.size();
+}
+
+static void rebuildStartOutfitFilter()
+{
+    g_startOutfitFiltered.clear();
+
+    std::string search = core::toLower(std::string(g_startOutfitSearchBuf));
+    auto s = search.find_first_not_of(" \t\r\n");
+    auto e = search.find_last_not_of(" \t\r\n");
+    search = (s == std::string::npos) ? "" : search.substr(s, e - s + 1);
+
+    for (size_t i = 0; i < g_startOutfits.size(); ++i)
+    {
+        if (!search.empty() && !core::containsIgnoreCase(g_startOutfits[i].name, search))
+            continue;
+        g_startOutfitFiltered.push_back(i);
+    }
+
+    g_startOutfitFilterDirty = false;
+}
+
+static void applyStartOutfit(WoWModel* model, int outfitId)
+{
+    if (!model || outfitId <= 0)
+        return;
+
+    const std::string query = std::format(
+        "SELECT CSO.iitem1, CSO.iitem2, CSO.iitem3, CSO.iitem4, CSO.iitem5,"
+        "CSO.iitem6, CSO.iitem7, CSO.iitem8, CSO.iitem9, CSO.iitem10, CSO.iitem11,"
+        "CSO.iitem12, CSO.iitem13, CSO.iitem14, CSO.iitem15, CSO.iitem16, CSO.iitem17, CSO.iitem18,"
+        "CSO.iitem19, CSO.iitem20, CSO.iitem21, CSO.iitem22, CSO.iitem23, CSO.iitem24 "
+        "FROM CharStartOutfit AS CSO WHERE CSO.ID={}", outfitId);
+
+    sqlResult r = GAMEDATABASE.sqlQuery(query);
+    if (!r.valid || r.empty())
+    {
+        LOG_ERROR << "Start outfit query failed for ID " << outfitId;
+        return;
+    }
+
+    // Reset all equipped items
+    for (const auto it : *model)
+        it->setId(0);
+    std::memset(g_equipSlotLevels, 0, sizeof(g_equipSlotLevels));
+
+    const size_t cols = r.values[0].size();
+    for (unsigned i = 0; i < 24 && i < cols; ++i)
+    {
+        const auto& val = r.values[0][i];
+        if (val.empty() || val == "0")
+            continue;
+        try
+        {
+            tryToEquipItem(model, core::safeStoi(val));
+        }
+        catch (const std::exception& ex)
+        {
+            LOG_ERROR << "Failed to equip start outfit entry " << i
+                      << " (val=\"" << val << "\"): " << ex.what();
+        }
+    }
+
+    model->refresh();
+    LOG_INFO << "Applied start outfit ID " << outfitId;
+}
+
 static void applyItemSet(WoWModel* model, int setId)
 {
     if (!model || setId <= 0)
@@ -1377,6 +1492,11 @@ static void clearModel()
     g_exportAnimChecked.clear();
     g_exportStatus.clear();
     g_isMounted = false;
+    g_startOutfits.clear();
+    g_startOutfitsBuilt = false;
+    g_startOutfitSearchBuf[0] = '\0';
+    g_startOutfitFiltered.clear();
+    g_startOutfitFilterDirty = true;
 }
 
 // ---- Load a model from GameFile (ported from ModelViewer::LoadModel) -------
@@ -3088,6 +3208,52 @@ int main(int /*argc*/, char* /*argv*/[])
                 }
                 ImGui::EndChild();
 
+                // ---- Start Outfits ----
+                ImGui::SeparatorText("Start Outfits");
+
+                if (!g_startOutfitsBuilt)
+                    buildStartOutfits(cModel);
+
+                if (g_startOutfits.empty())
+                {
+                    ImGui::TextDisabled("No start outfits available for this race/sex.");
+                }
+                else
+                {
+                    ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x - 60.0f);
+                    if (ImGui::InputText("##startOutfitSearch", g_startOutfitSearchBuf, sizeof(g_startOutfitSearchBuf),
+                                         ImGuiInputTextFlags_EnterReturnsTrue))
+                        g_startOutfitFilterDirty = true;
+                    ImGui::SameLine();
+                    if (ImGui::Button("Apply##startoutfit", ImVec2(-1, 0)))
+                        g_startOutfitFilterDirty = true;
+
+                    if (g_startOutfitFilterDirty)
+                        rebuildStartOutfitFilter();
+
+                    ImGui::Text("%d classes", static_cast<int>(g_startOutfitFiltered.size()));
+                    ImGui::Separator();
+
+                    ImGui::BeginChild("##StartOutfitList", ImVec2(0, 150), ImGuiChildFlags_Borders);
+                    {
+                        ImGuiListClipper clipper;
+                        clipper.Begin(static_cast<int>(g_startOutfitFiltered.size()));
+                        while (clipper.Step())
+                        {
+                            for (int i = clipper.DisplayStart; i < clipper.DisplayEnd; ++i)
+                            {
+                                const auto& entry = g_startOutfits[g_startOutfitFiltered[i]];
+                                ImGui::PushID(entry.id);
+                                std::string label = std::format("{} (ID:{})", entry.name, entry.id);
+                                if (ImGui::Selectable(label.c_str()))
+                                    applyStartOutfit(cModel, entry.id);
+                                ImGui::PopID();
+                            }
+                        }
+                    }
+                    ImGui::EndChild();
+                }
+
                 // ---- Mount ----
                 ImGui::SeparatorText("Mount");
 
@@ -3553,6 +3719,9 @@ int main(int /*argc*/, char* /*argv*/[])
                         ImGui::TextWrapped("%s", status.c_str());
                 }
             }
+
+            ImGui::Checkbox("Enable Database Cache", &g_enableDbCache);
+            ImGui::TextDisabled("Speeds up loading by caching the database. Takes effect on next load.");
 
             // ---- Viewport section ----
             ImGui::SeparatorText("Viewport");

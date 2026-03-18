@@ -444,7 +444,7 @@ void WoWModel::initCommon()
 
 	LOG_INFO << "Loading model:" << tempname.c_str() << "size:" << gamefile->getSize();
 
-	// displayHeader(header);
+	displayHeader(header);
 
 	if (header.id[0] != 'M' && header.id[1] != 'D' && header.id[2] != '2' && header.id[3] != '0')
 	{
