@@ -241,6 +241,13 @@ struct CustomizationOption
 
 static std::vector<CustomizationOption> g_customizationOptions;
 
+// ---- Equipment popup state ------------------------------------------------
+static char                   g_equipSearchBuf[256] = {};
+static int                    g_equipSlotToEdit = -1;
+static bool                   g_equipPopupJustOpened = false;
+static std::vector<size_t>    g_equipFilteredItems; // indices into items.items
+static int                    g_equipSlotLevels[NUM_CHAR_SLOTS] = {};
+
 // ---- Model Control state --------------------------------------------------
 struct GeosetEntry
 {
@@ -956,6 +963,73 @@ static void initModelControl(WoWModel* model)
     }
 }
 
+// ---- Equipment helpers (ported from charcontrol / util) -------------------
+static bool correctType(int type, int slot)
+{
+    if (type == IT_ALL)
+        return true;
+    switch (slot)
+    {
+    case CS_HEAD:       return (type == IT_HEAD);
+    case CS_SHOULDER:   return (type == IT_SHOULDER);
+    case CS_SHIRT:      return (type == IT_SHIRT);
+    case CS_CHEST:      return (type == IT_CHEST || type == IT_ROBE);
+    case CS_BELT:       return (type == IT_BELT);
+    case CS_PANTS:      return (type == IT_PANTS);
+    case CS_BOOTS:      return (type == IT_BOOTS);
+    case CS_BRACERS:    return (type == IT_BRACERS);
+    case CS_GLOVES:     return (type == IT_GLOVES);
+    case CS_HAND_RIGHT: return (type == IT_RIGHTHANDED || type == IT_GUN || type == IT_THROWN ||
+                                type == IT_2HANDED || type == IT_DAGGER);
+    case CS_HAND_LEFT:  return (type == IT_LEFTHANDED || type == IT_BOW || type == IT_SHIELD ||
+                                type == IT_2HANDED || type == IT_DAGGER || type == IT_OFFHAND);
+    case CS_CAPE:       return (type == IT_CAPE);
+    case CS_TABARD:     return (type == IT_TABARD);
+    case CS_QUIVER:     return (type == IT_QUIVER);
+    default: return false;
+    }
+}
+
+static ImVec4 getQualityColor(int quality)
+{
+    switch (quality)
+    {
+    case 0:  return ImVec4(0.616f, 0.616f, 0.616f, 1.0f); // Poor (gray)
+    case 1:  return ImVec4(1.0f,   1.0f,   1.0f,   1.0f); // Common (white)
+    case 2:  return ImVec4(0.118f, 1.0f,   0.0f,   1.0f); // Uncommon (green)
+    case 3:  return ImVec4(0.0f,   0.439f, 0.867f, 1.0f); // Rare (blue)
+    case 4:  return ImVec4(0.639f, 0.208f, 0.933f, 1.0f); // Epic (purple)
+    case 5:  return ImVec4(1.0f,   0.502f, 0.0f,   1.0f); // Legendary (orange)
+    case 6:
+    case 7:  return ImVec4(0.898f, 0.8f,   0.502f, 1.0f); // Artifact/Heirloom (gold)
+    default: return ImVec4(1.0f,   1.0f,   1.0f,   1.0f);
+    }
+}
+
+static void rebuildEquipFilteredItems()
+{
+    g_equipFilteredItems.clear();
+    if (g_equipSlotToEdit < 0)
+        return;
+
+    std::string search = core::toLower(std::string(g_equipSearchBuf));
+    auto s = search.find_first_not_of(" \t\r\n");
+    auto e = search.find_last_not_of(" \t\r\n");
+    search = (s == std::string::npos) ? "" : search.substr(s, e - s + 1);
+
+    for (size_t i = 0; i < items.items.size(); ++i)
+    {
+        const auto& item = items.items[i];
+        if (item.id == 0)
+            continue;
+        if (!correctType(item.type, g_equipSlotToEdit))
+            continue;
+        if (!search.empty() && !core::containsIgnoreCase(item.name, search))
+            continue;
+        g_equipFilteredItems.push_back(i);
+    }
+}
+
 // ---- Clear current model --------------------------------------------------
 static void clearModel()
 {
@@ -979,6 +1053,10 @@ static void clearModel()
     g_selectedSkin = -1;
     g_animSpeed = 1.0f;
     g_autoAnimate = true;
+    g_equipSlotToEdit = -1;
+    g_equipFilteredItems.clear();
+    g_equipSearchBuf[0] = '\0';
+    std::memset(g_equipSlotLevels, 0, sizeof(g_equipSlotLevels));
 }
 
 // ---- Load a model from GameFile (ported from ModelViewer::LoadModel) -------
@@ -1758,20 +1836,132 @@ int main(int /*argc*/, char* /*argv*/[])
                     }
                 }
 
-                // ---- Equipment summary ----
+                // ---- Equipment ----
                 ImGui::SeparatorText("Equipment");
                 static const char* slotNames[] = {
                     "Head", "Shoulder", "Boots", "Belt", "Shirt", "Pants",
                     "Chest", "Bracers", "Gloves", "Right Hand", "Left Hand",
                     "Cape", "Tabard", "Quiver"
                 };
+
+                bool openEquipPopup = false;
                 for (int s = 0; s < NUM_CHAR_SLOTS; ++s)
                 {
-                    WoWItem* item = cModel->getItem(static_cast<CharSlots>(s));
-                    if (item && item->id() > 0)
-                        ImGui::Text("%s: %s (%d)", slotNames[s], item->name().c_str(), item->id());
+                    WoWItem* witem = cModel->getItem(static_cast<CharSlots>(s));
+                    ImGui::PushID(s);
+
+                    if (ImGui::Button(slotNames[s], ImVec2(90, 0)))
+                    {
+                        g_equipSlotToEdit = s;
+                        g_equipSearchBuf[0] = '\0';
+                        g_equipPopupJustOpened = true;
+                        rebuildEquipFilteredItems();
+                        openEquipPopup = true;
+                    }
+
+                    ImGui::SameLine();
+
+                    if (witem && witem->id() > 0)
+                    {
+                        ImVec4 qcol = getQualityColor(witem->quality());
+                        ImGui::TextColored(qcol, "%s (%d)", witem->name().c_str(), witem->id());
+
+                        if (witem->nbLevels() > 1)
+                        {
+                            ImGui::SameLine();
+                            ImGui::SetNextItemWidth(60);
+                            int maxLvl = static_cast<int>(witem->nbLevels()) - 1;
+                            if (ImGui::SliderInt("##Lvl", &g_equipSlotLevels[s], 0, maxLvl))
+                            {
+                                witem->setLevel(g_equipSlotLevels[s]);
+                                cModel->refresh();
+                            }
+                        }
+
+                        ImGui::SameLine();
+                        if (ImGui::SmallButton("X"))
+                        {
+                            witem->setId(0);
+                            g_equipSlotLevels[s] = 0;
+                            cModel->refresh();
+                        }
+                    }
                     else
-                        ImGui::TextDisabled("%s: empty", slotNames[s]);
+                    {
+                        ImGui::TextDisabled("empty");
+                    }
+
+                    ImGui::PopID();
+                }
+
+                if (openEquipPopup)
+                    ImGui::OpenPopup("Select Item##EquipModal");
+
+                if (ImGui::BeginPopupModal("Select Item##EquipModal", nullptr,
+                    ImGuiWindowFlags_AlwaysAutoResize))
+                {
+                    if (g_equipSlotToEdit >= 0 && g_equipSlotToEdit < NUM_CHAR_SLOTS)
+                    {
+                        ImGui::Text("Equip to: %s", slotNames[g_equipSlotToEdit]);
+                        ImGui::Separator();
+
+                        if (g_equipPopupJustOpened)
+                        {
+                            ImGui::SetKeyboardFocusHere();
+                            g_equipPopupJustOpened = false;
+                        }
+
+                        ImGui::SetNextItemWidth(400);
+                        if (ImGui::InputText("##EquipSearch", g_equipSearchBuf,
+                            sizeof(g_equipSearchBuf)))
+                            rebuildEquipFilteredItems();
+
+                        ImGui::Text("%d items found",
+                            static_cast<int>(g_equipFilteredItems.size()));
+                        ImGui::Separator();
+
+                        ImGui::BeginChild("##EquipItemList", ImVec2(420, 350),
+                            ImGuiChildFlags_Borders);
+                        ImGuiListClipper clipper;
+                        clipper.Begin(
+                            static_cast<int>(g_equipFilteredItems.size()));
+                        while (clipper.Step())
+                        {
+                            for (int i = clipper.DisplayStart;
+                                 i < clipper.DisplayEnd; ++i)
+                            {
+                                const auto& rec =
+                                    items.items[g_equipFilteredItems[i]];
+                                ImGui::PushID(i);
+                                ImVec4 qcol = getQualityColor(rec.quality);
+                                ImGui::PushStyleColor(ImGuiCol_Text, qcol);
+                                std::string label = std::format(
+                                    "{} ({})", rec.name, rec.id);
+                                if (ImGui::Selectable(label.c_str()))
+                                {
+                                    WoWItem* targetItem = cModel->getItem(
+                                        static_cast<CharSlots>(
+                                            g_equipSlotToEdit));
+                                    if (targetItem)
+                                    {
+                                        targetItem->setId(rec.id);
+                                        g_equipSlotLevels[
+                                            g_equipSlotToEdit] = 0;
+                                        cModel->refresh();
+                                    }
+                                    ImGui::CloseCurrentPopup();
+                                }
+                                ImGui::PopStyleColor();
+                                ImGui::PopID();
+                            }
+                        }
+                        ImGui::EndChild();
+
+                        ImGui::Separator();
+                        if (ImGui::Button("Cancel", ImVec2(120, 0)))
+                            ImGui::CloseCurrentPopup();
+                    }
+                    ImGui::EndPopup();
                 }
             }
             else if (g_isModel)
