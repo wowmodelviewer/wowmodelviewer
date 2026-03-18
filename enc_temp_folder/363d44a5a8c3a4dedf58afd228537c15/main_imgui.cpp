@@ -25,7 +25,6 @@
 #include <glad/gl.h>
 #include <GLFW/glfw3.h>
 #include "imgui.h"
-#include "imgui_internal.h"
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_opengl3.h"
 
@@ -1199,7 +1198,6 @@ int main(int /*argc*/, char* /*argv*/[])
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_COMPAT_PROFILE);
-    glfwWindowHint(GLFW_SCALE_TO_MONITOR, GLFW_TRUE);
 
     GLFWwindow* window = glfwCreateWindow(1600, 900, "WoW Model Viewer (ImGui)", nullptr, nullptr);
     if (!window)
@@ -1234,23 +1232,10 @@ int main(int /*argc*/, char* /*argv*/[])
     io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
 
     ImGui::StyleColorsDark();
-
-    // ---- DPI-aware font scaling ----
-    float xscale = 1.0f, yscale = 1.0f;
-    glfwGetWindowContentScale(window, &xscale, &yscale);
-    const float dpiScale = (xscale > yscale) ? xscale : yscale;
-    if (dpiScale > 1.0f)
-    {
-        ImGui::GetStyle().ScaleAllSizes(dpiScale);
-    }
-    io.Fonts->AddFontDefault();
-    io.FontGlobalScale = dpiScale;
-
     ImGui_ImplGlfw_InitForOpenGL(window, true);
     ImGui_ImplOpenGL3_Init("#version 130");
 
     bool show_demo_window = false;
-    bool firstFrame = true;
     g_lastTick = std::chrono::steady_clock::now();
 
     // ---- Main loop ----
@@ -1266,35 +1251,7 @@ int main(int /*argc*/, char* /*argv*/[])
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
 
-        ImGuiID dockspace_id = ImGui::DockSpaceOverViewport(0, ImGui::GetMainViewport());
-
-        // ---- Build default docking layout on first frame ----
-        if (firstFrame)
-        {
-            firstFrame = false;
-            ImGui::DockBuilderRemoveNode(dockspace_id);
-            ImGui::DockBuilderAddNode(dockspace_id, ImGuiDockNodeFlags_DockSpace);
-
-            int fw, fh;
-            glfwGetFramebufferSize(window, &fw, &fh);
-            ImGui::DockBuilderSetNodeSize(dockspace_id, ImVec2(static_cast<float>(fw), static_cast<float>(fh)));
-
-            ImGuiID dock_left, dock_center;
-            ImGui::DockBuilderSplitNode(dockspace_id, ImGuiDir_Left, 0.15f, &dock_left, &dock_center);
-
-            ImGuiID dock_right;
-            ImGui::DockBuilderSplitNode(dock_center, ImGuiDir_Right, 0.20f, &dock_right, &dock_center);
-
-            ImGuiID dock_bottom;
-            ImGui::DockBuilderSplitNode(dock_center, ImGuiDir_Down, 0.25f, &dock_bottom, &dock_center);
-
-            ImGui::DockBuilderDockWindow("File Browser", dock_left);
-            ImGui::DockBuilderDockWindow("Settings", dock_left);
-            ImGui::DockBuilderDockWindow("3D Viewport", dock_center);
-            ImGui::DockBuilderDockWindow("Animation", dock_bottom);
-            ImGui::DockBuilderDockWindow("Character", dock_right);
-            ImGui::DockBuilderFinish(dockspace_id);
-        }
+        ImGui::DockSpaceOverViewport(0, ImGui::GetMainViewport());
 
         // ===== 3D Viewport panel =====
         ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
