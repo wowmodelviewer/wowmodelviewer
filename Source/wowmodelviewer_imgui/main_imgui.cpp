@@ -241,6 +241,32 @@ struct CustomizationOption
 
 static std::vector<CustomizationOption> g_customizationOptions;
 
+// ---- Model Control state --------------------------------------------------
+struct GeosetEntry
+{
+    size_t index;     // index into model->geosets[]
+    uint32_t id;      // geoset id
+    std::string label;
+};
+
+struct GeosetGroupEntry
+{
+    std::string name;
+    size_t meshId;
+    std::vector<GeosetEntry> geosets;
+};
+
+static std::vector<GeosetGroupEntry> g_geosetGroups;
+
+struct ParticleColorState
+{
+    bool enabled = false;
+    float colors[3][3][3] = {}; // [set 0..2 for IDs 11,12,13][phase 0..2 = start/mid/end][r/g/b]
+    bool hasSet[3] = {};        // which color IDs (11,12,13) are present on model
+};
+
+static ParticleColorState g_pcrState;
+
 // ---- Helpers --------------------------------------------------------------
 static std::filesystem::path getApplicationDirPath()
 {
@@ -868,6 +894,68 @@ static void initCharacterControl(WoWModel* model)
     }
 }
 
+// ---- Model Control helpers ------------------------------------------------
+static void applyParticleColors(WoWModel* model)
+{
+    if (!model) return;
+
+    model->particleColorReplacements.clear();
+    for (int s = 0; s < 3; ++s)
+    {
+        std::vector<glm::vec4> pcs;
+        for (int p = 0; p < 3; ++p)
+        {
+            pcs.push_back(glm::vec4(
+                g_pcrState.colors[s][p][0],
+                g_pcrState.colors[s][p][1],
+                g_pcrState.colors[s][p][2],
+                1.0f));
+        }
+        model->particleColorReplacements.push_back(pcs);
+    }
+    model->replaceParticleColors = true;
+}
+
+static void initModelControl(WoWModel* model)
+{
+    g_geosetGroups.clear();
+    g_pcrState = {};
+
+    if (!model)
+        return;
+
+    // Build geoset groups
+    std::map<size_t, size_t> meshToGroupIdx;
+    for (size_t i = 0; i < model->geosets.size(); ++i)
+    {
+        size_t mesh = model->geosets[i]->id / 100;
+        if (meshToGroupIdx.find(mesh) == meshToGroupIdx.end())
+        {
+            GeosetGroupEntry group;
+            group.meshId = mesh;
+            std::string groupName = WoWModel::getCGGroupName(static_cast<CharGeosets>(mesh));
+            group.name = groupName.empty() ? std::to_string(mesh) : groupName;
+            meshToGroupIdx[mesh] = g_geosetGroups.size();
+            g_geosetGroups.push_back(std::move(group));
+        }
+
+        GeosetEntry ge;
+        ge.index = i;
+        ge.id = model->geosets[i]->id;
+        ge.label = std::format("{} [{}, {}, {}]", i, mesh,
+                               model->geosets[i]->id % 100, model->geosets[i]->id);
+        g_geosetGroups[meshToGroupIdx[mesh]].geosets.push_back(ge);
+    }
+
+    // Detect available particle color replacement IDs
+    for (uint pcid : model->replacableParticleColorIDs)
+    {
+        if (pcid == 11) g_pcrState.hasSet[0] = true;
+        else if (pcid == 12) g_pcrState.hasSet[1] = true;
+        else if (pcid == 13) g_pcrState.hasSet[2] = true;
+    }
+}
+
 // ---- Clear current model --------------------------------------------------
 static void clearModel()
 {
@@ -885,6 +973,8 @@ static void clearModel()
     g_animEntries.clear();
     g_skinEntries.clear();
     g_customizationOptions.clear();
+    g_geosetGroups.clear();
+    g_pcrState = {};
     g_selectedAnimCombo = 0;
     g_selectedSkin = -1;
     g_animSpeed = 1.0f;
@@ -947,6 +1037,7 @@ static void loadModel(GameFile* file)
 
     g_selModel = model;
     initAnimationControl(model);
+    initModelControl(model);
     if (g_isChar)
         initCharacterControl(model);
 
@@ -1292,6 +1383,7 @@ int main(int /*argc*/, char* /*argv*/[])
             ImGui::DockBuilderDockWindow("Settings", dock_left);
             ImGui::DockBuilderDockWindow("3D Viewport", dock_center);
             ImGui::DockBuilderDockWindow("Animation", dock_bottom);
+            ImGui::DockBuilderDockWindow("Model Control", dock_bottom);
             ImGui::DockBuilderDockWindow("Character", dock_right);
             ImGui::DockBuilderFinish(dockspace_id);
         }
@@ -1490,6 +1582,114 @@ int main(int /*argc*/, char* /*argv*/[])
                         }
                         ImGui::EndCombo();
                     }
+                }
+            }
+            else
+            {
+                ImGui::TextDisabled("No model loaded.");
+            }
+        }
+        ImGui::End();
+
+        // ===== Model Control =====
+        if (ImGui::Begin("Model Control"))
+        {
+            WoWModel* mModel = getLoadedModel();
+            if (mModel)
+            {
+                // ---- Rendering toggles ----
+                ImGui::SeparatorText("Display Toggles");
+                ImGui::Checkbox("Render", &mModel->showModel);
+                ImGui::Checkbox("Wireframe", &mModel->showWireframe);
+                ImGui::Checkbox("Texture", &mModel->showTexture);
+                ImGui::Checkbox("Bones", &mModel->showBones);
+                ImGui::Checkbox("Bounds", &mModel->showBounds);
+                ImGui::Checkbox("Particles", &mModel->showParticles);
+
+                // ---- Alpha ----
+                ImGui::SeparatorText("Opacity & Scale");
+                int alphaPercent = static_cast<int>(mModel->alpha_ * 100.0f);
+                if (ImGui::SliderInt("Alpha", &alphaPercent, 0, 100))
+                    mModel->alpha_ = alphaPercent / 100.0f;
+
+                // ---- Scale ----
+                ImGui::SliderFloat("Scale", &mModel->scale_, 0.1f, 3.0f, "%.2f");
+
+                // ---- Position / Rotation ----
+                ImGui::SeparatorText("Position & Rotation");
+                ImGui::DragFloat3("Position", &mModel->pos_.x, 0.1f);
+                ImGui::DragFloat3("Rotation", &mModel->rot_.x, 1.0f);
+
+                // ---- Geosets ----
+                if (!g_geosetGroups.empty())
+                {
+                    ImGui::SeparatorText("Geosets");
+                    ImGui::TextDisabled("Click to toggle on/off");
+                    for (auto& group : g_geosetGroups)
+                    {
+                        if (ImGui::TreeNode(group.name.c_str()))
+                        {
+                            for (auto& ge : group.geosets)
+                            {
+                                bool displayed = mModel->isGeosetDisplayed(static_cast<uint>(ge.index));
+                                ImVec4 color = displayed
+                                    ? ImVec4(0.3f, 1.0f, 0.3f, 1.0f)
+                                    : ImVec4(0.5f, 0.5f, 0.5f, 1.0f);
+                                ImGui::PushStyleColor(ImGuiCol_Text, color);
+                                ImGuiTreeNodeFlags flags =
+                                    ImGuiTreeNodeFlags_Leaf |
+                                    ImGuiTreeNodeFlags_NoTreePushOnOpen |
+                                    ImGuiTreeNodeFlags_SpanAvailWidth;
+                                ImGui::TreeNodeEx(ge.label.c_str(), flags);
+                                if (ImGui::IsItemClicked())
+                                    mModel->showGeoset(static_cast<uint>(ge.index), !displayed);
+                                ImGui::PopStyleColor();
+                            }
+                            ImGui::TreePop();
+                        }
+                    }
+                }
+
+                // ---- Particle Color Replacement ----
+                bool anyPCR = g_pcrState.hasSet[0] || g_pcrState.hasSet[1] || g_pcrState.hasSet[2];
+                ImGui::SeparatorText("Particle Colors");
+                if (anyPCR)
+                {
+                    if (ImGui::Checkbox("Replace Particle Colors", &g_pcrState.enabled))
+                    {
+                        if (g_pcrState.enabled)
+                        {
+                            applyParticleColors(mModel);
+                        }
+                        else
+                        {
+                            mModel->replaceParticleColors = false;
+                            if (g_selectedSkin >= 0)
+                                applySkin(mModel, g_selectedSkin);
+                        }
+                    }
+
+                    static const char* setNames[] = {"ID 11", "ID 12", "ID 13"};
+                    static const char* phaseNames[] = {"Start", "Mid", "End"};
+                    for (int s = 0; s < 3; ++s)
+                    {
+                        if (!g_pcrState.hasSet[s]) continue;
+                        ImGui::Text("%s", setNames[s]);
+                        for (int p = 0; p < 3; ++p)
+                        {
+                            std::string label = std::format("{} {}##pcr{}{}",
+                                setNames[s], phaseNames[p], s, p);
+                            if (ImGui::ColorEdit3(label.c_str(), g_pcrState.colors[s][p]))
+                            {
+                                if (g_pcrState.enabled)
+                                    applyParticleColors(mModel);
+                            }
+                        }
+                    }
+                }
+                else
+                {
+                    ImGui::TextDisabled("Not available on this model.");
                 }
             }
             else
