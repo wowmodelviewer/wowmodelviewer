@@ -287,12 +287,18 @@ static std::filesystem::path getApplicationDirPath()
 }
 
 // ---- Config.ini reading/writing -------------------------------------------
+static const char* g_imguiIniPath = "userSettings/imgui_layout.ini";
+
 static void loadSettings()
 {
     g_cfgPath = "userSettings/Config.ini";
     const core::IniFile config(g_cfgPath);
 
     g_gamePath = config.getString("Settings/Path");
+    g_drawGrid = config.getBool("Viewport/DrawGrid", true);
+    g_bgColor.x = static_cast<float>(config.getDouble("Viewport/BgR", 71.0 / 255.0));
+    g_bgColor.y = static_cast<float>(config.getDouble("Viewport/BgG", 95.0 / 255.0));
+    g_bgColor.z = static_cast<float>(config.getDouble("Viewport/BgB", 121.0 / 255.0));
 
     LOG_INFO << "Settings loaded. Game path:" << g_gamePath;
 }
@@ -301,8 +307,14 @@ static void saveSettings()
 {
     core::IniFile config(g_cfgPath);
     config.setValue("Settings/Path", g_gamePath);
+    config.setValue("Viewport/DrawGrid", g_drawGrid);
+    config.setValue("Viewport/BgR", static_cast<double>(g_bgColor.x));
+    config.setValue("Viewport/BgG", static_cast<double>(g_bgColor.y));
+    config.setValue("Viewport/BgB", static_cast<double>(g_bgColor.z));
     config.sync();
-    LOG_INFO << "Settings saved.";
+
+    ImGui::SaveIniSettingsToDisk(g_imguiIniPath);
+    LOG_INFO << "Settings and UI layout saved.";
 }
 
 // ---- Support-file download (listfile.csv, extraEncryptionKeys.csv) --------
@@ -1401,6 +1413,7 @@ int main(int /*argc*/, char* /*argv*/[])
     ImGuiIO& io = ImGui::GetIO();
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
     io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+    io.IniFilename = g_imguiIniPath;
 
     ImGui::StyleColorsDark();
 
@@ -1437,10 +1450,12 @@ int main(int /*argc*/, char* /*argv*/[])
 
         ImGuiID dockspace_id = ImGui::DockSpaceOverViewport(0, ImGui::GetMainViewport());
 
-        // ---- Build default docking layout on first frame ----
+        // ---- Build default docking layout on first frame (only if no saved layout) ----
         if (firstFrame)
         {
             firstFrame = false;
+            if (!std::filesystem::exists(g_imguiIniPath))
+            {
             ImGui::DockBuilderRemoveNode(dockspace_id);
             ImGui::DockBuilderAddNode(dockspace_id, ImGuiDockNodeFlags_DockSpace);
 
@@ -1464,6 +1479,7 @@ int main(int /*argc*/, char* /*argv*/[])
             ImGui::DockBuilderDockWindow("Model Control", dock_bottom);
             ImGui::DockBuilderDockWindow("Character", dock_right);
             ImGui::DockBuilderFinish(dockspace_id);
+            }
         }
 
         // ===== 3D Viewport panel =====
@@ -2029,6 +2045,15 @@ int main(int /*argc*/, char* /*argv*/[])
             ImGui::Text("Camera  yaw=%.1f  pitch=%.1f  radius=%.2f",
                         g_camera.yaw(), g_camera.pitch(), g_camera.radius());
             ImGui::Text("GL_RENDERER: %s", glGetString(GL_RENDERER));
+
+            // ---- Save ----
+            ImGui::SeparatorText("Save");
+            if (ImGui::Button("Save Settings", ImVec2(-1, 0)))
+            {
+                g_gamePath = g_pathBuf;
+                saveSettings();
+            }
+            ImGui::TextDisabled("Saves preferences and UI layout.");
         }
         ImGui::End();
 
