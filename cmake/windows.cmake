@@ -1,7 +1,7 @@
 message(STATUS "Using Windows version")
 
 add_definitions(-D_WINDOWS)
-# Prevent windows.h from including winsock.h (conflicts with winsock2.h used by wxWidgets 3.x)
+# Prevent windows.h from including winsock.h
 add_definitions(-DWIN32_LEAN_AND_MEAN)
 # Prevent windows.h from defining min/max macros (conflicts with glm and STL)
 add_definitions(-DNOMINMAX)
@@ -20,11 +20,8 @@ if(MSVC)
     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /NODEFAULTLIB:LIBCMT")
     # Debug: also suppress dynamic release CRT pulled in by release-only third-party libs
     set(CMAKE_EXE_LINKER_FLAGS_DEBUG "${CMAKE_EXE_LINKER_FLAGS_DEBUG} /NODEFAULTLIB:MSVCRT")
-    # wxWidgets 3.x static lib debug builds can produce duplicate symbols for template instantiations
-    set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} /FORCE:MULTIPLE")
-    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /FORCE:MULTIPLE")
 
-    # Fix LNK4272: ensure bare system library names (kernel32, user32, etc. from wxWidgets)
+    # Fix LNK4272: ensure bare system library names (kernel32, user32, etc.)
     # resolve to x64 versions. Derive correct paths from the compiler and SDK tool locations
     # so /LIBPATH entries are searched before the LIB environment variable.
     if(CMAKE_SIZEOF_VOID_P EQUAL 8)

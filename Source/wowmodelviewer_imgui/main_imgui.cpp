@@ -1,7 +1,6 @@
 // ============================================================================
 // WoW Model Viewer — ImGui / GLFW entry point
 //
-// Replaces the wxWidgets WinMain ? wxEntry flow from main.cpp / app.cpp.
 // Initialises engine systems (GlobalSettings, Logger, video), creates an
 // offscreen FBO for the 3-D viewport, renders the scene into that FBO, and
 // displays it as an ImGui::Image() inside a dockable "3D Viewport" panel.
@@ -146,7 +145,12 @@ static bool         g_drawCheckerBg = true;
 static float        g_animTime   = 0.0f;
 static std::chrono::steady_clock::time_point g_lastTick;
 
-// ---- Game loading state (Phase 2) -----------------------------------------
+// FPS tracking
+static float        g_fps = 0.0f;
+static int          g_fpsFrameCount = 0;
+static float        g_fpsAccum = 0.0f;
+
+// ---- Game loading state ---------------------------------------------------
 static std::string  g_gamePath;              // WoW Data folder path
 static std::string  g_cfgPath;               // userSettings/Config.ini
 static bool         g_isWoWLoaded  = false;
@@ -234,7 +238,7 @@ static int                    g_fileTreeFileCount = 0;
 static bool                   g_isModel = false;
 static bool                   g_isChar  = false;
 
-// ---- Animation control state (Phase 4) ------------------------------------
+// ---- Animation control state ----------------------------------------------
 struct AnimEntry
 {
     std::string label;
@@ -266,7 +270,7 @@ static std::vector<SkinEntry>  g_skinEntries;
 static int                     g_selectedSkin = -1;
 static int                     g_blpSkin[3] = {-1, -1, -1};
 
-// ---- Character control state (Phase 4) ------------------------------------
+// ---- Character control state ----------------------------------------------
 struct CustomizationOption
 {
     unsigned int optionID;
@@ -311,6 +315,8 @@ static std::vector<size_t>           g_startOutfitFiltered; // indices into g_st
 static bool                          g_startOutfitFilterDirty = true;
 
 // ---- Light Control state --------------------------------------------------
+enum LightType { LIGHT_DIRECTIONAL = 0, LIGHT_POINT, LIGHT_SPOT, LIGHT_AMBIENT_ONLY };
+
 struct LightSettings
 {
     float direction[4] = { -1.0f, 1.0f, -1.0f, 0.0f }; // xyz + w=0 directional
@@ -319,6 +325,10 @@ struct LightSettings
     float specular[3]  = {  0.0f, 0.0f,  0.0f };
     float intensity    = 1.0f;
     bool  enabled      = true;
+    LightType type     = LIGHT_DIRECTIONAL;
+    float position[3]  = { 0.0f, 5.0f, 0.0f };  // for point/spot lights
+    float spotCutoff   = 45.0f;
+    float spotExponent = 10.0f;
 };
 
 static LightSettings g_light;
@@ -391,7 +401,47 @@ static int                       g_mountTab = 0;      // 0 = Player Mounts, 1 = 
 static std::vector<size_t>       g_mountFiltered;     // filtered indices into g_mountList or g_creatureModels
 static bool                      g_mountFilterDirty = true;
 
+// ---- Log viewer state -----------------------------------------------------
+static std::vector<std::string>  g_logLines;
+static bool                      g_logAutoScroll = true;
+static bool                      g_logNeedsReload = true;
+
+// ---- Canvas size override -------------------------------------------------
+static bool g_useCanvasOverride = false;
+static int  g_canvasWidth  = 1920;
+static int  g_canvasHeight = 1080;
+
+// ---- Gradient background --------------------------------------------------
+static bool      g_drawGradientBg = false;
+static glm::vec3 g_gradientTop(0.15f, 0.20f, 0.35f);
+static glm::vec3 g_gradientBottom(0.02f, 0.02f, 0.05f);
+
+// ---- Background colour palette --------------------------------------------
+static glm::vec3 g_bgPalette[] = {
+    {0.22f, 0.22f, 0.22f},   // Dark gray (default)
+    {0.0f,  0.0f,  0.0f},    // Black
+    {1.0f,  1.0f,  1.0f},    // White
+    {0.278f,0.373f,0.475f},   // Steel blue
+    {0.15f, 0.30f, 0.15f},   // Forest green
+    {0.35f, 0.15f, 0.15f},   // Dark red
+    {0.0f,  0.47f, 0.84f},   // WoW blue
+    {0.10f, 0.10f, 0.18f},   // Midnight
+};
+static constexpr int g_bgPaletteCount = sizeof(g_bgPalette) / sizeof(g_bgPalette[0]);
+
 // ---- Helpers --------------------------------------------------------------
+static void reloadLogFile()
+{
+    g_logLines.clear();
+    std::ifstream file("userSettings/log_imgui.txt");
+    if (!file.is_open())
+        return;
+    std::string line;
+    while (std::getline(file, line))
+        g_logLines.push_back(line);
+    g_logNeedsReload = false;
+}
+
 static std::filesystem::path getApplicationDirPath()
 {
 #ifdef _WIN32
@@ -2321,7 +2371,7 @@ static void doExport()
     }
 }
 
-// ---- Default lighting (replaces LightControl / wxWindow) ------------------
+// ---- Default lighting -----------------------------------------------------
 static void setupDefaultLighting()
 {
     if (!g_light.enabled)
@@ -2331,10 +2381,33 @@ static void setupDefaultLighting()
     }
 
     glEnable(GL_LIGHTING);
+
+    if (g_light.type == LIGHT_AMBIENT_ONLY)
+    {
+        glDisable(GL_LIGHT0);
+        GLfloat modelAmb[] = { g_light.ambient[0], g_light.ambient[1],
+                               g_light.ambient[2], 1.0f };
+        glLightModelfv(GL_LIGHT_MODEL_AMBIENT, modelAmb);
+        return;
+    }
+
     glEnable(GL_LIGHT0);
 
-    GLfloat pos[] = { g_light.direction[0], g_light.direction[1],
-                      g_light.direction[2], g_light.direction[3] };
+    GLfloat pos[4];
+    if (g_light.type == LIGHT_DIRECTIONAL)
+    {
+        pos[0] = g_light.direction[0];
+        pos[1] = g_light.direction[1];
+        pos[2] = g_light.direction[2];
+        pos[3] = 0.0f; // w=0 directional
+    }
+    else
+    {
+        pos[0] = g_light.position[0];
+        pos[1] = g_light.position[1];
+        pos[2] = g_light.position[2];
+        pos[3] = 1.0f; // w=1 positional
+    }
 
     float i = g_light.intensity;
     GLfloat diffuse[]  = { g_light.diffuse[0]  * i, g_light.diffuse[1]  * i,
@@ -2348,6 +2421,19 @@ static void setupDefaultLighting()
     glLightfv(GL_LIGHT0, GL_DIFFUSE,  diffuse);
     glLightfv(GL_LIGHT0, GL_AMBIENT,  ambient);
     glLightfv(GL_LIGHT0, GL_SPECULAR, specular);
+
+    // Spot light parameters
+    if (g_light.type == LIGHT_SPOT)
+    {
+        GLfloat spotDir[] = { g_light.direction[0], g_light.direction[1], g_light.direction[2] };
+        glLightfv(GL_LIGHT0, GL_SPOT_DIRECTION, spotDir);
+        glLightf(GL_LIGHT0, GL_SPOT_CUTOFF, g_light.spotCutoff);
+        glLightf(GL_LIGHT0, GL_SPOT_EXPONENT, g_light.spotExponent);
+    }
+    else
+    {
+        glLightf(GL_LIGHT0, GL_SPOT_CUTOFF, 180.0f); // no spot cone
+    }
 
     GLfloat modelAmb[] = { g_light.ambient[0], g_light.ambient[1],
                            g_light.ambient[2], 1.0f };
@@ -2491,9 +2577,37 @@ static void renderSceneToFBO(int w, int h)
     glClearColor(g_bgColor.x, g_bgColor.y, g_bgColor.z, 1.0f);
     glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 
-    // Checkerboard background (screen-space, drawn before 3D scene)
-    if (g_drawCheckerBg && g_checkerTex)
+    // Background (screen-space, drawn before 3D scene)
+    if (g_drawGradientBg)
+    {
+        glMatrixMode(GL_PROJECTION);
+        glPushMatrix();
+        glLoadIdentity();
+        glOrtho(0, w, 0, h, -1, 1);
+        glMatrixMode(GL_MODELVIEW);
+        glPushMatrix();
+        glLoadIdentity();
+        glDisable(GL_DEPTH_TEST);
+        glDisable(GL_LIGHTING);
+        glDisable(GL_TEXTURE_2D);
+        glBegin(GL_QUADS);
+        glColor3f(g_gradientBottom.x, g_gradientBottom.y, g_gradientBottom.z);
+        glVertex2f(0, 0);
+        glVertex2f(static_cast<float>(w), 0);
+        glColor3f(g_gradientTop.x, g_gradientTop.y, g_gradientTop.z);
+        glVertex2f(static_cast<float>(w), static_cast<float>(h));
+        glVertex2f(0, static_cast<float>(h));
+        glEnd();
+        glEnable(GL_DEPTH_TEST);
+        glMatrixMode(GL_PROJECTION);
+        glPopMatrix();
+        glMatrixMode(GL_MODELVIEW);
+        glPopMatrix();
+    }
+    else if (g_drawCheckerBg && g_checkerTex)
+    {
         renderCheckerboardBackground(w, h);
+    }
     glClear(GL_DEPTH_BUFFER_BIT);
 
     // Projection
@@ -2525,7 +2639,7 @@ static void renderSceneToFBO(int w, int h)
     g_fbo.unbind();
 }
 
-// ---- Handle viewport input (ported from ModelCanvas::OnMouse) -------------
+// ---- Handle viewport input ------------------------------------------------
 static void handleViewportInput()
 {
     const ImGuiIO& io = ImGui::GetIO();
@@ -2612,12 +2726,22 @@ static void tickScene()
     float dt = std::chrono::duration<float>(now - g_lastTick).count();
     g_lastTick = now;
 
-    // Clamp to avoid huge jumps
+    // Clamp to avoid huge jumps after breakpoints, window moves, or long pauses
     if (dt > 0.1f) dt = 0.1f;
+    if (dt < 0.0f) dt = 0.0f;
+
+    // FPS tracking
+    g_fpsAccum += dt;
+    g_fpsFrameCount++;
+    if (g_fpsAccum >= 0.5f)
+    {
+        g_fps = static_cast<float>(g_fpsFrameCount) / g_fpsAccum;
+        g_fpsFrameCount = 0;
+        g_fpsAccum = 0.0f;
+    }
 
     g_animTime += dt;
 
-    // Engine expects milliseconds (AnimManager::Tick takes int ms)
     if (g_root)
         g_root->tick(dt * 1000.0f);
 }
@@ -2788,6 +2912,7 @@ int main(int /*argc*/, char* /*argv*/[])
             ImGui::DockBuilderDockWindow("Presets", dock_bottom);
             ImGui::DockBuilderDockWindow("Character", dock_right);
             ImGui::DockBuilderDockWindow("Lighting", dock_right);
+            ImGui::DockBuilderDockWindow("Log", dock_bottom);
             ImGui::DockBuilderFinish(dockspace_id);
             }
         }
@@ -2824,6 +2949,7 @@ int main(int /*argc*/, char* /*argv*/[])
                 ImGui::MenuItem("Export", nullptr, nullptr);
                 ImGui::MenuItem("Screenshot", nullptr, nullptr);
                 ImGui::MenuItem("Presets", nullptr, nullptr);
+                ImGui::MenuItem("Log", nullptr, nullptr);
                 ImGui::Separator();
                 ImGui::MenuItem("ImGui Demo", nullptr, &show_demo_window);
                 ImGui::EndMenu();
@@ -2868,6 +2994,32 @@ int main(int /*argc*/, char* /*argv*/[])
                 if (ImGui::MenuItem("About..."))
                     g_showAboutDialog = true;
                 ImGui::EndMenu();
+            }
+
+            // ---- Status bar (right-aligned in menu bar) ----
+            {
+                WoWModel* sm = getLoadedModel();
+                std::string statusText;
+                if (sm)
+                {
+                    int curFrame = 0, totalFrames = 0;
+                    if (sm->animManager)
+                    {
+                        curFrame = static_cast<int>(sm->animManager->GetFrame());
+                        totalFrames = static_cast<int>(sm->animManager->GetFrameCount());
+                    }
+                    statusText = std::format("FPS: {:.0f} | {} | V:{} B:{} T:{} | Frame: {}/{}",
+                        g_fps, sm->name(),
+                        sm->header.nVertices, sm->header.nBones, sm->header.nTextures,
+                        curFrame, totalFrames);
+                }
+                else
+                {
+                    statusText = std::format("FPS: {:.0f}", g_fps);
+                }
+                float textWidth = ImGui::CalcTextSize(statusText.c_str()).x;
+                ImGui::SameLine(ImGui::GetWindowWidth() - textWidth - 10.0f);
+                ImGui::TextDisabled("%s", statusText.c_str());
             }
 
             ImGui::EndMainMenuBar();
@@ -3216,6 +3368,21 @@ int main(int /*argc*/, char* /*argv*/[])
             WoWModel* mModel = getLoadedModel();
             if (mModel)
             {
+                // ---- Model Info ----
+                ImGui::SeparatorText("Model Info");
+                ImGui::Text("Name: %s", mModel->name().c_str());
+                if (mModel->gamefile)
+                {
+                    ImGui::Text("File: %s", mModel->gamefile->fullname().c_str());
+                    ImGui::Text("FileDataID: %d", mModel->gamefile->fileDataId());
+                }
+                ImGui::Text("Vertices: %u", mModel->header.nVertices);
+                ImGui::Text("Bones: %u", mModel->header.nBones);
+                ImGui::Text("Textures: %u", mModel->header.nTextures);
+                ImGui::Text("Animations: %zu", mModel->anims.size());
+                ImGui::Text("Geosets: %zu", mModel->geosets.size());
+                ImGui::Text("Animated: %s", mModel->animated ? "Yes" : "No");
+
                 // ---- Rendering toggles ----
                 ImGui::SeparatorText("Display Toggles");
                 ImGui::Checkbox("Render", &mModel->showModel);
@@ -3687,8 +3854,28 @@ int main(int /*argc*/, char* /*argv*/[])
             if (!g_light.enabled)
                 ImGui::BeginDisabled();
 
-            ImGui::SeparatorText("Direction");
-            ImGui::DragFloat3("Dir XYZ", g_light.direction, 0.01f, -5.0f, 5.0f, "%.2f");
+            ImGui::SeparatorText("Light Type");
+            static const char* lightTypeNames[] = { "Directional", "Point", "Spot", "Ambient Only" };
+            ImGui::Combo("##LightType", reinterpret_cast<int*>(&g_light.type), lightTypeNames, IM_ARRAYSIZE(lightTypeNames));
+
+            if (g_light.type == LIGHT_DIRECTIONAL || g_light.type == LIGHT_SPOT)
+            {
+                ImGui::SeparatorText("Direction");
+                ImGui::DragFloat3("Dir XYZ", g_light.direction, 0.01f, -5.0f, 5.0f, "%.2f");
+            }
+
+            if (g_light.type == LIGHT_POINT || g_light.type == LIGHT_SPOT)
+            {
+                ImGui::SeparatorText("Position");
+                ImGui::DragFloat3("Pos XYZ", g_light.position, 0.1f, -50.0f, 50.0f, "%.1f");
+            }
+
+            if (g_light.type == LIGHT_SPOT)
+            {
+                ImGui::SeparatorText("Spot Parameters");
+                ImGui::SliderFloat("Cutoff Angle", &g_light.spotCutoff, 1.0f, 90.0f, "%.1f deg");
+                ImGui::SliderFloat("Exponent", &g_light.spotExponent, 0.0f, 128.0f, "%.1f");
+            }
 
             ImGui::SeparatorText("Colors");
             ImGui::ColorEdit3("Diffuse",  g_light.diffuse,  ImGuiColorEditFlags_Float);
@@ -3912,10 +4099,24 @@ int main(int /*argc*/, char* /*argv*/[])
                     ImGui::TextDisabled("No animations on current model.");
                 }
 
-                // ---- Export button ----
+                // ---- Export buttons ----
                 ImGui::Separator();
                 if (ImGui::Button("Export", ImVec2(-1, 0)))
                     doExport();
+
+                if (canAnim && !g_animEntries.empty() && g_selectedAnimCombo >= 0)
+                {
+                    if (ImGui::Button("Export Current Anim Only", ImVec2(-1, 0)))
+                    {
+                        // Temporarily select only the current animation
+                        std::vector<char> saved = g_exportAnimChecked;
+                        g_exportAnimChecked.assign(g_animEntries.size(), 0);
+                        if (g_selectedAnimCombo < static_cast<int>(g_exportAnimChecked.size()))
+                            g_exportAnimChecked[g_selectedAnimCombo] = 1;
+                        doExport();
+                        g_exportAnimChecked = std::move(saved);
+                    }
+                }
 
                 // ---- Status ----
                 if (!g_exportStatus.empty())
@@ -3945,7 +4146,88 @@ int main(int /*argc*/, char* /*argv*/[])
             ImGui::InputText("##screenshotPath", g_screenshotPath, sizeof(g_screenshotPath));
 
             if (ImGui::Button("Save Screenshot", ImVec2(-1, 0)))
-                captureScreenshot(g_screenshotPath);
+            {
+                if (g_useCanvasOverride && g_canvasWidth > 0 && g_canvasHeight > 0)
+                {
+                    // Render to a temporary FBO at the override resolution
+                    ViewportFBO tmpFbo;
+                    tmpFbo.create(g_canvasWidth, g_canvasHeight);
+                    tmpFbo.bind();
+                    glViewport(0, 0, g_canvasWidth, g_canvasHeight);
+                    glClearColor(g_bgColor.x, g_bgColor.y, g_bgColor.z, 1.0f);
+                    glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
+                    if (g_drawGradientBg)
+                    {
+                        int cw = g_canvasWidth, ch = g_canvasHeight;
+                        glMatrixMode(GL_PROJECTION); glPushMatrix(); glLoadIdentity();
+                        glOrtho(0, cw, 0, ch, -1, 1);
+                        glMatrixMode(GL_MODELVIEW); glPushMatrix(); glLoadIdentity();
+                        glDisable(GL_DEPTH_TEST); glDisable(GL_LIGHTING); glDisable(GL_TEXTURE_2D);
+                        glBegin(GL_QUADS);
+                        glColor3f(g_gradientBottom.x, g_gradientBottom.y, g_gradientBottom.z);
+                        glVertex2f(0, 0); glVertex2f(static_cast<float>(cw), 0);
+                        glColor3f(g_gradientTop.x, g_gradientTop.y, g_gradientTop.z);
+                        glVertex2f(static_cast<float>(cw), static_cast<float>(ch));
+                        glVertex2f(0, static_cast<float>(ch));
+                        glEnd();
+                        glEnable(GL_DEPTH_TEST);
+                        glMatrixMode(GL_PROJECTION); glPopMatrix();
+                        glMatrixMode(GL_MODELVIEW); glPopMatrix();
+                    }
+                    else if (g_drawCheckerBg && g_checkerTex)
+                    {
+                        renderCheckerboardBackground(g_canvasWidth, g_canvasHeight);
+                    }
+                    glClear(GL_DEPTH_BUFFER_BIT);
+                    glMatrixMode(GL_PROJECTION);
+                    glLoadIdentity();
+                    glm::mat4 proj = glm::perspective(video.fov,
+                        static_cast<float>(g_canvasWidth) / static_cast<float>(g_canvasHeight),
+                        0.1f, 1280.0f * 5.0f);
+                    glMultMatrixf(glm::value_ptr(proj));
+                    glMatrixMode(GL_MODELVIEW);
+                    glLoadIdentity();
+                    glm::mat4 view = g_camera.getViewMatrix();
+                    glMultMatrixf(glm::value_ptr(view));
+                    setupDefaultLighting();
+                    if (g_drawGrid) renderGrid();
+                    glEnable(GL_NORMALIZE);
+                    renderObjects();
+                    glDisable(GL_NORMALIZE);
+                    tmpFbo.unbind();
+
+                    // Read pixels from the temp FBO
+                    const int tw = g_canvasWidth, th = g_canvasHeight;
+                    std::vector<unsigned char> pixels(static_cast<size_t>(tw) * th * 4);
+                    glBindFramebuffer(GL_FRAMEBUFFER, tmpFbo.fbo);
+                    glReadPixels(0, 0, tw, th, GL_RGBA, GL_UNSIGNED_BYTE, pixels.data());
+                    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+                    const size_t rowBytes = static_cast<size_t>(tw) * 4;
+                    std::vector<unsigned char> row(rowBytes);
+                    for (int y = 0; y < th / 2; ++y)
+                    {
+                        unsigned char* top = pixels.data() + y * rowBytes;
+                        unsigned char* bot = pixels.data() + (th - 1 - y) * rowBytes;
+                        std::memcpy(row.data(), top, rowBytes);
+                        std::memcpy(top, bot, rowBytes);
+                        std::memcpy(bot, row.data(), rowBytes);
+                    }
+                    if (stbi_write_png(g_screenshotPath, tw, th, 4, pixels.data(), static_cast<int>(rowBytes)))
+                    {
+                        g_screenshotStatus = std::format("Saved ({}x{}): {}", tw, th, g_screenshotPath);
+                        LOG_INFO << "Screenshot saved to " << g_screenshotPath << " (" << tw << "x" << th << ")";
+                    }
+                    else
+                    {
+                        g_screenshotStatus = std::string("Failed to write: ") + g_screenshotPath;
+                    }
+                    tmpFbo.destroy();
+                }
+                else
+                {
+                    captureScreenshot(g_screenshotPath);
+                }
+            }
 
             if (!g_screenshotStatus.empty())
             {
@@ -3957,13 +4239,33 @@ int main(int /*argc*/, char* /*argv*/[])
                     ImGui::TextColored(ImVec4(0.4f, 1.0f, 0.4f, 1.0f), "%s", g_screenshotStatus.c_str());
             }
 
-            ImGui::SeparatorText("Quick Sizes");
-            if (ImGui::Button("1x (viewport)", ImVec2(-1, 0)))
+            ImGui::SeparatorText("Canvas Size Override");
+            ImGui::Checkbox("Use custom resolution", &g_useCanvasOverride);
+            if (g_useCanvasOverride)
             {
-                captureScreenshot(g_screenshotPath);
+                ImGui::SetNextItemWidth(100);
+                ImGui::InputInt("Width##canvas", &g_canvasWidth, 0, 0);
+                ImGui::SameLine();
+                ImGui::SetNextItemWidth(100);
+                ImGui::InputInt("Height##canvas", &g_canvasHeight, 0, 0);
+                g_canvasWidth  = std::max(1, std::min(g_canvasWidth, 8192));
+                g_canvasHeight = std::max(1, std::min(g_canvasHeight, 8192));
+
+                ImGui::Text("Quick:");
+                ImGui::SameLine();
+                if (ImGui::SmallButton("1080p")) { g_canvasWidth = 1920; g_canvasHeight = 1080; }
+                ImGui::SameLine();
+                if (ImGui::SmallButton("1440p")) { g_canvasWidth = 2560; g_canvasHeight = 1440; }
+                ImGui::SameLine();
+                if (ImGui::SmallButton("4K"))    { g_canvasWidth = 3840; g_canvasHeight = 2160; }
+                ImGui::SameLine();
+                if (ImGui::SmallButton("Square")) { g_canvasWidth = 2048; g_canvasHeight = 2048; }
             }
-            ImGui::TextDisabled("Captures at current viewport resolution (%dx%d).",
-                                g_fbo.width, g_fbo.height);
+            else
+            {
+                ImGui::TextDisabled("Captures at current viewport resolution (%dx%d).",
+                                    g_fbo.width, g_fbo.height);
+            }
         }
         ImGui::End();
 
@@ -4007,6 +4309,49 @@ int main(int /*argc*/, char* /*argv*/[])
 
             if (!g_isChar)
                 ImGui::TextDisabled("Load a character model first.");
+        }
+        ImGui::End();
+
+        // ===== Log viewer panel =====
+        if (ImGui::Begin("Log"))
+        {
+            if (g_logNeedsReload)
+                reloadLogFile();
+
+            if (ImGui::Button("Reload"))
+                reloadLogFile();
+            ImGui::SameLine();
+            if (ImGui::Button("Clear"))
+                g_logLines.clear();
+            ImGui::SameLine();
+            ImGui::Checkbox("Auto-scroll", &g_logAutoScroll);
+            ImGui::SameLine();
+            ImGui::TextDisabled("%d lines", static_cast<int>(g_logLines.size()));
+
+            ImGui::Separator();
+            ImGui::BeginChild("##LogScroll", ImVec2(0, 0), ImGuiChildFlags_None,
+                              ImGuiWindowFlags_HorizontalScrollbar);
+            ImGuiListClipper clipper;
+            clipper.Begin(static_cast<int>(g_logLines.size()));
+            while (clipper.Step())
+            {
+                for (int i = clipper.DisplayStart; i < clipper.DisplayEnd; ++i)
+                {
+                    const auto& line = g_logLines[i];
+                    // Colour-code by log level
+                    if (line.find("ERROR") != std::string::npos)
+                        ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 0.4f, 0.4f, 1.0f));
+                    else if (line.find("WARNING") != std::string::npos)
+                        ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 1.0f, 0.3f, 1.0f));
+                    else
+                        ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.7f, 0.7f, 0.7f, 1.0f));
+                    ImGui::TextUnformatted(line.c_str());
+                    ImGui::PopStyleColor();
+                }
+            }
+            if (g_logAutoScroll && ImGui::GetScrollY() >= ImGui::GetScrollMaxY() - 20.0f)
+                ImGui::SetScrollHereY(1.0f);
+            ImGui::EndChild();
         }
         ImGui::End();
 
@@ -4132,7 +4477,29 @@ int main(int /*argc*/, char* /*argv*/[])
             ImGui::SeparatorText("Viewport");
             ImGui::Checkbox("Draw Grid", &g_drawGrid);
             ImGui::Checkbox("Checkerboard Background", &g_drawCheckerBg);
+            if (ImGui::Checkbox("Gradient Background", &g_drawGradientBg))
+            {
+                if (g_drawGradientBg)
+                    g_drawCheckerBg = false;
+            }
+            if (g_drawGradientBg)
+            {
+                ImGui::ColorEdit3("Gradient Top", &g_gradientTop.x);
+                ImGui::ColorEdit3("Gradient Bottom", &g_gradientBottom.x);
+            }
             ImGui::ColorEdit3("Background", &g_bgColor.x);
+
+            ImGui::Spacing();
+            ImGui::Text("Background Palette:");
+            for (int i = 0; i < g_bgPaletteCount; ++i)
+            {
+                ImGui::PushID(i);
+                if (ImGui::ColorButton("##pal", ImVec4(g_bgPalette[i].x, g_bgPalette[i].y, g_bgPalette[i].z, 1.0f),
+                                       ImGuiColorEditFlags_NoTooltip, ImVec2(20, 20)))
+                    g_bgColor = g_bgPalette[i];
+                ImGui::PopID();
+                if (i < g_bgPaletteCount - 1) ImGui::SameLine();
+            }
 
             ImGui::Spacing();
             ImGui::Text("Camera Presets:");
@@ -4147,6 +4514,11 @@ int main(int /*argc*/, char* /*argv*/[])
             ImGui::SameLine();
             if (ImGui::Button("Iso"))
                 g_camera.setYawAndPitch(315.f, 90.f);
+            if (ImGui::Button("Top"))
+                g_camera.setYawAndPitch(g_camera.yaw(), 179.f);
+            ImGui::SameLine();
+            if (ImGui::Button("Bottom"))
+                g_camera.setYawAndPitch(g_camera.yaw(), 1.f);
             ImGui::SameLine();
             if (ImGui::Button("Reset"))
                 g_camera.reset(getLoadedModel());

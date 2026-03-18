@@ -25,7 +25,7 @@ add_executable(${NAME} ${src})
 
 set_property(TARGET ${NAME} PROPERTY FOLDER "executables")
 
-# Force-include glad/gl.h before all source files (same as the wxWidgets target)
+# Force-include glad/gl.h before all source files
 if(MSVC)
   target_compile_options(${NAME} PRIVATE /FIglad/gl.h)
 endif()

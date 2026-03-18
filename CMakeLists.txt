@@ -78,24 +78,7 @@ if(WIN32 AND NOT EXISTS "${_fbx_sentinel}")
 endif()
 
 # Dependencies.
-# WxWidgets
-message(STATUS "Finding wxWidgets...")
-set(wxWidgets_ROOT_DIR "${CMAKE_SOURCE_DIR}/ThirdParty/wxWidgets_x64")
-set(wxWidgets_LIB_DIR "${CMAKE_SOURCE_DIR}/ThirdParty/wxWidgets_x64/lib/vc_x64_lib")
-set(wxWidgets_USE_UNICODE ON)
-find_package(wxWidgets COMPONENTS gl net aui xml adv core base REQUIRED)
-message(STATUS "  wxWidgets found: ${wxWidgets_LIBRARIES}")
-# Include WxWidgets headers
-include(${wxWidgets_USE_FILE})
-# FindWxWidgets incorrectly injects /MT based on the vc_x64_lib directory name.
-# Strip it so our CMAKE_MSVC_RUNTIME_LIBRARY setting (/MDd, /MD) is not overridden.
-if(MSVC)
-  foreach(_f CMAKE_CXX_FLAGS CMAKE_C_FLAGS)
-    string(REGEX REPLACE "/M[Td]+" "" ${_f} "${${_f}}")
-    string(STRIP "${${_f}}" ${_f})
-  endforeach()
-endif()
-include_directories(${wxWidgets_INCLUDE_DIRS} "${CMAKE_SOURCE_DIR}/ThirdParty/include")
+include_directories("${CMAKE_SOURCE_DIR}/ThirdParty/include")
 
 
 # Find includes in corresponding build directories
