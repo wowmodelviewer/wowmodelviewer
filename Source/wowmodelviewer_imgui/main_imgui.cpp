@@ -35,6 +35,9 @@
 #include <filesystem>
 #include <fstream>
 #include <algorithm>
+#include <thread>
+#include <mutex>
+#include <atomic>
 
 // Engine (no wxWidgets dependencies)
 #include "GlobalSettings.h"
@@ -140,8 +143,14 @@ static std::string  g_cfgPath;               // userSettings/Config.ini
 static bool         g_isWoWLoaded  = false;
 static bool         g_initDB       = false;
 static std::string  g_loadStatus;            // status text shown in File Browser
-static float        g_loadProgress = 0.0f;   // 0..1 progress bar fraction
+static std::atomic<float> g_loadProgress{0.0f}; // 0..1 progress bar fraction (atomic for thread safety)
 static bool         g_loadInProgress = false;
+
+// Async loading state
+static std::thread        g_loadThread;
+static std::mutex         g_loadStatusMutex;
+static std::atomic<bool>  g_loadThreadDone{false};
+static std::atomic<bool>  g_loadThreadSuccess{false};
 
 // ImGui folder-path input buffer
 static char         g_pathBuf[1024] = {};
@@ -317,18 +326,31 @@ static void saveSettings()
     LOG_INFO << "Settings and UI layout saved.";
 }
 
+// ---- Thread-safe load status helpers --------------------------------------
+static void setLoadStatus(const std::string& s)
+{
+    std::lock_guard<std::mutex> lock(g_loadStatusMutex);
+    g_loadStatus = s;
+}
+
+static std::string getLoadStatus()
+{
+    std::lock_guard<std::mutex> lock(g_loadStatusMutex);
+    return g_loadStatus;
+}
+
 // ---- Support-file download (listfile.csv, extraEncryptionKeys.csv) --------
 static bool downloadFile(const std::string& url, const std::filesystem::path& dest,
                           const std::string& label, bool replaceSeparators = false)
 {
     LOG_INFO << "Downloading " << label << "...";
-    g_loadStatus = "Downloading " + label + "...";
+    setLoadStatus("Downloading " + label + "...");
 
     const auto resp = HttpClient::Get(url);
     if (!resp.success)
     {
         LOG_ERROR << "Failed to download " << label << ": " << resp.error;
-        g_loadStatus = "Failed to download " + label + ": " + resp.error;
+        setLoadStatus("Failed to download " + label + ": " + resp.error);
         return false;
     }
 
@@ -340,7 +362,7 @@ static bool downloadFile(const std::string& url, const std::filesystem::path& de
     if (!file.is_open())
     {
         LOG_ERROR << "Failed to write " << label << " to " << dest.string();
-        g_loadStatus = "Failed to write " + label;
+        setLoadStatus("Failed to write " + label);
         return false;
     }
 
@@ -383,13 +405,13 @@ static bool checkAndDownloadSupportFiles()
 static void initDatabase()
 {
     LOG_INFO << "Initializing Databases...";
-    g_loadStatus = "Initializing database...";
+    setLoadStatus("Initializing database...");
 
     if (!GAMEDATABASE.initFromXML("database.xml"))
     {
         g_initDB = false;
         LOG_ERROR << "Database initialization failed!";
-        g_loadStatus = "Database initialization failed!";
+        setLoadStatus("Database initialization failed!");
         return;
     }
 
@@ -457,21 +479,19 @@ static void initDatabase()
 }
 
 // ---- loadWoW (ported from ModelViewer::LoadWoW) ---------------------------
-// Called once the user has set g_gamePath (and optionally chosen a config).
-// This runs synchronously (blocks the frame), which is acceptable for now.
+// Called on the background thread to perform heavy CASC / listfile / DB work.
 static void loadWoW(const core::GameConfig& config)
 {
-    g_loadInProgress = true;
     g_loadProgress = 0.0f;
-    g_loadStatus = "Opening CASC storage...";
+    setLoadStatus("Opening CASC storage...");
 
     if (!GAMEDIRECTORY.setConfig(config))
     {
         LOG_ERROR << "Could not load WoW Data folder (error "
                   << GAMEDIRECTORY.lastError() << ").";
-        g_loadStatus = "Failed to open CASC storage (error "
-                       + std::to_string(GAMEDIRECTORY.lastError()) + ").";
-        g_loadInProgress = false;
+        setLoadStatus("Failed to open CASC storage (error "
+                       + std::to_string(GAMEDIRECTORY.lastError()) + ").");
+        g_loadThreadDone = true;
         return;
     }
 
@@ -485,7 +505,7 @@ static void loadWoW(const core::GameConfig& config)
     core::Game::instance().setConfigFolder(baseConfigFolder);
 
     // Load file list from listfile.csv
-    g_loadStatus = "Loading file list...";
+    setLoadStatus("Loading file list...");
     g_loadProgress = 0.10f;
     GAMEDIRECTORY.setProgressCallback([](int current, int total) {
         if (total > 0)
@@ -496,29 +516,69 @@ static void loadWoW(const core::GameConfig& config)
     g_loadProgress = 0.50f;
 
     // Init database
-    g_loadStatus = "Initializing database...";
+    setLoadStatus("Initializing database...");
     g_loadProgress = 0.55f;
     initDatabase();
 
     if (!g_initDB)
     {
-        g_loadInProgress = false;
+        g_loadThreadDone = true;
         return;
     }
 
     g_loadProgress = 1.0f;
-    g_loadStatus = "World of Warcraft loaded successfully.";
-    g_isWoWLoaded = true;
-    g_loadInProgress = false;
-    g_fileTreeDirty = true; // trigger initial file tree build
-
-    LOG_INFO << "World of Warcraft loaded successfully. Version: "
-             << GAMEDIRECTORY.version() << " Locale: " << GAMEDIRECTORY.locale();
-
-    saveSettings();
+    setLoadStatus("World of Warcraft loaded successfully.");
+    g_loadThreadSuccess = true;
+    g_loadThreadDone = true;
 }
 
-// Called when the user clicks "Load WoW" — kicks off the full init sequence.
+// ---- Async thread launcher / poller ---------------------------------------
+static void loadWoWThreadFunc(core::GameConfig config)
+{
+    setLoadStatus("Checking support files...");
+    if (!checkAndDownloadSupportFiles())
+    {
+        g_loadThreadDone = true;
+        return;
+    }
+    loadWoW(config);
+}
+
+static void launchLoadThread(const core::GameConfig& config)
+{
+    g_loadProgress = 0.0f;
+    g_loadThreadDone = false;
+    g_loadThreadSuccess = false;
+    g_loadInProgress = true;
+
+    if (g_loadThread.joinable())
+        g_loadThread.join();
+
+    g_loadThread = std::thread(loadWoWThreadFunc, config);
+}
+
+static void pollAsyncLoad()
+{
+    if (!g_loadInProgress || !g_loadThreadDone.load())
+        return;
+
+    if (g_loadThread.joinable())
+        g_loadThread.join();
+
+    g_loadInProgress = false;
+
+    if (g_loadThreadSuccess.load())
+    {
+        g_isWoWLoaded = true;
+        g_fileTreeDirty = true;
+        LOG_INFO << "World of Warcraft loaded successfully. Version: "
+                 << GAMEDIRECTORY.version() << " Locale: " << GAMEDIRECTORY.locale();
+        saveSettings();
+    }
+}
+
+// Called when the user clicks "Load WoW" — validates the path and launches
+// the background loading thread (downloads, CASC, listfile, database).
 static void beginLoadWoW()
 {
     if (g_isWoWLoaded || g_loadInProgress)
@@ -526,20 +586,14 @@ static void beginLoadWoW()
 
     g_loadInProgress = true;
     g_loadProgress = 0.0f;
-    g_loadStatus = "Checking support files...";
-
-    if (!checkAndDownloadSupportFiles())
-    {
-        g_loadInProgress = false;
-        return;
-    }
+    setLoadStatus("Validating game path...");
 
     // Validate game path
     namespace fs = std::filesystem;
     std::string path = g_gamePath;
     if (path.empty() || !fs::is_directory(path))
     {
-        g_loadStatus = "Please set a valid WoW Data folder path above.";
+        setLoadStatus("Please set a valid WoW Data folder path above.");
         g_loadInProgress = false;
         return;
     }
@@ -566,15 +620,15 @@ static void beginLoadWoW()
     if (g_pendingConfigs.empty())
     {
         LOG_ERROR << "No locale found in WoW folder.";
-        g_loadStatus = "No locale found in the WoW folder.";
+        setLoadStatus("No locale found in the WoW folder.");
         g_loadInProgress = false;
         return;
     }
 
     if (g_pendingConfigs.size() == 1)
     {
-        // Only one config — load immediately
-        loadWoW(g_pendingConfigs[0]);
+        // Only one config — launch background loading thread
+        launchLoadThread(g_pendingConfigs[0]);
     }
     else
     {
@@ -1440,6 +1494,9 @@ int main(int /*argc*/, char* /*argv*/[])
     {
         glfwPollEvents();
 
+        // Check if background loading thread has finished
+        pollAsyncLoad();
+
         // Animation tick
         tickScene();
 
@@ -1518,15 +1575,16 @@ int main(int /*argc*/, char* /*argv*/[])
                 {
                     ImGui::Text("Loading...");
                     ImGui::ProgressBar(g_loadProgress, ImVec2(-1, 0));
-                    ImGui::TextWrapped("%s", g_loadStatus.c_str());
-                }
-                else if (!g_loadStatus.empty())
-                {
-                    ImGui::TextWrapped("%s", g_loadStatus.c_str());
+                    auto status = getLoadStatus();
+                    ImGui::TextWrapped("%s", status.c_str());
                 }
                 else
                 {
-                    ImGui::TextWrapped("Game not loaded. Use Settings panel to set the WoW path and click Load WoW.");
+                    auto status = getLoadStatus();
+                    if (!status.empty())
+                        ImGui::TextWrapped("%s", status.c_str());
+                    else
+                        ImGui::TextWrapped("Game not loaded. Use Settings panel to set the WoW path and click Load WoW.");
                 }
             }
             else
@@ -2025,11 +2083,14 @@ int main(int /*argc*/, char* /*argv*/[])
                 if (g_loadInProgress)
                 {
                     ImGui::ProgressBar(g_loadProgress);
-                    ImGui::TextWrapped("%s", g_loadStatus.c_str());
+                    auto status = getLoadStatus();
+                    ImGui::TextWrapped("%s", status.c_str());
                 }
-                else if (!g_loadStatus.empty())
+                else
                 {
-                    ImGui::TextWrapped("%s", g_loadStatus.c_str());
+                    auto status = getLoadStatus();
+                    if (!status.empty())
+                        ImGui::TextWrapped("%s", status.c_str());
                 }
             }
 
@@ -2079,13 +2140,13 @@ int main(int /*argc*/, char* /*argv*/[])
             {
                 g_showConfigPopup = false;
                 ImGui::CloseCurrentPopup();
-                loadWoW(g_pendingConfigs[g_selectedConfig]);
+                launchLoadThread(g_pendingConfigs[g_selectedConfig]);
             }
             ImGui::SameLine();
             if (ImGui::Button("Cancel", ImVec2(120, 0)))
             {
                 g_showConfigPopup = false;
-                g_loadStatus = "Load cancelled.";
+                setLoadStatus("Load cancelled.");
                 ImGui::CloseCurrentPopup();
             }
             ImGui::EndPopup();
@@ -2107,6 +2168,9 @@ int main(int /*argc*/, char* /*argv*/[])
     }
 
     // ---- Cleanup ----
+    if (g_loadThread.joinable())
+        g_loadThread.join();
+
     freeNodePool();
     g_fileTreeRoot = nullptr;
 
