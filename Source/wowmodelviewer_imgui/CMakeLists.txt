@@ -4,16 +4,17 @@ include(${CMAKE_SOURCE_DIR}/cmake/common.cmake)
 include_directories(.)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
-# Include the wowmodelviewer directory for OrbitCamera.h
-include_directories(${CMAKE_SOURCE_DIR}/Source/wowmodelviewer)
-
 # Exporter headers (OBJ / FBX)
 include_directories(${CMAKE_SOURCE_DIR}/Source/exporters/obj)
 include_directories(${CMAKE_SOURCE_DIR}/Source/exporters/fbx)
 include_directories(${CMAKE_SOURCE_DIR}/ThirdParty/include)  # fbxsdk.h
 
+# Importer headers (Armory / Wowhead)
+include_directories(${CMAKE_SOURCE_DIR}/Source/importers/armory)
+include_directories(${CMAKE_SOURCE_DIR}/Source/importers/wowhead)
+
 set(src main_imgui.cpp
-        ${CMAKE_SOURCE_DIR}/Source/wowmodelviewer/OrbitCamera.cpp)
+        OrbitCamera.cpp)
 
 # External dependencies
 use_glad()
@@ -38,6 +39,8 @@ target_link_libraries(${NAME}
   pugixml-static
   objexporter
   fbxexporter
+  armory
+  wowhead
   ${CMAKE_SOURCE_DIR}/ThirdParty/lib/x64/zlib.lib
   ${CMAKE_SOURCE_DIR}/ThirdParty/lib/x64/libpng.lib
 )

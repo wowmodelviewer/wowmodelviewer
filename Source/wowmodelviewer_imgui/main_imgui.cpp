@@ -69,6 +69,12 @@
 #include "OBJExporter.h"
 #include "FBXExporter.h"
 
+// Importers (Armory / Wowhead URL import)
+#include "ArmoryImporter.h"
+#include "WowheadImporter.h"
+#include "CharInfos.h"
+#include "NPCInfos.h"
+
 #include <format>
 #include <deque>
 #include <map>
@@ -177,6 +183,28 @@ static int                             g_selectedConfig  = 0;
 // Menu bar / modal state
 static bool g_showAboutDialog    = false;
 static bool g_showLanguageDialog = false;
+
+// ---- Panel visibility (View menu toggles) ---------------------------------
+static bool g_showViewport       = true;
+static bool g_showFileBrowser    = true;
+static bool g_showAnimation      = true;
+static bool g_showModelControl   = true;
+static bool g_showCharacter      = true;
+static bool g_showLighting       = true;
+static bool g_showNpcBrowser     = true;
+static bool g_showItemBrowser    = true;
+static bool g_showExport         = true;
+static bool g_showScreenshot     = true;
+static bool g_showPresets        = true;
+static bool g_showLog            = true;
+static bool g_showSettings       = true;
+
+// ---- URL Import state -----------------------------------------------------
+static std::vector<ImporterPlugin*> g_importers;
+static bool         g_showImportDialog = false;
+static char         g_importUrlBuf[1024] = {};
+static std::string  g_importStatus;
+static bool         g_importPopupJustOpened = false;
 
 // ---- Folder Picker state (ImGui-based) ------------------------------------
 static bool                          g_showFolderPicker = false;
@@ -2746,6 +2774,176 @@ static void tickScene()
         g_root->tick(dt * 1000.0f);
 }
 
+// ---- URL Import helpers ----------------------------------------------------
+static void applyImportedChar(CharInfos* info)
+{
+    if (!info || !info->valid)
+    {
+        g_importStatus = "Import returned no valid character data.";
+        return;
+    }
+
+    // Find the character model by race + gender
+    int raceID = static_cast<int>(info->raceId);
+    int sexID = (info->gender == "FEMALE" || info->gender == "Female") ? 1 : 0;
+
+    int fileDataID = RaceInfos::getFileIDForRaceSex(raceID, sexID);
+    if (fileDataID <= 0)
+    {
+        g_importStatus = "Could not determine model for race " + std::to_string(raceID);
+        return;
+    }
+
+    GameFile* file = GAMEDIRECTORY.getFile(fileDataID);
+    if (!file)
+    {
+        g_importStatus = "Model file not found for race " + std::to_string(raceID);
+        return;
+    }
+
+    loadModel(file);
+
+    WoWModel* model = getLoadedModel();
+    if (!model || !g_isChar)
+    {
+        g_importStatus = "Failed to load character model.";
+        return;
+    }
+
+    // Apply customizations
+    auto& cd = model->cd;
+    for (const auto& [optionId, choiceId] : info->customizations)
+        cd.set(optionId, choiceId);
+
+    // Apply eye glow
+    cd.eyeGlowType = static_cast<EyeGlowTypes>(info->eyeGlowType);
+
+    // Apply equipment
+    for (int s = 0; s < NUM_CHAR_SLOTS && s < static_cast<int>(info->equipment.size()); ++s)
+    {
+        int itemId = info->equipment[s];
+        if (itemId <= 0) continue;
+        WoWItem* witem = model->getItem(static_cast<CharSlots>(s));
+        if (witem)
+            witem->setId(itemId);
+    }
+
+    model->refresh();
+
+    // Update customization UI state
+    initCharacterControl(model);
+
+    g_importStatus = "Character imported successfully.";
+    LOG_INFO << "Character imported from URL.";
+}
+
+static void applyImportedNPC(NPCInfos* info)
+{
+    if (!info || info->displayId <= 0)
+    {
+        g_importStatus = "Import returned no valid NPC data.";
+        return;
+    }
+
+    // Use the existing loadNPC path via creature display ID
+    std::string query = std::format(
+        "SELECT CreatureModelData.FileDataID FROM CreatureDisplayInfo "
+        "LEFT JOIN CreatureModelData ON CreatureDisplayInfo.modelID = CreatureModelData.ID "
+        "WHERE CreatureDisplayInfo.ID = {};", info->displayId);
+
+    sqlResult r = GAMEDATABASE.sqlQuery(query);
+    if (!r.valid || r.empty() || r.values[0][0].empty() || r.values[0][0] == "0")
+    {
+        g_importStatus = "NPC display ID " + std::to_string(info->displayId) + " not found in database.";
+        return;
+    }
+
+    GameFile* file = GAMEDIRECTORY.getFile(core::safeStoi(r.values[0][0]));
+    if (!file)
+    {
+        g_importStatus = "NPC model file not found.";
+        return;
+    }
+
+    loadModel(file);
+    g_importStatus = std::string("NPC imported: ") + wstringToString(info->name);
+    LOG_INFO << "NPC imported from URL: " << wstringToString(info->name);
+}
+
+static void applyImportedItem(ItemRecord* rec)
+{
+    if (!rec || rec->id <= 0)
+    {
+        g_importStatus = "Import returned no valid item data.";
+        return;
+    }
+
+    loadItemModel(static_cast<unsigned int>(rec->id));
+    g_importStatus = std::string("Item imported: ") + rec->name;
+    LOG_INFO << "Item imported from URL: " << rec->name;
+}
+
+static void doURLImport()
+{
+    std::string url(g_importUrlBuf);
+    if (url.empty())
+    {
+        g_importStatus = "Please enter a URL.";
+        return;
+    }
+
+    g_importStatus = "Importing...";
+
+    // Find matching importer
+    ImporterPlugin* importer = nullptr;
+    for (auto* imp : g_importers)
+    {
+        if (imp->acceptURL(url))
+        {
+            importer = imp;
+            break;
+        }
+    }
+
+    if (!importer)
+    {
+        g_importStatus = "No importer recognises this URL. Supported: battle.net, worldofwarcraft.com, wowhead.com";
+        return;
+    }
+
+    // Try character import first (Armory)
+    CharInfos* charInfo = importer->importChar(url);
+    if (charInfo && charInfo->valid)
+    {
+        applyImportedChar(charInfo);
+        delete charInfo;
+        return;
+    }
+    delete charInfo;
+
+    // Try NPC import (Wowhead)
+    NPCInfos* npcInfo = importer->importNPC(url);
+    if (npcInfo && npcInfo->displayId > 0)
+    {
+        applyImportedNPC(npcInfo);
+        delete npcInfo;
+        return;
+    }
+    delete npcInfo;
+
+    // Try item import
+    ItemRecord* itemRec = importer->importItem(url);
+    if (itemRec && itemRec->id > 0)
+    {
+        applyImportedItem(itemRec);
+        delete itemRec;
+        return;
+    }
+    delete itemRec;
+
+    g_importStatus = "Could not import anything from this URL.";
+}
+
 // ---- Engine initialization ------------------------------------------------
 static void initEngine()
 {
@@ -2775,6 +2973,10 @@ static void initEngine()
     // Instantiate exporters (OBJ / FBX)
     g_exporters.push_back(new OBJExporter());
     g_exporters.push_back(new FBXExporter());
+
+    // Instantiate importers (Armory / Wowhead)
+    g_importers.push_back(new ArmoryImporter());
+    g_importers.push_back(new WowheadImporter());
 }
 
 static void initGL()
@@ -2925,6 +3127,13 @@ int main(int /*argc*/, char* /*argv*/[])
                 if (ImGui::MenuItem("Load WoW", nullptr, false, !g_isWoWLoaded && !g_loadInProgress))
                     beginLoadWoW();
                 ImGui::Separator();
+                if (ImGui::MenuItem("Import from URL...", nullptr, false, g_isWoWLoaded && g_initDB))
+                {
+                    g_showImportDialog = true;
+                    g_importPopupJustOpened = true;
+                    g_importStatus.clear();
+                }
+                ImGui::Separator();
                 if (ImGui::MenuItem("Screenshot...", "Ctrl+S"))
                 {
                     // Focus the Screenshot panel (user picks path there)
@@ -2938,18 +3147,19 @@ int main(int /*argc*/, char* /*argv*/[])
 
             if (ImGui::BeginMenu("View"))
             {
-                ImGui::MenuItem("3D Viewport", nullptr, nullptr);
-                ImGui::MenuItem("File Browser", nullptr, nullptr);
-                ImGui::MenuItem("Animation", nullptr, nullptr);
-                ImGui::MenuItem("Model Control", nullptr, nullptr);
-                ImGui::MenuItem("Character", nullptr, nullptr);
-                ImGui::MenuItem("Lighting", nullptr, nullptr);
-                ImGui::MenuItem("NPC Browser", nullptr, nullptr);
-                ImGui::MenuItem("Item Browser", nullptr, nullptr);
-                ImGui::MenuItem("Export", nullptr, nullptr);
-                ImGui::MenuItem("Screenshot", nullptr, nullptr);
-                ImGui::MenuItem("Presets", nullptr, nullptr);
-                ImGui::MenuItem("Log", nullptr, nullptr);
+                ImGui::MenuItem("3D Viewport", nullptr, &g_showViewport);
+                ImGui::MenuItem("File Browser", nullptr, &g_showFileBrowser);
+                ImGui::MenuItem("Animation", nullptr, &g_showAnimation);
+                ImGui::MenuItem("Model Control", nullptr, &g_showModelControl);
+                ImGui::MenuItem("Character", nullptr, &g_showCharacter);
+                ImGui::MenuItem("Lighting", nullptr, &g_showLighting);
+                ImGui::MenuItem("NPC Browser", nullptr, &g_showNpcBrowser);
+                ImGui::MenuItem("Item Browser", nullptr, &g_showItemBrowser);
+                ImGui::MenuItem("Export", nullptr, &g_showExport);
+                ImGui::MenuItem("Screenshot", nullptr, &g_showScreenshot);
+                ImGui::MenuItem("Presets", nullptr, &g_showPresets);
+                ImGui::MenuItem("Log", nullptr, &g_showLog);
+                ImGui::MenuItem("Settings", nullptr, &g_showSettings);
                 ImGui::Separator();
                 ImGui::MenuItem("ImGui Demo", nullptr, &show_demo_window);
                 ImGui::EndMenu();
@@ -3026,8 +3236,10 @@ int main(int /*argc*/, char* /*argv*/[])
         }
 
         // ===== 3D Viewport panel =====
+        if (g_showViewport)
+        {
         ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
-        if (ImGui::Begin("3D Viewport"))
+        if (ImGui::Begin("3D Viewport", &g_showViewport))
         {
             // Determine available size for the viewport image
             ImVec2 panelSize = ImGui::GetContentRegionAvail();
@@ -3051,9 +3263,12 @@ int main(int /*argc*/, char* /*argv*/[])
         }
         ImGui::End();
         ImGui::PopStyleVar();
+        }
 
         // ===== File Browser panel =====
-        if (ImGui::Begin("File Browser"))
+        if (g_showFileBrowser)
+        {
+        if (ImGui::Begin("File Browser", &g_showFileBrowser))
         {
             if (!g_isWoWLoaded)
             {
@@ -3138,9 +3353,12 @@ int main(int /*argc*/, char* /*argv*/[])
             }
         }
         ImGui::End();
+        }
 
         // ===== Animation Control =====
-        if (ImGui::Begin("Animation"))
+        if (g_showAnimation)
+        {
+        if (ImGui::Begin("Animation", &g_showAnimation))
         {
             WoWModel* aModel = getLoadedModel();
             if (aModel && !g_animEntries.empty())
@@ -3361,9 +3579,12 @@ int main(int /*argc*/, char* /*argv*/[])
             }
         }
         ImGui::End();
+        }
 
         // ===== Model Control =====
-        if (ImGui::Begin("Model Control"))
+        if (g_showModelControl)
+        {
+        if (ImGui::Begin("Model Control", &g_showModelControl))
         {
             WoWModel* mModel = getLoadedModel();
             if (mModel)
@@ -3484,9 +3705,12 @@ int main(int /*argc*/, char* /*argv*/[])
             }
         }
         ImGui::End();
+        }
 
         // ===== Character Control =====
-        if (ImGui::Begin("Character"))
+        if (g_showCharacter)
+        {
+        if (ImGui::Begin("Character", &g_showCharacter))
         {
             WoWModel* cModel = getLoadedModel();
             if (cModel && g_isChar)
@@ -3845,9 +4069,12 @@ int main(int /*argc*/, char* /*argv*/[])
             }
         }
         ImGui::End();
+        }
 
         // ===== Lighting panel =====
-        if (ImGui::Begin("Lighting"))
+        if (g_showLighting)
+        {
+        if (ImGui::Begin("Lighting", &g_showLighting))
         {
             ImGui::Checkbox("Enable Lighting", &g_light.enabled);
 
@@ -3935,9 +4162,12 @@ int main(int /*argc*/, char* /*argv*/[])
             }
         }
         ImGui::End();
+        }
 
         // ===== NPC Browser panel =====
-        if (ImGui::Begin("NPC Browser"))
+        if (g_showNpcBrowser)
+        {
+        if (ImGui::Begin("NPC Browser", &g_showNpcBrowser))
         {
             if (!g_isWoWLoaded || !g_initDB)
             {
@@ -3979,9 +4209,12 @@ int main(int /*argc*/, char* /*argv*/[])
             }
         }
         ImGui::End();
+        }
 
         // ===== Item Browser panel =====
-        if (ImGui::Begin("Item Browser"))
+        if (g_showItemBrowser)
+        {
+        if (ImGui::Begin("Item Browser", &g_showItemBrowser))
         {
             if (!g_isWoWLoaded || !g_initDB)
             {
@@ -4026,9 +4259,12 @@ int main(int /*argc*/, char* /*argv*/[])
             }
         }
         ImGui::End();
+        }
 
         // ===== Export panel =====
-        if (ImGui::Begin("Export"))
+        if (g_showExport)
+        {
+        if (ImGui::Begin("Export", &g_showExport))
         {
             WoWModel* eModel = getLoadedModel();
             if (eModel)
@@ -4136,9 +4372,12 @@ int main(int /*argc*/, char* /*argv*/[])
             }
         }
         ImGui::End();
+        }
 
         // ===== Screenshot panel =====
-        if (ImGui::Begin("Screenshot"))
+        if (g_showScreenshot)
+        {
+        if (ImGui::Begin("Screenshot", &g_showScreenshot))
         {
             ImGui::SeparatorText("Capture Viewport");
             ImGui::Text("Output File:");
@@ -4268,9 +4507,12 @@ int main(int /*argc*/, char* /*argv*/[])
             }
         }
         ImGui::End();
+        }
 
         // ===== Character Preset panel =====
-        if (ImGui::Begin("Presets"))
+        if (g_showPresets)
+        {
+        if (ImGui::Begin("Presets", &g_showPresets))
         {
             ImGui::SeparatorText("Character Preset");
             ImGui::Text("File:");
@@ -4311,9 +4553,12 @@ int main(int /*argc*/, char* /*argv*/[])
                 ImGui::TextDisabled("Load a character model first.");
         }
         ImGui::End();
+        }
 
         // ===== Log viewer panel =====
-        if (ImGui::Begin("Log"))
+        if (g_showLog)
+        {
+        if (ImGui::Begin("Log", &g_showLog))
         {
             if (g_logNeedsReload)
                 reloadLogFile();
@@ -4354,9 +4599,12 @@ int main(int /*argc*/, char* /*argv*/[])
             ImGui::EndChild();
         }
         ImGui::End();
+        }
 
         // ===== Settings panel =====
-        if (ImGui::Begin("Settings"))
+        if (g_showSettings)
+        {
+        if (ImGui::Begin("Settings", &g_showSettings))
         {
             // ---- Game loading section ----
             ImGui::SeparatorText("World of Warcraft");
@@ -4540,6 +4788,52 @@ int main(int /*argc*/, char* /*argv*/[])
             ImGui::TextDisabled("Saves preferences and UI layout.");
         }
         ImGui::End();
+        }
+
+        // ===== URL Import dialog =====
+        if (g_showImportDialog)
+            ImGui::OpenPopup("Import from URL##ImportModal");
+
+        if (ImGui::BeginPopupModal("Import from URL##ImportModal", &g_showImportDialog,
+            ImGuiWindowFlags_AlwaysAutoResize))
+        {
+            ImGui::Text("Paste an Armory, Battle.net, or Wowhead URL:");
+            ImGui::Spacing();
+
+            if (g_importPopupJustOpened)
+            {
+                ImGui::SetKeyboardFocusHere();
+                g_importPopupJustOpened = false;
+            }
+
+            ImGui::SetNextItemWidth(500);
+            ImGui::InputText("##importUrl", g_importUrlBuf, sizeof(g_importUrlBuf));
+
+            ImGui::Spacing();
+            if (ImGui::Button("Import", ImVec2(120, 0)))
+                doURLImport();
+            ImGui::SameLine();
+            if (ImGui::Button("Cancel", ImVec2(120, 0)))
+            {
+                g_showImportDialog = false;
+                ImGui::CloseCurrentPopup();
+            }
+
+            if (!g_importStatus.empty())
+            {
+                ImGui::Spacing();
+                bool isError = g_importStatus.find("failed") != std::string::npos ||
+                               g_importStatus.find("No ") != std::string::npos ||
+                               g_importStatus.find("not") != std::string::npos ||
+                               g_importStatus.find("Please") != std::string::npos;
+                if (isError)
+                    ImGui::TextColored(ImVec4(1.0f, 0.4f, 0.4f, 1.0f), "%s", g_importStatus.c_str());
+                else
+                    ImGui::TextColored(ImVec4(0.4f, 1.0f, 0.4f, 1.0f), "%s", g_importStatus.c_str());
+            }
+
+            ImGui::EndPopup();
+        }
 
         // ===== Config selection modal (multiple WoW installs) =====
         if (g_showConfigPopup)
@@ -4704,6 +4998,10 @@ int main(int /*argc*/, char* /*argv*/[])
     for (auto* e : g_exporters)
         delete e;
     g_exporters.clear();
+
+    for (auto* imp : g_importers)
+        delete imp;
+    g_importers.clear();
 
     ImGui_ImplOpenGL3_Shutdown();
     ImGui_ImplGlfw_Shutdown();
