@@ -24,7 +24,10 @@ bool core::GameDatabase::initFromXML(const std::string& file)
 	int rc;
 
 	if (m_fastMode)
-		rc = sqlite3_open("./wowdb.sqlite", &m_db);
+	{
+		const char* path = m_cachePath.empty() ? "./wowdb.sqlite" : m_cachePath.c_str();
+		rc = sqlite3_open(path, &m_db);
+	}
 	else
 		rc = sqlite3_open(":memory:", &m_db);
 

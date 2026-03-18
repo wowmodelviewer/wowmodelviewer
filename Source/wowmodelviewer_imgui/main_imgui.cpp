@@ -493,12 +493,57 @@ static void initDatabase()
     LOG_INFO << "Initializing Databases...";
     setLoadStatus("Initializing database...");
 
+    // --- Database caching via fast mode ---
+    // When a valid cache file exists for the current game version, SQLite is
+    // opened from disk and the expensive DB2-to-SQLite conversion is skipped.
+    namespace fs = std::filesystem;
+    const fs::path appDir      = getApplicationDirPath();
+    const fs::path cachePath   = appDir / "wowdb.sqlite";
+    const fs::path versionPath = appDir / "wowdb.version";
+
+    const std::string currentVersion = GAMEDIRECTORY.version();
+    bool cacheValid = false;
+
+    std::error_code ec;
+    if (fs::exists(cachePath, ec) && fs::file_size(cachePath, ec) > 0 &&
+        fs::exists(versionPath, ec))
+    {
+        std::ifstream vf(versionPath);
+        std::string cachedVersion;
+        if (std::getline(vf, cachedVersion) && cachedVersion == currentVersion)
+        {
+            cacheValid = true;
+            LOG_INFO << "Database cache is valid for version " << currentVersion;
+        }
+    }
+
+    if (!cacheValid)
+    {
+        LOG_INFO << "Database cache miss — will rebuild from DB2 files.";
+        fs::remove(cachePath, ec);
+        fs::remove(versionPath, ec);
+    }
+
+    GAMEDATABASE.setCachePath(cachePath.string());
+    GAMEDATABASE.setFastMode();
+
     if (!GAMEDATABASE.initFromXML("database.xml"))
     {
         g_initDB = false;
         LOG_ERROR << "Database initialization failed!";
         setLoadStatus("Database initialization failed!");
+        // Clean up partial cache so next launch starts fresh
+        fs::remove(cachePath, ec);
+        fs::remove(versionPath, ec);
         return;
+    }
+
+    // Write version marker so subsequent launches can reuse the cache.
+    if (!cacheValid)
+    {
+        std::ofstream vf(versionPath, std::ios::trunc);
+        vf << currentVersion;
+        LOG_INFO << "Database cache written for version " << currentVersion;
     }
 
     LOG_INFO << "Database initialization succeeded.";
@@ -1180,6 +1225,126 @@ static void rebuildEquipFilteredItems()
             continue;
         g_equipFilteredItems.push_back(i);
     }
+}
+
+// ---- Item Set helpers -----------------------------------------------------
+static void buildItemSets()
+{
+    if (g_itemSetsBuilt)
+        return;
+
+    g_itemSets.clear();
+
+    sqlResult r = GAMEDATABASE.sqlQuery("SELECT ID, Name_Lang FROM ItemSet");
+    if (r.valid && !r.empty())
+    {
+        for (const auto& value : r.values)
+        {
+            ItemSetEntry e;
+            e.id = std::stoi(value[0]);
+            e.name = value[1];
+            if (!e.name.empty())
+                g_itemSets.push_back(e);
+        }
+    }
+
+    std::sort(g_itemSets.begin(), g_itemSets.end(),
+        [](const ItemSetEntry& a, const ItemSetEntry& b) { return a.name < b.name; });
+
+    g_itemSetsBuilt = true;
+    g_itemSetFilterDirty = true;
+    LOG_INFO << "Item sets loaded: " << g_itemSets.size();
+}
+
+static void rebuildItemSetFilter()
+{
+    g_itemSetFiltered.clear();
+
+    std::string search = core::toLower(std::string(g_itemSetSearchBuf));
+    auto s = search.find_first_not_of(" \t\r\n");
+    auto e = search.find_last_not_of(" \t\r\n");
+    search = (s == std::string::npos) ? "" : search.substr(s, e - s + 1);
+
+    for (size_t i = 0; i < g_itemSets.size(); ++i)
+    {
+        if (!search.empty() && !core::containsIgnoreCase(g_itemSets[i].name, search))
+            continue;
+        g_itemSetFiltered.push_back(i);
+    }
+
+    g_itemSetFilterDirty = false;
+}
+
+static void tryToEquipItem(WoWModel* model, int id)
+{
+    if (id == 0 || !model)
+        return;
+
+    ItemRecord itemr = items.getById(id);
+    if (itemr.name == items.items[0].name)
+    {
+        LOG_ERROR << "Cannot retrieve item from database (id " << id << ")";
+        return;
+    }
+
+    int itemSlot = itemr.slot();
+    if (itemSlot == -1)
+    {
+        LOG_ERROR << "Cannot determine slot for object " << itemr.name;
+        return;
+    }
+
+    WoWItem* item = model->getItem(static_cast<CharSlots>(itemSlot));
+    if (item)
+    {
+        item->setId(id);
+        g_equipSlotLevels[itemSlot] = 0;
+    }
+}
+
+static void applyItemSet(WoWModel* model, int setId)
+{
+    if (!model || setId <= 0)
+        return;
+
+    const std::string query = std::format(
+        "SELECT ItemID1, ItemID2, ItemID3, ItemID4, ItemID5, "
+        "ItemID6, ItemID7, ItemID8 FROM ItemSet WHERE ID = {}", setId);
+
+    sqlResult r = GAMEDATABASE.sqlQuery(query);
+    if (!r.valid || r.empty())
+    {
+        LOG_ERROR << "Item set query failed for ID " << setId;
+        return;
+    }
+
+    // Reset all equipped items
+    for (const auto it : *model)
+        it->setId(0);
+    std::memset(g_equipSlotLevels, 0, sizeof(g_equipSlotLevels));
+
+    // Equip each item from the set.  WoWItem::setId() may throw
+    // std::invalid_argument when downstream DB queries return empty strings
+    // for items that lack appearance data — catch per-item to keep going.
+    const size_t cols = r.values[0].size();
+    for (unsigned i = 0; i < 8 && i < cols; ++i)
+    {
+        const auto& val = r.values[0][i];
+        if (val.empty() || val == "0")
+            continue;
+        try
+        {
+            tryToEquipItem(model, std::stoi(val));
+        }
+        catch (const std::exception& e)
+        {
+            LOG_ERROR << "Failed to equip item set entry " << i
+                      << " (val=\"" << val << "\"): " << e.what();
+        }
+    }
+
+    model->refresh();
+    LOG_INFO << "Applied item set ID " << setId;
 }
 
 // ---- Clear current model --------------------------------------------------
@@ -2884,6 +3049,44 @@ int main(int /*argc*/, char* /*argv*/[])
                     }
                     ImGui::EndPopup();
                 }
+
+                // ---- Item Sets ----
+                ImGui::SeparatorText("Item Sets");
+
+                buildItemSets(); // lazy init on first frame
+
+                ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x - 60.0f);
+                if (ImGui::InputText("##itemSetSearch", g_itemSetSearchBuf, sizeof(g_itemSetSearchBuf),
+                                     ImGuiInputTextFlags_EnterReturnsTrue))
+                    g_itemSetFilterDirty = true;
+                ImGui::SameLine();
+                if (ImGui::Button("Apply##itemset", ImVec2(-1, 0)))
+                    g_itemSetFilterDirty = true;
+
+                if (g_itemSetFilterDirty)
+                    rebuildItemSetFilter();
+
+                ImGui::Text("%d sets", static_cast<int>(g_itemSetFiltered.size()));
+                ImGui::Separator();
+
+                ImGui::BeginChild("##ItemSetList", ImVec2(0, 200), ImGuiChildFlags_Borders);
+                {
+                    ImGuiListClipper clipper;
+                    clipper.Begin(static_cast<int>(g_itemSetFiltered.size()));
+                    while (clipper.Step())
+                    {
+                        for (int i = clipper.DisplayStart; i < clipper.DisplayEnd; ++i)
+                        {
+                            const auto& setEntry = g_itemSets[g_itemSetFiltered[i]];
+                            ImGui::PushID(setEntry.id);
+                            std::string label = std::format("{} (ID:{})", setEntry.name, setEntry.id);
+                            if (ImGui::Selectable(label.c_str()))
+                                applyItemSet(cModel, setEntry.id);
+                            ImGui::PopID();
+                        }
+                    }
+                }
+                ImGui::EndChild();
 
                 // ---- Mount ----
                 ImGui::SeparatorText("Mount");

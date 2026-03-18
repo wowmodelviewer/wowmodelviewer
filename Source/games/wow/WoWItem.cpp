@@ -63,6 +63,8 @@ void WoWItem::setId(int id)
 			levelDisplayMap_.clear();
 			for (auto& value : itemlevels.values)
 			{
+				if (value[1].empty() || value[2].empty())
+					continue;
 				const auto curid = std::stoi(value[1]);
 				modifierIdDisplayMap_[std::stoi(value[2])] = curid;
 				// if display id is null (case when item's look doesn't change with level)
@@ -88,11 +90,14 @@ void WoWItem::setId(int id)
 			}
 		}
 
-		const auto iteminfos = GAMEDATABASE.sqlQuery(std::format("SELECT ItemDisplayInfoID FROM ItemAppearance WHERE ID = {}",
-			levelDisplayMap_[level_]));
+		if (levelDisplayMap_.count(level_))
+		{
+			const auto iteminfos = GAMEDATABASE.sqlQuery(std::format("SELECT ItemDisplayInfoID FROM ItemAppearance WHERE ID = {}",
+				levelDisplayMap_[level_]));
 
-		if (iteminfos.valid && !iteminfos.values.empty())
-			displayId_ = std::stoi(iteminfos.values[0][0]);
+			if (iteminfos.valid && !iteminfos.values.empty() && !iteminfos.values[0][0].empty())
+				displayId_ = std::stoi(iteminfos.values[0][0]);
+		}
 
 		const auto& itemRcd = items.getById(id);
 		setName(itemRcd.name);

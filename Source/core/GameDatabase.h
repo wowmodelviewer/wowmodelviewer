@@ -82,6 +82,7 @@ namespace core
 		sqlResult sqlQuery(const std::string& query);
 
 		void setFastMode() { m_fastMode = true; }
+		void setCachePath(const std::string& path) { m_cachePath = path; }
 
 		virtual ~GameDatabase();
 
@@ -105,5 +106,6 @@ namespace core
 		std::vector<TableStructure*> m_dbStruct;
 
 		bool m_fastMode;
+		std::string m_cachePath;
 	};
 }
