@@ -62,6 +62,7 @@
 #include <format>
 #include <deque>
 #include <map>
+#include <set>
 
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
@@ -202,6 +203,42 @@ static bool                   g_fileTreeDirty = true; // needs rebuild
 static int                    g_fileTreeFileCount = 0;
 static bool                   g_isModel = false;
 static bool                   g_isChar  = false;
+
+// ---- Animation control state (Phase 4) ------------------------------------
+struct AnimEntry
+{
+    std::string label;
+    int animIndex;   // index into model->anims[]
+};
+
+static std::vector<AnimEntry>  g_animEntries;
+static int                     g_selectedAnimCombo = 0;
+static float                   g_animSpeed = 1.0f;
+static bool                    g_autoAnimate = true;
+
+struct SkinEntry
+{
+    std::string label;
+    GameFile* tex[3] = {nullptr, nullptr, nullptr};
+    int base = 0;
+    size_t count = 0;
+    std::set<int> creatureGeosetData;
+};
+
+static std::vector<SkinEntry>  g_skinEntries;
+static int                     g_selectedSkin = -1;
+
+// ---- Character control state (Phase 4) ------------------------------------
+struct CustomizationOption
+{
+    unsigned int optionID;
+    std::string name;
+    std::vector<unsigned int> choiceIDs;
+    std::vector<std::string> choiceNames;
+    int selectedIndex = 0;
+};
+
+static std::vector<CustomizationOption> g_customizationOptions;
 
 // ---- Helpers --------------------------------------------------------------
 static std::filesystem::path getApplicationDirPath()
@@ -571,6 +608,265 @@ static void rebuildFileTree()
     LOG_INFO << "File tree rebuilt: " << g_fileTreeFileCount << " files matching filter.";
 }
 
+// ---- Animation / skin helpers (Phase 4) -----------------------------------
+static std::string wstringToString(const std::wstring& ws)
+{
+    std::string s;
+    s.reserve(ws.size());
+    for (wchar_t c : ws)
+        s.push_back(static_cast<char>(c & 0x7F));
+    return s;
+}
+
+static void applySkin(WoWModel* model, int skinIndex)
+{
+    if (!model || skinIndex < 0 || skinIndex >= static_cast<int>(g_skinEntries.size()))
+        return;
+
+    const auto& skin = g_skinEntries[skinIndex];
+    model->setCreatureGeosetData(skin.creatureGeosetData);
+    for (size_t i = 0; i < skin.count; ++i)
+    {
+        if (skin.tex[i])
+            model->updateTextureList(skin.tex[i], skin.base + static_cast<int>(i));
+    }
+    g_selectedSkin = skinIndex;
+}
+
+static WoWModel* getLoadedModel()
+{
+    if (!g_root) return nullptr;
+    auto* att = g_root->children.empty() ? nullptr : g_root->children[0];
+    return att ? dynamic_cast<WoWModel*>(att->model()) : nullptr;
+}
+
+static void initAnimationControl(WoWModel* model)
+{
+    g_animEntries.clear();
+    g_skinEntries.clear();
+    g_selectedAnimCombo = 0;
+    g_selectedSkin = -1;
+    g_animSpeed = 1.0f;
+
+    if (!model || !model->animated || model->anims.empty())
+        return;
+
+    // Build animation list
+    auto animsMap = model->getAnimsMap();
+    int standIndex = -1;
+
+    for (size_t i = 0; i < model->anims.size(); ++i)
+    {
+        AnimEntry e;
+        auto it = animsMap.find(model->anims[i].animID);
+        if (it != animsMap.end())
+            e.label = wstringToString(it->second) + " [" + std::to_string(i) + "]";
+        else
+            e.label = "Anim " + std::to_string(model->anims[i].animID) + " [" + std::to_string(i) + "]";
+        e.animIndex = static_cast<int>(i);
+        g_animEntries.push_back(e);
+
+        if (model->anims[i].animID == 0 && standIndex < 0) // ANIM_STAND == 0
+            standIndex = static_cast<int>(g_animEntries.size()) - 1;
+    }
+
+    if (standIndex >= 0)
+        g_selectedAnimCombo = standIndex;
+
+    int useAnim = (standIndex >= 0) ? g_animEntries[standIndex].animIndex : 0;
+    model->currentAnim = useAnim;
+    model->animManager->SetAnim(0, useAnim, 0);
+    model->animManager->SetSpeed(1.0f);
+    model->animManager->Play();
+
+    // Build skin list for creatures / items
+    const std::string fn = model->itemName();
+    bool isCreature = (fn.size() >= 8 && (fn.substr(0, 8) == "creature" || fn.substr(0, 8) == "Creature"));
+    bool isItem = (fn.size() >= 4 && (fn.substr(0, 4) == "item" || fn.substr(0, 4) == "Item"));
+
+    if (isCreature)
+    {
+        std::string query = std::format(
+            "SELECT TextureVariationFileDataID1, TextureVariationFileDataID2, TextureVariationFileDataID3, "
+            "CreatureDisplayInfo.ID FROM CreatureDisplayInfo "
+            "LEFT JOIN CreatureModelData ON CreatureDisplayInfo.ModelID = CreatureModelData.ID "
+            "WHERE CreatureModelData.FileDataID = {}", model->gamefile->fileDataId());
+
+        sqlResult r = GAMEDATABASE.sqlQuery(query);
+        if (r.valid && !r.empty())
+        {
+            for (size_t i = 0; i < r.values.size(); ++i)
+            {
+                SkinEntry se;
+                size_t cnt = 0;
+                for (size_t s = 0; s < 3; ++s)
+                {
+                    if (!r.values[i][s].empty() && r.values[i][s] != "0")
+                    {
+                        se.tex[s] = GAMEDIRECTORY.getFile(std::stoi(r.values[i][s]));
+                        if (se.tex[s]) ++cnt;
+                    }
+                }
+                if (cnt == 0) continue;
+                se.base = TEXTURE_GAMEOBJECT1;
+                se.count = cnt;
+
+                int cdi = std::stoi(r.values[i][3]);
+                std::string q2 = std::format(
+                    "SELECT GeosetIndex, GeosetValue FROM CreatureDisplayInfoGeosetData "
+                    "WHERE CreatureDisplayInfoID = {}", cdi);
+                sqlResult r2 = GAMEDATABASE.sqlQuery(q2);
+                if (r2.valid && !r2.empty())
+                {
+                    for (size_t j = 0; j < r2.values.size(); ++j)
+                    {
+                        int geoType = 100 * (std::stoi(r2.values[j][0]) + 1);
+                        int geoId   = std::stoi(r2.values[j][1]);
+                        if (geoId > 0) se.creatureGeosetData.insert(geoType + geoId);
+                    }
+                }
+
+                se.label = "Skin " + std::to_string(g_skinEntries.size());
+                g_skinEntries.push_back(se);
+            }
+        }
+    }
+    else if (isItem)
+    {
+        std::string query = std::format(
+            "SELECT TextureFileData.FileDataID FROM ItemDisplayInfo "
+            "LEFT JOIN TextureFileData ON ModelMaterialResourcesID1 = TextureFileData.MaterialResourcesID "
+            "LEFT JOIN ModelFileData ON ItemDisplayInfo.ModelResourcesID1 = ModelFileData.ModelResourcesID "
+            "WHERE ModelFileData.FileDataID = {}", model->gamefile->fileDataId());
+
+        sqlResult r = GAMEDATABASE.sqlQuery(query);
+        if (r.valid && !r.empty())
+        {
+            for (size_t i = 0; i < r.values.size(); ++i)
+            {
+                if (r.values[i][0].empty() || r.values[i][0] == "0") continue;
+                SkinEntry se;
+                se.tex[0] = GAMEDIRECTORY.getFile(std::stoi(r.values[i][0]));
+                if (!se.tex[0]) continue;
+                se.base = TEXTURE_OBJECT_SKIN;
+                se.count = 1;
+                se.label = "Skin " + std::to_string(g_skinEntries.size());
+                g_skinEntries.push_back(se);
+            }
+        }
+    }
+
+    if (!g_skinEntries.empty())
+        applySkin(model, 0);
+}
+
+static void initCharacterControl(WoWModel* model)
+{
+    g_customizationOptions.clear();
+    if (!model) return;
+
+    auto& cd = model->cd;
+    cd.showUnderwear = true;
+    cd.showEars = true;
+    cd.showHair = true;
+    cd.showFacialHair = true;
+    cd.showFeet = false;
+    cd.autoHideGeosetsForHeadItems = true;
+    cd.eyeGlowType = EGT_DEFAULT;
+    model->bSheathe = false;
+    cd.reset(model);
+
+    const auto& infos = model->infos;
+    if (infos.raceID == -1 || infos.ChrModelID.empty())
+        return;
+
+    std::string query = std::format(
+        "SELECT ID FROM ChrCustomizationOption WHERE ChrModelID = {} "
+        "AND ChrCustomizationID != 0 ORDER BY OrderIndex",
+        infos.ChrModelID[0]);
+
+    sqlResult r = GAMEDATABASE.sqlQuery(query);
+    if (!r.valid || r.empty())
+        return;
+
+    for (size_t i = 0; i < r.values.size(); ++i)
+    {
+        unsigned int optionID = static_cast<unsigned int>(std::stoul(r.values[i][0]));
+
+        CustomizationOption opt;
+        opt.optionID = optionID;
+
+        // Get option name
+        std::string nameQ = std::format(
+            "SELECT Name_Lang FROM ChrCustomizationOption WHERE ID = {}", optionID);
+        sqlResult nameR = GAMEDATABASE.sqlQuery(nameQ);
+        if (nameR.valid && !nameR.empty() && !nameR.values[0][0].empty())
+            opt.name = nameR.values[0][0];
+        else
+            opt.name = "Option " + std::to_string(optionID);
+
+        // Get available choices
+        std::vector<unsigned int> choiceIDs = cd.getCustomizationChoices(optionID);
+        if (choiceIDs.empty())
+            continue;
+
+        // Build IN clause for choice names
+        std::string inClause;
+        for (size_t c = 0; c < choiceIDs.size(); ++c)
+        {
+            if (c > 0) inClause += ",";
+            inClause += std::to_string(choiceIDs[c]);
+        }
+
+        std::string choiceQ = std::format(
+            "SELECT ID, Name_Lang FROM ChrCustomizationChoice WHERE ID IN ({}) ORDER BY OrderIndex",
+            inClause);
+        sqlResult choiceR = GAMEDATABASE.sqlQuery(choiceQ);
+
+        if (choiceR.valid && !choiceR.empty())
+        {
+            // Build ordered lists from DB results
+            std::map<unsigned int, std::string> idToName;
+            for (size_t j = 0; j < choiceR.values.size(); ++j)
+            {
+                unsigned int cid = static_cast<unsigned int>(std::stoul(choiceR.values[j][0]));
+                std::string cname = choiceR.values[j][1].empty()
+                    ? ("Choice " + std::to_string(j))
+                    : choiceR.values[j][1];
+                idToName[cid] = cname;
+            }
+            for (unsigned int cid : choiceIDs)
+            {
+                opt.choiceIDs.push_back(cid);
+                auto it = idToName.find(cid);
+                opt.choiceNames.push_back(it != idToName.end() ? it->second : ("Choice " + std::to_string(cid)));
+            }
+        }
+        else
+        {
+            for (unsigned int cid : choiceIDs)
+            {
+                opt.choiceIDs.push_back(cid);
+                opt.choiceNames.push_back("Choice " + std::to_string(cid));
+            }
+        }
+
+        // Determine current selection
+        unsigned int cur = cd.get(optionID);
+        opt.selectedIndex = 0;
+        for (size_t c = 0; c < opt.choiceIDs.size(); ++c)
+        {
+            if (opt.choiceIDs[c] == cur)
+            {
+                opt.selectedIndex = static_cast<int>(c);
+                break;
+            }
+        }
+
+        g_customizationOptions.push_back(std::move(opt));
+    }
+}
+
 // ---- Clear current model --------------------------------------------------
 static void clearModel()
 {
@@ -583,6 +879,15 @@ static void clearModel()
     TEXTUREMANAGER.clear();
     g_isModel = false;
     g_isChar = false;
+
+    g_selModel = nullptr;
+    g_animEntries.clear();
+    g_skinEntries.clear();
+    g_customizationOptions.clear();
+    g_selectedAnimCombo = 0;
+    g_selectedSkin = -1;
+    g_animSpeed = 1.0f;
+    g_autoAnimate = true;
 }
 
 // ---- Load a model from GameFile (ported from ModelViewer::LoadModel) -------
@@ -638,6 +943,11 @@ static void loadModel(GameFile* file)
     }
 
     g_isModel = true;
+
+    g_selModel = model;
+    initAnimationControl(model);
+    if (g_isChar)
+        initCharacterControl(model);
 
     // Reset camera to frame the model
     g_camera.reset(model);
@@ -1056,10 +1366,179 @@ int main(int /*argc*/, char* /*argv*/[])
         }
         ImGui::End();
 
-        // ===== Animation placeholder =====
+        // ===== Animation Control =====
         if (ImGui::Begin("Animation"))
         {
-            ImGui::Text("AnimControl will go here.");
+            WoWModel* aModel = getLoadedModel();
+            if (aModel && !g_animEntries.empty())
+            {
+                // ---- Animation selector ----
+                ImGui::SeparatorText("Animation");
+                const char* previewAnim = (g_selectedAnimCombo >= 0 && g_selectedAnimCombo < static_cast<int>(g_animEntries.size()))
+                    ? g_animEntries[g_selectedAnimCombo].label.c_str() : "<none>";
+                if (ImGui::BeginCombo("##AnimCombo", previewAnim))
+                {
+                    for (int i = 0; i < static_cast<int>(g_animEntries.size()); ++i)
+                    {
+                        bool selected = (i == g_selectedAnimCombo);
+                        if (ImGui::Selectable(g_animEntries[i].label.c_str(), selected))
+                        {
+                            g_selectedAnimCombo = i;
+                            int idx = g_animEntries[i].animIndex;
+                            aModel->currentAnim = idx;
+                            aModel->animManager->SetAnim(0, idx, 0);
+                            aModel->animManager->Play();
+                        }
+                        if (selected) ImGui::SetItemDefaultFocus();
+                    }
+                    ImGui::EndCombo();
+                }
+
+                // ---- Playback controls ----
+                if (ImGui::Button("Play"))
+                    aModel->animManager->Play();
+                ImGui::SameLine();
+                if (ImGui::Button("Pause"))
+                    aModel->animManager->Pause();
+                ImGui::SameLine();
+                if (ImGui::Button("Stop"))
+                    aModel->animManager->Stop();
+                ImGui::SameLine();
+                if (ImGui::Button("<<"))
+                    aModel->animManager->PrevFrame();
+                ImGui::SameLine();
+                if (ImGui::Button(">>"))
+                    aModel->animManager->NextFrame();
+
+                if (aModel->animManager->IsPaused())
+                    ImGui::TextColored(ImVec4(1.0f, 1.0f, 0.3f, 1.0f), "Paused");
+
+                // ---- Speed ----
+                if (ImGui::SliderFloat("Speed", &g_animSpeed, 0.0f, 4.0f, "%.2f"))
+                    aModel->animManager->SetSpeed(g_animSpeed);
+
+                // ---- Frame scrubber ----
+                int frameCount = static_cast<int>(aModel->animManager->GetFrameCount());
+                int curFrame = static_cast<int>(aModel->animManager->GetFrame());
+                if (frameCount > 0)
+                {
+                    if (ImGui::SliderInt("Frame", &curFrame, 0, frameCount))
+                        aModel->animManager->SetFrame(static_cast<size_t>(curFrame));
+                }
+                else
+                {
+                    ImGui::Text("Frame: %d", curFrame);
+                }
+
+                // ---- Skin selector ----
+                if (!g_skinEntries.empty())
+                {
+                    ImGui::SeparatorText("Skin / Texture");
+                    const char* previewSkin = (g_selectedSkin >= 0 && g_selectedSkin < static_cast<int>(g_skinEntries.size()))
+                        ? g_skinEntries[g_selectedSkin].label.c_str() : "<none>";
+                    if (ImGui::BeginCombo("##SkinCombo", previewSkin))
+                    {
+                        for (int i = 0; i < static_cast<int>(g_skinEntries.size()); ++i)
+                        {
+                            bool selected = (i == g_selectedSkin);
+                            if (ImGui::Selectable(g_skinEntries[i].label.c_str(), selected))
+                                applySkin(aModel, i);
+                            if (selected) ImGui::SetItemDefaultFocus();
+                        }
+                        ImGui::EndCombo();
+                    }
+                }
+            }
+            else
+            {
+                ImGui::TextDisabled("No model loaded.");
+            }
+        }
+        ImGui::End();
+
+        // ===== Character Control =====
+        if (ImGui::Begin("Character"))
+        {
+            WoWModel* cModel = getLoadedModel();
+            if (cModel && g_isChar)
+            {
+                auto& cd = cModel->cd;
+
+                // ---- Display options ----
+                ImGui::SeparatorText("Display");
+                bool changed = false;
+                changed |= ImGui::Checkbox("Show Underwear", &cd.showUnderwear);
+                changed |= ImGui::Checkbox("Show Hair", &cd.showHair);
+                changed |= ImGui::Checkbox("Show Facial Hair", &cd.showFacialHair);
+                changed |= ImGui::Checkbox("Show Ears", &cd.showEars);
+                changed |= ImGui::Checkbox("Show Feet", &cd.showFeet);
+                changed |= ImGui::Checkbox("Auto-hide Geosets for Head Items", &cd.autoHideGeosetsForHeadItems);
+                changed |= ImGui::Checkbox("Sheathe Weapons", &cModel->bSheathe);
+
+                // ---- Eye glow ----
+                ImGui::SeparatorText("Eye Glow");
+                int eyeGlow = static_cast<int>(cd.eyeGlowType);
+                if (ImGui::RadioButton("None", &eyeGlow, EGT_NONE)) changed = true;
+                ImGui::SameLine();
+                if (ImGui::RadioButton("Default", &eyeGlow, EGT_DEFAULT)) changed = true;
+                ImGui::SameLine();
+                if (ImGui::RadioButton("Death Knight", &eyeGlow, EGT_DEATHKNIGHT)) changed = true;
+                cd.eyeGlowType = static_cast<EyeGlowTypes>(eyeGlow);
+
+                if (changed)
+                    cModel->refresh();
+
+                // ---- Customization options ----
+                if (!g_customizationOptions.empty())
+                {
+                    ImGui::SeparatorText("Customization");
+                    for (auto& opt : g_customizationOptions)
+                    {
+                        if (opt.choiceNames.empty()) continue;
+                        const char* preview = (opt.selectedIndex >= 0 && opt.selectedIndex < static_cast<int>(opt.choiceNames.size()))
+                            ? opt.choiceNames[opt.selectedIndex].c_str() : "<none>";
+                        if (ImGui::BeginCombo(opt.name.c_str(), preview))
+                        {
+                            for (int c = 0; c < static_cast<int>(opt.choiceNames.size()); ++c)
+                            {
+                                bool sel = (c == opt.selectedIndex);
+                                if (ImGui::Selectable(opt.choiceNames[c].c_str(), sel))
+                                {
+                                    opt.selectedIndex = c;
+                                    cd.set(opt.optionID, opt.choiceIDs[c]);
+                                    cModel->refresh();
+                                }
+                                if (sel) ImGui::SetItemDefaultFocus();
+                            }
+                            ImGui::EndCombo();
+                        }
+                    }
+                }
+
+                // ---- Equipment summary ----
+                ImGui::SeparatorText("Equipment");
+                static const char* slotNames[] = {
+                    "Head", "Shoulder", "Boots", "Belt", "Shirt", "Pants",
+                    "Chest", "Bracers", "Gloves", "Right Hand", "Left Hand",
+                    "Cape", "Tabard", "Quiver"
+                };
+                for (int s = 0; s < NUM_CHAR_SLOTS; ++s)
+                {
+                    WoWItem* item = cModel->getItem(static_cast<CharSlots>(s));
+                    if (item && item->id() > 0)
+                        ImGui::Text("%s: %s (%d)", slotNames[s], item->name().c_str(), item->id());
+                    else
+                        ImGui::TextDisabled("%s: empty", slotNames[s]);
+                }
+            }
+            else if (g_isModel)
+            {
+                ImGui::TextDisabled("Not a character model.");
+            }
+            else
+            {
+                ImGui::TextDisabled("No model loaded.");
+            }
         }
         ImGui::End();
 
