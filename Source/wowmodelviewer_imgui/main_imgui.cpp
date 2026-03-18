@@ -165,10 +165,20 @@ static std::atomic<bool>  g_loadThreadSuccess{false};
 // ImGui folder-path input buffer
 static char         g_pathBuf[1024] = {};
 
-// Config selection state (ImGui modal replaces wxGetSingleChoiceIndex)
+// Config selection state (ImGui modal replaces old single-choice dialog)
 static bool                            g_showConfigPopup = false;
 static std::vector<core::GameConfig>   g_pendingConfigs;
 static int                             g_selectedConfig  = 0;
+
+// Menu bar / modal state
+static bool g_showAboutDialog    = false;
+static bool g_showLanguageDialog = false;
+
+// ---- Folder Picker state (ImGui-based) ------------------------------------
+static bool                          g_showFolderPicker = false;
+static std::filesystem::path         g_folderPickerCurrent;
+static std::vector<std::filesystem::path> g_folderPickerEntries;
+static bool                          g_folderPickerNeedsRefresh = true;
 
 // ---- File Browser state ---------------------------------------------------
 struct FileBrowserNode
@@ -391,6 +401,65 @@ static std::filesystem::path getApplicationDirPath()
 #else
     return std::filesystem::current_path();
 #endif
+}
+
+// ---- Folder Picker helpers ------------------------------------------------
+static void folderPickerRefresh()
+{
+    g_folderPickerEntries.clear();
+    namespace fs = std::filesystem;
+    std::error_code ec;
+
+    if (g_folderPickerCurrent.empty())
+    {
+        // List drive roots on Windows
+#ifdef _WIN32
+        DWORD drives = GetLogicalDrives();
+        for (int i = 0; i < 26; ++i)
+        {
+            if (drives & (1u << i))
+            {
+                std::string root = std::string(1, static_cast<char>('A' + i)) + ":\\";
+                g_folderPickerEntries.push_back(fs::path(root));
+            }
+        }
+#else
+        g_folderPickerEntries.push_back(fs::path("/"));
+#endif
+    }
+    else
+    {
+        for (auto& entry : fs::directory_iterator(g_folderPickerCurrent, fs::directory_options::skip_permission_denied, ec))
+        {
+            if (entry.is_directory(ec))
+                g_folderPickerEntries.push_back(entry.path());
+        }
+        std::sort(g_folderPickerEntries.begin(), g_folderPickerEntries.end(),
+            [](const fs::path& a, const fs::path& b)
+            {
+                return core::toLower(a.filename().string()) < core::toLower(b.filename().string());
+            });
+    }
+
+    g_folderPickerNeedsRefresh = false;
+}
+
+static void openFolderPicker()
+{
+    namespace fs = std::filesystem;
+    std::error_code ec;
+
+    // Start from the current path buffer if it's a valid directory
+    fs::path startDir(g_pathBuf);
+    if (fs::is_directory(startDir, ec))
+        g_folderPickerCurrent = startDir;
+    else if (startDir.has_parent_path() && fs::is_directory(startDir.parent_path(), ec))
+        g_folderPickerCurrent = startDir.parent_path();
+    else
+        g_folderPickerCurrent.clear(); // show drive roots
+
+    g_folderPickerNeedsRefresh = true;
+    g_showFolderPicker = true;
 }
 
 // ---- Config.ini reading/writing -------------------------------------------
@@ -735,6 +804,9 @@ static void beginLoadWoW()
     if (g_isWoWLoaded || g_loadInProgress)
         return;
 
+    // Sync game path from the Settings panel input buffer
+    g_gamePath = g_pathBuf;
+
     g_loadInProgress = true;
     g_loadProgress = 0.0f;
     setLoadStatus("Validating game path...");
@@ -744,7 +816,7 @@ static void beginLoadWoW()
     std::string path = g_gamePath;
     if (path.empty() || !fs::is_directory(path))
     {
-        setLoadStatus("Please set a valid WoW Data folder path above.");
+        setLoadStatus("Please set a valid WoW Data folder path in Options > Settings.");
         g_loadInProgress = false;
         return;
     }
@@ -2720,6 +2792,87 @@ int main(int /*argc*/, char* /*argv*/[])
             }
         }
 
+        // ===== Main Menu Bar =====
+        if (ImGui::BeginMainMenuBar())
+        {
+            if (ImGui::BeginMenu("File"))
+            {
+                if (ImGui::MenuItem("Load WoW", nullptr, false, !g_isWoWLoaded && !g_loadInProgress))
+                    beginLoadWoW();
+                ImGui::Separator();
+                if (ImGui::MenuItem("Screenshot...", "Ctrl+S"))
+                {
+                    // Focus the Screenshot panel (user picks path there)
+                    ImGui::SetWindowFocus("Screenshot");
+                }
+                ImGui::Separator();
+                if (ImGui::MenuItem("Exit", "Alt+F4"))
+                    glfwSetWindowShouldClose(window, GLFW_TRUE);
+                ImGui::EndMenu();
+            }
+
+            if (ImGui::BeginMenu("View"))
+            {
+                ImGui::MenuItem("3D Viewport", nullptr, nullptr);
+                ImGui::MenuItem("File Browser", nullptr, nullptr);
+                ImGui::MenuItem("Animation", nullptr, nullptr);
+                ImGui::MenuItem("Model Control", nullptr, nullptr);
+                ImGui::MenuItem("Character", nullptr, nullptr);
+                ImGui::MenuItem("Lighting", nullptr, nullptr);
+                ImGui::MenuItem("NPC Browser", nullptr, nullptr);
+                ImGui::MenuItem("Item Browser", nullptr, nullptr);
+                ImGui::MenuItem("Export", nullptr, nullptr);
+                ImGui::MenuItem("Screenshot", nullptr, nullptr);
+                ImGui::MenuItem("Presets", nullptr, nullptr);
+                ImGui::Separator();
+                ImGui::MenuItem("ImGui Demo", nullptr, &show_demo_window);
+                ImGui::EndMenu();
+            }
+
+            if (ImGui::BeginMenu("Character"))
+            {
+                WoWModel* m = getLoadedModel();
+                bool isChar = m && m->modelType == MT_CHAR;
+                if (!isChar) ImGui::BeginDisabled();
+
+                if (ImGui::MenuItem("Show Underwear", nullptr, m ? m->cd.showUnderwear : false))
+                    if (m) { m->cd.showUnderwear = !m->cd.showUnderwear; m->refresh(); }
+                if (ImGui::MenuItem("Show Ears", nullptr, m ? m->cd.showEars : false))
+                    if (m) { m->cd.showEars = !m->cd.showEars; m->refresh(); }
+                if (ImGui::MenuItem("Show Hair", nullptr, m ? m->cd.showHair : false))
+                    if (m) { m->cd.showHair = !m->cd.showHair; m->refresh(); }
+                if (ImGui::MenuItem("Show Facial Hair", nullptr, m ? m->cd.showFacialHair : false))
+                    if (m) { m->cd.showFacialHair = !m->cd.showFacialHair; m->refresh(); }
+                if (ImGui::MenuItem("Show Feet", nullptr, m ? m->cd.showFeet : false))
+                    if (m) { m->cd.showFeet = !m->cd.showFeet; m->refresh(); }
+
+                if (!isChar) ImGui::EndDisabled();
+                ImGui::EndMenu();
+            }
+
+            if (ImGui::BeginMenu("Options"))
+            {
+                ImGui::MenuItem("Draw Grid", nullptr, &g_drawGrid);
+                ImGui::MenuItem("Checkerboard Background", nullptr, &g_drawCheckerBg);
+                ImGui::Separator();
+                if (ImGui::MenuItem("Language / Locale..."))
+                    g_showLanguageDialog = true;
+                ImGui::Separator();
+                if (ImGui::MenuItem("Settings..."))
+                    ImGui::SetWindowFocus("Settings");
+                ImGui::EndMenu();
+            }
+
+            if (ImGui::BeginMenu("Help"))
+            {
+                if (ImGui::MenuItem("About..."))
+                    g_showAboutDialog = true;
+                ImGui::EndMenu();
+            }
+
+            ImGui::EndMainMenuBar();
+        }
+
         // ===== 3D Viewport panel =====
         ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
         if (ImGui::Begin("3D Viewport"))
@@ -3864,8 +4017,92 @@ int main(int /*argc*/, char* /*argv*/[])
             ImGui::SeparatorText("World of Warcraft");
 
             ImGui::Text("Game Data Path:");
-            ImGui::SetNextItemWidth(-1);
+            float browseWidth = ImGui::CalcTextSize("Browse...").x + ImGui::GetStyle().FramePadding.x * 2.0f;
+            ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x - browseWidth - ImGui::GetStyle().ItemSpacing.x);
             ImGui::InputText("##gamepath", g_pathBuf, sizeof(g_pathBuf));
+            ImGui::SameLine();
+            if (ImGui::Button("Browse..."))
+                openFolderPicker();
+
+            // ---- Folder Picker popup ----
+            if (g_showFolderPicker)
+                ImGui::OpenPopup("Select Folder##FolderPicker");
+
+            if (ImGui::BeginPopupModal("Select Folder##FolderPicker", &g_showFolderPicker,
+                ImGuiWindowFlags_AlwaysAutoResize))
+            {
+                // Current path display
+                std::string curPathStr = g_folderPickerCurrent.empty()
+                    ? "My Computer" : g_folderPickerCurrent.string();
+                ImGui::TextColored(ImVec4(0.4f, 0.8f, 1.0f, 1.0f), "%s", curPathStr.c_str());
+                ImGui::Separator();
+
+                if (g_folderPickerNeedsRefresh)
+                    folderPickerRefresh();
+
+                // Up / back button
+                {
+                    bool canGoUp = !g_folderPickerCurrent.empty() && g_folderPickerCurrent.has_parent_path()
+                        && g_folderPickerCurrent.parent_path() != g_folderPickerCurrent;
+                    bool canGoRoot = !g_folderPickerCurrent.empty();
+                    if (!canGoUp && !canGoRoot) ImGui::BeginDisabled();
+                    if (ImGui::Button("Up"))
+                    {
+                        if (canGoUp)
+                            g_folderPickerCurrent = g_folderPickerCurrent.parent_path();
+                        else
+                            g_folderPickerCurrent.clear(); // back to drive roots
+                        g_folderPickerNeedsRefresh = true;
+                    }
+                    if (!canGoUp && !canGoRoot) ImGui::EndDisabled();
+                }
+
+                ImGui::SameLine();
+                ImGui::Text("%d folders", static_cast<int>(g_folderPickerEntries.size()));
+
+                // Folder list
+                ImGui::BeginChild("##FolderList", ImVec2(500, 400), ImGuiChildFlags_Borders);
+                ImGuiListClipper clipper;
+                clipper.Begin(static_cast<int>(g_folderPickerEntries.size()));
+                while (clipper.Step())
+                {
+                    for (int i = clipper.DisplayStart; i < clipper.DisplayEnd; ++i)
+                    {
+                        const auto& p = g_folderPickerEntries[i];
+                        std::string displayName = g_folderPickerCurrent.empty()
+                            ? p.string() : p.filename().string();
+                        ImGui::PushID(i);
+                        if (ImGui::Selectable(displayName.c_str(), false, ImGuiSelectableFlags_AllowDoubleClick))
+                        {
+                            if (ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left))
+                            {
+                                g_folderPickerCurrent = p;
+                                g_folderPickerNeedsRefresh = true;
+                            }
+                        }
+                        ImGui::PopID();
+                    }
+                }
+                ImGui::EndChild();
+
+                ImGui::Separator();
+                if (ImGui::Button("Select This Folder", ImVec2(200, 0)))
+                {
+                    if (!g_folderPickerCurrent.empty())
+                    {
+                        strncpy_s(g_pathBuf, g_folderPickerCurrent.string().c_str(), sizeof(g_pathBuf) - 1);
+                        g_showFolderPicker = false;
+                        ImGui::CloseCurrentPopup();
+                    }
+                }
+                ImGui::SameLine();
+                if (ImGui::Button("Cancel", ImVec2(120, 0)))
+                {
+                    g_showFolderPicker = false;
+                    ImGui::CloseCurrentPopup();
+                }
+                ImGui::EndPopup();
+            }
 
             if (g_isWoWLoaded)
             {
@@ -3873,33 +4110,19 @@ int main(int /*argc*/, char* /*argv*/[])
                                    GAMEDIRECTORY.version().c_str(),
                                    GAMEDIRECTORY.locale().c_str());
             }
+            else if (g_loadInProgress)
+            {
+                ImGui::ProgressBar(g_loadProgress);
+                auto status = getLoadStatus();
+                ImGui::TextWrapped("%s", status.c_str());
+            }
             else
             {
-                bool canLoad = !g_loadInProgress;
-                if (!canLoad)
-                    ImGui::BeginDisabled();
-
-                if (ImGui::Button("Load WoW", ImVec2(-1, 0)))
-                {
-                    g_gamePath = g_pathBuf;
-                    beginLoadWoW();
-                }
-
-                if (!canLoad)
-                    ImGui::EndDisabled();
-
-                if (g_loadInProgress)
-                {
-                    ImGui::ProgressBar(g_loadProgress);
-                    auto status = getLoadStatus();
+                auto status = getLoadStatus();
+                if (!status.empty())
                     ImGui::TextWrapped("%s", status.c_str());
-                }
                 else
-                {
-                    auto status = getLoadStatus();
-                    if (!status.empty())
-                        ImGui::TextWrapped("%s", status.c_str());
-                }
+                    ImGui::TextDisabled("Use File > Load WoW to load game data.");
             }
 
             ImGui::Checkbox("Enable Database Cache", &g_enableDbCache);
@@ -3982,6 +4205,99 @@ int main(int /*argc*/, char* /*argv*/[])
 
         if (show_demo_window)
             ImGui::ShowDemoWindow(&show_demo_window);
+
+        // ===== About Dialog =====
+        if (g_showAboutDialog)
+            ImGui::OpenPopup("About WoW Model Viewer");
+
+        if (ImGui::BeginPopupModal("About WoW Model Viewer", &g_showAboutDialog,
+                                    ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoMove))
+        {
+            // Convert wstring title to narrow string for ImGui
+            std::wstring wTitle = GLOBALSETTINGS.appTitle();
+            std::string title(wTitle.begin(), wTitle.end());
+            ImGui::TextColored(ImVec4(0.4f, 0.8f, 1.0f, 1.0f), "%s", title.c_str());
+
+            ImGui::Separator();
+            ImGui::Text("A 3D model viewer for World of Warcraft game assets.");
+            ImGui::Spacing();
+            ImGui::Text("Built with GLFW, OpenGL, and Dear ImGui.");
+            ImGui::Text("Uses CASCLib for game data access.");
+            ImGui::Spacing();
+            ImGui::Separator();
+            ImGui::TextColored(ImVec4(0.6f, 0.6f, 0.6f, 1.0f), "https://wowmodelviewer.net");
+            ImGui::TextColored(ImVec4(0.6f, 0.6f, 0.6f, 1.0f), "https://github.com/wowmodelviewer/wowmodelviewer");
+            ImGui::Spacing();
+            ImGui::Text("GL_RENDERER: %s", glGetString(GL_RENDERER));
+            ImGui::Text("GL_VERSION:  %s", glGetString(GL_VERSION));
+            ImGui::Spacing();
+
+            if (ImGui::Button("Close", ImVec2(120, 0)))
+            {
+                g_showAboutDialog = false;
+                ImGui::CloseCurrentPopup();
+            }
+            ImGui::EndPopup();
+        }
+
+        // ===== Language / Locale Dialog =====
+        if (g_showLanguageDialog)
+            ImGui::OpenPopup("Language / Locale");
+
+        if (ImGui::BeginPopupModal("Language / Locale", &g_showLanguageDialog,
+                                    ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoMove))
+        {
+            if (!g_isWoWLoaded)
+            {
+                ImGui::TextWrapped("Game data is not loaded. Load WoW first, then change the locale here.");
+                ImGui::Spacing();
+                if (ImGui::Button("OK", ImVec2(120, 0)))
+                {
+                    g_showLanguageDialog = false;
+                    ImGui::CloseCurrentPopup();
+                }
+            }
+            else
+            {
+                ImGui::Text("Current locale: %s", GAMEDIRECTORY.locale().c_str());
+                ImGui::Separator();
+                ImGui::Text("Select a different locale to reload game data:");
+                ImGui::Spacing();
+
+                auto configs = GAMEDIRECTORY.configsFound();
+                for (int i = 0; i < static_cast<int>(configs.size()); ++i)
+                {
+                    std::string label = configs[i].locale + " - " + configs[i].product;
+                    bool isCurrent = (configs[i].locale == GAMEDIRECTORY.locale());
+                    if (isCurrent)
+                        ImGui::BeginDisabled();
+
+                    if (ImGui::Button(label.c_str(), ImVec2(-1, 0)))
+                    {
+                        g_showLanguageDialog = false;
+                        ImGui::CloseCurrentPopup();
+                        // Trigger a reload with the selected config
+                        g_isWoWLoaded = false;
+                        g_initDB = false;
+                        g_loadInProgress = true;
+                        g_loadProgress = 0.0f;
+                        setLoadStatus("Reloading with locale: " + configs[i].locale + "...");
+                        launchLoadThread(configs[i]);
+                    }
+
+                    if (isCurrent)
+                        ImGui::EndDisabled();
+                }
+
+                ImGui::Spacing();
+                if (ImGui::Button("Cancel", ImVec2(120, 0)))
+                {
+                    g_showLanguageDialog = false;
+                    ImGui::CloseCurrentPopup();
+                }
+            }
+            ImGui::EndPopup();
+        }
 
         // ---- Render ImGui over the default framebuffer ----
         ImGui::Render();
