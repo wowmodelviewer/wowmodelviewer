@@ -257,6 +257,19 @@ static bool                   g_equipPopupJustOpened = false;
 static std::vector<size_t>    g_equipFilteredItems; // indices into items.items
 static int                    g_equipSlotLevels[NUM_CHAR_SLOTS] = {};
 
+// ---- Light Control state --------------------------------------------------
+struct LightSettings
+{
+    float direction[4] = { -1.0f, 1.0f, -1.0f, 0.0f }; // xyz + w=0 directional
+    float diffuse[3]   = {  1.0f, 1.0f,  1.0f };
+    float ambient[3]   = {  0.35f, 0.35f, 0.35f };
+    float specular[3]  = {  0.0f, 0.0f,  0.0f };
+    float intensity    = 1.0f;
+    bool  enabled      = true;
+};
+
+static LightSettings g_light;
+
 // ---- Model Control state --------------------------------------------------
 struct GeosetEntry
 {
@@ -1194,21 +1207,33 @@ static void loadModel(GameFile* file)
 // ---- Default lighting (replaces LightControl / wxWindow) ------------------
 static void setupDefaultLighting()
 {
+    if (!g_light.enabled)
+    {
+        glDisable(GL_LIGHTING);
+        return;
+    }
+
     glEnable(GL_LIGHTING);
     glEnable(GL_LIGHT0);
 
-    // A simple directional light from upper-right-front
-    GLfloat pos[]     = { -1.0f, 1.0f, -1.0f, 0.0f };
-    GLfloat diffuse[] = {  1.0f, 1.0f,  1.0f, 1.0f };
-    GLfloat ambient[] = {  0.35f, 0.35f, 0.35f, 1.0f };
-    GLfloat specular[]= {  0.0f, 0.0f,  0.0f, 1.0f };
+    GLfloat pos[] = { g_light.direction[0], g_light.direction[1],
+                      g_light.direction[2], g_light.direction[3] };
+
+    float i = g_light.intensity;
+    GLfloat diffuse[]  = { g_light.diffuse[0]  * i, g_light.diffuse[1]  * i,
+                           g_light.diffuse[2]  * i, 1.0f };
+    GLfloat ambient[]  = { g_light.ambient[0], g_light.ambient[1],
+                           g_light.ambient[2], 1.0f };
+    GLfloat specular[] = { g_light.specular[0] * i, g_light.specular[1] * i,
+                           g_light.specular[2] * i, 1.0f };
 
     glLightfv(GL_LIGHT0, GL_POSITION, pos);
     glLightfv(GL_LIGHT0, GL_DIFFUSE,  diffuse);
     glLightfv(GL_LIGHT0, GL_AMBIENT,  ambient);
     glLightfv(GL_LIGHT0, GL_SPECULAR, specular);
 
-    GLfloat modelAmb[] = { 0.35f, 0.35f, 0.35f, 1.0f };
+    GLfloat modelAmb[] = { g_light.ambient[0], g_light.ambient[1],
+                           g_light.ambient[2], 1.0f };
     glLightModelfv(GL_LIGHT_MODEL_AMBIENT, modelAmb);
 }
 
@@ -1535,6 +1560,7 @@ int main(int /*argc*/, char* /*argv*/[])
             ImGui::DockBuilderDockWindow("Animation", dock_bottom);
             ImGui::DockBuilderDockWindow("Model Control", dock_bottom);
             ImGui::DockBuilderDockWindow("Character", dock_right);
+            ImGui::DockBuilderDockWindow("Lighting", dock_right);
             ImGui::DockBuilderFinish(dockspace_id);
             }
         }
@@ -2045,6 +2071,76 @@ int main(int /*argc*/, char* /*argv*/[])
             else
             {
                 ImGui::TextDisabled("No model loaded.");
+            }
+        }
+        ImGui::End();
+
+        // ===== Lighting panel =====
+        if (ImGui::Begin("Lighting"))
+        {
+            ImGui::Checkbox("Enable Lighting", &g_light.enabled);
+
+            if (!g_light.enabled)
+                ImGui::BeginDisabled();
+
+            ImGui::SeparatorText("Direction");
+            ImGui::DragFloat3("Dir XYZ", g_light.direction, 0.01f, -5.0f, 5.0f, "%.2f");
+
+            ImGui::SeparatorText("Colors");
+            ImGui::ColorEdit3("Diffuse",  g_light.diffuse,  ImGuiColorEditFlags_Float);
+            ImGui::ColorEdit3("Ambient",  g_light.ambient,  ImGuiColorEditFlags_Float);
+            ImGui::ColorEdit3("Specular", g_light.specular, ImGuiColorEditFlags_Float);
+
+            ImGui::SeparatorText("Intensity");
+            ImGui::SliderFloat("##Intensity", &g_light.intensity, 0.0f, 3.0f, "%.2f");
+
+            if (!g_light.enabled)
+                ImGui::EndDisabled();
+
+            ImGui::SeparatorText("Presets");
+            if (ImGui::Button("Default", ImVec2(-1, 0)))
+            {
+                g_light = LightSettings{};
+            }
+            if (ImGui::Button("Bright Daylight", ImVec2(-1, 0)))
+            {
+                g_light.direction[0] = -0.5f; g_light.direction[1] = 1.0f;
+                g_light.direction[2] = -0.3f; g_light.direction[3] = 0.0f;
+                g_light.diffuse[0] = 1.0f; g_light.diffuse[1] = 0.98f; g_light.diffuse[2] = 0.92f;
+                g_light.ambient[0] = 0.45f; g_light.ambient[1] = 0.45f; g_light.ambient[2] = 0.50f;
+                g_light.specular[0] = 0.3f; g_light.specular[1] = 0.3f; g_light.specular[2] = 0.3f;
+                g_light.intensity = 1.2f;
+                g_light.enabled = true;
+            }
+            if (ImGui::Button("Warm Sunset", ImVec2(-1, 0)))
+            {
+                g_light.direction[0] = -1.0f; g_light.direction[1] = 0.3f;
+                g_light.direction[2] = -0.5f; g_light.direction[3] = 0.0f;
+                g_light.diffuse[0] = 1.0f; g_light.diffuse[1] = 0.65f; g_light.diffuse[2] = 0.3f;
+                g_light.ambient[0] = 0.25f; g_light.ambient[1] = 0.2f; g_light.ambient[2] = 0.25f;
+                g_light.specular[0] = 0.1f; g_light.specular[1] = 0.05f; g_light.specular[2] = 0.0f;
+                g_light.intensity = 1.0f;
+                g_light.enabled = true;
+            }
+            if (ImGui::Button("Cool Moonlight", ImVec2(-1, 0)))
+            {
+                g_light.direction[0] = 0.3f; g_light.direction[1] = 1.0f;
+                g_light.direction[2] = -0.7f; g_light.direction[3] = 0.0f;
+                g_light.diffuse[0] = 0.6f; g_light.diffuse[1] = 0.65f; g_light.diffuse[2] = 0.8f;
+                g_light.ambient[0] = 0.15f; g_light.ambient[1] = 0.15f; g_light.ambient[2] = 0.2f;
+                g_light.specular[0] = 0.0f; g_light.specular[1] = 0.0f; g_light.specular[2] = 0.0f;
+                g_light.intensity = 0.7f;
+                g_light.enabled = true;
+            }
+            if (ImGui::Button("Flat (No Shading)", ImVec2(-1, 0)))
+            {
+                g_light.direction[0] = 0.0f; g_light.direction[1] = 0.0f;
+                g_light.direction[2] = -1.0f; g_light.direction[3] = 0.0f;
+                g_light.diffuse[0] = 1.0f; g_light.diffuse[1] = 1.0f; g_light.diffuse[2] = 1.0f;
+                g_light.ambient[0] = 1.0f; g_light.ambient[1] = 1.0f; g_light.ambient[2] = 1.0f;
+                g_light.specular[0] = 0.0f; g_light.specular[1] = 0.0f; g_light.specular[2] = 0.0f;
+                g_light.intensity = 0.5f;
+                g_light.enabled = true;
             }
         }
         ImGui::End();
