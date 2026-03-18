@@ -66,6 +66,10 @@
 
 #include "stb_image_write.h"
 
+// Exporters (OBJ / FBX)
+#include "OBJExporter.h"
+#include "FBXExporter.h"
+
 #include <format>
 #include <deque>
 #include <map>
@@ -316,6 +320,13 @@ static bool g_npcFilterDirty = true;
 static char g_itemBrowseSearchBuf[256] = {};
 static std::vector<size_t> g_itemBrowseFiltered; // indices into items.items
 static bool g_itemBrowseFilterDirty = true;
+
+// ---- Export state ---------------------------------------------------------
+static std::vector<ExporterPlugin*> g_exporters;
+static int                          g_selectedExporter = 0;
+static char                         g_exportPath[512] = "export";
+static std::string                  g_exportStatus;
+static std::vector<char>            g_exportAnimChecked; // per-anim checkbox state (char to avoid vector<bool> proxy)
 
 // ---- Helpers --------------------------------------------------------------
 static std::filesystem::path getApplicationDirPath()
@@ -1157,6 +1168,8 @@ static void clearModel()
     g_equipFilteredItems.clear();
     g_equipSearchBuf[0] = '\0';
     std::memset(g_equipSlotLevels, 0, sizeof(g_equipSlotLevels));
+    g_exportAnimChecked.clear();
+    g_exportStatus.clear();
 }
 
 // ---- Load a model from GameFile (ported from ModelViewer::LoadModel) -------
@@ -1593,6 +1606,79 @@ static void loadItemModel(unsigned int itemId)
     }
 }
 
+// ---- Export helper --------------------------------------------------------
+static std::wstring stringToWstring(const std::string& s)
+{
+    std::wstring ws;
+    ws.reserve(s.size());
+    for (char c : s)
+        ws.push_back(static_cast<wchar_t>(static_cast<unsigned char>(c)));
+    return ws;
+}
+
+static void doExport()
+{
+    WoWModel* model = getLoadedModel();
+    if (!model)
+    {
+        g_exportStatus = "No model loaded.";
+        return;
+    }
+
+    if (g_selectedExporter < 0 || g_selectedExporter >= static_cast<int>(g_exporters.size()))
+    {
+        g_exportStatus = "Invalid exporter selection.";
+        return;
+    }
+
+    ExporterPlugin* exporter = g_exporters[g_selectedExporter];
+
+    // Build file path with appropriate extension
+    std::string pathStr{g_exportPath};
+    // Extract extension from the exporter filter (e.g. "*.fbx" -> ".fbx")
+    std::wstring filter = exporter->fileSaveFilter();
+    std::string ext;
+    {
+        std::string f = wstringToString(filter);
+        auto pos = f.find("*.");
+        if (pos != std::string::npos)
+        {
+            auto end = f.find_first_of(";|)", pos);
+            ext = f.substr(pos + 1, (end == std::string::npos) ? std::string::npos : end - pos - 1);
+        }
+    }
+
+    // Append extension if the user hasn't already
+    if (!ext.empty() && !core::endsWithIgnoreCase(pathStr, ext))
+        pathStr += ext;
+
+    // If exporter supports animation, gather selected anim indices
+    if (exporter->canExportAnimation())
+    {
+        std::vector<int> animsToExport;
+        for (size_t i = 0; i < g_exportAnimChecked.size() && i < model->anims.size(); ++i)
+        {
+            if (g_exportAnimChecked[i])
+                animsToExport.push_back(model->anims[i].Index);
+        }
+        exporter->setAnimationsToExport(animsToExport);
+    }
+
+    std::wstring wpath = stringToWstring(pathStr);
+    LOG_INFO << "Exporting model to: " << pathStr;
+
+    if (exporter->exportModel(model, wpath))
+    {
+        g_exportStatus = "Export successful: " + pathStr;
+        LOG_INFO << "Export complete: " << pathStr;
+    }
+    else
+    {
+        g_exportStatus = "Export failed: " + pathStr;
+        LOG_ERROR << "Export failed: " << pathStr;
+    }
+}
+
 // ---- Default lighting (replaces LightControl / wxWindow) ------------------
 static void setupDefaultLighting()
 {
@@ -1820,6 +1906,10 @@ static void initEngine()
     loadSettings();
     // Pre-fill the path input buffer from saved settings
     strncpy_s(g_pathBuf, g_gamePath.c_str(), sizeof(g_pathBuf) - 1);
+
+    // Instantiate exporters (OBJ / FBX)
+    g_exporters.push_back(new OBJExporter());
+    g_exporters.push_back(new FBXExporter());
 }
 
 static void initGL()
@@ -1951,6 +2041,7 @@ int main(int /*argc*/, char* /*argv*/[])
             ImGui::DockBuilderDockWindow("Animation", dock_bottom);
             ImGui::DockBuilderDockWindow("Model Control", dock_bottom);
             ImGui::DockBuilderDockWindow("Screenshot", dock_bottom);
+            ImGui::DockBuilderDockWindow("Export", dock_bottom);
             ImGui::DockBuilderDockWindow("Presets", dock_bottom);
             ImGui::DockBuilderDockWindow("Character", dock_right);
             ImGui::DockBuilderDockWindow("Lighting", dock_right);
@@ -2629,6 +2720,102 @@ int main(int /*argc*/, char* /*argv*/[])
         }
         ImGui::End();
 
+        // ===== Export panel =====
+        if (ImGui::Begin("Export"))
+        {
+            WoWModel* eModel = getLoadedModel();
+            if (eModel)
+            {
+                // ---- Format selector ----
+                ImGui::SeparatorText("Format");
+                if (!g_exporters.empty())
+                {
+                    for (int i = 0; i < static_cast<int>(g_exporters.size()); ++i)
+                    {
+                        std::string label = wstringToString(g_exporters[i]->menuLabel());
+                        ImGui::RadioButton(label.c_str(), &g_selectedExporter, i);
+                        if (i < static_cast<int>(g_exporters.size()) - 1)
+                            ImGui::SameLine();
+                    }
+                }
+
+                // ---- Output path ----
+                ImGui::SeparatorText("Output");
+                ImGui::Text("File Path:");
+                ImGui::SetNextItemWidth(-1);
+                ImGui::InputText("##exportPath", g_exportPath, sizeof(g_exportPath));
+
+                // ---- Animation selection (only for exporters that support it) ----
+                bool canAnim = (g_selectedExporter >= 0 &&
+                                g_selectedExporter < static_cast<int>(g_exporters.size()) &&
+                                g_exporters[g_selectedExporter]->canExportAnimation());
+
+                if (canAnim && !g_animEntries.empty())
+                {
+                    ImGui::SeparatorText("Animations");
+
+                    // Ensure checkbox vector is sized to match
+                    if (g_exportAnimChecked.size() != g_animEntries.size())
+                    {
+                        g_exportAnimChecked.assign(g_animEntries.size(), 1);
+                    }
+
+                    if (ImGui::Button("Select All"))
+                        std::fill(g_exportAnimChecked.begin(), g_exportAnimChecked.end(), static_cast<char>(1));
+                    ImGui::SameLine();
+                    if (ImGui::Button("Select None"))
+                        std::fill(g_exportAnimChecked.begin(), g_exportAnimChecked.end(), static_cast<char>(0));
+
+                    int checkedCount = 0;
+                    for (char b : g_exportAnimChecked) if (b) ++checkedCount;
+                    ImGui::Text("%d / %d selected", checkedCount, static_cast<int>(g_animEntries.size()));
+
+                    ImGui::BeginChild("##AnimExportList", ImVec2(0, 200), ImGuiChildFlags_Borders);
+                    ImGuiListClipper clipper;
+                    clipper.Begin(static_cast<int>(g_animEntries.size()));
+                    while (clipper.Step())
+                    {
+                        for (int i = clipper.DisplayStart; i < clipper.DisplayEnd; ++i)
+                        {
+                            ImGui::PushID(i);
+                            bool checked = g_exportAnimChecked[i] != 0;
+                            if (ImGui::Checkbox(g_animEntries[i].label.c_str(), &checked))
+                                g_exportAnimChecked[i] = checked ? 1 : 0;
+                            ImGui::PopID();
+                        }
+                    }
+                    ImGui::EndChild();
+                }
+                else if (canAnim)
+                {
+                    ImGui::SeparatorText("Animations");
+                    ImGui::TextDisabled("No animations on current model.");
+                }
+
+                // ---- Export button ----
+                ImGui::Separator();
+                if (ImGui::Button("Export", ImVec2(-1, 0)))
+                    doExport();
+
+                // ---- Status ----
+                if (!g_exportStatus.empty())
+                {
+                    bool isError = g_exportStatus.find("failed") != std::string::npos ||
+                                   g_exportStatus.find("No ") != std::string::npos ||
+                                   g_exportStatus.find("Invalid") != std::string::npos;
+                    if (isError)
+                        ImGui::TextColored(ImVec4(1.0f, 0.4f, 0.4f, 1.0f), "%s", g_exportStatus.c_str());
+                    else
+                        ImGui::TextColored(ImVec4(0.4f, 1.0f, 0.4f, 1.0f), "%s", g_exportStatus.c_str());
+                }
+            }
+            else
+            {
+                ImGui::TextDisabled("No model loaded.");
+            }
+        }
+        ImGui::End();
+
         // ===== Screenshot panel =====
         if (ImGui::Begin("Screenshot"))
         {
@@ -2836,6 +3023,10 @@ int main(int /*argc*/, char* /*argv*/[])
     }
 
     g_fbo.destroy();
+
+    for (auto* e : g_exporters)
+        delete e;
+    g_exporters.clear();
 
     ImGui_ImplOpenGL3_Shutdown();
     ImGui_ImplGlfw_Shutdown();
