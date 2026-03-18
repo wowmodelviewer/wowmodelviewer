@@ -62,6 +62,9 @@
 #include "string_utils.h"
 #include "TextureManager.h"
 #include "WoWItem.h"
+#include "CharDetails.h"
+
+#include "stb_image_write.h"
 
 #include <format>
 #include <deque>
@@ -295,6 +298,24 @@ struct ParticleColorState
 };
 
 static ParticleColorState g_pcrState;
+
+// ---- Screenshot state -----------------------------------------------------
+static char g_screenshotPath[512] = "screenshot.png";
+static std::string g_screenshotStatus;
+
+// ---- Save/Load Character Preset state -------------------------------------
+static char g_presetPath[512] = "userSettings/preset.ini";
+static std::string g_presetStatus;
+
+// ---- NPC Browser state ----------------------------------------------------
+static char g_npcSearchBuf[256] = {};
+static std::vector<size_t> g_npcFiltered; // indices into npcs
+static bool g_npcFilterDirty = true;
+
+// ---- Item Browser state ---------------------------------------------------
+static char g_itemBrowseSearchBuf[256] = {};
+static std::vector<size_t> g_itemBrowseFiltered; // indices into items.items
+static bool g_itemBrowseFilterDirty = true;
 
 // ---- Helpers --------------------------------------------------------------
 static std::filesystem::path getApplicationDirPath()
@@ -1204,6 +1225,374 @@ static void loadModel(GameFile* file)
     LOG_INFO << "Model loaded: " << model->name();
 }
 
+// ---- Screenshot (capture FBO to PNG) --------------------------------------
+static void captureScreenshot(const char* path)
+{
+    if (g_fbo.width <= 0 || g_fbo.height <= 0 || !g_fbo.fbo)
+    {
+        g_screenshotStatus = "No viewport to capture.";
+        return;
+    }
+
+    const int w = g_fbo.width;
+    const int h = g_fbo.height;
+    std::vector<unsigned char> pixels(static_cast<size_t>(w) * h * 4);
+
+    glBindFramebuffer(GL_FRAMEBUFFER, g_fbo.fbo);
+    glReadPixels(0, 0, w, h, GL_RGBA, GL_UNSIGNED_BYTE, pixels.data());
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+    // Flip vertically (OpenGL is bottom-up, PNG is top-down)
+    const size_t rowBytes = static_cast<size_t>(w) * 4;
+    std::vector<unsigned char> row(rowBytes);
+    for (int y = 0; y < h / 2; ++y)
+    {
+        unsigned char* top = pixels.data() + y * rowBytes;
+        unsigned char* bot = pixels.data() + (h - 1 - y) * rowBytes;
+        std::memcpy(row.data(), top, rowBytes);
+        std::memcpy(top, bot, rowBytes);
+        std::memcpy(bot, row.data(), rowBytes);
+    }
+
+    if (stbi_write_png(path, w, h, 4, pixels.data(), static_cast<int>(rowBytes)))
+    {
+        g_screenshotStatus = std::string("Saved: ") + path;
+        LOG_INFO << "Screenshot saved to " << path;
+    }
+    else
+    {
+        g_screenshotStatus = std::string("Failed to write: ") + path;
+        LOG_ERROR << "Screenshot failed: " << path;
+    }
+}
+
+// ---- Save/Load Character Preset -------------------------------------------
+static void saveCharacterPreset(const char* path)
+{
+    WoWModel* model = getLoadedModel();
+    if (!model || !g_isChar)
+    {
+        g_presetStatus = "No character model loaded.";
+        return;
+    }
+
+    std::string pathStr{path};
+    core::IniFile ini{pathStr};
+
+    // Display options
+    const auto& cd = model->cd;
+    ini.setValue("Display/ShowUnderwear", cd.showUnderwear);
+    ini.setValue("Display/ShowHair", cd.showHair);
+    ini.setValue("Display/ShowFacialHair", cd.showFacialHair);
+    ini.setValue("Display/ShowEars", cd.showEars);
+    ini.setValue("Display/ShowFeet", cd.showFeet);
+    ini.setValue("Display/AutoHideGeosets", cd.autoHideGeosetsForHeadItems);
+    ini.setValue("Display/Sheathe", model->bSheathe);
+    ini.setValue("Display/EyeGlow", static_cast<int>(cd.eyeGlowType));
+
+    // Customization choices
+    int optIdx = 0;
+    for (const auto& opt : g_customizationOptions)
+    {
+        std::string key = "Customization/" + std::to_string(optIdx);
+        ini.setValue(key + "_OptionID", static_cast<int>(opt.optionID));
+        if (opt.selectedIndex >= 0 && opt.selectedIndex < static_cast<int>(opt.choiceIDs.size()))
+            ini.setValue(key + "_ChoiceID", static_cast<int>(opt.choiceIDs[opt.selectedIndex]));
+        ++optIdx;
+    }
+    ini.setValue("Customization/Count", optIdx);
+
+    // Equipment
+    for (int s = 0; s < NUM_CHAR_SLOTS; ++s)
+    {
+        WoWItem* witem = model->getItem(static_cast<CharSlots>(s));
+        std::string key = "Equipment/" + std::to_string(s);
+        ini.setValue(key + "_ID", witem ? static_cast<int>(witem->id()) : 0);
+        ini.setValue(key + "_Level", g_equipSlotLevels[s]);
+    }
+
+    ini.sync();
+    g_presetStatus = std::string("Preset saved: ") + path;
+    LOG_INFO << "Character preset saved to " << path;
+}
+
+static void loadCharacterPreset(const char* path)
+{
+    WoWModel* model = getLoadedModel();
+    if (!model || !g_isChar)
+    {
+        g_presetStatus = "No character model loaded.";
+        return;
+    }
+
+    if (!std::filesystem::exists(path))
+    {
+        g_presetStatus = std::string("File not found: ") + path;
+        return;
+    }
+
+    std::string pathStr{path};
+    core::IniFile ini{pathStr};
+
+    // Display options
+    auto& cd = model->cd;
+    cd.showUnderwear = ini.getBool("Display/ShowUnderwear", true);
+    cd.showHair = ini.getBool("Display/ShowHair", true);
+    cd.showFacialHair = ini.getBool("Display/ShowFacialHair", true);
+    cd.showEars = ini.getBool("Display/ShowEars", true);
+    cd.showFeet = ini.getBool("Display/ShowFeet", false);
+    cd.autoHideGeosetsForHeadItems = ini.getBool("Display/AutoHideGeosets", true);
+    model->bSheathe = ini.getBool("Display/Sheathe", false);
+    cd.eyeGlowType = static_cast<EyeGlowTypes>(ini.getInt("Display/EyeGlow", EGT_DEFAULT));
+
+    // Customization choices
+    int optCount = ini.getInt("Customization/Count", 0);
+    for (int i = 0; i < optCount; ++i)
+    {
+        std::string key = "Customization/" + std::to_string(i);
+        unsigned int optionID = static_cast<unsigned int>(ini.getInt(key + "_OptionID", 0));
+        unsigned int choiceID = static_cast<unsigned int>(ini.getInt(key + "_ChoiceID", 0));
+        if (optionID == 0) continue;
+
+        cd.set(optionID, choiceID);
+
+        // Update the UI state
+        for (auto& opt : g_customizationOptions)
+        {
+            if (opt.optionID == optionID)
+            {
+                for (int c = 0; c < static_cast<int>(opt.choiceIDs.size()); ++c)
+                {
+                    if (opt.choiceIDs[c] == choiceID)
+                    {
+                        opt.selectedIndex = c;
+                        break;
+                    }
+                }
+                break;
+            }
+        }
+    }
+
+    // Equipment
+    for (int s = 0; s < NUM_CHAR_SLOTS; ++s)
+    {
+        std::string key = "Equipment/" + std::to_string(s);
+        int itemId = ini.getInt(key + "_ID", 0);
+        int level = ini.getInt(key + "_Level", 0);
+
+        WoWItem* witem = model->getItem(static_cast<CharSlots>(s));
+        if (witem)
+        {
+            witem->setId(itemId);
+            if (level > 0) witem->setLevel(level);
+        }
+        g_equipSlotLevels[s] = level;
+    }
+
+    model->refresh();
+    g_presetStatus = std::string("Preset loaded: ") + path;
+    LOG_INFO << "Character preset loaded from " << path;
+}
+
+// ---- NPC Browser helpers --------------------------------------------------
+static void rebuildNpcFilter()
+{
+    g_npcFiltered.clear();
+
+    std::string search = core::toLower(std::string(g_npcSearchBuf));
+    auto s = search.find_first_not_of(" \t\r\n");
+    auto e = search.find_last_not_of(" \t\r\n");
+    search = (s == std::string::npos) ? "" : search.substr(s, e - s + 1);
+
+    for (size_t i = 0; i < npcs.size(); ++i)
+    {
+        const auto& npc = npcs[i];
+        if (npc.model == 0) continue;
+        if (!search.empty() && !core::containsIgnoreCase(npc.name, search))
+            continue;
+        g_npcFiltered.push_back(i);
+    }
+
+    g_npcFilterDirty = false;
+}
+
+static void loadNPC(unsigned int creatureID)
+{
+    std::string query = std::format(
+        "SELECT CreatureModelData.FileDataID, CreatureDisplayInfo.TextureVariationFileDataID1, "
+        "CreatureDisplayInfo.TextureVariationFileDataID2, CreatureDisplayInfo.TextureVariationFileDataID3, "
+        "CreatureDisplayInfo.ExtendedDisplayInfoID, CreatureDisplayInfo.ID FROM Creature "
+        "LEFT JOIN CreatureDisplayInfo ON Creature.DisplayID1 = CreatureDisplayInfo.ID "
+        "LEFT JOIN CreatureModelData ON CreatureDisplayInfo.modelID = CreatureModelData.ID "
+        "WHERE Creature.ID = {};", creatureID);
+
+    sqlResult r = GAMEDATABASE.sqlQuery(query);
+    if (!r.valid || r.empty())
+    {
+        LOG_ERROR << "NPC query failed for ID " << creatureID;
+        return;
+    }
+
+    const int extraId = std::stoi(r.values[0][4]);
+    if (extraId == 0)
+    {
+        // Simple NPC — load model directly
+        GameFile* file = GAMEDIRECTORY.getFile(std::stoi(r.values[0][0]));
+        if (!file) return;
+        loadModel(file);
+
+        // Apply skin by display ID
+        WoWModel* m = getLoadedModel();
+        if (m)
+        {
+            int displayID = std::stoi(r.values[0][5]);
+            // Find matching skin entry for this displayID
+            std::string skinQuery = std::format(
+                "SELECT TextureVariationFileDataID1, TextureVariationFileDataID2, TextureVariationFileDataID3 "
+                "FROM CreatureDisplayInfo WHERE ID = {}", displayID);
+            sqlResult sr = GAMEDATABASE.sqlQuery(skinQuery);
+            if (sr.valid && !sr.empty())
+            {
+                for (size_t i = 0; i < g_skinEntries.size(); ++i)
+                {
+                    bool match = true;
+                    for (size_t t = 0; t < 3 && match; ++t)
+                    {
+                        if (g_skinEntries[i].tex[t])
+                        {
+                            int fdid = g_skinEntries[i].tex[t]->fileDataId();
+                            if (!sr.values[0][t].empty() && sr.values[0][t] != "0")
+                                match = (fdid == std::stoi(sr.values[0][t]));
+                            else
+                                match = false;
+                        }
+                    }
+                    if (match)
+                    {
+                        applySkin(m, static_cast<int>(i));
+                        break;
+                    }
+                }
+            }
+        }
+    }
+    else
+    {
+        // Character-type NPC
+        int fileDataId = std::stoi(r.values[0][0]);
+        GameFile* file = GAMEDIRECTORY.getFile(RaceInfos::getHDModelForFileID(fileDataId));
+        if (!file) return;
+        loadModel(file);
+
+        WoWModel* m = getLoadedModel();
+        if (!m) return;
+
+        // Apply customization from CreatureDisplayInfoExtra
+        query = std::format(
+            "SELECT Skin, Face, HairStyle, HairColor, FacialHair FROM CreatureDisplayInfoExtra WHERE ID = {}",
+            extraId);
+        r = GAMEDATABASE.sqlQuery(query);
+        if (r.valid && !r.empty())
+        {
+            m->cd.set(CharDetails::SKIN_COLOR, std::stoi(r.values[0][0]));
+            m->cd.set(CharDetails::FACE, std::stoi(r.values[0][1]));
+            m->cd.set(CharDetails::FACIAL_CUSTOMIZATION_STYLE, std::stoi(r.values[0][2]));
+            m->cd.set(CharDetails::FACIAL_CUSTOMIZATION_COLOR, std::stoi(r.values[0][3]));
+            m->cd.set(CharDetails::ADDITIONAL_FACIAL_CUSTOMIZATION, std::stoi(r.values[0][4]));
+        }
+
+        // Apply equipment from NpcModelItemSlotDisplayInfo
+        query = std::format(
+            "SELECT ItemDisplayInfoID, ItemSlot FROM NpcModelItemSlotDisplayInfo WHERE NpcModelID = {}",
+            extraId);
+        r = GAMEDATABASE.sqlQuery(query);
+        if (r.valid && !r.empty())
+        {
+            static const std::map<int, CharSlots> ItemTypeToInternal = {
+                {0, CS_HEAD}, {1, CS_SHOULDER}, {2, CS_SHIRT}, {3, CS_CHEST}, {4, CS_BELT}, {5, CS_PANTS},
+                {6, CS_BOOTS}, {7, CS_BRACERS}, {8, CS_GLOVES}, {9, CS_TABARD}, {10, CS_CAPE}
+            };
+            for (const auto& value : r.values)
+            {
+                auto it = ItemTypeToInternal.find(std::stoi(value[1]));
+                if (it != ItemTypeToInternal.end())
+                {
+                    WoWItem* item = m->getItem(it->second);
+                    if (item)
+                        item->setDisplayId(std::stoi(value[0]));
+                }
+            }
+        }
+
+        m->cd.isNPC = true;
+        m->refresh();
+    }
+}
+
+// ---- Item Browser helpers -------------------------------------------------
+static void rebuildItemBrowseFilter()
+{
+    g_itemBrowseFiltered.clear();
+
+    std::string search = core::toLower(std::string(g_itemBrowseSearchBuf));
+    auto s = search.find_first_not_of(" \t\r\n");
+    auto e = search.find_last_not_of(" \t\r\n");
+    search = (s == std::string::npos) ? "" : search.substr(s, e - s + 1);
+
+    for (size_t i = 0; i < items.items.size(); ++i)
+    {
+        const auto& item = items.items[i];
+        if (item.id == 0) continue;
+        if (!search.empty() && !core::containsIgnoreCase(item.name, search))
+            continue;
+        g_itemBrowseFiltered.push_back(i);
+    }
+
+    g_itemBrowseFilterDirty = false;
+}
+
+static void loadItemModel(unsigned int itemId)
+{
+    try
+    {
+        const std::string query = std::format(
+            "SELECT ModelFileData.FileDataID, TextureFileData.FileDataID, ItemDisplayInfo.ID FROM ItemDisplayInfo "
+            "LEFT JOIN ModelFileData ON ItemDisplayInfo.ModelResourcesID1 = ModelFileData.ModelResourcesID "
+            "LEFT JOIN TextureFileData ON ItemDisplayInfo.ModelMaterialResourcesID1 = TextureFileData.MaterialResourcesID "
+            "WHERE ItemDisplayInfo.ID = (SELECT ItemDisplayInfoID FROM ItemAppearance WHERE ItemAppearance.ID = "
+            "(SELECT ItemAppearanceID FROM ItemModifiedAppearance WHERE ItemID = {}))", itemId);
+
+        sqlResult r = GAMEDATABASE.sqlQuery(query);
+        if (!r.valid || r.empty())
+        {
+            LOG_ERROR << "Item model query failed for ID " << itemId;
+            return;
+        }
+
+        if (r.values[0][0].empty() || r.values[0][0] == "0")
+            return;
+
+        GameFile* file = GAMEDIRECTORY.getFile(std::stoi(r.values[0][0]));
+        if (!file) return;
+
+        loadModel(file);
+
+        // Apply texture if available
+        WoWModel* m = getLoadedModel();
+        if (m && !r.values[0][1].empty() && r.values[0][1] != "0")
+        {
+            GameFile* texFile = GAMEDIRECTORY.getFile(std::stoi(r.values[0][1]));
+            if (texFile)
+                m->updateTextureList(texFile, TEXTURE_OBJECT_SKIN);
+        }
+    }
+    catch (...)
+    {
+        LOG_ERROR << "Exception loading item model for ID " << itemId;
+    }
+}
+
 // ---- Default lighting (replaces LightControl / wxWindow) ------------------
 static void setupDefaultLighting()
 {
@@ -1555,10 +1944,14 @@ int main(int /*argc*/, char* /*argv*/[])
             ImGui::DockBuilderSplitNode(dock_center, ImGuiDir_Down, 0.25f, &dock_bottom, &dock_center);
 
             ImGui::DockBuilderDockWindow("File Browser", dock_left);
+            ImGui::DockBuilderDockWindow("NPC Browser", dock_left);
+            ImGui::DockBuilderDockWindow("Item Browser", dock_left);
             ImGui::DockBuilderDockWindow("Settings", dock_left);
             ImGui::DockBuilderDockWindow("3D Viewport", dock_center);
             ImGui::DockBuilderDockWindow("Animation", dock_bottom);
             ImGui::DockBuilderDockWindow("Model Control", dock_bottom);
+            ImGui::DockBuilderDockWindow("Screenshot", dock_bottom);
+            ImGui::DockBuilderDockWindow("Presets", dock_bottom);
             ImGui::DockBuilderDockWindow("Character", dock_right);
             ImGui::DockBuilderDockWindow("Lighting", dock_right);
             ImGui::DockBuilderFinish(dockspace_id);
@@ -2142,6 +2535,171 @@ int main(int /*argc*/, char* /*argv*/[])
                 g_light.intensity = 0.5f;
                 g_light.enabled = true;
             }
+        }
+        ImGui::End();
+
+        // ===== NPC Browser panel =====
+        if (ImGui::Begin("NPC Browser"))
+        {
+            if (!g_isWoWLoaded || !g_initDB)
+            {
+                ImGui::TextDisabled("Game not loaded.");
+            }
+            else
+            {
+                ImGui::Text("Search:");
+                ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x - 60.0f);
+                if (ImGui::InputText("##npcSearch", g_npcSearchBuf, sizeof(g_npcSearchBuf),
+                                     ImGuiInputTextFlags_EnterReturnsTrue))
+                    g_npcFilterDirty = true;
+                ImGui::SameLine();
+                if (ImGui::Button("Apply##npc", ImVec2(-1, 0)))
+                    g_npcFilterDirty = true;
+
+                if (g_npcFilterDirty)
+                    rebuildNpcFilter();
+
+                ImGui::Text("%d NPCs", static_cast<int>(g_npcFiltered.size()));
+                ImGui::Separator();
+
+                ImGui::BeginChild("##NpcList", ImVec2(0, 0), ImGuiChildFlags_None);
+                ImGuiListClipper clipper;
+                clipper.Begin(static_cast<int>(g_npcFiltered.size()));
+                while (clipper.Step())
+                {
+                    for (int i = clipper.DisplayStart; i < clipper.DisplayEnd; ++i)
+                    {
+                        const auto& npc = npcs[g_npcFiltered[i]];
+                        ImGui::PushID(static_cast<int>(g_npcFiltered[i]));
+                        std::string label = std::format("{} (ID:{} Type:{})", npc.name, npc.id, npc.type);
+                        if (ImGui::Selectable(label.c_str()))
+                            loadNPC(static_cast<unsigned int>(npc.id));
+                        ImGui::PopID();
+                    }
+                }
+                ImGui::EndChild();
+            }
+        }
+        ImGui::End();
+
+        // ===== Item Browser panel =====
+        if (ImGui::Begin("Item Browser"))
+        {
+            if (!g_isWoWLoaded || !g_initDB)
+            {
+                ImGui::TextDisabled("Game not loaded.");
+            }
+            else
+            {
+                ImGui::Text("Search:");
+                ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x - 60.0f);
+                if (ImGui::InputText("##itemBrowseSearch", g_itemBrowseSearchBuf, sizeof(g_itemBrowseSearchBuf),
+                                     ImGuiInputTextFlags_EnterReturnsTrue))
+                    g_itemBrowseFilterDirty = true;
+                ImGui::SameLine();
+                if (ImGui::Button("Apply##itembrowse", ImVec2(-1, 0)))
+                    g_itemBrowseFilterDirty = true;
+
+                if (g_itemBrowseFilterDirty)
+                    rebuildItemBrowseFilter();
+
+                ImGui::Text("%d items", static_cast<int>(g_itemBrowseFiltered.size()));
+                ImGui::Separator();
+
+                ImGui::BeginChild("##ItemBrowseList", ImVec2(0, 0), ImGuiChildFlags_None);
+                ImGuiListClipper clipper;
+                clipper.Begin(static_cast<int>(g_itemBrowseFiltered.size()));
+                while (clipper.Step())
+                {
+                    for (int i = clipper.DisplayStart; i < clipper.DisplayEnd; ++i)
+                    {
+                        const auto& item = items.items[g_itemBrowseFiltered[i]];
+                        ImGui::PushID(static_cast<int>(g_itemBrowseFiltered[i]));
+                        ImVec4 qcol = getQualityColor(item.quality);
+                        ImGui::PushStyleColor(ImGuiCol_Text, qcol);
+                        std::string label = std::format("{} ({})", item.name, item.id);
+                        if (ImGui::Selectable(label.c_str()))
+                            loadItemModel(static_cast<unsigned int>(item.id));
+                        ImGui::PopStyleColor();
+                        ImGui::PopID();
+                    }
+                }
+                ImGui::EndChild();
+            }
+        }
+        ImGui::End();
+
+        // ===== Screenshot panel =====
+        if (ImGui::Begin("Screenshot"))
+        {
+            ImGui::SeparatorText("Capture Viewport");
+            ImGui::Text("Output File:");
+            ImGui::SetNextItemWidth(-1);
+            ImGui::InputText("##screenshotPath", g_screenshotPath, sizeof(g_screenshotPath));
+
+            if (ImGui::Button("Save Screenshot", ImVec2(-1, 0)))
+                captureScreenshot(g_screenshotPath);
+
+            if (!g_screenshotStatus.empty())
+            {
+                bool isError = g_screenshotStatus.find("Failed") != std::string::npos ||
+                               g_screenshotStatus.find("No ") != std::string::npos;
+                if (isError)
+                    ImGui::TextColored(ImVec4(1.0f, 0.4f, 0.4f, 1.0f), "%s", g_screenshotStatus.c_str());
+                else
+                    ImGui::TextColored(ImVec4(0.4f, 1.0f, 0.4f, 1.0f), "%s", g_screenshotStatus.c_str());
+            }
+
+            ImGui::SeparatorText("Quick Sizes");
+            if (ImGui::Button("1x (viewport)", ImVec2(-1, 0)))
+            {
+                captureScreenshot(g_screenshotPath);
+            }
+            ImGui::TextDisabled("Captures at current viewport resolution (%dx%d).",
+                                g_fbo.width, g_fbo.height);
+        }
+        ImGui::End();
+
+        // ===== Character Preset panel =====
+        if (ImGui::Begin("Presets"))
+        {
+            ImGui::SeparatorText("Character Preset");
+            ImGui::Text("File:");
+            ImGui::SetNextItemWidth(-1);
+            ImGui::InputText("##presetPath", g_presetPath, sizeof(g_presetPath));
+
+            {
+                bool canSave = g_isChar && getLoadedModel() != nullptr;
+                if (!canSave) ImGui::BeginDisabled();
+
+                if (ImGui::Button("Save Preset", ImVec2(-1, 0)))
+                    saveCharacterPreset(g_presetPath);
+
+                if (!canSave) ImGui::EndDisabled();
+            }
+
+            {
+                bool canLoad = g_isChar && getLoadedModel() != nullptr;
+                if (!canLoad) ImGui::BeginDisabled();
+
+                if (ImGui::Button("Load Preset", ImVec2(-1, 0)))
+                    loadCharacterPreset(g_presetPath);
+
+                if (!canLoad) ImGui::EndDisabled();
+            }
+
+            if (!g_presetStatus.empty())
+            {
+                bool isError = g_presetStatus.find("not found") != std::string::npos ||
+                               g_presetStatus.find("No ") != std::string::npos;
+                if (isError)
+                    ImGui::TextColored(ImVec4(1.0f, 0.4f, 0.4f, 1.0f), "%s", g_presetStatus.c_str());
+                else
+                    ImGui::TextColored(ImVec4(0.4f, 1.0f, 0.4f, 1.0f), "%s", g_presetStatus.c_str());
+            }
+
+            if (!g_isChar)
+                ImGui::TextDisabled("Load a character model first.");
         }
         ImGui::End();
 
