@@ -75,7 +75,6 @@ enum
 
 enum POSITION_SLOTS
 {
-	// wxString Attach_Names[]
 	ATT_LEFT_WRIST = 0, // Mountpoint
 	ATT_RIGHT_PALM,
 	ATT_LEFT_PALM,
@@ -161,8 +160,7 @@ enum CharRegions
 
 enum KeyBoneTable
 {
-	// wxString Bone_Names[]
-	//Block F - Key Bone lookup table.
+	//Block F
 	//---------------------------------
 	BONE_LARM = 0, // 0, ArmL: Left upper arm
 	BONE_RARM, // 1, ArmR: Right upper arm

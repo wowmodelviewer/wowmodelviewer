@@ -35,8 +35,6 @@
 #include "ModelRenderPass.h"
 #include "WoWModel.h"
 
-#include "util.h" // SLASH
-
 bool FBXHeaders::createFBXHeaders(FbxString fileVersion, std::string l_FileName, FbxManager* & l_Manager,
 								  FbxExporter* & l_Exporter, FbxScene* & l_Scene)
 {

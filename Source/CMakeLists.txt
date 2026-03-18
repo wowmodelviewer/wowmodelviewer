@@ -8,8 +8,5 @@ add_subdirectory(exporters/fbx)
 add_subdirectory(importers/armory)
 add_subdirectory(importers/wowhead)
 
-# then trigs executables compilation
-add_subdirectory(wowmodelviewer)
-
-# ImGui-based viewer (parallel migration target)
+# ImGui-based viewer (GLFW + Dear ImGui)
 add_subdirectory(wowmodelviewer_imgui)

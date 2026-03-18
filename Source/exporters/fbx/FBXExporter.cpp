@@ -33,7 +33,6 @@
 #include "ModelRenderPass.h"
 #include "WoWModel.h"
 
-#include "util.h" // SLASH
 #include "GlobalSettings.h"
 
 FBXExporter::FBXExporter() : m_p_manager(nullptr), m_p_scene(nullptr), m_p_model(nullptr),

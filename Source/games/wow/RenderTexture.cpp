@@ -189,7 +189,6 @@ void RenderTexture::Init(int width, int height, bool fboMode)
 
 		unsigned int iCount = 0;
 		int iPixelFormat = 0;
-		// g_hdc = wxglcanvas hdc
 
 		wglChoosePixelFormatARB(canvas_hDC, static_cast<const int*>(pf_attr), nullptr, 1, &iPixelFormat, &iCount);
 
@@ -293,7 +292,7 @@ void RenderTexture::Init(int width, int height, bool fboMode)
 		if (!wglMakeCurrent(canvas_hDC, canvas_hRC))
 		{
 			err = glGetError();
-			LOG_ERROR << "wglMakeCurrent() Failed! Could not return the context back to the wxGLCanvas!" << err;
+			LOG_ERROR << "wglMakeCurrent() Failed! Could not return the context back to the GL canvas!" << err;
 		}
 	}
 }
