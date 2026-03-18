@@ -236,6 +236,13 @@ static int                     g_selectedAnimCombo = 0;
 static float                   g_animSpeed = 1.0f;
 static bool                    g_autoAnimate = true;
 
+// Secondary / mouth / loop state
+static int                     g_selectedSecondaryAnim = -1;
+static int                     g_selectedMouthAnim = -1;
+static float                   g_mouthSpeed = 1.0f;
+static bool                    g_lockAnims = true;
+static int                     g_loopCount = 0;
+
 struct SkinEntry
 {
     std::string label;
@@ -890,6 +897,11 @@ static void initAnimationControl(WoWModel* model)
     g_selectedAnimCombo = 0;
     g_selectedSkin = -1;
     g_animSpeed = 1.0f;
+    g_selectedSecondaryAnim = -1;
+    g_selectedMouthAnim = -1;
+    g_mouthSpeed = 1.0f;
+    g_lockAnims = true;
+    g_loopCount = 0;
 
     if (!model || !model->animated || model->anims.empty())
         return;
@@ -2497,8 +2509,9 @@ static void tickScene()
 
     g_animTime += dt;
 
+    // Engine expects milliseconds (AnimManager::Tick takes int ms)
     if (g_root)
-        g_root->tick(dt);
+        g_root->tick(dt * 1000.0f);
 }
 
 // ---- Engine initialization ------------------------------------------------
@@ -2847,6 +2860,102 @@ int main(int /*argc*/, char* /*argv*/[])
                 else
                 {
                     ImGui::Text("Frame: %d", curFrame);
+                }
+
+                // ---- Loop count ----
+                if (ImGui::SliderInt("Loops", &g_loopCount, 0, 9))
+                {
+                    aModel->animManager->Stop();
+                    int idx = g_animEntries[g_selectedAnimCombo].animIndex;
+                    aModel->animManager->SetAnim(0, idx, static_cast<short>(g_loopCount));
+                    // Chain next animations if available
+                    int nextAnim = idx;
+                    for (int i = 1; i < 4; ++i)
+                    {
+                        if (nextAnim >= 0 && nextAnim < static_cast<int>(aModel->anims.size()))
+                        {
+                            nextAnim = aModel->anims[nextAnim].NextAnimation;
+                            if (nextAnim >= 0)
+                                aModel->animManager->AddAnim(static_cast<unsigned int>(nextAnim), static_cast<short>(g_loopCount));
+                            else
+                                break;
+                        }
+                        else
+                            break;
+                    }
+                    aModel->animManager->Play();
+                }
+                ImGui::SetItemTooltip("0 = infinite loop");
+
+                // ---- Secondary / Mouth animations ----
+                ImGui::SeparatorText("Body Animation");
+                if (ImGui::Checkbox("Lock animations", &g_lockAnims))
+                {
+                    if (g_lockAnims)
+                    {
+                        aModel->animManager->ClearSecondary();
+                        aModel->animManager->ClearMouth();
+                        g_selectedSecondaryAnim = -1;
+                        g_selectedMouthAnim = -1;
+                    }
+                }
+                ImGui::SetItemTooltip("Uncheck to enable independent upper body and mouth animations");
+
+                if (!g_lockAnims)
+                {
+                    // Secondary animation (upper body)
+                    {
+                        const char* previewSec = (g_selectedSecondaryAnim >= 0 && g_selectedSecondaryAnim < static_cast<int>(g_animEntries.size()))
+                            ? g_animEntries[g_selectedSecondaryAnim].label.c_str() : "<none>";
+                        if (ImGui::BeginCombo("Upper Body##SecAnim", previewSec))
+                        {
+                            if (ImGui::Selectable("<none>", g_selectedSecondaryAnim < 0))
+                            {
+                                g_selectedSecondaryAnim = -1;
+                                aModel->animManager->ClearSecondary();
+                            }
+                            for (int i = 0; i < static_cast<int>(g_animEntries.size()); ++i)
+                            {
+                                bool selected = (i == g_selectedSecondaryAnim);
+                                if (ImGui::Selectable(g_animEntries[i].label.c_str(), selected))
+                                {
+                                    g_selectedSecondaryAnim = i;
+                                    aModel->animManager->SetSecondary(g_animEntries[i].animIndex);
+                                }
+                                if (selected) ImGui::SetItemDefaultFocus();
+                            }
+                            ImGui::EndCombo();
+                        }
+                    }
+
+                    // Mouth animation
+                    {
+                        const char* previewMouth = (g_selectedMouthAnim >= 0 && g_selectedMouthAnim < static_cast<int>(g_animEntries.size()))
+                            ? g_animEntries[g_selectedMouthAnim].label.c_str() : "<none>";
+                        if (ImGui::BeginCombo("Mouth##MouthAnim", previewMouth))
+                        {
+                            if (ImGui::Selectable("<none>", g_selectedMouthAnim < 0))
+                            {
+                                g_selectedMouthAnim = -1;
+                                aModel->animManager->ClearMouth();
+                            }
+                            for (int i = 0; i < static_cast<int>(g_animEntries.size()); ++i)
+                            {
+                                bool selected = (i == g_selectedMouthAnim);
+                                if (ImGui::Selectable(g_animEntries[i].label.c_str(), selected))
+                                {
+                                    g_selectedMouthAnim = i;
+                                    aModel->animManager->SetMouth(g_animEntries[i].animIndex);
+                                }
+                                if (selected) ImGui::SetItemDefaultFocus();
+                            }
+                            ImGui::EndCombo();
+                        }
+                    }
+
+                    // Mouth speed
+                    if (ImGui::SliderFloat("Mouth Speed", &g_mouthSpeed, 0.0f, 4.0f, "%.2f"))
+                        aModel->animManager->SetMouthSpeed(g_mouthSpeed);
                 }
 
                 // ---- Skin selector ----
