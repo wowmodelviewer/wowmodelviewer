@@ -13,6 +13,7 @@
 #include "WoWModel.h"
 
 #include "logger/Logger.h"
+#include "string_utils.h"
 
 std::map<CharSlots, int> WoWItem::SLOT_LAYERS_ =
 {
@@ -64,9 +65,9 @@ void WoWItem::setId(int id)
 			for (auto& value : itemlevels.values)
 			{
 				if (value[1].empty() || value[2].empty())
-					continue;
-				const auto curid = std::stoi(value[1]);
-				modifierIdDisplayMap_[std::stoi(value[2])] = curid;
+						continue;
+					const auto curid = core::safeStoi(value[1]);
+					modifierIdDisplayMap_[core::safeStoi(value[2])] = curid;
 				// if display id is null (case when item's look doesn't change with level)
 				if (curid == 0)
 					continue;
@@ -96,10 +97,10 @@ void WoWItem::setId(int id)
 				levelDisplayMap_[level_]));
 
 			if (iteminfos.valid && !iteminfos.values.empty() && !iteminfos.values[0][0].empty())
-				displayId_ = std::stoi(iteminfos.values[0][0]);
-		}
+					displayId_ = core::safeStoi(iteminfos.values[0][0]);
+			}
 
-		const auto& itemRcd = items.getById(id);
+			const auto& itemRcd = items.getById(id);
 		setName(itemRcd.name);
 		quality_ = itemRcd.quality;
 		type_ = itemRcd.type;
@@ -128,7 +129,7 @@ void WoWItem::setLevel(int level)
 			levelDisplayMap_[level_]));
 
 		if (iteminfos.valid && !iteminfos.values.empty())
-			displayId_ = std::stoi(iteminfos.values[0][0]);
+			displayId_ = core::safeStoi(iteminfos.values[0][0]);
 
 		const auto& itemRcd = items.getById(id_);
 		setName(itemRcd.name);
@@ -147,7 +148,7 @@ void WoWItem::setModifierId(int id)
 			it->second));
 
 		if (iteminfos.valid && !iteminfos.values.empty())
-			displayId_ = std::stoi(iteminfos.values[0][0]);
+			displayId_ = core::safeStoi(iteminfos.values[0][0]);
 
 		const auto& itemRcd = items.getById(id_);
 		setName(itemRcd.name);
@@ -219,19 +220,19 @@ void WoWItem::load()
 		return;
 
 	const int geosetGroup[6] = {
-		std::stoi(iteminfos.values[0][0]), std::stoi(iteminfos.values[0][1]),
-		std::stoi(iteminfos.values[0][2]), std::stoi(iteminfos.values[0][3]),
-		std::stoi(iteminfos.values[0][4]), std::stoi(iteminfos.values[0][5])
+		core::safeStoi(iteminfos.values[0][0]), core::safeStoi(iteminfos.values[0][1]),
+		core::safeStoi(iteminfos.values[0][2]), core::safeStoi(iteminfos.values[0][3]),
+		core::safeStoi(iteminfos.values[0][4]), core::safeStoi(iteminfos.values[0][5])
 	};
 
 	const int attachmentGeosetGroup[6] =
 	{
-		std::stoi(iteminfos.values[0][6]), std::stoi(iteminfos.values[0][7]),
-		std::stoi(iteminfos.values[0][8]), std::stoi(iteminfos.values[0][9]),
-		std::stoi(iteminfos.values[0][10]), std::stoi(iteminfos.values[0][11])
+		core::safeStoi(iteminfos.values[0][6]), core::safeStoi(iteminfos.values[0][7]),
+		core::safeStoi(iteminfos.values[0][8]), core::safeStoi(iteminfos.values[0][9]),
+		core::safeStoi(iteminfos.values[0][10]), core::safeStoi(iteminfos.values[0][11])
 	};
 
-	displayFlags_ = std::stoi(iteminfos.values[0][12]);
+	displayFlags_ = core::safeStoi(iteminfos.values[0][12]);
 
 	// query models
 	const int models[2] = {getCustomModelId(0), getCustomModelId(1)};
@@ -260,10 +261,10 @@ void WoWItem::load()
 		{
 			for (auto& value : iteminfos.values)
 			{
-				const auto tex = GAMEDIRECTORY.getFile(std::stoi(value[0]));
-				if (tex)
-				{
-					auto texRegion = getRegionForTexture(tex);
+				const auto tex = GAMEDIRECTORY.getFile(core::safeStoi(value[0]));
+					if (tex)
+					{
+						auto texRegion = getRegionForTexture(tex);
 					// Only add one texture per region (first one in sort order):
 					if (itemTextures_.count(texRegion) < 1)
 					{
@@ -313,8 +314,8 @@ void WoWItem::load()
 			auto rightIndex = 1;
 			if (result.valid && !result.values.empty())
 			{
-				const auto modelid = std::stoi(result.values[0][0]);
-				const auto position = std::stoi(result.values[0][1]);
+				const auto modelid = core::safeStoi(result.values[0][0]);
+				const auto position = core::safeStoi(result.values[0][1]);
 
 				// If the modelid matches models[0], use position to determine left/right
 				// Otherwise, swap the indices
@@ -1022,7 +1023,7 @@ int WoWItem::getCustomModelId(size_t index) const
 
 	// if there is only one result, return model id:
 	if (infos.values.size() == 1)
-		return std::stoi(infos.values[0][0]);
+		return core::safeStoi(infos.values[0][0]);
 
 	// if there are multiple values, check by race and sex:
 	std::string idListStr = "(";
@@ -1055,7 +1056,7 @@ int WoWItem::getCustomModelId(size_t index) const
 					charInfos.raceID, charInfos.sexID, static_cast<int>(GENDER_ANY), idListStr, classFilter,
 					positionSort);
 	if (queryItemInfo(query, iteminfos))
-		return std::stoi(iteminfos.values[0][0]);
+		return core::safeStoi(iteminfos.values[0][0]);
 
 	// Failed to find model for that specific race and sex, so check fallback race:
 	if (charInfos.modelFallbackRaceID > 0)
@@ -1068,7 +1069,7 @@ int WoWItem::getCustomModelId(size_t index) const
 					classFilter, positionSort);
 
 		if (queryItemInfo(query, iteminfos))
-			return std::stoi(iteminfos.values[0][0]);
+			return core::safeStoi(iteminfos.values[0][0]);
 	}
 
 	// We still didn't find the model, so check for RACE_ANY (race = 0) items:
@@ -1082,7 +1083,7 @@ int WoWItem::getCustomModelId(size_t index) const
 				positionSort);
 
 	if (queryItemInfo(query, iteminfos))
-		return std::stoi(iteminfos.values[0][0]);
+		return core::safeStoi(iteminfos.values[0][0]);
 
 	return 0;
 }
@@ -1102,7 +1103,7 @@ int WoWItem::getCustomTextureId(size_t index) const
 
 	// if there is only one result, return texture id:
 	if (infos.values.size() == 1)
-		return std::stoi(infos.values[0][0]);
+		return core::safeStoi(infos.values[0][0]);
 
 	// if there are multiple values, check by race and sex:
 	std::string idListStr = "(";
@@ -1129,7 +1130,7 @@ int WoWItem::getCustomTextureId(size_t index) const
 					"ORDER BY GenderIndex, ClassID DESC",
 					charInfos.raceID, charInfos.sexID, static_cast<int>(GENDER_ANY), idListStr, classFilter);
 	if (queryItemInfo(query, iteminfos))
-		return std::stoi(iteminfos.values[0][0]);
+		return core::safeStoi(iteminfos.values[0][0]);
 
 	// Failed to find model for that specific race and sex, so check fallback race:
 	if (charInfos.textureFallbackRaceID > 0)
@@ -1142,7 +1143,7 @@ int WoWItem::getCustomTextureId(size_t index) const
 					classFilter);
 
 		if (queryItemInfo(query, iteminfos))
-			return std::stoi(iteminfos.values[0][0]);
+			return core::safeStoi(iteminfos.values[0][0]);
 	}
 
 	// We still didn't find the model, so check for RACE_ANY (race = 0) items: 
@@ -1153,7 +1154,7 @@ int WoWItem::getCustomTextureId(size_t index) const
 				static_cast<int>(RACE_ANY), charInfos.sexID, static_cast<int>(GENDER_ANY), idListStr, classFilter);
 
 	if (queryItemInfo(query, iteminfos))
-		return std::stoi(iteminfos.values[0][0]);
+		return core::safeStoi(iteminfos.values[0][0]);
 
 	return 0;
 }

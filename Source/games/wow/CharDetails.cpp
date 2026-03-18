@@ -5,6 +5,7 @@
 #include "Game.h"
 #include "WoWModel.h"
 #include "logger/Logger.h"
+#include "string_utils.h"
 
 #include <format>
 #include <fstream>
@@ -164,7 +165,7 @@ void CharDetails::fillCustomizationMap()
 
 	if (options.valid)
 		for (auto& option : options.values)
-			choicesPerOptionMap_[std::stoi(option[0])] = {};
+			choicesPerOptionMap_[core::safeStoi(option[0])] = {};
 
 	LINKED_OPTIONS_MAP_.clear();
 	initLinkedOptionsMap();
@@ -189,7 +190,7 @@ void CharDetails::fillCustomizationMapForOption(uint chrCustomizationOption)
 	{
 		LOG_INFO << __FUNCTION__ << "DIRECT values" << choices.values.size();
 		for (auto v : choices.values)
-			vals.push_back(std::stoi(v[0]));
+			vals.push_back(core::safeStoi(v[0]));
 	}
 
 	// 2. fill with parent values
@@ -388,35 +389,35 @@ bool CharDetails::applyChrCustomizationElements(uint chrCustomizationOption, sql
 	{
 		for (auto elt : elements.values) // treat each line
 		{
-			if (std::stoi(elt[0]) != 0) // geoset customization
+			if (core::safeStoi(elt[0]) != 0) // geoset customization
 			{
 				LOG_INFO << "ChrCustomizationGeosetID based customization for" << elt[6] << "/" << elt[0];
 
 				auto vals = GAMEDATABASE.sqlQuery(
 					std::format("SELECT GeosetType, GeosetID FROM ChrCustomizationGeoset WHERE ID = {}",
-						std::stoi(elt[0])));
+						core::safeStoi(elt[0])));
 
 				if (vals.valid)
 				{
 					for (auto geo : vals.values)
 						customizationElementsPerOption_[chrCustomizationOption].geosets.emplace_back(
-							std::stoi(geo[0]), std::stoi(geo[1]));
+							core::safeStoi(geo[0]), core::safeStoi(geo[1]));
 				}
 			}
-			else if (std::stoi(elt[1]) != 0) // added model customization
+			else if (core::safeStoi(elt[1]) != 0) // added model customization
 			{
 				LOG_INFO << "ChrCustomizationSkinnedModelID based customization for" << elt[6] << "/" << elt[1];
 				auto vals = GAMEDATABASE.sqlQuery(
 					std::format(
 						"SELECT CollectionsFileDataID, GeosetType, GeosetID FROM ChrCustomizationSkinnedModel WHERE ID = {}",
-						std::stoi(elt[1])));
+						core::safeStoi(elt[1])));
 
 				if (vals.valid && !vals.values.empty())
 						customizationElementsPerOption_[chrCustomizationOption].models.emplace_back(
-							std::stoi(vals.values[0][0]),
-							std::make_pair(std::stoi(vals.values[0][1]), std::stoi(vals.values[0][2])));
+							core::safeStoi(vals.values[0][0]),
+							std::make_pair(core::safeStoi(vals.values[0][1]), core::safeStoi(vals.values[0][2])));
 			}
-			else if (std::stoi(elt[2]) != 0) // texture customization
+			else if (core::safeStoi(elt[2]) != 0) // texture customization
 			{
 				LOG_INFO << "ChrCustomizationMaterialID based customization for" << elt[6] << "/" << elt[2];
 				auto vals = GAMEDATABASE.sqlQuery(std::format(
@@ -424,16 +425,16 @@ bool CharDetails::applyChrCustomizationElements(uint chrCustomizationOption, sql
 					"LEFT JOIN TextureFileData ON ChrCustomizationMaterial.MaterialResourcesID = TextureFileData.MaterialResourcesID "
 					"LEFT JOIN ChrModelTextureLayer ON ChrCustomizationMaterial.ChrModelTextureTargetID = ChrModelTextureLayer.ChrModelTextureTargetID1 "
 					"AND ChrModelTextureLayer.CharComponentTextureLayoutsID = {} "
-					"WHERE ChrCustomizationMaterial.ID = {}", model_->infos.textureLayoutID, std::stoi(elt[2])));
+					"WHERE ChrCustomizationMaterial.ID = {}", model_->infos.textureLayoutID, core::safeStoi(elt[2])));
 
 				if (vals.valid && !vals.values.empty())
 					{
 						TextureCustomization t{};
-						t.layer = std::stoi(vals.values[0][0]);
-					t.region = bitMaskToSectionType(std::stoi(vals.values[0][1]));
-					t.type = std::stoi(vals.values[0][2]);
-					t.blendMode = std::stoi(vals.values[0][3]);
-					t.fileId = std::stoi(vals.values[0][4]);
+						t.layer = core::safeStoi(vals.values[0][0]);
+					t.region = bitMaskToSectionType(core::safeStoi(vals.values[0][1]));
+					t.type = core::safeStoi(vals.values[0][2]);
+					t.blendMode = core::safeStoi(vals.values[0][3]);
+					t.fileId = core::safeStoi(vals.values[0][4]);
 
 					LOG_INFO << "texture ->" << "layer" << t.layer << "region" << t.region << "type" << t.type <<
 						"blendMode" << t.blendMode << "fileId" << t.fileId;
@@ -441,15 +442,15 @@ bool CharDetails::applyChrCustomizationElements(uint chrCustomizationOption, sql
 					customizationElementsPerOption_[chrCustomizationOption].textures.push_back(t);
 				}
 			}
-			else if (std::stoi(elt[3]) != 0) // boneset customization ??
+			else if (core::safeStoi(elt[3]) != 0) // boneset customization ??
 			{
 				LOG_ERROR << "Not yet implemented ! boneset based customization for" << elt[6] << "/" << elt[3];
 			}
-			else if (std::stoi(elt[4]) != 0) // cond model customization ??
+			else if (core::safeStoi(elt[4]) != 0) // cond model customization ??
 			{
 				LOG_ERROR << "Not yet implemented ! Cond model based customization for" << elt[6] << "/" << elt[4];
 			}
-			else if (std::stoi(elt[5]) != 0) // display info customization ??
+			else if (core::safeStoi(elt[5]) != 0) // display info customization ??
 			{
 				LOG_ERROR << "Not yet implemented ! Display info based customization for" << elt[6] << "/" << elt[5];
 			}
@@ -519,7 +520,7 @@ void CharDetails::initLinkedOptionsMap()
 		if (link.valid && !link.values.empty())
 		{
 			for (const auto& vals : link.values)
-				LINKED_OPTIONS_MAP_.emplace(id, std::stoi(vals[0]));
+				LINKED_OPTIONS_MAP_.emplace(id, core::safeStoi(vals[0]));
 		}
 		else
 		{

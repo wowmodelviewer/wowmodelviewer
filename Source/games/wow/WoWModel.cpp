@@ -818,7 +818,7 @@ void WoWModel::initCommon()
 	sqlResult r = GAMEDATABASE.sqlQuery(query);
 	if (r.valid && !r.values.empty())
 	{
-		creatureGeosetDataID = std::stoi(r.values[0][0]);
+		creatureGeosetDataID = core::safeStoi(r.values[0][0]);
 	}
 
 	gamefile->close();
@@ -4291,7 +4291,7 @@ void WoWModel::refresh()
 		{
 			for (auto it : helmetInfos.values)
 			{
-				setGeosetGroupDisplay(static_cast<CharGeosets>(std::stoi(it[0])), 0);
+				setGeosetGroupDisplay(static_cast<CharGeosets>(core::safeStoi(it[0])), 0);
 			}
 		}
 	}

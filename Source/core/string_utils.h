@@ -59,4 +59,11 @@ namespace core
 		return std::equal(suffix.rbegin(), suffix.rend(), s.rbegin(),
 			[](unsigned char a, unsigned char b) { return std::tolower(a) == std::tolower(b); });
 	}
+
+	inline int safeStoi(const std::string& s, int fallback = 0)
+	{
+		if (s.empty()) return fallback;
+		try { return std::stoi(s); }
+		catch (...) { return fallback; }
+	}
 }

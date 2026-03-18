@@ -934,7 +934,7 @@ static void initAnimationControl(WoWModel* model)
                 {
                     if (!r.values[i][s].empty() && r.values[i][s] != "0")
                     {
-                        se.tex[s] = GAMEDIRECTORY.getFile(std::stoi(r.values[i][s]));
+                        se.tex[s] = GAMEDIRECTORY.getFile(core::safeStoi(r.values[i][s]));
                         if (se.tex[s]) ++cnt;
                     }
                 }
@@ -942,7 +942,7 @@ static void initAnimationControl(WoWModel* model)
                 se.base = TEXTURE_GAMEOBJECT1;
                 se.count = cnt;
 
-                int cdi = std::stoi(r.values[i][3]);
+                int cdi = core::safeStoi(r.values[i][3]);
                 std::string q2 = std::format(
                     "SELECT GeosetIndex, GeosetValue FROM CreatureDisplayInfoGeosetData "
                     "WHERE CreatureDisplayInfoID = {}", cdi);
@@ -951,8 +951,8 @@ static void initAnimationControl(WoWModel* model)
                 {
                     for (size_t j = 0; j < r2.values.size(); ++j)
                     {
-                        int geoType = 100 * (std::stoi(r2.values[j][0]) + 1);
-                        int geoId   = std::stoi(r2.values[j][1]);
+                        int geoType = 100 * (core::safeStoi(r2.values[j][0]) + 1);
+                        int geoId   = core::safeStoi(r2.values[j][1]);
                         if (geoId > 0) se.creatureGeosetData.insert(geoType + geoId);
                     }
                 }
@@ -977,7 +977,7 @@ static void initAnimationControl(WoWModel* model)
             {
                 if (r.values[i][0].empty() || r.values[i][0] == "0") continue;
                 SkinEntry se;
-                se.tex[0] = GAMEDIRECTORY.getFile(std::stoi(r.values[i][0]));
+                se.tex[0] = GAMEDIRECTORY.getFile(core::safeStoi(r.values[i][0]));
                 if (!se.tex[0]) continue;
                 se.base = TEXTURE_OBJECT_SKIN;
                 se.count = 1;
@@ -1241,7 +1241,7 @@ static void buildItemSets()
         for (const auto& value : r.values)
         {
             ItemSetEntry e;
-            e.id = std::stoi(value[0]);
+            e.id = core::safeStoi(value[0]);
             e.name = value[1];
             if (!e.name.empty())
                 g_itemSets.push_back(e);
@@ -1334,7 +1334,7 @@ static void applyItemSet(WoWModel* model, int setId)
             continue;
         try
         {
-            tryToEquipItem(model, std::stoi(val));
+            tryToEquipItem(model, core::safeStoi(val));
         }
         catch (const std::exception& e)
         {
@@ -1654,11 +1654,11 @@ static void loadNPC(unsigned int creatureID)
         return;
     }
 
-    const int extraId = std::stoi(r.values[0][4]);
+    const int extraId = core::safeStoi(r.values[0][4]);
     if (extraId == 0)
     {
         // Simple NPC — load model directly
-        GameFile* file = GAMEDIRECTORY.getFile(std::stoi(r.values[0][0]));
+        GameFile* file = GAMEDIRECTORY.getFile(core::safeStoi(r.values[0][0]));
         if (!file) return;
         loadModel(file);
 
@@ -1666,7 +1666,7 @@ static void loadNPC(unsigned int creatureID)
         WoWModel* m = getLoadedModel();
         if (m)
         {
-            int displayID = std::stoi(r.values[0][5]);
+            int displayID = core::safeStoi(r.values[0][5]);
             // Find matching skin entry for this displayID
             std::string skinQuery = std::format(
                 "SELECT TextureVariationFileDataID1, TextureVariationFileDataID2, TextureVariationFileDataID3 "
@@ -1683,7 +1683,7 @@ static void loadNPC(unsigned int creatureID)
                         {
                             int fdid = g_skinEntries[i].tex[t]->fileDataId();
                             if (!sr.values[0][t].empty() && sr.values[0][t] != "0")
-                                match = (fdid == std::stoi(sr.values[0][t]));
+                                match = (fdid == core::safeStoi(sr.values[0][t]));
                             else
                                 match = false;
                         }
@@ -1700,7 +1700,7 @@ static void loadNPC(unsigned int creatureID)
     else
     {
         // Character-type NPC
-        int fileDataId = std::stoi(r.values[0][0]);
+        int fileDataId = core::safeStoi(r.values[0][0]);
         GameFile* file = GAMEDIRECTORY.getFile(RaceInfos::getHDModelForFileID(fileDataId));
         if (!file) return;
         loadModel(file);
@@ -1715,11 +1715,11 @@ static void loadNPC(unsigned int creatureID)
         r = GAMEDATABASE.sqlQuery(query);
         if (r.valid && !r.empty())
         {
-            m->cd.set(CharDetails::SKIN_COLOR, std::stoi(r.values[0][0]));
-            m->cd.set(CharDetails::FACE, std::stoi(r.values[0][1]));
-            m->cd.set(CharDetails::FACIAL_CUSTOMIZATION_STYLE, std::stoi(r.values[0][2]));
-            m->cd.set(CharDetails::FACIAL_CUSTOMIZATION_COLOR, std::stoi(r.values[0][3]));
-            m->cd.set(CharDetails::ADDITIONAL_FACIAL_CUSTOMIZATION, std::stoi(r.values[0][4]));
+            m->cd.set(CharDetails::SKIN_COLOR, core::safeStoi(r.values[0][0]));
+            m->cd.set(CharDetails::FACE, core::safeStoi(r.values[0][1]));
+            m->cd.set(CharDetails::FACIAL_CUSTOMIZATION_STYLE, core::safeStoi(r.values[0][2]));
+            m->cd.set(CharDetails::FACIAL_CUSTOMIZATION_COLOR, core::safeStoi(r.values[0][3]));
+            m->cd.set(CharDetails::ADDITIONAL_FACIAL_CUSTOMIZATION, core::safeStoi(r.values[0][4]));
         }
 
         // Apply equipment from NpcModelItemSlotDisplayInfo
@@ -1735,12 +1735,12 @@ static void loadNPC(unsigned int creatureID)
             };
             for (const auto& value : r.values)
             {
-                auto it = ItemTypeToInternal.find(std::stoi(value[1]));
+                auto it = ItemTypeToInternal.find(core::safeStoi(value[1]));
                 if (it != ItemTypeToInternal.end())
                 {
                     WoWItem* item = m->getItem(it->second);
                     if (item)
-                        item->setDisplayId(std::stoi(value[0]));
+                        item->setDisplayId(core::safeStoi(value[0]));
                 }
             }
         }
@@ -1793,7 +1793,7 @@ static void loadItemModel(unsigned int itemId)
         if (r.values[0][0].empty() || r.values[0][0] == "0")
             return;
 
-        GameFile* file = GAMEDIRECTORY.getFile(std::stoi(r.values[0][0]));
+        GameFile* file = GAMEDIRECTORY.getFile(core::safeStoi(r.values[0][0]));
         if (!file) return;
 
         loadModel(file);
@@ -1802,7 +1802,7 @@ static void loadItemModel(unsigned int itemId)
         WoWModel* m = getLoadedModel();
         if (m && !r.values[0][1].empty() && r.values[0][1] != "0")
         {
-            GameFile* texFile = GAMEDIRECTORY.getFile(std::stoi(r.values[0][1]));
+            GameFile* texFile = GAMEDIRECTORY.getFile(core::safeStoi(r.values[0][1]));
             if (texFile)
                 m->updateTextureList(texFile, TEXTURE_OBJECT_SKIN);
         }
@@ -1832,7 +1832,7 @@ static void buildMountList()
         for (auto& value : r.values)
         {
             MountEntry me;
-            me.displayID = std::stoi(value[0]);
+            me.displayID = core::safeStoi(value[0]);
             me.name = value[1];
             g_mountList.push_back(me);
         }
@@ -1931,7 +1931,7 @@ static void mountCharacter(int displayID, GameFile* creatureFile)
             LOG_ERROR << "Mount display query failed for displayID " << displayID;
             return;
         }
-        modelFile = GAMEDIRECTORY.getFile(std::stoi(r.values[0][0]));
+        modelFile = GAMEDIRECTORY.getFile(core::safeStoi(r.values[0][0]));
     }
     else if (creatureFile)
     {
@@ -1973,7 +1973,7 @@ static void mountCharacter(int displayID, GameFile* creatureFile)
             {
                 if (!tr.values[0][t].empty() && tr.values[0][t] != "0")
                 {
-                    GameFile* texFile = GAMEDIRECTORY.getFile(std::stoi(tr.values[0][t]));
+                    GameFile* texFile = GAMEDIRECTORY.getFile(core::safeStoi(tr.values[0][t]));
                     if (texFile)
                         mountModel->updateTextureList(texFile, TEXTURE_GAMEOBJECT1 + static_cast<int>(t));
                 }
