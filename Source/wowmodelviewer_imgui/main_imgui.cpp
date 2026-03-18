@@ -254,6 +254,7 @@ struct SkinEntry
 
 static std::vector<SkinEntry>  g_skinEntries;
 static int                     g_selectedSkin = -1;
+static int                     g_blpSkin[3] = {-1, -1, -1};
 
 // ---- Character control state (Phase 4) ------------------------------------
 struct CustomizationOption
@@ -896,6 +897,7 @@ static void initAnimationControl(WoWModel* model)
     g_skinEntries.clear();
     g_selectedAnimCombo = 0;
     g_selectedSkin = -1;
+    g_blpSkin[0] = g_blpSkin[1] = g_blpSkin[2] = -1;
     g_animSpeed = 1.0f;
     g_selectedSecondaryAnim = -1;
     g_selectedMouthAnim = -1;
@@ -2495,6 +2497,40 @@ static void handleViewportInput()
         const float dy = io.MouseDelta.y * MOUSE_SENSITIVITY * mul;
         g_camera.setRadius(g_camera.radius() + dy / 10.0f);
     }
+
+    // Numpad camera controls
+    if (ImGui::IsKeyDown(ImGuiKey_Keypad4))
+        g_camera.setYaw(g_camera.yaw() + 1.0f);
+    if (ImGui::IsKeyDown(ImGuiKey_Keypad6))
+        g_camera.setYaw(g_camera.yaw() - 1.0f);
+    if (ImGui::IsKeyDown(ImGuiKey_Keypad8))
+        g_camera.setPitch(g_camera.pitch() + 1.0f);
+    if (ImGui::IsKeyDown(ImGuiKey_Keypad2))
+        g_camera.setPitch(g_camera.pitch() - 1.0f);
+    if (ImGui::IsKeyPressed(ImGuiKey_Keypad5))
+        g_camera.reset(getLoadedModel());
+    if (ImGui::IsKeyDown(ImGuiKey_Keypad7))
+    {
+        auto la = g_camera.lookAt();
+        g_camera.setLookAt(glm::vec3(la.x, la.y, la.z + 0.2f));
+    }
+    if (ImGui::IsKeyDown(ImGuiKey_Keypad9))
+    {
+        auto la = g_camera.lookAt();
+        g_camera.setLookAt(glm::vec3(la.x, la.y, la.z - 0.2f));
+    }
+    if (ImGui::IsKeyDown(ImGuiKey_Keypad1))
+    {
+        auto la = g_camera.lookAt();
+        auto r = g_camera.right();
+        g_camera.setLookAt(glm::vec3(la.x + r.x * -0.2f, la.y + r.y * -0.2f, la.z));
+    }
+    if (ImGui::IsKeyDown(ImGuiKey_Keypad3))
+    {
+        auto la = g_camera.lookAt();
+        auto r = g_camera.right();
+        g_camera.setLookAt(glm::vec3(la.x + r.x * 0.2f, la.y + r.y * 0.2f, la.z));
+    }
 }
 
 // ---- Animation tick -------------------------------------------------------
@@ -2970,10 +3006,47 @@ int main(int /*argc*/, char* /*argv*/[])
                         {
                             bool selected = (i == g_selectedSkin);
                             if (ImGui::Selectable(g_skinEntries[i].label.c_str(), selected))
+                            {
                                 applySkin(aModel, i);
+                                g_blpSkin[0] = g_blpSkin[1] = g_blpSkin[2] = -1;
+                            }
                             if (selected) ImGui::SetItemDefaultFocus();
                         }
                         ImGui::EndCombo();
+                    }
+
+                    // Per-slot BLP skin selector
+                    size_t maxSlots = 0;
+                    for (const auto& se : g_skinEntries)
+                        if (se.count > maxSlots) maxSlots = se.count;
+                    if (maxSlots > 3) maxSlots = 3;
+
+                    if (maxSlots > 1)
+                    {
+                        const char* slotLabels[3] = { "Texture 1", "Texture 2", "Texture 3" };
+                        for (size_t slot = 0; slot < maxSlots; ++slot)
+                        {
+                            const char* preview = (g_blpSkin[slot] >= 0 && g_blpSkin[slot] < static_cast<int>(g_skinEntries.size()))
+                                ? g_skinEntries[g_blpSkin[slot]].label.c_str() : "(grouped)";
+                            char comboId[32];
+                            snprintf(comboId, sizeof(comboId), "##BLPSlot%zu", slot);
+                            if (ImGui::BeginCombo(slotLabels[slot], preview))
+                            {
+                                for (int i = 0; i < static_cast<int>(g_skinEntries.size()); ++i)
+                                {
+                                    if (!g_skinEntries[i].tex[0]) continue;
+                                    bool selected = (i == g_blpSkin[slot]);
+                                    if (ImGui::Selectable(g_skinEntries[i].label.c_str(), selected))
+                                    {
+                                        g_blpSkin[slot] = i;
+                                        aModel->updateTextureList(g_skinEntries[i].tex[0],
+                                            g_skinEntries[i].base + static_cast<int>(slot));
+                                    }
+                                    if (selected) ImGui::SetItemDefaultFocus();
+                                }
+                                ImGui::EndCombo();
+                            }
+                        }
                     }
                 }
             }
@@ -3835,10 +3908,26 @@ int main(int /*argc*/, char* /*argv*/[])
             // ---- Viewport section ----
             ImGui::SeparatorText("Viewport");
             ImGui::Checkbox("Draw Grid", &g_drawGrid);
-                    ImGui::Checkbox("Checkerboard Background", &g_drawCheckerBg);
-                    ImGui::ColorEdit3("Background", &g_bgColor.x);
-            if (ImGui::Button("Reset Camera"))
-                g_camera.reset();
+            ImGui::Checkbox("Checkerboard Background", &g_drawCheckerBg);
+            ImGui::ColorEdit3("Background", &g_bgColor.x);
+
+            ImGui::Spacing();
+            ImGui::Text("Camera Presets:");
+            if (ImGui::Button("Front"))
+                g_camera.setYawAndPitch(0.f, 90.f);
+            ImGui::SameLine();
+            if (ImGui::Button("Side"))
+                g_camera.setYawAndPitch(270.f, 90.f);
+            ImGui::SameLine();
+            if (ImGui::Button("Back"))
+                g_camera.setYawAndPitch(180.f, 90.f);
+            ImGui::SameLine();
+            if (ImGui::Button("Iso"))
+                g_camera.setYawAndPitch(315.f, 90.f);
+            ImGui::SameLine();
+            if (ImGui::Button("Reset"))
+                g_camera.reset(getLoadedModel());
+
             ImGui::Separator();
             ImGui::Checkbox("ImGui Demo Window", &show_demo_window);
             ImGui::Separator();
