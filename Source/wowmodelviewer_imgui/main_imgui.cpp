@@ -328,6 +328,23 @@ static char                         g_exportPath[512] = "export";
 static std::string                  g_exportStatus;
 static std::vector<char>            g_exportAnimChecked; // per-anim checkbox state (char to avoid vector<bool> proxy)
 
+// ---- Mount state ----------------------------------------------------------
+struct MountEntry
+{
+    int         displayID;  // CreatureDisplayInfoID (>0 for DB mounts, -1 for "None")
+    std::string name;
+};
+
+static std::vector<MountEntry>   g_mountList;        // built from MountXDisplay DB
+static std::vector<GameFile*>    g_creatureModels;   // all creature/*.m2 files
+static std::vector<std::string>  g_creatureModelNames;
+static bool                      g_mountListBuilt = false;
+static bool                      g_isMounted = false;
+static char                      g_mountSearchBuf[256] = {};
+static int                       g_mountTab = 0;      // 0 = Player Mounts, 1 = Creature Models
+static std::vector<size_t>       g_mountFiltered;     // filtered indices into g_mountList or g_creatureModels
+static bool                      g_mountFilterDirty = true;
+
 // ---- Helpers --------------------------------------------------------------
 static std::filesystem::path getApplicationDirPath()
 {
@@ -1170,6 +1187,7 @@ static void clearModel()
     std::memset(g_equipSlotLevels, 0, sizeof(g_equipSlotLevels));
     g_exportAnimChecked.clear();
     g_exportStatus.clear();
+    g_isMounted = false;
 }
 
 // ---- Load a model from GameFile (ported from ModelViewer::LoadModel) -------
@@ -1604,6 +1622,235 @@ static void loadItemModel(unsigned int itemId)
     {
         LOG_ERROR << "Exception loading item model for ID " << itemId;
     }
+}
+
+// ---- Mount helpers --------------------------------------------------------
+static void buildMountList()
+{
+    if (g_mountListBuilt || !g_isWoWLoaded || !g_initDB)
+        return;
+
+    g_mountList.clear();
+    g_creatureModels.clear();
+    g_creatureModelNames.clear();
+
+    // Player mounts from MountXDisplay DB
+    sqlResult r = GAMEDATABASE.sqlQuery(
+        "SELECT MountXDisplay.CreatureDisplayInfoID, Mount.Name_Lang "
+        "FROM Mount LEFT JOIN MountXDisplay ON Mount.ID = MountXDisplay.MountID");
+    if (r.valid && !r.empty())
+    {
+        for (auto& value : r.values)
+        {
+            MountEntry me;
+            me.displayID = std::stoi(value[0]);
+            me.name = value[1];
+            g_mountList.push_back(me);
+        }
+        std::sort(g_mountList.begin(), g_mountList.end(),
+            [](const MountEntry& a, const MountEntry& b) { return a.name < b.name; });
+    }
+    LOG_INFO << "Mount list: " << g_mountList.size() << " player mounts.";
+
+    // All creature/*.m2 files
+    std::vector<GameFile*> files;
+    GAMEDIRECTORY.getFilesForFolder(files, std::string("creature/"), std::string("m2"));
+    for (auto* gf : files)
+    {
+        g_creatureModels.push_back(gf);
+        // Remove "creature/" prefix for readability
+        std::string n = gf->fullname();
+        if (n.size() > 9)
+            n = n.substr(9);
+        g_creatureModelNames.push_back(n);
+    }
+    // Sort alphabetically (keeping parallel arrays in sync)
+    if (!g_creatureModels.empty())
+    {
+        std::vector<size_t> indices(g_creatureModels.size());
+        for (size_t i = 0; i < indices.size(); ++i) indices[i] = i;
+        std::sort(indices.begin(), indices.end(),
+            [&](size_t a, size_t b) { return g_creatureModelNames[a] < g_creatureModelNames[b]; });
+        std::vector<GameFile*> sortedFiles(g_creatureModels.size());
+        std::vector<std::string> sortedNames(g_creatureModelNames.size());
+        for (size_t i = 0; i < indices.size(); ++i)
+        {
+            sortedFiles[i] = g_creatureModels[indices[i]];
+            sortedNames[i] = g_creatureModelNames[indices[i]];
+        }
+        g_creatureModels = std::move(sortedFiles);
+        g_creatureModelNames = std::move(sortedNames);
+    }
+    LOG_INFO << "Creature models: " << g_creatureModels.size() << " files.";
+
+    g_mountListBuilt = true;
+    g_mountFilterDirty = true;
+}
+
+static void rebuildMountFilter()
+{
+    g_mountFiltered.clear();
+
+    std::string search = core::toLower(std::string(g_mountSearchBuf));
+    auto s = search.find_first_not_of(" \t\r\n");
+    auto e = search.find_last_not_of(" \t\r\n");
+    search = (s == std::string::npos) ? "" : search.substr(s, e - s + 1);
+
+    if (g_mountTab == 0)
+    {
+        for (size_t i = 0; i < g_mountList.size(); ++i)
+        {
+            if (!search.empty() && !core::containsIgnoreCase(g_mountList[i].name, search))
+                continue;
+            g_mountFiltered.push_back(i);
+        }
+    }
+    else
+    {
+        for (size_t i = 0; i < g_creatureModelNames.size(); ++i)
+        {
+            if (!search.empty() && !core::containsIgnoreCase(g_creatureModelNames[i], search))
+                continue;
+            g_mountFiltered.push_back(i);
+        }
+    }
+
+    g_mountFilterDirty = false;
+}
+
+static void mountCharacter(int displayID, GameFile* creatureFile)
+{
+    WoWModel* charModel = getLoadedModel();
+    if (!charModel || !g_isChar || !g_root)
+        return;
+
+    // Get or resolve the mount model file
+    GameFile* modelFile = nullptr;
+    int morphID = 0;
+
+    if (displayID > 0)
+    {
+        // Player mount — lookup model file from CreatureDisplayInfo
+        morphID = displayID;
+        std::string query = std::format(
+            "SELECT CreatureModelData.FileDataID FROM CreatureDisplayInfo "
+            "LEFT JOIN CreatureModelData ON CreatureDisplayInfo.modelID = CreatureModelData.ID "
+            "WHERE CreatureDisplayInfo.ID = {};", displayID);
+        sqlResult r = GAMEDATABASE.sqlQuery(query);
+        if (!r.valid || r.empty() || r.values[0][0].empty() || r.values[0][0] == "0")
+        {
+            LOG_ERROR << "Mount display query failed for displayID " << displayID;
+            return;
+        }
+        modelFile = GAMEDIRECTORY.getFile(std::stoi(r.values[0][0]));
+    }
+    else if (creatureFile)
+    {
+        modelFile = creatureFile;
+    }
+
+    if (!modelFile)
+        return;
+
+    // Get the character's attachment
+    Attachment* charAtt = g_root->children.empty() ? nullptr : g_root->children[0];
+    if (!charAtt)
+        return;
+
+    // Create the mount model
+    auto* mountModel = new WoWModel(modelFile, false);
+    if (!mountModel->ok)
+    {
+        LOG_ERROR << "Mount model failed to load.";
+        delete mountModel;
+        return;
+    }
+    mountModel->isMount = true;
+
+    // Set mount as root model; character stays as child attachment
+    g_root->setModel(mountModel);
+    charAtt->id = 0; // attachment slot 0 = mount point
+
+    // Apply mount skin/texture if it's a DB mount
+    if (morphID > 0)
+    {
+        std::string texQuery = std::format(
+            "SELECT TextureVariationFileDataID1, TextureVariationFileDataID2, TextureVariationFileDataID3 "
+            "FROM CreatureDisplayInfo WHERE ID = {}", morphID);
+        sqlResult tr = GAMEDATABASE.sqlQuery(texQuery);
+        if (tr.valid && !tr.empty())
+        {
+            for (size_t t = 0; t < 3; ++t)
+            {
+                if (!tr.values[0][t].empty() && tr.values[0][t] != "0")
+                {
+                    GameFile* texFile = GAMEDIRECTORY.getFile(std::stoi(tr.values[0][t]));
+                    if (texFile)
+                        mountModel->updateTextureList(texFile, TEXTURE_GAMEOBJECT1 + static_cast<int>(t));
+                }
+            }
+        }
+    }
+
+    // Sheathe character weapons
+    charModel->bSheathe = true;
+
+    // Switch character to mount animation
+    if (charModel->animLookups.size() > ANIMATION_MOUNT &&
+        charModel->animLookups[ANIMATION_MOUNT] >= 0)
+    {
+        charModel->animManager->Stop();
+        charModel->currentAnim = charModel->animLookups[ANIMATION_MOUNT];
+        charModel->animManager->SetAnim(0, static_cast<short>(charModel->currentAnim), 0);
+        charModel->animManager->Play();
+    }
+
+    // Reset transforms
+    charModel->rot_ = charModel->pos_ = glm::vec3(0.0f);
+    charModel->scale_ = 1.0f;
+    mountModel->rot_.x = 0.0f;
+
+    g_isMounted = true;
+    g_selModel = mountModel;
+
+    // Update animation control for the mount
+    initAnimationControl(mountModel);
+    initModelControl(mountModel);
+
+    g_camera.reset(mountModel);
+    LOG_INFO << "Character mounted on: " << modelFile->fullname();
+}
+
+static void dismountCharacter()
+{
+    if (!g_isMounted || !g_root || !g_isChar)
+        return;
+
+    WoWModel* charModel = nullptr;
+    Attachment* charAtt = g_root->children.empty() ? nullptr : g_root->children[0];
+    if (charAtt)
+        charModel = dynamic_cast<WoWModel*>(charAtt->model());
+
+    // Remove mount model from root
+    g_root->setModel(nullptr);
+    g_isMounted = false;
+
+    if (charAtt)
+        charAtt->id = 0;
+
+    if (charModel)
+    {
+        charModel->bSheathe = false;
+        charModel->scale_ = 1.0f;
+        charModel->rot_ = charModel->pos_ = glm::vec3(0.0f);
+
+        g_selModel = charModel;
+        initAnimationControl(charModel);
+        initModelControl(charModel);
+        g_camera.reset(charModel);
+    }
+
+    LOG_INFO << "Character dismounted.";
 }
 
 // ---- Export helper --------------------------------------------------------
@@ -2546,6 +2793,85 @@ int main(int /*argc*/, char* /*argv*/[])
                             ImGui::CloseCurrentPopup();
                     }
                     ImGui::EndPopup();
+                }
+
+                // ---- Mount ----
+                ImGui::SeparatorText("Mount");
+
+                buildMountList(); // lazy init on first frame
+
+                if (g_isMounted)
+                {
+                    ImGui::TextColored(ImVec4(0.4f, 1.0f, 0.4f, 1.0f), "Mounted");
+                    if (ImGui::Button("Dismount", ImVec2(-1, 0)))
+                        dismountCharacter();
+                }
+                else
+                {
+                    if (ImGui::BeginTabBar("##MountTabs"))
+                    {
+                        int prevTab = g_mountTab;
+
+                        if (ImGui::BeginTabItem("Player Mounts"))
+                        {
+                            g_mountTab = 0;
+                            ImGui::EndTabItem();
+                        }
+                        if (ImGui::BeginTabItem("Creature Models"))
+                        {
+                            g_mountTab = 1;
+                            ImGui::EndTabItem();
+                        }
+                        ImGui::EndTabBar();
+
+                        if (g_mountTab != prevTab)
+                        {
+                            g_mountFilterDirty = true;
+                            g_mountSearchBuf[0] = '\0';
+                        }
+                    }
+
+                    ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x - 60.0f);
+                    if (ImGui::InputText("##mountSearch", g_mountSearchBuf, sizeof(g_mountSearchBuf),
+                                         ImGuiInputTextFlags_EnterReturnsTrue))
+                        g_mountFilterDirty = true;
+                    ImGui::SameLine();
+                    if (ImGui::Button("Apply##mount", ImVec2(-1, 0)))
+                        g_mountFilterDirty = true;
+
+                    if (g_mountFilterDirty)
+                        rebuildMountFilter();
+
+                    ImGui::Text("%d entries", static_cast<int>(g_mountFiltered.size()));
+                    ImGui::Separator();
+
+                    ImGui::BeginChild("##MountList", ImVec2(0, 200), ImGuiChildFlags_Borders);
+                    ImGuiListClipper clipper;
+                    clipper.Begin(static_cast<int>(g_mountFiltered.size()));
+                    while (clipper.Step())
+                    {
+                        for (int i = clipper.DisplayStart; i < clipper.DisplayEnd; ++i)
+                        {
+                            size_t idx = g_mountFiltered[i];
+                            ImGui::PushID(static_cast<int>(idx));
+
+                            if (g_mountTab == 0)
+                            {
+                                const auto& me = g_mountList[idx];
+                                std::string label = std::format("{} (DisplayID:{})", me.name, me.displayID);
+                                if (ImGui::Selectable(label.c_str()))
+                                    mountCharacter(me.displayID, nullptr);
+                            }
+                            else
+                            {
+                                if (ImGui::Selectable(g_creatureModelNames[idx].c_str()))
+                                    mountCharacter(-1, g_creatureModels[idx]);
+                            }
+
+                            ImGui::PopID();
+                        }
+                    }
+                    ImGui::EndChild();
                 }
             }
             else if (g_isModel)
