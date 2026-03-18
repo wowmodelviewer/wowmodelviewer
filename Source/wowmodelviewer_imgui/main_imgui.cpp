@@ -138,7 +138,9 @@ static OrbitCamera  g_camera;
 static Attachment*  g_root       = nullptr;
 static ViewportFBO  g_fbo;
 static bool         g_drawGrid   = true;
-static glm::vec3    g_bgColor(71.0f / 255.0f, 95.0f / 255.0f, 121.0f / 255.0f);
+static glm::vec3    g_bgColor(0.22f, 0.22f, 0.22f);
+static GLuint       g_checkerTex = 0;
+static bool         g_drawCheckerBg = true;
 
 // Timing for animation tick
 static float        g_animTime   = 0.0f;
@@ -263,6 +265,28 @@ static int                    g_equipSlotToEdit = -1;
 static bool                   g_equipPopupJustOpened = false;
 static std::vector<size_t>    g_equipFilteredItems; // indices into items.items
 static int                    g_equipSlotLevels[NUM_CHAR_SLOTS] = {};
+
+// ---- Item Set / Start Outfit state ----------------------------------------
+struct ItemSetEntry
+{
+    int id;
+    std::string name;
+};
+
+static std::vector<ItemSetEntry>  g_itemSets;
+static bool                       g_itemSetsBuilt = false;
+static char                       g_itemSetSearchBuf[256] = {};
+static std::vector<size_t>        g_itemSetFiltered; // indices into g_itemSets
+static bool                       g_itemSetFilterDirty = true;
+
+struct StartOutfitEntry
+{
+    int id;           // CharStartOutfit.ID
+    std::string name; // class name
+};
+
+static std::vector<StartOutfitEntry> g_startOutfits;
+static bool                          g_startOutfitsBuilt = false;
 
 // ---- Light Control state --------------------------------------------------
 struct LightSettings
@@ -1959,42 +1983,101 @@ static void setupDefaultLighting()
     glLightModelfv(GL_LIGHT_MODEL_AMBIENT, modelAmb);
 }
 
-// ---- Grid (ported from ModelCanvas::RenderGrid) ---------------------------
+// ---- Checkerboard background ----------------------------------------------
+static void createCheckerboardTexture()
+{
+    // 2x2 checkerboard — two shades of dark gray
+    const unsigned char pixels[2 * 2 * 4] = {
+        56, 56, 56, 255,   46, 46, 46, 255,
+        46, 46, 46, 255,   56, 56, 56, 255,
+    };
+    glGenTextures(1, &g_checkerTex);
+    glBindTexture(GL_TEXTURE_2D, g_checkerTex);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, 2, 2, 0, GL_RGBA, GL_UNSIGNED_BYTE, pixels);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glBindTexture(GL_TEXTURE_2D, 0);
+}
+
+static void renderCheckerboardBackground(int w, int h)
+{
+    glMatrixMode(GL_PROJECTION);
+    glPushMatrix();
+    glLoadIdentity();
+    glOrtho(0, w, 0, h, -1, 1);
+
+    glMatrixMode(GL_MODELVIEW);
+    glPushMatrix();
+    glLoadIdentity();
+
+    glDisable(GL_DEPTH_TEST);
+    glDisable(GL_LIGHTING);
+    glEnable(GL_TEXTURE_2D);
+
+    glBindTexture(GL_TEXTURE_2D, g_checkerTex);
+    glColor3f(1.0f, 1.0f, 1.0f);
+
+    const float tileSize = 16.0f;
+    float u = static_cast<float>(w) / (tileSize * 2.0f);
+    float v = static_cast<float>(h) / (tileSize * 2.0f);
+
+    glBegin(GL_QUADS);
+    glTexCoord2f(0, 0); glVertex2f(0, 0);
+    glTexCoord2f(u, 0); glVertex2f(static_cast<float>(w), 0);
+    glTexCoord2f(u, v); glVertex2f(static_cast<float>(w), static_cast<float>(h));
+    glTexCoord2f(0, v); glVertex2f(0, static_cast<float>(h));
+    glEnd();
+
+    glBindTexture(GL_TEXTURE_2D, 0);
+    glDisable(GL_TEXTURE_2D);
+    glEnable(GL_DEPTH_TEST);
+
+    glMatrixMode(GL_PROJECTION);
+    glPopMatrix();
+    glMatrixMode(GL_MODELVIEW);
+    glPopMatrix();
+}
+
+// ---- Grid (wireframe with blue center axes) -------------------------------
 static void renderGrid()
 {
-    int count = 0;
-    const GLfloat white[] = { 1.0f, 1.0f, 1.0f, 1.0f };
-    const GLfloat black[] = { 0.0f, 0.0f, 0.0f, 1.0f };
+    const float gridSize = 40.0f;
+    const float step     = 1.0f;
 
     glDisable(GL_TEXTURE_2D);
     glDisable(GL_LIGHTING);
 
-    glBegin(GL_QUADS);
-    for (int i = -20; i <= 20; ++i)
-    {
-        for (int j = -20; j <= 20; ++j)
-        {
-            if ((count % 2) == 0)
-            {
-                glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, white);
-                glColor3f(1.0f, 1.0f, 1.0f);
-            }
-            else
-            {
-                glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, black);
-                glColor3f(0.2f, 0.2f, 0.2f);
-            }
+    // Minor grid lines — thin gray
+    glLineWidth(1.0f);
+    glColor4f(0.55f, 0.55f, 0.55f, 0.6f);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-            glNormal3f(0, 0, 1);
-            glVertex3f(static_cast<float>(j),     static_cast<float>(i),     0.0f);
-            glVertex3f(static_cast<float>(j),     static_cast<float>(i + 1), 0.0f);
-            glVertex3f(static_cast<float>(j + 1), static_cast<float>(i + 1), 0.0f);
-            glVertex3f(static_cast<float>(j + 1), static_cast<float>(i),     0.0f);
-            count++;
-        }
+    glBegin(GL_LINES);
+    for (float i = -gridSize; i <= gridSize; i += step)
+    {
+        if (i == 0.0f) continue; // center axes drawn separately
+        glVertex3f(-gridSize, i, 0.0f);
+        glVertex3f( gridSize, i, 0.0f);
+        glVertex3f(i, -gridSize, 0.0f);
+        glVertex3f(i,  gridSize, 0.0f);
     }
     glEnd();
 
+    // Center axis lines — blue
+    glLineWidth(2.0f);
+    glColor3f(0.2f, 0.5f, 1.0f);
+    glBegin(GL_LINES);
+    glVertex3f(-gridSize, 0.0f, 0.0f);
+    glVertex3f( gridSize, 0.0f, 0.0f);
+    glVertex3f(0.0f, -gridSize, 0.0f);
+    glVertex3f(0.0f,  gridSize, 0.0f);
+    glEnd();
+
+    glLineWidth(1.0f);
+    glDisable(GL_BLEND);
     glEnable(GL_LIGHTING);
     glEnable(GL_TEXTURE_2D);
 }
@@ -2036,6 +2119,11 @@ static void renderSceneToFBO(int w, int h)
     glViewport(0, 0, w, h);
     glClearColor(g_bgColor.x, g_bgColor.y, g_bgColor.z, 1.0f);
     glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
+
+    // Checkerboard background (screen-space, drawn before 3D scene)
+    if (g_drawCheckerBg && g_checkerTex)
+        renderCheckerboardBackground(w, h);
+    glClear(GL_DEPTH_BUFFER_BIT);
 
     // Projection
     glMatrixMode(GL_PROJECTION);
@@ -2164,6 +2252,8 @@ static void initGL()
     video.render = true;
     // video.Init() calls gladLoaderLoadGL() internally — safe after GLFW context
     video.InitGL();
+
+    createCheckerboardTexture();
 
     LOG_INFO << "OpenGL initialisation complete.";
 }
@@ -3264,7 +3354,8 @@ int main(int /*argc*/, char* /*argv*/[])
             // ---- Viewport section ----
             ImGui::SeparatorText("Viewport");
             ImGui::Checkbox("Draw Grid", &g_drawGrid);
-            ImGui::ColorEdit3("Background", &g_bgColor.x);
+                    ImGui::Checkbox("Checkerboard Background", &g_drawCheckerBg);
+                    ImGui::ColorEdit3("Background", &g_bgColor.x);
             if (ImGui::Button("Reset Camera"))
                 g_camera.reset();
             ImGui::Separator();
@@ -3349,6 +3440,8 @@ int main(int /*argc*/, char* /*argv*/[])
     }
 
     g_fbo.destroy();
+
+    if (g_checkerTex) { glDeleteTextures(1, &g_checkerTex); g_checkerTex = 0; }
 
     for (auto* e : g_exporters)
         delete e;
