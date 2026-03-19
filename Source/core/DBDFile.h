@@ -57,6 +57,7 @@ namespace core
 		std::vector<DBDVersionField> fields;
 
 		bool matchesBuild(const DBDBuild& target) const;
+		bool matchesLayoutHash(const std::string& layoutHash) const;
 	};
 
 	// Parsed content of a single .dbd file
@@ -73,6 +74,11 @@ namespace core
 		// Find the version definition that matches the given build.
 		// Returns nullptr if no match found.
 		const DBDVersionDef* findVersion(const DBDBuild& build) const;
+
+		// Find the version definition that matches the given build or layout hash.
+		// Layout hash is checked first, then build.
+		// Returns nullptr if no match found.
+		const DBDVersionDef* findVersion(const DBDBuild& build, const std::string& layoutHash) const;
 
 		// Find the column definition for a given field name.
 		// Returns nullptr if not found.

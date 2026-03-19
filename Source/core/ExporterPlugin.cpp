@@ -4,7 +4,7 @@
 
 void ExporterPlugin::exportGLTexture(GLuint id, std::wstring filename) const
 {
-	LOG_INFO << "Exporting GL texture with id " << id << "in" << filename.c_str();
+	LOG_INFO << "Exporting GL texture with id " << id << " in " << filename.c_str();
 	glEnable(GL_TEXTURE_2D);
 	glBindTexture(GL_TEXTURE_2D, id);
 

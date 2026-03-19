@@ -74,4 +74,4 @@ set(NAME core)
 add_library(${NAME} STATIC ${src} ${headers})
 set_property(TARGET ${NAME} PROPERTY FOLDER "libraries")
 
-target_link_libraries(${NAME} pugixml-static winhttp ${CMAKE_SOURCE_DIR}/ThirdParty/lib/x64/zlib.lib ${extralibs})
+target_link_libraries(${NAME} pugixml-static nlohmann_json::nlohmann_json winhttp ${CMAKE_SOURCE_DIR}/ThirdParty/lib/x64/zlib.lib ${extralibs})

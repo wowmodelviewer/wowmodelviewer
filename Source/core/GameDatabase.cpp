@@ -5,12 +5,16 @@
 #include "Game.h"
 #include "DBDFile.h"
 #include "string_utils.h"
+#include "HttpClient.h"
 
 #include <filesystem>
+#include <fstream>
+#include <sstream>
 #include <string>
 #include <vector>
 
 #include "sqlite3.h"
+#include <nlohmann/json.hpp>
 
 core::GameDatabase::~GameDatabase()
 {
@@ -20,6 +24,54 @@ core::GameDatabase::~GameDatabase()
 
 core::GameDatabase::GameDatabase() : m_db(nullptr), m_fastMode(false)
 {
+}
+
+bool core::GameDatabase::downloadAndParseManifest()
+{
+	if (m_manifestUrl.empty())
+	{
+		LOG_ERROR << "Manifest URL not set.";
+		return false;
+	}
+
+	LOG_INFO << "Downloading DBD manifest from " << m_manifestUrl;
+	const auto resp = HttpClient::Get(m_manifestUrl);
+	if (!resp.success || resp.body.empty())
+	{
+		LOG_ERROR << "Failed to download manifest:" << resp.error;
+		return false;
+	}
+
+	try
+	{
+		const auto manifest = nlohmann::json::parse(resp.body);
+		for (const auto& entry : manifest)
+		{
+			if (entry.contains("tableName") && entry.contains("db2FileDataID"))
+			{
+				const std::string tableName = entry["tableName"].get<std::string>();
+				const int fileDataId = entry["db2FileDataID"].get<int>();
+				if (!tableName.empty() && fileDataId > 0)
+					m_tableFileDataIds[tableName] = fileDataId;
+			}
+		}
+
+		LOG_INFO << "Loaded DBD manifest with " << m_tableFileDataIds.size() << " entries ";
+		return true;
+	}
+	catch (const std::exception& e)
+	{
+		LOG_ERROR << "Failed to parse manifest JSON:" << e.what();
+		return false;
+	}
+}
+
+int core::GameDatabase::getFileDataIdForTable(const std::string& tableName) const
+{
+	const auto it = m_tableFileDataIds.find(tableName);
+	if (it != m_tableFileDataIds.end())
+		return it->second;
+	return 0;
 }
 
 sqlResult core::GameDatabase::sqlQuery(const std::string& query)
@@ -79,7 +131,7 @@ void core::GameDatabase::logQueryTime(void* aDb, const char* aQueryStr, sqlite3_
 
 bool core::TableStructure::create()
 {
-	LOG_INFO << "Creating table" << name;
+	LOG_INFO << "Creating table " << name;
 	std::string create = "CREATE TABLE " + name + " (";
 
 	std::vector<std::string> indexesToCreate;
@@ -399,6 +451,36 @@ bool core::GameDatabase::readStructureFromDBD(const std::string& dbdDir, const c
 		const std::string& tableName = entry;
 		std::string dbdPath = dbdDir + "/" + tableName + ".dbd";
 
+		// If local file does not exist and we have a base URL, download on demand
+		if (!fs::exists(dbdPath) && !m_dbdBaseUrl.empty())
+		{
+			std::string url = m_dbdBaseUrl;
+			// Replace %s placeholder with table name, or just append
+			auto pos = url.find("%s");
+			if (pos != std::string::npos)
+				url.replace(pos, 2, tableName);
+			else
+				url += tableName + ".dbd";
+
+			LOG_INFO << "Downloading DBD for" << tableName << "from" << url;
+			const auto resp = HttpClient::Get(url);
+			if (resp.success && !resp.body.empty())
+			{
+				// Cache to local directory
+				fs::create_directories(dbdDir);
+				std::ofstream out(dbdPath, std::ios::binary);
+				if (out.is_open())
+				{
+					out.write(resp.body.data(), resp.body.size());
+					out.close();
+				}
+			}
+			else
+			{
+				LOG_ERROR << "Failed to download DBD for" << tableName << ":" << resp.error;
+			}
+		}
+
 		if (!fs::exists(dbdPath))
 		{
 			LOG_ERROR << "DBD file not found:" << dbdPath;
@@ -412,7 +494,8 @@ bool core::GameDatabase::readStructureFromDBD(const std::string& dbdDir, const c
 			continue;
 		}
 
-		const core::DBDVersionDef* verDef = dbd.findVersion(build);
+		const std::string layoutHash = getLayoutHashForTable(tableName);
+		const core::DBDVersionDef* verDef = dbd.findVersion(build, layoutHash);
 		if (!verDef)
 		{
 			LOG_ERROR << "No matching version definition found in" << dbdPath

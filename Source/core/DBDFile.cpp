@@ -52,6 +52,19 @@ bool core::DBDVersionDef::matchesBuild(const DBDBuild& target) const
 	return false;
 }
 
+bool core::DBDVersionDef::matchesLayoutHash(const std::string& layoutHash) const
+{
+	if (layoutHash.empty())
+		return false;
+
+	for (const auto& h : layoutHashes)
+	{
+		if (h == layoutHash)
+			return true;
+	}
+	return false;
+}
+
 // --- DBDFile ---
 
 static std::string trimWhitespace(const std::string& s)
@@ -363,6 +376,22 @@ const core::DBDVersionDef* core::DBDFile::findVersion(const DBDBuild& build) con
 			return &v;
 	}
 	return nullptr;
+}
+
+const core::DBDVersionDef* core::DBDFile::findVersion(const DBDBuild& build, const std::string& layoutHash) const
+{
+	// Check layout hash first (most reliable match)
+	if (!layoutHash.empty())
+	{
+		for (const auto& v : m_versions)
+		{
+			if (v.matchesLayoutHash(layoutHash))
+				return &v;
+		}
+	}
+
+	// Fall back to build matching
+	return findVersion(build);
 }
 
 const core::DBDColumnDef* core::DBDFile::findColumn(const std::string& name) const

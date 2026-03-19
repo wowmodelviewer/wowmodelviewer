@@ -651,35 +651,9 @@ static bool checkAndDownloadSupportFiles()
             return false;
     }
 
-    // Download WoWDBDefs definitions if not present
+    // Ensure the dbdefs cache directory exists (DBDs are downloaded on demand)
     const fs::path dbdDir = appDir / "games" / "wow" / "dbdefs";
-    if (!fs::exists(dbdDir, ec) || fs::is_empty(dbdDir, ec))
-    {
-        LOG_INFO << "Downloading WoWDBDefs definitions...";
-        setLoadStatus("Downloading database definitions...");
-
-        const auto resp = HttpClient::Get(
-            "https://github.com/wowdev/WoWDBDefs/releases/latest/download/dbd.zip");
-        if (!resp.success)
-        {
-            LOG_ERROR << "Failed to download dbd.zip: " << resp.error;
-            setLoadStatus("Failed to download dbd.zip: " + resp.error);
-            // Non-fatal: the XML fallback will be used
-        }
-        else
-        {
-            fs::create_directories(dbdDir, ec);
-            if (extractZip(resp.body, dbdDir))
-            {
-                LOG_INFO << "WoWDBDefs definitions extracted to " << dbdDir.string();
-            }
-            else
-            {
-                LOG_ERROR << "Failed to extract dbd.zip";
-                fs::remove_all(dbdDir, ec);
-            }
-        }
-    }
+    fs::create_directories(dbdDir, ec);
 
     return true;
 }
@@ -734,15 +708,24 @@ static void initDatabase()
     const fs::path dbdDir = appDir / "games" / "wow" / "dbdefs";
     const fs::path tablesFile = appDir / "games" / "wow" / "tables.txt";
 
-    if (!fs::exists(dbdDir, ec) || !fs::is_directory(dbdDir, ec) || !fs::exists(tablesFile, ec))
+    if (!fs::exists(tablesFile, ec))
     {
         g_initDB = false;
-        LOG_ERROR << "DBD definitions or tables.txt not found!";
-        setLoadStatus("Database definition files not found!");
+        LOG_ERROR << "tables.txt not found!";
+        setLoadStatus("Database table list not found!");
         fs::remove(cachePath, ec);
         fs::remove(versionPath, ec);
         return;
     }
+
+    // Configure on-demand DBD downloading from WoWDBDefs master branch
+    GAMEDATABASE.setDbdBaseUrl(
+        "https://raw.githubusercontent.com/wowdev/WoWDBDefs/refs/heads/master/definitions/%s.dbd");
+
+    // Download and parse the DBD manifest for table name -> file data ID mapping
+    GAMEDATABASE.setManifestUrl(
+        "https://raw.githubusercontent.com/wowdev/WoWDBDefs/refs/heads/master/manifest.json");
+    GAMEDATABASE.downloadAndParseManifest();
 
     // Read table names from tables.txt
     std::vector<std::string> tableNames;

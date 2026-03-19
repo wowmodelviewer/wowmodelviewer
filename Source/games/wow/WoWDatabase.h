@@ -48,7 +48,8 @@ namespace wow
 
 		void readSpecificTableAttributesFromDBD(const core::DBDVersionDef&, core::TableStructure*) override;
 		void readSpecificFieldAttributesFromDBD(const core::DBDVersionField&, const core::DBDColumnDef&,
-												core::FieldStructure*) override;
+											core::FieldStructure*) override;
 		void setFieldPos(core::FieldStructure*, int pos) override;
+		std::string getLayoutHashForTable(const std::string& tableName) override;
 	};
 }
