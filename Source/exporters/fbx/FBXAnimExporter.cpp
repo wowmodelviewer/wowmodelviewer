@@ -24,6 +24,10 @@
  */
 
 #include "FBXAnimExporter.h"
+
+#ifdef _WIN32
+#include <windows.h>
+#endif
 #include <filesystem>
 #include <mutex>
 #include <sstream>
@@ -107,13 +111,23 @@ void FBXAnimExporter::run()
 	sceneInfo->mTitle = anim_name.c_str();
 	{
 		std::wstring appName = GLOBALSETTINGS.appName();
-		std::string appNameUtf8(appName.begin(), appName.end());
-		sceneInfo->mAuthor = appNameUtf8.c_str();
+		if (!appName.empty())
+		{
+			int n = WideCharToMultiByte(CP_UTF8, 0, appName.c_str(), static_cast<int>(appName.size()), nullptr, 0, nullptr, nullptr);
+			std::string appNameUtf8(n, '\0');
+			WideCharToMultiByte(CP_UTF8, 0, appName.c_str(), static_cast<int>(appName.size()), appNameUtf8.data(), n, nullptr, nullptr);
+			sceneInfo->mAuthor = appNameUtf8.c_str();
+		}
 	}
 	{
 		std::wstring appVer = GLOBALSETTINGS.appVersion();
-		std::string appVerUtf8(appVer.begin(), appVer.end());
-		sceneInfo->mRevision = appVerUtf8.c_str();
+		if (!appVer.empty())
+		{
+			int n = WideCharToMultiByte(CP_UTF8, 0, appVer.c_str(), static_cast<int>(appVer.size()), nullptr, 0, nullptr, nullptr);
+			std::string appVerUtf8(n, '\0');
+			WideCharToMultiByte(CP_UTF8, 0, appVer.c_str(), static_cast<int>(appVer.size()), appVerUtf8.data(), n, nullptr, nullptr);
+			sceneInfo->mRevision = appVerUtf8.c_str();
+		}
 	}
 	l_animscene->SetSceneInfo(sceneInfo);
 

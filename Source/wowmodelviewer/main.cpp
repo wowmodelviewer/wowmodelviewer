@@ -4879,9 +4879,15 @@ int main(int /*argc*/, char* /*argv*/[])
         if (ImGui::BeginPopupModal("About WoW Model Viewer", &g_showAboutDialog,
                                     ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoMove))
         {
-            // Convert wstring title to narrow string for ImGui
+            // Convert wstring title to narrow UTF-8 string for ImGui
             std::wstring wTitle = GLOBALSETTINGS.appTitle();
-            std::string title(wTitle.begin(), wTitle.end());
+            std::string title;
+            if (!wTitle.empty())
+            {
+                int n = WideCharToMultiByte(CP_UTF8, 0, wTitle.c_str(), static_cast<int>(wTitle.size()), nullptr, 0, nullptr, nullptr);
+                title.resize(n);
+                WideCharToMultiByte(CP_UTF8, 0, wTitle.c_str(), static_cast<int>(wTitle.size()), title.data(), n, nullptr, nullptr);
+            }
             ImGui::TextColored(ImVec4(0.4f, 0.8f, 1.0f, 1.0f), "%s", title.c_str());
 
             ImGui::Separator();

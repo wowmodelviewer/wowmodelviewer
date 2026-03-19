@@ -13,7 +13,7 @@ include_directories(${CMAKE_SOURCE_DIR}/ThirdParty/include)  # fbxsdk.h
 include_directories(${CMAKE_SOURCE_DIR}/Source/importers/armory)
 include_directories(${CMAKE_SOURCE_DIR}/Source/importers/wowhead)
 
-set(src main_imgui.cpp
+set(src main.cpp
         OrbitCamera.cpp)
 
 # External dependencies
@@ -21,7 +21,7 @@ use_glad()
 use_imgui()
 use_wow()   # brings in core, casclib, wow (video, Attachment, WoWModel, etc.)
 
-set(NAME wowmodelviewer_imgui)
+set(NAME wowmodelviewer)
 add_executable(${NAME} ${src})
 
 set_property(TARGET ${NAME} PROPERTY FOLDER "executables")

@@ -25,6 +25,9 @@
 
 #include "FBXExporter.h"
 
+#ifdef _WIN32
+#include <windows.h>
+#endif
 #include <filesystem>
 #include <mutex>
 
@@ -89,7 +92,14 @@ bool FBXExporter::exportModel(Model* model, std::wstring target)
 
 	m_fileVersion = FBX_2014_00_COMPATIBLE;
 
-	if (FBXHeaders::createFBXHeaders(m_fileVersion, std::string(m_filename.begin(), m_filename.end()), m_p_manager, exporter,
+	std::string filenameUtf8;
+	if (!m_filename.empty())
+	{
+		int n = WideCharToMultiByte(CP_UTF8, 0, m_filename.c_str(), static_cast<int>(m_filename.size()), nullptr, 0, nullptr, nullptr);
+		filenameUtf8.resize(n);
+		WideCharToMultiByte(CP_UTF8, 0, m_filename.c_str(), static_cast<int>(m_filename.size()), filenameUtf8.data(), n, nullptr, nullptr);
+	}
+	if (FBXHeaders::createFBXHeaders(m_fileVersion, filenameUtf8, m_p_manager, exporter,
 									 m_p_scene) == false)
 		return false;
 
@@ -104,11 +114,23 @@ bool FBXExporter::exportModel(Model* model, std::wstring target)
 	}
 	{
 		std::wstring appName = GLOBALSETTINGS.appName();
-		sceneInfo->mAuthor = std::string(appName.begin(), appName.end()).c_str();
+		if (!appName.empty())
+		{
+			int n = WideCharToMultiByte(CP_UTF8, 0, appName.c_str(), static_cast<int>(appName.size()), nullptr, 0, nullptr, nullptr);
+			std::string s(n, '\0');
+			WideCharToMultiByte(CP_UTF8, 0, appName.c_str(), static_cast<int>(appName.size()), s.data(), n, nullptr, nullptr);
+			sceneInfo->mAuthor = s.c_str();
+		}
 	}
 	{
 		std::wstring appVer = GLOBALSETTINGS.appVersion();
-		sceneInfo->mRevision = std::string(appVer.begin(), appVer.end()).c_str();
+		if (!appVer.empty())
+		{
+			int n = WideCharToMultiByte(CP_UTF8, 0, appVer.c_str(), static_cast<int>(appVer.size()), nullptr, 0, nullptr, nullptr);
+			std::string s(n, '\0');
+			WideCharToMultiByte(CP_UTF8, 0, appVer.c_str(), static_cast<int>(appVer.size()), s.data(), n, nullptr, nullptr);
+			sceneInfo->mRevision = s.c_str();
+		}
 	}
 	m_p_scene->SetSceneInfo(sceneInfo);
 
@@ -342,8 +364,23 @@ bool FBXExporter::createAnimationFiles()
 		std::lock_guard<std::mutex> locker(m_mutex);
 		const ModelAnimation curAnimation = m_p_model->anims[it];
 		FBXAnimExporter* exporter = new FBXAnimExporter();
-		exporter->setValues(m_fileVersion, std::string(m_filename.begin(), m_filename.end()),
-							std::string(animsMap[curAnimation.animID].begin(), animsMap[curAnimation.animID].end()), m_p_model, m_boneClusters,
+		std::string fnUtf8, anUtf8;
+		if (!m_filename.empty())
+		{
+			int n = WideCharToMultiByte(CP_UTF8, 0, m_filename.c_str(), static_cast<int>(m_filename.size()), nullptr, 0, nullptr, nullptr);
+			fnUtf8.resize(n);
+			WideCharToMultiByte(CP_UTF8, 0, m_filename.c_str(), static_cast<int>(m_filename.size()), fnUtf8.data(), n, nullptr, nullptr);
+		}
+		{
+			const std::wstring& wAnim = animsMap[curAnimation.animID];
+			if (!wAnim.empty())
+			{
+				int n = WideCharToMultiByte(CP_UTF8, 0, wAnim.c_str(), static_cast<int>(wAnim.size()), nullptr, 0, nullptr, nullptr);
+				anUtf8.resize(n);
+				WideCharToMultiByte(CP_UTF8, 0, wAnim.c_str(), static_cast<int>(wAnim.size()), anUtf8.data(), n, nullptr, nullptr);
+			}
+		}
+		exporter->setValues(m_fileVersion, fnUtf8, anUtf8, m_p_model, m_boneClusters,
 							m_p_meshNode, it);
 		exporter->run();
 		delete exporter;
@@ -386,7 +423,13 @@ void FBXExporter::createMaterials()
 			if (auto blpPos = tex_name.find(".blp"); blpPos != std::string::npos)
 				tex_name.replace(blpPos, 4, ".png");
 
-			std::string filenameNarrow(m_filename.begin(), m_filename.end());
+			std::string filenameNarrow;
+			if (!m_filename.empty())
+			{
+				int n = WideCharToMultiByte(CP_UTF8, 0, m_filename.c_str(), static_cast<int>(m_filename.size()), nullptr, 0, nullptr, nullptr);
+				filenameNarrow.resize(n);
+				WideCharToMultiByte(CP_UTF8, 0, m_filename.c_str(), static_cast<int>(m_filename.size()), filenameNarrow.data(), n, nullptr, nullptr);
+			}
 			std::string tex_fullpath = filenameNarrow;
 			auto bsPos = tex_fullpath.rfind('\\');
 			if (bsPos != std::string::npos)
@@ -449,7 +492,13 @@ void FBXExporter::createMaterials()
 							if (auto blpPos = tex_name.find(".blp"); blpPos != std::string::npos)
 								tex_name.replace(blpPos, 4, ".png");
 
-							std::string filenameNarrow2(m_filename.begin(), m_filename.end());
+							std::string filenameNarrow2;
+							if (!m_filename.empty())
+							{
+								int n = WideCharToMultiByte(CP_UTF8, 0, m_filename.c_str(), static_cast<int>(m_filename.size()), nullptr, 0, nullptr, nullptr);
+								filenameNarrow2.resize(n);
+								WideCharToMultiByte(CP_UTF8, 0, m_filename.c_str(), static_cast<int>(m_filename.size()), filenameNarrow2.data(), n, nullptr, nullptr);
+							}
 							std::string tex_fullpath2 = filenameNarrow2;
 							auto bsPos2 = tex_fullpath2.rfind('\\');
 							if (bsPos2 != std::string::npos)
