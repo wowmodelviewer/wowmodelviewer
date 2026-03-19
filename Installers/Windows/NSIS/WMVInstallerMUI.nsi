@@ -69,7 +69,7 @@ writeUninstaller $INSTDIR\uninstaller.exe
 # install vcredist package and launch if not found
 ReadRegDword $0 HKLM "SOFTWARE\Microsoft\DevDiv\vc\Servicing\14.0\RuntimeMinimum" "Install"
 ${If} $0 == ""
-File "${wmvroot}\bin\vcredist_x64.exe"
+File "${wmvroot}\bin_support\vcredist_x64.exe"
 ExecWait '"$INSTDIR\vcredist_x64.exe" /install /quiet /norestart'
 Delete "$INSTDIR\vcredist_x64.exe"
 ${EndIf}

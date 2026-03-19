@@ -33,11 +33,10 @@ jobs:
         uses: actions/cache@v5
         with:
           path: |
-            ThirdParty/Qt
-            ThirdParty/wxWidgets_x64
             ThirdParty/lib/x64
             ThirdParty/include/fbxsdk.h
             ThirdParty/include/fbxsdk
+            bin_support/vcredist_x64.exe
           key: ThirdParty-${{ runner.os }}-${{ hashFiles('scripts/setup_x64_deps.ps1') }}
           restore-keys: |
             ThirdParty-${{ runner.os }}-
