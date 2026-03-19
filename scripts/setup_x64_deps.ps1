@@ -87,26 +87,6 @@ $src1 = "$tmp1\vcpkg_installed\x64-windows-static-md"
 $libDst = Join-Path $RepoRoot "ThirdParty\lib\x64"; Ensure-Dir $libDst
 Copy-Item "$src1\lib\libpng16.lib" "$libDst\libpng.lib" -Force
 Copy-Item "$src1\lib\zlib.lib" "$libDst\zlib.lib" -Force
-Write-Step "Installing wxWidgets via vcpkg"
-$tmp2 = Join-Path $RepoRoot "out\vcpkg_wx"; Ensure-Dir $tmp2
-$j2 = "{""name"":""wmv-wx"",""version"":""1.0.0"",""builtin-baseline"":""$baseline"",""overrides"":[{""name"":""wxwidgets"",""version"":""3.2.8.1""}],""dependencies"":[{""name"":""wxwidgets"",""default-features"":false}]}"
-Set-Content "$tmp2\vcpkg.json" -Encoding UTF8 -Value $ExecutionContext.InvokeCommand.ExpandString($j2)
-Push-Location $tmp2; & $vcpkgExe install --triplet x64-windows-static-md @vcpkgOverlay; Pop-Location
-$wxSrc = "$tmp2\vcpkg_installed\x64-windows-static-md"
-$wxDst = Join-Path $RepoRoot "ThirdParty\wxWidgets_x64"
-if (Test-Path $wxDst) { Remove-Item $wxDst -Recurse -Force }
-Ensure-Dir "$wxDst\lib\vc_x64_lib"
-Copy-Item "$wxSrc\include" "$wxDst\include" -Recurse -Force
-Get-ChildItem "$wxSrc\lib" -Filter "wx*.lib" | ForEach-Object { Copy-Item $_.FullName "$wxDst\lib\vc_x64_lib\$($_.Name)" -Force }
-if (Test-Path "$wxSrc\debug\lib") {
-    Get-ChildItem "$wxSrc\debug\lib" -Filter "wx*.lib" | ForEach-Object { Copy-Item $_.FullName "$wxDst\lib\vc_x64_lib\$($_.Name)" -Force }
-    Copy-Item "$wxSrc\debug\lib\nanosvg.lib" "$wxDst\lib\vc_x64_lib\nanosvgd.lib" -Force
-    Copy-Item "$wxSrc\debug\lib\nanosvgrast.lib" "$wxDst\lib\vc_x64_lib\nanosvgrastd.lib" -Force
-}
-Copy-Item "$wxSrc\lib\nanosvg.lib" "$wxDst\lib\vc_x64_lib\nanosvg.lib" -Force
-Copy-Item "$wxSrc\lib\nanosvgrast.lib" "$wxDst\lib\vc_x64_lib\nanosvgrast.lib" -Force
-if (Test-Path "$wxSrc\lib\mswu") { Copy-Item "$wxSrc\lib\mswu" "$wxDst\lib\vc_x64_lib\mswu" -Recurse -Force }
-if (Test-Path "$wxSrc\lib\mswud") { Copy-Item "$wxSrc\lib\mswud" "$wxDst\lib\vc_x64_lib\mswud" -Recurse -Force }
 Write-Step "Installing FBX SDK 2020.3.9"
 $fbxIncDst = Join-Path $RepoRoot "ThirdParty\include"
 $fbxLibDst = Join-Path $RepoRoot "ThirdParty\lib\x64"
