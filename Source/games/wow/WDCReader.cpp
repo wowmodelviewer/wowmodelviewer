@@ -239,11 +239,15 @@ bool WDCReader::open()
 	LOG_INFO << "WDCReader step 6 done: commonDataSize=" << m_header.common_data_size
 			 << " pos=" << getPos() << " for " << fullname();
 
-	// ── 7. WDC4+ inter-section data (skip) ──────────────────────────────
-	if (m_wdcVersion > 3 && sectionCount > 1)
+	// ── 7. WDC4+ inter-section data ─────────────────────────────────────
+	// Per WebWowViewerCpp: only encrypted sections have inter-section data.
+	if (m_wdcVersion > 3)
 	{
-		for (uint32_t si = 0; si < sectionCount - 1; si++)
+		for (uint32_t si = 0; si < sectionCount; si++)
 		{
+			if (m_sections[si].tactKeyHash == 0)
+				continue;
+
 			uint32_t entryCount = 0;
 			read(&entryCount, 4);
 			seekRelative(entryCount * 4);
@@ -254,11 +258,18 @@ bool WDCReader::open()
 			 << " eof=" << isEof() << " for " << fullname();
 
 	// ── 8. Data sections ────────────────────────────────────────────────
+	// Approach follows WebWowViewerCpp: seek to sec.fileOffset (absolute)
+	// at the top of each section, read ALL data (even for encrypted sections)
+	// sequentially, then check encryption afterward in step 9.
 	uint32_t previousStringTableSize = 0;
 
 	for (uint32_t si = 0; si < sectionCount; si++)
 	{
 		SectionData& sec = m_sections[si];
+
+		// Seek to the section's declared absolute file offset.
+		// This eliminates cumulative offset drift across sections.
+		seek(sec.fileOffset);
 
 		LOG_INFO << "WDCReader step 8: section " << si
 				 << " recordCount=" << sec.recordCount
@@ -268,52 +279,47 @@ bool WDCReader::open()
 				 << " relDataSize=" << sec.relationshipDataSize
 				 << " offsetMapIdCount=" << sec.offsetMapIdCount
 				 << " tactKey=" << sec.tactKeyHash
+				 << " fileOffset=" << sec.fileOffset
 				 << " pos=" << getPos()
 				 << " for " << fullname();
 
-		const uint32_t recordDataOfs = static_cast<uint32_t>(getPos());
+		const uint32_t recordDataOfs = sec.fileOffset;
 		const uint32_t recordDataSize = sec.isNormal
 			? (m_header.record_size * sec.recordCount)
 			: (sec.offsetRecordsEnd - sec.fileOffset);
 
-		sec.recordDataPtr  = m_fileData + recordDataOfs;
-		sec.recordDataSize = recordDataSize;
-
-		// For encrypted sections, skip all data without parsing — the bytes
-		// are ciphertext, so interpreting counts/ids would be garbage.
-		if (sec.tactKeyHash != 0)
+		// Bounds-check: if the record data extends past the file buffer,
+		// mark the section as unusable.
+		if (recordDataOfs + recordDataSize > m_fileDataSize)
 		{
-			seekRelative(recordDataSize);
-
-			// string block
-			sec.stringTableOffset = static_cast<uint32_t>(getPos());
-			sec.previousStringTableSize = previousStringTableSize;
-			if (m_wdcVersion > 2)
-				previousStringTableSize += sec.stringTableSize;
-			seekRelative(sec.stringTableSize);
-
-			// skip id list, copy table, offset map, relationship data, offset map id list
-			seekRelative(sec.idListSize);
-			seekRelative(sec.copyTableCount * sizeof(CopyTableEntry));
-			if (m_wdcVersion > 2)
-				seekRelative(sec.offsetMapIdCount * sizeof(OffsetMapEntry));
-			seekRelative(sec.relationshipDataSize);
-			if (m_wdcVersion > 2 && sec.offsetMapIdCount > 0)
-				seekRelative(sec.offsetMapIdCount * 4);
-
+			LOG_INFO << "WDCReader step 8: section " << si
+					 << " record data out of bounds (ofs=" << recordDataOfs
+					 << " size=" << recordDataSize
+					 << " fileSize=" << m_fileDataSize
+					 << "), marking encrypted for " << fullname();
+			sec.recordDataPtr  = nullptr;
+			sec.recordDataSize = 0;
+			sec.isEncrypted    = true;
 			continue;
 		}
 
-		// skip past record data
+		sec.recordDataPtr  = m_fileData + recordDataOfs;
+		sec.recordDataSize = recordDataSize;
+
+		// Skip past record data
 		seekRelative(recordDataSize);
 
-		// string block
+		// String block
 		sec.stringTableOffset = static_cast<uint32_t>(getPos());
 		sec.previousStringTableSize = previousStringTableSize;
 		if (m_wdcVersion > 2)
 			previousStringTableSize += sec.stringTableSize;
-
 		seekRelative(sec.stringTableSize);
+
+		// For encrypted sections, we still need to advance past sub-section
+		// data to maintain offset tracking.  We read id list / copy table /
+		// offset map even for encrypted sections (they'll be zero-filled);
+		// step 9 will detect the encryption and ignore the records.
 
 		// id list
 		if (sec.idListSize > 0)
@@ -326,14 +332,27 @@ bool WDCReader::open()
 		// copy table
 		if (sec.copyTableCount > 0)
 		{
-			for (uint32_t i = 0; i < sec.copyTableCount; i++)
+			if (sec.tactKeyHash != 0)
 			{
-				CopyTableEntry entry{};
-				read(&entry, sizeof(entry));
-				if (entry.newRowId != entry.copiedRowId)
-					m_copyTable[entry.newRowId] = entry.copiedRowId;
+				// Encrypted: skip, don't parse (values are garbage)
+				seekRelative(sec.copyTableCount * sizeof(CopyTableEntry));
+			}
+			else
+			{
+				for (uint32_t i = 0; i < sec.copyTableCount; i++)
+				{
+					CopyTableEntry entry{};
+					read(&entry, sizeof(entry));
+					if (entry.newRowId != entry.copiedRowId)
+						m_copyTable[entry.newRowId] = entry.copiedRowId;
+				}
 			}
 		}
+
+		// ItemSparse (table_hash 145293629) has an extra offset_map_id_count*4
+		// block before the offset map — skip it. (Matches WebWowViewerCpp.)
+		if (m_header.table_hash == 145293629)
+			seekRelative(sec.offsetMapIdCount * 4);
 
 		// offset map (WDC3+)
 		if (m_wdcVersion > 2 && sec.offsetMapIdCount > 0)
@@ -355,24 +374,33 @@ bool WDCReader::open()
 		if (sec.relationshipDataSize > 0)
 		{
 			const size_t relStart = getPos();
-			uint32_t numEntries = 0;
-			read(&numEntries, 4);
-			seekRelative(8); // skip min/max relationship ID
 
-			for (uint32_t i = 0; i < numEntries; i++)
+			if (sec.tactKeyHash != 0)
 			{
-				uint32_t foreignID, recIndex;
-				read(&foreignID, 4);
-				read(&recIndex, 4);
-				sec.relationshipMap[recIndex] = foreignID;
-
-				m_relationshipLookup[foreignID]; // ensure entry exists
+				// Encrypted: skip relationship data entirely
+				seekRelative(sec.relationshipDataSize);
 			}
+			else
+			{
+				uint32_t numEntries = 0;
+				read(&numEntries, 4);
+				seekRelative(8); // skip min/max relationship ID
 
-			// Advance to expected end in case of read mismatch
-			const size_t expected = relStart + sec.relationshipDataSize;
-			if (getPos() != expected)
-				seek(expected);
+				for (uint32_t i = 0; i < numEntries; i++)
+				{
+					uint32_t foreignID, recIndex;
+					read(&foreignID, 4);
+					read(&recIndex, 4);
+					sec.relationshipMap[recIndex] = foreignID;
+
+					m_relationshipLookup[foreignID]; // ensure entry exists
+				}
+
+				// Advance to expected end in case of read mismatch
+				const size_t expected = relStart + sec.relationshipDataSize;
+				if (getPos() != expected)
+					seek(expected);
+			}
 		}
 
 		// offset map id list (WDC3+ — duplicate of id list for offset records)
@@ -400,6 +428,18 @@ bool WDCReader::open()
 		{
 			bool isZeroed = true;
 
+			// Bounds-check before scanning bytes — recordDataPtr may be
+			// invalid if offsets drifted during step 8.
+			if (!sec.recordDataPtr ||
+				sec.recordDataPtr + sec.recordDataSize > m_fileData + m_fileDataSize)
+			{
+				LOG_INFO << "WDCReader: section " << si
+						 << " record data out of file bounds, treating as encrypted in "
+						 << fullname();
+				sec.isEncrypted = true;
+				continue;
+			}
+
 			// check if record data is all zeroes
 			for (uint32_t i = 0; i < sec.recordDataSize && isZeroed; i++)
 			{
@@ -412,9 +452,12 @@ bool WDCReader::open()
 				(sec.idListSize > 0 || sec.copyTableCount > 0))
 			{
 				const unsigned char* ptr = m_fileData + sec.stringTableOffset + sec.stringTableSize;
-				uint32_t firstVal = 0;
-				std::memcpy(&firstVal, ptr, 4);
-				isZeroed = (firstVal == 0);
+				if (ptr + 4 <= m_fileData + m_fileDataSize)
+				{
+					uint32_t firstVal = 0;
+					std::memcpy(&firstVal, ptr, 4);
+					isZeroed = (firstVal == 0);
+				}
 			}
 
 			// check first offset map entry

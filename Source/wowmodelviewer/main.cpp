@@ -19,10 +19,16 @@
 
 #ifdef _WIN32
 #include <windows.h>
+#include <dwmapi.h>
+#pragma comment(lib, "dwmapi.lib")
 #endif
 
 #include <glad/gl.h>
 #include <GLFW/glfw3.h>
+#ifdef _WIN32
+#define GLFW_EXPOSE_NATIVE_WIN32
+#include <GLFW/glfw3native.h>
+#endif
 #include "imgui.h"
 #include "imgui_internal.h"
 #include "imgui_impl_glfw.h"
@@ -190,20 +196,55 @@ static bool g_showAboutDialog    = false;
 static bool g_showLanguageDialog = false;
 
 // ---- Panel visibility (View menu toggles) ---------------------------------
+static bool g_showCharViewer     = true;
 static bool g_showViewport       = true;
 static bool g_showFileBrowser    = true;
 static bool g_showAnimation      = true;
-static bool g_showModelControl   = true;
-static bool g_showCharacter      = true;
-static bool g_showLighting       = true;
-static bool g_showCharBrowser    = true;
+static bool g_showViewportOpts   = true;
 static bool g_showNpcBrowser     = true;
 static bool g_showItemBrowser    = true;
 static bool g_showExport         = true;
 static bool g_showScreenshot     = true;
 static bool g_showPresets        = true;
 static bool g_showLog            = true;
-static bool g_showSettings       = true;
+static bool g_showSettings       = false;
+static bool g_showMounts         = false;
+static bool g_showItemSets       = false;
+
+// ---- Theme ----------------------------------------------------------------
+enum AppTheme
+{
+    THEME_DEFAULT = 0,
+    THEME_UE4,
+    THEME_UE5,
+    THEME_VS2026,
+    THEME_LIGHT,
+    THEME_WARCRAFT,
+    THEME_COUNT
+};
+
+static const char* g_themeNames[] = {
+    "Default (ImGui Dark)",
+    "Unreal Engine 4",
+    "Unreal Engine 5",
+    "Visual Studio 2026",
+    "Light",
+    "Warcraft"
+};
+
+static int g_currentTheme = THEME_UE4;
+static GLFWwindow* g_window = nullptr;
+
+// ---- Font system ----------------------------------------------------------
+struct FontEntry {
+    std::string name;
+    std::string path;  // absolute path to .ttf
+};
+static std::vector<FontEntry>  g_availableFonts;  // discovered fonts
+static int                     g_currentFont = 0; // index into g_availableFonts
+static float                   g_fontSize = 18.0f;// base size before DPI scale
+static bool                    g_fontsDirty = false; // rebuild atlas next frame
+static float                   g_dpiScale = 1.0f;
 
 // ---- URL Import state -----------------------------------------------------
 static std::vector<ImporterPlugin*> g_importers;
@@ -420,6 +461,13 @@ static char  g_charBrowserSearchBuf[256] = {};
 static int   g_charBrowserGender = 0;       // 0 = Male, 1 = Female
 static bool  g_charBrowserPreferHD = true;
 
+// ---- Character Viewer state (standalone tab) ------------------------------
+static int   g_cvSelectedRaceIdx = -1;   // index into g_charBrowserRaces
+static int   g_cvGender = 0;             // 0=Male, 1=Female
+static bool  g_cvPreferHD = true;
+static float g_cvLeftWidth = 220.0f;     // left column width
+static float g_cvRightWidth = 220.0f;    // right column width
+
 // ---- NPC Browser state ----------------------------------------------------
 static char g_npcSearchBuf[256] = {};
 static std::vector<size_t> g_npcFiltered; // indices into npcs
@@ -565,6 +613,401 @@ static void openFolderPicker()
     g_showFolderPicker = true;
 }
 
+// ---- Native title bar color -----------------------------------------------
+static void updateTitleBarColor(int theme)
+{
+#ifdef _WIN32
+    if (!g_window)
+        return;
+
+    HWND hwnd = glfwGetWin32Window(g_window);
+    if (!hwnd)
+        return;
+
+    // DWMWA_USE_IMMERSIVE_DARK_MODE = 20, DWMWA_CAPTION_COLOR = 35
+    constexpr DWORD DWMWA_USE_IMMERSIVE_DARK_MODE_VAL = 20;
+    constexpr DWORD DWMWA_CAPTION_COLOR_VAL = 35;
+
+    BOOL useDarkMode = (theme != THEME_LIGHT) ? TRUE : FALSE;
+    DwmSetWindowAttribute(hwnd, DWMWA_USE_IMMERSIVE_DARK_MODE_VAL, &useDarkMode, sizeof(useDarkMode));
+
+    COLORREF captionColor = RGB(36, 36, 36); // default dark
+    switch (theme)
+    {
+    case THEME_DEFAULT:    captionColor = RGB(50, 50, 55);    break; // ImGui dark
+    case THEME_UE4:        captionColor = RGB(25, 25, 25);    break; // #191919
+    case THEME_UE5:        captionColor = RGB(30, 32, 36);    break; // cool blue-grey
+    case THEME_VS2026:     captionColor = RGB(30, 30, 30);    break; // #1E1E1E
+    case THEME_LIGHT:      captionColor = RGB(239, 239, 239); break; // #EFEFEF
+    case THEME_WARCRAFT:   captionColor = RGB(18, 20, 28);    break; // dark navy
+    }
+    DwmSetWindowAttribute(hwnd, DWMWA_CAPTION_COLOR_VAL, &captionColor, sizeof(captionColor));
+#else
+    (void)theme;
+#endif
+}
+
+// ---- Theme application ----------------------------------------------------
+static void applyTheme(int theme)
+{
+    ImGuiStyle& style = ImGui::GetStyle();
+
+    // Common style resets
+    auto setCommonStyle = [&](float rounding, float frameBorder) {
+        style.WindowRounding    = rounding;
+        style.ChildRounding     = rounding;
+        style.FrameRounding     = rounding;
+        style.PopupRounding     = rounding;
+        style.ScrollbarRounding = rounding;
+        style.GrabRounding      = rounding;
+        style.TabRounding       = rounding;
+        style.WindowBorderSize  = 1.0f;
+        style.FrameBorderSize   = frameBorder;
+        style.PopupBorderSize   = 1.0f;
+        style.FramePadding      = ImVec2(5.0f, 3.0f);
+        style.ItemSpacing       = ImVec2(5.0f, 4.0f);
+        style.ItemInnerSpacing  = ImVec2(4.0f, 4.0f);
+        style.IndentSpacing     = 16.0f;
+        style.ScrollbarSize     = 13.0f;
+        style.GrabMinSize       = 8.0f;
+        style.SeparatorTextBorderSize = 2.0f;
+    };
+
+    ImVec4* c = style.Colors;
+
+    switch (theme)
+    {
+    // ????????????????????????????????????????????????????????????????????????
+    case THEME_DEFAULT:
+    {
+        ImGui::StyleColorsDark();
+        setCommonStyle(4.0f, 0.0f);
+        style.WindowTitleAlign = ImVec2(0.0f, 0.5f);
+        style.WindowMenuButtonPosition = ImGuiDir_Left;
+        break;
+    }
+    // ????????????????????????????????????????????????????????????????????????
+    case THEME_UE4:
+    {
+        ImGui::StyleColorsDark();
+        setCommonStyle(1.0f, 1.0f);
+        style.WindowTitleAlign = ImVec2(0.5f, 0.5f);
+        style.WindowMenuButtonPosition = ImGuiDir_Right;
+
+        c[ImGuiCol_WindowBg]             = ImVec4(0.141f, 0.141f, 0.141f, 1.00f);
+        c[ImGuiCol_ChildBg]              = ImVec4(0.141f, 0.141f, 0.141f, 1.00f);
+        c[ImGuiCol_PopupBg]              = ImVec4(0.118f, 0.118f, 0.118f, 0.98f);
+        c[ImGuiCol_MenuBarBg]            = ImVec4(0.176f, 0.176f, 0.176f, 1.00f);
+        c[ImGuiCol_Border]               = ImVec4(0.082f, 0.082f, 0.082f, 1.00f);
+        c[ImGuiCol_BorderShadow]         = ImVec4(0.000f, 0.000f, 0.000f, 0.00f);
+        c[ImGuiCol_TitleBg]              = ImVec4(0.098f, 0.098f, 0.098f, 1.00f);
+        c[ImGuiCol_TitleBgActive]        = ImVec4(0.137f, 0.137f, 0.137f, 1.00f);
+        c[ImGuiCol_TitleBgCollapsed]     = ImVec4(0.098f, 0.098f, 0.098f, 0.75f);
+        c[ImGuiCol_Text]                 = ImVec4(0.784f, 0.784f, 0.784f, 1.00f);
+        c[ImGuiCol_TextDisabled]         = ImVec4(0.392f, 0.392f, 0.392f, 1.00f);
+        c[ImGuiCol_TextSelectedBg]       = ImVec4(0.051f, 0.431f, 0.992f, 0.40f);
+        c[ImGuiCol_FrameBg]              = ImVec4(0.102f, 0.102f, 0.102f, 1.00f);
+        c[ImGuiCol_FrameBgHovered]       = ImVec4(0.137f, 0.137f, 0.137f, 1.00f);
+        c[ImGuiCol_FrameBgActive]        = ImVec4(0.176f, 0.176f, 0.176f, 1.00f);
+        c[ImGuiCol_Button]               = ImVec4(0.200f, 0.200f, 0.200f, 1.00f);
+        c[ImGuiCol_ButtonHovered]        = ImVec4(0.275f, 0.275f, 0.275f, 1.00f);
+        c[ImGuiCol_ButtonActive]         = ImVec4(0.816f, 0.533f, 0.000f, 1.00f);
+        c[ImGuiCol_Header]               = ImVec4(0.176f, 0.176f, 0.176f, 1.00f);
+        c[ImGuiCol_HeaderHovered]        = ImVec4(0.051f, 0.431f, 0.992f, 0.50f);
+        c[ImGuiCol_HeaderActive]         = ImVec4(0.051f, 0.431f, 0.992f, 0.70f);
+        c[ImGuiCol_Tab]                  = ImVec4(0.118f, 0.118f, 0.118f, 1.00f);
+        c[ImGuiCol_TabHovered]           = ImVec4(0.235f, 0.235f, 0.235f, 1.00f);
+        c[ImGuiCol_TabSelected]          = ImVec4(0.176f, 0.176f, 0.176f, 1.00f);
+        c[ImGuiCol_TabDimmed]            = ImVec4(0.098f, 0.098f, 0.098f, 1.00f);
+        c[ImGuiCol_TabDimmedSelected]    = ImVec4(0.141f, 0.141f, 0.141f, 1.00f);
+        c[ImGuiCol_ScrollbarBg]          = ImVec4(0.102f, 0.102f, 0.102f, 0.50f);
+        c[ImGuiCol_ScrollbarGrab]        = ImVec4(0.275f, 0.275f, 0.275f, 1.00f);
+        c[ImGuiCol_ScrollbarGrabHovered] = ImVec4(0.353f, 0.353f, 0.353f, 1.00f);
+        c[ImGuiCol_ScrollbarGrabActive]  = ImVec4(0.431f, 0.431f, 0.431f, 1.00f);
+        c[ImGuiCol_SliderGrab]           = ImVec4(0.353f, 0.353f, 0.353f, 1.00f);
+        c[ImGuiCol_SliderGrabActive]     = ImVec4(0.816f, 0.533f, 0.000f, 1.00f);
+        c[ImGuiCol_CheckMark]            = ImVec4(0.816f, 0.533f, 0.000f, 1.00f);
+        c[ImGuiCol_Separator]            = ImVec4(0.082f, 0.082f, 0.082f, 1.00f);
+        c[ImGuiCol_SeparatorHovered]     = ImVec4(0.816f, 0.533f, 0.000f, 0.78f);
+        c[ImGuiCol_SeparatorActive]      = ImVec4(0.816f, 0.533f, 0.000f, 1.00f);
+        c[ImGuiCol_ResizeGrip]           = ImVec4(0.275f, 0.275f, 0.275f, 0.25f);
+        c[ImGuiCol_ResizeGripHovered]    = ImVec4(0.816f, 0.533f, 0.000f, 0.67f);
+        c[ImGuiCol_ResizeGripActive]     = ImVec4(0.816f, 0.533f, 0.000f, 0.95f);
+        c[ImGuiCol_DockingPreview]       = ImVec4(0.816f, 0.533f, 0.000f, 0.70f);
+        c[ImGuiCol_DockingEmptyBg]       = ImVec4(0.098f, 0.098f, 0.098f, 1.00f);
+        c[ImGuiCol_NavCursor]            = ImVec4(0.816f, 0.533f, 0.000f, 1.00f);
+        c[ImGuiCol_NavWindowingHighlight]= ImVec4(0.816f, 0.533f, 0.000f, 0.70f);
+        c[ImGuiCol_NavWindowingDimBg]    = ImVec4(0.118f, 0.118f, 0.118f, 0.20f);
+        c[ImGuiCol_ModalWindowDimBg]     = ImVec4(0.000f, 0.000f, 0.000f, 0.55f);
+        c[ImGuiCol_TableHeaderBg]        = ImVec4(0.176f, 0.176f, 0.176f, 1.00f);
+        c[ImGuiCol_TableBorderStrong]    = ImVec4(0.082f, 0.082f, 0.082f, 1.00f);
+        c[ImGuiCol_TableBorderLight]     = ImVec4(0.118f, 0.118f, 0.118f, 1.00f);
+        c[ImGuiCol_TableRowBg]           = ImVec4(0.000f, 0.000f, 0.000f, 0.00f);
+        c[ImGuiCol_TableRowBgAlt]        = ImVec4(1.000f, 1.000f, 1.000f, 0.02f);
+        break;
+    }
+    // ????????????????????????????????????????????????????????????????????????
+    case THEME_UE5:
+    {
+        // UE5 is darker/cooler than UE4, with a blue-grey tint and teal accents
+        ImGui::StyleColorsDark();
+        setCommonStyle(2.0f, 1.0f);
+        style.WindowTitleAlign = ImVec2(0.5f, 0.5f);
+        style.WindowMenuButtonPosition = ImGuiDir_Right;
+
+        c[ImGuiCol_WindowBg]             = ImVec4(0.110f, 0.114f, 0.125f, 1.00f); // #1C1D20
+        c[ImGuiCol_ChildBg]              = ImVec4(0.110f, 0.114f, 0.125f, 1.00f);
+        c[ImGuiCol_PopupBg]              = ImVec4(0.094f, 0.098f, 0.110f, 0.98f);
+        c[ImGuiCol_MenuBarBg]            = ImVec4(0.133f, 0.137f, 0.153f, 1.00f);
+        c[ImGuiCol_Border]               = ImVec4(0.059f, 0.063f, 0.075f, 1.00f);
+        c[ImGuiCol_BorderShadow]         = ImVec4(0.000f, 0.000f, 0.000f, 0.00f);
+        c[ImGuiCol_TitleBg]              = ImVec4(0.071f, 0.075f, 0.086f, 1.00f);
+        c[ImGuiCol_TitleBgActive]        = ImVec4(0.094f, 0.098f, 0.114f, 1.00f);
+        c[ImGuiCol_TitleBgCollapsed]     = ImVec4(0.071f, 0.075f, 0.086f, 0.75f);
+        c[ImGuiCol_Text]                 = ImVec4(0.824f, 0.835f, 0.859f, 1.00f);
+        c[ImGuiCol_TextDisabled]         = ImVec4(0.400f, 0.412f, 0.435f, 1.00f);
+        c[ImGuiCol_TextSelectedBg]       = ImVec4(0.125f, 0.455f, 0.651f, 0.50f);
+        c[ImGuiCol_FrameBg]              = ImVec4(0.075f, 0.078f, 0.090f, 1.00f);
+        c[ImGuiCol_FrameBgHovered]       = ImVec4(0.110f, 0.114f, 0.130f, 1.00f);
+        c[ImGuiCol_FrameBgActive]        = ImVec4(0.145f, 0.149f, 0.169f, 1.00f);
+        c[ImGuiCol_Button]               = ImVec4(0.157f, 0.161f, 0.180f, 1.00f);
+        c[ImGuiCol_ButtonHovered]        = ImVec4(0.212f, 0.220f, 0.243f, 1.00f);
+        c[ImGuiCol_ButtonActive]         = ImVec4(0.125f, 0.455f, 0.651f, 1.00f); // teal-blue
+        c[ImGuiCol_Header]               = ImVec4(0.145f, 0.149f, 0.169f, 1.00f);
+        c[ImGuiCol_HeaderHovered]        = ImVec4(0.125f, 0.455f, 0.651f, 0.50f);
+        c[ImGuiCol_HeaderActive]         = ImVec4(0.125f, 0.455f, 0.651f, 0.70f);
+        c[ImGuiCol_Tab]                  = ImVec4(0.086f, 0.090f, 0.102f, 1.00f);
+        c[ImGuiCol_TabHovered]           = ImVec4(0.176f, 0.184f, 0.208f, 1.00f);
+        c[ImGuiCol_TabSelected]          = ImVec4(0.133f, 0.137f, 0.157f, 1.00f);
+        c[ImGuiCol_TabDimmed]            = ImVec4(0.071f, 0.075f, 0.086f, 1.00f);
+        c[ImGuiCol_TabDimmedSelected]    = ImVec4(0.098f, 0.102f, 0.118f, 1.00f);
+        c[ImGuiCol_ScrollbarBg]          = ImVec4(0.075f, 0.078f, 0.090f, 0.50f);
+        c[ImGuiCol_ScrollbarGrab]        = ImVec4(0.220f, 0.227f, 0.251f, 1.00f);
+        c[ImGuiCol_ScrollbarGrabHovered] = ImVec4(0.290f, 0.298f, 0.325f, 1.00f);
+        c[ImGuiCol_ScrollbarGrabActive]  = ImVec4(0.361f, 0.369f, 0.400f, 1.00f);
+        c[ImGuiCol_SliderGrab]           = ImVec4(0.290f, 0.298f, 0.325f, 1.00f);
+        c[ImGuiCol_SliderGrabActive]     = ImVec4(0.125f, 0.455f, 0.651f, 1.00f);
+        c[ImGuiCol_CheckMark]            = ImVec4(0.125f, 0.455f, 0.651f, 1.00f);
+        c[ImGuiCol_Separator]            = ImVec4(0.059f, 0.063f, 0.075f, 1.00f);
+        c[ImGuiCol_SeparatorHovered]     = ImVec4(0.125f, 0.455f, 0.651f, 0.78f);
+        c[ImGuiCol_SeparatorActive]      = ImVec4(0.125f, 0.455f, 0.651f, 1.00f);
+        c[ImGuiCol_ResizeGrip]           = ImVec4(0.220f, 0.227f, 0.251f, 0.25f);
+        c[ImGuiCol_ResizeGripHovered]    = ImVec4(0.125f, 0.455f, 0.651f, 0.67f);
+        c[ImGuiCol_ResizeGripActive]     = ImVec4(0.125f, 0.455f, 0.651f, 0.95f);
+        c[ImGuiCol_DockingPreview]       = ImVec4(0.125f, 0.455f, 0.651f, 0.70f);
+        c[ImGuiCol_DockingEmptyBg]       = ImVec4(0.071f, 0.075f, 0.086f, 1.00f);
+        c[ImGuiCol_NavCursor]            = ImVec4(0.125f, 0.455f, 0.651f, 1.00f);
+        c[ImGuiCol_NavWindowingHighlight]= ImVec4(0.125f, 0.455f, 0.651f, 0.70f);
+        c[ImGuiCol_NavWindowingDimBg]    = ImVec4(0.094f, 0.098f, 0.110f, 0.20f);
+        c[ImGuiCol_ModalWindowDimBg]     = ImVec4(0.000f, 0.000f, 0.000f, 0.55f);
+        c[ImGuiCol_TableHeaderBg]        = ImVec4(0.133f, 0.137f, 0.157f, 1.00f);
+        c[ImGuiCol_TableBorderStrong]    = ImVec4(0.059f, 0.063f, 0.075f, 1.00f);
+        c[ImGuiCol_TableBorderLight]     = ImVec4(0.094f, 0.098f, 0.114f, 1.00f);
+        c[ImGuiCol_TableRowBg]           = ImVec4(0.000f, 0.000f, 0.000f, 0.00f);
+        c[ImGuiCol_TableRowBgAlt]        = ImVec4(1.000f, 1.000f, 1.000f, 0.02f);
+        break;
+    }
+    // ????????????????????????????????????????????????????????????????????????
+    case THEME_VS2026:
+    {
+        // Visual Studio 2022/2026 Dark theme — blue accent, #1E1E1E bg
+        ImGui::StyleColorsDark();
+        setCommonStyle(0.0f, 1.0f);
+        style.WindowTitleAlign = ImVec2(0.0f, 0.5f);
+        style.WindowMenuButtonPosition = ImGuiDir_Left;
+
+        c[ImGuiCol_WindowBg]             = ImVec4(0.118f, 0.118f, 0.118f, 1.00f); // #1E1E1E
+        c[ImGuiCol_ChildBg]              = ImVec4(0.118f, 0.118f, 0.118f, 1.00f);
+        c[ImGuiCol_PopupBg]              = ImVec4(0.118f, 0.118f, 0.118f, 0.98f);
+        c[ImGuiCol_MenuBarBg]            = ImVec4(0.173f, 0.173f, 0.173f, 1.00f); // #2C2C2C
+        c[ImGuiCol_Border]               = ImVec4(0.200f, 0.200f, 0.200f, 1.00f); // #333333
+        c[ImGuiCol_BorderShadow]         = ImVec4(0.000f, 0.000f, 0.000f, 0.00f);
+        c[ImGuiCol_TitleBg]              = ImVec4(0.173f, 0.173f, 0.173f, 1.00f); // #2C2C2C
+        c[ImGuiCol_TitleBgActive]        = ImVec4(0.000f, 0.478f, 0.800f, 1.00f); // #007ACC VS blue
+        c[ImGuiCol_TitleBgCollapsed]     = ImVec4(0.173f, 0.173f, 0.173f, 0.75f);
+        c[ImGuiCol_Text]                 = ImVec4(0.863f, 0.863f, 0.863f, 1.00f); // #DCDCDC
+        c[ImGuiCol_TextDisabled]         = ImVec4(0.400f, 0.400f, 0.400f, 1.00f); // #666666
+        c[ImGuiCol_TextSelectedBg]       = ImVec4(0.000f, 0.478f, 0.800f, 0.45f);
+        c[ImGuiCol_FrameBg]              = ImVec4(0.200f, 0.200f, 0.200f, 1.00f); // #333333
+        c[ImGuiCol_FrameBgHovered]       = ImVec4(0.239f, 0.239f, 0.239f, 1.00f); // #3D3D3D
+        c[ImGuiCol_FrameBgActive]        = ImVec4(0.278f, 0.278f, 0.278f, 1.00f); // #474747
+        c[ImGuiCol_Button]               = ImVec4(0.200f, 0.200f, 0.200f, 1.00f);
+        c[ImGuiCol_ButtonHovered]        = ImVec4(0.239f, 0.239f, 0.239f, 1.00f);
+        c[ImGuiCol_ButtonActive]         = ImVec4(0.000f, 0.478f, 0.800f, 1.00f); // VS blue
+        c[ImGuiCol_Header]               = ImVec4(0.173f, 0.173f, 0.173f, 1.00f);
+        c[ImGuiCol_HeaderHovered]        = ImVec4(0.000f, 0.478f, 0.800f, 0.50f);
+        c[ImGuiCol_HeaderActive]         = ImVec4(0.000f, 0.478f, 0.800f, 0.70f);
+        c[ImGuiCol_Tab]                  = ImVec4(0.118f, 0.118f, 0.118f, 1.00f);
+        c[ImGuiCol_TabHovered]           = ImVec4(0.000f, 0.478f, 0.800f, 0.60f);
+        c[ImGuiCol_TabSelected]          = ImVec4(0.118f, 0.118f, 0.118f, 1.00f);
+        c[ImGuiCol_TabDimmed]            = ImVec4(0.173f, 0.173f, 0.173f, 1.00f);
+        c[ImGuiCol_TabDimmedSelected]    = ImVec4(0.118f, 0.118f, 0.118f, 1.00f);
+        c[ImGuiCol_ScrollbarBg]          = ImVec4(0.149f, 0.149f, 0.149f, 0.50f);
+        c[ImGuiCol_ScrollbarGrab]        = ImVec4(0.310f, 0.310f, 0.310f, 1.00f);
+        c[ImGuiCol_ScrollbarGrabHovered] = ImVec4(0.400f, 0.400f, 0.400f, 1.00f);
+        c[ImGuiCol_ScrollbarGrabActive]  = ImVec4(0.502f, 0.502f, 0.502f, 1.00f);
+        c[ImGuiCol_SliderGrab]           = ImVec4(0.310f, 0.310f, 0.310f, 1.00f);
+        c[ImGuiCol_SliderGrabActive]     = ImVec4(0.000f, 0.478f, 0.800f, 1.00f);
+        c[ImGuiCol_CheckMark]            = ImVec4(0.000f, 0.478f, 0.800f, 1.00f);
+        c[ImGuiCol_Separator]            = ImVec4(0.200f, 0.200f, 0.200f, 1.00f);
+        c[ImGuiCol_SeparatorHovered]     = ImVec4(0.000f, 0.478f, 0.800f, 0.78f);
+        c[ImGuiCol_SeparatorActive]      = ImVec4(0.000f, 0.478f, 0.800f, 1.00f);
+        c[ImGuiCol_ResizeGrip]           = ImVec4(0.310f, 0.310f, 0.310f, 0.25f);
+        c[ImGuiCol_ResizeGripHovered]    = ImVec4(0.000f, 0.478f, 0.800f, 0.67f);
+        c[ImGuiCol_ResizeGripActive]     = ImVec4(0.000f, 0.478f, 0.800f, 0.95f);
+        c[ImGuiCol_DockingPreview]       = ImVec4(0.000f, 0.478f, 0.800f, 0.70f);
+        c[ImGuiCol_DockingEmptyBg]       = ImVec4(0.118f, 0.118f, 0.118f, 1.00f);
+        c[ImGuiCol_NavCursor]            = ImVec4(0.000f, 0.478f, 0.800f, 1.00f);
+        c[ImGuiCol_NavWindowingHighlight]= ImVec4(0.000f, 0.478f, 0.800f, 0.70f);
+        c[ImGuiCol_NavWindowingDimBg]    = ImVec4(0.118f, 0.118f, 0.118f, 0.20f);
+        c[ImGuiCol_ModalWindowDimBg]     = ImVec4(0.000f, 0.000f, 0.000f, 0.55f);
+        c[ImGuiCol_TableHeaderBg]        = ImVec4(0.173f, 0.173f, 0.173f, 1.00f);
+        c[ImGuiCol_TableBorderStrong]    = ImVec4(0.200f, 0.200f, 0.200f, 1.00f);
+        c[ImGuiCol_TableBorderLight]     = ImVec4(0.149f, 0.149f, 0.149f, 1.00f);
+        c[ImGuiCol_TableRowBg]           = ImVec4(0.000f, 0.000f, 0.000f, 0.00f);
+        c[ImGuiCol_TableRowBgAlt]        = ImVec4(1.000f, 1.000f, 1.000f, 0.02f);
+        break;
+    }
+    // ????????????????????????????????????????????????????????????????????????
+    case THEME_LIGHT:
+    {
+        ImGui::StyleColorsLight();
+        setCommonStyle(3.0f, 1.0f);
+        style.WindowTitleAlign = ImVec2(0.0f, 0.5f);
+        style.WindowMenuButtonPosition = ImGuiDir_Left;
+
+        c[ImGuiCol_WindowBg]             = ImVec4(0.937f, 0.937f, 0.937f, 1.00f); // #EFEFEF
+        c[ImGuiCol_ChildBg]              = ImVec4(0.961f, 0.961f, 0.961f, 1.00f);
+        c[ImGuiCol_PopupBg]              = ImVec4(0.976f, 0.976f, 0.976f, 0.98f);
+        c[ImGuiCol_MenuBarBg]            = ImVec4(0.898f, 0.898f, 0.898f, 1.00f);
+        c[ImGuiCol_Border]               = ImVec4(0.757f, 0.757f, 0.757f, 1.00f);
+        c[ImGuiCol_BorderShadow]         = ImVec4(0.000f, 0.000f, 0.000f, 0.00f);
+        c[ImGuiCol_TitleBg]              = ImVec4(0.898f, 0.898f, 0.898f, 1.00f);
+        c[ImGuiCol_TitleBgActive]        = ImVec4(0.835f, 0.835f, 0.835f, 1.00f);
+        c[ImGuiCol_TitleBgCollapsed]     = ImVec4(0.898f, 0.898f, 0.898f, 0.75f);
+        c[ImGuiCol_Text]                 = ImVec4(0.133f, 0.133f, 0.133f, 1.00f);
+        c[ImGuiCol_TextDisabled]         = ImVec4(0.502f, 0.502f, 0.502f, 1.00f);
+        c[ImGuiCol_TextSelectedBg]       = ImVec4(0.184f, 0.525f, 0.945f, 0.35f);
+        c[ImGuiCol_FrameBg]              = ImVec4(1.000f, 1.000f, 1.000f, 1.00f);
+        c[ImGuiCol_FrameBgHovered]       = ImVec4(0.906f, 0.933f, 0.976f, 1.00f);
+        c[ImGuiCol_FrameBgActive]        = ImVec4(0.835f, 0.882f, 0.953f, 1.00f);
+        c[ImGuiCol_Button]               = ImVec4(0.859f, 0.859f, 0.859f, 1.00f);
+        c[ImGuiCol_ButtonHovered]        = ImVec4(0.184f, 0.525f, 0.945f, 0.60f);
+        c[ImGuiCol_ButtonActive]         = ImVec4(0.184f, 0.525f, 0.945f, 1.00f);
+        c[ImGuiCol_Header]               = ImVec4(0.898f, 0.898f, 0.898f, 1.00f);
+        c[ImGuiCol_HeaderHovered]        = ImVec4(0.184f, 0.525f, 0.945f, 0.40f);
+        c[ImGuiCol_HeaderActive]         = ImVec4(0.184f, 0.525f, 0.945f, 0.60f);
+        c[ImGuiCol_Tab]                  = ImVec4(0.898f, 0.898f, 0.898f, 1.00f);
+        c[ImGuiCol_TabHovered]           = ImVec4(0.184f, 0.525f, 0.945f, 0.40f);
+        c[ImGuiCol_TabSelected]          = ImVec4(0.961f, 0.961f, 0.961f, 1.00f);
+        c[ImGuiCol_TabDimmed]            = ImVec4(0.922f, 0.922f, 0.922f, 1.00f);
+        c[ImGuiCol_TabDimmedSelected]    = ImVec4(0.937f, 0.937f, 0.937f, 1.00f);
+        c[ImGuiCol_ScrollbarBg]          = ImVec4(0.937f, 0.937f, 0.937f, 0.50f);
+        c[ImGuiCol_ScrollbarGrab]        = ImVec4(0.690f, 0.690f, 0.690f, 1.00f);
+        c[ImGuiCol_ScrollbarGrabHovered] = ImVec4(0.565f, 0.565f, 0.565f, 1.00f);
+        c[ImGuiCol_ScrollbarGrabActive]  = ImVec4(0.439f, 0.439f, 0.439f, 1.00f);
+        c[ImGuiCol_SliderGrab]           = ImVec4(0.184f, 0.525f, 0.945f, 0.60f);
+        c[ImGuiCol_SliderGrabActive]     = ImVec4(0.184f, 0.525f, 0.945f, 1.00f);
+        c[ImGuiCol_CheckMark]            = ImVec4(0.184f, 0.525f, 0.945f, 1.00f);
+        c[ImGuiCol_Separator]            = ImVec4(0.757f, 0.757f, 0.757f, 1.00f);
+        c[ImGuiCol_SeparatorHovered]     = ImVec4(0.184f, 0.525f, 0.945f, 0.78f);
+        c[ImGuiCol_SeparatorActive]      = ImVec4(0.184f, 0.525f, 0.945f, 1.00f);
+        c[ImGuiCol_ResizeGrip]           = ImVec4(0.690f, 0.690f, 0.690f, 0.25f);
+        c[ImGuiCol_ResizeGripHovered]    = ImVec4(0.184f, 0.525f, 0.945f, 0.67f);
+        c[ImGuiCol_ResizeGripActive]     = ImVec4(0.184f, 0.525f, 0.945f, 0.95f);
+        c[ImGuiCol_DockingPreview]       = ImVec4(0.184f, 0.525f, 0.945f, 0.70f);
+        c[ImGuiCol_DockingEmptyBg]       = ImVec4(0.937f, 0.937f, 0.937f, 1.00f);
+        c[ImGuiCol_NavCursor]            = ImVec4(0.184f, 0.525f, 0.945f, 1.00f);
+        c[ImGuiCol_NavWindowingHighlight]= ImVec4(0.184f, 0.525f, 0.945f, 0.70f);
+        c[ImGuiCol_NavWindowingDimBg]    = ImVec4(0.800f, 0.800f, 0.800f, 0.20f);
+        c[ImGuiCol_ModalWindowDimBg]     = ImVec4(0.200f, 0.200f, 0.200f, 0.35f);
+        c[ImGuiCol_TableHeaderBg]        = ImVec4(0.882f, 0.882f, 0.882f, 1.00f);
+        c[ImGuiCol_TableBorderStrong]    = ImVec4(0.757f, 0.757f, 0.757f, 1.00f);
+        c[ImGuiCol_TableBorderLight]     = ImVec4(0.835f, 0.835f, 0.835f, 1.00f);
+        c[ImGuiCol_TableRowBg]           = ImVec4(0.000f, 0.000f, 0.000f, 0.00f);
+        c[ImGuiCol_TableRowBgAlt]        = ImVec4(0.000f, 0.000f, 0.000f, 0.03f);
+        break;
+    }
+    // ????????????????????????????????????????????????????????????????????????
+    case THEME_WARCRAFT:
+    {
+        // Dark theme inspired by World of Warcraft UI — deep navy/charcoal
+        // with golden highlights and subtle warm parchment tones
+        ImGui::StyleColorsDark();
+        setCommonStyle(3.0f, 1.0f);
+        style.WindowTitleAlign = ImVec2(0.5f, 0.5f);
+        style.WindowMenuButtonPosition = ImGuiDir_Right;
+
+        // Gold accent: #C5A44E  ? (0.773, 0.643, 0.306)
+        // Dark bg:     #12141A
+        // Panel bg:    #1A1D26
+        // Frame bg:    #141720
+        const ImVec4 gold       = ImVec4(0.773f, 0.643f, 0.306f, 1.00f);
+        const ImVec4 goldHover  = ImVec4(0.847f, 0.718f, 0.384f, 1.00f);
+        const ImVec4 goldDim    = ImVec4(0.533f, 0.443f, 0.212f, 1.00f);
+
+        c[ImGuiCol_WindowBg]             = ImVec4(0.102f, 0.114f, 0.149f, 1.00f); // #1A1D26
+        c[ImGuiCol_ChildBg]              = ImVec4(0.102f, 0.114f, 0.149f, 1.00f);
+        c[ImGuiCol_PopupBg]              = ImVec4(0.082f, 0.090f, 0.118f, 0.98f);
+        c[ImGuiCol_MenuBarBg]            = ImVec4(0.133f, 0.145f, 0.180f, 1.00f);
+        c[ImGuiCol_Border]               = ImVec4(0.286f, 0.239f, 0.133f, 0.60f); // warm gold tint
+        c[ImGuiCol_BorderShadow]         = ImVec4(0.000f, 0.000f, 0.000f, 0.00f);
+        c[ImGuiCol_TitleBg]              = ImVec4(0.071f, 0.078f, 0.102f, 1.00f);
+        c[ImGuiCol_TitleBgActive]        = ImVec4(0.184f, 0.153f, 0.082f, 1.00f); // dark gold
+        c[ImGuiCol_TitleBgCollapsed]     = ImVec4(0.071f, 0.078f, 0.102f, 0.75f);
+        c[ImGuiCol_Text]                 = ImVec4(0.882f, 0.843f, 0.749f, 1.00f); // parchment white
+        c[ImGuiCol_TextDisabled]         = ImVec4(0.498f, 0.459f, 0.380f, 1.00f);
+        c[ImGuiCol_TextSelectedBg]       = ImVec4(0.773f, 0.643f, 0.306f, 0.35f);
+        c[ImGuiCol_FrameBg]              = ImVec4(0.078f, 0.090f, 0.125f, 1.00f); // #141720
+        c[ImGuiCol_FrameBgHovered]       = ImVec4(0.118f, 0.130f, 0.169f, 1.00f);
+        c[ImGuiCol_FrameBgActive]        = ImVec4(0.157f, 0.169f, 0.212f, 1.00f);
+        c[ImGuiCol_Button]               = ImVec4(0.157f, 0.169f, 0.216f, 1.00f);
+        c[ImGuiCol_ButtonHovered]        = ImVec4(goldDim.x, goldDim.y, goldDim.z, 0.70f);
+        c[ImGuiCol_ButtonActive]         = ImVec4(gold.x, gold.y, gold.z, 1.00f);
+        c[ImGuiCol_Header]               = ImVec4(0.141f, 0.153f, 0.196f, 1.00f);
+        c[ImGuiCol_HeaderHovered]        = ImVec4(gold.x, gold.y, gold.z, 0.35f);
+        c[ImGuiCol_HeaderActive]         = ImVec4(gold.x, gold.y, gold.z, 0.55f);
+        c[ImGuiCol_Tab]                  = ImVec4(0.086f, 0.094f, 0.125f, 1.00f);
+        c[ImGuiCol_TabHovered]           = ImVec4(goldDim.x, goldDim.y, goldDim.z, 0.50f);
+        c[ImGuiCol_TabSelected]          = ImVec4(0.133f, 0.145f, 0.184f, 1.00f);
+        c[ImGuiCol_TabDimmed]            = ImVec4(0.071f, 0.078f, 0.102f, 1.00f);
+        c[ImGuiCol_TabDimmedSelected]    = ImVec4(0.102f, 0.110f, 0.145f, 1.00f);
+        c[ImGuiCol_ScrollbarBg]          = ImVec4(0.078f, 0.086f, 0.114f, 0.50f);
+        c[ImGuiCol_ScrollbarGrab]        = ImVec4(goldDim.x, goldDim.y, goldDim.z, 0.60f);
+        c[ImGuiCol_ScrollbarGrabHovered] = ImVec4(gold.x, gold.y, gold.z, 0.70f);
+        c[ImGuiCol_ScrollbarGrabActive]  = ImVec4(goldHover.x, goldHover.y, goldHover.z, 0.90f);
+        c[ImGuiCol_SliderGrab]           = ImVec4(goldDim.x, goldDim.y, goldDim.z, 0.70f);
+        c[ImGuiCol_SliderGrabActive]     = ImVec4(gold.x, gold.y, gold.z, 1.00f);
+        c[ImGuiCol_CheckMark]            = ImVec4(gold.x, gold.y, gold.z, 1.00f);
+        c[ImGuiCol_Separator]            = ImVec4(goldDim.x, goldDim.y, goldDim.z, 0.40f);
+        c[ImGuiCol_SeparatorHovered]     = ImVec4(gold.x, gold.y, gold.z, 0.78f);
+        c[ImGuiCol_SeparatorActive]      = ImVec4(gold.x, gold.y, gold.z, 1.00f);
+        c[ImGuiCol_ResizeGrip]           = ImVec4(goldDim.x, goldDim.y, goldDim.z, 0.25f);
+        c[ImGuiCol_ResizeGripHovered]    = ImVec4(gold.x, gold.y, gold.z, 0.67f);
+        c[ImGuiCol_ResizeGripActive]     = ImVec4(gold.x, gold.y, gold.z, 0.95f);
+        c[ImGuiCol_DockingPreview]       = ImVec4(gold.x, gold.y, gold.z, 0.70f);
+        c[ImGuiCol_DockingEmptyBg]       = ImVec4(0.071f, 0.078f, 0.102f, 1.00f);
+        c[ImGuiCol_NavCursor]            = ImVec4(gold.x, gold.y, gold.z, 1.00f);
+        c[ImGuiCol_NavWindowingHighlight]= ImVec4(gold.x, gold.y, gold.z, 0.70f);
+        c[ImGuiCol_NavWindowingDimBg]    = ImVec4(0.082f, 0.090f, 0.118f, 0.20f);
+        c[ImGuiCol_ModalWindowDimBg]     = ImVec4(0.000f, 0.000f, 0.000f, 0.60f);
+        c[ImGuiCol_TableHeaderBg]        = ImVec4(0.133f, 0.145f, 0.184f, 1.00f);
+        c[ImGuiCol_TableBorderStrong]    = ImVec4(goldDim.x, goldDim.y, goldDim.z, 0.40f);
+        c[ImGuiCol_TableBorderLight]     = ImVec4(goldDim.x, goldDim.y, goldDim.z, 0.20f);
+        c[ImGuiCol_TableRowBg]           = ImVec4(0.000f, 0.000f, 0.000f, 0.00f);
+        c[ImGuiCol_TableRowBgAlt]        = ImVec4(0.773f, 0.643f, 0.306f, 0.03f);
+        break;
+    }
+    // ????????????????????????????????????????????????????????????????????????
+    default:
+        ImGui::StyleColorsDark();
+        break;
+    }
+
+    g_currentTheme = theme;
+    updateTitleBarColor(theme);
+}
+
 // ---- Config.ini reading/writing -------------------------------------------
 static const char* g_imguiIniPath = "userSettings/imgui_layout.ini";
 
@@ -580,6 +1023,13 @@ static void loadSettings()
     g_bgColor.x = static_cast<float>(config.getDouble("Viewport/BgR", 71.0 / 255.0));
     g_bgColor.y = static_cast<float>(config.getDouble("Viewport/BgG", 95.0 / 255.0));
     g_bgColor.z = static_cast<float>(config.getDouble("Viewport/BgB", 121.0 / 255.0));
+    g_currentTheme = config.getInt("Settings/Theme", THEME_UE4);
+    if (g_currentTheme < 0 || g_currentTheme >= THEME_COUNT)
+        g_currentTheme = THEME_UE4;
+    g_currentFont = config.getInt("Settings/Font", 0);
+    g_fontSize = static_cast<float>(config.getDouble("Settings/FontSize", 18.0));
+    if (g_fontSize < 10.0f) g_fontSize = 10.0f;
+    if (g_fontSize > 40.0f) g_fontSize = 40.0f;
 
     LOG_INFO << "Settings loaded. Game path:" << g_gamePath;
 }
@@ -594,6 +1044,9 @@ static void saveSettings()
     config.setValue("Viewport/BgR", static_cast<double>(g_bgColor.x));
     config.setValue("Viewport/BgG", static_cast<double>(g_bgColor.y));
     config.setValue("Viewport/BgB", static_cast<double>(g_bgColor.z));
+    config.setValue("Settings/Theme", g_currentTheme);
+    config.setValue("Settings/Font", g_currentFont);
+    config.setValue("Settings/FontSize", static_cast<double>(g_fontSize));
     config.sync();
 
     ImGui::SaveIniSettingsToDisk(g_imguiIniPath);
@@ -770,81 +1223,16 @@ static void initDatabase()
 
     g_initDB = true;
 
-    LOG_INFO << "initDatabase: loading Creature table...";
-    {
-        const auto* creatureTable = WOWDB.getTable("Creature");
-        if (creatureTable && creatureTable->getRowCount() > 0)
-        {
-            size_t count = 0;
-            for (const auto& row : *creatureTable)
-            {
-                std::vector<std::string> vals = {
-                    std::to_string(row.recordID()),
-                    std::to_string(row.getUInt("DisplayID1")),
-                    std::to_string(row.getUInt("CreatureType")),
-                    row.getString("Name_Lang")
-                };
-                NPCRecord rec(vals);
-                if (rec.model != 0)
-                    npcs.push_back(rec);
-                count++;
-            }
-            LOG_INFO << "Found " << npcs.size() << " NPCs (from " << count << " creatures)";
-        }
-        else
-        {
-            g_initDB = false;
-            LOG_ERROR << "Error during NPC detection from database.";
-            return;
-        }
-    }
+    // TODO: Creature table in 12.0.x no longer has DisplayID — needs
+    //       CreatureDisplayInfo join (like wow.export).  Disabled for now.
+    LOG_INFO << "initDatabase: skipping Creature table (disabled).";
 
     g_loadProgress = 0.80f;
 
-    LOG_INFO << "initDatabase: loading Item/ItemSparse tables...";
-    {
-        const auto* itemTable = WOWDB.getTable("Item");
-        const auto* itemSparseTable = WOWDB.getTable("ItemSparse");
-        size_t count = 0;
-        if (!itemTable || !itemSparseTable) { g_initDB = false; return; }
-        for (const auto& row : *itemTable)
-        {
-            uint32_t invType = row.getUInt("InventoryType");
-            if (invType == 0)
-                continue;
-
-            auto sparse = itemSparseTable->getRow(row.recordID());
-            if (!sparse)
-                continue;
-
-            std::string displayLang = sparse.getString("Display_lang");
-            if (displayLang.empty())
-                continue;
-
-            std::vector<std::string> vals = {
-                std::to_string(row.recordID()),
-                displayLang,
-                std::to_string(invType),
-                std::to_string(row.getUInt("ClassID")),
-                std::to_string(row.getUInt("SubclassID")),
-                std::to_string(row.getUInt("SheatheType"))
-            };
-            ItemRecord rec(vals);
-            items.items.push_back(rec);
-            count++;
-        }
-
-        if (count > 0)
-        {
-            LOG_INFO << "Found " << count << " items";
-        }
-        else
-        {
-            g_initDB = false;
-            LOG_ERROR << "Error during Item detection from database.";
-            return;
-        }
-    }
+    // TODO: Item/ItemSparse loading disabled while focusing on base character
+    //       customisation.  Re-enable once WDCReader string resolution is
+    //       verified stable for large multi-section DB2 files.
+    LOG_INFO << "initDatabase: skipping Item/ItemSparse loading (disabled).";
 
     g_loadProgress = 0.90f;
     LOG_INFO << "Finished initiating database files.";
@@ -2074,6 +2462,279 @@ static void loadCharBrowserRace(int raceID, int gender, bool preferHD)
     }
 }
 
+// Forward declarations for functions used by drawCharacterViewer()
+static void renderSceneToFBO(int w, int h);
+static void handleViewportInput();
+
+// ---- Character Viewer (standalone tab like wow.export) ---------------------
+static void drawCharacterViewer()
+{
+    if (!g_isWoWLoaded || !g_initDB)
+    {
+        ImGui::TextDisabled("Game not loaded.");
+        return;
+    }
+
+    // Ensure race list is built
+    if (!g_charBrowserBuilt)
+    {
+        buildCharBrowserRaceList();
+        g_charBrowserBuilt = true;
+    }
+
+    WoWModel* model = getLoadedModel();
+    const bool isChar = model && g_isChar;
+
+    const ImVec2 avail = ImGui::GetContentRegionAvail();
+    const float spacing = ImGui::GetStyle().ItemSpacing.x;
+    const float centerWidth = avail.x - g_cvLeftWidth - g_cvRightWidth - spacing * 2.0f;
+
+    // =====================================================================
+    // LEFT COLUMN — Race selector + Customization
+    // =====================================================================
+    ImGui::BeginChild("##cvLeft", ImVec2(g_cvLeftWidth, -1), ImGuiChildFlags_Borders);
+    {
+        // ---- Race Selector ----
+        ImGui::SeparatorText("Race");
+
+        // Race combo
+        const char* racePreview = (g_cvSelectedRaceIdx >= 0 &&
+            g_cvSelectedRaceIdx < static_cast<int>(g_charBrowserRaces.size()))
+            ? g_charBrowserRaces[g_cvSelectedRaceIdx].name.c_str() : "<select race>";
+
+        ImGui::SetNextItemWidth(-1);
+        if (ImGui::BeginCombo("##cvRace", racePreview))
+        {
+            for (int i = 0; i < static_cast<int>(g_charBrowserRaces.size()); ++i)
+            {
+                const auto& race = g_charBrowserRaces[i];
+                bool selected = (i == g_cvSelectedRaceIdx);
+                if (ImGui::Selectable(race.name.c_str(), selected))
+                {
+                    g_cvSelectedRaceIdx = i;
+                    loadCharBrowserRace(race.raceID, g_cvGender, g_cvPreferHD);
+                }
+                if (selected) ImGui::SetItemDefaultFocus();
+            }
+            ImGui::EndCombo();
+        }
+
+        // Gender radio
+        {
+            int prevGender = g_cvGender;
+            ImGui::RadioButton("Male##cv", &g_cvGender, 0);
+            ImGui::SameLine();
+            ImGui::RadioButton("Female##cv", &g_cvGender, 1);
+            if (g_cvGender != prevGender && g_cvSelectedRaceIdx >= 0)
+                loadCharBrowserRace(g_charBrowserRaces[g_cvSelectedRaceIdx].raceID,
+                                    g_cvGender, g_cvPreferHD);
+        }
+
+        // HD toggle
+        {
+            bool prevHD = g_cvPreferHD;
+            ImGui::Checkbox("HD Model##cv", &g_cvPreferHD);
+            if (g_cvPreferHD != prevHD && g_cvSelectedRaceIdx >= 0)
+                loadCharBrowserRace(g_charBrowserRaces[g_cvSelectedRaceIdx].raceID,
+                                    g_cvGender, g_cvPreferHD);
+        }
+
+        // ---- Customization Options ----
+        if (isChar && !g_customizationOptions.empty())
+        {
+            ImGui::SeparatorText("Customization");
+            for (auto& opt : g_customizationOptions)
+            {
+                if (opt.choiceNames.empty()) continue;
+                const char* preview = (opt.selectedIndex >= 0 &&
+                    opt.selectedIndex < static_cast<int>(opt.choiceNames.size()))
+                    ? opt.choiceNames[opt.selectedIndex].c_str() : "<none>";
+                ImGui::SetNextItemWidth(-1);
+                if (ImGui::BeginCombo(opt.name.c_str(), preview))
+                {
+                    for (int c = 0; c < static_cast<int>(opt.choiceNames.size()); ++c)
+                    {
+                        bool sel = (c == opt.selectedIndex);
+                        if (ImGui::Selectable(opt.choiceNames[c].c_str(), sel))
+                        {
+                            opt.selectedIndex = c;
+                            model->cd.set(opt.optionID, opt.choiceIDs[c]);
+                            model->refresh();
+                        }
+                        if (sel) ImGui::SetItemDefaultFocus();
+                    }
+                    ImGui::EndCombo();
+                }
+            }
+        }
+
+        // ---- Display Toggles ----
+        if (isChar)
+        {
+            ImGui::SeparatorText("Display");
+            auto& cd = model->cd;
+            bool changed = false;
+            changed |= ImGui::Checkbox("Underwear##cv", &cd.showUnderwear);
+            changed |= ImGui::Checkbox("Hair##cv", &cd.showHair);
+            changed |= ImGui::Checkbox("Facial Hair##cv", &cd.showFacialHair);
+            changed |= ImGui::Checkbox("Ears##cv", &cd.showEars);
+            changed |= ImGui::Checkbox("Feet##cv", &cd.showFeet);
+
+            // Eye glow
+            int eyeGlow = static_cast<int>(cd.eyeGlowType);
+            ImGui::Text("Eye Glow:");
+            if (ImGui::RadioButton("None##cveg", &eyeGlow, EGT_NONE)) changed = true;
+            ImGui::SameLine();
+            if (ImGui::RadioButton("Default##cveg", &eyeGlow, EGT_DEFAULT)) changed = true;
+            ImGui::SameLine();
+            if (ImGui::RadioButton("DK##cveg", &eyeGlow, EGT_DEATHKNIGHT)) changed = true;
+            cd.eyeGlowType = static_cast<EyeGlowTypes>(eyeGlow);
+
+            if (changed) model->refresh();
+        }
+    }
+    ImGui::EndChild();
+
+    ImGui::SameLine();
+
+    // =====================================================================
+    // CENTER COLUMN — Animation controls + 3D Viewport
+    // =====================================================================
+    ImGui::BeginChild("##cvCenter", ImVec2(centerWidth > 100.0f ? centerWidth : 100.0f, -1),
+                      ImGuiChildFlags_None);
+    {
+        // ---- Animation Controls Bar ----
+        if (isChar && model->animated && !g_animEntries.empty())
+        {
+            // Animation combo (compact)
+            const char* animPreview = (g_selectedAnimCombo >= 0 &&
+                g_selectedAnimCombo < static_cast<int>(g_animEntries.size()))
+                ? g_animEntries[g_selectedAnimCombo].label.c_str() : "<none>";
+
+            ImGui::SetNextItemWidth(180);
+            if (ImGui::BeginCombo("##cvAnim", animPreview))
+            {
+                for (int i = 0; i < static_cast<int>(g_animEntries.size()); ++i)
+                {
+                    bool selected = (i == g_selectedAnimCombo);
+                    if (ImGui::Selectable(g_animEntries[i].label.c_str(), selected))
+                    {
+                        g_selectedAnimCombo = i;
+                        int idx = g_animEntries[i].animIndex;
+                        model->currentAnim = idx;
+                        model->animManager->SetAnim(0, idx, 0);
+                        model->animManager->Play();
+                    }
+                    if (selected) ImGui::SetItemDefaultFocus();
+                }
+                ImGui::EndCombo();
+            }
+
+            ImGui::SameLine();
+            if (ImGui::Button("\xE2\x97\x80##cv")) // ?
+                model->animManager->PrevFrame();
+            ImGui::SameLine();
+            if (model->animManager->IsPaused())
+            {
+                if (ImGui::Button("\xE2\x96\xB6##cv")) // ?
+                    model->animManager->Play();
+            }
+            else
+            {
+                if (ImGui::Button("\xE2\x8F\xB8##cv")) // ?
+                    model->animManager->Pause();
+            }
+            ImGui::SameLine();
+            if (ImGui::Button("\xE2\x96\xB8##cv")) // ? (next frame)
+                model->animManager->NextFrame();
+
+            ImGui::SameLine();
+            ImGui::SetNextItemWidth(120);
+            int frameCount = static_cast<int>(model->animManager->GetFrameCount());
+            int curFrame = static_cast<int>(model->animManager->GetFrame());
+            if (frameCount > 0)
+            {
+                if (ImGui::SliderInt("##cvFrame", &curFrame, 0, frameCount))
+                    model->animManager->SetFrame(static_cast<size_t>(curFrame));
+            }
+
+            ImGui::SameLine();
+            ImGui::Text("%d", curFrame);
+        }
+
+        // ---- 3D Viewport ----
+        ImVec2 vpSize = ImGui::GetContentRegionAvail();
+        int vpW = static_cast<int>(vpSize.x);
+        int vpH = static_cast<int>(vpSize.y);
+
+        if (vpW > 0 && vpH > 0)
+        {
+            renderSceneToFBO(vpW, vpH);
+            ImGui::Image(static_cast<ImTextureID>(static_cast<uintptr_t>(g_fbo.colorTex)),
+                         vpSize, ImVec2(0, 1), ImVec2(1, 0));
+
+            if (ImGui::IsItemHovered())
+                handleViewportInput();
+        }
+    }
+    ImGui::EndChild();
+
+    ImGui::SameLine();
+
+    // =====================================================================
+    // RIGHT COLUMN — Equipment slots (placeholder)
+    // =====================================================================
+    ImGui::BeginChild("##cvRight", ImVec2(g_cvRightWidth, -1), ImGuiChildFlags_Borders);
+    {
+        ImGui::SeparatorText("Equipment");
+
+        static const char* slotLabels[] = {
+            "Head", "Neck", "Shoulder", "Back", "Chest", "Shirt",
+            "Tabard", "Wrist", "Hands", "Waist", "Legs", "Feet",
+            "Main-hand", "Off-hand"
+        };
+
+        for (int i = 0; i < 14; ++i)
+        {
+            float w = ImGui::GetContentRegionAvail().x;
+            ImGui::PushID(i);
+            ImGui::BeginGroup();
+            ImGui::Text("%s:", slotLabels[i]);
+            ImGui::SameLine(w - ImGui::CalcTextSize("Empty").x);
+            ImGui::TextDisabled("Empty");
+            ImGui::EndGroup();
+            if (i < 13) ImGui::Separator();
+            ImGui::PopID();
+        }
+
+        ImGui::Spacing();
+        ImGui::Spacing();
+        if (ImGui::Button("Clear All Equipment", ImVec2(-1, 0)))
+        {
+            // TODO: clear all equipment when item loading is re-enabled
+        }
+
+        // ---- Export Section ----
+        ImGui::Spacing();
+        ImGui::Spacing();
+        ImGui::SeparatorText("Export");
+
+        if (isChar)
+        {
+            if (ImGui::Button("Export glTF", ImVec2(-1, 0)))
+            {
+                // TODO: quick-export from Character Viewer
+                ImGui::SetWindowFocus("Export");
+            }
+        }
+        else
+        {
+            ImGui::TextDisabled("Load a character first.");
+        }
+    }
+    ImGui::EndChild();
+}
+
 // ---- NPC Browser helpers --------------------------------------------------
 static void rebuildNpcFilter()
 {
@@ -3244,12 +3905,13 @@ int main(int /*argc*/, char* /*argv*/[])
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_COMPAT_PROFILE);
     glfwWindowHint(GLFW_SCALE_TO_MONITOR, GLFW_TRUE);
 
-    GLFWwindow* window = glfwCreateWindow(1600, 900, "WoW Model Viewer (ImGui)", nullptr, nullptr);
+    GLFWwindow* window = glfwCreateWindow(1600, 900, "WoW Model Viewer", nullptr, nullptr);
     if (!window)
     {
         glfwTerminate();
         return 1;
     }
+    g_window = window;
     glfwMakeContextCurrent(window);
     glfwSwapInterval(1);
 
@@ -3301,18 +3963,97 @@ int main(int /*argc*/, char* /*argv*/[])
     io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
     io.IniFilename = g_imguiIniPath;
 
-    ImGui::StyleColorsDark();
+    applyTheme(g_currentTheme);
 
-    // ---- DPI-aware font scaling ----
+    // ---- DPI-aware scaling ----
     float xscale = 1.0f, yscale = 1.0f;
     glfwGetWindowContentScale(window, &xscale, &yscale);
-    const float dpiScale = (xscale > yscale) ? xscale : yscale;
-    if (dpiScale > 1.0f)
+    g_dpiScale = (xscale > yscale) ? xscale : yscale;
+    if (g_dpiScale > 1.0f)
     {
-        ImGui::GetStyle().ScaleAllSizes(dpiScale);
+        ImGui::GetStyle().ScaleAllSizes(g_dpiScale);
     }
-    io.Fonts->AddFontDefault();
-    io.FontGlobalScale = dpiScale;
+
+    // ---- Font discovery ----
+    {
+        namespace fs = std::filesystem;
+        // Look for fonts next to the executable (installed build) and in the
+        // compile-time source tree (development build).
+        std::vector<fs::path> searchDirs;
+#ifdef _WIN32
+        {
+            wchar_t exePath[MAX_PATH]{};
+            GetModuleFileNameW(nullptr, exePath, MAX_PATH);
+            searchDirs.push_back(fs::path(exePath).parent_path() / "fonts");
+        }
+#endif
+#ifdef WMV_FONTS_PATH
+        searchDirs.push_back(fs::path(WMV_FONTS_PATH));
+#endif
+        // Always include a "fonts" dir relative to cwd as fallback.
+        searchDirs.push_back(fs::current_path() / "fonts");
+
+        std::set<std::string> seen; // avoid duplicates (keyed on lowercase stem name)
+        for (const auto& dir : searchDirs)
+        {
+            if (!fs::is_directory(dir))
+                continue;
+            for (const auto& entry : fs::directory_iterator(dir))
+            {
+                if (!entry.is_regular_file())
+                    continue;
+                auto ext = entry.path().extension().string();
+                std::transform(ext.begin(), ext.end(), ext.begin(), ::tolower);
+                if (ext != ".ttf" && ext != ".otf")
+                    continue;
+                std::string stemName = entry.path().stem().string();
+                std::string stemLower = stemName;
+                std::transform(stemLower.begin(), stemLower.end(), stemLower.begin(), ::tolower);
+                if (seen.count(stemLower))
+                    continue;
+                seen.insert(stemLower);
+                std::string absPath = fs::canonical(entry.path()).string();
+                g_availableFonts.push_back({stemName, absPath});
+            }
+        }
+        // Sort alphabetically by display name
+        std::sort(g_availableFonts.begin(), g_availableFonts.end(),
+            [](const FontEntry& a, const FontEntry& b) { return a.name < b.name; });
+
+        // Default font: prefer "arialn" by name if available and no saved preference
+        if (g_currentFont <= 0)
+        {
+            for (int i = 0; i < static_cast<int>(g_availableFonts.size()); ++i)
+            {
+                std::string lower = g_availableFonts[i].name;
+                std::transform(lower.begin(), lower.end(), lower.begin(), ::tolower);
+                if (lower == "arialn")
+                {
+                    g_currentFont = i;
+                    break;
+                }
+            }
+        }
+    }
+
+    // ---- Build initial font atlas ----
+    {
+        const float pixelSize = g_fontSize * g_dpiScale;
+        bool loaded = false;
+        if (g_currentFont >= 0 && g_currentFont < static_cast<int>(g_availableFonts.size()))
+        {
+            const auto& fe = g_availableFonts[g_currentFont];
+            if (std::filesystem::exists(fe.path))
+            {
+                io.Fonts->AddFontFromFileTTF(fe.path.c_str(), pixelSize);
+                loaded = true;
+                LOG_INFO << "Loaded font:" << fe.name << "at" << pixelSize << "px";
+            }
+        }
+        if (!loaded)
+            io.Fonts->AddFontDefault();
+        io.FontGlobalScale = 1.0f; // size is already baked into the rasterised glyphs
+    }
 
     ImGui_ImplGlfw_InitForOpenGL(window, true);
     ImGui_ImplOpenGL3_Init("#version 130");
@@ -3325,6 +4066,29 @@ int main(int /*argc*/, char* /*argv*/[])
     while (!glfwWindowShouldClose(window))
     {
         glfwPollEvents();
+
+        // ---- Rebuild font atlas if font/size changed ----
+        if (g_fontsDirty)
+        {
+            g_fontsDirty = false;
+            ImGuiIO& fio = ImGui::GetIO();
+            fio.Fonts->Clear();
+            const float pixelSize = g_fontSize * g_dpiScale;
+            bool loaded = false;
+            if (g_currentFont >= 0 && g_currentFont < static_cast<int>(g_availableFonts.size()))
+            {
+                const auto& fe = g_availableFonts[g_currentFont];
+                if (std::filesystem::exists(fe.path))
+                {
+                    fio.Fonts->AddFontFromFileTTF(fe.path.c_str(), pixelSize);
+                    loaded = true;
+                }
+            }
+            if (!loaded)
+                fio.Fonts->AddFontDefault();
+            fio.FontGlobalScale = 1.0f;
+            fio.Fonts->Build();
+        }
 
         // Check if background loading thread has finished
         pollAsyncLoad();
@@ -3362,18 +4126,17 @@ int main(int /*argc*/, char* /*argv*/[])
             ImGui::DockBuilderSplitNode(dock_center, ImGuiDir_Down, 0.25f, &dock_bottom, &dock_center);
 
             ImGui::DockBuilderDockWindow("File Browser", dock_left);
-            ImGui::DockBuilderDockWindow("Character Browser", dock_left);
             ImGui::DockBuilderDockWindow("NPC Browser", dock_left);
             ImGui::DockBuilderDockWindow("Item Browser", dock_left);
-            ImGui::DockBuilderDockWindow("Settings", dock_left);
             ImGui::DockBuilderDockWindow("3D Viewport", dock_center);
+            ImGui::DockBuilderDockWindow("Character Viewer", dock_center);
             ImGui::DockBuilderDockWindow("Animation", dock_bottom);
-            ImGui::DockBuilderDockWindow("Model Control", dock_bottom);
             ImGui::DockBuilderDockWindow("Screenshot", dock_bottom);
             ImGui::DockBuilderDockWindow("Export", dock_bottom);
             ImGui::DockBuilderDockWindow("Presets", dock_bottom);
-            ImGui::DockBuilderDockWindow("Character", dock_right);
-            ImGui::DockBuilderDockWindow("Lighting", dock_right);
+            ImGui::DockBuilderDockWindow("Viewport Options", dock_right);
+            ImGui::DockBuilderDockWindow("Mounts", dock_right);
+            ImGui::DockBuilderDockWindow("Item Sets", dock_right);
             ImGui::DockBuilderDockWindow("Log", dock_bottom);
             ImGui::DockBuilderFinish(dockspace_id);
             }
@@ -3408,12 +4171,12 @@ int main(int /*argc*/, char* /*argv*/[])
             if (ImGui::BeginMenu("View"))
             {
                 ImGui::MenuItem("3D Viewport", nullptr, &g_showViewport);
+                ImGui::MenuItem("Character Viewer", nullptr, &g_showCharViewer);
                 ImGui::MenuItem("File Browser", nullptr, &g_showFileBrowser);
                 ImGui::MenuItem("Animation", nullptr, &g_showAnimation);
-                ImGui::MenuItem("Model Control", nullptr, &g_showModelControl);
-                ImGui::MenuItem("Character", nullptr, &g_showCharacter);
-                ImGui::MenuItem("Lighting", nullptr, &g_showLighting);
-                ImGui::MenuItem("Character Browser", nullptr, &g_showCharBrowser);
+                ImGui::MenuItem("Viewport Options", nullptr, &g_showViewportOpts);
+                ImGui::MenuItem("Mounts", nullptr, &g_showMounts);
+                ImGui::MenuItem("Item Sets", nullptr, &g_showItemSets);
                 ImGui::MenuItem("NPC Browser", nullptr, &g_showNpcBrowser);
                 ImGui::MenuItem("Item Browser", nullptr, &g_showItemBrowser);
                 ImGui::MenuItem("Export", nullptr, &g_showExport);
@@ -3426,37 +4189,13 @@ int main(int /*argc*/, char* /*argv*/[])
                 ImGui::EndMenu();
             }
 
-            if (ImGui::BeginMenu("Character"))
-            {
-                WoWModel* m = getLoadedModel();
-                bool isChar = m && m->modelType == MT_CHAR;
-                if (!isChar) ImGui::BeginDisabled();
-
-                if (ImGui::MenuItem("Show Underwear", nullptr, m ? m->cd.showUnderwear : false))
-                    if (m) { m->cd.showUnderwear = !m->cd.showUnderwear; m->refresh(); }
-                if (ImGui::MenuItem("Show Ears", nullptr, m ? m->cd.showEars : false))
-                    if (m) { m->cd.showEars = !m->cd.showEars; m->refresh(); }
-                if (ImGui::MenuItem("Show Hair", nullptr, m ? m->cd.showHair : false))
-                    if (m) { m->cd.showHair = !m->cd.showHair; m->refresh(); }
-                if (ImGui::MenuItem("Show Facial Hair", nullptr, m ? m->cd.showFacialHair : false))
-                    if (m) { m->cd.showFacialHair = !m->cd.showFacialHair; m->refresh(); }
-                if (ImGui::MenuItem("Show Feet", nullptr, m ? m->cd.showFeet : false))
-                    if (m) { m->cd.showFeet = !m->cd.showFeet; m->refresh(); }
-
-                if (!isChar) ImGui::EndDisabled();
-                ImGui::EndMenu();
-            }
-
             if (ImGui::BeginMenu("Options"))
             {
-                ImGui::MenuItem("Draw Grid", nullptr, &g_drawGrid);
-                ImGui::MenuItem("Checkerboard Background", nullptr, &g_drawCheckerBg);
-                ImGui::Separator();
                 if (ImGui::MenuItem("Language / Locale..."))
                     g_showLanguageDialog = true;
                 ImGui::Separator();
                 if (ImGui::MenuItem("Settings..."))
-                    ImGui::SetWindowFocus("Settings");
+                    g_showSettings = true;
                 ImGui::EndMenu();
             }
 
@@ -3494,6 +4233,18 @@ int main(int /*argc*/, char* /*argv*/[])
             }
 
             ImGui::EndMainMenuBar();
+        }
+
+        // ===== Character Viewer (standalone tab like wow.export) =====
+        if (g_showCharViewer)
+        {
+        ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(4, 4));
+        if (ImGui::Begin("Character Viewer", &g_showCharViewer))
+        {
+            drawCharacterViewer();
+        }
+        ImGui::End();
+        ImGui::PopStyleVar();
         }
 
         // ===== 3D Viewport panel =====
@@ -3842,324 +4593,348 @@ int main(int /*argc*/, char* /*argv*/[])
         ImGui::End();
         }
 
-        // ===== Model Control =====
-        if (g_showModelControl)
+        // ===== Viewport Options (combined Background / Lighting / Model Control) =====
+        if (g_showViewportOpts)
         {
-        if (ImGui::Begin("Model Control", &g_showModelControl))
+        if (ImGui::Begin("Viewport Options", &g_showViewportOpts))
         {
-            WoWModel* mModel = getLoadedModel();
-            if (mModel)
+            // ---- Background ----
+            if (ImGui::CollapsingHeader("Background", ImGuiTreeNodeFlags_DefaultOpen))
             {
-                // ---- Model Info ----
-                ImGui::SeparatorText("Model Info");
-                ImGui::Text("Name: %s", mModel->name().c_str());
-                if (mModel->gamefile)
+                ImGui::Checkbox("Draw Grid", &g_drawGrid);
+                ImGui::Checkbox("Checkerboard Background", &g_drawCheckerBg);
+                if (ImGui::Checkbox("Gradient Background", &g_drawGradientBg))
                 {
-                    ImGui::Text("File: %s", mModel->gamefile->fullname().c_str());
-                    ImGui::Text("FileDataID: %d", mModel->gamefile->fileDataId());
+                    if (g_drawGradientBg)
+                        g_drawCheckerBg = false;
                 }
-                ImGui::Text("Vertices: %u", mModel->header.nVertices);
-                ImGui::Text("Bones: %u", mModel->header.nBones);
-                ImGui::Text("Textures: %u", mModel->header.nTextures);
-                ImGui::Text("Animations: %zu", mModel->anims.size());
-                ImGui::Text("Geosets: %zu", mModel->geosets.size());
-                ImGui::Text("Animated: %s", mModel->animated ? "Yes" : "No");
-
-                // ---- Rendering toggles ----
-                ImGui::SeparatorText("Display Toggles");
-                ImGui::Checkbox("Render", &mModel->showModel);
-                ImGui::Checkbox("Wireframe", &mModel->showWireframe);
-                ImGui::Checkbox("Texture", &mModel->showTexture);
-                ImGui::Checkbox("Bones", &mModel->showBones);
-                ImGui::Checkbox("Bounds", &mModel->showBounds);
-                ImGui::Checkbox("Particles", &mModel->showParticles);
-
-                // ---- Alpha ----
-                ImGui::SeparatorText("Opacity & Scale");
-                int alphaPercent = static_cast<int>(mModel->alpha_ * 100.0f);
-                if (ImGui::SliderInt("Alpha", &alphaPercent, 0, 100))
-                    mModel->alpha_ = alphaPercent / 100.0f;
-
-                // ---- Scale ----
-                ImGui::SliderFloat("Scale", &mModel->scale_, 0.1f, 3.0f, "%.2f");
-
-                // ---- Position / Rotation ----
-                ImGui::SeparatorText("Position & Rotation");
-                ImGui::DragFloat3("Position", &mModel->pos_.x, 0.1f);
-                ImGui::DragFloat3("Rotation", &mModel->rot_.x, 1.0f);
-
-                // ---- Geosets ----
-                if (!g_geosetGroups.empty())
+                if (g_drawGradientBg)
                 {
-                    ImGui::SeparatorText("Geosets");
-                    ImGui::TextDisabled("Click to toggle on/off");
-                    for (auto& group : g_geosetGroups)
+                    ImGui::ColorEdit3("Gradient Top", &g_gradientTop.x);
+                    ImGui::ColorEdit3("Gradient Bottom", &g_gradientBottom.x);
+                }
+                ImGui::ColorEdit3("Background Color", &g_bgColor.x);
+
+                ImGui::Spacing();
+                ImGui::Text("Palette:");
+                for (int i = 0; i < g_bgPaletteCount; ++i)
+                {
+                    ImGui::PushID(i);
+                    if (ImGui::ColorButton("##pal", ImVec4(g_bgPalette[i].x, g_bgPalette[i].y, g_bgPalette[i].z, 1.0f),
+                                           ImGuiColorEditFlags_NoTooltip, ImVec2(20, 20)))
+                        g_bgColor = g_bgPalette[i];
+                    ImGui::PopID();
+                    if (i < g_bgPaletteCount - 1) ImGui::SameLine();
+                }
+
+                ImGui::Spacing();
+                ImGui::Text("Camera Presets:");
+                if (ImGui::Button("Front"))
+                    g_camera.setYawAndPitch(0.f, 90.f);
+                ImGui::SameLine();
+                if (ImGui::Button("Side"))
+                    g_camera.setYawAndPitch(270.f, 90.f);
+                ImGui::SameLine();
+                if (ImGui::Button("Back"))
+                    g_camera.setYawAndPitch(180.f, 90.f);
+                ImGui::SameLine();
+                if (ImGui::Button("Iso"))
+                    g_camera.setYawAndPitch(315.f, 90.f);
+                if (ImGui::Button("Top"))
+                    g_camera.setYawAndPitch(g_camera.yaw(), 179.f);
+                ImGui::SameLine();
+                if (ImGui::Button("Bottom"))
+                    g_camera.setYawAndPitch(g_camera.yaw(), 1.f);
+                ImGui::SameLine();
+                if (ImGui::Button("Reset Camera"))
+                    g_camera.reset(getLoadedModel());
+            }
+
+            // ---- Lighting ----
+            if (ImGui::CollapsingHeader("Lighting", ImGuiTreeNodeFlags_DefaultOpen))
+            {
+                ImGui::Checkbox("Enable Lighting", &g_light.enabled);
+
+                if (!g_light.enabled)
+                    ImGui::BeginDisabled();
+
+                static const char* lightTypeNames[] = { "Directional", "Point", "Spot", "Ambient Only" };
+                ImGui::Combo("##LightType", reinterpret_cast<int*>(&g_light.type), lightTypeNames, IM_ARRAYSIZE(lightTypeNames));
+
+                if (g_light.type == LIGHT_DIRECTIONAL || g_light.type == LIGHT_SPOT)
+                    ImGui::DragFloat3("Dir XYZ", g_light.direction, 0.01f, -5.0f, 5.0f, "%.2f");
+
+                if (g_light.type == LIGHT_POINT || g_light.type == LIGHT_SPOT)
+                    ImGui::DragFloat3("Pos XYZ", g_light.position, 0.1f, -50.0f, 50.0f, "%.1f");
+
+                if (g_light.type == LIGHT_SPOT)
+                {
+                    ImGui::SliderFloat("Cutoff Angle", &g_light.spotCutoff, 1.0f, 90.0f, "%.1f deg");
+                    ImGui::SliderFloat("Exponent", &g_light.spotExponent, 0.0f, 128.0f, "%.1f");
+                }
+
+                ImGui::ColorEdit3("Diffuse",  g_light.diffuse,  ImGuiColorEditFlags_Float);
+                ImGui::ColorEdit3("Ambient",  g_light.ambient,  ImGuiColorEditFlags_Float);
+                ImGui::ColorEdit3("Specular", g_light.specular, ImGuiColorEditFlags_Float);
+                ImGui::SliderFloat("Intensity", &g_light.intensity, 0.0f, 3.0f, "%.2f");
+
+                if (!g_light.enabled)
+                    ImGui::EndDisabled();
+
+                ImGui::Spacing();
+                if (ImGui::Button("Default##light", ImVec2(-1, 0)))
+                    g_light = LightSettings{};
+                if (ImGui::Button("Bright Daylight", ImVec2(-1, 0)))
+                {
+                    g_light.direction[0] = -0.5f; g_light.direction[1] = 1.0f;
+                    g_light.direction[2] = -0.3f; g_light.direction[3] = 0.0f;
+                    g_light.diffuse[0] = 1.0f; g_light.diffuse[1] = 0.98f; g_light.diffuse[2] = 0.92f;
+                    g_light.ambient[0] = 0.45f; g_light.ambient[1] = 0.45f; g_light.ambient[2] = 0.50f;
+                    g_light.specular[0] = 0.3f; g_light.specular[1] = 0.3f; g_light.specular[2] = 0.3f;
+                    g_light.intensity = 1.2f;
+                    g_light.enabled = true;
+                }
+                if (ImGui::Button("Warm Sunset", ImVec2(-1, 0)))
+                {
+                    g_light.direction[0] = -1.0f; g_light.direction[1] = 0.3f;
+                    g_light.direction[2] = -0.5f; g_light.direction[3] = 0.0f;
+                    g_light.diffuse[0] = 1.0f; g_light.diffuse[1] = 0.65f; g_light.diffuse[2] = 0.3f;
+                    g_light.ambient[0] = 0.25f; g_light.ambient[1] = 0.2f; g_light.ambient[2] = 0.25f;
+                    g_light.specular[0] = 0.1f; g_light.specular[1] = 0.05f; g_light.specular[2] = 0.0f;
+                    g_light.intensity = 1.0f;
+                    g_light.enabled = true;
+                }
+                if (ImGui::Button("Cool Moonlight", ImVec2(-1, 0)))
+                {
+                    g_light.direction[0] = 0.3f; g_light.direction[1] = 1.0f;
+                    g_light.direction[2] = -0.7f; g_light.direction[3] = 0.0f;
+                    g_light.diffuse[0] = 0.6f; g_light.diffuse[1] = 0.65f; g_light.diffuse[2] = 0.8f;
+                    g_light.ambient[0] = 0.15f; g_light.ambient[1] = 0.15f; g_light.ambient[2] = 0.2f;
+                    g_light.specular[0] = 0.0f; g_light.specular[1] = 0.0f; g_light.specular[2] = 0.0f;
+                    g_light.intensity = 0.7f;
+                    g_light.enabled = true;
+                }
+                if (ImGui::Button("Flat (No Shading)", ImVec2(-1, 0)))
+                {
+                    g_light.direction[0] = 0.0f; g_light.direction[1] = 0.0f;
+                    g_light.direction[2] = -1.0f; g_light.direction[3] = 0.0f;
+                    g_light.diffuse[0] = 1.0f; g_light.diffuse[1] = 1.0f; g_light.diffuse[2] = 1.0f;
+                    g_light.ambient[0] = 1.0f; g_light.ambient[1] = 1.0f; g_light.ambient[2] = 1.0f;
+                    g_light.specular[0] = 0.0f; g_light.specular[1] = 0.0f; g_light.specular[2] = 0.0f;
+                    g_light.intensity = 0.5f;
+                    g_light.enabled = true;
+                }
+            }
+
+            // ---- Model Control ----
+            if (ImGui::CollapsingHeader("Model", ImGuiTreeNodeFlags_DefaultOpen))
+            {
+                WoWModel* mModel = getLoadedModel();
+                if (mModel)
+                {
+                    ImGui::Text("Name: %s", mModel->name().c_str());
+                    if (mModel->gamefile)
                     {
-                        if (ImGui::TreeNode(group.name.c_str()))
+                        ImGui::Text("File: %s", mModel->gamefile->fullname().c_str());
+                        ImGui::Text("FileDataID: %d", mModel->gamefile->fileDataId());
+                    }
+                    ImGui::Text("V:%u  B:%u  T:%u  A:%zu  G:%zu",
+                        mModel->header.nVertices, mModel->header.nBones,
+                        mModel->header.nTextures, mModel->anims.size(), mModel->geosets.size());
+
+                    ImGui::Separator();
+                    ImGui::Checkbox("Render", &mModel->showModel);
+                    ImGui::SameLine();
+                    ImGui::Checkbox("Wireframe", &mModel->showWireframe);
+                    ImGui::Checkbox("Texture", &mModel->showTexture);
+                    ImGui::SameLine();
+                    ImGui::Checkbox("Bones", &mModel->showBones);
+                    ImGui::Checkbox("Bounds", &mModel->showBounds);
+                    ImGui::SameLine();
+                    ImGui::Checkbox("Particles", &mModel->showParticles);
+
+                    int alphaPercent = static_cast<int>(mModel->alpha_ * 100.0f);
+                    if (ImGui::SliderInt("Alpha", &alphaPercent, 0, 100))
+                        mModel->alpha_ = alphaPercent / 100.0f;
+                    ImGui::SliderFloat("Scale", &mModel->scale_, 0.1f, 3.0f, "%.2f");
+
+                    ImGui::DragFloat3("Position", &mModel->pos_.x, 0.1f);
+                    ImGui::DragFloat3("Rotation", &mModel->rot_.x, 1.0f);
+
+                    // Geosets
+                    if (!g_geosetGroups.empty())
+                    {
+                        ImGui::Separator();
+                        ImGui::TextDisabled("Geosets (click to toggle)");
+                        for (auto& group : g_geosetGroups)
                         {
-                            for (auto& ge : group.geosets)
+                            if (ImGui::TreeNode(group.name.c_str()))
                             {
-                                bool displayed = mModel->isGeosetDisplayed(static_cast<uint>(ge.index));
-                                ImVec4 color = displayed
-                                    ? ImVec4(0.3f, 1.0f, 0.3f, 1.0f)
-                                    : ImVec4(0.5f, 0.5f, 0.5f, 1.0f);
-                                ImGui::PushStyleColor(ImGuiCol_Text, color);
-                                ImGuiTreeNodeFlags flags =
-                                    ImGuiTreeNodeFlags_Leaf |
-                                    ImGuiTreeNodeFlags_NoTreePushOnOpen |
-                                    ImGuiTreeNodeFlags_SpanAvailWidth;
-                                ImGui::TreeNodeEx(ge.label.c_str(), flags);
-                                if (ImGui::IsItemClicked())
-                                    mModel->showGeoset(static_cast<uint>(ge.index), !displayed);
-                                ImGui::PopStyleColor();
+                                for (auto& ge : group.geosets)
+                                {
+                                    bool displayed = mModel->isGeosetDisplayed(static_cast<uint>(ge.index));
+                                    ImVec4 color = displayed
+                                        ? ImVec4(0.3f, 1.0f, 0.3f, 1.0f)
+                                        : ImVec4(0.5f, 0.5f, 0.5f, 1.0f);
+                                    ImGui::PushStyleColor(ImGuiCol_Text, color);
+                                    ImGuiTreeNodeFlags flags =
+                                        ImGuiTreeNodeFlags_Leaf |
+                                        ImGuiTreeNodeFlags_NoTreePushOnOpen |
+                                        ImGuiTreeNodeFlags_SpanAvailWidth;
+                                    ImGui::TreeNodeEx(ge.label.c_str(), flags);
+                                    if (ImGui::IsItemClicked())
+                                        mModel->showGeoset(static_cast<uint>(ge.index), !displayed);
+                                    ImGui::PopStyleColor();
+                                }
+                                ImGui::TreePop();
                             }
-                            ImGui::TreePop();
-                        }
-                    }
-                }
-
-                // ---- Particle Color Replacement ----
-                bool anyPCR = g_pcrState.hasSet[0] || g_pcrState.hasSet[1] || g_pcrState.hasSet[2];
-                ImGui::SeparatorText("Particle Colors");
-                if (anyPCR)
-                {
-                    if (ImGui::Checkbox("Replace Particle Colors", &g_pcrState.enabled))
-                    {
-                        if (g_pcrState.enabled)
-                        {
-                            applyParticleColors(mModel);
-                        }
-                        else
-                        {
-                            mModel->replaceParticleColors = false;
-                            if (g_selectedSkin >= 0)
-                                applySkin(mModel, g_selectedSkin);
                         }
                     }
 
-                    static const char* setNames[] = {"ID 11", "ID 12", "ID 13"};
-                    static const char* phaseNames[] = {"Start", "Mid", "End"};
-                    for (int s = 0; s < 3; ++s)
+                    // Particle Color Replacement
+                    bool anyPCR = g_pcrState.hasSet[0] || g_pcrState.hasSet[1] || g_pcrState.hasSet[2];
+                    if (anyPCR)
                     {
-                        if (!g_pcrState.hasSet[s]) continue;
-                        ImGui::Text("%s", setNames[s]);
-                        for (int p = 0; p < 3; ++p)
+                        ImGui::Separator();
+                        if (ImGui::Checkbox("Replace Particle Colors", &g_pcrState.enabled))
                         {
-                            std::string label = std::format("{} {}##pcr{}{}",
-                                setNames[s], phaseNames[p], s, p);
-                            if (ImGui::ColorEdit3(label.c_str(), g_pcrState.colors[s][p]))
+                            if (g_pcrState.enabled)
+                                applyParticleColors(mModel);
+                            else
                             {
-                                if (g_pcrState.enabled)
-                                    applyParticleColors(mModel);
+                                mModel->replaceParticleColors = false;
+                                if (g_selectedSkin >= 0)
+                                    applySkin(mModel, g_selectedSkin);
+                            }
+                        }
+
+                        static const char* setNames[] = {"ID 11", "ID 12", "ID 13"};
+                        static const char* phaseNames[] = {"Start", "Mid", "End"};
+                        for (int s = 0; s < 3; ++s)
+                        {
+                            if (!g_pcrState.hasSet[s]) continue;
+                            ImGui::Text("%s", setNames[s]);
+                            for (int p = 0; p < 3; ++p)
+                            {
+                                std::string label = std::format("{} {}##pcr{}{}",
+                                    setNames[s], phaseNames[p], s, p);
+                                if (ImGui::ColorEdit3(label.c_str(), g_pcrState.colors[s][p]))
+                                {
+                                    if (g_pcrState.enabled)
+                                        applyParticleColors(mModel);
+                                }
                             }
                         }
                     }
                 }
                 else
                 {
-                    ImGui::TextDisabled("Not available on this model.");
+                    ImGui::TextDisabled("No model loaded.");
+                }
+            }
+        }
+        ImGui::End();
+        }
+        if (g_showMounts)
+        {
+        if (ImGui::Begin("Mounts", &g_showMounts))
+        {
+            WoWModel* cModel = getLoadedModel();
+            if (cModel && g_isChar)
+            {
+                buildMountList(); // lazy init on first frame
+
+                if (g_isMounted)
+                {
+                    ImGui::TextColored(ImVec4(0.4f, 1.0f, 0.4f, 1.0f), "Mounted");
+                    if (ImGui::Button("Dismount", ImVec2(-1, 0)))
+                        dismountCharacter();
+                }
+                else
+                {
+                    if (ImGui::BeginTabBar("##MountTabs"))
+                    {
+                        int prevTab = g_mountTab;
+
+                        if (ImGui::BeginTabItem("Player Mounts"))
+                        {
+                            g_mountTab = 0;
+                            ImGui::EndTabItem();
+                        }
+                        if (ImGui::BeginTabItem("Creature Models"))
+                        {
+                            g_mountTab = 1;
+                            ImGui::EndTabItem();
+                        }
+                        ImGui::EndTabBar();
+
+                        if (g_mountTab != prevTab)
+                        {
+                            g_mountFilterDirty = true;
+                            g_mountSearchBuf[0] = '\0';
+                        }
+                    }
+
+                    ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x - 60.0f);
+                    if (ImGui::InputText("##mountSearch", g_mountSearchBuf, sizeof(g_mountSearchBuf),
+                                         ImGuiInputTextFlags_EnterReturnsTrue))
+                        g_mountFilterDirty = true;
+                    ImGui::SameLine();
+                    if (ImGui::Button("Apply##mount", ImVec2(-1, 0)))
+                        g_mountFilterDirty = true;
+
+                    if (g_mountFilterDirty)
+                        rebuildMountFilter();
+
+                    ImGui::Text("%d entries", static_cast<int>(g_mountFiltered.size()));
+                    ImGui::Separator();
+
+                    ImGui::BeginChild("##MountList", ImVec2(0, 0), ImGuiChildFlags_Borders);
+                    ImGuiListClipper clipper;
+                    clipper.Begin(static_cast<int>(g_mountFiltered.size()));
+                    while (clipper.Step())
+                    {
+                        for (int i = clipper.DisplayStart; i < clipper.DisplayEnd; ++i)
+                        {
+                            size_t idx = g_mountFiltered[i];
+                            ImGui::PushID(static_cast<int>(idx));
+
+                            if (g_mountTab == 0)
+                            {
+                                const auto& me = g_mountList[idx];
+                                std::string label = std::format("{} (DisplayID:{})", me.name, me.displayID);
+                                if (ImGui::Selectable(label.c_str()))
+                                    mountCharacter(me.displayID, nullptr);
+                            }
+                            else
+                            {
+                                if (ImGui::Selectable(g_creatureModelNames[idx].c_str()))
+                                    mountCharacter(-1, g_creatureModels[idx]);
+                            }
+
+                            ImGui::PopID();
+                        }
+                    }
+                    ImGui::EndChild();
                 }
             }
             else
             {
-                ImGui::TextDisabled("No model loaded.");
+                ImGui::TextDisabled("Load a character model first.");
             }
         }
         ImGui::End();
         }
 
-        // ===== Character Control =====
-        if (g_showCharacter)
+        // ===== Item Sets panel (standalone tab) =====
+        if (g_showItemSets)
         {
-        if (ImGui::Begin("Character", &g_showCharacter))
+        if (ImGui::Begin("Item Sets", &g_showItemSets))
         {
             WoWModel* cModel = getLoadedModel();
             if (cModel && g_isChar)
             {
-                auto& cd = cModel->cd;
-
-                // ---- Display options ----
-                ImGui::SeparatorText("Display");
-                bool changed = false;
-                changed |= ImGui::Checkbox("Show Underwear", &cd.showUnderwear);
-                changed |= ImGui::Checkbox("Show Hair", &cd.showHair);
-                changed |= ImGui::Checkbox("Show Facial Hair", &cd.showFacialHair);
-                changed |= ImGui::Checkbox("Show Ears", &cd.showEars);
-                changed |= ImGui::Checkbox("Show Feet", &cd.showFeet);
-                changed |= ImGui::Checkbox("Auto-hide Geosets for Head Items", &cd.autoHideGeosetsForHeadItems);
-                changed |= ImGui::Checkbox("Sheathe Weapons", &cModel->bSheathe);
-
-                // ---- Eye glow ----
-                ImGui::SeparatorText("Eye Glow");
-                int eyeGlow = static_cast<int>(cd.eyeGlowType);
-                if (ImGui::RadioButton("None", &eyeGlow, EGT_NONE)) changed = true;
-                ImGui::SameLine();
-                if (ImGui::RadioButton("Default", &eyeGlow, EGT_DEFAULT)) changed = true;
-                ImGui::SameLine();
-                if (ImGui::RadioButton("Death Knight", &eyeGlow, EGT_DEATHKNIGHT)) changed = true;
-                cd.eyeGlowType = static_cast<EyeGlowTypes>(eyeGlow);
-
-                if (changed)
-                    cModel->refresh();
-
-                // ---- Customization options ----
-                if (!g_customizationOptions.empty())
-                {
-                    ImGui::SeparatorText("Customization");
-                    for (auto& opt : g_customizationOptions)
-                    {
-                        if (opt.choiceNames.empty()) continue;
-                        const char* preview = (opt.selectedIndex >= 0 && opt.selectedIndex < static_cast<int>(opt.choiceNames.size()))
-                            ? opt.choiceNames[opt.selectedIndex].c_str() : "<none>";
-                        if (ImGui::BeginCombo(opt.name.c_str(), preview))
-                        {
-                            for (int c = 0; c < static_cast<int>(opt.choiceNames.size()); ++c)
-                            {
-                                bool sel = (c == opt.selectedIndex);
-                                if (ImGui::Selectable(opt.choiceNames[c].c_str(), sel))
-                                {
-                                    opt.selectedIndex = c;
-                                    cd.set(opt.optionID, opt.choiceIDs[c]);
-                                    cModel->refresh();
-                                }
-                                if (sel) ImGui::SetItemDefaultFocus();
-                            }
-                            ImGui::EndCombo();
-                        }
-                    }
-                }
-
-                // ---- Equipment ----
-                ImGui::SeparatorText("Equipment");
-                static const char* slotNames[] = {
-                    "Head", "Shoulder", "Boots", "Belt", "Shirt", "Pants",
-                    "Chest", "Bracers", "Gloves", "Right Hand", "Left Hand",
-                    "Cape", "Tabard", "Quiver"
-                };
-
-                bool openEquipPopup = false;
-                for (int s = 0; s < NUM_CHAR_SLOTS; ++s)
-                {
-                    WoWItem* witem = cModel->getItem(static_cast<CharSlots>(s));
-                    ImGui::PushID(s);
-
-                    if (ImGui::Button(slotNames[s], ImVec2(90, 0)))
-                    {
-                        g_equipSlotToEdit = s;
-                        g_equipSearchBuf[0] = '\0';
-                        g_equipPopupJustOpened = true;
-                        rebuildEquipFilteredItems();
-                        openEquipPopup = true;
-                    }
-
-                    ImGui::SameLine();
-
-                    if (witem && witem->id() > 0)
-                    {
-                        ImVec4 qcol = getQualityColor(witem->quality());
-                        ImGui::TextColored(qcol, "%s (%d)", witem->name().c_str(), witem->id());
-
-                        if (witem->nbLevels() > 1)
-                        {
-                            ImGui::SameLine();
-                            ImGui::SetNextItemWidth(60);
-                            int maxLvl = static_cast<int>(witem->nbLevels()) - 1;
-                            if (ImGui::SliderInt("##Lvl", &g_equipSlotLevels[s], 0, maxLvl))
-                            {
-                                witem->setLevel(g_equipSlotLevels[s]);
-                                cModel->refresh();
-                            }
-                        }
-
-                        ImGui::SameLine();
-                        if (ImGui::SmallButton("X"))
-                        {
-                            witem->setId(0);
-                            g_equipSlotLevels[s] = 0;
-                            cModel->refresh();
-                        }
-                    }
-                    else
-                    {
-                        ImGui::TextDisabled("empty");
-                    }
-
-                    ImGui::PopID();
-                }
-
-                if (openEquipPopup)
-                    ImGui::OpenPopup("Select Item##EquipModal");
-
-                if (ImGui::BeginPopupModal("Select Item##EquipModal", nullptr,
-                    ImGuiWindowFlags_AlwaysAutoResize))
-                {
-                    if (g_equipSlotToEdit >= 0 && g_equipSlotToEdit < NUM_CHAR_SLOTS)
-                    {
-                        ImGui::Text("Equip to: %s", slotNames[g_equipSlotToEdit]);
-                        ImGui::Separator();
-
-                        if (g_equipPopupJustOpened)
-                        {
-                            ImGui::SetKeyboardFocusHere();
-                            g_equipPopupJustOpened = false;
-                        }
-
-                        ImGui::SetNextItemWidth(400);
-                        if (ImGui::InputText("##EquipSearch", g_equipSearchBuf,
-                            sizeof(g_equipSearchBuf)))
-                            rebuildEquipFilteredItems();
-
-                        ImGui::Text("%d items found",
-                            static_cast<int>(g_equipFilteredItems.size()));
-                        ImGui::Separator();
-
-                        ImGui::BeginChild("##EquipItemList", ImVec2(420, 350),
-                            ImGuiChildFlags_Borders);
-                        ImGuiListClipper clipper;
-                        clipper.Begin(
-                            static_cast<int>(g_equipFilteredItems.size()));
-                        while (clipper.Step())
-                        {
-                            for (int i = clipper.DisplayStart;
-                                 i < clipper.DisplayEnd; ++i)
-                            {
-                                const auto& rec =
-                                    items.items[g_equipFilteredItems[i]];
-                                ImGui::PushID(i);
-                                ImVec4 qcol = getQualityColor(rec.quality);
-                                ImGui::PushStyleColor(ImGuiCol_Text, qcol);
-                                std::string label = std::format(
-                                    "{} ({})", rec.name, rec.id);
-                                if (ImGui::Selectable(label.c_str()))
-                                {
-                                    WoWItem* targetItem = cModel->getItem(
-                                        static_cast<CharSlots>(
-                                            g_equipSlotToEdit));
-                                    if (targetItem)
-                                    {
-                                        targetItem->setId(rec.id);
-                                        g_equipSlotLevels[
-                                            g_equipSlotToEdit] = 0;
-                                        cModel->refresh();
-                                    }
-                                    ImGui::CloseCurrentPopup();
-                                }
-                                ImGui::PopStyleColor();
-                                ImGui::PopID();
-                            }
-                        }
-                        ImGui::EndChild();
-
-                        ImGui::Separator();
-                        if (ImGui::Button("Cancel", ImVec2(120, 0)))
-                            ImGui::CloseCurrentPopup();
-                    }
-                    ImGui::EndPopup();
-                }
-
                 // ---- Item Sets ----
-                ImGui::SeparatorText("Item Sets");
-
                 buildItemSets(); // lazy init on first frame
 
                 ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x - 60.0f);
@@ -4240,256 +5015,10 @@ int main(int /*argc*/, char* /*argv*/[])
                     }
                     ImGui::EndChild();
                 }
-
-                // ---- Mount ----
-                ImGui::SeparatorText("Mount");
-
-                buildMountList(); // lazy init on first frame
-
-                if (g_isMounted)
-                {
-                    ImGui::TextColored(ImVec4(0.4f, 1.0f, 0.4f, 1.0f), "Mounted");
-                    if (ImGui::Button("Dismount", ImVec2(-1, 0)))
-                        dismountCharacter();
-                }
-                else
-                {
-                    if (ImGui::BeginTabBar("##MountTabs"))
-                    {
-                        int prevTab = g_mountTab;
-
-                        if (ImGui::BeginTabItem("Player Mounts"))
-                        {
-                            g_mountTab = 0;
-                            ImGui::EndTabItem();
-                        }
-                        if (ImGui::BeginTabItem("Creature Models"))
-                        {
-                            g_mountTab = 1;
-                            ImGui::EndTabItem();
-                        }
-                        ImGui::EndTabBar();
-
-                        if (g_mountTab != prevTab)
-                        {
-                            g_mountFilterDirty = true;
-                            g_mountSearchBuf[0] = '\0';
-                        }
-                    }
-
-                    ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x - 60.0f);
-                    if (ImGui::InputText("##mountSearch", g_mountSearchBuf, sizeof(g_mountSearchBuf),
-                                         ImGuiInputTextFlags_EnterReturnsTrue))
-                        g_mountFilterDirty = true;
-                    ImGui::SameLine();
-                    if (ImGui::Button("Apply##mount", ImVec2(-1, 0)))
-                        g_mountFilterDirty = true;
-
-                    if (g_mountFilterDirty)
-                        rebuildMountFilter();
-
-                    ImGui::Text("%d entries", static_cast<int>(g_mountFiltered.size()));
-                    ImGui::Separator();
-
-                    ImGui::BeginChild("##MountList", ImVec2(0, 200), ImGuiChildFlags_Borders);
-                    ImGuiListClipper clipper;
-                    clipper.Begin(static_cast<int>(g_mountFiltered.size()));
-                    while (clipper.Step())
-                    {
-                        for (int i = clipper.DisplayStart; i < clipper.DisplayEnd; ++i)
-                        {
-                            size_t idx = g_mountFiltered[i];
-                            ImGui::PushID(static_cast<int>(idx));
-
-                            if (g_mountTab == 0)
-                            {
-                                const auto& me = g_mountList[idx];
-                                std::string label = std::format("{} (DisplayID:{})", me.name, me.displayID);
-                                if (ImGui::Selectable(label.c_str()))
-                                    mountCharacter(me.displayID, nullptr);
-                            }
-                            else
-                            {
-                                if (ImGui::Selectable(g_creatureModelNames[idx].c_str()))
-                                    mountCharacter(-1, g_creatureModels[idx]);
-                            }
-
-                            ImGui::PopID();
-                        }
-                    }
-                    ImGui::EndChild();
-                }
-            }
-            else if (g_isModel)
-            {
-                ImGui::TextDisabled("Not a character model.");
             }
             else
             {
-                ImGui::TextDisabled("No model loaded.");
-            }
-        }
-        ImGui::End();
-        }
-
-        // ===== Lighting panel =====
-        if (g_showLighting)
-        {
-        if (ImGui::Begin("Lighting", &g_showLighting))
-        {
-            ImGui::Checkbox("Enable Lighting", &g_light.enabled);
-
-            if (!g_light.enabled)
-                ImGui::BeginDisabled();
-
-            ImGui::SeparatorText("Light Type");
-            static const char* lightTypeNames[] = { "Directional", "Point", "Spot", "Ambient Only" };
-            ImGui::Combo("##LightType", reinterpret_cast<int*>(&g_light.type), lightTypeNames, IM_ARRAYSIZE(lightTypeNames));
-
-            if (g_light.type == LIGHT_DIRECTIONAL || g_light.type == LIGHT_SPOT)
-            {
-                ImGui::SeparatorText("Direction");
-                ImGui::DragFloat3("Dir XYZ", g_light.direction, 0.01f, -5.0f, 5.0f, "%.2f");
-            }
-
-            if (g_light.type == LIGHT_POINT || g_light.type == LIGHT_SPOT)
-            {
-                ImGui::SeparatorText("Position");
-                ImGui::DragFloat3("Pos XYZ", g_light.position, 0.1f, -50.0f, 50.0f, "%.1f");
-            }
-
-            if (g_light.type == LIGHT_SPOT)
-            {
-                ImGui::SeparatorText("Spot Parameters");
-                ImGui::SliderFloat("Cutoff Angle", &g_light.spotCutoff, 1.0f, 90.0f, "%.1f deg");
-                ImGui::SliderFloat("Exponent", &g_light.spotExponent, 0.0f, 128.0f, "%.1f");
-            }
-
-            ImGui::SeparatorText("Colors");
-            ImGui::ColorEdit3("Diffuse",  g_light.diffuse,  ImGuiColorEditFlags_Float);
-            ImGui::ColorEdit3("Ambient",  g_light.ambient,  ImGuiColorEditFlags_Float);
-            ImGui::ColorEdit3("Specular", g_light.specular, ImGuiColorEditFlags_Float);
-
-            ImGui::SeparatorText("Intensity");
-            ImGui::SliderFloat("##Intensity", &g_light.intensity, 0.0f, 3.0f, "%.2f");
-
-            if (!g_light.enabled)
-                ImGui::EndDisabled();
-
-            ImGui::SeparatorText("Presets");
-            if (ImGui::Button("Default", ImVec2(-1, 0)))
-            {
-                g_light = LightSettings{};
-            }
-            if (ImGui::Button("Bright Daylight", ImVec2(-1, 0)))
-            {
-                g_light.direction[0] = -0.5f; g_light.direction[1] = 1.0f;
-                g_light.direction[2] = -0.3f; g_light.direction[3] = 0.0f;
-                g_light.diffuse[0] = 1.0f; g_light.diffuse[1] = 0.98f; g_light.diffuse[2] = 0.92f;
-                g_light.ambient[0] = 0.45f; g_light.ambient[1] = 0.45f; g_light.ambient[2] = 0.50f;
-                g_light.specular[0] = 0.3f; g_light.specular[1] = 0.3f; g_light.specular[2] = 0.3f;
-                g_light.intensity = 1.2f;
-                g_light.enabled = true;
-            }
-            if (ImGui::Button("Warm Sunset", ImVec2(-1, 0)))
-            {
-                g_light.direction[0] = -1.0f; g_light.direction[1] = 0.3f;
-                g_light.direction[2] = -0.5f; g_light.direction[3] = 0.0f;
-                g_light.diffuse[0] = 1.0f; g_light.diffuse[1] = 0.65f; g_light.diffuse[2] = 0.3f;
-                g_light.ambient[0] = 0.25f; g_light.ambient[1] = 0.2f; g_light.ambient[2] = 0.25f;
-                g_light.specular[0] = 0.1f; g_light.specular[1] = 0.05f; g_light.specular[2] = 0.0f;
-                g_light.intensity = 1.0f;
-                g_light.enabled = true;
-            }
-            if (ImGui::Button("Cool Moonlight", ImVec2(-1, 0)))
-            {
-                g_light.direction[0] = 0.3f; g_light.direction[1] = 1.0f;
-                g_light.direction[2] = -0.7f; g_light.direction[3] = 0.0f;
-                g_light.diffuse[0] = 0.6f; g_light.diffuse[1] = 0.65f; g_light.diffuse[2] = 0.8f;
-                g_light.ambient[0] = 0.15f; g_light.ambient[1] = 0.15f; g_light.ambient[2] = 0.2f;
-                g_light.specular[0] = 0.0f; g_light.specular[1] = 0.0f; g_light.specular[2] = 0.0f;
-                g_light.intensity = 0.7f;
-                g_light.enabled = true;
-            }
-            if (ImGui::Button("Flat (No Shading)", ImVec2(-1, 0)))
-            {
-                g_light.direction[0] = 0.0f; g_light.direction[1] = 0.0f;
-                g_light.direction[2] = -1.0f; g_light.direction[3] = 0.0f;
-                g_light.diffuse[0] = 1.0f; g_light.diffuse[1] = 1.0f; g_light.diffuse[2] = 1.0f;
-                g_light.ambient[0] = 1.0f; g_light.ambient[1] = 1.0f; g_light.ambient[2] = 1.0f;
-                g_light.specular[0] = 0.0f; g_light.specular[1] = 0.0f; g_light.specular[2] = 0.0f;
-                g_light.intensity = 0.5f;
-                g_light.enabled = true;
-            }
-        }
-        ImGui::End();
-        }
-
-        // ===== Character Browser panel =====
-        if (g_showCharBrowser)
-        {
-        if (ImGui::Begin("Character Browser", &g_showCharBrowser))
-        {
-            if (!g_isWoWLoaded || !g_initDB)
-            {
-                ImGui::TextDisabled("Game not loaded.");
-            }
-            else
-            {
-                if (!g_charBrowserBuilt)
-                {
-                    buildCharBrowserRaceList();
-                    g_charBrowserBuilt = true;
-                }
-
-                // Gender selection
-                ImGui::RadioButton("Male", &g_charBrowserGender, 0);
-                ImGui::SameLine();
-                ImGui::RadioButton("Female", &g_charBrowserGender, 1);
-                ImGui::Checkbox("Prefer HD model", &g_charBrowserPreferHD);
-
-                ImGui::Separator();
-
-                // Search
-                ImGui::Text("Search:");
-                ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x - 60.0f);
-                if (ImGui::InputText("##charBrowserSearch", g_charBrowserSearchBuf, sizeof(g_charBrowserSearchBuf),
-                                     ImGuiInputTextFlags_EnterReturnsTrue))
-                    g_charBrowserFilterDirty = true;
-                ImGui::SameLine();
-                if (ImGui::Button("Apply##charBrowser", ImVec2(-1, 0)))
-                    g_charBrowserFilterDirty = true;
-
-                if (g_charBrowserFilterDirty)
-                    rebuildCharBrowserFilter();
-
-                ImGui::Text("%d races", static_cast<int>(g_charBrowserFiltered.size()));
-                ImGui::Separator();
-
-                ImGui::BeginChild("##CharRaceList", ImVec2(0, 0), ImGuiChildFlags_None);
-                ImGuiListClipper clipper;
-                clipper.Begin(static_cast<int>(g_charBrowserFiltered.size()));
-                while (clipper.Step())
-                {
-                    for (int i = clipper.DisplayStart; i < clipper.DisplayEnd; ++i)
-                    {
-                        const auto& race = g_charBrowserRaces[g_charBrowserFiltered[i]];
-                        ImGui::PushID(race.raceID);
-
-                        bool hasGender = (g_charBrowserGender == GENDER_MALE)
-                            ? (race.hasMale || race.hasMaleHD)
-                            : (race.hasFemale || race.hasFemaleHD);
-
-                        if (!hasGender) ImGui::BeginDisabled();
-
-                        if (ImGui::Selectable(race.name.c_str()))
-                            loadCharBrowserRace(race.raceID, g_charBrowserGender, g_charBrowserPreferHD);
-
-                        if (!hasGender) ImGui::EndDisabled();
-                        ImGui::PopID();
-                    }
-                }
-                ImGui::EndChild();
+                ImGui::TextDisabled("Load a character model first.");
             }
         }
         ImGui::End();
@@ -4932,10 +5461,12 @@ int main(int /*argc*/, char* /*argv*/[])
         ImGui::End();
         }
 
-        // ===== Settings panel =====
+        // ===== Settings panel (floating popup) =====
         if (g_showSettings)
         {
-        if (ImGui::Begin("Settings", &g_showSettings))
+        ImGui::SetNextWindowSize(ImVec2(480, 340), ImGuiCond_FirstUseEver);
+        ImGui::SetNextWindowPos(ImGui::GetMainViewport()->GetCenter(), ImGuiCond_FirstUseEver, ImVec2(0.5f, 0.5f));
+        if (ImGui::Begin("Settings", &g_showSettings, ImGuiWindowFlags_NoDocking))
         {
             // ---- Game loading section ----
             ImGui::SeparatorText("World of Warcraft");
@@ -5063,55 +5594,48 @@ int main(int /*argc*/, char* /*argv*/[])
             }
             ImGui::TextDisabled("Shows/hides the debug console. Useful for diagnostics.");
 
-            // ---- Viewport section ----
-            ImGui::SeparatorText("Viewport");
-            ImGui::Checkbox("Draw Grid", &g_drawGrid);
-            ImGui::Checkbox("Checkerboard Background", &g_drawCheckerBg);
-            if (ImGui::Checkbox("Gradient Background", &g_drawGradientBg))
-            {
-                if (g_drawGradientBg)
-                    g_drawCheckerBg = false;
-            }
-            if (g_drawGradientBg)
-            {
-                ImGui::ColorEdit3("Gradient Top", &g_gradientTop.x);
-                ImGui::ColorEdit3("Gradient Bottom", &g_gradientBottom.x);
-            }
-            ImGui::ColorEdit3("Background", &g_bgColor.x);
+            // ---- Theme selector ----
+            ImGui::SeparatorText("Appearance");
+            ImGui::Text("Theme:");
+            ImGui::SetNextItemWidth(-1);
+            if (ImGui::Combo("##Theme", &g_currentTheme, g_themeNames, THEME_COUNT))
+                applyTheme(g_currentTheme);
 
-            ImGui::Spacing();
-            ImGui::Text("Background Palette:");
-            for (int i = 0; i < g_bgPaletteCount; ++i)
+            // ---- Font selector ----
+            ImGui::Text("Font:");
+            ImGui::SetNextItemWidth(-1);
+            if (!g_availableFonts.empty())
             {
-                ImGui::PushID(i);
-                if (ImGui::ColorButton("##pal", ImVec4(g_bgPalette[i].x, g_bgPalette[i].y, g_bgPalette[i].z, 1.0f),
-                                       ImGuiColorEditFlags_NoTooltip, ImVec2(20, 20)))
-                    g_bgColor = g_bgPalette[i];
-                ImGui::PopID();
-                if (i < g_bgPaletteCount - 1) ImGui::SameLine();
+                if (ImGui::BeginCombo("##Font",
+                    (g_currentFont >= 0 && g_currentFont < static_cast<int>(g_availableFonts.size()))
+                        ? g_availableFonts[g_currentFont].name.c_str() : "Default"))
+                {
+                    for (int i = 0; i < static_cast<int>(g_availableFonts.size()); ++i)
+                    {
+                        ImGui::PushID(i);
+                        const bool selected = (i == g_currentFont);
+                        if (ImGui::Selectable(g_availableFonts[i].name.c_str(), selected))
+                        {
+                            g_currentFont = i;
+                            g_fontsDirty = true;
+                        }
+                        if (selected)
+                            ImGui::SetItemDefaultFocus();
+                        ImGui::PopID();
+                    }
+                    ImGui::EndCombo();
+                }
+            }
+            else
+            {
+                ImGui::TextDisabled("No .ttf/.otf files found in fonts/ directory.");
             }
 
-            ImGui::Spacing();
-            ImGui::Text("Camera Presets:");
-            if (ImGui::Button("Front"))
-                g_camera.setYawAndPitch(0.f, 90.f);
-            ImGui::SameLine();
-            if (ImGui::Button("Side"))
-                g_camera.setYawAndPitch(270.f, 90.f);
-            ImGui::SameLine();
-            if (ImGui::Button("Back"))
-                g_camera.setYawAndPitch(180.f, 90.f);
-            ImGui::SameLine();
-            if (ImGui::Button("Iso"))
-                g_camera.setYawAndPitch(315.f, 90.f);
-            if (ImGui::Button("Top"))
-                g_camera.setYawAndPitch(g_camera.yaw(), 179.f);
-            ImGui::SameLine();
-            if (ImGui::Button("Bottom"))
-                g_camera.setYawAndPitch(g_camera.yaw(), 1.f);
-            ImGui::SameLine();
-            if (ImGui::Button("Reset"))
-                g_camera.reset(getLoadedModel());
+            ImGui::Text("Font Size:");
+            ImGui::SetNextItemWidth(-1);
+            if (ImGui::SliderFloat("##FontSize", &g_fontSize, 10.0f, 40.0f, "%.0f px"))
+                g_fontsDirty = true;
+            ImGui::TextDisabled("Drop .ttf or .otf files into the fonts/ folder to add more.");
 
             ImGui::Separator();
             ImGui::Checkbox("ImGui Demo Window", &show_demo_window);
@@ -5358,6 +5882,6 @@ int main(int /*argc*/, char* /*argv*/[])
     glfwDestroyWindow(window);
     glfwTerminate();
 
-    LOG_INFO << "WoW Model Viewer (ImGui) shutdown complete.";
+    LOG_INFO << "WoW Model Viewer shutdown complete.";
     return 0;
 }

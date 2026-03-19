@@ -119,7 +119,10 @@ void CharDetails::reset(WoWModel* model)
 	refreshTextures();
 
 	for (const auto& c : choicesPerOptionMap_)
-		set(c.first, c.second[0]);
+	{
+		if (!c.second.empty())
+			set(c.first, c.second[0]);
+	}
 }
 
 void CharDetails::randomise()
@@ -170,7 +173,7 @@ void CharDetails::fillCustomizationMap()
 
 void CharDetails::fillCustomizationMapForOption(uint chrCustomizationOption)
 {
-	auto& vals = choicesPerOptionMap_.at(chrCustomizationOption);
+	auto& vals = choicesPerOptionMap_[chrCustomizationOption];
 	const auto originalVals = std::move(vals);
 	vals.clear();
 
@@ -209,6 +212,9 @@ void CharDetails::fillCustomizationMapForOption(uint chrCustomizationOption)
 
 void CharDetails::set(uint chrCustomizationOptionID, uint chrCustomizationChoiceID) // wow version >= 9.x
 {
+	if (!model_)
+		return;
+
 	const auto infos = model_->infos;
 	if (infos.raceID == -1)
 		return;
@@ -282,12 +288,18 @@ std::vector<uint> CharDetails::getCustomizationChoices(const uint chrCustomizati
 	if (choicesPerOptionMap_.count(chrCustomizationOptionID) == 0)
 		fillCustomizationMap();
 
-	return choicesPerOptionMap_.at(chrCustomizationOptionID);
+	auto it = choicesPerOptionMap_.find(chrCustomizationOptionID);
+	if (it != choicesPerOptionMap_.end())
+		return it->second;
+	return {};
 }
 
 uint CharDetails::get(uint chrCustomizationOptionID) const
 {
-	return currentCustomization_.at(chrCustomizationOptionID);
+	auto it = currentCustomization_.find(chrCustomizationOptionID);
+	if (it != currentCustomization_.end())
+		return it->second;
+	return 0;
 }
 
 bool CharDetails::applyChrCustomizationElements(uint chrCustomizationOption, uint choiceId, uint relatedChoiceId)

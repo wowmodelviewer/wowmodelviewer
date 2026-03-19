@@ -311,7 +311,10 @@ public:
 		{
 			uint32* ptimes;
 			AnimationBlockHeader* pHeadTimes;
-			auto it = modelData.animfiles.find(modelData.animIndexToAnimId.at(static_cast<uint>(j)));
+			auto animIdIt = modelData.animIndexToAnimId.find(static_cast<uint>(j));
+			if (animIdIt == modelData.animIndexToAnimId.end())
+				continue;
+			auto it = modelData.animfiles.find(animIdIt->second);
 			if (it != modelData.animfiles.end())
 			{
 				GameFile* animfile = it->second.first;
@@ -388,7 +391,10 @@ public:
 		{
 			D* keys;
 			AnimationBlockHeader* pHeadKeys;
-			auto it = modelData.animfiles.find(modelData.animIndexToAnimId.at(static_cast<uint>(j)));
+			auto animIdIt = modelData.animIndexToAnimId.find(static_cast<uint>(j));
+			if (animIdIt == modelData.animIndexToAnimId.end())
+				continue;
+			auto it = modelData.animfiles.find(animIdIt->second);
 			if (it != modelData.animfiles.end())
 			{
 				GameFile* animfile = it->second.first;

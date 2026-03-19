@@ -50,6 +50,10 @@ File "${wmvroot}bin\*.dll"
 File "${wmvroot}bin_support\Icons\wmv.ico"
 File "${wmvroot}bin_support\Icons\wmv_16.png"
 
+# Install bundled fonts for the UI font selector.
+SetOutPath $INSTDIR\fonts
+File /r "${wmvroot}bin_support\fonts\*.*"
+
 # Auto-include all WoW version directories
 # To add a new version, just create a new folder under bin_support\wow\.
 SetOutPath $INSTDIR\games\wow

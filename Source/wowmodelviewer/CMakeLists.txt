@@ -32,7 +32,8 @@ set_property(TARGET ${NAME} PROPERTY FOLDER "executables")
 
 # Pass the absolute path to the window icon PNG so the code works from any working directory.
 target_compile_definitions(${NAME} PRIVATE
-  WMV_ICON_PATH="${CMAKE_SOURCE_DIR}/bin_support/Icons/wmv_16.png")
+  WMV_ICON_PATH="${CMAKE_SOURCE_DIR}/bin_support/Icons/wmv_16.png"
+  WMV_FONTS_PATH="${CMAKE_SOURCE_DIR}/bin_support/fonts")
 
 # Force-include glad/gl.h before all source files
 if(MSVC)
@@ -44,6 +45,7 @@ target_link_libraries(${NAME}
   opengl32
   glu32
   winhttp
+  dwmapi
   pugixml-static
   objexporter
   fbxexporter
@@ -62,6 +64,12 @@ install(FILES
   ${CMAKE_SOURCE_DIR}/bin_support/Icons/wmv_16.png
   DESTINATION ${BIN_DIR}
 )
+
+# Install fonts directory next to the exe.
+if(IS_DIRECTORY ${CMAKE_SOURCE_DIR}/bin_support/fonts)
+  install(DIRECTORY ${CMAKE_SOURCE_DIR}/bin_support/fonts
+    DESTINATION ${BIN_DIR})
+endif()
 
 # Install DBD definitions directory if present.
 if(IS_DIRECTORY ${CMAKE_SOURCE_DIR}/bin_support/wow/dbdefs)
