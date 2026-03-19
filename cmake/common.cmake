@@ -44,10 +44,6 @@ macro(use_casclib)
   list(APPEND extralibs casc_static)
 endmacro()
 
-macro(use_sqlite)
-  list(APPEND src sqlite3.c)
-endmacro()
-
 macro(use_glfw)
   list(APPEND extralibs glfw)
 endmacro()

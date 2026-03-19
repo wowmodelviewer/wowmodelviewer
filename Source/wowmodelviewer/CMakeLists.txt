@@ -63,12 +63,6 @@ install(FILES
   DESTINATION ${BIN_DIR}
 )
 
-# Install shared WoW support files (CSV data files, tables.txt).
-file(GLOB _wow_shared_files ${CMAKE_SOURCE_DIR}/bin_support/wow/*.csv ${CMAKE_SOURCE_DIR}/bin_support/wow/*.txt)
-if(_wow_shared_files)
-  install(FILES ${_wow_shared_files} DESTINATION ${CMAKE_SOURCE_DIR}/bin/games/wow)
-endif()
-
 # Install DBD definitions directory if present.
 if(IS_DIRECTORY ${CMAKE_SOURCE_DIR}/bin_support/wow/dbdefs)
   install(DIRECTORY ${CMAKE_SOURCE_DIR}/bin_support/wow/dbdefs

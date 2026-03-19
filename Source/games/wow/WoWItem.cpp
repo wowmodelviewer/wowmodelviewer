@@ -3,10 +3,12 @@
 #include <algorithm>
 #include <format>
 #include <fstream>
+#include <set>
 #include <sstream>
 
 #include "Attachment.h"
 #include "database.h" // items
+#include "DB2Table.h"
 #include "Game.h"
 #include "RaceInfos.h"
 #include "wow_enums.h"
@@ -52,22 +54,19 @@ void WoWItem::setId(int id)
 			return;
 		}
 
-		const auto itemlevels = GAMEDATABASE.sqlQuery(
-			std::format(
-				"SELECT OrderIndex, ItemAppearanceID, ItemAppearanceModifierID FROM ItemModifiedAppearance WHERE ItemID = {}",
-				id));
-
-		if (itemlevels.valid && !itemlevels.values.empty())
+		const DB2Table* imaTbl = WOWDB.getTable("ItemModifiedAppearance");
+		if (imaTbl)
 		{
 			nbLevels_ = 0;
 			level_ = 0;
 			levelDisplayMap_.clear();
-			for (auto& value : itemlevels.values)
+			for (const auto& row : *imaTbl)
 			{
-				if (value[1].empty() || value[2].empty())
-						continue;
-					const auto curid = core::safeStoi(value[1]);
-					modifierIdDisplayMap_[core::safeStoi(value[2])] = curid;
+				if (static_cast<int>(row.getUInt("ItemID")) != id)
+					continue;
+
+				const auto curid = static_cast<int>(row.getUInt("ItemAppearanceID"));
+				modifierIdDisplayMap_[static_cast<int>(row.getUInt("ItemAppearanceModifierID"))] = curid;
 				// if display id is null (case when item's look doesn't change with level)
 				if (curid == 0)
 					continue;
@@ -93,20 +92,22 @@ void WoWItem::setId(int id)
 
 		if (levelDisplayMap_.count(level_))
 		{
-			const auto iteminfos = GAMEDATABASE.sqlQuery(std::format("SELECT ItemDisplayInfoID FROM ItemAppearance WHERE ID = {}",
-				levelDisplayMap_[level_]));
-
-			if (iteminfos.valid && !iteminfos.values.empty() && !iteminfos.values[0][0].empty())
-					displayId_ = core::safeStoi(iteminfos.values[0][0]);
+			const DB2Table* iaTbl = WOWDB.getTable("ItemAppearance");
+			if (iaTbl)
+			{
+				DB2Row iaRow = iaTbl->getRow(levelDisplayMap_[level_]);
+				if (iaRow)
+					displayId_ = static_cast<int>(iaRow.getUInt("ItemDisplayInfoID"));
 			}
 
-			const auto& itemRcd = items.getById(id);
-		setName(itemRcd.name);
-		quality_ = itemRcd.quality;
-		type_ = itemRcd.type;
-		load();
-	}
-}
+					const auto& itemRcd = items.getById(id);
+						setName(itemRcd.name);
+						quality_ = itemRcd.quality;
+						type_ = itemRcd.type;
+						load();
+					}
+				}
+			}
 
 void WoWItem::setDisplayId(int id)
 {
@@ -125,11 +126,13 @@ void WoWItem::setLevel(int level)
 	{
 		level_ = level;
 
-		const auto iteminfos = GAMEDATABASE.sqlQuery(std::format("SELECT ItemDisplayInfoID FROM ItemAppearance WHERE ID = {}",
-			levelDisplayMap_[level_]));
-
-		if (iteminfos.valid && !iteminfos.values.empty())
-			displayId_ = core::safeStoi(iteminfos.values[0][0]);
+		const DB2Table* iaTbl = WOWDB.getTable("ItemAppearance");
+		if (iaTbl)
+		{
+			DB2Row iaRow = iaTbl->getRow(levelDisplayMap_[level_]);
+			if (iaRow)
+				displayId_ = static_cast<int>(iaRow.getUInt("ItemDisplayInfoID"));
+		}
 
 		const auto& itemRcd = items.getById(id_);
 		setName(itemRcd.name);
@@ -144,11 +147,13 @@ void WoWItem::setModifierId(int id)
 	const auto it = modifierIdDisplayMap_.find(id);
 	if (it != modifierIdDisplayMap_.end())
 	{
-		const auto iteminfos = GAMEDATABASE.sqlQuery(std::format("SELECT ItemDisplayInfoID FROM ItemAppearance WHERE ID = {}",
-			it->second));
-
-		if (iteminfos.valid && !iteminfos.values.empty())
-			displayId_ = core::safeStoi(iteminfos.values[0][0]);
+		const DB2Table* iaTbl = WOWDB.getTable("ItemAppearance");
+		if (iaTbl)
+		{
+			DB2Row iaRow = iaTbl->getRow(it->second);
+			if (iaRow)
+				displayId_ = static_cast<int>(iaRow.getUInt("ItemDisplayInfoID"));
+		}
 
 		const auto& itemRcd = items.getById(id_);
 		setName(itemRcd.name);
@@ -208,31 +213,33 @@ void WoWItem::load()
 
 	const auto charInfos = charModel_->infos;
 
-	sqlResult iteminfos;
-
-	// query geosets infos
-	if (!queryItemInfo(
-		std::format("SELECT GeoSetGroup1, GeoSetGroup2, GeoSetGroup3, GeoSetGroup4, GeoSetGroup5, GeoSetGroup6, "
-			"AttachmentGeoSetGroup1, AttachmentGeoSetGroup2, AttachmentGeoSetGroup3, "
-			"AttachmentGeoSetGroup4, AttachmentGeoSetGroup5, AttachmentGeoSetGroup6, Flags "
-			"FROM ItemDisplayInfo WHERE ItemDisplayInfo.ID = {}", displayId_),
-		iteminfos))
+	// query geosets infos from ItemDisplayInfo
+	const DB2Table* idiTbl = WOWDB.getTable("ItemDisplayInfo");
+	if (!idiTbl)
 		return;
 
+	DB2Row idiRow = idiTbl->getRow(displayId_);
+	if (!idiRow)
+	{
+		LOG_ERROR << "Impossible to query information for item" << name() << "(id " << id_ << "- display id" <<
+			displayId_ << ")";
+		return;
+	}
+
 	const int geosetGroup[6] = {
-		core::safeStoi(iteminfos.values[0][0]), core::safeStoi(iteminfos.values[0][1]),
-		core::safeStoi(iteminfos.values[0][2]), core::safeStoi(iteminfos.values[0][3]),
-		core::safeStoi(iteminfos.values[0][4]), core::safeStoi(iteminfos.values[0][5])
+		idiRow.getInt("GeoSetGroup1"), idiRow.getInt("GeoSetGroup2"),
+		idiRow.getInt("GeoSetGroup3"), idiRow.getInt("GeoSetGroup4"),
+		idiRow.getInt("GeoSetGroup5"), idiRow.getInt("GeoSetGroup6")
 	};
 
 	const int attachmentGeosetGroup[6] =
 	{
-		core::safeStoi(iteminfos.values[0][6]), core::safeStoi(iteminfos.values[0][7]),
-		core::safeStoi(iteminfos.values[0][8]), core::safeStoi(iteminfos.values[0][9]),
-		core::safeStoi(iteminfos.values[0][10]), core::safeStoi(iteminfos.values[0][11])
+		idiRow.getInt("AttachmentGeoSetGroup1"), idiRow.getInt("AttachmentGeoSetGroup2"),
+		idiRow.getInt("AttachmentGeoSetGroup3"), idiRow.getInt("AttachmentGeoSetGroup4"),
+		idiRow.getInt("AttachmentGeoSetGroup5"), idiRow.getInt("AttachmentGeoSetGroup6")
 	};
 
-	displayFlags_ = core::safeStoi(iteminfos.values[0][12]);
+	displayFlags_ = idiRow.getInt("Flags");
 
 	// query models
 	const int models[2] = {getCustomModelId(0), getCustomModelId(1)};
@@ -241,30 +248,78 @@ void WoWItem::load()
 	const int textures[2] = {getCustomTextureId(0), getCustomTextureId(1)};
 
 	// query textures from ItemDisplayInfoMaterialRes (if relevant)
-	auto texinfos = GAMEDATABASE.sqlQuery(
-		std::format("SELECT * FROM ItemDisplayInfoMaterialRes WHERE ItemDisplayInfoID = {}", displayId_));
-	if (texinfos.valid && !texinfos.empty())
-	{
-		auto classFilter = std::format("ComponentTextureFileData.ClassID = {}", static_cast<int>(CLASS_ANY));
-		if (charModel_ && charModel_->cd.isDemonHunter())
-			classFilter = std::format("(ComponentTextureFileData.ClassID = {} OR ComponentTextureFileData.ClassID = {})",
-						  static_cast<int>(CLASS_DEMONHUNTER), static_cast<int>(CLASS_ANY));
+	const DB2Table* matResTbl = WOWDB.getTable("ItemDisplayInfoMaterialRes");
+	const DB2Table* texFileTbl = WOWDB.getTable("TextureFileData");
+	const DB2Table* compTexTbl = WOWDB.getTable("ComponentTextureFileData");
 
-		if (queryItemInfo(std::format("SELECT FileDataID FROM ItemDisplayInfoMaterialRes "
-							  "LEFT JOIN TextureFileData ON ItemDisplayInfoMaterialRes.MaterialResourcesID = TextureFileData.MaterialResourcesID "
-							  "INNER JOIN ComponentTextureFileData ON ComponentTextureFileData.ID = TextureFileData.FileDataID "
-							  "WHERE (ComponentTextureFileData.GenderIndex = {} OR ComponentTextureFileData.GenderIndex = {}) "
-							  "AND ItemDisplayInfoID = {} AND {} "
-							  "ORDER BY ComponentTextureFileData.GenderIndex, ComponentTextureFileData.ClassID DESC",
-						  static_cast<int>(GENDER_ANY), charInfos.sexID, displayId_, classFilter),
-						  iteminfos))
+	if (matResTbl && texFileTbl && compTexTbl)
+	{
+		// Collect MaterialResourcesIDs for this display
+		std::vector<uint32_t> materialResIds;
+		for (const auto& mrRow : *matResTbl)
 		{
-			for (auto& value : iteminfos.values)
+			if (static_cast<int>(mrRow.getUInt("ItemDisplayInfoID")) == displayId_)
+				materialResIds.push_back(mrRow.getUInt("MaterialResourcesID"));
+		}
+
+		if (!materialResIds.empty())
+		{
+			const bool isDH = charModel_ && charModel_->cd.isDemonHunter();
+
+			// Build candidate FileDataIDs via TextureFileData JOIN ComponentTextureFileData
+			struct TexCandidate { int fileDataID; int genderIndex; int classID; };
+			std::vector<TexCandidate> candidates;
+
+			for (const auto& tfdRow : *texFileTbl)
 			{
-				const auto tex = GAMEDIRECTORY.getFile(core::safeStoi(value[0]));
-					if (tex)
-					{
-						auto texRegion = getRegionForTexture(tex);
+				const uint32_t tfdMatResID = tfdRow.getUInt("MaterialResourcesID");
+				bool matchesMat = false;
+				for (uint32_t mrid : materialResIds)
+				{
+					if (tfdMatResID == mrid) { matchesMat = true; break; }
+				}
+				if (!matchesMat)
+					continue;
+
+				const int fileDataID = static_cast<int>(tfdRow.getUInt("FileDataID"));
+				DB2Row ctRow = compTexTbl->getRow(fileDataID);
+				if (!ctRow)
+					continue;
+
+				const int genderIdx = ctRow.getInt("GenderIndex");
+				const int classID = ctRow.getInt("ClassID");
+
+				// Filter: gender must be GENDER_ANY or sexID
+				if (genderIdx != static_cast<int>(GENDER_ANY) && genderIdx != charInfos.sexID)
+					continue;
+
+				// Filter: class must match
+				if (isDH)
+				{
+					if (classID != static_cast<int>(CLASS_DEMONHUNTER) && classID != static_cast<int>(CLASS_ANY))
+						continue;
+				}
+				else
+				{
+					if (classID != static_cast<int>(CLASS_ANY))
+						continue;
+				}
+
+				candidates.push_back({fileDataID, genderIdx, classID});
+			}
+
+			// Sort: GenderIndex ASC, ClassID DESC
+			std::sort(candidates.begin(), candidates.end(), [](const TexCandidate& a, const TexCandidate& b) {
+				if (a.genderIndex != b.genderIndex) return a.genderIndex < b.genderIndex;
+				return a.classID > b.classID;
+			});
+
+			for (const auto& c : candidates)
+			{
+				const auto tex = GAMEDIRECTORY.getFile(c.fileDataID);
+				if (tex)
+				{
+					auto texRegion = getRegionForTexture(tex);
 					// Only add one texture per region (first one in sort order):
 					if (itemTextures_.count(texRegion) < 1)
 					{
@@ -305,31 +360,34 @@ void WoWItem::load()
 			itemGeosets_[CG_GEOSET2600] = 1 + geosetGroup[0];
 
 			// find position index value from ComponentModelFileData table
-			const auto query = std::format("SELECT ID, PositionIndex FROM ComponentModelFileData "
-				"WHERE ID IN ({},{})", models[0], models[1]);
-
-			const auto result = GAMEDATABASE.sqlQuery(query);
+			const DB2Table* cmfTbl = WOWDB.getTable("ComponentModelFileData");
 
 			auto leftIndex = 0;
 			auto rightIndex = 1;
-			if (result.valid && !result.values.empty())
+			if (cmfTbl)
 			{
-				const auto modelid = core::safeStoi(result.values[0][0]);
-				const auto position = core::safeStoi(result.values[0][1]);
+				DB2Row cmfRow = cmfTbl->getRow(models[0]);
+				if (!cmfRow)
+					cmfRow = cmfTbl->getRow(models[1]);
 
-				// If the modelid matches models[0], use position to determine left/right
-				// Otherwise, swap the indices
-				if ((modelid == models[0] && position != 0) || (modelid != models[0] && position == 0))
+				if (cmfRow)
 				{
-					leftIndex = 1;
-					rightIndex = 0;
+					const auto modelid = static_cast<int>(cmfRow.recordID());
+					const auto position = cmfRow.getInt("PositionIndex");
+
+					// If the modelid matches models[0], use position to determine left/right
+					// Otherwise, swap the indices
+					if ((modelid == models[0] && position != 0) || (modelid != models[0] && position == 0))
+					{
+						leftIndex = 1;
+						rightIndex = 0;
+					}
 				}
-			}
-			else
-			{
-				LOG_ERROR << "Impossible to query information for item" << name() << "(id " << id_ << "- display id" <<
-					displayId_ << ") - SQL ERROR";
-				LOG_ERROR << query.c_str();
+				else
+				{
+					LOG_ERROR << "Impossible to query information for item" << name() << "(id " << id_ << "- display id" <<
+						displayId_ << ")";
+				}
 			}
 
 			LOG_INFO << "leftIndex" << leftIndex << "rightIndex" << rightIndex;
@@ -993,19 +1051,102 @@ CharRegions WoWItem::getRegionForTexture(GameFile* file) const
 	return result;
 }
 
-bool WoWItem::queryItemInfo(const std::string& query, sqlResult& result) const
+// Helper: find the best ComponentModelFileData match from a set of candidate IDs,
+// filtering by raceID, genderIndex, classID, and sorting by GenderIndex ASC, ClassID DESC, PositionIndex ASC/DESC
+static int findBestComponentModel(const DB2Table* cmfTbl, const std::set<int>& candidateIds,
+	int raceID, int sexID, int altGender, bool isDH, bool positionDesc)
 {
-	result = GAMEDATABASE.sqlQuery(query);
+	struct Candidate { int id; int genderIndex; int classID; int positionIndex; };
+	std::vector<Candidate> matches;
 
-	if (!result.valid || result.values.empty())
+	for (const auto& row : *cmfTbl)
 	{
-		LOG_ERROR << "Impossible to query information for item" << name() << "(id " << id_ << "- display id" <<
-			displayId_ << ") - SQL ERROR";
-		LOG_ERROR << query.c_str();
-		return false;
+		const int rowID = static_cast<int>(row.recordID());
+		if (candidateIds.find(rowID) == candidateIds.end())
+			continue;
+
+		const int rowRace = row.getInt("RaceID");
+		if (rowRace != raceID)
+			continue;
+
+		const int rowGender = row.getInt("GenderIndex");
+		if (rowGender != sexID && rowGender != altGender)
+			continue;
+
+		const int rowClass = row.getInt("ClassID");
+		if (isDH)
+		{
+			if (rowClass != static_cast<int>(CLASS_DEMONHUNTER) && rowClass != static_cast<int>(CLASS_ANY))
+				continue;
+		}
+		else
+		{
+			if (rowClass != static_cast<int>(CLASS_ANY))
+				continue;
+		}
+
+		matches.push_back({rowID, rowGender, rowClass, row.getInt("PositionIndex")});
 	}
 
-	return true;
+	if (matches.empty())
+		return 0;
+
+	// Sort: GenderIndex ASC, ClassID DESC, PositionIndex ASC or DESC
+	std::sort(matches.begin(), matches.end(), [positionDesc](const Candidate& a, const Candidate& b) {
+		if (a.genderIndex != b.genderIndex) return a.genderIndex < b.genderIndex;
+		if (a.classID != b.classID) return a.classID > b.classID;
+		return positionDesc ? (a.positionIndex > b.positionIndex) : (a.positionIndex < b.positionIndex);
+	});
+
+	return matches[0].id;
+}
+
+// Helper: find the best ComponentTextureFileData match from a set of candidate IDs
+static int findBestComponentTexture(const DB2Table* ctfTbl, const std::set<int>& candidateIds,
+	int raceID, int sexID, int altGender, bool isDH)
+{
+	struct Candidate { int id; int genderIndex; int classID; };
+	std::vector<Candidate> matches;
+
+	for (const auto& row : *ctfTbl)
+	{
+		const int rowID = static_cast<int>(row.recordID());
+		if (candidateIds.find(rowID) == candidateIds.end())
+			continue;
+
+		const int rowRace = row.getInt("RaceID");
+		if (rowRace != raceID)
+			continue;
+
+		const int rowGender = row.getInt("GenderIndex");
+		if (rowGender != sexID && rowGender != altGender)
+			continue;
+
+		const int rowClass = row.getInt("ClassID");
+		if (isDH)
+		{
+			if (rowClass != static_cast<int>(CLASS_DEMONHUNTER) && rowClass != static_cast<int>(CLASS_ANY))
+				continue;
+		}
+		else
+		{
+			if (rowClass != static_cast<int>(CLASS_ANY))
+				continue;
+		}
+
+		matches.push_back({rowID, rowGender, rowClass});
+	}
+
+	if (matches.empty())
+		return 0;
+
+	// Sort: GenderIndex ASC, ClassID DESC
+	std::sort(matches.begin(), matches.end(), [](const Candidate& a, const Candidate& b) {
+		if (a.genderIndex != b.genderIndex) return a.genderIndex < b.genderIndex;
+		return a.classID > b.classID;
+	});
+
+	return matches[0].id;
 }
 
 int WoWItem::getCustomModelId(size_t index) const
@@ -1013,77 +1154,75 @@ int WoWItem::getCustomModelId(size_t index) const
 	if (!charModel_)
 		return 0;
 
-	sqlResult infos;
-	if (!queryItemInfo(std::format("SELECT FileDataID FROM ItemDisplayInfo "
-						   "LEFT JOIN ModelFileData ON {} = ModelFileData.ModelResourcesID "
-						   "WHERE ItemDisplayInfo.ID = {}",
-						   (index == 0) ? "ModelResourcesID1" : "ModelResourcesID2", displayId_),
-					   infos))
+	// Step 1: Get ModelResourcesID from ItemDisplayInfo
+	const DB2Table* idiTbl = WOWDB.getTable("ItemDisplayInfo");
+	if (!idiTbl)
+		return 0;
+
+	DB2Row idiRow = idiTbl->getRow(displayId_);
+	if (!idiRow)
+		return 0;
+
+	const uint32_t modelResID = (index == 0) ? idiRow.getUInt("ModelResourcesID1") : idiRow.getUInt("ModelResourcesID2");
+	if (modelResID == 0)
+		return 0;
+
+	// Step 2: Find FileDataIDs from ModelFileData where ModelResourcesID matches
+	const DB2Table* mfdTbl = WOWDB.getTable("ModelFileData");
+	if (!mfdTbl)
+		return 0;
+
+	std::set<int> candidateIds;
+	for (const auto& row : *mfdTbl)
+	{
+		if (row.getUInt("ModelResourcesID") == modelResID)
+			candidateIds.insert(static_cast<int>(row.getUInt("FileDataID")));
+	}
+
+	if (candidateIds.empty())
 		return 0;
 
 	// if there is only one result, return model id:
-	if (infos.values.size() == 1)
-		return core::safeStoi(infos.values[0][0]);
+	if (candidateIds.size() == 1)
+		return *candidateIds.begin();
 
-	// if there are multiple values, check by race and sex:
-	std::string idListStr = "(";
-	for (size_t i = 0; i < infos.values.size(); i++)
-	{
-		if (i > 0) idListStr += ", ";
-		idListStr += infos.values[i][0];
-	}
-	idListStr += ")";
+	// Step 3: Filter through ComponentModelFileData by race/sex/class
+	const DB2Table* cmfTbl = WOWDB.getTable("ComponentModelFileData");
+	if (!cmfTbl)
+		return 0;
 
 	const auto charInfos = charModel_->infos;
-
-	auto classFilter = std::format("ClassID = {}", static_cast<int>(CLASS_ANY));
-	if (charModel_->cd.isDemonHunter())
-		classFilter = std::format("(ClassID = {} OR ClassID = {})", static_cast<int>(CLASS_DEMONHUNTER), static_cast<int>(CLASS_ANY));
+	const bool isDH = charModel_->cd.isDemonHunter();
 
 	// It looks like shoulders are always in pairs, with PositionIndex values 0 and 1.
 	// Depending on index (model 1 or 2) we sort the PositionIndex differently so one will
 	// return left and one right shoulder. Noting this in case in the future it turns out
 	// this assumption isn't always right - Wain
-	const std::string positionSort = ((index == 0) ? "" : "DESC");
+	const bool positionDesc = (index != 0);
 
 	// Order all queries by GenderIndex to ensure definite genders have priority over generic ones,
 	// and ClassID descending to ensure Demon Hunter textures have priority over regular ones, for DHs only:
-	sqlResult iteminfos;
-	std::string query = std::format("SELECT ID, PositionIndex FROM ComponentModelFileData "
-					"WHERE RaceID = {} AND (GenderIndex = {} OR GenderIndex = {}) "
-					"AND ID IN {} AND {} "
-					"ORDER BY GenderIndex, ClassID DESC, PositionIndex {}",
-					charInfos.raceID, charInfos.sexID, static_cast<int>(GENDER_ANY), idListStr, classFilter,
-					positionSort);
-	if (queryItemInfo(query, iteminfos))
-		return core::safeStoi(iteminfos.values[0][0]);
+	int result = findBestComponentModel(cmfTbl, candidateIds, charInfos.raceID, charInfos.sexID,
+		static_cast<int>(GENDER_ANY), isDH, positionDesc);
+	if (result != 0)
+		return result;
 
 	// Failed to find model for that specific race and sex, so check fallback race:
 	if (charInfos.modelFallbackRaceID > 0)
 	{
-		query = std::format("SELECT ID, PositionIndex FROM ComponentModelFileData "
-					"WHERE RaceID = {} AND (GenderIndex = {} OR GenderIndex = {}) "
-					"AND ID IN {} AND {} "
-					"ORDER BY GenderIndex, ClassID DESC, PositionIndex {}",
-					charInfos.modelFallbackRaceID, charInfos.modelFallbackSexID, static_cast<int>(GENDER_NONE), idListStr,
-					classFilter, positionSort);
-
-		if (queryItemInfo(query, iteminfos))
-			return core::safeStoi(iteminfos.values[0][0]);
+		result = findBestComponentModel(cmfTbl, candidateIds, charInfos.modelFallbackRaceID, charInfos.modelFallbackSexID,
+			static_cast<int>(GENDER_NONE), isDH, positionDesc);
+		if (result != 0)
+			return result;
 	}
 
 	// We still didn't find the model, so check for RACE_ANY (race = 0) items:
 	// Note: currently all race = 0 entries are also gender = 2, but we probably
 	// shouldn't assume it will stay that way, so check for both gender values:
-	query = std::format("SELECT ID, PositionIndex FROM ComponentModelFileData "
-				"WHERE RaceID = {} AND (GenderIndex = {} OR GenderIndex = {}) "
-				"AND ID IN {} AND {} "
-				"ORDER BY GenderIndex, ClassID DESC, PositionIndex {}",
-				static_cast<int>(RACE_ANY), charInfos.modelFallbackSexID, static_cast<int>(GENDER_NONE), idListStr, classFilter,
-				positionSort);
-
-	if (queryItemInfo(query, iteminfos))
-		return core::safeStoi(iteminfos.values[0][0]);
+	result = findBestComponentModel(cmfTbl, candidateIds, static_cast<int>(RACE_ANY), charInfos.modelFallbackSexID,
+		static_cast<int>(GENDER_NONE), isDH, positionDesc);
+	if (result != 0)
+		return result;
 
 	return 0;
 }
@@ -1093,68 +1232,67 @@ int WoWItem::getCustomTextureId(size_t index) const
 	if (!charModel_)
 		return 0;
 
-	sqlResult infos;
-	if (!queryItemInfo(std::format("SELECT FileDataID FROM ItemDisplayInfo "
-						   "LEFT JOIN TextureFileData ON {} = TextureFileData.MaterialResourcesID "
-						   "WHERE ItemDisplayInfo.ID = {}",
-						   (index == 0) ? "ModelMaterialResourcesID1" : "ModelMaterialResourcesID2", displayId_),
-					   infos))
+	// Step 1: Get ModelMaterialResourcesID from ItemDisplayInfo
+	const DB2Table* idiTbl = WOWDB.getTable("ItemDisplayInfo");
+	if (!idiTbl)
+		return 0;
+
+	DB2Row idiRow = idiTbl->getRow(displayId_);
+	if (!idiRow)
+		return 0;
+
+	const uint32_t matResID = (index == 0) ? idiRow.getUInt("ModelMaterialResourcesID1") : idiRow.getUInt("ModelMaterialResourcesID2");
+	if (matResID == 0)
+		return 0;
+
+	// Step 2: Find FileDataIDs from TextureFileData where MaterialResourcesID matches
+	const DB2Table* tfdTbl = WOWDB.getTable("TextureFileData");
+	if (!tfdTbl)
+		return 0;
+
+	std::set<int> candidateIds;
+	for (const auto& row : *tfdTbl)
+	{
+		if (row.getUInt("MaterialResourcesID") == matResID)
+			candidateIds.insert(static_cast<int>(row.getUInt("FileDataID")));
+	}
+
+	if (candidateIds.empty())
 		return 0;
 
 	// if there is only one result, return texture id:
-	if (infos.values.size() == 1)
-		return core::safeStoi(infos.values[0][0]);
+	if (candidateIds.size() == 1)
+		return *candidateIds.begin();
 
-	// if there are multiple values, check by race and sex:
-	std::string idListStr = "(";
-	for (size_t i = 0; i < infos.values.size(); i++)
-	{
-		if (i > 0) idListStr += ", ";
-		idListStr += infos.values[i][0];
-	}
-	idListStr += ")";
+	// Step 3: Filter through ComponentTextureFileData by race/sex/class
+	const DB2Table* ctfTbl = WOWDB.getTable("ComponentTextureFileData");
+	if (!ctfTbl)
+		return 0;
 
 	const auto charInfos = charModel_->infos;
-
-	std::string classFilter = std::format("ClassID = {}", static_cast<int>(CLASS_ANY));
-
-	if (charModel_->cd.isDemonHunter())
-		classFilter = std::format("(ClassID = {} OR ClassID = {})", static_cast<int>(CLASS_DEMONHUNTER), static_cast<int>(CLASS_ANY));
+	const bool isDH = charModel_->cd.isDemonHunter();
 
 	// Order all queries by GenderIndex to ensure definite genders have priority over generic ones,
 	// and ClassID descending to ensure Demon Hunter textures have priority over regular ones, for DHs only:
-	sqlResult iteminfos;
-	std::string query = std::format("SELECT ID FROM ComponentTextureFileData "
-					"WHERE RaceID = {} AND (GenderIndex = {} OR GenderIndex = {}) "
-					"AND ID IN {} AND {} "
-					"ORDER BY GenderIndex, ClassID DESC",
-					charInfos.raceID, charInfos.sexID, static_cast<int>(GENDER_ANY), idListStr, classFilter);
-	if (queryItemInfo(query, iteminfos))
-		return core::safeStoi(iteminfos.values[0][0]);
+	int result = findBestComponentTexture(ctfTbl, candidateIds, charInfos.raceID, charInfos.sexID,
+		static_cast<int>(GENDER_ANY), isDH);
+	if (result != 0)
+		return result;
 
 	// Failed to find model for that specific race and sex, so check fallback race:
 	if (charInfos.textureFallbackRaceID > 0)
 	{
-		query = std::format("SELECT ID FROM ComponentTextureFileData "
-					"WHERE RaceID = {} AND (GenderIndex = {} OR GenderIndex = {}) "
-					"AND ID IN {} AND {} "
-					"ORDER BY GenderIndex, ClassID DESC",
-					charInfos.textureFallbackRaceID, charInfos.textureFallbackSexID, static_cast<int>(GENDER_ANY), idListStr,
-					classFilter);
-
-		if (queryItemInfo(query, iteminfos))
-			return core::safeStoi(iteminfos.values[0][0]);
+		result = findBestComponentTexture(ctfTbl, candidateIds, charInfos.textureFallbackRaceID, charInfos.textureFallbackSexID,
+			static_cast<int>(GENDER_ANY), isDH);
+		if (result != 0)
+			return result;
 	}
 
 	// We still didn't find the model, so check for RACE_ANY (race = 0) items: 
-	query = std::format("SELECT ID FROM ComponentTextureFileData "
-				"WHERE RaceID = {} AND (GenderIndex = {} OR GenderIndex = {}) "
-				"AND ID IN {} AND {} "
-				"ORDER BY GenderIndex, ClassID DESC",
-				static_cast<int>(RACE_ANY), charInfos.sexID, static_cast<int>(GENDER_ANY), idListStr, classFilter);
-
-	if (queryItemInfo(query, iteminfos))
-		return core::safeStoi(iteminfos.values[0][0]);
+	result = findBestComponentTexture(ctfTbl, candidateIds, static_cast<int>(RACE_ANY), charInfos.sexID,
+		static_cast<int>(GENDER_ANY), isDH);
+	if (result != 0)
+		return result;
 
 	return 0;
 }

@@ -64,6 +64,7 @@
 #include "ZipExtract.h"
 #include "WoWItem.h"
 #include "CharDetails.h"
+#include "DB2Table.h"
 
 #include "stb_image.h"
 #include "stb_image_write.h"
@@ -195,6 +196,7 @@ static bool g_showAnimation      = true;
 static bool g_showModelControl   = true;
 static bool g_showCharacter      = true;
 static bool g_showLighting       = true;
+static bool g_showCharBrowser    = true;
 static bool g_showNpcBrowser     = true;
 static bool g_showItemBrowser    = true;
 static bool g_showExport         = true;
@@ -398,6 +400,25 @@ static std::string g_screenshotStatus;
 // ---- Save/Load Character Preset state -------------------------------------
 static char g_presetPath[512] = "userSettings/preset.ini";
 static std::string g_presetStatus;
+
+// ---- Character Browser state ----------------------------------------------
+struct CharBrowserRace
+{
+    int         raceID;
+    std::string name;
+    bool hasMale   = false;
+    bool hasFemale = false;
+    bool hasMaleHD   = false;
+    bool hasFemaleHD = false;
+};
+
+static std::vector<CharBrowserRace> g_charBrowserRaces;
+static std::vector<size_t>          g_charBrowserFiltered;
+static bool  g_charBrowserBuilt = false;
+static bool  g_charBrowserFilterDirty = true;
+static char  g_charBrowserSearchBuf[256] = {};
+static int   g_charBrowserGender = 0;       // 0 = Male, 1 = Female
+static bool  g_charBrowserPreferHD = true;
 
 // ---- NPC Browser state ----------------------------------------------------
 static char g_npcSearchBuf[256] = {};
@@ -704,19 +725,9 @@ static void initDatabase()
         GAMEDATABASE.setFastMode();
     }
 
-    // DBD-based database initialization
+    // DBD-based database initialization — fully on-demand like wow.export.
+    // Tables are loaded lazily when first accessed via WOWDB.getTable().
     const fs::path dbdDir = appDir / "games" / "wow" / "dbdefs";
-    const fs::path tablesFile = appDir / "games" / "wow" / "tables.txt";
-
-    if (!fs::exists(tablesFile, ec))
-    {
-        g_initDB = false;
-        LOG_ERROR << "tables.txt not found!";
-        setLoadStatus("Database table list not found!");
-        fs::remove(cachePath, ec);
-        fs::remove(versionPath, ec);
-        return;
-    }
 
     // Configure on-demand DBD downloading from WoWDBDefs master branch
     GAMEDATABASE.setDbdBaseUrl(
@@ -727,33 +738,8 @@ static void initDatabase()
         "https://raw.githubusercontent.com/wowdev/WoWDBDefs/refs/heads/master/manifest.json");
     GAMEDATABASE.downloadAndParseManifest();
 
-    // Read table names from tables.txt
-    std::vector<std::string> tableNames;
-    std::ifstream tf(tablesFile);
-    std::string tline;
-    while (std::getline(tf, tline))
-    {
-        // Trim whitespace
-        auto start = tline.find_first_not_of(" \t\r\n");
-        if (start == std::string::npos) continue;
-        auto end = tline.find_last_not_of(" \t\r\n");
-        tline = tline.substr(start, end - start + 1);
-        if (tline.empty() || tline[0] == '#') continue;
-        tableNames.push_back(tline);
-    }
-
-    if (tableNames.empty())
-    {
-        g_initDB = false;
-        LOG_ERROR << "No table names found in tables.txt!";
-        setLoadStatus("Database table list is empty!");
-        fs::remove(cachePath, ec);
-        fs::remove(versionPath, ec);
-        return;
-    }
-
-    LOG_INFO << "Attempting DBD-based database init with" << tableNames.size() << "tables from" << dbdDir.string();
-    if (!GAMEDATABASE.initFromDBD(dbdDir.string(), currentVersion, tableNames))
+    LOG_INFO << "Attempting on-demand DBD-based database init from" << dbdDir.string();
+    if (!GAMEDATABASE.initFromDBD(dbdDir.string(), currentVersion))
     {
         g_initDB = false;
         LOG_ERROR << "Database initialization failed!";
@@ -774,27 +760,36 @@ static void initDatabase()
     LOG_INFO << "Database initialization succeeded.";
     g_loadProgress = 0.60f;
 
+    LOG_INFO << "initDatabase: CharTexture::initRegions...";
     CharTexture::initRegions();
     g_loadProgress = 0.65f;
 
+    LOG_INFO << "initDatabase: RaceInfos::init...";
     RaceInfos::init();
     g_loadProgress = 0.70f;
 
     g_initDB = true;
 
+    LOG_INFO << "initDatabase: loading Creature table...";
     {
-        sqlResult npc = GAMEDATABASE.sqlQuery(
-            "SELECT ID, DisplayID1, CreatureType, Name_Lang From Creature;");
-
-        if (npc.valid && !npc.empty())
+        const auto* creatureTable = WOWDB.getTable("Creature");
+        if (creatureTable && creatureTable->getRowCount() > 0)
         {
-            LOG_INFO << "Found " << npc.values.size() << " NPCs";
-            for (const auto& value : npc.values)
+            size_t count = 0;
+            for (const auto& row : *creatureTable)
             {
-                NPCRecord rec(value);
+                std::vector<std::string> vals = {
+                    std::to_string(row.recordID()),
+                    std::to_string(row.getUInt("DisplayID1")),
+                    std::to_string(row.getUInt("CreatureType")),
+                    row.getString("Name_Lang")
+                };
+                NPCRecord rec(vals);
                 if (rec.model != 0)
                     npcs.push_back(rec);
+                count++;
             }
+            LOG_INFO << "Found " << npcs.size() << " NPCs (from " << count << " creatures)";
         }
         else
         {
@@ -806,21 +801,42 @@ static void initDatabase()
 
     g_loadProgress = 0.80f;
 
+    LOG_INFO << "initDatabase: loading Item/ItemSparse tables...";
     {
-        sqlResult item = GAMEDATABASE.sqlQuery(
-            "SELECT Item.ID, ItemSparse.Display_lang, Item.InventoryType, "
-            "Item.ClassID, Item.SubclassID, Item.SheatheType "
-            "FROM Item LEFT JOIN ItemSparse ON Item.ID = ItemSparse.ID "
-            "WHERE Item.InventoryType !=0 AND ItemSparse.Display_lang != \"\"");
-
-        if (item.valid && !item.empty())
+        const auto* itemTable = WOWDB.getTable("Item");
+        const auto* itemSparseTable = WOWDB.getTable("ItemSparse");
+        size_t count = 0;
+        if (!itemTable || !itemSparseTable) { g_initDB = false; return; }
+        for (const auto& row : *itemTable)
         {
-            LOG_INFO << "Found " << item.values.size() << " items";
-            for (const auto& value : item.values)
-            {
-                ItemRecord rec(value);
-                items.items.push_back(rec);
-            }
+            uint32_t invType = row.getUInt("InventoryType");
+            if (invType == 0)
+                continue;
+
+            auto sparse = itemSparseTable->getRow(row.recordID());
+            if (!sparse)
+                continue;
+
+            std::string displayLang = sparse.getString("Display_lang");
+            if (displayLang.empty())
+                continue;
+
+            std::vector<std::string> vals = {
+                std::to_string(row.recordID()),
+                displayLang,
+                std::to_string(invType),
+                std::to_string(row.getUInt("ClassID")),
+                std::to_string(row.getUInt("SubclassID")),
+                std::to_string(row.getUInt("SheatheType"))
+            };
+            ItemRecord rec(vals);
+            items.items.push_back(rec);
+            count++;
+        }
+
+        if (count > 0)
+        {
+            LOG_INFO << "Found " << count << " items";
         }
         else
         {
@@ -1150,67 +1166,85 @@ static void initAnimationControl(WoWModel* model)
 
     if (isCreature)
     {
-        std::string query = std::format(
-            "SELECT TextureVariationFileDataID1, TextureVariationFileDataID2, TextureVariationFileDataID3, "
-            "CreatureDisplayInfo.ID FROM CreatureDisplayInfo "
-            "LEFT JOIN CreatureModelData ON CreatureDisplayInfo.ModelID = CreatureModelData.ID "
-            "WHERE CreatureModelData.FileDataID = {}", model->gamefile->fileDataId());
+        // Find CreatureDisplayInfo rows whose CreatureModelData has matching FileDataID
+        const auto* cdiTable = WOWDB.getTable("CreatureDisplayInfo");
+        const auto* cmdTable = WOWDB.getTable("CreatureModelData");
+        const auto* geoTable = WOWDB.getTable("CreatureDisplayInfoGeosetData");
+        const int targetFDID = model->gamefile->fileDataId();
 
-        sqlResult r = GAMEDATABASE.sqlQuery(query);
-        if (r.valid && !r.empty())
+        if (cdiTable && cmdTable && geoTable)
+        for (const auto& cdiRow : *cdiTable)
         {
-            for (size_t i = 0; i < r.values.size(); ++i)
+            auto cmdRow = cmdTable->getRow(cdiRow.getUInt("ModelID"));
+            if (!cmdRow || static_cast<int>(cmdRow.getUInt("FileDataID")) != targetFDID)
+                continue;
+
+            SkinEntry se;
+            size_t cnt = 0;
+            uint32_t texFDIDs[3] = {
+                cdiRow.getUInt("TextureVariationFileDataID1"),
+                cdiRow.getUInt("TextureVariationFileDataID2"),
+                cdiRow.getUInt("TextureVariationFileDataID3")
+            };
+            for (size_t s = 0; s < 3; ++s)
             {
-                SkinEntry se;
-                size_t cnt = 0;
-                for (size_t s = 0; s < 3; ++s)
+                if (texFDIDs[s] != 0)
                 {
-                    if (!r.values[i][s].empty() && r.values[i][s] != "0")
-                    {
-                        se.tex[s] = GAMEDIRECTORY.getFile(core::safeStoi(r.values[i][s]));
-                        if (se.tex[s]) ++cnt;
-                    }
+                    se.tex[s] = GAMEDIRECTORY.getFile(texFDIDs[s]);
+                    if (se.tex[s]) ++cnt;
                 }
-                if (cnt == 0) continue;
-                se.base = TEXTURE_GAMEOBJECT1;
-                se.count = cnt;
-
-                int cdi = core::safeStoi(r.values[i][3]);
-                std::string q2 = std::format(
-                    "SELECT GeosetIndex, GeosetValue FROM CreatureDisplayInfoGeosetData "
-                    "WHERE CreatureDisplayInfoID = {}", cdi);
-                sqlResult r2 = GAMEDATABASE.sqlQuery(q2);
-                if (r2.valid && !r2.empty())
-                {
-                    for (size_t j = 0; j < r2.values.size(); ++j)
-                    {
-                        int geoType = 100 * (core::safeStoi(r2.values[j][0]) + 1);
-                        int geoId   = core::safeStoi(r2.values[j][1]);
-                        if (geoId > 0) se.creatureGeosetData.insert(geoType + geoId);
-                    }
-                }
-
-                se.label = "Skin " + std::to_string(g_skinEntries.size());
-                g_skinEntries.push_back(se);
             }
+            if (cnt == 0) continue;
+            se.base = TEXTURE_GAMEOBJECT1;
+            se.count = cnt;
+
+            uint32_t cdi = cdiRow.recordID();
+            for (const auto& geoRow : *geoTable)
+            {
+                if (geoRow.getUInt("CreatureDisplayInfoID") != cdi)
+                    continue;
+                int geoType = 100 * (static_cast<int>(geoRow.getUInt("GeosetIndex")) + 1);
+                int geoId   = static_cast<int>(geoRow.getUInt("GeosetValue"));
+                if (geoId > 0) se.creatureGeosetData.insert(geoType + geoId);
+            }
+
+            se.label = "Skin " + std::to_string(g_skinEntries.size());
+            g_skinEntries.push_back(se);
         }
     }
     else if (isItem)
     {
-        std::string query = std::format(
-            "SELECT TextureFileData.FileDataID FROM ItemDisplayInfo "
-            "LEFT JOIN TextureFileData ON ModelMaterialResourcesID1 = TextureFileData.MaterialResourcesID "
-            "LEFT JOIN ModelFileData ON ItemDisplayInfo.ModelResourcesID1 = ModelFileData.ModelResourcesID "
-            "WHERE ModelFileData.FileDataID = {}", model->gamefile->fileDataId());
+        // Find ItemDisplayInfo rows whose ModelFileData has matching FileDataID
+        const auto* idiTable = WOWDB.getTable("ItemDisplayInfo");
+        const auto* texFDTable = WOWDB.getTable("TextureFileData");
+        const auto* modFDTable = WOWDB.getTable("ModelFileData");
+        const int targetFDID = model->gamefile->fileDataId();
 
-        sqlResult r = GAMEDATABASE.sqlQuery(query);
-        if (r.valid && !r.empty())
+        // Build a set of ModelResourcesIDs that match our file
+        std::set<uint32_t> matchingModelResIDs;
+        if (idiTable && texFDTable && modFDTable)
         {
-            for (size_t i = 0; i < r.values.size(); ++i)
+        for (const auto& mfdRow : *modFDTable)
+        {
+            if (static_cast<int>(mfdRow.getUInt("FileDataID")) == targetFDID)
+                matchingModelResIDs.insert(mfdRow.getUInt("ModelResourcesID"));
+        }
+
+        for (const auto& idiRow : *idiTable)
+        {
+            if (matchingModelResIDs.find(idiRow.getUInt("ModelResourcesID1")) == matchingModelResIDs.end())
+                continue;
+
+            uint32_t matResID = idiRow.getUInt("ModelMaterialResourcesID1");
+            // Find TextureFileData for this material
+            for (const auto& tfdRow : *texFDTable)
             {
-                if (r.values[i][0].empty() || r.values[i][0] == "0") continue;
+                if (tfdRow.getUInt("MaterialResourcesID") != matResID)
+                    continue;
+                uint32_t fdid = tfdRow.getUInt("FileDataID");
+                if (fdid == 0) continue;
                 SkinEntry se;
-                se.tex[0] = GAMEDIRECTORY.getFile(core::safeStoi(r.values[i][0]));
+                se.tex[0] = GAMEDIRECTORY.getFile(fdid);
                 if (!se.tex[0]) continue;
                 se.base = TEXTURE_OBJECT_SKIN;
                 se.count = 1;
@@ -1218,6 +1252,7 @@ static void initAnimationControl(WoWModel* model)
                 g_skinEntries.push_back(se);
             }
         }
+        } // if (idiTable && texFDTable && modFDTable)
     }
 
     if (!g_skinEntries.empty())
@@ -1244,75 +1279,62 @@ static void initCharacterControl(WoWModel* model)
     if (infos.raceID == -1 || infos.ChrModelID.empty())
         return;
 
-    std::string query = std::format(
-        "SELECT ID FROM ChrCustomizationOption WHERE ChrModelID = {} "
-        "AND ChrCustomizationID != 0 ORDER BY OrderIndex",
-        infos.ChrModelID[0]);
+    // Gather ChrCustomizationOption rows for this ChrModelID, sorted by OrderIndex
+    const auto* optTable = WOWDB.getTable("ChrCustomizationOption");
+    const auto* choiceTable = WOWDB.getTable("ChrCustomizationChoice");
+    if (!optTable || !choiceTable) return;
+    const uint32_t targetModelID = static_cast<uint32_t>(infos.ChrModelID[0]);
 
-    sqlResult r = GAMEDATABASE.sqlQuery(query);
-    if (!r.valid || r.empty())
-        return;
-
-    for (size_t i = 0; i < r.values.size(); ++i)
+    struct OptionEntry { uint32_t id; uint32_t orderIndex; };
+    std::vector<OptionEntry> matchingOptions;
+    for (const auto& row : *optTable)
     {
-        unsigned int optionID = static_cast<unsigned int>(std::stoul(r.values[i][0]));
+        if (row.getUInt("ChrModelID") == targetModelID && row.getUInt("ChrCustomizationID") != 0)
+            matchingOptions.push_back({ row.recordID(), row.getUInt("OrderIndex") });
+    }
+    std::sort(matchingOptions.begin(), matchingOptions.end(),
+        [](const OptionEntry& a, const OptionEntry& b) { return a.orderIndex < b.orderIndex; });
+
+    for (const auto& optEntry : matchingOptions)
+    {
+        unsigned int optionID = optEntry.id;
 
         CustomizationOption opt;
         opt.optionID = optionID;
 
         // Get option name
-        std::string nameQ = std::format(
-            "SELECT Name_Lang FROM ChrCustomizationOption WHERE ID = {}", optionID);
-        sqlResult nameR = GAMEDATABASE.sqlQuery(nameQ);
-        if (nameR.valid && !nameR.empty() && !nameR.values[0][0].empty())
-            opt.name = nameR.values[0][0];
+        auto optRow = optTable->getRow(optionID);
+        if (optRow)
+        {
+            std::string n = optRow.getString("Name_Lang");
+            opt.name = n.empty() ? ("Option " + std::to_string(optionID)) : n;
+        }
         else
+        {
             opt.name = "Option " + std::to_string(optionID);
+        }
 
         // Get available choices
         std::vector<unsigned int> choiceIDs = cd.getCustomizationChoices(optionID);
         if (choiceIDs.empty())
             continue;
 
-        // Build IN clause for choice names
-        std::string inClause;
-        for (size_t c = 0; c < choiceIDs.size(); ++c)
+        // Lookup choice names by ID
+        std::map<unsigned int, std::string> idToName;
+        for (unsigned int cid : choiceIDs)
         {
-            if (c > 0) inClause += ",";
-            inClause += std::to_string(choiceIDs[c]);
-        }
-
-        std::string choiceQ = std::format(
-            "SELECT ID, Name_Lang FROM ChrCustomizationChoice WHERE ID IN ({}) ORDER BY OrderIndex",
-            inClause);
-        sqlResult choiceR = GAMEDATABASE.sqlQuery(choiceQ);
-
-        if (choiceR.valid && !choiceR.empty())
-        {
-            // Build ordered lists from DB results
-            std::map<unsigned int, std::string> idToName;
-            for (size_t j = 0; j < choiceR.values.size(); ++j)
+            auto cRow = choiceTable->getRow(cid);
+            if (cRow)
             {
-                unsigned int cid = static_cast<unsigned int>(std::stoul(choiceR.values[j][0]));
-                std::string cname = choiceR.values[j][1].empty()
-                    ? ("Choice " + std::to_string(j))
-                    : choiceR.values[j][1];
-                idToName[cid] = cname;
-            }
-            for (unsigned int cid : choiceIDs)
-            {
-                opt.choiceIDs.push_back(cid);
-                auto it = idToName.find(cid);
-                opt.choiceNames.push_back(it != idToName.end() ? it->second : ("Choice " + std::to_string(cid)));
+                std::string cname = cRow.getString("Name_Lang");
+                idToName[cid] = cname.empty() ? ("Choice " + std::to_string(cid)) : cname;
             }
         }
-        else
+        for (unsigned int cid : choiceIDs)
         {
-            for (unsigned int cid : choiceIDs)
-            {
-                opt.choiceIDs.push_back(cid);
-                opt.choiceNames.push_back("Choice " + std::to_string(cid));
-            }
+            opt.choiceIDs.push_back(cid);
+            auto it = idToName.find(cid);
+            opt.choiceNames.push_back(it != idToName.end() ? it->second : ("Choice " + std::to_string(cid)));
         }
 
         // Determine current selection
@@ -1468,17 +1490,15 @@ static void buildItemSets()
 
     g_itemSets.clear();
 
-    sqlResult r = GAMEDATABASE.sqlQuery("SELECT ID, Name_Lang FROM ItemSet");
-    if (r.valid && !r.empty())
+    const auto* itemSetTable = WOWDB.getTable("ItemSet");
+    if (!itemSetTable) return;
+    for (const auto& row : *itemSetTable)
     {
-        for (const auto& value : r.values)
-        {
-            ItemSetEntry e;
-            e.id = core::safeStoi(value[0]);
-            e.name = value[1];
-            if (!e.name.empty())
-                g_itemSets.push_back(e);
-        }
+        ItemSetEntry e;
+        e.id = static_cast<int>(row.recordID());
+        e.name = row.getString("Name_Lang");
+        if (!e.name.empty())
+            g_itemSets.push_back(e);
     }
 
     std::sort(g_itemSets.begin(), g_itemSets.end(),
@@ -1548,22 +1568,25 @@ static void buildStartOutfits(WoWModel* model)
     if (infos.raceID == -1)
         return;
 
-    const std::string query = std::format(
-        "SELECT ChrClasses.Filename, CSO.ID "
-        "FROM CharStartOutfit AS CSO LEFT JOIN ChrClasses ON CSO.classID = ChrClasses.ID "
-        "WHERE CSO.raceID={} AND CSO.sexID={}", infos.raceID, infos.sexID);
+    const auto* csoTable = WOWDB.getTable("CharStartOutfit");
+    const auto* chrClassTable = WOWDB.getTable("ChrClasses");
+    if (!csoTable || !chrClassTable) return;
+    const uint32_t targetRace = static_cast<uint32_t>(infos.raceID);
+    const uint32_t targetSex = static_cast<uint32_t>(infos.sexID);
 
-    sqlResult r = GAMEDATABASE.sqlQuery(query);
-    if (r.valid && !r.empty())
+    for (const auto& row : *csoTable)
     {
-        for (const auto& value : r.values)
-        {
-            StartOutfitEntry e;
-            e.name = value[0];
-            e.id = core::safeStoi(value[1]);
-            if (!e.name.empty() && e.id > 0)
-                g_startOutfits.push_back(e);
-        }
+        if (row.getUInt("raceID") != targetRace || row.getUInt("sexID") != targetSex)
+            continue;
+
+        auto classRow = chrClassTable->getRow(row.getUInt("classID"));
+        std::string className = classRow ? classRow.getString("Filename") : "";
+
+        StartOutfitEntry e;
+        e.name = className;
+        e.id = static_cast<int>(row.recordID());
+        if (!e.name.empty() && e.id > 0)
+            g_startOutfits.push_back(e);
     }
 
     std::sort(g_startOutfits.begin(), g_startOutfits.end(),
@@ -1598,15 +1621,10 @@ static void applyStartOutfit(WoWModel* model, int outfitId)
     if (!model || outfitId <= 0)
         return;
 
-    const std::string query = std::format(
-        "SELECT CSO.iitem1, CSO.iitem2, CSO.iitem3, CSO.iitem4, CSO.iitem5,"
-        "CSO.iitem6, CSO.iitem7, CSO.iitem8, CSO.iitem9, CSO.iitem10, CSO.iitem11,"
-        "CSO.iitem12, CSO.iitem13, CSO.iitem14, CSO.iitem15, CSO.iitem16, CSO.iitem17, CSO.iitem18,"
-        "CSO.iitem19, CSO.iitem20, CSO.iitem21, CSO.iitem22, CSO.iitem23, CSO.iitem24 "
-        "FROM CharStartOutfit AS CSO WHERE CSO.ID={}", outfitId);
-
-    sqlResult r = GAMEDATABASE.sqlQuery(query);
-    if (!r.valid || r.empty())
+    const auto* csoTable = WOWDB.getTable("CharStartOutfit");
+    if (!csoTable) return;
+    auto csoRow = csoTable->getRow(static_cast<uint32_t>(outfitId));
+    if (!csoRow)
     {
         LOG_ERROR << "Start outfit query failed for ID " << outfitId;
         return;
@@ -1617,20 +1635,20 @@ static void applyStartOutfit(WoWModel* model, int outfitId)
         it->setId(0);
     std::memset(g_equipSlotLevels, 0, sizeof(g_equipSlotLevels));
 
-    const size_t cols = r.values[0].size();
-    for (unsigned i = 0; i < 24 && i < cols; ++i)
+    for (unsigned i = 0; i < 24; ++i)
     {
-        const auto& val = r.values[0][i];
-        if (val.empty() || val == "0")
+        std::string fieldName = "iitem" + std::to_string(i + 1);
+        uint32_t itemID = csoRow.getUInt(fieldName);
+        if (itemID == 0)
             continue;
         try
         {
-            tryToEquipItem(model, core::safeStoi(val));
+            tryToEquipItem(model, static_cast<int>(itemID));
         }
         catch (const std::exception& ex)
         {
             LOG_ERROR << "Failed to equip start outfit entry " << i
-                      << " (val=\"" << val << "\"): " << ex.what();
+                      << " (id=" << itemID << "): " << ex.what();
         }
     }
 
@@ -1643,12 +1661,10 @@ static void applyItemSet(WoWModel* model, int setId)
     if (!model || setId <= 0)
         return;
 
-    const std::string query = std::format(
-        "SELECT ItemID1, ItemID2, ItemID3, ItemID4, ItemID5, "
-        "ItemID6, ItemID7, ItemID8 FROM ItemSet WHERE ID = {}", setId);
-
-    sqlResult r = GAMEDATABASE.sqlQuery(query);
-    if (!r.valid || r.empty())
+    const auto* itemSetTable = WOWDB.getTable("ItemSet");
+    if (!itemSetTable) return;
+    auto setRow = itemSetTable->getRow(static_cast<uint32_t>(setId));
+    if (!setRow)
     {
         LOG_ERROR << "Item set query failed for ID " << setId;
         return;
@@ -1662,20 +1678,20 @@ static void applyItemSet(WoWModel* model, int setId)
     // Equip each item from the set.  WoWItem::setId() may throw
     // std::invalid_argument when downstream DB queries return empty strings
     // for items that lack appearance data — catch per-item to keep going.
-    const size_t cols = r.values[0].size();
-    for (unsigned i = 0; i < 8 && i < cols; ++i)
+    for (unsigned i = 0; i < 8; ++i)
     {
-        const auto& val = r.values[0][i];
-        if (val.empty() || val == "0")
+        std::string fieldName = "ItemID" + std::to_string(i + 1);
+        uint32_t itemID = setRow.getUInt(fieldName);
+        if (itemID == 0)
             continue;
         try
         {
-            tryToEquipItem(model, core::safeStoi(val));
+            tryToEquipItem(model, static_cast<int>(itemID));
         }
         catch (const std::exception& e)
         {
             LOG_ERROR << "Failed to equip item set entry " << i
-                      << " (val=\"" << val << "\"): " << e.what();
+                      << " (id=" << itemID << "): " << e.what();
         }
     }
 
@@ -1956,6 +1972,108 @@ static void loadCharacterPreset(const char* path)
     LOG_INFO << "Character preset loaded from " << path;
 }
 
+// ---- Character Browser helpers --------------------------------------------
+static void buildCharBrowserRaceList()
+{
+    g_charBrowserRaces.clear();
+
+    const auto* chrRaces = WOWDB.getTable("ChrRaces");
+
+    // Collect unique races from RaceInfos
+    std::map<int, CharBrowserRace> raceMap;
+    for (const auto& [fileID, info] : RaceInfos::getAllRaces())
+    {
+        auto& entry = raceMap[info.raceID];
+        entry.raceID = info.raceID;
+
+        if (entry.name.empty())
+        {
+            if (chrRaces)
+            {
+                auto row = chrRaces->getRow(static_cast<uint32_t>(info.raceID));
+                if (row)
+                    entry.name = row.getString("Name_Lang");
+            }
+            if (entry.name.empty())
+                entry.name = info.prefix.empty() ? ("Race " + std::to_string(info.raceID)) : info.prefix;
+        }
+
+        if (info.sexID == GENDER_MALE)
+        {
+            if (info.isHD) entry.hasMaleHD = true;
+            else entry.hasMale = true;
+        }
+        else
+        {
+            if (info.isHD) entry.hasFemaleHD = true;
+            else entry.hasFemale = true;
+        }
+    }
+
+    for (auto& [id, race] : raceMap)
+        g_charBrowserRaces.push_back(std::move(race));
+
+    std::sort(g_charBrowserRaces.begin(), g_charBrowserRaces.end(),
+        [](const CharBrowserRace& a, const CharBrowserRace& b) { return a.name < b.name; });
+
+    g_charBrowserFilterDirty = true;
+}
+
+static void rebuildCharBrowserFilter()
+{
+    g_charBrowserFiltered.clear();
+
+    std::string search = core::toLower(std::string(g_charBrowserSearchBuf));
+    auto s = search.find_first_not_of(" \t\r\n");
+    auto e = search.find_last_not_of(" \t\r\n");
+    search = (s == std::string::npos) ? "" : search.substr(s, e - s + 1);
+
+    for (size_t i = 0; i < g_charBrowserRaces.size(); ++i)
+    {
+        const auto& race = g_charBrowserRaces[i];
+        if (!search.empty() && !core::containsIgnoreCase(race.name, search))
+            continue;
+        g_charBrowserFiltered.push_back(i);
+    }
+
+    g_charBrowserFilterDirty = false;
+}
+
+static void loadCharBrowserRace(int raceID, int gender, bool preferHD)
+{
+    int fileID = -1;
+    int fallbackID = -1;
+
+    for (const auto& [fid, info] : RaceInfos::getAllRaces())
+    {
+        if (info.raceID == raceID && info.sexID == gender)
+        {
+            if (preferHD && info.isHD)
+            {
+                fileID = fid;
+                break;
+            }
+            else if (!preferHD && !info.isHD)
+            {
+                fileID = fid;
+                break;
+            }
+            if (fallbackID == -1)
+                fallbackID = fid;
+        }
+    }
+
+    if (fileID == -1)
+        fileID = fallbackID;
+
+    if (fileID > 0)
+    {
+        GameFile* file = GAMEDIRECTORY.getFile(fileID);
+        if (file)
+            loadModel(file);
+    }
+}
+
 // ---- NPC Browser helpers --------------------------------------------------
 static void rebuildNpcFilter()
 {
@@ -1980,26 +2098,35 @@ static void rebuildNpcFilter()
 
 static void loadNPC(unsigned int creatureID)
 {
-    std::string query = std::format(
-        "SELECT CreatureModelData.FileDataID, CreatureDisplayInfo.TextureVariationFileDataID1, "
-        "CreatureDisplayInfo.TextureVariationFileDataID2, CreatureDisplayInfo.TextureVariationFileDataID3, "
-        "CreatureDisplayInfo.ExtendedDisplayInfoID, CreatureDisplayInfo.ID FROM Creature "
-        "LEFT JOIN CreatureDisplayInfo ON Creature.DisplayID1 = CreatureDisplayInfo.ID "
-        "LEFT JOIN CreatureModelData ON CreatureDisplayInfo.modelID = CreatureModelData.ID "
-        "WHERE Creature.ID = {};", creatureID);
-
-    sqlResult r = GAMEDATABASE.sqlQuery(query);
-    if (!r.valid || r.empty())
+    // Creature ? CreatureDisplayInfo ? CreatureModelData
+    const auto* creatureTable = WOWDB.getTable("Creature");
+    if (!creatureTable) return;
+    auto creatureRow = creatureTable->getRow(creatureID);
+    if (!creatureRow)
     {
         LOG_ERROR << "NPC query failed for ID " << creatureID;
         return;
     }
 
-    const int extraId = core::safeStoi(r.values[0][4]);
+    uint32_t displayInfoID = creatureRow.getUInt("DisplayID1");
+    const auto* cdiTable = WOWDB.getTable("CreatureDisplayInfo");
+    if (!cdiTable) return;
+    auto cdiRow = cdiTable->getRow(displayInfoID);
+    if (!cdiRow)
+    {
+        LOG_ERROR << "NPC query failed for ID " << creatureID << " (no CreatureDisplayInfo for DisplayID1=" << displayInfoID << ")";
+        return;
+    }
+
+    const auto* cmdTable = WOWDB.getTable("CreatureModelData");
+    auto cmdRow = cmdTable ? cmdTable->getRow(cdiRow.getUInt("ModelID")) : DB2Row();
+    uint32_t fileDataID = cmdRow ? cmdRow.getUInt("FileDataID") : 0;
+    uint32_t extraId = cdiRow.getUInt("ExtendedDisplayInfoID");
+
     if (extraId == 0)
     {
         // Simple NPC — load model directly
-        GameFile* file = GAMEDIRECTORY.getFile(core::safeStoi(r.values[0][0]));
+        GameFile* file = GAMEDIRECTORY.getFile(fileDataID);
         if (!file) return;
         loadModel(file);
 
@@ -2007,33 +2134,29 @@ static void loadNPC(unsigned int creatureID)
         WoWModel* m = getLoadedModel();
         if (m)
         {
-            int displayID = core::safeStoi(r.values[0][5]);
-            // Find matching skin entry for this displayID
-            std::string skinQuery = std::format(
-                "SELECT TextureVariationFileDataID1, TextureVariationFileDataID2, TextureVariationFileDataID3 "
-                "FROM CreatureDisplayInfo WHERE ID = {}", displayID);
-            sqlResult sr = GAMEDATABASE.sqlQuery(skinQuery);
-            if (sr.valid && !sr.empty())
+            uint32_t texFDIDs[3] = {
+                cdiRow.getUInt("TextureVariationFileDataID1"),
+                cdiRow.getUInt("TextureVariationFileDataID2"),
+                cdiRow.getUInt("TextureVariationFileDataID3")
+            };
+            for (size_t i = 0; i < g_skinEntries.size(); ++i)
             {
-                for (size_t i = 0; i < g_skinEntries.size(); ++i)
+                bool match = true;
+                for (size_t t = 0; t < 3 && match; ++t)
                 {
-                    bool match = true;
-                    for (size_t t = 0; t < 3 && match; ++t)
+                    if (g_skinEntries[i].tex[t])
                     {
-                        if (g_skinEntries[i].tex[t])
-                        {
-                            int fdid = g_skinEntries[i].tex[t]->fileDataId();
-                            if (!sr.values[0][t].empty() && sr.values[0][t] != "0")
-                                match = (fdid == core::safeStoi(sr.values[0][t]));
-                            else
-                                match = false;
-                        }
+                        int fdid = g_skinEntries[i].tex[t]->fileDataId();
+                        if (texFDIDs[t] != 0)
+                            match = (fdid == static_cast<int>(texFDIDs[t]));
+                        else
+                            match = false;
                     }
-                    if (match)
-                    {
-                        applySkin(m, static_cast<int>(i));
-                        break;
-                    }
+                }
+                if (match)
+                {
+                    applySkin(m, static_cast<int>(i));
+                    break;
                 }
             }
         }
@@ -2041,8 +2164,7 @@ static void loadNPC(unsigned int creatureID)
     else
     {
         // Character-type NPC
-        int fileDataId = core::safeStoi(r.values[0][0]);
-        GameFile* file = GAMEDIRECTORY.getFile(RaceInfos::getHDModelForFileID(fileDataId));
+        GameFile* file = GAMEDIRECTORY.getFile(RaceInfos::getHDModelForFileID(static_cast<int>(fileDataID)));
         if (!file) return;
         loadModel(file);
 
@@ -2050,39 +2172,34 @@ static void loadNPC(unsigned int creatureID)
         if (!m) return;
 
         // Apply customization from CreatureDisplayInfoExtra
-        query = std::format(
-            "SELECT Skin, Face, HairStyle, HairColor, FacialHair FROM CreatureDisplayInfoExtra WHERE ID = {}",
-            extraId);
-        r = GAMEDATABASE.sqlQuery(query);
-        if (r.valid && !r.empty())
+        const auto* cdieTable = WOWDB.getTable("CreatureDisplayInfoExtra");
+        auto cdieRow = cdieTable ? cdieTable->getRow(extraId) : DB2Row();
+        if (cdieRow)
         {
-            m->cd.set(CharDetails::SKIN_COLOR, core::safeStoi(r.values[0][0]));
-            m->cd.set(CharDetails::FACE, core::safeStoi(r.values[0][1]));
-            m->cd.set(CharDetails::FACIAL_CUSTOMIZATION_STYLE, core::safeStoi(r.values[0][2]));
-            m->cd.set(CharDetails::FACIAL_CUSTOMIZATION_COLOR, core::safeStoi(r.values[0][3]));
-            m->cd.set(CharDetails::ADDITIONAL_FACIAL_CUSTOMIZATION, core::safeStoi(r.values[0][4]));
+            m->cd.set(CharDetails::SKIN_COLOR, static_cast<int>(cdieRow.getUInt("Skin")));
+            m->cd.set(CharDetails::FACE, static_cast<int>(cdieRow.getUInt("Face")));
+            m->cd.set(CharDetails::FACIAL_CUSTOMIZATION_STYLE, static_cast<int>(cdieRow.getUInt("HairStyle")));
+            m->cd.set(CharDetails::FACIAL_CUSTOMIZATION_COLOR, static_cast<int>(cdieRow.getUInt("HairColor")));
+            m->cd.set(CharDetails::ADDITIONAL_FACIAL_CUSTOMIZATION, static_cast<int>(cdieRow.getUInt("FacialHair")));
         }
 
         // Apply equipment from NpcModelItemSlotDisplayInfo
-        query = std::format(
-            "SELECT ItemDisplayInfoID, ItemSlot FROM NpcModelItemSlotDisplayInfo WHERE NpcModelID = {}",
-            extraId);
-        r = GAMEDATABASE.sqlQuery(query);
-        if (r.valid && !r.empty())
+        const auto* npcSlotTable = WOWDB.getTable("NpcModelItemSlotDisplayInfo");
+        static const std::map<int, CharSlots> ItemTypeToInternal = {
+            {0, CS_HEAD}, {1, CS_SHOULDER}, {2, CS_SHIRT}, {3, CS_CHEST}, {4, CS_BELT}, {5, CS_PANTS},
+            {6, CS_BOOTS}, {7, CS_BRACERS}, {8, CS_GLOVES}, {9, CS_TABARD}, {10, CS_CAPE}
+        };
+        if (npcSlotTable)
+        for (const auto& npcRow : *npcSlotTable)
         {
-            static const std::map<int, CharSlots> ItemTypeToInternal = {
-                {0, CS_HEAD}, {1, CS_SHOULDER}, {2, CS_SHIRT}, {3, CS_CHEST}, {4, CS_BELT}, {5, CS_PANTS},
-                {6, CS_BOOTS}, {7, CS_BRACERS}, {8, CS_GLOVES}, {9, CS_TABARD}, {10, CS_CAPE}
-            };
-            for (const auto& value : r.values)
+            if (npcRow.getUInt("NpcModelID") != extraId)
+                continue;
+            auto it = ItemTypeToInternal.find(static_cast<int>(npcRow.getUInt("ItemSlot")));
+            if (it != ItemTypeToInternal.end())
             {
-                auto it = ItemTypeToInternal.find(core::safeStoi(value[1]));
-                if (it != ItemTypeToInternal.end())
-                {
-                    WoWItem* item = m->getItem(it->second);
-                    if (item)
-                        item->setDisplayId(core::safeStoi(value[0]));
-                }
+                WoWItem* item = m->getItem(it->second);
+                if (item)
+                    item->setDisplayId(static_cast<int>(npcRow.getUInt("ItemDisplayInfoID")));
             }
         }
 
@@ -2117,35 +2234,70 @@ static void loadItemModel(unsigned int itemId)
 {
     try
     {
-        const std::string query = std::format(
-            "SELECT ModelFileData.FileDataID, TextureFileData.FileDataID, ItemDisplayInfo.ID FROM ItemDisplayInfo "
-            "LEFT JOIN ModelFileData ON ItemDisplayInfo.ModelResourcesID1 = ModelFileData.ModelResourcesID "
-            "LEFT JOIN TextureFileData ON ItemDisplayInfo.ModelMaterialResourcesID1 = TextureFileData.MaterialResourcesID "
-            "WHERE ItemDisplayInfo.ID = (SELECT ItemDisplayInfoID FROM ItemAppearance WHERE ItemAppearance.ID = "
-            "(SELECT ItemAppearanceID FROM ItemModifiedAppearance WHERE ItemID = {}))", itemId);
+        // ItemModifiedAppearance ? ItemAppearance ? ItemDisplayInfo ? ModelFileData/TextureFileData
+        const auto* imaTable = WOWDB.getTable("ItemModifiedAppearance");
+        const auto* iaTable = WOWDB.getTable("ItemAppearance");
+        const auto* idiTable = WOWDB.getTable("ItemDisplayInfo");
+        const auto* modFDTable = WOWDB.getTable("ModelFileData");
+        const auto* texFDTable = WOWDB.getTable("TextureFileData");
+        if (!imaTable || !iaTable || !idiTable || !modFDTable || !texFDTable) return;
 
-        sqlResult r = GAMEDATABASE.sqlQuery(query);
-        if (!r.valid || r.empty())
+        // Find ItemModifiedAppearance for this item
+        uint32_t itemAppearanceID = 0;
+        for (const auto& row : *imaTable)
         {
-            LOG_ERROR << "Item model query failed for ID " << itemId;
-            return;
+            if (row.getUInt("ItemID") == itemId)
+            {
+                itemAppearanceID = row.getUInt("ItemAppearanceID");
+                break;
+            }
         }
+        if (itemAppearanceID == 0) return;
 
-        if (r.values[0][0].empty() || r.values[0][0] == "0")
-            return;
+        auto iaRow = iaTable->getRow(itemAppearanceID);
+        if (!iaRow) return;
 
-        GameFile* file = GAMEDIRECTORY.getFile(core::safeStoi(r.values[0][0]));
+        uint32_t displayInfoID = iaRow.getUInt("ItemDisplayInfoID");
+        auto idiRow = idiTable->getRow(displayInfoID);
+        if (!idiRow) return;
+
+        // Find model file
+        uint32_t modelResID = idiRow.getUInt("ModelResourcesID1");
+        uint32_t modelFDID = 0;
+        for (const auto& mfdRow : *modFDTable)
+        {
+            if (mfdRow.getUInt("ModelResourcesID") == modelResID)
+            {
+                modelFDID = mfdRow.getUInt("FileDataID");
+                break;
+            }
+        }
+        if (modelFDID == 0) return;
+
+        GameFile* file = GAMEDIRECTORY.getFile(modelFDID);
         if (!file) return;
 
         loadModel(file);
 
         // Apply texture if available
         WoWModel* m = getLoadedModel();
-        if (m && !r.values[0][1].empty() && r.values[0][1] != "0")
+        if (m)
         {
-            GameFile* texFile = GAMEDIRECTORY.getFile(core::safeStoi(r.values[0][1]));
-            if (texFile)
-                m->updateTextureList(texFile, TEXTURE_OBJECT_SKIN);
+            uint32_t matResID = idiRow.getUInt("ModelMaterialResourcesID1");
+            for (const auto& tfdRow : *texFDTable)
+            {
+                if (tfdRow.getUInt("MaterialResourcesID") == matResID)
+                {
+                    uint32_t texFDID = tfdRow.getUInt("FileDataID");
+                    if (texFDID != 0)
+                    {
+                        GameFile* texFile = GAMEDIRECTORY.getFile(texFDID);
+                        if (texFile)
+                            m->updateTextureList(texFile, TEXTURE_OBJECT_SKIN);
+                    }
+                    break;
+                }
+            }
         }
     }
     catch (...)
@@ -2165,21 +2317,20 @@ static void buildMountList()
     g_creatureModelNames.clear();
 
     // Player mounts from MountXDisplay DB
-    sqlResult r = GAMEDATABASE.sqlQuery(
-        "SELECT MountXDisplay.CreatureDisplayInfoID, Mount.Name_Lang "
-        "FROM Mount LEFT JOIN MountXDisplay ON Mount.ID = MountXDisplay.MountID");
-    if (r.valid && !r.empty())
+    const auto* mountTable = WOWDB.getTable("Mount");
+    const auto* mxdTable = WOWDB.getTable("MountXDisplay");
+    if (mountTable && mxdTable)
+    for (const auto& mxdRow : *mxdTable)
     {
-        for (auto& value : r.values)
-        {
-            MountEntry me;
-            me.displayID = core::safeStoi(value[0]);
-            me.name = value[1];
-            g_mountList.push_back(me);
-        }
-        std::sort(g_mountList.begin(), g_mountList.end(),
-            [](const MountEntry& a, const MountEntry& b) { return a.name < b.name; });
+        uint32_t mountID = mxdRow.getUInt("MountID");
+        auto mountRow = mountTable->getRow(mountID);
+        MountEntry me;
+        me.displayID = static_cast<int>(mxdRow.getUInt("CreatureDisplayInfoID"));
+        me.name = mountRow ? mountRow.getString("Name_Lang") : "";
+        g_mountList.push_back(me);
     }
+    std::sort(g_mountList.begin(), g_mountList.end(),
+        [](const MountEntry& a, const MountEntry& b) { return a.name < b.name; });
     LOG_INFO << "Mount list: " << g_mountList.size() << " player mounts.";
 
     // All creature/*.m2 files
@@ -2260,19 +2411,25 @@ static void mountCharacter(int displayID, GameFile* creatureFile)
 
     if (displayID > 0)
     {
-        // Player mount — lookup model file from CreatureDisplayInfo
+        // Player mount — lookup model file from CreatureDisplayInfo ? CreatureModelData
         morphID = displayID;
-        std::string query = std::format(
-            "SELECT CreatureModelData.FileDataID FROM CreatureDisplayInfo "
-            "LEFT JOIN CreatureModelData ON CreatureDisplayInfo.modelID = CreatureModelData.ID "
-            "WHERE CreatureDisplayInfo.ID = {};", displayID);
-        sqlResult r = GAMEDATABASE.sqlQuery(query);
-        if (!r.valid || r.empty() || r.values[0][0].empty() || r.values[0][0] == "0")
+        const auto* cdiTable = WOWDB.getTable("CreatureDisplayInfo");
+        const auto* cmdTable = WOWDB.getTable("CreatureModelData");
+        if (!cdiTable || !cmdTable) return;
+        auto cdiRow = cdiTable->getRow(static_cast<uint32_t>(displayID));
+        if (!cdiRow)
         {
             LOG_ERROR << "Mount display query failed for displayID " << displayID;
             return;
         }
-        modelFile = GAMEDIRECTORY.getFile(core::safeStoi(r.values[0][0]));
+        auto cmdRow = cmdTable->getRow(cdiRow.getUInt("ModelID"));
+        uint32_t mountFDID = cmdRow ? cmdRow.getUInt("FileDataID") : 0;
+        if (mountFDID == 0)
+        {
+            LOG_ERROR << "Mount display query failed for displayID " << displayID;
+            return;
+        }
+        modelFile = GAMEDIRECTORY.getFile(mountFDID);
     }
     else if (creatureFile)
     {
@@ -2304,17 +2461,22 @@ static void mountCharacter(int displayID, GameFile* creatureFile)
     // Apply mount skin/texture if it's a DB mount
     if (morphID > 0)
     {
-        std::string texQuery = std::format(
-            "SELECT TextureVariationFileDataID1, TextureVariationFileDataID2, TextureVariationFileDataID3 "
-            "FROM CreatureDisplayInfo WHERE ID = {}", morphID);
-        sqlResult tr = GAMEDATABASE.sqlQuery(texQuery);
-        if (tr.valid && !tr.empty())
+        const auto* cdiTexTable = WOWDB.getTable("CreatureDisplayInfo");
+        if (!cdiTexTable) return;
+        auto cdiTexRow = cdiTexTable->getRow(static_cast<uint32_t>(morphID));
+        if (cdiTexRow)
         {
+            static const char* texFields[] = {
+                "TextureVariationFileDataID1",
+                "TextureVariationFileDataID2",
+                "TextureVariationFileDataID3"
+            };
             for (size_t t = 0; t < 3; ++t)
             {
-                if (!tr.values[0][t].empty() && tr.values[0][t] != "0")
+                uint32_t texFDID = cdiTexRow.getUInt(texFields[t]);
+                if (texFDID != 0)
                 {
-                    GameFile* texFile = GAMEDIRECTORY.getFile(core::safeStoi(tr.values[0][t]));
+                    GameFile* texFile = GAMEDIRECTORY.getFile(texFDID);
                     if (texFile)
                         mountModel->updateTextureList(texFile, TEXTURE_GAMEOBJECT1 + static_cast<int>(t));
                 }
@@ -2902,20 +3064,29 @@ static void applyImportedNPC(NPCInfos* info)
         return;
     }
 
-    // Use the existing loadNPC path via creature display ID
-    std::string query = std::format(
-        "SELECT CreatureModelData.FileDataID FROM CreatureDisplayInfo "
-        "LEFT JOIN CreatureModelData ON CreatureDisplayInfo.modelID = CreatureModelData.ID "
-        "WHERE CreatureDisplayInfo.ID = {};", info->displayId);
-
-    sqlResult r = GAMEDATABASE.sqlQuery(query);
-    if (!r.valid || r.empty() || r.values[0][0].empty() || r.values[0][0] == "0")
+    // Use DB2Table to resolve CreatureDisplayInfo ? CreatureModelData ? FileDataID
+    const auto* cdiTable = WOWDB.getTable("CreatureDisplayInfo");
+    const auto* cmdTable = WOWDB.getTable("CreatureModelData");
+    if (!cdiTable || !cmdTable)
+    {
+        g_importStatus = "NPC display ID " + std::to_string(info->displayId) + " not found in database.";
+        return;
+    }
+    auto cdiRow = cdiTable->getRow(static_cast<uint32_t>(info->displayId));
+    if (!cdiRow)
+    {
+        g_importStatus = "NPC display ID " + std::to_string(info->displayId) + " not found in database.";
+        return;
+    }
+    auto cmdRow = cmdTable->getRow(cdiRow.getUInt("ModelID"));
+    uint32_t npcFDID = cmdRow ? cmdRow.getUInt("FileDataID") : 0;
+    if (npcFDID == 0)
     {
         g_importStatus = "NPC display ID " + std::to_string(info->displayId) + " not found in database.";
         return;
     }
 
-    GameFile* file = GAMEDIRECTORY.getFile(core::safeStoi(r.values[0][0]));
+    GameFile* file = GAMEDIRECTORY.getFile(npcFDID);
     if (!file)
     {
         g_importStatus = "NPC model file not found.";
@@ -3191,6 +3362,7 @@ int main(int /*argc*/, char* /*argv*/[])
             ImGui::DockBuilderSplitNode(dock_center, ImGuiDir_Down, 0.25f, &dock_bottom, &dock_center);
 
             ImGui::DockBuilderDockWindow("File Browser", dock_left);
+            ImGui::DockBuilderDockWindow("Character Browser", dock_left);
             ImGui::DockBuilderDockWindow("NPC Browser", dock_left);
             ImGui::DockBuilderDockWindow("Item Browser", dock_left);
             ImGui::DockBuilderDockWindow("Settings", dock_left);
@@ -3241,6 +3413,7 @@ int main(int /*argc*/, char* /*argv*/[])
                 ImGui::MenuItem("Model Control", nullptr, &g_showModelControl);
                 ImGui::MenuItem("Character", nullptr, &g_showCharacter);
                 ImGui::MenuItem("Lighting", nullptr, &g_showLighting);
+                ImGui::MenuItem("Character Browser", nullptr, &g_showCharBrowser);
                 ImGui::MenuItem("NPC Browser", nullptr, &g_showNpcBrowser);
                 ImGui::MenuItem("Item Browser", nullptr, &g_showItemBrowser);
                 ImGui::MenuItem("Export", nullptr, &g_showExport);
@@ -4247,6 +4420,76 @@ int main(int /*argc*/, char* /*argv*/[])
                 g_light.specular[0] = 0.0f; g_light.specular[1] = 0.0f; g_light.specular[2] = 0.0f;
                 g_light.intensity = 0.5f;
                 g_light.enabled = true;
+            }
+        }
+        ImGui::End();
+        }
+
+        // ===== Character Browser panel =====
+        if (g_showCharBrowser)
+        {
+        if (ImGui::Begin("Character Browser", &g_showCharBrowser))
+        {
+            if (!g_isWoWLoaded || !g_initDB)
+            {
+                ImGui::TextDisabled("Game not loaded.");
+            }
+            else
+            {
+                if (!g_charBrowserBuilt)
+                {
+                    buildCharBrowserRaceList();
+                    g_charBrowserBuilt = true;
+                }
+
+                // Gender selection
+                ImGui::RadioButton("Male", &g_charBrowserGender, 0);
+                ImGui::SameLine();
+                ImGui::RadioButton("Female", &g_charBrowserGender, 1);
+                ImGui::Checkbox("Prefer HD model", &g_charBrowserPreferHD);
+
+                ImGui::Separator();
+
+                // Search
+                ImGui::Text("Search:");
+                ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x - 60.0f);
+                if (ImGui::InputText("##charBrowserSearch", g_charBrowserSearchBuf, sizeof(g_charBrowserSearchBuf),
+                                     ImGuiInputTextFlags_EnterReturnsTrue))
+                    g_charBrowserFilterDirty = true;
+                ImGui::SameLine();
+                if (ImGui::Button("Apply##charBrowser", ImVec2(-1, 0)))
+                    g_charBrowserFilterDirty = true;
+
+                if (g_charBrowserFilterDirty)
+                    rebuildCharBrowserFilter();
+
+                ImGui::Text("%d races", static_cast<int>(g_charBrowserFiltered.size()));
+                ImGui::Separator();
+
+                ImGui::BeginChild("##CharRaceList", ImVec2(0, 0), ImGuiChildFlags_None);
+                ImGuiListClipper clipper;
+                clipper.Begin(static_cast<int>(g_charBrowserFiltered.size()));
+                while (clipper.Step())
+                {
+                    for (int i = clipper.DisplayStart; i < clipper.DisplayEnd; ++i)
+                    {
+                        const auto& race = g_charBrowserRaces[g_charBrowserFiltered[i]];
+                        ImGui::PushID(race.raceID);
+
+                        bool hasGender = (g_charBrowserGender == GENDER_MALE)
+                            ? (race.hasMale || race.hasMaleHD)
+                            : (race.hasFemale || race.hasFemaleHD);
+
+                        if (!hasGender) ImGui::BeginDisabled();
+
+                        if (ImGui::Selectable(race.name.c_str()))
+                            loadCharBrowserRace(race.raceID, g_charBrowserGender, g_charBrowserPreferHD);
+
+                        if (!hasGender) ImGui::EndDisabled();
+                        ImGui::PopID();
+                    }
+                }
+                ImGui::EndChild();
             }
         }
         ImGui::End();

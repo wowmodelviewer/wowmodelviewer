@@ -45,6 +45,7 @@ bool GameFile::open(bool useMemoryBuffer /* = true */)
 
 	eof = true;
 
+	LOG_INFO << "GameFile::open - openFile() for " << filepath;
 	if (!openFile())
 		return false;
 
@@ -52,17 +53,21 @@ bool GameFile::open(bool useMemoryBuffer /* = true */)
 
 	if (getFileSize(size))
 	{
+		LOG_INFO << "GameFile::open - size=" << size << " buffered=" << m_useMemoryBuffer << " for " << filepath;
 		if (m_useMemoryBuffer)
 		{
 			allocate(size);
 
+			LOG_INFO << "GameFile::open - readFile() for " << filepath;
 			if (readFile() != 0)
 				eof = false;
 
+			LOG_INFO << "GameFile::open - doPostOpenOperation() for " << filepath;
 			doPostOpenOperation();
 		}
 	}
 
+	LOG_INFO << "GameFile::open - done for " << filepath;
 	return true;
 }
 

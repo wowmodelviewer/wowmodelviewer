@@ -4,6 +4,7 @@
 #include <map>
 #include <string>
 
+#include "DB2Table.h"
 #include "Game.h"
 #include "GameFile.h"
 #include "Texture.h"
@@ -63,41 +64,54 @@ void CharTexture::compose(GLuint texID)
 
 void CharTexture::initRegions()
 {
-	auto layouts = GAMEDATABASE.sqlQuery("SELECT ID, Width, Height FROM CharComponentTextureLayouts");
-
-	if (!layouts.valid || layouts.empty())
+	const DB2Table* layoutsTbl = WOWDB.getTable("CharComponentTextureLayouts");
+	if (!layoutsTbl || layoutsTbl->getRowCount() == 0)
 	{
 		LOG_ERROR << "Fail to retrieve Texture Layout information from game database";
 		return;
 	}
 
-	// Iterate on layout to initialize our members (sections informations)
-	for (auto& value : layouts.values)
+	const DB2Table* sectionsTbl = WOWDB.getTable("CharComponentTextureSections");
+	if (!sectionsTbl || sectionsTbl->getRowCount() == 0)
 	{
-		LayoutSize texLayout = {std::stoi(value[1]), std::stoi(value[2])};
-		auto curLayout = std::stoi(value[0]);
+		LOG_ERROR << "Fail to retrieve Section Layout information from game database";
+		return;
+	}
 
-		// search all regions for this layout
-		auto regions = GAMEDATABASE.sqlQuery(
-			"SELECT SectionType, X, Y, Width, Height  FROM CharComponentTextureSections WHERE CharComponentTextureLayoutID = "
-			+ std::to_string(curLayout));
-
-		if (!regions.valid || regions.empty())
-		{
-			LOG_ERROR << "Fail to retrieve Section Layout information from game database for layout" << curLayout;
-			continue;
-		}
+	// Iterate on layout to initialize our members (sections informations)
+	for (const auto& layoutRow : *layoutsTbl)
+	{
+		const int curLayout = static_cast<int>(layoutRow.recordID());
+		LayoutSize texLayout = {static_cast<int>(layoutRow.getUInt("Width")),
+								static_cast<int>(layoutRow.getUInt("Height"))};
 
 		std::map<int, CharRegionCoords> regionCoords;
 		const CharRegionCoords base = {0, 0, texLayout.width, texLayout.height};
 		regionCoords[LAYOUT_BASE_REGION] = base;
 
-		for (auto& r : regions.values)
+		// search all regions for this layout
+		bool found = false;
+		for (const auto& secRow : *sectionsTbl)
 		{
-			const CharRegionCoords coords = {std::stoi(r[1]), std::stoi(r[2]), std::stoi(r[3]), std::stoi(r[4])};
-			//LOG_INFO << regions.values[r][0].toInt()+1 << " " << coords.xpos << " " << coords.ypos << " " << coords.width << " " << coords.height << std::endl;
-			regionCoords[std::stoi(r[0])] = coords;
+			if (static_cast<int>(secRow.getUInt("CharComponentTextureLayoutID")) != curLayout)
+				continue;
+
+			found = true;
+			const CharRegionCoords coords = {
+				static_cast<int>(secRow.getUInt("X")),
+				static_cast<int>(secRow.getUInt("Y")),
+				static_cast<int>(secRow.getUInt("Width")),
+				static_cast<int>(secRow.getUInt("Height"))
+			};
+			regionCoords[static_cast<int>(secRow.getUInt("SectionType"))] = coords;
 		}
+
+		if (!found)
+		{
+			LOG_ERROR << "Fail to retrieve Section Layout information from game database for layout" << curLayout;
+			continue;
+		}
+
 		LOG_INFO << "Found" << regionCoords.size() << "regions for layout" << curLayout;
 		CharTexture::LAYOUTS[curLayout] = make_pair(texLayout, regionCoords);
 	}

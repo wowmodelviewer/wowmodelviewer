@@ -7,7 +7,7 @@
 #include <cstring>
 #include <sstream>
 
-#define WDC_READ_DEBUG 0
+#define WDC_READ_DEBUG 1
 
 // ── magic constants ──────────────────────────────────────────────────────────
 static constexpr uint32_t MAGIC_WDC2 = 0x32434457; // 'WDC2'
@@ -115,6 +115,10 @@ bool WDCReader::open()
 			 << "flags=0x" << std::hex << m_header.flags << std::dec;
 #endif
 
+	LOG_INFO << "WDCReader step 1 done: version=" << m_wdcVersion
+			 << " fileSize=" << m_fileDataSize << " pos=" << getPos()
+			 << " for " << fullname();
+
 	// ── 2. Section headers ───────────────────────────────────────────────
 	const uint32_t sectionCount = m_header.section_count;
 	m_sections.resize(sectionCount);
@@ -154,6 +158,9 @@ bool WDCReader::open()
 		}
 	}
 
+	LOG_INFO << "WDCReader step 2 done: sectionCount=" << sectionCount
+			 << " pos=" << getPos() << " for " << fullname();
+
 	// ── 3. Field structures ──────────────────────────────────────────────
 	{
 		std::vector<FieldStructure> fields(m_header.total_field_count);
@@ -162,6 +169,9 @@ bool WDCReader::open()
 			m_fieldSizes[fields[i].position] = fields[i].size;
 	}
 
+	LOG_INFO << "WDCReader step 3 done: totalFieldCount=" << m_header.total_field_count
+			 << " pos=" << getPos() << " for " << fullname();
+
 	// ── 4. Field storage info ────────────────────────────────────────────
 	if (m_header.field_storage_info_size > 0)
 	{
@@ -169,6 +179,9 @@ bool WDCReader::open()
 		m_fieldStorageInfo.resize(count);
 		read(m_fieldStorageInfo.data(), m_header.field_storage_info_size);
 	}
+
+	LOG_INFO << "WDCReader step 4 done: fieldStorageInfoSize=" << m_header.field_storage_info_size
+			 << " pos=" << getPos() << " for " << fullname();
 
 	// ── 5. Pallet data ──────────────────────────────────────────────────
 	if (m_header.pallet_data_size > 0)
@@ -190,6 +203,9 @@ bool WDCReader::open()
 			fieldId++;
 		}
 	}
+
+	LOG_INFO << "WDCReader step 5 done: palletDataSize=" << m_header.pallet_data_size
+			 << " pos=" << getPos() << " for " << fullname();
 
 	// ── 6. Common data ──────────────────────────────────────────────────
 	if (m_header.common_data_size > 0)
@@ -220,8 +236,11 @@ bool WDCReader::open()
 		delete[] commonRaw;
 	}
 
+	LOG_INFO << "WDCReader step 6 done: commonDataSize=" << m_header.common_data_size
+			 << " pos=" << getPos() << " for " << fullname();
+
 	// ── 7. WDC4+ inter-section data (skip) ──────────────────────────────
-	if (m_wdcVersion > 3)
+	if (m_wdcVersion > 3 && sectionCount > 1)
 	{
 		for (uint32_t si = 0; si < sectionCount - 1; si++)
 		{
@@ -231,12 +250,26 @@ bool WDCReader::open()
 		}
 	}
 
+	LOG_INFO << "WDCReader step 7 done: pos=" << getPos()
+			 << " eof=" << isEof() << " for " << fullname();
+
 	// ── 8. Data sections ────────────────────────────────────────────────
 	uint32_t previousStringTableSize = 0;
 
 	for (uint32_t si = 0; si < sectionCount; si++)
 	{
 		SectionData& sec = m_sections[si];
+
+		LOG_INFO << "WDCReader step 8: section " << si
+				 << " recordCount=" << sec.recordCount
+				 << " stringTableSize=" << sec.stringTableSize
+				 << " idListSize=" << sec.idListSize
+				 << " copyTableCount=" << sec.copyTableCount
+				 << " relDataSize=" << sec.relationshipDataSize
+				 << " offsetMapIdCount=" << sec.offsetMapIdCount
+				 << " tactKey=" << sec.tactKeyHash
+				 << " pos=" << getPos()
+				 << " for " << fullname();
 
 		const uint32_t recordDataOfs = static_cast<uint32_t>(getPos());
 		const uint32_t recordDataSize = sec.isNormal
@@ -322,12 +355,20 @@ bool WDCReader::open()
 			seekRelative(sec.offsetMapIdCount * 4);
 	}
 
+	LOG_INFO << "WDCReader step 8 done: data sections parsed, pos=" << getPos()
+			 << " eof=" << isEof() << " for " << fullname();
+
 	// ── 9. Detect encrypted sections & build record locations ───────────
 	recordCount = 0;
 
 	for (uint32_t si = 0; si < sectionCount; si++)
 	{
 		SectionData& sec = m_sections[si];
+
+		LOG_INFO << "WDCReader step 9: section " << si
+				 << " recordDataSize=" << sec.recordDataSize
+				 << " tactKey=" << sec.tactKeyHash
+				 << " for " << fullname();
 
 		// Encrypted section detection
 		if (sec.tactKeyHash != 0)
@@ -420,6 +461,9 @@ bool WDCReader::open()
 		recordCount += sec.recordCount;
 	}
 
+	LOG_INFO << "WDCReader step 9 done: recordLocations=" << m_recordLocations.size()
+			 << " for " << fullname();
+
 	// ── 10. Inflate copy table ──────────────────────────────────────────
 	// Build a recordID -> RecordLocation map for source lookup
 	std::unordered_map<uint32_t, size_t> idToLocationIndex;
@@ -438,6 +482,17 @@ bool WDCReader::open()
 	}
 
 	recordCount = m_recordLocations.size();
+
+	LOG_INFO << "WDCReader step 10 done: totalRecords=" << recordCount
+			 << " copyTable=" << m_copyTable.size() << " for " << fullname();
+
+	// Build ID-to-record-index lookup for O(1) getRow() by ID
+	m_idToRecordIndex.clear();
+	m_idToRecordIndex.reserve(m_recordLocations.size());
+	for (size_t i = 0; i < m_recordLocations.size(); i++)
+		m_idToRecordIndex[m_recordLocations[i].recordID] = i;
+
+	LOG_INFO << "WDCReader step 11 done: idToRecordIndex built for " << fullname();
 
 	// Populate relationship reverse lookup using a map for O(1) lookups
 	{

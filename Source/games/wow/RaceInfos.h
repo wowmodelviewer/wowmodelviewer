@@ -27,6 +27,7 @@ public:
 	static int getHDModelForFileID(int);
 	static bool getRaceInfosForFileID(int, RaceInfos&);
 	static int getFileIDForRaceSex(const int& race, const int& sex);
+	static const std::map<int, RaceInfos>& getAllRaces() { return RACES; }
 
 private:
 	static std::map<int, RaceInfos> RACES;

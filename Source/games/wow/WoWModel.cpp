@@ -7,8 +7,10 @@
 #include <vector>
 #include <map>
 #include <string>
+#include "AnimMapper.h"
 #include "Attachment.h"
 #include "CASCFile.h"
+#include "DB2Table.h"
 #include "Game.h"
 #include "GlobalSettings.h"
 #include "ModelColor.h"
@@ -811,14 +813,16 @@ void WoWModel::initCommon()
 	else
 		initStatic();
 
-	std::string query = std::format("SELECT CreatureGeosetDataID "
-			"FROM CreatureModelData "
-			"WHERE FileDataID = {}",
-		gamefile->fileDataId());
-	sqlResult r = GAMEDATABASE.sqlQuery(query);
-	if (r.valid && !r.values.empty())
+	if (const DB2Table* cmdTbl = WOWDB.getTable("CreatureModelData"))
 	{
-		creatureGeosetDataID = core::safeStoi(r.values[0][0]);
+		for (const auto& row : *cmdTbl)
+		{
+			if (row.getUInt("FileDataID") == static_cast<uint32_t>(gamefile->fileDataId()))
+			{
+				creatureGeosetDataID = static_cast<int>(row.getUInt("CreatureGeosetDataID"));
+				break;
+			}
+		}
 	}
 
 	gamefile->close();
@@ -4278,20 +4282,52 @@ void WoWModel::refresh()
 
 	if (headItemId != -1 && cd.autoHideGeosetsForHeadItems)
 	{
-		const auto query = std::format("SELECT HideGeosetGroup FROM HelmetGeosetData WHERE HelmetGeosetData.RaceID = {} "
-							   "AND HelmetGeosetData.HelmetGeosetVisDataID = (SELECT {} FROM ItemDisplayInfo WHERE ItemDisplayInfo.ID = "
-							   "(SELECT ItemDisplayInfoID FROM ItemAppearance WHERE ID = (SELECT ItemAppearanceID FROM ItemModifiedAppearance WHERE ItemID = {})))",
-						   infos.raceID,
-						   (infos.sexID == 0) ? "HelmetGeosetVis1" : "HelmetGeosetVis2",
-						   headItemId);
+		// Resolve: ItemModifiedAppearance(ItemID) -> ItemAppearanceID -> ItemAppearance -> ItemDisplayInfoID
+		//          -> ItemDisplayInfo -> HelmetGeosetVis1/2 -> HelmetGeosetData(RaceID, HelmetGeosetVisDataID) -> HideGeosetGroup
+		uint32_t helmetGeosetVisDataID = 0;
 
-		const auto helmetInfos = GAMEDATABASE.sqlQuery(query);
-
-		if (helmetInfos.valid && !helmetInfos.values.empty())
+		if (const DB2Table* imaTbl = WOWDB.getTable("ItemModifiedAppearance"))
 		{
-			for (auto it : helmetInfos.values)
+			for (const auto& imaRow : *imaTbl)
 			{
-				setGeosetGroupDisplay(static_cast<CharGeosets>(core::safeStoi(it[0])), 0);
+				if (static_cast<int>(imaRow.getUInt("ItemID")) == headItemId)
+				{
+					const uint32_t itemAppearanceID = imaRow.getUInt("ItemAppearanceID");
+					if (const DB2Table* iaTbl = WOWDB.getTable("ItemAppearance"))
+					{
+						DB2Row iaRow = iaTbl->getRow(itemAppearanceID);
+						if (iaRow)
+						{
+							const uint32_t displayInfoID = iaRow.getUInt("ItemDisplayInfoID");
+							if (const DB2Table* idiTbl = WOWDB.getTable("ItemDisplayInfo"))
+							{
+								DB2Row idiRow = idiTbl->getRow(displayInfoID);
+								if (idiRow)
+								{
+									helmetGeosetVisDataID = (infos.sexID == 0)
+										? idiRow.getUInt("HelmetGeosetVis1")
+										: idiRow.getUInt("HelmetGeosetVis2");
+								}
+							}
+						}
+					}
+					break;
+				}
+			}
+		}
+
+		if (helmetGeosetVisDataID != 0)
+		{
+			if (const DB2Table* hgdTbl = WOWDB.getTable("HelmetGeosetData"))
+			{
+				for (const auto& hgdRow : *hgdTbl)
+				{
+					if (static_cast<int>(hgdRow.getUInt("RaceID")) == infos.raceID &&
+						hgdRow.getUInt("HelmetGeosetVisDataID") == helmetGeosetVisDataID)
+					{
+						setGeosetGroupDisplay(static_cast<CharGeosets>(hgdRow.getUInt("HideGeosetGroup")), 0);
+					}
+				}
 			}
 		}
 	}
@@ -4510,13 +4546,7 @@ std::ostream& operator<<(std::ostream& out, const WoWModel& m)
 	{
 		out << "    <Animation id=\"" << i << "\">" << endl;
 		out << "      <animID>" << m.anims[i].animID << "</animID>" << endl;
-		std::string strName;
-		std::string query = std::format("SELECT Name FROM AnimationData WHERE ID = {}", m.anims[i].animID);
-		sqlResult anim = GAMEDATABASE.sqlQuery(query);
-		if (anim.valid && !anim.empty())
-			strName = anim.values[0][0];
-		else
-			strName = "???";
+		std::string strName = AnimMapper::getAnimName(m.anims[i].animID);
 		out << "      <animName>" << strName << "</animName>" << endl;
 		out << "      <length>" << m.anims[i].length << "</length>" << endl;
 		out << "      <moveSpeed>" << m.anims[i].moveSpeed << "</moveSpeed>" << endl;

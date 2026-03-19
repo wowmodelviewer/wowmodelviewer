@@ -1,4 +1,5 @@
 #include "WoWDatabase.h"
+#include "DB2Table.h"
 #include "Game.h"
 #include "logger/Logger.h"
 #include "wdb2file.h"
@@ -18,6 +19,73 @@ const std::vector<std::string> POSSIBLE_DB_EXT = {".db2", ".dbc"};
 
 wow::WoWDatabase::WoWDatabase()
 {
+}
+
+wow::WoWDatabase::~WoWDatabase()
+{
+	for (auto& [name, table] : m_tables)
+		delete table;
+}
+
+const DB2Table* wow::WoWDatabase::getTable(const std::string& name)
+{
+	auto it = m_tables.find(name);
+	if (it != m_tables.end())
+		return it->second;
+
+	DB2Table* table = buildDB2Table(name);
+	m_tables[name] = table;
+	return table;
+}
+
+DB2Table* wow::WoWDatabase::buildDB2Table(const std::string& tableName)
+{
+	LOG_INFO << "buildDB2Table: start for " << tableName;
+
+	LOG_INFO << "buildDB2Table: buildTableStructure for " << tableName;
+	core::TableStructure* tblStruct = buildTableStructure(tableName);
+	if (!tblStruct)
+		return nullptr;
+
+	// Build DB2FieldInfo vector from the TableStructure
+	std::vector<DB2FieldInfo> fields;
+	for (auto* f : tblStruct->fields)
+	{
+		auto* wf = dynamic_cast<wow::FieldStructure*>(f);
+		DB2FieldInfo info;
+		info.name = f->name;
+		info.type = f->type;
+		info.pos = wf ? wf->pos : -1;
+		info.arraySize = f->arraySize;
+		info.isKey = f->isKey;
+		info.isRelationshipData = wf ? wf->isRelationshipData : false;
+		fields.push_back(std::move(info));
+	}
+
+	// Create the WDCReader from the CASC file
+	LOG_INFO << "buildDB2Table: createDBFile for " << tableName;
+	DBFile* dbFile = tblStruct->createDBFile();
+	auto* reader = dynamic_cast<WDCReader*>(dbFile);
+	if (!reader)
+	{
+		delete dbFile;
+		delete tblStruct;
+		LOG_ERROR << "WoWDatabase: not a WDC file for table " << tableName;
+		return nullptr;
+	}
+
+	LOG_INFO << "buildDB2Table: reader->open() for " << tableName;
+	if (!reader->open())
+	{
+		delete reader;
+		delete tblStruct;
+		LOG_ERROR << "WoWDatabase: failed to open DB2 for table " << tableName;
+		return nullptr;
+	}
+
+	LOG_INFO << "buildDB2Table: done for " << tableName;
+	delete tblStruct;
+	return new DB2Table(reader, std::move(fields));
 }
 
 core::TableStructure* wow::WoWDatabase::createTableStructure()

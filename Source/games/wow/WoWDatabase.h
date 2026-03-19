@@ -2,8 +2,12 @@
 
 #include "GameDatabase.h"
 
+#include <string>
+#include <unordered_map>
+
 class DBFile;
 class GameFile;
+class DB2Table;
 
 #define _WOWDATABASE_API_
 
@@ -37,11 +41,11 @@ namespace wow
 	{
 	public:
 		WoWDatabase();
-		//WoWDatabase(WoWDatabase&);
+		~WoWDatabase() override;
 
-		~WoWDatabase()
-		{
-		}
+		// Direct DB2 table access (lazy-loaded, on-demand like wow.export).
+		// Returns nullptr if the table cannot be loaded.
+		const DB2Table* getTable(const std::string& name);
 
 		core::TableStructure* createTableStructure();
 		core::FieldStructure* createFieldStructure();
@@ -51,5 +55,14 @@ namespace wow
 											core::FieldStructure*) override;
 		void setFieldPos(core::FieldStructure*, int pos) override;
 		std::string getLayoutHashForTable(const std::string& tableName) override;
+
+	private:
+		DB2Table* buildDB2Table(const std::string& tableName);
+
+		std::unordered_map<std::string, DB2Table*> m_tables;
 	};
 }
+
+// Convenience macro: access the WoWDatabase instance.
+// Requires Game.h to be included for the GAMEDATABASE macro.
+#define WOWDB static_cast<wow::WoWDatabase&>(GAMEDATABASE)

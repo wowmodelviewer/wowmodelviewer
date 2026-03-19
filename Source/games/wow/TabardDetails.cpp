@@ -1,77 +1,88 @@
 #include "TabardDetails.h"
 #include "Game.h"
+#include "WoWDatabase.h"
+#include "DB2Table.h"
+
+#include <set>
 
 TabardDetails::TabardDetails()
-    : showCustom(false),
-      iconId(0),
-      iconColor(0),
-      borderId(0),
-      borderColor(0),
-      backgroundId(0),
-      tier(0)
+	: showCustom(false),
+	  iconId(0),
+	  iconColor(0),
+	  borderId(0),
+	  borderColor(0),
+	  backgroundId(0),
+	  tier(0)
 {
-	std::string query = "SELECT DISTINCT Color FROM GuildTabardBackground";
-	sqlResult r = GAMEDATABASE.sqlQuery(query);
+	if (const DB2Table* tbl = WOWDB.getTable("GuildTabardBackground"))
+	{
+		std::set<int> unique;
+		for (const auto& row : *tbl)
+			unique.insert(static_cast<int>(row.getUInt("Color")));
+		backgrounds.assign(unique.begin(), unique.end());
+	}
 
-	if (r.valid && !r.values.empty())
-		for (auto& v : r.values)
-			backgrounds.push_back(std::stoi(v[0]));
+	if (const DB2Table* tbl = WOWDB.getTable("GuildTabardEmblem"))
+	{
+		std::set<int> unique;
+		for (const auto& row : *tbl)
+			unique.insert(static_cast<int>(row.getUInt("EmblemID")));
+		icons.assign(unique.begin(), unique.end());
+	}
 
-	query = "SELECT DISTINCT EmblemID FROM GuildTabardEmblem";
-	r = GAMEDATABASE.sqlQuery(query);
-
-	if (r.valid && !r.values.empty())
-		for (auto& v : r.values)
-			icons.push_back(std::stoi(v[0]));
-
-	query = "SELECT DISTINCT BorderID FROM GuildTabardBorder";
-	r = GAMEDATABASE.sqlQuery(query);
-
-	if (r.valid && !r.values.empty())
-		for (auto& v : r.values)
-			borders.push_back(std::stoi(v[0]));
+	if (const DB2Table* tbl = WOWDB.getTable("GuildTabardBorder"))
+	{
+		std::set<int> unique;
+		for (const auto& row : *tbl)
+			unique.insert(static_cast<int>(row.getUInt("BorderID")));
+		borders.assign(unique.begin(), unique.end());
+	}
 }
 
 GameFile* TabardDetails::GetBackgroundTex(int slot)
 {
-	GameFile* result = nullptr;
-	const std::string query = "SELECT FileDataID FROM GuildTabardBackground WHERE Color="
-		+ std::to_string(backgroundId) + " AND Tier=" + std::to_string(tier) + " AND Component=" + std::to_string(slot);
-
-	const sqlResult r = GAMEDATABASE.sqlQuery(query);
-
-	if (r.valid && !r.values.empty())
-		result = GAMEDIRECTORY.getFile(std::stoi(r.values[0][0]));
-
-	return result;
+	if (const DB2Table* tbl = WOWDB.getTable("GuildTabardBackground"))
+	{
+		for (const auto& row : *tbl)
+		{
+			if (static_cast<int>(row.getUInt("Color")) == backgroundId &&
+				static_cast<int>(row.getUInt("Tier")) == tier &&
+				static_cast<int>(row.getUInt("Component")) == slot)
+				return GAMEDIRECTORY.getFile(row.getUInt("FileDataID"));
+		}
+	}
+	return nullptr;
 }
 
 GameFile* TabardDetails::GetBorderTex(int slot)
 {
-	GameFile* result = nullptr;
-	const std::string query = "SELECT FileDataID FROM GuildTabardBorder WHERE BorderID="
-		+ std::to_string(borderId) + " AND Color=" + std::to_string(borderColor) + " AND Tier=" + std::to_string(tier) + " AND Component=" + std::to_string(slot);
-
-	const sqlResult r = GAMEDATABASE.sqlQuery(query);
-
-	if (r.valid && !r.values.empty())
-		result = GAMEDIRECTORY.getFile(std::stoi(r.values[0][0]));
-
-	return result;
+	if (const DB2Table* tbl = WOWDB.getTable("GuildTabardBorder"))
+	{
+		for (const auto& row : *tbl)
+		{
+			if (static_cast<int>(row.getUInt("BorderID")) == borderId &&
+				static_cast<int>(row.getUInt("Color")) == borderColor &&
+				static_cast<int>(row.getUInt("Tier")) == tier &&
+				static_cast<int>(row.getUInt("Component")) == slot)
+				return GAMEDIRECTORY.getFile(row.getUInt("FileDataID"));
+		}
+	}
+	return nullptr;
 }
 
 GameFile* TabardDetails::GetIconTex(int slot)
 {
-	GameFile* result = nullptr;
-	const std::string query = "SELECT FileDataID FROM GuildTabardEmblem WHERE EmblemID="
-		+ std::to_string(iconId) + " AND Color=" + std::to_string(iconColor) + " AND Component=" + std::to_string(slot);
-
-	const sqlResult r = GAMEDATABASE.sqlQuery(query);
-
-	if (r.valid && !r.values.empty())
-		result = GAMEDIRECTORY.getFile(std::stoi(r.values[0][0]));
-
-	return result;
+	if (const DB2Table* tbl = WOWDB.getTable("GuildTabardEmblem"))
+	{
+		for (const auto& row : *tbl)
+		{
+			if (static_cast<int>(row.getUInt("EmblemID")) == iconId &&
+				static_cast<int>(row.getUInt("Color")) == iconColor &&
+				static_cast<int>(row.getUInt("Component")) == slot)
+				return GAMEDIRECTORY.getFile(row.getUInt("FileDataID"));
+		}
+	}
+	return nullptr;
 }
 
 int TabardDetails::GetMaxBackground()
@@ -86,14 +97,14 @@ int TabardDetails::GetMaxIcon()
 
 int TabardDetails::GetMaxIconColor(int icon)
 {
-	const std::string query = "SELECT COUNT(*) FROM(SELECT DISTINCT Color FROM GuildTabardEmblem WHERE EmblemID = "
-		+ std::to_string(icon) + ")";
-
-	const sqlResult r = GAMEDATABASE.sqlQuery(query);
-
-	if (r.valid && !r.values.empty())
-		return std::stoi(r.values[0][0]);
-
+	if (const DB2Table* tbl = WOWDB.getTable("GuildTabardEmblem"))
+	{
+		std::set<int> uniqueColors;
+		for (const auto& row : *tbl)
+			if (static_cast<int>(row.getUInt("EmblemID")) == icon)
+				uniqueColors.insert(static_cast<int>(row.getUInt("Color")));
+		return static_cast<int>(uniqueColors.size());
+	}
 	return -1;
 }
 
@@ -104,14 +115,14 @@ int TabardDetails::GetMaxBorder()
 
 int TabardDetails::GetMaxBorderColor(int border)
 {
-	const std::string query = "SELECT COUNT(*) FROM (SELECT DISTINCT Color FROM GuildTabardBorder WHERE BorderID = "
-		+ std::to_string(border) + ")";
-
-	const sqlResult r = GAMEDATABASE.sqlQuery(query);
-
-	if (r.valid && !r.values.empty())
-		return std::stoi(r.values[0][0]);
-
+	if (const DB2Table* tbl = WOWDB.getTable("GuildTabardBorder"))
+	{
+		std::set<int> uniqueColors;
+		for (const auto& row : *tbl)
+			if (static_cast<int>(row.getUInt("BorderID")) == border)
+				uniqueColors.insert(static_cast<int>(row.getUInt("Color")));
+		return static_cast<int>(uniqueColors.size());
+	}
 	return -1;
 }
 

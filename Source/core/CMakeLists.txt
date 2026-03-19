@@ -10,7 +10,6 @@ include_directories(${CMAKE_SOURCE_DIR}/ThirdParty/include)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
 set(src CharInfos.cpp
-    CSVFile.cpp
     DBDFile.cpp
     dbfile.cpp
     ExporterPlugin.cpp
@@ -36,7 +35,6 @@ set(src CharInfos.cpp
     logger/LogOutputFile.cpp)
 
 set(headers CharInfos.h
-      CSVFile.h
       DBDFile.h
       dbfile.h
       ExporterPlugin.h
@@ -68,7 +66,6 @@ set(headers CharInfos.h
 source_group("Header Files" FILES ${headers})
 
 use_glad()
-use_sqlite()
 
 set(NAME core)
 add_library(${NAME} STATIC ${src} ${headers})

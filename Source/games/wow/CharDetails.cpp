@@ -1,15 +1,13 @@
 ﻿#include "CharDetails.h"
 
-#include "animated.h" // randint
 #include "CharDetailsEvent.h"
+#include "DB2Table.h"
 #include "Game.h"
 #include "WoWModel.h"
 #include "logger/Logger.h"
 #include "string_utils.h"
 
-#include <format>
-#include <fstream>
-#include <sstream>
+#include <set>
 
 std::multimap<uint, int> CharDetails::LINKED_OPTIONS_MAP_ =
 {
@@ -126,25 +124,7 @@ void CharDetails::reset(WoWModel* model)
 
 void CharDetails::randomise()
 {
-	// TODO repair randomise
 	reset();
-	/*
-	// Choose random values for the looks! ^_^
-	setRandomValue(SKIN_COLOR);
-	setRandomValue(FACE);
-	setRandomValue(FACIAL_CUSTOMIZATION_STYLE);
-	setRandomValue(FACIAL_CUSTOMIZATION_COLOR);
-	setRandomValue(ADDITIONAL_FACIAL_CUSTOMIZATION);
-  
-	// Don't worry about Custom 1-3 for elves, unless they're Demon Hunters:
-	if(isDemonHunter_)
-	{
-	  setRandomValue(CUSTOM1_STYLE);
-	  setRandomValue(CUSTOM1_COLOR);
-	  setRandomValue(CUSTOM2_STYLE);
-	  setRandomValue(CUSTOM3_STYLE);
-	}
-	*/
 }
 
 void CharDetails::fillCustomizationMap()
@@ -159,13 +139,27 @@ void CharDetails::fillCustomizationMap()
 	if (infos.raceID == -1)
 		return;
 
-	const auto options = GAMEDATABASE.sqlQuery(
-		std::format("SELECT ID FROM ChrCustomizationOption WHERE ChrModelID = {} AND ChrCustomizationID != 0 ORDER BY OrderIndex",
-			infos.ChrModelID[0]));
+	const auto options = WOWDB.getTable("ChrCustomizationOption");
 
-	if (options.valid)
-		for (auto& option : options.values)
-			choicesPerOptionMap_[core::safeStoi(option[0])] = {};
+	if (options)
+	{
+		// Collect matching options and sort by OrderIndex
+		struct OptionEntry { uint id; uint orderIndex; };
+		std::vector<OptionEntry> matchingOptions;
+		for (const auto& row : *options)
+		{
+			if (row.getUInt("ChrModelID") == static_cast<uint32_t>(infos.ChrModelID[0]) &&
+				row.getUInt("ChrCustomizationID") != 0)
+			{
+				matchingOptions.push_back({static_cast<uint>(row.recordID()), row.getUInt("OrderIndex")});
+			}
+		}
+		std::sort(matchingOptions.begin(), matchingOptions.end(),
+			[](const OptionEntry& a, const OptionEntry& b) { return a.orderIndex < b.orderIndex; });
+
+		for (const auto& opt : matchingOptions)
+			choicesPerOptionMap_[opt.id] = {};
+	}
 
 	LINKED_OPTIONS_MAP_.clear();
 	initLinkedOptionsMap();
@@ -176,48 +170,30 @@ void CharDetails::fillCustomizationMap()
 
 void CharDetails::fillCustomizationMapForOption(uint chrCustomizationOption)
 {
-	//const auto parentOptions = getParentOptions(chrCustomizationOption);
-
 	auto& vals = choicesPerOptionMap_.at(chrCustomizationOption);
 	const auto originalVals = std::move(vals);
 	vals.clear();
 
 	// 1. fill direct values
-	const auto choices = GAMEDATABASE.sqlQuery(
-		std::format("SELECT ID FROM ChrCustomizationChoice WHERE ChrCustomizationOptionID = {} ORDER BY OrderIndex",
-			chrCustomizationOption));
-	if (choices.valid)
+	const DB2Table* choicesTbl = WOWDB.getTable("ChrCustomizationChoice");
+	if (choicesTbl)
 	{
-		LOG_INFO << __FUNCTION__ << "DIRECT values" << choices.values.size();
-		for (auto v : choices.values)
-			vals.push_back(core::safeStoi(v[0]));
-	}
+		struct ChoiceEntry { uint id; uint orderIndex; };
+		std::vector<ChoiceEntry> matchingChoices;
+		for (const auto& row : *choicesTbl)
+		{
+			if (row.getUInt("ChrCustomizationOptionID") == chrCustomizationOption)
+				matchingChoices.push_back({static_cast<uint>(row.recordID()), row.getUInt("OrderIndex")});
+		}
+		std::sort(matchingChoices.begin(), matchingChoices.end(),
+			[](const ChoiceEntry& a, const ChoiceEntry& b) { return a.orderIndex < b.orderIndex; });
 
-	// 2. fill with parent values
-	/*
-	for (auto parentOption : parentOptions)
-	{
-	  choices.valid = false;
-	  if ((parentOption != -1) && (currentCustomization_.count(parentOption) != 0))
-	  {
-	    choices = GAMEDATABASE.sqlQuery(QString("SELECT ID FROM ChrCustomizationChoice WHERE ID IN (SELECT ChrCustomizationChoiceID FROM ChrCustomizationElement WHERE RelatedChrCustomizationChoiceID = %1) "
-	      "ORDER BY OrderIndex").arg(currentCustomization_[parentOption]));
-	  }
-  
-	  if (choices.valid)
-	  {
-	    LOG_INFO << __FUNCTION__ << "INDIRECT values from" << parentOption << currentCustomization_[parentOption] << choices.values.size();
-	    for (auto v : choices.values)
-	      vals.push_back(v[0].toUInt());
-	  }
-	}
-  
-	// remove potential duplicates
-	std::sort(vals.begin(), vals.end());
-	const auto last = std::unique(vals.begin(), vals.end());
-	vals.erase(last, vals.end());
-	*/
-	if (vals != originalVals)
+		LOG_INFO << __FUNCTION__ << "DIRECT values" << matchingChoices.size();
+		for (const auto& c : matchingChoices)
+				vals.push_back(c.id);
+			}
+
+			if (vals != originalVals)
 	{
 		LOG_INFO << __FUNCTION__ << chrCustomizationOption;
 		std::string info;
@@ -251,20 +227,13 @@ void CharDetails::set(uint chrCustomizationOptionID, uint chrCustomizationChoice
 	LOG_INFO << "\t" << childOption;
 
 	auto choiceId = chrCustomizationChoiceID;
-	auto relatedChoiceId = 0;
+	auto relatedChoiceId = 0u;
 
 	// 1. First query direct elements (related choice id = 0)
-	auto query = std::format("SELECT ChrCustomizationGeosetID, ChrCustomizationSkinnedModelID, ChrCustomizationMaterialID, "
-			"ChrCustomizationBoneSetID, ChrCustomizationCondModelID, ChrCustomizationDisplayInfoID, ID FROM ChrCustomizationElement "
-			"WHERE ChrCustomizationChoiceID = {} AND RelatedChrCustomizationChoiceID = {}", choiceId,
-			relatedChoiceId);
-
-	auto elements = GAMEDATABASE.sqlQuery(query);
-	if (!applyChrCustomizationElements(chrCustomizationOptionID, elements))
+	if (!applyChrCustomizationElements(chrCustomizationOptionID, choiceId, relatedChoiceId))
 	{
 		LOG_ERROR << __FUNCTION__ << "No direct customization entry found for chrCustomizationOptionID" <<
 			chrCustomizationOptionID << "/ chrCustomizationChoiceID" << chrCustomizationChoiceID;
-		LOG_ERROR << query;
 	}
 
 	// 2. Query elements coming from parent options
@@ -274,21 +243,11 @@ void CharDetails::set(uint chrCustomizationOptionID, uint chrCustomizationChoice
 		{
 			relatedChoiceId = currentCustomization_[option];
 
-			// query related ChrCustomizationElements
-			query = std::format(
-					"SELECT ChrCustomizationGeosetID, ChrCustomizationSkinnedModelID, ChrCustomizationMaterialID, "
-					"ChrCustomizationBoneSetID, ChrCustomizationCondModelID, ChrCustomizationDisplayInfoID, ID FROM ChrCustomizationElement "
-					"WHERE ChrCustomizationChoiceID = {} AND RelatedChrCustomizationChoiceID = {}", choiceId,
-					relatedChoiceId);
-
-			elements = GAMEDATABASE.sqlQuery(query);
-
-			if (!applyChrCustomizationElements(option, elements))
+			if (!applyChrCustomizationElements(option, choiceId, relatedChoiceId))
 			{
 				LOG_ERROR << __FUNCTION__ << "Parent Option" << option <<
 					"-> No dependant customization entry found for chrCustomizationOptionID" << chrCustomizationOptionID
 					<< "/ chrCustomizationChoiceID" << chrCustomizationChoiceID;
-				LOG_ERROR << query;
 			}
 		}
 	}
@@ -302,20 +261,11 @@ void CharDetails::set(uint chrCustomizationOptionID, uint chrCustomizationChoice
 		//customizationElementsPerOption_.erase(childOption);
 		fillCustomizationMapForOption(childOption);
 
-		// query related ChrCustomizationElements
-		query = std::format("SELECT ChrCustomizationGeosetID, ChrCustomizationSkinnedModelID, ChrCustomizationMaterialID, "
-				"ChrCustomizationBoneSetID, ChrCustomizationCondModelID, ChrCustomizationDisplayInfoID, ID FROM ChrCustomizationElement "
-				"WHERE ChrCustomizationChoiceID = {} AND RelatedChrCustomizationChoiceID = {}", choiceId,
-				relatedChoiceId);
-
-		elements = GAMEDATABASE.sqlQuery(query);
-
-		if (!applyChrCustomizationElements(chrCustomizationOptionID, elements))
+		if (!applyChrCustomizationElements(chrCustomizationOptionID, choiceId, relatedChoiceId))
 		{
 			LOG_ERROR << __FUNCTION__ << "Child option" << childOption <<
 				"No dependant customization entry found for chrCustomizationOptionID" << chrCustomizationOptionID <<
 				"/ chrCustomizationChoiceID" << chrCustomizationChoiceID;
-			LOG_ERROR << query;
 		}
 	}
 
@@ -340,119 +290,141 @@ uint CharDetails::get(uint chrCustomizationOptionID) const
 	return currentCustomization_.at(chrCustomizationOptionID);
 }
 
-void CharDetails::setRandomValue(CustomizationType type)
+bool CharDetails::applyChrCustomizationElements(uint chrCustomizationOption, uint choiceId, uint relatedChoiceId)
 {
-	/*
-	const auto allValues = customizationParamsMap_[type].possibleValues;
-	if (allValues.empty())
-	  return;
-	const auto flags = customizationParamsMap_[type].flags;
-	std::vector<int> filteredIndices;
-	for (uint i = 0; i < allValues.size(); i++)
-	{
-	  const auto flag = flags[i];
-	  if (isDemonHunter_)
-	  {
-	    if ((flag & SF_DEMON_HUNTER) || (flag & SF_DEMON_HUNTER_FACE) || (flag & SF_DEMON_HUNTER_BFX) || (flag & SF_REGULAR) || flag == 0)
-	    {
-	      filteredIndices.push_back(i);
-	    }
-	  }
-	  else  // only select regular, mundane skins for the random display
-	  {
-	    if ((flag & SF_REGULAR) || flag == SF_BARBERSHOP || flag == SF_CHARACTER_CREATE || flag == 0)
-	    {
-	      filteredIndices.push_back(i);
-	    }
-	  }
-	}
-	if (!filteredIndices.empty())
-	{
-	  const auto maxVal = filteredIndices.size() - 1;
-	  const auto randval = filteredIndices[randint(0, maxVal)];
-	  set(type, randval);
-	}
-	else // ok, filtering left us with nothing...
-	{
-	  const auto maxVal = allValues.size() - 1;
-	  const auto randval = randint(0, maxVal);
-	  set(type, randval);
-	}
-	*/
-}
+	const DB2Table* elementsTbl = WOWDB.getTable("ChrCustomizationElement");
+	if (!elementsTbl)
+		return false;
 
-bool CharDetails::applyChrCustomizationElements(uint chrCustomizationOption, sqlResult& elements)
-{
-	LOG_INFO << __FUNCTION__ << chrCustomizationOption << elements.values.size();
+	// Collect matching elements
+	struct ElementData { uint geosetID; uint skinnedModelID; uint materialID; uint boneSetID; uint condModelID; uint displayInfoID; uint id; };
+	std::vector<ElementData> matchingElements;
 
-	if (elements.valid && !elements.values.empty())
+	for (const auto& row : *elementsTbl)
 	{
-		for (auto elt : elements.values) // treat each line
+		if (row.getUInt("ChrCustomizationChoiceID") == choiceId &&
+			row.getUInt("RelatedChrCustomizationChoiceID") == relatedChoiceId)
 		{
-			if (core::safeStoi(elt[0]) != 0) // geoset customization
+			matchingElements.push_back({
+				row.getUInt("ChrCustomizationGeosetID"),
+				row.getUInt("ChrCustomizationSkinnedModelID"),
+				row.getUInt("ChrCustomizationMaterialID"),
+				row.getUInt("ChrCustomizationBoneSetID"),
+				row.getUInt("ChrCustomizationCondModelID"),
+				row.getUInt("ChrCustomizationDisplayInfoID"),
+				static_cast<uint>(row.recordID())
+			});
+		}
+	}
+
+	LOG_INFO << __FUNCTION__ << chrCustomizationOption << matchingElements.size();
+
+	if (!matchingElements.empty())
+	{
+		for (const auto& elt : matchingElements) // treat each element
+		{
+			if (elt.geosetID != 0) // geoset customization
 			{
-				LOG_INFO << "ChrCustomizationGeosetID based customization for" << elt[6] << "/" << elt[0];
+				LOG_INFO << "ChrCustomizationGeosetID based customization for" << elt.id << "/" << elt.geosetID;
 
-				auto vals = GAMEDATABASE.sqlQuery(
-					std::format("SELECT GeosetType, GeosetID FROM ChrCustomizationGeoset WHERE ID = {}",
-						core::safeStoi(elt[0])));
-
-				if (vals.valid)
+				const DB2Table* geosetTbl = WOWDB.getTable("ChrCustomizationGeoset");
+				if (geosetTbl)
 				{
-					for (auto geo : vals.values)
-						customizationElementsPerOption_[chrCustomizationOption].geosets.emplace_back(
-							core::safeStoi(geo[0]), core::safeStoi(geo[1]));
-				}
-			}
-			else if (core::safeStoi(elt[1]) != 0) // added model customization
-			{
-				LOG_INFO << "ChrCustomizationSkinnedModelID based customization for" << elt[6] << "/" << elt[1];
-				auto vals = GAMEDATABASE.sqlQuery(
-					std::format(
-						"SELECT CollectionsFileDataID, GeosetType, GeosetID FROM ChrCustomizationSkinnedModel WHERE ID = {}",
-						core::safeStoi(elt[1])));
-
-				if (vals.valid && !vals.values.empty())
-						customizationElementsPerOption_[chrCustomizationOption].models.emplace_back(
-							core::safeStoi(vals.values[0][0]),
-							std::make_pair(core::safeStoi(vals.values[0][1]), core::safeStoi(vals.values[0][2])));
-			}
-			else if (core::safeStoi(elt[2]) != 0) // texture customization
-			{
-				LOG_INFO << "ChrCustomizationMaterialID based customization for" << elt[6] << "/" << elt[2];
-				auto vals = GAMEDATABASE.sqlQuery(std::format(
-					"SELECT ChrModelTextureLayer.Layer, ChrModelTextureLayer.TextureSectionTypeBitMask, ChrModelTextureLayer.TextureType, ChrModelTextureLayer.BlendMode, FileDataID FROM ChrCustomizationMaterial "
-					"LEFT JOIN TextureFileData ON ChrCustomizationMaterial.MaterialResourcesID = TextureFileData.MaterialResourcesID "
-					"LEFT JOIN ChrModelTextureLayer ON ChrCustomizationMaterial.ChrModelTextureTargetID = ChrModelTextureLayer.ChrModelTextureTargetID1 "
-					"AND ChrModelTextureLayer.CharComponentTextureLayoutsID = {} "
-					"WHERE ChrCustomizationMaterial.ID = {}", model_->infos.textureLayoutID, core::safeStoi(elt[2])));
-
-				if (vals.valid && !vals.values.empty())
+					DB2Row geoRow = geosetTbl->getRow(elt.geosetID);
+					if (geoRow)
 					{
-						TextureCustomization t{};
-						t.layer = core::safeStoi(vals.values[0][0]);
-					t.region = bitMaskToSectionType(core::safeStoi(vals.values[0][1]));
-					t.type = core::safeStoi(vals.values[0][2]);
-					t.blendMode = core::safeStoi(vals.values[0][3]);
-					t.fileId = core::safeStoi(vals.values[0][4]);
-
-					LOG_INFO << "texture ->" << "layer" << t.layer << "region" << t.region << "type" << t.type <<
-						"blendMode" << t.blendMode << "fileId" << t.fileId;
-
-					customizationElementsPerOption_[chrCustomizationOption].textures.push_back(t);
+						customizationElementsPerOption_[chrCustomizationOption].geosets.emplace_back(
+							geoRow.getUInt("GeosetType"), geoRow.getUInt("GeosetID"));
+					}
 				}
 			}
-			else if (core::safeStoi(elt[3]) != 0) // boneset customization ??
+			else if (elt.skinnedModelID != 0) // added model customization
 			{
-				LOG_ERROR << "Not yet implemented ! boneset based customization for" << elt[6] << "/" << elt[3];
+				LOG_INFO << "ChrCustomizationSkinnedModelID based customization for" << elt.id << "/" << elt.skinnedModelID;
+				const DB2Table* skinnedTbl = WOWDB.getTable("ChrCustomizationSkinnedModel");
+				if (skinnedTbl)
+				{
+					DB2Row skinRow = skinnedTbl->getRow(elt.skinnedModelID);
+					if (skinRow)
+					{
+						customizationElementsPerOption_[chrCustomizationOption].models.emplace_back(
+							skinRow.getUInt("CollectionsFileDataID"),
+							std::make_pair(skinRow.getUInt("GeosetType"), skinRow.getUInt("GeosetID")));
+					}
+				}
 			}
-			else if (core::safeStoi(elt[4]) != 0) // cond model customization ??
+			else if (elt.materialID != 0) // texture customization
 			{
-				LOG_ERROR << "Not yet implemented ! Cond model based customization for" << elt[6] << "/" << elt[4];
+				LOG_INFO << "ChrCustomizationMaterialID based customization for" << elt.id << "/" << elt.materialID;
+
+				// Resolve: ChrCustomizationMaterial -> MaterialResourcesID -> TextureFileData -> FileDataID
+				//          ChrCustomizationMaterial -> ChrModelTextureTargetID -> ChrModelTextureLayer (with layout filter)
+				const DB2Table* matTbl = WOWDB.getTable("ChrCustomizationMaterial");
+				const DB2Table* texFileTbl = WOWDB.getTable("TextureFileData");
+				const DB2Table* layerTbl = WOWDB.getTable("ChrModelTextureLayer");
+
+				if (matTbl && texFileTbl && layerTbl)
+				{
+					DB2Row matRow = matTbl->getRow(elt.materialID);
+					if (matRow)
+					{
+						const uint32_t materialResID = matRow.getUInt("MaterialResourcesID");
+						const uint32_t textureTargetID = matRow.getUInt("ChrModelTextureTargetID");
+
+						// Find FileDataID from TextureFileData
+						uint fileDataID = 0;
+						for (const auto& tfdRow : *texFileTbl)
+						{
+							if (tfdRow.getUInt("MaterialResourcesID") == materialResID)
+							{
+								fileDataID = tfdRow.getUInt("FileDataID");
+								break;
+							}
+						}
+
+						// Find ChrModelTextureLayer matching target and layout
+						uint layer = 0;
+						int bitmask = -1;
+						uint textureType = 0;
+						uint blendMode = 0;
+						for (const auto& layerRow : *layerTbl)
+						{
+							if (layerRow.getUInt("ChrModelTextureTargetID1") == textureTargetID &&
+								static_cast<int>(layerRow.getUInt("CharComponentTextureLayoutsID")) == model_->infos.textureLayoutID)
+							{
+								layer = layerRow.getUInt("Layer");
+								bitmask = layerRow.getInt("TextureSectionTypeBitMask");
+								textureType = layerRow.getUInt("TextureType");
+								blendMode = layerRow.getUInt("BlendMode");
+								break;
+							}
+						}
+
+						TextureCustomization t{};
+						t.layer = layer;
+						t.region = bitMaskToSectionType(bitmask);
+						t.type = textureType;
+						t.blendMode = blendMode;
+						t.fileId = fileDataID;
+
+						LOG_INFO << "texture ->" << "layer" << t.layer << "region" << t.region << "type" << t.type <<
+							"blendMode" << t.blendMode << "fileId" << t.fileId;
+
+						customizationElementsPerOption_[chrCustomizationOption].textures.push_back(t);
+					}
+				}
 			}
-			else if (core::safeStoi(elt[5]) != 0) // display info customization ??
+			else if (elt.boneSetID != 0) // boneset customization ??
 			{
-				LOG_ERROR << "Not yet implemented ! Display info based customization for" << elt[6] << "/" << elt[5];
+				LOG_ERROR << "Not yet implemented ! boneset based customization for" << elt.id << "/" << elt.boneSetID;
+			}
+			else if (elt.condModelID != 0) // cond model customization ??
+			{
+				LOG_ERROR << "Not yet implemented ! Cond model based customization for" << elt.id << "/" << elt.condModelID;
+			}
+			else if (elt.displayInfoID != 0) // display info customization ??
+			{
+				LOG_ERROR << "Not yet implemented ! Display info based customization for" << elt.id << "/" << elt.displayInfoID;
 			}
 		}
 		return true;
@@ -508,19 +480,64 @@ void CharDetails::initLinkedOptionsMap()
 	if (!LINKED_OPTIONS_MAP_.empty()) // already initialized
 		return;
 
+	const DB2Table* choicesTbl = WOWDB.getTable("ChrCustomizationChoice");
+	const DB2Table* elementsTbl = WOWDB.getTable("ChrCustomizationElement");
+
+	if (!choicesTbl || !elementsTbl)
+		return;
+
 	for (const auto& c : choicesPerOptionMap_)
 	{
 		auto id = c.first;
-		const auto query = std::format("SELECT DISTINCT ChrCustomizationOptionID FROM ChrCustomizationChoice WHERE ID IN "
-			"(SELECT RelatedChrCustomizationChoiceID FROM ChrCustomizationElement WHERE ChrCustomizationChoiceID = "
-			"(SELECT ID FROM ChrCustomizationChoice WHERE ChrCustomizationOptionID = {} AND OrderIndex = 1))", id);
 
-		auto link = GAMEDATABASE.sqlQuery(query);
-
-		if (link.valid && !link.values.empty())
+		// Inner: Find ChrCustomizationChoice ID where ChrCustomizationOptionID = id AND OrderIndex = 1
+		uint32_t innerChoiceId = 0;
+		for (const auto& row : *choicesTbl)
 		{
-			for (const auto& vals : link.values)
-				LINKED_OPTIONS_MAP_.emplace(id, core::safeStoi(vals[0]));
+			if (row.getUInt("ChrCustomizationOptionID") == id && row.getUInt("OrderIndex") == 1)
+			{
+				innerChoiceId = static_cast<uint32_t>(row.recordID());
+				break;
+			}
+		}
+
+		if (innerChoiceId == 0)
+		{
+			LINKED_OPTIONS_MAP_.emplace(id, -1);
+			continue;
+		}
+
+		// Middle: Find ChrCustomizationElement rows where ChrCustomizationChoiceID = innerChoiceId
+		//         -> collect RelatedChrCustomizationChoiceID
+		std::set<uint32_t> relatedChoiceIds;
+		for (const auto& row : *elementsTbl)
+		{
+			if (row.getUInt("ChrCustomizationChoiceID") == innerChoiceId)
+			{
+				const uint32_t relId = row.getUInt("RelatedChrCustomizationChoiceID");
+				if (relId != 0)
+					relatedChoiceIds.insert(relId);
+			}
+		}
+
+		if (relatedChoiceIds.empty())
+		{
+			LINKED_OPTIONS_MAP_.emplace(id, -1);
+			continue;
+		}
+
+		// Outer: Find ChrCustomizationChoice rows with ID in relatedChoiceIds -> collect DISTINCT ChrCustomizationOptionID
+		std::set<int> linkedOptionIds;
+		for (const auto& row : *choicesTbl)
+		{
+			if (relatedChoiceIds.count(static_cast<uint32_t>(row.recordID())) > 0)
+				linkedOptionIds.insert(static_cast<int>(row.getUInt("ChrCustomizationOptionID")));
+		}
+
+		if (!linkedOptionIds.empty())
+		{
+			for (const auto& optId : linkedOptionIds)
+				LINKED_OPTIONS_MAP_.emplace(id, optId);
 		}
 		else
 		{

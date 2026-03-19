@@ -26,6 +26,8 @@ public:
 	std::vector<std::string> get(unsigned int recordIndex, const core::TableStructure* structure) const override;
 
 private:
+	friend class DB2Table;
+
 	// ── compression types (same enum values as the on-disk format) ────────
 	enum FieldCompression : uint32_t
 	{
@@ -175,6 +177,9 @@ private:
 		uint32_t recordID;
 	};
 	std::vector<RecordLocation> m_recordLocations;
+
+	// recordID -> index in m_recordLocations for O(1) getRow() by ID
+	std::unordered_map<uint32_t, size_t> m_idToRecordIndex;
 
 	// relationship reverse lookup: foreignID -> list of recordIDs
 	std::unordered_map<uint32_t, std::vector<uint32_t>> m_relationshipLookup;

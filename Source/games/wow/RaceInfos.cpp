@@ -1,4 +1,5 @@
 #include "RaceInfos.h"
+#include "DB2Table.h"
 #include "Game.h"
 #include "WoWDatabase.h"
 #include "WoWModel.h"
@@ -10,33 +11,46 @@ std::map<int, RaceInfos> RaceInfos::RACES;
 
 void RaceInfos::init()
 {
-	auto races =
-		GAMEDATABASE.sqlQuery(
-			"SELECT ChrRaces.ClientPrefix, ChrRaces.ID, ChrRaces.Flags, ChrModel.Sex, CreatureModelData.FileDataID, ChrModel.CharComponentTextureLayoutID, "
-			"ChrRaces.MaleModelFallbackRaceID, ChrRaces.MaleModelFallbackSex, ChrRaces.MaleTextureFallbackRaceID, ChrRaces.MaleTextureFallbackSex, "
-			"ChrRaces.FemaleModelFallbackRaceID, ChrRaces.FemaleModelFallbackSex, ChrRaces.FemaleTextureFallbackRaceID, ChrRaces.FemaleTextureFallbackSex, "
-			"ChrRaceXChrModel.ChrModelID "
-			"FROM ChrRaceXChrModel "
-			"LEFT JOIN ChrRaces ON ChrRaces.ID = ChrRaceXChrModel.ChrRacesID "
-			"LEFT JOIN ChrModel ON ChrModel.ID = ChrRaceXChrModel.ChrModelID "
-			"LEFT JOIN CreatureDisplayInfo ON CreatureDisplayInfo.ID = ChrModel.DisplayID "
-			"LEFT JOIN CreatureModelData ON CreatureModelData.ID = CreatureDisplayInfo.ModelID ");
+	const DB2Table* chrRaceXChrModel = WOWDB.getTable("ChrRaceXChrModel");
+	const DB2Table* chrRaces = WOWDB.getTable("ChrRaces");
+	const DB2Table* chrModel = WOWDB.getTable("ChrModel");
+	const DB2Table* creatureDisplayInfo = WOWDB.getTable("CreatureDisplayInfo");
+	const DB2Table* creatureModelData = WOWDB.getTable("CreatureModelData");
 
-	if (!races.valid || races.empty())
+	if (!chrRaceXChrModel || !chrRaces || !chrModel || !creatureDisplayInfo || !creatureModelData)
 	{
 		LOG_ERROR << "Unable to collect race information from game database";
 		return;
 	}
 
-	for (auto& race : races.values)
+	for (const auto& xRow : *chrRaceXChrModel)
 	{
+		const uint32_t chrRacesID = xRow.getUInt("ChrRacesID");
+		const uint32_t chrModelID = xRow.getUInt("ChrModelID");
+
+		DB2Row raceRow = chrRaces->getRow(chrRacesID);
+		DB2Row modelRow = chrModel->getRow(chrModelID);
+
+		if (!raceRow || !modelRow)
+			continue;
+
+		const uint32_t displayID = modelRow.getUInt("DisplayID");
+		DB2Row displayRow = creatureDisplayInfo->getRow(displayID);
+		if (!displayRow)
+			continue;
+
+		const uint32_t modelDataID = displayRow.getUInt("ModelID");
+		DB2Row modelDataRow = creatureModelData->getRow(modelDataID);
+		if (!modelDataRow)
+			continue;
+
 		RaceInfos infos;
-		infos.prefix = race[0];
-		infos.raceID = std::stoi(race[1]);
-		infos.barefeet = (std::stoi(race[2]) & 0x2);
-		infos.sexID = std::stoi(race[3]);
-		auto modelfileid = std::stoi(race[4]);
-		infos.textureLayoutID = std::stoi(race[5]);
+		infos.prefix = raceRow.getString("ClientPrefix");
+		infos.raceID = static_cast<int>(raceRow.recordID());
+		infos.barefeet = (static_cast<int>(raceRow.getUInt("Flags")) & 0x2);
+		infos.sexID = static_cast<int>(modelRow.getUInt("Sex"));
+		auto modelfileid = static_cast<int>(modelDataRow.getUInt("FileDataID"));
+		infos.textureLayoutID = static_cast<int>(modelRow.getUInt("CharComponentTextureLayoutID"));
 		if (infos.textureLayoutID <= 0)
 		{
 			LOG_WARNING << "Unexpected textureLayoutID (" << infos.textureLayoutID << ") for raceID " << infos.raceID << ", sexID " << infos.sexID;
@@ -46,20 +60,20 @@ void RaceInfos::init()
 		// item display info from other race models):
 		if (infos.sexID == GENDER_MALE)
 		{
-			infos.modelFallbackRaceID = std::stoi(race[6]);
-			infos.modelFallbackSexID = std::stoi(race[7]);
-			infos.textureFallbackRaceID = std::stoi(race[8]);
-			infos.textureFallbackSexID = std::stoi(race[9]);
+			infos.modelFallbackRaceID = raceRow.getInt("MaleModelFallbackRaceID");
+			infos.modelFallbackSexID = raceRow.getInt("MaleModelFallbackSex");
+			infos.textureFallbackRaceID = raceRow.getInt("MaleTextureFallbackRaceID");
+			infos.textureFallbackSexID = raceRow.getInt("MaleTextureFallbackSex");
 		}
 		else
 		{
-			infos.modelFallbackRaceID = std::stoi(race[10]);
-			infos.modelFallbackSexID = std::stoi(race[11]);
-			infos.textureFallbackRaceID = std::stoi(race[12]);
-			infos.textureFallbackSexID = std::stoi(race[13]);
+			infos.modelFallbackRaceID = raceRow.getInt("FemaleModelFallbackRaceID");
+			infos.modelFallbackSexID = raceRow.getInt("FemaleModelFallbackSex");
+			infos.textureFallbackRaceID = raceRow.getInt("FemaleTextureFallbackRaceID");
+			infos.textureFallbackSexID = raceRow.getInt("FemaleTextureFallbackSex");
 		}
 
-		infos.ChrModelID.push_back(std::stoi(race[14]));
+		infos.ChrModelID.push_back(static_cast<int>(chrModelID));
 
 		infos.isHD = GAMEDIRECTORY.getFile(modelfileid)->fullname().find("_hd") != std::string::npos;
 
@@ -69,7 +83,7 @@ void RaceInfos::init()
 		}
 		else // if a race is already inserted, capture any additional ChrModelID
 		{
-			auto id = std::stoi(race[14]);
+			auto id = static_cast<int>(chrModelID);
 			if (std::find(RACES[modelfileid].ChrModelID.begin(), RACES[modelfileid].ChrModelID.end(), id) == RACES[
 				modelfileid].ChrModelID.end())
 				RACES[modelfileid].ChrModelID.push_back(id);

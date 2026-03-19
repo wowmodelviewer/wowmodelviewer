@@ -94,8 +94,6 @@ private:
 
 	CharRegions getRegionForTexture(GameFile* file) const;
 
-	bool queryItemInfo(const std::string& query, sqlResult& result) const;
-
 	int getCustomModelId(size_t index) const;
 	int getCustomTextureId(size_t index) const;
 };

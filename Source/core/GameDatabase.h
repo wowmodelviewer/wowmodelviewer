@@ -3,31 +3,12 @@
 #include <string>
 #include <vector>
 #include <unordered_map>
-#include "sqlite3.h"
 #include "DBDFile.h"
 
 class DBFile;
 class GameFile;
 
 #define _GAMEDATABASE_API_
-
-class _GAMEDATABASE_API_ sqlResult
-{
-public:
-	sqlResult() : valid(false), nbcols(0)
-	{
-	}
-
-	~sqlResult()
-	{
-		/* TODO :free char** */
-	}
-
-	bool empty() { return values.size() == 0; }
-	bool valid;
-	int nbcols;
-	std::vector<std::vector<std::string>> values;
-};
 
 namespace core
 {
@@ -65,9 +46,6 @@ namespace core
 		std::string file;
 		std::vector<FieldStructure*> fields;
 
-		bool create();
-		bool fill();
-
 		virtual DBFile* createDBFile();
 	};
 
@@ -75,12 +53,10 @@ namespace core
 	{
 	public:
 		GameDatabase();
-		//GameDatabase(GameDatabase&);
 
+		bool initFromDBD(const std::string& dbdDir, const std::string& buildVersion);
 		bool initFromDBD(const std::string& dbdDir, const std::string& buildVersion,
 						 const std::vector<std::string>& tableNames);
-
-		sqlResult sqlQuery(const std::string& query);
 
 		void setFastMode() { m_fastMode = true; }
 		void setCachePath(const std::string& path) { m_cachePath = path; }
@@ -96,8 +72,6 @@ namespace core
 
 		virtual ~GameDatabase();
 
-		void addTable(TableStructure*);
-
 		virtual core::TableStructure* createTableStructure() = 0;
 		virtual core::FieldStructure* createFieldStructure() = 0;
 
@@ -107,36 +81,14 @@ namespace core
 		virtual void setFieldPos(core::FieldStructure*, int pos) = 0;
 
 		// Get the layout hash from the actual DB2 file for a given table name.
-		// Returns the hash as an uppercase hex string, or empty string if unavailable.
-		// Override in game-specific subclasses to read from game files.
 		virtual std::string getLayoutHashForTable(const std::string& tableName) { return ""; }
 
+	protected:
+		// Build a TableStructure from a table name by parsing its DBD definition.
+		// Returns nullptr on failure.
+		core::TableStructure* buildTableStructure(const std::string& tableName);
+
 	private:
-		static int treatQuery(void* NotUsed, int nbcols, char** values, char** cols);
-		static void logQueryTime(void* aDb, const char* aQueryStr, sqlite3_uint64 aTimeInNs);
-
-		bool createDatabaseFromDBD(const std::string& dbdDir, const core::DBDBuild& build,
-								   const std::vector<std::string>& tableNames);
-		bool readStructureFromDBD(const std::string& dbdDir, const core::DBDBuild& build,
-								  const std::vector<std::string>& tableNames);
-
-		// Fully prepare a single table on-demand: parse DBD/CSV, CREATE TABLE, fill.
-		bool prepareTable(const std::string& entry);
-
-		void ensureTablesFilled(const std::string& query);
-
-		sqlite3* m_db;
-
-		std::vector<TableStructure*> m_dbStruct;
-
-		// Tables that have been CREATE'd but not yet filled with data.
-		// Filled on-demand when first referenced by a SELECT query.
-		std::unordered_map<std::string, TableStructure*> m_pendingFill;
-
-		// Table entries not yet processed at all (tableName -> original entry string).
-		// Fully prepared on-demand when first referenced by a SELECT query.
-		std::unordered_map<std::string, std::string> m_pendingTableEntries;
-
 		// Stored from initFromDBD for lazy per-table use.
 		std::string m_dbdDir;
 		core::DBDBuild m_build;
