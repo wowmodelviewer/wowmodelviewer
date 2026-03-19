@@ -16,15 +16,23 @@ include_directories(${CMAKE_SOURCE_DIR}/Source/importers/wowhead)
 set(src main.cpp
         OrbitCamera.cpp)
 
+# Generate the resource file that embeds the application icon.
+set(WMV_ICO_PATH "${CMAKE_SOURCE_DIR}/bin_support/Icons/wmv.ico")
+configure_file(wowmodelviewer.rc.in "${CMAKE_CURRENT_BINARY_DIR}/wowmodelviewer.rc" @ONLY)
+
 # External dependencies
 use_glad()
 use_imgui()
 use_wow()   # brings in core, casclib, wow (video, Attachment, WoWModel, etc.)
 
 set(NAME wowmodelviewer)
-add_executable(${NAME} ${src})
+add_executable(${NAME} ${src} "${CMAKE_CURRENT_BINARY_DIR}/wowmodelviewer.rc")
 
 set_property(TARGET ${NAME} PROPERTY FOLDER "executables")
+
+# Pass the absolute path to the window icon PNG so the code works from any working directory.
+target_compile_definitions(${NAME} PRIVATE
+  WMV_ICON_PATH="${CMAKE_SOURCE_DIR}/bin_support/Icons/wmv_16.png")
 
 # Force-include glad/gl.h before all source files
 if(MSVC)

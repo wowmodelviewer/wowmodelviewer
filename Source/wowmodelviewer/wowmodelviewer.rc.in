@@ -1,0 +1,3 @@
+// wowmodelviewer.rc – Embeds the application icon into the executable.
+// Resource ID 1 is the default icon Windows uses for the .exe file.
+1 ICON "@WMV_ICO_PATH@"

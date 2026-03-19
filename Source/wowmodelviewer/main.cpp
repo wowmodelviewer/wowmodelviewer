@@ -30,6 +30,7 @@
 
 #include <cstdio>
 #include <string>
+#include <vector>
 #include <chrono>
 #include <filesystem>
 #include <fstream>
@@ -63,6 +64,7 @@
 #include "WoWItem.h"
 #include "CharDetails.h"
 
+#include "stb_image.h"
 #include "stb_image_write.h"
 
 // Exporters (OBJ / FBX)
@@ -3028,7 +3030,19 @@ int main(int /*argc*/, char* /*argv*/[])
     glfwMakeContextCurrent(window);
     glfwSwapInterval(1);
 
-    // ---- glad ----
+// Set window icon from wmv_16.png.
+{
+    int iw = 0, ih = 0, ic = 0;
+    unsigned char* px = stbi_load(WMV_ICON_PATH, &iw, &ih, &ic, 4);
+    if (px)
+    {
+        GLFWimage img{ iw, ih, px };
+        glfwSetWindowIcon(window, 1, &img);
+        stbi_image_free(px);
+    }
+}
+
+// ---- glad ----
     if (!gladLoadGL(glfwGetProcAddress))
     {
         fprintf(stderr, "Failed to initialise OpenGL loader (glad)\n");
