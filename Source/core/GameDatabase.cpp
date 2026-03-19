@@ -16,8 +16,14 @@
 #include "sqlite3.h"
 #include <nlohmann/json.hpp>
 
+static std::string dbdTypeToSqlType(const std::string& baseType, const std::string& sizeStr);
+
 core::GameDatabase::~GameDatabase()
 {
+	for (auto& [name, tbl] : m_pendingFill)
+		delete tbl;
+	m_pendingFill.clear();
+
 	if (m_db)
 		sqlite3_close(m_db);
 }
@@ -76,6 +82,9 @@ int core::GameDatabase::getFileDataIdForTable(const std::string& tableName) cons
 
 sqlResult core::GameDatabase::sqlQuery(const std::string& query)
 {
+	if ((!m_pendingTableEntries.empty() || !m_pendingFill.empty()) && query.starts_with("SELECT"))
+		ensureTablesFilled(query);
+
 	sqlResult result;
 
 	char* zErrMsg = nullptr;
@@ -93,6 +102,227 @@ sqlResult core::GameDatabase::sqlQuery(const std::string& query)
 	}
 
 	return result;
+}
+
+void core::GameDatabase::ensureTablesFilled(const std::string& query)
+{
+	// Phase 1: fully prepare tables that haven't been processed at all yet
+	// (no DBD parsed, no CASC opened, no CREATE TABLE, no fill)
+	{
+		std::vector<std::string> toProcess;
+		for (const auto& [name, _] : m_pendingTableEntries)
+		{
+			if (query.find(name) != std::string::npos)
+				toProcess.push_back(name);
+		}
+
+		for (const auto& name : toProcess)
+		{
+			auto it = m_pendingTableEntries.find(name);
+			if (it == m_pendingTableEntries.end())
+				continue;
+
+			std::string entry = it->second;
+			m_pendingTableEntries.erase(it);
+
+			if (!prepareTable(entry))
+				LOG_ERROR << "Error during on-demand table preparation:" << name;
+		}
+	}
+
+	// Phase 2: fill tables that were CREATE'd but not yet filled
+	// (kept for backward compatibility with any code that populates m_pendingFill directly)
+	{
+		std::vector<std::string> toFill;
+		for (const auto& [name, _] : m_pendingFill)
+		{
+			if (query.find(name) != std::string::npos)
+				toFill.push_back(name);
+		}
+
+		for (const auto& name : toFill)
+		{
+			auto it = m_pendingFill.find(name);
+			if (it == m_pendingFill.end())
+				continue;
+
+			TableStructure* tbl = it->second;
+			m_pendingFill.erase(it);
+
+			if (!tbl->fill())
+				LOG_ERROR << "Error during on-demand table filling:" << name;
+
+			delete tbl;
+		}
+	}
+}
+
+bool core::GameDatabase::prepareTable(const std::string& entry)
+{
+	namespace fs = std::filesystem;
+
+	core::TableStructure* tblStruct = nullptr;
+
+	if (entry.starts_with("CSV:"))
+	{
+		auto parts = core::split(entry, ':');
+		if (parts.size() < 5)
+		{
+			LOG_ERROR << "Invalid CSV table definition:" << entry;
+			return false;
+		}
+
+		const std::string& tableName = parts[1];
+		const std::string& csvFile = parts[2];
+
+		tblStruct = createTableStructure();
+		tblStruct->name = tableName;
+		tblStruct->file = csvFile;
+
+		int fieldId = 0;
+		size_t i = 3;
+		while (i + 1 < parts.size())
+		{
+			const std::string& fieldType = parts[i];
+			const std::string& fieldName = parts[i + 1];
+
+			bool isPrimary = false;
+			if (i + 2 < parts.size() && parts[i + 2] == "primary")
+			{
+				isPrimary = true;
+				i += 3;
+			}
+			else
+			{
+				i += 2;
+			}
+
+			core::FieldStructure* fieldStruct = createFieldStructure();
+			fieldStruct->id = fieldId++;
+			fieldStruct->name = fieldName;
+			fieldStruct->type = fieldType;
+			fieldStruct->isKey = isPrimary;
+			fieldStruct->arraySize = 1;
+			fieldStruct->needIndex = false;
+
+			tblStruct->fields.push_back(fieldStruct);
+		}
+	}
+	else
+	{
+		const std::string& tableName = entry;
+		std::string dbdPath = m_dbdDir + "/" + tableName + ".dbd";
+
+		if (!fs::exists(dbdPath) && !m_dbdBaseUrl.empty())
+		{
+			std::string url = m_dbdBaseUrl;
+			auto pos = url.find("%s");
+			if (pos != std::string::npos)
+				url.replace(pos, 2, tableName);
+			else
+				url += tableName + ".dbd";
+
+			LOG_INFO << "Downloading DBD for" << tableName << "from" << url;
+			const auto resp = HttpClient::Get(url);
+			if (resp.success && !resp.body.empty())
+			{
+				fs::create_directories(m_dbdDir);
+				std::ofstream out(dbdPath, std::ios::binary);
+				if (out.is_open())
+				{
+					out.write(resp.body.data(), resp.body.size());
+					out.close();
+				}
+			}
+			else
+			{
+				LOG_ERROR << "Failed to download DBD for" << tableName << ":" << resp.error;
+			}
+		}
+
+		if (!fs::exists(dbdPath))
+		{
+			LOG_ERROR << "DBD file not found:" << dbdPath;
+			return false;
+		}
+
+		core::DBDFile dbd;
+		if (!dbd.parse(dbdPath))
+		{
+			LOG_ERROR << "Failed to parse DBD file:" << dbdPath;
+			return false;
+		}
+
+		const std::string layoutHash = getLayoutHashForTable(tableName);
+		const core::DBDVersionDef* verDef = dbd.findVersion(m_build, layoutHash);
+		if (!verDef)
+		{
+			LOG_ERROR << "No matching version definition found in" << dbdPath
+					  << "for build" << m_build.major << "." << m_build.minor
+					  << "." << m_build.patch << "." << m_build.build;
+			return false;
+		}
+
+		tblStruct = createTableStructure();
+		tblStruct->name = tableName;
+		tblStruct->file = tableName;
+
+		readSpecificTableAttributesFromDBD(*verDef, tblStruct);
+
+		int fieldId = 0;
+		int fieldPos = 0;
+
+		for (const auto& vField : verDef->fields)
+		{
+			const core::DBDColumnDef* colDef = dbd.findColumn(vField.name);
+			if (!colDef)
+			{
+				LOG_ERROR << "Column definition not found for field" << vField.name
+						  << "in table" << tableName;
+				if (!vField.isNonInline)
+					fieldPos++;
+				continue;
+			}
+
+			core::FieldStructure* fieldStruct = createFieldStructure();
+			fieldStruct->id = fieldId++;
+			fieldStruct->name = vField.name;
+			fieldStruct->type = dbdTypeToSqlType(colDef->type, vField.sizeStr);
+			fieldStruct->arraySize = vField.arraySize;
+			fieldStruct->isKey = vField.isID;
+			fieldStruct->needIndex = false;
+
+			readSpecificFieldAttributesFromDBD(vField, *colDef, fieldStruct);
+
+			if (!vField.isNonInline)
+			{
+				setFieldPos(fieldStruct, fieldPos);
+				fieldPos++;
+			}
+
+			tblStruct->fields.push_back(fieldStruct);
+		}
+	}
+
+	if (!tblStruct)
+		return false;
+
+	if (!tblStruct->create())
+	{
+		LOG_ERROR << "Error during on-demand table creation:" << tblStruct->name;
+		delete tblStruct;
+		return false;
+	}
+
+	if (!tblStruct->fill())
+	{
+		LOG_ERROR << "Error during on-demand table filling:" << tblStruct->name;
+		delete tblStruct;
+		return false;
+	}
+
+	delete tblStruct;
+	return true;
 }
 
 void core::GameDatabase::addTable(TableStructure* tbl)
@@ -325,38 +555,32 @@ bool core::GameDatabase::initFromDBD(const std::string& dbdDir, const std::strin
 bool core::GameDatabase::createDatabaseFromDBD(const std::string& dbdDir, const core::DBDBuild& build,
 											   const std::vector<std::string>& tableNames)
 {
-	if (!readStructureFromDBD(dbdDir, build, tableNames))
-	{
-		LOG_ERROR << "Reading database structure from DBD files failed! Impossible to create database.";
-		return false;
-	}
+	// Store parameters for fully lazy per-table preparation.
+	// Nothing is read from CASC or HTTP here — all work is deferred to
+	// the first SELECT query that references each table.
+	m_dbdDir = dbdDir;
+	m_build = build;
 
-	bool result = true;
-
-	for (const auto& it : m_dbStruct)
+	for (const auto& entry : tableNames)
 	{
-		if (it->create())
+		std::string tableName;
+		if (entry.starts_with("CSV:"))
 		{
-			if (!it->fill() && !m_fastMode)
-			{
-				LOG_ERROR << "Error during table filling" << it->name;
-				result = false;
-			}
+			auto parts = core::split(entry, ':');
+			if (parts.size() >= 5)
+				tableName = parts[1];
 		}
 		else
 		{
-			if (!m_fastMode)
-			{
-				LOG_ERROR << "Error during table creation" << it->name;
-				result = false;
-			}
+			tableName = entry;
 		}
+
+		if (!tableName.empty())
+			m_pendingTableEntries[tableName] = entry;
 	}
 
-	for (const auto it : m_dbStruct)
-		delete it;
-
-	return result;
+	LOG_INFO << "Registered " << m_pendingTableEntries.size() << " tables for on-demand loading";
+	return true;
 }
 
 static std::string dbdTypeToSqlType(const std::string& baseType, const std::string& sizeStr)

@@ -120,9 +120,26 @@ namespace core
 		bool readStructureFromDBD(const std::string& dbdDir, const core::DBDBuild& build,
 								  const std::vector<std::string>& tableNames);
 
+		// Fully prepare a single table on-demand: parse DBD/CSV, CREATE TABLE, fill.
+		bool prepareTable(const std::string& entry);
+
+		void ensureTablesFilled(const std::string& query);
+
 		sqlite3* m_db;
 
 		std::vector<TableStructure*> m_dbStruct;
+
+		// Tables that have been CREATE'd but not yet filled with data.
+		// Filled on-demand when first referenced by a SELECT query.
+		std::unordered_map<std::string, TableStructure*> m_pendingFill;
+
+		// Table entries not yet processed at all (tableName -> original entry string).
+		// Fully prepared on-demand when first referenced by a SELECT query.
+		std::unordered_map<std::string, std::string> m_pendingTableEntries;
+
+		// Stored from initFromDBD for lazy per-table use.
+		std::string m_dbdDir;
+		core::DBDBuild m_build;
 
 		bool m_fastMode;
 		std::string m_cachePath;

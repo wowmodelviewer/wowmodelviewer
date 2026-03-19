@@ -383,7 +383,8 @@ bool WDCReader::open()
 				{
 					const uint32_t fieldSize = idInfo.field_size_bits / 8;
 					std::memcpy(&id, recPtr + idInfo.field_offset_bits / 8, std::min(fieldSize, 4u));
-					id &= static_cast<uint32_t>((1ull << idInfo.field_size_bits) - 1);
+					if (idInfo.field_size_bits < 32)
+						id &= (1u << idInfo.field_size_bits) - 1;
 					break;
 				}
 				case COMP_BITPACKED:
@@ -438,20 +439,21 @@ bool WDCReader::open()
 
 	recordCount = m_recordLocations.size();
 
-	// Populate relationship reverse lookup
-	for (uint32_t si = 0; si < sectionCount; si++)
+	// Populate relationship reverse lookup using a map for O(1) lookups
 	{
-		const SectionData& sec = m_sections[si];
-		for (const auto& [recIndex, foreignID] : sec.relationshipMap)
+		std::unordered_map<uint64_t, uint32_t> sectionLocalToRecordID;
+		for (const auto& loc : m_recordLocations)
+			sectionLocalToRecordID[(uint64_t(loc.sectionIndex) << 32) | loc.localIndex] = loc.recordID;
+
+		for (uint32_t si = 0; si < sectionCount; si++)
 		{
-			// find the recordID for this recIndex in this section
-			for (const auto& loc : m_recordLocations)
+			const SectionData& sec = m_sections[si];
+			for (const auto& [recIndex, foreignID] : sec.relationshipMap)
 			{
-				if (loc.sectionIndex == si && loc.localIndex == recIndex)
-				{
-					m_relationshipLookup[foreignID].push_back(loc.recordID);
-					break;
-				}
+				const uint64_t key = (uint64_t(si) << 32) | recIndex;
+				auto it = sectionLocalToRecordID.find(key);
+				if (it != sectionLocalToRecordID.end())
+					m_relationshipLookup[foreignID].push_back(it->second);
 			}
 		}
 	}
@@ -536,7 +538,11 @@ bool WDCReader::readFieldValue(unsigned int sectionIndex,
 
 		result = 0;
 		std::memcpy(&result, fieldOffset, std::min(fieldSize, 4u));
-		result &= static_cast<uint32_t>((1ull << (info.field_size_bits / arraySize)) - 1);
+		{
+			const uint32_t bitsPerElement = info.field_size_bits / arraySize;
+			if (bitsPerElement < 32)
+				result &= (1u << bitsPerElement) - 1;
+		}
 		break;
 	}
 	case COMP_BITPACKED:
