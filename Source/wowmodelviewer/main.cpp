@@ -162,6 +162,7 @@ static std::string  g_cfgPath;               // userSettings/Config.ini
 static bool         g_isWoWLoaded  = false;
 static bool         g_initDB       = false;
 static bool         g_enableDbCache = false;
+static bool         g_showConsole   = false;  // toggle debug console window
 static std::string  g_loadStatus;            // status text shown in File Browser
 static std::atomic<float> g_loadProgress{0.0f}; // 0..1 progress bar fraction (atomic for thread safety)
 static bool         g_loadInProgress = false;
@@ -550,6 +551,7 @@ static void loadSettings()
 
     g_gamePath = config.getString("Settings/Path");
     g_enableDbCache = config.getBool("Settings/EnableDbCache", false);
+    g_showConsole = config.getBool("Settings/ShowConsole", false);
     g_drawGrid = config.getBool("Viewport/DrawGrid", true);
     g_bgColor.x = static_cast<float>(config.getDouble("Viewport/BgR", 71.0 / 255.0));
     g_bgColor.y = static_cast<float>(config.getDouble("Viewport/BgG", 95.0 / 255.0));
@@ -563,6 +565,7 @@ static void saveSettings()
     core::IniFile config(g_cfgPath);
     config.setValue("Settings/Path", g_gamePath);
     config.setValue("Settings/EnableDbCache", g_enableDbCache);
+    config.setValue("Settings/ShowConsole", g_showConsole);
     config.setValue("Viewport/DrawGrid", g_drawGrid);
     config.setValue("Viewport/BgR", static_cast<double>(g_bgColor.x));
     config.setValue("Viewport/BgG", static_cast<double>(g_bgColor.y));
@@ -2967,6 +2970,13 @@ static void initEngine()
     LOG_INFO << "==============================================";
 
     loadSettings();
+
+    // Apply initial console visibility
+#ifdef _WIN32
+    if (HWND hConsole = GetConsoleWindow())
+        ShowWindow(hConsole, g_showConsole ? SW_SHOW : SW_HIDE);
+#endif
+
     // Pre-fill the path input buffer from saved settings
     strncpy_s(g_pathBuf, g_gamePath.c_str(), sizeof(g_pathBuf) - 1);
 
@@ -4720,6 +4730,17 @@ int main(int /*argc*/, char* /*argv*/[])
 
             ImGui::Checkbox("Enable Database Cache", &g_enableDbCache);
             ImGui::TextDisabled("Speeds up loading by caching the database. Takes effect on next load.");
+
+            // ---- General section ----
+            ImGui::SeparatorText("General");
+            if (ImGui::Checkbox("Show Console Window", &g_showConsole))
+            {
+#ifdef _WIN32
+                if (HWND hConsole = GetConsoleWindow())
+                    ShowWindow(hConsole, g_showConsole ? SW_SHOW : SW_HIDE);
+#endif
+            }
+            ImGui::TextDisabled("Shows/hides the debug console. Useful for diagnostics.");
 
             // ---- Viewport section ----
             ImGui::SeparatorText("Viewport");
