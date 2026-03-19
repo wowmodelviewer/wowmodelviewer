@@ -190,10 +190,10 @@ void CharDetails::fillCustomizationMapForOption(uint chrCustomizationOption)
 
 		LOG_INFO << __FUNCTION__ << "DIRECT values" << matchingChoices.size();
 		for (const auto& c : matchingChoices)
-				vals.push_back(c.id);
-			}
+			vals.push_back(c.id);
+	}
 
-			if (vals != originalVals)
+	if (vals != originalVals)
 	{
 		LOG_INFO << __FUNCTION__ << chrCustomizationOption;
 		std::string info;

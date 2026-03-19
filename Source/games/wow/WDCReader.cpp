@@ -279,6 +279,31 @@ bool WDCReader::open()
 		sec.recordDataPtr  = m_fileData + recordDataOfs;
 		sec.recordDataSize = recordDataSize;
 
+		// For encrypted sections, skip all data without parsing — the bytes
+		// are ciphertext, so interpreting counts/ids would be garbage.
+		if (sec.tactKeyHash != 0)
+		{
+			seekRelative(recordDataSize);
+
+			// string block
+			sec.stringTableOffset = static_cast<uint32_t>(getPos());
+			sec.previousStringTableSize = previousStringTableSize;
+			if (m_wdcVersion > 2)
+				previousStringTableSize += sec.stringTableSize;
+			seekRelative(sec.stringTableSize);
+
+			// skip id list, copy table, offset map, relationship data, offset map id list
+			seekRelative(sec.idListSize);
+			seekRelative(sec.copyTableCount * sizeof(CopyTableEntry));
+			if (m_wdcVersion > 2)
+				seekRelative(sec.offsetMapIdCount * sizeof(OffsetMapEntry));
+			seekRelative(sec.relationshipDataSize);
+			if (m_wdcVersion > 2 && sec.offsetMapIdCount > 0)
+				seekRelative(sec.offsetMapIdCount * 4);
+
+			continue;
+		}
+
 		// skip past record data
 		seekRelative(recordDataSize);
 
@@ -344,7 +369,7 @@ bool WDCReader::open()
 				m_relationshipLookup[foreignID]; // ensure entry exists
 			}
 
-			// If section is encrypted we may have read the wrong amount — fix up
+			// Advance to expected end in case of read mismatch
 			const size_t expected = relStart + sec.relationshipDataSize;
 			if (getPos() != expected)
 				seek(expected);

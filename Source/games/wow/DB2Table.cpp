@@ -73,13 +73,23 @@ std::string DB2Row::getString(const std::string& field, unsigned int arrayIndex)
 	return m_table->readString(m_recordIndex, *fi, idx);
 }
 
+// ── helpers ──────────────────────────────────────────────────────────────────
+
+static std::string toLower(const std::string& s)
+{
+	std::string result = s;
+	std::transform(result.begin(), result.end(), result.begin(),
+		[](unsigned char c) { return static_cast<char>(std::tolower(c)); });
+	return result;
+}
+
 // ── DB2Table ─────────────────────────────────────────────────────────────────
 
 DB2Table::DB2Table(WDCReader* reader, std::vector<DB2FieldInfo> fields)
 	: m_reader(reader), m_fields(std::move(fields))
 {
 	for (size_t i = 0; i < m_fields.size(); i++)
-		m_fieldNameToIndex[m_fields[i].name] = i;
+		m_fieldNameToIndex[toLower(m_fields[i].name)] = i;
 }
 
 DB2Table::~DB2Table()
@@ -109,7 +119,7 @@ size_t DB2Table::getRowCount() const
 
 const DB2FieldInfo* DB2Table::findField(const std::string& name) const
 {
-	auto it = m_fieldNameToIndex.find(name);
+	auto it = m_fieldNameToIndex.find(toLower(name));
 	if (it != m_fieldNameToIndex.end())
 		return &m_fields[it->second];
 	return nullptr;
@@ -117,23 +127,25 @@ const DB2FieldInfo* DB2Table::findField(const std::string& name) const
 
 const DB2FieldInfo* DB2Table::resolveField(const std::string& name, unsigned int& arrayIndex) const
 {
+	const std::string lower = toLower(name);
+
 	// Try exact match first (base name or single field)
-	auto it = m_fieldNameToIndex.find(name);
+	auto it = m_fieldNameToIndex.find(lower);
 	if (it != m_fieldNameToIndex.end())
 		return &m_fields[it->second];
 
 	// Try expanded SQL-style array name: "Field1" -> "Field" + arrayIndex=0
-	size_t numStart = name.size();
-	while (numStart > 0 && std::isdigit(static_cast<unsigned char>(name[numStart - 1])))
+	size_t numStart = lower.size();
+	while (numStart > 0 && std::isdigit(static_cast<unsigned char>(lower[numStart - 1])))
 		--numStart;
 
-	if (numStart > 0 && numStart < name.size())
+	if (numStart > 0 && numStart < lower.size())
 	{
-		std::string baseName = name.substr(0, numStart);
+		std::string baseName = lower.substr(0, numStart);
 		it = m_fieldNameToIndex.find(baseName);
 		if (it != m_fieldNameToIndex.end() && m_fields[it->second].arraySize > 1)
 		{
-			int idx = std::stoi(name.substr(numStart)) - 1; // SQL names are 1-based
+			int idx = std::stoi(lower.substr(numStart)) - 1; // SQL names are 1-based
 			if (idx >= 0 && static_cast<unsigned int>(idx) < m_fields[it->second].arraySize)
 			{
 				arrayIndex = static_cast<unsigned int>(idx);
