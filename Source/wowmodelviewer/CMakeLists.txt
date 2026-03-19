@@ -56,6 +56,13 @@ target_link_libraries(${NAME}
 set(BIN_DIR "${CMAKE_SOURCE_DIR}/bin/")
 install(TARGETS ${NAME} RUNTIME DESTINATION ${BIN_DIR})
 
+# Install icon files next to the exe so the NSIS installer and runtime can find them.
+install(FILES
+  ${CMAKE_SOURCE_DIR}/bin_support/Icons/wmv.ico
+  ${CMAKE_SOURCE_DIR}/bin_support/Icons/wmv_16.png
+  DESTINATION ${BIN_DIR}
+)
+
 # Install WoW version support files (database.xml, AnimationData.csv, etc.)
 # so the game loading code can find them at games/wow/X.Y/ relative to bin/.
 file(GLOB _wow_ver_dirs LIST_DIRECTORIES true ${CMAKE_SOURCE_DIR}/bin_support/wow/*)

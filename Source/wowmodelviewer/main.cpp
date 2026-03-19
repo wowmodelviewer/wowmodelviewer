@@ -3032,8 +3032,20 @@ int main(int /*argc*/, char* /*argv*/[])
 
 // Set window icon from wmv_16.png.
 {
+    // Resolve the icon relative to the executable so it works in installed
+    // builds (NSIS) as well as development builds (compile-time path).
     int iw = 0, ih = 0, ic = 0;
-    unsigned char* px = stbi_load(WMV_ICON_PATH, &iw, &ih, &ic, 4);
+    unsigned char* px = nullptr;
+#ifdef _WIN32
+    {
+        wchar_t exePath[MAX_PATH]{};
+        GetModuleFileNameW(nullptr, exePath, MAX_PATH);
+        std::filesystem::path iconPath = std::filesystem::path(exePath).parent_path() / "wmv_16.png";
+        px = stbi_load(iconPath.string().c_str(), &iw, &ih, &ic, 4);
+    }
+#endif
+    if (!px)
+        px = stbi_load(WMV_ICON_PATH, &iw, &ih, &ic, 4);
     if (px)
     {
         GLFWimage img{ iw, ih, px };
