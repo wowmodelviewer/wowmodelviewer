@@ -247,23 +247,27 @@ bool core::DBDFile::parseVersionDef(std::istream& stream, const std::string& fir
 		{
 			std::string buildStr = trimWhitespace(line.substr(6));
 
-			// Check for range: X.X.X.X-X.X.X.X
-			if (buildStr.find('-') != std::string::npos && buildStr.find(',') == std::string::npos)
+			// Split by comma first, then check each token for range or exact build.
+			// This correctly handles mixed lines like:
+			//   BUILD 0.5.3.3368-0.5.5.3494, 0.6.0.3592
+			auto buildList = core::split(buildStr, ',');
+			for (auto& token : buildList)
 			{
-				auto rangeParts = core::split(buildStr, '-');
-				if (rangeParts.size() == 2)
+				token = trimWhitespace(token);
+				if (token.empty())
+					continue;
+
+				auto dashPos = token.find('-');
+				if (dashPos != std::string::npos)
 				{
-					auto lo = DBDBuild::fromString(trimWhitespace(rangeParts[0]));
-					auto hi = DBDBuild::fromString(trimWhitespace(rangeParts[1]));
+					auto lo = DBDBuild::fromString(token.substr(0, dashPos));
+					auto hi = DBDBuild::fromString(token.substr(dashPos + 1));
 					verDef.buildRanges.emplace_back(lo, hi);
 				}
-			}
-			else
-			{
-				// Multiple exact builds separated by ", "
-				auto buildList = core::split(buildStr, ',');
-				for (auto& b : buildList)
-					verDef.builds.push_back(DBDBuild::fromString(trimWhitespace(b)));
+				else
+				{
+					verDef.builds.push_back(DBDBuild::fromString(token));
+				}
 			}
 		}
 		else if (line.starts_with("COMMENT "))

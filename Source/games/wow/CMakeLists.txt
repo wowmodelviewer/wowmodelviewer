@@ -38,6 +38,7 @@ set(src animated.cpp
       wdc2file.cpp
       wdc3file.cpp
       wdc5file.cpp
+      WDCReader.cpp
       WoWDatabase.cpp
       WoWFolder.cpp
       WoWItem.cpp
@@ -85,6 +86,7 @@ set(headers animated.h
       wdc2file.h
       wdc3file.h
       wdc5file.h
+      WDCReader.h
       wow_enums.h
       WoWDatabase.h
       WoWFolder.h

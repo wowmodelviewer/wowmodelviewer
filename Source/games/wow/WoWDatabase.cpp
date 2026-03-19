@@ -8,6 +8,7 @@
 #include "wdc2file.h"
 #include "wdc3file.h"
 #include "wdc5file.h"
+#include "WDCReader.h"
 #include "DBDFile.h"
 
 #include <sstream>
@@ -163,13 +164,13 @@ DBFile* wow::TableStructure::createDBFile()
 		else if (strncmp(header, "WDC1", 4) == 0)
 			result = new WDC1File(fileToOpen->fullname());
 		else if (strncmp(header, "WDC2", 4) == 0)
-			result = new WDC2File(fileToOpen->fullname());
+			result = new WDCReader(fileToOpen->fullname());
 		else if (strncmp(header, "WDC3", 4) == 0)
-			result = new WDC3File(fileToOpen->fullname());
+			result = new WDCReader(fileToOpen->fullname());
 		else if (strncmp(header, "WDC4", 4) == 0)
-			result = new WDC3File(fileToOpen->fullname());
+			result = new WDCReader(fileToOpen->fullname());
 		else if (strncmp(header, "WDC5", 4) == 0)
-			result = new WDC5File(fileToOpen->fullname());
+			result = new WDCReader(fileToOpen->fullname());
 		else
 			LOG_ERROR << "Unsupported database file" << header[0] << header[1] << header[2] << header[3];
 
