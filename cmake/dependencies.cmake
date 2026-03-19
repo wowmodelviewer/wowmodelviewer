@@ -102,11 +102,16 @@ if(NOT EXISTS "${_fbx_sentinel}")
   endif()
 
   # Locate fbxsdk.h inside the extraction tree.
-  file(GLOB_RECURSE _fbx_headers "${_fbx_extract}/**/include/fbxsdk.h")
-  list(GET _fbx_headers 0 _fbx_header_path)
-  if(NOT _fbx_header_path)
-    message(FATAL_ERROR "Could not find fbxsdk.h in extracted FBX SDK")
+  file(GLOB_RECURSE _fbx_headers "${_fbx_extract}/*/fbxsdk.h")
+  if(NOT _fbx_headers)
+    # Also try flat layout (no intermediate directory).
+    if(EXISTS "${_fbx_extract}/include/fbxsdk.h")
+      set(_fbx_headers "${_fbx_extract}/include/fbxsdk.h")
+    else()
+      message(FATAL_ERROR "Could not find fbxsdk.h in extracted FBX SDK")
+    endif()
   endif()
+  list(GET _fbx_headers 0 _fbx_header_path)
   cmake_path(GET _fbx_header_path PARENT_PATH _fbx_inc_src)   # .../include
   cmake_path(GET _fbx_inc_src     PARENT_PATH _fbx_root)      # .../
 
@@ -116,11 +121,11 @@ if(NOT EXISTS "${_fbx_sentinel}")
   file(COPY "${_fbx_inc_src}/fbxsdk"   DESTINATION "${_fbx_inc_dst}")
 
   # Locate x64/release libs.
-  file(GLOB_RECURSE _fbx_libs "${_fbx_root}/**/x64/release/libfbxsdk.lib")
-  list(GET _fbx_libs 0 _fbx_lib_path)
-  if(NOT _fbx_lib_path)
+  file(GLOB_RECURSE _fbx_libs "${_fbx_root}/*/x64/release/libfbxsdk.lib")
+  if(NOT _fbx_libs)
     message(FATAL_ERROR "Could not find libfbxsdk.lib under x64/release in extracted FBX SDK")
   endif()
+  list(GET _fbx_libs 0 _fbx_lib_path)
   cmake_path(GET _fbx_lib_path PARENT_PATH _fbx_lib_src)
 
   file(MAKE_DIRECTORY "${_fbx_lib_dst}")
