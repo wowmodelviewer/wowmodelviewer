@@ -60,22 +60,9 @@ if(MSVC)
 endif()
 message(STATUS "=== Configuring WoWModelViewer ===")
 
-# Auto-install third-party dependencies on a fresh clone.
-# Uses fbxsdk.h as sentinel – if absent, runs the full setup script.
-set(_fbx_sentinel "${CMAKE_SOURCE_DIR}/ThirdParty/include/fbxsdk.h")
-if(WIN32 AND NOT EXISTS "${_fbx_sentinel}")
-  message(STATUS "Dependencies not found – running scripts/setup_x64_deps.ps1 ...")
-  execute_process(
-    COMMAND powershell.exe -ExecutionPolicy Bypass
-            -File "${CMAKE_SOURCE_DIR}/scripts/setup_x64_deps.ps1"
-            -RepoRoot "${CMAKE_SOURCE_DIR}"
-    WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
-    RESULT_VARIABLE _setup_rc
-  )
-  if(NOT _setup_rc EQUAL 0)
-    message(FATAL_ERROR "setup_x64_deps.ps1 failed (exit code ${_setup_rc}). See output above.")
-  endif()
-endif()
+# Auto-install third-party dependencies (zlib, libpng, FBX SDK, vcredist)
+# at configure time via pure CMake — no external scripts required.
+include(${CMAKE_SOURCE_DIR}/cmake/dependencies.cmake)
 
 # Dependencies.
 include_directories("${CMAKE_SOURCE_DIR}/ThirdParty/include")
@@ -123,10 +110,8 @@ set(CASC_BUILD_SHARED_LIB OFF CACHE BOOL "Compile dynamically linked library")
 include_directories(ThirdParty/casclib/src)
 set(CASCLIB_INSTALL_LOCATION ${CMAKE_BINARY_DIR}/casclib)
 set(CMAKE_INSTALL_PREFIX ${CASCLIB_INSTALL_LOCATION})
-# Point CascLib's find_package(ZLIB) to our ThirdParty zlib 1.3.1 so it
-# does not fall back to its bundled (older) copy.
-set(ZLIB_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/ThirdParty/include" CACHE PATH "" FORCE)
-set(ZLIB_LIBRARY "${CMAKE_SOURCE_DIR}/ThirdParty/lib/x64/zlib.lib" CACHE FILEPATH "" FORCE)
+# ZLIB_INCLUDE_DIR / ZLIB_LIBRARY are set by cmake/dependencies.cmake so
+# CascLib's find_package(ZLIB) finds our vcpkg copy.
 set(CMAKE_POLICY_VERSION_MINIMUM 3.5 CACHE STRING "" FORCE)
 add_subdirectory(ThirdParty/casclib)
 unset(CMAKE_POLICY_VERSION_MINIMUM CACHE)

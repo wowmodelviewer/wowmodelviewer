@@ -25,7 +25,7 @@ jobs:
           submodules: recursive
 
       # Primary cache:
-      # Cache is invalidated automatically when setup_x64_deps.ps1 changes.
+      # Cache is invalidated automatically when cmake/dependencies.cmake changes.
       # restore-keys lets a partial match seed the cache so only changed
       # packages need to be rebuilt by vcpkg.
       # Only cache generated artifacts — exclude git submodules (glm, casclib).
@@ -37,7 +37,7 @@ jobs:
             ThirdParty/include/fbxsdk.h
             ThirdParty/include/fbxsdk
             bin_support/vcredist_x64.exe
-          key: ThirdParty-${{ runner.os }}-${{ hashFiles('scripts/setup_x64_deps.ps1') }}
+          key: ThirdParty-${{ runner.os }}-${{ hashFiles('cmake/dependencies.cmake') }}
           restore-keys: |
             ThirdParty-${{ runner.os }}-
 
@@ -53,13 +53,6 @@ jobs:
             }
           }
 
-      - name: Install dependencies
-        shell: pwsh
-        run: |
-          $env:PATH = "$env:VCPKG_INSTALLATION_ROOT;$env:PATH"
-          $env:VCPKG_ROOT = $env:VCPKG_INSTALLATION_ROOT
-          .\scripts\setup_x64_deps.ps1 -RepoRoot ${{ github.workspace }}
-
       - name: Set up Python for glad2
         uses: actions/setup-python@v5
         with:
@@ -69,7 +62,10 @@ jobs:
         run: pip install jinja2
 
       - name: Configure
-        run: cmake --preset x64-Release -DBUILDNUMBER=${{ github.run_number }}
+        shell: pwsh
+        run: |
+          $env:VCPKG_ROOT = $env:VCPKG_INSTALLATION_ROOT
+          cmake --preset x64-Release -DBUILDNUMBER=${{ github.run_number }} -DVCPKG_OVERLAY_TRIPLETS="${{ github.workspace }}/scripts/vcpkg-triplets"
 
       - name: Build
         run: cmake --build --preset x64-Release

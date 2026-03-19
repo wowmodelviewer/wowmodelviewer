@@ -1,0 +1,9 @@
+{
+  "name": "wowmodelviewer",
+  "version": "0.11.0",
+  "builtin-baseline": "544a4c5c297e60e4ac4a5a1810df66748d908869",
+  "dependencies": [
+    "zlib",
+    "libpng"
+  ]
+}
