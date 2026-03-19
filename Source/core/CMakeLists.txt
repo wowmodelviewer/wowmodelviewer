@@ -5,11 +5,13 @@ message(STATUS "Building nextgen Core")
 
 include_directories(.)
 include_directories(${CMAKE_SOURCE_DIR}/ThirdParty/stb)
+include_directories(${CMAKE_SOURCE_DIR}/ThirdParty/include)
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
 set(src CharInfos.cpp
     CSVFile.cpp
+    DBDFile.cpp
     dbfile.cpp
     ExporterPlugin.cpp
     HttpClient.cpp
@@ -28,12 +30,14 @@ set(src CharInfos.cpp
     metaclasses/Observer.cpp
     SoftwareImage.cpp
     stb_impl.cpp
+    ZipExtract.cpp
     logger/Logger.cpp
     logger/LogOutputConsole.cpp
     logger/LogOutputFile.cpp)
 
 set(headers CharInfos.h
       CSVFile.h
+      DBDFile.h
       dbfile.h
       ExporterPlugin.h
       HttpClient.h
@@ -49,6 +53,7 @@ set(headers CharInfos.h
       NPCInfos.h
       SoftwareImage.h
       string_utils.h
+      ZipExtract.h
       metaclasses/BaseIterator.h
       metaclasses/Component.h
       metaclasses/Container.h
@@ -69,4 +74,4 @@ set(NAME core)
 add_library(${NAME} STATIC ${src} ${headers})
 set_property(TARGET ${NAME} PROPERTY FOLDER "libraries")
 
-target_link_libraries(${NAME} pugixml-static winhttp ${extralibs})
+target_link_libraries(${NAME} pugixml-static winhttp ${CMAKE_SOURCE_DIR}/ThirdParty/lib/x64/zlib.lib ${extralibs})

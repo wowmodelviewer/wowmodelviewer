@@ -3,7 +3,7 @@
 #include <string>
 #include <vector>
 #include "sqlite3.h"
-#include <pugixml.hpp>
+#include "DBDFile.h"
 
 class DBFile;
 class GameFile;
@@ -30,7 +30,6 @@ public:
 
 namespace core
 {
-	// table structures as defined in xml file
 	class _GAMEDATABASE_API_ FieldStructure
 	{
 	public:
@@ -77,7 +76,8 @@ namespace core
 		GameDatabase();
 		//GameDatabase(GameDatabase&);
 
-		bool initFromXML(const std::string& file);
+		bool initFromDBD(const std::string& dbdDir, const std::string& buildVersion,
+						 const std::vector<std::string>& tableNames);
 
 		sqlResult sqlQuery(const std::string& query);
 
@@ -91,15 +91,19 @@ namespace core
 		virtual core::TableStructure* createTableStructure() = 0;
 		virtual core::FieldStructure* createFieldStructure() = 0;
 
-		virtual void readSpecificTableAttributes(const pugi::xml_node&, core::TableStructure*) = 0;
-		virtual void readSpecificFieldAttributes(const pugi::xml_node&, core::FieldStructure*) = 0;
+		virtual void readSpecificTableAttributesFromDBD(const core::DBDVersionDef&, core::TableStructure*) = 0;
+		virtual void readSpecificFieldAttributesFromDBD(const core::DBDVersionField&, const core::DBDColumnDef&,
+														core::FieldStructure*) = 0;
+		virtual void setFieldPos(core::FieldStructure*, int pos) = 0;
 
 	private:
 		static int treatQuery(void* NotUsed, int nbcols, char** values, char** cols);
 		static void logQueryTime(void* aDb, const char* aQueryStr, sqlite3_uint64 aTimeInNs);
 
-		bool createDatabaseFromXML(const std::string& file);
-		bool readStructureFromXML(const std::string& file);
+		bool createDatabaseFromDBD(const std::string& dbdDir, const core::DBDBuild& build,
+								   const std::vector<std::string>& tableNames);
+		bool readStructureFromDBD(const std::string& dbdDir, const core::DBDBuild& build,
+								  const std::vector<std::string>& tableNames);
 
 		sqlite3* m_db;
 

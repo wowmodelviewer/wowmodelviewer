@@ -61,6 +61,7 @@
 #include "database.h"
 #include "string_utils.h"
 #include "TextureManager.h"
+#include "ZipExtract.h"
 #include "WoWItem.h"
 #include "CharDetails.h"
 
@@ -650,6 +651,36 @@ static bool checkAndDownloadSupportFiles()
             return false;
     }
 
+    // Download WoWDBDefs definitions if not present
+    const fs::path dbdDir = appDir / "games" / "wow" / "dbdefs";
+    if (!fs::exists(dbdDir, ec) || fs::is_empty(dbdDir, ec))
+    {
+        LOG_INFO << "Downloading WoWDBDefs definitions...";
+        setLoadStatus("Downloading database definitions...");
+
+        const auto resp = HttpClient::Get(
+            "https://github.com/wowdev/WoWDBDefs/releases/latest/download/dbd.zip");
+        if (!resp.success)
+        {
+            LOG_ERROR << "Failed to download dbd.zip: " << resp.error;
+            setLoadStatus("Failed to download dbd.zip: " + resp.error);
+            // Non-fatal: the XML fallback will be used
+        }
+        else
+        {
+            fs::create_directories(dbdDir, ec);
+            if (extractZip(resp.body, dbdDir))
+            {
+                LOG_INFO << "WoWDBDefs definitions extracted to " << dbdDir.string();
+            }
+            else
+            {
+                LOG_ERROR << "Failed to extract dbd.zip";
+                fs::remove_all(dbdDir, ec);
+            }
+        }
+    }
+
     return true;
 }
 
@@ -699,12 +730,51 @@ static void initDatabase()
         GAMEDATABASE.setFastMode();
     }
 
-    if (!GAMEDATABASE.initFromXML("database.xml"))
+    // DBD-based database initialization
+    const fs::path dbdDir = appDir / "games" / "wow" / "dbdefs";
+    const fs::path tablesFile = appDir / "games" / "wow" / "tables.txt";
+
+    if (!fs::exists(dbdDir, ec) || !fs::is_directory(dbdDir, ec) || !fs::exists(tablesFile, ec))
+    {
+        g_initDB = false;
+        LOG_ERROR << "DBD definitions or tables.txt not found!";
+        setLoadStatus("Database definition files not found!");
+        fs::remove(cachePath, ec);
+        fs::remove(versionPath, ec);
+        return;
+    }
+
+    // Read table names from tables.txt
+    std::vector<std::string> tableNames;
+    std::ifstream tf(tablesFile);
+    std::string tline;
+    while (std::getline(tf, tline))
+    {
+        // Trim whitespace
+        auto start = tline.find_first_not_of(" \t\r\n");
+        if (start == std::string::npos) continue;
+        auto end = tline.find_last_not_of(" \t\r\n");
+        tline = tline.substr(start, end - start + 1);
+        if (tline.empty() || tline[0] == '#') continue;
+        tableNames.push_back(tline);
+    }
+
+    if (tableNames.empty())
+    {
+        g_initDB = false;
+        LOG_ERROR << "No table names found in tables.txt!";
+        setLoadStatus("Database table list is empty!");
+        fs::remove(cachePath, ec);
+        fs::remove(versionPath, ec);
+        return;
+    }
+
+    LOG_INFO << "Attempting DBD-based database init with" << tableNames.size() << "tables from" << dbdDir.string();
+    if (!GAMEDATABASE.initFromDBD(dbdDir.string(), currentVersion, tableNames))
     {
         g_initDB = false;
         LOG_ERROR << "Database initialization failed!";
         setLoadStatus("Database initialization failed!");
-        // Clean up partial cache so next launch starts fresh
         fs::remove(cachePath, ec);
         fs::remove(versionPath, ec);
         return;
@@ -755,10 +825,10 @@ static void initDatabase()
 
     {
         sqlResult item = GAMEDATABASE.sqlQuery(
-            "SELECT Item.ID, ItemSparse.Display_Lang, Item.InventoryType, "
-            "Item.ClassID, Item.SubclassID, Item.SheathType "
+            "SELECT Item.ID, ItemSparse.Display_lang, Item.InventoryType, "
+            "Item.ClassID, Item.SubclassID, Item.SheatheType "
             "FROM Item LEFT JOIN ItemSparse ON Item.ID = ItemSparse.ID "
-            "WHERE Item.InventoryType !=0 AND ItemSparse.Display_Lang != \"\"");
+            "WHERE Item.InventoryType !=0 AND ItemSparse.Display_lang != \"\"");
 
         if (item.valid && !item.empty())
         {
@@ -801,9 +871,8 @@ static void loadWoW(const core::GameConfig& config)
     LOG_INFO << "Major version: " << GAMEDIRECTORY.majorVersion();
     g_loadProgress = 0.05f;
 
-    // Set the config folder used for database.xml, listfile paths, etc.
-    auto ver = core::split(GAMEDIRECTORY.version(), '.');
-    const std::string baseConfigFolder = "games/wow/" + ver[0] + "." + ver[1] + "/";
+    // Set the config folder used for CSV data files, listfile paths, etc.
+    const std::string baseConfigFolder = "games/wow/";
     LOG_INFO << "Using config folder: " << baseConfigFolder;
     core::Game::instance().setConfigFolder(baseConfigFolder);
 
@@ -814,7 +883,7 @@ static void loadWoW(const core::GameConfig& config)
         if (total > 0)
             g_loadProgress = 0.10f + 0.40f * static_cast<float>(current) / static_cast<float>(total);
     });
-    GAMEDIRECTORY.initFromListfile("../../../listfile.csv");
+    GAMEDIRECTORY.initFromListfile("../../listfile.csv");
     GAMEDIRECTORY.setProgressCallback(nullptr);
     g_loadProgress = 0.50f;
 

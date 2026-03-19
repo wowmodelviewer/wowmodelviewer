@@ -46,7 +46,9 @@ namespace wow
 		core::TableStructure* createTableStructure();
 		core::FieldStructure* createFieldStructure();
 
-		void readSpecificTableAttributes(const pugi::xml_node&, core::TableStructure*);
-		void readSpecificFieldAttributes(const pugi::xml_node&, core::FieldStructure*);
+		void readSpecificTableAttributesFromDBD(const core::DBDVersionDef&, core::TableStructure*) override;
+		void readSpecificFieldAttributesFromDBD(const core::DBDVersionField&, const core::DBDColumnDef&,
+												core::FieldStructure*) override;
+		void setFieldPos(core::FieldStructure*, int pos) override;
 	};
 }

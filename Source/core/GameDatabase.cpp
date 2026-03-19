@@ -3,7 +3,10 @@
 #include "CSVFile.h"
 #include "logger/Logger.h"
 #include "Game.h"
+#include "DBDFile.h"
+#include "string_utils.h"
 
+#include <filesystem>
 #include <string>
 #include <vector>
 
@@ -17,33 +20,6 @@ core::GameDatabase::~GameDatabase()
 
 core::GameDatabase::GameDatabase() : m_db(nullptr), m_fastMode(false)
 {
-}
-
-bool core::GameDatabase::initFromXML(const std::string& file)
-{
-	int rc;
-
-	if (m_fastMode)
-	{
-		const char* path = m_cachePath.empty() ? "./wowdb.sqlite" : m_cachePath.c_str();
-		rc = sqlite3_open(path, &m_db);
-	}
-	else
-		rc = sqlite3_open(":memory:", &m_db);
-
-	if (rc)
-	{
-		LOG_INFO << "Can't open database:" << sqlite3_errmsg(m_db);
-		return false;
-	}
-	else
-	{
-		LOG_INFO << "Opened database successfully";
-	}
-
-	sqlite3_profile(m_db, GameDatabase::logQueryTime, m_db);
-
-	return createDatabaseFromXML(core::Game::instance().configFolder() + file);
 }
 
 sqlResult core::GameDatabase::sqlQuery(const std::string& query)
@@ -91,42 +67,6 @@ int core::GameDatabase::treatQuery(void* resultPtr, int nbcols, char** vals, cha
 	return 0;
 }
 
-bool core::GameDatabase::createDatabaseFromXML(const std::string& file)
-{
-	if (!readStructureFromXML(file))
-	{
-		LOG_ERROR << "Reading database structure from XML file failed ! Impossible to create database.";
-		return false;
-	}
-
-	bool result = true; // ok until we found an issue
-
-	for (const auto& it : m_dbStruct)
-	{
-		if (it->create())
-		{
-			if (!it->fill() && !m_fastMode)
-			{
-				LOG_ERROR << "Error during table filling" << it->name;
-				result = false;
-			}
-		}
-		else
-		{
-			if (!m_fastMode) // if table already exists in fast mode, continue
-			{
-				LOG_ERROR << "Error during table creation" << it->name;
-				result = false;
-			}
-		}
-	}
-
-	for (const auto it : m_dbStruct)
-		delete it;
-
-	return result;
-}
-
 void core::GameDatabase::logQueryTime(void* aDb, const char* aQueryStr, sqlite3_uint64 aTimeInNs)
 {
 	if (aTimeInNs / 1000000 > 50)
@@ -135,73 +75,6 @@ void core::GameDatabase::logQueryTime(void* aDb, const char* aQueryStr, sqlite3_
 		LOG_WARNING << aQueryStr;
 		LOG_WARNING << "Query time (ms)" << aTimeInNs / 1000000;
 	}
-}
-
-bool core::GameDatabase::readStructureFromXML(const std::string& file)
-{
-	pugi::xml_document doc;
-	const pugi::xml_parse_result parseResult = doc.load_file(file.c_str());
-
-	if (!parseResult)
-	{
-		LOG_ERROR << "XML parse error:" << parseResult.description() << "at offset" << parseResult.offset;
-		return false;
-	}
-
-	const pugi::xml_node docElem = doc.document_element();
-
-	for (pugi::xml_node e = docElem.first_child(); e; e = e.next_sibling())
-	{
-		core::TableStructure* tblStruct = createTableStructure();
-		pugi::xml_node child = e.first_child();
-
-		// table values
-		tblStruct->name = e.attribute("name").as_string();
-
-		const pugi::xml_attribute dbfile = e.attribute("dbfile");
-		if (dbfile)
-			tblStruct->file = dbfile.as_string();
-		else
-			tblStruct->file = tblStruct->name;
-
-		readSpecificTableAttributes(child, tblStruct);
-
-		int fieldId = 0;
-		for (; child; child = child.next_sibling(), fieldId++)
-		{
-			core::FieldStructure* fieldStruct = createFieldStructure();
-			fieldStruct->id = fieldId;
-
-			// search if name and type are here
-			const pugi::xml_attribute name = child.attribute("name");
-			const pugi::xml_attribute type = child.attribute("type");
-			const pugi::xml_attribute key = child.attribute("primary");
-			const pugi::xml_attribute arraySize = child.attribute("arraySize");
-			const pugi::xml_attribute index = child.attribute("createIndex");
-
-			if (name && type)
-			{
-				fieldStruct->name = name.as_string();
-				fieldStruct->type = type.as_string();
-
-				if (key)
-					fieldStruct->isKey = true;
-
-				if (index)
-					fieldStruct->needIndex = true;
-
-				if (arraySize)
-					fieldStruct->arraySize = arraySize.as_uint();
-
-				readSpecificFieldAttributes(child, fieldStruct);
-
-				tblStruct->fields.push_back(fieldStruct);
-			}
-		}
-
-		addTable(tblStruct);
-	}
-	return true;
 }
 
 bool core::TableStructure::create()
@@ -363,4 +236,237 @@ core::TableStructure::~TableStructure()
 {
 	for (const auto it : fields)
 		delete it;
+}
+
+// --- DBD support ---
+
+bool core::GameDatabase::initFromDBD(const std::string& dbdDir, const std::string& buildVersion,
+									 const std::vector<std::string>& tableNames)
+{
+	int rc;
+
+	if (m_fastMode)
+	{
+		const char* path = m_cachePath.empty() ? "./wowdb.sqlite" : m_cachePath.c_str();
+		rc = sqlite3_open(path, &m_db);
+	}
+	else
+		rc = sqlite3_open(":memory:", &m_db);
+
+	if (rc)
+	{
+		LOG_INFO << "Can't open database:" << sqlite3_errmsg(m_db);
+		return false;
+	}
+	else
+	{
+		LOG_INFO << "Opened database successfully";
+	}
+
+	sqlite3_profile(m_db, GameDatabase::logQueryTime, m_db);
+
+	const core::DBDBuild build = core::DBDBuild::fromString(buildVersion);
+
+	return createDatabaseFromDBD(dbdDir, build, tableNames);
+}
+
+bool core::GameDatabase::createDatabaseFromDBD(const std::string& dbdDir, const core::DBDBuild& build,
+											   const std::vector<std::string>& tableNames)
+{
+	if (!readStructureFromDBD(dbdDir, build, tableNames))
+	{
+		LOG_ERROR << "Reading database structure from DBD files failed! Impossible to create database.";
+		return false;
+	}
+
+	bool result = true;
+
+	for (const auto& it : m_dbStruct)
+	{
+		if (it->create())
+		{
+			if (!it->fill() && !m_fastMode)
+			{
+				LOG_ERROR << "Error during table filling" << it->name;
+				result = false;
+			}
+		}
+		else
+		{
+			if (!m_fastMode)
+			{
+				LOG_ERROR << "Error during table creation" << it->name;
+				result = false;
+			}
+		}
+	}
+
+	for (const auto it : m_dbStruct)
+		delete it;
+
+	return result;
+}
+
+static std::string dbdTypeToSqlType(const std::string& baseType, const std::string& sizeStr)
+{
+	if (baseType == "string" || baseType == "locstring")
+		return "text";
+
+	if (baseType == "float")
+		return "float";
+
+	// int type - determine signed/unsigned and bit size from sizeStr
+	if (baseType == "int")
+	{
+		if (sizeStr.empty())
+			return "int32"; // default
+
+		bool isUnsigned = false;
+		std::string numStr = sizeStr;
+
+		if (!numStr.empty() && (numStr[0] == 'u' || numStr[0] == 'U'))
+		{
+			isUnsigned = true;
+			numStr = numStr.substr(1);
+		}
+
+		std::string prefix = isUnsigned ? "uint" : "int";
+		return prefix + numStr;
+	}
+
+	return "int32";
+}
+
+bool core::GameDatabase::readStructureFromDBD(const std::string& dbdDir, const core::DBDBuild& build,
+											  const std::vector<std::string>& tableNames)
+{
+	namespace fs = std::filesystem;
+
+	for (const auto& entry : tableNames)
+	{
+		// Check for CSV table definition: CSV:TableName:filename.csv:type1:name1:primary:type2:name2:...
+		if (entry.starts_with("CSV:"))
+		{
+			auto parts = core::split(entry, ':');
+			if (parts.size() < 5)
+			{
+				LOG_ERROR << "Invalid CSV table definition:" << entry;
+				continue;
+			}
+
+			const std::string& tableName = parts[1];
+			const std::string& csvFile = parts[2];
+
+			core::TableStructure* tblStruct = createTableStructure();
+			tblStruct->name = tableName;
+			tblStruct->file = csvFile;
+
+			int fieldId = 0;
+			size_t i = 3;
+			while (i + 1 < parts.size())
+			{
+				const std::string& fieldType = parts[i];
+				const std::string& fieldName = parts[i + 1];
+
+				// Check if the next token is "primary"
+				bool isPrimary = false;
+				if (i + 2 < parts.size() && parts[i + 2] == "primary")
+				{
+					isPrimary = true;
+					i += 3; // skip type, name, primary
+				}
+				else
+				{
+					i += 2; // skip type, name
+				}
+
+				core::FieldStructure* fieldStruct = createFieldStructure();
+				fieldStruct->id = fieldId++;
+				fieldStruct->name = fieldName;
+				fieldStruct->type = fieldType;
+				fieldStruct->isKey = isPrimary;
+				fieldStruct->arraySize = 1;
+				fieldStruct->needIndex = false;
+
+				tblStruct->fields.push_back(fieldStruct);
+			}
+
+			addTable(tblStruct);
+			continue;
+		}
+
+		// Regular DBD table
+		const std::string& tableName = entry;
+		std::string dbdPath = dbdDir + "/" + tableName + ".dbd";
+
+		if (!fs::exists(dbdPath))
+		{
+			LOG_ERROR << "DBD file not found:" << dbdPath;
+			continue;
+		}
+
+		core::DBDFile dbd;
+		if (!dbd.parse(dbdPath))
+		{
+			LOG_ERROR << "Failed to parse DBD file:" << dbdPath;
+			continue;
+		}
+
+		const core::DBDVersionDef* verDef = dbd.findVersion(build);
+		if (!verDef)
+		{
+			LOG_ERROR << "No matching version definition found in" << dbdPath
+					  << "for build" << build.major << "." << build.minor
+					  << "." << build.patch << "." << build.build;
+			continue;
+		}
+
+		core::TableStructure* tblStruct = createTableStructure();
+		tblStruct->name = tableName;
+		tblStruct->file = tableName;
+
+		readSpecificTableAttributesFromDBD(*verDef, tblStruct);
+
+		int fieldId = 0;
+		int fieldPos = 0; // position index in DB2 for non-id/non-noninline fields
+
+		for (const auto& vField : verDef->fields)
+		{
+			const core::DBDColumnDef* colDef = dbd.findColumn(vField.name);
+			if (!colDef)
+			{
+				LOG_ERROR << "Column definition not found for field" << vField.name
+						  << "in table" << tableName;
+				// Still need to advance pos for inline fields even on error
+					if (!vField.isNonInline)
+						fieldPos++;
+				continue;
+			}
+
+			core::FieldStructure* fieldStruct = createFieldStructure();
+			fieldStruct->id = fieldId++;
+
+			fieldStruct->name = vField.name;
+			fieldStruct->type = dbdTypeToSqlType(colDef->type, vField.sizeStr);
+			fieldStruct->arraySize = vField.arraySize;
+			fieldStruct->isKey = vField.isID;
+			fieldStruct->needIndex = false;
+
+			// Pass the current field position to the game-specific handler
+			readSpecificFieldAttributesFromDBD(vField, *colDef, fieldStruct);
+
+			// Set the DB2 field position for inline fields
+			if (!vField.isNonInline)
+			{
+				setFieldPos(fieldStruct, fieldPos);
+				fieldPos++;
+			}
+
+			tblStruct->fields.push_back(fieldStruct);
+		}
+
+		addTable(tblStruct);
+	}
+
+	return !m_dbStruct.empty();
 }

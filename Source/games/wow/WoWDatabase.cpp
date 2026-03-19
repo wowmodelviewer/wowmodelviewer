@@ -8,6 +8,9 @@
 #include "wdc2file.h"
 #include "wdc3file.h"
 #include "wdc5file.h"
+#include "DBDFile.h"
+
+#include <sstream>
 
 const std::vector<std::string> POSSIBLE_DB_EXT = {".db2", ".dbc"};
 
@@ -25,38 +28,42 @@ core::FieldStructure* wow::WoWDatabase::createFieldStructure()
 	return new wow::FieldStructure;
 }
 
-void wow::WoWDatabase::readSpecificTableAttributes(const pugi::xml_node& e, core::TableStructure* tblStruct)
+void wow::WoWDatabase::readSpecificTableAttributesFromDBD(const core::DBDVersionDef& verDef,
+														  core::TableStructure* tblStruct)
 {
 	wow::TableStructure* tbl = dynamic_cast<wow::TableStructure*>(tblStruct);
-
 	if (!tbl)
 		return;
 
-	const pugi::xml_attribute hash = e.attribute("layoutHash");
-
-	if (hash)
-		tbl->hash = hash.as_uint();
+	// Extract the layout hash from the version definition
+	if (!verDef.layoutHashes.empty())
+	{
+		// Layout hash is a hex string - convert to uint32
+		unsigned long val = std::stoul(verDef.layoutHashes[0], nullptr, 16);
+		tbl->hash = static_cast<unsigned int>(val);
+	}
 }
 
-void wow::WoWDatabase::readSpecificFieldAttributes(const pugi::xml_node& e, core::FieldStructure* fieldStruct)
+void wow::WoWDatabase::readSpecificFieldAttributesFromDBD(const core::DBDVersionField& vField,
+														  const core::DBDColumnDef& colDef,
+														  core::FieldStructure* fieldStruct)
 {
 	wow::FieldStructure* field = dynamic_cast<wow::FieldStructure*>(fieldStruct);
-
 	if (!field)
 		return;
 
-	const pugi::xml_attribute pos = e.attribute("pos");
-	const pugi::xml_attribute commonData = e.attribute("commonData");
-	const pugi::xml_attribute relationshipData = e.attribute("relationshipData");
+	field->isRelationshipData = vField.isRelation;
 
-	if (pos)
-		field->pos = pos.as_int();
+	// Only noninline fields have no DB2 position
+	if (vField.isNonInline)
+		field->pos = -1;
+}
 
-	if (commonData)
-		field->isCommonData = true;
-
-	if (relationshipData)
-		field->isRelationshipData = true;
+void wow::WoWDatabase::setFieldPos(core::FieldStructure* fieldStruct, int pos)
+{
+	wow::FieldStructure* field = dynamic_cast<wow::FieldStructure*>(fieldStruct);
+	if (field)
+		field->pos = pos;
 }
 
 DBFile* wow::TableStructure::createDBFile()

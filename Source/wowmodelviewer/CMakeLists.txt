@@ -63,13 +63,14 @@ install(FILES
   DESTINATION ${BIN_DIR}
 )
 
-# Install WoW version support files (database.xml, AnimationData.csv, etc.)
-# so the game loading code can find them at games/wow/X.Y/ relative to bin/.
-file(GLOB _wow_ver_dirs LIST_DIRECTORIES true ${CMAKE_SOURCE_DIR}/bin_support/wow/*)
-foreach(_dir ${_wow_ver_dirs})
-  if(IS_DIRECTORY ${_dir})
-    get_filename_component(_ver ${_dir} NAME)
-    file(GLOB _ver_files ${_dir}/*)
-    install(FILES ${_ver_files} DESTINATION ${CMAKE_SOURCE_DIR}/bin/games/wow/${_ver})
-  endif()
-endforeach()
+# Install shared WoW support files (CSV data files, tables.txt).
+file(GLOB _wow_shared_files ${CMAKE_SOURCE_DIR}/bin_support/wow/*.csv ${CMAKE_SOURCE_DIR}/bin_support/wow/*.txt)
+if(_wow_shared_files)
+  install(FILES ${_wow_shared_files} DESTINATION ${CMAKE_SOURCE_DIR}/bin/games/wow)
+endif()
+
+# Install DBD definitions directory if present.
+if(IS_DIRECTORY ${CMAKE_SOURCE_DIR}/bin_support/wow/dbdefs)
+  install(DIRECTORY ${CMAKE_SOURCE_DIR}/bin_support/wow/dbdefs
+    DESTINATION ${CMAKE_SOURCE_DIR}/bin/games/wow)
+endif()

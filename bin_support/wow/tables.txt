@@ -1,0 +1,53 @@
+# List of database tables to load from DBD definitions.
+# One table name per line. Lines starting with # are comments.
+# Table names must match the .dbd filenames (without extension).
+#
+# CSV-based tables use the format:
+#   CSV:TableName:filename.csv:type1:name1:type2:name2:...
+# The first field listed as "primary" is the primary key.
+CharacterFacialHairStyles
+CharBaseSection
+CharComponentTextureLayouts
+CharComponentTextureSections
+CharHairGeoSets
+ChrClasses
+CharStartOutfit
+ChrRaces
+ChrRaceXChrModel
+ChrModel
+ChrCustomization
+ChrCustomizationOption
+ChrCustomizationChoice
+ChrCustomizationElement
+ChrCustomizationGeoset
+ChrCustomizationMaterial
+ChrCustomizationSkinnedModel
+ChrModelTextureLayer
+ComponentModelFileData
+ComponentTextureFileData
+Creature
+CreatureType
+CreatureDisplayInfo
+CreatureDisplayInfoGeosetData
+NpcModelItemSlotDisplayInfo
+CreatureModelData
+Item
+ItemClass
+ItemSubClass
+ItemSparse
+ItemAppearance
+ItemModifiedAppearance
+ItemDisplayInfo
+ItemDisplayInfoMaterialRes
+HelmetGeosetData
+ItemSet
+TextureFileData
+ModelFileData
+ParticleColor
+Mount
+MountXDisplay
+GuildTabardBackground
+GuildTabardBorder
+GuildTabardEmblem
+CSV:AnimationData:AnimationData.csv:uint32:ID:primary:text:Name
+CSV:ChrRacesCustomization:ChrRacesCustomization.csv:int32:ID:primary:text:FacialHairCustomization1:text:FacialHairCustomization2:text:HairCustomization
