@@ -1,7 +1,5 @@
 #include "video.h"
 #include "Logger.h"
-#include "Game.h"
-#include "GameFile.h"
 
 #define WIP_DH_SUPPORT 1
 

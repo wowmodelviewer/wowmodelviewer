@@ -55,7 +55,6 @@ set(src CASC/CASCFile.cpp
       Character/TabardDetails.cpp
       Character/WoWItem.cpp
       World/WoWFolder.cpp
-      Rendering/video.cpp
       Rendering/Texture.cpp)
 
 set(headers CASC/CASCChunks.h
@@ -104,7 +103,6 @@ set(headers CASC/CASCChunks.h
       Character/TabardDetails.h
       Character/WoWItem.h
       World/WoWFolder.h
-      Rendering/video.h
       Rendering/Texture.h
       Common/wow_enums.h)
 

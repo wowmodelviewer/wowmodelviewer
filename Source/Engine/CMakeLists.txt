@@ -10,6 +10,7 @@ include_directories(Core/Containers)
 include_directories(Core/Memory)
 include_directories(IO)
 include_directories(Plugin)
+include_directories(Rendering)
 include_directories(Settings)
 include_directories(${CMAKE_SOURCE_DIR}/ThirdParty/stb)
 include_directories(${CMAKE_SOURCE_DIR}/ThirdParty/include)
@@ -34,6 +35,7 @@ set(src Core/Game.cpp
     IO/SoftwareImage.cpp
     Plugin/ExporterPlugin.cpp
     Plugin/ImporterPlugin.cpp
+    Rendering/video.cpp
     Settings/GlobalSettings.cpp)
 
 set(headers Core/Game.h
@@ -61,6 +63,7 @@ set(headers Core/Game.h
       IO/SoftwareImage.h
       Plugin/ExporterPlugin.h
       Plugin/ImporterPlugin.h
+      Rendering/video.h
       Settings/GlobalSettings.h)
 
 source_group("Header Files" FILES ${headers})
@@ -71,4 +74,4 @@ set(NAME core)
 add_library(${NAME} STATIC ${src} ${headers})
 set_property(TARGET ${NAME} PROPERTY FOLDER "libraries")
 
-target_link_libraries(${NAME} pugixml-static winhttp ${CMAKE_SOURCE_DIR}/ThirdParty/lib/x64/zlib.lib ${extralibs})
+target_link_libraries(${NAME} pugixml-static winhttp glu32 ${CMAKE_SOURCE_DIR}/ThirdParty/lib/x64/zlib.lib ${extralibs})
