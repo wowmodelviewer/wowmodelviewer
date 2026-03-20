@@ -1502,6 +1502,24 @@ static WoWModel* getLoadedModel()
     return att ? dynamic_cast<WoWModel*>(att->model()) : nullptr;
 }
 
+static void resetCameraToModel(OrbitCamera& camera, const WoWModel* model)
+{
+    if (!model)
+    {
+        camera.reset();
+        return;
+    }
+
+    float zMin = 0.0f;
+    float zMax = 0.0f;
+    for (const auto& v : model->origVertices)
+    {
+        if (v.pos.z < zMin) zMin = v.pos.z;
+        if (v.pos.z > zMax) zMax = v.pos.z;
+    }
+    camera.resetFromBounds(zMin, zMax, video.fov);
+}
+
 static void initAnimationControl(WoWModel* model)
 {
     g_animEntries.clear();
@@ -2185,7 +2203,7 @@ static void loadModel(GameFile* file)
         initCharacterControl(model);
 
     // Reset camera to frame the model
-    g_camera.reset(model);
+    resetCameraToModel(g_camera, model);
 
     LOG_INFO << "Model loaded: " << model->name();
 }
@@ -3170,7 +3188,7 @@ static void mountCharacter(int displayID, GameFile* creatureFile)
     initAnimationControl(mountModel);
     initModelControl(mountModel);
 
-    g_camera.reset(mountModel);
+    resetCameraToModel(g_camera, mountModel);
     LOG_INFO << "Character mounted on: " << modelFile->fullname();
 }
 
@@ -3200,7 +3218,7 @@ static void dismountCharacter()
         g_selModel = charModel;
         initAnimationControl(charModel);
         initModelControl(charModel);
-        g_camera.reset(charModel);
+        resetCameraToModel(g_camera, charModel);
     }
 
     LOG_INFO << "Character dismounted.";
@@ -3602,7 +3620,7 @@ static void handleViewportInput()
     if (ImGui::IsKeyDown(ImGuiKey_Keypad2))
         g_camera.setPitch(g_camera.pitch() - 1.0f);
     if (ImGui::IsKeyPressed(ImGuiKey_Keypad5))
-        g_camera.reset(getLoadedModel());
+        resetCameraToModel(g_camera, getLoadedModel());
     if (ImGui::IsKeyDown(ImGuiKey_Keypad7))
     {
         auto la = g_camera.lookAt();
@@ -4647,7 +4665,7 @@ int main(int /*argc*/, char* /*argv*/[])
                     g_camera.setYawAndPitch(g_camera.yaw(), 1.f);
                 ImGui::SameLine();
                 if (ImGui::Button("Reset Camera"))
-                    g_camera.reset(getLoadedModel());
+                    resetCameraToModel(g_camera, getLoadedModel());
             }
 
             // ---- Lighting ----

@@ -13,8 +13,7 @@ include_directories(${CMAKE_SOURCE_DIR}/ThirdParty/include)  # fbxsdk.h
 include_directories(${CMAKE_SOURCE_DIR}/Source/Plugins/Importers/Armory)
 include_directories(${CMAKE_SOURCE_DIR}/Source/Plugins/Importers/Wowhead)
 
-set(src main.cpp
-        OrbitCamera.cpp)
+set(src main.cpp)
 
 # Generate the resource file that embeds the application icon.
 set(WMV_ICO_PATH "${CMAKE_SOURCE_DIR}/bin_support/Icons/wmv.ico")

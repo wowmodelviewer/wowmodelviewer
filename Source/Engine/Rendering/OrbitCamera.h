@@ -2,8 +2,6 @@
 
 #include "glm/glm.hpp"
 
-class WoWModel;
-
 class OrbitCamera
 {
 public:
@@ -11,7 +9,8 @@ public:
 
 	glm::mat4 getViewMatrix() const;
 
-	void reset(const WoWModel* m = nullptr);
+	void reset();
+	void resetFromBounds(float zMin, float zMax, float fovDegrees);
 
 	void setPosition(const glm::vec3& position);
 	glm::vec3 position() const { return pos_; }

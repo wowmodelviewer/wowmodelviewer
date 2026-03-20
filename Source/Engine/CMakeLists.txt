@@ -35,6 +35,7 @@ set(src Core/Game.cpp
     IO/SoftwareImage.cpp
     Plugin/ExporterPlugin.cpp
     Plugin/ImporterPlugin.cpp
+    Rendering/OrbitCamera.cpp
     Rendering/video.cpp
     Settings/GlobalSettings.cpp)
 
@@ -63,6 +64,7 @@ set(headers Core/Game.h
       IO/SoftwareImage.h
       Plugin/ExporterPlugin.h
       Plugin/ImporterPlugin.h
+      Rendering/OrbitCamera.h
       Rendering/video.h
       Settings/GlobalSettings.h)
 

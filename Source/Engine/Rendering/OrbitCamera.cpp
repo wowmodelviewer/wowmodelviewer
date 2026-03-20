@@ -1,13 +1,11 @@
 #include "OrbitCamera.h"
 #include "glm/gtc/matrix_transform.hpp"
-#include "WoWModel.h"
-#include "video.h"
 
-const float CAMERA_DEFAULT_YAW = 0.0f;
-const float CAMERA_DEFAULT_PITCH = 90.0f;
-const float CAMERA_DEFAULT_RADIUS = 5.0f;
-const float CAMERA_MIN_RADIUS = 0.5f;
-const float CAMERA_MAX_RADIUS = 150.0f;
+constexpr float CAMERA_DEFAULT_YAW = 0.0f;
+constexpr float CAMERA_DEFAULT_PITCH = 90.0f;
+constexpr float CAMERA_DEFAULT_RADIUS = 5.0f;
+constexpr float CAMERA_MIN_RADIUS = 0.5f;
+constexpr float CAMERA_MAX_RADIUS = 150.0f;
 
 OrbitCamera::OrbitCamera()
 	: pos_(glm::vec3(0.0f)),
@@ -26,7 +24,7 @@ glm::mat4 OrbitCamera::getViewMatrix() const
 	return glm::lookAt(pos_, target_, up_);
 }
 
-void OrbitCamera::reset(const WoWModel* m)
+void OrbitCamera::reset()
 {
 	pos_ = glm::vec3(0.0f, 0.0f, 0.0f);
 	target_ = glm::vec3(0.0f, 0.0f, 0.0f);
@@ -34,31 +32,19 @@ void OrbitCamera::reset(const WoWModel* m)
 	yaw_ = CAMERA_DEFAULT_YAW;
 	pitch_ = CAMERA_DEFAULT_PITCH;
 	radius_ = CAMERA_DEFAULT_RADIUS;
+	updatePosition();
+}
 
-	if (m != nullptr)
-	{
-		// adjust camera settings based on current model loaded
-		// Look at is set to middle of z coords
-		// zoom is adjusted to have model's z fitting screen
-		float zmin = 0., zmax = 0.;
+void OrbitCamera::resetFromBounds(float zMin, float zMax, float fovDegrees)
+{
+	reset();
 
-		for (const auto& v : m->origVertices)
-		{
-			if (v.pos.z < zmin)
-				zmin = v.pos.z;
+	// by default, creatures/characters are "on the ground", consider 0 as minimal possible z value
+	if (zMin < 0.0f)
+		zMin = 0.0f;
 
-			if (v.pos.z > zmax)
-				zmax = v.pos.z;
-		}
-
-		// by default, creatures/ characters are "on the ground", consider 0. as minimal possible z value
-		if (zmin < 0.0f)
-			zmin = 0.0f;
-
-		target_.z = (zmin + zmax) / 2.0f;
-		setRadius((zmin + zmax) / 2.0f * 1.3f / sinf(glm::radians(video.fov / 2.0f)));
-	}
-
+	target_.z = (zMin + zMax) / 2.0f;
+	setRadius((zMin + zMax) / 2.0f * 1.3f / sinf(glm::radians(fovDegrees / 2.0f)));
 	updatePosition();
 }
 
