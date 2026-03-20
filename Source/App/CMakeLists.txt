@@ -18,7 +18,8 @@ set(src main.cpp
          AppSettings.cpp
          SceneRenderer.cpp
          ThemeManager.cpp
-         Panels/FileBrowserPanel.cpp)
+         Panels/FileBrowserPanel.cpp
+         Panels/CharacterViewerPanel.cpp)
 
 # Generate the resource file that embeds the application icon.
 set(WMV_ICO_PATH "${CMAKE_SOURCE_DIR}/bin_support/Icons/wmv.ico")

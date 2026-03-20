@@ -57,6 +57,7 @@
 #include "AppSettings.h"
 #include "SceneRenderer.h"
 #include "FileBrowserPanel.h"
+#include "CharacterViewerPanel.h"
 
 // Game loading
 #include "Game.h"
@@ -183,11 +184,7 @@ static bool                   g_isModel = false;
 static bool                   g_isChar  = false;
 
 // ---- Animation control state ----------------------------------------------
-struct AnimEntry
-{
-    std::string label;
-    int animIndex;   // index into model->anims[]
-};
+using AnimEntry = CharacterViewerPanel::AnimEntry;
 
 static std::vector<AnimEntry>  g_animEntries;
 static int                     g_selectedAnimCombo = 0;
@@ -215,14 +212,7 @@ static int                     g_selectedSkin = -1;
 static int                     g_blpSkin[3] = {-1, -1, -1};
 
 // ---- Character control state ----------------------------------------------
-struct CustomizationOption
-{
-    unsigned int optionID;
-    std::string name;
-    std::vector<unsigned int> choiceIDs;
-    std::vector<std::string> choiceNames;
-    int selectedIndex = 0;
-};
+using CustomizationOption = CharacterViewerPanel::CustomizationOption;
 
 static std::vector<CustomizationOption> g_customizationOptions;
 
@@ -293,31 +283,7 @@ static std::string g_screenshotStatus;
 static char g_presetPath[512] = "userSettings/preset.ini";
 static std::string g_presetStatus;
 
-// ---- Character Browser state ----------------------------------------------
-struct CharBrowserRace
-{
-    int         raceID;
-    std::string name;
-    bool hasMale   = false;
-    bool hasFemale = false;
-    bool hasMaleHD   = false;
-    bool hasFemaleHD = false;
-};
-
-static std::vector<CharBrowserRace> g_charBrowserRaces;
-static std::vector<size_t>          g_charBrowserFiltered;
-static bool  g_charBrowserBuilt = false;
-static bool  g_charBrowserFilterDirty = true;
-static char  g_charBrowserSearchBuf[256] = {};
-static int   g_charBrowserGender = 0;       // 0 = Male, 1 = Female
-static bool  g_charBrowserPreferHD = true;
-
-// ---- Character Viewer state (standalone tab) ------------------------------
-static int   g_cvSelectedRaceIdx = -1;   // index into g_charBrowserRaces
-static int   g_cvGender = 0;             // 0=Male, 1=Female
-static bool  g_cvPreferHD = true;
-static float g_cvLeftWidth = 220.0f;     // left column width
-static float g_cvRightWidth = 220.0f;    // right column width
+// ---- Character Browser / Viewer state moved to Panels/CharacterViewerPanel ----
 
 // ---- NPC Browser state ----------------------------------------------------
 static char g_npcSearchBuf[256] = {};
@@ -1718,380 +1684,6 @@ static void loadCharacterPreset(const char* path)
     LOG_INFO << "Character preset loaded from " << path;
 }
 
-// ---- Character Browser helpers --------------------------------------------
-static void buildCharBrowserRaceList()
-{
-    g_charBrowserRaces.clear();
-
-    const auto* chrRaces = WOWDB.getTable("ChrRaces");
-
-    // Collect unique races from RaceInfos
-    std::map<int, CharBrowserRace> raceMap;
-    for (const auto& [fileID, info] : RaceInfos::getAllRaces())
-    {
-        auto& entry = raceMap[info.raceID];
-        entry.raceID = info.raceID;
-
-        if (entry.name.empty())
-        {
-            if (chrRaces)
-            {
-                auto row = chrRaces->getRow(static_cast<uint32_t>(info.raceID));
-                if (row)
-                    entry.name = row.getString("Name_Lang");
-            }
-            if (entry.name.empty())
-                entry.name = info.prefix.empty() ? ("Race " + std::to_string(info.raceID)) : info.prefix;
-        }
-
-        if (info.sexID == GENDER_MALE)
-        {
-            if (info.isHD) entry.hasMaleHD = true;
-            else entry.hasMale = true;
-        }
-        else
-        {
-            if (info.isHD) entry.hasFemaleHD = true;
-            else entry.hasFemale = true;
-        }
-    }
-
-    for (auto& [id, race] : raceMap)
-        g_charBrowserRaces.push_back(std::move(race));
-
-    std::sort(g_charBrowserRaces.begin(), g_charBrowserRaces.end(),
-        [](const CharBrowserRace& a, const CharBrowserRace& b) { return a.name < b.name; });
-
-    g_charBrowserFilterDirty = true;
-}
-
-static void rebuildCharBrowserFilter()
-{
-    g_charBrowserFiltered.clear();
-
-    std::string search = core::toLower(std::string(g_charBrowserSearchBuf));
-    auto s = search.find_first_not_of(" \t\r\n");
-    auto e = search.find_last_not_of(" \t\r\n");
-    search = (s == std::string::npos) ? "" : search.substr(s, e - s + 1);
-
-    for (size_t i = 0; i < g_charBrowserRaces.size(); ++i)
-    {
-        const auto& race = g_charBrowserRaces[i];
-        if (!search.empty() && !core::containsIgnoreCase(race.name, search))
-            continue;
-        g_charBrowserFiltered.push_back(i);
-    }
-
-    g_charBrowserFilterDirty = false;
-}
-
-static void loadCharBrowserRace(int raceID, int gender, bool preferHD)
-{
-    int fileID = -1;
-    int fallbackID = -1;
-
-    for (const auto& [fid, info] : RaceInfos::getAllRaces())
-    {
-        if (info.raceID == raceID && info.sexID == gender)
-        {
-            if (preferHD && info.isHD)
-            {
-                fileID = fid;
-                break;
-            }
-            else if (!preferHD && !info.isHD)
-            {
-                fileID = fid;
-                break;
-            }
-            if (fallbackID == -1)
-                fallbackID = fid;
-        }
-    }
-
-    if (fileID == -1)
-        fileID = fallbackID;
-
-    if (fileID > 0)
-    {
-        GameFile* file = GAMEDIRECTORY.getFile(fileID);
-        if (file)
-            loadModel(file);
-    }
-}
-
-// Forward declarations for functions used by drawCharacterViewer()
-static void handleViewportInput();
-
-// ---- Character Viewer (standalone tab like wow.export) ---------------------
-static void drawCharacterViewer()
-{
-    if (!g_isWoWLoaded || !g_initDB)
-    {
-        ImGui::TextDisabled("Game not loaded.");
-        return;
-    }
-
-    // Ensure race list is built
-    if (!g_charBrowserBuilt)
-    {
-        buildCharBrowserRaceList();
-        g_charBrowserBuilt = true;
-    }
-
-    WoWModel* model = getLoadedModel();
-    const bool isChar = model && g_isChar;
-
-    const ImVec2 avail = ImGui::GetContentRegionAvail();
-    const float spacing = ImGui::GetStyle().ItemSpacing.x;
-    const float centerWidth = avail.x - g_cvLeftWidth - g_cvRightWidth - spacing * 2.0f;
-
-    // =====================================================================
-    // LEFT COLUMN � Race selector + Customization
-    // =====================================================================
-    ImGui::BeginChild("##cvLeft", ImVec2(g_cvLeftWidth, -1), ImGuiChildFlags_Borders);
-    {
-        // ---- Race Selector ----
-        ImGui::SeparatorText("Race");
-
-        // Race combo
-        const char* racePreview = (g_cvSelectedRaceIdx >= 0 &&
-            g_cvSelectedRaceIdx < static_cast<int>(g_charBrowserRaces.size()))
-            ? g_charBrowserRaces[g_cvSelectedRaceIdx].name.c_str() : "<select race>";
-
-        ImGui::SetNextItemWidth(-1);
-        if (ImGui::BeginCombo("##cvRace", racePreview))
-        {
-            for (int i = 0; i < static_cast<int>(g_charBrowserRaces.size()); ++i)
-            {
-                const auto& race = g_charBrowserRaces[i];
-                bool selected = (i == g_cvSelectedRaceIdx);
-                if (ImGui::Selectable(race.name.c_str(), selected))
-                {
-                    g_cvSelectedRaceIdx = i;
-                    loadCharBrowserRace(race.raceID, g_cvGender, g_cvPreferHD);
-                }
-                if (selected) ImGui::SetItemDefaultFocus();
-            }
-            ImGui::EndCombo();
-        }
-
-        // Gender radio
-        {
-            int prevGender = g_cvGender;
-            ImGui::RadioButton("Male##cv", &g_cvGender, 0);
-            ImGui::SameLine();
-            ImGui::RadioButton("Female##cv", &g_cvGender, 1);
-            if (g_cvGender != prevGender && g_cvSelectedRaceIdx >= 0)
-                loadCharBrowserRace(g_charBrowserRaces[g_cvSelectedRaceIdx].raceID,
-                                    g_cvGender, g_cvPreferHD);
-        }
-
-        // HD toggle
-        {
-            bool prevHD = g_cvPreferHD;
-            ImGui::Checkbox("HD Model##cv", &g_cvPreferHD);
-            if (g_cvPreferHD != prevHD && g_cvSelectedRaceIdx >= 0)
-                loadCharBrowserRace(g_charBrowserRaces[g_cvSelectedRaceIdx].raceID,
-                                    g_cvGender, g_cvPreferHD);
-        }
-
-        // ---- Customization Options ----
-        if (isChar && !g_customizationOptions.empty())
-        {
-            ImGui::SeparatorText("Customization");
-            for (auto& opt : g_customizationOptions)
-            {
-                if (opt.choiceNames.empty()) continue;
-                const char* preview = (opt.selectedIndex >= 0 &&
-                    opt.selectedIndex < static_cast<int>(opt.choiceNames.size()))
-                    ? opt.choiceNames[opt.selectedIndex].c_str() : "<none>";
-                ImGui::SetNextItemWidth(-1);
-                if (ImGui::BeginCombo(opt.name.c_str(), preview))
-                {
-                    for (int c = 0; c < static_cast<int>(opt.choiceNames.size()); ++c)
-                    {
-                        bool sel = (c == opt.selectedIndex);
-                        if (ImGui::Selectable(opt.choiceNames[c].c_str(), sel))
-                        {
-                            opt.selectedIndex = c;
-                            model->cd.set(opt.optionID, opt.choiceIDs[c]);
-                            model->refresh();
-                        }
-                        if (sel) ImGui::SetItemDefaultFocus();
-                    }
-                    ImGui::EndCombo();
-                }
-            }
-        }
-
-        // ---- Display Toggles ----
-        if (isChar)
-        {
-            ImGui::SeparatorText("Display");
-            auto& cd = model->cd;
-            bool changed = false;
-            changed |= ImGui::Checkbox("Underwear##cv", &cd.showUnderwear);
-            changed |= ImGui::Checkbox("Hair##cv", &cd.showHair);
-            changed |= ImGui::Checkbox("Facial Hair##cv", &cd.showFacialHair);
-            changed |= ImGui::Checkbox("Ears##cv", &cd.showEars);
-            changed |= ImGui::Checkbox("Feet##cv", &cd.showFeet);
-
-            // Eye glow
-            int eyeGlow = static_cast<int>(cd.eyeGlowType);
-            ImGui::Text("Eye Glow:");
-            if (ImGui::RadioButton("None##cveg", &eyeGlow, EGT_NONE)) changed = true;
-            ImGui::SameLine();
-            if (ImGui::RadioButton("Default##cveg", &eyeGlow, EGT_DEFAULT)) changed = true;
-            ImGui::SameLine();
-            if (ImGui::RadioButton("DK##cveg", &eyeGlow, EGT_DEATHKNIGHT)) changed = true;
-            cd.eyeGlowType = static_cast<EyeGlowTypes>(eyeGlow);
-
-            if (changed) model->refresh();
-        }
-    }
-    ImGui::EndChild();
-
-    ImGui::SameLine();
-
-    // =====================================================================
-    // CENTER COLUMN � Animation controls + 3D Viewport
-    // =====================================================================
-    ImGui::BeginChild("##cvCenter", ImVec2(centerWidth > 100.0f ? centerWidth : 100.0f, -1),
-                      ImGuiChildFlags_None);
-    {
-        // ---- Animation Controls Bar ----
-        if (isChar && model->animated && !g_animEntries.empty())
-        {
-            // Animation combo (compact)
-            const char* animPreview = (g_selectedAnimCombo >= 0 &&
-                g_selectedAnimCombo < static_cast<int>(g_animEntries.size()))
-                ? g_animEntries[g_selectedAnimCombo].label.c_str() : "<none>";
-
-            ImGui::SetNextItemWidth(180);
-            if (ImGui::BeginCombo("##cvAnim", animPreview))
-            {
-                for (int i = 0; i < static_cast<int>(g_animEntries.size()); ++i)
-                {
-                    bool selected = (i == g_selectedAnimCombo);
-                    if (ImGui::Selectable(g_animEntries[i].label.c_str(), selected))
-                    {
-                        g_selectedAnimCombo = i;
-                        int idx = g_animEntries[i].animIndex;
-                        model->currentAnim = idx;
-                        model->animManager->SetAnim(0, idx, 0);
-                        model->animManager->Play();
-                    }
-                    if (selected) ImGui::SetItemDefaultFocus();
-                }
-                ImGui::EndCombo();
-            }
-
-            ImGui::SameLine();
-            if (ImGui::Button("\xE2\x97\x80##cv")) // ?
-                model->animManager->PrevFrame();
-            ImGui::SameLine();
-            if (model->animManager->IsPaused())
-            {
-                if (ImGui::Button("\xE2\x96\xB6##cv")) // ?
-                    model->animManager->Play();
-            }
-            else
-            {
-                if (ImGui::Button("\xE2\x8F\xB8##cv")) // ?
-                    model->animManager->Pause();
-            }
-            ImGui::SameLine();
-            if (ImGui::Button("\xE2\x96\xB8##cv")) // ? (next frame)
-                model->animManager->NextFrame();
-
-            ImGui::SameLine();
-            ImGui::SetNextItemWidth(120);
-            int frameCount = static_cast<int>(model->animManager->GetFrameCount());
-            int curFrame = static_cast<int>(model->animManager->GetFrame());
-            if (frameCount > 0)
-            {
-                if (ImGui::SliderInt("##cvFrame", &curFrame, 0, frameCount))
-                    model->animManager->SetFrame(static_cast<size_t>(curFrame));
-            }
-
-            ImGui::SameLine();
-            ImGui::Text("%d", curFrame);
-        }
-
-        // ---- 3D Viewport ----
-        ImVec2 vpSize = ImGui::GetContentRegionAvail();
-        int vpW = static_cast<int>(vpSize.x);
-        int vpH = static_cast<int>(vpSize.y);
-
-        if (vpW > 0 && vpH > 0)
-        {
-            SceneRenderer::renderToFBO(g_fbo, vpW, vpH, g_camera, g_root, video.fov, g_settings.bgColor, g_settings.drawGrid);
-            ImGui::Image(static_cast<ImTextureID>(static_cast<uintptr_t>(g_fbo.colorTex)),
-                         vpSize, ImVec2(0, 1), ImVec2(1, 0));
-
-            if (ImGui::IsItemHovered())
-                handleViewportInput();
-        }
-    }
-    ImGui::EndChild();
-
-    ImGui::SameLine();
-
-    // =====================================================================
-    // RIGHT COLUMN � Equipment slots (placeholder)
-    // =====================================================================
-    ImGui::BeginChild("##cvRight", ImVec2(g_cvRightWidth, -1), ImGuiChildFlags_Borders);
-    {
-        ImGui::SeparatorText("Equipment");
-
-        static const char* slotLabels[] = {
-            "Head", "Neck", "Shoulder", "Back", "Chest", "Shirt",
-            "Tabard", "Wrist", "Hands", "Waist", "Legs", "Feet",
-            "Main-hand", "Off-hand"
-        };
-
-        for (int i = 0; i < 14; ++i)
-        {
-            float w = ImGui::GetContentRegionAvail().x;
-            ImGui::PushID(i);
-            ImGui::BeginGroup();
-            ImGui::Text("%s:", slotLabels[i]);
-            ImGui::SameLine(w - ImGui::CalcTextSize("Empty").x);
-            ImGui::TextDisabled("Empty");
-            ImGui::EndGroup();
-            if (i < 13) ImGui::Separator();
-            ImGui::PopID();
-        }
-
-        ImGui::Spacing();
-        ImGui::Spacing();
-        if (ImGui::Button("Clear All Equipment", ImVec2(-1, 0)))
-        {
-            // TODO: clear all equipment when item loading is re-enabled
-        }
-
-        // ---- Export Section ----
-        ImGui::Spacing();
-        ImGui::Spacing();
-        ImGui::SeparatorText("Export");
-
-        if (isChar)
-        {
-            if (ImGui::Button("Export glTF", ImVec2(-1, 0)))
-            {
-                // TODO: quick-export from Character Viewer
-                ImGui::SetWindowFocus("Export");
-            }
-        }
-        else
-        {
-            ImGui::TextDisabled("Load a character first.");
-        }
-    }
-    ImGui::EndChild();
-}
-
 // ---- NPC Browser helpers --------------------------------------------------
 static void rebuildNpcFilter()
 {
@@ -3330,7 +2922,24 @@ int main(int /*argc*/, char* /*argv*/[])
         ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(4, 4));
         if (ImGui::Begin("Character Viewer", &g_showCharViewer))
         {
-            drawCharacterViewer();
+            CharacterViewerPanel::DrawContext cvCtx;
+            cvCtx.isWoWLoaded          = g_isWoWLoaded;
+            cvCtx.isDBReady            = g_initDB;
+            cvCtx.isChar               = g_isChar;
+            cvCtx.customizationOptions = &g_customizationOptions;
+            cvCtx.animEntries          = &g_animEntries;
+            cvCtx.selectedAnimCombo    = &g_selectedAnimCombo;
+            cvCtx.fbo                  = &g_fbo;
+            cvCtx.camera               = &g_camera;
+            cvCtx.root                 = g_root;
+            cvCtx.fov                  = video.fov;
+            cvCtx.bgColor              = g_settings.bgColor;
+            cvCtx.drawGrid             = g_settings.drawGrid;
+            cvCtx.getLoadedModel       = getLoadedModel;
+            cvCtx.loadModel            = [](GameFile* f) { loadModel(f); };
+            cvCtx.handleViewportInput  = handleViewportInput;
+
+            CharacterViewerPanel::draw(cvCtx);
         }
         ImGui::End();
         ImGui::PopStyleVar();
