@@ -54,6 +54,7 @@
 #include "OrbitCamera.h"
 #include "ViewportFBO.h"
 #include "ThemeManager.h"
+#include "AppSettings.h"
 
 // Game loading
 #include "Game.h"
@@ -98,8 +99,7 @@ static OrbitCamera  g_camera;
 static Attachment*  g_root       = nullptr;
 static WoWModel*    g_selModel   = nullptr;
 static ViewportFBO  g_fbo;
-static bool         g_drawGrid   = true;
-static glm::vec3    g_bgColor(0.22f, 0.22f, 0.22f);
+static AppSettings  g_settings;
 static GLuint       g_checkerTex = 0;
 static bool         g_drawCheckerBg = true;
 
@@ -113,12 +113,8 @@ static int          g_fpsFrameCount = 0;
 static float        g_fpsAccum = 0.0f;
 
 // ---- Game loading state ---------------------------------------------------
-static std::string  g_gamePath;              // WoW Data folder path
-static std::string  g_cfgPath;               // userSettings/Config.ini
 static bool         g_isWoWLoaded  = false;
 static bool         g_initDB       = false;
-static bool         g_enableDbCache = false;
-static bool         g_showConsole   = false;  // toggle debug console window
 static std::string  g_loadStatus;            // status text shown in File Browser
 static std::atomic<float> g_loadProgress{0.0f}; // 0..1 progress bar fraction (atomic for thread safety)
 static bool         g_loadInProgress = false;
@@ -165,8 +161,6 @@ struct FontEntry {
     std::string path;  // absolute path to .ttf
 };
 static std::vector<FontEntry>  g_availableFonts;  // discovered fonts
-static int                     g_currentFont = 0; // index into g_availableFonts
-static float                   g_fontSize = 18.0f;// base size before DPI scale
 static bool                    g_fontsDirty = false; // rebuild atlas next frame
 static float                   g_dpiScale = 1.0f;
 
@@ -537,50 +531,6 @@ static void openFolderPicker()
     g_showFolderPicker = true;
 }
 
-// ---- Config.ini reading/writing -------------------------------------------
-static const char* g_imguiIniPath = "userSettings/imgui_layout.ini";
-
-static void loadSettings()
-{
-    g_cfgPath = "userSettings/Config.ini";
-    const core::IniFile config(g_cfgPath);
-
-    g_gamePath = config.getString("Settings/Path");
-    g_enableDbCache = config.getBool("Settings/EnableDbCache", false);
-    g_showConsole = config.getBool("Settings/ShowConsole", false);
-    g_drawGrid = config.getBool("Viewport/DrawGrid", true);
-    g_bgColor.x = static_cast<float>(config.getDouble("Viewport/BgR", 71.0 / 255.0));
-    g_bgColor.y = static_cast<float>(config.getDouble("Viewport/BgG", 95.0 / 255.0));
-    g_bgColor.z = static_cast<float>(config.getDouble("Viewport/BgB", 121.0 / 255.0));
-    ThemeManager::currentThemeRef() = config.getInt("Settings/Theme", static_cast<int>(ThemeManager::UE4));
-    if (ThemeManager::currentThemeRef() < 0 || ThemeManager::currentThemeRef() >= ThemeManager::themeCount())
-        ThemeManager::currentThemeRef() = static_cast<int>(ThemeManager::UE4);
-    g_currentFont = config.getInt("Settings/Font", 0);
-    g_fontSize = static_cast<float>(config.getDouble("Settings/FontSize", 18.0));
-    if (g_fontSize < 10.0f) g_fontSize = 10.0f;
-    if (g_fontSize > 40.0f) g_fontSize = 40.0f;
-
-    LOG_INFO << "Settings loaded. Game path:" << g_gamePath;
-}
-
-static void saveSettings()
-{
-    core::IniFile config(g_cfgPath);
-    config.setValue("Settings/Path", g_gamePath);
-    config.setValue("Settings/EnableDbCache", g_enableDbCache);
-    config.setValue("Settings/ShowConsole", g_showConsole);
-    config.setValue("Viewport/DrawGrid", g_drawGrid);
-    config.setValue("Viewport/BgR", static_cast<double>(g_bgColor.x));
-    config.setValue("Viewport/BgG", static_cast<double>(g_bgColor.y));
-    config.setValue("Viewport/BgB", static_cast<double>(g_bgColor.z));
-    config.setValue("Settings/Theme", ThemeManager::currentThemeRef());
-    config.setValue("Settings/Font", g_currentFont);
-    config.setValue("Settings/FontSize", static_cast<double>(g_fontSize));
-    config.sync();
-
-    ImGui::SaveIniSettingsToDisk(g_imguiIniPath);
-    LOG_INFO << "Settings and UI layout saved.";
-}
 
 // ---- Thread-safe load status helpers --------------------------------------
 static void setLoadStatus(const std::string& s)
@@ -678,7 +628,7 @@ static void initDatabase()
     const std::string currentVersion = GAMEDIRECTORY.version();
     bool cacheValid = false;
 
-    const bool enableDbCache = g_enableDbCache;
+    const bool enableDbCache = g_settings.enableDbCache;
 
     std::error_code ec;
     if (enableDbCache &&
@@ -861,7 +811,7 @@ static void pollAsyncLoad()
         g_fileTreeDirty = true;
         LOG_INFO << "World of Warcraft loaded successfully. Version: "
                  << GAMEDIRECTORY.version() << " Locale: " << GAMEDIRECTORY.locale();
-        saveSettings();
+        g_settings.save();
     }
 }
 
@@ -873,7 +823,7 @@ static void beginLoadWoW()
         return;
 
     // Sync game path from the Settings panel input buffer
-    g_gamePath = g_pathBuf;
+    g_settings.gamePath = g_pathBuf;
 
     g_loadInProgress = true;
     g_loadProgress = 0.0f;
@@ -881,7 +831,7 @@ static void beginLoadWoW()
 
     // Validate game path
     namespace fs = std::filesystem;
-    std::string path = g_gamePath;
+    std::string path = g_settings.gamePath;
     if (path.empty() || !fs::is_directory(path))
     {
         setLoadStatus("Please set a valid WoW Data folder path in Options > Settings.");
@@ -899,11 +849,11 @@ static void beginLoadWoW()
         if (lower.find("data\\") == std::string::npos && lower.find("data/") == std::string::npos)
             path += "Data\\";
     }
-    g_gamePath = path;
+    g_settings.gamePath = path;
 
     // Init Game if needed
     if (!core::Game::instance().initDone())
-        core::Game::instance().init(new wow::WoWFolder(g_gamePath), new wow::WoWDatabase());
+        core::Game::instance().init(new wow::WoWFolder(g_settings.gamePath), new wow::WoWDatabase());
 
     // Check available configs
     g_pendingConfigs = GAMEDIRECTORY.configsFound();
@@ -3029,7 +2979,7 @@ static void renderSceneToFBO(int w, int h)
     g_fbo.bind();
 
     glViewport(0, 0, w, h);
-    glClearColor(g_bgColor.x, g_bgColor.y, g_bgColor.z, 1.0f);
+    glClearColor(g_settings.bgColor.x, g_settings.bgColor.y, g_settings.bgColor.z, 1.0f);
     glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 
     // Background (screen-space, drawn before 3D scene)
@@ -3083,7 +3033,7 @@ static void renderSceneToFBO(int w, int h)
     setupDefaultLighting();
 
     // Grid
-    if (g_drawGrid)
+    if (g_settings.drawGrid)
         renderGrid();
 
     // Model
@@ -3402,16 +3352,16 @@ static void initEngine()
              << GLOBALSETTINGS.buildName();
     LOG_INFO << "==============================================";
 
-    loadSettings();
+    g_settings.load();
 
     // Apply initial console visibility
 #ifdef _WIN32
     if (HWND hConsole = GetConsoleWindow())
-        ShowWindow(hConsole, g_showConsole ? SW_SHOW : SW_HIDE);
+        ShowWindow(hConsole, g_settings.showConsole ? SW_SHOW : SW_HIDE);
 #endif
 
     // Pre-fill the path input buffer from saved settings
-    strncpy_s(g_pathBuf, g_gamePath.c_str(), sizeof(g_pathBuf) - 1);
+    strncpy_s(g_pathBuf, g_settings.gamePath.c_str(), sizeof(g_pathBuf) - 1);
 
     // Instantiate exporters (OBJ / FBX)
     g_exporters.push_back(new OBJExporter());
@@ -3508,7 +3458,7 @@ int main(int /*argc*/, char* /*argv*/[])
     ImGuiIO& io = ImGui::GetIO();
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
     io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
-    io.IniFilename = g_imguiIniPath;
+    io.IniFilename = AppSettings::imguiIniPath;
 
     ThemeManager::apply(ThemeManager::currentTheme(), g_window);
 
@@ -3568,7 +3518,7 @@ int main(int /*argc*/, char* /*argv*/[])
             [](const FontEntry& a, const FontEntry& b) { return a.name < b.name; });
 
         // Default font: prefer "arialn" by name if available and no saved preference
-        if (g_currentFont <= 0)
+        if (g_settings.currentFont <= 0)
         {
             for (int i = 0; i < static_cast<int>(g_availableFonts.size()); ++i)
             {
@@ -3576,7 +3526,7 @@ int main(int /*argc*/, char* /*argv*/[])
                 std::transform(lower.begin(), lower.end(), lower.begin(), ::tolower);
                 if (lower == "arialn")
                 {
-                    g_currentFont = i;
+                    g_settings.currentFont = i;
                     break;
                 }
             }
@@ -3585,11 +3535,11 @@ int main(int /*argc*/, char* /*argv*/[])
 
     // ---- Build initial font atlas ----
     {
-        const float pixelSize = g_fontSize * g_dpiScale;
+        const float pixelSize = g_settings.fontSize * g_dpiScale;
         bool loaded = false;
-        if (g_currentFont >= 0 && g_currentFont < static_cast<int>(g_availableFonts.size()))
+        if (g_settings.currentFont >= 0 && g_settings.currentFont < static_cast<int>(g_availableFonts.size()))
         {
-            const auto& fe = g_availableFonts[g_currentFont];
+            const auto& fe = g_availableFonts[g_settings.currentFont];
             if (std::filesystem::exists(fe.path))
             {
                 io.Fonts->AddFontFromFileTTF(fe.path.c_str(), pixelSize);
@@ -3620,11 +3570,11 @@ int main(int /*argc*/, char* /*argv*/[])
             g_fontsDirty = false;
             ImGuiIO& fio = ImGui::GetIO();
             fio.Fonts->Clear();
-            const float pixelSize = g_fontSize * g_dpiScale;
+            const float pixelSize = g_settings.fontSize * g_dpiScale;
             bool loaded = false;
-            if (g_currentFont >= 0 && g_currentFont < static_cast<int>(g_availableFonts.size()))
+            if (g_settings.currentFont >= 0 && g_settings.currentFont < static_cast<int>(g_availableFonts.size()))
             {
-                const auto& fe = g_availableFonts[g_currentFont];
+                const auto& fe = g_availableFonts[g_settings.currentFont];
                 if (std::filesystem::exists(fe.path))
                 {
                     fio.Fonts->AddFontFromFileTTF(fe.path.c_str(), pixelSize);
@@ -3654,7 +3604,7 @@ int main(int /*argc*/, char* /*argv*/[])
         if (firstFrame)
         {
             firstFrame = false;
-            if (!std::filesystem::exists(g_imguiIniPath))
+            if (!std::filesystem::exists(AppSettings::imguiIniPath))
             {
             ImGui::DockBuilderRemoveNode(dockspace_id);
             ImGui::DockBuilderAddNode(dockspace_id, ImGuiDockNodeFlags_DockSpace);
@@ -4148,7 +4098,7 @@ int main(int /*argc*/, char* /*argv*/[])
             // ---- Background ----
             if (ImGui::CollapsingHeader("Background", ImGuiTreeNodeFlags_DefaultOpen))
             {
-                ImGui::Checkbox("Draw Grid", &g_drawGrid);
+                ImGui::Checkbox("Draw Grid", &g_settings.drawGrid);
                 ImGui::Checkbox("Checkerboard Background", &g_drawCheckerBg);
                 if (ImGui::Checkbox("Gradient Background", &g_drawGradientBg))
                 {
@@ -4160,7 +4110,7 @@ int main(int /*argc*/, char* /*argv*/[])
                     ImGui::ColorEdit3("Gradient Top", &g_gradientTop.x);
                     ImGui::ColorEdit3("Gradient Bottom", &g_gradientBottom.x);
                 }
-                ImGui::ColorEdit3("Background Color", &g_bgColor.x);
+                ImGui::ColorEdit3("Background Color", &g_settings.bgColor.x);
 
                 ImGui::Spacing();
                 ImGui::Text("Palette:");
@@ -4169,7 +4119,7 @@ int main(int /*argc*/, char* /*argv*/[])
                     ImGui::PushID(i);
                     if (ImGui::ColorButton("##pal", ImVec4(g_bgPalette[i].x, g_bgPalette[i].y, g_bgPalette[i].z, 1.0f),
                                            ImGuiColorEditFlags_NoTooltip, ImVec2(20, 20)))
-                        g_bgColor = g_bgPalette[i];
+                        g_settings.bgColor = g_bgPalette[i];
                     ImGui::PopID();
                     if (i < g_bgPaletteCount - 1) ImGui::SameLine();
                 }
@@ -4800,7 +4750,7 @@ int main(int /*argc*/, char* /*argv*/[])
                     tmpFbo.create(g_canvasWidth, g_canvasHeight);
                     tmpFbo.bind();
                     glViewport(0, 0, g_canvasWidth, g_canvasHeight);
-                    glClearColor(g_bgColor.x, g_bgColor.y, g_bgColor.z, 1.0f);
+                    glClearColor(g_settings.bgColor.x, g_settings.bgColor.y, g_settings.bgColor.z, 1.0f);
                     glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
                     if (g_drawGradientBg)
                     {
@@ -4836,7 +4786,7 @@ int main(int /*argc*/, char* /*argv*/[])
                     glm::mat4 view = g_camera.getViewMatrix();
                     glMultMatrixf(glm::value_ptr(view));
                     setupDefaultLighting();
-                    if (g_drawGrid) renderGrid();
+                    if (g_settings.drawGrid) renderGrid();
                     glEnable(GL_NORMALIZE);
                     renderObjects();
                     glDisable(GL_NORMALIZE);
@@ -5127,16 +5077,16 @@ int main(int /*argc*/, char* /*argv*/[])
                     ImGui::TextDisabled("Use File > Load WoW to load game data.");
             }
 
-            ImGui::Checkbox("Enable Database Cache", &g_enableDbCache);
+            ImGui::Checkbox("Enable Database Cache", &g_settings.enableDbCache);
             ImGui::TextDisabled("Speeds up loading by caching the database. Takes effect on next load.");
 
             // ---- General section ----
             ImGui::SeparatorText("General");
-            if (ImGui::Checkbox("Show Console Window", &g_showConsole))
+            if (ImGui::Checkbox("Show Console Window", &g_settings.showConsole))
             {
 #ifdef _WIN32
                 if (HWND hConsole = GetConsoleWindow())
-                    ShowWindow(hConsole, g_showConsole ? SW_SHOW : SW_HIDE);
+                    ShowWindow(hConsole, g_settings.showConsole ? SW_SHOW : SW_HIDE);
 #endif
             }
             ImGui::TextDisabled("Shows/hides the debug console. Useful for diagnostics.");
@@ -5154,16 +5104,16 @@ int main(int /*argc*/, char* /*argv*/[])
             if (!g_availableFonts.empty())
             {
                 if (ImGui::BeginCombo("##Font",
-                    (g_currentFont >= 0 && g_currentFont < static_cast<int>(g_availableFonts.size()))
-                        ? g_availableFonts[g_currentFont].name.c_str() : "Default"))
+                    (g_settings.currentFont >= 0 && g_settings.currentFont < static_cast<int>(g_availableFonts.size()))
+                        ? g_availableFonts[g_settings.currentFont].name.c_str() : "Default"))
                 {
                     for (int i = 0; i < static_cast<int>(g_availableFonts.size()); ++i)
                     {
                         ImGui::PushID(i);
-                        const bool selected = (i == g_currentFont);
+                        const bool selected = (i == g_settings.currentFont);
                         if (ImGui::Selectable(g_availableFonts[i].name.c_str(), selected))
                         {
-                            g_currentFont = i;
+                            g_settings.currentFont = i;
                             g_fontsDirty = true;
                         }
                         if (selected)
@@ -5180,7 +5130,7 @@ int main(int /*argc*/, char* /*argv*/[])
 
             ImGui::Text("Font Size:");
             ImGui::SetNextItemWidth(-1);
-            if (ImGui::SliderFloat("##FontSize", &g_fontSize, 10.0f, 40.0f, "%.0f px"))
+            if (ImGui::SliderFloat("##FontSize", &g_settings.fontSize, 10.0f, 40.0f, "%.0f px"))
                 g_fontsDirty = true;
             ImGui::TextDisabled("Drop .ttf or .otf files into the fonts/ folder to add more.");
 
@@ -5195,8 +5145,8 @@ int main(int /*argc*/, char* /*argv*/[])
             ImGui::SeparatorText("Save");
             if (ImGui::Button("Save Settings", ImVec2(-1, 0)))
             {
-                g_gamePath = g_pathBuf;
-                saveSettings();
+                g_settings.gamePath = g_pathBuf;
+                g_settings.save();
             }
             ImGui::TextDisabled("Saves preferences and UI layout.");
         }
