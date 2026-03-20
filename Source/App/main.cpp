@@ -51,7 +51,6 @@
 #include "LogOutputFile.h"
 #include "LogOutputConsole.h"
 #include "video.h"
-#include "globalvars.h"
 #include "Attachment.h"
 #include "WoWModel.h"
 #include "OrbitCamera.h"
@@ -151,6 +150,7 @@ struct ViewportFBO
 // ---- Globals --------------------------------------------------------------
 static OrbitCamera  g_camera;
 static Attachment*  g_root       = nullptr;
+static WoWModel*    g_selModel   = nullptr;
 static ViewportFBO  g_fbo;
 static bool         g_drawGrid   = true;
 static glm::vec3    g_bgColor(0.22f, 0.22f, 0.22f);

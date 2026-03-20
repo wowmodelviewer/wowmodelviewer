@@ -56,8 +56,7 @@ set(src CASC/CASCFile.cpp
       Character/WoWItem.cpp
       World/WoWFolder.cpp
       Rendering/video.cpp
-      Rendering/Texture.cpp
-      Common/globalvars.cpp)
+      Rendering/Texture.cpp)
 
 set(headers CASC/CASCChunks.h
       CASC/CASCFile.h
@@ -110,7 +109,6 @@ set(headers CASC/CASCChunks.h
       Common/types.h
       Common/wow_enums.h
       Common/displayable.h
-      Common/globalvars.h
       Common/manager.h)
 
 source_group("Header Files" FILES ${headers})
