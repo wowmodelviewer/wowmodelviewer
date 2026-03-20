@@ -55,6 +55,7 @@
 #include "ViewportFBO.h"
 #include "ThemeManager.h"
 #include "AppSettings.h"
+#include "SceneRenderer.h"
 
 // Game loading
 #include "Game.h"
@@ -100,8 +101,6 @@ static Attachment*  g_root       = nullptr;
 static WoWModel*    g_selModel   = nullptr;
 static ViewportFBO  g_fbo;
 static AppSettings  g_settings;
-static GLuint       g_checkerTex = 0;
-static bool         g_drawCheckerBg = true;
 
 // Timing for animation tick
 static float        g_animTime   = 0.0f;
@@ -307,24 +306,6 @@ static char                          g_startOutfitSearchBuf[256] = {};
 static std::vector<size_t>           g_startOutfitFiltered; // indices into g_startOutfits
 static bool                          g_startOutfitFilterDirty = true;
 
-// ---- Light Control state --------------------------------------------------
-enum LightType { LIGHT_DIRECTIONAL = 0, LIGHT_POINT, LIGHT_SPOT, LIGHT_AMBIENT_ONLY };
-
-struct LightSettings
-{
-    float direction[4] = { -1.0f, 1.0f, -1.0f, 0.0f }; // xyz + w=0 directional
-    float diffuse[3]   = {  1.0f, 1.0f,  1.0f };
-    float ambient[3]   = {  0.35f, 0.35f, 0.35f };
-    float specular[3]  = {  0.0f, 0.0f,  0.0f };
-    float intensity    = 1.0f;
-    bool  enabled      = true;
-    LightType type     = LIGHT_DIRECTIONAL;
-    float position[3]  = { 0.0f, 5.0f, 0.0f };  // for point/spot lights
-    float spotCutoff   = 45.0f;
-    float spotExponent = 10.0f;
-};
-
-static LightSettings g_light;
 
 // ---- Model Control state --------------------------------------------------
 struct GeosetEntry
@@ -431,9 +412,6 @@ static int  g_canvasWidth  = 1920;
 static int  g_canvasHeight = 1080;
 
 // ---- Gradient background --------------------------------------------------
-static bool      g_drawGradientBg = false;
-static glm::vec3 g_gradientTop(0.15f, 0.20f, 0.35f);
-static glm::vec3 g_gradientBottom(0.02f, 0.02f, 0.05f);
 
 // ---- Background colour palette --------------------------------------------
 static glm::vec3 g_bgPalette[] = {
@@ -1960,7 +1938,6 @@ static void loadCharBrowserRace(int raceID, int gender, bool preferHD)
 }
 
 // Forward declarations for functions used by drawCharacterViewer()
-static void renderSceneToFBO(int w, int h);
 static void handleViewportInput();
 
 // ---- Character Viewer (standalone tab like wow.export) ---------------------
@@ -2166,7 +2143,7 @@ static void drawCharacterViewer()
 
         if (vpW > 0 && vpH > 0)
         {
-            renderSceneToFBO(vpW, vpH);
+            SceneRenderer::renderToFBO(g_fbo, vpW, vpH, g_camera, g_root, video.fov, g_settings.bgColor, g_settings.drawGrid);
             ImGui::Image(static_cast<ImTextureID>(static_cast<uintptr_t>(g_fbo.colorTex)),
                          vpSize, ImVec2(0, 1), ImVec2(1, 0));
 
@@ -2776,274 +2753,6 @@ static void doExport()
     }
 }
 
-// ---- Default lighting -----------------------------------------------------
-static void setupDefaultLighting()
-{
-    if (!g_light.enabled)
-    {
-        glDisable(GL_LIGHTING);
-        return;
-    }
-
-    glEnable(GL_LIGHTING);
-
-    if (g_light.type == LIGHT_AMBIENT_ONLY)
-    {
-        glDisable(GL_LIGHT0);
-        GLfloat modelAmb[] = { g_light.ambient[0], g_light.ambient[1],
-                               g_light.ambient[2], 1.0f };
-        glLightModelfv(GL_LIGHT_MODEL_AMBIENT, modelAmb);
-        return;
-    }
-
-    glEnable(GL_LIGHT0);
-
-    GLfloat pos[4];
-    if (g_light.type == LIGHT_DIRECTIONAL)
-    {
-        pos[0] = g_light.direction[0];
-        pos[1] = g_light.direction[1];
-        pos[2] = g_light.direction[2];
-        pos[3] = 0.0f; // w=0 directional
-    }
-    else
-    {
-        pos[0] = g_light.position[0];
-        pos[1] = g_light.position[1];
-        pos[2] = g_light.position[2];
-        pos[3] = 1.0f; // w=1 positional
-    }
-
-    float i = g_light.intensity;
-    GLfloat diffuse[]  = { g_light.diffuse[0]  * i, g_light.diffuse[1]  * i,
-                           g_light.diffuse[2]  * i, 1.0f };
-    GLfloat ambient[]  = { g_light.ambient[0], g_light.ambient[1],
-                           g_light.ambient[2], 1.0f };
-    GLfloat specular[] = { g_light.specular[0] * i, g_light.specular[1] * i,
-                           g_light.specular[2] * i, 1.0f };
-
-    glLightfv(GL_LIGHT0, GL_POSITION, pos);
-    glLightfv(GL_LIGHT0, GL_DIFFUSE,  diffuse);
-    glLightfv(GL_LIGHT0, GL_AMBIENT,  ambient);
-    glLightfv(GL_LIGHT0, GL_SPECULAR, specular);
-
-    // Spot light parameters
-    if (g_light.type == LIGHT_SPOT)
-    {
-        GLfloat spotDir[] = { g_light.direction[0], g_light.direction[1], g_light.direction[2] };
-        glLightfv(GL_LIGHT0, GL_SPOT_DIRECTION, spotDir);
-        glLightf(GL_LIGHT0, GL_SPOT_CUTOFF, g_light.spotCutoff);
-        glLightf(GL_LIGHT0, GL_SPOT_EXPONENT, g_light.spotExponent);
-    }
-    else
-    {
-        glLightf(GL_LIGHT0, GL_SPOT_CUTOFF, 180.0f); // no spot cone
-    }
-
-    GLfloat modelAmb[] = { g_light.ambient[0], g_light.ambient[1],
-                           g_light.ambient[2], 1.0f };
-    glLightModelfv(GL_LIGHT_MODEL_AMBIENT, modelAmb);
-}
-
-// ---- Checkerboard background ----------------------------------------------
-static void createCheckerboardTexture()
-{
-    // 2x2 checkerboard � two shades of dark gray
-    const unsigned char pixels[2 * 2 * 4] = {
-        56, 56, 56, 255,   46, 46, 46, 255,
-        46, 46, 46, 255,   56, 56, 56, 255,
-    };
-    glGenTextures(1, &g_checkerTex);
-    glBindTexture(GL_TEXTURE_2D, g_checkerTex);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, 2, 2, 0, GL_RGBA, GL_UNSIGNED_BYTE, pixels);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-    glBindTexture(GL_TEXTURE_2D, 0);
-}
-
-static void renderCheckerboardBackground(int w, int h)
-{
-    glMatrixMode(GL_PROJECTION);
-    glPushMatrix();
-    glLoadIdentity();
-    glOrtho(0, w, 0, h, -1, 1);
-
-    glMatrixMode(GL_MODELVIEW);
-    glPushMatrix();
-    glLoadIdentity();
-
-    glDisable(GL_DEPTH_TEST);
-    glDisable(GL_LIGHTING);
-    glEnable(GL_TEXTURE_2D);
-
-    glBindTexture(GL_TEXTURE_2D, g_checkerTex);
-    glColor3f(1.0f, 1.0f, 1.0f);
-
-    const float tileSize = 16.0f;
-    float u = static_cast<float>(w) / (tileSize * 2.0f);
-    float v = static_cast<float>(h) / (tileSize * 2.0f);
-
-    glBegin(GL_QUADS);
-    glTexCoord2f(0, 0); glVertex2f(0, 0);
-    glTexCoord2f(u, 0); glVertex2f(static_cast<float>(w), 0);
-    glTexCoord2f(u, v); glVertex2f(static_cast<float>(w), static_cast<float>(h));
-    glTexCoord2f(0, v); glVertex2f(0, static_cast<float>(h));
-    glEnd();
-
-    glBindTexture(GL_TEXTURE_2D, 0);
-    glDisable(GL_TEXTURE_2D);
-    glEnable(GL_DEPTH_TEST);
-
-    glMatrixMode(GL_PROJECTION);
-    glPopMatrix();
-    glMatrixMode(GL_MODELVIEW);
-    glPopMatrix();
-}
-
-// ---- Grid (wireframe with blue center axes) -------------------------------
-static void renderGrid()
-{
-    const float gridSize = 40.0f;
-    const float step     = 1.0f;
-
-    glDisable(GL_TEXTURE_2D);
-    glDisable(GL_LIGHTING);
-
-    // Minor grid lines � thin gray
-    glLineWidth(1.0f);
-    glColor4f(0.55f, 0.55f, 0.55f, 0.6f);
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-    glBegin(GL_LINES);
-    for (float i = -gridSize; i <= gridSize; i += step)
-    {
-        if (i == 0.0f) continue; // center axes drawn separately
-        glVertex3f(-gridSize, i, 0.0f);
-        glVertex3f( gridSize, i, 0.0f);
-        glVertex3f(i, -gridSize, 0.0f);
-        glVertex3f(i,  gridSize, 0.0f);
-    }
-    glEnd();
-
-    // Center axis lines � blue
-    glLineWidth(2.0f);
-    glColor3f(0.2f, 0.5f, 1.0f);
-    glBegin(GL_LINES);
-    glVertex3f(-gridSize, 0.0f, 0.0f);
-    glVertex3f( gridSize, 0.0f, 0.0f);
-    glVertex3f(0.0f, -gridSize, 0.0f);
-    glVertex3f(0.0f,  gridSize, 0.0f);
-    glEnd();
-
-    glLineWidth(1.0f);
-    glDisable(GL_BLEND);
-    glEnable(GL_LIGHTING);
-    glEnable(GL_TEXTURE_2D);
-}
-
-// ---- RenderObjects (ported from ModelCanvas::RenderObjects) ---------------
-static void renderObjects()
-{
-    if (!g_root)
-        return;
-
-    glEnable(GL_LIGHTING);
-    glEnable(GL_TEXTURE_2D);
-    glEnable(GL_DEPTH_TEST);
-    glDepthFunc(GL_LEQUAL);
-
-    g_root->draw();
-
-    // Particles: rendered after opaque geometry with blending
-    glEnable(GL_TEXTURE_2D);
-    glDisable(GL_LIGHTING);
-    glDepthMask(GL_FALSE);
-    glEnable(GL_BLEND);
-
-    g_root->drawParticles();
-
-    glDisable(GL_BLEND);
-    glDepthMask(GL_TRUE);
-}
-
-// ---- Render scene to FBO --------------------------------------------------
-static void renderSceneToFBO(int w, int h)
-{
-    if (w <= 0 || h <= 0)
-        return;
-
-    g_fbo.resize(w, h);
-    g_fbo.bind();
-
-    glViewport(0, 0, w, h);
-    glClearColor(g_settings.bgColor.x, g_settings.bgColor.y, g_settings.bgColor.z, 1.0f);
-    glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
-
-    // Background (screen-space, drawn before 3D scene)
-    if (g_drawGradientBg)
-    {
-        glMatrixMode(GL_PROJECTION);
-        glPushMatrix();
-        glLoadIdentity();
-        glOrtho(0, w, 0, h, -1, 1);
-        glMatrixMode(GL_MODELVIEW);
-        glPushMatrix();
-        glLoadIdentity();
-        glDisable(GL_DEPTH_TEST);
-        glDisable(GL_LIGHTING);
-        glDisable(GL_TEXTURE_2D);
-        glBegin(GL_QUADS);
-        glColor3f(g_gradientBottom.x, g_gradientBottom.y, g_gradientBottom.z);
-        glVertex2f(0, 0);
-        glVertex2f(static_cast<float>(w), 0);
-        glColor3f(g_gradientTop.x, g_gradientTop.y, g_gradientTop.z);
-        glVertex2f(static_cast<float>(w), static_cast<float>(h));
-        glVertex2f(0, static_cast<float>(h));
-        glEnd();
-        glEnable(GL_DEPTH_TEST);
-        glMatrixMode(GL_PROJECTION);
-        glPopMatrix();
-        glMatrixMode(GL_MODELVIEW);
-        glPopMatrix();
-    }
-    else if (g_drawCheckerBg && g_checkerTex)
-    {
-        renderCheckerboardBackground(w, h);
-    }
-    glClear(GL_DEPTH_BUFFER_BIT);
-
-    // Projection
-    glMatrixMode(GL_PROJECTION);
-    glLoadIdentity();
-    glm::mat4 proj = glm::perspective(video.fov,
-                                       static_cast<float>(w) / static_cast<float>(h),
-                                       0.1f, 1280.0f * 5.0f);
-    glMultMatrixf(glm::value_ptr(proj));
-
-    // View
-    glMatrixMode(GL_MODELVIEW);
-    glLoadIdentity();
-    glm::mat4 view = g_camera.getViewMatrix();
-    glMultMatrixf(glm::value_ptr(view));
-
-    // Lighting
-    setupDefaultLighting();
-
-    // Grid
-    if (g_settings.drawGrid)
-        renderGrid();
-
-    // Model
-    glEnable(GL_NORMALIZE);
-    renderObjects();
-    glDisable(GL_NORMALIZE);
-
-    g_fbo.unbind();
-}
-
 // ---- Handle viewport input ------------------------------------------------
 static void handleViewportInput()
 {
@@ -3378,7 +3087,7 @@ static void initGL()
     // video.Init() calls gladLoaderLoadGL() internally � safe after GLFW context
     video.InitGL();
 
-    createCheckerboardTexture();
+    SceneRenderer::initResources();
 
     LOG_INFO << "OpenGL initialisation complete.";
 }
@@ -3758,7 +3467,7 @@ int main(int /*argc*/, char* /*argv*/[])
             if (vpW > 0 && vpH > 0)
             {
                 // Render scene to offscreen FBO
-                renderSceneToFBO(vpW, vpH);
+                SceneRenderer::renderToFBO(g_fbo, vpW, vpH, g_camera, g_root, video.fov, g_settings.bgColor, g_settings.drawGrid);
 
                 // Display FBO colour texture (UV-flipped: OpenGL is bottom-up)
                 ImGui::Image(static_cast<ImTextureID>(static_cast<uintptr_t>(g_fbo.colorTex)),
@@ -4099,16 +3808,16 @@ int main(int /*argc*/, char* /*argv*/[])
             if (ImGui::CollapsingHeader("Background", ImGuiTreeNodeFlags_DefaultOpen))
             {
                 ImGui::Checkbox("Draw Grid", &g_settings.drawGrid);
-                ImGui::Checkbox("Checkerboard Background", &g_drawCheckerBg);
-                if (ImGui::Checkbox("Gradient Background", &g_drawGradientBg))
+                ImGui::Checkbox("Checkerboard Background", &SceneRenderer::state().drawCheckerBg);
+                if (ImGui::Checkbox("Gradient Background", &SceneRenderer::state().drawGradientBg))
                 {
-                    if (g_drawGradientBg)
-                        g_drawCheckerBg = false;
+                    if (SceneRenderer::state().drawGradientBg)
+                        SceneRenderer::state().drawCheckerBg = false;
                 }
-                if (g_drawGradientBg)
+                if (SceneRenderer::state().drawGradientBg)
                 {
-                    ImGui::ColorEdit3("Gradient Top", &g_gradientTop.x);
-                    ImGui::ColorEdit3("Gradient Bottom", &g_gradientBottom.x);
+                    ImGui::ColorEdit3("Gradient Top", &SceneRenderer::state().gradientTop.x);
+                    ImGui::ColorEdit3("Gradient Bottom", &SceneRenderer::state().gradientBottom.x);
                 }
                 ImGui::ColorEdit3("Background Color", &g_settings.bgColor.x);
 
@@ -4150,76 +3859,76 @@ int main(int /*argc*/, char* /*argv*/[])
             // ---- Lighting ----
             if (ImGui::CollapsingHeader("Lighting", ImGuiTreeNodeFlags_DefaultOpen))
             {
-                ImGui::Checkbox("Enable Lighting", &g_light.enabled);
+                ImGui::Checkbox("Enable Lighting", &SceneRenderer::state().light.enabled);
 
-                if (!g_light.enabled)
+                if (!SceneRenderer::state().light.enabled)
                     ImGui::BeginDisabled();
 
                 static const char* lightTypeNames[] = { "Directional", "Point", "Spot", "Ambient Only" };
-                ImGui::Combo("##LightType", reinterpret_cast<int*>(&g_light.type), lightTypeNames, IM_ARRAYSIZE(lightTypeNames));
+                ImGui::Combo("##LightType", reinterpret_cast<int*>(&SceneRenderer::state().light.type), lightTypeNames, IM_ARRAYSIZE(lightTypeNames));
 
-                if (g_light.type == LIGHT_DIRECTIONAL || g_light.type == LIGHT_SPOT)
-                    ImGui::DragFloat3("Dir XYZ", g_light.direction, 0.01f, -5.0f, 5.0f, "%.2f");
+                if (SceneRenderer::state().light.type == SceneRenderer::LIGHT_DIRECTIONAL || SceneRenderer::state().light.type == SceneRenderer::LIGHT_SPOT)
+                    ImGui::DragFloat3("Dir XYZ", SceneRenderer::state().light.direction, 0.01f, -5.0f, 5.0f, "%.2f");
 
-                if (g_light.type == LIGHT_POINT || g_light.type == LIGHT_SPOT)
-                    ImGui::DragFloat3("Pos XYZ", g_light.position, 0.1f, -50.0f, 50.0f, "%.1f");
+                if (SceneRenderer::state().light.type == SceneRenderer::LIGHT_POINT || SceneRenderer::state().light.type == SceneRenderer::LIGHT_SPOT)
+                    ImGui::DragFloat3("Pos XYZ", SceneRenderer::state().light.position, 0.1f, -50.0f, 50.0f, "%.1f");
 
-                if (g_light.type == LIGHT_SPOT)
+                if (SceneRenderer::state().light.type == SceneRenderer::LIGHT_SPOT)
                 {
-                    ImGui::SliderFloat("Cutoff Angle", &g_light.spotCutoff, 1.0f, 90.0f, "%.1f deg");
-                    ImGui::SliderFloat("Exponent", &g_light.spotExponent, 0.0f, 128.0f, "%.1f");
+                    ImGui::SliderFloat("Cutoff Angle", &SceneRenderer::state().light.spotCutoff, 1.0f, 90.0f, "%.1f deg");
+                    ImGui::SliderFloat("Exponent", &SceneRenderer::state().light.spotExponent, 0.0f, 128.0f, "%.1f");
                 }
 
-                ImGui::ColorEdit3("Diffuse",  g_light.diffuse,  ImGuiColorEditFlags_Float);
-                ImGui::ColorEdit3("Ambient",  g_light.ambient,  ImGuiColorEditFlags_Float);
-                ImGui::ColorEdit3("Specular", g_light.specular, ImGuiColorEditFlags_Float);
-                ImGui::SliderFloat("Intensity", &g_light.intensity, 0.0f, 3.0f, "%.2f");
+                ImGui::ColorEdit3("Diffuse",  SceneRenderer::state().light.diffuse,  ImGuiColorEditFlags_Float);
+                ImGui::ColorEdit3("Ambient",  SceneRenderer::state().light.ambient,  ImGuiColorEditFlags_Float);
+                ImGui::ColorEdit3("Specular", SceneRenderer::state().light.specular, ImGuiColorEditFlags_Float);
+                ImGui::SliderFloat("Intensity", &SceneRenderer::state().light.intensity, 0.0f, 3.0f, "%.2f");
 
-                if (!g_light.enabled)
+                if (!SceneRenderer::state().light.enabled)
                     ImGui::EndDisabled();
 
                 ImGui::Spacing();
                 if (ImGui::Button("Default##light", ImVec2(-1, 0)))
-                    g_light = LightSettings{};
+                    SceneRenderer::state().light = SceneRenderer::LightSettings{};
                 if (ImGui::Button("Bright Daylight", ImVec2(-1, 0)))
                 {
-                    g_light.direction[0] = -0.5f; g_light.direction[1] = 1.0f;
-                    g_light.direction[2] = -0.3f; g_light.direction[3] = 0.0f;
-                    g_light.diffuse[0] = 1.0f; g_light.diffuse[1] = 0.98f; g_light.diffuse[2] = 0.92f;
-                    g_light.ambient[0] = 0.45f; g_light.ambient[1] = 0.45f; g_light.ambient[2] = 0.50f;
-                    g_light.specular[0] = 0.3f; g_light.specular[1] = 0.3f; g_light.specular[2] = 0.3f;
-                    g_light.intensity = 1.2f;
-                    g_light.enabled = true;
+                    SceneRenderer::state().light.direction[0] = -0.5f; SceneRenderer::state().light.direction[1] = 1.0f;
+                    SceneRenderer::state().light.direction[2] = -0.3f; SceneRenderer::state().light.direction[3] = 0.0f;
+                    SceneRenderer::state().light.diffuse[0] = 1.0f; SceneRenderer::state().light.diffuse[1] = 0.98f; SceneRenderer::state().light.diffuse[2] = 0.92f;
+                    SceneRenderer::state().light.ambient[0] = 0.45f; SceneRenderer::state().light.ambient[1] = 0.45f; SceneRenderer::state().light.ambient[2] = 0.50f;
+                    SceneRenderer::state().light.specular[0] = 0.3f; SceneRenderer::state().light.specular[1] = 0.3f; SceneRenderer::state().light.specular[2] = 0.3f;
+                    SceneRenderer::state().light.intensity = 1.2f;
+                    SceneRenderer::state().light.enabled = true;
                 }
                 if (ImGui::Button("Warm Sunset", ImVec2(-1, 0)))
                 {
-                    g_light.direction[0] = -1.0f; g_light.direction[1] = 0.3f;
-                    g_light.direction[2] = -0.5f; g_light.direction[3] = 0.0f;
-                    g_light.diffuse[0] = 1.0f; g_light.diffuse[1] = 0.65f; g_light.diffuse[2] = 0.3f;
-                    g_light.ambient[0] = 0.25f; g_light.ambient[1] = 0.2f; g_light.ambient[2] = 0.25f;
-                    g_light.specular[0] = 0.1f; g_light.specular[1] = 0.05f; g_light.specular[2] = 0.0f;
-                    g_light.intensity = 1.0f;
-                    g_light.enabled = true;
+                    SceneRenderer::state().light.direction[0] = -1.0f; SceneRenderer::state().light.direction[1] = 0.3f;
+                    SceneRenderer::state().light.direction[2] = -0.5f; SceneRenderer::state().light.direction[3] = 0.0f;
+                    SceneRenderer::state().light.diffuse[0] = 1.0f; SceneRenderer::state().light.diffuse[1] = 0.65f; SceneRenderer::state().light.diffuse[2] = 0.3f;
+                    SceneRenderer::state().light.ambient[0] = 0.25f; SceneRenderer::state().light.ambient[1] = 0.2f; SceneRenderer::state().light.ambient[2] = 0.25f;
+                    SceneRenderer::state().light.specular[0] = 0.1f; SceneRenderer::state().light.specular[1] = 0.05f; SceneRenderer::state().light.specular[2] = 0.0f;
+                    SceneRenderer::state().light.intensity = 1.0f;
+                    SceneRenderer::state().light.enabled = true;
                 }
                 if (ImGui::Button("Cool Moonlight", ImVec2(-1, 0)))
                 {
-                    g_light.direction[0] = 0.3f; g_light.direction[1] = 1.0f;
-                    g_light.direction[2] = -0.7f; g_light.direction[3] = 0.0f;
-                    g_light.diffuse[0] = 0.6f; g_light.diffuse[1] = 0.65f; g_light.diffuse[2] = 0.8f;
-                    g_light.ambient[0] = 0.15f; g_light.ambient[1] = 0.15f; g_light.ambient[2] = 0.2f;
-                    g_light.specular[0] = 0.0f; g_light.specular[1] = 0.0f; g_light.specular[2] = 0.0f;
-                    g_light.intensity = 0.7f;
-                    g_light.enabled = true;
+                    SceneRenderer::state().light.direction[0] = 0.3f; SceneRenderer::state().light.direction[1] = 1.0f;
+                    SceneRenderer::state().light.direction[2] = -0.7f; SceneRenderer::state().light.direction[3] = 0.0f;
+                    SceneRenderer::state().light.diffuse[0] = 0.6f; SceneRenderer::state().light.diffuse[1] = 0.65f; SceneRenderer::state().light.diffuse[2] = 0.8f;
+                    SceneRenderer::state().light.ambient[0] = 0.15f; SceneRenderer::state().light.ambient[1] = 0.15f; SceneRenderer::state().light.ambient[2] = 0.2f;
+                    SceneRenderer::state().light.specular[0] = 0.0f; SceneRenderer::state().light.specular[1] = 0.0f; SceneRenderer::state().light.specular[2] = 0.0f;
+                    SceneRenderer::state().light.intensity = 0.7f;
+                    SceneRenderer::state().light.enabled = true;
                 }
                 if (ImGui::Button("Flat (No Shading)", ImVec2(-1, 0)))
                 {
-                    g_light.direction[0] = 0.0f; g_light.direction[1] = 0.0f;
-                    g_light.direction[2] = -1.0f; g_light.direction[3] = 0.0f;
-                    g_light.diffuse[0] = 1.0f; g_light.diffuse[1] = 1.0f; g_light.diffuse[2] = 1.0f;
-                    g_light.ambient[0] = 1.0f; g_light.ambient[1] = 1.0f; g_light.ambient[2] = 1.0f;
-                    g_light.specular[0] = 0.0f; g_light.specular[1] = 0.0f; g_light.specular[2] = 0.0f;
-                    g_light.intensity = 0.5f;
-                    g_light.enabled = true;
+                    SceneRenderer::state().light.direction[0] = 0.0f; SceneRenderer::state().light.direction[1] = 0.0f;
+                    SceneRenderer::state().light.direction[2] = -1.0f; SceneRenderer::state().light.direction[3] = 0.0f;
+                    SceneRenderer::state().light.diffuse[0] = 1.0f; SceneRenderer::state().light.diffuse[1] = 1.0f; SceneRenderer::state().light.diffuse[2] = 1.0f;
+                    SceneRenderer::state().light.ambient[0] = 1.0f; SceneRenderer::state().light.ambient[1] = 1.0f; SceneRenderer::state().light.ambient[2] = 1.0f;
+                    SceneRenderer::state().light.specular[0] = 0.0f; SceneRenderer::state().light.specular[1] = 0.0f; SceneRenderer::state().light.specular[2] = 0.0f;
+                    SceneRenderer::state().light.intensity = 0.5f;
+                    SceneRenderer::state().light.enabled = true;
                 }
             }
 
@@ -4752,7 +4461,7 @@ int main(int /*argc*/, char* /*argv*/[])
                     glViewport(0, 0, g_canvasWidth, g_canvasHeight);
                     glClearColor(g_settings.bgColor.x, g_settings.bgColor.y, g_settings.bgColor.z, 1.0f);
                     glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
-                    if (g_drawGradientBg)
+                    if (SceneRenderer::state().drawGradientBg)
                     {
                         int cw = g_canvasWidth, ch = g_canvasHeight;
                         glMatrixMode(GL_PROJECTION); glPushMatrix(); glLoadIdentity();
@@ -4760,9 +4469,9 @@ int main(int /*argc*/, char* /*argv*/[])
                         glMatrixMode(GL_MODELVIEW); glPushMatrix(); glLoadIdentity();
                         glDisable(GL_DEPTH_TEST); glDisable(GL_LIGHTING); glDisable(GL_TEXTURE_2D);
                         glBegin(GL_QUADS);
-                        glColor3f(g_gradientBottom.x, g_gradientBottom.y, g_gradientBottom.z);
+                        glColor3f(SceneRenderer::state().gradientBottom.x, SceneRenderer::state().gradientBottom.y, SceneRenderer::state().gradientBottom.z);
                         glVertex2f(0, 0); glVertex2f(static_cast<float>(cw), 0);
-                        glColor3f(g_gradientTop.x, g_gradientTop.y, g_gradientTop.z);
+                        glColor3f(SceneRenderer::state().gradientTop.x, SceneRenderer::state().gradientTop.y, SceneRenderer::state().gradientTop.z);
                         glVertex2f(static_cast<float>(cw), static_cast<float>(ch));
                         glVertex2f(0, static_cast<float>(ch));
                         glEnd();
@@ -4770,9 +4479,9 @@ int main(int /*argc*/, char* /*argv*/[])
                         glMatrixMode(GL_PROJECTION); glPopMatrix();
                         glMatrixMode(GL_MODELVIEW); glPopMatrix();
                     }
-                    else if (g_drawCheckerBg && g_checkerTex)
+                    else if (SceneRenderer::state().drawCheckerBg && SceneRenderer::state().checkerTex)
                     {
-                        renderCheckerboardBackground(g_canvasWidth, g_canvasHeight);
+                        SceneRenderer::renderCheckerboard(g_canvasWidth, g_canvasHeight);
                     }
                     glClear(GL_DEPTH_BUFFER_BIT);
                     glMatrixMode(GL_PROJECTION);
@@ -4785,10 +4494,10 @@ int main(int /*argc*/, char* /*argv*/[])
                     glLoadIdentity();
                     glm::mat4 view = g_camera.getViewMatrix();
                     glMultMatrixf(glm::value_ptr(view));
-                    setupDefaultLighting();
-                    if (g_settings.drawGrid) renderGrid();
+                    SceneRenderer::setupLighting();
+                    if (g_settings.drawGrid) SceneRenderer::renderGrid();
                     glEnable(GL_NORMALIZE);
-                    renderObjects();
+                    SceneRenderer::renderObjects(g_root);
                     glDisable(GL_NORMALIZE);
                     tmpFbo.unbind();
 
@@ -5362,7 +5071,7 @@ int main(int /*argc*/, char* /*argv*/[])
 
     g_fbo.destroy();
 
-    if (g_checkerTex) { glDeleteTextures(1, &g_checkerTex); g_checkerTex = 0; }
+    SceneRenderer::shutdown();
 
     for (auto* e : g_exporters)
         delete e;
