@@ -40,6 +40,7 @@ set(headers Core/Game.h
       Core/IniFile.h
       Core/Model.h
       Core/string_utils.h
+      Core/types.h
       Core/ZipExtract.h
       Core/Logger/Logger.h
       Core/Logger/LogOutput.h

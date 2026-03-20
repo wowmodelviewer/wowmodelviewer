@@ -106,7 +106,6 @@ set(headers CASC/CASCChunks.h
       World/WoWFolder.h
       Rendering/video.h
       Rendering/Texture.h
-      Common/types.h
       Common/wow_enums.h
       Common/displayable.h
       Common/manager.h)
