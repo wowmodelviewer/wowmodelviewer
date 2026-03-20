@@ -39,6 +39,7 @@ set(src Core/Game.cpp
 set(headers Core/Game.h
       Core/IniFile.h
       Core/Model.h
+      Core/manager.h
       Core/string_utils.h
       Core/types.h
       Core/ZipExtract.h

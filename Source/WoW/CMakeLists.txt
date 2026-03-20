@@ -107,8 +107,7 @@ set(headers CASC/CASCChunks.h
       Rendering/video.h
       Rendering/Texture.h
       Common/wow_enums.h
-      Common/displayable.h
-      Common/manager.h)
+      Common/displayable.h)
 
 source_group("Header Files" FILES ${headers})
 
