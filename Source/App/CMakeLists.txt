@@ -2,6 +2,7 @@
 include(${CMAKE_SOURCE_DIR}/cmake/common.cmake)
 
 include_directories(.)
+include_directories(Panels)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
 # Exporter headers (OBJ / FBX)
@@ -16,7 +17,8 @@ include_directories(${CMAKE_SOURCE_DIR}/Source/Plugins/Importers/Wowhead)
 set(src main.cpp
          AppSettings.cpp
          SceneRenderer.cpp
-         ThemeManager.cpp)
+         ThemeManager.cpp
+         Panels/FileBrowserPanel.cpp)
 
 # Generate the resource file that embeds the application icon.
 set(WMV_ICO_PATH "${CMAKE_SOURCE_DIR}/bin_support/Icons/wmv.ico")
