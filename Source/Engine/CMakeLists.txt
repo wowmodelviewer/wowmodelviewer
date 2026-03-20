@@ -65,6 +65,7 @@ set(headers Core/Game.h
       Plugin/ExporterPlugin.h
       Plugin/ImporterPlugin.h
       Rendering/OrbitCamera.h
+      Rendering/ViewportFBO.h
       Rendering/video.h
       Settings/GlobalSettings.h)
 
