@@ -64,6 +64,10 @@
 #include "ScreenshotPanel.h"
 #include "LogPanel.h"
 #include "PresetsPanel.h"
+#include "MountsPanel.h"
+#include "ItemSetsPanel.h"
+#include "NpcBrowserPanel.h"
+#include "ItemBrowserPanel.h"
 
 // Game loading
 #include "Game.h"
@@ -111,27 +115,14 @@ struct FontEntry {
 
 using SkinEntry = AnimationPanel::SkinEntry;
 
-struct ItemSetEntry
-{
-    int id;
-    std::string name;
-};
-
-struct StartOutfitEntry
-{
-    int id;           // CharStartOutfit.ID
-    std::string name; // class name
-};
+using ItemSetEntry      = ItemSetsPanel::ItemSetEntry;
+using StartOutfitEntry  = ItemSetsPanel::StartOutfitEntry;
 
 using GeosetEntry      = ViewportOptionsPanel::GeosetEntry;
 using GeosetGroupEntry = ViewportOptionsPanel::GeosetGroupEntry;
 using ParticleColorState = ViewportOptionsPanel::ParticleColorState;
 
-struct MountEntry
-{
-    int         displayID;  // CreatureDisplayInfoID (>0 for DB mounts, -1 for "None")
-    std::string name;
-};
+using MountEntry = MountsPanel::MountEntry;
 
 using AnimEntry = AnimationPanel::AnimEntry;
 using CustomizationOption = CharacterViewerPanel::CustomizationOption;
@@ -1072,22 +1063,6 @@ static bool correctType(int type, int slot)
     case CS_TABARD:     return (type == IT_TABARD);
     case CS_QUIVER:     return (type == IT_QUIVER);
     default: return false;
-    }
-}
-
-static ImVec4 getQualityColor(int quality)
-{
-    switch (quality)
-    {
-    case 0:  return ImVec4(0.616f, 0.616f, 0.616f, 1.0f); // Poor (gray)
-    case 1:  return ImVec4(1.0f,   1.0f,   1.0f,   1.0f); // Common (white)
-    case 2:  return ImVec4(0.118f, 1.0f,   0.0f,   1.0f); // Uncommon (green)
-    case 3:  return ImVec4(0.0f,   0.439f, 0.867f, 1.0f); // Rare (blue)
-    case 4:  return ImVec4(0.639f, 0.208f, 0.933f, 1.0f); // Epic (purple)
-    case 5:  return ImVec4(1.0f,   0.502f, 0.0f,   1.0f); // Legendary (orange)
-    case 6:
-    case 7:  return ImVec4(0.898f, 0.8f,   0.502f, 1.0f); // Artifact/Heirloom (gold)
-    default: return ImVec4(1.0f,   1.0f,   1.0f,   1.0f);
     }
 }
 
@@ -2852,89 +2827,24 @@ int main(int /*argc*/, char* /*argv*/[])
         {
         if (ImGui::Begin("Mounts", &app.showMounts))
         {
-            WoWModel* cModel = getLoadedModel();
-            if (cModel && app.isChar)
-            {
-                buildMountList(); // lazy init on first frame
+            MountsPanel::DrawContext mCtx;
+            mCtx.isChar              = app.isChar;
+            mCtx.isMounted           = app.isMounted;
+            mCtx.mountList           = &app.mountList;
+            mCtx.creatureModelNames  = &app.creatureModelNames;
+            mCtx.creatureModels      = &app.creatureModels;
+            mCtx.mountFiltered       = &app.mountFiltered;
+            mCtx.mountFilterDirty    = &app.mountFilterDirty;
+            mCtx.mountTab            = &app.mountTab;
+            mCtx.mountSearchBuf      = app.mountSearchBuf;
+            mCtx.mountSearchBufSize  = sizeof(app.mountSearchBuf);
+            mCtx.getLoadedModel      = getLoadedModel;
+            mCtx.buildMountList      = [] { buildMountList(); };
+            mCtx.rebuildMountFilter  = [] { rebuildMountFilter(); };
+            mCtx.mountCharacter      = [](int d, GameFile* f) { mountCharacter(d, f); };
+            mCtx.dismountCharacter   = [] { dismountCharacter(); };
 
-                if (app.isMounted)
-                {
-                    ImGui::TextColored(ImVec4(0.4f, 1.0f, 0.4f, 1.0f), "Mounted");
-                    if (ImGui::Button("Dismount", ImVec2(-1, 0)))
-                        dismountCharacter();
-                }
-                else
-                {
-                    if (ImGui::BeginTabBar("##MountTabs"))
-                    {
-                        int prevTab = app.mountTab;
-
-                        if (ImGui::BeginTabItem("Player Mounts"))
-                        {
-                            app.mountTab = 0;
-                            ImGui::EndTabItem();
-                        }
-                        if (ImGui::BeginTabItem("Creature Models"))
-                        {
-                            app.mountTab = 1;
-                            ImGui::EndTabItem();
-                        }
-                        ImGui::EndTabBar();
-
-                        if (app.mountTab != prevTab)
-                        {
-                            app.mountFilterDirty = true;
-                            app.mountSearchBuf[0] = '\0';
-                        }
-                    }
-
-                    ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x - 60.0f);
-                    if (ImGui::InputText("##mountSearch", app.mountSearchBuf, sizeof(app.mountSearchBuf),
-                                         ImGuiInputTextFlags_EnterReturnsTrue))
-                        app.mountFilterDirty = true;
-                    ImGui::SameLine();
-                    if (ImGui::Button("Apply##mount", ImVec2(-1, 0)))
-                        app.mountFilterDirty = true;
-
-                    if (app.mountFilterDirty)
-                        rebuildMountFilter();
-
-                    ImGui::Text("%d entries", static_cast<int>(app.mountFiltered.size()));
-                    ImGui::Separator();
-
-                    ImGui::BeginChild("##MountList", ImVec2(0, 0), ImGuiChildFlags_Borders);
-                    ImGuiListClipper clipper;
-                    clipper.Begin(static_cast<int>(app.mountFiltered.size()));
-                    while (clipper.Step())
-                    {
-                        for (int i = clipper.DisplayStart; i < clipper.DisplayEnd; ++i)
-                        {
-                            size_t idx = app.mountFiltered[i];
-                            ImGui::PushID(static_cast<int>(idx));
-
-                            if (app.mountTab == 0)
-                            {
-                                const auto& me = app.mountList[idx];
-                                std::string label = std::format("{} (DisplayID:{})", me.name, me.displayID);
-                                if (ImGui::Selectable(label.c_str()))
-                                    mountCharacter(me.displayID, nullptr);
-                            }
-                            else
-                            {
-                                if (ImGui::Selectable(app.creatureModelNames[idx].c_str()))
-                                    mountCharacter(-1, app.creatureModels[idx]);
-                            }
-
-                            ImGui::PopID();
-                        }
-                    }
-                    ImGui::EndChild();
-                }
-            }
-            else
-            {
-                ImGui::TextDisabled("Load a character model first.");
-            }
+            MountsPanel::draw(mCtx);
         }
         ImGui::End();
         }
@@ -2944,95 +2854,29 @@ int main(int /*argc*/, char* /*argv*/[])
         {
         if (ImGui::Begin("Item Sets", &app.showItemSets))
         {
-            WoWModel* cModel = getLoadedModel();
-            if (cModel && app.isChar)
-            {
-                // ---- Item Sets ----
-                buildItemSets(); // lazy init on first frame
+            ItemSetsPanel::DrawContext isCtx;
+            isCtx.isChar                  = app.isChar;
+            isCtx.itemSets                = &app.itemSets;
+            isCtx.itemSetsBuilt           = &app.itemSetsBuilt;
+            isCtx.itemSetSearchBuf        = app.itemSetSearchBuf;
+            isCtx.itemSetSearchBufSize    = sizeof(app.itemSetSearchBuf);
+            isCtx.itemSetFiltered         = &app.itemSetFiltered;
+            isCtx.itemSetFilterDirty      = &app.itemSetFilterDirty;
+            isCtx.startOutfits            = &app.startOutfits;
+            isCtx.startOutfitsBuilt       = &app.startOutfitsBuilt;
+            isCtx.startOutfitSearchBuf    = app.startOutfitSearchBuf;
+            isCtx.startOutfitSearchBufSize = sizeof(app.startOutfitSearchBuf);
+            isCtx.startOutfitFiltered     = &app.startOutfitFiltered;
+            isCtx.startOutfitFilterDirty  = &app.startOutfitFilterDirty;
+            isCtx.getLoadedModel          = getLoadedModel;
+            isCtx.buildItemSets           = [] { buildItemSets(); };
+            isCtx.rebuildItemSetFilter    = [] { rebuildItemSetFilter(); };
+            isCtx.applyItemSet            = [](WoWModel* m, int id) { applyItemSet(m, id); };
+            isCtx.buildStartOutfits       = [](WoWModel* m) { buildStartOutfits(m); };
+            isCtx.rebuildStartOutfitFilter = [] { rebuildStartOutfitFilter(); };
+            isCtx.applyStartOutfit        = [](WoWModel* m, int id) { applyStartOutfit(m, id); };
 
-                ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x - 60.0f);
-                if (ImGui::InputText("##itemSetSearch", app.itemSetSearchBuf, sizeof(app.itemSetSearchBuf),
-                                     ImGuiInputTextFlags_EnterReturnsTrue))
-                    app.itemSetFilterDirty = true;
-                ImGui::SameLine();
-                if (ImGui::Button("Apply##itemset", ImVec2(-1, 0)))
-                    app.itemSetFilterDirty = true;
-
-                if (app.itemSetFilterDirty)
-                    rebuildItemSetFilter();
-
-                ImGui::Text("%d sets", static_cast<int>(app.itemSetFiltered.size()));
-                ImGui::Separator();
-
-                ImGui::BeginChild("##ItemSetList", ImVec2(0, 200), ImGuiChildFlags_Borders);
-                {
-                    ImGuiListClipper clipper;
-                    clipper.Begin(static_cast<int>(app.itemSetFiltered.size()));
-                    while (clipper.Step())
-                    {
-                        for (int i = clipper.DisplayStart; i < clipper.DisplayEnd; ++i)
-                        {
-                            const auto& setEntry = app.itemSets[app.itemSetFiltered[i]];
-                            ImGui::PushID(setEntry.id);
-                            std::string label = std::format("{} (ID:{})", setEntry.name, setEntry.id);
-                            if (ImGui::Selectable(label.c_str()))
-                                applyItemSet(cModel, setEntry.id);
-                            ImGui::PopID();
-                        }
-                    }
-                }
-                ImGui::EndChild();
-
-                // ---- Start Outfits ----
-                ImGui::SeparatorText("Start Outfits");
-
-                if (!app.startOutfitsBuilt)
-                    buildStartOutfits(cModel);
-
-                if (app.startOutfits.empty())
-                {
-                    ImGui::TextDisabled("No start outfits available for this race/sex.");
-                }
-                else
-                {
-                    ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x - 60.0f);
-                    if (ImGui::InputText("##startOutfitSearch", app.startOutfitSearchBuf, sizeof(app.startOutfitSearchBuf),
-                                         ImGuiInputTextFlags_EnterReturnsTrue))
-                        app.startOutfitFilterDirty = true;
-                    ImGui::SameLine();
-                    if (ImGui::Button("Apply##startoutfit", ImVec2(-1, 0)))
-                        app.startOutfitFilterDirty = true;
-
-                    if (app.startOutfitFilterDirty)
-                        rebuildStartOutfitFilter();
-
-                    ImGui::Text("%d classes", static_cast<int>(app.startOutfitFiltered.size()));
-                    ImGui::Separator();
-
-                    ImGui::BeginChild("##StartOutfitList", ImVec2(0, 150), ImGuiChildFlags_Borders);
-                    {
-                        ImGuiListClipper clipper;
-                        clipper.Begin(static_cast<int>(app.startOutfitFiltered.size()));
-                        while (clipper.Step())
-                        {
-                            for (int i = clipper.DisplayStart; i < clipper.DisplayEnd; ++i)
-                            {
-                                const auto& entry = app.startOutfits[app.startOutfitFiltered[i]];
-                                ImGui::PushID(entry.id);
-                                std::string label = std::format("{} (ID:{})", entry.name, entry.id);
-                                if (ImGui::Selectable(label.c_str()))
-                                    applyStartOutfit(cModel, entry.id);
-                                ImGui::PopID();
-                            }
-                        }
-                    }
-                    ImGui::EndChild();
-                }
-            }
-            else
-            {
-                ImGui::TextDisabled("Load a character model first.");
-            }
+            ItemSetsPanel::draw(isCtx);
         }
         ImGui::End();
         }
@@ -3042,44 +2886,18 @@ int main(int /*argc*/, char* /*argv*/[])
         {
         if (ImGui::Begin("NPC Browser", &app.showNpcBrowser))
         {
-            if (!app.isWoWLoaded || !app.initDB)
-            {
-                ImGui::TextDisabled("Game not loaded.");
-            }
-            else
-            {
-                ImGui::Text("Search:");
-                ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x - 60.0f);
-                if (ImGui::InputText("##npcSearch", app.npcSearchBuf, sizeof(app.npcSearchBuf),
-                                     ImGuiInputTextFlags_EnterReturnsTrue))
-                    app.npcFilterDirty = true;
-                ImGui::SameLine();
-                if (ImGui::Button("Apply##npc", ImVec2(-1, 0)))
-                    app.npcFilterDirty = true;
+            NpcBrowserPanel::DrawContext npcCtx;
+            npcCtx.isWoWLoaded      = app.isWoWLoaded;
+            npcCtx.isDBReady        = app.initDB;
+            npcCtx.npcs             = &npcs;
+            npcCtx.npcFiltered      = &app.npcFiltered;
+            npcCtx.npcFilterDirty   = &app.npcFilterDirty;
+            npcCtx.npcSearchBuf     = app.npcSearchBuf;
+            npcCtx.npcSearchBufSize = sizeof(app.npcSearchBuf);
+            npcCtx.rebuildNpcFilter = [] { rebuildNpcFilter(); };
+            npcCtx.loadNPC          = [](unsigned int id) { loadNPC(id); };
 
-                if (app.npcFilterDirty)
-                    rebuildNpcFilter();
-
-                ImGui::Text("%d NPCs", static_cast<int>(app.npcFiltered.size()));
-                ImGui::Separator();
-
-                ImGui::BeginChild("##NpcList", ImVec2(0, 0), ImGuiChildFlags_None);
-                ImGuiListClipper clipper;
-                clipper.Begin(static_cast<int>(app.npcFiltered.size()));
-                while (clipper.Step())
-                {
-                    for (int i = clipper.DisplayStart; i < clipper.DisplayEnd; ++i)
-                    {
-                        const auto& npc = npcs[app.npcFiltered[i]];
-                        ImGui::PushID(static_cast<int>(app.npcFiltered[i]));
-                        std::string label = std::format("{} (ID:{} Type:{})", npc.name, npc.id, npc.type);
-                        if (ImGui::Selectable(label.c_str()))
-                            loadNPC(static_cast<unsigned int>(npc.id));
-                        ImGui::PopID();
-                    }
-                }
-                ImGui::EndChild();
-            }
+            NpcBrowserPanel::draw(npcCtx);
         }
         ImGui::End();
         }
@@ -3089,47 +2907,18 @@ int main(int /*argc*/, char* /*argv*/[])
         {
         if (ImGui::Begin("Item Browser", &app.showItemBrowser))
         {
-            if (!app.isWoWLoaded || !app.initDB)
-            {
-                ImGui::TextDisabled("Game not loaded.");
-            }
-            else
-            {
-                ImGui::Text("Search:");
-                ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x - 60.0f);
-                if (ImGui::InputText("##itemBrowseSearch", app.itemBrowseSearchBuf, sizeof(app.itemBrowseSearchBuf),
-                                     ImGuiInputTextFlags_EnterReturnsTrue))
-                    app.itemBrowseFilterDirty = true;
-                ImGui::SameLine();
-                if (ImGui::Button("Apply##itembrowse", ImVec2(-1, 0)))
-                    app.itemBrowseFilterDirty = true;
+            ItemBrowserPanel::DrawContext ibCtx;
+            ibCtx.isWoWLoaded            = app.isWoWLoaded;
+            ibCtx.isDBReady              = app.initDB;
+            ibCtx.items                  = &items;
+            ibCtx.itemBrowseFiltered     = &app.itemBrowseFiltered;
+            ibCtx.itemBrowseFilterDirty  = &app.itemBrowseFilterDirty;
+            ibCtx.itemBrowseSearchBuf    = app.itemBrowseSearchBuf;
+            ibCtx.itemBrowseSearchBufSize = sizeof(app.itemBrowseSearchBuf);
+            ibCtx.rebuildItemBrowseFilter = [] { rebuildItemBrowseFilter(); };
+            ibCtx.loadItemModel          = [](unsigned int id) { loadItemModel(id); };
 
-                if (app.itemBrowseFilterDirty)
-                    rebuildItemBrowseFilter();
-
-                ImGui::Text("%d items", static_cast<int>(app.itemBrowseFiltered.size()));
-                ImGui::Separator();
-
-                ImGui::BeginChild("##ItemBrowseList", ImVec2(0, 0), ImGuiChildFlags_None);
-                ImGuiListClipper clipper;
-                clipper.Begin(static_cast<int>(app.itemBrowseFiltered.size()));
-                while (clipper.Step())
-                {
-                    for (int i = clipper.DisplayStart; i < clipper.DisplayEnd; ++i)
-                    {
-                        const auto& item = items.items[app.itemBrowseFiltered[i]];
-                        ImGui::PushID(static_cast<int>(app.itemBrowseFiltered[i]));
-                        ImVec4 qcol = getQualityColor(item.quality);
-                        ImGui::PushStyleColor(ImGuiCol_Text, qcol);
-                        std::string label = std::format("{} ({})", item.name, item.id);
-                        if (ImGui::Selectable(label.c_str()))
-                            loadItemModel(static_cast<unsigned int>(item.id));
-                        ImGui::PopStyleColor();
-                        ImGui::PopID();
-                    }
-                }
-                ImGui::EndChild();
-            }
+            ItemBrowserPanel::draw(ibCtx);
         }
         ImGui::End();
         }
