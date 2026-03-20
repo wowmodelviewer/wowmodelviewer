@@ -97,106 +97,11 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
-// ---- Globals --------------------------------------------------------------
-static OrbitCamera  g_camera;
-static Attachment*  g_root       = nullptr;
-static WoWModel*    g_selModel   = nullptr;
-static ViewportFBO  g_fbo;
-static AppSettings  g_settings;
-
-// Timing for animation tick
-static float        g_animTime   = 0.0f;
-static std::chrono::steady_clock::time_point g_lastTick;
-
-// FPS tracking
-static float        g_fps = 0.0f;
-static int          g_fpsFrameCount = 0;
-static float        g_fpsAccum = 0.0f;
-
-// ---- Game loading state ---------------------------------------------------
-static bool         g_isWoWLoaded  = false;
-static bool         g_initDB       = false;
-static std::string  g_loadStatus;            // status text shown in File Browser
-static std::atomic<float> g_loadProgress{0.0f}; // 0..1 progress bar fraction (atomic for thread safety)
-static bool         g_loadInProgress = false;
-
-// Async loading state
-static std::thread        g_loadThread;
-static std::mutex         g_loadStatusMutex;
-static std::atomic<bool>  g_loadThreadDone{false};
-static std::atomic<bool>  g_loadThreadSuccess{false};
-
-// ImGui folder-path input buffer
-static char         g_pathBuf[1024] = {};
-
-// Config selection state (ImGui modal replaces old single-choice dialog)
-static bool                            g_showConfigPopup = false;
-static std::vector<core::GameConfig>   g_pendingConfigs;
-static int                             g_selectedConfig  = 0;
-
-// Menu bar / modal state
-static bool g_showAboutDialog    = false;
-static bool g_showLanguageDialog = false;
-
-// ---- Panel visibility (View menu toggles) ---------------------------------
-static bool g_showCharViewer     = true;
-static bool g_showViewport       = true;
-static bool g_showFileBrowser    = true;
-static bool g_showAnimation      = true;
-static bool g_showViewportOpts   = true;
-static bool g_showNpcBrowser     = true;
-static bool g_showItemBrowser    = true;
-static bool g_showExport         = true;
-static bool g_showScreenshot     = true;
-static bool g_showPresets        = true;
-static bool g_showLog            = true;
-static bool g_showSettings       = false;
-static bool g_showMounts         = false;
-static bool g_showItemSets       = false;
-
-static GLFWwindow* g_window = nullptr;
-
-// ---- Font system ----------------------------------------------------------
+// ---- Supporting types -----------------------------------------------------
 struct FontEntry {
     std::string name;
     std::string path;  // absolute path to .ttf
 };
-static std::vector<FontEntry>  g_availableFonts;  // discovered fonts
-static bool                    g_fontsDirty = false; // rebuild atlas next frame
-static float                   g_dpiScale = 1.0f;
-
-// ---- URL Import state -----------------------------------------------------
-static std::vector<ImporterPlugin*> g_importers;
-static bool         g_showImportDialog = false;
-static char         g_importUrlBuf[1024] = {};
-static std::string  g_importStatus;
-static bool         g_importPopupJustOpened = false;
-
-// ---- Folder Picker state (ImGui-based) ------------------------------------
-static bool                          g_showFolderPicker = false;
-static std::filesystem::path         g_folderPickerCurrent;
-static std::vector<std::filesystem::path> g_folderPickerEntries;
-static bool                          g_folderPickerNeedsRefresh = true;
-
-// ---- File Browser ---------------------------------------------------------
-// Extracted to Panels/FileBrowserPanel.h/.cpp
-static bool                   g_isModel = false;
-static bool                   g_isChar  = false;
-
-// ---- Animation control state ----------------------------------------------
-using AnimEntry = CharacterViewerPanel::AnimEntry;
-
-static std::vector<AnimEntry>  g_animEntries;
-static int                     g_selectedAnimCombo = 0;
-static float                   g_animSpeed = 1.0f;
-static bool                    g_autoAnimate = true;
-
-// Secondary / mouth / loop state
-static int                     g_selectedSecondaryAnim = -1;
-static int                     g_selectedMouthAnim = -1;
-static float                   g_mouthSpeed = 1.0f;
-static bool                    g_lockAnims = true;
-static int                     g_loopCount = 0;
 
 struct SkinEntry
 {
@@ -207,34 +112,11 @@ struct SkinEntry
     std::set<int> creatureGeosetData;
 };
 
-static std::vector<SkinEntry>  g_skinEntries;
-static int                     g_selectedSkin = -1;
-static int                     g_blpSkin[3] = {-1, -1, -1};
-
-// ---- Character control state ----------------------------------------------
-using CustomizationOption = CharacterViewerPanel::CustomizationOption;
-
-static std::vector<CustomizationOption> g_customizationOptions;
-
-// ---- Equipment popup state ------------------------------------------------
-static char                   g_equipSearchBuf[256] = {};
-static int                    g_equipSlotToEdit = -1;
-static bool                   g_equipPopupJustOpened = false;
-static std::vector<size_t>    g_equipFilteredItems; // indices into items.items
-static int                    g_equipSlotLevels[NUM_CHAR_SLOTS] = {};
-
-// ---- Item Set / Start Outfit state ----------------------------------------
 struct ItemSetEntry
 {
     int id;
     std::string name;
 };
-
-static std::vector<ItemSetEntry>  g_itemSets;
-static bool                       g_itemSetsBuilt = false;
-static char                       g_itemSetSearchBuf[256] = {};
-static std::vector<size_t>        g_itemSetFiltered; // indices into g_itemSets
-static bool                       g_itemSetFilterDirty = true;
 
 struct StartOutfitEntry
 {
@@ -242,14 +124,6 @@ struct StartOutfitEntry
     std::string name; // class name
 };
 
-static std::vector<StartOutfitEntry> g_startOutfits;
-static bool                          g_startOutfitsBuilt = false;
-static char                          g_startOutfitSearchBuf[256] = {};
-static std::vector<size_t>           g_startOutfitFiltered; // indices into g_startOutfits
-static bool                          g_startOutfitFilterDirty = true;
-
-
-// ---- Model Control state --------------------------------------------------
 struct GeosetEntry
 {
     size_t index;     // index into model->geosets[]
@@ -264,8 +138,6 @@ struct GeosetGroupEntry
     std::vector<GeosetEntry> geosets;
 };
 
-static std::vector<GeosetGroupEntry> g_geosetGroups;
-
 struct ParticleColorState
 {
     bool enabled = false;
@@ -273,65 +145,180 @@ struct ParticleColorState
     bool hasSet[3] = {};        // which color IDs (11,12,13) are present on model
 };
 
-static ParticleColorState g_pcrState;
-
-// ---- Screenshot state -----------------------------------------------------
-static char g_screenshotPath[512] = "screenshot.png";
-static std::string g_screenshotStatus;
-
-// ---- Save/Load Character Preset state -------------------------------------
-static char g_presetPath[512] = "userSettings/preset.ini";
-static std::string g_presetStatus;
-
-// ---- Character Browser / Viewer state moved to Panels/CharacterViewerPanel ----
-
-// ---- NPC Browser state ----------------------------------------------------
-static char g_npcSearchBuf[256] = {};
-static std::vector<size_t> g_npcFiltered; // indices into npcs
-static bool g_npcFilterDirty = true;
-
-// ---- Item Browser state ---------------------------------------------------
-static char g_itemBrowseSearchBuf[256] = {};
-static std::vector<size_t> g_itemBrowseFiltered; // indices into items.items
-static bool g_itemBrowseFilterDirty = true;
-
-// ---- Export state ---------------------------------------------------------
-static std::vector<ExporterPlugin*> g_exporters;
-static int                          g_selectedExporter = 0;
-static char                         g_exportPath[512] = "export";
-static std::string                  g_exportStatus;
-static std::vector<char>            g_exportAnimChecked; // per-anim checkbox state (char to avoid vector<bool> proxy)
-
-// ---- Mount state ----------------------------------------------------------
 struct MountEntry
 {
     int         displayID;  // CreatureDisplayInfoID (>0 for DB mounts, -1 for "None")
     std::string name;
 };
 
-static std::vector<MountEntry>   g_mountList;        // built from MountXDisplay DB
-static std::vector<GameFile*>    g_creatureModels;   // all creature/*.m2 files
-static std::vector<std::string>  g_creatureModelNames;
-static bool                      g_mountListBuilt = false;
-static bool                      g_isMounted = false;
-static char                      g_mountSearchBuf[256] = {};
-static int                       g_mountTab = 0;      // 0 = Player Mounts, 1 = Creature Models
-static std::vector<size_t>       g_mountFiltered;     // filtered indices into g_mountList or g_creatureModels
-static bool                      g_mountFilterDirty = true;
+using AnimEntry = CharacterViewerPanel::AnimEntry;
+using CustomizationOption = CharacterViewerPanel::CustomizationOption;
 
-// ---- Log viewer state -----------------------------------------------------
-static std::vector<std::string>  g_logLines;
-static bool                      g_logAutoScroll = true;
-static bool                      g_logNeedsReload = true;
+// ---- Consolidated application state ---------------------------------------
+struct AppState
+{
+    // Scene core
+    OrbitCamera camera;
+    Attachment* root = nullptr;
+    WoWModel* selModel = nullptr;
+    ViewportFBO fbo;
+    AppSettings settings;
+    GLFWwindow* window = nullptr;
 
-// ---- Canvas size override -------------------------------------------------
-static bool g_useCanvasOverride = false;
-static int  g_canvasWidth  = 1920;
-static int  g_canvasHeight = 1080;
+    // Timing / FPS
+    float animTime = 0.0f;
+    std::chrono::steady_clock::time_point lastTick;
+    float fps = 0.0f;
+    int fpsFrameCount = 0;
+    float fpsAccum = 0.0f;
 
-// ---- Gradient background --------------------------------------------------
+    // Game loading
+    bool isWoWLoaded = false;
+    bool initDB = false;
+    std::string loadStatus;
+    std::atomic<float> loadProgress{0.0f};
+    bool loadInProgress = false;
+    std::thread loadThread;
+    std::mutex loadStatusMutex;
+    std::atomic<bool> loadThreadDone{false};
+    std::atomic<bool> loadThreadSuccess{false};
+    char pathBuf[1024] = {};
+    bool showConfigPopup = false;
+    std::vector<core::GameConfig> pendingConfigs;
+    int selectedConfig = 0;
 
-// ---- Background colour palette --------------------------------------------
+    // Dialog visibility
+    bool showAboutDialog = false;
+    bool showLanguageDialog = false;
+
+    // Panel visibility (View menu toggles)
+    bool showCharViewer = true;
+    bool showViewport = true;
+    bool showFileBrowser = true;
+    bool showAnimation = true;
+    bool showViewportOpts = true;
+    bool showNpcBrowser = true;
+    bool showItemBrowser = true;
+    bool showExport = true;
+    bool showScreenshot = true;
+    bool showPresets = true;
+    bool showLog = true;
+    bool showSettings = false;
+    bool showMounts = false;
+    bool showItemSets = false;
+
+    // Font system
+    std::vector<FontEntry> availableFonts;
+    bool fontsDirty = false;
+    float dpiScale = 1.0f;
+
+    // URL Import
+    std::vector<ImporterPlugin*> importers;
+    bool showImportDialog = false;
+    char importUrlBuf[1024] = {};
+    std::string importStatus;
+    bool importPopupJustOpened = false;
+
+    // Folder Picker (ImGui-based)
+    bool showFolderPicker = false;
+    std::filesystem::path folderPickerCurrent;
+    std::vector<std::filesystem::path> folderPickerEntries;
+    bool folderPickerNeedsRefresh = true;
+
+    // Model flags
+    bool isModel = false;
+    bool isChar = false;
+
+    // Animation control
+    std::vector<AnimEntry> animEntries;
+    int selectedAnimCombo = 0;
+    float animSpeed = 1.0f;
+    bool autoAnimate = true;
+    int selectedSecondaryAnim = -1;
+    int selectedMouthAnim = -1;
+    float mouthSpeed = 1.0f;
+    bool lockAnims = true;
+    int loopCount = 0;
+    std::vector<SkinEntry> skinEntries;
+    int selectedSkin = -1;
+    int blpSkin[3] = {-1, -1, -1};
+
+    // Character customization
+    std::vector<CustomizationOption> customizationOptions;
+
+    // Equipment popup
+    char equipSearchBuf[256] = {};
+    int equipSlotToEdit = -1;
+    bool equipPopupJustOpened = false;
+    std::vector<size_t> equipFilteredItems;
+    int equipSlotLevels[NUM_CHAR_SLOTS] = {};
+
+    // Item Sets
+    std::vector<ItemSetEntry> itemSets;
+    bool itemSetsBuilt = false;
+    char itemSetSearchBuf[256] = {};
+    std::vector<size_t> itemSetFiltered;
+    bool itemSetFilterDirty = true;
+
+    // Start Outfits
+    std::vector<StartOutfitEntry> startOutfits;
+    bool startOutfitsBuilt = false;
+    char startOutfitSearchBuf[256] = {};
+    std::vector<size_t> startOutfitFiltered;
+    bool startOutfitFilterDirty = true;
+
+    // Model control
+    std::vector<GeosetGroupEntry> geosetGroups;
+    ParticleColorState pcrState;
+
+    // Screenshot
+    char screenshotPath[512] = "screenshot.png";
+    std::string screenshotStatus;
+    bool useCanvasOverride = false;
+    int canvasWidth = 1920;
+    int canvasHeight = 1080;
+
+    // Presets
+    char presetPath[512] = "userSettings/preset.ini";
+    std::string presetStatus;
+
+    // NPC Browser
+    char npcSearchBuf[256] = {};
+    std::vector<size_t> npcFiltered;
+    bool npcFilterDirty = true;
+
+    // Item Browser
+    char itemBrowseSearchBuf[256] = {};
+    std::vector<size_t> itemBrowseFiltered;
+    bool itemBrowseFilterDirty = true;
+
+    // Export
+    std::vector<ExporterPlugin*> exporters;
+    int selectedExporter = 0;
+    char exportPath[512] = "export";
+    std::string exportStatus;
+    std::vector<char> exportAnimChecked;
+
+    // Mounts
+    std::vector<MountEntry> mountList;
+    std::vector<GameFile*> creatureModels;
+    std::vector<std::string> creatureModelNames;
+    bool mountListBuilt = false;
+    bool isMounted = false;
+    char mountSearchBuf[256] = {};
+    int mountTab = 0;
+    std::vector<size_t> mountFiltered;
+    bool mountFilterDirty = true;
+
+    // Log viewer
+    std::vector<std::string> logLines;
+    bool logAutoScroll = true;
+    bool logNeedsReload = true;
+};
+
+static AppState app;
+
+// ---- Background colour palette (constant data) ---------------------------
 static glm::vec3 g_bgPalette[] = {
     {0.22f, 0.22f, 0.22f},   // Dark gray (default)
     {0.0f,  0.0f,  0.0f},    // Black
@@ -347,14 +334,14 @@ static constexpr int g_bgPaletteCount = sizeof(g_bgPalette) / sizeof(g_bgPalette
 // ---- Helpers --------------------------------------------------------------
 static void reloadLogFile()
 {
-    g_logLines.clear();
+    app.logLines.clear();
     std::ifstream file("userSettings/log_imgui.txt");
     if (!file.is_open())
         return;
     std::string line;
     while (std::getline(file, line))
-        g_logLines.push_back(line);
-    g_logNeedsReload = false;
+        app.logLines.push_back(line);
+    app.logNeedsReload = false;
 }
 
 static std::filesystem::path getApplicationDirPath()
@@ -371,11 +358,11 @@ static std::filesystem::path getApplicationDirPath()
 // ---- Folder Picker helpers ------------------------------------------------
 static void folderPickerRefresh()
 {
-    g_folderPickerEntries.clear();
+    app.folderPickerEntries.clear();
     namespace fs = std::filesystem;
     std::error_code ec;
 
-    if (g_folderPickerCurrent.empty())
+    if (app.folderPickerCurrent.empty())
     {
         // List drive roots on Windows
 #ifdef _WIN32
@@ -385,28 +372,28 @@ static void folderPickerRefresh()
             if (drives & (1u << i))
             {
                 std::string root = std::string(1, static_cast<char>('A' + i)) + ":\\";
-                g_folderPickerEntries.push_back(fs::path(root));
+                app.folderPickerEntries.push_back(fs::path(root));
             }
         }
 #else
-        g_folderPickerEntries.push_back(fs::path("/"));
+        app.folderPickerEntries.push_back(fs::path("/"));
 #endif
     }
     else
     {
-        for (auto& entry : fs::directory_iterator(g_folderPickerCurrent, fs::directory_options::skip_permission_denied, ec))
+        for (auto& entry : fs::directory_iterator(app.folderPickerCurrent, fs::directory_options::skip_permission_denied, ec))
         {
             if (entry.is_directory(ec))
-                g_folderPickerEntries.push_back(entry.path());
+                app.folderPickerEntries.push_back(entry.path());
         }
-        std::sort(g_folderPickerEntries.begin(), g_folderPickerEntries.end(),
+        std::sort(app.folderPickerEntries.begin(), app.folderPickerEntries.end(),
             [](const fs::path& a, const fs::path& b)
             {
                 return core::toLower(a.filename().string()) < core::toLower(b.filename().string());
             });
     }
 
-    g_folderPickerNeedsRefresh = false;
+    app.folderPickerNeedsRefresh = false;
 }
 
 static void openFolderPicker()
@@ -415,30 +402,30 @@ static void openFolderPicker()
     std::error_code ec;
 
     // Start from the current path buffer if it's a valid directory
-    fs::path startDir(g_pathBuf);
+    fs::path startDir(app.pathBuf);
     if (fs::is_directory(startDir, ec))
-        g_folderPickerCurrent = startDir;
+        app.folderPickerCurrent = startDir;
     else if (startDir.has_parent_path() && fs::is_directory(startDir.parent_path(), ec))
-        g_folderPickerCurrent = startDir.parent_path();
+        app.folderPickerCurrent = startDir.parent_path();
     else
-        g_folderPickerCurrent.clear(); // show drive roots
+        app.folderPickerCurrent.clear(); // show drive roots
 
-    g_folderPickerNeedsRefresh = true;
-    g_showFolderPicker = true;
+    app.folderPickerNeedsRefresh = true;
+    app.showFolderPicker = true;
 }
 
 
 // ---- Thread-safe load status helpers --------------------------------------
 static void setLoadStatus(const std::string& s)
 {
-    std::lock_guard<std::mutex> lock(g_loadStatusMutex);
-    g_loadStatus = s;
+    std::lock_guard<std::mutex> lock(app.loadStatusMutex);
+    app.loadStatus = s;
 }
 
 static std::string getLoadStatus()
 {
-    std::lock_guard<std::mutex> lock(g_loadStatusMutex);
-    return g_loadStatus;
+    std::lock_guard<std::mutex> lock(app.loadStatusMutex);
+    return app.loadStatus;
 }
 
 // ---- Support-file download (listfile.csv, extraEncryptionKeys.csv) --------
@@ -524,7 +511,7 @@ static void initDatabase()
     const std::string currentVersion = GAMEDIRECTORY.version();
     bool cacheValid = false;
 
-    const bool enableDbCache = g_settings.enableDbCache;
+    const bool enableDbCache = app.settings.enableDbCache;
 
     std::error_code ec;
     if (enableDbCache &&
@@ -569,7 +556,7 @@ static void initDatabase()
     LOG_INFO << "Attempting on-demand DBD-based database init from" << dbdDir.string();
     if (!GAMEDATABASE.initFromDBD(dbdDir.string(), currentVersion))
     {
-        g_initDB = false;
+        app.initDB = false;
         LOG_ERROR << "Database initialization failed!";
         setLoadStatus("Database initialization failed!");
         fs::remove(cachePath, ec);
@@ -586,30 +573,30 @@ static void initDatabase()
     }
 
     LOG_INFO << "Database initialization succeeded.";
-    g_loadProgress = 0.60f;
+    app.loadProgress = 0.60f;
 
     LOG_INFO << "initDatabase: CharTexture::initRegions...";
     CharTexture::initRegions();
-    g_loadProgress = 0.65f;
+    app.loadProgress = 0.65f;
 
     LOG_INFO << "initDatabase: RaceInfos::init...";
     RaceInfos::init();
-    g_loadProgress = 0.70f;
+    app.loadProgress = 0.70f;
 
-    g_initDB = true;
+    app.initDB = true;
 
     // TODO: Creature table in 12.0.x no longer has DisplayID � needs
     //       CreatureDisplayInfo join (like wow.export).  Disabled for now.
     LOG_INFO << "initDatabase: skipping Creature table (disabled).";
 
-    g_loadProgress = 0.80f;
+    app.loadProgress = 0.80f;
 
     // TODO: Item/ItemSparse loading disabled while focusing on base character
     //       customisation.  Re-enable once WDCReader string resolution is
     //       verified stable for large multi-section DB2 files.
     LOG_INFO << "initDatabase: skipping Item/ItemSparse loading (disabled).";
 
-    g_loadProgress = 0.90f;
+    app.loadProgress = 0.90f;
     LOG_INFO << "Finished initiating database files.";
 }
 
@@ -617,7 +604,7 @@ static void initDatabase()
 // Called on the background thread to perform heavy CASC / listfile / DB work.
 static void loadWoW(const core::GameConfig& config)
 {
-    g_loadProgress = 0.0f;
+    app.loadProgress = 0.0f;
     setLoadStatus("Opening CASC storage...");
 
     if (!GAMEDIRECTORY.setConfig(config))
@@ -626,12 +613,12 @@ static void loadWoW(const core::GameConfig& config)
                   << GAMEDIRECTORY.lastError() << ").";
         setLoadStatus("Failed to open CASC storage (error "
                        + std::to_string(GAMEDIRECTORY.lastError()) + ").");
-        g_loadThreadDone = true;
+        app.loadThreadDone = true;
         return;
     }
 
     LOG_INFO << "Major version: " << GAMEDIRECTORY.majorVersion();
-    g_loadProgress = 0.05f;
+    app.loadProgress = 0.05f;
 
     // Set the config folder used for CSV data files, listfile paths, etc.
     const std::string baseConfigFolder = "games/wow/";
@@ -640,30 +627,30 @@ static void loadWoW(const core::GameConfig& config)
 
     // Load file list from listfile.csv
     setLoadStatus("Loading file list...");
-    g_loadProgress = 0.10f;
+    app.loadProgress = 0.10f;
     GAMEDIRECTORY.setProgressCallback([](int current, int total) {
         if (total > 0)
-            g_loadProgress = 0.10f + 0.40f * static_cast<float>(current) / static_cast<float>(total);
+            app.loadProgress = 0.10f + 0.40f * static_cast<float>(current) / static_cast<float>(total);
     });
     GAMEDIRECTORY.initFromListfile("../../listfile.csv");
     GAMEDIRECTORY.setProgressCallback(nullptr);
-    g_loadProgress = 0.50f;
+    app.loadProgress = 0.50f;
 
     // Init database
     setLoadStatus("Initializing database...");
-    g_loadProgress = 0.55f;
+    app.loadProgress = 0.55f;
     initDatabase();
 
-    if (!g_initDB)
+    if (!app.initDB)
     {
-        g_loadThreadDone = true;
+        app.loadThreadDone = true;
         return;
     }
 
-    g_loadProgress = 1.0f;
+    app.loadProgress = 1.0f;
     setLoadStatus("World of Warcraft loaded successfully.");
-    g_loadThreadSuccess = true;
-    g_loadThreadDone = true;
+    app.loadThreadSuccess = true;
+    app.loadThreadDone = true;
 }
 
 // ---- Async thread launcher / poller ---------------------------------------
@@ -672,7 +659,7 @@ static void loadWoWThreadFunc(core::GameConfig config)
     setLoadStatus("Checking support files...");
     if (!checkAndDownloadSupportFiles())
     {
-        g_loadThreadDone = true;
+        app.loadThreadDone = true;
         return;
     }
     loadWoW(config);
@@ -680,34 +667,34 @@ static void loadWoWThreadFunc(core::GameConfig config)
 
 static void launchLoadThread(const core::GameConfig& config)
 {
-    g_loadProgress = 0.0f;
-    g_loadThreadDone = false;
-    g_loadThreadSuccess = false;
-    g_loadInProgress = true;
+    app.loadProgress = 0.0f;
+    app.loadThreadDone = false;
+    app.loadThreadSuccess = false;
+    app.loadInProgress = true;
 
-    if (g_loadThread.joinable())
-        g_loadThread.join();
+    if (app.loadThread.joinable())
+        app.loadThread.join();
 
-    g_loadThread = std::thread(loadWoWThreadFunc, config);
+    app.loadThread = std::thread(loadWoWThreadFunc, config);
 }
 
 static void pollAsyncLoad()
 {
-    if (!g_loadInProgress || !g_loadThreadDone.load())
+    if (!app.loadInProgress || !app.loadThreadDone.load())
         return;
 
-    if (g_loadThread.joinable())
-        g_loadThread.join();
+    if (app.loadThread.joinable())
+        app.loadThread.join();
 
-    g_loadInProgress = false;
+    app.loadInProgress = false;
 
-    if (g_loadThreadSuccess.load())
+    if (app.loadThreadSuccess.load())
     {
-        g_isWoWLoaded = true;
+        app.isWoWLoaded = true;
         FileBrowserPanel::markDirty();
         LOG_INFO << "World of Warcraft loaded successfully. Version: "
                  << GAMEDIRECTORY.version() << " Locale: " << GAMEDIRECTORY.locale();
-        g_settings.save();
+        app.settings.save();
     }
 }
 
@@ -715,23 +702,23 @@ static void pollAsyncLoad()
 // the background loading thread (downloads, CASC, listfile, database).
 static void beginLoadWoW()
 {
-    if (g_isWoWLoaded || g_loadInProgress)
+    if (app.isWoWLoaded || app.loadInProgress)
         return;
 
     // Sync game path from the Settings panel input buffer
-    g_settings.gamePath = g_pathBuf;
+    app.settings.gamePath = app.pathBuf;
 
-    g_loadInProgress = true;
-    g_loadProgress = 0.0f;
+    app.loadInProgress = true;
+    app.loadProgress = 0.0f;
     setLoadStatus("Validating game path...");
 
     // Validate game path
     namespace fs = std::filesystem;
-    std::string path = g_settings.gamePath;
+    std::string path = app.settings.gamePath;
     if (path.empty() || !fs::is_directory(path))
     {
         setLoadStatus("Please set a valid WoW Data folder path in Options > Settings.");
-        g_loadInProgress = false;
+        app.loadInProgress = false;
         return;
     }
 
@@ -745,34 +732,34 @@ static void beginLoadWoW()
         if (lower.find("data\\") == std::string::npos && lower.find("data/") == std::string::npos)
             path += "Data\\";
     }
-    g_settings.gamePath = path;
+    app.settings.gamePath = path;
 
     // Init Game if needed
     if (!core::Game::instance().initDone())
-        core::Game::instance().init(new wow::WoWFolder(g_settings.gamePath), new wow::WoWDatabase());
+        core::Game::instance().init(new wow::WoWFolder(app.settings.gamePath), new wow::WoWDatabase());
 
     // Check available configs
-    g_pendingConfigs = GAMEDIRECTORY.configsFound();
+    app.pendingConfigs = GAMEDIRECTORY.configsFound();
 
-    if (g_pendingConfigs.empty())
+    if (app.pendingConfigs.empty())
     {
         LOG_ERROR << "No locale found in WoW folder.";
         setLoadStatus("No locale found in the WoW folder.");
-        g_loadInProgress = false;
+        app.loadInProgress = false;
         return;
     }
 
-    if (g_pendingConfigs.size() == 1)
+    if (app.pendingConfigs.size() == 1)
     {
         // Only one config � launch background loading thread
-        launchLoadThread(g_pendingConfigs[0]);
+        launchLoadThread(app.pendingConfigs[0]);
     }
     else
     {
         // Multiple configs � show selection popup
-        g_selectedConfig = 0;
-        g_showConfigPopup = true;
-        g_loadInProgress = false; // will resume after user picks
+        app.selectedConfig = 0;
+        app.showConfigPopup = true;
+        app.loadInProgress = false; // will resume after user picks
     }
 }
 
@@ -788,23 +775,23 @@ static std::string wstringToString(const std::wstring& ws)
 
 static void applySkin(WoWModel* model, int skinIndex)
 {
-    if (!model || skinIndex < 0 || skinIndex >= static_cast<int>(g_skinEntries.size()))
+    if (!model || skinIndex < 0 || skinIndex >= static_cast<int>(app.skinEntries.size()))
         return;
 
-    const auto& skin = g_skinEntries[skinIndex];
+    const auto& skin = app.skinEntries[skinIndex];
     model->setCreatureGeosetData(skin.creatureGeosetData);
     for (size_t i = 0; i < skin.count; ++i)
     {
         if (skin.tex[i])
             model->updateTextureList(skin.tex[i], skin.base + static_cast<int>(i));
     }
-    g_selectedSkin = skinIndex;
+    app.selectedSkin = skinIndex;
 }
 
 static WoWModel* getLoadedModel()
 {
-    if (!g_root) return nullptr;
-    auto* att = g_root->children.empty() ? nullptr : g_root->children[0];
+    if (!app.root) return nullptr;
+    auto* att = app.root->children.empty() ? nullptr : app.root->children[0];
     return att ? dynamic_cast<WoWModel*>(att->model()) : nullptr;
 }
 
@@ -828,17 +815,17 @@ static void resetCameraToModel(OrbitCamera& camera, const WoWModel* model)
 
 static void initAnimationControl(WoWModel* model)
 {
-    g_animEntries.clear();
-    g_skinEntries.clear();
-    g_selectedAnimCombo = 0;
-    g_selectedSkin = -1;
-    g_blpSkin[0] = g_blpSkin[1] = g_blpSkin[2] = -1;
-    g_animSpeed = 1.0f;
-    g_selectedSecondaryAnim = -1;
-    g_selectedMouthAnim = -1;
-    g_mouthSpeed = 1.0f;
-    g_lockAnims = true;
-    g_loopCount = 0;
+    app.animEntries.clear();
+    app.skinEntries.clear();
+    app.selectedAnimCombo = 0;
+    app.selectedSkin = -1;
+    app.blpSkin[0] = app.blpSkin[1] = app.blpSkin[2] = -1;
+    app.animSpeed = 1.0f;
+    app.selectedSecondaryAnim = -1;
+    app.selectedMouthAnim = -1;
+    app.mouthSpeed = 1.0f;
+    app.lockAnims = true;
+    app.loopCount = 0;
 
     if (!model || !model->animated || model->anims.empty())
         return;
@@ -856,16 +843,16 @@ static void initAnimationControl(WoWModel* model)
         else
             e.label = "Anim " + std::to_string(model->anims[i].animID) + " [" + std::to_string(i) + "]";
         e.animIndex = static_cast<int>(i);
-        g_animEntries.push_back(e);
+        app.animEntries.push_back(e);
 
         if (model->anims[i].animID == 0 && standIndex < 0) // ANIM_STAND == 0
-            standIndex = static_cast<int>(g_animEntries.size()) - 1;
+            standIndex = static_cast<int>(app.animEntries.size()) - 1;
     }
 
     if (standIndex >= 0)
-        g_selectedAnimCombo = standIndex;
+        app.selectedAnimCombo = standIndex;
 
-    int useAnim = (standIndex >= 0) ? g_animEntries[standIndex].animIndex : 0;
+    int useAnim = (standIndex >= 0) ? app.animEntries[standIndex].animIndex : 0;
     model->currentAnim = useAnim;
     model->animManager->SetAnim(0, useAnim, 0);
     model->animManager->SetSpeed(1.0f);
@@ -920,8 +907,8 @@ static void initAnimationControl(WoWModel* model)
                 if (geoId > 0) se.creatureGeosetData.insert(geoType + geoId);
             }
 
-            se.label = "Skin " + std::to_string(g_skinEntries.size());
-            g_skinEntries.push_back(se);
+            se.label = "Skin " + std::to_string(app.skinEntries.size());
+            app.skinEntries.push_back(se);
         }
     }
     else if (isItem)
@@ -960,20 +947,20 @@ static void initAnimationControl(WoWModel* model)
                 if (!se.tex[0]) continue;
                 se.base = TEXTURE_OBJECT_SKIN;
                 se.count = 1;
-                se.label = "Skin " + std::to_string(g_skinEntries.size());
-                g_skinEntries.push_back(se);
+                se.label = "Skin " + std::to_string(app.skinEntries.size());
+                app.skinEntries.push_back(se);
             }
         }
         } // if (idiTable && texFDTable && modFDTable)
     }
 
-    if (!g_skinEntries.empty())
+    if (!app.skinEntries.empty())
         applySkin(model, 0);
 }
 
 static void initCharacterControl(WoWModel* model)
 {
-    g_customizationOptions.clear();
+    app.customizationOptions.clear();
     if (!model) return;
 
     auto& cd = model->cd;
@@ -1061,7 +1048,7 @@ static void initCharacterControl(WoWModel* model)
             }
         }
 
-        g_customizationOptions.push_back(std::move(opt));
+        app.customizationOptions.push_back(std::move(opt));
     }
 }
 
@@ -1077,9 +1064,9 @@ static void applyParticleColors(WoWModel* model)
         for (int p = 0; p < 3; ++p)
         {
             pcs.push_back(glm::vec4(
-                g_pcrState.colors[s][p][0],
-                g_pcrState.colors[s][p][1],
-                g_pcrState.colors[s][p][2],
+                app.pcrState.colors[s][p][0],
+                app.pcrState.colors[s][p][1],
+                app.pcrState.colors[s][p][2],
                 1.0f));
         }
         model->particleColorReplacements.push_back(pcs);
@@ -1089,8 +1076,8 @@ static void applyParticleColors(WoWModel* model)
 
 static void initModelControl(WoWModel* model)
 {
-    g_geosetGroups.clear();
-    g_pcrState = {};
+    app.geosetGroups.clear();
+    app.pcrState = {};
 
     if (!model)
         return;
@@ -1106,8 +1093,8 @@ static void initModelControl(WoWModel* model)
             group.meshId = mesh;
             std::string groupName = WoWModel::getCGGroupName(static_cast<CharGeosets>(mesh));
             group.name = groupName.empty() ? std::to_string(mesh) : groupName;
-            meshToGroupIdx[mesh] = g_geosetGroups.size();
-            g_geosetGroups.push_back(std::move(group));
+            meshToGroupIdx[mesh] = app.geosetGroups.size();
+            app.geosetGroups.push_back(std::move(group));
         }
 
         GeosetEntry ge;
@@ -1115,15 +1102,15 @@ static void initModelControl(WoWModel* model)
         ge.id = model->geosets[i]->id;
         ge.label = std::format("{} [{}, {}, {}]", i, mesh,
                                model->geosets[i]->id % 100, model->geosets[i]->id);
-        g_geosetGroups[meshToGroupIdx[mesh]].geosets.push_back(ge);
+        app.geosetGroups[meshToGroupIdx[mesh]].geosets.push_back(ge);
     }
 
     // Detect available particle color replacement IDs
     for (uint pcid : model->replacableParticleColorIDs)
     {
-        if (pcid == 11) g_pcrState.hasSet[0] = true;
-        else if (pcid == 12) g_pcrState.hasSet[1] = true;
-        else if (pcid == 13) g_pcrState.hasSet[2] = true;
+        if (pcid == 11) app.pcrState.hasSet[0] = true;
+        else if (pcid == 12) app.pcrState.hasSet[1] = true;
+        else if (pcid == 13) app.pcrState.hasSet[2] = true;
     }
 }
 
@@ -1172,11 +1159,11 @@ static ImVec4 getQualityColor(int quality)
 
 static void rebuildEquipFilteredItems()
 {
-    g_equipFilteredItems.clear();
-    if (g_equipSlotToEdit < 0)
+    app.equipFilteredItems.clear();
+    if (app.equipSlotToEdit < 0)
         return;
 
-    std::string search = core::toLower(std::string(g_equipSearchBuf));
+    std::string search = core::toLower(std::string(app.equipSearchBuf));
     auto s = search.find_first_not_of(" \t\r\n");
     auto e = search.find_last_not_of(" \t\r\n");
     search = (s == std::string::npos) ? "" : search.substr(s, e - s + 1);
@@ -1186,21 +1173,21 @@ static void rebuildEquipFilteredItems()
         const auto& item = items.items[i];
         if (item.id == 0)
             continue;
-        if (!correctType(item.type, g_equipSlotToEdit))
+        if (!correctType(item.type, app.equipSlotToEdit))
             continue;
         if (!search.empty() && !core::containsIgnoreCase(item.name, search))
             continue;
-        g_equipFilteredItems.push_back(i);
+        app.equipFilteredItems.push_back(i);
     }
 }
 
 // ---- Item Set helpers -----------------------------------------------------
 static void buildItemSets()
 {
-    if (g_itemSetsBuilt)
+    if (app.itemSetsBuilt)
         return;
 
-    g_itemSets.clear();
+    app.itemSets.clear();
 
     const auto* itemSetTable = WOWDB.getTable("ItemSet");
     if (!itemSetTable) return;
@@ -1210,34 +1197,34 @@ static void buildItemSets()
         e.id = static_cast<int>(row.recordID());
         e.name = row.getString("Name_Lang");
         if (!e.name.empty())
-            g_itemSets.push_back(e);
+            app.itemSets.push_back(e);
     }
 
-    std::sort(g_itemSets.begin(), g_itemSets.end(),
+    std::sort(app.itemSets.begin(), app.itemSets.end(),
         [](const ItemSetEntry& a, const ItemSetEntry& b) { return a.name < b.name; });
 
-    g_itemSetsBuilt = true;
-    g_itemSetFilterDirty = true;
-    LOG_INFO << "Item sets loaded: " << g_itemSets.size();
+    app.itemSetsBuilt = true;
+    app.itemSetFilterDirty = true;
+    LOG_INFO << "Item sets loaded: " << app.itemSets.size();
 }
 
 static void rebuildItemSetFilter()
 {
-    g_itemSetFiltered.clear();
+    app.itemSetFiltered.clear();
 
-    std::string search = core::toLower(std::string(g_itemSetSearchBuf));
+    std::string search = core::toLower(std::string(app.itemSetSearchBuf));
     auto s = search.find_first_not_of(" \t\r\n");
     auto e = search.find_last_not_of(" \t\r\n");
     search = (s == std::string::npos) ? "" : search.substr(s, e - s + 1);
 
-    for (size_t i = 0; i < g_itemSets.size(); ++i)
+    for (size_t i = 0; i < app.itemSets.size(); ++i)
     {
-        if (!search.empty() && !core::containsIgnoreCase(g_itemSets[i].name, search))
+        if (!search.empty() && !core::containsIgnoreCase(app.itemSets[i].name, search))
             continue;
-        g_itemSetFiltered.push_back(i);
+        app.itemSetFiltered.push_back(i);
     }
 
-    g_itemSetFilterDirty = false;
+    app.itemSetFilterDirty = false;
 }
 
 static void tryToEquipItem(WoWModel* model, int id)
@@ -1263,16 +1250,16 @@ static void tryToEquipItem(WoWModel* model, int id)
     if (item)
     {
         item->setId(id);
-        g_equipSlotLevels[itemSlot] = 0;
+        app.equipSlotLevels[itemSlot] = 0;
     }
 }
 
 // ---- Start Outfit helpers -------------------------------------------------
 static void buildStartOutfits(WoWModel* model)
 {
-    g_startOutfits.clear();
-    g_startOutfitsBuilt = false;
-    g_startOutfitFilterDirty = true;
+    app.startOutfits.clear();
+    app.startOutfitsBuilt = false;
+    app.startOutfitFilterDirty = true;
 
     if (!model) return;
 
@@ -1298,34 +1285,34 @@ static void buildStartOutfits(WoWModel* model)
         e.name = className;
         e.id = static_cast<int>(row.recordID());
         if (!e.name.empty() && e.id > 0)
-            g_startOutfits.push_back(e);
+            app.startOutfits.push_back(e);
     }
 
-    std::sort(g_startOutfits.begin(), g_startOutfits.end(),
+    std::sort(app.startOutfits.begin(), app.startOutfits.end(),
         [](const StartOutfitEntry& a, const StartOutfitEntry& b) { return a.name < b.name; });
 
-    g_startOutfitsBuilt = true;
-    g_startOutfitFilterDirty = true;
-    LOG_INFO << "Start outfits loaded: " << g_startOutfits.size();
+    app.startOutfitsBuilt = true;
+    app.startOutfitFilterDirty = true;
+    LOG_INFO << "Start outfits loaded: " << app.startOutfits.size();
 }
 
 static void rebuildStartOutfitFilter()
 {
-    g_startOutfitFiltered.clear();
+    app.startOutfitFiltered.clear();
 
-    std::string search = core::toLower(std::string(g_startOutfitSearchBuf));
+    std::string search = core::toLower(std::string(app.startOutfitSearchBuf));
     auto s = search.find_first_not_of(" \t\r\n");
     auto e = search.find_last_not_of(" \t\r\n");
     search = (s == std::string::npos) ? "" : search.substr(s, e - s + 1);
 
-    for (size_t i = 0; i < g_startOutfits.size(); ++i)
+    for (size_t i = 0; i < app.startOutfits.size(); ++i)
     {
-        if (!search.empty() && !core::containsIgnoreCase(g_startOutfits[i].name, search))
+        if (!search.empty() && !core::containsIgnoreCase(app.startOutfits[i].name, search))
             continue;
-        g_startOutfitFiltered.push_back(i);
+        app.startOutfitFiltered.push_back(i);
     }
 
-    g_startOutfitFilterDirty = false;
+    app.startOutfitFilterDirty = false;
 }
 
 static void applyStartOutfit(WoWModel* model, int outfitId)
@@ -1345,7 +1332,7 @@ static void applyStartOutfit(WoWModel* model, int outfitId)
     // Reset all equipped items
     for (const auto it : *model)
         it->setId(0);
-    std::memset(g_equipSlotLevels, 0, sizeof(g_equipSlotLevels));
+    std::memset(app.equipSlotLevels, 0, sizeof(app.equipSlotLevels));
 
     for (unsigned i = 0; i < 24; ++i)
     {
@@ -1385,7 +1372,7 @@ static void applyItemSet(WoWModel* model, int setId)
     // Reset all equipped items
     for (const auto it : *model)
         it->setId(0);
-    std::memset(g_equipSlotLevels, 0, sizeof(g_equipSlotLevels));
+    std::memset(app.equipSlotLevels, 0, sizeof(app.equipSlotLevels));
 
     // Equip each item from the set.  WoWItem::setId() may throw
     // std::invalid_argument when downstream DB queries return empty strings
@@ -1414,44 +1401,44 @@ static void applyItemSet(WoWModel* model, int setId)
 // ---- Clear current model --------------------------------------------------
 static void clearModel()
 {
-    if (g_root)
+    if (app.root)
     {
-        g_root->delChildren();
-        g_root->setModel(nullptr);
+        app.root->delChildren();
+        app.root->setModel(nullptr);
     }
 
     TEXTUREMANAGER.clear();
-    g_isModel = false;
-    g_isChar = false;
+    app.isModel = false;
+    app.isChar = false;
 
-    g_selModel = nullptr;
-    g_animEntries.clear();
-    g_skinEntries.clear();
-    g_customizationOptions.clear();
-    g_geosetGroups.clear();
-    g_pcrState = {};
-    g_selectedAnimCombo = 0;
-    g_selectedSkin = -1;
-    g_animSpeed = 1.0f;
-    g_autoAnimate = true;
-    g_equipSlotToEdit = -1;
-    g_equipFilteredItems.clear();
-    g_equipSearchBuf[0] = '\0';
-    std::memset(g_equipSlotLevels, 0, sizeof(g_equipSlotLevels));
-    g_exportAnimChecked.clear();
-    g_exportStatus.clear();
-    g_isMounted = false;
-    g_startOutfits.clear();
-    g_startOutfitsBuilt = false;
-    g_startOutfitSearchBuf[0] = '\0';
-    g_startOutfitFiltered.clear();
-    g_startOutfitFilterDirty = true;
+    app.selModel = nullptr;
+    app.animEntries.clear();
+    app.skinEntries.clear();
+    app.customizationOptions.clear();
+    app.geosetGroups.clear();
+    app.pcrState = {};
+    app.selectedAnimCombo = 0;
+    app.selectedSkin = -1;
+    app.animSpeed = 1.0f;
+    app.autoAnimate = true;
+    app.equipSlotToEdit = -1;
+    app.equipFilteredItems.clear();
+    app.equipSearchBuf[0] = '\0';
+    std::memset(app.equipSlotLevels, 0, sizeof(app.equipSlotLevels));
+    app.exportAnimChecked.clear();
+    app.exportStatus.clear();
+    app.isMounted = false;
+    app.startOutfits.clear();
+    app.startOutfitsBuilt = false;
+    app.startOutfitSearchBuf[0] = '\0';
+    app.startOutfitFiltered.clear();
+    app.startOutfitFilterDirty = true;
 }
 
 // ---- Load a model from GameFile (ported from ModelViewer::LoadModel) -------
 static void loadModel(GameFile* file)
 {
-    if (!file || !g_root)
+    if (!file || !app.root)
         return;
 
     LOG_INFO << "Loading model: " << file->fullname();
@@ -1466,15 +1453,15 @@ static void loadModel(GameFile* file)
         return;
     }
 
-    g_root->addChild(model, 0, -1);
+    app.root->addChild(model, 0, -1);
 
     // Determine if this is a character model
     const std::string fn = file->fullname();
-    g_isChar = (core::startsWithIgnoreCase(fn, "char") ||
+    app.isChar = (core::startsWithIgnoreCase(fn, "char") ||
                 core::startsWithIgnoreCase(fn, "alternate/char") ||
                 core::startsWithIgnoreCase(fn, "alternate\\char"));
 
-    if (g_isChar)
+    if (app.isChar)
     {
         model->addChild(new WoWItem(CS_SHIRT));
         model->addChild(new WoWItem(CS_HEAD));
@@ -1500,16 +1487,16 @@ static void loadModel(GameFile* file)
         model->modelType = MT_NORMAL;
     }
 
-    g_isModel = true;
+    app.isModel = true;
 
-    g_selModel = model;
+    app.selModel = model;
     initAnimationControl(model);
     initModelControl(model);
-    if (g_isChar)
+    if (app.isChar)
         initCharacterControl(model);
 
     // Reset camera to frame the model
-    resetCameraToModel(g_camera, model);
+    resetCameraToModel(app.camera, model);
 
     LOG_INFO << "Model loaded: " << model->name();
 }
@@ -1517,17 +1504,17 @@ static void loadModel(GameFile* file)
 // ---- Screenshot (capture FBO to PNG) --------------------------------------
 static void captureScreenshot(const char* path)
 {
-    if (g_fbo.width <= 0 || g_fbo.height <= 0 || !g_fbo.fbo)
+    if (app.fbo.width <= 0 || app.fbo.height <= 0 || !app.fbo.fbo)
     {
-        g_screenshotStatus = "No viewport to capture.";
+        app.screenshotStatus = "No viewport to capture.";
         return;
     }
 
-    const int w = g_fbo.width;
-    const int h = g_fbo.height;
+    const int w = app.fbo.width;
+    const int h = app.fbo.height;
     std::vector<unsigned char> pixels(static_cast<size_t>(w) * h * 4);
 
-    glBindFramebuffer(GL_FRAMEBUFFER, g_fbo.fbo);
+    glBindFramebuffer(GL_FRAMEBUFFER, app.fbo.fbo);
     glReadPixels(0, 0, w, h, GL_RGBA, GL_UNSIGNED_BYTE, pixels.data());
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
@@ -1545,12 +1532,12 @@ static void captureScreenshot(const char* path)
 
     if (stbi_write_png(path, w, h, 4, pixels.data(), static_cast<int>(rowBytes)))
     {
-        g_screenshotStatus = std::string("Saved: ") + path;
+        app.screenshotStatus = std::string("Saved: ") + path;
         LOG_INFO << "Screenshot saved to " << path;
     }
     else
     {
-        g_screenshotStatus = std::string("Failed to write: ") + path;
+        app.screenshotStatus = std::string("Failed to write: ") + path;
         LOG_ERROR << "Screenshot failed: " << path;
     }
 }
@@ -1559,9 +1546,9 @@ static void captureScreenshot(const char* path)
 static void saveCharacterPreset(const char* path)
 {
     WoWModel* model = getLoadedModel();
-    if (!model || !g_isChar)
+    if (!model || !app.isChar)
     {
-        g_presetStatus = "No character model loaded.";
+        app.presetStatus = "No character model loaded.";
         return;
     }
 
@@ -1581,7 +1568,7 @@ static void saveCharacterPreset(const char* path)
 
     // Customization choices
     int optIdx = 0;
-    for (const auto& opt : g_customizationOptions)
+    for (const auto& opt : app.customizationOptions)
     {
         std::string key = "Customization/" + std::to_string(optIdx);
         ini.setValue(key + "_OptionID", static_cast<int>(opt.optionID));
@@ -1597,26 +1584,26 @@ static void saveCharacterPreset(const char* path)
         WoWItem* witem = model->getItem(static_cast<CharSlots>(s));
         std::string key = "Equipment/" + std::to_string(s);
         ini.setValue(key + "_ID", witem ? static_cast<int>(witem->id()) : 0);
-        ini.setValue(key + "_Level", g_equipSlotLevels[s]);
+        ini.setValue(key + "_Level", app.equipSlotLevels[s]);
     }
 
     ini.sync();
-    g_presetStatus = std::string("Preset saved: ") + path;
+    app.presetStatus = std::string("Preset saved: ") + path;
     LOG_INFO << "Character preset saved to " << path;
 }
 
 static void loadCharacterPreset(const char* path)
 {
     WoWModel* model = getLoadedModel();
-    if (!model || !g_isChar)
+    if (!model || !app.isChar)
     {
-        g_presetStatus = "No character model loaded.";
+        app.presetStatus = "No character model loaded.";
         return;
     }
 
     if (!std::filesystem::exists(path))
     {
-        g_presetStatus = std::string("File not found: ") + path;
+        app.presetStatus = std::string("File not found: ") + path;
         return;
     }
 
@@ -1646,7 +1633,7 @@ static void loadCharacterPreset(const char* path)
         cd.set(optionID, choiceID);
 
         // Update the UI state
-        for (auto& opt : g_customizationOptions)
+        for (auto& opt : app.customizationOptions)
         {
             if (opt.optionID == optionID)
             {
@@ -1676,20 +1663,20 @@ static void loadCharacterPreset(const char* path)
             witem->setId(itemId);
             if (level > 0) witem->setLevel(level);
         }
-        g_equipSlotLevels[s] = level;
+        app.equipSlotLevels[s] = level;
     }
 
     model->refresh();
-    g_presetStatus = std::string("Preset loaded: ") + path;
+    app.presetStatus = std::string("Preset loaded: ") + path;
     LOG_INFO << "Character preset loaded from " << path;
 }
 
 // ---- NPC Browser helpers --------------------------------------------------
 static void rebuildNpcFilter()
 {
-    g_npcFiltered.clear();
+    app.npcFiltered.clear();
 
-    std::string search = core::toLower(std::string(g_npcSearchBuf));
+    std::string search = core::toLower(std::string(app.npcSearchBuf));
     auto s = search.find_first_not_of(" \t\r\n");
     auto e = search.find_last_not_of(" \t\r\n");
     search = (s == std::string::npos) ? "" : search.substr(s, e - s + 1);
@@ -1700,10 +1687,10 @@ static void rebuildNpcFilter()
         if (npc.model == 0) continue;
         if (!search.empty() && !core::containsIgnoreCase(npc.name, search))
             continue;
-        g_npcFiltered.push_back(i);
+        app.npcFiltered.push_back(i);
     }
 
-    g_npcFilterDirty = false;
+    app.npcFilterDirty = false;
 }
 
 static void loadNPC(unsigned int creatureID)
@@ -1749,14 +1736,14 @@ static void loadNPC(unsigned int creatureID)
                 cdiRow.getUInt("TextureVariationFileDataID2"),
                 cdiRow.getUInt("TextureVariationFileDataID3")
             };
-            for (size_t i = 0; i < g_skinEntries.size(); ++i)
+            for (size_t i = 0; i < app.skinEntries.size(); ++i)
             {
                 bool match = true;
                 for (size_t t = 0; t < 3 && match; ++t)
                 {
-                    if (g_skinEntries[i].tex[t])
+                    if (app.skinEntries[i].tex[t])
                     {
-                        int fdid = g_skinEntries[i].tex[t]->fileDataId();
+                        int fdid = app.skinEntries[i].tex[t]->fileDataId();
                         if (texFDIDs[t] != 0)
                             match = (fdid == static_cast<int>(texFDIDs[t]));
                         else
@@ -1821,9 +1808,9 @@ static void loadNPC(unsigned int creatureID)
 // ---- Item Browser helpers -------------------------------------------------
 static void rebuildItemBrowseFilter()
 {
-    g_itemBrowseFiltered.clear();
+    app.itemBrowseFiltered.clear();
 
-    std::string search = core::toLower(std::string(g_itemBrowseSearchBuf));
+    std::string search = core::toLower(std::string(app.itemBrowseSearchBuf));
     auto s = search.find_first_not_of(" \t\r\n");
     auto e = search.find_last_not_of(" \t\r\n");
     search = (s == std::string::npos) ? "" : search.substr(s, e - s + 1);
@@ -1834,10 +1821,10 @@ static void rebuildItemBrowseFilter()
         if (item.id == 0) continue;
         if (!search.empty() && !core::containsIgnoreCase(item.name, search))
             continue;
-        g_itemBrowseFiltered.push_back(i);
+        app.itemBrowseFiltered.push_back(i);
     }
 
-    g_itemBrowseFilterDirty = false;
+    app.itemBrowseFilterDirty = false;
 }
 
 static void loadItemModel(unsigned int itemId)
@@ -1919,12 +1906,12 @@ static void loadItemModel(unsigned int itemId)
 // ---- Mount helpers --------------------------------------------------------
 static void buildMountList()
 {
-    if (g_mountListBuilt || !g_isWoWLoaded || !g_initDB)
+    if (app.mountListBuilt || !app.isWoWLoaded || !app.initDB)
         return;
 
-    g_mountList.clear();
-    g_creatureModels.clear();
-    g_creatureModelNames.clear();
+    app.mountList.clear();
+    app.creatureModels.clear();
+    app.creatureModelNames.clear();
 
     // Player mounts from MountXDisplay DB
     const auto* mountTable = WOWDB.getTable("Mount");
@@ -1937,82 +1924,82 @@ static void buildMountList()
         MountEntry me;
         me.displayID = static_cast<int>(mxdRow.getUInt("CreatureDisplayInfoID"));
         me.name = mountRow ? mountRow.getString("Name_Lang") : "";
-        g_mountList.push_back(me);
+        app.mountList.push_back(me);
     }
-    std::sort(g_mountList.begin(), g_mountList.end(),
+    std::sort(app.mountList.begin(), app.mountList.end(),
         [](const MountEntry& a, const MountEntry& b) { return a.name < b.name; });
-    LOG_INFO << "Mount list: " << g_mountList.size() << " player mounts.";
+    LOG_INFO << "Mount list: " << app.mountList.size() << " player mounts.";
 
     // All creature/*.m2 files
     std::vector<GameFile*> files;
     GAMEDIRECTORY.getFilesForFolder(files, std::string("creature/"), std::string("m2"));
     for (auto* gf : files)
     {
-        g_creatureModels.push_back(gf);
+        app.creatureModels.push_back(gf);
         // Remove "creature/" prefix for readability
         std::string n = gf->fullname();
         if (n.size() > 9)
             n = n.substr(9);
-        g_creatureModelNames.push_back(n);
+        app.creatureModelNames.push_back(n);
     }
     // Sort alphabetically (keeping parallel arrays in sync)
-    if (!g_creatureModels.empty())
+    if (!app.creatureModels.empty())
     {
-        std::vector<size_t> indices(g_creatureModels.size());
+        std::vector<size_t> indices(app.creatureModels.size());
         for (size_t i = 0; i < indices.size(); ++i) indices[i] = i;
         std::sort(indices.begin(), indices.end(),
-            [&](size_t a, size_t b) { return g_creatureModelNames[a] < g_creatureModelNames[b]; });
-        std::vector<GameFile*> sortedFiles(g_creatureModels.size());
-        std::vector<std::string> sortedNames(g_creatureModelNames.size());
+            [&](size_t a, size_t b) { return app.creatureModelNames[a] < app.creatureModelNames[b]; });
+        std::vector<GameFile*> sortedFiles(app.creatureModels.size());
+        std::vector<std::string> sortedNames(app.creatureModelNames.size());
         for (size_t i = 0; i < indices.size(); ++i)
         {
-            sortedFiles[i] = g_creatureModels[indices[i]];
-            sortedNames[i] = g_creatureModelNames[indices[i]];
+            sortedFiles[i] = app.creatureModels[indices[i]];
+            sortedNames[i] = app.creatureModelNames[indices[i]];
         }
-        g_creatureModels = std::move(sortedFiles);
-        g_creatureModelNames = std::move(sortedNames);
+        app.creatureModels = std::move(sortedFiles);
+        app.creatureModelNames = std::move(sortedNames);
     }
-    LOG_INFO << "Creature models: " << g_creatureModels.size() << " files.";
+    LOG_INFO << "Creature models: " << app.creatureModels.size() << " files.";
 
-    g_mountListBuilt = true;
-    g_mountFilterDirty = true;
+    app.mountListBuilt = true;
+    app.mountFilterDirty = true;
 }
 
 static void rebuildMountFilter()
 {
-    g_mountFiltered.clear();
+    app.mountFiltered.clear();
 
-    std::string search = core::toLower(std::string(g_mountSearchBuf));
+    std::string search = core::toLower(std::string(app.mountSearchBuf));
     auto s = search.find_first_not_of(" \t\r\n");
     auto e = search.find_last_not_of(" \t\r\n");
     search = (s == std::string::npos) ? "" : search.substr(s, e - s + 1);
 
-    if (g_mountTab == 0)
+    if (app.mountTab == 0)
     {
-        for (size_t i = 0; i < g_mountList.size(); ++i)
+        for (size_t i = 0; i < app.mountList.size(); ++i)
         {
-            if (!search.empty() && !core::containsIgnoreCase(g_mountList[i].name, search))
+            if (!search.empty() && !core::containsIgnoreCase(app.mountList[i].name, search))
                 continue;
-            g_mountFiltered.push_back(i);
+            app.mountFiltered.push_back(i);
         }
     }
     else
     {
-        for (size_t i = 0; i < g_creatureModelNames.size(); ++i)
+        for (size_t i = 0; i < app.creatureModelNames.size(); ++i)
         {
-            if (!search.empty() && !core::containsIgnoreCase(g_creatureModelNames[i], search))
+            if (!search.empty() && !core::containsIgnoreCase(app.creatureModelNames[i], search))
                 continue;
-            g_mountFiltered.push_back(i);
+            app.mountFiltered.push_back(i);
         }
     }
 
-    g_mountFilterDirty = false;
+    app.mountFilterDirty = false;
 }
 
 static void mountCharacter(int displayID, GameFile* creatureFile)
 {
     WoWModel* charModel = getLoadedModel();
-    if (!charModel || !g_isChar || !g_root)
+    if (!charModel || !app.isChar || !app.root)
         return;
 
     // Get or resolve the mount model file
@@ -2050,7 +2037,7 @@ static void mountCharacter(int displayID, GameFile* creatureFile)
         return;
 
     // Get the character's attachment
-    Attachment* charAtt = g_root->children.empty() ? nullptr : g_root->children[0];
+    Attachment* charAtt = app.root->children.empty() ? nullptr : app.root->children[0];
     if (!charAtt)
         return;
 
@@ -2065,7 +2052,7 @@ static void mountCharacter(int displayID, GameFile* creatureFile)
     mountModel->isMount = true;
 
     // Set mount as root model; character stays as child attachment
-    g_root->setModel(mountModel);
+    app.root->setModel(mountModel);
     charAtt->id = 0; // attachment slot 0 = mount point
 
     // Apply mount skin/texture if it's a DB mount
@@ -2112,30 +2099,30 @@ static void mountCharacter(int displayID, GameFile* creatureFile)
     charModel->scale_ = 1.0f;
     mountModel->rot_.x = 0.0f;
 
-    g_isMounted = true;
-    g_selModel = mountModel;
+    app.isMounted = true;
+    app.selModel = mountModel;
 
     // Update animation control for the mount
     initAnimationControl(mountModel);
     initModelControl(mountModel);
 
-    resetCameraToModel(g_camera, mountModel);
+    resetCameraToModel(app.camera, mountModel);
     LOG_INFO << "Character mounted on: " << modelFile->fullname();
 }
 
 static void dismountCharacter()
 {
-    if (!g_isMounted || !g_root || !g_isChar)
+    if (!app.isMounted || !app.root || !app.isChar)
         return;
 
     WoWModel* charModel = nullptr;
-    Attachment* charAtt = g_root->children.empty() ? nullptr : g_root->children[0];
+    Attachment* charAtt = app.root->children.empty() ? nullptr : app.root->children[0];
     if (charAtt)
         charModel = dynamic_cast<WoWModel*>(charAtt->model());
 
     // Remove mount model from root
-    g_root->setModel(nullptr);
-    g_isMounted = false;
+    app.root->setModel(nullptr);
+    app.isMounted = false;
 
     if (charAtt)
         charAtt->id = 0;
@@ -2146,10 +2133,10 @@ static void dismountCharacter()
         charModel->scale_ = 1.0f;
         charModel->rot_ = charModel->pos_ = glm::vec3(0.0f);
 
-        g_selModel = charModel;
+        app.selModel = charModel;
         initAnimationControl(charModel);
         initModelControl(charModel);
-        resetCameraToModel(g_camera, charModel);
+        resetCameraToModel(app.camera, charModel);
     }
 
     LOG_INFO << "Character dismounted.";
@@ -2170,20 +2157,20 @@ static void doExport()
     WoWModel* model = getLoadedModel();
     if (!model)
     {
-        g_exportStatus = "No model loaded.";
+        app.exportStatus = "No model loaded.";
         return;
     }
 
-    if (g_selectedExporter < 0 || g_selectedExporter >= static_cast<int>(g_exporters.size()))
+    if (app.selectedExporter < 0 || app.selectedExporter >= static_cast<int>(app.exporters.size()))
     {
-        g_exportStatus = "Invalid exporter selection.";
+        app.exportStatus = "Invalid exporter selection.";
         return;
     }
 
-    ExporterPlugin* exporter = g_exporters[g_selectedExporter];
+    ExporterPlugin* exporter = app.exporters[app.selectedExporter];
 
     // Build file path with appropriate extension
-    std::string pathStr{g_exportPath};
+    std::string pathStr{app.exportPath};
     // Extract extension from the exporter filter (e.g. "*.fbx" -> ".fbx")
     std::wstring filter = exporter->fileSaveFilter();
     std::string ext;
@@ -2205,9 +2192,9 @@ static void doExport()
     if (exporter->canExportAnimation())
     {
         std::vector<int> animsToExport;
-        for (size_t i = 0; i < g_exportAnimChecked.size() && i < model->anims.size(); ++i)
+        for (size_t i = 0; i < app.exportAnimChecked.size() && i < model->anims.size(); ++i)
         {
-            if (g_exportAnimChecked[i])
+            if (app.exportAnimChecked[i])
                 animsToExport.push_back(model->anims[i].Index);
         }
         exporter->setAnimationsToExport(animsToExport);
@@ -2218,12 +2205,12 @@ static void doExport()
 
     if (exporter->exportModel(model, wpath))
     {
-        g_exportStatus = "Export successful: " + pathStr;
+        app.exportStatus = "Export successful: " + pathStr;
         LOG_INFO << "Export complete: " << pathStr;
     }
     else
     {
-        g_exportStatus = "Export failed: " + pathStr;
+        app.exportStatus = "Export failed: " + pathStr;
         LOG_ERROR << "Export failed: " << pathStr;
     }
 }
@@ -2243,7 +2230,7 @@ static void handleViewportInput()
     if (io.MouseWheel != 0.0f)
     {
         const float zoom = -io.MouseWheel * 0.5f * mul;
-        g_camera.setRadius(g_camera.radius() + zoom);
+        app.camera.setRadius(app.camera.radius() + zoom);
     }
 
     // Left drag ? orbit (yaw / pitch)
@@ -2251,7 +2238,7 @@ static void handleViewportInput()
     {
         const float dx = io.MouseDelta.x * MOUSE_SENSITIVITY * mul;
         const float dy = io.MouseDelta.y * MOUSE_SENSITIVITY * mul;
-        g_camera.setYawAndPitch(g_camera.yaw() + (-dx), g_camera.pitch() + (-dy));
+        app.camera.setYawAndPitch(app.camera.yaw() + (-dx), app.camera.pitch() + (-dy));
     }
 
     // Right drag ? pan
@@ -2259,9 +2246,9 @@ static void handleViewportInput()
     {
         const float dx = io.MouseDelta.x * MOUSE_SENSITIVITY * mul * 0.025f;
         const float dy = io.MouseDelta.y * MOUSE_SENSITIVITY * mul * 0.025f;
-        const auto  look  = g_camera.lookAt();
-        const auto  right = g_camera.right();
-        g_camera.setLookAt(glm::vec3(look.x + right.x * -dx,
+        const auto  look  = app.camera.lookAt();
+        const auto  right = app.camera.right();
+        app.camera.setLookAt(glm::vec3(look.x + right.x * -dx,
                                       look.y + right.y * -dx,
                                       look.z + dy));
     }
@@ -2270,41 +2257,41 @@ static void handleViewportInput()
     if (ImGui::IsMouseDragging(ImGuiMouseButton_Middle))
     {
         const float dy = io.MouseDelta.y * MOUSE_SENSITIVITY * mul;
-        g_camera.setRadius(g_camera.radius() + dy / 10.0f);
+        app.camera.setRadius(app.camera.radius() + dy / 10.0f);
     }
 
     // Numpad camera controls
     if (ImGui::IsKeyDown(ImGuiKey_Keypad4))
-        g_camera.setYaw(g_camera.yaw() + 1.0f);
+        app.camera.setYaw(app.camera.yaw() + 1.0f);
     if (ImGui::IsKeyDown(ImGuiKey_Keypad6))
-        g_camera.setYaw(g_camera.yaw() - 1.0f);
+        app.camera.setYaw(app.camera.yaw() - 1.0f);
     if (ImGui::IsKeyDown(ImGuiKey_Keypad8))
-        g_camera.setPitch(g_camera.pitch() + 1.0f);
+        app.camera.setPitch(app.camera.pitch() + 1.0f);
     if (ImGui::IsKeyDown(ImGuiKey_Keypad2))
-        g_camera.setPitch(g_camera.pitch() - 1.0f);
+        app.camera.setPitch(app.camera.pitch() - 1.0f);
     if (ImGui::IsKeyPressed(ImGuiKey_Keypad5))
-        resetCameraToModel(g_camera, getLoadedModel());
+        resetCameraToModel(app.camera, getLoadedModel());
     if (ImGui::IsKeyDown(ImGuiKey_Keypad7))
     {
-        auto la = g_camera.lookAt();
-        g_camera.setLookAt(glm::vec3(la.x, la.y, la.z + 0.2f));
+        auto la = app.camera.lookAt();
+        app.camera.setLookAt(glm::vec3(la.x, la.y, la.z + 0.2f));
     }
     if (ImGui::IsKeyDown(ImGuiKey_Keypad9))
     {
-        auto la = g_camera.lookAt();
-        g_camera.setLookAt(glm::vec3(la.x, la.y, la.z - 0.2f));
+        auto la = app.camera.lookAt();
+        app.camera.setLookAt(glm::vec3(la.x, la.y, la.z - 0.2f));
     }
     if (ImGui::IsKeyDown(ImGuiKey_Keypad1))
     {
-        auto la = g_camera.lookAt();
-        auto r = g_camera.right();
-        g_camera.setLookAt(glm::vec3(la.x + r.x * -0.2f, la.y + r.y * -0.2f, la.z));
+        auto la = app.camera.lookAt();
+        auto r = app.camera.right();
+        app.camera.setLookAt(glm::vec3(la.x + r.x * -0.2f, la.y + r.y * -0.2f, la.z));
     }
     if (ImGui::IsKeyDown(ImGuiKey_Keypad3))
     {
-        auto la = g_camera.lookAt();
-        auto r = g_camera.right();
-        g_camera.setLookAt(glm::vec3(la.x + r.x * 0.2f, la.y + r.y * 0.2f, la.z));
+        auto la = app.camera.lookAt();
+        auto r = app.camera.right();
+        app.camera.setLookAt(glm::vec3(la.x + r.x * 0.2f, la.y + r.y * 0.2f, la.z));
     }
 }
 
@@ -2312,27 +2299,27 @@ static void handleViewportInput()
 static void tickScene()
 {
     auto now = std::chrono::steady_clock::now();
-    float dt = std::chrono::duration<float>(now - g_lastTick).count();
-    g_lastTick = now;
+    float dt = std::chrono::duration<float>(now - app.lastTick).count();
+    app.lastTick = now;
 
     // Clamp to avoid huge jumps after breakpoints, window moves, or long pauses
     if (dt > 0.1f) dt = 0.1f;
     if (dt < 0.0f) dt = 0.0f;
 
     // FPS tracking
-    g_fpsAccum += dt;
-    g_fpsFrameCount++;
-    if (g_fpsAccum >= 0.5f)
+    app.fpsAccum += dt;
+    app.fpsFrameCount++;
+    if (app.fpsAccum >= 0.5f)
     {
-        g_fps = static_cast<float>(g_fpsFrameCount) / g_fpsAccum;
-        g_fpsFrameCount = 0;
-        g_fpsAccum = 0.0f;
+        app.fps = static_cast<float>(app.fpsFrameCount) / app.fpsAccum;
+        app.fpsFrameCount = 0;
+        app.fpsAccum = 0.0f;
     }
 
-    g_animTime += dt;
+    app.animTime += dt;
 
-    if (g_root)
-        g_root->tick(dt * 1000.0f);
+    if (app.root)
+        app.root->tick(dt * 1000.0f);
 }
 
 // ---- URL Import helpers ----------------------------------------------------
@@ -2340,7 +2327,7 @@ static void applyImportedChar(CharInfos* info)
 {
     if (!info || !info->valid)
     {
-        g_importStatus = "Import returned no valid character data.";
+        app.importStatus = "Import returned no valid character data.";
         return;
     }
 
@@ -2351,23 +2338,23 @@ static void applyImportedChar(CharInfos* info)
     int fileDataID = RaceInfos::getFileIDForRaceSex(raceID, sexID);
     if (fileDataID <= 0)
     {
-        g_importStatus = "Could not determine model for race " + std::to_string(raceID);
+        app.importStatus = "Could not determine model for race " + std::to_string(raceID);
         return;
     }
 
     GameFile* file = GAMEDIRECTORY.getFile(fileDataID);
     if (!file)
     {
-        g_importStatus = "Model file not found for race " + std::to_string(raceID);
+        app.importStatus = "Model file not found for race " + std::to_string(raceID);
         return;
     }
 
     loadModel(file);
 
     WoWModel* model = getLoadedModel();
-    if (!model || !g_isChar)
+    if (!model || !app.isChar)
     {
-        g_importStatus = "Failed to load character model.";
+        app.importStatus = "Failed to load character model.";
         return;
     }
 
@@ -2394,7 +2381,7 @@ static void applyImportedChar(CharInfos* info)
     // Update customization UI state
     initCharacterControl(model);
 
-    g_importStatus = "Character imported successfully.";
+    app.importStatus = "Character imported successfully.";
     LOG_INFO << "Character imported from URL.";
 }
 
@@ -2402,7 +2389,7 @@ static void applyImportedNPC(NPCInfos* info)
 {
     if (!info || info->displayId <= 0)
     {
-        g_importStatus = "Import returned no valid NPC data.";
+        app.importStatus = "Import returned no valid NPC data.";
         return;
     }
 
@@ -2411,32 +2398,32 @@ static void applyImportedNPC(NPCInfos* info)
     const auto* cmdTable = WOWDB.getTable("CreatureModelData");
     if (!cdiTable || !cmdTable)
     {
-        g_importStatus = "NPC display ID " + std::to_string(info->displayId) + " not found in database.";
+        app.importStatus = "NPC display ID " + std::to_string(info->displayId) + " not found in database.";
         return;
     }
     auto cdiRow = cdiTable->getRow(static_cast<uint32_t>(info->displayId));
     if (!cdiRow)
     {
-        g_importStatus = "NPC display ID " + std::to_string(info->displayId) + " not found in database.";
+        app.importStatus = "NPC display ID " + std::to_string(info->displayId) + " not found in database.";
         return;
     }
     auto cmdRow = cmdTable->getRow(cdiRow.getUInt("ModelID"));
     uint32_t npcFDID = cmdRow ? cmdRow.getUInt("FileDataID") : 0;
     if (npcFDID == 0)
     {
-        g_importStatus = "NPC display ID " + std::to_string(info->displayId) + " not found in database.";
+        app.importStatus = "NPC display ID " + std::to_string(info->displayId) + " not found in database.";
         return;
     }
 
     GameFile* file = GAMEDIRECTORY.getFile(npcFDID);
     if (!file)
     {
-        g_importStatus = "NPC model file not found.";
+        app.importStatus = "NPC model file not found.";
         return;
     }
 
     loadModel(file);
-    g_importStatus = std::string("NPC imported: ") + wstringToString(info->name);
+    app.importStatus = std::string("NPC imported: ") + wstringToString(info->name);
     LOG_INFO << "NPC imported from URL: " << wstringToString(info->name);
 }
 
@@ -2444,29 +2431,29 @@ static void applyImportedItem(ItemRecord* rec)
 {
     if (!rec || rec->id <= 0)
     {
-        g_importStatus = "Import returned no valid item data.";
+        app.importStatus = "Import returned no valid item data.";
         return;
     }
 
     loadItemModel(static_cast<unsigned int>(rec->id));
-    g_importStatus = std::string("Item imported: ") + rec->name;
+    app.importStatus = std::string("Item imported: ") + rec->name;
     LOG_INFO << "Item imported from URL: " << rec->name;
 }
 
 static void doURLImport()
 {
-    std::string url(g_importUrlBuf);
+    std::string url(app.importUrlBuf);
     if (url.empty())
     {
-        g_importStatus = "Please enter a URL.";
+        app.importStatus = "Please enter a URL.";
         return;
     }
 
-    g_importStatus = "Importing...";
+    app.importStatus = "Importing...";
 
     // Find matching importer
     ImporterPlugin* importer = nullptr;
-    for (auto* imp : g_importers)
+    for (auto* imp : app.importers)
     {
         if (imp->acceptURL(url))
         {
@@ -2477,7 +2464,7 @@ static void doURLImport()
 
     if (!importer)
     {
-        g_importStatus = "No importer recognises this URL. Supported: battle.net, worldofwarcraft.com, wowhead.com";
+        app.importStatus = "No importer recognises this URL. Supported: battle.net, worldofwarcraft.com, wowhead.com";
         return;
     }
 
@@ -2511,7 +2498,7 @@ static void doURLImport()
     }
     delete itemRec;
 
-    g_importStatus = "Could not import anything from this URL.";
+    app.importStatus = "Could not import anything from this URL.";
 }
 
 // ---- Engine initialization ------------------------------------------------
@@ -2536,24 +2523,24 @@ static void initEngine()
              << GLOBALSETTINGS.buildName();
     LOG_INFO << "==============================================";
 
-    g_settings.load();
+    app.settings.load();
 
     // Apply initial console visibility
 #ifdef _WIN32
     if (HWND hConsole = GetConsoleWindow())
-        ShowWindow(hConsole, g_settings.showConsole ? SW_SHOW : SW_HIDE);
+        ShowWindow(hConsole, app.settings.showConsole ? SW_SHOW : SW_HIDE);
 #endif
 
     // Pre-fill the path input buffer from saved settings
-    strncpy_s(g_pathBuf, g_settings.gamePath.c_str(), sizeof(g_pathBuf) - 1);
+    strncpy_s(app.pathBuf, app.settings.gamePath.c_str(), sizeof(app.pathBuf) - 1);
 
     // Instantiate exporters (OBJ / FBX)
-    g_exporters.push_back(new OBJExporter());
-    g_exporters.push_back(new FBXExporter());
+    app.exporters.push_back(new OBJExporter());
+    app.exporters.push_back(new FBXExporter());
 
     // Instantiate importers (Armory / Wowhead)
-    g_importers.push_back(new ArmoryImporter());
-    g_importers.push_back(new WowheadImporter());
+    app.importers.push_back(new ArmoryImporter());
+    app.importers.push_back(new WowheadImporter());
 }
 
 static void initGL()
@@ -2592,7 +2579,7 @@ int main(int /*argc*/, char* /*argv*/[])
         glfwTerminate();
         return 1;
     }
-    g_window = window;
+    app.window = window;
     glfwMakeContextCurrent(window);
     glfwSwapInterval(1);
 
@@ -2634,7 +2621,7 @@ int main(int /*argc*/, char* /*argv*/[])
     initGL();
 
     // Create root attachment (scene graph root � no model yet)
-    g_root = new Attachment(nullptr, nullptr, -1, -1);
+    app.root = new Attachment(nullptr, nullptr, -1, -1);
 
     // ---- Dear ImGui ----
     IMGUI_CHECKVERSION();
@@ -2644,15 +2631,15 @@ int main(int /*argc*/, char* /*argv*/[])
     io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
     io.IniFilename = AppSettings::imguiIniPath;
 
-    ThemeManager::apply(ThemeManager::currentTheme(), g_window);
+    ThemeManager::apply(ThemeManager::currentTheme(), app.window);
 
     // ---- DPI-aware scaling ----
     float xscale = 1.0f, yscale = 1.0f;
     glfwGetWindowContentScale(window, &xscale, &yscale);
-    g_dpiScale = (xscale > yscale) ? xscale : yscale;
-    if (g_dpiScale > 1.0f)
+    app.dpiScale = (xscale > yscale) ? xscale : yscale;
+    if (app.dpiScale > 1.0f)
     {
-        ImGui::GetStyle().ScaleAllSizes(g_dpiScale);
+        ImGui::GetStyle().ScaleAllSizes(app.dpiScale);
     }
 
     // ---- Font discovery ----
@@ -2694,23 +2681,23 @@ int main(int /*argc*/, char* /*argv*/[])
                     continue;
                 seen.insert(stemLower);
                 std::string absPath = fs::canonical(entry.path()).string();
-                g_availableFonts.push_back({stemName, absPath});
+                app.availableFonts.push_back({stemName, absPath});
             }
         }
         // Sort alphabetically by display name
-        std::sort(g_availableFonts.begin(), g_availableFonts.end(),
+        std::sort(app.availableFonts.begin(), app.availableFonts.end(),
             [](const FontEntry& a, const FontEntry& b) { return a.name < b.name; });
 
         // Default font: prefer "arialn" by name if available and no saved preference
-        if (g_settings.currentFont <= 0)
+        if (app.settings.currentFont <= 0)
         {
-            for (int i = 0; i < static_cast<int>(g_availableFonts.size()); ++i)
+            for (int i = 0; i < static_cast<int>(app.availableFonts.size()); ++i)
             {
-                std::string lower = g_availableFonts[i].name;
+                std::string lower = app.availableFonts[i].name;
                 std::transform(lower.begin(), lower.end(), lower.begin(), ::tolower);
                 if (lower == "arialn")
                 {
-                    g_settings.currentFont = i;
+                    app.settings.currentFont = i;
                     break;
                 }
             }
@@ -2719,11 +2706,11 @@ int main(int /*argc*/, char* /*argv*/[])
 
     // ---- Build initial font atlas ----
     {
-        const float pixelSize = g_settings.fontSize * g_dpiScale;
+        const float pixelSize = app.settings.fontSize * app.dpiScale;
         bool loaded = false;
-        if (g_settings.currentFont >= 0 && g_settings.currentFont < static_cast<int>(g_availableFonts.size()))
+        if (app.settings.currentFont >= 0 && app.settings.currentFont < static_cast<int>(app.availableFonts.size()))
         {
-            const auto& fe = g_availableFonts[g_settings.currentFont];
+            const auto& fe = app.availableFonts[app.settings.currentFont];
             if (std::filesystem::exists(fe.path))
             {
                 io.Fonts->AddFontFromFileTTF(fe.path.c_str(), pixelSize);
@@ -2741,7 +2728,7 @@ int main(int /*argc*/, char* /*argv*/[])
 
     bool show_demo_window = false;
     bool firstFrame = true;
-    g_lastTick = std::chrono::steady_clock::now();
+    app.lastTick = std::chrono::steady_clock::now();
 
     // ---- Main loop ----
     while (!glfwWindowShouldClose(window))
@@ -2749,16 +2736,16 @@ int main(int /*argc*/, char* /*argv*/[])
         glfwPollEvents();
 
         // ---- Rebuild font atlas if font/size changed ----
-        if (g_fontsDirty)
+        if (app.fontsDirty)
         {
-            g_fontsDirty = false;
+            app.fontsDirty = false;
             ImGuiIO& fio = ImGui::GetIO();
             fio.Fonts->Clear();
-            const float pixelSize = g_settings.fontSize * g_dpiScale;
+            const float pixelSize = app.settings.fontSize * app.dpiScale;
             bool loaded = false;
-            if (g_settings.currentFont >= 0 && g_settings.currentFont < static_cast<int>(g_availableFonts.size()))
+            if (app.settings.currentFont >= 0 && app.settings.currentFont < static_cast<int>(app.availableFonts.size()))
             {
-                const auto& fe = g_availableFonts[g_settings.currentFont];
+                const auto& fe = app.availableFonts[app.settings.currentFont];
                 if (std::filesystem::exists(fe.path))
                 {
                     fio.Fonts->AddFontFromFileTTF(fe.path.c_str(), pixelSize);
@@ -2828,14 +2815,14 @@ int main(int /*argc*/, char* /*argv*/[])
         {
             if (ImGui::BeginMenu("File"))
             {
-                if (ImGui::MenuItem("Load WoW", nullptr, false, !g_isWoWLoaded && !g_loadInProgress))
+                if (ImGui::MenuItem("Load WoW", nullptr, false, !app.isWoWLoaded && !app.loadInProgress))
                     beginLoadWoW();
                 ImGui::Separator();
-                if (ImGui::MenuItem("Import from URL...", nullptr, false, g_isWoWLoaded && g_initDB))
+                if (ImGui::MenuItem("Import from URL...", nullptr, false, app.isWoWLoaded && app.initDB))
                 {
-                    g_showImportDialog = true;
-                    g_importPopupJustOpened = true;
-                    g_importStatus.clear();
+                    app.showImportDialog = true;
+                    app.importPopupJustOpened = true;
+                    app.importStatus.clear();
                 }
                 ImGui::Separator();
                 if (ImGui::MenuItem("Screenshot...", "Ctrl+S"))
@@ -2851,20 +2838,20 @@ int main(int /*argc*/, char* /*argv*/[])
 
             if (ImGui::BeginMenu("View"))
             {
-                ImGui::MenuItem("3D Viewport", nullptr, &g_showViewport);
-                ImGui::MenuItem("Character Viewer", nullptr, &g_showCharViewer);
-                ImGui::MenuItem("File Browser", nullptr, &g_showFileBrowser);
-                ImGui::MenuItem("Animation", nullptr, &g_showAnimation);
-                ImGui::MenuItem("Viewport Options", nullptr, &g_showViewportOpts);
-                ImGui::MenuItem("Mounts", nullptr, &g_showMounts);
-                ImGui::MenuItem("Item Sets", nullptr, &g_showItemSets);
-                ImGui::MenuItem("NPC Browser", nullptr, &g_showNpcBrowser);
-                ImGui::MenuItem("Item Browser", nullptr, &g_showItemBrowser);
-                ImGui::MenuItem("Export", nullptr, &g_showExport);
-                ImGui::MenuItem("Screenshot", nullptr, &g_showScreenshot);
-                ImGui::MenuItem("Presets", nullptr, &g_showPresets);
-                ImGui::MenuItem("Log", nullptr, &g_showLog);
-                ImGui::MenuItem("Settings", nullptr, &g_showSettings);
+                ImGui::MenuItem("3D Viewport", nullptr, &app.showViewport);
+                ImGui::MenuItem("Character Viewer", nullptr, &app.showCharViewer);
+                ImGui::MenuItem("File Browser", nullptr, &app.showFileBrowser);
+                ImGui::MenuItem("Animation", nullptr, &app.showAnimation);
+                ImGui::MenuItem("Viewport Options", nullptr, &app.showViewportOpts);
+                ImGui::MenuItem("Mounts", nullptr, &app.showMounts);
+                ImGui::MenuItem("Item Sets", nullptr, &app.showItemSets);
+                ImGui::MenuItem("NPC Browser", nullptr, &app.showNpcBrowser);
+                ImGui::MenuItem("Item Browser", nullptr, &app.showItemBrowser);
+                ImGui::MenuItem("Export", nullptr, &app.showExport);
+                ImGui::MenuItem("Screenshot", nullptr, &app.showScreenshot);
+                ImGui::MenuItem("Presets", nullptr, &app.showPresets);
+                ImGui::MenuItem("Log", nullptr, &app.showLog);
+                ImGui::MenuItem("Settings", nullptr, &app.showSettings);
                 ImGui::Separator();
                 ImGui::MenuItem("ImGui Demo", nullptr, &show_demo_window);
                 ImGui::EndMenu();
@@ -2873,17 +2860,17 @@ int main(int /*argc*/, char* /*argv*/[])
             if (ImGui::BeginMenu("Options"))
             {
                 if (ImGui::MenuItem("Language / Locale..."))
-                    g_showLanguageDialog = true;
+                    app.showLanguageDialog = true;
                 ImGui::Separator();
                 if (ImGui::MenuItem("Settings..."))
-                    g_showSettings = true;
+                    app.showSettings = true;
                 ImGui::EndMenu();
             }
 
             if (ImGui::BeginMenu("Help"))
             {
                 if (ImGui::MenuItem("About..."))
-                    g_showAboutDialog = true;
+                    app.showAboutDialog = true;
                 ImGui::EndMenu();
             }
 
@@ -2900,13 +2887,13 @@ int main(int /*argc*/, char* /*argv*/[])
                         totalFrames = static_cast<int>(sm->animManager->GetFrameCount());
                     }
                     statusText = std::format("FPS: {:.0f} | {} | V:{} B:{} T:{} | Frame: {}/{}",
-                        g_fps, sm->name(),
+                        app.fps, sm->name(),
                         sm->header.nVertices, sm->header.nBones, sm->header.nTextures,
                         curFrame, totalFrames);
                 }
                 else
                 {
-                    statusText = std::format("FPS: {:.0f}", g_fps);
+                    statusText = std::format("FPS: {:.0f}", app.fps);
                 }
                 float textWidth = ImGui::CalcTextSize(statusText.c_str()).x;
                 ImGui::SameLine(ImGui::GetWindowWidth() - textWidth - 10.0f);
@@ -2917,24 +2904,24 @@ int main(int /*argc*/, char* /*argv*/[])
         }
 
         // ===== Character Viewer (standalone tab like wow.export) =====
-        if (g_showCharViewer)
+        if (app.showCharViewer)
         {
         ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(4, 4));
-        if (ImGui::Begin("Character Viewer", &g_showCharViewer))
+        if (ImGui::Begin("Character Viewer", &app.showCharViewer))
         {
             CharacterViewerPanel::DrawContext cvCtx;
-            cvCtx.isWoWLoaded          = g_isWoWLoaded;
-            cvCtx.isDBReady            = g_initDB;
-            cvCtx.isChar               = g_isChar;
-            cvCtx.customizationOptions = &g_customizationOptions;
-            cvCtx.animEntries          = &g_animEntries;
-            cvCtx.selectedAnimCombo    = &g_selectedAnimCombo;
-            cvCtx.fbo                  = &g_fbo;
-            cvCtx.camera               = &g_camera;
-            cvCtx.root                 = g_root;
+            cvCtx.isWoWLoaded          = app.isWoWLoaded;
+            cvCtx.isDBReady            = app.initDB;
+            cvCtx.isChar               = app.isChar;
+            cvCtx.customizationOptions = &app.customizationOptions;
+            cvCtx.animEntries          = &app.animEntries;
+            cvCtx.selectedAnimCombo    = &app.selectedAnimCombo;
+            cvCtx.fbo                  = &app.fbo;
+            cvCtx.camera               = &app.camera;
+            cvCtx.root                 = app.root;
             cvCtx.fov                  = video.fov;
-            cvCtx.bgColor              = g_settings.bgColor;
-            cvCtx.drawGrid             = g_settings.drawGrid;
+            cvCtx.bgColor              = app.settings.bgColor;
+            cvCtx.drawGrid             = app.settings.drawGrid;
             cvCtx.getLoadedModel       = getLoadedModel;
             cvCtx.loadModel            = [](GameFile* f) { loadModel(f); };
             cvCtx.handleViewportInput  = handleViewportInput;
@@ -2946,10 +2933,10 @@ int main(int /*argc*/, char* /*argv*/[])
         }
 
         // ===== 3D Viewport panel =====
-        if (g_showViewport)
+        if (app.showViewport)
         {
         ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
-        if (ImGui::Begin("3D Viewport", &g_showViewport))
+        if (ImGui::Begin("3D Viewport", &app.showViewport))
         {
             // Determine available size for the viewport image
             ImVec2 panelSize = ImGui::GetContentRegionAvail();
@@ -2959,10 +2946,10 @@ int main(int /*argc*/, char* /*argv*/[])
             if (vpW > 0 && vpH > 0)
             {
                 // Render scene to offscreen FBO
-                SceneRenderer::renderToFBO(g_fbo, vpW, vpH, g_camera, g_root, video.fov, g_settings.bgColor, g_settings.drawGrid);
+                SceneRenderer::renderToFBO(app.fbo, vpW, vpH, app.camera, app.root, video.fov, app.settings.bgColor, app.settings.drawGrid);
 
                 // Display FBO colour texture (UV-flipped: OpenGL is bottom-up)
-                ImGui::Image(static_cast<ImTextureID>(static_cast<uintptr_t>(g_fbo.colorTex)),
+                ImGui::Image(static_cast<ImTextureID>(static_cast<uintptr_t>(app.fbo.colorTex)),
                              panelSize,
                              ImVec2(0, 1), ImVec2(1, 0));
 
@@ -2976,40 +2963,40 @@ int main(int /*argc*/, char* /*argv*/[])
         }
 
         // ===== File Browser panel =====
-        if (g_showFileBrowser)
+        if (app.showFileBrowser)
         {
             auto statusStr = getLoadStatus();
             FileBrowserPanel::LoadState ls;
-            ls.isLoaded   = g_isWoWLoaded;
-            ls.inProgress = g_loadInProgress;
-            ls.progress   = g_loadProgress;
+            ls.isLoaded   = app.isWoWLoaded;
+            ls.inProgress = app.loadInProgress;
+            ls.progress   = app.loadProgress;
             ls.statusText = statusStr.c_str();
 
-            if (GameFile* picked = FileBrowserPanel::draw(g_showFileBrowser, ls))
+            if (GameFile* picked = FileBrowserPanel::draw(app.showFileBrowser, ls))
                 loadModel(picked);
         }
 
         // ===== Animation Control =====
-        if (g_showAnimation)
+        if (app.showAnimation)
         {
-        if (ImGui::Begin("Animation", &g_showAnimation))
+        if (ImGui::Begin("Animation", &app.showAnimation))
         {
             WoWModel* aModel = getLoadedModel();
-            if (aModel && !g_animEntries.empty())
+            if (aModel && !app.animEntries.empty())
             {
                 // ---- Animation selector ----
                 ImGui::SeparatorText("Animation");
-                const char* previewAnim = (g_selectedAnimCombo >= 0 && g_selectedAnimCombo < static_cast<int>(g_animEntries.size()))
-                    ? g_animEntries[g_selectedAnimCombo].label.c_str() : "<none>";
+                const char* previewAnim = (app.selectedAnimCombo >= 0 && app.selectedAnimCombo < static_cast<int>(app.animEntries.size()))
+                    ? app.animEntries[app.selectedAnimCombo].label.c_str() : "<none>";
                 if (ImGui::BeginCombo("##AnimCombo", previewAnim))
                 {
-                    for (int i = 0; i < static_cast<int>(g_animEntries.size()); ++i)
+                    for (int i = 0; i < static_cast<int>(app.animEntries.size()); ++i)
                     {
-                        bool selected = (i == g_selectedAnimCombo);
-                        if (ImGui::Selectable(g_animEntries[i].label.c_str(), selected))
+                        bool selected = (i == app.selectedAnimCombo);
+                        if (ImGui::Selectable(app.animEntries[i].label.c_str(), selected))
                         {
-                            g_selectedAnimCombo = i;
-                            int idx = g_animEntries[i].animIndex;
+                            app.selectedAnimCombo = i;
+                            int idx = app.animEntries[i].animIndex;
                             aModel->currentAnim = idx;
                             aModel->animManager->SetAnim(0, idx, 0);
                             aModel->animManager->Play();
@@ -3039,8 +3026,8 @@ int main(int /*argc*/, char* /*argv*/[])
                     ImGui::TextColored(ImVec4(1.0f, 1.0f, 0.3f, 1.0f), "Paused");
 
                 // ---- Speed ----
-                if (ImGui::SliderFloat("Speed", &g_animSpeed, 0.0f, 4.0f, "%.2f"))
-                    aModel->animManager->SetSpeed(g_animSpeed);
+                if (ImGui::SliderFloat("Speed", &app.animSpeed, 0.0f, 4.0f, "%.2f"))
+                    aModel->animManager->SetSpeed(app.animSpeed);
 
                 // ---- Frame scrubber ----
                 int frameCount = static_cast<int>(aModel->animManager->GetFrameCount());
@@ -3056,11 +3043,11 @@ int main(int /*argc*/, char* /*argv*/[])
                 }
 
                 // ---- Loop count ----
-                if (ImGui::SliderInt("Loops", &g_loopCount, 0, 9))
+                if (ImGui::SliderInt("Loops", &app.loopCount, 0, 9))
                 {
                     aModel->animManager->Stop();
-                    int idx = g_animEntries[g_selectedAnimCombo].animIndex;
-                    aModel->animManager->SetAnim(0, idx, static_cast<short>(g_loopCount));
+                    int idx = app.animEntries[app.selectedAnimCombo].animIndex;
+                    aModel->animManager->SetAnim(0, idx, static_cast<short>(app.loopCount));
                     // Chain next animations if available
                     int nextAnim = idx;
                     for (int i = 1; i < 4; ++i)
@@ -3069,7 +3056,7 @@ int main(int /*argc*/, char* /*argv*/[])
                         {
                             nextAnim = aModel->anims[nextAnim].NextAnimation;
                             if (nextAnim >= 0)
-                                aModel->animManager->AddAnim(static_cast<unsigned int>(nextAnim), static_cast<short>(g_loopCount));
+                                aModel->animManager->AddAnim(static_cast<unsigned int>(nextAnim), static_cast<short>(app.loopCount));
                             else
                                 break;
                         }
@@ -3082,38 +3069,38 @@ int main(int /*argc*/, char* /*argv*/[])
 
                 // ---- Secondary / Mouth animations ----
                 ImGui::SeparatorText("Body Animation");
-                if (ImGui::Checkbox("Lock animations", &g_lockAnims))
+                if (ImGui::Checkbox("Lock animations", &app.lockAnims))
                 {
-                    if (g_lockAnims)
+                    if (app.lockAnims)
                     {
                         aModel->animManager->ClearSecondary();
                         aModel->animManager->ClearMouth();
-                        g_selectedSecondaryAnim = -1;
-                        g_selectedMouthAnim = -1;
+                        app.selectedSecondaryAnim = -1;
+                        app.selectedMouthAnim = -1;
                     }
                 }
                 ImGui::SetItemTooltip("Uncheck to enable independent upper body and mouth animations");
 
-                if (!g_lockAnims)
+                if (!app.lockAnims)
                 {
                     // Secondary animation (upper body)
                     {
-                        const char* previewSec = (g_selectedSecondaryAnim >= 0 && g_selectedSecondaryAnim < static_cast<int>(g_animEntries.size()))
-                            ? g_animEntries[g_selectedSecondaryAnim].label.c_str() : "<none>";
+                        const char* previewSec = (app.selectedSecondaryAnim >= 0 && app.selectedSecondaryAnim < static_cast<int>(app.animEntries.size()))
+                            ? app.animEntries[app.selectedSecondaryAnim].label.c_str() : "<none>";
                         if (ImGui::BeginCombo("Upper Body##SecAnim", previewSec))
                         {
-                            if (ImGui::Selectable("<none>", g_selectedSecondaryAnim < 0))
+                            if (ImGui::Selectable("<none>", app.selectedSecondaryAnim < 0))
                             {
-                                g_selectedSecondaryAnim = -1;
+                                app.selectedSecondaryAnim = -1;
                                 aModel->animManager->ClearSecondary();
                             }
-                            for (int i = 0; i < static_cast<int>(g_animEntries.size()); ++i)
+                            for (int i = 0; i < static_cast<int>(app.animEntries.size()); ++i)
                             {
-                                bool selected = (i == g_selectedSecondaryAnim);
-                                if (ImGui::Selectable(g_animEntries[i].label.c_str(), selected))
+                                bool selected = (i == app.selectedSecondaryAnim);
+                                if (ImGui::Selectable(app.animEntries[i].label.c_str(), selected))
                                 {
-                                    g_selectedSecondaryAnim = i;
-                                    aModel->animManager->SetSecondary(g_animEntries[i].animIndex);
+                                    app.selectedSecondaryAnim = i;
+                                    aModel->animManager->SetSecondary(app.animEntries[i].animIndex);
                                 }
                                 if (selected) ImGui::SetItemDefaultFocus();
                             }
@@ -3123,22 +3110,22 @@ int main(int /*argc*/, char* /*argv*/[])
 
                     // Mouth animation
                     {
-                        const char* previewMouth = (g_selectedMouthAnim >= 0 && g_selectedMouthAnim < static_cast<int>(g_animEntries.size()))
-                            ? g_animEntries[g_selectedMouthAnim].label.c_str() : "<none>";
+                        const char* previewMouth = (app.selectedMouthAnim >= 0 && app.selectedMouthAnim < static_cast<int>(app.animEntries.size()))
+                            ? app.animEntries[app.selectedMouthAnim].label.c_str() : "<none>";
                         if (ImGui::BeginCombo("Mouth##MouthAnim", previewMouth))
                         {
-                            if (ImGui::Selectable("<none>", g_selectedMouthAnim < 0))
+                            if (ImGui::Selectable("<none>", app.selectedMouthAnim < 0))
                             {
-                                g_selectedMouthAnim = -1;
+                                app.selectedMouthAnim = -1;
                                 aModel->animManager->ClearMouth();
                             }
-                            for (int i = 0; i < static_cast<int>(g_animEntries.size()); ++i)
+                            for (int i = 0; i < static_cast<int>(app.animEntries.size()); ++i)
                             {
-                                bool selected = (i == g_selectedMouthAnim);
-                                if (ImGui::Selectable(g_animEntries[i].label.c_str(), selected))
+                                bool selected = (i == app.selectedMouthAnim);
+                                if (ImGui::Selectable(app.animEntries[i].label.c_str(), selected))
                                 {
-                                    g_selectedMouthAnim = i;
-                                    aModel->animManager->SetMouth(g_animEntries[i].animIndex);
+                                    app.selectedMouthAnim = i;
+                                    aModel->animManager->SetMouth(app.animEntries[i].animIndex);
                                 }
                                 if (selected) ImGui::SetItemDefaultFocus();
                             }
@@ -3147,25 +3134,25 @@ int main(int /*argc*/, char* /*argv*/[])
                     }
 
                     // Mouth speed
-                    if (ImGui::SliderFloat("Mouth Speed", &g_mouthSpeed, 0.0f, 4.0f, "%.2f"))
-                        aModel->animManager->SetMouthSpeed(g_mouthSpeed);
+                    if (ImGui::SliderFloat("Mouth Speed", &app.mouthSpeed, 0.0f, 4.0f, "%.2f"))
+                        aModel->animManager->SetMouthSpeed(app.mouthSpeed);
                 }
 
                 // ---- Skin selector ----
-                if (!g_skinEntries.empty())
+                if (!app.skinEntries.empty())
                 {
                     ImGui::SeparatorText("Skin / Texture");
-                    const char* previewSkin = (g_selectedSkin >= 0 && g_selectedSkin < static_cast<int>(g_skinEntries.size()))
-                        ? g_skinEntries[g_selectedSkin].label.c_str() : "<none>";
+                    const char* previewSkin = (app.selectedSkin >= 0 && app.selectedSkin < static_cast<int>(app.skinEntries.size()))
+                        ? app.skinEntries[app.selectedSkin].label.c_str() : "<none>";
                     if (ImGui::BeginCombo("##SkinCombo", previewSkin))
                     {
-                        for (int i = 0; i < static_cast<int>(g_skinEntries.size()); ++i)
+                        for (int i = 0; i < static_cast<int>(app.skinEntries.size()); ++i)
                         {
-                            bool selected = (i == g_selectedSkin);
-                            if (ImGui::Selectable(g_skinEntries[i].label.c_str(), selected))
+                            bool selected = (i == app.selectedSkin);
+                            if (ImGui::Selectable(app.skinEntries[i].label.c_str(), selected))
                             {
                                 applySkin(aModel, i);
-                                g_blpSkin[0] = g_blpSkin[1] = g_blpSkin[2] = -1;
+                                app.blpSkin[0] = app.blpSkin[1] = app.blpSkin[2] = -1;
                             }
                             if (selected) ImGui::SetItemDefaultFocus();
                         }
@@ -3174,7 +3161,7 @@ int main(int /*argc*/, char* /*argv*/[])
 
                     // Per-slot BLP skin selector
                     size_t maxSlots = 0;
-                    for (const auto& se : g_skinEntries)
+                    for (const auto& se : app.skinEntries)
                         if (se.count > maxSlots) maxSlots = se.count;
                     if (maxSlots > 3) maxSlots = 3;
 
@@ -3183,21 +3170,21 @@ int main(int /*argc*/, char* /*argv*/[])
                         const char* slotLabels[3] = { "Texture 1", "Texture 2", "Texture 3" };
                         for (size_t slot = 0; slot < maxSlots; ++slot)
                         {
-                            const char* preview = (g_blpSkin[slot] >= 0 && g_blpSkin[slot] < static_cast<int>(g_skinEntries.size()))
-                                ? g_skinEntries[g_blpSkin[slot]].label.c_str() : "(grouped)";
+                            const char* preview = (app.blpSkin[slot] >= 0 && app.blpSkin[slot] < static_cast<int>(app.skinEntries.size()))
+                                ? app.skinEntries[app.blpSkin[slot]].label.c_str() : "(grouped)";
                             char comboId[32];
                             snprintf(comboId, sizeof(comboId), "##BLPSlot%zu", slot);
                             if (ImGui::BeginCombo(slotLabels[slot], preview))
                             {
-                                for (int i = 0; i < static_cast<int>(g_skinEntries.size()); ++i)
+                                for (int i = 0; i < static_cast<int>(app.skinEntries.size()); ++i)
                                 {
-                                    if (!g_skinEntries[i].tex[0]) continue;
-                                    bool selected = (i == g_blpSkin[slot]);
-                                    if (ImGui::Selectable(g_skinEntries[i].label.c_str(), selected))
+                                    if (!app.skinEntries[i].tex[0]) continue;
+                                    bool selected = (i == app.blpSkin[slot]);
+                                    if (ImGui::Selectable(app.skinEntries[i].label.c_str(), selected))
                                     {
-                                        g_blpSkin[slot] = i;
-                                        aModel->updateTextureList(g_skinEntries[i].tex[0],
-                                            g_skinEntries[i].base + static_cast<int>(slot));
+                                        app.blpSkin[slot] = i;
+                                        aModel->updateTextureList(app.skinEntries[i].tex[0],
+                                            app.skinEntries[i].base + static_cast<int>(slot));
                                     }
                                     if (selected) ImGui::SetItemDefaultFocus();
                                 }
@@ -3216,14 +3203,14 @@ int main(int /*argc*/, char* /*argv*/[])
         }
 
         // ===== Viewport Options (combined Background / Lighting / Model Control) =====
-        if (g_showViewportOpts)
+        if (app.showViewportOpts)
         {
-        if (ImGui::Begin("Viewport Options", &g_showViewportOpts))
+        if (ImGui::Begin("Viewport Options", &app.showViewportOpts))
         {
             // ---- Background ----
             if (ImGui::CollapsingHeader("Background", ImGuiTreeNodeFlags_DefaultOpen))
             {
-                ImGui::Checkbox("Draw Grid", &g_settings.drawGrid);
+                ImGui::Checkbox("Draw Grid", &app.settings.drawGrid);
                 ImGui::Checkbox("Checkerboard Background", &SceneRenderer::state().drawCheckerBg);
                 if (ImGui::Checkbox("Gradient Background", &SceneRenderer::state().drawGradientBg))
                 {
@@ -3235,7 +3222,7 @@ int main(int /*argc*/, char* /*argv*/[])
                     ImGui::ColorEdit3("Gradient Top", &SceneRenderer::state().gradientTop.x);
                     ImGui::ColorEdit3("Gradient Bottom", &SceneRenderer::state().gradientBottom.x);
                 }
-                ImGui::ColorEdit3("Background Color", &g_settings.bgColor.x);
+                ImGui::ColorEdit3("Background Color", &app.settings.bgColor.x);
 
                 ImGui::Spacing();
                 ImGui::Text("Palette:");
@@ -3244,7 +3231,7 @@ int main(int /*argc*/, char* /*argv*/[])
                     ImGui::PushID(i);
                     if (ImGui::ColorButton("##pal", ImVec4(g_bgPalette[i].x, g_bgPalette[i].y, g_bgPalette[i].z, 1.0f),
                                            ImGuiColorEditFlags_NoTooltip, ImVec2(20, 20)))
-                        g_settings.bgColor = g_bgPalette[i];
+                        app.settings.bgColor = g_bgPalette[i];
                     ImGui::PopID();
                     if (i < g_bgPaletteCount - 1) ImGui::SameLine();
                 }
@@ -3252,24 +3239,24 @@ int main(int /*argc*/, char* /*argv*/[])
                 ImGui::Spacing();
                 ImGui::Text("Camera Presets:");
                 if (ImGui::Button("Front"))
-                    g_camera.setYawAndPitch(0.f, 90.f);
+                    app.camera.setYawAndPitch(0.f, 90.f);
                 ImGui::SameLine();
                 if (ImGui::Button("Side"))
-                    g_camera.setYawAndPitch(270.f, 90.f);
+                    app.camera.setYawAndPitch(270.f, 90.f);
                 ImGui::SameLine();
                 if (ImGui::Button("Back"))
-                    g_camera.setYawAndPitch(180.f, 90.f);
+                    app.camera.setYawAndPitch(180.f, 90.f);
                 ImGui::SameLine();
                 if (ImGui::Button("Iso"))
-                    g_camera.setYawAndPitch(315.f, 90.f);
+                    app.camera.setYawAndPitch(315.f, 90.f);
                 if (ImGui::Button("Top"))
-                    g_camera.setYawAndPitch(g_camera.yaw(), 179.f);
+                    app.camera.setYawAndPitch(app.camera.yaw(), 179.f);
                 ImGui::SameLine();
                 if (ImGui::Button("Bottom"))
-                    g_camera.setYawAndPitch(g_camera.yaw(), 1.f);
+                    app.camera.setYawAndPitch(app.camera.yaw(), 1.f);
                 ImGui::SameLine();
                 if (ImGui::Button("Reset Camera"))
-                    resetCameraToModel(g_camera, getLoadedModel());
+                    resetCameraToModel(app.camera, getLoadedModel());
             }
 
             // ---- Lighting ----
@@ -3384,11 +3371,11 @@ int main(int /*argc*/, char* /*argv*/[])
                     ImGui::DragFloat3("Rotation", &mModel->rot_.x, 1.0f);
 
                     // Geosets
-                    if (!g_geosetGroups.empty())
+                    if (!app.geosetGroups.empty())
                     {
                         ImGui::Separator();
                         ImGui::TextDisabled("Geosets (click to toggle)");
-                        for (auto& group : g_geosetGroups)
+                        for (auto& group : app.geosetGroups)
                         {
                             if (ImGui::TreeNode(group.name.c_str()))
                             {
@@ -3414,19 +3401,19 @@ int main(int /*argc*/, char* /*argv*/[])
                     }
 
                     // Particle Color Replacement
-                    bool anyPCR = g_pcrState.hasSet[0] || g_pcrState.hasSet[1] || g_pcrState.hasSet[2];
+                    bool anyPCR = app.pcrState.hasSet[0] || app.pcrState.hasSet[1] || app.pcrState.hasSet[2];
                     if (anyPCR)
                     {
                         ImGui::Separator();
-                        if (ImGui::Checkbox("Replace Particle Colors", &g_pcrState.enabled))
+                        if (ImGui::Checkbox("Replace Particle Colors", &app.pcrState.enabled))
                         {
-                            if (g_pcrState.enabled)
+                            if (app.pcrState.enabled)
                                 applyParticleColors(mModel);
                             else
                             {
                                 mModel->replaceParticleColors = false;
-                                if (g_selectedSkin >= 0)
-                                    applySkin(mModel, g_selectedSkin);
+                                if (app.selectedSkin >= 0)
+                                    applySkin(mModel, app.selectedSkin);
                             }
                         }
 
@@ -3434,15 +3421,15 @@ int main(int /*argc*/, char* /*argv*/[])
                         static const char* phaseNames[] = {"Start", "Mid", "End"};
                         for (int s = 0; s < 3; ++s)
                         {
-                            if (!g_pcrState.hasSet[s]) continue;
+                            if (!app.pcrState.hasSet[s]) continue;
                             ImGui::Text("%s", setNames[s]);
                             for (int p = 0; p < 3; ++p)
                             {
                                 std::string label = std::format("{} {}##pcr{}{}",
                                     setNames[s], phaseNames[p], s, p);
-                                if (ImGui::ColorEdit3(label.c_str(), g_pcrState.colors[s][p]))
+                                if (ImGui::ColorEdit3(label.c_str(), app.pcrState.colors[s][p]))
                                 {
-                                    if (g_pcrState.enabled)
+                                    if (app.pcrState.enabled)
                                         applyParticleColors(mModel);
                                 }
                             }
@@ -3457,16 +3444,16 @@ int main(int /*argc*/, char* /*argv*/[])
         }
         ImGui::End();
         }
-        if (g_showMounts)
+        if (app.showMounts)
         {
-        if (ImGui::Begin("Mounts", &g_showMounts))
+        if (ImGui::Begin("Mounts", &app.showMounts))
         {
             WoWModel* cModel = getLoadedModel();
-            if (cModel && g_isChar)
+            if (cModel && app.isChar)
             {
                 buildMountList(); // lazy init on first frame
 
-                if (g_isMounted)
+                if (app.isMounted)
                 {
                     ImGui::TextColored(ImVec4(0.4f, 1.0f, 0.4f, 1.0f), "Mounted");
                     if (ImGui::Button("Dismount", ImVec2(-1, 0)))
@@ -3476,62 +3463,62 @@ int main(int /*argc*/, char* /*argv*/[])
                 {
                     if (ImGui::BeginTabBar("##MountTabs"))
                     {
-                        int prevTab = g_mountTab;
+                        int prevTab = app.mountTab;
 
                         if (ImGui::BeginTabItem("Player Mounts"))
                         {
-                            g_mountTab = 0;
+                            app.mountTab = 0;
                             ImGui::EndTabItem();
                         }
                         if (ImGui::BeginTabItem("Creature Models"))
                         {
-                            g_mountTab = 1;
+                            app.mountTab = 1;
                             ImGui::EndTabItem();
                         }
                         ImGui::EndTabBar();
 
-                        if (g_mountTab != prevTab)
+                        if (app.mountTab != prevTab)
                         {
-                            g_mountFilterDirty = true;
-                            g_mountSearchBuf[0] = '\0';
+                            app.mountFilterDirty = true;
+                            app.mountSearchBuf[0] = '\0';
                         }
                     }
 
                     ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x - 60.0f);
-                    if (ImGui::InputText("##mountSearch", g_mountSearchBuf, sizeof(g_mountSearchBuf),
+                    if (ImGui::InputText("##mountSearch", app.mountSearchBuf, sizeof(app.mountSearchBuf),
                                          ImGuiInputTextFlags_EnterReturnsTrue))
-                        g_mountFilterDirty = true;
+                        app.mountFilterDirty = true;
                     ImGui::SameLine();
                     if (ImGui::Button("Apply##mount", ImVec2(-1, 0)))
-                        g_mountFilterDirty = true;
+                        app.mountFilterDirty = true;
 
-                    if (g_mountFilterDirty)
+                    if (app.mountFilterDirty)
                         rebuildMountFilter();
 
-                    ImGui::Text("%d entries", static_cast<int>(g_mountFiltered.size()));
+                    ImGui::Text("%d entries", static_cast<int>(app.mountFiltered.size()));
                     ImGui::Separator();
 
                     ImGui::BeginChild("##MountList", ImVec2(0, 0), ImGuiChildFlags_Borders);
                     ImGuiListClipper clipper;
-                    clipper.Begin(static_cast<int>(g_mountFiltered.size()));
+                    clipper.Begin(static_cast<int>(app.mountFiltered.size()));
                     while (clipper.Step())
                     {
                         for (int i = clipper.DisplayStart; i < clipper.DisplayEnd; ++i)
                         {
-                            size_t idx = g_mountFiltered[i];
+                            size_t idx = app.mountFiltered[i];
                             ImGui::PushID(static_cast<int>(idx));
 
-                            if (g_mountTab == 0)
+                            if (app.mountTab == 0)
                             {
-                                const auto& me = g_mountList[idx];
+                                const auto& me = app.mountList[idx];
                                 std::string label = std::format("{} (DisplayID:{})", me.name, me.displayID);
                                 if (ImGui::Selectable(label.c_str()))
                                     mountCharacter(me.displayID, nullptr);
                             }
                             else
                             {
-                                if (ImGui::Selectable(g_creatureModelNames[idx].c_str()))
-                                    mountCharacter(-1, g_creatureModels[idx]);
+                                if (ImGui::Selectable(app.creatureModelNames[idx].c_str()))
+                                    mountCharacter(-1, app.creatureModels[idx]);
                             }
 
                             ImGui::PopID();
@@ -3549,39 +3536,39 @@ int main(int /*argc*/, char* /*argv*/[])
         }
 
         // ===== Item Sets panel (standalone tab) =====
-        if (g_showItemSets)
+        if (app.showItemSets)
         {
-        if (ImGui::Begin("Item Sets", &g_showItemSets))
+        if (ImGui::Begin("Item Sets", &app.showItemSets))
         {
             WoWModel* cModel = getLoadedModel();
-            if (cModel && g_isChar)
+            if (cModel && app.isChar)
             {
                 // ---- Item Sets ----
                 buildItemSets(); // lazy init on first frame
 
                 ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x - 60.0f);
-                if (ImGui::InputText("##itemSetSearch", g_itemSetSearchBuf, sizeof(g_itemSetSearchBuf),
+                if (ImGui::InputText("##itemSetSearch", app.itemSetSearchBuf, sizeof(app.itemSetSearchBuf),
                                      ImGuiInputTextFlags_EnterReturnsTrue))
-                    g_itemSetFilterDirty = true;
+                    app.itemSetFilterDirty = true;
                 ImGui::SameLine();
                 if (ImGui::Button("Apply##itemset", ImVec2(-1, 0)))
-                    g_itemSetFilterDirty = true;
+                    app.itemSetFilterDirty = true;
 
-                if (g_itemSetFilterDirty)
+                if (app.itemSetFilterDirty)
                     rebuildItemSetFilter();
 
-                ImGui::Text("%d sets", static_cast<int>(g_itemSetFiltered.size()));
+                ImGui::Text("%d sets", static_cast<int>(app.itemSetFiltered.size()));
                 ImGui::Separator();
 
                 ImGui::BeginChild("##ItemSetList", ImVec2(0, 200), ImGuiChildFlags_Borders);
                 {
                     ImGuiListClipper clipper;
-                    clipper.Begin(static_cast<int>(g_itemSetFiltered.size()));
+                    clipper.Begin(static_cast<int>(app.itemSetFiltered.size()));
                     while (clipper.Step())
                     {
                         for (int i = clipper.DisplayStart; i < clipper.DisplayEnd; ++i)
                         {
-                            const auto& setEntry = g_itemSets[g_itemSetFiltered[i]];
+                            const auto& setEntry = app.itemSets[app.itemSetFiltered[i]];
                             ImGui::PushID(setEntry.id);
                             std::string label = std::format("{} (ID:{})", setEntry.name, setEntry.id);
                             if (ImGui::Selectable(label.c_str()))
@@ -3595,38 +3582,38 @@ int main(int /*argc*/, char* /*argv*/[])
                 // ---- Start Outfits ----
                 ImGui::SeparatorText("Start Outfits");
 
-                if (!g_startOutfitsBuilt)
+                if (!app.startOutfitsBuilt)
                     buildStartOutfits(cModel);
 
-                if (g_startOutfits.empty())
+                if (app.startOutfits.empty())
                 {
                     ImGui::TextDisabled("No start outfits available for this race/sex.");
                 }
                 else
                 {
                     ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x - 60.0f);
-                    if (ImGui::InputText("##startOutfitSearch", g_startOutfitSearchBuf, sizeof(g_startOutfitSearchBuf),
+                    if (ImGui::InputText("##startOutfitSearch", app.startOutfitSearchBuf, sizeof(app.startOutfitSearchBuf),
                                          ImGuiInputTextFlags_EnterReturnsTrue))
-                        g_startOutfitFilterDirty = true;
+                        app.startOutfitFilterDirty = true;
                     ImGui::SameLine();
                     if (ImGui::Button("Apply##startoutfit", ImVec2(-1, 0)))
-                        g_startOutfitFilterDirty = true;
+                        app.startOutfitFilterDirty = true;
 
-                    if (g_startOutfitFilterDirty)
+                    if (app.startOutfitFilterDirty)
                         rebuildStartOutfitFilter();
 
-                    ImGui::Text("%d classes", static_cast<int>(g_startOutfitFiltered.size()));
+                    ImGui::Text("%d classes", static_cast<int>(app.startOutfitFiltered.size()));
                     ImGui::Separator();
 
                     ImGui::BeginChild("##StartOutfitList", ImVec2(0, 150), ImGuiChildFlags_Borders);
                     {
                         ImGuiListClipper clipper;
-                        clipper.Begin(static_cast<int>(g_startOutfitFiltered.size()));
+                        clipper.Begin(static_cast<int>(app.startOutfitFiltered.size()));
                         while (clipper.Step())
                         {
                             for (int i = clipper.DisplayStart; i < clipper.DisplayEnd; ++i)
                             {
-                                const auto& entry = g_startOutfits[g_startOutfitFiltered[i]];
+                                const auto& entry = app.startOutfits[app.startOutfitFiltered[i]];
                                 ImGui::PushID(entry.id);
                                 std::string label = std::format("{} (ID:{})", entry.name, entry.id);
                                 if (ImGui::Selectable(label.c_str()))
@@ -3647,11 +3634,11 @@ int main(int /*argc*/, char* /*argv*/[])
         }
 
         // ===== NPC Browser panel =====
-        if (g_showNpcBrowser)
+        if (app.showNpcBrowser)
         {
-        if (ImGui::Begin("NPC Browser", &g_showNpcBrowser))
+        if (ImGui::Begin("NPC Browser", &app.showNpcBrowser))
         {
-            if (!g_isWoWLoaded || !g_initDB)
+            if (!app.isWoWLoaded || !app.initDB)
             {
                 ImGui::TextDisabled("Game not loaded.");
             }
@@ -3659,28 +3646,28 @@ int main(int /*argc*/, char* /*argv*/[])
             {
                 ImGui::Text("Search:");
                 ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x - 60.0f);
-                if (ImGui::InputText("##npcSearch", g_npcSearchBuf, sizeof(g_npcSearchBuf),
+                if (ImGui::InputText("##npcSearch", app.npcSearchBuf, sizeof(app.npcSearchBuf),
                                      ImGuiInputTextFlags_EnterReturnsTrue))
-                    g_npcFilterDirty = true;
+                    app.npcFilterDirty = true;
                 ImGui::SameLine();
                 if (ImGui::Button("Apply##npc", ImVec2(-1, 0)))
-                    g_npcFilterDirty = true;
+                    app.npcFilterDirty = true;
 
-                if (g_npcFilterDirty)
+                if (app.npcFilterDirty)
                     rebuildNpcFilter();
 
-                ImGui::Text("%d NPCs", static_cast<int>(g_npcFiltered.size()));
+                ImGui::Text("%d NPCs", static_cast<int>(app.npcFiltered.size()));
                 ImGui::Separator();
 
                 ImGui::BeginChild("##NpcList", ImVec2(0, 0), ImGuiChildFlags_None);
                 ImGuiListClipper clipper;
-                clipper.Begin(static_cast<int>(g_npcFiltered.size()));
+                clipper.Begin(static_cast<int>(app.npcFiltered.size()));
                 while (clipper.Step())
                 {
                     for (int i = clipper.DisplayStart; i < clipper.DisplayEnd; ++i)
                     {
-                        const auto& npc = npcs[g_npcFiltered[i]];
-                        ImGui::PushID(static_cast<int>(g_npcFiltered[i]));
+                        const auto& npc = npcs[app.npcFiltered[i]];
+                        ImGui::PushID(static_cast<int>(app.npcFiltered[i]));
                         std::string label = std::format("{} (ID:{} Type:{})", npc.name, npc.id, npc.type);
                         if (ImGui::Selectable(label.c_str()))
                             loadNPC(static_cast<unsigned int>(npc.id));
@@ -3694,11 +3681,11 @@ int main(int /*argc*/, char* /*argv*/[])
         }
 
         // ===== Item Browser panel =====
-        if (g_showItemBrowser)
+        if (app.showItemBrowser)
         {
-        if (ImGui::Begin("Item Browser", &g_showItemBrowser))
+        if (ImGui::Begin("Item Browser", &app.showItemBrowser))
         {
-            if (!g_isWoWLoaded || !g_initDB)
+            if (!app.isWoWLoaded || !app.initDB)
             {
                 ImGui::TextDisabled("Game not loaded.");
             }
@@ -3706,28 +3693,28 @@ int main(int /*argc*/, char* /*argv*/[])
             {
                 ImGui::Text("Search:");
                 ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x - 60.0f);
-                if (ImGui::InputText("##itemBrowseSearch", g_itemBrowseSearchBuf, sizeof(g_itemBrowseSearchBuf),
+                if (ImGui::InputText("##itemBrowseSearch", app.itemBrowseSearchBuf, sizeof(app.itemBrowseSearchBuf),
                                      ImGuiInputTextFlags_EnterReturnsTrue))
-                    g_itemBrowseFilterDirty = true;
+                    app.itemBrowseFilterDirty = true;
                 ImGui::SameLine();
                 if (ImGui::Button("Apply##itembrowse", ImVec2(-1, 0)))
-                    g_itemBrowseFilterDirty = true;
+                    app.itemBrowseFilterDirty = true;
 
-                if (g_itemBrowseFilterDirty)
+                if (app.itemBrowseFilterDirty)
                     rebuildItemBrowseFilter();
 
-                ImGui::Text("%d items", static_cast<int>(g_itemBrowseFiltered.size()));
+                ImGui::Text("%d items", static_cast<int>(app.itemBrowseFiltered.size()));
                 ImGui::Separator();
 
                 ImGui::BeginChild("##ItemBrowseList", ImVec2(0, 0), ImGuiChildFlags_None);
                 ImGuiListClipper clipper;
-                clipper.Begin(static_cast<int>(g_itemBrowseFiltered.size()));
+                clipper.Begin(static_cast<int>(app.itemBrowseFiltered.size()));
                 while (clipper.Step())
                 {
                     for (int i = clipper.DisplayStart; i < clipper.DisplayEnd; ++i)
                     {
-                        const auto& item = items.items[g_itemBrowseFiltered[i]];
-                        ImGui::PushID(static_cast<int>(g_itemBrowseFiltered[i]));
+                        const auto& item = items.items[app.itemBrowseFiltered[i]];
+                        ImGui::PushID(static_cast<int>(app.itemBrowseFiltered[i]));
                         ImVec4 qcol = getQualityColor(item.quality);
                         ImGui::PushStyleColor(ImGuiCol_Text, qcol);
                         std::string label = std::format("{} ({})", item.name, item.id);
@@ -3744,22 +3731,22 @@ int main(int /*argc*/, char* /*argv*/[])
         }
 
         // ===== Export panel =====
-        if (g_showExport)
+        if (app.showExport)
         {
-        if (ImGui::Begin("Export", &g_showExport))
+        if (ImGui::Begin("Export", &app.showExport))
         {
             WoWModel* eModel = getLoadedModel();
             if (eModel)
             {
                 // ---- Format selector ----
                 ImGui::SeparatorText("Format");
-                if (!g_exporters.empty())
+                if (!app.exporters.empty())
                 {
-                    for (int i = 0; i < static_cast<int>(g_exporters.size()); ++i)
+                    for (int i = 0; i < static_cast<int>(app.exporters.size()); ++i)
                     {
-                        std::string label = wstringToString(g_exporters[i]->menuLabel());
-                        ImGui::RadioButton(label.c_str(), &g_selectedExporter, i);
-                        if (i < static_cast<int>(g_exporters.size()) - 1)
+                        std::string label = wstringToString(app.exporters[i]->menuLabel());
+                        ImGui::RadioButton(label.c_str(), &app.selectedExporter, i);
+                        if (i < static_cast<int>(app.exporters.size()) - 1)
                             ImGui::SameLine();
                     }
                 }
@@ -3768,44 +3755,44 @@ int main(int /*argc*/, char* /*argv*/[])
                 ImGui::SeparatorText("Output");
                 ImGui::Text("File Path:");
                 ImGui::SetNextItemWidth(-1);
-                ImGui::InputText("##exportPath", g_exportPath, sizeof(g_exportPath));
+                ImGui::InputText("##exportPath", app.exportPath, sizeof(app.exportPath));
 
                 // ---- Animation selection (only for exporters that support it) ----
-                bool canAnim = (g_selectedExporter >= 0 &&
-                                g_selectedExporter < static_cast<int>(g_exporters.size()) &&
-                                g_exporters[g_selectedExporter]->canExportAnimation());
+                bool canAnim = (app.selectedExporter >= 0 &&
+                                app.selectedExporter < static_cast<int>(app.exporters.size()) &&
+                                app.exporters[app.selectedExporter]->canExportAnimation());
 
-                if (canAnim && !g_animEntries.empty())
+                if (canAnim && !app.animEntries.empty())
                 {
                     ImGui::SeparatorText("Animations");
 
                     // Ensure checkbox vector is sized to match
-                    if (g_exportAnimChecked.size() != g_animEntries.size())
+                    if (app.exportAnimChecked.size() != app.animEntries.size())
                     {
-                        g_exportAnimChecked.assign(g_animEntries.size(), 1);
+                        app.exportAnimChecked.assign(app.animEntries.size(), 1);
                     }
 
                     if (ImGui::Button("Select All"))
-                        std::fill(g_exportAnimChecked.begin(), g_exportAnimChecked.end(), static_cast<char>(1));
+                        std::fill(app.exportAnimChecked.begin(), app.exportAnimChecked.end(), static_cast<char>(1));
                     ImGui::SameLine();
                     if (ImGui::Button("Select None"))
-                        std::fill(g_exportAnimChecked.begin(), g_exportAnimChecked.end(), static_cast<char>(0));
+                        std::fill(app.exportAnimChecked.begin(), app.exportAnimChecked.end(), static_cast<char>(0));
 
                     int checkedCount = 0;
-                    for (char b : g_exportAnimChecked) if (b) ++checkedCount;
-                    ImGui::Text("%d / %d selected", checkedCount, static_cast<int>(g_animEntries.size()));
+                    for (char b : app.exportAnimChecked) if (b) ++checkedCount;
+                    ImGui::Text("%d / %d selected", checkedCount, static_cast<int>(app.animEntries.size()));
 
                     ImGui::BeginChild("##AnimExportList", ImVec2(0, 200), ImGuiChildFlags_Borders);
                     ImGuiListClipper clipper;
-                    clipper.Begin(static_cast<int>(g_animEntries.size()));
+                    clipper.Begin(static_cast<int>(app.animEntries.size()));
                     while (clipper.Step())
                     {
                         for (int i = clipper.DisplayStart; i < clipper.DisplayEnd; ++i)
                         {
                             ImGui::PushID(i);
-                            bool checked = g_exportAnimChecked[i] != 0;
-                            if (ImGui::Checkbox(g_animEntries[i].label.c_str(), &checked))
-                                g_exportAnimChecked[i] = checked ? 1 : 0;
+                            bool checked = app.exportAnimChecked[i] != 0;
+                            if (ImGui::Checkbox(app.animEntries[i].label.c_str(), &checked))
+                                app.exportAnimChecked[i] = checked ? 1 : 0;
                             ImGui::PopID();
                         }
                     }
@@ -3822,30 +3809,30 @@ int main(int /*argc*/, char* /*argv*/[])
                 if (ImGui::Button("Export", ImVec2(-1, 0)))
                     doExport();
 
-                if (canAnim && !g_animEntries.empty() && g_selectedAnimCombo >= 0)
+                if (canAnim && !app.animEntries.empty() && app.selectedAnimCombo >= 0)
                 {
                     if (ImGui::Button("Export Current Anim Only", ImVec2(-1, 0)))
                     {
                         // Temporarily select only the current animation
-                        std::vector<char> saved = g_exportAnimChecked;
-                        g_exportAnimChecked.assign(g_animEntries.size(), 0);
-                        if (g_selectedAnimCombo < static_cast<int>(g_exportAnimChecked.size()))
-                            g_exportAnimChecked[g_selectedAnimCombo] = 1;
+                        std::vector<char> saved = app.exportAnimChecked;
+                        app.exportAnimChecked.assign(app.animEntries.size(), 0);
+                        if (app.selectedAnimCombo < static_cast<int>(app.exportAnimChecked.size()))
+                            app.exportAnimChecked[app.selectedAnimCombo] = 1;
                         doExport();
-                        g_exportAnimChecked = std::move(saved);
+                        app.exportAnimChecked = std::move(saved);
                     }
                 }
 
                 // ---- Status ----
-                if (!g_exportStatus.empty())
+                if (!app.exportStatus.empty())
                 {
-                    bool isError = g_exportStatus.find("failed") != std::string::npos ||
-                                   g_exportStatus.find("No ") != std::string::npos ||
-                                   g_exportStatus.find("Invalid") != std::string::npos;
+                    bool isError = app.exportStatus.find("failed") != std::string::npos ||
+                                   app.exportStatus.find("No ") != std::string::npos ||
+                                   app.exportStatus.find("Invalid") != std::string::npos;
                     if (isError)
-                        ImGui::TextColored(ImVec4(1.0f, 0.4f, 0.4f, 1.0f), "%s", g_exportStatus.c_str());
+                        ImGui::TextColored(ImVec4(1.0f, 0.4f, 0.4f, 1.0f), "%s", app.exportStatus.c_str());
                     else
-                        ImGui::TextColored(ImVec4(0.4f, 1.0f, 0.4f, 1.0f), "%s", g_exportStatus.c_str());
+                        ImGui::TextColored(ImVec4(0.4f, 1.0f, 0.4f, 1.0f), "%s", app.exportStatus.c_str());
                 }
             }
             else
@@ -3857,29 +3844,29 @@ int main(int /*argc*/, char* /*argv*/[])
         }
 
         // ===== Screenshot panel =====
-        if (g_showScreenshot)
+        if (app.showScreenshot)
         {
-        if (ImGui::Begin("Screenshot", &g_showScreenshot))
+        if (ImGui::Begin("Screenshot", &app.showScreenshot))
         {
             ImGui::SeparatorText("Capture Viewport");
             ImGui::Text("Output File:");
             ImGui::SetNextItemWidth(-1);
-            ImGui::InputText("##screenshotPath", g_screenshotPath, sizeof(g_screenshotPath));
+            ImGui::InputText("##screenshotPath", app.screenshotPath, sizeof(app.screenshotPath));
 
             if (ImGui::Button("Save Screenshot", ImVec2(-1, 0)))
             {
-                if (g_useCanvasOverride && g_canvasWidth > 0 && g_canvasHeight > 0)
+                if (app.useCanvasOverride && app.canvasWidth > 0 && app.canvasHeight > 0)
                 {
                     // Render to a temporary FBO at the override resolution
                     ViewportFBO tmpFbo;
-                    tmpFbo.create(g_canvasWidth, g_canvasHeight);
+                    tmpFbo.create(app.canvasWidth, app.canvasHeight);
                     tmpFbo.bind();
-                    glViewport(0, 0, g_canvasWidth, g_canvasHeight);
-                    glClearColor(g_settings.bgColor.x, g_settings.bgColor.y, g_settings.bgColor.z, 1.0f);
+                    glViewport(0, 0, app.canvasWidth, app.canvasHeight);
+                    glClearColor(app.settings.bgColor.x, app.settings.bgColor.y, app.settings.bgColor.z, 1.0f);
                     glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
                     if (SceneRenderer::state().drawGradientBg)
                     {
-                        int cw = g_canvasWidth, ch = g_canvasHeight;
+                        int cw = app.canvasWidth, ch = app.canvasHeight;
                         glMatrixMode(GL_PROJECTION); glPushMatrix(); glLoadIdentity();
                         glOrtho(0, cw, 0, ch, -1, 1);
                         glMatrixMode(GL_MODELVIEW); glPushMatrix(); glLoadIdentity();
@@ -3897,28 +3884,28 @@ int main(int /*argc*/, char* /*argv*/[])
                     }
                     else if (SceneRenderer::state().drawCheckerBg && SceneRenderer::state().checkerTex)
                     {
-                        SceneRenderer::renderCheckerboard(g_canvasWidth, g_canvasHeight);
+                        SceneRenderer::renderCheckerboard(app.canvasWidth, app.canvasHeight);
                     }
                     glClear(GL_DEPTH_BUFFER_BIT);
                     glMatrixMode(GL_PROJECTION);
                     glLoadIdentity();
                     glm::mat4 proj = glm::perspective(video.fov,
-                        static_cast<float>(g_canvasWidth) / static_cast<float>(g_canvasHeight),
+                        static_cast<float>(app.canvasWidth) / static_cast<float>(app.canvasHeight),
                         0.1f, 1280.0f * 5.0f);
                     glMultMatrixf(glm::value_ptr(proj));
                     glMatrixMode(GL_MODELVIEW);
                     glLoadIdentity();
-                    glm::mat4 view = g_camera.getViewMatrix();
+                    glm::mat4 view = app.camera.getViewMatrix();
                     glMultMatrixf(glm::value_ptr(view));
                     SceneRenderer::setupLighting();
-                    if (g_settings.drawGrid) SceneRenderer::renderGrid();
+                    if (app.settings.drawGrid) SceneRenderer::renderGrid();
                     glEnable(GL_NORMALIZE);
-                    SceneRenderer::renderObjects(g_root);
+                    SceneRenderer::renderObjects(app.root);
                     glDisable(GL_NORMALIZE);
                     tmpFbo.unbind();
 
                     // Read pixels from the temp FBO
-                    const int tw = g_canvasWidth, th = g_canvasHeight;
+                    const int tw = app.canvasWidth, th = app.canvasHeight;
                     std::vector<unsigned char> pixels(static_cast<size_t>(tw) * th * 4);
                     glBindFramebuffer(GL_FRAMEBUFFER, tmpFbo.fbo);
                     glReadPixels(0, 0, tw, th, GL_RGBA, GL_UNSIGNED_BYTE, pixels.data());
@@ -3933,138 +3920,138 @@ int main(int /*argc*/, char* /*argv*/[])
                         std::memcpy(top, bot, rowBytes);
                         std::memcpy(bot, row.data(), rowBytes);
                     }
-                    if (stbi_write_png(g_screenshotPath, tw, th, 4, pixels.data(), static_cast<int>(rowBytes)))
+                    if (stbi_write_png(app.screenshotPath, tw, th, 4, pixels.data(), static_cast<int>(rowBytes)))
                     {
-                        g_screenshotStatus = std::format("Saved ({}x{}): {}", tw, th, g_screenshotPath);
-                        LOG_INFO << "Screenshot saved to " << g_screenshotPath << " (" << tw << "x" << th << ")";
+                        app.screenshotStatus = std::format("Saved ({}x{}): {}", tw, th, app.screenshotPath);
+                        LOG_INFO << "Screenshot saved to " << app.screenshotPath << " (" << tw << "x" << th << ")";
                     }
                     else
                     {
-                        g_screenshotStatus = std::string("Failed to write: ") + g_screenshotPath;
+                        app.screenshotStatus = std::string("Failed to write: ") + app.screenshotPath;
                     }
                     tmpFbo.destroy();
                 }
                 else
                 {
-                    captureScreenshot(g_screenshotPath);
+                    captureScreenshot(app.screenshotPath);
                 }
             }
 
-            if (!g_screenshotStatus.empty())
+            if (!app.screenshotStatus.empty())
             {
-                bool isError = g_screenshotStatus.find("Failed") != std::string::npos ||
-                               g_screenshotStatus.find("No ") != std::string::npos;
+                bool isError = app.screenshotStatus.find("Failed") != std::string::npos ||
+                               app.screenshotStatus.find("No ") != std::string::npos;
                 if (isError)
-                    ImGui::TextColored(ImVec4(1.0f, 0.4f, 0.4f, 1.0f), "%s", g_screenshotStatus.c_str());
+                    ImGui::TextColored(ImVec4(1.0f, 0.4f, 0.4f, 1.0f), "%s", app.screenshotStatus.c_str());
                 else
-                    ImGui::TextColored(ImVec4(0.4f, 1.0f, 0.4f, 1.0f), "%s", g_screenshotStatus.c_str());
+                    ImGui::TextColored(ImVec4(0.4f, 1.0f, 0.4f, 1.0f), "%s", app.screenshotStatus.c_str());
             }
 
             ImGui::SeparatorText("Canvas Size Override");
-            ImGui::Checkbox("Use custom resolution", &g_useCanvasOverride);
-            if (g_useCanvasOverride)
+            ImGui::Checkbox("Use custom resolution", &app.useCanvasOverride);
+            if (app.useCanvasOverride)
             {
                 ImGui::SetNextItemWidth(100);
-                ImGui::InputInt("Width##canvas", &g_canvasWidth, 0, 0);
+                ImGui::InputInt("Width##canvas", &app.canvasWidth, 0, 0);
                 ImGui::SameLine();
                 ImGui::SetNextItemWidth(100);
-                ImGui::InputInt("Height##canvas", &g_canvasHeight, 0, 0);
-                g_canvasWidth  = std::max(1, std::min(g_canvasWidth, 8192));
-                g_canvasHeight = std::max(1, std::min(g_canvasHeight, 8192));
+                ImGui::InputInt("Height##canvas", &app.canvasHeight, 0, 0);
+                app.canvasWidth  = std::max(1, std::min(app.canvasWidth, 8192));
+                app.canvasHeight = std::max(1, std::min(app.canvasHeight, 8192));
 
                 ImGui::Text("Quick:");
                 ImGui::SameLine();
-                if (ImGui::SmallButton("1080p")) { g_canvasWidth = 1920; g_canvasHeight = 1080; }
+                if (ImGui::SmallButton("1080p")) { app.canvasWidth = 1920; app.canvasHeight = 1080; }
                 ImGui::SameLine();
-                if (ImGui::SmallButton("1440p")) { g_canvasWidth = 2560; g_canvasHeight = 1440; }
+                if (ImGui::SmallButton("1440p")) { app.canvasWidth = 2560; app.canvasHeight = 1440; }
                 ImGui::SameLine();
-                if (ImGui::SmallButton("4K"))    { g_canvasWidth = 3840; g_canvasHeight = 2160; }
+                if (ImGui::SmallButton("4K"))    { app.canvasWidth = 3840; app.canvasHeight = 2160; }
                 ImGui::SameLine();
-                if (ImGui::SmallButton("Square")) { g_canvasWidth = 2048; g_canvasHeight = 2048; }
+                if (ImGui::SmallButton("Square")) { app.canvasWidth = 2048; app.canvasHeight = 2048; }
             }
             else
             {
                 ImGui::TextDisabled("Captures at current viewport resolution (%dx%d).",
-                                    g_fbo.width, g_fbo.height);
+                                    app.fbo.width, app.fbo.height);
             }
         }
         ImGui::End();
         }
 
         // ===== Character Preset panel =====
-        if (g_showPresets)
+        if (app.showPresets)
         {
-        if (ImGui::Begin("Presets", &g_showPresets))
+        if (ImGui::Begin("Presets", &app.showPresets))
         {
             ImGui::SeparatorText("Character Preset");
             ImGui::Text("File:");
             ImGui::SetNextItemWidth(-1);
-            ImGui::InputText("##presetPath", g_presetPath, sizeof(g_presetPath));
+            ImGui::InputText("##presetPath", app.presetPath, sizeof(app.presetPath));
 
             {
-                bool canSave = g_isChar && getLoadedModel() != nullptr;
+                bool canSave = app.isChar && getLoadedModel() != nullptr;
                 if (!canSave) ImGui::BeginDisabled();
 
                 if (ImGui::Button("Save Preset", ImVec2(-1, 0)))
-                    saveCharacterPreset(g_presetPath);
+                    saveCharacterPreset(app.presetPath);
 
                 if (!canSave) ImGui::EndDisabled();
             }
 
             {
-                bool canLoad = g_isChar && getLoadedModel() != nullptr;
+                bool canLoad = app.isChar && getLoadedModel() != nullptr;
                 if (!canLoad) ImGui::BeginDisabled();
 
                 if (ImGui::Button("Load Preset", ImVec2(-1, 0)))
-                    loadCharacterPreset(g_presetPath);
+                    loadCharacterPreset(app.presetPath);
 
                 if (!canLoad) ImGui::EndDisabled();
             }
 
-            if (!g_presetStatus.empty())
+            if (!app.presetStatus.empty())
             {
-                bool isError = g_presetStatus.find("not found") != std::string::npos ||
-                               g_presetStatus.find("No ") != std::string::npos;
+                bool isError = app.presetStatus.find("not found") != std::string::npos ||
+                               app.presetStatus.find("No ") != std::string::npos;
                 if (isError)
-                    ImGui::TextColored(ImVec4(1.0f, 0.4f, 0.4f, 1.0f), "%s", g_presetStatus.c_str());
+                    ImGui::TextColored(ImVec4(1.0f, 0.4f, 0.4f, 1.0f), "%s", app.presetStatus.c_str());
                 else
-                    ImGui::TextColored(ImVec4(0.4f, 1.0f, 0.4f, 1.0f), "%s", g_presetStatus.c_str());
+                    ImGui::TextColored(ImVec4(0.4f, 1.0f, 0.4f, 1.0f), "%s", app.presetStatus.c_str());
             }
 
-            if (!g_isChar)
+            if (!app.isChar)
                 ImGui::TextDisabled("Load a character model first.");
         }
         ImGui::End();
         }
 
         // ===== Log viewer panel =====
-        if (g_showLog)
+        if (app.showLog)
         {
-        if (ImGui::Begin("Log", &g_showLog))
+        if (ImGui::Begin("Log", &app.showLog))
         {
-            if (g_logNeedsReload)
+            if (app.logNeedsReload)
                 reloadLogFile();
 
             if (ImGui::Button("Reload"))
                 reloadLogFile();
             ImGui::SameLine();
             if (ImGui::Button("Clear"))
-                g_logLines.clear();
+                app.logLines.clear();
             ImGui::SameLine();
-            ImGui::Checkbox("Auto-scroll", &g_logAutoScroll);
+            ImGui::Checkbox("Auto-scroll", &app.logAutoScroll);
             ImGui::SameLine();
-            ImGui::TextDisabled("%d lines", static_cast<int>(g_logLines.size()));
+            ImGui::TextDisabled("%d lines", static_cast<int>(app.logLines.size()));
 
             ImGui::Separator();
             ImGui::BeginChild("##LogScroll", ImVec2(0, 0), ImGuiChildFlags_None,
                               ImGuiWindowFlags_HorizontalScrollbar);
             ImGuiListClipper clipper;
-            clipper.Begin(static_cast<int>(g_logLines.size()));
+            clipper.Begin(static_cast<int>(app.logLines.size()));
             while (clipper.Step())
             {
                 for (int i = clipper.DisplayStart; i < clipper.DisplayEnd; ++i)
                 {
-                    const auto& line = g_logLines[i];
+                    const auto& line = app.logLines[i];
                     // Colour-code by log level
                     if (line.find("ERROR") != std::string::npos)
                         ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 0.4f, 0.4f, 1.0f));
@@ -4076,7 +4063,7 @@ int main(int /*argc*/, char* /*argv*/[])
                     ImGui::PopStyleColor();
                 }
             }
-            if (g_logAutoScroll && ImGui::GetScrollY() >= ImGui::GetScrollMaxY() - 20.0f)
+            if (app.logAutoScroll && ImGui::GetScrollY() >= ImGui::GetScrollMaxY() - 20.0f)
                 ImGui::SetScrollHereY(1.0f);
             ImGui::EndChild();
         }
@@ -4084,11 +4071,11 @@ int main(int /*argc*/, char* /*argv*/[])
         }
 
         // ===== Settings panel (floating popup) =====
-        if (g_showSettings)
+        if (app.showSettings)
         {
         ImGui::SetNextWindowSize(ImVec2(480, 340), ImGuiCond_FirstUseEver);
         ImGui::SetNextWindowPos(ImGui::GetMainViewport()->GetCenter(), ImGuiCond_FirstUseEver, ImVec2(0.5f, 0.5f));
-        if (ImGui::Begin("Settings", &g_showSettings, ImGuiWindowFlags_NoDocking))
+        if (ImGui::Begin("Settings", &app.showSettings, ImGuiWindowFlags_NoDocking))
         {
             // ---- Game loading section ----
             ImGui::SeparatorText("World of Warcraft");
@@ -4096,65 +4083,65 @@ int main(int /*argc*/, char* /*argv*/[])
             ImGui::Text("Game Data Path:");
             float browseWidth = ImGui::CalcTextSize("Browse...").x + ImGui::GetStyle().FramePadding.x * 2.0f;
             ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x - browseWidth - ImGui::GetStyle().ItemSpacing.x);
-            ImGui::InputText("##gamepath", g_pathBuf, sizeof(g_pathBuf));
+            ImGui::InputText("##gamepath", app.pathBuf, sizeof(app.pathBuf));
             ImGui::SameLine();
             if (ImGui::Button("Browse..."))
                 openFolderPicker();
 
             // ---- Folder Picker popup ----
-            if (g_showFolderPicker)
+            if (app.showFolderPicker)
                 ImGui::OpenPopup("Select Folder##FolderPicker");
 
-            if (ImGui::BeginPopupModal("Select Folder##FolderPicker", &g_showFolderPicker,
+            if (ImGui::BeginPopupModal("Select Folder##FolderPicker", &app.showFolderPicker,
                 ImGuiWindowFlags_AlwaysAutoResize))
             {
                 // Current path display
-                std::string curPathStr = g_folderPickerCurrent.empty()
-                    ? "My Computer" : g_folderPickerCurrent.string();
+                std::string curPathStr = app.folderPickerCurrent.empty()
+                    ? "My Computer" : app.folderPickerCurrent.string();
                 ImGui::TextColored(ImVec4(0.4f, 0.8f, 1.0f, 1.0f), "%s", curPathStr.c_str());
                 ImGui::Separator();
 
-                if (g_folderPickerNeedsRefresh)
+                if (app.folderPickerNeedsRefresh)
                     folderPickerRefresh();
 
                 // Up / back button
                 {
-                    bool canGoUp = !g_folderPickerCurrent.empty() && g_folderPickerCurrent.has_parent_path()
-                        && g_folderPickerCurrent.parent_path() != g_folderPickerCurrent;
-                    bool canGoRoot = !g_folderPickerCurrent.empty();
+                    bool canGoUp = !app.folderPickerCurrent.empty() && app.folderPickerCurrent.has_parent_path()
+                        && app.folderPickerCurrent.parent_path() != app.folderPickerCurrent;
+                    bool canGoRoot = !app.folderPickerCurrent.empty();
                     if (!canGoUp && !canGoRoot) ImGui::BeginDisabled();
                     if (ImGui::Button("Up"))
                     {
                         if (canGoUp)
-                            g_folderPickerCurrent = g_folderPickerCurrent.parent_path();
+                            app.folderPickerCurrent = app.folderPickerCurrent.parent_path();
                         else
-                            g_folderPickerCurrent.clear(); // back to drive roots
-                        g_folderPickerNeedsRefresh = true;
+                            app.folderPickerCurrent.clear(); // back to drive roots
+                        app.folderPickerNeedsRefresh = true;
                     }
                     if (!canGoUp && !canGoRoot) ImGui::EndDisabled();
                 }
 
                 ImGui::SameLine();
-                ImGui::Text("%d folders", static_cast<int>(g_folderPickerEntries.size()));
+                ImGui::Text("%d folders", static_cast<int>(app.folderPickerEntries.size()));
 
                 // Folder list
                 ImGui::BeginChild("##FolderList", ImVec2(500, 400), ImGuiChildFlags_Borders);
                 ImGuiListClipper clipper;
-                clipper.Begin(static_cast<int>(g_folderPickerEntries.size()));
+                clipper.Begin(static_cast<int>(app.folderPickerEntries.size()));
                 while (clipper.Step())
                 {
                     for (int i = clipper.DisplayStart; i < clipper.DisplayEnd; ++i)
                     {
-                        const auto& p = g_folderPickerEntries[i];
-                        std::string displayName = g_folderPickerCurrent.empty()
+                        const auto& p = app.folderPickerEntries[i];
+                        std::string displayName = app.folderPickerCurrent.empty()
                             ? p.string() : p.filename().string();
                         ImGui::PushID(i);
                         if (ImGui::Selectable(displayName.c_str(), false, ImGuiSelectableFlags_AllowDoubleClick))
                         {
                             if (ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left))
                             {
-                                g_folderPickerCurrent = p;
-                                g_folderPickerNeedsRefresh = true;
+                                app.folderPickerCurrent = p;
+                                app.folderPickerNeedsRefresh = true;
                             }
                         }
                         ImGui::PopID();
@@ -4165,31 +4152,31 @@ int main(int /*argc*/, char* /*argv*/[])
                 ImGui::Separator();
                 if (ImGui::Button("Select This Folder", ImVec2(200, 0)))
                 {
-                    if (!g_folderPickerCurrent.empty())
+                    if (!app.folderPickerCurrent.empty())
                     {
-                        strncpy_s(g_pathBuf, g_folderPickerCurrent.string().c_str(), sizeof(g_pathBuf) - 1);
-                        g_showFolderPicker = false;
+                        strncpy_s(app.pathBuf, app.folderPickerCurrent.string().c_str(), sizeof(app.pathBuf) - 1);
+                        app.showFolderPicker = false;
                         ImGui::CloseCurrentPopup();
                     }
                 }
                 ImGui::SameLine();
                 if (ImGui::Button("Cancel", ImVec2(120, 0)))
                 {
-                    g_showFolderPicker = false;
+                    app.showFolderPicker = false;
                     ImGui::CloseCurrentPopup();
                 }
                 ImGui::EndPopup();
             }
 
-            if (g_isWoWLoaded)
+            if (app.isWoWLoaded)
             {
                 ImGui::TextColored(ImVec4(0.4f, 1.0f, 0.4f, 1.0f), "Loaded: %s (%s)",
                                    GAMEDIRECTORY.version().c_str(),
                                    GAMEDIRECTORY.locale().c_str());
             }
-            else if (g_loadInProgress)
+            else if (app.loadInProgress)
             {
-                ImGui::ProgressBar(g_loadProgress);
+                ImGui::ProgressBar(app.loadProgress);
                 auto status = getLoadStatus();
                 ImGui::TextWrapped("%s", status.c_str());
             }
@@ -4202,16 +4189,16 @@ int main(int /*argc*/, char* /*argv*/[])
                     ImGui::TextDisabled("Use File > Load WoW to load game data.");
             }
 
-            ImGui::Checkbox("Enable Database Cache", &g_settings.enableDbCache);
+            ImGui::Checkbox("Enable Database Cache", &app.settings.enableDbCache);
             ImGui::TextDisabled("Speeds up loading by caching the database. Takes effect on next load.");
 
             // ---- General section ----
             ImGui::SeparatorText("General");
-            if (ImGui::Checkbox("Show Console Window", &g_settings.showConsole))
+            if (ImGui::Checkbox("Show Console Window", &app.settings.showConsole))
             {
 #ifdef _WIN32
                 if (HWND hConsole = GetConsoleWindow())
-                    ShowWindow(hConsole, g_settings.showConsole ? SW_SHOW : SW_HIDE);
+                    ShowWindow(hConsole, app.settings.showConsole ? SW_SHOW : SW_HIDE);
 #endif
             }
             ImGui::TextDisabled("Shows/hides the debug console. Useful for diagnostics.");
@@ -4221,25 +4208,25 @@ int main(int /*argc*/, char* /*argv*/[])
             ImGui::Text("Theme:");
             ImGui::SetNextItemWidth(-1);
             if (ImGui::Combo("##Theme", &ThemeManager::currentThemeRef(), ThemeManager::themeNames(), ThemeManager::themeCount()))
-                ThemeManager::apply(ThemeManager::currentTheme(), g_window);
+                ThemeManager::apply(ThemeManager::currentTheme(), app.window);
 
             // ---- Font selector ----
             ImGui::Text("Font:");
             ImGui::SetNextItemWidth(-1);
-            if (!g_availableFonts.empty())
+            if (!app.availableFonts.empty())
             {
                 if (ImGui::BeginCombo("##Font",
-                    (g_settings.currentFont >= 0 && g_settings.currentFont < static_cast<int>(g_availableFonts.size()))
-                        ? g_availableFonts[g_settings.currentFont].name.c_str() : "Default"))
+                    (app.settings.currentFont >= 0 && app.settings.currentFont < static_cast<int>(app.availableFonts.size()))
+                        ? app.availableFonts[app.settings.currentFont].name.c_str() : "Default"))
                 {
-                    for (int i = 0; i < static_cast<int>(g_availableFonts.size()); ++i)
+                    for (int i = 0; i < static_cast<int>(app.availableFonts.size()); ++i)
                     {
                         ImGui::PushID(i);
-                        const bool selected = (i == g_settings.currentFont);
-                        if (ImGui::Selectable(g_availableFonts[i].name.c_str(), selected))
+                        const bool selected = (i == app.settings.currentFont);
+                        if (ImGui::Selectable(app.availableFonts[i].name.c_str(), selected))
                         {
-                            g_settings.currentFont = i;
-                            g_fontsDirty = true;
+                            app.settings.currentFont = i;
+                            app.fontsDirty = true;
                         }
                         if (selected)
                             ImGui::SetItemDefaultFocus();
@@ -4255,23 +4242,23 @@ int main(int /*argc*/, char* /*argv*/[])
 
             ImGui::Text("Font Size:");
             ImGui::SetNextItemWidth(-1);
-            if (ImGui::SliderFloat("##FontSize", &g_settings.fontSize, 10.0f, 40.0f, "%.0f px"))
-                g_fontsDirty = true;
+            if (ImGui::SliderFloat("##FontSize", &app.settings.fontSize, 10.0f, 40.0f, "%.0f px"))
+                app.fontsDirty = true;
             ImGui::TextDisabled("Drop .ttf or .otf files into the fonts/ folder to add more.");
 
             ImGui::Separator();
             ImGui::Checkbox("ImGui Demo Window", &show_demo_window);
             ImGui::Separator();
             ImGui::Text("Camera  yaw=%.1f  pitch=%.1f  radius=%.2f",
-                        g_camera.yaw(), g_camera.pitch(), g_camera.radius());
+                        app.camera.yaw(), app.camera.pitch(), app.camera.radius());
             ImGui::Text("GL_RENDERER: %s", glGetString(GL_RENDERER));
 
             // ---- Save ----
             ImGui::SeparatorText("Save");
             if (ImGui::Button("Save Settings", ImVec2(-1, 0)))
             {
-                g_settings.gamePath = g_pathBuf;
-                g_settings.save();
+                app.settings.gamePath = app.pathBuf;
+                app.settings.save();
             }
             ImGui::TextDisabled("Saves preferences and UI layout.");
         }
@@ -4279,23 +4266,23 @@ int main(int /*argc*/, char* /*argv*/[])
         }
 
         // ===== URL Import dialog =====
-        if (g_showImportDialog)
+        if (app.showImportDialog)
             ImGui::OpenPopup("Import from URL##ImportModal");
 
-        if (ImGui::BeginPopupModal("Import from URL##ImportModal", &g_showImportDialog,
+        if (ImGui::BeginPopupModal("Import from URL##ImportModal", &app.showImportDialog,
             ImGuiWindowFlags_AlwaysAutoResize))
         {
             ImGui::Text("Paste an Armory, Battle.net, or Wowhead URL:");
             ImGui::Spacing();
 
-            if (g_importPopupJustOpened)
+            if (app.importPopupJustOpened)
             {
                 ImGui::SetKeyboardFocusHere();
-                g_importPopupJustOpened = false;
+                app.importPopupJustOpened = false;
             }
 
             ImGui::SetNextItemWidth(500);
-            ImGui::InputText("##importUrl", g_importUrlBuf, sizeof(g_importUrlBuf));
+            ImGui::InputText("##importUrl", app.importUrlBuf, sizeof(app.importUrlBuf));
 
             ImGui::Spacing();
             if (ImGui::Button("Import", ImVec2(120, 0)))
@@ -4303,28 +4290,28 @@ int main(int /*argc*/, char* /*argv*/[])
             ImGui::SameLine();
             if (ImGui::Button("Cancel", ImVec2(120, 0)))
             {
-                g_showImportDialog = false;
+                app.showImportDialog = false;
                 ImGui::CloseCurrentPopup();
             }
 
-            if (!g_importStatus.empty())
+            if (!app.importStatus.empty())
             {
                 ImGui::Spacing();
-                bool isError = g_importStatus.find("failed") != std::string::npos ||
-                               g_importStatus.find("No ") != std::string::npos ||
-                               g_importStatus.find("not") != std::string::npos ||
-                               g_importStatus.find("Please") != std::string::npos;
+                bool isError = app.importStatus.find("failed") != std::string::npos ||
+                               app.importStatus.find("No ") != std::string::npos ||
+                               app.importStatus.find("not") != std::string::npos ||
+                               app.importStatus.find("Please") != std::string::npos;
                 if (isError)
-                    ImGui::TextColored(ImVec4(1.0f, 0.4f, 0.4f, 1.0f), "%s", g_importStatus.c_str());
+                    ImGui::TextColored(ImVec4(1.0f, 0.4f, 0.4f, 1.0f), "%s", app.importStatus.c_str());
                 else
-                    ImGui::TextColored(ImVec4(0.4f, 1.0f, 0.4f, 1.0f), "%s", g_importStatus.c_str());
+                    ImGui::TextColored(ImVec4(0.4f, 1.0f, 0.4f, 1.0f), "%s", app.importStatus.c_str());
             }
 
             ImGui::EndPopup();
         }
 
         // ===== Config selection modal (multiple WoW installs) =====
-        if (g_showConfigPopup)
+        if (app.showConfigPopup)
             ImGui::OpenPopup("Select WoW Config");
 
         if (ImGui::BeginPopupModal("Select WoW Config", nullptr, ImGuiWindowFlags_AlwaysAutoResize))
@@ -4332,25 +4319,25 @@ int main(int /*argc*/, char* /*argv*/[])
             ImGui::Text("Multiple configurations found. Please select one:");
             ImGui::Separator();
 
-            for (int i = 0; i < static_cast<int>(g_pendingConfigs.size()); ++i)
+            for (int i = 0; i < static_cast<int>(app.pendingConfigs.size()); ++i)
             {
-                std::string label = g_pendingConfigs[i].locale + " - " + g_pendingConfigs[i].product;
-                if (!g_pendingConfigs[i].version.empty())
-                    label += " (" + g_pendingConfigs[i].version + ")";
-                ImGui::RadioButton(label.c_str(), &g_selectedConfig, i);
+                std::string label = app.pendingConfigs[i].locale + " - " + app.pendingConfigs[i].product;
+                if (!app.pendingConfigs[i].version.empty())
+                    label += " (" + app.pendingConfigs[i].version + ")";
+                ImGui::RadioButton(label.c_str(), &app.selectedConfig, i);
             }
 
             ImGui::Separator();
             if (ImGui::Button("OK", ImVec2(120, 0)))
             {
-                g_showConfigPopup = false;
+                app.showConfigPopup = false;
                 ImGui::CloseCurrentPopup();
-                launchLoadThread(g_pendingConfigs[g_selectedConfig]);
+                launchLoadThread(app.pendingConfigs[app.selectedConfig]);
             }
             ImGui::SameLine();
             if (ImGui::Button("Cancel", ImVec2(120, 0)))
             {
-                g_showConfigPopup = false;
+                app.showConfigPopup = false;
                 setLoadStatus("Load cancelled.");
                 ImGui::CloseCurrentPopup();
             }
@@ -4361,10 +4348,10 @@ int main(int /*argc*/, char* /*argv*/[])
             ImGui::ShowDemoWindow(&show_demo_window);
 
         // ===== About Dialog =====
-        if (g_showAboutDialog)
+        if (app.showAboutDialog)
             ImGui::OpenPopup("About WoW Model Viewer");
 
-        if (ImGui::BeginPopupModal("About WoW Model Viewer", &g_showAboutDialog,
+        if (ImGui::BeginPopupModal("About WoW Model Viewer", &app.showAboutDialog,
                                     ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoMove))
         {
             // Convert wstring title to narrow UTF-8 string for ImGui
@@ -4394,26 +4381,26 @@ int main(int /*argc*/, char* /*argv*/[])
 
             if (ImGui::Button("Close", ImVec2(120, 0)))
             {
-                g_showAboutDialog = false;
+                app.showAboutDialog = false;
                 ImGui::CloseCurrentPopup();
             }
             ImGui::EndPopup();
         }
 
         // ===== Language / Locale Dialog =====
-        if (g_showLanguageDialog)
+        if (app.showLanguageDialog)
             ImGui::OpenPopup("Language / Locale");
 
-        if (ImGui::BeginPopupModal("Language / Locale", &g_showLanguageDialog,
+        if (ImGui::BeginPopupModal("Language / Locale", &app.showLanguageDialog,
                                     ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoMove))
         {
-            if (!g_isWoWLoaded)
+            if (!app.isWoWLoaded)
             {
                 ImGui::TextWrapped("Game data is not loaded. Load WoW first, then change the locale here.");
                 ImGui::Spacing();
                 if (ImGui::Button("OK", ImVec2(120, 0)))
                 {
-                    g_showLanguageDialog = false;
+                    app.showLanguageDialog = false;
                     ImGui::CloseCurrentPopup();
                 }
             }
@@ -4434,13 +4421,13 @@ int main(int /*argc*/, char* /*argv*/[])
 
                     if (ImGui::Button(label.c_str(), ImVec2(-1, 0)))
                     {
-                        g_showLanguageDialog = false;
+                        app.showLanguageDialog = false;
                         ImGui::CloseCurrentPopup();
                         // Trigger a reload with the selected config
-                        g_isWoWLoaded = false;
-                        g_initDB = false;
-                        g_loadInProgress = true;
-                        g_loadProgress = 0.0f;
+                        app.isWoWLoaded = false;
+                        app.initDB = false;
+                        app.loadInProgress = true;
+                        app.loadProgress = 0.0f;
                         setLoadStatus("Reloading with locale: " + configs[i].locale + "...");
                         launchLoadThread(configs[i]);
                     }
@@ -4452,7 +4439,7 @@ int main(int /*argc*/, char* /*argv*/[])
                 ImGui::Spacing();
                 if (ImGui::Button("Cancel", ImVec2(120, 0)))
                 {
-                    g_showLanguageDialog = false;
+                    app.showLanguageDialog = false;
                     ImGui::CloseCurrentPopup();
                 }
             }
@@ -4472,29 +4459,29 @@ int main(int /*argc*/, char* /*argv*/[])
     }
 
     // ---- Cleanup ----
-    if (g_loadThread.joinable())
-        g_loadThread.join();
+    if (app.loadThread.joinable())
+        app.loadThread.join();
 
     FileBrowserPanel::shutdown();
 
-    if (g_root)
+    if (app.root)
     {
-        g_root->delChildren();
-        delete g_root;
-        g_root = nullptr;
+        app.root->delChildren();
+        delete app.root;
+        app.root = nullptr;
     }
 
-    g_fbo.destroy();
+    app.fbo.destroy();
 
     SceneRenderer::shutdown();
 
-    for (auto* e : g_exporters)
+    for (auto* e : app.exporters)
         delete e;
-    g_exporters.clear();
+    app.exporters.clear();
 
-    for (auto* imp : g_importers)
+    for (auto* imp : app.importers)
         delete imp;
-    g_importers.clear();
+    app.importers.clear();
 
     ImGui_ImplOpenGL3_Shutdown();
     ImGui_ImplGlfw_Shutdown();
