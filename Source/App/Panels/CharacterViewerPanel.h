@@ -6,6 +6,8 @@
 
 #include <glm/glm.hpp>
 
+#include "AnimationPanel.h"
+
 class GameFile;
 class WoWModel;
 class Attachment;
@@ -27,12 +29,8 @@ struct CustomizationOption
     int selectedIndex = 0;
 };
 
-/// Animation entry for the compact anim bar in the center column.
-struct AnimEntry
-{
-    std::string label;
-    int animIndex = 0;
-};
+/// Animation entry — shared definition from AnimationPanel.
+using AnimEntry = AnimationPanel::AnimEntry;
 
 /// Per-frame context passed by the caller so the panel never touches globals.
 struct DrawContext
