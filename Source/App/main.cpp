@@ -60,6 +60,7 @@
 #include "CharacterViewerPanel.h"
 #include "AnimationPanel.h"
 #include "ViewportOptionsPanel.h"
+#include "ExportPanel.h"
 
 // Game loading
 #include "Game.h"
@@ -2085,79 +2086,6 @@ static void dismountCharacter()
     LOG_INFO << "Character dismounted.";
 }
 
-// ---- Export helper --------------------------------------------------------
-static std::wstring stringToWstring(const std::string& s)
-{
-    std::wstring ws;
-    ws.reserve(s.size());
-    for (char c : s)
-        ws.push_back(static_cast<wchar_t>(static_cast<unsigned char>(c)));
-    return ws;
-}
-
-static void doExport()
-{
-    WoWModel* model = getLoadedModel();
-    if (!model)
-    {
-        app.exportStatus = "No model loaded.";
-        return;
-    }
-
-    if (app.selectedExporter < 0 || app.selectedExporter >= static_cast<int>(app.exporters.size()))
-    {
-        app.exportStatus = "Invalid exporter selection.";
-        return;
-    }
-
-    ExporterPlugin* exporter = app.exporters[app.selectedExporter];
-
-    // Build file path with appropriate extension
-    std::string pathStr{app.exportPath};
-    // Extract extension from the exporter filter (e.g. "*.fbx" -> ".fbx")
-    std::wstring filter = exporter->fileSaveFilter();
-    std::string ext;
-    {
-        std::string f = wstringToString(filter);
-        auto pos = f.find("*.");
-        if (pos != std::string::npos)
-        {
-            auto end = f.find_first_of(";|)", pos);
-            ext = f.substr(pos + 1, (end == std::string::npos) ? std::string::npos : end - pos - 1);
-        }
-    }
-
-    // Append extension if the user hasn't already
-    if (!ext.empty() && !core::endsWithIgnoreCase(pathStr, ext))
-        pathStr += ext;
-
-    // If exporter supports animation, gather selected anim indices
-    if (exporter->canExportAnimation())
-    {
-        std::vector<int> animsToExport;
-        for (size_t i = 0; i < app.exportAnimChecked.size() && i < model->anims.size(); ++i)
-        {
-            if (app.exportAnimChecked[i])
-                animsToExport.push_back(model->anims[i].Index);
-        }
-        exporter->setAnimationsToExport(animsToExport);
-    }
-
-    std::wstring wpath = stringToWstring(pathStr);
-    LOG_INFO << "Exporting model to: " << pathStr;
-
-    if (exporter->exportModel(model, wpath))
-    {
-        app.exportStatus = "Export successful: " + pathStr;
-        LOG_INFO << "Export complete: " << pathStr;
-    }
-    else
-    {
-        app.exportStatus = "Export failed: " + pathStr;
-        LOG_ERROR << "Export failed: " << pathStr;
-    }
-}
-
 // ---- Handle viewport input ------------------------------------------------
 static void handleViewportInput()
 {
@@ -3262,110 +3190,18 @@ int main(int /*argc*/, char* /*argv*/[])
         {
         if (ImGui::Begin("Export", &app.showExport))
         {
-            WoWModel* eModel = getLoadedModel();
-            if (eModel)
-            {
-                // ---- Format selector ----
-                ImGui::SeparatorText("Format");
-                if (!app.exporters.empty())
-                {
-                    for (int i = 0; i < static_cast<int>(app.exporters.size()); ++i)
-                    {
-                        std::string label = wstringToString(app.exporters[i]->menuLabel());
-                        ImGui::RadioButton(label.c_str(), &app.selectedExporter, i);
-                        if (i < static_cast<int>(app.exporters.size()) - 1)
-                            ImGui::SameLine();
-                    }
-                }
+            ExportPanel::DrawContext exCtx;
+            exCtx.getLoadedModel    = getLoadedModel;
+            exCtx.exporters         = &app.exporters;
+            exCtx.selectedExporter  = &app.selectedExporter;
+            exCtx.animEntries       = &app.animEntries;
+            exCtx.exportAnimChecked = &app.exportAnimChecked;
+            exCtx.selectedAnimCombo = &app.selectedAnimCombo;
+            exCtx.exportPath        = app.exportPath;
+            exCtx.exportPathSize    = sizeof(app.exportPath);
+            exCtx.exportStatus      = &app.exportStatus;
 
-                // ---- Output path ----
-                ImGui::SeparatorText("Output");
-                ImGui::Text("File Path:");
-                ImGui::SetNextItemWidth(-1);
-                ImGui::InputText("##exportPath", app.exportPath, sizeof(app.exportPath));
-
-                // ---- Animation selection (only for exporters that support it) ----
-                bool canAnim = (app.selectedExporter >= 0 &&
-                                app.selectedExporter < static_cast<int>(app.exporters.size()) &&
-                                app.exporters[app.selectedExporter]->canExportAnimation());
-
-                if (canAnim && !app.animEntries.empty())
-                {
-                    ImGui::SeparatorText("Animations");
-
-                    // Ensure checkbox vector is sized to match
-                    if (app.exportAnimChecked.size() != app.animEntries.size())
-                    {
-                        app.exportAnimChecked.assign(app.animEntries.size(), 1);
-                    }
-
-                    if (ImGui::Button("Select All"))
-                        std::fill(app.exportAnimChecked.begin(), app.exportAnimChecked.end(), static_cast<char>(1));
-                    ImGui::SameLine();
-                    if (ImGui::Button("Select None"))
-                        std::fill(app.exportAnimChecked.begin(), app.exportAnimChecked.end(), static_cast<char>(0));
-
-                    int checkedCount = 0;
-                    for (char b : app.exportAnimChecked) if (b) ++checkedCount;
-                    ImGui::Text("%d / %d selected", checkedCount, static_cast<int>(app.animEntries.size()));
-
-                    ImGui::BeginChild("##AnimExportList", ImVec2(0, 200), ImGuiChildFlags_Borders);
-                    ImGuiListClipper clipper;
-                    clipper.Begin(static_cast<int>(app.animEntries.size()));
-                    while (clipper.Step())
-                    {
-                        for (int i = clipper.DisplayStart; i < clipper.DisplayEnd; ++i)
-                        {
-                            ImGui::PushID(i);
-                            bool checked = app.exportAnimChecked[i] != 0;
-                            if (ImGui::Checkbox(app.animEntries[i].label.c_str(), &checked))
-                                app.exportAnimChecked[i] = checked ? 1 : 0;
-                            ImGui::PopID();
-                        }
-                    }
-                    ImGui::EndChild();
-                }
-                else if (canAnim)
-                {
-                    ImGui::SeparatorText("Animations");
-                    ImGui::TextDisabled("No animations on current model.");
-                }
-
-                // ---- Export buttons ----
-                ImGui::Separator();
-                if (ImGui::Button("Export", ImVec2(-1, 0)))
-                    doExport();
-
-                if (canAnim && !app.animEntries.empty() && app.selectedAnimCombo >= 0)
-                {
-                    if (ImGui::Button("Export Current Anim Only", ImVec2(-1, 0)))
-                    {
-                        // Temporarily select only the current animation
-                        std::vector<char> saved = app.exportAnimChecked;
-                        app.exportAnimChecked.assign(app.animEntries.size(), 0);
-                        if (app.selectedAnimCombo < static_cast<int>(app.exportAnimChecked.size()))
-                            app.exportAnimChecked[app.selectedAnimCombo] = 1;
-                        doExport();
-                        app.exportAnimChecked = std::move(saved);
-                    }
-                }
-
-                // ---- Status ----
-                if (!app.exportStatus.empty())
-                {
-                    bool isError = app.exportStatus.find("failed") != std::string::npos ||
-                                   app.exportStatus.find("No ") != std::string::npos ||
-                                   app.exportStatus.find("Invalid") != std::string::npos;
-                    if (isError)
-                        ImGui::TextColored(ImVec4(1.0f, 0.4f, 0.4f, 1.0f), "%s", app.exportStatus.c_str());
-                    else
-                        ImGui::TextColored(ImVec4(0.4f, 1.0f, 0.4f, 1.0f), "%s", app.exportStatus.c_str());
-                }
-            }
-            else
-            {
-                ImGui::TextDisabled("No model loaded.");
-            }
+            ExportPanel::draw(exCtx);
         }
         ImGui::End();
         }
