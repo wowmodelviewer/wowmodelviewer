@@ -18,6 +18,10 @@ set(src main.cpp
          AppSettings.cpp
          SceneRenderer.cpp
          ThemeManager.cpp
+         GameLoader.cpp
+         ModelLoader.cpp
+         PresetManager.cpp
+         URLImportHandler.cpp
          Panels/FileBrowserPanel.cpp
          Panels/CharacterViewerPanel.cpp
          Panels/AnimationPanel.cpp
