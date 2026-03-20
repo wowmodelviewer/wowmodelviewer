@@ -61,6 +61,7 @@
 #include "AnimationPanel.h"
 #include "ViewportOptionsPanel.h"
 #include "ExportPanel.h"
+#include "ScreenshotPanel.h"
 
 // Game loading
 #include "Game.h"
@@ -1445,48 +1446,7 @@ static void loadModel(GameFile* file)
     LOG_INFO << "Model loaded: " << model->name();
 }
 
-// ---- Screenshot (capture FBO to PNG) --------------------------------------
-static void captureScreenshot(const char* path)
-{
-    if (app.fbo.width <= 0 || app.fbo.height <= 0 || !app.fbo.fbo)
-    {
-        app.screenshotStatus = "No viewport to capture.";
-        return;
-    }
-
-    const int w = app.fbo.width;
-    const int h = app.fbo.height;
-    std::vector<unsigned char> pixels(static_cast<size_t>(w) * h * 4);
-
-    glBindFramebuffer(GL_FRAMEBUFFER, app.fbo.fbo);
-    glReadPixels(0, 0, w, h, GL_RGBA, GL_UNSIGNED_BYTE, pixels.data());
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
-    // Flip vertically (OpenGL is bottom-up, PNG is top-down)
-    const size_t rowBytes = static_cast<size_t>(w) * 4;
-    std::vector<unsigned char> row(rowBytes);
-    for (int y = 0; y < h / 2; ++y)
-    {
-        unsigned char* top = pixels.data() + y * rowBytes;
-        unsigned char* bot = pixels.data() + (h - 1 - y) * rowBytes;
-        std::memcpy(row.data(), top, rowBytes);
-        std::memcpy(top, bot, rowBytes);
-        std::memcpy(bot, row.data(), rowBytes);
-    }
-
-    if (stbi_write_png(path, w, h, 4, pixels.data(), static_cast<int>(rowBytes)))
-    {
-        app.screenshotStatus = std::string("Saved: ") + path;
-        LOG_INFO << "Screenshot saved to " << path;
-    }
-    else
-    {
-        app.screenshotStatus = std::string("Failed to write: ") + path;
-        LOG_ERROR << "Screenshot failed: " << path;
-    }
-}
-
-// ---- Save/Load Character Preset -------------------------------------------
+// ---- Save/Load Character Preset
 static void saveCharacterPreset(const char* path)
 {
     WoWModel* model = getLoadedModel();
@@ -3211,132 +3171,21 @@ int main(int /*argc*/, char* /*argv*/[])
         {
         if (ImGui::Begin("Screenshot", &app.showScreenshot))
         {
-            ImGui::SeparatorText("Capture Viewport");
-            ImGui::Text("Output File:");
-            ImGui::SetNextItemWidth(-1);
-            ImGui::InputText("##screenshotPath", app.screenshotPath, sizeof(app.screenshotPath));
+            ScreenshotPanel::DrawContext ssCtx;
+            ssCtx.screenshotPath     = app.screenshotPath;
+            ssCtx.screenshotPathSize = sizeof(app.screenshotPath);
+            ssCtx.screenshotStatus   = &app.screenshotStatus;
+            ssCtx.useCanvasOverride  = &app.useCanvasOverride;
+            ssCtx.canvasWidth        = &app.canvasWidth;
+            ssCtx.canvasHeight       = &app.canvasHeight;
+            ssCtx.fbo                = &app.fbo;
+            ssCtx.camera             = &app.camera;
+            ssCtx.root               = app.root;
+            ssCtx.fov                = video.fov;
+            ssCtx.bgColor            = app.settings.bgColor;
+            ssCtx.drawGrid           = app.settings.drawGrid;
 
-            if (ImGui::Button("Save Screenshot", ImVec2(-1, 0)))
-            {
-                if (app.useCanvasOverride && app.canvasWidth > 0 && app.canvasHeight > 0)
-                {
-                    // Render to a temporary FBO at the override resolution
-                    ViewportFBO tmpFbo;
-                    tmpFbo.create(app.canvasWidth, app.canvasHeight);
-                    tmpFbo.bind();
-                    glViewport(0, 0, app.canvasWidth, app.canvasHeight);
-                    glClearColor(app.settings.bgColor.x, app.settings.bgColor.y, app.settings.bgColor.z, 1.0f);
-                    glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
-                    if (SceneRenderer::state().drawGradientBg)
-                    {
-                        int cw = app.canvasWidth, ch = app.canvasHeight;
-                        glMatrixMode(GL_PROJECTION); glPushMatrix(); glLoadIdentity();
-                        glOrtho(0, cw, 0, ch, -1, 1);
-                        glMatrixMode(GL_MODELVIEW); glPushMatrix(); glLoadIdentity();
-                        glDisable(GL_DEPTH_TEST); glDisable(GL_LIGHTING); glDisable(GL_TEXTURE_2D);
-                        glBegin(GL_QUADS);
-                        glColor3f(SceneRenderer::state().gradientBottom.x, SceneRenderer::state().gradientBottom.y, SceneRenderer::state().gradientBottom.z);
-                        glVertex2f(0, 0); glVertex2f(static_cast<float>(cw), 0);
-                        glColor3f(SceneRenderer::state().gradientTop.x, SceneRenderer::state().gradientTop.y, SceneRenderer::state().gradientTop.z);
-                        glVertex2f(static_cast<float>(cw), static_cast<float>(ch));
-                        glVertex2f(0, static_cast<float>(ch));
-                        glEnd();
-                        glEnable(GL_DEPTH_TEST);
-                        glMatrixMode(GL_PROJECTION); glPopMatrix();
-                        glMatrixMode(GL_MODELVIEW); glPopMatrix();
-                    }
-                    else if (SceneRenderer::state().drawCheckerBg && SceneRenderer::state().checkerTex)
-                    {
-                        SceneRenderer::renderCheckerboard(app.canvasWidth, app.canvasHeight);
-                    }
-                    glClear(GL_DEPTH_BUFFER_BIT);
-                    glMatrixMode(GL_PROJECTION);
-                    glLoadIdentity();
-                    glm::mat4 proj = glm::perspective(video.fov,
-                        static_cast<float>(app.canvasWidth) / static_cast<float>(app.canvasHeight),
-                        0.1f, 1280.0f * 5.0f);
-                    glMultMatrixf(glm::value_ptr(proj));
-                    glMatrixMode(GL_MODELVIEW);
-                    glLoadIdentity();
-                    glm::mat4 view = app.camera.getViewMatrix();
-                    glMultMatrixf(glm::value_ptr(view));
-                    SceneRenderer::setupLighting();
-                    if (app.settings.drawGrid) SceneRenderer::renderGrid();
-                    glEnable(GL_NORMALIZE);
-                    SceneRenderer::renderObjects(app.root);
-                    glDisable(GL_NORMALIZE);
-                    tmpFbo.unbind();
-
-                    // Read pixels from the temp FBO
-                    const int tw = app.canvasWidth, th = app.canvasHeight;
-                    std::vector<unsigned char> pixels(static_cast<size_t>(tw) * th * 4);
-                    glBindFramebuffer(GL_FRAMEBUFFER, tmpFbo.fbo);
-                    glReadPixels(0, 0, tw, th, GL_RGBA, GL_UNSIGNED_BYTE, pixels.data());
-                    glBindFramebuffer(GL_FRAMEBUFFER, 0);
-                    const size_t rowBytes = static_cast<size_t>(tw) * 4;
-                    std::vector<unsigned char> row(rowBytes);
-                    for (int y = 0; y < th / 2; ++y)
-                    {
-                        unsigned char* top = pixels.data() + y * rowBytes;
-                        unsigned char* bot = pixels.data() + (th - 1 - y) * rowBytes;
-                        std::memcpy(row.data(), top, rowBytes);
-                        std::memcpy(top, bot, rowBytes);
-                        std::memcpy(bot, row.data(), rowBytes);
-                    }
-                    if (stbi_write_png(app.screenshotPath, tw, th, 4, pixels.data(), static_cast<int>(rowBytes)))
-                    {
-                        app.screenshotStatus = std::format("Saved ({}x{}): {}", tw, th, app.screenshotPath);
-                        LOG_INFO << "Screenshot saved to " << app.screenshotPath << " (" << tw << "x" << th << ")";
-                    }
-                    else
-                    {
-                        app.screenshotStatus = std::string("Failed to write: ") + app.screenshotPath;
-                    }
-                    tmpFbo.destroy();
-                }
-                else
-                {
-                    captureScreenshot(app.screenshotPath);
-                }
-            }
-
-            if (!app.screenshotStatus.empty())
-            {
-                bool isError = app.screenshotStatus.find("Failed") != std::string::npos ||
-                               app.screenshotStatus.find("No ") != std::string::npos;
-                if (isError)
-                    ImGui::TextColored(ImVec4(1.0f, 0.4f, 0.4f, 1.0f), "%s", app.screenshotStatus.c_str());
-                else
-                    ImGui::TextColored(ImVec4(0.4f, 1.0f, 0.4f, 1.0f), "%s", app.screenshotStatus.c_str());
-            }
-
-            ImGui::SeparatorText("Canvas Size Override");
-            ImGui::Checkbox("Use custom resolution", &app.useCanvasOverride);
-            if (app.useCanvasOverride)
-            {
-                ImGui::SetNextItemWidth(100);
-                ImGui::InputInt("Width##canvas", &app.canvasWidth, 0, 0);
-                ImGui::SameLine();
-                ImGui::SetNextItemWidth(100);
-                ImGui::InputInt("Height##canvas", &app.canvasHeight, 0, 0);
-                app.canvasWidth  = std::max(1, std::min(app.canvasWidth, 8192));
-                app.canvasHeight = std::max(1, std::min(app.canvasHeight, 8192));
-
-                ImGui::Text("Quick:");
-                ImGui::SameLine();
-                if (ImGui::SmallButton("1080p")) { app.canvasWidth = 1920; app.canvasHeight = 1080; }
-                ImGui::SameLine();
-                if (ImGui::SmallButton("1440p")) { app.canvasWidth = 2560; app.canvasHeight = 1440; }
-                ImGui::SameLine();
-                if (ImGui::SmallButton("4K"))    { app.canvasWidth = 3840; app.canvasHeight = 2160; }
-                ImGui::SameLine();
-                if (ImGui::SmallButton("Square")) { app.canvasWidth = 2048; app.canvasHeight = 2048; }
-            }
-            else
-            {
-                ImGui::TextDisabled("Captures at current viewport resolution (%dx%d).",
-                                    app.fbo.width, app.fbo.height);
-            }
+            ScreenshotPanel::draw(ssCtx);
         }
         ImGui::End();
         }
