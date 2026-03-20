@@ -63,6 +63,7 @@
 #include "ExportPanel.h"
 #include "ScreenshotPanel.h"
 #include "LogPanel.h"
+#include "PresetsPanel.h"
 
 // Game loading
 #include "Game.h"
@@ -3183,43 +3184,16 @@ int main(int /*argc*/, char* /*argv*/[])
         {
         if (ImGui::Begin("Presets", &app.showPresets))
         {
-            ImGui::SeparatorText("Character Preset");
-            ImGui::Text("File:");
-            ImGui::SetNextItemWidth(-1);
-            ImGui::InputText("##presetPath", app.presetPath, sizeof(app.presetPath));
+            PresetsPanel::DrawContext preCtx;
+            preCtx.presetPath     = app.presetPath;
+            preCtx.presetPathSize = sizeof(app.presetPath);
+            preCtx.presetStatus   = &app.presetStatus;
+            preCtx.isChar         = app.isChar;
+            preCtx.hasModel       = getLoadedModel() != nullptr;
+            preCtx.savePreset     = [](const char* p) { saveCharacterPreset(p); };
+            preCtx.loadPreset     = [](const char* p) { loadCharacterPreset(p); };
 
-            {
-                bool canSave = app.isChar && getLoadedModel() != nullptr;
-                if (!canSave) ImGui::BeginDisabled();
-
-                if (ImGui::Button("Save Preset", ImVec2(-1, 0)))
-                    saveCharacterPreset(app.presetPath);
-
-                if (!canSave) ImGui::EndDisabled();
-            }
-
-            {
-                bool canLoad = app.isChar && getLoadedModel() != nullptr;
-                if (!canLoad) ImGui::BeginDisabled();
-
-                if (ImGui::Button("Load Preset", ImVec2(-1, 0)))
-                    loadCharacterPreset(app.presetPath);
-
-                if (!canLoad) ImGui::EndDisabled();
-            }
-
-            if (!app.presetStatus.empty())
-            {
-                bool isError = app.presetStatus.find("not found") != std::string::npos ||
-                               app.presetStatus.find("No ") != std::string::npos;
-                if (isError)
-                    ImGui::TextColored(ImVec4(1.0f, 0.4f, 0.4f, 1.0f), "%s", app.presetStatus.c_str());
-                else
-                    ImGui::TextColored(ImVec4(0.4f, 1.0f, 0.4f, 1.0f), "%s", app.presetStatus.c_str());
-            }
-
-            if (!app.isChar)
-                ImGui::TextDisabled("Load a character model first.");
+            PresetsPanel::draw(preCtx);
         }
         ImGui::End();
         }
