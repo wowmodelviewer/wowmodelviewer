@@ -16,6 +16,9 @@ include_directories(Common)
 set(src CASC/CASCFile.cpp
       CASC/CASCFolder.cpp
       CASC/HardDriveFile.cpp
+      Database/GameDatabase.cpp
+      Database/dbfile.cpp
+      Database/DBDFile.cpp
       Database/WoWDatabase.cpp
       Database/DB2Table.cpp
       Database/WDCReader.cpp
@@ -46,6 +49,8 @@ set(src CASC/CASCFile.cpp
       Texture/TextureManager.cpp
       Texture/ddslib.cpp
       Character/CharDetails.cpp
+      Character/CharInfos.cpp
+      Character/NPCInfos.cpp
       Character/RaceInfos.cpp
       Character/TabardDetails.cpp
       Character/WoWItem.cpp
@@ -59,6 +64,9 @@ set(headers CASC/CASCChunks.h
       CASC/CASCFile.h
       CASC/CASCFolder.h
       CASC/HardDriveFile.h
+      Database/GameDatabase.h
+      Database/dbfile.h
+      Database/DBDFile.h
       Database/WoWDatabase.h
       Database/DB2Table.h
       Database/WDCReader.h
@@ -92,6 +100,8 @@ set(headers CASC/CASCChunks.h
       Texture/ddslib.h
       Character/CharDetails.h
       Character/CharDetailsEvent.h
+      Character/CharInfos.h
+      Character/NPCInfos.h
       Character/RaceInfos.h
       Character/TabardDetails.h
       Character/WoWItem.h
@@ -116,5 +126,5 @@ set(NAME wow)
 add_library(${NAME} STATIC ${src} ${headers})
 set_property(TARGET ${NAME} PROPERTY FOLDER "libraries")
 
-target_link_libraries(${NAME} pugixml-static ${extralibs} glu32)
+target_link_libraries(${NAME} pugixml-static nlohmann_json::nlohmann_json ${extralibs} glu32)
 add_dependencies(${NAME} casc_static)

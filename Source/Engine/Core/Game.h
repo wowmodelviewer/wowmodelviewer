@@ -2,7 +2,8 @@
 
 #include <string>
 #include "GameFolder.h"
-#include "GameDatabase.h"
+
+namespace core { class GameDatabase; }
 
 #define GAMEDIRECTORY core::Game::instance().folder()
 #define GAMEDATABASE core::Game::instance().database()
