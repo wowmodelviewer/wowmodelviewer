@@ -23,7 +23,8 @@ set(src main.cpp
          Panels/AnimationPanel.cpp
          Panels/ViewportOptionsPanel.cpp
          Panels/ExportPanel.cpp
-         Panels/ScreenshotPanel.cpp)
+         Panels/ScreenshotPanel.cpp
+         Panels/LogPanel.cpp)
 
 # Generate the resource file that embeds the application icon.
 set(WMV_ICO_PATH "${CMAKE_SOURCE_DIR}/bin_support/Icons/wmv.ico")

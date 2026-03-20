@@ -62,6 +62,7 @@
 #include "ViewportOptionsPanel.h"
 #include "ExportPanel.h"
 #include "ScreenshotPanel.h"
+#include "LogPanel.h"
 
 // Game loading
 #include "Game.h"
@@ -297,19 +298,6 @@ struct AppState
 };
 
 static AppState app;
-
-// ---- Helpers --------------------------------------------------------------
-static void reloadLogFile()
-{
-    app.logLines.clear();
-    std::ifstream file("userSettings/log_imgui.txt");
-    if (!file.is_open())
-        return;
-    std::string line;
-    while (std::getline(file, line))
-        app.logLines.push_back(line);
-    app.logNeedsReload = false;
-}
 
 static std::filesystem::path getApplicationDirPath()
 {
@@ -3241,43 +3229,12 @@ int main(int /*argc*/, char* /*argv*/[])
         {
         if (ImGui::Begin("Log", &app.showLog))
         {
-            if (app.logNeedsReload)
-                reloadLogFile();
+            LogPanel::DrawContext logCtx;
+            logCtx.logLines       = &app.logLines;
+            logCtx.logAutoScroll  = &app.logAutoScroll;
+            logCtx.logNeedsReload = &app.logNeedsReload;
 
-            if (ImGui::Button("Reload"))
-                reloadLogFile();
-            ImGui::SameLine();
-            if (ImGui::Button("Clear"))
-                app.logLines.clear();
-            ImGui::SameLine();
-            ImGui::Checkbox("Auto-scroll", &app.logAutoScroll);
-            ImGui::SameLine();
-            ImGui::TextDisabled("%d lines", static_cast<int>(app.logLines.size()));
-
-            ImGui::Separator();
-            ImGui::BeginChild("##LogScroll", ImVec2(0, 0), ImGuiChildFlags_None,
-                              ImGuiWindowFlags_HorizontalScrollbar);
-            ImGuiListClipper clipper;
-            clipper.Begin(static_cast<int>(app.logLines.size()));
-            while (clipper.Step())
-            {
-                for (int i = clipper.DisplayStart; i < clipper.DisplayEnd; ++i)
-                {
-                    const auto& line = app.logLines[i];
-                    // Colour-code by log level
-                    if (line.find("ERROR") != std::string::npos)
-                        ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 0.4f, 0.4f, 1.0f));
-                    else if (line.find("WARNING") != std::string::npos)
-                        ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 1.0f, 0.3f, 1.0f));
-                    else
-                        ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.7f, 0.7f, 0.7f, 1.0f));
-                    ImGui::TextUnformatted(line.c_str());
-                    ImGui::PopStyleColor();
-                }
-            }
-            if (app.logAutoScroll && ImGui::GetScrollY() >= ImGui::GetScrollMaxY() - 20.0f)
-                ImGui::SetScrollHereY(1.0f);
-            ImGui::EndChild();
+            LogPanel::draw(logCtx);
         }
         ImGui::End();
         }
