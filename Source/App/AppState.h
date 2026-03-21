@@ -83,7 +83,7 @@ struct SceneState
 struct LoadingState
 {
     bool isWoWLoaded = false;
-    bool initDB = false;
+    std::atomic<bool> initDB{false};
     std::string loadStatus;
     std::atomic<float> loadProgress{0.0f};
     bool loadInProgress = false;
