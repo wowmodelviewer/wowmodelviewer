@@ -40,11 +40,16 @@ jobs:
       - name: Install Doxygen & Graphviz
         run: sudo apt-get update && sudo apt-get install -y doxygen graphviz
 
-      - name: Configure CMake (docs only)
-        run: cmake -B build -S . -DCMAKE_BUILD_TYPE=Release
+      - name: Generate Doxyfile from template
+        run: |
+          sed -e "s|@CMAKE_SOURCE_DIR@|$GITHUB_WORKSPACE|g" \
+              -e "s|@DOXYGEN_OUTPUT_DIR@|$GITHUB_WORKSPACE/build/docs|g" \
+              -e "s|@DOXYGEN_AWESOME_DIR@|$GITHUB_WORKSPACE/ThirdParty/doxygen-awesome-css|g" \
+              -e "s|@DOXYGEN_HAVE_DOT@|YES|g" \
+              docs/Doxyfile.in > Doxyfile
 
       - name: Generate documentation
-        run: cmake --build build --target docs
+        run: doxygen Doxyfile
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
