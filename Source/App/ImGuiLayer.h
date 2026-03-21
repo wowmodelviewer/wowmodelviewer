@@ -12,6 +12,7 @@
 
 struct GLFWwindow;
 struct FontEntry;
+struct UIState;
 class AppWindow;
 
 class ImGuiLayer
@@ -24,8 +25,9 @@ public:
     ImGuiLayer& operator=(const ImGuiLayer&) = delete;
 
     /// Create the ImGui context, configure flags, apply DPI scaling,
-    /// and initialise the GLFW + OpenGL3 backends.
-    bool init(GLFWwindow* window, float dpiScale);
+    /// register the panel open/close settings handler, and initialise
+    /// the GLFW + OpenGL3 backends.
+    bool init(GLFWwindow* window, float dpiScale, UIState* uiState);
 
     /// Scan font directories for .ttf / .otf files and populate @p fonts.
     /// If @p selectedFont is <= 0 a sensible default is chosen.

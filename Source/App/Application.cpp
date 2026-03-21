@@ -317,7 +317,7 @@ bool Application::init()
 
     // ---- Dear ImGui ----
     m_state.ui.dpiScale = m_window.queryDpiScale();
-    m_imguiLayer.init(m_window.handle(), m_state.ui.dpiScale);
+    m_imguiLayer.init(m_window.handle(), m_state.ui.dpiScale, &m_state.ui);
     m_imguiLayer.discoverFonts(m_state.ui.availableFonts, m_state.settings.currentFont);
     m_imguiLayer.buildFontAtlas(m_state.ui.availableFonts, m_state.settings.currentFont,
                                 m_state.settings.fontSize, m_state.ui.dpiScale);
@@ -500,9 +500,15 @@ void Application::drawTitleBarAndMenus()
             ImGui::Separator();
             if (ImGui::MenuItem("Export...", nullptr, false,
                                 ModelLoader::getLoadedModel(m_state) != nullptr))
+            {
+                m_state.ui.panel("Export") = true;
                 ImGui::SetWindowFocus("Export");
+            }
             if (ImGui::MenuItem("Screenshot...", "Ctrl+S"))
+            {
+                m_state.ui.panel("Screenshot") = true;
                 ImGui::SetWindowFocus("Screenshot");
+            }
             ImGui::Separator();
             if (ImGui::MenuItem("Exit", "Alt+F4"))
                 m_window.requestClose();
@@ -521,22 +527,22 @@ void Application::drawTitleBarAndMenus()
 
         if (ImGui::BeginMenu("Window"))
         {
-            if (ImGui::MenuItem("3D Viewport"))       ImGui::SetWindowFocus("3D Viewport");
-            if (ImGui::MenuItem("Character Viewer"))   ImGui::SetWindowFocus("Character Viewer");
-            if (ImGui::MenuItem("File Browser"))       ImGui::SetWindowFocus("File Browser");
-            if (ImGui::MenuItem("Animation"))          ImGui::SetWindowFocus("Animation");
-            if (ImGui::MenuItem("Viewport Options"))   ImGui::SetWindowFocus("Viewport Options");
-            if (ImGui::MenuItem("Mounts"))             ImGui::SetWindowFocus("Mounts");
-            if (ImGui::MenuItem("Item Sets"))          ImGui::SetWindowFocus("Item Sets");
-            if (ImGui::MenuItem("NPC Browser"))        ImGui::SetWindowFocus("NPC Browser");
-            if (ImGui::MenuItem("Item Browser"))       ImGui::SetWindowFocus("Item Browser");
-            if (ImGui::MenuItem("Export"))             ImGui::SetWindowFocus("Export");
-            if (ImGui::MenuItem("Screenshot"))         ImGui::SetWindowFocus("Screenshot");
-            if (ImGui::MenuItem("Presets"))            ImGui::SetWindowFocus("Presets");
-            if (ImGui::MenuItem("Log"))                ImGui::SetWindowFocus("Log");
-            ImGui::MenuItem("Settings", nullptr, &m_showSettings);
+            ImGui::MenuItem("3D Viewport",      nullptr, &m_state.ui.panel("3D Viewport"));
+            ImGui::MenuItem("Character Viewer",  nullptr, &m_state.ui.panel("Character Viewer"));
+            ImGui::MenuItem("File Browser",      nullptr, &m_state.ui.panel("File Browser"));
+            ImGui::MenuItem("Animation",         nullptr, &m_state.ui.panel("Animation"));
+            ImGui::MenuItem("Viewport Options",  nullptr, &m_state.ui.panel("Viewport Options"));
+            ImGui::MenuItem("Mounts",            nullptr, &m_state.ui.panel("Mounts"));
+            ImGui::MenuItem("Item Sets",         nullptr, &m_state.ui.panel("Item Sets"));
+            ImGui::MenuItem("NPC Browser",       nullptr, &m_state.ui.panel("NPC Browser"));
+            ImGui::MenuItem("Item Browser",      nullptr, &m_state.ui.panel("Item Browser"));
+            ImGui::MenuItem("Export",            nullptr, &m_state.ui.panel("Export"));
+            ImGui::MenuItem("Screenshot",        nullptr, &m_state.ui.panel("Screenshot"));
+            ImGui::MenuItem("Presets",           nullptr, &m_state.ui.panel("Presets"));
+            ImGui::MenuItem("Log",               nullptr, &m_state.ui.panel("Log"));
+            ImGui::MenuItem("Settings",          nullptr, &m_showSettings);
             ImGui::Separator();
-            ImGui::MenuItem("Dear ImGui Demo", nullptr, &m_showDemoWindow);
+            ImGui::MenuItem("Dear ImGui Demo",   nullptr, &m_showDemoWindow);
             ImGui::EndMenu();
         }
 
@@ -647,53 +653,60 @@ void Application::drawPanels()
     auto& st = m_state;
 
     // ===== Character Viewer =====
-    ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(4, 4));
-    if (ImGui::Begin("Character Viewer"))
+    if (st.ui.panel("Character Viewer"))
     {
-        auto ctx = buildCharViewerCtx(st, [this]() { handleViewportInput(); });
-        CharacterViewerPanel::draw(ctx);
+        ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(4, 4));
+        if (ImGui::Begin("Character Viewer", &st.ui.panel("Character Viewer")))
+        {
+            auto ctx = buildCharViewerCtx(st, [this]() { handleViewportInput(); });
+            CharacterViewerPanel::draw(ctx);
+        }
+        ImGui::End();
+        ImGui::PopStyleVar();
     }
-    ImGui::End();
-    ImGui::PopStyleVar();
 
     // ===== 3D Viewport =====
-    ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
-    if (ImGui::Begin("3D Viewport"))
+    if (st.ui.panel("3D Viewport"))
     {
-        ImVec2 panelSize = ImGui::GetContentRegionAvail();
-        int vpW = static_cast<int>(panelSize.x);
-        int vpH = static_cast<int>(panelSize.y);
-        if (vpW > 0 && vpH > 0)
+        ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
+        if (ImGui::Begin("3D Viewport", &st.ui.panel("3D Viewport")))
         {
-            st.scene.renderer.renderScene(st.scene.fbo, vpW, vpH, st.scene.camera,
-                                          video.fov, st.settings.bgColor, st.settings.drawGrid,
-                                          [&]() {
-                                              if (auto* root = st.scene.root.get())
-                                              {
-                                                  glEnable(GL_LIGHTING);
-                                                  glEnable(GL_TEXTURE_2D);
-                                                  glEnable(GL_DEPTH_TEST);
-                                                  glDepthFunc(GL_LEQUAL);
-                                                  root->draw();
-                                                  glEnable(GL_TEXTURE_2D);
-                                                  glDisable(GL_LIGHTING);
-                                                  glDepthMask(GL_FALSE);
-                                                  glEnable(GL_BLEND);
-                                                  root->drawParticles();
-                                                  glDisable(GL_BLEND);
-                                                  glDepthMask(GL_TRUE);
-                                              }
-                                          });
-            ImGui::Image(static_cast<ImTextureID>(static_cast<uintptr_t>(st.scene.fbo.colorTex)),
-                         panelSize, ImVec2(0, 1), ImVec2(1, 0));
-            if (ImGui::IsItemHovered())
-                handleViewportInput();
+            ImVec2 panelSize = ImGui::GetContentRegionAvail();
+            int vpW = static_cast<int>(panelSize.x);
+            int vpH = static_cast<int>(panelSize.y);
+            if (vpW > 0 && vpH > 0)
+            {
+                st.scene.renderer.renderScene(st.scene.fbo, vpW, vpH, st.scene.camera,
+                                              video.fov, st.settings.bgColor, st.settings.drawGrid,
+                                              [&]() {
+                                                  if (auto* root = st.scene.root.get())
+                                                  {
+                                                      glEnable(GL_LIGHTING);
+                                                      glEnable(GL_TEXTURE_2D);
+                                                      glEnable(GL_DEPTH_TEST);
+                                                      glDepthFunc(GL_LEQUAL);
+                                                      root->draw();
+                                                      glEnable(GL_TEXTURE_2D);
+                                                      glDisable(GL_LIGHTING);
+                                                      glDepthMask(GL_FALSE);
+                                                      glEnable(GL_BLEND);
+                                                      root->drawParticles();
+                                                      glDisable(GL_BLEND);
+                                                      glDepthMask(GL_TRUE);
+                                                  }
+                                              });
+                ImGui::Image(static_cast<ImTextureID>(static_cast<uintptr_t>(st.scene.fbo.colorTex)),
+                             panelSize, ImVec2(0, 1), ImVec2(1, 0));
+                if (ImGui::IsItemHovered())
+                    handleViewportInput();
+            }
         }
+        ImGui::End();
+        ImGui::PopStyleVar();
     }
-    ImGui::End();
-    ImGui::PopStyleVar();
 
     // ===== File Browser =====
+    if (st.ui.panel("File Browser"))
     {
         auto statusStr = GameLoader::getLoadStatus(st);
         FileBrowserPanel::LoadState ls;
@@ -701,92 +714,122 @@ void Application::drawPanels()
         ls.inProgress = st.loading.loadInProgress;
         ls.progress   = st.loading.loadProgress;
         ls.statusText = statusStr.c_str();
-        if (GameFile* picked = FileBrowserPanel::draw(ls))
+        if (GameFile* picked = FileBrowserPanel::draw(st.ui.panel("File Browser"), ls))
             ModelLoader::loadModel(picked, st, video.fov);
     }
 
     // ===== Animation Control =====
-    if (ImGui::Begin("Animation"))
+    if (st.ui.panel("Animation"))
     {
-        auto ctx = buildAnimCtx(st);
-        AnimationPanel::draw(ctx);
-        st.anim.blpSkin[0] = ctx.blpSkin[0];
-        st.anim.blpSkin[1] = ctx.blpSkin[1];
-        st.anim.blpSkin[2] = ctx.blpSkin[2];
+        if (ImGui::Begin("Animation", &st.ui.panel("Animation")))
+        {
+            auto ctx = buildAnimCtx(st);
+            AnimationPanel::draw(ctx);
+            st.anim.blpSkin[0] = ctx.blpSkin[0];
+            st.anim.blpSkin[1] = ctx.blpSkin[1];
+            st.anim.blpSkin[2] = ctx.blpSkin[2];
+        }
+        ImGui::End();
     }
-    ImGui::End();
 
     // ===== Viewport Options =====
-    if (ImGui::Begin("Viewport Options"))
+    if (st.ui.panel("Viewport Options"))
     {
-        auto ctx = buildViewportOptsCtx(st);
-        ViewportOptionsPanel::draw(ctx);
+        if (ImGui::Begin("Viewport Options", &st.ui.panel("Viewport Options")))
+        {
+            auto ctx = buildViewportOptsCtx(st);
+            ViewportOptionsPanel::draw(ctx);
+        }
+        ImGui::End();
     }
-    ImGui::End();
 
     // ===== Mounts =====
-    if (ImGui::Begin("Mounts"))
+    if (st.ui.panel("Mounts"))
     {
-        auto ctx = buildMountsCtx(st);
-        MountsPanel::draw(ctx);
+        if (ImGui::Begin("Mounts", &st.ui.panel("Mounts")))
+        {
+            auto ctx = buildMountsCtx(st);
+            MountsPanel::draw(ctx);
+        }
+        ImGui::End();
     }
-    ImGui::End();
 
     // ===== Item Sets =====
-    if (ImGui::Begin("Item Sets"))
+    if (st.ui.panel("Item Sets"))
     {
-        auto ctx = buildItemSetsCtx(st);
-        ItemSetsPanel::draw(ctx);
+        if (ImGui::Begin("Item Sets", &st.ui.panel("Item Sets")))
+        {
+            auto ctx = buildItemSetsCtx(st);
+            ItemSetsPanel::draw(ctx);
+        }
+        ImGui::End();
     }
-    ImGui::End();
 
     // ===== NPC Browser =====
-    if (ImGui::Begin("NPC Browser"))
+    if (st.ui.panel("NPC Browser"))
     {
-        auto ctx = buildNpcBrowserCtx(st);
-        NpcBrowserPanel::draw(ctx);
+        if (ImGui::Begin("NPC Browser", &st.ui.panel("NPC Browser")))
+        {
+            auto ctx = buildNpcBrowserCtx(st);
+            NpcBrowserPanel::draw(ctx);
+        }
+        ImGui::End();
     }
-    ImGui::End();
 
     // ===== Item Browser =====
-    if (ImGui::Begin("Item Browser"))
+    if (st.ui.panel("Item Browser"))
     {
-        auto ctx = buildItemBrowserCtx(st);
-        ItemBrowserPanel::draw(ctx);
+        if (ImGui::Begin("Item Browser", &st.ui.panel("Item Browser")))
+        {
+            auto ctx = buildItemBrowserCtx(st);
+            ItemBrowserPanel::draw(ctx);
+        }
+        ImGui::End();
     }
-    ImGui::End();
 
     // ===== Export =====
-    if (ImGui::Begin("Export"))
+    if (st.ui.panel("Export"))
     {
-        auto ctx = buildExportCtx(st);
-        ExportPanel::draw(ctx);
+        if (ImGui::Begin("Export", &st.ui.panel("Export")))
+        {
+            auto ctx = buildExportCtx(st);
+            ExportPanel::draw(ctx);
+        }
+        ImGui::End();
     }
-    ImGui::End();
 
     // ===== Screenshot =====
-    if (ImGui::Begin("Screenshot"))
+    if (st.ui.panel("Screenshot"))
     {
-        auto ctx = buildScreenshotCtx(st);
-        ScreenshotPanel::draw(ctx);
+        if (ImGui::Begin("Screenshot", &st.ui.panel("Screenshot")))
+        {
+            auto ctx = buildScreenshotCtx(st);
+            ScreenshotPanel::draw(ctx);
+        }
+        ImGui::End();
     }
-    ImGui::End();
 
     // ===== Presets =====
-    if (ImGui::Begin("Presets"))
+    if (st.ui.panel("Presets"))
     {
-        auto ctx = buildPresetsCtx(st);
-        PresetsPanel::draw(ctx);
+        if (ImGui::Begin("Presets", &st.ui.panel("Presets")))
+        {
+            auto ctx = buildPresetsCtx(st);
+            PresetsPanel::draw(ctx);
+        }
+        ImGui::End();
     }
-    ImGui::End();
 
     // ===== Log =====
-    if (ImGui::Begin("Log"))
+    if (st.ui.panel("Log"))
     {
-        auto ctx = buildLogCtx(st);
-        LogPanel::draw(ctx);
+        if (ImGui::Begin("Log", &st.ui.panel("Log")))
+        {
+            auto ctx = buildLogCtx(st);
+            LogPanel::draw(ctx);
+        }
+        ImGui::End();
     }
-    ImGui::End();
 
     // ===== Settings (non-docking dialog) =====
     if (m_showSettings)

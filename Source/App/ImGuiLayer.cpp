@@ -12,6 +12,7 @@
 #include <glad/gl.h>
 #include <GLFW/glfw3.h>
 #include "imgui.h"
+#include "imgui_internal.h"
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_opengl3.h"
 
@@ -22,9 +23,42 @@
 #include "CustomTitleBar.h"
 #include "ThemeManager.h"
 
+// ---- Panel open/close settings handler ------------------------------------
+// Persists UIState::panelOpen inside imgui_layout.ini as a
+// [UserData][Panels] section so open/close state survives across sessions.
+
+namespace {
+
+void* PanelReadOpen(ImGuiContext*, ImGuiSettingsHandler* handler, const char* name)
+{
+    if (strcmp(name, "Panels") == 0)
+        return handler->UserData;
+    return nullptr;
+}
+
+void PanelReadLine(ImGuiContext*, ImGuiSettingsHandler*, void* entry, const char* line)
+{
+    auto* ui = static_cast<UIState*>(entry);
+    const char* eq = strchr(line, '=');
+    if (!eq) return;
+    std::string key(line, eq);
+    ui->panelOpen[key] = (atoi(eq + 1) != 0);
+}
+
+void PanelWriteAll(ImGuiContext*, ImGuiSettingsHandler* handler, ImGuiTextBuffer* buf)
+{
+    const auto* ui = static_cast<const UIState*>(handler->UserData);
+    buf->appendf("[UserData][Panels]\n");
+    for (const auto& [name, open] : ui->panelOpen)
+        buf->appendf("%s=%d\n", name.c_str(), open ? 1 : 0);
+    buf->append("\n");
+}
+
+} // anonymous namespace
+
 // ---- init / shutdown ------------------------------------------------------
 
-bool ImGuiLayer::init(GLFWwindow* window, float dpiScale)
+bool ImGuiLayer::init(GLFWwindow* window, float dpiScale, UIState* uiState)
 {
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
@@ -32,6 +66,16 @@ bool ImGuiLayer::init(GLFWwindow* window, float dpiScale)
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
     io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
     io.IniFilename = AppSettings::imguiIniPath;
+
+    // Register panel open/close handler before the ini file is loaded.
+    ImGuiSettingsHandler handler;
+    handler.TypeName    = "UserData";
+    handler.TypeHash    = ImHashStr("UserData");
+    handler.ReadOpenFn  = PanelReadOpen;
+    handler.ReadLineFn  = PanelReadLine;
+    handler.WriteAllFn  = PanelWriteAll;
+    handler.UserData    = uiState;
+    ImGui::GetCurrentContext()->SettingsHandlers.push_back(handler);
 
     ThemeManager::apply(ThemeManager::currentTheme(), window);
 

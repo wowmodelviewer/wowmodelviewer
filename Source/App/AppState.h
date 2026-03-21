@@ -12,6 +12,7 @@
 #include <mutex>
 #include <string>
 #include <thread>
+#include <unordered_map>
 #include <vector>
 
 #include "AppSettings.h"
@@ -106,6 +107,18 @@ struct UIState
     // Dialog visibility
     bool showAboutDialog = false;
     bool showLanguageDialog = false;
+
+    // Panel open/close state (persisted via ImGui settings handler).
+    // Panels not in the map default to open.
+    std::unordered_map<std::string, bool> panelOpen;
+
+    /// Returns a reference to the open flag for a named panel.
+    /// Missing entries are inserted as true (open by default).
+    bool& panel(const char* name)
+    {
+        auto [it, _] = panelOpen.try_emplace(name, true);
+        return it->second;
+    }
 
     // Transient dialog visibility (not persisted)
     bool showImportDialog = false;

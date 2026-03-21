@@ -139,11 +139,11 @@ void rebuildFileTree()
 namespace FileBrowserPanel
 {
 
-GameFile* draw(const LoadState& load)
+GameFile* draw(bool& visible, const LoadState& load)
 {
     GameFile* selected = nullptr;
 
-    if (ImGui::Begin("File Browser"))
+    if (ImGui::Begin("File Browser", &visible))
     {
         if (!load.isLoaded)
         {
