@@ -8,6 +8,7 @@
 #include <glm/glm.hpp>
 
 class OrbitCamera;
+class Renderer;
 class WoWModel;
 
 namespace ViewportOptionsPanel
@@ -40,6 +41,9 @@ struct ParticleColorState
 
 struct DrawContext
 {
+    // Renderer
+    Renderer* renderer = nullptr;
+
     // Settings
     bool*       drawGrid = nullptr;
     glm::vec3*  bgColor  = nullptr;

@@ -1,4 +1,5 @@
 #include "Renderer.h"
+#include "OrbitCamera.h"
 #include "ViewportFBO.h"
 
 #include <glad/gl.h>
@@ -253,4 +254,56 @@ void Renderer::beginPass(ViewportFBO& fbo, int w, int h,
 void Renderer::endPass(ViewportFBO& fbo)
 {
     fbo.unbind();
+}
+
+// ---- Convenience helpers ---------------------------------------------------
+
+void Renderer::applyLighting()
+{
+    applyLighting(m_state.light);
+}
+
+void Renderer::drawBackground(int w, int h)
+{
+    if (m_state.drawGradientBg)
+    {
+        drawGradient(w, h, m_state.gradientTop, m_state.gradientBottom);
+    }
+    else if (m_state.drawCheckerBg && m_checkerTex)
+    {
+        drawCheckerboard(w, h);
+    }
+}
+
+// ---- Composite render pass -------------------------------------------------
+
+void Renderer::renderScene(ViewportFBO& fbo, int w, int h,
+                           const OrbitCamera& camera, float fov,
+                           const glm::vec3& clearColor, bool drawGridFlag,
+                           const std::function<void()>& drawObjects)
+{
+    if (w <= 0 || h <= 0)
+        return;
+
+    beginPass(fbo, w, h, clearColor);
+
+    drawBackground(w, h);
+    glClear(GL_DEPTH_BUFFER_BIT);
+
+    applyProjection(w, h, fov);
+    applyView(camera.getViewMatrix());
+
+    applyLighting();
+
+    if (drawGridFlag)
+        drawGrid();
+
+    if (drawObjects)
+    {
+        glEnable(GL_NORMALIZE);
+        drawObjects();
+        glDisable(GL_NORMALIZE);
+    }
+
+    endPass(fbo);
 }

@@ -5,6 +5,7 @@
 
 class OrbitCamera;
 class Attachment;
+class Renderer;
 struct ViewportFBO;
 
 namespace ScreenshotPanel
@@ -12,6 +13,7 @@ namespace ScreenshotPanel
 
 struct DrawContext
 {
+    Renderer*    renderer           = nullptr;
     std::string* screenshotPath     = nullptr;
     std::string* screenshotStatus   = nullptr;
     bool*        useCanvasOverride  = nullptr;

@@ -16,6 +16,7 @@
 
 #include "AppSettings.h"
 #include "OrbitCamera.h"
+#include "Renderer.h"
 #include "ViewportFBO.h"
 #include "wow_enums.h"
 
@@ -62,6 +63,7 @@ using MountEntry         = MountsPanel::MountEntry;
 
 struct SceneState
 {
+    Renderer renderer;
     OrbitCamera camera;
     std::unique_ptr<Attachment> root;
     WoWModel* selModel = nullptr;

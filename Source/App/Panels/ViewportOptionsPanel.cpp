@@ -3,7 +3,7 @@
 #include <cassert>
 
 #include "imgui.h"
-#include "SceneRenderer.h"
+#include "Renderer.h"
 #include "OrbitCamera.h"
 #include "WoWModel.h"
 
@@ -60,21 +60,24 @@ void draw(DrawContext& ctx)
     assert(ctx.drawGrid && "DrawContext::drawGrid must not be null");
     assert(ctx.bgColor && "DrawContext::bgColor must not be null");
     assert(ctx.camera && "DrawContext::camera must not be null");
+    assert(ctx.renderer && "DrawContext::renderer must not be null");
+
+    auto& rs = ctx.renderer->state();
 
     // ---- Background ----
     if (ImGui::CollapsingHeader("Background", ImGuiTreeNodeFlags_DefaultOpen))
     {
         ImGui::Checkbox("Draw Grid", ctx.drawGrid);
-        ImGui::Checkbox("Checkerboard Background", &SceneRenderer::state().drawCheckerBg);
-        if (ImGui::Checkbox("Gradient Background", &SceneRenderer::state().drawGradientBg))
+        ImGui::Checkbox("Checkerboard Background", &rs.drawCheckerBg);
+        if (ImGui::Checkbox("Gradient Background", &rs.drawGradientBg))
         {
-            if (SceneRenderer::state().drawGradientBg)
-                SceneRenderer::state().drawCheckerBg = false;
+            if (rs.drawGradientBg)
+                rs.drawCheckerBg = false;
         }
-        if (SceneRenderer::state().drawGradientBg)
+        if (rs.drawGradientBg)
         {
-            ImGui::ColorEdit3("Gradient Top", &SceneRenderer::state().gradientTop.x);
-            ImGui::ColorEdit3("Gradient Bottom", &SceneRenderer::state().gradientBottom.x);
+            ImGui::ColorEdit3("Gradient Top", &rs.gradientTop.x);
+            ImGui::ColorEdit3("Gradient Bottom", &rs.gradientBottom.x);
         }
         ImGui::ColorEdit3("Background Color", &ctx.bgColor->x);
 
@@ -117,46 +120,46 @@ void draw(DrawContext& ctx)
     // ---- Lighting ----
     if (ImGui::CollapsingHeader("Lighting", ImGuiTreeNodeFlags_DefaultOpen))
     {
-        ImGui::Checkbox("Enable Lighting", &SceneRenderer::state().light.enabled);
+        ImGui::Checkbox("Enable Lighting", &rs.light.enabled);
 
-        if (!SceneRenderer::state().light.enabled)
+        if (!rs.light.enabled)
             ImGui::BeginDisabled();
 
         static const char* lightTypeNames[] = { "Directional", "Point", "Spot", "Ambient Only" };
         ImGui::Combo("##LightType",
-                     reinterpret_cast<int*>(&SceneRenderer::state().light.type),
+                     reinterpret_cast<int*>(&rs.light.type),
                      lightTypeNames, IM_ARRAYSIZE(lightTypeNames));
 
-        if (SceneRenderer::state().light.type == SceneRenderer::LIGHT_DIRECTIONAL ||
-            SceneRenderer::state().light.type == SceneRenderer::LIGHT_SPOT)
-            ImGui::DragFloat3("Dir XYZ", SceneRenderer::state().light.direction, 0.01f, -5.0f, 5.0f, "%.2f");
+        if (rs.light.type == Renderer::LightType::Directional ||
+            rs.light.type == Renderer::LightType::Spot)
+            ImGui::DragFloat3("Dir XYZ", rs.light.direction, 0.01f, -5.0f, 5.0f, "%.2f");
 
-        if (SceneRenderer::state().light.type == SceneRenderer::LIGHT_POINT ||
-            SceneRenderer::state().light.type == SceneRenderer::LIGHT_SPOT)
-            ImGui::DragFloat3("Pos XYZ", SceneRenderer::state().light.position, 0.1f, -50.0f, 50.0f, "%.1f");
+        if (rs.light.type == Renderer::LightType::Point ||
+            rs.light.type == Renderer::LightType::Spot)
+            ImGui::DragFloat3("Pos XYZ", rs.light.position, 0.1f, -50.0f, 50.0f, "%.1f");
 
-        if (SceneRenderer::state().light.type == SceneRenderer::LIGHT_SPOT)
+        if (rs.light.type == Renderer::LightType::Spot)
         {
-            ImGui::SliderFloat("Cutoff Angle", &SceneRenderer::state().light.spotCutoff,
+            ImGui::SliderFloat("Cutoff Angle", &rs.light.spotCutoff,
                                1.0f, 90.0f, "%.1f deg");
-            ImGui::SliderFloat("Exponent", &SceneRenderer::state().light.spotExponent,
+            ImGui::SliderFloat("Exponent", &rs.light.spotExponent,
                                0.0f, 128.0f, "%.1f");
         }
 
-        ImGui::ColorEdit3("Diffuse",  SceneRenderer::state().light.diffuse,  ImGuiColorEditFlags_Float);
-        ImGui::ColorEdit3("Ambient",  SceneRenderer::state().light.ambient,  ImGuiColorEditFlags_Float);
-        ImGui::ColorEdit3("Specular", SceneRenderer::state().light.specular, ImGuiColorEditFlags_Float);
-        ImGui::SliderFloat("Intensity", &SceneRenderer::state().light.intensity, 0.0f, 3.0f, "%.2f");
+        ImGui::ColorEdit3("Diffuse",  rs.light.diffuse,  ImGuiColorEditFlags_Float);
+        ImGui::ColorEdit3("Ambient",  rs.light.ambient,  ImGuiColorEditFlags_Float);
+        ImGui::ColorEdit3("Specular", rs.light.specular, ImGuiColorEditFlags_Float);
+        ImGui::SliderFloat("Intensity", &rs.light.intensity, 0.0f, 3.0f, "%.2f");
 
-        if (!SceneRenderer::state().light.enabled)
+        if (!rs.light.enabled)
             ImGui::EndDisabled();
 
         ImGui::Spacing();
         if (ImGui::Button("Default##light", ImVec2(-1, 0)))
-            SceneRenderer::state().light = SceneRenderer::LightSettings{};
+            rs.light = Renderer::LightSettings{};
         if (ImGui::Button("Bright Daylight", ImVec2(-1, 0)))
         {
-            auto& l = SceneRenderer::state().light;
+            auto& l = rs.light;
             l.direction[0] = -0.5f; l.direction[1] = 1.0f;
             l.direction[2] = -0.3f; l.direction[3] = 0.0f;
             l.diffuse[0] = 1.0f; l.diffuse[1] = 0.98f; l.diffuse[2] = 0.92f;
@@ -167,7 +170,7 @@ void draw(DrawContext& ctx)
         }
         if (ImGui::Button("Warm Sunset", ImVec2(-1, 0)))
         {
-            auto& l = SceneRenderer::state().light;
+            auto& l = rs.light;
             l.direction[0] = -1.0f; l.direction[1] = 0.3f;
             l.direction[2] = -0.5f; l.direction[3] = 0.0f;
             l.diffuse[0] = 1.0f; l.diffuse[1] = 0.65f; l.diffuse[2] = 0.3f;
@@ -178,7 +181,7 @@ void draw(DrawContext& ctx)
         }
         if (ImGui::Button("Cool Moonlight", ImVec2(-1, 0)))
         {
-            auto& l = SceneRenderer::state().light;
+            auto& l = rs.light;
             l.direction[0] = 0.3f; l.direction[1] = 1.0f;
             l.direction[2] = -0.7f; l.direction[3] = 0.0f;
             l.diffuse[0] = 0.6f; l.diffuse[1] = 0.65f; l.diffuse[2] = 0.8f;
@@ -189,7 +192,7 @@ void draw(DrawContext& ctx)
         }
         if (ImGui::Button("Flat (No Shading)", ImVec2(-1, 0)))
         {
-            auto& l = SceneRenderer::state().light;
+            auto& l = rs.light;
             l.direction[0] = 0.0f; l.direction[1] = 0.0f;
             l.direction[2] = -1.0f; l.direction[3] = 0.0f;
             l.diffuse[0] = 1.0f; l.diffuse[1] = 1.0f; l.diffuse[2] = 1.0f;

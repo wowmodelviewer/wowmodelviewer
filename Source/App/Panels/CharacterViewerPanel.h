@@ -9,6 +9,7 @@
 #include "AnimationPanel.h"
 
 class GameFile;
+class Renderer;
 class WoWModel;
 class Attachment;
 class OrbitCamera;
@@ -45,6 +46,7 @@ struct DrawContext
     int*                              selectedAnimCombo    = nullptr;
 
     // Rendering resources
+    Renderer*  renderer = nullptr;
     ViewportFBO*   fbo    = nullptr;
     OrbitCamera*   camera = nullptr;
     Attachment*    root   = nullptr;

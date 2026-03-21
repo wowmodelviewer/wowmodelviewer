@@ -15,7 +15,8 @@
 #include "OrbitCamera.h"
 #include "ViewportFBO.h"
 #include "AppSettings.h"
-#include "SceneRenderer.h"
+#include "Renderer.h"
+#include "Attachment.h"
 #include "RaceInfos.h"
 #include "WoWDatabase.h"
 #include "WoWFolder.h"
@@ -383,11 +384,24 @@ void draw(const DrawContext& ctx)
         int vpW = static_cast<int>(vpSize.x);
         int vpH = static_cast<int>(vpSize.y);
 
-        if (vpW > 0 && vpH > 0 && ctx.fbo && ctx.camera && ctx.root)
+        if (vpW > 0 && vpH > 0 && ctx.fbo && ctx.camera && ctx.root && ctx.renderer)
         {
-            SceneRenderer::renderToFBO(*ctx.fbo, vpW, vpH, *ctx.camera,
-                                       ctx.root, ctx.fov,
-                                       ctx.bgColor, ctx.drawGrid);
+            ctx.renderer->renderScene(*ctx.fbo, vpW, vpH, *ctx.camera,
+                                       ctx.fov, ctx.bgColor, ctx.drawGrid,
+                                       [root = ctx.root]() {
+                                           glEnable(GL_LIGHTING);
+                                           glEnable(GL_TEXTURE_2D);
+                                           glEnable(GL_DEPTH_TEST);
+                                           glDepthFunc(GL_LEQUAL);
+                                           root->draw();
+                                           glEnable(GL_TEXTURE_2D);
+                                           glDisable(GL_LIGHTING);
+                                           glDepthMask(GL_FALSE);
+                                           glEnable(GL_BLEND);
+                                           root->drawParticles();
+                                           glDisable(GL_BLEND);
+                                           glDepthMask(GL_TRUE);
+                                       });
             ImGui::Image(
                 static_cast<ImTextureID>(static_cast<uintptr_t>(ctx.fbo->colorTex)),
                 vpSize, ImVec2(0, 1), ImVec2(1, 0));

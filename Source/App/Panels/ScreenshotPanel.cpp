@@ -12,7 +12,8 @@
 #include "Logger.h"
 #include "ViewportFBO.h"
 #include "OrbitCamera.h"
-#include "SceneRenderer.h"
+#include "Renderer.h"
+#include "Attachment.h"
 
 #include "stb_image_write.h"
 
@@ -67,61 +68,28 @@ void captureScreenshot(const std::string& path, ViewportFBO& fbo, std::string& s
 
 // Render the scene at a custom resolution into a temporary FBO and save as PNG.
 void captureAtResolution(const std::string& path, int cw, int ch,
-                         OrbitCamera& camera, Attachment* root,
-                         float fov, const glm::vec3& bgColor, bool drawGrid,
+                         Renderer& renderer, OrbitCamera& camera,
+                         Attachment* root, float fov,
+                         const glm::vec3& bgColor, bool drawGrid,
                          std::string& status)
 {
     ViewportFBO tmpFbo;
-    tmpFbo.create(cw, ch);
-    tmpFbo.bind();
-    glViewport(0, 0, cw, ch);
-    glClearColor(bgColor.x, bgColor.y, bgColor.z, 1.0f);
-    glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
-
-    if (SceneRenderer::state().drawGradientBg)
-    {
-        glMatrixMode(GL_PROJECTION); glPushMatrix(); glLoadIdentity();
-        glOrtho(0, cw, 0, ch, -1, 1);
-        glMatrixMode(GL_MODELVIEW); glPushMatrix(); glLoadIdentity();
-        glDisable(GL_DEPTH_TEST); glDisable(GL_LIGHTING); glDisable(GL_TEXTURE_2D);
-        glBegin(GL_QUADS);
-        glColor3f(SceneRenderer::state().gradientBottom.x,
-                  SceneRenderer::state().gradientBottom.y,
-                  SceneRenderer::state().gradientBottom.z);
-        glVertex2f(0, 0);
-        glVertex2f(static_cast<float>(cw), 0);
-        glColor3f(SceneRenderer::state().gradientTop.x,
-                  SceneRenderer::state().gradientTop.y,
-                  SceneRenderer::state().gradientTop.z);
-        glVertex2f(static_cast<float>(cw), static_cast<float>(ch));
-        glVertex2f(0, static_cast<float>(ch));
-        glEnd();
-        glEnable(GL_DEPTH_TEST);
-        glMatrixMode(GL_PROJECTION); glPopMatrix();
-        glMatrixMode(GL_MODELVIEW); glPopMatrix();
-    }
-    else if (SceneRenderer::state().drawCheckerBg && SceneRenderer::renderer().checkerTexture())
-    {
-        SceneRenderer::renderCheckerboard(cw, ch);
-    }
-
-    glClear(GL_DEPTH_BUFFER_BIT);
-    glMatrixMode(GL_PROJECTION);
-    glLoadIdentity();
-    glm::mat4 proj = glm::perspective(fov,
-        static_cast<float>(cw) / static_cast<float>(ch),
-        0.1f, 1280.0f * 5.0f);
-    glMultMatrixf(glm::value_ptr(proj));
-    glMatrixMode(GL_MODELVIEW);
-    glLoadIdentity();
-    glm::mat4 view = camera.getViewMatrix();
-    glMultMatrixf(glm::value_ptr(view));
-    SceneRenderer::setupLighting();
-    if (drawGrid) SceneRenderer::renderGrid();
-    glEnable(GL_NORMALIZE);
-    SceneRenderer::renderObjects(root);
-    glDisable(GL_NORMALIZE);
-    tmpFbo.unbind();
+    renderer.renderScene(tmpFbo, cw, ch, camera, fov, bgColor, drawGrid,
+                         [root]() {
+                             if (!root) return;
+                             glEnable(GL_LIGHTING);
+                             glEnable(GL_TEXTURE_2D);
+                             glEnable(GL_DEPTH_TEST);
+                             glDepthFunc(GL_LEQUAL);
+                             root->draw();
+                             glEnable(GL_TEXTURE_2D);
+                             glDisable(GL_LIGHTING);
+                             glDepthMask(GL_FALSE);
+                             glEnable(GL_BLEND);
+                             root->drawParticles();
+                             glDisable(GL_BLEND);
+                             glDepthMask(GL_TRUE);
+                         });
 
     // Read pixels from the temp FBO
     std::vector<unsigned char> pixels(static_cast<size_t>(cw) * ch * 4);
@@ -173,7 +141,7 @@ void ScreenshotPanel::draw(DrawContext& ctx)
         {
             captureAtResolution(*ctx.screenshotPath,
                                 *ctx.canvasWidth, *ctx.canvasHeight,
-                                *ctx.camera, ctx.root,
+                                *ctx.renderer, *ctx.camera, ctx.root,
                                 ctx.fov, ctx.bgColor, ctx.drawGrid,
                                 *ctx.screenshotStatus);
         }

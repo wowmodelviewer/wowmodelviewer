@@ -26,7 +26,7 @@
 #include "video.h"
 #include "Attachment.h"
 #include "WoWModel.h"
-#include "SceneRenderer.h"
+#include "Renderer.h"
 #include "CustomTitleBar.h"
 #include "ViewportController.h"
 
@@ -76,6 +76,7 @@ CharacterViewerPanel::DrawContext buildCharViewerCtx(
     ctx.customizationOptions = &st.character.customizationOptions;
     ctx.animEntries          = &st.anim.animEntries;
     ctx.selectedAnimCombo    = &st.anim.selectedAnimCombo;
+    ctx.renderer             = &st.scene.renderer;
     ctx.fbo                  = &st.scene.fbo;
     ctx.camera               = &st.scene.camera;
     ctx.root                 = st.scene.root.get();
@@ -112,6 +113,7 @@ AnimationPanel::DrawContext buildAnimCtx(AppState& st)
 ViewportOptionsPanel::DrawContext buildViewportOptsCtx(AppState& st)
 {
     ViewportOptionsPanel::DrawContext ctx;
+    ctx.renderer       = &st.scene.renderer;
     ctx.drawGrid       = &st.settings.drawGrid;
     ctx.bgColor        = &st.settings.bgColor;
     ctx.camera         = &st.scene.camera;
@@ -215,6 +217,7 @@ ExportPanel::DrawContext buildExportCtx(AppState& st)
 ScreenshotPanel::DrawContext buildScreenshotCtx(AppState& st)
 {
     ScreenshotPanel::DrawContext ctx;
+    ctx.renderer           = &st.scene.renderer;
     ctx.screenshotPath     = &st.exporting.screenshotPath;
     ctx.screenshotStatus   = &st.exporting.screenshotStatus;
     ctx.useCanvasOverride  = &st.exporting.useCanvasOverride;
@@ -369,7 +372,7 @@ void Application::shutdown()
     m_state.scene.root.reset();
     m_state.scene.fbo.destroy();
 
-    SceneRenderer::shutdown();
+    m_state.scene.renderer.shutdown();
 
     m_state.exporting.exporters.clear();
     m_state.exporting.importers.clear();
@@ -423,7 +426,7 @@ void Application::initGL()
 {
     video.render = true;
     video.InitGL();
-    SceneRenderer::initResources();
+    m_state.scene.renderer.init();
     LOG_INFO << "OpenGL initialisation complete.";
 }
 
@@ -676,9 +679,25 @@ void Application::drawPanels()
             int vpH = static_cast<int>(panelSize.y);
             if (vpW > 0 && vpH > 0)
             {
-                SceneRenderer::renderToFBO(st.scene.fbo, vpW, vpH, st.scene.camera,
-                                           st.scene.root.get(), video.fov,
-                                           st.settings.bgColor, st.settings.drawGrid);
+                st.scene.renderer.renderScene(st.scene.fbo, vpW, vpH, st.scene.camera,
+                                              video.fov, st.settings.bgColor, st.settings.drawGrid,
+                                              [&]() {
+                                                  if (auto* root = st.scene.root.get())
+                                                  {
+                                                      glEnable(GL_LIGHTING);
+                                                      glEnable(GL_TEXTURE_2D);
+                                                      glEnable(GL_DEPTH_TEST);
+                                                      glDepthFunc(GL_LEQUAL);
+                                                      root->draw();
+                                                      glEnable(GL_TEXTURE_2D);
+                                                      glDisable(GL_LIGHTING);
+                                                      glDepthMask(GL_FALSE);
+                                                      glEnable(GL_BLEND);
+                                                      root->drawParticles();
+                                                      glDisable(GL_BLEND);
+                                                      glDepthMask(GL_TRUE);
+                                                  }
+                                              });
                 ImGui::Image(static_cast<ImTextureID>(static_cast<uintptr_t>(st.scene.fbo.colorTex)),
                              panelSize, ImVec2(0, 1), ImVec2(1, 0));
                 if (ImGui::IsItemHovered())

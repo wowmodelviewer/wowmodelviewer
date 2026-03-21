@@ -19,7 +19,6 @@ set(src main.cpp
          AppWindow.cpp
          ImGuiLayer.cpp
          AppSettings.cpp
-         SceneRenderer.cpp
          ThemeManager.cpp
          CustomTitleBar.cpp
          GameLoader.cpp

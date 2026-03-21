@@ -1,16 +1,19 @@
 #pragma once
 
+#include <functional>
+
 #include <glad/gl.h>
 #include <glm/glm.hpp>
 
+class OrbitCamera;
 struct ViewportFBO;
 
 /// Low-level rendering operations for the engine's OpenGL pipeline.
 ///
 /// Encapsulates GPU resource management, fixed-function lighting,
 /// common backgrounds, grid drawing, and FBO render-pass bookkeeping.
-/// Higher-level, game-specific rendering (e.g. model drawing) lives
-/// in the application layer and uses Renderer as a building block.
+/// The application layer calls individual primitives or the composite
+/// renderScene() helper to draw a complete frame.
 class Renderer
 {
 public:
@@ -39,6 +42,16 @@ public:
         float     spotExponent = 10.0f;
     };
 
+    /// Aggregate rendering state exposed for UI binding.
+    struct RenderState
+    {
+        LightSettings light;
+        bool      drawCheckerBg  = true;
+        bool      drawGradientBg = false;
+        glm::vec3 gradientTop{0.15f, 0.20f, 0.35f};
+        glm::vec3 gradientBottom{0.02f, 0.02f, 0.05f};
+    };
+
     Renderer() = default;
     ~Renderer();
 
@@ -53,9 +66,17 @@ public:
     /// Release GPU resources.
     void shutdown();
 
+    // ---- State access ------------------------------------------------------
+
+    RenderState&       state() noexcept       { return m_state; }
+    const RenderState& state() const noexcept { return m_state; }
+
     // ---- Rendering operations ----------------------------------------------
 
-    /// Configure OpenGL fixed-function lighting from the given settings.
+    /// Configure OpenGL fixed-function lighting from the current state.
+    void applyLighting();
+
+    /// Configure OpenGL fixed-function lighting from explicit settings.
     void applyLighting(const LightSettings& light);
 
     /// Draw a tiled checkerboard pattern in screen space.
@@ -64,6 +85,9 @@ public:
     /// Draw a vertical gradient quad in screen space.
     void drawGradient(int w, int h,
                       const glm::vec3& top, const glm::vec3& bottom);
+
+    /// Draw the background (checker or gradient) based on current state.
+    void drawBackground(int w, int h);
 
     /// Draw a ground grid with highlighted centre axes.
     void drawGrid(float size = 40.0f, float step = 1.0f);
@@ -82,10 +106,18 @@ public:
     /// End the current FBO render pass (unbind).
     void endPass(ViewportFBO& fbo);
 
+    /// Composite render pass: background, projection, lighting, grid, then
+    /// invoke @p drawObjects for application-specific geometry.
+    void renderScene(ViewportFBO& fbo, int w, int h,
+                     const OrbitCamera& camera, float fov,
+                     const glm::vec3& clearColor, bool drawGrid,
+                     const std::function<void()>& drawObjects);
+
     // ---- Resource access ---------------------------------------------------
 
     GLuint checkerTexture() const noexcept { return m_checkerTex; }
 
 private:
-    GLuint m_checkerTex = 0;
+    GLuint      m_checkerTex = 0;
+    RenderState m_state;
 };
