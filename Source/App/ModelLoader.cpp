@@ -38,8 +38,8 @@ std::string wstringToString(const std::wstring& ws)
 
 WoWModel* getLoadedModel(AppState& app)
 {
-    if (!app.root) return nullptr;
-    auto* att = app.root->children.empty() ? nullptr : app.root->children[0];
+    if (!app.scene.root) return nullptr;
+    auto* att = app.scene.root->children.empty() ? nullptr : app.scene.root->children[0];
     return att ? dynamic_cast<WoWModel*>(att->model()) : nullptr;
 }
 
@@ -63,34 +63,34 @@ void resetCameraToModel(OrbitCamera& camera, const WoWModel* model)
 
 void applySkin(WoWModel* model, int skinIndex, AppState& app)
 {
-    if (!model || skinIndex < 0 || skinIndex >= static_cast<int>(app.skinEntries.size()))
+    if (!model || skinIndex < 0 || skinIndex >= static_cast<int>(app.anim.skinEntries.size()))
         return;
 
-    const auto& skin = app.skinEntries[skinIndex];
+    const auto& skin = app.anim.skinEntries[skinIndex];
     model->setCreatureGeosetData(skin.creatureGeosetData);
     for (size_t i = 0; i < skin.count; ++i)
     {
         if (skin.tex[i])
             model->updateTextureList(skin.tex[i], skin.base + static_cast<int>(i));
     }
-    app.selectedSkin = skinIndex;
+    app.anim.selectedSkin = skinIndex;
 }
 
 // ---- Animation control init -----------------------------------------------
 
 void initAnimationControl(WoWModel* model, AppState& app)
 {
-    app.animEntries.clear();
-    app.skinEntries.clear();
-    app.selectedAnimCombo = 0;
-    app.selectedSkin = -1;
-    app.blpSkin[0] = app.blpSkin[1] = app.blpSkin[2] = -1;
-    app.animSpeed = 1.0f;
-    app.selectedSecondaryAnim = -1;
-    app.selectedMouthAnim = -1;
-    app.mouthSpeed = 1.0f;
-    app.lockAnims = true;
-    app.loopCount = 0;
+    app.anim.animEntries.clear();
+    app.anim.skinEntries.clear();
+    app.anim.selectedAnimCombo = 0;
+    app.anim.selectedSkin = -1;
+    app.anim.blpSkin[0] = app.anim.blpSkin[1] = app.anim.blpSkin[2] = -1;
+    app.anim.animSpeed = 1.0f;
+    app.anim.selectedSecondaryAnim = -1;
+    app.anim.selectedMouthAnim = -1;
+    app.anim.mouthSpeed = 1.0f;
+    app.anim.lockAnims = true;
+    app.anim.loopCount = 0;
 
     if (!model || !model->animated || model->anims.empty())
         return;
@@ -107,16 +107,16 @@ void initAnimationControl(WoWModel* model, AppState& app)
         else
             e.label = "Anim " + std::to_string(model->anims[i].animID) + " [" + std::to_string(i) + "]";
         e.animIndex = static_cast<int>(i);
-        app.animEntries.push_back(e);
+        app.anim.animEntries.push_back(e);
 
         if (model->anims[i].animID == 0 && standIndex < 0)
-            standIndex = static_cast<int>(app.animEntries.size()) - 1;
+            standIndex = static_cast<int>(app.anim.animEntries.size()) - 1;
     }
 
     if (standIndex >= 0)
-        app.selectedAnimCombo = standIndex;
+        app.anim.selectedAnimCombo = standIndex;
 
-    int useAnim = (standIndex >= 0) ? app.animEntries[standIndex].animIndex : 0;
+    int useAnim = (standIndex >= 0) ? app.anim.animEntries[standIndex].animIndex : 0;
     model->currentAnim = useAnim;
     model->animManager->SetAnim(0, useAnim, 0);
     model->animManager->SetSpeed(1.0f);
@@ -170,8 +170,8 @@ void initAnimationControl(WoWModel* model, AppState& app)
                 if (geoId > 0) se.creatureGeosetData.insert(geoType + geoId);
             }
 
-            se.label = "Skin " + std::to_string(app.skinEntries.size());
-            app.skinEntries.push_back(se);
+            se.label = "Skin " + std::to_string(app.anim.skinEntries.size());
+            app.anim.skinEntries.push_back(se);
         }
     }
     else if (isItem)
@@ -207,14 +207,14 @@ void initAnimationControl(WoWModel* model, AppState& app)
                 if (!se.tex[0]) continue;
                 se.base = TEXTURE_OBJECT_SKIN;
                 se.count = 1;
-                se.label = "Skin " + std::to_string(app.skinEntries.size());
-                app.skinEntries.push_back(se);
+                se.label = "Skin " + std::to_string(app.anim.skinEntries.size());
+                app.anim.skinEntries.push_back(se);
             }
         }
         }
     }
 
-    if (!app.skinEntries.empty())
+    if (!app.anim.skinEntries.empty())
         applySkin(model, 0, app);
 }
 
@@ -222,7 +222,7 @@ void initAnimationControl(WoWModel* model, AppState& app)
 
 void initCharacterControl(WoWModel* model, AppState& app)
 {
-    app.customizationOptions.clear();
+    app.character.customizationOptions.clear();
     if (!model) return;
 
     auto& cd = model->cd;
@@ -305,7 +305,7 @@ void initCharacterControl(WoWModel* model, AppState& app)
             }
         }
 
-        app.customizationOptions.push_back(std::move(opt));
+        app.character.customizationOptions.push_back(std::move(opt));
     }
 }
 
@@ -313,8 +313,8 @@ void initCharacterControl(WoWModel* model, AppState& app)
 
 void initModelControl(WoWModel* model, AppState& app)
 {
-    app.geosetGroups.clear();
-    app.pcrState = {};
+    app.browsers.geosetGroups.clear();
+    app.browsers.pcrState = {};
 
     if (!model)
         return;
@@ -329,8 +329,8 @@ void initModelControl(WoWModel* model, AppState& app)
             group.meshId = mesh;
             std::string groupName = WoWModel::getCGGroupName(static_cast<CharGeosets>(mesh));
             group.name = groupName.empty() ? std::to_string(mesh) : groupName;
-            meshToGroupIdx[mesh] = app.geosetGroups.size();
-            app.geosetGroups.push_back(std::move(group));
+            meshToGroupIdx[mesh] = app.browsers.geosetGroups.size();
+            app.browsers.geosetGroups.push_back(std::move(group));
         }
 
         GeosetEntry ge;
@@ -338,14 +338,14 @@ void initModelControl(WoWModel* model, AppState& app)
         ge.id = model->geosets[i]->id;
         ge.label = std::format("{} [{}, {}, {}]", i, mesh,
                                model->geosets[i]->id % 100, model->geosets[i]->id);
-        app.geosetGroups[meshToGroupIdx[mesh]].geosets.push_back(ge);
+        app.browsers.geosetGroups[meshToGroupIdx[mesh]].geosets.push_back(ge);
     }
 
     for (uint pcid : model->replacableParticleColorIDs)
     {
-        if (pcid == 11) app.pcrState.hasSet[0] = true;
-        else if (pcid == 12) app.pcrState.hasSet[1] = true;
-        else if (pcid == 13) app.pcrState.hasSet[2] = true;
+        if (pcid == 11) app.browsers.pcrState.hasSet[0] = true;
+        else if (pcid == 12) app.browsers.pcrState.hasSet[1] = true;
+        else if (pcid == 13) app.browsers.pcrState.hasSet[2] = true;
     }
 }
 
@@ -379,11 +379,11 @@ static bool correctType(int type, int slot)
 
 void rebuildEquipFilteredItems(AppState& app)
 {
-    app.equipFilteredItems.clear();
-    if (app.equipSlotToEdit < 0)
+    app.character.equipFilteredItems.clear();
+    if (app.character.equipSlotToEdit < 0)
         return;
 
-    std::string search = core::toLower(std::string(app.equipSearchBuf));
+    std::string search = core::toLower(std::string(app.character.equipSearchBuf));
     auto s = search.find_first_not_of(" \t\r\n");
     auto e = search.find_last_not_of(" \t\r\n");
     search = (s == std::string::npos) ? "" : search.substr(s, e - s + 1);
@@ -393,11 +393,11 @@ void rebuildEquipFilteredItems(AppState& app)
         const auto& item = items.items[i];
         if (item.id == 0)
             continue;
-        if (!correctType(item.type, app.equipSlotToEdit))
+        if (!correctType(item.type, app.character.equipSlotToEdit))
             continue;
         if (!search.empty() && !core::containsIgnoreCase(item.name, search))
             continue;
-        app.equipFilteredItems.push_back(i);
+        app.character.equipFilteredItems.push_back(i);
     }
 }
 
@@ -424,7 +424,7 @@ void tryToEquipItem(WoWModel* model, int id, AppState& app)
     if (item)
     {
         item->setId(id);
-        app.equipSlotLevels[itemSlot] = 0;
+        app.character.equipSlotLevels[itemSlot] = 0;
     }
 }
 
@@ -432,10 +432,10 @@ void tryToEquipItem(WoWModel* model, int id, AppState& app)
 
 void buildItemSets(AppState& app)
 {
-    if (app.itemSetsBuilt)
+    if (app.browsers.itemSetsBuilt)
         return;
 
-    app.itemSets.clear();
+    app.browsers.itemSets.clear();
 
     const auto* itemSetTable = WOWDB.getTable("ItemSet");
     if (!itemSetTable) return;
@@ -445,34 +445,34 @@ void buildItemSets(AppState& app)
         e.id = static_cast<int>(row.recordID());
         e.name = row.getString("Name_Lang");
         if (!e.name.empty())
-            app.itemSets.push_back(e);
+            app.browsers.itemSets.push_back(e);
     }
 
-    std::sort(app.itemSets.begin(), app.itemSets.end(),
+    std::sort(app.browsers.itemSets.begin(), app.browsers.itemSets.end(),
         [](const ItemSetEntry& a, const ItemSetEntry& b) { return a.name < b.name; });
 
-    app.itemSetsBuilt = true;
-    app.itemSetFilterDirty = true;
-    LOG_INFO << "Item sets loaded: " << app.itemSets.size();
+    app.browsers.itemSetsBuilt = true;
+    app.browsers.itemSetFilterDirty = true;
+    LOG_INFO << "Item sets loaded: " << app.browsers.itemSets.size();
 }
 
 void rebuildItemSetFilter(AppState& app)
 {
-    app.itemSetFiltered.clear();
+    app.browsers.itemSetFiltered.clear();
 
-    std::string search = core::toLower(std::string(app.itemSetSearchBuf));
+    std::string search = core::toLower(std::string(app.browsers.itemSetSearchBuf));
     auto s = search.find_first_not_of(" \t\r\n");
     auto e = search.find_last_not_of(" \t\r\n");
     search = (s == std::string::npos) ? "" : search.substr(s, e - s + 1);
 
-    for (size_t i = 0; i < app.itemSets.size(); ++i)
+    for (size_t i = 0; i < app.browsers.itemSets.size(); ++i)
     {
-        if (!search.empty() && !core::containsIgnoreCase(app.itemSets[i].name, search))
+        if (!search.empty() && !core::containsIgnoreCase(app.browsers.itemSets[i].name, search))
             continue;
-        app.itemSetFiltered.push_back(i);
+        app.browsers.itemSetFiltered.push_back(i);
     }
 
-    app.itemSetFilterDirty = false;
+    app.browsers.itemSetFilterDirty = false;
 }
 
 void applyItemSet(WoWModel* model, int setId, AppState& app)
@@ -491,7 +491,7 @@ void applyItemSet(WoWModel* model, int setId, AppState& app)
 
     for (const auto it : *model)
         it->setId(0);
-    std::memset(app.equipSlotLevels, 0, sizeof(app.equipSlotLevels));
+    std::memset(app.character.equipSlotLevels, 0, sizeof(app.character.equipSlotLevels));
 
     for (unsigned i = 0; i < 8; ++i)
     {
@@ -518,9 +518,9 @@ void applyItemSet(WoWModel* model, int setId, AppState& app)
 
 void buildStartOutfits(WoWModel* model, AppState& app)
 {
-    app.startOutfits.clear();
-    app.startOutfitsBuilt = false;
-    app.startOutfitFilterDirty = true;
+    app.browsers.startOutfits.clear();
+    app.browsers.startOutfitsBuilt = false;
+    app.browsers.startOutfitFilterDirty = true;
 
     if (!model) return;
 
@@ -546,34 +546,34 @@ void buildStartOutfits(WoWModel* model, AppState& app)
         e.name = className;
         e.id = static_cast<int>(row.recordID());
         if (!e.name.empty() && e.id > 0)
-            app.startOutfits.push_back(e);
+            app.browsers.startOutfits.push_back(e);
     }
 
-    std::sort(app.startOutfits.begin(), app.startOutfits.end(),
+    std::sort(app.browsers.startOutfits.begin(), app.browsers.startOutfits.end(),
         [](const StartOutfitEntry& a, const StartOutfitEntry& b) { return a.name < b.name; });
 
-    app.startOutfitsBuilt = true;
-    app.startOutfitFilterDirty = true;
-    LOG_INFO << "Start outfits loaded: " << app.startOutfits.size();
+    app.browsers.startOutfitsBuilt = true;
+    app.browsers.startOutfitFilterDirty = true;
+    LOG_INFO << "Start outfits loaded: " << app.browsers.startOutfits.size();
 }
 
 void rebuildStartOutfitFilter(AppState& app)
 {
-    app.startOutfitFiltered.clear();
+    app.browsers.startOutfitFiltered.clear();
 
-    std::string search = core::toLower(std::string(app.startOutfitSearchBuf));
+    std::string search = core::toLower(std::string(app.browsers.startOutfitSearchBuf));
     auto s = search.find_first_not_of(" \t\r\n");
     auto e = search.find_last_not_of(" \t\r\n");
     search = (s == std::string::npos) ? "" : search.substr(s, e - s + 1);
 
-    for (size_t i = 0; i < app.startOutfits.size(); ++i)
+    for (size_t i = 0; i < app.browsers.startOutfits.size(); ++i)
     {
-        if (!search.empty() && !core::containsIgnoreCase(app.startOutfits[i].name, search))
+        if (!search.empty() && !core::containsIgnoreCase(app.browsers.startOutfits[i].name, search))
             continue;
-        app.startOutfitFiltered.push_back(i);
+        app.browsers.startOutfitFiltered.push_back(i);
     }
 
-    app.startOutfitFilterDirty = false;
+    app.browsers.startOutfitFilterDirty = false;
 }
 
 void applyStartOutfit(WoWModel* model, int outfitId, AppState& app)
@@ -592,7 +592,7 @@ void applyStartOutfit(WoWModel* model, int outfitId, AppState& app)
 
     for (const auto it : *model)
         it->setId(0);
-    std::memset(app.equipSlotLevels, 0, sizeof(app.equipSlotLevels));
+    std::memset(app.character.equipSlotLevels, 0, sizeof(app.character.equipSlotLevels));
 
     for (unsigned i = 0; i < 24; ++i)
     {
@@ -619,43 +619,43 @@ void applyStartOutfit(WoWModel* model, int outfitId, AppState& app)
 
 void clearModel(AppState& app)
 {
-    if (app.root)
+    if (app.scene.root)
     {
-        app.root->delChildren();
-        app.root->setModel(nullptr);
+        app.scene.root->delChildren();
+        app.scene.root->setModel(nullptr);
     }
 
     TEXTUREMANAGER.clear();
-    app.isModel = false;
-    app.isChar = false;
+    app.scene.isModel = false;
+    app.scene.isChar = false;
 
-    app.selModel = nullptr;
-    app.animEntries.clear();
-    app.skinEntries.clear();
-    app.customizationOptions.clear();
-    app.geosetGroups.clear();
-    app.pcrState = {};
-    app.selectedAnimCombo = 0;
-    app.selectedSkin = -1;
-    app.animSpeed = 1.0f;
-    app.autoAnimate = true;
-    app.equipSlotToEdit = -1;
-    app.equipFilteredItems.clear();
-    app.equipSearchBuf[0] = '\0';
-    std::memset(app.equipSlotLevels, 0, sizeof(app.equipSlotLevels));
-    app.exportAnimChecked.clear();
-    app.exportStatus.clear();
-    app.isMounted = false;
-    app.startOutfits.clear();
-    app.startOutfitsBuilt = false;
-    app.startOutfitSearchBuf[0] = '\0';
-    app.startOutfitFiltered.clear();
-    app.startOutfitFilterDirty = true;
+    app.scene.selModel = nullptr;
+    app.anim.animEntries.clear();
+    app.anim.skinEntries.clear();
+    app.character.customizationOptions.clear();
+    app.browsers.geosetGroups.clear();
+    app.browsers.pcrState = {};
+    app.anim.selectedAnimCombo = 0;
+    app.anim.selectedSkin = -1;
+    app.anim.animSpeed = 1.0f;
+    app.anim.autoAnimate = true;
+    app.character.equipSlotToEdit = -1;
+    app.character.equipFilteredItems.clear();
+    app.character.equipSearchBuf[0] = '\0';
+    std::memset(app.character.equipSlotLevels, 0, sizeof(app.character.equipSlotLevels));
+    app.exporting.exportAnimChecked.clear();
+    app.exporting.exportStatus.clear();
+    app.scene.isMounted = false;
+    app.browsers.startOutfits.clear();
+    app.browsers.startOutfitsBuilt = false;
+    app.browsers.startOutfitSearchBuf[0] = '\0';
+    app.browsers.startOutfitFiltered.clear();
+    app.browsers.startOutfitFilterDirty = true;
 }
 
 void loadModel(GameFile* file, AppState& app)
 {
-    if (!file || !app.root)
+    if (!file || !app.scene.root)
         return;
 
     LOG_INFO << "Loading model: " << file->fullname();
@@ -670,14 +670,14 @@ void loadModel(GameFile* file, AppState& app)
         return;
     }
 
-    app.root->addChild(model, 0, -1);
+    app.scene.root->addChild(model, 0, -1);
 
     const std::string fn = file->fullname();
-    app.isChar = (core::startsWithIgnoreCase(fn, "char") ||
+    app.scene.isChar = (core::startsWithIgnoreCase(fn, "char") ||
                 core::startsWithIgnoreCase(fn, "alternate/char") ||
                 core::startsWithIgnoreCase(fn, "alternate\\char"));
 
-    if (app.isChar)
+    if (app.scene.isChar)
     {
         model->addChild(new WoWItem(CS_SHIRT));
         model->addChild(new WoWItem(CS_HEAD));
@@ -703,15 +703,15 @@ void loadModel(GameFile* file, AppState& app)
         model->modelType = MT_NORMAL;
     }
 
-    app.isModel = true;
+    app.scene.isModel = true;
 
-    app.selModel = model;
+    app.scene.selModel = model;
     initAnimationControl(model, app);
     initModelControl(model, app);
-    if (app.isChar)
+    if (app.scene.isChar)
         initCharacterControl(model, app);
 
-    resetCameraToModel(app.camera, model);
+    resetCameraToModel(app.scene.camera, model);
 
     LOG_INFO << "Model loaded: " << model->name();
 }
@@ -720,9 +720,9 @@ void loadModel(GameFile* file, AppState& app)
 
 void rebuildNpcFilter(AppState& app)
 {
-    app.npcFiltered.clear();
+    app.browsers.npcFiltered.clear();
 
-    std::string search = core::toLower(std::string(app.npcSearchBuf));
+    std::string search = core::toLower(std::string(app.browsers.npcSearchBuf));
     auto s = search.find_first_not_of(" \t\r\n");
     auto e = search.find_last_not_of(" \t\r\n");
     search = (s == std::string::npos) ? "" : search.substr(s, e - s + 1);
@@ -733,10 +733,10 @@ void rebuildNpcFilter(AppState& app)
         if (npc.model == 0) continue;
         if (!search.empty() && !core::containsIgnoreCase(npc.name, search))
             continue;
-        app.npcFiltered.push_back(i);
+        app.browsers.npcFiltered.push_back(i);
     }
 
-    app.npcFilterDirty = false;
+    app.browsers.npcFilterDirty = false;
 }
 
 void loadNPC(unsigned int creatureID, AppState& app)
@@ -779,14 +779,14 @@ void loadNPC(unsigned int creatureID, AppState& app)
                 cdiRow.getUInt("TextureVariationFileDataID2"),
                 cdiRow.getUInt("TextureVariationFileDataID3")
             };
-            for (size_t i = 0; i < app.skinEntries.size(); ++i)
+            for (size_t i = 0; i < app.anim.skinEntries.size(); ++i)
             {
                 bool match = true;
                 for (size_t t = 0; t < 3 && match; ++t)
                 {
-                    if (app.skinEntries[i].tex[t])
+                    if (app.anim.skinEntries[i].tex[t])
                     {
-                        int fdid = app.skinEntries[i].tex[t]->fileDataId();
+                        int fdid = app.anim.skinEntries[i].tex[t]->fileDataId();
                         if (texFDIDs[t] != 0)
                             match = (fdid == static_cast<int>(texFDIDs[t]));
                         else
@@ -849,9 +849,9 @@ void loadNPC(unsigned int creatureID, AppState& app)
 
 void rebuildItemBrowseFilter(AppState& app)
 {
-    app.itemBrowseFiltered.clear();
+    app.browsers.itemBrowseFiltered.clear();
 
-    std::string search = core::toLower(std::string(app.itemBrowseSearchBuf));
+    std::string search = core::toLower(std::string(app.browsers.itemBrowseSearchBuf));
     auto s = search.find_first_not_of(" \t\r\n");
     auto e = search.find_last_not_of(" \t\r\n");
     search = (s == std::string::npos) ? "" : search.substr(s, e - s + 1);
@@ -862,10 +862,10 @@ void rebuildItemBrowseFilter(AppState& app)
         if (item.id == 0) continue;
         if (!search.empty() && !core::containsIgnoreCase(item.name, search))
             continue;
-        app.itemBrowseFiltered.push_back(i);
+        app.browsers.itemBrowseFiltered.push_back(i);
     }
 
-    app.itemBrowseFilterDirty = false;
+    app.browsers.itemBrowseFilterDirty = false;
 }
 
 void loadItemModel(unsigned int itemId, AppState& app)
@@ -944,12 +944,12 @@ void loadItemModel(unsigned int itemId, AppState& app)
 
 void buildMountList(AppState& app)
 {
-    if (app.mountListBuilt || !app.isWoWLoaded || !app.initDB)
+    if (app.browsers.mountListBuilt || !app.loading.isWoWLoaded || !app.loading.initDB)
         return;
 
-    app.mountList.clear();
-    app.creatureModels.clear();
-    app.creatureModelNames.clear();
+    app.browsers.mountList.clear();
+    app.browsers.creatureModels.clear();
+    app.browsers.creatureModelNames.clear();
 
     const auto* mountTable = WOWDB.getTable("Mount");
     const auto* mxdTable = WOWDB.getTable("MountXDisplay");
@@ -961,79 +961,79 @@ void buildMountList(AppState& app)
         MountEntry me;
         me.displayID = static_cast<int>(mxdRow.getUInt("CreatureDisplayInfoID"));
         me.name = mountRow ? mountRow.getString("Name_Lang") : "";
-        app.mountList.push_back(me);
+        app.browsers.mountList.push_back(me);
     }
-    std::sort(app.mountList.begin(), app.mountList.end(),
+    std::sort(app.browsers.mountList.begin(), app.browsers.mountList.end(),
         [](const MountEntry& a, const MountEntry& b) { return a.name < b.name; });
-    LOG_INFO << "Mount list: " << app.mountList.size() << " player mounts.";
+    LOG_INFO << "Mount list: " << app.browsers.mountList.size() << " player mounts.";
 
     std::vector<GameFile*> files;
     GAMEDIRECTORY.getFilesForFolder(files, std::string("creature/"), std::string("m2"));
     for (auto* gf : files)
     {
-        app.creatureModels.push_back(gf);
+        app.browsers.creatureModels.push_back(gf);
         std::string n = gf->fullname();
         if (n.size() > 9)
             n = n.substr(9);
-        app.creatureModelNames.push_back(n);
+        app.browsers.creatureModelNames.push_back(n);
     }
-    if (!app.creatureModels.empty())
+    if (!app.browsers.creatureModels.empty())
     {
-        std::vector<size_t> indices(app.creatureModels.size());
+        std::vector<size_t> indices(app.browsers.creatureModels.size());
         for (size_t i = 0; i < indices.size(); ++i) indices[i] = i;
         std::sort(indices.begin(), indices.end(),
-            [&](size_t a, size_t b) { return app.creatureModelNames[a] < app.creatureModelNames[b]; });
-        std::vector<GameFile*> sortedFiles(app.creatureModels.size());
-        std::vector<std::string> sortedNames(app.creatureModelNames.size());
+            [&](size_t a, size_t b) { return app.browsers.creatureModelNames[a] < app.browsers.creatureModelNames[b]; });
+        std::vector<GameFile*> sortedFiles(app.browsers.creatureModels.size());
+        std::vector<std::string> sortedNames(app.browsers.creatureModelNames.size());
         for (size_t i = 0; i < indices.size(); ++i)
         {
-            sortedFiles[i] = app.creatureModels[indices[i]];
-            sortedNames[i] = app.creatureModelNames[indices[i]];
+            sortedFiles[i] = app.browsers.creatureModels[indices[i]];
+            sortedNames[i] = app.browsers.creatureModelNames[indices[i]];
         }
-        app.creatureModels = std::move(sortedFiles);
-        app.creatureModelNames = std::move(sortedNames);
+        app.browsers.creatureModels = std::move(sortedFiles);
+        app.browsers.creatureModelNames = std::move(sortedNames);
     }
-    LOG_INFO << "Creature models: " << app.creatureModels.size() << " files.";
+    LOG_INFO << "Creature models: " << app.browsers.creatureModels.size() << " files.";
 
-    app.mountListBuilt = true;
-    app.mountFilterDirty = true;
+    app.browsers.mountListBuilt = true;
+    app.browsers.mountFilterDirty = true;
 }
 
 void rebuildMountFilter(AppState& app)
 {
-    app.mountFiltered.clear();
+    app.browsers.mountFiltered.clear();
 
-    std::string search = core::toLower(std::string(app.mountSearchBuf));
+    std::string search = core::toLower(std::string(app.browsers.mountSearchBuf));
     auto s = search.find_first_not_of(" \t\r\n");
     auto e = search.find_last_not_of(" \t\r\n");
     search = (s == std::string::npos) ? "" : search.substr(s, e - s + 1);
 
-    if (app.mountTab == 0)
+    if (app.browsers.mountTab == 0)
     {
-        for (size_t i = 0; i < app.mountList.size(); ++i)
+        for (size_t i = 0; i < app.browsers.mountList.size(); ++i)
         {
-            if (!search.empty() && !core::containsIgnoreCase(app.mountList[i].name, search))
+            if (!search.empty() && !core::containsIgnoreCase(app.browsers.mountList[i].name, search))
                 continue;
-            app.mountFiltered.push_back(i);
+            app.browsers.mountFiltered.push_back(i);
         }
     }
     else
     {
-        for (size_t i = 0; i < app.creatureModelNames.size(); ++i)
+        for (size_t i = 0; i < app.browsers.creatureModelNames.size(); ++i)
         {
-            if (!search.empty() && !core::containsIgnoreCase(app.creatureModelNames[i], search))
+            if (!search.empty() && !core::containsIgnoreCase(app.browsers.creatureModelNames[i], search))
                 continue;
-            app.mountFiltered.push_back(i);
+            app.browsers.mountFiltered.push_back(i);
         }
     }
 
-    app.mountFilterDirty = false;
+    app.browsers.mountFilterDirty = false;
 }
 
 void mountCharacter(int displayID, GameFile* creatureFile, AppState& app)
 {
     WoWModel* charModel = getLoadedModel(app);
-    if (!charModel || !app.isChar || !app.root)
+    if (!charModel || !app.scene.isChar || !app.scene.root)
         return;
 
     GameFile* modelFile = nullptr;
@@ -1068,7 +1068,7 @@ void mountCharacter(int displayID, GameFile* creatureFile, AppState& app)
     if (!modelFile)
         return;
 
-    Attachment* charAtt = app.root->children.empty() ? nullptr : app.root->children[0];
+    Attachment* charAtt = app.scene.root->children.empty() ? nullptr : app.scene.root->children[0];
     if (!charAtt)
         return;
 
@@ -1081,7 +1081,7 @@ void mountCharacter(int displayID, GameFile* creatureFile, AppState& app)
     }
     mountModel->isMount = true;
 
-    app.root->setModel(mountModel);
+    app.scene.root->setModel(mountModel);
     charAtt->id = 0;
 
     if (morphID > 0)
@@ -1124,28 +1124,28 @@ void mountCharacter(int displayID, GameFile* creatureFile, AppState& app)
     charModel->scale_ = 1.0f;
     mountModel->rot_.x = 0.0f;
 
-    app.isMounted = true;
-    app.selModel = mountModel;
+    app.scene.isMounted = true;
+    app.scene.selModel = mountModel;
 
     initAnimationControl(mountModel, app);
     initModelControl(mountModel, app);
 
-    resetCameraToModel(app.camera, mountModel);
+    resetCameraToModel(app.scene.camera, mountModel);
     LOG_INFO << "Character mounted on: " << modelFile->fullname();
 }
 
 void dismountCharacter(AppState& app)
 {
-    if (!app.isMounted || !app.root || !app.isChar)
+    if (!app.scene.isMounted || !app.scene.root || !app.scene.isChar)
         return;
 
     WoWModel* charModel = nullptr;
-    Attachment* charAtt = app.root->children.empty() ? nullptr : app.root->children[0];
+    Attachment* charAtt = app.scene.root->children.empty() ? nullptr : app.scene.root->children[0];
     if (charAtt)
         charModel = dynamic_cast<WoWModel*>(charAtt->model());
 
-    app.root->setModel(nullptr);
-    app.isMounted = false;
+    app.scene.root->setModel(nullptr);
+    app.scene.isMounted = false;
 
     if (charAtt)
         charAtt->id = 0;
@@ -1156,10 +1156,10 @@ void dismountCharacter(AppState& app)
         charModel->scale_ = 1.0f;
         charModel->rot_ = charModel->pos_ = glm::vec3(0.0f);
 
-        app.selModel = charModel;
+        app.scene.selModel = charModel;
         initAnimationControl(charModel, app);
         initModelControl(charModel, app);
-        resetCameraToModel(app.camera, charModel);
+        resetCameraToModel(app.scene.camera, charModel);
     }
 
     LOG_INFO << "Character dismounted.";

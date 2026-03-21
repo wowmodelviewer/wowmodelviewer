@@ -22,9 +22,9 @@ namespace PresetManager
 void save(const char* path, AppState& app)
 {
     WoWModel* model = ModelLoader::getLoadedModel(app);
-    if (!model || !app.isChar)
+    if (!model || !app.scene.isChar)
     {
-        app.presetStatus = "No character model loaded.";
+        app.exporting.presetStatus = "No character model loaded.";
         return;
     }
 
@@ -42,7 +42,7 @@ void save(const char* path, AppState& app)
     ini.setValue("Display/EyeGlow", static_cast<int>(cd.eyeGlowType));
 
     int optIdx = 0;
-    for (const auto& opt : app.customizationOptions)
+    for (const auto& opt : app.character.customizationOptions)
     {
         std::string key = "Customization/" + std::to_string(optIdx);
         ini.setValue(key + "_OptionID", static_cast<int>(opt.optionID));
@@ -57,26 +57,26 @@ void save(const char* path, AppState& app)
         WoWItem* witem = model->getItem(static_cast<CharSlots>(s));
         std::string key = "Equipment/" + std::to_string(s);
         ini.setValue(key + "_ID", witem ? static_cast<int>(witem->id()) : 0);
-        ini.setValue(key + "_Level", app.equipSlotLevels[s]);
+        ini.setValue(key + "_Level", app.character.equipSlotLevels[s]);
     }
 
     ini.sync();
-    app.presetStatus = std::string("Preset saved: ") + path;
+    app.exporting.presetStatus = std::string("Preset saved: ") + path;
     LOG_INFO << "Character preset saved to " << path;
 }
 
 void load(const char* path, AppState& app)
 {
     WoWModel* model = ModelLoader::getLoadedModel(app);
-    if (!model || !app.isChar)
+    if (!model || !app.scene.isChar)
     {
-        app.presetStatus = "No character model loaded.";
+        app.exporting.presetStatus = "No character model loaded.";
         return;
     }
 
     if (!std::filesystem::exists(path))
     {
-        app.presetStatus = std::string("File not found: ") + path;
+        app.exporting.presetStatus = std::string("File not found: ") + path;
         return;
     }
 
@@ -103,7 +103,7 @@ void load(const char* path, AppState& app)
 
         cd.set(optionID, choiceID);
 
-        for (auto& opt : app.customizationOptions)
+        for (auto& opt : app.character.customizationOptions)
         {
             if (opt.optionID == optionID)
             {
@@ -132,11 +132,11 @@ void load(const char* path, AppState& app)
             witem->setId(itemId);
             if (level > 0) witem->setLevel(level);
         }
-        app.equipSlotLevels[s] = level;
+        app.character.equipSlotLevels[s] = level;
     }
 
     model->refresh();
-    app.presetStatus = std::string("Preset loaded: ") + path;
+    app.exporting.presetStatus = std::string("Preset loaded: ") + path;
     LOG_INFO << "Character preset loaded from " << path;
 }
 

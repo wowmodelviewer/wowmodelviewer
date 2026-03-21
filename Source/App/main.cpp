@@ -139,36 +139,36 @@ static void tryToEquipItem(WoWModel* m, int id) { ModelLoader::tryToEquipItem(m,
 // ---- Handle viewport input (delegates to InputManager + ViewportController)
 static void handleViewportInput()
 {
-    ViewportController::apply(inputManager.state(), app.camera);
+    ViewportController::apply(inputManager.state(), app.scene.camera);
     if (inputManager.state().resetCamera)
-        resetCameraToModel(app.camera, getLoadedModel());
+        resetCameraToModel(app.scene.camera, getLoadedModel());
 }
 
 // ---- Animation tick -------------------------------------------------------
 static void tickScene()
 {
     auto now = std::chrono::steady_clock::now();
-    float dt = std::chrono::duration<float>(now - app.lastTick).count();
-    app.lastTick = now;
+    float dt = std::chrono::duration<float>(now - app.scene.lastTick).count();
+    app.scene.lastTick = now;
 
     // Clamp to avoid huge jumps after breakpoints, window moves, or long pauses
     if (dt > 0.1f) dt = 0.1f;
     if (dt < 0.0f) dt = 0.0f;
 
     // FPS tracking
-    app.fpsAccum += dt;
-    app.fpsFrameCount++;
-    if (app.fpsAccum >= 0.5f)
+    app.scene.fpsAccum += dt;
+    app.scene.fpsFrameCount++;
+    if (app.scene.fpsAccum >= 0.5f)
     {
-        app.fps = static_cast<float>(app.fpsFrameCount) / app.fpsAccum;
-        app.fpsFrameCount = 0;
-        app.fpsAccum = 0.0f;
+        app.scene.fps = static_cast<float>(app.scene.fpsFrameCount) / app.scene.fpsAccum;
+        app.scene.fpsFrameCount = 0;
+        app.scene.fpsAccum = 0.0f;
     }
 
-    app.animTime += dt;
+    app.scene.animTime += dt;
 
-    if (app.root)
-        app.root->tick(dt * 1000.0f);
+    if (app.scene.root)
+        app.scene.root->tick(dt * 1000.0f);
 }
 
 // ---- Engine initialization ------------------------------------------------
@@ -202,15 +202,15 @@ static void initEngine()
 #endif
 
     // Pre-fill the path input buffer from saved settings
-    strncpy_s(app.pathBuf, app.settings.gamePath.c_str(), sizeof(app.pathBuf) - 1);
+    strncpy_s(app.loading.pathBuf, app.settings.gamePath.c_str(), sizeof(app.loading.pathBuf) - 1);
 
     // Instantiate exporters (OBJ / FBX)
-    app.exporters.push_back(std::make_unique<OBJExporter>());
-    app.exporters.push_back(std::make_unique<FBXExporter>());
+    app.exporting.exporters.push_back(std::make_unique<OBJExporter>());
+    app.exporting.exporters.push_back(std::make_unique<FBXExporter>());
 
     // Instantiate importers (Armory / Wowhead)
-    app.importers.push_back(std::make_unique<ArmoryImporter>());
-    app.importers.push_back(std::make_unique<WowheadImporter>());
+    app.exporting.importers.push_back(std::make_unique<ArmoryImporter>());
+    app.exporting.importers.push_back(std::make_unique<WowheadImporter>());
 }
 
 static void initGL()
@@ -294,7 +294,7 @@ int main(int /*argc*/, char* /*argv*/[])
     initGL();
 
     // Create root attachment (scene graph root � no model yet)
-    app.root = std::make_unique<Attachment>(nullptr, nullptr, -1, -1);
+    app.scene.root = std::make_unique<Attachment>(nullptr, nullptr, -1, -1);
 
     // ---- Dear ImGui ----
     IMGUI_CHECKVERSION();
@@ -309,10 +309,10 @@ int main(int /*argc*/, char* /*argv*/[])
     // ---- DPI-aware scaling ----
     float xscale = 1.0f, yscale = 1.0f;
     glfwGetWindowContentScale(window, &xscale, &yscale);
-    app.dpiScale = (xscale > yscale) ? xscale : yscale;
-    if (app.dpiScale > 1.0f)
+    app.ui.dpiScale = (xscale > yscale) ? xscale : yscale;
+    if (app.ui.dpiScale > 1.0f)
     {
-        ImGui::GetStyle().ScaleAllSizes(app.dpiScale);
+        ImGui::GetStyle().ScaleAllSizes(app.ui.dpiScale);
     }
 
     // ---- Font discovery ----
@@ -354,11 +354,11 @@ int main(int /*argc*/, char* /*argv*/[])
                     continue;
                 seen.insert(stemLower);
                 std::string absPath = fs::canonical(entry.path()).string();
-                app.availableFonts.push_back({stemName, absPath});
+                app.ui.availableFonts.push_back({stemName, absPath});
             }
         }
         // Sort alphabetically by display name
-        std::sort(app.availableFonts.begin(), app.availableFonts.end(),
+        std::sort(app.ui.availableFonts.begin(), app.ui.availableFonts.end(),
             [](const FontEntry& a, const FontEntry& b) { return a.name < b.name; });
 
         // Default font: prefer "Roboto-Regular" (UE5 default), fall back to "arialn"
@@ -368,9 +368,9 @@ int main(int /*argc*/, char* /*argv*/[])
             for (const char* target : preferred)
             {
                 bool found = false;
-                for (int i = 0; i < static_cast<int>(app.availableFonts.size()); ++i)
+                for (int i = 0; i < static_cast<int>(app.ui.availableFonts.size()); ++i)
                 {
-                    std::string lower = app.availableFonts[i].name;
+                    std::string lower = app.ui.availableFonts[i].name;
                     std::transform(lower.begin(), lower.end(), lower.begin(), ::tolower);
                     if (lower == target)
                     {
@@ -387,11 +387,11 @@ int main(int /*argc*/, char* /*argv*/[])
 
     // ---- Build initial font atlas ----
     {
-        const float pixelSize = app.settings.fontSize * app.dpiScale;
+        const float pixelSize = app.settings.fontSize * app.ui.dpiScale;
         bool loaded = false;
-        if (app.settings.currentFont >= 0 && app.settings.currentFont < static_cast<int>(app.availableFonts.size()))
+        if (app.settings.currentFont >= 0 && app.settings.currentFont < static_cast<int>(app.ui.availableFonts.size()))
         {
-            const auto& fe = app.availableFonts[app.settings.currentFont];
+            const auto& fe = app.ui.availableFonts[app.settings.currentFont];
             if (std::filesystem::exists(fe.path))
             {
                 io.Fonts->AddFontFromFileTTF(fe.path.c_str(), pixelSize);
@@ -411,7 +411,7 @@ int main(int /*argc*/, char* /*argv*/[])
     bool show_demo_window = false;
     bool firstFrame = true;
     bool resetLayout = false;
-    app.lastTick = std::chrono::steady_clock::now();
+    app.scene.lastTick = std::chrono::steady_clock::now();
 
     // ---- Main loop ----
     while (!glfwWindowShouldClose(window))
@@ -419,16 +419,16 @@ int main(int /*argc*/, char* /*argv*/[])
         glfwPollEvents();
 
         // ---- Rebuild font atlas if font/size changed ----
-        if (app.fontsDirty)
+        if (app.ui.fontsDirty)
         {
-            app.fontsDirty = false;
+            app.ui.fontsDirty = false;
             ImGuiIO& fio = ImGui::GetIO();
             fio.Fonts->Clear();
-            const float pixelSize = app.settings.fontSize * app.dpiScale;
+            const float pixelSize = app.settings.fontSize * app.ui.dpiScale;
             bool loaded = false;
-            if (app.settings.currentFont >= 0 && app.settings.currentFont < static_cast<int>(app.availableFonts.size()))
+            if (app.settings.currentFont >= 0 && app.settings.currentFont < static_cast<int>(app.ui.availableFonts.size()))
             {
-                const auto& fe = app.availableFonts[app.settings.currentFont];
+                const auto& fe = app.ui.availableFonts[app.settings.currentFont];
                 if (std::filesystem::exists(fe.path))
                 {
                     fio.Fonts->AddFontFromFileTTF(fe.path.c_str(), pixelSize);
@@ -463,14 +463,14 @@ int main(int /*argc*/, char* /*argv*/[])
         {
             if (ImGui::BeginMenu("File"))
             {
-                if (ImGui::MenuItem("Load WoW", nullptr, false, !app.isWoWLoaded && !app.loadInProgress))
+                if (ImGui::MenuItem("Load WoW", nullptr, false, !app.loading.isWoWLoaded && !app.loading.loadInProgress))
                     beginLoadWoW();
                 ImGui::Separator();
-                if (ImGui::MenuItem("Import from URL...", nullptr, false, app.isWoWLoaded && app.initDB))
+                if (ImGui::MenuItem("Import from URL...", nullptr, false, app.loading.isWoWLoaded && app.loading.initDB))
                 {
-                    app.showImportDialog = true;
-                    app.importPopupJustOpened = true;
-                    app.importStatus.clear();
+                    app.ui.showImportDialog = true;
+                    app.ui.importPopupJustOpened = true;
+                    app.exporting.importStatus.clear();
                 }
                 ImGui::Separator();
                 if (ImGui::MenuItem("Close Model", nullptr, false, getLoadedModel() != nullptr))
@@ -478,12 +478,12 @@ int main(int /*argc*/, char* /*argv*/[])
                 ImGui::Separator();
                 if (ImGui::MenuItem("Export...", nullptr, false, getLoadedModel() != nullptr))
                 {
-                    app.showExport = true;
+                    app.ui.showExport = true;
                     ImGui::SetWindowFocus("Export");
                 }
                 if (ImGui::MenuItem("Screenshot...", "Ctrl+S"))
                 {
-                    app.showScreenshot = true;
+                    app.ui.showScreenshot = true;
                     ImGui::SetWindowFocus("Screenshot");
                 }
                 ImGui::Separator();
@@ -495,7 +495,7 @@ int main(int /*argc*/, char* /*argv*/[])
             if (ImGui::BeginMenu("Edit"))
             {
                 if (ImGui::MenuItem("Reset Camera", "Numpad 5", false, getLoadedModel() != nullptr))
-                    resetCameraToModel(app.camera, getLoadedModel());
+                    resetCameraToModel(app.scene.camera, getLoadedModel());
                 ImGui::Separator();
                 if (ImGui::MenuItem("Reset Layout"))
                     resetLayout = true;
@@ -504,20 +504,20 @@ int main(int /*argc*/, char* /*argv*/[])
 
             if (ImGui::BeginMenu("View"))
             {
-                ImGui::MenuItem("3D Viewport", nullptr, &app.showViewport);
-                ImGui::MenuItem("Character Viewer", nullptr, &app.showCharViewer);
-                ImGui::MenuItem("File Browser", nullptr, &app.showFileBrowser);
-                ImGui::MenuItem("Animation", nullptr, &app.showAnimation);
-                ImGui::MenuItem("Viewport Options", nullptr, &app.showViewportOpts);
-                ImGui::MenuItem("Mounts", nullptr, &app.showMounts);
-                ImGui::MenuItem("Item Sets", nullptr, &app.showItemSets);
-                ImGui::MenuItem("NPC Browser", nullptr, &app.showNpcBrowser);
-                ImGui::MenuItem("Item Browser", nullptr, &app.showItemBrowser);
-                ImGui::MenuItem("Export", nullptr, &app.showExport);
-                ImGui::MenuItem("Screenshot", nullptr, &app.showScreenshot);
-                ImGui::MenuItem("Presets", nullptr, &app.showPresets);
-                ImGui::MenuItem("Log", nullptr, &app.showLog);
-                ImGui::MenuItem("Settings", nullptr, &app.showSettings);
+                ImGui::MenuItem("3D Viewport", nullptr, &app.ui.showViewport);
+                ImGui::MenuItem("Character Viewer", nullptr, &app.ui.showCharViewer);
+                ImGui::MenuItem("File Browser", nullptr, &app.ui.showFileBrowser);
+                ImGui::MenuItem("Animation", nullptr, &app.ui.showAnimation);
+                ImGui::MenuItem("Viewport Options", nullptr, &app.ui.showViewportOpts);
+                ImGui::MenuItem("Mounts", nullptr, &app.ui.showMounts);
+                ImGui::MenuItem("Item Sets", nullptr, &app.ui.showItemSets);
+                ImGui::MenuItem("NPC Browser", nullptr, &app.ui.showNpcBrowser);
+                ImGui::MenuItem("Item Browser", nullptr, &app.ui.showItemBrowser);
+                ImGui::MenuItem("Export", nullptr, &app.ui.showExport);
+                ImGui::MenuItem("Screenshot", nullptr, &app.ui.showScreenshot);
+                ImGui::MenuItem("Presets", nullptr, &app.ui.showPresets);
+                ImGui::MenuItem("Log", nullptr, &app.ui.showLog);
+                ImGui::MenuItem("Settings", nullptr, &app.ui.showSettings);
                 ImGui::Separator();
                 ImGui::MenuItem("ImGui Demo", nullptr, &show_demo_window);
                 ImGui::EndMenu();
@@ -526,17 +526,17 @@ int main(int /*argc*/, char* /*argv*/[])
             if (ImGui::BeginMenu("Options"))
             {
                 if (ImGui::MenuItem("Language / Locale..."))
-                    app.showLanguageDialog = true;
+                    app.ui.showLanguageDialog = true;
                 ImGui::Separator();
                 if (ImGui::MenuItem("Settings..."))
-                    app.showSettings = true;
+                    app.ui.showSettings = true;
                 ImGui::EndMenu();
             }
 
             if (ImGui::BeginMenu("Help"))
             {
                 if (ImGui::MenuItem("About..."))
-                    app.showAboutDialog = true;
+                    app.ui.showAboutDialog = true;
                 ImGui::EndMenu();
             }
 
@@ -553,13 +553,13 @@ int main(int /*argc*/, char* /*argv*/[])
                         totalFrames = static_cast<int>(sm->animManager->GetFrameCount());
                     }
                     statusText = std::format("FPS: {:.0f} | {} | V:{} B:{} T:{} | Frame: {}/{}",
-                        app.fps, sm->name(),
+                        app.scene.fps, sm->name(),
                         sm->header.nVertices, sm->header.nBones, sm->header.nTextures,
                         curFrame, totalFrames);
                 }
                 else
                 {
-                    statusText = std::format("FPS: {:.0f}", app.fps);
+                    statusText = std::format("FPS: {:.0f}", app.scene.fps);
                 }
             }
             CustomTitleBar::end(window, statusText.c_str());
@@ -626,21 +626,21 @@ int main(int /*argc*/, char* /*argv*/[])
         } // dockspace scope
 
         // ===== Character Viewer (standalone tab like wow.export) =====
-        if (app.showCharViewer)
+        if (app.ui.showCharViewer)
         {
         ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(4, 4));
-        if (ImGui::Begin("Character Viewer", &app.showCharViewer))
+        if (ImGui::Begin("Character Viewer", &app.ui.showCharViewer))
         {
             CharacterViewerPanel::DrawContext cvCtx;
-            cvCtx.isWoWLoaded          = app.isWoWLoaded;
-            cvCtx.isDBReady            = app.initDB;
-            cvCtx.isChar               = app.isChar;
-            cvCtx.customizationOptions = &app.customizationOptions;
-            cvCtx.animEntries          = &app.animEntries;
-            cvCtx.selectedAnimCombo    = &app.selectedAnimCombo;
-            cvCtx.fbo                  = &app.fbo;
-            cvCtx.camera               = &app.camera;
-            cvCtx.root                 = app.root.get();
+            cvCtx.isWoWLoaded          = app.loading.isWoWLoaded;
+            cvCtx.isDBReady            = app.loading.initDB;
+            cvCtx.isChar               = app.scene.isChar;
+            cvCtx.customizationOptions = &app.character.customizationOptions;
+            cvCtx.animEntries          = &app.anim.animEntries;
+            cvCtx.selectedAnimCombo    = &app.anim.selectedAnimCombo;
+            cvCtx.fbo                  = &app.scene.fbo;
+            cvCtx.camera               = &app.scene.camera;
+            cvCtx.root                 = app.scene.root.get();
             cvCtx.fov                  = video.fov;
             cvCtx.bgColor              = app.settings.bgColor;
             cvCtx.drawGrid             = app.settings.drawGrid;
@@ -655,10 +655,10 @@ int main(int /*argc*/, char* /*argv*/[])
         }
 
         // ===== 3D Viewport panel =====
-        if (app.showViewport)
+        if (app.ui.showViewport)
         {
         ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
-        if (ImGui::Begin("3D Viewport", &app.showViewport))
+        if (ImGui::Begin("3D Viewport", &app.ui.showViewport))
         {
             // Determine available size for the viewport image
             ImVec2 panelSize = ImGui::GetContentRegionAvail();
@@ -668,10 +668,10 @@ int main(int /*argc*/, char* /*argv*/[])
             if (vpW > 0 && vpH > 0)
             {
                 // Render scene to offscreen FBO
-                SceneRenderer::renderToFBO(app.fbo, vpW, vpH, app.camera, app.root.get(), video.fov, app.settings.bgColor, app.settings.drawGrid);
+                SceneRenderer::renderToFBO(app.scene.fbo, vpW, vpH, app.scene.camera, app.scene.root.get(), video.fov, app.settings.bgColor, app.settings.drawGrid);
 
                 // Display FBO colour texture (UV-flipped: OpenGL is bottom-up)
-                ImGui::Image(static_cast<ImTextureID>(static_cast<uintptr_t>(app.fbo.colorTex)),
+                ImGui::Image(static_cast<ImTextureID>(static_cast<uintptr_t>(app.scene.fbo.colorTex)),
                              panelSize,
                              ImVec2(0, 1), ImVec2(1, 0));
 
@@ -685,86 +685,86 @@ int main(int /*argc*/, char* /*argv*/[])
         }
 
         // ===== File Browser panel =====
-        if (app.showFileBrowser)
+        if (app.ui.showFileBrowser)
         {
             auto statusStr = getLoadStatus();
             FileBrowserPanel::LoadState ls;
-            ls.isLoaded   = app.isWoWLoaded;
-            ls.inProgress = app.loadInProgress;
-            ls.progress   = app.loadProgress;
+            ls.isLoaded   = app.loading.isWoWLoaded;
+            ls.inProgress = app.loading.loadInProgress;
+            ls.progress   = app.loading.loadProgress;
             ls.statusText = statusStr.c_str();
 
-            if (GameFile* picked = FileBrowserPanel::draw(app.showFileBrowser, ls))
+            if (GameFile* picked = FileBrowserPanel::draw(app.ui.showFileBrowser, ls))
                 loadModel(picked);
         }
 
         // ===== Animation Control =====
-        if (app.showAnimation)
+        if (app.ui.showAnimation)
         {
-        if (ImGui::Begin("Animation", &app.showAnimation))
+        if (ImGui::Begin("Animation", &app.ui.showAnimation))
         {
             AnimationPanel::DrawContext animCtx;
             animCtx.getLoadedModel       = getLoadedModel;
-            animCtx.animEntries          = &app.animEntries;
-            animCtx.selectedAnimCombo    = &app.selectedAnimCombo;
-            animCtx.animSpeed            = &app.animSpeed;
-            animCtx.loopCount            = &app.loopCount;
-            animCtx.lockAnims            = &app.lockAnims;
-            animCtx.selectedSecondaryAnim = &app.selectedSecondaryAnim;
-            animCtx.selectedMouthAnim    = &app.selectedMouthAnim;
-            animCtx.mouthSpeed           = &app.mouthSpeed;
-            animCtx.skinEntries          = &app.skinEntries;
-            animCtx.selectedSkin         = &app.selectedSkin;
-            animCtx.blpSkin[0] = app.blpSkin[0];
-            animCtx.blpSkin[1] = app.blpSkin[1];
-            animCtx.blpSkin[2] = app.blpSkin[2];
+            animCtx.animEntries          = &app.anim.animEntries;
+            animCtx.selectedAnimCombo    = &app.anim.selectedAnimCombo;
+            animCtx.animSpeed            = &app.anim.animSpeed;
+            animCtx.loopCount            = &app.anim.loopCount;
+            animCtx.lockAnims            = &app.anim.lockAnims;
+            animCtx.selectedSecondaryAnim = &app.anim.selectedSecondaryAnim;
+            animCtx.selectedMouthAnim    = &app.anim.selectedMouthAnim;
+            animCtx.mouthSpeed           = &app.anim.mouthSpeed;
+            animCtx.skinEntries          = &app.anim.skinEntries;
+            animCtx.selectedSkin         = &app.anim.selectedSkin;
+            animCtx.blpSkin[0] = app.anim.blpSkin[0];
+            animCtx.blpSkin[1] = app.anim.blpSkin[1];
+            animCtx.blpSkin[2] = app.anim.blpSkin[2];
             animCtx.applySkin            = [](WoWModel* m, int idx) { applySkin(m, idx); };
 
             AnimationPanel::draw(animCtx);
 
             // Copy back blpSkin state (modified by per-slot BLP selector)
-            app.blpSkin[0] = animCtx.blpSkin[0];
-            app.blpSkin[1] = animCtx.blpSkin[1];
-            app.blpSkin[2] = animCtx.blpSkin[2];
+            app.anim.blpSkin[0] = animCtx.blpSkin[0];
+            app.anim.blpSkin[1] = animCtx.blpSkin[1];
+            app.anim.blpSkin[2] = animCtx.blpSkin[2];
         }
         ImGui::End();
         }
 
         // ===== Viewport Options (combined Background / Lighting / Model Control) =====
-        if (app.showViewportOpts)
+        if (app.ui.showViewportOpts)
         {
-        if (ImGui::Begin("Viewport Options", &app.showViewportOpts))
+        if (ImGui::Begin("Viewport Options", &app.ui.showViewportOpts))
         {
             ViewportOptionsPanel::DrawContext vpCtx;
             vpCtx.drawGrid       = &app.settings.drawGrid;
             vpCtx.bgColor        = &app.settings.bgColor;
-            vpCtx.camera         = &app.camera;
+            vpCtx.camera         = &app.scene.camera;
             vpCtx.getLoadedModel = getLoadedModel;
-            vpCtx.geosetGroups   = &app.geosetGroups;
-            vpCtx.pcrState       = &app.pcrState;
-            vpCtx.selectedSkin   = &app.selectedSkin;
+            vpCtx.geosetGroups   = &app.browsers.geosetGroups;
+            vpCtx.pcrState       = &app.browsers.pcrState;
+            vpCtx.selectedSkin   = &app.anim.selectedSkin;
             vpCtx.applySkin      = [](WoWModel* m, int idx) { applySkin(m, idx); };
-            vpCtx.resetCamera    = [] { resetCameraToModel(app.camera, getLoadedModel()); };
+            vpCtx.resetCamera    = [] { resetCameraToModel(app.scene.camera, getLoadedModel()); };
 
             ViewportOptionsPanel::draw(vpCtx);
         }
         ImGui::End();
         }
-        if (app.showMounts)
+        if (app.ui.showMounts)
         {
-        if (ImGui::Begin("Mounts", &app.showMounts))
+        if (ImGui::Begin("Mounts", &app.ui.showMounts))
         {
             MountsPanel::DrawContext mCtx;
-            mCtx.isChar              = app.isChar;
-            mCtx.isMounted           = app.isMounted;
-            mCtx.mountList           = &app.mountList;
-            mCtx.creatureModelNames  = &app.creatureModelNames;
-            mCtx.creatureModels      = &app.creatureModels;
-            mCtx.mountFiltered       = &app.mountFiltered;
-            mCtx.mountFilterDirty    = &app.mountFilterDirty;
-            mCtx.mountTab            = &app.mountTab;
-            mCtx.mountSearchBuf      = app.mountSearchBuf;
-            mCtx.mountSearchBufSize  = sizeof(app.mountSearchBuf);
+            mCtx.isChar              = app.scene.isChar;
+            mCtx.isMounted           = app.scene.isMounted;
+            mCtx.mountList           = &app.browsers.mountList;
+            mCtx.creatureModelNames  = &app.browsers.creatureModelNames;
+            mCtx.creatureModels      = &app.browsers.creatureModels;
+            mCtx.mountFiltered       = &app.browsers.mountFiltered;
+            mCtx.mountFilterDirty    = &app.browsers.mountFilterDirty;
+            mCtx.mountTab            = &app.browsers.mountTab;
+            mCtx.mountSearchBuf      = app.browsers.mountSearchBuf;
+            mCtx.mountSearchBufSize  = sizeof(app.browsers.mountSearchBuf);
             mCtx.getLoadedModel      = getLoadedModel;
             mCtx.buildMountList      = [] { buildMountList(); };
             mCtx.rebuildMountFilter  = [] { rebuildMountFilter(); };
@@ -777,24 +777,24 @@ int main(int /*argc*/, char* /*argv*/[])
         }
 
         // ===== Item Sets panel (standalone tab) =====
-        if (app.showItemSets)
+        if (app.ui.showItemSets)
         {
-        if (ImGui::Begin("Item Sets", &app.showItemSets))
+        if (ImGui::Begin("Item Sets", &app.ui.showItemSets))
         {
             ItemSetsPanel::DrawContext isCtx;
-            isCtx.isChar                  = app.isChar;
-            isCtx.itemSets                = &app.itemSets;
-            isCtx.itemSetsBuilt           = &app.itemSetsBuilt;
-            isCtx.itemSetSearchBuf        = app.itemSetSearchBuf;
-            isCtx.itemSetSearchBufSize    = sizeof(app.itemSetSearchBuf);
-            isCtx.itemSetFiltered         = &app.itemSetFiltered;
-            isCtx.itemSetFilterDirty      = &app.itemSetFilterDirty;
-            isCtx.startOutfits            = &app.startOutfits;
-            isCtx.startOutfitsBuilt       = &app.startOutfitsBuilt;
-            isCtx.startOutfitSearchBuf    = app.startOutfitSearchBuf;
-            isCtx.startOutfitSearchBufSize = sizeof(app.startOutfitSearchBuf);
-            isCtx.startOutfitFiltered     = &app.startOutfitFiltered;
-            isCtx.startOutfitFilterDirty  = &app.startOutfitFilterDirty;
+            isCtx.isChar                  = app.scene.isChar;
+            isCtx.itemSets                = &app.browsers.itemSets;
+            isCtx.itemSetsBuilt           = &app.browsers.itemSetsBuilt;
+            isCtx.itemSetSearchBuf        = app.browsers.itemSetSearchBuf;
+            isCtx.itemSetSearchBufSize    = sizeof(app.browsers.itemSetSearchBuf);
+            isCtx.itemSetFiltered         = &app.browsers.itemSetFiltered;
+            isCtx.itemSetFilterDirty      = &app.browsers.itemSetFilterDirty;
+            isCtx.startOutfits            = &app.browsers.startOutfits;
+            isCtx.startOutfitsBuilt       = &app.browsers.startOutfitsBuilt;
+            isCtx.startOutfitSearchBuf    = app.browsers.startOutfitSearchBuf;
+            isCtx.startOutfitSearchBufSize = sizeof(app.browsers.startOutfitSearchBuf);
+            isCtx.startOutfitFiltered     = &app.browsers.startOutfitFiltered;
+            isCtx.startOutfitFilterDirty  = &app.browsers.startOutfitFilterDirty;
             isCtx.getLoadedModel          = getLoadedModel;
             isCtx.buildItemSets           = [] { buildItemSets(); };
             isCtx.rebuildItemSetFilter    = [] { rebuildItemSetFilter(); };
@@ -809,18 +809,18 @@ int main(int /*argc*/, char* /*argv*/[])
         }
 
         // ===== NPC Browser panel =====
-        if (app.showNpcBrowser)
+        if (app.ui.showNpcBrowser)
         {
-        if (ImGui::Begin("NPC Browser", &app.showNpcBrowser))
+        if (ImGui::Begin("NPC Browser", &app.ui.showNpcBrowser))
         {
             NpcBrowserPanel::DrawContext npcCtx;
-            npcCtx.isWoWLoaded      = app.isWoWLoaded;
-            npcCtx.isDBReady        = app.initDB;
+            npcCtx.isWoWLoaded      = app.loading.isWoWLoaded;
+            npcCtx.isDBReady        = app.loading.initDB;
             npcCtx.npcs             = &npcs;
-            npcCtx.npcFiltered      = &app.npcFiltered;
-            npcCtx.npcFilterDirty   = &app.npcFilterDirty;
-            npcCtx.npcSearchBuf     = app.npcSearchBuf;
-            npcCtx.npcSearchBufSize = sizeof(app.npcSearchBuf);
+            npcCtx.npcFiltered      = &app.browsers.npcFiltered;
+            npcCtx.npcFilterDirty   = &app.browsers.npcFilterDirty;
+            npcCtx.npcSearchBuf     = app.browsers.npcSearchBuf;
+            npcCtx.npcSearchBufSize = sizeof(app.browsers.npcSearchBuf);
             npcCtx.rebuildNpcFilter = [] { rebuildNpcFilter(); };
             npcCtx.loadNPC          = [](unsigned int id) { loadNPC(id); };
 
@@ -830,18 +830,18 @@ int main(int /*argc*/, char* /*argv*/[])
         }
 
         // ===== Item Browser panel =====
-        if (app.showItemBrowser)
+        if (app.ui.showItemBrowser)
         {
-        if (ImGui::Begin("Item Browser", &app.showItemBrowser))
+        if (ImGui::Begin("Item Browser", &app.ui.showItemBrowser))
         {
             ItemBrowserPanel::DrawContext ibCtx;
-            ibCtx.isWoWLoaded            = app.isWoWLoaded;
-            ibCtx.isDBReady              = app.initDB;
+            ibCtx.isWoWLoaded            = app.loading.isWoWLoaded;
+            ibCtx.isDBReady              = app.loading.initDB;
             ibCtx.items                  = &items;
-            ibCtx.itemBrowseFiltered     = &app.itemBrowseFiltered;
-            ibCtx.itemBrowseFilterDirty  = &app.itemBrowseFilterDirty;
-            ibCtx.itemBrowseSearchBuf    = app.itemBrowseSearchBuf;
-            ibCtx.itemBrowseSearchBufSize = sizeof(app.itemBrowseSearchBuf);
+            ibCtx.itemBrowseFiltered     = &app.browsers.itemBrowseFiltered;
+            ibCtx.itemBrowseFilterDirty  = &app.browsers.itemBrowseFilterDirty;
+            ibCtx.itemBrowseSearchBuf    = app.browsers.itemBrowseSearchBuf;
+            ibCtx.itemBrowseSearchBufSize = sizeof(app.browsers.itemBrowseSearchBuf);
             ibCtx.rebuildItemBrowseFilter = [] { rebuildItemBrowseFilter(); };
             ibCtx.loadItemModel          = [](unsigned int id) { loadItemModel(id); };
 
@@ -851,20 +851,20 @@ int main(int /*argc*/, char* /*argv*/[])
         }
 
         // ===== Export panel =====
-        if (app.showExport)
+        if (app.ui.showExport)
         {
-        if (ImGui::Begin("Export", &app.showExport))
+        if (ImGui::Begin("Export", &app.ui.showExport))
         {
             ExportPanel::DrawContext exCtx;
             exCtx.getLoadedModel    = getLoadedModel;
-            exCtx.exporters         = &app.exporters;
-            exCtx.selectedExporter  = &app.selectedExporter;
-            exCtx.animEntries       = &app.animEntries;
-            exCtx.exportAnimChecked = &app.exportAnimChecked;
-            exCtx.selectedAnimCombo = &app.selectedAnimCombo;
-            exCtx.exportPath        = app.exportPath;
-            exCtx.exportPathSize    = sizeof(app.exportPath);
-            exCtx.exportStatus      = &app.exportStatus;
+            exCtx.exporters         = &app.exporting.exporters;
+            exCtx.selectedExporter  = &app.exporting.selectedExporter;
+            exCtx.animEntries       = &app.anim.animEntries;
+            exCtx.exportAnimChecked = &app.exporting.exportAnimChecked;
+            exCtx.selectedAnimCombo = &app.anim.selectedAnimCombo;
+            exCtx.exportPath        = app.exporting.exportPath;
+            exCtx.exportPathSize    = sizeof(app.exporting.exportPath);
+            exCtx.exportStatus      = &app.exporting.exportStatus;
 
             ExportPanel::draw(exCtx);
         }
@@ -872,20 +872,20 @@ int main(int /*argc*/, char* /*argv*/[])
         }
 
         // ===== Screenshot panel =====
-        if (app.showScreenshot)
+        if (app.ui.showScreenshot)
         {
-        if (ImGui::Begin("Screenshot", &app.showScreenshot))
+        if (ImGui::Begin("Screenshot", &app.ui.showScreenshot))
         {
             ScreenshotPanel::DrawContext ssCtx;
-            ssCtx.screenshotPath     = app.screenshotPath;
-            ssCtx.screenshotPathSize = sizeof(app.screenshotPath);
-            ssCtx.screenshotStatus   = &app.screenshotStatus;
-            ssCtx.useCanvasOverride  = &app.useCanvasOverride;
-            ssCtx.canvasWidth        = &app.canvasWidth;
-            ssCtx.canvasHeight       = &app.canvasHeight;
-            ssCtx.fbo                = &app.fbo;
-            ssCtx.camera             = &app.camera;
-            ssCtx.root               = app.root.get();
+            ssCtx.screenshotPath     = app.exporting.screenshotPath;
+            ssCtx.screenshotPathSize = sizeof(app.exporting.screenshotPath);
+            ssCtx.screenshotStatus   = &app.exporting.screenshotStatus;
+            ssCtx.useCanvasOverride  = &app.exporting.useCanvasOverride;
+            ssCtx.canvasWidth        = &app.exporting.canvasWidth;
+            ssCtx.canvasHeight       = &app.exporting.canvasHeight;
+            ssCtx.fbo                = &app.scene.fbo;
+            ssCtx.camera             = &app.scene.camera;
+            ssCtx.root               = app.scene.root.get();
             ssCtx.fov                = video.fov;
             ssCtx.bgColor            = app.settings.bgColor;
             ssCtx.drawGrid           = app.settings.drawGrid;
@@ -896,15 +896,15 @@ int main(int /*argc*/, char* /*argv*/[])
         }
 
         // ===== Character Preset panel =====
-        if (app.showPresets)
+        if (app.ui.showPresets)
         {
-        if (ImGui::Begin("Presets", &app.showPresets))
+        if (ImGui::Begin("Presets", &app.ui.showPresets))
         {
             PresetsPanel::DrawContext preCtx;
-            preCtx.presetPath     = app.presetPath;
-            preCtx.presetPathSize = sizeof(app.presetPath);
-            preCtx.presetStatus   = &app.presetStatus;
-            preCtx.isChar         = app.isChar;
+            preCtx.presetPath     = app.exporting.presetPath;
+            preCtx.presetPathSize = sizeof(app.exporting.presetPath);
+            preCtx.presetStatus   = &app.exporting.presetStatus;
+            preCtx.isChar         = app.scene.isChar;
             preCtx.hasModel       = getLoadedModel() != nullptr;
             preCtx.savePreset     = [](const char* p) { saveCharacterPreset(p); };
             preCtx.loadPreset     = [](const char* p) { loadCharacterPreset(p); };
@@ -915,14 +915,14 @@ int main(int /*argc*/, char* /*argv*/[])
         }
 
         // ===== Log viewer panel =====
-        if (app.showLog)
+        if (app.ui.showLog)
         {
-        if (ImGui::Begin("Log", &app.showLog))
+        if (ImGui::Begin("Log", &app.ui.showLog))
         {
             LogPanel::DrawContext logCtx;
-            logCtx.logLines       = &app.logLines;
-            logCtx.logAutoScroll  = &app.logAutoScroll;
-            logCtx.logNeedsReload = &app.logNeedsReload;
+            logCtx.logLines       = &app.ui.logLines;
+            logCtx.logAutoScroll  = &app.ui.logAutoScroll;
+            logCtx.logNeedsReload = &app.ui.logNeedsReload;
 
             LogPanel::draw(logCtx);
         }
@@ -930,28 +930,28 @@ int main(int /*argc*/, char* /*argv*/[])
         }
 
         // ===== Settings panel (floating popup) =====
-        if (app.showSettings)
+        if (app.ui.showSettings)
         {
         ImGui::SetNextWindowSize(ImVec2(480, 340), ImGuiCond_FirstUseEver);
         ImGui::SetNextWindowPos(ImGui::GetMainViewport()->GetCenter(), ImGuiCond_FirstUseEver, ImVec2(0.5f, 0.5f));
-        if (ImGui::Begin("Settings", &app.showSettings, ImGuiWindowFlags_NoDocking))
+        if (ImGui::Begin("Settings", &app.ui.showSettings, ImGuiWindowFlags_NoDocking))
         {
             SettingsPanel::DrawContext settingsCtx;
-            settingsCtx.pathBuf                = app.pathBuf;
-            settingsCtx.pathBufSize            = sizeof(app.pathBuf);
-            settingsCtx.isWoWLoaded            = app.isWoWLoaded;
-            settingsCtx.loadInProgress         = app.loadInProgress;
-            settingsCtx.loadProgress           = &app.loadProgress;
-            settingsCtx.showFolderPicker       = &app.showFolderPicker;
-            settingsCtx.folderPickerCurrent    = &app.folderPickerCurrent;
-            settingsCtx.folderPickerEntries    = &app.folderPickerEntries;
-            settingsCtx.folderPickerNeedsRefresh = &app.folderPickerNeedsRefresh;
+            settingsCtx.pathBuf                = app.loading.pathBuf;
+            settingsCtx.pathBufSize            = sizeof(app.loading.pathBuf);
+            settingsCtx.isWoWLoaded            = app.loading.isWoWLoaded;
+            settingsCtx.loadInProgress         = app.loading.loadInProgress;
+            settingsCtx.loadProgress           = &app.loading.loadProgress;
+            settingsCtx.showFolderPicker       = &app.ui.showFolderPicker;
+            settingsCtx.folderPickerCurrent    = &app.ui.folderPickerCurrent;
+            settingsCtx.folderPickerEntries    = &app.ui.folderPickerEntries;
+            settingsCtx.folderPickerNeedsRefresh = &app.ui.folderPickerNeedsRefresh;
             settingsCtx.settings               = &app.settings;
-            settingsCtx.availableFonts         = &app.availableFonts;
-            settingsCtx.fontsDirty             = &app.fontsDirty;
+            settingsCtx.availableFonts         = &app.ui.availableFonts;
+            settingsCtx.fontsDirty             = &app.ui.fontsDirty;
             settingsCtx.window                 = app.window;
             settingsCtx.showDemoWindow         = &show_demo_window;
-            settingsCtx.camera                 = &app.camera;
+            settingsCtx.camera                 = &app.scene.camera;
             settingsCtx.getLoadStatus          = [&]() { return getLoadStatus(); };
 
             SettingsPanel::draw(settingsCtx);
@@ -982,19 +982,19 @@ int main(int /*argc*/, char* /*argv*/[])
     }
 
     // ---- Cleanup ----
-    if (app.loadThread.joinable())
-        app.loadThread.join();
+    if (app.loading.loadThread.joinable())
+        app.loading.loadThread.join();
 
     FileBrowserPanel::shutdown();
 
-    app.root.reset();
+    app.scene.root.reset();
 
-    app.fbo.destroy();
+    app.scene.fbo.destroy();
 
     SceneRenderer::shutdown();
 
-    app.exporters.clear();
-    app.importers.clear();
+    app.exporting.exporters.clear();
+    app.exporting.importers.clear();
 
     ImGui_ImplOpenGL3_Shutdown();
     ImGui_ImplGlfw_Shutdown();

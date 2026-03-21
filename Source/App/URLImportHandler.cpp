@@ -25,7 +25,7 @@ void applyImportedChar(CharInfos* info, AppState& app)
 {
     if (!info || !info->valid)
     {
-        app.importStatus = "Import returned no valid character data.";
+        app.exporting.importStatus = "Import returned no valid character data.";
         return;
     }
 
@@ -36,23 +36,23 @@ void applyImportedChar(CharInfos* info, AppState& app)
     int fileDataID = RaceInfos::getFileIDForRaceSex(raceID, sexID);
     if (fileDataID <= 0)
     {
-        app.importStatus = "Could not determine model for race " + std::to_string(raceID);
+        app.exporting.importStatus = "Could not determine model for race " + std::to_string(raceID);
         return;
     }
 
     GameFile* file = GAMEDIRECTORY.getFile(fileDataID);
     if (!file)
     {
-        app.importStatus = "Model file not found for race " + std::to_string(raceID);
+        app.exporting.importStatus = "Model file not found for race " + std::to_string(raceID);
         return;
     }
 
     ModelLoader::loadModel(file, app);
 
     WoWModel* model = ModelLoader::getLoadedModel(app);
-    if (!model || !app.isChar)
+    if (!model || !app.scene.isChar)
     {
-        app.importStatus = "Failed to load character model.";
+        app.exporting.importStatus = "Failed to load character model.";
         return;
     }
 
@@ -79,7 +79,7 @@ void applyImportedChar(CharInfos* info, AppState& app)
     // Update customization UI state
     ModelLoader::initCharacterControl(model, app);
 
-    app.importStatus = "Character imported successfully.";
+    app.exporting.importStatus = "Character imported successfully.";
     LOG_INFO << "Character imported from URL.";
 }
 
@@ -87,7 +87,7 @@ void applyImportedNPC(NPCInfos* info, AppState& app)
 {
     if (!info || info->displayId <= 0)
     {
-        app.importStatus = "Import returned no valid NPC data.";
+        app.exporting.importStatus = "Import returned no valid NPC data.";
         return;
     }
 
@@ -96,32 +96,32 @@ void applyImportedNPC(NPCInfos* info, AppState& app)
     const auto* cmdTable = WOWDB.getTable("CreatureModelData");
     if (!cdiTable || !cmdTable)
     {
-        app.importStatus = "NPC display ID " + std::to_string(info->displayId) + " not found in database.";
+        app.exporting.importStatus = "NPC display ID " + std::to_string(info->displayId) + " not found in database.";
         return;
     }
     auto cdiRow = cdiTable->getRow(static_cast<uint32_t>(info->displayId));
     if (!cdiRow)
     {
-        app.importStatus = "NPC display ID " + std::to_string(info->displayId) + " not found in database.";
+        app.exporting.importStatus = "NPC display ID " + std::to_string(info->displayId) + " not found in database.";
         return;
     }
     auto cmdRow = cmdTable->getRow(cdiRow.getUInt("ModelID"));
     uint32_t npcFDID = cmdRow ? cmdRow.getUInt("FileDataID") : 0;
     if (npcFDID == 0)
     {
-        app.importStatus = "NPC display ID " + std::to_string(info->displayId) + " not found in database.";
+        app.exporting.importStatus = "NPC display ID " + std::to_string(info->displayId) + " not found in database.";
         return;
     }
 
     GameFile* file = GAMEDIRECTORY.getFile(npcFDID);
     if (!file)
     {
-        app.importStatus = "NPC model file not found.";
+        app.exporting.importStatus = "NPC model file not found.";
         return;
     }
 
     ModelLoader::loadModel(file, app);
-    app.importStatus = std::string("NPC imported: ") + ModelLoader::wstringToString(info->name);
+    app.exporting.importStatus = std::string("NPC imported: ") + ModelLoader::wstringToString(info->name);
     LOG_INFO << "NPC imported from URL: " << ModelLoader::wstringToString(info->name);
 }
 
@@ -129,12 +129,12 @@ void applyImportedItem(ItemRecord* rec, AppState& app)
 {
     if (!rec || rec->id <= 0)
     {
-        app.importStatus = "Import returned no valid item data.";
+        app.exporting.importStatus = "Import returned no valid item data.";
         return;
     }
 
     ModelLoader::loadItemModel(static_cast<unsigned int>(rec->id), app);
-    app.importStatus = std::string("Item imported: ") + rec->name;
+    app.exporting.importStatus = std::string("Item imported: ") + rec->name;
     LOG_INFO << "Item imported from URL: " << rec->name;
 }
 
@@ -145,18 +145,18 @@ namespace URLImportHandler
 
 void doImport(AppState& app)
 {
-    std::string url(app.importUrlBuf);
+    std::string url(app.exporting.importUrlBuf);
     if (url.empty())
     {
-        app.importStatus = "Please enter a URL.";
+        app.exporting.importStatus = "Please enter a URL.";
         return;
     }
 
-    app.importStatus = "Importing...";
+    app.exporting.importStatus = "Importing...";
 
     // Find matching importer
     ImporterPlugin* importer = nullptr;
-    for (const auto& imp : app.importers)
+    for (const auto& imp : app.exporting.importers)
     {
         if (imp->acceptURL(url))
         {
@@ -167,7 +167,7 @@ void doImport(AppState& app)
 
     if (!importer)
     {
-        app.importStatus = "No importer recognises this URL. Supported: battle.net, worldofwarcraft.com, wowhead.com";
+        app.exporting.importStatus = "No importer recognises this URL. Supported: battle.net, worldofwarcraft.com, wowhead.com";
         return;
     }
 
@@ -201,7 +201,7 @@ void doImport(AppState& app)
     }
     delete itemRec;
 
-    app.importStatus = "Could not import anything from this URL.";
+    app.exporting.importStatus = "Could not import anything from this URL.";
 }
 
 } // namespace URLImportHandler

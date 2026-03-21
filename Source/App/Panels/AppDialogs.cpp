@@ -23,23 +23,23 @@
 
 void AppDialogs::drawImportDialog(AppState& app)
 {
-    if (app.showImportDialog)
+    if (app.ui.showImportDialog)
         ImGui::OpenPopup("Import from URL##ImportModal");
 
-    if (ImGui::BeginPopupModal("Import from URL##ImportModal", &app.showImportDialog,
+    if (ImGui::BeginPopupModal("Import from URL##ImportModal", &app.ui.showImportDialog,
         ImGuiWindowFlags_AlwaysAutoResize))
     {
         ImGui::Text("Paste an Armory, Battle.net, or Wowhead URL:");
         ImGui::Spacing();
 
-        if (app.importPopupJustOpened)
+        if (app.ui.importPopupJustOpened)
         {
             ImGui::SetKeyboardFocusHere();
-            app.importPopupJustOpened = false;
+            app.ui.importPopupJustOpened = false;
         }
 
         ImGui::SetNextItemWidth(500);
-        ImGui::InputText("##importUrl", app.importUrlBuf, sizeof(app.importUrlBuf));
+        ImGui::InputText("##importUrl", app.exporting.importUrlBuf, sizeof(app.exporting.importUrlBuf));
 
         ImGui::Spacing();
         if (ImGui::Button("Import", ImVec2(120, 0)))
@@ -47,21 +47,21 @@ void AppDialogs::drawImportDialog(AppState& app)
         ImGui::SameLine();
         if (ImGui::Button("Cancel", ImVec2(120, 0)))
         {
-            app.showImportDialog = false;
+            app.ui.showImportDialog = false;
             ImGui::CloseCurrentPopup();
         }
 
-        if (!app.importStatus.empty())
+        if (!app.exporting.importStatus.empty())
         {
             ImGui::Spacing();
-            bool isError = app.importStatus.find("failed") != std::string::npos ||
-                           app.importStatus.find("No ") != std::string::npos ||
-                           app.importStatus.find("not") != std::string::npos ||
-                           app.importStatus.find("Please") != std::string::npos;
+            bool isError = app.exporting.importStatus.find("failed") != std::string::npos ||
+                           app.exporting.importStatus.find("No ") != std::string::npos ||
+                           app.exporting.importStatus.find("not") != std::string::npos ||
+                           app.exporting.importStatus.find("Please") != std::string::npos;
             if (isError)
-                ImGui::TextColored(ImVec4(1.0f, 0.4f, 0.4f, 1.0f), "%s", app.importStatus.c_str());
+                ImGui::TextColored(ImVec4(1.0f, 0.4f, 0.4f, 1.0f), "%s", app.exporting.importStatus.c_str());
             else
-                ImGui::TextColored(ImVec4(0.4f, 1.0f, 0.4f, 1.0f), "%s", app.importStatus.c_str());
+                ImGui::TextColored(ImVec4(0.4f, 1.0f, 0.4f, 1.0f), "%s", app.exporting.importStatus.c_str());
         }
 
         ImGui::EndPopup();
@@ -72,7 +72,7 @@ void AppDialogs::drawImportDialog(AppState& app)
 
 void AppDialogs::drawConfigPopup(AppState& app)
 {
-    if (app.showConfigPopup)
+    if (app.loading.showConfigPopup)
         ImGui::OpenPopup("Select WoW Config");
 
     if (ImGui::BeginPopupModal("Select WoW Config", nullptr, ImGuiWindowFlags_AlwaysAutoResize))
@@ -80,25 +80,25 @@ void AppDialogs::drawConfigPopup(AppState& app)
         ImGui::Text("Multiple configurations found. Please select one:");
         ImGui::Separator();
 
-        for (int i = 0; i < static_cast<int>(app.pendingConfigs.size()); ++i)
+        for (int i = 0; i < static_cast<int>(app.loading.pendingConfigs.size()); ++i)
         {
-            std::string label = app.pendingConfigs[i].locale + " - " + app.pendingConfigs[i].product;
-            if (!app.pendingConfigs[i].version.empty())
-                label += " (" + app.pendingConfigs[i].version + ")";
-            ImGui::RadioButton(label.c_str(), &app.selectedConfig, i);
+            std::string label = app.loading.pendingConfigs[i].locale + " - " + app.loading.pendingConfigs[i].product;
+            if (!app.loading.pendingConfigs[i].version.empty())
+                label += " (" + app.loading.pendingConfigs[i].version + ")";
+            ImGui::RadioButton(label.c_str(), &app.loading.selectedConfig, i);
         }
 
         ImGui::Separator();
         if (ImGui::Button("OK", ImVec2(120, 0)))
         {
-            app.showConfigPopup = false;
+            app.loading.showConfigPopup = false;
             ImGui::CloseCurrentPopup();
-            GameLoader::launchLoadThread(app.pendingConfigs[app.selectedConfig], app);
+            GameLoader::launchLoadThread(app.loading.pendingConfigs[app.loading.selectedConfig], app);
         }
         ImGui::SameLine();
         if (ImGui::Button("Cancel", ImVec2(120, 0)))
         {
-            app.showConfigPopup = false;
+            app.loading.showConfigPopup = false;
             GameLoader::setLoadStatus("Load cancelled.", app);
             ImGui::CloseCurrentPopup();
         }
@@ -110,10 +110,10 @@ void AppDialogs::drawConfigPopup(AppState& app)
 
 void AppDialogs::drawAboutDialog(AppState& app)
 {
-    if (app.showAboutDialog)
+    if (app.ui.showAboutDialog)
         ImGui::OpenPopup("About WoW Model Viewer");
 
-    if (ImGui::BeginPopupModal("About WoW Model Viewer", &app.showAboutDialog,
+    if (ImGui::BeginPopupModal("About WoW Model Viewer", &app.ui.showAboutDialog,
                                 ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoMove))
     {
         // Convert wstring title to narrow UTF-8 string for ImGui
@@ -149,7 +149,7 @@ void AppDialogs::drawAboutDialog(AppState& app)
 
         if (ImGui::Button("Close", ImVec2(120, 0)))
         {
-            app.showAboutDialog = false;
+            app.ui.showAboutDialog = false;
             ImGui::CloseCurrentPopup();
         }
         ImGui::EndPopup();
@@ -160,19 +160,19 @@ void AppDialogs::drawAboutDialog(AppState& app)
 
 void AppDialogs::drawLanguageDialog(AppState& app)
 {
-    if (app.showLanguageDialog)
+    if (app.ui.showLanguageDialog)
         ImGui::OpenPopup("Language / Locale");
 
-    if (ImGui::BeginPopupModal("Language / Locale", &app.showLanguageDialog,
+    if (ImGui::BeginPopupModal("Language / Locale", &app.ui.showLanguageDialog,
                                 ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoMove))
     {
-        if (!app.isWoWLoaded)
+        if (!app.loading.isWoWLoaded)
         {
             ImGui::TextWrapped("Game data is not loaded. Load WoW first, then change the locale here.");
             ImGui::Spacing();
             if (ImGui::Button("OK", ImVec2(120, 0)))
             {
-                app.showLanguageDialog = false;
+                app.ui.showLanguageDialog = false;
                 ImGui::CloseCurrentPopup();
             }
         }
@@ -193,12 +193,12 @@ void AppDialogs::drawLanguageDialog(AppState& app)
 
                 if (ImGui::Button(label.c_str(), ImVec2(-1, 0)))
                 {
-                    app.showLanguageDialog = false;
+                    app.ui.showLanguageDialog = false;
                     ImGui::CloseCurrentPopup();
-                    app.isWoWLoaded = false;
-                    app.initDB = false;
-                    app.loadInProgress = true;
-                    app.loadProgress = 0.0f;
+                    app.loading.isWoWLoaded = false;
+                    app.loading.initDB = false;
+                    app.loading.loadInProgress = true;
+                    app.loading.loadProgress = 0.0f;
                     GameLoader::setLoadStatus("Reloading with locale: " + configs[i].locale + "...", app);
                     GameLoader::launchLoadThread(configs[i], app);
                 }
@@ -210,7 +210,7 @@ void AppDialogs::drawLanguageDialog(AppState& app)
             ImGui::Spacing();
             if (ImGui::Button("Cancel", ImVec2(120, 0)))
             {
-                app.showLanguageDialog = false;
+                app.ui.showLanguageDialog = false;
                 ImGui::CloseCurrentPopup();
             }
         }

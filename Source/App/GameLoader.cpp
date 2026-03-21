@@ -42,14 +42,14 @@ std::filesystem::path getApplicationDirPath()
 
 void setLoadStatus(const std::string& s, AppState& app)
 {
-    std::lock_guard<std::mutex> lock(app.loadStatusMutex);
-    app.loadStatus = s;
+    std::lock_guard<std::mutex> lock(app.loading.loadStatusMutex);
+    app.loading.loadStatus = s;
 }
 
 std::string getLoadStatus(AppState& app)
 {
-    std::lock_guard<std::mutex> lock(app.loadStatusMutex);
-    return app.loadStatus;
+    std::lock_guard<std::mutex> lock(app.loading.loadStatusMutex);
+    return app.loading.loadStatus;
 }
 
 // ---- Support-file download ------------------------------------------------
@@ -176,7 +176,7 @@ static void initDatabase(AppState& app)
     LOG_INFO << "Attempting on-demand DBD-based database init from" << dbdDir.string();
     if (!GAMEDATABASE.initFromDBD(dbdDir.string(), currentVersion))
     {
-        app.initDB = false;
+        app.loading.initDB = false;
         LOG_ERROR << "Database initialization failed!";
         setLoadStatus("Database initialization failed!", app);
         fs::remove(cachePath, ec);
@@ -192,23 +192,23 @@ static void initDatabase(AppState& app)
     }
 
     LOG_INFO << "Database initialization succeeded.";
-    app.loadProgress = 0.60f;
+    app.loading.loadProgress = 0.60f;
 
     LOG_INFO << "initDatabase: CharTexture::initRegions...";
     CharTexture::initRegions();
-    app.loadProgress = 0.65f;
+    app.loading.loadProgress = 0.65f;
 
     LOG_INFO << "initDatabase: RaceInfos::init...";
     RaceInfos::init();
-    app.loadProgress = 0.70f;
+    app.loading.loadProgress = 0.70f;
 
-    app.initDB = true;
+    app.loading.initDB = true;
 
     LOG_INFO << "initDatabase: skipping Creature table (disabled).";
-    app.loadProgress = 0.80f;
+    app.loading.loadProgress = 0.80f;
 
     LOG_INFO << "initDatabase: skipping Item/ItemSparse loading (disabled).";
-    app.loadProgress = 0.90f;
+    app.loading.loadProgress = 0.90f;
     LOG_INFO << "Finished initiating database files.";
 }
 
@@ -216,7 +216,7 @@ static void initDatabase(AppState& app)
 
 static void loadWoW(const core::GameConfig& config, AppState& app)
 {
-    app.loadProgress = 0.0f;
+    app.loading.loadProgress = 0.0f;
     setLoadStatus("Opening CASC storage...", app);
 
     if (!GAMEDIRECTORY.setConfig(config))
@@ -225,41 +225,41 @@ static void loadWoW(const core::GameConfig& config, AppState& app)
                   << GAMEDIRECTORY.lastError() << ").";
         setLoadStatus("Failed to open CASC storage (error "
                        + std::to_string(GAMEDIRECTORY.lastError()) + ").", app);
-        app.loadThreadDone = true;
+        app.loading.loadThreadDone = true;
         return;
     }
 
     LOG_INFO << "Major version: " << GAMEDIRECTORY.majorVersion();
-    app.loadProgress = 0.05f;
+    app.loading.loadProgress = 0.05f;
 
     const std::string baseConfigFolder = "games/wow/";
     LOG_INFO << "Using config folder: " << baseConfigFolder;
     core::Game::instance().setConfigFolder(baseConfigFolder);
 
     setLoadStatus("Loading file list...", app);
-    app.loadProgress = 0.10f;
+    app.loading.loadProgress = 0.10f;
     GAMEDIRECTORY.setProgressCallback([&app](int current, int total) {
         if (total > 0)
-            app.loadProgress = 0.10f + 0.40f * static_cast<float>(current) / static_cast<float>(total);
+            app.loading.loadProgress = 0.10f + 0.40f * static_cast<float>(current) / static_cast<float>(total);
     });
     GAMEDIRECTORY.initFromListfile("../../listfile.csv");
     GAMEDIRECTORY.setProgressCallback(nullptr);
-    app.loadProgress = 0.50f;
+    app.loading.loadProgress = 0.50f;
 
     setLoadStatus("Initializing database...", app);
-    app.loadProgress = 0.55f;
+    app.loading.loadProgress = 0.55f;
     initDatabase(app);
 
-    if (!app.initDB)
+    if (!app.loading.initDB)
     {
-        app.loadThreadDone = true;
+        app.loading.loadThreadDone = true;
         return;
     }
 
-    app.loadProgress = 1.0f;
+    app.loading.loadProgress = 1.0f;
     setLoadStatus("World of Warcraft loaded successfully.", app);
-    app.loadThreadSuccess = true;
-    app.loadThreadDone = true;
+    app.loading.loadThreadSuccess = true;
+    app.loading.loadThreadDone = true;
 }
 
 // ---- Public API -----------------------------------------------------------
@@ -269,7 +269,7 @@ void loadWoWThreadFunc(core::GameConfig config, AppState& app)
     setLoadStatus("Checking support files...", app);
     if (!checkAndDownloadSupportFiles(app))
     {
-        app.loadThreadDone = true;
+        app.loading.loadThreadDone = true;
         return;
     }
     loadWoW(config, app);
@@ -277,30 +277,30 @@ void loadWoWThreadFunc(core::GameConfig config, AppState& app)
 
 void launchLoadThread(const core::GameConfig& config, AppState& app)
 {
-    app.loadProgress = 0.0f;
-    app.loadThreadDone = false;
-    app.loadThreadSuccess = false;
-    app.loadInProgress = true;
+    app.loading.loadProgress = 0.0f;
+    app.loading.loadThreadDone = false;
+    app.loading.loadThreadSuccess = false;
+    app.loading.loadInProgress = true;
 
-    if (app.loadThread.joinable())
-        app.loadThread.join();
+    if (app.loading.loadThread.joinable())
+        app.loading.loadThread.join();
 
-    app.loadThread = std::thread(loadWoWThreadFunc, config, std::ref(app));
+    app.loading.loadThread = std::thread(loadWoWThreadFunc, config, std::ref(app));
 }
 
 void pollAsyncLoad(AppState& app)
 {
-    if (!app.loadInProgress || !app.loadThreadDone.load())
+    if (!app.loading.loadInProgress || !app.loading.loadThreadDone.load())
         return;
 
-    if (app.loadThread.joinable())
-        app.loadThread.join();
+    if (app.loading.loadThread.joinable())
+        app.loading.loadThread.join();
 
-    app.loadInProgress = false;
+    app.loading.loadInProgress = false;
 
-    if (app.loadThreadSuccess.load())
+    if (app.loading.loadThreadSuccess.load())
     {
-        app.isWoWLoaded = true;
+        app.loading.isWoWLoaded = true;
         FileBrowserPanel::markDirty();
         LOG_INFO << "World of Warcraft loaded successfully. Version: "
                  << GAMEDIRECTORY.version() << " Locale: " << GAMEDIRECTORY.locale();
@@ -310,13 +310,13 @@ void pollAsyncLoad(AppState& app)
 
 void beginLoadWoW(AppState& app)
 {
-    if (app.isWoWLoaded || app.loadInProgress)
+    if (app.loading.isWoWLoaded || app.loading.loadInProgress)
         return;
 
-    app.settings.gamePath = app.pathBuf;
+    app.settings.gamePath = app.loading.pathBuf;
 
-    app.loadInProgress = true;
-    app.loadProgress = 0.0f;
+    app.loading.loadInProgress = true;
+    app.loading.loadProgress = 0.0f;
     setLoadStatus("Validating game path...", app);
 
     namespace fs = std::filesystem;
@@ -324,7 +324,7 @@ void beginLoadWoW(AppState& app)
     if (path.empty() || !fs::is_directory(path))
     {
         setLoadStatus("Please set a valid WoW Data folder path in Options > Settings.", app);
-        app.loadInProgress = false;
+        app.loading.loadInProgress = false;
         return;
     }
 
@@ -341,25 +341,25 @@ void beginLoadWoW(AppState& app)
     if (!core::Game::instance().initDone())
         core::Game::instance().init(new wow::WoWFolder(app.settings.gamePath), new wow::WoWDatabase());
 
-    app.pendingConfigs = GAMEDIRECTORY.configsFound();
+    app.loading.pendingConfigs = GAMEDIRECTORY.configsFound();
 
-    if (app.pendingConfigs.empty())
+    if (app.loading.pendingConfigs.empty())
     {
         LOG_ERROR << "No locale found in WoW folder.";
         setLoadStatus("No locale found in the WoW folder.", app);
-        app.loadInProgress = false;
+        app.loading.loadInProgress = false;
         return;
     }
 
-    if (app.pendingConfigs.size() == 1)
+    if (app.loading.pendingConfigs.size() == 1)
     {
-        launchLoadThread(app.pendingConfigs[0], app);
+        launchLoadThread(app.loading.pendingConfigs[0], app);
     }
     else
     {
-        app.selectedConfig = 0;
-        app.showConfigPopup = true;
-        app.loadInProgress = false;
+        app.loading.selectedConfig = 0;
+        app.loading.showConfigPopup = true;
+        app.loading.loadInProgress = false;
     }
 }
 
