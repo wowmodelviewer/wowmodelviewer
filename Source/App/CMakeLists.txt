@@ -15,6 +15,7 @@ include_directories(${CMAKE_SOURCE_DIR}/Source/Plugins/Importers/Armory)
 include_directories(${CMAKE_SOURCE_DIR}/Source/Plugins/Importers/Wowhead)
 
 set(src main.cpp
+         AppWindow.cpp
          AppSettings.cpp
          SceneRenderer.cpp
          ThemeManager.cpp

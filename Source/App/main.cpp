@@ -76,6 +76,8 @@
 
 #include "stb_image.h"
 
+#include "AppWindow.h"
+
 // Exporters (OBJ / FBX)
 #include "OBJExporter.h"
 #include "FBXExporter.h"
@@ -102,6 +104,7 @@
 #include "ViewportController.h"
 
 static AppState app;
+static AppWindow appWindow;
 static InputManager inputManager;
 
 // ---- Thin wrappers forwarding to helper modules --------------------------
@@ -224,67 +227,16 @@ static void initGL()
     LOG_INFO << "OpenGL initialisation complete.";
 }
 
-// ---- GLFW error callback --------------------------------------------------
-static void glfw_error_callback(int error, const char* description)
-{
-    fprintf(stderr, "GLFW Error %d: %s\n", error, description);
-}
-
 // ---- Entry point ----------------------------------------------------------
 int main(int /*argc*/, char* /*argv*/[])
 {
-    // ---- GLFW + window ----
-    glfwSetErrorCallback(glfw_error_callback);
-    if (!glfwInit())
+    // ---- Platform window (GLFW + glad) ----
+    if (!appWindow.init(1600, 900, "WoW Model Viewer"))
         return 1;
 
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
-    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_COMPAT_PROFILE);
-    glfwWindowHint(GLFW_SCALE_TO_MONITOR, GLFW_TRUE);
-
-    GLFWwindow* window = glfwCreateWindow(1600, 900, "WoW Model Viewer", nullptr, nullptr);
-    if (!window)
-    {
-        glfwTerminate();
-        return 1;
-    }
+    appWindow.setIcon(WMV_ICON_PATH);
+    GLFWwindow* window = appWindow.handle();
     app.window = window;
-    glfwMakeContextCurrent(window);
-    glfwSwapInterval(1);
-
-// Set window icon from wmv_16.png.
-{
-    // Resolve the icon relative to the executable so it works in installed
-    // builds (NSIS) as well as development builds (compile-time path).
-    int iw = 0, ih = 0, ic = 0;
-    unsigned char* px = nullptr;
-#ifdef _WIN32
-    {
-        wchar_t exePath[MAX_PATH]{};
-        GetModuleFileNameW(nullptr, exePath, MAX_PATH);
-        std::filesystem::path iconPath = std::filesystem::path(exePath).parent_path() / "wmv_16.png";
-        px = stbi_load(iconPath.string().c_str(), &iw, &ih, &ic, 4);
-    }
-#endif
-    if (!px)
-        px = stbi_load(WMV_ICON_PATH, &iw, &ih, &ic, 4);
-    if (px)
-    {
-        GLFWimage img{ iw, ih, px };
-        glfwSetWindowIcon(window, 1, &img);
-        stbi_image_free(px);
-    }
-}
-
-// ---- glad ----
-    if (!gladLoadGL(glfwGetProcAddress))
-    {
-        fprintf(stderr, "Failed to initialise OpenGL loader (glad)\n");
-        glfwDestroyWindow(window);
-        glfwTerminate();
-        return 1;
-    }
 
     // ---- Custom title bar (embed menus in the window frame) ----
     CustomTitleBar::init(window);
@@ -307,9 +259,7 @@ int main(int /*argc*/, char* /*argv*/[])
     ThemeManager::apply(ThemeManager::currentTheme(), app.window);
 
     // ---- DPI-aware scaling ----
-    float xscale = 1.0f, yscale = 1.0f;
-    glfwGetWindowContentScale(window, &xscale, &yscale);
-    app.ui.dpiScale = (xscale > yscale) ? xscale : yscale;
+    app.ui.dpiScale = appWindow.queryDpiScale();
     if (app.ui.dpiScale > 1.0f)
     {
         ImGui::GetStyle().ScaleAllSizes(app.ui.dpiScale);
@@ -414,9 +364,9 @@ int main(int /*argc*/, char* /*argv*/[])
     app.scene.lastTick = std::chrono::steady_clock::now();
 
     // ---- Main loop ----
-    while (!glfwWindowShouldClose(window))
+    while (!appWindow.shouldClose())
     {
-        glfwPollEvents();
+        appWindow.pollEvents();
 
         // ---- Rebuild font atlas if font/size changed ----
         if (app.ui.fontsDirty)
@@ -488,7 +438,7 @@ int main(int /*argc*/, char* /*argv*/[])
                 }
                 ImGui::Separator();
                 if (ImGui::MenuItem("Exit", "Alt+F4"))
-                    glfwSetWindowShouldClose(window, GLFW_TRUE);
+                    appWindow.requestClose();
                 ImGui::EndMenu();
             }
 
@@ -972,13 +922,13 @@ int main(int /*argc*/, char* /*argv*/[])
         // ---- Render ImGui over the default framebuffer ----
         ImGui::Render();
         int display_w, display_h;
-        glfwGetFramebufferSize(window, &display_w, &display_h);
+        appWindow.framebufferSize(display_w, display_h);
         glViewport(0, 0, display_w, display_h);
         glClearColor(0.1f, 0.1f, 0.12f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
-        glfwSwapBuffers(window);
+        appWindow.swapBuffers();
     }
 
     // ---- Cleanup ----
@@ -1000,8 +950,7 @@ int main(int /*argc*/, char* /*argv*/[])
     ImGui_ImplGlfw_Shutdown();
     ImGui::DestroyContext();
 
-    glfwDestroyWindow(window);
-    glfwTerminate();
+    // AppWindow destructor handles glfwDestroyWindow + glfwTerminate
 
     LOG_INFO << "WoW Model Viewer shutdown complete.";
     return 0;
