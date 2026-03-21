@@ -47,58 +47,59 @@ public:
 	void SetHandle(HWND hwnd, int bpp);
 
 	// Resources
-	HDC hDC;
-	HWND hWnd;
-	HGLRC hRC;
+	HDC hDC   = nullptr;
+	HWND hWnd = nullptr;
+	HGLRC hRC = nullptr;
 #endif
 
-	bool init;
-	bool render;
-	bool refresh;
+	bool init    = false;
+	bool render  = false;
+	bool refresh = false;
 
 	// OpenGL Settings
-	int xRes, yRes;
-	int pixelFormat;
-	float fov;
-	int desktopBPP;
+	int xRes = 0;
+	int yRes = 0;
+	int pixelFormat = 0;
+	float fov = 45.0f;
+	int desktopBPP = 0;
 
 	// Card capabilities
 	std::vector<VideoCaps> capsList;
-	VideoCaps curCap;
-	int capIndex;
+	VideoCaps curCap{};
+	int capIndex = 0;
 
-	int AnisofilterLevel;
-	int numTextureUnits;
+	int AnisofilterLevel = 0;
+	int numTextureUnits  = 0;
 
 	// Card Info
-	char* vendor;
-	char* version;
-	char* renderer;
+	char* vendor   = nullptr;
+	char* version  = nullptr;
+	char* renderer = nullptr;
 
 	// Is there hardware support?
-	bool hasHardware;
-	bool secondPass;
+	bool hasHardware = false;
+	bool secondPass  = false;
 
 	// Video card support for OGL Extensions
-	bool supportFragProg;
-	bool supportVertexProg;
-	bool supportGLSL;
-	bool supportCompression; // = false;
-	bool supportMultiTex; //  = false;
-	bool supportDrawRangeElements; //  = false;
-	bool supportPointSprites; //  = false;
-	bool supportShaders; //  = false;
-	bool supportAntiAlias; //  = false;
-	bool supportVBO; //  = false;
-	bool supportPBO; //  = false;
-	bool supportFBO; //  = false;
-	bool supportNPOT; //  = false;
-	bool supportOGL20; //  = false;
-	bool supportWGLPixelFormat;
-	bool supportTexRects;
+	bool supportFragProg            = false;
+	bool supportVertexProg          = false;
+	bool supportGLSL                = false;
+	bool supportCompression         = false;
+	bool supportMultiTex            = false;
+	bool supportDrawRangeElements   = false;
+	bool supportPointSprites        = false;
+	bool supportShaders             = false;
+	bool supportAntiAlias           = false;
+	bool supportVBO                 = false;
+	bool supportPBO                 = false;
+	bool supportFBO                 = false;
+	bool supportNPOT                = false;
+	bool supportOGL20               = false;
+	bool supportWGLPixelFormat      = false;
+	bool supportTexRects            = false;
 
-	bool useMasking;
-	bool useEnvMapping; //  = true;
+	bool useMasking    = false;
+	bool useEnvMapping = true;
 };
 
 extern VideoSettings video;

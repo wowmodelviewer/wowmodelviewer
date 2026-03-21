@@ -37,54 +37,7 @@ PIXELFORMATDESCRIPTOR pfd = // pfd Tells Windows How We Want Things To Be
 
 VideoSettings video;
 
-VideoSettings::VideoSettings()
-    : refresh(0),
-      desktopBPP(0),
-      curCap{},
-      capIndex(0),
-      AnisofilterLevel(0),
-      numTextureUnits(0),
-      vendor(nullptr),
-      version(nullptr),
-      renderer(nullptr),
-      hasHardware(false),
-      secondPass(false),
-      supportFragProg(false),
-      supportVertexProg(false),
-      supportGLSL(false),
-      supportCompression(false),
-      supportMultiTex(false),
-      supportDrawRangeElements(false),
-      supportPointSprites(false),
-      supportVBO(false),
-      supportShaders(false),
-      supportPBO(false),
-      supportAntiAlias(false),
-      supportWGLPixelFormat(false),
-      supportFBO(false),
-      supportNPOT(false),
-      supportOGL20(false),
-      supportTexRects(false),
-      useMasking(false)
-{
-#ifdef _WINDOWS
-	hWnd = nullptr;
-	hRC = nullptr;
-	hDC = nullptr;
-#endif
-
-	pixelFormat = 0;
-	xRes = 0;
-	yRes = 0;
-
-	fov = 45.0f;
-
-	init = false;
-	render = false;
-
-	//useAntiAlias = true;
-	useEnvMapping = true;
-}
+VideoSettings::VideoSettings() = default;
 
 VideoSettings::~VideoSettings()
 {
