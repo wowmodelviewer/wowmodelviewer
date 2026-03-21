@@ -21,10 +21,10 @@ void AppSettings::load()
     bgColor.z     = static_cast<float>(config.getDouble("Viewport/BgB", 121.0 / 255.0));
 
     ThemeManager::currentThemeRef() = config.getInt("Settings/Theme",
-                                                     static_cast<int>(ThemeManager::UE4));
+                                                     static_cast<int>(ThemeManager::UE5));
     if (ThemeManager::currentThemeRef() < 0 ||
         ThemeManager::currentThemeRef() >= ThemeManager::themeCount())
-        ThemeManager::currentThemeRef() = static_cast<int>(ThemeManager::UE4);
+        ThemeManager::currentThemeRef() = static_cast<int>(ThemeManager::UE5);
 
     currentFont = config.getInt("Settings/Font", 0);
     fontSize    = static_cast<float>(config.getDouble("Settings/FontSize", 18.0));

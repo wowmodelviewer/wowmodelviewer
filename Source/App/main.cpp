@@ -426,18 +426,26 @@ int main(int /*argc*/, char* /*argv*/[])
         std::sort(app.availableFonts.begin(), app.availableFonts.end(),
             [](const FontEntry& a, const FontEntry& b) { return a.name < b.name; });
 
-        // Default font: prefer "arialn" by name if available and no saved preference
+        // Default font: prefer "Roboto-Regular" (UE5 default), fall back to "arialn"
         if (app.settings.currentFont <= 0)
         {
-            for (int i = 0; i < static_cast<int>(app.availableFonts.size()); ++i)
+            const char* preferred[] = { "roboto-regular", "arialn" };
+            for (const char* target : preferred)
             {
-                std::string lower = app.availableFonts[i].name;
-                std::transform(lower.begin(), lower.end(), lower.begin(), ::tolower);
-                if (lower == "arialn")
+                bool found = false;
+                for (int i = 0; i < static_cast<int>(app.availableFonts.size()); ++i)
                 {
-                    app.settings.currentFont = i;
-                    break;
+                    std::string lower = app.availableFonts[i].name;
+                    std::transform(lower.begin(), lower.end(), lower.begin(), ::tolower);
+                    if (lower == target)
+                    {
+                        app.settings.currentFont = i;
+                        found = true;
+                        break;
+                    }
                 }
+                if (found)
+                    break;
             }
         }
     }

@@ -7,12 +7,9 @@ namespace ThemeManager
 
 enum Theme
 {
-    Default = 0,
-    UE4,
-    UE5,
-    VS2026,
+    Dark = 0,
     Light,
-    Warcraft,
+    UE5,
     Count
 };
 
