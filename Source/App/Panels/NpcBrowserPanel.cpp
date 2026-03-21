@@ -1,5 +1,7 @@
 #include "NpcBrowserPanel.h"
 
+#include <cassert>
+
 #include "imgui.h"
 #include "imgui_stdlib.h"
 #include "database.h"
@@ -11,6 +13,10 @@ namespace NpcBrowserPanel
 
 void draw(DrawContext& ctx)
 {
+    assert(ctx.npcs && "DrawContext::npcs must not be null");
+    assert(ctx.npcFiltered && "DrawContext::npcFiltered must not be null");
+    assert(ctx.npcSearchBuf && "DrawContext::npcSearchBuf must not be null");
+
     if (!ctx.isWoWLoaded || !ctx.isDBReady)
     {
         ImGui::TextDisabled("Game not loaded.");

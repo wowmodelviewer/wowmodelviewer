@@ -1,5 +1,7 @@
 #include "ViewportOptionsPanel.h"
 
+#include <cassert>
+
 #include "imgui.h"
 #include "SceneRenderer.h"
 #include "OrbitCamera.h"
@@ -55,6 +57,10 @@ namespace ViewportOptionsPanel
 
 void draw(DrawContext& ctx)
 {
+    assert(ctx.drawGrid && "DrawContext::drawGrid must not be null");
+    assert(ctx.bgColor && "DrawContext::bgColor must not be null");
+    assert(ctx.camera && "DrawContext::camera must not be null");
+
     // ---- Background ----
     if (ImGui::CollapsingHeader("Background", ImGuiTreeNodeFlags_DefaultOpen))
     {

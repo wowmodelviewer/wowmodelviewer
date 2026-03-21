@@ -1,5 +1,7 @@
 #include "ItemBrowserPanel.h"
 
+#include <cassert>
+
 #include "imgui.h"
 #include "imgui_stdlib.h"
 #include "database.h"
@@ -32,6 +34,10 @@ ImVec4 getQualityColor(int quality)
 
 void draw(DrawContext& ctx)
 {
+    assert(ctx.items && "DrawContext::items must not be null");
+    assert(ctx.itemBrowseFiltered && "DrawContext::itemBrowseFiltered must not be null");
+    assert(ctx.itemBrowseSearchBuf && "DrawContext::itemBrowseSearchBuf must not be null");
+
     if (!ctx.isWoWLoaded || !ctx.isDBReady)
     {
         ImGui::TextDisabled("Game not loaded.");

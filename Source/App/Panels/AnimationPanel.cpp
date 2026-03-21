@@ -3,6 +3,8 @@
 // ============================================================================
 #include "AnimationPanel.h"
 
+#include <cassert>
+
 #include "imgui.h"
 #include "WoWModel.h"
 
@@ -11,6 +13,14 @@ namespace AnimationPanel
 
 void draw(DrawContext& ctx)
 {
+    assert(ctx.selectedAnimCombo && "DrawContext::selectedAnimCombo must not be null");
+    assert(ctx.animSpeed && "DrawContext::animSpeed must not be null");
+    assert(ctx.loopCount && "DrawContext::loopCount must not be null");
+    assert(ctx.lockAnims && "DrawContext::lockAnims must not be null");
+    assert(ctx.selectedSecondaryAnim && "DrawContext::selectedSecondaryAnim must not be null");
+    assert(ctx.selectedMouthAnim && "DrawContext::selectedMouthAnim must not be null");
+    assert(ctx.mouthSpeed && "DrawContext::mouthSpeed must not be null");
+
     WoWModel* aModel = ctx.getLoadedModel ? ctx.getLoadedModel() : nullptr;
     if (!aModel || !ctx.animEntries || ctx.animEntries->empty())
     {

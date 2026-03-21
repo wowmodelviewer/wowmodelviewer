@@ -6,6 +6,8 @@
 // ============================================================================
 #include "CharacterViewerPanel.h"
 
+#include <cassert>
+
 #include "imgui.h"
 #include "imgui_internal.h"
 
@@ -169,6 +171,12 @@ namespace CharacterViewerPanel
 
 void draw(const DrawContext& ctx)
 {
+    assert(ctx.customizationOptions && "DrawContext::customizationOptions must not be null");
+    assert(ctx.animEntries && "DrawContext::animEntries must not be null");
+    assert(ctx.selectedAnimCombo && "DrawContext::selectedAnimCombo must not be null");
+    assert(ctx.fbo && "DrawContext::fbo must not be null");
+    assert(ctx.camera && "DrawContext::camera must not be null");
+
     if (!ctx.isWoWLoaded || !ctx.isDBReady)
     {
         ImGui::TextDisabled("Game not loaded.");

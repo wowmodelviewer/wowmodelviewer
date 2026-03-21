@@ -1,5 +1,7 @@
 #include "SettingsPanel.h"
 
+#include <cassert>
+
 #ifdef _WIN32
 #include <windows.h>
 #endif
@@ -91,6 +93,12 @@ void openFolderPicker(SettingsPanel::DrawContext& ctx)
 
 void SettingsPanel::draw(DrawContext& ctx)
 {
+    assert(ctx.pathBuf && "DrawContext::pathBuf must not be null");
+    assert(ctx.settings && "DrawContext::settings must not be null");
+    assert(ctx.showFolderPicker && "DrawContext::showFolderPicker must not be null");
+    assert(ctx.folderPickerCurrent && "DrawContext::folderPickerCurrent must not be null");
+    assert(ctx.folderPickerEntries && "DrawContext::folderPickerEntries must not be null");
+
     // ---- Game loading section ----
     ImGui::SeparatorText("World of Warcraft");
 

@@ -1,10 +1,15 @@
 #include "PresetsPanel.h"
 
+#include <cassert>
+
 #include "imgui.h"
 #include "imgui_stdlib.h"
 
 void PresetsPanel::draw(DrawContext& ctx)
 {
+    assert(ctx.presetPath && "DrawContext::presetPath must not be null");
+    assert(ctx.presetStatus && "DrawContext::presetStatus must not be null");
+
     ImGui::SeparatorText("Character Preset");
     ImGui::Text("File:");
     ImGui::SetNextItemWidth(-1);

@@ -1,5 +1,7 @@
 #include "ItemSetsPanel.h"
 
+#include <cassert>
+
 #include "imgui.h"
 #include "imgui_stdlib.h"
 
@@ -10,6 +12,12 @@ namespace ItemSetsPanel
 
 void draw(DrawContext& ctx)
 {
+    assert(ctx.itemSets && "DrawContext::itemSets must not be null");
+    assert(ctx.itemSetSearchBuf && "DrawContext::itemSetSearchBuf must not be null");
+    assert(ctx.itemSetFiltered && "DrawContext::itemSetFiltered must not be null");
+    assert(ctx.startOutfitSearchBuf && "DrawContext::startOutfitSearchBuf must not be null");
+    assert(ctx.startOutfitFiltered && "DrawContext::startOutfitFiltered must not be null");
+
     WoWModel* cModel = ctx.getLoadedModel ? ctx.getLoadedModel() : nullptr;
     if (!cModel || !ctx.isChar)
     {

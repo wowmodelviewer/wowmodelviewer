@@ -1,5 +1,7 @@
 #include "MountsPanel.h"
 
+#include <cassert>
+
 #include "imgui.h"
 #include "imgui_stdlib.h"
 
@@ -10,6 +12,11 @@ namespace MountsPanel
 
 void draw(DrawContext& ctx)
 {
+    assert(ctx.mountList && "DrawContext::mountList must not be null");
+    assert(ctx.mountFiltered && "DrawContext::mountFiltered must not be null");
+    assert(ctx.mountSearchBuf && "DrawContext::mountSearchBuf must not be null");
+    assert(ctx.mountTab && "DrawContext::mountTab must not be null");
+
     WoWModel* cModel = ctx.getLoadedModel ? ctx.getLoadedModel() : nullptr;
     if (cModel && ctx.isChar)
     {

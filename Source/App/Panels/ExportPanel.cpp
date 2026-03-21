@@ -1,5 +1,6 @@
 // ExportPanel.cpp  –  Export panel (format, path, animation selection, export)
 #include "ExportPanel.h"
+#include <cassert>
 #include "imgui.h"
 #include "imgui_stdlib.h"
 #include "ExporterPlugin.h"
@@ -101,6 +102,11 @@ namespace ExportPanel
 
 void draw(DrawContext& ctx)
 {
+    assert(ctx.exporters && "DrawContext::exporters must not be null");
+    assert(ctx.selectedExporter && "DrawContext::selectedExporter must not be null");
+    assert(ctx.exportPath && "DrawContext::exportPath must not be null");
+    assert(ctx.exportStatus && "DrawContext::exportStatus must not be null");
+
     WoWModel* eModel = ctx.getLoadedModel ? ctx.getLoadedModel() : nullptr;
     if (eModel)
     {

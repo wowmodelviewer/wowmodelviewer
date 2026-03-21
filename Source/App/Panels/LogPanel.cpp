@@ -1,5 +1,7 @@
 #include "LogPanel.h"
 
+#include <cassert>
+
 #include "imgui.h"
 
 #include <fstream>
@@ -24,6 +26,10 @@ void reloadLogFile(std::vector<std::string>& lines, bool& needsReload)
 
 void LogPanel::draw(DrawContext& ctx)
 {
+    assert(ctx.logLines && "DrawContext::logLines must not be null");
+    assert(ctx.logAutoScroll && "DrawContext::logAutoScroll must not be null");
+    assert(ctx.logNeedsReload && "DrawContext::logNeedsReload must not be null");
+
     if (*ctx.logNeedsReload)
         reloadLogFile(*ctx.logLines, *ctx.logNeedsReload);
 

@@ -1,5 +1,7 @@
 #include "ScreenshotPanel.h"
 
+#include <cassert>
+
 #include <glad/gl.h>
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -154,6 +156,12 @@ void captureAtResolution(const std::string& path, int cw, int ch,
 
 void ScreenshotPanel::draw(DrawContext& ctx)
 {
+    assert(ctx.screenshotPath && "DrawContext::screenshotPath must not be null");
+    assert(ctx.screenshotStatus && "DrawContext::screenshotStatus must not be null");
+    assert(ctx.useCanvasOverride && "DrawContext::useCanvasOverride must not be null");
+    assert(ctx.fbo && "DrawContext::fbo must not be null");
+    assert(ctx.camera && "DrawContext::camera must not be null");
+
     ImGui::SeparatorText("Capture Viewport");
     ImGui::Text("Output File:");
     ImGui::SetNextItemWidth(-1);
