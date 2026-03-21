@@ -1,0 +1,63 @@
+# ---------------------------------------------------------------------------
+# .github/workflows/docs.yml — Build & deploy Doxygen docs to GitHub Pages
+# ---------------------------------------------------------------------------
+# Triggers on pushes to 'develop' that touch Source/ or docs/.
+#
+# Prerequisites (one-time repo setup):
+#   Settings → Pages → Source → "GitHub Actions"
+# ---------------------------------------------------------------------------
+
+name: Documentation
+
+on:
+  push:
+    branches: [develop]
+    paths:
+      - 'Source/**'
+      - 'docs/**'
+      - 'readme.md'
+      - 'cmake/docs.cmake'
+  workflow_dispatch:   # allow manual trigger
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build-docs:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          submodules: true          # needed for doxygen-awesome-css
+
+      - name: Install Doxygen & Graphviz
+        run: sudo apt-get update && sudo apt-get install -y doxygen graphviz
+
+      - name: Configure CMake (docs only)
+        run: cmake -B build -S . -DCMAKE_BUILD_TYPE=Release
+
+      - name: Generate documentation
+        run: cmake --build build --target docs
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: build/docs/html
+
+  deploy:
+    needs: build-docs
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

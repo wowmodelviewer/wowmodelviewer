@@ -21,3 +21,6 @@
 	path = ThirdParty/imgui
 	url = https://github.com/ocornut/imgui.git
 	branch = docking
+[submodule "ThirdParty/doxygen-awesome-css"]
+	path = ThirdParty/doxygen-awesome-css
+	url = https://github.com/jothepro/doxygen-awesome-css.git

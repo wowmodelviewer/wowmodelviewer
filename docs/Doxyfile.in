@@ -1,0 +1,58 @@
+# ---------------------------------------------------------------------------
+# Doxyfile.in — CMake-configured Doxygen template for WoW Model Viewer
+# ---------------------------------------------------------------------------
+# CMake substitutes @VARIABLES@ at configure time.  Run the 'docs' build
+# target to generate the HTML output:
+#
+#   cmake --build <build-dir> --target docs
+# ---------------------------------------------------------------------------
+
+# --- Project ---
+PROJECT_NAME           = "WoW Model Viewer"
+PROJECT_BRIEF          = "Your premiere tool for viewing, equipping and animating World of Warcraft models."
+PROJECT_LOGO           =
+OUTPUT_DIRECTORY       = "@DOXYGEN_OUTPUT_DIR@"
+
+# --- Input ---
+INPUT                  = "@CMAKE_SOURCE_DIR@/Source" \
+                         "@CMAKE_SOURCE_DIR@/readme.md"
+RECURSIVE              = YES
+FILE_PATTERNS          = *.h *.hpp *.cpp
+USE_MDFILE_AS_MAINPAGE = "@CMAKE_SOURCE_DIR@/readme.md"
+
+# --- Extraction ---
+EXTRACT_ALL            = YES
+EXTRACT_PRIVATE        = YES
+EXTRACT_STATIC         = YES
+
+# --- Source browsing ---
+SOURCE_BROWSER         = YES
+INLINE_SOURCES         = NO
+STRIP_FROM_PATH        = "@CMAKE_SOURCE_DIR@"
+
+# --- Output formats ---
+GENERATE_HTML          = YES
+GENERATE_LATEX         = NO
+GENERATE_XML           = NO
+
+# --- Diagrams (requires Graphviz) ---
+HAVE_DOT               = @DOXYGEN_HAVE_DOT@
+DOT_IMAGE_FORMAT       = svg
+INTERACTIVE_SVG        = YES
+CALL_GRAPH             = YES
+CALLER_GRAPH           = YES
+CLASS_GRAPH            = YES
+COLLABORATION_GRAPH    = YES
+
+# --- doxygen-awesome-css theme ---
+HTML_EXTRA_STYLESHEET  = "@DOXYGEN_AWESOME_DIR@/doxygen-awesome.css"
+HTML_COLORSTYLE        = LIGHT
+DISABLE_INDEX          = NO
+FULL_SIDEBAR           = NO
+GENERATE_TREEVIEW      = YES
+
+# --- Miscellaneous ---
+QUIET                  = YES
+WARNINGS               = YES
+WARN_IF_UNDOCUMENTED   = NO
+WARN_IF_DOC_ERROR      = YES

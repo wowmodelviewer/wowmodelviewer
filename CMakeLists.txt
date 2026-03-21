@@ -165,6 +165,9 @@ if(MSVC)
 endif()
 set_property(TARGET imgui PROPERTY FOLDER "ThirdParty libraries")
 
+# Documentation (optional — only when Doxygen is installed).
+include(${CMAKE_SOURCE_DIR}/cmake/docs.cmake)
+
 # Main source files.
 message(STATUS "Adding Source...")
 add_subdirectory(Source)
