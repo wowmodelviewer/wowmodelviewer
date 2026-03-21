@@ -1,6 +1,6 @@
 #pragma once
 
-#include <glad/gl.h>
+#include "Renderer.h"
 #include <glm/glm.hpp>
 
 class OrbitCamera;
@@ -10,29 +10,14 @@ struct ViewportFBO;
 namespace SceneRenderer
 {
 
-// ---- Light type -----------------------------------------------------------
-enum LightType
-{
-    LIGHT_DIRECTIONAL = 0,
-    LIGHT_POINT,
-    LIGHT_SPOT,
-    LIGHT_AMBIENT_ONLY
-};
+// ---- Backward-compatible type aliases (canonical types live in Renderer) ---
+using LightType     = Renderer::LightType;
+using LightSettings = Renderer::LightSettings;
 
-// ---- Lighting parameters --------------------------------------------------
-struct LightSettings
-{
-    float direction[4] = { -1.0f, 1.0f, -1.0f, 0.0f };
-    float diffuse[3]   = {  1.0f, 1.0f,  1.0f };
-    float ambient[3]   = {  0.35f, 0.35f, 0.35f };
-    float specular[3]  = {  0.0f, 0.0f,  0.0f };
-    float intensity    = 1.0f;
-    bool  enabled      = true;
-    LightType type     = LIGHT_DIRECTIONAL;
-    float position[3]  = { 0.0f, 5.0f, 0.0f };
-    float spotCutoff   = 45.0f;
-    float spotExponent = 10.0f;
-};
+inline constexpr LightType LIGHT_DIRECTIONAL  = LightType::Directional;
+inline constexpr LightType LIGHT_POINT        = LightType::Point;
+inline constexpr LightType LIGHT_SPOT         = LightType::Spot;
+inline constexpr LightType LIGHT_AMBIENT_ONLY = LightType::AmbientOnly;
 
 // ---- Module state exposed for UI binding ----------------------------------
 struct State
@@ -42,11 +27,13 @@ struct State
     bool      drawGradientBg = false;
     glm::vec3 gradientTop{0.15f, 0.20f, 0.35f};
     glm::vec3 gradientBottom{0.02f, 0.02f, 0.05f};
-    GLuint    checkerTex     = 0;   // created by initResources()
 };
 
 /// Writable reference to the shared rendering state.
 State& state() noexcept;
+
+/// Access the engine-level Renderer instance.
+Renderer& renderer() noexcept;
 
 /// Create GPU resources (checkerboard texture, etc.).  Call once after
 /// the OpenGL context is current.

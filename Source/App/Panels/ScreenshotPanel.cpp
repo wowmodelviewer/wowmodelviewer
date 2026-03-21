@@ -100,7 +100,7 @@ void captureAtResolution(const std::string& path, int cw, int ch,
         glMatrixMode(GL_PROJECTION); glPopMatrix();
         glMatrixMode(GL_MODELVIEW); glPopMatrix();
     }
-    else if (SceneRenderer::state().drawCheckerBg && SceneRenderer::state().checkerTex)
+    else if (SceneRenderer::state().drawCheckerBg && SceneRenderer::renderer().checkerTexture())
     {
         SceneRenderer::renderCheckerboard(cw, ch);
     }
