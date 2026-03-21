@@ -48,9 +48,15 @@ jobs:
               -e "s|@DOXYGEN_AWESOME_DIR@|$GITHUB_WORKSPACE/ThirdParty/doxygen-awesome-css|g" \
               -e "s|@DOXYGEN_HAVE_DOT@|YES|g" \
               docs/Doxyfile.in > Doxyfile
+          cat Doxyfile
+
+      - name: Create output directory
+        run: mkdir -p build/docs
 
       - name: Generate documentation
-        run: doxygen Doxyfile
+        run: |
+          doxygen --version
+          doxygen Doxyfile 2>&1
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3

@@ -52,7 +52,8 @@ FULL_SIDEBAR           = NO
 GENERATE_TREEVIEW      = YES
 
 # --- Miscellaneous ---
-QUIET                  = YES
+QUIET                  = NO
 WARNINGS               = YES
+WARN_AS_ERROR          = NO
 WARN_IF_UNDOCUMENTED   = NO
 WARN_IF_DOC_ERROR      = YES
