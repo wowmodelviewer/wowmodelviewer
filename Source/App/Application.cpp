@@ -13,6 +13,7 @@
 #include "imgui.h"
 #include "imgui_internal.h"
 
+#include <algorithm>
 #include <chrono>
 #include <filesystem>
 #include <format>
@@ -527,24 +528,33 @@ void Application::drawTitleBarAndMenus()
             ImGui::EndMenu();
         }
 
-        if (ImGui::BeginMenu("View"))
+        if (ImGui::BeginMenu("Window"))
         {
-            ImGui::MenuItem("3D Viewport",      nullptr, &m_state.ui.showViewport);
-            ImGui::MenuItem("Character Viewer",  nullptr, &m_state.ui.showCharViewer);
-            ImGui::MenuItem("File Browser",      nullptr, &m_state.ui.showFileBrowser);
-            ImGui::MenuItem("Animation",         nullptr, &m_state.ui.showAnimation);
-            ImGui::MenuItem("Viewport Options",  nullptr, &m_state.ui.showViewportOpts);
-            ImGui::MenuItem("Mounts",            nullptr, &m_state.ui.showMounts);
-            ImGui::MenuItem("Item Sets",         nullptr, &m_state.ui.showItemSets);
-            ImGui::MenuItem("NPC Browser",       nullptr, &m_state.ui.showNpcBrowser);
-            ImGui::MenuItem("Item Browser",      nullptr, &m_state.ui.showItemBrowser);
-            ImGui::MenuItem("Export",            nullptr, &m_state.ui.showExport);
-            ImGui::MenuItem("Screenshot",        nullptr, &m_state.ui.showScreenshot);
-            ImGui::MenuItem("Presets",           nullptr, &m_state.ui.showPresets);
-            ImGui::MenuItem("Log",               nullptr, &m_state.ui.showLog);
-            ImGui::MenuItem("Settings",          nullptr, &m_state.ui.showSettings);
+            // Helper: toggle visibility and mark for undocking when first shown.
+            auto windowItem = [this](const char* label, bool* p_visible)
+            {
+                bool was = *p_visible;
+                ImGui::MenuItem(label, nullptr, p_visible);
+                if (*p_visible && !was)
+                    m_pendingUndock.emplace_back(label);
+            };
+
+            windowItem("3D Viewport",      &m_state.ui.showViewport);
+            windowItem("Character Viewer",  &m_state.ui.showCharViewer);
+            windowItem("File Browser",      &m_state.ui.showFileBrowser);
+            windowItem("Animation",         &m_state.ui.showAnimation);
+            windowItem("Viewport Options",  &m_state.ui.showViewportOpts);
+            windowItem("Mounts",            &m_state.ui.showMounts);
+            windowItem("Item Sets",         &m_state.ui.showItemSets);
+            windowItem("NPC Browser",       &m_state.ui.showNpcBrowser);
+            windowItem("Item Browser",      &m_state.ui.showItemBrowser);
+            windowItem("Export",            &m_state.ui.showExport);
+            windowItem("Screenshot",        &m_state.ui.showScreenshot);
+            windowItem("Presets",           &m_state.ui.showPresets);
+            windowItem("Log",               &m_state.ui.showLog);
+            windowItem("Settings",          &m_state.ui.showSettings);
             ImGui::Separator();
-            ImGui::MenuItem("ImGui Demo",        nullptr, &m_showDemoWindow);
+            windowItem("Dear ImGui Demo",   &m_showDemoWindow);
             ImGui::EndMenu();
         }
 
@@ -655,9 +665,22 @@ void Application::drawPanels()
 {
     auto& st = m_state;
 
+    // If a window was just toggled ON from the Window menu, force it to
+    // appear as a floating (undocked) window instead of re-docking.
+    auto undockIfPending = [this](const char* windowName)
+    {
+        auto it = std::find(m_pendingUndock.begin(), m_pendingUndock.end(), windowName);
+        if (it != m_pendingUndock.end())
+        {
+            ImGui::SetNextWindowDockID(0, ImGuiCond_Always);
+            m_pendingUndock.erase(it);
+        }
+    };
+
     // ===== Character Viewer =====
     if (st.ui.showCharViewer)
     {
+        undockIfPending("Character Viewer");
         ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(4, 4));
         if (ImGui::Begin("Character Viewer", &st.ui.showCharViewer))
         {
@@ -671,6 +694,7 @@ void Application::drawPanels()
     // ===== 3D Viewport =====
     if (st.ui.showViewport)
     {
+        undockIfPending("3D Viewport");
         ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
         if (ImGui::Begin("3D Viewport", &st.ui.showViewport))
         {
@@ -711,6 +735,7 @@ void Application::drawPanels()
     // ===== File Browser =====
     if (st.ui.showFileBrowser)
     {
+        undockIfPending("File Browser");
         auto statusStr = GameLoader::getLoadStatus(st);
         FileBrowserPanel::LoadState ls;
         ls.isLoaded   = st.loading.isWoWLoaded;
@@ -724,6 +749,7 @@ void Application::drawPanels()
     // ===== Animation Control =====
     if (st.ui.showAnimation)
     {
+        undockIfPending("Animation");
         if (ImGui::Begin("Animation", &st.ui.showAnimation))
         {
             auto ctx = buildAnimCtx(st);
@@ -738,6 +764,7 @@ void Application::drawPanels()
     // ===== Viewport Options =====
     if (st.ui.showViewportOpts)
     {
+        undockIfPending("Viewport Options");
         if (ImGui::Begin("Viewport Options", &st.ui.showViewportOpts))
         {
             auto ctx = buildViewportOptsCtx(st);
@@ -749,6 +776,7 @@ void Application::drawPanels()
     // ===== Mounts =====
     if (st.ui.showMounts)
     {
+        undockIfPending("Mounts");
         if (ImGui::Begin("Mounts", &st.ui.showMounts))
         {
             auto ctx = buildMountsCtx(st);
@@ -760,6 +788,7 @@ void Application::drawPanels()
     // ===== Item Sets =====
     if (st.ui.showItemSets)
     {
+        undockIfPending("Item Sets");
         if (ImGui::Begin("Item Sets", &st.ui.showItemSets))
         {
             auto ctx = buildItemSetsCtx(st);
@@ -771,6 +800,7 @@ void Application::drawPanels()
     // ===== NPC Browser =====
     if (st.ui.showNpcBrowser)
     {
+        undockIfPending("NPC Browser");
         if (ImGui::Begin("NPC Browser", &st.ui.showNpcBrowser))
         {
             auto ctx = buildNpcBrowserCtx(st);
@@ -782,6 +812,7 @@ void Application::drawPanels()
     // ===== Item Browser =====
     if (st.ui.showItemBrowser)
     {
+        undockIfPending("Item Browser");
         if (ImGui::Begin("Item Browser", &st.ui.showItemBrowser))
         {
             auto ctx = buildItemBrowserCtx(st);
@@ -793,6 +824,7 @@ void Application::drawPanels()
     // ===== Export =====
     if (st.ui.showExport)
     {
+        undockIfPending("Export");
         if (ImGui::Begin("Export", &st.ui.showExport))
         {
             auto ctx = buildExportCtx(st);
@@ -804,6 +836,7 @@ void Application::drawPanels()
     // ===== Screenshot =====
     if (st.ui.showScreenshot)
     {
+        undockIfPending("Screenshot");
         if (ImGui::Begin("Screenshot", &st.ui.showScreenshot))
         {
             auto ctx = buildScreenshotCtx(st);
@@ -815,6 +848,7 @@ void Application::drawPanels()
     // ===== Presets =====
     if (st.ui.showPresets)
     {
+        undockIfPending("Presets");
         if (ImGui::Begin("Presets", &st.ui.showPresets))
         {
             auto ctx = buildPresetsCtx(st);
@@ -826,6 +860,7 @@ void Application::drawPanels()
     // ===== Log =====
     if (st.ui.showLog)
     {
+        undockIfPending("Log");
         if (ImGui::Begin("Log", &st.ui.showLog))
         {
             auto ctx = buildLogCtx(st);
@@ -855,7 +890,15 @@ void Application::drawDialogs()
     AppDialogs::drawConfigPopup(m_state);
 
     if (m_showDemoWindow)
+    {
+        auto it = std::find(m_pendingUndock.begin(), m_pendingUndock.end(), "Dear ImGui Demo");
+        if (it != m_pendingUndock.end())
+        {
+            ImGui::SetNextWindowDockID(0, ImGuiCond_Always);
+            m_pendingUndock.erase(it);
+        }
         ImGui::ShowDemoWindow(&m_showDemoWindow);
+    }
 
     AppDialogs::drawAboutDialog(m_state);
     AppDialogs::drawLanguageDialog(m_state);
