@@ -26,11 +26,13 @@
 #include "ItemSetsPanel.h"
 #include "MountsPanel.h"
 
+// Full definitions required for std::unique_ptr members
+#include "Attachment.h"
+#include "ExporterPlugin.h"
+#include "ImporterPlugin.h"
+
 // Forward declarations for pointer / reference members
-class Attachment;
-class ExporterPlugin;
 class GameFile;
-class ImporterPlugin;
 class WoWModel;
 struct GLFWwindow;
 
