@@ -56,6 +56,7 @@
 #include "ThemeManager.h"
 #include "AppSettings.h"
 #include "SceneRenderer.h"
+#include "CustomTitleBar.h"
 #include "FileBrowserPanel.h"
 #include "CharacterViewerPanel.h"
 #include "AnimationPanel.h"
@@ -354,6 +355,9 @@ int main(int /*argc*/, char* /*argv*/[])
         return 1;
     }
 
+    // ---- Custom title bar (embed menus in the window frame) ----
+    CustomTitleBar::init(window);
+
     // ---- Engine init ----
     initEngine();
     initGL();
@@ -466,6 +470,7 @@ int main(int /*argc*/, char* /*argv*/[])
         }
         if (!loaded)
             io.Fonts->AddFontDefault();
+        CustomTitleBar::mergeIconFont(pixelSize);
         io.FontGlobalScale = 1.0f; // size is already baked into the rasterised glyphs
     }
 
@@ -474,6 +479,7 @@ int main(int /*argc*/, char* /*argv*/[])
 
     bool show_demo_window = false;
     bool firstFrame = true;
+    bool resetLayout = false;
     app.lastTick = std::chrono::steady_clock::now();
 
     // ---- Main loop ----
@@ -500,6 +506,7 @@ int main(int /*argc*/, char* /*argv*/[])
             }
             if (!loaded)
                 fio.Fonts->AddFontDefault();
+            CustomTitleBar::mergeIconFont(pixelSize);
             fio.FontGlobalScale = 1.0f;
             fio.Fonts->Build();
         }
@@ -515,49 +522,10 @@ int main(int /*argc*/, char* /*argv*/[])
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
 
-        ImGuiID dockspace_id = ImGui::DockSpaceOverViewport(0, ImGui::GetMainViewport());
-
-        // ---- Build default docking layout on first frame (only if no saved layout) ----
-        if (firstFrame)
-        {
-            firstFrame = false;
-            if (!std::filesystem::exists(AppSettings::imguiIniPath))
-            {
-            ImGui::DockBuilderRemoveNode(dockspace_id);
-            ImGui::DockBuilderAddNode(dockspace_id, ImGuiDockNodeFlags_DockSpace);
-
-            int fw, fh;
-            glfwGetFramebufferSize(window, &fw, &fh);
-            ImGui::DockBuilderSetNodeSize(dockspace_id, ImVec2(static_cast<float>(fw), static_cast<float>(fh)));
-
-            ImGuiID dock_left, dock_center;
-            ImGui::DockBuilderSplitNode(dockspace_id, ImGuiDir_Left, 0.15f, &dock_left, &dock_center);
-
-            ImGuiID dock_right;
-            ImGui::DockBuilderSplitNode(dock_center, ImGuiDir_Right, 0.20f, &dock_right, &dock_center);
-
-            ImGuiID dock_bottom;
-            ImGui::DockBuilderSplitNode(dock_center, ImGuiDir_Down, 0.25f, &dock_bottom, &dock_center);
-
-            ImGui::DockBuilderDockWindow("File Browser", dock_left);
-            ImGui::DockBuilderDockWindow("NPC Browser", dock_left);
-            ImGui::DockBuilderDockWindow("Item Browser", dock_left);
-            ImGui::DockBuilderDockWindow("3D Viewport", dock_center);
-            ImGui::DockBuilderDockWindow("Character Viewer", dock_center);
-            ImGui::DockBuilderDockWindow("Animation", dock_bottom);
-            ImGui::DockBuilderDockWindow("Screenshot", dock_bottom);
-            ImGui::DockBuilderDockWindow("Export", dock_bottom);
-            ImGui::DockBuilderDockWindow("Presets", dock_bottom);
-            ImGui::DockBuilderDockWindow("Viewport Options", dock_right);
-            ImGui::DockBuilderDockWindow("Mounts", dock_right);
-            ImGui::DockBuilderDockWindow("Item Sets", dock_right);
-            ImGui::DockBuilderDockWindow("Log", dock_bottom);
-            ImGui::DockBuilderFinish(dockspace_id);
-            }
-        }
-
-        // ===== Main Menu Bar =====
-        if (ImGui::BeginMainMenuBar())
+        // ===== Custom Title Bar (menus embedded in window frame) =====
+        ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(8.0f, 8.0f));
+        ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(14.0f, 8.0f));
+        if (CustomTitleBar::begin(window))
         {
             if (ImGui::BeginMenu("File"))
             {
@@ -571,14 +539,32 @@ int main(int /*argc*/, char* /*argv*/[])
                     app.importStatus.clear();
                 }
                 ImGui::Separator();
+                if (ImGui::MenuItem("Close Model", nullptr, false, getLoadedModel() != nullptr))
+                    clearModel();
+                ImGui::Separator();
+                if (ImGui::MenuItem("Export...", nullptr, false, getLoadedModel() != nullptr))
+                {
+                    app.showExport = true;
+                    ImGui::SetWindowFocus("Export");
+                }
                 if (ImGui::MenuItem("Screenshot...", "Ctrl+S"))
                 {
-                    // Focus the Screenshot panel (user picks path there)
+                    app.showScreenshot = true;
                     ImGui::SetWindowFocus("Screenshot");
                 }
                 ImGui::Separator();
                 if (ImGui::MenuItem("Exit", "Alt+F4"))
                     glfwSetWindowShouldClose(window, GLFW_TRUE);
+                ImGui::EndMenu();
+            }
+
+            if (ImGui::BeginMenu("Edit"))
+            {
+                if (ImGui::MenuItem("Reset Camera", "Numpad 5", false, getLoadedModel() != nullptr))
+                    resetCameraToModel(app.camera, getLoadedModel());
+                ImGui::Separator();
+                if (ImGui::MenuItem("Reset Layout"))
+                    resetLayout = true;
                 ImGui::EndMenu();
             }
 
@@ -620,10 +606,10 @@ int main(int /*argc*/, char* /*argv*/[])
                 ImGui::EndMenu();
             }
 
-            // ---- Status bar (right-aligned in menu bar) ----
+            // ---- Status bar + window controls (right-aligned in title bar) ----
+            std::string statusText;
             {
                 WoWModel* sm = getLoadedModel();
-                std::string statusText;
                 if (sm)
                 {
                     int curFrame = 0, totalFrames = 0;
@@ -641,13 +627,69 @@ int main(int /*argc*/, char* /*argv*/[])
                 {
                     statusText = std::format("FPS: {:.0f}", app.fps);
                 }
-                float textWidth = ImGui::CalcTextSize(statusText.c_str()).x;
-                ImGui::SameLine(ImGui::GetWindowWidth() - textWidth - 10.0f);
-                ImGui::TextDisabled("%s", statusText.c_str());
             }
-
-            ImGui::EndMainMenuBar();
+            CustomTitleBar::end(window, statusText.c_str());
         }
+        ImGui::PopStyleVar(2);
+
+        // ===== Dockspace (below custom title bar) =====
+        {
+            const float titleBarH = CustomTitleBar::height();
+            const ImGuiViewport* mainVp = ImGui::GetMainViewport();
+            ImGui::SetNextWindowPos(ImVec2(mainVp->WorkPos.x, mainVp->WorkPos.y + titleBarH));
+            ImGui::SetNextWindowSize(ImVec2(mainVp->WorkSize.x, mainVp->WorkSize.y - titleBarH));
+            ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
+            ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
+            ImGui::Begin("##DockHost", nullptr,
+                ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse |
+                ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove |
+                ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse |
+                ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus |
+                ImGuiWindowFlags_NoDocking | ImGuiWindowFlags_NoBackground);
+            ImGui::PopStyleVar(2);
+            ImGuiID dockspace_id = ImGui::DockSpace(ImGui::GetID("MainDockspace"));
+            ImGui::End();
+
+            // ---- Build default docking layout on first frame (only if no saved layout) ----
+            if (firstFrame || resetLayout)
+            {
+                firstFrame = false;
+                if (resetLayout || !std::filesystem::exists(AppSettings::imguiIniPath))
+                {
+                    resetLayout = false;
+                    ImGui::DockBuilderRemoveNode(dockspace_id);
+                    ImGui::DockBuilderAddNode(dockspace_id, ImGuiDockNodeFlags_DockSpace);
+
+                    int fw, fh;
+                    glfwGetFramebufferSize(window, &fw, &fh);
+                    ImGui::DockBuilderSetNodeSize(dockspace_id, ImVec2(static_cast<float>(fw), static_cast<float>(fh)));
+
+                    ImGuiID dock_left, dock_center;
+                    ImGui::DockBuilderSplitNode(dockspace_id, ImGuiDir_Left, 0.15f, &dock_left, &dock_center);
+
+                    ImGuiID dock_right;
+                    ImGui::DockBuilderSplitNode(dock_center, ImGuiDir_Right, 0.20f, &dock_right, &dock_center);
+
+                    ImGuiID dock_bottom;
+                    ImGui::DockBuilderSplitNode(dock_center, ImGuiDir_Down, 0.25f, &dock_bottom, &dock_center);
+
+                    ImGui::DockBuilderDockWindow("File Browser", dock_left);
+                    ImGui::DockBuilderDockWindow("NPC Browser", dock_left);
+                    ImGui::DockBuilderDockWindow("Item Browser", dock_left);
+                    ImGui::DockBuilderDockWindow("3D Viewport", dock_center);
+                    ImGui::DockBuilderDockWindow("Character Viewer", dock_center);
+                    ImGui::DockBuilderDockWindow("Animation", dock_bottom);
+                    ImGui::DockBuilderDockWindow("Screenshot", dock_bottom);
+                    ImGui::DockBuilderDockWindow("Export", dock_bottom);
+                    ImGui::DockBuilderDockWindow("Presets", dock_bottom);
+                    ImGui::DockBuilderDockWindow("Viewport Options", dock_right);
+                    ImGui::DockBuilderDockWindow("Mounts", dock_right);
+                    ImGui::DockBuilderDockWindow("Item Sets", dock_right);
+                    ImGui::DockBuilderDockWindow("Log", dock_bottom);
+                    ImGui::DockBuilderFinish(dockspace_id);
+                }
+            }
+        } // dockspace scope
 
         // ===== Character Viewer (standalone tab like wow.export) =====
         if (app.showCharViewer)

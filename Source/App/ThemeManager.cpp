@@ -110,7 +110,7 @@ void apply(Theme theme, GLFWwindow* window)
 
         c[ImGuiCol_WindowBg]             = ImVec4(0.141f, 0.141f, 0.141f, 1.00f); // Panel
         c[ImGuiCol_ChildBg]              = ImVec4(0.102f, 0.102f, 0.102f, 1.00f); // Recessed
-        c[ImGuiCol_PopupBg]              = ImVec4(0.082f, 0.082f, 0.082f, 0.98f); // Background
+        c[ImGuiCol_PopupBg]              = ImVec4(0.220f, 0.220f, 0.220f, 1.00f); // Dropdown
         c[ImGuiCol_MenuBarBg]            = ImVec4(0.082f, 0.082f, 0.082f, 1.00f); // Background
         c[ImGuiCol_Border]               = ImVec4(0.059f, 0.059f, 0.059f, 1.00f); // WindowBorder
         c[ImGuiCol_BorderShadow]         = ImVec4(0.000f, 0.000f, 0.000f, 0.00f);

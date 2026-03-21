@@ -18,6 +18,7 @@ set(src main.cpp
          AppSettings.cpp
          SceneRenderer.cpp
          ThemeManager.cpp
+         CustomTitleBar.cpp
          GameLoader.cpp
          ModelLoader.cpp
          PresetManager.cpp
