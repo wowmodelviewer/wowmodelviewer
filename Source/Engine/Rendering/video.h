@@ -10,8 +10,6 @@
 #include <glad/wgl.h>
 #endif
 
-#define _VIDEO_API_
-
 struct VideoCaps
 {
 	int colour;
@@ -25,7 +23,7 @@ struct VideoCaps
 	GLboolean doubleBuffer; // double buffered?
 };
 
-class _VIDEO_API_ VideoSettings
+class VideoSettings
 {
 public:
 	VideoSettings();
@@ -103,4 +101,4 @@ public:
 	bool useEnvMapping; //  = true;
 };
 
-_VIDEO_API_ extern VideoSettings video;
+extern VideoSettings video;

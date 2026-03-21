@@ -6,8 +6,6 @@
 #include "Container.h"
 #include "LogOutput.h"
 
-#define _LOGGER_API_
-
 #define LOGGER WMVLog::Logger::instance()
 #define LOG_INFO LOGGER(WMVLog::Logger::INFO_LOG)
 #define LOG_ERROR LOGGER(WMVLog::Logger::ERROR_LOG)
@@ -18,7 +16,7 @@ namespace WMVLog
 {
 	class Logger;
 
-	class _LOGGER_API_ LogStream
+	class LogStream
 	{
 	public:
 		LogStream(Logger& logger, int type);
@@ -49,7 +47,7 @@ namespace WMVLog
 		bool m_active;
 	};
 
-	class _LOGGER_API_ Logger : public Container<LogOutput>
+	class Logger : public Container<LogOutput>
 	{
 	public:
 		enum LogType

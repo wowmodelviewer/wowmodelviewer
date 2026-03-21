@@ -2,9 +2,7 @@
 
 #include <string>
 
-#define _COMPONENT_API_
-
-class _COMPONENT_API_ Component
+class Component
 {
 public:
 	Component();

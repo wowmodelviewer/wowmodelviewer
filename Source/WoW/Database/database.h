@@ -16,14 +16,12 @@
 class ItemDatabase;
 struct NPCRecord;
 
-#define _DATABASE_API_
-
 class ItemDatabase;
 
-_DATABASE_API_ extern ItemDatabase items;
-_DATABASE_API_ extern std::vector<NPCRecord> npcs;
+extern ItemDatabase items;
+extern std::vector<NPCRecord> npcs;
 
-struct _DATABASE_API_ ItemRecord
+struct ItemRecord
 {
 	std::string name;
 	int id, itemclass, subclass, type, model, sheath, quality;
@@ -37,7 +35,7 @@ struct _DATABASE_API_ ItemRecord
 	int slot();
 };
 
-class _DATABASE_API_ ItemDatabase
+class ItemDatabase
 {
 public:
 	ItemDatabase();
@@ -48,7 +46,7 @@ public:
 	const ItemRecord& getById(int id);
 };
 
-struct _DATABASE_API_ NPCRecord
+struct NPCRecord
 {
 	std::string name;
 	int id, model, type;
@@ -58,21 +56,5 @@ struct _DATABASE_API_ NPCRecord
 
 	NPCRecord(): id(0), model(0), type(0)
 	{
-	}
-
-	NPCRecord(const NPCRecord& r): name(r.name), id(r.id), model(r.model), type(r.type)
-	{
-	}
-
-	NPCRecord& operator=(const NPCRecord& r)
-	{
-		if (this != &r)
-		{
-			name = r.name;
-			id = r.id;
-			model = r.model;
-			type = r.type;
-		}
-		return *this;
 	}
 };

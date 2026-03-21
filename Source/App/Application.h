@@ -13,11 +13,18 @@
 class Application
 {
 public:
+    Application() = default;
+
     /// Initialise all subsystems and enter the main loop.
     /// @return Process exit code (0 on success).
     int run();
 
     ~Application();
+
+    Application(const Application&)            = delete;
+    Application& operator=(const Application&) = delete;
+    Application(Application&&)                 = delete;
+    Application& operator=(Application&&)      = delete;
 
 private:
     // ---- Owned subsystems (explicit lifecycle order) ----

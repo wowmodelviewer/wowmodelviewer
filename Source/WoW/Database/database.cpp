@@ -4,8 +4,8 @@
 #include "wow_enums.h"
 #include "Logger.h"
 
-_DATABASE_API_ ItemDatabase items;
-_DATABASE_API_ std::vector<NPCRecord> npcs;
+ItemDatabase items;
+std::vector<NPCRecord> npcs;
 
 ItemRecord::ItemRecord(const std::vector<std::string>& vals)
 	: id(0), itemclass(0), subclass(0), type(0), model(0), sheath(0), quality(0)
