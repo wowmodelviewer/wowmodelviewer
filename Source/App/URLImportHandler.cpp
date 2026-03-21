@@ -145,7 +145,7 @@ namespace URLImportHandler
 
 void doImport(AppState& app)
 {
-    std::string url(app.exporting.importUrlBuf);
+    const std::string& url = app.exporting.importUrlBuf;
     if (url.empty())
     {
         app.exporting.importStatus = "Please enter a URL.";

@@ -17,8 +17,7 @@ struct DrawContext
     const std::vector<NPCRecord>* npcs          = nullptr;
     std::vector<size_t>*          npcFiltered    = nullptr;
     bool*                         npcFilterDirty = nullptr;
-    char*                         npcSearchBuf   = nullptr;
-    int                           npcSearchBufSize = 0;
+    std::string*                  npcSearchBuf   = nullptr;
 
     std::function<void()>              rebuildNpcFilter;
     std::function<void(unsigned int)>  loadNPC;

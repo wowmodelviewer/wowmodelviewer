@@ -1,6 +1,7 @@
 #include "ItemSetsPanel.h"
 
 #include "imgui.h"
+#include "imgui_stdlib.h"
 
 #include <format>
 
@@ -21,7 +22,7 @@ void draw(DrawContext& ctx)
         ctx.buildItemSets(); // lazy init on first frame
 
     ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x - 60.0f);
-    if (ImGui::InputText("##itemSetSearch", ctx.itemSetSearchBuf, ctx.itemSetSearchBufSize,
+    if (ImGui::InputText("##itemSetSearch", ctx.itemSetSearchBuf,
                          ImGuiInputTextFlags_EnterReturnsTrue))
     {
         if (ctx.itemSetFilterDirty) *ctx.itemSetFilterDirty = true;
@@ -75,7 +76,7 @@ void draw(DrawContext& ctx)
     }
 
     ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x - 60.0f);
-    if (ImGui::InputText("##startOutfitSearch", ctx.startOutfitSearchBuf, ctx.startOutfitSearchBufSize,
+    if (ImGui::InputText("##startOutfitSearch", ctx.startOutfitSearchBuf,
                          ImGuiInputTextFlags_EnterReturnsTrue))
     {
         if (ctx.startOutfitFilterDirty) *ctx.startOutfitFilterDirty = true;

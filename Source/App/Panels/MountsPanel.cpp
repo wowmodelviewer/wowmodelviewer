@@ -1,6 +1,7 @@
 #include "MountsPanel.h"
 
 #include "imgui.h"
+#include "imgui_stdlib.h"
 
 #include <format>
 
@@ -45,12 +46,12 @@ void draw(DrawContext& ctx)
                 if (ctx.mountTab && *ctx.mountTab != prevTab)
                 {
                     if (ctx.mountFilterDirty) *ctx.mountFilterDirty = true;
-                    if (ctx.mountSearchBuf) ctx.mountSearchBuf[0] = '\0';
+                    if (ctx.mountSearchBuf) ctx.mountSearchBuf->clear();
                 }
             }
 
             ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x - 60.0f);
-            if (ImGui::InputText("##mountSearch", ctx.mountSearchBuf, ctx.mountSearchBufSize,
+            if (ImGui::InputText("##mountSearch", ctx.mountSearchBuf,
                                  ImGuiInputTextFlags_EnterReturnsTrue))
             {
                 if (ctx.mountFilterDirty) *ctx.mountFilterDirty = true;

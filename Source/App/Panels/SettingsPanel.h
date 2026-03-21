@@ -22,8 +22,7 @@ namespace SettingsPanel
 struct DrawContext
 {
     // Game path
-    char* pathBuf       = nullptr;
-    int   pathBufSize   = 0;
+    std::string* pathBuf = nullptr;
     bool  isWoWLoaded   = false;
     bool  loadInProgress = false;
     std::atomic<float>* loadProgress = nullptr;

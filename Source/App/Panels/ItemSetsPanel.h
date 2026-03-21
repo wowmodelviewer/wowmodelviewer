@@ -28,16 +28,14 @@ struct DrawContext
     // Item Sets state
     std::vector<ItemSetEntry>*    itemSets          = nullptr;
     bool*                         itemSetsBuilt     = nullptr;
-    char*                         itemSetSearchBuf  = nullptr;
-    int                           itemSetSearchBufSize = 0;
+    std::string*                  itemSetSearchBuf  = nullptr;
     std::vector<size_t>*          itemSetFiltered   = nullptr;
     bool*                         itemSetFilterDirty = nullptr;
 
     // Start Outfits state
     std::vector<StartOutfitEntry>* startOutfits          = nullptr;
     bool*                          startOutfitsBuilt     = nullptr;
-    char*                          startOutfitSearchBuf  = nullptr;
-    int                            startOutfitSearchBufSize = 0;
+    std::string*                   startOutfitSearchBuf  = nullptr;
     std::vector<size_t>*           startOutfitFiltered   = nullptr;
     bool*                          startOutfitFilterDirty = nullptr;
 

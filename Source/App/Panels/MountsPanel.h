@@ -27,8 +27,7 @@ struct DrawContext
     std::vector<size_t>*       mountFiltered      = nullptr;
     bool*                      mountFilterDirty   = nullptr;
     int*                       mountTab           = nullptr;
-    char*                      mountSearchBuf     = nullptr;
-    int                        mountSearchBufSize = 0;
+    std::string*               mountSearchBuf     = nullptr;
 
     std::function<WoWModel*()>                getLoadedModel;
     std::function<void()>                     buildMountList;

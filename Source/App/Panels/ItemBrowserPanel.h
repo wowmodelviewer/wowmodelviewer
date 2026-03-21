@@ -18,8 +18,7 @@ struct DrawContext
     const ItemDatabase*           items               = nullptr;
     std::vector<size_t>*          itemBrowseFiltered   = nullptr;
     bool*                         itemBrowseFilterDirty = nullptr;
-    char*                         itemBrowseSearchBuf  = nullptr;
-    int                           itemBrowseSearchBufSize = 0;
+    std::string*                  itemBrowseSearchBuf  = nullptr;
 
     std::function<void()>              rebuildItemBrowseFilter;
     std::function<void(unsigned int)>  loadItemModel;

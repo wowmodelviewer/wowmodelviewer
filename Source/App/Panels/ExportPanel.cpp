@@ -1,6 +1,7 @@
 // ExportPanel.cpp  –  Export panel (format, path, animation selection, export)
 #include "ExportPanel.h"
 #include "imgui.h"
+#include "imgui_stdlib.h"
 #include "ExporterPlugin.h"
 #include "WoWModel.h"
 #include "Logger.h"
@@ -49,7 +50,7 @@ void doExport(ExportPanel::DrawContext& ctx)
     ExporterPlugin* exporter = (*ctx.exporters)[*ctx.selectedExporter].get();
 
     // Build file path with appropriate extension
-    std::string pathStr{ctx.exportPath};
+    std::string pathStr = *ctx.exportPath;
     std::wstring filter = exporter->fileSaveFilter();
     std::string ext;
     {
@@ -120,8 +121,7 @@ void draw(DrawContext& ctx)
         ImGui::SeparatorText("Output");
         ImGui::Text("File Path:");
         ImGui::SetNextItemWidth(-1);
-        ImGui::InputText("##exportPath", ctx.exportPath,
-                         static_cast<int>(ctx.exportPathSize));
+        ImGui::InputText("##exportPath", ctx.exportPath);
 
         // ---- Animation selection (only for exporters that support it) ----
         bool canAnim = (*ctx.selectedExporter >= 0 &&

@@ -1,20 +1,21 @@
 #include "PresetsPanel.h"
 
 #include "imgui.h"
+#include "imgui_stdlib.h"
 
 void PresetsPanel::draw(DrawContext& ctx)
 {
     ImGui::SeparatorText("Character Preset");
     ImGui::Text("File:");
     ImGui::SetNextItemWidth(-1);
-    ImGui::InputText("##presetPath", ctx.presetPath, ctx.presetPathSize);
+    ImGui::InputText("##presetPath", ctx.presetPath);
 
     {
         bool canSave = ctx.isChar && ctx.hasModel;
         if (!canSave) ImGui::BeginDisabled();
 
         if (ImGui::Button("Save Preset", ImVec2(-1, 0)))
-            ctx.savePreset(ctx.presetPath);
+            ctx.savePreset(ctx.presetPath->c_str());
 
         if (!canSave) ImGui::EndDisabled();
     }
@@ -24,7 +25,7 @@ void PresetsPanel::draw(DrawContext& ctx)
         if (!canLoad) ImGui::BeginDisabled();
 
         if (ImGui::Button("Load Preset", ImVec2(-1, 0)))
-            ctx.loadPreset(ctx.presetPath);
+            ctx.loadPreset(ctx.presetPath->c_str());
 
         if (!canLoad) ImGui::EndDisabled();
     }

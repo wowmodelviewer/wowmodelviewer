@@ -1,6 +1,7 @@
 #include "NpcBrowserPanel.h"
 
 #include "imgui.h"
+#include "imgui_stdlib.h"
 #include "database.h"
 
 #include <format>
@@ -18,7 +19,7 @@ void draw(DrawContext& ctx)
 
     ImGui::Text("Search:");
     ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x - 60.0f);
-    if (ImGui::InputText("##npcSearch", ctx.npcSearchBuf, ctx.npcSearchBufSize,
+    if (ImGui::InputText("##npcSearch", ctx.npcSearchBuf,
                          ImGuiInputTextFlags_EnterReturnsTrue))
     {
         if (ctx.npcFilterDirty) *ctx.npcFilterDirty = true;

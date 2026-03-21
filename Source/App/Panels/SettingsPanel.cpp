@@ -7,6 +7,7 @@
 #include <glad/gl.h>
 
 #include "imgui.h"
+#include "imgui_stdlib.h"
 
 #include "AppSettings.h"
 #include "OrbitCamera.h"
@@ -74,7 +75,7 @@ void openFolderPicker(SettingsPanel::DrawContext& ctx)
     namespace fs = std::filesystem;
     std::error_code ec;
 
-    fs::path startDir(ctx.pathBuf);
+    fs::path startDir(*ctx.pathBuf);
     if (fs::is_directory(startDir, ec))
         *ctx.folderPickerCurrent = startDir;
     else if (startDir.has_parent_path() && fs::is_directory(startDir.parent_path(), ec))
@@ -96,7 +97,7 @@ void SettingsPanel::draw(DrawContext& ctx)
     ImGui::Text("Game Data Path:");
     float browseWidth = ImGui::CalcTextSize("Browse...").x + ImGui::GetStyle().FramePadding.x * 2.0f;
     ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x - browseWidth - ImGui::GetStyle().ItemSpacing.x);
-    ImGui::InputText("##gamepath", ctx.pathBuf, ctx.pathBufSize);
+    ImGui::InputText("##gamepath", ctx.pathBuf);
     ImGui::SameLine();
     if (ImGui::Button("Browse..."))
         openFolderPicker(ctx);
@@ -167,7 +168,7 @@ void SettingsPanel::draw(DrawContext& ctx)
         {
             if (!ctx.folderPickerCurrent->empty())
             {
-                strncpy_s(ctx.pathBuf, ctx.pathBufSize, ctx.folderPickerCurrent->string().c_str(), ctx.pathBufSize - 1);
+                *ctx.pathBuf = ctx.folderPickerCurrent->string();
                 *ctx.showFolderPicker = false;
                 ImGui::CloseCurrentPopup();
             }
@@ -272,7 +273,7 @@ void SettingsPanel::draw(DrawContext& ctx)
     ImGui::SeparatorText("Save");
     if (ImGui::Button("Save Settings", ImVec2(-1, 0)))
     {
-        ctx.settings->gamePath = ctx.pathBuf;
+        ctx.settings->gamePath = *ctx.pathBuf;
         ctx.settings->save();
     }
     ImGui::TextDisabled("Saves preferences and UI layout.");

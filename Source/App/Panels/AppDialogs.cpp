@@ -7,6 +7,7 @@
 #include <glad/gl.h>
 
 #include "imgui.h"
+#include "imgui_stdlib.h"
 
 #include "AppState.h"
 #include "GameLoader.h"
@@ -39,7 +40,7 @@ void AppDialogs::drawImportDialog(AppState& app)
         }
 
         ImGui::SetNextItemWidth(500);
-        ImGui::InputText("##importUrl", app.exporting.importUrlBuf, sizeof(app.exporting.importUrlBuf));
+        ImGui::InputText("##importUrl", &app.exporting.importUrlBuf);
 
         ImGui::Spacing();
         if (ImGui::Button("Import", ImVec2(120, 0)))

@@ -1,6 +1,7 @@
 #include "ItemBrowserPanel.h"
 
 #include "imgui.h"
+#include "imgui_stdlib.h"
 #include "database.h"
 
 #include <format>
@@ -39,7 +40,7 @@ void draw(DrawContext& ctx)
 
     ImGui::Text("Search:");
     ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x - 60.0f);
-    if (ImGui::InputText("##itemBrowseSearch", ctx.itemBrowseSearchBuf, ctx.itemBrowseSearchBufSize,
+    if (ImGui::InputText("##itemBrowseSearch", ctx.itemBrowseSearchBuf,
                          ImGuiInputTextFlags_EnterReturnsTrue))
     {
         if (ctx.itemBrowseFilterDirty) *ctx.itemBrowseFilterDirty = true;

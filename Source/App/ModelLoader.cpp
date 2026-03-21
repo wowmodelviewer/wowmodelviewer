@@ -383,7 +383,7 @@ void rebuildEquipFilteredItems(AppState& app)
     if (app.character.equipSlotToEdit < 0)
         return;
 
-    std::string search = core::toLower(std::string(app.character.equipSearchBuf));
+    std::string search = core::toLower(app.character.equipSearchBuf);
     auto s = search.find_first_not_of(" \t\r\n");
     auto e = search.find_last_not_of(" \t\r\n");
     search = (s == std::string::npos) ? "" : search.substr(s, e - s + 1);
@@ -641,14 +641,14 @@ void clearModel(AppState& app)
     app.anim.autoAnimate = true;
     app.character.equipSlotToEdit = -1;
     app.character.equipFilteredItems.clear();
-    app.character.equipSearchBuf[0] = '\0';
+    app.character.equipSearchBuf.clear();
     std::memset(app.character.equipSlotLevels, 0, sizeof(app.character.equipSlotLevels));
     app.exporting.exportAnimChecked.clear();
     app.exporting.exportStatus.clear();
     app.scene.isMounted = false;
     app.browsers.startOutfits.clear();
     app.browsers.startOutfitsBuilt = false;
-    app.browsers.startOutfitSearchBuf[0] = '\0';
+    app.browsers.startOutfitSearchBuf.clear();
     app.browsers.startOutfitFiltered.clear();
     app.browsers.startOutfitFilterDirty = true;
 }

@@ -22,8 +22,7 @@ namespace ExportPanel
         std::vector<AnimEntry>*          animEntries        = nullptr;
         std::vector<char>*               exportAnimChecked  = nullptr;
         int*                             selectedAnimCombo  = nullptr;
-        char*                            exportPath         = nullptr;
-        size_t                           exportPathSize     = 0;
+        std::string*                     exportPath         = nullptr;
         std::string*                     exportStatus       = nullptr;
     };
 

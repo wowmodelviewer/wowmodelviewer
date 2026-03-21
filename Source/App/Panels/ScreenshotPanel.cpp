@@ -5,6 +5,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 
 #include "imgui.h"
+#include "imgui_stdlib.h"
 
 #include "Logger.h"
 #include "ViewportFBO.h"
@@ -22,7 +23,7 @@ namespace
 {
 
 // Capture the current FBO contents to a PNG file.
-void captureScreenshot(const char* path, ViewportFBO& fbo, std::string& status)
+void captureScreenshot(const std::string& path, ViewportFBO& fbo, std::string& status)
 {
     if (fbo.width <= 0 || fbo.height <= 0 || !fbo.fbo)
     {
@@ -50,20 +51,20 @@ void captureScreenshot(const char* path, ViewportFBO& fbo, std::string& status)
         std::memcpy(bot, row.data(), rowBytes);
     }
 
-    if (stbi_write_png(path, w, h, 4, pixels.data(), static_cast<int>(rowBytes)))
+    if (stbi_write_png(path.c_str(), w, h, 4, pixels.data(), static_cast<int>(rowBytes)))
     {
-        status = std::string("Saved: ") + path;
+        status = "Saved: " + path;
         LOG_INFO << "Screenshot saved to " << path;
     }
     else
     {
-        status = std::string("Failed to write: ") + path;
+        status = "Failed to write: " + path;
         LOG_ERROR << "Screenshot failed: " << path;
     }
 }
 
 // Render the scene at a custom resolution into a temporary FBO and save as PNG.
-void captureAtResolution(const char* path, int cw, int ch,
+void captureAtResolution(const std::string& path, int cw, int ch,
                          OrbitCamera& camera, Attachment* root,
                          float fov, const glm::vec3& bgColor, bool drawGrid,
                          std::string& status)
@@ -136,14 +137,14 @@ void captureAtResolution(const char* path, int cw, int ch,
         std::memcpy(bot, row.data(), rowBytes);
     }
 
-    if (stbi_write_png(path, cw, ch, 4, pixels.data(), static_cast<int>(rowBytes)))
+    if (stbi_write_png(path.c_str(), cw, ch, 4, pixels.data(), static_cast<int>(rowBytes)))
     {
         status = std::format("Saved ({}x{}): {}", cw, ch, path);
         LOG_INFO << "Screenshot saved to " << path << " (" << cw << "x" << ch << ")";
     }
     else
     {
-        status = std::string("Failed to write: ") + path;
+        status = "Failed to write: " + path;
     }
 
     tmpFbo.destroy();
@@ -156,13 +157,13 @@ void ScreenshotPanel::draw(DrawContext& ctx)
     ImGui::SeparatorText("Capture Viewport");
     ImGui::Text("Output File:");
     ImGui::SetNextItemWidth(-1);
-    ImGui::InputText("##screenshotPath", ctx.screenshotPath, ctx.screenshotPathSize);
+    ImGui::InputText("##screenshotPath", ctx.screenshotPath);
 
     if (ImGui::Button("Save Screenshot", ImVec2(-1, 0)))
     {
         if (*ctx.useCanvasOverride && *ctx.canvasWidth > 0 && *ctx.canvasHeight > 0)
         {
-            captureAtResolution(ctx.screenshotPath,
+            captureAtResolution(*ctx.screenshotPath,
                                 *ctx.canvasWidth, *ctx.canvasHeight,
                                 *ctx.camera, ctx.root,
                                 ctx.fov, ctx.bgColor, ctx.drawGrid,
@@ -170,7 +171,7 @@ void ScreenshotPanel::draw(DrawContext& ctx)
         }
         else
         {
-            captureScreenshot(ctx.screenshotPath, *ctx.fbo, *ctx.screenshotStatus);
+            captureScreenshot(*ctx.screenshotPath, *ctx.fbo, *ctx.screenshotStatus);
         }
     }
 

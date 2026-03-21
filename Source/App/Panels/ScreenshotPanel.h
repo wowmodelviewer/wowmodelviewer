@@ -12,8 +12,7 @@ namespace ScreenshotPanel
 
 struct DrawContext
 {
-    char*        screenshotPath     = nullptr;
-    int          screenshotPathSize = 0;
+    std::string* screenshotPath     = nullptr;
     std::string* screenshotStatus   = nullptr;
     bool*        useCanvasOverride  = nullptr;
     int*         canvasWidth        = nullptr;

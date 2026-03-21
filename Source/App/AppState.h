@@ -91,7 +91,7 @@ struct LoadingState
     std::mutex loadStatusMutex;
     std::atomic<bool> loadThreadDone{false};
     std::atomic<bool> loadThreadSuccess{false};
-    char pathBuf[1024] = {};
+    std::string pathBuf;
     bool showConfigPopup = false;
     std::vector<core::GameConfig> pendingConfigs;
     int selectedConfig = 0;
@@ -165,7 +165,7 @@ struct AnimationState
 struct CharacterState
 {
     std::vector<CustomizationOption> customizationOptions;
-    char equipSearchBuf[256] = {};
+    std::string equipSearchBuf;
     int equipSlotToEdit = -1;
     bool equipPopupJustOpened = false;
     std::vector<size_t> equipFilteredItems;
@@ -179,24 +179,24 @@ struct BrowserState
     // Item Sets
     std::vector<ItemSetEntry> itemSets;
     bool itemSetsBuilt = false;
-    char itemSetSearchBuf[256] = {};
+    std::string itemSetSearchBuf;
     std::vector<size_t> itemSetFiltered;
     bool itemSetFilterDirty = true;
 
     // Start Outfits
     std::vector<StartOutfitEntry> startOutfits;
     bool startOutfitsBuilt = false;
-    char startOutfitSearchBuf[256] = {};
+    std::string startOutfitSearchBuf;
     std::vector<size_t> startOutfitFiltered;
     bool startOutfitFilterDirty = true;
 
     // NPC Browser
-    char npcSearchBuf[256] = {};
+    std::string npcSearchBuf;
     std::vector<size_t> npcFiltered;
     bool npcFilterDirty = true;
 
     // Item Browser
-    char itemBrowseSearchBuf[256] = {};
+    std::string itemBrowseSearchBuf;
     std::vector<size_t> itemBrowseFiltered;
     bool itemBrowseFilterDirty = true;
 
@@ -205,7 +205,7 @@ struct BrowserState
     std::vector<GameFile*> creatureModels;
     std::vector<std::string> creatureModelNames;
     bool mountListBuilt = false;
-    char mountSearchBuf[256] = {};
+    std::string mountSearchBuf;
     int mountTab = 0;
     std::vector<size_t> mountFiltered;
     bool mountFilterDirty = true;
@@ -221,24 +221,24 @@ struct ExportState
 {
     std::vector<std::unique_ptr<ExporterPlugin>> exporters;
     int selectedExporter = 0;
-    char exportPath[512] = "export";
+    std::string exportPath = "export";
     std::string exportStatus;
     std::vector<char> exportAnimChecked;
 
     // Screenshot
-    char screenshotPath[512] = "screenshot.png";
+    std::string screenshotPath = "screenshot.png";
     std::string screenshotStatus;
     bool useCanvasOverride = false;
     int canvasWidth = 1920;
     int canvasHeight = 1080;
 
     // Presets
-    char presetPath[512] = "userSettings/preset.ini";
+    std::string presetPath = "userSettings/preset.ini";
     std::string presetStatus;
 
     // URL Import
     std::vector<std::unique_ptr<ImporterPlugin>> importers;
-    char importUrlBuf[1024] = {};
+    std::string importUrlBuf;
     std::string importStatus;
 };
 

@@ -136,8 +136,7 @@ MountsPanel::DrawContext buildMountsCtx(AppState& st)
     ctx.mountFiltered      = &st.browsers.mountFiltered;
     ctx.mountFilterDirty   = &st.browsers.mountFilterDirty;
     ctx.mountTab           = &st.browsers.mountTab;
-    ctx.mountSearchBuf     = st.browsers.mountSearchBuf;
-    ctx.mountSearchBufSize = sizeof(st.browsers.mountSearchBuf);
+    ctx.mountSearchBuf     = &st.browsers.mountSearchBuf;
     ctx.getLoadedModel     = [&st]() { return ModelLoader::getLoadedModel(st); };
     ctx.buildMountList     = [&st]() { ModelLoader::buildMountList(st); };
     ctx.rebuildMountFilter = [&st]() { ModelLoader::rebuildMountFilter(st); };
@@ -152,14 +151,12 @@ ItemSetsPanel::DrawContext buildItemSetsCtx(AppState& st)
     ctx.isChar                   = st.scene.isChar;
     ctx.itemSets                 = &st.browsers.itemSets;
     ctx.itemSetsBuilt            = &st.browsers.itemSetsBuilt;
-    ctx.itemSetSearchBuf         = st.browsers.itemSetSearchBuf;
-    ctx.itemSetSearchBufSize     = sizeof(st.browsers.itemSetSearchBuf);
+    ctx.itemSetSearchBuf         = &st.browsers.itemSetSearchBuf;
     ctx.itemSetFiltered          = &st.browsers.itemSetFiltered;
     ctx.itemSetFilterDirty       = &st.browsers.itemSetFilterDirty;
     ctx.startOutfits             = &st.browsers.startOutfits;
     ctx.startOutfitsBuilt        = &st.browsers.startOutfitsBuilt;
-    ctx.startOutfitSearchBuf     = st.browsers.startOutfitSearchBuf;
-    ctx.startOutfitSearchBufSize = sizeof(st.browsers.startOutfitSearchBuf);
+    ctx.startOutfitSearchBuf     = &st.browsers.startOutfitSearchBuf;
     ctx.startOutfitFiltered      = &st.browsers.startOutfitFiltered;
     ctx.startOutfitFilterDirty   = &st.browsers.startOutfitFilterDirty;
     ctx.getLoadedModel           = [&st]() { return ModelLoader::getLoadedModel(st); };
@@ -180,8 +177,7 @@ NpcBrowserPanel::DrawContext buildNpcBrowserCtx(AppState& st)
     ctx.npcs             = &npcs;
     ctx.npcFiltered      = &st.browsers.npcFiltered;
     ctx.npcFilterDirty   = &st.browsers.npcFilterDirty;
-    ctx.npcSearchBuf     = st.browsers.npcSearchBuf;
-    ctx.npcSearchBufSize = sizeof(st.browsers.npcSearchBuf);
+    ctx.npcSearchBuf     = &st.browsers.npcSearchBuf;
     ctx.rebuildNpcFilter = [&st]() { ModelLoader::rebuildNpcFilter(st); };
     ctx.loadNPC          = [&st](unsigned int id) { ModelLoader::loadNPC(id, st); };
     return ctx;
@@ -195,8 +191,7 @@ ItemBrowserPanel::DrawContext buildItemBrowserCtx(AppState& st)
     ctx.items                   = &items;
     ctx.itemBrowseFiltered      = &st.browsers.itemBrowseFiltered;
     ctx.itemBrowseFilterDirty   = &st.browsers.itemBrowseFilterDirty;
-    ctx.itemBrowseSearchBuf     = st.browsers.itemBrowseSearchBuf;
-    ctx.itemBrowseSearchBufSize = sizeof(st.browsers.itemBrowseSearchBuf);
+    ctx.itemBrowseSearchBuf     = &st.browsers.itemBrowseSearchBuf;
     ctx.rebuildItemBrowseFilter = [&st]() { ModelLoader::rebuildItemBrowseFilter(st); };
     ctx.loadItemModel           = [&st](unsigned int id) { ModelLoader::loadItemModel(id, st); };
     return ctx;
@@ -211,8 +206,7 @@ ExportPanel::DrawContext buildExportCtx(AppState& st)
     ctx.animEntries       = &st.anim.animEntries;
     ctx.exportAnimChecked = &st.exporting.exportAnimChecked;
     ctx.selectedAnimCombo = &st.anim.selectedAnimCombo;
-    ctx.exportPath        = st.exporting.exportPath;
-    ctx.exportPathSize    = sizeof(st.exporting.exportPath);
+    ctx.exportPath        = &st.exporting.exportPath;
     ctx.exportStatus      = &st.exporting.exportStatus;
     return ctx;
 }
@@ -220,8 +214,7 @@ ExportPanel::DrawContext buildExportCtx(AppState& st)
 ScreenshotPanel::DrawContext buildScreenshotCtx(AppState& st)
 {
     ScreenshotPanel::DrawContext ctx;
-    ctx.screenshotPath     = st.exporting.screenshotPath;
-    ctx.screenshotPathSize = sizeof(st.exporting.screenshotPath);
+    ctx.screenshotPath     = &st.exporting.screenshotPath;
     ctx.screenshotStatus   = &st.exporting.screenshotStatus;
     ctx.useCanvasOverride  = &st.exporting.useCanvasOverride;
     ctx.canvasWidth        = &st.exporting.canvasWidth;
@@ -238,8 +231,7 @@ ScreenshotPanel::DrawContext buildScreenshotCtx(AppState& st)
 PresetsPanel::DrawContext buildPresetsCtx(AppState& st)
 {
     PresetsPanel::DrawContext ctx;
-    ctx.presetPath     = st.exporting.presetPath;
-    ctx.presetPathSize = sizeof(st.exporting.presetPath);
+    ctx.presetPath     = &st.exporting.presetPath;
     ctx.presetStatus   = &st.exporting.presetStatus;
     ctx.isChar         = st.scene.isChar;
     ctx.hasModel       = ModelLoader::getLoadedModel(st) != nullptr;
@@ -260,8 +252,7 @@ LogPanel::DrawContext buildLogCtx(AppState& st)
 SettingsPanel::DrawContext buildSettingsCtx(AppState& st, GLFWwindow* window, bool* showDemoWindow)
 {
     SettingsPanel::DrawContext ctx;
-    ctx.pathBuf                  = st.loading.pathBuf;
-    ctx.pathBufSize              = sizeof(st.loading.pathBuf);
+    ctx.pathBuf                  = &st.loading.pathBuf;
     ctx.isWoWLoaded              = st.loading.isWoWLoaded;
     ctx.loadInProgress           = st.loading.loadInProgress;
     ctx.loadProgress             = &st.loading.loadProgress;
@@ -418,8 +409,7 @@ void Application::initEngine()
         ShowWindow(hConsole, m_state.settings.showConsole ? SW_SHOW : SW_HIDE);
 #endif
 
-    strncpy_s(m_state.loading.pathBuf, m_state.settings.gamePath.c_str(),
-              sizeof(m_state.loading.pathBuf) - 1);
+    m_state.loading.pathBuf = m_state.settings.gamePath;
 
     m_state.exporting.exporters.push_back(std::make_unique<OBJExporter>());
     m_state.exporting.exporters.push_back(std::make_unique<FBXExporter>());
