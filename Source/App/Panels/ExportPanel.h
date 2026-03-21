@@ -1,6 +1,7 @@
 #pragma once
 
 #include <functional>
+#include <memory>
 #include <string>
 #include <vector>
 
@@ -16,7 +17,7 @@ namespace ExportPanel
     struct DrawContext
     {
         std::function<WoWModel*()>       getLoadedModel;
-        std::vector<ExporterPlugin*>*    exporters          = nullptr;
+        std::vector<std::unique_ptr<ExporterPlugin>>* exporters = nullptr;
         int*                             selectedExporter   = nullptr;
         std::vector<AnimEntry>*          animEntries        = nullptr;
         std::vector<char>*               exportAnimChecked  = nullptr;

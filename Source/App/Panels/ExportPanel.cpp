@@ -46,7 +46,7 @@ void doExport(ExportPanel::DrawContext& ctx)
         return;
     }
 
-    ExporterPlugin* exporter = (*ctx.exporters)[*ctx.selectedExporter];
+    ExporterPlugin* exporter = (*ctx.exporters)[*ctx.selectedExporter].get();
 
     // Build file path with appropriate extension
     std::string pathStr{ctx.exportPath};

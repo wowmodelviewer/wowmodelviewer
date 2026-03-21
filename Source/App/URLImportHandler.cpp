@@ -156,11 +156,11 @@ void doImport(AppState& app)
 
     // Find matching importer
     ImporterPlugin* importer = nullptr;
-    for (auto* imp : app.importers)
+    for (const auto& imp : app.importers)
     {
         if (imp->acceptURL(url))
         {
-            importer = imp;
+            importer = imp.get();
             break;
         }
     }

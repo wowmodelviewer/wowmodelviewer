@@ -33,7 +33,9 @@ set(src main.cpp
          Panels/MountsPanel.cpp
          Panels/ItemSetsPanel.cpp
          Panels/NpcBrowserPanel.cpp
-         Panels/ItemBrowserPanel.cpp)
+         Panels/ItemBrowserPanel.cpp
+         Panels/SettingsPanel.cpp
+         Panels/AppDialogs.cpp)
 
 # Generate the resource file that embeds the application icon.
 set(WMV_ICO_PATH "${CMAKE_SOURCE_DIR}/bin_support/Icons/wmv.ico")

@@ -68,13 +68,10 @@
 #include "ItemSetsPanel.h"
 #include "NpcBrowserPanel.h"
 #include "ItemBrowserPanel.h"
+#include "SettingsPanel.h"
+#include "AppDialogs.h"
 
-// Game loading
-#include "Game.h"
-#include "WoWFolder.h"
-#include "WoWDatabase.h"
-#include "database.h"
-#include "string_utils.h"
+// Game loading (headers used transitively by helper modules)
 
 #include "stb_image.h"
 
@@ -88,7 +85,7 @@
 
 
 #include <format>
-#include <map>
+#include <memory>
 #include <set>
 
 #include <glm/glm.hpp>
@@ -100,18 +97,15 @@
 #include "GameLoader.h"
 #include "ModelLoader.h"
 #include "PresetManager.h"
-#include "URLImportHandler.h"
 
 static AppState app;
 
 // ---- Thin wrappers forwarding to helper modules --------------------------
 static std::filesystem::path getApplicationDirPath() { return GameLoader::getApplicationDirPath(); }
 static WoWModel* getLoadedModel() { return ModelLoader::getLoadedModel(app); }
-static void setLoadStatus(const std::string& s) { GameLoader::setLoadStatus(s, app); }
 static std::string getLoadStatus() { return GameLoader::getLoadStatus(app); }
 static void pollAsyncLoad() { GameLoader::pollAsyncLoad(app); }
 static void beginLoadWoW() { GameLoader::beginLoadWoW(app); }
-static void launchLoadThread(const core::GameConfig& c) { GameLoader::launchLoadThread(c, app); }
 static void applySkin(WoWModel* m, int idx) { ModelLoader::applySkin(m, idx, app); }
 static void resetCameraToModel(OrbitCamera& cam, const WoWModel* m) { ModelLoader::resetCameraToModel(cam, m); }
 static void loadModel(GameFile* f) { ModelLoader::loadModel(f, app); }
@@ -133,70 +127,10 @@ static void mountCharacter(int d, GameFile* f) { ModelLoader::mountCharacter(d, 
 static void dismountCharacter() { ModelLoader::dismountCharacter(app); }
 static void saveCharacterPreset(const char* p) { PresetManager::save(p, app); }
 static void loadCharacterPreset(const char* p) { PresetManager::load(p, app); }
-static void doURLImport() { URLImportHandler::doImport(app); }
 static void initAnimationControl(WoWModel* m) { ModelLoader::initAnimationControl(m, app); }
 static void initCharacterControl(WoWModel* m) { ModelLoader::initCharacterControl(m, app); }
 static void initModelControl(WoWModel* m) { ModelLoader::initModelControl(m, app); }
 static void tryToEquipItem(WoWModel* m, int id) { ModelLoader::tryToEquipItem(m, id, app); }
-
-// ---- Folder Picker helpers ------------------------------------------------
-static void folderPickerRefresh()
-{
-    app.folderPickerEntries.clear();
-    namespace fs = std::filesystem;
-    std::error_code ec;
-
-    if (app.folderPickerCurrent.empty())
-    {
-        // List drive roots on Windows
-#ifdef _WIN32
-        DWORD drives = GetLogicalDrives();
-        for (int i = 0; i < 26; ++i)
-        {
-            if (drives & (1u << i))
-            {
-                std::string root = std::string(1, static_cast<char>('A' + i)) + ":\\";
-                app.folderPickerEntries.push_back(fs::path(root));
-            }
-        }
-#else
-        app.folderPickerEntries.push_back(fs::path("/"));
-#endif
-    }
-    else
-    {
-        for (auto& entry : fs::directory_iterator(app.folderPickerCurrent, fs::directory_options::skip_permission_denied, ec))
-        {
-            if (entry.is_directory(ec))
-                app.folderPickerEntries.push_back(entry.path());
-        }
-        std::sort(app.folderPickerEntries.begin(), app.folderPickerEntries.end(),
-            [](const fs::path& a, const fs::path& b)
-            {
-                return core::toLower(a.filename().string()) < core::toLower(b.filename().string());
-            });
-    }
-
-    app.folderPickerNeedsRefresh = false;
-}
-
-static void openFolderPicker()
-{
-    namespace fs = std::filesystem;
-    std::error_code ec;
-
-    // Start from the current path buffer if it's a valid directory
-    fs::path startDir(app.pathBuf);
-    if (fs::is_directory(startDir, ec))
-        app.folderPickerCurrent = startDir;
-    else if (startDir.has_parent_path() && fs::is_directory(startDir.parent_path(), ec))
-        app.folderPickerCurrent = startDir.parent_path();
-    else
-        app.folderPickerCurrent.clear(); // show drive roots
-
-    app.folderPickerNeedsRefresh = true;
-    app.showFolderPicker = true;
-}
 
 // ---- Handle viewport input ------------------------------------------------
 static void handleViewportInput()
@@ -339,12 +273,12 @@ static void initEngine()
     strncpy_s(app.pathBuf, app.settings.gamePath.c_str(), sizeof(app.pathBuf) - 1);
 
     // Instantiate exporters (OBJ / FBX)
-    app.exporters.push_back(new OBJExporter());
-    app.exporters.push_back(new FBXExporter());
+    app.exporters.push_back(std::make_unique<OBJExporter>());
+    app.exporters.push_back(std::make_unique<FBXExporter>());
 
     // Instantiate importers (Armory / Wowhead)
-    app.importers.push_back(new ArmoryImporter());
-    app.importers.push_back(new WowheadImporter());
+    app.importers.push_back(std::make_unique<ArmoryImporter>());
+    app.importers.push_back(std::make_unique<WowheadImporter>());
 }
 
 static void initGL()
@@ -425,7 +359,7 @@ int main(int /*argc*/, char* /*argv*/[])
     initGL();
 
     // Create root attachment (scene graph root � no model yet)
-    app.root = new Attachment(nullptr, nullptr, -1, -1);
+    app.root = std::make_unique<Attachment>(nullptr, nullptr, -1, -1);
 
     // ---- Dear ImGui ----
     IMGUI_CHECKVERSION();
@@ -722,7 +656,7 @@ int main(int /*argc*/, char* /*argv*/[])
             cvCtx.selectedAnimCombo    = &app.selectedAnimCombo;
             cvCtx.fbo                  = &app.fbo;
             cvCtx.camera               = &app.camera;
-            cvCtx.root                 = app.root;
+            cvCtx.root                 = app.root.get();
             cvCtx.fov                  = video.fov;
             cvCtx.bgColor              = app.settings.bgColor;
             cvCtx.drawGrid             = app.settings.drawGrid;
@@ -750,7 +684,7 @@ int main(int /*argc*/, char* /*argv*/[])
             if (vpW > 0 && vpH > 0)
             {
                 // Render scene to offscreen FBO
-                SceneRenderer::renderToFBO(app.fbo, vpW, vpH, app.camera, app.root, video.fov, app.settings.bgColor, app.settings.drawGrid);
+                SceneRenderer::renderToFBO(app.fbo, vpW, vpH, app.camera, app.root.get(), video.fov, app.settings.bgColor, app.settings.drawGrid);
 
                 // Display FBO colour texture (UV-flipped: OpenGL is bottom-up)
                 ImGui::Image(static_cast<ImTextureID>(static_cast<uintptr_t>(app.fbo.colorTex)),
@@ -967,7 +901,7 @@ int main(int /*argc*/, char* /*argv*/[])
             ssCtx.canvasHeight       = &app.canvasHeight;
             ssCtx.fbo                = &app.fbo;
             ssCtx.camera             = &app.camera;
-            ssCtx.root               = app.root;
+            ssCtx.root               = app.root.get();
             ssCtx.fov                = video.fov;
             ssCtx.bgColor            = app.settings.bgColor;
             ssCtx.drawGrid           = app.settings.drawGrid;
@@ -1018,374 +952,38 @@ int main(int /*argc*/, char* /*argv*/[])
         ImGui::SetNextWindowPos(ImGui::GetMainViewport()->GetCenter(), ImGuiCond_FirstUseEver, ImVec2(0.5f, 0.5f));
         if (ImGui::Begin("Settings", &app.showSettings, ImGuiWindowFlags_NoDocking))
         {
-            // ---- Game loading section ----
-            ImGui::SeparatorText("World of Warcraft");
+            SettingsPanel::DrawContext settingsCtx;
+            settingsCtx.pathBuf                = app.pathBuf;
+            settingsCtx.pathBufSize            = sizeof(app.pathBuf);
+            settingsCtx.isWoWLoaded            = app.isWoWLoaded;
+            settingsCtx.loadInProgress         = app.loadInProgress;
+            settingsCtx.loadProgress           = &app.loadProgress;
+            settingsCtx.showFolderPicker       = &app.showFolderPicker;
+            settingsCtx.folderPickerCurrent    = &app.folderPickerCurrent;
+            settingsCtx.folderPickerEntries    = &app.folderPickerEntries;
+            settingsCtx.folderPickerNeedsRefresh = &app.folderPickerNeedsRefresh;
+            settingsCtx.settings               = &app.settings;
+            settingsCtx.availableFonts         = &app.availableFonts;
+            settingsCtx.fontsDirty             = &app.fontsDirty;
+            settingsCtx.window                 = app.window;
+            settingsCtx.showDemoWindow         = &show_demo_window;
+            settingsCtx.camera                 = &app.camera;
+            settingsCtx.getLoadStatus          = [&]() { return getLoadStatus(); };
 
-            ImGui::Text("Game Data Path:");
-            float browseWidth = ImGui::CalcTextSize("Browse...").x + ImGui::GetStyle().FramePadding.x * 2.0f;
-            ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x - browseWidth - ImGui::GetStyle().ItemSpacing.x);
-            ImGui::InputText("##gamepath", app.pathBuf, sizeof(app.pathBuf));
-            ImGui::SameLine();
-            if (ImGui::Button("Browse..."))
-                openFolderPicker();
-
-            // ---- Folder Picker popup ----
-            if (app.showFolderPicker)
-                ImGui::OpenPopup("Select Folder##FolderPicker");
-
-            if (ImGui::BeginPopupModal("Select Folder##FolderPicker", &app.showFolderPicker,
-                ImGuiWindowFlags_AlwaysAutoResize))
-            {
-                // Current path display
-                std::string curPathStr = app.folderPickerCurrent.empty()
-                    ? "My Computer" : app.folderPickerCurrent.string();
-                ImGui::TextColored(ImVec4(0.4f, 0.8f, 1.0f, 1.0f), "%s", curPathStr.c_str());
-                ImGui::Separator();
-
-                if (app.folderPickerNeedsRefresh)
-                    folderPickerRefresh();
-
-                // Up / back button
-                {
-                    bool canGoUp = !app.folderPickerCurrent.empty() && app.folderPickerCurrent.has_parent_path()
-                        && app.folderPickerCurrent.parent_path() != app.folderPickerCurrent;
-                    bool canGoRoot = !app.folderPickerCurrent.empty();
-                    if (!canGoUp && !canGoRoot) ImGui::BeginDisabled();
-                    if (ImGui::Button("Up"))
-                    {
-                        if (canGoUp)
-                            app.folderPickerCurrent = app.folderPickerCurrent.parent_path();
-                        else
-                            app.folderPickerCurrent.clear(); // back to drive roots
-                        app.folderPickerNeedsRefresh = true;
-                    }
-                    if (!canGoUp && !canGoRoot) ImGui::EndDisabled();
-                }
-
-                ImGui::SameLine();
-                ImGui::Text("%d folders", static_cast<int>(app.folderPickerEntries.size()));
-
-                // Folder list
-                ImGui::BeginChild("##FolderList", ImVec2(500, 400), ImGuiChildFlags_Borders);
-                ImGuiListClipper clipper;
-                clipper.Begin(static_cast<int>(app.folderPickerEntries.size()));
-                while (clipper.Step())
-                {
-                    for (int i = clipper.DisplayStart; i < clipper.DisplayEnd; ++i)
-                    {
-                        const auto& p = app.folderPickerEntries[i];
-                        std::string displayName = app.folderPickerCurrent.empty()
-                            ? p.string() : p.filename().string();
-                        ImGui::PushID(i);
-                        if (ImGui::Selectable(displayName.c_str(), false, ImGuiSelectableFlags_AllowDoubleClick))
-                        {
-                            if (ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left))
-                            {
-                                app.folderPickerCurrent = p;
-                                app.folderPickerNeedsRefresh = true;
-                            }
-                        }
-                        ImGui::PopID();
-                    }
-                }
-                ImGui::EndChild();
-
-                ImGui::Separator();
-                if (ImGui::Button("Select This Folder", ImVec2(200, 0)))
-                {
-                    if (!app.folderPickerCurrent.empty())
-                    {
-                        strncpy_s(app.pathBuf, app.folderPickerCurrent.string().c_str(), sizeof(app.pathBuf) - 1);
-                        app.showFolderPicker = false;
-                        ImGui::CloseCurrentPopup();
-                    }
-                }
-                ImGui::SameLine();
-                if (ImGui::Button("Cancel", ImVec2(120, 0)))
-                {
-                    app.showFolderPicker = false;
-                    ImGui::CloseCurrentPopup();
-                }
-                ImGui::EndPopup();
-            }
-
-            if (app.isWoWLoaded)
-            {
-                ImGui::TextColored(ImVec4(0.4f, 1.0f, 0.4f, 1.0f), "Loaded: %s (%s)",
-                                   GAMEDIRECTORY.version().c_str(),
-                                   GAMEDIRECTORY.locale().c_str());
-            }
-            else if (app.loadInProgress)
-            {
-                ImGui::ProgressBar(app.loadProgress);
-                auto status = getLoadStatus();
-                ImGui::TextWrapped("%s", status.c_str());
-            }
-            else
-            {
-                auto status = getLoadStatus();
-                if (!status.empty())
-                    ImGui::TextWrapped("%s", status.c_str());
-                else
-                    ImGui::TextDisabled("Use File > Load WoW to load game data.");
-            }
-
-            ImGui::Checkbox("Enable Database Cache", &app.settings.enableDbCache);
-            ImGui::TextDisabled("Speeds up loading by caching the database. Takes effect on next load.");
-
-            // ---- General section ----
-            ImGui::SeparatorText("General");
-            if (ImGui::Checkbox("Show Console Window", &app.settings.showConsole))
-            {
-#ifdef _WIN32
-                if (HWND hConsole = GetConsoleWindow())
-                    ShowWindow(hConsole, app.settings.showConsole ? SW_SHOW : SW_HIDE);
-#endif
-            }
-            ImGui::TextDisabled("Shows/hides the debug console. Useful for diagnostics.");
-
-            // ---- Theme selector ----
-            ImGui::SeparatorText("Appearance");
-            ImGui::Text("Theme:");
-            ImGui::SetNextItemWidth(-1);
-            if (ImGui::Combo("##Theme", &ThemeManager::currentThemeRef(), ThemeManager::themeNames(), ThemeManager::themeCount()))
-                ThemeManager::apply(ThemeManager::currentTheme(), app.window);
-
-            // ---- Font selector ----
-            ImGui::Text("Font:");
-            ImGui::SetNextItemWidth(-1);
-            if (!app.availableFonts.empty())
-            {
-                if (ImGui::BeginCombo("##Font",
-                    (app.settings.currentFont >= 0 && app.settings.currentFont < static_cast<int>(app.availableFonts.size()))
-                        ? app.availableFonts[app.settings.currentFont].name.c_str() : "Default"))
-                {
-                    for (int i = 0; i < static_cast<int>(app.availableFonts.size()); ++i)
-                    {
-                        ImGui::PushID(i);
-                        const bool selected = (i == app.settings.currentFont);
-                        if (ImGui::Selectable(app.availableFonts[i].name.c_str(), selected))
-                        {
-                            app.settings.currentFont = i;
-                            app.fontsDirty = true;
-                        }
-                        if (selected)
-                            ImGui::SetItemDefaultFocus();
-                        ImGui::PopID();
-                    }
-                    ImGui::EndCombo();
-                }
-            }
-            else
-            {
-                ImGui::TextDisabled("No .ttf/.otf files found in fonts/ directory.");
-            }
-
-            ImGui::Text("Font Size:");
-            ImGui::SetNextItemWidth(-1);
-            if (ImGui::SliderFloat("##FontSize", &app.settings.fontSize, 10.0f, 40.0f, "%.0f px"))
-                app.fontsDirty = true;
-            ImGui::TextDisabled("Drop .ttf or .otf files into the fonts/ folder to add more.");
-
-            ImGui::Separator();
-            ImGui::Checkbox("ImGui Demo Window", &show_demo_window);
-            ImGui::Separator();
-            ImGui::Text("Camera  yaw=%.1f  pitch=%.1f  radius=%.2f",
-                        app.camera.yaw(), app.camera.pitch(), app.camera.radius());
-            ImGui::Text("GL_RENDERER: %s", glGetString(GL_RENDERER));
-
-            // ---- Save ----
-            ImGui::SeparatorText("Save");
-            if (ImGui::Button("Save Settings", ImVec2(-1, 0)))
-            {
-                app.settings.gamePath = app.pathBuf;
-                app.settings.save();
-            }
-            ImGui::TextDisabled("Saves preferences and UI layout.");
+            SettingsPanel::draw(settingsCtx);
         }
         ImGui::End();
         }
 
-        // ===== URL Import dialog =====
-        if (app.showImportDialog)
-            ImGui::OpenPopup("Import from URL##ImportModal");
-
-        if (ImGui::BeginPopupModal("Import from URL##ImportModal", &app.showImportDialog,
-            ImGuiWindowFlags_AlwaysAutoResize))
-        {
-            ImGui::Text("Paste an Armory, Battle.net, or Wowhead URL:");
-            ImGui::Spacing();
-
-            if (app.importPopupJustOpened)
-            {
-                ImGui::SetKeyboardFocusHere();
-                app.importPopupJustOpened = false;
-            }
-
-            ImGui::SetNextItemWidth(500);
-            ImGui::InputText("##importUrl", app.importUrlBuf, sizeof(app.importUrlBuf));
-
-            ImGui::Spacing();
-            if (ImGui::Button("Import", ImVec2(120, 0)))
-                doURLImport();
-            ImGui::SameLine();
-            if (ImGui::Button("Cancel", ImVec2(120, 0)))
-            {
-                app.showImportDialog = false;
-                ImGui::CloseCurrentPopup();
-            }
-
-            if (!app.importStatus.empty())
-            {
-                ImGui::Spacing();
-                bool isError = app.importStatus.find("failed") != std::string::npos ||
-                               app.importStatus.find("No ") != std::string::npos ||
-                               app.importStatus.find("not") != std::string::npos ||
-                               app.importStatus.find("Please") != std::string::npos;
-                if (isError)
-                    ImGui::TextColored(ImVec4(1.0f, 0.4f, 0.4f, 1.0f), "%s", app.importStatus.c_str());
-                else
-                    ImGui::TextColored(ImVec4(0.4f, 1.0f, 0.4f, 1.0f), "%s", app.importStatus.c_str());
-            }
-
-            ImGui::EndPopup();
-        }
-
-        // ===== Config selection modal (multiple WoW installs) =====
-        if (app.showConfigPopup)
-            ImGui::OpenPopup("Select WoW Config");
-
-        if (ImGui::BeginPopupModal("Select WoW Config", nullptr, ImGuiWindowFlags_AlwaysAutoResize))
-        {
-            ImGui::Text("Multiple configurations found. Please select one:");
-            ImGui::Separator();
-
-            for (int i = 0; i < static_cast<int>(app.pendingConfigs.size()); ++i)
-            {
-                std::string label = app.pendingConfigs[i].locale + " - " + app.pendingConfigs[i].product;
-                if (!app.pendingConfigs[i].version.empty())
-                    label += " (" + app.pendingConfigs[i].version + ")";
-                ImGui::RadioButton(label.c_str(), &app.selectedConfig, i);
-            }
-
-            ImGui::Separator();
-            if (ImGui::Button("OK", ImVec2(120, 0)))
-            {
-                app.showConfigPopup = false;
-                ImGui::CloseCurrentPopup();
-                launchLoadThread(app.pendingConfigs[app.selectedConfig]);
-            }
-            ImGui::SameLine();
-            if (ImGui::Button("Cancel", ImVec2(120, 0)))
-            {
-                app.showConfigPopup = false;
-                setLoadStatus("Load cancelled.");
-                ImGui::CloseCurrentPopup();
-            }
-            ImGui::EndPopup();
-        }
+        // ===== Modal dialogs =====
+        AppDialogs::drawImportDialog(app);
+        AppDialogs::drawConfigPopup(app);
 
         if (show_demo_window)
             ImGui::ShowDemoWindow(&show_demo_window);
 
-        // ===== About Dialog =====
-        if (app.showAboutDialog)
-            ImGui::OpenPopup("About WoW Model Viewer");
-
-        if (ImGui::BeginPopupModal("About WoW Model Viewer", &app.showAboutDialog,
-                                    ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoMove))
-        {
-            // Convert wstring title to narrow UTF-8 string for ImGui
-            std::wstring wTitle = GLOBALSETTINGS.appTitle();
-            std::string title;
-            if (!wTitle.empty())
-            {
-                int n = WideCharToMultiByte(CP_UTF8, 0, wTitle.c_str(), static_cast<int>(wTitle.size()), nullptr, 0, nullptr, nullptr);
-                title.resize(n);
-                WideCharToMultiByte(CP_UTF8, 0, wTitle.c_str(), static_cast<int>(wTitle.size()), title.data(), n, nullptr, nullptr);
-            }
-            ImGui::TextColored(ImVec4(0.4f, 0.8f, 1.0f, 1.0f), "%s", title.c_str());
-
-            ImGui::Separator();
-            ImGui::Text("A 3D model viewer for World of Warcraft game assets.");
-            ImGui::Spacing();
-            ImGui::Text("Built with GLFW, OpenGL, and Dear ImGui.");
-            ImGui::Text("Uses CASCLib for game data access.");
-            ImGui::Spacing();
-            ImGui::Separator();
-            ImGui::TextColored(ImVec4(0.6f, 0.6f, 0.6f, 1.0f), "https://wowmodelviewer.net");
-            ImGui::TextColored(ImVec4(0.6f, 0.6f, 0.6f, 1.0f), "https://github.com/wowmodelviewer/wowmodelviewer");
-            ImGui::Spacing();
-            ImGui::Text("GL_RENDERER: %s", glGetString(GL_RENDERER));
-            ImGui::Text("GL_VERSION:  %s", glGetString(GL_VERSION));
-            ImGui::Spacing();
-
-            if (ImGui::Button("Close", ImVec2(120, 0)))
-            {
-                app.showAboutDialog = false;
-                ImGui::CloseCurrentPopup();
-            }
-            ImGui::EndPopup();
-        }
-
-        // ===== Language / Locale Dialog =====
-        if (app.showLanguageDialog)
-            ImGui::OpenPopup("Language / Locale");
-
-        if (ImGui::BeginPopupModal("Language / Locale", &app.showLanguageDialog,
-                                    ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoMove))
-        {
-            if (!app.isWoWLoaded)
-            {
-                ImGui::TextWrapped("Game data is not loaded. Load WoW first, then change the locale here.");
-                ImGui::Spacing();
-                if (ImGui::Button("OK", ImVec2(120, 0)))
-                {
-                    app.showLanguageDialog = false;
-                    ImGui::CloseCurrentPopup();
-                }
-            }
-            else
-            {
-                ImGui::Text("Current locale: %s", GAMEDIRECTORY.locale().c_str());
-                ImGui::Separator();
-                ImGui::Text("Select a different locale to reload game data:");
-                ImGui::Spacing();
-
-                auto configs = GAMEDIRECTORY.configsFound();
-                for (int i = 0; i < static_cast<int>(configs.size()); ++i)
-                {
-                    std::string label = configs[i].locale + " - " + configs[i].product;
-                    bool isCurrent = (configs[i].locale == GAMEDIRECTORY.locale());
-                    if (isCurrent)
-                        ImGui::BeginDisabled();
-
-                    if (ImGui::Button(label.c_str(), ImVec2(-1, 0)))
-                    {
-                        app.showLanguageDialog = false;
-                        ImGui::CloseCurrentPopup();
-                        // Trigger a reload with the selected config
-                        app.isWoWLoaded = false;
-                        app.initDB = false;
-                        app.loadInProgress = true;
-                        app.loadProgress = 0.0f;
-                        setLoadStatus("Reloading with locale: " + configs[i].locale + "...");
-                        launchLoadThread(configs[i]);
-                    }
-
-                    if (isCurrent)
-                        ImGui::EndDisabled();
-                }
-
-                ImGui::Spacing();
-                if (ImGui::Button("Cancel", ImVec2(120, 0)))
-                {
-                    app.showLanguageDialog = false;
-                    ImGui::CloseCurrentPopup();
-                }
-            }
-            ImGui::EndPopup();
-        }
+        AppDialogs::drawAboutDialog(app);
+        AppDialogs::drawLanguageDialog(app);
 
         // ---- Render ImGui over the default framebuffer ----
         ImGui::Render();
@@ -1405,23 +1003,13 @@ int main(int /*argc*/, char* /*argv*/[])
 
     FileBrowserPanel::shutdown();
 
-    if (app.root)
-    {
-        app.root->delChildren();
-        delete app.root;
-        app.root = nullptr;
-    }
+    app.root.reset();
 
     app.fbo.destroy();
 
     SceneRenderer::shutdown();
 
-    for (auto* e : app.exporters)
-        delete e;
     app.exporters.clear();
-
-    for (auto* imp : app.importers)
-        delete imp;
     app.importers.clear();
 
     ImGui_ImplOpenGL3_Shutdown();

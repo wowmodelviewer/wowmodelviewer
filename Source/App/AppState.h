@@ -6,6 +6,7 @@
 
 #include <atomic>
 #include <filesystem>
+#include <memory>
 #include <mutex>
 #include <string>
 #include <thread>
@@ -31,7 +32,8 @@ class ImporterPlugin;
 class WoWModel;
 struct GLFWwindow;
 
-namespace core { class GameConfig; }
+// Full definition required for std::vector<core::GameConfig>
+#include "GameFolder.h"
 
 // ---- Supporting types -----------------------------------------------------
 
@@ -59,7 +61,7 @@ struct AppState
 {
     // Scene core
     OrbitCamera camera;
-    Attachment* root = nullptr;
+    std::unique_ptr<Attachment> root;
     WoWModel* selModel = nullptr;
     ViewportFBO fbo;
     AppSettings settings;
@@ -113,7 +115,7 @@ struct AppState
     float dpiScale = 1.0f;
 
     // URL Import
-    std::vector<ImporterPlugin*> importers;
+    std::vector<std::unique_ptr<ImporterPlugin>> importers;
     bool showImportDialog = false;
     char importUrlBuf[1024] = {};
     std::string importStatus;
@@ -193,7 +195,7 @@ struct AppState
     bool itemBrowseFilterDirty = true;
 
     // Export
-    std::vector<ExporterPlugin*> exporters;
+    std::vector<std::unique_ptr<ExporterPlugin>> exporters;
     int selectedExporter = 0;
     char exportPath[512] = "export";
     std::string exportStatus;
