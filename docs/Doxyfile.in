@@ -1,10 +1,10 @@
 # ---------------------------------------------------------------------------
 # Doxyfile.in — CMake-configured Doxygen template for WoW Model Viewer
 # ---------------------------------------------------------------------------
-# CMake substitutes @VARIABLES@ at configure time.  Run the 'docs' build
-# target to generate the HTML output:
+# CMake substitutes @VARIABLES@ at configure time.
 #
-#   cmake --build <build-dir> --target docs
+# Local:  cmake --build <build-dir> --target docs
+# CI:     Variables are substituted via sed (see .github/workflows/docs.yml)
 # ---------------------------------------------------------------------------
 
 # --- Project ---
