@@ -29,8 +29,6 @@
 #endif
 #include "imgui.h"
 #include "imgui_internal.h"
-#include "imgui_impl_glfw.h"
-#include "imgui_impl_opengl3.h"
 
 #include <cstdio>
 #include <string>
@@ -74,9 +72,8 @@
 
 // Game loading (headers used transitively by helper modules)
 
-#include "stb_image.h"
-
 #include "AppWindow.h"
+#include "ImGuiLayer.h"
 
 // Exporters (OBJ / FBX)
 #include "OBJExporter.h"
@@ -105,6 +102,7 @@
 
 static AppState app;
 static AppWindow appWindow;
+static ImGuiLayer imguiLayer;
 static InputManager inputManager;
 
 // ---- Thin wrappers forwarding to helper modules --------------------------
@@ -249,114 +247,11 @@ int main(int /*argc*/, char* /*argv*/[])
     app.scene.root = std::make_unique<Attachment>(nullptr, nullptr, -1, -1);
 
     // ---- Dear ImGui ----
-    IMGUI_CHECKVERSION();
-    ImGui::CreateContext();
-    ImGuiIO& io = ImGui::GetIO();
-    io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
-    io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
-    io.IniFilename = AppSettings::imguiIniPath;
-
-    ThemeManager::apply(ThemeManager::currentTheme(), app.window);
-
-    // ---- DPI-aware scaling ----
     app.ui.dpiScale = appWindow.queryDpiScale();
-    if (app.ui.dpiScale > 1.0f)
-    {
-        ImGui::GetStyle().ScaleAllSizes(app.ui.dpiScale);
-    }
-
-    // ---- Font discovery ----
-    {
-        namespace fs = std::filesystem;
-        // Look for fonts next to the executable (installed build) and in the
-        // compile-time source tree (development build).
-        std::vector<fs::path> searchDirs;
-#ifdef _WIN32
-        {
-            wchar_t exePath[MAX_PATH]{};
-            GetModuleFileNameW(nullptr, exePath, MAX_PATH);
-            searchDirs.push_back(fs::path(exePath).parent_path() / "fonts");
-        }
-#endif
-#ifdef WMV_FONTS_PATH
-        searchDirs.push_back(fs::path(WMV_FONTS_PATH));
-#endif
-        // Always include a "fonts" dir relative to cwd as fallback.
-        searchDirs.push_back(fs::current_path() / "fonts");
-
-        std::set<std::string> seen; // avoid duplicates (keyed on lowercase stem name)
-        for (const auto& dir : searchDirs)
-        {
-            if (!fs::is_directory(dir))
-                continue;
-            for (const auto& entry : fs::directory_iterator(dir))
-            {
-                if (!entry.is_regular_file())
-                    continue;
-                auto ext = entry.path().extension().string();
-                std::transform(ext.begin(), ext.end(), ext.begin(), ::tolower);
-                if (ext != ".ttf" && ext != ".otf")
-                    continue;
-                std::string stemName = entry.path().stem().string();
-                std::string stemLower = stemName;
-                std::transform(stemLower.begin(), stemLower.end(), stemLower.begin(), ::tolower);
-                if (seen.count(stemLower))
-                    continue;
-                seen.insert(stemLower);
-                std::string absPath = fs::canonical(entry.path()).string();
-                app.ui.availableFonts.push_back({stemName, absPath});
-            }
-        }
-        // Sort alphabetically by display name
-        std::sort(app.ui.availableFonts.begin(), app.ui.availableFonts.end(),
-            [](const FontEntry& a, const FontEntry& b) { return a.name < b.name; });
-
-        // Default font: prefer "Roboto-Regular" (UE5 default), fall back to "arialn"
-        if (app.settings.currentFont <= 0)
-        {
-            const char* preferred[] = { "roboto-regular", "arialn" };
-            for (const char* target : preferred)
-            {
-                bool found = false;
-                for (int i = 0; i < static_cast<int>(app.ui.availableFonts.size()); ++i)
-                {
-                    std::string lower = app.ui.availableFonts[i].name;
-                    std::transform(lower.begin(), lower.end(), lower.begin(), ::tolower);
-                    if (lower == target)
-                    {
-                        app.settings.currentFont = i;
-                        found = true;
-                        break;
-                    }
-                }
-                if (found)
-                    break;
-            }
-        }
-    }
-
-    // ---- Build initial font atlas ----
-    {
-        const float pixelSize = app.settings.fontSize * app.ui.dpiScale;
-        bool loaded = false;
-        if (app.settings.currentFont >= 0 && app.settings.currentFont < static_cast<int>(app.ui.availableFonts.size()))
-        {
-            const auto& fe = app.ui.availableFonts[app.settings.currentFont];
-            if (std::filesystem::exists(fe.path))
-            {
-                io.Fonts->AddFontFromFileTTF(fe.path.c_str(), pixelSize);
-                loaded = true;
-                LOG_INFO << "Loaded font:" << fe.name << "at" << pixelSize << "px";
-            }
-        }
-        if (!loaded)
-            io.Fonts->AddFontDefault();
-        CustomTitleBar::mergeIconFont(pixelSize);
-        io.FontGlobalScale = 1.0f; // size is already baked into the rasterised glyphs
-    }
-
-    ImGui_ImplGlfw_InitForOpenGL(window, true);
-    ImGui_ImplOpenGL3_Init("#version 130");
+    imguiLayer.init(window, app.ui.dpiScale);
+    imguiLayer.discoverFonts(app.ui.availableFonts, app.settings.currentFont);
+    imguiLayer.buildFontAtlas(app.ui.availableFonts, app.settings.currentFont,
+                              app.settings.fontSize, app.ui.dpiScale);
 
     bool show_demo_window = false;
     bool firstFrame = true;
@@ -369,28 +264,9 @@ int main(int /*argc*/, char* /*argv*/[])
         appWindow.pollEvents();
 
         // ---- Rebuild font atlas if font/size changed ----
-        if (app.ui.fontsDirty)
-        {
-            app.ui.fontsDirty = false;
-            ImGuiIO& fio = ImGui::GetIO();
-            fio.Fonts->Clear();
-            const float pixelSize = app.settings.fontSize * app.ui.dpiScale;
-            bool loaded = false;
-            if (app.settings.currentFont >= 0 && app.settings.currentFont < static_cast<int>(app.ui.availableFonts.size()))
-            {
-                const auto& fe = app.ui.availableFonts[app.settings.currentFont];
-                if (std::filesystem::exists(fe.path))
-                {
-                    fio.Fonts->AddFontFromFileTTF(fe.path.c_str(), pixelSize);
-                    loaded = true;
-                }
-            }
-            if (!loaded)
-                fio.Fonts->AddFontDefault();
-            CustomTitleBar::mergeIconFont(pixelSize);
-            fio.FontGlobalScale = 1.0f;
-            fio.Fonts->Build();
-        }
+        imguiLayer.rebuildFontAtlasIfDirty(app.ui.fontsDirty, app.ui.availableFonts,
+                                           app.settings.currentFont, app.settings.fontSize,
+                                           app.ui.dpiScale);
 
         // Check if background loading thread has finished
         pollAsyncLoad();
@@ -399,9 +275,7 @@ int main(int /*argc*/, char* /*argv*/[])
         tickScene();
 
         // ---- ImGui frame ----
-        ImGui_ImplOpenGL3_NewFrame();
-        ImGui_ImplGlfw_NewFrame();
-        ImGui::NewFrame();
+        imguiLayer.beginFrame();
 
         // ---- Resolve input bindings for this frame ----
         inputManager.update();
@@ -920,13 +794,7 @@ int main(int /*argc*/, char* /*argv*/[])
         AppDialogs::drawLanguageDialog(app);
 
         // ---- Render ImGui over the default framebuffer ----
-        ImGui::Render();
-        int display_w, display_h;
-        appWindow.framebufferSize(display_w, display_h);
-        glViewport(0, 0, display_w, display_h);
-        glClearColor(0.1f, 0.1f, 0.12f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT);
-        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+        imguiLayer.endFrame(appWindow);
 
         appWindow.swapBuffers();
     }
@@ -946,9 +814,7 @@ int main(int /*argc*/, char* /*argv*/[])
     app.exporting.exporters.clear();
     app.exporting.importers.clear();
 
-    ImGui_ImplOpenGL3_Shutdown();
-    ImGui_ImplGlfw_Shutdown();
-    ImGui::DestroyContext();
+    imguiLayer.shutdown();
 
     // AppWindow destructor handles glfwDestroyWindow + glfwTerminate
 
