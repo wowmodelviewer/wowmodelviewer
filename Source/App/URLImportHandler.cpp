@@ -16,6 +16,7 @@
 #include "WoWDatabase.h"
 #include "DB2Table.h"
 #include "database.h"
+#include "video.h"
 #include "wow_enums.h"
 
 namespace
@@ -47,7 +48,7 @@ void applyImportedChar(CharInfos* info, AppState& app)
         return;
     }
 
-    ModelLoader::loadModel(file, app);
+    ModelLoader::loadModel(file, app, video.fov);
 
     WoWModel* model = ModelLoader::getLoadedModel(app);
     if (!model || !app.scene.isChar)
@@ -120,7 +121,7 @@ void applyImportedNPC(NPCInfos* info, AppState& app)
         return;
     }
 
-    ModelLoader::loadModel(file, app);
+    ModelLoader::loadModel(file, app, video.fov);
     app.exporting.importStatus = std::string("NPC imported: ") + ModelLoader::wstringToString(info->name);
     LOG_INFO << "NPC imported from URL: " << ModelLoader::wstringToString(info->name);
 }
@@ -133,7 +134,7 @@ void applyImportedItem(ItemRecord* rec, AppState& app)
         return;
     }
 
-    ModelLoader::loadItemModel(static_cast<unsigned int>(rec->id), app);
+    ModelLoader::loadItemModel(static_cast<unsigned int>(rec->id), app, video.fov);
     app.exporting.importStatus = std::string("Item imported: ") + rec->name;
     LOG_INFO << "Item imported from URL: " << rec->name;
 }

@@ -56,6 +56,7 @@
 #include "GameLoader.h"
 #include "ModelLoader.h"
 #include "PresetManager.h"
+#include "database.h"
 
 // ============================================================================
 // DrawContext factory helpers — wire AppState fields into per-panel contexts.
@@ -82,7 +83,7 @@ CharacterViewerPanel::DrawContext buildCharViewerCtx(
     ctx.bgColor              = st.settings.bgColor;
     ctx.drawGrid             = st.settings.drawGrid;
     ctx.getLoadedModel       = [&st]() { return ModelLoader::getLoadedModel(st); };
-    ctx.loadModel            = [&st](GameFile* f) { ModelLoader::loadModel(f, st); };
+    ctx.loadModel            = [&st](GameFile* f) { ModelLoader::loadModel(f, st, video.fov); };
     ctx.handleViewportInput  = std::move(handleInput);
     return ctx;
 }
@@ -120,7 +121,7 @@ ViewportOptionsPanel::DrawContext buildViewportOptsCtx(AppState& st)
     ctx.selectedSkin   = &st.anim.selectedSkin;
     ctx.applySkin      = [&st](WoWModel* m, int idx) { ModelLoader::applySkin(m, idx, st); };
     ctx.resetCamera    = [&st]() {
-        ModelLoader::resetCameraToModel(st.scene.camera, ModelLoader::getLoadedModel(st));
+        ModelLoader::resetCameraToModel(st.scene.camera, ModelLoader::getLoadedModel(st), video.fov);
     };
     return ctx;
 }
@@ -140,8 +141,8 @@ MountsPanel::DrawContext buildMountsCtx(AppState& st)
     ctx.getLoadedModel     = [&st]() { return ModelLoader::getLoadedModel(st); };
     ctx.buildMountList     = [&st]() { ModelLoader::buildMountList(st); };
     ctx.rebuildMountFilter = [&st]() { ModelLoader::rebuildMountFilter(st); };
-    ctx.mountCharacter     = [&st](int d, GameFile* f) { ModelLoader::mountCharacter(d, f, st); };
-    ctx.dismountCharacter  = [&st]() { ModelLoader::dismountCharacter(st); };
+    ctx.mountCharacter     = [&st](int d, GameFile* f) { ModelLoader::mountCharacter(d, f, st, video.fov); };
+    ctx.dismountCharacter  = [&st]() { ModelLoader::dismountCharacter(st, video.fov); };
     return ctx;
 }
 
@@ -162,10 +163,10 @@ ItemSetsPanel::DrawContext buildItemSetsCtx(AppState& st)
     ctx.getLoadedModel           = [&st]() { return ModelLoader::getLoadedModel(st); };
     ctx.buildItemSets            = [&st]() { ModelLoader::buildItemSets(st); };
     ctx.rebuildItemSetFilter     = [&st]() { ModelLoader::rebuildItemSetFilter(st); };
-    ctx.applyItemSet             = [&st](WoWModel* m, int id) { ModelLoader::applyItemSet(m, id, st); };
+    ctx.applyItemSet             = [&st](WoWModel* m, int id) { ModelLoader::applyItemSet(m, id, st, items); };
     ctx.buildStartOutfits        = [&st](WoWModel* m) { ModelLoader::buildStartOutfits(m, st); };
     ctx.rebuildStartOutfitFilter = [&st]() { ModelLoader::rebuildStartOutfitFilter(st); };
-    ctx.applyStartOutfit         = [&st](WoWModel* m, int id) { ModelLoader::applyStartOutfit(m, id, st); };
+    ctx.applyStartOutfit         = [&st](WoWModel* m, int id) { ModelLoader::applyStartOutfit(m, id, st, items); };
     return ctx;
 }
 
@@ -178,8 +179,8 @@ NpcBrowserPanel::DrawContext buildNpcBrowserCtx(AppState& st)
     ctx.npcFiltered      = &st.browsers.npcFiltered;
     ctx.npcFilterDirty   = &st.browsers.npcFilterDirty;
     ctx.npcSearchBuf     = &st.browsers.npcSearchBuf;
-    ctx.rebuildNpcFilter = [&st]() { ModelLoader::rebuildNpcFilter(st); };
-    ctx.loadNPC          = [&st](unsigned int id) { ModelLoader::loadNPC(id, st); };
+    ctx.rebuildNpcFilter = [&st]() { ModelLoader::rebuildNpcFilter(st, npcs); };
+    ctx.loadNPC          = [&st](unsigned int id) { ModelLoader::loadNPC(id, st, video.fov); };
     return ctx;
 }
 
@@ -192,8 +193,8 @@ ItemBrowserPanel::DrawContext buildItemBrowserCtx(AppState& st)
     ctx.itemBrowseFiltered      = &st.browsers.itemBrowseFiltered;
     ctx.itemBrowseFilterDirty   = &st.browsers.itemBrowseFilterDirty;
     ctx.itemBrowseSearchBuf     = &st.browsers.itemBrowseSearchBuf;
-    ctx.rebuildItemBrowseFilter = [&st]() { ModelLoader::rebuildItemBrowseFilter(st); };
-    ctx.loadItemModel           = [&st](unsigned int id) { ModelLoader::loadItemModel(id, st); };
+    ctx.rebuildItemBrowseFilter = [&st]() { ModelLoader::rebuildItemBrowseFilter(st, items); };
+    ctx.loadItemModel           = [&st](unsigned int id) { ModelLoader::loadItemModel(id, st, video.fov); };
     return ctx;
 }
 
@@ -459,7 +460,8 @@ void Application::handleViewportInput()
     ViewportController::apply(m_inputManager.state(), m_state.scene.camera);
     if (m_inputManager.state().resetCamera)
         ModelLoader::resetCameraToModel(m_state.scene.camera,
-                                        ModelLoader::getLoadedModel(m_state));
+                                        ModelLoader::getLoadedModel(m_state),
+                                        video.fov);
 }
 
 // ============================================================================
@@ -514,7 +516,8 @@ void Application::drawTitleBarAndMenus()
             if (ImGui::MenuItem("Reset Camera", "Numpad 5", false,
                                 ModelLoader::getLoadedModel(m_state) != nullptr))
                 ModelLoader::resetCameraToModel(m_state.scene.camera,
-                                                ModelLoader::getLoadedModel(m_state));
+                                                ModelLoader::getLoadedModel(m_state),
+                                                video.fov);
             ImGui::Separator();
             if (ImGui::MenuItem("Reset Layout"))
                 m_resetLayout = true;
@@ -696,7 +699,7 @@ void Application::drawPanels()
         ls.progress   = st.loading.loadProgress;
         ls.statusText = statusStr.c_str();
         if (GameFile* picked = FileBrowserPanel::draw(st.ui.showFileBrowser, ls))
-            ModelLoader::loadModel(picked, st);
+            ModelLoader::loadModel(picked, st, video.fov);
     }
 
     // ===== Animation Control =====

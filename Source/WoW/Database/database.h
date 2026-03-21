@@ -43,7 +43,7 @@ public:
 	std::vector<ItemRecord> items;
 	std::map<int, int> itemLookup;
 
-	const ItemRecord& getById(int id);
+	const ItemRecord& getById(int id) const;
 };
 
 struct NPCRecord

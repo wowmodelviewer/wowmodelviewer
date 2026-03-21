@@ -20,7 +20,6 @@
 #include "database.h"
 #include "DB2Table.h"
 #include "string_utils.h"
-#include "video.h"
 
 namespace ModelLoader
 {
@@ -43,7 +42,7 @@ WoWModel* getLoadedModel(AppState& app)
     return att ? dynamic_cast<WoWModel*>(att->model()) : nullptr;
 }
 
-void resetCameraToModel(OrbitCamera& camera, const WoWModel* model)
+void resetCameraToModel(OrbitCamera& camera, const WoWModel* model, float fov)
 {
     if (!model)
     {
@@ -58,7 +57,7 @@ void resetCameraToModel(OrbitCamera& camera, const WoWModel* model)
         if (v.pos.z < zMin) zMin = v.pos.z;
         if (v.pos.z > zMax) zMax = v.pos.z;
     }
-    camera.resetFromBounds(zMin, zMax, video.fov);
+    camera.resetFromBounds(zMin, zMax, fov);
 }
 
 void applySkin(WoWModel* model, int skinIndex, AppState& app)
@@ -377,7 +376,7 @@ static bool correctType(int type, int slot)
     }
 }
 
-void rebuildEquipFilteredItems(AppState& app)
+void rebuildEquipFilteredItems(AppState& app, const ItemDatabase& db)
 {
     app.character.equipFilteredItems.clear();
     if (app.character.equipSlotToEdit < 0)
@@ -388,9 +387,9 @@ void rebuildEquipFilteredItems(AppState& app)
     auto e = search.find_last_not_of(" \t\r\n");
     search = (s == std::string::npos) ? "" : search.substr(s, e - s + 1);
 
-    for (size_t i = 0; i < items.items.size(); ++i)
+    for (size_t i = 0; i < db.items.size(); ++i)
     {
-        const auto& item = items.items[i];
+        const auto& item = db.items[i];
         if (item.id == 0)
             continue;
         if (!correctType(item.type, app.character.equipSlotToEdit))
@@ -401,13 +400,13 @@ void rebuildEquipFilteredItems(AppState& app)
     }
 }
 
-void tryToEquipItem(WoWModel* model, int id, AppState& app)
+void tryToEquipItem(WoWModel* model, int id, AppState& app, const ItemDatabase& db)
 {
     if (id == 0 || !model)
         return;
 
-    ItemRecord itemr = items.getById(id);
-    if (itemr.name == items.items[0].name)
+    ItemRecord itemr = db.getById(id);
+    if (itemr.name == db.items[0].name)
     {
         LOG_ERROR << "Cannot retrieve item from database (id " << id << ")";
         return;
@@ -475,7 +474,7 @@ void rebuildItemSetFilter(AppState& app)
     app.browsers.itemSetFilterDirty = false;
 }
 
-void applyItemSet(WoWModel* model, int setId, AppState& app)
+void applyItemSet(WoWModel* model, int setId, AppState& app, const ItemDatabase& db)
 {
     if (!model || setId <= 0)
         return;
@@ -501,7 +500,7 @@ void applyItemSet(WoWModel* model, int setId, AppState& app)
             continue;
         try
         {
-            tryToEquipItem(model, static_cast<int>(itemID), app);
+            tryToEquipItem(model, static_cast<int>(itemID), app, db);
         }
         catch (const std::exception& e)
         {
@@ -576,7 +575,7 @@ void rebuildStartOutfitFilter(AppState& app)
     app.browsers.startOutfitFilterDirty = false;
 }
 
-void applyStartOutfit(WoWModel* model, int outfitId, AppState& app)
+void applyStartOutfit(WoWModel* model, int outfitId, AppState& app, const ItemDatabase& db)
 {
     if (!model || outfitId <= 0)
         return;
@@ -602,7 +601,7 @@ void applyStartOutfit(WoWModel* model, int outfitId, AppState& app)
             continue;
         try
         {
-            tryToEquipItem(model, static_cast<int>(itemID), app);
+            tryToEquipItem(model, static_cast<int>(itemID), app, db);
         }
         catch (const std::exception& ex)
         {
@@ -653,7 +652,7 @@ void clearModel(AppState& app)
     app.browsers.startOutfitFilterDirty = true;
 }
 
-void loadModel(GameFile* file, AppState& app)
+void loadModel(GameFile* file, AppState& app, float fov)
 {
     if (!file || !app.scene.root)
         return;
@@ -711,14 +710,14 @@ void loadModel(GameFile* file, AppState& app)
     if (app.scene.isChar)
         initCharacterControl(model, app);
 
-    resetCameraToModel(app.scene.camera, model);
+    resetCameraToModel(app.scene.camera, model, fov);
 
     LOG_INFO << "Model loaded: " << model->name();
 }
 
 // ---- NPC Browser ----------------------------------------------------------
 
-void rebuildNpcFilter(AppState& app)
+void rebuildNpcFilter(AppState& app, const std::vector<NPCRecord>& npcList)
 {
     app.browsers.npcFiltered.clear();
 
@@ -727,9 +726,9 @@ void rebuildNpcFilter(AppState& app)
     auto e = search.find_last_not_of(" \t\r\n");
     search = (s == std::string::npos) ? "" : search.substr(s, e - s + 1);
 
-    for (size_t i = 0; i < npcs.size(); ++i)
+    for (size_t i = 0; i < npcList.size(); ++i)
     {
-        const auto& npc = npcs[i];
+        const auto& npc = npcList[i];
         if (npc.model == 0) continue;
         if (!search.empty() && !core::containsIgnoreCase(npc.name, search))
             continue;
@@ -739,7 +738,7 @@ void rebuildNpcFilter(AppState& app)
     app.browsers.npcFilterDirty = false;
 }
 
-void loadNPC(unsigned int creatureID, AppState& app)
+void loadNPC(unsigned int creatureID, AppState& app, float fov)
 {
     const auto* creatureTable = WOWDB.getTable("Creature");
     if (!creatureTable) return;
@@ -769,7 +768,7 @@ void loadNPC(unsigned int creatureID, AppState& app)
     {
         GameFile* file = GAMEDIRECTORY.getFile(fileDataID);
         if (!file) return;
-        loadModel(file, app);
+        loadModel(file, app, fov);
 
         WoWModel* m = getLoadedModel(app);
         if (m)
@@ -805,7 +804,7 @@ void loadNPC(unsigned int creatureID, AppState& app)
     {
         GameFile* file = GAMEDIRECTORY.getFile(RaceInfos::getHDModelForFileID(static_cast<int>(fileDataID)));
         if (!file) return;
-        loadModel(file, app);
+        loadModel(file, app, fov);
 
         WoWModel* m = getLoadedModel(app);
         if (!m) return;
@@ -847,7 +846,7 @@ void loadNPC(unsigned int creatureID, AppState& app)
 
 // ---- Item Browser ---------------------------------------------------------
 
-void rebuildItemBrowseFilter(AppState& app)
+void rebuildItemBrowseFilter(AppState& app, const ItemDatabase& db)
 {
     app.browsers.itemBrowseFiltered.clear();
 
@@ -856,9 +855,9 @@ void rebuildItemBrowseFilter(AppState& app)
     auto e = search.find_last_not_of(" \t\r\n");
     search = (s == std::string::npos) ? "" : search.substr(s, e - s + 1);
 
-    for (size_t i = 0; i < items.items.size(); ++i)
+    for (size_t i = 0; i < db.items.size(); ++i)
     {
-        const auto& item = items.items[i];
+        const auto& item = db.items[i];
         if (item.id == 0) continue;
         if (!search.empty() && !core::containsIgnoreCase(item.name, search))
             continue;
@@ -868,7 +867,7 @@ void rebuildItemBrowseFilter(AppState& app)
     app.browsers.itemBrowseFilterDirty = false;
 }
 
-void loadItemModel(unsigned int itemId, AppState& app)
+void loadItemModel(unsigned int itemId, AppState& app, float fov)
 {
     try
     {
@@ -912,7 +911,7 @@ void loadItemModel(unsigned int itemId, AppState& app)
         GameFile* file = GAMEDIRECTORY.getFile(modelFDID);
         if (!file) return;
 
-        loadModel(file, app);
+        loadModel(file, app, fov);
 
         WoWModel* m = getLoadedModel(app);
         if (m)
@@ -1030,7 +1029,7 @@ void rebuildMountFilter(AppState& app)
     app.browsers.mountFilterDirty = false;
 }
 
-void mountCharacter(int displayID, GameFile* creatureFile, AppState& app)
+void mountCharacter(int displayID, GameFile* creatureFile, AppState& app, float fov)
 {
     WoWModel* charModel = getLoadedModel(app);
     if (!charModel || !app.scene.isChar || !app.scene.root)
@@ -1130,11 +1129,11 @@ void mountCharacter(int displayID, GameFile* creatureFile, AppState& app)
     initAnimationControl(mountModel, app);
     initModelControl(mountModel, app);
 
-    resetCameraToModel(app.scene.camera, mountModel);
+    resetCameraToModel(app.scene.camera, mountModel, fov);
     LOG_INFO << "Character mounted on: " << modelFile->fullname();
 }
 
-void dismountCharacter(AppState& app)
+void dismountCharacter(AppState& app, float fov)
 {
     if (!app.scene.isMounted || !app.scene.root || !app.scene.isChar)
         return;
@@ -1159,7 +1158,7 @@ void dismountCharacter(AppState& app)
         app.scene.selModel = charModel;
         initAnimationControl(charModel, app);
         initModelControl(charModel, app);
-        resetCameraToModel(app.scene.camera, charModel);
+        resetCameraToModel(app.scene.camera, charModel, fov);
     }
 
     LOG_INFO << "Character dismounted.";

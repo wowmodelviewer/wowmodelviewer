@@ -94,7 +94,7 @@ ItemDatabase::ItemDatabase()
 	items.push_back(all);
 }
 
-const ItemRecord& ItemDatabase::getById(int id)
+const ItemRecord& ItemDatabase::getById(int id) const
 {
 	for (auto& item : items)
 	{
