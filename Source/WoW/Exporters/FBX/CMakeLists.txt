@@ -4,7 +4,6 @@ include(${CMAKE_SOURCE_DIR}/cmake/common.cmake)
 message(STATUS "Building FBX exporter (static)")
 
 include_directories(${CMAKE_SOURCE_DIR}/ThirdParty/include)
-include_directories(${CMAKE_SOURCE_DIR}/Source/App) # needed for util.h inclusion
 
 set(src FBXExporter.cpp
   FBXAnimExporter.cpp

@@ -1,8 +1,10 @@
-# wow lib
+# wow lib - self-contained WoW game module
 include(${CMAKE_SOURCE_DIR}/cmake/common.cmake)
 
 message(STATUS "Building wow library")
 
+include_directories(Core)
+include_directories(Plugin)
 include_directories(CASC)
 include_directories(Database)
 include_directories(Model)
@@ -13,7 +15,13 @@ include_directories(World)
 include_directories(Rendering)
 include_directories(Common)
 
-set(src CASC/CASCFile.cpp
+set(src Core/Game.cpp
+      Core/Model.cpp
+      Core/GameFile.cpp
+      Core/GameFolder.cpp
+      Plugin/ExporterPlugin.cpp
+      Plugin/ImporterPlugin.cpp
+      CASC/CASCFile.cpp
       CASC/CASCFolder.cpp
       CASC/HardDriveFile.cpp
       Database/GameDatabase.cpp
@@ -57,7 +65,15 @@ set(src CASC/CASCFile.cpp
       World/WoWFolder.cpp
       Rendering/Texture.cpp)
 
-set(headers CASC/CASCChunks.h
+set(headers Core/Game.h
+      Core/Model.h
+      Core/GameFile.h
+      Core/GameFolder.h
+      Core/displayable.h
+      Core/manager.h
+      Plugin/ExporterPlugin.h
+      Plugin/ImporterPlugin.h
+      CASC/CASCChunks.h
       CASC/CASCFile.h
       CASC/CASCFolder.h
       CASC/HardDriveFile.h
@@ -118,3 +134,9 @@ set_property(TARGET ${NAME} PROPERTY FOLDER "libraries")
 
 target_link_libraries(${NAME} pugixml-static nlohmann_json::nlohmann_json ${extralibs} glu32)
 add_dependencies(${NAME} casc_static)
+
+# Exporters and importers are WoW-specific; build them from here.
+add_subdirectory(Exporters/OBJ)
+add_subdirectory(Exporters/FBX)
+add_subdirectory(Importers/Armory)
+add_subdirectory(Importers/Wowhead)

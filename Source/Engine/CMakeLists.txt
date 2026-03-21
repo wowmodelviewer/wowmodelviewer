@@ -1,4 +1,4 @@
-# core lib (Engine)
+# core lib (Engine) - game-agnostic utilities, rendering, logging, events
 include(${CMAKE_SOURCE_DIR}/cmake/common.cmake)
 
 message(STATUS "Building Engine (core)")
@@ -9,7 +9,6 @@ include_directories(Core/Events)
 include_directories(Core/Containers)
 include_directories(Core/Memory)
 include_directories(IO)
-include_directories(Plugin)
 include_directories(Rendering)
 include_directories(Settings)
 include_directories(${CMAKE_SOURCE_DIR}/ThirdParty/stb)
@@ -17,9 +16,7 @@ include_directories(${CMAKE_SOURCE_DIR}/ThirdParty/include)
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
-set(src Core/Game.cpp
-    Core/Model.cpp
-    Core/stb_impl.cpp
+set(src Core/stb_impl.cpp
     Core/ZipExtract.cpp
     Core/Logger/Logger.cpp
     Core/Logger/LogOutputConsole.cpp
@@ -29,22 +26,14 @@ set(src Core/Game.cpp
     Core/Events/Observable.cpp
     Core/Events/Observer.cpp
     Core/Memory/MemoryUtils.cpp
-    IO/GameFile.cpp
-    IO/GameFolder.cpp
     IO/HttpClient.cpp
     IO/SoftwareImage.cpp
-    Plugin/ExporterPlugin.cpp
-    Plugin/ImporterPlugin.cpp
     Rendering/OrbitCamera.cpp
     Rendering/Renderer.cpp
     Rendering/video.cpp
     Settings/GlobalSettings.cpp)
 
-set(headers Core/Game.h
-      Core/IniFile.h
-      Core/Model.h
-      Core/displayable.h
-      Core/manager.h
+set(headers Core/IniFile.h
       Core/string_utils.h
       Core/types.h
       Core/ZipExtract.h
@@ -59,12 +48,8 @@ set(headers Core/Game.h
       Core/Containers/BaseIterator.h
       Core/Containers/Container.h
       Core/Memory/MemoryUtils.h
-      IO/GameFile.h
-      IO/GameFolder.h
       IO/HttpClient.h
       IO/SoftwareImage.h
-      Plugin/ExporterPlugin.h
-      Plugin/ImporterPlugin.h
       Rendering/OrbitCamera.h
       Rendering/Renderer.h
       Rendering/ViewportFBO.h

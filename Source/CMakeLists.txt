@@ -1,7 +1,3 @@
 add_subdirectory(Engine)
 add_subdirectory(WoW)
-add_subdirectory(WoW/Exporters/OBJ)
-add_subdirectory(WoW/Exporters/FBX)
-add_subdirectory(WoW/Importers/Armory)
-add_subdirectory(WoW/Importers/Wowhead)
 add_subdirectory(App)
