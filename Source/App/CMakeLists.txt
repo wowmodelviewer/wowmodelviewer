@@ -6,13 +6,13 @@ include_directories(Panels)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
 # Exporter headers (OBJ / FBX)
-include_directories(${CMAKE_SOURCE_DIR}/Source/Plugins/Exporters/OBJ)
-include_directories(${CMAKE_SOURCE_DIR}/Source/Plugins/Exporters/FBX)
+include_directories(${CMAKE_SOURCE_DIR}/Source/WoW/Exporters/OBJ)
+include_directories(${CMAKE_SOURCE_DIR}/Source/WoW/Exporters/FBX)
 include_directories(${CMAKE_SOURCE_DIR}/ThirdParty/include)  # fbxsdk.h
 
 # Importer headers (Armory / Wowhead)
-include_directories(${CMAKE_SOURCE_DIR}/Source/Plugins/Importers/Armory)
-include_directories(${CMAKE_SOURCE_DIR}/Source/Plugins/Importers/Wowhead)
+include_directories(${CMAKE_SOURCE_DIR}/Source/WoW/Importers/Armory)
+include_directories(${CMAKE_SOURCE_DIR}/Source/WoW/Importers/Wowhead)
 
 set(src main.cpp
          Application.cpp
