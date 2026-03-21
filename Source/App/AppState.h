@@ -34,7 +34,6 @@
 // Forward declarations for pointer / reference members
 class GameFile;
 class WoWModel;
-struct GLFWwindow;
 
 // Full definition required for std::vector<core::GameConfig>
 #include "GameFolder.h"
@@ -255,5 +254,4 @@ struct AppState
     BrowserState   browsers;
     ExportState    exporting;
     AppSettings    settings;
-    GLFWwindow*    window = nullptr;
 };

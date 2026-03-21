@@ -257,7 +257,7 @@ LogPanel::DrawContext buildLogCtx(AppState& st)
     return ctx;
 }
 
-SettingsPanel::DrawContext buildSettingsCtx(AppState& st, bool* showDemoWindow)
+SettingsPanel::DrawContext buildSettingsCtx(AppState& st, GLFWwindow* window, bool* showDemoWindow)
 {
     SettingsPanel::DrawContext ctx;
     ctx.pathBuf                  = st.loading.pathBuf;
@@ -272,7 +272,7 @@ SettingsPanel::DrawContext buildSettingsCtx(AppState& st, bool* showDemoWindow)
     ctx.settings                 = &st.settings;
     ctx.availableFonts           = &st.ui.availableFonts;
     ctx.fontsDirty               = &st.ui.fontsDirty;
-    ctx.window                   = st.window;
+    ctx.window                   = window;
     ctx.showDemoWindow           = showDemoWindow;
     ctx.camera                   = &st.scene.camera;
     ctx.getLoadStatus            = [&st]() { return GameLoader::getLoadStatus(st); };
@@ -308,7 +308,6 @@ bool Application::init()
         return false;
 
     m_window.setIcon(WMV_ICON_PATH);
-    m_state.window = m_window.handle();
 
     // ---- Custom title bar (embed menus in the window frame) ----
     CustomTitleBar::init(m_window.handle());
@@ -831,7 +830,7 @@ void Application::drawPanels()
                                 ImGuiCond_FirstUseEver, ImVec2(0.5f, 0.5f));
         if (ImGui::Begin("Settings", &st.ui.showSettings, ImGuiWindowFlags_NoDocking))
         {
-            auto ctx = buildSettingsCtx(st, &m_showDemoWindow);
+            auto ctx = buildSettingsCtx(st, m_window.handle(), &m_showDemoWindow);
             SettingsPanel::draw(ctx);
         }
         ImGui::End();
