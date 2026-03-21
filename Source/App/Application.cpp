@@ -58,6 +58,230 @@
 #include "PresetManager.h"
 
 // ============================================================================
+// DrawContext factory helpers — wire AppState fields into per-panel contexts.
+// Each function assembles a single panel's DrawContext from AppState so that
+// drawPanels() stays concise and each panel remains decoupled from AppState.
+// ============================================================================
+
+namespace {
+
+CharacterViewerPanel::DrawContext buildCharViewerCtx(
+    AppState& st, std::function<void()> handleInput)
+{
+    CharacterViewerPanel::DrawContext ctx;
+    ctx.isWoWLoaded          = st.loading.isWoWLoaded;
+    ctx.isDBReady            = st.loading.initDB;
+    ctx.isChar               = st.scene.isChar;
+    ctx.customizationOptions = &st.character.customizationOptions;
+    ctx.animEntries          = &st.anim.animEntries;
+    ctx.selectedAnimCombo    = &st.anim.selectedAnimCombo;
+    ctx.fbo                  = &st.scene.fbo;
+    ctx.camera               = &st.scene.camera;
+    ctx.root                 = st.scene.root.get();
+    ctx.fov                  = video.fov;
+    ctx.bgColor              = st.settings.bgColor;
+    ctx.drawGrid             = st.settings.drawGrid;
+    ctx.getLoadedModel       = [&st]() { return ModelLoader::getLoadedModel(st); };
+    ctx.loadModel            = [&st](GameFile* f) { ModelLoader::loadModel(f, st); };
+    ctx.handleViewportInput  = std::move(handleInput);
+    return ctx;
+}
+
+AnimationPanel::DrawContext buildAnimCtx(AppState& st)
+{
+    AnimationPanel::DrawContext ctx;
+    ctx.getLoadedModel        = [&st]() { return ModelLoader::getLoadedModel(st); };
+    ctx.animEntries           = &st.anim.animEntries;
+    ctx.selectedAnimCombo     = &st.anim.selectedAnimCombo;
+    ctx.animSpeed             = &st.anim.animSpeed;
+    ctx.loopCount             = &st.anim.loopCount;
+    ctx.lockAnims             = &st.anim.lockAnims;
+    ctx.selectedSecondaryAnim = &st.anim.selectedSecondaryAnim;
+    ctx.selectedMouthAnim     = &st.anim.selectedMouthAnim;
+    ctx.mouthSpeed            = &st.anim.mouthSpeed;
+    ctx.skinEntries           = &st.anim.skinEntries;
+    ctx.selectedSkin          = &st.anim.selectedSkin;
+    ctx.blpSkin[0]            = st.anim.blpSkin[0];
+    ctx.blpSkin[1]            = st.anim.blpSkin[1];
+    ctx.blpSkin[2]            = st.anim.blpSkin[2];
+    ctx.applySkin             = [&st](WoWModel* m, int idx) { ModelLoader::applySkin(m, idx, st); };
+    return ctx;
+}
+
+ViewportOptionsPanel::DrawContext buildViewportOptsCtx(AppState& st)
+{
+    ViewportOptionsPanel::DrawContext ctx;
+    ctx.drawGrid       = &st.settings.drawGrid;
+    ctx.bgColor        = &st.settings.bgColor;
+    ctx.camera         = &st.scene.camera;
+    ctx.getLoadedModel = [&st]() { return ModelLoader::getLoadedModel(st); };
+    ctx.geosetGroups   = &st.browsers.geosetGroups;
+    ctx.pcrState       = &st.browsers.pcrState;
+    ctx.selectedSkin   = &st.anim.selectedSkin;
+    ctx.applySkin      = [&st](WoWModel* m, int idx) { ModelLoader::applySkin(m, idx, st); };
+    ctx.resetCamera    = [&st]() {
+        ModelLoader::resetCameraToModel(st.scene.camera, ModelLoader::getLoadedModel(st));
+    };
+    return ctx;
+}
+
+MountsPanel::DrawContext buildMountsCtx(AppState& st)
+{
+    MountsPanel::DrawContext ctx;
+    ctx.isChar             = st.scene.isChar;
+    ctx.isMounted          = st.scene.isMounted;
+    ctx.mountList          = &st.browsers.mountList;
+    ctx.creatureModelNames = &st.browsers.creatureModelNames;
+    ctx.creatureModels     = &st.browsers.creatureModels;
+    ctx.mountFiltered      = &st.browsers.mountFiltered;
+    ctx.mountFilterDirty   = &st.browsers.mountFilterDirty;
+    ctx.mountTab           = &st.browsers.mountTab;
+    ctx.mountSearchBuf     = st.browsers.mountSearchBuf;
+    ctx.mountSearchBufSize = sizeof(st.browsers.mountSearchBuf);
+    ctx.getLoadedModel     = [&st]() { return ModelLoader::getLoadedModel(st); };
+    ctx.buildMountList     = [&st]() { ModelLoader::buildMountList(st); };
+    ctx.rebuildMountFilter = [&st]() { ModelLoader::rebuildMountFilter(st); };
+    ctx.mountCharacter     = [&st](int d, GameFile* f) { ModelLoader::mountCharacter(d, f, st); };
+    ctx.dismountCharacter  = [&st]() { ModelLoader::dismountCharacter(st); };
+    return ctx;
+}
+
+ItemSetsPanel::DrawContext buildItemSetsCtx(AppState& st)
+{
+    ItemSetsPanel::DrawContext ctx;
+    ctx.isChar                   = st.scene.isChar;
+    ctx.itemSets                 = &st.browsers.itemSets;
+    ctx.itemSetsBuilt            = &st.browsers.itemSetsBuilt;
+    ctx.itemSetSearchBuf         = st.browsers.itemSetSearchBuf;
+    ctx.itemSetSearchBufSize     = sizeof(st.browsers.itemSetSearchBuf);
+    ctx.itemSetFiltered          = &st.browsers.itemSetFiltered;
+    ctx.itemSetFilterDirty       = &st.browsers.itemSetFilterDirty;
+    ctx.startOutfits             = &st.browsers.startOutfits;
+    ctx.startOutfitsBuilt        = &st.browsers.startOutfitsBuilt;
+    ctx.startOutfitSearchBuf     = st.browsers.startOutfitSearchBuf;
+    ctx.startOutfitSearchBufSize = sizeof(st.browsers.startOutfitSearchBuf);
+    ctx.startOutfitFiltered      = &st.browsers.startOutfitFiltered;
+    ctx.startOutfitFilterDirty   = &st.browsers.startOutfitFilterDirty;
+    ctx.getLoadedModel           = [&st]() { return ModelLoader::getLoadedModel(st); };
+    ctx.buildItemSets            = [&st]() { ModelLoader::buildItemSets(st); };
+    ctx.rebuildItemSetFilter     = [&st]() { ModelLoader::rebuildItemSetFilter(st); };
+    ctx.applyItemSet             = [&st](WoWModel* m, int id) { ModelLoader::applyItemSet(m, id, st); };
+    ctx.buildStartOutfits        = [&st](WoWModel* m) { ModelLoader::buildStartOutfits(m, st); };
+    ctx.rebuildStartOutfitFilter = [&st]() { ModelLoader::rebuildStartOutfitFilter(st); };
+    ctx.applyStartOutfit         = [&st](WoWModel* m, int id) { ModelLoader::applyStartOutfit(m, id, st); };
+    return ctx;
+}
+
+NpcBrowserPanel::DrawContext buildNpcBrowserCtx(AppState& st)
+{
+    NpcBrowserPanel::DrawContext ctx;
+    ctx.isWoWLoaded      = st.loading.isWoWLoaded;
+    ctx.isDBReady        = st.loading.initDB;
+    ctx.npcs             = &npcs;
+    ctx.npcFiltered      = &st.browsers.npcFiltered;
+    ctx.npcFilterDirty   = &st.browsers.npcFilterDirty;
+    ctx.npcSearchBuf     = st.browsers.npcSearchBuf;
+    ctx.npcSearchBufSize = sizeof(st.browsers.npcSearchBuf);
+    ctx.rebuildNpcFilter = [&st]() { ModelLoader::rebuildNpcFilter(st); };
+    ctx.loadNPC          = [&st](unsigned int id) { ModelLoader::loadNPC(id, st); };
+    return ctx;
+}
+
+ItemBrowserPanel::DrawContext buildItemBrowserCtx(AppState& st)
+{
+    ItemBrowserPanel::DrawContext ctx;
+    ctx.isWoWLoaded             = st.loading.isWoWLoaded;
+    ctx.isDBReady               = st.loading.initDB;
+    ctx.items                   = &items;
+    ctx.itemBrowseFiltered      = &st.browsers.itemBrowseFiltered;
+    ctx.itemBrowseFilterDirty   = &st.browsers.itemBrowseFilterDirty;
+    ctx.itemBrowseSearchBuf     = st.browsers.itemBrowseSearchBuf;
+    ctx.itemBrowseSearchBufSize = sizeof(st.browsers.itemBrowseSearchBuf);
+    ctx.rebuildItemBrowseFilter = [&st]() { ModelLoader::rebuildItemBrowseFilter(st); };
+    ctx.loadItemModel           = [&st](unsigned int id) { ModelLoader::loadItemModel(id, st); };
+    return ctx;
+}
+
+ExportPanel::DrawContext buildExportCtx(AppState& st)
+{
+    ExportPanel::DrawContext ctx;
+    ctx.getLoadedModel    = [&st]() { return ModelLoader::getLoadedModel(st); };
+    ctx.exporters         = &st.exporting.exporters;
+    ctx.selectedExporter  = &st.exporting.selectedExporter;
+    ctx.animEntries       = &st.anim.animEntries;
+    ctx.exportAnimChecked = &st.exporting.exportAnimChecked;
+    ctx.selectedAnimCombo = &st.anim.selectedAnimCombo;
+    ctx.exportPath        = st.exporting.exportPath;
+    ctx.exportPathSize    = sizeof(st.exporting.exportPath);
+    ctx.exportStatus      = &st.exporting.exportStatus;
+    return ctx;
+}
+
+ScreenshotPanel::DrawContext buildScreenshotCtx(AppState& st)
+{
+    ScreenshotPanel::DrawContext ctx;
+    ctx.screenshotPath     = st.exporting.screenshotPath;
+    ctx.screenshotPathSize = sizeof(st.exporting.screenshotPath);
+    ctx.screenshotStatus   = &st.exporting.screenshotStatus;
+    ctx.useCanvasOverride  = &st.exporting.useCanvasOverride;
+    ctx.canvasWidth        = &st.exporting.canvasWidth;
+    ctx.canvasHeight       = &st.exporting.canvasHeight;
+    ctx.fbo                = &st.scene.fbo;
+    ctx.camera             = &st.scene.camera;
+    ctx.root               = st.scene.root.get();
+    ctx.fov                = video.fov;
+    ctx.bgColor            = st.settings.bgColor;
+    ctx.drawGrid           = st.settings.drawGrid;
+    return ctx;
+}
+
+PresetsPanel::DrawContext buildPresetsCtx(AppState& st)
+{
+    PresetsPanel::DrawContext ctx;
+    ctx.presetPath     = st.exporting.presetPath;
+    ctx.presetPathSize = sizeof(st.exporting.presetPath);
+    ctx.presetStatus   = &st.exporting.presetStatus;
+    ctx.isChar         = st.scene.isChar;
+    ctx.hasModel       = ModelLoader::getLoadedModel(st) != nullptr;
+    ctx.savePreset     = [&st](const char* p) { PresetManager::save(p, st); };
+    ctx.loadPreset     = [&st](const char* p) { PresetManager::load(p, st); };
+    return ctx;
+}
+
+LogPanel::DrawContext buildLogCtx(AppState& st)
+{
+    LogPanel::DrawContext ctx;
+    ctx.logLines       = &st.ui.logLines;
+    ctx.logAutoScroll  = &st.ui.logAutoScroll;
+    ctx.logNeedsReload = &st.ui.logNeedsReload;
+    return ctx;
+}
+
+SettingsPanel::DrawContext buildSettingsCtx(AppState& st, bool* showDemoWindow)
+{
+    SettingsPanel::DrawContext ctx;
+    ctx.pathBuf                  = st.loading.pathBuf;
+    ctx.pathBufSize              = sizeof(st.loading.pathBuf);
+    ctx.isWoWLoaded              = st.loading.isWoWLoaded;
+    ctx.loadInProgress           = st.loading.loadInProgress;
+    ctx.loadProgress             = &st.loading.loadProgress;
+    ctx.showFolderPicker         = &st.ui.showFolderPicker;
+    ctx.folderPickerCurrent      = &st.ui.folderPickerCurrent;
+    ctx.folderPickerEntries      = &st.ui.folderPickerEntries;
+    ctx.folderPickerNeedsRefresh = &st.ui.folderPickerNeedsRefresh;
+    ctx.settings                 = &st.settings;
+    ctx.availableFonts           = &st.ui.availableFonts;
+    ctx.fontsDirty               = &st.ui.fontsDirty;
+    ctx.window                   = st.window;
+    ctx.showDemoWindow           = showDemoWindow;
+    ctx.camera                   = &st.scene.camera;
+    ctx.getLoadStatus            = [&st]() { return GameLoader::getLoadStatus(st); };
+    return ctx;
+}
+
+} // anonymous namespace
+
+// ============================================================================
 // run() — single entry point called from main()
 // ============================================================================
 
@@ -434,7 +658,7 @@ void Application::drawDockspace()
 
 void Application::drawPanels()
 {
-    auto& st = m_state; // shorthand
+    auto& st = m_state;
 
     // ===== Character Viewer =====
     if (st.ui.showCharViewer)
@@ -442,23 +666,8 @@ void Application::drawPanels()
         ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(4, 4));
         if (ImGui::Begin("Character Viewer", &st.ui.showCharViewer))
         {
-            CharacterViewerPanel::DrawContext cvCtx;
-            cvCtx.isWoWLoaded          = st.loading.isWoWLoaded;
-            cvCtx.isDBReady            = st.loading.initDB;
-            cvCtx.isChar               = st.scene.isChar;
-            cvCtx.customizationOptions = &st.character.customizationOptions;
-            cvCtx.animEntries          = &st.anim.animEntries;
-            cvCtx.selectedAnimCombo    = &st.anim.selectedAnimCombo;
-            cvCtx.fbo                  = &st.scene.fbo;
-            cvCtx.camera               = &st.scene.camera;
-            cvCtx.root                 = st.scene.root.get();
-            cvCtx.fov                  = video.fov;
-            cvCtx.bgColor              = st.settings.bgColor;
-            cvCtx.drawGrid             = st.settings.drawGrid;
-            cvCtx.getLoadedModel       = [&]() { return ModelLoader::getLoadedModel(st); };
-            cvCtx.loadModel            = [&](GameFile* f) { ModelLoader::loadModel(f, st); };
-            cvCtx.handleViewportInput  = [this]() { handleViewportInput(); };
-            CharacterViewerPanel::draw(cvCtx);
+            auto ctx = buildCharViewerCtx(st, [this]() { handleViewportInput(); });
+            CharacterViewerPanel::draw(ctx);
         }
         ImGui::End();
         ImGui::PopStyleVar();
@@ -506,26 +715,11 @@ void Application::drawPanels()
     {
         if (ImGui::Begin("Animation", &st.ui.showAnimation))
         {
-            AnimationPanel::DrawContext animCtx;
-            animCtx.getLoadedModel        = [&]() { return ModelLoader::getLoadedModel(st); };
-            animCtx.animEntries           = &st.anim.animEntries;
-            animCtx.selectedAnimCombo     = &st.anim.selectedAnimCombo;
-            animCtx.animSpeed             = &st.anim.animSpeed;
-            animCtx.loopCount             = &st.anim.loopCount;
-            animCtx.lockAnims             = &st.anim.lockAnims;
-            animCtx.selectedSecondaryAnim = &st.anim.selectedSecondaryAnim;
-            animCtx.selectedMouthAnim     = &st.anim.selectedMouthAnim;
-            animCtx.mouthSpeed            = &st.anim.mouthSpeed;
-            animCtx.skinEntries           = &st.anim.skinEntries;
-            animCtx.selectedSkin          = &st.anim.selectedSkin;
-            animCtx.blpSkin[0] = st.anim.blpSkin[0];
-            animCtx.blpSkin[1] = st.anim.blpSkin[1];
-            animCtx.blpSkin[2] = st.anim.blpSkin[2];
-            animCtx.applySkin  = [&](WoWModel* m, int idx) { ModelLoader::applySkin(m, idx, st); };
-            AnimationPanel::draw(animCtx);
-            st.anim.blpSkin[0] = animCtx.blpSkin[0];
-            st.anim.blpSkin[1] = animCtx.blpSkin[1];
-            st.anim.blpSkin[2] = animCtx.blpSkin[2];
+            auto ctx = buildAnimCtx(st);
+            AnimationPanel::draw(ctx);
+            st.anim.blpSkin[0] = ctx.blpSkin[0];
+            st.anim.blpSkin[1] = ctx.blpSkin[1];
+            st.anim.blpSkin[2] = ctx.blpSkin[2];
         }
         ImGui::End();
     }
@@ -535,19 +729,8 @@ void Application::drawPanels()
     {
         if (ImGui::Begin("Viewport Options", &st.ui.showViewportOpts))
         {
-            ViewportOptionsPanel::DrawContext vpCtx;
-            vpCtx.drawGrid       = &st.settings.drawGrid;
-            vpCtx.bgColor        = &st.settings.bgColor;
-            vpCtx.camera         = &st.scene.camera;
-            vpCtx.getLoadedModel = [&]() { return ModelLoader::getLoadedModel(st); };
-            vpCtx.geosetGroups   = &st.browsers.geosetGroups;
-            vpCtx.pcrState       = &st.browsers.pcrState;
-            vpCtx.selectedSkin   = &st.anim.selectedSkin;
-            vpCtx.applySkin      = [&](WoWModel* m, int idx) { ModelLoader::applySkin(m, idx, st); };
-            vpCtx.resetCamera    = [&]() {
-                ModelLoader::resetCameraToModel(st.scene.camera, ModelLoader::getLoadedModel(st));
-            };
-            ViewportOptionsPanel::draw(vpCtx);
+            auto ctx = buildViewportOptsCtx(st);
+            ViewportOptionsPanel::draw(ctx);
         }
         ImGui::End();
     }
@@ -557,23 +740,8 @@ void Application::drawPanels()
     {
         if (ImGui::Begin("Mounts", &st.ui.showMounts))
         {
-            MountsPanel::DrawContext mCtx;
-            mCtx.isChar              = st.scene.isChar;
-            mCtx.isMounted           = st.scene.isMounted;
-            mCtx.mountList           = &st.browsers.mountList;
-            mCtx.creatureModelNames  = &st.browsers.creatureModelNames;
-            mCtx.creatureModels      = &st.browsers.creatureModels;
-            mCtx.mountFiltered       = &st.browsers.mountFiltered;
-            mCtx.mountFilterDirty    = &st.browsers.mountFilterDirty;
-            mCtx.mountTab            = &st.browsers.mountTab;
-            mCtx.mountSearchBuf      = st.browsers.mountSearchBuf;
-            mCtx.mountSearchBufSize  = sizeof(st.browsers.mountSearchBuf);
-            mCtx.getLoadedModel      = [&]() { return ModelLoader::getLoadedModel(st); };
-            mCtx.buildMountList      = [&]() { ModelLoader::buildMountList(st); };
-            mCtx.rebuildMountFilter  = [&]() { ModelLoader::rebuildMountFilter(st); };
-            mCtx.mountCharacter      = [&](int d, GameFile* f) { ModelLoader::mountCharacter(d, f, st); };
-            mCtx.dismountCharacter   = [&]() { ModelLoader::dismountCharacter(st); };
-            MountsPanel::draw(mCtx);
+            auto ctx = buildMountsCtx(st);
+            MountsPanel::draw(ctx);
         }
         ImGui::End();
     }
@@ -583,28 +751,8 @@ void Application::drawPanels()
     {
         if (ImGui::Begin("Item Sets", &st.ui.showItemSets))
         {
-            ItemSetsPanel::DrawContext isCtx;
-            isCtx.isChar                   = st.scene.isChar;
-            isCtx.itemSets                 = &st.browsers.itemSets;
-            isCtx.itemSetsBuilt            = &st.browsers.itemSetsBuilt;
-            isCtx.itemSetSearchBuf         = st.browsers.itemSetSearchBuf;
-            isCtx.itemSetSearchBufSize     = sizeof(st.browsers.itemSetSearchBuf);
-            isCtx.itemSetFiltered          = &st.browsers.itemSetFiltered;
-            isCtx.itemSetFilterDirty       = &st.browsers.itemSetFilterDirty;
-            isCtx.startOutfits             = &st.browsers.startOutfits;
-            isCtx.startOutfitsBuilt        = &st.browsers.startOutfitsBuilt;
-            isCtx.startOutfitSearchBuf     = st.browsers.startOutfitSearchBuf;
-            isCtx.startOutfitSearchBufSize = sizeof(st.browsers.startOutfitSearchBuf);
-            isCtx.startOutfitFiltered      = &st.browsers.startOutfitFiltered;
-            isCtx.startOutfitFilterDirty   = &st.browsers.startOutfitFilterDirty;
-            isCtx.getLoadedModel           = [&]() { return ModelLoader::getLoadedModel(st); };
-            isCtx.buildItemSets            = [&]() { ModelLoader::buildItemSets(st); };
-            isCtx.rebuildItemSetFilter     = [&]() { ModelLoader::rebuildItemSetFilter(st); };
-            isCtx.applyItemSet             = [&](WoWModel* m, int id) { ModelLoader::applyItemSet(m, id, st); };
-            isCtx.buildStartOutfits        = [&](WoWModel* m) { ModelLoader::buildStartOutfits(m, st); };
-            isCtx.rebuildStartOutfitFilter = [&]() { ModelLoader::rebuildStartOutfitFilter(st); };
-            isCtx.applyStartOutfit         = [&](WoWModel* m, int id) { ModelLoader::applyStartOutfit(m, id, st); };
-            ItemSetsPanel::draw(isCtx);
+            auto ctx = buildItemSetsCtx(st);
+            ItemSetsPanel::draw(ctx);
         }
         ImGui::End();
     }
@@ -614,17 +762,8 @@ void Application::drawPanels()
     {
         if (ImGui::Begin("NPC Browser", &st.ui.showNpcBrowser))
         {
-            NpcBrowserPanel::DrawContext npcCtx;
-            npcCtx.isWoWLoaded      = st.loading.isWoWLoaded;
-            npcCtx.isDBReady        = st.loading.initDB;
-            npcCtx.npcs             = &npcs;
-            npcCtx.npcFiltered      = &st.browsers.npcFiltered;
-            npcCtx.npcFilterDirty   = &st.browsers.npcFilterDirty;
-            npcCtx.npcSearchBuf     = st.browsers.npcSearchBuf;
-            npcCtx.npcSearchBufSize = sizeof(st.browsers.npcSearchBuf);
-            npcCtx.rebuildNpcFilter = [&]() { ModelLoader::rebuildNpcFilter(st); };
-            npcCtx.loadNPC          = [&](unsigned int id) { ModelLoader::loadNPC(id, st); };
-            NpcBrowserPanel::draw(npcCtx);
+            auto ctx = buildNpcBrowserCtx(st);
+            NpcBrowserPanel::draw(ctx);
         }
         ImGui::End();
     }
@@ -634,17 +773,8 @@ void Application::drawPanels()
     {
         if (ImGui::Begin("Item Browser", &st.ui.showItemBrowser))
         {
-            ItemBrowserPanel::DrawContext ibCtx;
-            ibCtx.isWoWLoaded             = st.loading.isWoWLoaded;
-            ibCtx.isDBReady               = st.loading.initDB;
-            ibCtx.items                   = &items;
-            ibCtx.itemBrowseFiltered      = &st.browsers.itemBrowseFiltered;
-            ibCtx.itemBrowseFilterDirty   = &st.browsers.itemBrowseFilterDirty;
-            ibCtx.itemBrowseSearchBuf     = st.browsers.itemBrowseSearchBuf;
-            ibCtx.itemBrowseSearchBufSize = sizeof(st.browsers.itemBrowseSearchBuf);
-            ibCtx.rebuildItemBrowseFilter = [&]() { ModelLoader::rebuildItemBrowseFilter(st); };
-            ibCtx.loadItemModel           = [&](unsigned int id) { ModelLoader::loadItemModel(id, st); };
-            ItemBrowserPanel::draw(ibCtx);
+            auto ctx = buildItemBrowserCtx(st);
+            ItemBrowserPanel::draw(ctx);
         }
         ImGui::End();
     }
@@ -654,17 +784,8 @@ void Application::drawPanels()
     {
         if (ImGui::Begin("Export", &st.ui.showExport))
         {
-            ExportPanel::DrawContext exCtx;
-            exCtx.getLoadedModel    = [&]() { return ModelLoader::getLoadedModel(st); };
-            exCtx.exporters         = &st.exporting.exporters;
-            exCtx.selectedExporter  = &st.exporting.selectedExporter;
-            exCtx.animEntries       = &st.anim.animEntries;
-            exCtx.exportAnimChecked = &st.exporting.exportAnimChecked;
-            exCtx.selectedAnimCombo = &st.anim.selectedAnimCombo;
-            exCtx.exportPath        = st.exporting.exportPath;
-            exCtx.exportPathSize    = sizeof(st.exporting.exportPath);
-            exCtx.exportStatus      = &st.exporting.exportStatus;
-            ExportPanel::draw(exCtx);
+            auto ctx = buildExportCtx(st);
+            ExportPanel::draw(ctx);
         }
         ImGui::End();
     }
@@ -674,20 +795,8 @@ void Application::drawPanels()
     {
         if (ImGui::Begin("Screenshot", &st.ui.showScreenshot))
         {
-            ScreenshotPanel::DrawContext ssCtx;
-            ssCtx.screenshotPath     = st.exporting.screenshotPath;
-            ssCtx.screenshotPathSize = sizeof(st.exporting.screenshotPath);
-            ssCtx.screenshotStatus   = &st.exporting.screenshotStatus;
-            ssCtx.useCanvasOverride  = &st.exporting.useCanvasOverride;
-            ssCtx.canvasWidth        = &st.exporting.canvasWidth;
-            ssCtx.canvasHeight       = &st.exporting.canvasHeight;
-            ssCtx.fbo                = &st.scene.fbo;
-            ssCtx.camera             = &st.scene.camera;
-            ssCtx.root               = st.scene.root.get();
-            ssCtx.fov                = video.fov;
-            ssCtx.bgColor            = st.settings.bgColor;
-            ssCtx.drawGrid           = st.settings.drawGrid;
-            ScreenshotPanel::draw(ssCtx);
+            auto ctx = buildScreenshotCtx(st);
+            ScreenshotPanel::draw(ctx);
         }
         ImGui::End();
     }
@@ -697,15 +806,8 @@ void Application::drawPanels()
     {
         if (ImGui::Begin("Presets", &st.ui.showPresets))
         {
-            PresetsPanel::DrawContext preCtx;
-            preCtx.presetPath     = st.exporting.presetPath;
-            preCtx.presetPathSize = sizeof(st.exporting.presetPath);
-            preCtx.presetStatus   = &st.exporting.presetStatus;
-            preCtx.isChar         = st.scene.isChar;
-            preCtx.hasModel       = ModelLoader::getLoadedModel(st) != nullptr;
-            preCtx.savePreset     = [&](const char* p) { PresetManager::save(p, st); };
-            preCtx.loadPreset     = [&](const char* p) { PresetManager::load(p, st); };
-            PresetsPanel::draw(preCtx);
+            auto ctx = buildPresetsCtx(st);
+            PresetsPanel::draw(ctx);
         }
         ImGui::End();
     }
@@ -715,11 +817,8 @@ void Application::drawPanels()
     {
         if (ImGui::Begin("Log", &st.ui.showLog))
         {
-            LogPanel::DrawContext logCtx;
-            logCtx.logLines       = &st.ui.logLines;
-            logCtx.logAutoScroll  = &st.ui.logAutoScroll;
-            logCtx.logNeedsReload = &st.ui.logNeedsReload;
-            LogPanel::draw(logCtx);
+            auto ctx = buildLogCtx(st);
+            LogPanel::draw(ctx);
         }
         ImGui::End();
     }
@@ -732,24 +831,8 @@ void Application::drawPanels()
                                 ImGuiCond_FirstUseEver, ImVec2(0.5f, 0.5f));
         if (ImGui::Begin("Settings", &st.ui.showSettings, ImGuiWindowFlags_NoDocking))
         {
-            SettingsPanel::DrawContext settingsCtx;
-            settingsCtx.pathBuf                  = st.loading.pathBuf;
-            settingsCtx.pathBufSize              = sizeof(st.loading.pathBuf);
-            settingsCtx.isWoWLoaded              = st.loading.isWoWLoaded;
-            settingsCtx.loadInProgress           = st.loading.loadInProgress;
-            settingsCtx.loadProgress             = &st.loading.loadProgress;
-            settingsCtx.showFolderPicker         = &st.ui.showFolderPicker;
-            settingsCtx.folderPickerCurrent      = &st.ui.folderPickerCurrent;
-            settingsCtx.folderPickerEntries       = &st.ui.folderPickerEntries;
-            settingsCtx.folderPickerNeedsRefresh = &st.ui.folderPickerNeedsRefresh;
-            settingsCtx.settings                 = &st.settings;
-            settingsCtx.availableFonts           = &st.ui.availableFonts;
-            settingsCtx.fontsDirty               = &st.ui.fontsDirty;
-            settingsCtx.window                   = st.window;
-            settingsCtx.showDemoWindow           = &m_showDemoWindow;
-            settingsCtx.camera                   = &st.scene.camera;
-            settingsCtx.getLoadStatus            = [&]() { return GameLoader::getLoadStatus(st); };
-            SettingsPanel::draw(settingsCtx);
+            auto ctx = buildSettingsCtx(st, &m_showDemoWindow);
+            SettingsPanel::draw(ctx);
         }
         ImGui::End();
     }
