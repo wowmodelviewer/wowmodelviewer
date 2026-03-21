@@ -98,8 +98,11 @@
 #include "GameLoader.h"
 #include "ModelLoader.h"
 #include "PresetManager.h"
+#include "InputManager.h"
+#include "ViewportController.h"
 
 static AppState app;
+static InputManager inputManager;
 
 // ---- Thin wrappers forwarding to helper modules --------------------------
 static std::filesystem::path getApplicationDirPath() { return GameLoader::getApplicationDirPath(); }
@@ -133,84 +136,12 @@ static void initCharacterControl(WoWModel* m) { ModelLoader::initCharacterContro
 static void initModelControl(WoWModel* m) { ModelLoader::initModelControl(m, app); }
 static void tryToEquipItem(WoWModel* m, int id) { ModelLoader::tryToEquipItem(m, id, app); }
 
-// ---- Handle viewport input ------------------------------------------------
+// ---- Handle viewport input (delegates to InputManager + ViewportController)
 static void handleViewportInput()
 {
-    const ImGuiIO& io = ImGui::GetIO();
-
-    float mul = 1.0f;
-    if (io.KeyShift)
-        mul /= 10.0f;
-
-    const float MOUSE_SENSITIVITY = 0.25f;
-
-    // Mouse wheel ? zoom
-    if (io.MouseWheel != 0.0f)
-    {
-        const float zoom = -io.MouseWheel * 0.5f * mul;
-        app.camera.setRadius(app.camera.radius() + zoom);
-    }
-
-    // Left drag ? orbit (yaw / pitch)
-    if (ImGui::IsMouseDragging(ImGuiMouseButton_Left))
-    {
-        const float dx = io.MouseDelta.x * MOUSE_SENSITIVITY * mul;
-        const float dy = io.MouseDelta.y * MOUSE_SENSITIVITY * mul;
-        app.camera.setYawAndPitch(app.camera.yaw() + (-dx), app.camera.pitch() + (-dy));
-    }
-
-    // Right drag ? pan
-    if (ImGui::IsMouseDragging(ImGuiMouseButton_Right))
-    {
-        const float dx = io.MouseDelta.x * MOUSE_SENSITIVITY * mul * 0.025f;
-        const float dy = io.MouseDelta.y * MOUSE_SENSITIVITY * mul * 0.025f;
-        const auto  look  = app.camera.lookAt();
-        const auto  right = app.camera.right();
-        app.camera.setLookAt(glm::vec3(look.x + right.x * -dx,
-                                      look.y + right.y * -dx,
-                                      look.z + dy));
-    }
-
-    // Middle drag ? zoom (alternative)
-    if (ImGui::IsMouseDragging(ImGuiMouseButton_Middle))
-    {
-        const float dy = io.MouseDelta.y * MOUSE_SENSITIVITY * mul;
-        app.camera.setRadius(app.camera.radius() + dy / 10.0f);
-    }
-
-    // Numpad camera controls
-    if (ImGui::IsKeyDown(ImGuiKey_Keypad4))
-        app.camera.setYaw(app.camera.yaw() + 1.0f);
-    if (ImGui::IsKeyDown(ImGuiKey_Keypad6))
-        app.camera.setYaw(app.camera.yaw() - 1.0f);
-    if (ImGui::IsKeyDown(ImGuiKey_Keypad8))
-        app.camera.setPitch(app.camera.pitch() + 1.0f);
-    if (ImGui::IsKeyDown(ImGuiKey_Keypad2))
-        app.camera.setPitch(app.camera.pitch() - 1.0f);
-    if (ImGui::IsKeyPressed(ImGuiKey_Keypad5))
+    ViewportController::apply(inputManager.state(), app.camera);
+    if (inputManager.state().resetCamera)
         resetCameraToModel(app.camera, getLoadedModel());
-    if (ImGui::IsKeyDown(ImGuiKey_Keypad7))
-    {
-        auto la = app.camera.lookAt();
-        app.camera.setLookAt(glm::vec3(la.x, la.y, la.z + 0.2f));
-    }
-    if (ImGui::IsKeyDown(ImGuiKey_Keypad9))
-    {
-        auto la = app.camera.lookAt();
-        app.camera.setLookAt(glm::vec3(la.x, la.y, la.z - 0.2f));
-    }
-    if (ImGui::IsKeyDown(ImGuiKey_Keypad1))
-    {
-        auto la = app.camera.lookAt();
-        auto r = app.camera.right();
-        app.camera.setLookAt(glm::vec3(la.x + r.x * -0.2f, la.y + r.y * -0.2f, la.z));
-    }
-    if (ImGui::IsKeyDown(ImGuiKey_Keypad3))
-    {
-        auto la = app.camera.lookAt();
-        auto r = app.camera.right();
-        app.camera.setLookAt(glm::vec3(la.x + r.x * 0.2f, la.y + r.y * 0.2f, la.z));
-    }
 }
 
 // ---- Animation tick -------------------------------------------------------
@@ -521,6 +452,9 @@ int main(int /*argc*/, char* /*argv*/[])
         ImGui_ImplOpenGL3_NewFrame();
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
+
+        // ---- Resolve input bindings for this frame ----
+        inputManager.update();
 
         // ===== Custom Title Bar (menus embedded in window frame) =====
         ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(8.0f, 8.0f));

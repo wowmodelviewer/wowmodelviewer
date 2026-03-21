@@ -23,6 +23,8 @@ set(src main.cpp
          ModelLoader.cpp
          PresetManager.cpp
          URLImportHandler.cpp
+         InputManager.cpp
+         ViewportController.cpp
          Panels/FileBrowserPanel.cpp
          Panels/CharacterViewerPanel.cpp
          Panels/AnimationPanel.cpp
