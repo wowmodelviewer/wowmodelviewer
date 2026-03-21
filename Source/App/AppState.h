@@ -107,21 +107,7 @@ struct UIState
     bool showAboutDialog = false;
     bool showLanguageDialog = false;
 
-    // Panel visibility (View menu toggles)
-    bool showCharViewer = true;
-    bool showViewport = true;
-    bool showFileBrowser = true;
-    bool showAnimation = true;
-    bool showViewportOpts = true;
-    bool showNpcBrowser = true;
-    bool showItemBrowser = true;
-    bool showExport = true;
-    bool showScreenshot = true;
-    bool showPresets = true;
-    bool showLog = true;
-    bool showSettings = false;
-    bool showMounts = false;
-    bool showItemSets = false;
+    // Transient dialog visibility (not persisted)
     bool showImportDialog = false;
     bool showFolderPicker = false;
 

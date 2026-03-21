@@ -16,11 +16,10 @@ struct LoadState
 };
 
 /// Draw the File Browser ImGui panel.
-/// @param visible  Panel open/close toggle (passed to ImGui::Begin).
 /// @param load     Current game-loading state.
 /// @return         The GameFile the user clicked, or nullptr if nothing was
 ///                 selected this frame.
-GameFile* draw(bool& visible, const LoadState& load);
+GameFile* draw(const LoadState& load);
 
 /// Mark the file tree as dirty so it will be rebuilt on the next draw().
 void markDirty();

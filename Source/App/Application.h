@@ -38,11 +38,8 @@ private:
 
     // ---- Frame-local UI flags ----
     bool m_showDemoWindow = false;
+    bool m_showSettings   = false;
     bool m_firstFrame     = true;
-    bool m_resetLayout    = false;
-
-    // Windows toggled on this frame that should appear undocked/floating.
-    std::vector<std::string> m_pendingUndock;
 
     // ---- Lifecycle phases ----
     bool init();
