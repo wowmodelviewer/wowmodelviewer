@@ -185,6 +185,14 @@ void CustomTitleBar::init(GLFWwindow* window)
     MARGINS m = { 0, 0, 0, 1 };
     DwmExtendFrameIntoClientArea(g_hwnd, &m);
 
+    // Disable Windows 11 rounded corners so the window matches UE5's
+    // sharp-cornered look.  DWMWA_WINDOW_CORNER_PREFERENCE (33) with
+    // DWMWCP_DONOTROUND (1).
+    constexpr DWORD DWMWA_WINDOW_CORNER_PREFERENCE_VAL = 33;
+    constexpr DWORD DWMWCP_DONOTROUND_VAL              = 1;
+    DwmSetWindowAttribute(g_hwnd, DWMWA_WINDOW_CORNER_PREFERENCE_VAL,
+                          &DWMWCP_DONOTROUND_VAL, sizeof(DWMWCP_DONOTROUND_VAL));
+
     // Force the frame to be recalculated so the title bar disappears
     SetWindowPos(g_hwnd, nullptr, 0, 0, 0, 0,
                  SWP_FRAMECHANGED | SWP_NOMOVE | SWP_NOSIZE |
@@ -345,6 +353,19 @@ void CustomTitleBar::end([[maybe_unused]] GLFWwindow* window, const char* status
 
     ImGui::EndMenuBar();
     ImGui::End();
+
+    // ---- 1px window border (UE5 style) ----
+    // Draw a thin border around the entire viewport using the foreground
+    // draw list so it renders on top of all ImGui content.  Skip when
+    // maximised because the window edges are off-screen.
+    if (!IsZoomed(g_hwnd))
+    {
+        ImDrawList* fg = ImGui::GetForegroundDrawList();
+        const ImVec2 p0 = vp->Pos;
+        const ImVec2 p1 = ImVec2(vp->Pos.x + vp->Size.x, vp->Pos.y + vp->Size.y);
+        const ImU32  borderCol = ImGui::GetColorU32(ImGuiCol_Border);
+        fg->AddRect(p0, p1, borderCol, 0.0f, 0, 1.0f);
+    }
 
 #else
     // Non-Windows fallback: standard main menu bar
