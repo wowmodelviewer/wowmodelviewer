@@ -84,12 +84,6 @@ protected:
 	std::string filepath;
 	int m_fileDataId;
 
-	struct chunkHeader
-	{
-		char magic[4];
-		unsigned __int32 size;
-	};
-
 	struct Chunk
 	{
 		std::string magic;
@@ -102,9 +96,8 @@ protected:
 	bool m_useMemoryBuffer;
 
 private:
-	// disable copying
-	GameFile(const GameFile&);
-	void operator=(const GameFile&);
+	GameFile(const GameFile&) = delete;
+	GameFile& operator=(const GameFile&) = delete;
 	unsigned char* originalBuffer;
 	std::string curChunk;
 };
