@@ -30,13 +30,6 @@ set(src Core/Game.cpp
       Database/WoWDatabase.cpp
       Database/DB2Table.cpp
       Database/WDCReader.cpp
-      Database/wdb2file.cpp
-      Database/wdb5file.cpp
-      Database/wdb6file.cpp
-      Database/wdc1file.cpp
-      Database/wdc2file.cpp
-      Database/wdc3file.cpp
-      Database/wdc5file.cpp
       Database/database.cpp
       Model/WoWModel.cpp
       Model/Bone.cpp
@@ -83,13 +76,6 @@ set(headers Core/Game.h
       Database/WoWDatabase.h
       Database/DB2Table.h
       Database/WDCReader.h
-      Database/wdb2file.h
-      Database/wdb5file.h
-      Database/wdb6file.h
-      Database/wdc1file.h
-      Database/wdc2file.h
-      Database/wdc3file.h
-      Database/wdc5file.h
       Database/database.h
       Model/WoWModel.h
       Model/Bone.h

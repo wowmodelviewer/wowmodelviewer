@@ -2,13 +2,6 @@
 #include "DB2Table.h"
 #include "Game.h"
 #include "Logger.h"
-#include "wdb2file.h"
-#include "wdb5file.h"
-#include "wdb6file.h"
-#include "wdc1file.h"
-#include "wdc2file.h"
-#include "wdc3file.h"
-#include "wdc5file.h"
 #include "WDCReader.h"
 #include "DBDFile.h"
 
@@ -223,21 +216,11 @@ DBFile* wow::TableStructure::createDBFile()
 
 		fileToOpen->read(header, 4);
 
-		if (strncmp(header, "WDB2", 4) == 0)
-			result = new WDB2File(fileToOpen->fullname());
-		else if (strncmp(header, "WDB5", 4) == 0)
-			result = new WDB5File(fileToOpen->fullname());
-		else if (strncmp(header, "WDB6", 4) == 0)
-			result = new WDB6File(fileToOpen->fullname());
-		else if (strncmp(header, "WDC1", 4) == 0)
-			result = new WDC1File(fileToOpen->fullname());
-		else if (strncmp(header, "WDC2", 4) == 0)
-			result = new WDCReader(fileToOpen->fullname());
-		else if (strncmp(header, "WDC3", 4) == 0)
-			result = new WDCReader(fileToOpen->fullname());
-		else if (strncmp(header, "WDC4", 4) == 0)
-			result = new WDCReader(fileToOpen->fullname());
-		else if (strncmp(header, "WDC5", 4) == 0)
+		if (strncmp(header, "WDC2", 4) == 0
+			|| strncmp(header, "WDC3", 4) == 0
+			|| strncmp(header, "WDC4", 4) == 0
+			|| strncmp(header, "WDC5", 4) == 0
+			|| strncmp(header, "CLS1", 4) == 0)
 			result = new WDCReader(fileToOpen->fullname());
 		else
 			LOG_ERROR << "Unsupported database file" << header[0] << header[1] << header[2] << header[3];
