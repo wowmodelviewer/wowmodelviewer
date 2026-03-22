@@ -62,6 +62,7 @@ set(headers Core/Game.h
       Core/Model.h
       Core/GameFile.h
       Core/GameFolder.h
+      Core/ChunkReader.h
       Core/displayable.h
       Core/manager.h
       Plugin/ExporterPlugin.h

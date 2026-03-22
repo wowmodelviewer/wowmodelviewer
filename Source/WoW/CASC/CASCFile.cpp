@@ -5,79 +5,10 @@
 #endif
 #include "CascLib.h"
 #include "CASCChunks.h"
+#include "ChunkReader.h"
 #include "Game.h"
 #include "Logger.h"
 // #define DEBUG_READ
-
-std::vector<std::string> KNOWN_CHUNKS =
-{
-	"PFID",
-	"SFID",
-	"AFID",
-	"BFID",
-	"MD21",
-	"TXAC",
-	"EXPT",
-	"EXP2",
-	"PABC",
-	"PADC",
-	"PSBC",
-	"PEDC",
-	"SKID",
-	"TXID",
-	"LDV1",
-	"AFM2",
-	"AFSA",
-	"AFSB",
-	"SKL1",
-	"SKA1",
-	"SKB1",
-	"SKS1",
-	"SKPD"
-	/*
-	"MOHD",
-	"MOTX",
-	"MOMT",
-	"MOUV",
-	"MOGN",
-	"MOGI",
-	"MOSB",
-	"MOPV",
-	"MOPT",
-	"MOPR",
-	"MOVV",
-	"MOVB",
-	"MOLT",
-	"MODS",
-	"MODN",
-	"MODD",
-	"MFOG",
-	"MCVP",
-	"GFID",
-	"MOGP",
-	"MOPY",
-	"MOVI",
-	"MOVT",
-	"MONR",
-	"MOTV",
-	"MOBA",
-	"MOLR",
-	"MODR",
-	"MOBN",
-	"MOBR",
-	"MOCV",
-	"MLIQ",
-	"MORI",
-	"MORB",
-	"MOTA",
-	"MOBS",
-	"MDAL",
-	"MOPL",
-	"MOPB",
-	"MOLS",
-	"MOLP"
-	*/
-};
 
 CASCFile::CASCFile(std::string path, int id) : GameFile(std::move(path), id), m_handle(nullptr)
 {
@@ -165,40 +96,22 @@ unsigned long CASCFile::readFile()
 
 void CASCFile::doPostOpenOperation()
 {
-	if (size >= sizeof(chunkHeader))
+	if (!ChunkReader::isChunked(buffer, size))
+		return;
+
+	const auto parsed = ChunkReader::parse(buffer, size);
+	for (const auto& ci : parsed)
 	{
-		chunkHeader chunkHead;
-		memcpy(&chunkHead, buffer, sizeof(chunkHeader));
-		const std::string magic = std::string(chunkHead.magic, 4);
-		if (std::find(KNOWN_CHUNKS.begin(), KNOWN_CHUNKS.end(), magic) != KNOWN_CHUNKS.end()
-			&& chunkHead.size <= size)
-		{
-			unsigned int offset = 0;
-
-			//LOG_INFO << "Parsing chunks for file" << filepath << "First chunk read :" << magic.c_str();
-			while (offset < size)
-			{
-				chunkHeader ChunkHead;
-				memcpy(&ChunkHead, buffer + offset, sizeof(chunkHeader));
-				offset += sizeof(chunkHeader);
-
-				Chunk* chunk = new Chunk();
-				chunk->magic = std::string(ChunkHead.magic, 4);
-				chunk->start = offset;
-				chunk->size = ChunkHead.size;
-				chunk->pointer = 0;
-				chunks.push_back(*chunk);
-
-				//LOG_INFO << "Chunk :" << chunk->magic.c_str() << chunk->start << chunk->size;
-
-				offset += ChunkHead.size;
-			}
-
-			// if there is only one chunk, set it
-			if (chunks.size() == 1)
-				setChunk(chunks[0].magic);
-		}
+		Chunk chunk;
+		chunk.magic   = ci.magic;
+		chunk.start   = ci.start;
+		chunk.size    = ci.size;
+		chunk.pointer = 0;
+		chunks.push_back(std::move(chunk));
 	}
+
+	if (chunks.size() == 1)
+		setChunk(chunks[0].magic);
 }
 
 bool CASCFile::doPostCloseOperation()
