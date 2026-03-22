@@ -9,17 +9,17 @@
 #include "dbfile.h"
 #include "CASCFile.h"
 
-#define _WDCREADER_API_
+#define _DB2READER_API_
 
-/// @brief Unified WDC reader for WDC2, WDC3, WDC4 and WDC5 DB2 files.
+/// @brief Unified reader for WDC2, WDC3, WDC4 and WDC5 DB2 files.
 ///
-/// Modelled after wow.export's WDCReader.js — supports multiple sections,
-/// encrypted-section detection, 64-bit bitpacked reads, and WDC4/5 extras.
-class _WDCREADER_API_ WDCReader : public DBFile, public CASCFile
+/// Supports multiple sections, encrypted-section detection,
+/// 64-bit bitpacked reads, and WDC4/5 extras.
+class _DB2READER_API_ DB2Reader : public DBFile, public CASCFile
 {
 public:
-	explicit WDCReader(const std::string& file);
-	~WDCReader() override;
+	explicit DB2Reader(const std::string& file);
+	~DB2Reader() override;
 
 	bool open() override;
 	bool close() override;

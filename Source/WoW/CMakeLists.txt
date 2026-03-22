@@ -29,7 +29,7 @@ set(src Core/Game.cpp
       Database/DBDFile.cpp
       Database/WoWDatabase.cpp
       Database/DB2Table.cpp
-      Database/WDCReader.cpp
+      Database/DB2Reader.cpp
       Database/database.cpp
       Model/WoWModel.cpp
       Model/Bone.cpp
@@ -75,7 +75,7 @@ set(headers Core/Game.h
       Database/DBDFile.h
       Database/WoWDatabase.h
       Database/DB2Table.h
-      Database/WDCReader.h
+      Database/DB2Reader.h
       Database/database.h
       Model/WoWModel.h
       Model/Bone.h

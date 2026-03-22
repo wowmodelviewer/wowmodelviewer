@@ -1,4 +1,4 @@
-#include "WDCReader.h"
+#include "DB2Reader.h"
 #include "Logger.h"
 #include "Game.h"
 #include "WoWDatabase.h"
@@ -32,20 +32,20 @@ static int versionFromMagic(uint32_t magic)
 
 // ─────────────────────────────────────────────────────────────────────────────
 
-WDCReader::WDCReader(const std::string& file)
+DB2Reader::DB2Reader(const std::string& file)
 	: CASCFile(file)
 {
 }
 
-WDCReader::~WDCReader()
+DB2Reader::~DB2Reader()
 {
-	WDCReader::close();
+	DB2Reader::close();
 	delete[] m_palletData;
 	// m_fileData is the CASCFile buffer — do NOT delete it here;
 	// CASCFile::close() handles the buffer.
 }
 
-bool WDCReader::close()
+bool DB2Reader::close()
 {
 	m_fileData = nullptr;
 	m_fileDataSize = 0;
@@ -53,14 +53,14 @@ bool WDCReader::close()
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-bool WDCReader::open()
+bool DB2Reader::open()
 {
-	// Must use memory-buffered mode (true) because WDCReader stores direct
+	// Must use memory-buffered mode (true) because DB2Reader stores direct
 	// pointers into the file data for random access during get() calls.
 	// open(false) streams via CascReadFile and getBuffer() returns nullptr.
 	if (!CASCFile::open(true))
 	{
-		LOG_ERROR << "WDCReader: failed to open file " << fullname();
+		LOG_ERROR << "DB2Reader: failed to open file " << fullname();
 		return false;
 	}
 
@@ -69,7 +69,7 @@ bool WDCReader::open()
 
 	if (m_fileDataSize < sizeof(WDCHeader))
 	{
-		LOG_ERROR << "WDCReader: file too small " << fullname();
+		LOG_ERROR << "DB2Reader: file too small " << fullname();
 		return false;
 	}
 
@@ -80,7 +80,7 @@ bool WDCReader::open()
 	m_wdcVersion = versionFromMagic(magic);
 	if (m_wdcVersion == 0)
 	{
-		LOG_ERROR << "WDCReader: unsupported magic in " << fullname();
+		LOG_ERROR << "DB2Reader: unsupported magic in " << fullname();
 		return false;
 	}
 
@@ -107,7 +107,7 @@ bool WDCReader::open()
 	stringSize  = m_header.string_table_size;
 
 #if WDC_READ_DEBUG > 0
-	LOG_INFO << "WDCReader:" << fullname() << "version=" << m_wdcVersion
+	LOG_INFO << "DB2Reader:" << fullname() << "version=" << m_wdcVersion
 			 << "records=" << m_header.record_count
 			 << "fields=" << m_header.field_count
 			 << "recordSize=" << m_header.record_size
@@ -115,7 +115,7 @@ bool WDCReader::open()
 			 << "flags=0x" << std::hex << m_header.flags << std::dec;
 #endif
 
-	LOG_INFO << "WDCReader step 1 done: version=" << m_wdcVersion
+	LOG_INFO << "DB2Reader step 1 done: version=" << m_wdcVersion
 			 << " fileSize=" << m_fileDataSize << " pos=" << getPos()
 			 << " for " << fullname();
 
@@ -158,7 +158,7 @@ bool WDCReader::open()
 		}
 	}
 
-	LOG_INFO << "WDCReader step 2 done: sectionCount=" << sectionCount
+	LOG_INFO << "DB2Reader step 2 done: sectionCount=" << sectionCount
 			 << " pos=" << getPos() << " for " << fullname();
 
 	// ── 3. Field structures ──────────────────────────────────────────────
@@ -169,7 +169,7 @@ bool WDCReader::open()
 			m_fieldSizes[fields[i].position] = fields[i].size;
 	}
 
-	LOG_INFO << "WDCReader step 3 done: totalFieldCount=" << m_header.total_field_count
+	LOG_INFO << "DB2Reader step 3 done: totalFieldCount=" << m_header.total_field_count
 			 << " pos=" << getPos() << " for " << fullname();
 
 	// ── 4. Field storage info ────────────────────────────────────────────
@@ -180,7 +180,7 @@ bool WDCReader::open()
 		read(m_fieldStorageInfo.data(), m_header.field_storage_info_size);
 	}
 
-	LOG_INFO << "WDCReader step 4 done: fieldStorageInfoSize=" << m_header.field_storage_info_size
+	LOG_INFO << "DB2Reader step 4 done: fieldStorageInfoSize=" << m_header.field_storage_info_size
 			 << " pos=" << getPos() << " for " << fullname();
 
 	// ── 5. Pallet data ──────────────────────────────────────────────────
@@ -204,7 +204,7 @@ bool WDCReader::open()
 		}
 	}
 
-	LOG_INFO << "WDCReader step 5 done: palletDataSize=" << m_header.pallet_data_size
+	LOG_INFO << "DB2Reader step 5 done: palletDataSize=" << m_header.pallet_data_size
 			 << " pos=" << getPos() << " for " << fullname();
 
 	// ── 6. Common data ──────────────────────────────────────────────────
@@ -236,7 +236,7 @@ bool WDCReader::open()
 		delete[] commonRaw;
 	}
 
-	LOG_INFO << "WDCReader step 6 done: commonDataSize=" << m_header.common_data_size
+	LOG_INFO << "DB2Reader step 6 done: commonDataSize=" << m_header.common_data_size
 			 << " pos=" << getPos() << " for " << fullname();
 
 	// ── 7. WDC4+ inter-section data ─────────────────────────────────────
@@ -254,7 +254,7 @@ bool WDCReader::open()
 		}
 	}
 
-	LOG_INFO << "WDCReader step 7 done: pos=" << getPos()
+	LOG_INFO << "DB2Reader step 7 done: pos=" << getPos()
 			 << " eof=" << isEof() << " for " << fullname();
 
 	// ── 8. Data sections ────────────────────────────────────────────────
@@ -271,7 +271,7 @@ bool WDCReader::open()
 		// This eliminates cumulative offset drift across sections.
 		seek(sec.fileOffset);
 
-		LOG_INFO << "WDCReader step 8: section " << si
+		LOG_INFO << "DB2Reader step 8: section " << si
 				 << " recordCount=" << sec.recordCount
 				 << " stringTableSize=" << sec.stringTableSize
 				 << " idListSize=" << sec.idListSize
@@ -292,7 +292,7 @@ bool WDCReader::open()
 		// mark the section as unusable.
 		if (recordDataOfs + recordDataSize > m_fileDataSize)
 		{
-			LOG_INFO << "WDCReader step 8: section " << si
+			LOG_INFO << "DB2Reader step 8: section " << si
 					 << " record data out of bounds (ofs=" << recordDataOfs
 					 << " size=" << recordDataSize
 					 << " fileSize=" << m_fileDataSize
@@ -408,7 +408,7 @@ bool WDCReader::open()
 			seekRelative(sec.offsetMapIdCount * 4);
 	}
 
-	LOG_INFO << "WDCReader step 8 done: data sections parsed, pos=" << getPos()
+	LOG_INFO << "DB2Reader step 8 done: data sections parsed, pos=" << getPos()
 			 << " eof=" << isEof() << " for " << fullname();
 
 	// ── 9. Detect encrypted sections & build record locations ───────────
@@ -418,7 +418,7 @@ bool WDCReader::open()
 	{
 		SectionData& sec = m_sections[si];
 
-		LOG_INFO << "WDCReader step 9: section " << si
+		LOG_INFO << "DB2Reader step 9: section " << si
 				 << " recordDataSize=" << sec.recordDataSize
 				 << " tactKey=" << sec.tactKeyHash
 				 << " for " << fullname();
@@ -433,7 +433,7 @@ bool WDCReader::open()
 			if (!sec.recordDataPtr ||
 				sec.recordDataPtr + sec.recordDataSize > m_fileData + m_fileDataSize)
 			{
-				LOG_INFO << "WDCReader: section " << si
+				LOG_INFO << "DB2Reader: section " << si
 						 << " record data out of file bounds, treating as encrypted in "
 						 << fullname();
 				sec.isEncrypted = true;
@@ -466,7 +466,7 @@ bool WDCReader::open()
 
 			if (isZeroed)
 			{
-				LOG_INFO << "WDCReader: skipping encrypted section " << si << " in " << fullname();
+				LOG_INFO << "DB2Reader: skipping encrypted section " << si << " in " << fullname();
 				sec.isEncrypted = true;
 				continue;
 			}
@@ -503,7 +503,7 @@ bool WDCReader::open()
 					break;
 				}
 				default:
-					LOG_ERROR << "WDCReader: unsupported ID compression type " << idInfo.storage_type;
+					LOG_ERROR << "DB2Reader: unsupported ID compression type " << idInfo.storage_type;
 					return false;
 				}
 
@@ -529,7 +529,7 @@ bool WDCReader::open()
 		recordCount += sec.recordCount;
 	}
 
-	LOG_INFO << "WDCReader step 9 done: recordLocations=" << m_recordLocations.size()
+	LOG_INFO << "DB2Reader step 9 done: recordLocations=" << m_recordLocations.size()
 			 << " for " << fullname();
 
 	// ── 10. Inflate copy table ──────────────────────────────────────────
@@ -551,7 +551,7 @@ bool WDCReader::open()
 
 	recordCount = m_recordLocations.size();
 
-	LOG_INFO << "WDCReader step 10 done: totalRecords=" << recordCount
+	LOG_INFO << "DB2Reader step 10 done: totalRecords=" << recordCount
 			 << " copyTable=" << m_copyTable.size() << " for " << fullname();
 
 	// Build ID-to-record-index lookup for O(1) getRow() by ID
@@ -560,7 +560,7 @@ bool WDCReader::open()
 	for (size_t i = 0; i < m_recordLocations.size(); i++)
 		m_idToRecordIndex[m_recordLocations[i].recordID] = i;
 
-	LOG_INFO << "WDCReader step 11 done: idToRecordIndex built for " << fullname();
+	LOG_INFO << "DB2Reader step 11 done: idToRecordIndex built for " << fullname();
 
 	// Populate relationship reverse lookup using a map for O(1) lookups
 	{
@@ -581,7 +581,7 @@ bool WDCReader::open()
 		}
 	}
 
-	LOG_INFO << "WDCReader: parsed " << fullname()
+	LOG_INFO << "DB2Reader: parsed " << fullname()
 			 << " version=" << m_wdcVersion
 			 << " records=" << recordCount
 			 << " sections=" << sectionCount;
@@ -590,7 +590,7 @@ bool WDCReader::open()
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-const unsigned char* WDCReader::getRecordOffset(unsigned int sectionIndex,
+const unsigned char* DB2Reader::getRecordOffset(unsigned int sectionIndex,
 												unsigned int recordIndexInSection) const
 {
 	const SectionData& sec = m_sections[sectionIndex];
@@ -620,7 +620,7 @@ const unsigned char* WDCReader::getRecordOffset(unsigned int sectionIndex,
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-uint64_t WDCReader::readBitpackedValue64(const FieldStorageInfo& info,
+uint64_t DB2Reader::readBitpackedValue64(const FieldStorageInfo& info,
 										 const unsigned char* recordOffset) const
 {
 	const uint32_t byteOffset = info.field_offset_bits / 8;
@@ -635,7 +635,7 @@ uint64_t WDCReader::readBitpackedValue64(const FieldStorageInfo& info,
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-bool WDCReader::readFieldValue(unsigned int sectionIndex,
+bool DB2Reader::readFieldValue(unsigned int sectionIndex,
 							   unsigned int recordIndexInSection,
 							   unsigned int fieldIndex,
 							   unsigned int arrayIndex,
@@ -692,7 +692,7 @@ bool WDCReader::readFieldValue(unsigned int sectionIndex,
 		auto it = m_palletBlockOffsets.find(fieldIndex);
 		if (it == m_palletBlockOffsets.end())
 		{
-			LOG_ERROR << "WDCReader: missing pallet offset for field " << fieldIndex;
+			LOG_ERROR << "DB2Reader: missing pallet offset for field " << fieldIndex;
 			return false;
 		}
 		const uint32_t offset = it->second + index * 4;
@@ -705,7 +705,7 @@ bool WDCReader::readFieldValue(unsigned int sectionIndex,
 		auto it = m_palletBlockOffsets.find(fieldIndex);
 		if (it == m_palletBlockOffsets.end())
 		{
-			LOG_ERROR << "WDCReader: missing pallet offset for field " << fieldIndex;
+			LOG_ERROR << "DB2Reader: missing pallet offset for field " << fieldIndex;
 			return false;
 		}
 		const uint32_t offset = it->second + index * arraySize * 4 + arrayIndex * 4;
@@ -713,7 +713,7 @@ bool WDCReader::readFieldValue(unsigned int sectionIndex,
 		break;
 	}
 	default:
-		LOG_ERROR << "WDCReader: unsupported compression type " << info.storage_type;
+		LOG_ERROR << "DB2Reader: unsupported compression type " << info.storage_type;
 		return false;
 	}
 
@@ -721,7 +721,7 @@ bool WDCReader::readFieldValue(unsigned int sectionIndex,
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-std::vector<std::string> WDCReader::get(unsigned int recordIndex,
+std::vector<std::string> DB2Reader::get(unsigned int recordIndex,
 										const core::TableStructure* structure) const
 {
 	std::vector<std::string> result;

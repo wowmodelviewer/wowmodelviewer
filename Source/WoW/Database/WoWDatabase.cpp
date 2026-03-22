@@ -2,7 +2,7 @@
 #include "DB2Table.h"
 #include "Game.h"
 #include "Logger.h"
-#include "WDCReader.h"
+#include "DB2Reader.h"
 #include "DBDFile.h"
 
 #include <sstream>
@@ -55,10 +55,10 @@ DB2Table* wow::WoWDatabase::buildDB2Table(const std::string& tableName)
 		fields.push_back(std::move(info));
 	}
 
-	// Create the WDCReader from the CASC file
+	// Create the DB2Reader from the CASC file
 	LOG_INFO << "buildDB2Table: createDBFile for " << tableName;
 	DBFile* dbFile = tblStruct->createDBFile();
-	auto* reader = dynamic_cast<WDCReader*>(dbFile);
+	auto* reader = dynamic_cast<DB2Reader*>(dbFile);
 	if (!reader)
 	{
 		delete dbFile;
@@ -221,7 +221,7 @@ DBFile* wow::TableStructure::createDBFile()
 			|| strncmp(header, "WDC4", 4) == 0
 			|| strncmp(header, "WDC5", 4) == 0
 			|| strncmp(header, "CLS1", 4) == 0)
-			result = new WDCReader(fileToOpen->fullname());
+			result = new DB2Reader(fileToOpen->fullname());
 		else
 			LOG_ERROR << "Unsupported database file" << header[0] << header[1] << header[2] << header[3];
 

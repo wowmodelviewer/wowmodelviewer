@@ -6,7 +6,7 @@
 #include <vector>
 #include <unordered_map>
 
-class WDCReader;
+class DB2Reader;
 
 /// @brief Describes a single field (column) in a DB2 table.
 struct DB2FieldInfo
@@ -48,7 +48,7 @@ private:
 class DB2Table
 {
 public:
-	DB2Table(WDCReader* reader, std::vector<DB2FieldInfo> fields);
+	DB2Table(DB2Reader* reader, std::vector<DB2FieldInfo> fields);
 	~DB2Table();
 
 	DB2Table(const DB2Table&) = delete;
@@ -96,7 +96,7 @@ private:
 	// Get the record ID for a given record index.
 	uint32_t getRecordID(size_t recordIndex) const;
 
-	WDCReader* m_reader;  // owned
+	DB2Reader* m_reader;  // owned
 	std::vector<DB2FieldInfo> m_fields;
 	std::unordered_map<std::string, size_t> m_fieldNameToIndex;  // base name -> index in m_fields
 };

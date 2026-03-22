@@ -1,5 +1,5 @@
 #include "DB2Table.h"
-#include "WDCReader.h"
+#include "DB2Reader.h"
 #include "Logger.h"
 
 #include <algorithm>
@@ -85,7 +85,7 @@ static std::string toLower(const std::string& s)
 
 // ── DB2Table ─────────────────────────────────────────────────────────────────
 
-DB2Table::DB2Table(WDCReader* reader, std::vector<DB2FieldInfo> fields)
+DB2Table::DB2Table(DB2Reader* reader, std::vector<DB2FieldInfo> fields)
 	: m_reader(reader), m_fields(std::move(fields))
 {
 	for (size_t i = 0; i < m_fields.size(); i++)
