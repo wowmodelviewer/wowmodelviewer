@@ -423,7 +423,7 @@ void WoWModel::initCommon()
 		return;
 	}
 
-	if (gamefile->isChunked() && !gamefile->setChunk("MD21")) // Legion chunked files
+	if (!gamefile->setChunk("MD21"))
 	{
 		LOG_ERROR << "Unable to set chunk to MD21 for model:" << gamefile->fullname();
 		gamefile->close();
@@ -435,10 +435,7 @@ void WoWModel::initCommon()
 	initRaceInfos();
 	cd.reset(this);
 
-	// replace .MDX with .M2
 	std::string tempname = gamefile->fullname();
-	if (auto pos = tempname.find(".mdx"); pos != std::string::npos)
-		tempname.replace(pos, 4, ".m2");
 
 	ok = true;
 
@@ -457,9 +454,6 @@ void WoWModel::initCommon()
 		gamefile->close();
 		return;
 	}
-
-	if (header.GlobalModelFlags & 0x200000)
-		model24500 = true;
 
 	modelname = tempname;
 	auto list = core::split(modelname, '\\');
