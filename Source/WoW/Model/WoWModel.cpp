@@ -4367,16 +4367,32 @@ void WoWModel::refresh()
 	// If model is one of these races, show the feet (don't wear boots)
 	cd.showFeet = infos.barefeet;
 
-	// Reset geosets
-	for (const auto geo : cd.geosets)
-		setGeosetGroupDisplay(static_cast<CharGeosets>(geo.first), geo.second);
-
 	// finalize character texture
 	const GLuint charTex = 0;
 	tex.compose(charTex);
 
 	// set replacable textures
 	replaceTextures[TEXTURE_SKIN] = charTex;
+
+	// refresh merged models (must happen BEFORE geoset display changes,
+	// because refreshMerging() resets geosets from rawGeosets)
+	refreshMerging();
+
+	// Apply geoset display states after merging so they aren't overwritten
+	for (const auto geo : cd.geosets)
+		setGeosetGroupDisplay(static_cast<CharGeosets>(geo.first), geo.second);
+
+	// Group 32 (CG_FACE / HeadSwap): enable ALL variants by default (matches wow.export)
+	{
+		constexpr int faceA = static_cast<int>(CG_FACE) * 100;
+		constexpr int faceB = (static_cast<int>(CG_FACE) + 1) * 100;
+		for (uint i = 0; i < rawGeosets.size(); i++)
+		{
+			const int id = geosets[i]->id;
+			if (id >= faceA && id < faceB)
+				showGeoset(i, true);
+		}
+	}
 
 	// Eye Glow Geosets are ID 1701, 1702, etc.
 	const int egt = static_cast<int>(cd.eyeGlowType);
@@ -4387,9 +4403,6 @@ void WoWModel::refresh()
 		if ((int)(id / 100) == CG_EYEGLOW) // geosets 1700..1799
 			showGeoset(static_cast<uint>(i), (id == egtId));
 	}
-
-	// refresh merged models
-	refreshMerging();
 }
 
 std::string WoWModel::getNameForTex(uint16 Tex)

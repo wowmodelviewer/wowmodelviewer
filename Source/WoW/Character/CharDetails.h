@@ -7,6 +7,7 @@
 
 #pragma once
 
+#include <set>
 #include <string>
 
 #include "CharTexture.h"
@@ -137,24 +138,18 @@ private:
 	};
 
 	void fillCustomizationMapForOption(uint chrCustomizationOption);
-	bool applyChrCustomizationElements(uint chrCustomizationOption, uint choiceId, uint relatedChoiceId);
+	void rebuildAllCustomizationElements();
 	static int bitMaskToSectionType(int mask);
-	std::vector<int> getParentOptions(uint chrCustomizationOption);
-	int getChildOption(uint chrCustomizationOption);
-	void initLinkedOptionsMap();
 	void refreshGeosets();
 	void refreshTextures();
 	void refreshSkinnedModels();
 
 	std::map<uint, std::vector<uint>> choicesPerOptionMap_;
 	// map < ChrCustomizationOption::ID, vector <ChrCustomizationChoice::ID> >
+	std::set<uint> defaultOptionIds_;
+	// options without Flags & 0x20 get a default choice on reset (matches wow.export)
 	std::map<uint, CustomizationElements> customizationElementsPerOption_;
 	// keep track of current elements applied for a given option
 	std::vector<std::pair<uint, std::pair<uint, uint>>> models_;
 	// vector < pair < GameFileId, pair <GeosetType, GeosetID> > >
-
-	static std::multimap<uint, int> LINKED_OPTIONS_MAP_;
-	// multimap < child ChrCustomizationOption::ID, parent ChrCustomizationOption::ID>
-	// (ie, <markings color, markings> or <tattoo color, tattoo>)
-	// some child options are multi parent (ie Tauren facial Markings & body markings are sharing same color)
 };

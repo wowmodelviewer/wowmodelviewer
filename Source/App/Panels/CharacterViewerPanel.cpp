@@ -17,7 +17,6 @@
 #include "AppSettings.h"
 #include "Renderer.h"
 #include "Attachment.h"
-#include "RaceInfos.h"
 #include "WoWDatabase.h"
 #include "WoWFolder.h"
 #include "Game.h"
@@ -28,6 +27,7 @@
 
 #include <algorithm>
 #include <map>
+#include <set>
 #include <string>
 #include <vector>
 
@@ -39,62 +39,60 @@ struct CharBrowserRace
 {
     int         raceID = 0;
     std::string name;
-    bool hasMale     = false;
-    bool hasFemale   = false;
-    bool hasMaleHD   = false;
-    bool hasFemaleHD = false;
+};
+
+// ---- Body type data (matches wow.export ChrRaceXChrModel flow) ------------
+struct BodyType
+{
+    int         chrModelID = 0;
+    int         fileDataID = 0;
+    std::string label;
 };
 
 std::vector<CharBrowserRace> s_races;
+std::vector<BodyType>        s_bodyTypes;
 std::vector<size_t>          s_filtered;
 bool  s_built        = false;
 bool  s_filterDirty  = true;
 char  s_searchBuf[256] = {};
 
 // ---- Character Viewer state -----------------------------------------------
-int   s_selectedRaceIdx = -1;
-int   s_gender          = 0;       // 0 = Male, 1 = Female
-bool  s_preferHD        = true;
-float s_leftWidth       = 220.0f;
-float s_rightWidth      = 220.0f;
+int   s_selectedRaceIdx  = -1;
+int   s_selectedBodyType = -1;
+float s_leftWidth        = 280.0f;
+float s_rightWidth       = 220.0f;
 
 // ---- Helpers --------------------------------------------------------------
+
+/// Build race list from ChrRaceXChrModel + ChrRaces (matches wow.export).
+/// Only includes races that have at least one model in ChrRaceXChrModel.
 void buildRaceList()
 {
     s_races.clear();
 
     const auto* chrRaces = WOWDB.getTable("ChrRaces");
+    const auto* xTable   = WOWDB.getTable("ChrRaceXChrModel");
+    if (!chrRaces || !xTable) return;
+
+    // Collect race IDs that have at least one model
+    std::set<int> raceIdsWithModels;
+    for (const auto& row : *xTable)
+        raceIdsWithModels.insert(static_cast<int>(row.getUInt("ChrRacesID")));
 
     std::map<int, CharBrowserRace> raceMap;
-    for (const auto& [fileID, info] : RaceInfos::getAllRaces())
+    for (int rid : raceIdsWithModels)
     {
-        auto& entry = raceMap[info.raceID];
-        entry.raceID = info.raceID;
+        auto row = chrRaces->getRow(static_cast<uint32_t>(rid));
+        if (!row)
+            continue;
 
-        if (entry.name.empty())
-        {
-            if (chrRaces)
-            {
-                auto row = chrRaces->getRow(static_cast<uint32_t>(info.raceID));
-                if (row)
-                    entry.name = row.getString("Name_Lang");
-            }
-            if (entry.name.empty())
-                entry.name = info.prefix.empty()
-                    ? ("Race " + std::to_string(info.raceID))
-                    : info.prefix;
-        }
+        CharBrowserRace race;
+        race.raceID = rid;
+        race.name = row.getString("Name_Lang");
+        if (race.name.empty())
+            race.name = "Race " + std::to_string(rid);
 
-        if (info.sexID == GENDER_MALE)
-        {
-            if (info.isHD) entry.hasMaleHD = true;
-            else           entry.hasMale   = true;
-        }
-        else
-        {
-            if (info.isHD) entry.hasFemaleHD = true;
-            else           entry.hasFemale   = true;
-        }
+        raceMap[rid] = std::move(race);
     }
 
     for (auto& [id, race] : raceMap)
@@ -105,6 +103,56 @@ void buildRaceList()
         { return a.name < b.name; });
 
     s_filterDirty = true;
+}
+
+/// Build body type list for a given race from ChrRaceXChrModel → ChrModel →
+/// CreatureDisplayInfo → CreatureModelData → FileDataID (matches wow.export).
+void buildBodyTypes(int raceID)
+{
+    s_bodyTypes.clear();
+    s_selectedBodyType = -1;
+
+    const auto* xTable   = WOWDB.getTable("ChrRaceXChrModel");
+    const auto* chrModel = WOWDB.getTable("ChrModel");
+    const auto* cdi      = WOWDB.getTable("CreatureDisplayInfo");
+    const auto* cmd      = WOWDB.getTable("CreatureModelData");
+    if (!xTable || !chrModel || !cdi || !cmd) return;
+
+    struct ModelEntry { int sex; int chrModelID; };
+    std::vector<ModelEntry> models;
+
+    for (const auto& row : *xTable)
+    {
+        if (static_cast<int>(row.getUInt("ChrRacesID")) == raceID)
+        {
+            const int modelID = static_cast<int>(row.getUInt("ChrModelID"));
+            DB2Row modelRow = chrModel->getRow(static_cast<uint32_t>(modelID));
+            if (!modelRow) continue;
+            const int sex = static_cast<int>(modelRow.getUInt("Sex"));
+            models.push_back({ sex, modelID });
+        }
+    }
+
+    std::sort(models.begin(), models.end(),
+        [](const ModelEntry& a, const ModelEntry& b) { return a.sex < b.sex; });
+
+    for (const auto& m : models)
+    {
+        DB2Row modelRow = chrModel->getRow(static_cast<uint32_t>(m.chrModelID));
+        if (!modelRow) continue;
+
+        DB2Row displayRow = cdi->getRow(modelRow.getUInt("DisplayID"));
+        if (!displayRow) continue;
+
+        DB2Row modelDataRow = cmd->getRow(displayRow.getUInt("ModelID"));
+        if (!modelDataRow) continue;
+
+        BodyType bt;
+        bt.chrModelID = m.chrModelID;
+        bt.fileDataID = static_cast<int>(modelDataRow.getUInt("FileDataID"));
+        bt.label = (m.sex == 0) ? "Male" : (m.sex == 1) ? "Female" : "Body " + std::to_string(m.sex + 1);
+        s_bodyTypes.push_back(std::move(bt));
+    }
 }
 
 void rebuildFilter()
@@ -126,37 +174,11 @@ void rebuildFilter()
     s_filterDirty = false;
 }
 
-void loadRace(int raceID, int gender, bool preferHD,
-              const CharacterViewerPanel::DrawContext& ctx)
+void loadBodyType(int fileDataID, const CharacterViewerPanel::DrawContext& ctx)
 {
-    int fileID     = -1;
-    int fallbackID = -1;
-
-    for (const auto& [fid, info] : RaceInfos::getAllRaces())
+    if (fileDataID > 0)
     {
-        if (info.raceID == raceID && info.sexID == gender)
-        {
-            if (preferHD && info.isHD)
-            {
-                fileID = fid;
-                break;
-            }
-            else if (!preferHD && !info.isHD)
-            {
-                fileID = fid;
-                break;
-            }
-            if (fallbackID == -1)
-                fallbackID = fid;
-        }
-    }
-
-    if (fileID == -1)
-        fileID = fallbackID;
-
-    if (fileID > 0)
-    {
-        GameFile* file = GAMEDIRECTORY.getFile(fileID);
+        GameFile* file = GAMEDIRECTORY.getFile(fileDataID);
         if (file && ctx.loadModel)
             ctx.loadModel(file);
     }
@@ -219,89 +241,104 @@ void draw(const DrawContext& ctx)
             {
                 const auto& race = s_races[i];
                 bool selected = (i == s_selectedRaceIdx);
-                if (ImGui::Selectable(race.name.c_str(), selected))
+                std::string label = race.name + "##race" + std::to_string(race.raceID);
+                if (ImGui::Selectable(label.c_str(), selected) && !selected)
                 {
                     s_selectedRaceIdx = i;
-                    loadRace(race.raceID, s_gender, s_preferHD, ctx);
+                    buildBodyTypes(race.raceID);
+                    if (!s_bodyTypes.empty())
+                    {
+                        s_selectedBodyType = 0;
+                        loadBodyType(s_bodyTypes[0].fileDataID, ctx);
+                    }
                 }
                 if (selected) ImGui::SetItemDefaultFocus();
             }
             ImGui::EndCombo();
         }
 
-        // Gender radio
+        // Body type selector (populated from ChrRaceXChrModel)
+        if (!s_bodyTypes.empty())
         {
-            int prevGender = s_gender;
-            ImGui::RadioButton("Male##cv",   &s_gender, 0);
-            ImGui::SameLine();
-            ImGui::RadioButton("Female##cv", &s_gender, 1);
-            if (s_gender != prevGender && s_selectedRaceIdx >= 0)
-                loadRace(s_races[s_selectedRaceIdx].raceID,
-                         s_gender, s_preferHD, ctx);
+            const char* bodyPreview =
+                (s_selectedBodyType >= 0 &&
+                 s_selectedBodyType < static_cast<int>(s_bodyTypes.size()))
+                ? s_bodyTypes[s_selectedBodyType].label.c_str()
+                : "<select body>";
+
+            ImGui::SetNextItemWidth(-1);
+            if (ImGui::BeginCombo("##cvBodyType", bodyPreview))
+            {
+                for (int i = 0; i < static_cast<int>(s_bodyTypes.size()); ++i)
+                {
+                    bool selected = (i == s_selectedBodyType);
+                    std::string bodyLabel = s_bodyTypes[i].label + "##body" + std::to_string(s_bodyTypes[i].chrModelID);
+                    if (ImGui::Selectable(bodyLabel.c_str(), selected) && !selected)
+                    {
+                        s_selectedBodyType = i;
+                        loadBodyType(s_bodyTypes[i].fileDataID, ctx);
+                    }
+                    if (selected) ImGui::SetItemDefaultFocus();
+                }
+                ImGui::EndCombo();
+            }
         }
 
-        // HD toggle
-        {
-            bool prevHD = s_preferHD;
-            ImGui::Checkbox("HD Model##cv", &s_preferHD);
-            if (s_preferHD != prevHD && s_selectedRaceIdx >= 0)
-                loadRace(s_races[s_selectedRaceIdx].raceID,
-                         s_gender, s_preferHD, ctx);
-        }
-
-        // ---- Customization Options ----
+        // ---- Customization Options (grouped by category) ----
         if (isChar && ctx.customizationOptions && !ctx.customizationOptions->empty())
         {
-            ImGui::SeparatorText("Customization");
+            // Try to load ChrCustomizationCategory table for section names
+            const auto* catTable = WOWDB.getTable("ChrCustomizationCategory");
+
+            unsigned int lastCatID = UINT_MAX;
             for (auto& opt : *ctx.customizationOptions)
             {
                 if (opt.choiceNames.empty()) continue;
+
+                // Show section header when category changes
+                if (opt.categoryID != lastCatID)
+                {
+                    lastCatID = opt.categoryID;
+                    std::string catName;
+                    if (catTable)
+                    {
+                        auto catRow = catTable->getRow(opt.categoryID);
+                        if (catRow)
+                            catName = catRow.getString("CategoryName_Lang");
+                    }
+                    if (catName.empty())
+                        catName = "Customization";
+                    ImGui::SeparatorText(catName.c_str());
+                }
+
                 const char* preview =
                     (opt.selectedIndex >= 0 &&
                      opt.selectedIndex < static_cast<int>(opt.choiceNames.size()))
                     ? opt.choiceNames[opt.selectedIndex].c_str()
                     : "<none>";
+                ImGui::Text("%s:", opt.name.c_str());
                 ImGui::SetNextItemWidth(-1);
-                if (ImGui::BeginCombo(opt.name.c_str(), preview))
+                std::string comboID = "##cvOpt" + std::to_string(opt.optionID);
+                if (ImGui::BeginCombo(comboID.c_str(), preview))
                 {
                     for (int c = 0; c < static_cast<int>(opt.choiceNames.size()); ++c)
                     {
                         bool sel = (c == opt.selectedIndex);
-                        if (ImGui::Selectable(opt.choiceNames[c].c_str(), sel))
+                        std::string choiceLabel = opt.choiceNames[c] + "##ch" + std::to_string(opt.choiceIDs[c]);
+                        if (ImGui::Selectable(choiceLabel.c_str(), sel))
                         {
-                            opt.selectedIndex = c;
-                            model->cd.set(opt.optionID, opt.choiceIDs[c]);
-                            model->refresh();
+                            if (c != opt.selectedIndex)
+                            {
+                                opt.selectedIndex = c;
+                                model->cd.set(opt.optionID, opt.choiceIDs[c]);
+                                model->refresh();
+                            }
                         }
                         if (sel) ImGui::SetItemDefaultFocus();
                     }
                     ImGui::EndCombo();
                 }
             }
-        }
-
-        // ---- Display Toggles ----
-        if (isChar)
-        {
-            ImGui::SeparatorText("Display");
-            auto& cd = model->cd;
-            bool changed = false;
-            changed |= ImGui::Checkbox("Underwear##cv",    &cd.showUnderwear);
-            changed |= ImGui::Checkbox("Hair##cv",         &cd.showHair);
-            changed |= ImGui::Checkbox("Facial Hair##cv",  &cd.showFacialHair);
-            changed |= ImGui::Checkbox("Ears##cv",         &cd.showEars);
-            changed |= ImGui::Checkbox("Feet##cv",         &cd.showFeet);
-
-            int eyeGlow = static_cast<int>(cd.eyeGlowType);
-            ImGui::Text("Eye Glow:");
-            if (ImGui::RadioButton("None##cveg",    &eyeGlow, EGT_NONE))        changed = true;
-            ImGui::SameLine();
-            if (ImGui::RadioButton("Default##cveg", &eyeGlow, EGT_DEFAULT))     changed = true;
-            ImGui::SameLine();
-            if (ImGui::RadioButton("DK##cveg",      &eyeGlow, EGT_DEATHKNIGHT)) changed = true;
-            cd.eyeGlowType = static_cast<EyeGlowTypes>(eyeGlow);
-
-            if (changed) model->refresh();
         }
     }
     ImGui::EndChild();

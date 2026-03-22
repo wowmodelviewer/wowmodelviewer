@@ -244,15 +244,35 @@ void initCharacterControl(WoWModel* model, AppState& app)
     if (!optTable || !choiceTable) return;
     const uint32_t targetModelID = static_cast<uint32_t>(infos.ChrModelID[0]);
 
-    struct OptionEntry { uint32_t id; uint32_t orderIndex; };
+    // Collect ALL options for this ChrModel (no ChrCustomizationID filter — matches wow.export)
+    struct OptionEntry { uint32_t id; uint32_t orderIndex; uint32_t flags; uint32_t categoryID; };
     std::vector<OptionEntry> matchingOptions;
     for (const auto& row : *optTable)
     {
-        if (row.getUInt("ChrModelID") == targetModelID && row.getUInt("ChrCustomizationID") != 0)
-            matchingOptions.push_back({ row.recordID(), row.getUInt("OrderIndex") });
+        if (row.getUInt("ChrModelID") == targetModelID)
+            matchingOptions.push_back({ row.recordID(), row.getUInt("OrderIndex"), row.getUInt("Flags"),
+                                         row.getUInt("ChrCustomizationCategoryID") });
     }
     std::sort(matchingOptions.begin(), matchingOptions.end(),
         [](const OptionEntry& a, const OptionEntry& b) { return a.orderIndex < b.orderIndex; });
+
+    // Collect all choices grouped by option, sorted by OrderIndex (matches wow.export)
+    struct ChoiceData { uint32_t id; uint32_t orderIndex; std::string name; };
+    std::map<uint32_t, std::vector<ChoiceData>> choicesByOption;
+    for (const auto& row : *choiceTable)
+    {
+        uint32_t optID = row.getUInt("ChrCustomizationOptionID");
+        std::string cname = row.getString("Name_Lang");
+        uint32_t orderIdx = row.getUInt("OrderIndex");
+        if (cname.empty())
+            cname = "Choice " + std::to_string(orderIdx);
+        choicesByOption[optID].push_back({ row.recordID(), orderIdx, std::move(cname) });
+    }
+    for (auto& [optID, choices] : choicesByOption)
+    {
+        std::sort(choices.begin(), choices.end(),
+            [](const ChoiceData& a, const ChoiceData& b) { return a.orderIndex < b.orderIndex; });
+    }
 
     for (const auto& optEntry : matchingOptions)
     {
@@ -260,39 +280,32 @@ void initCharacterControl(WoWModel* model, AppState& app)
 
         CustomizationOption opt;
         opt.optionID = optionID;
+        opt.categoryID = optEntry.categoryID;
 
+        // Option name: Name_lang, fallback to "Option " + OrderIndex (matches wow.export)
         auto optRow = optTable->getRow(optionID);
         if (optRow)
         {
             std::string n = optRow.getString("Name_Lang");
-            opt.name = n.empty() ? ("Option " + std::to_string(optionID)) : n;
+            opt.name = n.empty() ? ("Option " + std::to_string(optEntry.orderIndex)) : n;
         }
         else
         {
-            opt.name = "Option " + std::to_string(optionID);
+            opt.name = "Option " + std::to_string(optEntry.orderIndex);
         }
 
-        std::vector<unsigned int> choiceIDs = cd.getCustomizationChoices(optionID);
-        if (choiceIDs.empty())
+        // Get choices directly from DB (not through CharDetails)
+        auto it = choicesByOption.find(optionID);
+        if (it == choicesByOption.end() || it->second.empty())
             continue;
 
-        std::map<unsigned int, std::string> idToName;
-        for (unsigned int cid : choiceIDs)
+        for (const auto& choice : it->second)
         {
-            auto cRow = choiceTable->getRow(cid);
-            if (cRow)
-            {
-                std::string cname = cRow.getString("Name_Lang");
-                idToName[cid] = cname.empty() ? ("Choice " + std::to_string(cid)) : cname;
-            }
-        }
-        for (unsigned int cid : choiceIDs)
-        {
-            opt.choiceIDs.push_back(cid);
-            auto it = idToName.find(cid);
-            opt.choiceNames.push_back(it != idToName.end() ? it->second : ("Choice " + std::to_string(cid)));
+            opt.choiceIDs.push_back(choice.id);
+            opt.choiceNames.push_back(choice.name);
         }
 
+        // Set selected index from current customization state
         unsigned int cur = cd.get(optionID);
         opt.selectedIndex = 0;
         for (size_t c = 0; c < opt.choiceIDs.size(); ++c)

@@ -1,5 +1,6 @@
 #pragma once
 
+#include <algorithm>
 #include <cstdint>
 #include <cstring>
 #include <string>
@@ -9,8 +10,10 @@
 ///
 /// All WoW chunked files (M2, .skel, .bone, .anim, WMO, ADT, etc.) share
 /// a common envelope: sequential [4-char magic][uint32 size][data] blocks.
-/// This reader walks the buffer and returns the chunk table without
-/// requiring a whitelist.
+/// This reader walks the buffer and returns the chunk table.  Detection of
+/// chunked files uses a whitelist of known first-chunk IDs to avoid false
+/// positives on non-chunked formats (.skin, .db2, .blp, etc.) that also
+/// happen to start with printable ASCII.
 namespace ChunkReader
 {
 	/// @brief On-disk chunk header: 4-byte magic + 4-byte size.
@@ -30,11 +33,28 @@ namespace ChunkReader
 		uint32_t     size;     ///< Size of the chunk data in bytes.
 	};
 
-	/// @brief Determine whether a buffer begins with a valid chunk header.
+	/// Known first-chunk magic values for WoW chunked file formats.
+	/// Only the magic that can appear as the *first* chunk in a file
+	/// needs to be listed here — inner chunks are parsed generically.
+	inline const std::vector<std::string>& knownFirstChunks()
+	{
+		static const std::vector<std::string> chunks =
+		{
+			// M2 model chunks
+			"PFID", "SFID", "AFID", "BFID", "MD21",
+			"TXAC", "EXPT", "EXP2", "PABC", "PADC",
+			"PSBC", "PEDC", "SKID", "TXID", "LDV1",
+			// Animation / skeleton chunks
+			"AFM2", "AFSA", "AFSB",
+			"SKL1", "SKA1", "SKB1", "SKS1", "SKPD",
+		};
+		return chunks;
+	}
+
+	/// @brief Determine whether a buffer begins with a known chunked-file header.
 	///
-	/// Checks that the first 4 bytes are printable ASCII and the declared
-	/// size fits within the buffer.  This replaces the old KNOWN_CHUNKS
-	/// whitelist with a format-agnostic heuristic.
+	/// Checks the first 4 bytes against the whitelist of known WoW chunk IDs
+	/// and verifies the declared size fits within the buffer.
 	/// @param data       Pointer to the start of the buffer.
 	/// @param dataSize   Total size of the buffer in bytes.
 	/// @return true if the buffer appears to be chunk-structured.
@@ -46,13 +66,10 @@ namespace ChunkReader
 		ChunkHeader header{};
 		std::memcpy(&header, data, sizeof(ChunkHeader));
 
-		// Magic bytes should be printable ASCII (0x20–0x7E) — this is true
-		// for all known WoW chunk IDs (MD21, MOHD, MVER, SKL1, etc.)
-		for (char c : header.magic)
-		{
-			if (c < 0x20 || c > 0x7E)
-				return false;
-		}
+		const std::string magic(header.magic, 4);
+		const auto& known = knownFirstChunks();
+		if (std::find(known.begin(), known.end(), magic) == known.end())
+			return false;
 
 		// The first chunk's data must fit within the file.
 		return (sizeof(ChunkHeader) + header.size) <= dataSize;

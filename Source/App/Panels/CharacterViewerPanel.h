@@ -24,6 +24,7 @@ namespace CharacterViewerPanel
 struct CustomizationOption
 {
     unsigned int optionID = 0;
+    unsigned int categoryID = 0;
     std::string name;
     std::vector<unsigned int> choiceIDs;
     std::vector<std::string> choiceNames;
