@@ -14,29 +14,26 @@ wow::WoWDatabase::WoWDatabase()
 {
 }
 
-wow::WoWDatabase::~WoWDatabase()
-{
-	for (auto& [name, table] : m_tables)
-		delete table;
-}
+wow::WoWDatabase::~WoWDatabase() = default;
 
 const DB2Table* wow::WoWDatabase::getTable(const std::string& name)
 {
 	auto it = m_tables.find(name);
 	if (it != m_tables.end())
-		return it->second;
+		return it->second.get();
 
-	DB2Table* table = buildDB2Table(name);
-	m_tables[name] = table;
-	return table;
+	auto table = buildDB2Table(name);
+	const DB2Table* result = table.get();
+	m_tables[name] = std::move(table);
+	return result;
 }
 
-DB2Table* wow::WoWDatabase::buildDB2Table(const std::string& tableName)
+std::unique_ptr<DB2Table> wow::WoWDatabase::buildDB2Table(const std::string& tableName)
 {
 	LOG_INFO << "buildDB2Table: start for " << tableName;
 
 	LOG_INFO << "buildDB2Table: buildTableStructure for " << tableName;
-	core::TableStructure* tblStruct = buildTableStructure(tableName);
+	std::unique_ptr<core::TableStructure> tblStruct(buildTableStructure(tableName));
 	if (!tblStruct)
 		return nullptr;
 
@@ -81,25 +78,21 @@ DB2Table* wow::WoWDatabase::buildDB2Table(const std::string& tableName)
 	}
 	if (db2Path.empty())
 	{
-		delete tblStruct;
 		LOG_ERROR << "WoWDatabase: DB2 file not found for table " << tableName;
 		return nullptr;
 	}
 
-	auto* reader = new DB2Reader(db2Path);
+	auto reader = std::make_unique<DB2Reader>(db2Path);
 
 	LOG_INFO << "buildDB2Table: reader->open() for " << tableName;
 	if (!reader->open())
 	{
-		delete reader;
-		delete tblStruct;
 		LOG_ERROR << "WoWDatabase: failed to open DB2 for table " << tableName;
 		return nullptr;
 	}
 
 	LOG_INFO << "buildDB2Table: done for " << tableName;
-	delete tblStruct;
-	return new DB2Table(reader, std::move(fields));
+	return std::make_unique<DB2Table>(std::move(reader), std::move(fields));
 }
 
 core::TableStructure* wow::WoWDatabase::createTableStructure()

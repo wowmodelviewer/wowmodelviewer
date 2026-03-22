@@ -339,7 +339,7 @@ void beginLoadWoW(AppState& app)
     app.settings.gamePath = path;
 
     if (!core::Game::instance().initDone())
-        core::Game::instance().init(new wow::WoWFolder(app.settings.gamePath), new wow::WoWDatabase());
+        core::Game::instance().init(std::make_unique<wow::WoWFolder>(app.settings.gamePath), std::make_unique<wow::WoWDatabase>());
 
     app.loading.pendingConfigs = GAMEDIRECTORY.configsFound();
 

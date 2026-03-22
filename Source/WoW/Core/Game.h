@@ -1,5 +1,6 @@
 #pragma once
 
+#include <memory>
 #include <string>
 #include "GameFolder.h"
 
@@ -19,19 +20,18 @@ namespace core
 	class _GAME_API_ Game
 	{
 	public:
-		/// @brief Access the singleton instance (created on first call).
+		/// @brief Access the singleton instance (Meyers singleton).
 		static Game& instance()
 		{
-			if (Game::m_instance == nullptr)
-				Game::m_instance = new Game();
-			return *m_instance;
+			static Game s_instance;
+			return s_instance;
 		}
 
 		/// @brief Initialise with the given folder and database backends.
-		void init(core::GameFolder* folder, core::GameDatabase* db);
+		void init(std::unique_ptr<core::GameFolder> folder, std::unique_ptr<core::GameDatabase> db);
 
 		/// @brief True once both the folder and database have been set.
-		bool initDone() { return ((m_db != nullptr) && (m_folder != nullptr)); }
+		bool initDone() { return (m_db != nullptr) && (m_folder != nullptr); }
 
 		/// @brief Overlay custom loose files on top of the game archive.
 		void addCustomFiles(const std::string& path, bool bypassOriginalFiles);
@@ -42,20 +42,16 @@ namespace core
 		void setConfigFolder(const std::string& folder) { m_configFolder = folder; }
 		std::string configFolder() { return m_configFolder; }
 
+		Game(const Game&) = delete;
+		Game& operator=(const Game&) = delete;
+
 	private:
-		// disable explicit construct and destruct
 		Game();
+		~Game();
 
-		virtual ~Game() = default;
-
-		Game(const Game&);
-		void operator=(const Game&);
-
-		core::GameFolder* m_folder;
-		core::GameDatabase* m_db;
+		std::unique_ptr<core::GameFolder> m_folder;
+		std::unique_ptr<core::GameDatabase> m_db;
 
 		std::string m_configFolder;
-
-		static Game* m_instance;
 	};
 }

@@ -1,15 +1,13 @@
 #include "Game.h"
+#include "GameDatabase.h"
 
-core::Game* core::Game::m_instance = nullptr;
+core::Game::Game() = default;
+core::Game::~Game() = default;
 
-core::Game::Game() : m_folder(nullptr), m_db(nullptr)
+void core::Game::init(std::unique_ptr<core::GameFolder> folder, std::unique_ptr<core::GameDatabase> db)
 {
-}
-
-void core::Game::init(core::GameFolder* folder, core::GameDatabase* db)
-{
-	m_db = db;
-	m_folder = folder;
+	m_db = std::move(db);
+	m_folder = std::move(folder);
 	if (m_folder)
 		m_folder->init();
 }

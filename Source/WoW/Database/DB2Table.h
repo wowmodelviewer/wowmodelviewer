@@ -2,6 +2,7 @@
 
 #include <cstdint>
 #include <cstring>
+#include <memory>
 #include <string>
 #include <vector>
 #include <unordered_map>
@@ -48,7 +49,7 @@ private:
 class DB2Table
 {
 public:
-	DB2Table(DB2Reader* reader, std::vector<DB2FieldInfo> fields);
+	DB2Table(std::unique_ptr<DB2Reader> reader, std::vector<DB2FieldInfo> fields);
 	~DB2Table();
 
 	DB2Table(const DB2Table&) = delete;
@@ -96,7 +97,7 @@ private:
 	// Get the record ID for a given record index.
 	uint32_t getRecordID(size_t recordIndex) const;
 
-	DB2Reader* m_reader;  // owned
+	std::unique_ptr<DB2Reader> m_reader;
 	std::vector<DB2FieldInfo> m_fields;
 	std::unordered_map<std::string, size_t> m_fieldNameToIndex;  // base name -> index in m_fields
 };

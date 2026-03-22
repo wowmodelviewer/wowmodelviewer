@@ -2,6 +2,7 @@
 
 #include "GameDatabase.h"
 
+#include <memory>
 #include <string>
 #include <unordered_map>
 
@@ -55,9 +56,9 @@ namespace wow
 		std::string getLayoutHashForTable(const std::string& tableName) override;
 
 	private:
-		DB2Table* buildDB2Table(const std::string& tableName);
+		std::unique_ptr<DB2Table> buildDB2Table(const std::string& tableName);
 
-		std::unordered_map<std::string, DB2Table*> m_tables;
+		std::unordered_map<std::string, std::unique_ptr<DB2Table>> m_tables;
 	};
 }
 

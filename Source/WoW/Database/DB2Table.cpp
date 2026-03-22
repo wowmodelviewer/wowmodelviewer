@@ -85,17 +85,14 @@ static std::string toLower(const std::string& s)
 
 // ── DB2Table ─────────────────────────────────────────────────────────────────
 
-DB2Table::DB2Table(DB2Reader* reader, std::vector<DB2FieldInfo> fields)
-	: m_reader(reader), m_fields(std::move(fields))
+DB2Table::DB2Table(std::unique_ptr<DB2Reader> reader, std::vector<DB2FieldInfo> fields)
+	: m_reader(std::move(reader)), m_fields(std::move(fields))
 {
 	for (size_t i = 0; i < m_fields.size(); i++)
 		m_fieldNameToIndex[toLower(m_fields[i].name)] = i;
 }
 
-DB2Table::~DB2Table()
-{
-	delete m_reader;
-}
+DB2Table::~DB2Table() = default;
 
 DB2Row DB2Table::getRow(uint32_t id) const
 {
