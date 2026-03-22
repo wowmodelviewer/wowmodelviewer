@@ -1,7 +1,6 @@
 #include "DB2Reader.h"
 #include "Logger.h"
 #include "Game.h"
-#include "WoWDatabase.h"
 
 #include <algorithm>
 #include <cstring>
@@ -100,11 +99,6 @@ bool DB2Reader::open()
 	const size_t headerRemainder = sizeof(WDCHeader) - sizeof(m_header.magic);
 	read(&m_header.record_count, headerRemainder);
 	std::memcpy(m_header.magic, &magic, 4);
-
-	recordSize  = m_header.record_size;
-	recordCount = m_header.record_count;
-	fieldCount  = m_header.field_count;
-	stringSize  = m_header.string_table_size;
 
 #if WDC_READ_DEBUG > 0
 	LOG_INFO << "DB2Reader:" << fullname() << "version=" << m_wdcVersion
@@ -412,7 +406,7 @@ bool DB2Reader::open()
 			 << " eof=" << isEof() << " for " << fullname();
 
 	// ── 9. Detect encrypted sections & build record locations ───────────
-	recordCount = 0;
+	uint32_t totalRecordCount = 0;
 
 	for (uint32_t si = 0; si < sectionCount; si++)
 	{
@@ -526,7 +520,7 @@ bool DB2Reader::open()
 			}
 		}
 
-		recordCount += sec.recordCount;
+		totalRecordCount += sec.recordCount;
 	}
 
 	LOG_INFO << "DB2Reader step 9 done: recordLocations=" << m_recordLocations.size()
@@ -549,9 +543,7 @@ bool DB2Reader::open()
 		}
 	}
 
-	recordCount = m_recordLocations.size();
-
-	LOG_INFO << "DB2Reader step 10 done: totalRecords=" << recordCount
+	LOG_INFO << "DB2Reader step 10 done: totalRecords=" << m_recordLocations.size()
 			 << " copyTable=" << m_copyTable.size() << " for " << fullname();
 
 	// Build ID-to-record-index lookup for O(1) getRow() by ID
@@ -583,7 +575,7 @@ bool DB2Reader::open()
 
 	LOG_INFO << "DB2Reader: parsed " << fullname()
 			 << " version=" << m_wdcVersion
-			 << " records=" << recordCount
+			 << " records=" << m_recordLocations.size()
 			 << " sections=" << sectionCount;
 
 	return true;
@@ -720,221 +712,4 @@ bool DB2Reader::readFieldValue(unsigned int sectionIndex,
 	return true;
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-std::vector<std::string> DB2Reader::get(unsigned int recordIndex,
-										const core::TableStructure* structure) const
-{
-	std::vector<std::string> result;
-
-	if (recordIndex >= m_recordLocations.size())
-		return result;
-
-	const RecordLocation& loc = m_recordLocations[recordIndex];
-	const SectionData& sec = m_sections[loc.sectionIndex];
-	const unsigned char* recordOffset = getRecordOffset(loc.sectionIndex, loc.localIndex);
-
-	for (auto it : structure->fields)
-	{
-		wow::FieldStructure* field = dynamic_cast<wow::FieldStructure*>(it);
-		if (!field)
-			continue;
-
-		// ID field — read from the record location
-		if (field->isKey)
-		{
-			std::stringstream ss;
-			ss << loc.recordID;
-			result.push_back(ss.str());
-			continue;
-		}
-
-		// Relationship (non-inline foreign key)
-		if (field->isRelationshipData)
-		{
-			auto relIt = sec.relationshipMap.find(loc.localIndex);
-			if (relIt != sec.relationshipMap.end())
-			{
-				std::stringstream ss;
-				ss << relIt->second;
-				result.push_back(ss.str());
-			}
-			else
-			{
-				result.emplace_back("");
-			}
-			continue;
-		}
-
-		// Regular field — may be an array
-		for (unsigned int i = 0; i < field->arraySize; i++)
-		{
-			unsigned int val = 0;
-			if (!readFieldValue(loc.sectionIndex, loc.localIndex,
-								field->pos, i, field->arraySize, loc.recordID, val))
-				continue;
-
-			if (field->type == "text")
-			{
-				const char* stringPtr = nullptr;
-				if (!sec.isNormal)
-				{
-					// sparse table: strings are inline
-					const unsigned char* ptr = recordOffset;
-					for (int f = 0; f <= field->pos; f++)
-					{
-						if (structure->fields[f]->isKey)
-							continue;
-						if (structure->fields[f]->type == "uint64")
-						{
-							ptr += 8;
-						}
-						else
-						{
-							std::string v(reinterpret_cast<const char*>(ptr));
-							ptr = ptr + v.size() + 1;
-						}
-					}
-					stringPtr = reinterpret_cast<const char*>(ptr);
-				}
-				else if (m_wdcVersion > 2)
-				{
-					// WDC3+: string table reference
-					const uint32_t dataPos = m_fieldStorageInfo[field->pos].field_offset_bits / 8;
-
-					// compute cumulative record data size of earlier sections
-					uint32_t outsideDataSize = 0;
-					for (uint32_t s = 0; s < loc.sectionIndex; s++)
-						outsideDataSize += m_sections[s].recordDataSize;
-
-					const int32_t absoluteRecordOfs =
-						static_cast<int32_t>(loc.localIndex * m_header.record_size) -
-						static_cast<int32_t>(m_header.record_count * m_header.record_size);
-
-					const int32_t stringTableIndex =
-						static_cast<int32_t>(outsideDataSize) + absoluteRecordOfs +
-						static_cast<int32_t>(dataPos) + static_cast<int32_t>(val);
-
-					// find which section's string table contains this index
-					const unsigned char* strBase = nullptr;
-					for (uint32_t s = 0; s < m_sections.size(); s++)
-					{
-						const SectionData& strSec = m_sections[s];
-						const int32_t localOfs = stringTableIndex - static_cast<int32_t>(strSec.previousStringTableSize);
-						if (localOfs >= 0 && static_cast<uint32_t>(localOfs) < strSec.stringTableSize)
-						{
-							strBase = m_fileData + strSec.stringTableOffset + localOfs;
-							break;
-						}
-					}
-
-					if (strBase)
-						stringPtr = reinterpret_cast<const char*>(strBase);
-					else
-						stringPtr = "";
-				}
-				else
-				{
-					// WDC2: strings inline in record data
-					stringPtr = reinterpret_cast<const char*>(
-						recordOffset + m_fieldStorageInfo[field->pos].field_offset_bits / 8 + val -
-						((m_header.record_count - sec.recordCount) * m_header.record_size));
-				}
-
-				std::string value(stringPtr ? stringPtr : "");
-				std::replace(value.begin(), value.end(), '"', '\'');
-				result.push_back(value);
-			}
-			else if (field->type == "float")
-			{
-				std::stringstream ss;
-				float fval;
-				std::memcpy(&fval, &val, sizeof(float));
-				ss << fval;
-				result.push_back(ss.str());
-			}
-			else if (field->type == "int8")
-			{
-				std::stringstream ss;
-				int8_t v;
-				std::memcpy(&v, &val, sizeof(int8_t));
-				ss << static_cast<int>(v);
-				result.push_back(ss.str());
-			}
-			else if (field->type == "uint8")
-			{
-				std::stringstream ss;
-				uint8_t v;
-				std::memcpy(&v, &val, sizeof(uint8_t));
-				ss << static_cast<unsigned>(v);
-				result.push_back(ss.str());
-			}
-			else if (field->type == "int16")
-			{
-				std::stringstream ss;
-				int16_t v = static_cast<int16_t>(val & 0xFFFF);
-				ss << static_cast<int>(v);
-				result.push_back(ss.str());
-			}
-			else if (field->type == "uint16")
-			{
-				std::stringstream ss;
-				uint16_t v = static_cast<uint16_t>(val & 0xFFFF);
-				ss << static_cast<unsigned>(v);
-				result.push_back(ss.str());
-			}
-			else if (field->type == "int32")
-			{
-				std::stringstream ss;
-				int32_t v;
-				std::memcpy(&v, &val, sizeof(int32_t));
-				ss << v;
-				result.push_back(ss.str());
-			}
-			else if (field->type == "uint32")
-			{
-				std::stringstream ss;
-				uint32_t v;
-				std::memcpy(&v, &val, sizeof(uint32_t));
-				ss << v;
-				result.push_back(ss.str());
-			}
-			else if (field->type == "int64")
-			{
-				std::stringstream ss;
-				ss << static_cast<int64_t>(val);
-				result.push_back(ss.str());
-			}
-			else if (field->type == "uint64")
-			{
-				std::stringstream ss;
-				ss << static_cast<uint64_t>(val);
-				result.push_back(ss.str());
-			}
-			else if (field->type == "int")
-			{
-				std::stringstream ss;
-				int32_t v;
-				std::memcpy(&v, &val, sizeof(int32_t));
-				ss << v;
-				result.push_back(ss.str());
-			}
-			else if (field->type == "byte")
-			{
-				std::stringstream ss;
-				uint8_t v = static_cast<uint8_t>(val & 0xFF);
-				ss << static_cast<unsigned>(v);
-				result.push_back(ss.str());
-			}
-			else
-			{
-				std::stringstream ss;
-				uint32_t v;
-				std::memcpy(&v, &val, sizeof(uint32_t));
-				ss << v;
-				result.push_back(ss.str());
-			}
-		}
-	}
-
-	return result;
-}
+// get() was removed — DB2Table accesses record data directly via friend.

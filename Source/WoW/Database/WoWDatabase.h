@@ -5,7 +5,6 @@
 #include <string>
 #include <unordered_map>
 
-class DBFile;
 class GameFile;
 class DB2Table;
 
@@ -21,8 +20,6 @@ namespace wow
 		}
 
 		unsigned int hash;
-
-		DBFile* createDBFile();
 	};
 
 	class FieldStructure : public core::FieldStructure

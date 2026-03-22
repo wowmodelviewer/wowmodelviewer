@@ -5,7 +5,6 @@
 #include <unordered_map>
 #include "DBDFile.h"
 
-class DBFile;
 class GameFile;
 
 #define _GAMEDATABASE_API_
@@ -47,8 +46,6 @@ namespace core
 		std::string name;
 		std::string file;
 		std::vector<FieldStructure*> fields;
-
-		virtual DBFile* createDBFile();
 	};
 
 	class _GAMEDATABASE_API_ GameDatabase

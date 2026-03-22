@@ -6,7 +6,6 @@
 #include <vector>
 #include <unordered_map>
 
-#include "dbfile.h"
 #include "CASCFile.h"
 
 #define _DB2READER_API_
@@ -15,16 +14,14 @@
 ///
 /// Supports multiple sections, encrypted-section detection,
 /// 64-bit bitpacked reads, and WDC4/5 extras.
-class _DB2READER_API_ DB2Reader : public DBFile, public CASCFile
+class _DB2READER_API_ DB2Reader : public CASCFile
 {
 public:
 	explicit DB2Reader(const std::string& file);
 	~DB2Reader() override;
 
-	bool open() override;
-	bool close() override;
-
-	std::vector<std::string> get(unsigned int recordIndex, const core::TableStructure* structure) const override;
+	bool open();
+	bool close();
 
 private:
 	friend class DB2Table;

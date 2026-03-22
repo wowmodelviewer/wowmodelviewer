@@ -1,5 +1,4 @@
 #include "GameDatabase.h"
-#include "dbfile.h"
 #include "Logger.h"
 #include "Game.h"
 #include "DBDFile.h"
@@ -175,11 +174,6 @@ core::TableStructure::~TableStructure()
 {
 	for (const auto it : fields)
 		delete it;
-}
-
-DBFile* core::TableStructure::createDBFile()
-{
-	return nullptr;
 }
 
 // --- DBD support ---

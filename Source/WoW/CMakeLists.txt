@@ -25,7 +25,6 @@ set(src Core/Game.cpp
       CASC/CASCFolder.cpp
       CASC/HardDriveFile.cpp
       Database/GameDatabase.cpp
-      Database/dbfile.cpp
       Database/DBDFile.cpp
       Database/WoWDatabase.cpp
       Database/DB2Table.cpp
@@ -72,7 +71,6 @@ set(headers Core/Game.h
       CASC/CASCFolder.h
       CASC/HardDriveFile.h
       Database/GameDatabase.h
-      Database/dbfile.h
       Database/DBDFile.h
       Database/WoWDatabase.h
       Database/DB2Table.h

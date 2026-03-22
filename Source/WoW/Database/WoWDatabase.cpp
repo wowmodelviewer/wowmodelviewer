@@ -55,17 +55,38 @@ DB2Table* wow::WoWDatabase::buildDB2Table(const std::string& tableName)
 		fields.push_back(std::move(info));
 	}
 
-	// Create the DB2Reader from the CASC file
-	LOG_INFO << "buildDB2Table: createDBFile for " << tableName;
-	DBFile* dbFile = tblStruct->createDBFile();
-	auto* reader = dynamic_cast<DB2Reader*>(dbFile);
-	if (!reader)
+	// Create the DB2Reader directly from CASC
+	LOG_INFO << "buildDB2Table: creating DB2Reader for " << tableName;
+
+	// Resolve the DB2 file in CASC by name or file data ID
+	std::string db2Path;
+	for (const auto& ext : POSSIBLE_DB_EXT)
 	{
-		delete dbFile;
+		GameFile* f = GAMEDIRECTORY.getFile("DBFilesClient\\" + tblStruct->file + ext);
+		if (f)
+		{
+			db2Path = f->fullname();
+			break;
+		}
+	}
+	if (db2Path.empty())
+	{
+		const int fileDataId = GAMEDATABASE.getFileDataIdForTable(tblStruct->file);
+		if (fileDataId > 0)
+		{
+			GameFile* f = GAMEDIRECTORY.getFile(fileDataId);
+			if (f)
+				db2Path = f->fullname();
+		}
+	}
+	if (db2Path.empty())
+	{
 		delete tblStruct;
-		LOG_ERROR << "WoWDatabase: not a WDC file for table " << tableName;
+		LOG_ERROR << "WoWDatabase: DB2 file not found for table " << tableName;
 		return nullptr;
 	}
+
+	auto* reader = new DB2Reader(db2Path);
 
 	LOG_INFO << "buildDB2Table: reader->open() for " << tableName;
 	if (!reader->open())
@@ -183,50 +204,4 @@ std::string wow::WoWDatabase::getLayoutHashForTable(const std::string& tableName
 	return std::string(hexBuf);
 }
 
-DBFile* wow::TableStructure::createDBFile()
-{
-	DBFile* result = core::TableStructure::createDBFile();
-
-	if (result != nullptr)
-		return result;
-
-	GameFile* fileToOpen = nullptr;
-	// loop over possible extension to check if file exists
-	for (const auto& i : POSSIBLE_DB_EXT)
-	{
-		fileToOpen = GAMEDIRECTORY.getFile("DBFilesClient\\" + file + i);
-		if (fileToOpen)
-			break;
-	}
-
-	// Fallback: try file data ID from manifest
-	if (!fileToOpen)
-	{
-		const int fileDataId = GAMEDATABASE.getFileDataIdForTable(file);
-		if (fileDataId > 0)
-			fileToOpen = GAMEDIRECTORY.getFile(fileDataId);
-	}
-
-	if (!fileToOpen)
-		return nullptr;
-
-	if (fileToOpen->open(false))
-	{
-		char header[5];
-
-		fileToOpen->read(header, 4);
-
-		if (strncmp(header, "WDC2", 4) == 0
-			|| strncmp(header, "WDC3", 4) == 0
-			|| strncmp(header, "WDC4", 4) == 0
-			|| strncmp(header, "WDC5", 4) == 0
-			|| strncmp(header, "CLS1", 4) == 0)
-			result = new DB2Reader(fileToOpen->fullname());
-		else
-			LOG_ERROR << "Unsupported database file" << header[0] << header[1] << header[2] << header[3];
-
-		fileToOpen->close();
-	}
-
-	return result;
-}
+// createDBFile() removed — DB2Reader is created directly in buildDB2Table().
