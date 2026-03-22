@@ -8,11 +8,13 @@
 
 namespace core
 {
+	/// @brief Singleton providing application-wide version info and global flags.
 	class _GLOBALSETTINGS_API_ GlobalSettings
 	{
 	public:
 		~GlobalSettings();
 
+		/// @brief Access the singleton instance (created on first call).
 		static GlobalSettings& instance()
 		{
 			if (GlobalSettings::m_instance == nullptr)

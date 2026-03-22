@@ -6,21 +6,25 @@
 
 class WoWModel;
 
+/// @brief ImGui panel for applying pre-defined item sets and start outfits.
 namespace ItemSetsPanel
 {
 
+/// @brief An item set from the ItemSet DB2 table.
 struct ItemSetEntry
 {
-    int         id;
-    std::string name;
+    int         id;    ///< ItemSet ID.
+    std::string name;  ///< Display name.
 };
 
+/// @brief A starter outfit from the CharStartOutfit DB2 table.
 struct StartOutfitEntry
 {
-    int         id;
-    std::string name;
+    int         id;    ///< StartOutfit ID.
+    std::string name;  ///< Display name.
 };
 
+/// @brief Per-frame context for the item sets panel.
 struct DrawContext
 {
     bool isChar = false;

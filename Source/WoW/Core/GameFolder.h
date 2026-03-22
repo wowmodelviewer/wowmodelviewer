@@ -13,14 +13,19 @@ namespace core
 {
 	using ProgressCallback = std::function<void(int, int)>;
 
+	/// @brief Describes a detected game installation (locale, version, product).
 	class _GAMEFOLDER_API_ GameConfig
 	{
 	public:
-		std::string locale;
-		std::string version;
-		std::string product;
+		std::string locale;   ///< e.g. "enUS".
+		std::string version;  ///< e.g. "11.0.7.58238".
+		std::string product;  ///< e.g. "wow" or "wow_classic".
 	};
 
+	/// @brief Abstract base for game data folder backends (CASC, loose files, etc.).
+	///
+	/// Manages a collection of GameFile children and provides name- and ID-based
+	/// lookup, filtering, and iteration.
 	class _GAMEFOLDER_API_ GameFolder : public Container<GameFile>
 	{
 	public:

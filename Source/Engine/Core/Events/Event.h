@@ -4,6 +4,9 @@ class Observable;
 
 #define _EVENT_API_
 
+/// @brief Lightweight event object carrying a type tag and sender reference.
+///
+/// Used by the Observer pattern to notify subscribers of state changes.
 class _EVENT_API_ Event
 {
 public:

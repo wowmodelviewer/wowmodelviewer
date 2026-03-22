@@ -12,6 +12,7 @@ class GameFile;
 
 namespace core
 {
+	/// @brief Describes a single field (column) in a database table.
 	class _GAMEDATABASE_API_ FieldStructure
 	{
 	public:
@@ -35,6 +36,7 @@ namespace core
 		int id;
 	};
 
+	/// @brief Describes the schema of a database table (name, file path, fields).
 	class _GAMEDATABASE_API_ TableStructure
 	{
 	public:

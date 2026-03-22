@@ -8,9 +8,11 @@ class Attachment;
 class Renderer;
 struct ViewportFBO;
 
+/// @brief ImGui panel for capturing screenshots at custom resolutions.
 namespace ScreenshotPanel
 {
 
+/// @brief Per-frame context for the screenshot panel.
 struct DrawContext
 {
     Renderer*    renderer           = nullptr;

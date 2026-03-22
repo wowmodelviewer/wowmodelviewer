@@ -9,6 +9,10 @@
 
 #define _MANAGEDITEM_API_
 
+/// @brief Reference-counted item stored in a Manager.
+///
+/// Tracks its own name and reference count; the owning Manager deletes
+/// the item when its count drops to zero.
 class _MANAGEDITEM_API_ ManagedItem
 {
 	int m_refcount;
@@ -38,6 +42,8 @@ public:
 	int refCount() { return m_refcount; }
 };
 
+/// @brief Generic name-to-ID resource manager with reference-counted items.
+/// @tparam IDTYPE  The numeric ID type used to identify managed items (e.g. GLuint).
 template <class IDTYPE>
 class Manager
 {

@@ -225,8 +225,28 @@ ddsColor_t;
 //int DDSGetInfo( ddsBuffer_t *dds, int *width, int *height, ddsPF_t *pf );
 //int DDSDecompress( ddsBuffer_t *dds, unsigned char *pixels );
 
+/// @brief Decompress a DXT5 (BC3) compressed texture into raw RGBA pixels.
+/// @param src Pointer to the DXT5 compressed source data.
+/// @param width Width of the texture in pixels.
+/// @param height Height of the texture in pixels.
+/// @param dest Pointer to the destination buffer (must be width * height * 4 bytes).
+/// @return 0 on success, -1 on failure.
 int DDSDecompressDXT5(unsigned char* src, int width, int height, unsigned char* dest);
+
+/// @brief Decompress a DXT3 (BC2) compressed texture into raw RGBA pixels.
+/// @param src Pointer to the DXT3 compressed source data.
+/// @param width Width of the texture in pixels.
+/// @param height Height of the texture in pixels.
+/// @param dest Pointer to the destination buffer (must be width * height * 4 bytes).
+/// @return 0 on success, -1 on failure.
 int DDSDecompressDXT3(unsigned char* src, int width, int height, unsigned char* dest);
+
+/// @brief Decompress a DXT1 (BC1) compressed texture into raw RGBA pixels.
+/// @param src Pointer to the DXT1 compressed source data.
+/// @param width Width of the texture in pixels.
+/// @param height Height of the texture in pixels.
+/// @param dest Pointer to the destination buffer (must be width * height * 4 bytes).
+/// @return 0 on success, -1 on failure.
 int DDSDecompressDXT1(unsigned char* src, int width, int height, unsigned char* dest);
 
 /* end marker */

@@ -16,6 +16,9 @@ namespace WMVLog
 {
 	class Logger;
 
+	/// @brief RAII stream object that collects log output and dispatches it on destruction.
+	///
+	/// Created by Logger::operator() — use the LOG_INFO / LOG_ERROR / LOG_WARNING macros.
 	class LogStream
 	{
 	public:
@@ -47,6 +50,10 @@ namespace WMVLog
 		bool m_active;
 	};
 
+	/// @brief Singleton logging facility that dispatches formatted messages to LogOutput sinks.
+	///
+	/// Access via the LOGGER macro or the convenience macros LOG_INFO, LOG_ERROR,
+	/// LOG_WARNING, and LOG_FATAL.  Outputs are added as children (see Container).
 	class Logger : public Container<LogOutput>
 	{
 	public:
@@ -66,12 +73,16 @@ namespace WMVLog
 			return *m_instance;
 		}
 
+		/// @brief Initialise the logging subsystem (creates console and file outputs).
 		static void init();
 
+		/// @brief Send a pre-formatted message to all registered outputs.
 		void dispatchLog(int type, const std::string& msg);
 
+		/// @brief Format a log message with a severity prefix and timestamp.
 		static std::string formatLog(int type, const std::string& msg);
 
+		/// @brief Create a LogStream for the given severity level.
 		LogStream operator()(Logger::LogType type);
 
 	private:

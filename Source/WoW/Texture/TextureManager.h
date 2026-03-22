@@ -9,7 +9,11 @@
 class GameFile;
 class Texture;
 
-class _TEXTUREMANAGER_API_ TextureManager : public Manager<GLuint> 
+/// @brief Manages OpenGL texture lifetimes with reference-counted caching.
+///
+/// Textures are loaded from GameFile sources and cached by name.  Duplicate
+/// requests return the existing GL texture ID instead of re-uploading.
+class _TEXTUREMANAGER_API_ TextureManager : public Manager<GLuint>
 {
 public:
 	virtual GLuint add(GameFile *);

@@ -8,34 +8,35 @@ class WoWModel;
 
 #define _MODELRENDERPASS_API_
 
+/// @brief Represents a single render pass (material + geometry) for an M2 model geoset.
 class _MODELRENDERPASS_API_ ModelRenderPass
 {
 public:
 	ModelRenderPass(WoWModel*, int geo);
 
-	bool useTex2, useEnvMap, cull, trans, unlit, noZWrite, billboard;
+	bool useTex2, useEnvMap, cull, trans, unlit, noZWrite, billboard;  ///< Render state flags.
 
-	int16 texanim, color, opacity, blendmode, specialTex;
-	uint16 tex;
+	int16 texanim, color, opacity, blendmode, specialTex;  ///< Material property indices.
+	uint16 tex;  ///< Texture index.
 
-	// texture wrapping
-	bool swrap, twrap;
+	bool swrap, twrap;  ///< Texture wrapping modes (S and T).
 
-	// colours
-	glm::vec4 ocol, ecol;
+	glm::vec4 ocol, ecol;  ///< Output and emissive colours.
 
-	WoWModel* model;
+	WoWModel* model;  ///< Owning model.
 
-	int geoIndex;
+	int geoIndex;  ///< Geoset index this pass draws.
 
+	/// @brief Initialise render state from the model's material data.
 	bool init();
-	//int BlendValueForMode(int mode);
 
+	/// @brief Execute the render pass.
 	void render(bool animated);
 
+	/// @brief Clean up render state after drawing.
 	void deinit();
 
-	static const uint16 INVALID_TEX = 50000;
+	static const uint16 INVALID_TEX = 50000;  ///< Sentinel value for an unset texture.
 
 	/*
 	  bool operator< (const ModelRenderPass &m) const

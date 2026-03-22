@@ -7,15 +7,18 @@
 class GameFile;
 class WoWModel;
 
+/// @brief ImGui panel for mounting and dismounting characters.
 namespace MountsPanel
 {
 
+/// @brief A mount entry from the CreatureDisplayInfo DB2 table.
 struct MountEntry
 {
-    int         displayID;
-    std::string name;
+    int         displayID;  ///< Creature display ID.
+    std::string name;       ///< Display name.
 };
 
+/// @brief Per-frame context for the mounts panel.
 struct DrawContext
 {
     bool isChar    = false;

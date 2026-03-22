@@ -6,6 +6,10 @@ struct ItemRecord;
 class CharInfos;
 class NPCInfos;
 
+/// @brief Abstract base class for URL-based import plugins (Armory, Wowhead, etc.).
+///
+/// Subclasses detect whether they can handle a given URL and import
+/// character, NPC, or item data from it.
 class ImporterPlugin
 {
 public:

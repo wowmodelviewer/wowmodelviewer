@@ -6,6 +6,10 @@
 
 #define _WDB6FILE_API_
 
+/// @brief Reader for the WDB6 database file format (.db2).
+///
+/// WDB6 extends WDB5 by adding a nonzero-column table and common-data
+/// compression, reducing file sizes by storing default values separately.
 class _WDB6FILE_API_ WDB6File : public WDB5File
 {
 public:

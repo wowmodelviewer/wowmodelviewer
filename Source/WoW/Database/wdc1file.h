@@ -5,6 +5,10 @@
 
 #define _WDC1FILE_API_
 
+/// @brief Reader for the WDC1 database file format (.db2).
+///
+/// WDC1 introduced bitpacked fields, pallet-compressed data, and
+/// relationship mapping. It is the first format in the WDC family.
 class _WDC1FILE_API_ WDC1File : public WDB5File
 {
 public:

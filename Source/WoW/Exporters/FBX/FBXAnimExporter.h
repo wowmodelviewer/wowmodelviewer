@@ -34,10 +34,13 @@
 class WoWModel;
 struct ModelAnimation;
 
+/// @brief Exports individual animation sequences from a WoW model into separate FBX files.
 class FBXAnimExporter
 {
 public:
+	/// @brief Execute the animation export.
 	void run();
+	/// @brief Configure the exporter with source model, animation, and output settings.
 	void setValues(FbxString fileVersion, std::string fn, std::string an, WoWModel* m, std::vector<FbxCluster*> bc,
 				   FbxNode* & meshnode, int aID, bool uan = false);
 

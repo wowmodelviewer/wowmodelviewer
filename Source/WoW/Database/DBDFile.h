@@ -60,7 +60,7 @@ namespace core
 		bool matchesLayoutHash(const std::string& layoutHash) const;
 	};
 
-	// Parsed content of a single .dbd file
+	/// @brief Parsed content of a single .dbd file (database definition).
 	class _DBDFILE_API_ DBDFile
 	{
 	public:

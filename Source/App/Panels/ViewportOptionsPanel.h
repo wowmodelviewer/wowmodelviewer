@@ -16,29 +16,31 @@ namespace ViewportOptionsPanel
 
 // ---- Types shared with the rest of the application -----------------------
 
+/// @brief Single geoset entry referencing a model geoset by index and id.
 struct GeosetEntry
 {
-    size_t   index = 0;  // index into model->geosets[]
-    uint32_t id    = 0;  // geoset id
-    std::string label;
+    size_t   index = 0;  ///< Index into model->geosets[].
+    uint32_t id    = 0;  ///< Geoset id.
+    std::string label;   ///< Human-readable label for the geoset.
 };
 
+/// @brief A named group of geosets sharing the same mesh id.
 struct GeosetGroupEntry
 {
-    std::string name;
-    size_t meshId = 0;
-    std::vector<GeosetEntry> geosets;
+    std::string name;                    ///< Display name for the group.
+    size_t meshId = 0;                   ///< Shared mesh id for geosets in this group.
+    std::vector<GeosetEntry> geosets;    ///< Geosets belonging to this group.
 };
 
+/// @brief Editable state for particle colour replacement (colour IDs 11, 12, 13).
 struct ParticleColorState
 {
-    bool  enabled           = false;
-    float colors[3][3][3]   = {}; // [set 0..2 for IDs 11,12,13][phase 0..2][r/g/b]
-    bool  hasSet[3]         = {}; // which color IDs (11,12,13) are present
+    bool  enabled           = false;     ///< Whether particle colour replacement is active.
+    float colors[3][3][3]   = {};        ///< Colour values [set 0..2 for IDs 11,12,13][phase 0..2][r/g/b].
+    bool  hasSet[3]         = {};        ///< Which colour IDs (11, 12, 13) are present in the model.
 };
 
-// ---- Per-frame context passed by the caller ------------------------------
-
+/// @brief Per-frame context for the viewport options panel.
 struct DrawContext
 {
     // Renderer

@@ -6,6 +6,7 @@
 
 #define _DBFILE_API_
 
+/// @brief Abstract base class for reading WoW DB2/DBC database files.
 class _DBFILE_API_ DBFile
 {
 public:

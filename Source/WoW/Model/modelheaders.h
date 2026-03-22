@@ -6,22 +6,25 @@
 #include "glm/glm.hpp"
 #include "types.h" // unit8, etC.
 
+/// @brief A simple vertex with texture coordinates and position.
 struct Vertex
 {
-	float tu, tv;
-	float x, y, z;
+	float tu, tv;     ///< Texture coordinates.
+	float x, y, z;    ///< Position.
 };
 
+/// @brief Axis-aligned bounding sphere.
 struct Sphere
 {
 	/*0x00*/
-	glm::vec3 min;
+	glm::vec3 min;    ///< Minimum corner of the bounding box.
 	/*0x0C*/
-	glm::vec3 max;
+	glm::vec3 max;    ///< Maximum corner of the bounding box.
 	/*0x18*/
-	float radius;
+	float radius;     ///< Bounding sphere radius.
 };
 
+/// @brief Tracks character-specific model state (hand closure, character flag).
 struct CharModelDetails
 {
 	bool closeRHand;
@@ -37,6 +40,7 @@ struct CharModelDetails
 	}
 };
 
+/// @brief M2 model file header — offsets and counts for all data blocks.
 struct ModelHeader
 {
 	char id[4];
@@ -133,7 +137,7 @@ enum
 	ANIMATION_LOOPED = 0x20 // flags
 };
 
-// block B - animations, size 68 bytes, WotLK 64 bytes
+/// @brief An animation sequence entry in the M2 model (block B).
 struct ModelAnimation
 {
 	int16 animID; // AnimationDataDB.ID
@@ -156,7 +160,7 @@ struct ModelAnimation
 	int16 Index;
 };
 
-// sub-block in block E - animation data, size 28 bytes, WotLK 20 bytes
+/// @brief Sub-block header for animated values in M2 models.
 struct AnimationBlock
 {
 	int16 type; // interpolation type (0=none, 1=linear, 2=hermite)
@@ -187,7 +191,7 @@ enum
 	MODELBONE_TRANSFORM = 512
 };
 
-// block E - bones
+/// @brief On-disk bone definition (block E) in an M2 file.
 struct ModelBoneDef
 {
 	int32 keyboneid; // Back-reference to the key bone lookup table. -1 if this is no key bone.
@@ -208,6 +212,7 @@ struct ModelTexAnimDef
 	AnimationBlock scale; // ( glm::vec3)
 };
 
+/// @brief A vertex as stored in the M2 file (position, bone weights, normal, texcoord).
 struct ModelVertex
 {
 	glm::vec3 pos;
@@ -235,7 +240,7 @@ struct ModelView
 	int32 lod; // LOD bias?
 };
 
-/// Lod part, One material + render operation
+/// @brief A submesh/geoset within a model LOD view (one material + draw call).
 struct ModelGeoset
 {
 	uint32 id; // mesh part id?
@@ -251,7 +256,7 @@ struct ModelGeoset
 	float radius;
 };
 
-// same as ModelGeoset but with a uint32 as istart, to handle index > 65535 (present in HD models)
+/// @brief Extended geoset with 32-bit index start to support HD models with > 65535 indices.
 class ModelGeosetHD
 {
 public:
@@ -535,6 +540,7 @@ struct vector_2fp_6_9
 	fp_6_9 y;
 };
 
+/// @brief On-disk particle emitter definition in an M2 file.
 struct M2ParticleDef
 {
 	int32 id; // so far it's always -1
@@ -672,6 +678,7 @@ $CST
  * knees etc. It is used to put items on a character. This seems very likely as this block 
  * also contains positions for sheathed weapons, a shield, etc.
  */
+/// @brief On-disk attachment point definition in an M2 file.
 struct ModelAttachmentDef
 {
 	uint32 id; // Just an id. Is referenced in the enum POSITION_SLOTS.

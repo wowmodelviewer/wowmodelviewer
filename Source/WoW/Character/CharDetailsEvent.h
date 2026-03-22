@@ -27,20 +27,27 @@
 
 #include "Event.h"
 
+/// @brief Event fired when character detail customisation options change.
 class CharDetailsEvent : public Event
 {
 public:
+	/// @brief Event types specific to character detail changes.
 	enum EventType
 	{
-		CHOICE_LIST_CHANGED = 0x10000001
+		CHOICE_LIST_CHANGED = 0x10000001  ///< A customisation choice list was modified.
 	};
 
+	/// @brief Construct a CharDetailsEvent.
+	/// @param obs  The observable that fired the event.
+	/// @param type The event type.
 	CharDetailsEvent(Observable* obs, EventType type) : Event(obs, static_cast<Event::EventType>(type)),
 														customizationOptionId_(0)
 	{
 	}
 
+	/// @brief Set the customisation option ID associated with this event.
 	void setCustomizationOptionId(const uint id) { customizationOptionId_ = id; }
+	/// @brief Get the customisation option ID associated with this event.
 	uint getCustomizationOptionId() const { return customizationOptionId_; }
 
 private:

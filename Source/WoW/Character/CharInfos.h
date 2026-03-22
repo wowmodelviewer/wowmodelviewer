@@ -5,29 +5,29 @@
 
 #define _CHARINFOS_API_
 
+/// @brief Stores imported character information (race, gender, equipment, customisations, tabard).
 class _CHARINFOS_API_ CharInfos
 {
 public:
 	CharInfos();
 
-	bool valid;
-	bool customTabard;
+	bool valid;           ///< Whether the data was successfully parsed.
+	bool customTabard;    ///< Whether a custom tabard design is applied.
 
-	unsigned int raceId;
-	std::string gender;
-	bool hasTransmogGear;
+	unsigned int raceId;  ///< Character race ID.
+	std::string gender;   ///< Gender string ("male" or "female").
+	bool hasTransmogGear; ///< Whether transmog overrides are present.
 
-	unsigned int eyeGlowType;
+	unsigned int eyeGlowType;  ///< Eye glow type (none, default, death knight).
 
-	int tabardIcon;
-	int iconColor;
-	int tabardBorder;
-	int borderColor;
-	int background;
+	int tabardIcon;    ///< Tabard icon index.
+	int iconColor;     ///< Tabard icon colour index.
+	int tabardBorder;  ///< Tabard border index.
+	int borderColor;   ///< Tabard border colour index.
+	int background;    ///< Tabard background index.
 
-	std::vector<std::pair<unsigned int, unsigned int>> customizations; // vector<pair<optionId, choiceId>>
+	std::vector<std::pair<unsigned int, unsigned int>> customizations; ///< Customisation pairs (optionId, choiceId).
 
-	// TODO refactor this part to associate slots, id and level
-	std::vector<int> equipment;
-	std::vector<int> itemModifierIds;
+	std::vector<int> equipment;       ///< Equipment item IDs per slot.
+	std::vector<int> itemModifierIds;  ///< Item modifier IDs per slot.
 };

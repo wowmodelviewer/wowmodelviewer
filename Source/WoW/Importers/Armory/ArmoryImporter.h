@@ -30,6 +30,7 @@
 
 #include "ImporterPlugin.h"
 
+/// @brief Imports character and item data from the World of Warcraft Armory API.
 class ArmoryImporter final : public ImporterPlugin //-V1106
 {
 

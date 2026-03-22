@@ -33,6 +33,10 @@ class WoWModel;
 
 #define _WOWITEM_API_
 
+/// @brief Represents an equipped item on a character model.
+///
+/// Handles item display lookup, model attachment, texture composition,
+/// and geoset visibility for a single equipment slot.
 class _WOWITEM_API_ WoWItem : public Component
 {
 public:

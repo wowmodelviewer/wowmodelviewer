@@ -6,9 +6,11 @@
 
 struct NPCRecord;
 
+/// @brief ImGui panel for browsing and loading NPC models.
 namespace NpcBrowserPanel
 {
 
+/// @brief Per-frame context for the NPC browser panel.
 struct DrawContext
 {
     bool isWoWLoaded = false;

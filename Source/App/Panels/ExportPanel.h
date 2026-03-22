@@ -10,10 +10,12 @@
 class ExporterPlugin;
 class WoWModel;
 
+/// @brief ImGui panel for exporting models to OBJ / FBX formats.
 namespace ExportPanel
 {
     using AnimEntry = AnimationPanel::AnimEntry;
 
+    /// @brief Per-frame context for the export panel.
     struct DrawContext
     {
         std::function<WoWModel*()>       getLoadedModel;

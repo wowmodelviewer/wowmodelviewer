@@ -7,6 +7,11 @@
 
 #define _WDB5FILE_API_
 
+/// @brief Reader for the WDB5 database file format (.db2).
+///
+/// WDB5 introduced variable-width fields, an embedded ID column, sparse
+/// (offset-map) tables, and a copy table for deduplication. It serves as the
+/// base class for all subsequent DB2 format readers (WDB6, WDC1–WDC5).
 class _WDB5FILE_API_ WDB5File : public DBFile, public CASCFile
 {
 public:

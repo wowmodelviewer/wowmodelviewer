@@ -8,18 +8,20 @@
 
 class WDCReader;
 
+/// @brief Describes a single field (column) in a DB2 table.
 struct DB2FieldInfo
 {
-	std::string name;
-	std::string type;      // "text", "float", "int8", "uint8", "int16", "uint16", "int32", "uint32", "int64", "uint64", "int", "byte"
-	int pos = -1;          // DB2 field position index (-1 for non-inline/key)
-	unsigned int arraySize = 1;
-	bool isKey = false;
-	bool isRelationshipData = false;
+	std::string name;      ///< Column name.
+	std::string type;      ///< Type string ("text", "float", "int8", "uint8", etc.).
+	int pos = -1;          ///< DB2 field position index (-1 for non-inline/key).
+	unsigned int arraySize = 1;  ///< Array size (> 1 for array fields).
+	bool isKey = false;          ///< Whether this field is the primary key.
+	bool isRelationshipData = false;  ///< Whether this field is relationship data.
 };
 
 class DB2Table;
 
+/// @brief Lightweight handle to a single row in a DB2Table.
 class DB2Row
 {
 public:
@@ -42,6 +44,7 @@ private:
 	size_t m_recordIndex = SIZE_MAX;
 };
 
+/// @brief Provides typed, field-name-based access to records in a WDC DB2 file.
 class DB2Table
 {
 public:

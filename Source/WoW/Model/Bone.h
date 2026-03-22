@@ -15,23 +15,27 @@
 class GameFile;
 class WoWModel;
 
+/// @brief Represents a single bone in a WoW M2 model skeleton.
 class Bone
 {
 public:
-	Animated<glm::vec3> trans;
-	Animated<glm::fquat, PACK_QUATERNION, Quat16ToQuat32> rot;
-	Animated<glm::vec3> scale;
+	Animated<glm::vec3> trans;  ///< Translation animation track.
+	Animated<glm::fquat, PACK_QUATERNION, Quat16ToQuat32> rot;  ///< Rotation animation track (packed 16-bit).
+	Animated<glm::vec3> scale;  ///< Scale animation track.
 
-	glm::vec3 pivot, transPivot;
-	int16 parent;
+	glm::vec3 pivot, transPivot;  ///< Pivot point and translated pivot.
+	int16 parent;  ///< Parent bone index (-1 if root).
 
-	bool billboard;
-	glm::mat4 mat;
-	glm::mat4 mrot;
+	bool billboard;  ///< Whether this bone is billboarded.
+	glm::mat4 mat;   ///< Computed transformation matrix.
+	glm::mat4 mrot;  ///< Computed rotation-only matrix.
 
-	ModelBoneDef boneDef;
+	ModelBoneDef boneDef;  ///< Raw bone definition from the M2 file.
 
-	bool calc;
+	bool calc;  ///< Whether this bone has been calculated for the current frame.
+
+	/// @brief Compute the bone matrix from parent bones and animation data.
 	void calcMatrix(std::vector<Bone>& allbones, ssize_t anim, size_t time, bool rotate = true);
+	/// @brief Initialise the bone from an M2 v3+ file.
 	void initV3(GameFile& f, ModelBoneDef& b, const modelAnimData& data);
 };

@@ -1,5 +1,6 @@
 #pragma once
 
+/// @brief Character equipment slot indices.
 enum CharSlots
 {
 	CS_HEAD,
@@ -20,6 +21,7 @@ enum CharSlots
 	NUM_CHAR_SLOTS
 };
 
+/// @brief Character geoset group identifiers (mesh IDs for body/armour regions).
 enum CharGeosets
 {
 	CG_SKIN_OR_HAIR = 0,
@@ -73,6 +75,7 @@ enum
 	UPPER_BODY_BONES = 5
 };
 
+/// @brief Attachment point positions on a character model.
 enum POSITION_SLOTS
 {
 	ATT_LEFT_WRIST = 0, // Mountpoint
@@ -133,6 +136,7 @@ enum POSITION_SLOTS
 	ATT_HEAD_TOP
 };
 
+/// @brief Texture compositing region IDs for character texture layout.
 enum CharRegions
 {
 	// Corresponds to "Section" column in CharComponentTextureSection table
@@ -158,6 +162,7 @@ enum CharRegions
 	CR_TABARD_6
 };
 
+/// @brief Key bone indices used for programmatic bone lookups.
 enum KeyBoneTable
 {
 	//Block F
@@ -202,6 +207,7 @@ enum KeyBoneTable
 	BONE_MAX
 };
 
+/// @brief Classification of model types.
 enum ModelType
 {
 	MT_NORMAL,
@@ -210,6 +216,7 @@ enum ModelType
 	MT_NPC
 };
 
+/// @brief Weapon sheath position types.
 enum SheathTypes
 {
 	SHEATHETYPE_NONE = 0,
@@ -219,7 +226,7 @@ enum SheathTypes
 	SHEATHETYPE_SHIELD = 4
 };
 
-// Item type values as referred to by the items.csv list
+/// @brief Item type values as referred to by the items.csv list.
 enum ItemTypes
 {
 	IT_ALL = 0,
@@ -273,6 +280,7 @@ Value   Mapped to   Meaning
 5   4   Combiners_Fade
 6   4   Used in the Deeprun Tram subway glass, supposedly (src=dest_color, dest=src_color) (?)
 */
+/// @brief Blending modes for M2 model render passes.
 enum BlendModes
 {
 	BM_OPAQUE,
@@ -296,6 +304,7 @@ DBFilesClient\CreatureDisplayInfo.dbc
 DBFilesClient\ItemDisplayInfo.dbc
 (possibly more)
 */
+/// @brief M2 texture type IDs — 0 for filename-referenced, non-zero for skinned/dynamic textures.
 enum TextureTypes
 {
 	TEXTURE_FILENAME = 0, // Texture given in filename
@@ -335,7 +344,7 @@ enum Gender
 	GENDER_ANY = 3 // used in some database tables
 };
 
-// Race value is index in ChrRaces.dbc
+/// @brief Race IDs matching ChrRaces.dbc indices.
 enum Races
 {
 	RACE_ANY = 0, // used in some database tables
@@ -387,7 +396,7 @@ enum Races
 	RACE_COMPANIONPTERRODAX = 77
 };
 
-// Class value is index in ChrClasses.db*
+/// @brief Class IDs matching ChrClasses.db* indices.
 enum Classes
 {
 	CLASS_ANY = 0,

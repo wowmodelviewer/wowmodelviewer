@@ -5,6 +5,10 @@
 
 #define _WDC2FILE_API_
 
+/// @brief Reader for the WDC2 database file format (.db2).
+///
+/// WDC2 introduced sectioned data storage, splitting records, copy tables,
+/// ID lists, and relationship maps into independently addressable sections.
 class _WDC2FILE_API_ WDC2File : public WDB5File
 {
 public:

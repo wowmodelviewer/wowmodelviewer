@@ -23,6 +23,10 @@ class WoWModel;
 
 #define _CHARDETAILS_API_
 
+/// @brief Manages character customisation options (skin, face, hair, etc.).
+///
+/// Maintains the current selection indices for each customisation slot and
+/// notifies observers when selections change so textures can be rebuilt.
 class _CHARDETAILS_API_ CharDetails : public Observable
 {
 public:

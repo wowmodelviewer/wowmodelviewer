@@ -9,23 +9,19 @@
 
 #include "modelheaders.h" // ModelAnimation
 
-// This will be our animation manager
-// instead of using a STL vector or list or table, etc.
-// Decided to just limit it up to 4 animations to loop through - for experimental testing.
-// The second id and loop count will later be used for being able to have a primary and secondary animation.
-
-// Currently, this is more of a "Wrapper" over the existing code
-// but hopefully over time I can remove and re-write it so this is the core.
+/// @brief Stores loop count and animation ID for a single animation slot.
 struct AnimInfo
 {
-	short Loops;
-	size_t AnimID;
+	short Loops;     ///< Number of loops to play.
+	size_t AnimID;   ///< Animation identifier.
 };
 
 #define _ANIMMANAGER_API_
 
 class WoWModel;
 
+/// @brief Manages animation playback for a WoWModel, supporting up to 4 queued animations,
+///        a secondary (upper-body) animation, and independent mouth movement.
 class _ANIMMANAGER_API_ AnimManager
 {
 	WoWModel& model;

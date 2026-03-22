@@ -13,6 +13,8 @@
 
 #define _HARDDRIVEFILE_API_
 
+/// @brief A CASCFile implementation that reads data from the local hard drive
+///        rather than from a CASC archive.
 class _HARDDRIVEFILE_API_ HardDriveFile : public CASCFile
 {
 public:

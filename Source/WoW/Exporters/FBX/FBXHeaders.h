@@ -36,6 +36,7 @@
 
 #define SCALE_FACTOR 50.0f
 
+/// @brief Shared FBX export utility functions for scene setup, mesh creation, and skeleton binding.
 namespace FBXHeaders
 {
 	bool createFBXHeaders(FbxString fileVersion, std::string l_FileName, FbxManager* & l_Manager, FbxExporter* & l_Exporter,

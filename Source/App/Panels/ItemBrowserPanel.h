@@ -7,9 +7,11 @@
 struct ItemRecord;
 class ItemDatabase;
 
+/// @brief ImGui panel for browsing and loading item models.
 namespace ItemBrowserPanel
 {
 
+/// @brief Per-frame context for the item browser panel.
 struct DrawContext
 {
     bool isWoWLoaded = false;

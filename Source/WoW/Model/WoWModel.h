@@ -41,9 +41,13 @@ class ModelRenderPass;
 
 enum
 {
-	TEXTURE_MAX = 32
+	TEXTURE_MAX = 32  ///< Maximum number of texture slots per model.
 };
 
+/// @brief Core WoW .m2 model: geometry, animation, textures, and character data.
+///
+/// Loaded from a CASCFile, this class owns vertex buffers, bones, animations,
+/// render passes, particle emitters, character details, and equipment items.
 class _WOWMODEL_API_ WoWModel : public ManagedItem, public Displayable, public Model, public Container<WoWItem>
 {
 	// VBO Data

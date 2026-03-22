@@ -5,8 +5,10 @@
 #include <string>
 #include <vector>
 
+/// @brief Common string utility functions (split, case-insensitive search, etc.).
 namespace core
 {
+	/// @brief Split a string by a single-character delimiter.
 	inline std::vector<std::string> split(const std::string& s, char delimiter)
 	{
 		std::vector<std::string> tokens;

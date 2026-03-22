@@ -35,6 +35,7 @@ class WoWModel;
 
 #include "ExporterPlugin.h"
 
+/// @brief Exports WoW models to Wavefront OBJ format with accompanying MTL material files.
 class OBJExporter : public ExporterPlugin //-V1106
 {
 

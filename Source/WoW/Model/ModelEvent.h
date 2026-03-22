@@ -13,11 +13,13 @@
 
 class GameFile;
 
+/// @brief Represents a timed event in an M2 model (e.g. death sound, footstep).
 class ModelEvent
 {
-	ModelEventDef def;
+	ModelEventDef def;  ///< On-disk event definition.
 
 public:
+	/// @brief Initialise from an on-disk event definition.
 	void init(ModelEventDef& med);
 
 	friend std::ostream& operator<<(std::ostream& out, const ModelEvent& v)

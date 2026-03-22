@@ -12,9 +12,14 @@ namespace core { class GameDatabase; }
 
 namespace core
 {
+	/// @brief Singleton entry point for the game data layer.
+	///
+	/// Owns the GameFolder (archive access) and GameDatabase (DB2 tables).
+	/// Access via the GAMEDIRECTORY and GAMEDATABASE macros.
 	class _GAME_API_ Game
 	{
 	public:
+		/// @brief Access the singleton instance (created on first call).
 		static Game& instance()
 		{
 			if (Game::m_instance == nullptr)
@@ -22,8 +27,13 @@ namespace core
 			return *m_instance;
 		}
 
+		/// @brief Initialise with the given folder and database backends.
 		void init(core::GameFolder* folder, core::GameDatabase* db);
+
+		/// @brief True once both the folder and database have been set.
 		bool initDone() { return ((m_db != nullptr) && (m_folder != nullptr)); }
+
+		/// @brief Overlay custom loose files on top of the game archive.
 		void addCustomFiles(const std::string& path, bool bypassOriginalFiles);
 
 		core::GameFolder& folder() { return *m_folder; }

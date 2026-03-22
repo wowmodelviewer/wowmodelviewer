@@ -2,15 +2,19 @@
 
 #include <glad/gl.h>
 
-/// Simple OpenGL framebuffer object wrapper for off-screen rendering.
+/// @brief Simple OpenGL framebuffer object wrapper for off-screen rendering.
+///
+/// Manages the lifetime of an FBO, colour texture, and depth renderbuffer.
+/// Used by the viewport to render the 3D scene into an ImGui image.
 struct ViewportFBO
 {
-    GLuint fbo       = 0;
-    GLuint colorTex  = 0;
-    GLuint depthRbo  = 0;
-    int    width     = 0;
-    int    height    = 0;
+    GLuint fbo       = 0;   ///< Framebuffer object handle.
+    GLuint colorTex  = 0;   ///< Colour attachment (GL_RGBA8 texture).
+    GLuint depthRbo  = 0;   ///< Depth attachment (GL_DEPTH_COMPONENT24 renderbuffer).
+    int    width     = 0;   ///< Current width in pixels.
+    int    height    = 0;   ///< Current height in pixels.
 
+    /// @brief Allocate GPU resources at the given resolution.
     void create(int w, int h)
     {
         width  = w;
@@ -35,6 +39,7 @@ struct ViewportFBO
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
     }
 
+    /// @brief Resize the FBO; destroys and recreates if dimensions changed.
     void resize(int w, int h)
     {
         if (w == width && h == height)
@@ -44,9 +49,13 @@ struct ViewportFBO
             create(w, h);
     }
 
+    /// @brief Bind this FBO as the current render target.
     void bind()   const { glBindFramebuffer(GL_FRAMEBUFFER, fbo); }
+
+    /// @brief Unbind (revert to the default framebuffer).
     void unbind() const { glBindFramebuffer(GL_FRAMEBUFFER, 0);   }
 
+    /// @brief Release all GPU resources.
     void destroy()
     {
         if (fbo)       { glDeleteFramebuffers(1, &fbo);       fbo       = 0; }

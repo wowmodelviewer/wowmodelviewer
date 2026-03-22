@@ -16,9 +16,11 @@ struct FontEntry;
 struct GLFWwindow;
 class  OrbitCamera;
 
+/// @brief ImGui panel for application settings (game path, fonts, theme, debug info).
 namespace SettingsPanel
 {
 
+/// @brief Per-frame context for the settings panel.
 struct DrawContext
 {
     // Game path

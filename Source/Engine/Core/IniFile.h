@@ -6,6 +6,11 @@
 
 namespace core
 {
+	/// @brief Simple INI file reader/writer with section/key support.
+	///
+	/// Keys are stored as "section/key" internally.  Supports string, int,
+	/// double, bool, and wide-string values.  Backward-compatible with
+	/// QSettings-style quoted strings.
 	class IniFile
 	{
 	public:

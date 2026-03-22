@@ -8,10 +8,14 @@
 
 namespace WMVLog
 {
+	/// @brief Thread-safe log output sink that writes messages to a file on disk.
 	class _LOGOUTPUTFILE_API_ LogOutputFile : public LogOutput
 	{
 	public:
+		/// @brief Construct a file output sink that writes to the given path.
 		LogOutputFile(std::string fileName);
+
+		/// @brief Write a log message to the file (thread-safe).
 		void write(const std::string& message);
 
 	private:

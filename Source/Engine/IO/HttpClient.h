@@ -22,22 +22,26 @@
 #include <string>
 #include <vector>
 
-// Synchronous HTTP client using the Windows WinHTTP API.
-// Supports HTTPS via the OS certificate store (no OpenSSL required).
+/// @brief Synchronous HTTP client using the Windows WinHTTP API.
+///
+/// Supports HTTPS via the OS certificate store (no OpenSSL required).
 namespace HttpClient
 {
-	// Simple response structure
+	/// @brief Simple HTTP response containing status, body, and error info.
 	struct Response
 	{
-		int statusCode = 0;
-		std::string body;
-		std::string error;
-		bool success = false;
+		int statusCode = 0;          ///< HTTP status code (e.g. 200, 404).
+		std::string body;            ///< Response body.
+		std::string error;           ///< Error message (empty on success).
+		bool success = false;        ///< True if the request completed without error.
 	};
 
-	// Optional progress callback: (bytesReceived, totalBytes).  totalBytes may be 0 if unknown.
+	/// Optional progress callback: (bytesReceived, totalBytes).  totalBytes may be 0 if unknown.
 	using ProgressCallback = std::function<void(size_t bytesReceived, size_t totalBytes)>;
 
-	// Perform a synchronous HTTP(S) GET.
+	/// @brief Perform a synchronous HTTP(S) GET request.
+	/// @param url       The full URL to fetch.
+	/// @param progress  Optional callback invoked as data is received.
+	/// @return Response containing the status code, body, and any error.
 	Response Get(const std::string& url, const ProgressCallback& progress = nullptr);
 }

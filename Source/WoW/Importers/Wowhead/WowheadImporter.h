@@ -29,6 +29,7 @@
 
 #include "ImporterPlugin.h"
 
+/// @brief Imports NPC and item data by scraping Wowhead web pages.
 class WowheadImporter : public ImporterPlugin //-V1106
 {
 

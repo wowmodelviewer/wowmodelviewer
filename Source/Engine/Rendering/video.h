@@ -10,19 +10,25 @@
 #include <glad/wgl.h>
 #endif
 
+/// @brief Describes a single video mode's capabilities (colour depth, AA, etc.).
 struct VideoCaps
 {
-	int colour;
-	int alpha;
-	int zBuffer;
-	int accum;
-	int stencil;
-	int aaSamples; // how many AA samples can this mode do?
-	int hwAcc; // Hardware Acceleration mode?
-	GLboolean sampleBuffer; // do we have an AA sample buffer?
-	GLboolean doubleBuffer; // double buffered?
+	int colour;          ///< Colour buffer bit depth.
+	int alpha;           ///< Alpha buffer bit depth.
+	int zBuffer;         ///< Depth buffer bit depth.
+	int accum;           ///< Accumulation buffer bit depth.
+	int stencil;         ///< Stencil buffer bit depth.
+	int aaSamples;       ///< Number of anti-aliasing samples.
+	int hwAcc;           ///< Hardware acceleration mode.
+	GLboolean sampleBuffer; ///< True if an AA sample buffer is available.
+	GLboolean doubleBuffer; ///< True if double-buffered.
 };
 
+/// @brief Legacy OpenGL video-settings manager.
+///
+/// Enumerates display modes, negotiates pixel formats, and tracks
+/// GPU capabilities.  Retained for backward compatibility with the
+/// fixed-function rendering path.
 class VideoSettings
 {
 public:

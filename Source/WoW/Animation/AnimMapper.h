@@ -5,8 +5,8 @@
 #include <string>
 #include <string_view>
 
-// Index-based animation name lookup, ported from wow.export's AnimMapper.js.
-// Retrieved from https://github.com/Marlamin/wow.tools.local/blob/main/wwwroot/js/anims.js
+/// @brief Index-based animation name lookup, ported from wow.export's AnimMapper.js.
+/// @see https://github.com/Marlamin/wow.tools.local/blob/main/wwwroot/js/anims.js
 namespace AnimMapper
 {
 	static constexpr std::string_view ANIM_NAMES[] = {

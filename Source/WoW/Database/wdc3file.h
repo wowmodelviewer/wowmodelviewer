@@ -5,6 +5,11 @@
 
 #define _WDC3FILE_API_
 
+/// @brief Reader for the WDC3 / WDC4 database file format (.db2).
+///
+/// WDC3 refines the sectioned layout of WDC2 and adds a TACT encryption
+/// key hash per section. WDC4 shares the same on-disk layout and is
+/// handled identically. This class also serves as the base for WDC5File.
 class _WDC3FILE_API_ WDC3File : public WDB5File
 {
 public:

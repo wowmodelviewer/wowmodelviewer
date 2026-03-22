@@ -42,10 +42,11 @@ class WoWModel;
 
 // ---- Supporting types -----------------------------------------------------
 
+/// @brief Font entry for the UI font selector.
 struct FontEntry
 {
-    std::string name;
-    std::string path;  // absolute path to .ttf
+    std::string name;  ///< Display name of the font.
+    std::string path;  ///< Absolute path to the .ttf file.
 };
 
 // ---- Type aliases for brevity ---------------------------------------------
@@ -62,6 +63,7 @@ using MountEntry         = MountsPanel::MountEntry;
 
 // ---- Sub-struct: Scene (3D scene graph, camera, timing, model flags) ------
 
+/// @brief Mutable state for the 3D scene: renderer, camera, model tree, and timing.
 struct SceneState
 {
     Renderer renderer;
@@ -83,6 +85,7 @@ struct SceneState
 
 // ---- Sub-struct: Loading (async game-data loading thread) -----------------
 
+/// @brief Mutable state for the async game-data loading thread.
 struct LoadingState
 {
     bool isWoWLoaded = false;
@@ -102,6 +105,7 @@ struct LoadingState
 
 // ---- Sub-struct: UI (visibility toggles, fonts, log, folder picker) -------
 
+/// @brief Mutable state for the UI layer: dialogs, fonts, log viewer, folder picker.
 struct UIState
 {
     // Dialog visibility
@@ -145,6 +149,7 @@ struct UIState
 
 // ---- Sub-struct: Animation (playback, skins) ------------------------------
 
+/// @brief Mutable state for animation playback and skin selection.
 struct AnimationState
 {
     std::vector<AnimEntry> animEntries;
@@ -163,6 +168,7 @@ struct AnimationState
 
 // ---- Sub-struct: Character (customization + equipment) --------------------
 
+/// @brief Mutable state for character customisation and equipment editing.
 struct CharacterState
 {
     std::vector<CustomizationOption> customizationOptions;
@@ -175,6 +181,7 @@ struct CharacterState
 
 // ---- Sub-struct: Browsers (NPC, Item, Mount, ItemSet, StartOutfit) --------
 
+/// @brief Mutable state for the NPC, Item, Mount, ItemSet, and StartOutfit browsers.
 struct BrowserState
 {
     // Item Sets
@@ -218,6 +225,7 @@ struct BrowserState
 
 // ---- Sub-struct: Export (export, import, screenshot, presets) --------------
 
+/// @brief Mutable state for export, import, screenshot, and preset operations.
 struct ExportState
 {
     std::vector<std::unique_ptr<ExporterPlugin>> exporters;
@@ -245,6 +253,10 @@ struct ExportState
 
 // ---- Consolidated application state ---------------------------------------
 
+/// @brief Top-level aggregate of all mutable application state.
+///
+/// Sub-structs follow the Gregory "subsystem state" pattern: each group
+/// owns a cohesive slice of the application's data.
 struct AppState
 {
     SceneState     scene;

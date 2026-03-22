@@ -4,6 +4,10 @@
 #include "Component.h"
 #include <vector>
 
+/// @brief Generic typed container that manages a set of child Component pointers.
+/// @tparam DataType  The child element type (must derive from Component).
+///
+/// Children are reference-counted and automatically released on destruction.
 template <class DataType>
 class Container : public Component
 {

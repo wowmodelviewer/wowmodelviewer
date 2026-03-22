@@ -37,6 +37,7 @@ namespace wow
 		bool isRelationshipData;
 	};
 
+	/// @brief WoW-specific database that lazy-loads DB2 tables from the CASC archive.
 	class _WOWDATABASE_API_ WoWDatabase : public core::GameDatabase
 	{
 	public:

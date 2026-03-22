@@ -15,21 +15,35 @@
 
 #define _ANIMATED_API_
 
+/// @brief Holds per-model animation metadata: index-to-id mapping, external anim files, and global sequences.
 class modelAnimData
 {
 public:
-	std::map<uint, int16> animIndexToAnimId;
-	std::map<int16, std::pair<GameFile*, GameFile*>> animfiles;
-	std::vector<uint32> globalSequences;
+	std::map<uint, int16> animIndexToAnimId;  ///< Maps animation index to animation ID.
+	std::map<int16, std::pair<GameFile*, GameFile*>> animfiles;  ///< Maps anim ID to (anim file, skel file) pair.
+	std::vector<uint32> globalSequences;  ///< Global sequence durations.
 };
 
-// interpolation functions
+/// @brief Linearly interpolate between two values.
+/// @tparam T Value type.
+/// @param r Interpolation factor in [0, 1].
+/// @param v1 Start value.
+/// @param v2 End value.
+/// @return Interpolated result.
 template <class T>
 inline T interpolate(const float r, const T& v1, const T& v2)
 {
 	return static_cast<T>(v1 * (1.0f - r) + v2 * r);
 }
 
+/// @brief Hermite spline interpolation between two values.
+/// @tparam T Value type.
+/// @param r Interpolation factor in [0, 1].
+/// @param v1 Start value.
+/// @param v2 End value.
+/// @param in Incoming tangent.
+/// @param outVal Outgoing tangent.
+/// @return Interpolated result.
 template <class T>
 inline T interpolateHermite(const float r, const T& v1, const T& v2, const T& in, const T& outVal)
 {
@@ -43,6 +57,14 @@ inline T interpolateHermite(const float r, const T& v1, const T& v2, const T& in
 	return static_cast<T>(v1 * h1 + v2 * h2 + in * h3 + outVal * h4);
 }
 
+/// @brief Bezier spline interpolation between two values.
+/// @tparam T Value type.
+/// @param r Interpolation factor in [0, 1].
+/// @param v1 Start value.
+/// @param v2 End value.
+/// @param in Incoming control point.
+/// @param outVal Outgoing control point.
+/// @return Interpolated result.
 template <class T>
 inline T interpolateBezier(const float r, const T& v1, const T& v2, const T& in, const T& outVal)
 {
@@ -66,40 +88,45 @@ inline glm::fquat interpolate<glm::fquat>(const float r, const glm::fquat& v1, c
 	return glm::slerp(v1, v2, r);
 }
 
+/// @brief A (start, end) frame range for an animation.
 typedef std::pair<size_t, size_t> AnimRange;
 
-// global time for global sequences
+/// @brief Global clock for global-sequence animations.
 _ANIMATED_API_ extern size_t globalTime;
 
+/// @brief Interpolation modes used by animated values in M2 models.
 enum Interpolations
 {
-	INTERPOLATION_NONE,
-	INTERPOLATION_LINEAR,
-	INTERPOLATION_HERMITE,
-	INTERPOLATION_BEZIER
+	INTERPOLATION_NONE,     ///< No interpolation (step).
+	INTERPOLATION_LINEAR,   ///< Linear interpolation.
+	INTERPOLATION_HERMITE,  ///< Hermite spline.
+	INTERPOLATION_BEZIER    ///< Bezier spline.
 };
 
+/// @brief Identity conversion functor — returns its argument unchanged.
+/// @tparam T Value type.
 template <class T>
 class Identity
 {
 public:
+	/// @brief Passthrough conversion.
 	static const T& conv(const T& t)
 	{
 		return t;
 	}
 };
 
-// In WoW 2.0+ Blizzard are now storing rotation data in 16bit values instead of 32bit.
-// I don't really understand why as its only a very minor saving in model sizes and adds extra overhead in
-// processing the models.  Need this structure to read the data into.
+/// @brief Packed 16-bit quaternion as stored in WoW 2.0+ M2 files.
 struct PACK_QUATERNION
 {
-	int16 x, y, z, w;
+	int16 x, y, z, w;  ///< Packed quaternion components.
 };
 
+/// @brief Converts a packed 16-bit quaternion to a 32-bit float quaternion.
 class Quat16ToQuat32
 {
 public:
+	/// @brief Convert packed 16-bit quaternion to glm::fquat.
 	static const glm::fquat conv(const PACK_QUATERNION t)
 	{
 		return glm::fquat(
@@ -110,32 +137,27 @@ public:
 	}
 };
 
-// Convert opacity values stored as shorts to floating point
-// I wonder why Blizzard decided to save 2 bytes by doing this
+/// @brief Converts opacity values stored as int16 to normalised float [0, 1].
 class ShortToFloat
 {
 public:
+	/// @brief Convert a short opacity value to float.
 	static float conv(const short t)
 	{
 		return t / 32767.0f;
 	}
 };
 
-/*
-  Generic animated value class:
-
-  T is the data type to animate
-  D is the data type stored in the file (by default this is the same as T)
-  Conv is a conversion object that defines T conv(D) to convert from D to T
-    (by default this is an identity function)
-  (there might be a nicer way to do this? meh meh)
-*/
-
+/// @brief Maximum number of animation tracks per Animated value.
 enum
 {
 	MAX_ANIMATED = 500
 };
 
+/// @brief Generic animated value class that reads keyframe data from M2 files.
+/// @tparam T    The runtime data type to animate.
+/// @tparam D    The data type stored on disk (defaults to T).
+/// @tparam Conv A conversion functor with `static T conv(D)` (defaults to Identity).
 template <class T, class D=T, class Conv=Identity<T>>
 class Animated
 {

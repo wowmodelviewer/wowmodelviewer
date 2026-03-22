@@ -15,34 +15,38 @@ class RibbonEmitter;
 
 class Bone;
 
+/// @brief A single particle instance in a particle system.
 struct Particle
 {
-	glm::vec3 pos, speed, down, origin, dir;
-	glm::vec3 corners[4];
-	glm::vec3 tpos;
-	float size, life, maxlife;
-	size_t tile;
-	glm::vec4 color;
+	glm::vec3 pos, speed, down, origin, dir;  ///< Position, velocity, gravity, origin, and direction.
+	glm::vec3 corners[4];   ///< Billboard corner positions.
+	glm::vec3 tpos;         ///< Transformed position.
+	float size, life, maxlife;  ///< Current size, remaining life, and maximum lifespan.
+	size_t tile;            ///< Current texture tile index.
+	glm::vec4 color;        ///< Current RGBA colour.
 };
 
 typedef std::list<Particle> ParticleList;
 
+/// @brief Abstract base class for particle emitters.
 class ParticleEmitter
 {
 protected:
-	ParticleSystem* sys;
+	ParticleSystem* sys;  ///< Owning particle system.
 
 public:
 	ParticleEmitter(ParticleSystem* sys): sys(sys)
 	{
 	}
 
+	/// @brief Create a new particle with the given emission parameters.
 	virtual Particle newParticle(size_t anim, size_t time, float w, float l, float spd, float var, float spr,
-	                             float spr2) = 0;
+								 float spr2) = 0;
 
 	virtual ~ParticleEmitter() = default;
 };
 
+/// @brief Emits particles from a rectangular plane.
 class PlaneParticleEmitter : public ParticleEmitter
 {
 public:
@@ -53,6 +57,7 @@ public:
 	Particle newParticle(size_t anim, size_t time, float w, float l, float spd, float var, float spr, float spr2);
 };
 
+/// @brief Emits particles from the surface of a sphere.
 class SphereParticleEmitter : public ParticleEmitter
 {
 public:
@@ -63,11 +68,13 @@ public:
 	Particle newParticle(size_t anim, size_t time, float w, float l, float spd, float var, float spr, float spr2);
 };
 
+/// @brief A set of 4 texture coordinates for a particle tile.
 struct TexCoordSet
 {
-	glm::vec2 tc[4];
+	glm::vec2 tc[4];  ///< Texture coordinates for the four corners.
 };
 
+/// @brief M2 particle system — manages emission, simulation, and rendering of particles.
 class _PARTICLE_API_ ParticleSystem
 {
 	float mid, slowdown, rotation;
@@ -177,12 +184,14 @@ public:
 	static bool useDoNotTrail;
 };
 
+/// @brief A single segment in a ribbon trail.
 struct RibbonSegment
 {
-	glm::vec3 pos, up, back;
-	float len, len0;
+	glm::vec3 pos, up, back;  ///< Segment position, up vector, and back vector.
+	float len, len0;          ///< Current length and initial length.
 };
 
+/// @brief M2 ribbon emitter — produces trailing ribbon effects attached to bones.
 class RibbonEmitter
 {
 	Animated<glm::vec3> color;

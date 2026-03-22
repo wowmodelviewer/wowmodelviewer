@@ -21,9 +21,10 @@ class ItemDatabase;
 extern ItemDatabase items;
 extern std::vector<NPCRecord> npcs;
 
+/// @brief A single equipment item record from the item database.
 struct ItemRecord
 {
-	std::string name;
+	std::string name;                             ///< Display name of the item.
 	int id, itemclass, subclass, type, model, sheath, quality;
 
 	ItemRecord(const std::vector<std::string>&);
@@ -35,6 +36,7 @@ struct ItemRecord
 	int slot();
 };
 
+/// @brief In-memory item database loaded from the CSV item list.
 class ItemDatabase
 {
 public:
@@ -46,10 +48,11 @@ public:
 	const ItemRecord& getById(int id) const;
 };
 
+/// @brief A single NPC record (creature display info).
 struct NPCRecord
 {
-	std::string name;
-	int id, model, type;
+	std::string name;         ///< Display name of the NPC.
+	int id, model, type;      ///< Creature ID, display model ID, and type.
 
 	NPCRecord(const std::string& line);
 	NPCRecord(const std::vector<std::string>&);

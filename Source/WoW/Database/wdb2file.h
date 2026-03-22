@@ -5,6 +5,10 @@
 
 #define _WDB2FILE_API_
 
+/// @brief Reader for the legacy WDB2 database file format (.db2).
+///
+/// WDB2 is an older World of Warcraft client database format with fixed-size
+/// records and a simple string table. Superseded by WDB5 and later formats.
 class _WDB2FILE_API_ WDB2File : public DBFile, public CASCFile
 {
 public:

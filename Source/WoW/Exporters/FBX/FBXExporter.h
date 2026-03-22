@@ -37,6 +37,7 @@ struct ModelAnimation;
 
 #include "ExporterPlugin.h"
 
+/// @brief Exports WoW models to Autodesk FBX format with meshes, skeletons, and animations.
 class FBXExporter : public ExporterPlugin //-V1106
 {
 

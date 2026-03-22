@@ -11,9 +11,10 @@
 
 #define _WDCREADER_API_
 
-// Unified WDC reader for WDC2, WDC3, WDC4 and WDC5 DB2 files.
-// Modelled after wow.export's WDCReader.js — supports multiple sections,
-// encrypted-section detection, 64-bit bitpacked reads, and WDC4/5 extras.
+/// @brief Unified WDC reader for WDC2, WDC3, WDC4 and WDC5 DB2 files.
+///
+/// Modelled after wow.export's WDCReader.js — supports multiple sections,
+/// encrypted-section detection, 64-bit bitpacked reads, and WDC4/5 extras.
 class _WDCREADER_API_ WDCReader : public DBFile, public CASCFile
 {
 public:

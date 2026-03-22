@@ -2,13 +2,21 @@
 
 #include <string>
 
+/// @brief Base class for all scene-graph nodes in the component hierarchy.
+///
+/// Supports parent–child relationships, reference counting, and naming.
+/// Derived classes (Container, GameFile, WoWItem, etc.) extend this to
+/// form the application's object graph.
 class Component
 {
 public:
 	Component();
 	virtual ~Component();
 
+	/// @brief Add a child component to this node.
 	virtual bool addChild(Component*);
+
+	/// @brief Remove a child component from this node.
 	virtual bool removeChild(Component*);
 
 	virtual void removeAllChildren()
@@ -21,17 +29,28 @@ public:
 	virtual Component* getChild(unsigned int /* index */) { return nullptr; }
 	virtual const Component* getChild(unsigned int /* index */) const { return nullptr; }
 
-	// parent management
+	/// @brief Set the parent of this component.
 	void setParentComponent(Component*);
+
+	/// @brief Called after the parent has been set; override for custom logic.
 	virtual void onParentSet(Component*);
+
+	/// @brief Get the parent component (const).
 	const Component* parent() const { return m_p_parent; }
+
+	/// @brief Get the parent component.
 	Component* parent() { return m_p_parent; }
 
+	/// @brief Walk up the parent chain and return the first ancestor of the given type.
+	/// @tparam DataType  The type to search for (must be a Component subclass).
+	/// @return Pointer to the ancestor, or nullptr if none found.
 	template <class DataType>
 	const DataType* firstParentOfType();
 
-	// auto delete management
+	/// @brief Increment the reference counter.
 	void ref();
+
+	/// @brief Decrement the reference counter; deletes this when it reaches zero.
 	void unref();
 
 	// Name management
