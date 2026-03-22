@@ -13,8 +13,6 @@
 #include "types.h"
 #include "Logger.h"
 
-#define _ANIMATED_API_
-
 /// @brief Holds per-model animation metadata: index-to-id mapping, external anim files, and global sequences.
 class modelAnimData
 {
@@ -92,7 +90,7 @@ inline glm::fquat interpolate<glm::fquat>(const float r, const glm::fquat& v1, c
 typedef std::pair<size_t, size_t> AnimRange;
 
 /// @brief Global clock for global-sequence animations.
-_ANIMATED_API_ extern size_t globalTime;
+extern size_t globalTime;
 
 /// @brief Interpolation modes used by animated values in M2 models.
 enum Interpolations
@@ -544,4 +542,4 @@ typedef Animated<float, short, ShortToFloat> AnimatedShort;
 float frand();
 
 float randfloat(float lower, float upper);
-_ANIMATED_API_ int randint(int lower, int upper);
+int randint(int lower, int upper);

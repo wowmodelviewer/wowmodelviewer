@@ -6,10 +6,8 @@
 
 class WoWModel;
 
-#define _MODELRENDERPASS_API_
-
 /// @brief Represents a single render pass (material + geometry) for an M2 model geoset.
-class _MODELRENDERPASS_API_ ModelRenderPass
+class ModelRenderPass
 {
 public:
 	ModelRenderPass(WoWModel*, int geo);

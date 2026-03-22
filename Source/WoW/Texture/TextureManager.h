@@ -4,8 +4,6 @@
 #include <glad/gl.h>
 #include "manager.h"
 
-#define _TEXTUREMANAGER_API_
-
 class GameFile;
 class Texture;
 
@@ -13,7 +11,7 @@ class Texture;
 ///
 /// Textures are loaded from GameFile sources and cached by name.  Duplicate
 /// requests return the existing GL texture ID instead of re-uploading.
-class _TEXTUREMANAGER_API_ TextureManager : public Manager<GLuint>
+class TextureManager : public Manager<GLuint>
 {
 public:
 	virtual GLuint add(GameFile *);
@@ -21,4 +19,4 @@ public:
 
 };
 
-_TEXTUREMANAGER_API_ extern TextureManager TEXTUREMANAGER;
+extern TextureManager TEXTUREMANAGER;

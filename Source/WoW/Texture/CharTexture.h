@@ -41,13 +41,11 @@ struct CharTextureComponent
 	}
 };
 
-#define _CHARTEXTURE_API_
-
 /// @brief Composites multiple texture layers into a single character skin texture.
 ///
 /// Layers (skin, face, hair, clothing, etc.) are blended together and uploaded
 /// to an OpenGL texture via compose().
-class _CHARTEXTURE_API_ CharTexture
+class CharTexture
 {
 public:
 	explicit CharTexture(unsigned int _layoutSizeId = 0)

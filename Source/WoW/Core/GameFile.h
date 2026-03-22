@@ -4,13 +4,11 @@
 #include <vector>
 #include "Component.h"
 
-#define _GAMEFILE_API_
-
 /// @brief Abstract base class representing a file within the game data archive.
 ///
 /// Provides a memory-buffered read interface with seek, chunk navigation,
 /// and subclass hooks for the actual I/O backend (CASC, hard-drive, etc.).
-class _GAMEFILE_API_ GameFile : public Component
+class GameFile : public Component
 {
 public:
 	GameFile(std::string path, int id = -1)

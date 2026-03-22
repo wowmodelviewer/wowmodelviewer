@@ -2,14 +2,12 @@
 
 #include <string>
 
-#define _GLOBALSETTINGS_API_
-
 #define GLOBALSETTINGS core::GlobalSettings::instance()
 
 namespace core
 {
 	/// @brief Singleton providing application-wide version info and global flags.
-	class _GLOBALSETTINGS_API_ GlobalSettings
+	class GlobalSettings
 	{
 	public:
 		~GlobalSettings();

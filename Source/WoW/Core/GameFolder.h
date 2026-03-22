@@ -7,14 +7,12 @@
 #include "GameFile.h"
 #include "Container.h"
 
-#define _GAMEFOLDER_API_
-
 namespace core
 {
 	using ProgressCallback = std::function<void(int, int)>;
 
 	/// @brief Describes a detected game installation (locale, version, product).
-	class _GAMEFOLDER_API_ GameConfig
+	class GameConfig
 	{
 	public:
 		std::string locale;   ///< e.g. "enUS".
@@ -26,7 +24,7 @@ namespace core
 	///
 	/// Manages a collection of GameFile children and provides name- and ID-based
 	/// lookup, filtering, and iteration.
-	class _GAMEFOLDER_API_ GameFolder : public Container<GameFile>
+	class GameFolder : public Container<GameFile>
 	{
 	public:
 		explicit GameFolder(std::string path);

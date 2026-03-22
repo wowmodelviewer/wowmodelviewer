@@ -1,7 +1,5 @@
 #pragma once
 
-#define _PARTICLE_API_
-
 class WoWModel;
 class ParticleSystem;
 class RibbonEmitter;
@@ -75,7 +73,7 @@ struct TexCoordSet
 };
 
 /// @brief M2 particle system — manages emission, simulation, and rendering of particles.
-class _PARTICLE_API_ ParticleSystem
+class ParticleSystem
 {
 	float mid, slowdown, rotation;
 	glm::vec3 pos, tpos;

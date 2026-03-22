@@ -15,10 +15,8 @@
 
 class CASCFolder;
 
-#define _CASCFILE_API_
-
 /// @brief GameFile implementation that reads from a CASC storage archive.
-class _CASCFILE_API_ CASCFile : public GameFile
+class CASCFile : public GameFile
 {
 public:
 	CASCFile(std::string path, int id = -1);

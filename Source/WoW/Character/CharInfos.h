@@ -3,10 +3,8 @@
 #include <string>
 #include <vector>
 
-#define _CHARINFOS_API_
-
 /// @brief Stores imported character information (race, gender, equipment, customisations, tabard).
-class _CHARINFOS_API_ CharInfos
+class CharInfos
 {
 public:
 	CharInfos();

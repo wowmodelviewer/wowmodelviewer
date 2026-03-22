@@ -8,13 +8,11 @@
 
 class Model;
 
-#define _EXPORTERPLUGIN_API_
-
 /// @brief Abstract base class for model export plugins (OBJ, FBX, etc.).
 ///
 /// Subclasses provide a menu label, file dialog filter, and the
 /// exportModel() implementation for their specific format.
-class _EXPORTERPLUGIN_API_ ExporterPlugin
+class ExporterPlugin
 {
 public:
 	ExporterPlugin() = default;

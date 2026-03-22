@@ -1,13 +1,11 @@
 #pragma once
 
-#define _DISPLAYABLE_API_
-
 class Attachment;
 
 /// @brief Interface for objects that can be drawn and animated in the scene.
 ///
 /// Provides virtual hooks for setup, drawing, resetting, and per-frame updates.
-class _DISPLAYABLE_API_ Displayable
+class Displayable
 {
 public:
 	virtual ~Displayable()

@@ -2,10 +2,8 @@
 
 #include <string>
 
-#define _NPCINFOS_API_
-
 /// @brief Stores basic NPC metadata (id, display id, type, name) imported from external sources.
-class _NPCINFOS_API_ NPCInfos
+class NPCInfos
 {
 public:
 	NPCInfos();

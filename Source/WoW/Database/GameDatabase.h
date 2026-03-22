@@ -7,12 +7,10 @@
 
 class GameFile;
 
-#define _GAMEDATABASE_API_
-
 namespace core
 {
 	/// @brief Describes a single field (column) in a database table.
-	class _GAMEDATABASE_API_ FieldStructure
+	class FieldStructure
 	{
 	public:
 		FieldStructure() :
@@ -36,7 +34,7 @@ namespace core
 	};
 
 	/// @brief Describes the schema of a database table (name, file path, fields).
-	class _GAMEDATABASE_API_ TableStructure
+	class TableStructure
 	{
 	public:
 		TableStructure() {}
@@ -48,7 +46,7 @@ namespace core
 		std::vector<FieldStructure*> fields;
 	};
 
-	class _GAMEDATABASE_API_ GameDatabase
+	class GameDatabase
 	{
 	public:
 		GameDatabase();

@@ -4,12 +4,10 @@
 #include <string>
 #include <vector>
 
-#define _RACEINFOS_API_
-
 class WoWModel;
 
 /// @brief Stores per-race/sex metadata loaded from ChrRaces / ChrModel database tables.
-class _RACEINFOS_API_ RaceInfos
+class RaceInfos
 {
 public:
 	int raceID = -1;               ///< Race ID (-1 = invalid).

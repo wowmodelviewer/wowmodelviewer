@@ -5,15 +5,13 @@
 #include "GameFile.h"
 #include "GameFolder.h"
 
-#define _WOWFOLDER_API_
-
 namespace wow
 {
 	/// @brief GameFolder implementation backed by a CASC archive.
 	///
 	/// Wraps CASCFolder to provide file lookup by name and by FileDataID,
 	/// listfile loading, and custom-file overlay.
-	class _WOWFOLDER_API_ WoWFolder : public core::GameFolder
+	class WoWFolder : public core::GameFolder
 	{
 	public:
 		WoWFolder(const std::string& path);

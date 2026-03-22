@@ -9,8 +9,6 @@
 class GameFile;
 class DB2Table;
 
-#define _WOWDATABASE_API_
-
 namespace wow
 {
 	class TableStructure : public core::TableStructure
@@ -36,7 +34,7 @@ namespace wow
 	};
 
 	/// @brief WoW-specific database that lazy-loads DB2 tables from the CASC archive.
-	class _WOWDATABASE_API_ WoWDatabase : public core::GameDatabase
+	class WoWDatabase : public core::GameDatabase
 	{
 	public:
 		WoWDatabase();

@@ -8,13 +8,11 @@
 
 #include "CASCFile.h"
 
-#define _DB2READER_API_
-
 /// @brief Unified reader for WDC2, WDC3, WDC4 and WDC5 DB2 files.
 ///
 /// Supports multiple sections, encrypted-section detection,
 /// 64-bit bitpacked reads, and WDC4/5 extras.
-class _DB2READER_API_ DB2Reader : public CASCFile
+class DB2Reader : public CASCFile
 {
 public:
 	explicit DB2Reader(const std::string& file);

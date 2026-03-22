@@ -5,9 +5,7 @@
 
 typedef GLuint TextureID;
 
-#define _TEXTURE_API_
-
-class _TEXTURE_API_ Texture : public ManagedItem 
+class Texture : public ManagedItem 
 {
 public:
 	int w,h;

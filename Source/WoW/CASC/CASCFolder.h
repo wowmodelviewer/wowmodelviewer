@@ -16,13 +16,11 @@
 
 #include "GameFolder.h" // GameConfig
 
-#define _CASCFOLDER_API_
-
 /// @brief Manages a CASC (Content Addressable Storage Container) archive.
 ///
 /// Handles archive opening, locale/version detection, file existence checks,
 /// and individual file open/close operations via CascLib.
-class _CASCFOLDER_API_ CASCFolder
+class CASCFolder
 {
 public:
 	CASCFolder();

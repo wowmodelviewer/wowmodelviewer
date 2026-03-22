@@ -5,12 +5,10 @@
 
 class Observer;
 
-#define _OBSERVABLE_API_
-
 /// @brief Subject in the Observer pattern; maintains a list of Observer subscribers.
 ///
 /// Derived classes call notify() to broadcast events to all attached observers.
-class _OBSERVABLE_API_ Observable
+class Observable
 {
 public:
 	Observable();

@@ -7,11 +7,9 @@ class GameFile;
 #include <string>
 #include <vector>
 
-#define _TABARDDETAILS_API_
-
 /// @brief Manages custom tabard design details (icon, border, colours) and provides
 ///        texture lookup for rendering.
-class _TABARDDETAILS_API_ TabardDetails
+class TabardDetails
 {
 public:
 	TabardDetails();

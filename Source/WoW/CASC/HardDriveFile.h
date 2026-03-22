@@ -11,11 +11,9 @@
 
 #include <fstream>
 
-#define _HARDDRIVEFILE_API_
-
 /// @brief A CASCFile implementation that reads data from the local hard drive
 ///        rather than from a CASC archive.
-class _HARDDRIVEFILE_API_ HardDriveFile : public CASCFile
+class HardDriveFile : public CASCFile
 {
 public:
 	HardDriveFile(std::string path, std::string realpath, int id = -1);

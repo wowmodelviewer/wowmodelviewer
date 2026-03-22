@@ -9,15 +9,13 @@ namespace core { class GameDatabase; }
 #define GAMEDIRECTORY core::Game::instance().folder()
 #define GAMEDATABASE core::Game::instance().database()
 
-#define _GAME_API_
-
 namespace core
 {
 	/// @brief Singleton entry point for the game data layer.
 	///
 	/// Owns the GameFolder (archive access) and GameDatabase (DB2 tables).
 	/// Access via the GAMEDIRECTORY and GAMEDATABASE macros.
-	class _GAME_API_ Game
+	class Game
 	{
 	public:
 		/// @brief Access the singleton instance (Meyers singleton).

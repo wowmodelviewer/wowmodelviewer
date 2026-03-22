@@ -4,12 +4,10 @@
 #include <mutex>
 #include "LogOutput.h"
 
-#define _LOGOUTPUTFILE_API_
-
 namespace WMVLog
 {
 	/// @brief Thread-safe log output sink that writes messages to a file on disk.
-	class _LOGOUTPUTFILE_API_ LogOutputFile : public LogOutput
+	class LogOutputFile : public LogOutput
 	{
 	public:
 		/// @brief Construct a file output sink that writes to the given path.

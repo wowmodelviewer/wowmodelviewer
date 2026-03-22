@@ -37,8 +37,6 @@ class CASCFile;
 class GameFile;
 class ModelRenderPass;
 
-#define _WOWMODEL_API_
-
 enum
 {
 	TEXTURE_MAX = 32  ///< Maximum number of texture slots per model.
@@ -48,7 +46,7 @@ enum
 ///
 /// Loaded from a CASCFile, this class owns vertex buffers, bones, animations,
 /// render passes, particle emitters, character details, and equipment items.
-class _WOWMODEL_API_ WoWModel : public ManagedItem, public Displayable, public Model, public Container<WoWItem>
+class WoWModel : public ManagedItem, public Displayable, public Model, public Container<WoWItem>
 {
 	// VBO Data
 	GLuint vbuf, nbuf, tbuf;
@@ -260,7 +258,7 @@ public:
 	GLuint getGLTexture(uint16 tex) const;
 	void dumpTextureStatus();
 
-	friend _WOWMODEL_API_ std::ostream& operator<<(std::ostream& out, const WoWModel& m);
+	friend std::ostream& operator<<(std::ostream& out, const WoWModel& m);
 
 	friend class ModelRenderPass; // to allow access to rendering elements (texAnims, etc.)
 };

@@ -16,13 +16,11 @@ struct AnimInfo
 	size_t AnimID;   ///< Animation identifier.
 };
 
-#define _ANIMMANAGER_API_
-
 class WoWModel;
 
 /// @brief Manages animation playback for a WoWModel, supporting up to 4 queued animations,
 ///        a secondary (upper-body) animation, and independent mouth movement.
-class _ANIMMANAGER_API_ AnimManager
+class AnimManager
 {
 	WoWModel& model;
 

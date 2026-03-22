@@ -5,12 +5,10 @@
 #include <string>
 #include <vector>
 
-#define _DBDFILE_API_
-
 namespace core
 {
 	// Represents a build version: major.minor.patch.build
-	struct _DBDFILE_API_ DBDBuild
+	struct DBDBuild
 	{
 		int major = 0;
 		int minor = 0;
@@ -26,7 +24,7 @@ namespace core
 	};
 
 	// Column definition from the COLUMNS section of a .dbd file
-	struct _DBDFILE_API_ DBDColumnDef
+	struct DBDColumnDef
 	{
 		std::string type;        // int, string, float, locstring
 		std::string name;        // column name (may end with '?' for unverified)
@@ -36,7 +34,7 @@ namespace core
 	};
 
 	// A single field entry within a version definition
-	struct _DBDFILE_API_ DBDVersionField
+	struct DBDVersionField
 	{
 		std::string name;
 		std::string sizeStr;       // e.g. "32", "u8", "16", etc. (empty for strings/floats)
@@ -48,7 +46,7 @@ namespace core
 	};
 
 	// A version definition block (one BUILD/LAYOUT section)
-	struct _DBDFILE_API_ DBDVersionDef
+	struct DBDVersionDef
 	{
 		std::vector<std::string> layoutHashes;
 		std::vector<DBDBuild> builds;                    // exact builds
@@ -61,7 +59,7 @@ namespace core
 	};
 
 	/// @brief Parsed content of a single .dbd file (database definition).
-	class _DBDFILE_API_ DBDFile
+	class DBDFile
 	{
 	public:
 		bool parse(const std::string& filepath);

@@ -12,10 +12,8 @@
 
 #include "glm/glm.hpp"
 
-#define _MODELCAMERA_API_
-
 /// @brief An animated camera defined within an M2 model (e.g. portrait or character-info camera).
-struct _MODELCAMERA_API_ ModelCamera
+struct ModelCamera
 {
 	bool ok;  ///< Whether this camera was successfully initialised.
 

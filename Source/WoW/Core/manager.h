@@ -7,13 +7,11 @@
 #include "GameFile.h"
 #include "Logger.h"
 
-#define _MANAGEDITEM_API_
-
 /// @brief Reference-counted item stored in a Manager.
 ///
 /// Tracks its own name and reference count; the owning Manager deletes
 /// the item when its count drops to zero.
-class _MANAGEDITEM_API_ ManagedItem
+class ManagedItem
 {
 	int m_refcount;
 	std::string m_itemName;
