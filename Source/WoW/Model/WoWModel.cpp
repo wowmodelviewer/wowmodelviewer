@@ -4060,7 +4060,12 @@ void WoWModel::refreshMerging()
 	origVertices = rawVertices;
 	indices = rawIndices;
 	passes = rawPasses;
-	geosets = rawGeosets;
+
+	// Rebuild this model's working geosets as fresh, OWNED copies of the originals.
+	// They must not alias rawGeosets: both restoreRawGeosets() and ~WoWModel() delete
+	// every pointer in `geosets`, so aliasing would free (and later double-free) the
+	// shared rawGeosets objects.
+	restoreRawGeosets();
 	textures.resize(TEXTURE_MAX);
 	replaceTextures.resize(TEXTURE_MAX);
 	specialTextures.resize(TEXTURE_MAX);
@@ -4080,11 +4085,16 @@ void WoWModel::refreshMerging()
 
 		mergeIndex++;
 
-		for (auto it : modelsIt->geosets)
+		// Append OWNED copies of the merged model's geosets, offset into the combined
+		// vertex/index buffers. These are copies (not the merged model's own pointers) so
+		// this model never frees geosets owned by a merged model — the merged model deletes
+		// them itself in its own destructor.
+		for (const auto it : modelsIt->geosets)
 		{
-			it->istart += nbIndices;
-			it->vstart += nbVertices;
-			geosets.push_back(it);
+			auto* geo = new ModelGeosetHD(*it);
+			geo->istart += nbIndices;
+			geo->vstart += nbVertices;
+			geosets.push_back(geo);
 		}
 
 		// build bone correspondence table
