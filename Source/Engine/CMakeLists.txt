@@ -63,5 +63,6 @@ use_glad()
 set(NAME core)
 add_library(${NAME} STATIC ${src} ${headers})
 set_property(TARGET ${NAME} PROPERTY FOLDER "libraries")
+wmv_set_compiler_flags(${NAME})
 
 target_link_libraries(${NAME} pugixml-static winhttp glu32 ${CMAKE_SOURCE_DIR}/ThirdParty/lib/x64/zlib.lib ${extralibs})

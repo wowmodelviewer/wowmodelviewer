@@ -55,6 +55,7 @@ set(NAME wowmodelviewer)
 add_executable(${NAME} ${src} "${CMAKE_CURRENT_BINARY_DIR}/wowmodelviewer.rc")
 
 set_property(TARGET ${NAME} PROPERTY FOLDER "executables")
+wmv_set_compiler_flags(${NAME})
 
 # Pass the absolute path to the window icon PNG so the code works from any working directory.
 target_compile_definitions(${NAME} PRIVATE

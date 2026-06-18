@@ -75,9 +75,8 @@ if exist "%REPO%\bin" (
 
 echo.
 echo === Clean complete. Next steps: ===
-echo     1. Open a x64 Native Tools Command Prompt (or VS Developer prompt)
-echo     2. cmake --preset x64-Debug   (downloads deps automatically)
-echo     3. cmake --build --preset x64-Debug
+echo     1. cmake --preset msvc-debug-local         (configures + downloads deps)
+echo     2. cmake --build --preset msvc-debug-local
 echo.
 
 endlocal

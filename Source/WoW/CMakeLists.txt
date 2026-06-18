@@ -116,6 +116,7 @@ use_casclib()
 set(NAME wow)
 add_library(${NAME} STATIC ${src} ${headers})
 set_property(TARGET ${NAME} PROPERTY FOLDER "libraries")
+wmv_set_compiler_flags(${NAME})
 
 target_link_libraries(${NAME} pugixml-static nlohmann_json::nlohmann_json ${extralibs} glu32)
 add_dependencies(${NAME} casc_static)

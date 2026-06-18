@@ -1,42 +1,10 @@
 cmake_minimum_required(VERSION 3.16)
 
-# ---------------------------------------------------------------------------
-# Force x64 MSVC compiler.
-# With the Ninja generator the architecture "strategy" must be "external", so
-# CMake uses whatever cl.exe is first on PATH.  If the environment was not set
-# up via 'vcvarsall x64' this can silently pick up the x86 compiler.  Detect
-# that situation and locate the x64 cl.exe automatically via vswhere before
-# project() runs.
-# ---------------------------------------------------------------------------
-if(CMAKE_HOST_WIN32 AND NOT DEFINED CMAKE_C_COMPILER AND NOT DEFINED CMAKE_CXX_COMPILER)
-  find_program(_vswhere vswhere
-    PATHS "$ENV{ProgramFiles\(x86\)}/Microsoft Visual Studio/Installer"
-    NO_DEFAULT_PATH
-  )
-  if(_vswhere)
-    execute_process(
-      COMMAND "${_vswhere}" -latest -products *
-              -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64
-              -property installationPath
-      OUTPUT_VARIABLE _vs_path
-      OUTPUT_STRIP_TRAILING_WHITESPACE
-      ERROR_QUIET
-    )
-    if(_vs_path)
-      set(_vc_ver_file "${_vs_path}/VC/Auxiliary/Build/Microsoft.VCToolsVersion.default.txt")
-      if(EXISTS "${_vc_ver_file}")
-        file(READ "${_vc_ver_file}" _vc_ver)
-        string(STRIP "${_vc_ver}" _vc_ver)
-        set(_cl_x64 "${_vs_path}/VC/Tools/MSVC/${_vc_ver}/bin/Hostx64/x64/cl.exe")
-        if(EXISTS "${_cl_x64}")
-          set(CMAKE_C_COMPILER "${_cl_x64}" CACHE FILEPATH "" FORCE)
-          set(CMAKE_CXX_COMPILER "${_cl_x64}" CACHE FILEPATH "" FORCE)
-          message(STATUS "Auto-selected x64 MSVC compiler: ${_cl_x64}")
-        endif()
-      endif()
-    endif()
-  endif()
-endif()
+# Compiler, Windows SDK, and INCLUDE / LIB / PATH / RC settings are resolved by the MSVC x64
+# toolchain file (cmake/toolchains/msvc-x64.cmake), which the presets chainload through vcpkg
+# (VCPKG_CHAINLOAD_TOOLCHAIN_FILE). The build is therefore self-contained and does NOT require
+# a Visual Studio developer prompt / vcvars64. Always configure via a preset (msvc-debug-local,
+# msvc-release-local, msvc-relwithdebinfo-local).
 
 project(WoWModelViewer)
 

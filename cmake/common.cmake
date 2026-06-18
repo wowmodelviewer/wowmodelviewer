@@ -5,6 +5,9 @@
 # define policies to avoid warnings
 include(${CMAKE_SOURCE_DIR}/cmake/policies.cmake)
 
+# per-target warning flags (wmv_set_compiler_flags) for our own targets
+include(${CMAKE_SOURCE_DIR}/cmake/CompilerFlags.cmake)
+
 #############################
 #  platform specific part   #
 #############################

@@ -24,6 +24,7 @@ set(FBXSDK_LIB_DIR ${CMAKE_SOURCE_DIR}/ThirdParty/lib/x64)
 set(NAME fbxexporter)
 add_library(${NAME} STATIC ${src} ${headers})
 set_property(TARGET ${NAME} PROPERTY FOLDER "exporters")
+wmv_set_compiler_flags(${NAME})
 
 # glm needs <cmath> which is not available transitively with WIN32_LEAN_AND_MEAN
 if(MSVC)

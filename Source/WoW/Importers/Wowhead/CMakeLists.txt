@@ -15,5 +15,6 @@ use_wow()
 set(NAME wowhead)
 add_library(${NAME} STATIC ${src} ${headers})
 set_property(TARGET ${NAME} PROPERTY FOLDER "importers")
+wmv_set_compiler_flags(${NAME})
 
 target_link_libraries(${NAME} nlohmann_json::nlohmann_json winhttp ${extralibs})

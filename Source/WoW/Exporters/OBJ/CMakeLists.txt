@@ -17,5 +17,6 @@ use_wow()
 set(NAME objexporter)
 add_library(${NAME} STATIC ${src} ${headers})
 set_property(TARGET ${NAME} PROPERTY FOLDER "exporters")
+wmv_set_compiler_flags(${NAME})
 
 target_link_libraries(${NAME} ${extralibs})
