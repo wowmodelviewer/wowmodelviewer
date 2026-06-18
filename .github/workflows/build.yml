@@ -65,10 +65,10 @@ jobs:
         shell: pwsh
         run: |
           $env:VCPKG_ROOT = $env:VCPKG_INSTALLATION_ROOT
-          cmake --preset x64-Release -DBUILDNUMBER=${{ github.run_number }} -DVCPKG_OVERLAY_TRIPLETS="${{ github.workspace }}/scripts/vcpkg-triplets"
+          cmake --preset msvc-release -DBUILDNUMBER=${{ github.run_number }} -DVCPKG_OVERLAY_TRIPLETS="${{ github.workspace }}/scripts/vcpkg-triplets"
 
       - name: Build
-        run: cmake --build --preset x64-Release
+        run: cmake --build --preset msvc-release
 
       - name: Rename installer
         shell: pwsh

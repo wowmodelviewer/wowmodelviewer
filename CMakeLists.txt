@@ -13,7 +13,7 @@ if(CMAKE_SIZEOF_VOID_P EQUAL 4)
   message(FATAL_ERROR
     "32-bit (x86) compiler detected but this project requires x64.\n"
     "Detected compiler: ${CMAKE_CXX_COMPILER}\n"
-    "Open an 'x64 Native Tools Command Prompt' or let VS select the x64-Debug/x64-Release preset."
+    "Configure via a preset (msvc-debug / msvc-release / msvc-relwithdebinfo)."
   )
 endif()
 
