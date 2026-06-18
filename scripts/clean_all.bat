@@ -21,18 +21,6 @@ if exist "%REPO%\out" (
     rmdir /s /q "%REPO%\out"
 )
 
-REM -- Qt --
-if exist "%REPO%\ThirdParty\Qt\6.8.3" (
-    echo Removing ThirdParty\Qt\6.8.3\
-    rmdir /s /q "%REPO%\ThirdParty\Qt\6.8.3"
-)
-
-REM -- wxWidgets --
-if exist "%REPO%\ThirdParty\wxWidgets_x64" (
-    echo Removing ThirdParty\wxWidgets_x64\
-    rmdir /s /q "%REPO%\ThirdParty\wxWidgets_x64"
-)
-
 REM -- FBX SDK headers --
 if exist "%REPO%\ThirdParty\include\fbxsdk.h" (
     echo Removing ThirdParty\include\fbxsdk.h

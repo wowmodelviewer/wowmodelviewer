@@ -123,7 +123,7 @@ void CharTexture::burnComponent(SoftwareImage& destImage, CharTextureComponent& 
 
 	const auto& coords = layoutInfos.second[ct.region];
 
-	const auto* tmp = gameFileToQImage(ct.file);
+	const auto* tmp = gameFileToImage(ct.file);
 
 	if (!tmp)
 		return;
@@ -159,7 +159,7 @@ void CharTexture::burnComponent(SoftwareImage& destImage, CharTextureComponent& 
 	delete tmp;
 }
 
-SoftwareImage* CharTexture::gameFileToQImage(GameFile* file)
+SoftwareImage* CharTexture::gameFileToImage(GameFile* file)
 {
 	SoftwareImage* result = nullptr;
 	const auto temptex = TEXTUREMANAGER.add(file);

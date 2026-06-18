@@ -117,19 +117,19 @@ add_subdirectory(ThirdParty/casclib)
 unset(CMAKE_POLICY_VERSION_MINIMUM CACHE)
 set_property(TARGET casc_static PROPERTY FOLDER "ThirdParty libraries")
 
-# pugixml — lightweight XML parser (replaces Qt Xml / QDom)
+# pugixml — lightweight XML parser
 message(STATUS "Adding pugixml...")
 add_subdirectory(ThirdParty/pugixml)
 set_property(TARGET pugixml-static PROPERTY FOLDER "ThirdParty libraries")
 
-# nlohmann/json — header-only JSON library (replaces Qt JSON)
+# nlohmann/json — header-only JSON library
 message(STATUS "Adding nlohmann/json...")
 set(JSON_BuildTests OFF CACHE INTERNAL "")
 set(JSON_Install OFF CACHE INTERNAL "")
 add_subdirectory(ThirdParty/json)
 set_property(TARGET nlohmann_json PROPERTY FOLDER "ThirdParty libraries")
 
-# GLFW — cross-platform window/context/input library (replaces wxGLCanvas)
+# GLFW — cross-platform window/context/input library
 message(STATUS "Adding GLFW...")
 set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
 set(GLFW_BUILD_TESTS    OFF CACHE BOOL "" FORCE)
@@ -138,7 +138,7 @@ set(GLFW_INSTALL        OFF CACHE BOOL "" FORCE)
 add_subdirectory(ThirdParty/glfw)
 set_property(TARGET glfw PROPERTY FOLDER "ThirdParty libraries")
 
-# Dear ImGui — immediate-mode GUI library (docking branch, replaces wxWidgets UI)
+# Dear ImGui — immediate-mode GUI library (docking branch)
 message(STATUS "Adding Dear ImGui...")
 set(IMGUI_DIR "${CMAKE_SOURCE_DIR}/ThirdParty/imgui")
 add_library(imgui STATIC

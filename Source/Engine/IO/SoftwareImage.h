@@ -7,7 +7,7 @@
 /// @brief CPU-side image buffer storing BGRA pixel data.
 ///
 /// Provides scaling, mirroring, compositing, and PNG save operations.
-/// Replaces QImage/QPainter for texture composition in the WoW Model Viewer.
+/// Used for texture composition in the WoW Model Viewer.
 class SoftwareImage
 {
 public:

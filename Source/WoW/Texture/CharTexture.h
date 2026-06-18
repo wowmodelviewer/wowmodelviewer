@@ -64,7 +64,7 @@ public:
 
 private:
 	void burnComponent(SoftwareImage& destImage, CharTextureComponent&) const;
-	static SoftwareImage* gameFileToQImage(GameFile* file);
+	static SoftwareImage* gameFileToImage(GameFile* file);
 	unsigned int layoutSizeId;
 	std::vector<CharTextureComponent> m_components;
 	static std::map<int, std::pair<LayoutSize, std::map<int, CharRegionCoords>>> LAYOUTS;

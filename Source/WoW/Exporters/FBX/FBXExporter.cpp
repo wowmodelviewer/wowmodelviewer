@@ -338,26 +338,16 @@ void FBXExporter::createAnimations()
 // Creates separate FBX files for each animation, in a folder with the original FBX file's name.
 bool FBXExporter::createAnimationFiles()
 {
-	//int maxThreads = QThread::idealThreadCount();
-	// Get the ideal number of threads we can run at once. This usually equals the total number of threads in a CPU.
 	std::map<int, std::wstring> animsMap = m_p_model->getAnimsMap();
 
 	/**** NOTICE! ****//*
 
-  While the QThreadPool code DOES start the FBX animation exporting in threads, the FBX SDK itself is not thread-safe!
+  Animation export runs single-threaded on purpose: the FBX SDK itself is not thread-safe!
 
   We will have to develop our own threaded wrapper for FBX, or copy the FBX data, or find some other method to make the SDK work in a thread-safe manner before we can re-enable multi-threaded animation exporting.
   Without doing this, WMV will crash while exporting animations, as the data becomes cross-contaminated, and thus, invalidated.
 
   */ /****         ****/
-
-	// If we allow users to set the number of threads WMV can use, we can limit it here. I would recommend using no more than 3/4ths of the total thread count! (Gotta leave some for normal CPU usage...)
-	//int allocatedThreads = 5;
-	//if (maxThreads > allocatedThreads)
-	//  maxThreads = allocatedThreads;
-
-	//LOG_INFO << "Exporting animations with" << maxThreads << "threads...";
-	//QThreadPool::globalInstance()->setMaxThreadCount(maxThreads);   // Use to limit the number of threads we can run at once.
 
 	for (const auto it : m_animsToExport)
 	{
@@ -386,7 +376,6 @@ bool FBXExporter::createAnimationFiles()
 		delete exporter;
 	}
 
-	//QThreadPool::globalInstance()->waitForDone();   // Don't finish until all the threads have been processed.
 	return true;
 }
 
