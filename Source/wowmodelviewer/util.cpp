@@ -172,7 +172,12 @@ bool loadDataFromResource(char*& t_data, DWORD& t_dataSize, const wxString& t_na
 wxBitmap* getBitmapFromMemory(const char* t_data, const DWORD t_size, long type, int width, int height)
 {
   wxMemoryInputStream a_is(t_data, t_size);
-  
+
+  // Silence benign image-decode notices for the duration of the load. The newer libpng in the
+  // 64-bit build flags PNGs with a malformed colour profile ("iCCP: known incorrect sRGB
+  // profile") that older libpng ignored; under wx 3.x such a warning would otherwise pop a modal
+  // dialog the user has to dismiss. The bitmap decodes fine, so just don't interrupt them.
+  wxLogNull noLog;
   wxImage newImage(wxImage(a_is, (wxBitmapType)type, -1));
   
   if((width != 0) && (height != 0))
