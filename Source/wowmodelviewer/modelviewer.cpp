@@ -1125,6 +1125,26 @@ void ModelViewer::LoadNPC(unsigned int modelid)
 
   sqlResult r = GAMEDATABASE.sqlQuery(query);
 
+  // The NPC's display id may not resolve to a model in the currently loaded data -- e.g. an NPC
+  // from a newer patch than this build's data: the Wowhead page hands back a CreatureDisplayInfo
+  // id that doesn't exist locally, so the LEFT JOINs above yield a null FileDataID, getFile(0)
+  // returns null and LoadModel fails. The model pointer is then null; bail out cleanly here
+  // instead of dereferencing it (which crashed the whole application).
+  auto bailNPCUnavailable = [&]()
+  {
+    LOG_ERROR << "LoadNPC: NPC" << modelid << "has no loadable model in the currently loaded game "
+                 "data (its display id is likely from a newer / PTR build); not displaying.";
+    if (!batchMode)
+      wxMessageBox(wxT("This NPC could not be displayed.\n\n"
+                       "Its model isn't in the game data WoW Model Viewer currently has loaded. "
+                       "This usually means the NPC is from a newer patch (for example a PTR build) "
+                       "than the data you have loaded."),
+                   wxT("NPC unavailable"), wxOK | wxICON_INFORMATION);
+    fileControl->UpdateInterface();
+    interfaceManager.GetPane(charControl).Show(isChar);
+    interfaceManager.Update();
+  };
+
   if (r.valid && !r.empty())
   {
     int extraId = r.values[0][4].toInt();
@@ -1133,12 +1153,22 @@ void ModelViewer::LoadNPC(unsigned int modelid)
     {
       LoadModel(GAMEDIRECTORY.getFile(r.values[0][0].toInt()));
       WoWModel * m = const_cast<WoWModel *>(canvas->model());
+      if (!m)
+      {
+        bailNPCUnavailable();
+        return;
+      }
       m->modelType = MT_NORMAL;
       animControl->SetSkinByDisplayID(r.values[0][5].toInt());
     }
     else
     {
       LoadModel(GAMEDIRECTORY.getFile(RaceInfos::getHDModelForFileID(r.values[0][0].toInt())));
+      if (!canvas->model())
+      {
+        bailNPCUnavailable();
+        return;
+      }
 
       query = QString("SELECT Skin, Face, HairStyle, HairColor, FacialHair FROM CreatureDisplayInfoExtra WHERE ID = %1").arg(extraId);
 
@@ -1182,6 +1212,21 @@ void ModelViewer::LoadNPC(unsigned int modelid)
   interfaceManager.GetPane(charControl).Show(isChar);
 
   interfaceManager.Update();
+}
+
+void ModelViewer::LoadNPCByDisplay(int npcId, int displayId, int type, const QString & name)
+{
+  if (npcId <= 0)
+    return;
+
+  // If this NPC isn't already in the loaded WoW database, add it from the imported data so
+  // LoadNPC() can resolve its display/model (mirrors the old NPC-browser import path).
+  sqlResult existing = GAMEDATABASE.sqlQuery(QString("SELECT ID FROM Creature WHERE ID = %1").arg(npcId));
+  if ((!existing.valid || existing.empty()) && displayId > 0)
+    GAMEDATABASE.sqlQuery(QString("INSERT INTO Creature(ID,CreatureType,DisplayID1,Name_Lang) VALUES (%1,%2,%3,\"%4\")")
+                            .arg(npcId).arg(type).arg(displayId).arg(name));
+
+  LoadNPC(npcId);
 }
 
 void ModelViewer::LoadItem(unsigned int id)
@@ -2097,21 +2142,11 @@ void ModelViewer::OnImportNPCFromURL(wxCommandEvent &event)
     const int npcId = dlg->getImportedId();
     if (npcId != -1)
     {
-      // If this NPC isn't already in the loaded WoW database, add it from the imported data
-      // so LoadNPC() can resolve its display/model (mirrors the old NPC-browser import path).
-      sqlResult existing = GAMEDATABASE.sqlQuery(QString("SELECT ID FROM Creature WHERE ID = %1").arg(npcId));
-      if (!existing.valid || existing.empty())
-      {
-        const QString line = dlg->getNPCLine();         // "id,displayId,type,name"
-        const int displayId = line.section(',', 1, 1).toInt();
-        const int type = line.section(',', 2, 2).toInt();
-        const QString name = line.section(',', 3);      // remainder, tolerates commas in the name
-        if (displayId > 0)
-          GAMEDATABASE.sqlQuery(QString("INSERT INTO Creature(ID,CreatureType,DisplayID1,Name_Lang) VALUES (%1,%2,%3,\"%4\")")
-                                  .arg(npcId).arg(type).arg(displayId).arg(name));
-      }
-
-      LoadNPC(npcId);
+      const QString line = dlg->getNPCLine();         // "id,displayId,type,name"
+      const int displayId = line.section(',', 1, 1).toInt();
+      const int type = line.section(',', 2, 2).toInt();
+      const QString name = line.section(',', 3);      // remainder, tolerates commas in the name
+      LoadNPCByDisplay(npcId, displayId, type, name);
     }
   }
   dlg->Destroy();

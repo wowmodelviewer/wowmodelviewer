@@ -240,6 +240,7 @@ bool WowModelViewApp::OnInit()
   QString cmd;
   QString snapModelPath; // -mo: defer load+screenshot until after LoadWoW
   QString snapArmoryUrl; // -armory <url>: headless import + screenshot (test harness)
+  QString snapNpcArg;    // -npc <id|id:displayId>: headless NPC load + screenshot (test harness)
   for (int i = 0; i<argc; i++) {
     cmd = QString::fromWCharArray(argv[i]);
 
@@ -276,6 +277,14 @@ bool WowModelViewApp::OnInit()
       if (i + 1 < argc) {
         i++;
         snapArmoryUrl = QString::fromWCharArray(argv[i]);
+      }
+    }
+    else if (cmd == "-npc") {
+      // Headless NPC load for testing: "-npc <id>" loads an NPC already present in the data,
+      // or "-npc <id>:<displayId>" first registers a (possibly newer/PTR) NPC by display id.
+      if (i + 1 < argc) {
+        i++;
+        snapNpcArg = QString::fromWCharArray(argv[i]);
       }
     }
     else if (cmd == "-dbfromfile") {
@@ -327,7 +336,7 @@ bool WowModelViewApp::OnInit()
   for (int i = 1; i < argc; i++)
   {
     QString a = QString::fromWCharArray(argv[i]);
-    if (a == "-m" || a == "-mo" || a == "-armory" || a == "-dbfromfile" || a.endsWith(".chr"))
+    if (a == "-m" || a == "-mo" || a == "-armory" || a == "-npc" || a == "-dbfromfile" || a.endsWith(".chr"))
     {
       headlessLoad = true;
       break;
@@ -336,6 +345,7 @@ bool WowModelViewApp::OnInit()
 
   if (headlessLoad)
   {
+    frame->batchMode = true; // non-interactive run: suppress modal dialogs that would block it
     frame->LoadWoW(); // auto-pick config + profile, no prompt
     if (!snapModelPath.isEmpty())
     {
@@ -348,6 +358,15 @@ bool WowModelViewApp::OnInit()
     {
       frame->ImportArmoury(wxString::FromUTF8(snapArmoryUrl.toUtf8().constData()));
       QString out = "ss_armory_" + QString(snapArmoryUrl).section('/', -1).replace('?', '_') + ".png";
+      frame->canvas->Screenshot(out.toStdWString());
+      return false; // headless capture done -> exit
+    }
+    if (!snapNpcArg.isEmpty())
+    {
+      const int npcId = snapNpcArg.section(':', 0, 0).toInt();
+      const int dispId = snapNpcArg.contains(':') ? snapNpcArg.section(':', 1, 1).toInt() : 0;
+      frame->LoadNPCByDisplay(npcId, dispId);
+      QString out = "ss_npc_" + QString(snapNpcArg).replace(':', '_') + ".png";
       frame->canvas->Screenshot(out.toStdWString());
       return false; // headless capture done -> exit
     }

@@ -84,6 +84,9 @@ public:
   bool isWMO;
   bool isADT;
   bool initDB;
+  // Set for non-interactive CLI / headless test runs (-mo/-armory/-npc). Suppresses modal
+  // dialogs that would otherwise block a headless run.
+  bool batchMode = false;
 
   // Initialising related functions
   void InitMenu();
@@ -105,6 +108,9 @@ public:
   void LoadModel(GameFile * f);
   void LoadItem(unsigned int displayID);
   void LoadNPC(unsigned int modelid);
+  // Register an NPC in the in-memory DB (if not already present) and load it. Shared by the
+  // "Import NPC from URL" dialog flow and the -npc headless test harness.
+  void LoadNPCByDisplay(int npcId, int displayId, int type = 0, const QString & name = QString("npc"));
 
   // Window GUI event related functions
   //void OnIdle();

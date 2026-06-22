@@ -36,6 +36,11 @@ Format loosely based on [Keep a Changelog](https://keepachangelog.com/).
   only validated the start of the data block, not its length, so a malformed or newer rig could read
   a few bytes past the end of the animation file. The loader now clamps to the keyframes that
   actually fit in the buffer. (Found with AddressSanitizer while tracking down the attachment bug.)
+- **Importing an NPC from a newer patch no longer crashes the viewer.** Pasting a Wowhead link for an
+  NPC whose model isn't in the game data you have loaded -- e.g. a PTR / next-patch creature whose
+  display id doesn't exist in your data yet -- made WMV try to use a model that had failed to load and
+  crash to desktop. It now detects the missing model, keeps the current view, and shows a short "NPC
+  unavailable" notice explaining the NPC is most likely from a newer build than your loaded data.
 
 ## [0.3.0] — 2026-06-21
 
