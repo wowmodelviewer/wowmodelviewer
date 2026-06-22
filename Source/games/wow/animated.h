@@ -317,6 +317,7 @@ public:
     {
       uint32 *ptimes;
       AnimationBlockHeader* pHeadTimes;
+      size_t bufSize = 0;
       auto it = modelData.animfiles.find(modelData.animIndexToAnimId.at(j));
       if (it != modelData.animfiles.end())
       {
@@ -327,6 +328,7 @@ public:
         ptimes = (uint32*)(animfile->getBuffer() + pHeadTimes->ofsEntrys);
         if (animfile->getSize() < pHeadTimes->ofsEntrys)
           continue;
+        bufSize = animfile->getSize();
       }
       else
       {
@@ -334,9 +336,19 @@ public:
         ptimes = (uint32*)(f.getBuffer() + pHeadTimes->ofsEntrys);
         if (f.getSize() < pHeadTimes->ofsEntrys)
           continue;
+        bufSize = f.getSize();
       }
 
-      for (size_t i=0; i < pHeadTimes->nEntrys; i++)
+      // nEntrys is read from the file and can over-report (a modern/malformed rig, or
+      // ofsEntrys sitting near EOF). The guard above only validated the START offset, so
+      // this loop ran past the end of the animation buffer -- an ASan heap-buffer-overflow
+      // that read garbage into the bone's animation track, producing a garbage bone matrix
+      // and flinging attached gear (helm/shoulders/weapon) off-screen. Clamp to the entries
+      // that actually fit in the buffer.
+      size_t nT = pHeadTimes->nEntrys;
+      const size_t availT = (bufSize - pHeadTimes->ofsEntrys) / sizeof(uint32);
+      if (nT > availT) nT = availT;
+      for (size_t i=0; i < nT; i++)
         times[j].push_back(ptimes[i]);
     }
 
@@ -345,6 +357,7 @@ public:
     {
       D *keys;
       AnimationBlockHeader* pHeadKeys;
+      size_t bufSize = 0;
       auto it = modelData.animfiles.find(modelData.animIndexToAnimId.at(j));
       if (it != modelData.animfiles.end())
       {
@@ -355,6 +368,7 @@ public:
         keys = (D*)(animfile->getBuffer() + pHeadKeys->ofsEntrys);
         if (animfile->getSize() < pHeadKeys->ofsEntrys)
           continue;
+        bufSize = animfile->getSize();
       }
       else
       {
@@ -362,31 +376,37 @@ public:
         keys = (D*)(f.getBuffer() + pHeadKeys->ofsEntrys);
         if (f.getSize() < pHeadKeys->ofsEntrys)
           continue;
+        bufSize = f.getSize();
       }
 
-      switch (type) 
+      // Same clamp as the times loop above: nEntrys can over-report and run the read off the
+      // end of the buffer. Hermite/Bezier consume 3 D-sized entries (value + in/out tangents)
+      // per keyframe, so divide the budget by 3 for those.
+      const size_t availK = (bufSize - pHeadKeys->ofsEntrys) / sizeof(D);
+      switch (type)
       {
         case INTERPOLATION_NONE:
         case INTERPOLATION_LINEAR:
-          for (size_t i = 0; i < pHeadKeys->nEntrys; i++) 
+        {
+          size_t nK = pHeadKeys->nEntrys;
+          if (nK > availK) nK = availK;
+          for (size_t i = 0; i < nK; i++)
             data[j].push_back(Conv::conv(keys[i]));
           break;
+        }
         case INTERPOLATION_HERMITE:
-          for (size_t i = 0; i < pHeadKeys->nEntrys; i++) 
-          {
-            data[j].push_back(Conv::conv(keys[i*3]));
-            in[j].push_back(Conv::conv(keys[i*3+1]));
-            out[j].push_back(Conv::conv(keys[i*3+2]));
-          }
-          break;
         case INTERPOLATION_BEZIER:
-          for (size_t i = 0; i < pHeadKeys->nEntrys; i++) 
+        {
+          size_t nK = pHeadKeys->nEntrys;
+          if (nK > availK / 3) nK = availK / 3;
+          for (size_t i = 0; i < nK; i++)
           {
             data[j].push_back(Conv::conv(keys[i*3]));
             in[j].push_back(Conv::conv(keys[i*3+1]));
             out[j].push_back(Conv::conv(keys[i*3+2]));
           }
           break;
+        }
       }
     }
   }

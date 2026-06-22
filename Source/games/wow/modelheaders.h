@@ -1,10 +1,21 @@
 #ifndef MODELHEADERS_H
 #define MODELHEADERS_H
 
-#pragma pack(push,1)
-
+// IMPORTANT: include glm and the integer typedefs OUTSIDE the pack(push,1) region
+// below. glm.hpp / types.h have include guards, so whichever translation unit pulls
+// them in first fixes the layout of glm::vec3 / glm::mat4 / etc. for the whole build.
+// If they were first included here while pack(1) was active, glm's vector/matrix types
+// got 1-byte alignment in that TU and natural alignment in every other TU -- an ODR
+// violation that shifted the fields of any struct embedding them (notably Bone, whose
+// mat/calc members then differed by a byte between WoWModel.cpp and ModelAttachment.cpp).
+// That made attachment code read each bone matrix at the wrong offset, so helmets,
+// shoulders and weapons were transformed off-screen (invisible). The on-disk file structs
+// declared below still get pack(1) -- it packs members tightly regardless of their type's
+// natural alignment, so their byte layout is unchanged.
 #include "glm/glm.hpp"
 #include "types.h" // unit8, etC.
+
+#pragma pack(push,1)
 
 struct Vertex {
   float tu, tv;

@@ -13,6 +13,13 @@ Format loosely based on [Keep a Changelog](https://keepachangelog.com/).
   (achievement / quest / collected-appearance) and only hides genuinely locked entries, so the full
   set of hairstyles, ears, eyes, skin tones and race features shows again. Verified across Blood Elf,
   Night Elf and the Dracthyr dragon (which had been rendering solid black for the same reason).
+- **Helmets, shoulders and weapons show up again.** On modern character rigs every equipped
+  attachment item — helm, both shoulders, and held weapons/off-hands — rendered invisible, while
+  body gear (chest, legs, boots, gloves) showed fine. The animation code and the attachment code
+  had drifted into using two slightly different in-memory layouts for a skeleton bone, so each
+  attached item was placed with a corrupted bone transform and ended up far off-screen. Both sides
+  now agree on the layout, so attachments position and pose correctly. Verified on the Synesthesia
+  armory import: the gold crown, both pauldrons and the weapon now render, matching the Armory.
 - **Armory import no longer mixes in your dragonriding mounts.** The character appearance API now
   returns the account's dragonriding-drake customizations alongside the character's own. The importer
   applied them all, so a drake's "Skin Color" (a companion-drake / serpent / proto-dragon scale
@@ -25,6 +32,10 @@ Format loosely based on [Keep a Changelog](https://keepachangelog.com/).
   Glow" eye styles) are no longer offered on the classic races, while the dragon races keep them.
 - **No more spurious image-decode pop-up.** A harmless "incorrect sRGB profile" notice from the
   newer image library could open a dialog the user had to dismiss; it is now logged quietly instead.
+- **Hardened animation-track loading.** The bounds check when reading a bone's animation keyframes
+  only validated the start of the data block, not its length, so a malformed or newer rig could read
+  a few bytes past the end of the animation file. The loader now clamps to the keyframes that
+  actually fit in the buffer. (Found with AddressSanitizer while tracking down the attachment bug.)
 
 ## [0.3.0] — 2026-06-21
 
