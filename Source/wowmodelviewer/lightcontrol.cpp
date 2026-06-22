@@ -75,7 +75,7 @@ LightControl::LightControl(wxWindow* parent, wxWindowID id)
     choices.Add(s);
   }
 
-  lightSel = new wxComboBox(this, ID_LIGHTSEL, wxT("Light 1"), wxPoint(20,10), wxSize(100, 20), choices, wxCB_READONLY);
+  lightSel = new wxComboBox(this, ID_LIGHTSEL, wxT("Light 1"), wxPoint(20,10), wxSize(100, -1), choices, wxCB_READONLY);
 
   enabled = new wxCheckBox(this, ID_LIGHTENABLED, wxT("Enabled"), wxPoint(10, 40), wxDefaultSize);
   relative = new wxCheckBox(this, ID_LIGHTRELATIVE, wxT("Relative"), wxPoint(70, 40), wxDefaultSize);

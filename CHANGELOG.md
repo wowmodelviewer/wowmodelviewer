@@ -53,9 +53,10 @@ Format loosely based on [Keep a Changelog](https://keepachangelog.com/).
   crash to desktop. It now detects the missing model, keeps the current view, and shows a short "NPC
   unavailable" notice explaining the NPC is most likely from a newer build than your loaded data.
 
-- **Animation/skin dropdowns no longer collapse after loading a model.** They were created at a
-  fixed 16 px height; under the 64-bit/wxWidgets 3.2 move (and with display scaling) the combo boxes
-  got clamped to a thin sliver once the layout settled. They now use their natural height.
+- **Dropdowns no longer collapse to a thin sliver.** Several combo boxes/choices (the animation and
+  skin selectors, the File List filter, the light selector) were created at a fixed small height;
+  under the 64-bit/wxWidgets 3.2 move (and with display scaling) they got clamped below the native
+  control height once the layout settled. They now use their natural height.
 
 ## [0.3.0] — 2026-06-21
 
