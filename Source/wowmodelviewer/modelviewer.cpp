@@ -1773,18 +1773,26 @@ void ModelViewer::OnGameToggle(wxCommandEvent &event)
 }
 
 // Quietly refresh the CASC file list so files added by new client patches resolve by name
-// without the user maintaining anything. The source and cadence are fixed (no setting, nothing
-// user-visible): at most once a week, the list on disk is replaced with the current community
-// listfile. Any problem (offline, server error, short payload) leaves the existing list in place,
-// so a failed refresh can never break startup. Streams to a temp file to keep memory flat, then
-// swaps it in atomically. Reuses the generic "Loading file list..." step so nothing about a
-// network fetch surfaces in the UI.
+// without the user maintaining anything. The source is fixed (no setting, nothing user-visible):
+// on EVERY launch it asks the server whether the community listfile changed (cheap conditional
+// request) and only re-downloads the ~147 MB list when it actually did. Any problem (offline,
+// server error, short payload) leaves the existing list in place, so a failed refresh can never
+// break startup. Streams to a temp file to keep memory flat, then swaps it in atomically. Reuses
+// the generic "Loading file list..." step so nothing about a network fetch surfaces in the UI.
 static void refreshCommunityListfile(const QString & localPath, LoadingDialog * progress)
 {
-  const QFileInfo fi(localPath);
-  if (fi.exists() && fi.lastModified().isValid() &&
-      fi.lastModified().daysTo(QDateTime::currentDateTime()) < 7)
-    return; // recent enough; nothing to do
+  // Check on EVERY launch, but avoid re-pulling the ~147 MB list when it hasn't changed: send the
+  // ETag saved from last time as If-None-Match and let the server answer "304 Not Modified" for an
+  // unchanged list (GitHub's release CDN honours this through the redirect). Only a real change
+  // (200) downloads. The saved ETag is trusted only while the list it described is still on disk.
+  const QString etagPath = localPath + ".etag";
+  QByteArray savedEtag;
+  if (QFile::exists(localPath))
+  {
+    QFile ef(etagPath);
+    if (ef.open(QIODevice::ReadOnly))
+      savedEtag = ef.readAll().trimmed();
+  }
 
   const QString tmpPath = localPath + ".new";
   QFile out(tmpPath);
@@ -1794,6 +1802,8 @@ static void refreshCommunityListfile(const QString & localPath, LoadingDialog * 
   QNetworkAccessManager manager;
   QNetworkRequest request(QUrl("https://github.com/wowdev/wow-listfile/releases/latest/download/community-listfile.csv"));
   request.setRawHeader("User-Agent", "WoWModelViewer");
+  if (!savedEtag.isEmpty())
+    request.setRawHeader("If-None-Match", savedEtag);
   request.setAttribute(QNetworkRequest::RedirectPolicyAttribute, QNetworkRequest::NoLessSafeRedirectPolicy);
   QNetworkReply * reply = manager.get(request);
 
@@ -1818,7 +1828,18 @@ static void refreshCommunityListfile(const QString & localPath, LoadingDialog * 
   loop.exec();
 
   const bool ok = (reply->error() == QNetworkReply::NoError);
+  const int status = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
+  const QByteArray newEtag = reply->rawHeader("ETag");
   out.close();
+
+  // Unchanged since last launch -> nothing downloaded; keep the existing list.
+  if (ok && status == 304)
+  {
+    LOG_INFO << "File list unchanged (304 Not Modified); keeping existing list.";
+    QFile::remove(tmpPath);
+    return;
+  }
+
   const qint64 size = QFileInfo(tmpPath).size();
 
   // A real listfile is tens of MB of "<id>;<path>" lines; anything much smaller is an error page
@@ -1830,6 +1851,15 @@ static void refreshCommunityListfile(const QString & localPath, LoadingDialog * 
     if (QFile::rename(tmpPath, localPath))
     {
       LOG_INFO << "File list refreshed (" << size << "bytes).";
+      if (!newEtag.isEmpty())
+      {
+        QFile ef(etagPath);
+        if (ef.open(QIODevice::WriteOnly | QIODevice::Truncate))
+        {
+          ef.write(newEtag);
+          ef.close();
+        }
+      }
       return;
     }
     LOG_ERROR << "File list refresh: could not replace" << localPath;
@@ -1841,20 +1871,16 @@ static void refreshCommunityListfile(const QString & localPath, LoadingDialog * 
   QFile::remove(tmpPath); // discard the partial/unused temp file
 }
 
-// Hidden weekly refresh of the TACT encryption keys (the same idea as the listfile refresh
-// above). CASC needs these keys to decrypt encrypted content -- both whole encrypted files and
-// the encrypted DB2 sections that hold brand-new / unreleased records (recent raid bosses etc.).
-// The community list at wowdev/TACTKeys is whitespace-separated "<keyname> <key>"; we convert it
-// to the "<keyname>;<key>" form CASCFolder::addExtraEncryptionKeys() reads. Must run BEFORE
-// setConfig() opens the storage (that is when the keys are handed to CASC). Any failure keeps the
-// bundled/on-disk keys untouched.
+// Refresh the TACT encryption keys on EVERY launch. CASC needs these to decrypt encrypted content
+// -- both whole encrypted files and the encrypted DB2 sections that hold brand-new / unreleased
+// records (recent raid bosses etc.). New keys get published frequently while a patch is on the PTR,
+// and the list is small (~1 MB), so we always pull the latest rather than caching it for a week
+// like the (147 MB) file list. The community list at wowdev/TACTKeys is whitespace-separated
+// "<keyname> <key>"; we convert it to the "<keyname>;<key>" form CASCFolder::addExtraEncryptionKeys()
+// reads. Must run BEFORE setConfig() opens the storage (that is when the keys are handed to CASC).
+// Any failure (e.g. offline, or GitHub down) keeps the existing on-disk keys untouched.
 static void refreshTactKeys(const QString & localPath, LoadingDialog * progress)
 {
-  const QFileInfo fi(localPath);
-  if (fi.exists() && fi.lastModified().isValid() &&
-      fi.lastModified().daysTo(QDateTime::currentDateTime()) < 7)
-    return; // recent enough; nothing to do
-
   if (progress)
     progress->step(_("Updating encryption keys..."), 6);
 
