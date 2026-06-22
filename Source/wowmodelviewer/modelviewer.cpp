@@ -1034,6 +1034,10 @@ void ModelViewer::LoadModel(GameFile * file)
   }
 
   SetStatusText(canvas->model()->name().toStdWString());
+  // Also show the loaded model in the title bar -- the status bar at the bottom is easy to miss,
+  // so this makes "what am I looking at" obvious at a glance.
+  SetTitle(wxString(GLOBALSETTINGS.appTitle()) + wxT("  -  ") +
+           wxString(canvas->model()->name().toStdWString()));
   WoWModel * m = const_cast<WoWModel *>(canvas->model());
   m->charModelDetails.isChar = isChar;
 

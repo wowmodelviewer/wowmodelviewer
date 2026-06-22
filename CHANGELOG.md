@@ -13,6 +13,8 @@ Format loosely based on [Keep a Changelog](https://keepachangelog.com/).
   weekly from the community key list, https://github.com/wowdev/TACTKeys), so this content appears as
   soon as its key is public. A model whose key hasn't been published yet simply doesn't show (with a
   notice, not a crash) and starts working on its own once the key lands.
+- **The window title shows the loaded model.** The model's path now appears in the title bar (it was
+  already in the status bar at the bottom, which is easy to miss), so it's obvious what you're viewing.
 
 ### Fixed
 - **Characters render with their full appearance again.** After the move to the newer game data
@@ -50,6 +52,10 @@ Format loosely based on [Keep a Changelog](https://keepachangelog.com/).
   display id doesn't exist in your data yet -- made WMV try to use a model that had failed to load and
   crash to desktop. It now detects the missing model, keeps the current view, and shows a short "NPC
   unavailable" notice explaining the NPC is most likely from a newer build than your loaded data.
+
+- **Animation/skin dropdowns no longer collapse after loading a model.** They were created at a
+  fixed 16 px height; under the 64-bit/wxWidgets 3.2 move (and with display scaling) the combo boxes
+  got clamped to a thin sliver once the layout settled. They now use their natural height.
 
 ## [0.3.0] — 2026-06-21
 
