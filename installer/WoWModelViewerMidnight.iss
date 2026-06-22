@@ -10,7 +10,7 @@
 ; Output:   installer\dist\WoWModelViewerMidnight-Setup.exe
 
 #define MyAppName "WoW Model Viewer Midnight"
-#define MyAppVersion "0.3.0"
+#define MyAppVersion "0.3.1"
 #define MyAppPublisher "Skogdesign"
 #define MyAppExeName "wowmodelviewer.exe"
 ; 0.3.0 is the 64-bit build: source the x64 Release tree (build64).

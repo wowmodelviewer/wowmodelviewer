@@ -278,17 +278,25 @@ void CharDetails::fillCustomizationMap()
   LINKED_OPTIONS_MAP_.clear();
   initLinkedOptionsMap();
 
-  // Load per-choice requirement masks (class/race) so we can hide choices that
-  // don't apply to this character -- e.g. Demon-Hunter-only horns/blindfold/
-  // tattoos on a regular character (ChrCustomizationReq.ClassMask & 0x800).
+  // Load per-choice requirement fields so we can hide choices that don't apply to
+  // this character: class/race gating (e.g. Demon-Hunter-only horns/blindfold on a
+  // regular character) and "borrowed"/collectible appearances the account must unlock
+  // (achievement/quest/transmog item). See isChoiceAvailable() for how each is used.
   auto reqs = GAMEDATABASE.sqlQuery(
-    "SELECT ChrCustomizationChoice.ID, ChrCustomizationReq.ClassMask, ChrCustomizationReq.RaceMask "
+    "SELECT ChrCustomizationChoice.ID, ChrCustomizationReq.ClassMask, ChrCustomizationReq.RaceMask, "
+    "ChrCustomizationReq.ReqAchievementID, ChrCustomizationReq.ReqQuestID, ChrCustomizationReq.ReqItemModifiedAppearanceID "
     "FROM ChrCustomizationChoice "
     "JOIN ChrCustomizationReq ON ChrCustomizationReq.ID = ChrCustomizationChoice.ChrCustomizationReqID "
     "WHERE ChrCustomizationChoice.ChrCustomizationReqID != 0");
   if (reqs.valid)
     for (auto & r : reqs.values)
-      choiceReq_[r[0].toUInt()] = std::make_pair(r[1].toLongLong(), r[2].toLongLong());
+    {
+      ChoiceReq cr;
+      cr.classMask = r[1].toLongLong();
+      cr.raceMask = r[2].toLongLong();
+      cr.unlockGated = (r[3].toLongLong() != 0) || (r[4].toLongLong() != 0) || (r[5].toLongLong() != 0);
+      choiceReq_[r[0].toUInt()] = cr;
+    }
 
   for (auto &option : choicesPerOptionMap_)
     fillCustomizationMapForOption(option.first);
@@ -300,33 +308,44 @@ bool CharDetails::isChoiceAvailable(uint chrCustomizationChoiceID) const
   if (it == choiceReq_.end())
     return true; // no requirement -> available to everyone
 
-  const long long raceMask = it->second.second;
+  const long long raceMask = it->second.raceMask;
+  const int rid = (model_ && model_->infos.raceID > 0) ? model_->infos.raceID : 0;
 
-  // ChrCustomizationReq.RaceMask is a 64-bit race bitmask (race N => bit N-1). A value
-  // of exactly 0xFFFFFFFF (the low 32 bits set, no high bits) is a generic "classic
-  // races" placeholder shared by ~1300 conditional/borrowed choices: transmog-only
-  // eyes, Evoker "Primalist" eye colours, the Dracthyr "Eye Style", and other
-  // achievement/class-gated extras. Real, curated race choices carry a proper 64-bit
-  // mask (high race bits set). WMV cannot evaluate those extra conditions and the
-  // in-game appearance editor doesn't list them, so treat the placeholder as
-  // unavailable -- this is what produced the long run of meaningless Eye Colour entries
-  // (14, 18, 20 ...) on an ordinary Blood Elf.
-  if (raceMask == 0xFFFFFFFFll)
+  // 1. Unlock-gated appearances. A ChrCustomizationReq with an achievement, quest or
+  // transmog-item requirement is a collectible/"borrowed" look the account has to earn;
+  // the in-game appearance editor hides them by default and WMV cannot evaluate the
+  // condition, so drop them. This replaces an older guess (RaceMask == 0xFFFFFFFF) that
+  // mis-classified the *normal* "all classic races" mask as junk -- which silently
+  // wiped out every hair/ear/jewellery/skin choice on Blood Elf and left it bald with
+  // empty customization dropdowns. The real gate is these unlock fields.
+  if (it->second.unlockGated)
     return false;
-  // Otherwise this character's race must actually be present in the mask (0 = no race
-  // restriction). IMPORTANT: a mask with all 32 low (classic-race) bits set is a
-  // BROAD "applies to everyone" mask -- e.g. the Dracthyr dragon's choices use
-  // 0x...FFFFFFFF plus a few high allied-race bits, and their own race bit (52/70) is
-  // NOT set. Race-filtering those wiped out every choice for the Dracthyr dragon (a
-  // shared ChrModel), leaving it completely uncustomisable. So only a NARROW,
-  // genuinely race-specific mask drops choices, and only for races representable in a
-  // 64-bit mask (race id <= 64 -- avoids the undefined 1ull << 69 for race 70).
-  if (raceMask != 0 && model_ && model_->infos.raceID > 0)
+
+  // 2. Race gating. RaceMask is a 64-bit race bitmask (race N => bit N-1); 0 = no race
+  // restriction. The low 32 bits set (0xFFFFFFFF) is the "all classic races" baseline.
+  // Two cases must be told apart:
+  //   * low == 0xFFFFFFFF and NO high bits  -> a genuine all-core-races appearance
+  //     (real hair, eyes, etc.) -> keep for any classic race.
+  //   * low == 0xFFFFFFFF and high bits set -> the entry actually targets the high
+  //     (allied/Evoker) races and a classic race is only incidentally in the baseline:
+  //     e.g. the Evoker "Primalist" eye colours and Dracthyr "Slit/Star/Glow" eye
+  //     styles. A classic race (id <= 32, its bit lives in the always-set low word)
+  //     should NOT show these, so drop them. A high race (id > 32) IS genuinely the
+  //     target, so it keeps them -- this is what stops the Dracthyr dragon (whose own
+  //     bit 52/70 is not set, but which is covered by the broad baseline) from losing
+  //     all of its customization.
+  if (raceMask != 0 && rid > 0)
   {
     const unsigned long long m = static_cast<unsigned long long>(raceMask);
-    const bool broad = (m & 0xFFFFFFFFull) == 0xFFFFFFFFull; // all classic races -> broadly applicable
-    const int rid = model_->infos.raceID;
-    if (!broad && rid >= 1 && rid <= 64)
+    const bool broadClassic = (m & 0xFFFFFFFFull) == 0xFFFFFFFFull;
+    const bool hasHighBits = (m >> 32) != 0;
+    if (broadClassic)
+    {
+      if (hasHighBits && rid <= 32)
+        return false; // borrowed allied/Evoker appearance, not for this classic race
+      // else: applies broadly to this race -> keep
+    }
+    else if (rid <= 64) // narrow, genuinely race-specific mask (avoid 1<<69 for race 70)
     {
       const unsigned long long raceBit = 1ull << (rid - 1);
       if ((m & raceBit) == 0)
@@ -334,7 +353,7 @@ bool CharDetails::isChoiceAvailable(uint chrCustomizationChoiceID) const
     }
   }
 
-  // ChrCustomizationReq.ClassMask is an int32 class bitmask (class N => bit N-1).
+  // 3. ChrCustomizationReq.ClassMask is an int32 class bitmask (class N => bit N-1).
   // 0 = no class restriction; "all classes" comes through as the unsigned int32
   // sentinel 0xFFFFFFFF (NOT -1, since it's read unsigned). We only model Demon
   // Hunter specially: hide a choice only when it is DEMON-HUNTER-EXCLUSIVE -- the
@@ -342,7 +361,7 @@ bool CharDetails::isChoiceAvailable(uint chrCustomizationChoiceID) const
   // Demon Hunter mode. Masking to the 13 player-class bits makes the "all classes"
   // value (0x1FFF / 0xFFFFFFFF) read as non-exclusive, so normal choices (hair,
   // eyes, skin, the "None" options) are never filtered out.
-  const long long classBits = it->second.first & 0x1FFFll; // player classes 1..13
+  const long long classBits = it->second.classMask & 0x1FFFll; // player classes 1..13
   const bool dhExclusive = (classBits != 0) && ((classBits & ~0x800ll) == 0);
   if (dhExclusive && !isDemonHunter_)
     return false;

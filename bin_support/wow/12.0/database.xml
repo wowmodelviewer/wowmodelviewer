@@ -113,6 +113,13 @@
     <field type="int32" name="ID" primary="yes" />
     <field type="int64" name="RaceMask" pos="8" />
     <field type="int32" name="ClassMask" pos="2" />
+    <!-- Unlock gates (CA154412 record positions): a choice with any of these set is a
+         conditional/collectible appearance the account must earn (achievement, quest, or
+         a transmog item appearance). The in-game creator hides those by default, so we use
+         them to drop "borrowed" entries instead of guessing from the race mask. -->
+    <field type="int32" name="ReqAchievementID" pos="4" />
+    <field type="int32" name="ReqQuestID" pos="5" />
+    <field type="int32" name="ReqItemModifiedAppearanceID" pos="7" />
   </table>
   <table name="ChrCustomizationElement">
     <field type="int32" name="ID" primary="yes" />

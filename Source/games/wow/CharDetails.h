@@ -195,10 +195,18 @@ private:
   std::map<uint, std::vector<std::pair<int, uint> > > choiceGeosetElements_;
   const std::vector<std::pair<int, uint> > & getChoiceGeosetElements(uint chrCustomizationChoiceID);
 
-  // ChrCustomizationChoice::ID -> { ClassMask, RaceMask } from ChrCustomizationReq.
-  // Used to hide class/race-gated choices (e.g. Demon-Hunter-only horns/blindfold
-  // on a non-DH character). A choice absent from the map has no requirement.
-  std::map<uint, std::pair<long long, long long> > choiceReq_;
+  // ChrCustomizationChoice::ID -> its ChrCustomizationReq fields. Used to hide choices
+  // that don't apply to this character: class/race-gated (e.g. Demon-Hunter-only
+  // horns/blindfold on a non-DH) and "borrowed"/collectible appearances the account
+  // would have to unlock (achievement/quest/transmog-item). A choice absent from the
+  // map has no requirement and is always available. See isChoiceAvailable().
+  struct ChoiceReq
+  {
+    long long raceMask = 0;
+    long long classMask = 0;
+    bool unlockGated = false; // ReqAchievementID / ReqQuestID / ReqItemModifiedAppearanceID set
+  };
+  std::map<uint, ChoiceReq> choiceReq_;
   bool isChoiceAvailable(uint chrCustomizationChoiceID) const;
 
   // When a choice adds a skinned model whose texture comes from a direct-bind material

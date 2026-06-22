@@ -3,6 +3,22 @@
 All notable changes to **WoW Model Viewer: Midnight** are recorded here.
 Format loosely based on [Keep a Changelog](https://keepachangelog.com/).
 
+## [0.3.1] — 2026-06-22
+
+### Fixed
+- **Characters render with their full appearance again.** After the move to the newer game data
+  format, every customization choice came back tagged as if it needed special unlocking, so the
+  viewer treated them all as unavailable — characters loaded bald, with no tattoos, jewellery,
+  horns or markings, and empty customization dropdowns. WMV now reads the real unlock requirements
+  (achievement / quest / collected-appearance) and only hides genuinely locked entries, so the full
+  set of hairstyles, ears, eyes, skin tones and race features shows again. Verified across Blood Elf,
+  Night Elf and the Dracthyr dragon (which had been rendering solid black for the same reason).
+- **Race-specific options no longer leak between races.** "Borrowed" appearances that belong to the
+  newer dragon/allied races (e.g. the Evoker "Primalist" eye colours and the Dracthyr "Slit/Star/
+  Glow" eye styles) are no longer offered on the classic races, while the dragon races keep them.
+- **No more spurious image-decode pop-up.** A harmless "incorrect sRGB profile" notice from the
+  newer image library could open a dialog the user had to dismiss; it is now logged quietly instead.
+
 ## [0.3.0] — 2026-06-21
 
 ### Added
