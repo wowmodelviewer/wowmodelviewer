@@ -68,7 +68,12 @@ bool CASCFolder::setConfig(core::GameConfig config)
     if (it != locales.end())
     {
       HANDLE dummy;
-      QString cascParams = m_folder + ":" + m_currentConfig.product;
+      // CascLib's storage param uses CASC_PARAM_SEPARATOR ('*'), NOT ':', to split the
+      // local path from the product code name (e.g. "...\Data*wowt"). Passing ':' left the
+      // code name unset, so CascLib fell back to the FIRST active product in .build.info
+      // (retail "wow") for every product -- silently loading the retail root instead of the
+      // requested one (e.g. the PTR "wowt" root), which hid PTR-only files like new creatures.
+      QString cascParams = m_folder + "*" + m_currentConfig.product;
       LOG_INFO << "Loading Game Folder:" << cascParams;
       // locale found => try to open it
       if (!CascOpenStorage(cascParams.toStdWString().c_str(), it->second, &hStorage))

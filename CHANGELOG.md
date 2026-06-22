@@ -17,6 +17,13 @@ Format loosely based on [Keep a Changelog](https://keepachangelog.com/).
   already in the status bar at the bottom, which is easy to miss), so it's obvious what you're viewing.
 
 ### Fixed
+- **PTR / Beta installs now load their own game data instead of retail.** When you pointed the viewer
+  at a Public Test Realm or Beta game folder, it was silently loading the *retail* data instead — so
+  anything retail and the test realm share looked fine, but brand-new test-only content (the latest
+  datamined creatures, updated models, new customizations) came up missing or stale. The product you
+  pick is now passed to the storage layer correctly, so the exact game version you selected is the one
+  that loads. (Cause: the path/product separator passed to the storage reader was a `:` where the
+  reader expected `*`, so the product code was dropped and it fell back to the first listed build.)
 - **Characters render with their full appearance again.** After the move to the newer game data
   format, every customization choice came back tagged as if it needed special unlocking, so the
   viewer treated them all as unavailable — characters loaded bald, with no tattoos, jewellery,
