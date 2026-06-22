@@ -131,6 +131,9 @@ private:
   unsigned char * m_sectionData;
   size_t m_sectionDataSize;
   unsigned char * m_palletData;
+  // Buffers for sections beyond section 0 (WDC3 is multi-section). m_recordOffsets points
+  // directly into these, so they must outlive parsing; freed in the destructor.
+  std::vector<unsigned char *> m_extraSectionData;
 };
 
 #endif

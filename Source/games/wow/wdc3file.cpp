@@ -451,6 +451,109 @@ bool WDC3File::open()
     }
   }
 
+  // ----- Additional sections (WDC3+ is multi-section) -----
+  // The block above only read section 0. New / recently-added records -- notably unreleased
+  // content the installed client is entitled to (e.g. PTR raid bosses) -- live in further
+  // sections, which WMV historically dropped. Append each readable section's records + ids so
+  // they resolve too. Encrypted sections you have no key for come back all-zeroed (CASC zeroes
+  // what it cannot decrypt) and are skipped; sections whose key is present decrypt to plain data
+  // and read like section 0. Per-section copy tables / sparse offset maps are not merged here
+  // (uncommon for this extra content); string fields of these extra records read back empty
+  // because get()'s bounds check rejects pointers outside section 0's buffer -- harmless, since
+  // the resolved numeric ids (display -> model -> FileDataID) are what callers need.
+  if ((m_header.flags & 0x01) == 0) // non-sparse tables only
+  {
+    field_storage_info idInfo = m_fieldStorageInfo.empty()
+                                  ? field_storage_info()
+                                  : m_fieldStorageInfo[m_header.id_index];
+    for (uint s = 1; s < m_header.section_count; s++)
+    {
+      const section_header & sh = m_sectionHeader[s];
+      if (sh.record_count == 0 || sh.file_offset >= size)
+        continue;
+
+      const size_t secSize = (s + 1 < m_header.section_count)
+                               ? (m_sectionHeader[s + 1].file_offset - sh.file_offset)
+                               : (size - sh.file_offset);
+      const size_t recBytes = static_cast<size_t>(recordSize) * sh.record_count;
+      if (secSize == 0 || sh.file_offset + secSize > size || recBytes > secSize)
+        continue; // malformed -- don't walk off the buffer
+
+      unsigned char * buf = new unsigned char[secSize];
+      // Zero first: when CASC lacks the key for an encrypted section it leaves the buffer
+      // unfilled, so without this the read would surface stale heap bytes (looking like random
+      // records). Zeroed -> the all-zero check below skips the section cleanly.
+      memset(buf, 0, secSize);
+      seek(sh.file_offset);
+      read(buf, secSize);
+      m_extraSectionData.push_back(buf);
+
+      // Sections we have no key for end up all-zeroed -> nothing to recover.
+      bool zeroed = true;
+      for (size_t i = 0; i < recBytes; i++)
+        if (buf[i] != 0) { zeroed = false; break; }
+      if (zeroed)
+        continue;
+
+      const size_t firstNewRecord = m_recordOffsets.size();
+      for (uint i = 0; i < sh.record_count; i++)
+        m_recordOffsets.push_back(buf + static_cast<size_t>(i) * recordSize);
+
+      // ids: explicit id list (after records + string block) or inline in the record
+      if (sh.id_list_size > 0)
+      {
+        const size_t idOfs = recBytes + sh.string_table_size;
+        if (idOfs + sh.id_list_size > secSize)
+        {
+          m_recordOffsets.resize(firstNewRecord); // can't locate ids -> drop these records
+          continue;
+        }
+        const uint32 * ids = reinterpret_cast<const uint32 *>(buf + idOfs);
+        for (uint i = 0; i < sh.id_list_size / 4; i++)
+          m_IDs.push_back(ids[i]);
+      }
+      else
+      {
+        // inline id stored in the record (mirror the section-0 inline path)
+        for (uint i = 0; i < sh.record_count; i++)
+        {
+          unsigned char * recordOffset = buf + static_cast<size_t>(i) * recordSize;
+          uint32 id = 0;
+          switch (idInfo.storage_type)
+          {
+            case FIELD_COMPRESSION::NONE:
+            {
+              uint sz = idInfo.field_size_bits / 8;
+              if (sz > 4) sz = 4;
+              if (sz) memcpy(&id, recordOffset + idInfo.field_offset_bits / 8, sz);
+              break;
+            }
+            case FIELD_COMPRESSION::BITPACKED:
+            {
+              uint Size = (idInfo.field_size_bits + (idInfo.field_offset_bits & 7) + 7) / 8;
+              if (Size > 4) Size = 4;
+              if (Size) memcpy(&id, recordOffset + idInfo.field_offset_bits / 8, Size);
+              id = id & ((1ull << idInfo.field_size_bits) - 1);
+              break;
+            }
+            case FIELD_COMPRESSION::BITPACKED_INDEXED:
+            case FIELD_COMPRESSION::BITPACKED_SIGNED:
+              id = readBitpackedValue(idInfo, recordOffset);
+              break;
+            default:
+              break; // unsupported inline id compression -> leave 0
+          }
+          m_IDs.push_back(id);
+        }
+      }
+
+      // Keep m_IDs aligned 1:1 with m_recordOffsets no matter how this section's id list
+      // parsed -- get()/fill() index m_IDs[recordIndex], so any desync would read out of bounds.
+      if (m_IDs.size() != m_recordOffsets.size())
+        m_IDs.resize(m_recordOffsets.size(), 0);
+    }
+  }
+
   recordCount = m_recordOffsets.size();
 
   /*
@@ -739,6 +842,8 @@ WDC3File::~WDC3File()
   close();
   delete [] m_sectionData;
   delete [] m_palletData;
+  for (unsigned char * buf : m_extraSectionData)
+    delete [] buf;
 }
 
 bool WDC3File::readFieldValue(unsigned int recordIndex, unsigned int fieldIndex, uint arrayIndex, uint arraySize, unsigned int & result) const

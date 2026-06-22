@@ -5,6 +5,15 @@ Format loosely based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [0.3.1] — 2026-06-22
 
+### Added
+- **Brand-new and still-encrypted models now load.** Recently-added content -- e.g. bosses from a
+  just-shipped patch or the current PTR -- keeps its database records and model files encrypted, in
+  extra data sections the viewer used to skip entirely (so those NPCs/items came up missing). WMV now
+  reads *all* sections of a data table, and keeps its decryption keys current automatically (refreshed
+  weekly from the community key list, https://github.com/wowdev/TACTKeys), so this content appears as
+  soon as its key is public. A model whose key hasn't been published yet simply doesn't show (with a
+  notice, not a crash) and starts working on its own once the key lands.
+
 ### Fixed
 - **Characters render with their full appearance again.** After the move to the newer game data
   format, every customization choice came back tagged as if it needed special unlocking, so the

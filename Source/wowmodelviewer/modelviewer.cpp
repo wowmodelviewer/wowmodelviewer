@@ -1841,6 +1841,85 @@ static void refreshCommunityListfile(const QString & localPath, LoadingDialog * 
   QFile::remove(tmpPath); // discard the partial/unused temp file
 }
 
+// Hidden weekly refresh of the TACT encryption keys (the same idea as the listfile refresh
+// above). CASC needs these keys to decrypt encrypted content -- both whole encrypted files and
+// the encrypted DB2 sections that hold brand-new / unreleased records (recent raid bosses etc.).
+// The community list at wowdev/TACTKeys is whitespace-separated "<keyname> <key>"; we convert it
+// to the "<keyname>;<key>" form CASCFolder::addExtraEncryptionKeys() reads. Must run BEFORE
+// setConfig() opens the storage (that is when the keys are handed to CASC). Any failure keeps the
+// bundled/on-disk keys untouched.
+static void refreshTactKeys(const QString & localPath, LoadingDialog * progress)
+{
+  const QFileInfo fi(localPath);
+  if (fi.exists() && fi.lastModified().isValid() &&
+      fi.lastModified().daysTo(QDateTime::currentDateTime()) < 7)
+    return; // recent enough; nothing to do
+
+  if (progress)
+    progress->step(_("Updating encryption keys..."), 6);
+
+  QNetworkAccessManager manager;
+  QNetworkRequest request(QUrl("https://raw.githubusercontent.com/wowdev/TACTKeys/master/WoW.txt"));
+  request.setRawHeader("User-Agent", "WoWModelViewer");
+  request.setAttribute(QNetworkRequest::RedirectPolicyAttribute, QNetworkRequest::NoLessSafeRedirectPolicy);
+  QNetworkReply * reply = manager.get(request);
+
+  QEventLoop loop;
+  QObject::connect(reply, SIGNAL(finished()), &loop, SLOT(quit()));
+  QObject::connect(reply, SIGNAL(error(QNetworkReply::NetworkError)), &loop, SLOT(quit()));
+  loop.exec();
+
+  const bool ok = (reply->error() == QNetworkReply::NoError);
+  const QByteArray body = reply->readAll();
+  reply->deleteLater();
+
+  // A real list is hundreds of KB of "<16 hex> <32 hex>" lines; anything tiny is an error page.
+  if (!ok || body.size() < (100 * 1024))
+  {
+    LOG_INFO << "TACT key refresh skipped; keeping existing keys.";
+    return;
+  }
+
+  // Convert to the "<keyname>;<key>" CSV, validating the hex lengths.
+  QByteArray outData;
+  int count = 0;
+  for (const QByteArray & raw : body.split('\n'))
+  {
+    const QByteArray line = raw.simplified();
+    if (line.isEmpty() || line.startsWith('#'))
+      continue;
+    const QList<QByteArray> parts = line.split(' ');
+    if (parts.size() < 2)
+      continue;
+    const QByteArray name = parts[0].toUpper();
+    const QByteArray key = parts[1].toUpper();
+    if (name.size() != 16 || key.size() != 32)
+      continue;
+    outData += name + ';' + key + '\n';
+    count++;
+  }
+
+  if (count < 1000) // a real list has many thousands of keys; refuse a suspicious result
+  {
+    LOG_INFO << "TACT key refresh produced too few keys (" << count << "); keeping existing.";
+    return;
+  }
+
+  const QString tmpPath = localPath + ".new";
+  QFile out(tmpPath);
+  if (!out.open(QIODevice::WriteOnly))
+    return;
+  out.write(outData);
+  out.close();
+
+  if (QFile::exists(localPath))
+    QFile::remove(localPath);
+  if (QFile::rename(tmpPath, localPath))
+    LOG_INFO << "TACT keys refreshed (" << count << "keys).";
+  else
+    QFile::remove(tmpPath);
+}
+
 void ModelViewer::LoadWoW(const core::GameConfig * chosenConfig, const QString & profileOverride, bool showProgress)
 {
   fileControl->Disable();
@@ -1981,6 +2060,11 @@ void ModelViewer::LoadWoW(const core::GameConfig * chosenConfig, const QString &
       pd->step(_("Opening game data..."), 10 + (int)(frac * 34.0f)); // advance 10 -> 44 during file enumeration
     });
   }
+
+  // Refresh the TACT keys before opening the storage -- setConfig() hands them to CASC, so a
+  // newer key list lets it decrypt encrypted db2 sections + files for recently-added content.
+  // The keys file is read from the working directory (see CASCFolder::addExtraEncryptionKeys).
+  refreshTactKeys("extraEncryptionKeys.csv", progress);
 
   if (!GAMEDIRECTORY.setConfig(config))
   {
