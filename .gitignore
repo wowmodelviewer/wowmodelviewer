@@ -24,6 +24,9 @@ installer/dist
 # x64 build tree (out-of-source, regenerated)
 /build64
 
+# x64 AddressSanitizer build tree (out-of-source, regenerated for debugging)
+/build64-asan
+
 # wxWidgets 3.x prebuilt x64 tree (~200MB, re-acquired from github v3.2.10 vc14x_x64 assets)
 /ThirdParty/wxWidgets3
 
