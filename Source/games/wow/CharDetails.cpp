@@ -431,6 +431,11 @@ void CharDetails::fillCustomizationMapForOption(uint chrCustomizationOption)
 
 
 
+bool CharDetails::hasOption(uint chrCustomizationOptionID) const
+{
+  return choicesPerOptionMap_.find(chrCustomizationOptionID) != choicesPerOptionMap_.end();
+}
+
 void CharDetails::set(uint chrCustomizationOptionID, uint chrCustomizationChoiceID) // wow version >= 9.x
 {
   const auto infos = model_->infos;

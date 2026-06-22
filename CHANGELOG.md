@@ -13,6 +13,13 @@ Format loosely based on [Keep a Changelog](https://keepachangelog.com/).
   (achievement / quest / collected-appearance) and only hides genuinely locked entries, so the full
   set of hairstyles, ears, eyes, skin tones and race features shows again. Verified across Blood Elf,
   Night Elf and the Dracthyr dragon (which had been rendering solid black for the same reason).
+- **Armory import no longer mixes in your dragonriding mounts.** The character appearance API now
+  returns the account's dragonriding-drake customizations alongside the character's own. The importer
+  applied them all, so a drake's "Skin Color" (a companion-drake / serpent / proto-dragon scale
+  texture) was painted over the character's body — e.g. a Blood Elf imported with near-black skin and
+  the wrong hair colour. The importer now keeps only the customizations that belong to the character's
+  own model, so imports match the in-game appearance. (Worn gear was already correct: it shows the
+  transmogged appearance, which is why the item names differ from the equipped items on the Armory.)
 - **Race-specific options no longer leak between races.** "Borrowed" appearances that belong to the
   newer dragon/allied races (e.g. the Evoker "Primalist" eye colours and the Dracthyr "Slit/Star/
   Glow" eye styles) are no longer offered on the classic races, while the dragon races keep them.

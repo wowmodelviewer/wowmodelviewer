@@ -134,8 +134,15 @@ public:
 
   // accessors to customization
   uint get(uint chrCustomizationOptionID) const;
-  void set(uint chrCustomizationOptionID, uint chrCustomizationChoiceID); 
+  void set(uint chrCustomizationOptionID, uint chrCustomizationChoiceID);
   std::vector<uint> getCustomizationChoices(const uint chrCustomizationOptionID);
+
+  // True if chrCustomizationOptionID is one of THIS model's customization options
+  // (i.e. it belongs to the model's ChrModelID). Used to reject foreign options --
+  // the armory appearance API returns the character's dragonriding-drake options too,
+  // and applying a drake "Skin Color" to a humanoid paints the drake's scale texture
+  // over the body. Valid only after the model is set (reset()/fillCustomizationMap()).
+  bool hasOption(uint chrCustomizationOptionID) const;
  
   void setDemonHunterMode(bool val);
   bool isDemonHunter() const { return isDemonHunter_; }

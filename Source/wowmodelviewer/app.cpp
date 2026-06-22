@@ -239,6 +239,7 @@ bool WowModelViewApp::OnInit()
   // Command arguments
   QString cmd;
   QString snapModelPath; // -mo: defer load+screenshot until after LoadWoW
+  QString snapArmoryUrl; // -armory <url>: headless import + screenshot (test harness)
   for (int i = 0; i<argc; i++) {
     cmd = QString::fromWCharArray(argv[i]);
 
@@ -266,6 +267,15 @@ bool WowModelViewApp::OnInit()
         // Defer load + screenshot until AFTER LoadWoW() below -- the game data
         // must be loaded before a model can be resolved/composed.
         snapModelPath = fn;
+      }
+    }
+    else if (cmd == "-armory") {
+      // Headless armory import for testing: load the character from the URL and
+      // screenshot it after LoadWoW(). Mirrors -mo. importChar sets hasTransmogGear
+      // false so no modal dialog blocks the run.
+      if (i + 1 < argc) {
+        i++;
+        snapArmoryUrl = QString::fromWCharArray(argv[i]);
       }
     }
     else if (cmd == "-dbfromfile") {
@@ -317,7 +327,7 @@ bool WowModelViewApp::OnInit()
   for (int i = 1; i < argc; i++)
   {
     QString a = QString::fromWCharArray(argv[i]);
-    if (a == "-m" || a == "-mo" || a == "-dbfromfile" || a.endsWith(".chr"))
+    if (a == "-m" || a == "-mo" || a == "-armory" || a == "-dbfromfile" || a.endsWith(".chr"))
     {
       headlessLoad = true;
       break;
@@ -331,6 +341,13 @@ bool WowModelViewApp::OnInit()
     {
       frame->LoadModel(GAMEDIRECTORY.getFile(snapModelPath));
       QString out = "ss_" + QString(snapModelPath).replace('\\', '_').replace('/', '_') + ".png";
+      frame->canvas->Screenshot(out.toStdWString());
+      return false; // headless capture done -> exit
+    }
+    if (!snapArmoryUrl.isEmpty())
+    {
+      frame->ImportArmoury(wxString::FromUTF8(snapArmoryUrl.toUtf8().constData()));
+      QString out = "ss_armory_" + QString(snapArmoryUrl).section('/', -1).replace('?', '_') + ".png";
       frame->canvas->Screenshot(out.toStdWString());
       return false; // headless capture done -> exit
     }

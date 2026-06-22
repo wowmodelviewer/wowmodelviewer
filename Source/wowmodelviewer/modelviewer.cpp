@@ -2739,6 +2739,22 @@ void ModelViewer::ImportArmoury(wxString strURL)
       wxMessageBox(wxT("We found Transmogrified gear on your character. The items your character is wearing will be exchanged for the items they look like."), wxT("Transmog Notice"));
     }
 
+    // The appearance API returns EVERY customization on the account's character record,
+    // which today includes the character's dragonriding-drake mounts (Worn Wylderdrake,
+    // Renewed Proto-Drake, Cliffside Wylderdrake, ...). Those options belong to the drake
+    // ChrModels, not the humanoid -- and a drake "Skin Color" resolves to a companion-drake/
+    // serpent/proto-dragon scale texture that targets the universal base-skin layer, so
+    // applying it paints the drake's (often dark) scales over the character's body. Keep only
+    // the options that belong to THIS model so foreign customizations can't leak in.
+    std::vector<std::pair<unsigned int, unsigned int> > ownCustomizations;
+    for (const auto& customization : result->customizations)
+      if (g_charControl->model->cd.hasOption(customization.first))
+        ownCustomizations.push_back(customization);
+    LOG_INFO << "Armory import: applying" << (int)ownCustomizations.size() << "of"
+             << (int)result->customizations.size() << "customizations ("
+             << (int)(result->customizations.size() - ownCustomizations.size())
+             << "belong to other models, e.g. dragonriding drakes -- skipped).";
+
     // Apply the imported customizations. Skin/hair COLOUR options are parent/child-linked
     // (Face->SkinColor, HairStyle->HairColor) and their textures are related-gated, so resolving
     // a colour depends on its linked partner's current value. The appearance API returns the
@@ -2747,9 +2763,9 @@ void ModelViewer::ImportArmoury(wxString strURL)
     // from direct, non-related elements -- which is exactly why geometry was right but colour
     // wrong). Apply all choices, then re-resolve them in a second pass so every colour is
     // resolved against the final value of its partner (same idea as reset()/setDemonHunterMode).
-    for (const auto& customization : result->customizations)
+    for (const auto& customization : ownCustomizations)
       g_charControl->model->cd.set(customization.first, customization.second);
-    for (const auto& customization : result->customizations)
+    for (const auto& customization : ownCustomizations)
       g_charControl->model->cd.set(customization.first, customization.second);
 
     g_charControl->model->cd.eyeGlowType = static_cast<EyeGlowTypes>(result->eyeGlowType);
