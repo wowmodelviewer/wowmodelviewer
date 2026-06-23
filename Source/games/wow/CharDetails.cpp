@@ -274,7 +274,28 @@ void CharDetails::fillCustomizationMap()
       choicesPerOptionMap_[id] = {};
       optionFlags_[id] = option[1].toUInt();
     }
-  
+
+  // Record which geoset GROUPS (GeosetType) any customization option for this model
+  // drives. Used to distinguish fixed geometry the default-visibility rule must show
+  // from geometry a customization choice owns -- specifically the ears group (CG_EARS=7),
+  // which is fixed ear geometry on most playable races but is repurposed as a
+  // customization option on others (Tail/Throat/Effects on dragonriding drakes,
+  // "Modification" on Mechagnome, "Ears" on races with an ear-shape option). See
+  // isGeosetGroupCustomized() and the ear-visibility net in WoWModel::refresh().
+  customizationControlledGroups_.clear();
+  {
+    auto grps = GAMEDATABASE.sqlQuery(QString(
+      "SELECT DISTINCT ChrCustomizationGeoset.GeosetType "
+      "FROM ChrCustomizationOption "
+      "JOIN ChrCustomizationChoice ON ChrCustomizationChoice.ChrCustomizationOptionID = ChrCustomizationOption.ID "
+      "JOIN ChrCustomizationElement ON ChrCustomizationElement.ChrCustomizationChoiceID = ChrCustomizationChoice.ID "
+      "JOIN ChrCustomizationGeoset ON ChrCustomizationGeoset.ID = ChrCustomizationElement.ChrCustomizationGeosetID "
+      "WHERE ChrCustomizationOption.ChrModelID = %1").arg(infos.ChrModelID[0]));
+    if (grps.valid)
+      for (const auto & g : grps.values)
+        customizationControlledGroups_.insert(g[0].toInt());
+  }
+
   LINKED_OPTIONS_MAP_.clear();
   initLinkedOptionsMap();
 
@@ -803,9 +824,22 @@ void CharDetails::initLinkedOptionsMap()
   for (const auto& c : choicesPerOptionMap_)
   {
     auto id = c.first;
+    // Find the option(s) this option depends on: options whose active choice GATES one of
+    // THIS option's customization elements (via ChrCustomizationElement.RelatedChrCustomization-
+    // ChoiceID). This dependency must be discovered across ALL of the option's choices, not a
+    // single sampled one. An option can be heterogeneous -- most choices carry a direct
+    // (ungated) element while only some carry gated ones. The old query sampled just the
+    // OrderIndex = 1 choice; for e.g. Vulpera "Eye Color" that choice is a plain coloured eye
+    // with a DIRECT texture, so its real dependency on "Eye Style" (which gates the higher eye
+    // colours' textures, one material per Slit/Star/Glow) was never recorded. Without the link,
+    // set() never re-resolves the gated eye texture when Eye Style is applied, so those eye
+    // colours load untextured until the colour is manually re-picked. (This affected the Eye
+    // Color option on ~50 races.) Scanning every choice records the true dependency; it only
+    // ever ADDS links the single-choice sample missed (verified: a strict superset, no cycles).
     const auto query = QString("SELECT DISTINCT ChrCustomizationOptionID FROM ChrCustomizationChoice WHERE ID IN "
-      "(SELECT RelatedChrCustomizationChoiceID FROM ChrCustomizationElement WHERE ChrCustomizationChoiceID = "
-      "(SELECT ID FROM ChrCustomizationChoice WHERE ChrCustomizationOptionID = %1 AND OrderIndex = 1))").arg(id);
+      "(SELECT RelatedChrCustomizationChoiceID FROM ChrCustomizationElement WHERE ChrCustomizationChoiceID IN "
+      "(SELECT ID FROM ChrCustomizationChoice WHERE ChrCustomizationOptionID = %1) "
+      "AND RelatedChrCustomizationChoiceID != 0) AND ChrCustomizationOptionID != %2").arg(id).arg(id);
 
     auto link = GAMEDATABASE.sqlQuery(query);
 
@@ -1044,6 +1078,19 @@ void CharDetails::refreshSkinnedModels()
       continue;
     model->hideAllGeosets();
     for (const auto& g : gf.second)
+    {
       model->setGeosetGroupDisplay((CharGeosets)g.first, g.second);
+      // The merged (skinned) part PROVIDES geoset group g.first; hide the BASE body's own
+      // geoset of that group so the part REPLACES the bare body rather than z-fighting it.
+      // Without this, a Mechagnome's upgraded arm/leg (e.g. collection-model geoset 2903 /
+      // 3002) renders coincident with the body's default geoset (2901 / 3001) -- one samples
+      // the painted metal, the other the body skin, so they flicker (most visible on the
+      // male). Recorded in cd.geosets so it is applied to the BASE after the default
+      // visibility rule; the base has no such upgraded variant, so setGeosetGroupDisplay
+      // there simply switches its own group off. Only fires while the part is merged (the
+      // option is not "None"), so unrelated parts (DH horns, whose group the base lacks) are
+      // unaffected.
+      geosets[g.first] = g.second;
+    }
   }
 }

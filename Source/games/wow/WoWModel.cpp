@@ -2778,12 +2778,22 @@ void WoWModel::refreshMerging()
       if (it == -1)
         specialTextures.push_back(it);
       else if (it == TEXTURE_SKIN_EXTRA)
-        // Use the character's composed body skin for skin-extra merged parts.
-        // Pushing the raw type (8) made getGLTexture read replaceTextures[8],
-        // which is never populated (the composed skin lives at
-        // replaceTextures[TEXTURE_SKIN]), so the part rendered untextured.
-        // skin/skin-extra parts likewise bind to the composite skin.
-        specialTextures.push_back(TEXTURE_SKIN);
+      {
+        // Skin-extra (component-model) texture. If THIS merged model resolved its OWN
+        // skin-extra texture, bind that via the per-merge offset slot. The Mechagnome
+        // "Paint" material is a TextureType-8 customization that refresh() loads onto each
+        // merged collection model (updateTextureList(paint, TEXTURE_SKIN_EXTRA)); binding it
+        // here is what makes the cybernetic parts (Modification / Arm & Leg Upgrade) show
+        // their painted metal. The old code UNCONDITIONALLY remapped skin-extra to the body
+        // skin, which discarded the paint and left every mech part wearing the bare gnome
+        // skin. Fall back to the composed body skin only when the part has no skin-extra
+        // texture of its own (e.g. the DH blindfold), which is the slot it expects.
+        if (it < static_cast<int>(modelsIt->replaceTextures.size()) &&
+            modelsIt->replaceTextures[it] != ModelRenderPass::INVALID_TEX)
+          specialTextures.push_back(it + (mergeIndex * TEXTURE_MAX));
+        else
+          specialTextures.push_back(TEXTURE_SKIN);
+      }
       else
         specialTextures.push_back(it + (mergeIndex * TEXTURE_MAX));
     }
@@ -3025,6 +3035,41 @@ void WoWModel::refresh()
   // run after customization so UI toggles (e.g. hide facial hair) win.
   for (auto geo : cd.geosets)
     setGeosetGroupDisplay((CharGeosets)geo.first, geo.second);
+
+  // Ensure the race/sex's FIXED built-in ears render. The default rule above shows a
+  // group's "*01" variant, but built-in ears are not always variant 1: Gnome MALE ears
+  // are geoset 701 (caught by the *01 rule), but Gnome FEMALE ears are 702 -- and with
+  // no customization option driving group 7 to re-show it (females only have an Earrings
+  // option, group 35), the *01 rule leaves 702 hidden and the head renders earless. If
+  // ears should be visible but the whole Ears group (CG_EARS) ended up hidden, show its
+  // lowest real variant (id%100 >= 1; the *00 entry is the deliberate "no ears" worn
+  // under helmets).
+  //
+  // CRITICAL: only do this when NO customization option drives group 7 for this model,
+  // i.e. the ears are genuinely fixed geometry. Several models repurpose group 7 as a
+  // customization option whose default maps to the *00 "none" variant -- dragonriding
+  // drakes (Tail/Throat/Effects), Mechagnome (Modification), races with an "Ears" option
+  // (Haranir, and now Human, etc.). For those, applyCustomizationGeosets() above has
+  // already shown exactly the chosen variant (and a "Bare"/"None" default legitimately
+  // shows nothing), so forcing the lowest variant here would wrongly grow a tail spike /
+  // throat fin / second ear on a default-loaded model. isGeosetGroupCustomized() gates
+  // that out. (No-op too for races whose ear IS 701, already shown.)
+  if (cd.showEars && !cd.isGeosetGroupCustomized(CG_EARS))
+  {
+    int lowestEar = -1;
+    bool anyEarShown = false;
+    for (size_t i = 0; i < rawGeosets.size() && i < geosets.size(); i++)
+    {
+      const int id = geosets[i]->id;
+      if (id / 100 == CG_EARS && (id % 100) >= 1)
+      {
+        if (geosets[i]->display) { anyEarShown = true; break; }
+        if (lowestEar == -1 || id < lowestEar) lowestEar = id;
+      }
+    }
+    if (!anyEarShown && lowestEar != -1)
+      setGeosetDisplayById(lowestEar, true);
+  }
 
   // finalize character texture
   const GLuint charTex = 0;

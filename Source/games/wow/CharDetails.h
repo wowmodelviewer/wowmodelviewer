@@ -8,6 +8,8 @@
 #ifndef _CHARDETAILS_H_
 #define _CHARDETAILS_H_
 
+#include <set>
+
 #include "CharTexture.h"
 #include "database.h"
 #include "RaceInfos.h"
@@ -152,6 +154,13 @@ public:
   // CHOICE_LIST_CHANGED during a batch -- the batch refreshes once at the end.
   bool isBatching() const { return batchUpdate_; }
 
+  // True if a customization option for this model drives the given geoset GROUP
+  // (GeosetType). E.g. false for the ears group (CG_EARS = 7) on Gnome -- their ears
+  // are fixed geometry -- but true on Mechagnome (a "Modification" option), a drake
+  // (group 7 repurposed as Tail/Throat/Effects), or any race with an "Ears" option.
+  // The ear-visibility net in WoWModel::refresh() uses this to act ONLY on fixed ears.
+  bool isGeosetGroupCustomized(int geosetGroup) const { return customizationControlledGroups_.count(geosetGroup) != 0; }
+
   void refresh();
 
   // Selective application of customization-choice geosets to the model:
@@ -199,6 +208,11 @@ private:
 
   std::map<uint, std::vector<uint> > choicesPerOptionMap_; // map < ChrCustomizationOption::ID, vector <ChrCustomizationChoice::ID> >
   std::map<uint, uint> optionFlags_; // map < ChrCustomizationOption::ID, ChrCustomizationOption::Flags >
+
+  // Geoset GROUPS (GeosetType) that any customization option for this model drives.
+  // Computed once in fillCustomizationMap(); lets fixed geometry be told from
+  // customization-owned geometry. See isGeosetGroupCustomized().
+  std::set<int> customizationControlledGroups_;
 
   // ChrCustomizationChoice::ID -> its geoset elements: each is
   // { geosetId (GeosetType*100 + GeosetID), RelatedChrCustomizationChoiceID }.

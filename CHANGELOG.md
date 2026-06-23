@@ -17,6 +17,22 @@ Format loosely based on [Keep a Changelog](https://keepachangelog.com/).
   already in the status bar at the bottom, which is easy to miss), so it's obvious what you're viewing.
 
 ### Fixed
+- **Mechagnome cybernetic parts show their painted metal.** The Modification, Arm Upgrade and Leg
+  Upgrade are separate part-models merged onto the character, and their metal/paint comes from the
+  "Paint" customization. The viewer was discarding that paint and drawing the parts in bare gnome
+  skin; it now binds the paint to each merged part. The upgraded arms/legs also no longer draw on top
+  of (and flicker with) the body's default limb. (A remaining male-only flicker on the modification
+  head-piece — two duplicate part-meshes — is tracked separately.)
+- **Eye colours that change with Eye Style now apply on load.** Many races (Vulpera and around fifty
+  others) have eye colours whose iris texture is selected by the separate "Eye Style" option. Those
+  colours loaded with no eye texture (a blank/grey eye) until you manually re-picked the colour,
+  because the viewer never recorded that Eye Color depends on Eye Style. It now discovers that
+  dependency across all of an option's choices, so the eye is correct on first load.
+- **Races whose ears aren't the default geoset no longer load earless.** The viewer auto-shows the
+  "variant 1" geoset of each body group, but some race/sex combos use a different variant for their
+  built-in ears (e.g. Gnome females) and so loaded with no ears. When ears should be visible but none
+  are, the viewer now shows the model's actual ear geoset — without affecting races that customise the
+  ear group (Mechagnome, dragonriding drakes, etc.).
 - **Customization dropdowns no longer list the game's "Transmog" placeholder.** Many appearance
   options (Skin/Hair/Eye Color, Face, Fur Color and more) carried an extra "Transmog" entry that
   isn't a real appearance — in game it just means "this part follows the equipped transmog," which
