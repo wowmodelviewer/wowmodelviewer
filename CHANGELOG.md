@@ -17,6 +17,13 @@ Format loosely based on [Keep a Changelog](https://keepachangelog.com/).
   already in the status bar at the bottom, which is easy to miss), so it's obvious what you're viewing.
 
 ### Fixed
+- **Models with many animations no longer hang the viewer, and characters load in a fraction of the
+  time.** Opening an effect-heavy creature or a customizable character (e.g. Dracthyr) used to freeze
+  the window for tens of seconds — up to ~90s on models with hundreds of animations — while the
+  animation list filled in, the character was re-composited dozens of times, and the same texture
+  layers were decoded over and over. Now the animation list fills in the background once the model is
+  on screen, the model is refreshed once per load instead of ~30 times, and each texture layer is
+  decoded once and reused. A Dracthyr character that took ~12 seconds now loads in about 2.
 - **PTR / Beta installs now load their own game data instead of retail.** When you pointed the viewer
   at a Public Test Realm or Beta game folder, it was silently loading the *retail* data instead — so
   anything retail and the test realm share looked fine, but brand-new test-only content (the latest

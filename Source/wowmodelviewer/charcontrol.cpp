@@ -1064,6 +1064,13 @@ const wxString CharControl::selectCharModel()
 
 void CharControl::onEvent(Event *)
 {
+  // reset()/randomise() apply a choice to every customization option in one batched
+  // pass, firing a CHOICE_LIST_CHANGED per option. Refreshing the whole model on each
+  // (28+ times for a Dracthyr load) re-applies all textures/geosets/equipment per
+  // option and defeated the batch's single end-of-pass refresh. Skip the per-event
+  // refresh while batching; the batch does exactly one refresh when it finishes.
+  if (model && model->cd.isBatching())
+    return;
   RefreshModel();
 }
 

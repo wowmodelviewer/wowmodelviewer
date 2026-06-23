@@ -2322,10 +2322,18 @@ void WoWModel::updateTextureList(GameFile * Tex, int special)
   {
     if (specialTextures[i] == special)
     {
+      // Acquire the new texture BEFORE releasing the old one. When customization
+      // re-applies the same file (which happens repeatedly per character load),
+      // add() returns the cached id and bumps its refcount; the following del()
+      // of the old id then just drops the extra ref, so the texture is never
+      // evicted and re-decoded. The previous del-then-add order evicted the
+      // texture (refcount -> 0) and forced a full CASC read + BLP decode on every
+      // apply -- the bulk of the character-load texture cost.
+      const GLuint newId = TEXTUREMANAGER.add(Tex);
       if (replaceTextures[special] != ModelRenderPass::INVALID_TEX)
         TEXTUREMANAGER.del(replaceTextures[special]);
 
-      replaceTextures[special] = TEXTUREMANAGER.add(Tex);
+      replaceTextures[special] = newId;
       break;
     }
   }

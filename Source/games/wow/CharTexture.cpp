@@ -8,6 +8,7 @@
 #include "CharTexture.h"
 
 
+#include <list>
 #include <map>
 #include <string>
 
@@ -179,7 +180,28 @@ void imageCleanUpHandler(void * ptr)
 
 QImage * CharTexture::gameFileToQImage(GameFile * file)
 {
-  QImage * result = nullptr;
+  // A character composition decodes the same source BLP many times: each layer is
+  // reused across regions and re-composed on every customization change (Dracthyr
+  // measured 337 decodes for 40 distinct files -- the base skin alone 29x). Decoding
+  // a BLP (CASC read + decompress + GL round-trip via getPixels) is the dominant cost
+  // of a character load, and TextureManager can't help because we del() right after.
+  // Cache the decoded image per source file instead. Keying by name is safe: a name
+  // resolves to fixed content, and different customization choices are different files.
+  // Bounded with simple LRU eviction so memory can't grow without limit.
+  static std::map<QString, QImage> s_cache;
+  static std::list<QString> s_lru;
+  const size_t CACHE_MAX = 64;
+
+  const QString name = file->fullname();
+
+  auto cached = s_cache.find(name);
+  if (cached != s_cache.end())
+  {
+    s_lru.remove(name);
+    s_lru.push_back(name);
+    return new QImage(cached->second); // implicitly-shared copy, no decode
+  }
+
   const auto temptex = TEXTUREMANAGER.add(file);
   auto * tex = dynamic_cast<Texture*>(TEXTUREMANAGER.items[temptex]);
 
@@ -187,16 +209,26 @@ QImage * CharTexture::gameFileToQImage(GameFile * file)
   if (tex->w == 0 || tex->h == 0)
   {
     TEXTUREMANAGER.del(temptex);
-    return result;
+    return nullptr;
   }
 
   auto * tempbuf = (unsigned char*)malloc(tex->w*tex->h * 4);
 
   tex->getPixels(tempbuf, GL_BGRA_EXT);
-  result = new QImage(tempbuf, tex->w, tex->h, QImage::Format_ARGB32, imageCleanUpHandler, tempbuf);
-  
+  QImage decoded(tempbuf, tex->w, tex->h, QImage::Format_ARGB32, imageCleanUpHandler, tempbuf);
+
   TEXTUREMANAGER.del(temptex);
 
-  return result;
+  // Store an independent deep copy; hand the caller its own shared copy.
+  QImage entry = decoded.copy();
+  if (s_cache.size() >= CACHE_MAX && !s_lru.empty())
+  {
+    s_cache.erase(s_lru.front());
+    s_lru.pop_front();
+  }
+  s_cache[name] = entry;
+  s_lru.push_back(name);
+
+  return new QImage(entry);
 }
 

@@ -302,6 +302,14 @@ void AnimControl::UpdateModel(WoWModel *m)
 
     map<int, wstring> animsVal = m->getAnimsMap();
 
+    // Build the label list once, then batch-append to each combo with redraws
+    // suspended. Per-item wxComboBox::Append on Windows re-measures and relayouts
+    // the native control on every call, so populating three combos with a model's
+    // hundreds of animations (322 on this creature, 380 on Dracthyr) made loading
+    // take ~90s. Appending the whole array under Freeze()/Thaw() collapses 3*N
+    // control updates into 3 and makes the load near-instant.
+    wxArrayString names;
+    names.Alloc(m->anims.size());
     for (size_t i=0; i<m->anims.size(); i++)
     {
       std::wstringstream label;
@@ -317,10 +325,29 @@ void AnimControl::UpdateModel(WoWModel *m)
         useanim = i;
       }
 
-      animCList->Append(StrName);
-      animCList2->Append(StrName);
-      animCList3->Append(StrName);
+      names.Add(StrName);
     }
+
+    // Populate the primary (visible) animation combo now; the model's default
+    // animation is selected from it just below. The two "next animation" blend
+    // combos are only needed when chaining animations, so fill them AFTER the model
+    // is shown rather than blocking the load on two more 405-item native combos
+    // (~1s). CallAfter runs them on the next event-loop turn.
+    animCList->Freeze();
+    animCList->Append(names);
+    animCList->Thaw();
+
+    wxComboBox * cb2 = animCList2;
+    wxComboBox * cb3 = animCList3;
+    CallAfter([cb2, cb3, names]()
+    {
+      for (wxComboBox * cb : { cb2, cb3 })
+      {
+        cb->Freeze();
+        cb->Append(names);
+        cb->Thaw();
+      }
+    });
 
     if (useanim != -1)
     {

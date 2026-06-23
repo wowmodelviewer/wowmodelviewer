@@ -147,6 +147,11 @@ public:
   void setDemonHunterMode(bool val);
   bool isDemonHunter() const { return isDemonHunter_; }
 
+  // True while reset()/randomise() are applying a choice to every option in one
+  // pass. Listeners (e.g. CharControl) must NOT trigger a full model refresh per
+  // CHOICE_LIST_CHANGED during a batch -- the batch refreshes once at the end.
+  bool isBatching() const { return batchUpdate_; }
+
   void refresh();
 
   // Selective application of customization-choice geosets to the model:
