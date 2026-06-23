@@ -382,7 +382,19 @@ void CharDetails::fillCustomizationMapForOption(uint chrCustomizationOption)
   // OrderIndex, and without a stable secondary sort SQLite returns them in an
   // arbitrary order, so reset()'s "first available choice" default would vary
   // between loads (a character's default skin/markings changing each time).
-  auto choices = GAMEDATABASE.sqlQuery(QString("SELECT ID FROM ChrCustomizationChoice WHERE ChrCustomizationOptionID = %1 ORDER BY OrderIndex, ID").arg(chrCustomizationOption));
+  //
+  // Drop the game's "Transmog" placeholder choice. Many options (Skin/Hair/Eye
+  // Color, Face, Fur Color, ...) carry one extra choice -- named "Transmog" in
+  // English -- that is not a real appearance: it is the slot meaning "this part is
+  // driven by the equipped transmog set". A model viewer has no transmog context,
+  // so it is a dead entry in every affected dropdown (e.g. Blood Elf Skin Color #25,
+  // Hair Color #13, Eye Color #20). Every such choice, and ONLY these, points at the
+  // shared requirement row ChrCustomizationReqID 10 (verified across the whole table:
+  // every choice on that requirement is the placeholder, no real choice uses it), so
+  // we exclude by that requirement id rather than the localized name -- locale
+  // independent, and the choice never appears, is never a default, is never randomised.
+  const int TRANSMOG_PLACEHOLDER_REQ = 10;
+  auto choices = GAMEDATABASE.sqlQuery(QString("SELECT ID FROM ChrCustomizationChoice WHERE ChrCustomizationOptionID = %1 AND ChrCustomizationReqID <> %2 ORDER BY OrderIndex, ID").arg(chrCustomizationOption).arg(TRANSMOG_PLACEHOLDER_REQ));
   if (choices.valid)
   {
     LOG_INFO << __FUNCTION__ << "DIRECT values" << choices.values.size();

@@ -17,6 +17,12 @@ Format loosely based on [Keep a Changelog](https://keepachangelog.com/).
   already in the status bar at the bottom, which is easy to miss), so it's obvious what you're viewing.
 
 ### Fixed
+- **Customization dropdowns no longer list the game's "Transmog" placeholder.** Many appearance
+  options (Skin/Hair/Eye Color, Face, Fur Color and more) carried an extra "Transmog" entry that
+  isn't a real appearance — in game it just means "this part follows the equipped transmog," which
+  has no meaning in a model viewer. It's now hidden across every race and option, so the lists show
+  only selectable looks (e.g. Blood Elf Skin Color, Hair Color and Eye Color each lose their dead
+  Transmog slot).
 - **Models with many animations no longer hang the viewer, and characters load in a fraction of the
   time.** Opening an effect-heavy creature or a customizable character (e.g. Dracthyr) used to freeze
   the window for tens of seconds — up to ~90s on models with hundreds of animations — while the
