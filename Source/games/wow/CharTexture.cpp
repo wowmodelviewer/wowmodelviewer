@@ -71,6 +71,58 @@ void CharTexture::compose(GLuint texID)
   glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR);
 }
 
+GLuint CharTexture::composeStackToTexture(const std::vector<CharTextureComponent> & layersIn)
+{
+  std::vector<CharTextureComponent> layers = layersIn;
+  std::sort(layers.begin(), layers.end()); // by layer (lowest = base)
+
+  QImage composite;
+  for (const auto & c : layers)
+  {
+    if (!c.file)
+      continue;
+    QImage * img = gameFileToQImage(c.file);
+    if (!img)
+      continue;
+
+    if (composite.isNull())
+    {
+      composite = img->copy(); // first (lowest) layer is the base
+    }
+    else
+    {
+      const QImage scaled = (img->size() == composite.size())
+        ? *img
+        : img->scaled(composite.size(), Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
+
+      QPainter::CompositionMode mode = QPainter::CompositionMode_SourceOver;
+      switch (c.blendMode)
+      {
+      case 4: mode = QPainter::CompositionMode_Multiply; break;
+      case 6: mode = QPainter::CompositionMode_Overlay; break;
+      default: break; // 1 (blit) / 9 (alpha) etc. -> straight alpha over
+      }
+
+      QPainter painter(&composite);
+      painter.setCompositionMode(mode);
+      painter.drawImage(0, 0, scaled);
+      painter.end();
+    }
+    delete img;
+  }
+
+  if (composite.isNull())
+    return 0;
+
+  GLuint id = 0;
+  glGenTextures(1, &id);
+  glBindTexture(GL_TEXTURE_2D, id);
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, composite.width(), composite.height(), 0, GL_BGRA_EXT, GL_UNSIGNED_BYTE, composite.bits());
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+  return id;
+}
+
 void CharTexture::initRegions()
 {
   auto layouts = GAMEDATABASE.sqlQuery("SELECT ID, Width, Height FROM CharComponentTextureLayouts");

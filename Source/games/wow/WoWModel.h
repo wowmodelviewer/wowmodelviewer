@@ -77,6 +77,12 @@ class _WOWMODEL_API_ WoWModel : public ManagedItem, public Displayable, public M
   std::vector<int> specialTextures;
   std::vector<GLuint> replaceTextures;
 
+  // Owned GL texture holding the composited eye (TextureType 19): the coloured iris and the
+  // Eyesight glow are separate customization textures that target the same replaceTextures
+  // slot, so they are layered into this one texture instead of overwriting each other.
+  // Recreated each refresh, freed here and in ~WoWModel.
+  GLuint eyeCompositeTex_ = 0;
+
   inline void drawModel();
   void initCommon();
   bool isAnimated();

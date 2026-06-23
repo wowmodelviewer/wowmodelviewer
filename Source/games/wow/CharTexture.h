@@ -63,6 +63,15 @@ class _CHARTEXTURE_API_ CharTexture
 
     static void initRegions();
 
+    // Decode + layer a stack of full-image textures into ONE new GL texture, returning its id
+    // (0 on failure). Used for a slot the model samples as a single texture but that
+    // customization splits across multiple layers -- e.g. the eye (TextureType 19), where the
+    // coloured iris and the Eyesight glow are separate textures that must be composited rather
+    // than overwrite each other in one replaceTextures slot. Layers are applied in 'layer'
+    // order (lowest first = base); 'region' is ignored (each layer fills the whole image).
+    // The caller OWNS the returned texture and must glDeleteTextures() it.
+    static GLuint composeStackToTexture(const std::vector<CharTextureComponent> & layers);
+
   private:
     void burnComponent(QImage & destImage, CharTextureComponent &) const;
     static QImage * gameFileToQImage(GameFile * file);

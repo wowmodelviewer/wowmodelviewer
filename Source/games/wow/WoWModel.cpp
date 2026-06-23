@@ -183,6 +183,9 @@ gamefile(file)
 
 WoWModel::~WoWModel()
 {
+  if (eyeCompositeTex_ != 0)
+    glDeleteTextures(1, &eyeCompositeTex_);
+
   // Free any models held in the re-merge cache (these are NOT in mergedModels, so the
   // merge cleanup below won't reach them).
   for (auto & entry : mergedModelCache)
@@ -2748,6 +2751,23 @@ void WoWModel::refreshMerging()
       ModelRenderPass * p = new ModelRenderPass(*it);
       p->model = this;
       p->geoIndex += nbGeosets;
+
+      // The copied pass now renders against THIS (parent) model, but its animation-channel
+      // indices (texanim/texanim2/color/opacity) were assigned against the MERGED model's own
+      // arrays. The parent's texAnims/colors/transparency are a DIFFERENT M2's data, so those
+      // indices alias unrelated tracks and apply a stray animation to the merged geometry --
+      // e.g. the character's free-running global-sequence eye/blink UV-scroll (or its
+      // emissive/alpha track) drives a Mechagnome metal "Modification"/"Upgrade" pass, making
+      // its texture crawl/shimmer non-stop -- or flicker out entirely via the ecol/ocol
+      // zero-alpha skip in ModelRenderPass::init(). These merged customization parts are static
+      // attachments sharing the parent skeleton and carry no meaningful UV/colour/alpha
+      // animation of their own, so neutralise the stale indices (-1 = no animation). The
+      // env/sphere reflection is a separate uvSource==2 path and is unaffected.
+      p->texanim = -1;
+      p->texanim2 = -1;
+      p->color = -1;
+      p->opacity = -1;
+
       if (geosets[it->geoIndex]->id / 100 != 23) // don't copy texture for hands
       {
         p->tex += (mergeIndex * TEXTURE_MAX);
@@ -2959,9 +2979,18 @@ void WoWModel::refresh()
 
   // reset char texture
   tex.reset(infos.textureLayoutID);
+  // The eye (TextureType 19) is composited from possibly SEVERAL customization layers -- the
+  // coloured iris plus the Eyesight glow -- that all target one replaceTextures slot. Applying
+  // them via the single-slot updateTextureList below would let the last one (the glow) overwrite
+  // the others (the iris), so skip type 19 here and build the layered eye texture after the loop.
+  const int TEXTURE_TYPE_EYES = 19;
   for (auto t : cd.textures)
   {
-    if(t.type != 1)
+    if (t.type == 1)
+    {
+      tex.addLayer(GAMEDIRECTORY.getFile(t.fileId), t.region, t.layer, t.blendMode);
+    }
+    else if ((int)t.type != TEXTURE_TYPE_EYES)
     {
       updateTextureList(GAMEDIRECTORY.getFile(t.fileId), t.type);
       // A customization texture (e.g. the DH blindfold) can belong to a MERGED
@@ -2974,9 +3003,34 @@ void WoWModel::refresh()
       for (auto * mm : mergedModels)
         mm->updateTextureList(GAMEDIRECTORY.getFile(t.fileId), t.type);
     }
-    else
+    // else: the eye (type 19) is composited from its layers after this loop.
+  }
+
+  // Build the layered eye texture (iris + Eyesight glow + ...) and bind it to the eye's
+  // replaceTextures slot. They are separate textures that share one slot, so they must be
+  // composited rather than overwrite each other (which left e.g. Mechagnome eyes showing only
+  // the blue glow, not the coloured iris, once the Eyesight option was restored).
+  if (eyeCompositeTex_ != 0)
+  {
+    glDeleteTextures(1, &eyeCompositeTex_);
+    eyeCompositeTex_ = 0;
+  }
+  {
+    std::vector<CharTextureComponent> eyeLayers;
+    for (const auto & t : cd.textures)
+      if ((int)t.type == TEXTURE_TYPE_EYES)
+        eyeLayers.push_back({ GAMEDIRECTORY.getFile(t.fileId), t.region, (int)t.layer, (int)t.blendMode });
+
+    if (!eyeLayers.empty())
     {
-      tex.addLayer(GAMEDIRECTORY.getFile(t.fileId), t.region, t.layer, t.blendMode);
+      eyeCompositeTex_ = CharTexture::composeStackToTexture(eyeLayers);
+      if (eyeCompositeTex_ != 0)
+        for (size_t i = 0; i < specialTextures.size(); i++)
+          if (specialTextures[i] == TEXTURE_TYPE_EYES)
+          {
+            replaceTextures[TEXTURE_TYPE_EYES] = eyeCompositeTex_;
+            break;
+          }
     }
   }
 
