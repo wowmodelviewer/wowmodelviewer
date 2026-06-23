@@ -256,16 +256,18 @@ void CharDetails::fillCustomizationMap()
   if (infos.raceID == -1)
     return;
 
-  auto options = GAMEDATABASE.sqlQuery(QString("SELECT ID, Flags FROM ChrCustomizationOption WHERE ChrModelID = %1 AND ChrCustomizationID != 0 ORDER BY OrderIndex").arg(infos.ChrModelID[0]));
-
-  // Some ChrModels have EVERY option with ChrCustomizationID == 0 (e.g. the
-  // Dracthyr visage male, ChrModelID 127, plus ~22 newer forms). For those the
-  // filter above returns nothing and the character renders with no customization
-  // -> a blank body. Fall back to the unfiltered option set ONLY in that case, so
-  // models that do have ChrCustomizationID-tagged options keep their exact prior
-  // behaviour (no regression) while the otherwise-blank models become customisable.
-  if (!options.valid || options.values.empty())
-    options = GAMEDATABASE.sqlQuery(QString("SELECT ID, Flags FROM ChrCustomizationOption WHERE ChrModelID = %1 ORDER BY OrderIndex").arg(infos.ChrModelID[0]));
+  // Load ALL of this model's customization options, regardless of ChrCustomizationOption's
+  // ChrCustomizationID. An earlier version filtered to ChrCustomizationID != 0 and only fell
+  // back to the unfiltered set when that returned NOTHING. That silently dropped every
+  // ChrCustomizationID == 0 option on models that ALSO have a few tagged ones -- a mixed case
+  // the all-empty fallback never caught -- and those options are legitimate. The casualties
+  // were severe: the Dracthyr VISAGE female (ChrModelID 128) kept only Skin Color + Eyesight
+  // and lost Face / Hair / Horns / Eye Color / Scales / Eyebrows / ...; every dragonriding
+  // drake lost its entire armour wardrobe; and allied races (Vulpera, Mechagnome, Mag'har,
+  // Dark Iron, Kul Tiran, ...) silently lost Eyesight + Eye Style. The visage MALE and every
+  // all-zero form already rendered correctly from the unfiltered set via the old fallback, so
+  // ChrCustomizationID == 0 is clearly valid -- there is no reason to filter at all.
+  auto options = GAMEDATABASE.sqlQuery(QString("SELECT ID, Flags FROM ChrCustomizationOption WHERE ChrModelID = %1 ORDER BY OrderIndex").arg(infos.ChrModelID[0]));
 
   if (options.valid)
     for (auto& option : options.values)
@@ -479,7 +481,7 @@ void CharDetails::set(uint chrCustomizationOptionID, uint chrCustomizationChoice
   customizationElementsPerOption_.erase(chrCustomizationOptionID);
 
   const auto parentOptions = getParentOptions(chrCustomizationOptionID);
-  const auto childOption = getChildOption(chrCustomizationOptionID);
+  const auto childOptions = getChildOptions(chrCustomizationOptionID);
 
   if (!batchUpdate_) // skip the verbose per-option logging during a batch (randomise)
   {
@@ -487,8 +489,9 @@ void CharDetails::set(uint chrCustomizationOptionID, uint chrCustomizationChoice
     LOG_INFO << "Parent options for" << chrCustomizationOptionID;
     for (const auto &opt : parentOptions)
       LOG_INFO << "\t" << opt;
-    LOG_INFO << "Child option for" << chrCustomizationOptionID;
-    LOG_INFO << "\t" << childOption;
+    LOG_INFO << "Child options for" << chrCustomizationOptionID;
+    for (const int c : childOptions)
+      LOG_INFO << "\t" << c;
   }
 
   auto choiceId = chrCustomizationChoiceID;
@@ -530,15 +533,18 @@ void CharDetails::set(uint chrCustomizationOptionID, uint chrCustomizationChoice
     }
   }
 
-  // 3. Query elements coming from child option
-  if (childOption != -1)
+  // 3. Query elements coming from child option(s). When we set an option that GATES another
+  // (e.g. setting "Underclothes Color", which the Top and Bottom textures depend on), each
+  // child must be re-resolved against the new related choice. An option can gate MORE THAN
+  // ONE child -- "Underclothes Color" gates BOTH the Top and the Bottom -- so loop over all
+  // of them; the old single-child path re-resolved only the Bottom and left the Top (the
+  // bra) untextured on load.
+  for (const int childOption : childOptions)
   {
-    // we are setting an option which have a dependant option, we need to set child choice with a new related choice (ie, we are setting tattoo, which needs to set tattoo color)
-    choiceId = currentCustomization_[childOption];
+    choiceId = currentCustomization_.count(childOption) ? currentCustomization_[childOption] : 0;
     relatedChoiceId = chrCustomizationChoiceID;
-    //customizationElementsPerOption_.erase(childOption);
     fillCustomizationMapForOption(childOption);
-    
+
     // query related ChrCustomizationElements
     query = QString("SELECT ChrCustomizationGeosetID, ChrCustomizationSkinnedModelID, ChrCustomizationMaterialID, "
       "ChrCustomizationBoneSetID, ChrCustomizationCondModelID, ChrCustomizationDisplayInfoID, ID FROM ChrCustomizationElement "
@@ -803,17 +809,22 @@ std::vector<int> CharDetails::getParentOptions(uint chrCustomizationOption)
   return result;
 }
 
-int CharDetails::getChildOption(uint chrCustomizationOption)
+std::vector<int> CharDetails::getChildOptions(uint chrCustomizationOption)
 {
   initLinkedOptionsMap();
 
+  // ALL options that have chrCustomizationOption as a parent. An option can gate more than
+  // one child -- e.g. "Underclothes Color" gates BOTH the Underclothes Top and the Bottom
+  // texture -- so we must return every child, not just the first. Returning only one left
+  // the second child (the bra/top) untextured on load (a topless Dracthyr visage female).
+  std::vector<int> result;
   for (const auto &c: LINKED_OPTIONS_MAP_)
   {
     if (c.second == static_cast<int>(chrCustomizationOption))
-      return static_cast<int>(c.first);
+      result.push_back(static_cast<int>(c.first));
   }
 
-  return -1;
+  return result;
 }
 
 void CharDetails::initLinkedOptionsMap()

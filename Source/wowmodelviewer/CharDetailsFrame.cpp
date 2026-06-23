@@ -63,15 +63,16 @@ void CharDetailsFrame::setModel(WoWModel * model)
   if (infos.ChrModelID.empty())
     return;
 
-  auto options = GAMEDATABASE.sqlQuery(QString("SELECT ID FROM ChrCustomizationOption WHERE ChrModelID = %1 AND ChrCustomizationID != 0 ORDER BY OrderIndex").arg(infos.ChrModelID[0]));
-
-  // Some ChrModels (Haranir 200/201, Dracthyr visage 127, ~21 newer forms) have EVERY option
-  // with ChrCustomizationID == 0, so the filtered query returns nothing and the panel shows no
-  // dropdowns (only Randomise). Fall back to the unfiltered option set in that case only -- this
-  // mirrors the data-model path in CharDetails::fillCustomizationMap, so models that do have
-  // ChrCustomizationID-tagged options keep their exact prior behaviour (no regression).
-  if (!options.valid || options.values.empty())
-    options = GAMEDATABASE.sqlQuery(QString("SELECT ID FROM ChrCustomizationOption WHERE ChrModelID = %1 ORDER BY OrderIndex").arg(infos.ChrModelID[0]));
+  // Build a dropdown for EVERY customization option of this model, regardless of
+  // ChrCustomizationID. The old filter (ChrCustomizationID != 0, falling back to the
+  // unfiltered set only when EMPTY) dropped every ChrCustomizationID == 0 option on models
+  // that also have a few tagged ones -- a mixed case the all-empty fallback never caught --
+  // so the panel was missing real options. Worst hit: the Dracthyr VISAGE female (ChrModelID
+  // 128) showed only Skin Color + Eyesight and lost Face/Hair/Horns/Eye Color/etc.; drakes
+  // lost their armour options; allied races lost Eyesight + Eye Style. These options are
+  // legitimate (the visage MALE and the all-zero forms already proved it via the old
+  // fallback), so list them all. Mirrors CharDetails::fillCustomizationMap.
+  auto options = GAMEDATABASE.sqlQuery(QString("SELECT ID FROM ChrCustomizationOption WHERE ChrModelID = %1 ORDER BY OrderIndex").arg(infos.ChrModelID[0]));
 
   if(options.valid && !options.values.empty())
   {

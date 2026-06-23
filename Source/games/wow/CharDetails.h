@@ -198,7 +198,7 @@ private:
   bool applyChrCustomizationElements(uint chrCustomizationOption, sqlResult &);
   static int bitMaskToSectionType(int mask);
   std::vector<int> getParentOptions(uint chrCustomizationOption);
-  int getChildOption(uint chrCustomizationOption);
+  std::vector<int> getChildOptions(uint chrCustomizationOption);
 
   void initLinkedOptionsMap();
 
