@@ -1071,6 +1071,18 @@ void CharDetails::refreshSkinnedModels()
   // 0 selects NOTHING -- correct, because a GeosetID-0 choice is the "None"
   // variant (e.g. Blindfold = None -> geoset 2500) which must stay hidden. Real
   // attachments (DH horns 2401, etc.) use GeosetID >= 1 and show normally.
+  //
+  // Groups in which an active customization choice already shows a BASE geoset element. A
+  // skinned part in such a group COEXISTS with that base geometry (Dracthyr drake body armor
+  // = an always-on base armor geoset PLUS a body-size-gated skinned detail; Earthen hair =
+  // a base scalp geoset PLUS a skinned hair model), so its base group must NOT be hidden or
+  // that geometry vanishes. Only when the skinned part is the SOLE geometry of its group (no
+  // base geoset element -- Mechagnome arm/leg, DH horns) do we hide the body's default below.
+  std::set<uint> groupsWithBaseGeoset;
+  for (const auto& elt : customizationElementsPerOption_)
+    for (const auto& geo : elt.second.geosets)
+      groupsWithBaseGeoset.insert(geo.first);
+
   for (const auto& gf : groupsByFile)
   {
     auto * model = model_->getMergedModel(gf.first);
@@ -1080,17 +1092,18 @@ void CharDetails::refreshSkinnedModels()
     for (const auto& g : gf.second)
     {
       model->setGeosetGroupDisplay((CharGeosets)g.first, g.second);
-      // The merged (skinned) part PROVIDES geoset group g.first; hide the BASE body's own
-      // geoset of that group so the part REPLACES the bare body rather than z-fighting it.
-      // Without this, a Mechagnome's upgraded arm/leg (e.g. collection-model geoset 2903 /
-      // 3002) renders coincident with the body's default geoset (2901 / 3001) -- one samples
-      // the painted metal, the other the body skin, so they flicker (most visible on the
-      // male). Recorded in cd.geosets so it is applied to the BASE after the default
-      // visibility rule; the base has no such upgraded variant, so setGeosetGroupDisplay
-      // there simply switches its own group off. Only fires while the part is merged (the
-      // option is not "None"), so unrelated parts (DH horns, whose group the base lacks) are
-      // unaffected.
-      geosets[g.first] = g.second;
+      // The merged (skinned) part PROVIDES geoset group g.first. When the base body has no
+      // customization geoset of its OWN in that group, HIDE the base's whole group (cd.geosets
+      // [group] = 0, the "variant 0 / none" hide idiom) so the part REPLACES the bare body
+      // instead of z-fighting it. Hiding the WHOLE group -- not switching it to the part's
+      // variant -- is required because the part's variant can EQUAL the base default: the
+      // Mechagnome leg upgrade is geoset 3001, the SAME id as the body's default leg, so
+      // selecting that variant left the body's 3001 drawn under the mech leg and they
+      // z-fought (the male flicker). The groupsWithBaseGeoset guard skips groups where a
+      // customization geoset co-exists with the part (Dracthyr drake armor, Earthen hair),
+      // which must stay visible.
+      if (groupsWithBaseGeoset.count(g.first) == 0)
+        geosets[g.first] = 0;
     }
   }
 }

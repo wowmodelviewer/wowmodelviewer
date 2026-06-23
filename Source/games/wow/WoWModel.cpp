@@ -2749,7 +2749,18 @@ void WoWModel::refreshMerging()
       p->model = this;
       p->geoIndex += nbGeosets;
       if (geosets[it->geoIndex]->id / 100 != 23) // don't copy texture for hands
+      {
         p->tex += (mergeIndex * TEXTURE_MAX);
+        // Multi-texture combiner passes carry up to three EXTRA texture units (env-map /
+        // glow / detail). They index the MERGED model's own texture array, so they need the
+        // same per-merge offset as the primary tex. Without this, a combiner unit binds the
+        // PARENT character's texture at that raw index -- e.g. the Mechagnome mech-metal's
+        // unit-1 environment/sphere map (pixelShader 12) sampled the character's body texture
+        // and smeared it across the armor as a wrong "reflection" that moved with the camera.
+        if (p->tex2 != ModelRenderPass::INVALID_TEX) p->tex2 += (mergeIndex * TEXTURE_MAX);
+        if (p->tex3 != ModelRenderPass::INVALID_TEX) p->tex3 += (mergeIndex * TEXTURE_MAX);
+        if (p->tex4 != ModelRenderPass::INVALID_TEX) p->tex4 += (mergeIndex * TEXTURE_MAX);
+      }
       else
         p->tex = handTex; // use regular model texture instead
 

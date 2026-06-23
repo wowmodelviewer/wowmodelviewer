@@ -17,12 +17,15 @@ Format loosely based on [Keep a Changelog](https://keepachangelog.com/).
   already in the status bar at the bottom, which is easy to miss), so it's obvious what you're viewing.
 
 ### Fixed
-- **Mechagnome cybernetic parts show their painted metal.** The Modification, Arm Upgrade and Leg
-  Upgrade are separate part-models merged onto the character, and their metal/paint comes from the
-  "Paint" customization. The viewer was discarding that paint and drawing the parts in bare gnome
-  skin; it now binds the paint to each merged part. The upgraded arms/legs also no longer draw on top
-  of (and flicker with) the body's default limb. (A remaining male-only flicker on the modification
-  head-piece — two duplicate part-meshes — is tracked separately.)
+- **Mechagnome cybernetic parts render correctly.** The Modification, Arm Upgrade and Leg Upgrade are
+  separate part-models merged onto the character, and three separate bugs left them looking wrong: the
+  metal/paint (from the "Paint" customization) was discarded and the parts wore bare gnome skin; the
+  upgraded limbs drew on top of — and flickered with — the body's default arm/leg; and the metal's
+  reflective sheen sampled the wrong texture and smeared across the armor as the camera moved. All
+  three are fixed — the paint binds to each part, the replaced body limb is hidden, and the armor's
+  environment reflection now uses the correct texture — so both male and female render cleanly. The
+  body-limb hide is also guarded so it never removes legitimate geometry on races where a base part
+  co-exists with a merged one (e.g. Dracthyr drake body armor, Earthen hair).
 - **Eye colours that change with Eye Style now apply on load.** Many races (Vulpera and around fifty
   others) have eye colours whose iris texture is selected by the separate "Eye Style" option. Those
   colours loaded with no eye texture (a blank/grey eye) until you manually re-picked the colour,
