@@ -3,6 +3,33 @@
 All notable changes to **WoW Model Viewer: Midnight** are recorded here.
 Format loosely based on [Keep a Changelog](https://keepachangelog.com/).
 
+## [0.3.2] — 2026-06-23
+
+### Fixed
+- **Characters show their full customization list again (Dracthyr visage and more).** Some models
+  list a few customization options tagged one way and the rest tagged another; the viewer was only
+  reading the tagged ones whenever *any* existed, and silently dropping the rest. On the worst-hit
+  models that meant most of the panel went missing — the Dracthyr **visage female** showed only Skin
+  Color and Eyesight and lost Face, Hair, Horns, Eye Color, Scales and Eyebrows; dragonriding drakes
+  lost their entire armour wardrobe; and allied races (Vulpera, Mechagnome, Mag'har, Dark Iron, Kul
+  Tiran and others) lost Eyesight and Eye Style. Every option is now loaded, so the full list shows
+  for each model.
+- **Underclothes now load fully clothed.** When one option controls two others — "Underclothes
+  Color" drives both the top and the bottom texture — only one of the two was being applied on load,
+  so a freshly loaded model could come up with the briefs textured but the bra blank. Both dependent
+  textures are now resolved, so underclothes appear complete on load.
+- **Eyes show their colour and glow at the same time.** The iris colour and the "Eyesight" glow are
+  separate textures that target the same eye slot, so whichever applied last replaced the other —
+  most visibly on Mechagnome, whose eye showed only the blue glow and not the coloured iris once
+  Eyesight was set. The eye layers are now combined into one image, so the iris and the glow render
+  together.
+- **Mechagnome cybernetic parts no longer shimmer while animating.** The Modification, Arm and Leg
+  upgrades are separate part-models merged onto the character, and they were picking up the
+  character body's *animation* tracks by mistake — so the body's looping eye/idle animation scrolled
+  and pulsed across the metal, making its texture crawl and shimmer non-stop (and occasionally flicker
+  out) during playback. The merged parts no longer inherit the body's animation, so the metal holds
+  still. (The separate, already-correct environment reflection is unaffected.)
+
 ## [0.3.1] — 2026-06-22
 
 ### Added
