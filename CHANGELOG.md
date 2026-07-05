@@ -5,6 +5,11 @@ Format loosely based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [0.11.0] — 2026-07-05
+
+Version numbering continues the official WoW Model Viewer line (following 0.10.x) rather
+than the fork's earlier 0.x scheme.
+
 ### Added
 - **FBX export: "Component (raw/Blender)" mode for item components.** A new checkbox in the FBX
   Export Options dialog (and the `-fbxcomponent` headless flag) exports models the way the WoW
