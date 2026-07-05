@@ -135,6 +135,12 @@ class _WOWMODEL_API_ WoWModel : public ManagedItem, public Displayable, public M
   std::vector<TXID> readTXIDSFromFile(GameFile * f);
 
 public:
+  // Read-only access for the FBX exporter (component/raw mode) to the UV-animation and transparency
+  // tracks -- otherwise private (only ModelRenderPass is friended). Inline, non-virtual -> the class
+  // layout is unchanged, so adding these needs no wow.dll ABI bump.
+  const std::vector<TextureAnim> & getTexAnims() const { return texAnims; }
+  const std::vector<ModelTransparency> & getTransparency() const { return transparency; }
+
   bool model24500; // flag for build 24500 model changes to anim chunking and other things
 
   GameFile * gamefile;
@@ -269,6 +275,10 @@ public:
 
   WoWItem * getItem(CharSlots slot);
   int getItemId(CharSlots slot);
+  // True if m is one of the models attached for the equipped head item (a helm mesh). Lets the
+  // UI re-run refresh() when a helm's Render is toggled, since the helm's geoset auto-hide
+  // (hiding hair/ears under the helm) must follow whether the helm is actually drawn.
+  bool isEquippedHeadModel(WoWModel * m);
   bool isWearingARobe();
 
   void updateTextureList(GameFile * tex, int special);

@@ -32,6 +32,7 @@ class CharControl : public wxScrolledWindow, public Observer
   wxSpinButton *tabardSpins[NUM_TABARD_BTNS];
   wxButton *buttons[NUM_CHAR_SLOTS];
   wxComboBox *levelboxes[NUM_CHAR_SLOTS];
+  wxButton *clearButtons[NUM_CHAR_SLOTS]; // small "X" per slot: one-click remove of that item
   wxStaticText *labels[NUM_CHAR_SLOTS];
   wxStaticText *spinTbLabels[NUM_TABARD_BTNS];
   CharDetailsFrame * cdFrame;
@@ -58,6 +59,7 @@ class CharControl : public wxScrolledWindow, public Observer
   void OnTabardSpin(wxSpinEvent &event);
   void OnCheck(wxCommandEvent &event);
   void OnButton(wxCommandEvent &event);
+  void OnClearSlot(wxCommandEvent &event); // "X" next to a slot: remove just that equipped item
   void OnItemLevelChange(wxCommandEvent& event);
 
   void OnUpdateItem(int type, int id);

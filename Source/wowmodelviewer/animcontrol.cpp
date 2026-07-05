@@ -734,10 +734,15 @@ bool AnimControl::UpdateItemModel(WoWModel *m)
 
   // query textures for model1
 
+  // Match ItemDisplayInfo rows whose ModelResourcesID1 refers to THIS model file (via
+  // ModelFileData.FileDataID), not TextureFileData.FileDataID -- a texture's own FileDataID
+  // can never equal the model M2's FileDataID, so filtering on it always returned 0 rows,
+  // leaving standalone-previewed item components (no equipped-item context) with no
+  // replaceable "type 2" texture resolved at all (plain grey / uncoloured in the viewport).
   QString query = QString("SELECT TextureFileData.FileDataID, ParticleColorID, ItemDisplayInfo.ID FROM ItemDisplayInfo "
                           "LEFT JOIN TextureFileData ON ModelMaterialResourcesID1 = TextureFileData.MaterialResourcesID "
                           "LEFT JOIN ModelFileData ON ItemDisplayInfo.ModelResourcesID1 = ModelFileData.ModelResourcesID "
-                          "WHERE TextureFileData.FileDataID = %1").arg(m->gamefile->fileDataId());
+                          "WHERE ModelFileData.FileDataID = %1").arg(m->gamefile->fileDataId());
 
   sqlResult r = GAMEDATABASE.sqlQuery(query);
 
@@ -782,11 +787,12 @@ bool AnimControl::UpdateItemModel(WoWModel *m)
     }
   }
   
-  // do the same for model2
+  // do the same for model2 -- join/filter on ModelResourcesID2 (this component's own
+  // resource id), same fix rationale as the model1 query above.
   query= QString("SELECT TextureFileData.FileDataID, ParticleColorID, ItemDisplayInfo.ID FROM ItemDisplayInfo "
                  "LEFT JOIN TextureFileData ON ModelMaterialResourcesID2 = TextureFileData.MaterialResourcesID "
-                 "LEFT JOIN ModelFileData ON ItemDisplayInfo.ModelResourcesID1 = ModelFileData.ModelResourcesID "
-                 "WHERE TextureFileData.FileDataID = %1").arg(m->gamefile->fileDataId());
+                 "LEFT JOIN ModelFileData ON ItemDisplayInfo.ModelResourcesID2 = ModelFileData.ModelResourcesID "
+                 "WHERE ModelFileData.FileDataID = %1").arg(m->gamefile->fileDataId());
 
   r = GAMEDATABASE.sqlQuery(query);
 
@@ -1333,7 +1339,29 @@ void AnimControl::SetSkin(int num)
     g_selModel->updateTextureList(tex, base);
   }
 
-  if (grp->particleColInd && grp->PCRIndex > -1 && !g_modelViewer->modelControl->IsReplacingParticleColors())
+  // Remember the applied item/weapon skin so an out-of-process FBX export re-binds EXACTLY this
+  // one (via -itemskin). A raw -mo reload in the child picks its own skin -- random when the
+  // "Random Skin" option is on -- so without this the export can show a different texture than the
+  // one on screen. Only the item skin slot maps to -itemskin; clear it for other bases so a
+  // creature/monster skin doesn't get mis-bound to the item slot.
+  if (g_modelViewer)
+  {
+    if (grp->base == TEXTURE_OBJECT_SKIN && grp->count >= 1 && grp->tex[0])
+      g_modelViewer->m_exportItemSkinFileId = (int)grp->tex[0]->fileDataId();
+    else
+      g_modelViewer->m_exportItemSkinFileId = 0;
+  }
+
+  // Armor components can declare a SECOND replaceable slot (texture type 3) whose UVs sit
+  // on an accent island of the same item texture (e.g. a hood's eye-beam crystals) -- feed
+  // it too, matching the equipped-item path (WoWItem::updateItemModel). Weapons keep the
+  // grey blade-sheen default that model load installs for type 3.
+  if (grp->base == TEXTURE_OBJECT_SKIN && grp->count == 1 && grp->tex[0] &&
+      !g_selModel->itemName().contains("objectcomponents/weapon", Qt::CaseInsensitive) &&
+      !g_selModel->itemName().contains("objectcomponents\\weapon", Qt::CaseInsensitive))
+    g_selModel->updateTextureList(grp->tex[0], TEXTURE_WEAPON_BLADE);
+
+  if (grp->particleColInd && grp->PCRIndex > -1)
   {
     g_selModel->replaceParticleColors = true;
     g_selModel->particleColorReplacements = PCRList[grp->PCRIndex];

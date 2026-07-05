@@ -1,0 +1,1627 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WoW Model Viewer: Midnight 0.3.2 — Power User</title>
+<style>
+:root{
+  --bg-0:#0a0a0c; --bg-1:#101014; --bg-2:#17171c;
+  --bg-zebra:#0d0d10;
+  --panel:#101014; --border:#26262e; --border-2:#33333d;
+  --text-primary:#f0f0f3; --text-secondary:#9a9aa6; --text-muted:#5a5a66;
+  --accent:#00e0a4;
+  --success:#1ec88a; --warning:#e0b400; --danger:#ff4d57;
+  --row-hover:#1a1a20; --row-sel:#06241f; --focus-ring:rgba(0,224,164,.5);
+  --data-mono:#7fd9c4;
+  --s0:2px; --s1:4px; --s2:8px; --s3:12px; --s4:16px; --s5:24px; --s6:32px;
+  --r-sm:3px; --r-md:5px; --r-lg:8px;
+  --t-xs:11px; --t-sm:12px; --t-md:13px; --t-lg:15px; --t-xl:18px;
+  --ui:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  --mono:"SF Mono","Cascadia Mono",Consolas,"Roboto Mono",monospace;
+
+  --q-poor:#9d9d9d; --q-common:#ffffff; --q-uncommon:#1eff00;
+  --q-rare:#0070dd; --q-epic:#a335ee; --q-legendary:#ff8000;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{
+  background:var(--bg-0); color:var(--text-primary);
+  font-family:var(--ui); font-size:var(--t-md); line-height:1.4;
+  overflow:hidden; -webkit-font-smoothing:antialiased;
+}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);border:0}
+kbd{
+  font-family:var(--mono); font-size:var(--t-xs); background:var(--bg-2);
+  border:1px solid var(--border-2); border-radius:var(--r-sm); padding:1px 5px;
+  color:var(--text-secondary); line-height:1.3; white-space:nowrap;
+}
+.mono{font-family:var(--mono); color:var(--data-mono); font-size:var(--t-sm)}
+button{font-family:inherit; color:inherit; cursor:pointer; border:none; background:none}
+input,select{font-family:inherit; color:inherit}
+svg{display:block}
+::-webkit-scrollbar{width:10px;height:10px}
+::-webkit-scrollbar-track{background:var(--bg-0)}
+::-webkit-scrollbar-thumb{background:#2a2a32;border:2px solid var(--bg-0);border-radius:6px}
+::-webkit-scrollbar-thumb:hover{background:#3a3a44}
+
+/* ---------- shell grid ---------- */
+#app{
+  display:grid; height:100vh; width:100vw;
+  grid-template-rows:38px 1fr 22px;
+  grid-template-columns:300px 1fr 340px;
+  grid-template-areas:
+    "topbar topbar topbar"
+    "left   center right"
+    "status status status";
+}
+#topbar{grid-area:topbar}
+#left{grid-area:left}
+#center{grid-area:center; display:flex; flex-direction:column; min-width:0; min-height:0}
+#right{grid-area:right}
+#statusbar{grid-area:status}
+
+/* ---------- top command bar ---------- */
+#topbar{
+  display:flex; align-items:center; gap:var(--s2);
+  background:var(--bg-2); border-bottom:1px solid var(--border);
+  padding:0 var(--s3); user-select:none;
+}
+.brand{display:flex; align-items:center; gap:var(--s2); padding-right:var(--s3); border-right:1px solid var(--border); height:100%}
+.brand .logo{width:18px;height:18px;color:var(--accent)}
+.brand .name{font-weight:600; font-size:var(--t-md); letter-spacing:.01em}
+.brand .ver{font-family:var(--mono); font-size:var(--t-xs); color:var(--text-muted); background:var(--bg-0); border:1px solid var(--border); border-radius:var(--r-sm); padding:1px 5px}
+.menubar{display:flex; align-items:center; gap:var(--s0)}
+.menu-item{padding:4px var(--s2); border-radius:var(--r-sm); font-size:var(--t-md); color:var(--text-secondary); position:relative}
+.menu-item:hover,.menu-item.open{background:var(--row-hover); color:var(--text-primary)}
+.dropdown{
+  position:absolute; top:calc(100% + 4px); left:0; min-width:210px;
+  background:var(--bg-2); border:1px solid var(--border-2); border-radius:var(--r-md);
+  box-shadow:0 4px 16px rgba(0,0,0,.35); padding:var(--s1); z-index:200; display:none;
+}
+.dropdown.show{display:block}
+.dd-row{display:flex; align-items:center; justify-content:space-between; gap:var(--s4); padding:5px var(--s2); border-radius:var(--r-sm); font-size:var(--t-md); color:var(--text-primary); white-space:nowrap}
+.dd-row:hover{background:var(--row-hover)}
+.dd-row .dd-icon{width:15px;height:15px;color:var(--text-secondary)}
+.dd-sep{height:1px; background:var(--border); margin:var(--s1) 0}
+.dd-label{display:flex; align-items:center; gap:var(--s2)}
+
+.topbar-spacer{flex:1}
+.global-search{position:relative; width:300px}
+.global-search input{
+  width:100%; height:26px; background:var(--bg-0); border:1px solid var(--border);
+  border-radius:var(--r-md); padding:0 var(--s2) 0 28px; font-size:var(--t-sm); color:var(--text-primary);
+}
+.global-search input:focus{outline:none; border-color:var(--accent); box-shadow:0 0 0 2px var(--focus-ring)}
+.global-search .gs-icon{position:absolute; left:8px; top:50%; transform:translateY(-50%); width:14px; height:14px; color:var(--text-muted)}
+.global-search .gs-kbd{position:absolute; right:6px; top:50%; transform:translateY(-50%)}
+
+.source-pill{
+  display:flex; align-items:center; gap:var(--s2); height:26px; padding:0 var(--s2);
+  background:var(--bg-0); border:1px solid var(--border); border-radius:var(--r-md); font-size:var(--t-sm); cursor:pointer;
+}
+.source-pill:hover{border-color:var(--border-2)}
+.source-pill .dot{width:8px;height:8px;border-radius:50%;background:var(--success)}
+.source-pill.ptr .dot{background:var(--warning)}
+.source-pill .src-name{font-family:var(--mono); color:var(--data-mono); font-size:var(--t-xs)}
+.source-pill svg{width:13px;height:13px;color:var(--text-muted)}
+
+.icon-btn{width:28px;height:28px;display:flex;align-items:center;justify-content:center;border-radius:var(--r-md);color:var(--text-secondary)}
+.icon-btn:hover{background:var(--row-hover);color:var(--text-primary)}
+.icon-btn svg{width:16px;height:16px}
+.icon-btn:focus-visible{outline:none;box-shadow:0 0 0 2px var(--focus-ring)}
+
+/* ---------- generic panel ---------- */
+.panel{background:var(--panel); display:flex; flex-direction:column; min-height:0}
+#left{border-right:1px solid var(--border)}
+#right{border-left:1px solid var(--border)}
+.panel-header{
+  height:32px; flex:none; display:flex; align-items:center; gap:var(--s2);
+  background:var(--bg-2); border-bottom:1px solid var(--border); padding:0 var(--s3);
+  font-size:var(--t-sm); text-transform:uppercase; letter-spacing:.04em; color:var(--text-secondary);
+}
+.panel-header .ph-actions{margin-left:auto; display:flex; gap:var(--s1)}
+.panel-header .ph-actions .icon-btn{width:22px;height:22px}
+.panel-header .ph-actions .icon-btn svg{width:14px;height:14px}
+
+/* ---------- left browser ---------- */
+.cat-rail{display:flex; flex-wrap:wrap; gap:var(--s1); padding:var(--s2); border-bottom:1px solid var(--border); flex:none}
+.cat-chip{display:flex; align-items:center; gap:var(--s1); padding:3px var(--s2); border:1px solid var(--border); border-radius:var(--r-sm); font-size:var(--t-xs); color:var(--text-secondary); background:var(--bg-1)}
+.cat-chip svg{width:13px;height:13px}
+.cat-chip:hover{background:var(--row-hover); color:var(--text-primary)}
+.cat-chip.active{background:var(--row-sel); border-color:var(--accent); color:var(--accent)}
+
+.browser-search{padding:var(--s2); border-bottom:1px solid var(--border); flex:none; display:flex; flex-direction:column; gap:var(--s2)}
+.bs-input{position:relative}
+.bs-input input{width:100%; height:26px; background:var(--bg-0); border:1px solid var(--border); border-radius:var(--r-md); padding:0 var(--s2) 0 26px; font-size:var(--t-sm)}
+.bs-input input:focus{outline:none; border-color:var(--accent); box-shadow:0 0 0 2px var(--focus-ring)}
+.bs-input svg{position:absolute; left:7px; top:50%; transform:translateY(-50%); width:13px; height:13px; color:var(--text-muted)}
+.bs-filters{display:flex; gap:var(--s1); flex-wrap:wrap}
+.filter-sel{flex:1; min-width:0; height:24px; background:var(--bg-0); border:1px solid var(--border); border-radius:var(--r-sm); font-size:var(--t-xs); padding:0 var(--s1); color:var(--text-secondary)}
+.filter-sel:focus{outline:none;border-color:var(--accent)}
+.bs-meta{display:flex; align-items:center; justify-content:space-between; font-size:var(--t-xs); color:var(--text-muted)}
+.bs-meta .multi{color:var(--accent)}
+
+.tree{flex:1; overflow:auto; padding:var(--s1) 0}
+.tree-group{font-size:var(--t-xs); text-transform:uppercase; letter-spacing:.05em; color:var(--text-muted); padding:6px var(--s3) 3px; user-select:none}
+.row{
+  height:24px; display:flex; align-items:center; gap:var(--s1); padding:0 var(--s3) 0 var(--s2);
+  font-size:var(--t-sm); color:var(--text-primary); cursor:pointer; position:relative; user-select:none;
+}
+.tree .row:nth-child(even){background:var(--bg-zebra)}
+.row:hover{background:var(--row-hover)}
+.row.sel{background:var(--row-sel)}
+.row.sel::before{content:"";position:absolute;left:0;top:0;bottom:0;width:2px;background:var(--accent)}
+.row .chev{width:14px;height:14px;color:var(--text-muted);flex:none}
+.row .chev.hidden{visibility:hidden}
+.row .ricon{width:14px;height:14px;flex:none;color:var(--text-secondary)}
+.row .rlabel{flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+.row .rid{font-family:var(--mono); font-size:var(--t-xs); color:var(--text-muted)}
+.row .qbar{width:3px;height:14px;border-radius:1px;flex:none}
+.row.check .rcheck{width:13px;height:13px;border:1px solid var(--border-2);border-radius:2px;flex:none;display:flex;align-items:center;justify-content:center}
+.row.check.sel .rcheck{background:var(--accent);border-color:var(--accent)}
+.row.check.sel .rcheck svg{width:11px;height:11px;color:#04150f}
+.row.indent{padding-left:var(--s5)}
+
+.state{flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:var(--s3); padding:var(--s5); text-align:center}
+.state svg{width:28px;height:28px;color:var(--text-muted)}
+.state .st-msg{font-size:var(--t-md); color:var(--text-secondary)}
+.state .st-sub{font-size:var(--t-sm); color:var(--text-muted)}
+.state button{background:var(--bg-2);border:1px solid var(--border-2);border-radius:var(--r-md);padding:5px var(--s3);font-size:var(--t-sm)}
+.state button:hover{background:var(--row-hover)}
+
+/* ---------- center viewport ---------- */
+.vp-toolbar{
+  height:40px; flex:none; display:flex; align-items:center; gap:var(--s2);
+  background:var(--bg-2); border-bottom:1px solid var(--border); padding:0 var(--s3);
+}
+.vp-sep{width:1px; height:20px; background:var(--border)}
+.tool-group{display:flex; gap:var(--s1)}
+.tool-btn{height:26px; padding:0 var(--s2); display:flex; align-items:center; gap:var(--s1); border:1px solid transparent; border-radius:var(--r-md); font-size:var(--t-sm); color:var(--text-secondary)}
+.tool-btn svg{width:15px;height:15px}
+.tool-btn:hover{background:var(--row-hover); color:var(--text-primary)}
+.tool-btn.active{background:var(--row-sel); border-color:var(--accent); color:var(--accent)}
+.tool-btn .tkbd{margin-left:2px}
+.vp-title{margin-left:auto; font-family:var(--mono); font-size:var(--t-xs); color:var(--text-muted)}
+
+.viewport{flex:1; position:relative; overflow:hidden; background:radial-gradient(ellipse at 50% 35%, #15151b 0%, #0a0a0c 70%); min-height:0}
+.scene{position:absolute; inset:0}
+.scene svg{width:100%;height:100%}
+.vp-hud{position:absolute; top:var(--s3); left:var(--s3); display:flex; gap:var(--s2); font-family:var(--mono); font-size:var(--t-xs)}
+.hud-chip{background:rgba(10,10,12,.7); border:1px solid var(--border); border-radius:var(--r-sm); padding:2px var(--s2); color:var(--text-secondary)}
+.hud-chip b{color:var(--data-mono); font-weight:400}
+
+/* axis gizmo */
+.gizmo{position:absolute; top:var(--s3); right:var(--s3); width:84px; height:84px}
+.gizmo svg{width:100%;height:100%; cursor:pointer}
+.gizmo .gz-ball{cursor:pointer}
+
+.vp-overlay{position:absolute; inset:0; display:none; align-items:center; justify-content:center; flex-direction:column; gap:var(--s4); background:rgba(8,8,10,.82); z-index:30}
+.vp-overlay.show{display:flex}
+.vp-overlay .ov-spinner{width:34px;height:34px;border:3px solid var(--border-2); border-top-color:var(--accent); border-radius:50%; animation:spin 1s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.vp-overlay .ov-msg{font-size:var(--t-lg); color:var(--text-primary)}
+.vp-overlay .ov-sub{font-size:var(--t-sm); color:var(--text-secondary); font-family:var(--mono)}
+.vp-overlay.err .ov-icon{width:38px;height:38px;color:var(--danger)}
+.vp-overlay.err .ov-msg{color:var(--danger)}
+.vp-overlay button{background:var(--bg-2); border:1px solid var(--border-2); border-radius:var(--r-md); padding:6px var(--s4); font-size:var(--t-sm)}
+.vp-overlay button:hover{background:var(--row-hover)}
+
+/* ---------- timeline ---------- */
+.timeline{height:118px; flex:none; background:var(--bg-1); border-top:1px solid var(--border); display:flex; flex-direction:column}
+.tl-header{height:32px; flex:none; display:flex; align-items:center; gap:var(--s3); padding:0 var(--s3); border-bottom:1px solid var(--border); background:var(--bg-2)}
+.tl-header .tl-label{font-size:var(--t-sm); text-transform:uppercase; letter-spacing:.04em; color:var(--text-secondary)}
+.clip-sel{position:relative; min-width:220px}
+.clip-sel select{width:100%; height:24px; background:var(--bg-0); border:1px solid var(--border); border-radius:var(--r-md); font-size:var(--t-sm); padding:0 var(--s2); font-family:var(--mono); color:var(--data-mono)}
+.clip-sel select:focus{outline:none; border-color:var(--accent)}
+.transport{display:flex; align-items:center; gap:var(--s1)}
+.tp-btn{width:28px;height:24px;display:flex;align-items:center;justify-content:center;border:1px solid var(--border);border-radius:var(--r-sm);color:var(--text-secondary);background:var(--bg-0)}
+.tp-btn:hover{background:var(--row-hover);color:var(--text-primary)}
+.tp-btn.active{background:var(--row-sel);border-color:var(--accent);color:var(--accent)}
+.tp-btn svg{width:14px;height:14px}
+.tp-btn.play svg{width:15px;height:15px;color:var(--accent)}
+.speed-ctl{display:flex;align-items:center;gap:var(--s2);font-size:var(--t-sm);color:var(--text-secondary)}
+.speed-ctl input[type=range]{width:90px}
+.speed-val{font-family:var(--mono);color:var(--data-mono);min-width:34px;font-size:var(--t-sm)}
+.tl-readout{margin-left:auto;font-family:var(--mono);font-size:var(--t-sm);color:var(--data-mono)}
+.tl-readout .muted{color:var(--text-muted)}
+
+input[type=range]{-webkit-appearance:none;appearance:none;height:4px;background:var(--bg-2);border-radius:2px;outline:none}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:14px;height:14px;border-radius:50%;background:var(--accent);cursor:pointer;border:2px solid var(--bg-0)}
+input[type=range]:focus{box-shadow:0 0 0 2px var(--focus-ring)}
+
+.scrub-wrap{flex:1; padding:var(--s3) var(--s4); display:flex; align-items:center}
+.scrub{position:relative; width:100%; height:44px}
+.scrub-track{position:absolute; left:0; right:0; top:18px; height:8px; background:var(--bg-2); border-radius:var(--r-sm); border:1px solid var(--border)}
+.scrub-fill{position:absolute; left:0; top:18px; height:8px; background:linear-gradient(90deg,rgba(0,224,164,.25),rgba(0,224,164,.45)); border-radius:var(--r-sm) 0 0 var(--r-sm)}
+.scrub-tick{position:absolute; top:13px; width:1px; height:18px; background:var(--border-2)}
+.scrub-key{position:absolute; top:11px; width:2px; height:22px; background:var(--warning); border-radius:1px}
+.playhead{position:absolute; top:6px; width:2px; height:32px; background:var(--accent); cursor:ew-resize}
+.playhead::before{content:"";position:absolute;top:-5px;left:-4px;width:10px;height:10px;background:var(--accent);border-radius:2px;transform:rotate(45deg)}
+.scrub-input{position:absolute; left:0; right:0; top:14px; width:100%; height:16px; opacity:0; cursor:ew-resize; margin:0}
+
+/* ---------- right inspector ---------- */
+.tabs{height:34px; flex:none; display:flex; background:var(--bg-2); border-bottom:1px solid var(--border); overflow-x:auto}
+.tab{padding:0 var(--s3); height:34px; display:flex; align-items:center; gap:var(--s1); font-size:var(--t-sm); color:var(--text-secondary); border-bottom:2px solid transparent; white-space:nowrap}
+.tab svg{width:14px;height:14px}
+.tab:hover{color:var(--text-primary)}
+.tab.active{color:var(--accent); border-bottom-color:var(--accent)}
+.tab:focus-visible{outline:none;box-shadow:inset 0 0 0 2px var(--focus-ring)}
+.tab-body{flex:1; overflow:auto; min-height:0}
+.tab-pane{display:none; padding:var(--s3)}
+.tab-pane.active{display:block}
+
+.insp-section{border:1px solid var(--border); border-radius:var(--r-md); margin-bottom:var(--s3); overflow:hidden}
+.insp-sh{height:28px; display:flex; align-items:center; gap:var(--s2); padding:0 var(--s2); background:var(--bg-2); font-size:var(--t-xs); text-transform:uppercase; letter-spacing:.04em; color:var(--text-secondary); cursor:pointer; user-select:none}
+.insp-sh svg{width:13px;height:13px;color:var(--text-muted)}
+.insp-sh .sh-r{margin-left:auto;color:var(--text-muted);font-family:var(--mono);text-transform:none}
+.insp-sb{padding:var(--s2)}
+.insp-section.collapsed .insp-sb{display:none}
+.kv{display:flex; align-items:center; justify-content:space-between; gap:var(--s2); padding:3px var(--s1); font-size:var(--t-sm); min-height:22px}
+.kv .k{color:var(--text-secondary)}
+.kv .v{font-family:var(--mono); color:var(--data-mono); font-size:var(--t-sm); text-align:right}
+.kv:nth-child(even){background:var(--bg-zebra)}
+
+.field{display:flex; align-items:center; justify-content:space-between; gap:var(--s2); padding:3px var(--s1); min-height:24px}
+.field label{font-size:var(--t-sm); color:var(--text-secondary)}
+.field select,.field input[type=text],.field input[type=number]{height:22px; background:var(--bg-0); border:1px solid var(--border); border-radius:var(--r-sm); font-size:var(--t-sm); padding:0 var(--s1); min-width:120px; color:var(--text-primary)}
+.field select:focus,.field input:focus{outline:none;border-color:var(--accent)}
+.swatch-row{display:flex; gap:var(--s1); flex-wrap:wrap; padding:var(--s1)}
+.swatch{width:20px;height:20px;border-radius:var(--r-sm);border:1px solid var(--border-2);cursor:pointer}
+.swatch.sel{box-shadow:0 0 0 2px var(--accent)}
+
+/* equipment slots */
+.eq-grid{display:grid; grid-template-columns:1fr 1fr; gap:var(--s1)}
+.eq-slot{display:flex; align-items:center; gap:var(--s2); padding:4px var(--s2); background:var(--bg-0); border:1px solid var(--border); border-radius:var(--r-sm); cursor:pointer; min-height:34px}
+.eq-slot:hover{border-color:var(--border-2); background:var(--row-hover)}
+.eq-slot .eq-ico{width:24px;height:24px;flex:none;border-radius:var(--r-sm);background:var(--bg-2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;color:var(--text-muted)}
+.eq-slot .eq-ico svg{width:14px;height:14px}
+.eq-meta{min-width:0;flex:1}
+.eq-slotname{font-size:var(--t-xs);color:var(--text-muted);text-transform:uppercase;letter-spacing:.03em}
+.eq-item{font-size:var(--t-sm);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.eq-empty .eq-item{color:var(--text-muted);font-style:italic}
+
+/* bone tree */
+.bone-tree .row{font-family:var(--mono);font-size:var(--t-xs)}
+.attach-pt{display:flex;align-items:center;gap:var(--s2);padding:3px var(--s1);font-size:var(--t-sm)}
+.attach-pt .ap-dot{width:7px;height:7px;border-radius:50%;background:var(--accent)}
+.attach-pt .ap-name{flex:1}
+.attach-pt .ap-bone{font-family:var(--mono);font-size:var(--t-xs);color:var(--text-muted)}
+
+.mat-row{display:flex;align-items:center;gap:var(--s2);padding:var(--s1);border:1px solid var(--border);border-radius:var(--r-sm);margin-bottom:var(--s1)}
+.mat-thumb{width:34px;height:34px;border-radius:var(--r-sm);flex:none;border:1px solid var(--border-2)}
+.mat-info{flex:1;min-width:0}
+.mat-name{font-size:var(--t-sm);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.mat-id{font-family:var(--mono);font-size:var(--t-xs);color:var(--text-muted)}
+.mat-flags{display:flex;gap:var(--s1)}
+.flag{font-size:9px;text-transform:uppercase;padding:1px 4px;border-radius:2px;background:var(--bg-2);color:var(--text-muted);border:1px solid var(--border)}
+
+.btn{height:26px; padding:0 var(--s3); display:inline-flex; align-items:center; gap:var(--s1); background:var(--bg-2); border:1px solid var(--border-2); border-radius:var(--r-md); font-size:var(--t-sm); color:var(--text-primary)}
+.btn:hover{background:var(--row-hover)}
+.btn svg{width:14px;height:14px}
+.btn.primary{background:var(--accent); border-color:var(--accent); color:#04150f; font-weight:600}
+.btn.primary:hover{background:#1ff0b4}
+.btn.ghost{background:transparent;border-color:transparent;color:var(--text-secondary)}
+.btn.ghost:hover{background:var(--row-hover);color:var(--text-primary)}
+.btn:focus-visible{outline:none;box-shadow:0 0 0 2px var(--focus-ring)}
+.btn-row{display:flex;gap:var(--s1);flex-wrap:wrap;margin-top:var(--s2)}
+
+/* ---------- status bar ---------- */
+#statusbar{
+  display:flex; align-items:center; gap:var(--s4); background:var(--bg-2);
+  border-top:1px solid var(--border); padding:0 var(--s3); font-size:var(--t-xs);
+  color:var(--text-secondary); font-family:var(--mono); user-select:none;
+}
+#statusbar .sb-item{display:flex;align-items:center;gap:var(--s1)}
+#statusbar .sb-item svg{width:12px;height:12px;color:var(--text-muted)}
+#statusbar .sb-val{color:var(--data-mono)}
+#statusbar .sb-spacer{flex:1}
+#statusbar .sb-ok{color:var(--success)}
+
+/* ---------- bottom log/console panel ---------- */
+.log-strip{height:160px; flex:none; background:var(--bg-1); border-top:1px solid var(--border); display:flex; flex-direction:column}
+.log-strip.collapsed{height:30px}
+.log-header{height:30px; flex:none; display:flex; align-items:center; gap:var(--s3); padding:0 var(--s3); background:var(--bg-2); border-bottom:1px solid var(--border)}
+.log-tabs{display:flex; gap:var(--s1)}
+.log-tab{padding:2px var(--s2); border-radius:var(--r-sm); font-size:var(--t-xs); text-transform:uppercase; letter-spacing:.03em; color:var(--text-secondary)}
+.log-tab.active{background:var(--row-sel); color:var(--accent)}
+.log-tab:hover{background:var(--row-hover)}
+.log-body{flex:1; overflow:auto; font-family:var(--mono); font-size:var(--t-xs); padding:var(--s2) var(--s3); line-height:1.6}
+.log-strip.collapsed .log-body{display:none}
+.log-line{display:flex; gap:var(--s2); white-space:nowrap}
+.log-time{color:var(--text-muted)}
+.log-tag{width:54px;flex:none}
+.log-tag.info{color:var(--text-secondary)}
+.log-tag.ok{color:var(--success)}
+.log-tag.warn{color:var(--warning)}
+.log-tag.err{color:var(--danger)}
+.log-msg{color:var(--text-primary); white-space:pre-wrap}
+.log-msg .hl{color:var(--data-mono)}
+
+/* ---------- export drawer ---------- */
+.scrim{position:fixed; inset:0; background:rgba(4,4,6,.6); z-index:500; display:none}
+.scrim.show{display:block}
+.drawer{
+  position:fixed; top:0; right:0; bottom:0; width:560px; background:var(--bg-1);
+  border-left:1px solid var(--border-2); z-index:600; transform:translateX(100%);
+  transition:transform .18s ease; display:flex; flex-direction:column;
+  box-shadow:-8px 0 30px rgba(0,0,0,.4);
+}
+.drawer.show{transform:translateX(0)}
+.drawer-head{height:44px; flex:none; display:flex; align-items:center; gap:var(--s2); padding:0 var(--s4); border-bottom:1px solid var(--border); background:var(--bg-2)}
+.drawer-head .dh-title{font-size:var(--t-lg); font-weight:600}
+.drawer-head .dh-icon{width:18px;height:18px;color:var(--accent)}
+.drawer-body{flex:1; overflow:auto; padding:var(--s4)}
+.drawer-foot{flex:none; padding:var(--s3) var(--s4); border-top:1px solid var(--border); background:var(--bg-2); display:flex; align-items:center; gap:var(--s2)}
+
+.form-group{margin-bottom:var(--s4)}
+.form-group > .fg-label{font-size:var(--t-xs); text-transform:uppercase; letter-spacing:.04em; color:var(--text-muted); margin-bottom:var(--s2); display:block}
+.dest-row{display:flex; gap:var(--s1)}
+.dest-row input{flex:1; height:28px; background:var(--bg-0); border:1px solid var(--border); border-radius:var(--r-md); padding:0 var(--s2); font-family:var(--mono); font-size:var(--t-sm); color:var(--data-mono)}
+.dest-row input:focus{outline:none;border-color:var(--accent)}
+.fmt-grid{display:grid; grid-template-columns:1fr 1fr 1fr; gap:var(--s1)}
+.fmt-opt{padding:var(--s2); border:1px solid var(--border); border-radius:var(--r-md); cursor:pointer; text-align:center; background:var(--bg-0)}
+.fmt-opt:hover{border-color:var(--border-2)}
+.fmt-opt.sel{border-color:var(--accent); background:var(--row-sel)}
+.fmt-opt svg{width:18px;height:18px;color:var(--text-secondary);margin-bottom:var(--s1)}
+.fmt-opt.sel svg{color:var(--accent)}
+.fmt-opt .fmt-name{font-size:var(--t-sm)}
+.fmt-opt .fmt-sub{font-size:9px;color:var(--text-muted);font-family:var(--mono)}
+
+.preset-bar{display:flex;align-items:center;gap:var(--s2);margin-bottom:var(--s4);padding:var(--s2);background:var(--bg-0);border:1px solid var(--border);border-radius:var(--r-md)}
+.preset-bar select{flex:1;height:26px;background:var(--bg-2);border:1px solid var(--border);border-radius:var(--r-sm);font-size:var(--t-sm);padding:0 var(--s2)}
+.preset-bar select:focus{outline:none;border-color:var(--accent)}
+
+.opt-grid{display:grid;grid-template-columns:1fr;gap:var(--s1)}
+.opt-row{display:flex;align-items:center;justify-content:space-between;gap:var(--s2);padding:4px var(--s1);min-height:26px}
+.opt-row label{font-size:var(--t-sm);color:var(--text-secondary);display:flex;align-items:center;gap:var(--s2)}
+.opt-row select,.opt-row input[type=text],.opt-row input[type=number]{height:24px;background:var(--bg-0);border:1px solid var(--border);border-radius:var(--r-sm);font-size:var(--t-sm);padding:0 var(--s1);min-width:120px;color:var(--text-primary)}
+.opt-row select:focus,.opt-row input:focus{outline:none;border-color:var(--accent)}
+.chk{width:15px;height:15px;border:1px solid var(--border-2);border-radius:2px;display:inline-flex;align-items:center;justify-content:center;background:var(--bg-0);cursor:pointer}
+.chk.on{background:var(--accent);border-color:var(--accent)}
+.chk.on svg{width:12px;height:12px;color:#04150f}
+.chk svg{display:none}
+.chk.on svg{display:block}
+
+.take-list{max-height:120px;overflow:auto;border:1px solid var(--border);border-radius:var(--r-md);padding:var(--s1);background:var(--bg-0)}
+.take-row{display:flex;align-items:center;gap:var(--s2);padding:3px var(--s1);font-size:var(--t-sm);border-radius:var(--r-sm)}
+.take-row:hover{background:var(--row-hover)}
+.take-row .tk-name{flex:1;font-family:var(--mono);color:var(--data-mono);font-size:var(--t-xs)}
+.take-row .tk-frames{font-family:var(--mono);font-size:var(--t-xs);color:var(--text-muted)}
+
+.warn-box{display:flex;gap:var(--s2);padding:var(--s2);border-radius:var(--r-md);border:1px solid;font-size:var(--t-sm);margin-bottom:var(--s3)}
+.warn-box svg{width:15px;height:15px;flex:none;margin-top:1px}
+.warn-box.warn{background:rgba(224,180,0,.08);border-color:rgba(224,180,0,.4);color:#e8d27a}
+.warn-box.warn svg{color:var(--warning)}
+.warn-box.ok{background:rgba(30,200,138,.06);border-color:rgba(30,200,138,.3);color:#8fe3c4}
+.warn-box.ok svg{color:var(--success)}
+
+.progress-area{margin-top:var(--s3);display:none}
+.progress-area.show{display:block}
+.prog-track{height:6px;background:var(--bg-2);border:1px solid var(--border);border-radius:var(--r-sm);overflow:hidden}
+.prog-fill{height:100%;background:var(--accent);width:0%;transition:width .2s linear}
+.prog-label{display:flex;justify-content:space-between;font-family:var(--mono);font-size:var(--t-xs);color:var(--text-secondary);margin-top:var(--s1)}
+.prog-label .pct{color:var(--data-mono)}
+
+.result-log{margin-top:var(--s3);border:1px solid var(--border);border-radius:var(--r-md);background:var(--bg-0);font-family:var(--mono);font-size:var(--t-xs);padding:var(--s2);max-height:120px;overflow:auto;display:none}
+.result-log.show{display:block}
+.result-log .rl-line{padding:1px 0}
+.result-log .rl-ok{color:var(--success)}
+.result-log .rl-path{color:var(--data-mono)}
+
+/* batch queue */
+.queue-table{width:100%;border-collapse:collapse;font-size:var(--t-sm)}
+.queue-table th{text-align:left;font-size:var(--t-xs);text-transform:uppercase;letter-spacing:.04em;color:var(--text-muted);font-weight:500;padding:var(--s1) var(--s2);border-bottom:1px solid var(--border);position:sticky;top:0;background:var(--bg-1)}
+.queue-table td{padding:var(--s1) var(--s2);border-bottom:1px solid var(--border)}
+.queue-table tr:hover td{background:var(--row-hover)}
+.queue-table .qt-asset{font-size:var(--t-sm)}
+.queue-table .qt-mono{font-family:var(--mono);color:var(--data-mono);font-size:var(--t-xs)}
+.qstatus{display:inline-flex;align-items:center;gap:var(--s1);font-size:var(--t-xs);font-family:var(--mono)}
+.qstatus .qs-dot{width:7px;height:7px;border-radius:50%}
+.qstatus.done{color:var(--success)} .qstatus.done .qs-dot{background:var(--success)}
+.qstatus.run{color:var(--accent)} .qstatus.run .qs-dot{background:var(--accent);animation:pulse 1s infinite}
+.qstatus.queued{color:var(--text-muted)} .qstatus.queued .qs-dot{background:var(--text-muted)}
+.qstatus.err{color:var(--danger)} .qstatus.err .qs-dot{background:var(--danger)}
+@keyframes pulse{50%{opacity:.4}}
+.qprog{width:70px;height:4px;background:var(--bg-2);border-radius:2px;overflow:hidden;display:inline-block;vertical-align:middle}
+.qprog-fill{height:100%;background:var(--accent)}
+
+/* ---------- command palette ---------- */
+.cmd-scrim{position:fixed;inset:0;background:rgba(4,4,6,.55);z-index:800;display:none;align-items:flex-start;justify-content:center;padding-top:120px}
+.cmd-scrim.show{display:flex}
+.cmd-palette{width:580px;max-height:60vh;background:var(--bg-2);border:1px solid var(--border-2);border-radius:var(--r-lg);box-shadow:0 12px 48px rgba(0,0,0,.5);overflow:hidden;display:flex;flex-direction:column}
+.cmd-input-wrap{display:flex;align-items:center;gap:var(--s2);padding:var(--s3) var(--s4);border-bottom:1px solid var(--border)}
+.cmd-input-wrap svg{width:18px;height:18px;color:var(--text-muted)}
+.cmd-input-wrap input{flex:1;background:none;border:none;font-size:var(--t-lg);color:var(--text-primary)}
+.cmd-input-wrap input:focus{outline:none}
+.cmd-list{overflow:auto;padding:var(--s1)}
+.cmd-item{display:flex;align-items:center;gap:var(--s3);padding:var(--s2) var(--s3);border-radius:var(--r-md);cursor:pointer}
+.cmd-item.active{background:var(--row-sel)}
+.cmd-item .ci-icon{width:16px;height:16px;color:var(--text-secondary)}
+.cmd-item.active .ci-icon{color:var(--accent)}
+.cmd-item .ci-label{flex:1;font-size:var(--t-md)}
+.cmd-item .ci-cat{font-size:var(--t-xs);color:var(--text-muted);text-transform:uppercase}
+.cmd-foot{padding:var(--s2) var(--s4);border-top:1px solid var(--border);display:flex;gap:var(--s4);font-size:var(--t-xs);color:var(--text-muted)}
+
+/* ---------- settings modal ---------- */
+.settings-modal{position:fixed;inset:0;z-index:700;display:none;align-items:center;justify-content:center;background:rgba(4,4,6,.6)}
+.settings-modal.show{display:flex}
+.settings-card{width:900px;height:620px;background:var(--bg-1);border:1px solid var(--border-2);border-radius:var(--r-lg);box-shadow:0 12px 48px rgba(0,0,0,.5);display:flex;flex-direction:column;overflow:hidden}
+.settings-head{height:44px;flex:none;display:flex;align-items:center;gap:var(--s2);padding:0 var(--s4);border-bottom:1px solid var(--border);background:var(--bg-2)}
+.settings-head .sh-title{font-size:var(--t-lg);font-weight:600;flex:1}
+.settings-main{flex:1;display:flex;min-height:0}
+.settings-nav{width:200px;flex:none;border-right:1px solid var(--border);padding:var(--s2);background:var(--bg-1)}
+.settings-nav-item{display:flex;align-items:center;gap:var(--s2);padding:var(--s2);border-radius:var(--r-md);font-size:var(--t-sm);color:var(--text-secondary)}
+.settings-nav-item svg{width:15px;height:15px}
+.settings-nav-item:hover{background:var(--row-hover);color:var(--text-primary)}
+.settings-nav-item.active{background:var(--row-sel);color:var(--accent)}
+.settings-content{flex:1;overflow:auto;padding:var(--s5)}
+.settings-section{display:none}
+.settings-section.active{display:block}
+.settings-section h3{font-size:var(--t-lg);font-weight:600;margin-bottom:var(--s4)}
+.settings-foot{height:48px;flex:none;display:flex;align-items:center;justify-content:flex-end;gap:var(--s2);padding:0 var(--s4);border-top:1px solid var(--border);background:var(--bg-2)}
+.set-field{display:flex;align-items:center;justify-content:space-between;gap:var(--s4);padding:var(--s2) 0;border-bottom:1px solid var(--border)}
+.set-field .sf-label{font-size:var(--t-md)}
+.set-field .sf-desc{font-size:var(--t-xs);color:var(--text-muted);margin-top:2px}
+.set-field input[type=text],.set-field input[type=number],.set-field select{height:28px;background:var(--bg-0);border:1px solid var(--border);border-radius:var(--r-md);padding:0 var(--s2);font-size:var(--t-sm);min-width:240px;color:var(--text-primary);font-family:var(--mono)}
+.set-field input:focus,.set-field select:focus{outline:none;border-color:var(--accent)}
+.toggle{width:38px;height:20px;border-radius:10px;background:var(--bg-2);border:1px solid var(--border-2);position:relative;cursor:pointer;flex:none}
+.toggle::after{content:"";position:absolute;top:2px;left:2px;width:14px;height:14px;border-radius:50%;background:var(--text-muted);transition:all .15s}
+.toggle.on{background:var(--row-sel);border-color:var(--accent)}
+.toggle.on::after{left:20px;background:var(--accent)}
+
+.shortcut-hint{position:absolute;bottom:var(--s3);left:50%;transform:translateX(-50%);display:flex;gap:var(--s4);font-size:var(--t-xs);color:var(--text-muted);background:rgba(10,10,12,.7);border:1px solid var(--border);border-radius:var(--r-md);padding:var(--s1) var(--s3);z-index:20}
+.shortcut-hint span{display:flex;align-items:center;gap:var(--s1)}
+</style>
+</head>
+<body>
+<h2 class="sr-only">Modernized WoW Model Viewer prototype — a dense, dark, keyboard-first desktop tool with an asset browser, faux-3D viewport, animation timeline, tabbed inspector, batch export queue, and command palette.</h2>
+
+<div id="app">
+
+  <!-- ===================== TOP COMMAND BAR ===================== -->
+  <div id="topbar">
+    <div class="brand">
+      <svg class="logo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7l9-4 9 4-9 4-9-4z"/><path d="M3 7v10l9 4 9-4V7"/><path d="M12 11v10"/></svg>
+      <span class="name">WoW Model Viewer: Midnight</span>
+      <span class="ver">0.3.2</span>
+    </div>
+
+    <div class="menubar" id="menubar">
+      <div class="menu-item" data-menu="file">File
+        <div class="dropdown" id="m-file">
+          <div class="dd-row" onclick="loadWoW()"><span class="dd-label"><svg class="dd-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 7h18v12H3z"/><path d="M3 7l3-3h6l2 2h7"/></svg>Load World of Warcraft</span><kbd>Ctrl O</kbd></div>
+          <div class="dd-row" onclick="logMsg('info','Open M2/WMO file dialog')"><span class="dd-label">Open file…</span></div>
+          <div class="dd-row" onclick="logMsg('info','Load WMO set')"><span class="dd-label">Load WMO</span></div>
+          <div class="dd-row" onclick="logMsg('info','Load ADT map tile')"><span class="dd-label">Load ADT</span></div>
+          <div class="dd-sep"></div>
+          <div class="dd-row" onclick="openExport()"><span class="dd-label"><svg class="dd-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 3v12"/><path d="M8 11l4 4 4-4"/><path d="M5 19h14"/></svg>Export…</span><kbd>Ctrl E</kbd></div>
+          <div class="dd-row" onclick="screenshot()"><span class="dd-label">Screenshot</span><kbd>F12</kbd></div>
+          <div class="dd-row" onclick="logMsg('info','Export to video (AVI)')"><span class="dd-label">Export to video</span></div>
+          <div class="dd-sep"></div>
+          <div class="dd-row" onclick="logMsg('info','Exit')"><span class="dd-label">Exit</span></div>
+        </div>
+      </div>
+      <div class="menu-item" data-menu="view">View
+        <div class="dropdown" id="m-view">
+          <div class="dd-row" onclick="toggleGrid()"><span class="dd-label">Show grid</span><kbd>G</kbd></div>
+          <div class="dd-row" onclick="toggleGizmo()"><span class="dd-label">Show axis gizmo</span><kbd>X</kbd></div>
+          <div class="dd-row" onclick="logMsg('info','Load background image')"><span class="dd-label">Load background</span></div>
+          <div class="dd-row" onclick="logMsg('info','Background color picker')"><span class="dd-label">Background color</span></div>
+          <div class="dd-row" onclick="logMsg('info','Toggle skybox')"><span class="dd-label">Skybox</span></div>
+          <div class="dd-sep"></div>
+          <div class="dd-row" onclick="logMsg('info','Canvas size 1920x1080')"><span class="dd-label">Canvas size…</span></div>
+        </div>
+      </div>
+      <div class="menu-item" data-menu="cam">Cam
+        <div class="dropdown" id="m-cam">
+          <div class="dd-row" onclick="setCam('front')"><span class="dd-label">Front</span><kbd>1</kbd></div>
+          <div class="dd-row" onclick="setCam('back')"><span class="dd-label">Back</span><kbd>2</kbd></div>
+          <div class="dd-row" onclick="setCam('side')"><span class="dd-label">Side</span><kbd>3</kbd></div>
+          <div class="dd-row" onclick="setCam('iso')"><span class="dd-label">Isometric</span></div>
+          <div class="dd-row" onclick="setCam('reset')"><span class="dd-label">Reset</span><kbd>0</kbd></div>
+        </div>
+      </div>
+      <div class="menu-item" data-menu="char">Char
+        <div class="dropdown" id="m-char">
+          <div class="dd-row"><span class="dd-label">Show hair</span><kbd>Ctrl H</kbd></div>
+          <div class="dd-row"><span class="dd-label">Show ears</span></div>
+          <div class="dd-row"><span class="dd-label">Sheathe weapons</span><kbd>Ctrl Z</kbd></div>
+          <div class="dd-row"><span class="dd-label">Eye glow</span></div>
+          <div class="dd-sep"></div>
+          <div class="dd-row" onclick="logMsg('info','Randomise appearance')"><span class="dd-label">Randomise</span><kbd>F10</kbd></div>
+        </div>
+      </div>
+      <div class="menu-item" data-menu="lighting">Lighting
+        <div class="dropdown" id="m-lighting">
+          <div class="dd-row"><span class="dd-label">Dynamic light</span></div>
+          <div class="dd-row"><span class="dd-label">Ambient light</span></div>
+          <div class="dd-row"><span class="dd-label">Model lights only</span></div>
+          <div class="dd-row"><span class="dd-label">True lighting</span></div>
+        </div>
+      </div>
+      <div class="menu-item" data-menu="help">Help
+        <div class="dropdown" id="m-help">
+          <div class="dd-row" onclick="openPalette()"><span class="dd-label">Command palette</span><kbd>Ctrl K</kbd></div>
+          <div class="dd-row"><span class="dd-label">Keyboard shortcuts</span></div>
+          <div class="dd-row"><span class="dd-label">About</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="topbar-spacer"></div>
+
+    <div class="global-search">
+      <svg class="gs-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4-4"/></svg>
+      <input id="globalSearch" type="text" placeholder="Search all assets…  (Ctrl+F)">
+      <kbd class="gs-kbd">Ctrl F</kbd>
+    </div>
+
+    <button class="btn primary" onclick="openExport()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3v12"/><path d="M8 11l4 4 4-4"/><path d="M5 19h14"/></svg>Export <kbd style="margin-left:4px;background:rgba(0,0,0,.2);border-color:rgba(0,0,0,.2);color:#04150f">Ctrl E</kbd></button>
+
+    <div class="source-pill" id="sourcePill" onclick="toggleSource()" title="Active data source / product">
+      <span class="dot"></span>
+      <span class="src-name" id="srcName">retail · 12.0.7.58238</span>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 9l6 6 6-6"/></svg>
+    </div>
+
+    <button class="icon-btn" onclick="openPalette()" title="Command palette (Ctrl+K)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M8 9h8M8 12h5M8 15h6"/></svg></button>
+    <button class="icon-btn" onclick="openSettings()" title="Settings / Preferences"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></button>
+  </div>
+
+  <!-- ===================== LEFT ASSET BROWSER ===================== -->
+  <div id="left" class="panel">
+    <div class="panel-header">Asset Browser
+      <div class="ph-actions">
+        <button class="icon-btn" title="Favorites"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 17.3l-6.2 3.7 1.6-7L2 9.2l7.1-.6L12 2l2.9 6.6 7.1.6-5.4 4.8 1.6 7z"/></svg></button>
+        <button class="icon-btn" title="Raw file tree"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 7h7l2 2h9v10H3z"/></svg></button>
+      </div>
+    </div>
+
+    <div class="cat-rail" id="catRail">
+      <div class="cat-chip active" data-cat="characters"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg>Characters</div>
+      <div class="cat-chip" data-cat="creatures"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 11l2-6 4 3h4l4-3 2 6-4 8H8z"/></svg>Creatures</div>
+      <div class="cat-chip" data-cat="items"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M14 3l7 7-9 9-7-7z"/><path d="M9 8l-4 4"/></svg>Items</div>
+      <div class="cat-chip" data-cat="doodads"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 2l4 7h-8z"/><rect x="9" y="9" width="6" height="11"/></svg>Doodads</div>
+      <div class="cat-chip" data-cat="wmo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 21V8l9-5 9 5v13"/><path d="M9 21v-6h6v6"/></svg>WMO</div>
+      <div class="cat-chip" data-cat="adt"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 6l6-3 6 3 6-3v15l-6 3-6-3-6 3z"/><path d="M9 3v15M15 6v15"/></svg>ADT</div>
+      <div class="cat-chip" data-cat="particles"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="6" cy="6" r="1.5"/><circle cx="18" cy="8" r="1.5"/><circle cx="12" cy="14" r="1.5"/><circle cx="7" cy="18" r="1.5"/><circle cx="17" cy="17" r="1.5"/></svg>Particles</div>
+    </div>
+
+    <div class="browser-search">
+      <div class="bs-input">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4-4"/></svg>
+        <input id="browserSearch" type="text" placeholder="Filter assets… (fuzzy)">
+      </div>
+      <div class="bs-filters">
+        <select class="filter-sel" id="filterRace"><option>All races</option><option>Blood Elf</option><option>Human</option><option>Orc</option><option>Night Elf</option><option>Dracthyr</option><option>Mechagnome</option></select>
+        <select class="filter-sel" id="filterGender"><option>Any gender</option><option>Female</option><option>Male</option></select>
+        <select class="filter-sel" id="filterPatch"><option>Any patch</option><option>12.1 PTR</option><option>12.0</option><option>11.x</option></select>
+      </div>
+      <div class="bs-meta">
+        <span id="resultCount">128 results</span>
+        <span class="multi" id="multiCount" style="display:none">3 selected</span>
+      </div>
+    </div>
+
+    <div class="tree" id="assetTree"></div>
+  </div>
+
+  <!-- ===================== CENTER VIEWPORT ===================== -->
+  <div id="center">
+    <div class="vp-toolbar">
+      <div class="tool-group">
+        <button class="tool-btn active" data-cam="front" onclick="setCam('front')">Front <kbd class="tkbd">1</kbd></button>
+        <button class="tool-btn" data-cam="side" onclick="setCam('side')">Side <kbd class="tkbd">3</kbd></button>
+        <button class="tool-btn" data-cam="top" onclick="setCam('top')">Top</button>
+        <button class="tool-btn" data-cam="iso" onclick="setCam('iso')">Iso</button>
+      </div>
+      <div class="vp-sep"></div>
+      <div class="tool-group">
+        <button class="tool-btn active" id="btnGizmo" onclick="toggleGizmo()" title="Toggle axis gizmo (X)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 12V4M12 12h8M12 12L5 19"/><circle cx="12" cy="4" r="1.6"/><circle cx="20" cy="12" r="1.6"/><circle cx="5" cy="19" r="1.6"/></svg>Gizmo</button>
+        <button class="tool-btn active" id="btnGrid" onclick="toggleGrid()" title="Toggle grid (G)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M3 3h18v18H3z"/><path d="M9 3v18M15 3v18M3 9h18M3 15h18"/></svg>Grid</button>
+      </div>
+      <div class="vp-sep"></div>
+      <div class="tool-group">
+        <button class="tool-btn" data-shade="wire" onclick="setShade('wire')">Wireframe</button>
+        <button class="tool-btn" data-shade="solid" onclick="setShade('solid')">Solid</button>
+        <button class="tool-btn active" data-shade="tex" onclick="setShade('tex')">Textured</button>
+      </div>
+      <div class="vp-sep"></div>
+      <button class="tool-btn" onclick="cycleLighting()" id="btnLight"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M9 18h6M10 21h4"/><path d="M12 2a7 7 0 0 0-4 12.7c.6.5 1 1.3 1 2.1h6c0-.8.4-1.6 1-2.1A7 7 0 0 0 12 2z"/></svg>Dynamic</button>
+      <div class="vp-title" id="vpTitle">bloodelf_female.m2 · 24,318 tris</div>
+    </div>
+
+    <div class="viewport" id="viewport">
+      <div class="scene" id="scene"></div>
+
+      <div class="vp-hud">
+        <div class="hud-chip">build <b id="hudBuild">12.0.7.58238</b></div>
+        <div class="hud-chip">locale <b>enUS</b></div>
+        <div class="hud-chip">light <b id="hudLight">dynamic</b></div>
+        <div class="hud-chip">gizmo <b id="hudGizmo">free</b></div>
+      </div>
+
+      <div class="gizmo" id="gizmo">
+        <svg viewBox="0 0 84 84">
+          <line x1="42" y1="42" x2="42" y2="14" stroke="#1ec88a" stroke-width="2"/>
+          <line x1="42" y1="42" x2="68" y2="54" stroke="#ff4d57" stroke-width="2"/>
+          <line x1="42" y1="42" x2="18" y2="56" stroke="#3a8ade" stroke-width="2"/>
+          <circle class="gz-ball" cx="42" cy="14" r="8" fill="#1ec88a" onclick="snapAxis('Y')"/>
+          <text x="42" y="18" text-anchor="middle" font-size="9" fill="#04150f" font-family="monospace" style="pointer-events:none">Y</text>
+          <circle class="gz-ball" cx="68" cy="54" r="8" fill="#ff4d57" onclick="snapAxis('X')"/>
+          <text x="68" y="58" text-anchor="middle" font-size="9" fill="#2a0708" font-family="monospace" style="pointer-events:none">X</text>
+          <circle class="gz-ball" cx="18" cy="56" r="8" fill="#3a8ade" onclick="snapAxis('Z')"/>
+          <text x="18" y="60" text-anchor="middle" font-size="9" fill="#04203a" font-family="monospace" style="pointer-events:none">Z</text>
+        </svg>
+      </div>
+
+      <div class="vp-overlay" id="loadOverlay">
+        <div class="ov-spinner"></div>
+        <div class="ov-msg">Loading model…</div>
+        <div class="ov-sub" id="loadSub">streaming bloodelf_female.m2 · 24,318 tris</div>
+      </div>
+
+      <div class="vp-overlay err" id="errOverlay">
+        <svg class="ov-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 2l10 18H2z"/><path d="M12 9v5M12 17.5v.01"/></svg>
+        <div class="ov-msg">Couldn't load model</div>
+        <div class="ov-sub">Section encrypted — missing TACT key (record awaiting key publication)</div>
+        <button onclick="hideOverlays()"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" style="vertical-align:-2px;margin-right:4px;display:inline-block"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg>Retry / fetch keys</button>
+      </div>
+
+      <div class="shortcut-hint">
+        <span><kbd>Space</kbd> play/pause</span>
+        <span><kbd>Shift</kbd>+drag orbit-lock</span>
+        <span><kbd>1</kbd>/<kbd>3</kbd> cam</span>
+        <span><kbd>G</kbd> grid</span>
+        <span><kbd>Ctrl K</kbd> palette</span>
+      </div>
+    </div>
+
+    <!-- ===================== BOTTOM ANIMATION TIMELINE ===================== -->
+    <div class="timeline">
+      <div class="tl-header">
+        <span class="tl-label">Animation</span>
+        <div class="clip-sel">
+          <select id="clipSel" onchange="onClipChange()">
+            <option value="0">Stand [0] · 1100f</option>
+            <option value="4">Walk [4] · 800f</option>
+            <option value="5">Run [5] · 600f</option>
+            <option value="60">Attack1H [60] · 420f</option>
+            <option value="75">SpellCast [75] · 540f</option>
+            <option value="1">Death [1] · 980f</option>
+            <option value="71">EmoteDance [71] · 1900f</option>
+            <option value="69">EmoteTalk [69] · 600f</option>
+            <option value="6">Jump [6] · 360f</option>
+          </select>
+        </div>
+        <div class="transport">
+          <button class="tp-btn" onclick="stepClip(-1)" title="Prev clip (,)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M18 5L8 12l10 7zM6 5v14"/></svg></button>
+          <button class="tp-btn play" id="playBtn" onclick="togglePlay()" title="Play / pause (Space)"><svg id="playIcon" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M7 4l13 8-13 8z"/></svg></button>
+          <button class="tp-btn" onclick="stopAnim()" title="Stop (.)"><svg viewBox="0 0 24 24" fill="currentColor" stroke="none"><rect x="6" y="6" width="12" height="12" rx="1"/></svg></button>
+          <button class="tp-btn" onclick="stepClip(1)" title="Next clip (;)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 5l10 7-10 7zM18 5v14"/></svg></button>
+          <button class="tp-btn active" id="loopBtn" onclick="toggleLoop()" title="Loop"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M17 2l4 4-4 4"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><path d="M7 22l-4-4 4-4"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg></button>
+        </div>
+        <div class="speed-ctl">
+          <span>Speed</span>
+          <input type="range" id="speed" min="0.1" max="1" step="0.1" value="1" oninput="onSpeed()">
+          <span class="speed-val" id="speedVal">1.0×</span>
+        </div>
+        <div class="tl-readout"><span id="frameNow">000</span><span class="muted"> / 1100f</span> <span class="muted">·</span> <span id="timeNow">0.00s</span></div>
+      </div>
+      <div class="scrub-wrap">
+        <div class="scrub" id="scrub">
+          <div class="scrub-track"></div>
+          <div class="scrub-fill" id="scrubFill"></div>
+          <div class="playhead" id="playhead" style="left:0%"></div>
+          <input type="range" class="scrub-input" id="scrubInput" min="0" max="1100" value="0" oninput="onScrub()">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== RIGHT INSPECTOR ===================== -->
+  <div id="right" class="panel">
+    <div class="tabs" id="tabs">
+      <div class="tab active" data-tab="details"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 6h16M4 12h16M4 18h10"/></svg>Details</div>
+      <div class="tab" data-tab="appearance"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="9" r="4"/><path d="M5 20c0-3 3-5 7-5s7 2 7 5"/></svg>Appearance</div>
+      <div class="tab" data-tab="equipment"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M14 3l7 7-9 9-7-7z"/></svg>Equipment</div>
+      <div class="tab" data-tab="materials"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 3v18"/></svg>Materials</div>
+      <div class="tab" data-tab="skeleton"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="5" r="2"/><path d="M12 7v4M8 15l4-4 4 4M9 20l3-5 3 5"/></svg>Skeleton</div>
+    </div>
+    <div class="tab-body">
+
+      <!-- DETAILS -->
+      <div class="tab-pane active" data-pane="details">
+        <div class="insp-section">
+          <div class="insp-sh" onclick="toggleSection(this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 9l6 6 6-6"/></svg>Identity</div>
+          <div class="insp-sb">
+            <div class="kv"><span class="k">Name</span><span class="v">Blood Elf Female</span></div>
+            <div class="kv"><span class="k">Model</span><span class="v">bloodelf_female.m2</span></div>
+            <div class="kv"><span class="k">FileDataID</span><span class="v">119376</span></div>
+            <div class="kv"><span class="k">ChrModelID</span><span class="v">38</span></div>
+            <div class="kv"><span class="k">Build</span><span class="v">12.0.7.58238</span></div>
+            <div class="kv"><span class="k">Locale</span><span class="v">enUS</span></div>
+          </div>
+        </div>
+        <div class="insp-section">
+          <div class="insp-sh" onclick="toggleSection(this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 9l6 6 6-6"/></svg>Geometry</div>
+          <div class="insp-sb">
+            <div class="kv"><span class="k">Triangles</span><span class="v">24,318</span></div>
+            <div class="kv"><span class="k">Vertices</span><span class="v">12,904</span></div>
+            <div class="kv"><span class="k">Geosets</span><span class="v">37</span></div>
+            <div class="kv"><span class="k">Bones</span><span class="v">128</span></div>
+            <div class="kv"><span class="k">Textures</span><span class="v">6</span></div>
+            <div class="kv"><span class="k">Anim clips</span><span class="v">387</span></div>
+          </div>
+        </div>
+        <div class="insp-section">
+          <div class="insp-sh" onclick="toggleSection(this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 9l6 6 6-6"/></svg>Texture variations</div>
+          <div class="insp-sb">
+            <div class="kv"><span class="k">Skin set</span><span class="v">2 / 14</span></div>
+            <div class="kv"><span class="k">Hair variation</span><span class="v">5 / 11</span></div>
+            <div class="kv"><span class="k">Face variation</span><span class="v">3 / 9</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- APPEARANCE -->
+      <div class="tab-pane" data-pane="appearance">
+        <div class="insp-section">
+          <div class="insp-sh" onclick="toggleSection(this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 9l6 6 6-6"/></svg>Body<span class="sh-r">ChrCustomization</span></div>
+          <div class="insp-sb">
+            <div class="field"><label>Skin</label><select><option>Light</option><option selected>Fair</option><option>Tan</option><option>Pale Green</option></select></div>
+            <div class="field"><label>Face</label><select><option>Face 1</option><option selected>Face 3</option><option>Face 5</option></select></div>
+            <div class="field"><label>Hair style</label><select><option>Long</option><option selected>Ponytail</option><option>Braided</option><option>Short</option></select></div>
+            <div class="field"><label>Facial hair</label><select><option selected>None</option><option>Light</option></select></div>
+            <div class="field"><label>Eye color</label><select><option selected>Fel Green</option><option>Blue</option><option>Amber</option></select></div>
+          </div>
+        </div>
+        <div class="insp-section">
+          <div class="insp-sh" onclick="toggleSection(this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 9l6 6 6-6"/></svg>Hair color</div>
+          <div class="insp-sb">
+            <div class="swatch-row" id="hairColors">
+              <div class="swatch sel" style="background:#1a1a1a"></div>
+              <div class="swatch" style="background:#5a3a1e"></div>
+              <div class="swatch" style="background:#c89b5a"></div>
+              <div class="swatch" style="background:#e8e8e8"></div>
+              <div class="swatch" style="background:#a83232"></div>
+              <div class="swatch" style="background:#2a5a8a"></div>
+              <div class="swatch" style="background:#1ec88a"></div>
+              <div class="swatch" style="background:#7a3a8a"></div>
+            </div>
+          </div>
+        </div>
+        <div class="insp-section">
+          <div class="insp-sh" onclick="toggleSection(this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 9l6 6 6-6"/></svg>Visibility flags</div>
+          <div class="insp-sb">
+            <div class="opt-row"><label><span class="chk on" onclick="toggleChk(this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 12l5 5L19 7"/></svg></span>Show hair</label></div>
+            <div class="opt-row"><label><span class="chk on" onclick="toggleChk(this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 12l5 5L19 7"/></svg></span>Show ears</label></div>
+            <div class="opt-row"><label><span class="chk" onclick="toggleChk(this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 12l5 5L19 7"/></svg></span>Sheathe weapons</label></div>
+            <div class="opt-row"><label><span class="chk" onclick="toggleChk(this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 12l5 5L19 7"/></svg></span>Eye glow</label></div>
+          </div>
+        </div>
+        <button class="btn" style="width:100%" onclick="logMsg('info','Randomised appearance')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 3l18 18M9 3h12v12"/></svg>Randomise <kbd style="margin-left:auto">F10</kbd></button>
+      </div>
+
+      <!-- EQUIPMENT -->
+      <div class="tab-pane" data-pane="equipment">
+        <div class="insp-section">
+          <div class="insp-sh" onclick="toggleSection(this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 9l6 6 6-6"/></svg>Armor<span class="sh-r">14 slots</span></div>
+          <div class="insp-sb">
+            <div class="eq-grid" id="eqGrid"></div>
+          </div>
+        </div>
+        <div class="insp-section">
+          <div class="insp-sh" onclick="toggleSection(this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 9l6 6 6-6"/></svg>Sets & Outfits</div>
+          <div class="insp-sb">
+            <div class="field"><label>Item set</label><select><option>None</option><option>T2 — Bloodfang</option><option>T3 — Bonescythe</option></select></div>
+            <div class="field"><label>Start outfit</label><select><option>None</option><option>Mage — lvl 1</option><option>Rogue — lvl 1</option></select></div>
+            <div class="field"><label>Mount</label><select><option>None</option><option>Swift Pink Hawkstrider</option></select></div>
+          </div>
+        </div>
+        <div class="btn-row">
+          <button class="btn" onclick="logMsg('ok','Equipment saved to slot F5')">Save <kbd>F5</kbd></button>
+          <button class="btn" onclick="logMsg('info','Loaded equipment F6')">Load <kbd>F6</kbd></button>
+          <button class="btn ghost" onclick="logMsg('info','Equipment cleared')">Clear <kbd>F9</kbd></button>
+        </div>
+        <div class="btn-row">
+          <button class="btn" style="flex:1" onclick="logMsg('info','Importing from Armory via proxy…')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M10 13a5 5 0 0 0 7 0l3-3a5 5 0 0 0-7-7l-1 1"/><path d="M14 11a5 5 0 0 0-7 0l-3 3a5 5 0 0 0 7 7l1-1"/></svg>Import from Armory URL</button>
+        </div>
+      </div>
+
+      <!-- MATERIALS -->
+      <div class="tab-pane" data-pane="materials">
+        <div class="insp-section">
+          <div class="insp-sh" onclick="toggleSection(this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 9l6 6 6-6"/></svg>Textures<span class="sh-r">6 passes</span></div>
+          <div class="insp-sb" id="matList"></div>
+        </div>
+        <div class="insp-section">
+          <div class="insp-sh" onclick="toggleSection(this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 9l6 6 6-6"/></svg>Skin overrides</div>
+          <div class="insp-sb">
+            <div class="field"><label>Skin 1</label><input type="text" value="BloodElfFemaleSkin00_02.blp"></div>
+            <div class="field"><label>Skin 2</label><input type="text" value="(none)"></div>
+            <div class="field"><label>Skin 3</label><input type="text" value="(none)"></div>
+          </div>
+        </div>
+        <button class="btn" style="width:100%" onclick="openExport('textures')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 3v12M8 11l4 4 4-4M5 19h14"/></svg>Export BLP → PNG</button>
+      </div>
+
+      <!-- SKELETON -->
+      <div class="tab-pane" data-pane="skeleton">
+        <div class="insp-section">
+          <div class="insp-sh" onclick="toggleSection(this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 9l6 6 6-6"/></svg>Bone hierarchy<span class="sh-r">128 bones</span></div>
+          <div class="insp-sb bone-tree" id="boneTree"></div>
+        </div>
+        <div class="insp-section">
+          <div class="insp-sh" onclick="toggleSection(this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 9l6 6 6-6"/></svg>Attachment points<span class="sh-r">11</span></div>
+          <div class="insp-sb" id="attachList"></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ===================== STATUS BAR ===================== -->
+  <div id="statusbar">
+    <span class="sb-item">v<span class="sb-val">0.3.2</span></span>
+    <span class="sb-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 12h4l3 8 4-16 3 8h4"/></svg>FPS <span class="sb-val" id="sbFps">120</span></span>
+    <span class="sb-item">tris <span class="sb-val">24,318</span></span>
+    <span class="sb-item">verts <span class="sb-val">12,904</span></span>
+    <span class="sb-item">selection <span class="sb-val" id="sbSel">1</span></span>
+    <span class="sb-item">build <span class="sb-val" id="sbBuild">12.0.7.58238</span> (<span id="sbProduct">retail</span>)</span>
+    <span class="sb-spacer"></span>
+    <span class="sb-item sb-ok"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M5 12l5 5L19 7"/></svg>CASC connected · 1,892,043 files</span>
+    <span class="sb-item">GL 4.6 · FSAA 8×</span>
+  </div>
+
+  <!-- ===================== LOG / CONSOLE (overlays bottom over center) ===================== -->
+  <div class="log-strip collapsed" id="logStrip" style="position:fixed;left:300px;right:340px;bottom:22px;z-index:50;border-left:1px solid var(--border);border-right:1px solid var(--border)">
+    <div class="log-header">
+      <div class="log-tabs">
+        <div class="log-tab active" data-log="export" onclick="setLogTab('export')">Export log</div>
+        <div class="log-tab" data-log="messages" onclick="setLogTab('messages')">Messages</div>
+        <div class="log-tab" data-log="queue" onclick="setLogTab('queue')">Batch queue <span id="queueBadge" class="mono" style="color:var(--accent)">(3)</span></div>
+      </div>
+      <button class="icon-btn" style="margin-left:auto;width:22px;height:22px" onclick="clearLog()" title="Clear"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14"/></svg></button>
+      <button class="icon-btn" style="width:22px;height:22px" onclick="toggleLog()" id="logToggleBtn" title="Expand/collapse console"><svg id="logChev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 15l6-6 6 6"/></svg></button>
+    </div>
+    <div class="log-body" id="logExport"></div>
+    <div class="log-body" id="logMessages" style="display:none"></div>
+    <div class="log-body" id="logQueue" style="display:none;padding:0">
+      <table class="queue-table">
+        <thead><tr><th style="width:30%">Asset</th><th>Format</th><th>Destination</th><th>Status</th><th style="width:90px">Progress</th></tr></thead>
+        <tbody id="queueBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+
+<!-- ===================== EXPORT DRAWER ===================== -->
+<div class="scrim" id="exportScrim" onclick="closeExport()"></div>
+<div class="drawer" id="exportDrawer" role="dialog" aria-label="Export">
+  <div class="drawer-head">
+    <svg class="dh-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3v12M8 11l4 4 4-4M5 19h14"/></svg>
+    <span class="dh-title">Export</span>
+    <button class="icon-btn" style="margin-left:auto" onclick="closeExport()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+  </div>
+  <div class="drawer-body">
+    <div class="preset-bar">
+      <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="var(--text-secondary)" stroke-width="1.6"><path d="M5 5h14v14l-7-3-7 3z"/></svg>
+      <select id="presetSel" onchange="applyPreset()">
+        <option value="">Preset…</option>
+        <option value="fbx-anim">FBX — full rig + all takes</option>
+        <option value="seq-turntable">Image seq — 1080p turntable 30fps</option>
+        <option value="seq-exr">Image seq — EXR alpha 4K</option>
+        <option value="obj-static">OBJ — static T-pose</option>
+      </select>
+      <button class="btn ghost" onclick="logMsg('ok','Preset saved')" title="Save current options as preset"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M5 5h11l3 3v11H5z"/><path d="M8 5v5h7"/></svg></button>
+    </div>
+
+    <div class="form-group">
+      <span class="fg-label">Destination</span>
+      <div class="dest-row">
+        <input id="destPath" type="text" value="F:\WMW 2.0\exports\bloodelf_female\">
+        <button class="btn" onclick="logMsg('info','Folder picker opened')"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 7h7l2 2h9v10H3z"/></svg>Browse</button>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <span class="fg-label">Format</span>
+      <div class="fmt-grid" id="fmtGrid">
+        <div class="fmt-opt sel" data-fmt="fbx" onclick="selectFmt('fbx')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="5" r="2"/><path d="M12 7v4M8 15l4-4 4 4"/></svg><div class="fmt-name">FBX</div><div class="fmt-sub">rigged</div></div>
+        <div class="fmt-opt" data-fmt="obj" onclick="selectFmt('obj')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 2l9 5v10l-9 5-9-5V7z"/></svg><div class="fmt-name">OBJ</div><div class="fmt-sub">static</div></div>
+        <div class="fmt-opt" data-fmt="seq" onclick="selectFmt('seq')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="5" width="14" height="14"/><path d="M7 9v6M11 9v6M21 7v10"/></svg><div class="fmt-name">Image Seq</div><div class="fmt-sub">PNG/JPG/EXR</div></div>
+        <div class="fmt-opt" data-fmt="shot" onclick="selectFmt('shot')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="6" width="18" height="13" rx="2"/><circle cx="12" cy="12" r="3"/></svg><div class="fmt-name">Screenshot</div><div class="fmt-sub">PNG</div></div>
+        <div class="fmt-opt" data-fmt="video" onclick="selectFmt('video')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="6" width="13" height="12" rx="2"/><path d="M16 10l5-3v10l-5-3z"/></svg><div class="fmt-name">Video</div><div class="fmt-sub">AVI</div></div>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <span class="fg-label" id="optLabel">FBX options</span>
+      <div class="opt-grid" id="optGrid"><!-- format-specific options injected by JS --></div>
+    </div>
+
+    <div class="form-group" id="takesGroup">
+      <span class="fg-label">Animation takes</span>
+      <div class="take-list" id="takeList"></div>
+    </div>
+
+    <div class="warn-box warn" id="warnBox">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2l10 18H2z"/><path d="M12 9v5M12 17.5v.01"/></svg>
+      <span id="warnText">Output folder is not empty (12 files). Existing frames will be overwritten.</span>
+    </div>
+    <div class="warn-box ok" id="diskBox">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M5 12l5 5L19 7"/></svg>
+      <span id="diskText">Estimated 6.4 MB · 248 GB free on F:\ — enough space.</span>
+    </div>
+
+    <div class="progress-area" id="progArea">
+      <div class="prog-track"><div class="prog-fill" id="progFill"></div></div>
+      <div class="prog-label"><span id="progStage">Writing skeleton…</span><span class="pct" id="progPct">0%</span></div>
+    </div>
+
+    <div class="result-log" id="resultLog"></div>
+  </div>
+  <div class="drawer-foot">
+    <button class="btn ghost" onclick="addToQueue()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 5v14M5 12h14"/></svg>Add to queue</button>
+    <div style="flex:1"></div>
+    <button class="btn" onclick="closeExport()">Cancel</button>
+    <button class="btn primary" id="exportGoBtn" onclick="runExport()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M5 12l5 5L19 7"/></svg>Export</button>
+  </div>
+</div>
+
+<!-- ===================== COMMAND PALETTE ===================== -->
+<div class="cmd-scrim" id="cmdScrim">
+  <div class="cmd-palette" role="dialog" aria-label="Command palette">
+    <div class="cmd-input-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 17l6-6-6-6M12 19h8"/></svg>
+      <input id="cmdInput" type="text" placeholder="Type a command or search…" autocomplete="off">
+    </div>
+    <div class="cmd-list" id="cmdList"></div>
+    <div class="cmd-foot"><span><kbd>↑</kbd><kbd>↓</kbd> navigate</span><span><kbd>↵</kbd> run</span><span><kbd>Esc</kbd> close</span></div>
+  </div>
+</div>
+
+<!-- ===================== SETTINGS MODAL ===================== -->
+<div class="settings-modal" id="settingsModal">
+  <div class="settings-card" role="dialog" aria-label="Settings">
+    <div class="settings-head">
+      <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="var(--accent)" stroke-width="1.6"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82 2 2 0 1 1-2.83 2.83 1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51 2 2 0 0 1-4 0 1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33 2 2 0 1 1-2.83-2.83 1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1 2 2 0 0 1 0-4 1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82 2 2 0 1 1 2.83-2.83 1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51 2 2 0 0 1 4 0 1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33 2 2 0 1 1 2.83 2.83 1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1 2 2 0 0 1 0 4 1.65 1.65 0 0 0-1.51 1z"/></svg>
+      <span class="sh-title">Settings</span>
+      <button class="icon-btn" onclick="closeSettings()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+    </div>
+    <div class="settings-main">
+      <div class="settings-nav" id="settingsNav">
+        <div class="settings-nav-item active" data-set="data"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><ellipse cx="12" cy="5" rx="8" ry="3"/><path d="M4 5v14c0 1.7 3.6 3 8 3s8-1.3 8-3V5"/></svg>Data Sources / CASC</div>
+        <div class="settings-nav-item" data-set="viewport"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="4" width="18" height="14" rx="2"/><path d="M8 21h8"/></svg>Viewport</div>
+        <div class="settings-nav-item" data-set="export"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 3v12M8 11l4 4 4-4M5 19h14"/></svg>Export Defaults</div>
+        <div class="settings-nav-item" data-set="armory"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M10 13a5 5 0 0 0 7 0l3-3a5 5 0 0 0-7-7l-1 1"/><path d="M14 11a5 5 0 0 0-7 0l-3 3a5 5 0 0 0 7 7l1-1"/></svg>Integrations / Armory</div>
+        <div class="settings-nav-item" data-set="advanced"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 8v8M8 12h8"/><circle cx="12" cy="12" r="9"/></svg>Advanced</div>
+      </div>
+      <div class="settings-content" id="settingsContent">
+        <div class="settings-section active" data-setpane="data">
+          <h3>Data Sources / CASC</h3>
+          <div class="set-field"><div><div class="sf-label">WoW install path</div><div class="sf-desc">Root of the CASC storage to read assets from.</div></div><input type="text" value="C:\Program Files\World of Warcraft"></div>
+          <div class="set-field"><div><div class="sf-label">Product</div><div class="sf-desc">Retail Midnight or PTR. Changing this restarts CASC.</div></div><select><option>wow (retail) · 12.0.7.58238</option><option>wowt (PTR) · 12.1.0.58401</option><option>wow_beta</option></select></div>
+          <div class="set-field"><div><div class="sf-label">Custom files directory</div><div class="sf-desc">Overlay folder for modded BLP/M2 — takes priority on conflict.</div></div><input type="text" value="F:\WMW 2.0\custom"></div>
+          <div class="set-field"><div><div class="sf-label">Listfile cache refresh</div><div class="sf-desc">Days between community listfile updates (0 = never).</div></div><input type="number" value="7" style="min-width:80px"></div>
+        </div>
+        <div class="settings-section" data-setpane="viewport">
+          <h3>Viewport</h3>
+          <div class="set-field"><div><div class="sf-label">Field of view</div></div><input type="number" value="45" style="min-width:80px"></div>
+          <div class="set-field"><div><div class="sf-label">Background color</div></div><input type="text" value="#0a0a0c"></div>
+          <div class="set-field"><div><div class="sf-label">Show grid</div></div><div class="toggle on" onclick="this.classList.toggle('on')"></div></div>
+          <div class="set-field"><div><div class="sf-label">Show axis gizmo</div></div><div class="toggle on" onclick="this.classList.toggle('on')"></div></div>
+          <div class="set-field"><div><div class="sf-label">Skybox</div></div><div class="toggle" onclick="this.classList.toggle('on')"></div></div>
+          <div class="set-field"><div><div class="sf-label">Lighting mode</div></div><select><option>Dynamic</option><option>Ambient</option><option>Model lights only</option><option>True lighting</option></select></div>
+        </div>
+        <div class="settings-section" data-setpane="export">
+          <h3>Export Defaults</h3>
+          <div class="set-field"><div><div class="sf-label">Default format</div></div><select><option>FBX</option><option>OBJ</option><option>Image Sequence</option><option>Screenshot</option></select></div>
+          <div class="set-field"><div><div class="sf-label">Scale factor</div><div class="sf-desc">FBX export scale (91.44 = 1 yard → cm).</div></div><input type="number" value="91.44" style="min-width:100px"></div>
+          <div class="set-field"><div><div class="sf-label">Transparent background</div></div><div class="toggle on" onclick="this.classList.toggle('on')"></div></div>
+          <div class="set-field"><div><div class="sf-label">Frame numbering</div></div><select><option>0001, 0002…</option><option>0, 1, 2…</option></select></div>
+          <div class="set-field"><div><div class="sf-label">Last destination</div></div><input type="text" value="F:\WMW 2.0\exports"></div>
+        </div>
+        <div class="settings-section" data-setpane="armory">
+          <h3>Integrations / Armory</h3>
+          <div class="set-field"><div><div class="sf-label">Armory proxy URL</div><div class="sf-desc">Self-hosted proxy that fetches character appearance.</div></div><input type="text" value="http://localhost:8723/armory"></div>
+          <div class="set-field"><div><div class="sf-label">Display item & NPC IDs in lists</div></div><div class="toggle on" onclick="this.classList.toggle('on')"></div></div>
+        </div>
+        <div class="settings-section" data-setpane="advanced">
+          <h3>Advanced</h3>
+          <div class="set-field"><div><div class="sf-label">OpenGL mode</div></div><select><option>Core 4.6</option><option>Compatibility</option></select></div>
+          <div class="set-field"><div><div class="sf-label">FSAA</div></div><select><option>8×</option><option>4×</option><option>2×</option><option>Off</option></select></div>
+          <div class="set-field"><div><div class="sf-label">Language</div></div><select><option>English (enUS)</option><option>Deutsch (deDE)</option><option>Français (frFR)</option></select></div>
+          <div class="set-field"><div><div class="sf-label">Config.ini path</div></div><input type="text" value="%APPDATA%\WoWModelViewer\Config.ini"></div>
+          <div class="set-field"><div><div class="sf-label">Reset layout</div><div class="sf-desc">Restore default dock arrangement.</div></div><button class="btn" onclick="logMsg('info','Layout reset to default')">Reset</button></div>
+        </div>
+      </div>
+    </div>
+    <div class="settings-foot">
+      <button class="btn ghost" onclick="closeSettings()">Cancel</button>
+      <button class="btn primary" onclick="closeSettings();logMsg('ok','Settings saved')">Save</button>
+    </div>
+  </div>
+</div>
+
+<script>
+"use strict";
+
+/* ---------- data ---------- */
+const ASSETS = {
+  characters: [
+    {n:"Blood Elf Female", id:119376, q:null, sub:"ChrModelID 38"},
+    {n:"Blood Elf Male", id:119375, q:null, sub:"ChrModelID 37"},
+    {n:"Human Female", id:117045, q:null, sub:"ChrModelID 4"},
+    {n:"Human Male", id:117044, q:null, sub:"ChrModelID 3"},
+    {n:"Orc Male", id:118043, q:null, sub:"ChrModelID 7"},
+    {n:"Night Elf Female", id:117809, q:null, sub:"ChrModelID 10"},
+    {n:"Dracthyr Visage F", id:201283, q:null, sub:"ChrModelID 78"},
+    {n:"Mechagnome Male", id:188394, q:null, sub:"ChrModelID 62"},
+    {n:"Void Elf Female", id:122809, q:null, sub:"ChrModelID 41"},
+    {n:"Worgen Male", id:120590, q:null, sub:"ChrModelID 22"},
+  ],
+  creatures: [
+    {n:"The Lich King", id:307418, q:null, sub:"CreatureType Undead"},
+    {n:"Illidan Stormrage", id:201926, q:null, sub:"CreatureType Demon"},
+    {n:"Deathwing", id:303852, q:null, sub:"CreatureType Dragonkin"},
+    {n:"Ragnaros", id:298471, q:null, sub:"CreatureType Elemental"},
+    {n:"Sylvanas Windrunner", id:401203, q:null, sub:"CreatureType Undead"},
+    {n:"Murloc", id:118764, q:null, sub:"CreatureType Humanoid"},
+    {n:"Felguard", id:299018, q:null, sub:"CreatureType Demon"},
+  ],
+  items: [
+    {n:"Ashbringer", id:191902, q:"legendary", sub:"Two-Hand Sword"},
+    {n:"Thunderfury", id:185749, q:"legendary", sub:"One-Hand Sword"},
+    {n:"Frostmourne", id:303891, q:"artifact", sub:"Two-Hand Sword"},
+    {n:"Warglaive of Azzinoth", id:184871, q:"legendary", sub:"One-Hand Sword"},
+    {n:"Helm of Domination", id:298776, q:"epic", sub:"Plate Head"},
+    {n:"Bloodfang Hood", id:165121, q:"epic", sub:"Leather Head"},
+    {n:"Sulfuras", id:191900, q:"legendary", sub:"Two-Hand Mace"},
+    {n:"Atiesh", id:184865, q:"legendary", sub:"Staff"},
+  ],
+  doodads: [
+    {n:"Stormwind Lamp Post", id:165442, q:null, sub:"world/generic"},
+    {n:"Orgrimmar Banner", id:166903, q:null, sub:"world/horde"},
+    {n:"Dalaran Crystal", id:177821, q:null, sub:"world/magic"},
+    {n:"Campfire", id:142001, q:null, sub:"world/generic"},
+  ],
+  wmo: [
+    {n:"Stormwind Keep", id:114998, q:null, sub:"World\\wmo\\Azeroth"},
+    {n:"Karazhan", id:113201, q:null, sub:"World\\wmo\\Dungeon"},
+    {n:"Ironforge Great Forge", id:114120, q:null, sub:"World\\wmo\\Khaz"},
+    {n:"Undercity Throne", id:115044, q:null, sub:"World\\wmo\\Lordaeron"},
+  ],
+  adt: [
+    {n:"Elwynn Forest 31_48", id:782441, q:null, sub:"Map 0 · tile 31,48"},
+    {n:"Durotar 41_30", id:782902, q:null, sub:"Map 1 · tile 41,30"},
+    {n:"Hellfire Peninsula 23_22", id:790112, q:null, sub:"Map 530 · tile 23,22"},
+  ],
+  particles: [
+    {n:"Fire Nova", id:601233, q:null, sub:"spells/fire"},
+    {n:"Frost Bolt Trail", id:601891, q:null, sub:"spells/frost"},
+    {n:"Holy Light Burst", id:602044, q:null, sub:"spells/holy"},
+    {n:"Fel Explosion", id:603012, q:null, sub:"spells/fel"},
+  ],
+};
+const CAT_LABEL = {characters:"Characters",creatures:"Creatures & NPCs",items:"Items",doodads:"Doodads",wmo:"WMO Sets",adt:"ADT Map Tiles",particles:"Particles"};
+const QCOLOR = {poor:"var(--q-poor)",common:"var(--q-common)",uncommon:"var(--q-uncommon)",rare:"var(--q-rare)",epic:"var(--q-epic)",legendary:"var(--q-legendary)",artifact:"#e6cc80"};
+
+let state = {cat:"characters", search:"", selected:new Set(), playing:false, loop:true, frame:0, totalF:1100, speed:1, fmt:"fbx", logTab:"export"};
+
+/* ---------- helpers ---------- */
+const $ = s => document.querySelector(s);
+const $$ = s => document.querySelectorAll(s);
+function fuzzy(q, t){ q=q.toLowerCase(); t=t.toLowerCase(); let i=0; for(const c of t){ if(c===q[i]) i++; } return i===q.length; }
+
+/* ---------- asset tree ---------- */
+function renderTree(){
+  const tree = $("#assetTree");
+  const list = ASSETS[state.cat] || [];
+  const q = state.search.trim();
+  const filtered = q.length ? list.filter(a => fuzzy(q, a.n) || String(a.id).includes(q)) : list;
+  $("#resultCount").textContent = filtered.length + " result" + (filtered.length===1?"":"s");
+
+  if(filtered.length === 0){
+    tree.innerHTML = `<div class="state">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4-4M8 11h6"/></svg>
+      <div class="st-msg">No assets match “${q}”</div>
+      <div class="st-sub">Try a shorter query or switch category.</div>
+      <button onclick="clearSearch()">Clear search</button>
+    </div>`;
+    return;
+  }
+  let html = `<div class="tree-group">${CAT_LABEL[state.cat]} · ${filtered.length}</div>`;
+  filtered.forEach(a => {
+    const sel = state.selected.has(a.id) ? "sel" : "";
+    const qbar = a.q ? `<span class="qbar" style="background:${QCOLOR[a.q]||'#888'}"></span>` : "";
+    html += `<div class="row check ${sel}" data-id="${a.id}" data-name="${a.n}" onclick="selectAsset(${a.id}, event)">
+      <span class="rcheck"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 12l5 5L19 7"/></svg></span>
+      ${qbar}
+      <svg class="ricon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2l9 5v10l-9 5-9-5V7z"/></svg>
+      <span class="rlabel">${a.n}</span>
+      <span class="rid">${a.id}</span>
+    </div>`;
+  });
+  tree.innerHTML = html;
+}
+
+function selectAsset(id, ev){
+  if(ev && (ev.ctrlKey || ev.metaKey)){
+    if(state.selected.has(id)) state.selected.delete(id); else state.selected.add(id);
+  } else {
+    state.selected.clear(); state.selected.add(id);
+    loadModel(id);
+  }
+  const mc = $("#multiCount");
+  if(state.selected.size > 1){ mc.style.display="inline"; mc.textContent = state.selected.size + " selected"; }
+  else mc.style.display="none";
+  $("#sbSel").textContent = state.selected.size;
+  renderTree();
+}
+
+function loadModel(id){
+  const all = Object.values(ASSETS).flat();
+  const a = all.find(x => x.id === id);
+  if(!a) return;
+  hideOverlays();
+  const ov = $("#loadOverlay");
+  ov.classList.add("show");
+  $("#loadSub").textContent = "streaming " + a.n.toLowerCase().replace(/\s+/g,"_") + ".m2";
+  $("#vpTitle").textContent = a.n.toLowerCase().replace(/\s+/g,"_") + ".m2 · " + (8000+Math.floor(Math.random()*30000)).toLocaleString() + " tris";
+  logMsg("info", "Loading " + a.n + " [" + a.id + "]");
+  setTimeout(()=>{
+    ov.classList.remove("show");
+    if(a.q === "artifact"){ // simulate one encrypted asset
+      $("#errOverlay").classList.add("show");
+      logMsg("err", "FileDataID " + a.id + " lives in an encrypted section — TACT key not yet published");
+    } else {
+      logMsg("ok", a.n + " loaded · " + $("#vpTitle").textContent.split("· ")[1]);
+    }
+  }, 850);
+}
+function clearSearch(){ state.search=""; $("#browserSearch").value=""; renderTree(); }
+function hideOverlays(){ $("#loadOverlay").classList.remove("show"); $("#errOverlay").classList.remove("show"); }
+
+/* ---------- category rail ---------- */
+$$("#catRail .cat-chip").forEach(chip => chip.addEventListener("click", () => {
+  $$("#catRail .cat-chip").forEach(c=>c.classList.remove("active"));
+  chip.classList.add("active");
+  state.cat = chip.dataset.cat; state.search=""; $("#browserSearch").value="";
+  renderTree();
+}));
+$("#browserSearch").addEventListener("input", e => { state.search = e.target.value; renderTree(); });
+$("#globalSearch").addEventListener("input", e => {
+  state.search = e.target.value;
+  $("#browserSearch").value = e.target.value;
+  renderTree();
+});
+
+/* ---------- viewport scene ---------- */
+function renderScene(){
+  const grid = state.grid===false ? "" : `
+    <g opacity="0.5">
+      ${Array.from({length:11},(_,i)=>{const y=360+i*22-(i*i*0.6);const w=520-i*38;const x=480-w/2;return `<line x1="${x}" y1="${y}" x2="${x+w}" y2="${y}" stroke="#1b2a26" stroke-width="1"/>`}).join("")}
+      ${Array.from({length:11},(_,i)=>{const t=i/10;const xb=220+t*520;const xt=380+t*200;return `<line x1="${xb}" y1="488" x2="${xt}" y2="252" stroke="#1b2a26" stroke-width="1"/>`}).join("")}
+    </g>`;
+  const wire = state.shade==="wire";
+  const solid = state.shade==="solid";
+  const bodyFill = wire ? "none" : (solid ? "#2a2f3a" : "url(#bodyGrad)");
+  const bodyStroke = wire ? "#00e0a4" : (solid ? "#3a4150" : "#1a2e2a");
+  $("#scene").innerHTML = `
+  <svg viewBox="0 0 960 540" preserveAspectRatio="xMidYMid meet">
+    <defs>
+      <radialGradient id="bodyGrad" cx="42%" cy="30%" r="80%">
+        <stop offset="0%" stop-color="#3a4a5e"/><stop offset="55%" stop-color="#27313f"/><stop offset="100%" stop-color="#161c25"/>
+      </radialGradient>
+      <radialGradient id="lightPool" cx="50%" cy="50%" r="50%">
+        <stop offset="0%" stop-color="rgba(0,224,164,0.10)"/><stop offset="100%" stop-color="rgba(0,224,164,0)"/>
+      </radialGradient>
+    </defs>
+    <ellipse cx="480" cy="430" rx="240" ry="60" fill="url(#lightPool)"/>
+    ${grid}
+    <ellipse cx="480" cy="452" rx="92" ry="20" fill="#06090b" opacity="0.7"/>
+    <g transform="translate(480,250)" stroke="${bodyStroke}" stroke-width="${wire?1:1.5}" fill="${bodyFill}" stroke-linejoin="round">
+      <ellipse cx="0" cy="-118" rx="30" ry="34"/>
+      <path d="M-40 -82 Q0 -98 40 -82 L52 30 Q0 46 -52 30 Z"/>
+      <path d="M-40 -78 Q-72 -30 -64 60 L-44 58 Q-40 -10 -22 -64 Z"/>
+      <path d="M40 -78 Q72 -30 64 60 L44 58 Q40 -10 22 -64 Z"/>
+      <path d="M-30 36 Q-34 130 -30 196 L-8 196 Q-6 120 -4 40 Z"/>
+      <path d="M30 36 Q34 130 30 196 L8 196 Q6 120 4 40 Z"/>
+      ${wire?'':'<path d="M-40 -82 Q0 -98 40 -82 L44 -40 Q0 -28 -44 -40 Z" fill="rgba(0,224,164,0.06)" stroke="none"/>'}
+    </g>
+    ${wire?'<g transform="translate(480,250)" stroke="#00e0a4" stroke-width="0.5" opacity="0.5" fill="none"><path d="M-40-82L40-82M-46-10L46-10M-48 30L48 30M0-152L0 196M-22-64L-4 40M22-64L4 40"/></g>':''}
+  </svg>`;
+}
+
+/* ---------- viewport controls ---------- */
+function setCam(c){
+  $$(".tool-btn[data-cam]").forEach(b=>b.classList.toggle("active", b.dataset.cam===c));
+  logMsg("info","Camera → " + c);
+  $("#hudGizmo").textContent = "free";
+}
+function snapAxis(ax){ logMsg("info","Gizmo snap to " + ax + " axis"); $("#hudGizmo").textContent = ax+"-lock"; }
+function setShade(s){ state.shade=s; $$(".tool-btn[data-shade]").forEach(b=>b.classList.toggle("active", b.dataset.shade===s)); logMsg("info","Shading → "+s); renderScene(); }
+function toggleGrid(){ state.grid = !(state.grid!==false); $("#btnGrid").classList.toggle("active", state.grid!==false); renderScene(); logMsg("info","Grid " + (state.grid!==false?"on":"off")); }
+function toggleGizmo(){ const g=$("#gizmo"); const on=g.style.display!=="none"; g.style.display=on?"none":"block"; $("#btnGizmo").classList.toggle("active",!on); logMsg("info","Gizmo "+(on?"hidden":"shown")); }
+let lightModes=["dynamic","ambient","model","true"], lightIdx=0;
+function cycleLighting(){ lightIdx=(lightIdx+1)%lightModes.length; const m=lightModes[lightIdx]; $("#hudLight").textContent=m; $("#btnLight").lastChild.textContent=m.charAt(0).toUpperCase()+m.slice(1); logMsg("info","Lighting → "+m); }
+
+/* ---------- timeline ---------- */
+const CLIP_FRAMES = {0:1100,4:800,5:600,60:420,75:540,1:980,71:1900,69:600,6:360};
+function onClipChange(){
+  const v = $("#clipSel").value;
+  state.totalF = CLIP_FRAMES[v] || 1000;
+  state.frame = 0;
+  $("#scrubInput").max = state.totalF;
+  const label = $("#clipSel").selectedOptions[0].text.split(" ·")[0];
+  $(".tl-readout .muted").textContent = " / " + state.totalF + "f";
+  logMsg("info","Clip → " + label);
+  renderTicks(); updateScrub();
+}
+function renderTicks(){
+  const scrub = $("#scrub");
+  scrub.querySelectorAll(".scrub-tick,.scrub-key").forEach(e=>e.remove());
+  for(let i=1;i<10;i++){ const t=document.createElement("div"); t.className="scrub-tick"; t.style.left=(i*10)+"%"; scrub.appendChild(t); }
+  [12,34,58,81].forEach(p=>{ const k=document.createElement("div"); k.className="scrub-key"; k.style.left=p+"%"; scrub.appendChild(k); });
+}
+function togglePlay(){
+  state.playing=!state.playing;
+  $("#playBtn").classList.toggle("active", state.playing);
+  $("#playIcon").innerHTML = state.playing ? '<rect x="6" y="5" width="4" height="14"/><rect x="14" y="5" width="4" height="14"/>' : '<path d="M7 4l13 8-13 8z"/>';
+  logMsg("info", state.playing?"Playing":"Paused");
+}
+function stopAnim(){ state.playing=false; state.frame=0; $("#playBtn").classList.remove("active"); $("#playIcon").innerHTML='<path d="M7 4l13 8-13 8z"/>'; updateScrub(); logMsg("info","Stopped"); }
+function toggleLoop(){ state.loop=!state.loop; $("#loopBtn").classList.toggle("active",state.loop); }
+function stepClip(d){ const sel=$("#clipSel"); let i=sel.selectedIndex+d; if(i<0)i=sel.options.length-1; if(i>=sel.options.length)i=0; sel.selectedIndex=i; onClipChange(); }
+function onSpeed(){ state.speed=parseFloat($("#speed").value); $("#speedVal").textContent=state.speed.toFixed(1)+"×"; }
+function onScrub(){ state.frame=parseInt($("#scrubInput").value); updateScrub(); }
+function updateScrub(){
+  const pct = state.totalF? (state.frame/state.totalF*100):0;
+  $("#scrubFill").style.width=pct+"%";
+  $("#playhead").style.left=pct+"%";
+  $("#scrubInput").value=state.frame;
+  $("#frameNow").textContent=String(Math.floor(state.frame)).padStart(3,"0");
+  $("#timeNow").textContent=(state.frame/33.3).toFixed(2)+"s";
+}
+let lastT=performance.now();
+function tick(now){
+  const dt=now-lastT; lastT=now;
+  if(state.playing){
+    // advance the playhead at ~33.3 frames/sec scaled by playback speed
+    state.frame += dt*0.0333*state.speed*33.3;
+    if(state.frame>=state.totalF){ if(state.loop) state.frame=state.frame%state.totalF; else { state.frame=state.totalF; togglePlay(); } }
+    updateScrub();
+  }
+  $("#sbFps").textContent = (118 + Math.floor(Math.random()*6));
+  requestAnimationFrame(tick);
+}
+
+/* ---------- inspector tabs ---------- */
+$$("#tabs .tab").forEach(tab => { tab.tabIndex=0; tab.addEventListener("click",()=>switchTab(tab.dataset.tab)); tab.addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();switchTab(tab.dataset.tab);}}); });
+function switchTab(name){
+  $$("#tabs .tab").forEach(t=>t.classList.toggle("active", t.dataset.tab===name));
+  $$(".tab-pane").forEach(p=>p.classList.toggle("active", p.dataset.pane===name));
+}
+function toggleSection(h){ h.parentElement.classList.toggle("collapsed"); h.querySelector("svg").style.transform = h.parentElement.classList.contains("collapsed")?"rotate(-90deg)":""; }
+function toggleChk(el){ el.classList.toggle("on"); }
+
+/* ---------- equipment ---------- */
+const EQ_SLOTS = [
+  {s:"Head", i:"Helm of Domination", q:"epic"},{s:"Shoulder", i:"Spaulders of Valor", q:"rare"},
+  {s:"Chest", i:"Bloodfang Chestpiece", q:"epic"},{s:"Shirt", i:"", q:null},
+  {s:"Tabard", i:"Tabard of the Hand", q:"uncommon"},{s:"Belt", i:"Girdle of the Mentor", q:"rare"},
+  {s:"Legs", i:"Bloodfang Pants", q:"epic"},{s:"Boots", i:"Bloodfang Boots", q:"epic"},
+  {s:"Bracers", i:"", q:null},{s:"Gloves", i:"Bloodfang Gloves", q:"epic"},
+  {s:"Cape", i:"Cloak of the Shrouded Mists", q:"rare"},{s:"Main-hand", i:"Ashbringer", q:"legendary"},
+  {s:"Off-hand", i:"", q:null},{s:"Ranged", i:"", q:null},
+];
+function renderEq(){
+  $("#eqGrid").innerHTML = EQ_SLOTS.map(e=>`
+    <div class="eq-slot ${e.i?'':'eq-empty'}" onclick="logMsg('info','Open item picker — ${e.s}')">
+      <span class="eq-ico" style="${e.q?'color:'+(QCOLOR[e.q]):''}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2l9 5v10l-9 5-9-5V7z"/></svg></span>
+      <span class="eq-meta"><span class="eq-slotname">${e.s}</span><span class="eq-item" style="${e.q?'color:'+QCOLOR[e.q]:''}">${e.i||"— empty —"}</span></span>
+    </div>`).join("");
+}
+
+/* ---------- materials ---------- */
+const MATS = [
+  {n:"BloodElfFemaleSkin00_02.blp", id:119412, c:"#7a5a48", flags:["diffuse"]},
+  {n:"BloodElfFemaleFaceLower03.blp", id:119418, c:"#8a6a54", flags:["diffuse","blend"]},
+  {n:"BloodElfFemaleHair05.blp", id:119440, c:"#1a1a1a", flags:["diffuse","alpha"]},
+  {n:"Helm_Plate_DK.blp", id:298780, c:"#4a4a55", flags:["diffuse","spec"]},
+  {n:"Ashbringer_Blade.blp", id:191920, c:"#e6cc80", flags:["diffuse","emissive"]},
+  {n:"Cape_Mists.blp", id:165130, c:"#3a4a5a", flags:["diffuse","alpha"]},
+];
+function renderMats(){
+  $("#matList").innerHTML = MATS.map(m=>`
+    <div class="mat-row">
+      <div class="mat-thumb" style="background:${m.c}"></div>
+      <div class="mat-info"><div class="mat-name">${m.n}</div><div class="mat-id">FDID ${m.id}</div></div>
+      <div class="mat-flags">${m.flags.map(f=>`<span class="flag">${f}</span>`).join("")}</div>
+    </div>`).join("");
+}
+
+/* ---------- skeleton ---------- */
+const BONES = [
+  {n:"Root", d:0},{n:"Pelvis", d:1},{n:"Spine_01", d:2},{n:"Spine_02", d:3},
+  {n:"Neck", d:4},{n:"Head", d:5},{n:"Clavicle_L", d:4},{n:"UpperArm_L", d:5},
+  {n:"Forearm_L", d:6},{n:"Hand_L", d:7},
+  {n:"Clavicle_R", d:4},{n:"UpperArm_R", d:5},{n:"Forearm_R", d:6},{n:"Hand_R", d:7},
+  {n:"Thigh_R", d:2},{n:"Calf_R", d:3},{n:"Foot_R", d:4},
+];
+const ATTACH = [
+  {n:"Helm", b:"Head"},{n:"Shoulder_L", b:"Clavicle_L"},{n:"Shoulder_R", b:"Clavicle_R"},
+  {n:"Hand_L", b:"Hand_L"},{n:"Hand_R", b:"Hand_R"},{n:"Weapon_L", b:"Hand_L"},
+  {n:"Weapon_R", b:"Hand_R"},{n:"Back", b:"Spine_02"},{n:"Quiver", b:"Pelvis"},
+  {n:"Mount_Main", b:"Root"},{n:"Ground", b:"Root"},
+];
+function renderBones(){
+  $("#boneTree").innerHTML = BONES.map((b,i)=>`
+    <div class="row" style="padding-left:${4+b.d*12}px" onclick="logMsg('info','Bone selected: ${b.n}')">
+      <svg class="chev ${i<BONES.length-1?'':'hidden'}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 6l6 6-6 6"/></svg>
+      <svg class="ricon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="3"/></svg>
+      <span class="rlabel">${b.n}</span><span class="rid">${i}</span>
+    </div>`).join("");
+}
+function renderAttach(){
+  $("#attachList").innerHTML = ATTACH.map(a=>`
+    <div class="attach-pt"><span class="ap-dot"></span><span class="ap-name">${a.n}</span><span class="ap-bone">→ ${a.b}</span></div>`).join("");
+}
+
+/* ---------- menus ---------- */
+$$("#menubar .menu-item").forEach(mi => {
+  mi.addEventListener("click", e => {
+    if(e.target.closest(".dd-row")) return;
+    const id = "m-" + mi.dataset.menu;
+    const dd = $("#"+id);
+    const wasOpen = dd.classList.contains("show");
+    closeMenus();
+    if(!wasOpen){ dd.classList.add("show"); mi.classList.add("open"); }
+  });
+});
+function closeMenus(){ $$(".dropdown").forEach(d=>d.classList.remove("show")); $$(".menu-item").forEach(m=>m.classList.remove("open")); }
+document.addEventListener("click", e => { if(!e.target.closest(".menu-item")) closeMenus(); });
+
+/* ---------- source toggle ---------- */
+function toggleSource(){
+  const p=$("#sourcePill");
+  if(p.classList.toggle("ptr")){
+    $("#srcName").textContent="PTR · 12.1.0.58401"; $("#sbProduct").textContent="PTR";
+    $("#sbBuild").textContent="12.1.0.58401"; $("#hudBuild").textContent="12.1.0.58401";
+    logMsg("warn","Switched to PTR (wowt) — restarting CASC…");
+  } else {
+    $("#srcName").textContent="retail · 12.0.7.58238"; $("#sbProduct").textContent="retail";
+    $("#sbBuild").textContent="12.0.7.58238"; $("#hudBuild").textContent="12.0.7.58238";
+    logMsg("info","Switched to retail (wow)");
+  }
+}
+
+/* ---------- log/console ---------- */
+function logMsg(tag, msg){
+  const t = new Date().toLocaleTimeString("en-GB");
+  const target = (tag==="info") ? "#logMessages" : "#logExport";
+  const line = `<div class="log-line"><span class="log-time">${t}</span><span class="log-tag ${tag}">[${tag.toUpperCase()}]</span><span class="log-msg">${msg.replace(/(\[\d+\]|\d{3,})/g,'<span class="hl">$1</span>')}</span></div>`;
+  // route: info → messages, ok/warn/err → export
+  if(tag==="info"){ $("#logMessages").insertAdjacentHTML("beforeend", line); $("#logMessages").scrollTop=9e9; }
+  else { $("#logExport").insertAdjacentHTML("beforeend", line); $("#logExport").scrollTop=9e9; }
+  // also surface ok/warn/err briefly by expanding if collapsed and on export
+}
+function setLogTab(t){
+  state.logTab=t;
+  $$(".log-tab").forEach(x=>x.classList.toggle("active", x.dataset.log===t));
+  $("#logExport").style.display = t==="export"?"block":"none";
+  $("#logMessages").style.display = t==="messages"?"block":"none";
+  $("#logQueue").style.display = t==="queue"?"block":"none";
+  if($("#logStrip").classList.contains("collapsed")) toggleLog();
+}
+function toggleLog(){
+  const s=$("#logStrip").classList.toggle("collapsed");
+  $("#logChev").innerHTML = s ? '<path d="M6 15l6-6 6 6"/>' : '<path d="M6 9l6 6 6-6"/>';
+}
+function clearLog(){
+  const id = state.logTab==="export"?"#logExport":(state.logTab==="messages"?"#logMessages":null);
+  if(id) $(id).innerHTML="";
+}
+
+/* ---------- batch queue ---------- */
+let QUEUE = [
+  {asset:"Blood Elf Female", id:119376, fmt:"FBX · all takes", dest:"…\\bloodelf_female\\", status:"done", prog:100},
+  {asset:"The Lich King", id:307418, fmt:"Image Seq · EXR 4K", dest:"…\\lichking_seq\\", status:"run", prog:62},
+  {asset:"Ashbringer", id:191902, fmt:"OBJ · static", dest:"…\\ashbringer.obj", status:"queued", prog:0},
+];
+function renderQueue(){
+  $("#queueBody").innerHTML = QUEUE.map(j=>`
+    <tr>
+      <td class="qt-asset">${j.asset} <span class="qt-mono">[${j.id}]</span></td>
+      <td class="qt-mono">${j.fmt}</td>
+      <td class="qt-mono">${j.dest}</td>
+      <td><span class="qstatus ${j.status}"><span class="qs-dot"></span>${j.status}</span></td>
+      <td><span class="qprog"><span class="qprog-fill" style="width:${j.prog}%"></span></span> <span class="qt-mono">${j.prog}%</span></td>
+    </tr>`).join("");
+  $("#queueBadge").textContent = "(" + QUEUE.length + ")";
+}
+function addToQueue(){
+  const sel = [...state.selected];
+  const name = $(".row.sel .rlabel")?.textContent || "Blood Elf Female";
+  const id = sel[0] || 119376;
+  const fmtName = {fbx:"FBX · all takes",obj:"OBJ · static",seq:"Image Seq · PNG",shot:"Screenshot · PNG",video:"Video · AVI"}[state.fmt];
+  QUEUE.push({asset:name, id, fmt:fmtName, dest:$("#destPath").value.replace(/^.*exports/,"…"), status:"queued", prog:0});
+  renderQueue();
+  logMsg("ok", name + " [" + id + "] added to batch queue (" + QUEUE.length + " jobs)");
+  setLogTab("queue");
+}
+
+/* ---------- export drawer ---------- */
+const FMT_OPTS = {
+  fbx:{label:"FBX options", takes:true, rows:[
+    ["chk:Include mesh","on"],["chk:Include skeleton","on"],["chk:Include skin weights","on"],
+    ["num:Scale factor","91.44"],["sel:Up axis","Y-up,Z-up"],["chk:Embed textures","off"]]},
+  obj:{label:"OBJ options", takes:false, rows:[
+    ["chk:Export MTL","on"],["chk:Triangulate","on"],["sel:Pose","Bind pose,Current frame"],["num:Scale factor","91.44"]]},
+  seq:{label:"Image sequence options", takes:false, rows:[
+    ["sel:Codec","PNG,JPG,EXR"],["sel:Resolution","1920×1080,3840×2160,1280×720,Custom"],
+    ["num:FPS","30"],["txt:Frame range","0 – 1100"],["chk:Transparent background","on"],["sel:Numbering","0001…,0…"]]},
+  shot:{label:"Screenshot options", takes:false, rows:[
+    ["sel:Resolution","1920×1080,3840×2160,Viewport"],["chk:Transparent background","on"],["chk:Hide grid","on"]]},
+  video:{label:"Video (AVI) options", takes:false, rows:[
+    ["sel:Resolution","1920×1080,1280×720"],["num:FPS","30"],["txt:Frame range","0 – 1100"],["sel:Codec","Uncompressed,Xvid"]]},
+};
+function selectFmt(f){
+  state.fmt=f;
+  $$(".fmt-opt").forEach(o=>o.classList.toggle("sel", o.dataset.fmt===f));
+  const cfg = FMT_OPTS[f];
+  $("#optLabel").textContent = cfg.label;
+  $("#takesGroup").style.display = cfg.takes ? "block":"none";
+  $("#optGrid").innerHTML = cfg.rows.map(r=>{
+    const [type,label] = r[0].split(":"); const val=r[1];
+    if(type==="chk") return `<div class="opt-row"><label><span class="chk ${val==='on'?'on':''}" onclick="toggleChk(this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 12l5 5L19 7"/></svg></span>${label}</label></div>`;
+    if(type==="sel") return `<div class="opt-row"><label>${label}</label><select>${val.split(",").map(o=>`<option>${o}</option>`).join("")}</select></div>`;
+    if(type==="num") return `<div class="opt-row"><label>${label}</label><input type="number" value="${val}"></div>`;
+    return `<div class="opt-row"><label>${label}</label><input type="text" value="${val}"></div>`;
+  }).join("");
+  // warnings per format
+  if(f==="seq"){ $("#warnText").textContent="Output folder is not empty (12 files). Existing frames will be overwritten."; $("#warnBox").style.display="flex"; $("#diskText").textContent="Estimated 1.1 GB · 248 GB free on F:\\ — enough space.";}
+  else if(f==="fbx"){ $("#warnText").textContent="6 animation takes selected — large file (~38 MB). FBX runs as a background job."; $("#warnBox").style.display="flex"; $("#diskText").textContent="Estimated 38 MB · 248 GB free on F:\\ — enough space.";}
+  else { $("#warnBox").style.display="none"; $("#diskText").textContent="Estimated 6.4 MB · 248 GB free on F:\\ — enough space.";}
+}
+const TAKES = [["Stand",1100],["Walk",800],["Run",600],["Attack1H",420],["SpellCast",540],["EmoteDance",1900]];
+function renderTakes(){
+  $("#takeList").innerHTML = TAKES.map((t,i)=>`
+    <div class="take-row"><span class="chk ${i<4?'on':''}" onclick="toggleChk(this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 12l5 5L19 7"/></svg></span>
+    <span class="tk-name">${t[0]} [${[0,4,5,60,75,71][i]}]</span><span class="tk-frames">${t[1]}f</span></div>`).join("");
+}
+function openExport(pre){
+  $("#exportScrim").classList.add("show");
+  $("#exportDrawer").classList.add("show");
+  $("#progArea").classList.remove("show");
+  $("#resultLog").classList.remove("show");
+  if(pre==="textures"){ selectFmt("shot"); } else { selectFmt(state.fmt); }
+  logMsg("info","Export drawer opened");
+}
+function closeExport(){ $("#exportScrim").classList.remove("show"); $("#exportDrawer").classList.remove("show"); }
+function applyPreset(){
+  const p=$("#presetSel").value;
+  const map={"fbx-anim":"fbx","seq-turntable":"seq","seq-exr":"seq","obj-static":"obj"};
+  if(map[p]){ selectFmt(map[p]); logMsg("info","Preset applied: "+$("#presetSel").selectedOptions[0].text); }
+}
+function runExport(){
+  const btn=$("#exportGoBtn"); btn.disabled=true;
+  $("#progArea").classList.add("show");
+  $("#resultLog").classList.remove("show");
+  const fill=$("#progFill"); const pct=$("#progPct"); const stage=$("#progStage");
+  const stages = state.fmt==="fbx"
+    ? ["Writing mesh…","Writing skeleton…","Writing skin weights…","Writing animation takes…","Finalizing FBX…"]
+    : state.fmt==="seq" ? ["Rendering frames…","Encoding PNG…","Writing sequence…"]
+    : ["Rendering…","Writing file…"];
+  let p=0;
+  logMsg("ok","Export started · " + state.fmt.toUpperCase() + " → " + $("#destPath").value);
+  const iv=setInterval(()=>{
+    p+=2+Math.random()*4; if(p>100)p=100;
+    fill.style.width=p+"%"; pct.textContent=Math.floor(p)+"%";
+    stage.textContent = stages[Math.min(stages.length-1, Math.floor(p/100*stages.length))];
+    if(p>=100){
+      clearInterval(iv); btn.disabled=false;
+      stage.textContent="Done";
+      const path=$("#destPath").value;
+      $("#resultLog").classList.add("show");
+      $("#resultLog").innerHTML = `
+        <div class="rl-line rl-ok">✓ Export complete</div>
+        <div class="rl-line">Format: <span class="rl-path">${state.fmt.toUpperCase()}</span></div>
+        <div class="rl-line">Output: <span class="rl-path">${path}</span></div>
+        <div class="rl-line">Sidecar: <span class="rl-path">${path}_export.log</span></div>`;
+      logMsg("ok","Export complete → " + path);
+    }
+  }, 120);
+}
+
+/* ---------- command palette ---------- */
+const COMMANDS = [
+  {label:"Load World of Warcraft", cat:"File", run:loadWoW, icon:'<path d="M3 7h18v12H3z"/><path d="M3 7l3-3h6l2 2h7"/>'},
+  {label:"Export…", cat:"File", run:()=>openExport(), icon:'<path d="M12 3v12M8 11l4 4 4-4M5 19h14"/>'},
+  {label:"Take screenshot", cat:"File", run:screenshot, icon:'<rect x="3" y="6" width="18" height="13" rx="2"/><circle cx="12" cy="12" r="3"/>'},
+  {label:"Add selection to batch queue", cat:"Export", run:()=>{openExport();addToQueue();}, icon:'<path d="M12 5v14M5 12h14"/>'},
+  {label:"Open settings", cat:"App", run:openSettings, icon:'<circle cx="12" cy="12" r="3"/>'},
+  {label:"Toggle grid", cat:"View", run:toggleGrid, icon:'<path d="M3 3h18v18H3zM9 3v18M15 3v18M3 9h18M3 15h18"/>'},
+  {label:"Toggle axis gizmo", cat:"View", run:toggleGizmo, icon:'<path d="M12 12V4M12 12h8M12 12L5 19"/>'},
+  {label:"Camera: Front", cat:"Cam", run:()=>setCam('front'), icon:'<rect x="3" y="6" width="18" height="13" rx="2"/>'},
+  {label:"Camera: Side", cat:"Cam", run:()=>setCam('side'), icon:'<rect x="3" y="6" width="18" height="13" rx="2"/>'},
+  {label:"Play / Pause animation", cat:"Anim", run:togglePlay, icon:'<path d="M7 4l13 8-13 8z"/>'},
+  {label:"Switch to PTR", cat:"Data", run:toggleSource, icon:'<ellipse cx="12" cy="5" rx="8" ry="3"/><path d="M4 5v14c0 1.7 3.6 3 8 3s8-1.3 8-3V5"/>'},
+  {label:"Randomise appearance", cat:"Char", run:()=>logMsg("info","Randomised appearance"), icon:'<path d="M3 3l18 18M9 3h12v12"/>'},
+  {label:"Wireframe shading", cat:"View", run:()=>setShade('wire'), icon:'<path d="M12 2l9 5v10l-9 5-9-5V7z"/>'},
+];
+let cmdFiltered=COMMANDS, cmdIdx=0;
+function openPalette(){ $("#cmdScrim").classList.add("show"); $("#cmdInput").value=""; cmdFiltered=COMMANDS; cmdIdx=0; renderCmds(); setTimeout(()=>$("#cmdInput").focus(),20); }
+function closePalette(){ $("#cmdScrim").classList.remove("show"); }
+function renderCmds(){
+  $("#cmdList").innerHTML = cmdFiltered.map((c,i)=>`
+    <div class="cmd-item ${i===cmdIdx?'active':''}" data-i="${i}" onmousedown="runCmd(${i})">
+      <svg class="ci-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">${c.icon}</svg>
+      <span class="ci-label">${c.label}</span><span class="ci-cat">${c.cat}</span>
+    </div>`).join("") || `<div class="cmd-item"><span class="ci-label" style="color:var(--text-muted)">No matching command</span></div>`;
+}
+$("#cmdInput").addEventListener("input", e=>{
+  const q=e.target.value.toLowerCase();
+  cmdFiltered = q ? COMMANDS.filter(c=>fuzzy(q,c.label)||c.label.toLowerCase().includes(q)||c.cat.toLowerCase().includes(q)) : COMMANDS;
+  cmdIdx=0; renderCmds();
+});
+$("#cmdInput").addEventListener("keydown", e=>{
+  if(e.key==="ArrowDown"){ e.preventDefault(); cmdIdx=Math.min(cmdFiltered.length-1,cmdIdx+1); renderCmds(); }
+  else if(e.key==="ArrowUp"){ e.preventDefault(); cmdIdx=Math.max(0,cmdIdx-1); renderCmds(); }
+  else if(e.key==="Enter"){ e.preventDefault(); runCmd(cmdIdx); }
+  else if(e.key==="Escape"){ closePalette(); }
+});
+function runCmd(i){ const c=cmdFiltered[i]; if(c&&c.run){ closePalette(); c.run(); } }
+$("#cmdScrim").addEventListener("click", e=>{ if(e.target.id==="cmdScrim") closePalette(); });
+
+/* ---------- settings ---------- */
+function openSettings(){ $("#settingsModal").classList.add("show"); }
+function closeSettings(){ $("#settingsModal").classList.remove("show"); }
+$$("#settingsNav .settings-nav-item").forEach(item=>item.addEventListener("click",()=>{
+  $$("#settingsNav .settings-nav-item").forEach(i=>i.classList.remove("active"));
+  item.classList.add("active");
+  $$(".settings-section").forEach(s=>s.classList.toggle("active", s.dataset.setpane===item.dataset.set));
+}));
+$("#settingsModal").addEventListener("click", e=>{ if(e.target.id==="settingsModal") closeSettings(); });
+
+/* ---------- misc actions ---------- */
+function loadWoW(){ closeMenus(); logMsg("ok","CASC connected · retail (wow) · 1,892,043 files indexed"); }
+function screenshot(){ logMsg("ok","Screenshot saved → F:\\WMW 2.0\\exports\\shot_0042.png"); }
+
+/* ---------- keyboard shortcuts ---------- */
+document.addEventListener("keydown", e=>{
+  const inField = /INPUT|SELECT|TEXTAREA/.test(document.activeElement.tagName);
+  if((e.ctrlKey||e.metaKey) && e.key.toLowerCase()==="k"){ e.preventDefault(); openPalette(); return; }
+  if((e.ctrlKey||e.metaKey) && e.key.toLowerCase()==="e"){ e.preventDefault(); openExport(); return; }
+  if((e.ctrlKey||e.metaKey) && e.key.toLowerCase()==="f"){ e.preventDefault(); $("#globalSearch").focus(); return; }
+  if((e.ctrlKey||e.metaKey) && e.key.toLowerCase()==="o"){ e.preventDefault(); loadWoW(); return; }
+  if(e.key==="Escape"){ closeExport(); closeSettings(); closePalette(); closeMenus(); return; }
+  if(inField) return;
+  switch(e.key){
+    case " ": e.preventDefault(); togglePlay(); break;
+    case ".": stopAnim(); break;
+    case ",": stepClip(-1); break;
+    case ";": stepClip(1); break;
+    case "1": setCam("front"); break;
+    case "2": setCam("back"); break;
+    case "3": setCam("side"); break;
+    case "0": setCam("reset"); break;
+    case "g": case "G": toggleGrid(); break;
+    case "x": case "X": toggleGizmo(); break;
+    case "F12": e.preventDefault(); screenshot(); break;
+  }
+});
+
+/* ---------- init ---------- */
+state.grid=true; state.shade="tex";
+renderScene(); renderTree(); renderEq(); renderMats(); renderBones(); renderAttach(); renderTakes(); renderQueue(); renderTicks(); updateScrub();
+logMsg("ok","CASC connected · retail (wow) · build 12.0.7.58238 · 1,892,043 files");
+logMsg("info","Workspace restored · Blood Elf Female [119376] loaded");
+requestAnimationFrame(tick);
+</script>
+</body>
+</html>

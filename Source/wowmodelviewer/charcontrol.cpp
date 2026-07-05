@@ -28,6 +28,12 @@ EVT_SPIN(ID_TABARD_BORDERCOLOR, CharControl::OnTabardSpin)
 EVT_SPIN(ID_TABARD_BACKGROUND, CharControl::OnTabardSpin)
 
 EVT_BUTTON(ID_MOUNT, CharControl::OnButton)
+EVT_BUTTON(ID_CLEAR_EQUIPMENT, CharControl::OnButton) // in-panel "Clear all equipment" button
+
+// Per-slot "X" remove buttons occupy the ID_EQUIPMENT + 2000 + slot range (slot buttons are
+// ID_EQUIPMENT + slot, level combos ID_EQUIPMENT + 1000 + slot). One handler for all of them.
+EVT_COMMAND_RANGE(ID_EQUIPMENT + 2000, ID_EQUIPMENT + 2000 + NUM_CHAR_SLOTS - 1,
+                  wxEVT_COMMAND_BUTTON_CLICKED, CharControl::OnClearSlot)
 
 EVT_BUTTON(ID_EQUIPMENT + CS_HEAD, CharControl::OnButton)
 EVT_BUTTON(ID_EQUIPMENT + CS_SHOULDER, CharControl::OnButton)
@@ -78,12 +84,13 @@ CharControl::CharControl(wxWindow* parent, wxWindowID id)
 
   for (ssize_t i = 0; i < NUM_CHAR_SLOTS; i++) {
     buttons[i] = NULL;
+    clearButtons[i] = NULL;
     labels[i] = NULL;
   }
 
   top->Add(new wxStaticText(this, -1, _("Equipment"), wxDefaultPosition, wxSize(200, 20), wxALIGN_CENTRE), wxSizerFlags().Border(wxTOP, 5));
-  auto * gs2 = new wxFlexGridSizer(3, 5, 5);
-  gs2->AddGrowableCol(1);
+  auto * gs2 = new wxFlexGridSizer(4, 5, 5);
+  gs2->AddGrowableCol(3);
 
 #define ADD_CONTROLS(type, caption) \
     { \
@@ -91,7 +98,10 @@ CharControl::CharControl(wxWindow* parent, wxWindowID id)
   gs2->Add(levelboxes[type]=new wxComboBox(this, ID_EQUIPMENT + 1000 + type, caption)); \
   levelboxes[type]->SetMinSize(wxSize(15, -1)); \
   levelboxes[type]->SetMaxSize(wxSize(15, -1)); \
-  gs2->Add(labels[type]=new wxStaticText(this, -1, _("---- None ----"))); \
+  clearButtons[type]=new wxButton(this, ID_EQUIPMENT + 2000 + type, wxT("X"), wxDefaultPosition, wxSize(24, -1)); \
+  clearButtons[type]->SetToolTip(_("Remove this item")); \
+  gs2->Add(clearButtons[type], wxSizerFlags().Align(wxALIGN_CENTER_VERTICAL)); \
+  gs2->Add(labels[type]=new wxStaticText(this, -1, _("---- None ----")), wxSizerFlags().Align(wxALIGN_CENTER_VERTICAL)); \
     }
 
   ADD_CONTROLS(CS_HEAD, _("Head"))
@@ -115,6 +125,12 @@ CharControl::CharControl(wxWindow* parent, wxWindowID id)
 #undef ADD_CONTROLS
 
   top->Add(gs2, wxSizerFlags(1).Align(wxALIGN_CENTER));
+
+  // Strip every equipped item at once (same action as the Character > Clear Equipment menu / F9),
+  // exposed here as a button so it is discoverable right beside the slots.
+  auto * clearAllBtn = new wxButton(this, ID_CLEAR_EQUIPMENT, _("Clear all equipment"));
+  clearAllBtn->SetToolTip(_("Remove every equipped item (shortcut: F9)"));
+  top->Add(clearAllBtn, wxSizerFlags(1).Align(wxALIGN_CENTRE).Border(wxTOP, 6));
 
   // Create our tabard customisation spin buttons
   auto * gs3 = new wxGridSizer(3);
@@ -271,6 +287,8 @@ void CharControl::UpdateModel(Attachment *a)
     {
       levelboxes[i]->Enable(false);
     }
+    if (clearButtons[i]) // nothing equipped yet -> nothing to remove
+      clearButtons[i]->Enable(false);
   }
   RefreshModel();
 }
@@ -299,7 +317,11 @@ void CharControl::OnCheck(wxCommandEvent &event)
   else if (ID == ID_AUTOHIDE_GEOSETS_FOR_HEAD_ITEMS)
     model->cd.autoHideGeosetsForHeadItems = event.IsChecked();
 
-  //  Update controls associated
+  //  Update controls associated. RefreshModel() re-runs model->refresh() so the flags we just
+  //  changed actually take effect -- every option here (show hair/ears/facial-hair/feet/underwear,
+  //  eye glow, head-item auto-hide) is applied by the geoset pass inside refresh(). Without it the
+  //  menu item toggled but nothing on the model changed.
+  RefreshModel();
   RefreshEquipment();
   g_modelViewer->UpdateControls();
   // ----
@@ -335,6 +357,9 @@ void CharControl::RefreshEquipment()
           levelboxes[i]->Enable(false);
         }
       }
+
+      if (clearButtons[i]) // enable the "X" only when there is actually something to remove
+        clearButtons[i]->Enable(item && item->id() != 0);
 
       if (item && (i == CS_TABARD) && (model->td.showCustom == true))
       {
@@ -405,6 +430,23 @@ void CharControl::OnButton(wxCommandEvent &event)
       break;
     }
   }
+}
+
+void CharControl::OnClearSlot(wxCommandEvent &event)
+{
+  if (!model)
+    return;
+  const int slot = event.GetId() - (ID_EQUIPMENT + 2000);
+  if (slot < 0 || slot >= NUM_CHAR_SLOTS)
+    return;
+  WoWItem * item = model->getItem((CharSlots)slot);
+  if (!item || item->id() == 0)
+    return; // nothing equipped in this slot -> nothing to do (avoids a wasted model refresh)
+  item->setId(0);
+  RefreshEquipment();
+  RefreshModel();
+  if (g_modelViewer)
+    g_modelViewer->UpdateControls();
 }
 
 void CharControl::OnItemLevelChange(wxCommandEvent& event)

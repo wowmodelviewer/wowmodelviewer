@@ -16,12 +16,18 @@ set(src  AnimationExportChoiceDialog.cpp
          CharDetailsCustomizationChoice.cpp
          CharDetailsFrame.cpp
          ClientChoiceDialog.cpp
+         ColorPickerDialog.cpp
          DisplaySettings.cpp
          effects.cpp
+         ExportJobManager.cpp
+         ExportProgressDialog.cpp
          ExportSettings.cpp
          filecontrol.cpp
          GeneralSettings.cpp
          imagecontrol.cpp
+         ImageSequenceDialog.cpp
+         ImageSequenceExporter.cpp
+         MiniExr.cpp
          ItemImporterDialog.cpp
          itemselection.cpp
          lightcontrol.cpp
@@ -30,7 +36,6 @@ set(src  AnimationExportChoiceDialog.cpp
          LogStackWalker.cpp
          main.cpp
          maptile.cpp
-         modelbankcontrol.cpp
          modelcanvas.cpp
          modelcontrol.cpp
          modelviewer.cpp
@@ -51,13 +56,19 @@ set(headers AnimationExportChoiceDialog.h
             CharDetailsCustomizationChoice.h
             CharDetailsFrame.h
             ClientChoiceDialog.h
+            ColorPickerDialog.h
             DisplaySettings.h
             effects.h
             enums.h
+            ExportJobManager.h
+            ExportProgressDialog.h
             ExportSettings.h
             filecontrol.h
             GeneralSettings.h
             imagecontrol.h
+            ImageSequenceDialog.h
+            ImageSequenceExporter.h
+            MiniExr.h
             ItemImporterDialog.h
             itemselection.h
             lightcontrol.h
@@ -65,7 +76,6 @@ set(headers AnimationExportChoiceDialog.h
             liquid.h
             LogStackWalker.h
             maptile.h
-            modelbankcontrol.h
             modelcanvas.h
             modelcontrol.h
             modelviewer.h

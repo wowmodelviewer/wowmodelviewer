@@ -30,6 +30,7 @@ protected:
   GLenum    m_texFormat;
 
   bool    m_FBO;
+  bool    m_floatFormat; // RGBA16F target for HDR/EXR capture (default false = RGBA8)
 
 public:
 
@@ -46,6 +47,7 @@ public:
     nHeight = 0;
 
     m_FBO = false;
+    m_floatFormat = false;
     m_frameBuffer = 0;
     m_depthRenderBuffer = 0;
     m_texFormat = 0;
@@ -56,7 +58,7 @@ public:
       Shutdown();
   }
 
-  void Init(int width, int height, bool fboMode);
+  void Init(int width, int height, bool fboMode, bool floatFormat = false);
   void Shutdown();
 
   void BeginRender();

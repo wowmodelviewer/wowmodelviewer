@@ -45,7 +45,12 @@
 
 // Beginning of implementation
 //--------------------------------------------------------------------
-#define SCALE_FACTOR 50.0f
+// WoW model units are yards; the scene is declared in centimetres (see createFBXHeaders), so
+// scale by 1 yard = 91.44 cm. This makes a ~2-yard humanoid export at a realistic ~1.8 m in
+// every DCC instead of the previous arbitrary 50x (which produced ~1 m characters). Applied
+// uniformly to vertices, bone pivots, skeleton sizes and animation translation keys.
+// (Was 50.0f; bumping it changes the real-world size of exports vs. earlier WMV builds.)
+#define SCALE_FACTOR 91.44f
 
 // Namespaces used
 //--------------------------------------------------------------------
@@ -57,10 +62,10 @@
 namespace FBXHeaders
 {
   bool createFBXHeaders(FbxString fileVersion, QString l_FileName, FbxManager* &l_Manager, FbxExporter* &l_Exporter, FbxScene* &l_Scene);
-  FbxNode* createMesh(FbxManager* &l_manager, FbxScene* &l_scene, WoWModel* model, const glm::mat4 & matrix = glm::mat4(1.0f), const glm::vec3 & offset = glm::vec3(0.0f));
+  FbxNode* createMesh(FbxManager* &l_manager, FbxScene* &l_scene, WoWModel* model, const glm::mat4 & matrix = glm::mat4(1.0f), const glm::vec3 & offset = glm::vec3(0.0f), bool addUV2 = false);
   void createSkeleton(WoWModel* l_model, FbxScene* &l_scene, FbxNode* &l_skeletonNode, std::map<int, FbxNode*> &l_boneNodes);
   void storeBindPose(FbxScene* &l_scene, std::vector<FbxCluster*> l_boneClusters, FbxNode* l_meshNode);
-  void storeRestPose(FbxScene* &l_scene, FbxNode* &l_SkeletonRoot);
+  void storeRestPose(FbxScene* &l_scene, std::map<int, FbxNode*>& l_boneNodes);
   void createAnimation(WoWModel *l_model, FbxScene *& l_scene, QString animName, ModelAnimation cur_anim, std::map<int, FbxNode*>& skeleton);
 }
 

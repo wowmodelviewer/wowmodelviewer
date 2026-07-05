@@ -1,6 +1,9 @@
 #include "modelcanvas.h"
 
+#include "MiniExr.h"
 #include "ximage.h"
+#include <vector>
+#include <algorithm>
 #include <QImage>
 #include <QImageWriter>
 #include <QImageReader>
@@ -963,7 +966,7 @@ inline void ModelCanvas::RenderModel()
     }
   }
 
-  
+
   // Finished rendering, swap it into our front buffer (to the screen)
   //glFlush();
   //glFinish();
@@ -1753,6 +1756,131 @@ void ModelCanvas::Screenshot(const wxString fn, int x, int y)
 
   // Set back to normal
   glPixelStorei(GL_PACK_ALIGNMENT, 4);
+}
+
+// Render the current model off-screen at an arbitrary resolution and write one image-sequence
+// frame (0=PNG/RGBA, 1=JPG/RGB, 2=EXR/float). All GL work runs on the main/GUI thread.
+//
+// Transparency: WoW models draw with MANY blend modes, so the framebuffer's own alpha channel is
+// NOT a clean matte -- trusting it makes opaque pixels semi-transparent and the model looks
+// "see-through". So for a transparent export we never read that alpha; instead we render the model
+// twice (once over BLACK, once over WHITE) and reconstruct true coverage and straight (un-
+// premultiplied) colour: over black a pixel = a*C, over white = a*C + (1-a), so
+// a = 1 - (white - black) and C = black / a. This is correct for every blend mode.
+bool ModelCanvas::CaptureSequenceFrame(const wxString & fn, int w, int h, int imgFormat, bool transparent)
+{
+  if (!model_)
+    return false;
+
+  SetCurrent();
+  glPixelStorei(GL_PACK_ALIGNMENT, 1);
+  const bool wantFloat = (imgFormat == 2);
+
+  delete rt;
+  rt = 0;
+
+  int outW = w, outH = h;
+  const bool useFBO = (video.supportPBO || video.supportFBO);
+  if (useFBO)
+  {
+    rt = new (std::nothrow) RenderTexture();
+    if (!rt)
+    {
+      LOG_ERROR << "[imgseq] could not create render texture";
+      glPixelStorei(GL_PACK_ALIGNMENT, 4);
+      return false;
+    }
+    rt->Init(w, h, video.supportFBO, wantFloat);
+    outW = rt->nWidth;
+    outH = rt->nHeight;
+  }
+  else
+  {
+    int sc[4]; glGetIntegerv(GL_VIEWPORT, sc); outW = sc[2]; outH = sc[3];
+  }
+
+  // Render the model over a solid (r,g,b) background and read the colour back (no background image
+  // or skybox -- only the model is composited).
+  const bool savedMask = video.useMasking;
+  const glm::vec3 savedBg = vecBGColor;
+  const bool savedDrawBg = drawBackground, savedDrawSky = drawSky;
+  drawBackground = false; drawSky = false;
+  auto renderOver = [&](float r, float g, float b, void * buf)
+  {
+    video.useMasking = false;        // opaque solid clear (RenderToBuffer uses vecBGColor)
+    vecBGColor = glm::vec3(r, g, b);
+    if (rt) rt->BeginRender();
+    if (!useFBO) glReadBuffer(GL_BACK);
+    RenderToBuffer();
+    if (rt) rt->BindTexture();
+    glReadPixels(0, 0, outW, outH, wantFloat ? GL_RGBA : GL_BGRA_EXT, wantFloat ? GL_FLOAT : GL_UNSIGNED_BYTE, buf);
+    if (rt) { rt->ReleaseTexture(); rt->EndRender(); }
+  };
+
+  bool ok = false;
+  const size_t N = (size_t)outW * outH;
+
+  if (wantFloat)
+  {
+    std::vector<float> cb(N * 4);
+    renderOver(0, 0, 0, cb.data());
+    if (transparent)
+    {
+      std::vector<float> cw(N * 4);
+      renderOver(1, 1, 1, cw.data());
+      for (size_t i = 0; i < N; i++)
+      {
+        float * p = &cb[i*4]; const float * q = &cw[i*4];
+        float a = 1.0f - ((q[0]-p[0]) + (q[1]-p[1]) + (q[2]-p[2])) / 3.0f;
+        a = a < 0 ? 0 : (a > 1 ? 1 : a);
+        if (a > 1e-4f) { p[0]/=a; p[1]/=a; p[2]/=a; } else { p[0]=p[1]=p[2]=0; }
+        p[3] = a;
+      }
+    }
+    else
+      for (size_t i = 0; i < N; i++) cb[i*4+3] = 1.0f;
+    ok = MiniExr::writeRGBAF(fn.ToStdWstring(), outW, outH, cb.data(), true /* bottom-up */);
+  }
+  else
+  {
+    std::vector<unsigned char> cb(N * 4); // BGRA
+    renderOver(0, 0, 0, cb.data());
+    QImage image(outW, outH, (imgFormat == 1) ? QImage::Format_RGB32 : QImage::Format_ARGB32);
+    unsigned char * out = image.bits();
+    if (transparent && imgFormat != 1)
+    {
+      std::vector<unsigned char> cw(N * 4);
+      renderOver(1, 1, 1, cw.data());
+      for (size_t i = 0; i < N; i++)
+      {
+        const float bB=cb[i*4]/255.f, bG=cb[i*4+1]/255.f, bR=cb[i*4+2]/255.f;
+        const float wB=cw[i*4]/255.f, wG=cw[i*4+1]/255.f, wR=cw[i*4+2]/255.f;
+        float a = 1.0f - ((wR-bR) + (wG-bG) + (wB-bB)) / 3.0f;
+        a = a < 0 ? 0 : (a > 1 ? 1 : a);
+        float R=bR, G=bG, B=bB;
+        if (a > 4e-3f) { R/=a; G/=a; B/=a; }
+        out[i*4+0]=(unsigned char)(std::min(1.f,B)*255.f+0.5f);
+        out[i*4+1]=(unsigned char)(std::min(1.f,G)*255.f+0.5f);
+        out[i*4+2]=(unsigned char)(std::min(1.f,R)*255.f+0.5f);
+        out[i*4+3]=(unsigned char)(a*255.f+0.5f);
+      }
+    }
+    else
+    {
+      for (size_t i = 0; i < N; i++)
+      { out[i*4+0]=cb[i*4+0]; out[i*4+1]=cb[i*4+1]; out[i*4+2]=cb[i*4+2]; out[i*4+3]=255; }
+    }
+    ok = image.mirrored().save(QString::fromWCharArray(fn.c_str()));
+  }
+
+  drawBackground = savedDrawBg; drawSky = savedDrawSky;
+  video.useMasking = savedMask; vecBGColor = savedBg;
+  if (rt) { rt->Shutdown(); delete rt; rt = 0; }
+
+  glPixelStorei(GL_PACK_ALIGNMENT, 4);
+  if (!ok)
+    LOG_ERROR << "[imgseq] failed to write frame:" << QString::fromWCharArray(fn.c_str());
+  return ok;
 }
 
 // Save the scene state,  currently this is just position/rotation/field of view

@@ -16,7 +16,16 @@
 #include "CASCFolder.h"
 #include "CharInfos.h"
 #include "ExporterPlugin.h"
+#include "ExportJobManager.h"
+#include "ImageSequenceExporter.h"
+#include "ImageSequenceDialog.h"
 #include "Game.h"
+
+#include <wx/dir.h>
+#include <wx/filename.h>
+#include <wx/stdpaths.h>
+#include <wx/utils.h> // wxExecute / wxGetProcessId for File > Restart
+#include <wx/display.h>
 #include "GlobalSettings.h"
 #include "globalvars.h"
 #include "ImporterPlugin.h"
@@ -69,15 +78,14 @@ EVT_MENU(ID_FILE_VIEWLOG, ModelViewer::OnViewLog)
 EVT_MENU(ID_VIEW_NPC, ModelViewer::OnCharToggle)
 EVT_MENU(ID_VIEW_ITEM, ModelViewer::OnCharToggle)
 EVT_MENU(ID_FILE_SCREENSHOT, ModelViewer::OnSave)
-EVT_MENU(ID_FILE_SCREENSHOTCONFIG, ModelViewer::OnSave)
-EVT_MENU(ID_FILE_EXPORTGIF, ModelViewer::OnSave)
-EVT_MENU(ID_FILE_EXPORTAVI, ModelViewer::OnSave)
+EVT_MENU(ID_FILE_EXPORTIMGSEQ, ModelViewer::OnExportImageSequence)
 // --
 EVT_MENU(ID_FILE_MODEL_INFO, ModelViewer::OnExportOther)
 //--
 EVT_MENU(ID_FILE_RESETLAYOUT, ModelViewer::OnToggleCommand)
 // --
 EVT_MENU(ID_FILE_EXIT, ModelViewer::OnExit)
+EVT_MENU(ID_RESTART, ModelViewer::OnRestart)
 
 // view menu
 EVT_MENU(ID_SHOW_FILE_LIST, ModelViewer::OnToggleDock)
@@ -85,9 +93,7 @@ EVT_MENU(ID_SHOW_ANIM, ModelViewer::OnToggleDock)
 EVT_MENU(ID_SHOW_CHAR, ModelViewer::OnToggleDock)
 EVT_MENU(ID_SHOW_LIGHT, ModelViewer::OnToggleDock)
 EVT_MENU(ID_SHOW_MODEL, ModelViewer::OnToggleDock)
-EVT_MENU(ID_SHOW_MODELBANK, ModelViewer::OnToggleDock)
 // --
-EVT_MENU(ID_SHOW_MASK, ModelViewer::OnToggleCommand)
 //EVT_MENU(ID_SHOW_WIREFRAME, ModelViewer::OnToggleCommand)
 //EVT_MENU(ID_SHOW_BONES, ModelViewer::OnToggleCommand)
 EVT_MENU(ID_SHOW_BOUNDS, ModelViewer::OnToggleCommand)
@@ -95,8 +101,6 @@ EVT_MENU(ID_SHOW_BOUNDS, ModelViewer::OnToggleCommand)
 
 EVT_MENU(ID_BACKGROUND, ModelViewer::OnBackground)
 EVT_MENU(ID_BG_COLOR, ModelViewer::OnSetColor)
-EVT_MENU(ID_SKYBOX, ModelViewer::OnBackground)
-EVT_MENU(ID_SHOW_GRID, ModelViewer::OnToggleCommand)
 
 EVT_MENU(ID_USE_CAMERA, ModelViewer::OnToggleCommand)
 
@@ -215,7 +219,6 @@ ModelViewer::ModelViewer()
   modelControl = NULL;
   imageControl = NULL;
   settingsControl = NULL;
-  modelbankControl = NULL;
   animExporter = NULL;
   fileControl = NULL;
 
@@ -248,6 +251,9 @@ ModelViewer::ModelViewer()
 #endif
 
     InitObjects();  // create our canvas, anim control, character control, etc
+
+    // FBX exports run in a separate process so the FBX SDK can never freeze or crash WMV.
+    m_exportJobManager = new ExportJobManager(this);
 
     // Show our window
     Show(false);
@@ -319,13 +325,7 @@ void ModelViewer::InitMenu()
   fileMenu->Append(ID_FILE_VIEWLOG, _("View Log"));
   fileMenu->AppendSeparator();
   fileMenu->Append(ID_FILE_SCREENSHOT, _("Save Screenshot\tF12"));
-  fileMenu->Append(ID_FILE_SCREENSHOTCONFIG, _("Save Sized Screenshot\tCTRL+S"));
-
-  // deactivate sized screenshot (needs a backbuffer rendering)
-  //fileMenu->Enable(ID_FILE_SCREENSHOTCONFIG,false);
-
-  fileMenu->Append(ID_FILE_EXPORTGIF, _("GIF/Sequence Export"));
-  fileMenu->Append(ID_FILE_EXPORTAVI, _("Export AVI"));
+  fileMenu->Append(ID_FILE_EXPORTIMGSEQ, _("Export Image Sequence..."));
   fileMenu->AppendSeparator();
 
   // --== Continue regular menu ==--
@@ -358,6 +358,7 @@ void ModelViewer::InitMenu()
   fileMenu->AppendSeparator();
   fileMenu->Append(ID_FILE_RESETLAYOUT, _("Reset Layout"));
   fileMenu->AppendSeparator();
+  fileMenu->Append(ID_RESTART, _("Restart\tCTRL+SHIFT+R"));
   fileMenu->Append(ID_FILE_EXIT, _("E&xit\tCTRL+X"));
 
   viewMenu = new wxMenu;
@@ -368,19 +369,11 @@ void ModelViewer::InitMenu()
   viewMenu->Append(ID_SHOW_ANIM, _("Show animation control"));
   viewMenu->Append(ID_SHOW_CHAR, _("Show character control"));
   viewMenu->Append(ID_SHOW_MODEL, _("Show model control"));
-  viewMenu->Append(ID_SHOW_MODELBANK, _("Show model bank"));
-  viewMenu->AppendSeparator();
   if (canvas) {
     viewMenu->Append(ID_BG_COLOR, _("Background Color..."));
     viewMenu->AppendCheckItem(ID_BACKGROUND, _("Load Background\tCTRL+L"));
     viewMenu->Check(ID_BACKGROUND, canvas->drawBackground);
-    viewMenu->AppendCheckItem(ID_SKYBOX, _("Skybox"));
-    viewMenu->Check(ID_SKYBOX, canvas->drawSky);
-    viewMenu->AppendCheckItem(ID_SHOW_GRID, _("Show Grid"));
-    viewMenu->Check(ID_SHOW_GRID, canvas->drawGrid);
 
-    viewMenu->AppendCheckItem(ID_SHOW_MASK, _("Show Mask"));
-    viewMenu->Check(ID_SHOW_MASK, false);
 
     viewMenu->AppendSeparator();
   }
@@ -506,9 +499,6 @@ void ModelViewer::InitMenu()
     charMenu->Enable(ID_AUTOHIDE_GEOSETS_FOR_HEAD_ITEMS, false);
 
 
-    wxMenu *effectsMenu = new wxMenu;
-    effectsMenu->Append(ID_ENCHANTS, _("Apply Enchants"));
-
     // Options menu
     optMenu = new wxMenu;
     optMenu->AppendCheckItem(ID_DEFAULT_DOODADS, _("Always show default doodads in WMOs"));
@@ -528,7 +518,6 @@ void ModelViewer::InitMenu()
     menuBar->Append(viewMenu, _("&View"));
     menuBar->Append(charMenu, _("&Character"));
     menuBar->Append(optMenu, _("&Options"));
-    menuBar->Append(effectsMenu, _("&Effects"));
     menuBar->Append(aboutMenu, _("&About"));
     SetMenuBar(menuBar);
   }
@@ -538,7 +527,7 @@ void ModelViewer::InitMenu()
   // menuBar->EnableTop(2, false);
 
   // Hotkeys / shortcuts
-  wxAcceleratorEntry entries[26];
+  wxAcceleratorEntry entries[27];
   int keys = 0;
   entries[keys++].Set(wxACCEL_NORMAL, WXK_F5, ID_SAVE_EQUIPMENT);
   entries[keys++].Set(wxACCEL_NORMAL, WXK_F6, ID_LOAD_EQUIPMENT);
@@ -554,7 +543,6 @@ void ModelViewer::InitMenu()
   entries[keys++].Set(wxACCEL_CTRL, (int)'l', ID_BACKGROUND);
   entries[keys++].Set(wxACCEL_CTRL, (int)'+', ID_ZOOM_IN);
   entries[keys++].Set(wxACCEL_CTRL, (int)'-', ID_ZOOM_OUT);
-  entries[keys++].Set(wxACCEL_CTRL, (int)'s', ID_FILE_SCREENSHOTCONFIG);
   entries[keys++].Set(wxACCEL_NORMAL, WXK_F9, ID_CLEAR_EQUIPMENT);
   entries[keys++].Set(wxACCEL_NORMAL, WXK_F10, ID_CHAR_RANDOMISE);
   entries[keys++].Set(wxACCEL_NORMAL, WXK_F11, ID_OPENGL_DEBUG);
@@ -570,6 +558,8 @@ void ModelViewer::InitMenu()
   entries[keys++].Set(wxACCEL_CTRL, WXK_F2, ID_LOAD_TEMP2);
   entries[keys++].Set(wxACCEL_CTRL, WXK_F3, ID_LOAD_TEMP3);
   entries[keys++].Set(wxACCEL_CTRL, WXK_F4, ID_LOAD_TEMP4);
+
+  entries[keys++].Set(wxACCEL_CTRL | wxACCEL_SHIFT, (int)'R', ID_RESTART);
 
   wxAcceleratorTable accel(keys, entries);
   this->SetAcceleratorTable(accel);
@@ -588,7 +578,6 @@ void ModelViewer::InitObjects()
   modelControl = new ModelControl(this, ID_MODEL_FRAME);
   settingsControl = new SettingsControl(this, ID_SETTINGS_FRAME);
   settingsControl->Show(false);
-  modelbankControl = new ModelBankControl(this, ID_MODELBANK_FRAME);
 
   canvas = new ModelCanvas(this);
 
@@ -723,11 +712,6 @@ void ModelViewer::InitDocking()
                            FloatingSize(wxSize(160, 460)).TopDockable(false).BottomDockable(false).Float().Show(false).
                            DestroyOnClose(false));
 
-  // model bank control
-  interfaceManager.AddPane(modelbankControl, wxAuiPaneInfo().
-                           Name(wxT("ModelBank")).Caption(wxT("ModelBank")).
-                           FloatingSize(wxSize(300, 320)).Float().Fixed().Show(false).
-                           DestroyOnClose(false));
 
   // settings frame
   interfaceManager.AddPane(settingsControl, wxAuiPaneInfo().
@@ -914,6 +898,28 @@ void ModelViewer::LoadLayout()
   int posx = config.value("Session/PositionX", "").toInt();
   int posy = config.value("Session/PositionY", "").toInt();
 
+  // Sanity-check the saved position against the currently-connected monitors before applying it.
+  // A bad value strands the window where the user can't reach it -- e.g. (-32000,-32000) left by a
+  // non-interactive run, or a coordinate on a monitor that has since been disconnected. If the
+  // window's title bar wouldn't land on any live display, fall back to a safe on-screen spot.
+  bool onScreen = false;
+  for (unsigned int d = 0; d < wxDisplay::GetCount(); d++)
+  {
+    const wxRect g = wxDisplay(d).GetGeometry();
+    if (g.Contains(posx + 20, posy + 10)) // a few px into the window must be visible
+    {
+      onScreen = true;
+      break;
+    }
+  }
+  if (!onScreen)
+  {
+    const wxRect primary = wxDisplay(0u).GetClientArea();
+    posx = primary.x + 40;
+    posy = primary.y + 40;
+    LOG_INFO << "Saved window position was off-screen; recentering to" << posx << posy;
+  }
+
   SetPosition(wxPoint(posx, posy));
 
   wxString layout = config.value("Session/Layout", "").toString().toStdWString();
@@ -976,6 +982,13 @@ void ModelViewer::LoadModel(GameFile * file)
     return;
 
   isModel = true;
+
+  // A direct model load is not an NPC; clear any NPC export descriptor. (LoadNPC calls us and
+  // then re-sets it afterwards, so the NPC case is unaffected.) Same for the item skin: a raw
+  // model load has no item skin, and LoadItem calls us then re-sets it afterwards.
+  m_exportNpcId = -1;
+  m_exportNpcDisplayId = 0;
+  m_exportItemSkinFileId = 0;
 
   // check if this is a character model
   isChar = (file->fullname().startsWith("char", Qt::CaseInsensitive) || file->fullname().startsWith("alternate\\char", Qt::CaseInsensitive));
@@ -1209,6 +1222,11 @@ void ModelViewer::LoadNPC(unsigned int modelid)
     }
   }
 
+  // Reaching here means the NPC composed successfully (the failure paths above return early).
+  // Remember it so an out-of-process FBX export can rebuild this exact NPC via -npc.
+  m_exportNpcId = (int)modelid;
+  m_exportNpcDisplayId = 0; // child re-resolves DisplayID1; overridden by LoadNPCByDisplay
+
   fileControl->UpdateInterface();
 
   // wxAUI
@@ -1231,6 +1249,11 @@ void ModelViewer::LoadNPCByDisplay(int npcId, int displayId, int type, const QSt
                             .arg(npcId).arg(type).arg(displayId).arg(name));
 
   LoadNPC(npcId);
+
+  // Carry the display id (LoadNPC only knows the creature id) so a child process can
+  // re-register an imported NPC that isn't in its own database.
+  if (m_exportNpcId == (int)npcId)
+    m_exportNpcDisplayId = displayId;
 }
 
 void ModelViewer::LoadItem(unsigned int id)
@@ -1263,7 +1286,13 @@ void ModelViewer::LoadItem(unsigned int id)
         grp.count = 1;
         grp.tex[0] = GAMEDIRECTORY.getFile(itemInfos.values[0][1].toInt());
         if (grp.tex[0])
+        {
           animControl->SetSkinByDisplayID(itemInfos.values[0][2].toInt());
+          // Remember the applied skin texture so an out-of-process FBX export can re-bind it
+          // in the child (a raw -mo reload would otherwise fall back to the model's DEFAULT skin,
+          // exporting a different texture than the one on screen).
+          m_exportItemSkinFileId = itemInfos.values[0][1].toInt();
+        }
       }
     }
 
@@ -1302,6 +1331,40 @@ void ModelViewer::OnExit(wxCommandEvent &event)
   }
 }
 
+// File > Restart: quit and reopen the application in one click (no manual exit + relaunch).
+void ModelViewer::OnRestart(wxCommandEvent & WXUNUSED(event))
+{
+  if (wxMessageBox(_("Restart WoW Model Viewer now?\n\nThe current scene is reloaded fresh; your saved settings are kept."),
+                   _("Restart"), wxYES_NO | wxYES_DEFAULT | wxICON_QUESTION, this) != wxYES)
+    return;
+
+  const wxString exe = wxStandardPaths::Get().GetExecutablePath();
+
+  // Development build: a "_relaunch.bat" sits a few folders above the exe (next to _run.bat). It
+  // waits for THIS instance to exit so its DLLs unlock, then redeploys the freshly-built DLLs and
+  // launches a new instance -- so a rebuild is picked up and a new exe never runs against stale
+  // DLLs. Installed builds don't ship that script, so we relaunch the exe directly (DLLs are
+  // colocated, no redeploy needed).
+  wxString relaunchBat;
+  wxFileName probe(exe);
+  for (int up = 0; up < 6 && probe.GetDirCount() > 0; ++up)
+  {
+    probe.RemoveLastDir();
+    const wxFileName cand(probe.GetPath(), wxT("_relaunch.bat"));
+    if (cand.FileExists()) { relaunchBat = cand.GetFullPath(); break; }
+  }
+
+  if (!relaunchBat.IsEmpty())
+    wxExecute(wxString::Format(wxT("cmd /c \"\"%s\" %lu\""), relaunchBat, wxGetProcessId()), wxEXEC_ASYNC);
+  else
+    wxExecute(wxString::Format(wxT("\"%s\""), exe), wxEXEC_ASYNC);
+
+  // Tear down like File > Exit; OnClose saves the session as usual before the process exits.
+  video.render = false;
+  canvas->Disable();
+  Close(false);
+}
+
 // This is called when the window is closing
 void ModelViewer::OnClose(wxCloseEvent &event)
 {
@@ -1328,19 +1391,33 @@ ModelViewer::~ModelViewer()
 
   video.render = false;
 
+  // Tear down the export job manager (stops its poll timer; detaches any running children).
+  if (m_exportJobManager) {
+    delete m_exportJobManager;
+    m_exportJobManager = nullptr;
+  }
+  if (m_imgSeqExporter) {
+    delete m_imgSeqExporter;
+    m_imgSeqExporter = nullptr;
+  }
+
   // If we have a canvas (which we always should)
   // Stop rendering, give more power back to the CPU to close this sucker down!
   //if (canvas)
   //  canvas->timer.Stop();
 
-  // Save current layout
-  SaveLayout();
+  // Persist the GUI layout/session only for real interactive runs. A headless/CLI run
+  // (FBX export child, screenshot/test harness) parks its window off-screen at (-32000,-32000)
+  // and never touches the UI, so saving here would overwrite the shared Config.ini with that
+  // off-screen position -- which then strands the next interactive launch's window off-screen.
+  if (!batchMode)
+    SaveLayout();
 
-  // wxAUI stuff
+  // wxAUI stuff (teardown, always run)
   interfaceManager.UnInit();
 
-  // Save our session and layout info
-  SaveSession();
+  if (!batchMode)
+    SaveSession();
 
   if (animExporter) {
     animExporter->Destroy();
@@ -1415,9 +1492,6 @@ void ModelViewer::OnToggleDock(wxCommandEvent &event)
     interfaceManager.GetPane(settingsControl).Show(true);
     settingsControl->Open();
   }
-  else if (id == ID_SHOW_MODELBANK) {
-    interfaceManager.GetPane(modelbankControl).Show(true);
-  }
   interfaceManager.Update();
 }
 
@@ -1432,9 +1506,6 @@ void ModelViewer::OnToggleCommand(wxCommandEvent &event)
       ResetLayout();
       break;
 
-    case ID_SHOW_MASK:
-      video.useMasking = !video.useMasking;
-      break;
 
     case ID_SHOW_BOUNDS:
       if (canvas->model())
@@ -1444,9 +1515,6 @@ void ModelViewer::OnToggleCommand(wxCommandEvent &event)
       }
       break;
 
-    case ID_SHOW_GRID:
-      canvas->drawGrid = event.IsChecked();
-      break;
 
     case ID_USE_CAMERA:
       canvas->useCamera = event.IsChecked();
@@ -1734,15 +1802,13 @@ void ModelViewer::OnEffects(wxCommandEvent &event)
 glm::vec3 ModelViewer::DoSetColor(const glm::vec3 &defColor)
 {
   wxColour dcol(roundf(defColor.x*255.0f), roundf(defColor.y*255.0f), roundf(defColor.z*255.0f));
-  bgDialogData.SetChooseFull(true);
-  bgDialogData.SetColour(dcol);
 
-  wxColourDialog dialog(this, &bgDialogData);
-
+  // Modern Photoshop-style picker (replaces the outdated native Win32 wxColourDialog).
+  ColorPickerDialog dialog(this, dcol);
   if (dialog.ShowModal() == wxID_OK)
   {
-    bgDialogData = dialog.GetColourData();
-    wxColour col = bgDialogData.GetColour();
+    wxColour col = dialog.GetColour();
+    bgDialogData.SetColour(col); // keep the session "bgCol" persistence in sync
     return glm::vec3(col.Red() / 255.0f, col.Green() / 255.0f, col.Blue() / 255.0f);
   }
   return defColor;
@@ -2107,6 +2173,10 @@ void ModelViewer::LoadWoW(const core::GameConfig * chosenConfig, const QString &
   }
   GAMEDIRECTORY.setLoadProgressCallback(std::function<void(float)>()); // done enumerating
 
+  // Remember which build we settled on so out-of-process FBX exports can pin their child to
+  // the same game data (-build), instead of letting the child's auto-pick choose a different one.
+  m_loadedBuild = config.version;
+
   LOG_INFO << "Major version:" << GAMEDIRECTORY.majorVersion();
   // check if we are loading a 9.x version of WoW
   if(~GAMEDIRECTORY.majorVersion() >= 9)
@@ -2415,39 +2485,6 @@ void ModelViewer::OnBackground(wxCommandEvent &event)
       canvas->drawBackground = false;
     }
   }
-  else if (id == ID_SKYBOX) {
-    if (canvas->skyModel) {
-      wxDELETE(canvas->skyModel);
-      canvas->sky->delChildren();
-
-    }
-    else {
-      // List of skybox models, LightSkybox.dbc
-      wxArrayString skyboxes;
-
-      sqlResult skyboxesInfos = GAMEDATABASE.sqlQuery("SELECT DISTINCT name FROM LightSkybox");
-
-      if (skyboxesInfos.valid && !skyboxesInfos.values.empty())
-      {
-        for (unsigned int i = 0, imax = skyboxesInfos.values.size(); i < imax; i++)
-        {
-          skyboxes.Add(skyboxesInfos.values[i][0].replace(".mdx", ".m2").toStdWString());
-        }
-      }
-
-      skyboxes.Add(wxT("World\\Outland\\PassiveDoodads\\SkyBox\\OutlandSkyBox.m2"));
-      skyboxes.Sort();
-
-
-      wxSingleChoiceDialog skyDialog(this, wxT("Choose"), wxT("Select a Sky Box"), skyboxes);
-      if (skyDialog.ShowModal() == wxID_OK && skyDialog.GetStringSelection() != wxEmptyString) {
-        canvas->skyModel = new WoWModel(GAMEDIRECTORY.getFile(QString::fromWCharArray(skyDialog.GetStringSelection().c_str())), false);
-        canvas->sky->setModel(canvas->skyModel);
-      }
-    }
-
-    canvas->drawSky = event.IsChecked();
-  }
 }
 
 void ModelViewer::SaveChar(QString fn, bool equipmentOnly /*= false*/)
@@ -2492,6 +2529,14 @@ void ModelViewer::LoadChar(QString fn, bool equipmentOnly /* = false */)
   {
     LOG_ERROR << "Fail to open" << fn;
     return;
+  }
+
+  // A loaded character is exported via SaveChar, not the NPC path -- drop any NPC descriptor.
+  if (!equipmentOnly)
+  {
+    m_exportNpcId = -1;
+    m_exportNpcDisplayId = 0;
+    m_exportItemSkinFileId = 0;
   }
 
   if (!equipmentOnly)
@@ -2658,6 +2703,10 @@ void ModelViewer::LoadChar(QString fn, bool equipmentOnly /* = false */)
 
   charControl->RefreshModel();
   charControl->RefreshEquipment();
+  // Rebuild the Model Control attachment list so a loaded character's helm/shoulders/weapon models
+  // are selectable immediately (previously the list stayed empty until an item was re-equipped).
+  if (canvas && canvas->root)
+    modelControl->RefreshModel(canvas->root);
 
   charMenu->Enable(ID_SAVE_CHAR, true);
   charMenu->Enable(ID_SHOW_UNDERWEAR, true);
@@ -2942,6 +2991,10 @@ void ModelViewer::ImportArmoury(wxString strURL)
 
     g_charControl->RefreshModel();
     g_charControl->RefreshEquipment();
+    // Rebuild the Model Control attachment list so the imported helm/shoulders/weapon models are
+    // selectable immediately (previously the list stayed empty until an item was re-equipped).
+    if (canvas && canvas->root)
+      modelControl->RefreshModel(canvas->root);
 
     delete result;
   }
@@ -2976,21 +3029,25 @@ void ModelViewer::OnExport(wxCommandEvent &event)
       if (saveFileDialog.ShowModal() == wxID_CANCEL)
         return;
 
-      // START OF HACK
-      // @TODO : remove Hack
-      // ugly hack waiting for application to be full Qt, and being able to have qt pop up in plugins...
-      // today, creating wxDialog in Qt plugins simply crashes, and no qt app in executed to raised a Qt pop up...
+      const wxString outPath = saveFileDialog.GetPath();
 
-      // if exporter supports animations, we have to chose which one to export
+      // The FBX exporter runs the heavy, non-thread-safe FBX SDK; if it freezes or crashes it
+      // must not take WMV down with it. So FBX exports are dispatched to a separate process
+      // (see ExportJobManager) while the UI stays live. Other exporters (OBJ, ...) are quick
+      // and stay in-process below.
+      const bool isFbx = (plugin->menuLabel() == std::wstring(L"FBX..."));
+
+      // Gather the content + clip selection. Only animation-capable exporters (FBX) prompt.
+      // Component/raw export (UV2 + raw per-unit textures + node-based sidecar for the Blender
+      // add-on) is ALWAYS on -- it is the only FBX export mode now, no longer a dialog option.
+      bool optMesh = true, optSkel = true, optSkin = true, optAnim = true, optComponent = true;
+      std::vector<int> animsToExport;
       if (plugin->canExportAnimation())
       {
         WoWModel * m = const_cast<WoWModel *>(canvas->model());
         std::map<int, std::wstring> animsMap = m->getAnimsMap();
         wxArrayString values;
         wxArrayInt selection;
-        std::vector<int> ids;
-        ids.resize(animsMap.size());
-        unsigned int i = 0;
 
         for (size_t I = 0; I < canvas->model()->anims.size(); I++)
         {
@@ -3002,26 +3059,105 @@ void ModelViewer::OnExport(wxCommandEvent &event)
           selection.Add(I);
         }
 
-        AnimationExportChoiceDialog animChoiceDlg(this, L"", wxT("Animation Choice"), values);
+        AnimationExportChoiceDialog animChoiceDlg(this, L"", wxT("FBX Export Options"), values);
         animChoiceDlg.SetSelections(selection);
         if (animChoiceDlg.ShowModal() == wxID_CANCEL)
           return;
 
-        selection = animChoiceDlg.GetSelections();
-        vector<int> animsToExport;
-        animsToExport.reserve(selection.GetCount());
-        for (unsigned int I = 0; I < selection.GetCount(); I++)
-          animsToExport.push_back(canvas->model()->anims[selection[I]].Index);
+        optMesh = animChoiceDlg.exportMesh();
+        optSkel = animChoiceDlg.exportSkeleton();
+        optSkin = animChoiceDlg.exportSkinning();
+        optAnim = animChoiceDlg.exportAnimations();
 
-        plugin->setAnimationsToExport(animsToExport);
-
+        // Clip selection only matters when animations are being exported.
+        if (optAnim)
+        {
+          selection = animChoiceDlg.GetSelections();
+          animsToExport.reserve(selection.GetCount());
+          for (unsigned int I = 0; I < selection.GetCount(); I++)
+            animsToExport.push_back(canvas->model()->anims[selection[I]].Index);
+        }
       }
 
-      // END OF HACK
-      WoWModel * m = const_cast<WoWModel *>(canvas->model());
-      if (!plugin->exportModel(m, std::wstring(saveFileDialog.GetPath().c_str())))
+      // ---------- Out-of-process FBX export ----------
+      if (isFbx && m_exportJobManager)
       {
-        wxMessageBox(wxT("An error occurred during export."), wxT("Export Error"), wxOK | wxICON_ERROR);
+        WoWModel * m = const_cast<WoWModel *>(canvas->model());
+
+        // Build the descriptor a fresh process needs to reload exactly this asset.
+        wxString assetArgs, assetLabel, tempCharPath;
+        if (isChar)
+        {
+          // Serialise the live customisation + equipment to a temp .chr the child reloads.
+          wxString base = wxFileName::CreateTempFileName(wxT("wmvexport"));
+          if (!base.IsEmpty() && wxFileName::FileExists(base))
+            wxRemoveFile(base);
+          tempCharPath = base + wxT(".chr");
+          SaveChar(QString::fromStdWString(tempCharPath.ToStdWstring()));
+          assetArgs  = wxT("\"") + tempCharPath + wxT("\"");
+          assetLabel = wxT("character");
+        }
+        else if (m_exportNpcId > 0)
+        {
+          assetArgs  = wxString::Format(wxT("-npc %d:%d"), m_exportNpcId, m_exportNpcDisplayId);
+          assetLabel = wxString::Format(wxT("NPC %d"), m_exportNpcId);
+        }
+        else if (m && !m->modelname.empty())
+        {
+          wxString gp = wxString::FromUTF8(m->modelname.c_str());
+          gp.Replace(wxT("\\"), wxT("/"));
+          assetArgs  = wxT("-mo \"") + gp + wxT("\"");
+          // Carry the on-screen item skin so the child re-binds it instead of the default one.
+          if (m_exportItemSkinFileId > 0)
+            assetArgs << wxString::Format(wxT(" -itemskin %d"), m_exportItemSkinFileId);
+          assetLabel = gp;
+        }
+
+        if (!assetArgs.IsEmpty())
+        {
+          ExportJobManager::Request req;
+          req.assetArgs    = assetArgs;
+          req.assetLabel   = assetLabel;
+          req.outPath      = outPath;
+          req.build        = wxString(m_loadedBuild.toStdWString().c_str());
+          req.mesh         = optMesh;
+          req.skeleton     = optSkel;
+          req.skinning     = optSkin;
+          req.animation    = optAnim;
+          req.component    = optComponent;
+          req.tempCharPath = tempCharPath;
+          wxString csv;
+          for (size_t I = 0; I < animsToExport.size(); I++)
+          {
+            if (I) csv << wxT(",");
+            csv << animsToExport[I];
+          }
+          req.clipsCsv = csv;
+
+          m_exportJobManager->startExport(req);
+          return; // async: the manager owns progress, completion, and cleanup from here
+        }
+
+        // Couldn't build a re-loadable descriptor (e.g. an unnamed model) -> fall through to
+        // the in-process export below so the user still gets their file.
+        if (!tempCharPath.IsEmpty() && wxFileName::FileExists(tempCharPath))
+          wxRemoveFile(tempCharPath);
+        LOG_WARNING << "[export] no asset descriptor for out-of-process FBX; exporting in-process.";
+      }
+
+      // ---------- In-process export (non-FBX, or FBX fallback) ----------
+      plugin->setExportOptions(optMesh, optSkel, optSkin, optAnim);
+      plugin->setAnimationsToExport(animsToExport);
+
+      WoWModel * m = const_cast<WoWModel *>(canvas->model());
+      if (!plugin->exportModel(m, std::wstring(outPath.c_str())))
+      {
+        // Surface the exporter's specific reason (missing skeleton, unwritable path, ...) so the
+        // user knows what to change, falling back to a generic message if none was set.
+        std::wstring err = plugin->lastError();
+        wxString msg = err.empty() ? wxString(wxT("An error occurred during export."))
+                                   : wxString(err.c_str());
+        wxMessageBox(msg, wxT("Export Error"), wxOK | wxICON_ERROR);
       }
       else
       {
@@ -3031,6 +3167,34 @@ void ModelViewer::OnExport(wxCommandEvent &event)
       break;
     }
   }
+}
+
+void ModelViewer::OnExportImageSequence(wxCommandEvent & WXUNUSED(event))
+{
+  if (!canvas || !canvas->model())
+  {
+    wxMessageBox(wxT("Load a model before exporting an image sequence."),
+                 wxT("Export Image Sequence"), wxOK | wxICON_ERROR, this);
+    return;
+  }
+
+  if (!m_imgSeqExporter)
+    m_imgSeqExporter = new ImageSequenceExporter(this);
+
+  if (m_imgSeqExporter->isRunning())
+  {
+    wxMessageBox(wxT("An image-sequence export is already running."),
+                 wxT("Export Image Sequence"), wxOK | wxICON_INFORMATION, this);
+    return;
+  }
+
+  ImageSequenceDialog dlg(this);
+  if (dlg.ShowModal() != wxID_OK)
+    return;
+
+  ImageSequenceExporter::Settings s;
+  if (dlg.getSettings(s))
+    m_imgSeqExporter->start(s); // non-blocking: renders one frame per event-loop tick
 }
 
 void ModelViewer::OnStatusBarRefreshTimer(wxTimerEvent& event)

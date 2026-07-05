@@ -33,6 +33,10 @@ installer/dist
 # aqt Qt-download log
 aqtinstall.log
 
+# Python bytecode (the bundled Blender add-on is tracked source)
+__pycache__/
+*.pyc
+
 /ThirdParty/fbx_x64
 /ThirdParty/ossl_build
 /ThirdParty/openssl_x64

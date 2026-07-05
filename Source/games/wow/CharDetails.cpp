@@ -901,6 +901,14 @@ void CharDetails::refreshGeosets()
   if (!showFacialHair)
     geosets[CG_FACE_1] = geosets[CG_FACE_2] = geosets[CG_FACE_3] = 0;
 
+  // Hair is geoset group 0 (CG_SKIN_OR_HAIR); the individual hairstyles are ids 1..99, resolved as
+  // a customization choice by applyCustomizationGeosets(). The Show Hair toggle previously did
+  // nothing -- showHair was never read anywhere. Forcing the group to variant 0 hides every
+  // hairstyle; setGeosetGroupDisplay excludes id 0 (the base scalp/body), so this is a clean "bald"
+  // rather than a hole in the head. Only when Show Hair is off -- otherwise leave the chosen style.
+  if (!showHair)
+    geosets[CG_SKIN_OR_HAIR] = 0;
+
   // NOTE: customization-choice geosets are applied selectively in
   // applyCustomizationGeosets() -- it toggles only the specific choice geosets
   // (show the active choice's geoset, hide the other choices' geosets). The old

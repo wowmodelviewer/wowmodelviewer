@@ -66,7 +66,7 @@ void RenderTexture::InitGL()
   glEnable(GL_DEPTH_TEST);
 }
 
-void RenderTexture::Init(int width, int height, bool fboMode)
+void RenderTexture::Init(int width, int height, bool fboMode, bool floatFormat)
 {
   GLenum err;
   canvas_hDC = wglGetCurrentDC();
@@ -74,6 +74,7 @@ void RenderTexture::Init(int width, int height, bool fboMode)
 
   m_texID = 0;
   m_FBO = fboMode;
+  m_floatFormat = floatFormat;
 
   if (width == 0 || height == 0)
   {
@@ -143,8 +144,12 @@ void RenderTexture::Init(int width, int height, bool fboMode)
       glBindTexture(m_texFormat, m_texID);
 
       // This is our dynamic texture, which will be loaded with new pixel data
-      // after we're finshed rendering to the p-buffer.
-      glTexImage2D(m_texFormat, 0, GL_RGBA8, nWidth, nHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, 0);
+      // after we're finshed rendering to the p-buffer. A float (RGBA16F) target is used for
+      // HDR/EXR image-sequence export so values above 1.0 (emissive/additive passes) survive.
+      if (m_floatFormat)
+        glTexImage2D(m_texFormat, 0, GL_RGBA16F, nWidth, nHeight, 0, GL_RGBA, GL_FLOAT, 0);
+      else
+        glTexImage2D(m_texFormat, 0, GL_RGBA8, nWidth, nHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, 0);
       glTexParameteri(m_texFormat, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
       glTexParameteri(m_texFormat, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
 

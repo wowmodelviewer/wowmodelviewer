@@ -49,12 +49,14 @@
 //====================================================================
 const int ID_SELECT_ALL = wxNewId();
 const int ID_UNSELECT_ALL = wxNewId();
+const int ID_CB_ANIMATIONS = wxNewId();
 #define wxID_LISTBOX 3000 // from choicedgg.cpp
 
 BEGIN_EVENT_TABLE(AnimationExportChoiceDialog, wxMultiChoiceDialog)
   EVT_CHECKLISTBOX(wxID_LISTBOX, AnimationExportChoiceDialog::updateButtons)
   EVT_BUTTON(ID_SELECT_ALL,  AnimationExportChoiceDialog::OnSelectAll)
   EVT_BUTTON(ID_UNSELECT_ALL,  AnimationExportChoiceDialog::OnUnselectAll)
+  EVT_CHECKBOX(ID_CB_ANIMATIONS, AnimationExportChoiceDialog::onToggleAnimations)
 END_EVENT_TABLE()
 
 // Constructors
@@ -101,11 +103,30 @@ AnimationExportChoiceDialog::AnimationExportChoiceDialog(wxWindow *parent, const
   sizer->Add(m_selectall, 0, wxLEFT|wxRIGHT|wxBOTTOM, 5);
   sizer->Add(m_unselectall, 0, wxLEFT|wxRIGHT|wxBOTTOM, 5);
 
+  // Export-content options (Mesh / Skeleton / Skinning / Animations). The clip list below is
+  // the animation selection; "Export Animations" enables or greys it out.
+  wxBoxSizer * optsizer = new wxBoxSizer(wxHORIZONTAL);
+  m_cbMesh = new wxCheckBox(this, wxID_ANY, _("Export Mesh"));
+  m_cbSkeleton = new wxCheckBox(this, wxID_ANY, _("Export Skeleton"));
+  m_cbSkinning = new wxCheckBox(this, wxID_ANY, _("Export Skinning"));
+  m_cbAnimations = new wxCheckBox(this, ID_CB_ANIMATIONS, _("Export Animations"));
+  // Component/raw (UV2 + raw per-unit textures + node-based sidecar for the Blender add-on) is the
+  // only FBX export mode now -- no checkbox; it is always on (see modelviewer.cpp OnExport).
+  m_cbMesh->SetValue(true);
+  m_cbSkeleton->SetValue(true);
+  m_cbSkinning->SetValue(true);
+  m_cbAnimations->SetValue(true);
+  optsizer->Add(m_cbMesh, 0, wxLEFT|wxRIGHT, 5);
+  optsizer->Add(m_cbSkeleton, 0, wxLEFT|wxRIGHT, 5);
+  optsizer->Add(m_cbSkinning, 0, wxLEFT|wxRIGHT, 5);
+  optsizer->Add(m_cbAnimations, 0, wxLEFT|wxRIGHT, 5);
+
   topsizer->Prepend(sizer, 0, wxEXPAND | wxALL, 0);
   //topsizer->Prepend(bugexplain, 0, wxALL, 5);
   //topsizer->Prepend(fbxVersionChoice, 0, wxALL, 5);
   //topsizer->Prepend(fbxversionexplain, 0, wxALL, 5);
   topsizer->Prepend(explain, 0, wxALL, 5);
+  topsizer->Prepend(optsizer, 0, wxEXPAND | wxALL, 5); // options row at the very top
   topsizer->SetSizeHints( this );
   topsizer->Fit( this );
 
@@ -184,4 +205,19 @@ void AnimationExportChoiceDialog::OnUnselectAll(wxCommandEvent&)
   m_selectall->Enable(true);
   m_unselectall->Enable(false);
 }
+
+void AnimationExportChoiceDialog::onToggleAnimations(wxCommandEvent&)
+{
+  // Grey out the clip list + select buttons when animations won't be exported.
+  const bool on = m_cbAnimations->GetValue();
+  if (m_listbox)
+    m_listbox->Enable(on);
+  m_selectall->Enable(on);
+  m_unselectall->Enable(on);
+}
+
+bool AnimationExportChoiceDialog::exportMesh() const { return m_cbMesh->GetValue(); }
+bool AnimationExportChoiceDialog::exportSkeleton() const { return m_cbSkeleton->GetValue(); }
+bool AnimationExportChoiceDialog::exportSkinning() const { return m_cbSkinning->GetValue(); }
+bool AnimationExportChoiceDialog::exportAnimations() const { return m_cbAnimations->GetValue(); }
 

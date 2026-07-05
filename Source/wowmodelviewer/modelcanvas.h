@@ -108,6 +108,9 @@ public:
   //void GenerateShadowMap();
 
   void Screenshot(const wxString fn, int x=0, int y=0);
+  // Render the current model off-screen at w x h and write one image-sequence frame
+  // (0=PNG/RGBA, 1=JPG/RGB, 2=EXR/float). transparent => clean two-pass alpha matte. Main thread only.
+  bool CaptureSequenceFrame(const wxString & fn, int w, int h, int imgFormat, bool transparent);
   void SaveSceneState(int id);
   void LoadSceneState(int id);
 

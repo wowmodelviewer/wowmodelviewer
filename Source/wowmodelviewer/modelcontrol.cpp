@@ -29,27 +29,11 @@ BEGIN_EVENT_TABLE(ModelControl, wxWindow)
   EVT_CHECKBOX(ID_MODEL_WIREFRAME, ModelControl::OnCheck)
   EVT_CHECKBOX(ID_MODEL_PARTICLES, ModelControl::OnCheck)
   EVT_CHECKBOX(ID_MODEL_TEXTURE, ModelControl::OnCheck)
-  EVT_CHECKBOX(ID_MODEL_PC_REPLACE, ModelControl::OnCheck)
 
   EVT_COMMAND_SCROLL(ID_MODEL_ALPHA, ModelControl::OnSlider)
   EVT_COMMAND_SCROLL(ID_MODEL_SCALE, ModelControl::OnSlider)
   EVT_TEXT_ENTER(ID_MODEL_SIZE, ModelControl::OnEnter)
 
-  EVT_TEXT_ENTER(ID_MODEL_X, ModelControl::OnEnter)
-  EVT_TEXT_ENTER(ID_MODEL_Y, ModelControl::OnEnter)
-  EVT_TEXT_ENTER(ID_MODEL_Z, ModelControl::OnEnter)
-  EVT_TEXT_ENTER(ID_MODEL_ROT_X, ModelControl::OnEnter)
-  EVT_TEXT_ENTER(ID_MODEL_ROT_Y, ModelControl::OnEnter)
-  EVT_TEXT_ENTER(ID_MODEL_ROT_Z, ModelControl::OnEnter)
-  EVT_COLOURPICKER_CHANGED(ID_MODEL_PC_START_11, ModelControl::OnColourChange)
-  EVT_COLOURPICKER_CHANGED(ID_MODEL_PC_MID_11, ModelControl::OnColourChange)
-  EVT_COLOURPICKER_CHANGED(ID_MODEL_PC_END_11, ModelControl::OnColourChange)
-  EVT_COLOURPICKER_CHANGED(ID_MODEL_PC_START_12, ModelControl::OnColourChange)
-  EVT_COLOURPICKER_CHANGED(ID_MODEL_PC_MID_12, ModelControl::OnColourChange)
-  EVT_COLOURPICKER_CHANGED(ID_MODEL_PC_END_12, ModelControl::OnColourChange)
-  EVT_COLOURPICKER_CHANGED(ID_MODEL_PC_START_13, ModelControl::OnColourChange)
-  EVT_COLOURPICKER_CHANGED(ID_MODEL_PC_MID_13, ModelControl::OnColourChange)
-  EVT_COLOURPICKER_CHANGED(ID_MODEL_PC_END_13, ModelControl::OnColourChange)
 END_EVENT_TABLE()
 
 
@@ -124,96 +108,17 @@ ModelControl::ModelControl(wxWindow* parent, wxWindowID id)
   top->Add(new wxStaticText(this, wxID_ANY, wxT("Double click to toggle on/off")), 1, wxEXPAND);
   clbGeosets = new wxTreeCtrl(this, ID_MODEL_GEOSETS, wxDefaultPosition, wxSize(150,150));
   top->Add(clbGeosets, 1, wxEXPAND);
-
-  top->AddSpacer(5);
-  top->Add(new wxStaticLine(this, wxID_ANY), 1, wxEXPAND);
-  top->AddSpacer(5);
-
-  // POSITION CONTROLS
-  top->Add(new wxStaticText(this, wxID_ANY, wxT("Position")), 1, wxEXPAND);
-  gbox = new wxFlexGridSizer(2, 5, 5);
-  gbox->Add(new wxStaticText(this, wxID_ANY, wxT("X")), 1, wxALIGN_CENTER_VERTICAL|wxALIGN_RIGHT);
-  txtX = new wxTextCtrl(this, ID_MODEL_X, wxT("0.0"), wxDefaultPosition, wxSize(75, -1));
-  gbox->Add(txtX);
-  gbox->Add(new wxStaticText(this, wxID_ANY, wxT("Y")), 1, wxALIGN_CENTER_VERTICAL|wxALIGN_RIGHT);
-  txtY = new wxTextCtrl(this, ID_MODEL_Y, wxT("0.0"), wxDefaultPosition, wxSize(75, -1));
-  gbox->Add(txtY);
-  gbox->Add(new wxStaticText(this, wxID_ANY, wxT("Z")), 1, wxALIGN_CENTER_VERTICAL|wxALIGN_RIGHT);
-  txtZ = new wxTextCtrl(this, ID_MODEL_Z, wxT("0.0"), wxDefaultPosition, wxSize(75, -1));
-  gbox->Add(txtZ);
-  gbox->Add(new wxStaticText(this, wxID_ANY, wxT("rX")), 1, wxALIGN_CENTER_VERTICAL|wxALIGN_RIGHT);
-  rotX = new wxTextCtrl(this, ID_MODEL_ROT_X, wxT("0.0"), wxDefaultPosition, wxSize(75, -1));
-  gbox->Add(rotX);
-  gbox->Add(new wxStaticText(this, wxID_ANY, wxT("rY")), 1, wxALIGN_CENTER_VERTICAL|wxALIGN_RIGHT);
-  rotY = new wxTextCtrl(this, ID_MODEL_ROT_Y, wxT("0.0"), wxDefaultPosition, wxSize(75, -1));
-  gbox->Add(rotY);
-  gbox->Add(new wxStaticText(this, wxID_ANY, wxT("rZ")), 1, wxALIGN_CENTER_VERTICAL|wxALIGN_RIGHT);
-  rotZ = new wxTextCtrl(this, ID_MODEL_ROT_Z, wxT("0.0"), wxDefaultPosition, wxSize(75, -1));
-  gbox->Add(rotZ);
-  top->Add(gbox, 1, wxEXPAND);
-
-  // PARTICLE COLOUR CONTROLS
-  top->AddSpacer(5);
-  top->Add(new wxStaticLine(this, wxID_ANY), 1, wxEXPAND);
-  top->AddSpacer(5);
-  particlecolreplace = new wxCheckBox(this, ID_MODEL_PC_REPLACE, wxT("Replace particle colours:"));
-  top->Add(particlecolreplace, 1, wxEXPAND);
-  PCHint = new wxStaticText(this, wxID_ANY, wxT("(#RRGGBB hexadecimal)"));
-  top->Add(PCHint, 1, wxEXPAND);
-  NoPC = new wxStaticText(this, wxID_ANY, wxT("* Not enabled on this model *"));
-  top->Add(NoPC, 1, wxEXPAND);
-  gbox = new wxFlexGridSizer(2, 5, 5);
-  PC11SLabel = new wxStaticText(this, wxID_ANY, wxT("ID11 Start"));
-  gbox->Add(PC11SLabel, 1, wxALIGN_CENTER_VERTICAL|wxALIGN_RIGHT);
-  PC11S = new wxColourPickerCtrl(this, ID_MODEL_PC_START_11, wxColour(0,0,0), wxDefaultPosition,
-                                  wxSize(55, 10), wxCLRP_USE_TEXTCTRL);
-  gbox->Add(PC11S);
-  PC11MLabel = new wxStaticText(this, wxID_ANY, wxT("Mid"));
-  gbox->Add(PC11MLabel, 1, wxALIGN_CENTER_VERTICAL|wxALIGN_RIGHT);
-  PC11M = new wxColourPickerCtrl(this, ID_MODEL_PC_MID_11, wxColour(0,0,0), wxDefaultPosition,
-                                  wxSize(55, -1), wxCLRP_USE_TEXTCTRL);
-  gbox->Add(PC11M);
-  PC11ELabel = new wxStaticText(this, wxID_ANY, wxT("End"));
-  gbox->Add(PC11ELabel, 1, wxALIGN_CENTER_VERTICAL|wxALIGN_RIGHT);
-  PC11E = new wxColourPickerCtrl(this, ID_MODEL_PC_END_11, wxColour(0,0,0), wxDefaultPosition,
-                                  wxSize(55, -1), wxCLRP_USE_TEXTCTRL);
-  gbox->Add(PC11E);
-  PC12SLabel = new wxStaticText(this, wxID_ANY, wxT("ID12 Start"));
-  gbox->Add(PC12SLabel, 1, wxALIGN_CENTER_VERTICAL|wxALIGN_RIGHT);
-  PC12S = new wxColourPickerCtrl(this, ID_MODEL_PC_START_12, wxColour(0,0,0), wxDefaultPosition,
-                                  wxSize(55, -1), wxCLRP_USE_TEXTCTRL);
-  gbox->Add(PC12S);
-  PC12MLabel = new wxStaticText(this, wxID_ANY, wxT("Mid"));
-  gbox->Add(PC12MLabel, 1, wxALIGN_CENTER_VERTICAL|wxALIGN_RIGHT);
-  PC12M = new wxColourPickerCtrl(this, ID_MODEL_PC_MID_12, wxColour(0,0,0), wxDefaultPosition,
-                                  wxSize(55, -1), wxCLRP_USE_TEXTCTRL);
-  gbox->Add(PC12M);
-  PC12ELabel = new wxStaticText(this, wxID_ANY, wxT("End"));
-  gbox->Add(PC12ELabel, 1, wxALIGN_CENTER_VERTICAL|wxALIGN_RIGHT);
-  PC12E = new wxColourPickerCtrl(this, ID_MODEL_PC_END_12, wxColour(0,0,0), wxDefaultPosition,
-                                  wxSize(55, -1), wxCLRP_USE_TEXTCTRL);
-  gbox->Add(PC12E);
-  PC13SLabel = new wxStaticText(this, wxID_ANY, wxT("ID13 Start"));
-  gbox->Add(PC13SLabel, 1, wxALIGN_CENTER_VERTICAL|wxALIGN_RIGHT);
-  PC13S = new wxColourPickerCtrl(this, ID_MODEL_PC_START_13, wxColour(0,0,0), wxDefaultPosition,
-                                  wxSize(55, -1), wxCLRP_USE_TEXTCTRL);
-  gbox->Add(PC13S);
-  PC13MLabel = new wxStaticText(this, wxID_ANY, wxT("Mid"));
-  gbox->Add(PC13MLabel, 1, wxALIGN_CENTER_VERTICAL|wxALIGN_RIGHT);
-  PC13M = new wxColourPickerCtrl(this, ID_MODEL_PC_MID_13, wxColour(0,0,0), wxDefaultPosition,
-                                  wxSize(55, -1), wxCLRP_USE_TEXTCTRL);
-  gbox->Add(PC13M);
-  PC13ELabel = new wxStaticText(this, wxID_ANY, wxT("End"));
-  gbox->Add(PC13ELabel, 1, wxALIGN_CENTER_VERTICAL|wxALIGN_RIGHT);
-  PC13E = new wxColourPickerCtrl(this, ID_MODEL_PC_END_13, wxColour(0,0,0), wxDefaultPosition,
-                                  wxSize(55, -1), wxCLRP_USE_TEXTCTRL);
-  gbox->Add(PC13E);
-  top->Add(gbox, 1);
+  // Let the geoset list absorb the panel's spare height and grow when the Model Control window is
+  // resized, instead of being pinned to a 150px box you have to scroll. GetItemCount()-1 is the
+  // geoset tree's row (it is the last item added to this single-column sizer).
+  top->AddGrowableCol(0);
+  top->AddGrowableRow(top->GetItemCount() - 1);
   top->SetSizeHints(this);
-  TogglePCRFields();
   Show(true);
   SetAutoLayout(true);
   padding->Add(top, 1, wxEXPAND|wxLEFT|wxTOP, 10);
+  padding->AddGrowableCol(0); // propagate the window's spare space down to the growable geoset row
+  padding->AddGrowableRow(0);
   SetSizer(padding);
   Layout();
 }
@@ -231,32 +136,6 @@ ModelControl::~ModelControl()
   texture->Destroy();
   particles->Destroy();
   clbGeosets->Destroy();
-  txtX->Destroy();
-  txtY->Destroy();
-  txtZ->Destroy();
-  rotX->Destroy();
-  rotY->Destroy();
-  rotZ->Destroy();
-  PC11S->Destroy();
-  PC11M->Destroy();
-  PC11E->Destroy();
-  PC12S->Destroy();
-  PC12M->Destroy();
-  PC12E->Destroy();
-  PC13S->Destroy();
-  PC13M->Destroy();
-  PC13E->Destroy();
-  NoPC->Destroy();
-  PCHint->Destroy();
-  PC11SLabel->Destroy();
-  PC11MLabel->Destroy();
-  PC11ELabel->Destroy();
-  PC12SLabel->Destroy();
-  PC12MLabel->Destroy();
-  PC12ELabel->Destroy();
-  PC13SLabel->Destroy();
-  PC13MLabel->Destroy();
-  PC13ELabel->Destroy();
 }
 
 // Iterates through all the models counting and creating a list
@@ -421,39 +300,8 @@ void ModelControl::Update()
   alpha->SetValue(int(model->alpha_ * 100));
   scale->SetValue(model->scale_*100);
 
-  txtX->SetValue(wxString::Format(wxT("%f"), model->pos_.x));
-  txtY->SetValue(wxString::Format(wxT("%f"), model->pos_.y));
-  txtZ->SetValue(wxString::Format(wxT("%f"), model->pos_.z));
-  rotX->SetValue(wxString::Format(wxT("%f"), model->rot_.x));
-  rotY->SetValue(wxString::Format(wxT("%f"), model->rot_.y));
-  rotZ->SetValue(wxString::Format(wxT("%f"), model->rot_.z));
   txtsize->SetValue(wxString::Format(wxT("%.2f"), model->scale_));
 
-  if (modelPCRSaves.find(model->modelname) != modelPCRSaves.end())
-  {
-    pcr = modelPCRSaves[model->modelname];
-  }
-  else
-  {
-    pcr.clear();
-    particleColorSet cols11, cols12, cols13;
-    cols11 = { glm::vec4(0.0, 0.0, 0.0, 1.0), glm::vec4(0.0, 0.0, 0.0, 1.0), glm::vec4(0.0, 0.0, 0.0, 1.0) };
-    cols12 = { glm::vec4(0.0, 0.0, 0.0, 1.0), glm::vec4(0.0, 0.0, 0.0, 1.0), glm::vec4(0.0, 0.0, 0.0, 1.0) };
-    cols13 = { glm::vec4(0.0, 0.0, 0.0, 1.0), glm::vec4(0.0, 0.0, 0.0, 1.0), glm::vec4(0.0, 0.0, 0.0, 1.0) };
-    pcr = { cols11, cols12, cols13 };
-  }
-  particlecolreplace->SetValue(false);
-  PC11S->SetColour(wxColour(pcr[0][0][0]*255, pcr[0][0][1]*255, pcr[0][0][2]*255));
-  PC11M->SetColour(wxColour(pcr[0][1][0]*255, pcr[0][1][1]*255, pcr[0][1][2]*255));
-  PC11E->SetColour(wxColour(pcr[0][2][0]*255, pcr[0][2][1]*255, pcr[0][2][2]*255));
-  PC12S->SetColour(wxColour(pcr[1][0][0]*255, pcr[1][0][1]*255, pcr[1][0][2]*255));
-  PC12M->SetColour(wxColour(pcr[1][1][0]*255, pcr[1][1][1]*255, pcr[1][1][2]*255));
-  PC12E->SetColour(wxColour(pcr[1][2][0]*255, pcr[1][2][1]*255, pcr[1][2][2]*255));
-  PC13S->SetColour(wxColour(pcr[2][0][0]*255, pcr[2][0][1]*255, pcr[2][0][2]*255));
-  PC13M->SetColour(wxColour(pcr[2][1][0]*255, pcr[2][1][1]*255, pcr[2][1][2]*255));
-  PC13E->SetColour(wxColour(pcr[2][2][0]*255, pcr[2][2][1]*255, pcr[2][2][2]*255));
-  UpdatePCRTexts();
-  TogglePCRFields();
 }
 
 void ModelControl::UpdateGeosetSelection()
@@ -470,45 +318,6 @@ void ModelControl::UpdateGeosetSelection()
   }
 }
 
-void ModelControl::TogglePCRFields()
-{
-  bool show11, show12, show13;
-
-  if (model)
-  {
-    std::vector<uint> pcrIDs = model->replacableParticleColorIDs;
-    show11 = (std::find(pcrIDs.begin(), pcrIDs.end(), 11) != pcrIDs.end());
-    show12 = (std::find(pcrIDs.begin(), pcrIDs.end(), 12) != pcrIDs.end());
-    show13 = (std::find(pcrIDs.begin(), pcrIDs.end(), 13) != pcrIDs.end());
-  }
-  else
-  {
-    show11 = false;
-    show12 = false;
-    show13 = false;
-  }
-  PCHint->Show(show11 || show12 || show13);
-  NoPC->Show(!(show11 || show12 || show13));
-  PC11SLabel->Show(show11);
-  PC11MLabel->Show(show11);
-  PC11ELabel->Show(show11);
-  PC12SLabel->Show(show12);
-  PC12MLabel->Show(show12);
-  PC12ELabel->Show(show12);
-  PC13SLabel->Show(show13);
-  PC13MLabel->Show(show13);
-  PC13ELabel->Show(show13);
-  PC11S->Show(show11);
-  PC11M->Show(show11);
-  PC11E->Show(show11);
-  PC12S->Show(show12);
-  PC12M->Show(show12);
-  PC12E->Show(show12);
-  PC13S->Show(show13);
-  PC13M->Show(show13);
-  PC13E->Show(show13);
-  Layout();
-}
 
 void ModelControl::OnCheck(wxCommandEvent &event)
 {
@@ -527,6 +336,16 @@ void ModelControl::OnCheck(wxCommandEvent &event)
           break;
     case ID_MODEL_RENDER :
           model->showModel = check;
+          {
+            // A character hides the hair/ears/horns an equipped helm would cover. That auto-hide
+            // only makes sense while the helm is drawn, so if we just toggled a head-item's model,
+            // re-run the character refresh: the covered geosets reappear when the helm is hidden
+            // and hide again when it is re-shown.
+            WoWModel * charModel = attachments.empty()
+                                 ? NULL : dynamic_cast<WoWModel*>(attachments[0]->model());
+            if (charModel && charModel != model && charModel->isEquippedHeadModel(model))
+              charModel->refresh();
+          }
           break;
     case ID_MODEL_WIREFRAME :
           model->showWireframe = check;
@@ -536,15 +355,6 @@ void ModelControl::OnCheck(wxCommandEvent &event)
           break;
     case ID_MODEL_TEXTURE :
           model->showTexture = check;
-          break;
-    case ID_MODEL_PC_REPLACE :
-          if (check)
-          {
-            model->particleColorReplacements = pcr;
-            model->replaceParticleColors = true;
-          }
-          else
-            animControl->SetSkin(-1);  // reset to the current skin to use default particles
           break;
   }
 }
@@ -635,10 +445,6 @@ void ModelControl::OnSlider(wxScrollEvent &event)
   }
 }
 
-glm::vec4 ModelControl::fromColWidget(wxColour col)
-{
-  return glm::vec4((float)col.Red()/255.0f, (float)col.Green()/255.0f, (float)col.Blue()/255.0f, 1.0);
-}
 
 void ModelControl::OnEnter(wxCommandEvent &event)
 {
@@ -647,16 +453,6 @@ void ModelControl::OnEnter(wxCommandEvent &event)
 
   int eventID = event.GetId();
 
-  if (eventID == ID_MODEL_X || eventID == ID_MODEL_Y || eventID == ID_MODEL_Z ||
-      eventID == ID_MODEL_ROT_X || eventID == ID_MODEL_ROT_Y || eventID == ID_MODEL_ROT_Z)
-  {
-    model->pos_.x = wxAtof(txtX->GetValue());
-    model->pos_.y = wxAtof(txtY->GetValue());
-    model->pos_.z = wxAtof(txtZ->GetValue());
-    model->rot_.x = wxAtof(rotX->GetValue());
-    model->rot_.y = wxAtof(rotY->GetValue());
-    model->rot_.z = wxAtof(rotZ->GetValue());
-  }
 
   if (eventID == ID_MODEL_SIZE)
   {
@@ -666,93 +462,6 @@ void ModelControl::OnEnter(wxCommandEvent &event)
 }
 
 
-void ModelControl::UpdatePCRTexts()
-{
-  UpdatePCRText(PC11S);
-  UpdatePCRText(PC11M);
-  UpdatePCRText(PC11E);
-  UpdatePCRText(PC12S);
-  UpdatePCRText(PC12M);
-  UpdatePCRText(PC12E);
-  UpdatePCRText(PC13S);
-  UpdatePCRText(PC13M);
-  UpdatePCRText(PC13E);
-}
-
-
-void ModelControl::UpdatePCRText(wxColourPickerCtrl *cpc)
-{
-  wxTextCtrl *txtCtrl;
-
-  if (!cpc)
-    return;
-  txtCtrl = cpc->GetTextCtrl();
-  if (txtCtrl)
-    txtCtrl->SetValue(cpc->GetColour().GetAsString(wxC2S_HTML_SYNTAX));
-}
-
-void ModelControl::OnColourChange(wxColourPickerEvent &event)
-{
-  if (!init)
-    return;
-
-  glm::vec4 col = fromColWidget(event.GetColour());
-  wxColourPickerCtrl *cpc{ };
-
-  switch (event.GetId())
-  {
-    case ID_MODEL_PC_START_11 :
-          pcr[0][0] = col;
-          cpc = PC11S;
-          break;
-    case ID_MODEL_PC_MID_11 :
-          pcr[0][1] = col;
-          cpc = PC11M;
-          break;
-    case ID_MODEL_PC_END_11 :
-          pcr[0][2] = col;
-          cpc = PC11E;
-          break;
-    case ID_MODEL_PC_START_12 :
-          pcr[1][0] = col;
-          cpc = PC12S;
-          break;
-    case ID_MODEL_PC_MID_12 :
-          pcr[1][1] = col;
-          cpc = PC12M;
-          break;
-    case ID_MODEL_PC_END_12 :
-          pcr[1][2] = col;
-          cpc = PC12E;
-          break;
-    case ID_MODEL_PC_START_13 :
-          pcr[2][0] = col;
-          cpc = PC13S;
-          break;
-    case ID_MODEL_PC_MID_13 :
-          pcr[2][1] = col;
-          cpc = PC13M;
-          break;
-    case ID_MODEL_PC_END_13 :
-          pcr[2][2] = col;
-          cpc = PC13E;
-          break;
-  }
-
-  if (cpc)
-    UpdatePCRText(cpc);
-  if (model)
-  {
-    if (particlecolreplace->GetValue() == true)
-      model->particleColorReplacements = pcr;
-    modelPCRSaves[model->modelname] = pcr;
-  }
-}
-
-bool ModelControl::IsReplacingParticleColors()
-{
-  return particlecolreplace->GetValue();
-}
 
 
 

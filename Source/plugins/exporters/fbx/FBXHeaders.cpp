@@ -86,16 +86,28 @@ bool FBXHeaders::createFBXHeaders(FbxString fileVersion, QString l_FileName, Fbx
     return false;
   }
 
-  // convert scene from Yup to Zup
-  FbxAxisSystem conv(FbxAxisSystem::eMayaZUp); // we desire to convert the scene from Y-Up to Z-Up
+  // WoW is a Z-up, right-handed world, so declare the scene Z-up. The scene is still empty
+  // here, so this only writes axis metadata (no data is transformed); importers (Blender/Max
+  // are Z-up, Unity/Unreal convert from the declared axis) use it to orient the model. Done
+  // before any geometry is added so nothing gets double-transformed.
+  FbxAxisSystem conv(FbxAxisSystem::eMayaZUp);
   conv.ConvertScene(l_Scene);
+
+  // Declare the unit explicitly. The geometry/skeleton are written pre-scaled by SCALE_FACTOR
+  // and the FBX default unit is centimetres; stating it removes the "undeclared unit" guess
+  // that makes some importers silently apply a 100x scale. Unreal is natively cm (1:1); Unity
+  // and Blender convert from this declared unit on import.
+  // 1.0 == centimetres. Constructed explicitly rather than via the FbxSystemUnit::cm static,
+  // which this FBX SDK build does not export (link error). Sets metadata only (scene is empty),
+  // so nothing is rescaled.
+  l_Scene->GetGlobalSettings().SetSystemUnit(FbxSystemUnit(1.0));
 
   //LOG_INFO << "FBX SDK scene successfully created";
   return true;
 }
 
 // Create mesh.
-FbxNode * FBXHeaders::createMesh(FbxManager* &l_manager, FbxScene* &l_scene, WoWModel * model, const glm::mat4 & matrix, const glm::vec3 & offset)
+FbxNode * FBXHeaders::createMesh(FbxManager* &l_manager, FbxScene* &l_scene, WoWModel * model, const glm::mat4 & matrix, const glm::vec3 & offset, bool addUV2)
 {
   // Create a node for the mesh.
   FbxNode *meshNode = FbxNode::Create(l_manager, qPrintable(model->name()));
@@ -129,6 +141,25 @@ FbxNode * FBXHeaders::createMesh(FbxManager* &l_manager, FbxScene* &l_scene, WoW
   layer_texcoord->SetReferenceMode(FbxLayerElement::eDirect);
   layer->SetUVs(layer_texcoord, FbxLayerElement::eTextureDiffuse);
 
+  // Optional second UV set (component / raw node-based mode). Modern M2 vertices carry UV2 in the
+  // trailing two ints of the 48-byte vertex, reinterpreted as float (see ModelRenderPass's combiner
+  // loop). The item-component workflow needs it: scrolling-glow layers and gradient masks live on
+  // UV2. Added on a distinct FBX texture channel (Emissive) so Blender imports it as its own
+  // uv_layer named "UV2Map". Same V-flip as UV1 so the two sets stay consistent.
+  FbxLayerElementUV* layer_texcoord2 = nullptr;
+  if (addUV2)
+  {
+    // A second UV set must live on its OWN layer's diffuse slot for Blender's FBX importer to read
+    // it as a distinct uv_layer (a second UV element on layer 0's *emissive* channel is silently
+    // dropped on import). Create a fresh layer and put UV2Map on its eTextureDiffuse.
+    const int uv2LayerIndex = mesh->CreateLayer();
+    FbxLayer* layer2 = mesh->GetLayer(uv2LayerIndex);
+    layer_texcoord2 = FbxLayerElementUV::Create(mesh, "UV2Map");
+    layer_texcoord2->SetMappingMode(FbxLayerElement::eByControlPoint);
+    layer_texcoord2->SetReferenceMode(FbxLayerElement::eDirect);
+    layer2->SetUVs(layer_texcoord2, FbxLayerElement::eTextureDiffuse);
+  }
+
   // Fill data.
   LOG_INFO << "Adding main mesh Verts...";
   for (size_t i = 0; i < num_of_vertices; i++)
@@ -139,6 +170,12 @@ FbxNode * FBXHeaders::createMesh(FbxManager* &l_manager, FbxScene* &l_scene, WoW
     glm::vec3 vn = glm::normalize(v.normal);
     layer_normal->GetDirectArray().Add(FbxVector4(vn.x, vn.y, vn.z));
     layer_texcoord->GetDirectArray().Add(FbxVector2(v.texcoords.x, 1.0 - v.texcoords.y));
+    if (layer_texcoord2)
+    {
+      const float u2 = *reinterpret_cast<const float *>(&v.unk1);
+      const float v2 = *reinterpret_cast<const float *>(&v.unk2);
+      layer_texcoord2->GetDirectArray().Add(FbxVector2(u2, 1.0 - v2));
+    }
   }
 
   // Create polygons.
@@ -153,17 +190,17 @@ FbxNode * FBXHeaders::createMesh(FbxManager* &l_manager, FbxScene* &l_scene, WoW
   for (size_t i = 0; i < num_of_passes; i++)
   {
     ModelRenderPass * p = model->passes[i];
-    if (p->init())
+    // init(true): export-time visibility (a pass invisible only at this INSTANT of its opacity
+    // animation still exports). MUST match the gating FBXExporter::createMaterials() uses, since
+    // mtrl_index below is matched to that loop's material order purely by counting.
+    if (p->init(true))
     {
-      // Build material name.
-      FbxString mtrl_name = "testToChange";
-      mtrl_name.Append("_", 1);
-      char tmp[32];
-      _itoa((int)i, tmp, 10);
-      mtrl_name.Append(tmp, strlen(tmp));
-      FbxSurfaceMaterial* material = l_scene->GetMaterial(mtrl_name.Buffer());
-      meshNode->AddMaterial(material);
-
+      // The actual FbxSurfaceMaterial objects are created and added to this node, in this same
+      // per-pass order, by FBXExporter::createMaterials(); here we only emit the per-polygon
+      // material index (mtrl_index) that the eIndexToDirect material layer maps to them. (The
+      // old code looked materials up by a placeholder name "testToChange_<i>" that never existed
+      // and AddMaterial(null)'d the result -- dead code that happened to be harmless only because
+      // AddMaterial ignores a null.)
       ModelGeosetHD * g = model->geosets[p->geoIndex];
       size_t num_of_faces = g->icount / 3;
       for (size_t j = 0; j < num_of_faces; j++)
@@ -181,6 +218,66 @@ FbxNode * FBXHeaders::createMesh(FbxManager* &l_manager, FbxScene* &l_scene, WoW
 
   layer->SetNormals(layer_normal);
 
+  // --- Tangents (computed; WoW M2 vertices carry no tangent) --------------------------------
+  // Per-control-point tangent from positions + UVs + normals (standard Lengyel accumulation +
+  // Gram-Schmidt orthonormalisation). The 4th component is the handedness sign Blender/Unity/
+  // Unreal use to rebuild the bitangent for normal mapping. UVs use the SAME V-flip as the
+  // exported UV set so the tangent basis is consistent with it.
+  {
+    FbxLayerElementTangent* layer_tangent = FbxLayerElementTangent::Create(mesh, "tangents");
+    layer_tangent->SetMappingMode(FbxLayerElement::eByControlPoint);
+    layer_tangent->SetReferenceMode(FbxLayerElement::eDirect);
+
+    std::vector<glm::vec3> tan(num_of_vertices, glm::vec3(0.0f));
+    std::vector<glm::vec3> bitan(num_of_vertices, glm::vec3(0.0f));
+
+    for (size_t i = 0; i < num_of_passes; i++)
+    {
+      ModelRenderPass * p = model->passes[i];
+      if (!p->init(true)) // export-time visibility, same gating as the polygon loop above
+        continue;
+      ModelGeosetHD * g = model->geosets[p->geoIndex];
+      const size_t nf = g->icount / 3;
+      for (size_t j = 0; j < nf; j++)
+      {
+        const uint32 a = model->indices[g->istart + j * 3];
+        const uint32 b = model->indices[g->istart + j * 3 + 1];
+        const uint32 c = model->indices[g->istart + j * 3 + 2];
+        const ModelVertex & v0 = model->origVertices[a];
+        const ModelVertex & v1 = model->origVertices[b];
+        const ModelVertex & v2 = model->origVertices[c];
+
+        const glm::vec3 e1 = v1.pos - v0.pos;
+        const glm::vec3 e2 = v2.pos - v0.pos;
+        const glm::vec2 uv0(v0.texcoords.x, 1.0f - v0.texcoords.y);
+        const glm::vec2 duv1 = glm::vec2(v1.texcoords.x, 1.0f - v1.texcoords.y) - uv0;
+        const glm::vec2 duv2 = glm::vec2(v2.texcoords.x, 1.0f - v2.texcoords.y) - uv0;
+
+        const float denom = duv1.x * duv2.y - duv2.x * duv1.y;
+        if (fabsf(denom) < 1e-10f) // degenerate UVs -> skip this triangle's contribution
+          continue;
+        const float r = 1.0f / denom;
+        const glm::vec3 sdir = (e1 * duv2.y - e2 * duv1.y) * r;
+        const glm::vec3 tdir = (e2 * duv1.x - e1 * duv2.x) * r;
+
+        tan[a] += sdir; tan[b] += sdir; tan[c] += sdir;
+        bitan[a] += tdir; bitan[b] += tdir; bitan[c] += tdir;
+      }
+    }
+
+    for (size_t i = 0; i < num_of_vertices; i++)
+    {
+      const glm::vec3 n = glm::normalize(model->origVertices[i].normal);
+      glm::vec3 t = tan[i] - n * glm::dot(n, tan[i]); // Gram-Schmidt against the normal
+      const float len = glm::length(t);
+      const glm::vec3 tt = (len > 1e-6f) ? (t / len) : glm::vec3(1.0f, 0.0f, 0.0f);
+      const float handed = (glm::dot(glm::cross(n, tt), bitan[i]) < 0.0f) ? -1.0f : 1.0f;
+      layer_tangent->GetDirectArray().Add(FbxVector4(tt.x, tt.y, tt.z, handed));
+    }
+
+    layer->SetTangents(layer_tangent);
+  }
+
   FbxGeometryConverter lGeometryConverter(l_manager);
   lGeometryConverter.ComputeEdgeSmoothingFromNormals(mesh);
   //convert soft/hard edge info to smoothing group info
@@ -197,11 +294,12 @@ FbxNode * FBXHeaders::createMesh(FbxManager* &l_manager, FbxScene* &l_scene, WoW
 
 void FBXHeaders::createSkeleton(WoWModel * l_model, FbxScene *& l_scene, FbxNode *& l_skeletonNode, std::map<int, FbxNode*>& l_boneNodes)
 {
-  l_skeletonNode = FbxNode::Create(l_scene, qPrintable(QString::fromWCharArray(wxT("%1_rig")).arg(l_model->name())));
-  FbxSkeleton* bone_group_skeleton_attribute = FbxSkeleton::Create(l_scene, "");
-  bone_group_skeleton_attribute->SetSkeletonType(FbxSkeleton::eRoot);
-  bone_group_skeleton_attribute->Size.Set(10.0 * SCALE_FACTOR);
-  l_skeletonNode->SetNodeAttribute(bone_group_skeleton_attribute);
+  // Grouping node that holds the rig. It is a PLAIN transform node, NOT a skeleton joint:
+  // giving it an FbxSkeleton(eRoot) attribute (as before) injected a fake extra root into the
+  // joint list, which DCCs import as a duplicate/parent root bone above the real skeleton
+  // (a retargeting hazard in Unreal/Unity). The single real WoW bone with parent==-1 is the
+  // one and only eRoot joint (typed below).
+  l_skeletonNode = FbxNode::Create(l_scene, qPrintable(QString("%1_rig").arg(l_model->name())));
 
   std::vector<FbxSkeleton::EType> bone_types;
   size_t num_of_bones = l_model->bones.size();
@@ -245,9 +343,10 @@ void FBXHeaders::createSkeleton(WoWModel * l_model, FbxScene *& l_scene, FbxNode
     if (pid > -1)
       trans -= l_model->bones[pid].pivot;
 
-    FbxString bone_name(qPrintable(l_model->name()));
-    bone_name += "_bone_";
-    bone_name += static_cast<int>(i);
+    // Unique, decimal bone name. The old `FbxString += static_cast<int>(i)` appended the
+    // CHARACTER whose code is i (garbage, and non-unique/empty for many i), so bones lost their
+    // names -- breaking retargeting and humanoid mapping in every DCC. Build it from the index.
+    FbxString bone_name(qPrintable(QString("%1_bone_%2").arg(l_model->name()).arg((int)i)));
 
     FbxNode* skeleton_node = FbxNode::Create(l_scene, bone_name);
     l_boneNodes[i] = skeleton_node;
@@ -299,55 +398,30 @@ void FBXHeaders::storeBindPose(FbxScene* &l_scene, std::vector<FbxCluster*> l_bo
   l_scene->AddPose(pose);
 }
 
-void FBXHeaders::storeRestPose(FbxScene* &l_scene, FbxNode* &l_SkeletonRoot)
+void FBXHeaders::storeRestPose(FbxScene* &l_scene, std::map<int, FbxNode*>& l_boneNodes)
 {
-  // Not ready yet...
-  return;
-
-  if (l_SkeletonRoot == NULL || l_SkeletonRoot == nullptr)
+  if (l_boneNodes.empty())
     return;
-  FbxString lNodeName;
-  FbxNode* lKFbxNode;
-  FbxMatrix lTransformMatrix;
-  FbxVector4 lT, lR, lS(1.0, 1.0, 1.0);
 
-  // Create the rest pose
+  // A reference "rest pose" snapshot of the skeleton at its default (un-animated) transform.
+  // For WoW the default pose coincides with the bind pose, but it is stored here as a separate
+  // NON-bind FbxPose because some tools/pipelines expect an explicit rest pose alongside the
+  // bind pose. Each bone is recorded with its LOCAL default transform (the rest the skeleton
+  // was built with in createSkeleton), so this stays correct regardless of bone count.
+  // (Replaces the old stub, which returned immediately and left copy-pasted SDK demo code that
+  // hard-coded three fake joints at arbitrary positions.)
   FbxPose* pose = FbxPose::Create(l_scene, "Rest Pose");
+  pose->SetIsBindPose(false);
 
-  // Set the skeleton root node to the global position (10, 10, 10)
-  // and global rotation of 45deg along the Z axis.
-  lT.Set(10.0, 10.0, 10.0);
-  lR.Set(0.0, 0.0, 45.0);
+  for (auto& it : l_boneNodes)
+  {
+    FbxNode* node = it.second;
+    if (!node)
+      continue;
+    FbxMatrix local = node->EvaluateLocalTransform();
+    pose->Add(node, local, true /* local matrix */);
+  }
 
-  lTransformMatrix.SetTRS(lT, lR, lS);
-
-  // Add the skeleton root node to the pose
-  lKFbxNode = l_SkeletonRoot;
-  pose->Add(lKFbxNode, lTransformMatrix, false /*it's a global matrix*/);
-
-  // Set the lLimbNode1 node to the local position of (0, 40, 0)
-  // and local rotation of -90deg along the Z axis. This show that
-  // you can mix local and global coordinates in a rest pose.
-  lT.Set(0.0, 40.0, 0.0);
-  lR.Set(0.0, 0.0, -90.0);
-  lTransformMatrix.SetTRS(lT, lR, lS);
-
-  // Add the skeleton second node to the pose
-  lKFbxNode = lKFbxNode->GetChild(0);
-  pose->Add(lKFbxNode, lTransformMatrix, true /*it's a local matrix*/);
-
-  // Set the lLimbNode2 node to the local position of (0, 40, 0)
-  // and local rotation of 45deg along the Z axis.
-  lT.Set(0.0, 40.0, 0.0);
-  lR.Set(0.0, 0.0, 45.0);
-  lTransformMatrix.SetTRS(lT, lR, lS);
-
-  // Add the skeleton second node to the pose
-  lKFbxNode = lKFbxNode->GetChild(0);
-  lNodeName = lKFbxNode->GetName();
-  pose->Add(lKFbxNode, lTransformMatrix, true /*it's a local matrix*/);
-
-  // Now add the pose to the scene
   l_scene->AddPose(pose);
 }
 
@@ -359,131 +433,139 @@ void FBXHeaders::createAnimation(WoWModel * l_model, FbxScene *& l_scene, QStrin
     return;
   }
 
-  // Animation stack and layer.
+  // Animation stack (== "take" / clip) and a single layer. Naming the stack with the clip
+  // name is what Blender/Max/Unity/Unreal surface as the clip/action/take name.
   FbxAnimStack* anim_stack = FbxAnimStack::Create(l_scene, qPrintable(animName));
   FbxAnimLayer* anim_layer = FbxAnimLayer::Create(l_scene, qPrintable(animName));
   anim_stack->AddMember(anim_layer);
 
-  //LOG_INFO << "Animation length:" << cur_anim.length;
-  float timeInc = cur_anim.length / 60;
-  if (timeInc < 1.0f)
-  {
-    timeInc = cur_anim.length;
-  }
-  FbxTime::SetGlobalTimeMode(FbxTime::eFrames60);
-  //LOG_INFO << "Skeleton Bone count:" << skeleton.size();
+  // Looping: FBX has no standard "loop" flag on a take, and the SDK data-type globals used to
+  // author a custom bool property are not exported by this SDK build. WoW sequences loop by
+  // default (and the source flag bit 0x20 marks looped ones); since there is no portable field
+  // to carry it, the clip's full [0, length] range is written and the importing DCC/engine sets
+  // looping per its own clip settings. (Documented as a known limitation.)
 
-  //LOG_INFO << "Starting frame loop...";
-  for (uint32 t = 0; t < cur_anim.length; t += timeInc)
-  {
-    //LOG_INFO << "Starting frame" << t;
-    FbxTime time;
-    time.SetSecondDouble((float)t / 1000.0);
+  // Bake at a fixed, real frame rate. WoW stores per-bone keys at arbitrary millisecond times
+  // with mixed interpolation (linear/hermite/bezier); sampling onto a uniform 30 fps grid and
+  // writing linear keys reproduces the motion identically in every DCC and sidesteps curve-type
+  // mismatches. The clip's true duration is preserved via the stack time span below.
+  const double fps = 30.0;
+  const double dt = 1000.0 / fps;                  // ms per frame
+  const uint32 length = (cur_anim.length > 0) ? cur_anim.length : 1;
+  l_scene->GetGlobalSettings().SetTimeMode(FbxTime::eFrames30);
 
-    for (auto& it : skeleton)
+  FbxTime startT, endT;
+  startT.SetSecondDouble(0.0);
+  endT.SetSecondDouble(length / 1000.0);
+  anim_stack->SetLocalTimeSpan(FbxTimeSpan(startT, endT));
+
+  // Frame sample times in ms: 0, dt, 2dt, ... and always a final key exactly at length so the
+  // last pose and the clip duration are exact.
+  std::vector<double> sampleMs;
+  for (double t = 0.0; t < (double)length; t += dt)
+    sampleMs.push_back(t);
+  sampleMs.push_back((double)length);
+
+  // Remember which bones got rotation curves so the unroll filter can fix Euler flips after.
+  std::vector<int> rotatedBones;
+
+  for (auto& it : skeleton)
+  {
+    int b = it.first;
+    Bone& bone = l_model->bones[b];
+
+    const bool hasRot = bone.rot.uses(cur_anim.Index);
+    const bool hasScale = bone.scale.uses(cur_anim.Index);
+    const bool hasTrans = bone.trans.uses(cur_anim.Index);
+
+    if (!hasRot && !hasScale && !hasTrans) // bone is static for this clip -> keeps its rest transform
+      continue;
+
+    FbxNode* node = it.second;
+
+    FbxAnimCurve* tx = hasTrans ? node->LclTranslation.GetCurve(anim_layer, FBXSDK_CURVENODE_COMPONENT_X, true) : nullptr;
+    FbxAnimCurve* ty = hasTrans ? node->LclTranslation.GetCurve(anim_layer, FBXSDK_CURVENODE_COMPONENT_Y, true) : nullptr;
+    FbxAnimCurve* tz = hasTrans ? node->LclTranslation.GetCurve(anim_layer, FBXSDK_CURVENODE_COMPONENT_Z, true) : nullptr;
+    FbxAnimCurve* rx = hasRot ? node->LclRotation.GetCurve(anim_layer, FBXSDK_CURVENODE_COMPONENT_X, true) : nullptr;
+    FbxAnimCurve* ry = hasRot ? node->LclRotation.GetCurve(anim_layer, FBXSDK_CURVENODE_COMPONENT_Y, true) : nullptr;
+    FbxAnimCurve* rz = hasRot ? node->LclRotation.GetCurve(anim_layer, FBXSDK_CURVENODE_COMPONENT_Z, true) : nullptr;
+    FbxAnimCurve* sx = hasScale ? node->LclScaling.GetCurve(anim_layer, FBXSDK_CURVENODE_COMPONENT_X, true) : nullptr;
+    FbxAnimCurve* sy = hasScale ? node->LclScaling.GetCurve(anim_layer, FBXSDK_CURVENODE_COMPONENT_Y, true) : nullptr;
+    FbxAnimCurve* sz = hasScale ? node->LclScaling.GetCurve(anim_layer, FBXSDK_CURVENODE_COMPONENT_Z, true) : nullptr;
+
+    if (tx) { tx->KeyModifyBegin(); ty->KeyModifyBegin(); tz->KeyModifyBegin(); }
+    if (rx) { rx->KeyModifyBegin(); ry->KeyModifyBegin(); rz->KeyModifyBegin(); }
+    if (sx) { sx->KeyModifyBegin(); sy->KeyModifyBegin(); sz->KeyModifyBegin(); }
+
+    for (double ms : sampleMs)
     {
-      int b = it.first;
-      Bone& bone = l_model->bones[b];
+      FbxTime time;
+      time.SetSecondDouble(ms / 1000.0);
+      // The final sample sits at exactly `length`, which is the loop WRAP point: getValue(length)
+      // returns the START pose, not the end-of-clip pose. Writing that as the last keyframe snaps
+      // the whole skeleton back to the start on the last frame (a severe 1-frame distortion at the
+      // end of every take). Clamp the sampled time just below the wrap so the final key holds the
+      // true end pose; the importing DCC handles the loop back to frame 0 on its own.
+      uint32 wowT = (uint32)(ms + 0.5);
+      if (length > 1 && wowT >= length)
+        wowT = length - 1;
 
-      bool rot = bone.rot.uses(cur_anim.Index);
-      bool scale = bone.scale.uses(cur_anim.Index);
-      bool trans = bone.trans.uses(cur_anim.Index);
-
-      if (!rot && !scale && !trans) // bone is not animated, skip it
-        continue;
-
-      if (trans)
+      if (hasTrans)
       {
-        FbxAnimCurve* t_curve_x = skeleton[b]->LclTranslation.GetCurve(anim_layer, FBXSDK_CURVENODE_COMPONENT_X, true);
-        FbxAnimCurve* t_curve_y = skeleton[b]->LclTranslation.GetCurve(anim_layer, FBXSDK_CURVENODE_COMPONENT_Y, true);
-        FbxAnimCurve* t_curve_z = skeleton[b]->LclTranslation.GetCurve(anim_layer, FBXSDK_CURVENODE_COMPONENT_Z, true);
-
-        glm::vec3 v = bone.trans.getValue(cur_anim.Index, t);
-
+        // Local translation relative to the parent bone = rest pivot offset + animated track,
+        // matching Bone::calcMatrix's T(pivot)*T(animTrans)*...*T(-pivot) composition.
+        glm::vec3 v = bone.trans.getValue(cur_anim.Index, wowT);
         if (bone.parent != -1)
-        {
-          Bone& parent_bone = l_model->bones[bone.parent];
-          v += (bone.pivot - parent_bone.pivot);
-        }
-
-        t_curve_x->KeyModifyBegin();
-        int key_index = t_curve_x->KeyAdd(time);
-        t_curve_x->KeySetValue(key_index, v.x * SCALE_FACTOR);
-        t_curve_x->KeySetInterpolation(key_index, bone.trans.type == INTERPOLATION_LINEAR ? FbxAnimCurveDef::eInterpolationLinear : FbxAnimCurveDef::eInterpolationCubic);
-        t_curve_x->KeyModifyEnd();
-
-        t_curve_y->KeyModifyBegin();
-        key_index = t_curve_y->KeyAdd(time);
-        t_curve_y->KeySetValue(key_index, v.y * SCALE_FACTOR);
-        t_curve_y->KeySetInterpolation(key_index, bone.trans.type == INTERPOLATION_LINEAR ? FbxAnimCurveDef::eInterpolationLinear : FbxAnimCurveDef::eInterpolationCubic);
-        t_curve_y->KeyModifyEnd();
-
-        t_curve_z->KeyModifyBegin();
-        key_index = t_curve_z->KeyAdd(time);
-        t_curve_z->KeySetValue(key_index, v.z * SCALE_FACTOR);
-        t_curve_z->KeySetInterpolation(key_index, bone.trans.type == INTERPOLATION_LINEAR ? FbxAnimCurveDef::eInterpolationLinear : FbxAnimCurveDef::eInterpolationCubic);
-        t_curve_z->KeyModifyEnd();
+          v += (bone.pivot - l_model->bones[bone.parent].pivot);
+        int k;
+        k = tx->KeyAdd(time); tx->KeySetValue(k, v.x * SCALE_FACTOR); tx->KeySetInterpolation(k, FbxAnimCurveDef::eInterpolationLinear);
+        k = ty->KeyAdd(time); ty->KeySetValue(k, v.y * SCALE_FACTOR); ty->KeySetInterpolation(k, FbxAnimCurveDef::eInterpolationLinear);
+        k = tz->KeyAdd(time); tz->KeySetValue(k, v.z * SCALE_FACTOR); tz->KeySetInterpolation(k, FbxAnimCurveDef::eInterpolationLinear);
       }
 
-      if (rot)
+      if (hasRot)
       {
-        FbxAnimCurve* r_curve_x = skeleton[b]->LclRotation.GetCurve(anim_layer, FBXSDK_CURVENODE_COMPONENT_X, true);
-        FbxAnimCurve* r_curve_y = skeleton[b]->LclRotation.GetCurve(anim_layer, FBXSDK_CURVENODE_COMPONENT_Y, true);
-        FbxAnimCurve* r_curve_z = skeleton[b]->LclRotation.GetCurve(anim_layer, FBXSDK_CURVENODE_COMPONENT_Z, true);
-
-        auto r = glm::eulerAngles(bone.rot.getValue(cur_anim.Index, t));
-
-        auto x = glm::degrees(r.x);
-        auto y = glm::degrees(r.y);
-        auto z = glm::degrees(r.z);
-       
-        r_curve_x->KeyModifyBegin();
-        int key_index = r_curve_x->KeyAdd(time);
-        r_curve_x->KeySetValue(key_index, x);
-        r_curve_x->KeySetInterpolation(key_index, bone.rot.type == INTERPOLATION_LINEAR ? FbxAnimCurveDef::eInterpolationLinear : FbxAnimCurveDef::eInterpolationCubic);
-        r_curve_x->KeyModifyEnd();
-
-        r_curve_y->KeyModifyBegin();
-        key_index = r_curve_y->KeyAdd(time);
-        r_curve_y->KeySetValue(key_index, y);
-        r_curve_y->KeySetInterpolation(key_index, bone.rot.type == INTERPOLATION_LINEAR ? FbxAnimCurveDef::eInterpolationLinear : FbxAnimCurveDef::eInterpolationCubic);
-        r_curve_y->KeyModifyEnd();
-
-        r_curve_z->KeyModifyBegin();
-        key_index = r_curve_z->KeyAdd(time);
-        r_curve_z->KeySetValue(key_index, z);
-        r_curve_z->KeySetInterpolation(key_index, bone.rot.type == INTERPOLATION_LINEAR ? FbxAnimCurveDef::eInterpolationLinear : FbxAnimCurveDef::eInterpolationCubic);
-        r_curve_z->KeyModifyEnd();
+        // Convert the WoW local quaternion to Euler degrees in the SAME order FBX nodes use by
+        // default (eEulerXYZ) by round-tripping through an FbxAMatrix. This is exact and avoids
+        // glm::eulerAngles' order/range ambiguity that produced flipped bones.
+        glm::fquat gq = bone.rot.getValue(cur_anim.Index, wowT);
+        FbxQuaternion fq(gq.x, gq.y, gq.z, gq.w);
+        FbxAMatrix rm; rm.SetQ(fq);
+        FbxVector4 e = rm.GetR();
+        int k;
+        k = rx->KeyAdd(time); rx->KeySetValue(k, (float)e[0]); rx->KeySetInterpolation(k, FbxAnimCurveDef::eInterpolationLinear);
+        k = ry->KeyAdd(time); ry->KeySetValue(k, (float)e[1]); ry->KeySetInterpolation(k, FbxAnimCurveDef::eInterpolationLinear);
+        k = rz->KeyAdd(time); rz->KeySetValue(k, (float)e[2]); rz->KeySetInterpolation(k, FbxAnimCurveDef::eInterpolationLinear);
       }
 
-      if (scale)
+      if (hasScale)
       {
-        FbxAnimCurve* s_curve_x = skeleton[b]->LclScaling.GetCurve(anim_layer, FBXSDK_CURVENODE_COMPONENT_X, true);
-        FbxAnimCurve* s_curve_y = skeleton[b]->LclScaling.GetCurve(anim_layer, FBXSDK_CURVENODE_COMPONENT_Y, true);
-        FbxAnimCurve* s_curve_z = skeleton[b]->LclScaling.GetCurve(anim_layer, FBXSDK_CURVENODE_COMPONENT_Z, true);
-
-        glm::vec3 v = bone.scale.getValue(cur_anim.Index, t);
-
-        s_curve_x->KeyModifyBegin();
-        int key_index = s_curve_x->KeyAdd(time);
-        s_curve_x->KeySetValue(key_index, v.x);
-        s_curve_x->KeySetInterpolation(key_index, bone.scale.type == INTERPOLATION_LINEAR ? FbxAnimCurveDef::eInterpolationLinear : FbxAnimCurveDef::eInterpolationCubic);
-        s_curve_x->KeyModifyEnd();
-
-        s_curve_y->KeyModifyBegin();
-        key_index = s_curve_y->KeyAdd(time);
-        s_curve_y->KeySetValue(key_index, v.y);
-        s_curve_y->KeySetInterpolation(key_index, bone.scale.type == INTERPOLATION_LINEAR ? FbxAnimCurveDef::eInterpolationLinear : FbxAnimCurveDef::eInterpolationCubic);
-        s_curve_y->KeyModifyEnd();
-
-        s_curve_z->KeyModifyBegin();
-        key_index = s_curve_z->KeyAdd(time);
-        s_curve_z->KeySetValue(key_index, v.z);
-        s_curve_z->KeySetInterpolation(key_index, bone.scale.type == INTERPOLATION_LINEAR ? FbxAnimCurveDef::eInterpolationLinear : FbxAnimCurveDef::eInterpolationCubic);
-        s_curve_z->KeyModifyEnd();
+        glm::vec3 v = bone.scale.getValue(cur_anim.Index, wowT);
+        int k;
+        k = sx->KeyAdd(time); sx->KeySetValue(k, v.x); sx->KeySetInterpolation(k, FbxAnimCurveDef::eInterpolationLinear);
+        k = sy->KeyAdd(time); sy->KeySetValue(k, v.y); sy->KeySetInterpolation(k, FbxAnimCurveDef::eInterpolationLinear);
+        k = sz->KeyAdd(time); sz->KeySetValue(k, v.z); sz->KeySetInterpolation(k, FbxAnimCurveDef::eInterpolationLinear);
       }
     }
 
-    //LOG_INFO << "Ended frame" << t;
+    if (tx) { tx->KeyModifyEnd(); ty->KeyModifyEnd(); tz->KeyModifyEnd(); }
+    if (rx) { rx->KeyModifyEnd(); ry->KeyModifyEnd(); rz->KeyModifyEnd(); rotatedBones.push_back(b); }
+    if (sx) { sx->KeyModifyEnd(); sy->KeyModifyEnd(); sz->KeyModifyEnd(); }
+  }
+
+  // Euler curves sampled per-frame can jump (e.g. 179deg -> -179deg) and make a joint spin the
+  // wrong way between keys. The unroll filter rewrites each joint's 3 rotation curves to be
+  // continuous, removing those flips without changing the represented orientation.
+  FbxAnimCurveFilterUnroll unroll;
+  for (int b : rotatedBones)
+  {
+    FbxNode* node = skeleton[b];
+    FbxAnimCurve* r[3] = {
+      node->LclRotation.GetCurve(anim_layer, FBXSDK_CURVENODE_COMPONENT_X),
+      node->LclRotation.GetCurve(anim_layer, FBXSDK_CURVENODE_COMPONENT_Y),
+      node->LclRotation.GetCurve(anim_layer, FBXSDK_CURVENODE_COMPONENT_Z)
+    };
+    if (r[0] && r[1] && r[2])
+      unroll.Apply(r, 3);
   }
 }

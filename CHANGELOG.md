@@ -3,6 +3,215 @@
 All notable changes to **WoW Model Viewer: Midnight** are recorded here.
 Format loosely based on [Keep a Changelog](https://keepachangelog.com/).
 
+## [Unreleased]
+
+### Added
+- **FBX export: "Component (raw/Blender)" mode for item components.** A new checkbox in the FBX
+  Export Options dialog (and the `-fbxcomponent` headless flag) exports models the way the WoW
+  Model Viewer Blender add-on wants them for rigging item components — instead of baking each
+  material into one flat texture, it writes a **second UV set (UV2)**, the **raw individual
+  textures** for every texture unit, and an expanded material sidecar. On import, the bundled
+  Blender add-on then rebuilds each material's node graph automatically: it picks UV1 vs UV2 per
+  texture, treats a texture's alpha channel as a **specular/mask (ignored) rather than
+  transparency** where appropriate (no more see-through blade edges), gives glow/effect planes
+  their own **Emission** material driven by the UV2 scrolling glow masked by the UV1 gradient, and
+  turns the model's UV scrolling into an **animated, looping Mapping node** — the whole manual
+  workflow, done on import. The default (unchecked) export is unchanged: it still bakes as before.
+  *After updating, re-install the Blender add-on (About → Install Blender Add-on) to get the new
+  import behavior.*
+- **Equipment panel: one-click item removal.** Each equipment slot now has a small **X** button that
+  removes just that item (greyed out when the slot is empty), plus a **Clear all equipment** button
+  that strips everything at once (the same action as the Character → Clear Equipment / F9 menu, now
+  discoverable next to the slots).
+- **File → Restart (Ctrl+Shift+R).** Relaunches the viewer in one click instead of quitting and
+  reopening by hand. Your saved settings are kept.
+- **Modern background-colour picker.** View → Background Color… now opens a Photoshop-style picker —
+  a saturation/brightness square, a hue strip, new/current swatches and editable H/S/B, R/G/B and
+  #RRGGBB fields — replacing the old native Windows colour dialog.
+- **Model Control: the geoset list scales with the panel.** The geoset tree fills the (floating,
+  resizable) Model Control window and grows when you drag its edge, instead of being a fixed small
+  box you had to scroll.
+
+- **Image Sequence Export (File → Export Image Sequence…).** Renders the animation to a numbered
+  PNG / JPG / EXR frame sequence for After Effects, Premiere and DaVinci Resolve. Choose output
+  folder, filename prefix, format, resolution (1080p/1440p/2160p presets, viewport, or custom with
+  keep-aspect), frame rate (24/25/30/60/native/custom), frame range, number padding and start
+  number. PNG and EXR keep a **clean transparent alpha channel** for compositing — the model is
+  rendered over black and over white and its true coverage reconstructed, so it stays fully solid
+  (no "see-through" models, which the framebuffer's own alpha would give with WoW's mixed blend
+  modes) and the matte is correct for every blend mode (EXR is linear float). Numbering is contiguous
+  (no skipped frames) so it imports cleanly as an image sequence. The export
+  renders one frame per event-loop tick, so the window stays responsive with a live progress bar,
+  current-frame readout and a Cancel button, and the viewport's animation/state is restored
+  afterwards. Output colour space is sRGB (PNG/JPG); EXR is linear.
+
+- **Blender importer add-on (About > Install Blender Add-on...).** One click installs a
+  "File > Import > WoW Model Viewer FBX (.fbx)" entry into every Blender version found on the
+  machine (works with Blender 3.0 through 5.0). Importing a WMV-exported FBX through it makes the
+  model look like the WMV viewport out of the box: every FBX export now writes a small
+  `.wmvmat.json` file next to it describing each material's real render state (opaque,
+  alpha-tested, alpha-blended, additive glow, unlit, two-sided), and the add-on rebuilds the
+  Blender materials from that — glows become emissive with black-is-transparent blending, cloth
+  keeps its recolour, backface culling matches the game — instead of leaving Blender's generic
+  FBX guesses in place. No more manually switching blend modes per material after every import.
+
+### Removed
+- **Model Bank panel** (View → Show model bank) and its "Show model bank" menu entry — removed.
+- **View menu items Skybox, Show Grid, and Show Mask** — removed.
+- **Effects menu** (its only item, Apply Enchants) — removed from the menu bar.
+- **Model Control: the Position/Rotation fields and the "Replace particle colours" section** —
+  removed. Alpha, Scale, the render/geoset toggles and the geoset list stay; creatures' own
+  skin-based particle colours are unaffected.
+- **File menu: Save Sized Screenshot (Ctrl+S), GIF/Sequence Export, and Export AVI** — removed
+  (including the Ctrl+S shortcut). Save Screenshot (F12) and Export Image Sequence remain.
+
+### Fixed
+- **Model Control list now populates right after importing a character.** After an Armory import or
+  loading a `.chr`, the equipped helm/shoulders/weapon were missing from Model Control's model list
+  until you re-equipped an item; the list is now rebuilt as soon as the character is composed.
+- **Equipped helmet: hiding it in Model Control now brings the hair/ears back.** Un-checking a
+  helmet's Render in Model Control used to hide the helmet mesh but leave the hair/ears/horns it was
+  covering hidden; the helm's geoset auto-hide now follows whether the helm is actually drawn.
+- **Image Sequence Export: corrected the progress dialog and a garbled label.** The progress popup
+  said "Exporting FBX / …to FBX…" for an image-sequence export (now "Exporting Image Sequence"), and
+  the "Transparent background" checkbox showed mojibake from a Unicode dash (now clean text).
+- **FBX export: blinking/pulsing parts are no longer randomly missing from the export.** Some
+  render passes animate their opacity on a repeating cycle — e.g. a character's eye-glow that
+  blinks on and off. The exporter decided whether a pass got a material and its geometry by asking
+  "is it visible *right now*?", so if the export happened to fire during the split second the
+  animation sat at zero, that pass was silently dropped: exporting the exact same character twice
+  could produce 18 materials one time and 17 the next. Export visibility is now judged over the
+  whole animation cycle (a pass exports if it is ever visible, at its peak opacity), so repeated
+  exports of the same model are identical. Passes that are permanently invisible are still skipped.
+- **FBX export: multi-texture "glow"/overlay effects are no longer dropped.** Some items (e.g. a
+  hood whose mask has a separate glowing eye-slit overlay) combine up to four textures per pass
+  using WoW's own material combiner — the viewport already renders this correctly via a GLSL
+  shader, but the exporter only ever exported the FIRST texture, silently ignoring the rest, so an
+  item's actual glow/overlay colour (e.g. yellow) was missing entirely and the plain, duller base
+  texture (e.g. grey) was exported instead. The exporter now bakes the real combined result — the
+  exact same formula and textures the viewport uses — into the exported texture for these passes,
+  so Blender shows the same effect the viewport does. Ordinary single-texture materials are
+  unaffected; passes using an environment/reflection map are also unaffected (unchanged behaviour).
+- **FBX export: equipped items no longer revert to their default appearance.** FBX export relaunches
+  WMV as a background process, which reloads the character from a snapshot (`.chr`) saved at the
+  moment you clicked Export. Reloading an item first resolves its DEFAULT appearance from its item
+  ID, then only corrects that for a saved variant when a simple per-item "level" index accounts for
+  it — but some equipped items (e.g. Armory-imported items, or any appearance not reachable through
+  that level index) have a look that mechanism can't reproduce, so the exact appearance actually
+  shown in the viewport was silently discarded and the item's generic default was used instead —
+  the exported FBX could show different (wrong) textures than what was equipped. The saved snapshot
+  now always wins as the final, authoritative appearance for every item, matching the viewport
+  exactly. (Everyday equipment, which has only one appearance, was never affected.)
+- **FBX export: the splash screen no longer flashes on screen.** Exporting to FBX runs as a
+  background copy of WMV itself so the main window stays responsive — but that background process
+  still ran the normal startup sequence, which unconditionally shows the splash screen (centred,
+  ~2s) before anything checks whether the run is headless. Only the main window was ever parked
+  off-screen; the splash showed itself immediately on construction, so every export briefly
+  flashed it on the real screen. The splash is now skipped entirely for a headless/background run.
+- **FBX export: recolored armor/weapons no longer lose their tint in Blender.** Some equipped
+  items (and some creature skins) share one base model/texture and are recolored via the M2
+  "colors" animation track (e.g. purple-tinted cloth over an otherwise gold/bronze texture) — the
+  viewport applies this tint every frame, but the exporter only ever wrote the raw, un-recolored
+  base texture, so the same item opened flat gold/bronze in Blender. The exporter now bakes that
+  same tint directly into a copy of the exported texture (only for passes that actually carry a
+  tint, under a distinct filename so untinted textures are unaffected), so Blender shows the exact
+  colour the viewport does. The existing self-illuminated/emissive glow (e.g. eyes) is unaffected.
+- **FBX export: glowing eyes are no longer pink/blank.** Composited textures with no source file on
+  disk (the character's eyes, baked skin, etc.) had no filename, so the exporter synthesised one
+  from the model name — but the model name is a full game path
+  (`character/bloodelf/female/bloodelffemale_hd`), so the texture path ended up pointing at
+  non-existent subfolders and the image silently failed to save, leaving a 0x0 (blank) texture that
+  DCCs draw as magenta — the reported "pink/purple eyes". The synthesised name now uses just the
+  base name, so the real (gold) eye texture is written and embedded. Self-illuminated passes also
+  drive the emissive channel so glowing parts light up.
+- **Previewing an item component directly (not through an equipped character) showed no colour at
+  all.** Some armor pieces (e.g. a hood/mask with a coloured cloth texture) get their actual texture
+  from a database lookup rather than from the model file itself, and the viewport's "Skins"
+  selector is what resolves that lookup and lets you pick between an item's different recolours.
+  Its database query filtered on the wrong column — comparing a *texture's* file ID against the
+  *model's* file ID, which can never match — so it always found zero candidates, silently leaving
+  the piece with no texture bound at all (flat grey, no matter which recolour the game actually
+  uses). The query now correctly matches on the model's own file ID, so the Skins selector is
+  populated again and the correct texture (colour and all) shows immediately.
+- **FBX export: glow effects no longer import as opaque black planes in Blender.** WoW draws
+  glows (eye-slit beams, floating shoulder wing-blades, weapon shine) as *additive* layers:
+  their bright parts add light and their black parts add nothing — invisible in-game. The
+  exporter wrote these as ordinary opaque materials, so in Blender the mostly-black glow planes
+  rendered as solid black geometry that covered the model behind them (black wings, a blacked-out
+  face behind the hood's beam planes). The Blender add-on now renders additive passes as genuine
+  additive layers (emission added over a fully transparent surface) — the model behind stays
+  visible, black contributes nothing, and the same stacked glow layers the game draws accumulate
+  in Blender like they do in the viewport, at the correct hue (no more oversized, over-bright or
+  colour-shifted glows). Glow layers the game animates (scrolling streaks / colour modulators)
+  are also no longer frozen at one arbitrary animation instant: the bake sweeps the whole
+  animation cycle, rendered supersampled so accents on very thin geometry (a beam's gold tip)
+  survive, and keeps each pixel's brightest result.
+- **Armor glow accents (e.g. a hood's eye-slit beams) are no longer colourless.** Some armor
+  pieces put their glowing accents on a second replaceable texture slot — the same slot weapon
+  models use for the blade sheen. The accent geometry's UVs point at a dedicated coloured island
+  inside the item's own texture, which is how each recolour of the item gets a matching (or
+  contrasting) accent colour in the game. The viewer filled that slot with a generic grey
+  weapon-sheen texture for every model, so those accents always rendered grey/white no matter the
+  item (both equipped on a character and in a direct preview). Armor components now feed their own
+  item texture into that slot — the hood's beams glow gold, and every recolour shows its intended
+  accent colour. Actual weapons keep the previous blade-sheen behaviour, and this also carries
+  into FBX exports automatically (the exported/baked textures use the same texture routing).
+- **FBX export: the last frame of every animation no longer snaps to a broken pose.** The final
+  keyframe was sampled exactly at the clip's loop point, which returns the *start* pose — so the end
+  of each take jumped the whole skeleton back to the start for one frame. The final key now holds the
+  true end-of-clip pose and the importing tool handles the loop itself.
+
+### Changed
+- **The camera now auto-fits the whole model on load.** The auto-frame used to size only to the
+  model's height, so wide or long models (mounts, dragons, spread poses, a weapon lying flat) spilled
+  off the sides. It now frames the model's full 3-D bounds, so the whole thing sits in view; Reset
+  Camera (and Numpad 5) do the same.
+- **M2 material rendering: explicit shader-mapping layer + material fixes.** Each render batch is now
+  classified from its shader id, blend mode, texture count and flags into an explicit render variant
+  (multi-texture materials keep the existing GLSL combiner; single-texture materials use the
+  fixed-function path). Two blend fixes apply by default: no-alpha **additive glows** use ONE/ONE
+  (were being squared/darkened), and **alpha-key cutouts** key at ~0.5 to match the game (were
+  over-clipping thin hair/foliage edges). Opt-in env flags for A/B testing: `WMV_SHADERDEBUG` logs
+  each batch's classification, `WMV_M2_SINGLECOMBINER` routes non-trivial single-texture materials
+  through the combiner, and `WMV_M2_STAGE2` folds the combiner's env-reflection/glow lobe back in
+  (metal/gem/eye sheen). Existing multi-texture (cosmic/void cape) rendering is unchanged.
+- **Metal weapons now catch the light.** Reflective metal materials (swords, axes, maces and other
+  gear that uses an environment-reflection texture) get two default-on touches: a **fresnel sheen**
+  that strengthens their reflection toward grazing angles, and a **specular glint** — a bright
+  highlight that slides across the surface as you orbit the model, the way polished metal does
+  in-game. Both are applied only to genuinely reflective, lit metal (opaque/alpha-key); cloth,
+  skin, self-illuminated, glow/energy and cosmic-effect materials are left exactly as they were,
+  and FBX exports are unchanged. Intensity is tunable for anyone who wants more or less: `WMV_ENV_BOOST`
+  (reflection sheen, default 0.45), `WMV_METAL_SPEC` (glint strength, default 0.26; 0 disables it) and
+  `WMV_METAL_TIGHT` (glint size, default 55). With everything at 0 the render is byte-for-byte the old image.
+- **Exporting to FBX no longer freezes the program.** A model export used to lock up the whole
+  window until it finished — no way to tell how far along it was, and no way to stop it. FBX export
+  now runs as a separate background job: the main window stays fully usable while it works, a small
+  progress window shows the current stage (skeleton, mesh, materials, skinning, each animation, and
+  writing the file) with a progress bar, and a **Cancel** button stops it cleanly. When it finishes
+  you get a "completed" message; if something goes wrong you get the reason instead of a silent
+  failure. Because the export runs in its own process, even a crash or a hang inside the export can
+  no longer take the viewer down with it.
+- Every export now writes a detailed log next to the saved file (`<name>.fbx.export.log`) for
+  troubleshooting, and starting a second export of the same model to the same file while one is
+  already running is politely refused instead of clobbering the first.
+
+### Fixed
+- **The Character menu's Show Ears / Show Hair / Show Facial Hair / Show Feet toggles work now.**
+  They previously did nothing: toggling a menu item flipped an internal flag but never re-applied the
+  character's geosets, so the model on screen didn't change. Now toggling any of them refreshes the
+  model immediately. Two of them needed more than that: **Show Hair** was wired to a flag that nothing
+  ever read, so it's now actually connected to the hairstyle geoset (turning it off gives a clean bald
+  head, not a hole); and **Show Feet** was being reset to the race default on every refresh, which
+  overwrote your choice — the default is now applied once when the character loads, so your toggle
+  sticks. Show Underwear, eye-glow and the head-item auto-hide option (which shared the same broken
+  path) also respond immediately now.
+- **The main window can no longer get "lost" off-screen.** If a saved window position would place
+  the window where you can't reach it — for example a coordinate left over from a second monitor
+  that's since been unplugged — the window now re-centers itself on a connected display at startup
+  instead of opening somewhere invisible (where it couldn't be moved or maximized). Background
+  export jobs also no longer write their own window position into your settings.
+
 ## [0.3.2] — 2026-06-23
 
 ### Fixed

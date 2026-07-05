@@ -702,6 +702,10 @@ void WoWModel::initCommon()
         if (texdef[I].type == TEXTURE_WEAPON_BLADE) // a fix for weapons with type-3 textures.
           replaceTextures[texdef[I].type] = TEXTUREMANAGER.add(GAMEDIRECTORY.getFile("Item\\ObjectComponents\\Weapon\\ArmorReflect4.BLP"));
       }
+
+      if (getenv("WMV_MATDUMP"))
+        LOG_INFO << "[matdump-texload] slot" << (int)I << "type" << (int)texdef[I].type
+                 << (texdef[I].type == TEXTURE_FILENAME ? "(filename, resolved now)" : "(special, needs later fill-in)");
     }
   }
 
@@ -871,7 +875,13 @@ void WoWModel::initRaceInfos()
     fdid = SDReplacementModel[fdid];
 
   if (RaceInfos::getRaceInfosForFileID(fdid, infos))
+  {
+    // Seed the "show feet" default from the race's barefoot flag ONCE, here at load, instead of
+    // in refresh() (which runs on every equip/customization and used to clobber the user's
+    // Show Feet menu toggle every time). A saved .chr's showFeet is applied after this and wins.
+    cd.showFeet = infos.barefeet;
     return;
+  }
 
   // The loaded file isn't the canonical race model in the map (e.g. a legacy
   // character/<race>/<sex>/*.m2 picked from the file tree, whose FileDataID is
@@ -888,6 +898,7 @@ void WoWModel::initRaceInfos()
       const int sex = (parts[2] == "female") ? GENDER_FEMALE : GENDER_MALE;
       if (RaceInfos::getRaceInfosForName(raceName, sex, infos))
       {
+        cd.showFeet = infos.barefeet; // race default (see note above); user toggle overrides
         LOG_INFO << "Resolved race infos by path for" << gamefile->fullname() << "(" << parts[1] << "/" << parts[2] << ")";
         return;
       }
@@ -1604,18 +1615,35 @@ void WoWModel::setLOD(int index)
     }
 
     pass->textureCount = (int)texCount;
-    if (texCount > 1)
+
+    // Shader-mapping layer, step 1: resolve the Blizzard pixel/vertex shader + per-unit UV
+    // routing for EVERY material (single- AND multi-texture) from its shader_id. This is pure
+    // name-table resolution -- no GL state, so it never changes rendering on its own -- and is
+    // the input to the variant classification below. (Previously only op_count>1 units were
+    // resolved; single-texture units were left with pixelShader = -1.)
+    // Single-texture UV routing (uvSource) is only consumed when a combiner actually runs: all
+    // multi-texture materials, or single-texture materials when the opt-in single-texture
+    // combiner is enabled. Compute the toggle here so we can leave uvSource untouched on the
+    // default single-texture path -- keeping BOTH the fixed-function render AND the FBX exporter
+    // (which also reads uvSource) byte-identical to before.
+    static const bool singleCombiner = (getenv("WMV_M2_SINGLECOMBINER") != NULL);
+    const int shaderID = (int)Tex[j].shading;
+    std::string vsNameDbg;
     {
-      // Multi-texture material: resolve the Blizzard combiner + per-unit UV routing and
-      // bind the textures in natural order so the fragment combiner can reproduce them.
-      texOffset = 0;
-      const int shaderID = (int)Tex[j].shading;
       const std::string psName = getPixelShaderName((int)texCount, shaderID);
       const std::string vsName = getVertexShaderName((int)texCount, shaderID);
+      vsNameDbg = vsName;
       pass->pixelShader = pixelShaderNameToId(psName);
       pass->vertexShader = vertexShaderNameToId(vsName);
-      uvSourceForVSName(vsName, pass->uvSource);
+      if (texCount > 1 || singleCombiner)
+        uvSourceForVSName(vsName, pass->uvSource);
+    }
 
+    if (texCount > 1)
+    {
+      // Multi-texture material: bind the extra textures in natural order so the fragment
+      // combiner can reproduce them (single-texture units keep the special-skin texOffset).
+      texOffset = 0;
       pass->tex2 = texLk(Tex[j].textureid + 1);
       pass->tex3 = (texCount > 2) ? texLk(Tex[j].textureid + 2) : ModelRenderPass::INVALID_TEX;
       pass->tex4 = (texCount > 3) ? texLk(Tex[j].textureid + 3) : ModelRenderPass::INVALID_TEX;
@@ -1684,6 +1712,48 @@ void WoWModel::setLOD(int index)
           pass->texanim2 = a1;
       }
     }
+
+    // Shader-mapping layer, step 2: map (shader_id, blend mode, texture count, flags) to an
+    // explicit render variant that ModelRenderPass::init() acts on. Multi-texture -> the GLSL
+    // combiner. Single-texture -> a fixed-function variant (behaviour unchanged) UNLESS the
+    // opt-in single-texture combiner (env WMV_M2_SINGLECOMBINER) is set AND the material's pixel
+    // shader is non-trivial: pixelShader ids 0/1 are Combiners_Opaque/Combiners_Mod, identical to
+    // plain fixed-function modulate, so they always stay on the fast fixed path. Blend modes we do
+    // not confidently map (mod / mod2x / blend-7) stay M2SV_FALLBACK == the legacy fixed path.
+    if (texCount > 1)
+      pass->m2Variant = M2SV_COMBINER;
+    else if (singleCombiner && pass->pixelShader > 1)         // >1 => not plain Opaque/Mod
+      pass->m2Variant = M2SV_COMBINER_SINGLE;
+    else if (pass->useEnvMap)
+      pass->m2Variant = M2SV_FIXED_ENV;
+    else if (pass->blendmode == 3 || pass->blendmode == 4)    // 3 additive, 4 additive-alpha
+      pass->m2Variant = M2SV_FIXED_ADD;
+    else if (pass->blendmode == 1 || pass->blendmode == 2)    // 1 alpha-key, 2 alpha-blend
+      pass->m2Variant = M2SV_FIXED_ALPHA;
+    else if (pass->blendmode == 0)                            // 0 opaque
+      pass->m2Variant = M2SV_FIXED_OPAQUE;
+    else
+      pass->m2Variant = M2SV_FALLBACK;                        // 5 mod / 6 mod2x / 7 -> legacy
+
+    // Per-batch shader-mapping trace (opt-in: set env WMV_SHADERDEBUG). One line per render batch.
+    static const bool shaderDebug = (getenv("WMV_SHADERDEBUG") != NULL);
+    if (shaderDebug)
+      LOG_INFO << "[m2shader]" << qPrintable(name())
+               << "| submesh(geoset)" << pass->geoIndex
+               << "shaderId" << shaderID
+               << "blend" << (int)pass->blendmode
+               << "flags" << qPrintable(QString("0x%1").arg((uint)rf.flags, 0, 16))
+               << "texCount" << pass->textureCount
+               << "pixelShader" << pass->pixelShader
+               << "unlit" << (pass->unlit ? 1 : 0)
+               << "twoSided" << (pass->cull ? 0 : 1)
+               << "env" << (pass->useEnvMap ? 1 : 0)
+               << "uvSrc" << (int)pass->uvSource[0] << (int)pass->uvSource[1] << (int)pass->uvSource[2] << (int)pass->uvSource[3]
+               << "vs" << qPrintable(QString::fromStdString(vsNameDbg))
+               << "colorIdx" << (int)pass->color
+               << "opacityIdx" << (int)pass->opacity
+               << "texanim" << (int)pass->texanim
+               << "=> variant" << ModelRenderPass::m2VariantName(pass->m2Variant);
 
     rawPasses.push_back(pass);
   }
@@ -2285,6 +2355,19 @@ WoWItem * WoWModel::getItem(CharSlots slot)
   }
 
   return nullptr;
+}
+
+bool WoWModel::isEquippedHeadModel(WoWModel * m)
+{
+  if (!m)
+    return false;
+  WoWItem * headItem = getItem(CS_HEAD);
+  if (!headItem)
+    return false;
+  for (const auto & hm : headItem->models())
+    if (hm.second == m)
+      return true;
+  return false;
 }
 
 int WoWModel::getItemId(CharSlots slot)
@@ -2955,28 +3038,6 @@ void WoWModel::refresh()
   if (infos.raceID == -1) 
     return;
 
-  const auto headItemId = getItemId(CS_HEAD);
-
-  if (headItemId != -1 && cd.autoHideGeosetsForHeadItems)
-  {
-    const auto query = QString("SELECT HideGeosetGroup FROM HelmetGeosetData WHERE HelmetGeosetData.RaceID = %1 "
-      "AND HelmetGeosetData.HelmetGeosetVisDataID = (SELECT %2 FROM ItemDisplayInfo WHERE ItemDisplayInfo.ID = "
-      "(SELECT ItemDisplayInfoID FROM ItemAppearance WHERE ID = (SELECT ItemAppearanceID FROM ItemModifiedAppearance WHERE ItemID = %3)))")
-      .arg(infos.raceID)
-      .arg((infos.sexID == 0) ? "HelmetGeosetVis1" : "HelmetGeosetVis2")
-      .arg(headItemId);
-
-    auto helmetInfos = GAMEDATABASE.sqlQuery(query);
-
-    if (helmetInfos.valid && !helmetInfos.values.empty())
-    {
-      for (auto it : helmetInfos.values)
-      {
-        setGeosetGroupDisplay((CharGeosets)it[0].toInt(), 0);
-      }
-    }
-  }
-
   // reset char texture
   tex.reset(infos.textureLayoutID);
   // The eye (TextureType 19) is composited from possibly SEVERAL customization layers -- the
@@ -3065,8 +3126,9 @@ void WoWModel::refresh()
       cd.geosets[CG_SLEEVES] = 0;
   }
 
-  // If model is one of these races, show the feet (don't wear boots)
-  cd.showFeet = infos.barefeet;
+  // NOTE: cd.showFeet is seeded once from infos.barefeet in initRaceInfos() (at load), NOT here.
+  // Setting it every refresh clobbered the user's Show Feet menu toggle (the toggle calls refresh(),
+  // which then immediately reset showFeet back to the race default -- so it never appeared to work).
 
   // Default geoset visibility (per the character customization rules):
   // show geoset id 0, any geoset whose id ends in "01", and the whole face group
@@ -3134,6 +3196,51 @@ void WoWModel::refresh()
     }
     if (!anyEarShown && lowestEar != -1)
       setGeosetDisplayById(lowestEar, true);
+  }
+
+  // Hide geosets covered by an equipped helmet (hair, ears, horns, etc. -- whatever
+  // HelmetGeosetData lists for this race/sex + helm). This MUST run last, after every
+  // other geoset pass above (the default "*01" rule, applyCustomizationGeosets, the
+  // cd.geosets group-display loop, and the built-in-ears fallback) -- those passes all
+  // re-show a character's own hairstyle/ears/etc. from their base customization with no
+  // knowledge of the helmet, so running the helm-hide any earlier just gets stomped
+  // immediately afterwards (e.g. a chosen hairstyle poking through the top of a hood, or
+  // ears re-shown by the "*01"/built-in-ears rules -- ear variant 1 is geoset id 701,
+  // which the "*01" default rule turns back on regardless of the helmet).
+  const auto headItemId = getItemId(CS_HEAD);
+  // The helm's geosets should only be hidden while the helm is actually on screen. If the helm
+  // has its own attached model(s) and the user has hidden them (Model Control > Render off),
+  // the covered hair/ears/horns must come back. Helms with no separate model (merged/geoset-only)
+  // have nothing to toggle, so they keep hiding as before.
+  bool helmDrawn = true;
+  if (WoWItem * headItem = getItem(CS_HEAD))
+  {
+    const auto headModels = headItem->models();
+    if (!headModels.empty())
+    {
+      helmDrawn = false;
+      for (const auto & hm : headModels)
+        if (hm.second && hm.second->showModel) { helmDrawn = true; break; }
+    }
+  }
+  if (headItemId != -1 && cd.autoHideGeosetsForHeadItems && helmDrawn)
+  {
+    const auto query = QString("SELECT HideGeosetGroup FROM HelmetGeosetData WHERE HelmetGeosetData.RaceID = %1 "
+      "AND HelmetGeosetData.HelmetGeosetVisDataID = (SELECT %2 FROM ItemDisplayInfo WHERE ItemDisplayInfo.ID = "
+      "(SELECT ItemDisplayInfoID FROM ItemAppearance WHERE ID = (SELECT ItemAppearanceID FROM ItemModifiedAppearance WHERE ItemID = %3)))")
+      .arg(infos.raceID)
+      .arg((infos.sexID == 0) ? "HelmetGeosetVis1" : "HelmetGeosetVis2")
+      .arg(headItemId);
+
+    auto helmetInfos = GAMEDATABASE.sqlQuery(query);
+
+    if (helmetInfos.valid && !helmetInfos.values.empty())
+    {
+      for (auto it : helmetInfos.values)
+      {
+        setGeosetGroupDisplay((CharGeosets)it[0].toInt(), 0);
+      }
+    }
   }
 
   // finalize character texture

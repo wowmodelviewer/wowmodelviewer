@@ -24,7 +24,7 @@
 #include "imagecontrol.h"
 #include "AnimExporter.h"
 #include "effects.h"
-#include "modelbankcontrol.h"
+#include "ColorPickerDialog.h"
 #include "filecontrol.h"
 
 #include "glm/glm.hpp"
@@ -32,6 +32,8 @@
 #include <QString>
 
 class SettingsControl;
+class ExportJobManager;
+class ImageSequenceExporter;
 
 namespace core { class GameConfig; }
 
@@ -63,7 +65,6 @@ public:
   ImageControl *imageControl;
   //SoundControl *soundControl;
   SettingsControl *settingsControl;
-  ModelBankControl *modelbankControl;
 
   CAnimationExporter *animExporter;
 
@@ -87,6 +88,24 @@ public:
   // Set for non-interactive CLI / headless test runs (-mo/-armory/-npc). Suppresses modal
   // dialogs that would otherwise block a headless run.
   bool batchMode = false;
+
+  // FBX export runs out-of-process (see ExportJobManager). These remember enough about the
+  // currently displayed model for a fresh child process to reload exactly the same asset:
+  //   - m_loadedBuild: the build version LoadWoW settled on, passed as -build so the child
+  //     loads the SAME game data (e.g. a pinned PTR build, not the auto-picked retail one).
+  //   - m_exportNpcId/m_exportNpcDisplayId: set when an NPC is shown so the child can
+  //     reconstruct it via -npc; cleared (-1) when a plain model or character is loaded.
+  //   - m_exportItemSkinFileId: the skin (TEXTURE_OBJECT_SKIN) texture FileDataID applied when an
+  //     item/weapon is shown via LoadItem, so the child can re-bind it via -itemskin instead of
+  //     re-loading the raw model with its DEFAULT skin; 0 when no item skin is active.
+  // Characters are reconstructed by serialising the live customisation to a temp .chr.
+  QString m_loadedBuild;
+  int m_exportNpcId = -1;
+  int m_exportNpcDisplayId = 0;
+  int m_exportItemSkinFileId = 0;
+
+  ExportJobManager * m_exportJobManager = nullptr;
+  ImageSequenceExporter * m_imgSeqExporter = nullptr;
 
   // Initialising related functions
   void InitMenu();
@@ -117,6 +136,7 @@ public:
   void OnClose(wxCloseEvent &event);
   void OnSize(wxSizeEvent &event);
   void OnExit(wxCommandEvent &event);
+  void OnRestart(wxCommandEvent &event); // File > Restart: relaunch the app in one click
   void UpdateCanvasStatus();
   void SetCanvasSize(uint32 sizex, uint32 sizey);
 
@@ -142,6 +162,7 @@ public:
   void OnTest(wxCommandEvent &event);
   void OnExport(wxCommandEvent &event);
   void OnExportOther(wxCommandEvent &event);
+  void OnExportImageSequence(wxCommandEvent &event);
   
   void UpdateControls();
    

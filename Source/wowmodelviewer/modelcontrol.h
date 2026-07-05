@@ -39,16 +39,10 @@ class ModelControl: public wxWindow
   wxComboBox *modelname;
   // wxComboBox *cbLod;
   wxSlider *alpha, *scale;
-  wxCheckBox *bones, *box, *render, *wireframe, *texture, *particles, *particlecolreplace;
+  wxCheckBox *bones, *box, *render, *wireframe, *texture, *particles;
   //wxCheckListBox *clbGeosets;
   wxTreeCtrl *clbGeosets;
-  wxTextCtrl *txtX, *txtY, *txtZ;
-  wxTextCtrl *rotX, *rotY, *rotZ;
-  wxColourPickerCtrl *PC11S, *PC11M, *PC11E, *PC12S, *PC12M, *PC12E, *PC13S, *PC13M, *PC13E;
   wxTextCtrl *txtsize;
-  wxStaticText *PC11SLabel, *PC11MLabel, *PC11ELabel, *PC12SLabel, *PC12MLabel, *PC12ELabel;
-  wxStaticText *PC13SLabel, *PC13MLabel, *PC13ELabel;
-  wxStaticText *NoPC, *PCHint;
 
   std::vector<wxTreeItemId> GeosetTreeItemIds;  // track items added to clbGeosets 
 
@@ -61,8 +55,6 @@ public:
   WoWModel *model;  // Currently 'active' model.
   Attachment *att; // Currently 'active' attachment.
   AnimControl *animControl;
-  particleColorReplacements pcr;
-  std::map<std::string, particleColorReplacements> modelPCRSaves;
   ModelControl(wxWindow* parent, wxWindowID id);
   ~ModelControl();
 
@@ -75,12 +67,6 @@ public:
   void OnList(wxTreeEvent &event);
   void OnSlider(wxScrollEvent &event);
   void OnEnter(wxCommandEvent &event);
-  void OnColourChange(wxColourPickerEvent &event);
-  void TogglePCRFields();
-  void UpdatePCRText(wxColourPickerCtrl *cpc);
-  void UpdatePCRTexts();
-  bool IsReplacingParticleColors();
-  glm::vec4 fromColWidget(wxColour col);
 };
 
 class ScrWindow : public wxFrame

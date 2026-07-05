@@ -41,28 +41,27 @@ void OrbitCamera::reset(const WoWModel * m)
   pitch_ = CAMERA_DEFAULT_PITCH;
   radius_ = CAMERA_DEFAULT_RADIUS;
 
-  if (m != nullptr)
+  if (m != nullptr && !m->origVertices.empty())
   {
-    // adjust camera settings based on current model loaded
-    // Look at is set to middle of z coords
-    // zoom is adjusted to have model's z fitting screen
-    float zmin = 0., zmax = 0.;
-
+    // Auto-fit the whole model in view: take the axis-aligned bounds of the base mesh across ALL
+    // axes and frame its bounding sphere. (The old code measured only the Z/height extent, so
+    // anything wider or longer than it was tall -- quadrupeds, mounts, spread poses -- spilled out
+    // the sides.) frameBounds() looks at the box centre and sizes the distance to the FOV.
+    glm::vec3 mn(1e9f, 1e9f, 1e9f), mx(-1e9f, -1e9f, -1e9f);
     for (const auto & v : m->origVertices)
     {
-      if (v.pos.z < zmin)
-        zmin = v.pos.z;
-
-      if (v.pos.z > zmax)
-        zmax = v.pos.z;
+      // component-wise min/max (glm::min/max clash with the windows.h min/max macros)
+      if (v.pos.x < mn.x) mn.x = v.pos.x;
+      if (v.pos.y < mn.y) mn.y = v.pos.y;
+      if (v.pos.z < mn.z) mn.z = v.pos.z;
+      if (v.pos.x > mx.x) mx.x = v.pos.x;
+      if (v.pos.y > mx.y) mx.y = v.pos.y;
+      if (v.pos.z > mx.z) mx.z = v.pos.z;
     }
-
-    // by default, creatures/ characters are "on the ground", consider 0. as minimal possible z value
-    if (zmin < 0.0f)
-      zmin = 0.0f;
-
-    target_.z = (zmin + zmax) / 2.0f;
-    setRadius((zmin + zmax) / 2.0f * 1.3f / sinf(glm::radians(video.fov / 2.0f)));
+    const glm::vec3 center = (mn + mx) * 0.5f;
+    const glm::vec3 d = mx - center;
+    frameBounds(center, sqrtf(d.x * d.x + d.y * d.y + d.z * d.z));
+    return;
   }
 
   updatePosition();

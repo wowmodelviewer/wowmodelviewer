@@ -30,6 +30,8 @@
 #include <QString>
 #include <QXmlStreamWriter>
 
+#include <cstdlib>
+
 
 #include "Attachment.h"
 #include "database.h" // items
@@ -900,6 +902,7 @@ void WoWItem::load(QString & f)
   reader.setDevice(&file);
 
   auto nbValuesRead = 0;
+  int savedId = -1, savedDisplayId = -1, savedLevel = 0;
   while (!reader.atEnd() && nbValuesRead != 3)
   {
     if (reader.isStartElement())
@@ -910,35 +913,59 @@ void WoWItem::load(QString & f)
 
         if (slot == slot_)
         {
+          // Read all three saved values before applying any of them -- see the comment below on
+          // why the ORDER they're applied in matters and differs from the order they're stored.
           while (!reader.atEnd() && nbValuesRead != 3)
           {
             if (reader.isStartElement())
             {
               if (reader.name() == "id")
               {
-                const auto id = reader.attributes().value("value").toString().toInt();
+                savedId = reader.attributes().value("value").toString().toInt();
                 nbValuesRead++;
-                if (id != -1)
-                  setId(id);
               }
 
               if (reader.name() == "displayId")
               {
-                const auto id = reader.attributes().value("value").toString().toInt();
+                savedDisplayId = reader.attributes().value("value").toString().toInt();
                 nbValuesRead++;
-                if (id_ == -1)
-                  setDisplayId(id);
               }
 
               if (reader.name() == "level")
               {
-                const auto level = reader.attributes().value("value").toString().toInt();
+                savedLevel = reader.attributes().value("value").toString().toInt();
                 nbValuesRead++;
-                setLevel(level);
               }
             }
             reader.readNext();
           }
+
+          // setId() always resolves displayId_ from level 0 of ItemModifiedAppearance (it resets
+          // level_ to 0 internally), and setLevel() only corrects that for the saved level when the
+          // item genuinely has multiple appearance variants (nbLevels_ > 1). Neither can reproduce a
+          // displayId that didn't come from that lookup at all -- e.g. an Armory-imported item, or
+          // any appearance chosen by a mechanism other than the level index. So the exact saved
+          // displayId_ (what was ACTUALLY shown when this .chr was written -- see ModelViewer::
+          // SaveChar, called live right before an FBX export launches its background process) must
+          // win as the final, authoritative value; otherwise a reloaded item silently reverts to its
+          // default look, which is why an exported FBX could show different textures than the
+          // viewport. Set displayId_ directly (not via setDisplayId(), which also resets id_ to -1 --
+          // we want to KEEP the real item id for name/tooltip/re-save purposes).
+          if (savedId != -1)
+            setId(savedId);
+          if (nbLevels_ > 1)
+            setLevel(savedLevel);
+          const bool forcedDisplayId = (savedDisplayId != -1 && displayId_ != savedDisplayId);
+          if (forcedDisplayId)
+          {
+            displayId_ = savedDisplayId;
+            load();
+          }
+          if (std::getenv("WMV_MATDUMP"))
+            LOG_INFO << "[matdump-item-restore] slot" << (int)slot_ << "id" << savedId
+                     << "savedDisplayId" << savedDisplayId << "level" << savedLevel
+                     << "-> final displayId_" << displayId_
+                     << (forcedDisplayId ? "(FORCED, id/level lookup would have given a different value)" : "(matched id/level lookup)");
         }
       }
     }
@@ -974,7 +1001,17 @@ void WoWItem::updateItemModel(POSITION_SLOTS pos, int modelId, int textureId)
     itemModels_[pos] = m;
     auto * texture = GAMEDIRECTORY.getFile(textureId);
     if (texture)
+    {
       m->updateTextureList(texture, TEXTURE_OBJECT_SKIN);
+      // Armor components can declare a SECOND replaceable slot (texture type 3,
+      // historically "weapon blade"). On armor the game feeds it the item's own
+      // skin texture: accent geometry (e.g. a hood's eye-beam crystals) has its UVs
+      // on a dedicated island of that texture, giving each recolour its own accent
+      // colour. The model-load default for type 3 (a grey weapon-blade sheen) is
+      // only right for actual weapons, so it stays for hand slots.
+      if (slot_ != CS_HAND_LEFT && slot_ != CS_HAND_RIGHT)
+        m->updateTextureList(texture, TEXTURE_WEAPON_BLADE);
+    }
     else
       LOG_ERROR << "Error during item update" << id_ << "(display id" << displayId_ << "). Texture" << textureId << "can't be loaded";
   }
@@ -998,6 +1035,9 @@ void WoWItem::mergeModel(CharSlots slot, int modelId, int textureId)
     {
       mergedModel_->updateTextureList(texture, TEXTURE_OBJECT_SKIN);
       charModel_->updateTextureList(texture, TEXTURE_OBJECT_SKIN);
+      // Same armor type-3 accent-slot routing as updateItemModel() above.
+      if (slot_ != CS_HAND_LEFT && slot_ != CS_HAND_RIGHT)
+        mergedModel_->updateTextureList(texture, TEXTURE_WEAPON_BLADE);
     }
     else
       LOG_ERROR << "Error during item update" << id_ << "(display id" << displayId_ << "). Texture" << textureId << "can't be loaded";

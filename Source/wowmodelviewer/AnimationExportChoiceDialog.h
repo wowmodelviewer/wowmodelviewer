@@ -61,6 +61,12 @@ class AnimationExportChoiceDialog : public wxMultiChoiceDialog
     ~AnimationExportChoiceDialog() {}
 
     // Methods
+    // Export-content toggles (the clip list below them is the animation selection). Read by
+    // OnExport to drive ExporterPlugin::setExportOptions / setAnimationsToExport.
+    bool exportMesh() const;
+    bool exportSkeleton() const;
+    bool exportSkinning() const;
+    bool exportAnimations() const;
 
     // Members
 
@@ -87,11 +93,19 @@ class AnimationExportChoiceDialog : public wxMultiChoiceDialog
     void updateButtons(wxCommandEvent& event);
     void OnSelectAll(wxCommandEvent &event);
     void OnUnselectAll(wxCommandEvent &event);
+    void onToggleAnimations(wxCommandEvent &event);
 
 
     // Members
     wxButton * m_selectall;
     wxButton * m_unselectall;
+
+    // Export-content checkboxes (default all-on). "Export Animations" enables/disables the
+    // clip list + Select/Unselect buttons.
+    wxCheckBox * m_cbMesh;
+    wxCheckBox * m_cbSkeleton;
+    wxCheckBox * m_cbSkinning;
+    wxCheckBox * m_cbAnimations;
 
     DECLARE_EVENT_TABLE();
 
