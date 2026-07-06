@@ -8,6 +8,7 @@ include_directories(.)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
 set(src CharInfos.cpp
+    ClientProfile.cpp
     CSVFile.cpp
     dbfile.cpp
     ExporterPlugin.cpp
@@ -32,8 +33,10 @@ set(src CharInfos.cpp
     logger/LogOutputFile.cpp)
 
 set(headers CharInfos.h
+      ClientProfile.h
       CSVFile.h
       dbfile.h
+      IFileProvider.h
       ExporterPlugin.h
       FileDownloader.h
       Game.h

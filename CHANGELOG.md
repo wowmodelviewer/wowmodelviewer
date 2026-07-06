@@ -5,6 +5,17 @@ Format loosely based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+### Internal
+- **Groundwork for loading older WoW clients (Vanilla/TBC/WotLK).** First, non-user-facing
+  milestone of a versioned client architecture: a **client profile** (era/version/build,
+  storage type, file-lookup mode and coarse capability flags) is now derived from the loaded
+  client, and file opening goes through a small **file-provider interface** that names the
+  storage backend. The modern client uses a CASC provider that forwards to the existing loader,
+  so behaviour is unchanged; a **placeholder MPQ provider** marks where classic-archive support
+  will slot in (not implemented yet). On load, the log now clearly reports the active profile,
+  build, storage type and lookup mode. No change to model rendering, character customization or
+  equipment.
+
 ## [0.11.0] — 2026-07-05
 
 Version numbering continues the official WoW Model Viewer line (following 0.10.x) rather
