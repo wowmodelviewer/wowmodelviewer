@@ -2016,6 +2016,28 @@ static void refreshTactKeys(const QString & localPath, LoadingDialog * progress)
     QFile::remove(tmpPath);
 }
 
+void ModelViewer::LoadWoWFromMpq(const QString & dataFolder, const QString & locale)
+{
+  fileControl->Disable();
+
+  if (!core::Game::instance().initDone())
+    core::Game::instance().init(new wow::WoWFolder(dataFolder), new wow::WoWDatabase());
+
+  // Open the legacy MPQ archive chain and build the MPQ client profile. GAMEDIRECTORY is a
+  // WoWFolder in this mode.
+  static_cast<wow::WoWFolder &>(GAMEDIRECTORY).initMpq(dataFolder, locale, "3.3.5.12340");
+
+  // Milestone 2 ships no DBC/database, so point the schema folder at the (absent) legacy profile
+  // -- the database stays empty and a model's textures come from its own embedded texture list.
+  // No CASC listfile and no version gate; files are served by name on demand (WoWFolder::getFile
+  // -> MpqFile). Character customization / equipment / DBC are later milestones.
+  core::Game::instance().setConfigFolder("games/wow/3.3.5/");
+
+  SetStatusText(wxString(GAMEDIRECTORY.version().toStdWString()), 1);
+  SetStatusText(wxT("MPQ"), 2);
+  LOG_INFO << "[mpq] legacy client ready (model-by-path only; no DBC/customization/equipment yet).";
+}
+
 void ModelViewer::LoadWoW(const core::GameConfig * chosenConfig, const QString & profileOverride, bool showProgress)
 {
   fileControl->Disable();

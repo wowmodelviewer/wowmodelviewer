@@ -16,6 +16,7 @@
 #include "CascFileProvider.h"
 #include "Game.h"
 #include "HardDriveFile.h"
+#include "MpqFile.h"
 #include "MpqFileProvider.h"
 
 #include "logger/Logger.h"
@@ -174,6 +175,31 @@ GameFile * wow::WoWFolder::getFile(int id)
   return result;
 }
 
+GameFile * wow::WoWFolder::getFile(QString filename)
+{
+  // First the normal name-map lookup (CASC listfile entries, custom files, and MPQ files that
+  // were already created on demand).
+  GameFile * result = GameFolder::getFile(filename);
+  if (result)
+    return result;
+
+  // Name-addressed storage (MPQ): create the file on demand if the archive chain has it. This
+  // is the legacy equivalent of the CASC getFile(int) force-open probe above.
+  if (m_provider && m_provider->supportsNameLookup())
+  {
+    const QString norm = filename.toLower().replace('\\', '/');
+    if (m_provider->hasFile(norm.toStdString()))
+    {
+      MpqFile * file = new MpqFile(norm);
+      file->setName(norm.mid(norm.lastIndexOf('/') + 1));
+      addChild(file); // registers it in the name map for next time
+      result = file;
+    }
+  }
+
+  return result;
+}
+
 bool wow::WoWFolder::openFile(int id, HANDLE * result)
 {
   // Route through the active storage provider. For the modern (CASC) client the provider
@@ -186,9 +212,13 @@ bool wow::WoWFolder::openFile(int id, HANDLE * result)
 
 bool wow::WoWFolder::openFile(std::string file, HANDLE * result)
 {
-  // Resolve the name to a FileDataID via the listfile (as before), then open by id through
-  // the provider. Old name-native storage (MPQ) will resolve names inside its own provider;
-  // that path is not wired yet.
+  // Name-addressed storage (MPQ): open directly by name through the provider -- there is no
+  // FileDataID and no listfile to resolve against.
+  if (m_provider && m_provider->supportsNameLookup())
+    return m_provider->openByName(file, result);
+
+  // CASC: resolve the name to a FileDataID via the listfile (as before), then open by id
+  // through the provider.
   auto it = m_nameIdMap.find(QString::fromStdString(file));
   if (it == m_nameIdMap.end())
     return false;
@@ -199,11 +229,15 @@ bool wow::WoWFolder::openFile(std::string file, HANDLE * result)
 
 QString wow::WoWFolder::version()
 {
+  if (m_clientProfile.storage == core::StorageType::MPQ)
+    return m_clientProfile.versionString;
   return m_CASCFolder.version();
 }
 
 int wow::WoWFolder::majorVersion()
 {
+  if (m_clientProfile.storage == core::StorageType::MPQ)
+    return m_clientProfile.major;
   auto v = m_CASCFolder.version().split(QLatin1Char('.'));
   return v[0].toInt();
 }
@@ -237,6 +271,35 @@ bool wow::WoWFolder::setConfig(core::GameConfig config)
            << "| lookup by name:" << (m_provider->supportsNameLookup() ? "yes" : "no");
 
   return ok;
+}
+
+void wow::WoWFolder::initMpq(const QString & dataFolder, const QString & locale, const QString & version)
+{
+  // Build the client profile for a legacy (pre-CASC) client. fromGameConfig maps the major
+  // version to the era and, for anything before Warlords (6.x), to MPQ storage / Name lookup.
+  core::GameConfig cfg;
+  cfg.locale = locale;
+  cfg.version = version;   // e.g. "3.3.5.12340"
+  cfg.product = "mpq";
+  m_clientProfile = core::ClientProfile::fromGameConfig(cfg);
+  // We are explicitly in the legacy path -- force MPQ storage / Name lookup regardless of the
+  // version string that was passed.
+  m_clientProfile.storage = core::StorageType::MPQ;
+  m_clientProfile.lookupMode = core::FileLookupMode::Name;
+  m_clientProfile.hasFileDataId = false;
+
+  MpqFileProvider * mpq = new MpqFileProvider();
+  const int opened = mpq->init(dataFolder, locale);
+  m_provider.reset(mpq);
+
+  LOG_INFO << "[clientprofile] active client ->" << m_clientProfile.describe();
+  LOG_INFO << "[fileprovider] storage backend:" << m_provider->name()
+           << "| ready:" << (m_provider->isReady() ? "yes" : "no")
+           << "| lookup by name:" << (m_provider->supportsNameLookup() ? "yes" : "no")
+           << "| archives:" << opened
+           << "| locale:" << (mpq->detectedLocale().isEmpty() ? QString("(auto: none)") : mpq->detectedLocale());
+  LOG_INFO << "[fileprovider] MPQ load order (base -> patches -> locale, highest priority last):"
+           << mpq->archiveListString();
 }
 
 std::vector<core::GameConfig> wow::WoWFolder::configsFound()

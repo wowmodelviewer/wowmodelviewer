@@ -24,6 +24,7 @@ set(src animated.cpp
       ModelLight.cpp
       ModelManager.cpp
       ModelRenderPass.cpp
+      MpqFile.cpp
       MpqFileProvider.cpp
       ModelTransparency.cpp
       particle.cpp
@@ -78,6 +79,7 @@ set(headers animated.h
       ModelManager.h
       ModelRenderPass.h
       ModelTransparency.h
+      MpqFile.h
       MpqFileProvider.h
       particle.h
       RaceInfos.h
@@ -108,6 +110,7 @@ source_group("Header Files" FILES ${headers})
 use_core()
 use_glew()
 use_casclib()
+use_stormlib()
 
 add_definitions(-DBUILDING_WOW_DLL)
 
@@ -116,7 +119,7 @@ add_library(${NAME} SHARED ${src} ${headers})
 set_property(TARGET ${NAME} PROPERTY FOLDER "libraries")
 
 target_link_libraries(${NAME} Qt5::Core Qt5::Xml Qt5::Gui ${extralibs} glu32)
-add_dependencies(${NAME} casc_static)
+add_dependencies(${NAME} casc_static storm)
 
 set(BIN_DIR "${CMAKE_SOURCE_DIR}/bin/")
 

@@ -1,18 +1,23 @@
 /*
  * MpqFileProvider.h
  *
- * PLACEHOLDER provider for classic MoPaQ (.MPQ) archives used by old clients
- * (Vanilla 1.x .. Cataclysm 4.x). MPQ reading is NOT implemented yet -- integrating a MoPaQ
- * library (e.g. StormLib) is a later milestone. This class exists so the versioned
- * file-provider abstraction is complete and so selecting an old client fails loudly and
- * clearly (a logged "not implemented" rather than a silent CASC failure) instead of
- * pretending to work.
+ * Real MPQ (MoPaQ) file provider for legacy WoW clients (Vanilla 1.x .. Cataclysm 4.x), backed
+ * by StormLib. Opens the Data\*.MPQ (+ locale) archive chain in override order (base archives
+ * first, patches last, locale patches highest) and serves files BY NAME. Legacy clients have no
+ * FileDataID, so openById always fails; name lookup probes the chain highest-priority first so
+ * patch archives correctly override base archives.
  *
- * Internal to the wow module; no DLL export needed.
+ * Internal to the wow module. StormLib is included only in the .cpp so windows.h/HANDLE do not
+ * leak into translation units that also pull in CASCFolder.h.
  */
 
 #ifndef _MPQFILEPROVIDER_H_
 #define _MPQFILEPROVIDER_H_
+
+#include <string>
+#include <vector>
+
+#include <QString>
 
 #include "IFileProvider.h"
 
@@ -21,26 +26,45 @@ namespace wow
   class MpqFileProvider : public core::IFileProvider
   {
     public:
-      MpqFileProvider() {}
-      ~MpqFileProvider() override {}
+      MpqFileProvider();
+      ~MpqFileProvider() override;
+
+      // Open the legacy archive chain. dataRoot may be the WoW install folder or its Data
+      // subfolder (auto-resolved). locale may be empty to auto-detect from the Data subfolders.
+      // Returns the number of archives opened; logs the full ordered list, locale and result.
+      int init(const QString & dataRoot, const QString & locale);
 
       const char * name() const override { return "MPQ"; }
       core::StorageType storageType() const override { return core::StorageType::MPQ; }
-
-      // MPQ archives are addressed by file name/path, not by FileDataID.
       bool supportsFileDataId() const override { return false; }
       bool supportsNameLookup() const override { return true; }
 
-      // Not implemented yet -- both log once and return false.
-      bool openById(int fileDataId, void ** handle) override;
+      bool openById(int fileDataId, void ** handle) override;   // always false (no FileDataID)
       bool openByName(const std::string & name, void ** handle) override;
-      bool closeFile(void * handle) override; // no-op: nothing is ever opened
+      bool closeFile(void * handle) override;
+      bool hasFile(const std::string & name) override;
+      bool isReady() const override { return !m_archives.empty(); }
 
-      // Never ready until a MoPaQ backend is integrated.
-      bool isReady() const override { return false; }
+      QString detectedLocale() const { return m_locale; }
+      // "common.MPQ; patch.MPQ; ..." in load order -- for logging / the POC report.
+      QString archiveListString() const;
 
     private:
-      void warnOnce() const;
+      struct Archive
+      {
+        QString name;   // base file name, e.g. "patch-3.MPQ"
+        void *  handle; // StormLib archive HANDLE
+      };
+
+      // Ordered low->high priority (base first, patches last, locale patches highest). openByName
+      // probes back-to-front so higher-priority archives win.
+      std::vector<Archive> m_archives;
+      QString m_dataFolder;
+      QString m_locale;
+
+      // Resolve the Data folder + locale and return archive file paths in load order.
+      std::vector<QString> buildArchiveList(const QString & dataRoot, const QString & locale);
+      static QString mpqInternalPath(const std::string & name); // '/' -> '\'
   };
 }
 
