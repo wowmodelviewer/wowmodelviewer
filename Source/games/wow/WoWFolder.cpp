@@ -13,8 +13,10 @@
 #include <QRegularExpression>
 
 #include "CASCFile.h"
+#include "CascFileProvider.h"
 #include "Game.h"
 #include "HardDriveFile.h"
+#include "MpqFileProvider.h"
 
 #include "logger/Logger.h"
 
@@ -149,11 +151,19 @@ GameFile * wow::WoWFolder::getFile(int id)
     QString filename = QString("File%1.unk").arg(id, 8, 16, QLatin1Char('0'));
     LOG_INFO << "File with id" << id << "not found in listfile. Trying to open" << filename;
 
+    // Force-open-by-id probe for a file that isn't in the listfile. Route through the active
+    // provider so storage stays abstracted (identical to the old direct call for modern CASC);
+    // fall back to m_CASCFolder if the provider isn't set yet.
     HANDLE newfile;
-    if(m_CASCFolder.openFile(id, &newfile))
+    const bool opened = m_provider ? m_provider->openById(id, &newfile)
+                                   : m_CASCFolder.openFile(id, &newfile);
+    if(opened)
     {
       LOG_INFO << "Succesfully opened";
-      m_CASCFolder.closeFile(newfile);
+      if (m_provider)
+        m_provider->closeFile(newfile);
+      else
+        m_CASCFolder.closeFile(newfile);
       CASCFile * file = new CASCFile(filename, id);
       file->setName(filename);
       addChild(file);
@@ -166,14 +176,24 @@ GameFile * wow::WoWFolder::getFile(int id)
 
 bool wow::WoWFolder::openFile(int id, HANDLE * result)
 {
+  // Route through the active storage provider. For the modern (CASC) client the provider
+  // forwards straight to m_CASCFolder, so behaviour is unchanged. Fall back to m_CASCFolder
+  // if the provider has not been created yet (openFile before setConfig()).
+  if (m_provider)
+    return m_provider->openById(id, result);
   return m_CASCFolder.openFile(id, result);
 }
 
 bool wow::WoWFolder::openFile(std::string file, HANDLE * result)
 {
+  // Resolve the name to a FileDataID via the listfile (as before), then open by id through
+  // the provider. Old name-native storage (MPQ) will resolve names inside its own provider;
+  // that path is not wired yet.
   auto it = m_nameIdMap.find(QString::fromStdString(file));
   if (it == m_nameIdMap.end())
     return false;
+  if (m_provider)
+    return m_provider->openById(it->second, result);
   return m_CASCFolder.openFile(it->second, result);
 }
 
@@ -197,7 +217,26 @@ bool wow::WoWFolder::setConfig(core::GameConfig config)
 {
   // Forward the load-progress callback so the (long) present-file enumeration can report.
   m_CASCFolder.setProgressCallback(m_loadProgressCb);
-  return m_CASCFolder.setConfig(config);
+  const bool ok = m_CASCFolder.setConfig(config);
+
+  // Derive the client profile from the detected config and select the matching storage
+  // provider. Modern clients (CASC) resolve to a CascFileProvider that forwards to
+  // m_CASCFolder -- identical behaviour to before. Old MoPaQ clients resolve to the
+  // placeholder MpqFileProvider (not implemented yet). Done regardless of ok so the profile
+  // reflects what was requested even on a failed open.
+  m_clientProfile = core::ClientProfile::fromGameConfig(config);
+  if (m_clientProfile.storage == core::StorageType::MPQ)
+    m_provider.reset(new MpqFileProvider());
+  else
+    m_provider.reset(new CascFileProvider(&m_CASCFolder));
+
+  LOG_INFO << "[clientprofile] active client ->" << m_clientProfile.describe();
+  LOG_INFO << "[fileprovider] storage backend:" << m_provider->name()
+           << "| ready:" << (m_provider->isReady() ? "yes" : "no")
+           << "| lookup by id:" << (m_provider->supportsFileDataId() ? "yes" : "no")
+           << "| lookup by name:" << (m_provider->supportsNameLookup() ? "yes" : "no");
+
+  return ok;
 }
 
 std::vector<core::GameConfig> wow::WoWFolder::configsFound()

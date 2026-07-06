@@ -9,12 +9,14 @@
 #define _WOWFOLDER_H_
 
 #include <map>
+#include <memory>
 
 #include <QString>
 
 #include "CASCFolder.h"
 #include "GameFile.h"
 #include "GameFolder.h"
+#include "IFileProvider.h"
 
 #ifdef _WIN32
 #    ifdef BUILDING_WOW_DLL
@@ -57,6 +59,11 @@ namespace wow
       int fileID(QString fileName);
     private:
       CASCFolder m_CASCFolder;
+      // Storage backend behind openFile(). Created in setConfig() from the detected client
+      // profile: a CascFileProvider (forwards to m_CASCFolder -- the modern default) or, for
+      // an old MoPaQ client, the placeholder MpqFileProvider. Null until setConfig() runs, in
+      // which case openFile() falls back to m_CASCFolder directly.
+      std::unique_ptr<core::IFileProvider> m_provider;
       std::map<int, GameFile *> m_idMap;
       std::map<int, QString> m_idNameMap;
       std::map<QString, int> m_nameIdMap;

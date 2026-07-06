@@ -9,6 +9,7 @@ set(src animated.cpp
       Bone.cpp
       CASCFile.cpp
       CASCFolder.cpp
+      CascFileProvider.cpp
       CharDetails.cpp
       CharTexture.cpp
       database.cpp
@@ -23,6 +24,7 @@ set(src animated.cpp
       ModelLight.cpp
       ModelManager.cpp
       ModelRenderPass.cpp
+      MpqFileProvider.cpp
       ModelTransparency.cpp
       particle.cpp
       RaceInfos.cpp
@@ -55,6 +57,7 @@ set(headers animated.h
       CASCChunks.h
       CASCFile.h
       CASCFolder.h
+      CascFileProvider.h
       CharDetails.h
       CharDetailsEvent.h
       CharTexture.h
@@ -75,6 +78,7 @@ set(headers animated.h
       ModelManager.h
       ModelRenderPass.h
       ModelTransparency.h
+      MpqFileProvider.h
       particle.h
       RaceInfos.h
       RenderTexture.h
