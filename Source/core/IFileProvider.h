@@ -49,6 +49,10 @@ namespace core
       // Close a handle previously returned by openById/openByName. Returns true on success.
       virtual bool closeFile(void * handle) = 0;
 
+      // True if a file with this name/path exists in the backend. Used to populate the file tree
+      // on demand for name-addressed storage (MPQ). Providers without name lookup return false.
+      virtual bool hasFile(const std::string & name) = 0;
+
       // True once the backend has been opened and is ready to serve files.
       virtual bool isReady() const = 0;
   };

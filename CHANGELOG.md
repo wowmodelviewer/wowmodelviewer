@@ -15,6 +15,16 @@ Format loosely based on [Keep a Changelog](https://keepachangelog.com/).
   will slot in (not implemented yet). On load, the log now clearly reports the active profile,
   build, storage type and lookup mode. No change to model rendering, character customization or
   equipment.
+- **Real legacy MPQ archive support (StormLib).** The placeholder MPQ provider is now a working
+  **MoPaQ reader**: StormLib is vendored in `ThirdParty/stormlib` (built UNICODE + static, like
+  CascLib) and a new `MpqFileProvider` opens a legacy install's `Data\*.MPQ` (+ locale) archive
+  chain in correct **override order** (base archives, then patches, then locale patches — highest
+  priority wins) and serves files **by name** (legacy clients have no FileDataID). A new
+  `MpqFile` reads through StormLib; `WoWFolder` creates MPQ files on demand by path. A headless
+  `-mpq <DataFolder> [locale]` flag loads a legacy client instead of CASC, logging the profile,
+  `storage=MPQ`, the full archive list, locale, `lookup=Name`, and per-file open results.
+  **Retail CASC loading is untouched.** This milestone is file access only — model rendering of
+  old M2/SKIN/BLP, DBC, character customization and equipment are later milestones.
 
 ## [0.11.0] — 2026-07-05
 

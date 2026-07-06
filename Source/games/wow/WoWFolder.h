@@ -40,7 +40,12 @@ namespace wow
       void initFromListfile(const QString & file) override;
       void addCustomFiles(const QString & path, bool bypassOriginalFiles) override;
 
+      // Legacy-MPQ setup: open the archive chain under dataFolder, build the client profile
+      // (storage=MPQ), select the MPQ provider and log the banner. Independent of the CASC path.
+      void initMpq(const QString & dataFolder, const QString & locale, const QString & version);
+
       GameFile * getFile(int id) override;
+      GameFile * getFile(QString filename) override; // adds MPQ create-on-demand
 
       bool openFile(int id, HANDLE * result) override;
       bool openFile(std::string file, HANDLE * result) override;

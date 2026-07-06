@@ -36,6 +36,9 @@ namespace wow
       bool openById(int fileDataId, void ** handle) override;
       bool openByName(const std::string & name, void ** handle) override;
       bool closeFile(void * handle) override;
+      // CASC files are resolved by FileDataID; name-existence is answered by the listfile/CASC
+      // index in WoWFolder, not here. The name-based create-on-demand path is MPQ-only.
+      bool hasFile(const std::string & name) override { return false; }
 
       bool isReady() const override { return m_casc != nullptr; }
 

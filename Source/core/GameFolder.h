@@ -54,7 +54,8 @@ namespace core
 
       void getFilesForFolder(std::vector<GameFile *> &fileNames, QString folderPath, QString extension = "");
       void getFilteredFiles(std::set<GameFile *> &dest, QString & filter);
-      GameFile * getFile(QString filename);
+      // Virtual so name-addressed storage (MPQ) can create files on demand on a name-map miss.
+      virtual GameFile * getFile(QString filename);
       virtual GameFile * getFile(int id) = 0;
 
       virtual bool openFile(std::string file, void ** result) = 0;

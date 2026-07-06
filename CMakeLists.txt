@@ -71,6 +71,18 @@ set(CMAKE_INSTALL_PREFIX ${CASCLIB_INSTALL_LOCATION})
 add_subdirectory(ThirdParty/casclib)
 set_property(TARGET casc_static PROPERTY FOLDER "ThirdParty libraries")
 
+# configure StormLib (legacy MoPaQ archives, for old Vanilla/TBC/WotLK clients) -- mirrors the
+# casclib vendoring above. StormLib MUST be built UNICODE to match WMV's _UNICODE build: its
+# archive-path API is TCHAR-based, so an ANSI StormLib linked against a _UNICODE consumer would
+# mismatch TCHAR (wchar_t vs char) exactly like the CASC_UNICODE case noted above. Static lib,
+# no tests, no install.
+set(STORM_UNICODE ON CACHE BOOL "Force StormLib Unicode build to match WMV" FORCE)
+set(STORM_BUILD_TESTS OFF CACHE BOOL "Do not build StormLib tests" FORCE)
+set(STORM_SKIP_INSTALL ON CACHE BOOL "Do not install StormLib" FORCE)
+set(BUILD_SHARED_LIBS OFF CACHE BOOL "Build StormLib as a static library" FORCE)
+add_subdirectory(ThirdParty/stormlib)
+set_property(TARGET storm PROPERTY FOLDER "ThirdParty libraries")
+
 # Main source files.
 add_subdirectory(Source)
 
