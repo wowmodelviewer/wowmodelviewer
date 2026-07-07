@@ -18,6 +18,7 @@
 #include "HardDriveFile.h"
 #include "MpqFile.h"
 #include "MpqFileProvider.h"
+#include "WotlkDbc.h"
 
 #include "logger/Logger.h"
 
@@ -294,6 +295,9 @@ int wow::WoWFolder::initMpq(const QString & dataFolder, const QString & locale, 
   const int opened = mpq->init(dataFolder, locale);
   m_provider.reset(mpq);
   m_mpqLocale = mpq->detectedLocale();
+
+  // Fresh legacy client -> drop any cached WotLK DBC tables so they are re-read from this install.
+  WotlkDbc::instance().reset();
 
   LOG_INFO << "[clientprofile] active client ->" << m_clientProfile.describe();
   LOG_INFO << "[fileprovider] storage backend:" << m_provider->name()

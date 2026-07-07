@@ -6,6 +6,15 @@ Format loosely based on [Keep a Changelog](https://keepachangelog.com/).
 ## [Unreleased]
 
 ### Added
+- **Legacy WotLK creatures and items now show their real, database-driven textures.** For a loaded
+  WotLK 3.3.5 (MPQ) client, the viewer now reads the classic `.dbc` databases
+  (`CreatureModelData`, `CreatureDisplayInfo`, `ItemDisplayInfo`) to resolve the skins and item
+  textures the game data actually defines — so creatures show their correct default skin (and the
+  full set of variations in the skin list) instead of a best-guess folder texture, and weapon /
+  item components that had no embedded texture are now textured. The default is the first display
+  the database lists (e.g. the plain chicken skin, not an alphabetical guess). Retail (CASC/DB2)
+  loading is completely unchanged. *Still to come for legacy clients: character customization and
+  equipped items.*
 - **Load a legacy (pre-CASC) WoW client — File → Load Legacy MPQ Client…** You can now open an old
   MoPaQ-based install (Wrath of the Lich King 3.3.5, and the same path for TBC/Vanilla) straight from
   the menu: pick the WoW folder **or** its `Data` folder, and the viewer opens the `Data\*.MPQ` (+
