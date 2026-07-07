@@ -244,7 +244,9 @@ int wow::WoWFolder::majorVersion()
 
 QString wow::WoWFolder::locale()
 {
-   return m_CASCFolder.locale();
+  if (m_clientProfile.storage == core::StorageType::MPQ)
+    return m_mpqLocale;
+  return m_CASCFolder.locale();
 }
 
 bool wow::WoWFolder::setConfig(core::GameConfig config)
@@ -273,7 +275,7 @@ bool wow::WoWFolder::setConfig(core::GameConfig config)
   return ok;
 }
 
-void wow::WoWFolder::initMpq(const QString & dataFolder, const QString & locale, const QString & version)
+int wow::WoWFolder::initMpq(const QString & dataFolder, const QString & locale, const QString & version)
 {
   // Build the client profile for a legacy (pre-CASC) client. fromGameConfig maps the major
   // version to the era and, for anything before Warlords (6.x), to MPQ storage / Name lookup.
@@ -291,15 +293,34 @@ void wow::WoWFolder::initMpq(const QString & dataFolder, const QString & locale,
   MpqFileProvider * mpq = new MpqFileProvider();
   const int opened = mpq->init(dataFolder, locale);
   m_provider.reset(mpq);
+  m_mpqLocale = mpq->detectedLocale();
 
   LOG_INFO << "[clientprofile] active client ->" << m_clientProfile.describe();
   LOG_INFO << "[fileprovider] storage backend:" << m_provider->name()
            << "| ready:" << (m_provider->isReady() ? "yes" : "no")
            << "| lookup by name:" << (m_provider->supportsNameLookup() ? "yes" : "no")
            << "| archives:" << opened
-           << "| locale:" << (mpq->detectedLocale().isEmpty() ? QString("(auto: none)") : mpq->detectedLocale());
+           << "| locale:" << (m_mpqLocale.isEmpty() ? QString("(auto: none)") : m_mpqLocale);
   LOG_INFO << "[fileprovider] MPQ load order (base -> patches -> locale, highest priority last):"
            << mpq->archiveListString();
+
+  // Populate the browsable file tree from the MPQ (listfile) so the GUI file browser works (the
+  // CASC path builds its tree from the community listfile; MPQ clients carry their own). Files
+  // are still opened lazily/by-name -- these entries just make them discoverable in the UI.
+  if (opened > 0)
+  {
+    std::vector<QString> names;
+    mpq->listAllFiles(names);
+    for (const QString & n : names)
+    {
+      MpqFile * f = new MpqFile(n);
+      f->setName(n.mid(n.lastIndexOf('/') + 1));
+      addChild(f);
+    }
+    LOG_INFO << "[fileprovider] MPQ file tree populated with" << (int)names.size() << "files";
+  }
+
+  return opened;
 }
 
 std::vector<core::GameConfig> wow::WoWFolder::configsFound()

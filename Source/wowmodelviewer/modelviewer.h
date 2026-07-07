@@ -179,10 +179,17 @@ public:
   void LoadWoW(const core::GameConfig * chosenConfig = 0, const QString & profileOverride = QString(),
                bool showProgress = false);
 
-  // Load a legacy (pre-CASC) client from its MPQ archives instead of CASC. Milestone 2: model
-  // loading by path only -- no DBC/database, customization or equipment. locale may be empty to
-  // auto-detect. Leaves the Retail CASC LoadWoW path untouched.
-  void LoadWoWFromMpq(const QString & dataFolder, const QString & locale = QString());
+  // Load a legacy (pre-CASC) client from its MPQ archives instead of CASC. Model loading by path
+  // only -- no DBC/database, customization or equipment. locale may be empty to auto-detect.
+  // Returns the number of archives opened (0 = no MPQ client found). Leaves the Retail CASC
+  // LoadWoW path untouched.
+  int LoadWoWFromMpq(const QString & dataFolder, const QString & locale = QString());
+
+  // File > Load Legacy MPQ Client... : folder picker -> LoadWoWFromMpq -> user feedback.
+  void OnLoadLegacyMpq(wxCommandEvent & event);
+
+  // Last legacy-MPQ folder the user picked (persisted in the session config).
+  QString m_lastMpqFolder;
 
 };
 

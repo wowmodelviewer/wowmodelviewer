@@ -5,6 +5,16 @@ Format loosely based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+### Added
+- **Load a legacy (pre-CASC) WoW client — File → Load Legacy MPQ Client…** You can now open an old
+  MoPaQ-based install (Wrath of the Lich King 3.3.5, and the same path for TBC/Vanilla) straight from
+  the menu: pick the WoW folder **or** its `Data` folder, and the viewer opens the `Data\*.MPQ` (+
+  locale) archive chain, auto-detects the locale, fills the file browser, and tells you the client
+  era/build, locale and how many archives loaded (with a clear message if none are found). The last
+  folder you used is remembered for next time. Retail (CASC) loading is unchanged. *This first pass is
+  model viewing only — character customization, equipment and the item/creature databases for legacy
+  clients come in later updates.*
+
 ### Internal
 - **Groundwork for loading older WoW clients (Vanilla/TBC/WotLK).** First, non-user-facing
   milestone of a versioned client architecture: a **client profile** (era/version/build,

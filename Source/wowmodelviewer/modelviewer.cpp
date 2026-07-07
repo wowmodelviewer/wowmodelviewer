@@ -5,6 +5,7 @@
 #include <wx/aboutdlg.h>
 #include <wx/busyinfo.h>
 #include <wx/colordlg.h>
+#include <wx/dirdlg.h>
 #include <wx/colour.h>
 #include <wx/filedlg.h>
 #include <wx/filename.h>
@@ -74,6 +75,7 @@ EVT_CLOSE(ModelViewer::OnClose)
 
 // File menu
 EVT_MENU(ID_LOAD_WOW, ModelViewer::OnGameToggle)
+EVT_MENU(ID_LOAD_MPQ, ModelViewer::OnLoadLegacyMpq)
 EVT_MENU(ID_FILE_VIEWLOG, ModelViewer::OnViewLog)
 EVT_MENU(ID_VIEW_NPC, ModelViewer::OnCharToggle)
 EVT_MENU(ID_VIEW_ITEM, ModelViewer::OnCharToggle)
@@ -320,6 +322,7 @@ void ModelViewer::InitMenu()
   // MENU
   fileMenu = new wxMenu;
   fileMenu->Append(ID_LOAD_WOW, _("Load World of Warcraft"));
+  fileMenu->Append(ID_LOAD_MPQ, _("Load Legacy MPQ Client..."));
   if (isWoWLoaded == true)
     fileMenu->Enable(ID_LOAD_WOW, false);
   fileMenu->Append(ID_FILE_VIEWLOG, _("View Log"));
@@ -783,6 +786,9 @@ void ModelViewer::LoadSession()
   GLOBALSETTINGS.bZeroParticle = config.value("Session/ZeroParticle", true).toBool();
   GLOBALSETTINGS.bInitPoseOnlyExport = config.value("Session/InitPoseOnlyExport", false).toBool();
 
+  // Last legacy-MPQ folder picked via File > Load Legacy MPQ Client... (defaults the dir picker).
+  m_lastMpqFolder = config.value("Session/LastMpqFolder", "").toString();
+
   // Background and Custom Colours
   wxString colStr;
   wxColour bgCol;
@@ -834,6 +840,7 @@ void ModelViewer::SaveSession()
   config.setValue("Session/ShowParticle", GLOBALSETTINGS.bShowParticle);
   config.setValue("Session/ZeroParticle", GLOBALSETTINGS.bZeroParticle);
   config.setValue("Session/InitPoseOnlyExport", GLOBALSETTINGS.bInitPoseOnlyExport);
+  config.setValue("Session/LastMpqFolder", m_lastMpqFolder);
 
   // Armory importer proxy URL override (entered in General Settings).
   config.setValue("Armory/ProxyURL", QString::fromStdString(GLOBALSETTINGS.armoryProxyURL()));
@@ -2016,26 +2023,99 @@ static void refreshTactKeys(const QString & localPath, LoadingDialog * progress)
     QFile::remove(tmpPath);
 }
 
-void ModelViewer::LoadWoWFromMpq(const QString & dataFolder, const QString & locale)
+int ModelViewer::LoadWoWFromMpq(const QString & dataFolder, const QString & locale)
 {
   fileControl->Disable();
 
-  if (!core::Game::instance().initDone())
-    core::Game::instance().init(new wow::WoWFolder(dataFolder), new wow::WoWDatabase());
+  // Always install a FRESH folder for the legacy client -- never reuse an already-loaded Retail
+  // (or previous MPQ) folder. Reusing the Retail folder would mix CASC + MPQ entries in one tree
+  // and leave its CASC storage pointing at the wrong path. Game::init replaces the previous folder.
+  core::Game::instance().init(new wow::WoWFolder(dataFolder), new wow::WoWDatabase());
 
-  // Open the legacy MPQ archive chain and build the MPQ client profile. GAMEDIRECTORY is a
-  // WoWFolder in this mode.
-  static_cast<wow::WoWFolder &>(GAMEDIRECTORY).initMpq(dataFolder, locale, "3.3.5.12340");
+  // Open the legacy MPQ archive chain, build the MPQ client profile and populate the file tree.
+  // GAMEDIRECTORY is a WoWFolder in this mode.
+  const int archives = static_cast<wow::WoWFolder &>(GAMEDIRECTORY).initMpq(dataFolder, locale, "3.3.5.12340");
+  if (archives <= 0)
+  {
+    LOG_ERROR << "[mpq] No MPQ archives found under" << dataFolder << "-- legacy client not loaded.";
+    return 0;
+  }
 
-  // Milestone 2 ships no DBC/database, so point the schema folder at the (absent) legacy profile
-  // -- the database stays empty and a model's textures come from its own embedded texture list.
-  // No CASC listfile and no version gate; files are served by name on demand (WoWFolder::getFile
-  // -> MpqFile). Character customization / equipment / DBC are later milestones.
+  // No DBC/database yet: point the schema folder at the (absent) legacy profile so the database
+  // stays empty -- a model's textures come from its own embedded texture list. No CASC listfile
+  // and no version gate; files are served by name (WoWFolder::getFile -> MpqFile). Character
+  // customization / equipment / DBC are later milestones.
   core::Game::instance().setConfigFolder("games/wow/3.3.5/");
 
+  // Enable the file browser over the freshly-populated MPQ file tree so models can be picked as
+  // usual. (charControl needs the DBC/database, which MPQ mode does not load yet, so it is left
+  // untouched here.)
+  fileControl->Init(this);
+  fileControl->Enable();
+
   SetStatusText(wxString(GAMEDIRECTORY.version().toStdWString()), 1);
-  SetStatusText(wxT("MPQ"), 2);
-  LOG_INFO << "[mpq] legacy client ready (model-by-path only; no DBC/customization/equipment yet).";
+  SetStatusText(wxT("Legacy MPQ"), 2);
+  LOG_INFO << "[mpq] legacy client ready: storage=MPQ, provider ready, archives=" << archives
+           << " -- load models from the file browser (no DBC/customization/equipment yet).";
+  return archives;
+}
+
+void ModelViewer::OnLoadLegacyMpq(wxCommandEvent & WXUNUSED(event))
+{
+  const wxString defaultDir = m_lastMpqFolder.isEmpty()
+                            ? wxString()
+                            : wxString(m_lastMpqFolder.toStdWString());
+
+  wxDirDialog dlg(this,
+    _("Select a legacy (pre-CASC) WoW folder -- the WoW install folder or its Data folder"),
+    defaultDir, wxDD_DEFAULT_STYLE | wxDD_DIR_MUST_EXIST);
+  if (dlg.ShowModal() != wxID_OK)
+    return;
+
+  const wxString path = dlg.GetPath();
+  const QString qpath = QString::fromWCharArray(path.c_str());
+
+  int archives = 0;
+  {
+    wxBusyCursor busy; // enumerating the archives + file list can take a moment
+    SetStatusText(_("Loading legacy MPQ client..."));
+    archives = LoadWoWFromMpq(qpath, QString()); // empty locale -> auto-detect
+  }
+
+  if (archives <= 0)
+  {
+    wxMessageBox(
+      wxString::Format(_("No MPQ archives were found in:\n\n%s\n\nPick the WoW install folder or its "
+                         "Data folder (the one containing common.MPQ, patch.MPQ, ...)."), path),
+      _("No legacy MPQ client found"), wxOK | wxICON_ERROR, this);
+    SetStatusText(_("No MPQ archives found."));
+    return;
+  }
+
+  // Persist the chosen folder for next launch (also written in SaveSession).
+  m_lastMpqFolder = qpath;
+  {
+    QSettings config(QString::fromWCharArray(cfgPath.c_str()), QSettings::IniFormat);
+    config.setValue("Session/LastMpqFolder", m_lastMpqFolder);
+  }
+
+  // Clear user feedback: client type / era-build / locale / archive count.
+  const core::ClientProfile & prof = GAMEDIRECTORY.clientProfile();
+  const QString loc = GAMEDIRECTORY.locale();
+  const wxString msg = wxString::Format(
+    _("Active client:   Legacy MPQ\n"
+      "Era / build:     %s (build %d)\n"
+      "Locale:          %s\n"
+      "Archives loaded: %d\n\n"
+      "Folder:\n%s\n\n"
+      "Browse the file list and load a model as usual."),
+    wxString(prof.eraName().toStdWString()),
+    prof.build,
+    wxString((loc.isEmpty() ? QString("(unknown)") : loc).toStdWString()),
+    archives,
+    path);
+  wxMessageBox(msg, _("Legacy MPQ client loaded"), wxOK | wxICON_INFORMATION, this);
+  SetStatusText(wxString::Format(_("Legacy MPQ client loaded (%d archives)"), archives));
 }
 
 void ModelViewer::LoadWoW(const core::GameConfig * chosenConfig, const QString & profileOverride, bool showProgress)
@@ -2045,7 +2125,11 @@ void ModelViewer::LoadWoW(const core::GameConfig * chosenConfig, const QString &
     getGamePath();
   }
 
-  if (!core::Game::instance().initDone())
+  // Create a fresh CASC folder on first load. Also recreate it when switching back from a legacy
+  // MPQ client -- otherwise the current folder is the MPQ folder (wrong path, MPQ provider), and
+  // reusing it would fail. Retail->Retail reuse is unchanged (initDone && storage==CASC -> skip).
+  if (!core::Game::instance().initDone()
+      || GAMEDIRECTORY.clientProfile().storage == core::StorageType::MPQ)
     core::Game::instance().init(new wow::WoWFolder(QString::fromWCharArray(gamePath.c_str())), new wow::WoWDatabase());
 
   core::GameConfig config;
