@@ -7,6 +7,7 @@
 #include "MpqFileProvider.h"
 
 #include <algorithm>
+#include <set>
 #include <utility>
 
 #include <QDir>
@@ -234,4 +235,29 @@ QString wow::MpqFileProvider::archiveListString() const
     s += m_archives[i].name;
   }
   return s;
+}
+
+void wow::MpqFileProvider::listAllFiles(std::vector<QString> & out) const
+{
+  std::set<QString> seen;
+  for (const Archive & a : m_archives)
+  {
+    SFILE_FIND_DATA fd;
+    HANDLE hFind = SFileFindFirstFile(a.handle, "*", &fd, NULL);
+    if (!hFind)
+      continue; // archive without a usable (listfile) -- its files are still openable by name
+
+    do
+    {
+      // cFileName is the internal MPQ path (backslash, ANSI). Normalise to lowercase '/' so it
+      // matches the file-tree / name-map keys (GameFolder lowercases + forward-slashes).
+      QString name = QString::fromLocal8Bit(fd.cFileName).toLower().replace('\\', '/');
+      if (name.isEmpty() || name.startsWith('(')) // skip MPQ metadata: (listfile), (attributes), ...
+        continue;
+      if (seen.insert(name).second)
+        out.push_back(name);
+    } while (SFileFindNextFile(hFind, &fd));
+
+    SFileFindClose(hFind);
+  }
 }

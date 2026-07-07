@@ -51,6 +51,7 @@ enum ObjectID {
   ID_VIEW_ITEM,
 
   ID_LOAD_WOW,
+  ID_LOAD_MPQ,
   ID_FILE_VIEWLOG,
 
   //ID_SHOW_BONES,

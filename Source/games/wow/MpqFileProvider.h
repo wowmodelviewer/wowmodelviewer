@@ -49,6 +49,12 @@ namespace wow
       // "common.MPQ; patch.MPQ; ..." in load order -- for logging / the POC report.
       QString archiveListString() const;
 
+      // Enumerate every named file across the archive chain (via each archive's internal
+      // "(listfile)"), de-duplicated and normalised to lowercase '/'. Used to populate the file
+      // browser tree in the GUI (the CASC path builds its tree from the community listfile; MPQ
+      // clients carry their own). Does not change how individual files are opened.
+      void listAllFiles(std::vector<QString> & out) const;
+
     private:
       struct Archive
       {

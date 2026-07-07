@@ -41,8 +41,10 @@ namespace wow
       void addCustomFiles(const QString & path, bool bypassOriginalFiles) override;
 
       // Legacy-MPQ setup: open the archive chain under dataFolder, build the client profile
-      // (storage=MPQ), select the MPQ provider and log the banner. Independent of the CASC path.
-      void initMpq(const QString & dataFolder, const QString & locale, const QString & version);
+      // (storage=MPQ), select the MPQ provider, populate the browsable file tree from the MPQ
+      // listfile, and log the banner. Returns the number of archives opened (0 = no MPQ client
+      // found). Independent of the CASC path.
+      int initMpq(const QString & dataFolder, const QString & locale, const QString & version);
 
       GameFile * getFile(int id) override;
       GameFile * getFile(QString filename) override; // adds MPQ create-on-demand
@@ -69,6 +71,7 @@ namespace wow
       // an old MoPaQ client, the placeholder MpqFileProvider. Null until setConfig() runs, in
       // which case openFile() falls back to m_CASCFolder directly.
       std::unique_ptr<core::IFileProvider> m_provider;
+      QString m_mpqLocale; // detected/selected locale when in MPQ mode (for locale())
       std::map<int, GameFile *> m_idMap;
       std::map<int, QString> m_idNameMap;
       std::map<QString, int> m_nameIdMap;
