@@ -49,7 +49,8 @@ set(src animated.cpp
       WoWDatabase.cpp
       WoWFolder.cpp
       WoWItem.cpp
-      WoWModel.cpp)
+      WoWModel.cpp
+      WotlkDbc.cpp)
 
 set(headers animated.h
       AnimManager.h
@@ -103,7 +104,8 @@ set(headers animated.h
       WoWDatabase.h
       WoWFolder.h
       WoWItem.h
-      WoWModel.h)
+      WoWModel.h
+      WotlkDbc.h)
 
 source_group("Header Files" FILES ${headers})
 
