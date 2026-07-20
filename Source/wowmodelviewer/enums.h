@@ -163,6 +163,7 @@ enum ObjectID {
   ID_ANIM_SECONDARY_TEXT,
   ID_ANIM_LOCK,
   ID_ANIM_NEXT,
+  ID_VOICELINES, // Voice Lines (V1): opens the creature-sound preview dialog
   ID_SKIN,
   ID_BLP_SKIN1,
   ID_BLP_SKIN2,

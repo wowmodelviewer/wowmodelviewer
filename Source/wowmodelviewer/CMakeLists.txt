@@ -23,6 +23,7 @@ set(src  AnimationExportChoiceDialog.cpp
          ExportProgressDialog.cpp
          ExportSettings.cpp
          filecontrol.cpp
+         VoiceLinesDialog.cpp
          GeneralSettings.cpp
          imagecontrol.cpp
          ImageSequenceDialog.cpp
@@ -50,6 +51,7 @@ set(src  AnimationExportChoiceDialog.cpp
 set(headers AnimationExportChoiceDialog.h
             animcontrol.h
             AnimExporter.h
+            VoiceLinesDialog.h
             app.h
             AVIGenerator.h
             charcontrol.h

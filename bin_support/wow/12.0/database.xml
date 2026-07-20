@@ -196,8 +196,10 @@
   <table name="CreatureDisplayInfo">
     <field type="int32" name="ID" primary="yes" pos="0" />
     <field type="uint16" name="ModelID" pos="1" />
+    <field type="int32" name="SoundID" pos="2" />
     <field type="int32" name="ExtendedDisplayInfoID" pos="7" />
 	<field type="uint16" name="ParticleColorID" pos="9" />
+    <field type="int32" name="NPCSoundID" pos="8" />
     <field type="int32" name="TextureVariationFileDataID" arraySize="4" pos="27" />
   </table>
   <!--
@@ -225,10 +227,56 @@
   <table name="CreatureModelData">
     <field type="int32" name="ID" primary="yes" />
     <field type="uint32" name="FileDataID" pos="2" />
+    <field type="int32" name="SoundID" pos="13" />
     <field type="uint32" name="CreatureGeosetDataID" pos="18" />
   </table>
-  
+
   <!-- Creature tables - END -->
+
+  <!-- Voice Lines (V1) sound tables - BEGIN.
+       Columns are declared by NAME; field positions self-correct at load from the bundled WoWDBDefs
+       .dbd (matched on the loaded DB2's layout hash). Base pos= values below are taken from the
+       12.1.0.68209 layout in WoWDBDefs and are only used if no .dbd layout matches. -->
+  <!-- CreatureSoundData: per-model/display creature sound SET; each Sound*ID column is a SoundKit id.
+       Only the V1 categories are declared (Aggro/Attack/Wound/Death/Stand-Loop/Fidget/Stun/Alert/etc.). -->
+  <table name="CreatureSoundData">
+    <field type="int32" name="ID" primary="yes" />
+    <field type="int32" name="SoundExertionID" pos="1" />
+    <field type="int32" name="SoundExertionCriticalID" pos="2" />
+    <field type="int32" name="SoundInjuryID" pos="3" />
+    <field type="int32" name="SoundInjuryCriticalID" pos="4" />
+    <field type="int32" name="SoundInjuryCrushingBlowID" pos="5" />
+    <field type="int32" name="SoundDeathID" pos="6" />
+    <field type="int32" name="SoundStunID" pos="7" />
+    <field type="int32" name="SoundStandID" pos="8" />
+    <field type="int32" name="SoundFootstepID" pos="9" />
+    <field type="int32" name="SoundAggroID" pos="10" />
+    <field type="int32" name="SoundWingFlapID" pos="11" />
+    <field type="int32" name="SoundWingGlideID" pos="12" />
+    <field type="int32" name="SoundAlertID" pos="13" />
+    <field type="int32" name="LoopSoundID" pos="19" />
+    <field type="int32" name="NPCSoundID" pos="35" />
+    <field type="int32" name="SoundFidget" arraySize="5" pos="37" />
+    <field type="int32" name="CustomAttack" arraySize="4" pos="38" />
+  </table>
+  <!-- SoundKit: the kit record (id + type). Not on the V1 critical path, but useful for later filtering. -->
+  <table name="SoundKit">
+    <field type="int32" name="ID" primary="yes" />
+    <field type="int32" name="SoundType" pos="0" />
+  </table>
+  <!-- SoundKitEntry: a SoundKit id -> audio FileDataID (multiple rows per kit = variations).
+       SoundKitID is a relationship column (not a positional record field). -->
+  <table name="SoundKitEntry">
+    <field type="int32" name="ID" primary="yes" />
+    <field type="int32" name="FileDataID" pos="0" />
+    <field type="int32" name="SoundKitID" relationshipData="yes" createIndex="yes" />
+  </table>
+  <!-- SoundKitName: optional friendly kit name (often blank/unshipped in retail). -->
+  <table name="SoundKitName">
+    <field type="int32" name="ID" primary="yes" />
+    <field type="text" name="Name" pos="0" />
+  </table>
+  <!-- Voice Lines (V1) sound tables - END -->
   
   <!-- Item tables - BEGIN -->
   <table name="Item">

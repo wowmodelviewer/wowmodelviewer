@@ -50,7 +50,10 @@ set(src animated.cpp
       WoWFolder.cpp
       WoWItem.cpp
       WoWModel.cpp
-      WotlkDbc.cpp)
+      WotlkDbc.cpp
+      AudioPlayer.cpp
+      SoundResolver.cpp
+      ${CMAKE_SOURCE_DIR}/ThirdParty/miniaudio/miniaudio_impl.c)
 
 set(headers animated.h
       AnimManager.h
@@ -105,7 +108,9 @@ set(headers animated.h
       WoWFolder.h
       WoWItem.h
       WoWModel.h
-      WotlkDbc.h)
+      WotlkDbc.h
+      AudioPlayer.h
+      SoundResolver.h)
 
 source_group("Header Files" FILES ${headers})
 
@@ -113,6 +118,11 @@ use_core()
 use_glew()
 use_casclib()
 use_stormlib()
+
+# miniaudio (+ stb_vorbis) for Voice Lines audio preview. It is an implementation detail of wow.dll:
+# the ~96k-line header is compiled once in ThirdParty/miniaudio/miniaudio_impl.c and only the thin
+# AudioPlayer wrapper includes it, so it never leaks to core/exe.
+include_directories(${CMAKE_SOURCE_DIR}/ThirdParty/miniaudio)
 
 add_definitions(-DBUILDING_WOW_DLL)
 

@@ -27,6 +27,11 @@
 #include "WoWDatabase.h"
 #include "WoWFolder.h"
 #include "WoWModel.h"
+#include "AudioPlayer.h"   // Voice Lines audio preview (-playsound)
+#include "SoundResolver.h" // Voice Lines creature-sound resolution (-vlprobe + UI)
+
+#include <chrono>
+#include <thread>
 
 #include "logger/Logger.h"
 #include "logger/LogOutputConsole.h"
@@ -215,6 +220,131 @@ static void doHeadlessDumpTexture(int fileDataId, const QString & outPath)
   std::fflush(stdout);
 }
 
+// -vlprobe <CreatureModelFileDataID>: headless Voice Lines V1 probe. Resolves the creature sound set for
+// a model FileDataID via SoundResolver (the exact resolver the UI uses) and logs each line (category,
+// SoundKit, audio FileDataID) plus an openable check. Read-only, diagnostic-only.
+static void doHeadlessVoiceLineProbe(int modelFileDataId)
+{
+  LOG_INFO << "[voicelines] === probe start === modelFileDataID=" << modelFileDataId;
+
+  // P1/P2 field-by-field diagnostic: raw CreatureModelData / CreatureDisplayInfo resolution so a failing
+  // probe can be traced to a specific link (schema column, table load, or missing data).
+  sqlResult diag = GAMEDATABASE.sqlQuery(QString(
+      "SELECT CreatureModelData.ID, CreatureModelData.SoundID, "
+      "CreatureDisplayInfo.ID, CreatureDisplayInfo.SoundID, CreatureDisplayInfo.NPCSoundID "
+      "FROM CreatureModelData "
+      "LEFT JOIN CreatureDisplayInfo ON CreatureDisplayInfo.ModelID = CreatureModelData.ID "
+      "WHERE CreatureModelData.FileDataID = %1").arg(modelFileDataId));
+  if (!diag.valid)
+  {
+    LOG_INFO << "[voicelines] DIAG query INVALID -> schema/column problem (a SoundID column may be missing)";
+  }
+  else if (diag.empty())
+  {
+    LOG_INFO << "[voicelines] DIAG no CreatureModelData row for FileDataID " << modelFileDataId
+             << " -> not referenced by CreatureModelData (or table empty)";
+  }
+  else
+  {
+    int cmdId = diag.values[0][0].toInt();
+    int cmdSound = diag.values[0][1].toInt();
+    int nDisp = 0, firstDispId = 0, firstDispSound = 0, firstNpcSound = 0;
+    for (size_t i = 0; i < diag.values.size(); ++i)
+    {
+      int di = diag.values[i][2].toInt();
+      if (di == 0)
+        continue;
+      if (firstDispId == 0)
+        firstDispId = di;
+      int ds = diag.values[i][3].toInt();
+      int ns = diag.values[i][4].toInt();
+      if (ds != 0 && firstDispSound == 0)
+        firstDispSound = ds;
+      if (ns != 0 && firstNpcSound == 0)
+        firstNpcSound = ns;
+      ++nDisp;
+    }
+    LOG_INFO << "[voicelines] DIAG CreatureModelData.ID=" << cmdId << " CreatureModelData.SoundID=" << cmdSound;
+    LOG_INFO << "[voicelines] DIAG CreatureDisplayInfo rows=" << nDisp << " firstID=" << firstDispId
+             << " firstDisplay.SoundID=" << firstDispSound << " firstNPCSoundID=" << firstNpcSound;
+    int chosen = cmdSound != 0 ? cmdSound : firstDispSound;
+    LOG_INFO << "[voicelines] DIAG chosen CreatureSoundData ID=" << chosen
+             << " source=" << (cmdSound != 0 ? "CreatureModelData.SoundID" : "CreatureDisplayInfo.SoundID");
+  }
+
+  int soundDataId = 0;
+  QString err;
+  std::vector<VoiceLineEntry> lines = SoundResolver::resolveCreatureSoundsForModel(modelFileDataId, &soundDataId, &err);
+
+  if (lines.empty())
+  {
+    LOG_INFO << "[voicelines] no creature sounds (CreatureSoundData ID=" << soundDataId << "): "
+             << (err.isEmpty() ? QString("(none)") : err);
+    LOG_INFO << "[voicelines] === probe end ===";
+    return;
+  }
+
+  LOG_INFO << "[voicelines] CreatureSoundData ID=" << soundDataId << " -> " << (int)lines.size() << " lines";
+  int openable = 0;
+  for (size_t i = 0; i < lines.size(); ++i)
+  {
+    const VoiceLineEntry & e = lines[i];
+    GameFile * gf = GAMEDIRECTORY.getFile((uint)e.fileDataId);
+    bool ok = gf && gf->open();
+    if (gf)
+      gf->close();
+    if (ok)
+      ++openable;
+    LOG_INFO << "[voicelines]  " << e.label << "  category=" << e.category
+             << " kit=" << e.soundKitId << " file=" << e.fileDataId << (ok ? "" : "  (UNOPENABLE)");
+  }
+  LOG_INFO << "[voicelines] totals: lines=" << (int)lines.size() << " openable=" << openable;
+  LOG_INFO << "[voicelines] === probe end ===";
+}
+
+// -playsound <FileDataID> [volume 0..1]: Voice Lines V1 audio probe. Extracts the audio file from CASC by
+// FileDataID and plays it once via AudioPlayer (miniaudio), blocking until it finishes (or a safety
+// timeout). Diagnostic-only; proves CASC-audio decode + playback before any UI. Default volume 1.0.
+static void doHeadlessPlaySound(int fileDataId, float volume)
+{
+  if (volume < 0.0f) volume = 0.0f;
+  if (volume > 1.0f) volume = 1.0f;
+
+  GameFile * f = GAMEDIRECTORY.getFile((uint)fileDataId);
+  if (!f)
+  {
+    LOG_INFO << "[playsound] file" << fileDataId << "not found in CASC";
+    return;
+  }
+  f->open();
+  if (f->isEof() || f->getSize() == 0)
+  {
+    LOG_INFO << "[playsound] file" << fileDataId << "empty or unreadable";
+    f->close();
+    return;
+  }
+
+  LOG_INFO << "[playsound] file" << fileDataId << "size" << (int)f->getSize() << "bytes  volume" << volume;
+
+  AudioPlayer player;
+  if (!player.playBytes(f->getBuffer(), f->getSize(), volume))
+  {
+    LOG_INFO << "[playsound] FAILED:" << player.lastError();
+    f->close();
+    return;
+  }
+
+  int waitedMs = 0;
+  const int maxMs = 30000; // safety cap
+  while (player.isPlaying() && waitedMs < maxMs)
+  {
+    std::this_thread::sleep_for(std::chrono::milliseconds(25));
+    waitedMs += 25;
+  }
+  LOG_INFO << "[playsound] done (played ~" << waitedMs << "ms" << (waitedMs >= maxMs ? ", hit safety cap)" : ")");
+  f->close();
+}
+
 // Headless smoke-test for the Image Sequence Exporter pipeline (off-screen, no GUI/timer): loads
 // the model, scrubs the current clip, and writes a handful of PNG + one EXR frame via the same
 // ModelCanvas::CaptureSequenceFrame() the GUI uses. Validates capture/alpha/EXR/naming without the
@@ -269,7 +399,7 @@ bool WowModelViewApp::OnInit()
     QString a = QString::fromWCharArray(argv[ai]);
     if (a == "-m" || a == "-mo" || a == "-armory" || a == "-npc" || a == "-fbxexport" ||
         a == "-animdump" || a == "-fbxinspect" || a == "-dbfromfile" || a == "-dumptex" ||
-        a == "-mpq" || a.endsWith(".chr"))
+        a == "-vlprobe" || a == "-playsound" || a == "-mpq" || a.endsWith(".chr"))
     {
       earlyHeadless = true;
       break;
@@ -429,6 +559,8 @@ bool WowModelViewApp::OnInit()
   QString mpqDataFolder;  // -mpq <DataFolder> [locale]: load a legacy MPQ client instead of CASC
   QString mpqLocale;      // optional locale for -mpq (auto-detected when empty)
   int dumpTexFileDataId = 0; QString dumpTexOutPath; // -dumptex <fileDataID> <out.png>: forensic-only
+  int vlProbeModelFileId = 0; // -vlprobe <CreatureModelFileDataID>: Voice Lines V1 sound-chain probe (diagnostic)
+  int playSoundFileId = 0; float playSoundVolume = 1.0f; // -playsound <FileDataID> [volume 0..1]: audio preview probe
   // Export content selection + clip list for the headless FBX export (the parent process passes
   // these so the child reproduces the user's exact options). Defaults: full content, no explicit
   // clips (the exporter falls back to none/first-N only if -fbxanim and no -fbxclips).
@@ -486,6 +618,28 @@ bool WowModelViewApp::OnInit()
         dumpTexFileDataId = QString::fromWCharArray(argv[i + 1]).toInt();
         dumpTexOutPath = QString::fromWCharArray(argv[i + 2]);
         i += 2;
+      }
+    }
+    else if (cmd == "-vlprobe") {
+      // Voice Lines V1: "-vlprobe <CreatureModelFileDataID>" loads game data, resolves the creature
+      // sound-set chain, logs a [voicelines] report, and exits. See doHeadlessVoiceLineProbe.
+      if (i + 1 < argc) {
+        vlProbeModelFileId = QString::fromWCharArray(argv[i + 1]).toInt();
+        i += 1;
+      }
+    }
+    else if (cmd == "-playsound") {
+      // Voice Lines V1: "-playsound <FileDataID> [volume 0..1]" extracts the audio from CASC and plays it
+      // once via AudioPlayer, then exits. See doHeadlessPlaySound.
+      if (i + 1 < argc) {
+        playSoundFileId = QString::fromWCharArray(argv[i + 1]).toInt();
+        i += 1;
+        // optional volume argument (only consume it if it parses as a number)
+        if (i + 1 < argc) {
+          bool okVol = false;
+          float v = QString::fromWCharArray(argv[i + 1]).toFloat(&okVol);
+          if (okVol) { playSoundVolume = v; i += 1; }
+        }
       }
     }
     else if (cmd == "-imgseq") {
@@ -605,7 +759,7 @@ bool WowModelViewApp::OnInit()
   for (int i = 1; i < argc; i++)
   {
     QString a = QString::fromWCharArray(argv[i]);
-    if (a == "-m" || a == "-mo" || a == "-armory" || a == "-npc" || a == "-fbxexport" || a == "-animdump" || a == "-fbxinspect" || a == "-dbfromfile" || a == "-dumptex" || a == "-mpq" || a.endsWith(".chr"))
+    if (a == "-m" || a == "-mo" || a == "-armory" || a == "-npc" || a == "-fbxexport" || a == "-animdump" || a == "-fbxinspect" || a == "-dbfromfile" || a == "-dumptex" || a == "-vlprobe" || a == "-playsound" || a == "-mpq" || a.endsWith(".chr"))
     {
       headlessLoad = true;
       break;
@@ -645,6 +799,18 @@ bool WowModelViewApp::OnInit()
     {
       doHeadlessDumpTexture(dumpTexFileDataId, dumpTexOutPath);
       return false; // forensic dump done -> exit
+    }
+
+    if (vlProbeModelFileId != 0)
+    {
+      doHeadlessVoiceLineProbe(vlProbeModelFileId);
+      return false; // Voice Lines probe done -> exit
+    }
+
+    if (playSoundFileId != 0)
+    {
+      doHeadlessPlaySound(playSoundFileId, playSoundVolume);
+      return false; // Voice Lines audio probe done -> exit
     }
 
     if (!snapModelPath.isEmpty())

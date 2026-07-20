@@ -10,6 +10,8 @@
 //#include "wmo.h"
 #include "modelcanvas.h"
 
+#include "SoundResolver.h" // Voice Lines (V1): VoiceLineEntry
+
 extern float animSpeed;
 
 // AnimationData.dbc
@@ -125,6 +127,8 @@ class AnimControl: public wxWindow
   wxTextCtrl *lockText;
 
   wxButton *btnPlay, *btnPause, *btnStop, *btnClear, *btnPrev, *btnNext;
+  wxButton *btnVoiceLines; // Voice Lines (V1): opens the creature-sound preview dialog (creatures only)
+  std::vector<VoiceLineEntry> m_voiceLines; // resolved for the current creature model; empty otherwise
   wxCheckBox *oldStyle;
 
   bool UpdateCreatureModel(WoWModel *m);
@@ -143,6 +147,7 @@ public:
   void UpdateWMO(WMO *w, int group);
 
   void OnButton(wxCommandEvent &event);
+  void OnVoiceLines(wxCommandEvent &event); // Voice Lines (V1)
   void OnCheck(wxCommandEvent &event);
   void OnAnim(wxCommandEvent &event);
   void OnSkin(wxCommandEvent &event);

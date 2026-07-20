@@ -13,6 +13,7 @@
 #include "WoWDatabase.h"
 #include "WotlkDbc.h"
 #include "WMOGroup.h"
+#include "VoiceLinesDialog.h" // Voice Lines (V1)
 
 
 IMPLEMENT_CLASS(AnimControl, wxWindow)
@@ -43,6 +44,7 @@ BEGIN_EVENT_TABLE(AnimControl, wxWindow)
   EVT_BUTTON(ID_CLEARANIM, AnimControl::OnButton)
   EVT_BUTTON(ID_PREVANIM, AnimControl::OnButton)
   EVT_BUTTON(ID_NEXTANIM, AnimControl::OnButton)
+  EVT_BUTTON(ID_VOICELINES, AnimControl::OnVoiceLines)
 
   EVT_SLIDER(ID_SPEED, AnimControl::OnSliderUpdate)
   EVT_SLIDER(ID_SPEED_MOUTH, AnimControl::OnSliderUpdate)
@@ -157,6 +159,11 @@ AnimControl::AnimControl(wxWindow* parent, wxWindowID id)
   nextAnims = new wxCheckBox(this, ID_ANIM_NEXT, _("Next Animations"), wxPoint(430,10), wxDefaultSize, 0);
   bNextAnims = false;
   nextAnims->SetValue(bNextAnims);
+
+  // Voice Lines (V1): opens the creature-sound preview dialog. Hidden unless the loaded model is a
+  // creature that resolves to sound data (see UpdateModel).
+  btnVoiceLines = new wxButton(this, ID_VOICELINES, _("Voice Lines..."), wxPoint(430,88), wxSize(150,24));
+  btnVoiceLines->Show(false);
 }
 
 AnimControl::~AnimControl()
@@ -270,6 +277,14 @@ void AnimControl::UpdateModel(WoWModel *m)
   }
 
   skinList->Show(res);
+
+  // Voice Lines (V1): for creature models, resolve the creature sound set and show/enable the button
+  // when it has playable lines. Non-creature models (chars/items/world objects) never show it.
+  m_voiceLines.clear();
+  if (fn.substr(0, 8) == wxT("creature") && m->gamefile)
+    m_voiceLines = SoundResolver::resolveCreatureSoundsForModel(m->gamefile->fileDataId());
+  btnVoiceLines->Show(!m_voiceLines.empty());
+  btnVoiceLines->Enable(!m_voiceLines.empty());
 
   // A small attempt at keeping the 'previous' animation that was selected when changing
   // the selected model via the model control.
@@ -1168,6 +1183,32 @@ bool AnimControl::FillBLPSkinSelector(TextureSet &skins, bool item)
   }
   else
     return false;
+}
+
+// Voice Lines (V1): open the creature-sound preview dialog for the current model. m_voiceLines was
+// resolved in UpdateModel; the button is only visible when it is non-empty.
+void AnimControl::OnVoiceLines(wxCommandEvent & WXUNUSED(event))
+{
+  if (!g_selModel || m_voiceLines.empty())
+    return;
+
+  // Friendly-ish creature name from the model file basename (e.g. "creature/wolf/wolf.m2" -> "wolf").
+  wxString name;
+  if (g_selModel->gamefile)
+  {
+    QString full = g_selModel->gamefile->fullname();
+    int slash = full.lastIndexOf('/');
+    int bslash = full.lastIndexOf('\\');
+    int cut = slash > bslash ? slash : bslash;
+    QString base = (cut >= 0) ? full.mid(cut + 1) : full;
+    int dot = base.lastIndexOf('.');
+    if (dot > 0)
+      base = base.left(dot);
+    name = wxString::FromUTF8(base.toStdString().c_str());
+  }
+
+  VoiceLinesDialog dlg(this, name, m_voiceLines);
+  dlg.ShowModal();
 }
 
 void AnimControl::OnButton(wxCommandEvent &event)
