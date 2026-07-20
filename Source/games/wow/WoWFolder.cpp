@@ -228,6 +228,15 @@ bool wow::WoWFolder::openFile(std::string file, HANDLE * result)
   return m_CASCFolder.openFile(it->second, result);
 }
 
+int wow::WoWFolder::fileKeyStatus(int id)
+{
+  // Only the CASC backend can distinguish encrypted/missing keys. Legacy MPQ clients have no
+  // TACT encryption, so report "not determinable" (-1) there.
+  if (m_clientProfile.storage == core::StorageType::MPQ)
+    return -1;
+  return m_CASCFolder.fileKeyStatus(id);
+}
+
 QString wow::WoWFolder::version()
 {
   if (m_clientProfile.storage == core::StorageType::MPQ)

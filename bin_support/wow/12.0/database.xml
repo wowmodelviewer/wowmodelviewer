@@ -277,6 +277,22 @@
     <field type="text" name="Name" pos="0" />
   </table>
   <!-- Voice Lines (V1) sound tables - END -->
+
+  <!-- Encounter Dialogue (V3 source #4). A raid boss's VO folder is named after the BOSS, not
+       the model (creature/ogresecurity/ogresecurity.m2 is "Mug'Zee, Heads of Security" -> the VO
+       lives in sound/creature/mug/ + sound/creature/zee/). These two tables provide the only
+       shipped link: CreatureDisplayInfo -> JournalEncounterCreature -> JournalEncounter.Name_lang.
+       Positions self-correct from the bundled .dbd at load. -->
+  <table name="JournalEncounter">
+    <field type="int" name="ID" primary="yes" />
+    <field type="text" name="Name_lang" pos="0" />
+    <field type="int" name="DungeonEncounterID" pos="5" />
+  </table>
+  <table name="JournalEncounterCreature">
+    <field type="int" name="ID" primary="yes" />
+    <field type="int" name="JournalEncounterID" relationshipData="yes" createIndex="yes" />
+    <field type="int" name="CreatureDisplayInfoID" pos="3" />
+  </table>
   
   <!-- Item tables - BEGIN -->
   <table name="Item">

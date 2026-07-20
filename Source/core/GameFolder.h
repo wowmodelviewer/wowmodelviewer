@@ -69,6 +69,13 @@ namespace core
 
       virtual int lastError() = 0;
 
+      // File availability in the loaded storage, for the Voice Lines browser Status column.
+      // Return codes: 0 = playable (opens + first block decrypts/reads), 1 = encrypted / missing
+      // TACT key (present but CascReadFile fails with ERROR_FILE_ENCRYPTED), 2 = missing from the
+      // selected build (not openable), -1 = not determinable (e.g. non-CASC storage). The default
+      // is -1; CASC overrides it. This only reports status -- entries are never hidden.
+      virtual int fileKeyStatus(int /*id*/) { return -1; }
+
       virtual void onChildAdded(GameFile *) override;
       virtual void onChildRemoved(GameFile *) override;
 

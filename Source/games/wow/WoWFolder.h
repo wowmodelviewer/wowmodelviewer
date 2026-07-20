@@ -52,6 +52,8 @@ namespace wow
       bool openFile(int id, HANDLE * result) override;
       bool openFile(std::string file, HANDLE * result) override;
 
+      int fileKeyStatus(int id) override; // Voice Lines browser: playable/encrypted/missing (0/1/2)
+
       QString version() override;
       int majorVersion() override;
       QString locale() override;

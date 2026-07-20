@@ -130,6 +130,8 @@ class AnimControl: public wxWindow
   wxButton *btnVoiceLines; // Voice Lines: opens the creature voice preview dialog (creatures only)
   std::vector<VoiceLineEntry> m_voiceLines;       // V1 Creature Sounds for the current model; empty otherwise
   std::vector<VoiceLineEntry> m_voiceFolderLines; // V2 Creature Voice Lines (sound/creature/<f>/vo_*); empty otherwise
+  std::vector<VoiceLineEntry> m_audioFolderLines; // V3 Creature Audio Folder (all *.ogg in the folder); empty otherwise
+  std::vector<VoiceLineEntry> m_encounterLines;   // V3 source #4 Encounter Dialogue (boss-named VO folders); empty otherwise
   wxCheckBox *oldStyle;
 
   bool UpdateCreatureModel(WoWModel *m);

@@ -49,6 +49,12 @@ class _CASCFOLDER_API_ CASCFolder
     bool openFile(int id, HANDLE * result);
     bool closeFile(HANDLE file);
 
+    // Availability probe for the Voice Lines browser: open the file by id and try to read its
+    // first block (which is where CascLib decrypts). Returns 0 = playable, 1 = encrypted / missing
+    // TACT key (ERROR_FILE_ENCRYPTED), 2 = missing/not openable in this build. Does not add the
+    // file to the tree. Cheap (16-byte read) but does touch CASC per call.
+    int fileKeyStatus(int id);
+
     // int fileDataId(std::string & filename);
 
   private:

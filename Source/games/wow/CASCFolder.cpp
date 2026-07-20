@@ -263,6 +263,30 @@ bool CASCFolder::closeFile(HANDLE file)
   return CascCloseFile(file);
 }
 
+int CASCFolder::fileKeyStatus(int id)
+{
+  if (!hStorage)
+    return 2; // no CASC storage loaded -> can't determine (treat as missing/unavailable)
+
+  HANDLE h = 0;
+  if (!CascOpenFile(hStorage, CASC_FILE_DATA_ID(id), m_currentCascLocale, CASC_OPEN_BY_FILEID, &h))
+    return 2; // not present / not openable in the selected build
+
+  // CascOpenFile locates an encrypted file too; decryption only happens on read. Read the first
+  // block so a missing TACT key surfaces as ERROR_FILE_ENCRYPTED instead of silent garbage.
+  unsigned char probe[16];
+  unsigned long got = 0;
+  const bool ok = CascReadFile(h, probe, sizeof(probe), &got) != 0;
+  const unsigned int err = ok ? 0u : (unsigned int)GetLastError();
+  CascCloseFile(h);
+
+  if (ok)
+    return 0; // decrypted + read fine -> playable
+  if (err == ERROR_FILE_ENCRYPTED)
+    return 1; // present but the required TACT key is not available to WMW
+  return 2;   // other read failure -> treat as unavailable
+}
+
 void CASCFolder::addExtraEncryptionKeys()
 {
   QFile tactKeys("extraEncryptionKeys.csv");

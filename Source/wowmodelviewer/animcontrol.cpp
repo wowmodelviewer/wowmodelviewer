@@ -283,6 +283,8 @@ void AnimControl::UpdateModel(WoWModel *m)
   // Non-creature models (chars/items/world objects) never show it.
   m_voiceLines.clear();
   m_voiceFolderLines.clear();
+  m_audioFolderLines.clear();
+  m_encounterLines.clear();
   if (fn.substr(0, 8) == wxT("creature") && m->gamefile)
   {
     m_voiceLines = SoundResolver::resolveCreatureSoundsForModel(m->gamefile->fileDataId());
@@ -291,8 +293,10 @@ void AnimControl::UpdateModel(WoWModel *m)
     QString base = (cut >= 0) ? cname.mid(cut + 1) : cname;
     int dot = base.lastIndexOf('.'); if (dot > 0) base = base.left(dot);
     m_voiceFolderLines = SoundResolver::resolveCreatureVoiceFolder(m->gamefile->fullname(), base);
+    m_audioFolderLines = SoundResolver::resolveCreatureAudioFolder(m->gamefile->fullname(), base);
+    m_encounterLines = SoundResolver::resolveEncounterDialogue(m->gamefile->fileDataId());
   }
-  const bool hasVoice = !m_voiceLines.empty() || !m_voiceFolderLines.empty();
+  const bool hasVoice = !m_voiceLines.empty() || !m_voiceFolderLines.empty() || !m_audioFolderLines.empty() || !m_encounterLines.empty();
   btnVoiceLines->Show(hasVoice);
   btnVoiceLines->Enable(hasVoice);
 
@@ -1199,7 +1203,7 @@ bool AnimControl::FillBLPSkinSelector(TextureSet &skins, bool item)
 // resolved in UpdateModel; the button is only visible when it is non-empty.
 void AnimControl::OnVoiceLines(wxCommandEvent & WXUNUSED(event))
 {
-  if (!g_selModel || (m_voiceLines.empty() && m_voiceFolderLines.empty()))
+  if (!g_selModel || (m_voiceLines.empty() && m_voiceFolderLines.empty() && m_audioFolderLines.empty() && m_encounterLines.empty()))
     return;
 
   // Friendly-ish creature name from the model file basename (e.g. "creature/wolf/wolf.m2" -> "wolf").
@@ -1217,7 +1221,7 @@ void AnimControl::OnVoiceLines(wxCommandEvent & WXUNUSED(event))
     name = wxString::FromUTF8(base.toStdString().c_str());
   }
 
-  VoiceLinesDialog dlg(this, name, m_voiceLines, m_voiceFolderLines);
+  VoiceLinesDialog dlg(this, name, m_voiceLines, m_voiceFolderLines, m_audioFolderLines, m_encounterLines);
   dlg.ShowModal();
 }
 

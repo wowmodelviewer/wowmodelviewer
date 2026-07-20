@@ -8,6 +8,8 @@
 #include "GameFolder.h"   // getFilesForFolder
 #include "GameFile.h"
 
+#include <QStringList>
+
 #include <algorithm>
 #include <map>
 #include <set>
@@ -34,6 +36,71 @@ namespace
     { "CustomAttack1", "Attack" }, { "CustomAttack2", "Attack" },
     { "CustomAttack3", "Attack" }, { "CustomAttack4", "Attack" },
   };
+
+  // Reverse-resolve a SoundKitID for an audio file (folder-scanned files carry no kit id of their own).
+  // Returns 0 when the file is not referenced by any SoundKitEntry.
+  int soundKitForFile(int fileDataId)
+  {
+    sqlResult r = GAMEDATABASE.sqlQuery(
+        QString("SELECT SoundKitID FROM SoundKitEntry WHERE FileDataID = %1 LIMIT 1").arg(fileDataId));
+    if (r.valid && !r.empty())
+      return r.values[0][0].toInt();
+    return 0;
+  }
+
+  // Shared folder scanner for the V2 (vo_ only) and V3 (all .ogg) sources. Derives the "<token>" from a
+  // "creature/<token>/..." model path, lists sound/creature/<token>/<prefix>*.ogg from the listfile-backed
+  // file tree (so every match is openable), sorts by path, and builds one VoiceLineEntry per file with the
+  // SoundKitID reverse-resolved. prefix is "vo_" for V2 or "" for V3. Empty vector = no matching folder.
+  std::vector<VoiceLineEntry> scanCreatureFolder(const QString & modelPath, const QString & creatureName,
+                                                 const char * prefix, const QString & source,
+                                                 const QString & category, const QString & labelWord)
+  {
+    std::vector<VoiceLineEntry> out;
+
+    QString p = modelPath;
+    p.replace('\\', '/');
+    QString token;
+    int ci = p.indexOf("creature/", 0, Qt::CaseInsensitive);
+    if (ci >= 0)
+    {
+      int start = ci + 9; // past "creature/"
+      int slash = p.indexOf('/', start);
+      if (slash > start)
+        token = p.mid(start, slash - start);
+    }
+    if (token.isEmpty())
+      return out;
+
+    const QString folder = "sound/creature/" + token + "/" + QString::fromLatin1(prefix);
+    std::vector<GameFile *> files;
+    GAMEDIRECTORY.getFilesForFolder(files, folder, ".ogg");
+    if (files.empty())
+      return out;
+
+    std::sort(files.begin(), files.end(), [](GameFile * a, GameFile * b) {
+      return a->fullname().compare(b->fullname(), Qt::CaseInsensitive) < 0;
+    });
+
+    int n = 0;
+    for (size_t i = 0; i < files.size(); ++i)
+    {
+      GameFile * f = files[i];
+      if (!f)
+        continue;
+      VoiceLineEntry e;
+      e.source = source;
+      e.category = category;
+      e.fileDataId = f->fileDataId();
+      e.filePath = f->fullname();
+      e.soundKitId = soundKitForFile(e.fileDataId);
+      e.variation = ++n;
+      e.label = (creatureName.isEmpty() ? (labelWord + " ")
+                                        : (creatureName + " " + labelWord + " ")) + QString::number(e.variation);
+      out.push_back(e);
+    }
+    return out;
+  }
 
   // Query a group of category columns for one CreatureSoundData row -> (label, kit) pairs for non-zero
   // kits. A separate query per group so a missing array column can't hide the scalar categories.
@@ -127,6 +194,18 @@ std::vector<VoiceLineEntry> SoundResolver::resolveCreatureSoundsForModel(int mod
       e.soundKitId = kit;
       e.fileDataId = fdid;
       e.soundKitName = name;
+      // Resolve a filename for the row when the listfile knows one. getFile() synthesizes a
+      // "File########.unk" placeholder for files with NO listfile name; treat that as unnamed
+      // (leave filePath empty) so the UI can show "(unnamed)" + the FileDataID rather than a stub.
+      // Real names -- friendly ("sound/creature/vashnik/...") or generic/numeric
+      // ("sound/creature/7133443/...") -- are kept as-is.
+      GameFile * gf = GAMEDIRECTORY.getFile((uint)fdid);
+      if (gf)
+      {
+        const QString fn = gf->fullname();
+        if (!fn.isEmpty() && !fn.endsWith(".unk", Qt::CaseInsensitive))
+          e.filePath = fn;
+      }
       e.variation = ++perCatCount[category];
       e.label = category + " " + QString::number(e.variation);
       if (!name.isEmpty())
@@ -141,50 +220,136 @@ std::vector<VoiceLineEntry> SoundResolver::resolveCreatureSoundsForModel(int mod
 std::vector<VoiceLineEntry> SoundResolver::resolveCreatureVoiceFolder(const QString & modelPath,
                                                                      const QString & creatureName)
 {
+  // V2: only vo_*.ogg. SoundKitID is reverse-resolved per file inside the shared scanner.
+  return scanCreatureFolder(modelPath, creatureName, "vo_", "CreatureVoiceFolder", "Voice Line", "VO");
+}
+
+std::vector<VoiceLineEntry> SoundResolver::resolveEncounterDialogue(int modelFileDataId,
+                                                                    QString * outEncounterName)
+{
   std::vector<VoiceLineEntry> out;
+  if (outEncounterName)
+    outEncounterName->clear();
 
-  // Derive the folder token: "creature/<token>/<file>.m2" -> "<token>".
-  QString p = modelPath;
-  p.replace('\\', '/');
-  QString token;
-  int ci = p.indexOf("creature/", 0, Qt::CaseInsensitive);
-  if (ci >= 0)
+  // model FileDataID -> CreatureModelData -> every CreatureDisplayInfo using that model.
+  sqlResult d = GAMEDATABASE.sqlQuery(QString(
+      "SELECT CreatureDisplayInfo.ID FROM CreatureModelData "
+      "JOIN CreatureDisplayInfo ON CreatureDisplayInfo.ModelID = CreatureModelData.ID "
+      "WHERE CreatureModelData.FileDataID = %1").arg(modelFileDataId));
+  if (!d.valid || d.empty())
+    return out;
+  QString dispList;
+  for (size_t i = 0; i < d.values.size(); ++i)
+  { if (!dispList.isEmpty()) dispList += ","; dispList += d.values[i][0]; }
+
+  // display -> JournalEncounterCreature -> the encounter this model belongs to.
+  sqlResult je = GAMEDATABASE.sqlQuery(QString(
+      "SELECT DISTINCT JournalEncounter.Name_lang FROM JournalEncounterCreature "
+      "JOIN JournalEncounter ON JournalEncounter.ID = JournalEncounterCreature.JournalEncounterID "
+      "WHERE JournalEncounterCreature.CreatureDisplayInfoID IN (%1)").arg(dispList));
+  if (!je.valid || je.empty())
+    return out;
+  const QString encName = je.values[0][0].trimmed();
+  if (encName.isEmpty())
+    return out;
+  if (outEncounterName)
+    *outEncounterName = encName;
+
+  // Encounter name -> candidate folder tokens. Words too short or too generic are never a VO
+  // folder on their own; keeping them produces obvious false hits ("king" -> king_anduin_wrynn).
+  static const char * STOP[] = { "the", "and", "of", "a", "an", "in", "on", "at", "to", "for",
+                                 "heads", "one", "king", "chrome" };
+  QStringList tokens;
+  QString slug, cur;
+  const QString low = encName.toLower();
+  for (int i = 0; i < low.size(); ++i)
   {
-    int start = ci + 9; // past "creature/"
-    int slash = p.indexOf('/', start);
-    if (slash > start)
-      token = p.mid(start, slash - start);
+    const QChar ch = low[i];
+    if (ch.isLetterOrNumber()) { cur += ch; slug += ch; }
+    else
+    {
+      if (!cur.isEmpty()) { tokens << cur; cur.clear(); }
+      if (ch == '-') slug += ch;                                   // keep "one-armed_bandit"
+      else if (!slug.isEmpty() && !slug.endsWith('_')) slug += '_';
+    }
   }
-  if (token.isEmpty())
-    return out;
-
-  // Match sound/creature/<token>/vo_*.ogg against the listfile-backed CASC file tree. Only files that
-  // actually exist in CASC are in the tree, so every match is openable.
-  const QString folder = "sound/creature/" + token + "/vo_";
-  std::vector<GameFile *> files;
-  GAMEDIRECTORY.getFilesForFolder(files, folder, ".ogg");
-  if (files.empty())
-    return out;
-
-  // Order by path so vo_..._01, _02, ... come out in sequence.
-  std::sort(files.begin(), files.end(), [](GameFile * a, GameFile * b) {
-    return a->fullname().compare(b->fullname(), Qt::CaseInsensitive) < 0;
-  });
-
-  int n = 0;
-  for (size_t i = 0; i < files.size(); ++i)
+  if (!cur.isEmpty()) tokens << cur;
+  while (slug.endsWith('_') || slug.endsWith('-')) slug.chop(1);
+  // Drop leading stop-words from the slug so "the_one-armed_bandit" -> "one-armed_bandit".
+  bool trimmed = true;
+  while (trimmed)
   {
-    GameFile * f = files[i];
-    if (!f)
-      continue;
-    VoiceLineEntry e;
-    e.source = "CreatureVoiceFolder";
-    e.category = "Voice";
-    e.fileDataId = f->fileDataId();
-    e.filePath = f->fullname();
-    e.variation = ++n;
-    e.label = (creatureName.isEmpty() ? QString("VO ") : (creatureName + " VO ")) + QString::number(e.variation);
-    out.push_back(e);
+    trimmed = false;
+    for (size_t s = 0; s < sizeof(STOP) / sizeof(STOP[0]); ++s)
+    {
+      const QString pre = QString(STOP[s]) + "_";
+      if (slug.startsWith(pre)) { slug = slug.mid(pre.length()); trimmed = true; break; }
+    }
+  }
+
+  QStringList cands;
+  for (int i = 0; i < tokens.size(); ++i)
+  {
+    const QString & t = tokens[i];
+    if (t.length() < 3) continue;
+    bool stop = false;
+    for (size_t s = 0; s < sizeof(STOP) / sizeof(STOP[0]) && !stop; ++s)
+      if (t == STOP[s]) stop = true;
+    if (!stop && !cands.contains(t)) cands << t;
+  }
+  if (!slug.isEmpty() && !cands.contains(slug)) cands << slug;
+
+  // For each candidate, list sound/creature/<cand>* and keep only files whose FOLDER is exactly
+  // the token or starts with "<token>_". The loose prefix alone would drag in rik->rikkal/riko.
+  std::map<QString, std::vector<GameFile *>> byFolder;
+  for (int i = 0; i < cands.size(); ++i)
+  {
+    const QString & t = cands[i];
+    std::vector<GameFile *> files;
+    GAMEDIRECTORY.getFilesForFolder(files, "sound/creature/" + t, ".ogg");
+    for (size_t k = 0; k < files.size(); ++k)
+    {
+      GameFile * f = files[k];
+      if (!f) continue;
+      QString p = f->fullname(); p.replace('\\', '/');
+      const int s = p.indexOf("sound/creature/", 0, Qt::CaseInsensitive);
+      if (s < 0) continue;
+      const int st = s + 15, sl = p.indexOf('/', st);
+      if (sl <= st) continue;
+      const QString folder = p.mid(st, sl - st).toLower();
+      if (folder == t || folder.startsWith(t + "_"))
+        byFolder[folder].push_back(f);
+    }
+  }
+  if (byFolder.empty())
+    return out;
+
+  for (std::map<QString, std::vector<GameFile *>>::iterator it = byFolder.begin(); it != byFolder.end(); ++it)
+  {
+    std::vector<GameFile *> & files = it->second;
+    std::sort(files.begin(), files.end(), [](GameFile * a, GameFile * b) {
+      return a->fullname().compare(b->fullname(), Qt::CaseInsensitive) < 0;
+    });
+    int n = 0;
+    for (size_t k = 0; k < files.size(); ++k)
+    {
+      VoiceLineEntry e;
+      e.source = "EncounterDialogue";
+      e.category = it->first;                 // the folder ("mug"/"zee") -> filter per speaker
+      e.fileDataId = files[k]->fileDataId();
+      e.filePath = files[k]->fullname();
+      e.soundKitId = soundKitForFile(e.fileDataId);
+      e.variation = ++n;
+      e.label = it->first + " " + QString::number(e.variation);
+      out.push_back(e);
+    }
   }
   return out;
+}
+
+std::vector<VoiceLineEntry> SoundResolver::resolveCreatureAudioFolder(const QString & modelPath,
+                                                                     const QString & creatureName)
+{
+  // V3: all *.ogg in the folder (superset of the vo_ files), catching non-vo_-named creature sounds.
+  return scanCreatureFolder(modelPath, creatureName, "", "CreatureAudioFolder", "Folder Audio", "Audio");
 }

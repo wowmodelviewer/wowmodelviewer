@@ -1,10 +1,11 @@
 /*
- * VoiceLinesDialog.cpp -- see VoiceLinesDialog.h.
+ * VoiceLinesDialog.cpp -- see VoiceLinesDialog.h. Creature / Boss VO Browser (V3).
  */
 #include "VoiceLinesDialog.h"
 
 #include <wx/filedlg.h>
 
+#include <algorithm>
 #include <cstdio>
 #include <set>
 
@@ -25,6 +26,8 @@ enum
 {
   ID_VL_SOURCE = wxID_HIGHEST + 501,
   ID_VL_CATEGORY,
+  ID_VL_SEARCH,
+  ID_VL_SORT,
   ID_VL_LIST,
   ID_VL_PLAY,
   ID_VL_STOP,
@@ -32,10 +35,19 @@ enum
   ID_VL_EXPORT
 };
 
+// Column indices for the report-mode list.
+enum { COL_LABEL = 0, COL_CATEGORY, COL_FILE, COL_FDID, COL_KIT, COL_SOURCE, COL_STATUS, COL_COUNT };
+
+// Sort-choice indices. (VLSORT_ prefix avoids clashing with the windows.h SORT_DEFAULT macro.)
+enum { VLSORT_DEFAULT = 0, VLSORT_SOURCE, VLSORT_CATEGORY, VLSORT_FILENAME,
+       VLSORT_FDID, VLSORT_KIT, VLSORT_STATUS };
+
 BEGIN_EVENT_TABLE(VoiceLinesDialog, wxDialog)
   EVT_CHOICE(ID_VL_SOURCE, VoiceLinesDialog::OnSource)
   EVT_CHOICE(ID_VL_CATEGORY, VoiceLinesDialog::OnCategory)
-  EVT_LISTBOX_DCLICK(ID_VL_LIST, VoiceLinesDialog::OnLineActivate)
+  EVT_TEXT(ID_VL_SEARCH, VoiceLinesDialog::OnSearch)
+  EVT_CHOICE(ID_VL_SORT, VoiceLinesDialog::OnSort)
+  EVT_LIST_ITEM_ACTIVATED(ID_VL_LIST, VoiceLinesDialog::OnLineActivate)
   EVT_BUTTON(ID_VL_PLAY, VoiceLinesDialog::OnPlay)
   EVT_BUTTON(ID_VL_STOP, VoiceLinesDialog::OnStop)
   EVT_SLIDER(ID_VL_VOLUME, VoiceLinesDialog::OnVolume)
@@ -69,38 +81,105 @@ static wxString sanitizeFileName(const wxString & in)
   return out;
 }
 
+wxString VoiceLinesDialog::BaseName(const QString & path)
+{
+  if (path.isEmpty())
+    return wxEmptyString;
+  QString p = path;
+  p.replace('\\', '/');
+  int sl = p.lastIndexOf('/');
+  return q2w(sl >= 0 ? p.mid(sl + 1) : p);
+}
+
+wxString VoiceLinesDialog::SourceLabel(const QString & source)
+{
+  if (source == "CreatureSound")       return wxT("Creature Sound");
+  if (source == "CreatureVoiceFolder") return wxT("Creature Voice Folder");
+  if (source == "CreatureAudioFolder") return wxT("Creature Audio Folder");
+  if (source == "EncounterDialogue")   return wxT("Encounter Dialogue");
+  return q2w(source);
+}
+
+wxString VoiceLinesDialog::StatusLabel(int st)
+{
+  switch (st)
+  {
+    case 0:  return wxT("Playable");
+    case 1:  return wxT("Encrypted / missing key");
+    case 2:  return wxT("Missing from build");
+    default: return wxT("Unknown");
+  }
+}
+
+int VoiceLinesDialog::entryStatus(int fileDataId)
+{
+  std::map<int, int>::iterator it = m_statusCache.find(fileDataId);
+  if (it != m_statusCache.end())
+    return it->second;
+  const int st = GAMEDIRECTORY.fileKeyStatus(fileDataId); // 0 playable / 1 encrypted / 2 missing / -1 unknown
+  m_statusCache[fileDataId] = st;
+  return st;
+}
+
 VoiceLinesDialog::VoiceLinesDialog(wxWindow * parent, const wxString & creatureName,
                                    const std::vector<VoiceLineEntry> & soundLines,
-                                   const std::vector<VoiceLineEntry> & voiceFolderLines)
+                                   const std::vector<VoiceLineEntry> & voiceFolderLines,
+                                   const std::vector<VoiceLineEntry> & audioFolderLines,
+                                   const std::vector<VoiceLineEntry> & encounterLines)
   : wxDialog(parent, wxID_ANY, wxT("Voice Lines - ") + creatureName, wxDefaultPosition,
-             wxSize(480, 440), wxDEFAULT_DIALOG_STYLE | wxRESIZE_BORDER),
+             wxSize(880, 520), wxDEFAULT_DIALOG_STYLE | wxRESIZE_BORDER),
     m_creatureName(creatureName), m_soundLines(soundLines), m_voiceFolderLines(voiceFolderLines),
-    m_player(new AudioPlayer())
+    m_audioFolderLines(audioFolderLines), m_encounterLines(encounterLines), m_player(new AudioPlayer())
 {
   wxBoxSizer * top = new wxBoxSizer(wxVERTICAL);
 
-  // Source row: Creature Sounds (V1 CreatureSoundData) vs Creature Voice Lines (V2 sound-folder vo_*).
+  // Source + Sort row.
   wxBoxSizer * srcRow = new wxBoxSizer(wxHORIZONTAL);
   srcRow->Add(new wxStaticText(this, wxID_ANY, wxT("Source:")), 0, wxALIGN_CENTER_VERTICAL | wxRIGHT, 6);
   m_source = new wxChoice(this, ID_VL_SOURCE);
-  m_source->Append(wxT("Creature Sounds"));      // index 0 -> m_soundLines
-  m_source->Append(wxT("Creature Voice Lines")); // index 1 -> m_voiceFolderLines
-  m_source->SetSelection(!m_soundLines.empty() ? 0 : (!m_voiceFolderLines.empty() ? 1 : 0));
-  srcRow->Add(m_source, 1, wxEXPAND);
+  m_source->Append(wxT("Creature Sounds"));       // index 0 -> m_soundLines
+  m_source->Append(wxT("Creature Voice Lines"));  // index 1 -> m_voiceFolderLines
+  m_source->Append(wxT("Creature Audio Folder")); // index 2 -> m_audioFolderLines
+  m_source->Append(wxT("Encounter Dialogue"));    // index 3 -> m_encounterLines
+  m_source->SetSelection(!m_encounterLines.empty() ? 3 : (!m_voiceFolderLines.empty() ? 1 : (!m_soundLines.empty() ? 0 : (!m_audioFolderLines.empty() ? 2 : 0))));
+  srcRow->Add(m_source, 1, wxEXPAND | wxRIGHT, 12);
+  srcRow->Add(new wxStaticText(this, wxID_ANY, wxT("Sort:")), 0, wxALIGN_CENTER_VERTICAL | wxRIGHT, 6);
+  m_sort = new wxChoice(this, ID_VL_SORT);
+  m_sort->Append(wxT("Default"));
+  m_sort->Append(wxT("Source"));
+  m_sort->Append(wxT("Category"));
+  m_sort->Append(wxT("Filename"));
+  m_sort->Append(wxT("FileDataID"));
+  m_sort->Append(wxT("SoundKitID"));
+  m_sort->Append(wxT("Status"));
+  m_sort->SetSelection(VLSORT_DEFAULT);
+  srcRow->Add(m_sort, 0);
   top->Add(srcRow, 0, wxEXPAND | wxLEFT | wxRIGHT | wxTOP, 8);
 
-  // Category filter row (rebuilt per source)
-  wxBoxSizer * catRow = new wxBoxSizer(wxHORIZONTAL);
-  catRow->Add(new wxStaticText(this, wxID_ANY, wxT("Category:")), 0, wxALIGN_CENTER_VERTICAL | wxRIGHT, 6);
+  // Category + Search row.
+  wxBoxSizer * filtRow = new wxBoxSizer(wxHORIZONTAL);
+  filtRow->Add(new wxStaticText(this, wxID_ANY, wxT("Category:")), 0, wxALIGN_CENTER_VERTICAL | wxRIGHT, 6);
   m_category = new wxChoice(this, ID_VL_CATEGORY);
-  catRow->Add(m_category, 1, wxEXPAND);
-  top->Add(catRow, 0, wxEXPAND | wxALL, 8);
+  filtRow->Add(m_category, 0, wxRIGHT, 12);
+  filtRow->Add(new wxStaticText(this, wxID_ANY, wxT("Search:")), 0, wxALIGN_CENTER_VERTICAL | wxRIGHT, 6);
+  m_search = new wxTextCtrl(this, ID_VL_SEARCH);
+  m_search->SetToolTip(wxT("Filter by label, filename, FileDataID, SoundKitID, source or category"));
+  filtRow->Add(m_search, 1, wxEXPAND);
+  top->Add(filtRow, 0, wxEXPAND | wxALL, 8);
 
-  // Line list
-  m_list = new wxListBox(this, ID_VL_LIST, wxDefaultPosition, wxDefaultSize, 0, NULL, wxLB_SINGLE);
+  // Multi-column list.
+  m_list = new wxListCtrl(this, ID_VL_LIST, wxDefaultPosition, wxDefaultSize,
+                          wxLC_REPORT | wxLC_SINGLE_SEL);
+  m_list->InsertColumn(COL_LABEL,    wxT("Label"),      wxLIST_FORMAT_LEFT,  110);
+  m_list->InsertColumn(COL_CATEGORY, wxT("Category"),   wxLIST_FORMAT_LEFT,  85);
+  m_list->InsertColumn(COL_FILE,     wxT("Filename"),   wxLIST_FORMAT_LEFT,  205);
+  m_list->InsertColumn(COL_FDID,     wxT("FileDataID"), wxLIST_FORMAT_RIGHT, 80);
+  m_list->InsertColumn(COL_KIT,      wxT("SoundKitID"), wxLIST_FORMAT_RIGHT, 80);
+  m_list->InsertColumn(COL_SOURCE,   wxT("Source"),     wxLIST_FORMAT_LEFT,  115);
+  m_list->InsertColumn(COL_STATUS,   wxT("Status"),     wxLIST_FORMAT_LEFT,  150);
   top->Add(m_list, 1, wxEXPAND | wxLEFT | wxRIGHT, 8);
 
-  // Playback + volume row
+  // Playback + volume row.
   wxBoxSizer * ctrlRow = new wxBoxSizer(wxHORIZONTAL);
   m_play = new wxButton(this, ID_VL_PLAY, wxT("Play"));
   m_stop = new wxButton(this, ID_VL_STOP, wxT("Stop"));
@@ -112,17 +191,17 @@ VoiceLinesDialog::VoiceLinesDialog(wxWindow * parent, const wxString & creatureN
   ctrlRow->Add(m_volume, 1, wxALIGN_CENTER_VERTICAL);
   top->Add(ctrlRow, 0, wxEXPAND | wxALL, 8);
 
-  // Export + close row
+  // Export + close row.
   wxBoxSizer * btnRow = new wxBoxSizer(wxHORIZONTAL);
   m_export = new wxButton(this, ID_VL_EXPORT, wxT("Export Original"));
   btnRow->Add(m_export, 0, wxRIGHT, 8);
   btnRow->AddStretchSpacer(1);
   btnRow->Add(new wxButton(this, wxID_CLOSE, wxT("Close")), 0);
-  top->Add(btnRow, 0, wxEXPAND | wxALL, 8);
+  top->Add(btnRow, 0, wxEXPAND | wxLEFT | wxRIGHT, 8);
 
-  // Status line
+  // Status line.
   m_status = new wxStaticText(this, wxID_ANY, wxEmptyString);
-  top->Add(m_status, 0, wxEXPAND | wxLEFT | wxRIGHT | wxBOTTOM, 8);
+  top->Add(m_status, 0, wxEXPAND | wxALL, 8);
 
   SetSizer(top);
 
@@ -135,7 +214,13 @@ VoiceLinesDialog::VoiceLinesDialog(wxWindow * parent, const wxString & creatureN
 
 const std::vector<VoiceLineEntry> & VoiceLinesDialog::activeLines() const
 {
-  return (m_source->GetSelection() == 1) ? m_voiceFolderLines : m_soundLines;
+  switch (m_source->GetSelection())
+  {
+    case 1:  return m_voiceFolderLines;
+    case 2:  return m_audioFolderLines;
+    case 3:  return m_encounterLines;
+    default: return m_soundLines;
+  }
 }
 
 void VoiceLinesDialog::RebuildCategories()
@@ -160,6 +245,10 @@ void VoiceLinesDialog::OnSource(wxCommandEvent &)
   RefillList();
 }
 
+void VoiceLinesDialog::OnCategory(wxCommandEvent &) { RefillList(); }
+void VoiceLinesDialog::OnSearch(wxCommandEvent &)   { RefillList(); }
+void VoiceLinesDialog::OnSort(wxCommandEvent &)     { RefillList(); }
+
 VoiceLinesDialog::~VoiceLinesDialog()
 {
   if (m_player)
@@ -178,47 +267,125 @@ void VoiceLinesDialog::SetStatus(const wxString & msg)
 
 void VoiceLinesDialog::RefillList()
 {
-  m_list->Clear();
+  m_list->DeleteAllItems();
   m_filtered.clear();
   const std::vector<VoiceLineEntry> & lines = activeLines();
-  const bool all = (m_category->GetSelection() <= 0);
-  const wxString cat = all ? wxString() : m_category->GetStringSelection();
+
+  const bool allCat = (m_category->GetSelection() <= 0);
+  const wxString cat = allCat ? wxString() : m_category->GetStringSelection();
+  const wxString needle = m_search->GetValue().Lower();
+
+  // 1) collect candidate indices (category filter + free-text search).
+  std::vector<int> idx;
   for (size_t i = 0; i < lines.size(); ++i)
   {
-    if (all || q2w(lines[i].category) == cat)
+    const VoiceLineEntry & e = lines[i];
+    if (!allCat && q2w(e.category) != cat)
+      continue;
+    if (!needle.IsEmpty())
     {
-      m_list->Append(q2w(lines[i].label));
-      m_filtered.push_back((int)i);
+      const wxString fileText = e.filePath.isEmpty() ? wxString(wxT("(unnamed)")) : BaseName(e.filePath);
+      wxString hay = q2w(e.label) + wxT(" ") + fileText + wxT(" ")
+                   + wxString::Format(wxT("%d %d "), e.fileDataId, e.soundKitId)
+                   + SourceLabel(e.source) + wxT(" ") + q2w(e.category) + wxT(" ")
+                   + StatusLabel(entryStatus(e.fileDataId));
+      if (hay.Lower().Find(needle) == wxNOT_FOUND)
+        continue;
     }
+    idx.push_back((int)i);
+  }
+
+  // 2) sort the surviving indices per the sort choice. Statuses are probed up-front so the
+  // comparator only reads the cache (never mutates it mid-sort).
+  const int sortMode = m_sort->GetSelection();
+  if (sortMode == VLSORT_STATUS)
+    for (size_t k = 0; k < idx.size(); ++k)
+      entryStatus(lines[idx[k]].fileDataId);
+  std::sort(idx.begin(), idx.end(), [&](int a, int b) {
+    const VoiceLineEntry & ea = lines[a];
+    const VoiceLineEntry & eb = lines[b];
+    switch (sortMode)
+    {
+      case VLSORT_SOURCE:
+      {
+        int c = SourceLabel(ea.source).CmpNoCase(SourceLabel(eb.source));
+        if (c != 0) return c < 0;
+        c = q2w(ea.category).CmpNoCase(q2w(eb.category));
+        if (c != 0) return c < 0;
+        return ea.variation < eb.variation;
+      }
+      case VLSORT_CATEGORY:
+      {
+        int c = q2w(ea.category).CmpNoCase(q2w(eb.category));
+        if (c != 0) return c < 0;
+        return ea.variation < eb.variation;
+      }
+      case VLSORT_FILENAME:
+        return BaseName(ea.filePath).CmpNoCase(BaseName(eb.filePath)) < 0;
+      case VLSORT_FDID:
+        return ea.fileDataId < eb.fileDataId;
+      case VLSORT_KIT:
+        return ea.soundKitId < eb.soundKitId;
+      case VLSORT_STATUS:
+      {
+        const int sa = m_statusCache.count(ea.fileDataId) ? m_statusCache[ea.fileDataId] : -1;
+        const int sb = m_statusCache.count(eb.fileDataId) ? m_statusCache[eb.fileDataId] : -1;
+        if (sa != sb) return sa < sb;              // playable(0) < encrypted(1) < missing(2)
+        return ea.fileDataId < eb.fileDataId;
+      }
+      default: // VLSORT_DEFAULT: keep the resolver's natural order
+        return a < b;
+    }
+  });
+
+  // 3) fill the report list.
+  for (size_t r = 0; r < idx.size(); ++r)
+  {
+    const VoiceLineEntry & e = lines[idx[r]];
+    long row = m_list->InsertItem((long)r, q2w(e.label));
+    m_list->SetItem(row, COL_CATEGORY, q2w(e.category)); // Aggro/Alert/... , Voice Line, or Folder Audio
+    // Three naming states: friendly path, generic/numeric path, or none -> "(unnamed)". Never hidden.
+    m_list->SetItem(row, COL_FILE, e.filePath.isEmpty() ? wxString(wxT("(unnamed)")) : BaseName(e.filePath));
+    m_list->SetItem(row, COL_FDID, wxString::Format(wxT("%d"), e.fileDataId));
+    m_list->SetItem(row, COL_KIT, e.soundKitId ? wxString::Format(wxT("%d"), e.soundKitId) : wxString(wxT("-")));
+    m_list->SetItem(row, COL_SOURCE, SourceLabel(e.source));
+    m_list->SetItem(row, COL_STATUS, StatusLabel(entryStatus(e.fileDataId))); // playable/encrypted/missing
+    m_filtered.push_back(idx[r]);
   }
   if (!m_filtered.empty())
-    m_list->SetSelection(0);
+  {
+    m_list->SetItemState(0, wxLIST_STATE_SELECTED | wxLIST_STATE_FOCUSED,
+                         wxLIST_STATE_SELECTED | wxLIST_STATE_FOCUSED);
+  }
 
   if (lines.empty())
-    SetStatus((m_source->GetSelection() == 1) ? wxT("No creature voice lines found.")
-                                              : wxT("No creature sounds found."));
+  {
+    const int s = m_source->GetSelection();
+    SetStatus(s == 1 ? wxT("No creature voice lines found for this model.")
+            : s == 2 ? wxT("No audio files found in this creature's sound folder.")
+            : s == 3 ? wxT("No encounter dialogue found (model not linked to a journal encounter).")
+                     : wxT("No creature sounds found for this model."));
+  }
   else
-    SetStatus(wxString::Format(wxT("%d line(s). Select one and press Play."), (int)lines.size()));
+  {
+    SetStatus(wxString::Format(wxT("Showing %d of %d file(s). Select one and press Play."),
+                               (int)m_filtered.size(), (int)lines.size()));
+  }
 }
 
 const VoiceLineEntry * VoiceLinesDialog::SelectedEntry() const
 {
-  int sel = m_list->GetSelection();
-  if (sel == wxNOT_FOUND || sel < 0 || (size_t)sel >= m_filtered.size())
+  long sel = m_list->GetNextItem(-1, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED);
+  if (sel == -1 || sel < 0 || (size_t)sel >= m_filtered.size())
     return NULL;
   const std::vector<VoiceLineEntry> & lines = activeLines();
-  int idx = m_filtered[sel];
-  if (idx < 0 || (size_t)idx >= lines.size())
+  int i = m_filtered[sel];
+  if (i < 0 || (size_t)i >= lines.size())
     return NULL;
-  return &lines[idx];
+  return &lines[i];
 }
 
-void VoiceLinesDialog::OnCategory(wxCommandEvent &)
-{
-  RefillList();
-}
-
-void VoiceLinesDialog::OnLineActivate(wxCommandEvent &)
+void VoiceLinesDialog::OnLineActivate(wxListEvent &)
 {
   wxCommandEvent dummy;
   OnPlay(dummy);
@@ -303,7 +470,7 @@ void VoiceLinesDialog::OnExport(wxCommandEvent &)
   if (ext.IsEmpty())
     ext = wxT("bin");
 
-  // Default filename: for a folder-matched voice line keep its real name (vo_73_aggramar_01_m); otherwise
+  // Default filename: for a named file keep its real basename (vo_73_aggramar_01_m); otherwise
   // fall back to CreatureName_Category_SoundKitID_FileDataID.
   wxString base;
   wxString wpath = q2w(e->filePath);

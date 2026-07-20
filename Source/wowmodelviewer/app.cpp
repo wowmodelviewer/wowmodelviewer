@@ -285,7 +285,7 @@ static void doHeadlessVoiceLineProbe(int modelFileDataId)
   }
 
   LOG_INFO << "[voicelines] CreatureSoundData ID=" << soundDataId << " -> " << (int)lines.size() << " lines";
-  int openable = 0;
+  int openable = 0, encrypted = 0, missing = 0;
   for (size_t i = 0; i < lines.size(); ++i)
   {
     const VoiceLineEntry & e = lines[i];
@@ -295,10 +295,16 @@ static void doHeadlessVoiceLineProbe(int modelFileDataId)
       gf->close();
     if (ok)
       ++openable;
+    int st = GAMEDIRECTORY.fileKeyStatus(e.fileDataId); // 0 playable / 1 encrypted / 2 missing / -1 unknown
+    if (st == 1) ++encrypted; else if (st == 2) ++missing;
+    const char * ss = st == 0 ? "Playable" : st == 1 ? "Encrypted/missing-key" : st == 2 ? "Missing" : "Unknown";
     LOG_INFO << "[voicelines]  " << e.label << "  category=" << e.category
-             << " kit=" << e.soundKitId << " file=" << e.fileDataId << (ok ? "" : "  (UNOPENABLE)");
+             << " kit=" << e.soundKitId << " file=" << e.fileDataId
+             << " path=" << (e.filePath.isEmpty() ? QString("(unnamed)") : e.filePath)
+             << " status=" << ss << (ok ? "" : "  (UNOPENABLE)");
   }
-  LOG_INFO << "[voicelines] totals: lines=" << (int)lines.size() << " openable=" << openable;
+  LOG_INFO << "[voicelines] totals: lines=" << (int)lines.size() << " openable=" << openable
+           << " encrypted=" << encrypted << " missing=" << missing;
   LOG_INFO << "[voicelines] === probe end ===";
 }
 
@@ -325,23 +331,89 @@ static void doHeadlessVoiceFolderProbe(int modelFileId)
   LOG_INFO << "[voicefolder] folder=" << token;
 
   std::vector<VoiceLineEntry> vo = SoundResolver::resolveCreatureVoiceFolder(modelPath);
-  LOG_INFO << "[voicefolder] matches=" << (int)vo.size();
+  LOG_INFO << "[voicefolder] Creature Voice Lines (vo_*.ogg) matches=" << (int)vo.size();
 
-  int openable = 0;
+  int openable = 0, withKit = 0;
   for (size_t i = 0; i < vo.size(); ++i)
   {
-    const VoiceLineEntry & e = vo[i];
+    const VoiceLineEntry & e = vo[i]; // SoundKitID is now reverse-resolved by the resolver itself
     GameFile * gf = GAMEDIRECTORY.getFile((uint)e.fileDataId);
     bool ok = gf && gf->open();
     if (gf) gf->close();
     if (ok) ++openable;
-    int kit = 0;
-    sqlResult r = GAMEDATABASE.sqlQuery(QString("SELECT SoundKitID FROM SoundKitEntry WHERE FileDataID = %1 LIMIT 1").arg(e.fileDataId));
-    if (r.valid && !r.empty()) kit = r.values[0][0].toInt();
-    LOG_INFO << "[voicefolder] FileDataID=" << e.fileDataId << " path=" << e.filePath
-             << " SoundKitID=" << kit << (ok ? "" : "  (UNOPENABLE)");
+    if (e.soundKitId) ++withKit;
+    if (i < 8) // sample a few rows (proves the resolver populates category + filePath + soundKitId)
+    {
+      int st = GAMEDIRECTORY.fileKeyStatus(e.fileDataId);
+      const char * ss = st == 0 ? "Playable" : st == 1 ? "Encrypted/missing-key" : st == 2 ? "Missing" : "Unknown";
+      LOG_INFO << "[voicefolder]   label=" << e.label << " category=" << e.category
+               << " FileDataID=" << e.fileDataId << " SoundKitID=" << e.soundKitId
+               << " status=" << ss << " path=" << e.filePath << (ok ? "" : "  (UNOPENABLE)");
+    }
   }
-  LOG_INFO << "[voicefolder] total matches=" << (int)vo.size() << " openable=" << openable;
+  LOG_INFO << "[voicefolder] vo_ total=" << (int)vo.size() << " openable=" << openable
+           << " withSoundKitID=" << withKit;
+
+  // V3: the "all *.ogg in folder" source (superset of vo_).
+  std::vector<VoiceLineEntry> audio = SoundResolver::resolveCreatureAudioFolder(modelPath);
+  int aKit = 0; for (size_t i = 0; i < audio.size(); ++i) if (audio[i].soundKitId) ++aKit;
+  LOG_INFO << "[voicefolder] Creature Audio Folder (all *.ogg) matches=" << (int)audio.size()
+           << " withSoundKitID=" << aKit << " (delta vs vo_ = " << (int)audio.size() - (int)vo.size() << ")";
+
+  // V3 source #4: Encounter Dialogue -- the boss-named VO folders reached via the journal encounter.
+  QString encName;
+  std::vector<VoiceLineEntry> enc = SoundResolver::resolveEncounterDialogue(modelFileId, &encName);
+  LOG_INFO << "[voicefolder] Encounter Dialogue: encounter=\"" << encName << "\" matches=" << (int)enc.size();
+  std::set<QString> encFolders;
+  for (size_t i = 0; i < enc.size(); ++i) encFolders.insert(enc[i].category);
+  QString fl; for (std::set<QString>::iterator it = encFolders.begin(); it != encFolders.end(); ++it)
+  { if (!fl.isEmpty()) fl += ","; fl += *it; }
+  LOG_INFO << "[voicefolder]   folders=[" << fl << "]";
+  for (size_t i = 0; i < enc.size() && i < 6; ++i)
+  {
+    int st = GAMEDIRECTORY.fileKeyStatus(enc[i].fileDataId);
+    const char * ss = st == 0 ? "Playable" : st == 1 ? "Encrypted/missing-key" : st == 2 ? "Missing" : "Unknown";
+    LOG_INFO << "[voicefolder]   label=" << enc[i].label << " category=" << enc[i].category
+             << " FileDataID=" << enc[i].fileDataId << " SoundKitID=" << enc[i].soundKitId
+             << " status=" << ss << " path=" << enc[i].filePath;
+  }
+}
+
+// -vlkeyscan <minFileDataId> [maxCount]: availability audit for the Voice Lines browser Status column.
+// Scans distinct SoundKitEntry FileDataIDs >= minFileDataId (newest first), probing fileKeyStatus for
+// each, and reports how many are playable / encrypted (present but missing TACT key) / missing-from-build.
+// Lists a few examples of the encrypted + missing ones. Diagnostic only.
+static void doHeadlessKeyScan(int minId, int maxCount)
+{
+  if (maxCount <= 0) maxCount = 3000;
+  sqlResult r = GAMEDATABASE.sqlQuery(QString(
+      "SELECT DISTINCT FileDataID FROM SoundKitEntry WHERE FileDataID >= %1 ORDER BY FileDataID DESC LIMIT %2")
+      .arg(minId).arg(maxCount));
+  LOG_INFO << "[keyscan] scanning " << (r.valid ? (int)r.values.size() : -1)
+           << " distinct SoundKitEntry FileDataIDs >= " << minId;
+
+  int playable = 0, encrypted = 0, missing = 0, unknown = 0, encShown = 0, misShown = 0;
+  for (size_t i = 0; r.valid && i < r.values.size(); ++i)
+  {
+    int fdid = r.values[i][0].toInt();
+    int st = GAMEDIRECTORY.fileKeyStatus(fdid);
+    if (st == 0) ++playable;
+    else if (st == 1)
+    {
+      ++encrypted;
+      if (encShown++ < 12)
+      { GameFile * gf = GAMEDIRECTORY.getFile((uint)fdid);
+        LOG_INFO << "[keyscan]   ENCRYPTED FileDataID=" << fdid << " path=" << (gf ? gf->fullname() : QString("(unnamed)")); }
+    }
+    else if (st == 2)
+    {
+      ++missing;
+      if (misShown++ < 12) LOG_INFO << "[keyscan]   MISSING FileDataID=" << fdid;
+    }
+    else ++unknown;
+  }
+  LOG_INFO << "[keyscan] totals: playable=" << playable << " encrypted=" << encrypted
+           << " missing=" << missing << " unknown=" << unknown;
 }
 
 // -playsound <FileDataID> [volume 0..1]: Voice Lines V1 audio probe. Extracts the audio file from CASC by
@@ -441,7 +513,7 @@ bool WowModelViewApp::OnInit()
     QString a = QString::fromWCharArray(argv[ai]);
     if (a == "-m" || a == "-mo" || a == "-armory" || a == "-npc" || a == "-fbxexport" ||
         a == "-animdump" || a == "-fbxinspect" || a == "-dbfromfile" || a == "-dumptex" ||
-        a == "-vlprobe" || a == "-playsound" || a == "-vlvoicefolderprobe" || a == "-mpq" || a.endsWith(".chr"))
+        a == "-vlprobe" || a == "-playsound" || a == "-vlvoicefolderprobe" || a == "-vlkeyscan" || a == "-mpq" || a.endsWith(".chr"))
     {
       earlyHeadless = true;
       break;
@@ -603,6 +675,7 @@ bool WowModelViewApp::OnInit()
   int dumpTexFileDataId = 0; QString dumpTexOutPath; // -dumptex <fileDataID> <out.png>: forensic-only
   int vlProbeModelFileId = 0; // -vlprobe <CreatureModelFileDataID>: Voice Lines V1 sound-chain probe (diagnostic)
   int voiceFolderProbeModelId = 0; // -vlvoicefolderprobe <CreatureModelFileDataID>: V2 Creature Voice Lines folder probe (diagnostic)
+  int keyScanMinId = 0, keyScanMax = 0; // -vlkeyscan <minFileDataId> [maxCount]: TACT-key/availability audit (diagnostic)
   int playSoundFileId = 0; float playSoundVolume = 1.0f; // -playsound <FileDataID> [volume 0..1]: audio preview probe
   // Export content selection + clip list for the headless FBX export (the parent process passes
   // these so the child reproduces the user's exact options). Defaults: full content, no explicit
@@ -677,6 +750,11 @@ bool WowModelViewApp::OnInit()
         voiceFolderProbeModelId = QString::fromWCharArray(argv[i + 1]).toInt();
         i += 1;
       }
+    }
+    else if (cmd == "-vlkeyscan") {
+      // "-vlkeyscan <minFileDataId> [maxCount]": audit audio-file availability (playable/encrypted/missing).
+      if (i + 1 < argc) { keyScanMinId = QString::fromWCharArray(argv[i + 1]).toInt(); i += 1; }
+      if (i + 1 < argc) { bool ok = false; int v = QString::fromWCharArray(argv[i + 1]).toInt(&ok); if (ok) { keyScanMax = v; i += 1; } }
     }
     else if (cmd == "-playsound") {
       // Voice Lines V1: "-playsound <FileDataID> [volume 0..1]" extracts the audio from CASC and plays it
@@ -809,7 +887,7 @@ bool WowModelViewApp::OnInit()
   for (int i = 1; i < argc; i++)
   {
     QString a = QString::fromWCharArray(argv[i]);
-    if (a == "-m" || a == "-mo" || a == "-armory" || a == "-npc" || a == "-fbxexport" || a == "-animdump" || a == "-fbxinspect" || a == "-dbfromfile" || a == "-dumptex" || a == "-vlprobe" || a == "-playsound" || a == "-vlvoicefolderprobe" || a == "-mpq" || a.endsWith(".chr"))
+    if (a == "-m" || a == "-mo" || a == "-armory" || a == "-npc" || a == "-fbxexport" || a == "-animdump" || a == "-fbxinspect" || a == "-dbfromfile" || a == "-dumptex" || a == "-vlprobe" || a == "-playsound" || a == "-vlvoicefolderprobe" || a == "-vlkeyscan" || a == "-mpq" || a.endsWith(".chr"))
     {
       headlessLoad = true;
       break;
@@ -861,6 +939,12 @@ bool WowModelViewApp::OnInit()
     {
       doHeadlessVoiceFolderProbe(voiceFolderProbeModelId);
       return false; // voice-folder probe done -> exit
+    }
+
+    if (keyScanMinId != 0)
+    {
+      doHeadlessKeyScan(keyScanMinId, keyScanMax);
+      return false; // TACT-key/availability audit done -> exit
     }
 
     if (playSoundFileId != 0)
