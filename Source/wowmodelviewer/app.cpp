@@ -302,6 +302,48 @@ static void doHeadlessVoiceLineProbe(int modelFileDataId)
   LOG_INFO << "[voicelines] === probe end ===";
 }
 
+// -vlvoicefolderprobe <CreatureModelFileDataID>: V2 Creature Voice Lines probe. From the model path it
+// derives the folder token and lists sound/creature/<token>/vo_*.ogg matches (FileDataID, path, openable,
+// optional SoundKitID). Diagnostic only.
+static void doHeadlessVoiceFolderProbe(int modelFileId)
+{
+  LOG_INFO << "[voicefolder] modelFileDataID=" << modelFileId;
+
+  GameFile * mf = GAMEDIRECTORY.getFile((uint)modelFileId);
+  QString modelPath = mf ? mf->fullname() : QString();
+  LOG_INFO << "[voicefolder] modelPath=" << modelPath;
+  if (modelPath.isEmpty())
+  {
+    LOG_INFO << "[voicefolder] no path known for this FileDataID -> cannot derive folder";
+    return;
+  }
+
+  // derive folder token for the log (resolver derives it too)
+  QString token, pl = modelPath; pl.replace('\\', '/');
+  int ci = pl.indexOf("creature/", 0, Qt::CaseInsensitive);
+  if (ci >= 0) { int s = ci + 9, sl = pl.indexOf('/', s); if (sl > s) token = pl.mid(s, sl - s); }
+  LOG_INFO << "[voicefolder] folder=" << token;
+
+  std::vector<VoiceLineEntry> vo = SoundResolver::resolveCreatureVoiceFolder(modelPath);
+  LOG_INFO << "[voicefolder] matches=" << (int)vo.size();
+
+  int openable = 0;
+  for (size_t i = 0; i < vo.size(); ++i)
+  {
+    const VoiceLineEntry & e = vo[i];
+    GameFile * gf = GAMEDIRECTORY.getFile((uint)e.fileDataId);
+    bool ok = gf && gf->open();
+    if (gf) gf->close();
+    if (ok) ++openable;
+    int kit = 0;
+    sqlResult r = GAMEDATABASE.sqlQuery(QString("SELECT SoundKitID FROM SoundKitEntry WHERE FileDataID = %1 LIMIT 1").arg(e.fileDataId));
+    if (r.valid && !r.empty()) kit = r.values[0][0].toInt();
+    LOG_INFO << "[voicefolder] FileDataID=" << e.fileDataId << " path=" << e.filePath
+             << " SoundKitID=" << kit << (ok ? "" : "  (UNOPENABLE)");
+  }
+  LOG_INFO << "[voicefolder] total matches=" << (int)vo.size() << " openable=" << openable;
+}
+
 // -playsound <FileDataID> [volume 0..1]: Voice Lines V1 audio probe. Extracts the audio file from CASC by
 // FileDataID and plays it once via AudioPlayer (miniaudio), blocking until it finishes (or a safety
 // timeout). Diagnostic-only; proves CASC-audio decode + playback before any UI. Default volume 1.0.
@@ -399,7 +441,7 @@ bool WowModelViewApp::OnInit()
     QString a = QString::fromWCharArray(argv[ai]);
     if (a == "-m" || a == "-mo" || a == "-armory" || a == "-npc" || a == "-fbxexport" ||
         a == "-animdump" || a == "-fbxinspect" || a == "-dbfromfile" || a == "-dumptex" ||
-        a == "-vlprobe" || a == "-playsound" || a == "-mpq" || a.endsWith(".chr"))
+        a == "-vlprobe" || a == "-playsound" || a == "-vlvoicefolderprobe" || a == "-mpq" || a.endsWith(".chr"))
     {
       earlyHeadless = true;
       break;
@@ -560,6 +602,7 @@ bool WowModelViewApp::OnInit()
   QString mpqLocale;      // optional locale for -mpq (auto-detected when empty)
   int dumpTexFileDataId = 0; QString dumpTexOutPath; // -dumptex <fileDataID> <out.png>: forensic-only
   int vlProbeModelFileId = 0; // -vlprobe <CreatureModelFileDataID>: Voice Lines V1 sound-chain probe (diagnostic)
+  int voiceFolderProbeModelId = 0; // -vlvoicefolderprobe <CreatureModelFileDataID>: V2 Creature Voice Lines folder probe (diagnostic)
   int playSoundFileId = 0; float playSoundVolume = 1.0f; // -playsound <FileDataID> [volume 0..1]: audio preview probe
   // Export content selection + clip list for the headless FBX export (the parent process passes
   // these so the child reproduces the user's exact options). Defaults: full content, no explicit
@@ -625,6 +668,13 @@ bool WowModelViewApp::OnInit()
       // sound-set chain, logs a [voicelines] report, and exits. See doHeadlessVoiceLineProbe.
       if (i + 1 < argc) {
         vlProbeModelFileId = QString::fromWCharArray(argv[i + 1]).toInt();
+        i += 1;
+      }
+    }
+    else if (cmd == "-vlvoicefolderprobe") {
+      // V2: "-vlvoicefolderprobe <CreatureModelFileDataID>" lists sound/creature/<folder>/vo_*.ogg matches.
+      if (i + 1 < argc) {
+        voiceFolderProbeModelId = QString::fromWCharArray(argv[i + 1]).toInt();
         i += 1;
       }
     }
@@ -759,7 +809,7 @@ bool WowModelViewApp::OnInit()
   for (int i = 1; i < argc; i++)
   {
     QString a = QString::fromWCharArray(argv[i]);
-    if (a == "-m" || a == "-mo" || a == "-armory" || a == "-npc" || a == "-fbxexport" || a == "-animdump" || a == "-fbxinspect" || a == "-dbfromfile" || a == "-dumptex" || a == "-vlprobe" || a == "-playsound" || a == "-mpq" || a.endsWith(".chr"))
+    if (a == "-m" || a == "-mo" || a == "-armory" || a == "-npc" || a == "-fbxexport" || a == "-animdump" || a == "-fbxinspect" || a == "-dbfromfile" || a == "-dumptex" || a == "-vlprobe" || a == "-playsound" || a == "-vlvoicefolderprobe" || a == "-mpq" || a.endsWith(".chr"))
     {
       headlessLoad = true;
       break;
@@ -805,6 +855,12 @@ bool WowModelViewApp::OnInit()
     {
       doHeadlessVoiceLineProbe(vlProbeModelFileId);
       return false; // Voice Lines probe done -> exit
+    }
+
+    if (voiceFolderProbeModelId != 0)
+    {
+      doHeadlessVoiceFolderProbe(voiceFolderProbeModelId);
+      return false; // voice-folder probe done -> exit
     }
 
     if (playSoundFileId != 0)

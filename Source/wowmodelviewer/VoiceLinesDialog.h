@@ -26,9 +26,11 @@ class VoiceLinesDialog : public wxDialog
 
 public:
   VoiceLinesDialog(wxWindow * parent, const wxString & creatureName,
-                   const std::vector<VoiceLineEntry> & lines);
+                   const std::vector<VoiceLineEntry> & soundLines,
+                   const std::vector<VoiceLineEntry> & voiceFolderLines);
   ~VoiceLinesDialog();
 
+  void OnSource(wxCommandEvent & event);   // switch between Creature Sounds / Creature Voice Lines
   void OnCategory(wxCommandEvent & event);
   void OnLineActivate(wxCommandEvent & event); // double-click plays
   void OnPlay(wxCommandEvent & event);
@@ -39,15 +41,19 @@ public:
   void OnClose(wxCloseEvent & event);
 
 private:
+  void RebuildCategories();
   void RefillList();
+  const std::vector<VoiceLineEntry> & activeLines() const; // the list for the selected source
   const VoiceLineEntry * SelectedEntry() const;
   void SetStatus(const wxString & msg);
 
   wxString                     m_creatureName;
-  std::vector<VoiceLineEntry>  m_lines;
-  std::vector<int>             m_filtered; // listbox row -> index into m_lines
+  std::vector<VoiceLineEntry>  m_soundLines;       // V1: Creature Sounds
+  std::vector<VoiceLineEntry>  m_voiceFolderLines; // V2: Creature Voice Lines (sound/creature/<f>/vo_*)
+  std::vector<int>             m_filtered;          // listbox row -> index into the active list
   AudioPlayer *                m_player;
 
+  wxChoice *     m_source;
   wxChoice *     m_category;
   wxListBox *    m_list;
   wxSlider *     m_volume;

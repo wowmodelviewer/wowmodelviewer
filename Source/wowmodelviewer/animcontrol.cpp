@@ -278,13 +278,23 @@ void AnimControl::UpdateModel(WoWModel *m)
 
   skinList->Show(res);
 
-  // Voice Lines (V1): for creature models, resolve the creature sound set and show/enable the button
-  // when it has playable lines. Non-creature models (chars/items/world objects) never show it.
+  // Voice Lines: for creature models, resolve both sources -- V1 Creature Sounds (CreatureSoundData) and
+  // V2 Creature Voice Lines (sound/creature/<folder>/vo_*). Show/enable the button when either has lines.
+  // Non-creature models (chars/items/world objects) never show it.
   m_voiceLines.clear();
+  m_voiceFolderLines.clear();
   if (fn.substr(0, 8) == wxT("creature") && m->gamefile)
+  {
     m_voiceLines = SoundResolver::resolveCreatureSoundsForModel(m->gamefile->fileDataId());
-  btnVoiceLines->Show(!m_voiceLines.empty());
-  btnVoiceLines->Enable(!m_voiceLines.empty());
+    QString cname = m->gamefile->fullname();
+    int cut = cname.lastIndexOf('/'); if (cut < 0) cut = cname.lastIndexOf('\\');
+    QString base = (cut >= 0) ? cname.mid(cut + 1) : cname;
+    int dot = base.lastIndexOf('.'); if (dot > 0) base = base.left(dot);
+    m_voiceFolderLines = SoundResolver::resolveCreatureVoiceFolder(m->gamefile->fullname(), base);
+  }
+  const bool hasVoice = !m_voiceLines.empty() || !m_voiceFolderLines.empty();
+  btnVoiceLines->Show(hasVoice);
+  btnVoiceLines->Enable(hasVoice);
 
   // A small attempt at keeping the 'previous' animation that was selected when changing
   // the selected model via the model control.
@@ -1189,7 +1199,7 @@ bool AnimControl::FillBLPSkinSelector(TextureSet &skins, bool item)
 // resolved in UpdateModel; the button is only visible when it is non-empty.
 void AnimControl::OnVoiceLines(wxCommandEvent & WXUNUSED(event))
 {
-  if (!g_selModel || m_voiceLines.empty())
+  if (!g_selModel || (m_voiceLines.empty() && m_voiceFolderLines.empty()))
     return;
 
   // Friendly-ish creature name from the model file basename (e.g. "creature/wolf/wolf.m2" -> "wolf").
@@ -1207,7 +1217,7 @@ void AnimControl::OnVoiceLines(wxCommandEvent & WXUNUSED(event))
     name = wxString::FromUTF8(base.toStdString().c_str());
   }
 
-  VoiceLinesDialog dlg(this, name, m_voiceLines);
+  VoiceLinesDialog dlg(this, name, m_voiceLines, m_voiceFolderLines);
   dlg.ShowModal();
 }
 

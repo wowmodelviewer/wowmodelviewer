@@ -3,9 +3,12 @@
  */
 #include "SoundResolver.h"
 
-#include "Game.h"         // GAMEDATABASE
+#include "Game.h"         // GAMEDATABASE, GAMEDIRECTORY
 #include "GameDatabase.h" // sqlResult
+#include "GameFolder.h"   // getFilesForFolder
+#include "GameFile.h"
 
+#include <algorithm>
 #include <map>
 #include <set>
 #include <utility>
@@ -119,6 +122,7 @@ std::vector<VoiceLineEntry> SoundResolver::resolveCreatureSoundsForModel(int mod
       if (fdid == 0)
         continue;
       VoiceLineEntry e;
+      e.source = "CreatureSound";
       e.category = category;
       e.soundKitId = kit;
       e.fileDataId = fdid;
@@ -131,5 +135,56 @@ std::vector<VoiceLineEntry> SoundResolver::resolveCreatureSoundsForModel(int mod
     }
   }
 
+  return out;
+}
+
+std::vector<VoiceLineEntry> SoundResolver::resolveCreatureVoiceFolder(const QString & modelPath,
+                                                                     const QString & creatureName)
+{
+  std::vector<VoiceLineEntry> out;
+
+  // Derive the folder token: "creature/<token>/<file>.m2" -> "<token>".
+  QString p = modelPath;
+  p.replace('\\', '/');
+  QString token;
+  int ci = p.indexOf("creature/", 0, Qt::CaseInsensitive);
+  if (ci >= 0)
+  {
+    int start = ci + 9; // past "creature/"
+    int slash = p.indexOf('/', start);
+    if (slash > start)
+      token = p.mid(start, slash - start);
+  }
+  if (token.isEmpty())
+    return out;
+
+  // Match sound/creature/<token>/vo_*.ogg against the listfile-backed CASC file tree. Only files that
+  // actually exist in CASC are in the tree, so every match is openable.
+  const QString folder = "sound/creature/" + token + "/vo_";
+  std::vector<GameFile *> files;
+  GAMEDIRECTORY.getFilesForFolder(files, folder, ".ogg");
+  if (files.empty())
+    return out;
+
+  // Order by path so vo_..._01, _02, ... come out in sequence.
+  std::sort(files.begin(), files.end(), [](GameFile * a, GameFile * b) {
+    return a->fullname().compare(b->fullname(), Qt::CaseInsensitive) < 0;
+  });
+
+  int n = 0;
+  for (size_t i = 0; i < files.size(); ++i)
+  {
+    GameFile * f = files[i];
+    if (!f)
+      continue;
+    VoiceLineEntry e;
+    e.source = "CreatureVoiceFolder";
+    e.category = "Voice";
+    e.fileDataId = f->fileDataId();
+    e.filePath = f->fullname();
+    e.variation = ++n;
+    e.label = (creatureName.isEmpty() ? QString("VO ") : (creatureName + " VO ")) + QString::number(e.variation);
+    out.push_back(e);
+  }
   return out;
 }
