@@ -4,18 +4,30 @@
 #include "VoiceLinesDialog.h"
 
 #include <wx/filedlg.h>
+#include <wx/dirdlg.h>
 
 #include <algorithm>
 #include <cstdio>
-#include <fstream>
 #include <set>
+#include <string>
 
 #include "AudioPlayer.h"
-#include "Game.h"         // GAMEDIRECTORY
+#include "Game.h"         // GAMEDIRECTORY, core::Game::instance().configFolder()
 #include "GameFile.h"
 #include "globalvars.h"
 
 int VoiceLinesDialog::s_sessionVolume = 100;
+
+// Availability status is probed off the open path, so a row starts life "not yet checked".
+static const int ST_PENDING = -2;
+// How many CASC key-status probes to run per timer tick. Small enough that the UI stays responsive
+// between ticks (each probe touches CASC); large enough that a folder of ~50 files fills in quickly.
+static const int STATUS_BATCH = 4;
+
+// The key-status cache is kept ALIVE between dialog opens, per loaded client, so re-opening the
+// browser for the same model (or any model in the same build) shows availability instantly instead
+// of re-probing CASC. Keyed by the client's data/config folder (distinguishes builds/products).
+static std::map<std::string, std::map<int, int> > s_statusByBuild;
 
 // VoiceLineEntry fields are Qt QStrings (resolved in the wow lib); convert to wxString at the UI boundary.
 static wxString q2w(const QString & s)
@@ -33,8 +45,9 @@ enum
   ID_VL_PLAY,
   ID_VL_STOP,
   ID_VL_VOLUME,
-  ID_VL_EXPORT,
-  ID_VL_MARK
+  ID_VL_EXPORT_SEL,
+  ID_VL_EXPORT_VIS,
+  ID_VL_STATUSTIMER
 };
 
 // Column indices for the report-mode list.
@@ -53,8 +66,9 @@ BEGIN_EVENT_TABLE(VoiceLinesDialog, wxDialog)
   EVT_BUTTON(ID_VL_PLAY, VoiceLinesDialog::OnPlay)
   EVT_BUTTON(ID_VL_STOP, VoiceLinesDialog::OnStop)
   EVT_SLIDER(ID_VL_VOLUME, VoiceLinesDialog::OnVolume)
-  EVT_BUTTON(ID_VL_EXPORT, VoiceLinesDialog::OnExport)
-  EVT_BUTTON(ID_VL_MARK, VoiceLinesDialog::OnMarkReviewed)
+  EVT_BUTTON(ID_VL_EXPORT_SEL, VoiceLinesDialog::OnExportSelected)
+  EVT_BUTTON(ID_VL_EXPORT_VIS, VoiceLinesDialog::OnExportVisible)
+  EVT_TIMER(ID_VL_STATUSTIMER, VoiceLinesDialog::OnStatusTimer)
   EVT_BUTTON(wxID_CLOSE, VoiceLinesDialog::OnCloseButton)
   EVT_CLOSE(VoiceLinesDialog::OnClose)
 END_EVENT_TABLE()
@@ -84,6 +98,27 @@ static wxString sanitizeFileName(const wxString & in)
   return out;
 }
 
+// A tidy filename slug: strip path-illegal characters and fold whitespace to '-' so the underscore
+// separators in the export filename pattern stay unambiguous.
+static wxString slug(const wxString & in)
+{
+  wxString s = sanitizeFileName(in);
+  s.Replace(wxT(" "), wxT("-"));
+  s.Replace(wxT("\t"), wxT("-"));
+  return s;
+}
+
+// Minimal RFC-4180 CSV field escaping for the export manifest.
+static wxString csvField(const wxString & in)
+{
+  if (in.Find(wxT(',')) == wxNOT_FOUND && in.Find(wxT('"')) == wxNOT_FOUND &&
+      in.Find(wxT('\n')) == wxNOT_FOUND && in.Find(wxT('\r')) == wxNOT_FOUND)
+    return in;
+  wxString s = in;
+  s.Replace(wxT("\""), wxT("\"\""));
+  return wxT("\"") + s + wxT("\"");
+}
+
 wxString VoiceLinesDialog::BaseName(const QString & path)
 {
   if (path.isEmpty())
@@ -104,73 +139,46 @@ wxString VoiceLinesDialog::SourceLabel(const QString & source)
   return q2w(source);
 }
 
+// Short lowercase slug used to prefix export filenames (keeps them terse and machine-friendly).
+wxString VoiceLinesDialog::SourceToken(const QString & source)
+{
+  if (source == "CreatureSound")       return wxT("creaturesound");
+  if (source == "CreatureVoiceFolder") return wxT("voicefolder");
+  if (source == "CreatureAudioFolder") return wxT("audiofolder");
+  if (source == "EncounterDialogue")   return wxT("encounter");
+  if (source == "Candidate")           return wxT("candidate");
+  return slug(q2w(source)).Lower();
+}
+
 wxString VoiceLinesDialog::StatusLabel(int st)
 {
   switch (st)
   {
-    case 0:  return wxT("Playable");
-    case 1:  return wxT("Encrypted / missing key");
-    case 2:  return wxT("Missing from build");
-    default: return wxT("Unknown");
+    case 0:          return wxT("Playable");
+    case 1:          return wxT("Encrypted / missing key");
+    case 2:          return wxT("Missing from build");
+    case ST_PENDING: return wxT("Checking...");
+    default:         return wxT("Unknown");
   }
 }
 
-int VoiceLinesDialog::entryStatus(int fileDataId)
+// BLOCKING availability probe. Only the status timer calls this; it touches CASC, so it must never
+// run on the dialog-open path. The result is cached (per build) for the life of the process.
+int VoiceLinesDialog::probeStatus(int fileDataId)
 {
-  std::map<int, int>::iterator it = m_statusCache.find(fileDataId);
-  if (it != m_statusCache.end())
+  std::map<int, int>::iterator it = m_statusCache->find(fileDataId);
+  if (it != m_statusCache->end())
     return it->second;
   const int st = GAMEDIRECTORY.fileKeyStatus(fileDataId); // 0 playable / 1 encrypted / 2 missing / -1 unknown
-  m_statusCache[fileDataId] = st;
+  (*m_statusCache)[fileDataId] = st;
   return st;
 }
 
-
-// ---- "already listened to" marks ---------------------------------------------------------
-// Persisted as one FileDataID per line next to the exe, so a long audition session is not lost
-// when the dialog closes or WMW restarts. Reviewed rows are drawn in red.
-static const char * REVIEWED_PATH = "voicelines_reviewed.txt";
-
-void VoiceLinesDialog::LoadReviewed()
+// NON-blocking lookup: cached value, or ST_PENDING if this id has not been probed yet.
+int VoiceLinesDialog::cachedStatus(int fileDataId) const
 {
-  m_reviewed.clear();
-  std::ifstream f(REVIEWED_PATH);
-  int id = 0;
-  while (f >> id)
-    if (id > 0) m_reviewed.insert(id);
-}
-
-void VoiceLinesDialog::SaveReviewed()
-{
-  std::ofstream f(REVIEWED_PATH, std::ios::out | std::ios::trunc);
-  if (!f) return;
-  for (std::set<int>::const_iterator it = m_reviewed.begin(); it != m_reviewed.end(); ++it)
-    f << *it << "\n";
-}
-
-void VoiceLinesDialog::SetReviewed(int fileDataId, bool on)
-{
-  if (on) m_reviewed.insert(fileDataId);
-  else    m_reviewed.erase(fileDataId);
-  SaveReviewed();
-}
-
-void VoiceLinesDialog::ApplyRowColour(long row, int fileDataId)
-{
-  m_list->SetItemTextColour(row, m_reviewed.count(fileDataId)
-                                 ? wxColour(180, 0, 0)      // reviewed
-                                 : wxSystemSettings::GetColour(wxSYS_COLOUR_WINDOWTEXT));
-}
-
-void VoiceLinesDialog::OnMarkReviewed(wxCommandEvent &)
-{
-  const VoiceLineEntry * e = SelectedEntry();
-  if (!e) { SetStatus(wxT("Select a line first.")); return; }
-  const bool now = m_reviewed.count(e->fileDataId) == 0;
-  SetReviewed(e->fileDataId, now);
-  long sel = m_list->GetNextItem(-1, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED);
-  if (sel != -1) ApplyRowColour(sel, e->fileDataId);
-  SetStatus(now ? wxT("Marked as listened to (red).") : wxT("Mark cleared."));
+  std::map<int, int>::const_iterator it = m_statusCache->find(fileDataId);
+  return it != m_statusCache->end() ? it->second : ST_PENDING;
 }
 
 VoiceLinesDialog::VoiceLinesDialog(wxWindow * parent, const wxString & creatureName,
@@ -180,10 +188,18 @@ VoiceLinesDialog::VoiceLinesDialog(wxWindow * parent, const wxString & creatureN
                                    const std::vector<VoiceLineEntry> & encounterLines,
                                    const std::vector<VoiceLineEntry> & candidateLines)
   : wxDialog(parent, wxID_ANY, wxT("Voice Lines - ") + creatureName, wxDefaultPosition,
-             wxSize(880, 520), wxDEFAULT_DIALOG_STYLE | wxRESIZE_BORDER),
+             wxSize(900, 540), wxDEFAULT_DIALOG_STYLE | wxRESIZE_BORDER),
     m_creatureName(creatureName), m_soundLines(soundLines), m_voiceFolderLines(voiceFolderLines),
-    m_audioFolderLines(audioFolderLines), m_encounterLines(encounterLines), m_candidateLines(candidateLines), m_player(new AudioPlayer())
+    m_audioFolderLines(audioFolderLines), m_encounterLines(encounterLines),
+    m_candidateLines(candidateLines), m_statusCache(NULL), m_statusTimer(NULL), m_statusTotal(0),
+    m_player(new AudioPlayer())
 {
+  // Point at this build's persistent status cache (created on first use).
+  const std::string buildKey(core::Game::instance().configFolder().toUtf8().constData());
+  m_statusCache = &s_statusByBuild[buildKey];
+
+  m_statusTimer = new wxTimer(this, ID_VL_STATUSTIMER);
+
   wxBoxSizer * top = new wxBoxSizer(wxVERTICAL);
 
   // Source + Sort row.
@@ -224,9 +240,8 @@ VoiceLinesDialog::VoiceLinesDialog(wxWindow * parent, const wxString & creatureN
   filtRow->Add(m_search, 1, wxEXPAND);
   top->Add(filtRow, 0, wxEXPAND | wxALL, 8);
 
-  // Multi-column list.
-  m_list = new wxListCtrl(this, ID_VL_LIST, wxDefaultPosition, wxDefaultSize,
-                          wxLC_REPORT | wxLC_SINGLE_SEL);
+  // Multi-column list. Multi-select is deliberate: it drives "Export Selected...".
+  m_list = new wxListCtrl(this, ID_VL_LIST, wxDefaultPosition, wxDefaultSize, wxLC_REPORT);
   m_list->InsertColumn(COL_LABEL,    wxT("Label"),      wxLIST_FORMAT_LEFT,  110);
   m_list->InsertColumn(COL_CATEGORY, wxT("Category"),   wxLIST_FORMAT_LEFT,  85);
   m_list->InsertColumn(COL_FILE,     wxT("Filename"),   wxLIST_FORMAT_LEFT,  205);
@@ -248,13 +263,15 @@ VoiceLinesDialog::VoiceLinesDialog(wxWindow * parent, const wxString & creatureN
   ctrlRow->Add(m_volume, 1, wxALIGN_CENTER_VERTICAL);
   top->Add(ctrlRow, 0, wxEXPAND | wxALL, 8);
 
-  // Export + close row.
+  // Export + close row. Audio is exported verbatim (original OGG bytes) -- there is no format
+  // selector because no other encoder is bundled.
   wxBoxSizer * btnRow = new wxBoxSizer(wxHORIZONTAL);
-  m_export = new wxButton(this, ID_VL_EXPORT, wxT("Export Original"));
-  btnRow->Add(m_export, 0, wxRIGHT, 8);
-  m_mark = new wxButton(this, ID_VL_MARK, wxT("Mark listened"));
-  m_mark->SetToolTip(wxT("Toggle the red \"already listened to\" mark on the selected row (saved between sessions)"));
-  btnRow->Add(m_mark, 0, wxRIGHT, 8);
+  m_exportSel = new wxButton(this, ID_VL_EXPORT_SEL, wxT("Export Selected..."));
+  m_exportSel->SetToolTip(wxT("Export the selected row(s) to a folder, with a manifest.csv"));
+  btnRow->Add(m_exportSel, 0, wxRIGHT, 8);
+  m_exportVisible = new wxButton(this, ID_VL_EXPORT_VIS, wxT("Export All Visible..."));
+  m_exportVisible->SetToolTip(wxT("Export every row currently shown (after the filter), with a manifest.csv"));
+  btnRow->Add(m_exportVisible, 0, wxRIGHT, 8);
   btnRow->AddStretchSpacer(1);
   btnRow->Add(new wxButton(this, wxID_CLOSE, wxT("Close")), 0);
   top->Add(btnRow, 0, wxEXPAND | wxLEFT | wxRIGHT, 8);
@@ -268,9 +285,8 @@ VoiceLinesDialog::VoiceLinesDialog(wxWindow * parent, const wxString & creatureN
   m_volumeLabel->SetLabel(wxString::Format(wxT("Volume: %d%%"), s_sessionVolume));
   m_player->setVolume(s_sessionVolume / 100.0f);
 
-  LoadReviewed();
   RebuildCategories();
-  RefillList();
+  RefillList(); // populates instantly; availability fills in via the status timer
 }
 
 const std::vector<VoiceLineEntry> & VoiceLinesDialog::activeLines() const
@@ -313,6 +329,12 @@ void VoiceLinesDialog::OnSort(wxCommandEvent &)     { RefillList(); }
 
 VoiceLinesDialog::~VoiceLinesDialog()
 {
+  if (m_statusTimer)
+  {
+    m_statusTimer->Stop();
+    delete m_statusTimer;
+    m_statusTimer = NULL;
+  }
   if (m_player)
   {
     m_player->stop();
@@ -347,22 +369,20 @@ void VoiceLinesDialog::RefillList()
     if (!needle.IsEmpty())
     {
       const wxString fileText = e.filePath.isEmpty() ? wxString(wxT("(unnamed)")) : BaseName(e.filePath);
+      // Status uses the cached value only -- searching must never trigger a blocking CASC probe.
       wxString hay = q2w(e.label) + wxT(" ") + fileText + wxT(" ")
                    + wxString::Format(wxT("%d %d "), e.fileDataId, e.soundKitId)
                    + SourceLabel(e.source) + wxT(" ") + q2w(e.category) + wxT(" ")
-                   + StatusLabel(entryStatus(e.fileDataId));
+                   + StatusLabel(cachedStatus(e.fileDataId));
       if (hay.Lower().Find(needle) == wxNOT_FOUND)
         continue;
     }
     idx.push_back((int)i);
   }
 
-  // 2) sort the surviving indices per the sort choice. Statuses are probed up-front so the
-  // comparator only reads the cache (never mutates it mid-sort).
+  // 2) sort the surviving indices per the sort choice. The comparator only reads cached statuses
+  // (never probes); rows not yet checked sort as ST_PENDING and settle once the timer finishes.
   const int sortMode = m_sort->GetSelection();
-  if (sortMode == VLSORT_STATUS)
-    for (size_t k = 0; k < idx.size(); ++k)
-      entryStatus(lines[idx[k]].fileDataId);
   std::sort(idx.begin(), idx.end(), [&](int a, int b) {
     const VoiceLineEntry & ea = lines[a];
     const VoiceLineEntry & eb = lines[b];
@@ -390,8 +410,8 @@ void VoiceLinesDialog::RefillList()
         return ea.soundKitId < eb.soundKitId;
       case VLSORT_STATUS:
       {
-        const int sa = m_statusCache.count(ea.fileDataId) ? m_statusCache[ea.fileDataId] : -1;
-        const int sb = m_statusCache.count(eb.fileDataId) ? m_statusCache[eb.fileDataId] : -1;
+        const int sa = cachedStatus(ea.fileDataId);
+        const int sb = cachedStatus(eb.fileDataId);
         if (sa != sb) return sa < sb;              // playable(0) < encrypted(1) < missing(2)
         return ea.fileDataId < eb.fileDataId;
       }
@@ -400,7 +420,7 @@ void VoiceLinesDialog::RefillList()
     }
   });
 
-  // 3) fill the report list.
+  // 3) fill the report list (no blocking probes -- Status shows the cached value or "Checking...").
   for (size_t r = 0; r < idx.size(); ++r)
   {
     const VoiceLineEntry & e = lines[idx[r]];
@@ -411,10 +431,10 @@ void VoiceLinesDialog::RefillList()
     m_list->SetItem(row, COL_FDID, wxString::Format(wxT("%d"), e.fileDataId));
     m_list->SetItem(row, COL_KIT, e.soundKitId ? wxString::Format(wxT("%d"), e.soundKitId) : wxString(wxT("-")));
     m_list->SetItem(row, COL_SOURCE, SourceLabel(e.source));
-    m_list->SetItem(row, COL_STATUS, StatusLabel(entryStatus(e.fileDataId))); // playable/encrypted/missing
-    ApplyRowColour(row, e.fileDataId);  // red = already listened to
+    m_list->SetItem(row, COL_STATUS, StatusLabel(cachedStatus(e.fileDataId)));
     m_filtered.push_back(idx[r]);
   }
+
   if (!m_filtered.empty())
   {
     m_list->SetItemState(0, wxLIST_STATE_SELECTED | wxLIST_STATE_FOCUSED,
@@ -430,11 +450,85 @@ void VoiceLinesDialog::RefillList()
             : s == 4 ? wxT("Candidate list is empty.")
                      : wxT("No creature sounds found for this model."));
   }
+
+  // Kick off (or refresh) the background availability probe for whatever is now visible.
+  startStatusProbe();
+}
+
+// Queue every still-unchecked visible FileDataID and start the incremental timer. Export is disabled
+// while a probe is outstanding (so we never export a file whose availability we haven't confirmed).
+void VoiceLinesDialog::startStatusProbe()
+{
+  if (m_statusTimer)
+    m_statusTimer->Stop();
+  m_pending.clear();
+
+  std::set<int> queued;
+  const std::vector<VoiceLineEntry> & lines = activeLines();
+  for (size_t r = 0; r < m_filtered.size(); ++r)
+  {
+    const int fdid = lines[m_filtered[r]].fileDataId;
+    if (cachedStatus(fdid) == ST_PENDING && queued.insert(fdid).second)
+      m_pending.push_back(fdid);
+  }
+
+  if (m_pending.empty())
+  {
+    m_exportSel->Enable(true);
+    m_exportVisible->Enable(true);
+    if (!m_filtered.empty())
+      SetStatus(wxString::Format(wxT("Showing %d of %d file(s). Select one and press Play."),
+                                 (int)m_filtered.size(), (int)activeLines().size()));
+    return;
+  }
+
+  m_statusTotal = m_pending.size();
+  m_exportSel->Enable(false);
+  m_exportVisible->Enable(false);
+  SetStatus(wxString::Format(wxT("Loading voice lines... checking availability (0/%d)"),
+                             (int)m_statusTotal));
+  m_statusTimer->Start(15); // continuous; drained in OnStatusTimer, stopped when m_pending empties
+}
+
+void VoiceLinesDialog::OnStatusTimer(wxTimerEvent &)
+{
+  for (int n = 0; n < STATUS_BATCH && !m_pending.empty(); ++n)
+  {
+    probeStatus(m_pending.front()); // blocking, but only STATUS_BATCH per tick -> UI stays responsive
+    m_pending.erase(m_pending.begin());
+  }
+
+  refreshVisibleStatus();
+
+  if (m_pending.empty())
+  {
+    m_statusTimer->Stop();
+    m_exportSel->Enable(true);
+    m_exportVisible->Enable(true);
+    // Status ordering is only meaningful once every row is checked; re-sort now (cache is warm, so
+    // this pass does no probing and starts no new timer).
+    if (m_sort->GetSelection() == VLSORT_STATUS)
+    {
+      RefillList();
+      return;
+    }
+    if (!m_filtered.empty())
+      SetStatus(wxString::Format(wxT("Showing %d of %d file(s). Select one and press Play."),
+                                 (int)m_filtered.size(), (int)activeLines().size()));
+  }
   else
   {
-    SetStatus(wxString::Format(wxT("Showing %d of %d file(s). Select one and press Play."),
-                               (int)m_filtered.size(), (int)lines.size()));
+    SetStatus(wxString::Format(wxT("Loading voice lines... checking availability (%d/%d)"),
+                               (int)(m_statusTotal - m_pending.size()), (int)m_statusTotal));
   }
+}
+
+// Repaint just the Status column of the visible rows from the (now partly warm) cache.
+void VoiceLinesDialog::refreshVisibleStatus()
+{
+  const std::vector<VoiceLineEntry> & lines = activeLines();
+  for (size_t r = 0; r < m_filtered.size(); ++r)
+    m_list->SetItem((long)r, COL_STATUS, StatusLabel(cachedStatus(lines[m_filtered[r]].fileDataId)));
 }
 
 const VoiceLineEntry * VoiceLinesDialog::SelectedEntry() const
@@ -447,6 +541,21 @@ const VoiceLineEntry * VoiceLinesDialog::SelectedEntry() const
   if (i < 0 || (size_t)i >= lines.size())
     return NULL;
   return &lines[i];
+}
+
+std::vector<int> VoiceLinesDialog::selectedLineIndices() const
+{
+  std::vector<int> out;
+  long sel = -1;
+  while ((sel = m_list->GetNextItem(sel, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED)) != -1)
+    if (sel >= 0 && (size_t)sel < m_filtered.size())
+      out.push_back(m_filtered[sel]);
+  return out;
+}
+
+std::vector<int> VoiceLinesDialog::visibleLineIndices() const
+{
+  return m_filtered;
 }
 
 void VoiceLinesDialog::OnLineActivate(wxListEvent &)
@@ -500,103 +609,162 @@ void VoiceLinesDialog::OnVolume(wxCommandEvent &)
   m_player->setVolume(s_sessionVolume / 100.0f);
 }
 
-void VoiceLinesDialog::OnExport(wxCommandEvent &)
+void VoiceLinesDialog::OnExportSelected(wxCommandEvent &)
 {
-  const VoiceLineEntry * e = SelectedEntry();
-  if (!e)
+  std::vector<int> sel = selectedLineIndices();
+  if (sel.empty())
   {
-    SetStatus(wxT("Select a line first."));
+    SetStatus(wxT("Select one or more rows first."));
     return;
   }
+  exportRows(sel);
+}
 
-  GameFile * f = GAMEDIRECTORY.getFile((uint)e->fileDataId);
-  if (!f)
+void VoiceLinesDialog::OnExportVisible(wxCommandEvent &)
+{
+  std::vector<int> vis = visibleLineIndices();
+  if (vis.empty())
   {
-    SetStatus(wxString::Format(wxT("Audio file %d not found."), e->fileDataId));
+    SetStatus(wxT("Nothing to export -- the list is empty."));
     return;
   }
-  f->open();
-  if (f->isEof() || f->getSize() == 0)
-  {
-    SetStatus(wxString::Format(wxT("Audio file %d is empty/unreadable."), e->fileDataId));
-    f->close();
+  exportRows(vis);
+}
+
+// Write each requested line (raw, original OGG bytes) into a chosen folder, tally the results, and
+// drop a manifest.csv alongside. Unavailable files (missing / encrypted) are skipped, not faked.
+void VoiceLinesDialog::exportRows(const std::vector<int> & lineIdx)
+{
+  if (lineIdx.empty())
     return;
+
+  const wxString folder = wxDirSelector(wxT("Choose a folder to export audio into"), wxGetCwd(),
+                                        0, wxDefaultPosition, this);
+  if (folder.IsEmpty())
+    return; // cancelled
+
+  const std::vector<VoiceLineEntry> & lines = activeLines();
+
+  wxString manifestPath = folder + wxFILE_SEP_PATH + wxT("manifest.csv");
+  FILE * manifest = fopen(manifestPath.mb_str(), "w");
+  if (manifest)
+    fputs("index,label,source,category,FileDataID,SoundKitID,original_path,status,exported_filename\n",
+          manifest);
+
+  int nExported = 0, nMissing = 0, nEncrypted = 0, nFailed = 0;
+  std::set<wxString> usedNames; // avoid clobbering when two entries would produce the same filename
+
+  for (size_t k = 0; k < lineIdx.size(); ++k)
+  {
+    const int li = lineIdx[k];
+    if (li < 0 || (size_t)li >= lines.size())
+      continue;
+    const VoiceLineEntry & e = lines[li];
+
+    const wxString label   = q2w(e.label);
+    const wxString srcTok  = SourceToken(e.source);
+    const wxString catSlug = slug(q2w(e.category));
+    const wxString origPath = e.filePath.isEmpty() ? wxString(wxT("(unnamed)")) : q2w(e.filePath);
+
+    wxString statusWord, outName;
+
+    // Availability first: exports are only enabled once the probe finished, so this reads the cache.
+    const int st = probeStatus(e.fileDataId);
+    if (st == 1)
+    {
+      statusWord = wxT("skipped-encrypted");
+      ++nEncrypted;
+    }
+    else if (st == 2)
+    {
+      statusWord = wxT("skipped-missing");
+      ++nMissing;
+    }
+    else
+    {
+      GameFile * f = GAMEDIRECTORY.getFile((uint)e.fileDataId);
+      if (!f)
+      {
+        statusWord = wxT("skipped-missing");
+        ++nMissing;
+      }
+      else
+      {
+        f->open();
+        if (f->isEof() || f->getSize() == 0)
+        {
+          statusWord = wxT("failed");
+          ++nFailed;
+          f->close();
+        }
+        else
+        {
+          wxString ext = inferAudioExtension(f->getBuffer(), f->getSize());
+          if (ext.IsEmpty())
+            ext = wxT("ogg"); // creature VO is Ogg Vorbis; a sane default when the magic is unusual
+
+          // <source>_<category>_fdid_<FileDataID>_sk_<SoundKitID>.<ext>
+          wxString base = wxString::Format(wxT("%s_%s_fdid_%d_sk_%d"),
+              srcTok, catSlug, e.fileDataId, e.soundKitId);
+          wxString name = base + wxT(".") + ext;
+          int dup = 2;
+          while (usedNames.count(name.Lower()))
+            name = wxString::Format(wxT("%s_%d.%s"), base, dup++, ext);
+          usedNames.insert(name.Lower());
+
+          wxString outPath = folder + wxFILE_SEP_PATH + name;
+          FILE * out = fopen(outPath.mb_str(), "wb");
+          if (out)
+          {
+            fwrite(f->getBuffer(), 1, f->getSize(), out);
+            fclose(out);
+            statusWord = wxT("exported");
+            outName = name;
+            ++nExported;
+          }
+          else
+          {
+            statusWord = wxT("failed");
+            ++nFailed;
+          }
+          f->close();
+        }
+      }
+    }
+
+    if (manifest)
+      fprintf(manifest, "%d,%s,%s,%s,%d,%d,%s,%s,%s\n",
+              (int)(k + 1),
+              (const char *)csvField(label).mb_str(),
+              (const char *)csvField(SourceLabel(e.source)).mb_str(),
+              (const char *)csvField(q2w(e.category)).mb_str(),
+              e.fileDataId, e.soundKitId,
+              (const char *)csvField(origPath).mb_str(),
+              (const char *)statusWord.mb_str(),
+              (const char *)csvField(outName).mb_str());
   }
 
-  // Extension comes from the CONTENT first. A file with no listfile entry is handed to us under the
-  // synthetic name "File########.unk", whose extension is meaningless -- trusting it wrote real Ogg
-  // audio out as ".unk". Only fall back to the name when the header magic isn't recognised.
-  wxString ext = inferAudioExtension(f->getBuffer(), f->getSize());
-  if (ext.IsEmpty())
-  {
-    wxString fullname = q2w(f->fullname());
-    int dot = fullname.Find(wxT('.'), true);
-    if (dot != wxNOT_FOUND && dot + 1 < (int)fullname.length())
-      ext = fullname.Mid(dot + 1).Lower();
-    if (ext.Find(wxT('/')) != wxNOT_FOUND || ext.length() > 4 || ext == wxT("unk"))
-      ext.Clear();
-  }
-  if (ext.IsEmpty())
-    ext = wxT("bin");
+  if (manifest)
+    fclose(manifest);
 
-  // Default filename: for a named file keep its real basename (vo_73_aggramar_01_m); otherwise
-  // fall back to CreatureName_Category_SoundKitID_FileDataID.
-  wxString base;
-  wxString wpath = q2w(e->filePath);
-  if (!wpath.IsEmpty())
-  {
-    int sl = wpath.Find(wxT('/'), true);
-    wxString bn = (sl != wxNOT_FOUND) ? wpath.Mid(sl + 1) : wpath;
-    int d = bn.Find(wxT('.'), true);
-    if (d != wxNOT_FOUND)
-      bn = bn.Mid(0, d);
-    base = sanitizeFileName(bn);
-  }
-  else if (e->source == "Candidate")
-  {
-    // Unattributed audition file: never borrow the loaded creature's name for it, or the exported
-    // filename would assert a link we have not proven.
-    base = sanitizeFileName(wxString::Format(wxT("candidate_sk%d_fdid%d_unverified"),
-        e->soundKitId, e->fileDataId));
-  }
-  else
-  {
-    wxString cname = m_creatureName.IsEmpty() ? wxString(wxT("Creature")) : m_creatureName;
-    wxString wcat = q2w(e->category);
-    base = sanitizeFileName(wxString::Format(wxT("%s_%s_%d_%d"),
-        cname, wcat, e->soundKitId, e->fileDataId));
-  }
+  wxString summary = wxString::Format(
+      wxT("Exported %d file(s) to:\n%s\n\n")
+      wxT("Skipped (missing from build): %d\n")
+      wxT("Skipped (encrypted / no key): %d\n")
+      wxT("Failed to write: %d\n\n")
+      wxT("Manifest: manifest.csv"),
+      nExported, folder, nMissing, nEncrypted, nFailed);
+  wxMessageBox(summary, wxT("Voice Lines export"), wxOK | wxICON_INFORMATION, this);
 
-  wxString path = wxFileSelector(wxT("Export original audio"), wxGetCwd(), base + wxT(".") + ext, ext,
-      ext.Upper() + wxT(" files (*.") + ext + wxT(")|*.") + ext + wxT("|All files (*.*)|*.*"),
-      wxFD_SAVE | wxFD_OVERWRITE_PROMPT, this);
-
-  if (path.IsEmpty())
-  {
-    f->close();
-    return; // user cancelled
-  }
-
-  FILE * out = fopen(path.mb_str(), "wb");
-  if (out)
-  {
-    fwrite(f->getBuffer(), 1, f->getSize(), out);
-    fclose(out);
-    // Exporting means you dealt with this one: mark it listened-to so the row turns red.
-    SetReviewed(e->fileDataId, true);
-    long sel = m_list->GetNextItem(-1, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED);
-    if (sel != -1) ApplyRowColour(sel, e->fileDataId);
-    SetStatus(wxT("Exported (marked listened): ") + path);
-  }
-  else
-  {
-    SetStatus(wxT("Export failed (could not write file)."));
-  }
-  f->close();
+  SetStatus(wxString::Format(
+      wxT("Export complete: %d exported, %d missing, %d encrypted, %d failed. (manifest.csv written)"),
+      nExported, nMissing, nEncrypted, nFailed));
 }
 
 void VoiceLinesDialog::OnCloseButton(wxCommandEvent &)
 {
+  if (m_statusTimer)
+    m_statusTimer->Stop();
   if (m_player)
     m_player->stop();
   EndModal(wxID_CLOSE);
@@ -604,6 +772,8 @@ void VoiceLinesDialog::OnCloseButton(wxCommandEvent &)
 
 void VoiceLinesDialog::OnClose(wxCloseEvent &)
 {
+  if (m_statusTimer)
+    m_statusTimer->Stop();
   if (m_player)
     m_player->stop();
   EndModal(wxID_CLOSE);

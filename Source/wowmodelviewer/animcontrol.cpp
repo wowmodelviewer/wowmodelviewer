@@ -160,9 +160,10 @@ AnimControl::AnimControl(wxWindow* parent, wxWindowID id)
   bNextAnims = false;
   nextAnims->SetValue(bNextAnims);
 
-  // Voice Lines (V1): opens the creature-sound preview dialog. Hidden unless the loaded model is a
-  // creature that resolves to sound data (see UpdateModel).
-  btnVoiceLines = new wxButton(this, ID_VOICELINES, _("Voice Lines..."), wxPoint(430,88), wxSize(150,24));
+  // Voice Lines: opens the creature/boss VO browser. Hidden unless the loaded model is a creature
+  // that resolves to any voice audio (see UpdateModel). Sits on the animation-controls row, to the
+  // right of the mouth-speed slider -- the only clean, overlap-free slot in this dense 700x120 pane.
+  btnVoiceLines = new wxButton(this, ID_VOICELINES, _("Voice Lines"), wxPoint(525,96), wxSize(150,22));
   btnVoiceLines->Show(false);
 }
 
