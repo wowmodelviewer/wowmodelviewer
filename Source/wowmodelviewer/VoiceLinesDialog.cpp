@@ -7,6 +7,7 @@
 
 #include <algorithm>
 #include <cstdio>
+#include <fstream>
 #include <set>
 
 #include "AudioPlayer.h"
@@ -32,7 +33,8 @@ enum
   ID_VL_PLAY,
   ID_VL_STOP,
   ID_VL_VOLUME,
-  ID_VL_EXPORT
+  ID_VL_EXPORT,
+  ID_VL_MARK
 };
 
 // Column indices for the report-mode list.
@@ -52,6 +54,7 @@ BEGIN_EVENT_TABLE(VoiceLinesDialog, wxDialog)
   EVT_BUTTON(ID_VL_STOP, VoiceLinesDialog::OnStop)
   EVT_SLIDER(ID_VL_VOLUME, VoiceLinesDialog::OnVolume)
   EVT_BUTTON(ID_VL_EXPORT, VoiceLinesDialog::OnExport)
+  EVT_BUTTON(ID_VL_MARK, VoiceLinesDialog::OnMarkReviewed)
   EVT_BUTTON(wxID_CLOSE, VoiceLinesDialog::OnCloseButton)
   EVT_CLOSE(VoiceLinesDialog::OnClose)
 END_EVENT_TABLE()
@@ -97,6 +100,7 @@ wxString VoiceLinesDialog::SourceLabel(const QString & source)
   if (source == "CreatureVoiceFolder") return wxT("Creature Voice Folder");
   if (source == "CreatureAudioFolder") return wxT("Creature Audio Folder");
   if (source == "EncounterDialogue")   return wxT("Encounter Dialogue");
+  if (source == "Candidate")           return wxT("Candidate (unverified)");
   return q2w(source);
 }
 
@@ -121,15 +125,64 @@ int VoiceLinesDialog::entryStatus(int fileDataId)
   return st;
 }
 
+
+// ---- "already listened to" marks ---------------------------------------------------------
+// Persisted as one FileDataID per line next to the exe, so a long audition session is not lost
+// when the dialog closes or WMW restarts. Reviewed rows are drawn in red.
+static const char * REVIEWED_PATH = "voicelines_reviewed.txt";
+
+void VoiceLinesDialog::LoadReviewed()
+{
+  m_reviewed.clear();
+  std::ifstream f(REVIEWED_PATH);
+  int id = 0;
+  while (f >> id)
+    if (id > 0) m_reviewed.insert(id);
+}
+
+void VoiceLinesDialog::SaveReviewed()
+{
+  std::ofstream f(REVIEWED_PATH, std::ios::out | std::ios::trunc);
+  if (!f) return;
+  for (std::set<int>::const_iterator it = m_reviewed.begin(); it != m_reviewed.end(); ++it)
+    f << *it << "\n";
+}
+
+void VoiceLinesDialog::SetReviewed(int fileDataId, bool on)
+{
+  if (on) m_reviewed.insert(fileDataId);
+  else    m_reviewed.erase(fileDataId);
+  SaveReviewed();
+}
+
+void VoiceLinesDialog::ApplyRowColour(long row, int fileDataId)
+{
+  m_list->SetItemTextColour(row, m_reviewed.count(fileDataId)
+                                 ? wxColour(180, 0, 0)      // reviewed
+                                 : wxSystemSettings::GetColour(wxSYS_COLOUR_WINDOWTEXT));
+}
+
+void VoiceLinesDialog::OnMarkReviewed(wxCommandEvent &)
+{
+  const VoiceLineEntry * e = SelectedEntry();
+  if (!e) { SetStatus(wxT("Select a line first.")); return; }
+  const bool now = m_reviewed.count(e->fileDataId) == 0;
+  SetReviewed(e->fileDataId, now);
+  long sel = m_list->GetNextItem(-1, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED);
+  if (sel != -1) ApplyRowColour(sel, e->fileDataId);
+  SetStatus(now ? wxT("Marked as listened to (red).") : wxT("Mark cleared."));
+}
+
 VoiceLinesDialog::VoiceLinesDialog(wxWindow * parent, const wxString & creatureName,
                                    const std::vector<VoiceLineEntry> & soundLines,
                                    const std::vector<VoiceLineEntry> & voiceFolderLines,
                                    const std::vector<VoiceLineEntry> & audioFolderLines,
-                                   const std::vector<VoiceLineEntry> & encounterLines)
+                                   const std::vector<VoiceLineEntry> & encounterLines,
+                                   const std::vector<VoiceLineEntry> & candidateLines)
   : wxDialog(parent, wxID_ANY, wxT("Voice Lines - ") + creatureName, wxDefaultPosition,
              wxSize(880, 520), wxDEFAULT_DIALOG_STYLE | wxRESIZE_BORDER),
     m_creatureName(creatureName), m_soundLines(soundLines), m_voiceFolderLines(voiceFolderLines),
-    m_audioFolderLines(audioFolderLines), m_encounterLines(encounterLines), m_player(new AudioPlayer())
+    m_audioFolderLines(audioFolderLines), m_encounterLines(encounterLines), m_candidateLines(candidateLines), m_player(new AudioPlayer())
 {
   wxBoxSizer * top = new wxBoxSizer(wxVERTICAL);
 
@@ -141,6 +194,10 @@ VoiceLinesDialog::VoiceLinesDialog(wxWindow * parent, const wxString & creatureN
   m_source->Append(wxT("Creature Voice Lines"));  // index 1 -> m_voiceFolderLines
   m_source->Append(wxT("Creature Audio Folder")); // index 2 -> m_audioFolderLines
   m_source->Append(wxT("Encounter Dialogue"));    // index 3 -> m_encounterLines
+  // index 4 -- debug audition list, only offered when WMV_VL_CANDIDATES supplied one. These are
+  // unattributed batch-mates, never a confirmed voice for the selected creature.
+  if (!m_candidateLines.empty())
+    m_source->Append(wxT("Candidates (unverified)"));
   m_source->SetSelection(!m_encounterLines.empty() ? 3 : (!m_voiceFolderLines.empty() ? 1 : (!m_soundLines.empty() ? 0 : (!m_audioFolderLines.empty() ? 2 : 0))));
   srcRow->Add(m_source, 1, wxEXPAND | wxRIGHT, 12);
   srcRow->Add(new wxStaticText(this, wxID_ANY, wxT("Sort:")), 0, wxALIGN_CENTER_VERTICAL | wxRIGHT, 6);
@@ -195,6 +252,9 @@ VoiceLinesDialog::VoiceLinesDialog(wxWindow * parent, const wxString & creatureN
   wxBoxSizer * btnRow = new wxBoxSizer(wxHORIZONTAL);
   m_export = new wxButton(this, ID_VL_EXPORT, wxT("Export Original"));
   btnRow->Add(m_export, 0, wxRIGHT, 8);
+  m_mark = new wxButton(this, ID_VL_MARK, wxT("Mark listened"));
+  m_mark->SetToolTip(wxT("Toggle the red \"already listened to\" mark on the selected row (saved between sessions)"));
+  btnRow->Add(m_mark, 0, wxRIGHT, 8);
   btnRow->AddStretchSpacer(1);
   btnRow->Add(new wxButton(this, wxID_CLOSE, wxT("Close")), 0);
   top->Add(btnRow, 0, wxEXPAND | wxLEFT | wxRIGHT, 8);
@@ -208,6 +268,7 @@ VoiceLinesDialog::VoiceLinesDialog(wxWindow * parent, const wxString & creatureN
   m_volumeLabel->SetLabel(wxString::Format(wxT("Volume: %d%%"), s_sessionVolume));
   m_player->setVolume(s_sessionVolume / 100.0f);
 
+  LoadReviewed();
   RebuildCategories();
   RefillList();
 }
@@ -219,6 +280,7 @@ const std::vector<VoiceLineEntry> & VoiceLinesDialog::activeLines() const
     case 1:  return m_voiceFolderLines;
     case 2:  return m_audioFolderLines;
     case 3:  return m_encounterLines;
+    case 4:  return m_candidateLines;
     default: return m_soundLines;
   }
 }
@@ -350,6 +412,7 @@ void VoiceLinesDialog::RefillList()
     m_list->SetItem(row, COL_KIT, e.soundKitId ? wxString::Format(wxT("%d"), e.soundKitId) : wxString(wxT("-")));
     m_list->SetItem(row, COL_SOURCE, SourceLabel(e.source));
     m_list->SetItem(row, COL_STATUS, StatusLabel(entryStatus(e.fileDataId))); // playable/encrypted/missing
+    ApplyRowColour(row, e.fileDataId);  // red = already listened to
     m_filtered.push_back(idx[r]);
   }
   if (!m_filtered.empty())
@@ -364,6 +427,7 @@ void VoiceLinesDialog::RefillList()
     SetStatus(s == 1 ? wxT("No creature voice lines found for this model.")
             : s == 2 ? wxT("No audio files found in this creature's sound folder.")
             : s == 3 ? wxT("No encounter dialogue found (model not linked to a journal encounter).")
+            : s == 4 ? wxT("Candidate list is empty.")
                      : wxT("No creature sounds found for this model."));
   }
   else
@@ -459,14 +523,19 @@ void VoiceLinesDialog::OnExport(wxCommandEvent &)
     return;
   }
 
-  // Preserve the real extension if the file has a listfile name; otherwise infer from the header.
-  wxString ext;
-  wxString fullname = q2w(f->fullname());
-  int dot = fullname.Find(wxT('.'), true);
-  if (dot != wxNOT_FOUND && dot + 1 < (int)fullname.length())
-    ext = fullname.Mid(dot + 1).Lower();
-  if (ext.IsEmpty() || ext.Find(wxT('/')) != wxNOT_FOUND || ext.length() > 4)
-    ext = inferAudioExtension(f->getBuffer(), f->getSize());
+  // Extension comes from the CONTENT first. A file with no listfile entry is handed to us under the
+  // synthetic name "File########.unk", whose extension is meaningless -- trusting it wrote real Ogg
+  // audio out as ".unk". Only fall back to the name when the header magic isn't recognised.
+  wxString ext = inferAudioExtension(f->getBuffer(), f->getSize());
+  if (ext.IsEmpty())
+  {
+    wxString fullname = q2w(f->fullname());
+    int dot = fullname.Find(wxT('.'), true);
+    if (dot != wxNOT_FOUND && dot + 1 < (int)fullname.length())
+      ext = fullname.Mid(dot + 1).Lower();
+    if (ext.Find(wxT('/')) != wxNOT_FOUND || ext.length() > 4 || ext == wxT("unk"))
+      ext.Clear();
+  }
   if (ext.IsEmpty())
     ext = wxT("bin");
 
@@ -482,6 +551,13 @@ void VoiceLinesDialog::OnExport(wxCommandEvent &)
     if (d != wxNOT_FOUND)
       bn = bn.Mid(0, d);
     base = sanitizeFileName(bn);
+  }
+  else if (e->source == "Candidate")
+  {
+    // Unattributed audition file: never borrow the loaded creature's name for it, or the exported
+    // filename would assert a link we have not proven.
+    base = sanitizeFileName(wxString::Format(wxT("candidate_sk%d_fdid%d_unverified"),
+        e->soundKitId, e->fileDataId));
   }
   else
   {
@@ -506,7 +582,11 @@ void VoiceLinesDialog::OnExport(wxCommandEvent &)
   {
     fwrite(f->getBuffer(), 1, f->getSize(), out);
     fclose(out);
-    SetStatus(wxT("Exported: ") + path);
+    // Exporting means you dealt with this one: mark it listened-to so the row turns red.
+    SetReviewed(e->fileDataId, true);
+    long sel = m_list->GetNextItem(-1, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED);
+    if (sel != -1) ApplyRowColour(sel, e->fileDataId);
+    SetStatus(wxT("Exported (marked listened): ") + path);
   }
   else
   {

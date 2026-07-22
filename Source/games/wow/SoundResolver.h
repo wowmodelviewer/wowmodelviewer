@@ -58,6 +58,14 @@ public:
   static std::vector<VoiceLineEntry> resolveCreatureVoiceFolder(const QString & modelPath,
                                                                 const QString & creatureName = QString());
 
+  // Debug/research only -- load an audition list of UNATTRIBUTED audio (the manifest.csv written
+  // by the unnamed-batch export) so those files can be played/exported inside the browser. Opt-in:
+  // point the WMV_VL_CANDIDATES environment variable at the CSV. When it is unset nothing loads and
+  // the dialog is unchanged. Entries use source "Candidate" and are deliberately NOT attached to any
+  // creature -- they are batch-mates of unknown character, never a confirmed attribution.
+  // CSV columns (first four are read): index, FileDataID, SoundKitID, original_path.
+  static std::vector<VoiceLineEntry> loadCandidateList(const QString & csvPath);
+
   // V3 source #4 -- Encounter Dialogue. A raid boss's VO folder is named after the BOSS, not the
   // model: creature/ogresecurity/ogresecurity.m2 is "Mug'Zee, Heads of Security", whose speech
   // lives in sound/creature/mug/ + sound/creature/zee/. The only shipped link is

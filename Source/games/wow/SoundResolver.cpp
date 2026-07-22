@@ -8,6 +8,7 @@
 #include "GameFolder.h"   // getFilesForFolder
 #include "GameFile.h"
 
+#include <QFile>
 #include <QStringList>
 
 #include <algorithm>
@@ -222,6 +223,42 @@ std::vector<VoiceLineEntry> SoundResolver::resolveCreatureVoiceFolder(const QStr
 {
   // V2: only vo_*.ogg. SoundKitID is reverse-resolved per file inside the shared scanner.
   return scanCreatureFolder(modelPath, creatureName, "vo_", "CreatureVoiceFolder", "Voice Line", "VO");
+}
+
+std::vector<VoiceLineEntry> SoundResolver::loadCandidateList(const QString & csvPath)
+{
+  std::vector<VoiceLineEntry> out;
+  QFile f(csvPath);
+  if (csvPath.isEmpty() || !f.open(QIODevice::ReadOnly | QIODevice::Text))
+    return out;
+
+  while (!f.atEnd())
+  {
+    const QString line = QString::fromUtf8(f.readLine()).trimmed();
+    if (line.isEmpty() || line.startsWith("index", Qt::CaseInsensitive) || line.startsWith("#"))
+      continue;                                  // header / comment
+    const QStringList c = line.split(',');       // only the first four columns are read
+    if (c.size() < 3)
+      continue;
+    bool okF = false, okK = false;
+    const int fdid = c[1].trimmed().toInt(&okF);
+    const int kit = c[2].trimmed().toInt(&okK);
+    if (!okF || fdid <= 0)
+      continue;
+
+    VoiceLineEntry e;
+    e.source = "Candidate";
+    e.category = "unverified";
+    e.fileDataId = fdid;
+    e.soundKitId = okK ? kit : soundKitForFile(fdid);
+    const QString p = (c.size() > 3) ? c[3].trimmed() : QString();
+    if (!p.isEmpty() && p != "(unnamed)")
+      e.filePath = p;                            // keep a real path if the list had one
+    e.variation = (int)out.size() + 1;
+    e.label = "cand " + QString::number(e.variation);
+    out.push_back(e);
+  }
+  return out;
 }
 
 std::vector<VoiceLineEntry> SoundResolver::resolveEncounterDialogue(int modelFileDataId,

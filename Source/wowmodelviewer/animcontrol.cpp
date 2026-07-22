@@ -295,6 +295,9 @@ void AnimControl::UpdateModel(WoWModel *m)
     m_voiceFolderLines = SoundResolver::resolveCreatureVoiceFolder(m->gamefile->fullname(), base);
     m_audioFolderLines = SoundResolver::resolveCreatureAudioFolder(m->gamefile->fullname(), base);
     m_encounterLines = SoundResolver::resolveEncounterDialogue(m->gamefile->fileDataId());
+    // Debug/research audition list -- model-independent, opt-in via WMV_VL_CANDIDATES, and kept out
+    // of hasVoice below so the button's visibility rules are untouched.
+    m_candidateLines = SoundResolver::loadCandidateList(qEnvironmentVariable("WMV_VL_CANDIDATES"));
   }
   const bool hasVoice = !m_voiceLines.empty() || !m_voiceFolderLines.empty() || !m_audioFolderLines.empty() || !m_encounterLines.empty();
   btnVoiceLines->Show(hasVoice);
@@ -1221,7 +1224,8 @@ void AnimControl::OnVoiceLines(wxCommandEvent & WXUNUSED(event))
     name = wxString::FromUTF8(base.toStdString().c_str());
   }
 
-  VoiceLinesDialog dlg(this, name, m_voiceLines, m_voiceFolderLines, m_audioFolderLines, m_encounterLines);
+  VoiceLinesDialog dlg(this, name, m_voiceLines, m_voiceFolderLines, m_audioFolderLines, m_encounterLines,
+                       m_candidateLines);
   dlg.ShowModal();
 }
 

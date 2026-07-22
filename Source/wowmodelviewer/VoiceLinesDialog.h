@@ -19,6 +19,7 @@
 #include <wx/listctrl.h>
 
 #include <map>
+#include <set>
 #include <vector>
 
 #include "SoundResolver.h" // VoiceLineEntry
@@ -34,7 +35,8 @@ public:
                    const std::vector<VoiceLineEntry> & soundLines,
                    const std::vector<VoiceLineEntry> & voiceFolderLines,
                    const std::vector<VoiceLineEntry> & audioFolderLines,
-                   const std::vector<VoiceLineEntry> & encounterLines);
+                   const std::vector<VoiceLineEntry> & encounterLines,
+                   const std::vector<VoiceLineEntry> & candidateLines);
   ~VoiceLinesDialog();
 
   void OnSource(wxCommandEvent & event);   // switch between Creature Sounds / Voice Lines / Audio Folder
@@ -46,6 +48,7 @@ public:
   void OnStop(wxCommandEvent & event);
   void OnVolume(wxCommandEvent & event);
   void OnExport(wxCommandEvent & event);
+  void OnMarkReviewed(wxCommandEvent & event); // toggle the "already listened to" flag
   void OnCloseButton(wxCommandEvent & event);
   void OnClose(wxCloseEvent & event);
 
@@ -59,11 +62,18 @@ private:
   static wxString SourceLabel(const QString & source);     // friendly source name
   static wxString StatusLabel(int st);                     // playable/encrypted/missing/unknown
   int entryStatus(int fileDataId);                         // cached GAMEDIRECTORY.fileKeyStatus probe
+  // "Already listened to" marks. Kept by FileDataID and persisted next to the exe so a long
+  // audition session survives closing the dialog or restarting WMW. Reviewed rows draw in red.
+  void LoadReviewed();
+  void SaveReviewed();
+  void SetReviewed(int fileDataId, bool on);
+  void ApplyRowColour(long row, int fileDataId);
 
   wxString                     m_creatureName;
   std::vector<VoiceLineEntry>  m_soundLines;       // V1: Creature Sounds
   std::vector<VoiceLineEntry>  m_voiceFolderLines; // V2: Creature Voice Lines (sound/creature/<f>/vo_*)
   std::vector<VoiceLineEntry>  m_audioFolderLines; // V3: Creature Audio Folder (all *.ogg in the folder)
+  std::vector<VoiceLineEntry>  m_candidateLines;   // debug-only, unattributed audition list
   std::vector<VoiceLineEntry>  m_encounterLines;   // V3 #4: Encounter Dialogue (boss-named VO folders)
   std::vector<int>             m_filtered;          // list row -> index into the active source list
   std::map<int, int>           m_statusCache;       // FileDataID -> fileKeyStatus (probed once, reused)
@@ -80,6 +90,8 @@ private:
   wxButton *     m_play;
   wxButton *     m_stop;
   wxButton *     m_export;
+  wxButton *     m_mark;
+  std::set<int>  m_reviewed;
 
   static int s_sessionVolume; // 0..100, remembered across dialog opens for the session
 };

@@ -369,6 +369,24 @@ static void doHeadlessVoiceFolderProbe(int modelFileId)
   QString fl; for (std::set<QString>::iterator it = encFolders.begin(); it != encFolders.end(); ++it)
   { if (!fl.isEmpty()) fl += ","; fl += *it; }
   LOG_INFO << "[voicefolder]   folders=[" << fl << "]";
+  // Debug audition list (opt-in). Reported here so the CSV parser can be checked headlessly.
+  const QString candCsv = qEnvironmentVariable("WMV_VL_CANDIDATES");
+  if (!candCsv.isEmpty())
+  {
+    std::vector<VoiceLineEntry> cand = SoundResolver::loadCandidateList(candCsv);
+    int cp = 0, ck = 0;
+    for (size_t i = 0; i < cand.size(); ++i)
+    {
+      if (GAMEDIRECTORY.fileKeyStatus(cand[i].fileDataId) == 0) ++cp;
+      if (cand[i].soundKitId) ++ck;
+    }
+    LOG_INFO << "[voicefolder] Candidates (unverified): loaded=" << (int)cand.size()
+             << " playable=" << cp << " withSoundKitID=" << ck << " from " << candCsv;
+    for (size_t i = 0; i < cand.size() && i < 3; ++i)
+      LOG_INFO << "[voicefolder]   " << cand[i].label << " FileDataID=" << cand[i].fileDataId
+               << " SoundKitID=" << cand[i].soundKitId << " source=" << cand[i].source;
+  }
+
   for (size_t i = 0; i < enc.size() && i < 6; ++i)
   {
     int st = GAMEDIRECTORY.fileKeyStatus(enc[i].fileDataId);
