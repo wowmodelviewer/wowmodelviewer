@@ -105,7 +105,7 @@ void WMOGroup::initDisplayList()
 
   // WMW renders WoW vertices directly under a Z-up camera (same as M2 models), so WMO geometry
   // is NOT converted into the old WoWmapview Y-up space (x,z,-y) -- that conversion tipped WMOs
-  // 90 degrees relative to characters/wow.export. Keep bounds in the same direct space.
+  // 90 degrees relative to the characters. Keep bounds in the same direct space.
   b1 = glm::vec3(gh.box1[0], gh.box1[1], gh.box1[2]);
   b2 = glm::vec3(gh.box2[0], gh.box2[1], gh.box2[2]);
 
@@ -365,7 +365,7 @@ void WMOGroup::initDisplayList()
 
     // Resolve the batch's material index. Modern WMOs (8.1+) can have >256 materials, so when
     // batch flag 0x2 is set the index is the 16-bit value in the second bounding box (a[5] ==
-    // possibleBox2[2]); otherwise it's the 8-bit 'texture' field. Matches wow.export:
+    // possibleBox2[2]); otherwise it's the 8-bit 'texture' field. Matches the reference implementation:
     //   matID = (flags & 2) ? possibleBox2[2] : materialID
     // Using the 8-bit field unconditionally bound the wrong material -> wrong textures.
     const uint32 matID = (batch->flags & 0x2) ? batch->a[5] : batch->texture;
@@ -376,7 +376,7 @@ void WMOGroup::initDisplayList()
     // NOTE: a dead "build IndiceToVerts" loop used to live here. The array was allocated and
     // written but never read anywhere, and its `i <= batch->indexCount` bound wrote one element
     // past `new uint32[nIndices]` (for the last batch, index nIndices) -- the exact heap
-    // corruption that crashed on retail WMOs. wow.export has no such mapping; removed entirely.
+    // corruption that crashed on retail WMOs. The reference implementation has no such mapping; removed entirely.
 
     // setup texture
     glBindTexture(GL_TEXTURE_2D, mat->tex);

@@ -166,7 +166,7 @@ void FileControl::Init(ModelViewer* mv)
 
     // Hide WMO group + LOD files ("<name>_000.wmo", "..._000_lod1.wmo", etc.). They are not
     // standalone WMOs -- the root WMO references its groups internally -- so only roots are
-    // listed. Pattern is wow.export's LISTFILE_MODEL_FILTER 1:1.
+    // listed. Pattern mirrors the reference implementation's WMO group/LOD filter.
     if (filterMode == FILE_FILTER_WMO)
     {
       static const QRegularExpression wmoGroupLod("(_\\d\\d\\d_)|(_\\d\\d\\d\\.wmo$)|(lod\\d\\.wmo$)");

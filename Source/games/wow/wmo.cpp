@@ -296,7 +296,7 @@ WMO::WMO(QString name) :
   // Resolve material textures now that the whole root has been parsed. If a MOTX string
   // block was present (texbuf) this is a classic WMO and each material's nameStart is a byte
   // offset into it. Modern/retail WMOs ship no MOTX and instead store the texture's
-  // FileDataID directly in that field. (Mirrors wow.export's WMOLoader/WMOExporter, where
+  // FileDataID directly in that field. (Mirrors the reference implementation's WMO loader, where
   // isClassic == "MOTX present".)
   for (size_t i = 0; i < nTextures; i++) {
     WMOMaterial * m = &mat[i];
