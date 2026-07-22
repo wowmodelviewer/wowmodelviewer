@@ -133,7 +133,7 @@ def _collect_imported_materials(objects):
 
 def _separate_by_material(objects):
     """Split each imported multi-material mesh into one object per material, named after the
-    material. WoW exports a whole model as ONE mesh with many material slots, so isolating a part
+    material. A WoW model comes through as ONE mesh with many material slots, so isolating a part
     (e.g. hiding an effect plane) otherwise means a manual Edit-Mode 'Separate by Material'. Blender's
     separate preserves the armature modifier, parenting and vertex groups on every piece, so skinning
     still works. Returns the resulting mesh objects."""

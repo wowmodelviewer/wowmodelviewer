@@ -483,7 +483,7 @@ broken in 0.2.0.
   modern WoW. Modern WMOs reference their data by FileDataID rather than by name, which the
   classic loader didn't handle, so opening one previously crashed (it read a texture name from
   a null string block using a FileDataID as an offset). The loader now follows the same rules
-  wow.export uses: group files are opened via the root's `GFID` chunk (FileDataIDs) with the
+  the reference implementation uses: group files are opened via the root's `GFID` chunk (FileDataIDs) with the
   old `_NNN.wmo` naming as fallback; material textures are taken as FileDataIDs when no `MOTX`
   name block is present (otherwise the classic name-offset path); and doodad models are read
   from `MODI` FileDataIDs (otherwise `MODN` names). Classic WMOs still load exactly as before.
@@ -492,16 +492,16 @@ broken in 0.2.0.
   now ignored with a log message instead of dereferencing uninitialised counts/arrays.
   Render batches now resolve their material with the modern >256-material rule (when the batch
   flag `0x2` is set the 16-bit index in the batch's second bounding box is used instead of the
-  8-bit field), matching wow.export — previously the wrong material/texture was applied.
+  8-bit field), matching the reference implementation — previously the wrong material/texture was applied.
   The WMO file list now shows only **root** WMOs: group and LOD files (`<name>_000.wmo`,
   `..._000_lod1.wmo`, etc.) are hidden, since they aren't standalone objects (the root
-  references them). Uses wow.export's exact filter, so the list matches wow.export's count.
+  references them). Uses the reference implementation's exact filter, so the list matches its count.
   The camera now frames a WMO to fit the view when it loads (WMOs span hundreds-thousands of
   units, so they used to load filling/overflowing the screen); the max zoom-out distance was
   also raised from 150 so large WMOs can actually be framed.
   WMO orientation is fixed: the geometry was converted into an old Y-up coordinate space (a
   leftover `x,z,-y` swizzle) while the camera and M2 models are Z-up, so WMOs loaded tipped 90
-  degrees. They now render directly (Z-up), upright like in wow.export.
+  degrees. They now render directly (Z-up), upright like in the reference implementation.
 
 ### Changed
 - **Customization & Randomise are much faster / no longer freeze.** Changing a
@@ -552,7 +552,7 @@ broken in 0.2.0.
   (~0.5 units), which felt fine on a character but was painfully slow on WMOs that sit
   hundreds-to-thousands of units away. The wheel (and middle-drag) now zoom *multiplicatively*
   — each notch scales the orbit distance — so it's fast far out and precise up close at any
-  model size (hold **Shift** for finer steps), matching wow.export. Right-drag panning is now
+  model size (hold **Shift** for finer steps), matching the reference implementation. Right-drag panning is now
   proportional to the view distance for the same reason.
 
 ### Fixed
@@ -571,7 +571,7 @@ broken in 0.2.0.
   the group-geometry loader's latent memory bugs began corrupting the heap (Windows
   `0xc0000374`). The worst was a dead, never-read `IndiceToVerts` loop whose `i <= indexCount`
   bound wrote one element past its array on the last batch; it's removed entirely (matching
-  wow.export, which has no such structure). Also hardened every group chunk read to copy
+  the reference implementation, which has no such structure). Also hardened every group chunk read to copy
   exactly the allocated element bytes instead of the raw chunk size (`MOPY/MOVT/MONR/MOTV/
   MOBA/MOCV` — previously a non-multiple chunk size, or a stale/zero vertex count, overran the
   buffer), reset all per-group counts on load, bounds-checked the render loop
