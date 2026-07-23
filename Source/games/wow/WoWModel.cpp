@@ -1578,6 +1578,26 @@ void WoWModel::setLOD(int index)
   uint16 *texanimlookup = (uint16*)(gamefile->getBuffer() + header.ofsTexAnimLookup);
   int16 *texunitlookup = (int16*)(gamefile->getBuffer() + header.ofsTexUnitLookup);
 
+  // Opt-in geoset-visibility diagnostic (WMV_LEGACY_GEOSET_DUMP). Header + per-submesh dump so we
+  // can see, for a Legacy MPQ model with missing parts, exactly which submeshes exist, their raw
+  // vs masked geoset id, and whether the default display rule (id==0) hides them.
+  static const bool geosetDump = (getenv("WMV_LEGACY_GEOSET_DUMP") != NULL);
+  if (geosetDump)
+  {
+    const bool isMpq = (GAMEDIRECTORY.clientProfile().storage == core::StorageType::MPQ);
+    LOG_INFO << "[geodump] ==== " << qPrintable(name())
+             << " storage" << (isMpq ? "MPQ" : "CASC")
+             << "m2ver" << (int)header.version[0]
+             << "nVertices" << (int)header.nVertices
+             << "nViews" << (int)header.nViews
+             << "isChar" << (charModelDetails.isChar ? 1 : 0)
+             << "raceID" << infos.raceID
+             << "| skin" << qPrintable(g->fullname())
+             << "nSub" << (int)view->nSub
+             << "nTex" << (int)view->nTex
+             << "nTris" << (int)view->nTris;
+  }
+
   uint32 istart = 0;
   for (size_t i = 0; i < view->nSub; i++)
   {
@@ -1585,7 +1605,45 @@ void WoWModel::setLOD(int index)
     hdgeo->istart = istart;
     istart += hdgeo->icount;
     hdgeo->display = (hdgeo->id == 0);
+    if (geosetDump)
+      LOG_INFO << "[geodump]   submesh" << (int)i
+               << "rawId" << qPrintable(QString("0x%1").arg((uint)ops[i].id, 0, 16))
+               << "maskedId" << (int)hdgeo->id
+               << "vstart" << (int)hdgeo->vstart << "vcount" << (int)hdgeo->vcount
+               << "istart" << (int)hdgeo->istart << "icount" << (int)hdgeo->icount
+               << "nBones" << (int)hdgeo->nBones << "startBone" << (int)hdgeo->StartBones
+               << "defaultDisplay" << (hdgeo->display ? 1 : 0);
     rawGeosets.push_back(hdgeo);
+  }
+
+  // Legacy MPQ baked-model geoset visibility.
+  //
+  // Character geoset groups (hair 0xx, facial-hair 1xx, gloves 4xx, boots 5xx, ears 7xx, ...) appear
+  // not only on playable-character models but on character-BASED creature/NPC models -- e.g.
+  // creature/band/* (the L70ETC band: bandorcmale sings into a mic, bandtaurenmale has a full drum
+  // kit) and creature/akama. Loaded as plain models these are isChar=0, so refresh()'s character
+  // show-rules never run and the default display=(id==0) hides every non-zero-id submesh: the NPC
+  // renders bald / earless / missing its baked hair, beard and instruments.
+  //
+  // A creature model's non-zero geosets are the FIXED, additive parts of its one baked look, so every
+  // submesh should be drawn (a drum kit legitimately puts several additive pieces in the same group --
+  // that is not the same as a choice). A RAW character model (character/<race>/<sex>/*) instead carries
+  // MANY mutually-exclusive variants per group (13 hairstyles, 9 beards, ...) meant to be chosen one at
+  // a time via the character-customization path; showing them all overlaps into a garbled blob. The two
+  // cases are indistinguishable from geoset structure alone (both have several geosets per group), so
+  // scope this to creature models by location. Force every submesh visible for MPQ models under
+  // "creature/". Storage==MPQ only (Retail/CASC untouched); character/, item/ and world models keep the
+  // default rule (character customization still works); plain single-geoset creatures
+  // (chicken/wolf/kelthuzad, all id 0) are unaffected -- there is nothing hidden to reveal.
+  if ((GAMEDIRECTORY.clientProfile().storage == core::StorageType::MPQ)
+      && !charModelDetails.isChar
+      && name().startsWith("creature/", Qt::CaseInsensitive))
+  {
+    for (ModelGeosetHD * g : rawGeosets)
+      g->display = true;
+    if (geosetDump)
+      LOG_INFO << "[geodump]   -> legacy MPQ creature model: forcing all"
+               << (int)rawGeosets.size() << "submeshes visible";
   }
 
   restoreRawGeosets();
@@ -1909,6 +1967,25 @@ void WoWModel::setLOD(int index)
 
   std::sort(rawPasses.begin(), rawPasses.end(), &WoWModel::sortPasses);
   passes = rawPasses;
+
+  // Opt-in (WMV_LEGACY_GEOSET_DUMP): map each render pass to its target geoset and show whether the
+  // geoset's display flag (as set so far -- for a plain creature refresh() leaves the id==0 default)
+  // will let the pass render. A pass whose geoset displays=0 is silently skipped in init() -> a
+  // missing body part. This is the direct signal for the hidden-geoset bug.
+  if (geosetDump)
+  {
+    int shown = 0, hidden = 0;
+    for (ModelRenderPass * p : passes)
+    {
+      const bool disp = (p->geoIndex >= 0 && p->geoIndex < (int)geosets.size()) ? geosets[p->geoIndex]->display : false;
+      const int gid = (p->geoIndex >= 0 && p->geoIndex < (int)geosets.size()) ? (int)geosets[p->geoIndex]->id : -1;
+      if (disp) shown++; else hidden++;
+      LOG_INFO << "[geodump]   pass geoIndex" << p->geoIndex << "geosetId" << gid
+               << "display" << (disp ? 1 : 0) << (disp ? "(DRAWN)" : "(SKIPPED - hidden geoset)")
+               << "blend" << (int)p->blendmode << "tex" << (int)p->tex;
+    }
+    LOG_INFO << "[geodump] ==== " << qPrintable(name()) << " passes shown=" << shown << " hidden=" << hidden;
+  }
 
   // Opt-in (WMV_LEGACY_MATERIAL_DUMP): print the FINAL sorted draw order with the compositing
   // state, so pass ordering / blend / depth-write problems are visible independent of texture data.
