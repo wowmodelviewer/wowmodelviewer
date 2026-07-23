@@ -185,7 +185,12 @@ public:
   // LoadWoW path untouched.
   int LoadWoWFromMpq(const QString & dataFolder, const QString & locale = QString());
 
-  // File > Load Legacy MPQ Client... : folder picker -> LoadWoWFromMpq -> user feedback.
+  // Prompt for a legacy (pre-CASC) MoPaQ install and load it: folder picker -> LoadWoWFromMpq ->
+  // persist + user feedback. Shared by the File menu and the startup Client Choice so both behave
+  // identically. Returns archive count on success, 0 on failure (error shown), -1 if cancelled.
+  int PromptAndLoadLegacyMpqClient();
+
+  // File > Load Legacy MPQ Client... : thin wrapper over PromptAndLoadLegacyMpqClient().
   void OnLoadLegacyMpq(wxCommandEvent & event);
 
   // Last legacy-MPQ folder the user picked (persisted in the session config).

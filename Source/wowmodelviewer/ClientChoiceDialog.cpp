@@ -268,24 +268,13 @@ void ClientChoiceDialog::onLoad(wxCommandEvent &)
   EndModal(wxID_OK);
 }
 
-// Legacy (pre-CASC) client: pick a MoPaQ install and hand the folder back to the caller, which
-// loads it through ModelViewer::LoadWoWFromMpq (auto-detects Data + locale). No .build.info needed.
-// If the folder already chosen above is valid, reuse it; otherwise browse for one.
+// Legacy (pre-CASC) client: only record the intent and close. The caller (app.cpp) then runs
+// ModelViewer::PromptAndLoadLegacyMpqClient(), which shows the folder picker and loads -- the exact
+// same path as File -> Load Legacy MPQ Client... The folder is deliberately NOT chosen here: the
+// field above holds the Retail/CASC folder (no MPQ archives), so the picker must run afresh.
 void ClientChoiceDialog::onLegacyMpq(wxCommandEvent &)
 {
-  wxString folder = m_folder ? m_folder->GetValue() : wxString();
-  if (folder.IsEmpty() || !wxDirExists(folder))
-  {
-    const wxString start = (!folder.IsEmpty() && wxDirExists(folder)) ? folder : wxT("C:\\");
-    folder = wxDirSelector(
-      wxT("Select a legacy (pre-CASC) WoW folder -- the WoW install folder or its Data folder"),
-      start, wxDD_DEFAULT_STYLE, wxDefaultPosition, this);
-    if (folder.IsEmpty())
-      return; // cancelled -> stay on the client-choice dialog
-  }
-
   m_legacyMpq = true;
-  m_mpqFolder = folder;
   EndModal(wxID_OK);
 }
 

@@ -757,16 +757,11 @@ bool WowModelViewApp::OnInit()
 
       if (clientDlg.isLegacyMpq())
       {
-        // Legacy (pre-CASC) MoPaQ client -- same path as File -> Load Legacy MPQ Client...
-        // (auto-detects the Data subfolder and locale). Retail/CASC startup is untouched.
-        const QString mpqFolder = QString::fromWCharArray(clientDlg.mpqFolder().c_str());
-        if (frame->LoadWoWFromMpq(mpqFolder, QString()) <= 0) // empty locale -> auto-detect
-        {
-          wxMessageBox(wxT("No MPQ archives were found in that folder.\n\nPick the WoW install folder "
-                           "or its Data folder (the one containing common.MPQ, patch.MPQ, ...)."),
-                       wxT("No legacy MPQ client found"), wxOK | wxICON_ERROR, frame);
-          continue; // back to the client-choice dialog
-        }
+        // Legacy (pre-CASC) MoPaQ client -- the shared helper shows the folder picker and loads it
+        // (auto-detects Data subfolder + locale), exactly like File -> Load Legacy MPQ Client...
+        // <=0 means cancelled or no archives (the helper shows its own error) -> back to the picker.
+        if (frame->PromptAndLoadLegacyMpqClient() <= 0)
+          continue;
       }
       else
       {

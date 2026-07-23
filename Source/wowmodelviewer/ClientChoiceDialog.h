@@ -32,10 +32,9 @@ public:
   QString selectedProfile() const;                  // schema dir name, e.g. "12.0" ("" = auto)
 
   // Legacy MPQ path: when true, the user chose "Legacy MPQ client" instead of a modern CASC
-  // product. The caller loads mpqFolder() via ModelViewer::LoadWoWFromMpq (the same code path as
-  // File -> Load Legacy MPQ Client...); locale is auto-detected. The CASC fields above are unused.
-  bool     isLegacyMpq() const { return m_legacyMpq; }
-  wxString mpqFolder()   const { return m_mpqFolder; } // WoW root or Data folder (either works)
+  // product. The caller then runs ModelViewer::PromptAndLoadLegacyMpqClient() (folder picker +
+  // load), the same code path as File -> Load Legacy MPQ Client... The CASC fields above are unused.
+  bool isLegacyMpq() const { return m_legacyMpq; }
 
 private:
   void buildUI(const wxString & initialRoot);
@@ -62,7 +61,6 @@ private:
   wxString                      m_dataPath;
 
   bool                          m_legacyMpq;   // user picked the Legacy MPQ option
-  wxString                      m_mpqFolder;   // chosen legacy folder (root or Data)
 
   DECLARE_EVENT_TABLE()
 };

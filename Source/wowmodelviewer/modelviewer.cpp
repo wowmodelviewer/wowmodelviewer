@@ -2060,17 +2060,19 @@ int ModelViewer::LoadWoWFromMpq(const QString & dataFolder, const QString & loca
   return archives;
 }
 
-void ModelViewer::OnLoadLegacyMpq(wxCommandEvent & WXUNUSED(event))
+int ModelViewer::PromptAndLoadLegacyMpqClient()
 {
   const wxString defaultDir = m_lastMpqFolder.isEmpty()
                             ? wxString()
                             : wxString(m_lastMpqFolder.toStdWString());
 
+  // ALWAYS prompt for the folder first -- never assume a path (the startup dialog's field holds
+  // the Retail/CASC folder, which has no MPQ archives).
   wxDirDialog dlg(this,
-    _("Select a legacy (pre-CASC) WoW folder -- the WoW install folder or its Data folder"),
+    _("Select WoW install folder or Data folder (containing common.MPQ, expansion.MPQ, ...)"),
     defaultDir, wxDD_DEFAULT_STYLE | wxDD_DIR_MUST_EXIST);
   if (dlg.ShowModal() != wxID_OK)
-    return;
+    return -1; // cancelled -> no error; caller stays where it was
 
   const wxString path = dlg.GetPath();
   const QString qpath = QString::fromWCharArray(path.c_str());
@@ -2089,7 +2091,7 @@ void ModelViewer::OnLoadLegacyMpq(wxCommandEvent & WXUNUSED(event))
                          "Data folder (the one containing common.MPQ, patch.MPQ, ...)."), path),
       _("No legacy MPQ client found"), wxOK | wxICON_ERROR, this);
     SetStatusText(_("No MPQ archives found."));
-    return;
+    return 0; // invalid folder -> error already shown
   }
 
   // Persist the chosen folder for next launch (also written in SaveSession).
@@ -2116,6 +2118,12 @@ void ModelViewer::OnLoadLegacyMpq(wxCommandEvent & WXUNUSED(event))
     path);
   wxMessageBox(msg, _("Legacy MPQ client loaded"), wxOK | wxICON_INFORMATION, this);
   SetStatusText(wxString::Format(_("Legacy MPQ client loaded (%d archives)"), archives));
+  return archives;
+}
+
+void ModelViewer::OnLoadLegacyMpq(wxCommandEvent & WXUNUSED(event))
+{
+  PromptAndLoadLegacyMpqClient();
 }
 
 void ModelViewer::LoadWoW(const core::GameConfig * chosenConfig, const QString & profileOverride, bool showProgress)
