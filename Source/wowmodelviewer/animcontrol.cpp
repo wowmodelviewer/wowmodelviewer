@@ -11,6 +11,7 @@
 #include "UserSkins.h"
 #include "util.h"
 #include "WoWDatabase.h"
+#include "WotlkDbc.h"
 #include "WMOGroup.h"
 
 
@@ -645,6 +646,45 @@ bool AnimControl::UpdateCreatureModel(WoWModel *m)
 
   LOG_INFO << "Found" << skins.size() << "skins (Database)";
 
+  // WotLK legacy (MPQ) clients have an empty GAMEDATABASE, so the modern query above returns
+  // nothing. Resolve the creature's intended skin variations from the WotLK .dbc files instead and
+  // insert them as *defined* textures. The skin list is a std::set (alphabetical) used for the
+  // dropdown + de-duplication, so we ALSO remember the first valid DB result and select it as the
+  // default below -- otherwise the alphabetically-first skin would win. MPQ-only; Retail untouched.
+  TextureGroup wotlkDefaultSkin;
+  bool haveWotlkDefault = false;
+  if (skins.empty() && GAMEDIRECTORY.clientProfile().storage == core::StorageType::MPQ)
+  {
+    std::vector<wow::WotlkDbc::CreatureSkin> dbcSkins;
+    if (wow::WotlkDbc::instance().resolveCreatureSkins(m->itemName(), dbcSkins))
+    {
+      // dbcSkins are in CreatureDisplayInfo file order, so the first valid one is the DB default.
+      for (const wow::WotlkDbc::CreatureSkin & ds : dbcSkins)
+      {
+        TextureGroup grp;
+        grp.base = TEXTURE_GAMEOBJECT1;
+        grp.definedTexture = true;
+        int c = 0;
+        for (int i = 0; i < 3; i++)
+        {
+          if (!ds.tex[i].isEmpty())
+          {
+            GameFile * tex = GAMEDIRECTORY.getFile(ds.tex[i]);
+            if (tex) { grp.tex[i] = tex; alreadyUsedTextures.insert(tex); c++; }
+          }
+        }
+        grp.count = c;
+        if (grp.tex[0] != 0 && std::find(skins.begin(), skins.end(), grp) == skins.end())
+        {
+          skins.insert(grp);
+          if (!haveWotlkDefault) { wotlkDefaultSkin = grp; haveWotlkDefault = true; }
+        }
+      }
+      count = (int)skins.size();
+      LOG_INFO << "Found" << skins.size() << "skins (WotLK DBC)";
+    }
+  }
+
   // Search the model's directory for all BLPs:
   std::vector<GameFile *> folderFiles;
 
@@ -715,7 +755,23 @@ bool AnimControl::UpdateCreatureModel(WoWModel *m)
 
     if (ret)
     { // Don't call SetSkin without a skin
-      int mySkin = useRandomLooks ? randint(0, (int)count-1) : 0;
+      // WotLK: deterministically default to the first DB display's skin (found by matching the
+      // remembered group in the alphabetically-ordered list), taking precedence over random-looks
+      // so a legacy creature shows its intended DB skin. Retail is unaffected (haveWotlkDefault
+      // is only ever set on the MPQ path).
+      int mySkin = -1;
+      if (haveWotlkDefault)
+      {
+        const int listCount = skinList->GetCount();
+        for (int i = 0; i < listCount; i++)
+          if (wotlkDefaultSkin == *(static_cast<TextureGroup *>(skinList->GetClientData(i))))
+          {
+            mySkin = i;
+            break;
+          }
+      }
+      if (mySkin < 0)
+        mySkin = useRandomLooks ? randint(0, (int)count - 1) : 0;
       SetSkin(mySkin);
     }
   }
@@ -852,6 +908,39 @@ bool AnimControl::UpdateItemModel(WoWModel *m)
 
   LOG_INFO << "Found" << skins.size() << "skins (Database)";
 
+  // WotLK legacy (MPQ): resolve the component's texture(s) from ItemDisplayInfo.dbc (matched by
+  // model file name -> ModelTexture base name) when the modern DB returned nothing. The DBC gives
+  // the exact texture name, which the folder-name heuristic below can miss. texPaths are in
+  // ItemDisplayInfo file order, so the first valid one is the default (remembered + selected
+  // below, rather than the alphabetical list index 0). MPQ-only; Retail untouched.
+  TextureGroup wotlkDefaultSkin;
+  bool haveWotlkDefault = false;
+  if (skins.empty() && GAMEDIRECTORY.clientProfile().storage == core::StorageType::MPQ)
+  {
+    std::vector<QString> texPaths;
+    if (wow::WotlkDbc::instance().resolveItemTextures(m->itemName(), texPaths))
+    {
+      for (const QString & tp : texPaths)
+      {
+        GameFile * tex = GAMEDIRECTORY.getFile(tp);
+        if (!tex)
+          continue;
+        TextureGroup grp;
+        grp.base = TEXTURE_OBJECT_SKIN;
+        grp.definedTexture = true;
+        grp.count = 1;
+        grp.tex[0] = tex;
+        alreadyUsedTextures.insert(tex);
+        if (std::find(skins.begin(), skins.end(), grp) == skins.end())
+        {
+          skins.insert(grp);
+          if (!haveWotlkDefault) { wotlkDefaultSkin = grp; haveWotlkDefault = true; }
+        }
+      }
+      LOG_INFO << "Found" << skins.size() << "skins (WotLK DBC)";
+    }
+  }
+
   // get all blp files that correspond to the model
   std::set<GameFile *> files;
 
@@ -932,8 +1021,23 @@ bool AnimControl::UpdateItemModel(WoWModel *m)
 
     if (ret)
     {
-      // Don't call SetSkin without a skin
-      int mySkin = useRandomLooks ? randint(0, (int)skins.size()-1) : 0;
+      // Don't call SetSkin without a skin.
+      // WotLK: deterministically default to the first ItemDisplayInfo texture (found by matching the
+      // remembered group in the alphabetically-ordered list), taking precedence over random-looks.
+      // Retail is unaffected (haveWotlkDefault is only ever set on the MPQ path).
+      int mySkin = -1;
+      if (haveWotlkDefault)
+      {
+        const int listCount = skinList->GetCount();
+        for (int i = 0; i < listCount; i++)
+          if (wotlkDefaultSkin == *(static_cast<TextureGroup *>(skinList->GetClientData(i))))
+          {
+            mySkin = i;
+            break;
+          }
+      }
+      if (mySkin < 0)
+        mySkin = useRandomLooks ? randint(0, (int)skins.size() - 1) : 0;
       SetSkin(mySkin);
     }
   }

@@ -9,6 +9,7 @@
 
 #include "Attachment.h"
 #include "CASCFile.h"
+#include "ClientProfile.h" // core::StorageType (skip legacy-format particle/ribbon emitters)
 #include "Game.h"
 #include "GlobalSettings.h"
 #include "ModelColor.h"
@@ -1216,8 +1217,15 @@ void WoWModel::initAnimated()
       events[i].init(edefs[i]);
   }
 
+  // Legacy (pre-CASC) M2 files use an older particle/ribbon emitter struct layout than the modern
+  // M2ParticleDef / ModelRibbonEmitterDef that WMV parses. Reading those chunks out of a WotLK 3.3.5
+  // M2 yields garbage fields/offsets and crashes ParticleSystem::init (out-of-range bone/emitter/
+  // animation-track). Legacy support is model-viewing only (particle FX are a later milestone), so
+  // skip emitter parsing for MPQ clients. Retail (CASC) is unaffected.
+  const bool legacyMpqModel = (GAMEDIRECTORY.clientProfile().storage == core::StorageType::MPQ);
+
   // particle systems
-  if (header.nParticleEmitters)
+  if (header.nParticleEmitters && !legacyMpqModel)
   {
     M2ParticleDef *pdefs = (M2ParticleDef *)(gamefile->getBuffer() + header.ofsParticleEmitters);
     M2ParticleDef *pdef;
@@ -1236,8 +1244,8 @@ void WoWModel::initAnimated()
     }
   }
 
-  // ribbons
-  if (header.nRibbonEmitters)
+  // ribbons (same legacy-format caveat as particle emitters above)
+  if (header.nRibbonEmitters && !legacyMpqModel)
   {
     ModelRibbonEmitterDef *rdefs = (ModelRibbonEmitterDef *)(gamefile->getBuffer() + header.ofsRibbonEmitters);
     ribbons.resize(header.nRibbonEmitters);
@@ -1592,6 +1600,68 @@ void WoWModel::setLOD(int index)
     uint texCount = Tex[j].op_count;
     if (texCount > 4) texCount = 4; // combiner arrays (uvSource[4], tex2..tex4) hold at most 4
 
+    // Legacy MPQ (WotLK-era) material resolver -- reproduce how retail renders these models.
+    //
+    // Pre-Legion M2 does not use the modern shaderId (0x8000 -> SHADER_ARRAY) system. Its per-unit
+    // UV routing lives in the texture-unit lookup table (texunitlookup[], indexed by
+    // ModelTexUnit.texunit): value 0 = the model's T1 UVs, 1 = T2, -1 = ENVIRONMENT sphere-map (the
+    // WotLK reflection signal). The modern decoder ignores that table and derives uvSource from the
+    // shaderId-based vertex-shader name; on an old M2 shaderId is 0, giving "Diffuse_T1_T1" ->
+    // uvSource {0,0}, so a reflective body (e.g. creature/aetherserpentmount: tex0 = the skin on T1,
+    // tex1 = armorreflect4.blp with texunitlookup == -1 = ENV) had its reflection unit sampled with
+    // the body's own T1 UVs and multiplied into the skin, washing it white.
+    //
+    // We derive uvSource from texunitlookup, then map each pass to the shader retail uses for that
+    // pass type so a backported model renders like its retail counterpart rather than like the raw
+    // (harsh, double-reflected) WotLK approximation:
+    //   * opaque reflective body (blend 0, T1+Env)  -> pixelShader 12 (base-preserving Mod2xNA_Alpha,
+    //     retail's env body shader) in a SINGLE pass; the separate WotLK alpha env-overlay pass is
+    //     dropped (see below) so the body is not reflected twice.
+    //   * additive glow / trail (blend 3/4)         -> pixelShader 6 with the second unit on T2, not
+    //     env (retail's trails are T1*T2, not sphere-mapped).
+    //   * a genuinely degraded multi-texture unit with no env unit falls back to the single base
+    //     texture, so the skin is never washed.
+    // Retail/CASC and modern (combiner-era) M2 are byte-identical: every branch is storage==MPQ only,
+    // and native single-texture WotLK creatures (no multi-texture / no env unit) are untouched.
+    const bool legacyMpqMaterial = (GAMEDIRECTORY.clientProfile().storage == core::StorageType::MPQ);
+    uint shaderTexCount   = texCount;
+    uint legacyUvSource[4] = { 0, 1, 3, 3 };  // defaults mirror ModelRenderPass ctor
+    bool legacyUseTUL      = false;           // did we derive uvSource from texunitlookup?
+    bool legacyHasEnv      = false;           // any unit routed to the env sphere-map?
+    if (legacyMpqMaterial)
+    {
+      const int tu   = (int)Tex[j].texunit;
+      const int nTUL = (int)header.nTexUnitLookup;
+      auto tulUv = [&](int unit) -> uint {
+        const int idx = tu + unit;
+        if (idx < 0 || idx >= nTUL) return 0;   // no table entry -> plain T1
+        const int v = (int)texunitlookup[idx];
+        if (v < 0)  return 2;                    // -1 => environment sphere-map
+        if (v == 1) return 1;                    // T2
+        if (v == 2) return 3;                    // T3
+        return 0;                                // 0 / unknown => T1
+      };
+      // Route as many units as the material loads (op_count), plus unit 0 for single-texture
+      // materials whose own texunit may itself be an env slot (the reflective overlay passes).
+      const uint units = (texCount < 1u) ? 1u : texCount;
+      for (uint u = 0; u < units && u < 4u; u++)
+      {
+        legacyUvSource[u] = tulUv((int)u);
+        if (legacyUvSource[u] == 2) legacyHasEnv = true;
+      }
+      legacyUseTUL = true;
+      // Degraded multi-texture with no env unit: keep the base skin (single-texture) rather than
+      // inventing a T1_T1 combine that would wash it out. (Evaluated before the additive reroute
+      // below so an env trail is still recognised as multi-texture here.)
+      if (texCount > 1u && !legacyHasEnv)
+        shaderTexCount = 1u;
+      // Additive glow / trail passes: retail renders these as T1*T2 (not sphere-mapped). Route the
+      // second unit to T2 so it is not env; the pixelShader override (below) picks ps6 to match.
+      const int legacyBlend = (int)renderFlags[Tex[j].flagsIndex].blend;
+      if (shaderTexCount > 1u && (legacyBlend == 3 || legacyBlend == 4))
+        legacyUvSource[1] = 1u;
+    }
+
     // Bounds-checked lookups: textureid + k indexes texlookup[] (size header.nTexLookup)
     // and its result indexes specialTextures[] -- guard both so a malformed multi-texture
     // unit can't over-read past those buffers (the +k accesses are new with the combiner).
@@ -1614,7 +1684,7 @@ void WoWModel::setLOD(int index)
       }
     }
 
-    pass->textureCount = (int)texCount;
+    pass->textureCount = (int)shaderTexCount;
 
     // Shader-mapping layer, step 1: resolve the Blizzard pixel/vertex shader + per-unit UV
     // routing for EVERY material (single- AND multi-texture) from its shader_id. This is pure
@@ -1630,16 +1700,32 @@ void WoWModel::setLOD(int index)
     const int shaderID = (int)Tex[j].shading;
     std::string vsNameDbg;
     {
-      const std::string psName = getPixelShaderName((int)texCount, shaderID);
-      const std::string vsName = getVertexShaderName((int)texCount, shaderID);
+      const std::string psName = getPixelShaderName((int)shaderTexCount, shaderID);
+      const std::string vsName = getVertexShaderName((int)shaderTexCount, shaderID);
       vsNameDbg = vsName;
       pass->pixelShader = pixelShaderNameToId(psName);
       pass->vertexShader = vertexShaderNameToId(vsName);
-      if (texCount > 1 || singleCombiner)
+      if (legacyUseTUL)
+      {
+        // Legacy MPQ: UV routing comes from the file's texunitlookup (env == -1), not the
+        // shaderId-derived vertex-shader name (which is meaningless on a pre-0x8000 M2).
+        for (int u = 0; u < 4; u++)
+          pass->uvSource[u] = (int8)legacyUvSource[u];
+      }
+      else if (shaderTexCount > 1 || singleCombiner)
         uvSourceForVSName(vsName, pass->uvSource);
+
+      // Match retail's pixel shader per pass type (see the resolver comment above). Only multi-texture
+      // legacy passes are remapped; single-texture and non-MPQ passes keep getPixelShaderName's result.
+      if (legacyMpqMaterial && shaderTexCount > 1)
+      {
+        const int b = (int)renderFlags[Tex[j].flagsIndex].blend;
+        if (b == 0)                 pass->pixelShader = 12;  // opaque reflective body: retail base-preserving env
+        else if (b == 3 || b == 4)  pass->pixelShader = 6;   // additive glow / trail: retail T1*T2
+      }
     }
 
-    if (texCount > 1)
+    if (shaderTexCount > 1)
     {
       // Multi-texture material: bind the extra textures in natural order so the fragment
       // combiner can reproduce them (single-texture units keep the special-skin texOffset).
@@ -1670,6 +1756,14 @@ void WoWModel::setLOD(int index)
 
     // Use environmental reflection effects?
     pass->useEnvMap = (texunitlookup[Tex[j].texunit] == -1) && pass->billboard && rf.blend > 2; //&& rf.blend<5;
+
+    // Legacy MPQ: a single-texture unit can itself be an env slot (texunitlookup == -1) -- the
+    // WotLK reflective overlay passes (e.g. aetherserpentmount's alpha-blended sphere-map shimmer).
+    // Honor that directly (independent of billboard / additive blend) so the single texture is
+    // sphere-mapped through the fixed-function env path. Multi-texture env is handled per-unit in
+    // the GLSL combiner via uvSource==2, so this only kicks in for single-texture env units.
+    if (legacyMpqMaterial && shaderTexCount == 1u && legacyUvSource[0] == 2)
+      pass->useEnvMap = true;
 
     // Disable environmental mapping if its been unchecked.
     if (pass->useEnvMap && !video.useEnvMapping)
@@ -1705,7 +1799,7 @@ void WoWModel::setLOD(int index)
         if (a0 < nAnims)
           pass->texanim = a0;
       }
-      if (texCount > 1 && base + 1 < nLookup)
+      if (shaderTexCount > 1 && base + 1 < nLookup)
       {
         const uint16 a1 = texanimlookup[base + 1];
         if (a1 < nAnims)
@@ -1720,7 +1814,7 @@ void WoWModel::setLOD(int index)
     // shader is non-trivial: pixelShader ids 0/1 are Combiners_Opaque/Combiners_Mod, identical to
     // plain fixed-function modulate, so they always stay on the fast fixed path. Blend modes we do
     // not confidently map (mod / mod2x / blend-7) stay M2SV_FALLBACK == the legacy fixed path.
-    if (texCount > 1)
+    if (shaderTexCount > 1)
       pass->m2Variant = M2SV_COMBINER;
     else if (singleCombiner && pass->pixelShader > 1)         // >1 => not plain Opaque/Mod
       pass->m2Variant = M2SV_COMBINER_SINGLE;
@@ -1755,12 +1849,86 @@ void WoWModel::setLOD(int index)
                << "texanim" << (int)pass->texanim
                << "=> variant" << ModelRenderPass::m2VariantName(pass->m2Variant);
 
+    // Deep legacy/backport material dump (opt-in: WMV_LEGACY_MATERIAL_DUMP). Prints the RAW
+    // WotLK material data -- M2 version, the texture-unit lookup values (the pre-shaderId env
+    // signal: texunitlookup[texunit+k] == -1 means environment mapping), and every texture the
+    // unit loads (op_count textures starting at textureid) with its type + filename -- so we can
+    // decide whether the file itself says the second texture is an env/reflection layer.
+    static const bool legacyMatDump = (getenv("WMV_LEGACY_MATERIAL_DUMP") != NULL);
+    if (legacyMatDump)
+    {
+      const int tu = (int)Tex[j].texunit;
+      const int nTUL = (int)header.nTexUnitLookup;
+      auto tulAt = [&](int idx) -> int { return (idx >= 0 && idx < nTUL) ? (int)texunitlookup[idx] : -999; };
+      LOG_INFO << "[legacymat]" << qPrintable(name())
+               << "m2ver" << (int)header.version[0]
+               << "| geoset" << (int)Tex[j].op
+               << "shading" << qPrintable(QString("0x%1").arg((uint)Tex[j].shading, 0, 16))
+               << "op_count" << (int)Tex[j].op_count
+               << "flagsIdx" << (int)Tex[j].flagsIndex
+               << "blend" << (int)rf.blend
+               << "rfFlags" << qPrintable(QString("0x%1").arg((uint)rf.flags, 0, 16))
+               << "texunit" << tu
+               << "nTexUnitLookup" << nTUL
+               << "TUL[tu]" << tulAt(tu)
+               << "TUL[tu+1]" << tulAt(tu + 1)
+               << "textureid" << (int)Tex[j].textureid
+               << "prio" << (int)Tex[j].priorityPlane
+               << "twoSided" << (pass->cull ? 0 : 1)         // pass->cull==true => culling ENABLED (one-sided)
+               << "noZWrite" << (pass->noZWrite ? 1 : 0)
+               << "useEnvMap" << (pass->useEnvMap ? 1 : 0)
+               << "ps" << pass->pixelShader
+               << "opacityIdx" << (int)pass->opacity;
+      const uint dumpN = (Tex[j].op_count > 4) ? 4u : (uint)Tex[j].op_count;
+      for (uint k = 0; k < dumpN; k++)
+      {
+        const uint slot = texLk(Tex[j].textureid + k);
+        const int typ = (slot < (uint)header.nTextures) ? (int)texdef[slot].type : -2;
+        QString fn = (typ == 0) ? QString((char*)(gamefile->getBuffer() + texdef[slot].nameOfs))
+                                : QString("(special type %1)").arg(typ);
+        LOG_INFO << "[legacymat]      tex[" << (int)k << "] lookupSlot" << (int)slot
+                 << "texdefType" << typ
+                 << "texFlags" << qPrintable(QString("0x%1").arg((slot < (uint)header.nTextures) ? (uint)texdef[slot].flags : 0u, 0, 16))
+                 << "file" << qPrintable(fn);
+      }
+    }
+
+    // Retail draws the reflective body as ONE env pass (the base-preserving ps12 above folds the
+    // reflection in) and has no separate single-texture env alpha-overlay pass. The WotLK backport
+    // authors that reflection as an extra alpha-blended sphere-map overlay of the base skin; keeping
+    // it would reflect the body twice (the "aggressive cyan"). Drop those redundant legacy overlays.
+    if (legacyMpqMaterial && pass->textureCount == 1 && pass->useEnvMap && pass->blendmode == 2)
+    {
+      delete pass;
+      continue;
+    }
+
     rawPasses.push_back(pass);
   }
   g->close();
 
   std::sort(rawPasses.begin(), rawPasses.end(), &WoWModel::sortPasses);
   passes = rawPasses;
+
+  // Opt-in (WMV_LEGACY_MATERIAL_DUMP): print the FINAL sorted draw order with the compositing
+  // state, so pass ordering / blend / depth-write problems are visible independent of texture data.
+  static const bool legacyOrderDump = (getenv("WMV_LEGACY_MATERIAL_DUMP") != NULL);
+  if (legacyOrderDump)
+  {
+    int drawIdx = 0;
+    for (ModelRenderPass * p : passes)
+      LOG_INFO << "[legacyorder]" << qPrintable(name())
+               << "draw#" << drawIdx++
+               << "geoset" << p->geoIndex
+               << "blend" << (int)p->blendmode
+               << "noZWrite" << (p->noZWrite ? 1 : 0)
+               << "twoSided" << (p->cull ? 0 : 1)
+               << "env" << (p->useEnvMap ? 1 : 0)
+               << "texCount" << p->textureCount
+               << "ps" << p->pixelShader
+               << "uvSrc" << (int)p->uvSource[0] << (int)p->uvSource[1]
+               << "specialTex" << (int)p->specialTex;
+  }
 }
 
 bool WoWModel::sortPasses(ModelRenderPass* mrp1, ModelRenderPass* mrp2)

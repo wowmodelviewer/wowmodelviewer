@@ -57,6 +57,11 @@ macro(use_casclib)
   list(APPEND extralibs casc_static)
 endmacro()
 
+macro(use_stormlib)
+  include_directories(${CMAKE_SOURCE_DIR}/ThirdParty/stormlib/src)
+  list(APPEND extralibs storm)
+endmacro()
+
 macro(use_sqlite)
   list(APPEND src sqlite3.c)
 endmacro()

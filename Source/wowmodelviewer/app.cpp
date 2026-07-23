@@ -269,7 +269,7 @@ bool WowModelViewApp::OnInit()
     QString a = QString::fromWCharArray(argv[ai]);
     if (a == "-m" || a == "-mo" || a == "-armory" || a == "-npc" || a == "-fbxexport" ||
         a == "-animdump" || a == "-fbxinspect" || a == "-dbfromfile" || a == "-dumptex" ||
-        a.endsWith(".chr"))
+        a == "-mpq" || a.endsWith(".chr"))
     {
       earlyHeadless = true;
       break;
@@ -426,6 +426,8 @@ bool WowModelViewApp::OnInit()
   QString fbxInspectPath; // -fbxinspect <in.fbx>: read-only forensic dump of an existing FBX (no game data)
   QString animDumpName;   // -animdump <animName>: source-vs-exported per-bone pose diff for the -mo model
   QString snapCharPath;   // <file.chr>: defer LoadChar until AFTER LoadWoW (export/screenshot)
+  QString mpqDataFolder;  // -mpq <DataFolder> [locale]: load a legacy MPQ client instead of CASC
+  QString mpqLocale;      // optional locale for -mpq (auto-detected when empty)
   int dumpTexFileDataId = 0; QString dumpTexOutPath; // -dumptex <fileDataID> <out.png>: forensic-only
   // Export content selection + clip list for the headless FBX export (the parent process passes
   // these so the child reproduces the user's exact options). Defaults: full content, no explicit
@@ -461,6 +463,20 @@ bool WowModelViewApp::OnInit()
         // Defer load + screenshot until AFTER LoadWoW() below -- the game data
         // must be loaded before a model can be resolved/composed.
         snapModelPath = fn;
+      }
+    }
+    else if (cmd == "-mpq") {
+      // Headless legacy-MPQ load: "-mpq <DataFolder> [locale] -mo <path\model.m2>" opens a
+      // Vanilla/TBC/WotLK MPQ install (instead of modern CASC) and loads the -mo model BY NAME
+      // from the archive chain. Locale is optional (auto-detected) and, if given, is the token
+      // right after the folder that does not start with '-'.
+      if (i + 1 < argc) {
+        i++;
+        mpqDataFolder = QString::fromWCharArray(argv[i]);
+        if (i + 1 < argc) {
+          const QString nxt = QString::fromWCharArray(argv[i + 1]);
+          if (!nxt.startsWith('-')) { i++; mpqLocale = nxt; }
+        }
       }
     }
     else if (cmd == "-dumptex") {
@@ -589,7 +605,7 @@ bool WowModelViewApp::OnInit()
   for (int i = 1; i < argc; i++)
   {
     QString a = QString::fromWCharArray(argv[i]);
-    if (a == "-m" || a == "-mo" || a == "-armory" || a == "-npc" || a == "-fbxexport" || a == "-animdump" || a == "-fbxinspect" || a == "-dbfromfile" || a == "-dumptex" || a.endsWith(".chr"))
+    if (a == "-m" || a == "-mo" || a == "-armory" || a == "-npc" || a == "-fbxexport" || a == "-animdump" || a == "-fbxinspect" || a == "-dbfromfile" || a == "-dumptex" || a == "-mpq" || a.endsWith(".chr"))
     {
       headlessLoad = true;
       break;
@@ -620,7 +636,10 @@ bool WowModelViewApp::OnInit()
       return false; // read-only inspect done -> exit
     }
 
-    frame->LoadWoW(); // auto-pick config + profile, no prompt
+    if (!mpqDataFolder.isEmpty())
+      frame->LoadWoWFromMpq(mpqDataFolder, mpqLocale); // legacy MPQ client (Vanilla/TBC/WotLK)
+    else
+      frame->LoadWoW(); // auto-pick config + profile, no prompt
 
     if (!dumpTexOutPath.isEmpty())
     {
@@ -725,16 +744,32 @@ bool WowModelViewApp::OnInit()
   }
   else
   {
-    ClientChoiceDialog clientDlg(frame);
-    if (clientDlg.ShowModal() == wxID_OK)
+    // Startup client picker. Loop so a failed legacy-MPQ load returns here instead of starting
+    // with no client; Cancel/close still exits without loading, exactly as before.
+    for (;;)
     {
-      gamePath = clientDlg.dataPath();
-      core::GameConfig chosen = clientDlg.selectedConfig();
-      frame->LoadWoW(&chosen, clientDlg.selectedProfile(), true /* show loading progress */);
-    }
-    else
-    {
-      LOG_INFO << "Client Choice dialog dismissed without loading a client.";
+      ClientChoiceDialog clientDlg(frame);
+      if (clientDlg.ShowModal() != wxID_OK)
+      {
+        LOG_INFO << "Client Choice dialog dismissed without loading a client.";
+        break;
+      }
+
+      if (clientDlg.isLegacyMpq())
+      {
+        // Legacy (pre-CASC) MoPaQ client -- the shared helper shows the folder picker and loads it
+        // (auto-detects Data subfolder + locale), exactly like File -> Load Legacy MPQ Client...
+        // <=0 means cancelled or no archives (the helper shows its own error) -> back to the picker.
+        if (frame->PromptAndLoadLegacyMpqClient() <= 0)
+          continue;
+      }
+      else
+      {
+        gamePath = clientDlg.dataPath();
+        core::GameConfig chosen = clientDlg.selectedConfig();
+        frame->LoadWoW(&chosen, clientDlg.selectedProfile(), true /* show loading progress */);
+      }
+      break; // a client loaded
     }
   }
 

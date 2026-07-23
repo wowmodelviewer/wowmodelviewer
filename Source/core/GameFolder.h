@@ -13,6 +13,7 @@
 #include <functional>
 
 #include "GameFile.h"
+#include "ClientProfile.h"
 
 #include "metaclasses/Container.h"
 
@@ -53,7 +54,8 @@ namespace core
 
       void getFilesForFolder(std::vector<GameFile *> &fileNames, QString folderPath, QString extension = "");
       void getFilteredFiles(std::set<GameFile *> &dest, QString & filter);
-      GameFile * getFile(QString filename);
+      // Virtual so name-addressed storage (MPQ) can create files on demand on a name-map miss.
+      virtual GameFile * getFile(QString filename);
       virtual GameFile * getFile(int id) = 0;
 
       virtual bool openFile(std::string file, void ** result) = 0;
@@ -72,12 +74,18 @@ namespace core
 
       QString path() { return m_path; }
 
+      // The client profile (era/version/storage/lookup) for the currently loaded client.
+      // Populated by the concrete folder in setConfig(); default-constructed (Unknown) until
+      // then. Read-only for the rest of the app.
+      const ClientProfile & clientProfile() const { return m_clientProfile; }
+
       // Optional progress callback (fraction 0..1), invoked while building the file list from
       // the listfile -- the longest startup step -- so the loading UI can advance during it.
       void setLoadProgressCallback(const std::function<void(float)> & cb) { m_loadProgressCb = cb; }
 
     protected:
       std::function<void(float)> m_loadProgressCb;
+      ClientProfile m_clientProfile;
 
     private:
       std::map<QString, GameFile *> m_nameMap;

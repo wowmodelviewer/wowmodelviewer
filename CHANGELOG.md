@@ -5,6 +5,46 @@ Format loosely based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+### Added
+- **Legacy WotLK creatures and items now show their real, database-driven textures.** For a loaded
+  WotLK 3.3.5 (MPQ) client, the viewer now reads the classic `.dbc` databases
+  (`CreatureModelData`, `CreatureDisplayInfo`, `ItemDisplayInfo`) to resolve the skins and item
+  textures the game data actually defines — so creatures show their correct default skin (and the
+  full set of variations in the skin list) instead of a best-guess folder texture, and weapon /
+  item components that had no embedded texture are now textured. The default is the first display
+  the database lists (e.g. the plain chicken skin, not an alphabetical guess). Retail (CASC/DB2)
+  loading is completely unchanged. *Still to come for legacy clients: character customization and
+  equipped items.*
+- **Load a legacy (pre-CASC) WoW client — File → Load Legacy MPQ Client…** You can now open an old
+  MoPaQ-based install (Wrath of the Lich King 3.3.5, and the same path for TBC/Vanilla) straight from
+  the menu: pick the WoW folder **or** its `Data` folder, and the viewer opens the `Data\*.MPQ` (+
+  locale) archive chain, auto-detects the locale, fills the file browser, and tells you the client
+  era/build, locale and how many archives loaded (with a clear message if none are found). The last
+  folder you used is remembered for next time. Retail (CASC) loading is unchanged. *This first pass is
+  model viewing only — character customization, equipment and the item/creature databases for legacy
+  clients come in later updates.*
+
+### Internal
+- **Groundwork for loading older WoW clients (Vanilla/TBC/WotLK).** First, non-user-facing
+  milestone of a versioned client architecture: a **client profile** (era/version/build,
+  storage type, file-lookup mode and coarse capability flags) is now derived from the loaded
+  client, and file opening goes through a small **file-provider interface** that names the
+  storage backend. The modern client uses a CASC provider that forwards to the existing loader,
+  so behaviour is unchanged; a **placeholder MPQ provider** marks where classic-archive support
+  will slot in (not implemented yet). On load, the log now clearly reports the active profile,
+  build, storage type and lookup mode. No change to model rendering, character customization or
+  equipment.
+- **Real legacy MPQ archive support (StormLib).** The placeholder MPQ provider is now a working
+  **MoPaQ reader**: StormLib is vendored in `ThirdParty/stormlib` (built UNICODE + static, like
+  CascLib) and a new `MpqFileProvider` opens a legacy install's `Data\*.MPQ` (+ locale) archive
+  chain in correct **override order** (base archives, then patches, then locale patches — highest
+  priority wins) and serves files **by name** (legacy clients have no FileDataID). A new
+  `MpqFile` reads through StormLib; `WoWFolder` creates MPQ files on demand by path. A headless
+  `-mpq <DataFolder> [locale]` flag loads a legacy client instead of CASC, logging the profile,
+  `storage=MPQ`, the full archive list, locale, `lookup=Name`, and per-file open results.
+  **Retail CASC loading is untouched.** This milestone is file access only — model rendering of
+  old M2/SKIN/BLP, DBC, character customization and equipment are later milestones.
+
 ## [0.11.0] — 2026-07-05
 
 Version numbering continues the official WoW Model Viewer line (following 0.10.x) rather

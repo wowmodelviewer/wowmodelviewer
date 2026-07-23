@@ -9,6 +9,7 @@ set(src animated.cpp
       Bone.cpp
       CASCFile.cpp
       CASCFolder.cpp
+      CascFileProvider.cpp
       CharDetails.cpp
       CharTexture.cpp
       database.cpp
@@ -23,6 +24,8 @@ set(src animated.cpp
       ModelLight.cpp
       ModelManager.cpp
       ModelRenderPass.cpp
+      MpqFile.cpp
+      MpqFileProvider.cpp
       ModelTransparency.cpp
       particle.cpp
       RaceInfos.cpp
@@ -46,7 +49,8 @@ set(src animated.cpp
       WoWDatabase.cpp
       WoWFolder.cpp
       WoWItem.cpp
-      WoWModel.cpp)
+      WoWModel.cpp
+      WotlkDbc.cpp)
 
 set(headers animated.h
       AnimManager.h
@@ -55,6 +59,7 @@ set(headers animated.h
       CASCChunks.h
       CASCFile.h
       CASCFolder.h
+      CascFileProvider.h
       CharDetails.h
       CharDetailsEvent.h
       CharTexture.h
@@ -75,6 +80,8 @@ set(headers animated.h
       ModelManager.h
       ModelRenderPass.h
       ModelTransparency.h
+      MpqFile.h
+      MpqFileProvider.h
       particle.h
       RaceInfos.h
       RenderTexture.h
@@ -97,13 +104,15 @@ set(headers animated.h
       WoWDatabase.h
       WoWFolder.h
       WoWItem.h
-      WoWModel.h)
+      WoWModel.h
+      WotlkDbc.h)
 
 source_group("Header Files" FILES ${headers})
 
 use_core()
 use_glew()
 use_casclib()
+use_stormlib()
 
 add_definitions(-DBUILDING_WOW_DLL)
 
@@ -112,7 +121,7 @@ add_library(${NAME} SHARED ${src} ${headers})
 set_property(TARGET ${NAME} PROPERTY FOLDER "libraries")
 
 target_link_libraries(${NAME} Qt5::Core Qt5::Xml Qt5::Gui ${extralibs} glu32)
-add_dependencies(${NAME} casc_static)
+add_dependencies(${NAME} casc_static storm)
 
 set(BIN_DIR "${CMAKE_SOURCE_DIR}/bin/")
 
