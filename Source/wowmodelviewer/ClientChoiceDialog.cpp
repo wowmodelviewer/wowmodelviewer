@@ -24,12 +24,13 @@
 BEGIN_EVENT_TABLE(ClientChoiceDialog, wxDialog)
   EVT_BUTTON(ID_CC_BROWSE,  ClientChoiceDialog::onBrowse)
   EVT_BUTTON(ID_CC_LOAD,    ClientChoiceDialog::onLoad)
+  EVT_BUTTON(ID_CC_LEGACY,  ClientChoiceDialog::onLegacyMpq)
   EVT_CHOICE(ID_CC_PRODUCT, ClientChoiceDialog::onProductChanged)
 END_EVENT_TABLE()
 
 ClientChoiceDialog::ClientChoiceDialog(wxWindow * parent)
   : wxDialog(parent, wxID_ANY, wxT("Client Choice"), wxDefaultPosition, wxDefaultSize),
-    m_folder(0), m_detected(0), m_product(0), m_profile(0), m_load(0)
+    m_folder(0), m_detected(0), m_product(0), m_profile(0), m_load(0), m_legacyMpq(false)
 {
   const wxString initialRoot = rootOf(gamePath);
   buildUI(initialRoot);
@@ -78,8 +79,16 @@ void ClientChoiceDialog::buildUI(const wxString & initialRoot)
 
   top->Add(grid, 0, wxEXPAND | wxALL, 12);
 
+  // Modern (CASC) Load, and a separate button for a legacy MoPaQ client.
+  wxBoxSizer * btnRow = new wxBoxSizer(wxHORIZONTAL);
   m_load = new wxButton(this, ID_CC_LOAD, wxT("Load"));
-  top->Add(m_load, 0, wxALIGN_CENTER | wxBOTTOM, 12);
+  btnRow->Add(m_load, 0, wxRIGHT, 12);
+  btnRow->Add(new wxButton(this, ID_CC_LEGACY, wxT("Legacy MPQ client...")), 0);
+  top->Add(btnRow, 0, wxALIGN_CENTER | wxBOTTOM, 6);
+
+  top->Add(new wxStaticText(this, wxID_ANY,
+             wxT("Legacy MPQ client: Vanilla / The Burning Crusade / Wrath -- pick the WoW folder or its Data folder.")),
+           0, wxALIGN_CENTER | wxLEFT | wxRIGHT | wxBOTTOM, 12);
 
   SetSizer(top);
 }
@@ -256,6 +265,27 @@ void ClientChoiceDialog::onLoad(wxCommandEvent &)
     return;
   }
   m_dataPath = dataPathOf(m_folder->GetValue());
+  EndModal(wxID_OK);
+}
+
+// Legacy (pre-CASC) client: pick a MoPaQ install and hand the folder back to the caller, which
+// loads it through ModelViewer::LoadWoWFromMpq (auto-detects Data + locale). No .build.info needed.
+// If the folder already chosen above is valid, reuse it; otherwise browse for one.
+void ClientChoiceDialog::onLegacyMpq(wxCommandEvent &)
+{
+  wxString folder = m_folder ? m_folder->GetValue() : wxString();
+  if (folder.IsEmpty() || !wxDirExists(folder))
+  {
+    const wxString start = (!folder.IsEmpty() && wxDirExists(folder)) ? folder : wxT("C:\\");
+    folder = wxDirSelector(
+      wxT("Select a legacy (pre-CASC) WoW folder -- the WoW install folder or its Data folder"),
+      start, wxDD_DEFAULT_STYLE, wxDefaultPosition, this);
+    if (folder.IsEmpty())
+      return; // cancelled -> stay on the client-choice dialog
+  }
+
+  m_legacyMpq = true;
+  m_mpqFolder = folder;
   EndModal(wxID_OK);
 }
 

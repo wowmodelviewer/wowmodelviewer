@@ -31,6 +31,12 @@ public:
   core::GameConfig selectedConfig() const;          // chosen product / locale / version
   QString selectedProfile() const;                  // schema dir name, e.g. "12.0" ("" = auto)
 
+  // Legacy MPQ path: when true, the user chose "Legacy MPQ client" instead of a modern CASC
+  // product. The caller loads mpqFolder() via ModelViewer::LoadWoWFromMpq (the same code path as
+  // File -> Load Legacy MPQ Client...); locale is auto-detected. The CASC fields above are unused.
+  bool     isLegacyMpq() const { return m_legacyMpq; }
+  wxString mpqFolder()   const { return m_mpqFolder; } // WoW root or Data folder (either works)
+
 private:
   void buildUI(const wxString & initialRoot);
   void detect(const wxString & rootFolder);         // parse .build.info -> populate fields
@@ -40,6 +46,7 @@ private:
   void onBrowse(wxCommandEvent &);
   void onProductChanged(wxCommandEvent &);
   void onLoad(wxCommandEvent &);
+  void onLegacyMpq(wxCommandEvent &);               // choose a pre-CASC (MoPaQ) client instead
 
   static wxString rootOf(const wxString & anyPath);  // strip a trailing "Data" segment
   static wxString dataPathOf(const wxString & root); // root + "\Data\"
@@ -53,6 +60,9 @@ private:
   std::vector<core::GameConfig> m_configs;     // detected from .build.info
   std::vector<QString>          m_profileDirs; // available schema dirs under games/wow/
   wxString                      m_dataPath;
+
+  bool                          m_legacyMpq;   // user picked the Legacy MPQ option
+  wxString                      m_mpqFolder;   // chosen legacy folder (root or Data)
 
   DECLARE_EVENT_TABLE()
 };

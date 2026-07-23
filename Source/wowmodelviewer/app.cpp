@@ -744,16 +744,37 @@ bool WowModelViewApp::OnInit()
   }
   else
   {
-    ClientChoiceDialog clientDlg(frame);
-    if (clientDlg.ShowModal() == wxID_OK)
+    // Startup client picker. Loop so a failed legacy-MPQ load returns here instead of starting
+    // with no client; Cancel/close still exits without loading, exactly as before.
+    for (;;)
     {
-      gamePath = clientDlg.dataPath();
-      core::GameConfig chosen = clientDlg.selectedConfig();
-      frame->LoadWoW(&chosen, clientDlg.selectedProfile(), true /* show loading progress */);
-    }
-    else
-    {
-      LOG_INFO << "Client Choice dialog dismissed without loading a client.";
+      ClientChoiceDialog clientDlg(frame);
+      if (clientDlg.ShowModal() != wxID_OK)
+      {
+        LOG_INFO << "Client Choice dialog dismissed without loading a client.";
+        break;
+      }
+
+      if (clientDlg.isLegacyMpq())
+      {
+        // Legacy (pre-CASC) MoPaQ client -- same path as File -> Load Legacy MPQ Client...
+        // (auto-detects the Data subfolder and locale). Retail/CASC startup is untouched.
+        const QString mpqFolder = QString::fromWCharArray(clientDlg.mpqFolder().c_str());
+        if (frame->LoadWoWFromMpq(mpqFolder, QString()) <= 0) // empty locale -> auto-detect
+        {
+          wxMessageBox(wxT("No MPQ archives were found in that folder.\n\nPick the WoW install folder "
+                           "or its Data folder (the one containing common.MPQ, patch.MPQ, ...)."),
+                       wxT("No legacy MPQ client found"), wxOK | wxICON_ERROR, frame);
+          continue; // back to the client-choice dialog
+        }
+      }
+      else
+      {
+        gamePath = clientDlg.dataPath();
+        core::GameConfig chosen = clientDlg.selectedConfig();
+        frame->LoadWoW(&chosen, clientDlg.selectedProfile(), true /* show loading progress */);
+      }
+      break; // a client loaded
     }
   }
 
