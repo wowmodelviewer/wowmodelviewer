@@ -9,6 +9,7 @@
 
 #include "Attachment.h"
 #include "CASCFile.h"
+#include "ClientProfile.h" // core::StorageType (skip legacy-format particle/ribbon emitters)
 #include "Game.h"
 #include "GlobalSettings.h"
 #include "ModelColor.h"
@@ -1216,8 +1217,15 @@ void WoWModel::initAnimated()
       events[i].init(edefs[i]);
   }
 
+  // Legacy (pre-CASC) M2 files use an older particle/ribbon emitter struct layout than the modern
+  // M2ParticleDef / ModelRibbonEmitterDef that WMV parses. Reading those chunks out of a WotLK 3.3.5
+  // M2 yields garbage fields/offsets and crashes ParticleSystem::init (out-of-range bone/emitter/
+  // animation-track). Legacy support is model-viewing only (particle FX are a later milestone), so
+  // skip emitter parsing for MPQ clients. Retail (CASC) is unaffected.
+  const bool legacyMpqModel = (GAMEDIRECTORY.clientProfile().storage == core::StorageType::MPQ);
+
   // particle systems
-  if (header.nParticleEmitters)
+  if (header.nParticleEmitters && !legacyMpqModel)
   {
     M2ParticleDef *pdefs = (M2ParticleDef *)(gamefile->getBuffer() + header.ofsParticleEmitters);
     M2ParticleDef *pdef;
@@ -1236,8 +1244,8 @@ void WoWModel::initAnimated()
     }
   }
 
-  // ribbons
-  if (header.nRibbonEmitters)
+  // ribbons (same legacy-format caveat as particle emitters above)
+  if (header.nRibbonEmitters && !legacyMpqModel)
   {
     ModelRibbonEmitterDef *rdefs = (ModelRibbonEmitterDef *)(gamefile->getBuffer() + header.ofsRibbonEmitters);
     ribbons.resize(header.nRibbonEmitters);
