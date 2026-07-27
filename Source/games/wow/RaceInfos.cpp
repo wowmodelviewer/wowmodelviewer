@@ -11,6 +11,7 @@
 #define DEBUG_RACEINFOS 1
 
 std::map<int, RaceInfos> RaceInfos::RACES;
+std::map<std::pair<int, int>, RaceInfos> RaceInfos::RACES_BY_RACE_SEX;
 
 void RaceInfos::init()
 {
@@ -39,6 +40,7 @@ void RaceInfos::init()
     infos.barefeet = (race[2].toInt() & 0x2);
     infos.sexID = race[3].toInt();
     auto modelfileid = race[4].toInt();
+    infos.modelFileID = modelfileid;
     infos.textureLayoutID = race[5].toInt();
 
     // Get fallback display race ID (this is mostly for allied races and others that rely on
@@ -88,6 +90,34 @@ void RaceInfos::init()
       auto id = race[14].toInt();
       if (std::find(RACES[modelfileid].ChrModelID.begin(), RACES[modelfileid].ChrModelID.end(), id) == RACES[modelfileid].ChrModelID.end())
         RACES[modelfileid].ChrModelID.push_back(id);
+    }
+
+    // Second index, keyed by race instead of by model file. RACES above drops every race that
+    // reuses an earlier race's M2 -- Mag'har (36) shares character/orc/male/orcmale_hd.m2 with
+    // Orc (2), the faction Pandaren (25/26) share the neutral Pandaren models, Gilnean (23)
+    // shares the Human ones, and so on. Those races ended up with no entry at all, so
+    // getFileIDForRaceSex() returned -1 for them and the Armory import silently bailed out.
+    // They differ from their host race in CharComponentTextureLayoutID and in their whole
+    // ChrCustomizationOption set, so they need their own entry.
+    const auto rsKey = std::make_pair(infos.raceID, infos.sexID);
+    const auto rsIt = RACES_BY_RACE_SEX.find(rsKey);
+    if (rsIt == RACES_BY_RACE_SEX.end())
+    {
+      RACES_BY_RACE_SEX[rsKey] = infos;
+    }
+    else // same race+sex through another ChrModel (e.g. the SD and HD variants)
+    {
+      auto & existing = rsIt->second;
+      const auto id = race[14].toInt();
+      if (std::find(existing.ChrModelID.begin(), existing.ChrModelID.end(), id) == existing.ChrModelID.end())
+        existing.ChrModelID.push_back(id);
+
+      if (infos.isHD && !existing.isHD) // prefer the HD model, but keep every ChrModelID seen
+      {
+        auto knownModels = existing.ChrModelID;
+        existing = infos;
+        existing.ChrModelID = std::move(knownModels);
+      }
     }
   }
 
@@ -164,8 +194,25 @@ bool RaceInfos::getRaceInfosForName(const std::string & raceName, int sex, RaceI
   return found;
 }
 
+bool RaceInfos::getRaceInfosForRaceSex(const int & race, const int & sex, RaceInfos & out)
+{
+  const auto it = RACES_BY_RACE_SEX.find(std::make_pair(race, sex));
+
+  if (it == RACES_BY_RACE_SEX.end())
+    return false;
+
+  out = it->second;
+  return true;
+}
+
 int RaceInfos::getFileIDForRaceSex(const int & race, const int & sex)
 {
+  // by-race index first: it also covers races that share their M2 with another race and are
+  // therefore absent from RACES (see the note in init()).
+  const auto it = RACES_BY_RACE_SEX.find(std::make_pair(race, sex));
+  if (it != RACES_BY_RACE_SEX.end() && it->second.modelFileID > 0)
+    return it->second.modelFileID;
+
   for (auto &r : RACES)
   {
     if (r.second.raceID == race && r.second.sexID == sex)
@@ -177,14 +224,16 @@ int RaceInfos::getFileIDForRaceSex(const int & race, const int & sex)
 
 std::vector<RaceInfos::RaceMenuEntry> RaceInfos::getRaceMenu()
 {
-  // collapse the per-(race,sex,model) RACES map into one entry per race, keeping
-  // the HD model FileDataID for each sex.
+  // collapse the per-(race,sex) map into one entry per race, keeping the HD model
+  // FileDataID for each sex. Built from RACES_BY_RACE_SEX rather than RACES so that races
+  // sharing an M2 with another race (Mag'har, faction Pandaren, Gilnean, ...) are listed
+  // at all -- they are missing from RACES by construction.
   std::map<int, RaceMenuEntry> byRace;
-  for (const auto & kv : RACES)
+  for (const auto & kv : RACES_BY_RACE_SEX)
   {
-    const int fileID = kv.first;
     const RaceInfos & r = kv.second;
-    if (r.raceID < 0)
+    const int fileID = r.modelFileID;
+    if (r.raceID < 0 || fileID <= 0)
       continue;
 
     RaceMenuEntry & e = byRace[r.raceID];

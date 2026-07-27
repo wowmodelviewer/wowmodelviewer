@@ -1,6 +1,7 @@
 #include "modelviewer.h"
 
 #include "AnimationExportChoiceDialog.h"
+#include "DarkTheme.h"
 
 #include <wx/aboutdlg.h>
 #include <wx/busyinfo.h>
@@ -275,6 +276,10 @@ ModelViewer::ModelViewer()
 
     // Ensure that the docking windows are properly positioned (otherwise it starts with a mess of overlapping windows)
     interfaceManager.Update();
+
+    // The primary frame and all panes now exist, so apply the shared palette in
+    // one pass. wxWidgets 3.2 has no global window-created event to hook.
+    DarkTheme::ApplyToWindow(this);
 
     // Are these really needed?
     Refresh();
@@ -685,6 +690,7 @@ void ModelViewer::InitDocking()
   // wxAUI stuff
   //interfaceManager.SetFrame(this); 
   interfaceManager.SetManagedWindow(this);
+	DarkTheme::ApplyDockArt(interfaceManager);
 
   // OpenGL Canvas
   interfaceManager.AddPane(canvas, wxAuiPaneInfo().
@@ -3040,10 +3046,50 @@ void ModelViewer::ImportArmoury(wxString strURL)
 
     const auto sex = (result->gender == "Male") ? 0 : 1;
 
-    LoadModel(GAMEDIRECTORY.getFile(RaceInfos::getFileIDForRaceSex(result->raceId, sex)));
+    const int raceModelFileID = RaceInfos::getFileIDForRaceSex(result->raceId, sex);
+    if (raceModelFileID <= 0)
+    {
+      LOG_ERROR << "Armory import: no model registered for race" << result->raceId << "sex" << sex;
+      wxMessageBox(wxString::Format(wxT("This character's race (id %d) is not known to the model viewer, so the import was aborted."),
+                                    result->raceId),
+                   wxT("Armory Import Failed"));
+      delete result;
+      return;
+    }
+
+    LoadModel(GAMEDIRECTORY.getFile(raceModelFileID));
 
     if (!g_canvas->model())
+    {
+      // used to return silently here, which made a failed import indistinguishable from
+      // nothing happening at all.
+      LOG_ERROR << "Armory import: could not load model" << raceModelFileID
+                << "for race" << result->raceId << "sex" << sex;
+      wxMessageBox(wxT("The character's model could not be loaded, so the import was aborted."),
+                   wxT("Armory Import Failed"));
+      delete result;
       return;
+    }
+
+    // A model that shares its M2 with another race resolves itself to that OTHER race on load,
+    // because the by-file lookup cannot tell them apart (Mag'har vs Orc, faction Pandaren vs
+    // neutral Pandaren, Gilnean vs Human, ...). Stamp the race we actually imported, otherwise
+    // the character keeps the host race's texture layout and customization options and none of
+    // the imported choices resolve.
+    RaceInfos importedRace;
+    if (RaceInfos::getRaceInfosForRaceSex(result->raceId, sex, importedRace) &&
+        g_canvas->model()->infos.raceID != result->raceId)
+    {
+      LOG_INFO << "Armory import: model resolved to race" << g_canvas->model()->infos.raceID
+               << "by file id, correcting to imported race" << result->raceId;
+      WoWModel * importedModel = const_cast<WoWModel *>(g_canvas->model());
+      importedModel->infos = importedRace;
+      importedModel->cd.rebuildCustomizationMap(importedModel);
+      importedModel->cd.reset(importedModel);
+      // reset() clears showFeet, so re-seed the barefoot default from the corrected race
+      // (same rule WoWModel applies at load time).
+      importedModel->cd.showFeet = importedRace.barefeet;
+    }
 
     if (result->hasTransmogGear == true)
     {

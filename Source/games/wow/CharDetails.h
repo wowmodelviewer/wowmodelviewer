@@ -132,6 +132,10 @@ public:
   void load(QString &);
 
   void reset(WoWModel * m = nullptr);
+  // Force a rebuild of the customization map against m. reset() only refills when the model
+  // POINTER changes; this is for the case where the same model object had its RaceInfos
+  // corrected in place (Armory import of a race that shares its M2 with another race).
+  void rebuildCustomizationMap(WoWModel * m);
   void randomise();
 
   // accessors to customization
