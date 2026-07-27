@@ -3,6 +3,7 @@
 
 #include <map>
 #include <string>
+#include <utility>
 #include <vector>
 
 #ifdef _WIN32
@@ -22,6 +23,7 @@ class _RACEINFOS_API_ RaceInfos
   public:
     int raceID = -1; // -1 means invalid race (default value)
     int sexID; // 0 male / 1 female
+    int modelFileID = -1; // CreatureModelData.FileDataID of this race+sex model
     int textureLayoutID;
     bool isHD;
     bool barefeet;
@@ -54,9 +56,20 @@ class _RACEINFOS_API_ RaceInfos
     // fallback when a character model file isn't the canonical race model in the map.
     static bool getRaceInfosForName(const std::string & raceName, int sex, RaceInfos &);
     static int getFileIDForRaceSex(const int & race, const int & sex);
+    // Resolve by ChrRaces ID + sex. Unlike getRaceInfosForFileID() this can tell apart races
+    // that SHARE an M2 (Mag'har/Orc, faction Pandaren/neutral Pandaren, Gilnean/Human, ...),
+    // because it is keyed by the race, not by the model file.
+    static bool getRaceInfosForRaceSex(const int & race, const int & sex, RaceInfos & out);
 
   private:
+    // Keyed by model FileDataID. Several races can share one M2, so this map holds only the
+    // FIRST race seen for a given file -- it answers "which race is this model file?", which
+    // is inherently ambiguous, and it must stay this way for the by-file lookups.
     static std::map<int, RaceInfos> RACES;
+    // Keyed by (raceID, sexID). One entry per race+sex, so races that share an M2 with an
+    // earlier race keep their own textureLayoutID and ChrModelID list instead of being folded
+    // into that race.
+    static std::map<std::pair<int, int>, RaceInfos> RACES_BY_RACE_SEX;
 };
 
 

@@ -122,6 +122,15 @@ void CharDetails::load(QString & f)
   }
 }
 
+void CharDetails::rebuildCustomizationMap(WoWModel * model)
+{
+  if (model == nullptr)
+    return;
+
+  model_ = model;
+  fillCustomizationMap();
+}
+
 void CharDetails::reset(WoWModel * model)
 {
   if ((model != nullptr) & (model != model_))
