@@ -27,6 +27,9 @@ extern wxString cfgPath;
 extern wxString bgImagePath;
 extern wxString armoryPath;
 extern wxString customDirectoryPath;
+// Optional override for the embedded Unity renderer player exe; empty -> resolved at
+// use-time as tools\unity-renderer\UnityRenderer.exe next to the WMV executable.
+extern wxString unityRendererPath;
 extern int customFilesConflictPolicy;
 extern int displayItemAndNPCId;
 

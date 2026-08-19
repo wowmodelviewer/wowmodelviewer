@@ -1,0 +1,11 @@
+# Never commit player or stub build output -- the Unity player is built locally
+# by each user (see README.md) and stays out of the repository.
+*.exe
+*.obj
+*.pdb
+*.ilk
+Library/
+Temp/
+Logs/
+Build/
+UserSettings/

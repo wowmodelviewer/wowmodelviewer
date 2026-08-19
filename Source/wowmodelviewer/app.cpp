@@ -853,6 +853,11 @@ void WowModelViewApp::LoadSettings()
   ssCounter = config.value("Settings/SSCounter", 100).toInt();
   imgFormat = config.value("Settings/DefaultFormat", 1).toInt();
 
+  // Optional override for the embedded Unity renderer player exe. Empty (the default) ->
+  // resolved at use-time as tools\unity-renderer\UnityRenderer.exe next to the WMV
+  // executable, so a moved install keeps finding its bundled player.
+  unityRendererPath = config.value("Tools/UnityRendererPath", "").toString().toStdWString();
+
   // Optional override for the armory importer's proxy URL (the proxy holds the
   // Blizzard credentials server-side). Pushed into the core singleton so the Qt
   // importer plugin can read it; empty -> the plugin uses its built-in default.
@@ -877,6 +882,8 @@ void WowModelViewApp::SaveSettings()
   config.setValue("Settings/displayItemAndNPCId", displayItemAndNPCId);
   config.setValue("Settings/SSCounter", ssCounter);
   config.setValue("Settings/DefaultFormat", imgFormat);
+
+  config.setValue("Tools/UnityRendererPath", QString::fromWCharArray(unityRendererPath.c_str()));
 
   config.setValue("Armory/ProxyURL", QString::fromStdString(GLOBALSETTINGS.armoryProxyURL()));
   config.sync();

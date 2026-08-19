@@ -50,6 +50,7 @@ enum ObjectID {
 
   ID_VIEW_NPC,
   ID_VIEW_ITEM,
+  ID_VIEW_UNITY_RENDERER,
 
   ID_LOAD_WOW,
   ID_LOAD_MPQ,
@@ -204,6 +205,7 @@ enum ObjectID {
   // ----------------------------------------
   // Model Control Frame
   ID_MODEL_FRAME,
+  ID_UNITY_FRAME,
   ID_MODEL_NAME,
   ID_MODEL_LOD,
   ID_MODEL_ALPHA,

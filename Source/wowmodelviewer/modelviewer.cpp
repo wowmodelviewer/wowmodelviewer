@@ -37,6 +37,7 @@
 #include "PluginManager.h"
 #include "RaceInfos.h"
 #include "SettingsControl.h"
+#include "UnityRendererHost.h"
 #include "UserSkins.h"
 #include "util.h"
 #include "WoWDatabase.h"
@@ -95,6 +96,7 @@ EVT_MENU(ID_SHOW_ANIM, ModelViewer::OnToggleDock)
 EVT_MENU(ID_SHOW_CHAR, ModelViewer::OnToggleDock)
 EVT_MENU(ID_SHOW_LIGHT, ModelViewer::OnToggleDock)
 EVT_MENU(ID_SHOW_MODEL, ModelViewer::OnToggleDock)
+EVT_MENU(ID_VIEW_UNITY_RENDERER, ModelViewer::OnUnityRenderer)
 // --
 //EVT_MENU(ID_SHOW_WIREFRAME, ModelViewer::OnToggleCommand)
 //EVT_MENU(ID_SHOW_BONES, ModelViewer::OnToggleCommand)
@@ -221,6 +223,7 @@ ModelViewer::ModelViewer()
   modelControl = NULL;
   imageControl = NULL;
   settingsControl = NULL;
+  unityRendererHost = NULL;
   animExporter = NULL;
   fileControl = NULL;
 
@@ -372,6 +375,8 @@ void ModelViewer::InitMenu()
   viewMenu->Append(ID_SHOW_ANIM, _("Show animation control"));
   viewMenu->Append(ID_SHOW_CHAR, _("Show character control"));
   viewMenu->Append(ID_SHOW_MODEL, _("Show model control"));
+  viewMenu->AppendSeparator();
+  viewMenu->Append(ID_VIEW_UNITY_RENDERER, _("Unity Renderer"));
   if (canvas) {
     viewMenu->Append(ID_BG_COLOR, _("Background Color..."));
     viewMenu->AppendCheckItem(ID_BACKGROUND, _("Load Background\tCTRL+L"));
@@ -726,9 +731,14 @@ void ModelViewer::InitDocking()
   //interfaceManager.Update();
 }
 
+// forward decl (defined next to OnUnityRenderer): shared Unity pane settings
+static wxAuiPaneInfo buildUnityRendererPaneInfo();
+
 void ModelViewer::ResetLayout()
 {
   interfaceManager.DetachPane(fileControl);
+  if (unityRendererHost)
+    interfaceManager.DetachPane(unityRendererHost);
   interfaceManager.DetachPane(animControl);
   interfaceManager.DetachPane(charControl);
   interfaceManager.DetachPane(lightControl);
@@ -768,6 +778,11 @@ void ModelViewer::ResetLayout()
                            Name(wxT("Settings")).Caption(wxT("Settings")).
                            FloatingSize(wxSize(400, 550)).Float().TopDockable(false).LeftDockable(false).
                            RightDockable(false).BottomDockable(false).Show(false));
+
+  // Unity viewport pane (only exists once View > Unity Renderer has been used)
+  if (unityRendererHost)
+    interfaceManager.AddPane(unityRendererHost,
+                             buildUnityRendererPaneInfo().Show(unityRendererHost->isRunning()));
 
   // tell the manager to "commit" all the changes just made
   interfaceManager.Update();
@@ -1420,6 +1435,12 @@ ModelViewer::~ModelViewer()
   if (!batchMode)
     SaveLayout();
 
+  // Shut the embedded Unity player down (if one was ever opened) BEFORE the AUI teardown
+  // destroys its host panel, so the child process never outlives -- or paints into -- a
+  // dead window.
+  if (unityRendererHost)
+    unityRendererHost->shutdown();
+
   // wxAUI stuff (teardown, always run)
   interfaceManager.UnInit();
 
@@ -1467,6 +1488,11 @@ ModelViewer::~ModelViewer()
     modelControl = NULL;
   }
 
+  if (unityRendererHost) {
+    unityRendererHost->Destroy();
+    unityRendererHost = NULL;
+  }
+
   if (enchants) {
     enchants->Destroy();
     enchants = NULL;
@@ -1500,6 +1526,48 @@ void ModelViewer::OnToggleDock(wxCommandEvent &event)
     settingsControl->Open();
   }
   interfaceManager.Update();
+}
+
+// The Unity viewport's docking setup, shared by the lazy creation below and ResetLayout so
+// both register the pane identically (an initially-hidden, dockable/floatable side pane).
+// For now the OpenGL canvas stays the one CenterPane; as the Unity renderer becomes the
+// primary viewport this pane is expected to take over that position, with the OpenGL
+// canvas retained as the legacy/fallback viewport.
+static wxAuiPaneInfo buildUnityRendererPaneInfo()
+{
+  return wxAuiPaneInfo().
+         Name(wxT("unityRenderer")).Caption(wxT("Unity Renderer")).
+         BestSize(wxSize(640, 480)).FloatingSize(wxSize(800, 600)).
+         Right().Layer(2).Show(false).DestroyOnClose(false);
+}
+
+// View > Unity Renderer: the embedded Unity viewport -- the new renderer foundation for WMV
+// (the OpenGL canvas is the legacy/fallback viewport during the migration; see
+// docs/unity-renderer/README.md). At this stage it is still OPTIONAL: the host panel and its
+// pane are created lazily on FIRST use (same pattern as the Screenshot pane) so normal
+// startup and headless/batch runs never construct them, and the player itself is an external
+// exe launched by UnityRendererHost -- nothing in the WMV build depends on Unity being
+// installed.
+void ModelViewer::OnUnityRenderer(wxCommandEvent &event)
+{
+  if (!unityRendererHost)
+  {
+    unityRendererHost = new UnityRendererHost(this, ID_UNITY_FRAME);
+    interfaceManager.AddPane(unityRendererHost, buildUnityRendererPaneInfo());
+  }
+
+  // Show the pane first so the panel is realized at its docked size, then embed the player
+  // into it (the player parents itself to the panel's HWND).
+  interfaceManager.GetPane(unityRendererHost).Show(true);
+  interfaceManager.Update();
+
+  if (!unityRendererHost->isRunning() && !unityRendererHost->launch())
+  {
+    // Launch failed (missing/broken player build): the host already told the user; hide the
+    // empty pane again and carry on -- the rest of the app is unaffected.
+    interfaceManager.GetPane(unityRendererHost).Show(false);
+    interfaceManager.Update();
+  }
 }
 
 // Menu button press events

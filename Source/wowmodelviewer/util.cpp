@@ -16,6 +16,7 @@ wxString cfgPath;
 wxString bgImagePath;
 wxString armoryPath;
 wxString customDirectoryPath;
+wxString unityRendererPath;
 int customFilesConflictPolicy = 0;
 int displayItemAndNPCId = 0;
 
