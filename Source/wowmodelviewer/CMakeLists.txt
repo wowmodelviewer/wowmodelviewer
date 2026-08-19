@@ -44,6 +44,7 @@ set(src  AnimationExportChoiceDialog.cpp
          Quantize.cpp
          SettingsControl.cpp
          shaders.cpp
+         UnityRendererHost.cpp
          UserSkins.cpp
          util.cpp)
 
@@ -85,6 +86,7 @@ set(headers AnimationExportChoiceDialog.h
             resource1.h
             SettingsControl.h
             shaders.h
+            UnityRendererHost.h
             UserSkins.h
             util.h)
 

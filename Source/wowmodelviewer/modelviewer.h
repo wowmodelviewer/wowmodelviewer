@@ -34,6 +34,7 @@
 class SettingsControl;
 class ExportJobManager;
 class ImageSequenceExporter;
+class UnityRendererHost;
 
 namespace core { class GameConfig; }
 
@@ -65,6 +66,11 @@ public:
   ImageControl *imageControl;
   //SoundControl *soundControl;
   SettingsControl *settingsControl;
+  // Embedded Unity viewport pane -- the new renderer foundation (the OpenGL canvas is the
+  // legacy/fallback viewport during the migration). Currently optional: created lazily on
+  // first View > Unity Renderer use (nullptr until then, and forever in headless runs).
+  // See UnityRendererHost.h and docs/unity-renderer/README.md.
+  UnityRendererHost *unityRendererHost;
 
   CAnimationExporter *animExporter;
 
@@ -152,6 +158,10 @@ public:
   void OnSetEquipment(wxCommandEvent &event);
   void OnCharToggle(wxCommandEvent &event);
   void OnImportNPCFromURL(wxCommandEvent &event);  // direct "Import NPC from URL" menu entry
+
+  // View > Unity Renderer: show the embedded Unity viewport -- the new renderer foundation,
+  // optional at this migration stage (lazy pane + player launch). See UnityRendererHost.h.
+  void OnUnityRenderer(wxCommandEvent &event);
 
   void OnMount(wxCommandEvent &event);
   void OnSave(wxCommandEvent &event);

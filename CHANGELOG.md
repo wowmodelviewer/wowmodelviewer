@@ -6,6 +6,21 @@ Format loosely based on [Keep a Changelog](https://keepachangelog.com/).
 ## [Unreleased]
 
 ### Added
+- **Embedded Unity renderer viewport — View → Unity Renderer (first step of the new renderer).**
+  The viewer can now host a separately built Unity standalone player inside a dockable pane.
+  This is the foundation of WMV's **new rendering pipeline**: long term the Unity viewport
+  becomes the primary viewport and future rendering features (characters, equipment, maps, fog,
+  OBS scenes, stream features) target it first, while the classic OpenGL viewport is kept as the
+  legacy/fallback renderer during the migration. Unity renders directly from WoW data -- it
+  requests raw assets/metadata from the app over IPC (no OBJ/FBX/GLB export step); the app
+  remains responsible for the UI, the active client/profile, CASC/MPQ access,
+  databases/metadata and runtime commands. The player is launched embedded (parent-window mode),
+  resizes with its pane and is shut down with the app. **For now it is optional:** nothing in the
+  normal build depends on Unity, and if no player build is found (default location
+  `tools\unity-renderer\UnityRenderer.exe` next to the exe, or the `Tools/UnityRendererPath`
+  setting) a clear message is shown and the app carries on with the OpenGL viewport. The player
+  project sources and a Unity-free test stub live in `Tools/UnityRendererProject/`; the direction
+  and migration roadmap are in `docs/unity-renderer/`.
 - **Legacy WotLK creatures and items now show their real, database-driven textures.** For a loaded
   WotLK 3.3.5 (MPQ) client, the viewer now reads the classic `.dbc` databases
   (`CreatureModelData`, `CreatureDisplayInfo`, `ItemDisplayInfo`) to resolve the skins and item
