@@ -37,6 +37,8 @@
 #include "PluginManager.h"
 #include "RaceInfos.h"
 #include "SettingsControl.h"
+#include "UnityAssetAccess.h"
+#include "UnityIpcServer.h"
 #include "UnityRendererHost.h"
 #include "UserSkins.h"
 #include "util.h"
@@ -1142,6 +1144,9 @@ void ModelViewer::LoadModel(GameFile * file)
   // Update the animations / skins
   animControl->UpdateModel(m);
   interfaceManager.Update();
+
+  // Embedded Unity renderer (if open): runtime command with the new active model.
+  SendCurrentModelToUnity();
 }
 
 // Load an NPC model
@@ -1545,15 +1550,23 @@ static wxAuiPaneInfo buildUnityRendererPaneInfo()
 // (the OpenGL canvas is the legacy/fallback viewport during the migration; see
 // docs/unity-renderer/README.md). At this stage it is still OPTIONAL: the host panel and its
 // pane are created lazily on FIRST use (same pattern as the Screenshot pane) so normal
-// startup and headless/batch runs never construct them, and the player itself is an external
+// startup does not construct them (headless runs only do so for the -unityipctest self-test),
+// and the player itself is an external
 // exe launched by UnityRendererHost -- nothing in the WMV build depends on Unity being
 // installed.
 void ModelViewer::OnUnityRenderer(wxCommandEvent &event)
+{
+  ShowUnityRenderer();
+}
+
+bool ModelViewer::ShowUnityRenderer(bool selfTest)
 {
   if (!unityRendererHost)
   {
     unityRendererHost = new UnityRendererHost(this, ID_UNITY_FRAME);
     interfaceManager.AddPane(unityRendererHost, buildUnityRendererPaneInfo());
+    // Runtime IPC: as soon as the player announces itself, tell it what is on the canvas.
+    unityRendererHost->ipc()->onUnityReady = [this]() { SendCurrentModelToUnity(); };
   }
 
   // Show the pane first so the panel is realized at its docked size, then embed the player
@@ -1561,13 +1574,26 @@ void ModelViewer::OnUnityRenderer(wxCommandEvent &event)
   interfaceManager.GetPane(unityRendererHost).Show(true);
   interfaceManager.Update();
 
-  if (!unityRendererHost->isRunning() && !unityRendererHost->launch())
+  if (!unityRendererHost->isRunning() && !unityRendererHost->launch(!batchMode, selfTest))
   {
     // Launch failed (missing/broken player build): the host already told the user; hide the
     // empty pane again and carry on -- the rest of the app is unaffected.
     interfaceManager.GetPane(unityRendererHost).Show(false);
     interfaceManager.Update();
+    return false;
   }
+  return true;
+}
+
+void ModelViewer::SendCurrentModelToUnity()
+{
+  if (!unityRendererHost || !unityRendererHost->ipc() || !unityRendererHost->ipc()->isConnected())
+    return;
+  if (!canvas || !canvas->model() || !canvas->model()->gamefile)
+    return;
+  WoWModel * m = const_cast<WoWModel *>(canvas->model());
+  GameFile * gf = m->gamefile;
+  unityRendererHost->ipc()->sendLoadWoWModel(gf->fullname(), gf->fileDataId() > 0 ? gf->fileDataId() : 0);
 }
 
 // Menu button press events
@@ -2093,6 +2119,7 @@ static void refreshTactKeys(const QString & localPath, LoadingDialog * progress)
 
 int ModelViewer::LoadWoWFromMpq(const QString & dataFolder, const QString & locale)
 {
+  UnityAssetAccess::ClientLoadGuard unityAssetGuard; // refuse Unity asset requests while the folder is rebuilt
   fileControl->Disable();
 
   // Always install a FRESH folder for the legacy client -- never reuse an already-loaded Retail
@@ -2196,6 +2223,7 @@ void ModelViewer::OnLoadLegacyMpq(wxCommandEvent & WXUNUSED(event))
 
 void ModelViewer::LoadWoW(const core::GameConfig * chosenConfig, const QString & profileOverride, bool showProgress)
 {
+  UnityAssetAccess::ClientLoadGuard unityAssetGuard; // refuse Unity asset requests while the folder is rebuilt
   fileControl->Disable();
   if (gamePath.IsEmpty() || !wxDirExists(gamePath)) {
     getGamePath();

@@ -44,6 +44,9 @@ class _GAMEFILE_API_ GameFile : public Component
     void seekRelative(size_t offset);
     bool open(bool useMemoryBuffer = true);
     bool close();
+    // True while the file is open (shared, folder-owned objects: another component may hold
+    // it open; opening/closing it again from outside would corrupt that reader's state).
+    bool isCurrentlyOpen() { return isAlreadyOpened(); }
     
     void setFullName(const QString & name) { filepath = name; }
     QString fullname() const { return filepath; }
@@ -52,6 +55,21 @@ class _GAMEFILE_API_ GameFile : public Component
     void allocate(unsigned long long size);
     bool setChunk(std::string chunkName, bool resetToStart = true);
     bool isChunked() { return chunks.size() > 0; }
+
+    // Raw (un-chunked) view of the whole file in memory mode. doPostOpenOperation() may have
+    // re-pointed buffer/size to a single chunk's payload via setChunk(); these always return
+    // the full file (the chunk parser walks the file to its end, so the end of the last chunk
+    // is the file size when chunked). The multi-chunk end is additionally clamped to the
+    // allocation (`size` still holds the whole file there) so a corrupt trailing chunk header
+    // can never claim bytes past the buffer. Inline and non-virtual: no layout/ABI change.
+    const unsigned char * rawBuffer() const { return originalBuffer; }
+    size_t rawSize() const
+    {
+      if (chunks.empty())
+        return (size_t)size;
+      const size_t end = (size_t)chunks.back().start + chunks.back().size;
+      return (chunks.size() > 1 && end > (size_t)size) ? (size_t)size : end;
+    }
 
     virtual void dumpStructure();
 

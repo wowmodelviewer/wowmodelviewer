@@ -6,6 +6,18 @@ Format loosely based on [Keep a Changelog](https://keepachangelog.com/).
 ## [Unreleased]
 
 ### Added
+- **Embedded Unity renderer: runtime asset access (V1).** The Unity viewport now talks to the app at
+  runtime: the app hosts a localhost IPC server (started before the player launches, port passed
+  on the player command line), the player connects back and announces itself, the app tells it
+  which model is active (`loadWoWModel`, re-sent on every model load), and the player fetches the
+  raw WoW files it needs (`getAsset` by path / `getAssetByFileDataID`) straight from the **active
+  client** -- CASC or legacy MPQ, through the same file providers the OpenGL viewport uses -- with
+  byte length + SHA-1 so the player can verify what it received. Missing files, unsupported
+  lookups (FileDataID on an MPQ client) and a client that is still loading come back as clear
+  errors. Nothing is exported or written to disk; this is the runtime channel the Unity renderer
+  will render from directly (no M2 parsing/rendering in Unity yet -- next step). Unity remains
+  optional at build and run time. New headless self-test: `-mo <model> -unityipctest` drives the
+  whole exchange against the installed player (the Unity-free TestStub speaks the protocol too).
 - **Embedded Unity renderer viewport — View → Unity Renderer (first step of the new renderer).**
   The viewer can now host a separately built Unity standalone player inside a dockable pane.
   This is the foundation of WMV's **new rendering pipeline**: long term the Unity viewport

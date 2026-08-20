@@ -44,6 +44,8 @@ set(src  AnimationExportChoiceDialog.cpp
          Quantize.cpp
          SettingsControl.cpp
          shaders.cpp
+         UnityAssetAccess.cpp
+         UnityIpcServer.cpp
          UnityRendererHost.cpp
          UserSkins.cpp
          util.cpp)
@@ -86,6 +88,8 @@ set(headers AnimationExportChoiceDialog.h
             resource1.h
             SettingsControl.h
             shaders.h
+            UnityAssetAccess.h
+            UnityIpcServer.h
             UnityRendererHost.h
             UserSkins.h
             util.h)
@@ -147,6 +151,14 @@ set(useful_files ${common_files} ${cmake_files} ${wow9_2_files} ${wow10_0_files}
 set_source_files_properties(${useful_files} PROPERTIES HEADER_FILE_ONLY TRUE)
 
 set(NAME wowmodelviewer)
+
+# Embedded Unity renderer runtime IPC (UnityIpcServer): plain Winsock2 localhost server. Listed
+# FIRST so the socket calls bind to ws2_32 by name rather than to the wsock32 ordinals that the
+# wxWidgets library list would otherwise satisfy.
+if(WIN32)
+  set(WMV_UNITY_IPC_SOCKET_LIB ws2_32)
+endif()
+
 add_executable(${NAME} WIN32 ${src} ${headers} ${RES_FILES} ${useful_files} )
 
 set_property(TARGET ${NAME} PROPERTY FOLDER "executables")
@@ -170,6 +182,7 @@ endif()
 set(BIN_DIR "${CMAKE_SOURCE_DIR}/bin/")
 
 target_link_libraries(${NAME}
+  ${WMV_UNITY_IPC_SOCKET_LIB}
   ${extralibs}
   Qt5::Xml
   Qt5::Gui
@@ -177,6 +190,8 @@ target_link_libraries(${NAME}
   Qt5::Widgets
   ${wxWidgets_LIBRARIES}
 )
+
+
 
 install(TARGETS ${NAME} RUNTIME DESTINATION ${BIN_DIR})
   

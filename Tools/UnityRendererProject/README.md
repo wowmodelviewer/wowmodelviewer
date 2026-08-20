@@ -16,12 +16,12 @@ build and run time.
 ## Build steps
 
 1. Install a Unity LTS (2021.3 or newer; any recent LTS works — the scripts use only
-   core UnityEngine + .NET `TcpListener`).
+   core UnityEngine + .NET `TcpClient`).
 2. Create a new **3D (Built-in Render Pipeline)** project named e.g. `WmvUnityRenderer`.
 3. Copy the `Assets/Scripts/` folder from here into the project's `Assets/`.
 4. Create an empty GameObject in the default scene and add the **WmvMain** component to
-   it. (It builds the camera rig, light, test cube and starts the IPC server at runtime —
-   no other scene setup needed.)
+   it. (It builds the camera rig, light, test cube, status overlay and the IPC client at
+   runtime — no other scene setup needed.)
 5. **Player Settings** (Edit → Project Settings → Player):
    - **Resolution and Presentation → Run In Background: ON** (required — otherwise the
      player pauses whenever the WMV window has focus, which is always).
@@ -39,8 +39,8 @@ this repository.
 
 | File | Role |
 |---|---|
-| `WmvMain.cs` | Bootstrap: camera rig, light, V0 test cube, wires the IPC handlers. `loadWoWModel` is acknowledged with "not implemented yet" until the V1 loaders land. |
-| `WmvIpcServer.cs` | IPC skeleton: runtime commands from WMV (`clearScene`, `loadWoWModel`, `setCamera`), state to WMV (`unityReady`, `loaded`, `error`), and the asset-channel requests to WMV (`getAsset`, `getAssetByFileDataID`). |
+| `WmvMain.cs` | Bootstrap: camera rig, light, test cube, on-screen status text, wires the IPC handlers. On `loadWoWModel` it requests the model raw bytes from WMV and reports byte length + SHA-1 (V1: no parsing/rendering yet). |
+| `WmvIpcClient.cs` | IPC client (protocol v1): connects back to the WMV server given by `-wmvPort`, sends `unityReady`, receives `loadWoWModel`, sends `getAsset` / `getAssetByFileDataID`, decodes + hash-checks `assetResponse`. |
 | `WmvOrbitCamera.cs` | Orbit / pan / zoom controls for the viewport. |
 
 ## How embedding works
@@ -48,7 +48,7 @@ this repository.
 WMV launches the player with the standard standalone-player embedding arguments:
 
 ```
-UnityRenderer.exe -parentHWND <decimal hwnd> delayed -logFile <...>\userSettings\unityRenderer.log
+UnityRenderer.exe -parentHWND <decimal hwnd> delayed -logFile <...>\userSettings\unityRenderer.log -wmvPort <port>
 ```
 
 The player creates its window as a child of the given WMV panel; WMV resizes that child
@@ -56,20 +56,31 @@ window whenever the pane resizes and sends it `WM_CLOSE` on shutdown.
 
 ## IPC
 
-`WmvIpcServer` listens on `127.0.0.1:9500` (override with `-wmvPort <n>` on the player
-command line) and speaks newline-delimited JSON — see `docs/unity-renderer/README.md` for
-the full vocabulary. In V0 the player starts the listener and sends `unityReady` to
-whoever connects; the WMV-side client and the asset serving land with V1.
+**WMV is the server.** It listens on `127.0.0.1` (ephemeral port) before launching the player
+and passes `-wmvPort <n>` on the command line; `WmvIpcClient` connects back, sends
+`unityReady { protocolVersion: 1 }`, and then requests raw WoW files with `getAsset` /
+`getAssetByFileDataID` (answered by `assetResponse` with base64 bytes + SHA-1). Newline-delimited
+JSON; full vocabulary and semantics in `docs/unity-renderer/README.md`. Run the player without
+`-wmvPort` and it runs standalone (test scene, no WMV connection).
 
 ## TestStub
 
-`TestStub/` contains a ~150-line Win32 program that honours the same `-parentHWND`
-contract (child window, fills the parent, exits on `WM_CLOSE`). Build it with any MSVC
-prompt:
+`TestStub/` contains a small Win32 program that honours the same contracts as the player:
+the `-parentHWND` embedding (child window, fills the parent, exits on `WM_CLOSE`) AND the v1
+IPC (connects to `-wmvPort`, sends `unityReady`, answers `loadWoWModel` with `getAsset`, logs
+and displays the `assetResponse` byte length / SHA-1 / decode check). It also accepts
+`-wmvSelfTest`, which WMV passes **only** for its `-unityipctest` diagnostic run: the stub then
+additionally probes the negative paths (the same asset by FileDataID, a missing path, an
+unknown message type). Without that flag -- i.e. every normal `View -> Unity Renderer` launch
+-- it makes exactly one request per model and the viewport shows only the real exchange.
+Build it with any MSVC prompt:
 
 ```
-cl fake_unity_renderer.c user32.lib gdi32.lib shell32.lib /Fe:UnityRenderer.exe
+cl fake_unity_renderer.c user32.lib gdi32.lib shell32.lib ws2_32.lib /Fe:UnityRenderer.exe
 ```
 
-Drop the result at `tools\unity-renderer\UnityRenderer.exe` to test the WMV-side
-embedding (launch, docking, resize, shutdown) without installing Unity.
+Drop the result at `tools\unity-renderer\UnityRenderer.exe` to test the WMV side without
+installing Unity -- interactively via `View -> Unity Renderer`, or headlessly with
+`wowmodelviewer.exe -mo creature/chicken/chicken.m2 -unityipctest` (logs `[unityipc-test]
+RESULT: PASS|FAIL` in `userSettings\log.txt`; the stub own log is
+`userSettings\unityRenderer.log`).
