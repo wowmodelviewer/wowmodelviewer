@@ -73,5 +73,14 @@ bool HardDriveFile::doPostCloseOperation()
   if(opened)
     opened = false;
 
+  // Release the underlying file in EVERY read mode: readFile() (memory mode) deletes it after
+  // reading, but a stream-mode open (open(false)) never runs readFile(), so without this a
+  // close() after such an open leaked the object and its OS handle.
+  if (file)
+  {
+    file->close();
+    delete file;
+    file = 0;
+  }
   return true;
 }

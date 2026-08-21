@@ -87,10 +87,10 @@ void wow::MpqFile::doPostOpenOperation()
     memcpy(&chunkHead, buffer, sizeof(chunkHeader));
     std::string magic = std::string(chunkHead.magic, 4);
     if (std::find(KNOWN_CHUNKS.begin(), KNOWN_CHUNKS.end(), magic) != KNOWN_CHUNKS.end()
-        && chunkHead.size <= size)
+        && chunkHead.size + sizeof(chunkHeader) <= size) // header + payload must fit the file
     {
       unsigned int offset = 0;
-      while (offset < size)
+      while (offset + sizeof(chunkHeader) <= size) // a trailing partial header is corruption, not a chunk
       {
         chunkHeader ChunkHead;
         memcpy(&ChunkHead, buffer + offset, sizeof(chunkHeader));

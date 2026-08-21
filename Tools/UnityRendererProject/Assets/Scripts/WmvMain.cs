@@ -4,18 +4,24 @@
 // primary viewport (the OpenGL canvas is the legacy/fallback viewport during the migration;
 // see docs/unity-renderer/README.md). Add this component to one empty GameObject in an
 // otherwise-empty scene; at runtime it builds everything else: camera rig + orbit controls,
-// a directional light, the V0 test cube, and the IPC server WMV talks to.
+// a directional light, the test cube, the on-screen status text, and the IPC client that
+// connects back to WMV.
 //
-// V0 scope: embedding proof (test cube) + IPC skeleton. loadWoWModel is acknowledged with
-// "not implemented yet"; the V1 loaders will build the scene from raw WoW data requested from
-// WMV over IPC (WmvIpcServer.RequestAsset / RequestAssetByFileDataID).
+// V1 scope: runtime asset access. On loadWoWModel the player requests the model's raw
+// bytes from WMV (getAsset / getAssetByFileDataID), verifies the assetResponse (byte
+// length + SHA-1) and reports it on screen. No M2 parsing and no mesh rendering yet --
+// that is the next step, built on top of these bytes.
 
 using UnityEngine;
 
 public class WmvMain : MonoBehaviour
 {
-    WmvIpcServer ipc;
+    WmvIpcClient ipc;
     GameObject testCube;
+    WmvStatusOverlay status;
+
+    string pendingRequestId;
+    string pendingWhat;
 
     void Awake()
     {
@@ -45,47 +51,95 @@ public class WmvMain : MonoBehaviour
         light.intensity = 1.1f;
         lightGo.transform.rotation = Quaternion.Euler(50f, -30f, 0f);
 
-        // V0 proof-of-life: a visible spinning cube until real WoW models arrive (V1).
+        // Proof-of-life: a visible spinning cube until real WoW models arrive.
         testCube = GameObject.CreatePrimitive(PrimitiveType.Cube);
         testCube.name = "WMV Test Cube";
         testCube.AddComponent<WmvSpin>();
 
-        // IPC
-        ipc = gameObject.AddComponent<WmvIpcServer>();
-        ipc.OnClearScene = HandleClearScene;
+        // Status text in the viewport
+        status = gameObject.AddComponent<WmvStatusOverlay>();
+        status.Set("Starting ...");
+
+        // IPC client (connects back to the WMV server given by -wmvPort)
+        ipc = gameObject.AddComponent<WmvIpcClient>();
+        ipc.OnStatus = s => status.Set(s);
         ipc.OnLoadWoWModel = HandleLoadWoWModel;
-        ipc.OnSetCamera = HandleSetCamera;
+        ipc.OnAssetResponse = HandleAssetResponse;
     }
 
-    // V1: request the model's M2 / skin / textures from WMV (ipc.RequestAsset /
-    // RequestAssetByFileDataID) and build the scene from that data. V0 only acknowledges.
-    void HandleLoadWoWModel(string sourcePath, int fileDataID)
+    // WMV tells us which model is active. V1: fetch its raw bytes and report; V2+: parse
+    // the M2 and its skin/textures (also fetched through getAsset) and build the scene.
+    void HandleLoadWoWModel(string path, int fileDataID, string client)
     {
-        var what = string.IsNullOrEmpty(sourcePath) ? ("fileDataID " + fileDataID) : sourcePath;
-        Debug.Log("loadWoWModel " + what + ": not implemented yet");
-        ipc.SendError("loadWoWModel not implemented yet (" + what + ")");
+        status.Set("Active client received (" + client + ")");
+        if (!string.IsNullOrEmpty(path))
+        {
+            pendingWhat = path;
+            pendingRequestId = ipc.RequestAsset(path);
+        }
+        else if (fileDataID > 0)
+        {
+            pendingWhat = "fileDataID " + fileDataID;
+            pendingRequestId = ipc.RequestAssetByFileDataID(fileDataID);
+        }
+        else
+        {
+            status.Set("loadWoWModel without path or fileDataID -- ignored");
+            return;
+        }
+        status.Set("Requested " + pendingWhat + " ...");
+        Debug.Log("WMV IPC: requested " + pendingWhat + " (requestId " + pendingRequestId + ")");
     }
 
-    void HandleClearScene()
+    void HandleAssetResponse(WmvIpcClient.AssetResponse r)
     {
-        // Nothing to clear in V0 beyond making sure the test scene is visible.
-        if (testCube != null) testCube.SetActive(true);
-    }
-
-    void HandleSetCamera(Vector3 position, Vector3 rotationEuler)
-    {
-        var cam = Camera.main;
-        if (cam == null) return;
-        cam.transform.position = position;
-        cam.transform.rotation = Quaternion.Euler(rotationEuler);
+        var what = !string.IsNullOrEmpty(r.path) ? r.path : ("fileDataID " + r.fileDataID);
+        if (!r.ok)
+        {
+            status.Set("Error for " + what + ": " + r.error);
+            Debug.LogWarning("WMV IPC: assetResponse error for " + what + ": " + r.error);
+            return;
+        }
+        var verdict = r.hashMatches ? "sha1 OK" : "sha1 MISMATCH (reported " + r.sha1 + ", local " + r.localSha1 + ")";
+        status.Set("Received " + r.byteLength + " bytes for " + what + " (" + verdict + ")");
+        Debug.Log("WMV IPC: received " + what + ": byteLength=" + r.byteLength +
+                  " decoded=" + (r.data != null ? r.data.Length : 0) + " sha1=" + r.sha1 + " " + verdict);
+        // Next step (not V1): parse r.data as M2 and request its skins/textures the same way.
     }
 }
 
-// Slow idle spin so the V0 test scene is visibly "live".
+// Slow idle spin so the test scene is visibly "live".
 public class WmvSpin : MonoBehaviour
 {
     void Update()
     {
         transform.Rotate(0f, 40f * Time.deltaTime, 0f);
+    }
+}
+
+// Top-left status lines (last few messages) drawn with the immediate-mode GUI --
+// no scene/canvas setup needed.
+public class WmvStatusOverlay : MonoBehaviour
+{
+    const int MaxLines = 6;
+    readonly System.Collections.Generic.List<string> lines = new System.Collections.Generic.List<string>();
+    GUIStyle style;
+
+    public void Set(string line)
+    {
+        lines.Add(line);
+        while (lines.Count > MaxLines) lines.RemoveAt(0);
+    }
+
+    void OnGUI()
+    {
+        if (style == null)
+        {
+            style = new GUIStyle(GUI.skin.label) { fontSize = 14, richText = false };
+            style.normal.textColor = new Color(0.92f, 0.92f, 0.95f);
+        }
+        GUI.Label(new Rect(10, 8, Screen.width - 20, 22), "WMV Unity Renderer  (V1: runtime asset access)", style);
+        for (int i = 0; i < lines.Count; i++)
+            GUI.Label(new Rect(10, 30 + i * 20, Screen.width - 20, 22), lines[i], style);
     }
 }

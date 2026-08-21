@@ -68,7 +68,7 @@ public:
   SettingsControl *settingsControl;
   // Embedded Unity viewport pane -- the new renderer foundation (the OpenGL canvas is the
   // legacy/fallback viewport during the migration). Currently optional: created lazily on
-  // first View > Unity Renderer use (nullptr until then, and forever in headless runs).
+  // first View > Unity Renderer use or by the -unityipctest self-test (nullptr until then).
   // See UnityRendererHost.h and docs/unity-renderer/README.md.
   UnityRendererHost *unityRendererHost;
 
@@ -162,6 +162,15 @@ public:
   // View > Unity Renderer: show the embedded Unity viewport -- the new renderer foundation,
   // optional at this migration stage (lazy pane + player launch). See UnityRendererHost.h.
   void OnUnityRenderer(wxCommandEvent &event);
+  // Create the Unity pane on first use, show it and launch the player (the body of the menu
+  // handler, also used by the headless -unityipctest run). selfTest asks a diagnostic-capable
+  // player to also exercise the protocol's error paths -- never set for a normal menu launch.
+  // Returns false if the player could not be started (already reported unless batchMode).
+  bool ShowUnityRenderer(bool selfTest = false);
+  // Runtime command to the embedded Unity player: "this is the active model" (path +
+  // FileDataID of the model on the canvas). No-op when no player is connected. Called after
+  // every model load and when the player announces unityReady.
+  void SendCurrentModelToUnity();
 
   void OnMount(wxCommandEvent &event);
   void OnSave(wxCommandEvent &event);

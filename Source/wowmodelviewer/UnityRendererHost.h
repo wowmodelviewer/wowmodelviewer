@@ -18,7 +18,8 @@
  * into ITS OWN child window, the legacy OpenGL viewport is untouched -- the app's single WGL
  * context stays bound to the ModelCanvas HWND and nothing here calls into GL at all.
  *
- * Current migration stage (V0): the player build is OPTIONAL at build and run time and never
+ * Current migration stage (V1, runtime asset access over the IPC server below): the player
+ * build is OPTIONAL at build and run time and never
  * part of the WMV build -- if the exe is absent, launch() shows a clear message and the app
  * (and the legacy viewport) continue normally. The exe location is the
  * "Tools/UnityRendererPath" setting when set, else tools\unity-renderer\UnityRenderer.exe
@@ -38,6 +39,8 @@
 #include <wx/msw/winundef.h>
 #endif
 
+class UnityIpcServer;
+
 class UnityRendererHost : public wxPanel
 {
     DECLARE_CLASS(UnityRendererHost)
@@ -52,9 +55,19 @@ public:
   static wxString resolveUnityExePath();
 
   // Launch the player embedded in this panel. Safe to call repeatedly (no-op while the
-  // player is already running). Returns false after showing a non-fatal error message
-  // when the exe is missing or the process cannot be started.
-  bool launch();
+  // player is already running). Starts the localhost IPC server first and passes its port
+  // to the player (-wmvPort). Returns false after showing a non-fatal error message (or only
+  // logging it when showErrors is false, e.g. headless runs) when the exe is missing or the
+  // process cannot be started.
+  //
+  // selfTest additionally passes -wmvSelfTest, which asks a diagnostic-capable player (the
+  // TestStub) to exercise the protocol's negative paths -- a missing asset and an unknown
+  // message type. Normal launches never request those, so the viewport only ever shows the
+  // real model exchange.
+  bool launch(bool showErrors = true, bool selfTest = false);
+
+  // The runtime IPC channel to the player (always valid; listening only while launched).
+  UnityIpcServer * ipc() const { return m_ipc; }
 
   // True while the embedded player process is alive (reaps the handle when it has exited,
   // so a crashed/closed player can simply be relaunched).
@@ -76,6 +89,8 @@ private:
   // The player's top-level-turned-child window inside this panel (found lazily: the
   // player creates it asynchronously after process start).
   HWND findEmbeddedWindow();
+
+  UnityIpcServer * m_ipc = nullptr; // owned
 
   HANDLE m_process = nullptr; // owned; nullptr when no player has been launched
   DWORD  m_processId = 0;

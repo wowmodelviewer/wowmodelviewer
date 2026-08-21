@@ -8,6 +8,7 @@
 #include <wx/stdpaths.h>
 
 #include "enums.h"
+#include "UnityIpcServer.h"
 #include "util.h"
 
 #include "logger/Logger.h"
@@ -26,11 +27,14 @@ UnityRendererHost::UnityRendererHost(wxWindow * parent, wxWindowID id)
   // the player is still starting up (or after it exited).
   Create(parent, id, wxDefaultPosition, wxSize(640, 480), wxNO_BORDER | wxCLIP_CHILDREN, wxT("UnityRendererHost"));
   SetBackgroundColour(*wxBLACK);
+  m_ipc = new UnityIpcServer();
 }
 
 UnityRendererHost::~UnityRendererHost()
 {
   shutdown();
+  delete m_ipc;
+  m_ipc = nullptr;
 }
 
 wxString UnityRendererHost::resolveUnityExePath()
@@ -68,7 +72,7 @@ namespace
   }
 }
 
-bool UnityRendererHost::launch()
+bool UnityRendererHost::launch(bool showErrors, bool selfTest)
 {
   if (isRunning())
     return true;
@@ -77,6 +81,7 @@ bool UnityRendererHost::launch()
   if (!wxFileName::FileExists(exePath))
   {
     LOG_ERROR << "Unity renderer player not found:" << QString::fromWCharArray(exePath.c_str());
+    if (showErrors)
     wxMessageBox(wxString::Format(
                    _("No Unity renderer build was found at:\n\n%s\n\n"
                      "The Unity viewport is optional -- the rest of the application is unaffected.\n\n"
@@ -97,6 +102,16 @@ bool UnityRendererHost::launch()
                                       (unsigned long long)(uintptr_t)GetHandle(),
                                       logPath.c_str());
 
+  // Runtime IPC: WMV is the server. Start listening BEFORE the player exists and hand it the
+  // port; the player connects back and announces unityReady. If the server cannot start, the
+  // player still launches (embedding only) -- the reason is logged by the server.
+  if (m_ipc && m_ipc->start())
+    cmdLine += wxString::Format(wxT(" -wmvPort %d"), m_ipc->port());
+
+  // Diagnostic runs only: ask the player to also probe the protocol's error paths.
+  if (selfTest)
+    cmdLine += wxT(" -wmvSelfTest");
+
   STARTUPINFOW si;
   ZeroMemory(&si, sizeof(si));
   si.cb = sizeof(si);
@@ -111,8 +126,11 @@ bool UnityRendererHost::launch()
                       workDir.empty() ? nullptr : workDir.c_str(), &si, &pi))
   {
     const DWORD err = GetLastError();
+    if (m_ipc)
+      m_ipc->stop(); // nobody will ever connect; don't leave the listener + poll timer running
     LOG_ERROR << "Failed to start Unity renderer player (error" << (int)err << "):"
               << QString::fromWCharArray(exePath.c_str());
+    if (showErrors)
     wxMessageBox(wxString::Format(_("Failed to start the Unity renderer player (error %lu):\n\n%s"),
                                   (unsigned long)err, exePath.c_str()),
                  _("Unity Renderer"), wxOK | wxICON_ERROR, this);
@@ -125,7 +143,7 @@ bool UnityRendererHost::launch()
   m_embeddedWnd = nullptr;
 
   LOG_INFO << "Unity renderer player started (pid" << (int)m_processId << "):"
-           << QString::fromWCharArray(exePath.c_str());
+           << QString::fromWCharArray(cmdLine.c_str());
   return true;
 }
 
@@ -148,7 +166,13 @@ bool UnityRendererHost::isRunning()
 void UnityRendererHost::shutdown()
 {
   if (!m_process)
+  {
+    // The player may have exited on its own and been reaped by isRunning(); the IPC listener
+    // and its poll timer must not outlive it. stop() is idempotent.
+    if (m_ipc)
+      m_ipc->stop();
     return;
+  }
 
   // Polite first: the embedding contract is to send the player's window WM_CLOSE.
   if (HWND wnd = findEmbeddedWindow())
@@ -165,12 +189,15 @@ void UnityRendererHost::shutdown()
     const DWORD elapsed = GetTickCount() - start;
     if (elapsed >= 3000)
       break;
-    const DWORD wait = MsgWaitForMultipleObjects(1, &m_process, FALSE, 3000 - elapsed, QS_ALLINPUT);
+    // Service only cross-thread SENT messages (what the player's DestroyWindow delivers to
+    // this thread) plus paint -- never queued input/timers/commands, which could re-enter
+    // handlers mid-teardown (shutdown also runs during frame destruction).
+    const DWORD wait = MsgWaitForMultipleObjects(1, &m_process, FALSE, 3000 - elapsed, QS_SENDMESSAGE | QS_PAINT);
     if (wait == WAIT_OBJECT_0) { exited = true; break; }
     if (wait != WAIT_OBJECT_0 + 1)
       break; // timeout/failure
     MSG msg;
-    while (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE))
+    while (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE | PM_QS_SENDMESSAGE | PM_QS_PAINT))
     {
       TranslateMessage(&msg);
       DispatchMessage(&msg);
@@ -188,6 +215,9 @@ void UnityRendererHost::shutdown()
   m_process = nullptr;
   m_processId = 0;
   m_embeddedWnd = nullptr;
+
+  if (m_ipc)
+    m_ipc->stop();
 }
 
 HWND UnityRendererHost::findEmbeddedWindow()
@@ -227,10 +257,11 @@ void UnityRendererHost::OnSetFocus(wxFocusEvent & event)
 
 #else // !_WINDOWS
 
-bool UnityRendererHost::launch()
+bool UnityRendererHost::launch(bool showErrors, bool selfTest)
 {
-  wxMessageBox(_("The embedded Unity renderer is only supported on Windows."),
-               _("Unity Renderer"), wxOK | wxICON_INFORMATION, this);
+  if (showErrors)
+    wxMessageBox(_("The embedded Unity renderer is only supported on Windows."),
+                 _("Unity Renderer"), wxOK | wxICON_INFORMATION, this);
   return false;
 }
 

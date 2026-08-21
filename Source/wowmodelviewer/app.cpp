@@ -37,6 +37,11 @@
 #include <QImage>
 
 #include "TextureManager.h"
+#include "UnityAssetAccess.h"
+#include "UnityIpcServer.h"
+#include "UnityRendererHost.h"
+
+#include <wx/stopwatch.h>
 
 
 /*  THIS IS OUR MAIN "START UP" FILE.
@@ -213,6 +218,82 @@ static void doHeadlessDumpTexture(int fileDataId, const QString & outPath)
   std::printf("WMVDUMPTEX: file %d -> %s %s (%dx%d)\n", fileDataId, qPrintable(outPath),
               saved ? "OK" : "SAVE-FAILED", width, height);
   std::fflush(stdout);
+}
+
+// -mo <model> -unityipctest: end-to-end self-test of the embedded Unity renderer's runtime
+// asset access, using whatever player build is installed (the Unity-free TestStub or a real
+// Unity build). Opens the Unity pane and launches the player exactly as View > Unity Renderer
+// does, then pumps until the player has connected, announced unityReady, received loadWoWModel
+// for the loaded model, requested it and got an assetResponse (or a timeout). The player is
+// launched with -wmvSelfTest, so a diagnostic-capable player (the TestStub) also probes the
+// error paths -- a missing asset and an unknown message type -- which a normal View > Unity
+// Renderer launch never does. The missing-asset and by-FileDataID paths are additionally
+// exercised in-process. Everything is logged with the [unityipc-test]
+// prefix. The asset exchange itself touches no files on disk (runtime access, not an export);
+// the surrounding -mo run still writes its usual screenshot + logs. The frame is parked
+// off-screen in this mode, so nothing shows up on the desktop.
+static void doHeadlessUnityIpcTest(ModelViewer * frame)
+{
+  LOG_INFO << "[unityipc-test] starting -- player:" << QString::fromWCharArray(UnityRendererHost::resolveUnityExePath().c_str());
+  if (!frame->ShowUnityRenderer(/* selfTest */ true) || !frame->unityRendererHost)
+  {
+    LOG_ERROR << "[unityipc-test] RESULT: FAIL (player could not be launched)";
+    return;
+  }
+  UnityIpcServer * ipc = frame->unityRendererHost->ipc();
+  if (!ipc || !ipc->isListening())
+  {
+    LOG_ERROR << "[unityipc-test] RESULT: FAIL (IPC server not listening)";
+    return;
+  }
+
+  // Pump: no event loop runs inside OnInit, so drive the server + the wx message queue by hand.
+  const long timeoutMs = 20000;
+  wxStopWatch sw;
+  while (sw.Time() < timeoutMs)
+  {
+    ipc->poll();
+    wxTheApp->Yield(true);
+    wxMilliSleep(10);
+    const UnityIpcServer::Stats & st = ipc->stats();
+    if (st.responsesOk + st.responsesError >= 1)
+      break;
+    if (!frame->unityRendererHost->isRunning())
+    {
+      LOG_ERROR << "[unityipc-test] player exited before completing the exchange";
+      break;
+    }
+  }
+  // let the response drain and the player log it before we look at the counters
+  for (int i = 0; i < 50; i++) { ipc->poll(); wxTheApp->Yield(true); wxMilliSleep(10); }
+
+  const UnityIpcServer::Stats & st = ipc->stats();
+  LOG_INFO << "[unityipc-test] connections=" << st.connections << "unityReady=" << (ipc->isUnityReady() ? 1 : 0)
+           << "requests=" << st.requests << "ok=" << st.responsesOk << "errors=" << st.responsesError
+           << "bytesServed=" << (qlonglong)st.bytesServed << "provider=" << st.lastProvider
+           << "lastRequest=" << st.lastRequest << "lastError=" << st.lastError
+           << "elapsedMs=" << (long)sw.Time();
+
+  // Direct checks (no player involved): a clean error for a missing asset, and the by-FileDataID path.
+  {
+    const UnityAssetAccess::Result miss = UnityAssetAccess::readByPath("creature/chicken/does_not_exist.m2");
+    LOG_INFO << "[unityipc-test] missing-asset check: ok=" << (miss.ok ? 1 : 0) << "error=" << miss.error
+             << "provider=" << miss.provider;
+    if (frame->canvas && frame->canvas->model() && frame->canvas->model()->gamefile)
+    {
+      const int fdid = frame->canvas->model()->gamefile->fileDataId();
+      const UnityAssetAccess::Result byId = UnityAssetAccess::readByFileDataID(fdid > 0 ? fdid : 0);
+      LOG_INFO << "[unityipc-test] by-FileDataID check: fileDataID=" << fdid << "ok=" << (byId.ok ? 1 : 0)
+               << "bytes=" << byId.data.size() << "path=" << byId.path << "error=" << byId.error;
+    }
+  }
+
+  const bool pass = st.connections >= 1 && ipc->isUnityReady() && st.requests >= 1 && st.responsesOk >= 1;
+  LOG_INFO << "[unityipc-test] RESULT:" << (pass ? "PASS" : "FAIL");
+
+  // Close the player now (what app shutdown does) and confirm the child process is gone.
+  frame->unityRendererHost->shutdown();
+  LOG_INFO << "[unityipc-test] player shut down; still running=" << (frame->unityRendererHost->isRunning() ? 1 : 0);
 }
 
 // Headless smoke-test for the Image Sequence Exporter pipeline (off-screen, no GUI/timer): loads
@@ -435,6 +516,7 @@ bool WowModelViewApp::OnInit()
   int optMesh = 1, optSkel = 1, optSkin = 1, optAnim = 1;
   int optComponent = 0;   // -fbxcomponent : opt-in raw/node-based item-component export (UV2 + raw units + sidecar v2)
   int itemSkinFileId = 0; // -itemskin <fileDataID> : re-bind an item/weapon's on-screen skin after -mo load
+  bool unityIpcTest = false; // -unityipctest : with -mo, run the embedded Unity renderer IPC self-test (see doHeadlessUnityIpcTest)
   QString fbxClipsArg;    // -fbxclips i,j,k : ModelAnimation.Index values to export
   for (int i = 0; i<argc; i++) {
     cmd = QString::fromWCharArray(argv[i]);
@@ -544,6 +626,7 @@ bool WowModelViewApp::OnInit()
     else if (cmd == "-fbxanim")  { if (i + 1 < argc) { i++; optAnim = QString::fromWCharArray(argv[i]).toInt(); } }
     else if (cmd == "-fbxclips") { if (i + 1 < argc) { i++; fbxClipsArg = QString::fromWCharArray(argv[i]); } }
     else if (cmd == "-fbxcomponent") { optComponent = 1; }
+    else if (cmd == "-unityipctest") { unityIpcTest = true; }
     else if (cmd == "-itemskin") {
       // "-mo <item.m2> -itemskin <fileDataID>": after loading the model, re-bind this texture to
       // the item skin slot so the export matches the appearance the GUI had on screen (the out-of-
@@ -696,6 +779,10 @@ bool WowModelViewApp::OnInit()
         doHeadlessImageSeq(frame, imgSeqFolder);
         return false;
       }
+
+      // Embedded Unity renderer runtime asset access self-test (needs the loaded model above).
+      if (unityIpcTest)
+        doHeadlessUnityIpcTest(frame);
 
       QString out = "ss_" + QString(snapModelPath).replace('\\', '_').replace('/', '_') + ".png";
       frame->canvas->Screenshot(out.toStdWString());
