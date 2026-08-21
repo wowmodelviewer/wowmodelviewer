@@ -15,6 +15,7 @@
 #include "UnityIpcServer.h"
 
 #include <QCryptographicHash>
+#include <QJsonArray>
 #include <QJsonDocument>
 
 #include "UnityAssetAccess.h"
@@ -317,6 +318,10 @@ void UnityIpcServer::handleLine(const std::string & line)
   {
     handleGetAsset(msg, true);
   }
+  else if (type == "getModelTextures")
+  {
+    handleGetModelTextures(msg);
+  }
   else
   {
     LOG_ERROR << "[unityipc] unknown message type from player:" << type;
@@ -330,6 +335,48 @@ void UnityIpcServer::handleLine(const std::string & line)
       queueJson(resp);
     }
   }
+}
+
+void UnityIpcServer::handleGetModelTextures(const QJsonObject & msg)
+{
+  const QString requestId = msg.value("requestId").toString();
+  const int fdid = msg.value("fileDataID").toInt(0);
+  m_stats.requests++;
+  m_stats.lastRequest = QString("modelTextures %1").arg(fdid);
+  LOG_INFO << "[unityipc] <- getModelTextures" << requestId << "fileDataID=" << fdid;
+
+  std::vector<UnityAssetAccess::ModelTexture> textures;
+  QString error;
+  const bool ok = UnityAssetAccess::resolveModelTextures(fdid, textures, error);
+
+  QJsonObject resp;
+  resp["type"] = "modelTextures";
+  resp["requestId"] = requestId;
+  resp["ok"] = ok;
+  resp["fileDataID"] = fdid;
+  if (ok)
+  {
+    QJsonArray arr;
+    for (const UnityAssetAccess::ModelTexture & t : textures)
+    {
+      QJsonObject o;
+      o["index"] = t.index;
+      o["fileDataID"] = t.fileDataID;
+      o["source"] = t.fromDatabase ? "database" : "convention";
+      arr.append(o);
+    }
+    resp["textures"] = arr;
+    m_stats.responsesOk++;
+    LOG_INFO << "[unityipc] -> modelTextures" << requestId << "resolved" << (int)textures.size() << "texture(s)";
+  }
+  else
+  {
+    resp["error"] = error;
+    m_stats.responsesError++;
+    m_stats.lastError = error;
+    LOG_ERROR << "[unityipc] -> modelTextures" << requestId << "error:" << error;
+  }
+  queueJson(resp);
 }
 
 void UnityIpcServer::handleGetAsset(const QJsonObject & msg, bool byFileDataID)

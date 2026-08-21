@@ -9,6 +9,7 @@
 #include "GameFile.h"
 #include "GameFolder.h"
 #include "HardDriveFile.h"
+#include "GameDatabase.h"   // sqlResult / GAMEDATABASE query surface
 #include "WoWFolder.h"
 #include "logger/Logger.h"
 
@@ -201,6 +202,89 @@ UnityAssetAccess::Result UnityAssetAccess::readByPath(const QString & path)
 
   r.ok = readGameFile(file, casc, r);
   return r;
+}
+
+bool UnityAssetAccess::resolveModelTextures(int m2FileDataID, std::vector<ModelTexture> & out, QString & error)
+{
+  out.clear();
+  if (m2FileDataID <= 0)
+  {
+    error = "invalid model fileDataID";
+    return false;
+  }
+  if (!hasActiveClient())
+  {
+    error = g_clientLoadDepth > 0 ? "game client is still loading" : "no game client loaded";
+    return false;
+  }
+
+  // 1) Authoritative: the creature's skins live on CreatureDisplayInfo, keyed to the model
+  //    through CreatureModelData.FileDataID -- the same relation the viewer's own skin list
+  //    uses (AnimControl::UpdateModel). Take the first display: the viewer's default skin.
+  //    Column count differs across client generations, so try the widest form first.
+  const char * queries[] = {
+    "SELECT TextureVariationFileDataID1, TextureVariationFileDataID2, TextureVariationFileDataID3, "
+    "TextureVariationFileDataID4 FROM CreatureDisplayInfo "
+    "LEFT JOIN CreatureModelData ON CreatureDisplayInfo.ModelID = CreatureModelData.ID "
+    "WHERE CreatureModelData.FileDataID = %1",
+    "SELECT TextureVariationFileDataID1, TextureVariationFileDataID2, TextureVariationFileDataID3 "
+    "FROM CreatureDisplayInfo "
+    "LEFT JOIN CreatureModelData ON CreatureDisplayInfo.ModelID = CreatureModelData.ID "
+    "WHERE CreatureModelData.FileDataID = %1",
+  };
+
+  for (const char * q : queries)
+  {
+    const sqlResult r = GAMEDATABASE.sqlQuery(QString(q).arg(m2FileDataID));
+    if (!r.valid || r.values.empty())
+      continue;
+    const std::vector<QString> & row = r.values[0];
+    for (size_t i = 0; i < row.size(); i++)
+    {
+      const int id = row[i].toInt();
+      if (id > 0)
+      {
+        ModelTexture t;
+        t.index = (int)i;
+        t.fileDataID = id;
+        t.fromDatabase = true;
+        out.push_back(t);
+      }
+    }
+    if (!out.empty())
+      return true;
+  }
+
+  // 2) Fallback for models no creature display references any more (legacy assets that are
+  //    still shipped, e.g. creature/chicken/chicken.m2): look for the conventional sibling
+  //    skin next to the model in the listfile. Existence is authoritative (the listfile knows
+  //    the file is really there); the ASSOCIATION is a naming convention, so it is reported as
+  //    such (fromDatabase = false) and logged, never presented as database truth.
+  wow::WoWFolder & folder = static_cast<wow::WoWFolder &>(GAMEDIRECTORY);
+  const QString modelPath = normalizePath(folder.fileName(m2FileDataID));
+  if (!modelPath.isEmpty() && modelPath.endsWith(".m2"))
+  {
+    const QString base = modelPath.left(modelPath.size() - 3); // drop ".m2"
+    const QString candidates[] = { base + "skin.blp", base + ".blp" };
+    for (const QString & cand : candidates)
+    {
+      const int id = folder.fileID(cand);
+      if (id > 0)
+      {
+        ModelTexture t;
+        t.index = 0;
+        t.fileDataID = id;
+        t.fromDatabase = false;
+        out.push_back(t);
+        LOG_INFO << "[unityipc] no creature display for model" << m2FileDataID
+                 << "-- using the conventional sibling skin" << cand << "(fileDataID" << id << ")";
+        return true;
+      }
+    }
+  }
+
+  error = "no texture could be resolved for this model (no creature display, no conventional skin)";
+  return false;
 }
 
 UnityAssetAccess::Result UnityAssetAccess::readByFileDataID(int fileDataID)

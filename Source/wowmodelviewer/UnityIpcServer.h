@@ -18,11 +18,19 @@
  *     { "type":"unityReady", "protocolVersion":1 }
  *     { "type":"getAsset",             "requestId":"abc123", "path":"creature/chicken/chicken.m2" }
  *     { "type":"getAssetByFileDataID", "requestId":"abc124", "fileDataID":123456 }
+ *     { "type":"getModelTextures",     "requestId":"abc125", "fileDataID":123200 }
  *   WMV -> player
  *     { "type":"loadWoWModel", "path":"creature/chicken/chicken.m2", "fileDataID":0, "client":"active" }
  *     { "type":"assetResponse", "requestId":"abc123", "ok":true, "path":"...", "fileDataID":n,
  *       "byteLength":123456, "sha1":"...", "encoding":"base64", "data":"..." }
  *     { "type":"assetResponse", "requestId":"abc123", "ok":false, "error":"not found" }
+ *     { "type":"modelTextures", "requestId":"abc125", "ok":true, "fileDataID":123200,
+ *       "textures":[ { "index":0, "fileDataID":123199 } ] }
+ *
+ * getModelTextures exists because modern M2s do NOT name their replaceable textures (a
+ * creature skin's TXID entry is 0 and the texture array carries no filename) -- the skin comes
+ * from the client database, which only WMV can read. It returns metadata only; the renderer
+ * still fetches the bytes with getAssetByFileDataID.
  *
  * Implementation: plain Winsock2, non-blocking, polled from the GUI thread by a wxTimer (the
  * app has no Qt event loop, so QTcpServer signals would never fire; and GAMEDIRECTORY must be
@@ -96,6 +104,7 @@ private:
   void pollSend();
   void handleLine(const std::string & line);
   void handleGetAsset(const QJsonObject & msg, bool byFileDataID);
+  void handleGetModelTextures(const QJsonObject & msg);
   void queueJson(const QJsonObject & obj);
   void dropClient(const char * why);
 

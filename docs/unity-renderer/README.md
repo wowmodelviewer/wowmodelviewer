@@ -108,7 +108,27 @@ viewport uses). Player side: `Tools/UnityRendererProject/Assets/Scripts/WmvIpcCl
 { "type": "unityReady", "protocolVersion": 1 }
 { "type": "getAsset", "requestId": "abc123", "path": "creature/chicken/chicken.m2" }
 { "type": "getAssetByFileDataID", "requestId": "abc124", "fileDataID": 123456 }
+{ "type": "getModelTextures", "requestId": "abc125", "fileDataID": 123200 }
 ```
+
+`getModelTextures` answers with `modelTextures { requestId, ok, fileDataID, textures:[{ index,
+fileDataID, source }] }`. It exists because a modern M2 does **not** name its replaceable
+textures: a creature skin's TXID entry is 0 and its texture array carries no filename, because
+the actual skin comes from the client database.
+
+- **`source: "database"` -- the normal, authoritative route.** WMV resolves the skin from
+  `CreatureDisplayInfo` joined to `CreatureModelData` on the model's FileDataID: the same
+  relation the legacy viewer's own skin list uses. This is the path any current creature takes,
+  and the path the primary validation target `creature/chicken2/chicken2.m2` exercises.
+- **`source: "convention"` -- a labelled fallback, not a substitute.** A handful of legacy
+  assets are still shipped in CASC but referenced by no creature display at all (for example
+  `creature/chicken/chicken.m2`, superseded by `chicken2`), so the database has nothing to say
+  about them. Rather than render them untextured, WMV looks for the conventional sibling skin
+  in the listfile and marks the result `convention`, so the renderer -- and anyone reading the
+  logs -- can tell a naming guess from database truth. A model that resolves only this way is
+  a regression case, never the proof that texture resolution works.
+
+The response carries metadata only; bytes are still fetched with `getAssetByFileDataID`.
 
 **WMV -> player**
 
@@ -156,6 +176,39 @@ launches the installed player (TestStub or a real build) embedded in the off-scr
 in-process, and shuts the player down. Result lines carry the `[unityipc-test]` prefix
 (`RESULT: PASS|FAIL`).
 
+## Status
+
+**Implemented**
+
+- Runtime CASC/MPQ asset access: the player asks WMV for raw WoW files over IPC and never
+  touches game archives or the disk itself.
+- Static M2 mesh rendering: the modern chunked M2 (MD21 / MD20 version 272 as current retail
+  ships) and its .skin profile are parsed at runtime into a Unity mesh with per-batch
+  submeshes, converted to Unity's coordinate system with corrected winding.
+- Runtime BLP decoding for the formats the creature pipeline uses: palettized (alpha 0/1/4/8),
+  DXT1 / DXT3 / DXT5 and raw BGRA, decoded straight from the received bytes into an in-memory
+  texture. Anything else is reported by name instead of being decoded into garbage.
+- Basic materials: opaque, alpha-key and alpha blending, two-sided when the model asks for it.
+  Blend modes beyond that log a diagnostic and draw opaque.
+- Model textures the M2 does not name (replaceable creature skins) are resolved by WMV from
+  the client database and handed to the player as FileDataIDs (`getModelTextures`), labelled
+  `database` or -- for orphaned legacy assets only -- `convention`.
+- Bounds-driven camera framing, so a loaded model is visible immediately.
+
+**Not yet implemented**
+
+- Skeletal animation (bone data is parsed and preserved, but nothing is animated or skinned).
+- The full WoW material system (shader/combiner effects, texture animation, environment
+  mapping, colour/transparency tracks).
+- Particles and ribbons.
+- The character / equipment pipeline (customization, attachments, geoset rules).
+- Maps, terrain, WMOs, fog.
+- Full parity with the legacy OpenGL renderer.
+
+Unity remains the migration target and the intended primary renderer; the OpenGL viewport
+remains the legacy/fallback renderer during the migration. There is no asset-export workflow:
+every byte the renderer uses arrives over IPC at runtime and nothing is written to disk.
+
 ## Migration roadmap
 
 - **V0 (merged):** `View -> Unity Renderer` opens a dockable pane, launches the player
@@ -165,9 +218,13 @@ in-process, and shuts the player down. Result lines carry the `[unityipc-test]` 
   back, announces `unityReady`, receives `loadWoWModel` and fetches the model's raw bytes with
   `getAsset` / `getAssetByFileDataID`, served by WMV from the active client (CASC or MPQ) and
   verified by byte length + SHA-1 on the player side. No M2 parsing or mesh rendering yet.
-- **V2: direct rendering.** Unity-side M2 + skin + BLP loaders built on these bytes (plus
-  metadata requests added to the same channel as needed) render
-  `creature/chicken/chicken.m2` directly from WoW data. Binary framing for asset payloads.
+- **V2 (this branch): direct rendering.** Unity-side M2 + skin + BLP loaders built on those
+  bytes render a WoW model directly from game data as a static mesh -- parsed, converted,
+  textured and framed at runtime. Primary validation target is
+  `creature/chicken2/chicken2.m2`, a current, database-backed creature: 1632 vertices, 796
+  triangles, 2 submeshes, 2 materials (opaque + alpha), skin resolved through
+  `CreatureDisplayInfo` to a 256x256 DXT5 texture. Binary framing for asset payloads is still
+  open.
 - **V3+ (Unity first):** characters + customization, equipment/attachments, animation,
   maps/terrain/fog, OBS-friendly backgrounds and scene/stream features -- each built on the
   Unity pipeline, with the legacy OpenGL viewport kept as fallback until parity.

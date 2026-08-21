@@ -60,6 +60,40 @@ namespace Wmv.Wow
         public bool DepthWriteDisabled { get { return (Flags & 0x10) != 0; } }
     }
 
+    /// <summary>
+    /// One entry of the M2 "colors" array, reduced to what a static render needs.
+    ///
+    /// Each entry holds two animation tracks -- an RGB track and an alpha track -- and a draw
+    /// batch points at one of them through its ColorIndex. The alpha track is how a model hides
+    /// geometry it does not currently want drawn: an eye overlay, a glow, a blink. The legacy
+    /// OpenGL renderer refuses to draw a batch whose entry resolves to zero alpha, which is why
+    /// a model can ship geometry that is never visible at rest.
+    ///
+    /// Only the value at the start of animation 0 is kept: this milestone renders a static pose.
+    /// </summary>
+    public struct M2ColorDef
+    {
+        /// <summary>The RGB track carries data for animation 0. When it does not, the legacy
+        /// renderer treats the batch as invisible rather than as untinted.</summary>
+        public bool HasColorTrack;
+
+        /// <summary>Alpha at the start of animation 0; 1 when the track carries no data.</summary>
+        public float Alpha;
+    }
+
+    /// <summary>
+    /// Where a texture unit takes its texture coordinates from. Matches the codes the OpenGL
+    /// renderer uses in ModelRenderPass::uvSource, which are derived from the material's vertex
+    /// shader name (Diffuse_T1_Env -> unit 0 = T1, unit 1 = Env).
+    /// </summary>
+    public enum M2UvSource
+    {
+        TexCoord0 = 0,
+        TexCoord1 = 1,
+        Environment = 2,   // sphere map generated from the view-space normal, not a stored UV set
+        TexCoord2 = 3,
+    }
+
     public enum M2BlendMode
     {
         Opaque = 0,
@@ -82,6 +116,16 @@ namespace Wmv.Wow
         public M2TextureDef[] Textures = new M2TextureDef[0];
         public M2MaterialDef[] Materials = new M2MaterialDef[0];
         public ushort[] TextureLookup = new ushort[0];   // batch.textureComboIndex -> texture index
+
+        /// <summary>The "colors" array: batch.ColorIndex selects one. Empty when the header is
+        /// too short to carry it, in which case every batch is treated as visible.</summary>
+        public M2ColorDef[] Colors = new M2ColorDef[0];
+
+        /// <summary>The "texture_weights" array, resolved to the value at animation 0 time 0.
+        /// A batch reaches one through TextureWeightLookup[batch.TextureWeightComboIndex].</summary>
+        public float[] TextureWeights = new float[0];
+
+        public ushort[] TextureWeightLookup = new ushort[0];
         public int SkinProfileCount;
         public int[] SkinFileDataIDs = new int[0];       // SFID chunk
         public int[] TextureFileDataIDs = new int[0];    // TXID chunk (0 where replaceable)
@@ -113,6 +157,20 @@ namespace Wmv.Wow
         public ushort MaterialLayer;
         public ushort TextureCount;
         public ushort TextureComboIndex;
+
+        /// <summary>Indexes the model's texture-coord-combo table, one entry per texture unit.
+        /// Parsed for completeness; modern creature M2s ship an empty table and take their
+        /// per-unit UV routing from the shader id instead. 0xFFFF means "none".</summary>
+        public ushort TextureCoordComboIndex;
+
+        /// <summary>Indexes the model's texture-weight-combo table -- the second animated input
+        /// to the legacy renderer's visibility gate.</summary>
+        public ushort TextureWeightComboIndex;
+
+        public ushort TextureTransformComboIndex;
+
+        /// <summary>No colour entry: the legacy renderer's gate ignores the colour track.</summary>
+        public bool HasColor { get { return ColorIndex != 0xFFFF; } }
     }
 
     /// <summary>A parsed .skin profile.</summary>

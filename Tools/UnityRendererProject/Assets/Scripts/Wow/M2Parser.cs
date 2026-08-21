@@ -39,9 +39,15 @@ namespace Wmv.Wow
         const int OfsVertices = 0x3C;
         const int OfsNumSkinProfiles = 0x44;
         const int OfsTextures = 0x50;
+        const int OfsColors = 0x48;        // M2Color[]: an RGB track + an alpha track each
         const int OfsMaterials = 0x70;     // "texFlags": render flags + blend mode
+        const int OfsTextureWeights = 0x58;
         const int OfsTextureLookup = 0x80;
+        const int OfsTextureWeightLookup = 0x90;
         const int MinHeaderSize = 0x84 + 8;
+
+        const int ColorStride = 40;        // two M2Tracks
+        const int TrackStride = 20;        // interpolation + globalSeq + two nested M2Arrays
 
         /// <summary>Parse an .m2 asset. Throws WowParseException on anything malformed.</summary>
         public static M2ParsedModel Parse(byte[] file)
@@ -125,7 +131,112 @@ namespace Wmv.Wow
                 model.TextureLookup[i] = c.ReadUInt16();
             }
 
+            ReadVisibilityTracks(c, model);
+
             return model;
+        }
+
+        /// <summary>
+        /// Read the two animated inputs that decide whether a draw batch is drawn at all: the
+        /// colors[] array (an RGB track plus an alpha track, selected by batch.ColorIndex) and
+        /// texture_weights[] (selected through texture_weight_combos). A model hides geometry it
+        /// does not currently want -- an eye overlay, a glow, a blink -- by keying one of these to
+        /// zero, and the legacy OpenGL renderer skips such a batch entirely rather than drawing it
+        /// transparent. See WmvModelBuilder.BatchVisibility.
+        ///
+        /// These arrays sit past the header offsets the rest of this parser needs, so a shorter
+        /// header simply yields empty arrays -- which the builder reads as "everything visible",
+        /// the behaviour before this was parsed.
+        /// </summary>
+        static void ReadVisibilityTracks(ByteCursor c, M2ParsedModel model)
+        {
+            if (c.Length < OfsTextureWeightLookup + 8)
+                return;
+
+            c.Seek(OfsColors);
+            M2Array colors = c.ReadArray();
+            if (colors.Count > 0 && FitsArray(c, colors, ColorStride))
+            {
+                model.Colors = new M2ColorDef[colors.Count];
+                for (int i = 0; i < colors.Count; i++)
+                {
+                    int rec = colors.Offset + i * ColorStride;
+                    float ignored;
+                    model.Colors[i].HasColorTrack = ReadTrackFirstValue(c, rec, false, out ignored);
+                    float alpha;
+                    model.Colors[i].Alpha = ReadTrackFirstValue(c, rec + TrackStride, true, out alpha)
+                                            ? alpha : 1f;
+                }
+            }
+
+            c.Seek(OfsTextureWeights);
+            M2Array weights = c.ReadArray();
+            if (weights.Count > 0 && FitsArray(c, weights, TrackStride))
+            {
+                model.TextureWeights = new float[weights.Count];
+                for (int i = 0; i < weights.Count; i++)
+                {
+                    float w;
+                    model.TextureWeights[i] =
+                        ReadTrackFirstValue(c, weights.Offset + i * TrackStride, true, out w) ? w : 1f;
+                }
+            }
+
+            c.Seek(OfsTextureWeightLookup);
+            M2Array weightLookup = c.ReadArray();
+            if (weightLookup.Count > 0 && FitsArray(c, weightLookup, 2))
+            {
+                model.TextureWeightLookup = new ushort[weightLookup.Count];
+                for (int i = 0; i < weightLookup.Count; i++)
+                {
+                    c.Seek(weightLookup.Offset + i * 2);
+                    model.TextureWeightLookup[i] = c.ReadUInt16();
+                }
+            }
+        }
+
+        static bool FitsArray(ByteCursor c, M2Array arr, int stride)
+        {
+            return arr.Offset >= 0 && arr.Count >= 0 &&
+                   (long)arr.Offset + (long)arr.Count * stride <= c.Length;
+        }
+
+        /// <summary>
+        /// Read one M2Track and report whether animation 0 carries any data, plus that animation's
+        /// first value. Layout:
+        ///
+        ///     uint16 interpolationType; uint16 globalSequence;
+        ///     M2Array&lt;M2Array&lt;uint32&gt;&gt; timestamps;
+        ///     M2Array&lt;M2Array&lt;T&gt;&gt;      values;
+        ///
+        /// i.e. one nested array per animation. Only animation 0 at time 0 is read: this milestone
+        /// renders a static pose, exactly as the legacy renderer does with animtime 0. Values are
+        /// fixed16 (32767 == 1.0) for the alpha and weight tracks; asFixed16 is false when the
+        /// caller only wants to know whether the track has data at all (the RGB track).
+        /// </summary>
+        static bool ReadTrackFirstValue(ByteCursor c, int trackOffset, bool asFixed16, out float value)
+        {
+            value = 0f;
+            if (trackOffset < 0 || trackOffset + TrackStride > c.Length)
+                return false;
+
+            c.Seek(trackOffset + 12);            // skip interpolation + globalSequence + timestamps
+            M2Array values = c.ReadArray();
+            if (values.Count <= 0 || values.Offset < 0 || values.Offset + 8 > c.Length)
+                return false;
+
+            c.Seek(values.Offset);               // animation 0's own array
+            M2Array anim0 = c.ReadArray();
+            if (anim0.Count <= 0)
+                return false;
+            if (!asFixed16)
+                return true;
+
+            if (anim0.Offset < 0 || anim0.Offset + 2 > c.Length)
+                return false;
+            c.Seek(anim0.Offset);
+            value = c.ReadInt16() / 32767f;
+            return true;
         }
 
         /// <summary>Walk the top-level chunk table. Empty when the asset is a bare MD20.</summary>

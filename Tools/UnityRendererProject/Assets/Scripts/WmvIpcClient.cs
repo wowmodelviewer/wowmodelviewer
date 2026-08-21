@@ -15,11 +15,17 @@
 //   unityReady           { protocolVersion }
 //   getAsset             { requestId, path }
 //   getAssetByFileDataID { requestId, fileDataID }
+//   getModelTextures     { requestId, fileDataID }
 //
 // WMV -> player
 //   loadWoWModel  { path, fileDataID, client }
 //   assetResponse { requestId, ok, path, fileDataID, byteLength, sha1, encoding:"base64", data }
 //   assetResponse { requestId, ok:false, error }
+//   modelTextures { requestId, ok, fileDataID, textures:[{ index, fileDataID, source }] }
+//
+// getModelTextures exists because a modern M2 does not name its replaceable textures (a
+// creature skin's TXID entry is 0 and its texture array carries no filename) -- the skin comes
+// from the client database, which only WMV can read.
 //
 // V1 carries asset bytes as base64 inside the JSON line (simple, debuggable). A binary
 // frame (JSON header + length-prefixed payload) can replace it later without changing
@@ -44,6 +50,7 @@ public class WmvIpcClient : MonoBehaviour
     // Raised on the main thread.
     public Action<string, int, string> OnLoadWoWModel;        // (path, fileDataID, client)
     public Action<AssetResponse> OnAssetResponse;
+    public Action<ModelTexturesResponse> OnModelTextures;
     public Action<string> OnStatus;                            // human-readable connection/state text
 
     public bool Connected { get { return connected; } }
@@ -63,8 +70,32 @@ public class WmvIpcClient : MonoBehaviour
         public bool hashMatches { get { return ok && data != null && localSha1 == (sha1 ?? "").ToLowerInvariant(); } }
     }
 
+    public class ModelTextureRef
+    {
+        public int index;
+        public int fileDataID;
+        public string source = "";   // "database" (authoritative) or "convention" (legacy fallback)
+    }
+
+    public class ModelTexturesResponse
+    {
+        public string requestId;
+        public bool ok;
+        public int fileDataID;
+        public string error;
+        public ModelTextureRef[] textures = new ModelTextureRef[0];
+    }
+
+    [Serializable] class MsgTexture
+    {
+        public int index;
+        public int fileDataID;
+        public string source;
+    }
+
     [Serializable] class Msg
     {
+        public MsgTexture[] textures;
         public string type;
         public string requestId;
         public string path;
@@ -181,6 +212,27 @@ public class WmvIpcClient : MonoBehaviour
                 OnLoadWoWModel?.Invoke(msg.path ?? "", msg.fileDataID, msg.client ?? "active");
                 break;
 
+            case "modelTextures":
+            {
+                var r = new ModelTexturesResponse
+                {
+                    requestId = msg.requestId, ok = msg.ok, fileDataID = msg.fileDataID, error = msg.error,
+                };
+                if (msg.textures != null)
+                {
+                    r.textures = new ModelTextureRef[msg.textures.Length];
+                    for (int i = 0; i < msg.textures.Length; i++)
+                        r.textures[i] = new ModelTextureRef
+                        {
+                            index = msg.textures[i].index,
+                            fileDataID = msg.textures[i].fileDataID,
+                            source = msg.textures[i].source ?? "",
+                        };
+                }
+                OnModelTextures?.Invoke(r);
+                break;
+            }
+
             case "assetResponse":
             {
                 var r = new AssetResponse
@@ -238,6 +290,14 @@ public class WmvIpcClient : MonoBehaviour
     {
         var id = NewRequestId();
         Send("{\"type\":\"getAssetByFileDataID\",\"requestId\":\"" + id + "\",\"fileDataID\":" + fileDataID + "}");
+        return id;
+    }
+
+    /// <summary>Ask WMV which textures a model needs (it resolves them from the client DB).</summary>
+    public string RequestModelTextures(int fileDataID)
+    {
+        var id = NewRequestId();
+        Send("{\"type\":\"getModelTextures\",\"requestId\":\"" + id + "\",\"fileDataID\":" + fileDataID + "}");
         return id;
     }
 

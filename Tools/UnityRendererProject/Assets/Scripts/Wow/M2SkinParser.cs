@@ -110,6 +110,9 @@ namespace Wmv.Wow
                 b.MaterialLayer = c.ReadUInt16();
                 b.TextureCount = c.ReadUInt16();
                 b.TextureComboIndex = c.ReadUInt16();
+                b.TextureCoordComboIndex = c.ReadUInt16();
+                b.TextureWeightComboIndex = c.ReadUInt16();
+                b.TextureTransformComboIndex = c.ReadUInt16();
                 if (b.SubmeshIndex >= skin.Submeshes.Length)
                     throw new WowParseException(string.Format(
                         "skin: batch {0} references submesh {1} of {2}", i, b.SubmeshIndex, skin.Submeshes.Length));

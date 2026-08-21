@@ -6,6 +6,38 @@ Format loosely based on [Keep a Changelog](https://keepachangelog.com/).
 ## [Unreleased]
 
 ### Added
+- **Embedded Unity renderer: static WoW models now render (M2 + BLP at runtime).** The Unity
+  viewport no longer just fetches bytes -- it turns them into a visible model. On `loadWoWModel`
+  the player fetches the `.m2`, parses it, fetches the `.skin` profile the model names, resolves
+  and fetches its texture(s), decodes the BLP in memory and builds a Unity mesh with one submesh
+  per WoW draw batch, correct WoW->Unity axes and winding, a basic material (opaque / alpha-key /
+  alpha, two-sided when asked) and bounds-driven camera framing. Solidity is treated as a
+  correctness requirement rather than a default: BLP rows are flipped once on upload (they are
+  top-down, Unity's raw texture data is bottom-up), transparency follows the WoW blend mode and
+  never the texture's alpha channel -- a creature skin has one regardless, and on an opaque
+  material it is discarded at upload -- and the shader is screened so it can actually be drawn
+  opaque, since always-included fallbacks such as `Sprites/Default` bake alpha blending, no depth
+  write and no back-face culling into the pass and silently swallow every attempt to change it.
+  `Assets/Resources/WmvOpaque.shader` ships with the renderer as the shader a player build cannot
+  strip. Each load logs the material state it actually produced, and `-wmvFlipV`,
+  `-wmvForceOpaque`, `-wmvForceSolid` and `-wmvMatColors` isolate a visual fault without a rebuild.
+  Draw batches now also honour the two things an M2 uses to say what a material really is: a batch
+  loads as many textures as it declares (unit *k* is `textureComboIndex + k`, not just the first
+  entry), and its shader id names the combiner and the per-unit UV routing -- chicken2's
+  `Combiners_Opaque_Mod2xNA_Alpha` / `Diffuse_T1_Env` makes unit 1 an environment sphere map and the
+  base texture's alpha the reflection mask rather than transparency. And a batch the model hides at
+  rest by keying its colour track to zero is skipped, exactly as the OpenGL viewport does: chicken2
+  ships an 18-triangle eye overlay keyed to alpha 0 whose only visible effect, if drawn, is to cover
+  the eye painted into the skin underneath.
+  Verified end to end against retail data in a real Unity 6 URP player build:
+  `creature/chicken2/chicken2.m2` renders as 1632 vertices, 778 triangles from the one batch the
+  model wants drawn, with its 256x256 DXT5 skin resolved from the creature database and its 64x64
+  environment unit bound, opaque with depth write and back-face culling on. Textures a model does not name
+  itself (replaceable creature skins) are resolved by the app from the client database and handed
+  over as FileDataIDs; the rare legacy model that no creature display references any more falls
+  back to its conventional sibling skin, explicitly labelled as such. Still runtime-only:
+  nothing is exported or written to disk, and there is no OBJ/FBX/GLB step. Animation, the full
+  material system, particles and the character/equipment pipeline are not part of this step.
 - **Embedded Unity renderer: runtime asset access (V1).** The Unity viewport now talks to the app at
   runtime: the app hosts a localhost IPC server (started before the player launches, port passed
   on the player command line), the player connects back and announces itself, the app tells it

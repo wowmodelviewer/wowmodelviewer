@@ -135,7 +135,8 @@ namespace Wmv.Wow.Tests
 
         /// <summary>Skin with `vertexCount` lookup entries and one submesh covering `triangles`.</summary>
         static byte[] BuildSkin(int vertexCount, ushort[] triangles, ushort submeshIndexCount = 0xFFFF,
-                                ushort lookupOverride = 0xFFFF)
+                                ushort lookupOverride = 0xFFFF, ushort batchColorIndex = 0xFFFF,
+                                ushort batchTextureCount = 1)
         {
             const int headerSize = 0x30;
             int vertOffset = headerSize;
@@ -166,8 +167,12 @@ namespace Wmv.Wow.Tests
 
             b[batchOffset] = 0;                              // flags
             PutU16(b, batchOffset + 4, 0);                   // submeshIndex
-            PutU16(b, batchOffset + 14, 1);                  // textureCount
+            PutU16(b, batchOffset + 8, batchColorIndex);     // colorIndex
+            PutU16(b, batchOffset + 14, batchTextureCount);  // textureCount
             PutU16(b, batchOffset + 16, 0);                  // textureComboIndex
+            PutU16(b, batchOffset + 18, 0xFFFF);             // textureCoordComboIndex
+            PutU16(b, batchOffset + 20, 0);                  // textureWeightComboIndex
+            PutU16(b, batchOffset + 22, 0);                  // textureTransformComboIndex
             return b;
         }
 
@@ -211,6 +216,10 @@ namespace Wmv.Wow.Tests
             BlpTests();
             log.Add("WowCoordinateConverter");
             CoordinateTests();
+            log.Add("M2ShaderTable");
+            ShaderTableTests();
+            log.Add("Visibility tracks");
+            VisibilityTests();
 
             log.Add(failures == 0 ? "ALL TESTS PASSED" : (failures + " TEST(S) FAILED"));
             if (output != null)
@@ -338,6 +347,147 @@ namespace Wmv.Wow.Tests
             byte[] huge = BuildBlpPalettized(4, 4, 8);
             PutU32(huge, 0x0C, 100000);
             Throws<WowParseException>(() => BlpDecoder.Decode(huge), "BLP: implausible dimensions rejected");
+        }
+
+        /// <summary>
+        /// The shader table decides which combiner a material uses and where each texture unit
+        /// takes its coordinates from. Getting this wrong is invisible -- the model still renders,
+        /// just with every unit past the first silently dropped -- so it is worth pinning down.
+        /// chicken2's own material (2 units, shaderId 0x8000) is the worked example.
+        /// </summary>
+        static void ShaderTableTests()
+        {
+            var r = M2ShaderTable.Resolve(2, 0x8000);
+            Check(r.PixelShaderName == "Combiners_Opaque_Mod2xNA_Alpha", "shader: 0x8000 -> pixel shader name");
+            Check(r.PixelShader == 12, "shader: 0x8000 -> combiner id 12");
+            Check(r.VertexShaderName == "Diffuse_T1_Env", "shader: 0x8000 -> vertex shader name");
+            Check(r.UvSource[0] == M2UvSource.TexCoord0, "shader: unit 0 samples uv set 0");
+            Check(r.UvSource[1] == M2UvSource.Environment, "shader: unit 1 is an environment sphere map");
+
+            // 0x8000 | 21 -> Combiners_Mod_Mod / Diffuse_EdgeFade_T1_T2: EdgeFade is a fade term,
+            // not a texture unit, so unit 1 must still come out as uv set 1.
+            var edge = M2ShaderTable.Resolve(2, 0x8000 | 21);
+            Check(edge.VertexShaderName == "Diffuse_EdgeFade_T1_T2", "shader: edge-fade vertex shader name");
+            Check(edge.UvSource[0] == M2UvSource.TexCoord0 && edge.UvSource[1] == M2UvSource.TexCoord1,
+                  "shader: EdgeFade is skipped when assigning units");
+
+            // an explicit id past the end of the table must degrade, not throw
+            var over = M2ShaderTable.Resolve(2, 0x8000 | 999);
+            Check(over.PixelShaderName == "Combiners_Opaque" && over.VertexShaderName == "Diffuse_T1",
+                  "shader: out-of-range explicit id falls back");
+
+            // without the explicit bit the id is decoded from its bit fields instead
+            Check(M2ShaderTable.GetPixelShaderName(1, 0) == "Combiners_Opaque",
+                  "shader: single texture, no flags -> opaque");
+            Check(M2ShaderTable.GetPixelShaderName(1, 0x70) == "Combiners_Mod",
+                  "shader: single texture, mod flag");
+            Check(M2ShaderTable.GetVertexShaderName(2, 0x8) == "Diffuse_T1_Env",
+                  "shader: two textures, env flag");
+        }
+
+        /// <summary>
+        /// A model hides geometry it is not currently using by keying an animation track to zero
+        /// rather than by leaving the geometry out. Reading those tracks is what stops the
+        /// renderer drawing a hidden overlay on top of the detail it is meant to replace.
+        /// </summary>
+        static void VisibilityTests()
+        {
+            byte[] payload = BuildM2PayloadWithTracks(new[] { 0f, 1f }, 1f);
+            M2ParsedModel m = M2Parser.Parse(payload);
+
+            Check(m.Colors.Length == 2, "tracks: colours parsed");
+            Check(m.Colors[0].HasColorTrack && m.Colors[1].HasColorTrack, "tracks: colour RGB tracks present");
+            Near(m.Colors[0].Alpha, 0f, "tracks: colour 0 alpha is 0");
+            Near(m.Colors[1].Alpha, 1f, "tracks: colour 1 alpha is 1");
+            Check(m.TextureWeights.Length == 1, "tracks: texture weights parsed");
+            Near(m.TextureWeights[0], 1f, "tracks: texture weight value");
+            Check(m.TextureWeightLookup.Length == 1 && m.TextureWeightLookup[0] == 0,
+                  "tracks: texture weight lookup parsed");
+
+            // a header with no such arrays must leave them empty, not throw: that is what makes
+            // "no tracks" mean "everything visible" rather than "everything hidden".
+            M2ParsedModel plain = M2Parser.Parse(BuildM2Payload(2));
+            Check(plain.Colors.Length == 0 && plain.TextureWeights.Length == 0,
+                  "tracks: absent arrays parse as empty");
+
+            // the batch fields those tracks are reached through
+            var skin = M2SkinParser.Parse(BuildSkin(3, new ushort[] { 0, 1, 2 },
+                                                    batchColorIndex: 0, batchTextureCount: 2));
+            Check(skin.Batches[0].ColorIndex == 0 && skin.Batches[0].HasColor,
+                  "tracks: batch colour index parsed");
+            Check(skin.Batches[0].TextureWeightComboIndex == 0, "tracks: batch weight combo index parsed");
+            Check(skin.Batches[0].TextureCoordComboIndex == 0xFFFF, "tracks: batch coord combo index parsed");
+
+            // a batch with no colour entry is never hidden by one
+            var noColor = M2SkinParser.Parse(BuildSkin(3, new ushort[] { 0, 1, 2 }));
+            Check(!noColor.Batches[0].HasColor, "tracks: 0xFFFF colour index means 'no colour entry'");
+
+            // two texture units resolve to two different slots through the same combo run
+            M2ParsedModel two = M2Parser.Parse(BuildM2PayloadWithTracks(new[] { 1f }, 1f, texLookup: new ushort[] { 0, 1 }));
+            Check(two.TextureLookup.Length == 2 && two.TextureLookup[0] == 0 && two.TextureLookup[1] == 1,
+                  "tracks: texture combo run resolves both units");
+        }
+
+        /// <summary>
+        /// An M2 payload carrying colour and texture-weight tracks. Each track is
+        /// {uint16 interpolation, uint16 globalSeq, M2Array timestamps, M2Array values}, where
+        /// both arrays are arrays OF arrays -- one per animation.
+        /// </summary>
+        static byte[] BuildM2PayloadWithTracks(float[] colorAlphas, float weight, ushort[] texLookup = null)
+        {
+            if (texLookup == null) texLookup = new ushort[] { 0 };
+            const int headerSize = 0x100;
+            int vertsOffset = headerSize;
+            int texOffset = vertsOffset + 1 * 48;
+            int matOffset = texOffset + 1 * 16;
+            int lookupOffset = matOffset + 4;
+            int colorsOffset = lookupOffset + texLookup.Length * 2;
+            int weightsOffset = colorsOffset + colorAlphas.Length * 40;
+            int weightLookupOffset = weightsOffset + 20;
+            // one nested-array header + one value per track, laid out after everything else
+            int poolOffset = weightLookupOffset + 2;
+            int total = poolOffset + (colorAlphas.Length * 2 + 1) * (8 + 2) + 64;
+
+            var b = new byte[total];
+            PutMagic(b, 0, "MD20");
+            PutU32(b, 0x04, 272);
+            PutU32(b, 0x3C, 1); PutU32(b, 0x40, (uint)vertsOffset);
+            PutU32(b, 0x44, 1);
+            PutU32(b, 0x50, 1); PutU32(b, 0x54, (uint)texOffset);
+            PutU32(b, 0x70, 1); PutU32(b, 0x74, (uint)matOffset);
+            PutU32(b, 0x80, (uint)texLookup.Length); PutU32(b, 0x84, (uint)lookupOffset);
+            PutU32(b, 0x48, (uint)colorAlphas.Length); PutU32(b, 0x4C, (uint)colorsOffset);
+            PutU32(b, 0x58, 1); PutU32(b, 0x5C, (uint)weightsOffset);
+            PutU32(b, 0x90, 1); PutU32(b, 0x94, (uint)weightLookupOffset);
+
+            PutU32(b, texOffset, 11);
+            for (int i = 0; i < texLookup.Length; i++) PutU16(b, lookupOffset + i * 2, texLookup[i]);
+            PutU16(b, weightLookupOffset, 0);
+
+            int pool = poolOffset;
+            // Writes one M2Track at trackOffset holding a single fixed16 value, and returns the
+            // next free byte in the pool.
+            Func<int, float, int> writeTrack = (trackOffset, value) =>
+            {
+                int inner = pool;                       // the value itself
+                PutU16(b, inner, (ushort)(short)(value * 32767f));
+                pool += 2;
+                int outer = pool;                       // M2Array pointing at it
+                PutU32(b, outer, 1); PutU32(b, outer + 4, (uint)inner);
+                pool += 8;
+                PutU32(b, trackOffset + 12, 1);         // values: one animation
+                PutU32(b, trackOffset + 16, (uint)outer);
+                return pool;
+            };
+
+            for (int i = 0; i < colorAlphas.Length; i++)
+            {
+                int rec = colorsOffset + i * 40;
+                writeTrack(rec, 1f);                    // RGB track: only its presence is read
+                writeTrack(rec + 20, colorAlphas[i]);   // alpha track
+            }
+            writeTrack(weightsOffset, weight);
+            return b;
         }
 
         static void CoordinateTests()

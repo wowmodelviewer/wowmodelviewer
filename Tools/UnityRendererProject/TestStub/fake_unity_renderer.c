@@ -228,6 +228,29 @@ static void handle_line(const char * line)
       ipc_send(req);
       _snprintf(req, sizeof(req), "{\"type\":\"bogusMessage\",\"requestId\":\"s%d\"}", g_nextRequest++);
       ipc_send(req);
+      /* metadata request: WMV resolves the model textures from the client database */
+      _snprintf(req, sizeof(req), "{\"type\":\"getModelTextures\",\"requestId\":\"s%d\",\"fileDataID\":%lld}",
+                g_nextRequest++, fdid);
+      ipc_send(req);
+    }
+  }
+  else if (strcmp(type, "modelTextures") == 0)
+  {
+    int ok = 0;
+    long long fdid = 0;
+    char err[256] = {0};
+    json_get_bool(line, "ok", &ok);
+    json_get_int(line, "fileDataID", &fdid);
+    if (ok)
+    {
+      logf("recv: modelTextures for %lld -> %.400s", fdid, line);
+      status("Model textures resolved");
+    }
+    else
+    {
+      json_get_string(line, "error", err, sizeof(err));
+      logf("recv: modelTextures for %lld failed: %s", fdid, err);
+      status("Model textures: %s", err);
     }
   }
   else if (strcmp(type, "assetResponse") == 0)
