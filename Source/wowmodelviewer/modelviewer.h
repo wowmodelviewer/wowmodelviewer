@@ -172,6 +172,7 @@ public:
   // every model load and when the player announces unityReady.
   void SendCurrentModelToUnity();
   void SendCurrentSkinToUnity();
+  void SendCurrentAnimationToUnity();
 
   void OnMount(wxCommandEvent &event);
   void OnSave(wxCommandEvent &event);

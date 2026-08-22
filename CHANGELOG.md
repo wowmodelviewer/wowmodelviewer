@@ -6,6 +6,33 @@ Format loosely based on [Keep a Changelog](https://keepachangelog.com/).
 ## [Unreleased]
 
 ### Added
+- **Embedded Unity renderer: it plays the animation you picked, not its own idle.** The viewport
+  now follows WMV's animation dropdown -- pick Run, Death or an emote and the Unity pane switches
+  with the canvas, as it already did for skins and geoset variants. The selection travels over IPC
+  as a new `modelAnimation` push carrying the **sequence index**, which is what the keyframes are
+  stored under and what the app's own selector identifies a choice by (its labels end in `[n]`); an
+  animID cannot pick one -- chicken2 carries animID 5 on two sequences, as sub-animations 0 and 1. It is sent from
+  `AnimControl::SelectAnimation`, one funnel that the default picked while a model loads, the
+  dropdown and the loop control all now route through, and again right after the model is sent so
+  the renderer starts on the app's choice instead of being corrected a moment later. On the player
+  side the model's .m2 bytes are kept and re-parsed for the requested sequence, because only one
+  sequence's keyframes are held at a time -- a boss has 109 of them; nothing else moves, so the
+  mesh, its materials, its textures and its geoset selection are untouched by which animation is
+  playing.
+  **Not every sequence can be played from the .m2, and finding out why was the substance of this
+  change.** Bit 0x20 on a sequence means its keyframes are stored in that file; without it they are
+  in a separate .anim file -- and the trap is that such a sequence's track headers are still
+  present, with offsets that address the OTHER file yet land in range often enough that bounds
+  checks pass and the data reads as noise. chicken2's sequence 14 is exactly that and is not even
+  named by an AFID entry, so looking for the keys cannot distinguish it; only the flag can. Those
+  sequences now fall back to the model's idle and log which of the two reasons applied, and a track
+  that slips through anyway degrades to a still bone instead of failing the load.
+  Validated by walking six animations on each of seven models through the app's own selector: the
+  renderer followed every playable one (chicken2's Run, Death, AttackUnarmed, EmoteEat...; horse3's
+  six; valkier's six of 109) and fell back with a reason on the two chicken2 sequences that keep
+  their keys elsewhere.
+
+### Added
 - **Embedded Unity renderer: creatures now play their idle animation.** The rig built by the
   previous milestone stood perfectly still; it now loops the model's default idle. Which sequence
   that is turned out to be the first thing worth getting right: it is NOT sequence 0, but the first

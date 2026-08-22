@@ -29,6 +29,8 @@
  *     { "type":"modelSkin", "fileDataID":1521037,
  *       "textures":[ { "index":0, "type":11, "fileDataID":1521061, "source":"selection" } ],
  *       "geosets":[ 101 ], "hasGeosets":true }
+ *     { "type":"modelAnimation", "fileDataID":1521037, "sequenceIndex":2, "animID":0,
+ *       "durationMs":2000, "loop":true }
  *
  * getModelTextures exists because modern M2s do NOT name their replaceable textures (a
  * creature skin's TXID entry is 0 and the texture array carries no filename) -- the skin comes
@@ -43,6 +45,13 @@
  * modelSkin is pushed whenever the displayed skin changes (the dropdown, or the default chosen on
  * model load). Same payload as modelTextures, no request: the player swaps the texture and keeps
  * the mesh it already built.
+ *
+ * modelAnimation is pushed the same way whenever the animation on display changes, and once after
+ * loadWoWModel so the player starts on the animation the app is showing rather than on its own
+ * idle. "sequenceIndex" is what the player must act on: it indexes the model's animation table,
+ * which is both how the keyframes are stored and how the app's own selector identifies a choice.
+ * Two sequences routinely share an "animID" (sub-animations of one action), so the id alone
+ * cannot pick one; it is carried for the log and for recognising the idle (animID 0, "Stand").
  *
  * Implementation: plain Winsock2, non-blocking, polled from the GUI thread by a wxTimer (the
  * app has no Qt event loop, so QTcpServer signals would never fire; and GAMEDIRECTORY must be
@@ -97,6 +106,11 @@ public:
   // unasked. No-op when the player is not connected, or when nothing can be resolved.
   void sendModelSkin(int m2FileDataID);
 
+  // Runtime command: the animation on display changed. sequenceIndex indexes the model's
+  // animation table (what the app's own selector picks); animID and durationMs come from that
+  // entry. No-op when the player is not connected.
+  void sendModelAnimation(int m2FileDataID, int sequenceIndex, int animID, int durationMs, bool loop);
+
   // Raised (on the GUI thread) when the player's unityReady arrives -- the host uses it to
   // push the currently displayed model.
   std::function<void()> onUnityReady;
@@ -114,10 +128,12 @@ public:
     int responsesError = 0;
     long long bytesServed = 0;
     int skinPushes = 0;     // modelSkin messages sent (the displayed skin changed)
+    int animPushes = 0;     // modelAnimation messages sent (the displayed animation changed)
     QString lastRequest;    // "path" or "fileDataID n"
     QString lastProvider;   // "CASC" / "MPQ" / ""
     QString lastError;
     QString lastSkin;       // "<fileDataID> (<source>)" of the last skin pushed
+    QString lastAnimation;  // "seq <n> animID <id> <ms>ms" of the last animation pushed
   };
   const Stats & stats() const { return m_stats; }
 

@@ -368,13 +368,12 @@ void AnimControl::UpdateModel(WoWModel *m)
       useanim = 0;
     //return;
 
-    g_selModel->currentAnim = useanim; // anim position in anims
     animCList->Select(selectAnim); // anim position in selection
     animCList->Show(true);
 
     UpdateFrameSlider(g_selModel->anims[useanim].length - 1, g_selModel->anims[useanim].playSpeed);
 
-    g_selModel->animManager->SetAnim(0, useanim, 0);
+    SelectAnimation(useanim, 0);
     if (bNextAnims && g_selModel)
     {
       int NextAnimation = useanim;
@@ -1308,9 +1307,8 @@ void AnimControl::OnAnim(wxCommandEvent &event)
       }
 
       if (bOldStyle == true) {
-        g_selModel->currentAnim = selectedAnim;
         g_selModel->animManager->Stop();
-        g_selModel->animManager->SetAnim(0, selectedAnim, loopList->GetSelection());
+        SelectAnimation(selectedAnim, loopList->GetSelection());
         if (bNextAnims && g_selModel) {
           int NextAnimation = selectedAnim;
           for(size_t i=1; i<4; i++) {
@@ -1417,7 +1415,7 @@ void AnimControl::OnLoop(wxCommandEvent &)
 {
   if (bOldStyle == true) {
     g_selModel->animManager->Stop();
-    g_selModel->animManager->SetAnim(0, selectedAnim, loopList->GetSelection());
+    SelectAnimation(selectedAnim, loopList->GetSelection());
     if (bNextAnims && g_selModel) {
       int NextAnimation = selectedAnim;
       for(size_t i=1; i<4; i++) {
@@ -1605,6 +1603,38 @@ void AnimControl::SetSkin(int num)
   // all three. No-op when the Unity pane was never opened.
   if (g_modelViewer)
     g_modelViewer->SendCurrentSkinToUnity();
+}
+
+// Every animation change goes through here. The three callers are the default picked while a
+// model loads, the dropdown, and the loop control; funnelling them means the embedded Unity
+// viewport is told once, from one place, and cannot be left playing something the canvas is not.
+//
+// What is NOT covered, deliberately: a queued "next animation" chain advancing on its own, and
+// play/pause/speed. Those change what the canvas shows without any selection happening, and
+// following them needs the player to be driven per frame rather than per choice -- a different
+// milestone.
+void AnimControl::SelectAnimation(int index, int loops)
+{
+  if (!g_selModel || index < 0 || index >= (int)g_selModel->anims.size())
+    return;
+
+  g_selModel->currentAnim = index;
+  g_selModel->animManager->SetAnim(0, index, loops);
+
+  if (g_modelViewer)
+    g_modelViewer->SendCurrentAnimationToUnity();
+}
+
+int AnimControl::animationCount()
+{
+  return animCList ? (int)animCList->GetCount() : 0;
+}
+
+wxString AnimControl::animationName(int index)
+{
+  if (!animCList || index < 0 || index >= (int)animCList->GetCount())
+    return wxEmptyString;
+  return animCList->GetString(index);
 }
 
 void AnimControl::SetSingleSkin(int num, int texnum)

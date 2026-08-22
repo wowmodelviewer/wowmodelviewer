@@ -338,6 +338,26 @@ void UnityIpcServer::sendModelSkin(int m2FileDataID)
   queueJson(msg);
 }
 
+void UnityIpcServer::sendModelAnimation(int m2FileDataID, int sequenceIndex, int animID,
+                                        int durationMs, bool loop)
+{
+  if (!m_client || !m_unityReady || sequenceIndex < 0)
+    return;
+
+  QJsonObject msg;
+  msg["type"] = "modelAnimation";
+  msg["fileDataID"] = m2FileDataID;
+  msg["sequenceIndex"] = sequenceIndex;
+  msg["animID"] = animID;
+  msg["durationMs"] = durationMs;
+  msg["loop"] = loop;
+  m_stats.animPushes++;
+  m_stats.lastAnimation = QString("seq %1 animID %2 %3ms").arg(sequenceIndex).arg(animID).arg(durationMs);
+  LOG_INFO << "[unityipc] -> modelAnimation fileDataID=" << m2FileDataID
+           << "sequenceIndex=" << sequenceIndex << "animID=" << animID << "durationMs=" << durationMs;
+  queueJson(msg);
+}
+
 void UnityIpcServer::sendLoadWoWModel(const QString & path, int fileDataID, const QString & client)
 {
   QJsonObject msg;

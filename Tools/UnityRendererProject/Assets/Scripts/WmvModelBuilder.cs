@@ -49,8 +49,21 @@ public class WmvRuntimeModel
     /// </summary>
     public Transform[] Bones = new Transform[0];
 
+    /// <summary>
+    /// Each bone's rest offset from its parent, parallel to Bones. The animator adds a
+    /// translation track to these, so switching to another animation needs them again -- and
+    /// re-deriving them from the pivots would be a second copy of the same arithmetic.
+    /// </summary>
+    public Vector3[] BoneRestPositions = new Vector3[0];
+
     /// <summary>True when the model is drawn through a SkinnedMeshRenderer.</summary>
     public bool Skinned;
+
+    /// <summary>The animator driving the bones, or null when nothing is playing.</summary>
+    public WmvM2Animator Animator;
+
+    /// <summary>The renderer, kept so an animation change can adjust its culling.</summary>
+    public SkinnedMeshRenderer Skin;
 
     /// <summary>The geoset numbers currently switched on, or null when the host has not said.</summary>
     public HashSet<int> Geosets;
@@ -67,6 +80,9 @@ public class WmvRuntimeModel
         Root = null;
         Mesh = null;
         Bones = new Transform[0];
+        BoneRestPositions = new Vector3[0];
+        Animator = null;
+        Skin = null;
         Materials = new Material[0];
         Textures = new Texture2D[0];
     }
@@ -579,12 +595,14 @@ public static class WmvModelBuilder
         var go = new GameObject(objectName);
         SkinPlan skinPlan = PlanSkinning(model);
         var boneTransforms = new Transform[0];
+        var restPositions = new Vector3[0];
 
         if (skinPlan.CanSkin)
         {
             Transform rootBone;
             Vector3[] restLocalPositions;
             boneTransforms = BuildSkeleton(model, go.transform, out rootBone, out restLocalPositions);
+            restPositions = restLocalPositions;
 
             int dropped, unweighted;
             mesh.boneWeights = BuildBoneWeights(model, boneTransforms.Length, out dropped, out unweighted);
@@ -649,9 +667,11 @@ public static class WmvModelBuilder
                     // rest pose. An animation moves vertices outside it, so let Unity measure the
                     // real bounds each frame instead of clipping the model as it moves.
                     smr.updateWhenOffscreen = true;
+                    result.Animator = animator;
                     if (Debug_.AnimCheck)
                         ReportAnimationRange(smr, animator, positions, mesh.bounds, log);
                 }
+                result.Skin = smr;
             }
             else if (log != null)
             {
@@ -669,6 +689,7 @@ public static class WmvModelBuilder
 
         result.Root = go;
         result.Bones = boneTransforms;
+        result.BoneRestPositions = restPositions;
         result.Skinned = skinPlan.CanSkin;
         result.Mesh = mesh;
         result.Materials = materials.ToArray();
@@ -804,6 +825,76 @@ public static class WmvModelBuilder
             if (d > deepest) deepest = d;
         }
         return deepest;
+    }
+
+    /// <summary>
+    /// Play a different animation on a model already on screen.
+    ///
+    /// The mesh, its materials, its textures and its geoset selection are all untouched: an
+    /// animation change moves bones and nothing else. The caller supplies the SAME model re-parsed
+    /// for the new sequence -- only one sequence's keyframes are ever read, so a different one
+    /// means reading again -- and everything else here comes from what the build already made.
+    ///
+    /// Returns false when the re-parsed model has nothing to play, in which case the model keeps
+    /// whatever it was doing rather than freezing halfway.
+    /// </summary>
+    public static bool ApplySequence(WmvRuntimeModel runtime, M2ParsedModel model, Action<string> log)
+    {
+        if (runtime == null || model == null)
+            return false;
+        if (!runtime.Skinned || runtime.Bones.Length == 0)
+        {
+            // Nothing to animate: the model is drawn as a static mesh, and the build already said
+            // why. Saying it again here keeps the two halves of the story in one log.
+            if (log != null)
+                log("anim: nothing to animate -- this model is drawn as a static mesh");
+            return false;
+        }
+        if (Debug_.NoAnim)
+        {
+            if (log != null)
+                log("anim: selection ignored -- -wmvNoAnim was passed");
+            return false;
+        }
+        if (model.AnimatedSequence < 0 || model.AnimatedSequence >= model.Sequences.Length)
+        {
+            if (log != null)
+                log("anim: cannot play the selected animation -- " +
+                    (model.AnimationSkipReason ?? "no sequence was resolved"));
+            return false;
+        }
+
+        WmvM2Animator animator = runtime.Animator;
+        if (animator != null)
+        {
+            // Undo the pose the OLD animation left behind, while the animator still knows which
+            // bones it moved. A bone the new sequence does not touch would otherwise keep the last
+            // frame of the previous one for as long as the model is on screen.
+            animator.RestorePose();
+        }
+        else
+        {
+            // The model was built without an animator (its idle moved nothing, or the app had not
+            // said what to play yet). Nothing about the skeleton or the bind poses changes here.
+            animator = runtime.Root.AddComponent<WmvM2Animator>();
+            runtime.Animator = animator;
+        }
+
+        animator.Setup(model, runtime.Bones, runtime.BoneRestPositions, log);
+        if (animator.AnimatedBoneCount == 0)
+        {
+            // A real sequence that happens to move nothing: the bones are already back at rest.
+            UnityEngine.Object.Destroy(animator);
+            runtime.Animator = null;
+            if (runtime.Skin != null)
+                runtime.Skin.updateWhenOffscreen = false;
+            if (log != null)
+                log("anim: the selected sequence moves no bones -- back to the rest pose");
+            return true;
+        }
+        if (runtime.Skin != null)
+            runtime.Skin.updateWhenOffscreen = true;
+        return true;
     }
 
     static readonly int[] EmptyTriangles = new int[0];
