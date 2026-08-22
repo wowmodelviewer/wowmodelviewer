@@ -196,6 +196,7 @@ void AnimControl::UpdateModel(WoWModel *m)
     return;
   PCRList.clear();
   CDIToTexGp.clear();
+  singleSkinOverrides.clear();
   // Clear skin/texture data from previous model - if there is any.
   if (g_selModel)
   {
@@ -1403,9 +1404,61 @@ void AnimControl::OnLoop(wxCommandEvent &)
   } 
 }
 
+int AnimControl::skinCount()
+{
+  return (skinList && skinList->IsShown()) ? (int)skinList->GetCount() : 0;
+}
+
+wxString AnimControl::skinName(int index)
+{
+  if (!skinList || index < 0 || index >= (int)skinList->GetCount())
+    return wxEmptyString;
+  return skinList->GetString((unsigned int)index);
+}
+
+bool AnimControl::selectedSkinTextures(std::vector<std::pair<int, int> > & out)
+{
+  out.clear();
+  if (!skinList || !skinList->IsShown())
+    return false;
+
+  // Whatever whole skin is selected, if any. A per-slot pick clears this selection, which is why
+  // the overrides below can still answer on their own.
+  std::map<int, int> byType;
+  const int sel = skinList->GetSelection();
+  if (sel >= 0)
+  {
+    TextureGroup * grp = static_cast<TextureGroup *>(skinList->GetClientData((unsigned int)sel));
+    if (grp)
+    {
+      for (size_t i = 0; i < grp->count && i < TextureGroup::num; i++)
+      {
+        GameFile * tex = grp->tex[i];
+        if (!tex)
+          continue;
+        const int fdid = (int)tex->fileDataId();
+        if (fdid > 0)
+          byType[grp->base + (int)i] = fdid;
+      }
+    }
+  }
+
+  // ... with anything picked slot-by-slot applied over it, exactly as the model sees it.
+  for (std::map<int, int>::const_iterator it = singleSkinOverrides.begin();
+       it != singleSkinOverrides.end(); ++it)
+    byType[it->first] = it->second;
+
+  for (std::map<int, int>::const_iterator it = byType.begin(); it != byType.end(); ++it)
+    out.push_back(std::make_pair(it->first, it->second));
+  return !out.empty();
+}
+
 void AnimControl::SetSkin(int num)
 {
   std::vector<wxString> currTextures(3);
+
+  // Choosing a whole skin replaces anything picked slot-by-slot before it.
+  singleSkinOverrides.clear();
 
   if (num == -1)
     num = skinList->GetSelection();  // if we pass -1 to the func, we're redrawing the current skin
@@ -1476,6 +1529,13 @@ void AnimControl::SetSkin(int num)
   skinList->Select(num);
 
   SyncBLPSkinList();
+
+  // The embedded Unity viewport draws the same model from the same data, so it has to follow
+  // the same selection. This is the one funnel every skin change goes through -- the default
+  // chosen on model load, the dropdown, and SetSkinByDisplayID -- so hooking it here covers
+  // all three. No-op when the Unity pane was never opened.
+  if (g_modelViewer)
+    g_modelViewer->SendCurrentSkinToUnity();
 }
 
 void AnimControl::SetSingleSkin(int num, int texnum)
@@ -1501,6 +1561,14 @@ void AnimControl::SetSingleSkin(int num, int texnum)
   GameFile * tex = grp->tex[0];
   LOG_INFO << "SETSINGLESKIN skin = " << tex->fullname();
   g_selModel->updateTextureList(tex, base);
+
+  // Same reasoning as SetSkin: the Unity viewport draws the same model and has to follow the
+  // same textures. Recorded as well as pushed, because the caller clears the main selector's
+  // selection right after this -- so this map is the only remaining record of what is on screen.
+  if (tex && (int)tex->fileDataId() > 0)
+    singleSkinOverrides[base] = (int)tex->fileDataId();
+  if (g_modelViewer)
+    g_modelViewer->SendCurrentSkinToUnity();
 }
 
 int AnimControl::AddSkin(TextureGroup grp)

@@ -11,6 +11,10 @@
 #include "HardDriveFile.h"
 #include "GameDatabase.h"   // sqlResult / GAMEDATABASE query surface
 #include "WoWFolder.h"
+#include "animcontrol.h"    // the skin selector: what the viewport is actually showing
+#include "globalvars.h"
+#include "modelviewer.h"
+#include "wow_enums.h"      // TEXTURE_GAMEOBJECT1
 #include "logger/Logger.h"
 
 namespace
@@ -204,6 +208,16 @@ UnityAssetAccess::Result UnityAssetAccess::readByPath(const QString & path)
   return r;
 }
 
+const char * UnityAssetAccess::sourceName(ModelTexture::Source source)
+{
+  switch (source)
+  {
+    case ModelTexture::Selection:  return "selection";
+    case ModelTexture::Convention: return "convention";
+    default:                       return "database";
+  }
+}
+
 bool UnityAssetAccess::resolveModelTextures(int m2FileDataID, std::vector<ModelTexture> & out, QString & error)
 {
   out.clear();
@@ -218,9 +232,32 @@ bool UnityAssetAccess::resolveModelTextures(int m2FileDataID, std::vector<ModelT
     return false;
   }
 
-  // 1) Authoritative: the creature's skins live on CreatureDisplayInfo, keyed to the model
-  //    through CreatureModelData.FileDataID -- the same relation the viewer's own skin list
-  //    uses (AnimControl::UpdateModel). Take the first display: the viewer's default skin.
+  // 0) What the viewport is showing. A creature normally has several skins -- chicken2 has seven
+  //    -- and which one is on screen is a UI fact the database cannot answer: it only knows the
+  //    default. Guarded on the model actually being the displayed one, so a request about some
+  //    other model still falls through to the database below.
+  if (g_modelViewer && g_modelViewer->animControl && g_selModel && g_selModel->gamefile &&
+      (int)g_selModel->gamefile->fileDataId() == m2FileDataID)
+  {
+    std::vector<std::pair<int, int> > selected;
+    if (g_modelViewer->animControl->selectedSkinTextures(selected))
+    {
+      for (size_t i = 0; i < selected.size(); i++)
+      {
+        ModelTexture t;
+        t.index = (int)i;
+        t.type = selected[i].first;
+        t.fileDataID = selected[i].second;
+        t.source = ModelTexture::Selection;
+        out.push_back(t);
+      }
+      return true;
+    }
+  }
+
+  // 1) The model's DEFAULT skin: the creature's skins live on CreatureDisplayInfo, keyed to the
+  //    model through CreatureModelData.FileDataID -- the same relation the viewer's own skin list
+  //    uses (AnimControl::UpdateModel). Take the first display.
   //    Column count differs across client generations, so try the widest form first.
   const char * queries[] = {
     "SELECT TextureVariationFileDataID1, TextureVariationFileDataID2, TextureVariationFileDataID3, "
@@ -246,8 +283,11 @@ bool UnityAssetAccess::resolveModelTextures(int m2FileDataID, std::vector<ModelT
       {
         ModelTexture t;
         t.index = (int)i;
+        // Variation i feeds creature-skin slot i, exactly as the viewer's own skin list does
+        // (TextureGroup::base is TEXTURE_GAMEOBJECT1 and SetSkin applies base + i).
+        t.type = TEXTURE_GAMEOBJECT1 + (int)i;
         t.fileDataID = id;
-        t.fromDatabase = true;
+        t.source = ModelTexture::Database;
         out.push_back(t);
       }
     }
@@ -273,8 +313,9 @@ bool UnityAssetAccess::resolveModelTextures(int m2FileDataID, std::vector<ModelT
       {
         ModelTexture t;
         t.index = 0;
+        t.type = TEXTURE_GAMEOBJECT1;
         t.fileDataID = id;
-        t.fromDatabase = false;
+        t.source = ModelTexture::Convention;
         out.push_back(t);
         LOG_INFO << "[unityipc] no creature display for model" << m2FileDataID
                  << "-- using the conventional sibling skin" << cand << "(fileDataID" << id << ")";

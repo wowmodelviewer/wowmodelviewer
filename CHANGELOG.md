@@ -6,6 +6,19 @@ Format loosely based on [Keep a Changelog](https://keepachangelog.com/).
 ## [Unreleased]
 
 ### Added
+- **Embedded Unity renderer: it now shows the skin you picked.** A creature normally has several
+  skins -- `chicken2` offers seven -- and the renderer was resolving whichever one the database
+  listed first, so the Unity viewport could show a white chicken while the OpenGL viewport showed
+  the spotted one the user had selected (or the one "Random Skins" had rolled). The app now
+  answers "which textures does this model use" from its own skin selector rather than from the
+  database default, and pushes a `modelSkin` message whenever the selection changes -- from the
+  dropdown, from the default chosen on model load, from NPC import, and from the per-slot
+  folder-texture lists. The player re-uploads only the textures that actually changed and keeps
+  the mesh it already built: a skin change alters which image a material samples, nothing about
+  the geometry. Re-picking the skin already on screen fetches nothing. Texture metadata now
+  carries the WoW texture *type* rather than a bare position, because a model's texture-variation
+  order and its M2 texture-slot order need not agree. Geoset variations (a display that toggles
+  geometry) remain out of scope for this static-M2 milestone.
 - **Embedded Unity renderer: static WoW models now render (M2 + BLP at runtime).** The Unity
   viewport no longer just fetches bytes -- it turns them into a visible model. On `loadWoWModel`
   the player fetches the `.m2`, parses it, fetches the `.skin` profile the model names, resolves

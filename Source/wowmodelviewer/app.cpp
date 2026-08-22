@@ -26,6 +26,7 @@
 #include "util.h"
 #include "WoWDatabase.h"
 #include "WoWFolder.h"
+#include "animcontrol.h"
 #include "WoWModel.h"
 
 #include "logger/Logger.h"
@@ -296,14 +297,55 @@ static void doHeadlessUnityIpcTest(ModelViewer * frame)
       for (size_t ti = 0; ti < modelTextures.size(); ti++)
       {
         const UnityAssetAccess::Result tex = UnityAssetAccess::readByFileDataID(modelTextures[ti].fileDataID);
-        LOG_INFO << "[unityipc-test]   texture[" << (int)modelTextures[ti].index << "] fileDataID="
-                 << modelTextures[ti].fileDataID << "ok=" << (tex.ok ? 1 : 0)
-                 << "bytes=" << tex.data.size() << "path=" << tex.path;
+        LOG_INFO << "[unityipc-test]   texture[" << (int)modelTextures[ti].index << "] type="
+                 << modelTextures[ti].type << "fileDataID=" << modelTextures[ti].fileDataID
+                 << "ok=" << (tex.ok ? 1 : 0) << "bytes=" << tex.data.size() << "path=" << tex.path
+                 << "source=" << UnityAssetAccess::sourceName(modelTextures[ti].source);
       }
+
+      // Selected-skin sync: a creature normally has several skins and the viewport shows ONE of
+      // them. Walk the app's own selector and confirm that what it selects is what gets resolved
+      // for the renderer -- and that each change is pushed to the player.
+      AnimControl * ac = frame->animControl;
+      const int skins = ac ? ac->skinCount() : 0;
+      LOG_INFO << "[unityipc-test] skin-sync check: the selector offers" << skins << "skin(s)";
+      for (int s = 0; s < skins; s++)
+      {
+        ac->SetSkin(s);
+        std::vector<UnityAssetAccess::ModelTexture> sel;
+        QString selError;
+        const bool selOk = UnityAssetAccess::resolveModelTextures(fdid, sel, selError);
+        const int selFdid = (selOk && !sel.empty()) ? sel[0].fileDataID : 0;
+        LOG_INFO << "[unityipc-test]   skin[" << s << "]"
+                 << QString::fromWCharArray(ac->skinName(s).c_str()) << "-> fileDataID="
+                 << selFdid << "type=" << ((selOk && !sel.empty()) ? sel[0].type : 0)
+                 << "source=" << ((selOk && !sel.empty())
+                                  ? UnityAssetAccess::sourceName(sel[0].source) : "none")
+                 << "path=" << (selFdid > 0 ? UnityAssetAccess::readByFileDataID(selFdid).path : QString());
+        // let the push reach the player before selecting the next one
+        for (int i = 0; i < 20; i++) { ipc->poll(); wxTheApp->Yield(true); wxMilliSleep(10); }
+      }
+      // Re-select what is already selected. WMV pushes regardless -- it cannot know what the
+      // player is holding -- so this checks the other half of the contract: the player must
+      // recognise the texture it already has and fetch nothing.
+      if (skins > 0)
+      {
+        ac->SetSkin(skins - 1);
+        for (int i = 0; i < 20; i++) { ipc->poll(); wxTheApp->Yield(true); wxMilliSleep(10); }
+        LOG_INFO << "[unityipc-test]   re-selected skin[" << (skins - 1)
+                 << "] -- the player should report it unchanged and fetch nothing";
+      }
+      LOG_INFO << "[unityipc-test] skin-sync: skinPushes=" << ipc->stats().skinPushes
+               << "lastSkin=" << ipc->stats().lastSkin;
     }
   }
 
-  const bool pass = st.connections >= 1 && ipc->isUnityReady() && st.requests >= 1 && st.responsesOk >= 1;
+  // A model with a skin selector must have pushed at least one skin; one without simply has
+  // nothing to sync, so the condition only bites when there was something to send.
+  const bool skinsOk = (frame->animControl == NULL) || (frame->animControl->skinCount() == 0) ||
+                       (st.skinPushes >= 1);
+  const bool pass = st.connections >= 1 && ipc->isUnityReady() && st.requests >= 1 &&
+                    st.responsesOk >= 1 && skinsOk;
   LOG_INFO << "[unityipc-test] RESULT:" << (pass ? "PASS" : "FAIL");
 
   // Close the player now (what app shutdown does) and confirm the child process is gone.

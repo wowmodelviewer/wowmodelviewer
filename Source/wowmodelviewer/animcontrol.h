@@ -152,6 +152,20 @@ public:
   void OnLoop(wxCommandEvent &event); 
   glm::vec4 fromARGB(int color);
   void SetSkinByDisplayID(int cdi);
+
+  // The skin the selector is showing right now, as (texture type, texture FileDataID) pairs --
+  // the textures the viewport is ACTUALLY drawing. The database can only say what a model's
+  // DEFAULT skin is; which of its variations is on screen is a UI fact, and this is where it
+  // lives. Texture type is the WoW TEXTURE_* slot the texture feeds (TEXTURE_GAMEOBJECT1 = 11
+  // for the first creature skin), i.e. TextureGroup::base + i, matching what SetSkin hands to
+  // WoWModel::updateTextureList. False (and out empty) when no skin list is active or nothing
+  // is selected -- e.g. a character model, or a creature with no skins at all.
+  bool selectedSkinTextures(std::vector<std::pair<int, int> > & out);
+
+  // Entries in the skin selector, and one entry's label -- diagnostics only (the -unityipctest
+  // run walks the list to prove every selection reaches the embedded renderer).
+  int skinCount();
+  wxString skinName(int index);
   int AddSkin(TextureGroup grp);
   void SetSkin(int num);
   void ActivateBLPSkinList();
@@ -166,6 +180,12 @@ public:
   QString modelFolder;
   bool modelFolderChanged, BLPListFilled;
   std::map<int, TextureGroup> CDIToTexGp;
+
+  // Textures picked one slot at a time from the "all skins in folder" lists, as
+  // texture type -> FileDataID. These sit ON TOP of whatever the main skin selector chose (and
+  // SetSingleSkin's own caller clears that selection), so the displayed skin is the selector's
+  // answer with these applied over it. Cleared when the model changes or a whole skin is picked.
+  std::map<int, int> singleSkinOverrides;
   std::vector<particleColorReplacements> PCRList; 
   int selectedAnim;
   int selectedAnim2;

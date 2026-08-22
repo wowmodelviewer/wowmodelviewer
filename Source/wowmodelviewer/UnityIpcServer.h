@@ -25,12 +25,23 @@
  *       "byteLength":123456, "sha1":"...", "encoding":"base64", "data":"..." }
  *     { "type":"assetResponse", "requestId":"abc123", "ok":false, "error":"not found" }
  *     { "type":"modelTextures", "requestId":"abc125", "ok":true, "fileDataID":123200,
- *       "textures":[ { "index":0, "fileDataID":123199 } ] }
+ *       "textures":[ { "index":0, "type":11, "fileDataID":123199, "source":"selection" } ] }
+ *     { "type":"modelSkin", "fileDataID":1521037,
+ *       "textures":[ { "index":0, "type":11, "fileDataID":1521061, "source":"selection" } ] }
  *
  * getModelTextures exists because modern M2s do NOT name their replaceable textures (a
  * creature skin's TXID entry is 0 and the texture array carries no filename) -- the skin comes
  * from the client database, which only WMV can read. It returns metadata only; the renderer
  * still fetches the bytes with getAssetByFileDataID.
+ *
+ * "type" is the WoW texture TYPE the texture feeds (11/12/13 for the three creature skin slots),
+ * NOT a position: variation order and M2 texture-slot order need not agree, so the renderer maps
+ * the type onto the slots that declare it. "source" says where the answer came from --
+ * "selection" is the skin the viewport is showing right now, "database" only the model's default.
+ *
+ * modelSkin is pushed whenever the displayed skin changes (the dropdown, or the default chosen on
+ * model load). Same payload as modelTextures, no request: the player swaps the texture and keeps
+ * the mesh it already built.
  *
  * Implementation: plain Winsock2, non-blocking, polled from the GUI thread by a wxTimer (the
  * app has no Qt event loop, so QTcpServer signals would never fire; and GAMEDIRECTORY must be
@@ -49,9 +60,14 @@
 #include <functional>
 #include <string>
 
+#include <vector>
+
 #include <QByteArray>
+#include <QJsonArray>
 #include <QJsonObject>
 #include <QString>
+
+#include "UnityAssetAccess.h"
 
 class UnityIpcServer : public wxEvtHandler
 {
@@ -75,6 +91,11 @@ public:
   // empty/0. Queued if the player is connected; dropped (logged) otherwise.
   void sendLoadWoWModel(const QString & path, int fileDataID, const QString & client = QStringLiteral("active"));
 
+  // Runtime command: the skin on display changed. Resolves the model's textures the same way
+  // getModelTextures does -- so the push and the reply can never disagree -- and sends them
+  // unasked. No-op when the player is not connected, or when nothing can be resolved.
+  void sendModelSkin(int m2FileDataID);
+
   // Raised (on the GUI thread) when the player's unityReady arrives -- the host uses it to
   // push the currently displayed model.
   std::function<void()> onUnityReady;
@@ -91,9 +112,11 @@ public:
     int responsesOk = 0;
     int responsesError = 0;
     long long bytesServed = 0;
+    int skinPushes = 0;     // modelSkin messages sent (the displayed skin changed)
     QString lastRequest;    // "path" or "fileDataID n"
     QString lastProvider;   // "CASC" / "MPQ" / ""
     QString lastError;
+    QString lastSkin;       // "<fileDataID> (<source>)" of the last skin pushed
   };
   const Stats & stats() const { return m_stats; }
 
@@ -105,6 +128,7 @@ private:
   void handleLine(const std::string & line);
   void handleGetAsset(const QJsonObject & msg, bool byFileDataID);
   void handleGetModelTextures(const QJsonObject & msg);
+  static QJsonArray textureArray(const std::vector<UnityAssetAccess::ModelTexture> & textures);
   void queueJson(const QJsonObject & obj);
   void dropClient(const char * why);
 

@@ -150,8 +150,8 @@ UV routing, the full runtime material state, and the shader that was chosen.
 | File | Role |
 |---|---|
 | `WmvMain.cs` | Bootstrap (camera rig, light, placeholder, status overlay) and the load pipeline: on `loadWoWModel` it fetches the .m2, parses it, fetches the .skin profile named by SFID, resolves and fetches textures, builds the mesh and frames the camera. |
-| `WmvIpcClient.cs` | IPC client (protocol v1): connects back to the WMV server given by `-wmvPort`, sends `unityReady`, receives `loadWoWModel`, sends `getAsset` / `getAssetByFileDataID` / `getModelTextures`, decodes + hash-checks `assetResponse`. |
-| `WmvModelBuilder.cs` | Parsed model + skin + decoded textures -> Unity `Mesh` (one submesh per WoW batch), `Material` and `Texture2D`; owns and disposes those runtime resources so repeated loads do not leak. |
+| `WmvIpcClient.cs` | IPC client (protocol v1): connects back to the WMV server given by `-wmvPort`, sends `unityReady`, receives `loadWoWModel` and `modelSkin`, sends `getAsset` / `getAssetByFileDataID` / `getModelTextures`, decodes + hash-checks `assetResponse`. |
+| `WmvModelBuilder.cs` | Parsed model + skin + decoded textures -> Unity `Mesh` (one submesh per WoW batch), `Material` and `Texture2D`; owns and disposes those runtime resources so repeated loads do not leak. `RebindTextures` re-uploads the textures behind the materials it already made, for when WMV's selected skin changes. |
 | `Wow/M2Parser.cs` | Chunked M2 (MD21/MD20 v272): header, vertices, textures, materials, lookups, SFID/TXID. |
 | `Wow/M2SkinParser.cs` | .skin profile: vertex lookup, triangles, submeshes, batches, and the two-level index resolution into model vertices. |
 | `Wow/BlpDecoder.cs` | BLP2 -> RGBA32 in memory (palettized, DXT1/3/5, raw BGRA). |

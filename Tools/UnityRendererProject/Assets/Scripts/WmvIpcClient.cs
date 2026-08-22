@@ -21,7 +21,8 @@
 //   loadWoWModel  { path, fileDataID, client }
 //   assetResponse { requestId, ok, path, fileDataID, byteLength, sha1, encoding:"base64", data }
 //   assetResponse { requestId, ok:false, error }
-//   modelTextures { requestId, ok, fileDataID, textures:[{ index, fileDataID, source }] }
+//   modelTextures { requestId, ok, fileDataID, textures:[{ index, type, fileDataID, source }] }
+//   modelSkin     { fileDataID, textures:[{ index, type, fileDataID, source }] }   (pushed, no request)
 //
 // getModelTextures exists because a modern M2 does not name its replaceable textures (a
 // creature skin's TXID entry is 0 and its texture array carries no filename) -- the skin comes
@@ -51,6 +52,7 @@ public class WmvIpcClient : MonoBehaviour
     public Action<string, int, string> OnLoadWoWModel;        // (path, fileDataID, client)
     public Action<AssetResponse> OnAssetResponse;
     public Action<ModelTexturesResponse> OnModelTextures;
+    public Action<ModelTexturesResponse> OnModelSkin;          // pushed when the displayed skin changes
     public Action<string> OnStatus;                            // human-readable connection/state text
 
     public bool Connected { get { return connected; } }
@@ -73,8 +75,23 @@ public class WmvIpcClient : MonoBehaviour
     public class ModelTextureRef
     {
         public int index;
+
+        /// <summary>
+        /// The WoW texture TYPE this feeds -- 11, 12, 13 for the three creature skin slots. NOT a
+        /// position: a model's texture-variation order and its M2 texture-slot order need not
+        /// agree, so the renderer matches this against the type each M2 texture declares. 0 when
+        /// the host did not say, in which case index is used as a fallback.
+        /// </summary>
+        public int type;
+
         public int fileDataID;
-        public string source = "";   // "database" (authoritative) or "convention" (legacy fallback)
+
+        /// <summary>
+        /// "selection" -- the skin the WMV viewport is showing right now;
+        /// "database"  -- the model's default skin from CreatureDisplayInfo;
+        /// "convention"-- a listfile naming guess for a model no creature display references.
+        /// </summary>
+        public string source = "";
     }
 
     public class ModelTexturesResponse
@@ -89,6 +106,7 @@ public class WmvIpcClient : MonoBehaviour
     [Serializable] class MsgTexture
     {
         public int index;
+        public int type;
         public int fileDataID;
         public string source;
     }
@@ -204,6 +222,27 @@ public class WmvIpcClient : MonoBehaviour
         }
     }
 
+    static ModelTexturesResponse ReadTextures(Msg msg)
+    {
+        var r = new ModelTexturesResponse
+        {
+            requestId = msg.requestId, ok = msg.ok, fileDataID = msg.fileDataID, error = msg.error,
+        };
+        if (msg.textures != null)
+        {
+            r.textures = new ModelTextureRef[msg.textures.Length];
+            for (int i = 0; i < msg.textures.Length; i++)
+                r.textures[i] = new ModelTextureRef
+                {
+                    index = msg.textures[i].index,
+                    type = msg.textures[i].type,
+                    fileDataID = msg.textures[i].fileDataID,
+                    source = msg.textures[i].source ?? "",
+                };
+        }
+        return r;
+    }
+
     void Dispatch(Msg msg)
     {
         switch (msg.type)
@@ -213,25 +252,14 @@ public class WmvIpcClient : MonoBehaviour
                 break;
 
             case "modelTextures":
-            {
-                var r = new ModelTexturesResponse
-                {
-                    requestId = msg.requestId, ok = msg.ok, fileDataID = msg.fileDataID, error = msg.error,
-                };
-                if (msg.textures != null)
-                {
-                    r.textures = new ModelTextureRef[msg.textures.Length];
-                    for (int i = 0; i < msg.textures.Length; i++)
-                        r.textures[i] = new ModelTextureRef
-                        {
-                            index = msg.textures[i].index,
-                            fileDataID = msg.textures[i].fileDataID,
-                            source = msg.textures[i].source ?? "",
-                        };
-                }
-                OnModelTextures?.Invoke(r);
+                OnModelTextures?.Invoke(ReadTextures(msg));
                 break;
-            }
+
+            // Unsolicited: the skin on display in WMV changed. Same payload as a modelTextures
+            // reply, minus the requestId -- nothing asked for it.
+            case "modelSkin":
+                OnModelSkin?.Invoke(ReadTextures(msg));
+                break;
 
             case "assetResponse":
             {

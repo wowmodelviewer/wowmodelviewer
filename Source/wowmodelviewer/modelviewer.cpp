@@ -1596,6 +1596,20 @@ void ModelViewer::SendCurrentModelToUnity()
   unityRendererHost->ipc()->sendLoadWoWModel(gf->fullname(), gf->fileDataId() > 0 ? gf->fileDataId() : 0);
 }
 
+// The displayed skin changed (dropdown, or the default picked on model load). The Unity viewport
+// renders the same model from the same data, so it has to follow the same selection -- otherwise
+// it shows whatever the database happens to call the model's default while the canvas shows what
+// the user picked. Texture only: the mesh it already built is unchanged.
+void ModelViewer::SendCurrentSkinToUnity()
+{
+  if (!unityRendererHost || !unityRendererHost->ipc() || !unityRendererHost->ipc()->isConnected())
+    return;
+  if (!canvas || !canvas->model() || !canvas->model()->gamefile)
+    return;
+  WoWModel * m = const_cast<WoWModel *>(canvas->model());
+  unityRendererHost->ipc()->sendModelSkin((int)m->gamefile->fileDataId());
+}
+
 // Menu button press events
 void ModelViewer::OnToggleCommand(wxCommandEvent &event)
 {
