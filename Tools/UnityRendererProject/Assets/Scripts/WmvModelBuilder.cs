@@ -19,9 +19,11 @@ using Wmv.Wow;
 /// </summary>
 public struct WmvMaterialBinding
 {
-    public int BaseSlot;    // M2 texture slot behind the main texture, -1 when untextured
-    public int EnvSlot;     // M2 texture slot bound as the combiner's second unit, -1 when unused
-    public bool DropAlpha;  // was the base texture's alpha discarded on upload? (see CreateTexture)
+    public int BaseSlot;         // M2 texture slot behind the main texture, -1 when untextured
+    public int EnvSlot;          // M2 texture slot bound as the combiner's second unit, -1 unused
+    public bool DropAlpha;       // was the base texture's alpha discarded on upload?
+    public bool Unit1DropAlpha;  // ... and the second unit's
+    public bool Unit1Clamp;      // the second unit is sphere-mapped, so it must not wrap
 }
 
 public class WmvRuntimeModel
@@ -159,6 +161,7 @@ public static class WmvModelBuilder
         var positions = new Vector3[n];
         var normals = new Vector3[n];
         var uvs = new Vector2[n];
+        var uvs2 = new Vector2[n];
         for (int i = 0; i < n; i++)
         {
             float x, y, z;
@@ -170,6 +173,9 @@ public static class WmvModelBuilder
             WowCoordinateConverter.ConvertTexCoord(model.Vertices[i].TexCoord0, out u, out v);
             if (Debug_.FlipV) v = 1f - v;
             uvs[i] = new Vector2(u, v);
+            WowCoordinateConverter.ConvertTexCoord(model.Vertices[i].TexCoord1, out u, out v);
+            if (Debug_.FlipV) v = 1f - v;
+            uvs2[i] = new Vector2(u, v);
         }
 
         if (log != null && model.Vertices.Length > 0)
@@ -190,6 +196,9 @@ public static class WmvModelBuilder
         mesh.vertices = positions;
         mesh.normals = normals;
         mesh.uv = uvs;
+        // An M2 carries two UV sets, and a combiner unit routed to "T2" reads the second. Cheap to
+        // upload and meaningless to the units that do not use it.
+        mesh.uv2 = uvs2;
 
         // ---- one submesh per batch ----------------------------------------------------
         var materials = new List<Material>();
@@ -256,30 +265,37 @@ public static class WmvModelBuilder
                 hiddenByGeoset++;
 
             // How this material combines its texture units, resolved exactly as the legacy
-            // renderer does. This milestone implements one combiner; the rest are logged and
-            // drawn from unit 0 alone, which is what happened to every one of them before.
+            // renderer does, then reduced to what this renderer can draw of it.
             var shader = M2ShaderTable.Resolve(batch.TextureCount, batch.ShaderId);
-            bool wantsCombiner = batch.TextureCount >= 2 &&
-                                 shader.PixelShader == PixelShaderOpaqueMod2xNaAlpha &&
-                                 shader.UvSource[1] == M2UvSource.Environment &&
-                                 mode == M2BlendMode.Opaque && !Debug_.ForceSolid;
-            bool useCombiner = wantsCombiner && combinerAvailable;
+            CombinerPlan plan = PlanCombiner(shader.PixelShader);
+            M2UvSource unit1Uv = batch.TextureCount >= 2 ? shader.UvSource[1] : M2UvSource.TexCoord1;
+
+            // Unit 1 is bound when the combiner reads it AND the model actually declares it. A
+            // shader that cannot run a combiner at all (a pipeline Lit shader) gets neither.
+            bool useUnit1 = plan.NeedsUnit1 && batch.TextureCount >= 2 &&
+                            combinerAvailable && !Debug_.ForceSolid;
 
             int textureSlot = ResolveTextureSlot(model, batch, 0);
-            int envSlot = useCombiner ? ResolveTextureSlot(model, batch, 1) : -1;
+            int unit1Slot = useUnit1 ? ResolveTextureSlot(model, batch, 1) : -1;
 
-            // The base texture's ALPHA is the combiner's mask -- pixel shader 12 folds unit 1 in
-            // where alpha is low -- so it must survive when the combiner runs. Discarding it is
-            // otherwise still the right call for an opaque material: nothing downstream should be
-            // able to read a channel WoW does not treat as transparency.
-            bool dropAlpha = Debug_.ForceSolid || (mode == M2BlendMode.Opaque && !useCombiner);
+            // The base texture's ALPHA is not transparency on an opaque material -- on a creature
+            // skin it is a reflection mask -- so it is discarded on upload UNLESS something
+            // actually reads it: a combiner that masks with it, or a blend mode that outputs it.
+            bool alphaIsRead = useUnit1 ||
+                               plan.AlphaMode == 1 || plan.AlphaMode == 3 || plan.AlphaMode == 4 ||
+                               mode != M2BlendMode.Opaque;
+            bool dropAlpha = Debug_.ForceSolid || !alphaIsRead;
 
             Texture2D tex = GetTexture(decodedTextures, textureCache, textures, textureSlot,
                                        dropAlpha, false, objectName);
-            // Unit 1's own alpha is unused by the combiner; it is sampled by generated sphere-map
-            // coordinates, so it must not wrap.
-            Texture2D envTex = GetTexture(decodedTextures, textureCache, textures, envSlot,
-                                          true, true, objectName);
+            // An environment unit is sampled by generated sphere-map coordinates, which must not
+            // wrap; a unit fed by a stored UV set is a normal repeating texture. Its own alpha is
+            // kept whenever the combiner reads it.
+            bool unit1Env = unit1Uv == M2UvSource.Environment;
+            bool unit1DropAlpha = !(plan.AlphaMode == 2 || plan.AlphaMode == 3 || plan.AlphaMode == 4 ||
+                                    plan.Mode == 4);
+            Texture2D unit1Tex = GetTexture(decodedTextures, textureCache, textures, unit1Slot,
+                                            unit1DropAlpha, unit1Env, objectName);
 
             if (log != null)
             {
@@ -289,25 +305,29 @@ public static class WmvModelBuilder
                                   (M2BlendMode)mat.BlendMode, mat.Flags, mat.TwoSided,
                                   mat.DepthWriteDisabled, textureSlot,
                                   tex == null ? " (no texture)" : "",
-                                  dropAlpha ? "forced to 255" : "kept (combiner mask)"));
-                log(string.Format("batch: shaderId 0x{0:X4} -> {1} / {2} (combiner {3}), {4} texture unit(s), " +
-                                  "unit 1 uv {5}{6}",
+                                  dropAlpha ? "forced to 255" : "kept (something reads it)"));
+                log(string.Format("batch: shaderId 0x{0:X4} -> {1} / {2} (pixel shader {3}), {4} unit(s), " +
+                                  "unit 1 uv {5} -> combiner {6}, alpha mode {7}x{8}{9}",
                                   batch.ShaderId, shader.PixelShaderName, shader.VertexShaderName,
                                   shader.PixelShader, batch.TextureCount,
-                                  batch.TextureCount >= 2 ? shader.UvSource[1].ToString() : "n/a",
-                                  useCombiner ? " -> env slot " + envSlot + " bound"
-                                              : (batch.TextureCount >= 2
-                                                 ? (wantsCombiner
-                                                    ? " -- the resolved shader cannot run the combiner, unit 1 dropped"
-                                                    : " -- this combiner is not implemented yet, unit 1 dropped")
-                                                 : "")));
+                                  batch.TextureCount >= 2 ? unit1Uv.ToString() : "n/a",
+                                  plan.Mode, plan.AlphaMode, plan.AlphaScale,
+                                  useUnit1 ? ", unit 1 slot " + unit1Slot + " bound"
+                                           : (plan.NeedsUnit1 && batch.TextureCount >= 2
+                                              ? ", unit 1 NOT bound (the resolved shader cannot combine)"
+                                              : "")));
+                if (!plan.Known)
+                    log(string.Format("material: pixel shader {0} ({1}) is not implemented -- drawing " +
+                                      "unit 0 alone with its own alpha",
+                                      shader.PixelShader, shader.PixelShaderName));
             }
 
             bindings.Add(new WmvMaterialBinding
             {
-                BaseSlot = textureSlot, EnvSlot = envSlot, DropAlpha = dropAlpha,
+                BaseSlot = textureSlot, EnvSlot = unit1Slot, DropAlpha = dropAlpha,
+                Unit1DropAlpha = unit1DropAlpha, Unit1Clamp = unit1Env,
             });
-            materials.Add(CreateMaterial(mat, mode, tex, envTex,
+            materials.Add(CreateMaterial(mat, mode, plan, unit1Uv, tex, unit1Tex,
                                          objectName + "_mat" + materials.Count, log));
         }
 
@@ -443,12 +463,14 @@ public static class WmvModelBuilder
             if (tex != null && !Debug_.MatColors)
                 m.mainTexture = tex;
 
-            Texture2D envTex = GetTexture(decodedTextures, cache, fresh, b.EnvSlot, true, true, objectName);
-            if (m.HasProperty(CombinerModeProperty))
+            // Unit 1 keeps whatever combiner the material was built with; only the image behind
+            // it is re-uploaded. Re-deriving the plan here would risk the two paths drifting.
+            if (b.EnvSlot >= 0 && m.HasProperty(CombinerModeProperty))
             {
-                bool on = envTex != null && !Debug_.MatColors;
-                if (on) m.SetTexture(SecondTexProperty, envTex);
-                m.SetFloat(CombinerModeProperty, on ? PixelShaderOpaqueMod2xNaAlpha : 0);
+                Texture2D unit1 = GetTexture(decodedTextures, cache, fresh, b.EnvSlot,
+                                             b.Unit1DropAlpha, b.Unit1Clamp, objectName);
+                if (unit1 != null && !Debug_.MatColors)
+                    m.SetTexture(SecondTexProperty, unit1);
             }
 
             if (log != null)
@@ -465,9 +487,208 @@ public static class WmvModelBuilder
         runtime.Textures = fresh.ToArray();
     }
 
-    /// <summary>M2 pixel shader 12, "Combiners_Opaque_Mod2xNA_Alpha" -- the one combiner this
-    /// milestone implements. See WmvOpaque.shader.</summary>
-    const int PixelShaderOpaqueMod2xNaAlpha = 12;
+    /// <summary>
+    /// How much of one M2 combiner this renderer can draw. The shader takes the arithmetic as a
+    /// few floats rather than a keyword per case, so widening coverage is a table entry here.
+    /// </summary>
+    struct CombinerPlan
+    {
+        public int Mode;          // _CombinerMode: 0 single, 1 u0*u1, 2 u0*u1*2, 3/4 masked/decal, 12 ps12
+        public int AlphaMode;     // _AlphaMode: 0 one, 1 u0.a, 2 u1.a, 3 u0.a*u1.a, 4 u0.a+u1.a
+        public float AlphaScale;
+        public bool NeedsUnit1;   // the second texture is sampled, for colour or for alpha
+        public bool Known;        // false: not implemented -- drawn from unit 0 alone, and logged
+    }
+
+    static CombinerPlan Plan(int mode, int alphaMode, float scale, bool unit1)
+    {
+        CombinerPlan p;
+        p.Mode = mode; p.AlphaMode = alphaMode; p.AlphaScale = scale;
+        p.NeedsUnit1 = unit1; p.Known = true;
+        return p;
+    }
+
+    /// <summary>
+    /// What one M2 pixel shader reduces to here. Ported case by case from the legacy viewport's
+    /// own GLSL combiner (ModelRenderPass.cpp), not from the shader NAMES -- "Combiners_Mod_Mod2x"
+    /// says nothing until you read that it is unit0 * unit1 * 2 with a discard of u0.a * u1.a * 2.
+    ///
+    /// One thing makes the table much shorter than it looks: several combiners differ from a
+    /// simpler one only in a SPECULAR lobe, and the legacy viewport multiplies that lobe by a
+    /// weight that is ZERO unless an opt-in environment variable is set. Reproducing its default
+    /// means dropping the lobe too, which collapses those cases onto plain single-texture colour
+    /// (8, 10, 13, 14, 16, 20, 23) or onto pixel shader 12 (15).
+    /// </summary>
+    static CombinerPlan PlanCombiner(int pixelShader)
+    {
+        switch (pixelShader)
+        {
+            // colour from unit 0 alone
+            case 0:  return Plan(0, 0, 1f, false);   // Combiners_Opaque
+            case 1:  return Plan(0, 1, 1f, false);   // Combiners_Mod
+            case 13: return Plan(0, 0, 1f, false);   // Opaque_AddAlpha        (lobe dropped)
+            case 14: return Plan(0, 0, 1f, false);   // Opaque_AddAlpha_Alpha  (lobe dropped)
+            case 20: return Plan(0, 0, 1f, false);   // Opaque_AddAlpha_Wgt    (lobe dropped)
+            case 10: return Plan(0, 1, 1f, false);   // Mod_AddNA              (lobe dropped)
+            case 16: return Plan(0, 1, 1f, false);   // Mod_AddAlpha           (lobe dropped)
+            case 23: return Plan(0, 1, 1f, false);   // Mod_AddAlpha_Wgt       (lobe dropped)
+            case 33: return Plan(0, 1, 1f, false);   // Mod_Depth
+
+            // the alpha, but not the colour, needs unit 1
+            case 8:  return Plan(0, 4, 1f, true);    // Mod_Add                (lobe dropped)
+            case 21: return Plan(0, 4, 1f, true);    // Mod_Add_Alpha          (lobe dropped)
+
+            // products of the two units
+            case 5:  return Plan(1, 0, 1f, true);    // Opaque_Opaque
+            case 2:  return Plan(1, 2, 1f, true);    // Opaque_Mod
+            case 6:  return Plan(1, 3, 1f, true);    // Mod_Mod
+            case 36: return Plan(1, 3, 1f, true);    // Mod_Mod_Depth
+            case 11: return Plan(1, 1, 1f, true);    // Mod_Opaque
+            case 4:  return Plan(2, 0, 1f, true);    // Opaque_Mod2xNA
+            case 3:  return Plan(2, 2, 2f, true);    // Opaque_Mod2x
+            case 7:  return Plan(2, 3, 2f, true);    // Mod_Mod2x
+            case 9:  return Plan(2, 1, 1f, true);    // Mod_Mod2xNA
+
+            // masked by unit 0's own alpha -- on a creature skin that channel is a reflection
+            // mask, not transparency
+            case 12: return Plan(12, 0, 1f, true);   // Opaque_Mod2xNA_Alpha
+            case 15: return Plan(12, 0, 1f, true);   // ..._Add: third unit only fed the lobe
+            case 22: return Plan(3, 0, 1f, true);    // Opaque_ModNA_Alpha
+            case 29: return Plan(4, 0, 1f, true);    // Opaque_Alpha (decal)
+
+            default:
+            {
+                // Not implemented: draw unit 0 with its own alpha, which is what every one of
+                // these did before any combiner existed, and say so once per material.
+                CombinerPlan p = Plan(0, 1, 1f, false);
+                p.Known = false;
+                return p;
+            }
+        }
+    }
+
+    /// <summary>
+    /// The GL state one M2 blend mode produces, read off the legacy viewport's own switch
+    /// (ModelRenderPass::init). Mode 0 sets a blend function but never enables blending, and mode
+    /// 1 sets One/Zero with an alpha test -- both are opaque, which is why they were already right
+    /// before this. The rest were being drawn opaque too, which they are not: an additive glow
+    /// rendered opaque is a solid box where a wisp of light belongs.
+    ///
+    /// opaqueAlpha follows the combiner's own final-opacity rule: only modes 0 and 1 ignore the
+    /// alpha the combiner built (they output mesh opacity, 1 for a static pose); every other mode
+    /// outputs it.
+    /// </summary>
+    static void ApplyBlendMode(Material m, M2BlendMode mode, bool depthWriteDisabled,
+                               float cutoff, out string described)
+    {
+        var src = UnityEngine.Rendering.BlendMode.One;
+        var dst = UnityEngine.Rendering.BlendMode.Zero;
+        int queue = (int)UnityEngine.Rendering.RenderQueue.Geometry;
+        string renderType = "Opaque";
+        bool alphaTest = false, opaqueAlpha = true;
+
+        switch (mode)
+        {
+            case M2BlendMode.Opaque:                                       // One/Zero, no blending
+                described = "opaque";
+                break;
+
+            case M2BlendMode.AlphaKey:                                     // One/Zero + alpha test
+                alphaTest = m.HasProperty("_Cutoff") || m.HasProperty("_AlphaCutoff");
+                if (alphaTest)
+                {
+                    queue = (int)UnityEngine.Rendering.RenderQueue.AlphaTest;
+                    renderType = "TransparentCutout";
+                }
+                described = alphaTest ? "alpha clip (cutoff " + cutoff.ToString("0.###") + ")"
+                                      : "opaque (the shader exposes no alpha cutoff)";
+                break;
+
+            case M2BlendMode.Alpha:                                        // SrcAlpha/OneMinusSrcAlpha
+                src = UnityEngine.Rendering.BlendMode.SrcAlpha;
+                dst = UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha;
+                opaqueAlpha = false;
+                queue = (int)UnityEngine.Rendering.RenderQueue.Transparent;
+                renderType = "Transparent";
+                described = "alpha blend";
+                break;
+
+            case M2BlendMode.NoAlphaAdd:                                     // One/One
+                src = UnityEngine.Rendering.BlendMode.One;
+                dst = UnityEngine.Rendering.BlendMode.One;
+                opaqueAlpha = false;
+                queue = (int)UnityEngine.Rendering.RenderQueue.Transparent;
+                renderType = "Transparent";
+                described = "additive";
+                break;
+
+            case M2BlendMode.Add:                                // SrcAlpha/One
+                src = UnityEngine.Rendering.BlendMode.SrcAlpha;
+                dst = UnityEngine.Rendering.BlendMode.One;
+                opaqueAlpha = false;
+                queue = (int)UnityEngine.Rendering.RenderQueue.Transparent;
+                renderType = "Transparent";
+                described = "additive (alpha-weighted)";
+                break;
+
+            case M2BlendMode.Mod:                                     // DstColor/Zero
+                src = UnityEngine.Rendering.BlendMode.DstColor;
+                dst = UnityEngine.Rendering.BlendMode.Zero;
+                opaqueAlpha = false;
+                queue = (int)UnityEngine.Rendering.RenderQueue.Transparent;
+                renderType = "Transparent";
+                described = "modulate";
+                break;
+
+            case M2BlendMode.Mod2x:                                   // DstColor/SrcColor
+                src = UnityEngine.Rendering.BlendMode.DstColor;
+                dst = UnityEngine.Rendering.BlendMode.SrcColor;
+                opaqueAlpha = false;
+                queue = (int)UnityEngine.Rendering.RenderQueue.Transparent;
+                renderType = "Transparent";
+                described = "modulate 2x";
+                break;
+
+            default:                                                       // mode 7: One/OneMinusSrcAlpha
+                src = UnityEngine.Rendering.BlendMode.One;
+                dst = UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha;
+                opaqueAlpha = false;
+                queue = (int)UnityEngine.Rendering.RenderQueue.Transparent;
+                renderType = "Transparent";
+                described = "premultiplied blend";
+                break;
+        }
+
+        // Depth write is the model's own flag and NOTHING else. The legacy viewport sets it from
+        // one unconditional test outside its blend switch, so a blended pass whose flag is clear
+        // still writes depth. Inferring "this mode blends, therefore no depth write" would look
+        // reasonable and diverge on every such pass.
+        bool zwrite = !depthWriteDisabled;
+
+        if (m.HasProperty("_Mode")) m.SetFloat("_Mode", alphaTest ? 1f : 0f);
+        if (m.HasProperty("_Surface")) m.SetFloat("_Surface", opaqueAlpha ? 0f : 1f);
+        if (m.HasProperty("_Blend")) m.SetFloat("_Blend", 0f);
+        if (m.HasProperty("_AlphaClip")) m.SetFloat("_AlphaClip", alphaTest ? 1f : 0f);
+        if (m.HasProperty("_SrcBlend")) m.SetInt("_SrcBlend", (int)src);
+        if (m.HasProperty("_DstBlend")) m.SetInt("_DstBlend", (int)dst);
+        if (m.HasProperty("_ZWrite")) m.SetInt("_ZWrite", zwrite ? 1 : 0);
+        if (m.HasProperty("_OpaqueAlpha")) m.SetFloat("_OpaqueAlpha", opaqueAlpha ? 1f : 0f);
+        if (m.HasProperty("_Cutoff")) m.SetFloat("_Cutoff", cutoff);
+        if (m.HasProperty("_AlphaCutoff")) m.SetFloat("_AlphaCutoff", cutoff);
+
+        m.DisableKeyword("_ALPHATEST_ON");
+        m.DisableKeyword("_ALPHABLEND_ON");
+        m.DisableKeyword("_ALPHAPREMULTIPLY_ON");
+        m.DisableKeyword("_SURFACE_TYPE_TRANSPARENT");
+        if (alphaTest) m.EnableKeyword("_ALPHATEST_ON");
+        if (!opaqueAlpha) m.EnableKeyword("_SURFACE_TYPE_TRANSPARENT");
+
+        m.SetOverrideTag("RenderType", renderType);
+        m.renderQueue = queue;
+
+        if (depthWriteDisabled)
+            described += ", no depth write (model flag)";
+    }
 
     /// <summary>
     /// Resolve one TEXTURE UNIT of a batch to an M2 texture slot.
@@ -651,10 +872,12 @@ public static class WmvModelBuilder
     ///     FindRenderShader. A shader that bakes its blending into the pass ignores every
     ///     property written here without complaining.
     ///
-    /// This is deliberately not a full WoW material system; see the blend-mode note below.
+    /// This is deliberately not a full WoW material system; see ApplyBlendMode and PlanCombiner
+    /// for exactly how much of one it is.
     /// </summary>
-    static Material CreateMaterial(M2MaterialDef def, M2BlendMode mode, Texture2D tex,
-                                   Texture2D envTex, string name, Action<string> log)
+    static Material CreateMaterial(M2MaterialDef def, M2BlendMode mode, CombinerPlan plan,
+                                   M2UvSource unit1Uv, Texture2D tex, Texture2D unit1Tex,
+                                   string name, Action<string> log)
     {
         var shader = FindRenderShader(log);
         // Material(null) throws; Unity's error shader is always present and at least draws
@@ -667,43 +890,23 @@ public static class WmvModelBuilder
         if (m.HasProperty("_Glossiness")) m.SetFloat("_Glossiness", 0f);      // Built-in
         else if (m.HasProperty("_Smoothness")) m.SetFloat("_Smoothness", 0f); // URP/HDRP
 
-        // Second texture unit. The property only exists on the renderer's own shader, so on every
-        // other shader this is a no-op and the material stays exactly as it was.
+        // The combiner properties exist only on the renderer's own shader. On a pipeline Lit
+        // shader every one of these is a no-op and the material keeps its single texture, which
+        // is the honest outcome: that shader cannot run an M2 combiner.
+        bool combining = plan.NeedsUnit1 && unit1Tex != null && !Debug_.MatColors &&
+                         m.HasProperty(CombinerModeProperty);
         if (m.HasProperty(CombinerModeProperty))
         {
-            bool on = envTex != null && !Debug_.MatColors;
-            if (on) m.SetTexture(SecondTexProperty, envTex);
-            m.SetFloat(CombinerModeProperty, on ? PixelShaderOpaqueMod2xNaAlpha : 0);
+            if (combining) m.SetTexture(SecondTexProperty, unit1Tex);
+            m.SetFloat(CombinerModeProperty, combining ? plan.Mode : 0);
+            m.SetFloat("_AlphaMode", combining ? plan.AlphaMode : (plan.AlphaMode == 1 ? 1 : 0));
+            m.SetFloat("_AlphaScale", combining ? plan.AlphaScale : 1f);
+            m.SetFloat("_Unit1UV", (float)(int)unit1Uv);
         }
 
         string treatedAs;
-        switch (mode)
-        {
-            case M2BlendMode.Opaque:
-                SetOpaque(m);
-                treatedAs = "opaque";
-                break;
-
-            // Alpha-key is a cutout in WoW. Plain Alpha is genuinely blended, but for a static
-            // V1 creature a clip is the safer reading: it keeps depth writes and solid geometry
-            // instead of risking a see-through model, and looks right for the hair/feather/eye
-            // decals creatures actually use it for. Real blending is left for the material pass.
-            case M2BlendMode.AlphaKey:
-            case M2BlendMode.Alpha:
-                treatedAs = SetAlphaClip(m, 0.5f) ? "alpha clip (cutoff 0.5)"
-                                                  : "opaque (shader has no alpha-clip property)";
-                if (mode == M2BlendMode.Alpha && log != null)
-                    log("material: blend mode Alpha is drawn as an alpha clip in this milestone");
-                break;
-
-            default:
-                SetOpaque(m);
-                treatedAs = "opaque (blend mode not implemented)";
-                if (log != null)
-                    log(string.Format("material: blend mode {0} is not implemented yet -- drawing it opaque",
-                                      def.BlendMode));
-                break;
-        }
+        // The legacy combiner keys at 128/255, not at a rounded half.
+        ApplyBlendMode(m, mode, def.DepthWriteDisabled, 128f / 255f, out treatedAs);
 
         // Only the model's own flag may disable culling; nothing here turns it off globally.
         if (m.HasProperty("_Cull"))
@@ -720,44 +923,6 @@ public static class WmvModelBuilder
 
         LogMaterialState(m, def, mode, treatedAs, log);
         return m;
-    }
-
-    /// <summary>Opaque, depth-writing, geometry queue -- stated explicitly across pipelines.</summary>
-    static void SetOpaque(Material m)
-    {
-        if (m.HasProperty("_Mode")) m.SetFloat("_Mode", 0f);        // Built-in Standard
-        if (m.HasProperty("_Surface")) m.SetFloat("_Surface", 0f);  // URP/HDRP: 0 = opaque
-        if (m.HasProperty("_Blend")) m.SetFloat("_Blend", 0f);
-        if (m.HasProperty("_AlphaClip")) m.SetFloat("_AlphaClip", 0f);
-        if (m.HasProperty("_SrcBlend")) m.SetInt("_SrcBlend", (int)UnityEngine.Rendering.BlendMode.One);
-        if (m.HasProperty("_DstBlend")) m.SetInt("_DstBlend", (int)UnityEngine.Rendering.BlendMode.Zero);
-        if (m.HasProperty("_ZWrite")) m.SetInt("_ZWrite", 1);
-        m.DisableKeyword("_ALPHATEST_ON");
-        m.DisableKeyword("_ALPHABLEND_ON");
-        m.DisableKeyword("_ALPHAPREMULTIPLY_ON");
-        m.DisableKeyword("_SURFACE_TYPE_TRANSPARENT");
-        m.SetOverrideTag("RenderType", "Opaque");
-        m.renderQueue = (int)UnityEngine.Rendering.RenderQueue.Geometry;
-    }
-
-    /// <summary>
-    /// Alpha-tested cutout: still opaque as far as depth and sorting are concerned. Returns false
-    /// when the shader exposes no cutoff at all, in which case the material is left fully opaque
-    /// -- for this milestone a solid surface beats a see-through one.
-    /// </summary>
-    static bool SetAlphaClip(Material m, float cutoff)
-    {
-        SetOpaque(m);                                                // depth/blend state first
-        if (!m.HasProperty("_Cutoff") && !m.HasProperty("_AlphaCutoff"))
-            return false;
-        if (m.HasProperty("_Mode")) m.SetFloat("_Mode", 1f);         // Built-in Standard: cutout
-        if (m.HasProperty("_AlphaClip")) m.SetFloat("_AlphaClip", 1f); // URP
-        if (m.HasProperty("_Cutoff")) m.SetFloat("_Cutoff", cutoff);
-        if (m.HasProperty("_AlphaCutoff")) m.SetFloat("_AlphaCutoff", cutoff); // HDRP
-        m.EnableKeyword("_ALPHATEST_ON");
-        m.SetOverrideTag("RenderType", "TransparentCutout");
-        m.renderQueue = (int)UnityEngine.Rendering.RenderQueue.AlphaTest;
-        return true;
     }
 
     /// <summary>

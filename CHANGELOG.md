@@ -6,6 +6,27 @@ Format loosely based on [Keep a Changelog](https://keepachangelog.com/).
 ## [Unreleased]
 
 ### Added
+- **Embedded Unity renderer: materials now follow the model instead of an approximation of it.**
+  The renderer drew almost everything opaque with a single texture, which is right for a chicken
+  and wrong for most of the bestiary. Measured over a spread of 300 retail creature models (1424
+  draw batches): 26.6% of batches ask for a blend mode that was being ignored -- additive glows,
+  alpha-blended wings, modulated shadows, all rendered as solid geometry -- and 33.4% declare a
+  second texture unit whose contribution was dropped. Both now come from the same tables the
+  OpenGL viewport uses. Every M2 blend mode is applied; the alpha test keys at 128/255, where the
+  legacy combiner keys it; depth write comes from the material's own flag and nothing else (the
+  viewport decides it outside its blend switch, so a blended pass whose flag is clear still writes
+  depth); and the texture combiners a static pose can reproduce -- the products of the two units,
+  the two alpha-masked forms and the decal -- are drawn with unit 1 sampled from whichever source
+  the material's vertex shader names, either stored UV set or a generated environment sphere map.
+  Combiner coverage over that sample goes from 66.6% of batches to 99.8%; the three that remain
+  are logged by name and drawn from unit 0 alone, as all of them were before. Ported case by case
+  from the viewport's own GLSL rather than from the combiner names, which matters: several
+  combiners differ from a simpler one only in a specular lobe the viewport weights at zero by
+  default, so reproducing the default collapses them onto the simpler case. All of it is driven by
+  uniforms on one shader variant, because a player build strips shader variants as readily as it
+  strips whole shaders.
+
+### Added
 - **Embedded Unity renderer: it now shows the right geometry, not just the right texture.** A
   creature display variant can differ from another by which geosets it switches on rather than by
   its skin -- `creature/horse3/horse3.m2` has three dropdown entries sharing one texture that
