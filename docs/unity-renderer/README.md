@@ -236,11 +236,22 @@ in-process, and shuts the player down. Result lines carry the `[unityipc-test]` 
 - Model textures the M2 does not name (replaceable creature skins) are resolved by WMV from
   the client database and handed to the player as FileDataIDs (`getModelTextures`), labelled
   `database` or -- for orphaned legacy assets only -- `convention`.
+- Skinned rendering in the rest pose: the model's bone hierarchy is rebuilt as Unity transforms,
+  the per-vertex influences and bind poses are handed to a SkinnedMeshRenderer, and the mesh is
+  deformed by that rig instead of being drawn rigid. No animation track is evaluated yet, so
+  every bone sits at rest -- and because an M2's stored vertex positions ARE that rest pose, the
+  result is the static mesh it replaces to within float noise (largest measured deviation across
+  the validation models: 3.8e-6 units). Models whose bones live in a separate skeleton file are
+  still drawn static, and say so.
 - Bounds-driven camera framing, so a loaded model is visible immediately.
 
 **Not yet implemented**
 
-- Skeletal animation (bone data is parsed and preserved, but nothing is animated or skinned).
+- Animation playback. The rig is built and the mesh is skinned to it, but no animation track is
+  read, so nothing moves; sequences, interpolation, timing and an idle loop are the next step.
+- Bones from a separate skeleton file (the SKID chunk, and the SKPD parent it can defer to).
+  Over a spread of 300 retail creature models, 299 keep their bones in the .m2 itself and one
+  does not; that one is drawn unskinned.
 - The rest of the WoW material system: texture animation, colour and transparency tracks beyond
   the rest-pose visibility gate, the specular lobes the legacy viewport leaves unweighted by
   default, and the few combiners that mix more than two contributing units.

@@ -6,6 +6,33 @@ Format loosely based on [Keep a Changelog](https://keepachangelog.com/).
 ## [Unreleased]
 
 ### Added
+- **Embedded Unity renderer: models are now skinned to their own skeleton.** The renderer drew
+  every M2 as a rigid mesh; the bone indices and weights each vertex carries were parsed and then
+  ignored. The rig is now rebuilt as Unity transforms, the influences and bind poses are handed to
+  a SkinnedMeshRenderer, and the mesh is deformed by that rig. **No animation is played yet** --
+  every bone sits in its rest pose, and that is the point: the milestone's contract is that a
+  skinned model at rest is indistinguishable from the static one it replaces. It holds because of
+  how the format is built. The legacy viewport composes a bone as
+  T(pivot) * T(translation) * R(rotation) * S(scale) * T(-pivot), composed with its parent's, and
+  with every track at rest that collapses to the identity -- so the positions stored in the file
+  already are the rest pose, and the bind pose only has to reproduce the identity. Each bone is
+  placed at its pivot with no rotation, which is also exactly the arrangement animation needs:
+  adding the translation track to that rest offset and setting the rotation and scale from their
+  tracks reproduces the viewport's expression term for term. Measured with the new `-wmvSkinCheck`
+  switch, which bakes the skinned result and compares it against the file's own positions, the
+  largest deviation across seven validation models (rigs of 29 to 236 bones, 2 to 15 deep) is
+  3.8e-6 units, and three of the seven are exactly zero. Two details of the data are easy to get
+  wrong and are handled explicitly: the per-vertex bone indices are DIRECT indices into the bone
+  array rather than indices through the .skin's lookup table, and a rig is a forest -- valkier has
+  27 root bones out of 149 -- with out-of-range, self-referential and cyclic parents all
+  normalised to roots at parse time. A model whose bones live in a separate skeleton file (the
+  SKID chunk) is still drawn as a static mesh and logs why; over a spread of 300 retail creature
+  models, 299 keep their bones in the .m2 itself. `-wmvNoSkin` forces the old static path for an
+  A/B, and every debug switch can now also be set through the `WMV_DEBUG` environment variable,
+  which is the only way to reach them in the embedded viewport since WMV builds the player's
+  command line itself.
+
+### Added
 - **Embedded Unity renderer: materials now follow the model instead of an approximation of it.**
   The renderer drew almost everything opaque with a single texture, which is right for a chicken
   and wrong for most of the bestiary. Measured over a spread of 300 retail creature models (1424
