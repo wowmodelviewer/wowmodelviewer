@@ -15,10 +15,15 @@ build and run time.
 
 ## Build steps
 
-1. Install a Unity LTS (2021.3 or newer; any recent LTS works — the scripts use only
-   core UnityEngine + .NET `TcpClient`).
-2. Create a new **3D (Built-in Render Pipeline)** project named e.g. `WmvUnityRenderer`.
-3. Copy the `Assets/Scripts/` folder from here into the project's `Assets/`.
+1. Install a Unity LTS (2021.3 or newer, including Unity 6 — the scripts use only core
+   UnityEngine + .NET `TcpClient`).
+2. Create a new 3D project named e.g. `WmvUnityRenderer`. **Built-in Render Pipeline is the
+   simplest project to test with**, but **URP (including Unity 6) and HDRP work too** — the
+   builder resolves a shader per pipeline (see *Render pipelines and shader stripping* below).
+3. Copy **both** `Assets/Scripts/` and `Assets/Resources/` from here into the project's
+   `Assets/`. `Assets/Resources/` is not optional: it holds the renderer's own opaque shader,
+   and a Resources folder is the only place Unity will not strip it from a player build (see
+   *Render pipelines and shader stripping*).
 4. Create an empty GameObject in the default scene and add the **WmvMain** component to
    it. (It builds the camera rig, light, test cube, status overlay and the IPC client at
    runtime — no other scene setup needed.)
@@ -26,6 +31,9 @@ build and run time.
    - **Resolution and Presentation → Run In Background: ON** (required — otherwise the
      player pauses whenever the WMV window has focus, which is always).
    - Fullscreen Mode: *Windowed*.
+   - **Active Input Handling: any of Old / New / Both.** The camera compiles against whichever
+     backend is active (`ENABLE_LEGACY_INPUT_MANAGER` / `ENABLE_INPUT_SYSTEM`); with *Both* it
+     uses the legacy path. No project setting needs changing just to avoid input exceptions.
 6. **File → Build Settings → Windows x86_64 → Build**, and build **into**
    `tools\unity-renderer\` next to `wowmodelviewer.exe`, with the executable named
    `UnityRenderer.exe`.
@@ -35,13 +43,128 @@ build and run time.
 Do **not** commit the build output (exe, `UnityRenderer_Data/`, `UnityPlayer.dll`, …) to
 this repository.
 
+## Render pipelines and shader stripping
+
+The renderer builds its materials at runtime, so it asks `Shader.Find` for one. Two things make
+that awkward in a **player build** (as opposed to the editor):
+
+- the shader name differs per pipeline, and
+- Unity strips shaders that no asset in the build references — which is why a runtime-built
+  material, or even an untouched primitive, can come out **magenta** in a player while looking
+  fine in the editor.
+
+And a third thing, the one that actually broke the first working render: **a shader is not
+usable just because `Shader.Find` returned it.** `Sprites/Default` is always included, so it wins
+any naive search — and it bakes `Blend One OneMinusSrcAlpha`, `ZWrite Off` and `Cull Off` into the
+pass. Those are *not* material properties, so `HasProperty`-guarded calls to set `_ZWrite` or
+`_SrcBlend` against it do nothing at all, in silence, and an opaque WoW material draws as a stack
+of translucent shells. Every candidate is therefore screened before it is taken: it must expose
+the blend/depth knobs, or already be opaque (its own default render queue says which), and it must
+not be one of Unity's `Hidden/` internal shaders.
+
+`WmvModelBuilder` tries, in order:
+
+| | Shader | |
+|---|---|---|
+| 1 | lit, for the active pipeline — `Standard`, `Legacy Shaders/Diffuse`, `Mobile/Diffuse` (Built-in) or `Universal Render Pipeline/Lit`, `.../Simple Lit`, `HDRP/Lit` (SRP) | best match to the OpenGL viewport |
+| 2 | the shader on a primitive's default material | pipeline-correct by construction — Unity picks it from the *active* pipeline |
+| 3 | **`Resources.Load("WmvOpaque")`** — `Assets/Resources/WmvOpaque.shader` | the guarantee: a Resources folder is never stripped |
+| 4 | unlit — `Unlit/Texture` (Built-in) or `Universal Render Pipeline/Unlit`, `HDRP/Unlit` (SRP) | flat, but solid |
+| 5 | `Sprites/Default` | last resort only; logs that the model **will** look see-through |
+
+The names are restricted to the pipeline in use, because a shader written for one pipeline renders
+magenta under another. Rungs 1, 2 and 4 are all strippable — in a real URP player build with an
+otherwise empty scene, *every one of them* came back missing or as the magenta error shader. Rung 3
+is why the renderer no longer depends on that going well.
+
+It never fails the load, and it always logs which shader it took and why. Adding the shader you
+want to **Project Settings → Graphics → Always Included Shaders** and rebuilding is still the way
+to get full pipeline lighting.
+
+Three consequences worth knowing:
+
+- The **render state is set explicitly**, never inherited from the shader's defaults — and the
+  shader is chosen so that setting it actually does something.
+- Transparency follows the **WoW blend mode only**, never the presence of an alpha channel in
+  the texture. Creature skins have one regardless: chicken2's is DXT5 with ~97% of its texels
+  below 255. On an opaque material that channel is **discarded at upload** rather than trusted.
+- Every material load logs its real runtime state — chosen shader, render queue, `RenderType`,
+  `_SrcBlend`/`_DstBlend`/`_ZWrite`/`_Cull`/`_Mode`/`_Surface`/`_AlphaClip` (or `n/a` where the
+  shader does not expose them), enabled keywords, and the WoW blend/two-sided/depth-write flags
+  it came from.
+
+## Texture units, combiners and hidden geometry
+
+Three things about an M2 material are easy to miss, and missing any of them looks like a texturing
+bug rather than a missing feature:
+
+**A batch can load more than one texture.** It declares how many (`textureCount`) and where its run
+starts in the texture-combo table (`textureComboIndex`); unit *k* is entry `textureComboIndex + k`.
+Reading only the first entry drops every unit past the first, silently. chicken2's two batches each
+declare two units.
+
+**The material does not describe how they combine.** That is selected by its shader id: the id plus
+the texture count names a Blizzard combiner (`Wow/M2ShaderTable.cs`, the same table the OpenGL
+viewport resolves). chicken2's `shaderId 0x8000` resolves to
+`Combiners_Opaque_Mod2xNA_Alpha` / `Diffuse_T1_Env` — unit 1 is an **environment sphere map**
+generated from the view-space normal, not a stored UV set, and the combine is
+
+```
+rgb = lerp(unit0.rgb * unit1.rgb * 2, unit0.rgb, unit0.a)
+```
+
+so the **base texture's alpha channel is the reflection mask**, not transparency. On chicken2's skin
+that mask is white everywhere except the eye pupil, which is exactly where the model wants a
+reflective highlight. Only this one combiner is implemented; any other is logged by name and drawn
+from unit 0 alone, which is what happened to all of them before. The combiner needs the renderer's
+own `WmvOpaque` shader — a pipeline Lit shader has one texture slot and no idea what a sphere-mapped
+second unit is — so on those the second unit is dropped and the log says so. `-wmvOwnShader` forces
+the renderer's own shader if you want to see it.
+
+**A model hides geometry by keying an animation track to zero, not by leaving it out.** An eye
+overlay, a glow, a blink. The OpenGL viewport refuses to draw a batch whose colour entry resolves to
+zero alpha (`ModelRenderPass::init`), and so does this renderer. chicken2 is the worked example: it
+ships an 18-triangle eye overlay pointing at a colour entry whose alpha track is 0, while the actual
+eye is painted into the skin texture on the head underneath. Drawing that batch anyway covers the
+painted eye with a flat red patch. `-wmvShowHidden` draws them if you want to see what is hidden.
+
+## Debug switches
+
+Pass these on the player command line to isolate a visual fault without rebuilding:
+
+| Flag | Effect |
+|---|---|
+| `-wmvFlipV` | invert the V texture coordinate — isolates a UV-orientation fault |
+| `-wmvForceOpaque` | force every material opaque, ignoring the WoW blend mode |
+| `-wmvForceSolid` | force-opaque **plus** a fully opaque alpha channel on every uploaded texture. If the model is still see-through with this on, the fault is geometry, depth or winding — not alpha |
+| `-wmvMatColors` | replace textures with a flat per-material colour — separates a batch/material assignment fault from a texture fault |
+| `-wmvShowHidden` | draw the batches the model hides at rest — shows *what* is hidden, and usually what it was covering |
+| `-wmvOwnShader` | resolve the renderer's own `WmvOpaque` shader ahead of any pipeline shader — the only one that can run an M2 combiner |
+
+Each model load also logs its UV sample, per-batch material/blend/texture-slot mapping, the alpha
+treatment per texture, which batches are hidden at rest and why, the resolved combiner and per-unit
+UV routing, the full runtime material state, and the shader that was chosen.
+
 ## Scripts
 
 | File | Role |
 |---|---|
-| `WmvMain.cs` | Bootstrap: camera rig, light, test cube, on-screen status text, wires the IPC handlers. On `loadWoWModel` it requests the model raw bytes from WMV and reports byte length + SHA-1 (V1: no parsing/rendering yet). |
-| `WmvIpcClient.cs` | IPC client (protocol v1): connects back to the WMV server given by `-wmvPort`, sends `unityReady`, receives `loadWoWModel`, sends `getAsset` / `getAssetByFileDataID`, decodes + hash-checks `assetResponse`. |
-| `WmvOrbitCamera.cs` | Orbit / pan / zoom controls for the viewport. |
+| `WmvMain.cs` | Bootstrap (camera rig, light, placeholder, status overlay) and the load pipeline: on `loadWoWModel` it fetches the .m2, parses it, fetches the .skin profile named by SFID, resolves and fetches textures, builds the mesh and frames the camera. |
+| `WmvIpcClient.cs` | IPC client (protocol v1): connects back to the WMV server given by `-wmvPort`, sends `unityReady`, receives `loadWoWModel`, sends `getAsset` / `getAssetByFileDataID` / `getModelTextures`, decodes + hash-checks `assetResponse`. |
+| `WmvModelBuilder.cs` | Parsed model + skin + decoded textures -> Unity `Mesh` (one submesh per WoW batch), `Material` and `Texture2D`; owns and disposes those runtime resources so repeated loads do not leak. |
+| `Wow/M2Parser.cs` | Chunked M2 (MD21/MD20 v272): header, vertices, textures, materials, lookups, SFID/TXID. |
+| `Wow/M2SkinParser.cs` | .skin profile: vertex lookup, triangles, submeshes, batches, and the two-level index resolution into model vertices. |
+| `Wow/BlpDecoder.cs` | BLP2 -> RGBA32 in memory (palettized, DXT1/3/5, raw BGRA). |
+| `Wow/M2ShaderTable.cs` | Shader id + texture count -> combiner name/id and per-unit UV routing. Pure data, no rendering; the same table the OpenGL viewport resolves. |
+| `Wow/WowCoordinateConverter.cs` | The single WoW -> Unity axis/winding/UV conversion. |
+| `Assets/Resources/WmvOpaque.shader` | The renderer's own opaque textured shader, kept under `Resources/` so a player build cannot strip it. Exposes `_SrcBlend`/`_DstBlend`/`_ZWrite`/`_Cull`/`_Cutoff` as real properties, and carries the second texture unit + M2 combiner 12. |
+| `Wow/ByteCursor.cs` | Bounds-checked little-endian reader shared by the parsers. |
+| `WmvOrbitCamera.cs` | Orbit / pan / zoom controls plus bounds-driven framing of a loaded model. |
+
+The parsing layer under `Assets/Scripts/Wow/` deliberately has no `UnityEngine` dependency, so
+it can be compiled and unit-tested outside the editor -- see `Tests/WowParserTests.cs`, which is
+framework-free (`WowParserTests.RunAll()` returns a failure count) and covers valid/truncated/
+out-of-range M2 and skin data, the BLP encodings and the coordinate conversion.
 
 ## How embedding works
 
@@ -81,6 +204,9 @@ cl fake_unity_renderer.c user32.lib gdi32.lib shell32.lib ws2_32.lib /Fe:UnityRe
 
 Drop the result at `tools\unity-renderer\UnityRenderer.exe` to test the WMV side without
 installing Unity -- interactively via `View -> Unity Renderer`, or headlessly with
-`wowmodelviewer.exe -mo creature/chicken/chicken.m2 -unityipctest` (logs `[unityipc-test]
+`wowmodelviewer.exe -mo creature/chicken2/chicken2.m2 -unityipctest` (logs `[unityipc-test]
 RESULT: PASS|FAIL` in `userSettings\log.txt`; the stub own log is
-`userSettings\unityRenderer.log`).
+`userSettings\unityRenderer.log`). `creature/chicken2/chicken2.m2` is the primary target
+because it is a current, database-backed creature; `creature/chicken/chicken.m2` is kept as a
+regression case for the labelled `convention` texture fallback -- no creature display
+references it any more.

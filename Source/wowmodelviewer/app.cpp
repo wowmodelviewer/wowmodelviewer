@@ -285,6 +285,21 @@ static void doHeadlessUnityIpcTest(ModelViewer * frame)
       const UnityAssetAccess::Result byId = UnityAssetAccess::readByFileDataID(fdid > 0 ? fdid : 0);
       LOG_INFO << "[unityipc-test] by-FileDataID check: fileDataID=" << fdid << "ok=" << (byId.ok ? 1 : 0)
                << "bytes=" << byId.data.size() << "path=" << byId.path << "error=" << byId.error;
+
+      // Replaceable-texture metadata: modern M2s do not name creature skins, so the renderer
+      // asks WMV to resolve them from the client database (getModelTextures over IPC).
+      std::vector<UnityAssetAccess::ModelTexture> modelTextures;
+      QString texError;
+      const bool texOk = UnityAssetAccess::resolveModelTextures(fdid, modelTextures, texError);
+      LOG_INFO << "[unityipc-test] model-textures check: ok=" << (texOk ? 1 : 0)
+               << "count=" << (int)modelTextures.size() << "error=" << texError;
+      for (size_t ti = 0; ti < modelTextures.size(); ti++)
+      {
+        const UnityAssetAccess::Result tex = UnityAssetAccess::readByFileDataID(modelTextures[ti].fileDataID);
+        LOG_INFO << "[unityipc-test]   texture[" << (int)modelTextures[ti].index << "] fileDataID="
+                 << modelTextures[ti].fileDataID << "ok=" << (tex.ok ? 1 : 0)
+                 << "bytes=" << tex.data.size() << "path=" << tex.path;
+      }
     }
   }
 
