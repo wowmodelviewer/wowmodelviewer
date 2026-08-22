@@ -14,15 +14,10 @@
 // built-in light uniforms). The key light below is fixed in world space so the model shades the
 // same way in every pipeline.
 //
-// The render state is exposed as properties, which is the point: WmvModelBuilder sets _SrcBlend,
-// _DstBlend, _ZWrite, _Cull and _Cutoff explicitly, and here those calls actually take effect.
-//
-// SECOND TEXTURE UNIT. An M2 material can combine several textures, and which arithmetic it uses
-// is selected by the material's shader id rather than described in the file. _CombinerMode carries
-// the resolved combiner id (the same numbering the legacy OpenGL viewport's GLSL combiner uses);
-// 0 means "single texture", which is the default and the behaviour of every material this shader
-// does not have a case for. It is a plain float uniform, not a shader keyword, so no extra shader
-// variants exist for a player build to strip.
+// EVERYTHING IS UNIFORM-DRIVEN, never a shader keyword: the blend state, the combiner, where the
+// second texture unit takes its coordinates, and how the output alpha is built. A player build
+// strips shader VARIANTS as readily as it strips whole shaders, so a keyword per material feature
+// would be a way to lose them all. One variant, a handful of floats.
 
 Shader "WMV/Opaque Textured"
 {
@@ -30,7 +25,21 @@ Shader "WMV/Opaque Textured"
     {
         _MainTex ("Texture", 2D) = "white" {}
         _SecondTex ("Second texture (M2 unit 1)", 2D) = "black" {}
-        _CombinerMode ("Combiner id (0 = single texture)", Float) = 0
+
+        // 0 = single texture;      1 = unit0 * unit1;          2 = unit0 * unit1 * 2;
+        // 3 = mix(u0*u1, u0, u0.a); 4 = mix(u0, u1, u1.a);      12 = mix(u0*u1*2, u0, u0.a).
+        // Which M2 pixel shader maps to which lives in WmvModelBuilder.PlanCombiner, next to the
+        // reasoning; the shader only needs the arithmetic.
+        _CombinerMode ("Combiner", Float) = 0
+        // Where unit 1 samples: 0 = uv set 0, 1 = uv set 1, 2 = environment sphere map.
+        _Unit1UV ("Unit 1 UV source", Float) = 2
+        // How the M2 combiner builds its "discard alpha": 0 = 1, 1 = unit0.a, 2 = unit1.a,
+        // 3 = unit0.a * unit1.a, 4 = unit0.a + unit1.a. Scaled by _AlphaScale (the x2 combiners).
+        _AlphaMode ("Alpha source", Float) = 0
+        _AlphaScale ("Alpha scale", Float) = 1
+        // 1 when the blend mode ignores that alpha entirely (opaque and alpha-key both output 1).
+        _OpaqueAlpha ("Force opaque alpha", Float) = 1
+
         _Color ("Tint", Color) = (1,1,1,1)
         _Cutoff ("Alpha cutoff", Range(0,1)) = 0.5
         [Enum(UnityEngine.Rendering.CullMode)] _Cull ("Cull", Float) = 2      // Back
@@ -62,6 +71,7 @@ Shader "WMV/Opaque Textured"
                 float4 vertex : POSITION;
                 float3 normal : NORMAL;
                 float2 uv     : TEXCOORD0;
+                float2 uv2    : TEXCOORD1;
             };
 
             struct v2f
@@ -70,12 +80,13 @@ Shader "WMV/Opaque Textured"
                 float2 uv     : TEXCOORD0;
                 float3 normal : TEXCOORD1;
                 float2 env    : TEXCOORD2;
+                float2 uv1    : TEXCOORD3;
             };
 
             sampler2D _MainTex;
             float4 _MainTex_ST;
             sampler2D _SecondTex;
-            float _CombinerMode;
+            float _CombinerMode, _Unit1UV, _AlphaMode, _AlphaScale, _OpaqueAlpha;
             fixed4 _Color;
             fixed _Cutoff;
 
@@ -84,6 +95,7 @@ Shader "WMV/Opaque Textured"
                 v2f o;
                 o.pos = UnityObjectToClipPos(v.vertex);
                 o.uv = TRANSFORM_TEX(v.uv, _MainTex);
+                o.uv1 = v.uv2;
                 o.normal = UnityObjectToWorldNormal(v.normal);
 
                 // ENVIRONMENT UNIT. The M2 vertex shader for a combiner material names where each
@@ -105,21 +117,40 @@ Shader "WMV/Opaque Textured"
             fixed4 frag (v2f i) : SV_Target
             {
                 fixed4 t1 = tex2D(_MainTex, i.uv);
-                fixed4 c = t1 * _Color;
-                #ifdef _ALPHATEST_ON
-                    clip(c.a - _Cutoff);
-                #endif
 
-                // Combiner 12, "Combiners_Opaque_Mod2xNA_Alpha". The BASE texture's alpha is the
-                // mask that decides where the second unit is folded in at 2x -- it is not
-                // transparency. On a creature skin that mask is white almost everywhere and dark
-                // only on small features (chicken2 uses it for the eye pupil), so the second unit
-                // shows up exactly where the model wants a reflective highlight.
-                if (_CombinerMode > 11.5 && _CombinerMode < 12.5)
-                {
-                    fixed3 t2 = tex2D(_SecondTex, i.env).rgb;
-                    c.rgb = lerp(t1.rgb * t2 * 2.0, t1.rgb, t1.a) * _Color.rgb;
-                }
+                // Unit 1's coordinates, per the material's vertex shader name.
+                float2 uv1 = (_Unit1UV < 0.5) ? i.uv : ((_Unit1UV < 1.5) ? i.uv1 : i.env);
+                fixed4 t2 = tex2D(_SecondTex, uv1);
+
+                // COLOUR. The M2 combiners this milestone implements are all products of the two
+                // units, except pixel shader 12, whose second unit is masked by the FIRST unit's
+                // alpha (that channel is a reflection mask on a creature skin, not transparency).
+                fixed3 rgb = t1.rgb;
+                if (_CombinerMode > 11.5)                       // 12
+                    rgb = lerp(t1.rgb * t2.rgb * 2.0, t1.rgb, t1.a);
+                else if (_CombinerMode > 3.5)                   // 4: decal
+                    rgb = lerp(t1.rgb, t2.rgb, t2.a);
+                else if (_CombinerMode > 2.5)                   // 3: masked modulate
+                    rgb = lerp(t1.rgb * t2.rgb, t1.rgb, t1.a);
+                else if (_CombinerMode > 1.5)                   // 2: unit0 * unit1 * 2
+                    rgb = t1.rgb * t2.rgb * 2.0;
+                else if (_CombinerMode > 0.5)                   // 1: unit0 * unit1
+                    rgb = t1.rgb * t2.rgb;
+                fixed4 c = fixed4(rgb * _Color.rgb, 1.0);
+
+                // ALPHA. The combiner builds a "discard alpha" the blend mode then either uses as
+                // the output opacity or only tests against. Opaque and alpha-key output 1 and the
+                // key discards below the cutoff; every other mode outputs it.
+                fixed a = 1.0;
+                if (_AlphaMode > 3.5)      a = t1.a + t2.a;
+                else if (_AlphaMode > 2.5) a = t1.a * t2.a;
+                else if (_AlphaMode > 1.5) a = t2.a;
+                else if (_AlphaMode > 0.5) a = t1.a;
+                a = saturate(a * _AlphaScale);
+
+                #ifdef _ALPHATEST_ON
+                    clip(a - _Cutoff);
+                #endif
 
                 // Fixed key light + ambient. Engine light data is unavailable across pipelines,
                 // so this is a viewer light, not the scene's -- it only has to read as shape.
@@ -127,8 +158,7 @@ Shader "WMV/Opaque Textured"
                 half ndl = saturate(dot(n, normalize(half3(0.35, 0.80, -0.50))));
                 c.rgb *= 0.45h + 0.75h * ndl;
 
-                // Opaque output: the alpha channel of a WoW skin is not transparency.
-                c.a = 1.0h;
+                c.a = (_OpaqueAlpha > 0.5) ? 1.0 : a;
                 return c;
             }
             ENDCG

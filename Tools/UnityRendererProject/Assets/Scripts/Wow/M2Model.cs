@@ -56,7 +56,10 @@ namespace Wmv.Wow
         public bool Unlit { get { return (Flags & 0x01) != 0; } }
         public bool NoFog { get { return (Flags & 0x02) != 0; } }
         public bool TwoSided { get { return (Flags & 0x04) != 0; } }
-        public bool DepthTestDisabled { get { return (Flags & 0x08) != 0; } }
+        /// <summary>Bit 0x08 is BILLBOARD in the legacy viewport, not a depth-test flag: it only
+        /// feeds that renderer's environment-mapping decision, and nothing there ever disables the
+        /// depth test. Kept for completeness, deliberately unused.</summary>
+        public bool Billboard { get { return (Flags & 0x08) != 0; } }
         public bool DepthWriteDisabled { get { return (Flags & 0x10) != 0; } }
     }
 

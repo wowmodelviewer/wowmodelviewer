@@ -222,8 +222,17 @@ in-process, and shuts the player down. Result lines carry the `[unityipc-test]` 
 - Runtime BLP decoding for the formats the creature pipeline uses: palettized (alpha 0/1/4/8),
   DXT1 / DXT3 / DXT5 and raw BGRA, decoded straight from the received bytes into an in-memory
   texture. Anything else is reported by name instead of being decoded into garbage.
-- Basic materials: opaque, alpha-key and alpha blending, two-sided when the model asks for it.
-  Blend modes beyond that log a diagnostic and draw opaque.
+- Static materials taken from the model's own render state rather than approximated: every M2
+  blend mode (opaque, alpha key, alpha blend, both additive forms, modulate, modulate 2x and
+  premultiplied), the alpha test keyed where the legacy combiner keys it, depth write from the
+  material's own flag alone, and two-sided when the model asks for it. Over a spread of 300
+  retail creature models, 26.6% of draw batches ask for a blend mode that was previously drawn
+  opaque -- an additive glow rendered opaque is a solid box where a wisp of light belongs.
+- The M2 texture combiners a static pose can reproduce: the products of the two units, the two
+  alpha-masked forms and the decal, with unit 1 sampled from whichever source the material's
+  vertex shader names (either stored UV set, or a generated environment sphere map). That covers
+  1421 of 1424 batches in the same sample; the remaining three are logged by name and drawn from
+  unit 0 alone.
 - Model textures the M2 does not name (replaceable creature skins) are resolved by WMV from
   the client database and handed to the player as FileDataIDs (`getModelTextures`), labelled
   `database` or -- for orphaned legacy assets only -- `convention`.
@@ -232,8 +241,9 @@ in-process, and shuts the player down. Result lines carry the `[unityipc-test]` 
 **Not yet implemented**
 
 - Skeletal animation (bone data is parsed and preserved, but nothing is animated or skinned).
-- The full WoW material system (shader/combiner effects, texture animation, environment
-  mapping, colour/transparency tracks).
+- The rest of the WoW material system: texture animation, colour and transparency tracks beyond
+  the rest-pose visibility gate, the specular lobes the legacy viewport leaves unweighted by
+  default, and the few combiners that mix more than two contributing units.
 - Particles and ribbons.
 - The character / equipment pipeline (customization, attachments, geoset rules).
 - Maps, terrain, WMOs, fog.

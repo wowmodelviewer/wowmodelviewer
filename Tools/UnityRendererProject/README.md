@@ -87,7 +87,9 @@ Three consequences worth knowing:
   shader is chosen so that setting it actually does something.
 - Transparency follows the **WoW blend mode only**, never the presence of an alpha channel in
   the texture. Creature skins have one regardless: chicken2's is DXT5 with ~97% of its texels
-  below 255. On an opaque material that channel is **discarded at upload** rather than trusted.
+  below 255. That channel is **discarded at upload** unless something actually reads it — a
+  combiner that masks or keys with it, or a blend mode that outputs it — rather than trusted
+  because it happens to be there.
 - Every material load logs its real runtime state — chosen shader, render queue, `RenderType`,
   `_SrcBlend`/`_DstBlend`/`_ZWrite`/`_Cull`/`_Mode`/`_Surface`/`_AlphaClip` (or `n/a` where the
   shader does not expose them), enabled keywords, and the WoW blend/two-sided/depth-write flags
@@ -95,8 +97,8 @@ Three consequences worth knowing:
 
 ## Texture units, combiners and hidden geometry
 
-Three things about an M2 material are easy to miss, and missing any of them looks like a texturing
-bug rather than a missing feature:
+These are the parts of an M2 material that are easy to miss, and missing any of them looks like a
+texturing bug rather than a missing feature:
 
 **A batch can load more than one texture.** It declares how many (`textureCount`) and where its run
 starts in the texture-combo table (`textureComboIndex`); unit *k* is entry `textureComboIndex + k`.
@@ -115,11 +117,52 @@ rgb = lerp(unit0.rgb * unit1.rgb * 2, unit0.rgb, unit0.a)
 
 so the **base texture's alpha channel is the reflection mask**, not transparency. On chicken2's skin
 that mask is white everywhere except the eye pupil, which is exactly where the model wants a
-reflective highlight. Only this one combiner is implemented; any other is logged by name and drawn
-from unit 0 alone, which is what happened to all of them before. The combiner needs the renderer's
-own `WmvOpaque` shader — a pipeline Lit shader has one texture slot and no idea what a sphere-mapped
-second unit is — so on those the second unit is dropped and the log says so. `-wmvOwnShader` forces
-the renderer's own shader if you want to see it.
+reflective highlight.
+
+`WmvModelBuilder.PlanCombiner` reduces each M2 pixel shader to what this renderer can draw of it,
+ported case by case from the legacy viewport's own GLSL rather than from the combiner *names* —
+`Combiners_Mod_Mod2x` says nothing until you read that it is `unit0 * unit1 * 2` keyed on
+`unit0.a * unit1.a * 2`. What comes out is a handful of floats on one shader variant, never a
+keyword per case: a player build strips shader *variants* as readily as whole shaders, so a keyword
+per material feature would be a way to lose them all.
+
+| Combiner | Arithmetic | Pixel shaders |
+|---|---|---|
+| 0 | `unit0` alone | 0, 1, 10, 13, 14, 16, 20, 23, 33 |
+| 1 | `unit0 * unit1` | 2, 5, 6, 11, 36 |
+| 2 | `unit0 * unit1 * 2` | 3, 4, 7, 9 |
+| 3 | `lerp(unit0 * unit1, unit0, unit0.a)` | 22 |
+| 4 | `lerp(unit0, unit1, unit1.a)` — a decal | 29 |
+| 12 | `lerp(unit0 * unit1 * 2, unit0, unit0.a)` | 12, 15 |
+
+One thing makes that table much shorter than the shader list looks: several combiners differ from a
+simpler one only in a **specular lobe**, and the legacy viewport multiplies that lobe by a weight
+that is **zero** unless an opt-in environment variable is set. Reproducing its default means
+dropping the lobe too, which collapses those cases onto plain single-texture colour (8, 10, 13, 14,
+16, 20, 23) or onto combiner 12 (15). Pixel shaders 8 and 21 still bind unit 1 anyway — their
+*alpha* reads it even though their colour does not.
+
+Anything outside the table is logged by name once per material and drawn from unit 0 alone, which is
+what happened to all of them before. A combiner also needs the renderer's own `WmvOpaque` shader —
+a pipeline Lit shader has one texture slot and no idea what a sphere-mapped second unit is — so on
+those the second unit is dropped and the log says so. `-wmvOwnShader` forces the renderer's own
+shader if you want to see it.
+
+**Where unit 1 samples is the vertex shader's business, not the material's.** The same table names
+it per unit: `T1`/`T2` are the mesh's two stored UV sets, `Env` is a sphere map generated from the
+view-space normal. Over a spread of 300 retail creature models (1424 batches), 30.6% of batches
+route unit 1 to `Env` and 21.9% to the second UV set, so reading either one as "the first UV set"
+is wrong most of the time.
+
+**The blend mode is not a suggestion either.** `ApplyBlendMode` sets `_SrcBlend`/`_DstBlend`/
+`_ZWrite`/`_Cutoff` from the same switch the legacy viewport uses (`ModelRenderPass::init`), and two
+of its readings are counter-intuitive. Mode 0 sets a blend function but never enables blending, and
+mode 1 is `One`/`Zero` with an alpha test — both are opaque, which is why they were already right
+before any of this. Depth write comes from the material's own `0x10` flag and **nothing else**: the
+viewport sets it from one unconditional test *outside* that switch, so a blended pass whose flag is
+clear still writes depth. "This mode blends, therefore no depth write" reads perfectly reasonably
+and diverges on every such pass. The alpha test keys at `128/255`, the value the combiner actually
+compares against, not a rounded half.
 
 **A model hides geometry by keying an animation track to zero, not by leaving it out.** An eye
 overlay, a glow, a blink. The OpenGL viewport refuses to draw a batch whose colour entry resolves to
@@ -164,7 +207,7 @@ UV routing, the full runtime material state, and the shader that was chosen.
 | `Wow/BlpDecoder.cs` | BLP2 -> RGBA32 in memory (palettized, DXT1/3/5, raw BGRA). |
 | `Wow/M2ShaderTable.cs` | Shader id + texture count -> combiner name/id and per-unit UV routing. Pure data, no rendering; the same table the OpenGL viewport resolves. |
 | `Wow/WowCoordinateConverter.cs` | The single WoW -> Unity axis/winding/UV conversion. |
-| `Assets/Resources/WmvOpaque.shader` | The renderer's own opaque textured shader, kept under `Resources/` so a player build cannot strip it. Exposes `_SrcBlend`/`_DstBlend`/`_ZWrite`/`_Cull`/`_Cutoff` as real properties, and carries the second texture unit + M2 combiner 12. |
+| `Assets/Resources/WmvOpaque.shader` | The renderer's own textured shader, kept under `Resources/` so a player build cannot strip it. One variant, everything uniform-driven: `_SrcBlend`/`_DstBlend`/`_ZWrite`/`_Cull`/`_Cutoff` as real properties, plus `_CombinerMode`, `_Unit1UV`, `_AlphaMode`/`_AlphaScale` and `_OpaqueAlpha` for the second texture unit and the M2 combiners. |
 | `Wow/ByteCursor.cs` | Bounds-checked little-endian reader shared by the parsers. |
 | `WmvOrbitCamera.cs` | Orbit / pan / zoom controls plus bounds-driven framing of a loaded model. |
 
