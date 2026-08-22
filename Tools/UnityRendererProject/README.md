@@ -237,6 +237,68 @@ drawn as a static mesh and the log says exactly that — as it does for any othe
 refuses. Reading the header's bone array anyway would be worse than not skinning: the vertices are
 not indexed against it.
 
+## The idle animation
+
+One animation plays: the model's default idle. There is no sequence selector, no blending and no
+UI — this is the smallest thing that makes a creature look alive, built on the skeleton above.
+
+**Which sequence is "the idle" is not sequence 0.** The legacy viewport picks the FIRST sequence
+whose `AnimId` is 0 ("Stand") and falls back to sequence 0 only when the model has none
+(`AnimControl::UpdateModel`). The difference is not academic: on `creature/chicken2` sequence 0 is
+a run cycle and the idle is sequence 2; on `creature/valkier` it is sequence 11.
+
+**How a track is stored.** A bone carries three tracks — translation, rotation, scale — and each is
+an array of *per-sequence* keyframe arrays. The keys for sequence *n* are entry *n* of both the
+timestamp array and the value array. Only the sequence being played is parsed: a boss with 109
+sequences would otherwise cost a hundred times the memory to play one of them. Rotations are four
+`int16` mapping onto [-1, 1], with the halves offset either side of zero, unpacked exactly as
+`Quat16ToQuat32` does.
+
+**How it is evaluated,** following `Animated::getValue` case for case: fewer than two keys holds
+the first value; a time past the last key holds the last (a track need not span the sequence);
+otherwise the span containing the time is found and interpolated. `None` steps, `Linear`
+interpolates — and *slerps* for rotations, which is what the legacy evaluator specialises it to.
+`Hermite` and `Bezier` store two extra tangents per key that this milestone does not read; their
+values are interpolated linearly and the count is logged. No bone track in any validation model
+uses either.
+
+**Global sequences are not optional.** A track can be bound to one instead of the animation, and
+then it loops over that sequence's own duration on a clock that ignores what is playing — a
+torch flickering at its own rate whatever the creature does. Such a track keeps its keys at entry
+0 whichever sequence is playing, and its time is `globalTime % duration`; both are reproduced. Of
+the validation models, `creature/valkier` drives 61 of its tracks this way. A global sequence of
+**zero** length exists in shipped data (`creature/wrathofazshara` has one): the legacy evaluator
+returns a default-constructed value for it, which is right for a translation and collapses a bone
+to a point for a scale, so this holds the first keyframe instead.
+
+**Where the animation is applied.** Not through an Animator Controller: Unity's animation system
+wants clips authored at build time, and a player build strips them, whereas this renderer receives
+its model over IPC at runtime. `WmvM2Animator` writes the bones directly, which is both less
+machinery and closer to what the legacy viewport does:
+
+```
+bone.localPosition = restLocalPosition + translation(t)
+bone.localRotation = rotation(t)
+bone.localScale    = scale(t)
+```
+
+That is the same expression the skinning section derives, with the tracks filled in instead of left
+at rest, so **the bind poses do not change and a bone with no track simply holds its rest
+transform**. Only bones that actually move are driven: a 236-bone boss moves 114 of them in its
+idle, and the rest would be identical writes every frame.
+
+**A rotation is not converted like a position.** The axis map mirrors (determinant -1), so
+conjugating a rotation by it remaps the axis *and reverses the turn*. `ConvertRotation` is where
+that lives, and `WowParserTests` checks it against the matrix route rather than trusting the
+algebra — a sign error there does not look subtly wrong, it looks like the model turning inside
+out.
+
+**What is not animated.** Only bones. Texture animation, colour and transparency tracks, particles,
+ribbons and attachments are untouched, as is anything belonging to characters or equipment. A model
+whose idle keeps its keyframes in a separate `.anim` file is not animated and says so; over a
+spread of 300 retail creature models that is a small minority, and fetching those files is a later
+milestone.
+
 ## Debug switches
 
 Pass these on the player command line to isolate a visual fault without rebuilding. They are also
@@ -253,7 +315,9 @@ process inherits the environment:
 | `-wmvShowHidden` | draw the batches the model hides at rest — shows *what* is hidden, and usually what it was covering |
 | `-wmvOwnShader` | resolve the renderer's own `WmvOpaque` shader ahead of any pipeline shader — the only one that can run an M2 combiner |
 | `-wmvNoSkin` | build every model as a static mesh, as before skinning existed — the A/B for "did the skinned path change what I see?" |
-| `-wmvSkinCheck` | bake the skinned result and report the largest distance between a baked vertex and the position the file gave it. At rest that distance is the milestone's whole claim, so it is measurable rather than asserted |
+| `-wmvSkinCheck` | bake the skinned result and report the largest distance between a baked vertex and the position the file gave it. Pair it with `-wmvNoAnim`: a moving model is not in its rest pose |
+| `-wmvNoAnim` | do not play anything. The model is still skinned, and still sits in the rest pose the bind poses describe |
+| `-wmvAnimCheck` | sample the idle across its length and report how far the skinned mesh moves from its rest pose, next to the model's own size. Zero everywhere means nothing animates; a number far larger than the model means the rig is being applied wrongly — both look like an ordinary still frame otherwise |
 
 Each model load also logs its UV sample, per-batch material/blend/texture-slot mapping, the alpha
 treatment per texture, which batches are hidden at rest and why, the resolved combiner and per-unit
@@ -274,6 +338,7 @@ to (or why it was not).
 | `Wow/WowCoordinateConverter.cs` | The single WoW -> Unity axis/winding/UV conversion. |
 | `Assets/Resources/WmvOpaque.shader` | The renderer's own textured shader, kept under `Resources/` so a player build cannot strip it. One variant, everything uniform-driven: `_SrcBlend`/`_DstBlend`/`_ZWrite`/`_Cull`/`_Cutoff` as real properties, plus `_CombinerMode`, `_Unit1UV`, `_AlphaMode`/`_AlphaScale` and `_OpaqueAlpha` for the second texture unit and the M2 combiners. |
 | `Wow/ByteCursor.cs` | Bounds-checked little-endian reader shared by the parsers. |
+| `WmvM2Animator.cs` | Plays the model's default idle by writing bone transforms each frame: sequence selection, track evaluation, global sequences and looping. No Animator Controller, no clips, nothing written to disk. |
 | `WmvOrbitCamera.cs` | Orbit / pan / zoom controls plus bounds-driven framing of a loaded model. |
 
 The parsing layer under `Assets/Scripts/Wow/` deliberately has no `UnityEngine` dependency, so

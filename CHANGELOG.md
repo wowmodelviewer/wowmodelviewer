@@ -6,6 +6,36 @@ Format loosely based on [Keep a Changelog](https://keepachangelog.com/).
 ## [Unreleased]
 
 ### Added
+- **Embedded Unity renderer: creatures now play their idle animation.** The rig built by the
+  previous milestone stood perfectly still; it now loops the model's default idle. Which sequence
+  that is turned out to be the first thing worth getting right: it is NOT sequence 0, but the first
+  sequence whose AnimId is "Stand", falling back to sequence 0 only when a model has none -- the
+  rule the OpenGL viewport itself uses. On `creature/chicken2` sequence 0 is a run cycle and the
+  idle is sequence 2; on `creature/valkier` it is sequence 11. Bone tracks are evaluated the way
+  the legacy evaluator does, case for case: fewer than two keys holds the first value, a time past
+  the last key holds the last, and otherwise the containing span is interpolated -- stepped for
+  "none", interpolated for "linear", and *slerped* rather than lerped for rotations. Hermite and
+  Bezier tracks are read as linear (their tangents are not), which no bone track in any validation
+  model uses. **Global sequences are implemented, not skipped**: a track bound to one loops on its
+  own clock independently of what is playing, and keeps its keys at entry 0 -- `creature/valkier`
+  drives 61 of its tracks that way. A global sequence of zero length, which `creature/wrathofazshara`
+  actually ships, holds its first keyframe here rather than returning a default value as the legacy
+  evaluator does; for a scale track that default collapses the bone to a point. Only the sequence
+  being played is parsed, so a 109-sequence boss costs one sequence of keyframes, and only bones
+  that actually move are driven. There is no Animator Controller and no clip: Unity's animation
+  system wants assets authored at build time and a player build strips them, so the animator writes
+  localPosition/localRotation/localScale straight onto the bones -- the same expression the
+  skinning milestone derived, with the tracks filled in instead of left at rest, so the bind poses
+  are untouched and `-wmvNoAnim` returns the model to a rest pose that still measures identical to
+  the static mesh. One rotation subtlety is worth naming: the WoW-to-Unity axis map mirrors, so
+  converting a rotation remaps its axis AND reverses its turn, which is checked against the matrix
+  route in the parser tests rather than trusted. Measured with the new `-wmvAnimCheck`, which
+  samples the idle across its length and bakes the skinned result, vertices move at most 16% of the
+  model's own diagonal on chicken2 and stay bounded on every model tested. Nothing but bones is
+  animated, and a model whose idle keeps its keyframes in a separate .anim file is left still and
+  says so.
+
+### Added
 - **Embedded Unity renderer: models are now skinned to their own skeleton.** The renderer drew
   every M2 as a rigid mesh; the bone indices and weights each vertex carries were parsed and then
   ignored. The rig is now rebuilt as Unity transforms, the influences and bind poses are handed to

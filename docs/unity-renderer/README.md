@@ -243,15 +243,23 @@ in-process, and shuts the player down. Result lines carry the `[unityipc-test]` 
   result is the static mesh it replaces to within float noise (largest measured deviation across
   the validation models: 3.8e-6 units). Models whose bones live in a separate skeleton file are
   still drawn static, and say so.
+- Idle animation playback: the model's default idle sequence loops on the rig above. The
+  sequence is the one the OpenGL viewport itself would select -- the first whose AnimId is
+  "Stand", not sequence 0 -- and its bone tracks are evaluated the way the legacy evaluator
+  does, including the global sequences that run on their own clock. One animation, no selector
+  and no UI; `-wmvNoAnim` returns the model to the rest pose.
 - Bounds-driven camera framing, so a loaded model is visible immediately.
 
 **Not yet implemented**
 
-- Animation playback. The rig is built and the mesh is skinned to it, but no animation track is
-  read, so nothing moves; sequences, interpolation, timing and an idle loop are the next step.
-- Bones from a separate skeleton file (the SKID chunk, and the SKPD parent it can defer to).
-  Over a spread of 300 retail creature models, 299 keep their bones in the .m2 itself and one
-  does not; that one is drawn unskinned.
+- Choosing an animation. One sequence plays, the default idle; there is no selector, no
+  blending between sequences and no animation UI.
+- Keyframes stored outside the .m2: the .anim files named by the AFID chunk, and bones from a
+  separate skeleton file (the SKID chunk and the SKPD parent it can defer to). A model that
+  needs either is drawn from what it does have -- unskinned, or skinned but still -- and says
+  which.
+- Animation of anything but bones: texture animation, colour and transparency tracks beyond the
+  rest-pose visibility gate, particles, ribbons and attachments.
 - The rest of the WoW material system: texture animation, colour and transparency tracks beyond
   the rest-pose visibility gate, the specular lobes the legacy viewport leaves unweighted by
   default, and the few combiners that mix more than two contributing units.
