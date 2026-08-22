@@ -138,6 +138,11 @@ namespace Wmv.Wow
     /// <summary>One renderable section of the skin profile (a "geoset"/submesh).</summary>
     public struct M2Submesh
     {
+        /// <summary>
+        /// The geoset number this submesh belongs to, group * 100 + variant, masked to 15 bits.
+        /// 0 means "always drawn"; anything else is drawn only when the displayed creature variant
+        /// switches that number on. See WmvModelBuilder.GeosetVisible.
+        /// </summary>
         public ushort Id;
         public ushort Level;
         public ushort VertexStart, VertexCount;

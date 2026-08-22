@@ -1453,6 +1453,26 @@ void AnimControl::displayIdSkinIndices(std::vector<std::pair<int, int> > & out)
   }
 }
 
+bool AnimControl::selectedSkinGeosets(std::vector<int> & out)
+{
+  out.clear();
+  if (!skinList || !skinList->IsShown())
+    return false;
+
+  const int sel = skinList->GetSelection();
+  if (sel < 0)
+    return false;   // a per-slot texture pick clears the selection; it does not change geosets
+
+  TextureGroup * grp = static_cast<TextureGroup *>(skinList->GetClientData((unsigned int)sel));
+  if (!grp)
+    return false;
+
+  for (std::set<GeosetNum>::const_iterator it = grp->creatureGeosetData.begin();
+       it != grp->creatureGeosetData.end(); ++it)
+    out.push_back((int)*it);
+  return true;   // true means "the selection is known", even when it switches nothing on
+}
+
 int AnimControl::skinCount()
 {
   return (skinList && skinList->IsShown()) ? (int)skinList->GetCount() : 0;

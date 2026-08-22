@@ -48,6 +48,14 @@ public class WmvMain : MonoBehaviour
     readonly Dictionary<int, int> currentTextureIds = new Dictionary<int, int>();   // slot -> FileDataID
     SkinJob skinJob;                  // in-flight skin change, if any
 
+    /// <summary>
+    /// The geoset numbers the displayed creature variant switches on, or null when the host has
+    /// not reported any. Two variants of the same creature can differ by GEOMETRY rather than
+    /// texture -- one horse's mane instead of another -- and this is what decides which submeshes
+    /// are drawn. See WmvModelBuilder.GeosetVisible.
+    /// </summary>
+    HashSet<int> currentGeosets;
+
     /// <summary>Textures still on their way for a skin change. Requests are keyed to the M2
     /// texture slot they will land in.</summary>
     class SkinJob
@@ -237,6 +245,7 @@ public class WmvMain : MonoBehaviour
         if (job == null || r.requestId != job.PendingTextureList)
             return;
         job.PendingTextureList = null;
+        AdoptGeosets(r);
 
         if (!r.ok || r.textures.Length == 0)
         {
@@ -299,7 +308,8 @@ public class WmvMain : MonoBehaviour
             long t0 = job.Clock.ElapsedMilliseconds;
             var built = WmvModelBuilder.Build(job.Model, job.Skin, job.Textures,
                                               string.IsNullOrEmpty(job.Model.Name) ? "WoWModel" : job.Model.Name,
-                                              s => Debug.LogWarning("WMV: " + s));
+                                              s => Debug.LogWarning("WMV: " + s),
+                                              currentGeosets);
             job.BuildMs = job.Clock.ElapsedMilliseconds - t0;
 
             if (current != null) current.Dispose();      // never leak the previous model
@@ -320,6 +330,9 @@ public class WmvMain : MonoBehaviour
             status.Set("Loaded " + job.Path);
             status.Set(string.Format("Vertices {0}  Triangles {1}  Submeshes {2}  Textures {3}",
                                      built.VertexCount, built.TriangleCount, built.SubmeshCount, job.Textures.Count));
+            if (currentGeosets != null)
+                status.Set("Geosets " + (currentGeosets.Count == 0 ? "none" : string.Join(",",
+                           new List<int>(currentGeosets).ConvertAll(x => x.ToString()).ToArray())));
             status.Set(string.Format("Bounds {0} size {1}", built.Bounds.center, built.Bounds.size));
             status.Set(string.Format("Load {0} ms (m2 {1}, skin {2}, tex {3}, parse {4}, build {5})",
                                      job.Clock.ElapsedMilliseconds, job.M2Ms, job.SkinMs, job.TextureMs,
@@ -346,6 +359,16 @@ public class WmvMain : MonoBehaviour
             return;                                     // about a different model
         if (!r.ok || r.textures.Length == 0)
             return;
+
+        // Geometry first: a variant can change which submeshes are drawn as well as which texture
+        // they wear, and the two are independent -- a variant that only swaps geosets has no
+        // texture to fetch and would otherwise be dropped by the no-op check below.
+        if (AdoptGeosets(r))
+        {
+            WmvModelBuilder.ApplyGeosets(current, currentGeosets, s => Debug.Log("WMV: " + s));
+            status.Set(string.Format("Geosets applied ({0} triangles, mesh unchanged)",
+                                     current.TriangleCount));
+        }
 
         var wanted = new Dictionary<int, int>();         // slot -> FileDataID
         foreach (var t in r.textures)
@@ -436,6 +459,34 @@ public class WmvMain : MonoBehaviour
             (model == null || t.index < model.Textures.Length))
             slots.Add(t.index);
         return slots;
+    }
+
+    /// <summary>
+    /// Take the geoset set out of a host message, if it reported one. Returns true when the set
+    /// actually CHANGED, so the caller only touches the mesh when there is something to do.
+    /// A message with hasGeosets false is silence, not an empty answer: the host had no creature
+    /// selection to report, and whatever is on screen stays.
+    /// </summary>
+    bool AdoptGeosets(WmvIpcClient.ModelTexturesResponse r)
+    {
+        if (!r.hasGeosets)
+            return false;
+
+        var next = new HashSet<int>();
+        foreach (int g in r.geosets)
+            next.Add(g);
+
+        if (currentGeosets != null && currentGeosets.Count == next.Count)
+        {
+            bool same = true;
+            foreach (int g in next)
+                if (!currentGeosets.Contains(g)) { same = false; break; }
+            if (same)
+                return false;
+        }
+
+        currentGeosets = next;
+        return true;
     }
 
     void Fail(string reason)

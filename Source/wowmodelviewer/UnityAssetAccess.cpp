@@ -218,6 +218,19 @@ const char * UnityAssetAccess::sourceName(ModelTexture::Source source)
   }
 }
 
+bool UnityAssetAccess::selectedModelGeosets(int m2FileDataID, std::vector<int> & out)
+{
+  out.clear();
+  if (m2FileDataID <= 0 || !hasActiveClient())
+    return false;
+  if (!g_modelViewer || !g_modelViewer->animControl || !g_selModel || !g_selModel->gamefile)
+    return false;
+  if ((int)g_selModel->gamefile->fileDataId() != m2FileDataID)
+    return false;   // a question about some other model; we only know about the displayed one
+
+  return g_modelViewer->animControl->selectedSkinGeosets(out);
+}
+
 bool UnityAssetAccess::resolveModelTextures(int m2FileDataID, std::vector<ModelTexture> & out, QString & error)
 {
   out.clear();

@@ -22,7 +22,7 @@
 //   assetResponse { requestId, ok, path, fileDataID, byteLength, sha1, encoding:"base64", data }
 //   assetResponse { requestId, ok:false, error }
 //   modelTextures { requestId, ok, fileDataID, textures:[{ index, type, fileDataID, source }] }
-//   modelSkin     { fileDataID, textures:[{ index, type, fileDataID, source }] }   (pushed, no request)
+//   modelSkin     { fileDataID, textures:[...], geosets:[...], hasGeosets }        (pushed, no request)
 //
 // getModelTextures exists because a modern M2 does not name its replaceable textures (a
 // creature skin's TXID entry is 0 and its texture array carries no filename) -- the skin comes
@@ -101,6 +101,15 @@ public class WmvIpcClient : MonoBehaviour
         public int fileDataID;
         public string error;
         public ModelTextureRef[] textures = new ModelTextureRef[0];
+
+        /// <summary>
+        /// The geoset numbers the displayed variant switches on. Only meaningful when
+        /// <see cref="hasGeosets"/> is true -- an empty list then means "this variant switches
+        /// none on", which hides every submesh whose id is not 0. When hasGeosets is false the
+        /// host had no selection to report and geoset visibility must be left alone.
+        /// </summary>
+        public int[] geosets = new int[0];
+        public bool hasGeosets;
     }
 
     [Serializable] class MsgTexture
@@ -114,6 +123,8 @@ public class WmvIpcClient : MonoBehaviour
     [Serializable] class Msg
     {
         public MsgTexture[] textures;
+        public int[] geosets;
+        public bool hasGeosets;
         public string type;
         public string requestId;
         public string path;
@@ -240,6 +251,8 @@ public class WmvIpcClient : MonoBehaviour
                     source = msg.textures[i].source ?? "",
                 };
         }
+        r.hasGeosets = msg.hasGeosets;
+        if (msg.geosets != null) r.geosets = msg.geosets;
         return r;
     }
 

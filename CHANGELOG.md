@@ -5,6 +5,18 @@ Format loosely based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+### Added
+- **Embedded Unity renderer: it now shows the right geometry, not just the right texture.** A
+  creature display variant can differ from another by which geosets it switches on rather than by
+  its skin -- `creature/horse3/horse3.m2` has three dropdown entries sharing one texture that
+  differ only in geoset 101, 102 or 103, a long mane and tail against a cropped one -- and the
+  Unity viewport drew all of them identically. It now follows the same rule the OpenGL viewport
+  uses: a submesh is drawn when its geoset number is 0, or when the displayed variant names that
+  number. WMV sends the selected set alongside the textures it already sent, so the app stays the
+  only thing that reads the client database; the renderer already knows each submesh's number from
+  the .skin it parsed. Switching variants swaps which submeshes hand the mesh their triangles --
+  the mesh, its vertices, its materials and its textures are all left alone.
+
 ### Fixed
 - **Creature display lookup read the wrong columns on retail.** `AnimControl::UpdateCreatureModel`
   builds one of three queries depending on the client generation, but read the display id and the

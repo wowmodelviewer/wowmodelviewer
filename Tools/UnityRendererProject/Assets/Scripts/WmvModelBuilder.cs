@@ -31,6 +31,17 @@ public class WmvRuntimeModel
     public Material[] Materials = new Material[0];
     public Texture2D[] Textures = new Texture2D[0];
     public WmvMaterialBinding[] Bindings = new WmvMaterialBinding[0];
+
+    /// <summary>Geoset number of each submesh, parallel to Materials. 0 = always drawn.</summary>
+    public int[] SubmeshGeosets = new int[0];
+
+    /// <summary>Every submesh's triangles, kept so hiding one is a matter of handing the mesh an
+    /// empty list and showing it again is handing back this array -- no geometry is re-uploaded
+    /// and no material is rebuilt.</summary>
+    public int[][] SubmeshTriangles = new int[0][];
+
+    /// <summary>The geoset numbers currently switched on, or null when the host has not said.</summary>
+    public HashSet<int> Geosets;
     public Bounds Bounds;
     public int VertexCount, TriangleCount, SubmeshCount;
 
@@ -113,9 +124,26 @@ public static class WmvModelBuilder
     /// pixels; a slot with no entry renders untextured (white), which is what happens for a
     /// replaceable texture the host could not resolve.
     /// </summary>
+    /// <summary>
+    /// Is this submesh drawn, given the geoset numbers the displayed variant switches on?
+    ///
+    /// This is the legacy viewport's rule, from WoWModel::setCreatureGeosetData: a submesh whose
+    /// geoset number is 0 is always drawn, and every other one is drawn only if the variant names
+    /// it. An EMPTY set is an answer, not a blank -- it hides everything but the id-0 submeshes,
+    /// which is exactly what the viewport does for a display with no geoset data. A null set means
+    /// the host had nothing to say (no creature selection at all), and then nothing is hidden.
+    /// </summary>
+    public static bool GeosetVisible(int submeshId, HashSet<int> geosets)
+    {
+        if (geosets == null || submeshId == 0)
+            return true;
+        return geosets.Contains(submeshId);
+    }
+
     public static WmvRuntimeModel Build(M2ParsedModel model, M2ParsedSkin skin,
                                         Dictionary<int, BlpImage> decodedTextures,
-                                        string objectName, Action<string> log)
+                                        string objectName, Action<string> log,
+                                        HashSet<int> geosets = null)
     {
         if (model == null || skin == null)
             throw new WowParseException("builder: nothing to build");
@@ -171,7 +199,8 @@ public static class WmvModelBuilder
         // can feed an opaque batch (alpha thrown away) and a blended one (alpha kept).
         var textureCache = new Dictionary<int, Texture2D>();
         var triangleSets = new List<int[]>();
-        int totalTriangles = 0;
+        var submeshGeosets = new List<int>();
+        int totalTriangles = 0, hiddenByGeoset = 0;
 
         // Resolve the shader up front: whether it can run the M2 combiner decides how the base
         // texture's alpha has to be treated, which happens before any material is created.
@@ -217,7 +246,14 @@ public static class WmvModelBuilder
             int[] indices = M2SkinParser.BuildTriangles(skin, submesh, n);
             WowCoordinateConverter.FlipWinding(indices);   // handedness change reverses winding
             triangleSets.Add(indices);
-            totalTriangles += indices.Length / 3;
+            submeshGeosets.Add(submesh.Id);
+            // A geoset the variant does not switch on still gets its submesh and material -- only
+            // its triangles are withheld -- so a later variant can switch it back on without
+            // rebuilding anything.
+            if (GeosetVisible(submesh.Id, geosets))
+                totalTriangles += indices.Length / 3;
+            else
+                hiddenByGeoset++;
 
             // How this material combines its texture units, resolved exactly as the legacy
             // renderer does. This milestone implements one combiner; the rest are logged and
@@ -281,8 +317,15 @@ public static class WmvModelBuilder
 
         mesh.subMeshCount = triangleSets.Count;
         for (int i = 0; i < triangleSets.Count; i++)
-            mesh.SetTriangles(triangleSets[i], i, true);
-        mesh.RecalculateBounds();
+            mesh.SetTriangles(GeosetVisible(submeshGeosets[i], geosets) ? triangleSets[i] : EmptyTriangles,
+                              i, false);
+        // Bounds come from the WHOLE model, not from what is currently visible, so switching a
+        // variant does not make the camera jump.
+        mesh.bounds = BoundsOfAll(positions, triangleSets);
+
+        if (log != null && hiddenByGeoset > 0)
+            log(string.Format("geosets: {0} of {1} submesh(es) hidden by the displayed variant [{2}]",
+                              hiddenByGeoset, triangleSets.Count, GeosetList(geosets)));
 
         // ---- scene object -------------------------------------------------------------
         var go = new GameObject(objectName);
@@ -295,11 +338,74 @@ public static class WmvModelBuilder
         result.Materials = materials.ToArray();
         result.Bindings = bindings.ToArray();
         result.Textures = textures.ToArray();
+        result.SubmeshGeosets = submeshGeosets.ToArray();
+        result.SubmeshTriangles = triangleSets.ToArray();
+        result.Geosets = geosets;
         result.Bounds = mesh.bounds;
         result.VertexCount = n;
         result.TriangleCount = totalTriangles;
         result.SubmeshCount = triangleSets.Count;
         return result;
+    }
+
+    static readonly int[] EmptyTriangles = new int[0];
+
+    /// <summary>Bounds over every triangle the model has, visible or not.</summary>
+    static Bounds BoundsOfAll(Vector3[] positions, List<int[]> triangleSets)
+    {
+        bool any = false;
+        Vector3 min = Vector3.zero, max = Vector3.zero;
+        foreach (var tris in triangleSets)
+        {
+            foreach (int i in tris)
+            {
+                Vector3 p = positions[i];
+                if (!any) { min = max = p; any = true; continue; }
+                min = new Vector3(Mathf.Min(min.x, p.x), Mathf.Min(min.y, p.y), Mathf.Min(min.z, p.z));
+                max = new Vector3(Mathf.Max(max.x, p.x), Mathf.Max(max.y, p.y), Mathf.Max(max.z, p.z));
+            }
+        }
+        var b = new Bounds();
+        b.center = (min + max) * 0.5f;
+        b.size = max - min;
+        return b;
+    }
+
+    static string GeosetList(HashSet<int> geosets)
+    {
+        if (geosets == null) return "not reported";
+        if (geosets.Count == 0) return "none";
+        var parts = new List<string>();
+        foreach (int g in geosets) parts.Add(g.ToString());
+        parts.Sort();
+        return string.Join(",", parts.ToArray());
+    }
+
+    /// <summary>
+    /// Switch which geosets the model shows. The mesh, its vertices, its materials and its
+    /// textures are all untouched: a variant change only decides which submeshes hand the mesh
+    /// their triangles. Returns the number of triangles now drawn.
+    /// </summary>
+    public static int ApplyGeosets(WmvRuntimeModel runtime, HashSet<int> geosets, Action<string> log)
+    {
+        if (runtime == null || runtime.Mesh == null ||
+            runtime.SubmeshTriangles.Length != runtime.Mesh.subMeshCount)
+            return 0;
+
+        runtime.Geosets = geosets;
+        int visible = 0, shown = 0, hidden = 0;
+        for (int i = 0; i < runtime.SubmeshTriangles.Length; i++)
+        {
+            bool on = GeosetVisible(runtime.SubmeshGeosets[i], geosets);
+            runtime.Mesh.SetTriangles(on ? runtime.SubmeshTriangles[i] : EmptyTriangles, i, false);
+            if (on) { visible += runtime.SubmeshTriangles[i].Length / 3; shown++; }
+            else hidden++;
+        }
+        runtime.TriangleCount = visible;
+        if (log != null)
+            log(string.Format("geosets [{0}]: {1} submesh(es) shown, {2} hidden, {3} triangles drawn",
+                              GeosetList(geosets), shown, hidden, visible));
+        return visible;
     }
 
     /// <summary>

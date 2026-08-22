@@ -136,7 +136,7 @@ namespace Wmv.Wow.Tests
         /// <summary>Skin with `vertexCount` lookup entries and one submesh covering `triangles`.</summary>
         static byte[] BuildSkin(int vertexCount, ushort[] triangles, ushort submeshIndexCount = 0xFFFF,
                                 ushort lookupOverride = 0xFFFF, ushort batchColorIndex = 0xFFFF,
-                                ushort batchTextureCount = 1)
+                                ushort batchTextureCount = 1, ushort submeshId = 0)
         {
             const int headerSize = 0x30;
             int vertOffset = headerSize;
@@ -158,7 +158,7 @@ namespace Wmv.Wow.Tests
             for (int i = 0; i < triangles.Length; i++)
                 PutU16(b, triOffset + i * 2, triangles[i]);
 
-            PutU16(b, subOffset + 0, 0);                     // id
+            PutU16(b, subOffset + 0, submeshId);             // id (geoset number)
             PutU16(b, subOffset + 2, 0);                     // level
             PutU16(b, subOffset + 4, 0);                     // vertexStart
             PutU16(b, subOffset + 6, (ushort)vertexCount);   // vertexCount
@@ -416,6 +416,14 @@ namespace Wmv.Wow.Tests
             Check(skin.Batches[0].ColorIndex == 0 && skin.Batches[0].HasColor,
                   "tracks: batch colour index parsed");
             Check(skin.Batches[0].TextureWeightComboIndex == 0, "tracks: batch weight combo index parsed");
+
+            // The geoset number is the low 15 bits: the legacy viewport masks the same way, and a
+            // creature display's geoset set is expressed in those numbers. Without the mask the
+            // two renderers would compare different values and never agree on what is visible.
+            var masked = M2SkinParser.Parse(BuildSkin(3, new ushort[] { 0, 1, 2 }, submeshId: 0x8065));
+            Check(masked.Submeshes[0].Id == 0x0065, "geoset: submesh id is masked to 15 bits");
+            var unmasked = M2SkinParser.Parse(BuildSkin(3, new ushort[] { 0, 1, 2 }, submeshId: 101));
+            Check(unmasked.Submeshes[0].Id == 101, "geoset: an id below the mask is unchanged");
             Check(skin.Batches[0].TextureCoordComboIndex == 0xFFFF, "tracks: batch coord combo index parsed");
 
             // a batch with no colour entry is never hidden by one
