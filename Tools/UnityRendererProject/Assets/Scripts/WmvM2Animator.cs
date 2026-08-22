@@ -126,9 +126,9 @@ public class WmvM2Animator : MonoBehaviour
 
         if (log != null)
         {
-            log(string.Format("anim: sequence [{0}] animId {1} \"{2}\", {3} ms, {4} of {5} bone(s) " +
+            log(string.Format("anim: sequence [{0}] animId {1}{2}, {3} ms, {4} of {5} bone(s) " +
                               "move, {6} track(s) on a global sequence",
-                              SequenceIndex, AnimId, AnimId == 0 ? "Stand" : "fallback",
+                              SequenceIndex, AnimId, AnimId == 0 ? " (Stand)" : "",
                               lengthMs, bones.Length, model.Bones.Length, globalTracks));
             foreach (var kv in unsupported)
                 log(string.Format("anim: {0} track(s) use {1} interpolation, which is read as " +

@@ -70,8 +70,16 @@ namespace Wmv.Wow
         const int ColorStride = 40;        // two M2Tracks
         const int TrackStride = 20;        // interpolation + globalSeq + two nested M2Arrays
 
-        /// <summary>Parse an .m2 asset. Throws WowParseException on anything malformed.</summary>
-        public static M2ParsedModel Parse(byte[] file)
+        /// <summary>
+        /// Parse an .m2 asset. Throws WowParseException on anything malformed.
+        ///
+        /// wantedSequence names which animation's bone tracks to read; -1 asks for the model's
+        /// default idle. Only one sequence is ever read (a track on disk is an array of
+        /// per-sequence keyframe arrays, and a boss has hundreds), so playing a different one
+        /// means parsing again with a different answer here -- which is what the renderer does
+        /// when the app's animation selection changes.
+        /// </summary>
+        public static M2ParsedModel Parse(byte[] file, int wantedSequence = -1)
         {
             if (file == null || file.Length < 8)
                 throw new WowParseException("m2: asset is empty or too small to hold a header");
@@ -141,8 +149,8 @@ namespace Wmv.Wow
             if (model.SkeletonFileDataID == 0)
             {
                 c.RequireArray(bones, BoneStride, "bones");
-                model.AnimatedSequence = ResolveIdleSequence(model, file, chunks,
-                                                             out model.AnimationSkipReason);
+                model.AnimatedSequence = ResolveSequence(model, file, chunks, wantedSequence,
+                                                        out model.AnimationSkipReason);
                 model.Bones = ReadBones(c, bones, model);
             }
             else
@@ -516,12 +524,23 @@ namespace Wmv.Wow
 
             var t = new uint[n];
             var v = new T[n];
-            for (int i = 0; i < n; i++)
+            try
             {
-                c.Seek(keyTimes.Offset + i * 4);
-                t[i] = c.ReadUInt32();
-                c.Seek(keyValues.Offset + i * stride);
-                v[i] = readValue(c);
+                for (int i = 0; i < n; i++)
+                {
+                    c.Seek(keyTimes.Offset + i * 4);
+                    t[i] = c.ReadUInt32();
+                    c.Seek(keyValues.Offset + i * stride);
+                    v[i] = readValue(c);
+                }
+            }
+            catch (WowParseException)
+            {
+                // Bounds were fine and the contents were not -- a sequence whose keys really live
+                // in another file, read here anyway. One bone that will not move beats a model
+                // that will not load; the sequence-level check above is what should have caught
+                // this, and the caller reports when it did.
+                return track;
             }
             track.Times = t;
             track.Values = v;
@@ -555,25 +574,40 @@ namespace Wmv.Wow
         }
 
         /// <summary>
-        /// Which sequence to parse bone tracks for: the model's default idle.
+        /// Which sequence to parse bone tracks for.
         ///
-        /// This is the legacy viewport's own rule (AnimControl::UpdateModel): the FIRST sequence
-        /// whose AnimId is "Stand", falling back to sequence 0 when the model has none. It is not
-        /// the same as "sequence 0" -- on chicken2 that is a run cycle and the idle is sequence 2.
+        /// With no request (-1) this is the model's default idle, by the legacy viewport's own
+        /// rule (AnimControl::UpdateModel): the FIRST sequence whose AnimId is "Stand", falling
+        /// back to sequence 0 when the model has none. It is not the same as "sequence 0" -- on
+        /// chicken2 that is a run cycle and the idle is sequence 2.
+        ///
+        /// A requested sequence that cannot be played falls back to the idle rather than to
+        /// nothing: the app is showing SOMETHING, and a still model is a worse answer than the
+        /// wrong-but-moving one. The reason is reported either way.
         ///
         /// A sequence whose keyframes live in a separate .anim file, named by an AFID entry for
         /// its (AnimId, SubAnimId), is refused: the offsets inside its track headers address that
         /// file, not this one, and following them here would read whatever happens to sit at those
         /// bytes of the model. Fetching .anim files is a later milestone.
         /// </summary>
-        static int ResolveIdleSequence(M2ParsedModel model, byte[] file,
-                                       Dictionary<string, M2Array> chunks, out string skipReason)
+        static int ResolveSequence(M2ParsedModel model, byte[] file,
+                                   Dictionary<string, M2Array> chunks, int wanted,
+                                   out string skipReason)
         {
             skipReason = null;
             if (model.Sequences.Length == 0)
             {
                 skipReason = "it declares no animation sequences";
                 return -1;
+            }
+
+            if (wanted >= 0)
+            {
+                string why = "there is no such sequence";
+                if (wanted < model.Sequences.Length && Playable(model.Sequences[wanted], file, chunks, out why))
+                    return wanted;
+                skipReason = "the selected sequence " + wanted + " cannot be played (" + why +
+                             "); falling back to the default idle";
             }
 
             int idle = 0;
@@ -586,18 +620,42 @@ namespace Wmv.Wow
                 }
             }
 
-            if (model.Sequences[idle].Length == 0)
+            string idleWhy;
+            if (!Playable(model.Sequences[idle], file, chunks, out idleWhy))
             {
-                skipReason = "its idle sequence has zero length";
-                return -1;
-            }
-            if (HasExternalAnimFile(file, chunks, model.Sequences[idle]))
-            {
-                skipReason = "its idle sequence keeps its keyframes in a separate .anim file, " +
-                             "which this milestone does not fetch";
+                skipReason = (skipReason == null ? "" : skipReason + "; and ") +
+                             "the default idle cannot be played either (" + idleWhy + ")";
                 return -1;
             }
             return idle;
+        }
+
+        /// <summary>
+        /// Can this renderer play this sequence at all, and if not, why not?
+        ///
+        /// The 0x20 flag is the test that matters: it says the keyframes are in this file. Without
+        /// it the track headers still exist here, but their offsets address the sequence's .anim
+        /// file -- and they routinely land inside this buffer by coincidence, so bounds-checking
+        /// them proves nothing and reading them yields noise. The AFID lookup is kept as well
+        /// because it can name the file the keys went to, which makes a better message.
+        /// </summary>
+        static bool Playable(M2Sequence seq, byte[] file, Dictionary<string, M2Array> chunks,
+                             out string why)
+        {
+            if (seq.Length == 0)
+            {
+                why = "it has zero length";
+                return false;
+            }
+            if (!seq.PrimarySequence)
+            {
+                why = HasExternalAnimFile(file, chunks, seq)
+                    ? "its keyframes are in a separate .anim file, which this milestone does not fetch"
+                    : "its keyframes are not stored in the .m2 (no 0x20 flag)";
+                return false;
+            }
+            why = null;
+            return true;
         }
 
         /// <summary>Does the AFID chunk name an .anim file for this sequence?</summary>

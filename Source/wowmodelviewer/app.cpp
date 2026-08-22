@@ -27,6 +27,7 @@
 #include "WoWDatabase.h"
 #include "WoWFolder.h"
 #include "animcontrol.h"
+#include "AnimManager.h"
 #include "WoWModel.h"
 
 #include "logger/Logger.h"
@@ -379,6 +380,41 @@ static void doHeadlessUnityIpcTest(ModelViewer * frame)
 
       LOG_INFO << "[unityipc-test] skin-sync: skinPushes=" << ipc->stats().skinPushes
                << "lastSkin=" << ipc->stats().lastSkin;
+
+      // Animation sync: the viewport plays ONE of the model's animations and the renderer has to
+      // play the same one. Walk a spread of the selector rather than all of it -- a boss has
+      // hundreds of entries and each push has to reach the player before the next -- and report
+      // what each selection resolved to, so a run shows the whole chain from the selector to the
+      // sequence index that left the app.
+      const int animCount = ac ? ac->animationCount() : 0;
+      LOG_INFO << "[unityipc-test] animation-sync check: the selector offers" << animCount << "animation(s)";
+      if (ac && animCount > 0)
+      {
+        const int wanted = 6;
+        const int step = (animCount > wanted) ? (animCount / wanted) : 1;
+        for (int a = 0; a < animCount; a += step)
+        {
+          // The selector's label carries the animation-table index in brackets; that index, not
+          // the list position, is what SelectAnimation and the renderer both work in.
+          const wxString label = ac->animationName(a);
+          const int open = label.Find('[') + 1;
+          const int close = label.Find(']');
+          const int index = (open > 0 && close > open) ? wxAtoi(label.Mid(open, close - open)) : a;
+          ac->SelectAnimation(index, 0);
+          const WoWModel * mdl = frame->canvas ? frame->canvas->model() : NULL;
+          const int playing = (mdl && mdl->animManager) ? (int)mdl->animManager->GetAnim() : -1;
+          LOG_INFO << "[unityipc-test]   animation[" << a << "]"
+                   << QString::fromWCharArray(label.c_str())
+                   << "-> sequence" << index << "playing" << playing
+                   << "animID" << ((mdl && playing >= 0 && playing < (int)mdl->anims.size())
+                                   ? mdl->anims[playing].animID : -1)
+                   << "length" << ((mdl && playing >= 0 && playing < (int)mdl->anims.size())
+                                   ? (int)mdl->anims[playing].length : -1);
+          for (int i = 0; i < 20; i++) { ipc->poll(); wxTheApp->Yield(true); wxMilliSleep(10); }
+        }
+        LOG_INFO << "[unityipc-test] animation-sync: animPushes=" << ipc->stats().animPushes
+                 << "lastAnimation=" << ipc->stats().lastAnimation;
+      }
     }
   }
 
@@ -386,8 +422,12 @@ static void doHeadlessUnityIpcTest(ModelViewer * frame)
   // nothing to sync, so the condition only bites when there was something to send.
   const bool skinsOk = (frame->animControl == NULL) || (frame->animControl->skinCount() == 0) ||
                        (st.skinPushes >= 1);
+  // A model with an animation selector must have pushed at least one animation; one without has
+  // nothing to sync, so the condition only bites when there was something to send.
+  const bool animsOk = (frame->animControl == NULL) || (frame->animControl->animationCount() == 0) ||
+                       (ipc->stats().animPushes >= 1);
   const bool pass = st.connections >= 1 && ipc->isUnityReady() && st.requests >= 1 &&
-                    st.responsesOk >= 1 && skinsOk;
+                    st.responsesOk >= 1 && skinsOk && animsOk;
   LOG_INFO << "[unityipc-test] RESULT:" << (pass ? "PASS" : "FAIL");
 
   // Close the player now (what app shutdown does) and confirm the child process is gone.

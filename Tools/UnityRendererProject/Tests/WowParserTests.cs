@@ -180,7 +180,8 @@ namespace Wmv.Wow.Tests
         /// still, bone 1 has an ordinary rotation track on the idle sequence, and bone 2 has a
         /// translation track bound to global sequence 1.
         /// </summary>
-        static byte[] BuildAnimatedM2(short[] animIds, bool standTrack, int afidAnimId = -1)
+        static byte[] BuildAnimatedM2(short[] animIds, bool standTrack, int afidAnimId = -1,
+                                      int noKeysInM2 = -1)
         {
             int nSeq = animIds.Length;
             byte[] b = BuildM2Payload(3, boneCount: 3);
@@ -214,7 +215,9 @@ namespace Wmv.Wow.Tests
                 PutU16(b, o, unchecked((ushort)animIds[i]));   // animId
                 PutU16(b, o + 2, 0);                            // subAnimId
                 PutU32(b, o + 4, 1000);                         // length
-                PutU32(b, o + 12, 0x20);                        // flags
+                // 0x20 says the keyframes are in this file; clearing it is how a sequence says
+                // they are somewhere else.
+                PutU32(b, o + 12, (i == noKeysInM2) ? 0u : 0x20u);
             }
             PutU32(b, 0x1C, (uint)nSeq); PutU32(b, 0x20, (uint)oSeqs);
 
@@ -532,12 +535,71 @@ namespace Wmv.Wow.Tests
                   "anim: a model with no sequences reports why it is not animated");
 
             // An idle whose keyframes live in a separate .anim file is refused rather than read
-            // out of the wrong buffer.
-            byte[] external = BuildAnimatedM2(new[] { (short)5, (short)0 }, standTrack: true, afidAnimId: 0);
+            // out of the wrong buffer. Real data marks such a sequence by CLEARING 0x20 as well as
+            // naming the file, and the fixture matches that.
+            byte[] external = BuildAnimatedM2(new[] { (short)5, (short)0 }, standTrack: true,
+                                              afidAnimId: 0, noKeysInM2: 1);
             M2ParsedModel ext = M2Parser.Parse(external);
             Check(ext.AnimatedSequence == -1, "anim: an idle with an AFID entry is skipped");
             Check(ext.AnimationSkipReason != null && ext.AnimationSkipReason.Contains(".anim"),
                   "anim: the skip reason names the .anim file");
+
+            SelectedSequenceTests();
+        }
+
+        /// <summary>
+        /// Following the app's animation selection: the requested sequence is parsed instead of the
+        /// idle, and anything that cannot be played falls back to the idle rather than to nothing.
+        /// </summary>
+        static void SelectedSequenceTests()
+        {
+            // Asking for a sequence gets that sequence, not the idle.
+            byte[] file = BuildAnimatedM2(new[] { (short)5, (short)4, (short)0, (short)1 },
+                                          standTrack: true);
+            Check(M2Parser.Parse(file).AnimatedSequence == 2, "select: no request still means the idle");
+            M2ParsedModel picked = M2Parser.Parse(file, 1);
+            Check(picked.AnimatedSequence == 1, "select: the requested sequence is the one parsed");
+            Check(picked.AnimationSkipReason == null, "select: nothing skipped for a playable request");
+            Check(picked.Sequences[picked.AnimatedSequence].AnimId == 4, "select: the right entry");
+
+            // The keys move with the request: the fixture puts its rotation track on the idle only,
+            // so another sequence parses that bone with no track at all.
+            Check(!picked.Bones[1].Rotation.HasData,
+                  "select: a sequence with no keys for a bone reads an empty track");
+            Check(M2Parser.Parse(file, 2).Bones[1].Rotation.HasData,
+                  "select: the sequence that does have keys still reads them");
+
+            // A track bound to a global sequence is unaffected by which animation is selected --
+            // it always reads entry 0.
+            Check(M2Parser.Parse(file, 1).Bones[2].Translation.HasData &&
+                  M2Parser.Parse(file, 3).Bones[2].Translation.HasData,
+                  "select: a global-sequence track is read whichever sequence is chosen");
+
+            // Out of range falls back to the idle, and says so.
+            M2ParsedModel far = M2Parser.Parse(file, 99);
+            Check(far.AnimatedSequence == 2, "select: an out-of-range request falls back to the idle");
+            Check(far.AnimationSkipReason != null && far.AnimationSkipReason.Contains("99"),
+                  "select: the fallback reason names the sequence that was asked for");
+
+            // So does a request whose keyframes are in an .anim file.
+            byte[] external = BuildAnimatedM2(new[] { (short)5, (short)0 }, standTrack: true,
+                                              afidAnimId: 5, noKeysInM2: 0);
+            M2ParsedModel ext = M2Parser.Parse(external, 0);
+            Check(ext.AnimatedSequence == 1, "select: a request needing an .anim file falls back to the idle");
+            Check(ext.AnimationSkipReason != null && ext.AnimationSkipReason.Contains(".anim"),
+                  "select: that fallback reason names the .anim file");
+
+            // And so does one whose keys are simply not in this file, with no .anim named for it.
+            // This is the case that matters: its track headers ARE here and its offsets land in
+            // range, so only the 0x20 flag distinguishes it from a playable sequence.
+            byte[] notHere = BuildAnimatedM2(new[] { (short)5, (short)0 }, standTrack: true, noKeysInM2: 0);
+            M2ParsedModel nh = M2Parser.Parse(notHere, 0);
+            Check(nh.AnimatedSequence == 1, "select: a sequence without the 0x20 flag falls back to the idle");
+            Check(nh.AnimationSkipReason != null && nh.AnimationSkipReason.Contains("0x20"),
+                  "select: that fallback reason names the missing flag");
+            Check(M2Parser.Parse(BuildAnimatedM2(new[] { (short)5, (short)0 }, standTrack: true,
+                                                 noKeysInM2: 1)).AnimatedSequence == -1,
+                  "select: an idle without the 0x20 flag is not played at all");
         }
 
         static void BoneTests()

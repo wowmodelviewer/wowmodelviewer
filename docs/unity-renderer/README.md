@@ -152,6 +152,8 @@ The response carries metadata only; bytes are still fetched with `getAssetByFile
 { "type": "modelSkin", "ok": true, "fileDataID": 1521037,
   "textures": [ { "index": 0, "type": 11, "fileDataID": 1521061, "source": "selection" } ],
   "geosets": [ 101 ], "hasGeosets": true }
+{ "type": "modelAnimation", "fileDataID": 1521037, "sequenceIndex": 2, "animID": 0,
+  "durationMs": 2000, "loop": true }
 ```
 
 Semantics:
@@ -166,6 +168,20 @@ Semantics:
   from `AnimControl::SetSkin`, the single funnel every skin change goes through (the dropdown,
   the default chosen on model load, and NPC import), plus `SetSingleSkin` for the per-slot
   folder-texture lists.
+- `modelAnimation` is **pushed, not requested**: the animation on display changed. It is sent
+  from `AnimControl::SelectAnimation`, the single funnel every animation change goes through (the
+  default picked while a model loads, the dropdown, and the loop control), and once more right
+  after `loadWoWModel` so the player starts on the app's selection rather than on an idle it
+  chose for itself.
+  **`sequenceIndex` is the field that decides what plays.** It indexes the model's animation
+  table, which is both how the keyframes are stored and how the app's own selector identifies a
+  choice -- its dropdown labels literally end in `[n]`. Two sequences routinely share an `animID`
+  (sub-animations of one action: chicken2's sequences 0 and 8 are both animID 5), so the id cannot
+  pick one; it travels for the log and for recognising the idle (`animID` 0, "Stand").
+  The player holds the model's `.m2` bytes and re-parses them for the requested sequence, because
+  only one sequence's keyframes are read at a time -- a boss has 109 of them. Nothing else moves:
+  the mesh, its materials, its textures and its geoset selection are untouched by which animation
+  is playing.
 - `geosets` / `hasGeosets` ride along with both `modelTextures` and `modelSkin`, because a display
   variant can differ from another by **geometry** rather than texture. `creature/horse3/horse3.m2`
   is the worked example: three of its dropdown entries share one texture and differ only in
@@ -243,17 +259,20 @@ in-process, and shuts the player down. Result lines carry the `[unityipc-test]` 
   result is the static mesh it replaces to within float noise (largest measured deviation across
   the validation models: 3.8e-6 units). Models whose bones live in a separate skeleton file are
   still drawn static, and say so.
-- Idle animation playback: the model's default idle sequence loops on the rig above. The
-  sequence is the one the OpenGL viewport itself would select -- the first whose AnimId is
-  "Stand", not sequence 0 -- and its bone tracks are evaluated the way the legacy evaluator
-  does, including the global sequences that run on their own clock. One animation, no selector
-  and no UI; `-wmvNoAnim` returns the model to the rest pose.
+- Animation playback that follows the app: the viewport plays the animation WMV is playing,
+  switching with the dropdown. Bone tracks are evaluated the way the legacy evaluator does,
+  including the global sequences that run on their own clock. With nothing selected yet the
+  model's default idle plays -- the first sequence whose AnimId is "Stand", which is the same
+  choice the OpenGL viewport makes and is not sequence 0. A sequence whose keyframes are not in
+  the .m2 falls back to that idle and says so. `-wmvNoAnim` returns the model to the rest pose.
 - Bounds-driven camera framing, so a loaded model is visible immediately.
 
 **Not yet implemented**
 
-- Choosing an animation. One sequence plays, the default idle; there is no selector, no
-  blending between sequences and no animation UI.
+- Animation UI of the renderer's own: the viewport follows WMV's selector and has no controls.
+  Blending between sequences, and following a queued "next animation" chain, play/pause or
+  playback speed, are not synced -- those change what the canvas shows without a selection
+  happening.
 - Keyframes stored outside the .m2: the .anim files named by the AFID chunk, and bones from a
   separate skeleton file (the SKID chunk and the SKPD parent it can defer to). A model that
   needs either is drawn from what it does have -- unskinned, or skinned but still -- and says

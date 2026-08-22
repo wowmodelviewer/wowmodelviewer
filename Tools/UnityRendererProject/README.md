@@ -237,15 +237,28 @@ drawn as a static mesh and the log says exactly that — as it does for any othe
 refuses. Reading the header's bone array anyway would be worse than not skinning: the vertices are
 not indexed against it.
 
-## The idle animation
+## The animation
 
-One animation plays: the model's default idle. There is no sequence selector, no blending and no
-UI — this is the smallest thing that makes a creature look alive, built on the skeleton above.
+The viewport plays whatever animation WMV is playing. It has no controls of its own: the app
+pushes its selection over IPC (`modelAnimation`, carrying the sequence index), and the renderer
+follows. With nothing selected yet — a model still loading, or a run with the pane opened before
+any choice — it plays the model's default idle.
 
 **Which sequence is "the idle" is not sequence 0.** The legacy viewport picks the FIRST sequence
 whose `AnimId` is 0 ("Stand") and falls back to sequence 0 only when the model has none
 (`AnimControl::UpdateModel`). The difference is not academic: on `creature/chicken2` sequence 0 is
 a run cycle and the idle is sequence 2; on `creature/valkier` it is sequence 11.
+
+**The selection travels as a sequence index, not an animID.** The index is what the keyframes are
+stored under and what the app's own dropdown carries (its labels end in `[n]`). An animID is not
+unique: on `creature/chicken2`, sequences 0 and 8 both carry animID 5 as sub-animations 0 and 1,
+and its `Death` entry is animID 1 sub-animation 2. The id rides along for the log and for spotting
+the idle.
+
+**Switching costs a re-parse.** Only one sequence's keyframes are held at a time, so the player
+keeps the model's `.m2` bytes and parses them again when the selection changes. A creature .m2 is a
+few hundred KB and the parse is single-digit milliseconds; holding every sequence's keys instead
+would mean parsing a hundred animations to play one.
 
 **How a track is stored.** A bone carries three tracks — translation, rotation, scale — and each is
 an array of *per-sequence* keyframe arrays. The keys for sequence *n* are entry *n* of both the
@@ -261,6 +274,17 @@ interpolates — and *slerps* for rotations, which is what the legacy evaluator 
 `Hermite` and `Bezier` store two extra tangents per key that this milestone does not read; their
 values are interpolated linearly and the count is logged. No bone track in any validation model
 uses either.
+
+**Not every sequence can be played from the .m2, and the FLAG is what says so.** Bit `0x20` on a
+sequence means its keyframes are stored in this file. Without it they are in a separate `.anim`
+file — and this is the part that bites: the track headers of such a sequence are still here, and
+their offsets still land inside this buffer often enough that bounds-checking them proves nothing.
+They address the other file, so what comes back is noise. `creature/chicken2`'s sequence 14 is
+exactly that and is not even named by an AFID entry, so no amount of looking for the keys finds
+the difference; sequence 20 is the same but AFID does name its file, which only makes for a better
+message. A sequence the renderer cannot play falls back to the model's idle and logs which of the
+two it was. Reading such a track is also caught one level down, so a header that slips through
+produces a still bone rather than a failed load.
 
 **Global sequences are not optional.** A track can be bound to one instead of the animation, and
 then it loops over that sequence's own duration on a clock that ignores what is playing — a
@@ -338,7 +362,7 @@ to (or why it was not).
 | `Wow/WowCoordinateConverter.cs` | The single WoW -> Unity axis/winding/UV conversion. |
 | `Assets/Resources/WmvOpaque.shader` | The renderer's own textured shader, kept under `Resources/` so a player build cannot strip it. One variant, everything uniform-driven: `_SrcBlend`/`_DstBlend`/`_ZWrite`/`_Cull`/`_Cutoff` as real properties, plus `_CombinerMode`, `_Unit1UV`, `_AlphaMode`/`_AlphaScale` and `_OpaqueAlpha` for the second texture unit and the M2 combiners. |
 | `Wow/ByteCursor.cs` | Bounds-checked little-endian reader shared by the parsers. |
-| `WmvM2Animator.cs` | Plays the model's default idle by writing bone transforms each frame: sequence selection, track evaluation, global sequences and looping. No Animator Controller, no clips, nothing written to disk. |
+| `WmvM2Animator.cs` | Plays one animation by writing bone transforms each frame: track evaluation, global sequences and looping. Re-bound whenever the app's selection changes. No Animator Controller, no clips, nothing written to disk. |
 | `WmvOrbitCamera.cs` | Orbit / pan / zoom controls plus bounds-driven framing of a loaded model. |
 
 The parsing layer under `Assets/Scripts/Wow/` deliberately has no `UnityEngine` dependency, so

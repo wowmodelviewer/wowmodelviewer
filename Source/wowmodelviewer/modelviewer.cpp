@@ -1,6 +1,7 @@
 #include "modelviewer.h"
 
 #include "AnimationExportChoiceDialog.h"
+#include "AnimManager.h"
 
 #include <wx/aboutdlg.h>
 #include <wx/busyinfo.h>
@@ -1594,6 +1595,9 @@ void ModelViewer::SendCurrentModelToUnity()
   WoWModel * m = const_cast<WoWModel *>(canvas->model());
   GameFile * gf = m->gamefile;
   unityRendererHost->ipc()->sendLoadWoWModel(gf->fullname(), gf->fileDataId() > 0 ? gf->fileDataId() : 0);
+  // ... and which animation it is showing, so the player starts on the app's selection instead of
+  // picking its own idle and being corrected a moment later.
+  SendCurrentAnimationToUnity();
 }
 
 // The displayed skin changed (dropdown, or the default picked on model load). The Unity viewport
@@ -1608,6 +1612,30 @@ void ModelViewer::SendCurrentSkinToUnity()
     return;
   WoWModel * m = const_cast<WoWModel *>(canvas->model());
   unityRendererHost->ipc()->sendModelSkin((int)m->gamefile->fileDataId());
+}
+
+// The animation on display changed (the dropdown, or the default picked on model load). Same
+// reasoning as the skin: the Unity viewport draws the same model from the same data, so it has to
+// play what the canvas is playing rather than the idle it would choose for itself.
+//
+// The animation manager is asked what is PLAYING rather than the control being asked what is
+// selected, so a default chosen during model load and a dropdown choice both report the same way.
+void ModelViewer::SendCurrentAnimationToUnity()
+{
+  if (!unityRendererHost || !unityRendererHost->ipc() || !unityRendererHost->ipc()->isConnected())
+    return;
+  if (!canvas || !canvas->model() || !canvas->model()->gamefile)
+    return;
+  WoWModel * m = const_cast<WoWModel *>(canvas->model());
+  if (!m->animManager || m->anims.empty())
+    return;
+
+  const int index = (int)m->animManager->GetAnim();
+  if (index < 0 || index >= (int)m->anims.size())
+    return;
+  unityRendererHost->ipc()->sendModelAnimation((int)m->gamefile->fileDataId(), index,
+                                               m->anims[index].animID, (int)m->anims[index].length,
+                                               true);
 }
 
 // Menu button press events

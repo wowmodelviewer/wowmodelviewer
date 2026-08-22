@@ -63,10 +63,15 @@ namespace Wmv.Wow
         public uint Length;       // milliseconds
         public uint Flags;
 
-        /// <summary>Bit 0x20. The legacy viewport calls it "looped"; in current data it marks the
-        /// sequences whose keyframes are stored in the .m2 rather than in a separate .anim file.
-        /// Nothing here relies on it -- whether the keys are really present is decided by looking
-        /// for them, not by trusting a flag.</summary>
+        /// <summary>
+        /// Bit 0x20: this sequence's keyframes are stored in the .m2 itself rather than in a
+        /// separate .anim file. The legacy viewport's header calls the bit "looped", which is a
+        /// misnomer -- and taking it at that word is expensive, because the track headers of a
+        /// sequence WITHOUT the bit still sit in the .m2 and still look reasonable: their offsets
+        /// address the .anim file, land inside this buffer by coincidence, and read as noise.
+        /// chicken2's sequence 14 is exactly that, and it is not even named by an AFID entry, so
+        /// no amount of looking for the keys distinguishes it. The flag does.
+        /// </summary>
         public bool PrimarySequence { get { return (Flags & 0x20) != 0; } }
     }
 

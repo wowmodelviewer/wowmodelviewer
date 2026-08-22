@@ -36,6 +36,23 @@ public class WmvMain : MonoBehaviour
     WmvOrbitCamera orbit;
 
     WmvRuntimeModel current;          // the model on screen (disposed when replaced)
+
+    /// <summary>
+    /// The .m2 bytes of the model on screen. Kept because only ONE animation's keyframes are
+    /// parsed at a time -- a track on disk is an array of per-sequence arrays -- so following the
+    /// app to a different animation means parsing these again with a different sequence in mind.
+    /// A creature .m2 is a few hundred KB; re-fetching it over IPC for every dropdown change
+    /// would cost a round-trip to save that.
+    /// </summary>
+    byte[] currentM2Bytes;
+
+    /// <summary>
+    /// The sequence the app says it is showing, or -1 when it has not said. Remembered because the
+    /// push can arrive before the model finishes loading -- it is sent right after loadWoWModel --
+    /// and then it decides which animation the model is built playing, rather than the model
+    /// starting on its own idle and being corrected a frame later.
+    /// </summary>
+    int selectedSequence = -1;
     LoadJob job;                      // in-flight load, if any
 
     // Kept after a successful load so the SKIN can change without reloading anything. A creature
@@ -127,6 +144,7 @@ public class WmvMain : MonoBehaviour
         ipc.OnAssetResponse = HandleAssetResponse;
         ipc.OnModelTextures = HandleModelTextures;
         ipc.OnModelSkin = HandleModelSkin;
+        ipc.OnModelAnimation = HandleModelAnimation;
     }
 
     // ---------------------------------------------------------------- load pipeline
@@ -139,6 +157,12 @@ public class WmvMain : MonoBehaviour
             status.Set("loadWoWModel without path or fileDataID -- ignored");
             return;
         }
+
+        // A sequence index means nothing across models -- entry 14 is a different animation in
+        // each -- so forget the previous one. The app pushes its selection for the NEW model right
+        // after this message, so the value is refilled before the .m2 arrives to be parsed.
+        selectedSequence = -1;
+        currentM2Bytes = null;
 
         job = new LoadJob { Path = path, FileDataID = fileDataID };
         status.Set("Requested " + (string.IsNullOrEmpty(path) ? ("fileDataID " + fileDataID) : path));
@@ -182,7 +206,7 @@ public class WmvMain : MonoBehaviour
         {
             long t0 = job.Clock.ElapsedMilliseconds;
             job.M2Bytes = r.data;
-            job.Model = M2Parser.Parse(r.data);
+            job.Model = M2Parser.Parse(r.data, selectedSequence);
             job.ParseMs += job.Clock.ElapsedMilliseconds - t0;
             if (job.FileDataID <= 0) job.FileDataID = r.fileDataID;
         }
@@ -319,6 +343,7 @@ public class WmvMain : MonoBehaviour
             // Keep what a later skin change needs: the parsed model (to map a texture type onto
             // slots) and the decoded textures (so untouched slots are not re-fetched).
             currentModel = job.Model;
+            currentM2Bytes = job.M2Bytes;
             currentName = string.IsNullOrEmpty(job.Model.Name) ? "WoWModel" : job.Model.Name;
             currentFileDataID = job.FileDataID;
             currentTextures.Clear();
@@ -344,6 +369,66 @@ public class WmvMain : MonoBehaviour
         }
         catch (WowParseException e) { Fail("mesh creation failed: " + e.Message); }
         finally { job = null; }
+    }
+
+    /// <summary>
+    /// WMV's displayed animation changed. The renderer draws the same model from the same data, so
+    /// it plays what the app plays rather than the idle it would pick for itself.
+    ///
+    /// Only one sequence's keyframes are held at a time, so this re-parses the .m2 kept from the
+    /// load with the new sequence in mind and re-binds the animator to the result. Nothing else
+    /// moves: the mesh, its materials, its textures and its geoset selection are all untouched by
+    /// which animation is playing.
+    /// </summary>
+    void HandleModelAnimation(WmvIpcClient.AnimationSelection a)
+    {
+        if (a.fileDataID != 0 && currentFileDataID != 0 && a.fileDataID != currentFileDataID)
+            return;                                     // about a different model
+        if (a.sequenceIndex < 0)
+            return;
+
+        bool changed = a.sequenceIndex != selectedSequence;
+        selectedSequence = a.sequenceIndex;
+
+        if (current == null || currentM2Bytes == null)
+        {
+            // Still loading. The parse below will use this selection when it gets there.
+            status.Set("Animation " + a.sequenceIndex + " selected (model still loading)");
+            return;
+        }
+        if (!changed && current.Animator != null)
+        {
+            status.Set("Animation unchanged");
+            return;
+        }
+
+        try
+        {
+            M2ParsedModel reparsed = M2Parser.Parse(currentM2Bytes, a.sequenceIndex);
+            if (WmvModelBuilder.ApplySequence(current, reparsed, s => Debug.Log("WMV: " + s)))
+            {
+                currentModel = reparsed;
+                // Report what is PLAYING, not what was asked for: a sequence whose keyframes are
+                // not in the .m2 falls back to the idle, and saying "animation 20" while the idle
+                // plays is the kind of log that costs an hour later.
+                int playing = reparsed.AnimatedSequence;
+                status.Set(string.Format("Animation {0} (animID {1}, {2} ms){3}",
+                                         playing, reparsed.Sequences[playing].AnimId,
+                                         reparsed.Sequences[playing].Length,
+                                         playing == a.sequenceIndex
+                                             ? "" : " -- fell back from " + a.sequenceIndex));
+                if (playing != a.sequenceIndex && reparsed.AnimationSkipReason != null)
+                    Debug.Log("WMV: anim: " + reparsed.AnimationSkipReason);
+            }
+            else
+            {
+                status.Set("Animation " + a.sequenceIndex + " could not be played");
+            }
+        }
+        catch (WowParseException e)
+        {
+            status.Set("Animation change failed: " + e.Message);
+        }
     }
 
     /// <summary>

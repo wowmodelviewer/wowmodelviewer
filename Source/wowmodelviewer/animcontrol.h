@@ -174,6 +174,19 @@ public:
   int skinCount();
   wxString skinName(int index);
 
+
+  // THE funnel for animation selection. Everything that changes which animation plays goes
+  // through here -- the default picked on model load, the dropdown, and the loop control -- so
+  // the embedded Unity viewport can be told from one place, exactly as SetSkin does for skins.
+  // index is a position in the model's animation table (WoWModel::anims), which is what the
+  // dropdown's "[n]" suffix carries and what the animation manager takes.
+  void SelectAnimation(int index, int loops);
+
+  // Entries in the animation selector and one entry's label -- diagnostics only, mirroring
+  // skinCount/skinName so the -unityipctest run can walk animations the same way.
+  int animationCount();
+  wxString animationName(int index);
+
   // Every creature display id this model's skins were built from, paired with the selector entry
   // it resolves to (-1 when it resolves to none). Matched exactly the way SetSkinByDisplayID
   // matches, so it reports what that call would actually do. Diagnostics only.
