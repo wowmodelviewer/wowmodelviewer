@@ -14,7 +14,7 @@
 //   model itself lives in the MD21 chunk and *every offset inside it is relative to the start
 //   of that chunk's payload*, not to the start of the file. Sibling chunks carry the
 //   FileDataIDs of related assets: SFID (skin profiles), TXID (textures), SKID/AFID/BFID/PFID
-//   (skeleton/animations/bones/physics -- not used in this milestone).
+//   (additional file-reference chunks -- not used in this milestone).
 //
 // The MD20 header layout below matches the one WMV's own loader uses (Source/games/wow/
 // modelheaders.h): count/offset pairs, with nViews being a lone uint32 because view (LOD) data
