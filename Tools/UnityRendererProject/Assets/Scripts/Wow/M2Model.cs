@@ -19,6 +19,57 @@ namespace Wmv.Wow
         public override string ToString() { return string.Format("({0:F3}, {1:F3}, {2:F3})", X, Y, Z); }
     }
 
+    /// <summary>A quaternion in the file's own component order: x, y, z, then w.</summary>
+    public struct WowQuat
+    {
+        public float X, Y, Z, W;
+        public WowQuat(float x, float y, float z, float w) { X = x; Y = y; Z = z; W = w; }
+        public static WowQuat Identity { get { return new WowQuat(0f, 0f, 0f, 1f); } }
+    }
+
+    /// <summary>How a track's values are read between keyframes.</summary>
+    public enum M2Interpolation { None = 0, Linear = 1, Hermite = 2, Bezier = 3 }
+
+    /// <summary>
+    /// One animation track, already narrowed to the single sequence the renderer will play.
+    ///
+    /// On disk a track is an array of per-sequence keyframe arrays; carrying all of them would
+    /// mean parsing every animation a model has (hundreds, on a boss) to play one. This holds the
+    /// keys for the sequence that was asked for -- or, when the track is driven by a GLOBAL
+    /// SEQUENCE, the keys at index 0, because that is the entry the legacy evaluator reads for
+    /// those regardless of which sequence is playing.
+    /// </summary>
+    public struct M2Track<T>
+    {
+        public M2Interpolation Interpolation;
+
+        /// <summary>Index into the model's GlobalSequences, or -1 for an ordinary track. A global
+        /// sequence runs on its own clock, looping over its own duration, independently of the
+        /// animation being played.</summary>
+        public int GlobalSequence;
+
+        public uint[] Times;     // milliseconds, ascending
+        public T[] Values;
+
+        public bool HasData { get { return Values != null && Values.Length > 0; } }
+        public bool IsGlobal { get { return GlobalSequence >= 0; } }
+    }
+
+    /// <summary>One entry of the animation sequence table (64 bytes on disk).</summary>
+    public struct M2Sequence
+    {
+        public short AnimId;      // AnimationData.db2 id -- 0 is "Stand"
+        public short SubAnimId;
+        public uint Length;       // milliseconds
+        public uint Flags;
+
+        /// <summary>Bit 0x20. The legacy viewport calls it "looped"; in current data it marks the
+        /// sequences whose keyframes are stored in the .m2 rather than in a separate .anim file.
+        /// Nothing here relies on it -- whether the keys are really present is decided by looking
+        /// for them, not by trusting a flag.</summary>
+        public bool PrimarySequence { get { return (Flags & 0x20) != 0; } }
+    }
+
     /// <summary>One M2 vertex (48 bytes on disk).</summary>
     public struct M2Vertex
     {
@@ -49,6 +100,19 @@ namespace Wmv.Wow
         public short Parent;         // -1 for a root bone
         public ushort SubmeshId;
         public WowVec3 Pivot;        // model space, the point this bone rotates about
+
+        /// <summary>The three tracks that move this bone, narrowed to the sequence that was
+        /// parsed. Empty tracks are the common case: most bones hold still in any one animation,
+        /// and a bone with no track at all keeps its rest transform.</summary>
+        public M2Track<WowVec3> Translation;
+        public M2Track<WowQuat> Rotation;
+        public M2Track<WowVec3> Scale;
+
+        /// <summary>Does anything move this bone in the parsed sequence?</summary>
+        public bool IsAnimated
+        {
+            get { return Translation.HasData || Rotation.HasData || Scale.HasData; }
+        }
 
         /// <summary>Bit 0x08. A billboarded bone is re-oriented towards the viewer every frame by
         /// the legacy viewport; at rest it is an ordinary bone, which is all this milestone
@@ -168,6 +232,26 @@ namespace Wmv.Wow
         /// <summary>Number of bones the header declares. Equal to Bones.Length whenever the bones
         /// are in the .m2 itself.</summary>
         public int BoneCount;
+
+        /// <summary>The model's animation sequence table.</summary>
+        public M2Sequence[] Sequences = new M2Sequence[0];
+
+        /// <summary>
+        /// Durations, in milliseconds, of the model's global sequences. A track bound to one loops
+        /// over that duration on a clock of its own, independent of the animation being played --
+        /// which is how a torch flickers at its own rate whatever the creature is doing.
+        /// </summary>
+        public uint[] GlobalSequences = new uint[0];
+
+        /// <summary>
+        /// Which sequence the bone tracks above were parsed for, or -1 when none was. This is the
+        /// idle the legacy viewport itself would select: the first sequence whose AnimId is 0
+        /// ("Stand"), falling back to sequence 0 when the model has no such entry.
+        /// </summary>
+        public int AnimatedSequence = -1;
+
+        /// <summary>Why no sequence was parsed, for the log. Null when one was.</summary>
+        public string AnimationSkipReason;
 
         /// <summary>
         /// The SKID chunk: the FileDataID of a separate skeleton (.skel) file. Non-zero means the

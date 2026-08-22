@@ -50,6 +50,40 @@ namespace Wmv.Wow
         }
 
         /// <summary>
+        /// Convert a WoW rotation.
+        ///
+        /// A rotation is NOT converted like a position, and this is the one place in the renderer
+        /// where that matters. The axis map above has determinant -1: it mirrors. Conjugating a
+        /// rotation by a mirror gives a rotation about the mapped axis but turning the OTHER WAY,
+        /// so the axis is remapped and the angle negated. In quaternion terms, with the vector
+        /// part v = sin(a/2) * axis,
+        ///
+        ///     unity = (w, -M*v)  where  M*v = (-v.y, v.z, v.x)
+        ///           = (w,  v.y, -v.z, -v.x)
+        ///
+        /// Getting this wrong does not look subtly off; it looks like the model turning inside
+        /// out, which is why WowParserTests checks it against the matrix route.
+        /// </summary>
+        public static void ConvertRotation(WowQuat wow, out float x, out float y, out float z, out float w)
+        {
+            x = wow.Y;
+            y = -wow.Z;
+            z = -wow.X;
+            w = wow.W;
+        }
+
+        /// <summary>
+        /// Convert a WoW per-axis scale. A scale is diagonal, so the axis map permutes its
+        /// components and the sign flip cancels with itself -- magnitudes only, never negated.
+        /// </summary>
+        public static void ConvertScale(WowVec3 wow, out float x, out float y, out float z)
+        {
+            x = wow.Y;
+            y = wow.Z;
+            z = wow.X;
+        }
+
+        /// <summary>
         /// WoW texture coordinates have V running down from the top; Unity's run up from the
         /// bottom, so V is flipped once, here.
         /// </summary>

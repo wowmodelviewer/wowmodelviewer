@@ -33,14 +33,29 @@ namespace Wmv.Wow
         const int MaterialStride = 4;
 
         // One M2 bone on disk: keyBoneId(4) flags(4) parent(2) submeshId(2) boneNameCRC(4),
-        // three animation tracks of 20 bytes each, then the pivot (12). 88 bytes in total, and
-        // the pivot -- the only part a bind pose needs -- sits at the end of it.
+        // three animation tracks of 20 bytes each, then the pivot (12). 88 bytes in total.
         const int BoneStride = 88;
+        const int OfsBoneTranslation = 16;
+        const int OfsBoneRotation = 36;
+        const int OfsBoneScale = 56;
         const int OfsBonePivot = 76;
+
+        // A bone track's header is interpolation(2) globalSeq(2) then two nested M2Arrays -- the
+        // timestamps and the values, each an array with ONE ENTRY PER ANIMATION SEQUENCE. It is
+        // the same 20 bytes as TrackStride, declared below for the colour and weight tracks.
+        const int SequenceStride = 64;      // one entry of the animation sequence table
+        const int PackedQuatStride = 8;     // a rotation key: four int16
+        const int Vec3Stride = 12;          // a translation or scale key
+
+        /// <summary>The AnimId the legacy viewport looks for when picking a model's default
+        /// animation ("Stand"). See ResolveIdleSequence.</summary>
+        const int AnimIdStand = 0;
 
         // MD20 header offsets (relative to the MD21 payload)
         const int OfsName = 0x08;
         const int OfsGlobalFlags = 0x10;
+        const int OfsGlobalSequences = 0x14;
+        const int OfsSequences = 0x1C;
         const int OfsBones = 0x2C;
         const int OfsVertices = 0x3C;
         const int OfsNumSkinProfiles = 0x44;
@@ -102,6 +117,21 @@ namespace Wmv.Wow
             c.Seek(OfsGlobalFlags);
             model.GlobalFlags = c.ReadUInt32();
 
+            c.Seek(OfsGlobalSequences);
+            M2Array globalSeqs = c.ReadArray();
+            c.RequireArray(globalSeqs, 4, "global sequences");
+            model.GlobalSequences = new uint[globalSeqs.Count];
+            for (int i = 0; i < globalSeqs.Count; i++)
+            {
+                c.Seek(globalSeqs.Offset + i * 4);
+                model.GlobalSequences[i] = c.ReadUInt32();
+            }
+
+            c.Seek(OfsSequences);
+            M2Array sequences = c.ReadArray();
+            c.RequireArray(sequences, SequenceStride, "sequences");
+            model.Sequences = ReadSequences(c, sequences);
+
             c.Seek(OfsBones);
             M2Array bones = c.ReadArray();
             model.BoneCount = bones.Count;
@@ -111,7 +141,13 @@ namespace Wmv.Wow
             if (model.SkeletonFileDataID == 0)
             {
                 c.RequireArray(bones, BoneStride, "bones");
-                model.Bones = ReadBones(c, bones);
+                model.AnimatedSequence = ResolveIdleSequence(model, file, chunks,
+                                                             out model.AnimationSkipReason);
+                model.Bones = ReadBones(c, bones, model);
+            }
+            else
+            {
+                model.AnimationSkipReason = "its bones and animations live in a separate skeleton file";
             }
 
             c.Seek(OfsNumSkinProfiles);
@@ -357,19 +393,31 @@ namespace Wmv.Wow
         /// than left to blow up downstream -- the legacy viewport sanitises the same field for the
         /// same reason, since a bad parent otherwise recurses off the end of its bone vector.
         /// </summary>
-        static M2BoneDef[] ReadBones(ByteCursor c, M2Array arr)
+        static M2BoneDef[] ReadBones(ByteCursor c, M2Array arr, M2ParsedModel model)
         {
+            int seq = model.AnimatedSequence;
             var bones = new M2BoneDef[arr.Count];
             for (int i = 0; i < arr.Count; i++)
             {
-                c.Seek(arr.Offset + i * BoneStride);
+                int bone = arr.Offset + i * BoneStride;
+                c.Seek(bone);
                 bones[i].KeyBoneId = c.ReadInt32();
                 bones[i].Flags = c.ReadUInt32();
                 short parent = c.ReadInt16();
                 bones[i].Parent = (parent >= 0 && parent < arr.Count && parent != i) ? parent : (short)-1;
                 bones[i].SubmeshId = c.ReadUInt16();
-                c.Seek(arr.Offset + i * BoneStride + OfsBonePivot);
+                c.Seek(bone + OfsBonePivot);
                 bones[i].Pivot = new WowVec3(c.ReadSingle(), c.ReadSingle(), c.ReadSingle());
+
+                if (seq >= 0)
+                {
+                    bones[i].Translation = ReadTrack<WowVec3>(c, bone + OfsBoneTranslation, seq,
+                                                              Vec3Stride, ReadVec3);
+                    bones[i].Rotation = ReadTrack<WowQuat>(c, bone + OfsBoneRotation, seq,
+                                                           PackedQuatStride, ReadPackedQuat);
+                    bones[i].Scale = ReadTrack<WowVec3>(c, bone + OfsBoneScale, seq,
+                                                        Vec3Stride, ReadVec3);
+                }
             }
 
             // A parent chain that loops is a forest no more, and a renderer asked to parent one
@@ -384,6 +432,196 @@ namespace Wmv.Wow
                     bones[i].Parent = -1;
             }
             return bones;
+        }
+
+        delegate T ReadValue<T>(ByteCursor c);
+
+        static WowVec3 ReadVec3(ByteCursor c)
+        {
+            return new WowVec3(c.ReadSingle(), c.ReadSingle(), c.ReadSingle());
+        }
+
+        /// <summary>
+        /// A rotation as the file stores it: four int16 in x, y, z, w order, each mapping the
+        /// 16-bit range onto [-1, 1]. The halves are offset by one either side of zero, which is
+        /// how the legacy viewport unpacks them too (Quat16ToQuat32).
+        /// </summary>
+        static WowQuat ReadPackedQuat(ByteCursor c)
+        {
+            float x = UnpackQuatComponent(c.ReadInt16());
+            float y = UnpackQuatComponent(c.ReadInt16());
+            float z = UnpackQuatComponent(c.ReadInt16());
+            float w = UnpackQuatComponent(c.ReadInt16());
+            return new WowQuat(x, y, z, w);
+        }
+
+        static float UnpackQuatComponent(short v)
+        {
+            return (v < 0 ? v + 32768 : v - 32767) / 32767f;
+        }
+
+        /// <summary>
+        /// Read one animation track, narrowed to a single sequence.
+        ///
+        /// The header is interpolation(2), globalSequence(2), then two M2Arrays: timestamps and
+        /// values. Each of those is an array of ARRAYS -- one per animation sequence -- so the
+        /// keys for sequence n are found by taking entry n of both. A track bound to a global
+        /// sequence is read at entry 0 instead, whatever is playing, which is what the legacy
+        /// evaluator does with it (Animated::getValue forces the index to 0 for those).
+        ///
+        /// Anything malformed produces an empty track rather than an exception: a bone that will
+        /// not move is a far better outcome than a model that will not load, and the caller
+        /// already treats an empty track as "hold the rest pose".
+        /// </summary>
+        static M2Track<T> ReadTrack<T>(ByteCursor c, int offset, int sequence, int valueStride,
+                                       ReadValue<T> readValue)
+        {
+            M2Track<T> track = new M2Track<T>();
+            track.Times = EmptyTimes;
+            track.Values = new T[0];
+
+            c.Seek(offset);
+            track.Interpolation = (M2Interpolation)c.ReadInt16();
+            track.GlobalSequence = c.ReadInt16();
+            M2Array times = c.ReadArray();
+            M2Array values = c.ReadArray();
+
+            // A global-sequence track keeps its keys at entry 0, whichever animation is playing.
+            int entry = track.IsGlobal ? 0 : sequence;
+            if (entry >= times.Count || entry >= values.Count)
+                return track;
+
+            // Each entry is itself an M2Array: count then offset.
+            const int NestedStride = 8;
+            if (!Fits(c, times.Offset, times.Count, NestedStride) ||
+                !Fits(c, values.Offset, values.Count, NestedStride))
+                return track;
+
+            c.Seek(times.Offset + entry * NestedStride);
+            M2Array keyTimes = c.ReadArray();
+            c.Seek(values.Offset + entry * NestedStride);
+            M2Array keyValues = c.ReadArray();
+
+            int n = keyTimes.Count < keyValues.Count ? keyTimes.Count : keyValues.Count;
+            if (n <= 0 || !Fits(c, keyTimes.Offset, n, 4) || !Fits(c, keyValues.Offset, n, valueStride))
+                return track;
+
+            // Hermite and Bezier store three values per key (the value and two tangents); this
+            // milestone reads the value and interpolates it linearly, which is what those degrade
+            // to without their tangents. No bone track in the validation data uses either.
+            int stride = (track.Interpolation == M2Interpolation.Hermite ||
+                          track.Interpolation == M2Interpolation.Bezier) ? valueStride * 3 : valueStride;
+            if (!Fits(c, keyValues.Offset, n, stride))
+                return track;
+
+            var t = new uint[n];
+            var v = new T[n];
+            for (int i = 0; i < n; i++)
+            {
+                c.Seek(keyTimes.Offset + i * 4);
+                t[i] = c.ReadUInt32();
+                c.Seek(keyValues.Offset + i * stride);
+                v[i] = readValue(c);
+            }
+            track.Times = t;
+            track.Values = v;
+            return track;
+        }
+
+        static readonly uint[] EmptyTimes = new uint[0];
+
+        /// <summary>Does an array of count*stride bytes at offset lie inside the payload?</summary>
+        static bool Fits(ByteCursor c, int offset, int count, int stride)
+        {
+            if (offset < 0 || count < 0 || stride <= 0)
+                return false;
+            long end = (long)offset + (long)count * stride;
+            return end <= c.Length;
+        }
+
+        static M2Sequence[] ReadSequences(ByteCursor c, M2Array arr)
+        {
+            var seqs = new M2Sequence[arr.Count];
+            for (int i = 0; i < arr.Count; i++)
+            {
+                c.Seek(arr.Offset + i * SequenceStride);
+                seqs[i].AnimId = c.ReadInt16();
+                seqs[i].SubAnimId = c.ReadInt16();
+                seqs[i].Length = c.ReadUInt32();
+                c.ReadSingle();                     // moveSpeed
+                seqs[i].Flags = c.ReadUInt32();
+            }
+            return seqs;
+        }
+
+        /// <summary>
+        /// Which sequence to parse bone tracks for: the model's default idle.
+        ///
+        /// This is the legacy viewport's own rule (AnimControl::UpdateModel): the FIRST sequence
+        /// whose AnimId is "Stand", falling back to sequence 0 when the model has none. It is not
+        /// the same as "sequence 0" -- on chicken2 that is a run cycle and the idle is sequence 2.
+        ///
+        /// A sequence whose keyframes live in a separate .anim file, named by an AFID entry for
+        /// its (AnimId, SubAnimId), is refused: the offsets inside its track headers address that
+        /// file, not this one, and following them here would read whatever happens to sit at those
+        /// bytes of the model. Fetching .anim files is a later milestone.
+        /// </summary>
+        static int ResolveIdleSequence(M2ParsedModel model, byte[] file,
+                                       Dictionary<string, M2Array> chunks, out string skipReason)
+        {
+            skipReason = null;
+            if (model.Sequences.Length == 0)
+            {
+                skipReason = "it declares no animation sequences";
+                return -1;
+            }
+
+            int idle = 0;
+            for (int i = 0; i < model.Sequences.Length; i++)
+            {
+                if (model.Sequences[i].AnimId == AnimIdStand)
+                {
+                    idle = i;
+                    break;
+                }
+            }
+
+            if (model.Sequences[idle].Length == 0)
+            {
+                skipReason = "its idle sequence has zero length";
+                return -1;
+            }
+            if (HasExternalAnimFile(file, chunks, model.Sequences[idle]))
+            {
+                skipReason = "its idle sequence keeps its keyframes in a separate .anim file, " +
+                             "which this milestone does not fetch";
+                return -1;
+            }
+            return idle;
+        }
+
+        /// <summary>Does the AFID chunk name an .anim file for this sequence?</summary>
+        static bool HasExternalAnimFile(byte[] file, Dictionary<string, M2Array> chunks, M2Sequence seq)
+        {
+            M2Array afid;
+            if (!chunks.TryGetValue("AFID", out afid))
+                return false;
+            // Each entry is animId(2) subAnimId(2) fileId(4).
+            for (int i = 0; i + 8 <= afid.Count; i += 8)
+            {
+                int o = afid.Offset + i;
+                if (o + 4 > file.Length)
+                    break;
+                if (ReadUInt16At(file, o) == (ushort)seq.AnimId &&
+                    ReadUInt16At(file, o + 2) == (ushort)seq.SubAnimId)
+                    return true;
+            }
+            return false;
+        }
+
+        static ushort ReadUInt16At(byte[] file, int offset)
+        {
+            return (ushort)(file[offset] | (file[offset + 1] << 8));
         }
 
         static M2TextureDef[] ReadTextures(ByteCursor c, M2Array arr, M2ParsedModel model)

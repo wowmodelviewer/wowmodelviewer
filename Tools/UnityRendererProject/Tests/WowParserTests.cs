@@ -132,11 +132,13 @@ namespace Wmv.Wow.Tests
             return b;
         }
 
-        static byte[] WrapChunked(byte[] md20Payload, int[] sfid, int[] txid, int skid = 0)
+        static byte[] WrapChunked(byte[] md20Payload, int[] sfid, int[] txid, int skid = 0,
+                                  int afidAnimId = -1)
         {
             int total = 8 + md20Payload.Length + (sfid != null ? 8 + sfid.Length * 4 : 0)
                                                + (txid != null ? 8 + txid.Length * 4 : 0)
-                                               + (skid != 0 ? 12 : 0);
+                                               + (skid != 0 ? 12 : 0)
+                                               + (afidAnimId >= 0 ? 16 : 0);
             var b = new byte[total];
             int o = 0;
             PutMagic(b, o, "MD21"); PutU32(b, o + 4, (uint)md20Payload.Length); o += 8;
@@ -156,7 +158,99 @@ namespace Wmv.Wow.Tests
                 PutMagic(b, o, "SKID"); PutU32(b, o + 4, 4); o += 8;
                 PutU32(b, o, (uint)skid); o += 4;
             }
+            if (afidAnimId >= 0)
+            {
+                // One entry: animId(2) subAnimId(2) fileId(4).
+                PutMagic(b, o, "AFID"); PutU32(b, o + 4, 8); o += 8;
+                PutU16(b, o, (ushort)afidAnimId); PutU16(b, o + 2, 0);
+                PutU32(b, o + 4, 999999); o += 8;
+            }
             return b;
+        }
+
+        /// <summary>One int16 of a packed quaternion. 1.0 encodes as -1, 0.0 as 32767.</summary>
+        static void PutQuatComponent(byte[] b, int o, float value)
+        {
+            int v = value >= 0.999f ? -1 : (int)Math.Round(value * 32767f) + 32767;
+            PutU16(b, o, unchecked((ushort)v));
+        }
+
+        /// <summary>
+        /// A model with a real sequence table, two global sequences, and bone tracks: bone 0 holds
+        /// still, bone 1 has an ordinary rotation track on the idle sequence, and bone 2 has a
+        /// translation track bound to global sequence 1.
+        /// </summary>
+        static byte[] BuildAnimatedM2(short[] animIds, bool standTrack, int afidAnimId = -1)
+        {
+            int nSeq = animIds.Length;
+            byte[] b = BuildM2Payload(3, boneCount: 3);
+            int boneOffset = 0x100 + 3 * 48 + 16 + 4 + 2;
+
+            // Which sequence the parser will pick, so the fixture can put its keys there.
+            int idle = 0;
+            for (int i = 0; i < nSeq; i++)
+                if (animIds[i] == 0) { idle = i; break; }
+
+            int baseLen = b.Length;
+            int oGlobals = baseLen;                      // 2 uint32
+            int oSeqs = oGlobals + 8;                    // nSeq * 64
+            int oRotTimeHdr = oSeqs + nSeq * 64;         // nSeq * 8
+            int oRotKeyHdr = oRotTimeHdr + nSeq * 8;     // nSeq * 8
+            int oRotTimes = oRotKeyHdr + nSeq * 8;       // 2 * 4
+            int oRotKeys = oRotTimes + 8;                // 2 * 8
+            int oTransTimeHdr = oRotKeys + 16;           // 1 * 8
+            int oTransKeyHdr = oTransTimeHdr + 8;        // 1 * 8
+            int oTransTimes = oTransKeyHdr + 8;          // 2 * 4
+            int oTransKeys = oTransTimes + 8;            // 2 * 12
+            int total = oTransKeys + 24;
+            Array.Resize(ref b, total);
+
+            PutU32(b, oGlobals, 1000); PutU32(b, oGlobals + 4, 500);
+            PutU32(b, 0x14, 2); PutU32(b, 0x18, (uint)oGlobals);
+
+            for (int i = 0; i < nSeq; i++)
+            {
+                int o = oSeqs + i * 64;
+                PutU16(b, o, unchecked((ushort)animIds[i]));   // animId
+                PutU16(b, o + 2, 0);                            // subAnimId
+                PutU32(b, o + 4, 1000);                         // length
+                PutU32(b, o + 12, 0x20);                        // flags
+            }
+            PutU32(b, 0x1C, (uint)nSeq); PutU32(b, 0x20, (uint)oSeqs);
+
+            // bone 1: rotation, linear, ordinary track with keys on the idle sequence only
+            int rot = boneOffset + 1 * 88 + 36;
+            PutU16(b, rot, 1);                                  // interpolation: linear
+            PutU16(b, rot + 2, 0xFFFF);                         // globalSequence: -1
+            PutU32(b, rot + 4, (uint)nSeq); PutU32(b, rot + 8, (uint)oRotTimeHdr);
+            PutU32(b, rot + 12, (uint)nSeq); PutU32(b, rot + 16, (uint)oRotKeyHdr);
+            if (standTrack)
+            {
+                PutU32(b, oRotTimeHdr + idle * 8, 2);
+                PutU32(b, oRotTimeHdr + idle * 8 + 4, (uint)oRotTimes);
+                PutU32(b, oRotKeyHdr + idle * 8, 2);
+                PutU32(b, oRotKeyHdr + idle * 8 + 4, (uint)oRotKeys);
+            }
+            PutU32(b, oRotTimes, 0); PutU32(b, oRotTimes + 4, 400);
+            for (int k = 0; k < 2; k++)
+            {
+                int o = oRotKeys + k * 8;
+                PutQuatComponent(b, o, 0f); PutQuatComponent(b, o + 2, 0f);
+                PutQuatComponent(b, o + 4, 0f); PutQuatComponent(b, o + 6, 1f);
+            }
+
+            // bone 2: translation bound to global sequence 1, keys at entry 0
+            int tr = boneOffset + 2 * 88 + 16;
+            PutU16(b, tr, 1);
+            PutU16(b, tr + 2, 1);                               // globalSequence 1
+            PutU32(b, tr + 4, 1); PutU32(b, tr + 8, (uint)oTransTimeHdr);
+            PutU32(b, tr + 12, 1); PutU32(b, tr + 16, (uint)oTransKeyHdr);
+            PutU32(b, oTransTimeHdr, 2); PutU32(b, oTransTimeHdr + 4, (uint)oTransTimes);
+            PutU32(b, oTransKeyHdr, 2); PutU32(b, oTransKeyHdr + 4, (uint)oTransKeys);
+            PutU32(b, oTransTimes, 0); PutU32(b, oTransTimes + 4, 250);
+            PutF32(b, oTransKeys + 12, 1f);                     // second key moves 1 unit on X
+
+            return WrapChunked(b, null, null, 0, afidAnimId);
         }
 
         /// <summary>Skin with `vertexCount` lookup entries and one submesh covering `triangles`.</summary>
@@ -248,6 +342,8 @@ namespace Wmv.Wow.Tests
             VisibilityTests();
             log.Add("Bones");
             BoneTests();
+            log.Add("Animation");
+            AnimationTests();
 
             log.Add(failures == 0 ? "ALL TESTS PASSED" : (failures + " TEST(S) FAILED"));
             if (output != null)
@@ -300,6 +396,148 @@ namespace Wmv.Wow.Tests
             var badChunk = WrapChunked(BuildM2Payload(1), null, null);
             PutU32(badChunk, 4, (uint)(badChunk.Length * 4));
             Throws<WowParseException>(() => M2Parser.Parse(badChunk), "M2: oversized chunk rejected");
+        }
+
+        /// <summary>
+        /// The rotation conversion, verified the long way round.
+        ///
+        /// A quaternion formula that mixes up a sign is not something you can eyeball, so this
+        /// builds the rotation matrix in WoW space, conjugates it by the axis map (R_unity =
+        /// M * R_wow * M^-1, the definition of "the same rotation seen in the other basis"), and
+        /// checks the converted quaternion produces that same matrix. If ConvertRotation ever
+        /// drifts, this fails with an actual number rather than a model that looks wrong.
+        /// </summary>
+        static void RotationConversionTests()
+        {
+            // A handful of rotations about assorted axes, none of them axis-aligned by accident.
+            float[][] axes =
+            {
+                new[] { 0f, 0f, 1f }, new[] { 1f, 0f, 0f }, new[] { 0f, 1f, 0f },
+                new[] { 0.267f, 0.535f, 0.802f }, new[] { -0.577f, 0.577f, -0.577f },
+            };
+            float[] angles = { 0.3f, 1.1f, -0.7f, 2.4f };
+            int checkedCases = 0;
+            float worst = 0f;
+
+            foreach (float[] axis in axes)
+            {
+                foreach (float angle in angles)
+                {
+                    float s = (float)Math.Sin(angle / 2), cw = (float)Math.Cos(angle / 2);
+                    var q = new WowQuat(axis[0] * s, axis[1] * s, axis[2] * s, cw);
+
+                    float[,] rWow = MatrixFromQuat(q.X, q.Y, q.Z, q.W);
+                    float[,] expected = Conjugate(rWow);
+
+                    float ux, uy, uz, uw;
+                    WowCoordinateConverter.ConvertRotation(q, out ux, out uy, out uz, out uw);
+                    float[,] actual = MatrixFromQuat(ux, uy, uz, uw);
+
+                    for (int r = 0; r < 3; r++)
+                        for (int cc = 0; cc < 3; cc++)
+                            worst = Math.Max(worst, Math.Abs(expected[r, cc] - actual[r, cc]));
+                    checkedCases++;
+                }
+            }
+            Check(worst < 1e-4f, "coords: rotation conversion matches the matrix route (worst " +
+                                 worst.ToString("E2") + " over " + checkedCases + " cases)");
+
+            // A unit quaternion must stay one: the map is a permutation with signs, nothing more.
+            float qx, qy, qz, qw;
+            WowCoordinateConverter.ConvertRotation(new WowQuat(0.5f, 0.5f, 0.5f, 0.5f),
+                                                   out qx, out qy, out qz, out qw);
+            Near((float)Math.Sqrt(qx * qx + qy * qy + qz * qz + qw * qw), 1f,
+                 "coords: rotation stays unit length");
+
+            // Identity in, identity out -- the rest pose depends on it.
+            WowCoordinateConverter.ConvertRotation(WowQuat.Identity, out qx, out qy, out qz, out qw);
+            Check(Math.Abs(qx) < 1e-6f && Math.Abs(qy) < 1e-6f && Math.Abs(qz) < 1e-6f &&
+                  Math.Abs(qw - 1f) < 1e-6f, "coords: identity rotation is unchanged");
+
+            // Scale permutes with the axes and is never negated.
+            float sx, sy, sz;
+            WowCoordinateConverter.ConvertScale(new WowVec3(2f, 3f, 4f), out sx, out sy, out sz);
+            Check(sx == 3f && sy == 4f && sz == 2f, "coords: scale follows the axis permutation");
+        }
+
+        /// <summary>Rotation matrix from a quaternion, columns in x/y/z order.</summary>
+        static float[,] MatrixFromQuat(float x, float y, float z, float w)
+        {
+            return new float[3, 3]
+            {
+                { 1 - 2 * (y * y + z * z), 2 * (x * y - z * w),     2 * (x * z + y * w) },
+                { 2 * (x * y + z * w),     1 - 2 * (x * x + z * z), 2 * (y * z - x * w) },
+                { 2 * (x * z - y * w),     2 * (y * z + x * w),     1 - 2 * (x * x + y * y) },
+            };
+        }
+
+        /// <summary>M * m * M^-1 for the WoW->Unity axis map (x,y,z) -> (-y, z, x).</summary>
+        static float[,] Conjugate(float[,] m)
+        {
+            // M as a matrix, and its inverse (which is its transpose: it is orthogonal).
+            float[,] M = { { 0, -1, 0 }, { 0, 0, 1 }, { 1, 0, 0 } };
+            float[,] Mt = { { 0, 0, 1 }, { -1, 0, 0 }, { 0, 1, 0 } };
+            return Multiply(Multiply(M, m), Mt);
+        }
+
+        static float[,] Multiply(float[,] a, float[,] b)
+        {
+            var r = new float[3, 3];
+            for (int i = 0; i < 3; i++)
+                for (int j = 0; j < 3; j++)
+                    for (int k = 0; k < 3; k++)
+                        r[i, j] += a[i, k] * b[k, j];
+            return r;
+        }
+
+        static void AnimationTests()
+        {
+            RotationConversionTests();
+
+            // Sequence table and the idle rule: the FIRST sequence whose animId is 0, not
+            // sequence 0. The fixture puts "Stand" third on purpose.
+            byte[] file = BuildAnimatedM2(new[] { (short)5, (short)4, (short)0, (short)1 },
+                                          standTrack: true);
+            M2ParsedModel m = M2Parser.Parse(file);
+            Check(m.Sequences.Length == 4, "anim: sequence table read");
+            Check(m.Sequences[0].AnimId == 5 && m.Sequences[0].Length == 1000, "anim: sequence fields read");
+            Check(m.AnimatedSequence == 2, "anim: idle is the first Stand sequence, not sequence 0");
+            Check(m.AnimationSkipReason == null, "anim: nothing skipped");
+            Check(m.GlobalSequences.Length == 2 && m.GlobalSequences[1] == 500,
+                  "anim: global sequences read");
+
+            // The track for that sequence, and only that sequence.
+            M2Track<WowQuat> rot = m.Bones[1].Rotation;
+            Check(rot.HasData, "anim: bone rotation track read for the idle");
+            Check(rot.Times.Length == 2 && rot.Times[1] == 400, "anim: keyframe times read");
+            Check(rot.Interpolation == M2Interpolation.Linear, "anim: interpolation type read");
+            Check(!rot.IsGlobal, "anim: ordinary track is not global");
+            Check(Math.Abs(rot.Values[0].W - 1f) < 1e-3f, "anim: packed quaternion unpacked");
+            Check(m.Bones[1].IsAnimated && !m.Bones[0].IsAnimated,
+                  "anim: only the bone with keys is animated");
+
+            // A track bound to a global sequence reads entry 0 whatever is playing.
+            M2Track<WowVec3> glob = m.Bones[2].Translation;
+            Check(glob.IsGlobal && glob.GlobalSequence == 1, "anim: global sequence id read");
+            Check(glob.HasData && glob.Times.Length == 2, "anim: global track reads entry 0");
+
+            // No Stand sequence -> fall back to sequence 0.
+            M2ParsedModel noStand = M2Parser.Parse(BuildAnimatedM2(new[] { (short)5, (short)4 },
+                                                                   standTrack: false));
+            Check(noStand.AnimatedSequence == 0, "anim: no Stand sequence falls back to sequence 0");
+
+            // A model with no sequences at all is not animated, and says why.
+            M2ParsedModel none = M2Parser.Parse(BuildM2Payload(3, boneCount: 2));
+            Check(none.AnimatedSequence == -1 && none.AnimationSkipReason != null,
+                  "anim: a model with no sequences reports why it is not animated");
+
+            // An idle whose keyframes live in a separate .anim file is refused rather than read
+            // out of the wrong buffer.
+            byte[] external = BuildAnimatedM2(new[] { (short)5, (short)0 }, standTrack: true, afidAnimId: 0);
+            M2ParsedModel ext = M2Parser.Parse(external);
+            Check(ext.AnimatedSequence == -1, "anim: an idle with an AFID entry is skipped");
+            Check(ext.AnimationSkipReason != null && ext.AnimationSkipReason.Contains(".anim"),
+                  "anim: the skip reason names the .anim file");
         }
 
         static void BoneTests()

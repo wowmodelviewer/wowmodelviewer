@@ -104,14 +104,23 @@ public static class WmvModelBuilder
     ///                    A/B for "did the skinned path change what I see?".
     ///   -wmvSkinCheck    after building a skinned model, bake the skinned result and report the
     ///                    largest distance between a baked vertex and the position the file gave
-    ///                    it. At rest that distance is the whole claim of this milestone, so it
-    ///                    is worth being able to measure rather than assert.
+    ///                    it. At rest that distance is the whole claim of the skinning milestone,
+    ///                    so it is worth being able to measure rather than assert. Only meaningful
+    ///                    together with -wmvNoAnim: a moving model is not in its rest pose.
+    ///   -wmvNoAnim       do not play anything. The model is still skinned, and still sits in the
+    ///                    rest pose the bind poses describe, which is what the milestone before
+    ///                    this one shipped.
+    ///   -wmvAnimCheck    sample the idle across its length and report how far the skinned mesh
+    ///                    moves away from its rest pose at each step, next to the model's own
+    ///                    size. Zero everywhere means nothing is animating; a number far larger
+    ///                    than the model means the rig is being applied wrongly. Both are
+    ///                    invisible in a still frame and obvious in this line.
     /// </summary>
     public static class Debug_
     {
         static bool parsed;
         static bool flipV, forceOpaque, forceSolid, matColors, showHidden, ownShader;
-        static bool noSkin, skinCheck;
+        static bool noSkin, skinCheck, noAnim, animCheck;
 
         static void Parse()
         {
@@ -132,13 +141,16 @@ public static class WmvModelBuilder
                 else if (a == "-wmvOwnShader") ownShader = true;
                 else if (a == "-wmvNoSkin") noSkin = true;
                 else if (a == "-wmvSkinCheck") skinCheck = true;
+                else if (a == "-wmvNoAnim") noAnim = true;
+                else if (a == "-wmvAnimCheck") animCheck = true;
             }
             if (flipV || forceOpaque || forceSolid || matColors || showHidden || ownShader ||
-                noSkin || skinCheck)
+                noSkin || skinCheck || noAnim || animCheck)
                 Debug.Log("WMV debug switches: flipV=" + flipV + " forceOpaque=" + forceOpaque +
                           " forceSolid=" + forceSolid + " matColors=" + matColors +
                           " showHidden=" + showHidden + " ownShader=" + ownShader +
-                          " noSkin=" + noSkin + " skinCheck=" + skinCheck);
+                          " noSkin=" + noSkin + " skinCheck=" + skinCheck + " noAnim=" + noAnim +
+                          " animCheck=" + animCheck);
         }
 
         public static bool FlipV { get { Parse(); return flipV; } }
@@ -149,6 +161,8 @@ public static class WmvModelBuilder
         public static bool OwnShader { get { Parse(); return ownShader; } }
         public static bool NoSkin { get { Parse(); return noSkin; } }
         public static bool SkinCheck { get { Parse(); return skinCheck; } }
+        public static bool NoAnim { get { Parse(); return noAnim; } }
+        public static bool AnimCheck { get { Parse(); return animCheck; } }
     }
 
     static readonly Color[] DebugColors =
@@ -255,7 +269,8 @@ public static class WmvModelBuilder
     /// and setting the rotation and scale from their tracks, reproduces the expression above term
     /// for term -- the pivot translations telescope through the parent chain.
     /// </summary>
-    static Transform[] BuildSkeleton(M2ParsedModel model, Transform root, out Transform rootBone)
+    static Transform[] BuildSkeleton(M2ParsedModel model, Transform root, out Transform rootBone,
+                                     out Vector3[] restLocalPositions)
     {
         int nb = model.Bones.Length;
         var pivots = new Vector3[nb];
@@ -281,10 +296,12 @@ public static class WmvModelBuilder
             if (parent < 0 && rootBone == null)
                 rootBone = bones[i];
         }
+        restLocalPositions = new Vector3[nb];
         for (int i = 0; i < nb; i++)
         {
             int parent = model.Bones[i].Parent;
-            bones[i].localPosition = parent >= 0 ? pivots[i] - pivots[parent] : pivots[i];
+            restLocalPositions[i] = parent >= 0 ? pivots[i] - pivots[parent] : pivots[i];
+            bones[i].localPosition = restLocalPositions[i];
             bones[i].localRotation = Quaternion.identity;
             bones[i].localScale = Vector3.one;
         }
@@ -566,7 +583,8 @@ public static class WmvModelBuilder
         if (skinPlan.CanSkin)
         {
             Transform rootBone;
-            boneTransforms = BuildSkeleton(model, go.transform, out rootBone);
+            Vector3[] restLocalPositions;
+            boneTransforms = BuildSkeleton(model, go.transform, out rootBone, out restLocalPositions);
 
             int dropped, unweighted;
             mesh.boneWeights = BuildBoneWeights(model, boneTransforms.Length, out dropped, out unweighted);
@@ -604,6 +622,41 @@ public static class WmvModelBuilder
 
             if (Debug_.SkinCheck)
                 ReportSkinDeviation(smr, positions, log);
+
+            // ---- animation ------------------------------------------------------------
+            // The bind poses above are read from the rest pose, so they must be taken BEFORE
+            // anything moves a bone. Adding the animator last keeps that ordering obvious.
+            if (Debug_.NoAnim)
+            {
+                if (log != null)
+                    log("anim: not playing -- -wmvNoAnim was passed");
+            }
+            else if (model.AnimatedSequence >= 0 && model.AnimatedSequence < model.Sequences.Length)
+            {
+                var animator = go.AddComponent<WmvM2Animator>();
+                animator.Setup(model, boneTransforms, restLocalPositions, log);
+                if (animator.AnimatedBoneCount == 0)
+                {
+                    // Nothing in the idle actually moves; the component would burn a LateUpdate
+                    // per frame to write nothing.
+                    UnityEngine.Object.Destroy(animator);
+                    if (log != null)
+                        log("anim: the idle sequence moves no bones -- staying in the rest pose");
+                }
+                else
+                {
+                    // A skinned renderer culls against localBounds, which was measured from the
+                    // rest pose. An animation moves vertices outside it, so let Unity measure the
+                    // real bounds each frame instead of clipping the model as it moves.
+                    smr.updateWhenOffscreen = true;
+                    if (Debug_.AnimCheck)
+                        ReportAnimationRange(smr, animator, positions, mesh.bounds, log);
+                }
+            }
+            else if (log != null)
+            {
+                log("anim: not playing -- " + (model.AnimationSkipReason ?? "no idle sequence was resolved"));
+            }
         }
         else
         {
@@ -670,6 +723,62 @@ public static class WmvModelBuilder
         finally
         {
             UnityEngine.Object.Destroy(baked);
+        }
+    }
+
+    /// <summary>
+    /// Sample the idle across its length and report how far the skinned mesh leaves its rest pose.
+    ///
+    /// This is the animation counterpart of ReportSkinDeviation, and it exists for the same
+    /// reason: the two ways this can be wrong -- nothing moves, or everything flies apart -- both
+    /// look like a perfectly ordinary still frame in a log. Displacements are printed next to the
+    /// model's own diagonal, because "0.4 units" means nothing until you know the chicken is 0.7
+    /// units across.
+    /// </summary>
+    static void ReportAnimationRange(SkinnedMeshRenderer smr, WmvM2Animator animator,
+                                     Vector3[] rest, Bounds bounds, Action<string> log)
+    {
+        if (log == null || smr == null || animator == null)
+            return;
+        const int Samples = 8;
+        var baked = new Mesh();
+        try
+        {
+            float worst = 0f, mean = 0f;
+            var perSample = new float[Samples];
+            for (int s = 0; s < Samples; s++)
+            {
+                animator.ApplyPose(animator.LengthMs * s / Samples);
+                smr.BakeMesh(baked, true);
+                Vector3[] now = baked.vertices;
+                float sampleWorst = 0f;
+                double sum = 0.0;
+                int n = Mathf.Min(now.Length, rest.Length);
+                for (int i = 0; i < n; i++)
+                {
+                    float dx = now[i].x - rest[i].x, dy = now[i].y - rest[i].y, dz = now[i].z - rest[i].z;
+                    float dist = Mathf.Sqrt(dx * dx + dy * dy + dz * dz);
+                    if (dist > sampleWorst) sampleWorst = dist;
+                    sum += dist;
+                }
+                perSample[s] = sampleWorst;
+                if (sampleWorst > worst) worst = sampleWorst;
+                mean += n > 0 ? (float)(sum / n) : 0f;
+            }
+            mean /= Samples;
+
+            var sb = new System.Text.StringBuilder();
+            for (int s = 0; s < Samples; s++)
+                sb.Append(s > 0 ? ", " : "").Append(perSample[s].ToString("F3"));
+            log(string.Format("anim check: over {0} samples of the {1} ms idle, vertices move at " +
+                              "most {2:F3} and on average {3:F3} units; the model is {4:F3} units " +
+                              "across. Per sample: {5}",
+                              Samples, animator.LengthMs, worst, mean, bounds.size.magnitude, sb));
+        }
+        finally
+        {
+            UnityEngine.Object.Destroy(baked);
+            animator.RestorePose();
         }
     }
 
