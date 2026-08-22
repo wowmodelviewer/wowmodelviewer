@@ -166,6 +166,11 @@ public:
   // run walks the list to prove every selection reaches the embedded renderer).
   int skinCount();
   wxString skinName(int index);
+
+  // Every creature display id this model's skins were built from, paired with the selector entry
+  // it resolves to (-1 when it resolves to none). Matched exactly the way SetSkinByDisplayID
+  // matches, so it reports what that call would actually do. Diagnostics only.
+  void displayIdSkinIndices(std::vector<std::pair<int, int> > & out);
   int AddSkin(TextureGroup grp);
   void SetSkin(int num);
   void ActivateBLPSkinList();

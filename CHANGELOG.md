@@ -5,6 +5,24 @@ Format loosely based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+### Fixed
+- **Creature display lookup read the wrong columns on retail.** `AnimControl::UpdateCreatureModel`
+  builds one of three queries depending on the client generation, but read the display id and the
+  particle colour at fixed positions that only match the two OLDER layouts. The modern query
+  selects a fourth texture variation the others do not, so on current retail the display id was
+  actually `ParticleColorID` and the particle colour was actually
+  `TextureVariationFileDataID4` -- both off by one. Consequences, all measured against retail
+  12.1: the display-id -> skin map collapsed to a single entry keyed 0 for 97.8% of creature
+  displays, so NPC and Armory import (`SetSkinByDisplayID`) could never find the skin a display
+  names and silently left the model on whatever was already selected; per-display geoset data was
+  fetched with a particle-colour id, so 16% of creature displays never received the geosets that
+  define them (and 48 rows received another display's); and creature particle-colour replacement
+  never ran at all, because the id it needed was never read. The column positions are now derived
+  beside the query that defines them, so the three layouts cannot drift apart again.
+  Two visible consequences worth expecting: `creature/chicken2/chicken2.m2` now maps all 41 of its
+  displays instead of 1, and creatures whose displays differ only by geoset now offer those
+  variants in the skin dropdown -- 433 of 2965 creature models gain entries, 2526 are unchanged.
+
 ### Added
 - **Embedded Unity renderer: it now shows the skin you picked.** A creature normally has several
   skins -- `chicken2` offers seven -- and the renderer was resolving whichever one the database
