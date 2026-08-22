@@ -277,6 +277,50 @@ void UnityIpcServer::queueJson(const QJsonObject & obj)
 #endif
 }
 
+QJsonArray UnityIpcServer::textureArray(const std::vector<UnityAssetAccess::ModelTexture> & textures)
+{
+  QJsonArray arr;
+  for (const UnityAssetAccess::ModelTexture & t : textures)
+  {
+    QJsonObject o;
+    o["index"] = t.index;
+    o["type"] = t.type;
+    o["fileDataID"] = t.fileDataID;
+    o["source"] = UnityAssetAccess::sourceName(t.source);
+    arr.append(o);
+  }
+  return arr;
+}
+
+void UnityIpcServer::sendModelSkin(int m2FileDataID)
+{
+  if (!m_client || !m_unityReady || m2FileDataID <= 0)
+    return;
+
+  std::vector<UnityAssetAccess::ModelTexture> textures;
+  QString error;
+  if (!UnityAssetAccess::resolveModelTextures(m2FileDataID, textures, error))
+  {
+    // Not an error worth shouting about: a model with no resolvable skin simply has nothing to
+    // follow, and the player keeps what it already has.
+    LOG_INFO << "[unityipc] modelSkin for" << m2FileDataID << "not sent:" << error;
+    return;
+  }
+
+  QJsonObject msg;
+  msg["type"] = "modelSkin";
+  msg["ok"] = true;              // same shape as a modelTextures reply, so one reader handles both
+  msg["fileDataID"] = m2FileDataID;
+  msg["textures"] = textureArray(textures);
+  m_stats.skinPushes++;
+  m_stats.lastSkin = QString("%1 (%2)").arg(textures[0].fileDataID)
+                                       .arg(UnityAssetAccess::sourceName(textures[0].source));
+  LOG_INFO << "[unityipc] -> modelSkin fileDataID=" << m2FileDataID << "textures=" << (int)textures.size()
+           << "source=" << UnityAssetAccess::sourceName(textures[0].source)
+           << "first=" << textures[0].fileDataID;
+  queueJson(msg);
+}
+
 void UnityIpcServer::sendLoadWoWModel(const QString & path, int fileDataID, const QString & client)
 {
   QJsonObject msg;
@@ -356,18 +400,11 @@ void UnityIpcServer::handleGetModelTextures(const QJsonObject & msg)
   resp["fileDataID"] = fdid;
   if (ok)
   {
-    QJsonArray arr;
-    for (const UnityAssetAccess::ModelTexture & t : textures)
-    {
-      QJsonObject o;
-      o["index"] = t.index;
-      o["fileDataID"] = t.fileDataID;
-      o["source"] = t.fromDatabase ? "database" : "convention";
-      arr.append(o);
-    }
-    resp["textures"] = arr;
+    resp["textures"] = textureArray(textures);
     m_stats.responsesOk++;
-    LOG_INFO << "[unityipc] -> modelTextures" << requestId << "resolved" << (int)textures.size() << "texture(s)";
+    LOG_INFO << "[unityipc] -> modelTextures" << requestId << "resolved" << (int)textures.size()
+             << "texture(s) from" << UnityAssetAccess::sourceName(textures.empty()
+                  ? UnityAssetAccess::ModelTexture::Database : textures[0].source);
   }
   else
   {

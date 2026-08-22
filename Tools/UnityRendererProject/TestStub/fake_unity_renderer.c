@@ -253,6 +253,16 @@ static void handle_line(const char * line)
       status("Model textures: %s", err);
     }
   }
+  else if (strcmp(type, "modelSkin") == 0)
+  {
+    /* Pushed, not asked for: the skin on display in WMV changed. The real player re-uploads the
+     * textures and keeps its mesh; the stub only has to prove the message arrives and carries the
+     * selection, which is what the -unityipctest run checks. */
+    long long fdid = 0;
+    json_get_int(line, "fileDataID", &fdid);
+    logf("recv: modelSkin for %lld -> %.400s", fdid, line);
+    status("Skin changed");
+  }
   else if (strcmp(type, "assetResponse") == 0)
   {
     int ok = 0;

@@ -38,6 +38,24 @@ public class WmvMain : MonoBehaviour
     WmvRuntimeModel current;          // the model on screen (disposed when replaced)
     LoadJob job;                      // in-flight load, if any
 
+    // Kept after a successful load so the SKIN can change without reloading anything. A creature
+    // normally has several skins -- chicken2 has seven -- and WMV lets the user pick among them;
+    // when they do, only the textures behind the existing materials need re-uploading.
+    M2ParsedModel currentModel;
+    string currentName = "WoWModel";
+    int currentFileDataID;
+    readonly Dictionary<int, BlpImage> currentTextures = new Dictionary<int, BlpImage>();
+    readonly Dictionary<int, int> currentTextureIds = new Dictionary<int, int>();   // slot -> FileDataID
+    SkinJob skinJob;                  // in-flight skin change, if any
+
+    /// <summary>Textures still on their way for a skin change. Requests are keyed to the M2
+    /// texture slot they will land in.</summary>
+    class SkinJob
+    {
+        public readonly Dictionary<string, int> Pending = new Dictionary<string, int>();
+        public int Applied;
+    }
+
     /// <summary>State for one in-flight model load.</summary>
     class LoadJob
     {
@@ -100,6 +118,7 @@ public class WmvMain : MonoBehaviour
         ipc.OnLoadWoWModel = HandleLoadWoWModel;
         ipc.OnAssetResponse = HandleAssetResponse;
         ipc.OnModelTextures = HandleModelTextures;
+        ipc.OnModelSkin = HandleModelSkin;
     }
 
     // ---------------------------------------------------------------- load pipeline
@@ -122,6 +141,13 @@ public class WmvMain : MonoBehaviour
 
     void HandleAssetResponse(WmvIpcClient.AssetResponse r)
     {
+        // A skin change is answered by the same assetResponse messages as a load, so claim ours
+        // before the load path sees them.
+        if (skinJob != null && skinJob.Pending.ContainsKey(r.requestId))
+        {
+            OnSkinTextureBytes(r);
+            return;
+        }
         if (job == null)
             return;
 
@@ -188,7 +214,11 @@ public class WmvMain : MonoBehaviour
         for (int i = 0; i < job.Model.Textures.Length; i++)
         {
             var t = job.Model.Textures[i];
-            if (t.FileDataID > 0) direct.Add(new KeyValuePair<int, int>(i, t.FileDataID));
+            if (t.FileDataID > 0)
+            {
+                direct.Add(new KeyValuePair<int, int>(i, t.FileDataID));
+                currentTextureIds[i] = t.FileDataID;   // the M2 named this one itself
+            }
             else if (t.IsReplaceable) needsHost = true;
         }
 
@@ -219,9 +249,14 @@ public class WmvMain : MonoBehaviour
         foreach (var t in r.textures)
         {
             if (t.fileDataID <= 0) continue;
-            job.TexturesExpected++;
-            job.PendingTextures[ipc.RequestAssetByFileDataID(t.fileDataID)] = t.index;
-            Debug.Log("WMV: texture slot " + t.index + " -> fileDataID " + t.fileDataID + " (" + t.source + ")");
+            foreach (int slot in SlotsForTexture(job.Model, t))
+            {
+                job.TexturesExpected++;
+                job.PendingTextures[ipc.RequestAssetByFileDataID(t.fileDataID)] = slot;
+                currentTextureIds[slot] = t.fileDataID;
+                Debug.Log("WMV: texture slot " + slot + " (type " + t.type + ") -> fileDataID " +
+                          t.fileDataID + " (" + t.source + ")");
+            }
         }
         if (job.TexturesExpected == 0)
             BuildIfReady();
@@ -271,6 +306,15 @@ public class WmvMain : MonoBehaviour
             current = built;
             if (placeholder != null) placeholder.SetActive(false);
 
+            // Keep what a later skin change needs: the parsed model (to map a texture type onto
+            // slots) and the decoded textures (so untouched slots are not re-fetched).
+            currentModel = job.Model;
+            currentName = string.IsNullOrEmpty(job.Model.Name) ? "WoWModel" : job.Model.Name;
+            currentFileDataID = job.FileDataID;
+            currentTextures.Clear();
+            foreach (var kv in job.Textures) currentTextures[kv.Key] = kv.Value;
+            skinJob = null;
+
             orbit.Frame(built.Bounds);
 
             status.Set("Loaded " + job.Path);
@@ -287,6 +331,111 @@ public class WmvMain : MonoBehaviour
         }
         catch (WowParseException e) { Fail("mesh creation failed: " + e.Message); }
         finally { job = null; }
+    }
+
+    /// <summary>
+    /// WMV's displayed skin changed. Fetch whatever textures that actually changes and re-bind
+    /// them onto the materials already on screen -- the mesh is unaffected by which image its
+    /// materials sample.
+    /// </summary>
+    void HandleModelSkin(WmvIpcClient.ModelTexturesResponse r)
+    {
+        if (current == null || currentModel == null)
+            return;                                     // nothing built yet; the load will pick it up
+        if (r.fileDataID != 0 && currentFileDataID != 0 && r.fileDataID != currentFileDataID)
+            return;                                     // about a different model
+        if (!r.ok || r.textures.Length == 0)
+            return;
+
+        var wanted = new Dictionary<int, int>();         // slot -> FileDataID
+        foreach (var t in r.textures)
+        {
+            if (t.fileDataID <= 0) continue;
+            foreach (int slot in SlotsForTexture(currentModel, t))
+                wanted[slot] = t.fileDataID;
+        }
+
+        var fetch = new List<KeyValuePair<int, int>>();
+        foreach (var kv in wanted)
+        {
+            int have;
+            if (currentTextureIds.TryGetValue(kv.Key, out have) && have == kv.Value &&
+                currentTextures.ContainsKey(kv.Key))
+                continue;                                // this slot already holds that texture
+            fetch.Add(kv);
+        }
+
+        if (fetch.Count == 0)
+        {
+            status.Set("Skin unchanged");
+            return;
+        }
+
+        skinJob = new SkinJob();
+        foreach (var kv in fetch)
+        {
+            skinJob.Pending[ipc.RequestAssetByFileDataID(kv.Value)] = kv.Key;
+            currentTextureIds[kv.Key] = kv.Value;
+            Debug.Log("WMV: skin change -> slot " + kv.Key + " becomes fileDataID " + kv.Value);
+        }
+        status.Set("Skin changed (" + fetch.Count + " texture(s))");
+    }
+
+    void OnSkinTextureBytes(WmvIpcClient.AssetResponse r)
+    {
+        int slot = skinJob.Pending[r.requestId];
+        skinJob.Pending.Remove(r.requestId);
+
+        if (!r.ok)
+        {
+            status.Set("Skin texture request failed: " + r.error);
+        }
+        else
+        {
+            try
+            {
+                currentTextures[slot] = BlpDecoder.Decode(r.data);
+                skinJob.Applied++;
+                Debug.Log("WMV: skin texture slot " + slot + ": " + currentTextures[slot].Width + "x" +
+                          currentTextures[slot].Height + " " + currentTextures[slot].Encoding);
+            }
+            catch (WowParseException e)
+            {
+                status.Set("Skin texture decode failed: " + e.Message);   // keep the old texture
+            }
+        }
+
+        if (skinJob.Pending.Count > 0)
+            return;
+
+        if (skinJob.Applied > 0)
+        {
+            WmvModelBuilder.RebindTextures(current, currentTextures, currentName,
+                                           s => Debug.Log("WMV: " + s));
+            status.Set("Skin applied (" + skinJob.Applied + " texture(s), mesh unchanged)");
+        }
+        skinJob = null;
+    }
+
+    /// <summary>
+    /// Which M2 texture slots a resolved texture feeds. The host names a texture TYPE (11, 12, 13
+    /// for the three creature skin slots) rather than a position, because a model's
+    /// texture-variation order and its M2 texture-slot order need not agree. Falls back to the
+    /// positional index when the host did not say -- an older host, or a texture with no type.
+    /// </summary>
+    static List<int> SlotsForTexture(M2ParsedModel model, WmvIpcClient.ModelTextureRef t)
+    {
+        var slots = new List<int>();
+        if (model != null && t.type > 0)
+        {
+            for (int i = 0; i < model.Textures.Length; i++)
+                if ((int)model.Textures[i].Type == t.type)
+                    slots.Add(i);
+        }
+        if (slots.Count == 0 && t.index >= 0 &&
+            (model == null || t.index < model.Textures.Length))
+            slots.Add(t.index);
+        return slots;
     }
 
     void Fail(string reason)

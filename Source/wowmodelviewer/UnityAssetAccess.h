@@ -50,17 +50,38 @@ public:
   // database. Only WMV can answer that -- it owns the DB -- so the renderer asks for it.
   struct ModelTexture
   {
-    int index = 0;         // slot in the model's texture array / variation index
-    int fileDataID = 0;    // resolved texture FileDataID (fetch it with readByFileDataID)
-    bool fromDatabase = true; // true: CreatureDisplayInfo (authoritative). false: the model is
-                              // not referenced by any creature display any more (legacy asset)
-                              // and this is the conventional sibling skin found in the listfile.
+    // Where the answer came from. Reported to the renderer so a naming guess is never mistaken
+    // for database truth, and so a stale default is never mistaken for what is on screen.
+    enum Source
+    {
+      Selection,   // the skin the viewport is showing right now (the app's own skin selector)
+      Database,    // CreatureDisplayInfo -- authoritative, but only about the DEFAULT skin
+      Convention,  // a listfile naming guess, for models no creature display references
+    };
+
+    int index = 0;       // position among the display's texture variations
+    int type = 0;        // WoW texture TYPE this feeds: TEXTURE_GAMEOBJECT1 (11) is the first
+                         // creature skin, 12 and 13 the second and third. The renderer maps it
+                         // onto the M2 texture slot(s) declaring that type -- which is the only
+                         // correct mapping, since variation order and slot order need not agree.
+    int fileDataID = 0;  // resolved texture FileDataID (fetch it with readByFileDataID)
+    Source source = Database;
   };
 
-  // Resolve the texture(s) of a model that the M2 itself does not name, using the same
-  // CreatureDisplayInfo -> CreatureModelData relation the viewer uses for its own skin list.
-  // Returns the FIRST display's variations (the viewer's own default skin). False with a
-  // reason when there is no client, no database or no matching creature display.
+  // "database" / "selection" / "convention" -- the wire spelling of ModelTexture::Source.
+  static const char * sourceName(ModelTexture::Source source);
+
+  // Resolve the texture(s) of a model that the M2 itself does not name.
+  //
+  // Tries, in order:
+  //   1. the skin the viewport is CURRENTLY showing, from the app's own skin selector. A model
+  //      usually has several skins (chicken2 has seven) and the database can only say which is
+  //      the default, so this is the only source that answers "what is on screen".
+  //   2. CreatureDisplayInfo -> CreatureModelData, the same relation the viewer's skin list is
+  //      built from -- the model's default skin, used before a selection exists.
+  //   3. the conventional sibling skin from the listfile, for legacy models no creature display
+  //      references any more.
+  // False with a reason when none of them can answer.
   static bool resolveModelTextures(int m2FileDataID, std::vector<ModelTexture> & out, QString & error);
 
   // Name of the active client's storage backend ("CASC"/"MPQ"/"Unknown") -- for logging.

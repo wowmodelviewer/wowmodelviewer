@@ -112,14 +112,26 @@ viewport uses). Player side: `Tools/UnityRendererProject/Assets/Scripts/WmvIpcCl
 ```
 
 `getModelTextures` answers with `modelTextures { requestId, ok, fileDataID, textures:[{ index,
-fileDataID, source }] }`. It exists because a modern M2 does **not** name its replaceable
+type, fileDataID, source }] }`. It exists because a modern M2 does **not** name its replaceable
 textures: a creature skin's TXID entry is 0 and its texture array carries no filename, because
 the actual skin comes from the client database.
 
-- **`source: "database"` -- the normal, authoritative route.** WMV resolves the skin from
-  `CreatureDisplayInfo` joined to `CreatureModelData` on the model's FileDataID: the same
-  relation the legacy viewer's own skin list uses. This is the path any current creature takes,
-  and the path the primary validation target `creature/chicken2/chicken2.m2` exercises.
+`type` is the WoW texture **type** the texture feeds -- 11, 12, 13 for the three creature skin
+slots -- not a position. A model's texture-variation order and its M2 texture-slot order need not
+agree, so the renderer matches this against the type each M2 texture declares.
+
+`source` says where the answer came from, in the order WMV tries them:
+
+- **`source: "selection"` -- what the viewport is actually showing.** A creature normally has
+  several skins (`chicken2` offers seven, plus a folder texture), and the database can only say
+  which is the *default*. Which one is on screen is a UI fact, so WMV answers from its own skin
+  selector -- the same `TextureGroup` the OpenGL viewport hands to `WoWModel::updateTextureList`.
+  Without this the two viewports disagree the moment the user touches the dropdown, or whenever
+  "Random Skins" picks something other than the first display.
+- **`source: "database"` -- the model's default skin.** `CreatureDisplayInfo` joined to
+  `CreatureModelData` on the model's FileDataID: the same relation the viewer's own skin list is
+  built from. Used when there is no selection to read -- a model with no skin list, or a request
+  about a model that is not the displayed one.
 - **`source: "convention"` -- a labelled fallback, not a substitute.** A handful of legacy
   assets are still shipped in CASC but referenced by no creature display at all (for example
   `creature/chicken/chicken.m2`, superseded by `chicken2`), so the database has nothing to say
@@ -137,6 +149,8 @@ The response carries metadata only; bytes are still fetched with `getAssetByFile
 { "type": "assetResponse", "requestId": "abc123", "ok": true, "path": "creature/chicken/chicken.m2",
   "fileDataID": 123200, "byteLength": 101840, "sha1": "1dc88a19...", "encoding": "base64", "data": "TUQyMb..." }
 { "type": "assetResponse", "requestId": "abc123", "ok": false, "error": "not found" }
+{ "type": "modelSkin", "ok": true, "fileDataID": 1521037,
+  "textures": [ { "index": 0, "type": 11, "fileDataID": 1521061, "source": "selection" } ] }
 ```
 
 Semantics:
@@ -144,6 +158,17 @@ Semantics:
 - `unityReady` is answered by a `loadWoWModel` for whatever is on the canvas (and every later
   model load pushes a new one). `client` is `"active"` -- the player never chooses a client;
   WMV's active client/profile is the only data source.
+- `modelSkin` is **pushed, not requested**: the skin on display changed. Same payload as a
+  `modelTextures` reply, built by the same resolver, so the push and the pull cannot disagree.
+  The player re-uploads only the textures that actually changed and keeps the mesh it built --
+  a skin change alters which image a material samples, nothing about the geometry. It is sent
+  from `AnimControl::SetSkin`, the single funnel every skin change goes through (the dropdown,
+  the default chosen on model load, and NPC import), plus `SetSingleSkin` for the per-slot
+  folder-texture lists.
+  *Known limitation:* a display variant can also toggle **geosets**
+  (`CreatureDisplayInfoGeosetData`). The Unity viewport swaps textures only, so on a variant that
+  changes geometry the two viewports will still differ in what is drawn -- geosets are not part
+  of this static-M2 milestone.
 - `getAsset` / `getAssetByFileDataID` return the **raw, whole file** exactly as stored in the
   active client (modern `.m2` bytes start with their `MD21` chunk header, etc.). Paths are
   normalised (lower-case, forward slashes). By-FileDataID works for CASC clients; a legacy

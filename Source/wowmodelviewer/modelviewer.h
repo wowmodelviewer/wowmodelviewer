@@ -171,6 +171,7 @@ public:
   // FileDataID of the model on the canvas). No-op when no player is connected. Called after
   // every model load and when the player announces unityReady.
   void SendCurrentModelToUnity();
+  void SendCurrentSkinToUnity();
 
   void OnMount(wxCommandEvent &event);
   void OnSave(wxCommandEvent &event);

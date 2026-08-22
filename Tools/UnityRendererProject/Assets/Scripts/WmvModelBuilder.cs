@@ -12,12 +12,25 @@ using System.Collections.Generic;
 using UnityEngine;
 using Wmv.Wow;
 
+/// <summary>
+/// Which textures one material was built from. Kept so the skin can be changed later without
+/// rebuilding the mesh: the WMV viewport lets the user pick among a creature's skins (chicken2
+/// has seven), and when they do, only these bindings need re-uploading.
+/// </summary>
+public struct WmvMaterialBinding
+{
+    public int BaseSlot;    // M2 texture slot behind the main texture, -1 when untextured
+    public int EnvSlot;     // M2 texture slot bound as the combiner's second unit, -1 when unused
+    public bool DropAlpha;  // was the base texture's alpha discarded on upload? (see CreateTexture)
+}
+
 public class WmvRuntimeModel
 {
     public GameObject Root;
     public Mesh Mesh;
     public Material[] Materials = new Material[0];
     public Texture2D[] Textures = new Texture2D[0];
+    public WmvMaterialBinding[] Bindings = new WmvMaterialBinding[0];
     public Bounds Bounds;
     public int VertexCount, TriangleCount, SubmeshCount;
 
@@ -152,6 +165,7 @@ public static class WmvModelBuilder
 
         // ---- one submesh per batch ----------------------------------------------------
         var materials = new List<Material>();
+        var bindings = new List<WmvMaterialBinding>();
         var textures = new List<Texture2D>();
         // Keyed by slot AND by whether the alpha channel was discarded, because the same slot
         // can feed an opaque batch (alpha thrown away) and a blended one (alpha kept).
@@ -253,6 +267,10 @@ public static class WmvModelBuilder
                                                  : "")));
             }
 
+            bindings.Add(new WmvMaterialBinding
+            {
+                BaseSlot = textureSlot, EnvSlot = envSlot, DropAlpha = dropAlpha,
+            });
             materials.Add(CreateMaterial(mat, mode, tex, envTex,
                                          objectName + "_mat" + materials.Count, log));
         }
@@ -275,12 +293,70 @@ public static class WmvModelBuilder
         result.Root = go;
         result.Mesh = mesh;
         result.Materials = materials.ToArray();
+        result.Bindings = bindings.ToArray();
         result.Textures = textures.ToArray();
         result.Bounds = mesh.bounds;
         result.VertexCount = n;
         result.TriangleCount = totalTriangles;
         result.SubmeshCount = triangleSets.Count;
         return result;
+    }
+
+    /// <summary>
+    /// Re-upload the textures of an already-built model and hand them to the materials it already
+    /// has. The mesh, the GameObject and the materials themselves survive: a skin change in WMV
+    /// swaps which image a material samples, nothing about the geometry.
+    ///
+    /// decodedTextures is the model's CURRENT texture set keyed by M2 slot -- the caller replaces
+    /// the entries the new skin changed and leaves the rest alone, so slots the skin does not
+    /// touch (an environment map named by the M2 itself, say) are simply re-uploaded unchanged.
+    /// </summary>
+    public static void RebindTextures(WmvRuntimeModel runtime, Dictionary<int, BlpImage> decodedTextures,
+                                      string objectName, Action<string> log)
+    {
+        if (runtime == null || runtime.Materials.Length == 0)
+            return;
+        if (runtime.Bindings.Length != runtime.Materials.Length)
+        {
+            if (log != null)
+                log("rebind: this model was built without texture bindings -- nothing to re-bind");
+            return;
+        }
+
+        var fresh = new List<Texture2D>();
+        var cache = new Dictionary<int, Texture2D>();
+
+        for (int i = 0; i < runtime.Materials.Length; i++)
+        {
+            Material m = runtime.Materials[i];
+            if (m == null)
+                continue;
+            WmvMaterialBinding b = runtime.Bindings[i];
+
+            Texture2D tex = GetTexture(decodedTextures, cache, fresh, b.BaseSlot, b.DropAlpha, false, objectName);
+            if (tex != null && !Debug_.MatColors)
+                m.mainTexture = tex;
+
+            Texture2D envTex = GetTexture(decodedTextures, cache, fresh, b.EnvSlot, true, true, objectName);
+            if (m.HasProperty(CombinerModeProperty))
+            {
+                bool on = envTex != null && !Debug_.MatColors;
+                if (on) m.SetTexture(SecondTexProperty, envTex);
+                m.SetFloat(CombinerModeProperty, on ? PixelShaderOpaqueMod2xNaAlpha : 0);
+            }
+
+            if (log != null)
+                log(string.Format("rebind: material '{0}' <- slot {1} (alpha {2}){3}",
+                                  m.name, b.BaseSlot, b.DropAlpha ? "forced to 255" : "kept (combiner mask)",
+                                  b.EnvSlot >= 0 ? ", env slot " + b.EnvSlot : ""));
+        }
+
+        // Only now destroy the old uploads: a material that ended up keeping its texture would
+        // otherwise be left pointing at a destroyed one.
+        foreach (var old in runtime.Textures)
+            if (old != null && !fresh.Contains(old))
+                UnityEngine.Object.Destroy(old);
+        runtime.Textures = fresh.ToArray();
     }
 
     /// <summary>M2 pixel shader 12, "Combiners_Opaque_Mod2xNA_Alpha" -- the one combiner this
