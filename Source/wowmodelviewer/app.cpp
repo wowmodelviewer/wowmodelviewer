@@ -316,12 +316,24 @@ static void doHeadlessUnityIpcTest(ModelViewer * frame)
         QString selError;
         const bool selOk = UnityAssetAccess::resolveModelTextures(fdid, sel, selError);
         const int selFdid = (selOk && !sel.empty()) ? sel[0].fileDataID : 0;
+
+        // Two variants of a creature can differ by GEOMETRY rather than texture, so report the
+        // geoset set alongside the texture -- that is what the renderer has to mirror.
+        std::vector<int> geosets;
+        UnityAssetAccess::selectedModelGeosets(fdid, geosets);
+        QString geoStr;
+        for (size_t gi = 0; gi < geosets.size(); gi++)
+          geoStr += (gi ? "," : "") + QString::number(geosets[gi]);
+        if (geoStr.isEmpty())
+          geoStr = "none";
+
         LOG_INFO << "[unityipc-test]   skin[" << s << "]"
                  << QString::fromWCharArray(ac->skinName(s).c_str()) << "-> fileDataID="
                  << selFdid << "type=" << ((selOk && !sel.empty()) ? sel[0].type : 0)
                  << "source=" << ((selOk && !sel.empty())
                                   ? UnityAssetAccess::sourceName(sel[0].source) : "none")
-                 << "path=" << (selFdid > 0 ? UnityAssetAccess::readByFileDataID(selFdid).path : QString());
+                 << "path=" << (selFdid > 0 ? UnityAssetAccess::readByFileDataID(selFdid).path : QString())
+                 << "geosets=" << geoStr;
         // let the push reach the player before selecting the next one
         for (int i = 0; i < 20; i++) { ipc->poll(); wxTheApp->Yield(true); wxMilliSleep(10); }
       }

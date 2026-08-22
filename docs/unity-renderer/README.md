@@ -150,7 +150,8 @@ The response carries metadata only; bytes are still fetched with `getAssetByFile
   "fileDataID": 123200, "byteLength": 101840, "sha1": "1dc88a19...", "encoding": "base64", "data": "TUQyMb..." }
 { "type": "assetResponse", "requestId": "abc123", "ok": false, "error": "not found" }
 { "type": "modelSkin", "ok": true, "fileDataID": 1521037,
-  "textures": [ { "index": 0, "type": 11, "fileDataID": 1521061, "source": "selection" } ] }
+  "textures": [ { "index": 0, "type": 11, "fileDataID": 1521061, "source": "selection" } ],
+  "geosets": [ 101 ], "hasGeosets": true }
 ```
 
 Semantics:
@@ -165,10 +166,18 @@ Semantics:
   from `AnimControl::SetSkin`, the single funnel every skin change goes through (the dropdown,
   the default chosen on model load, and NPC import), plus `SetSingleSkin` for the per-slot
   folder-texture lists.
-  *Known limitation:* a display variant can also toggle **geosets**
-  (`CreatureDisplayInfoGeosetData`). The Unity viewport swaps textures only, so on a variant that
-  changes geometry the two viewports will still differ in what is drawn -- geosets are not part
-  of this static-M2 milestone.
+- `geosets` / `hasGeosets` ride along with both `modelTextures` and `modelSkin`, because a display
+  variant can differ from another by **geometry** rather than texture. `creature/horse3/horse3.m2`
+  is the worked example: three of its dropdown entries share one texture and differ only in
+  whether geoset 101, 102 or 103 is switched on -- a long mane and tail, or a cropped one.
+  A submesh is drawn when **its geoset number is 0, or the variant switches that number on**,
+  which is the legacy viewport's own rule (`WoWModel::setCreatureGeosetData`: every geoset in
+  `[1, 900)` is shown iff the set names it, and `setLOD` starts them at `display = (id == 0)`).
+  The renderer already knows every submesh's number from the .skin it parsed, so only the SET
+  travels.
+  `hasGeosets` separates two things an empty list cannot: `true` with an empty list means "this
+  variant switches none on" -- which hides every submesh whose number is not 0 -- while `false`
+  means the host had no creature selection to report and geoset visibility must be left alone.
 - `getAsset` / `getAssetByFileDataID` return the **raw, whole file** exactly as stored in the
   active client (modern `.m2` bytes start with their `MD21` chunk header, etc.). Paths are
   normalised (lower-case, forward slashes). By-FileDataID works for CASC clients; a legacy

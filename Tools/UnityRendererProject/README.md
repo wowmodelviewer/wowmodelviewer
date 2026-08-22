@@ -128,6 +128,13 @@ ships an 18-triangle eye overlay pointing at a colour entry whose alpha track is
 eye is painted into the skin texture on the head underneath. Drawing that batch anyway covers the
 painted eye with a flat red patch. `-wmvShowHidden` draws them if you want to see what is hidden.
 
+**And a creature variant can change the geometry, not just the texture.** Each submesh carries a
+geoset number (group * 100 + variant, masked to 15 bits); a submesh numbered 0 is always drawn, and
+any other is drawn only when the displayed variant switches that number on. `creature/horse3/horse3.m2`
+has three dropdown entries sharing one texture that differ only in whether geoset 101, 102 or 103 is
+on -- a long mane and tail, or a cropped one. WMV sends the set; switching between variants swaps
+which submeshes hand the mesh their triangles, so nothing is re-uploaded and no material is rebuilt.
+
 ## Debug switches
 
 Pass these on the player command line to isolate a visual fault without rebuilding:

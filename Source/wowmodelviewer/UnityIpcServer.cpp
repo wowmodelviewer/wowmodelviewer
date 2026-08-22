@@ -292,6 +292,22 @@ QJsonArray UnityIpcServer::textureArray(const std::vector<UnityAssetAccess::Mode
   return arr;
 }
 
+void UnityIpcServer::addGeosets(QJsonObject & msg, int m2FileDataID)
+{
+  std::vector<int> geosets;
+  const bool known = UnityAssetAccess::selectedModelGeosets(m2FileDataID, geosets);
+
+  // "hasGeosets" separates "this display switches none on" (an answer) from "no selection to
+  // report" (not an answer). Without it the renderer could not tell an empty list from silence,
+  // and those mean opposite things: the first hides every non-zero geoset, the second must
+  // change nothing.
+  msg["hasGeosets"] = known;
+  QJsonArray arr;
+  for (size_t i = 0; i < geosets.size(); i++)
+    arr.append(geosets[i]);
+  msg["geosets"] = arr;
+}
+
 void UnityIpcServer::sendModelSkin(int m2FileDataID)
 {
   if (!m_client || !m_unityReady || m2FileDataID <= 0)
@@ -312,6 +328,7 @@ void UnityIpcServer::sendModelSkin(int m2FileDataID)
   msg["ok"] = true;              // same shape as a modelTextures reply, so one reader handles both
   msg["fileDataID"] = m2FileDataID;
   msg["textures"] = textureArray(textures);
+  addGeosets(msg, m2FileDataID);
   m_stats.skinPushes++;
   m_stats.lastSkin = QString("%1 (%2)").arg(textures[0].fileDataID)
                                        .arg(UnityAssetAccess::sourceName(textures[0].source));
@@ -401,6 +418,7 @@ void UnityIpcServer::handleGetModelTextures(const QJsonObject & msg)
   if (ok)
   {
     resp["textures"] = textureArray(textures);
+    addGeosets(resp, fdid);
     m_stats.responsesOk++;
     LOG_INFO << "[unityipc] -> modelTextures" << requestId << "resolved" << (int)textures.size()
              << "texture(s) from" << UnityAssetAccess::sourceName(textures.empty()

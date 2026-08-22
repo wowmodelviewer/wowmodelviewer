@@ -73,7 +73,10 @@ namespace Wmv.Wow
             {
                 c.Seek(submeshes.Offset + i * SubmeshStride);
                 M2Submesh s;
-                s.Id = c.ReadUInt16();
+                // Mask off the high bit: only the low 15 bits are the geoset number, and that
+                // number is what a creature display's geoset set is expressed in. The legacy
+                // viewport masks it the same way, so both renderers compare like with like.
+                s.Id = (ushort)(c.ReadUInt16() & 0x7FFF);
                 s.Level = c.ReadUInt16();
                 s.VertexStart = c.ReadUInt16();
                 s.VertexCount = c.ReadUInt16();

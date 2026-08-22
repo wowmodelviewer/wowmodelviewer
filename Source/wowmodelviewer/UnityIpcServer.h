@@ -27,7 +27,8 @@
  *     { "type":"modelTextures", "requestId":"abc125", "ok":true, "fileDataID":123200,
  *       "textures":[ { "index":0, "type":11, "fileDataID":123199, "source":"selection" } ] }
  *     { "type":"modelSkin", "fileDataID":1521037,
- *       "textures":[ { "index":0, "type":11, "fileDataID":1521061, "source":"selection" } ] }
+ *       "textures":[ { "index":0, "type":11, "fileDataID":1521061, "source":"selection" } ],
+ *       "geosets":[ 101 ], "hasGeosets":true }
  *
  * getModelTextures exists because modern M2s do NOT name their replaceable textures (a
  * creature skin's TXID entry is 0 and the texture array carries no filename) -- the skin comes
@@ -129,6 +130,8 @@ private:
   void handleGetAsset(const QJsonObject & msg, bool byFileDataID);
   void handleGetModelTextures(const QJsonObject & msg);
   static QJsonArray textureArray(const std::vector<UnityAssetAccess::ModelTexture> & textures);
+  // Adds "geosets"/"hasGeosets" to a message about one model, when a selection is known.
+  static void addGeosets(QJsonObject & msg, int m2FileDataID);
   void queueJson(const QJsonObject & obj);
   void dropClient(const char * why);
 

@@ -162,6 +162,13 @@ public:
   // is selected -- e.g. a character model, or a creature with no skins at all.
   bool selectedSkinTextures(std::vector<std::pair<int, int> > & out);
 
+  // The geosets the selected display switches on, as the same numbers the model's submeshes are
+  // identified by (group * 100 + variant). A creature display can differ from another by geometry
+  // rather than texture -- one horse mane instead of another -- and this is what says which.
+  // Empty is meaningful, not "unknown": it means the display switches none on, so only the
+  // submeshes with id 0 are drawn. See WoWModel::setCreatureGeosetData.
+  bool selectedSkinGeosets(std::vector<int> & out);
+
   // Entries in the skin selector, and one entry's label -- diagnostics only (the -unityipctest
   // run walks the list to prove every selection reaches the embedded renderer).
   int skinCount();
