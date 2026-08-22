@@ -178,9 +178,71 @@ has three dropdown entries sharing one texture that differ only in whether geose
 on -- a long mane and tail, or a cropped one. WMV sends the set; switching between variants swaps
 which submeshes hand the mesh their triangles, so nothing is re-uploaded and no material is rebuilt.
 
+## Skinning and the bind pose
+
+A model is drawn through a `SkinnedMeshRenderer` when it carries a rig this renderer can
+reproduce. No animation track is evaluated yet: every bone sits in its rest pose, and the point of
+the milestone is that this is **indistinguishable from the static mesh it replaces**.
+
+That is not a hope, it is a property of the format. The legacy viewport composes a bone as
+
+```
+local = T(pivot) * T(translation) * R(rotation) * S(scale) * T(-pivot)
+world = parent.world * local
+```
+
+(`Bone::calcMatrix`) and skins a vertex as the weighted sum of `world * position` over its four
+influences. With every track at rest that local matrix collapses to the **identity** — so the
+positions stored in the file already *are* the rest pose, and a bind pose only has to reproduce
+the identity. Each Unity bone is therefore placed at its pivot with no rotation and no scale, and
+the bind poses are read back off those same transforms:
+
+```
+bone.localPosition = pivot - parentPivot
+bindposes[i]       = bones[i].worldToLocalMatrix * renderer.localToWorldMatrix
+```
+
+The same arrangement is what animation will need. Unity composes a bone as
+`parent.world * T(localPosition) * R(localRotation) * S(localScale)`, so adding the M2's
+translation track to that rest `localPosition` and setting the rotation and scale from their
+tracks reproduces the expression above term for term — the pivot translations telescope through
+the parent chain. Nothing here will need re-deriving to make the model move.
+
+Four things about the data are worth stating, because getting any of them wrong stays invisible
+until the model deforms:
+
+**The per-vertex bone indices are direct indices into the bone array.** There is no lookup table
+in between. The `.skin` format does carry one, for its own batching purposes, and reading the
+vertex indices through it produces a rig that looks plausible and skins the wrong vertices.
+
+**Weights are `uint8`/255 and are renormalised here.** An influence pointing past the end of the
+bone array is dropped, as the legacy viewport drops it — but the remaining weights are then
+rescaled to sum to one rather than left short, because a vertex whose weights no longer sum to one
+is dragged toward the origin. A vertex left with no influence at all is bound to bone 0 at full
+weight, which at rest is the identity and so leaves it exactly where the file put it. Across the
+validation models neither correction fired: every weight set summed to 255 and every index was in
+range.
+
+**A rig is a forest, not a tree.** A creature routinely has a dozen bones with no parent —
+`creature/valkier` has 27 of 149 — so there is no single root to hang everything from. Parent
+indices are sanitised at parse time: out of range, self-referential, or part of a cycle all become
+roots, because a cycle is both an infinite parent walk and a transform Unity refuses to parent
+inside its own descendants.
+
+**Where the bones live.** Almost always in the `.m2` itself. A model can instead name a separate
+skeleton file through its `SKID` chunk, and that skeleton can defer again to a parent through
+`SKPD`; over a spread of 300 retail creature models, 299 kept their bones in the `.m2` and one
+used an `SKPD` parent. This milestone does not fetch skeleton files, so a model that names one is
+drawn as a static mesh and the log says exactly that — as it does for any other model the plan
+refuses. Reading the header's bone array anyway would be worse than not skinning: the vertices are
+not indexed against it.
+
 ## Debug switches
 
-Pass these on the player command line to isolate a visual fault without rebuilding:
+Pass these on the player command line to isolate a visual fault without rebuilding. They are also
+read from the **`WMV_DEBUG`** environment variable (space-separated, same spellings), which is how
+to reach them in the embedded viewport — WMV builds the player's command line itself, and a child
+process inherits the environment:
 
 | Flag | Effect |
 |---|---|
@@ -190,10 +252,13 @@ Pass these on the player command line to isolate a visual fault without rebuildi
 | `-wmvMatColors` | replace textures with a flat per-material colour — separates a batch/material assignment fault from a texture fault |
 | `-wmvShowHidden` | draw the batches the model hides at rest — shows *what* is hidden, and usually what it was covering |
 | `-wmvOwnShader` | resolve the renderer's own `WmvOpaque` shader ahead of any pipeline shader — the only one that can run an M2 combiner |
+| `-wmvNoSkin` | build every model as a static mesh, as before skinning existed — the A/B for "did the skinned path change what I see?" |
+| `-wmvSkinCheck` | bake the skinned result and report the largest distance between a baked vertex and the position the file gave it. At rest that distance is the milestone's whole claim, so it is measurable rather than asserted |
 
 Each model load also logs its UV sample, per-batch material/blend/texture-slot mapping, the alpha
 treatment per texture, which batches are hidden at rest and why, the resolved combiner and per-unit
-UV routing, the full runtime material state, and the shader that was chosen.
+UV routing, the full runtime material state, the shader that was chosen, and the rig it was skinned
+to (or why it was not).
 
 ## Scripts
 

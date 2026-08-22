@@ -26,8 +26,34 @@ namespace Wmv.Wow
         public WowVec3 Normal;
         public WowVec2 TexCoord0;
         public WowVec2 TexCoord1;
-        public byte BoneWeight0, BoneWeight1, BoneWeight2, BoneWeight3;   // preserved, unused in the static milestone
+        /// <summary>Four influences, weight/255. The indices are DIRECT indices into the
+        /// model's bone array -- not through any lookup table. See M2BoneDef.</summary>
+        public byte BoneWeight0, BoneWeight1, BoneWeight2, BoneWeight3;
         public byte BoneIndex0, BoneIndex1, BoneIndex2, BoneIndex3;
+    }
+
+    /// <summary>
+    /// One M2 bone, reduced to what a bind pose needs: where it sits, and whose child it is.
+    ///
+    /// The animation tracks are deliberately NOT parsed here. The reason is the shape of the
+    /// format: a bone's matrix is built as T(pivot) * T(translation) * R(rotation) * S(scale) *
+    /// T(-pivot) and then composed with its parent's, so with every track left at rest the matrix
+    /// is the IDENTITY -- and the vertex positions in the file are already in that pose. The bind
+    /// pose therefore needs the pivot and the parent, nothing else, and animation is a later
+    /// milestone that fills in the three tracks around the same pivot.
+    /// </summary>
+    public struct M2BoneDef
+    {
+        public int KeyBoneId;        // index into the key-bone lookup, -1 when this is not one
+        public uint Flags;
+        public short Parent;         // -1 for a root bone
+        public ushort SubmeshId;
+        public WowVec3 Pivot;        // model space, the point this bone rotates about
+
+        /// <summary>Bit 0x08. A billboarded bone is re-oriented towards the viewer every frame by
+        /// the legacy viewport; at rest it is an ordinary bone, which is all this milestone
+        /// needs.</summary>
+        public bool Billboard { get { return (Flags & 0x08) != 0; } }
     }
 
     /// <summary>
@@ -132,7 +158,24 @@ namespace Wmv.Wow
         public int SkinProfileCount;
         public int[] SkinFileDataIDs = new int[0];       // SFID chunk
         public int[] TextureFileDataIDs = new int[0];    // TXID chunk (0 where replaceable)
+
+        /// <summary>
+        /// The model's bones. Empty when the model declares none, and ALSO empty when the bones
+        /// live in a separate skeleton file -- see SkeletonFileDataID.
+        /// </summary>
+        public M2BoneDef[] Bones = new M2BoneDef[0];
+
+        /// <summary>Number of bones the header declares. Equal to Bones.Length whenever the bones
+        /// are in the .m2 itself.</summary>
         public int BoneCount;
+
+        /// <summary>
+        /// The SKID chunk: the FileDataID of a separate skeleton (.skel) file. Non-zero means the
+        /// bone array in the header is not the one the renderer must use -- the real one lives in
+        /// that file's SKB1 chunk (or, when it carries an SKPD, in its parent skeleton's). This
+        /// milestone does not fetch it; a model that has one is drawn unskinned and says so.
+        /// </summary>
+        public int SkeletonFileDataID;
 
         /// <summary>Model-space bounds of the vertex positions (WoW axes).</summary>
         public WowVec3 BoundsMin, BoundsMax;

@@ -42,6 +42,16 @@ public class WmvRuntimeModel
     /// and no material is rebuilt.</summary>
     public int[][] SubmeshTriangles = new int[0][];
 
+    /// <summary>
+    /// The bone transforms behind the SkinnedMeshRenderer, in the model's own bone order, or an
+    /// empty array when this model is drawn unskinned. They are children of Root, so Dispose
+    /// takes them with it.
+    /// </summary>
+    public Transform[] Bones = new Transform[0];
+
+    /// <summary>True when the model is drawn through a SkinnedMeshRenderer.</summary>
+    public bool Skinned;
+
     /// <summary>The geoset numbers currently switched on, or null when the host has not said.</summary>
     public HashSet<int> Geosets;
     public Bounds Bounds;
@@ -56,6 +66,7 @@ public class WmvRuntimeModel
         foreach (var t in Textures) if (t != null) UnityEngine.Object.Destroy(t);
         Root = null;
         Mesh = null;
+        Bones = new Transform[0];
         Materials = new Material[0];
         Textures = new Texture2D[0];
     }
@@ -64,9 +75,15 @@ public class WmvRuntimeModel
 public static class WmvModelBuilder
 {
     /// <summary>
-    /// Diagnostic switches, read from the player command line. They exist to isolate a visual
-    /// fault without rebuilding: run the player (or let WMV launch it) with the flag and the
-    /// rendering changes accordingly.
+    /// Diagnostic switches. They exist to isolate a visual fault without rebuilding: pass the
+    /// flag and the rendering changes accordingly.
+    ///
+    /// Each is read from the player's own command line AND from the WMV_DEBUG environment
+    /// variable (space-separated, same spellings). The environment matters because WMV builds the
+    /// player's command line itself when it launches it into the viewport pane -- without it these
+    /// switches would only reach a player started by hand, which is not the case anyone wants to
+    /// diagnose. A child process inherits the environment, so setting WMV_DEBUG for WMV sets it
+    /// for the player.
     ///
     ///   -wmvFlipV        invert the V texture coordinate (isolates a UV-orientation fault)
     ///   -wmvForceOpaque  force every material opaque, ignoring the WoW blend mode
@@ -83,17 +100,29 @@ public static class WmvModelBuilder
     ///   -wmvOwnShader    resolve the renderer's own WmvOpaque shader before any pipeline
     ///                    shader. The pipeline's Lit shaders cannot run the M2 combiner, so this
     ///                    is how to see the second texture unit in a build where they exist.
+    ///   -wmvNoSkin       build every model as a static mesh, as before skinning existed. The
+    ///                    A/B for "did the skinned path change what I see?".
+    ///   -wmvSkinCheck    after building a skinned model, bake the skinned result and report the
+    ///                    largest distance between a baked vertex and the position the file gave
+    ///                    it. At rest that distance is the whole claim of this milestone, so it
+    ///                    is worth being able to measure rather than assert.
     /// </summary>
     public static class Debug_
     {
         static bool parsed;
         static bool flipV, forceOpaque, forceSolid, matColors, showHidden, ownShader;
+        static bool noSkin, skinCheck;
 
         static void Parse()
         {
             if (parsed) return;
             parsed = true;
-            foreach (var a in System.Environment.GetCommandLineArgs())
+            var args = new List<string>(System.Environment.GetCommandLineArgs());
+            string fromEnv = System.Environment.GetEnvironmentVariable("WMV_DEBUG");
+            if (!string.IsNullOrEmpty(fromEnv))
+                args.AddRange(fromEnv.Split(new[] { ' ', '\t', ',', ';' },
+                                            StringSplitOptions.RemoveEmptyEntries));
+            foreach (var a in args)
             {
                 if (a == "-wmvFlipV") flipV = true;
                 else if (a == "-wmvForceOpaque") forceOpaque = true;
@@ -101,11 +130,15 @@ public static class WmvModelBuilder
                 else if (a == "-wmvMatColors") matColors = true;
                 else if (a == "-wmvShowHidden") showHidden = true;
                 else if (a == "-wmvOwnShader") ownShader = true;
+                else if (a == "-wmvNoSkin") noSkin = true;
+                else if (a == "-wmvSkinCheck") skinCheck = true;
             }
-            if (flipV || forceOpaque || forceSolid || matColors || showHidden || ownShader)
+            if (flipV || forceOpaque || forceSolid || matColors || showHidden || ownShader ||
+                noSkin || skinCheck)
                 Debug.Log("WMV debug switches: flipV=" + flipV + " forceOpaque=" + forceOpaque +
                           " forceSolid=" + forceSolid + " matColors=" + matColors +
-                          " showHidden=" + showHidden + " ownShader=" + ownShader);
+                          " showHidden=" + showHidden + " ownShader=" + ownShader +
+                          " noSkin=" + noSkin + " skinCheck=" + skinCheck);
         }
 
         public static bool FlipV { get { Parse(); return flipV; } }
@@ -114,6 +147,8 @@ public static class WmvModelBuilder
         public static bool MatColors { get { Parse(); return matColors; } }
         public static bool ShowHidden { get { Parse(); return showHidden; } }
         public static bool OwnShader { get { Parse(); return ownShader; } }
+        public static bool NoSkin { get { Parse(); return noSkin; } }
+        public static bool SkinCheck { get { Parse(); return skinCheck; } }
     }
 
     static readonly Color[] DebugColors =
@@ -140,6 +175,177 @@ public static class WmvModelBuilder
         if (geosets == null || submeshId == 0)
             return true;
         return geosets.Contains(submeshId);
+    }
+
+    /// <summary>An upper bound on the rig this renderer will build, purely so a corrupt bone
+    /// count cannot make the player allocate a GameObject per garbage entry. Real creature rigs
+    /// are two orders of magnitude below it.</summary>
+    const int MaxBones = 2048;
+
+    /// <summary>Whether this model can be skinned, and if not, why not -- in words meant for the
+    /// log, because an unexplained fallback to a static mesh is indistinguishable from a bug.</summary>
+    struct SkinPlan
+    {
+        public bool CanSkin;
+        public string Reason;
+    }
+
+    /// <summary>
+    /// Decide whether to build a skinned mesh for this model.
+    ///
+    /// The bar is deliberately high: the milestone's contract is that a skinned model in its rest
+    /// pose is INDISTINGUISHABLE from the static one, so anything that would make the two diverge
+    /// is a reason to stay static and say so rather than to approximate.
+    /// </summary>
+    static SkinPlan PlanSkinning(M2ParsedModel model)
+    {
+        SkinPlan p;
+        p.CanSkin = false;
+        if (Debug_.NoSkin)
+        {
+            p.Reason = "-wmvNoSkin was passed";
+            return p;
+        }
+        if (model.SkeletonFileDataID != 0)
+        {
+            // The bones are in a .skel named by the SKID chunk (and possibly in ITS parent, via
+            // SKPD). Fetching that is another asset round-trip and another chunked format; over a
+            // spread of 300 retail creature models exactly one needed it, so this milestone draws
+            // those unskinned rather than guessing at the header's unused bone array.
+            p.Reason = "its bones live in a separate skeleton file (SKID " +
+                       model.SkeletonFileDataID + "), which this milestone does not fetch";
+            return p;
+        }
+        if (model.Bones.Length == 0)
+        {
+            p.Reason = model.BoneCount > 0
+                ? "its " + model.BoneCount + " bone(s) could not be read"
+                : "it declares no bones";
+            return p;
+        }
+        if (model.Bones.Length > MaxBones)
+        {
+            p.Reason = "it declares " + model.Bones.Length + " bones, past the " + MaxBones +
+                       " this renderer will build";
+            return p;
+        }
+        p.CanSkin = true;
+        p.Reason = null;
+        return p;
+    }
+
+    /// <summary>
+    /// Build the Unity skeleton for a model, in the M2's own bone order.
+    ///
+    /// THE WHOLE THING RESTS ON ONE PROPERTY OF THE FORMAT. The legacy viewport composes a bone's
+    /// matrix as
+    ///
+    ///     local = T(pivot) * T(translation) * R(rotation) * S(scale) * T(-pivot)
+    ///     world = parent.world * local
+    ///
+    /// (Bone::calcMatrix), and it skins a vertex as the weighted sum of world * position over its
+    /// four influences. With every track at rest that local matrix collapses to the IDENTITY, so
+    /// the positions stored in the file ARE the rest pose. A bind pose therefore only has to
+    /// reproduce the identity -- which is why this places each bone at its pivot with no rotation
+    /// and no scale, and takes the bind poses from those same transforms.
+    ///
+    /// It is also exactly the arrangement animation needs later. Unity composes a bone as
+    /// parent.world * T(localPosition) * R(localRotation) * S(localScale); putting the rest
+    /// localPosition at (pivot - parentPivot) means that adding the M2's translation track to it,
+    /// and setting the rotation and scale from their tracks, reproduces the expression above term
+    /// for term -- the pivot translations telescope through the parent chain.
+    /// </summary>
+    static Transform[] BuildSkeleton(M2ParsedModel model, Transform root, out Transform rootBone)
+    {
+        int nb = model.Bones.Length;
+        var pivots = new Vector3[nb];
+        for (int i = 0; i < nb; i++)
+        {
+            float x, y, z;
+            WowCoordinateConverter.ConvertPosition(model.Bones[i].Pivot, out x, out y, out z);
+            pivots[i] = new Vector3(x, y, z);
+        }
+
+        var bones = new Transform[nb];
+        for (int i = 0; i < nb; i++)
+            bones[i] = new GameObject("bone" + i).transform;
+
+        // Parent first, place second: a bone's local offset is its pivot relative to its parent's,
+        // and because every rest rotation is the identity that offset does not depend on the order
+        // the transforms are visited in.
+        rootBone = null;
+        for (int i = 0; i < nb; i++)
+        {
+            int parent = model.Bones[i].Parent;
+            bones[i].SetParent(parent >= 0 ? bones[parent] : root, false);
+            if (parent < 0 && rootBone == null)
+                rootBone = bones[i];
+        }
+        for (int i = 0; i < nb; i++)
+        {
+            int parent = model.Bones[i].Parent;
+            bones[i].localPosition = parent >= 0 ? pivots[i] - pivots[parent] : pivots[i];
+            bones[i].localRotation = Quaternion.identity;
+            bones[i].localScale = Vector3.one;
+        }
+        if (rootBone == null)
+            rootBone = root;
+        return bones;
+    }
+
+    /// <summary>
+    /// Per-vertex influences, converted from the M2's four (bone index, weight/255) pairs. The
+    /// indices are direct indices into the bone array -- there is no lookup table in between,
+    /// which is worth stating because the .skin format has one for a different purpose.
+    ///
+    /// Two corrections are applied, and both exist to keep the rest pose identical to the static
+    /// mesh. An influence pointing past the end of the bone array is dropped -- the legacy
+    /// viewport drops it too -- but the remaining weights are then renormalised rather than left
+    /// short, because a vertex whose weights no longer sum to one is dragged toward the origin.
+    /// A vertex left with no influence at all is bound to bone 0 at full weight, which at rest is
+    /// the identity and so leaves it exactly where the file put it.
+    /// </summary>
+    static BoneWeight[] BuildBoneWeights(M2ParsedModel model, int boneCount,
+                                         out int droppedInfluences, out int unweightedVertices)
+    {
+        droppedInfluences = 0;
+        unweightedVertices = 0;
+        int n = model.Vertices.Length;
+        var weights = new BoneWeight[n];
+        var idx = new int[4];
+        var w = new float[4];
+
+        for (int i = 0; i < n; i++)
+        {
+            M2Vertex v = model.Vertices[i];
+            idx[0] = v.BoneIndex0; idx[1] = v.BoneIndex1; idx[2] = v.BoneIndex2; idx[3] = v.BoneIndex3;
+            w[0] = v.BoneWeight0; w[1] = v.BoneWeight1; w[2] = v.BoneWeight2; w[3] = v.BoneWeight3;
+
+            float sum = 0f;
+            for (int k = 0; k < 4; k++)
+            {
+                if (w[k] <= 0f) { w[k] = 0f; idx[k] = 0; continue; }
+                if (idx[k] >= boneCount) { droppedInfluences++; w[k] = 0f; idx[k] = 0; continue; }
+                sum += w[k];
+            }
+
+            var bw = new BoneWeight();
+            if (sum <= 0f)
+            {
+                unweightedVertices++;
+                bw.boneIndex0 = 0;
+                bw.weight0 = 1f;
+            }
+            else
+            {
+                bw.boneIndex0 = idx[0]; bw.weight0 = w[0] / sum;
+                bw.boneIndex1 = idx[1]; bw.weight1 = w[1] / sum;
+                bw.boneIndex2 = idx[2]; bw.weight2 = w[2] / sum;
+                bw.boneIndex3 = idx[3]; bw.weight3 = w[3] / sum;
+            }
+            weights[i] = bw;
+        }
+        return weights;
     }
 
     public static WmvRuntimeModel Build(M2ParsedModel model, M2ParsedSkin skin,
@@ -348,12 +554,69 @@ public static class WmvModelBuilder
                               hiddenByGeoset, triangleSets.Count, GeosetList(geosets)));
 
         // ---- scene object -------------------------------------------------------------
+        // Skinned when the model carries a rig this renderer can reproduce, static otherwise. The
+        // two paths share everything above: the same vertices, the same submesh-per-batch split,
+        // the same materials. Only how the mesh reaches the scene differs, and in the rest pose
+        // the result is the same geometry -- see BuildSkeleton for why that is exact rather than
+        // approximate.
         var go = new GameObject(objectName);
-        go.AddComponent<MeshFilter>().sharedMesh = mesh;
-        var renderer = go.AddComponent<MeshRenderer>();
-        renderer.sharedMaterials = materials.ToArray();
+        SkinPlan skinPlan = PlanSkinning(model);
+        var boneTransforms = new Transform[0];
+
+        if (skinPlan.CanSkin)
+        {
+            Transform rootBone;
+            boneTransforms = BuildSkeleton(model, go.transform, out rootBone);
+
+            int dropped, unweighted;
+            mesh.boneWeights = BuildBoneWeights(model, boneTransforms.Length, out dropped, out unweighted);
+
+            // The canonical bind pose: the matrix that takes a vertex from the renderer's space
+            // into the bone's. Taken from the transforms just built rather than from the pivots
+            // again, so the two can never disagree about where a bone is.
+            var bindPoses = new Matrix4x4[boneTransforms.Length];
+            for (int i = 0; i < boneTransforms.Length; i++)
+                bindPoses[i] = boneTransforms[i].worldToLocalMatrix * go.transform.localToWorldMatrix;
+            mesh.bindposes = bindPoses;
+
+            var smr = go.AddComponent<SkinnedMeshRenderer>();
+            smr.sharedMesh = mesh;
+            smr.bones = boneTransforms;
+            smr.rootBone = rootBone;
+            smr.sharedMaterials = materials.ToArray();
+            // A skinned renderer culls against localBounds, not against the mesh's own bounds, and
+            // an unset one is a zero-size box at the origin -- the model would flicker out the
+            // moment the camera moved. Bounds of the whole model, as above, so switching a geoset
+            // variant does not resize it.
+            smr.localBounds = mesh.bounds;
+            smr.updateWhenOffscreen = false;
+
+            if (log != null)
+            {
+                log(string.Format("skin: {0} bone(s), {1} root(s), max depth {2}; " +
+                                  "bind pose = rest pose (every bone at its pivot, no rotation)",
+                                  boneTransforms.Length, CountRoots(model), MaxDepth(model)));
+                if (dropped > 0 || unweighted > 0)
+                    log(string.Format("skin: {0} influence(s) pointed past the bone array and were " +
+                                      "dropped; {1} vertex/vertices were left with none and are bound " +
+                                      "to bone 0 (identity at rest)", dropped, unweighted));
+            }
+
+            if (Debug_.SkinCheck)
+                ReportSkinDeviation(smr, positions, log);
+        }
+        else
+        {
+            go.AddComponent<MeshFilter>().sharedMesh = mesh;
+            var renderer = go.AddComponent<MeshRenderer>();
+            renderer.sharedMaterials = materials.ToArray();
+            if (log != null)
+                log("skin: drawn as a static mesh -- " + skinPlan.Reason);
+        }
 
         result.Root = go;
+        result.Bones = boneTransforms;
+        result.Skinned = skinPlan.CanSkin;
         result.Mesh = mesh;
         result.Materials = materials.ToArray();
         result.Bindings = bindings.ToArray();
@@ -366,6 +629,72 @@ public static class WmvModelBuilder
         result.TriangleCount = totalTriangles;
         result.SubmeshCount = triangleSets.Count;
         return result;
+    }
+
+    /// <summary>
+    /// Bake the skinned mesh and report how far its vertices moved from where the file put them.
+    ///
+    /// This is the milestone's contract expressed as a number. The skinned and the static path
+    /// share their vertex array, so if the bind poses and the bone placement agree the baked
+    /// result is the input, and the largest deviation is float noise. A large one would mean the
+    /// rig is being applied rather than cancelled -- which is exactly the failure that is hard to
+    /// see by eye on a model you have not memorised.
+    /// </summary>
+    static void ReportSkinDeviation(SkinnedMeshRenderer smr, Vector3[] positions, Action<string> log)
+    {
+        if (log == null || smr == null)
+            return;
+        var baked = new Mesh();
+        try
+        {
+            smr.BakeMesh(baked, true);
+            Vector3[] after = baked.vertices;
+            if (after.Length != positions.Length)
+            {
+                log(string.Format("skin check: baked {0} vertices, expected {1}", after.Length, positions.Length));
+                return;
+            }
+            float worst = 0f;
+            int worstAt = -1;
+            for (int i = 0; i < after.Length; i++)
+            {
+                float dx = after[i].x - positions[i].x;
+                float dy = after[i].y - positions[i].y;
+                float dz = after[i].z - positions[i].z;
+                float dist = Mathf.Sqrt(dx * dx + dy * dy + dz * dz);
+                if (dist > worst) { worst = dist; worstAt = i; }
+            }
+            log(string.Format("skin check: {0} vertices baked from the rest pose; largest deviation " +
+                              "{1:E3} units at vertex {2}", after.Length, worst, worstAt));
+        }
+        finally
+        {
+            UnityEngine.Object.Destroy(baked);
+        }
+    }
+
+    /// <summary>How many bones have no parent. Diagnostic only: an M2 rig is a forest, not a
+    /// tree, and a creature routinely has a dozen roots.</summary>
+    static int CountRoots(M2ParsedModel model)
+    {
+        int roots = 0;
+        for (int i = 0; i < model.Bones.Length; i++)
+            if (model.Bones[i].Parent < 0) roots++;
+        return roots;
+    }
+
+    /// <summary>Deepest parent chain in the rig. Diagnostic only; the walk is bounded by the bone
+    /// count so a cycle in malformed data cannot hang the load.</summary>
+    static int MaxDepth(M2ParsedModel model)
+    {
+        int deepest = 0;
+        for (int i = 0; i < model.Bones.Length; i++)
+        {
+            int d = 0, p = model.Bones[i].Parent, guard = 0;
+            while (p >= 0 && guard++ < model.Bones.Length) { d++; p = model.Bones[p].Parent; }
+            if (d > deepest) deepest = d;
+        }
+        return deepest;
     }
 
     static readonly int[] EmptyTriangles = new int[0];

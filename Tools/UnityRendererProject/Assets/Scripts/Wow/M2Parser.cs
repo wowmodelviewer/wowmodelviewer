@@ -13,8 +13,8 @@
 //   A modern .m2 is a sequence of {char magic[4]; uint32 size; byte payload[size]} chunks. The
 //   model itself lives in the MD21 chunk and *every offset inside it is relative to the start
 //   of that chunk's payload*, not to the start of the file. Sibling chunks carry the
-//   FileDataIDs of related assets: SFID (skin profiles), TXID (textures), SKID/AFID/BFID/PFID
-//   (additional file-reference chunks -- not used in this milestone).
+//   FileDataIDs of related assets: SFID (skin profiles), TXID (textures) and SKID (a separate
+//   skeleton file). AFID/BFID/PFID are further file-reference chunks this milestone does not use.
 //
 // The MD20 header layout below matches the one WMV's own loader uses (Source/games/wow/
 // modelheaders.h): count/offset pairs, with nViews being a lone uint32 because view (LOD) data
@@ -31,6 +31,12 @@ namespace Wmv.Wow
         public const int VertexStride = 48;
         const int TextureStride = 16;
         const int MaterialStride = 4;
+
+        // One M2 bone on disk: keyBoneId(4) flags(4) parent(2) submeshId(2) boneNameCRC(4),
+        // three animation tracks of 20 bytes each, then the pivot (12). 88 bytes in total, and
+        // the pivot -- the only part a bind pose needs -- sits at the end of it.
+        const int BoneStride = 88;
+        const int OfsBonePivot = 76;
 
         // MD20 header offsets (relative to the MD21 payload)
         const int OfsName = 0x08;
@@ -68,6 +74,8 @@ namespace Wmv.Wow
 
                 model.SkinFileDataIDs = ReadIdChunk(file, chunks, "SFID");
                 model.TextureFileDataIDs = ReadIdChunk(file, chunks, "TXID");
+                int[] skeleton = ReadIdChunk(file, chunks, "SKID");
+                model.SkeletonFileDataID = skeleton.Length > 0 ? skeleton[0] : 0;
             }
 
             // Work on the MD21 payload as its own address space -- offsets inside are relative
@@ -95,7 +103,16 @@ namespace Wmv.Wow
             model.GlobalFlags = c.ReadUInt32();
 
             c.Seek(OfsBones);
-            model.BoneCount = c.ReadArray().Count;
+            M2Array bones = c.ReadArray();
+            model.BoneCount = bones.Count;
+            // A skeleton file overrides the header's bone array wholesale, so reading that array
+            // anyway would hand the renderer a rig the vertices are not indexed against. Leave
+            // Bones empty and let the caller decide what to do about it.
+            if (model.SkeletonFileDataID == 0)
+            {
+                c.RequireArray(bones, BoneStride, "bones");
+                model.Bones = ReadBones(c, bones);
+            }
 
             c.Seek(OfsNumSkinProfiles);
             model.SkinProfileCount = (int)c.ReadUInt32();
@@ -331,6 +348,42 @@ namespace Wmv.Wow
                 model.BoundsMax = new WowVec3(maxX, maxY, maxZ);
             }
             return verts;
+        }
+
+        /// <summary>
+        /// Read the bone array. Only the hierarchy and the pivots are taken: those are what a
+        /// bind pose is made of, and the three animation tracks each bone carries belong to a
+        /// later milestone. A parent index outside the array is normalised to "root" here rather
+        /// than left to blow up downstream -- the legacy viewport sanitises the same field for the
+        /// same reason, since a bad parent otherwise recurses off the end of its bone vector.
+        /// </summary>
+        static M2BoneDef[] ReadBones(ByteCursor c, M2Array arr)
+        {
+            var bones = new M2BoneDef[arr.Count];
+            for (int i = 0; i < arr.Count; i++)
+            {
+                c.Seek(arr.Offset + i * BoneStride);
+                bones[i].KeyBoneId = c.ReadInt32();
+                bones[i].Flags = c.ReadUInt32();
+                short parent = c.ReadInt16();
+                bones[i].Parent = (parent >= 0 && parent < arr.Count && parent != i) ? parent : (short)-1;
+                bones[i].SubmeshId = c.ReadUInt16();
+                c.Seek(arr.Offset + i * BoneStride + OfsBonePivot);
+                bones[i].Pivot = new WowVec3(c.ReadSingle(), c.ReadSingle(), c.ReadSingle());
+            }
+
+            // A parent chain that loops is a forest no more, and a renderer asked to parent one
+            // transform inside its own descendants throws. Any bone whose chain does not reach a
+            // root within the length of the array is part of a cycle, so it becomes a root.
+            for (int i = 0; i < bones.Length; i++)
+            {
+                int p = bones[i].Parent, steps = 0;
+                while (p >= 0 && steps++ <= bones.Length)
+                    p = bones[p].Parent;
+                if (steps > bones.Length)
+                    bones[i].Parent = -1;
+            }
+            return bones;
         }
 
         static M2TextureDef[] ReadTextures(ByteCursor c, M2Array arr, M2ParsedModel model)

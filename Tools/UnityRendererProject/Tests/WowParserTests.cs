@@ -67,22 +67,37 @@ namespace Wmv.Wow.Tests
             for (int i = 0; i < 4; i++) b[o + i] = (byte)m[i];
         }
 
-        /// <summary>Minimal but structurally valid MD20 payload with `vertexCount` vertices.</summary>
-        static byte[] BuildM2Payload(int vertexCount, int textureCount = 1, uint textureType = 11)
+        /// <summary>One bone on disk, laid out the way the format does it.</summary>
+        const int BoneStride = 88;
+
+        static void PutBone(byte[] b, int o, short parent, float px, float py, float pz, uint flags = 0)
+        {
+            PutU32(b, o + 0, unchecked((uint)-1));   // keyBoneId
+            PutU32(b, o + 4, flags);
+            PutU16(b, o + 8, unchecked((ushort)parent));
+            PutU16(b, o + 10, 0);                    // submeshId
+            PutF32(b, o + 76, px); PutF32(b, o + 80, py); PutF32(b, o + 84, pz);
+        }
+
+        /// <summary>Minimal but structurally valid MD20 payload with `vertexCount` vertices, and
+        /// optionally a bone array.</summary>
+        static byte[] BuildM2Payload(int vertexCount, int textureCount = 1, uint textureType = 11,
+                                     int boneCount = 0)
         {
             const int headerSize = 0x100;
             int vertsOffset = headerSize;
             int texOffset = vertsOffset + vertexCount * 48;
             int matOffset = texOffset + textureCount * 16;
             int lookupOffset = matOffset + 4;
-            int total = lookupOffset + 2;
+            int boneOffset = lookupOffset + 2;
+            int total = boneOffset + boneCount * BoneStride;
 
             var b = new byte[total];
             PutMagic(b, 0, "MD20");
             PutU32(b, 0x04, 272);
             PutU32(b, 0x08, 0); PutU32(b, 0x0C, 0);            // name
             PutU32(b, 0x10, 0);                                 // globalFlags
-            PutU32(b, 0x2C, 1); PutU32(b, 0x30, 0);             // bones (count only matters)
+            PutU32(b, 0x2C, (uint)boneCount); PutU32(b, 0x30, (uint)boneOffset);
             PutU32(b, 0x3C, (uint)vertexCount); PutU32(b, 0x40, (uint)vertsOffset);
             PutU32(b, 0x44, 1);                                 // numSkinProfiles
             PutU32(b, 0x50, (uint)textureCount); PutU32(b, 0x54, (uint)texOffset);
@@ -109,13 +124,19 @@ namespace Wmv.Wow.Tests
             PutU16(b, matOffset, 0);        // material flags
             PutU16(b, matOffset + 2, 1);    // blend mode: alpha key
             PutU16(b, lookupOffset, 0);     // textureLookup[0] -> slot 0
+
+            // A small chain: bone 0 at the origin, each later one a child of the one before it,
+            // one unit further along WoW's +X (forward).
+            for (int i = 0; i < boneCount; i++)
+                PutBone(b, boneOffset + i * BoneStride, (short)(i - 1), i, 0f, 0f);
             return b;
         }
 
-        static byte[] WrapChunked(byte[] md20Payload, int[] sfid, int[] txid)
+        static byte[] WrapChunked(byte[] md20Payload, int[] sfid, int[] txid, int skid = 0)
         {
             int total = 8 + md20Payload.Length + (sfid != null ? 8 + sfid.Length * 4 : 0)
-                                               + (txid != null ? 8 + txid.Length * 4 : 0);
+                                               + (txid != null ? 8 + txid.Length * 4 : 0)
+                                               + (skid != 0 ? 12 : 0);
             var b = new byte[total];
             int o = 0;
             PutMagic(b, o, "MD21"); PutU32(b, o + 4, (uint)md20Payload.Length); o += 8;
@@ -129,6 +150,11 @@ namespace Wmv.Wow.Tests
             {
                 PutMagic(b, o, "TXID"); PutU32(b, o + 4, (uint)(txid.Length * 4)); o += 8;
                 foreach (int id in txid) { PutU32(b, o, (uint)id); o += 4; }
+            }
+            if (skid != 0)
+            {
+                PutMagic(b, o, "SKID"); PutU32(b, o + 4, 4); o += 8;
+                PutU32(b, o, (uint)skid); o += 4;
             }
             return b;
         }
@@ -220,6 +246,8 @@ namespace Wmv.Wow.Tests
             ShaderTableTests();
             log.Add("Visibility tracks");
             VisibilityTests();
+            log.Add("Bones");
+            BoneTests();
 
             log.Add(failures == 0 ? "ALL TESTS PASSED" : (failures + " TEST(S) FAILED"));
             if (output != null)
@@ -272,6 +300,72 @@ namespace Wmv.Wow.Tests
             var badChunk = WrapChunked(BuildM2Payload(1), null, null);
             PutU32(badChunk, 4, (uint)(badChunk.Length * 4));
             Throws<WowParseException>(() => M2Parser.Parse(badChunk), "M2: oversized chunk rejected");
+        }
+
+        static void BoneTests()
+        {
+            M2ParsedModel m = M2Parser.Parse(BuildM2Payload(3, boneCount: 4));
+            Check(m.BoneCount == 4 && m.Bones.Length == 4, "bones: count read");
+            Check(m.Bones[0].Parent == -1, "bones: first bone is a root");
+            Check(m.Bones[1].Parent == 0 && m.Bones[3].Parent == 2, "bones: parent chain read");
+            Near(m.Bones[2].Pivot.X, 2f, "bones: pivot read");
+            Check(m.SkeletonFileDataID == 0, "bones: no SKID means no skeleton file");
+
+            // A parent index outside the array cannot be followed; it becomes a root rather than
+            // a read off the end of the array.
+            var badParent = BuildM2Payload(3, boneCount: 3);
+            PutU16(badParent, 0x100 + 3 * 48 + 16 + 4 + 2 + BoneStride + 8, 99);
+            M2ParsedModel bp = M2Parser.Parse(badParent);
+            Check(bp.Bones[1].Parent == -1, "bones: out-of-range parent becomes a root");
+
+            // Same for a bone that claims to be its own parent.
+            var selfParent = BuildM2Payload(3, boneCount: 3);
+            PutU16(selfParent, 0x100 + 3 * 48 + 16 + 4 + 2 + BoneStride + 8, 1);
+            Check(M2Parser.Parse(selfParent).Bones[1].Parent == -1, "bones: self-parent becomes a root");
+
+            // ... and for a cycle, which would otherwise be an infinite parent walk and a
+            // renderer asked to parent a transform inside its own descendants.
+            var cycle = BuildM2Payload(3, boneCount: 3);
+            int boneBase = 0x100 + 3 * 48 + 16 + 4 + 2;
+            PutU16(cycle, boneBase + 8, 2);                 // 0 -> 2 -> 1 -> 0
+            PutU16(cycle, boneBase + BoneStride + 8, 0);
+            PutU16(cycle, boneBase + 2 * BoneStride + 8, 1);
+            M2ParsedModel cy = M2Parser.Parse(cycle);
+            // The guarantee is not that every bone in the loop becomes a root -- it is that no
+            // parent chain runs forever, which is what the renderer and the depth walk need.
+            bool allChainsTerminate = true;
+            for (int i = 0; i < cy.Bones.Length; i++)
+            {
+                int p = cy.Bones[i].Parent, steps = 0;
+                while (p >= 0 && steps++ <= cy.Bones.Length) p = cy.Bones[p].Parent;
+                if (p >= 0) allChainsTerminate = false;
+            }
+            Check(allChainsTerminate, "bones: parent cycle broken");
+
+            // A model whose bones live in a skeleton file must not hand back the header's array:
+            // the vertices are not indexed against it.
+            byte[] skid = WrapChunked(BuildM2Payload(3, boneCount: 4), null, null, 1234567);
+            M2ParsedModel sk = M2Parser.Parse(skid);
+            Check(sk.SkeletonFileDataID == 1234567, "bones: SKID chunk read");
+            Check(sk.BoneCount == 4 && sk.Bones.Length == 0, "bones: SKID suppresses the header bone array");
+
+            // The per-vertex influences are direct indices, kept verbatim.
+            var weighted = BuildM2Payload(2, boneCount: 4);
+            int v1 = 0x100 + 48;
+            weighted[v1 + 12] = 200; weighted[v1 + 13] = 55;   // weights
+            weighted[v1 + 16] = 3; weighted[v1 + 17] = 1;      // indices
+            M2ParsedModel wm = M2Parser.Parse(weighted);
+            Check(wm.Vertices[1].BoneWeight0 == 200 && wm.Vertices[1].BoneWeight1 == 55,
+                  "bones: vertex weights read");
+            Check(wm.Vertices[1].BoneIndex0 == 3 && wm.Vertices[1].BoneIndex1 == 1,
+                  "bones: vertex bone indices read");
+
+            // A bone array that runs past the end of the payload is a parse error, not a read
+            // into whatever follows it.
+            var truncatedBones = BuildM2Payload(3, boneCount: 2);
+            PutU32(truncatedBones, 0x2C, 64);
+            Throws<WowParseException>(() => M2Parser.Parse(truncatedBones),
+                                      "bones: truncated bone array rejected");
         }
 
         static void SkinTests()
