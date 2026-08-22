@@ -512,6 +512,19 @@ bool AnimControl::UpdateCreatureModel(WoWModel *m)
 
   QString query;
 
+  // Where the non-texture values sit in each result row. The three queries below do NOT
+  // share a column layout -- the modern one selects a fourth texture variation the older two
+  // do not -- so the positions are derived here, beside the SELECT that defines them, and
+  // never assumed further down. Reading them at fixed positions is what made the modern
+  // branch take ParticleColorID for the display id and TextureVariationFileDataID4 for the
+  // particle colour.
+  //
+  // The first TextureGroup::num columns are always the texture variations in every branch,
+  // which is why the texture loop below can stay positional.
+  int colParticleColor = 3;
+  int colDisplayId = 4;
+  int colGeosetData = -1;   // only Legion packs the geoset data into the row itself
+
   if (GAMEDIRECTORY.version().contains("7.3"))
   { 
     query = QString("SELECT TextureVariationFileDataID1, TextureVariationFileDataID2, TextureVariationFileDataID3, ParticleColorID, "
@@ -520,6 +533,7 @@ bool AnimControl::UpdateCreatureModel(WoWModel *m)
                     "ON CreatureDisplayInfo.ModelID = CreatureModelData.ID "
                     "WHERE CreatureModelData.FileDataID = %1")
                     .arg( m->gamefile->fileDataId());
+    colGeosetData = 5;
   } 
   else if (GAMEDIRECTORY.version().contains("8.3") || GAMEDIRECTORY.version().contains("9.2"))
   {
@@ -538,6 +552,8 @@ bool AnimControl::UpdateCreatureModel(WoWModel *m)
                       "ON CreatureDisplayInfo.ModelID = CreatureModelData.ID "
                       "WHERE CreatureModelData.FileDataID = %1")
                       .arg(m->gamefile->fileDataId());
+      colParticleColor = 4;
+      colDisplayId = 5;
   }
 
   sqlResult r = GAMEDATABASE.sqlQuery(query);
@@ -546,6 +562,18 @@ bool AnimControl::UpdateCreatureModel(WoWModel *m)
   {
     for(size_t i = 0 ; i < r.values.size() ; i++)
     {
+      // A row shorter than the SELECT promised would otherwise be read past its end. Bound the
+      // LAST column any branch reads -- on Legion the geoset column sits past the display id, so
+      // checking the display id alone would leave that read unguarded.
+      const int colMax = std::max(colDisplayId, std::max(colParticleColor, colGeosetData));
+      if (r.values[i].size() <= (size_t)colMax)
+      {
+        LOG_ERROR << "CreatureDisplayInfo row" << (uint)i << "has only"
+                  << (uint)r.values[i].size() << "columns; expected at least" << (colMax + 1)
+                  << "-- skipping it";
+        continue;
+      }
+
       TextureGroup grp;
       int count = 0;
       for (size_t skin = 0; skin < TextureGroup::num; skin++)
@@ -558,7 +586,7 @@ bool AnimControl::UpdateCreatureModel(WoWModel *m)
           count++;
         }
       }
-      int cdi = r.values[i][4].toInt();
+      int cdi = r.values[i][colDisplayId].toInt();
       grp.base = TEXTURE_GAMEOBJECT1;
       grp.definedTexture = true;
       grp.count = count;
@@ -566,14 +594,14 @@ bool AnimControl::UpdateCreatureModel(WoWModel *m)
       // Configure geosets that are switched on only for certain displayIDs.
       // This is handled differently in BfA (has its own table) compared
       // to Legion (compressed into a single integer in CreatureDisplayInfo) :
-      if (GAMEDIRECTORY.version().contains("7.3"))
+      if (colGeosetData >= 0)
       {
         // Geoset data is compressed into a single integer.
         // The position of the hex digit (from right) represents
         // the group number, and the value of the four bits at
         // that position represents the geoset. So 0x00200000
         // means geoset 2 of group 600, therefore 602.
-        int cgd = r.values[i][5].toInt();
+        int cgd = r.values[i][colGeosetData].toInt();
         for (int I = 0; I < 8; I++)
         {
           int geotype = 100 * (I + 1);
@@ -601,7 +629,7 @@ bool AnimControl::UpdateCreatureModel(WoWModel *m)
         }
       }
 
-      int pci = r.values[i][3].toInt(); // particleColorIndex, for replacing particle color
+      int pci = r.values[i][colParticleColor].toInt(); // particleColorIndex, for replacing particle color
       if (pci)
       {
         grp.particleColInd = pci;
@@ -1402,6 +1430,27 @@ void AnimControl::OnLoop(wxCommandEvent &)
     }
     g_selModel->animManager->Play();
   } 
+}
+
+void AnimControl::displayIdSkinIndices(std::vector<std::pair<int, int> > & out)
+{
+  out.clear();
+  const int count = skinList ? (int)skinList->GetCount() : 0;
+  for (std::map<int, TextureGroup>::const_iterator it = CDIToTexGp.begin();
+       it != CDIToTexGp.end(); ++it)
+  {
+    int index = -1;
+    for (int i = 0; i < count; i++)
+    {
+      TextureGroup * grp = static_cast<TextureGroup *>(skinList->GetClientData((unsigned int)i));
+      if (grp && it->second == *grp)
+      {
+        index = i;
+        break;
+      }
+    }
+    out.push_back(std::make_pair(it->first, index));
+  }
 }
 
 int AnimControl::skinCount()

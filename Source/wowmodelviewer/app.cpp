@@ -335,6 +335,36 @@ static void doHeadlessUnityIpcTest(ModelViewer * frame)
         LOG_INFO << "[unityipc-test]   re-selected skin[" << (skins - 1)
                  << "] -- the player should report it unchanged and fetch nothing";
       }
+      // Display-id lookup: NPC and Armory import select a skin by CreatureDisplayInfo id
+      // (SetSkinByDisplayID), not by list position, so the map that translates one into the
+      // other has to be keyed on real display ids. Report what it holds, then round-trip one
+      // id through it and check the skin that comes out is the one that id names.
+      if (ac)
+      {
+        std::vector<std::pair<int, int> > displayMap;
+        ac->displayIdSkinIndices(displayMap);
+        LOG_INFO << "[unityipc-test] display-map check:" << (int)displayMap.size()
+                 << "display id(s) known to the skin selector";
+        for (size_t di = 0; di < displayMap.size() && di < 5; di++)
+          LOG_INFO << "[unityipc-test]   display" << displayMap[di].first << "-> skin["
+                   << displayMap[di].second << "]"
+                   << QString::fromWCharArray(ac->skinName(displayMap[di].second).c_str());
+
+        if (!displayMap.empty())
+        {
+          const int probeId = displayMap[0].first;
+          ac->SetSkinByDisplayID(probeId);
+          std::vector<UnityAssetAccess::ModelTexture> after;
+          QString afterError;
+          const bool afterOk = UnityAssetAccess::resolveModelTextures(fdid, after, afterError);
+          const int afterFdid = (afterOk && !after.empty()) ? after[0].fileDataID : 0;
+          LOG_INFO << "[unityipc-test]   SetSkinByDisplayID(" << probeId << ") -> skin["
+                   << displayMap[0].second << "] texture" << afterFdid
+                   << (afterFdid > 0 ? UnityAssetAccess::readByFileDataID(afterFdid).path : QString());
+          for (int i = 0; i < 20; i++) { ipc->poll(); wxTheApp->Yield(true); wxMilliSleep(10); }
+        }
+      }
+
       LOG_INFO << "[unityipc-test] skin-sync: skinPushes=" << ipc->stats().skinPushes
                << "lastSkin=" << ipc->stats().lastSkin;
     }
