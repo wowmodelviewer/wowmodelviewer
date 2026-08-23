@@ -159,6 +159,13 @@ public class WmvMain : MonoBehaviour
         cam.nearClipPlane = 0.01f;
         orbit = cam.gameObject.GetComponent<WmvOrbitCamera>() ?? cam.gameObject.AddComponent<WmvOrbitCamera>();
 
+        // A scene light and ambient, for the FALLBACK shaders only.
+        //
+        // The renderer's own shader ignores both -- it carries its own preview rig, because URP and
+        // HDRP do not feed the built-in light uniforms and a shader that read them would look
+        // different per pipeline. These exist so that a build which somehow has to fall back to a
+        // pipeline Lit shader (-wmvLitShader, or a player with no Resources) is not lit by nothing
+        // at all. Their angle matches the shader's key so the two do not disagree wildly.
         var lightGo = new GameObject("Directional Light");
         var light = lightGo.AddComponent<Light>();
         light.type = LightType.Directional;
@@ -419,6 +426,11 @@ public class WmvMain : MonoBehaviour
 
             orbit.Frame(built.Bounds);
 
+            // AFTER framing, not before: measuring the lighting on a model the camera has not
+            // pointed at yet reports a handful of stray pixels and calls it a reading.
+            if (WmvModelBuilder.Debug_.LightCheck)
+                ReportLighting();
+
             status.Set("Loaded " + job.Path);
             status.Set(string.Format("Vertices {0}  Triangles {1}  Submeshes {2}  Textures {3}",
                                      built.VertexCount, built.TriangleCount, built.SubmeshCount, job.Textures.Count));
@@ -532,6 +544,115 @@ public class WmvMain : MonoBehaviour
         }
 
         ReadAndApplySequence(sequenceIndex, external, animFileId == 0 ? "in-file" : "from .anim");
+    }
+
+    /// <summary>
+    /// Render the model offscreen and say what the lighting did to it.
+    ///
+    /// Lighting work is the one thing here that cannot be checked by reading a log: "readable",
+    /// "not blown out", "not crushed" are all statements about pixels. So this renders one frame
+    /// into a texture and measures it, which turns each of those into a number that a run either
+    /// meets or does not:
+    ///
+    ///   coverage   -- how much of the frame the model occupies (that it rendered at all)
+    ///   mean       -- overall brightness of the model against the background
+    ///   clipped    -- fraction of model pixels at full white in any channel. This is the one the
+    ///                 old rig failed: it peaked at 1.20, so pale surfaces facing the key light
+    ///                 came back as flat white with the painted detail gone.
+    ///   p05        -- the 5th-percentile luminance, i.e. how dark the darkest real parts are.
+    ///                 A shadow side that reads as a black silhouette shows up here.
+    ///
+    /// Diagnostics only, and it renders to its own texture -- nothing is written to disk and the
+    /// viewport is untouched.
+    /// </summary>
+    void ReportLighting()
+    {
+        var cam = Camera.main;
+        if (cam == null || current == null)
+            return;
+
+        const int W = 256, H = 256;
+        RenderTexture rt = RenderTexture.GetTemporary(W, H, 24, RenderTextureFormat.ARGB32,
+                                                      RenderTextureReadWrite.Default);
+        RenderTexture prevTarget = cam.targetTexture;
+        RenderTexture prevActive = RenderTexture.active;
+        Vector3 prevPos = cam.transform.position;
+        Quaternion prevRot = cam.transform.rotation;
+        Texture2D shot = null;
+        try
+        {
+            // Frame the model from a FIXED angle and distance for the measurement, then put the
+            // camera back. Reading whatever the orbit happened to be showing made the numbers
+            // wander between runs -- coverage moved by a fifth on repeats of the same build --
+            // and a measurement that disagrees with itself cannot say whether a change helped.
+            Bounds modelBounds = current.Bounds;
+            float radius = Mathf.Max(modelBounds.extents.magnitude, 0.001f);
+            Vector3 dir = new Vector3(0.45f, 0.35f, -1f).normalized;
+            cam.transform.position = modelBounds.center - dir * (radius * 2.6f);
+            cam.transform.rotation = Quaternion.LookRotation(dir, Vector3.up);
+
+            cam.targetTexture = rt;
+            cam.Render();
+            RenderTexture.active = rt;
+            shot = new Texture2D(W, H, TextureFormat.RGBA32, false);
+            shot.ReadPixels(new Rect(0, 0, W, H), 0, 0);
+            shot.Apply(false);
+
+            Color bg = cam.backgroundColor;
+            float bgLum = 0.2126f * bg.r + 0.7152f * bg.g + 0.0722f * bg.b;
+
+            var lums = new List<float>(W * H);
+            int clipped = 0;
+            // Mean over the WHOLE frame as well. The model-only figures below depend on a
+            // threshold to separate model from background, and a brighter model pulls previously
+            // excluded dark pixels above it -- which can drag the model-only mean DOWN while every
+            // pixel got brighter. This one has no threshold in it and cannot do that, so the two
+            // together say whether a change actually brightened anything.
+            float frameSum = 0f;
+            Color32[] px = shot.GetPixels32();
+            foreach (Color32 c in px)
+            {
+                float r = c.r / 255f, g = c.g / 255f, b = c.b / 255f;
+                float lum = 0.2126f * r + 0.7152f * g + 0.0722f * b;
+                frameSum += lum;
+                // Anything meaningfully brighter than the background is the model. The clear
+                // colour is flat, so this separates the two without needing a mask pass.
+                if (lum <= bgLum + 0.02f)
+                    continue;
+                lums.Add(lum);
+                if (c.r >= 253 || c.g >= 253 || c.b >= 253)
+                    clipped++;
+            }
+
+            if (lums.Count == 0)
+            {
+                Debug.Log("WMV: light check: nothing brighter than the background was drawn");
+                return;
+            }
+            lums.Sort();
+            float sum = 0f;
+            foreach (float l in lums) sum += l;
+            float p05 = lums[Mathf.Clamp(Mathf.RoundToInt(lums.Count * 0.05f), 0, lums.Count - 1)];
+            float p95 = lums[Mathf.Clamp(Mathf.RoundToInt(lums.Count * 0.95f), 0, lums.Count - 1)];
+            Debug.Log(string.Format(
+                "WMV: light check: coverage {0:P1} of frame | background {1:F3} | frame mean {7:F4} "
+                + "| model mean {2:F3} p05 {3:F3} p95 {4:F3} max {5:F3} | clipped {6:P2}",
+                lums.Count / (float)(W * H), bgLum, sum / lums.Count, p05, p95,
+                lums[lums.Count - 1], clipped / (float)lums.Count, frameSum / (W * H)));
+        }
+        catch (System.Exception e)
+        {
+            Debug.LogWarning("WMV: light check could not render: " + e.Message);
+        }
+        finally
+        {
+            cam.targetTexture = prevTarget;
+            RenderTexture.active = prevActive;
+            cam.transform.position = prevPos;
+            cam.transform.rotation = prevRot;
+            RenderTexture.ReleaseTemporary(rt);
+            if (shot != null) Destroy(shot);
+        }
     }
 
     /// <summary>

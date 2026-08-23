@@ -25,6 +25,69 @@ Concretely:
   message while the app — and the legacy OpenGL viewport — carry on unchanged. "Optional"
   describes the current migration stage, not the destination.
 
+## Lighting
+
+The viewport lights models with a **fixed preview rig in the renderer's own shader**, not with the
+engine's lighting. That is a deliberate choice twice over.
+
+**The shader is chosen on purpose, not by accident.** `WmvOpaque` used to be the last rung of a
+search that preferred the pipeline's Lit shader, and it won only because URP/Lit gets stripped out
+of a player build. Two things were riding on that accident: the M2 combiners (a Lit shader cannot
+run them, so chicken2's pixel shader 12 and every environment sheen worked only while Lit was
+absent), and the entire look of the application. It is now the first choice, so both are the same
+everywhere. `-wmvLitShader` asks for the pipeline's Lit shader when you want to compare — with the
+combiners disabled, which is the honest comparison.
+
+**Why not physically-based shading.** WoW's textures are hand-painted with their light and shade
+already in them. PBR relights an image that has already been lit: mid-tones the artist painted go
+dark, flat surfaces pick up specular they were never meant to have, and the hand-painted character
+of the art is exactly what gets lost. A model viewer wants the texture legible from a fixed angle,
+which is a different job from simulating a room.
+
+**The rig.** Three terms, in `Assets/Resources/WmvOpaque.shader`:
+
+| term | what it does |
+|---|---|
+| ambient `0.62` | floor: the darkest any surface gets |
+| key `0.62 * ndl` | upper front-left three-quarter angle |
+| fill `0.16 * ndl_fill * (1-key)` | low and opposite, keeps the shadow side in shape |
+| rim `0.16 * rim^2 * (1-key)` | edge separation against the dark background |
+| highlight `0.16 * ndh^26 * texLuma^2` | a narrow preview glint, weighted by how bright the texture already is |
+
+**A SHOULDER, NOT A CEILING.** The light deliberately sums past 1.0 (to 1.24), and the top end is
+rolled off instead of clamped: below a knee of `0.72` nothing is touched — that is where the painted
+colour lives — and above it the curve bends over and only approaches 1.0 asymptotically. The
+absolute maximum any pixel can reach is **0.975**.
+
+That replaced a rig which kept everything at or below 1.0 by never letting the light sum past it.
+It did prevent blow-out, but by guaranteeing nothing could ever be brighter than its own texture,
+so white fur read grey: a white texture at 70% light *is* grey. Rolling off the top instead lets a
+white read white (0.96 at full key) while still never reaching 1.0. The roll-off is per channel, so
+a saturated red lifts its red without dragging the other two up with it and the colour stays the
+colour.
+
+**The highlight is weighted by the texture, not by a material flag.** Nothing in an M2 says "this
+is metal", but the art already encodes it: gold trim, gems and polished metal are painted bright,
+leather and fur are not. Weighting a narrow glint by the texture's own luminance therefore lands it
+on the buckles and the gems and leaves the hide alone, with no specular map and no pretence of being
+physically based.
+
+**Checking it.** `-wmvLightCheck` renders one frame offscreen and reports coverage, background and
+model luminance, the 5th/95th percentiles, the fraction of clipped pixels, and the mean over the
+whole frame. "Readable" and "not blown out" are claims about pixels, so they are measured rather
+than asserted; nothing is written to disk and the viewport is not disturbed. It renders from a
+FIXED camera and is normally run with `-wmvNoAnim`, because a measurement taken from wherever the
+orbit happened to be, of whatever pose the animation happened to be in, disagrees with itself
+between runs.
+
+**Read the frame mean, not just the model mean.** The model-only figures separate model from
+background with a brightness threshold, and that makes them treacherous for before/after work: a
+brighter model pushes more of its own dark pixels above the threshold, those pixels join the
+sample, and the model-only average can FALL while every pixel got brighter. That is not
+hypothetical — tuning this rig showed two models apparently darkening by a third when the
+threshold-free frame mean showed chicken2 up 14%. The frame mean has no threshold in it and cannot
+do that.
+
 ## Which viewport owns the centre
 
 The Unity renderer is the **main viewport for the models it supports** -- creature M2s. Loading one

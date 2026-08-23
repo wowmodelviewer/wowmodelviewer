@@ -81,6 +81,7 @@ Shader "WMV/Opaque Textured"
                 float3 normal : TEXCOORD1;
                 float2 env    : TEXCOORD2;
                 float2 uv1    : TEXCOORD3;
+                half3  viewN  : TEXCOORD4;   // view-space normal: z is the facing ratio
             };
 
             sampler2D _MainTex;
@@ -111,6 +112,11 @@ Shader "WMV/Opaque Textured"
                 // that ordinary Unity UVs work, which puts this generated coordinate the other way
                 // up from the OpenGL viewport's. Without the flip the sheen sits on the wrong side.
                 o.env = float2(r.x / m + 0.5, 0.5 - r.y / m);
+
+                // Free: viewNrm is already here for the sphere map. Its z is how square-on the
+                // surface is to the camera (the rim), and the vector itself gives the highlight a
+                // stable frame that does not move when the model is orbited.
+                o.viewN = viewNrm;
                 return o;
             }
 
@@ -152,11 +158,68 @@ Shader "WMV/Opaque Textured"
                     clip(a - _Cutoff);
                 #endif
 
-                // Fixed key light + ambient. Engine light data is unavailable across pipelines,
-                // so this is a viewer light, not the scene's -- it only has to read as shape.
-                half3 n = normalize(i.normal);
-                half ndl = saturate(dot(n, normalize(half3(0.35, 0.80, -0.50))));
-                c.rgb *= 0.45h + 0.75h * ndl;
+                // PREVIEW LIGHT RIG.
+                //
+                // A model viewer is not a scene. The job here is to show what a texture artist
+                // painted, from a fixed angle, with both sides of the model readable -- not to
+                // simulate a room. So this is three cheap terms with a hard guarantee attached,
+                // and no engine lighting at all (URP and HDRP do not feed the built-in light
+                // uniforms, and a shader that read them would look different per pipeline).
+                //
+                // THE GUARANTEE IS THAT IT CANNOT EXCEED 1. The previous rig was
+                // 0.45 + 0.75*ndl, which peaks at 1.20: every surface pointing within about 40
+                // degrees of the key clipped, so a white tabard or a pale hide came back as a flat
+                // white shape with its painted detail crushed out of it. Ambient and key here sum
+                // to exactly 1.0 at full incidence, and the two additive terms are multiplied by
+                // (1 - key) so they can only ever fill in where the key is not already doing the
+                // work. Nothing can be brighter than its own texture.
+                half3 n  = normalize(i.normal);
+                half3 vn = normalize(i.viewN);
+
+                // Key: upper front-left, the standard three-quarter portrait angle.
+                half ndl  = saturate(dot(n, normalize(half3(0.35, 0.80, -0.50))));
+                // Fill: low and opposite, so the shadow side keeps its shape instead of going
+                // flat. WoW's own textures carry their shading painted in, so this only has to
+                // stop the far side reading as a silhouette.
+                half fill = saturate(dot(n, normalize(half3(-0.55, -0.15, 0.60))));
+                // Rim: edge separation against a dark background, confined to the shadow side so
+                // it never adds to a surface that is already fully lit.
+                half rim  = 1.0h - saturate(vn.z);
+
+                half shadowSide = 1.0h - ndl;
+                half lum = 0.62h                       // floor
+                         + 0.62h * ndl                 // key -- deliberately past 1.0 in sum
+                         + 0.16h * fill * shadowSide
+                         + 0.16h * rim  * rim * shadowSide;
+
+                // PREVIEW HIGHLIGHT, scaled by how bright the texture already is.
+                //
+                // Not a material property -- nothing in an M2 says "this is metal". But the art
+                // already encodes it: gold trim, gems and polished metal are painted bright, and
+                // leather and fur are not. Weighting a narrow highlight by the texture's own
+                // luminance therefore puts it on the buckles and the gems and leaves the hide
+                // alone, without a specular map and without pretending to be physically based.
+                half3 hv    = normalize(half3(0.30, 0.55, 1.0));      // view-space half vector
+                half  ndh   = saturate(dot(vn, hv));
+                half  texLu = dot(t1.rgb, half3(0.2126h, 0.7152h, 0.0722h));
+                half  spec  = 0.16h * pow(ndh, 26.0h) * texLu * texLu;
+
+                c.rgb = c.rgb * lum + spec;
+
+                // SHOULDER, not a ceiling.
+                //
+                // The previous rig kept everything at or below 1.0 by never letting the light sum
+                // past it, which does stop whites blowing out -- by making sure nothing is ever
+                // brighter than its own texture. White fur then reads grey, because that is what
+                // a white texture at 70% looks like. So the light now goes past 1.0 and the top
+                // end is rolled off instead: everything below the knee is untouched, which is
+                // where the painted colour lives, and above it the curve bends over and only
+                // approaches 1.0 asymptotically. Bright things get bright; nothing reaches white.
+                // Applied per channel, so a saturated red lifts its red without dragging the other
+                // two up with it -- the colour stays the colour.
+                const half knee = 0.72h;
+                half3 over = max(c.rgb - knee, 0.0h);
+                c.rgb = min(c.rgb, knee) + (1.0h - knee) * (1.0h - exp(-over / (1.0h - knee)));
 
                 c.a = (_OpaqueAlpha > 0.5) ? 1.0 : a;
                 return c;
