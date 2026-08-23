@@ -170,6 +170,42 @@ public:
   // player to also exercise the protocol's error paths -- never set for a normal menu launch.
   // Returns false if the player could not be started (already reported unless batchMode).
   bool ShowUnityRenderer(bool selfTest = false);
+
+  // WHICH VIEWPORT IS THE MAIN ONE for what is currently loaded.
+  //
+  // The Unity renderer takes the centre for the models it supports; everything else stays on the
+  // OpenGL canvas. Called after every model load, and when the View toggle changes, so the two
+  // can never disagree about who owns the middle of the window.
+  void UpdatePrimaryViewport();
+
+  // Open and start the Unity viewport at APP LAUNCH, before any model exists, so that picking
+  // the first creature does not also pay for starting a game engine. No-op in batch mode, when
+  // the user has turned the primary viewport off, or when no player build is installed.
+  void WarmStartUnityViewport();
+
+  // The parts of the viewer-first startup that involve NO player and NO IPC: hide the panes and
+  // take the screen. Safe to call before a client is loaded, which is the point -- see the note
+  // on WarmStartUnityViewport for why the player itself must wait.
+  void ApplyViewerStartupLayout();
+
+  // Show the Client Choice dialog and load whatever the user picks. This is the ONLY thing that
+  // loads a client now -- File > "Load World of Warcraft" calls it, and nothing calls it at
+  // startup. Loops so a failed legacy-MPQ pick returns to the dialog rather than giving up.
+  void PromptAndLoadClient();
+
+  // Put the OpenGL canvas back in the centre and the Unity pane back to a side pane.
+  void UncoverOpenGLViewport();
+
+  // Can the Unity viewport show what is currently loaded? Creature M2s, for now: no characters
+  // (no equipment pipeline yet) and nothing that is not an M2.
+  bool unityCanShowCurrentModel() const;
+
+  void OnUnityPrimaryViewport(wxCommandEvent & event);
+  void OnToggleFullScreen(wxCommandEvent & event);
+  void OnCharHook(wxKeyEvent & event);
+
+  // Borderless fullscreen that keeps the menu bar, so the mode can always be left.
+  void EnterViewerFullScreen(bool full);
   // Runtime command to the embedded Unity player: "this is the active model" (path +
   // FileDataID of the model on the canvas). No-op when no player is connected. Called after
   // every model load and when the player announces unityReady.

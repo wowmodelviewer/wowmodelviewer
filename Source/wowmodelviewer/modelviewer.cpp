@@ -1,4 +1,5 @@
 #include "modelviewer.h"
+#include "ClientChoiceDialog.h"   // File > Load World of Warcraft opens it
 
 #include "AnimationExportChoiceDialog.h"
 #include "AnimManager.h"
@@ -100,6 +101,9 @@ EVT_MENU(ID_SHOW_CHAR, ModelViewer::OnToggleDock)
 EVT_MENU(ID_SHOW_LIGHT, ModelViewer::OnToggleDock)
 EVT_MENU(ID_SHOW_MODEL, ModelViewer::OnToggleDock)
 EVT_MENU(ID_VIEW_UNITY_RENDERER, ModelViewer::OnUnityRenderer)
+EVT_MENU(ID_VIEW_UNITY_PRIMARY, ModelViewer::OnUnityPrimaryViewport)
+EVT_MENU(ID_VIEW_FULLSCREEN, ModelViewer::OnToggleFullScreen)
+EVT_CHAR_HOOK(ModelViewer::OnCharHook)
 // --
 //EVT_MENU(ID_SHOW_WIREFRAME, ModelViewer::OnToggleCommand)
 //EVT_MENU(ID_SHOW_BONES, ModelViewer::OnToggleCommand)
@@ -381,6 +385,9 @@ void ModelViewer::InitMenu()
   viewMenu->Append(ID_SHOW_MODEL, _("Show model control"));
   viewMenu->AppendSeparator();
   viewMenu->Append(ID_VIEW_UNITY_RENDERER, _("Unity Renderer"));
+  viewMenu->AppendCheckItem(ID_VIEW_UNITY_PRIMARY, _("Unity as main viewport"));
+  viewMenu->Check(ID_VIEW_UNITY_PRIMARY, unityPrimaryViewport);
+  viewMenu->Append(ID_VIEW_FULLSCREEN, _("Fullscreen\tF11"));
   if (canvas) {
     viewMenu->Append(ID_BG_COLOR, _("Background Color..."));
     viewMenu->AppendCheckItem(ID_BACKGROUND, _("Load Background\tCTRL+L"));
@@ -1149,6 +1156,9 @@ void ModelViewer::LoadModel(GameFile * file)
 
   // Embedded Unity renderer (if open): runtime command with the new active model.
   SendCurrentModelToUnity();
+
+  // ...and give it the centre of the window if it can show this model.
+  UpdatePrimaryViewport();
 }
 
 // Load an NPC model
@@ -1568,7 +1578,11 @@ bool ModelViewer::ShowUnityRenderer(bool selfTest)
     unityRendererHost = new UnityRendererHost(this, ID_UNITY_FRAME);
     interfaceManager.AddPane(unityRendererHost, buildUnityRendererPaneInfo());
     // Runtime IPC: as soon as the player announces itself, tell it what is on the canvas.
-    unityRendererHost->ipc()->onUnityReady = [this]() { SendCurrentModelToUnity(); };
+    unityRendererHost->ipc()->onUnityReady = [this]() {
+      if (unityRendererHost)
+        unityRendererHost->setPlayerReady(true);
+      SendCurrentModelToUnity();
+    };
   }
 
   // Show the pane first so the panel is realized at its docked size, then embed the player
@@ -1585,6 +1599,184 @@ bool ModelViewer::ShowUnityRenderer(bool selfTest)
     return false;
   }
   return true;
+}
+
+// Start the Unity viewport before it is needed.
+//
+// It used to be created and launched by the first model load that wanted it, which meant the user
+// picked a creature and then watched a game engine boot -- process start, engine init and the
+// player's own splash -- with the model appearing only afterwards. None of that has anything to do
+// with the model, so none of it belongs in front of one. Done here it happens while the user is
+// still looking at an empty app, and by the time a creature is picked the player is already
+// connected and waiting.
+//
+// Deliberately quiet: a missing player build is not worth a dialog at startup (the viewport is
+// still optional), so this checks for the exe itself rather than letting launch() complain. The
+// menu item still reports properly when the user asks for it explicitly.
+// The half of the viewer-first startup that touches NO player and NO IPC: hide the panes and take
+// the screen. Runs BEFORE the client is loaded, which is what makes the first thing on screen a
+// clean fullscreen viewer instead of a small window behind a dialog.
+void ModelViewer::ApplyViewerStartupLayout()
+{
+  if (batchMode || !unityPrimaryViewport || !canvas)
+    return;
+
+  // START AS A VIEWER, NOT AS A WORKBENCH. The file tree and the animation controls are how you
+  // drive the thing once you are using it, but on an empty application they are chrome around a
+  // viewport with nothing in it.
+  //
+  // Only HIDDEN, never removed: View > "Show file list" / "Show animation control" / "Show
+  // character control" bring each back, and they stay for the session. They are hidden again on
+  // the NEXT launch, deliberately -- "not visible by default on launch" is the point of the mode,
+  // so it starts clean every time rather than remembering the last time it was untidy.
+  interfaceManager.GetPane(fileControl).Show(false);
+  interfaceManager.GetPane(animControl).Show(false);
+  interfaceManager.GetPane(charControl).Show(false);
+  interfaceManager.Update();
+
+  // ...and take the screen. A viewer that opens in a small window in the corner is not one.
+  EnterViewerFullScreen(true);
+}
+
+// Start the player, at launch, before any client is loaded.
+//
+// Nothing it does needs game data: it talks to WMV over the local IPC channel and is told what to
+// show, so with nothing loaded it simply sits connected and idle on a dark viewport. That leaves
+// its one-second start-up overlapping the time the user spends deciding what to open, rather than
+// the moment they open it.
+//
+// Loading a client afterwards, with the player already running, is the normal case and was
+// verified as such -- unityReady lands in the middle of CASC and database initialisation and the
+// load completes untroubled. (The launch crash this branch had along the way was a double client
+// load, and it reproduced with no player running at all.)
+void ModelViewer::WarmStartUnityViewport()
+{
+  if (batchMode || !unityPrimaryViewport)
+    return;
+  if (!wxFileName::FileExists(UnityRendererHost::resolveUnityExePath()))
+  {
+    LOG_INFO << "Unity viewport not warm-started: no player build installed. The OpenGL canvas "
+                "remains the main viewport.";
+    return;
+  }
+
+  if (!ShowUnityRenderer())
+    return;                       // already reported; the OpenGL canvas keeps the centre
+
+  // Take the centre, so the viewport the user is going to use is the one they can see.
+  interfaceManager.DetachPane(unityRendererHost);
+  interfaceManager.AddPane(unityRendererHost, wxAuiPaneInfo().
+                           Name(wxT("unityRenderer")).Caption(wxT("Unity Renderer")).
+                           CenterPane().Show(true));
+  interfaceManager.GetPane(canvas).Show(false);
+  interfaceManager.Update();
+}
+
+// Borderless fullscreen, keeping the MENU BAR.
+//
+// Dropping the caption removes the window's own close and restore buttons, so without the menu
+// there would be no visible way back out -- and no way to reach View > "Unity as main viewport"
+// either. Keeping it costs one strip of chrome and means the mode can always be left: F11 or Esc
+// from anywhere, or View > Fullscreen.
+void ModelViewer::EnterViewerFullScreen(bool full)
+{
+  if (IsFullScreen() == full)
+    return;
+  ShowFullScreen(full, wxFULLSCREEN_NOBORDER | wxFULLSCREEN_NOCAPTION);
+}
+
+void ModelViewer::OnToggleFullScreen(wxCommandEvent & WXUNUSED(event))
+{
+  EnterViewerFullScreen(!IsFullScreen());
+}
+
+// Esc leaves fullscreen. Only that -- it is a way out, not a shortcut for anything else, and it
+// does nothing at all when the window is not fullscreen.
+void ModelViewer::OnCharHook(wxKeyEvent & event)
+{
+  if (event.GetKeyCode() == WXK_ESCAPE && IsFullScreen())
+  {
+    EnterViewerFullScreen(false);
+    return;
+  }
+  event.Skip();
+}
+
+// Creature M2s only, for now. A character needs the equipment pipeline the Unity viewport does
+// not have yet, and a WMO is not an M2 at all -- both stay where they already render correctly.
+bool ModelViewer::unityCanShowCurrentModel() const
+{
+  if (!canvas || !canvas->model() || !canvas->model()->gamefile)
+    return false;
+  if (canvas->wmo)
+    return false;
+  return !isChar;
+}
+
+// Hand the centre of the window to whichever viewport should own it.
+//
+// This is a ROUTING change, not a renderer swap: the OpenGL canvas still loads the model, still
+// owns the animation clock, and is still what every Send*ToUnity call reads from. It keeps
+// running when it is not the visible one -- its timer is independent of whether the pane is
+// shown, and it has already initialised by the time any model is loaded -- which matters,
+// because the playback state the Unity viewport mirrors is driven from ModelCanvas::tick.
+//
+// So the OpenGL viewport is never torn down, only uncovered: View > "Unity as main viewport"
+// hands the centre straight back to it for comparison, and unsupported models never leave it.
+void ModelViewer::UpdatePrimaryViewport()
+{
+  if (!canvas)
+    return;
+
+  // A non-interactive run keeps the viewport it was given. -mo screenshots and the OpenGL
+  // regression render through the canvas and must not have a player process appear underneath
+  // them; -unityipctest opens the Unity viewport explicitly and is unaffected by this.
+  if (batchMode)
+    return;
+
+  const bool wantUnity = unityPrimaryViewport && unityCanShowCurrentModel();
+
+  if (wantUnity)
+  {
+    // Launching can fail (no player build, or a broken one). ShowUnityRenderer has already told
+    // the user why; the centre simply stays where it is rather than going blank.
+    if (!ShowUnityRenderer())
+    {
+      LOG_INFO << "Unity viewport unavailable -- the OpenGL canvas remains the main viewport.";
+      UncoverOpenGLViewport();
+      return;
+    }
+
+    interfaceManager.DetachPane(unityRendererHost);
+    interfaceManager.AddPane(unityRendererHost, wxAuiPaneInfo().
+                             Name(wxT("unityRenderer")).Caption(wxT("Unity Renderer")).
+                             CenterPane().Show(true));
+    // The canvas is hidden, NOT stopped: see the note above.
+    interfaceManager.GetPane(canvas).Show(false);
+    interfaceManager.Update();
+    return;
+  }
+
+  UncoverOpenGLViewport();
+}
+
+// Put the OpenGL canvas back in the centre, and the Unity pane back to being a side pane.
+void ModelViewer::UncoverOpenGLViewport()
+{
+  interfaceManager.GetPane(canvas).Show(true);
+  if (unityRendererHost)
+  {
+    const bool wasRunning = unityRendererHost->isRunning();
+    interfaceManager.DetachPane(unityRendererHost);
+    interfaceManager.AddPane(unityRendererHost, buildUnityRendererPaneInfo().Show(wasRunning));
+  }
+  interfaceManager.Update();
+}
+
+void ModelViewer::OnUnityPrimaryViewport(wxCommandEvent & event)
+{
+  unityPrimaryViewport = event.IsChecked();
+  UpdatePrimaryViewport();
 }
 
 void ModelViewer::SendCurrentModelToUnity()
@@ -2035,7 +2227,47 @@ void ModelViewer::OnGameToggle(wxCommandEvent &event)
 {
   int ID = event.GetId();
   if (ID == ID_LOAD_WOW)
-    LoadWoW();
+    PromptAndLoadClient();
+}
+
+// Choosing and loading a client, on request.
+//
+// This used to run itself at startup, which is why it lived in app.cpp; it does not any more --
+// the application opens on an empty viewer and waits to be told which client to read. So the
+// picker belongs where the user asks for it, on the File menu, and this is the only path that
+// loads one.
+//
+// The load goes through the dialog's own commitDetectedSelection(), which is what settles the
+// data path: reading dataPath() without it returns an empty string, and CASC given an empty game
+// folder takes the application down with it. Nothing here second-guesses whether the load worked
+// afterwards -- LoadWoW reports its own failures, and the flag that looks like a success signal
+// (isWoWLoaded) is never actually assigned.
+void ModelViewer::PromptAndLoadClient()
+{
+  for (;;)
+  {
+    ClientChoiceDialog clientDlg(this);
+    if (clientDlg.ShowModal() != wxID_OK)
+    {
+      LOG_INFO << "Client Choice dialog dismissed without loading a client.";
+      return;
+    }
+
+    if (clientDlg.isLegacyMpq())
+    {
+      // Legacy (pre-CASC) MoPaQ client -- the shared helper shows the folder picker and loads it,
+      // exactly like File -> Load Legacy MPQ Client... <=0 means cancelled or no archives (the
+      // helper shows its own error) -> back to the picker.
+      if (PromptAndLoadLegacyMpqClient() <= 0)
+        continue;
+      return;
+    }
+
+    gamePath = clientDlg.dataPath();
+    core::GameConfig chosen = clientDlg.selectedConfig();
+    LoadWoW(&chosen, clientDlg.selectedProfile(), true /* show loading progress */);
+    return;
+  }
 }
 
 // Quietly refresh the CASC file list so files added by new client patches resolve by name

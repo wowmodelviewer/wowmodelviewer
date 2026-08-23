@@ -77,9 +77,22 @@ public:
   // fallback. Called from the host frame's OnClose and from the destructor.
   void shutdown();
 
+  // The player has connected and announced itself, so its window is up and this panel's own
+  // painting is no longer what the user sees. Until then the panel says what it is waiting for
+  // rather than showing an empty rectangle.
+  void setPlayerReady(bool ready);
+  bool isPlayerReady() const { return m_playerReady; }
+
 private:
   void OnSize(wxSizeEvent & event);
   void OnSetFocus(wxFocusEvent & event);
+  void OnPaint(wxPaintEvent & event);
+
+  // False until the player reports in. Only affects what this panel paints underneath it.
+  bool m_playerReady = false;
+  // When the process was started, so the log can say how long the user waited for it. That
+  // number is the whole reason the viewport is started at app launch rather than on demand.
+  unsigned long m_launchedAtMs = 0;
 
   // The player does not follow the parent's size on its own; the host must resize the
   // embedded child window whenever the panel resizes (it fills the whole client area).

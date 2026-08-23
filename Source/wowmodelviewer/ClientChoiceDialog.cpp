@@ -256,15 +256,26 @@ void ClientChoiceDialog::onProductChanged(wxCommandEvent &)
     selectProfileForVersion(m_configs[sel].version);
 }
 
+// What "Load" means, with no UI attached to it. See the header.
+bool ClientChoiceDialog::commitDetectedSelection()
+{
+  if (m_configs.empty() || !m_product || m_product->GetSelection() < 0)
+    return false;
+  const wxString root = m_folder ? m_folder->GetValue() : wxString();
+  if (root.IsEmpty() || !wxDirExists(root))
+    return false;
+  m_dataPath = dataPathOf(root);
+  return true;
+}
+
 void ClientChoiceDialog::onLoad(wxCommandEvent &)
 {
-  if (m_configs.empty() || m_product->GetSelection() < 0)
+  if (!commitDetectedSelection())
   {
     wxMessageBox(wxT("Please choose a World of Warcraft folder with a detected client."),
                  wxT("Client Choice"), wxOK | wxICON_INFORMATION, this);
     return;
   }
-  m_dataPath = dataPathOf(m_folder->GetValue());
   EndModal(wxID_OK);
 }
 

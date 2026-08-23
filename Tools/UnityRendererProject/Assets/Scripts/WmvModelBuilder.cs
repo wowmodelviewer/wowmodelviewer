@@ -136,7 +136,7 @@ public static class WmvModelBuilder
     {
         static bool parsed;
         static bool flipV, forceOpaque, forceSolid, matColors, showHidden, ownShader;
-        static bool noSkin, skinCheck, noAnim, animCheck;
+        static bool noSkin, skinCheck, noAnim, animCheck, placeholder, overlay;
 
         static void Parse()
         {
@@ -159,6 +159,8 @@ public static class WmvModelBuilder
                 else if (a == "-wmvSkinCheck") skinCheck = true;
                 else if (a == "-wmvNoAnim") noAnim = true;
                 else if (a == "-wmvAnimCheck") animCheck = true;
+                else if (a == "-wmvPlaceholder") placeholder = true;
+                else if (a == "-wmvOverlay") overlay = true;
             }
             if (flipV || forceOpaque || forceSolid || matColors || showHidden || ownShader ||
                 noSkin || skinCheck || noAnim || animCheck)
@@ -179,6 +181,26 @@ public static class WmvModelBuilder
         public static bool SkinCheck { get { Parse(); return skinCheck; } }
         public static bool NoAnim { get { Parse(); return noAnim; } }
         public static bool AnimCheck { get { Parse(); return animCheck; } }
+
+        /// <summary>
+        /// Draw the spinning proof-of-life cube while no model is loaded (-wmvPlaceholder).
+        ///
+        /// It existed to show that the embedded player was alive at all, back when that was the
+        /// open question. It is off by default now: this viewport is what the user looks at, and
+        /// a rotating grey box is a test object, not an empty viewer.
+        /// </summary>
+        public static bool Placeholder { get { Parse(); return placeholder; } }
+
+        /// <summary>
+        /// Draw the on-screen status lines (-wmvOverlay).
+        ///
+        /// They narrate what the renderer is doing -- connecting, loading, which animation --
+        /// which is exactly right while bringing it up and exactly wrong in a viewer, where the
+        /// first thing the user sees should be the model and not a commentary on it. The lines
+        /// are still WRITTEN TO THE LOG either way, so nothing diagnostic is lost by not drawing
+        /// them; this only decides whether they are painted over the viewport.
+        /// </summary>
+        public static bool Overlay { get { Parse(); return overlay; } }
     }
 
     static readonly Color[] DebugColors =

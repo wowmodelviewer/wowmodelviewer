@@ -166,16 +166,23 @@ public class WmvMain : MonoBehaviour
         lightGo.transform.rotation = Quaternion.Euler(50f, -30f, 0f);
         RenderSettings.ambientLight = new Color(0.35f, 0.35f, 0.4f);
 
-        // Proof-of-life until a real model arrives. Its default material comes from the
-        // built-in resources, which a player build may have stripped (that is what makes an
-        // untouched primitive render magenta), so give it the same shader the model builder
-        // resolved rather than leaving a confusing magenta cube on screen.
-        placeholder = GameObject.CreatePrimitive(PrimitiveType.Cube);
-        placeholder.name = "WMV Placeholder";
-        placeholder.AddComponent<WmvSpin>();
-        var placeholderShader = WmvModelBuilder.ResolveShader(s => Debug.Log("WMV: " + s));
-        if (placeholderShader != null)
-            placeholder.GetComponent<MeshRenderer>().material = new Material(placeholderShader);
+        // Proof-of-life until a real model arrives -- OFF unless asked for (-wmvPlaceholder).
+        // It answered "is the embedded player alive?", which stopped being the open question a
+        // long time ago; what is left is a grey box spinning in the middle of the viewer before
+        // the user has chosen anything. An empty viewport should look empty.
+        //
+        // Its default material comes from the built-in resources, which a player build may have
+        // stripped (that is what makes an untouched primitive render magenta), so it still gets
+        // the shader the model builder resolved rather than rendering magenta when it IS asked for.
+        if (WmvModelBuilder.Debug_.Placeholder)
+        {
+            placeholder = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            placeholder.name = "WMV Placeholder";
+            placeholder.AddComponent<WmvSpin>();
+            var placeholderShader = WmvModelBuilder.ResolveShader(s => Debug.Log("WMV: " + s));
+            if (placeholderShader != null)
+                placeholder.GetComponent<MeshRenderer>().material = new Material(placeholderShader);
+        }
 
         status = gameObject.AddComponent<WmvStatusOverlay>();
         status.Set("Starting ...");
@@ -890,6 +897,11 @@ public class WmvStatusOverlay : MonoBehaviour
 
     void OnGUI()
     {
+        // Silent unless asked for: see WmvModelBuilder.Debug_.Overlay. Set() still logs, so a run
+        // can be read afterwards without the viewport having been written on during it.
+        if (!WmvModelBuilder.Debug_.Overlay)
+            return;
+
         if (style == null)
         {
             style = new GUIStyle(GUI.skin.label) { fontSize = 14, richText = false };

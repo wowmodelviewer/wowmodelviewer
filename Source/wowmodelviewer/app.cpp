@@ -14,7 +14,6 @@
 
 #include <windows.h>
 
-#include "ClientChoiceDialog.h"
 #include "ExporterPlugin.h"
 #include "Game.h"
 #include "GameFolder.h" // core::GameConfig
@@ -443,6 +442,62 @@ static void doHeadlessUnityIpcTest(ModelViewer * frame)
           }
           LOG_INFO << "[unityipc-test] external-anim check: drove" << externalDriven
                    << "sequence(s) whose keyframes are in .anim files";
+
+          // PRIMARY VIEWPORT. Promote the Unity viewport to the centre the way a model load does
+          // outside batch mode, then check the two things that could break: the canvas must keep
+          // ticking (it owns the clock the renderer mirrors) and the state pushes must keep
+          // arriving. A frozen canvas here would look exactly like a frozen Unity viewport.
+          {
+            const bool supported = frame->unityCanShowCurrentModel();
+
+            // CONTROL FIRST. If the clock is not running before the promotion either, then a
+            // stopped clock afterwards says nothing about hiding the canvas -- it says the canvas
+            // never started ticking in this run. Without this the measurement is unreadable.
+            const size_t ctrlBefore = mdl2->animManager->GetFrame();
+            const int ctrlStates = ipc->stats().statePushes;
+            for (int i = 0; i < 60; i++) { ipc->poll(); wxTheApp->Yield(true); wxMilliSleep(10); }
+            const size_t ctrlAfter = mdl2->animManager->GetFrame();
+            LOG_INFO << "[unityipc-test] primary-viewport CONTROL (OpenGL still centre): frame"
+                     << (int)ctrlBefore << "->" << (int)ctrlAfter
+                     << (ctrlAfter != ctrlBefore ? "(ticking)" : "(not ticking in this run)")
+                     << "| statePushes +" << (ipc->stats().statePushes - ctrlStates);
+
+            const size_t frameBefore = mdl2->animManager->GetFrame();
+            const int statesBefore = ipc->stats().statePushes;
+
+            // The promotion deliberately does nothing in batch mode, so lift that for the check:
+            // this must exercise the real path, not a stand-in for it.
+            const bool wasBatch = frame->batchMode;
+            frame->batchMode = false;
+            frame->UpdatePrimaryViewport();
+            frame->batchMode = wasBatch;
+            const bool hidden = !frame->interfaceManager.GetPane(frame->canvas).IsShown();
+            LOG_INFO << "[unityipc-test] primary-viewport check: supported=" << (supported ? 1 : 0)
+                     << "unityPrimaryViewport=" << (unityPrimaryViewport ? 1 : 0)
+                     << "openGLPaneHidden=" << (hidden ? 1 : 0);
+
+            for (int i = 0; i < 120; i++) { ipc->poll(); wxTheApp->Yield(true); wxMilliSleep(10); }
+            const size_t frameAfter = mdl2->animManager->GetFrame();
+            const int statesAfter = ipc->stats().statePushes;
+            const bool controlTicked = (ctrlAfter != ctrlBefore);
+            const bool tickedNow = (frameAfter != frameBefore);
+            // Read against the control, not on its own. A clock that was already still before the
+            // promotion says nothing about the promotion; only a clock that stopped BECAUSE of it
+            // would be a fault, and that is the comparison this reports.
+            LOG_INFO << "[unityipc-test]   canvas clock with Unity in the centre: frame"
+                     << (int)frameBefore << "->" << (int)frameAfter
+                     << (!controlTicked
+                         ? "(not measurable: the canvas does not tick in a headless run either --"
+                           " video.render is off, so this needs the GUI)"
+                         : (tickedNow ? "(still ticking -- unaffected by hiding the pane)"
+                                      : "(STOPPED BY THE PROMOTION -- regression)"))
+                     << "| statePushes +" << (statesAfter - statesBefore);
+
+            // Hand it back, so the rest of the run and any screenshot behave as before.
+            frame->UncoverOpenGLViewport();
+            LOG_INFO << "[unityipc-test]   OpenGL viewport restored: openGLPaneShown="
+                     << (frame->interfaceManager.GetPane(frame->canvas).IsShown() ? 1 : 0);
+          }
 
           // THE DROPDOWN PATH. AnimControl::OnAnim is what the user actually operates, and it is
           // NOT SelectAnimation: it stops the model, selects, and plays again. Only the selection
@@ -1203,37 +1258,16 @@ bool WowModelViewApp::OnInit()
   }
   else
   {
-    // Startup client picker. Loop so a failed legacy-MPQ load returns here instead of starting
-    // with no client; Cancel/close still exits without loading, exactly as before.
-    for (;;)
-    {
-      ClientChoiceDialog clientDlg(frame);
-      if (clientDlg.ShowModal() != wxID_OK)
-      {
-        LOG_INFO << "Client Choice dialog dismissed without loading a client.";
-        break;
-      }
-
-      if (clientDlg.isLegacyMpq())
-      {
-        // Legacy (pre-CASC) MoPaQ client -- the shared helper shows the folder picker and loads it
-        // (auto-detects Data subfolder + locale), exactly like File -> Load Legacy MPQ Client...
-        // <=0 means cancelled or no archives (the helper shows its own error) -> back to the picker.
-        if (frame->PromptAndLoadLegacyMpqClient() <= 0)
-          continue;
-      }
-      else
-      {
-        gamePath = clientDlg.dataPath();
-        core::GameConfig chosen = clientDlg.selectedConfig();
-        frame->LoadWoW(&chosen, clientDlg.selectedProfile(), true /* show loading progress */);
-      }
-      break; // a client loaded
-    }
+    // THE APPLICATION COMES UP AND WAITS. It opens as an empty fullscreen viewer -- no client
+    // read, no dialog asked, no question put to the user before they have even seen the program.
+    // Loading a client is something they do when they want to, through
+    // File > "Load World of Warcraft", which is the only thing that loads one now.
+    //
+    // Nothing here needs game data: the layout is layout, and the renderer talks to WMV rather
+    // than to the client, so it can sit connected and idle until there is something to show.
+    frame->ApplyViewerStartupLayout();
+    frame->WarmStartUnityViewport();
   }
-
-
-
 
   return true;
 }
@@ -1317,6 +1351,10 @@ void WowModelViewApp::LoadSettings()
   // executable, so a moved install keeps finding its bundled player.
   unityRendererPath = config.value("Tools/UnityRendererPath", "").toString().toStdWString();
 
+  // Which viewport is the main one. Defaults to the Unity renderer for the models it supports;
+  // View > "Unity as main viewport" turns it off and hands the centre back to the OpenGL canvas.
+  unityPrimaryViewport = config.value("Tools/UnityPrimaryViewport", true).toBool();
+
   // Optional override for the armory importer's proxy URL (the proxy holds the
   // Blizzard credentials server-side). Pushed into the core singleton so the Qt
   // importer plugin can read it; empty -> the plugin uses its built-in default.
@@ -1343,6 +1381,7 @@ void WowModelViewApp::SaveSettings()
   config.setValue("Settings/DefaultFormat", imgFormat);
 
   config.setValue("Tools/UnityRendererPath", QString::fromWCharArray(unityRendererPath.c_str()));
+  config.setValue("Tools/UnityPrimaryViewport", unityPrimaryViewport);
 
   config.setValue("Armory/ProxyURL", QString::fromStdString(GLOBALSETTINGS.armoryProxyURL()));
   config.sync();
