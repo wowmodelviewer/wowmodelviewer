@@ -17,6 +17,7 @@ wxString bgImagePath;
 wxString armoryPath;
 wxString customDirectoryPath;
 wxString unityRendererPath;
+bool unityPrimaryViewport = true;
 int customFilesConflictPolicy = 0;
 int displayItemAndNPCId = 0;
 

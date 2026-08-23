@@ -18,7 +18,38 @@ IMPLEMENT_CLASS(UnityRendererHost, wxPanel)
 BEGIN_EVENT_TABLE(UnityRendererHost, wxPanel)
   EVT_SIZE(UnityRendererHost::OnSize)
   EVT_SET_FOCUS(UnityRendererHost::OnSetFocus)
+  EVT_PAINT(UnityRendererHost::OnPaint)
 END_EVENT_TABLE()
+
+// What the viewport area shows before the player's own window covers it: nothing but the
+// player's own background colour.
+//
+// Deliberately silent. The wait is about a second and the viewer is meant to look like a viewer,
+// so a caption explaining that a renderer is starting would be on screen for exactly as long as
+// it takes to read and would be the first thing the user ever sees. A dark rectangle that becomes
+// the model is better than a dark rectangle that announces itself first, and matching the
+// player's background means the handover is not a visible flash either.
+//
+// Failures are not silent -- they are reported where they can be acted on: the viewport falls
+// back to the OpenGL canvas and the reason goes to the log (and to a dialog when the user asked
+// for the Unity viewport explicitly).
+void UnityRendererHost::OnPaint(wxPaintEvent & WXUNUSED(event))
+{
+  wxPaintDC dc(this);
+  dc.SetBackground(wxBrush(wxColour(35, 31, 32)));
+  dc.Clear();
+}
+
+void UnityRendererHost::setPlayerReady(bool ready)
+{
+  if (m_playerReady == ready)
+    return;
+  m_playerReady = ready;
+  if (ready && m_launchedAtMs != 0)
+    LOG_INFO << "Unity renderer ready" << (int)(GetTickCount() - m_launchedAtMs)
+             << "ms after launch.";
+  Refresh(false);
+}
 
 UnityRendererHost::UnityRendererHost(wxWindow * parent, wxWindowID id)
 {
@@ -141,6 +172,8 @@ bool UnityRendererHost::launch(bool showErrors, bool selfTest)
   m_process = pi.hProcess;
   m_processId = pi.dwProcessId;
   m_embeddedWnd = nullptr;
+  m_launchedAtMs = GetTickCount();
+  m_playerReady = false;
 
   LOG_INFO << "Unity renderer player started (pid" << (int)m_processId << "):"
            << QString::fromWCharArray(cmdLine.c_str());

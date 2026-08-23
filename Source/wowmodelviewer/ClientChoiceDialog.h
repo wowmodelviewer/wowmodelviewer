@@ -36,6 +36,16 @@ public:
   // load), the same code path as File -> Load Legacy MPQ Client... The CASC fields above are unused.
   bool isLegacyMpq() const { return m_legacyMpq; }
 
+  // Commit the current selection exactly as pressing Load does, but without any UI: settles
+  // m_dataPath from the chosen folder so dataPath()/selectedConfig()/selectedProfile() are all
+  // answerable. False when there is nothing usable to commit, which is when the dialog has to be
+  // shown after all.
+  //
+  // onLoad() is implemented in terms of this, so the button and the silent path cannot drift:
+  // whatever "pressing Load" means, this is it. Reading dataPath() WITHOUT calling it returns an
+  // empty string, which is how a startup auto-load once handed CASC an empty game folder.
+  bool commitDetectedSelection();
+
 private:
   void buildUI(const wxString & initialRoot);
   void detect(const wxString & rootFolder);         // parse .build.info -> populate fields

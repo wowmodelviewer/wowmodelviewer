@@ -5,6 +5,55 @@ Format loosely based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+### Changed
+- **Nothing loads until you ask it to.** Launching opens an empty fullscreen viewer; the client is
+  chosen from File > "Load World of Warcraft", which is now the only path in the application that
+  loads one. Previously the picker was the first thing on screen, and briefly after that the saved
+  client was loaded silently instead — both are gone in favour of the program simply opening and
+  waiting.
+- **Double-clicking the exe no longer opens a dialog first.** (Fixed on the way: the first cut
+  of this crashed on launch, twice over. The silent load read the picker's chosen folder without
+  the picker ever having committed one — that value is only settled when Load is pressed — so CASC
+  was handed an empty game folder. And it then checked `isWoWLoaded` to decide whether the load had
+  worked, which is a flag whose only assignment sits inside a commented-out block: always false, so
+  a perfectly good load looked like a failure and the client was loaded a SECOND time on top of the
+  first. Both paths now go through the dialog's own commit, and the auto-load stops where pressing
+  Load stops.) The client picker was the first
+  thing on screen: the main window existed but was small, the modal sat on top of it, and the app
+  only filled the screen once the user had answered a question. The window now goes fullscreen and
+  the renderer starts warming BEFORE anything modal, and the picker is skipped entirely when it has
+  nothing to ask — it already seeds itself from the saved folder and detects the client, so pressing
+  Load was the only thing left to do. It still appears when there is a real question (first run, a
+  moved install), centred over a running application, and File > Client Choice is untouched.
+- **Unity-primary startup is now viewer-first.** An interactive launch opens maximised on the
+  viewport alone: file tree, animation controls and character pane start hidden (View brings any of
+  them back, and F11 gives real fullscreen). The viewport area is plain dark while the player
+  starts — the "Starting Unity renderer..." caption is gone, because a message that is on screen
+  for exactly as long as it takes to read is worse than nothing being there. And the spinning
+  placeholder cube no longer appears at all unless `-wmvPlaceholder` asks for it: it was there to
+  prove the embedded player was alive, which stopped being the question a long time ago.
+- **The Unity viewport is now the main one for creature models, and it is ready before you need
+  it.** The renderer is started when the application starts rather than when the first creature is
+  picked. It is a game engine and takes about a second to come up (~1.1 s, measured); started on
+  demand, that second sat between picking a creature and seeing it, which made loading a model look
+  slow when the model had nothing to do with it. While it starts, the viewport says
+  "Starting Unity renderer..." rather than showing an empty rectangle. The player is also now built
+  with its splash screen disabled — a "Made with Unity" logo belongs in a game, not in the middle
+  of a model viewer — so the logo is gone rather than merely moved.
+- **The Unity viewport is now the main one for creature models.** Opening a creature puts the
+  Unity renderer in the centre of the window instead of leaving it as a side pane you had to go
+  and find. The OpenGL canvas is not removed, replaced, or stopped -- it is uncovered:
+  View > "Unity as main viewport" hands the centre straight back to it for comparison, the
+  preference is remembered, and anything the Unity viewport cannot show yet never leaves it.
+  **This is a routing change, not a renderer swap, and deliberately so.** The OpenGL canvas still
+  loads the model, still owns the animation clock, and is still what every push to the Unity
+  renderer reads from; the Unity viewport mirrors it. Making it the visible one is therefore a
+  question of which pane holds the centre, not of moving ownership -- which is what keeps this
+  small enough to be safe.
+  What still belongs to OpenGL: characters (no equipment pipeline yet), WMOs, anything that is not
+  an M2, every screenshot and image-sequence path, and every headless run -- a non-interactive
+  run keeps the viewport it was given, so `-mo` regressions render exactly as they did.
+
 ### Fixed
 - **Embedded Unity renderer: the viewport no longer holds for about a second after every animation
   change.** The dropdown handler does three things -- `Stop()`, then select, then `Play()` -- and

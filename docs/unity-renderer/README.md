@@ -25,6 +25,71 @@ Concretely:
   message while the app — and the legacy OpenGL viewport — carry on unchanged. "Optional"
   describes the current migration stage, not the destination.
 
+## Which viewport owns the centre
+
+The Unity renderer is the **main viewport for the models it supports** -- creature M2s. Loading one
+puts it in the centre of the window; View > "Unity as main viewport" turns that off and hands the
+centre back to the OpenGL canvas, and the choice is remembered (`Tools/UnityPrimaryViewport` in
+Config.ini).
+
+**It is started when the app starts, not when a model needs it.** The player is a game engine: it
+takes about a second to come up (measured at ~1.1 s to the point where it reports ready). Started on
+first use, the user picked a creature and then watched that happen, with the model appearing
+afterwards — so the wait was attributed to the model, which had nothing to do with it. Starting it
+during app launch spends the same second while the user is still looking at an empty application,
+and the first creature goes straight into a player that is already connected. Until it reports in,
+the pane paints "Starting Unity renderer..." on the player's own background colour, so the handover
+is not a visible flash and an empty viewport never looks broken.
+
+**Nothing is loaded until you ask.** The application opens as an empty fullscreen viewer: no
+client is read and no dialog is put in front of you before you have seen the program. Choosing a
+client is File > "Load World of Warcraft", which opens the Client Choice dialog — and that is now
+the only thing in the application that loads one.
+
+**The application window comes up before anything else.** The client picker used to be the first
+thing on screen: the frame existed but was small and unremarkable, a modal dialog sat on top of it,
+and the viewer only took the screen after the user had answered. Now the window goes fullscreen and
+the renderer starts warming first, and the picker is not shown at all when there is nothing to ask
+— it seeds itself from the saved folder and detects the client in its constructor, so if that
+worked, loading it is exactly what pressing Load would have done. It still appears for a real
+question (first run, a moved install, a folder with no client in it), now centred over a running
+application, and File > Client Choice is unchanged.
+
+**Startup is viewer-first.** With the Unity viewport primary, an interactive launch opens
+maximised showing the viewport and nothing else: the file tree, animation controls and character
+pane start hidden, and the viewport area is plain dark until the player is up — no caption, no
+logo, no placeholder object. Every hidden pane is one item away on the View menu and stays for the
+session; the next launch starts clean again, which is the point of the mode. Launch goes straight to borderless fullscreen; F11 or Esc leaves it, and the menu bar
+survives it deliberately — without the caption there would otherwise be no visible way out, or
+back to View > "Unity as main viewport".
+
+**No test objects in a normal run.** The spinning cube that used to fill the viewport before a
+model was chosen is off unless `-wmvPlaceholder` is passed. It answered "is the embedded player
+alive at all?", which is no longer an open question; an empty viewer should look empty.
+
+**Build the player with the splash screen OFF.** `PlayerSettings.SplashScreen.show = false` (and
+`showUnityLogo = false`). A splash makes sense for a game; inside another application's window it is
+a game engine announcing itself in the middle of a model viewer. Unity 6 makes this optional for
+every licence tier, so there is no reason to keep it. A player built with it on still works — the
+user just sees the logo during app startup instead of during model selection.
+
+**The OpenGL canvas is never torn down, only uncovered.** It still loads the model, still owns the
+animation clock, and is still what every `Send*ToUnity` call reads from — the Unity viewport
+mirrors it rather than replacing it. Promoting it is therefore a routing change of one pane, not a
+renderer migration, and that is what makes the fallback trivial: the canvas is a `Show(true)` away.
+
+Deliberately still OpenGL:
+
+| | why |
+|---|---|
+| characters | no equipment pipeline in the Unity renderer yet |
+| WMOs, anything not an M2 | not modelled by the Unity renderer at all |
+| screenshots, image sequences, `-mo` runs | they render through the canvas; a non-interactive run keeps the viewport it was given |
+| comparison and debugging | one menu item away, on purpose |
+
+If the player cannot be launched (no build, or a broken one) the centre stays with the OpenGL
+canvas and the log says so — a missing Unity build costs you the new viewport, not the app.
+
 ## Responsibility split
 
 | WMV (wxWidgets application) | Unity (embedded player) |
