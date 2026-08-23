@@ -65,9 +65,106 @@ public class WmvM2Animator : MonoBehaviour
     }
 
     AnimatedBone[] bones = new AnimatedBone[0];
+
+    /// <summary>
+    /// Converted tracks, keyed by sequence index.
+    ///
+    /// Setup turns the parsed WoW tracks into the renderer's own space -- every key of every
+    /// moving bone, three tracks each -- and that conversion allocates. Doing it again each time
+    /// the user returns to an animation they have already watched is the last per-switch
+    /// allocation left after the parse and the fetch were dealt with, so it is kept too. The
+    /// entries hold this model's bone transforms, so the cache is dropped whenever the animator is
+    /// pointed at a different skeleton.
+    /// </summary>
+    readonly Dictionary<int, AnimatedBone[]> convertedBySequence = new Dictionary<int, AnimatedBone[]>();
+    Transform[] cachedFor;              // the skeleton the cache above belongs to
+    readonly Dictionary<int, int> globalCountBySequence = new Dictionary<int, int>();
     uint[] globalSequences = new uint[0];
     float lengthMs = 1f;
     double timeMs;
+
+    /// <summary>
+    /// Playback state, mirrored from the app. It is the app's clock that is authoritative: this
+    /// renderer runs its own only so the motion is smooth between the messages that carry it.
+    /// </summary>
+    bool playing = true;
+    float speed = 1f;
+
+    /// <summary>
+    /// How far this renderer's clock may sit from the app's before it is snapped.
+    ///
+    /// Two renderers timing themselves independently drift, and the app sends its position on a
+    /// slow heartbeat to correct that. Snapping on every message would trade the drift for a
+    /// visible stutter once a second, so a small difference is left alone -- at 30 frames a second
+    /// one frame is 33 ms, and a difference under that cannot be seen.
+    /// </summary>
+    const float TimeSnapToleranceMs = 40f;
+
+    /// <summary>
+    /// After a sequence change, how long until the animation actually MOVES again?
+    ///
+    /// This is the measurement the switching work needed and did not have. Timing the switch
+    /// itself only ever showed the parse and the fetch; what a viewer notices is whether the model
+    /// starts moving on the next frame or stands there. Those are different questions, and for a
+    /// while the answer to the second was "up to a second" while the first said "one millisecond".
+    ///
+    /// Reports the frames AND the milliseconds, so a hold is distinguishable from a stall: if
+    /// frames keep counting while the time stands still, the renderer is running fine and the
+    /// animation is being held -- which is what a missing playback-state push looks like.
+    /// Diagnostics only, under -wmvAnimCheck.
+    /// </summary>
+    int advanceWatchFrame = -1;
+    float advanceWatchStart;
+    int advanceWatchFrames;
+
+    public void BeginAdvanceWatch()
+    {
+        if (!WmvModelBuilder.Debug_.AnimCheck)
+            return;
+        advanceWatchFrame = Time.frameCount;
+        advanceWatchStart = Time.realtimeSinceStartup;
+        advanceWatchFrames = 0;
+    }
+
+    void AdvanceWatchTick(double before, double dt)
+    {
+        if (advanceWatchFrame < 0)
+            return;
+        advanceWatchFrames++;
+        if (timeMs != before)
+        {
+            Debug.Log(string.Format(
+                "WMV: anim: moving again {0} frame(s) / {1:F0} ms after the switch "
+                + "(playing={2} speed={3:F2}, frame time {4:F1} ms)",
+                Time.frameCount - advanceWatchFrame,
+                (Time.realtimeSinceStartup - advanceWatchStart) * 1000.0, playing, speed, dt));
+            advanceWatchFrame = -1;
+            return;
+        }
+        // A model the app has PAUSED is supposed to stand still; that is the feature, not a fault.
+        // Stop watching rather than reporting it.
+        if (!playing || speed <= 0f)
+        {
+            advanceWatchFrame = -1;
+            return;
+        }
+        // Rendering, told to play, and still not moving. Said once, loudly: it means the app never
+        // told this renderer to resume, and it will sit here until something does.
+        if (advanceWatchFrames == 30)
+            Debug.LogWarning(string.Format(
+                "WMV: anim: still not moving {0} frames / {1:F0} ms after the switch -- frames ARE "
+                + "running, so the animation is being HELD (playing={2} speed={3:F2})",
+                advanceWatchFrames, (Time.realtimeSinceStartup - advanceWatchStart) * 1000.0,
+                playing, speed));
+    }
+
+    /// <summary>How many corrections were needed, out of how many state messages. Reported with
+    /// each correction, because that ratio is what says whether the two clocks keep step.</summary>
+    public int SnapCount { get; private set; }
+    public int StateUpdates { get; private set; }
+
+    public bool IsPlaying { get { return playing; } }
+    public float Speed { get { return speed; } }
 
     /// <summary>Sequence index and AnimId, for the log and for nothing else.</summary>
     public int SequenceIndex { get; private set; }
@@ -93,6 +190,28 @@ public class WmvM2Animator : MonoBehaviour
         M2Sequence seq = model.Sequences[SequenceIndex];
         AnimId = seq.AnimId;
         lengthMs = seq.Length > 0 ? seq.Length : 1f;
+
+        // A different skeleton invalidates everything converted against the previous one.
+        if (!ReferenceEquals(cachedFor, boneTransforms))
+        {
+            convertedBySequence.Clear();
+            cachedFor = boneTransforms;
+        }
+
+        AnimatedBone[] already;
+        if (convertedBySequence.TryGetValue(SequenceIndex, out already))
+        {
+            bones = already;
+            GlobalSequenceTrackCount = globalCountBySequence.ContainsKey(SequenceIndex)
+                ? globalCountBySequence[SequenceIndex] : 0;
+            timeMs = 0.0;
+            if (log != null)
+                log(string.Format("anim: sequence [{0}] animId {1}{2}, {3} ms, {4} bone(s) move "
+                                  + "(tracks already converted)",
+                                  SequenceIndex, AnimId, AnimId == 0 ? " (Stand)" : "",
+                                  lengthMs, bones.Length));
+            return;
+        }
 
         var kept = new List<AnimatedBone>();
         int globalTracks = 0;
@@ -123,6 +242,8 @@ public class WmvM2Animator : MonoBehaviour
 
         bones = kept.ToArray();
         GlobalSequenceTrackCount = globalTracks;
+        convertedBySequence[SequenceIndex] = bones;
+        globalCountBySequence[SequenceIndex] = globalTracks;
 
         if (log != null)
         {
@@ -150,11 +271,91 @@ public class WmvM2Animator : MonoBehaviour
     void LateUpdate()
     {
         double dt = Time.deltaTime * 1000.0;
+
+        // GLOBAL SEQUENCES KEEP RUNNING WHILE THE ANIMATION IS PAUSED, and ignore the speed. That
+        // is not an oversight copied by accident: the legacy viewport advances its global clock
+        // before it decides whether the animation is paused, and its speed multiplier lives inside
+        // the animation tick alone (ModelCanvas::tick / AnimManager::Tick). A torch keeps
+        // flickering while the creature is held still.
         GlobalTimeMs += dt;
-        timeMs += dt;
-        if (timeMs >= lengthMs)
-            timeMs -= Math.Floor(timeMs / lengthMs) * lengthMs;
+
+        double beforeTimeMs = timeMs;
+
+        if (playing)
+        {
+            timeMs += dt * speed;
+            if (timeMs >= lengthMs)
+                timeMs -= Math.Floor(timeMs / lengthMs) * lengthMs;
+            else if (timeMs < 0.0)
+                timeMs += Math.Ceiling(-timeMs / lengthMs) * lengthMs;
+        }
         ApplyPose((float)timeMs);
+        AdvanceWatchTick(beforeTimeMs, dt);
+    }
+
+    /// <summary>
+    /// Mirror the app's playback state.
+    ///
+    /// Play/pause and speed are taken as given -- they are state, not measurements. The TIME is
+    /// treated as a correction rather than an assignment: it is only applied when this renderer's
+    /// own clock has drifted further than a frame away from it, because the app sends its position
+    /// on a heartbeat and snapping to every one would replace smooth motion with a periodic jump.
+    /// An explicit change (a scrub, a stop, a new selection) arrives with the app's time already
+    /// far from this one, so it snaps naturally without needing to be flagged as special.
+    /// </summary>
+    /// <summary>
+    /// Apply play/pause and speed WITHOUT touching the clock.
+    ///
+    /// Those two are the app's state, not the sequence's: they stay true while a switch is still
+    /// resolving, or has landed somewhere other than what was asked for. The position is the one
+    /// thing that would be wrong to carry across in those cases, so it is left alone.
+    /// </summary>
+    public void SetTransportOnly(bool isPlaying, float playbackSpeed)
+    {
+        playing = isPlaying;
+        speed = playbackSpeed > 0f ? playbackSpeed : 0f;
+        if (!playing)
+            ApplyPose((float)timeMs);
+    }
+
+    public void SetPlaybackState(bool isPlaying, float timeFromApp, float playbackSpeed)
+    {
+        StateUpdates++;
+        if (WmvModelBuilder.Debug_.AnimCheck)
+            Debug.Log(string.Format("WMV: anim state #{0}: playing={1} timeMs={2:F0} speed={3:F2} " +
+                                    "(mine {4:F0})", StateUpdates, isPlaying, timeFromApp,
+                                    playbackSpeed, timeMs));
+        playing = isPlaying;
+        speed = playbackSpeed > 0f ? playbackSpeed : 0f;
+
+        if (lengthMs > 0f)
+        {
+            float mine = (float)timeMs;
+            float theirs = timeFromApp % lengthMs;
+            if (theirs < 0f) theirs += lengthMs;
+            // Measure the SHORT way round the loop: 10 ms and (length - 10) ms are 20 ms apart,
+            // not a whole sequence apart, and a plain subtraction would snap on every wrap.
+            float diff = Math.Abs(mine - theirs);
+            if (diff > lengthMs * 0.5f)
+                diff = lengthMs - diff;
+            if (diff > TimeSnapToleranceMs)
+            {
+                timeMs = theirs;
+                SnapCount++;
+                // Logged every time, because it is rare by construction: an explicit change (a
+                // scrub, a stop) or genuine clock drift. A run that fills the log with these is
+                // telling you the two clocks are not keeping step, which is worth knowing.
+                Debug.Log(string.Format(
+                    "WMV: anim: clock corrected by {0:F0} ms -- was {1:F0}, app says {2:F0} " +
+                    "(correction {3} of {4} state update(s))",
+                    diff, mine, theirs, SnapCount, StateUpdates));
+            }
+        }
+
+        // A paused model still has to show the frame it is paused on -- LateUpdate will not pose it
+        // while playing is false, and the pose it is holding may be the one before the scrub.
+        if (!playing)
+            ApplyPose((float)timeMs);
     }
 
     /// <summary>

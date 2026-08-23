@@ -66,6 +66,41 @@ public class WmvMain : MonoBehaviour
     SkinJob skinJob;                  // in-flight skin change, if any
 
     /// <summary>
+    /// Bone tracks already read, keyed by sequence index.
+    ///
+    /// Reading a sequence's keyframes allocates its track arrays, and doing that again every time
+    /// the user returns to an animation they have already watched is both wasted work and -- more
+    /// to the point -- wasted garbage, which is what a switch is felt as. Cached, going back to a
+    /// sequence costs one dictionary lookup and no allocation at all.
+    ///
+    /// Bounded by what the user actually plays, and strictly lighter than the legacy viewport,
+    /// which reads EVERY sequence's tracks at load and holds them for the model's lifetime.
+    /// </summary>
+    readonly Dictionary<int, M2BoneDef[]> boneTrackCache = new Dictionary<int, M2BoneDef[]>();
+
+    /// <summary>
+    /// External .anim files already fetched, keyed by FileDataID. A sequence whose keyframes are
+    /// not in the .m2 needs its .anim bytes; fetching them again on every visit would put a
+    /// network round trip in front of an animation the renderer already has.
+    /// </summary>
+    readonly Dictionary<int, byte[]> animFileCache = new Dictionary<int, byte[]>();
+
+    /// <summary>The .anim fetch in flight, if any: requestId -> the sequence waiting on it.</summary>
+    readonly Dictionary<string, int> pendingAnimFetch = new Dictionary<string, int>();
+
+    /// <summary>
+    /// The last playback state the app sent, whether or not it could be applied when it arrived.
+    ///
+    /// A state message names the sequence it is about, and it used to be dropped whenever the
+    /// renderer was not already on that sequence. That is exactly the moment it matters most: a
+    /// selection that fell back to the idle, or one still waiting on its .anim file, would lose
+    /// the app's play/pause, speed and position entirely and keep whatever the previous animation
+    /// happened to be doing. Kept here, it can be applied to whatever ends up playing.
+    /// </summary>
+    WmvIpcClient.AnimationState lastAppState;
+    bool haveAppState;
+
+    /// <summary>
     /// The geoset numbers the displayed creature variant switches on, or null when the host has
     /// not reported any. Two variants of the same creature can differ by GEOMETRY rather than
     /// texture -- one horse's mane instead of another -- and this is what decides which submeshes
@@ -104,6 +139,13 @@ public class WmvMain : MonoBehaviour
         // The player is embedded in a host app whose window normally has focus; without this it
         // would pause immediately. (Also set Run In Background in Player Settings.)
         Application.runInBackground = true;
+
+        // Every Debug.Log otherwise walks and formats a full managed stack trace before writing
+        // the line -- for an ORDINARY log, on the main thread. This renderer logs what it decided
+        // about every batch, material, skin and animation, so that cost lands in the middle of the
+        // work it is describing. The traces stay on for warnings and errors, where something has
+        // actually gone wrong and the trace is the point.
+        Application.SetStackTraceLogType(LogType.Log, StackTraceLogType.None);
 
         var cam = Camera.main;
         if (cam == null)
@@ -145,6 +187,7 @@ public class WmvMain : MonoBehaviour
         ipc.OnModelTextures = HandleModelTextures;
         ipc.OnModelSkin = HandleModelSkin;
         ipc.OnModelAnimation = HandleModelAnimation;
+        ipc.OnModelAnimationState = HandleModelAnimationState;
     }
 
     // ---------------------------------------------------------------- load pipeline
@@ -163,6 +206,11 @@ public class WmvMain : MonoBehaviour
         // after this message, so the value is refilled before the .m2 arrives to be parsed.
         selectedSequence = -1;
         currentM2Bytes = null;
+        // Sequence indices and file ids mean nothing across models.
+        boneTrackCache.Clear();
+        animFileCache.Clear();
+        pendingAnimFetch.Clear();
+        haveAppState = false;
 
         job = new LoadJob { Path = path, FileDataID = fileDataID };
         status.Set("Requested " + (string.IsNullOrEmpty(path) ? ("fileDataID " + fileDataID) : path));
@@ -178,6 +226,13 @@ public class WmvMain : MonoBehaviour
         if (skinJob != null && skinJob.Pending.ContainsKey(r.requestId))
         {
             OnSkinTextureBytes(r);
+            return;
+        }
+        // An external .anim answer belongs to an animation change, not to a load.
+        int waitingSequence;
+        if (pendingAnimFetch.TryGetValue(r.requestId, out waitingSequence))
+        {
+            OnAnimFileBytes(r, waitingSequence);
             return;
         }
         if (job == null)
@@ -350,6 +405,11 @@ public class WmvMain : MonoBehaviour
             foreach (var kv in job.Textures) currentTextures[kv.Key] = kv.Value;
             skinJob = null;
 
+            // Ask for this creature's .anim files now rather than when one is first played, so no
+            // animation switch ever waits on a round trip. They arrive while the user is looking
+            // at the model, not while they are waiting for the animation they just picked.
+            PrefetchAnimFiles();
+
             orbit.Frame(built.Bounds);
 
             status.Set("Loaded " + job.Path);
@@ -402,33 +462,254 @@ public class WmvMain : MonoBehaviour
             return;
         }
 
+        SwitchToSequence(a.sequenceIndex);
+    }
+
+    /// <summary>
+    /// Show a different animation of the model already loaded.
+    ///
+    /// NOTHING is rebuilt here. The .m2 is not re-requested or re-parsed, the mesh, materials,
+    /// textures, geoset selection and skeleton are untouched, and the animator is re-bound to the
+    /// new tracks rather than recreated. Only loadWoWModel builds anything.
+    ///
+    /// Three ways this can go, cheapest first:
+    ///   1. the sequence has been played before  -> its tracks come from the cache, no allocation
+    ///   2. its keyframes are in the .m2         -> read them, cache them
+    ///   3. its keyframes are in a .anim file    -> fetch that once, then as (2)
+    /// The previous animation stays on screen throughout, including while a fetch is in flight.
+    /// </summary>
+    void SwitchToSequence(int sequenceIndex)
+    {
+        // -wmvNoAnim means nothing is going to be played, so nothing is worth reading or -- more
+        // to the point -- fetching. ApplySequence would refuse this anyway, but only after a .anim
+        // round trip had already been spent on a sequence that will not move a bone.
+        if (WmvModelBuilder.Debug_.NoAnim)
+            return;
+
+        // 1. Already read once. This becomes the common case as soon as the user goes back and
+        //    forth between a few animations, and it is deliberately the cheapest path there is:
+        //    no parse, no fetch, no allocation.
+        M2BoneDef[] cached;
+        if (boneTrackCache.TryGetValue(sequenceIndex, out cached))
+        {
+            long heapBefore = System.GC.GetTotalMemory(false);
+            int gcBefore = System.GC.CollectionCount(0);
+            var swc = System.Diagnostics.Stopwatch.StartNew();
+            currentModel.Bones = cached;
+            currentModel.AnimatedSequence = sequenceIndex;
+            currentModel.AnimationSkipReason = null;
+            ApplyResolvedSequence(sequenceIndex, "cached");
+            if (WmvModelBuilder.Debug_.AnimCheck)
+                Debug.Log(string.Format(
+                    "WMV: anim switch timing (cached): read 0 ms, total {0} ms, allocated {1} KB, "
+                    + "gen0 collections {2} (no reload, no fetch, no parse)",
+                    swc.ElapsedMilliseconds,
+                    (System.GC.GetTotalMemory(false) - heapBefore) / 1024,
+                    System.GC.CollectionCount(0) - gcBefore));
+            return;
+        }
+
+        // 3. Keys in a .anim file. Fetch it once; the switch completes when the bytes arrive.
+        int animFileId = M2Parser.ExternalAnimFileId(currentModel, sequenceIndex);
+        byte[] external = null;
+        if (animFileId != 0 && !animFileCache.TryGetValue(animFileId, out external))
+        {
+            foreach (int waiting in pendingAnimFetch.Values)
+                if (waiting == sequenceIndex)
+                    return;                          // already on its way
+            string req = ipc.RequestAssetByFileDataID(animFileId);
+            pendingAnimFetch[req] = sequenceIndex;
+            status.Set(string.Format("Animation {0}: fetching its .anim file ({1})",
+                                     sequenceIndex, animFileId));
+            return;
+        }
+
+        ReadAndApplySequence(sequenceIndex, external, animFileId == 0 ? "in-file" : "from .anim");
+    }
+
+    /// <summary>
+    /// Fetch every external .anim file this model names, as soon as it is built.
+    ///
+    /// A sequence whose keyframes are in a .anim used to fetch them the first time it was played,
+    /// which meant the FIRST switch to each such animation was deferred: the previous animation
+    /// stayed on screen until the bytes landed. Measured at 16-18 ms each -- about a frame, so not
+    /// a stall in itself, but it is the one part of a switch that is not instant, and there is no
+    /// reason for it to be on the interactive path at all. A creature names a handful of these
+    /// (Agronn 8, ~300 KB in total) and they are what its animations ARE.
+    ///
+    /// Everything else about it is unchanged: the bytes land in the same cache the on-demand path
+    /// fills, a sequence still falls back gracefully if its file never arrives, and nothing is
+    /// parsed until an animation actually asks for it.
+    /// </summary>
+    void PrefetchAnimFiles()
+    {
+        if (currentModel == null || WmvModelBuilder.Debug_.NoAnim)
+            return;
+        var wanted = new HashSet<int>();
+        foreach (var e in currentModel.AnimFileIds)
+            if (e.FileDataID > 0)
+                wanted.Add(e.FileDataID);
+        if (wanted.Count == 0)
+            return;
+        foreach (int fileId in wanted)
+        {
+            if (animFileCache.ContainsKey(fileId))
+                continue;
+            string req = ipc.RequestAssetByFileDataID(fileId);
+            pendingAnimFetch[req] = -1;          // -1: nothing is waiting on it, just fill the cache
+        }
+        Debug.Log(string.Format("WMV: anim: fetching {0} .anim file(s) up front so switching to "
+                                + "one never waits", wanted.Count));
+    }
+
+    /// <summary>The .anim bytes arrived. Cache them and finish the switch that was waiting.</summary>
+    void OnAnimFileBytes(WmvIpcClient.AssetResponse r, int sequenceIndex)
+    {
+        pendingAnimFetch.Remove(r.requestId);
+        if (sequenceIndex < 0 && (!r.ok || r.data == null))
+        {
+            pendingAnimFetch.Remove(r.requestId);
+            return;                              // a prefetch that failed; the switch will retry
+        }
+        if (!r.ok || r.data == null || r.data.Length == 0)
+        {
+            // Graceful for the viewer -- the previous animation keeps running rather than the
+            // model dropping to its rest pose -- but loud for whoever has to fix it. LogWarning
+            // rather than a status line: ordinary logs no longer carry a stack trace, and this is
+            // exactly the kind of thing worth having one for.
+            Debug.LogWarning(string.Format(
+                "WMV: anim: sequence {0} wanted .anim file {1}, which could not be read: {2}",
+                sequenceIndex, M2Parser.ExternalAnimFileId(currentModel, sequenceIndex),
+                r.error ?? "empty response"));
+            status.Set(string.Format("Animation {0}: its .anim file could not be read",
+                                     sequenceIndex));
+            return;
+        }
+        if (sequenceIndex < 0)
+        {
+            // A prefetch: nothing is waiting on it, it just belongs in the cache. The reply names
+            // the file, so it can be filed without a sequence to look it up from.
+            animFileCache[r.fileDataID] = r.data;
+            return;
+        }
+        int animFileId = M2Parser.ExternalAnimFileId(currentModel, sequenceIndex);
+        if (animFileId != 0)
+            animFileCache[animFileId] = r.data;
+        // Only apply if this is still what the app wants: the user may have moved on while the
+        // bytes were in flight.
+        if (sequenceIndex != selectedSequence)
+            return;
+        ReadAndApplySequence(sequenceIndex, r.data, "from .anim");
+    }
+
+    /// <summary>Read one sequence's bone tracks, cache them, and put them on screen.</summary>
+    void ReadAndApplySequence(int sequenceIndex, byte[] external, string source)
+    {
         try
         {
-            M2ParsedModel reparsed = M2Parser.Parse(currentM2Bytes, a.sequenceIndex);
-            if (WmvModelBuilder.ApplySequence(current, reparsed, s => Debug.Log("WMV: " + s)))
-            {
-                currentModel = reparsed;
-                // Report what is PLAYING, not what was asked for: a sequence whose keyframes are
-                // not in the .m2 falls back to the idle, and saying "animation 20" while the idle
-                // plays is the kind of log that costs an hour later.
-                int playing = reparsed.AnimatedSequence;
-                status.Set(string.Format("Animation {0} (animID {1}, {2} ms){3}",
-                                         playing, reparsed.Sequences[playing].AnimId,
-                                         reparsed.Sequences[playing].Length,
-                                         playing == a.sequenceIndex
-                                             ? "" : " -- fell back from " + a.sequenceIndex));
-                if (playing != a.sequenceIndex && reparsed.AnimationSkipReason != null)
-                    Debug.Log("WMV: anim: " + reparsed.AnimationSkipReason);
-            }
-            else
-            {
-                status.Set("Animation " + a.sequenceIndex + " could not be played");
-            }
+            // Time AND bytes. The time is what the switch costs now; the allocation is what it
+            // costs a frame or two later, when the collector runs -- and it is the collector, not
+            // the reading, that a viewer feels as a stutter.
+            long heapBefore = System.GC.GetTotalMemory(false);
+            int gcBefore = System.GC.CollectionCount(0);
+            var sw = System.Diagnostics.Stopwatch.StartNew();
+            M2Parser.ReadAnimationInto(currentM2Bytes, sequenceIndex, currentModel, external);
+            long readMs = sw.ElapsedMilliseconds;
+
+            // Cache under the sequence that RESOLVED, not the one asked for: a request that fell
+            // back to the idle must not be remembered as though it had played.
+            if (currentModel.AnimatedSequence >= 0)
+                boneTrackCache[currentModel.AnimatedSequence] = currentModel.Bones;
+
+            ApplyResolvedSequence(sequenceIndex, source);
+            if (WmvModelBuilder.Debug_.AnimCheck)
+                Debug.Log(string.Format(
+                    "WMV: anim switch timing ({0}): read {1} ms, total {2} ms, allocated {3} KB, "
+                    + "gen0 collections {4} (no reload, no mesh/material/texture rebuild)",
+                    source, readMs, sw.ElapsedMilliseconds,
+                    (System.GC.GetTotalMemory(false) - heapBefore) / 1024,
+                    System.GC.CollectionCount(0) - gcBefore));
         }
         catch (WowParseException e)
         {
+            Debug.LogWarning("WMV: anim: reading sequence " + sequenceIndex + " (" + source +
+                             ") failed: " + e.Message);
             status.Set("Animation change failed: " + e.Message);
         }
+    }
+
+    /// <summary>Bind whatever currentModel now holds, and say what is actually playing.</summary>
+    void ApplyResolvedSequence(int requested, string source)
+    {
+        if (!WmvModelBuilder.ApplySequence(current, currentModel, s => Debug.Log("WMV: " + s)))
+        {
+            status.Set("Animation " + requested + " could not be played");
+            return;
+        }
+        // Report what is PLAYING, not what was asked for: a sequence whose keyframes cannot be
+        // read falls back to the idle, and saying "animation 20" while the idle plays is the kind
+        // of log that costs an hour later.
+        int playing = currentModel.AnimatedSequence;
+        status.Set(string.Format("Animation {0} (animID {1}, {2} ms, {3}){4}",
+                                 playing, currentModel.Sequences[playing].AnimId,
+                                 currentModel.Sequences[playing].Length, source,
+                                 playing == requested ? "" : " -- fell back from " + requested));
+        if (playing != requested && currentModel.AnimationSkipReason != null)
+            Debug.Log("WMV: anim: " + currentModel.AnimationSkipReason);
+
+        // The app's playback state applies to whatever is now on screen. Without this a switch
+        // starts from the animator's own defaults -- playing, at 1x -- which is wrong whenever the
+        // app is paused or the speed slider is not at 1, and is not corrected until the next
+        // heartbeat. The heartbeat is meant to correct DRIFT, not to start the animation.
+        if (haveAppState && current.Animator != null)
+            current.Animator.SetPlaybackState(lastAppState.playing,
+                                              lastAppState.sequenceIndex == playing
+                                                  ? lastAppState.timeMs : 0f,
+                                              lastAppState.speed);
+        // Watch whether it actually starts moving; see WmvM2Animator.BeginAdvanceWatch.
+        if (current.Animator != null)
+            current.Animator.BeginAdvanceWatch();
+    }
+
+    /// <summary>
+    /// WMV's playback state changed, or the heartbeat arrived. Hand it to the animator, which
+    /// decides what to do with the time.
+    ///
+    /// Nothing here rebuilds or re-parses anything: play/pause, speed and position are the app's
+    /// state, and the renderer already has everything needed to act on them. A state message for a
+    /// sequence the renderer is not playing is ignored rather than acted on -- the selection push
+    /// that switches to it will arrive with its own state.
+    /// </summary>
+    void HandleModelAnimationState(WmvIpcClient.AnimationState s)
+    {
+        if (s.fileDataID != 0 && currentFileDataID != 0 && s.fileDataID != currentFileDataID)
+            return;                                     // about a different model
+        if (current == null || current.Animator == null)
+            return;                                     // nothing playing to apply it to
+        // Remember it even when it cannot be applied yet -- a deferred or fallen-back switch
+        // will ask for it as soon as it knows what is playing.
+        lastAppState = s;
+        haveAppState = true;
+
+        if (s.sequenceIndex >= 0 && current.Animator.SequenceIndex != s.sequenceIndex)
+        {
+            // Not about what is on screen. The play/pause and speed still are, though: they are
+            // the app's, not the sequence's, and dropping them here is what left a switch running
+            // at the wrong speed or moving while the app was paused.
+            current.Animator.SetTransportOnly(s.playing, s.speed);
+            return;
+        }
+
+        bool wasPlaying = current.Animator.IsPlaying;
+        float wasSpeed = current.Animator.Speed;
+        current.Animator.SetPlaybackState(s.playing, s.timeMs, s.speed);
+
+        // Only the changes worth reading are surfaced: the heartbeat would otherwise write a line
+        // a second for the whole session.
+        if (s.playing != wasPlaying)
+            status.Set(s.playing ? "Playing" : "Paused");
+        else if (System.Math.Abs(s.speed - wasSpeed) > 0.001f)
+            status.Set(string.Format("Speed {0:0.##}x", s.speed));
     }
 
     /// <summary>

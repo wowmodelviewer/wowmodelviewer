@@ -154,6 +154,8 @@ The response carries metadata only; bytes are still fetched with `getAssetByFile
   "geosets": [ 101 ], "hasGeosets": true }
 { "type": "modelAnimation", "fileDataID": 1521037, "sequenceIndex": 2, "animID": 0,
   "durationMs": 2000, "loop": true }
+{ "type": "modelAnimationState", "fileDataID": 1521037, "sequenceIndex": 2, "playing": true,
+  "timeMs": 840, "speed": 1.0, "loop": true }
 ```
 
 Semantics:
@@ -182,6 +184,66 @@ Semantics:
   only one sequence's keyframes are read at a time -- a boss has 109 of them. Nothing else moves:
   the mesh, its materials, its textures and its geoset selection are untouched by which animation
   is playing.
+- **Changing the animation reloads nothing.** `modelAnimation` re-reads one array -- the bone
+  tracks for the new sequence -- into the model already in memory, and touches nothing else. No
+  asset is requested for an in-file sequence, the .m2 is not parsed again, and the mesh, materials,
+  textures, geoset selection and skeleton are all left exactly as they are. `loadWoWModel` remains
+  the only path that builds anything. That split matters for more than tidiness: re-parsing the
+  whole file per selection allocated megabytes each time on a large model, and it was that garbage
+  -- collected a frame or two later -- that the viewport showed as a stutter.
+  **Everything a switch reads is then cached**, per sequence: the raw tracks, and the tracks
+  converted into the renderer's space. Returning to an animation already watched costs a dictionary
+  lookup and no allocation, which is what the user actually does when comparing two animations.
+- **Sequences whose keyframes live in a .anim file play too.** A sequence without flag 0x20 keeps
+  its track HEADERS in the .m2 -- counts and offsets, per sequence, exactly where an in-file
+  sequence keeps them -- but those offsets address a separate .anim file. The AFID chunk says which
+  file: `animId, subAnimId, fileId`, matched on BOTH ids because two sequences routinely share an
+  animId as sub-animations of one action. So playing one needs nothing but the right buffer to read
+  the entries from, which is precisely the split the legacy viewport makes
+  (`WoWModel::readAnimsFromFile` fills a map keyed by animID, and the track reader picks the buffer
+  from it). The bytes come over the existing asset channel and are cached per file, so a sequence is
+  fetched at most once per model. Without them the sequence falls back to the idle and says which
+  file it was waiting for. **This is what made Agronn's SitGroundDown play in the OpenGL viewport
+  and not in this one.**
+  Those files are fetched **when the model loads**, not when an animation first needs one. Fetching
+  on demand cost 16-18 ms of round trip on the first switch to each external animation, during
+  which the PREVIOUS animation stayed on screen -- so picking one did not appear to do anything
+  until it landed. A creature names a handful of them (Agronn 8, ~300 KB), they arrive while the
+  user is looking at the model, and no switch waits on one.
+- **The controls that change an animation also change whether it is RUNNING, and both have to be
+  pushed.** `AnimControl::OnAnim` stops the model, selects, and plays again; so do the loop control
+  and the load path. Only the selection used to push, so the renderer heard "not running" and
+  nothing after it, and held until the next heartbeat -- a half second to a second, on every model.
+  Each of those three now pushes the settled state after `Play()`. When adding a control that
+  touches playback, push after the transport has settled, not in the middle of it.
+- **A selection carries its playback state with it.** `modelAnimation` is followed immediately by
+  a `modelAnimationState` from the same control path, so the renderer knows whether to run the
+  animation it was just given, how fast, and from where -- without waiting on the heartbeat. The
+  heartbeat corrects DRIFT; it is not what starts an animation. Measured end to end, the state
+  arrives 0-2 ms after the selection.
+  The state is also **kept** rather than dropped when it cannot be applied yet. A selection that
+  falls back to the idle, or one still resolving, used to discard it entirely and leave the
+  previous animation's play/pause and speed in force. Play/pause and speed are the app's state, not
+  the sequence's, so they are applied regardless; only the position waits for the sequence it
+  belongs to.
+- `modelAnimationState` is **pushed, not requested**: it carries how that animation is being
+  played -- running or held, how fast, and where in the sequence the app is.
+  Unlike the skin and the animation choice there is **no single funnel** to hook: play, pause,
+  stop, clear, the two step buttons, the speed slider and the frame slider each change it, and the
+  time advances every frame with no control involved at all. So it is pushed two ways -- forced
+  from each of those controls, and on a **one-per-second heartbeat** from the canvas tick while
+  something is playing.
+  The heartbeat is the correction channel for two renderers timing themselves independently. The
+  **player** decides whether a given `timeMs` is worth acting on, because only it knows where its
+  own clock is: a difference under about a frame (40 ms) is ignored, and anything larger snaps. That
+  split is the whole design -- snapping to every message would trade drift for a visible stutter
+  once a second, and never snapping would let the two drift apart. A scrub or a stop arrives with
+  the app's time already far from the player's, so it snaps without needing to be marked special.
+  **Global sequences keep running while the animation is paused, and ignore the speed.** That is
+  the legacy viewport's own behaviour, not an accident: it advances its global clock before it
+  decides whether the animation is paused, and the speed multiplier lives inside the animation
+  tick alone (`ModelCanvas::tick`, `AnimManager::Tick`). A torch keeps flickering on a creature
+  held still.
 - `geosets` / `hasGeosets` ride along with both `modelTextures` and `modelSkin`, because a display
   variant can differ from another by **geometry** rather than texture. `creature/horse3/horse3.m2`
   is the worked example: three of its dropdown entries share one texture and differ only in
@@ -260,11 +322,13 @@ in-process, and shuts the player down. Result lines carry the `[unityipc-test]` 
   the validation models: 3.8e-6 units). Models whose bones live in a separate skeleton file are
   still drawn static, and say so.
 - Animation playback that follows the app: the viewport plays the animation WMV is playing,
-  switching with the dropdown. Bone tracks are evaluated the way the legacy evaluator does,
-  including the global sequences that run on their own clock. With nothing selected yet the
-  model's default idle plays -- the first sequence whose AnimId is "Stand", which is the same
-  choice the OpenGL viewport makes and is not sequence 0. A sequence whose keyframes are not in
-  the .m2 falls back to that idle and says so. `-wmvNoAnim` returns the model to the rest pose.
+  switching with the dropdown, and mirrors how it is being played -- play/pause, speed, and the
+  position in the sequence, including scrubbing the frame slider. Bone tracks are evaluated the
+  way the legacy evaluator does, including the global sequences that run on their own clock and
+  keep running while the animation is held. With nothing selected yet the model's default idle
+  plays -- the first sequence whose AnimId is "Stand", which is the same choice the OpenGL
+  viewport makes and is not sequence 0. A sequence whose keyframes are not in the .m2 falls back
+  to that idle and says so. `-wmvNoAnim` returns the model to the rest pose.
 - Bounds-driven camera framing, so a loaded model is visible immediately.
 
 **Not yet implemented**

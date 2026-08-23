@@ -317,6 +317,52 @@ that lives, and `WowParserTests` checks it against the matrix route rather than 
 algebra — a sign error there does not look subtly wrong, it looks like the model turning inside
 out.
 
+**Changing the animation is cheap on purpose.** A selection change re-reads the bone tracks for
+the new sequence into the model already loaded — `M2Parser.ReadAnimationInto` — and does nothing
+else. It does not re-parse the file, rebuild the mesh, rebuild materials or textures, or recreate
+the skeleton; the animator is re-bound to the new tracks. The MD21 slice the tracks are read from is
+cut once at load and kept, because cutting it again is by far the biggest allocation a switch could
+make. Only `loadWoWModel` builds anything.
+
+**And everything it reads is cached, per sequence.** Both the raw tracks (`WmvMain.boneTrackCache`)
+and the tracks converted into renderer space (`WmvM2Animator.convertedBySequence`). Going back to an
+animation already watched costs a dictionary lookup and allocates nothing — measured at 0 ms and 0
+collections — which matters because comparing two animations means switching between them
+repeatedly. The caches are keyed per model and dropped when a different model loads, since a
+sequence index means nothing across models.
+
+**Animations stored in .anim files.** A sequence without flag 0x20 keeps its track headers in the
+.m2 but its keyframe ENTRIES in a separate file, named by the AFID chunk. Those bytes are fetched
+over the ordinary asset channel the first time such a sequence is played and cached per file
+(`WmvMain.animFileCache`), so switching back never refetches. The parser reads the headers from the
+.m2 and the entries from the .anim — the same split the legacy viewport makes. A sequence whose
+.anim cannot be served falls back to the idle, names the file, and leaves the previous animation
+running rather than dropping the model to its rest pose.
+
+**Logging: ordinary lines carry no stack trace, anything wrong still does.** Unity captures and
+formats a full managed stack trace for every `Debug.Log`, on the main thread, before the line is
+written -- and this renderer logs what it decided about every batch, material, skin and animation,
+so that cost lands in the middle of the work it describes. `SetStackTraceLogType` turns it off for
+`LogType.Log` only. Warnings, errors, exceptions and assertions keep their traces, and the failure
+paths that used to report through the status overlay alone -- a .anim that could not be served, a
+track read that threw -- were raised to `LogWarning` so they stay debuggable rather than becoming
+one more untraced line.
+
+**Playback state comes from the app, not from here.** Whether the animation is running, how fast,
+and where it is are WMV's to decide; this renderer keeps its own clock only so the motion is smooth
+between the messages that carry them. Play/pause and speed are applied as given. The TIME is
+treated as a correction rather than an assignment: the app sends its position on a one-per-second
+heartbeat, and a difference under about a frame — 40 ms — is left alone. Snapping to every message
+would replace smooth motion with a stutter once a second; never snapping would let two
+independently-timed renderers drift apart. A scrub or a stop arrives with the app's time already
+far away, so it snaps with no special case. Every correction is logged with its size, because a run
+full of them means the two clocks are not keeping step.
+
+**Global sequences ignore all of it.** They keep running while the animation is paused and are not
+scaled by the speed, because that is what the legacy viewport does: it advances its global clock
+before it decides whether the animation is paused, and the speed multiplier lives inside the
+animation tick alone.
+
 **What is not animated.** Only bones. Texture animation, colour and transparency tracks, particles,
 ribbons and attachments are untouched, as is anything belonging to characters or equipment. A model
 whose idle keeps its keyframes in a separate `.anim` file is not animated and says so; over a
@@ -341,7 +387,7 @@ process inherits the environment:
 | `-wmvNoSkin` | build every model as a static mesh, as before skinning existed — the A/B for "did the skinned path change what I see?" |
 | `-wmvSkinCheck` | bake the skinned result and report the largest distance between a baked vertex and the position the file gave it. Pair it with `-wmvNoAnim`: a moving model is not in its rest pose |
 | `-wmvNoAnim` | do not play anything. The model is still skinned, and still sits in the rest pose the bind poses describe |
-| `-wmvAnimCheck` | sample the idle across its length and report how far the skinned mesh moves from its rest pose, next to the model's own size. Zero everywhere means nothing animates; a number far larger than the model means the rig is being applied wrongly — both look like an ordinary still frame otherwise |
+| `-wmvAnimCheck` | sample the idle across its length and report how far the skinned mesh moves from its rest pose, next to the model's own size. Zero everywhere means nothing animates; a number far larger than the model means the rig is being applied wrongly — both look like an ordinary still frame otherwise. Also logs every playback-state message the app sends, which is how to see what the transport controls actually pushed |
 
 Each model load also logs its UV sample, per-batch material/blend/texture-slot mapping, the alpha
 treatment per texture, which batches are hidden at rest and why, the resolved combiner and per-unit

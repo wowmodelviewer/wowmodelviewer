@@ -76,10 +76,15 @@ namespace Wmv.Wow
         /// wantedSequence names which animation's bone tracks to read; -1 asks for the model's
         /// default idle. Only one sequence is ever read (a track on disk is an array of
         /// per-sequence keyframe arrays, and a boss has hundreds), so playing a different one
-        /// means parsing again with a different answer here -- which is what the renderer does
-        /// when the app's animation selection changes.
+        /// means reading the bone tracks again with a different answer here.
+        ///
+        /// Changing the animation does NOT come back through here: it needs the bones and nothing
+        /// else, so it goes to ReadAnimationInto, which re-reads that one array and leaves the
+        /// vertices, textures, materials and lookups exactly as this call left them. See there for
+        /// why that distinction is worth having.
         /// </summary>
-        public static M2ParsedModel Parse(byte[] file, int wantedSequence = -1)
+        public static M2ParsedModel Parse(byte[] file, int wantedSequence = -1,
+                                          byte[] externalAnim = null)
         {
             if (file == null || file.Length < 8)
                 throw new WowParseException("m2: asset is empty or too small to hold a header");
@@ -95,6 +100,7 @@ namespace Wmv.Wow
                 md21Offset = chunks["MD21"].Offset;
                 md21Size = chunks["MD21"].Count;
 
+                model.AnimFileIds = ReadAnimFileIds(file, chunks);
                 model.SkinFileDataIDs = ReadIdChunk(file, chunks, "SFID");
                 model.TextureFileDataIDs = ReadIdChunk(file, chunks, "TXID");
                 int[] skeleton = ReadIdChunk(file, chunks, "SKID");
@@ -103,10 +109,20 @@ namespace Wmv.Wow
 
             // Work on the MD21 payload as its own address space -- offsets inside are relative
             // to it, so a slice keeps every later read honest about its bounds.
-            var payload = new byte[md21Size];
             if (md21Offset + md21Size > file.Length)
                 throw new WowParseException("m2: MD21 chunk extends past the end of the asset");
-            Buffer.BlockCopy(file, md21Offset, payload, 0, md21Size);
+            byte[] payload;
+            if (md21Offset == 0 && md21Size == file.Length)
+            {
+                payload = file;                     // unchunked: the file already IS the payload
+            }
+            else
+            {
+                payload = new byte[md21Size];
+                Buffer.BlockCopy(file, md21Offset, payload, 0, md21Size);
+            }
+            // Kept for ReadAnimationInto; see M2ParsedModel.Md21Payload for why.
+            model.Md21Payload = payload;
 
             var c = new ByteCursor(payload, "m2");
             if (payload.Length < MinHeaderSize)
@@ -149,9 +165,10 @@ namespace Wmv.Wow
             if (model.SkeletonFileDataID == 0)
             {
                 c.RequireArray(bones, BoneStride, "bones");
-                model.AnimatedSequence = ResolveSequence(model, file, chunks, wantedSequence,
+                model.AnimatedSequence = ResolveSequence(model, externalAnim, wantedSequence,
                                                         out model.AnimationSkipReason);
-                model.Bones = ReadBones(c, bones, model);
+                model.Bones = ReadBones(c, bones, model, ExternalFor(model, externalAnim));
+                model.RequiredAnimFileId = ExternalAnimFileId(model, model.AnimatedSequence);
             }
             else
             {
@@ -195,6 +212,94 @@ namespace Wmv.Wow
             ReadVisibilityTracks(c, model);
 
             return model;
+        }
+
+        /// <summary>
+        /// Re-read ONLY the bone animation for a different sequence, writing it into a model that
+        /// has already been parsed.
+        ///
+        /// Changing the displayed animation needs exactly four things: which sequence resolved,
+        /// the sequence table, the global sequences, and the bone tracks for that sequence. It
+        /// does not need the vertices, the textures, the materials, the texture lookups or the
+        /// visibility tracks -- none of those depend on which animation is playing, and on a model
+        /// of any size reading them again is most of the cost of a full parse. Doing that work on
+        /// every selection change is what made the viewport stutter when the user picked a new
+        /// animation from the dropdown.
+        ///
+        /// The model is updated IN PLACE rather than replaced, because the rest of it is still
+        /// live: the skin path reads model.Textures to decide which slots a variant's texture
+        /// feeds, and handing it a half-populated model would break selecting a skin after
+        /// selecting an animation.
+        ///
+        /// Throws WowParseException like Parse does; the caller keeps the previous animation.
+        /// </summary>
+        public static void ReadAnimationInto(byte[] file, int wantedSequence, M2ParsedModel model,
+                                             byte[] externalAnim = null)
+        {
+            if (model == null)
+                throw new WowParseException("m2: no parsed model to read an animation into");
+            if (file == null || file.Length < 8)
+                throw new WowParseException("m2: asset is empty or too small to hold a header");
+
+            // A skeleton-file model has no bone array of its own to re-read; it was never
+            // animated from this file and still is not.
+            if (model.SkeletonFileDataID != 0)
+            {
+                model.AnimationSkipReason = "its bones and animations live in a separate skeleton file";
+                model.AnimatedSequence = -1;
+                return;
+            }
+
+            var chunks = ReadChunks(file);
+
+            // Reuse the slice the load already cut. Cutting it again is the single biggest
+            // allocation an animation change could make -- megabytes on a large model, every
+            // time the selection changes -- and none of it is needed: the bytes have not moved.
+            byte[] payload = model.Md21Payload;
+            if (payload == null)
+            {
+                int md21Offset = 0, md21Size = file.Length;
+                if (chunks.Count > 0)
+                {
+                    if (!chunks.ContainsKey("MD21"))
+                        throw new WowParseException("m2: chunked asset without an MD21 chunk");
+                    md21Offset = chunks["MD21"].Offset;
+                    md21Size = chunks["MD21"].Count;
+                }
+                if (md21Offset + md21Size > file.Length)
+                    throw new WowParseException("m2: MD21 chunk extends past the end of the asset");
+                payload = new byte[md21Size];
+                Buffer.BlockCopy(file, md21Offset, payload, 0, md21Size);
+                model.Md21Payload = payload;
+            }
+            var c = new ByteCursor(payload, "m2");
+            if (payload.Length < MinHeaderSize)
+                throw new WowParseException(string.Format(
+                    "m2: header is truncated ({0} bytes, need at least {1})", payload.Length, MinHeaderSize));
+
+            c.Seek(OfsBones);
+            M2Array bones = c.ReadArray();
+            c.RequireArray(bones, BoneStride, "bones");
+
+            // Resolve against the sequence table the model already holds -- it does not change
+            // with the selection, and ResolveSequence reads it to decide whether the wanted
+            // sequence's keyframes are in this file at all.
+            model.AnimatedSequence = ResolveSequence(model, externalAnim, wantedSequence,
+                                                     out model.AnimationSkipReason);
+            model.Bones = ReadBones(c, bones, model, ExternalFor(model, externalAnim));
+            model.RequiredAnimFileId = ExternalAnimFileId(model, model.AnimatedSequence);
+        }
+
+        /// <summary>
+        /// The external bytes apply only when the sequence that actually resolved is the external
+        /// one. A request that fell back to the in-file idle must read the .m2, not the .anim that
+        /// was fetched for the sequence it could not play.
+        /// </summary>
+        static byte[] ExternalFor(M2ParsedModel model, byte[] externalAnim)
+        {
+            if (externalAnim == null || model.AnimatedSequence < 0)
+                return null;
+            return model.Sequences[model.AnimatedSequence].PrimarySequence ? null : externalAnim;
         }
 
         /// <summary>
@@ -401,8 +506,17 @@ namespace Wmv.Wow
         /// than left to blow up downstream -- the legacy viewport sanitises the same field for the
         /// same reason, since a bad parent otherwise recurses off the end of its bone vector.
         /// </summary>
-        static M2BoneDef[] ReadBones(ByteCursor c, M2Array arr, M2ParsedModel model)
+        /// <summary>
+        /// externalAnim, when given, holds the .anim file this sequence's keyframes live in. The
+        /// track HEADERS are still read from the .m2 either way -- only the entries they point at
+        /// come from the other buffer. That is exactly the split the legacy viewport makes.
+        /// </summary>
+        static M2BoneDef[] ReadBones(ByteCursor c, M2Array arr, M2ParsedModel model,
+                                     byte[] externalAnim)
         {
+            ByteCursor ext = externalAnim != null
+                ? new ByteCursor(externalAnim, "anim") : default(ByteCursor);
+            bool hasExt = externalAnim != null;
             int seq = model.AnimatedSequence;
             var bones = new M2BoneDef[arr.Count];
             for (int i = 0; i < arr.Count; i++)
@@ -420,11 +534,11 @@ namespace Wmv.Wow
                 if (seq >= 0)
                 {
                     bones[i].Translation = ReadTrack<WowVec3>(c, bone + OfsBoneTranslation, seq,
-                                                              Vec3Stride, ReadVec3);
+                                                              Vec3Stride, ReadVec3, ext, hasExt);
                     bones[i].Rotation = ReadTrack<WowQuat>(c, bone + OfsBoneRotation, seq,
-                                                           PackedQuatStride, ReadPackedQuat);
+                                                           PackedQuatStride, ReadPackedQuat, ext, hasExt);
                     bones[i].Scale = ReadTrack<WowVec3>(c, bone + OfsBoneScale, seq,
-                                                        Vec3Stride, ReadVec3);
+                                                        Vec3Stride, ReadVec3, ext, hasExt);
                 }
             }
 
@@ -482,7 +596,7 @@ namespace Wmv.Wow
         /// already treats an empty track as "hold the rest pose".
         /// </summary>
         static M2Track<T> ReadTrack<T>(ByteCursor c, int offset, int sequence, int valueStride,
-                                       ReadValue<T> readValue)
+                                       ReadValue<T> readValue, ByteCursor ext, bool hasExt)
         {
             M2Track<T> track = new M2Track<T>();
             track.Times = EmptyTimes;
@@ -510,8 +624,14 @@ namespace Wmv.Wow
             c.Seek(values.Offset + entry * NestedStride);
             M2Array keyValues = c.ReadArray();
 
+            // From here the offsets address the KEYFRAME buffer, which is the .anim file when
+            // this sequence's keys live outside the .m2, and the .m2 itself otherwise. Everything
+            // above -- the track header and the per-sequence arrays -- came from the .m2 in both
+            // cases, because that is where they are stored in both cases.
+            ByteCursor k = hasExt ? ext : c;
+
             int n = keyTimes.Count < keyValues.Count ? keyTimes.Count : keyValues.Count;
-            if (n <= 0 || !Fits(c, keyTimes.Offset, n, 4) || !Fits(c, keyValues.Offset, n, valueStride))
+            if (n <= 0 || !Fits(k, keyTimes.Offset, n, 4) || !Fits(k, keyValues.Offset, n, valueStride))
                 return track;
 
             // Hermite and Bezier store three values per key (the value and two tangents); this
@@ -519,7 +639,7 @@ namespace Wmv.Wow
             // to without their tangents. No bone track in the validation data uses either.
             int stride = (track.Interpolation == M2Interpolation.Hermite ||
                           track.Interpolation == M2Interpolation.Bezier) ? valueStride * 3 : valueStride;
-            if (!Fits(c, keyValues.Offset, n, stride))
+            if (!Fits(k, keyValues.Offset, n, stride))
                 return track;
 
             var t = new uint[n];
@@ -528,10 +648,10 @@ namespace Wmv.Wow
             {
                 for (int i = 0; i < n; i++)
                 {
-                    c.Seek(keyTimes.Offset + i * 4);
-                    t[i] = c.ReadUInt32();
-                    c.Seek(keyValues.Offset + i * stride);
-                    v[i] = readValue(c);
+                    k.Seek(keyTimes.Offset + i * 4);
+                    t[i] = k.ReadUInt32();
+                    k.Seek(keyValues.Offset + i * stride);
+                    v[i] = readValue(k);
                 }
             }
             catch (WowParseException)
@@ -590,8 +710,7 @@ namespace Wmv.Wow
         /// file, not this one, and following them here would read whatever happens to sit at those
         /// bytes of the model. Fetching .anim files is a later milestone.
         /// </summary>
-        static int ResolveSequence(M2ParsedModel model, byte[] file,
-                                   Dictionary<string, M2Array> chunks, int wanted,
+        static int ResolveSequence(M2ParsedModel model, byte[] externalAnim, int wanted,
                                    out string skipReason)
         {
             skipReason = null;
@@ -604,7 +723,8 @@ namespace Wmv.Wow
             if (wanted >= 0)
             {
                 string why = "there is no such sequence";
-                if (wanted < model.Sequences.Length && Playable(model.Sequences[wanted], file, chunks, out why))
+                if (wanted < model.Sequences.Length &&
+                    Playable(model.Sequences[wanted], model.AnimFileIds, externalAnim != null, out why))
                     return wanted;
                 skipReason = "the selected sequence " + wanted + " cannot be played (" + why +
                              "); falling back to the default idle";
@@ -621,7 +741,7 @@ namespace Wmv.Wow
             }
 
             string idleWhy;
-            if (!Playable(model.Sequences[idle], file, chunks, out idleWhy))
+            if (!Playable(model.Sequences[idle], model.AnimFileIds, false, out idleWhy))
             {
                 skipReason = (skipReason == null ? "" : skipReason + "; and ") +
                              "the default idle cannot be played either (" + idleWhy + ")";
@@ -639,8 +759,12 @@ namespace Wmv.Wow
         /// them proves nothing and reading them yields noise. The AFID lookup is kept as well
         /// because it can name the file the keys went to, which makes a better message.
         /// </summary>
-        static bool Playable(M2Sequence seq, byte[] file, Dictionary<string, M2Array> chunks,
-                             out string why)
+        /// <summary>
+        /// Can this sequence be played from what we hold? In-file sequences always can. One whose
+        /// keys live in a .anim can too, but only once those bytes have been fetched -- which is
+        /// why haveExternal is an argument rather than something guessed here.
+        /// </summary>
+        static bool Playable(M2Sequence seq, AfidEntry[] afids, bool haveExternal, out string why)
         {
             if (seq.Length == 0)
             {
@@ -649,37 +773,87 @@ namespace Wmv.Wow
             }
             if (!seq.PrimarySequence)
             {
-                why = HasExternalAnimFile(file, chunks, seq)
-                    ? "its keyframes are in a separate .anim file, which this milestone does not fetch"
-                    : "its keyframes are not stored in the .m2 (no 0x20 flag)";
+                if (haveExternal)
+                {
+                    why = null;
+                    return true;
+                }
+                why = HasAfidFor(afids, seq)
+                    ? "its keyframes are in a separate .anim file that has not been fetched yet"
+                    : "its keyframes are not stored in the .m2 (no 0x20 flag) and no .anim file is named for it";
                 return false;
             }
             why = null;
             return true;
         }
 
+        static bool HasAfidFor(AfidEntry[] afids, M2Sequence seq)
+        {
+            foreach (AfidEntry e in afids)
+                if (e.AnimId == seq.AnimId && e.SubAnimId == seq.SubAnimId)
+                    return true;
+            return false;
+        }
+
         /// <summary>Does the AFID chunk name an .anim file for this sequence?</summary>
-        static bool HasExternalAnimFile(byte[] file, Dictionary<string, M2Array> chunks, M2Sequence seq)
+        /// <summary>
+        /// Read AFID: animId(2) subAnimId(2) fileId(4) per entry. Empty when the chunk is absent,
+        /// which is every unchunked and most older models.
+        /// </summary>
+        static AfidEntry[] ReadAnimFileIds(byte[] file, Dictionary<string, M2Array> chunks)
         {
             M2Array afid;
             if (!chunks.TryGetValue("AFID", out afid))
-                return false;
-            // Each entry is animId(2) subAnimId(2) fileId(4).
-            for (int i = 0; i + 8 <= afid.Count; i += 8)
+                return EmptyAfid;
+            int n = afid.Count / 8;
+            if (n <= 0)
+                return EmptyAfid;
+            var list = new List<AfidEntry>(n);
+            for (int i = 0; i < n; i++)
             {
-                int o = afid.Offset + i;
-                if (o + 4 > file.Length)
+                int o = afid.Offset + i * 8;
+                if (o + 8 > file.Length)
                     break;
-                if (ReadUInt16At(file, o) == (ushort)seq.AnimId &&
-                    ReadUInt16At(file, o + 2) == (ushort)seq.SubAnimId)
-                    return true;
+                AfidEntry e;
+                e.AnimId = ReadUInt16At(file, o);
+                e.SubAnimId = ReadUInt16At(file, o + 2);
+                e.FileDataID = (int)ReadUInt32At(file, o + 4);
+                list.Add(e);
             }
-            return false;
+            return list.ToArray();
+        }
+
+        static readonly AfidEntry[] EmptyAfid = new AfidEntry[0];
+
+        /// <summary>
+        /// The external .anim FileDataID holding this sequence's keyframes, or 0 when they are in
+        /// the .m2. Matched on animId AND subAnimId, the way the legacy viewport matches them --
+        /// two sequences routinely share an animId as sub-animations of one action, and they have
+        /// separate .anim files.
+        /// </summary>
+        public static int ExternalAnimFileId(M2ParsedModel model, int sequenceIndex)
+        {
+            if (model == null || model.AnimFileIds.Length == 0 ||
+                sequenceIndex < 0 || sequenceIndex >= model.Sequences.Length)
+                return 0;
+            M2Sequence seq = model.Sequences[sequenceIndex];
+            if (seq.PrimarySequence)
+                return 0;                       // its keyframes are in the .m2
+            foreach (AfidEntry e in model.AnimFileIds)
+                if (e.AnimId == seq.AnimId && e.SubAnimId == seq.SubAnimId)
+                    return e.FileDataID;
+            return 0;
         }
 
         static ushort ReadUInt16At(byte[] file, int offset)
         {
             return (ushort)(file[offset] | (file[offset + 1] << 8));
+        }
+
+        static uint ReadUInt32At(byte[] file, int offset)
+        {
+            return (uint)(file[offset] | (file[offset + 1] << 8) |
+                          (file[offset + 2] << 16) | (file[offset + 3] << 24));
         }
 
         static M2TextureDef[] ReadTextures(ByteCursor c, M2Array arr, M2ParsedModel model)

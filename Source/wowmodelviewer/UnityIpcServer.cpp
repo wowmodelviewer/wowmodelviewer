@@ -358,6 +358,28 @@ void UnityIpcServer::sendModelAnimation(int m2FileDataID, int sequenceIndex, int
   queueJson(msg);
 }
 
+void UnityIpcServer::sendModelAnimationState(int m2FileDataID, int sequenceIndex, bool playing,
+                                             int timeMs, float speed, bool loop)
+{
+  if (!m_client || !m_unityReady || sequenceIndex < 0)
+    return;
+
+  QJsonObject msg;
+  msg["type"] = "modelAnimationState";
+  msg["fileDataID"] = m2FileDataID;
+  msg["sequenceIndex"] = sequenceIndex;
+  msg["playing"] = playing;
+  msg["timeMs"] = timeMs;
+  msg["speed"] = speed;
+  msg["loop"] = loop;
+  m_stats.statePushes++;
+  m_stats.lastState = QString("%1 %2ms x%3").arg(playing ? "playing" : "paused")
+                                            .arg(timeMs).arg(speed, 0, 'f', 2);
+  // Deliberately not logged per push: the heartbeat would bury everything else in the log. The
+  // counter and lastState above are what a diagnostic run reports.
+  queueJson(msg);
+}
+
 void UnityIpcServer::sendLoadWoWModel(const QString & path, int fileDataID, const QString & client)
 {
   QJsonObject msg;

@@ -205,6 +205,14 @@ namespace Wmv.Wow
     }
 
     /// <summary>A parsed M2 (the parts this milestone needs).</summary>
+    /// <summary>One AFID entry: which file holds animation (animId, subAnimId)'s keyframes.</summary>
+    public struct AfidEntry
+    {
+        public int AnimId;
+        public int SubAnimId;
+        public int FileDataID;
+    }
+
     public class M2ParsedModel
     {
         public string Name = "";
@@ -257,6 +265,38 @@ namespace Wmv.Wow
 
         /// <summary>Why no sequence was parsed, for the log. Null when one was.</summary>
         public string AnimationSkipReason;
+
+        /// <summary>
+        /// AFID: which external .anim file holds each animation's keyframes.
+        ///
+        /// A sequence without the 0x20 flag keeps its track HEADERS in the .m2 -- counts and
+        /// offsets, per sequence, exactly where an in-file sequence keeps them -- but those
+        /// offsets address the .anim file's bytes instead. So playing one needs nothing more than
+        /// the right buffer to read the entries out of, which is the same thing the legacy
+        /// viewport does (WoWModel::readAnimsFromFile fills an animfiles map keyed by animID, and
+        /// the track reader picks the buffer from it).
+        /// </summary>
+        public AfidEntry[] AnimFileIds = new AfidEntry[0];
+
+        /// <summary>
+        /// The external .anim FileDataID the CURRENTLY selected sequence needs, or 0 when its
+        /// keyframes are in the .m2. The renderer fetches this over the asset channel and hands
+        /// the bytes back to the parser.
+        /// </summary>
+        public int RequiredAnimFileId;
+
+        /// <summary>
+        /// The MD21 payload this model was parsed from, kept so that changing the animation can
+        /// re-read the bone tracks without copying it out of the file again.
+        ///
+        /// Offsets inside an .m2 are relative to the MD21 chunk, so reading it means working on
+        /// that slice as its own address space. Slicing it per animation change meant allocating
+        /// megabytes each time the user picked a different animation -- several MB per switch on a
+        /// boss -- and it is that garbage, not the reading, that the viewport showed as a stutter.
+        /// Holding the slice for as long as the model is displayed costs one buffer and makes the
+        /// switch allocate essentially nothing. Null on a model parsed before this was kept.
+        /// </summary>
+        public byte[] Md21Payload;
 
         /// <summary>
         /// The SKID chunk: the FileDataID of a separate skeleton (.skel) file. Non-zero means the

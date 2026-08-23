@@ -24,6 +24,7 @@
 //   modelTextures { requestId, ok, fileDataID, textures:[{ index, type, fileDataID, source }] }
 //   modelSkin     { fileDataID, textures:[...], geosets:[...], hasGeosets }        (pushed, no request)
 //   modelAnimation { fileDataID, sequenceIndex, animID, durationMs, loop }         (pushed, no request)
+//   modelAnimationState { fileDataID, sequenceIndex, playing, timeMs, speed, loop } (pushed, no request)
 //
 // getModelTextures exists because a modern M2 does not name its replaceable textures (a
 // creature skin's TXID entry is 0 and its texture array carries no filename) -- the skin comes
@@ -55,6 +56,7 @@ public class WmvIpcClient : MonoBehaviour
     public Action<ModelTexturesResponse> OnModelTextures;
     public Action<ModelTexturesResponse> OnModelSkin;          // pushed when the displayed skin changes
     public Action<AnimationSelection> OnModelAnimation;        // pushed when the displayed animation changes
+    public Action<AnimationState> OnModelAnimationState;       // pushed on play/pause/speed/time changes
     public Action<string> OnStatus;                            // human-readable connection/state text
 
     public bool Connected { get { return connected; } }
@@ -128,6 +130,20 @@ public class WmvIpcClient : MonoBehaviour
         public bool loop;
     }
 
+    /// <summary>
+    /// How the app is playing that animation. timeMs is where the app's own clock is; the player
+    /// decides whether that is far enough from its own to be worth snapping to.
+    /// </summary>
+    public struct AnimationState
+    {
+        public int fileDataID;
+        public int sequenceIndex;
+        public bool playing;
+        public int timeMs;
+        public float speed;
+        public bool loop;
+    }
+
     [Serializable] class MsgTexture
     {
         public int index;
@@ -157,6 +173,9 @@ public class WmvIpcClient : MonoBehaviour
         public int animID;
         public int durationMs;
         public bool loop;
+        public bool playing;
+        public int timeMs;
+        public float speed;
     }
 
     int port = -1;
@@ -292,6 +311,18 @@ public class WmvIpcClient : MonoBehaviour
             // reply, minus the requestId -- nothing asked for it.
             case "modelSkin":
                 OnModelSkin?.Invoke(ReadTextures(msg));
+                break;
+
+            case "modelAnimationState":
+                OnModelAnimationState?.Invoke(new AnimationState
+                {
+                    fileDataID = msg.fileDataID,
+                    sequenceIndex = msg.sequenceIndex,
+                    playing = msg.playing,
+                    timeMs = msg.timeMs,
+                    speed = msg.speed,
+                    loop = msg.loop,
+                });
                 break;
 
             case "modelAnimation":

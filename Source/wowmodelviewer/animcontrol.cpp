@@ -387,6 +387,7 @@ void AnimControl::UpdateModel(WoWModel *m)
       }
     }
     g_selModel->animManager->Play();
+    PushAnimationState();          // as in OnAnim: the selection was pushed while stopped
   }
   wmoList->Show(false);
   wmoLabel->Show(false);
@@ -1205,25 +1206,32 @@ void AnimControl::OnButton(wxCommandEvent &event)
 
   switch (event.GetId())
   {
+    // Every one of these changes what the viewport is doing without changing WHICH animation is
+    // selected, so each has to tell the embedded renderer itself -- there is no funnel to hang it
+    // on the way SelectAnimation covers the choice.
     case ID_PLAY :
         g_selModel->currentAnim = g_selModel->animManager->GetAnim();
         g_selModel->animManager->Play();
+        PushAnimationState();
         break;
     case ID_PAUSE :
         g_selModel->animManager->Pause();
+        PushAnimationState();
         break;
     case ID_STOP :
         g_selModel->animManager->Stop();
+        PushAnimationState();
         break;
     case ID_CLEARANIM :
         g_selModel->animManager->Clear();
+        PushAnimationState();
         break;
     case ID_ADDANIM :
         g_selModel->animManager->AddAnim(selectedAnim, loopList->GetSelection());
         break;
     case ID_PREVANIM :
         g_selModel->animManager->PrevFrame();
-        SetAnimFrame(g_selModel->animManager->GetFrame());
+        SetAnimFrame(g_selModel->animManager->GetFrame());   // pushes the new time itself
         break;
     case ID_NEXTANIM :
         g_selModel->animManager->NextFrame();
@@ -1320,6 +1328,11 @@ void AnimControl::OnAnim(wxCommandEvent &event)
           }
         }
         g_selModel->animManager->Play();
+        // Stop() paused the model before the selection, so the state that travelled with the
+        // selection said "not running". Play() undoes that in the app; without this it was
+        // never undone in the embedded renderer until the next heartbeat -- the half-second-
+        // odd hold the viewport showed after every animation change.
+        PushAnimationState();
         
         UpdateFrameSlider(g_selModel->anims[selectedAnim].length - 1, g_selModel->anims[selectedAnim].playSpeed);
       }
@@ -1427,6 +1440,7 @@ void AnimControl::OnLoop(wxCommandEvent &)
       }
     }
     g_selModel->animManager->Play();
+    PushAnimationState();          // as in OnAnim: the selection was pushed while stopped
   } 
 }
 
@@ -1625,6 +1639,25 @@ void AnimControl::SelectAnimation(int index, int loops)
     g_modelViewer->SendCurrentAnimationToUnity();
 }
 
+// The playback state has no single funnel to hook, so each control that changes it calls this.
+// Kept as one line here rather than repeated at every call site so the guard lives in one place.
+void AnimControl::PushAnimationState()
+{
+  if (g_modelViewer)
+    g_modelViewer->SendAnimationStateToUnity(true);
+}
+
+void AnimControl::pickAnimationLikeUser(int index)
+{
+  if (!animCList || index < 0 || index >= (int)animCList->GetCount())
+    return;
+  animCList->SetSelection(index);
+  wxCommandEvent pick(wxEVT_COMBOBOX, ID_ANIM);
+  pick.SetEventObject(animCList);
+  pick.SetInt(index);
+  OnAnim(pick);
+}
+
 int AnimControl::animationCount()
 {
   return animCList ? (int)animCList->GetCount() : 0;
@@ -1688,6 +1721,7 @@ void AnimControl::SetAnimSpeed(float speed)
   g_selModel->animManager->SetSpeed(speed);
   
   speedLabel->SetLabel(wxString::Format(_("Speed: %.1fx"), speed));
+  PushAnimationState();
 }
 
 void AnimControl::SetAnimFrame(size_t frame)
@@ -1699,6 +1733,9 @@ void AnimControl::SetAnimFrame(size_t frame)
 
   frameLabel->SetLabel(wxString::Format(_("Frame: %i"), frame));
   frameSlider->SetValue((int)frame);
+  // Scrubbing is the one case where the app's time jumps rather than advances, so the renderer
+  // has to be told: nothing about it is derivable from the clock it is running.
+  PushAnimationState();
 }
 
 void AnimControl::UpdateFrameSlider(int maxRange, int tickFreq)

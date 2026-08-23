@@ -5,6 +5,91 @@ Format loosely based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+### Fixed
+- **Embedded Unity renderer: the viewport no longer holds for about a second after every animation
+  change.** The dropdown handler does three things -- `Stop()`, then select, then `Play()` -- and
+  only the middle one told the renderer anything. So the state that travelled with the selection
+  said "this animation, and it is NOT running", `Play()` resumed the app without saying so, and the
+  Unity pane sat on the first frame until the one-per-second heartbeat came round. That is the
+  half-second-to-a-second hold, and it explains why it happened on every model, why it survived the
+  parse, fetch and cache work, and why no headless run ever saw it: the harness called
+  `SelectAnimation` directly, which is not the path the dropdown takes.
+  All three places with that shape now push the settled state after `Play()` -- the animation
+  dropdown, the loop control, and the selection made while a model loads. The heartbeat goes back
+  to being what it was meant to be: drift correction, not the thing that starts an animation.
+  Measured after the fix, animation time resumes **on the same frame as the switch, 0 ms later**,
+  and `-unityipctest` now drives the real dropdown handler and fails if the state that follows a
+  pick does not say the animation is running.
+
+- **Embedded Unity renderer: picking an animation takes effect at once.** Two things stood between
+  a selection and the animation actually starting, and both were found by timestamping the whole
+  path rather than reasoning about it.
+  First, a sequence whose keyframes live in a .anim file fetched them on the FIRST switch to it --
+  16-18 ms of round trip during which the PREVIOUS animation stayed on screen, so picking one
+  looked like nothing had happened. Those files are now fetched when the model loads (Agronn: 8
+  files, ~300 KB), so no switch waits on one; measured, zero switches are now deferred.
+  Second, the playback state that follows a selection was DISCARDED whenever the renderer was not
+  already on the sequence it named -- which is every fallback to the idle and every switch still
+  resolving. The app's play/pause and speed are properties of the app, not of the sequence, so they
+  are now applied regardless, and the position is applied as soon as it is known which sequence is
+  playing. Before, a switch in those cases kept the previous animation's transport until the next
+  heartbeat corrected it.
+  For the record, the selection itself was never the delay: WMV already pushed `modelAnimation` and
+  `modelAnimationState` from the same control path, and the renderer receives them **0-2 ms apart**.
+  The heartbeat corrects drift; it was never what started an animation.
+
+- **Embedded Unity renderer: animations stored in .anim files now play.** A creature sequence
+  without flag 0x20 keeps its track headers in the .m2 but its keyframes in a separate .anim file,
+  named by the AFID chunk. The Unity viewport used to detect that and fall back to the idle, so an
+  animation that played perfectly in the OpenGL viewport did nothing in the Unity one --
+  **Agronn's SitGroundDown** (sequence 37, animID 96, flags 0x81, 3533 ms) being the reported case.
+  The .anim bytes now travel over the ordinary asset channel and the parser reads the entries from
+  them while still reading the headers from the .m2, which is exactly the split the legacy viewport
+  makes. Agronn gains 6 such animations, valkier 8, chicken2 6. Each file is fetched at most once
+  per model. A sequence whose .anim cannot be served falls back to the idle, names the file, and
+  leaves the previous animation running.
+  Two of Agronn's sequences (36 and 40, animIDs 72 and 71) still fall back: they carry neither the
+  0x20 flag nor an AFID entry, so their keyframes are in no file at all. The legacy viewport has no
+  alias or replacement path either -- `NextAnimation` is only ever written to XML, never read -- so
+  it has nothing to play for them either.
+
+- **Embedded Unity renderer: switching animation no longer stutters.** Picking a different
+  animation used to re-parse the entire .m2 -- vertices, textures, materials, lookups and all --
+  to get at one thing: the bone tracks for the new sequence. It now reads just those, into the
+  model already in memory. Nothing is re-requested, nothing is rebuilt, and the mesh, materials,
+  textures, geoset selection and skeleton are left untouched; `loadWoWModel` stays the only path
+  that builds anything.
+  **The clock was never the whole story, which is why this needed measuring rather than guessing.**
+  The old path took 2-9 ms, too little to see. What the user could see was the GARBAGE: about
+  1-1.7 MB per switch, collected a frame or two later, landing as a hitch just as the new animation
+  started. The largest single piece of it was the MD21 slice the parser works in, copied out of the
+  file again on every selection; that slice is now cut once when the model loads and reused.
+  Per switch, measured over the validation models: 2.3 -> 0.1 ms and 1072 -> 108 KB (chicken2),
+  7.3 -> 0.0 ms and 512 -> 168 KB (horse3), 3.9 -> 0.4 ms and 1032 -> 244 KB (valkier),
+  9.4 -> 1.0 ms and 1680 -> 648 KB (shaboss_doubt).
+
+### Added
+- **Embedded Unity renderer: it now follows the transport controls too.** The viewport already
+  played the animation you picked; it now plays it the way you are playing it -- pause holds the
+  pane on the same frame, resume carries on from there, the speed slider changes its speed, and
+  dragging the frame slider scrubs it. A new `modelAnimationState` push carries whether the
+  animation is running, how fast, and where in the sequence the app is.
+  **This one had no funnel to hook.** Unlike the skin and the animation choice, playback state is
+  changed from seven places -- play, pause, stop, clear, the two step buttons, the speed slider and
+  the frame slider -- and the time advances every frame with no control involved at all. So it is
+  pushed both ways: forced from each of those controls, and on a one-per-second heartbeat from the
+  canvas tick while something is playing.
+  The heartbeat is a correction channel, not a stream, and the **player** decides what to do with
+  it: a time difference under about a frame (40 ms) is ignored and anything larger snaps. That split is
+  the design. Snapping to every message would trade drift for a visible stutter once a second;
+  never snapping would let two independently-timed renderers walk apart. A scrub or a stop arrives
+  with the app's time already far from the player's, so it snaps with no special case, and every
+  correction is logged with its size so a run full of them is visible as the symptom it is.
+  One inherited behaviour is reproduced rather than tidied: **global sequences keep running while
+  the animation is paused, and ignore the speed**. The legacy viewport advances its global clock
+  before it decides whether the animation is paused, and its speed multiplier lives inside the
+  animation tick alone -- so a torch keeps flickering on a creature held still, in both viewports.
+
 ### Added
 - **Embedded Unity renderer: it plays the animation you picked, not its own idle.** The viewport
   now follows WMV's animation dropdown -- pick Run, Death or an emote and the Unity pane switches

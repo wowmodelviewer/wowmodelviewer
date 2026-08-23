@@ -227,6 +227,7 @@ ModelViewer::ModelViewer()
   imageControl = NULL;
   settingsControl = NULL;
   unityRendererHost = NULL;
+  m_lastAnimStatePush = 0;
   animExporter = NULL;
   fileControl = NULL;
 
@@ -1636,6 +1637,58 @@ void ModelViewer::SendCurrentAnimationToUnity()
   unityRendererHost->ipc()->sendModelAnimation((int)m->gamefile->fileDataId(), index,
                                                m->anims[index].animID, (int)m->anims[index].length,
                                                true);
+  // A new selection restarts at frame 0 and keeps whatever play/pause and speed were in force;
+  // send that alongside so the renderer does not briefly run an animation the app has paused.
+  SendAnimationStateToUnity(true);
+}
+
+// Whether the animation is running, how fast, and where it is.
+//
+// This one has NO single funnel, unlike the skin and the animation choice. Play, pause, stop,
+// clear, the two step buttons, the speed slider and the frame slider all change it, and the time
+// advances every frame with no control involved at all. So it is pushed two ways: forced from each
+// of those controls, and on a slow heartbeat from the canvas tick while something is playing.
+//
+// The heartbeat exists because two renderers timing themselves independently drift apart; it is
+// the channel that corrects that. It is deliberately slow, and the PLAYER decides whether a given
+// timestamp is worth snapping to -- only it knows where its own clock is, and snapping on every
+// message would trade drift for jitter.
+void ModelViewer::SendAnimationStateToUnity(bool force)
+{
+  if (!unityRendererHost || !unityRendererHost->ipc() || !unityRendererHost->ipc()->isConnected())
+    return;
+  if (!canvas || !canvas->model() || !canvas->model()->gamefile)
+    return;
+  WoWModel * m = const_cast<WoWModel *>(canvas->model());
+  if (!m->animManager || m->anims.empty())
+    return;
+
+  const int index = (int)m->animManager->GetAnim();
+  if (index < 0 || index >= (int)m->anims.size())
+    return;
+
+  const bool playing = !m->animManager->IsPaused();
+  const float speed = m->animManager->GetSpeed();
+  const int timeMs = (int)m->animManager->GetFrame();
+
+  if (!force)
+  {
+    // Heartbeat. A paused model cannot drift, so it needs none; and the interval is long enough
+    // that this is a rounding error next to the asset traffic the same channel already carries.
+    if (!playing)
+      return;
+    const unsigned long now = timeGetTime();
+    if (m_lastAnimStatePush != 0 && (now - m_lastAnimStatePush) < ANIM_STATE_HEARTBEAT_MS)
+      return;
+    m_lastAnimStatePush = now;
+  }
+  else
+  {
+    m_lastAnimStatePush = timeGetTime();
+  }
+
+  unityRendererHost->ipc()->sendModelAnimationState((int)m->gamefile->fileDataId(), index,
+                                                    playing, timeMs, speed, true);
 }
 
 // Menu button press events
