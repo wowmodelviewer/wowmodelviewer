@@ -182,6 +182,15 @@ public:
   // dropdown's "[n]" suffix carries and what the animation manager takes.
   void SelectAnimation(int index, int loops);
 
+  // Tell the embedded Unity viewport the current play/pause, speed and time. Called by every
+  // control that changes any of them; see ModelViewer::SendAnimationStateToUnity.
+  void PushAnimationState();
+
+  // Pick an animation the way the USER does -- through the dropdown's own handler, which stops
+  // the model, selects, and plays again. Diagnostics only: SelectAnimation is the funnel for code,
+  // but only this path exercises what OnAnim does around it.
+  void pickAnimationLikeUser(int index);
+
   // Entries in the animation selector and one entry's label -- diagnostics only, mirroring
   // skinCount/skinName so the -unityipctest run can walk animations the same way.
   int animationCount();

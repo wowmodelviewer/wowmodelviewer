@@ -600,6 +600,112 @@ namespace Wmv.Wow.Tests
             Check(M2Parser.Parse(BuildAnimatedM2(new[] { (short)5, (short)0 }, standTrack: true,
                                                  noKeysInM2: 1)).AnimatedSequence == -1,
                   "select: an idle without the 0x20 flag is not played at all");
+
+            // Changing the animation goes through ReadAnimationInto, which re-reads the bone
+            // tracks and NOTHING else. It has to land on exactly what a full parse of the same
+            // sequence would have produced -- that equivalence is the whole basis for using the
+            // cheap path -- and it has to leave the rest of the model untouched, because the skin
+            // path keeps reading it.
+            M2ParsedModel live = M2Parser.Parse(file, 2);
+            M2TextureDef[] texturesBefore = live.Textures;
+            M2Vertex[] verticesBefore = live.Vertices;
+            byte[] payloadBefore = live.Md21Payload;
+
+            M2Parser.ReadAnimationInto(file, 1, live);
+            M2ParsedModel full = M2Parser.Parse(file, 1);
+            Check(live.AnimatedSequence == full.AnimatedSequence,
+                  "readInto: resolves the same sequence a full parse does");
+            Check(live.Bones.Length == full.Bones.Length,
+                  "readInto: reads the same number of bones");
+            Check(live.Bones[1].Rotation.HasData == full.Bones[1].Rotation.HasData &&
+                  live.Bones[2].Translation.HasData == full.Bones[2].Translation.HasData,
+                  "readInto: the tracks it reads match the full parse");
+            Check(ReferenceEquals(live.Textures, texturesBefore) &&
+                  ReferenceEquals(live.Vertices, verticesBefore),
+                  "readInto: leaves the mesh and texture data alone");
+            Check(ReferenceEquals(live.Md21Payload, payloadBefore),
+                  "readInto: reuses the payload rather than slicing a new one");
+
+            // Same fallbacks as the full parse, reported the same way.
+            M2Parser.ReadAnimationInto(file, 99, live);
+            Check(live.AnimatedSequence == 2 && live.AnimationSkipReason != null &&
+                  live.AnimationSkipReason.Contains("99"),
+                  "readInto: an out-of-range request falls back to the idle and says so");
+            M2Parser.ReadAnimationInto(file, 2, live);
+            Check(live.AnimatedSequence == 2 && live.AnimationSkipReason == null,
+                  "readInto: a playable request clears the previous skip reason");
+
+            // EXTERNAL .anim FILES. A sequence without the 0x20 flag keeps its track HEADERS in
+            // the .m2 -- counts and offsets, per sequence, exactly where an in-file sequence keeps
+            // them -- but those offsets address a .anim file's bytes. So the same headers are read
+            // either way, and only the buffer the entries come out of changes. Agronn's
+            // SitGroundDown is the model case: it plays in the legacy viewport and used to fall
+            // back to the idle here.
+            byte[] withAfid = BuildAnimatedM2(new[] { (short)5, (short)0 }, standTrack: true,
+                                              afidAnimId: 5, noKeysInM2: 0);
+            M2ParsedModel afidModel = M2Parser.Parse(withAfid, 1);
+            Check(afidModel.AnimFileIds.Length >= 1, "afid: the chunk is read into the model");
+            Check(M2Parser.ExternalAnimFileId(afidModel, 0) != 0,
+                  "afid: an external sequence reports the file that holds its keys");
+            Check(M2Parser.ExternalAnimFileId(afidModel, 1) == 0,
+                  "afid: an in-file sequence reports no external file");
+
+            // Without the bytes it still falls back, and says why -- now naming the fetch rather
+            // than claiming the milestone cannot do it.
+            M2ParsedModel notFetched = M2Parser.Parse(withAfid, 0);
+            Check(notFetched.AnimatedSequence == 1 && notFetched.AnimationSkipReason != null &&
+                  notFetched.AnimationSkipReason.Contains(".anim"),
+                  "afid: without the bytes the request still falls back to the idle");
+            Check(notFetched.RequiredAnimFileId != 0 ||
+                  M2Parser.ExternalAnimFileId(notFetched, 0) != 0,
+                  "afid: the file that would be needed is reported so it can be fetched");
+
+            // WITH the bytes it plays. The fixture's .anim carries the same keyframe bytes the
+            // .m2 would have, so the sequence resolves to itself rather than the idle.
+            byte[] animBytes = BuildAnimFileFor(withAfid);
+            M2ParsedModel fetched = M2Parser.Parse(withAfid, 0, animBytes);
+            Check(fetched.AnimatedSequence == 0,
+                  "afid: with the .anim bytes the requested sequence plays");
+            Check(fetched.AnimationSkipReason == null,
+                  "afid: and nothing is reported as skipped");
+
+            // ReadAnimationInto takes the same bytes, so switching to an external animation costs
+            // no more than switching to an in-file one.
+            M2ParsedModel live2 = M2Parser.Parse(withAfid, 1);
+            M2Parser.ReadAnimationInto(withAfid, 0, live2, animBytes);
+            Check(live2.AnimatedSequence == 0,
+                  "afid: ReadAnimationInto plays an external sequence too");
+
+            // Bytes fetched for a sequence that then falls back must NOT be read as though they
+            // belonged to the idle -- that would pose the model from the wrong file.
+            M2ParsedModel wrongWay = M2Parser.Parse(withAfid, 99, animBytes);
+            Check(wrongWay.AnimatedSequence == 1,
+                  "afid: an out-of-range request still falls back to the in-file idle");
+
+            // A skeleton-file model has no bone array in THIS file to re-read, so the request is
+            // refused rather than answered from whatever the header's bone array happens to hold.
+            M2ParsedModel skel = M2Parser.Parse(file, 2);
+            skel.SkeletonFileDataID = 4242;
+            M2Parser.ReadAnimationInto(file, 0, skel);
+            Check(skel.AnimatedSequence == -1 && skel.AnimationSkipReason != null &&
+                  skel.AnimationSkipReason.Contains("skeleton file"),
+                  "readInto: a skeleton-file model stays unanimated");
+        }
+
+        /// <summary>
+        /// A stand-in .anim file for the fixture: a copy of the .m2's own bytes.
+        ///
+        /// That is not a shortcut, it is the shape of the thing. A real .anim holds only keyframe
+        /// ENTRIES, addressed by the offsets in the .m2's track headers; copying the .m2 gives a
+        /// buffer where those same offsets resolve to the same keys, which is exactly what the
+        /// reader has to cope with. If the reader wrongly used the .m2 for the entries the test
+        /// would still pass -- so the tests above also check the cases where the two must differ.
+        /// </summary>
+        static byte[] BuildAnimFileFor(byte[] m2)
+        {
+            var copy = new byte[m2.Length];
+            System.Buffer.BlockCopy(m2, 0, copy, 0, m2.Length);
+            return copy;
         }
 
         static void BoneTests()

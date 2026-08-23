@@ -381,6 +381,7 @@ static void doHeadlessUnityIpcTest(ModelViewer * frame)
       LOG_INFO << "[unityipc-test] skin-sync: skinPushes=" << ipc->stats().skinPushes
                << "lastSkin=" << ipc->stats().lastSkin;
 
+      const WoWModel * mdl2 = frame->canvas ? frame->canvas->model() : NULL;
       // Animation sync: the viewport plays ONE of the model's animations and the renderer has to
       // play the same one. Walk a spread of the selector rather than all of it -- a boss has
       // hundreds of entries and each push has to reach the player before the next -- and report
@@ -414,6 +415,234 @@ static void doHeadlessUnityIpcTest(ModelViewer * frame)
         }
         LOG_INFO << "[unityipc-test] animation-sync: animPushes=" << ipc->stats().animPushes
                  << "lastAnimation=" << ipc->stats().lastAnimation;
+
+        // EXTERNAL ANIMATIONS. A sequence without flag 0x20 keeps its keyframes in a .anim file
+        // rather than in the .m2; the legacy viewport reads those files (WoWModel::readAnimsFromFile)
+        // and plays such a sequence normally, so the embedded renderer has to as well. These are
+        // the sequences that used to fall back to the idle in the Unity pane while playing fine in
+        // the OpenGL one -- Agronn's SitGroundDown among them -- so the self-test drives them
+        // explicitly rather than hoping the sampled walk lands on one.
+        if (mdl2 && ac)
+        {
+          int externalDriven = 0;
+          for (size_t s = 0; s < mdl2->anims.size() && externalDriven < 8; s++)
+          {
+            if (mdl2->anims[s].flags & 0x20)
+              continue;                       // its keys are in the .m2
+            if (mdl2->anims[s].length == 0)
+              continue;                       // nothing to play either way
+            LOG_INFO << "[unityipc-test]   external anim: sequence" << (int)s
+                     << "animID" << mdl2->anims[s].animID
+                     << "subAnimID" << mdl2->anims[s].subAnimID
+                     << "flags" << QString("0x%1").arg(mdl2->anims[s].flags, 0, 16)
+                     << "length" << mdl2->anims[s].length;
+            ac->SelectAnimation((int)s, 0);
+            // A .anim fetch is a round trip, so give it longer than an in-file switch needs.
+            for (int i = 0; i < 60; i++) { ipc->poll(); wxTheApp->Yield(true); wxMilliSleep(10); }
+            externalDriven++;
+          }
+          LOG_INFO << "[unityipc-test] external-anim check: drove" << externalDriven
+                   << "sequence(s) whose keyframes are in .anim files";
+
+          // THE DROPDOWN PATH. AnimControl::OnAnim is what the user actually operates, and it is
+          // NOT SelectAnimation: it stops the model, selects, and plays again. Only the selection
+          // pushed anything, so the renderer was told "this animation, not running" and nothing
+          // afterwards -- it sat still until the next heartbeat. Driving the handler itself is the
+          // only way a headless run can see that, which is why it is done here rather than by
+          // calling SelectAnimation like the checks above.
+          if (ac->animationCount() > 0)
+          {
+            const int pickIndex = (ac->animationCount() > 1) ? 1 : 0;
+            const wxString label = ac->animationName(pickIndex);
+            ac->pickAnimationLikeUser(pickIndex);
+            for (int i = 0; i < 40; i++) { ipc->poll(); wxTheApp->Yield(true); wxMilliSleep(10); }
+
+            const bool saysPlaying = ipc->stats().lastState.startsWith("playing");
+            LOG_INFO << "[unityipc-test] dropdown check: picked"
+                     << QString::fromWCharArray(label.c_str())
+                     << "-> app paused=" << (mdl2->animManager->IsPaused() ? 1 : 0)
+                     << "lastState=" << ipc->stats().lastState
+                     << (saysPlaying
+                         ? "(OK: the state after a dropdown change says the animation is running)"
+                         : "(BAD: the renderer was left holding until the next heartbeat)");
+            if (!saysPlaying)
+              LOG_ERROR << "[unityipc-test] dropdown change left the renderer paused";
+          }
+
+          // SELECTION MUST CARRY ITS STATE. Changing animation has to tell the renderer what the
+          // app is doing with it in the same breath -- if the state only turned up on the next
+          // heartbeat, the viewport would sit there for up to a second before the new animation
+          // started, which is the difference between "instant" and "laggy" to anyone using it.
+          // The counters make that checkable: one selection must produce one of each push.
+          {
+            AnimManager * am = mdl2->animManager;      // same manager, this block's own handle
+            const int animsBefore = ipc->stats().animPushes;
+            int probe = -1;
+            for (size_t s = 0; s < mdl2->anims.size(); s++)
+              if (mdl2->anims[s].length > 0) { probe = (int)s; break; }
+
+            if (probe >= 0)
+            {
+              // ...while PLAYING
+              am->Play();
+              ac->PushAnimationState();
+              const int stateAfterPlay = ipc->stats().statePushes;
+              ac->SelectAnimation(probe, 0);
+              LOG_INFO << "[unityipc-test]   selection while PLAYING -> animPushes +"
+                       << (ipc->stats().animPushes - animsBefore) << "statePushes +"
+                       << (ipc->stats().statePushes - stateAfterPlay)
+                       << "(both must be >= 1 -- the state cannot wait for the heartbeat)"
+                       << "lastState=" << ipc->stats().lastState;
+              for (int i = 0; i < 40; i++) { ipc->poll(); wxTheApp->Yield(true); wxMilliSleep(10); }
+
+              // ...and while PAUSED. The renderer must hold, not run: a switch while paused shows
+              // the new animation's first frame and stays there.
+              am->Pause(true);
+              ac->PushAnimationState();
+              const int stateAfterPause = ipc->stats().statePushes;
+              const int animAfterPause = ipc->stats().animPushes;
+              int other = -1;
+              for (size_t s = 0; s < mdl2->anims.size(); s++)
+                if (mdl2->anims[s].length > 0 && (int)s != probe) { other = (int)s; break; }
+              if (other >= 0)
+              {
+                ac->SelectAnimation(other, 0);
+                LOG_INFO << "[unityipc-test]   selection while PAUSED -> animPushes +"
+                         << (ipc->stats().animPushes - animAfterPause) << "statePushes +"
+                         << (ipc->stats().statePushes - stateAfterPause)
+                         << "paused=" << (am->IsPaused() ? 1 : 0)
+                         << "lastState=" << ipc->stats().lastState;
+                for (int i = 0; i < 40; i++) { ipc->poll(); wxTheApp->Yield(true); wxMilliSleep(10); }
+              }
+              am->Play();
+              ac->PushAnimationState();
+              for (int i = 0; i < 20; i++) { ipc->poll(); wxTheApp->Yield(true); wxMilliSleep(10); }
+            }
+          }
+
+          // REVISIT. Going back to an animation already played is what a user does constantly --
+          // comparing two animations means switching between them repeatedly -- so it has to be
+          // the cheapest thing the renderer does: read once, kept, and the second visit should
+          // neither fetch nor read nor allocate. The player logs which path it took, so the run
+          // shows whether the cache actually caught it.
+          //
+          // Prefer a sequence whose keyframes are EXTERNAL. That exercises both caches at once:
+          // the .anim bytes must not be fetched twice, and the tracks read out of them must not
+          // be read twice. An in-file sequence only exercises the second.
+          if (!mdl2->anims.empty())
+          {
+            int first = -1, second = -1;
+            for (size_t s = 0; s < mdl2->anims.size(); s++)   // an external one, if there is one
+            {
+              if (mdl2->anims[s].length == 0 || (mdl2->anims[s].flags & 0x20))
+                continue;
+              first = (int)s;
+              break;
+            }
+            for (size_t s = 0; s < mdl2->anims.size(); s++)
+            {
+              if (mdl2->anims[s].length == 0 || (int)s == first)
+                continue;
+              if (first < 0) { first = (int)s; continue; }
+              second = (int)s;
+              break;
+            }
+            if (first >= 0 && second >= 0)
+            {
+              LOG_INFO << "[unityipc-test] revisit check: sequence" << first
+                       << (mdl2->anims[first].flags & 0x20 ? "(in-file)" : "(external .anim)")
+                       << "-> " << second << "-> " << first
+                       << "-- the last one must come from the cache, with no second fetch";
+              for (int pass = 0; pass < 3; pass++)
+              {
+                ac->SelectAnimation(pass == 1 ? second : first, 0);
+                for (int i = 0; i < 60; i++) { ipc->poll(); wxTheApp->Yield(true); wxMilliSleep(10); }
+              }
+            }
+          }
+        }
+
+        // Playback state: the same animation, driven through the transport controls. Each step
+        // reports what the app now holds, so a run shows the whole chain from the control to the
+        // state that left the app -- and the player's own log shows what it did with it.
+        AnimManager * am = mdl2 ? mdl2->animManager : NULL;
+        // The scrub below indexes anims by the manager's current animation, so both have to be
+        // real: a model can reach here with a populated selector but nothing playable.
+        if (am && (am->GetAnim() >= mdl2->anims.size()))
+          am = NULL;
+        LOG_INFO << "[unityipc-test] playback-state check:";
+        if (am)
+        {
+          // pause
+          am->Pause(true);
+          ac->PushAnimationState();
+          LOG_INFO << "[unityipc-test]   pause     -> playing=" << (am->IsPaused() ? 0 : 1)
+                   << "timeMs=" << (int)am->GetFrame() << "speed=" << am->GetSpeed();
+          for (int i = 0; i < 20; i++) { ipc->poll(); wxTheApp->Yield(true); wxMilliSleep(10); }
+
+          // scrub while paused
+          ac->SetAnimFrame(mdl2->anims[am->GetAnim()].length / 3);
+          LOG_INFO << "[unityipc-test]   scrub     -> playing=" << (am->IsPaused() ? 0 : 1)
+                   << "timeMs=" << (int)am->GetFrame();
+          for (int i = 0; i < 20; i++) { ipc->poll(); wxTheApp->Yield(true); wxMilliSleep(10); }
+
+          // speed
+          ac->SetAnimSpeed(2.0f);
+          LOG_INFO << "[unityipc-test]   speed 2x  -> speed=" << am->GetSpeed();
+          for (int i = 0; i < 20; i++) { ipc->poll(); wxTheApp->Yield(true); wxMilliSleep(10); }
+
+          // A skin change WHILE PAUSED. Selecting a skin re-pushes the texture set and the
+          // geoset set, and the two subsystems have to stay out of each other's way: the model
+          // must not resume because its skin changed, and must not lose the frame it is held on.
+          if (skins > 1)
+          {
+            const size_t heldFrame = am->GetFrame();
+            ac->SetSkin(0);
+            for (int i = 0; i < 20; i++) { ipc->poll(); wxTheApp->Yield(true); wxMilliSleep(10); }
+            std::vector<int> pausedGeosets;
+            UnityAssetAccess::selectedModelGeosets(fdid, pausedGeosets);
+            QString pausedGeoStr;
+            for (size_t gi = 0; gi < pausedGeosets.size(); gi++)
+              pausedGeoStr += (gi ? "," : "") + QString::number(pausedGeosets[gi]);
+            if (pausedGeoStr.isEmpty())
+              pausedGeoStr = "none";
+            LOG_INFO << "[unityipc-test]   skin while paused -> skin[0] geosets=" << pausedGeoStr
+                     << "| playback still playing=" << (am->IsPaused() ? 0 : 1)
+                     << "timeMs=" << (int)am->GetFrame()
+                     << (am->GetFrame() == heldFrame ? "(frame held)" : "(FRAME MOVED)");
+
+            ac->SetSkin(skins - 1);
+            for (int i = 0; i < 20; i++) { ipc->poll(); wxTheApp->Yield(true); wxMilliSleep(10); }
+            LOG_INFO << "[unityipc-test]   skin while paused -> skin[" << (skins - 1)
+                     << "] | playback still playing=" << (am->IsPaused() ? 0 : 1)
+                     << "timeMs=" << (int)am->GetFrame()
+                     << (am->GetFrame() == heldFrame ? "(frame held)" : "(FRAME MOVED)");
+          }
+
+          // resume
+          am->Play();
+          ac->PushAnimationState();
+          LOG_INFO << "[unityipc-test]   resume    -> playing=" << (am->IsPaused() ? 0 : 1)
+                   << "timeMs=" << (int)am->GetFrame() << "speed=" << am->GetSpeed();
+          for (int i = 0; i < 20; i++) { ipc->poll(); wxTheApp->Yield(true); wxMilliSleep(10); }
+
+          // ...and the same change while it RUNS, which is the other half: a skin push must not
+          // stop or restart the animation either.
+          if (skins > 1)
+          {
+            ac->SetSkin(0);
+            for (int i = 0; i < 20; i++) { ipc->poll(); wxTheApp->Yield(true); wxMilliSleep(10); }
+            LOG_INFO << "[unityipc-test]   skin while animated -> skin[0] | playback still playing="
+                     << (am->IsPaused() ? 0 : 1) << "timeMs=" << (int)am->GetFrame();
+          }
+
+          // back to something ordinary so the run does not end in a doubled-speed state
+          ac->SetAnimSpeed(1.0f);
+          for (int i = 0; i < 20; i++) { ipc->poll(); wxTheApp->Yield(true); wxMilliSleep(10); }
+
+          LOG_INFO << "[unityipc-test] playback-state: statePushes=" << ipc->stats().statePushes
+                   << "lastState=" << ipc->stats().lastState;
+        }
       }
     }
   }
@@ -426,8 +655,12 @@ static void doHeadlessUnityIpcTest(ModelViewer * frame)
   // nothing to sync, so the condition only bites when there was something to send.
   const bool animsOk = (frame->animControl == NULL) || (frame->animControl->animationCount() == 0) ||
                        (ipc->stats().animPushes >= 1);
+  // Same shape for the playback state: a model with animations must have reported how it is
+  // playing them at least once.
+  const bool stateOk = (frame->animControl == NULL) || (frame->animControl->animationCount() == 0) ||
+                       (ipc->stats().statePushes >= 1);
   const bool pass = st.connections >= 1 && ipc->isUnityReady() && st.requests >= 1 &&
-                    st.responsesOk >= 1 && skinsOk && animsOk;
+                    st.responsesOk >= 1 && skinsOk && animsOk && stateOk;
   LOG_INFO << "[unityipc-test] RESULT:" << (pass ? "PASS" : "FAIL");
 
   // Close the player now (what app shutdown does) and confirm the child process is gone.

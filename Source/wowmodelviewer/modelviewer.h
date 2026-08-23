@@ -71,6 +71,9 @@ public:
   // first View > Unity Renderer use or by the -unityipctest self-test (nullptr until then).
   // See UnityRendererHost.h and docs/unity-renderer/README.md.
   UnityRendererHost *unityRendererHost;
+  // timeGetTime() of the last playback-state push, for the heartbeat in
+  // SendAnimationStateToUnity. 0 until the first push.
+  unsigned long m_lastAnimStatePush;
 
   CAnimationExporter *animExporter;
 
@@ -173,6 +176,16 @@ public:
   void SendCurrentModelToUnity();
   void SendCurrentSkinToUnity();
   void SendCurrentAnimationToUnity();
+
+  // The playback state of that animation: playing/paused, speed, and where in the sequence the
+  // app is. force pushes unconditionally (a control was used); without it this is the heartbeat,
+  // which pushes only while something is playing and only every so often. Safe and cheap to call
+  // every frame -- it rate-limits itself and no-ops when the Unity pane was never opened.
+  void SendAnimationStateToUnity(bool force = false);
+
+  // How often the heartbeat above may push while an animation runs. One a second is far below
+  // anything a viewer would notice and far above what clock drift needs.
+  static const unsigned long ANIM_STATE_HEARTBEAT_MS = 1000;
 
   void OnMount(wxCommandEvent &event);
   void OnSave(wxCommandEvent &event);

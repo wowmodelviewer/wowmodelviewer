@@ -1506,6 +1506,12 @@ void ModelCanvas::tick()
 
   globalTime += (ddt);
 
+  // The embedded Unity viewport times itself, so it drifts against this clock. This is the only
+  // place that runs every frame with the animation state to hand; the call rate-limits itself to
+  // a heartbeat and does nothing at all when the Unity pane was never opened.
+  if (g_modelViewer)
+    g_modelViewer->SendAnimationStateToUnity(false);
+
   if (model_) {
     if (model_->animManager && !wmo) {
       if (model_->animManager->IsPaused())
