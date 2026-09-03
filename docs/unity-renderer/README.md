@@ -25,6 +25,249 @@ Concretely:
   message while the app — and the legacy OpenGL viewport — carry on unchanged. "Optional"
   describes the current migration stage, not the destination.
 
+## Lighting
+
+The viewport lights models with a **fixed preview rig in the renderer's own shader**, not with the
+engine's lighting. That is a deliberate choice twice over.
+
+**The shader is chosen on purpose, not by accident.** `WmvOpaque` used to be the last rung of a
+search that preferred the pipeline's Lit shader, and it won only because URP/Lit gets stripped out
+of a player build. Two things were riding on that accident: the M2 combiners (a Lit shader cannot
+run them, so chicken2's pixel shader 12 and every environment sheen worked only while Lit was
+absent), and the entire look of the application. It is now the first choice, so both are the same
+everywhere. `-wmvLitShader` asks for the pipeline's Lit shader when you want to compare — with the
+combiners disabled, which is the honest comparison.
+
+**Why not physically-based shading.** WoW's textures are hand-painted with their light and shade
+already in them. PBR relights an image that has already been lit: mid-tones the artist painted go
+dark, flat surfaces pick up specular they were never meant to have, and the hand-painted character
+of the art is exactly what gets lost. A model viewer wants the texture legible from a fixed angle,
+which is a different job from simulating a room.
+
+**The key is the world's vertical.** `KEY_DIR` and `FILL_DIR` are view-space directions, but
+`WmvShadowRig` blends them toward world-up by `WorldAnchor` every frame and publishes the result as
+the one world vector that feeds the shading, the shadow map and the contact march. `WorldAnchor`
+ships at 1.0, so the published direction is straight down from the sky whatever the camera does,
+and the view-space tilt in `KEY_DIR` only decides the shader's fallback (below). An anchored key
+is what the reference viewers measurably do:
+frame analysis of a reference viewer's preview footage shows that orbiting a model there never flips
+its lit side (opposite profiles at 3:40 and 4:01 shade identically) and that a camera looking up
+from below finds the belly still dark (4:11—4:17) — which falsifies a fully camera-relative key,
+the previous behaviour here, since that swings under with the camera and lights the underside.
+Verified on ratmount2 from pitch −60 with the shipped constants: masked mean 0.189 against 0.326
+from the normal angle, the belly dark as it should be; `-wmvLightPitch=N` exists because pitch is
+the one axis that separates the two schemes (a vertical light is yaw-invariant under both, and the
+alpaca measures 0.219—0.239 across four yaws). The shader keeps a pure view-space fallback for a
+player where the rig never ran.
+
+A lesson from the first version of this rig, before the anchor: it put the key at 53 degrees of
+elevation in world space with a high floor, and almost every surface on a standing humanoid is
+vertical, so they all caught it at the same shallow angle and the figure came out brighter but
+completely flat, with a lit-to-shadow ratio of **1.06x** where even the old rig managed 1.55x.
+The shipped key is fully vertical, which is the same geometry, and it reads as modelled anyway
+because the range now comes from the floor-to-key ratio and the cast shadows rather than from the
+key's angle: measured light-only ranges are 1.7—2.9x on the nine test models.
+
+**The rig.** Every number is a `#define` at the top of `Assets/Resources/WmvOpaque.shader`, in one
+block, so a tuning pass edits constants and nothing else:
+
+| term | value | what it does |
+|---|---|---|
+| `KEY_DIR` | `(0.081, 0.858, 0.507)` | view space, 9 degrees round and 59 up: the fallback direction only, since the anchor is 1.0 |
+| `FILL_DIR` | `(0.059, 0.998, 0.032)` | very nearly straight up: a sky fill on the shadow side |
+| `KEY_FLOOR` | `0.265` | floor: the darkest any surface gets |
+| `KEY_GAIN` | `1.644 * ndl` | key |
+| `FILL_GAIN` | `1.5 * wrap * (1-key)` | sky-hemisphere fill (see below) |
+| `RIM_GAIN` | `0.0` | off |
+| `SPEC_GAIN` / `SPEC_TIGHT` | `3.0` / `49.2` | a tight preview highlight |
+| `KNEE` | `0.298` | where the top end starts rolling off |
+| `CEIL` | `1.0` | what the roll-off approaches |
+| `SHADOW_STRENGTH` / `SHADOW_SOFT` | `1.0` / `4.0` | the map's key shadow, full strength, 4-texel blur |
+| `CONTACT_STRENGTH` / `CONTACT_RANGE` | `1.0` / `0.25` | near-field occlusion, full strength, a quarter-radius reach |
+| `WorldAnchor` (in `WmvShadowRig`) | `1.0` | the key is world-vertical |
+
+**These values were settled by eye, on a live slider panel that has since been removed, and they
+choose form over parity.** A footage-calibrated set preceded them (floor 0.85, key 0.46, shadows
+0.20 and 0.30): measured over a background-free mask it matched a reference viewer's preview of
+the same alpaca to three decimals on the masked mean, and on screen it read as lighting that had
+not been switched on. The shipped set is the opposite bargain — a low floor under a strong key,
+shadows at full strength — and against the same footage it is still close: alpaca mean 0.234
+against 0.257, and nearer on the tails than the calibrated set ever got (p05 0.080 against 0.089,
+p95 0.482 against 0.507; the held-out white rat 0.376 against 0.402, p05 0.114 against 0.118). Two
+pieces of the recipe are measured rather than chosen: the anchored key above, and the FILL AS A
+WRAP TERM — `0.5 + 0.5 * dot(n, up)`, a sky hemisphere rather than a second sun, because a
+one-sided fill is zero on vertical surfaces and bellies, which under a vertical key are exactly
+the surfaces nothing else lights.
+
+**Additive batches are emissive and skip the rig** (shipped rig only; the legacy rig stays a
+record of what drew before). An additive pass is light the surface emits, and multiplying emitted
+light by received-light maths is wrong in principle: with the floor at 0.265, a lantern facing
+away from the key would be drawn at about a quarter of its authored intensity. Note the gate:
+`_Emissive` must
+be a shader PROPERTY, not just a uniform, because the builder's SetFloat is guarded by
+`Material.HasProperty` -- a first version declared only the uniform and the bypass never ran.
+
+What the numbers encode: a low ambient floor (0.265) under a strong vertical key (1.644), a
+lit-to-unlit ratio of 7.2x before the roll-off, with the wrap fill (1.5) keeping vertical surfaces
+and undersides readable. `KNEE` at 0.298 puts most of the tonal range inside the roll-off, which
+shapes it toward `CEIL` at exactly 1.0 without arriving, so whites read as white; measured
+light-only shading ranges on the nine test models are 1.7—2.9x (the footage-calibrated set gave
+1.2—1.3x), full renders 3.5—5.0x, and clipping is 0.000 % on every opaque model (the only
+non-zero figures are additive pile-ups: valkier 0.14 %, the alpaca's lantern at most 0.2 %). The
+cast shadows are at full strength (map 1.0, contact 1.0): an occluded key contributes nothing, and
+the half-floor rule below is what keeps a shadowed strap-line readable rather than black.
+
+`RIM_GAIN` is zero, so the rim term contributes nothing; it stays in the shader as the one knob
+not yet needed. The highlight is on (gain 3.0, tightness 49), a small tight catch-light that the
+map shadow removes along with the key.
+
+### Cast shadows
+
+The model occludes its own key light: a rein across the mount's body, a horn across a face. The
+rig's dot-product terms cannot produce that — they know which way a surface faces, not what stands
+between it and the light — so `WmvShadowRig` renders a depth map from the key's point of view every
+frame (one orthographic camera, fitted to the model bounds, 4096 px) and `WmvShadowFactor` in the
+shader compares each fragment against it with a 3x3 PCF kernel. `SHADOW_STRENGTH` says how much of
+the key an occluder removes and `SHADOW_SOFT` blurs the edge; both are in the constants block.
+
+Design points worth knowing:
+
+- **The map attenuates the key only; the contact march also takes the fill and half the
+  floor.** Each estimator removes what it actually knows about (see the split below), and the
+  floor can never drop below half, so a shadowed strap-line stays readable instead of black.
+- **The shadow follows the key, and the key is the world's vertical.** The rig blends the
+  camera-relative key toward world-up (`WorldAnchor`, shipped at 1.0, so fully) and re-renders
+  the map from that direction each frame; orbiting the model does not move the lit side, and
+  looking up from below does not carry the light under it.
+- **The depth pass is the ordinary render.** The shadow camera draws the model with its normal
+  materials and keeps the depth buffer: alpha-keyed batches clip in the shadow pass exactly as on
+  screen (hair casts shaped shadows, not slabs), and blended/additive batches write no depth and
+  cast nothing, which is right for glows.
+- **`WmvShadowRig.KeyDirView` must match the shader's `KEY_DIR`** — the shader's fallback
+  shades with its copy, the rig places the camera with its own. There is no tool keeping them in
+  step any more; change one, change the other (the `FillDirView`/`FILL_DIR` pair likewise).
+- Everything is gated by `_WmvShadowValid`, which unset reads 0: a player where the rig never ran
+  renders exactly as before, and the legacy rig (`-wmvRig=1`) never samples the map at all.
+
+**Contact shadows** close the gap the map cannot: its bias is a blind zone of a few millimetres
+(one texel of the map's window), so a map shadow always stops just short of the line where two
+surfaces meet, and a hood whose shadow starts a centimetre below the brim reads as pasted on
+rather than worn. `WmvShadowRig` therefore renders a second depth buffer each frame — the scene
+from the VIEWER's pose, near/far pinched around the model — and `WmvContactFactor` marches a short
+ray from each fragment toward the key light through it: any on-screen surface standing in front
+of the ray within touching distance is a contact occluder, found with no bias and no texel
+footprint. The two estimators answer the same question from opposite sides — the map sees the
+whole model but not the near field, the march sees only the near field and only what is on
+screen — and the darker verdict wins (`min`, not a product, so a rim both can see is not
+double-darkened). `CONTACT_STRENGTH` and `CONTACT_RANGE` (a fraction of the model's radius) are
+in the constants block.
+
+**What each shadow removes follows what each estimator knows.** The map answers a directional
+question ("does the key reach this point"), so it attenuates the key and the highlight and nothing
+else. The march answers a near-field one ("is something within touching distance overhead"), which
+is what sky-and-ambient occlusion is — so it also takes the sky fill and half the ambient floor,
+but only within its short range. Both other assignments were tried and failed measurably: key-only
+went invisible when the light was anchored near-vertical (a face's ndl against an overhead key is
+~0, and blocking a light a surface never received changes nothing), and letting the map take the
+fill dropped a cloaked boss model's mean by a third, because an overhead light puts the map's
+shadow across everything below the shoulders. The floor can never fall below half — a shadowed
+face stays readable, never black.
+
+**The march's verdict is fractional, not binary.** A first version returned fully-occluded on
+the first hit, and looked exactly as harsh and as pixelated as a binary function dithered by
+per-pixel jitter must: at every shadow boundary, neighbouring pixels flipped between fully dark
+and fully lit. Each hit is now weighted — by a smooth window on the depth test and by how far
+along the ray the occluder sits, so a touching edge darkens fully while one at the end of the
+range barely registers — and the strongest hit wins, so the value varies continuously as an
+occluder recedes. Measured on the hooded test model at contact strength 0.3, the fraction of
+shadowed pixels sitting on a hard edge halved (21 % to 10 %) and the mean local gradient dropped
+22 %. At the shipped strength of 1.0 the same profile is scaled up three-fold, and half the
+touched pixels sit on a step the metric counts as hard — so `CONTACT_STRENGTH` is the knob to
+lower if contact shadows read harsh, not the march.
+
+The parameter that makes or breaks the march is the assumed occluder THICKNESS. A depth buffer
+records only front surfaces; without a bound on their assumed depth, any geometry anywhere in
+front of the ray counts as blocking, and the first cut of this (thickness 0.20 R) draped a faint
+grey wash over every large surface. Thickness is 0.08 R and stays fixed while the march reach is a
+constant (`CONTACT_RANGE`, shipped at 0.25 R, so the ray now travels further than the window is
+thick): an occluder matters only if the ray passes within touching distance behind it, however far
+along the ray that happens. Verified per contributor on the hooded Saurfang (`-wmvLightYaw=210`
+turns the check camera to his face): the map-only pass, the combined pass and the contact-only
+difference are dumped separately. With the shipped constants the map touches 56 % of the model,
+the two together 84 %, and the contact march alone adds 30 % — the face under the hood rim, the
+mantle under the collar, the neck under the jaw, the belt lines.
+
+`-wmvLightCheck` reports what the shadows did (coverage, mean darkening, centroid), and
+`-wmvLightDump` writes the check's frames — shadowed, unshadowed, and the amplified difference —
+as PNGs next to the player. WHERE a shadow falls is a spatial question, and the difference image
+is the only reliable way to answer it: the first build shipped with a vertically mirrored map
+(the D3D render-into-texture flip counted twice) and every statistic looked plausible — it took
+eyes on the viewport to catch the model's own silhouette stamped across itself. The criterion
+that verified the fix: with a high key, darkening belongs on UNDER-surfaces (the flank below a
+saddle rim, a neck below the head, feet below the body) and the top of the back must be clean.
+
+### How the values were settled
+
+During this work the player carried a live slider panel over the viewport (one slider per constant
+above, plus the light directions), which is how the numbers were judged on real models rather than
+guessed and rebuilt. Once they were settled they were written into the `#define` block and the rig,
+and the panel, its `-wmvLightPanel` flag, the override uniforms it drove and the bake script that
+kept the copies in step were all removed: the shipped shader path never depended on any of it
+having run, and a normal run renders from the constants alone. Tuning again means editing the
+block at the top of `WmvOpaque.shader` (and the matching direction pair in `WmvShadowRig`) and
+rebuilding; the measurement flags below are what says whether a change did what it looked like.
+
+### Measuring it
+
+`-wmvLightCheck` renders the model offscreen and reports, for every rig, mask coverage, mean, p05,
+p50, p95, max, the clipped fraction, a saturation proxy and model/background contrast. Nothing is
+written to disk and the viewport is not disturbed. `-wmvRig=1` draws the viewport itself with the
+legacy rig for a visual A/B.
+
+**It also measures the rig on its own.** Every figure above is taken on a real model, where paint
+and light arrive as one number — and a rig that models form and a rig that lights everything flat
+can produce the same mean, the same percentiles and the same contrast, because most of the spread
+being measured is the texture. So each rig is rendered a second time with `_WmvFlatAlbedo` set,
+which replaces every surface colour with a flat mid grey and leaves only the light. The ratio of
+the bright end to the dark end of that render is the number that says whether the thing has shadows
+in it: around 1.2 is an evenly-lit figure, 1.6 upwards reads as modelled form. The albedo has to be
+a mid grey and not white — white is already at the top of the range before the light touches it, so
+every rig with any gain saturates and reports no range at all.
+
+This is the check that caught a rig which was better on *every other measure* — brighter at every
+percentile, more contrast against the background, saturation preserved — and was flat.
+
+Getting a number that means something took more care than the tuning did, so the guarantees are
+worth spelling out:
+
+- **The pixel set is geometric, not photometric.** The frame is drawn twice, once cleared to black
+  and once to white, and a pixel counts as model where the two agree exactly — only opaque,
+  depth-writing geometry can be independent of what was cleared behind it. A pixel that agrees only
+  because it saturated over both clears is dropped, since an additive pile-up agrees for a reason
+  that has nothing to do with coverage.
+- **The mask is built under the legacy rig**, which is finished and will not be tuned again, so the
+  pixel set is pinned across every candidate and every build.
+- **The measurement has its own camera**, framed from the bounds alone, so viewport orbit state
+  cannot leak in. Run it with `-wmvNoAnim` to pin the pose.
+- **Every rig is measured in one process**, through that one camera, over that one mask.
+- **Saturation is computed in linear light.** `(max-min)/max` is invariant under a scale factor only
+  in the space the scaling happens in; computed on sRGB bytes it falls whenever the picture gets
+  brighter, so a pure exposure change looks like a loss of colour.
+- **Pin the skin.** WMV picks a random skin per load unless `Session/RandomLooks` is off in
+  `userSettings/Config.ini`. The light check prints the texture FileDataIDs it measured so a
+  mismatched pair is visible rather than silent.
+
+**Why all of that.** An earlier pass concluded from measurements that a rig carrying strictly more
+light at every angle had made two models *darker*. Both halves of that were measurement error.
+chicken2 carries four skins spanning **2.4x** in brightness (mean 0.209 to 0.493) and a
+before/after taken in two separate builds is two separate processes, so it was two different
+chickens — a difference an order of magnitude larger than anything the rig does. Underneath that,
+the old brightness-threshold mask defined its sample in terms of the quantity being measured: a
+brighter model pushes its own dark pixels over the line, they join the sample at the bottom of it,
+and the reported average falls. Measured on the real models, that mask understated the legacy-to-
+shipped gain by 11 % to **98 %**, while its sample size moved by up to 63 %. With the skin pinned
+and the mask geometric, three consecutive runs of the same model now agree to every printed digit.
+
 ## Which viewport owns the centre
 
 The Unity renderer is the **main viewport for the models it supports** -- creature M2s. Loading one
@@ -398,14 +641,12 @@ in-process, and shuts the player down. Result lines carry the `[unityipc-test]` 
 
 **Not yet implemented**
 
-- Animation UI of the renderer's own: the viewport follows WMV's selector and has no controls.
-  Blending between sequences, and following a queued "next animation" chain, play/pause or
-  playback speed, are not synced -- those change what the canvas shows without a selection
-  happening.
-- Keyframes stored outside the .m2: the .anim files named by the AFID chunk, and bones from a
-  separate skeleton file (the SKID chunk and the SKPD parent it can defer to). A model that
-  needs either is drawn from what it does have -- unskinned, or skinned but still -- and says
-  which.
+- Animation UI of the renderer's own: the viewport follows WMV's selector and transport
+  (play/pause, speed, current time and looping are synced) and has no controls of its own.
+  Blending between sequences and following a queued "next animation" chain are not synced.
+- Bones from a separate skeleton file (the SKID chunk and the SKPD parent it can defer to). A
+  model that needs one is drawn from what it does have -- unskinned, or skinned but still -- and
+  says which. (Keyframes in external .anim files named by the AFID chunk ARE read.)
 - Animation of anything but bones: texture animation, colour and transparency tracks beyond the
   rest-pose visibility gate, particles, ribbons and attachments.
 - The rest of the WoW material system: texture animation, colour and transparency tracks beyond

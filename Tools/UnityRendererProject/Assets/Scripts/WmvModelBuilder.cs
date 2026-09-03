@@ -136,7 +136,12 @@ public static class WmvModelBuilder
     {
         static bool parsed;
         static bool flipV, forceOpaque, forceSolid, matColors, showHidden, ownShader;
-        static bool noSkin, skinCheck, noAnim, animCheck, placeholder, overlay;
+        static bool noSkin, skinCheck, noAnim, animCheck, placeholder, overlay, litShader;
+        static bool lightCheck;
+        static int rig;
+        static bool lightDump;
+        static float lightYaw = 30f;
+        static float lightPitch = 15f;
 
         static void Parse()
         {
@@ -154,7 +159,31 @@ public static class WmvModelBuilder
                 else if (a == "-wmvForceSolid") forceSolid = true;
                 else if (a == "-wmvMatColors") matColors = true;
                 else if (a == "-wmvShowHidden") showHidden = true;
-                else if (a == "-wmvOwnShader") ownShader = true;
+                else if (a == "-wmvOwnShader") ownShader = true;   // kept: now the default
+                else if (a == "-wmvLitShader") litShader = true;
+                else if (a == "-wmvLightCheck") lightCheck = true;
+                else if (a == "-wmvLightDump") lightDump = true;
+                else if (a.StartsWith("-wmvLightYaw="))
+                {
+                    float y;
+                    if (float.TryParse(a.Substring("-wmvLightYaw=".Length),
+                                       System.Globalization.NumberStyles.Float,
+                                       System.Globalization.CultureInfo.InvariantCulture, out y))
+                        lightYaw = y;
+                }
+                else if (a.StartsWith("-wmvLightPitch="))
+                {
+                    float pv;
+                    if (float.TryParse(a.Substring("-wmvLightPitch=".Length),
+                                       System.Globalization.NumberStyles.Float,
+                                       System.Globalization.CultureInfo.InvariantCulture, out pv))
+                        lightPitch = pv;
+                }
+                else if (a.StartsWith("-wmvRig="))
+                {
+                    int r;
+                    if (int.TryParse(a.Substring("-wmvRig=".Length), out r)) rig = r;
+                }
                 else if (a == "-wmvNoSkin") noSkin = true;
                 else if (a == "-wmvSkinCheck") skinCheck = true;
                 else if (a == "-wmvNoAnim") noAnim = true;
@@ -177,6 +206,51 @@ public static class WmvModelBuilder
         public static bool MatColors { get { Parse(); return matColors; } }
         public static bool ShowHidden { get { Parse(); return showHidden; } }
         public static bool OwnShader { get { Parse(); return ownShader; } }
+
+        /// <summary>
+        /// Use the pipeline's Lit shader instead of the viewer's own (-wmvLitShader).
+        ///
+        /// For comparing against physically-based shading, and nothing else: it cannot run the M2
+        /// combiners, so every material that needs one renders as its base texture alone.
+        /// </summary>
+        public static bool LitShader { get { Parse(); return litShader; } }
+
+        /// <summary>
+        /// Render the loaded model offscreen and report what the lighting actually did
+        /// (-wmvLightCheck): how bright it came out, how much of it clipped, how dark its darkest
+        /// parts are. "Looks right" is not checkable from a log; those numbers are.
+        /// </summary>
+        public static bool LightCheck { get { Parse(); return lightCheck; } }
+
+        /// <summary>
+        /// Which preview light rig the viewport draws with (-wmvRig=N), for a visual A/B:
+        /// 0 shipped, 1 legacy (what WMV drew with before this work). Defaults to 0.
+        /// The numeric comparison is -wmvLightCheck, which measures both in one run.
+        /// </summary>
+        public static int Rig { get { Parse(); return rig; } }
+
+        /// <summary>
+        /// Save the light check's frames as PNGs next to the player (-wmvLightDump), so a
+        /// headless run can be inspected by eye. Some lighting questions -- WHERE a shadow
+        /// falls, whether darkening is a shadow or acne speckle -- are spatial, and no summary
+        /// statistic answers them faster than the picture does.
+        /// </summary>
+        public static bool LightDump { get { Parse(); return lightDump; } }
+
+        /// <summary>
+        /// The light check camera's yaw (-wmvLightYaw=N, default 30). Models face where their
+        /// author pointed them, and a hood's shadow on a face can only be inspected from the
+        /// front -- the default three-quarter view happens to be this model's back.
+        /// </summary>
+        public static float LightYaw { get { Parse(); return lightYaw; } }
+
+        /// <summary>
+        /// The light check camera's pitch (-wmvLightPitch=N, default 15; negative looks UP from
+        /// below). Pitch is the axis that separates a camera-relative light from a
+        /// world-anchored one -- under yaw the two are indistinguishable when the light is
+        /// near-vertical -- so the world-anchor work is verified from down here.
+        /// </summary>
+        public static float LightPitch { get { Parse(); return lightPitch; } }
         public static bool NoSkin { get { Parse(); return noSkin; } }
         public static bool SkinCheck { get { Parse(); return skinCheck; } }
         public static bool NoAnim { get { Parse(); return noAnim; } }
@@ -1137,6 +1211,10 @@ public static class WmvModelBuilder
         int queue = (int)UnityEngine.Rendering.RenderQueue.Geometry;
         string renderType = "Opaque";
         bool alphaTest = false, opaqueAlpha = true;
+        // Additive batches are emissive: the preview rig must not dim them (see _Emissive in
+        // WmvOpaque.shader). Alpha-blended batches are ordinary lit surfaces seen through
+        // transparency and stay lit.
+        bool emissive = false;
 
         switch (mode)
         {
@@ -1170,6 +1248,7 @@ public static class WmvModelBuilder
                 opaqueAlpha = false;
                 queue = (int)UnityEngine.Rendering.RenderQueue.Transparent;
                 renderType = "Transparent";
+                emissive = true;
                 described = "additive";
                 break;
 
@@ -1179,6 +1258,7 @@ public static class WmvModelBuilder
                 opaqueAlpha = false;
                 queue = (int)UnityEngine.Rendering.RenderQueue.Transparent;
                 renderType = "Transparent";
+                emissive = true;
                 described = "additive (alpha-weighted)";
                 break;
 
@@ -1222,6 +1302,7 @@ public static class WmvModelBuilder
         if (m.HasProperty("_AlphaClip")) m.SetFloat("_AlphaClip", alphaTest ? 1f : 0f);
         if (m.HasProperty("_SrcBlend")) m.SetInt("_SrcBlend", (int)src);
         if (m.HasProperty("_DstBlend")) m.SetInt("_DstBlend", (int)dst);
+        if (m.HasProperty("_Emissive")) m.SetFloat("_Emissive", emissive ? 1f : 0f);
         if (m.HasProperty("_ZWrite")) m.SetInt("_ZWrite", zwrite ? 1 : 0);
         if (m.HasProperty("_OpaqueAlpha")) m.SetFloat("_OpaqueAlpha", opaqueAlpha ? 1f : 0f);
         if (m.HasProperty("_Cutoff")) m.SetFloat("_Cutoff", cutoff);
@@ -1553,16 +1634,37 @@ public static class WmvModelBuilder
         // decides which names may even be tried. null here means the built-in pipeline.
         bool builtIn = UnityEngine.Rendering.GraphicsSettings.currentRenderPipeline == null;
 
-        // The pipeline's Lit shaders cannot run the M2 combiner, so -wmvOwnShader exists to make
-        // the renderer's own shader win the search and show what the combiner does.
-        if (Debug_.OwnShader &&
+        // THE VIEWER'S OWN SHADER IS THE FIRST CHOICE, not the last resort.
+        //
+        // It used to be the bottom rung, tried only once every pipeline Lit shader had been
+        // stripped out of the build -- which is what happens in practice, so this is the shader
+        // that has been drawing every model all along. That made two things accidental that
+        // should not be:
+        //
+        //   THE M2 COMBINER. A pipeline Lit shader cannot run it. Every combiner case this
+        //   renderer implements -- chicken2's pixel shader 12, the environment sheen on metal,
+        //   the masked modulates -- worked only because URP/Lit happened to be absent. A build
+        //   that kept it would have rendered those materials plainly and silently.
+        //
+        //   THE LOOK. Lit means physically-based: specular response, tonemapping, scene lights.
+        //   WoW's textures are hand-painted with their shading already in them, so PBR relights
+        //   what is effectively an already-lit painting, and the result is shiny where it should
+        //   be matte and dark where the artist put mid-tones. It also made the viewer's
+        //   appearance depend on what a given build stripped.
+        //
+        // So the choice is now deliberate and identical everywhere. The Lit and Unlit rungs
+        // below are kept as a real fallback for a build where Resources somehow did not ship,
+        // and -wmvLitShader asks for the pipeline's Lit shader explicitly for comparison.
+        if (!Debug_.LitShader &&
             Accept(Resources.Load<Shader>(OpaqueShaderResource),
-                   "using the renderer's own '" + OpaqueShaderResource + "' shader (-wmvOwnShader)", log))
+                   "using the renderer's own '" + OpaqueShaderResource + "' shader (M2 combiners "
+                   + "and the preview light rig; pass -wmvLitShader for the pipeline's Lit shader)",
+                   log))
             return cachedShader;
 
-        // Best case: a real lit shader for the pipeline in use. Shader.Find only sees what
-        // survived build stripping, and a runtime-built material references nothing at build
-        // time, so any of these can come back null in a player that looks fine in the editor.
+        // Fallback only, or -wmvLitShader. Shader.Find only sees what survived build stripping,
+        // and a runtime-built material references nothing at build time, so any of these can come
+        // back null in a player that looks fine in the editor.
         string[] lit = builtIn
             ? new[] { "Standard", "Legacy Shaders/Diffuse", "Mobile/Diffuse" }
             : new[] { "Universal Render Pipeline/Lit", "Universal Render Pipeline/Simple Lit",
@@ -1589,10 +1691,7 @@ public static class WmvModelBuilder
         // stripped away like the named lookups above. Unlit, but opaque, textured and with its
         // render state exposed as real properties -- which is what actually matters here.
         if (Accept(Resources.Load<Shader>(OpaqueShaderResource),
-                   "no pipeline shader survived build stripping -- using the renderer's own " +
-                   "'" + OpaqueShaderResource + "' shader. Lighting is a fixed viewer key light " +
-                   "rather than the scene's; add a Lit shader to Project Settings > Graphics > " +
-                   "Always Included Shaders and rebuild the player for full lighting.", log))
+                   "falling back to the renderer's own '" + OpaqueShaderResource + "' shader", log))
             return cachedShader;
 
         // Unlit but still opaque: flat lighting, correct solidity.
