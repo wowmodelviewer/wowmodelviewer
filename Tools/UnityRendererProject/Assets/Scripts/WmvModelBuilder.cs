@@ -138,6 +138,10 @@ public static class WmvModelBuilder
         static bool flipV, forceOpaque, forceSolid, matColors, showHidden, ownShader;
         static bool noSkin, skinCheck, noAnim, animCheck, placeholder, overlay, litShader;
         static bool lightCheck;
+        static int rig;
+        static bool lightDump;
+        static float lightYaw = 30f;
+        static float lightPitch = 15f;
 
         static void Parse()
         {
@@ -158,6 +162,28 @@ public static class WmvModelBuilder
                 else if (a == "-wmvOwnShader") ownShader = true;   // kept: now the default
                 else if (a == "-wmvLitShader") litShader = true;
                 else if (a == "-wmvLightCheck") lightCheck = true;
+                else if (a == "-wmvLightDump") lightDump = true;
+                else if (a.StartsWith("-wmvLightYaw="))
+                {
+                    float y;
+                    if (float.TryParse(a.Substring("-wmvLightYaw=".Length),
+                                       System.Globalization.NumberStyles.Float,
+                                       System.Globalization.CultureInfo.InvariantCulture, out y))
+                        lightYaw = y;
+                }
+                else if (a.StartsWith("-wmvLightPitch="))
+                {
+                    float pv;
+                    if (float.TryParse(a.Substring("-wmvLightPitch=".Length),
+                                       System.Globalization.NumberStyles.Float,
+                                       System.Globalization.CultureInfo.InvariantCulture, out pv))
+                        lightPitch = pv;
+                }
+                else if (a.StartsWith("-wmvRig="))
+                {
+                    int r;
+                    if (int.TryParse(a.Substring("-wmvRig=".Length), out r)) rig = r;
+                }
                 else if (a == "-wmvNoSkin") noSkin = true;
                 else if (a == "-wmvSkinCheck") skinCheck = true;
                 else if (a == "-wmvNoAnim") noAnim = true;
@@ -195,6 +221,36 @@ public static class WmvModelBuilder
         /// parts are. "Looks right" is not checkable from a log; those numbers are.
         /// </summary>
         public static bool LightCheck { get { Parse(); return lightCheck; } }
+
+        /// <summary>
+        /// Which preview light rig the viewport draws with (-wmvRig=N), for a visual A/B:
+        /// 0 shipped, 1 legacy (what WMV drew with before this work). Defaults to 0.
+        /// The numeric comparison is -wmvLightCheck, which measures both in one run.
+        /// </summary>
+        public static int Rig { get { Parse(); return rig; } }
+
+        /// <summary>
+        /// Save the light check's frames as PNGs next to the player (-wmvLightDump), so a
+        /// headless run can be inspected by eye. Some lighting questions -- WHERE a shadow
+        /// falls, whether darkening is a shadow or acne speckle -- are spatial, and no summary
+        /// statistic answers them faster than the picture does.
+        /// </summary>
+        public static bool LightDump { get { Parse(); return lightDump; } }
+
+        /// <summary>
+        /// The light check camera's yaw (-wmvLightYaw=N, default 30). Models face where their
+        /// author pointed them, and a hood's shadow on a face can only be inspected from the
+        /// front -- the default three-quarter view happens to be this model's back.
+        /// </summary>
+        public static float LightYaw { get { Parse(); return lightYaw; } }
+
+        /// <summary>
+        /// The light check camera's pitch (-wmvLightPitch=N, default 15; negative looks UP from
+        /// below). Pitch is the axis that separates a camera-relative light from a
+        /// world-anchored one -- under yaw the two are indistinguishable when the light is
+        /// near-vertical -- so the world-anchor work is verified from down here.
+        /// </summary>
+        public static float LightPitch { get { Parse(); return lightPitch; } }
         public static bool NoSkin { get { Parse(); return noSkin; } }
         public static bool SkinCheck { get { Parse(); return skinCheck; } }
         public static bool NoAnim { get { Parse(); return noAnim; } }
@@ -1155,6 +1211,10 @@ public static class WmvModelBuilder
         int queue = (int)UnityEngine.Rendering.RenderQueue.Geometry;
         string renderType = "Opaque";
         bool alphaTest = false, opaqueAlpha = true;
+        // Additive batches are emissive: the preview rig must not dim them (see _Emissive in
+        // WmvOpaque.shader). Alpha-blended batches are ordinary lit surfaces seen through
+        // transparency and stay lit.
+        bool emissive = false;
 
         switch (mode)
         {
@@ -1188,6 +1248,7 @@ public static class WmvModelBuilder
                 opaqueAlpha = false;
                 queue = (int)UnityEngine.Rendering.RenderQueue.Transparent;
                 renderType = "Transparent";
+                emissive = true;
                 described = "additive";
                 break;
 
@@ -1197,6 +1258,7 @@ public static class WmvModelBuilder
                 opaqueAlpha = false;
                 queue = (int)UnityEngine.Rendering.RenderQueue.Transparent;
                 renderType = "Transparent";
+                emissive = true;
                 described = "additive (alpha-weighted)";
                 break;
 
@@ -1240,6 +1302,7 @@ public static class WmvModelBuilder
         if (m.HasProperty("_AlphaClip")) m.SetFloat("_AlphaClip", alphaTest ? 1f : 0f);
         if (m.HasProperty("_SrcBlend")) m.SetInt("_SrcBlend", (int)src);
         if (m.HasProperty("_DstBlend")) m.SetInt("_DstBlend", (int)dst);
+        if (m.HasProperty("_Emissive")) m.SetFloat("_Emissive", emissive ? 1f : 0f);
         if (m.HasProperty("_ZWrite")) m.SetInt("_ZWrite", zwrite ? 1 : 0);
         if (m.HasProperty("_OpaqueAlpha")) m.SetFloat("_OpaqueAlpha", opaqueAlpha ? 1f : 0f);
         if (m.HasProperty("_Cutoff")) m.SetFloat("_Cutoff", cutoff);

@@ -36,6 +36,7 @@ public class WmvMain : MonoBehaviour
     WmvOrbitCamera orbit;
 
     WmvRuntimeModel current;          // the model on screen (disposed when replaced)
+    WmvShadowRig shadowRig;           // renders the cast-shadow depth map (see WmvShadowRig.cs)
 
     /// <summary>
     /// The .m2 bytes of the model on screen. Kept because only ONE animation's keyframes are
@@ -166,6 +167,16 @@ public class WmvMain : MonoBehaviour
         // different per pipeline. These exist so that a build which somehow has to fall back to a
         // pipeline Lit shader (-wmvLitShader, or a player with no Resources) is not lit by nothing
         // at all. Their angle matches the shader's key so the two do not disagree wildly.
+        // -wmvRig=N draws the viewport with a different preview light rig (0 shipped,
+        // 1 legacy). The global is the only thing that changes; every material and every
+        // combiner stays exactly as it was.
+        Shader.SetGlobalFloat("_WmvRig", WmvModelBuilder.Debug_.Rig);
+
+        // Cast shadows: the model occluding its own key light (a rein across the mount's body).
+        // The rig renders a depth map from the key's viewpoint each frame; the shader attenuates
+        // the key term where the map says something stands in the way. See WmvShadowRig.cs.
+        shadowRig = gameObject.AddComponent<WmvShadowRig>();
+
         var lightGo = new GameObject("Directional Light");
         var light = lightGo.AddComponent<Light>();
         light.type = LightType.Directional;
@@ -425,9 +436,12 @@ public class WmvMain : MonoBehaviour
             PrefetchAnimFiles();
 
             orbit.Frame(built.Bounds);
+            if (shadowRig != null)
+                shadowRig.SetBounds(built.Bounds);
 
-            // AFTER framing, not before: measuring the lighting on a model the camera has not
-            // pointed at yet reports a handful of stray pixels and calls it a reading.
+            // The light check brings its own camera and frames the model itself, so it no longer
+            // depends on this call having happened -- an earlier version measured before framing
+            // and reported a few stray pixels as a reading.
             if (WmvModelBuilder.Debug_.LightCheck)
                 ReportLighting();
 
@@ -547,112 +561,429 @@ public class WmvMain : MonoBehaviour
     }
 
     /// <summary>
-    /// Render the model offscreen and say what the lighting did to it.
+    /// Render the model offscreen and report what the light rig did to it -- measured on a set of
+    /// pixels that the light rig cannot move.
     ///
-    /// Lighting work is the one thing here that cannot be checked by reading a log: "readable",
-    /// "not blown out", "not crushed" are all statements about pixels. So this renders one frame
-    /// into a texture and measures it, which turns each of those into a number that a run either
-    /// meets or does not:
+    /// WHY THE OLD VERSION WAS NOT TRUSTWORTHY. It picked the model out of the frame with
+    /// "brighter than the background plus 0.02", which defines the sample in terms of the very
+    /// quantity being measured. Brighten the shader and dim model pixels -- silhouette
+    /// antialiasing, the shadow side, dark texture regions -- cross that line and join the sample.
+    /// They join it at the bottom, so the reported mean can FALL while every single pixel got
+    /// brighter. That is a selection effect, not a lighting result, and it is why a rig carrying
+    /// strictly more light measured darker on the pale models.
     ///
-    ///   coverage   -- how much of the frame the model occupies (that it rendered at all)
-    ///   mean       -- overall brightness of the model against the background
-    ///   clipped    -- fraction of model pixels at full white in any channel. This is the one the
-    ///                 old rig failed: it peaked at 1.20, so pale surfaces facing the key light
-    ///                 came back as flat white with the painted detail gone.
-    ///   p05        -- the 5th-percentile luminance, i.e. how dark the darkest real parts are.
-    ///                 A shadow side that reads as a black silhouette shows up here.
+    /// WHAT REPLACES IT. The model is separated from the background geometrically: the same frame
+    /// is drawn twice, once cleared to black and once to white, and a pixel counts as model where
+    /// the two agree exactly. Only geometry that fully covers a pixel with opaque, depth-writing
+    /// material can be independent of what was cleared behind it, so the mask depends on the mesh,
+    /// the blend states and the camera -- and on nothing the light rig does. Additive and blended
+    /// batches, and antialiased silhouette pixels, fall outside it by construction, which is the
+    /// point: those are exactly the pixels whose value is part background.
     ///
-    /// Diagnostics only, and it renders to its own texture -- nothing is written to disk and the
-    /// viewport is untouched.
+    /// Everything else is pinned too: a camera of its own (the viewport orbit cannot leak in),
+    /// framing derived from the bounds alone, and -wmvNoAnim for a fixed pose. Every rig is then
+    /// measured through that one camera, over that one mask, in one process, so the only thing
+    /// that differs between the numbers is the rig.
+    ///
+    /// The old threshold number is still printed beside the new one, because the gap between them
+    /// IS the artefact, and it is worth being able to see it rather than take it on trust.
+    ///
+    /// Diagnostics only: its own camera and its own render texture, nothing written to disk, the
+    /// viewport untouched.
     /// </summary>
     void ReportLighting()
     {
-        var cam = Camera.main;
-        if (cam == null || current == null)
+        Camera src = Camera.main;
+        if (src == null || current == null)
+        {
+            Debug.Log("WMV: lightcheck: no camera or no model -- nothing measured");
             return;
+        }
 
-        const int W = 256, H = 256;
+        const int W = 512, H = 512;
+        const float Fov = 60f;
+        float Yaw = WmvModelBuilder.Debug_.LightYaw;
+        float Pitch = WmvModelBuilder.Debug_.LightPitch;
+
+        // FRAMING, from the bounds and two fixed angles. Not from the orbit: the viewport camera
+        // may have been moved by a Frame() call, a drag or a wheel, and a measurement that moves
+        // with it compares two different pictures.
+        Bounds b = current.Bounds;
+        Quaternion rot = Quaternion.Euler(Pitch, Yaw, 0f);
+        Vector3 up = rot * Vector3.up, right = rot * Vector3.right, fwd = rot * Vector3.forward;
+        Vector3 e = b.extents;
+        float halfUp = Mathf.Abs(e.x * up.x) + Mathf.Abs(e.y * up.y) + Mathf.Abs(e.z * up.z);
+        float halfRt = Mathf.Abs(e.x * right.x) + Mathf.Abs(e.y * right.y) + Mathf.Abs(e.z * right.z);
+        float halfFw = Mathf.Abs(e.x * fwd.x) + Mathf.Abs(e.y * fwd.y) + Mathf.Abs(e.z * fwd.z);
+        // Square frame, so the vertical field of view governs both axes.
+        float need = Mathf.Max(Mathf.Max(halfUp, halfRt), 0.01f);
+        float dist = need / Mathf.Tan(Fov * 0.5f * Mathf.Deg2Rad) * 1.08f + halfFw;
+
+        var go = new GameObject("WmvLightCheckCamera");
+        Camera cam = go.AddComponent<Camera>();
+        cam.enabled = false;                         // only ever rendered by hand, below
+        cam.clearFlags = CameraClearFlags.SolidColor;
+        cam.fieldOfView = Fov;
+        cam.cullingMask = src.cullingMask;
+        cam.allowHDR = false;
+        cam.allowMSAA = false;
+        cam.transform.rotation = rot;
+        cam.transform.position = b.center - fwd * dist;
+        cam.nearClipPlane = Mathf.Max(0.01f, dist * 0.01f);
+        cam.farClipPlane = dist * 10f + 100f;
+
         RenderTexture rt = RenderTexture.GetTemporary(W, H, 24, RenderTextureFormat.ARGB32,
                                                       RenderTextureReadWrite.Default);
-        RenderTexture prevTarget = cam.targetTexture;
         RenderTexture prevActive = RenderTexture.active;
-        Vector3 prevPos = cam.transform.position;
-        Quaternion prevRot = cam.transform.rotation;
-        Texture2D shot = null;
+        float restoreRig = WmvModelBuilder.Debug_.Rig;
         try
         {
-            // Frame the model from a FIXED angle and distance for the measurement, then put the
-            // camera back. Reading whatever the orbit happened to be showing made the numbers
-            // wander between runs -- coverage moved by a fifth on repeats of the same build --
-            // and a measurement that disagrees with itself cannot say whether a change helped.
-            Bounds modelBounds = current.Bounds;
-            float radius = Mathf.Max(modelBounds.extents.magnitude, 0.001f);
-            Vector3 dir = new Vector3(0.45f, 0.35f, -1f).normalized;
-            cam.transform.position = modelBounds.center - dir * (radius * 2.6f);
-            cam.transform.rotation = Quaternion.LookRotation(dir, Vector3.up);
+            // The shadow map must belong to THIS camera, not to wherever the viewport was
+            // pointing: the key is view-relative, so the map's light direction follows the
+            // camera it was rendered for, and a measurement taken with someone else's map
+            // would move when the viewport moved.
+            if (shadowRig != null)
+                shadowRig.RenderFor(cam);
 
-            cam.targetTexture = rt;
-            cam.Render();
-            RenderTexture.active = rt;
-            shot = new Texture2D(W, H, TextureFormat.RGBA32, false);
-            shot.ReadPixels(new Rect(0, 0, W, H), 0, 0);
-            shot.Apply(false);
-
-            Color bg = cam.backgroundColor;
-            float bgLum = 0.2126f * bg.r + 0.7152f * bg.g + 0.0722f * bg.b;
-
-            var lums = new List<float>(W * H);
-            int clipped = 0;
-            // Mean over the WHOLE frame as well. The model-only figures below depend on a
-            // threshold to separate model from background, and a brighter model pulls previously
-            // excluded dark pixels above it -- which can drag the model-only mean DOWN while every
-            // pixel got brighter. This one has no threshold in it and cannot do that, so the two
-            // together say whether a change actually brightened anything.
-            float frameSum = 0f;
-            Color32[] px = shot.GetPixels32();
-            foreach (Color32 c in px)
+            // ---- the mask: geometry decides, not brightness ---------------------------------
+            //
+            // Built under the LEGACY rig specifically. Byte-equality between the two clears is a
+            // near-perfect stand-in for "opaque geometry covered this pixel", but not a perfect
+            // one: where an additive batch is bright enough to saturate the result over BOTH
+            // clears, the two agree for a reason that has nothing to do with coverage, and the
+            // pixel joins the mask. Which pixels those are depends on how bright the rig is --
+            // so a mask built under the rig being measured would drift as the rig is tuned, and
+            // it did, by a few pixels on the two models with big additive passes. The legacy rig
+            // is the one rig that is finished and will not be tuned again, so building the mask
+            // under it pins the pixel set across every candidate and every build.
+            Shader.SetGlobalFloat("_WmvRig", 1);
+            Color32[] onBlack = GrabFrame(cam, rt, Color.black, W, H);
+            Color32[] onWhite = GrabFrame(cam, rt, Color.white, W, H);
+            var mask = new bool[W * H];
+            int covered = 0, saturated = 0;
+            for (int i = 0; i < mask.Length; i++)
             {
-                float r = c.r / 255f, g = c.g / 255f, b = c.b / 255f;
-                float lum = 0.2126f * r + 0.7152f * g + 0.0722f * b;
-                frameSum += lum;
-                // Anything meaningfully brighter than the background is the model. The clear
-                // colour is flat, so this separates the two without needing a mask pass.
-                if (lum <= bgLum + 0.02f)
-                    continue;
-                lums.Add(lum);
-                if (c.r >= 253 || c.g >= 253 || c.b >= 253)
-                    clipped++;
+                Color32 p = onBlack[i], q = onWhite[i];
+                bool same = p.r == q.r && p.g == q.g && p.b == q.b;
+                // ...but not if it agreed only because it ran out of range. An additive batch
+                // bright enough to saturate over a black clear saturates over a white one too,
+                // so the two agree for a reason that has nothing to do with coverage -- valkier,
+                // which is 99 % additive, smuggled in 1676 such pixels and then reported 12 %
+                // of its own mask as clipped. A pixel pinned at the top of the range carries no
+                // luminance to measure either way, so it is not part of the sample.
+                bool pinned = p.r >= 255 || p.g >= 255 || p.b >= 255;
+                if (same && pinned) { saturated++; same = false; }
+                mask[i] = same;
+                if (same) covered++;
             }
 
-            if (lums.Count == 0)
+            // Determinism is a claim, so check it rather than assert it: build the mask a second
+            // time and report whether the two agree pixel for pixel.
+            Color32[] onBlack2 = GrabFrame(cam, rt, Color.black, W, H);
+            Color32[] onWhite2 = GrabFrame(cam, rt, Color.white, W, H);
+            int maskDrift = 0;
+            for (int i = 0; i < mask.Length; i++)
             {
-                Debug.Log("WMV: light check: nothing brighter than the background was drawn");
+                bool same2 = onBlack2[i].r == onWhite2[i].r && onBlack2[i].g == onWhite2[i].g
+                             && onBlack2[i].b == onWhite2[i].b;
+                if (same2 && (onBlack2[i].r >= 255 || onBlack2[i].g >= 255 || onBlack2[i].b >= 255))
+                    same2 = false;
+                if (same2 != mask[i]) maskDrift++;
+            }
+
+            Color bg = src.backgroundColor;
+            float bgLum = 0.2126f * bg.r + 0.7152f * bg.g + 0.0722f * bg.b;
+            // WHICH SKIN WAS MEASURED, spelled out. WMV picks a random skin per load unless
+            // Session/RandomLooks is off, and a creature can carry skins that differ in brightness
+            // by more than any light rig ever will -- chicken2 spans 2.4x across its four. A
+            // before/after pair taken in two processes is therefore not comparable unless this
+            // line matches, and until it was printed there was no way to notice that it did not.
+            var skinIds = new List<string>();
+            foreach (var kv in currentTextureIds) skinIds.Add(kv.Key + ":" + kv.Value);
+            skinIds.Sort();
+            Debug.Log(string.Format(
+                "WMV: lightcheck: {0} | camera yaw {1} pitch {2} fov {3} dist {4:F3} "
+                + "| bounds extents ({5:F2},{6:F2},{7:F2}) | background {8:F4} | textures {9}",
+                currentName, Yaw, Pitch, Fov, dist, e.x, e.y, e.z, bgLum,
+                skinIds.Count > 0 ? string.Join(",", skinIds.ToArray()) : "(none recorded)"));
+            Debug.Log(string.Format(
+                "WMV: lightcheck: mask {0} px ({1:P2} of frame), {2} px dropped as saturated, "
+                + "drift on rebuild {3} px -- {4}",
+                covered, covered / (float)(W * H), saturated, maskDrift,
+                maskDrift == 0 ? "deterministic" : "NOT DETERMINISTIC, numbers below are suspect"));
+
+            // A model that is nearly all additive or alpha-blended has almost no opaque core
+            // to measure, so say so rather than quietly reporting a number from a sliver of it.
+            if (covered > 0 && covered < (W * H) / 100)
+                Debug.Log(string.Format(
+                    "WMV: lightcheck: WARNING -- only {0:P2} of the frame is opaque geometry; this "
+                    + "model is mostly blended/additive and the figures below describe a small "
+                    + "opaque core, not what the viewer shows", covered / (float)(W * H)));
+
+            if (covered == 0)
+            {
+                Debug.Log("WMV: lightcheck: no opaque depth-writing geometry covered a pixel -- "
+                          + "nothing to measure (a fully blended model, or nothing drawn)");
                 return;
             }
-            lums.Sort();
-            float sum = 0f;
-            foreach (float l in lums) sum += l;
-            float p05 = lums[Mathf.Clamp(Mathf.RoundToInt(lums.Count * 0.05f), 0, lums.Count - 1)];
-            float p95 = lums[Mathf.Clamp(Mathf.RoundToInt(lums.Count * 0.95f), 0, lums.Count - 1)];
-            Debug.Log(string.Format(
-                "WMV: light check: coverage {0:P1} of frame | background {1:F3} | frame mean {7:F4} "
-                + "| model mean {2:F3} p05 {3:F3} p95 {4:F3} max {5:F3} | clipped {6:P2}",
-                lums.Count / (float)(W * H), bgLum, sum / lums.Count, p05, p95,
-                lums[lums.Count - 1], clipped / (float)lums.Count, frameSum / (W * H)));
+
+            // ---- every rig, same camera, same mask, same process -----------------------------
+            for (int rig = 0; rig <= 1; rig++)
+            {
+                Shader.SetGlobalFloat("_WmvRig", rig);
+                Color32[] shot = GrabFrame(cam, rt, bg, W, H);
+                ReportOneRig(rig, shot, mask, covered, bgLum, W, H);
+
+                // CAST SHADOWS, measured by subtraction -- and PER CONTRIBUTOR, because the
+                // map and the contact march compose with min() and a joint measurement hides
+                // whichever one the other already covers (an early version disabled only the
+                // map in the reference frame and reported the contact march's entire output as
+                // a REDUCTION in shadow). Three frames: everything on, map only, neither.
+                if (rig == 0 && shadowRig != null)
+                {
+                    Shader.SetGlobalFloat("_WmvContactValid", 0f);
+                    Color32[] mapOnly = GrabFrame(cam, rt, bg, W, H);
+                    Shader.SetGlobalFloat("_WmvShadowValid", 0f);
+                    Color32[] unshadowed = GrabFrame(cam, rt, bg, W, H);
+                    shadowRig.RenderFor(cam);            // restores both maps and both flags
+                    ReportShadow("map", mapOnly, unshadowed, mask, W, H);
+                    ReportShadow("map+contact", shot, unshadowed, mask, W, H);
+                    ReportShadow("contact adds", shot, mapOnly, mask, W, H);
+                }
+
+                // ...and again with the texture taken out of it. On a real model, paint and light
+                // arrive as one number: a rig that models form and a rig that lights everything
+                // flat can produce the same mean, the same percentiles and the same contrast,
+                // because the spread being measured is mostly the texture. White albedo leaves
+                // only the rig, so "does this have shadows in it" becomes a ratio instead of an
+                // opinion. The shipped rig measured FLATTER than the legacy one here while every
+                // other number said it was better, which is exactly the failure this catches.
+                const float FlatAlbedo = 0.25f;   // linear, ~sRGB 0.54: a typical WoW texel
+                Shader.SetGlobalFloat("_WmvFlatAlbedo", FlatAlbedo);
+                Color32[] flat = GrabFrame(cam, rt, bg, W, H);
+                Shader.SetGlobalFloat("_WmvFlatAlbedo", 0f);
+                ReportShading(rig, flat, mask, covered);
+            }
         }
-        catch (System.Exception e)
+        catch (System.Exception ex)
         {
-            Debug.LogWarning("WMV: light check could not render: " + e.Message);
+            Debug.LogWarning("WMV: lightcheck could not render: " + ex.Message);
         }
         finally
         {
-            cam.targetTexture = prevTarget;
+            Shader.SetGlobalFloat("_WmvRig", restoreRig);
             RenderTexture.active = prevActive;
-            cam.transform.position = prevPos;
-            cam.transform.rotation = prevRot;
             RenderTexture.ReleaseTemporary(rt);
-            if (shot != null) Destroy(shot);
+            Destroy(go);
         }
+    }
+
+    /// <summary>
+    /// Render one frame of the measurement camera into rt with the given clear colour and read it
+    /// back. Its own texture each call, so the caller can hold several frames side by side.
+    /// </summary>
+    Color32[] GrabFrame(Camera cam, RenderTexture rt, Color clear, int w, int h)
+    {
+        cam.backgroundColor = clear;
+        cam.targetTexture = rt;
+        cam.Render();
+        cam.targetTexture = null;
+        RenderTexture prev = RenderTexture.active;
+        RenderTexture.active = rt;
+        var tex = new Texture2D(w, h, TextureFormat.RGBA32, false);
+        tex.ReadPixels(new Rect(0, 0, w, h), 0, 0);
+        tex.Apply(false);
+        RenderTexture.active = prev;
+        Color32[] px = tex.GetPixels32();
+        Destroy(tex);
+        return px;
+    }
+
+    /// <summary>
+    /// Statistics for one rig over the geometric mask, plus -- deliberately -- the number the old
+    /// threshold rule would have printed for the same frame, so the two can be compared directly.
+    /// </summary>
+    void ReportOneRig(int rig, Color32[] shot, bool[] mask, int covered, float bgLum, int w, int h)
+    {
+        var lums = new List<float>(covered);
+        int clipped = 0;
+        double chroma = 0.0;
+        int threshCount = 0;
+        double threshSum = 0.0;
+        float threshold = bgLum + 0.02f;
+
+        for (int i = 0; i < shot.Length; i++)
+        {
+            Color32 c = shot[i];
+            float r = c.r / 255f, g = c.g / 255f, bl = c.b / 255f;
+            float lum = 0.2126f * r + 0.7152f * g + 0.0722f * bl;
+
+            // The old rule, over the WHOLE frame, exactly as it used to be applied.
+            if (lum > threshold) { threshCount++; threshSum += lum; }
+
+            if (!mask[i]) continue;
+            lums.Add(lum);
+            if (c.r >= 253 || c.g >= 253 || c.b >= 253) clipped++;
+
+            // Chroma IN LINEAR LIGHT, not on the sRGB bytes. (max-min)/max is invariant under a
+            // scale factor only in the space the scaling happens in; computed on sRGB values it
+            // falls whenever the picture gets brighter, because the encoding curve is concave.
+            // Measured on the bytes, a pure exposure change looked like a loss of saturation --
+            // which is exactly the question this number is supposed to answer, so it has to be
+            // free of it. Linearised, a rig that only changes exposure leaves it untouched and
+            // only a real desaturation moves it.
+            float lr = Srgb2Linear(r), lg = Srgb2Linear(g), lb = Srgb2Linear(bl);
+            float mx = Mathf.Max(lr, Mathf.Max(lg, lb)), mn = Mathf.Min(lr, Mathf.Min(lg, lb));
+            if (mx > 0.0001f) chroma += (mx - mn) / mx;      // saturation, a colour-pop proxy
+        }
+
+        lums.Sort();
+        double sum = 0.0;
+        for (int i = 0; i < lums.Count; i++) sum += lums[i];
+        float mean = (float)(sum / lums.Count);
+        // Michelson contrast of the model against the background it sits on.
+        float contrast = (mean + bgLum) > 0.0001f ? (mean - bgLum) / (mean + bgLum) : 0f;
+
+        Debug.Log(string.Format(
+            "WMV: lightcheck rig={0} ({1}) | mask {2} px | mean {3:F4} p05 {4:F4} p50 {5:F4} "
+            + "p95 {6:F4} max {7:F4} | clipped {8:F3} % | chroma {9:F4} | contrast {10:F4} "
+            + "|| old-threshold mask: {11} px mean {12:F4}",
+            rig,
+            rig == 0 ? "shipped" : "legacy",
+            lums.Count, mean,
+            Pct(lums, 0.05f), Pct(lums, 0.50f), Pct(lums, 0.95f), lums[lums.Count - 1],
+            100f * clipped / lums.Count, (float)(chroma / lums.Count), contrast,
+            threshCount, threshCount > 0 ? (float)(threshSum / threshCount) : 0f));
+    }
+
+    /// <summary>sRGB byte value (0..1) to linear light.</summary>
+    static float Srgb2Linear(float c)
+    {
+        return c <= 0.04045f ? c / 12.92f : Mathf.Pow((c + 0.055f) / 1.055f, 2.4f);
+    }
+
+    /// <summary>
+    /// What the cast shadows did: how much of the model they touch, how hard they darken it,
+    /// and where their centre of mass sits. The centroid line is DESCRIPTIVE, not a verdict.
+    ///
+    /// The full story is a cautionary one. The first shadow build had a vertically mirrored
+    /// map (the render-into-texture flip counted twice -- see WmvShadowRig), and every check
+    /// here let it through: coverage looked plausible, darkening looked plausible, and when
+    /// the centroid flagged "shadows sit ABOVE the model" on two of three models, that was
+    /// explained away as receiver geometry. Even the dumped difference images were misread as
+    /// sensible. What caught it was someone LOOKING AT THE VIEWPORT and saying the shadow
+    /// looked like a whole copy of the model stamped across itself -- which is precisely what
+    /// a mirrored map does. The lesson stands in both directions: -wmvLightDump plus the
+    /// criterion "with a high key, darkening belongs on UNDER-surfaces and the top of the back
+    /// must be clean" is what verified the fix, and no summary statistic here should ever be
+    /// trusted over that picture.
+    /// </summary>
+    void ReportShadow(string what, Color32[] withShadow, Color32[] without, bool[] mask,
+                      int w, int h)
+    {
+        int touched = 0, maskCount = 0;
+        double deltaSum = 0.0;
+        double ySum = 0.0, yShadowSum = 0.0;
+        for (int i = 0; i < withShadow.Length; i++)
+        {
+            if (!mask[i]) continue;
+            maskCount++;
+            int y = i / w;                              // ReadPixels rows run bottom-up
+            ySum += y;
+            float on = 0.2126f * withShadow[i].r + 0.7152f * withShadow[i].g
+                       + 0.0722f * withShadow[i].b;
+            float off = 0.2126f * without[i].r + 0.7152f * without[i].g
+                        + 0.0722f * without[i].b;
+            float delta = (off - on) / 255f;            // positive where the shadow darkened
+            if (delta > 1.5f / 255f)
+            {
+                touched++;
+                deltaSum += delta;
+                yShadowSum += y;
+            }
+        }
+        if (WmvModelBuilder.Debug_.LightDump)
+        {
+            DumpPng(withShadow, w, h, "wmv-lightcheck-" + what + "-on.png");
+            DumpPng(without, w, h, "wmv-lightcheck-" + what + "-off.png");
+            // The difference, amplified: white = where the shadow darkened the frame.
+            var diff = new Color32[withShadow.Length];
+            for (int i = 0; i < diff.Length; i++)
+            {
+                float on = 0.2126f * withShadow[i].r + 0.7152f * withShadow[i].g
+                           + 0.0722f * withShadow[i].b;
+                float off = 0.2126f * without[i].r + 0.7152f * without[i].g
+                            + 0.0722f * without[i].b;
+                byte v = (byte)Mathf.Clamp((off - on) * 8f, 0f, 255f);
+                diff[i] = new Color32(v, v, v, 255);
+            }
+            DumpPng(diff, w, h, "wmv-lightcheck-" + what + "-diff.png");
+        }
+
+        if (maskCount == 0) return;
+        if (touched == 0)
+        {
+            Debug.Log("WMV: lightcheck shadows [" + what + "]: touch 0.0 % of the model");
+            return;
+        }
+        float centroidDy = (float)(yShadowSum / touched - ySum / maskCount);
+        Debug.Log(string.Format(
+            "WMV: lightcheck shadows [{4}]: touch {0:P1} of the model | mean darkening {1:F4} "
+            + "over touched px | shadow centroid {2:F1} px {3} the model centroid",
+            touched / (float)maskCount, deltaSum / touched,
+            Mathf.Abs(centroidDy), centroidDy < 0f ? "below" : "above", what));
+    }
+
+    /// <summary>Write one readback frame as a PNG next to the player (-wmvLightDump).</summary>
+    void DumpPng(Color32[] px, int w, int h, string name)
+    {
+        try
+        {
+            var tex = new Texture2D(w, h, TextureFormat.RGBA32, false);
+            tex.SetPixels32(px);
+            tex.Apply(false);
+            string path = System.IO.Path.Combine(Application.dataPath, "../" + name);
+            System.IO.File.WriteAllBytes(path, ImageConversion.EncodeToPNG(tex));
+            Destroy(tex);
+            Debug.Log("WMV: lightcheck dump: " + path);
+        }
+        catch (System.Exception e)
+        {
+            Debug.LogWarning("WMV: lightcheck dump failed: " + e.Message);
+        }
+    }
+
+    /// <summary>
+    /// How much light-to-dark range the rig itself puts on a model, with no texture in the way.
+    /// The ratio of the bright end to the dark end is the number that says whether the thing has
+    /// shadows: around 1.2 is a flat, evenly-lit figure; 1.8 upwards reads as modelled form.
+    /// </summary>
+    void ReportShading(int rig, Color32[] shot, bool[] mask, int covered)
+    {
+        var lums = new List<float>(covered);
+        for (int i = 0; i < shot.Length; i++)
+        {
+            if (!mask[i]) continue;
+            Color32 c = shot[i];
+            lums.Add(0.2126f * c.r / 255f + 0.7152f * c.g / 255f + 0.0722f * c.b / 255f);
+        }
+        if (lums.Count == 0) return;
+        lums.Sort();
+        float p05 = Pct(lums, 0.05f), p50 = Pct(lums, 0.50f), p95 = Pct(lums, 0.95f);
+        double sum = 0.0;
+        for (int i = 0; i < lums.Count; i++) sum += lums[i];
+        Debug.Log(string.Format(
+            "WMV: lightcheck rig={0} SHADING (flat albedo) | mean {1:F4} p05 {2:F4} p50 {3:F4} "
+            + "p95 {4:F4} min {5:F4} max {6:F4} | range p95/p05 {7:F2}x | full {8:F2}x",
+            rig, sum / lums.Count, p05, p50, p95, lums[0], lums[lums.Count - 1],
+            p05 > 0.0001f ? p95 / p05 : 0f,
+            lums[0] > 0.0001f ? lums[lums.Count - 1] / lums[0] : 0f));
+    }
+
+    static float Pct(List<float> sorted, float q)
+    {
+        int i = Mathf.Clamp(Mathf.RoundToInt((sorted.Count - 1) * q), 0, sorted.Count - 1);
+        return sorted[i];
     }
 
     /// <summary>
