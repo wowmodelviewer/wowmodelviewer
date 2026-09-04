@@ -296,10 +296,30 @@ public static class WmvModelBuilder
     /// which is exactly what the viewport does for a display with no geoset data. A null set means
     /// the host had nothing to say (no creature selection at all), and then nothing is hidden.
     /// </summary>
+    /// <summary>
+    /// Is this submesh's geoset switched on?
+    ///
+    /// Geoset 0 is the always-drawn part of a model -- the body under the options -- and every
+    /// other number is a variant a creature display turns on. Three cases, and the middle one is
+    /// the one that used to be wrong:
+    ///
+    ///   * a set was reported: draw geoset 0 and whatever the set names;
+    ///   * NO set was reported (null): draw geoset 0 alone. This is the legacy viewport's default
+    ///     -- it builds every submesh with display = (id == 0)
+    ///     (Source/games/wow/WoWModel.cpp:1607) and leaves it that way when nothing selects
+    ///     otherwise (Source/games/wow/WoWModel.cpp:2845-2847). Drawing everything instead, which
+    ///     is what this returned before, shows a model wearing all of its mutually exclusive
+    ///     variants at once: every helmet, every fur option, every alternative limb, overlapping.
+    ///   * an EMPTY set was reported: also geoset 0 alone, which the previous code already got
+    ///     right -- an empty set is a known selection that switches nothing on, and is not the
+    ///     same as silence.
+    /// </summary>
     public static bool GeosetVisible(int submeshId, HashSet<int> geosets)
     {
-        if (geosets == null || submeshId == 0)
+        if (submeshId == 0)
             return true;
+        if (geosets == null)
+            return false;
         return geosets.Contains(submeshId);
     }
 
@@ -678,9 +698,41 @@ public static class WmvModelBuilder
         // variant does not make the camera jump.
         mesh.bounds = BoundsOfAll(positions, triangleSets);
 
-        if (log != null && hiddenByGeoset > 0)
-            log(string.Format("geosets: {0} of {1} submesh(es) hidden by the displayed variant [{2}]",
-                              hiddenByGeoset, triangleSets.Count, GeosetList(geosets)));
+        if (log != null)
+        {
+            // What the skin's index starts looked like. Printed on every load, not only when
+            // something is odd, because "no model I tried exercised this" is itself a result and
+            // only a line that always prints can establish it.
+            M2SkinIndexSurvey ix = skin.IndexSurvey;
+            log(string.Format(
+                "skin indices: {0} submesh(es) over {1} index/es; {2} carry a Level word; " +
+                "largest start {3}{4}",
+                ix.Submeshes, ix.TotalIndices, ix.NonZeroLevel, ix.MaxIndexStart,
+                ix.ExercisesWideStarts ? " -- this model needs starts wider than 16 bits" : ""));
+            if (ix.CumulativeChecked && !ix.CumulativeAgrees)
+                log(string.Format(
+                    "skin indices: WARNING the format's start and the legacy viewport's running " +
+                    "sum disagree, first at submesh {0} (format {1}, running sum {2}). One of the " +
+                    "two renderers is drawing the wrong triangles here.",
+                    ix.DisagreeAt, ix.DisagreeExpanded, ix.DisagreeCumulative));
+
+            // Which geoset rule decided what is on screen. See GeosetVisible.
+            int shownSets = 0;
+            for (int i = 0; i < submeshGeosets.Count; i++)
+                if (GeosetVisible(submeshGeosets[i], geosets))
+                    shownSets++;
+            string how = geosets != null
+                ? "the displayed variant [" + GeosetList(geosets) + "]"
+                : "no variant reported -- geoset 0 only, as the legacy viewport defaults";
+            log(string.Format("geosets: {0} of {1} submesh(es) drawn, {2} hidden, by {3}; " +
+                              "{4} of the skin's submeshes carry geoset 0",
+                              shownSets, triangleSets.Count, hiddenByGeoset, how, ix.GeosetZero));
+            if (shownSets == 0 && triangleSets.Count > 0)
+                log("geosets: NOTHING is drawn -- this model has no geoset 0 submesh and no " +
+                    "variant switched anything on. The legacy viewport shows nothing here too; " +
+                    "reported rather than worked around, because a fallback would be a guess at " +
+                    "what the model meant.");
+        }
 
         // ---- scene object -------------------------------------------------------------
         // Skinned when the model carries a rig this renderer can reproduce, static otherwise. The

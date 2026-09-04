@@ -319,9 +319,68 @@ namespace Wmv.Wow
         /// switches that number on. See WmvModelBuilder.GeosetVisible.
         /// </summary>
         public ushort Id;
+
+        /// <summary>
+        /// The HIGH HALF of this submesh's first triangle index.
+        ///
+        /// The skin format stores that start in a 16-bit field, which cannot address a skin
+        /// holding more than 65535 indices, so the bits above 65535 live here and the real start
+        /// is RawIndexStart + (Level &lt;&lt; 16). The legacy viewport does not read this word at
+        /// all -- it reads the two together as one 32-bit id and masks the whole thing to 15 bits
+        /// (Source/games/wow/modelheaders.h:226, :252) -- and sidesteps the problem by recomputing
+        /// each start as a running sum of the counts before it instead
+        /// (Source/games/wow/WoWModel.cpp:1601-1606). Its own comment says why that class of file
+        /// exists: "to handle index &gt; 65535 (present in HD models)"
+        /// (Source/games/wow/modelheaders.h:239).
+        /// </summary>
         public ushort Level;
+
         public ushort VertexStart, VertexCount;
-        public ushort IndexStart, IndexCount;   // into the skin's triangle-index array
+
+        /// <summary>The first triangle index AS STORED -- the low 16 bits alone. Kept so the
+        /// diagnostic can show what the file said; never use it to address the triangle array.
+        /// IndexStart is the whole value.</summary>
+        public ushort RawIndexStart;
+
+        /// <summary>The first triangle index, whole: RawIndexStart + (Level &lt;&lt; 16). This is
+        /// the one to index with. It is an int, not a ushort, precisely because the value it
+        /// carries does not fit in one.</summary>
+        public int IndexStart;
+
+        public ushort IndexCount;
+    }
+
+    /// <summary>
+    /// What a skin's index starts look like, gathered while parsing so that the renderer can
+    /// report them and a run can be believed rather than assumed.
+    ///
+    /// It records TWO independent readings of the same quantity: the format's own (the stored
+    /// start plus the Level word) and the legacy viewport's (a running sum of the index counts,
+    /// which is how it reaches a 32-bit start without reading Level -- see M2Submesh.Level). If
+    /// the two ever disagree, one of the renderers is drawing the wrong triangles and no amount
+    /// of looking at the picture will say which, so the disagreement is recorded rather than
+    /// resolved by preference.
+    /// </summary>
+    public struct M2SkinIndexSurvey
+    {
+        public int Submeshes;
+        public int NonZeroLevel;        // submeshes whose Level word is set
+        public int MaxIndexStart;       // the largest expanded start in this skin
+        public int TotalIndices;        // entries in the triangle array
+        public int GeosetZero;          // submeshes whose Id is 0, the always-drawn geoset
+
+        /// <summary>Whether the legacy's running-sum reading was computable for every submesh.
+        /// It always is; the flag exists so a false reading cannot be mistaken for agreement.</summary>
+        public bool CumulativeChecked;
+        public bool CumulativeAgrees;
+
+        /// <summary>The first submesh where the two readings differ, or -1.</summary>
+        public int DisagreeAt;
+        public int DisagreeExpanded, DisagreeCumulative;
+
+        /// <summary>True when any start needed more than 16 bits -- i.e. when this model is one
+        /// of the files the fix exists for.</summary>
+        public bool ExercisesWideStarts { get { return MaxIndexStart > 0xFFFF || NonZeroLevel > 0; } }
     }
 
     /// <summary>A draw call: which submesh with which material/texture.</summary>
@@ -359,6 +418,10 @@ namespace Wmv.Wow
         public ushort[] VertexLookup = new ushort[0];   // skin vertex -> M2 vertex index
         public ushort[] Triangles = new ushort[0];      // indices into VertexLookup
         public M2Submesh[] Submeshes = new M2Submesh[0];
+
+        /// <summary>How this skin's index starts read, and whether the two independent readings
+        /// of them agree. See M2SkinIndexSurvey.</summary>
+        public M2SkinIndexSurvey IndexSurvey;
         public M2Batch[] Batches = new M2Batch[0];
 
         public int TriangleCount { get { return Triangles.Length / 3; } }
