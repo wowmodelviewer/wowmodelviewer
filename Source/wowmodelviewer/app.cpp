@@ -1,6 +1,7 @@
 #include "app.h"
 
 #include <cctype>
+#include <cstddef>
 #include <cstdio>
 #include <cstdlib>
 #include <fstream>
@@ -34,6 +35,7 @@
 #include "logger/LogOutputFile.h"
 
 #include <QCoreApplication>
+#include <QFile>
 #include <QSettings>
 #include <QImage>
 
@@ -175,6 +177,98 @@ static void doHeadlessFbxExport(ModelViewer * frame, const QString & outPath,
 }
 
 // Forensic-only: load an arbitrary texture by FileDataID and save it standalone, bypassing ALL
+// -m2inspect <list.txt> [out.csv]: one model per line, as an internal path or "fdid:<id>".
+//
+// For each, read the file's raw bytes and print the counts in its M2 header -- geometry, bones,
+// animations, colour and transparency tracks, texture transforms, materials, attachments,
+// events, lights, cameras, ribbon emitters, particle emitters -- and which sibling chunks it
+// carries. It reads the HEADER ONLY and never constructs a WoWModel, so it costs a file open per
+// entry and cannot be tripped up by a model the full loader chokes on; sweeping thousands of
+// files is a minute's work.
+//
+// Why it exists: "which model should I test this feature against" is otherwise answered by
+// guessing at names. This answers it from the files -- ask for every model whose header says it
+// has particle emitters, or texture transforms, or more than one skin profile, and the list is
+// evidence rather than a hunch. Forensic and read-only; nothing is written but the report.
+static void doHeadlessM2Inspect(const QString & listPath, const QString & outPath)
+{
+  QFile in(listPath);
+  if (!in.open(QIODevice::ReadOnly | QIODevice::Text))
+  {
+    std::printf("WMVM2: ERROR cannot read %s\n", qPrintable(listPath)); std::fflush(stdout);
+    return;
+  }
+  QFile out(outPath);
+  const bool toFile = !outPath.isEmpty() && out.open(QIODevice::WriteOnly | QIODevice::Text);
+  const char * head = "name,fileDataID,version,globalFlags,vertices,bones,anims,globalSeqs,colors,"
+                      "transparency,texTransforms,textures,materials,texLookup,attachments,events,"
+                      "lights,cameras,ribbons,particles,skinProfiles,chunks";
+  if (toFile) { out.write(head); out.write("\n"); }
+  std::printf("WMVM2: %s\n", head);
+
+  // Everything up to and including ofsParticleEmitters must be present to read; the two fields
+  // after it exist only when GlobalModelFlags & 8, so the struct's full size is not required.
+  const size_t needed = offsetof(ModelHeader, nTextureCombinerCombos);
+  int total = 0, ok = 0;
+  while (!in.atEnd())
+  {
+    const QString line = QString::fromUtf8(in.readLine()).trimmed();
+    if (line.isEmpty() || line.startsWith('#')) continue;
+    total++;
+    UnityAssetAccess::Result r = line.startsWith("fdid:", Qt::CaseInsensitive)
+        ? UnityAssetAccess::readByFileDataID(line.mid(5).toInt())
+        : UnityAssetAccess::readByPath(line);
+    if (!r.ok)
+    {
+      std::printf("WMVM2: %s,,,,,,,,,,,,,,,,,,,,,ERROR %s\n", qPrintable(line), qPrintable(r.error));
+      continue;
+    }
+    const char * data = r.data.constData();
+    const int size = r.data.size();
+
+    // Chunked files (MD21 plus siblings) or a bare MD20 payload.
+    int payload = 0, payloadSize = size;
+    QString chunks;
+    if (size >= 8 && qstrncmp(data, "MD20", 4) != 0)
+    {
+      int off = 0;
+      while (off + 8 <= size)
+      {
+        char tag[5] = { data[off], data[off + 1], data[off + 2], data[off + 3], 0 };
+        quint32 sz = 0; memcpy(&sz, data + off + 4, 4);
+        if ((qint64)off + 8 + (qint64)sz > (qint64)size) break;
+        chunks += (chunks.isEmpty() ? "" : " ") + QString::fromLatin1(tag);
+        if (qstrcmp(tag, "MD21") == 0) { payload = off + 8; payloadSize = (int)sz; }
+        off += 8 + (int)sz;
+      }
+    }
+    if (payloadSize < (int)needed)
+    {
+      std::printf("WMVM2: %s,%d,,,,,,,,,,,,,,,,,,,,ERROR header truncated (%d bytes)\n",
+                  qPrintable(line), r.fileDataID, payloadSize);
+      continue;
+    }
+    ModelHeader h;
+    memset(&h, 0, sizeof(h));
+    memcpy(&h, data + payload, needed);
+    const unsigned version = (unsigned)h.version[0] | ((unsigned)h.version[1] << 8)
+                           | ((unsigned)h.version[2] << 16) | ((unsigned)h.version[3] << 24);
+    const QString row = QString("%1,%2,%3,0x%4,%5,%6,%7,%8,%9,%10,%11,%12,%13,%14,%15,%16,%17,%18,%19,%20,%21,%22")
+        .arg(line).arg(r.fileDataID).arg(version).arg(h.GlobalModelFlags, 0, 16)
+        .arg(h.nVertices).arg(h.nBones).arg(h.nAnimations).arg(h.nGlobalSequences)
+        .arg(h.nColors).arg(h.nTransparency).arg(h.nTexAnims).arg(h.nTextures)
+        .arg(h.nTexFlags).arg(h.nTexLookup).arg(h.nAttachments).arg(h.nEvents)
+        .arg(h.nLights).arg(h.nCameras).arg(h.nRibbonEmitters).arg(h.nParticleEmitters)
+        .arg(h.nViews).arg(chunks);
+    if (toFile) { out.write(row.toUtf8()); out.write("\n"); }
+    std::printf("WMVM2: %s\n", qPrintable(row));
+    ok++;
+  }
+  if (toFile) out.close();
+  std::printf("WMVM2: %d of %d entries read\n", ok, total);
+  std::fflush(stdout);
+}
+
 // item/equip/combiner logic -- lets you look at exactly what a "type 1" replaceable texture (or
 // any other raw asset) actually contains, independent of whether the normal resolution pipeline
 // binds it correctly. -dumptex <fileDataID> <out.png>
@@ -777,7 +871,7 @@ bool WowModelViewApp::OnInit()
     QString a = QString::fromWCharArray(argv[ai]);
     if (a == "-m" || a == "-mo" || a == "-armory" || a == "-npc" || a == "-fbxexport" ||
         a == "-animdump" || a == "-fbxinspect" || a == "-dbfromfile" || a == "-dumptex" ||
-        a == "-mpq" || a.endsWith(".chr"))
+        a == "-m2inspect" || a == "-mpq" || a.endsWith(".chr"))
     {
       earlyHeadless = true;
       break;
@@ -937,6 +1031,7 @@ bool WowModelViewApp::OnInit()
   QString mpqDataFolder;  // -mpq <DataFolder> [locale]: load a legacy MPQ client instead of CASC
   QString mpqLocale;      // optional locale for -mpq (auto-detected when empty)
   int dumpTexFileDataId = 0; QString dumpTexOutPath; // -dumptex <fileDataID> <out.png>: forensic-only
+  QString m2InspectList, m2InspectOut;               // -m2inspect <list.txt> [out.csv]: forensic-only
   // Export content selection + clip list for the headless FBX export (the parent process passes
   // these so the child reproduces the user's exact options). Defaults: full content, no explicit
   // clips (the exporter falls back to none/first-N only if -fbxanim and no -fbxclips).
@@ -985,6 +1080,18 @@ bool WowModelViewApp::OnInit()
         if (i + 1 < argc) {
           const QString nxt = QString::fromWCharArray(argv[i + 1]);
           if (!nxt.startsWith('-')) { i++; mpqLocale = nxt; }
+        }
+      }
+    }
+    else if (cmd == "-m2inspect") {
+      // Forensic-only: "-m2inspect <list.txt> [out.csv]" reads each listed model's M2 header,
+      // reports what visual systems it carries, and exits. See doHeadlessM2Inspect.
+      if (i + 1 < argc) {
+        i++;
+        m2InspectList = QString::fromWCharArray(argv[i]);
+        if (i + 1 < argc) {
+          const QString nxt = QString::fromWCharArray(argv[i + 1]);
+          if (!nxt.startsWith('-')) { i++; m2InspectOut = nxt; }
         }
       }
     }
@@ -1115,7 +1222,7 @@ bool WowModelViewApp::OnInit()
   for (int i = 1; i < argc; i++)
   {
     QString a = QString::fromWCharArray(argv[i]);
-    if (a == "-m" || a == "-mo" || a == "-armory" || a == "-npc" || a == "-fbxexport" || a == "-animdump" || a == "-fbxinspect" || a == "-dbfromfile" || a == "-dumptex" || a == "-mpq" || a.endsWith(".chr"))
+    if (a == "-m" || a == "-mo" || a == "-armory" || a == "-npc" || a == "-fbxexport" || a == "-animdump" || a == "-fbxinspect" || a == "-dbfromfile" || a == "-dumptex" || a == "-m2inspect" || a == "-mpq" || a.endsWith(".chr"))
     {
       headlessLoad = true;
       break;
@@ -1150,6 +1257,12 @@ bool WowModelViewApp::OnInit()
       frame->LoadWoWFromMpq(mpqDataFolder, mpqLocale); // legacy MPQ client (Vanilla/TBC/WotLK)
     else
       frame->LoadWoW(); // auto-pick config + profile, no prompt
+
+    if (!m2InspectList.isEmpty())
+    {
+      doHeadlessM2Inspect(m2InspectList, m2InspectOut);
+      return false; // forensic sweep done -> exit
+    }
 
     if (!dumpTexOutPath.isEmpty())
     {
