@@ -445,6 +445,11 @@ public class WmvMain : MonoBehaviour
             if (WmvModelBuilder.Debug_.LightCheck)
                 ReportLighting();
 
+            // Independent of the model just loaded -- it brings its own geometry, materials and
+            // camera -- but hung off the same hook so one headless run produces both readings.
+            if (WmvModelBuilder.Debug_.QueueProof)
+                ReportQueueOrder();
+
             status.Set("Loaded " + job.Path);
             status.Set(string.Format("Vertices {0}  Triangles {1}  Submeshes {2}  Textures {3}",
                                      built.VertexCount, built.TriangleCount, built.SubmeshCount, job.Textures.Count));
@@ -797,6 +802,313 @@ public class WmvMain : MonoBehaviour
         Color32[] px = tex.GetPixels32();
         Destroy(tex);
         return px;
+    }
+
+    /// <summary>
+    /// Does a per-material render queue actually order the SUBMESHES OF ONE RENDERER?
+    /// (-wmvQueueProof)
+    ///
+    /// The transparent draw order in WmvModelBuilder rests entirely on this. A model is one
+    /// renderer with one submesh per batch, so the only place an order can be expressed without
+    /// rebuilding the mesh is the material's render queue -- and whether Unity honours that
+    /// BETWEEN SUBMESHES OF THE SAME RENDERER, rather than drawing them in submesh order
+    /// regardless, is a question about the engine. Reading how the render loop sorts draw calls
+    /// suggests an answer; it does not establish one, and a real model cannot settle it either:
+    /// additive blending is commutative, so a model whose blended batches are additive looks
+    /// identical whichever order they draw in, and a null result there would mean nothing.
+    ///
+    /// So the case is synthetic and fully determined. Two coplanar quads in one mesh, one submesh
+    /// each, both with depth writes off and an output alpha of exactly 1, blended SrcAlpha /
+    /// OneMinusSrcAlpha. Nothing about the geometry, the depth buffer or the winding can decide
+    /// what survives: the pixel that comes out IS the identity of whichever material drew SECOND.
+    /// Submesh 0 is red, submesh 1 is blue, and the queues are set both ways round --
+    ///
+    ///   equal queues     : records what the engine does with no queue to go on (submesh order)
+    ///   A 3000, B 3001   : expect BLUE, which agrees with submesh order
+    ///   A 3001, B 3000   : expect RED, which CONTRADICTS submesh order
+    ///
+    /// -- and it is the third case that carries the proof. Both renderer types are measured,
+    /// because models take both paths (WmvModelBuilder builds a SkinnedMeshRenderer when the file
+    /// can be skinned and a MeshRenderer when it cannot) and a skinned draw is submitted
+    /// differently.
+    /// </summary>
+    void ReportQueueOrder()
+    {
+        // Same 512 square the light check uses, so a saved frame from here sits beside a saved
+        // frame of a model at the same size and neither has to be scaled to be looked at.
+        const int W = 512, H = 512;
+        Shader sh = WmvModelBuilder.ResolveShader(null);
+        if (sh == null)
+        {
+            Debug.Log("WMV: queueproof: no render shader resolved -- nothing to measure");
+            return;
+        }
+
+        // Far from anything the viewport can see. The proof objects are destroyed before this
+        // method returns, but Destroy is deferred to the end of the frame, and 10 km away with a
+        // 20-unit far plane on the measuring camera means neither camera can see the other's
+        // subject even for that one frame.
+        Vector3 origin = new Vector3(10000f, 10000f, 10000f);
+        Color clear = new Color(0.25f, 0.25f, 0.25f, 1f);   // neither red- nor blue-dominant
+
+        var camGo = new GameObject("WmvQueueProofCamera");
+        Camera cam = camGo.AddComponent<Camera>();
+        cam.enabled = false;                        // only ever rendered by hand, below
+        cam.clearFlags = CameraClearFlags.SolidColor;
+        cam.orthographic = true;
+        cam.orthographicSize = 0.5f;                // the quads are 2 units across: they overfill
+        cam.nearClipPlane = 0.1f;
+        cam.farClipPlane = 20f;
+        cam.allowHDR = false;
+        cam.allowMSAA = false;
+        cam.transform.position = origin + new Vector3(0f, 0f, -5f);
+        cam.transform.rotation = Quaternion.identity;
+
+        RenderTexture rt = RenderTexture.GetTemporary(W, H, 24, RenderTextureFormat.ARGB32,
+                                                      RenderTextureReadWrite.Default);
+
+        // WHAT THIS DIAGNOSTIC BORROWS FROM GLOBAL SHADER STATE, AND HOW IT GIVES IT BACK.
+        //
+        // Two globals decide how the proof materials shade. _WmvRig, because the emissive bypass
+        // the proof depends on is gated on the shipped rig and the legacy rig deliberately
+        // ignores it; and _WmvFlatAlbedo, because the light check's white-albedo override would
+        // repaint both quads the same colour and destroy the very reading being taken.
+        //
+        // Both are READ FIRST and put back exactly as they were FOUND -- not put back to the
+        // value they ought to have had. An earlier version of this method restored _WmvRig to
+        // Debug_.Rig and did not restore _WmvFlatAlbedo at all, reasoning that ReportLighting is
+        // its only other writer and always leaves it at 0. That reasoning happens to be true of
+        // today's code and is still the wrong rule: it makes the diagnostic's cleanup depend on
+        // a fact about a different method, and it leaves the switch able to change what the
+        // viewport draws after it has finished measuring. Ask, do not assume -- and say in the
+        // log what was found and what was left, so the claim is checkable instead of asserted.
+        float prevRig = Shader.GetGlobalFloat("_WmvRig");
+        float prevFlatAlbedo = Shader.GetGlobalFloat("_WmvFlatAlbedo");
+        // THE RENDER TARGET, AND WHY RECORDING IT IS NOT ENOUGH.
+        //
+        // GrabFrame does put RenderTexture.active back -- but only on the path where nothing
+        // throws. It sets cam.targetTexture = rt, renders, clears it, then sets
+        // RenderTexture.active = rt and restores it after ReadPixels. A throw anywhere between
+        // those pairs leaves the process pointing at THIS method's temporary, and the release
+        // below would then hand the rest of the frame a freed render target. Depending on
+        // GrabFrame's internal cleanup is therefore fine for the happy path and not good enough
+        // for a finally block, so both are put back here as well, before the release.
+        //
+        // GrabFrame is left alone: twelve of its thirteen callers are the light check's, and
+        // rewriting it to be exception-safe is a change to that measurement, not to this
+        // diagnostic's cleanup. (The Texture2D it allocates does leak on a throw; that is
+        // GrabFrame's own business and not shared state.) cam.backgroundColor is also written
+        // and never restored, and that one does not matter: the camera belongs to this method
+        // and is destroyed below.
+        RenderTexture prevActive = RenderTexture.active;
+        try
+        {
+            Shader.SetGlobalFloat("_WmvRig", 0f);
+            Shader.SetGlobalFloat("_WmvFlatAlbedo", 0f);
+
+            bool allProven = true;
+            for (int p = 0; p < 2; p++)
+            {
+                bool skinned = p == 1;
+                string path = skinned ? "SkinnedMeshRenderer" : "MeshRenderer";
+                Material matA = QueueProofMaterial(sh, new Color(1f, 0f, 0f, 1f), "queueProofA");
+                Material matB = QueueProofMaterial(sh, new Color(0f, 0f, 1f, 1f), "queueProofB");
+                Mesh mesh;
+                GameObject go = BuildQueueProofCase(sh, origin, skinned,
+                                                    new[] { matA, matB }, out mesh);
+
+                char wEqual, wBlast, wAlast;
+                matA.renderQueue = 3000; matB.renderQueue = 3000;
+                Color32[] fEqual = GrabFrame(cam, rt, clear, W, H);
+                string sEqual = QueueProofRead(fEqual, out wEqual);
+                matA.renderQueue = 3000; matB.renderQueue = 3001;
+                Color32[] fBlast = GrabFrame(cam, rt, clear, W, H);
+                string sBlast = QueueProofRead(fBlast, out wBlast);
+                matA.renderQueue = 3001; matB.renderQueue = 3000;
+                Color32[] fAlast = GrabFrame(cam, rt, clear, W, H);
+                string sAlast = QueueProofRead(fAlast, out wAlast);
+
+                // Repeat the decisive case to show the reading is not a one-off.
+                char wAlast2;
+                string sAlast2 = QueueProofRead(GrabFrame(cam, rt, clear, W, H), out wAlast2);
+
+                // The frames themselves, under the switch that already saves the light check's
+                // pictures. A count of red and blue pixels is the measurement; the picture is
+                // what a reviewer can check the measurement against without running anything.
+                if (WmvModelBuilder.Debug_.LightDump)
+                {
+                    string tag = skinned ? "skinned" : "static";
+                    DumpPng(fEqual, W, H, "wmv-queueproof-" + tag + "-equal-3000-3000.png");
+                    DumpPng(fBlast, W, H, "wmv-queueproof-" + tag + "-A3000-B3001.png");
+                    DumpPng(fAlast, W, H, "wmv-queueproof-" + tag + "-A3001-B3000.png");
+                }
+
+                bool proven = wBlast == 'B' && wAlast == 'A' && wAlast2 == 'A';
+                if (!proven) allProven = false;
+
+                Debug.Log(string.Format(
+                    "WMV: queueproof: {0}: submesh 0 = red material A, submesh 1 = blue material B, "
+                    + "coplanar, ZWrite off, alpha 1 -- the frame shows whichever drew last", path));
+                Debug.Log(string.Format(
+                    "WMV: queueproof: {0}: queues equal (3000/3000), no queue to go on -> {1}",
+                    path, sEqual));
+                Debug.Log(string.Format(
+                    "WMV: queueproof: {0}: A=3000 B=3001, expect B/blue last -> {1} [{2}]",
+                    path, sBlast, wBlast == 'B' ? "as expected" : "NOT AS EXPECTED"));
+                Debug.Log(string.Format(
+                    "WMV: queueproof: {0}: A=3001 B=3000, expect A/red last, which CONTRADICTS "
+                    + "submesh order -> {1} [{2}]",
+                    path, sAlast, wAlast == 'A' ? "as expected" : "NOT AS EXPECTED"));
+                Debug.Log(string.Format(
+                    "WMV: queueproof: {0}: same case rendered again -> {1} [{2}]",
+                    path, sAlast2, wAlast2 == wAlast ? "repeatable" : "NOT REPEATABLE"));
+                Debug.Log(string.Format("WMV: queueproof: {0}: {1}", path, proven
+                    ? "PROVEN -- the frame follows the render queue, including when the queue "
+                      + "contradicts submesh order"
+                    : "NOT PROVEN -- the frame did not follow the render queue; the transparent "
+                      + "draw order has no effect and should be removed"));
+
+                go.SetActive(false);
+                Destroy(go);
+                Destroy(mesh);
+                Destroy(matA);
+                Destroy(matB);
+            }
+
+            Debug.Log("WMV: queueproof: verdict -- " + (allProven
+                ? "a per-material render queue orders the submeshes of one renderer on BOTH "
+                  + "renderer paths, so ranking transparent batches by queue does what it claims"
+                : "the render queue did NOT order the submeshes of one renderer on at least one "
+                  + "path -- see the lines above"));
+        }
+        finally
+        {
+            // ORDER MATTERS HERE. The render target goes back FIRST, so the temporary is neither
+            // the active target nor a camera's target at the moment it is released -- releasing
+            // one that is still bound is how a freed render target reaches the next frame.
+            RenderTexture.active = prevActive;
+            if (cam != null)
+                cam.targetTexture = null;
+            Shader.SetGlobalFloat("_WmvRig", prevRig);
+            Shader.SetGlobalFloat("_WmvFlatAlbedo", prevFlatAlbedo);
+            RenderTexture.ReleaseTemporary(rt);
+            Destroy(camGo);
+
+            // Read the globals back rather than trust the writes, and print entry and exit side
+            // by side. A diagnostic that quietly changes what the viewport draws after it has
+            // finished measuring is worse than no diagnostic, so this line exists to be looked at.
+            float nowRig = Shader.GetGlobalFloat("_WmvRig");
+            float nowFlatAlbedo = Shader.GetGlobalFloat("_WmvFlatAlbedo");
+            // Compared by REFERENCE, not by name: "the same render target object", not "a
+            // render target that happens to be called the same thing".
+            bool restored = nowRig == prevRig && nowFlatAlbedo == prevFlatAlbedo
+                            && ReferenceEquals(RenderTexture.active, prevActive);
+            Debug.Log(string.Format(
+                "WMV: queueproof: global state -- on entry _WmvRig {0} _WmvFlatAlbedo {1} "
+                + "RenderTexture.active {2}; on exit _WmvRig {3} _WmvFlatAlbedo {4} "
+                + "RenderTexture.active {5} -- {6}",
+                prevRig, prevFlatAlbedo, prevActive == null ? "none" : prevActive.name,
+                nowRig, nowFlatAlbedo,
+                RenderTexture.active == null ? "none" : RenderTexture.active.name,
+                restored ? "every borrowed global restored to the value it was found at"
+                         : "NOT RESTORED -- the diagnostic changed global state it did not put back"));
+        }
+    }
+
+    /// <summary>
+    /// A flat, self-lit, fully opaque-in-alpha blended material: the light rig, the texture, the
+    /// combiner and the alpha channel are all taken out of the reading, so the only thing the
+    /// frame can report is which material drew last.
+    /// </summary>
+    static Material QueueProofMaterial(Shader sh, Color c, string name)
+    {
+        var m = new Material(sh);
+        m.name = name;
+        m.SetColor("_Color", c);
+        m.SetFloat("_CombinerMode", 0f);      // single texture; _MainTex defaults to white
+        m.SetFloat("_Unit0UV", 0f);
+        m.SetFloat("_Unit1UV", 2f);
+        m.SetFloat("_AlphaMode", 0f);         // alpha 1 out of the combiner
+        m.SetFloat("_AlphaScale", 1f);
+        m.SetFloat("_OpaqueAlpha", 1f);       // ...and 1 out of the shader: the later draw wins
+        m.SetFloat("_Emissive", 1f);          // no light rig in the colour
+        m.SetFloat("_Cull", 0f);              // Off: winding cannot decide the outcome either
+        m.SetFloat("_ZWrite", 0f);            // as a transparent batch: depth cannot decide it
+        m.SetFloat("_SrcBlend", (float)UnityEngine.Rendering.BlendMode.SrcAlpha);
+        m.SetFloat("_DstBlend", (float)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);
+        return m;
+    }
+
+    /// <summary>
+    /// One renderer, one mesh, two submeshes that occupy exactly the same pixels -- built the two
+    /// ways WmvModelBuilder builds a model, so the answer covers both.
+    /// </summary>
+    static GameObject BuildQueueProofCase(Shader sh, Vector3 origin, bool skinned,
+                                          Material[] mats, out Mesh mesh)
+    {
+        Vector3[] corner = { new Vector3(-1f, -1f, 0f), new Vector3(-1f, 1f, 0f),
+                             new Vector3( 1f,  1f, 0f), new Vector3( 1f, -1f, 0f) };
+        var verts = new Vector3[8];
+        var norms = new Vector3[8];
+        for (int q = 0; q < 2; q++)
+            for (int c = 0; c < 4; c++)
+            {
+                verts[q * 4 + c] = corner[c];
+                norms[q * 4 + c] = new Vector3(0f, 0f, -1f);
+            }
+        mesh = new Mesh();
+        mesh.vertices = verts;
+        mesh.normals = norms;
+        mesh.subMeshCount = 2;
+        mesh.SetTriangles(new[] { 0, 1, 2, 0, 2, 3 }, 0, false);
+        mesh.SetTriangles(new[] { 4, 5, 6, 4, 6, 7 }, 1, false);
+        mesh.bounds = new Bounds(Vector3.zero, new Vector3(2f, 2f, 0.1f));
+
+        var go = new GameObject(skinned ? "WmvQueueProofSkinned" : "WmvQueueProofStatic");
+        go.transform.position = origin;
+        if (skinned)
+        {
+            var bone = new GameObject("WmvQueueProofBone");
+            bone.transform.SetParent(go.transform, false);
+            var bw = new BoneWeight[8];
+            for (int i = 0; i < bw.Length; i++) { bw[i].boneIndex0 = 0; bw[i].weight0 = 1f; }
+            mesh.boneWeights = bw;
+            mesh.bindposes = new[] { Matrix4x4.identity };
+            var smr = go.AddComponent<SkinnedMeshRenderer>();
+            smr.sharedMesh = mesh;
+            smr.bones = new[] { bone.transform };
+            smr.rootBone = bone.transform;
+            smr.sharedMaterials = mats;
+            smr.localBounds = mesh.bounds;
+            smr.updateWhenOffscreen = false;
+        }
+        else
+        {
+            go.AddComponent<MeshFilter>().sharedMesh = mesh;
+            go.AddComponent<MeshRenderer>().sharedMaterials = mats;
+        }
+        return go;
+    }
+
+    /// <summary>
+    /// Which material owns the frame: 'A' red, 'B' blue, '?' neither. Counted over every pixel
+    /// rather than sampled at the centre, so a partial draw cannot be read as a whole one.
+    /// </summary>
+    static string QueueProofRead(Color32[] px, out char winner)
+    {
+        int red = 0, blue = 0, neither = 0;
+        for (int i = 0; i < px.Length; i++)
+        {
+            Color32 q = px[i];
+            if (q.r > q.b + 40 && q.r > q.g + 40) red++;
+            else if (q.b > q.r + 40 && q.b > q.g + 40) blue++;
+            else neither++;
+        }
+        winner = red > blue && red > neither ? 'A'
+               : blue > red && blue > neither ? 'B' : '?';
+        return string.Format("{0} ({1} red px, {2} blue px, {3} neither, of {4})",
+                             winner == 'A' ? "A/red" : winner == 'B' ? "B/blue" : "INDETERMINATE",
+                             red, blue, neither, px.Length);
     }
 
     /// <summary>

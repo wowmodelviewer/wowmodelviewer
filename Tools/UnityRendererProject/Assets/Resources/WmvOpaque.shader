@@ -38,6 +38,17 @@ Shader "WMV/Opaque Textured"
         _Emissive ("Emissive pass", Float) = 0
         // Where unit 1 samples: 0 = uv set 0, 1 = uv set 1, 2 = environment sphere map.
         _Unit1UV ("Unit 1 UV source", Float) = 2
+
+        // The same question for UNIT 0, which used to have no answer: it always sampled mesh UV
+        // set 0. A material whose vertex program is named Diffuse_Env, Diffuse_Env_T1,
+        // Diffuse_Env_Env or Diffuse_EdgeFade_Env puts the ENVIRONMENT on unit 0, and sampling
+        // that texture with mesh coordinates pins a reflection to the surface: the sheen slides
+        // with the model instead of staying put as the view turns. The sphere map was already
+        // generated for unit 1's sake; this lets unit 0 reach it.
+        //
+        // Default 0 (mesh UV set 0), NOT 2 like _Unit1UV, so a material that never sets this --
+        // any pipeline fallback, any older path -- keeps exactly today's behaviour.
+        _Unit0UV ("Unit 0 UV source", Float) = 0
         // How the M2 combiner builds its "discard alpha": 0 = 1, 1 = unit0.a, 2 = unit1.a,
         // 3 = unit0.a * unit1.a, 4 = unit0.a + unit1.a. Scaled by _AlphaScale (the x2 combiners).
         _AlphaMode ("Alpha source", Float) = 0
@@ -130,7 +141,7 @@ Shader "WMV/Opaque Textured"
             sampler2D _MainTex;
             float4 _MainTex_ST;
             sampler2D _SecondTex;
-            float _CombinerMode, _Unit1UV, _AlphaMode, _AlphaScale, _OpaqueAlpha;
+            float _CombinerMode, _Unit1UV, _Unit0UV, _AlphaMode, _AlphaScale, _OpaqueAlpha;
 
             // 1 on an ADDITIVE batch. An additive pass is light the surface EMITS -- a lantern
             // flame, an eye glow, rune fire -- and multiplying emitted light by the preview rig
@@ -339,7 +350,13 @@ Shader "WMV/Opaque Textured"
 
             fixed4 frag (v2f i) : SV_Target
             {
-                fixed4 t1 = tex2D(_MainTex, i.uv);
+                // Unit 0's coordinate. Anything outside the three cases below falls back to mesh
+                // UV set 0, which is what this sampled before the choice existed -- an unknown
+                // source must not invent a coordinate.
+                float2 uv0 = i.uv;
+                if (_Unit0UV > 1.5 && _Unit0UV < 2.5)       uv0 = i.env;   // environment sphere map
+                else if (_Unit0UV > 0.5 && _Unit0UV < 1.5)  uv0 = i.uv1;   // mesh UV set 1
+                fixed4 t1 = tex2D(_MainTex, uv0);
 
                 // Unit 1's coordinates, per the material's vertex shader name.
                 float2 uv1 = (_Unit1UV < 0.5) ? i.uv : ((_Unit1UV < 1.5) ? i.uv1 : i.env);

@@ -23,7 +23,31 @@ public struct WmvMaterialBinding
     public int EnvSlot;          // M2 texture slot bound as the combiner's second unit, -1 unused
     public bool DropAlpha;       // was the base texture's alpha discarded on upload?
     public bool Unit1DropAlpha;  // ... and the second unit's
-    public bool Unit1Clamp;      // the second unit is sphere-mapped, so it must not wrap
+
+    /// <summary>
+    /// How each unit's texture addresses outside 0..1, per axis: true repeats, false clamps.
+    ///
+    /// It has to live here, not just at build time, because a skin change re-uploads the images
+    /// through RebindTextures and would otherwise hand every texture the default. That is exactly
+    /// how a wrap fix looks intermittent: right on load, wrong the moment the user picks a skin.
+    /// </summary>
+    public bool BaseWrapX, BaseWrapY;
+    public bool Unit1WrapX, Unit1WrapY;
+}
+
+/// <summary>
+/// One drawn batch's place in the transparent draw order. The legacy viewport sorts its passes
+/// before drawing -- blend mode first, then geoset index, then the texture's "special" type
+/// (Source/games/wow/WoWModel.cpp:2011-2018) -- and this renderer drew them in skin order, which
+/// is a different order whenever a model mixes blend modes across submeshes.
+/// </summary>
+struct WmvDrawOrderKey
+{
+    public int Material;     // index into the materials list
+    public int Blend;        // M2 blend mode, the legacy's primary key
+    public int Submesh;      // the legacy's secondary key
+    public int SpecialTex;   // the legacy's tertiary key: texture type, -1 for a plain file
+    public int Built;        // the order this batch was built in: the final tiebreaker
 }
 
 public class WmvRuntimeModel
@@ -131,6 +155,12 @@ public static class WmvModelBuilder
     ///                    size. Zero everywhere means nothing is animating; a number far larger
     ///                    than the model means the rig is being applied wrongly. Both are
     ///                    invisible in a still frame and obvious in this line.
+    ///   -wmvQueueProof   render a controlled two-submesh case offscreen and report which of the
+    ///                    two materials reached the frame buffer last. The transparent draw order
+    ///                    rests on one engine behaviour -- that a per-material render queue orders
+    ///                    the submeshes of a SINGLE renderer -- and reading the render loop's
+    ///                    sorting rules is not the same as measuring it. See
+    ///                    WmvMain.ReportQueueOrder.
     /// </summary>
     public static class Debug_
     {
@@ -138,6 +168,7 @@ public static class WmvModelBuilder
         static bool flipV, forceOpaque, forceSolid, matColors, showHidden, ownShader;
         static bool noSkin, skinCheck, noAnim, animCheck, placeholder, overlay, litShader;
         static bool lightCheck;
+        static bool queueProof;
         static int rig;
         static bool lightDump;
         static float lightYaw = 30f;
@@ -163,6 +194,7 @@ public static class WmvModelBuilder
                 else if (a == "-wmvLitShader") litShader = true;
                 else if (a == "-wmvLightCheck") lightCheck = true;
                 else if (a == "-wmvLightDump") lightDump = true;
+                else if (a == "-wmvQueueProof") queueProof = true;
                 else if (a.StartsWith("-wmvLightYaw="))
                 {
                     float y;
@@ -221,6 +253,18 @@ public static class WmvModelBuilder
         /// parts are. "Looks right" is not checkable from a log; those numbers are.
         /// </summary>
         public static bool LightCheck { get { Parse(); return lightCheck; } }
+
+        /// <summary>
+        /// Measure whether a per-material render queue orders the submeshes of one renderer
+        /// (-wmvQueueProof).
+        ///
+        /// The transparent draw order this builder applies is a claim about the engine, not about
+        /// WoW: the model is ONE renderer, so ranking its blended batches means giving each
+        /// batch's material its own queue value and trusting Unity to draw them in that sequence
+        /// rather than in submesh order. That trust is checkable, and a claim that can be measured
+        /// should not be inferred. The check itself lives in WmvMain.ReportQueueOrder.
+        /// </summary>
+        public static bool QueueProof { get { Parse(); return queueProof; } }
 
         /// <summary>
         /// Which preview light rig the viewport draws with (-wmvRig=N), for a visual A/B:
@@ -562,6 +606,7 @@ public static class WmvModelBuilder
         // Keyed by slot AND by whether the alpha channel was discarded, because the same slot
         // can feed an opaque batch (alpha thrown away) and a blended one (alpha kept).
         var textureCache = new Dictionary<int, Texture2D>();
+        var drawOrder = new List<WmvDrawOrderKey>();
         var triangleSets = new List<int[]>();
         var submeshGeosets = new List<int>();
         int totalTriangles = 0, hiddenByGeoset = 0;
@@ -641,16 +686,24 @@ public static class WmvModelBuilder
                                mode != M2BlendMode.Opaque;
             bool dropAlpha = Debug_.ForceSolid || !alphaIsRead;
 
+            // Unit 0's coordinate source. Read from the same resolved vertex-shader name unit 1
+            // uses; before this it was resolved and thrown away, and unit 0 always took mesh UVs.
+            M2UvSource unit0Uv = shader.UvSource.Length > 0 ? shader.UvSource[0] : M2UvSource.TexCoord0;
+            bool unit0Env = unit0Uv == M2UvSource.Environment;
+            bool baseWrapX, baseWrapY;
+            TextureWrap(model, textureSlot, unit0Env, out baseWrapX, out baseWrapY);
             Texture2D tex = GetTexture(decodedTextures, textureCache, textures, textureSlot,
-                                       dropAlpha, false, objectName);
+                                       dropAlpha, baseWrapX, baseWrapY, objectName);
             // An environment unit is sampled by generated sphere-map coordinates, which must not
             // wrap; a unit fed by a stored UV set is a normal repeating texture. Its own alpha is
             // kept whenever the combiner reads it.
             bool unit1Env = unit1Uv == M2UvSource.Environment;
             bool unit1DropAlpha = !(plan.AlphaMode == 2 || plan.AlphaMode == 3 || plan.AlphaMode == 4 ||
                                     plan.Mode == 4);
+            bool unit1WrapX, unit1WrapY;
+            TextureWrap(model, unit1Slot, unit1Env, out unit1WrapX, out unit1WrapY);
             Texture2D unit1Tex = GetTexture(decodedTextures, textureCache, textures, unit1Slot,
-                                            unit1DropAlpha, unit1Env, objectName);
+                                            unit1DropAlpha, unit1WrapX, unit1WrapY, objectName);
 
             if (log != null)
             {
@@ -680,15 +733,80 @@ public static class WmvModelBuilder
             bindings.Add(new WmvMaterialBinding
             {
                 BaseSlot = textureSlot, EnvSlot = unit1Slot, DropAlpha = dropAlpha,
-                Unit1DropAlpha = unit1DropAlpha, Unit1Clamp = unit1Env,
+                Unit1DropAlpha = unit1DropAlpha,
+                BaseWrapX = baseWrapX, BaseWrapY = baseWrapY,
+                Unit1WrapX = unit1WrapX, Unit1WrapY = unit1WrapY,
             });
-            materials.Add(CreateMaterial(mat, mode, plan, unit1Uv, tex, unit1Tex,
+            if (log != null && (unit0Env || baseWrapX || baseWrapY || unit1WrapX || unit1WrapY))
+                log(string.Format("batch: submesh {0} texture addressing -- unit 0 {1} ({2}), " +
+                                  "unit 1 {3}", batch.SubmeshIndex,
+                                  unit0Env ? "sphere map, clamped" : (baseWrapX ? "repeat X" : "clamp X") + "/" + (baseWrapY ? "repeat Y" : "clamp Y"),
+                                  unit0Uv, unit1Slot < 0 ? "-" : (unit1Env ? "sphere map, clamped"
+                                      : (unit1WrapX ? "repeat X" : "clamp X") + "/" + (unit1WrapY ? "repeat Y" : "clamp Y"))));
+            // The keys the legacy sorts its passes on, kept so the same order can be reproduced
+            // after the loop. specialTex mirrors the legacy's own mapping: a plain file texture is
+            // -1, anything database-resolved keeps its type number.
+            int specialTex = (textureSlot >= 0 && textureSlot < model.Textures.Length &&
+                              model.Textures[textureSlot].Type != 0)
+                             ? (int)model.Textures[textureSlot].Type : -1;
+            drawOrder.Add(new WmvDrawOrderKey
+            {
+                Material = materials.Count, Blend = (int)mode,
+                Submesh = batch.SubmeshIndex, SpecialTex = specialTex, Built = drawOrder.Count,
+            });
+            materials.Add(CreateMaterial(mat, mode, plan, unit0Uv, unit1Uv, tex, unit1Tex,
                                          objectName + "_mat" + materials.Count, log));
         }
 
         if (hiddenCount > 0 && !drawHidden && log != null)
             log(string.Format("{0} of {1} batch(es) hidden at rest -- pass -wmvShowHidden to draw them",
                               hiddenCount, skin.Batches.Length));
+
+        // ---- transparent draw order ---------------------------------------------------------
+        // The whole model is ONE renderer with one submesh per batch, so nothing about the mesh
+        // decides the order the blended ones reach the frame buffer: within a render queue they
+        // are drawn in submesh order, which is the order the skin happens to list them. The legacy
+        // viewport instead sorts every pass by blend mode, then geoset, then texture type. Giving
+        // each transparent material its own queue value in that order reproduces the legacy's
+        // sequence without touching the mesh, the materials' blend state, or the architecture.
+        //
+        // Only modes 2..7 are ranked: opaque and alpha-key already sit in earlier queues and must
+        // stay there. The rank is bounded so it can never reach the next queue band.
+        if (materials.Count > 0)
+        {
+            var ranked = new List<WmvDrawOrderKey>();
+            for (int i = 0; i < drawOrder.Count; i++)
+                if (drawOrder[i].Blend >= 2)
+                    ranked.Add(drawOrder[i]);
+            // A total order: every key compared, and the build position last, so the result is the
+            // same on every run and on every machine.
+            ranked.Sort(delegate(WmvDrawOrderKey a, WmvDrawOrderKey b)
+            {
+                if (a.Blend != b.Blend) return a.Blend.CompareTo(b.Blend);
+                if (a.Submesh != b.Submesh) return a.Submesh.CompareTo(b.Submesh);
+                if (a.SpecialTex != b.SpecialTex) return a.SpecialTex.CompareTo(b.SpecialTex);
+                return a.Built.CompareTo(b.Built);
+            });
+            int transparentQueue = (int)UnityEngine.Rendering.RenderQueue.Transparent;
+            for (int r = 0; r < ranked.Count; r++)
+            {
+                Material m = materials[ranked[r].Material];
+                if (m != null)
+                    m.renderQueue = transparentQueue + Mathf.Min(r, 899);
+            }
+            if (log != null && ranked.Count > 1)
+            {
+                string order = "";
+                for (int r = 0; r < ranked.Count && r < 12; r++)
+                    order += (r > 0 ? " " : "") + "submesh" + ranked[r].Submesh +
+                             "/blend" + ranked[r].Blend;
+                log(string.Format("draw order: {0} transparent batch(es) ranked by blend mode then " +
+                                  "submesh then texture type, queues {1}..{2} -- {3}{4}",
+                                  ranked.Count, transparentQueue,
+                                  transparentQueue + Mathf.Min(ranked.Count - 1, 899), order,
+                                  ranked.Count > 12 ? " ..." : ""));
+            }
+        }
 
         mesh.subMeshCount = triangleSets.Count;
         for (int i = 0; i < triangleSets.Count; i++)
@@ -1136,7 +1254,8 @@ public static class WmvModelBuilder
                 continue;
             WmvMaterialBinding b = runtime.Bindings[i];
 
-            Texture2D tex = GetTexture(decodedTextures, cache, fresh, b.BaseSlot, b.DropAlpha, false, objectName);
+            Texture2D tex = GetTexture(decodedTextures, cache, fresh, b.BaseSlot, b.DropAlpha,
+                                       b.BaseWrapX, b.BaseWrapY, objectName);
             if (tex != null && !Debug_.MatColors)
                 m.mainTexture = tex;
 
@@ -1145,7 +1264,7 @@ public static class WmvModelBuilder
             if (b.EnvSlot >= 0 && m.HasProperty(CombinerModeProperty))
             {
                 Texture2D unit1 = GetTexture(decodedTextures, cache, fresh, b.EnvSlot,
-                                             b.Unit1DropAlpha, b.Unit1Clamp, objectName);
+                                             b.Unit1DropAlpha, b.Unit1WrapX, b.Unit1WrapY, objectName);
                 if (unit1 != null && !Debug_.MatColors)
                     m.SetTexture(SecondTexProperty, unit1);
             }
@@ -1468,7 +1587,7 @@ public static class WmvModelBuilder
     /// </summary>
     static Texture2D GetTexture(Dictionary<int, BlpImage> decodedTextures,
                                 Dictionary<int, Texture2D> cache, List<Texture2D> owned,
-                                int slot, bool dropAlpha, bool clamp, string objectName)
+                                int slot, bool dropAlpha, bool wrapX, bool wrapY, string objectName)
     {
         if (slot < 0 || decodedTextures == null)
             return null;
@@ -1476,18 +1595,41 @@ public static class WmvModelBuilder
         if (!decodedTextures.TryGetValue(slot, out decoded) || decoded == null)
             return null;
 
-        int key = slot * 4 + (dropAlpha ? 2 : 0) + (clamp ? 1 : 0);
+        // The cache key carries the address mode as well, because the same M2 slot can feed one
+        // batch that repeats it and another that clamps it. Keyed on the alpha treatment alone,
+        // whichever batch was built first would silently decide the wrap for both.
+        int key = slot * 8 + (dropAlpha ? 4 : 0) + (wrapX ? 2 : 0) + (wrapY ? 1 : 0);
         Texture2D tex;
         if (cache.TryGetValue(key, out tex))
             return tex;
 
         tex = CreateTexture(decoded, objectName + "_tex" + slot + (dropAlpha ? "_opaque" : ""),
                             dropAlpha);
-        if (clamp)
-            tex.wrapMode = TextureWrapMode.Clamp;
+        // Per axis, from the texture's own flags: the legacy viewport sets GL_REPEAT on the axis
+        // whose bit is set and restores GL_CLAMP_TO_EDGE otherwise
+        // (Source/games/wow/ModelRenderPass.cpp:537-540 and :324-328), reading the same two bits
+        // (Source/games/wow/WoWModel.cpp:1836-1837, TEXTURE_WRAPX = 1, TEXTURE_WRAPY = 2).
+        tex.wrapModeU = wrapX ? TextureWrapMode.Repeat : TextureWrapMode.Clamp;
+        tex.wrapModeV = wrapY ? TextureWrapMode.Repeat : TextureWrapMode.Clamp;
         cache[key] = tex;
         owned.Add(tex);
         return tex;
+    }
+
+    /// <summary>
+    /// How one texture unit should address outside 0..1.
+    ///
+    /// From the texture's own two flag bits, except for a unit fed by the generated sphere map:
+    /// that coordinate is not a stored UV set and must never wrap, whatever the texture says,
+    /// or the reflection tiles at the silhouette.
+    /// </summary>
+    static void TextureWrap(M2ParsedModel model, int slot, bool env, out bool wrapX, out bool wrapY)
+    {
+        wrapX = wrapY = false;
+        if (env || slot < 0 || model == null || slot >= model.Textures.Length)
+            return;
+        wrapX = model.Textures[slot].WrapX;
+        wrapY = model.Textures[slot].WrapY;
     }
 
     /// <summary>
@@ -1560,7 +1702,8 @@ public static class WmvModelBuilder
     /// for exactly how much of one it is.
     /// </summary>
     static Material CreateMaterial(M2MaterialDef def, M2BlendMode mode, CombinerPlan plan,
-                                   M2UvSource unit1Uv, Texture2D tex, Texture2D unit1Tex,
+                                   M2UvSource unit0Uv, M2UvSource unit1Uv,
+                                   Texture2D tex, Texture2D unit1Tex,
                                    string name, Action<string> log)
     {
         var shader = FindRenderShader(log);
@@ -1583,14 +1726,48 @@ public static class WmvModelBuilder
         {
             if (combining) m.SetTexture(SecondTexProperty, unit1Tex);
             m.SetFloat(CombinerModeProperty, combining ? plan.Mode : 0);
-            m.SetFloat("_AlphaMode", combining ? plan.AlphaMode : (plan.AlphaMode == 1 ? 1 : 0));
+            // ALPHA-KEY KEYS ON ITS OWN TEXTURE, whatever combiner it resolved to.
+            //
+            // Without the second clause an alpha-keyed batch whose combiner yields alpha mode 0 --
+            // Combiners_Opaque, which is exactly what a cutout batch normally carries, since the
+            // key comes from the blend mode and not from the combiner -- writes _AlphaMode 0. The
+            // shader's alpha then keeps its 1.0 default and the clip can never fire, so hair
+            // cards, fur flaps and foliage draw as opaque rectangles and cast matching shadows.
+            // The texture's alpha was there all along: alphaIsRead keeps it for every non-opaque
+            // blend mode.
+            //
+            // Confined to the !combining arm ON PURPOSE. That arm is the set of batches the
+            // legacy viewport sends to its fixed-function path, where it keys unconditionally on
+            // the base texture's alpha. The combining arm keeps the plan's own value, because
+            // several two-unit combiners deliberately do not discard, and on those the base
+            // texture's alpha is a reflection mask rather than transparency -- forcing a key
+            // there would punch holes in creature skins.
+            m.SetFloat("_AlphaMode", combining
+                ? plan.AlphaMode
+                : ((plan.AlphaMode == 1 || mode == M2BlendMode.AlphaKey) ? 1 : 0));
             m.SetFloat("_AlphaScale", combining ? plan.AlphaScale : 1f);
             m.SetFloat("_Unit1UV", (float)(int)unit1Uv);
+            m.SetFloat("_Unit0UV", (float)(int)unit0Uv);
         }
 
         string treatedAs;
         // The legacy combiner keys at 128/255, not at a rounded half.
         ApplyBlendMode(m, mode, def.DepthWriteDisabled, 128f / 255f, out treatedAs);
+
+        // THE UNLIT RENDER FLAG, honoured at last.
+        //
+        // An unlit material is light the surface EMITS, not light it receives: an eye, a rune, a
+        // lantern flame, a spirit's body. The flag has been parsed since the parser was written
+        // and read by nothing, so such a batch went through the preview rig and shaded down to
+        // its ambient floor -- a self-lit thing rendered as a dark painted patch. Additive
+        // batches already took the emissive path; this adds the other half of the legacy's own
+        // definition, which disables lighting for exactly these passes.
+        //
+        // It must come AFTER ApplyBlendMode, which writes _Emissive unconditionally and would
+        // otherwise overwrite this with 0. It changes no rig constant: _Emissive is the existing
+        // bypass, and it is already gated so the legacy A/B rig is untouched.
+        if (def.Unlit && m.HasProperty("_Emissive"))
+            m.SetFloat("_Emissive", 1f);
 
         // Only the model's own flag may disable culling; nothing here turns it off globally.
         if (m.HasProperty("_Cull"))
@@ -1623,12 +1800,19 @@ public static class WmvModelBuilder
             "material '{0}': shader '{1}' (shader default queue {2}) -> treated as {3}; " +
             "renderQueue {4} RenderType '{5}' _Mode {6} _Surface {7} _AlphaClip {8} _SrcBlend {9} " +
             "_DstBlend {10} _ZWrite {11} _Cull {12} _CombinerMode {13} keywords [{14}]; " +
-            "WoW blend {15} depthWriteOff {16} twoSided {17}",
+            // The three surface-state values this stage decides. Without them in the log a run
+            // cannot say whether an alpha-key batch can actually clip, whether an unlit batch
+            // took the emissive path, or which coordinate unit 0 sampled -- and "the numbers did
+            // not move" is then indistinguishable from "the fix never reached the material".
+            "_AlphaMode {18} _Emissive {19} _Unit0UV {20} _Unit1UV {21}; " +
+            "WoW blend {15} depthWriteOff {16} twoSided {17} unlit {22}",
             m.name, s != null ? s.name : "<none>", s != null ? s.renderQueue : -1, treatedAs,
             m.renderQueue, m.GetTag("RenderType", false, "<unset>"),
             Prop(m, "_Mode"), Prop(m, "_Surface"), Prop(m, "_AlphaClip"), Prop(m, "_SrcBlend"),
             Prop(m, "_DstBlend"), Prop(m, "_ZWrite"), Prop(m, "_Cull"), Prop(m, CombinerModeProperty),
-            string.Join(",", m.shaderKeywords), mode, def.DepthWriteDisabled, def.TwoSided));
+            string.Join(",", m.shaderKeywords), mode, def.DepthWriteDisabled, def.TwoSided,
+            Prop(m, "_AlphaMode"), Prop(m, "_Emissive"), Prop(m, "_Unit0UV"), Prop(m, "_Unit1UV"),
+            def.Unlit));
 
         if (!shaderCanRenderOpaque)
             log("material '" + m.name + "': the resolved shader bakes blending, depth and culling " +
