@@ -259,7 +259,8 @@ namespace Wmv.Wow.Tests
         /// <summary>Skin with `vertexCount` lookup entries and one submesh covering `triangles`.</summary>
         static byte[] BuildSkin(int vertexCount, ushort[] triangles, ushort submeshIndexCount = 0xFFFF,
                                 ushort lookupOverride = 0xFFFF, ushort batchColorIndex = 0xFFFF,
-                                ushort batchTextureCount = 1, ushort submeshId = 0)
+                                ushort batchTextureCount = 1, ushort submeshId = 0,
+                                ushort submeshLevel = 0, ushort submeshIndexStart = 0)
         {
             const int headerSize = 0x30;
             int vertOffset = headerSize;
@@ -282,10 +283,10 @@ namespace Wmv.Wow.Tests
                 PutU16(b, triOffset + i * 2, triangles[i]);
 
             PutU16(b, subOffset + 0, submeshId);             // id (geoset number)
-            PutU16(b, subOffset + 2, 0);                     // level
+            PutU16(b, subOffset + 2, submeshLevel);          // level: the high half of indexStart
             PutU16(b, subOffset + 4, 0);                     // vertexStart
             PutU16(b, subOffset + 6, (ushort)vertexCount);   // vertexCount
-            PutU16(b, subOffset + 8, 0);                     // indexStart
+            PutU16(b, subOffset + 8, submeshIndexStart);     // indexStart: the low half
             PutU16(b, subOffset + 10, submeshIndexCount == 0xFFFF ? (ushort)triangles.Length : submeshIndexCount);
 
             b[batchOffset] = 0;                              // flags
@@ -335,6 +336,7 @@ namespace Wmv.Wow.Tests
             M2Tests();
             log.Add("M2SkinParser");
             SkinTests();
+            WideIndexStartTests();
             log.Add("BlpDecoder");
             BlpTests();
             log.Add("WowCoordinateConverter");
@@ -772,6 +774,54 @@ namespace Wmv.Wow.Tests
             PutU32(truncatedBones, 0x2C, 64);
             Throws<WowParseException>(() => M2Parser.Parse(truncatedBones),
                                       "bones: truncated bone array rejected");
+        }
+
+        /// <summary>
+        /// A skin whose triangle array runs past 65535. The submesh's first index does not fit in
+        /// the field that holds it, so the format puts the overflow in the Level word; reading the
+        /// stored half alone lands on a different submesh's triangles and every bounds check still
+        /// passes, because a wrapped start is a small in-range number. That is the whole bug, and
+        /// this is the case that proves it either way.
+        /// </summary>
+        static void WideIndexStartTests()
+        {
+            const int total = 65541;            // 21847 triangles: past the 16-bit ceiling
+            var tris = new ushort[total];
+            for (int i = 0; i < total; i++)
+                tris[i] = (ushort)(i % 3);
+            // The triangle the submesh should draw, and a decoy at the wrapped start.
+            tris[65538] = 0; tris[65539] = 1; tris[65540] = 2;
+            tris[2] = 2; tris[3] = 2; tris[4] = 2;
+
+            // level 1, stored start 2  ->  whole start 65538
+            M2ParsedSkin skin = M2SkinParser.Parse(
+                BuildSkin(3, tris, 3, 0xFFFF, 0xFFFF, 1, 0, 1, 2));
+            M2Submesh s = skin.Submeshes[0];
+            Check(s.Level == 1, "wide index: the level word is read");
+            Check(s.RawIndexStart == 2, "wide index: the stored half is kept as stored");
+            Check(s.IndexStart == 65538, "wide index: the start is expanded past 16 bits");
+
+            int[] drawn = M2SkinParser.BuildTriangles(skin, s, 3);
+            Check(drawn.Length == 3 && drawn[0] == 0 && drawn[1] == 1 && drawn[2] == 2,
+                  "wide index: triangles come from the expanded start, not the wrapped one");
+
+            Check(skin.IndexSurvey.NonZeroLevel == 1, "wide index: survey counts the level word");
+            Check(skin.IndexSurvey.MaxIndexStart == 65538, "wide index: survey records the start");
+            Check(skin.IndexSurvey.ExercisesWideStarts, "wide index: survey flags the model");
+            // This fixture has one submesh starting at 65538, so the legacy viewport's running-sum
+            // reading (which would say 0) disagrees -- exactly what the cross-check is for.
+            Check(!skin.IndexSurvey.CumulativeAgrees && skin.IndexSurvey.DisagreeAt == 0,
+                  "wide index: the running-sum cross-check notices the difference");
+
+            // An ordinary skin: the two readings agree and nothing is flagged.
+            var small = new ushort[] { 0, 1, 2, 0, 1, 2 };
+            M2ParsedSkin plain = M2SkinParser.Parse(BuildSkin(3, small));
+            Check(plain.Submeshes[0].IndexStart == 0, "wide index: an ordinary start is unchanged");
+            Check(plain.IndexSurvey.NonZeroLevel == 0 && !plain.IndexSurvey.ExercisesWideStarts,
+                  "wide index: an ordinary skin is not flagged");
+            Check(plain.IndexSurvey.CumulativeAgrees && plain.IndexSurvey.DisagreeAt == -1,
+                  "wide index: the two readings agree on an ordinary skin");
+            Check(plain.IndexSurvey.GeosetZero == 1, "wide index: survey counts geoset 0 submeshes");
         }
 
         static void SkinTests()

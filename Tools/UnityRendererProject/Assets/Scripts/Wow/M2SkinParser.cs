@@ -69,6 +69,16 @@ namespace Wmv.Wow
             }
 
             skin.Submeshes = new M2Submesh[submeshes.Count];
+            // The legacy viewport's reading of the same starts, for comparison: it ignores the
+            // Level word and makes each start the sum of the counts before it
+            // (Source/games/wow/WoWModel.cpp:1601-1606). Tracked alongside so the two can be
+            // checked against each other on real files instead of one being assumed correct.
+            long cumulative = 0;
+            skin.IndexSurvey.Submeshes = submeshes.Count;
+            skin.IndexSurvey.TotalIndices = skin.Triangles.Length;
+            skin.IndexSurvey.CumulativeChecked = true;
+            skin.IndexSurvey.CumulativeAgrees = true;
+            skin.IndexSurvey.DisagreeAt = -1;
             for (int i = 0; i < submeshes.Count; i++)
             {
                 c.Seek(submeshes.Offset + i * SubmeshStride);
@@ -80,17 +90,39 @@ namespace Wmv.Wow
                 s.Level = c.ReadUInt16();
                 s.VertexStart = c.ReadUInt16();
                 s.VertexCount = c.ReadUInt16();
-                s.IndexStart = c.ReadUInt16();
+                s.RawIndexStart = c.ReadUInt16();
                 s.IndexCount = c.ReadUInt16();
                 // remaining fields (bone counts, centre/sort positions, radius) are not needed here
+
+                // THE WHOLE START. Reading the stored half alone is not a smaller number, it is a
+                // WRONG one: past 65535 the field wraps, and a wrapped start is a small in-range
+                // value, so the bounds check below passes and the submesh quietly draws somebody
+                // else's triangles. See M2Submesh.Level.
+                s.IndexStart = s.RawIndexStart + (s.Level << 16);
+                if (s.Level != 0)
+                    skin.IndexSurvey.NonZeroLevel++;
+                if (s.IndexStart > skin.IndexSurvey.MaxIndexStart)
+                    skin.IndexSurvey.MaxIndexStart = s.IndexStart;
+                if (s.Id == 0)
+                    skin.IndexSurvey.GeosetZero++;
+                if (skin.IndexSurvey.CumulativeAgrees && s.IndexStart != cumulative)
+                {
+                    skin.IndexSurvey.CumulativeAgrees = false;
+                    skin.IndexSurvey.DisagreeAt = i;
+                    skin.IndexSurvey.DisagreeExpanded = s.IndexStart;
+                    skin.IndexSurvey.DisagreeCumulative = (int)cumulative;
+                }
+                cumulative += s.IndexCount;
 
                 if (s.IndexCount % 3 != 0)
                     throw new WowParseException(string.Format(
                         "skin: submesh {0} has {1} indices, not a multiple of 3", i, s.IndexCount));
                 if ((long)s.IndexStart + s.IndexCount > skin.Triangles.Length)
                     throw new WowParseException(string.Format(
-                        "skin: submesh {0} spans indices [{1},{2}) beyond the {3} available",
-                        i, s.IndexStart, s.IndexStart + s.IndexCount, skin.Triangles.Length));
+                        "skin: submesh {0} spans indices [{1},{2}) beyond the {3} available " +
+                        "(start {4} + level {5} << 16)",
+                        i, s.IndexStart, (long)s.IndexStart + s.IndexCount, skin.Triangles.Length,
+                        s.RawIndexStart, s.Level));
                 if ((long)s.VertexStart + s.VertexCount > skin.VertexLookup.Length)
                     throw new WowParseException(string.Format(
                         "skin: submesh {0} spans vertices [{1},{2}) beyond the {3} available",
