@@ -78,6 +78,8 @@ public class WmvMain : MonoBehaviour
     /// which reads EVERY sequence's tracks at load and holds them for the model's lifetime.
     /// </summary>
     readonly Dictionary<int, M2BoneDef[]> boneTrackCache = new Dictionary<int, M2BoneDef[]>();
+    struct MaterialTrackSet { public M2ColorDef[] Colors; public M2TextureTransform[] Transforms; public M2MaterialTrackSurvey Survey; }
+    readonly Dictionary<int, MaterialTrackSet> materialTrackCache = new Dictionary<int, MaterialTrackSet>();
 
     /// <summary>
     /// External .anim files already fetched, keyed by FileDataID. A sequence whose keyframes are
@@ -147,6 +149,9 @@ public class WmvMain : MonoBehaviour
         // work it is describing. The traces stay on for warnings and errors, where something has
         // actually gone wrong and the trace is the point.
         Application.SetStackTraceLogType(LogType.Log, StackTraceLogType.None);
+
+        if (WmvModelBuilder.Debug_.LifecycleTest)
+            WmvLifecycleSelfTest.RunAll(s => Debug.Log("WMV: " + s));
 
         var cam = Camera.main;
         if (cam == null)
@@ -233,6 +238,7 @@ public class WmvMain : MonoBehaviour
         currentM2Bytes = null;
         // Sequence indices and file ids mean nothing across models.
         boneTrackCache.Clear();
+            materialTrackCache.Clear();
         animFileCache.Clear();
         pendingAnimFetch.Clear();
         haveAppState = false;
@@ -435,9 +441,35 @@ public class WmvMain : MonoBehaviour
             // at the model, not while they are waiting for the animation they just picked.
             PrefetchAnimFiles();
 
+            // -wmvFrameBounds pins EVERYTHING that frames from the bounds -- the orbit camera, the
+            // light rig and the light check -- so two builds that disagree about the bounds
+            // (one keeps batches the other dropped) are lit and framed identically.
+            if (WmvModelBuilder.Debug_.HasFrameBounds)
+            {
+                Debug.Log(string.Format("WMV: bounds pinned by -wmvFrameBounds for framing and the light rig (model's own: centre {0} extents {1})",
+                                        built.Bounds.center, built.Bounds.extents));
+                built.Bounds = WmvModelBuilder.Debug_.FrameBounds;
+            }
             orbit.Frame(built.Bounds);
             if (shadowRig != null)
                 shadowRig.SetBounds(built.Bounds);
+
+            // -wmvAnimTime: pose the model at that instant BEFORE anything measures it. The
+            // animator's own LateUpdate has not run yet at this point, so without this the light
+            // check would capture the rest pose whatever time was asked for.
+            // -wmvSeqPath: walk the sequences in order first, through the same switch the host
+            // drives, so a capture can show the state AFTER a sequence change.
+            int[] seqPath = WmvModelBuilder.Debug_.SeqPath;
+            for (int i = 0; i < seqPath.Length; i++)
+            {
+                Debug.Log("WMV: seqpath: switching to sequence " + seqPath[i]);
+                SwitchToSequence(seqPath[i]);
+            }
+            if (WmvModelBuilder.Debug_.AnimTime >= 0f)
+                WmvModelBuilder.PoseAt(current, WmvModelBuilder.Debug_.AnimTime);
+
+            if (WmvModelBuilder.Debug_.AllocCheck)
+                allocProbe = new AllocProbe { StartFrame = Time.frameCount + 10 };
 
             // The light check brings its own camera and frames the model itself, so it no longer
             // depends on this call having happened -- an earlier version measured before framing
@@ -530,6 +562,16 @@ public class WmvMain : MonoBehaviour
         M2BoneDef[] cached;
         if (boneTrackCache.TryGetValue(sequenceIndex, out cached))
         {
+            // The material tracks that FOLLOW the sequence (colour alpha, texture transforms)
+            // were re-read with the bones the first time; restore that read too, or the
+            // materials would keep the keys of whichever sequence was read last.
+            MaterialTrackSet mats;
+            if (materialTrackCache.TryGetValue(sequenceIndex, out mats))
+            {
+                currentModel.Colors = mats.Colors;
+                currentModel.TextureTransforms = mats.Transforms;
+                currentModel.MaterialSurvey = mats.Survey;   // its per-sequence counts, for the log
+            }
             long heapBefore = System.GC.GetTotalMemory(false);
             int gcBefore = System.GC.CollectionCount(0);
             var swc = System.Diagnostics.Stopwatch.StartNew();
@@ -613,7 +655,11 @@ public class WmvMain : MonoBehaviour
         // FRAMING, from the bounds and two fixed angles. Not from the orbit: the viewport camera
         // may have been moved by a Frame() call, a drag or a wheel, and a measurement that moves
         // with it compares two different pictures.
-        Bounds b = current.Bounds;
+        Bounds b = WmvModelBuilder.Debug_.HasFrameBounds ? WmvModelBuilder.Debug_.FrameBounds : current.Bounds;
+        if (WmvModelBuilder.Debug_.HasFrameBounds)
+            Debug.Log(string.Format("WMV: lightcheck: framing bounds pinned by -wmvFrameBounds (model's own: centre ({0:F2},{1:F2},{2:F2}) extents ({3:F2},{4:F2},{5:F2}))",
+                                    current.Bounds.center.x, current.Bounds.center.y, current.Bounds.center.z,
+                                    current.Bounds.extents.x, current.Bounds.extents.y, current.Bounds.extents.z));
         Quaternion rot = Quaternion.Euler(Pitch, Yaw, 0f);
         Vector3 up = rot * Vector3.up, right = rot * Vector3.right, fwd = rot * Vector3.forward;
         Vector3 e = b.extents;
@@ -1390,7 +1436,16 @@ public class WmvMain : MonoBehaviour
             // Cache under the sequence that RESOLVED, not the one asked for: a request that fell
             // back to the idle must not be remembered as though it had played.
             if (currentModel.AnimatedSequence >= 0)
+            {
                 boneTrackCache[currentModel.AnimatedSequence] = currentModel.Bones;
+                // Copies: the parser refills these arrays in place on the next read.
+                materialTrackCache[currentModel.AnimatedSequence] = new MaterialTrackSet
+                {
+                    Colors = (M2ColorDef[])currentModel.Colors.Clone(),
+                    Transforms = (M2TextureTransform[])currentModel.TextureTransforms.Clone(),
+                    Survey = currentModel.MaterialSurvey
+                };
+            }
 
             ApplyResolvedSequence(sequenceIndex, source);
             if (WmvModelBuilder.Debug_.AnimCheck)
@@ -1636,6 +1691,65 @@ public class WmvMain : MonoBehaviour
     void OnDestroy()
     {
         if (current != null) current.Dispose();
+    }
+
+    // ---------------------------------------------------------------- -wmvAllocCheck
+
+    /// <summary>
+    /// A window of frames over which managed allocation and gen-0 collections are counted with
+    /// the animators running. Started 30 frames after the build so the load's own garbage is not
+    /// charged to the frame loop (ten frames in); reported once, with the material animator's
+    /// counters beside it. WmvMain has no other per-frame work of its own -- the IPC client and the animators run
+    /// their own -- so this Update exists for the probe alone and does nothing without it.
+    /// </summary>
+    class AllocProbe
+    {
+        public int StartFrame;
+        public int Frames;
+        public long HeapAtStart;
+        public int Gen0AtStart;
+        public int TogglesAtStart;
+        public bool Started, Done;
+    }
+    AllocProbe allocProbe;
+    // Short, because the headless harness keeps the player up for only a second or two after
+    // the load: sixty frames is what fits, and a per-frame figure needs no more.
+    const int AllocProbeFrames = 60;
+
+    void Update()
+    {
+        if (allocProbe == null || allocProbe.Done || current == null)
+            return;
+        if (!allocProbe.Started)
+        {
+            if (Time.frameCount < allocProbe.StartFrame)
+                return;
+            allocProbe.Started = true;
+            allocProbe.HeapAtStart = System.GC.GetTotalMemory(false);
+            allocProbe.Gen0AtStart = System.GC.CollectionCount(0);
+            allocProbe.TogglesAtStart = current.MaterialAnimator != null ? current.MaterialAnimator.GateToggles : 0;
+            allocProbe.Frames = 0;
+            return;
+        }
+        allocProbe.Frames++;
+        if (allocProbe.Frames < AllocProbeFrames)
+            return;
+        allocProbe.Done = true;
+        long heap = System.GC.GetTotalMemory(false) - allocProbe.HeapAtStart;
+        int gen0 = System.GC.CollectionCount(0) - allocProbe.Gen0AtStart;
+        WmvMaterialAnimator ma = current.MaterialAnimator;
+        Debug.Log(string.Format(
+            "WMV: alloccheck: {0} frames with {1}; managed heap delta {2} bytes ({3:F1} bytes/frame), "
+            + "gen-0 collections {4}; material bindings evaluated per frame {5} ({6} colour, {7} colour-alpha, "
+            + "{8} weight, {9} transform), gate toggles in the window {10}, bones moving {11}",
+            allocProbe.Frames,
+            current.Animator != null ? "the animator running" : "no animator",
+            heap, heap / (double)allocProbe.Frames, gen0,
+            ma != null ? ma.AnimatedCount : 0, ma != null ? ma.ColorCount : 0,
+            ma != null ? ma.OpacityCount : 0, ma != null ? ma.WeightCount : 0,
+            ma != null ? ma.TransformCount : 0,
+            ma != null ? ma.GateToggles - allocProbe.TogglesAtStart : 0,
+            current.Animator != null ? current.Animator.AnimatedBoneCount : 0));
     }
 }
 

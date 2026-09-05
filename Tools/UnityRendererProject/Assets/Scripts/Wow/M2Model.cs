@@ -177,6 +177,80 @@ namespace Wmv.Wow
 
         /// <summary>Alpha at the start of animation 0; 1 when the track carries no data.</summary>
         public float Alpha;
+
+        /// <summary>
+        /// The RGB track, as the legacy renderer evaluates it: ALWAYS animation 0's keys, whatever
+        /// is playing -- ModelRenderPass::init passes the literal index 0 to getValue for this
+        /// track (Source/games/wow/ModelRenderPass.cpp:400). Three floats, 0..1.
+        /// </summary>
+        public M2Track<WowVec3> Color;
+
+        /// <summary>
+        /// The alpha track, at the sequence that was parsed. This one the legacy renderer DOES
+        /// evaluate at the playing animation (ModelRenderPass.cpp:403). Stored as fixed16 (32767 is
+        /// 1.0, Animated.h ShortToFloat); held here as 0..1.
+        /// </summary>
+        public M2Track<float> Opacity;
+
+        /// <summary>
+        /// This entry's alpha is constant zero in the parsed sequence, but ANOTHER sequence of the
+        /// model can show it: that sequence either has alpha keys above zero, or has no alpha keys
+        /// at all (the legacy then keeps ocol.w at 1, ModelRenderPass.cpp:401-404). A batch gated
+        /// by such an entry must be built and withheld, or a sequence change could never show it.
+        /// Sequences whose keys live in a .anim file that was not read are counted in
+        /// OpacityOtherUnknown and treated as able to show it.
+        /// </summary>
+        public bool OpacityMayOpenElsewhere;
+        public int OpacityOtherVisible, OpacityOtherUnknown;
+    }
+
+    /// <summary>
+    /// One entry of the M2 "texture_transforms" array: the three tracks a texture unit's stored
+    /// coordinates are run through. The legacy renderer composes them as
+    ///
+    ///     glLoadIdentity; glTranslatef(t); glRotatef(rot.x, 0,0,1); glScalef(s)
+    ///
+    /// (Source/games/wow/TextureAnim.cpp:24-36), i.e. uv' = T(R(S(uv))) with no pivot -- and it
+    /// reads the rotation track, which the format stores as four floats, as three, then rotates
+    /// by the first component in degrees. Its own comment says "this is wrong". The rotation is
+    /// therefore parsed as the file stores it and NOT taken as a reference for anything.
+    /// </summary>
+    public struct M2TextureTransform
+    {
+        public M2Track<WowVec3> Translation;
+        public M2Track<WowQuat> Rotation;     // four floats per key, exactly as stored
+        public M2Track<WowVec3> Scale;
+
+        /// <summary>Does anything move this transform in the parsed sequence (or on its global
+        /// sequence)?</summary>
+        public bool IsAnimated
+        {
+            get { return Translation.HasData || Rotation.HasData || Scale.HasData; }
+        }
+    }
+
+    /// <summary>
+    /// What the material-track read found -- counted, so that a decision taken on the data (which
+    /// tracks are worth evaluating, whether the legacy's index-0 transparency rule costs anything)
+    /// rests on a number rather than on an impression.
+    /// </summary>
+    public struct M2MaterialTrackSurvey
+    {
+        public int TextureTransforms, TransformsAnimated, RotationTracksWithData;
+        public int Colors, ColorRgbTracks, ColorOpacityTracks;
+        public int TextureWeightTracks, WeightsAnimated;
+
+        /// <summary>
+        /// Transparency tracks whose keys for the PARSED sequence differ from animation 0's. The
+        /// legacy renderer evaluates every transparency track at index 0 (ModelRenderPass.cpp:443),
+        /// so this is exactly the data it never reads; a non-zero count is the cost of mirroring
+        /// that rule, measured.
+        /// </summary>
+        public int WeightPerSequenceDiffers, WeightPerSequenceChecked;
+
+        /// <summary>Arrays whose offset or count did not fit the payload and were left empty --
+        /// never silently replaced by an invented value.</summary>
+        public int Rejected;
     }
 
     /// <summary>
@@ -232,6 +306,26 @@ namespace Wmv.Wow
         public float[] TextureWeights = new float[0];
 
         public ushort[] TextureWeightLookup = new ushort[0];
+
+        /// <summary>
+        /// The "texture_weights" tracks themselves, parallel to TextureWeights, at animation 0 --
+        /// which is where the legacy renderer reads them from whatever is playing (see
+        /// M2MaterialTrackSurvey.WeightPerSequenceDiffers for what that rule leaves out).
+        /// </summary>
+        public M2Track<float>[] TextureWeightTracks = new M2Track<float>[0];
+
+        /// <summary>The "texture_transforms" array, with each track narrowed to the parsed
+        /// sequence. Empty when the header is too short to carry it or the array does not fit.</summary>
+        public M2TextureTransform[] TextureTransforms = new M2TextureTransform[0];
+
+        /// <summary>
+        /// batch.TextureTransformComboIndex + unit -> index into TextureTransforms. 0xFFFF, or any
+        /// value past the array, means the unit has no transform -- the legacy viewport tests
+        /// "a0 &lt; nAnims" and leaves texanim at -1 otherwise (WoWModel.cpp:1856-1858).
+        /// </summary>
+        public ushort[] TextureTransformLookup = new ushort[0];
+
+        public M2MaterialTrackSurvey MaterialSurvey;
         public int SkinProfileCount;
         public int[] SkinFileDataIDs = new int[0];       // SFID chunk
         public int[] TextureFileDataIDs = new int[0];    // TXID chunk (0 where replaceable)
@@ -410,6 +504,14 @@ namespace Wmv.Wow
 
         /// <summary>No colour entry: the legacy renderer's gate ignores the colour track.</summary>
         public bool HasColor { get { return ColorIndex != 0xFFFF; } }
+
+        /// <summary>
+        /// Bit 0x10 of the batch flags. The legacy viewport tests exactly this bit -- and only
+        /// this bit -- before assigning a texture transform to a pass (WoWModel.cpp:1848,
+        /// TEXTUREUNIT_STATIC); the colour and opacity indices are assigned regardless of it
+        /// (WoWModel.cpp:1805-1807). So STATIC suppresses UV animation and nothing else.
+        /// </summary>
+        public bool Static { get { return (Flags & 0x10) != 0; } }
     }
 
     /// <summary>A parsed .skin profile.</summary>
