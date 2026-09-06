@@ -871,7 +871,7 @@ bool WowModelViewApp::OnInit()
     QString a = QString::fromWCharArray(argv[ai]);
     if (a == "-m" || a == "-mo" || a == "-armory" || a == "-npc" || a == "-fbxexport" ||
         a == "-animdump" || a == "-fbxinspect" || a == "-dbfromfile" || a == "-dumptex" ||
-        a == "-m2inspect" || a == "-mpq" || a.endsWith(".chr"))
+        a == "-m2inspect" || a == "-mpq" || a == "-item" || a.endsWith(".chr"))
     {
       earlyHeadless = true;
       break;
@@ -1021,6 +1021,7 @@ bool WowModelViewApp::OnInit()
   // Command arguments
   QString cmd;
   QString snapModelPath; // -mo: defer load+screenshot until after LoadWoW
+  int snapItemId = 0;    // -item: defer an item/display-context load until after LoadWoW
   QString snapArmoryUrl; // -armory <url>: headless import + screenshot (test harness)
   QString snapNpcArg;    // -npc <id|id:displayId>: headless NPC load + screenshot (test harness)
   QString fbxExportPath; // -fbxexport <out.fbx>: headless FBX export of the -mo model (test harness)
@@ -1068,6 +1069,13 @@ bool WowModelViewApp::OnInit()
         // must be loaded before a model can be resolved/composed.
         snapModelPath = fn;
       }
+    }
+    else if (cmd == "-item") {
+      // Headless item load: "-item <itemID>" shows the item through the same ModelViewer::LoadItem
+      // the item-selection dialog calls, so the item/display-context path -- which resolves the
+      // item's display, its component model and its component geoset state -- can be captured and
+      // regressed. Composes with -unityipctest exactly as -mo does.
+      if (i + 1 < argc) { i++; snapItemId = QString::fromWCharArray(argv[i]).toInt(); }
     }
     else if (cmd == "-mpq") {
       // Headless legacy-MPQ load: "-mpq <DataFolder> [locale] -mo <path\model.m2>" opens a
@@ -1222,7 +1230,7 @@ bool WowModelViewApp::OnInit()
   for (int i = 1; i < argc; i++)
   {
     QString a = QString::fromWCharArray(argv[i]);
-    if (a == "-m" || a == "-mo" || a == "-armory" || a == "-npc" || a == "-fbxexport" || a == "-animdump" || a == "-fbxinspect" || a == "-dbfromfile" || a == "-dumptex" || a == "-m2inspect" || a == "-mpq" || a.endsWith(".chr"))
+    if (a == "-m" || a == "-mo" || a == "-armory" || a == "-npc" || a == "-fbxexport" || a == "-animdump" || a == "-fbxinspect" || a == "-dbfromfile" || a == "-dumptex" || a == "-m2inspect" || a == "-mpq" || a == "-item" || a.endsWith(".chr"))
     {
       headlessLoad = true;
       break;
@@ -1268,6 +1276,18 @@ bool WowModelViewApp::OnInit()
     {
       doHeadlessDumpTexture(dumpTexFileDataId, dumpTexOutPath);
       return false; // forensic dump done -> exit
+    }
+
+    if (snapItemId > 0)
+    {
+      // The item path decides the display, the component model, its skin and its component
+      // geoset state. Everything after this is the same tail -mo uses.
+      frame->LoadItem((unsigned int)snapItemId);
+      if (unityIpcTest)
+        doHeadlessUnityIpcTest(frame);
+      QString out = QString("ss_item_%1.png").arg(snapItemId);
+      frame->canvas->Screenshot(out.toStdWString());
+      return false; // headless capture done -> exit
     }
 
     if (!snapModelPath.isEmpty())

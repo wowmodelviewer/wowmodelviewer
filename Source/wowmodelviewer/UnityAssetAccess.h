@@ -71,12 +71,13 @@ public:
   // "database" / "selection" / "convention" -- the wire spelling of ModelTexture::Source.
   static const char * sourceName(ModelTexture::Source source);
 
-  // The geosets the displayed skin switches on, as the numbers the model's own submeshes are
-  // identified by. A creature display can differ from another by GEOMETRY rather than texture,
-  // and the renderer cannot work that out for itself: only the app knows which display is
-  // selected. An empty list with a true return means "this display switches none on", which is
-  // not the same as not knowing -- see WoWModel::setCreatureGeosetData, where a submesh is drawn
-  // when its id is 0 or appears in this set. False when there is no selection to report.
+  // The non-zero geosets the displayed model is currently showing, as the numbers its own
+  // submeshes are identified by. Read from the model's own per-geoset display flags, which is
+  // where every rule lands: a creature display that differs by GEOMETRY rather than texture
+  // (WoWModel::setCreatureGeosetData), an item component's state, or the parse-time default of
+  // "submesh id 0 only". The renderer cannot work any of that out for itself. An empty list with
+  // a true return means "the model is showing none of them", which is not the same as not
+  // knowing; false means there is no displayed model to ask about.
   static bool selectedModelGeosets(int m2FileDataID, std::vector<int> & out);
 
   // Resolve the texture(s) of a model that the M2 itself does not name.

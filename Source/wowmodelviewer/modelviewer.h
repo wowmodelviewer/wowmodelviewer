@@ -135,6 +135,8 @@ public:
 
   void LoadModel(GameFile * f);
   void LoadItem(unsigned int displayID);
+  // The component-geoset state an item's own model should be shown with. See the definition.
+  void applyItemComponentGeosets(unsigned int itemId);
   void LoadNPC(unsigned int modelid);
   // Register an NPC in the in-memory DB (if not already present) and load it. Shared by the
   // "Import NPC from URL" dialog flow and the -npc headless test harness.

@@ -223,12 +223,42 @@ bool UnityAssetAccess::selectedModelGeosets(int m2FileDataID, std::vector<int> &
   out.clear();
   if (m2FileDataID <= 0 || !hasActiveClient())
     return false;
-  if (!g_modelViewer || !g_modelViewer->animControl || !g_selModel || !g_selModel->gamefile)
+  if (!g_selModel || !g_selModel->gamefile)
     return false;
   if ((int)g_selModel->gamefile->fileDataId() != m2FileDataID)
     return false;   // a question about some other model; we only know about the displayed one
 
-  return g_modelViewer->animControl->selectedSkinGeosets(out);
+  // THE MODEL'S OWN STATE, not one of the inputs to it.
+  //
+  // This used to report the selected skin group's creatureGeosetData, which is the input the
+  // CREATURE path happens to use. Every path -- creature, item, plain default -- lands in the same
+  // place: each ModelGeosetHD's display flag, set by WoWModel::setCreatureGeosetData for a
+  // creature, by WoWItem/ModelViewer for an item component, and by the parse-time default
+  // otherwise. Reading the flags reports what the application actually decided instead of one of
+  // the reasons it decided it, so an item component's geosets survive to the renderer while the
+  // creature answer is unchanged (setCreatureGeosetData writes exactly the named set into these
+  // flags: "showGeoset(i, cgd.count(id) > 0)").
+  //
+  // ONLY THE GEOSETS THIS MODEL OWNS.
+  //
+  // A character has other models merged into it, and refreshMerging appends a copy of each merged
+  // model's geosets to geosets[] after the root's own. Reporting those would be wrong twice over:
+  // they describe geometry the renderer is not drawing, and an appended id can be the SAME NUMBER
+  // as one of the root's -- geoset numbering is per model, not global -- so a merged copy that is
+  // visible could switch on a root submesh the character has deliberately hidden. Stopping at
+  // ownGeosetCount() is the boundary the model class already uses everywhere else for this exact
+  // reason.
+  const size_t owned = g_selModel->ownGeosetCount();
+  for (size_t i = 0; i < owned && i < g_selModel->geosets.size(); i++)
+  {
+    const int id = g_selModel->geosets[i]->id;
+    // Submesh id 0 is drawn by every rule on both sides; listing it would say nothing.
+    if (id != 0 && g_selModel->geosets[i]->display)
+      out.push_back(id);
+  }
+  std::sort(out.begin(), out.end());
+  out.erase(std::unique(out.begin(), out.end()), out.end());
+  return true;   // the displayed model always has an answer, even when it is "none"
 }
 
 bool UnityAssetAccess::resolveModelTextures(int m2FileDataID, std::vector<ModelTexture> & out, QString & error)

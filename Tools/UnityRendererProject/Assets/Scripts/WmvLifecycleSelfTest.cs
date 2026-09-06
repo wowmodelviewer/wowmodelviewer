@@ -94,12 +94,96 @@ public static class WmvLifecycleSelfTest
         rt.Dispose();
     }
 
+    static int DrawnCount(WmvRuntimeModel rt)
+    {
+        int n = 0;
+        for (int i = 0; i < rt.SubmeshIndices.Length; i++)
+            if (WmvModelBuilder.GeosetVisibleFor(rt, i)) n++;
+        return n;
+    }
+
+    /// <summary>
+    /// WHICH SUBMESHES A GEOSET SELECTION DRAWS, and what changing it costs.
+    ///
+    /// Two things are checked that nothing checked before. First the rule itself: submesh id 0 is
+    /// always drawn, any other id only when the reported selection names it, and no selection at
+    /// all means id 0 alone -- which is why a component opened as a raw model shows less than the
+    /// same component shown as an item. Second, and the reason this lives in the runtime suite
+    /// rather than the parser one: changing the selection must not rebuild anything. A geoset
+    /// change is an index-buffer switch; if it started recreating the mesh, materials or textures
+    /// the model would flicker and every per-model diagnostic would reset.
+    /// </summary>
+    static void GeosetTests(Action<string> log)
+    {
+        // A Drakestalker-shaped component: two submeshes at id 0 and one alternative at 2602.
+        byte[] m2 = M2Synthetic.GeosetModel(3);
+        byte[] sk = M2Synthetic.GeosetSkin(new[] { 0, 0, 2602 });
+        M2ParsedModel model = M2Parser.Parse(m2, 0);
+        M2ParsedSkin skin = M2SkinParser.Parse(sk);
+
+        WmvRuntimeModel raw = WmvModelBuilder.Build(model, skin, new Dictionary<int, BlpImage>(),
+                                                    "GeosetTestRaw", log, null);
+        Check(raw != null, "geoset: component built with no selection reported", log);
+        if (raw == null) return;
+        Check(DrawnCount(raw) == 2, "geoset: raw component draws the two id-0 submeshes only", log);
+        Check(!WmvModelBuilder.GeosetVisibleFor(raw, 2), "geoset: raw component withholds 2602", log);
+
+        // The same component with the state an item would report for it.
+        var itemSet = new HashSet<int>(new[] { 2602 });
+        WmvRuntimeModel item = WmvModelBuilder.Build(model, skin, new Dictionary<int, BlpImage>(),
+                                                     "GeosetTestItem", log, itemSet);
+        Check(item != null, "geoset: component built with the item's selection", log);
+        if (item == null) { raw.Dispose(); return; }
+        Check(DrawnCount(item) == 3, "geoset: the item's selection draws all three submeshes", log);
+        Check(WmvModelBuilder.GeosetVisibleFor(item, 2), "geoset: 2602 drawn when the item names it", log);
+
+        // Alternatives in one group: exactly one of them draws, and changing which does not rebuild.
+        byte[] am2 = M2Synthetic.GeosetModel(5);
+        byte[] askin = M2Synthetic.GeosetSkin(new[] { 0, 2701, 2702, 2703, 2704 });
+        M2ParsedModel amodel = M2Parser.Parse(am2, 0);
+        M2ParsedSkin askn = M2SkinParser.Parse(askin);
+        WmvRuntimeModel alt = WmvModelBuilder.Build(amodel, askn, new Dictionary<int, BlpImage>(),
+                                                    "GeosetTestAlt", log, new HashSet<int>(new[] { 2702 }));
+        Check(alt != null, "geoset: alternatives model built", log);
+        if (alt == null) { raw.Dispose(); item.Dispose(); return; }
+        Check(DrawnCount(alt) == 2, "geoset: id 0 plus exactly one alternative draw", log);
+        Check(WmvModelBuilder.GeosetVisibleFor(alt, 2), "geoset: the selected alternative 2702 draws", log);
+        Check(!WmvModelBuilder.GeosetVisibleFor(alt, 1) && !WmvModelBuilder.GeosetVisibleFor(alt, 3) &&
+              !WmvModelBuilder.GeosetVisibleFor(alt, 4), "geoset: its three siblings do not draw", log);
+
+        // Change the selection. Nothing may be recreated.
+        var meshBefore = alt.Mesh;
+        var matsBefore = alt.Materials;
+        var mat0Before = (alt.Materials != null && alt.Materials.Length > 0) ? alt.Materials[0] : null;
+        WmvModelBuilder.ApplyGeosets(alt, new HashSet<int>(new[] { 2704 }), log);
+        Check(!WmvModelBuilder.GeosetVisibleFor(alt, 2), "geoset: 2702 withheld after the change", log);
+        Check(WmvModelBuilder.GeosetVisibleFor(alt, 4), "geoset: 2704 restored after the change", log);
+        Check(DrawnCount(alt) == 2, "geoset: still exactly one alternative after the change", log);
+        Check(ReferenceEquals(alt.Mesh, meshBefore), "geoset: the mesh was NOT recreated", log);
+        Check(ReferenceEquals(alt.Materials, matsBefore), "geoset: the material array was NOT recreated", log);
+        Check(alt.Materials != null && alt.Materials.Length > 0 &&
+              ReferenceEquals(alt.Materials[0], mat0Before), "geoset: material 0 was NOT recreated", log);
+
+        // An explicitly empty selection means id 0 alone, and agrees with no selection at all.
+        WmvModelBuilder.ApplyGeosets(alt, new HashSet<int>(), log);
+        Check(DrawnCount(alt) == 1, "geoset: an empty selection draws id 0 alone", log);
+        WmvModelBuilder.ApplyGeosets(alt, null, log);
+        Check(DrawnCount(alt) == 1, "geoset: no selection draws id 0 alone, as an empty one does", log);
+
+        // The diagnostic override must be inert unless it was passed.
+        Check(WmvModelBuilder.Debug_.OnlySubmeshes == null,
+              "geoset: -wmvOnlySubmesh is unset, so the geoset rule alone decides", log);
+
+        raw.Dispose(); item.Dispose(); alt.Dispose();
+    }
+
     public static void RunAll(Action<string> log)
     {
         passed = failed = 0;
         foreach (bool skinned in new[] { false, true })
             foreach (int keyed in new[] { 1, 0 })
                 Run(skinned, keyed, log);
+        GeosetTests(log);
         log(string.Format("lifecycle-test: {0} passed, {1} failed", passed, failed));
     }
 }
