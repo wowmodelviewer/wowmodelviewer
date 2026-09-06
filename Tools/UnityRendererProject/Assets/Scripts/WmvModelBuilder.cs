@@ -903,8 +903,10 @@ public static class WmvModelBuilder
             submeshIndices.Add(batch.SubmeshIndex);
             // A geoset the variant does not switch on still gets its submesh and material -- only
             // its triangles are withheld -- so a later variant can switch it back on without
-            // rebuilding anything.
-            if (GeosetVisible(submesh.Id, geosets))
+            // rebuilding anything. Counted through the same rule the mesh is built with, so the
+            // triangle count and the summary below agree with what was actually drawn even when
+            // -wmvOnlySubmesh is deciding.
+            if (SubmeshDrawn(batch.SubmeshIndex, submesh.Id, geosets))
                 totalTriangles += indices.Length / 3;
             else
                 hiddenByGeoset++;
@@ -1175,11 +1177,14 @@ public static class WmvModelBuilder
             log(string.Format("geosets: {0} of {1} submesh(es) drawn, {2} hidden, by {3}; " +
                               "{4} of the skin's submeshes carry geoset 0",
                               shownSets, triangleSets.Count, hiddenByGeoset, how, ix.GeosetZero));
-            if (shownSets == 0 && triangleSets.Count > 0)
+            if (shownSets == 0 && triangleSets.Count > 0 && Debug_.OnlySubmeshes == null)
                 log("geosets: NOTHING is drawn -- this model has no geoset 0 submesh and no " +
                     "variant switched anything on. The legacy viewport shows nothing here too; " +
                     "reported rather than worked around, because a fallback would be a guess at " +
                     "what the model meant.");
+            else if (shownSets == 0 && triangleSets.Count > 0)
+                log("geosets: nothing is drawn, because -wmvOnlySubmesh named no submesh this " +
+                    "model has. That is the switch, not the model.");
         }
 
         // ---- scene object -------------------------------------------------------------
