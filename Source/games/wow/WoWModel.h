@@ -295,6 +295,12 @@ public:
   // @TODO use geoset id instead of geoset index in vector
   void showGeoset(uint geosetindex, bool value);  
   void hideAllGeosets();
+  // How many of geosets[] this model OWNS. refreshMerging rebuilds geosets[] from rawGeosets and
+  // then appends a COPY of every merged model's geosets after them, so entries at or past this
+  // index describe geometry belonging to another model. The same count is already the stop
+  // criterion in setGeosetGroupDisplay, setCreatureGeosetData and refreshSkinnedModels; this
+  // exposes it so code outside the class can respect the same boundary.
+  size_t ownGeosetCount() const { return rawGeosets.size(); }
   bool isGeosetDisplayed(uint geosetindex);
   void setGeosetGroupDisplay(CharGeosets group, int val);
   void setGeosetDisplayById(int geosetId, bool display); // toggle the exact geoset id(s); never id 0

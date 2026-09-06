@@ -1295,6 +1295,60 @@ void ModelViewer::LoadNPCByDisplay(int npcId, int displayId, int type, const QSt
     m_exportNpcDisplayId = displayId;
 }
 
+// The component-geoset state an item's own model should be shown with.
+//
+// Opening an item here loads its component M2 as a plain model, and a plain model comes up in the
+// parse-time default: submesh id 0 only (WoWModel's "hdgeo->display = (hdgeo->id == 0)"). That
+// default is right for a raw M2 opened on its own. It is NOT what the item looks like, and the
+// application already knows better -- WoWItem decides a component's geosets when the item is
+// equipped, and for the slots below it decides "all of them" (WoWItem::updateItemModel, "for (uint
+// i = 0; i < m->geosets.size(); i++) m->showGeoset(i, true);"). Drakestalker's Trophy Pauldrons are
+// the worked example: their upper flame plumes are submesh 2, geoset 2602, and the default hides
+// them here while the equipped item shows them.
+//
+// WHICH SLOTS. ModelResourcesID1 -- the model this function loads -- is the ATTACHED component for
+// head, shoulder, belt (the buckle) and both hands; those take WoWItem's attachment path and its
+// all-on rule, and that is what is reproduced. For boots, trousers, shirt, chest, gloves and cape
+// ModelResourcesID1 is instead the MERGED component: WoWItem hides everything and re-opens one
+// variant per geoset group from ItemDisplayInfo.AttachmentGeosetGroup, against a model merged into
+// the character. That selection has no meaning for a component shown on its own out of that
+// context, so those slots are deliberately left at the default rather than guessed at.
+void ModelViewer::applyItemComponentGeosets(unsigned int itemId)
+{
+  WoWModel * m = const_cast<WoWModel *>(canvas ? canvas->model() : 0);
+  if (!m)
+    return;
+
+  sqlResult r = GAMEDATABASE.sqlQuery(
+      QString("SELECT InventoryType FROM Item WHERE ID = %1").arg(itemId));
+  if (!r.valid || r.empty())
+    return;
+  const int invType = r.values[0][0].toInt();
+
+  // The slot this inventory type belongs to, through the application's own mapping rather than a
+  // second table of numbers kept in step by hand.
+  int slot = -1;
+  for (int s = 0; s < NUM_CHAR_SLOTS; s++)
+  {
+    if (correctType(invType, s)) { slot = s; break; }
+  }
+
+  const bool attachedComponent = (slot == CS_HEAD || slot == CS_SHOULDER || slot == CS_BELT ||
+                                  slot == CS_HAND_LEFT || slot == CS_HAND_RIGHT);
+  if (!attachedComponent)
+  {
+    LOG_INFO << "[itemgeoset] item" << itemId << "inventory type" << invType
+             << "-- its first component is merged into the character, not attached; left at the"
+             << "default geoset state";
+    return;
+  }
+
+  for (uint i = 0; i < m->geosets.size(); i++)
+    m->showGeoset(i, true);
+  LOG_INFO << "[itemgeoset] item" << itemId << "slot" << slot << ": showed all"
+           << (int)m->geosets.size() << "component geoset(s), as the equipped attachment path does";
+}
+
 void ModelViewer::LoadItem(unsigned int id)
 {
   canvas->clearAttachments();
@@ -1320,6 +1374,7 @@ void ModelViewer::LoadItem(unsigned int id)
       if (itemInfos.values[0][0] != "" && itemInfos.values[0][1] != "")
       {
         LoadModel(GAMEDIRECTORY.getFile(itemInfos.values[0][0].toInt()));
+        applyItemComponentGeosets(id);
         TextureGroup grp;
         grp.base = TEXTURE_OBJECT_SKIN;
         grp.count = 1;
