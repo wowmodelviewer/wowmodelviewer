@@ -187,10 +187,17 @@ public static class WmvModelBuilder
     ///                    invisible (use -wmvShowHidden for that, they compose).
     ///                    Colons, because WMV_DEBUG is itself split on commas.
     ///   -wmvSkinTexture=slot:fileDataID[:slot:fileDataID...]
-    ///                    pin a texture slot to an exact file, overriding whatever the host
-    ///                    selected. A model with several skin variants otherwise renders whichever
-    ///                    one the app happened to choose, which is not something a controlled
-    ///                    comparison can name; with this, the variant IS the identifier.
+    ///                    OVERRIDE the file a texture slot loads. A model with several skin
+    ///                    variants otherwise renders whichever one the app happened to choose,
+    ///                    which is not something a controlled comparison can name; with this, the
+    ///                    variant IS the identifier.
+    ///                    IT IS A PIN, NOT AN INJECTOR. It rewrites the FileDataID of a slot the
+    ///                    host already offered a texture for, at both the initial resolve and a
+    ///                    later skin change. Naming a slot the host offered nothing for -- an
+    ///                    unresolved replaceable slot, say -- does NOTHING: no request is made and
+    ///                    the slot stays empty, because the request loop is driven by the host's
+    ///                    list, not by this switch. Feeding such a slot needs a deliberate change
+    ///                    to how slots are requested, which this is not.
     ///   -wmvOwnShader    resolve the renderer's own WmvOpaque shader before any pipeline
     ///                    shader. The pipeline's Lit shaders cannot run the M2 combiner, so this
     ///                    is how to see the second texture unit in a build where they exist.
