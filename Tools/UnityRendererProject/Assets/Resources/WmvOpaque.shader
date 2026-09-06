@@ -574,15 +574,42 @@ Shader "WMV/Opaque Textured"
                 // bypass leaking into the legacy path was measurable -- a model with glow
                 // batches moved by +0.002 mean under -wmvRig=1 -- and it was also the proof
                 // that the property finally reached the material.)
+                bool rigApplied = true;
                 if (_Emissive > 0.5h && _WmvRig < 0.5)
                 {
                     lum  = 1.0h;
                     spec = 0.0h;
+                    rigApplied = false;   // no preview light in this pass -- see the roll-off below
                 }
 
                 c.rgb = c.rgb * lum + spec;
 
-                if (_WmvRig < 0.5)
+                // THE ROLL-OFF SHAPES THE PREVIEW LIGHT, SO IT RUNS WHERE THE PREVIEW LIGHT DID.
+                //
+                // It was written (125f3781, "Improve Unity M2 preview lighting") for one reason,
+                // in its own words: the rig's terms deliberately sum past 1.0 -- "the light now
+                // sums to 1.24 at full incidence and the top end is rolled off instead" -- and
+                // capping the light instead would make a white texture read grey. That is a
+                // statement about LIGHT. The emissive bypass did not exist yet; _Emissive entered
+                // the shader eleven days later (0880a08d), and until then every fragment,
+                // additive ones included, carried preview light for the curve to shape.
+                //
+                // On the emissive path there is no longer any light to shape. The bypass above
+                // assigns lum = 1 and spec = 0, so c.rgb at this point is exactly the combiner
+                // times _Color: model-authored, every rig term discarded. Running a preview-light
+                // curve over it only darkens what the model asked for -- an authored white leaves
+                // at 0.742 -- and the legacy renderer, whose material semantics these passes come
+                // from, applies no clamp or curve of its own (the OpenGL viewport saturates at the
+                // framebuffer, which is a destination artefact, and the repository's own export
+                // target exists precisely so "values above 1.0 (emissive/additive passes)
+                // survive", RenderTexture.cpp).
+                //
+                // The one argument recorded for keeping it here -- that "a stacked glow cannot run
+                // away past white" -- is about ACCUMULATION, and a per-fragment curve cannot
+                // deliver it: this shader runs before blending and cannot see what it is adding
+                // to. Stacking is bounded by the destination, as it is in the legacy viewport and
+                // in the pipeline's own tone map.
+                if (_WmvRig < 0.5 && rigApplied)
                 {
                     // SHOULDER, not a ceiling.
                     //

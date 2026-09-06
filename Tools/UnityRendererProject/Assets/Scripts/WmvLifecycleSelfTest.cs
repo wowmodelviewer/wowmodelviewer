@@ -177,6 +177,73 @@ public static class WmvLifecycleSelfTest
         raw.Dispose(); item.Dispose(); alt.Dispose();
     }
 
+    /// <summary>
+    /// THE OUTPUT GATE, tested against real materials rather than against a copy of the arithmetic.
+    ///
+    /// WmvOpaque.shader skips the preview-light roll-off exactly where the preview light did not
+    /// apply, and the thing that decides that is _Emissive: the shader's bypass reads it, and the
+    /// builder writes it from the M2 blend mode (additive) or the material's own 0x01 UNLIT flag.
+    /// A fragment program cannot be run from either harness, so the curve itself is pinned as
+    /// arithmetic in the parser suite and said there to be a mirror. What CAN be tested here, in
+    /// the player, on materials the real builder produced, is the gate's INPUT -- which is the part
+    /// this branch actually changed. If _Emissive ever stopped tracking blend mode and the unlit
+    /// flag, the exemption would silently apply to the wrong passes and nothing else would notice.
+    /// </summary>
+    static void OutputGateTests(Action<string> log)
+    {
+        // EVERY M2 blend mode, so the boundary is pinned from both sides rather than sampled,
+        // plus the two cases where the material's own 0x01 UNLIT flag is what decides.
+        int[] flags  = { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0x01 };
+        int[] blends = {    0,    1,    2,    3,    4,    5,    6,    7,    0,    4 };
+        bool[] wantEmissive =
+        {
+            false, false, false, true, true, false, false, false, true, true
+        };
+        string[] what =
+        {
+            "blend 0 opaque, not unlit -> lit, the curve applies",
+            "blend 1 alpha key -> a cut-out surface is still lit",
+            "blend 2 alpha blend -> a lit surface seen through transparency",
+            "blend 3 NoAlphaAdd (One/One) -> emissive, the curve is skipped",
+            "blend 4 Add (SrcAlpha/One) -> emissive, the curve is skipped",
+            "blend 5 modulate -> multiplies the destination, still lit",
+            "blend 6 modulate 2x -> still lit",
+            "blend 7 BlendAdd (One/OneMinusSrcAlpha) -> premultiplied, NOT in the exempt set",
+            "the 0x01 UNLIT flag makes an OPAQUE pass emissive on its own",
+            "additive AND unlit -> emissive, the two sources agree rather than fight",
+        };
+
+        byte[] m2 = M2Synthetic.MaterialModeModel(flags, blends);
+        byte[] sk = M2Synthetic.MaterialModeSkin(flags.Length);
+        M2ParsedModel model = M2Parser.Parse(m2, 0);
+        M2ParsedSkin skin = M2SkinParser.Parse(sk);
+        WmvRuntimeModel rt = WmvModelBuilder.Build(model, skin, new Dictionary<int, BlpImage>(),
+                                                   "OutputGateTest", log, null);
+        Check(rt != null, "output gate: the material-mode model built", log);
+        if (rt == null) return;
+        Check(rt.Materials != null && rt.Materials.Length == flags.Length,
+              "output gate: one material per case reached the runtime", log);
+        if (rt.Materials == null || rt.Materials.Length != flags.Length) { rt.Dispose(); return; }
+
+        for (int i = 0; i < flags.Length; i++)
+        {
+            Material m = rt.Materials[i];
+            bool has = m != null && m.HasProperty("_Emissive");
+            Check(has, "output gate: material " + i + " carries _Emissive at all", log);
+            if (!has) continue;
+            bool got = m.GetFloat("_Emissive") > 0.5f;
+            Check(got == wantEmissive[i], "output gate: " + what[i], log);
+        }
+
+        // The exemption is gated on the SHIPPED rig as well; if the legacy rig were live the
+        // curve would be skipped on the A/B baseline too and that baseline would stop meaning
+        // anything. -wmvRig defaults to 0.
+        Check(WmvModelBuilder.Debug_.Rig < 0.5f,
+              "output gate: the shipped rig is the default, so the exemption is the live path", log);
+
+        rt.Dispose();
+    }
+
     public static void RunAll(Action<string> log)
     {
         passed = failed = 0;
@@ -184,6 +251,7 @@ public static class WmvLifecycleSelfTest
             foreach (int keyed in new[] { 1, 0 })
                 Run(skinned, keyed, log);
         GeosetTests(log);
+        OutputGateTests(log);
         log(string.Format("lifecycle-test: {0} passed, {1} failed", passed, failed));
     }
 }
