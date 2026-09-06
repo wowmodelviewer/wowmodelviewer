@@ -57,6 +57,15 @@ Shader "WMV/Opaque Textured"
         _OpaqueAlpha ("Force opaque alpha", Float) = 1
 
         _Color ("Tint", Color) = (1,1,1,1)
+
+        // THE M2 TEXTURE TRANSFORM, per unit, as a 2x2 matrix plus an offset in THIS renderer's
+        // UV space (the V axis is already flipped by the mesh builder; the animator conjugates the
+        // WoW-space matrix by that flip, so nothing here has to know about it). Identity by
+        // default, so a material nothing animates samples exactly as it did before this existed.
+        _UvXf0 ("Unit 0 UV transform (m00,m01,m10,m11)", Vector) = (1,0,0,1)
+        _UvOff0 ("Unit 0 UV offset", Vector) = (0,0,0,0)
+        _UvXf1 ("Unit 1 UV transform (m00,m01,m10,m11)", Vector) = (1,0,0,1)
+        _UvOff1 ("Unit 1 UV offset", Vector) = (0,0,0,0)
         _Cutoff ("Alpha cutoff", Range(0,1)) = 0.5
         [Enum(UnityEngine.Rendering.CullMode)] _Cull ("Cull", Float) = 2      // Back
         [Enum(UnityEngine.Rendering.BlendMode)] _SrcBlend ("Src blend", Float) = 1  // One
@@ -142,6 +151,7 @@ Shader "WMV/Opaque Textured"
             float4 _MainTex_ST;
             sampler2D _SecondTex;
             float _CombinerMode, _Unit1UV, _Unit0UV, _AlphaMode, _AlphaScale, _OpaqueAlpha;
+            float4 _UvXf0, _UvOff0, _UvXf1, _UvOff1;
 
             // 1 on an ADDITIVE batch. An additive pass is light the surface EMITS -- a lantern
             // flame, an eye glow, rune fire -- and multiplying emitted light by the preview rig
@@ -354,12 +364,24 @@ Shader "WMV/Opaque Textured"
                 // UV set 0, which is what this sampled before the choice existed -- an unknown
                 // source must not invent a coordinate.
                 float2 uv0 = i.uv;
-                if (_Unit0UV > 1.5 && _Unit0UV < 2.5)       uv0 = i.env;   // environment sphere map
+                bool unit0Env = (_Unit0UV > 1.5 && _Unit0UV < 2.5);
+                if (unit0Env)                               uv0 = i.env;   // environment sphere map
                 else if (_Unit0UV > 0.5 && _Unit0UV < 1.5)  uv0 = i.uv1;   // mesh UV set 1
+                // The M2 texture transform, applied AFTER the source is chosen and only to a
+                // STORED coordinate. A sphere-map coordinate is generated from the view-space
+                // normal and is not something the model authored a scroll for: the legacy
+                // viewport skips the texture matrix on an environment unit for exactly that
+                // reason (Source/games/wow/ModelRenderPass.cpp:623-636), and the animator never
+                // binds one to such a unit either. This branch is the second lock on that door.
+                if (!unit0Env)
+                    uv0 = float2(dot(_UvXf0.xy, uv0), dot(_UvXf0.zw, uv0)) + _UvOff0.xy;
                 fixed4 t1 = tex2D(_MainTex, uv0);
 
                 // Unit 1's coordinates, per the material's vertex shader name.
+                bool unit1Env = (_Unit1UV >= 1.5);
                 float2 uv1 = (_Unit1UV < 0.5) ? i.uv : ((_Unit1UV < 1.5) ? i.uv1 : i.env);
+                if (!unit1Env)
+                    uv1 = float2(dot(_UvXf1.xy, uv1), dot(_UvXf1.zw, uv1)) + _UvOff1.xy;
                 fixed4 t2 = tex2D(_SecondTex, uv1);
 
                 // COLOUR. The M2 combiners this milestone implements are all products of the two

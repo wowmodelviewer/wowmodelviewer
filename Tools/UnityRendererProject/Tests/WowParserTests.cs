@@ -260,7 +260,8 @@ namespace Wmv.Wow.Tests
         static byte[] BuildSkin(int vertexCount, ushort[] triangles, ushort submeshIndexCount = 0xFFFF,
                                 ushort lookupOverride = 0xFFFF, ushort batchColorIndex = 0xFFFF,
                                 ushort batchTextureCount = 1, ushort submeshId = 0,
-                                ushort submeshLevel = 0, ushort submeshIndexStart = 0)
+                                ushort submeshLevel = 0, ushort submeshIndexStart = 0,
+                                byte batchFlags = 0, ushort batchTransformCombo = 0)
         {
             const int headerSize = 0x30;
             int vertOffset = headerSize;
@@ -289,14 +290,14 @@ namespace Wmv.Wow.Tests
             PutU16(b, subOffset + 8, submeshIndexStart);     // indexStart: the low half
             PutU16(b, subOffset + 10, submeshIndexCount == 0xFFFF ? (ushort)triangles.Length : submeshIndexCount);
 
-            b[batchOffset] = 0;                              // flags
+            b[batchOffset] = batchFlags;                     // flags (0x10 = STATIC)
             PutU16(b, batchOffset + 4, 0);                   // submeshIndex
             PutU16(b, batchOffset + 8, batchColorIndex);     // colorIndex
             PutU16(b, batchOffset + 14, batchTextureCount);  // textureCount
             PutU16(b, batchOffset + 16, 0);                  // textureComboIndex
             PutU16(b, batchOffset + 18, 0xFFFF);             // textureCoordComboIndex
             PutU16(b, batchOffset + 20, 0);                  // textureWeightComboIndex
-            PutU16(b, batchOffset + 22, 0);                  // textureTransformComboIndex
+            PutU16(b, batchOffset + 22, batchTransformCombo); // textureTransformComboIndex
             return b;
         }
 
@@ -345,6 +346,11 @@ namespace Wmv.Wow.Tests
             ShaderTableTests();
             log.Add("Visibility tracks");
             VisibilityTests();
+            MaterialTrackTests();
+            MaterialSequenceTests();
+            CrossSequenceGateTests();
+            WeightLookupTests();
+            MaterialLifecycleTests();
             log.Add("Bones");
             BoneTests();
             log.Add("Animation");
@@ -984,6 +990,605 @@ namespace Wmv.Wow.Tests
             M2ParsedModel two = M2Parser.Parse(BuildM2PayloadWithTracks(new[] { 1f }, 1f, texLookup: new ushort[] { 0, 1 }));
             Check(two.TextureLookup.Length == 2 && two.TextureLookup[0] == 0 && two.TextureLookup[1] == 1,
                   "tracks: texture combo run resolves both units");
+        }
+
+
+        // ---------------------------------------------------------------- material animation
+
+        /// <summary>
+        /// A growable M2 payload with a key pool, so a fixture can carry REAL tracks -- several
+        /// keys, several sequences, global sequences -- without hand-computing every offset.
+        /// </summary>
+        sealed class M2Fixture
+        {
+            public byte[] B;
+            public int Pool;
+            public M2Fixture(int fixedSize) { B = new byte[fixedSize + 4096]; Pool = fixedSize; }
+
+            int Take(int n)
+            {
+                int o = Pool;
+                Pool += n;
+                if (Pool > B.Length) Array.Resize(ref B, Pool * 2);
+                return o;
+            }
+
+            /// <summary>
+            /// Write one M2Track at trackOffset. times[s]/values[s] are sequence s's keys; a null
+            /// entry is a sequence with no keys. values[s] is already encoded (fixed16, vec3, quat).
+            /// </summary>
+            public void Track(int trackOffset, ushort interpolation, short globalSeq, uint[][] times, byte[][] values)
+            {
+                int nSeq = times.Length;
+                PutU16(B, trackOffset, interpolation);
+                PutU16(B, trackOffset + 2, unchecked((ushort)globalSeq));
+                int th = Take(nSeq * 8), vh = Take(nSeq * 8);
+                PutU32(B, trackOffset + 4, (uint)nSeq); PutU32(B, trackOffset + 8, (uint)th);
+                PutU32(B, trackOffset + 12, (uint)nSeq); PutU32(B, trackOffset + 16, (uint)vh);
+                for (int s = 0; s < nSeq; s++)
+                {
+                    if (times[s] == null)
+                    {
+                        PutU32(B, th + s * 8, 0); PutU32(B, th + s * 8 + 4, 0);
+                        PutU32(B, vh + s * 8, 0); PutU32(B, vh + s * 8 + 4, 0);
+                        continue;
+                    }
+                    int to = Take(times[s].Length * 4);
+                    for (int k = 0; k < times[s].Length; k++) PutU32(B, to + k * 4, times[s][k]);
+                    int vo = Take(values[s].Length);
+                    Buffer.BlockCopy(values[s], 0, B, vo, values[s].Length);
+                    PutU32(B, th + s * 8, (uint)times[s].Length); PutU32(B, th + s * 8 + 4, (uint)to);
+                    PutU32(B, vh + s * 8, (uint)times[s].Length); PutU32(B, vh + s * 8 + 4, (uint)vo);
+                }
+            }
+
+            public byte[] Done() { Array.Resize(ref B, Pool); return B; }
+        }
+
+        static uint[] T(params uint[] t) { return t; }
+
+        /// <summary>fixed16 keys: 32767 is 1.0, as ShortToFloat reads them.</summary>
+        static byte[] F16(params float[] v)
+        {
+            var b = new byte[v.Length * 2];
+            for (int i = 0; i < v.Length; i++) PutU16(b, i * 2, unchecked((ushort)(short)Math.Round(v[i] * 32767f)));
+            return b;
+        }
+
+        /// <summary>vec3 keys, three floats each.</summary>
+        static byte[] V3(params float[] xyz)
+        {
+            var b = new byte[xyz.Length * 4];
+            for (int i = 0; i < xyz.Length; i++) PutF32(b, i * 4, xyz[i]);
+            return b;
+        }
+
+        /// <summary>
+        /// An M2 with two sequences (Stand and one more), two global sequences (1000 ms, 500 ms),
+        /// two colour entries, two texture weights, two texture transforms and a four-entry
+        /// transform lookup that includes the 0xFFFF sentinel and an out-of-range value. The
+        /// keys are chosen so that every "which sequence does this track follow" question has a
+        /// different answer for entry 0 and entry 1.
+        /// </summary>
+        static byte[] BuildMaterialM2(bool badTransformOffset = false, bool badLookupOffset = false)
+        {
+            const int nSeq = 2;
+            const int headerSize = 0x100;
+            int oGlobals = headerSize;                       // 2 * 4
+            int oSeqs = oGlobals + 8;                        // nSeq * 64
+            int oVerts = oSeqs + nSeq * 64;                  // 1 * 48
+            int oTex = oVerts + 48;                          // 1 * 16
+            int oMat = oTex + 16;                            // 4
+            int oTexLookup = oMat + 4;                       // 1 * 2
+            int oColors = oTexLookup + 2;                    // 2 * 40
+            int oWeights = oColors + 2 * 40;                 // 2 * 20
+            int oWeightLookup = oWeights + 2 * 20;           // 2 * 2
+            int oXf = oWeightLookup + 4;                     // 2 * 60
+            int oXfLookup = oXf + 2 * 60;                    // 4 * 2
+            int fixedEnd = oXfLookup + 8;
+
+            var f = new M2Fixture(fixedEnd);
+            byte[] b = f.B;
+            PutMagic(b, 0, "MD20");
+            PutU32(b, 0x04, 272);
+            PutU32(b, 0x14, 2); PutU32(b, 0x18, (uint)oGlobals);
+            PutU32(b, oGlobals, 1000); PutU32(b, oGlobals + 4, 500);
+            PutU32(b, 0x1C, nSeq); PutU32(b, 0x20, (uint)oSeqs);
+            for (int i = 0; i < nSeq; i++)
+            {
+                int o = oSeqs + i * 64;
+                PutU16(b, o, (ushort)i);                     // animId 0 = Stand
+                PutU32(b, o + 4, 1000);                      // length
+                PutU32(b, o + 12, 0x20);                     // keys are in this file
+            }
+            PutU32(b, 0x2C, 0); PutU32(b, 0x30, (uint)headerSize);          // no bones
+            PutU32(b, 0x3C, 1); PutU32(b, 0x40, (uint)oVerts);
+            PutF32(b, oVerts + 28, 1f); PutF32(b, oVerts + 32, 0.25f); PutF32(b, oVerts + 36, 0.75f);
+            PutU32(b, 0x44, 1);
+            PutU32(b, 0x50, 1); PutU32(b, 0x54, (uint)oTex);
+            PutU32(b, oTex, 11); PutU32(b, oTex + 4, 3);
+            PutU32(b, 0x70, 1); PutU32(b, 0x74, (uint)oMat);
+            PutU16(b, oMat + 2, 2);                          // blend: alpha
+            PutU32(b, 0x80, 1); PutU32(b, 0x84, (uint)oTexLookup);
+            PutU32(b, 0x48, 2); PutU32(b, 0x4C, (uint)oColors);
+            PutU32(b, 0x58, 2); PutU32(b, 0x5C, (uint)oWeights);
+            PutU32(b, 0x90, 2); PutU32(b, 0x94, (uint)oWeightLookup);
+            PutU16(b, oWeightLookup, 0); PutU16(b, oWeightLookup + 2, 1);
+            PutU32(b, 0x60, 2); PutU32(b, 0x64, badTransformOffset ? 0x7FFFFFF0u : (uint)oXf);
+            PutU32(b, 0x98, 4); PutU32(b, 0x9C, badLookupOffset ? 0x7FFFFFF0u : (uint)oXfLookup);
+            PutU16(b, oXfLookup, 0); PutU16(b, oXfLookup + 2, 0xFFFF);
+            PutU16(b, oXfLookup + 4, 1); PutU16(b, oXfLookup + 6, 7);
+
+            // colour 0: RGB red->blue on the idle, green on sequence 1; alpha 1->0 on the idle,
+            //           0.5 on sequence 1
+            f.Track(oColors, 1, -1,
+                    new[] { T(0, 1000), T(0) },
+                    new[] { V3(1, 0, 0, 0, 0, 1), V3(0, 1, 0) });
+            f.Track(oColors + 20, 1, -1,
+                    new[] { T(0, 500), T(0) },
+                    new[] { F16(1f, 0f), F16(0.5f) });
+            // colour 1: no RGB keys anywhere; alpha on global sequence 1 (keys at entry 0)
+            f.Track(oColors + 40, 1, -1, new uint[][] { null, null }, new byte[][] { null, null });
+            f.Track(oColors + 60, 1, 1,
+                    new[] { T(0, 250), null },
+                    new[] { F16(0.25f, 0.75f), null });
+            // weight 0: 0->1 on the idle, 0.5 on sequence 1 (DIFFERS: the legacy rule never reads it)
+            f.Track(oWeights, 1, -1,
+                    new[] { T(0, 400), T(0) },
+                    new[] { F16(0f, 1f), F16(0.5f) });
+            // weight 1: identical single key on both sequences
+            f.Track(oWeights + 20, 0, -1,
+                    new[] { T(0), T(0) },
+                    new[] { F16(1f), F16(1f) });
+            // transform 0: translation follows the sequence, rotation one quaternion key,
+            //              scale on global sequence 1
+            f.Track(oXf, 1, -1,
+                    new[] { T(0, 500), T(0, 1000) },
+                    new[] { V3(0, 0, 0, 0.5f, 0.25f, 0), V3(0, 0, 0, 1, 0, 0) });
+            f.Track(oXf + 20, 0, -1,
+                    new[] { T(0), null },
+                    new[] { V3(0, 0, 0.7071f, 0.7071f), null });      // four floats: x y z w
+            f.Track(oXf + 40, 1, 1,
+                    new[] { T(0, 250), null },
+                    new[] { V3(1, 1, 1, 2, 2, 1), null });
+            // transform 1: nothing
+            f.Track(oXf + 60, 0, -1, new uint[][] { null, null }, new byte[][] { null, null });
+            f.Track(oXf + 80, 0, -1, new uint[][] { null, null }, new byte[][] { null, null });
+            f.Track(oXf + 100, 0, -1, new uint[][] { null, null }, new byte[][] { null, null });
+            return f.Done();
+        }
+
+        // ------------------------------------------------------------------ sequence change
+
+        /// <summary>
+        /// Two-sequence model for the sequence-change tests. One colour entry, one weight, one
+        /// texture transform, one opaque material, one batch reading all three. In one sequence
+        /// the batch is animated -- a non-identity UV transform, an opacity below 1 that falls to
+        /// 0 at 500 ms (so the gate shuts), a weight of 1 -- and in the other it has NO keys for
+        /// any sequence-following track. keyedSequence says which one is which.
+        /// </summary>
+        static byte[] BuildSwitchM2(int keyedSequence)
+        {
+            const int nSeq = 2;
+            const int headerSize = 0x100;
+            int oGlobals = headerSize;                       // 1 * 4
+            int oSeqs = oGlobals + 4;                        // nSeq * 64
+            int oVerts = oSeqs + nSeq * 64;                  // 1 * 48
+            int oTex = oVerts + 48;                          // 1 * 16
+            int oMat = oTex + 16;                            // 4
+            int oTexLookup = oMat + 4;                       // 1 * 2
+            int oColors = oTexLookup + 2;                    // 1 * 40
+            int oWeights = oColors + 40;                     // 1 * 20
+            int oWeightLookup = oWeights + 20;               // 1 * 2
+            int oXf = oWeightLookup + 2;                     // 1 * 60
+            int oXfLookup = oXf + 60;                        // 1 * 2
+            int fixedEnd = oXfLookup + 2;
+
+            var f = new M2Fixture(fixedEnd);
+            byte[] b = f.B;
+            PutMagic(b, 0, "MD20");
+            PutU32(b, 0x04, 272);
+            PutU32(b, 0x14, 1); PutU32(b, 0x18, (uint)oGlobals);
+            PutU32(b, oGlobals, 1000);
+            PutU32(b, 0x1C, nSeq); PutU32(b, 0x20, (uint)oSeqs);
+            for (int i = 0; i < nSeq; i++)
+            {
+                int o = oSeqs + i * 64;
+                PutU16(b, o, (ushort)i);                     // animId 0 = Stand, 1 = the other
+                PutU32(b, o + 4, 1000);
+                PutU32(b, o + 12, 0x20);                     // keys are in this file
+            }
+            PutU32(b, 0x2C, 0); PutU32(b, 0x30, (uint)headerSize);
+            PutU32(b, 0x3C, 1); PutU32(b, 0x40, (uint)oVerts);
+            PutF32(b, oVerts + 28, 1f); PutF32(b, oVerts + 32, 0.25f); PutF32(b, oVerts + 36, 0.75f);
+            PutU32(b, 0x44, 1);
+            PutU32(b, 0x50, 1); PutU32(b, 0x54, (uint)oTex);
+            PutU32(b, oTex, 11); PutU32(b, oTex + 4, 3);
+            PutU32(b, 0x70, 1); PutU32(b, 0x74, (uint)oMat);
+            PutU16(b, oMat + 2, 0);                          // blend: opaque
+            PutU32(b, 0x80, 1); PutU32(b, 0x84, (uint)oTexLookup);
+            PutU32(b, 0x48, 1); PutU32(b, 0x4C, (uint)oColors);
+            PutU32(b, 0x58, 1); PutU32(b, 0x5C, (uint)oWeights);
+            PutU32(b, 0x90, 1); PutU32(b, 0x94, (uint)oWeightLookup);
+            PutU16(b, oWeightLookup, 0);
+            PutU32(b, 0x60, 1); PutU32(b, 0x64, (uint)oXf);
+            PutU32(b, 0x98, 1); PutU32(b, 0x9C, (uint)oXfLookup);
+            PutU16(b, oXfLookup, 0);
+
+            int k = keyedSequence, e = 1 - keyedSequence;
+            var times = new uint[nSeq][]; var vals = new byte[nSeq][];
+            // colour RGB: one key at animation 0 (index 0 is what the legacy reads, whatever plays)
+            f.Track(oColors, 0, -1, new[] { T(0), T(0) }, new[] { V3(0.5f, 0.5f, 0.5f), V3(0.5f, 0.5f, 0.5f) });
+            // colour alpha: keyed sequence 0.5 -> 0 at 500 ms; the other sequence: no keys
+            times[k] = T(0, 500); vals[k] = F16(0.5f, 0f); times[e] = null; vals[e] = null;
+            f.Track(oColors + 20, 1, -1, (uint[][])times.Clone(), (byte[][])vals.Clone());
+            // weight: 1 at animation 0 (sequence-independent)
+            f.Track(oWeights, 0, -1, new[] { T(0), T(0) }, new[] { F16(1f), F16(1f) });
+            // transform: translation (0.25, 0.5) and scale (2, 2) in the keyed sequence only
+            times = new uint[nSeq][]; vals = new byte[nSeq][];
+            times[k] = T(0); vals[k] = V3(0.25f, 0.5f, 0f);
+            f.Track(oXf, 0, -1, (uint[][])times.Clone(), (byte[][])vals.Clone());
+            f.Track(oXf + 20, 0, -1, new uint[][] { null, null }, new byte[][] { null, null });
+            times = new uint[nSeq][]; vals = new byte[nSeq][];
+            times[k] = T(0); vals[k] = V3(2f, 2f, 1f);
+            f.Track(oXf + 40, 0, -1, (uint[][])times.Clone(), (byte[][])vals.Clone());
+            return f.Done();
+        }
+
+        static bool Near(float a, float b) { return Math.Abs(a - b) < 1e-4f; }
+
+        static void MaterialSequenceTests()
+        {
+            foreach (int keyed in new[] { 0, 1 })
+            {
+                int other = 1 - keyed;
+                string shape = keyed == 0 ? "keys in 0, none in 1" : "keys in 1, none in 0";
+                byte[] file = BuildSwitchM2(keyed);
+                M2ParsedModel m = M2Parser.Parse(file, keyed);
+                Check(m.AnimatedSequence == keyed, "switch (" + shape + "): parsed at the keyed sequence");
+                int zero = 0;
+                var s = new M2MaterialState();
+                var batch = new M2Batch();
+                batch.ColorIndex = 0; batch.TextureWeightComboIndex = 0; batch.TextureTransformComboIndex = 0;
+                int w = M2MaterialEval.ResolveWeightIndex(m, batch);
+                int x0 = M2MaterialEval.ResolveTransformIndex(m, batch, 0);
+                Check(w == 0 && x0 == 0, "switch (" + shape + "): indices resolve through the lookups");
+
+                // --- the keyed sequence: animated
+                M2MaterialEval.Evaluate(m, 0, w, x0, -1, 0f, 0.0, ref s, ref zero);
+                Check(s.HasColor && Near(s.R, 0.5f), "switch (" + shape + "): colour present in the keyed sequence");
+                Check(s.AlphaFromTrack && Near(s.OcolW, 0.5f) && Near(s.EcolW, 0.5f), "switch (" + shape + "): opacity 0.5 from the track at t=0");
+                Check(s.Drawn, "switch (" + shape + "): gate open at t=0");
+                Check(s.Uv0Applied && Near(s.T0x, 0.25f) && Near(s.T0y, 0.5f) && Near(s.S0x, 2f) && Near(s.S0y, 2f),
+                      "switch (" + shape + "): non-identity UV transform in the keyed sequence");
+                M2MaterialEval.Evaluate(m, 0, w, x0, -1, 600f, 0.0, ref s, ref zero);
+                Check(Near(s.OcolW, 0f) && !s.Drawn, "switch (" + shape + "): gate shut at t=600 (alpha 0)");
+
+                // --- switch to the other sequence: everything falls back to the legacy defaults
+                M2Parser.ReadAnimationInto(file, other, m);
+                Check(m.AnimatedSequence == other, "switch (" + shape + "): re-read at the other sequence");
+                Check(!m.Colors[0].Opacity.HasData && !m.TextureTransforms[0].IsAnimated,
+                      "switch (" + shape + "): the other sequence has no keys for alpha or transform");
+                M2MaterialEval.Evaluate(m, 0, w, x0, -1, 600f, 0.0, ref s, ref zero);
+                Check(s.HasColor && Near(s.R, 0.5f), "switch (" + shape + "): colour still present (index 0)");
+                Check(!s.AlphaFromTrack && Near(s.OcolW, 1f) && Near(s.EcolW, 1f),
+                      "switch (" + shape + "): opacity back to the default 1 (legacy: ocol.w keeps 1 when the track has no keys)");
+                Check(s.Drawn, "switch (" + shape + "): gate open again");
+                Check(!s.Uv0Applied && Near(s.T0x, 0f) && Near(s.T0y, 0f) && Near(s.S0x, 1f) && Near(s.S0y, 1f),
+                      "switch (" + shape + "): UV transform back to identity (legacy: component not applied without keys)");
+
+                // --- and back: the animated values return
+                M2Parser.ReadAnimationInto(file, keyed, m);
+                M2MaterialEval.Evaluate(m, 0, w, x0, -1, 0f, 0.0, ref s, ref zero);
+                Check(s.AlphaFromTrack && Near(s.OcolW, 0.5f) && s.Uv0Applied && Near(s.T0x, 0.25f) && Near(s.S0x, 2f),
+                      "switch (" + shape + "): animated values restored on the way back");
+                M2MaterialEval.Evaluate(m, 0, w, x0, -1, 600f, 0.0, ref s, ref zero);
+                Check(!s.Drawn, "switch (" + shape + "): gate shuts again at t=600");
+            }
+            // The value the UNLIT opaque write derives its blend state from: OcolW below 1 means
+            // blending in place, exactly 1 means One/Zero and _OpaqueAlpha 1 -- both come from the
+            // same field, so a sequence whose alpha track is absent yields 1 and therefore the
+            // opaque state. (This fixture's material is lit -- flags 0 -- and a lit opaque pass
+            // ignores OcolW for blending; the animator applies it to unlit passes only. What is
+            // checked here is the evaluator's value.)
+            {
+                byte[] file = BuildSwitchM2(0);
+                M2ParsedModel m = M2Parser.Parse(file, 0);
+                int zero = 0; var s = new M2MaterialState();
+                M2MaterialEval.Evaluate(m, 0, 0, 0, -1, 0f, 0.0, ref s, ref zero);
+                bool blendIn0 = s.OcolW < 1f;
+                M2Parser.ReadAnimationInto(file, 1, m);
+                M2MaterialEval.Evaluate(m, 0, 0, 0, -1, 0f, 0.0, ref s, ref zero);
+                bool blendIn1 = s.OcolW < 1f;
+                Check(blendIn0 && !blendIn1, "switch: evaluator ocol.w below 1 in sequence 0 (an unlit opaque batch would blend in place) and 1 again in sequence 1 (One/Zero)");
+            }
+        }
+
+        // ------------------------------------------------------------------ cross-sequence gate
+
+        /// <summary>
+        /// One colour entry whose alpha is constant zero in sequence 0 and, in sequence 1, either
+        /// keyed above zero, keyed at zero, absent, or stored outside the file (flag 0x20 clear).
+        /// mode: 0 = keys above zero, 1 = keys all zero, 2 = no keys, 3 = external, 4 = global track.
+        /// </summary>
+        static byte[] BuildGateM2(int mode)
+        {
+            const int nSeq = 2;
+            const int headerSize = 0x100;
+            int oGlobals = headerSize;                       // 1 * 4
+            int oSeqs = oGlobals + 4;
+            int oVerts = oSeqs + nSeq * 64;
+            int oTex = oVerts + 48;
+            int oMat = oTex + 16;
+            int oTexLookup = oMat + 4;
+            int oColors = oTexLookup + 2;                    // 1 * 40
+            int fixedEnd = oColors + 40;
+            var f = new M2Fixture(fixedEnd);
+            byte[] b = f.B;
+            PutMagic(b, 0, "MD20");
+            PutU32(b, 0x04, 272);
+            PutU32(b, 0x14, 1); PutU32(b, 0x18, (uint)oGlobals);
+            PutU32(b, oGlobals, 1000);
+            PutU32(b, 0x1C, nSeq); PutU32(b, 0x20, (uint)oSeqs);
+            for (int i = 0; i < nSeq; i++)
+            {
+                int o = oSeqs + i * 64;
+                PutU16(b, o, (ushort)i);
+                PutU32(b, o + 4, 1000);
+                PutU32(b, o + 12, (i == 1 && mode == 3) ? 0u : 0x20u);   // sequence 1 external in mode 3
+            }
+            PutU32(b, 0x2C, 0); PutU32(b, 0x30, (uint)headerSize);
+            PutU32(b, 0x3C, 1); PutU32(b, 0x40, (uint)oVerts);
+            PutF32(b, oVerts + 28, 1f); PutF32(b, oVerts + 32, 0.25f); PutF32(b, oVerts + 36, 0.75f);
+            PutU32(b, 0x44, 1);
+            PutU32(b, 0x50, 1); PutU32(b, 0x54, (uint)oTex);
+            PutU32(b, oTex, 11); PutU32(b, oTex + 4, 3);
+            PutU32(b, 0x70, 1); PutU32(b, 0x74, (uint)oMat);
+            PutU32(b, 0x80, 1); PutU32(b, 0x84, (uint)oTexLookup);
+            PutU32(b, 0x48, 1); PutU32(b, 0x4C, (uint)oColors);
+            f.Track(oColors, 0, -1, new[] { T(0), T(0) }, new[] { V3(1f, 1f, 1f), V3(1f, 1f, 1f) });
+            if (mode == 4)
+                f.Track(oColors + 20, 0, 0, new[] { T(0), null }, new[] { F16(0f), null });
+            else
+                f.Track(oColors + 20, 1, -1,
+                        new[] { T(0), mode == 2 ? null : T(0, 500) },
+                        new[] { F16(0f), mode == 2 ? null : (mode == 1 ? F16(0f, 0f) : F16(0f, 1f)) });
+            return f.Done();
+        }
+
+        static void CrossSequenceGateTests()
+        {
+            string[] names = { "keys above zero", "keys all zero", "no keys", "external keys", "global track" };
+            bool[] expectOpen = { true, false, true, true, false };
+            for (int mode = 0; mode < 5; mode++)
+            {
+                M2ParsedModel m = M2Parser.Parse(BuildGateM2(mode), 0);
+                M2ColorDef c = m.Colors[0];
+                Check(c.Opacity.HasData && c.Opacity.Values.Length == 1 && c.Opacity.Values[0] == 0f,
+                      "gate scan (" + names[mode] + "): constant-zero alpha in the idle");
+                Check(c.OpacityMayOpenElsewhere == expectOpen[mode],
+                      "gate scan (" + names[mode] + "): may open elsewhere == " + expectOpen[mode]);
+                var batch = new M2Batch();
+                batch.ColorIndex = 0; batch.TextureWeightComboIndex = 0xFFFF; batch.TextureTransformComboIndex = 0xFFFF;
+                Check(M2MaterialEval.GateMayOpenElsewhere(m, batch) == expectOpen[mode],
+                      "gate scan (" + names[mode] + "): the build keeps the batch == " + expectOpen[mode]);
+                if (mode == 3)
+                    Check(c.OpacityOtherUnknown == 1 && c.OpacityOtherVisible == 0, "gate scan (external): counted as unknown, not visible");
+                if (mode == 0 || mode == 2)
+                    Check(c.OpacityOtherVisible == 1 && c.OpacityOtherUnknown == 0, "gate scan (" + names[mode] + "): counted as visible");
+            }
+            // sequence-independent hiders win: no RGB keys at animation 0, or weight 0 at animation 0
+            {
+                M2ParsedModel m = M2Parser.Parse(BuildGateM2(0), 0);
+                var noRgb = new M2Batch();
+                noRgb.ColorIndex = 0; noRgb.TextureWeightComboIndex = 0xFFFF; noRgb.TextureTransformComboIndex = 0xFFFF;
+                m.Colors[0].Color = new M2Track<WowVec3> { Times = new uint[0], Values = new WowVec3[0] };
+                Check(!M2MaterialEval.GateMayOpenElsewhere(m, noRgb), "gate scan: no RGB keys at animation 0 -> hidden everywhere, not kept");
+                M2ParsedModel m2 = M2Parser.Parse(BuildGateM2(0), 0);
+                m2.TextureWeightLookup = new ushort[] { 0 };
+                m2.TextureWeightTracks = new[] { new M2Track<float> { Times = new uint[] { 0 }, Values = new float[] { 0f }, GlobalSequence = -1 } };
+                var w0 = new M2Batch();
+                w0.ColorIndex = 0; w0.TextureWeightComboIndex = 0; w0.TextureTransformComboIndex = 0xFFFF;
+                Check(!M2MaterialEval.GateMayOpenElsewhere(m2, w0), "gate scan: weight 0 at animation 0 -> hidden everywhere, not kept");
+            }
+        }
+
+        // ------------------------------------------------------------------ weight lookup
+
+        static void WeightLookupTests()
+        {
+            var tracks = new M2Track<float>[3];
+            for (int i = 0; i < 3; i++)
+                tracks[i] = new M2Track<float> { Times = new uint[] { 0 }, Values = new float[] { 1f }, GlobalSequence = -1 };
+            var m = new M2ParsedModel();
+            m.TextureWeightTracks = tracks;
+            m.TextureWeightLookup = new ushort[] { 2, 0xFFFF, 7 };
+            var batch = new M2Batch();
+            batch.ColorIndex = 0xFFFF; batch.TextureTransformComboIndex = 0xFFFF;
+            batch.TextureWeightComboIndex = 0;
+            Check(M2MaterialEval.ResolveWeightIndex(m, batch) == 2, "weight lookup: valid entry -> its track");
+            batch.TextureWeightComboIndex = 1;
+            Check(M2MaterialEval.ResolveWeightIndex(m, batch) == -1, "weight lookup: 0xFFFF entry -> none");
+            batch.TextureWeightComboIndex = 2;
+            Check(M2MaterialEval.ResolveWeightIndex(m, batch) == -1, "weight lookup: entry past the tracks -> none");
+            batch.TextureWeightComboIndex = 3;
+            Check(M2MaterialEval.ResolveWeightIndex(m, batch) == -1, "weight lookup: combo past a NON-EMPTY lookup -> none (no direct index)");
+            m.TextureWeightLookup = new ushort[0];
+            batch.TextureWeightComboIndex = 0;
+            Check(M2MaterialEval.ResolveWeightIndex(m, batch) == -1, "weight lookup: absent table -> none (no direct index)");
+
+            // malformed / partial table through the parser: rejected as a whole, so nothing resolves
+            byte[] file = BuildMaterialM2();
+            byte[] past = (byte[])file.Clone();
+            PutU32(past, 0x94, 0x7FFFFFF0u);                 // lookup offset outside the file
+            M2ParsedModel mp = M2Parser.Parse(past, 0);
+            Check(mp.TextureWeightLookup.Length == 0, "weight lookup: table outside the file -> rejected");
+            batch.TextureWeightComboIndex = 0;
+            Check(M2MaterialEval.ResolveWeightIndex(mp, batch) == -1, "weight lookup: rejected table -> none");
+            byte[] partial = (byte[])file.Clone();
+            PutU32(partial, 0x90, 4000);                     // claims 4000 entries: does not fit
+            M2ParsedModel mq = M2Parser.Parse(partial, 0);
+            Check(mq.TextureWeightLookup.Length == 0, "weight lookup: partial table (count past the file) -> rejected");
+            Check(M2MaterialEval.ResolveWeightIndex(mq, batch) == -1, "weight lookup: partial table -> none");
+            // the intact fixture still resolves both of its entries
+            M2ParsedModel ok = M2Parser.Parse(file, 0);
+            batch.TextureWeightComboIndex = 1;
+            Check(M2MaterialEval.ResolveWeightIndex(ok, batch) == 1, "weight lookup: intact table -> entry 1 -> track 1");
+        }
+
+        // ------------------------------------------------------------------ lifecycle (evaluator side)
+
+        /// <summary>
+        /// The synthetic two-sequence transform model the runtime self-test drives, checked here at
+        /// the evaluator level: no keys in one sequence (identity, nothing to evaluate), keys in the
+        /// other (the transform applied), both shapes, and the skin resolving the transform.
+        /// </summary>
+        static void MaterialLifecycleTests()
+        {
+            M2ParsedSkin skin = M2SkinParser.Parse(M2Synthetic.TransformSwitchSkin());
+            Check(skin.Batches.Length == 1 && !skin.Batches[0].HasColor && skin.Batches[0].TextureTransformComboIndex == 0,
+                  "lifecycle: synthetic skin has one batch with a transform combo and no colour entry");
+            foreach (int keyed in new[] { 1, 0 })
+            {
+                const int other = 1;                        // the switches go to sequence 1 and back
+                foreach (bool skinned in new[] { false, true })
+                {
+                    string v = "lifecycle (" + (skinned ? "skinned" : "static") + ", keys in " + keyed + ")";
+                    byte[] file = M2Synthetic.TransformSwitchModel(keyed, skinned);
+                    M2ParsedModel m = M2Parser.Parse(file, 0);
+                    Check(m.Sequences.Length == 2 && m.AnimatedSequence == 0, v + ": parsed at sequence 0");
+                    Check(m.Bones.Length == (skinned ? 1 : 0), v + ": bone count as built");
+                    Check(m.TextureTransforms.Length == 1 && M2MaterialEval.ResolveTransformIndex(m, skin.Batches[0], 0) == 0,
+                          v + ": the batch resolves transform 0 through the lookup");
+                    Check(M2MaterialEval.ResolveWeightIndex(m, skin.Batches[0]) == -1, v + ": no weight resolves");
+                    int zero = 0; var s = new M2MaterialState();
+                    // sequence 0
+                    bool keysNow = keyed == 0;
+                    Check(m.TextureTransforms[0].IsAnimated == keysNow, v + ": sequence 0 has keys == " + keysNow);
+                    M2MaterialEval.Evaluate(m, -1, -1, 0, -1, 0f, 0.0, ref s, ref zero);
+                    Check(s.Drawn && !s.HasColor, v + ": drawn, no colour");
+                    Check(s.Uv0Applied == keysNow && Near(s.S0x, keysNow ? M2Synthetic.KeyedSx : 1f) && Near(s.T0x, keysNow ? M2Synthetic.KeyedTx : 0f),
+                          v + ": sequence 0 UV " + (keysNow ? "applied" : "identity"));
+                    // the other sequence
+                    M2Parser.ReadAnimationInto(file, other, m);
+                    bool keysThen = keyed == 1;
+                    Check(m.AnimatedSequence == other && m.TextureTransforms[0].IsAnimated == keysThen, v + ": sequence 1 re-read, keys == " + keysThen);
+                    M2MaterialEval.Evaluate(m, -1, -1, 0, -1, 0f, 0.0, ref s, ref zero);
+                    Check(s.Uv0Applied == keysThen && Near(s.S0y, keysThen ? M2Synthetic.KeyedSy : 1f) && Near(s.T0y, keysThen ? M2Synthetic.KeyedTy : 0f),
+                          v + ": sequence 1 UV " + (keysThen ? "applied" : "identity"));
+                    // and back
+                    M2Parser.ReadAnimationInto(file, 0, m);
+                    M2MaterialEval.Evaluate(m, -1, -1, 0, -1, 0f, 0.0, ref s, ref zero);
+                    Check(s.Uv0Applied == keysNow, v + ": back to sequence 0, UV " + (keysNow ? "applied" : "identity") + " again");
+                }
+            }
+        }
+
+        static void MaterialTrackTests()
+        {
+            byte[] file = BuildMaterialM2();
+            M2ParsedModel m = M2Parser.Parse(file);
+            Check(m.AnimatedSequence == 0, "mat: the idle resolved as the parsed sequence");
+
+            // the lookup, kept as stored: the consumer decides what an out-of-range value means
+            Check(m.TextureTransformLookup.Length == 4 && m.TextureTransformLookup[0] == 0 &&
+                  m.TextureTransformLookup[1] == 0xFFFF && m.TextureTransformLookup[2] == 1 &&
+                  m.TextureTransformLookup[3] == 7,
+                  "mat: transform lookup decoded, sentinel and out-of-range values kept as stored");
+
+            // transforms
+            Check(m.TextureTransforms.Length == 2, "mat: two texture transforms parsed");
+            M2TextureTransform x = m.TextureTransforms[0];
+            Check(x.Translation.HasData && x.Translation.Times.Length == 2 && x.Translation.Times[1] == 500 &&
+                  x.Translation.Interpolation == M2Interpolation.Linear && !x.Translation.IsGlobal,
+                  "mat: translation track decoded (linear, two keys, ordinary sequence)");
+            Near(x.Translation.Values[1].X, 0.5f, "mat: translation key value X");
+            Near(x.Translation.Values[1].Y, 0.25f, "mat: translation key value Y");
+            Check(x.Rotation.HasData && x.Rotation.Values.Length == 1 &&
+                  x.Rotation.Interpolation == M2Interpolation.None,
+                  "mat: rotation track decoded (one key, no interpolation)");
+            Near(x.Rotation.Values[0].Z, 0.7071f, "mat: rotation key Z, read as four floats");
+            Near(x.Rotation.Values[0].W, 0.7071f, "mat: rotation key W, read as four floats");
+            Check(x.Scale.HasData && x.Scale.IsGlobal && x.Scale.GlobalSequence == 1 &&
+                  x.Scale.Times.Length == 2 && x.Scale.Times[1] == 250,
+                  "mat: scale track bound to global sequence 1, keys read at entry 0");
+            Near(x.Scale.Values[1].X, 2f, "mat: scale key value");
+            Check(x.IsAnimated && !m.TextureTransforms[1].IsAnimated,
+                  "mat: an entry with no keys anywhere is not animated");
+            Check(m.MaterialSurvey.TextureTransforms == 2 && m.MaterialSurvey.TransformsAnimated == 1 &&
+                  m.MaterialSurvey.RotationTracksWithData == 1,
+                  "mat: survey counts transforms, animated transforms and rotation tracks");
+
+            // colours
+            Check(m.Colors.Length == 2, "mat: two colour entries");
+            Check(m.Colors[0].Color.HasData && m.Colors[0].Color.Values.Length == 2,
+                  "mat: colour RGB track decoded");
+            Near(m.Colors[0].Color.Values[0].X, 1f, "mat: colour RGB key 0 is red");
+            Near(m.Colors[0].Color.Values[1].Z, 1f, "mat: colour RGB key 1 is blue");
+            Check(m.Colors[0].Opacity.HasData && m.Colors[0].Opacity.Times[1] == 500,
+                  "mat: colour alpha track decoded");
+            Near(m.Colors[0].Opacity.Values[0], 1f, "mat: colour alpha key 0");
+            Near(m.Colors[0].Opacity.Values[1], 0f, "mat: colour alpha key 1");
+            Check(m.Colors[0].HasColorTrack, "mat: the animation-0 summary flag is still set");
+            Near(m.Colors[0].Alpha, 1f, "mat: the animation-0 summary alpha is unchanged");
+            Check(!m.Colors[1].Color.HasData, "mat: a colour entry with no RGB keys has no RGB track");
+            Check(m.Colors[1].Opacity.HasData && m.Colors[1].Opacity.IsGlobal &&
+                  m.Colors[1].Opacity.GlobalSequence == 1,
+                  "mat: colour alpha on a global sequence keeps the sequence id");
+            Near(m.Colors[1].Opacity.Values[1], 0.75f, "mat: global-sequence alpha key value");
+            Check(m.MaterialSurvey.Colors == 2 && m.MaterialSurvey.ColorRgbTracks == 1 &&
+                  m.MaterialSurvey.ColorOpacityTracks == 2, "mat: survey counts colour tracks");
+
+            // weights
+            Check(m.TextureWeightTracks.Length == 2 && m.TextureWeightTracks[0].Times.Length == 2 &&
+                  m.TextureWeightTracks[0].Times[1] == 400, "mat: texture weight track decoded");
+            Near(m.TextureWeightTracks[0].Values[1], 1f, "mat: weight key value");
+            Near(m.TextureWeights[0], 0f, "mat: the animation-0 first-value summary is unchanged");
+            Check(m.MaterialSurvey.WeightsAnimated == 1, "mat: survey counts animated weights");
+            Check(m.MaterialSurvey.WeightPerSequenceChecked == 0,
+                  "mat: with the idle parsed there is no other sequence to compare weights against");
+
+            // which sequence each track follows, when sequence 1 is parsed
+            M2ParsedModel m1 = M2Parser.Parse(file, 1);
+            Check(m1.AnimatedSequence == 1, "mat: sequence 1 resolved");
+            Check(m1.TextureTransforms[0].Translation.Times[1] == 1000, "mat: translation follows the parsed sequence");
+            Near(m1.TextureTransforms[0].Translation.Values[1].X, 1f, "mat: translation keys are sequence 1's");
+            Check(m1.Colors[0].Color.Values.Length == 2, "mat: colour RGB stays at animation 0 (legacy index 0)");
+            Near(m1.Colors[0].Color.Values[0].X, 1f, "mat: colour RGB keys are still animation 0's");
+            Near(m1.Colors[0].Opacity.Values[0], 0.5f, "mat: colour alpha follows the parsed sequence");
+            Check(m1.TextureWeightTracks[0].Times[1] == 400, "mat: texture weight stays at animation 0 (legacy index 0)");
+            Check(m1.MaterialSurvey.WeightPerSequenceChecked == 2 && m1.MaterialSurvey.WeightPerSequenceDiffers == 1,
+                  "mat: survey counts the one weight whose sequence-1 keys differ from animation 0's");
+
+            // a sequence change re-reads the tracks that follow the sequence, in place
+            M2Parser.ReadAnimationInto(file, 1, m);
+            Check(m.TextureTransforms[0].Translation.Times[1] == 1000, "mat: ReadAnimationInto re-reads the transforms");
+            Near(m.Colors[0].Opacity.Values[0], 0.5f, "mat: ReadAnimationInto re-reads colour alpha");
+            M2Parser.ReadAnimationInto(file, 0, m);
+            Check(m.TextureTransforms[0].Translation.Times[1] == 500, "mat: ...and back again");
+
+            // STATIC is bit 0x10 of the batch flags and nothing else
+            var tri = new ushort[] { 0, 1, 2 };
+            var s16 = M2SkinParser.Parse(BuildSkin(3, tri, batchFlags: 0x10, batchTransformCombo: 2));
+            Check(s16.Batches[0].Static && s16.Batches[0].TextureTransformComboIndex == 2,
+                  "mat: STATIC read from flag bit 0x10; transform combo index parsed");
+            var s01 = M2SkinParser.Parse(BuildSkin(3, tri, batchFlags: 0x01));
+            Check(!s01.Batches[0].Static, "mat: another flag bit is not STATIC");
+
+            // malformed arrays are left empty and counted, never defaulted
+            M2ParsedModel badXf = M2Parser.Parse(BuildMaterialM2(badTransformOffset: true));
+            Check(badXf.TextureTransforms.Length == 0 && badXf.MaterialSurvey.Rejected == 1 &&
+                  badXf.TextureTransformLookup.Length == 4,
+                  "mat: a transform array past the payload is rejected; the lookup is still read");
+            M2ParsedModel badL = M2Parser.Parse(BuildMaterialM2(badLookupOffset: true));
+            Check(badL.TextureTransformLookup.Length == 0 && badL.MaterialSurvey.Rejected == 1 &&
+                  badL.TextureTransforms.Length == 2,
+                  "mat: a lookup past the payload is rejected; the transforms are still read");
+
+            // a header with none of these arrays parses to empty arrays
+            M2ParsedModel plain = M2Parser.Parse(BuildM2Payload(2));
+            Check(plain.TextureTransforms.Length == 0 && plain.TextureTransformLookup.Length == 0 &&
+                  plain.TextureWeightTracks.Length == 0, "mat: absent arrays parse as empty");
         }
 
         /// <summary>

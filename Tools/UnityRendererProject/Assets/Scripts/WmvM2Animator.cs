@@ -67,6 +67,13 @@ public class WmvM2Animator : MonoBehaviour
     AnimatedBone[] bones = new AnimatedBone[0];
 
     /// <summary>
+    /// The material animator this clock also drives, or null. Set by the builder. Materials are
+    /// posed from ApplyPose with the very same t the bones get, which is the whole point: one
+    /// clock, so pause, scrub, speed, looping and a sequence change cannot pull the two apart.
+    /// </summary>
+    public WmvMaterialAnimator Materials;
+
+    /// <summary>
     /// Converted tracks, keyed by sequence index.
     ///
     /// Setup turns the parsed WoW tracks into the renderer's own space -- every key of every
@@ -272,6 +279,17 @@ public class WmvM2Animator : MonoBehaviour
     {
         double dt = Time.deltaTime * 1000.0;
 
+        // -wmvAnimTime: both clocks are held at the requested instant. Nothing advances, so every
+        // frame -- and every capture -- is the same frame of the animation.
+        float pinned = WmvModelBuilder.Debug_.AnimTime;
+        if (pinned >= 0f)
+        {
+            GlobalTimeMs = pinned;
+            timeMs = SequenceTimeAt(pinned);
+            ApplyPose((float)timeMs);
+            return;
+        }
+
         // GLOBAL SEQUENCES KEEP RUNNING WHILE THE ANIMATION IS PAUSED, and ignore the speed. That
         // is not an oversight copied by accident: the legacy viewport advances its global clock
         // before it decides whether the animation is paused, and its speed multiplier lives inside
@@ -359,12 +377,29 @@ public class WmvM2Animator : MonoBehaviour
     }
 
     /// <summary>
+    /// The sequence clock at a wall-clock instant. The running clock wraps at the sequence length
+    /// (LateUpdate), so a pinned instant must wrap the same way or "20 s" would hold every
+    /// sequence track at its last key. The global clock never wraps: each global sequence takes
+    /// its own modulo.
+    /// </summary>
+    public float SequenceTimeAt(float wallMs)
+    {
+        if (lengthMs <= 0.0 || wallMs < lengthMs)
+            return wallMs;
+        return (float)(wallMs - Math.Floor(wallMs / lengthMs) * lengthMs);
+    }
+
+    /// <summary>
     /// Write the pose at one instant onto the bones. Public because the -wmvAnimCheck diagnostic
     /// drives it directly: sampling the sequence is the only way to answer "does this move, and by
     /// how much" without a person watching the viewport.
     /// </summary>
     public void ApplyPose(float t)
     {
+        // Materials first or bones first makes no difference to the frame; materials are done
+        // first so the visibility gate has settled before the renderer culls.
+        if (Materials != null)
+            Materials.Apply(t);
         for (int i = 0; i < bones.Length; i++)
         {
             AnimatedBone b = bones[i];

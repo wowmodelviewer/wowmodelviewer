@@ -36,6 +36,28 @@ public struct WmvMaterialBinding
 }
 
 /// <summary>
+/// The animated inputs of ONE material, resolved once at build time from the batch's lookups,
+/// exactly the way the legacy viewport assigns them to a pass (Source/games/wow/WoWModel.cpp:
+/// 1805 colour, 1807 opacity, 1848-1866 the texture transforms, gated by TEXTUREUNIT_STATIC).
+/// Indices into the parsed model's arrays, -1 for "none"; the animator evaluates them per frame.
+/// </summary>
+public struct WmvMaterialAnimBinding
+{
+    public int Material;          // index into WmvRuntimeModel.Materials, and the submesh index
+    public int Submesh;           // the skin's submesh number, for the log
+    public int Color;             // model.Colors, or -1
+    public int Weight;            // model.TextureWeightTracks, or -1
+    public int Transform0;        // model.TextureTransforms for unit 0, or -1 (STATIC, env, none)
+    public int Transform1;        // ... unit 1
+    public bool Static;           // batch flag 0x10: the transforms above are forced to -1
+    public bool Unit0Env, Unit1Env;
+    public bool Opaque;           // M2 blend mode 0: an UNLIT one blends IN PLACE when its alpha drops below 1
+    public bool Unlit;            // material flag 0x01: tint and animated opacity apply to THESE only
+    public bool AlphaKey;         // M2 blend mode 1: alpha never reaches the frame, only the gate
+    public float BaseAlphaScale;  // the combiner's own alpha scale; the animated weight multiplies it
+}
+
+/// <summary>
 /// One drawn batch's place in the transparent draw order. The legacy viewport sorts its passes
 /// before drawing -- blend mode first, then geoset index, then the texture's "special" type
 /// (Source/games/wow/WoWModel.cpp:2011-2018) -- and this renderer drew them in skin order, which
@@ -85,6 +107,19 @@ public class WmvRuntimeModel
 
     /// <summary>The animator driving the bones, or null when nothing is playing.</summary>
     public WmvM2Animator Animator;
+
+    /// <summary>The component evaluating the material tracks, or null when no batch has any.</summary>
+    public WmvMaterialAnimator MaterialAnimator;
+
+    /// <summary>One entry per material/submesh: which tracks feed it.</summary>
+    public WmvMaterialAnimBinding[] MaterialAnim = new WmvMaterialAnimBinding[0];
+
+    /// <summary>
+    /// Per submesh: hidden right now by its material's visibility gate (the legacy per-frame
+    /// test at ModelRenderPass.cpp:468). Consulted by the geoset switch so a geoset that is on
+    /// cannot un-hide a batch whose opacity is zero at this instant.
+    /// </summary>
+    public bool[] GateHidden = new bool[0];
 
     /// <summary>The renderer, kept so an animation change can adjust its culling.</summary>
     public SkinnedMeshRenderer Skin;
@@ -169,6 +204,13 @@ public static class WmvModelBuilder
         static bool noSkin, skinCheck, noAnim, animCheck, placeholder, overlay, litShader;
         static bool lightCheck;
         static bool queueProof;
+        static float animTime = -1f;
+        static bool frameBoundsSet;
+        static int[] seqPath = new int[0];
+        static bool lifecycleTest;
+        static Bounds frameBounds;
+        static bool matDump;
+        static bool allocCheck;
         static int rig;
         static bool lightDump;
         static float lightYaw = 30f;
@@ -195,6 +237,46 @@ public static class WmvModelBuilder
                 else if (a == "-wmvLightCheck") lightCheck = true;
                 else if (a == "-wmvLightDump") lightDump = true;
                 else if (a == "-wmvQueueProof") queueProof = true;
+                else if (a == "-wmvMatDump") matDump = true;
+                else if (a == "-wmvAllocCheck") allocCheck = true;
+                else if (a == "-wmvLifecycleTest") lifecycleTest = true;
+                else if (a.StartsWith("-wmvSeqPath="))
+                {
+                    // a:b:c -- sequences to switch through, in order, before the light check
+                    string[] p = a.Substring("-wmvSeqPath=".Length).Split(':');
+                    var path = new List<int>();
+                    for (int i = 0; i < p.Length; i++)
+                    {
+                        int v;
+                        if (int.TryParse(p[i], out v) && v >= 0) path.Add(v);
+                    }
+                    seqPath = path.ToArray();
+                }
+                else if (a.StartsWith("-wmvFrameBounds="))
+                {
+                    // cx:cy:cz:ex:ey:ez -- the light check frames from THESE bounds instead of the
+                    // model's own, so two builds whose bounds differ can still be compared.
+                    string[] p = a.Substring("-wmvFrameBounds=".Length).Split(':');   // colons: WMV_DEBUG itself is split on commas
+                    float[] v = new float[6];
+                    bool ok = p.Length == 6;
+                    for (int i = 0; ok && i < 6; i++)
+                        ok = float.TryParse(p[i], System.Globalization.NumberStyles.Float,
+                                            System.Globalization.CultureInfo.InvariantCulture, out v[i]);
+                    if (ok)
+                    {
+                        frameBounds = new Bounds(new Vector3(v[0], v[1], v[2]),
+                                                 new Vector3(2f * v[3], 2f * v[4], 2f * v[5]));
+                        frameBoundsSet = true;
+                    }
+                }
+                else if (a.StartsWith("-wmvAnimTime="))
+                {
+                    float ms;
+                    if (float.TryParse(a.Substring("-wmvAnimTime=".Length),
+                                       System.Globalization.NumberStyles.Float,
+                                       System.Globalization.CultureInfo.InvariantCulture, out ms))
+                        animTime = ms;
+                }
                 else if (a.StartsWith("-wmvLightYaw="))
                 {
                     float y;
@@ -265,6 +347,49 @@ public static class WmvModelBuilder
         /// should not be inferred. The check itself lives in WmvMain.ReportQueueOrder.
         /// </summary>
         public static bool QueueProof { get { Parse(); return queueProof; } }
+
+        /// <summary>
+        /// Hold the animation -- bones, materials and the global-sequence clock alike -- at this
+        /// many milliseconds and never advance it (-wmvAnimTime=N). Negative means "not set". This
+        /// is what makes a before/after pair at "t = 250 ms" the same instant on both builds.
+        /// </summary>
+        public static float AnimTime { get { Parse(); return animTime; } }
+
+        /// <summary>
+        /// Log every evaluated material value -- the keys, the time, the interpolated result, the
+        /// final alpha and the gate -- whenever the materials are posed (-wmvMatDump). A picture
+        /// says a glow faded; this says by how much and from which keys.
+        /// </summary>
+        public static bool MatDump { get { Parse(); return matDump; } }
+
+        /// <summary>
+        /// Measure managed allocation per frame while the animators run (-wmvAllocCheck): the
+        /// material animator adds per-frame work, and "it is cheap" is a number or it is nothing.
+        /// </summary>
+        public static bool AllocCheck { get { Parse(); return allocCheck; } }
+
+        /// <summary>
+        /// Frame the light check from given bounds (-wmvFrameBounds=cx:cy:cz:ex:ey:ez) rather than
+        /// from the model's own. Two builds that disagree about the bounds -- one keeps batches the
+        /// other dropped -- would otherwise put the camera at two distances and compare two
+        /// different pictures.
+        /// </summary>
+        public static bool HasFrameBounds { get { Parse(); return frameBoundsSet; } }
+        public static Bounds FrameBounds { get { Parse(); return frameBounds; } }
+
+        /// <summary>
+        /// Switch through these sequences, in order, once the model is built and before anything
+        /// measures it (-wmvSeqPath=a:b:c, in-file sequences). A frame taken after "0:5" and one
+        /// taken after "5" must be the same frame: that is the sequence-change proof.
+        /// </summary>
+        public static int[] SeqPath { get { Parse(); return seqPath; } }
+
+        /// <summary>
+        /// Run WmvLifecycleSelfTest at start-up (-wmvLifecycleTest): the material animator's
+        /// dormant / active lifecycle across sequence changes, on synthetic models, through the
+        /// real build and switch paths. Result lines are logged for the regression to read.
+        /// </summary>
+        public static bool LifecycleTest { get { Parse(); return lifecycleTest; } }
 
         /// <summary>
         /// Which preview light rig the viewport draws with (-wmvRig=N), for a visual A/B:
@@ -607,6 +732,8 @@ public static class WmvModelBuilder
         // can feed an opaque batch (alpha thrown away) and a blended one (alpha kept).
         var textureCache = new Dictionary<int, Texture2D>();
         var drawOrder = new List<WmvDrawOrderKey>();
+        var animBindings = new List<WmvMaterialAnimBinding>();
+        var gateHidden = new List<bool>();
         var triangleSets = new List<int[]>();
         var submeshGeosets = new List<int>();
         int totalTriangles = 0, hiddenByGeoset = 0;
@@ -621,13 +748,30 @@ public static class WmvModelBuilder
         // visibility rule this milestone does not implement than a model that draws nothing.
         var visible = new bool[skin.Batches.Length];
         var hiddenReasons = new string[skin.Batches.Length];
-        int hiddenCount = 0;
+        // A batch whose gate is ANIMATED -- its weight or colour-alpha track has more than one
+        // key, or runs on a global sequence -- is invisible now and visible later, or the other
+        // way round. The legacy viewport decides that per frame (ModelRenderPass.cpp:468, called
+        // every frame from the draw loop); dropping such a batch at build time, as this used to,
+        // made it unrepresentable for the rest of the model's life. It is built and handed to the
+        // material animator, which withholds its triangles until its gate opens.
+        var keptForAnimation = new bool[skin.Batches.Length];
+        int hiddenCount = 0, keptCount = 0;
         for (int i = 0; i < skin.Batches.Length; i++)
         {
             visible[i] = BatchIsVisible(model, skin.Batches[i], out hiddenReasons[i]);
-            if (!visible[i]) hiddenCount++;
+            if (!visible[i])
+            {
+                if (GateAnimates(model, skin.Batches[i]) ||
+                    M2MaterialEval.GateMayOpenElsewhere(model, skin.Batches[i]))
+                {
+                    keptForAnimation[i] = true;
+                    keptCount++;
+                }
+                else
+                    hiddenCount++;
+            }
         }
-        bool drawHidden = Debug_.ShowHidden || hiddenCount == skin.Batches.Length;
+        bool drawHidden = Debug_.ShowHidden || hiddenCount + keptCount == skin.Batches.Length;
         if (hiddenCount == skin.Batches.Length && hiddenCount > 0 && log != null)
             log("every batch is hidden at rest -- drawing them all rather than nothing; this is " +
                 "almost certainly a visibility rule this milestone does not implement");
@@ -646,8 +790,15 @@ public static class WmvModelBuilder
                 if (log != null)
                     log(string.Format("batch: submesh {0} is HIDDEN at rest ({1}){2}",
                                       batch.SubmeshIndex, hiddenReasons[batchIndex],
-                                      drawHidden ? " -- drawn anyway" : " -- skipped, as the legacy viewport does"));
-                if (!drawHidden)
+                                      drawHidden ? " -- drawn anyway"
+                                      : keptForAnimation[batchIndex]
+                                          ? (GateAnimates(model, batch)
+                                              ? " -- but its gate animates: kept, triangles withheld until it opens"
+                                              : string.Format(" -- but another sequence can show it ({0} with keys above zero or none, {1} in unread .anim files): kept, triangles withheld",
+                                                              model.Colors[batch.ColorIndex].OpacityOtherVisible,
+                                                              model.Colors[batch.ColorIndex].OpacityOtherUnknown))
+                                          : " -- skipped, as the legacy viewport does"));
+                if (!drawHidden && !keptForAnimation[batchIndex])
                     continue;
             }
 
@@ -754,6 +905,12 @@ public static class WmvModelBuilder
                 Material = materials.Count, Blend = (int)mode,
                 Submesh = batch.SubmeshIndex, SpecialTex = specialTex, Built = drawOrder.Count,
             });
+            // What animates this material. Resolved here, where the batch, its units and the
+            // combiner plan are all in hand, exactly as the legacy viewport resolves a pass.
+            animBindings.Add(ResolveAnimBinding(model, batch, materials.Count, mode, plan,
+                                                unit0Env, unit1Env, useUnit1, log));
+            // A batch kept only for its animated gate starts hidden: the animator opens it.
+            gateHidden.Add(keptForAnimation[batchIndex] && !drawHidden);
             materials.Add(CreateMaterial(mat, mode, plan, unit0Uv, unit1Uv, tex, unit1Tex,
                                          objectName + "_mat" + materials.Count, log));
         }
@@ -810,11 +967,60 @@ public static class WmvModelBuilder
 
         mesh.subMeshCount = triangleSets.Count;
         for (int i = 0; i < triangleSets.Count; i++)
-            mesh.SetTriangles(GeosetVisible(submeshGeosets[i], geosets) ? triangleSets[i] : EmptyTriangles,
+            mesh.SetTriangles(GeosetVisible(submeshGeosets[i], geosets) && !gateHidden[i]
+                                  ? triangleSets[i] : EmptyTriangles,
                               i, false);
         // Bounds come from the WHOLE model, not from what is currently visible, so switching a
-        // variant does not make the camera jump.
+        // variant does not make the camera jump. A batch kept for its animated gate is in
+        // triangleSets like any other, so the bounds include it whether or not it is drawn yet.
         mesh.bounds = BoundsOfAll(positions, triangleSets);
+
+        var go = new GameObject(objectName);
+
+        // ---- material animation -------------------------------------------------------------
+        result.Materials = materials.ToArray();
+        result.Mesh = mesh;
+        result.SubmeshTriangles = triangleSets.ToArray();
+        result.SubmeshGeosets = submeshGeosets.ToArray();
+        result.Geosets = geosets;
+        result.MaterialAnim = animBindings.ToArray();
+        result.GateHidden = gateHidden.ToArray();
+        // The material animator is created UNCONDITIONALLY -- under -wmvNoAnim as well: the state
+        // at time 0 (the gate for every pass; a colour and an opacity for an unlit one) is part
+        // of what the model looks like at rest,
+        // and applying it once is the same picture the legacy viewport draws. -wmvNoAnim keeps
+        // its meaning through the clock, not through this component: no WmvM2Animator is created
+        // under it (see the skinned and static branches below), so nothing evaluates per frame.
+        {
+            // Created whenever any binding HAS an input at all -- a colour entry, a weight, a
+            // resolved transform -- keys or not: a transform with no keys in this sequence can
+            // have keys in another (the format allows it; the client sweep counted the models).
+            // The animator is what a sequence change re-reads through, so it must exist before
+            // the change. DORMANT when nothing evaluates (AnimatedCount 0): no clock is created
+            // and nothing runs per frame until Rebind finds keys, so a dormant animator costs one
+            // component and nothing else; a later sequence change in a normal animated run wakes it.
+            bool anyInput = false, anyKeys = false;
+            for (int i = 0; i < result.MaterialAnim.Length; i++)
+            {
+                WmvMaterialAnimBinding bnd = result.MaterialAnim[i];
+                if (bnd.Color >= 0 || bnd.Weight >= 0 || bnd.Transform0 >= 0 || bnd.Transform1 >= 0)
+                    anyInput = true;
+                if (WmvMaterialAnimator.BindingAnimates(model, bnd))
+                    anyKeys = true;
+            }
+            if (anyInput)
+            {
+                var ma = go.AddComponent<WmvMaterialAnimator>();
+                ma.Setup(result, model, log);
+                result.MaterialAnimator = ma;
+                if (!anyKeys && log != null)
+                    log("matanim: material animator created DORMANT -- inputs are bound but none has " +
+                        "keys in this sequence; a sequence change can wake it");
+            }
+            else if (log != null)
+                log("matanim: no material on this model binds a colour entry, a texture weight " +
+                    "or a texture transform");
+        }
 
         if (log != null)
         {
@@ -858,7 +1064,7 @@ public static class WmvModelBuilder
         // the same materials. Only how the mesh reaches the scene differs, and in the rest pose
         // the result is the same geometry -- see BuildSkeleton for why that is exact rather than
         // approximate.
-        var go = new GameObject(objectName);
+
         SkinPlan skinPlan = PlanSkinning(model);
         var boneTransforms = new Transform[0];
         var restPositions = new Vector3[0];
@@ -919,13 +1125,24 @@ public static class WmvModelBuilder
             {
                 var animator = go.AddComponent<WmvM2Animator>();
                 animator.Setup(model, boneTransforms, restLocalPositions, log);
-                if (animator.AnimatedBoneCount == 0)
+                animator.Materials = result.MaterialAnimator;
+                if (animator.AnimatedBoneCount == 0 && !MaterialsAnimate(result))
                 {
                     // Nothing in the idle actually moves; the component would burn a LateUpdate
                     // per frame to write nothing.
                     UnityEngine.Object.Destroy(animator);
                     if (log != null)
                         log("anim: the idle sequence moves no bones -- staying in the rest pose");
+                }
+                else if (animator.AnimatedBoneCount == 0)
+                {
+                    // No bone moves, but a material does: the animator stays for its clock. It is
+                    // the ONE clock in this renderer, and the materials follow it -- pause, scrub
+                    // and sequence change included -- rather than keeping a timer of their own.
+                    result.Animator = animator;
+                    if (log != null)
+                        log("anim: the idle sequence moves no bones, but materials animate -- the " +
+                            "animator stays as their clock");
                 }
                 else
                 {
@@ -951,19 +1168,26 @@ public static class WmvModelBuilder
             renderer.sharedMaterials = materials.ToArray();
             if (log != null)
                 log("skin: drawn as a static mesh -- " + skinPlan.Reason);
+            // A static mesh has no bones to drive, but its materials may still move. The same
+            // animator supplies the clock, with nothing to pose.
+            if (!Debug_.NoAnim && MaterialsAnimate(result) &&
+                model.AnimatedSequence >= 0 && model.AnimatedSequence < model.Sequences.Length)
+            {
+                var animator = go.AddComponent<WmvM2Animator>();
+                animator.Setup(model, new Transform[0], new Vector3[0], log);
+                animator.Materials = result.MaterialAnimator;
+                result.Animator = animator;
+                if (log != null)
+                    log("anim: static mesh, but materials animate -- an animator supplies the clock");
+            }
         }
 
         result.Root = go;
         result.Bones = boneTransforms;
         result.BoneRestPositions = restPositions;
         result.Skinned = skinPlan.CanSkin;
-        result.Mesh = mesh;
-        result.Materials = materials.ToArray();
         result.Bindings = bindings.ToArray();
         result.Textures = textures.ToArray();
-        result.SubmeshGeosets = submeshGeosets.ToArray();
-        result.SubmeshTriangles = triangleSets.ToArray();
-        result.Geosets = geosets;
         result.Bounds = mesh.bounds;
         result.VertexCount = n;
         result.TriangleCount = totalTriangles;
@@ -1108,8 +1332,38 @@ public static class WmvModelBuilder
     {
         if (runtime == null || model == null)
             return false;
+        // The material tracks that follow the sequence were re-read into the model; rebind them
+        // before the bones, so a model whose ONLY animation is material still switches.
+        if (runtime.MaterialAnimator != null)
+            runtime.MaterialAnimator.Rebind(model, log);
         if (!runtime.Skinned || runtime.Bones.Length == 0)
         {
+            // (-wmvNoAnim never reaches here -- SwitchToSequence returns first -- but the rule
+            // "no clock under -wmvNoAnim" is kept explicit rather than implied.)
+            if (!Debug_.NoAnim && MaterialsAnimate(runtime))
+            {
+                // A static mesh whose materials animate in THIS sequence: the clock must exist and
+                // point at it. It is created here when the build had nothing to drive (the
+                // materials were dormant then) and merely re-pointed otherwise.
+                if (runtime.Animator == null)
+                {
+                    runtime.Animator = runtime.Root.AddComponent<WmvM2Animator>();
+                    if (log != null)
+                        log("anim: static mesh, materials now animate -- an animator supplies the clock");
+                }
+                runtime.Animator.Setup(model, new Transform[0], new Vector3[0], log);
+                runtime.Animator.Materials = runtime.MaterialAnimator;
+                return true;
+            }
+            if (runtime.Animator != null)
+            {
+                // Materials stopped animating in this sequence and no bone exists: nothing needs a
+                // clock, so no per-frame work is left running.
+                UnityEngine.Object.Destroy(runtime.Animator);
+                runtime.Animator = null;
+                if (log != null)
+                    log("anim: static mesh, materials no longer animate in this sequence -- the clock is dropped");
+            }
             // Nothing to animate: the model is drawn as a static mesh, and the build already said
             // why. Saying it again here keeps the two halves of the story in one log.
             if (log != null)
@@ -1147,7 +1401,8 @@ public static class WmvModelBuilder
         }
 
         animator.Setup(model, runtime.Bones, runtime.BoneRestPositions, log);
-        if (animator.AnimatedBoneCount == 0)
+        animator.Materials = runtime.MaterialAnimator;
+        if (animator.AnimatedBoneCount == 0 && !MaterialsAnimate(runtime))
         {
             // A real sequence that happens to move nothing: the bones are already back at rest.
             UnityEngine.Object.Destroy(animator);
@@ -1156,6 +1411,16 @@ public static class WmvModelBuilder
                 runtime.Skin.updateWhenOffscreen = false;
             if (log != null)
                 log("anim: the selected sequence moves no bones -- back to the rest pose");
+            return true;
+        }
+        if (animator.AnimatedBoneCount == 0)
+        {
+            runtime.Animator = animator;
+            if (runtime.Skin != null)
+                runtime.Skin.updateWhenOffscreen = false;
+            if (log != null)
+                log("anim: the selected sequence moves no bones, but materials animate -- the " +
+                    "animator stays as their clock");
             return true;
         }
         if (runtime.Skin != null)
@@ -1211,7 +1476,8 @@ public static class WmvModelBuilder
         int visible = 0, shown = 0, hidden = 0;
         for (int i = 0; i < runtime.SubmeshTriangles.Length; i++)
         {
-            bool on = GeosetVisible(runtime.SubmeshGeosets[i], geosets);
+            bool on = GeosetVisible(runtime.SubmeshGeosets[i], geosets)
+                      && !(i < runtime.GateHidden.Length && runtime.GateHidden[i]);
             runtime.Mesh.SetTriangles(on ? runtime.SubmeshTriangles[i] : EmptyTriangles, i, false);
             if (on) { visible += runtime.SubmeshTriangles[i].Length / 3; shown++; }
             else hidden++;
@@ -1539,18 +1805,149 @@ public static class WmvModelBuilder
     /// static pose. When the model carries none of these tracks every batch is visible, which is
     /// the behaviour before any of this was read.
     /// </summary>
+    /// <summary>
+    /// Which array entry a batch's texture weight resolves to, the way the legacy viewport does it
+    /// (opacity = transLookup[transid], then a range check; WoWModel.cpp:1807 and
+    /// ModelRenderPass.cpp:438-440). -1 when the batch has none.
+    /// </summary>
+    static int ResolveWeightIndex(M2ParsedModel model, M2Batch batch)
+    {
+        // Through the lookup table only, as the legacy does (WoWModel.cpp:1807); the resolution
+        // lives with the evaluator so the parser tests can reach it.
+        return M2MaterialEval.ResolveWeightIndex(model, batch);
+    }
+
+    /// <summary>
+    /// Which texture transform a unit resolves to: lookup[combo + unit], valid only when the
+    /// value indexes the array (WoWModel.cpp:1850-1866: "if (a0 &lt; nAnims)"). -1 otherwise.
+    /// </summary>
+    static int ResolveTransformIndex(M2ParsedModel model, M2Batch batch, int unit)
+    {
+        return M2MaterialEval.ResolveTransformIndex(model, batch, unit);
+    }
+
+    /// <summary>
+    /// Does this batch's visibility gate change over time? A weight or colour-alpha track with
+    /// more than one key, or one on a global sequence, can open and close; a single key cannot.
+    /// </summary>
+    static bool GateAnimates(M2ParsedModel model, M2Batch batch)
+    {
+        int w = ResolveWeightIndex(model, batch);
+        if (w >= 0)
+        {
+            M2Track<float> t = model.TextureWeightTracks[w];
+            if (t.HasData && (t.Values.Length > 1 || t.IsGlobal))
+                return true;
+        }
+        if (batch.HasColor && batch.ColorIndex < model.Colors.Length)
+        {
+            M2Track<float> o = model.Colors[batch.ColorIndex].Opacity;
+            if (o.HasData && (o.Values.Length > 1 || o.IsGlobal))
+                return true;
+        }
+        return false;
+    }
+
+    static WmvMaterialAnimBinding ResolveAnimBinding(M2ParsedModel model, M2Batch batch, int materialIndex,
+                                                     M2BlendMode mode, CombinerPlan plan,
+                                                     bool unit0Env, bool unit1Env, bool useUnit1,
+                                                     Action<string> log)
+    {
+        var b = new WmvMaterialAnimBinding();
+        b.Material = materialIndex;
+        b.Submesh = batch.SubmeshIndex;
+        b.Color = batch.HasColor && batch.ColorIndex < model.Colors.Length ? batch.ColorIndex : -1;
+        b.Weight = ResolveWeightIndex(model, batch);
+        b.Static = batch.Static;
+        b.Unit0Env = unit0Env;
+        b.Unit1Env = unit1Env;
+        b.Opaque = mode == M2BlendMode.Opaque;
+        b.AlphaKey = mode == M2BlendMode.AlphaKey;
+        b.Unlit = batch.MaterialIndex < model.Materials.Length && model.Materials[batch.MaterialIndex].Unlit;
+        b.BaseAlphaScale = plan.NeedsUnit1 && useUnit1 ? plan.AlphaScale : 1f;
+        // The legacy viewport assigns a transform only when the STATIC bit is clear
+        // (WoWModel.cpp:1848), and skips loading it on an environment unit (ModelRenderPass.cpp
+        // :630). Unit 1 exists only for a two-unit material (WoWModel.cpp:1861 "shaderTexCount > 1").
+        b.Transform0 = -1;
+        b.Transform1 = -1;
+        if (!b.Static)
+        {
+            int t0 = ResolveTransformIndex(model, batch, 0);
+            int t1 = batch.TextureCount >= 2 ? ResolveTransformIndex(model, batch, 1) : -1;
+            b.Transform0 = unit0Env ? -1 : t0;
+            b.Transform1 = unit1Env || !useUnit1 ? -1 : t1;
+            if (log != null && (t0 >= 0 && unit0Env || t1 >= 0 && unit1Env))
+                log(string.Format("matanim: submesh {0} has a texture transform on an ENVIRONMENT unit " +
+                                  "(unit 0 -> {1}, unit 1 -> {2}); not applied -- a sphere map is not " +
+                                  "a stored coordinate", batch.SubmeshIndex, t0, t1));
+        }
+        else if (log != null && ResolveTransformIndex(model, batch, 0) >= 0)
+            log(string.Format("matanim: submesh {0} is STATIC (flag 0x10): its texture transform {1} " +
+                              "is not applied, as the legacy viewport does not assign it",
+                              batch.SubmeshIndex, ResolveTransformIndex(model, batch, 0)));
+
+        // The resolution itself, for any batch that could have been animated: which combo index
+        // it carried, what the lookup said, and what that became. A batch that "should scroll"
+        // but does not is answered from this line, not by re-deriving it.
+        if (log != null && (b.Color >= 0 || b.Weight >= 0 || b.Transform0 >= 0 || b.Transform1 >= 0 ||
+                            batch.TextureTransformComboIndex != 0xFFFF))
+        {
+            int combo = batch.TextureTransformComboIndex;
+            string l0 = combo < model.TextureTransformLookup.Length
+                ? model.TextureTransformLookup[combo].ToString() : "past lookup";
+            string l1 = combo + 1 < model.TextureTransformLookup.Length
+                ? model.TextureTransformLookup[combo + 1].ToString() : "past lookup";
+            log(string.Format("matanim: submesh {0} binds colour {1} weight {2} xf0 {3} xf1 {4} " +
+                              "(combo {5} -> lookup[{5}]={6}, lookup[{7}]={8}; {9} transform(s) in " +
+                              "the model; units {10}; static {11}; unit0 {12}; unit1 {13})",
+                              batch.SubmeshIndex, b.Color, b.Weight, b.Transform0, b.Transform1,
+                              combo, l0, combo + 1, l1, model.TextureTransforms.Length,
+                              batch.TextureCount, b.Static ? "yes" : "no",
+                              unit0Env ? "env" : "stored", unit1Env ? "env" : (useUnit1 ? "stored" : "unused")));
+        }
+        return b;
+    }
+
+    /// <summary>Is submesh i switched on by the current geoset selection?</summary>
+    public static bool GeosetVisibleFor(WmvRuntimeModel runtime, int i)
+    {
+        if (runtime == null || i < 0 || i >= runtime.SubmeshGeosets.Length)
+            return true;
+        return GeosetVisible(runtime.SubmeshGeosets[i], runtime.Geosets);
+    }
+
+    static bool MaterialsAnimate(WmvRuntimeModel runtime)
+    {
+        return runtime.MaterialAnimator != null && runtime.MaterialAnimator.AnimatedCount > 0;
+    }
+
+    /// <summary>
+    /// Put the whole model -- bones and materials -- at one instant of its animation and hold it
+    /// there. For the offscreen captures: two builds compared at "250 ms" must both mean the
+    /// same 250 ms, on the same two clocks.
+    /// </summary>
+    public static void PoseAt(WmvRuntimeModel runtime, float timeMs)
+    {
+        if (runtime == null)
+            return;
+        WmvM2Animator.GlobalTimeMs = timeMs;
+        if (Debug_.MatDump && runtime.MaterialAnimator != null)
+            runtime.MaterialAnimator.DumpNext();      // the dump describes THIS instant, not the build's t = 0
+        if (runtime.Animator != null)
+            runtime.Animator.ApplyPose(runtime.Animator.SequenceTimeAt(timeMs));   // drives the materials through its hook
+        else if (runtime.MaterialAnimator != null)
+            runtime.MaterialAnimator.Apply(timeMs);
+    }
+
     static bool BatchIsVisible(M2ParsedModel model, M2Batch batch, out string reason)
     {
         reason = null;
 
-        // texture weight (the transparency track)
+        // texture weight (the transparency track), through the lookup table only
         if (model.TextureWeights.Length > 0)
         {
-            int weightIndex = -1;
-            if (batch.TextureWeightComboIndex < model.TextureWeightLookup.Length)
-                weightIndex = model.TextureWeightLookup[batch.TextureWeightComboIndex];
-            else if (batch.TextureWeightComboIndex < model.TextureWeights.Length)
-                weightIndex = batch.TextureWeightComboIndex;   // no lookup table: index directly
+            int weightIndex = batch.TextureWeightComboIndex < model.TextureWeightLookup.Length
+                ? model.TextureWeightLookup[batch.TextureWeightComboIndex] : -1;
 
             if (weightIndex >= 0 && weightIndex < model.TextureWeights.Length &&
                 model.TextureWeights[weightIndex] <= 0f)

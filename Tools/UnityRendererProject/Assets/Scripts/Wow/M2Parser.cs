@@ -65,7 +65,12 @@ namespace Wmv.Wow
         const int OfsTextureWeights = 0x58;
         const int OfsTextureLookup = 0x80;
         const int OfsTextureWeightLookup = 0x90;
+        const int OfsTextureTransforms = 0x60;        // M2TextureTransform[]: three M2Tracks each
+        const int OfsTextureTransformLookup = 0x98;   // ushort[]: batch combo index + unit -> transform
         const int MinHeaderSize = 0x84 + 8;
+        const int TextureTransformStride = 60;        // three M2Tracks
+        const int Fixed16Stride = 2;                  // a colour-alpha or texture-weight key
+        const int FloatQuatStride = 16;               // a texture-transform rotation key: four floats
 
         const int ColorStride = 40;        // two M2Tracks
         const int TrackStride = 20;        // interpolation + globalSeq + two nested M2Arrays
@@ -210,6 +215,7 @@ namespace Wmv.Wow
             }
 
             ReadVisibilityTracks(c, model);
+            ReadMaterialTracks(c, model, externalAnim);
 
             return model;
         }
@@ -288,6 +294,11 @@ namespace Wmv.Wow
                                                      out model.AnimationSkipReason);
             model.Bones = ReadBones(c, bones, model, ExternalFor(model, externalAnim));
             model.RequiredAnimFileId = ExternalAnimFileId(model, model.AnimatedSequence);
+
+            // The material tracks that follow the playing sequence -- colour alpha and the texture
+            // transforms -- have to follow it here too, or a sequence change would leave them on
+            // the previous animation's keys while the bones moved on.
+            ReadMaterialTracks(c, model, externalAnim);
         }
 
         /// <summary>
@@ -365,6 +376,242 @@ namespace Wmv.Wow
         {
             return arr.Offset >= 0 && arr.Count >= 0 &&
                    (long)arr.Offset + (long)arr.Count * stride <= c.Length;
+        }
+
+        /// <summary>
+        /// Can any sequence other than the parsed one show a batch gated by this colour entry?
+        /// Reads the alpha track's per-sequence key arrays straight from the file: a sequence with
+        /// no keys shows it (the legacy default is alpha 1), a sequence stored in this file with a
+        /// key above zero shows it, a sequence stored in a .anim file is unknown and counted as
+        /// able to. A global-sequence track has one key set for every sequence and is never
+        /// "elsewhere". Measured across the client, 744 of 7596 readable models carry at least
+        /// one batch this decides.
+        /// </summary>
+        static void ScanOpacityAcrossSequences(ByteCursor c, int trackOffset, M2ParsedModel model,
+                                               int parsedSequence, ref M2ColorDef color)
+        {
+            color.OpacityMayOpenElsewhere = false;
+            color.OpacityOtherVisible = 0;
+            color.OpacityOtherUnknown = 0;
+            if (!Fits(c, trackOffset, 1, TrackStride))
+                return;
+            c.Seek(trackOffset + 2);
+            short globalSeq = c.ReadInt16();
+            if (globalSeq >= 0)
+                return;                                   // one key set for all sequences
+            c.Seek(trackOffset + 4);
+            M2Array times = c.ReadArray();
+            M2Array values = c.ReadArray();
+            const int NestedStride = 8;
+            if (!Fits(c, times.Offset, times.Count, NestedStride) ||
+                !Fits(c, values.Offset, values.Count, NestedStride))
+                return;
+            int nSeq = model.Sequences.Length;
+            for (int s = 0; s < nSeq; s++)
+            {
+                if (s == parsedSequence)
+                    continue;
+                if (s >= times.Count || s >= values.Count)
+                {
+                    color.OpacityOtherVisible++;          // no entry: no keys: alpha stays 1
+                    continue;
+                }
+                c.Seek(values.Offset + s * NestedStride);
+                M2Array keys = c.ReadArray();
+                if (keys.Count <= 0)
+                {
+                    color.OpacityOtherVisible++;          // no keys: alpha stays 1
+                    continue;
+                }
+                if (!model.Sequences[s].PrimarySequence)
+                {
+                    color.OpacityOtherUnknown++;          // keys in a .anim file not read here
+                    continue;
+                }
+                if (!Fits(c, keys.Offset, keys.Count, Fixed16Stride))
+                    continue;                             // malformed: cannot show anything
+                bool above = false;
+                for (int k = 0; k < keys.Count && !above; k++)
+                {
+                    c.Seek(keys.Offset + k * Fixed16Stride);
+                    if (c.ReadInt16() > 0) above = true;
+                }
+                if (above) color.OpacityOtherVisible++;
+            }
+            color.OpacityMayOpenElsewhere = color.OpacityOtherVisible + color.OpacityOtherUnknown > 0;
+        }
+
+        /// <summary>
+        /// Read the material-animation tracks: each colour entry's RGB and alpha, each texture
+        /// weight, each texture transform, and the transform lookup. Runs in Parse and again in
+        /// ReadAnimationInto, because two of these follow the playing sequence.
+        ///
+        /// WHICH SEQUENCE EACH TRACK IS READ AT mirrors the legacy renderer exactly, index for
+        /// index, rather than the format's intent:
+        ///
+        ///   colour RGB        animation 0, always     ModelRenderPass.cpp:400  getValue(0, ...)
+        ///   colour alpha      the playing sequence    ModelRenderPass.cpp:403  getValue(model-&gt;anim, ...)
+        ///   texture weight    animation 0, always     ModelRenderPass.cpp:443  getValue(0, ...)
+        ///   texture transform the playing sequence    WoWModel.cpp:2302        calc(Anim, t)
+        ///
+        /// A track on a global sequence reads entry 0 whatever the index (ReadTrack does that).
+        /// The transparency rule is a quirk -- it means per-sequence transparency data is never
+        /// evaluated -- and rather than argue about it, the survey counts how many tracks carry
+        /// per-sequence keys that differ from animation 0's, so the cost of the rule is a number.
+        ///
+        /// Anything that does not fit the payload is left EMPTY and counted in the survey, never
+        /// replaced by a default: an empty track means "does not animate", which is a safe reading
+        /// of a broken array and the same policy the bone tracks use.
+        /// </summary>
+        static void ReadMaterialTracks(ByteCursor c, M2ParsedModel model, byte[] externalAnim)
+        {
+            var survey = new M2MaterialTrackSurvey();
+            model.TextureWeightTracks = new M2Track<float>[0];
+            model.TextureTransforms = new M2TextureTransform[0];
+            model.TextureTransformLookup = new ushort[0];
+            if (c.Length < OfsTextureTransformLookup + 8)
+            {
+                model.MaterialSurvey = survey;
+                return;
+            }
+
+            int seq = model.AnimatedSequence;
+            byte[] extBytes = ExternalFor(model, externalAnim);
+            ByteCursor ext = extBytes != null ? new ByteCursor(extBytes, "anim") : default(ByteCursor);
+            bool hasExt = extBytes != null;
+            // Animation 0's keys are read from this file: the external buffer belongs to the
+            // sequence that resolved and to no other. Only when THAT is sequence 0 does entry 0
+            // live in the .anim.
+            bool extAt0 = hasExt && seq == 0;
+
+            // ---- colours ------------------------------------------------------------------
+            c.Seek(OfsColors);
+            M2Array colors = c.ReadArray();
+            if (colors.Count > 0 && FitsArray(c, colors, ColorStride))
+            {
+                // ReadVisibilityTracks has already sized this array and filled the animation-0
+                // summary fields; only the tracks are added here.
+                if (model.Colors.Length != colors.Count)
+                    model.Colors = new M2ColorDef[colors.Count];
+                survey.Colors = colors.Count;
+                for (int i = 0; i < colors.Count; i++)
+                {
+                    int rec = colors.Offset + i * ColorStride;
+                    model.Colors[i].Color = ReadTrack<WowVec3>(c, rec, 0, Vec3Stride, ReadVec3, ext, extAt0);
+                    model.Colors[i].Opacity = seq >= 0
+                        ? ReadTrack<float>(c, rec + TrackStride, seq, Fixed16Stride, ReadFixed16, ext, hasExt)
+                        : EmptyTrack<float>();
+                    if (model.Colors[i].Color.HasData) survey.ColorRgbTracks++;
+                    if (model.Colors[i].Opacity.HasData) survey.ColorOpacityTracks++;
+                    ScanOpacityAcrossSequences(c, rec + TrackStride, model, seq, ref model.Colors[i]);
+                }
+            }
+            else if (colors.Count > 0)
+                survey.Rejected++;
+
+            // ---- texture weights ----------------------------------------------------------
+            c.Seek(OfsTextureWeights);
+            M2Array weights = c.ReadArray();
+            if (weights.Count > 0 && FitsArray(c, weights, TrackStride))
+            {
+                var tracks = new M2Track<float>[weights.Count];
+                survey.TextureWeightTracks = weights.Count;
+                for (int i = 0; i < weights.Count; i++)
+                {
+                    int rec = weights.Offset + i * TrackStride;
+                    tracks[i] = ReadTrack<float>(c, rec, 0, Fixed16Stride, ReadFixed16, ext, extAt0);
+                    if (tracks[i].Values.Length > 1) survey.WeightsAnimated++;
+                    // The keys the legacy rule never reads. Counted, not used.
+                    if (seq > 0 && !tracks[i].IsGlobal)
+                    {
+                        M2Track<float> atSeq = ReadTrack<float>(c, rec, seq, Fixed16Stride, ReadFixed16, ext, hasExt);
+                        survey.WeightPerSequenceChecked++;
+                        if (!SameKeys(tracks[i], atSeq)) survey.WeightPerSequenceDiffers++;
+                    }
+                }
+                model.TextureWeightTracks = tracks;
+            }
+            else if (weights.Count > 0)
+                survey.Rejected++;
+
+            // ---- texture transforms -------------------------------------------------------
+            c.Seek(OfsTextureTransforms);
+            M2Array xforms = c.ReadArray();
+            if (xforms.Count > 0 && FitsArray(c, xforms, TextureTransformStride))
+            {
+                var arr = new M2TextureTransform[xforms.Count];
+                survey.TextureTransforms = xforms.Count;
+                for (int i = 0; i < xforms.Count; i++)
+                {
+                    int rec = xforms.Offset + i * TextureTransformStride;
+                    if (seq >= 0)
+                    {
+                        arr[i].Translation = ReadTrack<WowVec3>(c, rec, seq, Vec3Stride, ReadVec3, ext, hasExt);
+                        arr[i].Rotation = ReadTrack<WowQuat>(c, rec + TrackStride, seq, FloatQuatStride, ReadFloatQuat, ext, hasExt);
+                        arr[i].Scale = ReadTrack<WowVec3>(c, rec + 2 * TrackStride, seq, Vec3Stride, ReadVec3, ext, hasExt);
+                    }
+                    else
+                    {
+                        arr[i].Translation = EmptyTrack<WowVec3>();
+                        arr[i].Rotation = EmptyTrack<WowQuat>();
+                        arr[i].Scale = EmptyTrack<WowVec3>();
+                    }
+                    if (arr[i].IsAnimated) survey.TransformsAnimated++;
+                    if (arr[i].Rotation.HasData) survey.RotationTracksWithData++;
+                }
+                model.TextureTransforms = arr;
+            }
+            else if (xforms.Count > 0)
+                survey.Rejected++;
+
+            c.Seek(OfsTextureTransformLookup);
+            M2Array lookup = c.ReadArray();
+            if (lookup.Count > 0 && FitsArray(c, lookup, 2))
+            {
+                var l = new ushort[lookup.Count];
+                for (int i = 0; i < lookup.Count; i++)
+                {
+                    c.Seek(lookup.Offset + i * 2);
+                    l[i] = c.ReadUInt16();
+                }
+                model.TextureTransformLookup = l;
+            }
+            else if (lookup.Count > 0)
+                survey.Rejected++;
+
+            model.MaterialSurvey = survey;
+        }
+
+        static M2Track<T> EmptyTrack<T>()
+        {
+            M2Track<T> t = new M2Track<T>();
+            t.GlobalSequence = -1;
+            t.Times = EmptyTimes;
+            t.Values = new T[0];
+            return t;
+        }
+
+        static bool SameKeys(M2Track<float> a, M2Track<float> b)
+        {
+            if (a.Times.Length != b.Times.Length || a.Values.Length != b.Values.Length)
+                return false;
+            for (int i = 0; i < a.Times.Length; i++)
+                if (a.Times[i] != b.Times[i]) return false;
+            for (int i = 0; i < a.Values.Length; i++)
+                if (a.Values[i] != b.Values[i]) return false;
+            return true;
+        }
+
+        /// <summary>A colour-alpha or texture-weight key: int16, 32767 = 1.0 (Animated.h ShortToFloat).</summary>
+        static float ReadFixed16(ByteCursor c)
+        {
+            return c.ReadInt16() / 32767f;
+        }
+
+        /// <summary>A texture-transform rotation key: four floats, x y z w, as the file stores them.</summary>
+        static WowQuat ReadFloatQuat(ByteCursor c)
+        {
+            return new WowQuat(c.ReadSingle(), c.ReadSingle(), c.ReadSingle(), c.ReadSingle());
         }
 
         /// <summary>
