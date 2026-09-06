@@ -82,6 +82,8 @@ public class WmvRuntimeModel
 
     /// <summary>Geoset number of each submesh, parallel to Materials. 0 = always drawn.</summary>
     public int[] SubmeshGeosets = new int[0];
+    /// <summary>Each built entry's skin submesh index -- what the batch log calls "submesh N".</summary>
+    public int[] SubmeshIndices = new int[0];
 
     /// <summary>Every submesh's triangles, kept so hiding one is a matter of handing the mesh an
     /// empty list and showing it again is handing back this array -- no geometry is re-uploaded
@@ -172,6 +174,30 @@ public static class WmvModelBuilder
     ///   -wmvShowHidden   draw the batches the model hides at rest (see BatchIsVisible). Useful
     ///                    for seeing WHAT is hidden; the hidden geometry usually covers the
     ///                    detail it is meant to replace.
+    ///   -wmvOnlySubmesh=i:j:k
+    ///                    draw ONLY these skin submeshes (the "submesh N" of the batch log), and
+    ///                    withhold every other one's triangles. This is how a visible feature --
+    ///                    an eye, a crack, a trailing flame -- is ATTRIBUTED to a batch rather
+    ///                    than guessed at from a material name: render the whole model, then
+    ///                    render one submesh, and see which part of the picture went with it.
+    ///                    While it is passed it REPLACES the geoset rule, so a submesh the
+    ///                    displayed variant does not switch on can still be looked at -- which is
+    ///                    the whole point of being able to isolate one. It does not override the
+    ///                    material visibility gate; a batch the model keys to invisible stays
+    ///                    invisible (use -wmvShowHidden for that, they compose).
+    ///                    Colons, because WMV_DEBUG is itself split on commas.
+    ///   -wmvSkinTexture=slot:fileDataID[:slot:fileDataID...]
+    ///                    OVERRIDE the file a texture slot loads. A model with several skin
+    ///                    variants otherwise renders whichever one the app happened to choose,
+    ///                    which is not something a controlled comparison can name; with this, the
+    ///                    variant IS the identifier.
+    ///                    IT IS A PIN, NOT AN INJECTOR. It rewrites the FileDataID of a slot the
+    ///                    host already offered a texture for, at both the initial resolve and a
+    ///                    later skin change. Naming a slot the host offered nothing for -- an
+    ///                    unresolved replaceable slot, say -- does NOTHING: no request is made and
+    ///                    the slot stays empty, because the request loop is driven by the host's
+    ///                    list, not by this switch. Feeding such a slot needs a deliberate change
+    ///                    to how slots are requested, which this is not.
     ///   -wmvOwnShader    resolve the renderer's own WmvOpaque shader before any pipeline
     ///                    shader. The pipeline's Lit shaders cannot run the M2 combiner, so this
     ///                    is how to see the second texture unit in a build where they exist.
@@ -211,6 +237,8 @@ public static class WmvModelBuilder
         static Bounds frameBounds;
         static bool matDump;
         static bool allocCheck;
+        static int[] onlySubmeshes;                      // -wmvOnlySubmesh: null = draw them all
+        static int[] pinnedTextures = new int[0];        // -wmvSkinTexture: slot, file, slot, file
         static int rig;
         static bool lightDump;
         static float lightYaw = 30f;
@@ -251,6 +279,33 @@ public static class WmvModelBuilder
                         if (int.TryParse(p[i], out v) && v >= 0) path.Add(v);
                     }
                     seqPath = path.ToArray();
+                }
+                else if (a.StartsWith("-wmvOnlySubmesh="))
+                {
+                    // i:j:k -- the only skin submeshes to draw. An empty or unparsable list draws
+                    // nothing, which is a legitimate control (the background alone).
+                    string[] p = a.Substring("-wmvOnlySubmesh=".Length).Split(':');
+                    var keep = new List<int>();
+                    for (int i = 0; i < p.Length; i++)
+                    {
+                        int v;
+                        if (int.TryParse(p[i], out v) && v >= 0) keep.Add(v);
+                    }
+                    onlySubmeshes = keep.ToArray();
+                }
+                else if (a.StartsWith("-wmvSkinTexture="))
+                {
+                    // slot:fileDataID pairs. A slot named twice keeps the first pin.
+                    string[] p = a.Substring("-wmvSkinTexture=".Length).Split(':');
+                    var pin = new List<int>();
+                    for (int i = 0; i + 1 < p.Length; i += 2)
+                    {
+                        int s, f;
+                        if (int.TryParse(p[i], out s) && int.TryParse(p[i + 1], out f) &&
+                            s >= 0 && f > 0)
+                        { pin.Add(s); pin.Add(f); }
+                    }
+                    pinnedTextures = pin.ToArray();
                 }
                 else if (a.StartsWith("-wmvFrameBounds="))
                 {
@@ -312,6 +367,32 @@ public static class WmvModelBuilder
                           " showHidden=" + showHidden + " ownShader=" + ownShader +
                           " noSkin=" + noSkin + " skinCheck=" + skinCheck + " noAnim=" + noAnim +
                           " animCheck=" + animCheck);
+        }
+
+        /// <summary>The submeshes -wmvOnlySubmesh named, or null when it was not passed.</summary>
+        public static int[] OnlySubmeshes { get { Parse(); return onlySubmeshes; } }
+
+        /// <summary>
+        /// Is this skin submesh drawn? True for everything unless -wmvOnlySubmesh was passed, in
+        /// which case only the submeshes it named are. Indexed by the batch's SubmeshIndex -- the
+        /// number the batch log prints -- not by the order batches happened to be built in.
+        /// </summary>
+        public static bool SubmeshAllowed(int submeshIndex)
+        {
+            Parse();
+            if (onlySubmeshes == null) return true;
+            for (int i = 0; i < onlySubmeshes.Length; i++)
+                if (onlySubmeshes[i] == submeshIndex) return true;
+            return false;
+        }
+
+        /// <summary>The file -wmvSkinTexture pinned to this slot, or 0 when it named no such slot.</summary>
+        public static int PinnedTexture(int slot)
+        {
+            Parse();
+            for (int i = 0; i + 1 < pinnedTextures.Length; i += 2)
+                if (pinnedTextures[i] == slot) return pinnedTextures[i + 1];
+            return 0;
         }
 
         public static bool FlipV { get { Parse(); return flipV; } }
@@ -483,6 +564,17 @@ public static class WmvModelBuilder
     ///     right -- an empty set is a known selection that switches nothing on, and is not the
     ///     same as silence.
     /// </summary>
+    /// <summary>
+    /// Is the built entry for this skin submesh drawn? The geoset rule below, unless
+    /// -wmvOnlySubmesh named an explicit set, which replaces it (see the switch documentation).
+    /// </summary>
+    public static bool SubmeshDrawn(int submeshIndex, int geosetId, HashSet<int> geosets)
+    {
+        if (Debug_.OnlySubmeshes != null)
+            return Debug_.SubmeshAllowed(submeshIndex);
+        return GeosetVisible(geosetId, geosets);
+    }
+
     public static bool GeosetVisible(int submeshId, HashSet<int> geosets)
     {
         if (submeshId == 0)
@@ -736,6 +828,7 @@ public static class WmvModelBuilder
         var gateHidden = new List<bool>();
         var triangleSets = new List<int[]>();
         var submeshGeosets = new List<int>();
+        var submeshIndices = new List<int>();
         int totalTriangles = 0, hiddenByGeoset = 0;
 
         // Resolve the shader up front: whether it can run the M2 combiner decides how the base
@@ -807,10 +900,13 @@ public static class WmvModelBuilder
             WowCoordinateConverter.FlipWinding(indices);   // handedness change reverses winding
             triangleSets.Add(indices);
             submeshGeosets.Add(submesh.Id);
+            submeshIndices.Add(batch.SubmeshIndex);
             // A geoset the variant does not switch on still gets its submesh and material -- only
             // its triangles are withheld -- so a later variant can switch it back on without
-            // rebuilding anything.
-            if (GeosetVisible(submesh.Id, geosets))
+            // rebuilding anything. Counted through the same rule the mesh is built with, so the
+            // triangle count and the summary below agree with what was actually drawn even when
+            // -wmvOnlySubmesh is deciding.
+            if (SubmeshDrawn(batch.SubmeshIndex, submesh.Id, geosets))
                 totalTriangles += indices.Length / 3;
             else
                 hiddenByGeoset++;
@@ -875,6 +971,32 @@ public static class WmvModelBuilder
                                            : (plan.NeedsUnit1 && batch.TextureCount >= 2
                                               ? ", unit 1 NOT bound (the resolved shader cannot combine)"
                                               : "")));
+                // EVERY declared unit, and whether this renderer samples it. The combiner table
+                // decides how many units a pass HAS; this renderer binds at most two, so a pass
+                // with three declares one that never reaches the frame. That is invisible in a
+                // picture and decisive in an audit, so it is stated per batch rather than implied.
+                var units = new System.Text.StringBuilder();
+                for (int u = 0; u < batch.TextureCount; u++)
+                {
+                    int comboIndex = batch.TextureComboIndex + u;
+                    int lookup = (comboIndex >= 0 && comboIndex < model.TextureLookup.Length)
+                                 ? model.TextureLookup[comboIndex] : -1;
+                    int uslot = ResolveTextureSlot(model, batch, u);
+                    string src = u < shader.UvSource.Length ? shader.UvSource[u].ToString() : "?";
+                    string sampled = u == 0 ? "SAMPLED"
+                                    : (u == 1 ? (useUnit1 ? "SAMPLED" : "not sampled")
+                                              : "NOT SAMPLED -- this renderer binds two units");
+                    units.Append(string.Format("{0}unit {1} uv {2} -> lookup[{3}]={4} slot {5}",
+                                               u == 0 ? "" : "; ", u, src, comboIndex, lookup, uslot));
+                    if (uslot >= 0 && uslot < model.Textures.Length)
+                        units.Append(string.Format(" (M2 type {0}, file {1})",
+                                                   model.Textures[uslot].Type,
+                                                   model.Textures[uslot].FileDataID));
+                    units.Append(" ").Append(sampled);
+                }
+                log(string.Format("batch: submesh {0} geoset {1}, texture combo {2}, {3} unit(s) -- {4}",
+                                  batch.SubmeshIndex, submesh.Id, batch.TextureComboIndex,
+                                  batch.TextureCount, units));
                 if (!plan.Known)
                     log(string.Format("material: pixel shader {0} ({1}) is not implemented -- drawing " +
                                       "unit 0 alone with its own alpha",
@@ -967,7 +1089,7 @@ public static class WmvModelBuilder
 
         mesh.subMeshCount = triangleSets.Count;
         for (int i = 0; i < triangleSets.Count; i++)
-            mesh.SetTriangles(GeosetVisible(submeshGeosets[i], geosets) && !gateHidden[i]
+            mesh.SetTriangles(SubmeshDrawn(submeshIndices[i], submeshGeosets[i], geosets) && !gateHidden[i]
                                   ? triangleSets[i] : EmptyTriangles,
                               i, false);
         // Bounds come from the WHOLE model, not from what is currently visible, so switching a
@@ -982,6 +1104,7 @@ public static class WmvModelBuilder
         result.Mesh = mesh;
         result.SubmeshTriangles = triangleSets.ToArray();
         result.SubmeshGeosets = submeshGeosets.ToArray();
+        result.SubmeshIndices = submeshIndices.ToArray();
         result.Geosets = geosets;
         result.MaterialAnim = animBindings.ToArray();
         result.GateHidden = gateHidden.ToArray();
@@ -1040,10 +1163,13 @@ public static class WmvModelBuilder
                     "two renderers is drawing the wrong triangles here.",
                     ix.DisagreeAt, ix.DisagreeExpanded, ix.DisagreeCumulative));
 
-            // Which geoset rule decided what is on screen. See GeosetVisible.
+            // Which rule decided what is on screen. See SubmeshDrawn / GeosetVisible.
+            if (Debug_.OnlySubmeshes != null)
+                log("geosets: -wmvOnlySubmesh is in force -- the geoset rule is replaced by the " +
+                    "named submesh list for this run");
             int shownSets = 0;
             for (int i = 0; i < submeshGeosets.Count; i++)
-                if (GeosetVisible(submeshGeosets[i], geosets))
+                if (SubmeshDrawn(submeshIndices[i], submeshGeosets[i], geosets))
                     shownSets++;
             string how = geosets != null
                 ? "the displayed variant [" + GeosetList(geosets) + "]"
@@ -1051,11 +1177,14 @@ public static class WmvModelBuilder
             log(string.Format("geosets: {0} of {1} submesh(es) drawn, {2} hidden, by {3}; " +
                               "{4} of the skin's submeshes carry geoset 0",
                               shownSets, triangleSets.Count, hiddenByGeoset, how, ix.GeosetZero));
-            if (shownSets == 0 && triangleSets.Count > 0)
+            if (shownSets == 0 && triangleSets.Count > 0 && Debug_.OnlySubmeshes == null)
                 log("geosets: NOTHING is drawn -- this model has no geoset 0 submesh and no " +
                     "variant switched anything on. The legacy viewport shows nothing here too; " +
                     "reported rather than worked around, because a fallback would be a guess at " +
                     "what the model meant.");
+            else if (shownSets == 0 && triangleSets.Count > 0)
+                log("geosets: nothing is drawn, because -wmvOnlySubmesh named no submesh this " +
+                    "model has. That is the switch, not the model.");
         }
 
         // ---- scene object -------------------------------------------------------------
@@ -1476,7 +1605,9 @@ public static class WmvModelBuilder
         int visible = 0, shown = 0, hidden = 0;
         for (int i = 0; i < runtime.SubmeshTriangles.Length; i++)
         {
-            bool on = GeosetVisible(runtime.SubmeshGeosets[i], geosets)
+            bool on = (i < runtime.SubmeshIndices.Length
+                       ? SubmeshDrawn(runtime.SubmeshIndices[i], runtime.SubmeshGeosets[i], geosets)
+                       : GeosetVisible(runtime.SubmeshGeosets[i], geosets))
                       && !(i < runtime.GateHidden.Length && runtime.GateHidden[i]);
             runtime.Mesh.SetTriangles(on ? runtime.SubmeshTriangles[i] : EmptyTriangles, i, false);
             if (on) { visible += runtime.SubmeshTriangles[i].Length / 3; shown++; }
@@ -1913,6 +2044,8 @@ public static class WmvModelBuilder
     {
         if (runtime == null || i < 0 || i >= runtime.SubmeshGeosets.Length)
             return true;
+        if (i < runtime.SubmeshIndices.Length)
+            return SubmeshDrawn(runtime.SubmeshIndices[i], runtime.SubmeshGeosets[i], runtime.Geosets);
         return GeosetVisible(runtime.SubmeshGeosets[i], runtime.Geosets);
     }
 

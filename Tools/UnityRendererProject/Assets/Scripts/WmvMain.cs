@@ -370,15 +370,28 @@ public class WmvMain : MonoBehaviour
             if (t.fileDataID <= 0) continue;
             foreach (int slot in SlotsForTexture(job.Model, t))
             {
+                int fdid = PinTexture(slot, t.fileDataID);
                 job.TexturesExpected++;
-                job.PendingTextures[ipc.RequestAssetByFileDataID(t.fileDataID)] = slot;
-                currentTextureIds[slot] = t.fileDataID;
+                job.PendingTextures[ipc.RequestAssetByFileDataID(fdid)] = slot;
+                currentTextureIds[slot] = fdid;
                 Debug.Log("WMV: texture slot " + slot + " (type " + t.type + ") -> fileDataID " +
-                          t.fileDataID + " (" + t.source + ")");
+                          fdid + " (" + (fdid == t.fileDataID ? t.source
+                                         : "-wmvSkinTexture, host offered " + t.fileDataID) + ")");
             }
         }
         if (job.TexturesExpected == 0)
             BuildIfReady();
+    }
+
+    /// <summary>
+    /// The file a slot should actually load: whatever -wmvSkinTexture pinned to it, else the one
+    /// the host offered. A model with several skin variants otherwise shows whichever the app
+    /// selected, and "the purple one" is not something a controlled comparison can hold fixed.
+    /// </summary>
+    static int PinTexture(int slot, int offered)
+    {
+        int pinned = WmvModelBuilder.Debug_.PinnedTexture(slot);
+        return pinned > 0 ? pinned : offered;
     }
 
     void OnTextureBytes(WmvIpcClient.AssetResponse r)
@@ -775,6 +788,18 @@ public class WmvMain : MonoBehaviour
             {
                 Debug.Log("WMV: lightcheck: no opaque depth-writing geometry covered a pixel -- "
                           + "nothing to measure (a fully blended model, or nothing drawn)");
+                // There is nothing to MEASURE, but there may still be something to LOOK at: an
+                // all-additive model, or one additive submesh of one under -wmvOnlySubmesh. The
+                // measurement needs an opaque mask; a picture does not, so write the frame under
+                // the same name and rig the measuring path would have used.
+                if (WmvModelBuilder.Debug_.LightDump)
+                {
+                    Shader.SetGlobalFloat("_WmvRig", 0f);
+                    Color32[] blended = GrabFrame(cam, rt, bg, W, H);
+                    Shader.SetGlobalFloat("_WmvRig", restoreRig);
+                    DumpPng(blended, W, H, "wmv-lightcheck-map+contact-on.png");
+                    Debug.Log("WMV: lightcheck: frame written anyway for -wmvLightDump");
+                }
                 return;
             }
 
@@ -1567,7 +1592,7 @@ public class WmvMain : MonoBehaviour
         {
             if (t.fileDataID <= 0) continue;
             foreach (int slot in SlotsForTexture(currentModel, t))
-                wanted[slot] = t.fileDataID;
+                wanted[slot] = PinTexture(slot, t.fileDataID);
         }
 
         var fetch = new List<KeyValuePair<int, int>>();
