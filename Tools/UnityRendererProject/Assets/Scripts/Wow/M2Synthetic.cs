@@ -212,6 +212,98 @@ namespace Wmv.Wow
         }
 
         /// <summary>
+        /// A model whose materials cover a chosen set of (render flags, blend mode) pairs, one
+        /// submesh and one batch each. It exists so the OUTPUT GATE can be tested against real
+        /// materials built by the real builder: _Emissive is what decides whether the preview-light
+        /// roll-off runs, and it is set from the blend mode (additive) or the material's 0x01 UNLIT
+        /// flag. Each pair is (flags[i], blends[i]); batch i draws submesh i against material i.
+        /// </summary>
+        public static byte[] MaterialModeModel(int[] flags, int[] blends)
+        {
+            int n = flags.Length;
+            int verts = n * 3;
+            int oVerts = HeaderSize;
+            int oTex = oVerts + verts * 48;
+            int oMat = oTex + 16;
+            int oTexLookup = oMat + n * 4;
+            int oSeqs = oTexLookup + 2;
+            int fixedEnd = oSeqs + 64;
+
+            var f = new Image(fixedEnd);
+            byte[] b = f.B;
+            PutMagic(b, 0, "MD20");
+            PutU32(b, 0x04, 272);
+            PutU32(b, 0x1C, 1); PutU32(b, 0x20, (uint)oSeqs);
+            PutU16(b, oSeqs, 0);
+            PutU32(b, oSeqs + 4, 1000);
+            PutU32(b, oSeqs + 12, 0x20);
+            PutU32(b, 0x3C, (uint)verts); PutU32(b, 0x40, (uint)oVerts);
+            for (int i = 0; i < verts; i++)
+            {
+                int o = oVerts + i * 48;
+                PutF32(b, o + 0, (i % 3) == 1 ? 1f : 0f);
+                PutF32(b, o + 4, (i % 3) == 2 ? 1f : 0f);
+                PutF32(b, o + 8, i / 3);
+                PutF32(b, o + 20, 0f); PutF32(b, o + 24, 0f); PutF32(b, o + 28, 1f);
+                PutF32(b, o + 32, (i % 3) == 1 ? 1f : 0f);
+                PutF32(b, o + 36, (i % 3) == 2 ? 1f : 0f);
+            }
+            PutU32(b, 0x44, 1);
+            PutU32(b, 0x50, 1); PutU32(b, 0x54, (uint)oTex);
+            PutU32(b, oTex, 0); PutU32(b, oTex + 4, 3);
+            PutU32(b, 0x70, (uint)n); PutU32(b, 0x74, (uint)oMat);
+            for (int i = 0; i < n; i++)
+            {
+                PutU16(b, oMat + i * 4, (ushort)flags[i]);
+                PutU16(b, oMat + i * 4 + 2, (ushort)blends[i]);
+            }
+            PutU32(b, 0x80, 1); PutU32(b, 0x84, (uint)oTexLookup);
+            PutU16(b, oTexLookup, 0);
+            return f.Done();
+        }
+
+        /// <summary>The matching skin: submesh i drawn by batch i against material i.</summary>
+        public static byte[] MaterialModeSkin(int n)
+        {
+            const int headerSize = 0x30;
+            int vertOffset = headerSize;
+            int triOffset = vertOffset + n * 3 * 2;
+            int subOffset = triOffset + n * 3 * 2;
+            int batchOffset = subOffset + n * 48;
+            var b = new byte[batchOffset + n * 24];
+            PutMagic(b, 0, "SKIN");
+            PutU32(b, 0x04, (uint)(n * 3)); PutU32(b, 0x08, (uint)vertOffset);
+            PutU32(b, 0x0C, (uint)(n * 3)); PutU32(b, 0x10, (uint)triOffset);
+            PutU32(b, 0x14, 0); PutU32(b, 0x18, 0);
+            PutU32(b, 0x1C, (uint)n); PutU32(b, 0x20, (uint)subOffset);
+            PutU32(b, 0x24, (uint)n); PutU32(b, 0x28, (uint)batchOffset);
+            for (int i = 0; i < n * 3; i++)
+            {
+                PutU16(b, vertOffset + i * 2, (ushort)i);
+                PutU16(b, triOffset + i * 2, (ushort)i);
+            }
+            for (int s = 0; s < n; s++)
+            {
+                int o = subOffset + s * 48;
+                PutU16(b, o + 0, 0);                         // every submesh at geoset id 0
+                PutU16(b, o + 4, (ushort)(s * 3));
+                PutU16(b, o + 6, 3);
+                PutU16(b, o + 8, (ushort)(s * 3));
+                PutU16(b, o + 10, 3);
+                int bo = batchOffset + s * 24;
+                PutU16(b, bo + 4, (ushort)s);                // submesh
+                PutU16(b, bo + 8, 0xFFFF);                   // no colour entry
+                PutU16(b, bo + 10, (ushort)s);               // material s
+                PutU16(b, bo + 14, 1);                       // one texture unit
+                PutU16(b, bo + 16, 0);
+                PutU16(b, bo + 18, 0xFFFF);
+                PutU16(b, bo + 20, 0xFFFF);
+                PutU16(b, bo + 22, 0xFFFF);
+            }
+            return b;
+        }
+
+        /// <summary>
         /// The matching skin: one submesh per entry of geosetIds, each one triangle, each with its
         /// own batch. This is how a component model that carries alternatives is shaped.
         /// </summary>
