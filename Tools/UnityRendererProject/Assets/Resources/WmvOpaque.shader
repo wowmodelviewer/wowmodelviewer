@@ -119,13 +119,6 @@ Shader "WMV/Opaque Textured"
             #define RIM_GAIN    0.0h      // edge separation, shadow side only
             #define SPEC_GAIN   3.0h      // preview highlight strength
             #define SPEC_TIGHT  49.215h   // preview highlight tightness
-            #define KNEE        0.298h    // where the highlight roll-off starts
-            // What the roll-off approaches. The curve only reaches its asymptote at infinity, so
-            // with CEIL at exactly 1.0 nothing the rig produces can pass white, and a texel lands
-            // on 255 only when it is bright enough to round there anyway. (An earlier value of
-            // 0.97 kept one step of headroom below the point where a channel counts as clipped;
-            // the measured cost of giving it up is 0.000 % clipping on every opaque test model.)
-            #define CEIL        1.0h
             // Key and fill directions, in VIEW space: x right, y up, z toward the viewer. How far
             // the key sits off the view axis is what decides whether a model reads as modelled or
             // as evenly lit -- a key close to the axis lights everything the viewer can see by
@@ -439,12 +432,10 @@ Shader "WMV/Opaque Textured"
                 half3 vn = normalize(i.viewN);       // view space  -- the current rig lives here
                 half  rim = 1.0h - saturate(vn.z);
 
-                // Resolve the rig constants once, up here, because rollKnee/rollCeil are needed
-                // by the roll-off further down, outside the rig branch.
+                // Resolve the rig constants once, up here.
                 half  kFloor = KEY_FLOOR,  kGain    = KEY_GAIN;
                 half  fGain  = FILL_GAIN,  rGain    = RIM_GAIN;
                 half  sGain  = SPEC_GAIN,  sTight   = SPEC_TIGHT;
-                half  rollKnee = KNEE,     rollCeil = CEIL;
                 half3 kDir   = KEY_DIR,    fDir     = FILL_DIR;
                 half  shStr  = SHADOW_STRENGTH, shSoft = SHADOW_SOFT;
                 half  cStr   = CONTACT_STRENGTH, cRange = CONTACT_RANGE;
@@ -584,57 +575,37 @@ Shader "WMV/Opaque Textured"
 
                 c.rgb = c.rgb * lum + spec;
 
-                // THE ROLL-OFF SHAPES THE PREVIEW LIGHT, SO IT RUNS WHERE THE PREVIEW LIGHT DID.
+                // THE TOP END IS SHAPED ONCE, BY THE TONE MAP -- NOT TWICE.
                 //
-                // It was written (125f3781, "Improve Unity M2 preview lighting") for one reason,
-                // in its own words: the rig's terms deliberately sum past 1.0 -- "the light now
-                // sums to 1.24 at full incidence and the top end is rolled off instead" -- and
-                // capping the light instead would make a white texture read grey. That is a
-                // statement about LIGHT. The emissive bypass did not exist yet; _Emissive entered
-                // the shader eleven days later (0880a08d), and until then every fragment,
-                // additive ones included, carried preview light for the curve to shape.
+                // A roll-off used to sit here. 125f3781 added it for one reason, in its own
+                // words: the rig's terms deliberately sum past 1.0, and capping the light instead
+                // would make a white texture read grey, so "the top end is rolled off instead".
+                // That was written when this shader's output went more or less straight to an
+                // 8-bit target and nothing else was going to shape it.
                 //
-                // On the emissive path there is no longer any light to shape. The bypass above
-                // assigns lum = 1 and spec = 0, so c.rgb at this point is exactly the combiner
-                // times _Color: model-authored, every rig term discarded. Running a preview-light
-                // curve over it only darkens what the model asked for -- an authored white leaves
-                // at 0.742 -- and the legacy renderer, whose material semantics these passes come
-                // from, applies no clamp or curve of its own (the OpenGL viewport saturates at the
-                // framebuffer, which is a destination artefact, and the repository's own export
-                // target exists precisely so "values above 1.0 (emissive/additive passes)
-                // survive", RenderTexture.cpp).
+                // It is not true any more. The viewport renders into an HDR colour buffer and
+                // UberPost applies Neutral tonemapping, which is a shoulder -- exactly the job
+                // the curve was written to do, done once, globally, and after blending rather
+                // than per fragment. Running both compressed the top end TWICE, and that is what
+                // flattened authored highlights: on Drakestalker's Trophy Pauldrons the mouth
+                // reached 0.743 here against 0.950 in this application's own OpenGL viewport,
+                // and the cracks 0.601 against 0.915. The OpenGL renderer is the reference that
+                // settles it: ModelRenderPass.cpp applies no clamp, no curve and no tone map of
+                // its own -- it saturates at the framebuffer -- and its highlights are the ones
+                // that read as hot.
                 //
-                // The one argument recorded for keeping it here -- that "a stacked glow cannot run
-                // away past white" -- is about ACCUMULATION, and a per-fragment curve cannot
-                // deliver it: this shader runs before blending and cannot see what it is adding
-                // to. Stacking is bounded by the destination, as it is in the legacy viewport and
-                // in the pipeline's own tone map.
-                if (_WmvRig < 0.5 && rigApplied)
-                {
-                    // SHOULDER, not a ceiling.
-                    //
-                    // Capping the light so the product can never pass 1.0 does stop whites blowing
-                    // out -- by guaranteeing nothing is ever brighter than its own texture. White
-                    // fur then reads grey, because that is what a white texture at 70 % light IS.
-                    // So the light goes well past 1.0 and the top end is rolled off instead:
-                    // below the knee nothing is touched, which is where the painted colour lives,
-                    // and above it the curve bends over and approaches CEIL asymptotically.
-                    //
-                    // ON THE BRIGHTEST CHANNEL, NOT PER CHANNEL. Rolling each channel off
-                    // separately compresses a bright channel harder than a dim one, which pulls
-                    // the three together -- so the roll-off itself desaturates, worst exactly on
-                    // the saturated reds and golds that are supposed to be the ones that pop.
-                    // Rolling off the maximum and scaling all three by the same factor keeps
-                    // every channel ratio, so hue and saturation come out untouched and only
-                    // brightness is shaped. Measured: the per-channel form cost 0.008-0.012
-                    // chroma against the old rig; this form does not.
-                    half mx  = max(c.r, max(c.g, c.b));
-                    half ov  = max(mx - rollKnee, 0.0h);
-                    half rolled = min(mx, rollKnee)
-                                + (rollCeil - rollKnee) * (1.0h - exp(-ov / (rollCeil - rollKnee)));
-                    c.rgb *= mx > 0.0001h ? rolled / mx : 1.0h;
-                }
-
+                // WHAT REMOVING IT ACTUALLY MOVES. Only the top of the range. The curve was the
+                // identity below its knee, which is where most of a model's surface sits, so on
+                // ordinary models the median and the 90th percentile do not move at all
+                // (chicken2 0.326 / 0.430 before and after; drustvarbeastman 0.363 / 0.559;
+                // horse3 0.252 / 0.496, all to three decimals) and only the 99th percentile
+                // rises, by 0.002 to 0.018. On the benchmark it lifts the mouth from 2.20x the
+                // model's median surface to 2.43x and the cracks from 1.78x to 2.02x, against
+                // 2.51x and 2.42x in the OpenGL viewport.
+                //
+                // This reverses the decision 125f3781 made and 0880a08d narrowed. Both were
+                // taken before the viewport had a tone map to compare against, and neither had
+                // an OpenGL reference render to measure the top end against.
                 c.a = (_OpaqueAlpha > 0.5) ? 1.0 : a;
                 return c;
             }

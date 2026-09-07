@@ -351,8 +351,6 @@ namespace Wmv.Wow.Tests
             CrossSequenceGateTests();
             WeightLookupTests();
             MaterialLifecycleTests();
-            log.Add("Effect output curve");
-            OutputCurveTests();
             log.Add("Bones");
             BoneTests();
             log.Add("Animation");
@@ -1683,69 +1681,6 @@ namespace Wmv.Wow.Tests
             WowCoordinateConverter.FlipWinding(tri);
             Check(tri[0] == 0 && tri[1] == 2 && tri[2] == 1, "coords: winding flipped (triangle 1)");
             Check(tri[3] == 3 && tri[4] == 5 && tri[5] == 4, "coords: winding flipped (triangle 2)");
-        }
-
-        /// <summary>
-        /// THE PREVIEW-LIGHT ROLL-OFF, PINNED.
-        ///
-        /// WmvOpaque.shader shapes the top end of the preview rig's output with
-        ///
-        ///     ov     = max(mx - KNEE, 0)
-        ///     rolled = min(mx, KNEE) + (CEIL - KNEE) * (1 - exp(-ov / (CEIL - KNEE)))
-        ///     rgb   *= rolled / mx
-        ///
-        /// with KNEE 0.298 and CEIL 1.0, and it runs ONLY where the preview light contributed --
-        /// not on the emissive path, where the bypass has already set lum = 1 and spec = 0 and the
-        /// colour is entirely the model's own.
-        ///
-        /// WHAT THIS TEST IS AND IS NOT. It is a mirror of that arithmetic, not a test of the
-        /// compiled shader: neither harness can run a fragment program, the parser suite does not
-        /// even link against Unity. It exists so that changing the curve or its constants shows up
-        /// as a failing number here and has to be done on purpose. If the shader and this mirror
-        /// ever disagree, the shader is the truth and this test is the thing that is wrong.
-        /// </summary>
-        static void OutputCurveTests()
-        {
-            const double KNEE = 0.298, CEIL = 1.0;
-            Func<double, double> roll = mx =>
-            {
-                double ov = Math.Max(mx - KNEE, 0.0);
-                return Math.Min(mx, KNEE) + (CEIL - KNEE) * (1.0 - Math.Exp(-ov / (CEIL - KNEE)));
-            };
-
-            // Below the knee the painted colour is untouched -- that is the whole point of a knee.
-            Near((float)roll(0.0), 0f, "output curve: 0 stays 0");
-            Near((float)roll(0.1), 0.1f, "output curve: 0.1 is below the knee and unchanged");
-            Near((float)roll(0.298), 0.298f, "output curve: the knee itself is unchanged");
-
-            // Above it the curve bends over. These are the values the branch was measured against.
-            Near((float)roll(0.5), 0.4735f, "output curve: 0.5 -> 0.4735");
-            Near((float)roll(1.0), 0.7417f, "output curve: an authored white 1.0 -> 0.7417");
-            Near((float)roll(1.25), 0.8191f, "output curve: 1.25 -> 0.8191");
-            Near((float)roll(1.5), 0.8733f, "output curve: 1.5 -> 0.8733");
-            Near((float)roll(2.0), 0.9379f, "output curve: 2.0 -> 0.9379");
-            Near((float)roll(4.0), 0.9964f, "output curve: 4.0 -> 0.9964");
-
-            // The two figures the shoulder audit measured, reproduced exactly.
-            Near((float)roll(1.331), 0.8388f, "output curve: the audit's cracks, 1.331 -> 0.839");
-            Near((float)roll(1.150), 0.7914f, "output curve: the audit's trail, 1.150 -> 0.791");
-
-            // CEIL is an asymptote: the curve approaches it and never reaches it, for any finite
-            // input. That is why the value matters and why it is not a clamp.
-            // CEIL is a mathematical asymptote, but only a mathematical one: past roughly 10 the
-            // exponential underflows and the result saturates to CEIL exactly in floating point.
-            // Both halves are worth pinning, because "never reaches white" is true of the curve
-            // and false of the arithmetic that evaluates it.
-            Check(roll(4.0) < CEIL, "output curve: below CEIL where it matters (4.0)");
-            Check(roll(1e6) <= CEIL, "output curve: never above CEIL, however large the input");
-            Check(roll(8.0) > roll(4.0), "output curve: still monotonic far above the knee");
-
-            // What the emissive exemption is worth, as a number rather than an impression: an
-            // authored value keeps all of itself instead of the fraction the curve would leave.
-            Check(Math.Abs(1.0 - roll(1.0)) > 0.25,
-                  "output curve: the curve costs an authored white more than a quarter of itself");
-            Check(Math.Abs(0.5 - roll(0.5)) > 0.02,
-                  "output curve: it costs a mid-bright authored value something too");
         }
 
     }
