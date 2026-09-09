@@ -17,6 +17,8 @@
 #include "ModelLight.h"
 #include "ModelRenderPass.h"
 #include "ModelTransparency.h"
+#include "Texture.h"
+#include "TextureManager.h"
 #include "video.h"
 
 #include "logger/Logger.h"
@@ -2668,6 +2670,79 @@ void WoWModel::updateTextureList(GameFile * Tex, int special)
       break;
     }
   }
+}
+
+int WoWModel::applyDisplayMaterialResources(int itemDisplayInfoID, int modelIndex)
+{
+  if (itemDisplayInfoID <= 0 || modelIndex < 0)
+    return 0;
+
+  // One row per replaceable slot this display fills for this model. TextureType is the M2
+  // texture type the row is for; MaterialResourcesID resolves to a file exactly as the type-2
+  // skin does.
+  const QString query =
+      QString("SELECT ItemDisplayInfoModelMatRes.TextureType, TextureFileData.FileDataID "
+              "FROM ItemDisplayInfoModelMatRes "
+              "LEFT JOIN TextureFileData ON ItemDisplayInfoModelMatRes.MaterialResourcesID = "
+              "TextureFileData.MaterialResourcesID "
+              "WHERE ItemDisplayInfoModelMatRes.ItemDisplayInfoID = %1 "
+              "AND ItemDisplayInfoModelMatRes.ModelIndex = %2")
+          .arg(itemDisplayInfoID).arg(modelIndex);
+
+  sqlResult r = GAMEDATABASE.sqlQuery(query);
+  if (!r.valid || r.empty())
+    return 0;   // nothing authored here -- caller keeps its legacy behaviour
+
+  std::set<int> named;
+  int bound = 0;
+  for (size_t i = 0; i < r.values.size(); i++)
+  {
+    const int type = r.values[i][0].toInt();
+    const int fdid = r.values[i][1].toInt();
+    if (type <= 0 || fdid <= 0)
+      continue;
+    named.insert(type);
+    updateTextureList(GAMEDIRECTORY.getFile(fdid), type);
+    bound++;
+  }
+
+  // A slot the model declares but this display does NOT name is genuinely UNSPECIFIED, and the
+  // client has that as a real state -- its own CVar help reads "replaceable textures that aren't
+  // specified will be purple". So drop anything a previous guess left there rather than keep a
+  // fabricated texture. Only slots the display had a chance to name are touched, and only once
+  // the table has actually answered for this display.
+  for (size_t i = 0; i < specialTextures.size(); i++)
+  {
+    const int type = specialTextures[i];
+    if (type <= 0 || type == TEXTURE_OBJECT_SKIN || named.count(type))
+      continue;
+    if (replaceTextures[type] != ModelRenderPass::INVALID_TEX)
+    {
+      TEXTUREMANAGER.del(replaceTextures[type]);
+      replaceTextures[type] = ModelRenderPass::INVALID_TEX;
+    }
+  }
+
+  return bound;
+}
+
+int WoWModel::boundSpecialFileDataId(int special) const
+{
+  if (special < 0 || (size_t)special >= replaceTextures.size())
+    return 0;
+
+  const GLuint id = replaceTextures[special];
+  if (id == ModelRenderPass::INVALID_TEX)
+    return 0;
+
+  // TEXTUREMANAGER only ever stores Texture instances (TextureManager::add), so this cast is
+  // sound; the map is the manager's own index from GL id to the item it created.
+  std::map<GLuint, ManagedItem *>::const_iterator it = TEXTUREMANAGER.items.find(id);
+  if (it == TEXTUREMANAGER.items.end() || !it->second)
+    return 0;
+
+  const Texture * tex = static_cast<const Texture *>(it->second);
+  return (tex && tex->file) ? (int)tex->file->fileDataId() : 0;
 }
 
 std::map<int, std::wstring> WoWModel::getAnimsMap()

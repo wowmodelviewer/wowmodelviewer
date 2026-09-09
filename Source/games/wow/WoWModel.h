@@ -282,6 +282,18 @@ public:
   bool isWearingARobe();
 
   void updateTextureList(GameFile * tex, int special);
+
+  // Bind every replaceable texture RETAIL names for this item display, from
+  // ItemDisplayInfoModelMatRes: that table gives a MaterialResourcesID per M2 texture TYPE (and
+  // per model), which is how the client picks e.g. an emissive accent map for type 3 instead of
+  // reusing the type-2 diffuse. Returns the number of slots bound; 0 means the table said nothing
+  // about this display+model and the caller should keep whatever legacy behaviour it had.
+  int applyDisplayMaterialResources(int itemDisplayInfoID, int modelIndex);
+
+  // The fileDataID currently bound to a REPLACEABLE texture slot (an M2 texture type), or 0.
+  // replaceTextures stores a GL texture id; the texture manager holds the GameFile that id was
+  // created from, so the binding can be read back without keeping a second copy of it in sync.
+  int boundSpecialFileDataId(int special) const;
   void displayHeader(ModelHeader & a_header);
   bool canSetTextureFromFile(int texnum);
 

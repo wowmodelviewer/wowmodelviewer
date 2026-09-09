@@ -1255,13 +1255,13 @@ namespace Wmv.Wow.Tests
                 Check(w == 0 && x0 == 0, "switch (" + shape + "): indices resolve through the lookups");
 
                 // --- the keyed sequence: animated
-                M2MaterialEval.Evaluate(m, 0, w, x0, -1, 0f, 0.0, ref s, ref zero);
+                M2MaterialEval.Evaluate(m, 0, w, x0, -1, -1, 0f, 0.0, ref s, ref zero);
                 Check(s.HasColor && Near(s.R, 0.5f), "switch (" + shape + "): colour present in the keyed sequence");
                 Check(s.AlphaFromTrack && Near(s.OcolW, 0.5f) && Near(s.EcolW, 0.5f), "switch (" + shape + "): opacity 0.5 from the track at t=0");
                 Check(s.Drawn, "switch (" + shape + "): gate open at t=0");
                 Check(s.Uv0Applied && Near(s.T0x, 0.25f) && Near(s.T0y, 0.5f) && Near(s.S0x, 2f) && Near(s.S0y, 2f),
                       "switch (" + shape + "): non-identity UV transform in the keyed sequence");
-                M2MaterialEval.Evaluate(m, 0, w, x0, -1, 600f, 0.0, ref s, ref zero);
+                M2MaterialEval.Evaluate(m, 0, w, x0, -1, -1, 600f, 0.0, ref s, ref zero);
                 Check(Near(s.OcolW, 0f) && !s.Drawn, "switch (" + shape + "): gate shut at t=600 (alpha 0)");
 
                 // --- switch to the other sequence: everything falls back to the legacy defaults
@@ -1269,7 +1269,7 @@ namespace Wmv.Wow.Tests
                 Check(m.AnimatedSequence == other, "switch (" + shape + "): re-read at the other sequence");
                 Check(!m.Colors[0].Opacity.HasData && !m.TextureTransforms[0].IsAnimated,
                       "switch (" + shape + "): the other sequence has no keys for alpha or transform");
-                M2MaterialEval.Evaluate(m, 0, w, x0, -1, 600f, 0.0, ref s, ref zero);
+                M2MaterialEval.Evaluate(m, 0, w, x0, -1, -1, 600f, 0.0, ref s, ref zero);
                 Check(s.HasColor && Near(s.R, 0.5f), "switch (" + shape + "): colour still present (index 0)");
                 Check(!s.AlphaFromTrack && Near(s.OcolW, 1f) && Near(s.EcolW, 1f),
                       "switch (" + shape + "): opacity back to the default 1 (legacy: ocol.w keeps 1 when the track has no keys)");
@@ -1279,10 +1279,10 @@ namespace Wmv.Wow.Tests
 
                 // --- and back: the animated values return
                 M2Parser.ReadAnimationInto(file, keyed, m);
-                M2MaterialEval.Evaluate(m, 0, w, x0, -1, 0f, 0.0, ref s, ref zero);
+                M2MaterialEval.Evaluate(m, 0, w, x0, -1, -1, 0f, 0.0, ref s, ref zero);
                 Check(s.AlphaFromTrack && Near(s.OcolW, 0.5f) && s.Uv0Applied && Near(s.T0x, 0.25f) && Near(s.S0x, 2f),
                       "switch (" + shape + "): animated values restored on the way back");
-                M2MaterialEval.Evaluate(m, 0, w, x0, -1, 600f, 0.0, ref s, ref zero);
+                M2MaterialEval.Evaluate(m, 0, w, x0, -1, -1, 600f, 0.0, ref s, ref zero);
                 Check(!s.Drawn, "switch (" + shape + "): gate shuts again at t=600");
             }
             // The value the UNLIT opaque write derives its blend state from: OcolW below 1 means
@@ -1295,10 +1295,10 @@ namespace Wmv.Wow.Tests
                 byte[] file = BuildSwitchM2(0);
                 M2ParsedModel m = M2Parser.Parse(file, 0);
                 int zero = 0; var s = new M2MaterialState();
-                M2MaterialEval.Evaluate(m, 0, 0, 0, -1, 0f, 0.0, ref s, ref zero);
+                M2MaterialEval.Evaluate(m, 0, 0, 0, -1, -1, 0f, 0.0, ref s, ref zero);
                 bool blendIn0 = s.OcolW < 1f;
                 M2Parser.ReadAnimationInto(file, 1, m);
-                M2MaterialEval.Evaluate(m, 0, 0, 0, -1, 0f, 0.0, ref s, ref zero);
+                M2MaterialEval.Evaluate(m, 0, 0, 0, -1, -1, 0f, 0.0, ref s, ref zero);
                 bool blendIn1 = s.OcolW < 1f;
                 Check(blendIn0 && !blendIn1, "switch: evaluator ocol.w below 1 in sequence 0 (an unlit opaque batch would blend in place) and 1 again in sequence 1 (One/Zero)");
             }
@@ -1465,7 +1465,7 @@ namespace Wmv.Wow.Tests
                     // sequence 0
                     bool keysNow = keyed == 0;
                     Check(m.TextureTransforms[0].IsAnimated == keysNow, v + ": sequence 0 has keys == " + keysNow);
-                    M2MaterialEval.Evaluate(m, -1, -1, 0, -1, 0f, 0.0, ref s, ref zero);
+                    M2MaterialEval.Evaluate(m, -1, -1, 0, -1, -1, 0f, 0.0, ref s, ref zero);
                     Check(s.Drawn && !s.HasColor, v + ": drawn, no colour");
                     Check(s.Uv0Applied == keysNow && Near(s.S0x, keysNow ? M2Synthetic.KeyedSx : 1f) && Near(s.T0x, keysNow ? M2Synthetic.KeyedTx : 0f),
                           v + ": sequence 0 UV " + (keysNow ? "applied" : "identity"));
@@ -1473,12 +1473,12 @@ namespace Wmv.Wow.Tests
                     M2Parser.ReadAnimationInto(file, other, m);
                     bool keysThen = keyed == 1;
                     Check(m.AnimatedSequence == other && m.TextureTransforms[0].IsAnimated == keysThen, v + ": sequence 1 re-read, keys == " + keysThen);
-                    M2MaterialEval.Evaluate(m, -1, -1, 0, -1, 0f, 0.0, ref s, ref zero);
+                    M2MaterialEval.Evaluate(m, -1, -1, 0, -1, -1, 0f, 0.0, ref s, ref zero);
                     Check(s.Uv0Applied == keysThen && Near(s.S0y, keysThen ? M2Synthetic.KeyedSy : 1f) && Near(s.T0y, keysThen ? M2Synthetic.KeyedTy : 0f),
                           v + ": sequence 1 UV " + (keysThen ? "applied" : "identity"));
                     // and back
                     M2Parser.ReadAnimationInto(file, 0, m);
-                    M2MaterialEval.Evaluate(m, -1, -1, 0, -1, 0f, 0.0, ref s, ref zero);
+                    M2MaterialEval.Evaluate(m, -1, -1, 0, -1, -1, 0f, 0.0, ref s, ref zero);
                     Check(s.Uv0Applied == keysNow, v + ": back to sequence 0, UV " + (keysNow ? "applied" : "identity") + " again");
                 }
             }

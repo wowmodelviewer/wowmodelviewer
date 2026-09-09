@@ -30,6 +30,12 @@ class TextureGroup
     int particleColInd; // ID for ParticleColor.dbc
     int PCRIndex;  // index into PCRList - list of particle color replacement values
     std::set<GeosetNum> creatureGeosetData;  // Defines which geosets are switched on for a particular display ID of a model
+    // Where this group came from, so the retail per-slot material table can be consulted for the
+    // SAME display and model the skin itself came from. Deliberately not part of operator== /
+    // operator<: two displays that resolve to the same textures must still collapse to one skin
+    // entry exactly as they did before.
+    int displayId;    // ItemDisplayInfo.ID, or 0 when this group is not from an item display
+    int modelIndex;   // 0 = matched ModelResourcesID1, 1 = ModelResourcesID2, -1 = not applicable
 
     TextureGroup() : count(0), base(0)
     {
@@ -41,6 +47,8 @@ class TextureGroup
       PCRIndex = -1;
       creatureGeosetData.clear();
       definedTexture = false;
+      displayId = 0;
+      modelIndex = -1;
     }
 
     // default copy constr
@@ -56,6 +64,8 @@ class TextureGroup
       PCRIndex = grp.PCRIndex;
       creatureGeosetData = grp.creatureGeosetData;
       definedTexture = grp.definedTexture;
+      displayId = grp.displayId;
+      modelIndex = grp.modelIndex;
     }
 
     bool operator<(const TextureGroup &grp) const
@@ -201,7 +211,11 @@ public:
   // matches, so it reports what that call would actually do. Diagnostics only.
   void displayIdSkinIndices(std::vector<std::pair<int, int> > & out);
   int AddSkin(TextureGroup grp);
-  void SetSkin(int num);
+  // displayIdOverride: the ItemDisplayInfo the caller meant. The skin LIST collapses groups
+  // that resolve to the same textures, so the entry found for a display need not carry that
+  // display's own id; SetSkinByDisplayID passes it explicitly so the retail per-slot material
+  // lookup is done for the appearance that was actually requested.
+  void SetSkin(int num, int displayIdOverride = 0);
   void ActivateBLPSkinList();
   void SyncBLPSkinList();
   void SetSingleSkin(int num, int texnum);

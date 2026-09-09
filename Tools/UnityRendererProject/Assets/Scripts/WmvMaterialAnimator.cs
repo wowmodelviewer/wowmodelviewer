@@ -70,6 +70,11 @@ public class WmvMaterialAnimator : MonoBehaviour
     static readonly int IdUvOff0 = Shader.PropertyToID("_UvOff0");
     static readonly int IdUvXf1 = Shader.PropertyToID("_UvXf1");
     static readonly int IdUvOff1 = Shader.PropertyToID("_UvOff1");
+    static readonly int IdFirstUnitWeight = Shader.PropertyToID("_FirstUnitWeight");
+    static readonly int IdSecondUnitWeight = Shader.PropertyToID("_SecondUnitWeight");
+    static readonly int IdThirdUnitWeight = Shader.PropertyToID("_ThirdUnitWeight");
+    static readonly int IdUvXf2 = Shader.PropertyToID("_UvXf2");
+    static readonly int IdUvOff2 = Shader.PropertyToID("_UvOff2");
     static readonly int[] EmptyTriangles = new int[0];
 
     /// <summary>How many bindings are evaluated per frame, and of what kind.</summary>
@@ -126,8 +131,10 @@ public class WmvMaterialAnimator : MonoBehaviour
             if (b.Weight >= 0 && m.TextureWeightTracks[b.Weight].HasData) weights++;
             if (b.Transform0 >= 0 && m.TextureTransforms[b.Transform0].IsAnimated) transforms++;
             if (b.Transform1 >= 0 && m.TextureTransforms[b.Transform1].IsAnimated) transforms++;
+            if (b.Transform2 >= 0 && m.TextureTransforms[b.Transform2].IsAnimated) transforms++;
             if (b.Transform0 >= 0 && m.TextureTransforms[b.Transform0].Rotation.HasData) rotations++;
             if (b.Transform1 >= 0 && m.TextureTransforms[b.Transform1].Rotation.HasData) rotations++;
+            if (b.Transform2 >= 0 && m.TextureTransforms[b.Transform2].Rotation.HasData) rotations++;
         }
         animated = list.ToArray();
         AnimatedCount = animated.Length;
@@ -164,9 +171,15 @@ public class WmvMaterialAnimator : MonoBehaviour
             return true;
         if (b.Weight >= 0 && b.Weight < m.TextureWeightTracks.Length && m.TextureWeightTracks[b.Weight].HasData)
             return true;
+        if (b.Weight1 >= 0 && b.Weight1 < m.TextureWeightTracks.Length && m.TextureWeightTracks[b.Weight1].HasData)
+            return true;
+        if (b.Weight2 >= 0 && b.Weight2 < m.TextureWeightTracks.Length && m.TextureWeightTracks[b.Weight2].HasData)
+            return true;
         if (b.Transform0 >= 0 && b.Transform0 < m.TextureTransforms.Length && m.TextureTransforms[b.Transform0].IsAnimated)
             return true;
         if (b.Transform1 >= 0 && b.Transform1 < m.TextureTransforms.Length && m.TextureTransforms[b.Transform1].IsAnimated)
+            return true;
+        if (b.Transform2 >= 0 && b.Transform2 < m.TextureTransforms.Length && m.TextureTransforms[b.Transform2].IsAnimated)
             return true;
         return false;
     }
@@ -223,27 +236,84 @@ public class WmvMaterialAnimator : MonoBehaviour
         if (mat == null)
             return;
 
-        M2MaterialEval.Evaluate(model, b.Color, b.Weight, b.Transform0, b.Transform1, t,
+        M2MaterialEval.Evaluate(model, b.Color, b.Weight, b.Weight1, b.Weight2,
+                                b.Transform0, b.Transform1, b.Transform2, t,
                                 WmvM2Animator.GlobalTimeMs, ref state, ref zeroLengthGlobal);
 
-        // ---- the colour: the legacy c, read at animation 0 (sequence-independent) -------------
-        // UNLIT ONLY. For a lit pass the legacy feeds c into fixed-function emission and never
-        // lets ocol.w reach the fragment (see the file header); what the game does there is not
-        // established by anything in this repository, and the client is full of such batches
-        // (229 models with a lit tint, 913 with a lit animated opacity). Until that is settled a
-        // lit pass keeps the behaviour it had before this branch: no tint, no animated opacity,
-        // the gate and the texture transforms only.
-        if (state.HasColor && b.Unlit)
-            mat.SetColor(IdColor, new Color(state.R, state.G, state.B, 1f));
+        // ---- the third unit's gain: EVERY pass, lit or unlit ---------------------------------
+        // This is not the pass opacity and it is not a tint. It is one texture unit's own weight,
+        // which the M2 animates and which the ps15 combiner multiplies its additive lobe by. It
+        // therefore applies wherever that combiner runs, and it is written every frame for the
+        // same reason the UV transforms are: the value a previous sequence wrote must not survive
+        // into this one. Materials whose binding has no unit-2 weight get 1 written, not skipped.
+        // Unit 0's weight, for ps24's first-unit lobe. state.Weight is the RAW track value --
+        // ocol.w has it folded in separately, and this is the other of its two uses, not a
+        // re-application of the same one. See PlanCombiner case 24.
+        if (mat.HasProperty(IdFirstUnitWeight))
+            mat.SetFloat(IdFirstUnitWeight, state.Weight);
+        if (mat.HasProperty(IdSecondUnitWeight))
+            mat.SetFloat(IdSecondUnitWeight, state.Weight1);
+        if (mat.HasProperty(IdThirdUnitWeight))
+            mat.SetFloat(IdThirdUnitWeight, state.Weight2);
 
-        // ---- the alpha: UNLIT ONLY, for the same reason as the colour above -------------------
-        // Alpha-key: the legacy's blend func is ONE/ZERO there, so ocol.w never reaches the
-        // frame -- only the gate does. Opaque (unlit): the legacy turns blending on IN PLACE when
-        // ocol.w < 1 (ModelRenderPass.cpp:577), with the func already SrcAlpha /
-        // OneMinusSrcAlpha (:483); the queue, the depth write and the draw order do not move.
-        // Everything else (unlit): the combiner alpha times ocol.w (:145-151). A lit pass keeps
-        // the alpha scale and blend state CreateMaterial gave it.
-        if (!b.AlphaKey && b.Unlit)
+        // ---- the colour: EVERY PASS, lit or unlit --------------------------------------------
+        //
+        // This used to be unlit-only, and the comment here said the lit case was left alone
+        // because "what the game does there is not established by anything in this repository".
+        // It is now established, from the client's own compiled shaders, and the answer is that
+        // there is no lit/unlit distinction to make.
+        //
+        // The M2 vertex shaders write COLOR0 in exactly two forms across all 456 permutations:
+        //     228   add_sat r0, cb0[7], cb0[8] ; mul o1, r0, l(0.5,0.5,0.5,1.0)   CB0[9]
+        //     228   mul o1, cb0[7], l(0.5,0.5,0.5,1.0)                            CB0[8]
+        // -- half of them DO NOT DECLARE cb0[8] AT ALL, the constant buffer is one float4
+        // shorter. And the pixel shaders read COLOR0 as `combine * v1.rgb * 2` (1,158 shaders
+        // scanned across all three combiner containers: 2,016 multiplies, and the only 288 adds
+        // are `v1 + v1`, the doubling itself). So:
+        //
+        //   * THE TERM IS A MULTIPLY, NOT AN ADD. Not one instruction in the M2 pixel path adds
+        //     COLOR0 to a shaded result. The legacy's glMaterialfv(GL_FRONT, GL_EMISSION, ecol)
+        //     is WMV's own reimplementation, and it loses to the compiled `mul`.
+        //   * cb0[7] CANNOT BE THE LEGACY'S ocol, which is zeroed on a lit tinted pass: in the
+        //     half of the shaders with no cb0[8] there is nothing to add it back, so every lit
+        //     tinted model would render pure black.
+        //   * THERE IS NO DOUBLING CONVENTION. The vertex 0.5 and the pixel 2 cancel exactly, and
+        //     the no-cb0[8] half has no saturate at all, so the net factor is cb0[7] verbatim.
+        //     Blizzard states the neutral outright in the vertex-colour families, whose
+        //     no-colour variant emits `mov o1.xyzw, l(0.5, 0.5, 0.5, 1.0)`: RGB carried at half
+        //     scale, alpha at full, net (1,1,1,1).
+        //
+        // The authored data agrees. Across 67,750 colour records swept from the client, not one
+        // of the 48,285 unlit records peaks at exactly 0.5 while 62.7 % peak at exactly 1.0
+        // (exactly-0.500 against exactly-1.000 runs 3,891:1); the 1,194 constant tints that sit
+        // strictly between are EVERY ONE achromatic grey, i.e. plain dimmers -- doubling would
+        // render worgen_townlamp_03_off.m2, a lamp named "off", brighter than lit. And on lit
+        // opaque batches the constant tracks are white over black 1,018:1, which is the
+        // multiplicative identity and not the additive one.
+        //
+        // WHITE WHEN THERE IS NO TRACK, never skipped: a binding whose colour block runs in one
+        // sequence and not the next must not keep the old sequence's tint, for the same reason
+        // the UV transforms are written unconditionally (see the file header).
+        mat.SetColor(IdColor, state.HasColor
+                              ? new Color(state.R, state.G, state.B, 1f) : Color.white);
+
+        // ---- the alpha: EVERY PASS TOO, and undoubled ----------------------------------------
+        // Same evidence as the colour. COLOR0's alpha reaches the output through a single
+        // multiply in every one of the 1,152 shaders that use it and is never doubled -- the
+        // vertex literal is (0.5, 0.5, 0.5, 1.0), the alpha lane alone left at full scale. So an
+        // authored 0.5 reaches the frame as 0.5, which the data confirms: a fully opaque tinted
+        // batch authors 1.000, the observed maximum is exactly 1.000, and 212 constant opacity
+        // tracks sit strictly between 0.5 and 1.0 (auchindoun bridge 0.750, netherstorm 0.700,
+        // sunwell 0.650) -- values a doubling rule would render indistinguishably opaque.
+        //
+        // ALPHA-KEY IS STILL EXCLUDED, and now for a better reason than the legacy's blend func:
+        // retail's discard test runs BEFORE the COLOR0 multiply (`add r1.w, r1.w, l(-0.501961)`
+        // at 2_2/0.asm:404, against the raw combiner alpha), so the opacity must not move the
+        // cutout. Opaque: the legacy turns blending on IN PLACE when the alpha drops below 1
+        // (ModelRenderPass.cpp:577) with the func already SrcAlpha / OneMinusSrcAlpha (:483);
+        // the queue, the depth write and the draw order do not move. Everything else: the
+        // combiner alpha times ocol.w (:145-151).
+        if (!b.AlphaKey)
         {
             float a = Mathf.Clamp01(state.OcolW);
             if (b.Opaque)
@@ -290,6 +360,13 @@ public class WmvMaterialAnimator : MonoBehaviour
             UvVectors(state.T1x, state.T1y, state.S1x, state.S1y, out xf, out off);
             mat.SetVector(IdUvXf1, xf);
             mat.SetVector(IdUvOff1, off);
+        }
+        if (b.Transform2 >= 0)
+        {
+            Vector4 xf, off;
+            UvVectors(state.T2x, state.T2y, state.S2x, state.S2y, out xf, out off);
+            mat.SetVector(IdUvXf2, xf);
+            mat.SetVector(IdUvOff2, off);
         }
 
         if (dump)

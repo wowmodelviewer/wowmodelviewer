@@ -190,6 +190,118 @@ static void doHeadlessFbxExport(ModelViewer * frame, const QString & outPath,
 // guessing at names. This answers it from the files -- ask for every model whose header says it
 // has particle emitters, or texture transforms, or more than one skin profile, and the list is
 // evidence rather than a hunch. Forensic and read-only; nothing is written but the report.
+// -matrestest: regression checks for RETAIL replaceable-material selection, the
+// ItemDisplayInfoModelMatRes -> TextureFileData -> replaceTextures[type] chain.
+//
+// Why a headless switch and not a unit test: this repository has no C++ test framework and no
+// DB2 fixture layer -- every table is read from the installed client. So these are checks against
+// the live data, in the same idiom as -m2inspect. They need a client; they assert nothing about
+// pixels. Each line is PASS or FAIL and the process exit code is the failure count.
+//
+// The benchmark values come from build 12.1.0.69587. A future client may legitimately re-author
+// them: a failure here means "the data moved, go look", not necessarily "the code broke".
+static int doHeadlessMatResTest()
+{
+  int failures = 0;
+  auto check = [&failures](const char * what, bool ok, const QString & detail)
+  {
+    if (!ok) failures++;
+    std::printf("WMVMATRES: %s %s%s%s\n", ok ? "PASS" : "FAIL", what,
+                detail.isEmpty() ? "" : " -- ", qPrintable(detail));
+    std::fflush(stdout);
+  };
+
+  // 1. the table decoded at all
+  sqlResult all = GAMEDATABASE.sqlQuery("SELECT COUNT(*) FROM ItemDisplayInfoModelMatRes");
+  const int rows = (all.valid && !all.empty()) ? all.values[0][0].toInt() : 0;
+  check("schema: ItemDisplayInfoModelMatRes decodes", rows > 100000,
+        QString("%1 rows").arg(rows));
+
+  // 2. TextureType only ever carries M2 replaceable texture types
+  sqlResult types = GAMEDATABASE.sqlQuery(
+      "SELECT DISTINCT TextureType FROM ItemDisplayInfoModelMatRes ORDER BY TextureType");
+  QStringList seen;
+  bool typesSane = types.valid && !types.empty();
+  for (size_t i = 0; typesSane && i < types.values.size(); i++)
+  {
+    const int t = types.values[i][0].toInt();
+    seen << QString::number(t);
+    if (t < 1 || t > 30) typesSane = false;
+  }
+  check("schema: TextureType values are M2 texture types", typesSane, seen.join(","));
+
+  // 3. ModelIndex is a two-value model selector
+  sqlResult mi = GAMEDATABASE.sqlQuery(
+      "SELECT MIN(ModelIndex), MAX(ModelIndex) FROM ItemDisplayInfoModelMatRes");
+  const bool miOk = mi.valid && !mi.empty() &&
+                    mi.values[0][0].toInt() == 0 && mi.values[0][1].toInt() == 1;
+  check("schema: ModelIndex is 0..1", miOk,
+        mi.valid && !mi.empty() ? QString("%1..%2").arg(mi.values[0][0]).arg(mi.values[0][1]) : "no rows");
+
+  // 4. the benchmark's rows, exactly
+  sqlResult bench = GAMEDATABASE.sqlQuery(
+      "SELECT ModelIndex, TextureType, MaterialResourcesID FROM ItemDisplayInfoModelMatRes "
+      "WHERE ItemDisplayInfoID = 671486 ORDER BY ModelIndex, TextureType");
+  QStringList got;
+  for (size_t i = 0; bench.valid && i < bench.values.size(); i++)
+    got << QString("(%1,%2,%3)").arg(bench.values[i][0]).arg(bench.values[i][1]).arg(bench.values[i][2]);
+  check("lookup: ItemDisplayInfo 671486 rows",
+        got.join(" ") == "(0,2,797639) (0,3,799300) (1,2,797639) (1,3,799300)", got.join(" "));
+
+  // 5. MaterialResourcesID resolves through TextureFileData
+  sqlResult res = GAMEDATABASE.sqlQuery(
+      "SELECT FileDataID FROM TextureFileData WHERE MaterialResourcesID = 799300");
+  const int fdid = (res.valid && !res.empty()) ? res.values[0][0].toInt() : 0;
+  check("lookup: MaterialResourcesID 799300 -> FileDataID 5274037", fdid == 5274037,
+        QString::number(fdid));
+
+  // 6. model-index filtering actually filters
+  sqlResult idx0 = GAMEDATABASE.sqlQuery(
+      "SELECT COUNT(*) FROM ItemDisplayInfoModelMatRes WHERE ItemDisplayInfoID=671486 AND ModelIndex=0");
+  sqlResult idx1 = GAMEDATABASE.sqlQuery(
+      "SELECT COUNT(*) FROM ItemDisplayInfoModelMatRes WHERE ItemDisplayInfoID=671486 AND ModelIndex=1");
+  check("lookup: model-index filtering", idx0.valid && idx1.valid &&
+        idx0.values[0][0].toInt() == 2 && idx1.values[0][0].toInt() == 2,
+        QString("idx0=%1 idx1=%2").arg(idx0.values[0][0]).arg(idx1.values[0][0]));
+
+  // 7. a display with no rows returns nothing (absence stays absence)
+  sqlResult none = GAMEDATABASE.sqlQuery(
+      "SELECT COUNT(*) FROM ItemDisplayInfoModelMatRes WHERE ItemDisplayInfoID = 0");
+  check("lookup: missing display yields no rows",
+        none.valid && !none.empty() && none.values[0][0].toInt() == 0,
+        none.valid && !none.empty() ? none.values[0][0] : "query failed");
+
+  // 8. one display, several material types (the weapon benchmark)
+  sqlResult multi = GAMEDATABASE.sqlQuery(
+      "SELECT TextureType FROM ItemDisplayInfoModelMatRes WHERE ItemDisplayInfoID = 732409 "
+      "AND ModelIndex = 0 ORDER BY TextureType");
+  QStringList mt;
+  for (size_t i = 0; multi.valid && i < multi.values.size(); i++)
+    mt << multi.values[i][0];
+  check("lookup: one display carries several texture types", mt.join(",") == "2,3,4,24",
+        mt.join(","));
+
+  // 9. colour variants: every appearance of the benchmark model pairs type 2 with its own type 3
+  sqlResult variants = GAMEDATABASE.sqlQuery(
+      "SELECT m.ItemDisplayInfoID, COUNT(DISTINCT m.TextureType) FROM ItemDisplayInfoModelMatRes m "
+      "JOIN ItemDisplayInfo idi ON idi.ID = m.ItemDisplayInfoID "
+      "JOIN ModelFileData mfd ON idi.ModelResourcesID1 = mfd.ModelResourcesID "
+      "WHERE mfd.FileDataID = 5225313 AND m.ModelIndex = 0 GROUP BY m.ItemDisplayInfoID");
+  int variantsOk = 0, variantsSeen = 0;
+  for (size_t i = 0; variants.valid && i < variants.values.size(); i++)
+  {
+    variantsSeen++;
+    if (variants.values[i][1].toInt() == 2) variantsOk++;
+  }
+  check("variants: every appearance of the benchmark model names both type 2 and type 3",
+        variantsSeen > 0 && variantsOk == variantsSeen,
+        QString("%1 of %2 appearances").arg(variantsOk).arg(variantsSeen));
+
+  std::printf("WMVMATRES: %d failure(s)\n", failures);
+  std::fflush(stdout);
+  return failures;
+}
+
 static void doHeadlessM2Inspect(const QString & listPath, const QString & outPath)
 {
   QFile in(listPath);
@@ -871,7 +983,7 @@ bool WowModelViewApp::OnInit()
     QString a = QString::fromWCharArray(argv[ai]);
     if (a == "-m" || a == "-mo" || a == "-armory" || a == "-npc" || a == "-fbxexport" ||
         a == "-animdump" || a == "-fbxinspect" || a == "-dbfromfile" || a == "-dumptex" ||
-        a == "-m2inspect" || a == "-mpq" || a == "-item" || a.endsWith(".chr"))
+        a == "-m2inspect" || a == "-matrestest" || a == "-mpq" || a == "-item" || a.endsWith(".chr"))
     {
       earlyHeadless = true;
       break;
@@ -1032,6 +1144,7 @@ bool WowModelViewApp::OnInit()
   QString mpqDataFolder;  // -mpq <DataFolder> [locale]: load a legacy MPQ client instead of CASC
   QString mpqLocale;      // optional locale for -mpq (auto-detected when empty)
   int dumpTexFileDataId = 0; QString dumpTexOutPath; // -dumptex <fileDataID> <out.png>: forensic-only
+  bool matResTest = false;                           // -matrestest: replaceable-material checks
   QString m2InspectList, m2InspectOut;               // -m2inspect <list.txt> [out.csv]: forensic-only
   // Export content selection + clip list for the headless FBX export (the parent process passes
   // these so the child reproduces the user's exact options). Defaults: full content, no explicit
@@ -1090,6 +1203,10 @@ bool WowModelViewApp::OnInit()
           if (!nxt.startsWith('-')) { i++; mpqLocale = nxt; }
         }
       }
+    }
+    else if (cmd == "-matrestest") {
+      // Regression checks for retail replaceable-material selection; see doHeadlessMatResTest.
+      matResTest = true;
     }
     else if (cmd == "-m2inspect") {
       // Forensic-only: "-m2inspect <list.txt> [out.csv]" reads each listed model's M2 header,
@@ -1230,7 +1347,7 @@ bool WowModelViewApp::OnInit()
   for (int i = 1; i < argc; i++)
   {
     QString a = QString::fromWCharArray(argv[i]);
-    if (a == "-m" || a == "-mo" || a == "-armory" || a == "-npc" || a == "-fbxexport" || a == "-animdump" || a == "-fbxinspect" || a == "-dbfromfile" || a == "-dumptex" || a == "-m2inspect" || a == "-mpq" || a == "-item" || a.endsWith(".chr"))
+    if (a == "-m" || a == "-mo" || a == "-armory" || a == "-npc" || a == "-fbxexport" || a == "-animdump" || a == "-fbxinspect" || a == "-dbfromfile" || a == "-dumptex" || a == "-m2inspect" || a == "-matrestest" || a == "-mpq" || a == "-item" || a.endsWith(".chr"))
     {
       headlessLoad = true;
       break;
@@ -1265,6 +1382,12 @@ bool WowModelViewApp::OnInit()
       frame->LoadWoWFromMpq(mpqDataFolder, mpqLocale); // legacy MPQ client (Vanilla/TBC/WotLK)
     else
       frame->LoadWoW(); // auto-pick config + profile, no prompt
+
+    if (matResTest)
+    {
+      doHeadlessMatResTest();
+      return false; // checks done -> exit
+    }
 
     if (!m2InspectList.isEmpty())
     {

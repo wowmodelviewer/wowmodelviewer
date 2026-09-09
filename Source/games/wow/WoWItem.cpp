@@ -371,10 +371,10 @@ void WoWItem::load()
       LOG_INFO << "leftIndex" << leftIndex << "rightIndex" << rightIndex;
 
       // left shoulder
-      updateItemModel(ATT_LEFT_SHOULDER, models[leftIndex], textures[leftIndex]);
+      updateItemModel(ATT_LEFT_SHOULDER, models[leftIndex], textures[leftIndex], leftIndex);
 
       // right shoulder
-      updateItemModel(ATT_RIGHT_SHOULDER, models[rightIndex], textures[rightIndex]);
+      updateItemModel(ATT_RIGHT_SHOULDER, models[rightIndex], textures[rightIndex], rightIndex);
       
       break;
     }
@@ -986,7 +986,7 @@ void WoWItem::load(QString & f)
   }
 }
 
-void WoWItem::updateItemModel(POSITION_SLOTS pos, int modelId, int textureId)
+void WoWItem::updateItemModel(POSITION_SLOTS pos, int modelId, int textureId, int modelIndex)
 {
   if (modelId == 0)
     return;
@@ -1003,13 +1003,13 @@ void WoWItem::updateItemModel(POSITION_SLOTS pos, int modelId, int textureId)
     if (texture)
     {
       m->updateTextureList(texture, TEXTURE_OBJECT_SKIN);
-      // Armor components can declare a SECOND replaceable slot (texture type 3,
-      // historically "weapon blade"). On armor the game feeds it the item's own
-      // skin texture: accent geometry (e.g. a hood's eye-beam crystals) has its UVs
-      // on a dedicated island of that texture, giving each recolour its own accent
-      // colour. The model-load default for type 3 (a grey weapon-blade sheen) is
-      // only right for actual weapons, so it stays for hand slots.
-      if (slot_ != CS_HAND_LEFT && slot_ != CS_HAND_RIGHT)
+      // Retail's own per-slot material selection for this display and model (see
+      // WoWModel::applyDisplayMaterialResources). Authoritative when it answers.
+      const bool retailMaterials =
+          m->applyDisplayMaterialResources(displayId_, modelIndex) > 0;
+      // LEGACY FALLBACK for data without that table (Classic / Classic Era). Gated on the data
+      // answering, not on the slot being armour.
+      if (!retailMaterials && slot_ != CS_HAND_LEFT && slot_ != CS_HAND_RIGHT)
         m->updateTextureList(texture, TEXTURE_WEAPON_BLADE);
     }
     else
@@ -1035,8 +1035,10 @@ void WoWItem::mergeModel(CharSlots slot, int modelId, int textureId)
     {
       mergedModel_->updateTextureList(texture, TEXTURE_OBJECT_SKIN);
       charModel_->updateTextureList(texture, TEXTURE_OBJECT_SKIN);
-      // Same armor type-3 accent-slot routing as updateItemModel() above.
-      if (slot_ != CS_HAND_LEFT && slot_ != CS_HAND_RIGHT)
+      // Same retail-first routing as updateItemModel() above.
+      const bool retailMaterials =
+          mergedModel_->applyDisplayMaterialResources(displayId_, 0) > 0;
+      if (!retailMaterials && slot_ != CS_HAND_LEFT && slot_ != CS_HAND_RIGHT)
         mergedModel_->updateTextureList(texture, TEXTURE_WEAPON_BLADE);
     }
     else
