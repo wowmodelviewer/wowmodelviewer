@@ -278,7 +278,160 @@ namespace Wmv.Wow
         BlendAdd = 7,
     }
 
-    /// <summary>A parsed M2 (the parts this milestone needs).</summary>
+    /// <summary>
+    /// A particle emitter's shape. Measured across 34,873 emitters in the current client:
+    /// Plane 64.7 %, Sphere 34.5 %, Spline 0.8 %, and three emitters declaring 4.
+    /// </summary>
+    public enum M2EmitterType { Plane = 1, Sphere = 2, Spline = 3 }
+
+    /// <summary>
+    /// One M2 particle emitter. 492 bytes on disk -- MEASURED, not assumed: of the eight
+    /// candidate strides tried against real files, 492 validated every emitter of all 978
+    /// multi-emitter models in a 6,000-model sample and every other candidate failed on some
+    /// model (see M2Parser.ParticleEmitterStride). Both M2 versions this client ships, 272 and
+    /// 274, use it.
+    ///
+    /// The three "ramp" arrays below are the emitter's start / middle / end stops. On disk they
+    /// are FakeAnimationBlocks -- the same 16-byte shape as a track header, but the offsets point
+    /// straight at the values with no per-sequence indirection and no timestamps, because the
+    /// ramp is indexed by a particle's own age rather than by the clock.
+    /// </summary>
+    public struct M2ParticleEmitterDef
+    {
+        public int Flags;
+        public WowVec3 Position;        // model space, relative to Bone
+        public short Bone;
+        public short TextureId;         // a DIRECT index into Textures[], not through TextureLookup
+        public byte BlendMode;
+        public byte EmitterType;
+        public ushort ParticleColorIndex;   // 11, 12 or 13 select a ParticleColor override
+        public short TextureTileRotation;
+        public ushort Rows, Cols;
+
+        public M2Track<float> EmissionSpeed;
+        public M2Track<float> SpeedVariation;
+        public M2Track<float> VerticalRange;
+        public M2Track<float> HorizontalRange;
+        public M2Track<float> Gravity;
+        public M2Track<float> Lifespan;
+        public M2Track<float> EmissionRate;
+        public M2Track<float> EmissionAreaLength;
+        public M2Track<float> EmissionAreaWidth;
+        public M2Track<float> ZSource;
+        /// <summary>
+        /// Whether the emitter is emitting at all, as a track. ONE BYTE per key on disk, despite
+        /// modelheaders.h:506 declaring uint16 and particle.h:92 declaring Animated&lt;uint16&gt;:
+        /// read as uint16 the array yields 256 and 257 on 310 of 1,753 reads, which is exactly
+        /// what adjacent one-byte keys of 0 and 1 look like when paired. The byte values that
+        /// actually occur are 0 and 1 and nothing else.
+        /// </summary>
+        public M2Track<float> EnabledIn;
+
+        /// <summary>
+        /// The colour, opacity and size ramps, indexed by a particle's normalised AGE.
+        ///
+        /// NOT three stops at 0 / 0.5 / 1, which is what the legacy runtime assumes: it memcpys
+        /// exactly three keys whatever the count says and hardcodes the midpoint at 0.5
+        /// (particle.cpp:47-57, with its author's own "mid can't be 0 or 1, TODO" beside it).
+        /// Measured over 17,202 ramp tracks in 1,500 client models, neither half of that holds:
+        /// 42 % of ramps do not have three keys (2, 4, 5, 6, 7, 8 and up to 13 all occur), and
+        /// among those that do the middle stop sits at 0.5 only 55 % of the time -- 0.2, 0.25,
+        /// 0.3, 0.35, 0.6 and 0.75 all appear. A two-key ramp read the legacy's way takes its
+        /// third stop from whatever bytes follow the authored data.
+        ///
+        /// The times are stored as uint16 normalised by 32767, not as milliseconds. Over those
+        /// same 17,202 tracks the first key is 0 and the last is 32767 in 100.0 % of them, and
+        /// every one is monotonic; read as uint32 milliseconds, 0.0 % are either. Each of the
+        /// three ramps carries its own times, so they are kept separately rather than zipped.
+        /// </summary>
+        public float[] ColorTimes;
+        public WowVec3[] ColorKeys;      // 0..1 (stored 0..255)
+        public float[] AlphaTimes;
+        public float[] AlphaKeys;        // 0..1 (stored fixed16)
+        public float[] SizeTimes;
+        public WowVec2[] SizeKeys;       // already multiplied by ParticleScale
+
+        /// <summary>
+        /// ModelParticleParams.scales, read as the two-component quantity it measures as.
+        ///
+        /// The legacy runtime indexes this by RAMP STOP -- sizes[i] = key[i] * scales[i]
+        /// (particle.cpp:55) -- which is a category error: it is a per-AXIS scale applied to
+        /// every stop. The data settles it. Its x and y are equal on every emitter examined
+        /// (1.0/1.0 on Val'anyr, 0.1/0.1 and 1.3/1.3 on the Celestial cape) while the third
+        /// float is 519.0, -1.0 or 1.0 on different models -- not a scale at all. Under the
+        /// legacy's reading a 0.0556 particle on Val'anyr becomes 28.85 units across, and
+        /// another gets a NEGATIVE size.
+        /// </summary>
+        public WowVec2 ParticleScale;
+
+        public float Slowdown;
+        public float SpriteRotation;
+
+        public bool WorldSpace { get { return (Flags & 0x8) != 0; } }
+        public bool DoNotTrail { get { return (Flags & 0x10) != 0; } }
+        public bool ModelSpace { get { return (Flags & 0x80) != 0; } }
+        public bool Pinned { get { return (Flags & 0x400) != 0; } }
+        public bool DoNotBillboard { get { return (Flags & 0x1000) != 0; } }
+        public bool RandomTexture { get { return (Flags & 0x10000) != 0; } }
+        public bool Outward { get { return (Flags & 0x20000) != 0; } }
+        public bool RandomStart { get { return (Flags & 0x200000) != 0; } }
+
+        /// <summary>
+        /// Bit 0x800000. Set on 82.9 % of the client's emitters, and it changes how a Gravity KEY
+        /// is encoded -- not how big it is. See M2Parser.ReadCompressedGravity: reading these keys
+        /// as float32, which the legacy runtime does unconditionally (particle.cpp:38), produces
+        /// NaN or infinity on 47 % of them and |v| &gt; 1e6 on 65 %.
+        /// </summary>
+        public bool CompressedGravity { get { return (Flags & 0x800000) != 0; } }
+
+        public bool MultiTexture { get { return (Flags & 0x10000000) != 0; } }
+
+        /// <summary>Can this renderer draw it? Plane and Sphere, which is 99.2 % of the client.
+        /// The legacy runtime builds no emitter object for anything else either
+        /// (particle.cpp:109-121), so a Spline emitter has never been drawn by WMV.</summary>
+        public bool Supported
+        {
+            get { return EmitterType == (byte)M2EmitterType.Plane || EmitterType == (byte)M2EmitterType.Sphere; }
+        }
+    }
+
+    /// <summary>
+    /// One M2 ribbon emitter. 176 bytes on disk, measured the same way as the particle stride:
+    /// of four candidates it was the only one that validated, on 45 of the 94 multi-ribbon
+    /// models in a 12,000-model sample, and no other candidate scored at all.
+    /// </summary>
+    public struct M2RibbonEmitterDef
+    {
+        public int Bone;
+        public WowVec3 Position;        // model space, relative to Bone
+        public int[] TextureIds;        // direct indices into Textures[]
+
+        public M2Track<WowVec3> Color;
+        public M2Track<float> Opacity;  // fixed16 on disk
+        public M2Track<float> Above;
+        public M2Track<float> Below;
+
+        /// <summary>
+        /// Edges emitted per second, and how long an edge lives. NOT the legacy's reading -- see
+        /// WmvEmitterRuntime.RibbonState for why the data forces this one: across the client
+        /// these measure 30..100 and 0.1..2.0, which are an emission rate and a lifetime in
+        /// seconds, and give 5..200 edges.
+        /// </summary>
+        public float EdgesPerSecond;
+        public float EdgeLifetimeSeconds;
+
+        public float EmissionAngle;
+
+        /// <summary>
+        /// The ribbon's material, indexed into the model's materials ("texFlags") array at header
+        /// offset 0x70 -- NOT into the textures array, and not parallel to TextureIds. The count
+        /// is 1 on every ribbon measured (525 of 525). This is where a ribbon's blend mode comes
+        /// from; the legacy hardcodes SRC_ALPHA/ONE instead (particle.cpp:847) and so never reads
+        /// it. -1 when the array is absent or does not resolve.
+        /// </summary>
+        public int MaterialIndex;
+    }
+
     /// <summary>One AFID entry: which file holds animation (animId, subAnimId)'s keyframes.</summary>
     public struct AfidEntry
     {
@@ -326,6 +479,26 @@ namespace Wmv.Wow
         public ushort[] TextureTransformLookup = new ushort[0];
 
         public M2MaterialTrackSurvey MaterialSurvey;
+
+        /// <summary>
+        /// The model's particle emitters, with every track narrowed to the parsed sequence.
+        ///
+        /// THE SEQUENCE MATTERS HERE MORE THAN IT DOES FOR BONES. An emitter whose EmissionRate
+        /// has no keys in the playing sequence emits nothing at all, and that is authored, not a
+        /// fault: Val'anyr (253423) ships two sub-animations of Stand, and eleven of its thirteen
+        /// emitters carry EmissionRate keys only in the second. So these are re-read whenever the
+        /// sequence changes, exactly like the bone tracks.
+        /// </summary>
+        public M2ParticleEmitterDef[] ParticleEmitters = new M2ParticleEmitterDef[0];
+
+        /// <summary>The model's ribbon emitters, tracks narrowed to the parsed sequence.</summary>
+        public M2RibbonEmitterDef[] RibbonEmitters = new M2RibbonEmitterDef[0];
+
+        /// <summary>Counts as the header declares them, before anything was dropped as
+        /// unsupported or out of bounds. Reported so "we drew none" and "there were none" stay
+        /// distinguishable in the log.</summary>
+        public int ParticleEmitterCount, RibbonEmitterCount;
+
         public int SkinProfileCount;
         public int[] SkinFileDataIDs = new int[0];       // SFID chunk
         public int[] TextureFileDataIDs = new int[0];    // TXID chunk (0 where replaceable)

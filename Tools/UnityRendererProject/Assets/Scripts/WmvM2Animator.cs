@@ -74,6 +74,20 @@ public class WmvM2Animator : MonoBehaviour
     public WmvMaterialAnimator Materials;
 
     /// <summary>
+    /// The model's particle and ribbon emitters, or null. Driven from here for exactly the same
+    /// reason the materials are: one clock. An emitter that timed itself off Time.time would keep
+    /// raining while the model was paused, run at the wrong rate when the app changed the playback
+    /// speed, and ignore a scrub -- and the legacy viewport is explicit that it must not, passing
+    /// its emitters the SAME per-frame delta it passes the animation and zeroing that delta when
+    /// the animation is paused (modelcanvas.cpp:1515-1522, WoWModel.cpp:2647-2649).
+    /// </summary>
+    public WmvEmitterRuntime Emitters;
+
+    /// <summary>The -wmvAnimTime instant the emitters were last simulated to, or -1. A pinned
+    /// capture runs them forward once and then only refreshes the billboards.</summary>
+    float pinnedEmittersAt = -1f;
+
+    /// <summary>
     /// Converted tracks, keyed by sequence index.
     ///
     /// Setup turns the parsed WoW tracks into the renderer's own space -- every key of every
@@ -287,8 +301,30 @@ public class WmvM2Animator : MonoBehaviour
             GlobalTimeMs = pinned;
             timeMs = SequenceTimeAt(pinned);
             ApplyPose((float)timeMs);
+            if (Emitters != null && Emitters.HasAnything)
+            {
+                // A HELD CLOCK NEVER SPAWNS A PARTICLE. Pinning is right for bones -- one instant,
+                // one pose -- but an emitter's state is the whole history that led to the instant,
+                // so a pinned frame with the emitters merely frozen would be as empty as one with
+                // no emitter code at all, and a BEFORE/AFTER pair at "1.0 s" would show nothing.
+                // Run them forward to the pinned instant instead, in fixed deterministic steps,
+                // posing the bones at each one so particles leave the bone where it actually was.
+                if (pinnedEmittersAt != pinned)
+                {
+                    Emitters.SimulateTo(pinned, SequenceTimeAt, ApplyPose);
+                    pinnedEmittersAt = pinned;
+                    ApplyPose((float)timeMs);      // the simulation left the bones at the last step
+                }
+                else
+                {
+                    // Advance nothing; rebuild the meshes so the billboards still face a camera
+                    // the user is moving around a held frame.
+                    Emitters.Tick(0f, (float)timeMs, pinned);
+                }
+            }
             return;
         }
+        pinnedEmittersAt = -1f;
 
         // GLOBAL SEQUENCES KEEP RUNNING WHILE THE ANIMATION IS PAUSED, and ignore the speed. That
         // is not an oversight copied by accident: the legacy viewport advances its global clock
@@ -308,6 +344,14 @@ public class WmvM2Animator : MonoBehaviour
                 timeMs += Math.Ceiling(-timeMs / lengthMs) * lengthMs;
         }
         ApplyPose((float)timeMs);
+
+        // AFTER the pose, so an emitter reads the bone matrix for THIS frame rather than the
+        // previous one, and with the ANIMATION's advance rather than the frame's: zero while
+        // paused, scaled by the playback speed otherwise.
+        if (Emitters != null && Emitters.HasAnything)
+            Emitters.Tick(playing ? (float)(dt * speed) / 1000f : 0f,
+                          (float)timeMs, (float)GlobalTimeMs);
+
         AdvanceWatchTick(beforeTimeMs, dt);
     }
 

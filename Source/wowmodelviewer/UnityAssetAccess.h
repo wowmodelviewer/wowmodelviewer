@@ -93,6 +93,31 @@ public:
   // False with a reason when none of them can answer.
   static bool resolveModelTextures(int m2FileDataID, std::vector<ModelTexture> & out, QString & error);
 
+  // The three colour stops of one ParticleColor row: start, middle and end, each an RGB
+  // triple of 0..255. An M2 particle emitter opts into an override with ParticleColorIndex
+  // 11, 12 or 13, which select stop set 0, 1 and 2 -- so a resolved row supplies all three
+  // sets at once and each emitter takes the one its index names.
+  struct ParticleColorSet
+  {
+    bool ok = false;
+    int id = 0;               // the ParticleColor row, for the log
+    int rgb[3][3] = {};       // [stop][channel], 0..255
+  };
+
+  // Resolve the ParticleColor override for a model, in ITEM context.
+  //
+  // Retail assigns an item display a ParticleColorID and recolours the emitters its models
+  // declare with it: ItemDisplayInfo.ParticleColorID -> ParticleColor. WMV has always parsed
+  // the emitter's ParticleColorIndex (WoWModel.cpp:1242-1245 collects them) but never resolved
+  // a colour to put there -- WoWModel::replaceParticleColors is initialised false and nothing
+  // assigns it, so the override path has been dead.
+  //
+  // The displayed item is preferred when it is the model being asked about, because several
+  // displays can share one model with different particle colours; otherwise the display is
+  // found from the model file itself through ModelFileData.
+  // False with a reason when the model has no override, which is the common case.
+  static bool resolveParticleColor(int m2FileDataID, ParticleColorSet & out, QString & error);
+
   // Name of the active client's storage backend ("CASC"/"MPQ"/"Unknown") -- for logging.
   static QString activeProviderName();
 

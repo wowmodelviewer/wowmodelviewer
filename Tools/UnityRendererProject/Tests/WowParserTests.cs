@@ -355,6 +355,8 @@ namespace Wmv.Wow.Tests
             BoneTests();
             log.Add("Animation");
             AnimationTests();
+            log.Add("Emitters");
+            EmitterTests();
 
             log.Add(failures == 0 ? "ALL TESTS PASSED" : (failures + " TEST(S) FAILED"));
             if (output != null)
@@ -1681,6 +1683,277 @@ namespace Wmv.Wow.Tests
             WowCoordinateConverter.FlipWinding(tri);
             Check(tri[0] == 0 && tri[1] == 2 && tri[2] == 1, "coords: winding flipped (triangle 1)");
             Check(tri[3] == 3 && tri[4] == 5 && tri[5] == 4, "coords: winding flipped (triangle 2)");
+        }
+
+        // ---------------------------------------------------------------- emitters
+
+        const int ParticleStride = 492;
+        const int RibbonStride = 176;
+
+        /// <summary>
+        /// An M2 payload with a FULL 0x138 header plus one particle emitter and one ribbon
+        /// emitter, both with real nested tracks and real flat ramps.
+        ///
+        /// The header has to be the full length: the emitter arrays live at 0x120 and 0x128,
+        /// past where the other fixtures stop, and a parser that read those offsets out of the
+        /// vertex data would look like it worked.
+        /// </summary>
+        static byte[] BuildEmitterPayload(int particleFlags = 0, int rampStops = 3,
+                                          bool ribbonTexturesAsUint16 = true)
+        {
+            const int headerSize = 0x138;
+            const int boneCount = 2;
+            const int texCount = 4;
+            const int matCount = 2;
+
+            int boneOffset = headerSize;
+            int texOffset = boneOffset + boneCount * BoneStride;
+            int matOffset = texOffset + texCount * 16;
+            int seqOffset = matOffset + matCount * 4;
+            // The nested track arrays: one per animation sequence (one sequence here).
+            int nestedOffset = seqOffset + 64;
+            int keyTimesOffset = nestedOffset + 8 * 8;      // eight {count,offset} pairs
+            int keyValuesOffset = keyTimesOffset + 4 * 8;   // eight uint32 timestamps
+            int rampTimesOffset = keyValuesOffset + 4 * 8;  // eight floats of key value
+            int rampColorOffset = rampTimesOffset + 16 * 2; // uint16 normalised times
+            int rampAlphaOffset = rampColorOffset + 16 * 12;
+            int rampSizeOffset = rampAlphaOffset + 16 * 2;
+            int ribbonTexOffset = rampSizeOffset + 16 * 8;
+            int ribbonMatOffset = ribbonTexOffset + 8;
+            int particleOffset = ribbonMatOffset + 8;
+            int ribbonOffset = particleOffset + ParticleStride;
+            int total = ribbonOffset + RibbonStride;
+
+            var b = new byte[total];
+            PutMagic(b, 0, "MD20");
+            PutU32(b, 0x04, 272);
+            PutU32(b, 0x1C, 1); PutU32(b, 0x20, (uint)seqOffset);          // one sequence
+            PutU32(b, 0x2C, boneCount); PutU32(b, 0x30, (uint)boneOffset);
+            PutU32(b, 0x3C, 0); PutU32(b, 0x40, 0);                        // no vertices
+            PutU32(b, 0x44, 1);
+            PutU32(b, 0x50, texCount); PutU32(b, 0x54, (uint)texOffset);
+            PutU32(b, 0x70, matCount); PutU32(b, 0x74, (uint)matOffset);
+            PutU32(b, 0x120, 1); PutU32(b, 0x124, (uint)ribbonOffset);     // ribbon emitters
+            PutU32(b, 0x128, 1); PutU32(b, 0x12C, (uint)particleOffset);   // particle emitters
+
+            for (int i = 0; i < boneCount; i++)
+                PutBone(b, boneOffset + i * BoneStride, (short)(i - 1), i, 0f, 0f);
+            for (int i = 0; i < texCount; i++)
+            {
+                PutU32(b, texOffset + i * 16 + 0, 0);   // type 0: a named texture
+                PutU32(b, texOffset + i * 16 + 4, 0);
+            }
+            PutU16(b, matOffset, 0); PutU16(b, matOffset + 2, 2);          // material 0: blend 2
+            PutU16(b, matOffset + 4, 0); PutU16(b, matOffset + 6, 7);      // material 1: blend 7
+            PutU32(b, seqOffset + 4, 1000);                                 // sequence length
+            PutU32(b, seqOffset + 0x10, 0x20);                              // primary sequence
+
+            // One nested entry per track: {count, offset} into the times and values arrays.
+            for (int i = 0; i < 8; i++)
+            {
+                PutU32(b, nestedOffset + i * 8 + 0, 1);
+                PutU32(b, nestedOffset + i * 8 + 4, (uint)(keyTimesOffset + i * 4));
+            }
+            for (int i = 0; i < 8; i++)
+                PutU32(b, keyTimesOffset + i * 4, 0);
+
+            // The ramps. Times are uint16 over 32767; a deliberately UNEVEN middle stop, which is
+            // the case the legacy's hardcoded 0.5 gets wrong.
+            var stopTimes = new ushort[] { 0, 8192, 32767 };   // 0.0, 0.25, 1.0
+            for (int i = 0; i < rampStops; i++)
+                PutU16(b, rampTimesOffset + i * 2,
+                       i < stopTimes.Length ? stopTimes[i] : (ushort)32767);
+            for (int i = 0; i < rampStops; i++)
+            {
+                PutF32(b, rampColorOffset + i * 12 + 0, 255f);       // r -> 1.0
+                PutF32(b, rampColorOffset + i * 12 + 4, i * 100f);
+                PutF32(b, rampColorOffset + i * 12 + 8, 0f);
+                PutU16(b, rampAlphaOffset + i * 2, (ushort)(i == 1 ? 32767 : 0));
+                PutF32(b, rampSizeOffset + i * 8 + 0, 0.5f);         // x
+                PutF32(b, rampSizeOffset + i * 8 + 4, 0.25f);        // y, deliberately different
+            }
+
+            // Ribbon texture and material index arrays -- uint16 each.
+            PutU16(b, ribbonTexOffset + 0, 2);
+            PutU16(b, ribbonTexOffset + 2, 3);
+            PutU16(b, ribbonMatOffset + 0, 1);        // -> material 1, blend 7
+
+            // ---- the particle emitter ----
+            int p = particleOffset;
+            PutU32(b, p + 0, unchecked((uint)-1));               // id
+            PutU32(b, p + 4, (uint)particleFlags);
+            PutF32(b, p + 8, 1f); PutF32(b, p + 12, 2f); PutF32(b, p + 16, 3f);   // pos
+            PutU16(b, p + 20, 1);                                // bone 1
+            PutU16(b, p + 22, 2);                                // texture slot 2
+            b[p + 40] = 4;                                       // blend: additive on alpha
+            b[p + 41] = 2;                                       // emitter type: sphere
+            PutU16(b, p + 42, 12);                               // ParticleColorIndex
+            PutU16(b, p + 46, 0);                                // tile rotation
+            PutU16(b, p + 48, 2); PutU16(b, p + 50, 4);          // rows, cols
+            // The ten float tracks. Only EmissionRate (index 6, at +176) is given keys.
+            PutU16(b, p + 176, 1);                               // interpolation: linear
+            PutU16(b, p + 178, unchecked((ushort)-1));           // no global sequence
+            PutU32(b, p + 180, 1); PutU32(b, p + 184, (uint)nestedOffset);
+            PutU32(b, p + 188, 1); PutU32(b, p + 192, (uint)(nestedOffset + 8));
+            PutF32(b, keyValuesOffset + 4, 40f);                 // rate = 40
+            for (int i = 0; i < 8; i++)
+                PutU32(b, nestedOffset + i * 8 + 4,
+                       (uint)(i == 1 ? keyValuesOffset + 4 : keyTimesOffset + i * 4));
+            PutU32(b, nestedOffset + 0 * 8 + 4, (uint)keyTimesOffset);
+
+            // EnabledIn, at +456: ONE byte per key.
+            PutU16(b, p + 456, 0);
+            PutU16(b, p + 458, unchecked((ushort)-1));
+            PutU32(b, p + 460, 1); PutU32(b, p + 464, (uint)(nestedOffset + 16));
+            PutU32(b, p + 468, 1); PutU32(b, p + 472, (uint)(nestedOffset + 24));
+
+            // ModelParticleParams at +260: three FakeAnimationBlocks {nTimes,ofsTimes,nKeys,ofsKeys}
+            int pp = p + 260;
+            PutU32(b, pp + 0, (uint)rampStops); PutU32(b, pp + 4, (uint)rampTimesOffset);
+            PutU32(b, pp + 8, (uint)rampStops); PutU32(b, pp + 12, (uint)rampColorOffset);
+            PutU32(b, pp + 16, (uint)rampStops); PutU32(b, pp + 20, (uint)rampTimesOffset);
+            PutU32(b, pp + 24, (uint)rampStops); PutU32(b, pp + 28, (uint)rampAlphaOffset);
+            PutU32(b, pp + 32, (uint)rampStops); PutU32(b, pp + 36, (uint)rampTimesOffset);
+            PutU32(b, pp + 40, (uint)rampStops); PutU32(b, pp + 44, (uint)rampSizeOffset);
+            PutF32(b, pp + 100, 2f);      // scales.x
+            PutF32(b, pp + 104, 2f);      // scales.y
+            PutF32(b, pp + 108, 519f);    // the third float: NOT a scale
+            PutF32(b, pp + 112, 0.5f);    // slowdown
+            PutF32(b, pp + 124, 0.25f);   // sprite rotation
+
+            // ---- the ribbon emitter ----
+            int r = ribbonOffset;
+            PutU32(b, r + 0, unchecked((uint)-1));
+            PutU32(b, r + 4, 1);                                  // bone 1 (int32 here)
+            PutF32(b, r + 8, 4f); PutF32(b, r + 12, 5f); PutF32(b, r + 16, 6f);
+            PutU32(b, r + 20, 2); PutU32(b, r + 24, (uint)ribbonTexOffset);
+            PutU32(b, r + 28, 1); PutU32(b, r + 32, (uint)ribbonMatOffset);
+            PutF32(b, r + 116, 50f);       // edges per second
+            PutF32(b, r + 120, 0.2f);      // edge lifetime
+            PutF32(b, r + 124, 0f);        // emission angle
+            return b;
+        }
+
+        static void EmitterTests()
+        {
+            byte[] file = WrapChunked(BuildEmitterPayload(), new[] { 1 }, new[] { 10, 11, 12, 13 });
+            M2ParsedModel m = M2Parser.Parse(file);
+
+            Check(m.ParticleEmitterCount == 1 && m.ParticleEmitters.Length == 1,
+                  "emitters: particle array read at 0x128");
+            Check(m.RibbonEmitterCount == 1 && m.RibbonEmitters.Length == 1,
+                  "emitters: ribbon array read at 0x120");
+
+            M2ParticleEmitterDef p = m.ParticleEmitters[0];
+            Check(p.Bone == 1, "particle: bone index");
+            Check(p.TextureId == 2, "particle: texture is a DIRECT slot index");
+            Check(p.BlendMode == 4, "particle: blend mode");
+            Check(p.EmitterType == 2 && p.Supported, "particle: sphere emitter is supported");
+            Check(p.ParticleColorIndex == 12, "particle: ParticleColorIndex kept");
+            Check(p.Rows == 2 && p.Cols == 4, "particle: flipbook rows/cols");
+            Near(p.Position.X, 1f, "particle: position X");
+            Near(p.Position.Z, 3f, "particle: position Z");
+            Check(p.EmissionRate.HasData && p.EmissionRate.Values.Length == 1,
+                  "particle: EmissionRate track read through the nested arrays");
+            Near(p.EmissionRate.Values[0], 40f, "particle: EmissionRate value");
+
+            // The ramp: variable length, with the authored times, NOT three stops at 0/0.5/1.
+            Check(p.ColorKeys.Length == 3 && p.ColorTimes.Length == 3, "particle: colour ramp stops");
+            Near(p.ColorTimes[1], 8192f / 32767f, "particle: ramp times are uint16 over 32767");
+            Check(p.ColorTimes[1] < 0.3f, "particle: an uneven middle stop is NOT snapped to 0.5");
+            Near(p.ColorKeys[0].X, 1f, "particle: colour stored 0..255 becomes 0..1");
+            Near(p.AlphaKeys[1], 1f, "particle: alpha stored fixed16");
+
+            // scales is per-AXIS, applied to every stop -- and its third float is not a scale.
+            Near(p.ParticleScale.X, 2f, "particle: scales.x read");
+            Near(p.ParticleScale.Y, 2f, "particle: scales.y read");
+            Near(p.SizeKeys[0].X, 1f, "particle: size x scaled by scales.x (0.5 * 2)");
+            Near(p.SizeKeys[0].Y, 0.5f, "particle: size y scaled by scales.y (0.25 * 2)");
+            Check(Math.Abs(p.SizeKeys[2].X - 0.5f * 519f) > 1f,
+                  "particle: the third scales float is NOT applied to the last stop");
+            Near(p.Slowdown, 0.5f, "particle: slowdown");
+            Near(p.SpriteRotation, 0.25f, "particle: sprite rotation");
+
+            M2RibbonEmitterDef rb = m.RibbonEmitters[0];
+            Check(rb.Bone == 1, "ribbon: bone index (int32)");
+            Near(rb.Position.Y, 5f, "ribbon: position Y");
+            Check(rb.TextureIds.Length == 2 && rb.TextureIds[0] == 2 && rb.TextureIds[1] == 3,
+                  "ribbon: texture indices are UINT16, not int32");
+            Check(rb.MaterialIndex == 1, "ribbon: material index read from its own array");
+            Near(rb.EdgesPerSecond, 50f, "ribbon: res is edges per second");
+            Near(rb.EdgeLifetimeSeconds, 0.2f, "ribbon: length is an edge lifetime in seconds");
+            Check(rb.EmissionAngle == 0f,
+                  "ribbon: the three floats are read separately (a struct cursor is by value)");
+
+            // A two-stop ramp must stay two stops -- the legacy copies three regardless.
+            M2ParsedModel two = M2Parser.Parse(
+                WrapChunked(BuildEmitterPayload(rampStops: 2), new[] { 1 }, new[] { 10, 11, 12, 13 }));
+            Check(two.ParticleEmitters[0].ColorKeys.Length == 2,
+                  "particle: a two-stop ramp is not padded to three");
+
+            // A spline emitter is PARSED -- the parser reports what the file holds -- but marks
+            // itself unsupported, and the runtime is what declines to draw it (as the legacy
+            // builds no emitter object for one either, particle.cpp:117-120).
+            byte[] spline = BuildEmitterPayload();
+            spline[FindParticleOffset(spline) + 41] = 3;
+            M2ParsedModel sp = M2Parser.Parse(WrapChunked(spline, new[] { 1 }, new[] { 10, 11, 12, 13 }));
+            Check(sp.ParticleEmitters.Length == 1, "particle: a spline emitter still parses");
+            Check(!sp.ParticleEmitters[0].Supported,
+                  "particle: a spline emitter reports itself unsupported");
+
+            // An out-of-range bone is dropped rather than left to index off the end.
+            byte[] badBone = BuildEmitterPayload();
+            PutU16(badBone, FindParticleOffset(badBone) + 20, 900);
+            M2ParsedModel bb = M2Parser.Parse(WrapChunked(badBone, new[] { 1 }, new[] { 10, 11, 12, 13 }));
+            Check(bb.ParticleEmitters.Length == 0, "particle: an out-of-range bone is dropped");
+
+            // Flags.
+            M2ParticleEmitterDef f = M2Parser.Parse(
+                WrapChunked(BuildEmitterPayload(0x10 | 0x1000 | 0x800000 | 0x20000),
+                            new[] { 1 }, new[] { 10, 11, 12, 13 })).ParticleEmitters[0];
+            Check(f.DoNotTrail, "particle: DONOTTRAIL flag");
+            Check(f.DoNotBillboard, "particle: DONOTBILLBOARD flag");
+            Check(f.Outward, "particle: OUTWARD flag");
+            Check(f.CompressedGravity, "particle: compressed-gravity flag");
+
+            // The synthetic fixture the runtime lifecycle test drives, checked here so a failure
+            // in it is attributed to the fixture rather than to the runtime.
+            for (int keyed = 0; keyed < 2; keyed++)
+            {
+                byte[] synth = M2Synthetic.EmitterModel(keyed);
+                M2ParsedModel s0 = M2Parser.Parse(synth, 0);
+                M2ParsedModel s1 = M2Parser.Parse(synth, 1);
+                Check(s0.ParticleEmitters.Length == 1 && s0.RibbonEmitters.Length == 1,
+                      "synthetic[" + keyed + "]: one particle and one ribbon emitter in sequence 0");
+                Check(s1.ParticleEmitters.Length == 1 && s1.RibbonEmitters.Length == 1,
+                      "synthetic[" + keyed + "]: same in sequence 1");
+                // The float tracks are read at ANIMATION 0 whichever sequence is playing --
+                // WMV's bZeroParticle default, see M2Parser. So the rate is the same in both,
+                // and it is present exactly when animation 0 is the keyed one.
+                Check(s0.ParticleEmitters[0].EmissionRate.HasData == (keyed == 0),
+                      "synthetic[" + keyed + "]: rate read at animation 0, present == " + (keyed == 0));
+                Check(s1.ParticleEmitters[0].EmissionRate.HasData ==
+                      s0.ParticleEmitters[0].EmissionRate.HasData,
+                      "synthetic[" + keyed + "]: the played sequence does not change it");
+                Check(s0.ParticleEmitters[0].Lifespan.HasData && s1.ParticleEmitters[0].Lifespan.HasData,
+                      "synthetic[" + keyed + "]: lifespan keys in BOTH sequences");
+                Check(s0.RibbonEmitters[0].MaterialIndex == 1,
+                      "synthetic[" + keyed + "]: ribbon material index");
+            }
+
+            // A header too short to carry the arrays yields no emitters and no exception.
+            M2ParsedModel shortHeader = M2Parser.Parse(
+                WrapChunked(BuildM2Payload(3), new[] { 473370 }, new[] { 0 }));
+            Check(shortHeader.ParticleEmitters.Length == 0 && shortHeader.RibbonEmitters.Length == 0,
+                  "emitters: a model without emitter arrays parses to none");
+        }
+
+        /// <summary>Where BuildEmitterPayload put the particle emitter, read back out of the
+        /// header so the test does not restate the fixture's arithmetic.</summary>
+        static int FindParticleOffset(byte[] payload)
+        {
+            return (int)(payload[0x12C] | (payload[0x12D] << 8) |
+                         (payload[0x12E] << 16) | (payload[0x12F] << 24));
         }
 
     }

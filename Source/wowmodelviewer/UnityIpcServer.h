@@ -166,6 +166,11 @@ private:
   static QJsonArray textureArray(const std::vector<UnityAssetAccess::ModelTexture> & textures);
   // Adds "geosets"/"hasGeosets" to a message about one model, when a selection is known.
   static void addGeosets(QJsonObject & msg, int m2FileDataID);
+
+  // The item ParticleColor override, when the displayed model has one. Attached to the same two
+  // messages as the geosets, so a renderer that has the textures always has the colours that go
+  // with them and the two can never describe different states.
+  static void addParticleColor(QJsonObject & msg, int m2FileDataID);
   void queueJson(const QJsonObject & obj);
   void dropClient(const char * why);
 

@@ -371,6 +371,76 @@ bool UnityAssetAccess::resolveModelTextures(int m2FileDataID, std::vector<ModelT
   return false;
 }
 
+bool UnityAssetAccess::resolveParticleColor(int m2FileDataID, ParticleColorSet & out, QString & error)
+{
+  out = ParticleColorSet();
+  if (m2FileDataID <= 0)
+  {
+    error = "invalid model fileDataID";
+    return false;
+  }
+  if (!hasActiveClient())
+  {
+    error = g_clientLoadDepth > 0 ? "game client is still loading" : "no game client loaded";
+    return false;
+  }
+
+  // WHICH DISPLAY. An item component model is reached from its display through
+  // ItemDisplayInfo.ModelResourcesID{1,2} -> ModelFileData.ModelResourcesID, so the join runs
+  // backwards from the file the renderer actually loaded. Both model slots are tried because a
+  // two-handed or paired item puts its second component in slot 2.
+  //
+  // Only rows with a non-zero ParticleColorID are considered: an item whose display sets none
+  // must fall through to what the emitters authored rather than to row 0.
+  int colorId = 0;
+  // NOT named "slots": Qt defines that as an empty macro for moc, so a local of that name is a
+  // syntax error the moment this file sees a Qt header.
+  const char * modelSlots[] = { "ModelResourcesID1", "ModelResourcesID2" };
+  for (const char * slot : modelSlots)
+  {
+    const sqlResult r = GAMEDATABASE.sqlQuery(
+      QString("SELECT ItemDisplayInfo.ParticleColorID FROM ItemDisplayInfo "
+              "LEFT JOIN ModelFileData ON ItemDisplayInfo.%1 = ModelFileData.ModelResourcesID "
+              "WHERE ModelFileData.FileDataID = %2 AND ItemDisplayInfo.ParticleColorID > 0")
+        .arg(slot).arg(m2FileDataID));
+    if (r.valid && !r.values.empty() && !r.values[0].empty())
+    {
+      colorId = r.values[0][0].toInt();
+      if (colorId > 0)
+        break;
+    }
+  }
+  if (colorId <= 0)
+  {
+    error = "no item display references this model with a particle colour";
+    return false;
+  }
+
+  const sqlResult pc = GAMEDATABASE.sqlQuery(
+    QString("SELECT Start1, Start2, Start3, Mid1, Mid2, Mid3, End1, End2, End3 "
+            "FROM ParticleColor WHERE ID = %1").arg(colorId));
+  if (!pc.valid || pc.values.empty() || pc.values[0].size() < 9)
+  {
+    error = QString("ParticleColor row %1 could not be read").arg(colorId);
+    return false;
+  }
+
+  const std::vector<QString> & row = pc.values[0];
+  for (int stop = 0; stop < 3; stop++)
+    for (int ch = 0; ch < 3; ch++)
+    {
+      int v = row[stop * 3 + ch].toInt();
+      out.rgb[stop][ch] = v < 0 ? 0 : (v > 255 ? 255 : v);
+    }
+  out.id = colorId;
+  out.ok = true;
+  LOG_INFO << "[unityipc] model" << m2FileDataID << "-> ParticleColor" << colorId
+           << "start(" << out.rgb[0][0] << out.rgb[0][1] << out.rgb[0][2] << ")"
+           << "mid(" << out.rgb[1][0] << out.rgb[1][1] << out.rgb[1][2] << ")"
+           << "end(" << out.rgb[2][0] << out.rgb[2][1] << out.rgb[2][2] << ")";
+  return true;
+}
+
 UnityAssetAccess::Result UnityAssetAccess::readByFileDataID(int fileDataID)
 {
   Result r;

@@ -121,6 +121,13 @@ public class WmvRuntimeModel
     /// <summary>The component evaluating the material tracks, or null when no batch has any.</summary>
     public WmvMaterialAnimator MaterialAnimator;
 
+    /// <summary>
+    /// The model's particle and ribbon emitters, or null when it declares none this renderer can
+    /// draw. Its renderers are children of Root, so Dispose takes them with it, and its own
+    /// OnDestroy releases the meshes and materials it made.
+    /// </summary>
+    public WmvEmitterRuntime Emitters;
+
     /// <summary>One entry per material/submesh: which tracks feed it.</summary>
     public WmvMaterialAnimBinding[] MaterialAnim = new WmvMaterialAnimBinding[0];
 
@@ -148,6 +155,7 @@ public class WmvRuntimeModel
         foreach (var t in Textures) if (t != null) UnityEngine.Object.Destroy(t);
         Root = null;
         Mesh = null;
+        Emitters = null;
         Bones = new Transform[0];
         BoneRestPositions = new Vector3[0];
         Animator = null;
@@ -216,6 +224,8 @@ public static class WmvModelBuilder
     ///                    it. At rest that distance is the whole claim of the skinning milestone,
     ///                    so it is worth being able to measure rather than assert. Only meaningful
     ///                    together with -wmvNoAnim: a moving model is not in its rest pose.
+    ///   -wmvNoEmitters   draw no particles and no ribbons: the control for every emitter
+    ///                    measurement, and the BEFORE of a before/after pair.
     ///   -wmvNoAnim       do not play anything. The model is still skinned, and still sits in the
     ///                    rest pose the bind poses describe, which is what the milestone before
     ///                    this one shipped.
@@ -236,6 +246,7 @@ public static class WmvModelBuilder
         static bool parsed;
         static bool flipV, forceOpaque, forceSolid, matColors, showHidden, ownShader;
         static bool noSkin, skinCheck, noAnim, animCheck, placeholder, overlay, litShader;
+        static bool noEmitters;
         static bool lightCheck;
         static bool queueProof;
         static float animTime = -1f;
@@ -364,12 +375,13 @@ public static class WmvModelBuilder
                 else if (a == "-wmvNoSkin") noSkin = true;
                 else if (a == "-wmvSkinCheck") skinCheck = true;
                 else if (a == "-wmvNoAnim") noAnim = true;
+                else if (a == "-wmvNoEmitters") noEmitters = true;
                 else if (a == "-wmvAnimCheck") animCheck = true;
                 else if (a == "-wmvPlaceholder") placeholder = true;
                 else if (a == "-wmvOverlay") overlay = true;
             }
             if (flipV || forceOpaque || forceSolid || matColors || showHidden || ownShader ||
-                noSkin || skinCheck || noAnim || animCheck)
+                noSkin || skinCheck || noAnim || animCheck || noEmitters)
                 Debug.Log("WMV debug switches: flipV=" + flipV + " forceOpaque=" + forceOpaque +
                           " forceSolid=" + forceSolid + " matColors=" + matColors +
                           " showHidden=" + showHidden + " ownShader=" + ownShader +
@@ -512,6 +524,15 @@ public static class WmvModelBuilder
         public static bool NoSkin { get { Parse(); return noSkin; } }
         public static bool SkinCheck { get { Parse(); return skinCheck; } }
         public static bool NoAnim { get { Parse(); return noAnim; } }
+
+        /// <summary>
+        /// Draw no particles and no ribbons (-wmvNoEmitters).
+        ///
+        /// The control for every emitter measurement: the same model, the same camera, the same
+        /// instant, with the emitters the only difference. It is also the BEFORE of a before/after
+        /// pair without needing to check out the previous commit.
+        /// </summary>
+        public static bool NoEmitters { get { Parse(); return noEmitters; } }
         public static bool AnimCheck { get { Parse(); return animCheck; } }
 
         /// <summary>
@@ -1264,6 +1285,12 @@ public static class WmvModelBuilder
             smr.localBounds = mesh.bounds;
             smr.updateWhenOffscreen = false;
 
+            // Emitters BEFORE the animation block, because whether the model has any is one of
+            // the reasons to keep an animator: the emitters run on its clock, so a model whose
+            // idle moves no bone but which trails fire still needs one.
+            BuildEmitters(result, model, go, boneTransforms, decodedTextures, textureCache,
+                          textures, objectName, log);
+
             if (log != null)
             {
                 log(string.Format("skin: {0} bone(s), {1} root(s), max depth {2}; " +
@@ -1291,7 +1318,8 @@ public static class WmvModelBuilder
                 var animator = go.AddComponent<WmvM2Animator>();
                 animator.Setup(model, boneTransforms, restLocalPositions, log);
                 animator.Materials = result.MaterialAnimator;
-                if (animator.AnimatedBoneCount == 0 && !MaterialsAnimate(result))
+                animator.Emitters = result.Emitters;
+                if (animator.AnimatedBoneCount == 0 && !NeedsClock(result))
                 {
                     // Nothing in the idle actually moves; the component would burn a LateUpdate
                     // per frame to write nothing.
@@ -1333,17 +1361,23 @@ public static class WmvModelBuilder
             renderer.sharedMaterials = materials.ToArray();
             if (log != null)
                 log("skin: drawn as a static mesh -- " + skinPlan.Reason);
+            // No bones: an emitter still draws, at its authored model-space offset, with the
+            // identity where a bone matrix would be.
+            BuildEmitters(result, model, go, boneTransforms, decodedTextures, textureCache,
+                          textures, objectName, log);
             // A static mesh has no bones to drive, but its materials may still move. The same
             // animator supplies the clock, with nothing to pose.
-            if (!Debug_.NoAnim && MaterialsAnimate(result) &&
+            if (!Debug_.NoAnim && NeedsClock(result) &&
                 model.AnimatedSequence >= 0 && model.AnimatedSequence < model.Sequences.Length)
             {
                 var animator = go.AddComponent<WmvM2Animator>();
                 animator.Setup(model, new Transform[0], new Vector3[0], log);
                 animator.Materials = result.MaterialAnimator;
+                animator.Emitters = result.Emitters;
                 result.Animator = animator;
                 if (log != null)
-                    log("anim: static mesh, but materials animate -- an animator supplies the clock");
+                    log("anim: static mesh, but materials or emitters animate -- an animator "
+                        + "supplies the clock");
             }
         }
 
@@ -1501,14 +1535,22 @@ public static class WmvModelBuilder
         // before the bones, so a model whose ONLY animation is material still switches.
         if (runtime.MaterialAnimator != null)
             runtime.MaterialAnimator.Rebind(model, log);
-        if (!runtime.Skinned || runtime.Bones.Length == 0)
+
+        // The emitters' tracks were re-read for the new sequence too, and that is not cosmetic:
+        // an emitter with no EmissionRate keys in the new sequence has to stop and one that gains
+        // them has to start (see M2ParsedModel.ParticleEmitters). Rebind also drops every live
+        // particle and every ribbon edge, so a trail cannot smear from where the bone was in the
+        // old animation to where it is in the new one.
+        if (runtime.Emitters != null && !runtime.Emitters.Rebind(model) && log != null)
+            log("emitters: the re-parsed model has a different emitter count -- the existing "
+                + "emitters were left as they were");
         {
             // (-wmvNoAnim never reaches here -- SwitchToSequence returns first -- but the rule
             // "no clock under -wmvNoAnim" is kept explicit rather than implied.)
-            if (!Debug_.NoAnim && MaterialsAnimate(runtime))
+            if (!Debug_.NoAnim && NeedsClock(runtime))
             {
-                // A static mesh whose materials animate in THIS sequence: the clock must exist and
-                // point at it. It is created here when the build had nothing to drive (the
+                // A static mesh whose materials or emitters animate in THIS sequence: the clock
+                // must exist and point at it. It is created here when the build had nothing to drive (the
                 // materials were dormant then) and merely re-pointed otherwise.
                 if (runtime.Animator == null)
                 {
@@ -1518,6 +1560,7 @@ public static class WmvModelBuilder
                 }
                 runtime.Animator.Setup(model, new Transform[0], new Vector3[0], log);
                 runtime.Animator.Materials = runtime.MaterialAnimator;
+                runtime.Animator.Emitters = runtime.Emitters;
                 return true;
             }
             if (runtime.Animator != null)
@@ -1567,7 +1610,8 @@ public static class WmvModelBuilder
 
         animator.Setup(model, runtime.Bones, runtime.BoneRestPositions, log);
         animator.Materials = runtime.MaterialAnimator;
-        if (animator.AnimatedBoneCount == 0 && !MaterialsAnimate(runtime))
+        animator.Emitters = runtime.Emitters;
+        if (animator.AnimatedBoneCount == 0 && !NeedsClock(runtime))
         {
             // A real sequence that happens to move nothing: the bones are already back at rest.
             UnityEngine.Object.Destroy(animator);
@@ -2330,6 +2374,102 @@ public static class WmvModelBuilder
         return runtime.MaterialAnimator != null && runtime.MaterialAnimator.AnimatedCount > 0;
     }
 
+    /// <summary>Does anything on this model need the animator's clock -- a material track, or an
+    /// emitter? A model with neither is posed once and left alone.</summary>
+    static bool NeedsClock(WmvRuntimeModel runtime)
+    {
+        return MaterialsAnimate(runtime) || HasEmitters(runtime);
+    }
+
+    static bool HasEmitters(WmvRuntimeModel runtime)
+    {
+        return runtime.Emitters != null && runtime.Emitters.HasAnything;
+    }
+
+    /// <summary>
+    /// Add the emitter runtime to a model that has emitters, and nothing at all to one that does
+    /// not -- no component, no GameObject, no per-frame call. That is the "models with no
+    /// particles or ribbons cost nothing" property, and it is structural rather than a fast path
+    /// inside a component that runs anyway.
+    /// </summary>
+    static void BuildEmitters(WmvRuntimeModel result, M2ParsedModel model, GameObject go,
+                              Transform[] boneTransforms,
+                              Dictionary<int, BlpImage> decodedTextures,
+                              Dictionary<int, Texture2D> textureCache, List<Texture2D> owned,
+                              string objectName, Action<string> log)
+    {
+        if (Debug_.NoEmitters)
+        {
+            if (log != null && (model.ParticleEmitterCount > 0 || model.RibbonEmitterCount > 0))
+                log("emitters: not drawn -- -wmvNoEmitters was passed");
+            return;
+        }
+        if (model.ParticleEmitters.Length == 0 && model.RibbonEmitters.Length == 0)
+        {
+            // Say so only when the model DECLARED some and none survived the parse, so a model
+            // with no emitters at all stays silent instead of adding a line to every load.
+            if (log != null && (model.ParticleEmitterCount > 0 || model.RibbonEmitterCount > 0))
+                log(string.Format("emitters: {0} particle and {1} ribbon emitter(s) declared, none "
+                                  + "readable", model.ParticleEmitterCount, model.RibbonEmitterCount));
+            return;
+        }
+
+        Shader shader = FindParticleShader(log);
+        if (shader == null)
+            return;
+
+        var runtime = go.AddComponent<WmvEmitterRuntime>();
+        // A particle's texture field indexes the model's texture array DIRECTLY -- the legacy
+        // resolves it with getGLTexture(mta.texture), which is textures[Tex] (WoWModel.cpp:3596).
+        // Not through TextureLookup, which is the batch's route and a different table.
+        //
+        // Address mode comes from the texture's own two flag bits, the same rule the mesh
+        // materials follow, except that a flipbook must never wrap: a tile's edge samples would
+        // pull in the opposite side of the sheet.
+        Func<int, Texture2D> textureFor = slot =>
+        {
+            if (slot < 0 || slot >= model.Textures.Length)
+                return null;
+            bool wrapX = model.Textures[slot].WrapX;
+            bool wrapY = model.Textures[slot].WrapY;
+            return GetTexture(decodedTextures, textureCache, owned, slot, false, wrapX, wrapY,
+                              objectName);
+        };
+        runtime.SetGlobalSequences(model.GlobalSequences);
+        runtime.Setup(model, go.transform, boneTransforms, textureFor, shader, objectName, log);
+        if (!runtime.HasAnything)
+        {
+            UnityEngine.Object.Destroy(runtime);
+            return;
+        }
+        result.Emitters = runtime;
+    }
+
+    /// <summary>
+    /// The particle pass, from Resources so a player build cannot strip it.
+    ///
+    /// No fallback chain, deliberately. The model shader can fall back to a pipeline Lit shader
+    /// and still show the model; a particle shader cannot, because a substitute bakes its own
+    /// blend state into the pass and every M2 blend mode this renderer sets would be ignored --
+    /// 56 % of emitters are additive and would come out as opaque squares over the model. Missing
+    /// is better than wrong, and it is said in the log.
+    /// </summary>
+    const string ParticleShaderResource = "WmvParticle";
+    static Shader cachedParticleShader;
+    static bool particleShaderResolved;
+
+    static Shader FindParticleShader(Action<string> log)
+    {
+        if (particleShaderResolved)
+            return cachedParticleShader;
+        particleShaderResolved = true;
+        cachedParticleShader = Resources.Load<Shader>(ParticleShaderResource);
+        if (cachedParticleShader == null && log != null)
+            log("emitters: not drawn -- the '" + ParticleShaderResource + "' shader is not in this "
+                + "build, and a substitute would bake its own blend state over every M2 blend mode");
+        return cachedParticleShader;
+    }
+
     /// <summary>
     /// Put the whole model -- bones and materials -- at one instant of its animation and hold it
     /// there. For the offscreen captures: two builds compared at "250 ms" must both mean the
@@ -2346,6 +2486,18 @@ public static class WmvModelBuilder
             runtime.Animator.ApplyPose(runtime.Animator.SequenceTimeAt(timeMs));   // drives the materials through its hook
         else if (runtime.MaterialAnimator != null)
             runtime.MaterialAnimator.Apply(timeMs);
+
+        // Bones and materials are functions of the instant; emitters are not. A particle at
+        // 250 ms exists because of what happened over the 250 ms before it, so holding the clock
+        // still leaves an emitter empty. Run it forward to the instant instead, deterministically,
+        // which is what makes two captures at "250 ms" comparable rather than merely labelled the
+        // same. See WmvEmitterRuntime.SimulateTo.
+        if (runtime.Emitters != null && runtime.Emitters.HasAnything && runtime.Animator != null)
+        {
+            WmvM2Animator anim = runtime.Animator;
+            runtime.Emitters.SimulateTo(timeMs, anim.SequenceTimeAt, anim.ApplyPose);
+            anim.ApplyPose(anim.SequenceTimeAt(timeMs));   // the simulation left the bones mid-run
+        }
     }
 
     static bool BatchIsVisible(M2ParsedModel model, M2Batch batch, out string reason)

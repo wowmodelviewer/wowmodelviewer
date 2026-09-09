@@ -165,6 +165,171 @@ namespace Wmv.Wow
             return f.Done();
         }
 
+
+        /// <summary>
+        /// The size of the FULL MD20 header. TransformSwitchModel and friends stop at 0x100
+        /// because nothing they test lives past it; the emitter arrays are the last two entries
+        /// in the header, at 0x120 and 0x128, so a model that carries emitters must be built out
+        /// to here or those offsets land in whatever array came first.
+        /// </summary>
+        const int FullHeaderSize = 0x138;
+
+        public const int EmitterParticleStride = 492;
+        public const int EmitterRibbonStride = 176;
+
+        /// <summary>
+        /// A model with one particle emitter and one ribbon emitter, whose EMISSION RATE has keys
+        /// in exactly one of two sequences.
+        ///
+        /// That last part is the point of the fixture: an emitter with no rate keys in the
+        /// playing sequence emits nothing, which is authored behaviour rather than a fault (11 of
+        /// Val'anyr's 13 emitters are in exactly that state on its first sub-animation), and a
+        /// sequence change has to start and stop them accordingly. One bone, animated, so the
+        /// ribbon has something to trail behind.
+        /// </summary>
+        public static byte[] EmitterModel(int keyedSequence)
+        {
+            const int nSeq = 2;
+            const int boneCount = 1;
+            int oVerts = FullHeaderSize;
+            int oTex = oVerts + 3 * 48;
+            int oMat = oTex + 2 * 16;
+            int oTexLookup = oMat + 2 * 4;
+            int oSeqs = oTexLookup + 2;
+            int oBones = oSeqs + nSeq * 64;
+            int oRampTimes = oBones + boneCount * BoneStride;
+            int oRampColor = oRampTimes + 3 * 2;
+            int oRampAlpha = oRampColor + 3 * 12;
+            int oRampSize = oRampAlpha + 3 * 2;
+            int oRibbonTex = oRampSize + 3 * 8;
+            int oRibbonMat = oRibbonTex + 2;
+            int oParticle = oRibbonMat + 2;
+            int oRibbon = oParticle + EmitterParticleStride;
+            int fixedEnd = oRibbon + EmitterRibbonStride;
+
+            var f = new Image(fixedEnd);
+            byte[] b = f.B;
+            PutMagic(b, 0, "MD20");
+            PutU32(b, 0x04, 272);
+            PutU32(b, 0x1C, nSeq); PutU32(b, 0x20, (uint)oSeqs);
+            for (int i = 0; i < nSeq; i++)
+            {
+                int o = oSeqs + i * 64;
+                PutU16(b, o, (ushort)i);
+                PutU32(b, o + 4, 1000);
+                PutU32(b, o + 12, 0x20);
+            }
+            PutU32(b, 0x2C, boneCount); PutU32(b, 0x30, (uint)oBones);
+            PutU32(b, 0x3C, 3); PutU32(b, 0x40, (uint)oVerts);
+            for (int i = 0; i < 3; i++)
+            {
+                int o = oVerts + i * 48;
+                PutF32(b, o + 0, i == 1 ? 1f : 0f);
+                PutF32(b, o + 4, i == 2 ? 1f : 0f);
+                b[o + 12] = 255; b[o + 16] = 0;               // fully weighted to bone 0
+                PutF32(b, o + 28, 1f);                        // normal +Z
+            }
+            PutU32(b, 0x44, 1);
+            PutU32(b, 0x50, 2); PutU32(b, 0x54, (uint)oTex);
+            for (int i = 0; i < 2; i++) { PutU32(b, oTex + i * 16, 0); PutU32(b, oTex + i * 16 + 4, 3); }
+            PutU32(b, 0x70, 2); PutU32(b, 0x74, (uint)oMat);
+            PutU16(b, oMat, 0x01); PutU16(b, oMat + 2, 0);            // material 0: unlit opaque
+            PutU16(b, oMat + 4, 0x01); PutU16(b, oMat + 6, 4);        // material 1: additive
+            PutU32(b, 0x80, 1); PutU32(b, 0x84, (uint)oTexLookup);
+            PutU16(b, oTexLookup, 0);
+            PutU32(b, 0x120, 1); PutU32(b, 0x124, (uint)oRibbon);
+            PutU32(b, 0x128, 1); PutU32(b, 0x12C, (uint)oParticle);
+
+            // Bone 0: a translation track that MOVES in both sequences, so a ribbon has a spine.
+            int ob = oBones;
+            PutU32(b, ob, unchecked((uint)-1));
+            PutU16(b, ob + 8, unchecked((ushort)-1));         // no parent
+            var bT = new uint[nSeq][]; var bV = new byte[nSeq][];
+            for (int s = 0; s < nSeq; s++)
+            {
+                bT[s] = new uint[] { 0, 500, 1000 };
+                bV[s] = Concat(V3(0f, 0f, 0f), V3(1f, 0f, 0f), V3(0f, 0f, 0f));
+            }
+            Track(f, ob + 16, 1, -1, bT, bV);
+            Track(f, ob + 36, 0, -1, new uint[nSeq][], new byte[nSeq][]);
+            Track(f, ob + 56, 0, -1, new uint[nSeq][], new byte[nSeq][]);
+            b = f.B;                                          // Track may have grown the array
+
+            // Ramps: three stops, with the middle one at 0.25 rather than the halfway point.
+            PutU16(b, oRampTimes + 0, 0);
+            PutU16(b, oRampTimes + 2, 8192);
+            PutU16(b, oRampTimes + 4, 32767);
+            for (int i = 0; i < 3; i++)
+            {
+                PutF32(b, oRampColor + i * 12 + 0, 255f);
+                PutF32(b, oRampColor + i * 12 + 4, 128f);
+                PutF32(b, oRampColor + i * 12 + 8, 0f);
+                PutU16(b, oRampAlpha + i * 2, (ushort)(i == 1 ? 32767 : 0));
+                PutF32(b, oRampSize + i * 8 + 0, 0.2f);
+                PutF32(b, oRampSize + i * 8 + 4, 0.1f);
+            }
+            PutU16(b, oRibbonTex, 1);          // texture slot 1
+            PutU16(b, oRibbonMat, 1);          // material 1 -> blend 4
+
+            // ---- the particle emitter ----
+            int p = oParticle;
+            PutU32(b, p + 0, unchecked((uint)-1));
+            PutU32(b, p + 4, 0);
+            PutF32(b, p + 8, 0f); PutF32(b, p + 12, 0f); PutF32(b, p + 16, 0f);
+            PutU16(b, p + 20, 0);              // bone 0
+            PutU16(b, p + 22, 0);              // texture slot 0
+            b[p + 40] = 4;                     // blend: additive on alpha
+            b[p + 41] = 1;                     // plane emitter
+            PutU16(b, p + 48, 1); PutU16(b, p + 50, 1);     // 1x1
+            int pp = p + 260;
+            PutU32(b, pp + 0, 3); PutU32(b, pp + 4, (uint)oRampTimes);
+            PutU32(b, pp + 8, 3); PutU32(b, pp + 12, (uint)oRampColor);
+            PutU32(b, pp + 16, 3); PutU32(b, pp + 20, (uint)oRampTimes);
+            PutU32(b, pp + 24, 3); PutU32(b, pp + 28, (uint)oRampAlpha);
+            PutU32(b, pp + 32, 3); PutU32(b, pp + 36, (uint)oRampTimes);
+            PutU32(b, pp + 40, 3); PutU32(b, pp + 44, (uint)oRampSize);
+            PutF32(b, pp + 100, 1f); PutF32(b, pp + 104, 1f);
+
+            // Lifespan: keys in BOTH sequences, so only the rate decides whether anything emits.
+            var lT = new uint[nSeq][]; var lV = new byte[nSeq][];
+            for (int s = 0; s < nSeq; s++) { lT[s] = new uint[] { 0 }; lV[s] = F1(2f); }
+            Track(f, p + 152, 0, -1, lT, lV);
+
+            // EmissionRate: keys in ONE sequence only.
+            var rT = new uint[nSeq][]; var rV = new byte[nSeq][];
+            rT[keyedSequence] = new uint[] { 0 };
+            rV[keyedSequence] = F1(30f);
+            Track(f, p + 176, 0, -1, rT, rV);
+
+            // ---- the ribbon emitter ----
+            int r = oRibbon;
+            PutU32(f.B, r + 0, unchecked((uint)-1));
+            PutU32(f.B, r + 4, 0);                            // bone 0
+            PutU32(f.B, r + 20, 1); PutU32(f.B, r + 24, (uint)oRibbonTex);
+            PutU32(f.B, r + 28, 1); PutU32(f.B, r + 32, (uint)oRibbonMat);
+            PutF32(f.B, r + 116, 40f);                        // edges per second
+            PutF32(f.B, r + 120, 0.5f);                       // edge lifetime
+            var aT = new uint[nSeq][]; var aV = new byte[nSeq][];
+            for (int s = 0; s < nSeq; s++) { aT[s] = new uint[] { 0 }; aV[s] = F1(0.3f); }
+            Track(f, r + 76, 0, -1, aT, aV);                  // above
+            var bT2 = new uint[nSeq][]; var bV2 = new byte[nSeq][];
+            for (int s = 0; s < nSeq; s++) { bT2[s] = new uint[] { 0 }; bV2[s] = F1(0.3f); }
+            Track(f, r + 96, 0, -1, bT2, bV2);                // below
+            return f.Done();
+        }
+
+        static byte[] F1(float v) { return BitConverter.GetBytes(v); }
+
+        static byte[] Concat(params byte[][] parts)
+        {
+            int n = 0;
+            foreach (byte[] p in parts) n += p.Length;
+            var outp = new byte[n];
+            int o = 0;
+            foreach (byte[] p in parts) { Buffer.BlockCopy(p, 0, outp, o, p.Length); o += p.Length; }
+            return outp;
+        }
+
         /// <summary>
         /// A model with one triangle per submesh and nothing animated: the shape the geoset tests
         /// need, where each submesh can carry its own geoset id. Same single unlit opaque material
