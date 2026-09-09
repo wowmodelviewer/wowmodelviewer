@@ -33,6 +33,11 @@ public struct WmvMaterialBinding
     /// </summary>
     public bool BaseWrapX, BaseWrapY;
     public bool Unit1WrapX, Unit1WrapY;
+
+    /// <summary>M2 texture slot bound as the combiner's THIRD unit, or -1. Its alpha is the
+    /// luminous mask, so it is never dropped; it keeps its own address mode like the others.</summary>
+    public int ThirdSlot;
+    public bool Unit2WrapX, Unit2WrapY;
 }
 
 /// <summary>
@@ -46,7 +51,10 @@ public struct WmvMaterialAnimBinding
     public int Material;          // index into WmvRuntimeModel.Materials, and the submesh index
     public int Submesh;           // the skin's submesh number, for the log
     public int Color;             // model.Colors, or -1
-    public int Weight;            // model.TextureWeightTracks, or -1
+    public int Weight;            // model.TextureWeightTracks, or -1 -- unit 0, the pass opacity
+    public int Weight1;           // ... unit 1's own weight track, or -1 -- the ps20/23 lobe's gain
+    public int Weight2;           // ... unit 2's own weight track, or -1 -- the third unit's gain
+    public int Transform2;        // ... unit 2
     public int Transform0;        // model.TextureTransforms for unit 0, or -1 (STATIC, env, none)
     public int Transform1;        // ... unit 1
     public bool Static;           // batch flag 0x10: the transforms above are forced to -1
@@ -924,6 +932,11 @@ public static class WmvModelBuilder
 
             int textureSlot = ResolveTextureSlot(model, batch, 0);
             int unit1Slot = useUnit1 ? ResolveTextureSlot(model, batch, 1) : -1;
+            // The third unit. Only a combiner that actually consumes it asks for it, so no other
+            // material pays for the extra sampler or the extra upload.
+            bool useUnit2 = plan.Lobe && batch.TextureCount >= 3 &&
+                            combinerAvailable && !Debug_.ForceSolid;
+            int unit2Slot = useUnit2 ? ResolveTextureSlot(model, batch, 2) : -1;
 
             // The base texture's ALPHA is not transparency on an opaque material -- on a creature
             // skin it is a reflection mask -- so it is discarded on upload UNLESS something
@@ -945,12 +958,25 @@ public static class WmvModelBuilder
             // wrap; a unit fed by a stored UV set is a normal repeating texture. Its own alpha is
             // kept whenever the combiner reads it.
             bool unit1Env = unit1Uv == M2UvSource.Environment;
+            // Its alpha is kept whenever anything reads it: an alpha mode that combines it, the
+            // decal combiner -- or a second-unit lobe, whose whole shape is unit1.rgb * unit1.a.
             bool unit1DropAlpha = !(plan.AlphaMode == 2 || plan.AlphaMode == 3 || plan.AlphaMode == 4 ||
-                                    plan.Mode == 4);
+                                    plan.AlphaMode == 5 || plan.Mode == 4 || plan.Lobe2 > 0);
             bool unit1WrapX, unit1WrapY;
             TextureWrap(model, unit1Slot, unit1Env, out unit1WrapX, out unit1WrapY);
             Texture2D unit1Tex = GetTexture(decodedTextures, textureCache, textures, unit1Slot,
                                             unit1DropAlpha, unit1WrapX, unit1WrapY, objectName);
+            // Unit 2 keeps ITS OWN coordinate source and address mode. On the armour benchmark
+            // the host binds the same file to unit 0 and unit 2, but the M2 gives them different
+            // wrap flags (unit 0 repeats, unit 2 clamps), so reusing unit 0's sampler state would
+            // be wrong even where the image is identical. Its alpha is the lobe's mask and is
+            // never dropped.
+            M2UvSource unit2Uv = shader.UvSource.Length > 2 ? shader.UvSource[2] : M2UvSource.TexCoord0;
+            bool unit2Env = unit2Uv == M2UvSource.Environment;
+            bool unit2WrapX, unit2WrapY;
+            TextureWrap(model, unit2Slot, unit2Env, out unit2WrapX, out unit2WrapY);
+            Texture2D unit2Tex = GetTexture(decodedTextures, textureCache, textures, unit2Slot,
+                                            false, unit2WrapX, unit2WrapY, objectName);
 
             if (log != null)
             {
@@ -983,9 +1009,14 @@ public static class WmvModelBuilder
                                  ? model.TextureLookup[comboIndex] : -1;
                     int uslot = ResolveTextureSlot(model, batch, u);
                     string src = u < shader.UvSource.Length ? shader.UvSource[u].ToString() : "?";
+                    // Unit 2 IS sampled when the combiner has a lobe and a third texture
+                    // arrived. This line used to read "NOT SAMPLED -- this renderer binds two
+                    // units" unconditionally, which stopped being true when the third unit landed
+                    // and then sent a later reader looking for a binding bug that was not there.
                     string sampled = u == 0 ? "SAMPLED"
                                     : (u == 1 ? (useUnit1 ? "SAMPLED" : "not sampled")
-                                              : "NOT SAMPLED -- this renderer binds two units");
+                                    : (u == 2 ? (useUnit2 && plan.Lobe ? "SAMPLED" : "not sampled")
+                                              : "not sampled -- this renderer binds three units"));
                     units.Append(string.Format("{0}unit {1} uv {2} -> lookup[{3}]={4} slot {5}",
                                                u == 0 ? "" : "; ", u, src, comboIndex, lookup, uslot));
                     if (uslot >= 0 && uslot < model.Textures.Length)
@@ -1005,6 +1036,8 @@ public static class WmvModelBuilder
 
             bindings.Add(new WmvMaterialBinding
             {
+                ThirdSlot = unit2Tex != null ? unit2Slot : -1,
+                Unit2WrapX = unit2WrapX, Unit2WrapY = unit2WrapY,
                 BaseSlot = textureSlot, EnvSlot = unit1Slot, DropAlpha = dropAlpha,
                 Unit1DropAlpha = unit1DropAlpha,
                 BaseWrapX = baseWrapX, BaseWrapY = baseWrapY,
@@ -1030,10 +1063,12 @@ public static class WmvModelBuilder
             // What animates this material. Resolved here, where the batch, its units and the
             // combiner plan are all in hand, exactly as the legacy viewport resolves a pass.
             animBindings.Add(ResolveAnimBinding(model, batch, materials.Count, mode, plan,
-                                                unit0Env, unit1Env, useUnit1, log));
+                                                unit0Env, unit1Env, useUnit1,
+                                                unit2Env, unit2Tex != null, log));
             // A batch kept only for its animated gate starts hidden: the animator opens it.
             gateHidden.Add(keptForAnimation[batchIndex] && !drawHidden);
-            materials.Add(CreateMaterial(mat, mode, plan, unit0Uv, unit1Uv, tex, unit1Tex,
+            materials.Add(CreateMaterial(mat, mode, plan, unit0Uv, unit1Uv, unit2Uv,
+                                         tex, unit1Tex, unit2Tex,
                                          objectName + "_mat" + materials.Count, log));
         }
 
@@ -1126,7 +1161,8 @@ public static class WmvModelBuilder
             for (int i = 0; i < result.MaterialAnim.Length; i++)
             {
                 WmvMaterialAnimBinding bnd = result.MaterialAnim[i];
-                if (bnd.Color >= 0 || bnd.Weight >= 0 || bnd.Transform0 >= 0 || bnd.Transform1 >= 0)
+                if (bnd.Color >= 0 || bnd.Weight >= 0 || bnd.Weight1 >= 0 || bnd.Weight2 >= 0 ||
+                    bnd.Transform0 >= 0 || bnd.Transform1 >= 0)
                     anyInput = true;
                 if (WmvMaterialAnimator.BindingAnimates(model, bnd))
                     anyKeys = true;
@@ -1666,10 +1702,21 @@ public static class WmvModelBuilder
                     m.SetTexture(SecondTexProperty, unit1);
             }
 
+            // Unit 2 moves with the skin as well: on armour, texture type 3 IS the item skin,
+            // so a skin change re-points it exactly as it re-points unit 0.
+            if (b.ThirdSlot >= 0 && m.HasProperty(ThirdTexProperty))
+            {
+                Texture2D unit2 = GetTexture(decodedTextures, cache, fresh, b.ThirdSlot,
+                                             false, b.Unit2WrapX, b.Unit2WrapY, objectName);
+                if (unit2 != null && !Debug_.MatColors)
+                    m.SetTexture(ThirdTexProperty, unit2);
+            }
+
             if (log != null)
-                log(string.Format("rebind: material '{0}' <- slot {1} (alpha {2}){3}",
+                log(string.Format("rebind: material '{0}' <- slot {1} (alpha {2}){3}{4}",
                                   m.name, b.BaseSlot, b.DropAlpha ? "forced to 255" : "kept (combiner mask)",
-                                  b.EnvSlot >= 0 ? ", env slot " + b.EnvSlot : ""));
+                                  b.EnvSlot >= 0 ? ", env slot " + b.EnvSlot : "",
+                                  b.ThirdSlot >= 0 ? ", third slot " + b.ThirdSlot : ""));
         }
 
         // Only now destroy the old uploads: a material that ended up keeping its texture would
@@ -1690,27 +1737,84 @@ public static class WmvModelBuilder
         public int AlphaMode;     // _AlphaMode: 0 one, 1 u0.a, 2 u1.a, 3 u0.a*u1.a, 4 u0.a+u1.a
         public float AlphaScale;
         public bool NeedsUnit1;   // the second texture is sampled, for colour or for alpha
+        public bool Lobe;         // the THIRD unit contributes an additive luminous term
+        /// <summary>
+        /// The SECOND unit contributes an additive lobe:
+        ///   0  none
+        ///   1  unit1.rgb * unit1.a                     ps13, and ps16/20/23
+        ///   2  unit1.rgb * unit1.a * (1 - unit0.a)     ps14
+        ///   3  unit1.rgb * (1 - unit0.a)               ps21 -- NO unit1.a
+        ///   4  unit1.rgb                               ps8, ps10 -- raw, nothing at all
+        /// A different unit from Lobe, and much commoner: eight combiners have one where exactly
+        /// one has a third-unit lobe. Shape 3 exists because ps21's reference genuinely omits the
+        /// lobe texture's own alpha; giving it shape 2 would be a new bug, not a simplification.
+        /// </summary>
+        public int Lobe2;
+        /// <summary>
+        /// The second unit's lobe is scaled by UNIT 1's own texture weight -- the legacy's
+        /// u_tex_sample_alpha.g, retail's cb0[6].y. True for pixel shaders 20 and 23 and false
+        /// for 13 and 14, whose reference multiplies the lobe by nothing at all.
+        /// </summary>
+        public bool Lobe2Weighted;
+        /// <summary>
+        /// The FIRST unit contributes an additive lobe: unit0.rgb * unit0.a, scaled by unit 0's
+        /// own texture weight. ps24 alone, and it is the only lobe in the table that does not sit
+        /// on the batch's LAST texture unit -- retail reads cb0[22].x for it where every other
+        /// weighted lobe reads .y or .z.
+        /// </summary>
+        public bool Lobe0;
         public bool Known;        // false: not implemented -- drawn from unit 0 alone, and logged
     }
 
     static CombinerPlan Plan(int mode, int alphaMode, float scale, bool unit1)
     {
+        return Plan(mode, alphaMode, scale, unit1, false, 0);
+    }
+
+    /// <summary>As Plan, and the pixel shader also adds the third unit as a luminous lobe.</summary>
+    static CombinerPlan Plan(int mode, int alphaMode, float scale, bool unit1, bool lobe)
+    {
+        return Plan(mode, alphaMode, scale, unit1, lobe, 0);
+    }
+
+    /// <summary>As Plan, with a SECOND-unit additive lobe: 1 = unit1.rgb * unit1.a,
+    /// 2 = that masked by (1 - unit0.a).</summary>
+    static CombinerPlan Plan(int mode, int alphaMode, float scale, bool unit1, bool lobe, int lobe2)
+    {
+        return Plan(mode, alphaMode, scale, unit1, lobe, lobe2, false);
+    }
+
+    /// <summary>As Plan, and the second unit's lobe is scaled by unit 1's own texture weight.</summary>
+    static CombinerPlan Plan(int mode, int alphaMode, float scale, bool unit1, bool lobe, int lobe2,
+                             bool lobe2Weighted)
+    {
         CombinerPlan p;
         p.Mode = mode; p.AlphaMode = alphaMode; p.AlphaScale = scale;
-        p.NeedsUnit1 = unit1; p.Known = true;
+        p.NeedsUnit1 = unit1; p.Lobe = lobe; p.Lobe2 = lobe2;
+        p.Lobe2Weighted = lobe2Weighted; p.Lobe0 = false; p.Known = true;
         return p;
     }
+
+    /// <summary>The same plan, plus the FIRST unit's weighted lobe. One caller: ps24.</summary>
+    static CombinerPlan WithLobe0(CombinerPlan p) { p.Lobe0 = true; return p; }
 
     /// <summary>
     /// What one M2 pixel shader reduces to here. Ported case by case from the legacy viewport's
     /// own GLSL combiner (ModelRenderPass.cpp), not from the shader NAMES -- "Combiners_Mod_Mod2x"
     /// says nothing until you read that it is unit0 * unit1 * 2 with a discard of u0.a * u1.a * 2.
     ///
-    /// One thing makes the table much shorter than it looks: several combiners differ from a
-    /// simpler one only in a SPECULAR lobe, and the legacy viewport multiplies that lobe by a
-    /// weight that is ZERO unless an opt-in environment variable is set. Reproducing its default
-    /// means dropping the lobe too, which collapses those cases onto plain single-texture colour
-    /// (8, 10, 13, 14, 16, 20, 23) or onto pixel shader 12 (15).
+    /// Several combiners differ from a simpler one only in an ADDITIVE lobe, and the legacy
+    /// viewport multiplies that lobe by a weight pinned to ZERO unless an opt-in environment
+    /// variable is set (ModelRenderPass.cpp:661-662). This table used to reproduce that default
+    /// and drop the lobe, collapsing those cases onto plain single-texture colour. That is a
+    /// default of the legacy viewport, not a property of the material, and the lobes are being
+    /// restored one at a time. DONE: 15 (third unit, weighted at unit 2), 8, 10, 13, 14, 16 and
+    /// 21 (second unit, unweighted), 20 and 23 (second unit, weighted at unit 1). STILL
+    /// COLLAPSING: only 8 and 10, and those are held back on purpose rather than undecoded --
+    /// see their cases below. Every other combiner in this table that carries an additive term now
+    /// computes it. What remains unimplemented (18, 26, 28, 30, 31, 32, 34, 35, 36 and the rest of
+    /// the default arm) has no dropped lobe -- those are diffuse shapes we have not written, not
+    /// terms we are throwing away.
     /// </summary>
     static CombinerPlan PlanCombiner(int pixelShader)
     {
@@ -1719,17 +1823,91 @@ public static class WmvModelBuilder
             // colour from unit 0 alone
             case 0:  return Plan(0, 0, 1f, false);   // Combiners_Opaque
             case 1:  return Plan(0, 1, 1f, false);   // Combiners_Mod
-            case 13: return Plan(0, 0, 1f, false);   // Opaque_AddAlpha        (lobe dropped)
-            case 14: return Plan(0, 0, 1f, false);   // Opaque_AddAlpha_Alpha  (lobe dropped)
-            case 20: return Plan(0, 0, 1f, false);   // Opaque_AddAlpha_Wgt    (lobe dropped)
-            case 10: return Plan(0, 1, 1f, false);   // Mod_AddNA              (lobe dropped)
-            case 16: return Plan(0, 1, 1f, false);   // Mod_AddAlpha           (lobe dropped)
-            case 23: return Plan(0, 1, 1f, false);   // Mod_AddAlpha_Wgt       (lobe dropped)
+            // ..._AddAlpha. The diffuse is unit 0 alone; the "_AddAlpha" is the SECOND unit
+            // added as a luminous lobe, and on 14 it is masked by the inverse of unit 0's alpha.
+            //
+            //   ps13   mat_diffuse = mesh_color * tex1.rgb; specular = tex2.rgb * tex2.a;
+            //   ps14   ... ; specular = tex2.rgb * tex2.a * (1.0 - tex1.a);
+            //   (Source/games/wow/ModelRenderPass.cpp:120-121)
+            //
+            // Neither multiplies by a texture weight -- unlike ps15, ps20, ps23 and ps24, the
+            // reference multiplies by nothing at all, so the gain is literally 1 and there is no
+            // track to resolve. The whole gap was the dropped term.
+            //
+            // ON ps14 THE LOBE IS THE ENTIRE MATERIAL. Without it the combiner collapses to plain
+            // Combiners_Opaque and the batch draws as an inert flat surface -- which is what 6,482
+            // batches on 5,036 models have been doing. The legacy viewport calls these
+            // "glow / energy / cloth-effect materials ... NOT reflective metal"
+            // (ModelRenderPass.cpp:58-64, isAdditiveEnvPixelShader), and its own reason for
+            // dropping them was that it multiplies the lobe by a weight pinned to zero unless an
+            // opt-in environment variable is set (:661-662) -- a default, not a statement about
+            // the material.
+            case 13: return Plan(0, 0, 1f, true, false, 1);
+            case 14: return Plan(0, 0, 1f, true, false, 2);
+            // ..._Wgt. ps13's lobe, scaled by UNIT 1's own texture weight -- the legacy's
+            // u_tex_sample_alpha.g, retail's cb0[6].y, one channel over from the .b that ps15
+            // reads. Both arms are otherwise identical to 13 and 16 respectively:
+            //   ps20  specular = tex2.rgb * tex2.a * u_tex_sample_alpha.g   (:127)
+            //   ps23  ... and discard_alpha = tex1.a, can_discard           (:130)
+            //
+            // THE WEIGHT IS NOT OPTIONAL HERE, and that is why it lands with the lobe rather than
+            // after it. Across all 723 models in the client that carry these two combiners, 697 of
+            // 1,130 batches (61.7 %) have an ANIMATED weight track, exactly ONE constant in the
+            // whole set equals 1.0 -- the value the shader would default to -- and 17 are authored
+            // at 0.0, i.e. the artist switched the lobe off. Shipping the lobe without the weight
+            // would put content on screen that the model says to hide.
+            case 20: return Plan(0, 0, 1f, true, false, 1, true);
+            // Mod_AddNA: the raw second texture added, with unit 0's alpha as the discard.
+            //   specular = tex2.rgb   (ModelRenderPass.cpp:117)
+            // Confirmed against retail: combiners_uber_2_2.bls case l(10) leaves the t1 sample in
+            // the lobe register untouched and sets the diffuse to t0 -- no alpha, no mask, no
+            // weight -- and its alpha arm is an empty `break`, i.e. unit 0's alpha stands.
+            case 10: return Plan(0, 1, 1f, false);   // Mod_AddNA -- lobe HELD BACK, see below
+            // Mod_AddAlpha: ps13's lobe on a discarding pass.
+            //   specular = tex2.rgb * tex2.a; discard_alpha = tex1.a  (ModelRenderPass.cpp:123)
+            // No weight -- the reference multiplies the lobe by nothing.
+            // _AlphaMode is unchanged by this: it was already 1 through the !combining fallback
+            // and is now 1 through the plan, so the discard behaves exactly as before.
+            case 16: return Plan(0, 1, 1f, true, false, 1);
+            case 23: return Plan(0, 1, 1f, true, false, 1, true);   // Mod_AddAlpha_Wgt
             case 33: return Plan(0, 1, 1f, false);   // Mod_Depth
 
             // the alpha, but not the colour, needs unit 1
-            case 8:  return Plan(0, 4, 1f, true);    // Mod_Add                (lobe dropped)
-            case 21: return Plan(0, 4, 1f, true);    // Mod_Add_Alpha          (lobe dropped)
+            // Mod_Add: the same raw lobe, with both alphas summed for the discard.
+            //   specular = tex2.rgb; discard_alpha = tex1.a + tex2.a   (:115)
+            // Retail agrees on both halves: case l(8) is `mov r4.xyz, r6.xyzx` (the raw t1 sample)
+            // beside `mov r5.xyz, r3.xyzx`, and its alpha arm is `add r1.w, r1.w, r2.w`.
+            //
+            // THIS IS THE LARGEST-MAGNITUDE TERM IN THE TABLE -- a whole texture added with
+            // nothing attenuating it -- and it is also the widest-reaching: only 1,275 batches,
+            // but 52,180 of 120,978 CreatureDisplayInfo rows (43.13 %) resolve to a model that
+            // carries it, because humanoid NPCs reuse about 217 player-race bodies. It is the
+            // character EYES geoset (3301 -- the iris, not the 1700-1799 eye-glow).
+            // ps8 AND ps10 ARE HELD BACK DELIBERATELY, and this is not a gap in the decode.
+            // Their lobe is `specular = tex2.rgb` -- the raw second texture, no alpha, no weight --
+            // confirmed in retail in all three of combiners_uber_2_2's switch blocks (case l(8) at
+            // asm 2_2/0.asm:186 and :309, case l(10) at :194 and :320). We implemented exactly
+            // that, and on knife_1h_naxx25_d_01 it produced a white blowout across the blade that
+            // the user's in-game screenshot of the same dagger does not have. It is not a phase of
+            // the unit-1 scroll either: swept across the animation the blade's p99 is 254 at every
+            // instant and 8-15 % of it clips.
+            //
+            // THE CAUSE IS UPSTREAM AND IT IS NAMED. Retail multiplies the combiner output by the
+            // VERTEX COLOUR -- `mul r3.xyz, r5.xyzx, v1.xyzx`, asm 2_2/0.asm:477 -- and this
+            // renderer never uploads vertex colours at all (mesh.colors is never assigned). On the
+            // stacked additive batches these two combiners live on, vertex colour is exactly how
+            // the artist tones the layers down, so every such batch is already too bright here and
+            // a raw additive lobe on top is what made it visible.
+            //
+            // Restore these two AFTER the vertex-colour multiply exists, not before. Everything
+            // needed is in place: Lobe2 shape 4 is the raw lobe and the wiring is understood.
+            case 8:  return Plan(0, 4, 1f, true);    // Mod_Add   -- lobe HELD BACK, see above
+            // Mod_Add_Alpha. THE ONE THAT DOES NOT FOLLOW THE PATTERN:
+            //   specular = tex2.rgb * (1.0 - tex1.a)   (ModelRenderPass.cpp:128)
+            // There is no tex2.a in it. Every other second-unit lobe in the table multiplies by
+            // the lobe texture's own alpha and this one does not, so it gets its own shape rather
+            // than ps14's. Unit 1 was already bound here for the alpha mode (tex1.a + tex2.a).
+            case 21: return Plan(0, 4, 1f, true, false, 3);
 
             // products of the two units
             case 5:  return Plan(1, 0, 1f, true);    // Opaque_Opaque
@@ -1745,9 +1923,35 @@ public static class WmvModelBuilder
             // masked by unit 0's own alpha -- on a creature skin that channel is a reflection
             // mask, not transparency
             case 12: return Plan(12, 0, 1f, true);   // Opaque_Mod2xNA_Alpha
-            case 15: return Plan(12, 0, 1f, true);   // ..._Add: third unit only fed the lobe
+            // ..._Add. The diffuse half is ps12's; the "_Add" half is a THIRD unit added as an
+            // authored luminous term. Retail computes both -- combiners_uber_3_3.bls case 15 is
+            // mix(t0*t1*2, t0, t0.a) into r6 and t2.rgb*t2.a*cb0[6].z into r7, added at the end --
+            // and the legacy viewport has the same two terms at ModelRenderPass.cpp:122 and :156.
+            case 15: return Plan(12, 0, 1f, true, true);
+            // Mod_AddAlpha_Alpha. ps14's lobe with a LUMINANCE-WEIGHTED discard alpha, and that
+            // alpha is why this one sat in the default arm rather than beside 14:
+            //   specular      = tex2.rgb * tex2.a * (1 - tex1.a)
+            //   discard_alpha = tex1.a + tex2.a * (0.3*r + 0.59*g + 0.11*b)   (:124)
+            // Retail agrees in both switches: the colour arm at asm 2_2/0.asm:215 is byte-for-byte
+            // ps14's, and the alpha is `dp3 r1.y, r6.xyzx, l(0.3, 0.59, 0.11)` then
+            // `mad r4.w, r6.w, r1.y, r3.w` (:347-352). Those are the gamma-domain NTSC weights,
+            // which is the right domain for this shader since the working-space fix.
+            case 17: return Plan(0, 5, 1f, true, false, 2);
             case 22: return Plan(3, 0, 1f, true);    // Opaque_ModNA_Alpha
             case 29: return Plan(4, 0, 1f, true);    // Opaque_Alpha (decal)
+            // Opaque_Alpha_Alpha: ps29's decal diffuse, plus a lobe on the FIRST unit.
+            //   mat_diffuse = mix(tex1.rgb, tex2.rgb, tex2.a)
+            //   specular    = tex1.rgb * tex1.a * u_tex_sample_alpha.r    (:131)
+            // Retail: `mad r5.xyz, r4.wwww, r6.xyzx, r3.xyzx` is the decal mix, then
+            // `mul r6.xyz, r3.wwww, r3.xyzx` / `mul r4.xyz, r6.xyzx, cb0[22].xxxx` is the lobe --
+            // unit 0's own colour and alpha, scaled by unit 0's weight (asm 2_2/0.asm:249-253,
+            // and identically at :386-391). Alpha is 1.
+            //
+            // Unit 0's weight is the SAME track that feeds the pass opacity, so this value is used
+            // twice on a ps24 batch. That is not double-counting an error: the legacy does the
+            // same -- WoWModel.cpp:1807 assigns transLookup[transid] to pass->opacity, and its
+            // ps24 arm multiplies the lobe by u_tex_sample_alpha.r, which is that same entry.
+            case 24: return WithLobe0(Plan(4, 0, 1f, true));
 
             default:
             {
@@ -1982,6 +2186,7 @@ public static class WmvModelBuilder
     static WmvMaterialAnimBinding ResolveAnimBinding(M2ParsedModel model, M2Batch batch, int materialIndex,
                                                      M2BlendMode mode, CombinerPlan plan,
                                                      bool unit0Env, bool unit1Env, bool useUnit1,
+                                                     bool unit2Env, bool useUnit2,
                                                      Action<string> log)
     {
         var b = new WmvMaterialAnimBinding();
@@ -1989,6 +2194,12 @@ public static class WmvModelBuilder
         b.Submesh = batch.SubmeshIndex;
         b.Color = batch.HasColor && batch.ColorIndex < model.Colors.Length ? batch.ColorIndex : -1;
         b.Weight = ResolveWeightIndex(model, batch);
+        // Unit 2's own weight, for a combiner that actually has a third unit. Resolved only when
+        // the lobe will consume it, so a two-unit material's animator wake-up condition does not
+        // change. See M2MaterialEval.ResolveWeightIndex(model, batch, unit).
+        b.Weight1 = plan.Lobe2Weighted && useUnit1
+                    ? M2MaterialEval.ResolveWeightIndex(model, batch, 1) : -1;
+        b.Weight2 = plan.Lobe && useUnit2 ? M2MaterialEval.ResolveWeightIndex(model, batch, 2) : -1;
         b.Static = batch.Static;
         b.Unit0Env = unit0Env;
         b.Unit1Env = unit1Env;
@@ -2001,12 +2212,31 @@ public static class WmvModelBuilder
         // :630). Unit 1 exists only for a two-unit material (WoWModel.cpp:1861 "shaderTexCount > 1").
         b.Transform0 = -1;
         b.Transform1 = -1;
+        b.Transform2 = -1;
         if (!b.Static)
         {
             int t0 = ResolveTransformIndex(model, batch, 0);
             int t1 = batch.TextureCount >= 2 ? ResolveTransformIndex(model, batch, 1) : -1;
+            // UNIT 2 TAKES UNIT 0's MATRIX, NOT ITS OWN COMBO ENTRY.
+            //
+            // The M2 reserves a texture_transform_combos slot for a third unit, and reading it is
+            // the obvious thing to do -- but retail does not. All 40 vertex programs of the
+            // Diffuse_T1_Env_T1 family compute ONE texture matrix and write the same register to
+            // both texcoord outputs:
+            //     dp3 r1.x, cb0[3].xywx, r0.xyzx
+            //     dp3 r1.y, cb0[4].xywx, r0.xyzx
+            //     mov o5.xy, r1.xyxx      ; unit 0's coordinate
+            //     mov o6.xy, r1.xyxx      ; unit 2's -- the same one
+            // (combiners_uber_3_3.bls, vertex program 0, :81-84). The pixel shader then samples t0
+            // at that interpolant and t2 at v6.xy. There is no third matrix anywhere in the program.
+            //
+            // On the benchmark shoulder this changes nothing -- its texture_transform_combos are
+            // [65535, 0, 65535] and combo 0 resolves both ways to "none" -- so it is a latent
+            // correctness fix, for a ps15 material that scrolls its unit 0.
+            int t2 = batch.TextureCount >= 3 ? t0 : -1;
             b.Transform0 = unit0Env ? -1 : t0;
             b.Transform1 = unit1Env || !useUnit1 ? -1 : t1;
+            b.Transform2 = unit2Env || !useUnit2 ? -1 : t2;
             if (log != null && (t0 >= 0 && unit0Env || t1 >= 0 && unit1Env))
                 log(string.Format("matanim: submesh {0} has a texture transform on an ENVIRONMENT unit " +
                                   "(unit 0 -> {1}, unit 1 -> {2}); not applied -- a sphere map is not " +
@@ -2028,6 +2258,26 @@ public static class WmvModelBuilder
                 ? model.TextureTransformLookup[combo].ToString() : "past lookup";
             string l1 = combo + 1 < model.TextureTransformLookup.Length
                 ? model.TextureTransformLookup[combo + 1].ToString() : "past lookup";
+            // The unit-2 weight is stated with its track shape, because it is the ps15 lobe's
+            // gain and "which track, animated or not" is the whole question about it.
+            string w2 = "none";
+            if (b.Weight2 >= 0 && b.Weight2 < model.TextureWeightTracks.Length)
+            {
+                M2Track<float> wt = model.TextureWeightTracks[b.Weight2];
+                float lo = 1f, hi = 1f;
+                for (int k = 0; k < wt.Values.Length; k++)
+                {
+                    if (k == 0 || wt.Values[k] < lo) lo = wt.Values[k];
+                    if (k == 0 || wt.Values[k] > hi) hi = wt.Values[k];
+                }
+                w2 = string.Format("track {0}, {1} key(s), {2}, range {3:F4}..{4:F4}",
+                                   b.Weight2, wt.Values.Length,
+                                   wt.IsGlobal ? "global sequence " + wt.GlobalSequence : "sequence-local",
+                                   lo, hi);
+            }
+            int wcombo = batch.TextureWeightComboIndex;
+            string wl = wcombo + 2 < model.TextureWeightLookup.Length
+                ? model.TextureWeightLookup[wcombo + 2].ToString() : "past lookup";
             log(string.Format("matanim: submesh {0} binds colour {1} weight {2} xf0 {3} xf1 {4} " +
                               "(combo {5} -> lookup[{5}]={6}, lookup[{7}]={8}; {9} transform(s) in " +
                               "the model; units {10}; static {11}; unit0 {12}; unit1 {13})",
@@ -2035,6 +2285,32 @@ public static class WmvModelBuilder
                               combo, l0, combo + 1, l1, model.TextureTransforms.Length,
                               batch.TextureCount, b.Static ? "yes" : "no",
                               unit0Env ? "env" : "stored", unit1Env ? "env" : (useUnit1 ? "stored" : "unused")));
+            log(string.Format("matanim: submesh {0} unit-2 weight (the ps15 lobe's gain): {1} " +
+                              "(weight combo {2} -> lookup[{3}]={4})",
+                              batch.SubmeshIndex, w2, wcombo, wcombo + 2, wl));
+            if (plan.Lobe2Weighted)
+            {
+                string w1 = "none";
+                if (b.Weight1 >= 0 && b.Weight1 < model.TextureWeightTracks.Length)
+                {
+                    M2Track<float> wt1 = model.TextureWeightTracks[b.Weight1];
+                    float lo1 = 1f, hi1 = 1f;
+                    for (int k = 0; k < wt1.Values.Length; k++)
+                    {
+                        if (k == 0 || wt1.Values[k] < lo1) lo1 = wt1.Values[k];
+                        if (k == 0 || wt1.Values[k] > hi1) hi1 = wt1.Values[k];
+                    }
+                    w1 = string.Format("track {0}, {1} key(s), {2}, range {3:F4}..{4:F4}",
+                                       b.Weight1, wt1.Values.Length,
+                                       wt1.IsGlobal ? "global sequence " + wt1.GlobalSequence : "sequence-local",
+                                       lo1, hi1);
+                }
+                string wl1 = wcombo + 1 < model.TextureWeightLookup.Length
+                    ? model.TextureWeightLookup[wcombo + 1].ToString() : "past lookup";
+                log(string.Format("matanim: submesh {0} unit-1 weight (the ps20/23 lobe's gain): {1} " +
+                                  "(weight combo {2} -> lookup[{3}]={4})",
+                                  batch.SubmeshIndex, w1, wcombo, wcombo + 1, wl1));
+            }
         }
         return b;
     }
@@ -2183,7 +2459,43 @@ public static class WmvModelBuilder
 
     const string CombinerModeProperty = "_CombinerMode";
     const string SecondTexProperty = "_SecondTex";
+    const string FirstUnitLobeProperty = "_FirstUnitLobe";
+    const string FirstUnitWeightProperty = "_FirstUnitWeight";
+    const string SecondUnitLobeProperty = "_SecondUnitLobe";
+    const string SecondUnitWeightProperty = "_SecondUnitWeight";
+    const string ThirdTexProperty = "_ThirdTex";
+    const string ThirdUnitLobeProperty = "_ThirdUnitLobe";
+    const string ThirdUnitWeightProperty = "_ThirdUnitWeight";
+
+    /// <summary>
+    /// IS THE ps15 LUMINOUS LOBE ADDED TO THE FRAME? Currently NO, deliberately.
+    ///
+    /// Everything the lobe needs is built and bound: the host forwards the real texture-type-3
+    /// binding it already made, unit 2 is resolved with its own coordinate source, address mode
+    /// and transform, and _ThirdTex carries it. Only the last step -- adding
+    /// t2.rgb * t2.a * scale to the shaded colour -- is withheld, because the SCALE is not known.
+    ///
+    /// Retail scales that term by cb0[6].z, a per-material colour constant (the same cb0[6] is
+    /// the "Const" of Combiners_Mod_Mod_Mod_Const in the same program). Its draw-time value is
+    /// not recoverable from the shader binary, and 1.0 -- the only value with a source behind it,
+    /// this repository's own u_tex_sample_alpha placeholder at ModelRenderPass.cpp:656 -- was
+    /// measured to roughly DOUBLE the albedo of the armour benchmark, because on armour the host
+    /// binds texture type 3 to the item skin and ps15 samples it at unit 0's UV set, so
+    /// t2 == t0 and that skin's alpha averages 229/255. Broad doubling is not the authored glow.
+    ///
+    /// So the transport lands and the arithmetic waits. Flipping this to true is the whole of
+    /// re-enabling it, once the retail scale and the retail type-3 binding are settled.
+    /// See parity/ps15-third-unit-implementation.txt.
+    /// </summary>
+    const bool ThirdUnitLobeArmed = true;
     static bool combinerProbed, combinerAvailable;
+
+    /// <summary>
+    /// Upload textures undecoded (see CreateTexture). False restores the old sRGB-sampled
+    /// behaviour so both can be rendered from one build; WmvMain.ConfigureDisplayTransform sets
+    /// it from WMV_DISPLAY.
+    /// </summary>
+    public static bool AuthoredTextureDomain = true;
 
     static Texture2D CreateTexture(BlpImage img, string name, bool dropAlpha)
     {
@@ -2209,7 +2521,18 @@ public static class WmvModelBuilder
         // The decoder hands over mip 0 only. Upload it with SetPixelData(level 0) and let
         // Apply(updateMipmaps: true) build the rest -- LoadRawTextureData on a mip-chained
         // texture would expect data for every level and reject a mip-0-sized array.
-        var tex = new Texture2D(img.Width, img.Height, TextureFormat.RGBA32, true) { name = name };
+        // COLOUR DOMAIN. linear:true does NOT mean "this image is linear light" -- it means
+        // "do not apply a transfer function when sampling", i.e. hand the shader the byte the
+        // artist painted. That is what WoW's own combiner and this application's OpenGL viewport
+        // both operate on, and WmvOpaque.shader is written for that domain and encodes once at
+        // the end. Leaving it sRGB silently decoded every texel and made every authored additive
+        // term land at roughly two thirds of its intended screen value.
+        //
+        // It also fixes mip generation: Unity averages the stored values, which is what the
+        // legacy viewport's GL_RGBA8 mip chain does too. Under the sRGB flag the averaging
+        // happened in a different domain from the one the material is defined in.
+        var tex = new Texture2D(img.Width, img.Height, TextureFormat.RGBA32, true,
+                                AuthoredTextureDomain) { name = name };
         tex.SetPixelData(pixels, 0);
         tex.Apply(true, false);
         tex.wrapMode = TextureWrapMode.Repeat;
@@ -2232,8 +2555,8 @@ public static class WmvModelBuilder
     /// for exactly how much of one it is.
     /// </summary>
     static Material CreateMaterial(M2MaterialDef def, M2BlendMode mode, CombinerPlan plan,
-                                   M2UvSource unit0Uv, M2UvSource unit1Uv,
-                                   Texture2D tex, Texture2D unit1Tex,
+                                   M2UvSource unit0Uv, M2UvSource unit1Uv, M2UvSource unit2Uv,
+                                   Texture2D tex, Texture2D unit1Tex, Texture2D unit2Tex,
                                    string name, Action<string> log)
     {
         var shader = FindRenderShader(log);
@@ -2256,6 +2579,19 @@ public static class WmvModelBuilder
         {
             if (combining) m.SetTexture(SecondTexProperty, unit1Tex);
             m.SetFloat(CombinerModeProperty, combining ? plan.Mode : 0);
+            // The second unit's additive lobe rides on the same binding as the combiner's second
+            // texture, so it is armed by the same condition and dies with it.
+            if (m.HasProperty(FirstUnitLobeProperty))
+                m.SetFloat(FirstUnitLobeProperty, combining && plan.Lobe0 ? 1f : 0f);
+            if (m.HasProperty(FirstUnitWeightProperty))
+                m.SetFloat(FirstUnitWeightProperty, 1f);
+            if (m.HasProperty(SecondUnitLobeProperty))
+                m.SetFloat(SecondUnitLobeProperty, combining ? plan.Lobe2 : 0);
+            // 1 until the animator writes the model's own track over it, which it does for every
+            // binding at Setup and again on every sequence change. Only a material with no
+            // animator binding at all keeps this value.
+            if (m.HasProperty(SecondUnitWeightProperty))
+                m.SetFloat(SecondUnitWeightProperty, 1f);
             // ALPHA-KEY KEYS ON ITS OWN TEXTURE, whatever combiner it resolved to.
             //
             // Without the second clause an alpha-keyed batch whose combiner yields alpha mode 0 --
@@ -2278,6 +2614,29 @@ public static class WmvModelBuilder
             m.SetFloat("_AlphaScale", combining ? plan.AlphaScale : 1f);
             m.SetFloat("_Unit1UV", (float)(int)unit1Uv);
             m.SetFloat("_Unit0UV", (float)(int)unit0Uv);
+
+            // THE THIRD UNIT'S LUMINOUS LOBE.
+            //
+            // Armed only when the combiner asks for it AND a real third texture arrived. There is
+            // deliberately no fallback to unit 0: the same M2 batch shape appears on armour, where
+            // the host binds the item skin to texture type 3, and on weapons, where it binds
+            // ArmorReflect4 -- and nothing the renderer can see tells those apart. Substituting
+            // unit 0 would paint a weapon's own diffuse on as a glow. The host forwards the
+            // binding it already made, and this samples exactly that.
+            bool lobe = ThirdUnitLobeArmed &&
+                        plan.Lobe && unit2Tex != null && !Debug_.MatColors &&
+                        m.HasProperty(ThirdUnitLobeProperty);
+            if (m.HasProperty(ThirdTexProperty) && lobe)
+                m.SetTexture(ThirdTexProperty, unit2Tex);
+            if (m.HasProperty(ThirdUnitLobeProperty))
+                m.SetFloat(ThirdUnitLobeProperty, lobe ? 1f : 0f);
+            // The lobe's gain. 1 until the animator writes the model's own track over it, which it
+            // does for every binding at Setup and again on every sequence change -- so this value
+            // only survives on a material with no animator binding at all.
+            if (m.HasProperty(ThirdUnitWeightProperty))
+                m.SetFloat(ThirdUnitWeightProperty, 1f);
+            if (m.HasProperty("_Unit2UV"))
+                m.SetFloat("_Unit2UV", (float)(int)unit2Uv);
         }
 
         string treatedAs;
@@ -2335,6 +2694,9 @@ public static class WmvModelBuilder
             // took the emissive path, or which coordinate unit 0 sampled -- and "the numbers did
             // not move" is then indistinguishable from "the fix never reached the material".
             "_AlphaMode {18} _Emissive {19} _Unit0UV {20} _Unit1UV {21}; " +
+            // The third unit: which coordinate it samples, and whether its luminous lobe is armed.
+            // _ThirdUnitLobe 1 means a real host-forwarded type-3 texture reached this material.
+            "_Unit2UV {23} _ThirdUnitLobe {24}; " +
             "WoW blend {15} depthWriteOff {16} twoSided {17} unlit {22}",
             m.name, s != null ? s.name : "<none>", s != null ? s.renderQueue : -1, treatedAs,
             m.renderQueue, m.GetTag("RenderType", false, "<unset>"),
@@ -2342,7 +2704,7 @@ public static class WmvModelBuilder
             Prop(m, "_DstBlend"), Prop(m, "_ZWrite"), Prop(m, "_Cull"), Prop(m, CombinerModeProperty),
             string.Join(",", m.shaderKeywords), mode, def.DepthWriteDisabled, def.TwoSided,
             Prop(m, "_AlphaMode"), Prop(m, "_Emissive"), Prop(m, "_Unit0UV"), Prop(m, "_Unit1UV"),
-            def.Unlit));
+            def.Unlit, Prop(m, "_Unit2UV"), Prop(m, ThirdUnitLobeProperty)));
 
         if (!shaderCanRenderOpaque)
             log("material '" + m.name + "': the resolved shader bakes blending, depth and culling " +

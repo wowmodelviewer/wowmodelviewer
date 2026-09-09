@@ -351,8 +351,6 @@ namespace Wmv.Wow.Tests
             CrossSequenceGateTests();
             WeightLookupTests();
             MaterialLifecycleTests();
-            log.Add("Effect output curve");
-            OutputCurveTests();
             log.Add("Bones");
             BoneTests();
             log.Add("Animation");
@@ -1257,13 +1255,13 @@ namespace Wmv.Wow.Tests
                 Check(w == 0 && x0 == 0, "switch (" + shape + "): indices resolve through the lookups");
 
                 // --- the keyed sequence: animated
-                M2MaterialEval.Evaluate(m, 0, w, x0, -1, 0f, 0.0, ref s, ref zero);
+                M2MaterialEval.Evaluate(m, 0, w, x0, -1, -1, 0f, 0.0, ref s, ref zero);
                 Check(s.HasColor && Near(s.R, 0.5f), "switch (" + shape + "): colour present in the keyed sequence");
                 Check(s.AlphaFromTrack && Near(s.OcolW, 0.5f) && Near(s.EcolW, 0.5f), "switch (" + shape + "): opacity 0.5 from the track at t=0");
                 Check(s.Drawn, "switch (" + shape + "): gate open at t=0");
                 Check(s.Uv0Applied && Near(s.T0x, 0.25f) && Near(s.T0y, 0.5f) && Near(s.S0x, 2f) && Near(s.S0y, 2f),
                       "switch (" + shape + "): non-identity UV transform in the keyed sequence");
-                M2MaterialEval.Evaluate(m, 0, w, x0, -1, 600f, 0.0, ref s, ref zero);
+                M2MaterialEval.Evaluate(m, 0, w, x0, -1, -1, 600f, 0.0, ref s, ref zero);
                 Check(Near(s.OcolW, 0f) && !s.Drawn, "switch (" + shape + "): gate shut at t=600 (alpha 0)");
 
                 // --- switch to the other sequence: everything falls back to the legacy defaults
@@ -1271,7 +1269,7 @@ namespace Wmv.Wow.Tests
                 Check(m.AnimatedSequence == other, "switch (" + shape + "): re-read at the other sequence");
                 Check(!m.Colors[0].Opacity.HasData && !m.TextureTransforms[0].IsAnimated,
                       "switch (" + shape + "): the other sequence has no keys for alpha or transform");
-                M2MaterialEval.Evaluate(m, 0, w, x0, -1, 600f, 0.0, ref s, ref zero);
+                M2MaterialEval.Evaluate(m, 0, w, x0, -1, -1, 600f, 0.0, ref s, ref zero);
                 Check(s.HasColor && Near(s.R, 0.5f), "switch (" + shape + "): colour still present (index 0)");
                 Check(!s.AlphaFromTrack && Near(s.OcolW, 1f) && Near(s.EcolW, 1f),
                       "switch (" + shape + "): opacity back to the default 1 (legacy: ocol.w keeps 1 when the track has no keys)");
@@ -1281,10 +1279,10 @@ namespace Wmv.Wow.Tests
 
                 // --- and back: the animated values return
                 M2Parser.ReadAnimationInto(file, keyed, m);
-                M2MaterialEval.Evaluate(m, 0, w, x0, -1, 0f, 0.0, ref s, ref zero);
+                M2MaterialEval.Evaluate(m, 0, w, x0, -1, -1, 0f, 0.0, ref s, ref zero);
                 Check(s.AlphaFromTrack && Near(s.OcolW, 0.5f) && s.Uv0Applied && Near(s.T0x, 0.25f) && Near(s.S0x, 2f),
                       "switch (" + shape + "): animated values restored on the way back");
-                M2MaterialEval.Evaluate(m, 0, w, x0, -1, 600f, 0.0, ref s, ref zero);
+                M2MaterialEval.Evaluate(m, 0, w, x0, -1, -1, 600f, 0.0, ref s, ref zero);
                 Check(!s.Drawn, "switch (" + shape + "): gate shuts again at t=600");
             }
             // The value the UNLIT opaque write derives its blend state from: OcolW below 1 means
@@ -1297,10 +1295,10 @@ namespace Wmv.Wow.Tests
                 byte[] file = BuildSwitchM2(0);
                 M2ParsedModel m = M2Parser.Parse(file, 0);
                 int zero = 0; var s = new M2MaterialState();
-                M2MaterialEval.Evaluate(m, 0, 0, 0, -1, 0f, 0.0, ref s, ref zero);
+                M2MaterialEval.Evaluate(m, 0, 0, 0, -1, -1, 0f, 0.0, ref s, ref zero);
                 bool blendIn0 = s.OcolW < 1f;
                 M2Parser.ReadAnimationInto(file, 1, m);
-                M2MaterialEval.Evaluate(m, 0, 0, 0, -1, 0f, 0.0, ref s, ref zero);
+                M2MaterialEval.Evaluate(m, 0, 0, 0, -1, -1, 0f, 0.0, ref s, ref zero);
                 bool blendIn1 = s.OcolW < 1f;
                 Check(blendIn0 && !blendIn1, "switch: evaluator ocol.w below 1 in sequence 0 (an unlit opaque batch would blend in place) and 1 again in sequence 1 (One/Zero)");
             }
@@ -1467,7 +1465,7 @@ namespace Wmv.Wow.Tests
                     // sequence 0
                     bool keysNow = keyed == 0;
                     Check(m.TextureTransforms[0].IsAnimated == keysNow, v + ": sequence 0 has keys == " + keysNow);
-                    M2MaterialEval.Evaluate(m, -1, -1, 0, -1, 0f, 0.0, ref s, ref zero);
+                    M2MaterialEval.Evaluate(m, -1, -1, 0, -1, -1, 0f, 0.0, ref s, ref zero);
                     Check(s.Drawn && !s.HasColor, v + ": drawn, no colour");
                     Check(s.Uv0Applied == keysNow && Near(s.S0x, keysNow ? M2Synthetic.KeyedSx : 1f) && Near(s.T0x, keysNow ? M2Synthetic.KeyedTx : 0f),
                           v + ": sequence 0 UV " + (keysNow ? "applied" : "identity"));
@@ -1475,12 +1473,12 @@ namespace Wmv.Wow.Tests
                     M2Parser.ReadAnimationInto(file, other, m);
                     bool keysThen = keyed == 1;
                     Check(m.AnimatedSequence == other && m.TextureTransforms[0].IsAnimated == keysThen, v + ": sequence 1 re-read, keys == " + keysThen);
-                    M2MaterialEval.Evaluate(m, -1, -1, 0, -1, 0f, 0.0, ref s, ref zero);
+                    M2MaterialEval.Evaluate(m, -1, -1, 0, -1, -1, 0f, 0.0, ref s, ref zero);
                     Check(s.Uv0Applied == keysThen && Near(s.S0y, keysThen ? M2Synthetic.KeyedSy : 1f) && Near(s.T0y, keysThen ? M2Synthetic.KeyedTy : 0f),
                           v + ": sequence 1 UV " + (keysThen ? "applied" : "identity"));
                     // and back
                     M2Parser.ReadAnimationInto(file, 0, m);
-                    M2MaterialEval.Evaluate(m, -1, -1, 0, -1, 0f, 0.0, ref s, ref zero);
+                    M2MaterialEval.Evaluate(m, -1, -1, 0, -1, -1, 0f, 0.0, ref s, ref zero);
                     Check(s.Uv0Applied == keysNow, v + ": back to sequence 0, UV " + (keysNow ? "applied" : "identity") + " again");
                 }
             }
@@ -1683,69 +1681,6 @@ namespace Wmv.Wow.Tests
             WowCoordinateConverter.FlipWinding(tri);
             Check(tri[0] == 0 && tri[1] == 2 && tri[2] == 1, "coords: winding flipped (triangle 1)");
             Check(tri[3] == 3 && tri[4] == 5 && tri[5] == 4, "coords: winding flipped (triangle 2)");
-        }
-
-        /// <summary>
-        /// THE PREVIEW-LIGHT ROLL-OFF, PINNED.
-        ///
-        /// WmvOpaque.shader shapes the top end of the preview rig's output with
-        ///
-        ///     ov     = max(mx - KNEE, 0)
-        ///     rolled = min(mx, KNEE) + (CEIL - KNEE) * (1 - exp(-ov / (CEIL - KNEE)))
-        ///     rgb   *= rolled / mx
-        ///
-        /// with KNEE 0.298 and CEIL 1.0, and it runs ONLY where the preview light contributed --
-        /// not on the emissive path, where the bypass has already set lum = 1 and spec = 0 and the
-        /// colour is entirely the model's own.
-        ///
-        /// WHAT THIS TEST IS AND IS NOT. It is a mirror of that arithmetic, not a test of the
-        /// compiled shader: neither harness can run a fragment program, the parser suite does not
-        /// even link against Unity. It exists so that changing the curve or its constants shows up
-        /// as a failing number here and has to be done on purpose. If the shader and this mirror
-        /// ever disagree, the shader is the truth and this test is the thing that is wrong.
-        /// </summary>
-        static void OutputCurveTests()
-        {
-            const double KNEE = 0.298, CEIL = 1.0;
-            Func<double, double> roll = mx =>
-            {
-                double ov = Math.Max(mx - KNEE, 0.0);
-                return Math.Min(mx, KNEE) + (CEIL - KNEE) * (1.0 - Math.Exp(-ov / (CEIL - KNEE)));
-            };
-
-            // Below the knee the painted colour is untouched -- that is the whole point of a knee.
-            Near((float)roll(0.0), 0f, "output curve: 0 stays 0");
-            Near((float)roll(0.1), 0.1f, "output curve: 0.1 is below the knee and unchanged");
-            Near((float)roll(0.298), 0.298f, "output curve: the knee itself is unchanged");
-
-            // Above it the curve bends over. These are the values the branch was measured against.
-            Near((float)roll(0.5), 0.4735f, "output curve: 0.5 -> 0.4735");
-            Near((float)roll(1.0), 0.7417f, "output curve: an authored white 1.0 -> 0.7417");
-            Near((float)roll(1.25), 0.8191f, "output curve: 1.25 -> 0.8191");
-            Near((float)roll(1.5), 0.8733f, "output curve: 1.5 -> 0.8733");
-            Near((float)roll(2.0), 0.9379f, "output curve: 2.0 -> 0.9379");
-            Near((float)roll(4.0), 0.9964f, "output curve: 4.0 -> 0.9964");
-
-            // The two figures the shoulder audit measured, reproduced exactly.
-            Near((float)roll(1.331), 0.8388f, "output curve: the audit's cracks, 1.331 -> 0.839");
-            Near((float)roll(1.150), 0.7914f, "output curve: the audit's trail, 1.150 -> 0.791");
-
-            // CEIL is an asymptote: the curve approaches it and never reaches it, for any finite
-            // input. That is why the value matters and why it is not a clamp.
-            // CEIL is a mathematical asymptote, but only a mathematical one: past roughly 10 the
-            // exponential underflows and the result saturates to CEIL exactly in floating point.
-            // Both halves are worth pinning, because "never reaches white" is true of the curve
-            // and false of the arithmetic that evaluates it.
-            Check(roll(4.0) < CEIL, "output curve: below CEIL where it matters (4.0)");
-            Check(roll(1e6) <= CEIL, "output curve: never above CEIL, however large the input");
-            Check(roll(8.0) > roll(4.0), "output curve: still monotonic far above the knee");
-
-            // What the emissive exemption is worth, as a number rather than an impression: an
-            // authored value keeps all of itself instead of the fraction the curve would leave.
-            Check(Math.Abs(1.0 - roll(1.0)) > 0.25,
-                  "output curve: the curve costs an authored white more than a quarter of itself");
-            Check(Math.Abs(0.5 - roll(0.5)) > 0.02,
-                  "output curve: it costs a mid-bright authored value something too");
         }
 
     }

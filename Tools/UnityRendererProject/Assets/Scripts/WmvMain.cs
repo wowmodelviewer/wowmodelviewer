@@ -177,6 +177,8 @@ public class WmvMain : MonoBehaviour
         // combiner stays exactly as it was.
         Shader.SetGlobalFloat("_WmvRig", WmvModelBuilder.Debug_.Rig);
 
+        ConfigureDisplayTransform();
+
         // Cast shadows: the model occluding its own key light (a rein across the mount's body).
         // The rig renders a depth map from the key's viewpoint each frame; the shader attenuates
         // the key term where the map says something stands in the way. See WmvShadowRig.cs.
@@ -1318,6 +1320,80 @@ public class WmvMain : MonoBehaviour
     }
 
     /// <summary>Write one readback frame as a PNG next to the player (-wmvLightDump).</summary>
+    /// <summary>
+    /// THE DISPLAY TRANSFORM. A model viewer shows what an artist painted; it does not photograph
+    /// a scene, and it must not put a camera response curve between the two.
+    ///
+    /// The Unity project was created from the URP template, and the template's SampleSceneProfile
+    /// ships with Tonemapping enabled in Neutral mode. Nobody chose that for WoW content. Combined
+    /// with the pipeline asset's ColorGradingMode = LowDynamicRange, which clamps to [0,1] before
+    /// the grading LUT, it is a hard ceiling on the whole renderer:
+    ///
+    ///     NeutralTonemap(1.0) = 0.5444 linear  ->  sRGB byte 195
+    ///
+    /// A pure white surface could not exceed 195, and nothing could reach 250 at all. Measured on
+    /// item 207140 (Drakestalker's Trophy Pauldrons): with the tone curve enabled, 0.00 % of the
+    /// model's pixels reached 250 in any channel and 5.0 % reached 200; with it disabled, 3.3 %
+    /// and 14.2 %. The authored lava network -- the whole point of that material -- was being
+    /// deleted after the material had drawn it correctly.
+    ///
+    /// Neither renderer of record applies a tone curve: retail's M2 path has none, and this
+    /// application's OpenGL viewport saturates at the framebuffer. So it goes.
+    ///
+    /// The vignette goes with it, for the same reason: it is a photographic affectation, it is not
+    /// in either reference, and it darkens the frame edges of a capture.
+    ///
+    /// BLOOM STAYS. Glowing WoW content does bleed light, the effect is authored for, and it now
+    /// operates on genuine linear values above 1 rather than on a range that was clamped flat.
+    ///
+    /// WMV_DISPLAY selects, for A/B only:
+    ///   full     (default) authored working space + no tone curve + no vignette
+    ///   notonemap          tone curve and vignette off, old sampling domain
+    ///   legacy             exactly what the renderer did before this change
+    /// </summary>
+    static void ConfigureDisplayTransform()
+    {
+        string want = System.Environment.GetEnvironmentVariable("WMV_DISPLAY");
+        if (string.IsNullOrEmpty(want)) want = "full";
+        bool legacy = (want == "legacy");
+        bool authored = (want == "full");
+
+        WmvModelBuilder.AuthoredTextureDomain = authored;
+        Shader.SetGlobalFloat("_WmvAuthoredDomain", authored ? 1f : 0f);
+
+        int touched = 0;
+        var vols = UnityEngine.Object.FindObjectsByType<UnityEngine.Rendering.Volume>(
+                       FindObjectsSortMode.None);
+        foreach (var v in vols)
+        {
+            if (v == null || v.profile == null) continue;
+            UnityEngine.Rendering.Universal.Tonemapping tm;
+            UnityEngine.Rendering.Universal.Vignette vg;
+
+            // Setting VolumeComponent.active alone does NOT take effect here -- measured: four
+            // variants came back byte-identical to the baseline that way. Overriding the
+            // PARAMETER is what the pipeline actually reads.
+            if (v.profile.TryGet(out tm))
+            {
+                tm.mode.overrideState = true;
+                tm.mode.value = legacy ? UnityEngine.Rendering.Universal.TonemappingMode.Neutral
+                                       : UnityEngine.Rendering.Universal.TonemappingMode.None;
+                touched++;
+            }
+            if (v.profile.TryGet(out vg))
+            {
+                vg.intensity.overrideState = true;
+                vg.intensity.value = legacy ? 0.2f : 0f;
+                touched++;
+            }
+        }
+        Debug.Log(string.Format(
+            "WMV: display transform '{0}' -- authored texture domain {1}, shader encode {2}, "
+            + "{3} volume parameter(s) set across {4} volume(s)",
+            want, WmvModelBuilder.AuthoredTextureDomain ? "ON" : "off",
+            authored ? "ON" : "off", touched, vols != null ? vols.Length : 0));
+    }
+
     void DumpPng(Color32[] px, int w, int h, string name)
     {
         try

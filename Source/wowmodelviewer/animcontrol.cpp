@@ -478,7 +478,7 @@ void AnimControl::SetSkinByDisplayID(int cdi)
     // note that these aren't the same group, just equivalent:
     if (gp == *(static_cast<TextureGroup *> (skinList->GetClientData(i))))
     {
-      SetSkin(i);
+      SetSkin(i, cdi);
       return;
     }
   }
@@ -843,6 +843,8 @@ bool AnimControl::UpdateItemModel(WoWModel *m)
       alreadyUsedTextures.insert(tex);
       grp.tex[0] = tex;
       int cdi = r.values[i][2].toInt();
+      grp.displayId = cdi;      // this group came from ModelResourcesID1 of that display
+      grp.modelIndex = 0;
       int pci = r.values[i][1].toInt(); // particleColorIndex, for replacing particle color
       if (pci)
       {
@@ -893,6 +895,8 @@ bool AnimControl::UpdateItemModel(WoWModel *m)
       alreadyUsedTextures.insert(tex);
       grp.tex[0] = tex;
       int cdi = r.values[i][2].toInt();
+      grp.displayId = cdi;      // this group came from ModelResourcesID2 of that display
+      grp.modelIndex = 1;
       int pci = r.values[i][1].toInt(); // particleColorIndex, for replacing particle color
       if (pci)
       {
@@ -1529,12 +1533,25 @@ bool AnimControl::selectedSkinTextures(std::vector<std::pair<int, int> > & out)
        it != singleSkinOverrides.end(); ++it)
     byType[it->first] = it->second;
 
+  // The type-3 accent slot. The application has ALREADY decided what belongs there -- the item's
+  // own skin on armour (the rebind further down this file), the grey blade sheen that model load
+  // installs on weapons -- and that decision stays here, in the host, where the armour/weapon rule
+  // already lives. Forwarding the binding rather than the rule is what lets the renderer sample
+  // the real texture without having to know what kind of item it is drawing.
+  // Never overrides a slot the user picked by hand: those are applied above and win.
+  if (g_selModel && byType.find(TEXTURE_WEAPON_BLADE) == byType.end())
+  {
+    const int accent = g_selModel->boundSpecialFileDataId(TEXTURE_WEAPON_BLADE);
+    if (accent > 0)
+      byType[TEXTURE_WEAPON_BLADE] = accent;
+  }
+
   for (std::map<int, int>::const_iterator it = byType.begin(); it != byType.end(); ++it)
     out.push_back(std::make_pair(it->first, it->second));
   return !out.empty();
 }
 
-void AnimControl::SetSkin(int num)
+void AnimControl::SetSkin(int num, int displayIdOverride)
 {
   std::vector<wxString> currTextures(3);
 
@@ -1590,11 +1607,24 @@ void AnimControl::SetSkin(int num)
       g_modelViewer->m_exportItemSkinFileId = 0;
   }
 
-  // Armor components can declare a SECOND replaceable slot (texture type 3) whose UVs sit
-  // on an accent island of the same item texture (e.g. a hood's eye-beam crystals) -- feed
-  // it too, matching the equipped-item path (WoWItem::updateItemModel). Weapons keep the
-  // grey blade-sheen default that model load installs for type 3.
-  if (grp->base == TEXTURE_OBJECT_SKIN && grp->count == 1 && grp->tex[0] &&
+  // EVERY replaceable slot retail names for this appearance, from ItemDisplayInfoModelMatRes.
+  // That table gives a MaterialResourcesID per M2 texture TYPE, so the emissive accent map a
+  // display authors for type 3 is bound as itself instead of being guessed at. It also re-runs
+  // on every skin change, which is required: the accent map is per colour variant and moves
+  // with the diffuse.
+  //
+  // When it answers, it is authoritative and the legacy guesses below are skipped entirely.
+  const int displayId = displayIdOverride > 0 ? displayIdOverride : grp->displayId;
+  const int modelIndex = grp->modelIndex >= 0 ? grp->modelIndex : 0;
+  const bool retailMaterials =
+      g_selModel->applyDisplayMaterialResources(displayId, modelIndex) > 0;
+
+  // LEGACY FALLBACK, for data that predates the table -- older clients, and any display the
+  // table says nothing about. Kept because this build also serves Classic and Classic Era, whose
+  // DB2 set has no ItemDisplayInfoModelMatRes at all; gated on the DATA answering, never on the
+  // model's filename.
+  if (!retailMaterials &&
+      grp->base == TEXTURE_OBJECT_SKIN && grp->count == 1 && grp->tex[0] &&
       !g_selModel->itemName().contains("objectcomponents/weapon", Qt::CaseInsensitive) &&
       !g_selModel->itemName().contains("objectcomponents\\weapon", Qt::CaseInsensitive))
     g_selModel->updateTextureList(grp->tex[0], TEXTURE_WEAPON_BLADE);

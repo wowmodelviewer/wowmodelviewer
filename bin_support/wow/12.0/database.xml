@@ -309,6 +309,19 @@
     <field type="uint32" name="ID" primary="yes" />
     <field type="text" name="Name" />
   </table>
+  <!-- Retail's per-slot replaceable-material table: for one ItemDisplayInfo it names a
+       MaterialResourcesID PER M2 REPLACEABLE TEXTURE TYPE (and per model), which is how the
+       client picks e.g. an item's emissive accent map for texture type 3 rather than reusing
+       the type-2 diffuse. TextureType/ModelIndex names are inferred from the field widths and
+       value distributions (see parity/ps15-retail-semantics-investigation.txt); the DB2 ships
+       no names. -->
+  <table name="ItemDisplayInfoModelMatRes">
+    <field type="int32" name="ID" primary="yes" />
+    <field type="int32" name="MaterialResourcesID" pos="0" />
+    <field type="int32" name="TextureType" pos="1" />
+    <field type="int32" name="ModelIndex" pos="2" />
+    <field type="int32" name="ItemDisplayInfoID" relationshipData="yes" />
+  </table>
   <table name="TextureFileData">
     <field type="int32" name="FileDataID" primary="yes" pos="0" />
     <field type="int32" name="MaterialResourcesID" relationshipData="yes" pos="2" />

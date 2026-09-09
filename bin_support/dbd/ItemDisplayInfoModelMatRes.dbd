@@ -1,0 +1,14 @@
+COLUMNS
+int ID
+int<ItemDisplayInfo::ID> ItemDisplayInfoID
+int<TextureFileData::MaterialResourcesID> MaterialResourcesID
+int TextureType
+int ModelIndex
+
+LAYOUT 52510D63
+BUILD 12.1.0.69587
+$noninline,id$ID<32>
+MaterialResourcesID<22>
+TextureType<3>
+ModelIndex<2>
+$noninline,relation$ItemDisplayInfoID<32>

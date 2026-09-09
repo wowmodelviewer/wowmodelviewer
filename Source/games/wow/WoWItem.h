@@ -107,7 +107,7 @@ class _WOWITEM_API_ WoWItem : public Component
     std::map<POSITION_SLOTS, WoWModel *> itemModels_;
     WoWModel * mergedModel_ = nullptr;
 
-    void updateItemModel(POSITION_SLOTS pos, int modelId, int textureId);
+    void updateItemModel(POSITION_SLOTS pos, int modelId, int textureId, int modelIndex = 0);
     void mergeModel(CharSlots slot, int modelId, int textureId);
 
     CharRegions getRegionForTexture(GameFile * file) const;
