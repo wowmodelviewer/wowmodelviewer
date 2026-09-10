@@ -240,6 +240,160 @@ public static class WmvLifecycleSelfTest
         prt.Dispose();
     }
 
+
+    // ---------------------------------------------------------------- viewport zoom
+
+    /// <summary>
+    /// The four shapes the viewport actually has to serve, by bounding radius. These are real
+    /// numbers from this client: an item component is a fraction of a unit, a creature is a
+    /// couple of units, a large creature ten or so, and a doodad or WMO can be hundreds.
+    /// </summary>
+    static readonly float[] ZoomRadii = { 0.15f, 1.2f, 12f, 250f };
+    static readonly string[] ZoomNames = { "item component", "normal creature", "large model",
+                                           "very large model" };
+
+    static WmvOrbitCamera NewCamera(out GameObject go)
+    {
+        go = new GameObject("ZoomTestCamera");
+        var cam = go.AddComponent<Camera>();
+        cam.fieldOfView = 60f;
+        return go.AddComponent<WmvOrbitCamera>();
+    }
+
+    /// <summary>
+    /// Mouse-wheel zoom, driven through the same two methods the wheel drives.
+    ///
+    /// The wheel itself cannot be synthesised from in-process, so what is checked here is
+    /// everything downstream of the notch: that a notch moves the camera the right way by the
+    /// right proportion, that the range is derived from the model rather than fixed, that the
+    /// camera cannot reach or pass the focus point, and that the angle and the target survive.
+    /// Whether a notch ARRIVES is a windowing question and was settled by rolling a real wheel
+    /// over the viewport -- see the wheel note at the top of WmvOrbitCamera.
+    /// </summary>
+    static void ZoomTests(Action<string> log)
+    {
+        for (int i = 0; i < ZoomRadii.Length; i++)
+        {
+            float radius = ZoomRadii[i];
+            string what = ZoomNames[i] + " (r=" + radius + ")";
+            GameObject go;
+            WmvOrbitCamera cam = NewCamera(out go);
+
+            var pivot = new Vector3(3f, -2f, 5f);       // deliberately not the origin
+            cam.Frame(new Bounds(pivot, Vector3.one * (radius * 2f / Mathf.Sqrt(3f))));
+
+            float framed = cam.FramedDistance;
+            Check(framed > 0f, "zoom " + what + ": framed at a positive distance", log);
+            Check(cam.distance == framed, "zoom " + what + ": starts settled at the framing distance", log);
+
+            // THE RANGE COMES FROM THE MODEL. A fixed range cannot serve r=0.15 and r=250 both.
+            Check(cam.MinDistance < framed && cam.MaxDistance > framed,
+                  "zoom " + what + ": framing distance sits inside the range", log);
+            Check(cam.MinDistance > 0f, "zoom " + what + ": minimum is strictly positive", log);
+            Check(Mathf.Abs(cam.MinDistance / framed - 0.02f) < 1e-3f,
+                  "zoom " + what + ": minimum is 2% of framing, not a constant", log);
+            Check(Mathf.Abs(cam.MaxDistance / framed - 20f) < 1e-2f,
+                  "zoom " + what + ": maximum is 20x framing, not a constant", log);
+
+            // ---- one notch in, one notch out, back where we started ----------------------
+            float before = cam.distance;
+            float yaw0 = cam.yaw, pitch0 = cam.pitch;
+            Vector3 pivot0 = cam.pivot;
+            cam.ZoomByNotches(1f);
+            Check(cam.TargetDistance < before, "zoom " + what + ": wheel up moves closer", log);
+            cam.ZoomByNotches(-1f);
+            Check(Mathf.Abs(cam.TargetDistance - before) < before * 1e-4f,
+                  "zoom " + what + ": one notch in then out returns exactly (symmetric)", log);
+
+            // ---- angle and target are preserved -------------------------------------------
+            cam.ZoomByNotches(5f);
+            for (int f = 0; f < 200; f++) cam.AdvanceZoom(1f / 60f);
+            Check(cam.yaw == yaw0 && cam.pitch == pitch0,
+                  "zoom " + what + ": camera angle unchanged by zoom", log);
+            Check(cam.pivot == pivot0, "zoom " + what + ": orbit target unchanged by zoom", log);
+            Check(Vector3.Distance(cam.transform.position, cam.pivot) > 0f,
+                  "zoom " + what + ": camera is not AT the focus point", log);
+
+            // ---- the minimum holds, and the camera never crosses the pivot ----------------
+            for (int n = 0; n < 400; n++) cam.ZoomByNotches(1f);
+            for (int f = 0; f < 400; f++) cam.AdvanceZoom(1f / 60f);
+            Check(cam.distance >= cam.MinDistance - 1e-6f,
+                  "zoom " + what + ": 400 notches in stops at the minimum (" + cam.distance + ")", log);
+            Check(cam.distance > 0f, "zoom " + what + ": distance never reaches zero", log);
+            float dot = Vector3.Dot(cam.pivot - cam.transform.position, cam.transform.forward);
+            Check(dot > 0f, "zoom " + what + ": camera still looks AT the pivot (never flipped)", log);
+
+            // ---- and the maximum ----------------------------------------------------------
+            for (int n = 0; n < 800; n++) cam.ZoomByNotches(-1f);
+            for (int f = 0; f < 600; f++) cam.AdvanceZoom(1f / 60f);
+            Check(cam.distance <= cam.MaxDistance + 1e-4f,
+                  "zoom " + what + ": 800 notches out stops at the maximum (" + cam.distance + ")", log);
+            dot = Vector3.Dot(cam.pivot - cam.transform.position, cam.transform.forward);
+            Check(dot > 0f, "zoom " + what + ": still looks at the pivot when fully out", log);
+
+            UnityEngine.Object.DestroyImmediate(go);
+        }
+
+        // ---- smoothing is framerate-independent -----------------------------------------
+        {
+            GameObject a, b;
+            WmvOrbitCamera fast = NewCamera(out a);
+            WmvOrbitCamera slow = NewCamera(out b);
+            var bounds = new Bounds(Vector3.zero, Vector3.one * 2f);
+            fast.Frame(bounds); slow.Frame(bounds);
+            fast.ZoomByNotches(6f); slow.ZoomByNotches(6f);
+            // Half a second of animation, at 240 fps and at 30 fps.
+            for (int i = 0; i < 120; i++) fast.AdvanceZoom(1f / 240f);
+            for (int i = 0; i < 15; i++) slow.AdvanceZoom(1f / 30f);
+            float diff = Mathf.Abs(fast.distance - slow.distance) / Mathf.Max(fast.distance, 1e-6f);
+            Check(diff < 0.02f,
+                  "zoom: the same gesture lands within 2% at 240 fps and at 30 fps (" +
+                  (diff * 100f).ToString("F2") + "%)", log);
+            UnityEngine.Object.DestroyImmediate(a);
+            UnityEngine.Object.DestroyImmediate(b);
+        }
+
+        // ---- a model switch re-derives everything and leaves nothing gliding -------------
+        {
+            GameObject go;
+            WmvOrbitCamera cam = NewCamera(out go);
+            cam.Frame(new Bounds(Vector3.zero, Vector3.one * 2f));
+            cam.ZoomByNotches(8f);                       // leave a zoom in flight
+            float smallMin = cam.MinDistance;
+            cam.Frame(new Bounds(new Vector3(10f, 0f, 0f), Vector3.one * 200f));
+            Check(cam.distance == cam.TargetDistance,
+                  "zoom: a model switch lands settled, with no zoom still gliding", log);
+            Check(cam.distance == cam.FramedDistance,
+                  "zoom: a model switch re-frames rather than keeping the old distance", log);
+            Check(cam.MinDistance > smallMin,
+                  "zoom: the range is re-derived for the new model", log);
+            Check(cam.pivot == new Vector3(10f, 0f, 0f),
+                  "zoom: a model switch moves the orbit target to the new bounds", log);
+            // ... and the wheel still works afterwards, which is the "switching models must not
+            // break camera controls" requirement.
+            float after = cam.TargetDistance;
+            cam.ZoomByNotches(1f);
+            Check(cam.TargetDistance < after, "zoom: the wheel still works after a model switch", log);
+            UnityEngine.Object.DestroyImmediate(go);
+        }
+
+        // ---- zoom leaves orbit and pan alone ---------------------------------------------
+        {
+            GameObject go;
+            WmvOrbitCamera cam = NewCamera(out go);
+            cam.Frame(new Bounds(Vector3.zero, Vector3.one * 2f));
+            cam.ZoomByNotches(4f);
+            for (int f = 0; f < 200; f++) cam.AdvanceZoom(1f / 60f);
+            float zoomed = cam.distance;
+            cam.yaw += 90f;                              // what an orbit drag does
+            cam.pivot += new Vector3(1f, 0f, 0f);        // what a pan drag does
+            cam.AdvanceZoom(1f / 60f);
+            Check(Mathf.Abs(cam.distance - zoomed) < 1e-5f,
+                  "zoom: orbiting and panning after a zoom does not disturb the distance", log);
+            UnityEngine.Object.DestroyImmediate(go);
+        }
+    }
+
     static void GeosetTests(Action<string> log)
     {
         // A Drakestalker-shaped component: two submeshes at id 0 and one alternative at 2602.
@@ -380,6 +534,7 @@ public static class WmvLifecycleSelfTest
         GeosetTests(log);
         OutputGateTests(log);
         EmitterTests(log);
+        ZoomTests(log);
         log(string.Format("lifecycle-test: {0} passed, {1} failed", passed, failed));
     }
 }
