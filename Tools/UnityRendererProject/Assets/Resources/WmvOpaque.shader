@@ -236,6 +236,17 @@ Shader "WMV/Opaque Textured"
             // stops short of the contact line reads as floating.
             #define CONTACT_STRENGTH 1.0h
             #define CONTACT_RANGE    0.25h
+            // The march probes a CONE, not a line. Its half-angle, as a tangent, and how many
+            // samples across it. A single ray answers "is this point occluded from exactly one
+            // direction", which is a point light at infinity: the answer is binary, its boundary
+            // is the occluder's silhouette, and on the low-poly geometry this viewer draws that
+            // silhouette is a straight line. Widening it to a cone turns the binary answer into
+            // a coverage fraction, which is what near-field occlusion actually is, and gives the
+            // boundary a penumbra that grows with the distance to the occluder -- sharp where
+            // something touches, soft where it is lifted away. Not a strength: coverage is still
+            // 1 under an occluder and 0 in the open.
+            #define CONTACT_SOFTNESS 0.25h
+            #define CONTACT_TAPS     8
             // ----------------------------------------------------------------------------
 
             sampler2D _MainTex;
@@ -447,26 +458,56 @@ Shader "WMV/Opaque Textured"
                 // Per-fragment phase for the steps. See WmvStepPhase.
                 float jitter = WmvStepPhase(pix);
 
-                // STEP COUNT. Twelve was not enough, and the shortfall showed as a
-                // CHECKERBOARD wherever the geometry was thin and steeply inclined -- the
-                // pattern that is left once the world-space sawtooth is gone. The march's step
-                // is CONTACT_RANGE/STEPS = 0.021 R at twelve, against an acceptance window
-                // (thick - eps) of 0.070 R, which is ample while the recorded surface's depth
-                // drifts slowly along the ray -- and is not, where it does not: across a fin
-                // edge or a grazing panel the sampled depth moves several times faster than
-                // the ray does, the window is stepped clean over, and whether a pixel finds it
-                // at all becomes a coin toss on the phase. Measured on the benchmark model,
-                // 12 steps dither, 24 resolve into solid shading, and 48 change little beyond
-                // that (mean term 229.2 / 225.3 / 223.4 of 255): 24 is where the estimator
-                // stops flickering, not a look preference. It is a SAMPLING rate, not a
-                // strength: it converges the march onto its own acceptance test rather than
-                // altering what that test accepts.
-                const int STEPS = 24;
+                // THE LADDER AND THE WALK ARE DIFFERENT LENGTHS, AND THAT IS THE POINT.
+                //
+                // The along-ray fade is `1 - 0.75 * (s + 0.5)/RUNGS`, which is identically
+                // `1 - (s + 0.5)/32` at RUNGS = 24: a ramp whose zero is at rung 31.5. Walking
+                // only 24 rungs stopped it at 0.2656 and then dropped it to nothing because the
+                // loop had ended -- a 27 % step in occlusion at a fixed distance from the
+                // caster, which under a straight silhouette on a near-planar receiver draws a
+                // hard STRAIGHT LINE across the model where no geometry is. Walking the ramp out
+                // to its own zero ends the term at 0.0156 instead: a seventeenth of the step,
+                // under the measured noise floor. Every rung from 0 to 23 keeps the weight it
+                // had, so this can only ever make a pixel darker, never lighter -- verified over
+                // whole frames, zero pixels lighter. The reach grows with it, 0.25 R to 0.333 R,
+                // and the tail it adds is faint by construction.
+                //
+                // STEP COUNT. Twelve rungs was not enough and showed as a CHECKERBOARD on thin,
+                // steeply inclined geometry: where the sampled depth moves several times faster
+                // along the ray than the ray does, the acceptance window is stepped clean over
+                // and finding it becomes a coin toss on the phase. 24 resolves it; 48 changes
+                // little further. This is a SAMPLING rate, not a strength.
+                const float RUNGS = 24.0;            // the fade ladder's denominator
+                const int STEPS = 32;                // rungs actually walked: RUNGS * 4/3
+                const int TAPS = CONTACT_TAPS;
+
+                // THE CONE'S LATERAL AXIS. cross(march, camera forward) is perpendicular to the
+                // march AND to the view axis, so the projection's w row -- which IS the camera
+                // forward -- is orthogonal to it, and mul(M, float4(bLat,0)).w is exactly zero.
+                // A tap along bLat therefore changes WHICH TEXEL is read and leaves cp.w, the
+                // ray point's own distance from the camera, untouched: the acceptance test sees
+                // the same reference depth for every tap, which is what makes this a cone and
+                // not a slow walk out of the thickness window. Offsetting in the whole plane
+                // perpendicular to the march would not do: with the march anchored to world up
+                // that plane is the world's horizontal one, and one of its axes points into the
+                // screen, so those taps would shift the reference depth by up to the tap radius
+                // -- and by an amount that changes with camera yaw.
+                //
+                // One axis is enough. The along-march direction is already graded by the rung
+                // ladder above; only the perpendicular needs width, and in screen space there is
+                // exactly one direction perpendicular to the projected march.
+                float3 camF = float3(_WmvViewDepthMatrix[3][0], _WmvViewDepthMatrix[3][1],
+                                     _WmvViewDepthMatrix[3][2]);
+                float3 bLat = cross(dir, camF);
+                float bLen = dot(bLat, bLat);
+                bLat = (bLen > 1e-8) ? bLat * rsqrt(bLen) : float3(1.0, 0.0, 0.0);
+                float4 mbLat = mul(_WmvViewDepthMatrix, float4(bLat, 0.0));
+
                 float occ = 0.0;
                 [loop]
                 for (int s = 0; s < STEPS; s++)
                 {
-                    float t = (s + jitter) / STEPS;
+                    float t = (s + jitter) / RUNGS;
                     // The normal push keeps the ray off its own surface; it grows with t
                     // because a surface curving toward the light drifts back under the ray.
                     // Both pushes scale with `range`, so CONTACT_RANGE also sets the blind
@@ -479,45 +520,67 @@ Shader "WMV/Opaque Textured"
                     float4 cp = mul(_WmvViewDepthMatrix, float4(pw, 1.0));
                     if (cp.w <= _WmvViewDepthParams.x)
                         break;                       // in front of the near plane: nothing there
-                    float2 uv = cp.xy / cp.w * 0.5 + 0.5;
-                    // THE SCREEN EDGE, FADED RATHER THAN CUT. A screen-space march can only see
-                    // what is on screen, and a hard cutoff there is a SECOND zoom-in fade: the
-                    // model overflows a 60 degree fov once asin(e/D) > 30 degrees, i.e. from
-                    // about one wheel notch in from the framed distance, after which rays that
-                    // climb toward the key walk off the top of the frame and the march silently
-                    // reports "lit" with no transition at all. Ramping over a 5 % border makes
-                    // that boundary a gradient. It is not a strength knob: at the framed
-                    // distance no ray reaches the border, so nothing changes there.
-                    float2 edge = saturate(min(uv, 1.0 - uv) * 20.0);
-                    float border = edge.x * edge.y;
-                    if (border <= 0.0)
-                        break;                       // off-screen: nothing recorded out there
-                    // Both sides in WORLD UNITS. cp.w is the ray point's distance from the
-                    // camera directly -- the projection's w row IS the view-space depth, which
-                    // is also what makes the near-plane test above a plain comparison -- and the
-                    // stored device depth is inverted back to the same units. `infront` is then
-                    // how far IN FRONT of the ray the nearest recorded surface sits, in metres,
-                    // and it means the same thing at every camera distance and everywhere on
-                    // screen. The two reversed-Z branches collapse into one: the convention is
-                    // handled inside the linearisation, not duplicated at the comparison.
-                    float rayViewZ = cp.w;
-                    float stored = tex2D(_WmvViewDepth, uv).r;
-                    float sampleViewZ = WmvLinearViewDepth(stored);
-                    float infront = rayViewZ - sampleViewZ;
-                    float w = smoothstep(_WmvContactEps * 0.5, _WmvContactEps * 1.5, infront)
-                            * (1.0 - smoothstep(_WmvContactThick * 0.6, _WmvContactThick,
-                                                infront));
+
+                    // The cone's radius at this rung, in WORLD units, so the softness means the
+                    // same thing at every camera distance and on every model size.
+                    float rad = CONTACT_SOFTNESS * t * range;
+                    float cov = 0.0;                 // occluded fraction of the cone's width
+                    float covW = 0.0;                // how much of it could be sampled at all
+                    [unroll]
+                    for (int k = 0; k < TAPS; k++)
+                    {
+                        // Stratified across the cone, not a ring: a ring puts every tap at the
+                        // same radius, which does not blur an edge, it rings it.
+                        float off = rad * (2.0 * (k + 0.5) / TAPS - 1.0);
+                        float4 cpk = cp + mbLat * off;   // cpk.w == cp.w, by construction
+                        float2 uvk = cpk.xy / cpk.w * 0.5 + 0.5;
+                        // THE SCREEN EDGE, FADED RATHER THAN CUT. A screen-space march can only
+                        // see what is on screen, and a hard cutoff there is a SECOND zoom-in
+                        // fade: the model overflows a 60 degree fov once asin(e/D) > 30 degrees,
+                        // i.e. from about one wheel notch in from the framed distance, after
+                        // which rays that climb away from the surface walk off the frame and the
+                        // march silently reports "lit" with no transition at all. Ramping over a
+                        // 5 % border makes that boundary a gradient. It is not a strength knob:
+                        // at the framed distance no ray reaches the border.
+                        float2 edge = saturate(min(uvk, 1.0 - uvk) * 20.0);
+                        float border = edge.x * edge.y;
+                        if (border <= 0.0)
+                            continue;                // this tap saw nothing; the others may
+                        // Both sides in WORLD UNITS. cpk.w is the ray point's distance from the
+                        // camera directly -- the projection's w row IS the view-space depth,
+                        // which is also what makes the near-plane test above a plain comparison
+                        // -- and the stored device depth is inverted back to the same units.
+                        // `infront` is then how far IN FRONT of the ray the nearest recorded
+                        // surface sits, in metres, and it means the same thing at every camera
+                        // distance and everywhere on screen. The two reversed-Z branches
+                        // collapse into one: the convention is handled inside the linearisation,
+                        // not duplicated at the comparison.
+                        float stored = tex2D(_WmvViewDepth, uvk).r;
+                        float infront = cpk.w - WmvLinearViewDepth(stored);
+                        cov += border
+                             * smoothstep(_WmvContactEps * 0.5, _WmvContactEps * 1.5, infront)
+                             * (1.0 - smoothstep(_WmvContactThick * 0.6, _WmvContactThick,
+                                                 infront));
+                        covW += border;
+                    }
+                    if (covW <= 0.0)
+                        break;                       // the whole cone is off-screen
+
                     // THE LADDER IS FIXED; ONLY THE PROBE IS JITTERED. The depth window is
                     // effectively a step in t (the buffer is point-sampled and one march step
                     // spans many depth texels), so the loop's max() is attained at the first
                     // lattice point past the crossing -- and if the fade read the JITTERED t,
-                    // the result inherited that phase as a sawtooth of 0.75/STEPS of full
-                    // occlusion, hard-edged, which is the striping's amplitude. Reading the
+                    // the result inherited that phase as a sawtooth of 0.75/RUNGS of full
+                    // occlusion, hard-edged, which was the striping's amplitude. Reading the
                     // rung instead makes the fade identical for every pixel, so the phase
                     // survives only as WHICH rung is hit. `t` still drives the two pushes
                     // above, which is right: those have to follow the probe.
-                    float tFade = (s + 0.5) / STEPS;
-                    w *= (1.0 - 0.75 * tFade) * border;
+                    //
+                    // covW/TAPS is the mean border weight over the cone; dividing cov by covW
+                    // and multiplying it back is not a no-op, it restores the 5 % screen-edge
+                    // ramp that normalising the coverage would otherwise cancel out.
+                    float tFade = (s + 0.5) / RUNGS;
+                    float w = (cov / covW) * (1.0 - 0.75 * tFade) * (covW / TAPS);
                     occ = max(occ, w);
                 }
                 return (half)(1.0 - occ);
