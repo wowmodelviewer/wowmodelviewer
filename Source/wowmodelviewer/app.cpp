@@ -586,19 +586,6 @@ static void doHeadlessUnityIpcTest(ModelViewer * frame)
       LOG_INFO << "[unityipc-test] skin-sync: skinPushes=" << ipc->stats().skinPushes
                << "lastSkin=" << ipc->stats().lastSkin;
 
-      // Contact-shadow sliders: one push must already have gone out, on unityReady, carrying
-      // whatever the panel holds. This is reported rather than merely counted because the way
-      // this channel fails is silent -- the player parses every message into one flat
-      // JsonUtility class and gives a field it cannot match the value 0, so a renamed or
-      // mistyped field does not error, it sends zeroes, and a reach of zero is the effect
-      // switched off. lastContact is the app's side of that; the player logs its own side
-      // ("WMV: contact shadow -- ...") after clamping, and the two lines must agree.
-      LOG_INFO << "[unityipc-test] contact-shadow: contactPushes=" << ipc->stats().contactPushes
-               << "last=" << ipc->stats().lastContact;
-      if (ipc->stats().contactPushes < 1)
-        LOG_ERROR << "[unityipc-test] contact-shadow: nothing was pushed on unityReady -- the "
-                     "viewport will be showing the renderer's defaults, not the sliders";
-
       const WoWModel * mdl2 = frame->canvas ? frame->canvas->model() : NULL;
       // Animation sync: the viewport plays ONE of the model's animations and the renderer has to
       // play the same one. Walk a spread of the selector rather than all of it -- a boss has

@@ -234,11 +234,24 @@ Shader "WMV/Opaque Textured"
             // makes it blind for the last few millimetres before a contact, and a shadow that
             // stops short of the contact line reads as floating.
             //
-            // ITS FIVE CONTROLS ARE UNIFORMS, NOT #defines, because the application exposes them
-            // as sliders and a look is found by moving them and watching, not by rebuilding a
-            // shader. They are declared with the rest of the contact block below and published
-            // every frame by WmvShadowRig, which is also where their defaults live -- exactly
-            // the values that used to stand here. See WmvShadowRig.Contact*.
+            // These five were briefly uniforms, driven by a slider panel in the application, so
+            // that a look could be found by moving something and watching rather than by
+            // rebuilding a shader. They are the numbers that panel arrived at, and the panel is
+            // gone: a normal run draws from the constants alone.
+            //
+            // STRENGTH is how much light one contact removes. It is 0.4 rather than the 1.0 this
+            // shipped with because at 1.0 a full contact took the whole ambient term AND the
+            // whole directional with it (castKey = min(castKey, occ) below), so the deepest part
+            // of every contact shadow went to black and every boundary in it was a hundred-plus
+            // code values wide. RANGE is the total reach, as a fraction of the model radius, and
+            // it is a float rather than a half because 0.36666667 is not representable in fp16
+            // and the rung positions are derived from it. SOFTNESS is the tangent of the
+            // occlusion cone's half-angle, TAPS the samples across that cone, and the march's
+            // sample count lives with the march.
+            #define CONTACT_STRENGTH 0.4h
+            #define CONTACT_RANGE    0.36666667
+            #define CONTACT_SOFTNESS 0.25
+            #define CONTACT_TAPS     8
             // ----------------------------------------------------------------------------
 
             sampler2D _MainTex;
@@ -358,15 +371,6 @@ Shader "WMV/Opaque Textured"
             float     _WmvModelRadius;        // world units; scales the march to the model
             float     _WmvContactEps;         // self-hit guard, WORLD UNITS
             float     _WmvContactThick;       // occluder thickness assumption, WORLD UNITS
-            // The five live controls. WmvShadowRig publishes all of them every frame, so an
-            // unset global is not a state this shader can be rendered in: when the rig is not
-            // running _WmvContactValid is 0 and the march returns "unoccluded" before reading
-            // any of them.
-            float     _WmvContactStrength;    // how much of the light one contact removes, 0..1
-            float     _WmvContactReach;       // how far the probe looks, x the model radius
-            float     _WmvContactSoftness;    // half-angle of the occlusion cone, as a tangent
-            float     _WmvContactSteps;       // samples along the reach
-            float     _WmvContactTaps;        // samples across the cone
             float4    _WmvViewDepthParams;    // (near, far, far - near, near * far), world units
 
             // Device depth -> distance from the camera, in WORLD UNITS.
@@ -477,8 +481,8 @@ Shader "WMV/Opaque Textured"
                 // along the ray than the ray does, the acceptance window is stepped clean over
                 // and finding it becomes a coin toss on the phase. 32 resolves it; more changes
                 // little. It is a sampling rate, not a strength.
-                int STEPS = max(1, (int)_WmvContactSteps);
-                int TAPS = max(1, (int)_WmvContactTaps);
+                const int STEPS = 32;                // samples along the reach
+                const int TAPS = CONTACT_TAPS;
 
                 // THE CONE'S LATERAL AXIS. cross(march, camera forward) is perpendicular to the
                 // march AND to the view axis, so the projection's w row -- which IS the camera
@@ -509,7 +513,7 @@ Shader "WMV/Opaque Textured"
                     float t = (s + jitter) / STEPS;
                     // The normal push keeps the ray off its own surface; it grows with t
                     // because a surface curving toward the light drifts back under the ray.
-                    // Both pushes scale with `range`, so _WmvContactReach also sets the blind
+                    // Both pushes scale with `range`, so CONTACT_RANGE also sets the blind
                     // zone next to a contact: at 1/3 R the clearance is 0.015-0.04 R along
                     // the normal, four times what the march was first validated with (0.06 R).
                     // Tightening it means anchoring these fractions to a fixed share of the
@@ -522,10 +526,10 @@ Shader "WMV/Opaque Textured"
 
                     // The cone's radius at this rung, in WORLD units, so the softness means the
                     // same thing at every camera distance and on every model size.
-                    float rad = _WmvContactSoftness * t * range;
+                    float rad = CONTACT_SOFTNESS * t * range;
                     float cov = 0.0;                 // occluded fraction of the cone's width
                     float covW = 0.0;                // how much of it could be sampled at all
-                    [loop]
+                    [unroll]
                     for (int k = 0; k < TAPS; k++)
                     {
                         // Stratified across the cone, not a ring: a ring puts every tap at the
@@ -764,8 +768,8 @@ Shader "WMV/Opaque Textured"
                 // Resolve the rig constants once, up here.
                 half3 kDir   = KEY_DIR,    fDir     = FILL_DIR;
                 half  shStr  = SHADOW_STRENGTH, shSoft = SHADOW_SOFT;
-                half  cStr   = (half)_WmvContactStrength;
-                float cRange = _WmvContactReach;
+                half  cStr   = CONTACT_STRENGTH;
+                float cRange = CONTACT_RANGE;
 
                 half  lum;
                 half3 spec = 0.0h;

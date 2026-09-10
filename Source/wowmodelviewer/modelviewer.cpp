@@ -39,7 +39,6 @@
 #include "PluginManager.h"
 #include "RaceInfos.h"
 #include "SettingsControl.h"
-#include "ContactShadowControl.h"
 #include "UnityAssetAccess.h"
 #include "UnityIpcServer.h"
 #include "UnityRendererHost.h"
@@ -166,7 +165,6 @@ EVT_MENU(ID_USE_ANTIALIAS, ModelViewer::OnToggleCommand)
 EVT_MENU(ID_USE_HWACC, ModelViewer::OnToggleCommand)
 EVT_MENU(ID_USE_ENVMAP, ModelViewer::OnToggleCommand)
 EVT_MENU(ID_SHOW_SETTINGS, ModelViewer::OnToggleDock)
-EVT_MENU(ID_SHOW_CONTACT_SHADOW, ModelViewer::OnToggleDock)
 
 // char controls:
 EVT_MENU(ID_SAVE_EQUIPMENT, ModelViewer::OnToggleCommand)
@@ -229,7 +227,6 @@ ModelViewer::ModelViewer()
   charControl = NULL;
   enchants = NULL;
   lightControl = NULL;
-  contactShadowControl = NULL;
   modelControl = NULL;
   imageControl = NULL;
   settingsControl = NULL;
@@ -388,7 +385,6 @@ void ModelViewer::InitMenu()
   viewMenu->Append(ID_SHOW_MODEL, _("Show model control"));
   viewMenu->AppendSeparator();
   viewMenu->Append(ID_VIEW_UNITY_RENDERER, _("Unity Renderer"));
-  viewMenu->Append(ID_SHOW_CONTACT_SHADOW, _("Contact shadow sliders..."));
   viewMenu->AppendCheckItem(ID_VIEW_UNITY_PRIMARY, _("Unity as main viewport"));
   viewMenu->Check(ID_VIEW_UNITY_PRIMARY, unityPrimaryViewport);
   viewMenu->Append(ID_VIEW_FULLSCREEN, _("Fullscreen\tF11"));
@@ -602,18 +598,6 @@ void ModelViewer::InitObjects()
   settingsControl = new SettingsControl(this, ID_SETTINGS_FRAME);
   settingsControl->Show(false);
 
-  // The contact-shadow sliders. Created here with the other panels so the values are loaded and
-  // ready before the Unity player is launched; the push that makes the viewport agree with them
-  // happens on the player's unityReady (see ShowUnityRenderer), because the player connects on
-  // its own schedule and may do so long after this.
-  contactShadowControl = new ContactShadowControl(this, ID_CONTACT_SHADOW_FRAME);
-  contactShadowControl->Show(false);
-  contactShadowControl->onChanged = [this](const ContactShadowControl::Values & v) {
-    if (unityRendererHost && unityRendererHost->ipc())
-      unityRendererHost->ipc()->sendContactShadow(v.strength, v.reach, v.softness,
-                                                  v.thickness, v.bias, v.steps, v.taps);
-  };
-
   canvas = new ModelCanvas(this);
 
   if (video.secondPass) {
@@ -754,18 +738,6 @@ void ModelViewer::InitDocking()
                            FloatingSize(wxSize(400, 550)).Float().TopDockable(false).LeftDockable(false).
                            RightDockable(false).BottomDockable(false).Fixed().Show(false));
 
-  // Contact-shadow sliders. Floating rather than docked, and for a reason: the whole point is to
-  // watch the Unity viewport while dragging, so this has to be able to sit beside or over the app
-  // rather than take width away from the thing being judged. Registered HERE as well as in
-  // ResetLayout -- ResetLayout does not run at startup, and a pane the manager has never been
-  // told about answers GetPane() with wxAuiNullPaneInfo, on which Show(true) does nothing at all:
-  // the menu entry would simply appear to be broken.
-  interfaceManager.AddPane(contactShadowControl, wxAuiPaneInfo().
-                           Name(wxT("ContactShadow")).Caption(wxT("Contact Shadows")).
-                           FloatingSize(wxSize(380, 400)).Float().TopDockable(false).LeftDockable(false).
-                           RightDockable(false).BottomDockable(false).Show(false).
-                           DestroyOnClose(false));
-
   // tell the manager to "commit" all the changes just made
   //interfaceManager.Update();
 }
@@ -783,7 +755,6 @@ void ModelViewer::ResetLayout()
   interfaceManager.DetachPane(lightControl);
   interfaceManager.DetachPane(modelControl);
   interfaceManager.DetachPane(settingsControl);
-  interfaceManager.DetachPane(contactShadowControl);
   interfaceManager.DetachPane(canvas);
 
   // OpenGL Canvas
@@ -819,14 +790,6 @@ void ModelViewer::ResetLayout()
                            FloatingSize(wxSize(400, 550)).Float().TopDockable(false).LeftDockable(false).
                            RightDockable(false).BottomDockable(false).Show(false));
 
-  // Floating, like Settings: the whole point is to watch the Unity viewport while dragging, so
-  // it must be able to sit beside or over the app rather than steal width from the viewport.
-  interfaceManager.AddPane(contactShadowControl, wxAuiPaneInfo().
-                           Name(wxT("ContactShadow")).Caption(wxT("Contact Shadows")).
-                           FloatingSize(wxSize(380, 400)).Float().TopDockable(false).LeftDockable(false).
-                           RightDockable(false).BottomDockable(false).Show(false).
-                           DestroyOnClose(false));
-
   // Unity viewport pane (only exists once View > Unity Renderer has been used)
   if (unityRendererHost)
     interfaceManager.AddPane(unityRendererHost,
@@ -845,10 +808,6 @@ void ModelViewer::LoadSession()
 
   // Application Config Settings
   useRandomLooks = config.value("Session/RandomLooks", true).toBool();
-  // The contact-shadow sliders read their own keys, so the panel owns both ends of them and the
-  // defaults cannot drift apart. Guarded because LoadSession can run before InitObjects.
-  if (contactShadowControl)
-    contactShadowControl->LoadSettings();
   GLOBALSETTINGS.bShowParticle = config.value("Session/ShowParticle", true).toBool();
   GLOBALSETTINGS.bZeroParticle = config.value("Session/ZeroParticle", true).toBool();
   GLOBALSETTINGS.bInitPoseOnlyExport = config.value("Session/InitPoseOnlyExport", false).toBool();
@@ -904,8 +863,6 @@ void ModelViewer::SaveSession()
   config.setValue("Graphics/Fov", (double)video.fov);
 
   config.setValue("Session/RandomLooks", useRandomLooks);
-  if (contactShadowControl)
-    contactShadowControl->SaveSettings();
   config.setValue("Session/ShowParticle", GLOBALSETTINGS.bShowParticle);
   config.setValue("Session/ZeroParticle", GLOBALSETTINGS.bZeroParticle);
   config.setValue("Session/InitPoseOnlyExport", GLOBALSETTINGS.bInitPoseOnlyExport);
@@ -1598,12 +1555,6 @@ ModelViewer::~ModelViewer()
     settingsControl = NULL;
   }
 
-  // After SaveSession above, never before: SaveSession reads the sliders back out of this panel.
-  if (contactShadowControl) {
-    contactShadowControl->Destroy();
-    contactShadowControl = NULL;
-  }
-
   if (modelControl) {
     modelControl->Destroy();
     modelControl = NULL;
@@ -1646,9 +1597,6 @@ void ModelViewer::OnToggleDock(wxCommandEvent &event)
     interfaceManager.GetPane(settingsControl).Show(true);
     settingsControl->Open();
   }
-  else if (id == ID_SHOW_CONTACT_SHADOW) {
-    interfaceManager.GetPane(contactShadowControl).Show(true);
-  }
   interfaceManager.Update();
 }
 
@@ -1689,11 +1637,6 @@ bool ModelViewer::ShowUnityRenderer(bool selfTest)
       if (unityRendererHost)
         unityRendererHost->setPlayerReady(true);
       SendCurrentModelToUnity();
-      // The player comes up on the renderer's own defaults. If the user has moved a slider --
-      // in this session or a previous one -- the viewport would otherwise disagree with the
-      // panel, which is a difference nobody could account for from the screen.
-      if (contactShadowControl)
-        contactShadowControl->Push();
     };
   }
 

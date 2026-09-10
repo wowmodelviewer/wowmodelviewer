@@ -398,38 +398,6 @@ void UnityIpcServer::sendModelAnimationState(int m2FileDataID, int sequenceIndex
   queueJson(msg);
 }
 
-void UnityIpcServer::sendContactShadow(float strength, float reach, float softness,
-                                      float thickness, float bias, int steps, int taps)
-{
-  if (!m_client || !m_unityReady)
-    return;
-
-  QJsonObject msg;
-  msg["type"] = "contactShadow";
-  // Prefixed, and they must stay prefixed. The player parses EVERY message type into one flat
-  // JsonUtility class (WmvIpcClient.Msg), so these names share a single namespace with every
-  // other message on this socket -- a bare "steps" or "strength" is a collision waiting for the
-  // next message type that wants one. JsonUtility matches by exact name and gives an unmatched
-  // field 0 in silence, so a mismatch here does not fail loudly: it sets reach to zero, which
-  // is the effect switched off.
-  msg["contactStrength"] = strength;
-  msg["contactReach"] = reach;
-  msg["contactSoftness"] = softness;
-  msg["contactThickness"] = thickness;
-  msg["contactBias"] = bias;
-  msg["contactSteps"] = steps;
-  msg["contactTaps"] = taps;
-  m_stats.contactPushes++;
-  m_stats.lastContact = QString("str %1 reach %2 soft %3 thick %4 bias %5 steps %6 taps %7")
-                          .arg(strength, 0, 'f', 2).arg(reach, 0, 'f', 3)
-                          .arg(softness, 0, 'f', 2).arg(thickness, 0, 'f', 3)
-                          .arg(bias, 0, 'f', 4).arg(steps).arg(taps);
-  // Deliberately not logged per push, for the same reason modelAnimationState is not: one drag
-  // of one slider would otherwise fill the log. The counter and lastContact above are what a
-  // diagnostic run reports.
-  queueJson(msg);
-}
-
 void UnityIpcServer::sendLoadWoWModel(const QString & path, int fileDataID, const QString & client)
 {
   QJsonObject msg;

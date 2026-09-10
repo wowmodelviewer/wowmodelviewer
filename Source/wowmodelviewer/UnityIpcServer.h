@@ -33,9 +33,6 @@
  *       "durationMs":2000, "loop":true }
  *     { "type":"modelAnimationState", "fileDataID":1521037, "sequenceIndex":2, "playing":true,
  *       "timeMs":840, "speed":1.0, "loop":true }
- *     { "type":"contactShadow", "contactStrength":1.0, "contactReach":0.3333,
- *       "contactSoftness":0.25, "contactThickness":0.08, "contactBias":0.01,
- *       "contactSteps":32, "contactTaps":8 }
  *
  * getModelTextures exists because modern M2s do NOT name their replaceable textures (a
  * creature skin's TXID entry is 0 and the texture array carries no filename) -- the skin comes
@@ -66,28 +63,6 @@
  * only correction channel for clock drift between two independently-timed renderers; the player
  * decides whether a given "timeMs" is worth snapping to, because only it knows where its own
  * clock is.
- *
- * contactShadow carries the seven controls of the renderer's screen-space contact shadow, as
- * the app's sliders have them. It is the one message that exists purely so a person can find a
- * look by moving something and watching the viewport, so it is pushed on every slider tick --
- * and, like modelAnimationState, deliberately not logged per push, or a single drag would bury
- * the log. It is also pushed once on unityReady: the player is launched after the app is built,
- * so it may connect long after the user last touched a slider, and a viewport that came up
- * showing something other than what the sliders say would be a bug the user could not diagnose.
- *
- * The field names carry a "contact" prefix because the player parses every message type on this
- * socket into ONE flat JsonUtility class: the names share a namespace with every other message,
- * and JsonUtility matches by exact name and silently yields 0 for a field it cannot find.
- *
- * All seven fields are always sent. The player parses with Unity's JsonUtility, which gives an
- * absent number the value 0 rather than leaving the field alone -- a partial message would not
- * mean "change only these", it would mean "set the rest to zero", and a reach of zero is the
- * effect switched off. There is no partial form of this message.
- *
- * reach, thickness and bias are fractions of the MODEL RADIUS, not distances: that is what makes
- * one setting mean the same thing on a shoulder pad and on a boss. softness is the tangent of the
- * occlusion cone's half-angle. steps and taps are sampling rates -- they decide how finely the
- * march resolves the shape the other five describe, not what it accepts.
  *
  * Implementation: plain Winsock2, non-blocking, polled from the GUI thread by a wxTimer (the
  * app has no Qt event loop, so QTcpServer signals would never fire; and GAMEDIRECTORY must be
@@ -152,13 +127,6 @@ public:
   void sendModelAnimationState(int m2FileDataID, int sequenceIndex, bool playing, int timeMs,
                                float speed, bool loop);
 
-  // Runtime command: the contact-shadow controls changed (a slider moved), or the player has
-  // just connected and needs to be told where they stand. All seven values are always sent; see
-  // the protocol note above for why there is no partial form. No-op when the player is not
-  // connected, so dragging a slider with no viewport open costs nothing and logs nothing.
-  void sendContactShadow(float strength, float reach, float softness, float thickness,
-                         float bias, int steps, int taps);
-
   // Raised (on the GUI thread) when the player's unityReady arrives -- the host uses it to
   // push the currently displayed model.
   std::function<void()> onUnityReady;
@@ -178,14 +146,12 @@ public:
     int skinPushes = 0;     // modelSkin messages sent (the displayed skin changed)
     int animPushes = 0;     // modelAnimation messages sent (the displayed animation changed)
     int statePushes = 0;    // modelAnimationState messages sent (play/pause/speed/time)
-    int contactPushes = 0;  // contactShadow messages sent (a slider moved)
     QString lastRequest;    // "path" or "fileDataID n"
     QString lastProvider;   // "CASC" / "MPQ" / ""
     QString lastError;
     QString lastSkin;       // "<fileDataID> (<source>)" of the last skin pushed
     QString lastAnimation;  // "seq <n> animID <id> <ms>ms" of the last animation pushed
     QString lastState;      // "playing|paused <ms>ms x<speed>" of the last state pushed
-    QString lastContact;    // the last contact-shadow settings pushed
   };
   const Stats & stats() const { return m_stats; }
 
