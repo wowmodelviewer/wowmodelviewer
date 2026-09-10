@@ -222,18 +222,52 @@ public class WmvShadowRig : MonoBehaviour
         //
         // The viewer camera's pose, but near/far PINCHED around the model: hardware depth
         // spends its precision near the near plane, and a preview camera's own far plane is
-        // wildly generous. With the range tight the [0,1] depth units the march compares in
-        // correspond to a roughly constant world thickness across the model.
+        // wildly generous.
+        //
+        // What used to stand here was "with the range tight the [0,1] depth units the march
+        // compares in correspond to a roughly constant world thickness across the model". That
+        // was false, and it was the whole defect: perspective depth is hyperbolic, so the same
+        // physical gap maps to a depth difference that varies as ((D+z)/(D-z))^2 with the
+        // distance z from the camera -- at the shipped framing distance 5.4x between the near
+        // and the far side of the geometry, 12.6x across the whole frustum -- and collapses
+        // towards zero as the camera closes in. The march no longer compares device depths at all; it inverts them
+        // (WmvLinearViewDepth) and compares distances. These planes now exist only to keep the
+        // buffer's precision on the model, and to be the constants that inversion needs.
+        //
+        // AXIAL depth, not radial distance: near and far are PLANES, so the quantity that has
+        // to bracket the model is its extent along the camera's forward axis. Radial distance
+        // is always >= axial depth, so using it can only push the near plane INTO the model.
+        // Un-panned the two agree, because the orbit camera sits on a ray through the bounds
+        // centre; WmvOrbitCamera pans the PIVOT while the bounds centre stays put, and at
+        // thirty degrees off-axis and seven radii out the radial form puts the near plane a
+        // whole radius inside the geometry and clips the model's front half out of the buffer,
+        // which reads as contact shadows missing over exactly that region.
         Vector3 toCenter = bounds.center - view.transform.position;
-        float viewDist = toCenter.magnitude;
+        float viewDist = Vector3.Dot(toCenter, view.transform.forward);
         float modelR = Mathf.Max(bounds.extents.magnitude, 0.01f) * Padding;
         depthCam.transform.position = view.transform.position;
         depthCam.transform.rotation = view.transform.rotation;
         depthCam.orthographic = false;
         depthCam.fieldOfView = view.fieldOfView;
         depthCam.aspect = view.aspect;
-        depthCam.nearClipPlane = Mathf.Max(0.01f, viewDist - modelR);
-        depthCam.farClipPlane = viewDist + modelR;
+        // NEAR-CAMERA HANDLING. The far plane sits just past the model; the near plane wants
+        // to sit just in front of it, but once the camera is inside the model's bounding sphere
+        // `viewDist - modelR` goes to zero and below, which is not a perspective frustum at all.
+        // The floor that stood here was an absolute 1 cm, which made the depth camera's
+        // behaviour depend on the model's ABSOLUTE world scale: a 0.15-radius shoulder pad and
+        // a 12-radius boss ended up with wildly different f/n at the same relative zoom. A
+        // floor expressed as a fraction of the far plane is scale-free and caps f/n at 100.
+        //
+        // Precision is NOT the reason. This buffer is 24-bit (see viewDepth's construction), so
+        // even in the worst case above the depth quantum at the model is a few parts in 1e6 of
+        // a model radius, against a self-hit guard of 1e-2 R -- three orders of magnitude of
+        // headroom.
+        float depthFar = viewDist + modelR;
+        depthCam.nearClipPlane = Mathf.Max(viewDist - modelR, depthFar * 0.01f);
+        // A degenerate bounds (a single point, or a model behind the camera after a pan) can
+        // leave far at or below near, which produces a singular projection and a buffer full of
+        // NaN. Cheap to rule out; impossible to diagnose from the picture if it ever happens.
+        depthCam.farClipPlane = Mathf.Max(depthFar, depthCam.nearClipPlane * 1.001f);
         depthCam.cullingMask = view.cullingMask;
 
         Shader.SetGlobalFloat("_WmvContactValid", 0f);   // same read-write hazard as the map
@@ -251,20 +285,39 @@ public class WmvShadowRig : MonoBehaviour
         Shader.SetGlobalVector("_WmvFillDirWorld",
                                new Vector4(fillWorld.x, fillWorld.y, fillWorld.z, 0f));
         Shader.SetGlobalFloat("_WmvModelRadius", modelR);
-        // Self-hit guard and thickness, in the pinched camera's [0,1] depth units (the range
-        // spans ~2 model radii of world, so world-relative values divide by that).
+
+        // The planes the shader needs to undo the projection, plus the two products it would
+        // otherwise recompute on each of the march's samples. Read back OFF THE CAMERA
+        // rather than from the locals above: Unity clamps the nearClipPlane setter, and the
+        // shader's n and f have to be the ones the projection matrix was actually built from or
+        // the inversion is undone with the wrong constants.
+        float dNear = depthCam.nearClipPlane;
+        float dFar = depthCam.farClipPlane;
+        Shader.SetGlobalVector("_WmvViewDepthParams",
+                               new Vector4(dNear, dFar, dFar - dNear, dNear * dFar));
+
+        // Self-hit guard and thickness, in WORLD UNITS.
+        //
+        // These used to be divided by a `depthRange` of 2 model radii, on the assumption that the
+        // pinched near/far made [0,1] depth proportional to world distance. Perspective depth is
+        // hyperbolic, so that held only when the camera was many radii away: closer in, the same
+        // physical gap produced a steadily smaller depth difference until it fell under the guard
+        // and the effect switched off, and the error also varied across the image so the window
+        // was far too permissive on the far side of the model. The shader now linearises the
+        // stored depth (WmvLinearViewDepth), so a metre is a metre and these are simply the two
+        // distances they were always meant to be.
         //
         // THICKNESS IS THE KNIFE-EDGE OF THIS TECHNIQUE. A first version assumed occluders
         // 0.20 R thick, and the result was a faint even wash over every large surface: any
         // geometry anywhere within a fifth of the model IN FRONT of the ray -- the far side of
         // a fold, the silhouette of the cloak -- counted as touching. Contact shadows are about
-        // the near field, so the assumed thickness matches the march range itself: an occluder
-        // matters only if the ray passes within touching distance BEHIND it. The guard against
-        // a fragment finding its own surface is ~1 % of the model, paired with the ray's
-        // starting push off the surface in the shader.
-        float depthRange = 2f * modelR;
-        Shader.SetGlobalFloat("_WmvContactEps", 0.010f * modelR / depthRange);
-        Shader.SetGlobalFloat("_WmvContactThick", 0.08f * modelR / depthRange);
+        // the near field, so the assumed thickness is a third of the march's own reach (0.08 R
+        // against CONTACT_RANGE's 0.25 R): an occluder matters only if the ray passes within
+        // touching distance BEHIND it. The guard against a fragment finding its own surface is
+        // ~1 % of the model, paired with the ray's starting push off the surface in the shader.
+        // Both numbers are unchanged -- only the space they are measured in is.
+        Shader.SetGlobalFloat("_WmvContactEps", 0.010f * modelR);
+        Shader.SetGlobalFloat("_WmvContactThick", 0.08f * modelR);
         Shader.SetGlobalFloat("_WmvContactValid", 1f);
     }
 
