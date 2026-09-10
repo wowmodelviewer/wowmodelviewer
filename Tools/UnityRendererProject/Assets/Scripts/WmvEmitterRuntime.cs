@@ -1345,11 +1345,20 @@ public class WmvEmitterRuntime : MonoBehaviour
     /// <summary>
     /// Throw away every live particle and every ribbon edge, keeping the emitters themselves.
     ///
-    /// Called when the sequence changes and when a pinned simulation restarts. Without it a
-    /// ribbon would draw a straight line from wherever the bone was in the old animation to
-    /// wherever it is in the new one -- a smear across the model that no bone ever traced.
+    /// For a restart of the WHOLE simulation -- a pinned capture, or the lifecycle self-test.
+    /// A change of sequence resets only the ribbons; see Rebind for why the particles survive it.
     /// </summary>
     public void ResetState()
+    {
+        ResetParticles();
+        ResetRibbons();
+    }
+
+    /// <summary>
+    /// Throw away every live particle. Only for a restart of the whole simulation -- NOT for a
+    /// change of animation, which is what ResetRibbons is for.
+    /// </summary>
+    void ResetParticles()
     {
         for (int i = 0; i < particles.Count; i++)
         {
@@ -1359,6 +1368,11 @@ public class WmvEmitterRuntime : MonoBehaviour
             s.Rng = (uint)(0x9E3779B9u * (uint)(i + 1) + 0x85EBCA6Bu);
             s.Mesh.Clear(false);
         }
+    }
+
+    /// <summary>Throw away every ribbon segment. See ResetState for why this half is different.</summary>
+    void ResetRibbons()
+    {
         for (int i = 0; i < ribbons.Count; i++)
         {
             RibbonState s = ribbons[i];
@@ -1399,7 +1413,22 @@ public class WmvEmitterRuntime : MonoBehaviour
             s.EdgeInterval = 1f / (s.Def.EdgesPerSecond > 0f ? s.Def.EdgesPerSecond : 30f);
         }
         SetGlobalSequences(model.GlobalSequences);
-        ResetState();
+        // THE RIBBONS RESTART; THE PARTICLES DO NOT.
+        //
+        // A ribbon is a trail of segments left behind by a bone, so a sequence change has to
+        // clear it or the first frame of the new animation draws a straight edge from wherever
+        // the bone was in the old one -- a smear across the model that no bone ever traced.
+        //
+        // A particle owes nothing to the previous frame's bone. It is a free body with its own
+        // position, velocity and remaining life, and in the game changing animation does not put
+        // a torch out: the legacy viewport holds one std::list<Particle> for the life of the
+        // model (particle.h:74) and WoWModel::animate never touches it (WoWModel.cpp:2210-2224).
+        // Clearing it here was costing the whole cloud on every sequence change, and because the
+        // authored rate IS the number alive at once -- Algalon's emitter is 45 particles over a
+        // 7-second life -- the cloud then needed seven seconds of animation to build back up.
+        // Anyone who changed animation, or looked at a model in the first seconds after it
+        // loaded, saw no particles at all.
+        ResetRibbons();
         return true;
     }
 
