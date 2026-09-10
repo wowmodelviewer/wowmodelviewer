@@ -24,10 +24,10 @@ enum
 };
 
 // Slider positions are integers, so each control carries a divisor that turns its position into
-// the number the renderer wants. The defaults below are chosen so that the DEFAULT POSITION maps
-// to exactly the float the renderer ships with -- 100/300 is the same float as 1/3, 80/1000 the
-// same as 0.08f -- which is what lets a fresh install render bit-identically to a build with no
-// panel at all.
+// the number the renderer wants. Every divisor is chosen so that the DEFAULT POSITION maps to
+// exactly the float the renderer ships with -- 110/300 is the same float as 0.36666667f, 40/100
+// as 0.4f, 80/1000 as 0.08f -- which is what lets a fresh install render bit-identically to a
+// build with no panel at all.
 static const int   CS_STRENGTH_MAX = 100;    const float CS_STRENGTH_DIV = 100.0f;
 static const int   CS_REACH_MAX = 200;       const float CS_REACH_DIV = 300.0f;
 static const int   CS_SOFTNESS_MAX = 100;    const float CS_SOFTNESS_DIV = 100.0f;
@@ -52,8 +52,8 @@ END_EVENT_TABLE()
 ContactShadowControl::Values ContactShadowControl::Defaults()
 {
   Values v;
-  v.strength = 1.0f;
-  v.reach = 1.0f / 3.0f;
+  v.strength = 0.4f;
+  v.reach = 0.36666667f;
   v.softness = 0.25f;
   v.thickness = 0.08f;
   v.bias = 0.010f;

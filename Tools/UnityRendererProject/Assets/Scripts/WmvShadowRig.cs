@@ -64,8 +64,8 @@ public class WmvShadowRig : MonoBehaviour
     /// look controls -- they decide how finely the march resolves the shape the other five
     /// describe, and raising them cannot change what the acceptance test accepts.
     /// </summary>
-    public static float ContactStrength = 1.0f;      // of the light one contact removes
-    public static float ContactReach = 1f / 3f;      // how far the probe looks, x model radius
+    public static float ContactStrength = 0.4f;      // of the light one contact removes
+    public static float ContactReach = 0.36666667f;  // how far the probe looks, x model radius
     public static float ContactSoftness = 0.25f;     // cone half-angle, as a tangent
     public static float ContactThickness = 0.08f;    // assumed occluder thickness, x model radius
     public static float ContactBias = 0.010f;        // self-hit guard, x model radius
@@ -77,8 +77,8 @@ public class WmvShadowRig : MonoBehaviour
     /// </summary>
     public static void ResetContactSettings()
     {
-        ContactStrength = 1.0f;
-        ContactReach = 1f / 3f;
+        ContactStrength = 0.4f;
+        ContactReach = 0.36666667f;
         ContactSoftness = 0.25f;
         ContactThickness = 0.08f;
         ContactBias = 0.010f;
