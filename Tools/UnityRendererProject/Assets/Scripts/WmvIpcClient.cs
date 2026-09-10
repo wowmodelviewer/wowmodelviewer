@@ -114,6 +114,19 @@ public class WmvIpcClient : MonoBehaviour
         /// </summary>
         public int[] geosets = new int[0];
         public bool hasGeosets;
+
+        /// <summary>
+        /// The item ParticleColor override for this model, as nine bytes:
+        /// [start.r, start.g, start.b, mid.r, mid.g, mid.b, end.r, end.g, end.b], 0..255. Empty
+        /// when the item display names no particle colour, which is the common case.
+        ///
+        /// An M2 particle emitter opts in with ParticleColorIndex 11, 12 or 13, selecting the
+        /// start, middle or end set. Retail assigns the colour on ItemDisplayInfo and recolours
+        /// the emitters of the models that display references; WMV has always parsed the emitter's
+        /// index but never resolved a colour to put there.
+        /// </summary>
+        public int[] particleColor = new int[0];
+        public int particleColorId;
     }
 
     /// <summary>
@@ -157,6 +170,8 @@ public class WmvIpcClient : MonoBehaviour
         public MsgTexture[] textures;
         public int[] geosets;
         public bool hasGeosets;
+        public int[] particleColor;
+        public int particleColorId;
         public string type;
         public string requestId;
         public string path;
@@ -292,6 +307,8 @@ public class WmvIpcClient : MonoBehaviour
         }
         r.hasGeosets = msg.hasGeosets;
         if (msg.geosets != null) r.geosets = msg.geosets;
+        if (msg.particleColor != null) r.particleColor = msg.particleColor;
+        r.particleColorId = msg.particleColorId;
         return r;
     }
 

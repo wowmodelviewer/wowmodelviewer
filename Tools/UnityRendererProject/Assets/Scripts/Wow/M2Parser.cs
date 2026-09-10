@@ -75,6 +75,89 @@ namespace Wmv.Wow
         const int ColorStride = 40;        // two M2Tracks
         const int TrackStride = 20;        // interpolation + globalSeq + two nested M2Arrays
 
+        // ---- emitters -------------------------------------------------------------------------
+        //
+        // These two arrays sit past every offset above, at the tail of the MD20 header. Their
+        // positions were computed from this repo's own ModelHeader (Source/games/wow/
+        // modelheaders.h) by summing the fields ahead of them, and the same arithmetic reproduces
+        // every offset already known here -- 0x14, 0x1C, 0x2C, 0x3C, 0x48, 0x50, 0x70 -- so the
+        // method is checked before it is trusted. They were then confirmed against real files:
+        // the counts and offsets land inside the MD21 chunk and decode to sane emitters.
+        const int OfsRibbonEmitters = 0x120;
+        const int OfsParticleEmitters = 0x128;
+
+        /// <summary>
+        /// The full MD20 header. The emitter arrays are the last two entries in it, so anything
+        /// reaching this far has them -- and anything not reaching it has no emitters, which is
+        /// not an error.
+        ///
+        /// The payload being long enough is NOT the same as the HEADER being long enough: a file
+        /// whose header stops earlier still has bytes at 0x120, they are just the next array's
+        /// contents. Nothing in the format records the header's length, so the emitters are
+        /// validated on their own contents instead -- see ParticleEmitterLooksReal.
+        /// </summary>
+        const int HeaderSize = 0x138;
+        const int EmitterHeaderSize = OfsParticleEmitters + 8;
+
+        // Both strides are MEASURED. See M2ParticleEmitterDef / M2RibbonEmitterDef for the
+        // sample sizes and for what the competing candidates did.
+        const int ParticleEmitterStride = 492;
+        const int RibbonEmitterStride = 176;
+
+        // Field offsets inside M2ParticleDef.
+        const int OfsParticlePos = 8;
+        const int OfsParticleBone = 20;          // int16 bone, int16 texture
+        const int OfsParticleBlend = 40;         // uint8 blend, uint8 emitterType, uint16 colorIndex
+        const int OfsParticleTileRotation = 46;  // int16 tileRotation, uint16 rows, uint16 cols
+        const int OfsParticleParams = 260;       // ModelParticleParams
+        const int OfsParticleEnabledIn = 456;    // the track after ModelParticleParams
+
+        /// <summary>
+        /// Where each of the ten float tracks starts inside M2ParticleDef. Not a simple stride:
+        /// the struct interleaves two int32s the header calls "unknown", one after Lifespan and
+        /// one after EmissionRate. Getting that wrong reads a track header out of the middle of
+        /// another track, which still parses and still produces plausible garbage -- so the shape
+        /// is written out rather than computed.
+        /// </summary>
+        static readonly int[] ParticleTrackOffsets =
+        {
+            52,      // EmissionSpeed
+            72,      // SpeedVariation
+            92,      // VerticalRange
+            112,     // HorizontalRange
+            132,     // Gravity
+            152,     // Lifespan
+            176,     // EmissionRate       (after int32 unknown at 172)
+            200,     // EmissionAreaLength (after int32 unknown2 at 196)
+            220,     // EmissionAreaWidth
+            240,     // zSource
+        };
+
+        // Field offsets inside ModelParticleParams (relative to OfsParticleParams). Each of the
+        // first three is a FakeAnimationBlock: {nTimes, ofsTimes, nKeys, ofsKeys}, sixteen bytes,
+        // FLAT -- no per-sequence indirection, because a ramp is indexed by a particle's own age
+        // rather than by the clock. The KEYS are at +8/+12 and the TIMES at +0/+4; reading the
+        // pair at +0 as the keys gives the times array and produces convincing garbage.
+        const int OfsParamsColor = 0;      // keys: WowVec3, stored 0..255
+        const int OfsParamsAlpha = 16;     // keys: int16, fixed16
+        const int OfsParamsSize = 32;      // keys: WowVec2
+        const int OfsParamsScales = 100;         // see M2ParticleEmitterDef.ParticleScale
+        const int OfsParamsSlowdown = 112;
+        const int OfsParamsRotation = 124;
+
+        // Field offsets inside ModelRibbonEmitterDef.
+        const int OfsRibbonPos = 8;
+        const int OfsRibbonTextures = 20;
+        const int OfsRibbonMaterials = 28;
+        const int OfsRibbonColor = 36;           // then opacity, above, below at +20 each
+        const int OfsRibbonRes = 116;            // float res, float length, float emissionAngle
+
+        /// <summary>
+        /// Ceiling on a ramp's stops. The client's longest is 13 (of 17,202 tracks measured), so
+        /// 16 truncates nothing real while bounding a corrupt count.
+        /// </summary>
+        const int MaxRampStops = 16;
+
         /// <summary>
         /// Parse an .m2 asset. Throws WowParseException on anything malformed.
         ///
@@ -216,6 +299,7 @@ namespace Wmv.Wow
 
             ReadVisibilityTracks(c, model);
             ReadMaterialTracks(c, model, externalAnim);
+            ReadEmittersForSequence(c, model);
 
             return model;
         }
@@ -299,6 +383,21 @@ namespace Wmv.Wow
             // transforms -- have to follow it here too, or a sequence change would leave them on
             // the previous animation's keys while the bones moved on.
             ReadMaterialTracks(c, model, externalAnim);
+
+            // Emitters likewise, and for them it is not a refinement: an emitter whose
+            // EmissionRate has no keys in the new sequence must STOP, and one that gains keys
+            // must start. See M2ParsedModel.ParticleEmitters.
+            ReadEmittersForSequence(c, model);
+        }
+
+        /// <summary>
+        /// Resolve which buffer this sequence's keyframes live in, then read both emitter arrays.
+        /// Shared by Parse and ReadAnimationInto so the two can never disagree about it.
+        /// </summary>
+        static void ReadEmittersForSequence(ByteCursor c, M2ParsedModel model)
+        {
+            int seq = model.AnimatedSequence >= 0 ? model.AnimatedSequence : 0;
+            ReadEmitters(c, model, seq);
         }
 
         /// <summary>
@@ -499,7 +598,7 @@ namespace Wmv.Wow
                     int rec = colors.Offset + i * ColorStride;
                     model.Colors[i].Color = ReadTrack<WowVec3>(c, rec, 0, Vec3Stride, ReadVec3, ext, extAt0);
                     model.Colors[i].Opacity = seq >= 0
-                        ? ReadTrack<float>(c, rec + TrackStride, seq, Fixed16Stride, ReadFixed16, ext, hasExt)
+                        ? ReadTrack<float>(c, rec + TrackStride, seq, Fixed16Stride, ReadFixed16, NoExternalKeys, false)
                         : EmptyTrack<float>();
                     if (model.Colors[i].Color.HasData) survey.ColorRgbTracks++;
                     if (model.Colors[i].Opacity.HasData) survey.ColorOpacityTracks++;
@@ -524,7 +623,7 @@ namespace Wmv.Wow
                     // The keys the legacy rule never reads. Counted, not used.
                     if (seq > 0 && !tracks[i].IsGlobal)
                     {
-                        M2Track<float> atSeq = ReadTrack<float>(c, rec, seq, Fixed16Stride, ReadFixed16, ext, hasExt);
+                        M2Track<float> atSeq = ReadTrack<float>(c, rec, seq, Fixed16Stride, ReadFixed16, NoExternalKeys, false);
                         survey.WeightPerSequenceChecked++;
                         if (!SameKeys(tracks[i], atSeq)) survey.WeightPerSequenceDiffers++;
                     }
@@ -546,9 +645,9 @@ namespace Wmv.Wow
                     int rec = xforms.Offset + i * TextureTransformStride;
                     if (seq >= 0)
                     {
-                        arr[i].Translation = ReadTrack<WowVec3>(c, rec, seq, Vec3Stride, ReadVec3, ext, hasExt);
-                        arr[i].Rotation = ReadTrack<WowQuat>(c, rec + TrackStride, seq, FloatQuatStride, ReadFloatQuat, ext, hasExt);
-                        arr[i].Scale = ReadTrack<WowVec3>(c, rec + 2 * TrackStride, seq, Vec3Stride, ReadVec3, ext, hasExt);
+                        arr[i].Translation = ReadTrack<WowVec3>(c, rec, seq, Vec3Stride, ReadVec3, NoExternalKeys, false);
+                        arr[i].Rotation = ReadTrack<WowQuat>(c, rec + TrackStride, seq, FloatQuatStride, ReadFloatQuat, NoExternalKeys, false);
+                        arr[i].Scale = ReadTrack<WowVec3>(c, rec + 2 * TrackStride, seq, Vec3Stride, ReadVec3, NoExternalKeys, false);
                     }
                     else
                     {
@@ -781,11 +880,11 @@ namespace Wmv.Wow
                 if (seq >= 0)
                 {
                     bones[i].Translation = ReadTrack<WowVec3>(c, bone + OfsBoneTranslation, seq,
-                                                              Vec3Stride, ReadVec3, ext, hasExt);
+                                                              Vec3Stride, ReadVec3, NoExternalKeys, false);
                     bones[i].Rotation = ReadTrack<WowQuat>(c, bone + OfsBoneRotation, seq,
-                                                           PackedQuatStride, ReadPackedQuat, ext, hasExt);
+                                                           PackedQuatStride, ReadPackedQuat, NoExternalKeys, false);
                     bones[i].Scale = ReadTrack<WowVec3>(c, bone + OfsBoneScale, seq,
-                                                        Vec3Stride, ReadVec3, ext, hasExt);
+                                                        Vec3Stride, ReadVec3, NoExternalKeys, false);
                 }
             }
 
@@ -915,6 +1014,443 @@ namespace Wmv.Wow
         }
 
         static readonly uint[] EmptyTimes = new uint[0];
+
+        // -----------------------------------------------------------------------------------
+        // Particle and ribbon emitters
+        // -----------------------------------------------------------------------------------
+
+        /// <summary>
+        /// Read both emitter arrays, with every track narrowed to <paramref name="sequence"/>.
+        ///
+        /// Called from Parse AND from ReadAnimationInto, because an emitter's tracks are stored
+        /// per animation sequence exactly like a bone's. See M2ParsedModel.ParticleEmitters for
+        /// the model that makes the difference visible.
+        ///
+        /// Nothing in here throws. A header too short to carry the arrays, a count that does not
+        /// fit, an emitter whose bone points off the end -- each yields fewer emitters, never a
+        /// model that refuses to load. Emitters are decoration; geometry is not.
+        /// </summary>
+        /// <summary>
+        /// EMITTER TRACKS ARE NEVER IN A .anim FILE, so no external cursor is threaded through
+        /// any of this. The legacy binds them to the GameFile* overload of Animated::init
+        /// (particle.cpp:33-43 and :744-747, animated.h:239), which reads the model buffer and
+        /// only the model buffer; the .anim-redirecting overload (animated.h:298) has no emitter
+        /// call site anywhere. Pointing an M2-relative offset at the .anim buffer would read
+        /// whatever happened to be at that offset in the other file.
+        /// </summary>
+        static readonly ByteCursor NoExternalKeys = default(ByteCursor);
+
+        static void ReadEmitters(ByteCursor c, M2ParsedModel model, int sequence)
+        {
+            model.ParticleEmitters = new M2ParticleEmitterDef[0];
+            model.RibbonEmitters = new M2RibbonEmitterDef[0];
+            model.ParticleEmitterCount = 0;
+            model.RibbonEmitterCount = 0;
+            if (c.Length < EmitterHeaderSize)
+                return;
+
+            c.Seek(OfsParticleEmitters);
+            M2Array particles = c.ReadArray();
+            model.ParticleEmitterCount = particles.Count;
+            // An array cannot begin inside the header, so an offset that does is a sign these
+            // bytes are not the emitter entry at all -- the header stops earlier and something
+            // else lives at 0x128. Only meaningful for a NON-EMPTY array: an M2 with no particle
+            // emitters stores count 0 AND offset 0, which is the common case and says nothing
+            // about the ribbons that may still follow.
+            if (particles.Count > 0 && particles.Offset < HeaderSize)
+                particles = new M2Array(0, 0);
+            model.ParticleEmitterCount = particles.Count;
+            if (particles.Count > 0 && Fits(c, particles.Offset, particles.Count, ParticleEmitterStride))
+            {
+                var kept = new List<M2ParticleEmitterDef>(particles.Count);
+                for (int i = 0; i < particles.Count; i++)
+                {
+                    M2ParticleEmitterDef def;
+                    if (ReadParticleEmitter(c, particles.Offset + i * ParticleEmitterStride, model,
+                                            sequence, out def))
+                        kept.Add(def);
+                }
+                model.ParticleEmitters = kept.ToArray();
+            }
+
+            c.Seek(OfsRibbonEmitters);
+            M2Array ribbons = c.ReadArray();
+            model.RibbonEmitterCount = ribbons.Count;
+            if (ribbons.Count > 0 && ribbons.Offset < HeaderSize)
+                ribbons = new M2Array(0, 0);
+            model.RibbonEmitterCount = ribbons.Count;
+            if (ribbons.Count > 0 && Fits(c, ribbons.Offset, ribbons.Count, RibbonEmitterStride))
+            {
+                var kept = new List<M2RibbonEmitterDef>(ribbons.Count);
+                for (int i = 0; i < ribbons.Count; i++)
+                {
+                    M2RibbonEmitterDef def;
+                    if (ReadRibbonEmitter(c, ribbons.Offset + i * RibbonEmitterStride, model,
+                                          sequence, out def))
+                        kept.Add(def);
+                }
+                model.RibbonEmitters = kept.ToArray();
+            }
+        }
+
+        static bool ReadParticleEmitter(ByteCursor c, int at, M2ParsedModel model, int sequence,
+                                        out M2ParticleEmitterDef def)
+        {
+            def = new M2ParticleEmitterDef();
+            try
+            {
+                c.Seek(at + 4);
+                def.Flags = c.ReadInt32();
+
+                c.Seek(at + OfsParticlePos);
+                def.Position = ReadVec3(c);
+
+                c.Seek(at + OfsParticleBone);
+                def.Bone = c.ReadInt16();
+                def.TextureId = c.ReadInt16();
+
+                c.Seek(at + OfsParticleBlend);
+                def.BlendMode = c.ReadByte();
+                def.EmitterType = c.ReadByte();
+                def.ParticleColorIndex = c.ReadUInt16();
+
+                c.Seek(at + OfsParticleTileRotation);
+                def.TextureTileRotation = c.ReadInt16();
+                def.Rows = c.ReadUInt16();
+                def.Cols = c.ReadUInt16();
+
+                // rows/cols of 0 would make the flipbook a division by zero. The legacy runtime
+                // promotes both to 1 (particle.cpp:66-70); so does this.
+                if (def.Rows == 0) def.Rows = 1;
+                if (def.Cols == 0) def.Cols = 1;
+
+                // 0xFFFF appears on three emitters in the client and is not one of the three
+                // override slots. Treat it as "no override" rather than letting it index.
+                if (def.ParticleColorIndex < 11 || def.ParticleColorIndex > 13)
+                    def.ParticleColorIndex = 0;
+            }
+            catch (WowParseException)
+            {
+                return false;
+            }
+
+            if (!ParticleEmitterLooksReal(def, model))
+                return false;
+
+            // ---- WHICH SEQUENCE THE EMITTER'S OWN TRACKS ARE READ AT --------------------
+            //
+            // ANIMATION 0, always -- not the sequence that is playing. That is the app's shipped
+            // behaviour, not an invention: GLOBALSETTINGS.bZeroParticle defaults to true
+            // (app.cpp:969, modelviewer.cpp:812, and it is a checkbox in the general settings),
+            // and the legacy runtime then forces the animation index to 0 for every one of these
+            // ten tracks and for a particle's lifespan at spawn (particle.cpp:194-196, :615-617,
+            // :724-726). EnabledIn is the one exception -- it is read at the PLAYING animation
+            // even then (particle.cpp:233-234) -- and it is read that way below.
+            //
+            // It matters, and not rarely: 122 of the 806 emitters in a 900-model sample have no
+            // EmissionRate keys in the sequence that resolves, and every one of them would emit
+            // nothing at all if this followed the sequence.
+            const int ParticleTrackSequence = 0;
+            for (int k = 0; k < ParticleTrackOffsets.Length; k++)
+            {
+                int off = at + ParticleTrackOffsets[k];
+                M2Track<float> t;
+                if (k == 4)   // Gravity, whose key encoding depends on a flag
+                    t = def.CompressedGravity
+                        ? ReadTrack<float>(c, off, ParticleTrackSequence, 4, ReadCompressedGravity, NoExternalKeys, false)
+                        : ReadTrack<float>(c, off, ParticleTrackSequence, 4, ReadFloat, NoExternalKeys, false);
+                else
+                    t = ReadTrack<float>(c, off, ParticleTrackSequence, 4, ReadFloat, NoExternalKeys, false);
+
+                switch (k)
+                {
+                    case 0: def.EmissionSpeed = t; break;
+                    case 1: def.SpeedVariation = t; break;
+                    case 2: def.VerticalRange = t; break;
+                    case 3: def.HorizontalRange = t; break;
+                    case 4: def.Gravity = t; break;
+                    case 5: def.Lifespan = t; break;
+                    case 6: def.EmissionRate = t; break;
+                    case 7: def.EmissionAreaLength = t; break;
+                    case 8: def.EmissionAreaWidth = t; break;
+                    default: def.ZSource = t; break;
+                }
+            }
+            // ONE byte per key, not two -- see M2ParticleEmitterDef.EnabledIn. Read at the
+            // PLAYING sequence, which is the one track above that is (particle.cpp:233-234).
+            def.EnabledIn = ReadTrack<float>(c, at + OfsParticleEnabledIn, sequence, 1,
+                                             ReadByteAsFloat, NoExternalKeys, false);
+
+            ReadParticleRamps(c, at + OfsParticleParams, ref def);
+            return true;
+        }
+
+        /// <summary>
+        /// Are these bytes really an emitter?
+        ///
+        /// Every one of these is a field whose range the format fixes, and together they are what
+        /// made the 492-byte stride measurable in the first place: of eight candidate strides,
+        /// only 492 satisfied all of them on all 978 multi-emitter models of a 6,000-model sample.
+        /// So they are not defensive noise -- they are the same test, kept, and they are what
+        /// stands between a model whose header stops short of 0x138 and thirteen invented
+        /// emitters welded to its origin.
+        ///
+        /// An emitter whose BONE points off the end would additionally be a wild read every
+        /// frame. The legacy clamps that one to the root bone and logs (particle.cpp:78-87);
+        /// dropping it is the better answer here, because a stray emitter at the model's origin
+        /// is a visible artefact and this renderer would rather show nothing than something wrong.
+        /// </summary>
+        static bool ParticleEmitterLooksReal(M2ParticleEmitterDef def, M2ParsedModel model)
+        {
+            if (model.BoneCount > 0 && (def.Bone < 0 || def.Bone >= model.BoneCount))
+                return false;
+            if (def.EmitterType < 1 || def.EmitterType > 3)
+                return false;
+            if (def.BlendMode > 7)
+                return false;
+            if (def.Rows > 64 || def.Cols > 64)
+                return false;
+            return true;
+        }
+
+        /// <summary>
+        /// The colour / alpha / size ramps, and the two scalars beside them.
+        ///
+        /// See M2ParticleEmitterDef.ColorTimes for why these are variable-length with real times
+        /// rather than the legacy's three fixed stops at 0 / 0.5 / 1.
+        /// </summary>
+        static void ReadParticleRamps(ByteCursor c, int p, ref M2ParticleEmitterDef def)
+        {
+            def.ColorTimes = new float[0];
+            def.ColorKeys = new WowVec3[0];
+            def.AlphaTimes = new float[0];
+            def.AlphaKeys = new float[0];
+            def.SizeTimes = new float[0];
+            def.SizeKeys = new WowVec2[0];
+            def.ParticleScale = new WowVec2(1f, 1f);
+
+            try
+            {
+                // scales: a per-AXIS multiplier applied to every stop, NOT one per stop. See
+                // M2ParticleEmitterDef.ParticleScale for what the legacy's reading does to a real
+                // emitter. A zero would erase the emitter, so it is treated as unset.
+                c.Seek(p + OfsParamsScales);
+                float sx = c.ReadSingle();
+                float sy = c.ReadSingle();
+                if (IsFinite(sx) && IsFinite(sy) && sx != 0f && sy != 0f)
+                    def.ParticleScale = new WowVec2(sx, sy);
+
+                c.Seek(p + OfsParamsSlowdown);
+                float slow = c.ReadSingle();
+                def.Slowdown = IsFinite(slow) ? slow : 0f;
+
+                c.Seek(p + OfsParamsRotation);
+                float rot = c.ReadSingle();
+                def.SpriteRotation = IsFinite(rot) ? rot : 0f;
+
+                def.ColorKeys = ReadRamp<WowVec3>(c, p + OfsParamsColor, 12, ReadColor255,
+                                                  out def.ColorTimes);
+                def.AlphaKeys = ReadRamp<float>(c, p + OfsParamsAlpha, 2, ReadFixed16,
+                                                out def.AlphaTimes);
+                def.SizeKeys = ReadRamp<WowVec2>(c, p + OfsParamsSize, 8, ReadVec2,
+                                                 out def.SizeTimes);
+            }
+            catch (WowParseException)
+            {
+                // Keep what was read. An empty ramp means "hold the neutral value", which the
+                // runtime reads as white, opaque and unit-sized.
+            }
+
+            for (int i = 0; i < def.SizeKeys.Length; i++)
+                def.SizeKeys[i] = new WowVec2(def.SizeKeys[i].X * def.ParticleScale.X,
+                                              def.SizeKeys[i].Y * def.ParticleScale.Y);
+        }
+
+        /// <summary>
+        /// Read one ramp: its normalised times and its values.
+        ///
+        /// The times are UINT16 over 32767, not milliseconds. Across 17,202 ramp tracks the first
+        /// key is 0 and the last is 32767 in 100.0 % of them and every one is monotonic; read as
+        /// uint32 milliseconds, 0.0 % are either. A times array that cannot be read, or that does
+        /// not ascend, falls back to stops spread evenly over the life -- the best available
+        /// reading of values whose positions are unknown, and exactly right for the two- and
+        /// three-stop cases that are most of the client.
+        /// </summary>
+        static T[] ReadRamp<T>(ByteCursor c, int blockAt, int valueStride, ReadValue<T> read,
+                               out float[] times)
+        {
+            times = new float[0];
+            c.Seek(blockAt);
+            int timeCount = (int)c.ReadUInt32();
+            int timeOffset = (int)c.ReadUInt32();
+            int count = (int)c.ReadUInt32();
+            int offset = (int)c.ReadUInt32();
+            if (count <= 0 || !Fits(c, offset, count, valueStride))
+                return new T[0];
+            int n = count < MaxRampStops ? count : MaxRampStops;
+
+            var values = new T[n];
+            for (int i = 0; i < n; i++)
+            {
+                c.Seek(offset + i * valueStride);
+                values[i] = read(c);
+            }
+
+            var t = new float[n];
+            bool haveTimes = timeCount >= count && Fits(c, timeOffset, timeCount, 2);
+            if (haveTimes)
+            {
+                for (int i = 0; i < n; i++)
+                {
+                    c.Seek(timeOffset + i * 2);
+                    t[i] = c.ReadUInt16() / 32767f;
+                }
+                for (int i = 1; i < n && haveTimes; i++)
+                    if (t[i] < t[i - 1])
+                        haveTimes = false;
+            }
+            if (!haveTimes)
+                for (int i = 0; i < n; i++)
+                    t[i] = n > 1 ? i / (float)(n - 1) : 0f;
+            times = t;
+            return values;
+        }
+
+        /// <summary>A ramp colour stop: three floats the file stores as 0..255.</summary>
+        static WowVec3 ReadColor255(ByteCursor c)
+        {
+            float r = c.ReadSingle();
+            float g = c.ReadSingle();
+            float b = c.ReadSingle();
+            return new WowVec3(r / 255f, g / 255f, b / 255f);
+        }
+
+        /// <summary>A ramp size stop: the x and y scale of the particle's quad.</summary>
+        static WowVec2 ReadVec2(ByteCursor c)
+        {
+            float x = c.ReadSingle();
+            float y = c.ReadSingle();
+            return new WowVec2(IsFinite(x) ? x : 0f, IsFinite(y) ? y : 0f);
+        }
+
+        static float ReadFloat(ByteCursor c)
+        {
+            return Finite(c.ReadSingle());
+        }
+
+        static float Finite(float v) { return IsFinite(v) ? v : 0f; }
+
+        static float ReadByteAsFloat(ByteCursor c) { return c.ReadByte(); }
+
+        /// <summary>
+        /// A Gravity key when the emitter sets flag 0x800000, which 82.9 % of the client's
+        /// emitters do.
+        ///
+        /// WHAT IS MEASURED, AND WHAT IS NOT. The key is FOUR bytes either way -- the packing gap
+        /// between consecutive key arrays comes out at 4 bytes per key, so the flag changes the
+        /// ENCODING and not the stride, and every track offset around it is unaffected. Read as
+        /// float32, which is what the legacy runtime does for every emitter unconditionally
+        /// (particle.cpp:38), the keys decode to NaN or infinity 47 % of the time and to |v| &gt;
+        /// 1e6 65 % of the time: that reading is definitively wrong, whatever the right one is.
+        /// Read as two int16, the second divided by 32767 -- the fixed16 convention this format
+        /// uses everywhere else -- the values come out as clean authored decimals (-0.017, 0.005,
+        /// 0.010, -0.080) and span roughly [-0.08, +0.01] between the 1st and 99th percentiles.
+        ///
+        /// WHAT IS NOT SETTLED is the scale of that number against the PLAIN float gravity, which
+        /// measures as N/36 for small integer N (0.694, 6.944, 41.667). The two are clean in
+        /// different units and no file in this repository relates them. So this decodes the form
+        /// it can defend and accepts that the magnitude may be conservative: a gentle drift is
+        /// wrong by a factor, whereas the float32 reading is wrong by infinity.
+        /// </summary>
+        static float ReadCompressedGravity(ByteCursor c)
+        {
+            c.ReadInt16();                       // see above: zero on 94 % of keys, unidentified
+            return c.ReadInt16() / 32767f;
+        }
+
+        static bool IsFinite(float v)
+        {
+            return !float.IsNaN(v) && !float.IsInfinity(v);
+        }
+
+        static bool ReadRibbonEmitter(ByteCursor c, int at, M2ParsedModel model, int sequence,
+                                      out M2RibbonEmitterDef def)
+        {
+            def = new M2RibbonEmitterDef();
+            def.TextureIds = new int[0];
+            try
+            {
+                c.Seek(at + 4);
+                def.Bone = c.ReadInt32();
+
+                c.Seek(at + OfsRibbonPos);
+                def.Position = ReadVec3(c);
+
+                // UINT16 per entry, not int32. Measured: read as uint16 every index is inside
+                // the model's texture array on 322 of 322 multi-texture ribbons; read as uint32,
+                // only 207 of 322. spells/11fx_infusiontether_aura.m2 stores 21 00 22 00 23 00 --
+                // [33, 34, 35] against 36 textures. particle.cpp:753 makes the same four-byte
+                // mistake ("int *texlist") and gets away with it only because a one-entry array
+                // is padded with zeroes; 48.8 % of the client's ribbons have three textures.
+                c.Seek(at + OfsRibbonTextures);
+                M2Array textures = c.ReadArray();
+                if (textures.Count > 0 && Fits(c, textures.Offset, textures.Count, 2))
+                {
+                    var ids = new List<int>(textures.Count);
+                    for (int i = 0; i < textures.Count; i++)
+                    {
+                        c.Seek(textures.Offset + i * 2);
+                        int id = c.ReadUInt16();
+                        if (id >= 0 && id < model.Textures.Length)
+                            ids.Add(id);
+                    }
+                    def.TextureIds = ids.ToArray();
+                }
+
+                // The ribbon's material, from the SECOND array -- uint16 indices into the
+                // materials table at header offset 0x70. Not parallel to the textures above, and
+                // one entry on every ribbon measured.
+                def.MaterialIndex = -1;
+                c.Seek(at + OfsRibbonMaterials);
+                M2Array materials = c.ReadArray();
+                if (materials.Count > 0 && Fits(c, materials.Offset, materials.Count, 2))
+                {
+                    c.Seek(materials.Offset);
+                    int m = c.ReadUInt16();
+                    if (m >= 0 && m < model.Materials.Length)
+                        def.MaterialIndex = m;
+                }
+
+                // ByteCursor is a STRUCT. Reading through a helper that takes it by value
+                // would leave this cursor where it was and read the same float three times, so
+                // these go through the cursor itself and are sanitised afterwards.
+                c.Seek(at + OfsRibbonRes);
+                def.EdgesPerSecond = Finite(c.ReadSingle());
+                def.EdgeLifetimeSeconds = Finite(c.ReadSingle());
+                def.EmissionAngle = Finite(c.ReadSingle());
+            }
+            catch (WowParseException)
+            {
+                return false;
+            }
+
+            // Same reasoning as ParticleEmitterLooksReal: a ribbon with no usable texture, or
+            // one bound to a bone that does not exist, is not a ribbon.
+            if (model.BoneCount > 0 && (def.Bone < 0 || def.Bone >= model.BoneCount))
+                return false;
+            if (def.TextureIds.Length == 0)
+                return false;
+
+            def.Color = ReadTrack<WowVec3>(c, at + OfsRibbonColor, sequence, Vec3Stride,
+                                           ReadVec3, NoExternalKeys, false);
+            def.Opacity = ReadTrack<float>(c, at + OfsRibbonColor + TrackStride, sequence,
+                                           Fixed16Stride, ReadFixed16, NoExternalKeys, false);
+            def.Above = ReadTrack<float>(c, at + OfsRibbonColor + 2 * TrackStride, sequence,
+                                         4, ReadFloat, NoExternalKeys, false);
+            def.Below = ReadTrack<float>(c, at + OfsRibbonColor + 3 * TrackStride, sequence,
+                                         4, ReadFloat, NoExternalKeys, false);
+            return true;
+        }
 
         /// <summary>Does an array of count*stride bytes at offset lie inside the payload?</summary>
         static bool Fits(ByteCursor c, int offset, int count, int stride)

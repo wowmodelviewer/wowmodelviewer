@@ -308,6 +308,23 @@ void UnityIpcServer::addGeosets(QJsonObject & msg, int m2FileDataID)
   msg["geosets"] = arr;
 }
 
+void UnityIpcServer::addParticleColor(QJsonObject & msg, int m2FileDataID)
+{
+  UnityAssetAccess::ParticleColorSet set;
+  QString error;
+  if (!UnityAssetAccess::resolveParticleColor(m2FileDataID, set, error))
+    return;   // no override is the common case, and is not an error worth a field
+
+  // [start.r,start.g,start.b, mid.r,..., end.r,...] as 0..255, the order the DBC stores them and
+  // the order an emitter's ParticleColorIndex of 11 / 12 / 13 selects from.
+  QJsonArray arr;
+  for (int stop = 0; stop < 3; stop++)
+    for (int ch = 0; ch < 3; ch++)
+      arr.append(set.rgb[stop][ch]);
+  msg["particleColor"] = arr;
+  msg["particleColorId"] = set.id;
+}
+
 void UnityIpcServer::sendModelSkin(int m2FileDataID)
 {
   if (!m_client || !m_unityReady || m2FileDataID <= 0)
@@ -329,6 +346,7 @@ void UnityIpcServer::sendModelSkin(int m2FileDataID)
   msg["fileDataID"] = m2FileDataID;
   msg["textures"] = textureArray(textures);
   addGeosets(msg, m2FileDataID);
+  addParticleColor(msg, m2FileDataID);
   m_stats.skinPushes++;
   m_stats.lastSkin = QString("%1 (%2)").arg(textures[0].fileDataID)
                                        .arg(UnityAssetAccess::sourceName(textures[0].source));
@@ -461,6 +479,7 @@ void UnityIpcServer::handleGetModelTextures(const QJsonObject & msg)
   {
     resp["textures"] = textureArray(textures);
     addGeosets(resp, fdid);
+    addParticleColor(resp, fdid);
     m_stats.responsesOk++;
     LOG_INFO << "[unityipc] -> modelTextures" << requestId << "resolved" << (int)textures.size()
              << "texture(s) from" << UnityAssetAccess::sourceName(textures.empty()

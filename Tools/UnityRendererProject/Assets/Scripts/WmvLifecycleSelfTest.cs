@@ -113,6 +113,133 @@ public static class WmvLifecycleSelfTest
     /// change is an index-buffer switch; if it started recreating the mesh, materials or textures
     /// the model would flicker and every per-model diagnostic would reset.
     /// </summary>
+
+    // ---------------------------------------------------------------- emitters
+
+    /// <summary>A 2x2 opaque white texture, so an emitter has something to bind. The lifecycle
+    /// test never looks at a pixel; it only needs the slot to resolve.</summary>
+    static BlpImage FlatTexture()
+    {
+        var img = new BlpImage { Width = 2, Height = 2, Rgba = new byte[2 * 2 * 4], Encoding = "test" };
+        for (int i = 0; i < img.Rgba.Length; i++) img.Rgba[i] = 255;
+        return img;
+    }
+
+    static Dictionary<int, BlpImage> EmitterTextures()
+    {
+        return new Dictionary<int, BlpImage> { { 0, FlatTexture() }, { 1, FlatTexture() } };
+    }
+
+    /// <summary>
+    /// The emitter runtime, driven through the real builder the way the host drives it.
+    ///
+    /// What this is actually for: the emitters are the first thing in this renderer whose state
+    /// is a HISTORY rather than a function of the current instant, so the questions worth asking
+    /// are the lifecycle ones -- does a sequence change stop an emitter that should stop, does it
+    /// leave the previous animation's particles behind, does a model without emitters pay for the
+    /// feature at all, and does a rebuild produce two of everything.
+    /// </summary>
+    static void EmitterTests(Action<string> log)
+    {
+        // Rate keys in ANIMATION 0. The emitter float tracks are read there whichever sequence
+        // plays -- WMV's bZeroParticle default, see M2Parser -- so this is the fixture that
+        // emits, and the sequence-change check below is that switching does NOT stop it.
+        byte[] m2 = M2Synthetic.EmitterModel(0);
+        byte[] sk = M2Synthetic.TransformSwitchSkin();
+
+        M2ParsedModel model = M2Parser.Parse(m2, 0);
+        M2ParsedSkin skin = M2SkinParser.Parse(sk);
+        WmvRuntimeModel rt = WmvModelBuilder.Build(model, skin, EmitterTextures(), "EmitterTest",
+                                                   s => log("  " + s));
+        Check(rt != null && rt.Root != null, "emitter: model built", log);
+        Check(rt.Emitters != null, "emitter: runtime component added", log);
+        if (rt.Emitters == null) { rt.Dispose(); return; }
+
+        Check(rt.Emitters.ParticleEmitterCount == 1, "emitter: one particle emitter drawn", log);
+        Check(rt.Emitters.RibbonEmitterCount == 1, "emitter: one ribbon emitter drawn", log);
+        Check(rt.Emitters.DrawCallCount == 2, "emitter: two draw calls, not two per particle", log);
+        Check(rt.Emitters.SkippedEmitterCount == 0, "emitter: nothing skipped", log);
+        Check(rt.Animator != null, "emitter: a clock exists for the emitters to run on", log);
+        Check(rt.Animator.Emitters == rt.Emitters, "emitter: the animator drives THIS runtime", log);
+
+        // The emitter GameObjects must be children of the model root, or a model switch would
+        // leave the previous model's effects hanging in the scene.
+        int children = 0;
+        for (int i = 0; i < rt.Root.transform.childCount; i++)
+            if (rt.Root.transform.GetChild(i).GetComponent<MeshRenderer>() != null)
+                children++;
+        Check(children == 2, "emitter: both renderers are children of the model root", log);
+
+        // Two seconds of animation: the emitter should be running and the ribbon laying edges.
+        rt.Emitters.ResetState();
+        for (int i = 0; i < 120; i++)
+            rt.Emitters.Advance(1f / 60f, i * 16f, i * 16f);
+        int live = rt.Emitters.LiveParticleCount;
+        Check(live > 0, "emitter: the emitter emits (" + live + " live)", log);
+        Check(rt.Emitters.RibbonSegmentCount > 1,
+              "emitter: the ribbon laid down segments (" + rt.Emitters.RibbonSegmentCount + ")", log);
+
+        // A sequence change, through exactly the call the host makes.
+        M2Parser.ReadAnimationInto(m2, 1, model);
+        bool applied = WmvModelBuilder.ApplySequence(rt, model, s => log("  " + s));
+        Check(applied, "emitter: ApplySequence reports something to animate", log);
+        Check(rt.Emitters.ParticleEmitterCount == 1 && rt.Emitters.RibbonEmitterCount == 1,
+              "emitter: the sequence change did NOT duplicate the emitters", log);
+        Check(rt.Emitters.LiveParticleCount == 0 && rt.Emitters.RibbonSegmentCount == 0,
+              "emitter: the sequence change cleared the previous animation's particles and "
+              + "ribbon history (no smear from where the bone used to be)", log);
+
+        for (int i = 0; i < 120; i++)
+            rt.Emitters.Advance(1f / 60f, i * 16f, i * 16f);
+        Check(rt.Emitters.LiveParticleCount > 0,
+              "emitter: still emitting after the sequence change ("
+              + rt.Emitters.LiveParticleCount + " live)", log);
+
+        // A PAUSED model does not emit: dt is the animation's advance, and the animator passes
+        // zero while paused. Running with dt = 0 must change nothing at all.
+        int before = rt.Emitters.LiveParticleCount;
+        int segsBefore = rt.Emitters.RibbonSegmentCount;
+        for (int i = 0; i < 60; i++)
+            rt.Emitters.Advance(0f, 500f, 500f);
+        Check(rt.Emitters.LiveParticleCount == before,
+              "emitter: dt = 0 (paused) spawns nothing and kills nothing", log);
+        Check(rt.Emitters.RibbonSegmentCount == segsBefore,
+              "emitter: dt = 0 (paused) lays down no ribbon segment", log);
+
+        // Deterministic: the same instant, reached the same way, twice.
+        rt.Emitters.SimulateTo(1000f, x => x, null);
+        int a = rt.Emitters.LiveParticleCount;
+        rt.Emitters.SimulateTo(1000f, x => x, null);
+        Check(rt.Emitters.LiveParticleCount == a,
+              "emitter: SimulateTo is deterministic (" + a + " live both times)", log);
+
+        // A ParticleColor override must not change how many particles exist, only their colour.
+        var set = new Color[3];
+        for (int i = 0; i < 3; i++) set[i] = new Color(1f, 0f, 0f, 1f);
+        rt.Emitters.SetParticleColorOverride(new[] { set, set, set });
+        Check(rt.Emitters.LiveParticleCount == a, "emitter: a colour override changes no counts", log);
+        rt.Emitters.SetParticleColorOverride(null);
+
+        // Disposing the model drops the whole record, emitters included: the renderers are
+        // children of Root, so destroying Root destroys them, and the component's own OnDestroy
+        // releases the meshes and materials it made. That is why a model switch cannot leave the
+        // previous model's effects on screen.
+        rt.Dispose();
+        Check(rt.Root == null && rt.Emitters == null,
+              "emitter: disposing the model takes the emitters with it", log);
+
+        // A model with NO emitters gets no component, no GameObject and no per-frame call. That
+        // is the "costs nothing" property, and it is structural rather than a fast path.
+        M2ParsedModel plain = M2Parser.Parse(M2Synthetic.TransformSwitchModel(1, true), 0);
+        WmvRuntimeModel prt = WmvModelBuilder.Build(plain, skin, EmitterTextures(), "NoEmitterTest",
+                                                    s => log("  " + s));
+        Check(prt.Emitters == null,
+              "emitter: a model with no emitters gets no runtime component at all", log);
+        Check(prt.Root.GetComponent<WmvEmitterRuntime>() == null,
+              "emitter: ... and none on its root either", log);
+        prt.Dispose();
+    }
+
     static void GeosetTests(Action<string> log)
     {
         // A Drakestalker-shaped component: two submeshes at id 0 and one alternative at 2602.
@@ -252,6 +379,7 @@ public static class WmvLifecycleSelfTest
                 Run(skinned, keyed, log);
         GeosetTests(log);
         OutputGateTests(log);
+        EmitterTests(log);
         log(string.Format("lifecycle-test: {0} passed, {1} failed", passed, failed));
     }
 }

@@ -111,6 +111,13 @@ public class WmvMain : MonoBehaviour
     /// </summary>
     HashSet<int> currentGeosets;
 
+    /// <summary>
+    /// The item ParticleColor override the host last reported, as three RGB stops, or null when
+    /// the displayed item names none. Kept alongside currentGeosets because it arrives on the
+    /// same two messages and describes the same displayed state.
+    /// </summary>
+    Color[][] currentParticleColor;
+
     /// <summary>Textures still on their way for a skin change. Requests are keyed to the M2
     /// texture slot they will land in.</summary>
     class SkinJob
@@ -358,6 +365,7 @@ public class WmvMain : MonoBehaviour
             return;
         job.PendingTextureList = null;
         AdoptGeosets(r);
+        AdoptParticleColor(r);
 
         if (!r.ok || r.textures.Length == 0)
         {
@@ -439,6 +447,8 @@ public class WmvMain : MonoBehaviour
 
             if (current != null) current.Dispose();      // never leak the previous model
             current = built;
+            // The emitters were created by that build; the override arrived with the textures.
+            ApplyParticleColor();
             if (placeholder != null) placeholder.SetActive(false);
 
             // Keep what a later skin change needs: the parsed model (to map a texture type onto
@@ -1656,6 +1666,8 @@ public class WmvMain : MonoBehaviour
         // Geometry first: a variant can change which submeshes are drawn as well as which texture
         // they wear, and the two are independent -- a variant that only swaps geosets has no
         // texture to fetch and would otherwise be dropped by the no-op check below.
+        if (AdoptParticleColor(r))
+            ApplyParticleColor();
         if (AdoptGeosets(r))
         {
             WmvModelBuilder.ApplyGeosets(current, currentGeosets, s => Debug.Log("WMV: " + s));
@@ -1782,6 +1794,57 @@ public class WmvMain : MonoBehaviour
         return true;
     }
 
+    /// <summary>
+    /// Take the ParticleColor override out of a host message.
+    ///
+    /// The host sends nine bytes -- start, middle and end as RGB 0..255 -- and an emitter's
+    /// ParticleColorIndex of 11, 12 or 13 selects one of the three as ITS ramp. So each of the
+    /// three slots gets the whole three-stop ramp rooted at that stop, which is the shape
+    /// WmvEmitterRuntime.SetParticleColorOverride expects and what the legacy's
+    /// particleColorReplacements holds (particle.h:105, three sets of three).
+    ///
+    /// An absent field means "no override", which is different from black: it must leave the
+    /// emitters on their authored colours rather than tint them to nothing.
+    /// </summary>
+    bool AdoptParticleColor(WmvIpcClient.ModelTexturesResponse r)
+    {
+        Color[][] next = null;
+        if (r.particleColor != null && r.particleColor.Length >= 9)
+        {
+            var stops = new Color[3];
+            for (int i = 0; i < 3; i++)
+                stops[i] = new Color(r.particleColor[i * 3] / 255f,
+                                     r.particleColor[i * 3 + 1] / 255f,
+                                     r.particleColor[i * 3 + 2] / 255f, 1f);
+            // Index 11 -> start, 12 -> middle, 13 -> end. Each is the ramp an emitter with that
+            // index draws, so each is the same three stops rotated to begin at its own.
+            next = new Color[3][];
+            next[0] = new[] { stops[0], stops[1], stops[2] };
+            next[1] = new[] { stops[1], stops[2], stops[0] };
+            next[2] = new[] { stops[2], stops[0], stops[1] };
+        }
+
+        bool changed = (next == null) != (currentParticleColor == null);
+        if (!changed && next != null)
+            for (int i = 0; i < 3 && !changed; i++)
+                for (int j = 0; j < 3 && !changed; j++)
+                    if (next[i][j].r != currentParticleColor[i][j].r ||
+                        next[i][j].g != currentParticleColor[i][j].g ||
+                        next[i][j].b != currentParticleColor[i][j].b)
+                        changed = true;
+        currentParticleColor = next;
+        if (changed && r.particleColorId > 0)
+            Debug.Log("WMV: ParticleColor " + r.particleColorId + " applies to this model's emitters");
+        return changed;
+    }
+
+    /// <summary>Push whatever override is current onto the model on screen.</summary>
+    void ApplyParticleColor()
+    {
+        if (current != null && current.Emitters != null)
+            current.Emitters.SetParticleColorOverride(currentParticleColor);
+    }
+
     void Fail(string reason)
     {
         status.Set("FAILED: " + reason);
@@ -1839,6 +1902,7 @@ public class WmvMain : MonoBehaviour
         long heap = System.GC.GetTotalMemory(false) - allocProbe.HeapAtStart;
         int gen0 = System.GC.CollectionCount(0) - allocProbe.Gen0AtStart;
         WmvMaterialAnimator ma = current.MaterialAnimator;
+        WmvEmitterRuntime em = current.Emitters;
         Debug.Log(string.Format(
             "WMV: alloccheck: {0} frames with {1}; managed heap delta {2} bytes ({3:F1} bytes/frame), "
             + "gen-0 collections {4}; material bindings evaluated per frame {5} ({6} colour, {7} colour-alpha, "
@@ -1851,6 +1915,16 @@ public class WmvMain : MonoBehaviour
             ma != null ? ma.TransformCount : 0,
             ma != null ? ma.GateToggles - allocProbe.TogglesAtStart : 0,
             current.Animator != null ? current.Animator.AnimatedBoneCount : 0));
+
+        // The emitters, in the same window and on the same clock. Reported separately because
+        // "no allocation per frame" is a claim about THEM more than about anything else here:
+        // they are the only per-frame work that grows and shrinks with what is on screen.
+        Debug.Log(em == null
+            ? "WMV: alloccheck: emitters none -- no component, no GameObject, no per-frame call"
+            : string.Format("WMV: alloccheck: emitters {0} particle + {1} ribbon = {2} draw call(s); "
+                            + "{3} live particle(s) of {4} slot(s) reserved; {5} ribbon segment(s)",
+                            em.ParticleEmitterCount, em.RibbonEmitterCount, em.DrawCallCount,
+                            em.LiveParticleCount, em.ParticleCapacity, em.RibbonSegmentCount));
     }
 }
 
