@@ -49,6 +49,62 @@ public class WmvShadowRig : MonoBehaviour
     public static readonly Vector3 FillDirView = new Vector3(0.059f, 0.998f, 0.032f);
 
     /// <summary>
+    /// The contact shadow's seven controls, and the only place their defaults are written.
+    ///
+    /// They are here rather than in the shader because the application exposes them as sliders:
+    /// a look is found by moving them and watching, not by rebuilding a shader. RenderFor
+    /// publishes all seven every frame, so a player launched with no host -- the headless
+    /// self-tests, or a developer running the exe on its own -- renders from exactly these
+    /// numbers, which are the ones that used to be #defines in WmvOpaque.shader.
+    ///
+    /// Reach, Thickness and Bias are all fractions of the MODEL RADIUS, never absolute
+    /// distances: that is what keeps a setting meaning the same thing on a 0.15-radius shoulder
+    /// pad and a 12-radius boss. Softness is the tangent of the occlusion cone's half-angle,
+    /// which is a ratio and so needs no scaling at all. Steps and Taps are sampling rates, not
+    /// look controls -- they decide how finely the march resolves the shape the other five
+    /// describe, and raising them cannot change what the acceptance test accepts.
+    /// </summary>
+    public static float ContactStrength = 1.0f;      // of the light one contact removes
+    public static float ContactReach = 1f / 3f;      // how far the probe looks, x model radius
+    public static float ContactSoftness = 0.25f;     // cone half-angle, as a tangent
+    public static float ContactThickness = 0.08f;    // assumed occluder thickness, x model radius
+    public static float ContactBias = 0.010f;        // self-hit guard, x model radius
+    public static int ContactSteps = 32;             // samples along the reach
+    public static int ContactTaps = 8;               // samples across the cone
+
+    /// <summary>
+    /// The shipped defaults, so a caller can put the controls back without knowing the numbers.
+    /// </summary>
+    public static void ResetContactSettings()
+    {
+        ContactStrength = 1.0f;
+        ContactReach = 1f / 3f;
+        ContactSoftness = 0.25f;
+        ContactThickness = 0.08f;
+        ContactBias = 0.010f;
+        ContactSteps = 32;
+        ContactTaps = 8;
+    }
+
+    /// <summary>
+    /// Take a set of controls from the host. Clamped here rather than trusted: the values arrive
+    /// over a socket, and a reach of zero or a tap count of zero would divide by nothing in the
+    /// shader. The ceilings are generous -- they exist to stop a typo costing a frame, not to
+    /// express an opinion about what looks right.
+    /// </summary>
+    public static void SetContactSettings(float strength, float reach, float softness,
+                                          float thickness, float bias, int steps, int taps)
+    {
+        ContactStrength = Mathf.Clamp01(strength);
+        ContactReach = Mathf.Clamp(reach, 0.001f, 2f);
+        ContactSoftness = Mathf.Clamp(softness, 0f, 2f);
+        ContactThickness = Mathf.Clamp(thickness, 0.001f, 1f);
+        ContactBias = Mathf.Clamp(bias, 0f, 0.5f);
+        ContactSteps = Mathf.Clamp(steps, 1, 128);
+        ContactTaps = Mathf.Clamp(taps, 1, 32);
+    }
+
+    /// <summary>
     /// How much of the light direction is pinned to the world's vertical rather than the
     /// camera: 0 is the old fully camera-relative behaviour, 1 is a light pointing straight
     /// down from the world's sky regardless of the camera. Shipped at 1.0: the key is the
@@ -316,8 +372,18 @@ public class WmvShadowRig : MonoBehaviour
         // touching distance BEHIND it. The guard against a fragment finding its own surface is
         // ~1 % of the model, paired with the ray's starting push off the surface in the shader.
         // Both numbers are unchanged -- only the space they are measured in is.
-        Shader.SetGlobalFloat("_WmvContactEps", 0.010f * modelR);
-        Shader.SetGlobalFloat("_WmvContactThick", 0.08f * modelR);
+        Shader.SetGlobalFloat("_WmvContactEps", ContactBias * modelR);
+        Shader.SetGlobalFloat("_WmvContactThick", ContactThickness * modelR);
+
+        // The rest of the controls, straight through. Published every frame rather than on
+        // receipt because these are global shader state and this is the one place that owns it;
+        // a value set once could be lost to any other code that touches the same globals, and a
+        // slider that stops working intermittently is worse than no slider.
+        Shader.SetGlobalFloat("_WmvContactStrength", ContactStrength);
+        Shader.SetGlobalFloat("_WmvContactReach", ContactReach);
+        Shader.SetGlobalFloat("_WmvContactSoftness", ContactSoftness);
+        Shader.SetGlobalFloat("_WmvContactSteps", ContactSteps);
+        Shader.SetGlobalFloat("_WmvContactTaps", ContactTaps);
         Shader.SetGlobalFloat("_WmvContactValid", 1f);
     }
 

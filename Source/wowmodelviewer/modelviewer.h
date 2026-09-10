@@ -32,6 +32,7 @@
 #include <QString>
 
 class SettingsControl;
+class ContactShadowControl;
 class ExportJobManager;
 class ImageSequenceExporter;
 class UnityRendererHost;
@@ -66,6 +67,7 @@ public:
   ImageControl *imageControl;
   //SoundControl *soundControl;
   SettingsControl *settingsControl;
+  ContactShadowControl *contactShadowControl;
   // Embedded Unity viewport pane -- the new renderer foundation (the OpenGL canvas is the
   // legacy/fallback viewport during the migration). Currently optional: created lazily on
   // first View > Unity Renderer use or by the -unityipctest self-test (nullptr until then).

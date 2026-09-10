@@ -227,6 +227,7 @@ public class WmvMain : MonoBehaviour
         ipc.OnModelSkin = HandleModelSkin;
         ipc.OnModelAnimation = HandleModelAnimation;
         ipc.OnModelAnimationState = HandleModelAnimationState;
+        ipc.OnContactShadow = HandleContactShadow;
     }
 
     // ---------------------------------------------------------------- load pipeline
@@ -1402,6 +1403,30 @@ public class WmvMain : MonoBehaviour
             + "{3} volume parameter(s) set across {4} volume(s)",
             want, WmvModelBuilder.AuthoredTextureDomain ? "ON" : "off",
             authored ? "ON" : "off", touched, vols != null ? vols.Length : 0));
+    }
+
+    /// <summary>
+    /// A contact-shadow slider moved in the application. The values go straight into the rig,
+    /// which publishes them to the shader on its next frame -- there is no reload, no rebuild
+    /// and no model reload: the next frame drawn is the new one, which is the whole point of
+    /// having sliders.
+    ///
+    /// Logged in full, once per message, and deliberately so: this channel fails silently. The
+    /// player parses every message type into one flat JsonUtility class, and a field it cannot
+    /// match by exact name becomes 0 rather than an error -- so a renamed field on the host side
+    /// does not break the connection, it sends zeroes, and a reach of zero is the effect
+    /// switched off. This line is the only place the arriving values can be read back.
+    /// </summary>
+    void HandleContactShadow(WmvIpcClient.ContactShadowSettings s)
+    {
+        WmvShadowRig.SetContactSettings(s.strength, s.reach, s.softness,
+                                        s.thickness, s.bias, s.steps, s.taps);
+        Debug.Log(string.Format(
+            "WMV: contact shadow -- strength {0:F2} reach {1:F3} softness {2:F2} "
+            + "thickness {3:F3} bias {4:F4} steps {5} taps {6}",
+            WmvShadowRig.ContactStrength, WmvShadowRig.ContactReach, WmvShadowRig.ContactSoftness,
+            WmvShadowRig.ContactThickness, WmvShadowRig.ContactBias,
+            WmvShadowRig.ContactSteps, WmvShadowRig.ContactTaps));
     }
 
     void DumpPng(Color32[] px, int w, int h, string name)

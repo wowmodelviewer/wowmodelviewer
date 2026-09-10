@@ -42,6 +42,7 @@ set(src  AnimationExportChoiceDialog.cpp
          NPCImporterDialog.cpp
          OrbitCamera.cpp
          Quantize.cpp
+         ContactShadowControl.cpp
          SettingsControl.cpp
          shaders.cpp
          UnityAssetAccess.cpp
@@ -86,6 +87,7 @@ set(headers AnimationExportChoiceDialog.h
             OrbitCamera.h
             Quantize.h
             resource1.h
+            ContactShadowControl.h
             SettingsControl.h
             shaders.h
             UnityAssetAccess.h

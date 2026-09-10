@@ -229,24 +229,16 @@ Shader "WMV/Opaque Textured"
             // and the blur radius of the shadow edge, in shadow-map texels.
             #define SHADOW_STRENGTH 1.0h
             #define SHADOW_SOFT     4.0h
-            // Contact shadows: the strength of the screen-space near-field shadow, and how far
-            // it reaches, as a fraction of the model's bounding radius. This is what puts the
+            // Contact shadows: the screen-space near-field shadow. This is what puts the
             // hood's shadow ON the face right up to where they touch -- the shadow map's bias
             // makes it blind for the last few millimetres before a contact, and a shadow that
             // stops short of the contact line reads as floating.
-            #define CONTACT_STRENGTH 1.0h
-            #define CONTACT_RANGE    0.25h
-            // The march probes a CONE, not a line. Its half-angle, as a tangent, and how many
-            // samples across it. A single ray answers "is this point occluded from exactly one
-            // direction", which is a point light at infinity: the answer is binary, its boundary
-            // is the occluder's silhouette, and on the low-poly geometry this viewer draws that
-            // silhouette is a straight line. Widening it to a cone turns the binary answer into
-            // a coverage fraction, which is what near-field occlusion actually is, and gives the
-            // boundary a penumbra that grows with the distance to the occluder -- sharp where
-            // something touches, soft where it is lifted away. Not a strength: coverage is still
-            // 1 under an occluder and 0 in the open.
-            #define CONTACT_SOFTNESS 0.25h
-            #define CONTACT_TAPS     8
+            //
+            // ITS FIVE CONTROLS ARE UNIFORMS, NOT #defines, because the application exposes them
+            // as sliders and a look is found by moving them and watching, not by rebuilding a
+            // shader. They are declared with the rest of the contact block below and published
+            // every frame by WmvShadowRig, which is also where their defaults live -- exactly
+            // the values that used to stand here. See WmvShadowRig.Contact*.
             // ----------------------------------------------------------------------------
 
             sampler2D _MainTex;
@@ -366,6 +358,15 @@ Shader "WMV/Opaque Textured"
             float     _WmvModelRadius;        // world units; scales the march to the model
             float     _WmvContactEps;         // self-hit guard, WORLD UNITS
             float     _WmvContactThick;       // occluder thickness assumption, WORLD UNITS
+            // The five live controls. WmvShadowRig publishes all of them every frame, so an
+            // unset global is not a state this shader can be rendered in: when the rig is not
+            // running _WmvContactValid is 0 and the march returns "unoccluded" before reading
+            // any of them.
+            float     _WmvContactStrength;    // how much of the light one contact removes, 0..1
+            float     _WmvContactReach;       // how far the probe looks, x the model radius
+            float     _WmvContactSoftness;    // half-angle of the occlusion cone, as a tangent
+            float     _WmvContactSteps;       // samples along the reach
+            float     _WmvContactTaps;        // samples across the cone
             float4    _WmvViewDepthParams;    // (near, far, far - near, near * far), world units
 
             // Device depth -> distance from the camera, in WORLD UNITS.
@@ -458,28 +459,26 @@ Shader "WMV/Opaque Textured"
                 // Per-fragment phase for the steps. See WmvStepPhase.
                 float jitter = WmvStepPhase(pix);
 
-                // THE LADDER AND THE WALK ARE DIFFERENT LENGTHS, AND THAT IS THE POINT.
+                // ONE NUMBER IS THE REACH, AND THE FADE RUNS OUT OVER IT.
                 //
-                // The along-ray fade is `1 - 0.75 * (s + 0.5)/RUNGS`, which is identically
-                // `1 - (s + 0.5)/32` at RUNGS = 24: a ramp whose zero is at rung 31.5. Walking
-                // only 24 rungs stopped it at 0.2656 and then dropped it to nothing because the
-                // loop had ended -- a 27 % step in occlusion at a fixed distance from the
-                // caster, which under a straight silhouette on a near-planar receiver draws a
-                // hard STRAIGHT LINE across the model where no geometry is. Walking the ramp out
-                // to its own zero ends the term at 0.0156 instead: a seventeenth of the step,
-                // under the measured noise floor. Every rung from 0 to 23 keeps the weight it
-                // had, so this can only ever make a pixel darker, never lighter -- verified over
-                // whole frames, zero pixels lighter. The reach grows with it, 0.25 R to 0.333 R,
-                // and the tail it adds is faint by construction.
+                // This used to be a ladder of 24 rungs walked 32 times with a fade of
+                // `1 - 0.75*(s+0.5)/24`, three constants that only line up at those exact
+                // values: 0.75*(s+0.5)/24 IS (s+0.5)/32, so the fade reached zero at rung 31.5
+                // and walking 32 rungs was what stopped it being truncated mid-ramp -- which it
+                // had been, at 0.2656, drawing a hard straight line across the model at a fixed
+                // distance from the caster where no geometry is. Written as `1 - (s+0.5)/STEPS`
+                // over a reach of 0.3333 R the arithmetic is the same to the last bit at the
+                // shipped values (rung spacing 0.0104167 R either way) and the coupling is gone:
+                // the fade always lands on zero at the last sample, whatever STEPS is, so STEPS
+                // is a pure sampling rate and the reach is one number a person can set.
                 //
-                // STEP COUNT. Twelve rungs was not enough and showed as a CHECKERBOARD on thin,
+                // SAMPLE COUNT. Twelve was not enough and showed as a CHECKERBOARD on thin,
                 // steeply inclined geometry: where the sampled depth moves several times faster
                 // along the ray than the ray does, the acceptance window is stepped clean over
-                // and finding it becomes a coin toss on the phase. 24 resolves it; 48 changes
-                // little further. This is a SAMPLING rate, not a strength.
-                const float RUNGS = 24.0;            // the fade ladder's denominator
-                const int STEPS = 32;                // rungs actually walked: RUNGS * 4/3
-                const int TAPS = CONTACT_TAPS;
+                // and finding it becomes a coin toss on the phase. 32 resolves it; more changes
+                // little. It is a sampling rate, not a strength.
+                int STEPS = max(1, (int)_WmvContactSteps);
+                int TAPS = max(1, (int)_WmvContactTaps);
 
                 // THE CONE'S LATERAL AXIS. cross(march, camera forward) is perpendicular to the
                 // march AND to the view axis, so the projection's w row -- which IS the camera
@@ -507,26 +506,26 @@ Shader "WMV/Opaque Textured"
                 [loop]
                 for (int s = 0; s < STEPS; s++)
                 {
-                    float t = (s + jitter) / RUNGS;
+                    float t = (s + jitter) / STEPS;
                     // The normal push keeps the ray off its own surface; it grows with t
                     // because a surface curving toward the light drifts back under the ray.
-                    // Both pushes scale with `range`, so CONTACT_RANGE also sets the blind
-                    // zone next to a contact: at 0.25 R the clearance is 0.015-0.04 R along
+                    // Both pushes scale with `range`, so _WmvContactReach also sets the blind
+                    // zone next to a contact: at 1/3 R the clearance is 0.015-0.04 R along
                     // the normal, four times what the march was first validated with (0.06 R).
                     // Tightening it means anchoring these fractions to a fixed share of the
                     // model radius rather than to the reach -- a look change, not a fix.
-                    float3 pw = wpos + nrmWorld * ((0.06 + 0.10 * t) * range)
-                              + dir * (max(t, 0.02) * range);
+                    float3 pw = wpos + nrmWorld * ((0.045 + 0.10 * t) * range)
+                              + dir * (max(t, 0.015) * range);
                     float4 cp = mul(_WmvViewDepthMatrix, float4(pw, 1.0));
                     if (cp.w <= _WmvViewDepthParams.x)
                         break;                       // in front of the near plane: nothing there
 
                     // The cone's radius at this rung, in WORLD units, so the softness means the
                     // same thing at every camera distance and on every model size.
-                    float rad = CONTACT_SOFTNESS * t * range;
+                    float rad = _WmvContactSoftness * t * range;
                     float cov = 0.0;                 // occluded fraction of the cone's width
                     float covW = 0.0;                // how much of it could be sampled at all
-                    [unroll]
+                    [loop]
                     for (int k = 0; k < TAPS; k++)
                     {
                         // Stratified across the cone, not a ring: a ring puts every tap at the
@@ -570,7 +569,7 @@ Shader "WMV/Opaque Textured"
                     // effectively a step in t (the buffer is point-sampled and one march step
                     // spans many depth texels), so the loop's max() is attained at the first
                     // lattice point past the crossing -- and if the fade read the JITTERED t,
-                    // the result inherited that phase as a sawtooth of 0.75/RUNGS of full
+                    // the result inherited that phase as a sawtooth of 1/STEPS of full
                     // occlusion, hard-edged, which was the striping's amplitude. Reading the
                     // rung instead makes the fade identical for every pixel, so the phase
                     // survives only as WHICH rung is hit. `t` still drives the two pushes
@@ -579,8 +578,8 @@ Shader "WMV/Opaque Textured"
                     // covW/TAPS is the mean border weight over the cone; dividing cov by covW
                     // and multiplying it back is not a no-op, it restores the 5 % screen-edge
                     // ramp that normalising the coverage would otherwise cancel out.
-                    float tFade = (s + 0.5) / RUNGS;
-                    float w = (cov / covW) * (1.0 - 0.75 * tFade) * (covW / TAPS);
+                    float tFade = (s + 0.5) / STEPS;
+                    float w = (cov / covW) * (1.0 - tFade) * (covW / TAPS);
                     occ = max(occ, w);
                 }
                 return (half)(1.0 - occ);
@@ -765,7 +764,8 @@ Shader "WMV/Opaque Textured"
                 // Resolve the rig constants once, up here.
                 half3 kDir   = KEY_DIR,    fDir     = FILL_DIR;
                 half  shStr  = SHADOW_STRENGTH, shSoft = SHADOW_SOFT;
-                half  cStr   = CONTACT_STRENGTH, cRange = CONTACT_RANGE;
+                half  cStr   = (half)_WmvContactStrength;
+                float cRange = _WmvContactReach;
 
                 half  lum;
                 half3 spec = 0.0h;

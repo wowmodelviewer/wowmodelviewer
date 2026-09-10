@@ -57,6 +57,7 @@ public class WmvIpcClient : MonoBehaviour
     public Action<ModelTexturesResponse> OnModelSkin;          // pushed when the displayed skin changes
     public Action<AnimationSelection> OnModelAnimation;        // pushed when the displayed animation changes
     public Action<AnimationState> OnModelAnimationState;       // pushed on play/pause/speed/time changes
+    public Action<ContactShadowSettings> OnContactShadow;      // pushed when a contact slider moves
     public Action<string> OnStatus;                            // human-readable connection/state text
 
     public bool Connected { get { return connected; } }
@@ -157,6 +158,27 @@ public class WmvIpcClient : MonoBehaviour
         public bool loop;
     }
 
+    /// <summary>
+    /// The contact shadow's controls, as the application's sliders have them. Pushed on every
+    /// change and once when the player announces itself, because the player may connect long
+    /// after the user last touched a slider and must not come up showing something else.
+    ///
+    /// All seven fields are always present in the message. That matters: JsonUtility gives an
+    /// absent numeric field the value 0, so a partial message would not leave a control alone,
+    /// it would set it to zero -- a reach of 0 is the effect switched off. The host sends the
+    /// whole set or nothing.
+    /// </summary>
+    public struct ContactShadowSettings
+    {
+        public float strength;
+        public float reach;
+        public float softness;
+        public float thickness;
+        public float bias;
+        public int steps;
+        public int taps;
+    }
+
     [Serializable] class MsgTexture
     {
         public int index;
@@ -191,6 +213,13 @@ public class WmvIpcClient : MonoBehaviour
         public bool playing;
         public int timeMs;
         public float speed;
+        public float contactStrength;
+        public float contactReach;
+        public float contactSoftness;
+        public float contactThickness;
+        public float contactBias;
+        public int contactSteps;
+        public int contactTaps;
     }
 
     int port = -1;
@@ -350,6 +379,21 @@ public class WmvIpcClient : MonoBehaviour
                     animID = msg.animID,
                     durationMs = msg.durationMs,
                     loop = msg.loop,
+                });
+                break;
+
+            // Unsolicited: a contact-shadow slider moved in WMV, or the player has just
+            // announced itself and the host is telling it where the sliders stand.
+            case "contactShadow":
+                OnContactShadow?.Invoke(new ContactShadowSettings
+                {
+                    strength = msg.contactStrength,
+                    reach = msg.contactReach,
+                    softness = msg.contactSoftness,
+                    thickness = msg.contactThickness,
+                    bias = msg.contactBias,
+                    steps = msg.contactSteps,
+                    taps = msg.contactTaps,
                 });
                 break;
 
