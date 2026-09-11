@@ -99,6 +99,17 @@ public class WmvM2Animator : MonoBehaviour
     /// </summary>
     readonly Dictionary<int, AnimatedBone[]> convertedBySequence = new Dictionary<int, AnimatedBone[]>();
     Transform[] cachedFor;              // the skeleton the cache above belongs to
+
+    /// <summary>
+    /// The bones the file marks as billboarded, shallowest first.
+    ///
+    /// A billboard bone is not an ANIMATED bone -- most carry no track at all -- so it cannot ride
+    /// in `bones`, which Setup narrows to the bones the playing sequence actually moves. The flag
+    /// belongs to the bone rather than to the animation, so this list is rebuilt with the skeleton
+    /// and then left alone across sequence changes.
+    /// </summary>
+    Transform[] billboardBones = new Transform[0];
+    Camera billboardCamera;
     readonly Dictionary<int, int> globalCountBySequence = new Dictionary<int, int>();
     uint[] globalSequences = new uint[0];
     float lengthMs = 1f;
@@ -217,6 +228,7 @@ public class WmvM2Animator : MonoBehaviour
         {
             convertedBySequence.Clear();
             cachedFor = boneTransforms;
+            billboardBones = CollectBillboards(model, boneTransforms, log);
         }
 
         AnimatedBone[] already;
@@ -458,6 +470,94 @@ public class WmvM2Animator : MonoBehaviour
             if (b.Scale.HasData)
                 b.Transform.localScale = EvalVector(b.Scale, TrackTime(b.Scale.GlobalSequence, t));
         }
+
+        // LAST, so it is the animated pose that gets turned. A billboard bone may also be an
+        // animated one, and the flag overrides the track's rotation rather than composing with it.
+        ApplyBillboards();
+    }
+
+    /// <summary>
+    /// The bones carrying bone flag 0x08, ordered parents before children.
+    ///
+    /// The order matters because the billboard is written as a WORLD rotation: turning a parent
+    /// afterwards would carry its child round with it and undo the child's own facing. Depth
+    /// ordering costs one pass over the bone array and removes the question entirely.
+    ///
+    /// ONLY 0x08 -- the spherical billboard -- is collected. The cylindrical bits (0x10/0x20/0x40,
+    /// one per locked axis) are a different construction, and the legacy viewport implements
+    /// neither: Bone::calcMatrix tests MODELBONE_BILLBOARD (= 8) alone and carries the cylindrical
+    /// case only as a commented-out line (Bone.cpp:39-53). Guessing at them here would put
+    /// untested geometry on screen, so they keep the behaviour they have always had.
+    /// </summary>
+    static Transform[] CollectBillboards(M2ParsedModel model, Transform[] boneTransforms,
+                                         Action<string> log)
+    {
+        int n = Math.Min(model.Bones.Length, boneTransforms.Length);
+        var found = new List<int>();
+        for (int i = 0; i < n; i++)
+            if (model.Bones[i].Billboard && boneTransforms[i] != null)
+                found.Add(i);
+        if (found.Count == 0)
+            return new Transform[0];
+
+        var depth = new int[n];
+        for (int i = 0; i < n; i++)
+        {
+            int d = 0;
+            for (short p = model.Bones[i].Parent; p >= 0 && p < n && d <= n; p = model.Bones[p].Parent)
+                d++;
+            depth[i] = d;
+        }
+        found.Sort((a, b) => depth[a].CompareTo(depth[b]));
+
+        var result = new Transform[found.Count];
+        for (int i = 0; i < found.Count; i++)
+            result[i] = boneTransforms[found[i]];
+        if (log != null)
+            log(string.Format("anim: {0} of {1} bone(s) are billboarded (flag 0x08) and are turned "
+                              + "to face the camera every frame", found.Count, n));
+        return result;
+    }
+
+    /// <summary>
+    /// Turn every billboard bone to face the camera.
+    ///
+    /// WHAT THE FLAG IS FOR. A billboard bone carries a flat card -- a glow, a flare, a halo --
+    /// authored in one canonical plane, and the renderer is expected to spin that card to the
+    /// viewer every frame. Algalon the Observer is the plain case: 18 of his constellation joints
+    /// and both of his full-body haloes are single quads on bones flagged 0x08, each authored flat
+    /// in the model's YZ plane with EXACTLY zero thickness along X. Left unturned they are not
+    /// merely mis-angled, they are edge-on or backwards, and a card whose front face has turned
+    /// away is removed by back-face culling before it can be shaded: all twenty drew zero pixels.
+    ///
+    /// THE ROTATION. The card's authored plane maps to the bone's local XY with its front face
+    /// along local +Z, so facing the viewer means pointing local +Z back down the view direction.
+    /// That is Quaternion.LookRotation(-camera.forward, camera.up), and it is a screen-aligned
+    /// billboard -- built from the camera's own axes, not from the direction to the bone -- which
+    /// is what the legacy viewport does when it takes its two axes from the rows of the modelview
+    /// matrix (Bone.cpp:41-53, and particle.cpp:401-408 for the same construction on particles).
+    /// A useful check on the sign: at a camera square on to the model's face this expression is
+    /// the identity, so it reproduces exactly the orientation the artist authored.
+    ///
+    /// Setting the WORLD rotation rather than the local one is deliberate. The legacy writes its
+    /// billboard into the bone's LOCAL matrix and then multiplies by the parent's, so a billboard
+    /// bone hanging off a rotating parent comes out turned by that parent as well -- harmless on a
+    /// rig whose billboards hang off unrotated joints, wrong on one whose do not. Unity's
+    /// Transform.rotation is the world rotation and takes the parent out of it.
+    /// </summary>
+    void ApplyBillboards()
+    {
+        if (billboardBones.Length == 0)
+            return;
+        if (billboardCamera == null)
+            billboardCamera = Camera.main;
+        if (billboardCamera == null)
+            return;
+        Transform cam = billboardCamera.transform;
+        Quaternion facing = Quaternion.LookRotation(-cam.forward, cam.up);
+        for (int i = 0; i < billboardBones.Length; i++)
+            if (billboardBones[i] != null)
+                billboardBones[i].rotation = facing;
     }
 
     /// <summary>Put every animated bone back exactly where the bind pose expects it.</summary>

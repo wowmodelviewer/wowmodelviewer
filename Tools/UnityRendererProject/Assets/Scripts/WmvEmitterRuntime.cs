@@ -157,6 +157,11 @@ public class WmvEmitterRuntime : MonoBehaviour
         public float SpawnRemainder;
         public uint Rng;
 
+        /// <summary>Which quads each particle is drawn as. An emitter that names neither style
+        /// gets a head, which is what every particle was before the styles were read.</summary>
+        public bool DrawHead, DrawTail;
+        public int QuadsPerParticle;
+
         public Vector3[] Verts;
         public Vector2[] Uvs;
         public Color32[] Colors;
@@ -389,6 +394,9 @@ public class WmvEmitterRuntime : MonoBehaviour
         s.BoneLocal = def.DoNotTrail || def.Pinned;
         s.TileCount = Mathf.Max(1, def.Rows * def.Cols);
         s.Capacity = CapacityFor(def);
+        s.DrawTail = def.TailStyle;
+        s.DrawHead = def.HeadStyle || !def.TailStyle;
+        s.QuadsPerParticle = (s.DrawHead ? 1 : 0) + (s.DrawTail ? 1 : 0);
         s.Rng = (uint)(0x9E3779B9u * (uint)(index + 1) + 0x85EBCA6Bu);
 
         s.Pos = new Vector3[s.Capacity];
@@ -402,13 +410,14 @@ public class WmvEmitterRuntime : MonoBehaviour
             s.QuadUp = new Vector3[s.Capacity];
         }
 
-        s.Verts = new Vector3[s.Capacity * 4];
-        s.Uvs = new Vector2[s.Capacity * 4];
-        s.Colors = new Color32[s.Capacity * 4];
-        s.Indices = BuildQuadIndices(s.Capacity);
+        int quads = s.Capacity * s.QuadsPerParticle;
+        s.Verts = new Vector3[quads * 4];
+        s.Uvs = new Vector2[quads * 4];
+        s.Colors = new Color32[quads * 4];
+        s.Indices = BuildQuadIndices(quads);
 
         s.Go = NewChild(objectName + "_particles" + index);
-        s.Mesh = NewMesh(objectName + "_particleMesh" + index, s.Capacity * 4);
+        s.Mesh = NewMesh(objectName + "_particleMesh" + index, quads * 4);
         s.Material = NewMaterial(shader, tex, def.BlendMode, objectName + "_particleMat" + index);
         s.Renderer = Attach(s.Go, s.Mesh, s.Material);
         ResolveRamp(s);
@@ -566,6 +575,21 @@ public class WmvEmitterRuntime : MonoBehaviour
         m.SetFloat("_SrcBlend", (float)src);
         m.SetFloat("_DstBlend", (float)dst);
         m.SetFloat("_AlphaTest", alphaTest ? 1f : 0f);
+
+        // PARTICLES DRAW AFTER THE MODEL. The shader's own queue is Transparent (3000), which is
+        // the very first slot of the band the model's transparent batches are ranked into
+        // (Transparent + rank, WmvModelBuilder), so an emitter's quads went down BEFORE the
+        // alpha-blended geometry they float in front of and every sparkle inside the silhouette
+        // was dimmed by the body's alpha and pulled toward its colour. Both references draw the
+        // particle systems -- and the ribbons, which share this material path -- after the whole
+        // model. The legacy says why in so many words: "render our particles, we do this
+        // afterwards so that all the particles display OK without having things like shields
+        // overwriting the particles" (modelcanvas.cpp:694-702, root->drawParticles() after
+        // root->draw(); WoWModel::drawParticles draws the systems and then the ribbons). Wowhead's
+        // viewer issues its particle draw after the last batch draw of the model -- captured live
+        // on Algalon as the three batch draws and then the particle draw. The band is capped at
+        // Transparent + 899, so + 900 is the first queue no batch can reach.
+        m.renderQueue = (int)UnityEngine.Rendering.RenderQueue.Transparent + 900;
         ownedMaterials.Add(m);
         return m;
     }
@@ -753,10 +777,32 @@ public class WmvEmitterRuntime : MonoBehaviour
                           float seqMs, float globalMs)
     {
         // ---- emission -----------------------------------------------------------------------
-        // (dt * rate / lifespan) + carry, from particle.cpp:203-224. Dividing by the lifespan is
-        // what makes "rate" the number ALIVE at once rather than the number spawned per second:
-        // at equilibrium, rate/lifespan spawns per second times lifespan seconds of life is rate
-        // particles standing.
+        // (dt * rate) + carry. emissionRate IS particles per second, so the population settles at
+        // rate * lifespan.
+        //
+        // THIS DELIBERATELY DEPARTS FROM THE LEGACY, which divides by the lifespan
+        // (particle.cpp:203-211, `ftospawn = (dt * frate / flife) + rem`) and so settles at rate
+        // particles however long they live. That is a bug in the legacy, and three independent
+        // witnesses say so:
+        //
+        //   THE CLIENT. Instrumenting Wowhead's WebGL viewer -- which loads this very file, with
+        //   batches confirmed identical -- on Algalon the Observer shows its particle draw issue
+        //   1866 indices, i.e. 311 live quads. Algalon authors rate 45 and lifespan 7 s. 45 * 7 is
+        //   315; 45 is not 311. Measured here, the same model plateaus at exactly 315.
+        //
+        //   THIS FILE. CapacityFor (below) sizes the pool as "the largest rate it reaches times
+        //   the longest lifespan it reaches, WHICH IS THE STEADY STATE BY DEFINITION" -- rate *
+        //   life * 1.25 + 4, which is 398 for Algalon and is what the log prints. The allocator
+        //   and the simulator were disagreeing with each other by exactly one lifespan: the pool
+        //   was sized for 315 and never held more than 45.
+        //
+        //   THE RIBBON HALF. Ribbons in this same runtime read edgesPerSecond as a per-second rate
+        //   and size themselves rate * lifetime (BuildRibbon). Particles are the same shape of
+        //   quantity and were the only ones divided.
+        //
+        // What it looked like: Algalon's sparkle cloud was a seventh of its authored density -- a
+        // dozen specks where the game has a few hundred -- and every emitter in the viewer was
+        // thinned by its own lifespan.
         if (dt > 0f)
         {
             float rate = Sample(s.Def.EmissionRate, seqMs, globalMs, 0f);
@@ -764,7 +810,10 @@ public class WmvEmitterRuntime : MonoBehaviour
             bool enabled = !s.Def.EnabledIn.HasData
                            || Sample(s.Def.EnabledIn, seqMs, globalMs, 1f) != 0f;
 
-            float toSpawn = lifespan > 0f ? (dt * rate / lifespan) + s.SpawnRemainder
+            // The lifespan is still what decides whether anything spawns at all: a zero
+            // lifespan means a particle dies the instant it is born, and the legacy spawns none
+            // rather than dividing by zero (particle.cpp:206-211).
+            float toSpawn = lifespan > 0f ? (dt * rate) + s.SpawnRemainder
                                           : s.SpawnRemainder;
             if (toSpawn < 1f)
             {
@@ -948,9 +997,17 @@ public class WmvEmitterRuntime : MonoBehaviour
         return new WowVec2(Mathf.Lerp(keys[a].X, keys[b].X, r), Mathf.Lerp(keys[a].Y, keys[b].Y, r));
     }
 
+    /// <summary>
+    /// The squared length, in model units, below which a tail's screen-plane projection counts as
+    /// nothing and the particle is drawn as a 5 % speck instead. The client's builder tests
+    /// dot(a, a) > 1e-4 in its own view space; Wowhead's viewer runs that space at 3x model
+    /// units, so the same rule in model units is 1e-4 / 9.
+    /// </summary>
+    const float TailDegenerateSq = 1.1e-5f;
+
     void BuildParticleMesh(ParticleState s, Matrix4x4 boneMatrix, Vector3 camRight, Vector3 camUp)
     {
-        int v = 0;
+        int v = 0, quads = 0;
         Vector3 min = Vector3.positiveInfinity, max = Vector3.negativeInfinity;
         bool billboard = !s.Def.DoNotBillboard;
         float spin = s.Def.SpriteRotation;
@@ -960,6 +1017,7 @@ public class WmvEmitterRuntime : MonoBehaviour
             spinCos = Mathf.Cos(spin);
             spinSin = Mathf.Sin(spin);
         }
+        float slowdown = s.Def.Slowdown;
 
         for (int i = 0; i < s.Count; i++)
         {
@@ -1015,21 +1073,89 @@ public class WmvEmitterRuntime : MonoBehaviour
             // mesh UVs take (WowCoordinateConverter.ConvertTexCoord).
             float v1 = 1f - row / (float)s.Def.Rows, v0 = 1f - (row + 1) / (float)s.Def.Rows;
 
-            Vector3 p0 = centre - right - up;
-            Vector3 p1 = centre + right - up;
-            Vector3 p2 = centre + right + up;
-            Vector3 p3 = centre - right + up;
+            if (s.DrawHead)
+            {
+                Vector3 p0 = centre - right - up;
+                Vector3 p1 = centre + right - up;
+                Vector3 p2 = centre + right + up;
+                Vector3 p3 = centre - right + up;
 
-            s.Verts[v] = p0; s.Uvs[v] = new Vector2(u0, v0); s.Colors[v++] = c32;
-            s.Verts[v] = p1; s.Uvs[v] = new Vector2(u1, v0); s.Colors[v++] = c32;
-            s.Verts[v] = p2; s.Uvs[v] = new Vector2(u1, v1); s.Colors[v++] = c32;
-            s.Verts[v] = p3; s.Uvs[v] = new Vector2(u0, v1); s.Colors[v++] = c32;
+                s.Verts[v] = p0; s.Uvs[v] = new Vector2(u0, v0); s.Colors[v++] = c32;
+                s.Verts[v] = p1; s.Uvs[v] = new Vector2(u1, v0); s.Colors[v++] = c32;
+                s.Verts[v] = p2; s.Uvs[v] = new Vector2(u1, v1); s.Colors[v++] = c32;
+                s.Verts[v] = p3; s.Uvs[v] = new Vector2(u0, v1); s.Colors[v++] = c32;
+                quads++;
 
-            Grow(ref min, ref max, p0);
-            Grow(ref min, ref max, p2);
+                Grow(ref min, ref max, p0);
+                Grow(ref min, ref max, p2);
+            }
+
+            if (s.DrawTail)
+            {
+                // A TAIL PARTICLE IS A STREAK, NOT A SPRITE. The quad runs from the particle back
+                // along the path it just travelled: -velocity * TailLength long, and as wide as
+                // the size ramp says, turned to lie in the screen plane. Its length is therefore
+                // its speed, so a fresh spark is a streak and a spark that drag has stopped is
+                // nothing -- which is how the game empties Algalon's cloud of the two thirds of
+                // it that has stalled, and why a viewer drawing every one of them as a head
+                // shows a couple of hundred bright motes hanging in the air.
+                //
+                // This is the client's rule as Wowhead's viewer implements it, read out of the
+                // live page: tail = -v * tailLength (min(age, tailLength) under 0x400); if the
+                // projection of that onto the screen plane has any length, the long half-axis is
+                // half the tail and the centre moves half a tail back so the quad starts AT the
+                // particle; the short half-axis is the size, perpendicular to the projection.
+                // Otherwise the particle is a speck of 5 % of its size. Measured on Algalon that
+                // is 0.082 units wide at birth and 0.0048 once stalled, and the switch lands at
+                // 2.5 s, exactly where drag takes the projection under the threshold.
+                //
+                // The stored velocity is the launch velocity; the integrator damps the
+                // displacement rather than the velocity (see AdvanceParticles), so the speed the
+                // particle actually has now is Vel * exp(-slowdown * life).
+                Vector3 vel = s.Vel[i] * (slowdown > 0f ? Mathf.Exp(-slowdown * s.Life[i]) : 1f);
+                if (s.BoneLocal)
+                    vel = boneMatrix.MultiplyVector(vel);
+                float tailLen = s.Def.TailLength;
+                if (s.Def.ClampTailToAge)
+                    tailLen = Mathf.Min(s.Life[i], tailLen);
+                Vector3 tail = vel * -tailLen;
+
+                float ax = Vector3.Dot(tail, camRight), ay = Vector3.Dot(tail, camUp);
+                float a2 = ax * ax + ay * ay;
+                Vector3 tRight, tUp, tCentre;
+                if (a2 > TailDegenerateSq)
+                {
+                    float inv = 1f / Mathf.Sqrt(a2);
+                    float ux = ax * inv, uy = ay * inv;
+                    tRight = tail * 0.5f;
+                    tUp = camRight * (-uy * halfY) + camUp * (ux * halfX);
+                    tCentre = centre + tail * 0.5f;
+                }
+                else
+                {
+                    tRight = camRight * (0.05f * halfX);
+                    tUp = camUp * (0.05f * halfY);
+                    tCentre = centre;
+                }
+
+                // U runs along the streak and V across it, the client's corner order.
+                Vector3 q0 = tCentre - tRight - tUp;
+                Vector3 q1 = tCentre + tRight - tUp;
+                Vector3 q2 = tCentre + tRight + tUp;
+                Vector3 q3 = tCentre - tRight + tUp;
+
+                s.Verts[v] = q0; s.Uvs[v] = new Vector2(u0, v0); s.Colors[v++] = c32;
+                s.Verts[v] = q1; s.Uvs[v] = new Vector2(u1, v0); s.Colors[v++] = c32;
+                s.Verts[v] = q2; s.Uvs[v] = new Vector2(u1, v1); s.Colors[v++] = c32;
+                s.Verts[v] = q3; s.Uvs[v] = new Vector2(u0, v1); s.Colors[v++] = c32;
+                quads++;
+
+                Grow(ref min, ref max, q0);
+                Grow(ref min, ref max, q2);
+            }
         }
 
-        Upload(s.Mesh, s.Verts, s.Uvs, s.Colors, s.Indices, v, s.Count * 6, min, max);
+        Upload(s.Mesh, s.Verts, s.Uvs, s.Colors, s.Indices, v, quads * 6, min, max);
     }
 
     // =========================================================================================
@@ -1345,11 +1471,20 @@ public class WmvEmitterRuntime : MonoBehaviour
     /// <summary>
     /// Throw away every live particle and every ribbon edge, keeping the emitters themselves.
     ///
-    /// Called when the sequence changes and when a pinned simulation restarts. Without it a
-    /// ribbon would draw a straight line from wherever the bone was in the old animation to
-    /// wherever it is in the new one -- a smear across the model that no bone ever traced.
+    /// For a restart of the WHOLE simulation -- a pinned capture, or the lifecycle self-test.
+    /// A change of sequence resets only the ribbons; see Rebind for why the particles survive it.
     /// </summary>
     public void ResetState()
+    {
+        ResetParticles();
+        ResetRibbons();
+    }
+
+    /// <summary>
+    /// Throw away every live particle. Only for a restart of the whole simulation -- NOT for a
+    /// change of animation, which is what ResetRibbons is for.
+    /// </summary>
+    void ResetParticles()
     {
         for (int i = 0; i < particles.Count; i++)
         {
@@ -1359,6 +1494,11 @@ public class WmvEmitterRuntime : MonoBehaviour
             s.Rng = (uint)(0x9E3779B9u * (uint)(i + 1) + 0x85EBCA6Bu);
             s.Mesh.Clear(false);
         }
+    }
+
+    /// <summary>Throw away every ribbon segment. See ResetState for why this half is different.</summary>
+    void ResetRibbons()
+    {
         for (int i = 0; i < ribbons.Count; i++)
         {
             RibbonState s = ribbons[i];
@@ -1399,7 +1539,22 @@ public class WmvEmitterRuntime : MonoBehaviour
             s.EdgeInterval = 1f / (s.Def.EdgesPerSecond > 0f ? s.Def.EdgesPerSecond : 30f);
         }
         SetGlobalSequences(model.GlobalSequences);
-        ResetState();
+        // THE RIBBONS RESTART; THE PARTICLES DO NOT.
+        //
+        // A ribbon is a trail of segments left behind by a bone, so a sequence change has to
+        // clear it or the first frame of the new animation draws a straight edge from wherever
+        // the bone was in the old one -- a smear across the model that no bone ever traced.
+        //
+        // A particle owes nothing to the previous frame's bone. It is a free body with its own
+        // position, velocity and remaining life, and in the game changing animation does not put
+        // a torch out: the legacy viewport holds one std::list<Particle> for the life of the
+        // model (particle.h:74) and WoWModel::animate never touches it (WoWModel.cpp:2210-2224).
+        // Clearing it here was costing the whole cloud on every sequence change, and because the
+        // authored rate IS the number alive at once -- Algalon's emitter is 45 particles over a
+        // 7-second life -- the cloud then needed seven seconds of animation to build back up.
+        // Anyone who changed animation, or looked at a model in the first seconds after it
+        // loaded, saw no particles at all.
+        ResetRibbons();
         return true;
     }
 

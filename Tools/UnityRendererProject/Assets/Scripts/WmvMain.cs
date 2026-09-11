@@ -168,7 +168,7 @@ public class WmvMain : MonoBehaviour
             camGo.tag = "MainCamera";
         }
         cam.clearFlags = CameraClearFlags.SolidColor;
-        cam.backgroundColor = new Color(0.10f, 0.10f, 0.12f);
+        cam.backgroundColor = ViewportClear;    // re-set in the composited domain by ConfigureDisplayTransform
         cam.nearClipPlane = 0.01f;
         orbit = cam.gameObject.GetComponent<WmvOrbitCamera>() ?? cam.gameObject.AddComponent<WmvOrbitCamera>();
 
@@ -767,7 +767,7 @@ public class WmvMain : MonoBehaviour
                 if (same2 != mask[i]) maskDrift++;
             }
 
-            Color bg = src.backgroundColor;
+            Color bg = ViewportClear;   // as displayed; GrabFrame converts for the current domain
             float bgLum = 0.2126f * bg.r + 0.7152f * bg.g + 0.0722f * bg.b;
             // WHICH SKIN WAS MEASURED, spelled out. WMV picks a random skin per load unless
             // Session/RandomLooks is off, and a creature can carry skins that differ in brightness
@@ -872,7 +872,7 @@ public class WmvMain : MonoBehaviour
     /// </summary>
     Color32[] GrabFrame(Camera cam, RenderTexture rt, Color clear, int w, int h)
     {
-        cam.backgroundColor = clear;
+        cam.backgroundColor = ClearColour(clear);
         cam.targetTexture = rt;
         cam.Render();
         cam.targetTexture = null;
@@ -1356,20 +1356,78 @@ public class WmvMain : MonoBehaviour
     /// BLOOM STAYS. Glowing WoW content does bleed light, the effect is authored for, and it now
     /// operates on genuine linear values above 1 rather than on a range that was clamped flat.
     ///
+    /// WHERE THE FRAME IS DECODED. The authored working space needs one conversion to linear
+    /// somewhere before the swapchain. It used to be the last line of each fragment, and that was
+    /// exact for a lone fragment and wrong for every stack: the hardware blend then ran on linear
+    /// numbers while Wowhead's viewer, the legacy OpenGL viewport and the game all blend the
+    /// authored values. Two additive layers authored at 0.5 reach 255 in all three references and
+    /// 175 summed in linear; a lone additive particle fading at alpha a displays a in the
+    /// references and OETF(a) here. So the fragments now write authored values, the blend runs on
+    /// them, and WmvFrameDecodePass converts the finished composite once, before post-processing
+    /// (see that file). A lone fragment lands on exactly the same byte as before.
+    ///
+    /// The camera's clear colour has to be given in the same domain as the fragments: Unity
+    /// treats backgroundColor as sRGB and linearises it on clear, so to leave the AUTHORED value
+    /// in the buffer the colour is passed through its own OETF first (Color.gamma). The frame
+    /// decode then brings it back to the linear value the swapchain expects and the background
+    /// displays as (25,25,30), as it always has.
+    ///
     /// WMV_DISPLAY selects, for A/B only:
-    ///   full     (default) authored working space + no tone curve + no vignette
-    ///   notonemap          tone curve and vignette off, old sampling domain
-    ///   legacy             exactly what the renderer did before this change
+    ///   full      (default) authored working space, decoded once per FRAME, no tone curve,
+    ///                       no vignette
+    ///   fragment            authored working space decoded per FRAGMENT: the behaviour before
+    ///                       the frame decode, so the two can be differenced from one build
+    ///   notonemap           tone curve and vignette off, old sampling domain
+    ///   legacy              exactly what the renderer did before any of this
     /// </summary>
     static void ConfigureDisplayTransform()
     {
         string want = System.Environment.GetEnvironmentVariable("WMV_DISPLAY");
         if (string.IsNullOrEmpty(want)) want = "full";
         bool legacy = (want == "legacy");
-        bool authored = (want == "full");
+        bool authored = (want == "full" || want == "fragment");
+        bool frameDecode = (want == "full");
 
         WmvModelBuilder.AuthoredTextureDomain = authored;
         Shader.SetGlobalFloat("_WmvAuthoredDomain", authored ? 1f : 0f);
+
+        if (frameDecode && !WmvFrameDecodePass.SetActive(true))
+        {
+            // Without the shader nothing would ever decode the frame: fall back to the fragment
+            // encode rather than present authored values as linear.
+            Debug.LogWarning("WMV: display transform 'full' needs Wmv/FrameDecode, which is "
+                             + "missing -- decoding per fragment instead");
+            frameDecode = false;
+        }
+        if (!frameDecode)
+            WmvFrameDecodePass.SetActive(false);
+        Shader.SetGlobalFloat("_WmvShaderEncode", authored && !frameDecode ? 1f : 0f);
+        ClearInAuthoredDomain = frameDecode;
+
+        // THE BUFFER HAS TO HOLD AUTHORED VALUES WITHOUT BANDING. The pipeline asset asks for a
+        // 32-bit HDR buffer, which URP satisfies with B10G11R11: 6-bit mantissas in red and green,
+        // 5 in blue. That was fine for linear light, where the swapchain's encode spreads the
+        // top of the range out, but an authored value is already perceptual and the same format
+        // quantises [0.5, 1) to ~1/128 in red and green and ~1/64 in blue -- two and four 8-bit
+        // steps -- which bands in smooth bright gradients, blue worst. FP16 has a 10-bit mantissa
+        // and does not. The asset is not in the repository, so the request is made here.
+        if (frameDecode)
+        {
+            var rp = UnityEngine.Rendering.GraphicsSettings.currentRenderPipeline
+                     as UnityEngine.Rendering.Universal.UniversalRenderPipelineAsset;
+            if (rp != null)
+            {
+                var had = rp.hdrColorBufferPrecision;
+                rp.hdrColorBufferPrecision =
+                    UnityEngine.Rendering.Universal.HDRColorBufferPrecision._64Bits;
+                Debug.Log(string.Format("WMV: HDR colour buffer precision {0} -> {1} (authored "
+                                        + "values need the mantissa)", had, rp.hdrColorBufferPrecision));
+            }
+        }
+
+        var mainCam = Camera.main;
+        if (mainCam != null)
+            mainCam.backgroundColor = ClearColour(ViewportClear);
 
         int touched = 0;
         var vols = UnityEngine.Object.FindObjectsByType<UnityEngine.Rendering.Volume>(
@@ -1398,10 +1456,26 @@ public class WmvMain : MonoBehaviour
             }
         }
         Debug.Log(string.Format(
-            "WMV: display transform '{0}' -- authored texture domain {1}, shader encode {2}, "
+            "WMV: display transform '{0}' -- authored texture domain {1}, decode {2}, "
             + "{3} volume parameter(s) set across {4} volume(s)",
             want, WmvModelBuilder.AuthoredTextureDomain ? "ON" : "off",
-            authored ? "ON" : "off", touched, vols != null ? vols.Length : 0));
+            frameDecode ? "once per FRAME (blends in the authored domain)"
+                        : (authored ? "per FRAGMENT (blends in linear)" : "none"),
+            touched, vols != null ? vols.Length : 0));
+    }
+
+    /// <summary>The viewport's background, as displayed: (25,25,30).</summary>
+    static readonly Color ViewportClear = new Color(0.10f, 0.10f, 0.12f);
+
+    /// <summary>True while WmvFrameDecodePass is decoding the frame, so a clear colour has to be
+    /// left in the buffer in the authored domain. See ConfigureDisplayTransform.</summary>
+    static bool ClearInAuthoredDomain;
+
+    /// <summary>A camera clear colour in whichever domain the frame is currently composited in.
+    /// Black and white are fixed points of the curve and come back unchanged.</summary>
+    static Color ClearColour(Color displayed)
+    {
+        return ClearInAuthoredDomain ? displayed.gamma : displayed;
     }
 
     void DumpPng(Color32[] px, int w, int h, string name)

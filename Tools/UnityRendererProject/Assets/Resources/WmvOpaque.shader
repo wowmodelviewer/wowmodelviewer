@@ -243,6 +243,11 @@ Shader "WMV/Opaque Textured"
             // 0 = the old behaviour, kept only so the two can be rendered from one build. See the
             // block above frag() and WmvMain.ConfigureDisplayTransform.
             float _WmvAuthoredDomain;
+            // 1 = convert to linear at the end of this fragment (the behaviour before the frame
+            // decode existed; WMV_DISPLAY=fragment). 0 = write the authored value and let
+            // WmvFrameDecodePass convert the finished frame once, so blending happens in the
+            // authored domain like the references. Set by ConfigureDisplayTransform.
+            float _WmvShaderEncode;
             float _Unit2UV, _ThirdUnitLobe, _ThirdUnitWeight, _SecondUnitLobe, _SecondUnitWeight;
             float _FirstUnitLobe, _FirstUnitWeight;
             float4 _UvXf0, _UvOff0, _UvXf1, _UvOff1, _UvXf2, _UvOff2;
@@ -480,6 +485,15 @@ Shader "WMV/Opaque Textured"
             // domains. An authored emissive of 0.8 over a base lit at 0.55 reaches 253/255 added
             // in the authored domain and 212/255 added in linear -- and 173/255 once the Neutral
             // tone curve has had it as well. "The glow does not read like the game" IS that gap.
+            //
+            // WHERE THE CONVERSION NOW HAPPENS. Converting at the end of each fragment closed the
+            // gap inside a fragment and left it open between fragments: the hardware blend then
+            // ran on linear numbers, while Wowhead's viewer, the legacy OpenGL viewport and the
+            // game all blend the authored values themselves. Two additive layers authored at 0.5
+            // reach 255 in the references and 175 summed in linear. So the shipped path writes
+            // the authored value from this fragment and WmvFrameDecodePass converts the finished
+            // frame once, before post-processing; this function is kept for WMV_DISPLAY=fragment,
+            // the per-fragment behaviour, so the two can be differenced from one build.
             //
             // The exact curve, not the pow(2.2) approximation: it has to invert the swapchain's
             // encode exactly, or every mid-tone shifts. Values above 1 are deliberately left
@@ -892,8 +906,10 @@ Shader "WMV/Opaque Textured"
                 // an OpenGL reference render to measure the top end against.
                 c.a = (_OpaqueAlpha > 0.5) ? 1.0 : a;
 
-                // Authored domain -> linear, once, last. See the block above frag().
-                if (_WmvAuthoredDomain > 0.5)
+                // Authored domain -> linear here ONLY when the frame is not decoded as a whole
+                // (WMV_DISPLAY=fragment). See the block above frag(), and WmvFrameDecodePass for
+                // why the frame-level decode is the shipped one.
+                if (_WmvShaderEncode > 0.5)
                     c.rgb = WmvAuthoredToLinear(c.rgb);
                 return c;
             }

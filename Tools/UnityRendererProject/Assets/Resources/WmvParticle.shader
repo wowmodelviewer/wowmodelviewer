@@ -15,11 +15,14 @@
 //   The project renders in LINEAR space, so the framebuffer holds linear light and the swapchain
 //   applies the sRGB curve on write. Model textures are uploaded UNDECODED (WmvModelBuilder.
 //   CreateTexture passes linear:true, which in Unity's vocabulary means "hand the shader the
-//   stored value"), so the whole shader runs in the AUTHORED domain and converts once, at the
-//   end, with the exact sRGB EOTF. Doing the multiply in the authored domain matters here more
-//   than anywhere: 56 % of the client's particle emitters are additive, and an additive term is
-//   not scale-invariant between the two domains -- the same authored value lands at a different
-//   framebuffer level depending on which space the sum is taken in.
+//   stored value"), so the whole shader runs in the AUTHORED domain. The conversion to linear
+//   happens ONCE PER FRAME, in WmvFrameDecodePass, after every particle has been blended -- not
+//   at the end of this fragment. That is the whole point for particles: 56 % of the client's
+//   emitters are additive, an additive sum is not scale-invariant between the two domains, and
+//   the references (Wowhead's viewer, the legacy viewport, the game) take the sum in the
+//   authored domain. Summed in linear, two authored-0.5 layers reach 175 instead of 255, and a
+//   lone particle fading at alpha a displays OETF(a) instead of a. The per-fragment conversion
+//   below is kept for WMV_DISPLAY=fragment so the two can be differenced from one build.
 //
 //   Values above 1 are left unclamped so an additive stack can still blow out and still feed
 //   bloom, which is what makes a dense emitter read as bright rather than as flat white.
@@ -43,10 +46,6 @@ Shader "Wmv/Particle"
         [Enum(UnityEngine.Rendering.BlendMode)] _DstBlend ("Dst blend", Float) = 1   // One
         [Toggle] _AlphaTest ("Alpha test", Float) = 0
         _Cutoff ("Alpha cutoff", Range(0,1)) = 0.5
-
-        /// Matches WmvOpaque's switch of the same name, so both passes can be put back into the
-        /// linear-composited behaviour together if the project's colour space ever changes.
-        [Toggle] _WmvAuthoredDomain ("Composite in the authored domain", Float) = 1
     }
 
     SubShader
@@ -88,7 +87,13 @@ Shader "Wmv/Particle"
             float4 _MainTex_ST;
             half _AlphaTest;
             half _Cutoff;
-            half _WmvAuthoredDomain;
+            // A GLOBAL, deliberately not a material property: ConfigureDisplayTransform sets it
+            // with Shader.SetGlobalFloat, and a property of the same name on the material would
+            // shadow the global and pin every particle to whatever the property defaulted to --
+            // which is exactly what the previous _WmvAuthoredDomain property did. Same meaning as
+            // WmvOpaque's: 1 = convert to linear at the end of this fragment, 0 = write the
+            // authored value and let WmvFrameDecodePass convert the finished frame once.
+            float _WmvShaderEncode;
 
             v2f vert (appdata v)
             {
@@ -121,7 +126,7 @@ Shader "Wmv/Particle"
                 if (_AlphaTest > 0.5 && c.a < _Cutoff)
                     discard;
 
-                if (_WmvAuthoredDomain > 0.5)
+                if (_WmvShaderEncode > 0.5)
                     c.rgb = WmvAuthoredToLinear(c.rgb);
                 return c;
             }

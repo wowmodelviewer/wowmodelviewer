@@ -66,14 +66,31 @@ public struct WmvMaterialAnimBinding
 }
 
 /// <summary>
-/// One drawn batch's place in the transparent draw order. The legacy viewport sorts its passes
-/// before drawing -- blend mode first, then geoset index, then the texture's "special" type
-/// (Source/games/wow/WoWModel.cpp:2011-2018) -- and this renderer drew them in skin order, which
-/// is a different order whenever a model mixes blend modes across submeshes.
+/// One drawn batch's place in the transparent draw order.
+///
+/// PRIORITY PLANE FIRST. M2Batch.priorityPlane is the field the format provides for exactly this
+/// question, and it is what the client uses: instrumenting Wowhead's WebGL viewer on Algalon the
+/// Observer (FileDataID 252165, the same file this renderer loads, batches confirmed identical)
+/// shows it issue the three transparent draws in ascending priorityPlane -- constellation (1),
+/// body (2), haloes (3) -- not in blend-mode order.
+///
+/// The legacy viewport does NOT read the field. It sorts blend mode first, then geoset index, then
+/// the texture's "special" type (Source/games/wow/WoWModel.cpp:2011-2018), and it parses
+/// priorityPlane only to print it. That order is kept below as the tiebreaker chain, because it is
+/// still the right answer everywhere the planes are equal -- which is nearly every model, since
+/// the overwhelming majority ship priorityPlane 0 on every batch and are therefore bit-identical
+/// under this key.
+///
+/// WHAT IT FIXES. All three of Algalon's transparent batches have depth writes off, so order alone
+/// decides the composite. Ranking blend mode first put his alpha-blended body BEFORE the additive
+/// constellation, so the constellation lines landed on top of the torso at full strength; the
+/// client lays them down first and then draws the semi-transparent body over them, so they read as
+/// being inside him and fade out where the body is most opaque.
 /// </summary>
 struct WmvDrawOrderKey
 {
     public int Material;     // index into the materials list
+    public int Prio;         // M2Batch.priorityPlane -- the format's own key, and the client's
     public int Blend;        // M2 blend mode, the legacy's primary key
     public int Submesh;      // the legacy's secondary key
     public int SpecialTex;   // the legacy's tertiary key: texture type, -1 for a plain file
@@ -1078,7 +1095,7 @@ public static class WmvModelBuilder
                              ? (int)model.Textures[textureSlot].Type : -1;
             drawOrder.Add(new WmvDrawOrderKey
             {
-                Material = materials.Count, Blend = (int)mode,
+                Material = materials.Count, Prio = batch.PriorityPlane, Blend = (int)mode,
                 Submesh = batch.SubmeshIndex, SpecialTex = specialTex, Built = drawOrder.Count,
             });
             // What animates this material. Resolved here, where the batch, its units and the
@@ -1117,6 +1134,7 @@ public static class WmvModelBuilder
             // same on every run and on every machine.
             ranked.Sort(delegate(WmvDrawOrderKey a, WmvDrawOrderKey b)
             {
+                if (a.Prio != b.Prio) return a.Prio.CompareTo(b.Prio);
                 if (a.Blend != b.Blend) return a.Blend.CompareTo(b.Blend);
                 if (a.Submesh != b.Submesh) return a.Submesh.CompareTo(b.Submesh);
                 if (a.SpecialTex != b.SpecialTex) return a.SpecialTex.CompareTo(b.SpecialTex);
@@ -1134,9 +1152,10 @@ public static class WmvModelBuilder
                 string order = "";
                 for (int r = 0; r < ranked.Count && r < 12; r++)
                     order += (r > 0 ? " " : "") + "submesh" + ranked[r].Submesh +
-                             "/blend" + ranked[r].Blend;
-                log(string.Format("draw order: {0} transparent batch(es) ranked by blend mode then " +
-                                  "submesh then texture type, queues {1}..{2} -- {3}{4}",
+                             "/prio" + ranked[r].Prio + "/blend" + ranked[r].Blend;
+                log(string.Format("draw order: {0} transparent batch(es) ranked by priority plane " +
+                                  "then blend mode then submesh then texture type, " +
+                                  "queues {1}..{2} -- {3}{4}",
                                   ranked.Count, transparentQueue,
                                   transparentQueue + Mathf.Min(ranked.Count - 1, 899), order,
                                   ranked.Count > 12 ? " ..." : ""));
@@ -1906,7 +1925,18 @@ public static class WmvModelBuilder
             // Confirmed against retail: combiners_uber_2_2.bls case l(10) leaves the t1 sample in
             // the lobe register untouched and sets the diffuse to t0 -- no alpha, no mask, no
             // weight -- and its alpha arm is an empty `break`, i.e. unit 0's alpha stands.
-            case 10: return Plan(0, 1, 1f, false);   // Mod_AddNA -- lobe HELD BACK, see below
+            // Mod_AddNA. The diffuse is unit 0 alone; the "_AddNA" is the second unit added
+            // as a luminous lobe, with no alpha of its own:
+            //   ps10  mat_diffuse = mesh_color * tex1.rgb; discard_alpha = tex1.a;
+            //         can_discard = true; specular = tex2.rgb;
+            //   (Source/games/wow/ModelRenderPass.cpp:117)
+            // scaled by unit 1's own texture weight -- see the note above case 8 for why.
+            //
+            // WITHOUT THE LOBE THIS COMBINER LOSES A WHOLE TEXTURE. On the layered translucent
+            // materials it lives on -- Algalon the Observer, the Celestial mounts, Val'kier --
+            // unit 0 is the dim inner detail and unit 1 IS the luminous layer, so dropping it
+            // leaves a dark, nearly opaque figure where the game draws a glowing translucent one.
+            case 10: return Plan(0, 1, 1f, true, false, 4, true);   // Mod_AddNA
             // Mod_AddAlpha: ps13's lobe on a discarding pass.
             //   specular = tex2.rgb * tex2.a; discard_alpha = tex1.a  (ModelRenderPass.cpp:123)
             // No weight -- the reference multiplies the lobe by nothing.
@@ -1927,25 +1957,65 @@ public static class WmvModelBuilder
             // but 52,180 of 120,978 CreatureDisplayInfo rows (43.13 %) resolve to a model that
             // carries it, because humanoid NPCs reuse about 217 player-race bodies. It is the
             // character EYES geoset (3301 -- the iris, not the 1700-1799 eye-glow).
-            // ps8 AND ps10 ARE HELD BACK DELIBERATELY, and this is not a gap in the decode.
-            // Their lobe is `specular = tex2.rgb` -- the raw second texture, no alpha, no weight --
-            // confirmed in retail in all three of combiners_uber_2_2's switch blocks (case l(8) at
-            // asm 2_2/0.asm:186 and :309, case l(10) at :194 and :320). We implemented exactly
-            // that, and on knife_1h_naxx25_d_01 it produced a white blowout across the blade that
-            // the user's in-game screenshot of the same dagger does not have. It is not a phase of
-            // the unit-1 scroll either: swept across the animation the blade's p99 is 254 at every
-            // instant and 8-15 % of it clips.
+            // ps8 AND ps10 CARRY THE SAME LOBE -- `specular = tex2.rgb`, the raw second
+            // texture, no alpha -- confirmed in retail in all three of combiners_uber_2_2's
+            // switch blocks (case l(8) at asm 2_2/0.asm:186 and :309, case l(10) at :194 and
+            // :320). Both were held back after implementing exactly that produced a white blowout
+            // across the blade of knife_1h_naxx25_d_01.
             //
-            // THE CAUSE IS UPSTREAM AND IT IS NAMED. Retail multiplies the combiner output by the
-            // VERTEX COLOUR -- `mul r3.xyz, r5.xyzx, v1.xyzx`, asm 2_2/0.asm:477 -- and this
-            // renderer never uploads vertex colours at all (mesh.colors is never assigned). On the
-            // stacked additive batches these two combiners live on, vertex colour is exactly how
-            // the artist tones the layers down, so every such batch is already too bright here and
-            // a raw additive lobe on top is what made it visible.
+            // THE DIAGNOSIS THAT KEPT THEM BACK WAS WRONG, and its own witness disproves it. It
+            // blamed a missing multiply by retail's v1 -- the M2 material colour -- reasoning
+            // that the artist tones these stacked additive layers down with it. But
+            // knife_1h_naxx25_d_01 HAS NO COLOUR BLOCKS AT ALL: nColors is 0, and its ps10 batch
+            // (skin 490678 batch 3, submesh 1 layer 1) has colorIndex -1. The multiply would have
+            // been white there and could never have attenuated anything. That multiply does now
+            // exist -- WmvMaterialAnimator writes _Color on every pass, lit or unlit -- and it
+            // makes no difference to this model, which is exactly what its data predicts.
             //
-            // Restore these two AFTER the vertex-colour multiply exists, not before. Everything
-            // needed is in place: Lobe2 shape 4 is the raw lobe and the wiring is understood.
-            case 8:  return Plan(0, 4, 1f, true);    // Mod_Add   -- lobe HELD BACK, see above
+            // WHAT THE KNIFE ACTUALLY AUTHORS is a texture weight of 0.5 on UNIT 1 -- the very
+            // unit whose colour this lobe adds -- through textureWeightComboIndex 0 + unit 1 ->
+            // weight lookup[1] -> track 1. The reference transcriptions do not read it for these
+            // two combiners, and for a long time that looked like the end of the matter. The
+            // client's own authoring says otherwise: of the 219 ps10 batches that bind a CONSTANT
+            // unit-1 weight, only 21 are exactly 1.0 -- 90.4 % author something else, spread
+            // continuously from 0.15 to 0.9 -- and another 37 animate it with 8 more driven by a
+            // global sequence. ps8 is the same picture: 262 of its 293 constants (89.4 %) are not
+            // 1.0. A field set deliberately on nine batches out of ten, to values that only make
+            // sense as a dimmer, is not dead data.
+            //
+            // So the lobe is restored WEIGHTED BY UNIT 1'S OWN TEXTURE WEIGHT. Measured: on
+            // Algalon, both Celestial Serpents, the Celestial Fox Wyvern and Val'kier -- five
+            // models whose ps10 batches bind NO unit-1 weight, so the weight is 1 -- the weighted
+            // and raw forms are identical to the pixel. On the knife the clipped fraction goes
+            // 5.75 % raw to 1.90 %, against 0.77 % with no lobe at all, and the blade's engraving
+            // stays legible instead of washing out.
+            //
+            // THE WEIGHT IS A KNOWING DEVIATION, NOT A DECODE, AND IT IS STILL OPEN. This comment
+            // used to justify it as "what ps20 and ps23 already do here, on the same kind of
+            // evidence"; that is FALSE and is corrected here. ps20/ps23's weight is spelled out in
+            // the reference -- retail's own shader multiplies their lobe by cb0[22] explicitly --
+            // and for ps10 it is not. Every reference that names a weight names it for ps20, ps23
+            // and ps24 and NOT for this combiner. There are now three witnesses against the
+            // weighting and none for it:
+            //
+            //   the legacy GLSL transcription    specular = tex2.rgb   (ModelRenderPass.cpp:117)
+            //   retail's own DXBC                no cb0[22] multiply on the ps10 lobe
+            //   Wowhead's WebGL viewer           _specular = tex1.rgb, captured live from the
+            //                                    running page on this exact FileDataID
+            //
+            // What holds it in place is one model: raw, knife_1h_naxx25_d_01 blows out. Since the
+            // weight resolves to 1 wherever nothing binds it, the two forms differ ONLY on batches
+            // that author a unit-1 weight, so this term is doing nothing at all on Algalon and the
+            // other four models above -- it is hiding a fault that belongs to the knife. Reverting
+            // to Plan(0, 1, 1f, true, false, 4) is the correct end state; it needs the knife's
+            // blowout diagnosed first, and that has not been done.
+            //
+            // ps8 IS STILL HELD BACK, and now for a reason that is about coverage rather than
+            // correctness: its 1,277 batches include the character EYES geoset (3301), which
+            // 52,180 of 120,978 CreatureDisplayInfo rows resolve to, and none of that has been
+            // looked at. The shape is identical -- Plan(0, 4, 1f, true, false, 4, true). It is a
+            // validation job, not a decode one.
+            case 8:  return Plan(0, 4, 1f, true);    // Mod_Add   -- lobe held back, see above
             // Mod_Add_Alpha. THE ONE THAT DOES NOT FOLLOW THE PATTERN:
             //   specular = tex2.rgb * (1.0 - tex1.a)   (ModelRenderPass.cpp:128)
             // There is no tex2.a in it. Every other second-unit lobe in the table multiplies by
