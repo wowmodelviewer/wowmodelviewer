@@ -66,14 +66,31 @@ public struct WmvMaterialAnimBinding
 }
 
 /// <summary>
-/// One drawn batch's place in the transparent draw order. The legacy viewport sorts its passes
-/// before drawing -- blend mode first, then geoset index, then the texture's "special" type
-/// (Source/games/wow/WoWModel.cpp:2011-2018) -- and this renderer drew them in skin order, which
-/// is a different order whenever a model mixes blend modes across submeshes.
+/// One drawn batch's place in the transparent draw order.
+///
+/// PRIORITY PLANE FIRST. M2Batch.priorityPlane is the field the format provides for exactly this
+/// question, and it is what the client uses: instrumenting Wowhead's WebGL viewer on Algalon the
+/// Observer (FileDataID 252165, the same file this renderer loads, batches confirmed identical)
+/// shows it issue the three transparent draws in ascending priorityPlane -- constellation (1),
+/// body (2), haloes (3) -- not in blend-mode order.
+///
+/// The legacy viewport does NOT read the field. It sorts blend mode first, then geoset index, then
+/// the texture's "special" type (Source/games/wow/WoWModel.cpp:2011-2018), and it parses
+/// priorityPlane only to print it. That order is kept below as the tiebreaker chain, because it is
+/// still the right answer everywhere the planes are equal -- which is nearly every model, since
+/// the overwhelming majority ship priorityPlane 0 on every batch and are therefore bit-identical
+/// under this key.
+///
+/// WHAT IT FIXES. All three of Algalon's transparent batches have depth writes off, so order alone
+/// decides the composite. Ranking blend mode first put his alpha-blended body BEFORE the additive
+/// constellation, so the constellation lines landed on top of the torso at full strength; the
+/// client lays them down first and then draws the semi-transparent body over them, so they read as
+/// being inside him and fade out where the body is most opaque.
 /// </summary>
 struct WmvDrawOrderKey
 {
     public int Material;     // index into the materials list
+    public int Prio;         // M2Batch.priorityPlane -- the format's own key, and the client's
     public int Blend;        // M2 blend mode, the legacy's primary key
     public int Submesh;      // the legacy's secondary key
     public int SpecialTex;   // the legacy's tertiary key: texture type, -1 for a plain file
@@ -1078,7 +1095,7 @@ public static class WmvModelBuilder
                              ? (int)model.Textures[textureSlot].Type : -1;
             drawOrder.Add(new WmvDrawOrderKey
             {
-                Material = materials.Count, Blend = (int)mode,
+                Material = materials.Count, Prio = batch.PriorityPlane, Blend = (int)mode,
                 Submesh = batch.SubmeshIndex, SpecialTex = specialTex, Built = drawOrder.Count,
             });
             // What animates this material. Resolved here, where the batch, its units and the
@@ -1117,6 +1134,7 @@ public static class WmvModelBuilder
             // same on every run and on every machine.
             ranked.Sort(delegate(WmvDrawOrderKey a, WmvDrawOrderKey b)
             {
+                if (a.Prio != b.Prio) return a.Prio.CompareTo(b.Prio);
                 if (a.Blend != b.Blend) return a.Blend.CompareTo(b.Blend);
                 if (a.Submesh != b.Submesh) return a.Submesh.CompareTo(b.Submesh);
                 if (a.SpecialTex != b.SpecialTex) return a.SpecialTex.CompareTo(b.SpecialTex);
@@ -1134,9 +1152,10 @@ public static class WmvModelBuilder
                 string order = "";
                 for (int r = 0; r < ranked.Count && r < 12; r++)
                     order += (r > 0 ? " " : "") + "submesh" + ranked[r].Submesh +
-                             "/blend" + ranked[r].Blend;
-                log(string.Format("draw order: {0} transparent batch(es) ranked by blend mode then " +
-                                  "submesh then texture type, queues {1}..{2} -- {3}{4}",
+                             "/prio" + ranked[r].Prio + "/blend" + ranked[r].Blend;
+                log(string.Format("draw order: {0} transparent batch(es) ranked by priority plane " +
+                                  "then blend mode then submesh then texture type, " +
+                                  "queues {1}..{2} -- {3}{4}",
                                   ranked.Count, transparentQueue,
                                   transparentQueue + Mathf.Min(ranked.Count - 1, 899), order,
                                   ranked.Count > 12 ? " ..." : ""));
