@@ -575,6 +575,21 @@ public class WmvEmitterRuntime : MonoBehaviour
         m.SetFloat("_SrcBlend", (float)src);
         m.SetFloat("_DstBlend", (float)dst);
         m.SetFloat("_AlphaTest", alphaTest ? 1f : 0f);
+
+        // PARTICLES DRAW AFTER THE MODEL. The shader's own queue is Transparent (3000), which is
+        // the very first slot of the band the model's transparent batches are ranked into
+        // (Transparent + rank, WmvModelBuilder), so an emitter's quads went down BEFORE the
+        // alpha-blended geometry they float in front of and every sparkle inside the silhouette
+        // was dimmed by the body's alpha and pulled toward its colour. Both references draw the
+        // particle systems -- and the ribbons, which share this material path -- after the whole
+        // model. The legacy says why in so many words: "render our particles, we do this
+        // afterwards so that all the particles display OK without having things like shields
+        // overwriting the particles" (modelcanvas.cpp:694-702, root->drawParticles() after
+        // root->draw(); WoWModel::drawParticles draws the systems and then the ribbons). Wowhead's
+        // viewer issues its particle draw after the last batch draw of the model -- captured live
+        // on Algalon as the three batch draws and then the particle draw. The band is capped at
+        // Transparent + 899, so + 900 is the first queue no batch can reach.
+        m.renderQueue = (int)UnityEngine.Rendering.RenderQueue.Transparent + 900;
         ownedMaterials.Add(m);
         return m;
     }
