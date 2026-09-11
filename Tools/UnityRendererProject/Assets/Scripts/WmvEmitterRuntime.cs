@@ -157,6 +157,11 @@ public class WmvEmitterRuntime : MonoBehaviour
         public float SpawnRemainder;
         public uint Rng;
 
+        /// <summary>Which quads each particle is drawn as. An emitter that names neither style
+        /// gets a head, which is what every particle was before the styles were read.</summary>
+        public bool DrawHead, DrawTail;
+        public int QuadsPerParticle;
+
         public Vector3[] Verts;
         public Vector2[] Uvs;
         public Color32[] Colors;
@@ -389,6 +394,9 @@ public class WmvEmitterRuntime : MonoBehaviour
         s.BoneLocal = def.DoNotTrail || def.Pinned;
         s.TileCount = Mathf.Max(1, def.Rows * def.Cols);
         s.Capacity = CapacityFor(def);
+        s.DrawTail = def.TailStyle;
+        s.DrawHead = def.HeadStyle || !def.TailStyle;
+        s.QuadsPerParticle = (s.DrawHead ? 1 : 0) + (s.DrawTail ? 1 : 0);
         s.Rng = (uint)(0x9E3779B9u * (uint)(index + 1) + 0x85EBCA6Bu);
 
         s.Pos = new Vector3[s.Capacity];
@@ -402,13 +410,14 @@ public class WmvEmitterRuntime : MonoBehaviour
             s.QuadUp = new Vector3[s.Capacity];
         }
 
-        s.Verts = new Vector3[s.Capacity * 4];
-        s.Uvs = new Vector2[s.Capacity * 4];
-        s.Colors = new Color32[s.Capacity * 4];
-        s.Indices = BuildQuadIndices(s.Capacity);
+        int quads = s.Capacity * s.QuadsPerParticle;
+        s.Verts = new Vector3[quads * 4];
+        s.Uvs = new Vector2[quads * 4];
+        s.Colors = new Color32[quads * 4];
+        s.Indices = BuildQuadIndices(quads);
 
         s.Go = NewChild(objectName + "_particles" + index);
-        s.Mesh = NewMesh(objectName + "_particleMesh" + index, s.Capacity * 4);
+        s.Mesh = NewMesh(objectName + "_particleMesh" + index, quads * 4);
         s.Material = NewMaterial(shader, tex, def.BlendMode, objectName + "_particleMat" + index);
         s.Renderer = Attach(s.Go, s.Mesh, s.Material);
         ResolveRamp(s);
@@ -973,9 +982,17 @@ public class WmvEmitterRuntime : MonoBehaviour
         return new WowVec2(Mathf.Lerp(keys[a].X, keys[b].X, r), Mathf.Lerp(keys[a].Y, keys[b].Y, r));
     }
 
+    /// <summary>
+    /// The squared length, in model units, below which a tail's screen-plane projection counts as
+    /// nothing and the particle is drawn as a 5 % speck instead. The client's builder tests
+    /// dot(a, a) > 1e-4 in its own view space; Wowhead's viewer runs that space at 3x model
+    /// units, so the same rule in model units is 1e-4 / 9.
+    /// </summary>
+    const float TailDegenerateSq = 1.1e-5f;
+
     void BuildParticleMesh(ParticleState s, Matrix4x4 boneMatrix, Vector3 camRight, Vector3 camUp)
     {
-        int v = 0;
+        int v = 0, quads = 0;
         Vector3 min = Vector3.positiveInfinity, max = Vector3.negativeInfinity;
         bool billboard = !s.Def.DoNotBillboard;
         float spin = s.Def.SpriteRotation;
@@ -985,6 +1002,7 @@ public class WmvEmitterRuntime : MonoBehaviour
             spinCos = Mathf.Cos(spin);
             spinSin = Mathf.Sin(spin);
         }
+        float slowdown = s.Def.Slowdown;
 
         for (int i = 0; i < s.Count; i++)
         {
@@ -1040,21 +1058,89 @@ public class WmvEmitterRuntime : MonoBehaviour
             // mesh UVs take (WowCoordinateConverter.ConvertTexCoord).
             float v1 = 1f - row / (float)s.Def.Rows, v0 = 1f - (row + 1) / (float)s.Def.Rows;
 
-            Vector3 p0 = centre - right - up;
-            Vector3 p1 = centre + right - up;
-            Vector3 p2 = centre + right + up;
-            Vector3 p3 = centre - right + up;
+            if (s.DrawHead)
+            {
+                Vector3 p0 = centre - right - up;
+                Vector3 p1 = centre + right - up;
+                Vector3 p2 = centre + right + up;
+                Vector3 p3 = centre - right + up;
 
-            s.Verts[v] = p0; s.Uvs[v] = new Vector2(u0, v0); s.Colors[v++] = c32;
-            s.Verts[v] = p1; s.Uvs[v] = new Vector2(u1, v0); s.Colors[v++] = c32;
-            s.Verts[v] = p2; s.Uvs[v] = new Vector2(u1, v1); s.Colors[v++] = c32;
-            s.Verts[v] = p3; s.Uvs[v] = new Vector2(u0, v1); s.Colors[v++] = c32;
+                s.Verts[v] = p0; s.Uvs[v] = new Vector2(u0, v0); s.Colors[v++] = c32;
+                s.Verts[v] = p1; s.Uvs[v] = new Vector2(u1, v0); s.Colors[v++] = c32;
+                s.Verts[v] = p2; s.Uvs[v] = new Vector2(u1, v1); s.Colors[v++] = c32;
+                s.Verts[v] = p3; s.Uvs[v] = new Vector2(u0, v1); s.Colors[v++] = c32;
+                quads++;
 
-            Grow(ref min, ref max, p0);
-            Grow(ref min, ref max, p2);
+                Grow(ref min, ref max, p0);
+                Grow(ref min, ref max, p2);
+            }
+
+            if (s.DrawTail)
+            {
+                // A TAIL PARTICLE IS A STREAK, NOT A SPRITE. The quad runs from the particle back
+                // along the path it just travelled: -velocity * TailLength long, and as wide as
+                // the size ramp says, turned to lie in the screen plane. Its length is therefore
+                // its speed, so a fresh spark is a streak and a spark that drag has stopped is
+                // nothing -- which is how the game empties Algalon's cloud of the two thirds of
+                // it that has stalled, and why a viewer drawing every one of them as a head
+                // shows a couple of hundred bright motes hanging in the air.
+                //
+                // This is the client's rule as Wowhead's viewer implements it, read out of the
+                // live page: tail = -v * tailLength (min(age, tailLength) under 0x400); if the
+                // projection of that onto the screen plane has any length, the long half-axis is
+                // half the tail and the centre moves half a tail back so the quad starts AT the
+                // particle; the short half-axis is the size, perpendicular to the projection.
+                // Otherwise the particle is a speck of 5 % of its size. Measured on Algalon that
+                // is 0.082 units wide at birth and 0.0048 once stalled, and the switch lands at
+                // 2.5 s, exactly where drag takes the projection under the threshold.
+                //
+                // The stored velocity is the launch velocity; the integrator damps the
+                // displacement rather than the velocity (see AdvanceParticles), so the speed the
+                // particle actually has now is Vel * exp(-slowdown * life).
+                Vector3 vel = s.Vel[i] * (slowdown > 0f ? Mathf.Exp(-slowdown * s.Life[i]) : 1f);
+                if (s.BoneLocal)
+                    vel = boneMatrix.MultiplyVector(vel);
+                float tailLen = s.Def.TailLength;
+                if (s.Def.ClampTailToAge)
+                    tailLen = Mathf.Min(s.Life[i], tailLen);
+                Vector3 tail = vel * -tailLen;
+
+                float ax = Vector3.Dot(tail, camRight), ay = Vector3.Dot(tail, camUp);
+                float a2 = ax * ax + ay * ay;
+                Vector3 tRight, tUp, tCentre;
+                if (a2 > TailDegenerateSq)
+                {
+                    float inv = 1f / Mathf.Sqrt(a2);
+                    float ux = ax * inv, uy = ay * inv;
+                    tRight = tail * 0.5f;
+                    tUp = camRight * (-uy * halfY) + camUp * (ux * halfX);
+                    tCentre = centre + tail * 0.5f;
+                }
+                else
+                {
+                    tRight = camRight * (0.05f * halfX);
+                    tUp = camUp * (0.05f * halfY);
+                    tCentre = centre;
+                }
+
+                // U runs along the streak and V across it, the client's corner order.
+                Vector3 q0 = tCentre - tRight - tUp;
+                Vector3 q1 = tCentre + tRight - tUp;
+                Vector3 q2 = tCentre + tRight + tUp;
+                Vector3 q3 = tCentre - tRight + tUp;
+
+                s.Verts[v] = q0; s.Uvs[v] = new Vector2(u0, v0); s.Colors[v++] = c32;
+                s.Verts[v] = q1; s.Uvs[v] = new Vector2(u1, v0); s.Colors[v++] = c32;
+                s.Verts[v] = q2; s.Uvs[v] = new Vector2(u1, v1); s.Colors[v++] = c32;
+                s.Verts[v] = q3; s.Uvs[v] = new Vector2(u0, v1); s.Colors[v++] = c32;
+                quads++;
+
+                Grow(ref min, ref max, q0);
+                Grow(ref min, ref max, q2);
+            }
         }
 
-        Upload(s.Mesh, s.Verts, s.Uvs, s.Colors, s.Indices, v, s.Count * 6, min, max);
+        Upload(s.Mesh, s.Verts, s.Uvs, s.Colors, s.Indices, v, quads * 6, min, max);
     }
 
     // =========================================================================================

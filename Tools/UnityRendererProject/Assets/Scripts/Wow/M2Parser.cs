@@ -142,6 +142,7 @@ namespace Wmv.Wow
         const int OfsParamsAlpha = 16;     // keys: int16, fixed16
         const int OfsParamsSize = 32;      // keys: WowVec2
         const int OfsParamsScales = 100;         // see M2ParticleEmitterDef.ParticleScale
+        const int OfsParamsTailLength = 88;
         const int OfsParamsSlowdown = 112;
         const int OfsParamsRotation = 124;
 
@@ -1243,6 +1244,10 @@ namespace Wmv.Wow
                 c.Seek(p + OfsParamsSlowdown);
                 float slow = c.ReadSingle();
                 def.Slowdown = IsFinite(slow) ? slow : 0f;
+
+                c.Seek(p + OfsParamsTailLength);
+                float tail = c.ReadSingle();
+                def.TailLength = IsFinite(tail) && tail > 0f ? tail : 0f;
 
                 c.Seek(p + OfsParamsRotation);
                 float rot = c.ReadSingle();
