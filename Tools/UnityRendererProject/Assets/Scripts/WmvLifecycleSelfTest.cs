@@ -185,9 +185,20 @@ public static class WmvLifecycleSelfTest
         Check(applied, "emitter: ApplySequence reports something to animate", log);
         Check(rt.Emitters.ParticleEmitterCount == 1 && rt.Emitters.RibbonEmitterCount == 1,
               "emitter: the sequence change did NOT duplicate the emitters", log);
-        Check(rt.Emitters.LiveParticleCount == 0 && rt.Emitters.RibbonSegmentCount == 0,
-              "emitter: the sequence change cleared the previous animation's particles and "
-              + "ribbon history (no smear from where the bone used to be)", log);
+        // THE TWO HALVES OF A SEQUENCE CHANGE PART COMPANY HERE, and the reason is in
+        // WmvEmitterRuntime.Rebind. A ribbon is a trail of segments left behind by a bone, so its
+        // history has to go or the first frame of the new animation draws an edge from wherever
+        // the bone stood in the old one -- a smear across the model that no bone ever traced. A
+        // particle owes the previous frame's bone nothing: it is a free body with its own
+        // position, velocity and remaining life, and in the game changing animation does not put
+        // a torch out. The legacy viewport holds one std::list<Particle> for the life of the model
+        // (particle.h:74) and WoWModel::animate never touches it (WoWModel.cpp:2210-2224).
+        Check(rt.Emitters.LiveParticleCount == live,
+              "emitter: the sequence change KEPT the live particles (" + live + " before, "
+              + rt.Emitters.LiveParticleCount + " after)", log);
+        Check(rt.Emitters.RibbonSegmentCount == 0,
+              "emitter: the sequence change cleared the ribbon history (no smear from where the "
+              + "bone used to be)", log);
 
         for (int i = 0; i < 120; i++)
             rt.Emitters.Advance(1f / 60f, i * 16f, i * 16f);
