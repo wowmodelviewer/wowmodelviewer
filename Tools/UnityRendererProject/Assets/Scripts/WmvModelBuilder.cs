@@ -1983,19 +1983,38 @@ public static class WmvModelBuilder
             // 1.0. A field set deliberately on nine batches out of ten, to values that only make
             // sense as a dimmer, is not dead data.
             //
-            // So the lobe is restored WEIGHTED BY UNIT 1'S OWN TEXTURE WEIGHT, which is what ps20
-            // and ps23 already do here (Lobe2Weighted) and on the same kind of evidence. Measured:
-            // on Algalon, both Celestial Serpents, the Celestial Fox Wyvern and Val'kier -- five
+            // So the lobe is restored WEIGHTED BY UNIT 1'S OWN TEXTURE WEIGHT. Measured: on
+            // Algalon, both Celestial Serpents, the Celestial Fox Wyvern and Val'kier -- five
             // models whose ps10 batches bind NO unit-1 weight, so the weight is 1 -- the weighted
             // and raw forms are identical to the pixel. On the knife the clipped fraction goes
             // 5.75 % raw to 1.90 %, against 0.77 % with no lobe at all, and the blade's engraving
             // stays legible instead of washing out.
             //
+            // THE WEIGHT IS A KNOWING DEVIATION, NOT A DECODE, AND IT IS STILL OPEN. This comment
+            // used to justify it as "what ps20 and ps23 already do here, on the same kind of
+            // evidence"; that is FALSE and is corrected here. ps20/ps23's weight is spelled out in
+            // the reference -- retail's own shader multiplies their lobe by cb0[22] explicitly --
+            // and for ps10 it is not. Every reference that names a weight names it for ps20, ps23
+            // and ps24 and NOT for this combiner. There are now three witnesses against the
+            // weighting and none for it:
+            //
+            //   the legacy GLSL transcription    specular = tex2.rgb   (ModelRenderPass.cpp:117)
+            //   retail's own DXBC                no cb0[22] multiply on the ps10 lobe
+            //   Wowhead's WebGL viewer           _specular = tex1.rgb, captured live from the
+            //                                    running page on this exact FileDataID
+            //
+            // What holds it in place is one model: raw, knife_1h_naxx25_d_01 blows out. Since the
+            // weight resolves to 1 wherever nothing binds it, the two forms differ ONLY on batches
+            // that author a unit-1 weight, so this term is doing nothing at all on Algalon and the
+            // other four models above -- it is hiding a fault that belongs to the knife. Reverting
+            // to Plan(0, 1, 1f, true, false, 4) is the correct end state; it needs the knife's
+            // blowout diagnosed first, and that has not been done.
+            //
             // ps8 IS STILL HELD BACK, and now for a reason that is about coverage rather than
             // correctness: its 1,277 batches include the character EYES geoset (3301), which
             // 52,180 of 120,978 CreatureDisplayInfo rows resolve to, and none of that has been
-            // looked at. The shape is identical -- Plan(0, 4, 1f, true, false, 4, true) -- and the
-            // weight evidence above is as strong for it. It is a validation job, not a decode one.
+            // looked at. The shape is identical -- Plan(0, 4, 1f, true, false, 4, true). It is a
+            // validation job, not a decode one.
             case 8:  return Plan(0, 4, 1f, true);    // Mod_Add   -- lobe held back, see above
             // Mod_Add_Alpha. THE ONE THAT DOES NOT FOLLOW THE PATTERN:
             //   specular = tex2.rgb * (1.0 - tex1.a)   (ModelRenderPass.cpp:128)
