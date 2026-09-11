@@ -753,10 +753,32 @@ public class WmvEmitterRuntime : MonoBehaviour
                           float seqMs, float globalMs)
     {
         // ---- emission -----------------------------------------------------------------------
-        // (dt * rate / lifespan) + carry, from particle.cpp:203-224. Dividing by the lifespan is
-        // what makes "rate" the number ALIVE at once rather than the number spawned per second:
-        // at equilibrium, rate/lifespan spawns per second times lifespan seconds of life is rate
-        // particles standing.
+        // (dt * rate) + carry. emissionRate IS particles per second, so the population settles at
+        // rate * lifespan.
+        //
+        // THIS DELIBERATELY DEPARTS FROM THE LEGACY, which divides by the lifespan
+        // (particle.cpp:203-211, `ftospawn = (dt * frate / flife) + rem`) and so settles at rate
+        // particles however long they live. That is a bug in the legacy, and three independent
+        // witnesses say so:
+        //
+        //   THE CLIENT. Instrumenting Wowhead's WebGL viewer -- which loads this very file, with
+        //   batches confirmed identical -- on Algalon the Observer shows its particle draw issue
+        //   1866 indices, i.e. 311 live quads. Algalon authors rate 45 and lifespan 7 s. 45 * 7 is
+        //   315; 45 is not 311. Measured here, the same model plateaus at exactly 315.
+        //
+        //   THIS FILE. CapacityFor (below) sizes the pool as "the largest rate it reaches times
+        //   the longest lifespan it reaches, WHICH IS THE STEADY STATE BY DEFINITION" -- rate *
+        //   life * 1.25 + 4, which is 398 for Algalon and is what the log prints. The allocator
+        //   and the simulator were disagreeing with each other by exactly one lifespan: the pool
+        //   was sized for 315 and never held more than 45.
+        //
+        //   THE RIBBON HALF. Ribbons in this same runtime read edgesPerSecond as a per-second rate
+        //   and size themselves rate * lifetime (BuildRibbon). Particles are the same shape of
+        //   quantity and were the only ones divided.
+        //
+        // What it looked like: Algalon's sparkle cloud was a seventh of its authored density -- a
+        // dozen specks where the game has a few hundred -- and every emitter in the viewer was
+        // thinned by its own lifespan.
         if (dt > 0f)
         {
             float rate = Sample(s.Def.EmissionRate, seqMs, globalMs, 0f);
@@ -764,7 +786,10 @@ public class WmvEmitterRuntime : MonoBehaviour
             bool enabled = !s.Def.EnabledIn.HasData
                            || Sample(s.Def.EnabledIn, seqMs, globalMs, 1f) != 0f;
 
-            float toSpawn = lifespan > 0f ? (dt * rate / lifespan) + s.SpawnRemainder
+            // The lifespan is still what decides whether anything spawns at all: a zero
+            // lifespan means a particle dies the instant it is born, and the legacy spawns none
+            // rather than dividing by zero (particle.cpp:206-211).
+            float toSpawn = lifespan > 0f ? (dt * rate) + s.SpawnRemainder
                                           : s.SpawnRemainder;
             if (toSpawn < 1f)
             {
