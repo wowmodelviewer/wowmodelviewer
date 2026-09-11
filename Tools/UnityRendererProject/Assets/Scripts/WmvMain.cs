@@ -65,6 +65,14 @@ public class WmvMain : MonoBehaviour
     readonly Dictionary<int, BlpImage> currentTextures = new Dictionary<int, BlpImage>();
     readonly Dictionary<int, int> currentTextureIds = new Dictionary<int, int>();   // slot -> FileDataID
     SkinJob skinJob;                  // in-flight skin change, if any
+    // The app's playback state for the model being LOADED, kept until its animator exists.
+    WmvIpcClient.AnimationState loadState;
+    bool haveLoadState;
+    double loadStateAt;             // WmvIpcClient.NowSeconds when the push ARRIVED
+    // The app's skin push (geosets, particle colour) for the model being LOADED, adopted at
+    // build when the load did not ask the host for its textures itself.
+    WmvIpcClient.ModelTexturesResponse loadSkin;
+    bool haveLoadSkin;
 
     /// <summary>
     /// Bone tracks already read, keyed by sequence index.
@@ -140,6 +148,7 @@ public class WmvMain : MonoBehaviour
         public readonly Dictionary<int, BlpImage> Textures = new Dictionary<int, BlpImage>();
 
         public string PendingM2, PendingSkin, PendingTextureList;
+        public bool AskedHost;      // getModelTextures was sent: the answer carries the display's geosets
         public readonly Dictionary<string, int> PendingTextures = new Dictionary<string, int>(); // requestId -> slot
         public int TexturesExpected;
     }
@@ -195,7 +204,11 @@ public class WmvMain : MonoBehaviour
         var light = lightGo.AddComponent<Light>();
         light.type = LightType.Directional;
         light.intensity = 1.1f;
-        lightGo.transform.rotation = Quaternion.Euler(50f, -30f, 0f);
+        // Over the default camera's shoulder: the camera looks at the model's front from +Z
+        // (WmvOrbitCamera.FrontYaw), so this light travels toward -Z. Only the fallback shaders
+        // (-wmvLitShader, or a build without the WMV shader) read it; the WMV shader's key is
+        // view-relative (WmvShadowRig.KeyDirView) and turns with the camera by itself.
+        lightGo.transform.rotation = Quaternion.Euler(50f, 150f, 0f);
         RenderSettings.ambientLight = new Color(0.35f, 0.35f, 0.4f);
 
         // Proof-of-life until a real model arrives -- OFF unless asked for (-wmvPlaceholder).
@@ -247,10 +260,21 @@ public class WmvMain : MonoBehaviour
         currentM2Bytes = null;
         // Sequence indices and file ids mean nothing across models.
         boneTrackCache.Clear();
-            materialTrackCache.Clear();
+        materialTrackCache.Clear();
         animFileCache.Clear();
         pendingAnimFetch.Clear();
         haveAppState = false;
+        haveLoadState = false;
+        haveLoadSkin = false;
+        // Neither does the previous model's DISPLAY state, and it was being carried across: the
+        // geoset set chosen for the last creature was handed to the next Build as its own, hiding
+        // submeshes -- or the whole model -- on any file the host is never asked to describe
+        // (one whose textures all name files). Same for the particle recolour, an in-flight skin
+        // change and the texture ids the skin change reads.
+        currentGeosets = null;
+        currentParticleColor = null;
+        skinJob = null;
+        currentTextureIds.Clear();
 
         job = new LoadJob { Path = path, FileDataID = fileDataID };
         status.Set("Requested " + (string.IsNullOrEmpty(path) ? ("fileDataID " + fileDataID) : path));
@@ -354,7 +378,10 @@ public class WmvMain : MonoBehaviour
             job.PendingTextures[ipc.RequestAssetByFileDataID(d.Value)] = d.Key;
 
         if (needsHost)
+        {
+            job.AskedHost = true;
             job.PendingTextureList = ipc.RequestModelTextures(job.FileDataID);
+        }
         else if (direct.Count == 0)
             BuildIfReady();
     }
@@ -438,6 +465,17 @@ public class WmvMain : MonoBehaviour
 
         try
         {
+            // THE APP'S SKIN PUSH FOR THIS MODEL, when the load did not ask the host itself. A
+            // model whose every texture names a file never sends getModelTextures, so the push
+            // is the only word about which geosets its display switches on and what colour its
+            // particles take; it used to be dropped, and every geoset was drawn.
+            if (haveLoadSkin && !job.AskedHost)
+            {
+                AdoptGeosets(loadSkin);
+                AdoptParticleColor(loadSkin);
+            }
+            haveLoadSkin = false;
+
             long t0 = job.Clock.ElapsedMilliseconds;
             var built = WmvModelBuilder.Build(job.Model, job.Skin, job.Textures,
                                               string.IsNullOrEmpty(job.Model.Name) ? "WoWModel" : job.Model.Name,
@@ -465,6 +503,30 @@ public class WmvMain : MonoBehaviour
             // animation switch ever waits on a round trip. They arrive while the user is looking
             // at the model, not while they are waiting for the animation they just picked.
             PrefetchAnimFiles();
+
+            // THE APP'S PLAYBACK STATE FOR THIS MODEL, pushed while it was still loading. Without
+            // it the fresh animator starts at 0 and playing at 1x whatever the app is doing, and
+            // the first heartbeat -- a second later -- snaps it forward by however long the load
+            // took: the visible restart on every switch. The position is projected by the time
+            // the push has been waiting, at the app's own speed, so the two clocks meet.
+            if (current.Animator != null && haveLoadState)
+            {
+                lastAppState = loadState;
+                haveAppState = true;
+                int playingSeq = currentModel.AnimatedSequence;
+                if (loadState.sequenceIndex < 0 || loadState.sequenceIndex == playingSeq)
+                {
+                    float elapsed = loadState.playing && loadStateAt > 0.0
+                        ? (float)((WmvIpcClient.NowSeconds - loadStateAt) * 1000.0) * Mathf.Max(loadState.speed, 0f)
+                        : 0f;
+                    current.Animator.StartFromApp(loadState.playing, loadState.timeMs + elapsed, loadState.speed);
+                }
+                else
+                {
+                    current.Animator.SetTransportOnly(loadState.playing, loadState.speed);
+                }
+            }
+            haveLoadState = false;
 
             // -wmvFrameBounds pins EVERYTHING that frames from the bounds -- the orbit camera, the
             // light rig and the light check -- so two builds that disagree about the bounds
@@ -523,6 +585,13 @@ public class WmvMain : MonoBehaviour
                 built.Bounds, job.Clock.ElapsedMilliseconds));
         }
         catch (WowParseException e) { Fail("mesh creation failed: " + e.Message); }
+        catch (System.Exception e)
+        {
+            // Anything else out of Build used to escape to the IPC client's catch, which logged
+            // "handler failed" and left the previous model and camera on screen with a job that
+            // never completed. Same outcome as a parse failure: reported, and the load is over.
+            Fail("mesh creation failed: " + e.GetType().Name + ": " + e.Message);
+        }
         finally { job = null; }
     }
 
@@ -535,23 +604,50 @@ public class WmvMain : MonoBehaviour
     /// moves: the mesh, its materials, its textures and its geoset selection are all untouched by
     /// which animation is playing.
     /// </summary>
+    /// <summary>
+    /// Is a push about the model on screen, or about the one being loaded?
+    ///
+    /// While a switch is in flight the model on screen is still the PREVIOUS one, and the app's
+    /// pushes for the new one -- its skin, its default animation, its playback state -- name the
+    /// new file. Judging them by the on-screen id alone threw every one of them away, and the
+    /// new model then started on the animator's own defaults and was snapped forward by the first
+    /// heartbeat a second later. A push about neither model is still refused.
+    /// </summary>
+    bool AboutThisModel(int fileDataID)
+    {
+        if (fileDataID == 0)
+            return true;
+        if (job != null && job.FileDataID == fileDataID)
+            return true;
+        return currentFileDataID == 0 || fileDataID == currentFileDataID;
+    }
+
+    /// <summary>About the load in flight, specifically -- as opposed to the model on screen.</summary>
+    bool AboutTheLoad(int fileDataID)
+    {
+        return job != null && (fileDataID == 0 || fileDataID == job.FileDataID);
+    }
+
     void HandleModelAnimation(WmvIpcClient.AnimationSelection a)
     {
-        if (a.fileDataID != 0 && currentFileDataID != 0 && a.fileDataID != currentFileDataID)
+        if (!AboutThisModel(a.fileDataID))
             return;                                     // about a different model
         if (a.sequenceIndex < 0)
             return;
 
-        bool changed = a.sequenceIndex != selectedSequence;
         selectedSequence = a.sequenceIndex;
 
-        if (current == null || currentM2Bytes == null)
+        if (current == null || currentM2Bytes == null || AboutTheLoad(a.fileDataID))
         {
             // Still loading. The parse below will use this selection when it gets there.
             status.Set("Animation " + a.sequenceIndex + " selected (model still loading)");
             return;
         }
-        if (!changed && current.Animator != null)
+        // A re-push of what is PLAYING is a no-op: the animator is not re-bound and its clock is
+        // not touched. Judged by what is playing, not by what was last asked for, so a request
+        // that fell back to the idle is retried when it is asked for again.
+        if (current.Animator != null && current.Animator.SequenceIndex == a.sequenceIndex &&
+            currentModel != null && currentModel.AnimatedSequence == a.sequenceIndex)
         {
             status.Set("Animation unchanged");
             return;
@@ -1673,10 +1769,21 @@ public class WmvMain : MonoBehaviour
         // app is paused or the speed slider is not at 1, and is not corrected until the next
         // heartbeat. The heartbeat is meant to correct DRIFT, not to start the animation.
         if (haveAppState && current.Animator != null)
-            current.Animator.SetPlaybackState(lastAppState.playing,
-                                              lastAppState.sequenceIndex == playing
-                                                  ? lastAppState.timeMs : 0f,
-                                              lastAppState.speed);
+        {
+            // The app's position for this sequence, projected by the time the state has been
+            // waiting -- a .anim fetch can take a while, and a heartbeat may be a second old --
+            // and applied as given: a freshly bound sequence is a fresh clock, and a difference
+            // held to the dead band here would stay for the life of the sequence.
+            float at = 0f;
+            if (lastAppState.sequenceIndex == playing)
+            {
+                at = lastAppState.timeMs;
+                if (lastAppState.playing && lastAppState.receivedSeconds > 0.0)
+                    at += (float)((WmvIpcClient.NowSeconds - lastAppState.receivedSeconds) * 1000.0)
+                          * Mathf.Max(lastAppState.speed, 0f);
+            }
+            current.Animator.StartFromApp(lastAppState.playing, at, lastAppState.speed);
+        }
         // Watch whether it actually starts moving; see WmvM2Animator.BeginAdvanceWatch.
         if (current.Animator != null)
             current.Animator.BeginAdvanceWatch();
@@ -1693,8 +1800,18 @@ public class WmvMain : MonoBehaviour
     /// </summary>
     void HandleModelAnimationState(WmvIpcClient.AnimationState s)
     {
-        if (s.fileDataID != 0 && currentFileDataID != 0 && s.fileDataID != currentFileDataID)
+        if (!AboutThisModel(s.fileDataID))
             return;                                     // about a different model
+        if (AboutTheLoad(s.fileDataID))
+        {
+            // For the model being loaded. It cannot be applied yet -- the animator does not exist
+            // -- and it must NOT be applied to the model still on screen. Keep the latest, with
+            // when it arrived, and BuildIfReady starts the new animator from it.
+            loadState = s;
+            loadStateAt = s.receivedSeconds;    // when it arrived, on the reader thread -- not when it was dequeued
+            haveLoadState = true;
+            return;
+        }
         if (current == null || current.Animator == null)
             return;                                     // nothing playing to apply it to
         // Remember it even when it cannot be applied yet -- a deferred or fallen-back switch
@@ -1713,7 +1830,7 @@ public class WmvMain : MonoBehaviour
 
         bool wasPlaying = current.Animator.IsPlaying;
         float wasSpeed = current.Animator.Speed;
-        current.Animator.SetPlaybackState(s.playing, s.timeMs, s.speed);
+        current.Animator.SetPlaybackState(s.playing, s.timeMs, s.speed, s.explicitState);
 
         // Only the changes worth reading are surfaced: the heartbeat would otherwise write a line
         // a second for the whole session.
@@ -1730,9 +1847,19 @@ public class WmvMain : MonoBehaviour
     /// </summary>
     void HandleModelSkin(WmvIpcClient.ModelTexturesResponse r)
     {
+        if (AboutTheLoad(r.fileDataID))
+        {
+            // For the model being loaded. If the load asks the host for its textures, the answer
+            // carries the same geosets and particle colour; if it does not -- every texture
+            // named by the file itself -- this push is the only word the app sends about the
+            // display, so it is kept and adopted at build. See BuildIfReady.
+            loadSkin = r;
+            haveLoadSkin = true;
+            return;
+        }
         if (current == null || currentModel == null)
             return;                                     // nothing built yet; the load will pick it up
-        if (r.fileDataID != 0 && currentFileDataID != 0 && r.fileDataID != currentFileDataID)
+        if (!AboutThisModel(r.fileDataID))
             return;                                     // about a different model
         if (!r.ok || r.textures.Length == 0)
             return;

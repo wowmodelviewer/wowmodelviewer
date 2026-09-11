@@ -525,9 +525,11 @@ public static class WmvModelBuilder
         public static bool LightDump { get { Parse(); return lightDump; } }
 
         /// <summary>
-        /// The light check camera's yaw (-wmvLightYaw=N, default 30). Models face where their
-        /// author pointed them, and a hood's shadow on a face can only be inspected from the
-        /// front -- the default three-quarter view happens to be this model's back.
+        /// The light check camera's yaw (-wmvLightYaw=N, default 30). Deliberately NOT the
+        /// viewport's default view (WmvOrbitCamera.FrontYaw): the check measures the RIGS, and
+        /// the legacy rig's key is world-fixed, so its figures are only comparable from the yaw
+        /// they have always been taken at. Pass -wmvLightYaw=180 to measure the front the user
+        /// sees.
         /// </summary>
         public static float LightYaw { get { Parse(); return lightYaw; } }
 
@@ -1171,6 +1173,9 @@ public static class WmvModelBuilder
         // variant does not make the camera jump. A batch kept for its animated gate is in
         // triangleSets like any other, so the bounds include it whether or not it is drawn yet.
         mesh.bounds = BoundsOfAll(positions, triangleSets);
+        // What the camera and the light rig frame. The rest-pose box above unless the model is
+        // animated, in which case it is measured from the posed mesh: see PosedRange.
+        Bounds displayBounds = mesh.bounds;
 
         var go = new GameObject(objectName);
 
@@ -1295,12 +1300,18 @@ public static class WmvModelBuilder
             var smr = go.AddComponent<SkinnedMeshRenderer>();
             smr.sharedMesh = mesh;
             smr.bones = boneTransforms;
-            smr.rootBone = rootBone;
             smr.sharedMaterials = materials.ToArray();
             // A skinned renderer culls against localBounds, not against the mesh's own bounds, and
             // an unset one is a zero-size box at the origin -- the model would flicker out the
             // moment the camera moved. Bounds of the whole model, as above, so switching a geoset
             // variant does not resize it.
+            //
+            // NO rootBone. When one is assigned, Unity reads localBounds in THAT bone's space, and
+            // the first parentless bone sits at its own pivot -- a hip a unit or more above the
+            // origin on most creatures -- so the culling box was the model's box shifted by that
+            // pivot: the renderer vanished whenever the shifted box left the view while the model
+            // itself was still in it. Unset, the box is read in this object's space, which is
+            // model space, which is what the bounds are.
             smr.localBounds = mesh.bounds;
             smr.updateWhenOffscreen = false;
 
@@ -1338,6 +1349,13 @@ public static class WmvModelBuilder
                 animator.Setup(model, boneTransforms, restLocalPositions, log);
                 animator.Materials = result.MaterialAnimator;
                 animator.Emitters = result.Emitters;
+                // Pose it NOW, at the start of the sequence. The model is built during Update and
+                // the shadow rig renders its shadow and view-depth maps in LateUpdate, in no fixed
+                // order against the animator's own LateUpdate; on the frame a model appears the
+                // maps were being rendered from the bind pose and the main camera then drew the
+                // animated one against them -- a first frame shaded by depths that belong to a
+                // different pose. From here on the pose is already in place before either runs.
+                animator.ApplyPose(0f);
                 if (animator.AnimatedBoneCount == 0 && !NeedsClock(result))
                 {
                     // Nothing in the idle actually moves; the component would burn a LateUpdate
@@ -1365,6 +1383,16 @@ public static class WmvModelBuilder
                     result.Animator = animator;
                     if (Debug_.AnimCheck)
                         ReportAnimationRange(smr, animator, positions, mesh.bounds, log);
+                    // FRAME WHAT IS DRAWN, NOT WHAT THE FILE STORES. mesh.bounds is the box of the
+                    // vertices in the rest pose, and the idle can carry the whole model away from
+                    // it: a serpent stored coiled below the origin hovers a body length above it
+                    // the moment its idle plays, so the camera looked at the rest pose's centre
+                    // and the model sat clipped at the top edge of the viewport. The box is now
+                    // the union of the skinned mesh over the idle, sampled along the sequence, so
+                    // the model is in frame at every point of its loop. One rule, nothing per
+                    // model; a model whose idle moves nothing keeps the rest-pose box.
+                    displayBounds = PosedRange(smr, animator, mesh.bounds, DrawnMask(n, triangleSets), log);
+                    animator.ApplyPose(0f);          // back at the start of the idle for the first frame
                 }
                 result.Skin = smr;
             }
@@ -1406,7 +1434,7 @@ public static class WmvModelBuilder
         result.Skinned = skinPlan.CanSkin;
         result.Bindings = bindings.ToArray();
         result.Textures = textures.ToArray();
-        result.Bounds = mesh.bounds;
+        result.Bounds = displayBounds;
         result.VertexCount = n;
         result.TriangleCount = totalTriangles;
         result.SubmeshCount = triangleSets.Count;
@@ -1509,6 +1537,87 @@ public static class WmvModelBuilder
             UnityEngine.Object.Destroy(baked);
             animator.RestorePose();
         }
+    }
+
+    /// <summary>
+    /// The box of the skinned mesh over its sequence: the union of the posed vertices at evenly
+    /// spaced instants of the idle, in model space, like mesh.bounds. Leaves the bones where the
+    /// last sample put them; the caller re-poses. Falls back to the rest-pose box if nothing
+    /// could be baked.
+    /// </summary>
+    static Bounds PosedRange(SkinnedMeshRenderer smr, WmvM2Animator animator, Bounds rest,
+                             bool[] drawn, Action<string> log)
+    {
+        const int Samples = 8;
+        if (smr == null || animator == null)
+            return rest;
+        var baked = new Mesh();
+        double globalWas = WmvM2Animator.GlobalTimeMs;
+        // Billboards stay put while the box is measured: they turn to face the camera, and the
+        // camera is wherever the previous model's orbit left it, so a large flat card would be
+        // baked edge-on or face-on by chance. The box is a property of the file, not of the view.
+        animator.BakingBounds = true;
+        animator.ResetBillboards();
+        try
+        {
+            bool any = false;
+            Vector3 mn = Vector3.zero, mx = Vector3.zero;
+            float globalSpan = animator.MaxGlobalSequenceMs;
+            for (int s = 0; s < Samples; s++)
+            {
+                // A part on a global sequence follows the global clock, not the sequence time,
+                // so that clock is stepped across the longest sequence alongside the samples --
+                // at a golden-ratio stride, not eighths: a shorter sequence whose length divides
+                // an eighth of the longest would be met at the same phase eight times.
+                if (globalSpan > 0f)
+                    WmvM2Animator.GlobalTimeMs = globalSpan * (float)((s * 0.6180339887) % 1.0);
+                animator.ApplyPose(animator.LengthMs * s / Samples);
+                smr.BakeMesh(baked, true);
+                Vector3[] v = baked.vertices;
+                for (int i = 0; i < v.Length; i++)
+                {
+                    // Only what is drawn. The mesh carries every vertex of the file -- batches
+                    // the build skipped included -- and mesh.bounds leaves those out too.
+                    if (drawn != null && i < drawn.Length && !drawn[i])
+                        continue;
+                    if (!any) { mn = v[i]; mx = v[i]; any = true; continue; }
+                    if (v[i].x < mn.x) mn.x = v[i].x; else if (v[i].x > mx.x) mx.x = v[i].x;
+                    if (v[i].y < mn.y) mn.y = v[i].y; else if (v[i].y > mx.y) mx.y = v[i].y;
+                    if (v[i].z < mn.z) mn.z = v[i].z; else if (v[i].z > mx.z) mx.z = v[i].z;
+                }
+            }
+            if (!any)
+                return rest;
+            var b = new Bounds();
+            b.SetMinMax(mn, mx);
+            if (log != null)
+            {
+                float scale = Mathf.Max(rest.size.magnitude, 1e-3f);
+                float moved = (b.center - rest.center).magnitude / scale;
+                float grown = Mathf.Abs(b.size.magnitude - rest.size.magnitude) / scale;
+                if (moved > 0.05f || grown > 0.05f)
+                    log(string.Format("bounds: framed on the posed idle -- centre {0} size {1}; the rest " +
+                                      "pose's box was centre {2} size {3}", b.center, b.size, rest.center, rest.size));
+            }
+            return b;
+        }
+        finally
+        {
+            animator.BakingBounds = false;
+            WmvM2Animator.GlobalTimeMs = globalWas;
+            UnityEngine.Object.Destroy(baked);
+        }
+    }
+
+    /// <summary>Which vertices any drawn triangle references: the set mesh.bounds is measured over.</summary>
+    static bool[] DrawnMask(int vertexCount, List<int[]> triangleSets)
+    {
+        var drawn = new bool[vertexCount];
+        foreach (var set in triangleSets)
+            for (int i = 0; i < set.Length; i++)
+                if (set[i] >= 0 && set[i] < vertexCount)
+                    drawn[set[i]] = true;
+        return drawn;
     }
 
     /// <summary>How many bones have no parent. Diagnostic only: an M2 rig is a forest, not a

@@ -114,6 +114,17 @@ public class WmvM2Animator : MonoBehaviour
     uint[] globalSequences = new uint[0];
     float lengthMs = 1f;
     double timeMs;
+    // The wall clock at the previous LateUpdate, for the frame's elapsed time. See LateUpdate
+    // for why this is not Time.deltaTime.
+    double lastRealtime = -1.0;
+
+    /// <summary>Set by the builder while it bakes the posed bounds: billboards are left alone,
+    /// so the box is a property of the file and not of wherever the camera happened to be.</summary>
+    public bool BakingBounds;
+
+    /// <summary>The longest global sequence, in ms (0 when the model has none): the span the
+    /// bounds bake steps GlobalTimeMs across so parts on global sequences are measured too.</summary>
+    public float MaxGlobalSequenceMs { get; private set; }
 
     /// <summary>
     /// Playback state, mirrored from the app. It is the app's clock that is authoritative: this
@@ -130,7 +141,24 @@ public class WmvM2Animator : MonoBehaviour
     /// visible stutter once a second, so a small difference is left alone -- at 30 frames a second
     /// one frame is 33 ms, and a difference under that cannot be seen.
     /// </summary>
-    const float TimeSnapToleranceMs = 40f;
+    // 40 ms was inside the steady offset between the two clocks: the GUI log showed the
+    // heartbeat reading "player ahead" by 40-61 ms, always in that direction, and every one that
+    // crossed the line snapped the model BACK by that much -- a periodic jerk on a model that
+    // was not drifting. The direction and size are consistent with the heartbeat's position
+    // being sampled on the host and compared, after delivery, against a clock that has moved on
+    // meanwhile; that is the likely cause, not a measured one. The dead band covers the offset
+    // either way; a genuine change (a scrub, a stop, a new model) is hundreds of milliseconds
+    // and still snaps.
+    const float TimeSnapToleranceMs = 120f;
+
+    // The longest single step the emitters take, in seconds: Unity's own default frame cap
+    // (Time.maximumDeltaTime), which is what bounded them before the clock became real elapsed
+    // time. The bones and the clock take the whole of a long frame -- that is the point -- but
+    // an emitter integrating a whole second in one step spawns a burst of rate x 1 s particles
+    // at one point and moves every particle a second's travel in one Euler step. The emitters'
+    // clocks (sequence and global time) still receive the true time; only the integration step
+    // is bounded, as it always was.
+    const float MaxEmitterStepSeconds = 1f / 3f;
 
     /// <summary>
     /// After a sequence change, how long until the animation actually MOVES again?
@@ -219,6 +247,10 @@ public class WmvM2Animator : MonoBehaviour
     {
         SequenceIndex = model.AnimatedSequence;
         globalSequences = model.GlobalSequences;
+        MaxGlobalSequenceMs = 0f;
+        for (int i = 0; i < globalSequences.Length; i++)
+            if (globalSequences[i] > MaxGlobalSequenceMs)
+                MaxGlobalSequenceMs = globalSequences[i];
         M2Sequence seq = model.Sequences[SequenceIndex];
         AnimId = seq.AnimId;
         lengthMs = seq.Length > 0 ? seq.Length : 1f;
@@ -290,6 +322,7 @@ public class WmvM2Animator : MonoBehaviour
         }
         // Start at the beginning of the loop rather than wherever a previous model left off.
         timeMs = 0.0;
+        lastRealtime = Time.realtimeSinceStartupAsDouble;
     }
 
     static void CountUnsupported(Dictionary<M2Interpolation, int> counts, M2Interpolation kind, bool hasData)
@@ -303,7 +336,19 @@ public class WmvM2Animator : MonoBehaviour
 
     void LateUpdate()
     {
-        double dt = Time.deltaTime * 1000.0;
+        // REAL ELAPSED TIME, NOT Time.deltaTime. Unity caps deltaTime at Time.maximumDeltaTime
+        // (a third of a second by default): after a frame that took longer -- the frame a large
+        // model is built in, parse, textures, mesh and all -- the next frame's delta is the cap,
+        // and the excess is simply dropped from this clock. The app's clock, which this one
+        // follows, drops nothing, so the player fell behind by the excess on every big model
+        // and was snapped forward at the next heartbeat (137 ms on one, 293 ms on another, in
+        // the GUI). Real elapsed time keeps step with the app through a long frame as well as
+        // a short one. The emitters take their step from this same dt, so they keep step too.
+        double now = Time.realtimeSinceStartupAsDouble;
+        if (lastRealtime < 0.0)
+            lastRealtime = now;
+        double dt = (now - lastRealtime) * 1000.0;
+        lastRealtime = now;
 
         // -wmvAnimTime: both clocks are held at the requested instant. Nothing advances, so every
         // frame -- and every capture -- is the same frame of the animation.
@@ -361,7 +406,7 @@ public class WmvM2Animator : MonoBehaviour
         // previous one, and with the ANIMATION's advance rather than the frame's: zero while
         // paused, scaled by the playback speed otherwise.
         if (Emitters != null && Emitters.HasAnything)
-            Emitters.Tick(playing ? (float)(dt * speed) / 1000f : 0f,
+            Emitters.Tick(playing ? Mathf.Min((float)(dt * speed) / 1000f, MaxEmitterStepSeconds) : 0f,
                           (float)timeMs, (float)GlobalTimeMs);
 
         AdvanceWatchTick(beforeTimeMs, dt);
@@ -392,7 +437,36 @@ public class WmvM2Animator : MonoBehaviour
             ApplyPose((float)timeMs);
     }
 
-    public void SetPlaybackState(bool isPlaying, float timeFromApp, float playbackSpeed)
+    /// <summary>
+    /// The state a FRESH animator starts from: the app's position for this model, projected by
+    /// the caller to now. Applied as given -- the animator is at 0 and the app is wherever it
+    /// is, and a difference under the dead band would otherwise be kept for the life of the
+    /// model -- and the clock is anchored at this instant, so the rest of the build's frame is
+    /// not counted twice (Setup anchored it earlier, before the build's own work).
+    /// </summary>
+    public void StartFromApp(bool isPlaying, float timeFromApp, float playbackSpeed)
+    {
+        SetPlaybackState(isPlaying, timeFromApp, playbackSpeed, true);
+    }
+
+    /// <summary>
+    /// Billboard bones back to their rest rotation, for the bounds bake. The build's own
+    /// ApplyPose had already turned them toward whatever camera pose the previous model's orbit
+    /// left, and a billboard bone with no rotation track keeps that facing through every sample
+    /// otherwise -- the box would still depend on the previous view.
+    /// </summary>
+    public void ResetBillboards()
+    {
+        for (int i = 0; i < billboardBones.Length; i++)
+            if (billboardBones[i] != null)
+                billboardBones[i].localRotation = Quaternion.identity;
+    }
+
+    /// <param name="authoritative">True for a position a CONTROL set -- a frame step, a scrub,
+    /// the start of a load: applied as given, however small the step. False for a heartbeat,
+    /// which is held to the dead band so transport jitter cannot make the model twitch.</param>
+    public void SetPlaybackState(bool isPlaying, float timeFromApp, float playbackSpeed,
+                                 bool authoritative = false)
     {
         StateUpdates++;
         if (WmvModelBuilder.Debug_.AnimCheck)
@@ -412,9 +486,18 @@ public class WmvM2Animator : MonoBehaviour
             float diff = Math.Abs(mine - theirs);
             if (diff > lengthMs * 0.5f)
                 diff = lengthMs - diff;
-            if (diff > TimeSnapToleranceMs)
+            if (authoritative)
+            {
+                // A frame step is 33 ms on a 2 s idle -- well inside the dead band, which used
+                // to swallow three presses in four. The clock is anchored here so the rest of
+                // this frame is counted from this instant.
+                timeMs = theirs;
+                lastRealtime = Time.realtimeSinceStartupAsDouble;
+            }
+            else if (diff > TimeSnapToleranceMs)
             {
                 timeMs = theirs;
+                lastRealtime = Time.realtimeSinceStartupAsDouble;
                 SnapCount++;
                 // Logged every time, because it is rare by construction: an explicit change (a
                 // scrub, a stop) or genuine clock drift. A run that fills the log with these is
@@ -547,7 +630,7 @@ public class WmvM2Animator : MonoBehaviour
     /// </summary>
     void ApplyBillboards()
     {
-        if (billboardBones.Length == 0)
+        if (billboardBones.Length == 0 || BakingBounds)
             return;
         if (billboardCamera == null)
             billboardCamera = Camera.main;

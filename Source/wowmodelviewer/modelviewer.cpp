@@ -1150,15 +1150,28 @@ void ModelViewer::LoadModel(GameFile * file)
   modelControl->UpdateModel(modelAtt);
   modelControl->RefreshModel(canvas->root);
 
-  // Update the animations / skins
+  // Embedded Unity renderer (if open): the load itself goes out FIRST. AnimControl::UpdateModel
+  // below pushes the skin, the default animation and its playback state for the new model, and
+  // the player judges every push by the model it names -- so the player has to know which model
+  // is coming before those arrive, or it drops them as being about a different model and starts
+  // the new animation unsynchronised. Sending the load first is also what a player that is not
+  // open yet gets on connect (onUnityReady -> SendCurrentModelToUnity), so the two paths agree.
+  SendLoadToUnity();
+
+  // Update the animations / skins. This is where the skin and animation pushes happen, once,
+  // from the choices the control makes; nothing re-sends them afterwards.
   animControl->UpdateModel(m);
-  interfaceManager.Update();
 
-  // Embedded Unity renderer (if open): runtime command with the new active model.
-  SendCurrentModelToUnity();
-
-  // ...and give it the centre of the window if it can show this model.
+  // The centre of the window, if the Unity viewport can show this model. A no-op when the pane
+  // is already where it should be: see UpdatePrimaryViewport. FIRST: when the routing does
+  // change, its one relayout also commits the character panel shown or hidden above, and the
+  // commit below then finds nothing to do -- one relayout per switch, not two.
   UpdatePrimaryViewport();
+
+  // The character panel was shown or hidden above according to the model; lay out ONLY if that
+  // actually changed and the routing did not. An unconditional Update() here erased and
+  // repainted the whole window, player included, on every load: see CommitLayoutIfChanged.
+  CommitLayoutIfChanged();
 }
 
 // Load an NPC model
@@ -1198,7 +1211,7 @@ void ModelViewer::LoadNPC(unsigned int modelid)
                    wxT("NPC unavailable"), wxOK | wxICON_INFORMATION);
     fileControl->UpdateInterface();
     interfaceManager.GetPane(charControl).Show(isChar);
-    interfaceManager.Update();
+    CommitLayoutIfChanged();
   };
 
   if (r.valid && !r.empty())
@@ -1272,7 +1285,7 @@ void ModelViewer::LoadNPC(unsigned int modelid)
   // hide charControl if current model is not a Character one.
   interfaceManager.GetPane(charControl).Show(isChar);
 
-  interfaceManager.Update();
+  CommitLayoutIfChanged();
 }
 
 void ModelViewer::LoadNPCByDisplay(int npcId, int displayId, int type, const QString & name)
@@ -1411,7 +1424,7 @@ void ModelViewer::LoadItem(unsigned int id)
 
   // wxAUI
   interfaceManager.GetPane(charControl).Show(isChar);
-  interfaceManager.Update();
+  CommitLayoutIfChanged();
 }
 
 // This is called when the user goes to File->Exit
@@ -1628,8 +1641,10 @@ void ModelViewer::OnUnityRenderer(wxCommandEvent &event)
 
 bool ModelViewer::ShowUnityRenderer(bool selfTest)
 {
+  bool justAdded = false;
   if (!unityRendererHost)
   {
+    justAdded = true;
     unityRendererHost = new UnityRendererHost(this, ID_UNITY_FRAME);
     interfaceManager.AddPane(unityRendererHost, buildUnityRendererPaneInfo());
     // Runtime IPC: as soon as the player announces itself, tell it what is on the canvas.
@@ -1641,9 +1656,19 @@ bool ModelViewer::ShowUnityRenderer(bool selfTest)
   }
 
   // Show the pane first so the panel is realized at its docked size, then embed the player
-  // into it (the player parents itself to the panel's HWND).
-  interfaceManager.GetPane(unityRendererHost).Show(true);
-  interfaceManager.Update();
+  // into it (the player parents itself to the panel's HWND). This runs on every load, so the
+  // layout is committed only when the pane was not already shown: see CommitLayoutIfChanged.
+  wxAuiPaneInfo & unityPane = interfaceManager.GetPane(unityRendererHost);
+  const bool wasShown = unityPane.IsShown();
+  unityPane.Show(true);
+  // Only the change made HERE is committed: the pane appearing, or -- just added -- never laid
+  // out at all (AddPane puts it in the manager's list, not in a dock, and its window was
+  // created shown, so a shown-state test would see nothing to do and leave a bare 640 x 480
+  // panel at the frame's origin). A caller about to re-dock the pane commits everything else
+  // -- the character panel LoadModel showed or hid -- in that one relayout; committing it here
+  // first made every routing switch relayout twice.
+  if (justAdded || !wasShown)
+    interfaceManager.Update();
 
   if (!unityRendererHost->isRunning() && !unityRendererHost->launch(!batchMode, selfTest))
   {
@@ -1778,6 +1803,39 @@ bool ModelViewer::unityCanShowCurrentModel() const
 //
 // So the OpenGL viewport is never torn down, only uncovered: View > "Unity as main viewport"
 // hands the centre straight back to it for comparison, and unsupported models never leave it.
+// THE WHOLE WINDOW BLINKED ON EVERY MODEL LOAD, and this is why. On Windows, wxAuiManager::Update()
+// wraps its relayout in a wxWindowUpdateLocker on the frame (wx 3.2.10, framemanager.cpp: "only
+// under MSW and only when not using live resizing" -- which this manager does not use). The lock
+// is Freeze/Thaw, and wxWindowMSW::DoThaw is SendSetRedraw(true) followed by Refresh(), which is
+// RedrawWindow(RDW_INVALIDATE | RDW_ALLCHILDREN | RDW_ERASE): every window in the frame is
+// invalidated and ERASED, the embedded player's child window included, and everything repaints.
+// The load path called Update() two or three times per model -- after the animation control,
+// from FileControl::UpdateInterface, from ShowUnityRenderer -- with nothing to lay out: the same
+// panes, in the same places, at the same sizes.
+//
+// So the layout is committed only when something a load can change has changed: whether a pane
+// is shown (the character panel comes and goes with character models; a floating pane may have
+// been floated and not yet given its frame). Everything else that moves a pane -- a drag, a
+// detach-and-add, the perspective loader -- calls Update() itself, where the change is made.
+bool ModelViewer::CommitLayoutIfChanged()
+{
+  wxAuiPaneInfoArray & panes = interfaceManager.GetAllPanes();
+  bool changed = false;
+  for (size_t i = 0; i < panes.GetCount() && !changed; i++)
+  {
+    wxAuiPaneInfo & p = panes.Item(i);
+    if (!p.window)
+      continue;
+    if (p.IsFloating())
+      changed = !p.frame || (p.frame->IsShown() != p.IsShown());
+    else
+      changed = (p.window->IsShown() != p.IsShown());
+  }
+  if (changed)
+    interfaceManager.Update();
+  return changed;
+}
+
 void ModelViewer::UpdatePrimaryViewport()
 {
   if (!canvas)
@@ -1802,6 +1860,17 @@ void ModelViewer::UpdatePrimaryViewport()
       return;
     }
 
+    // ALREADY THERE: do nothing. This runs on every model load, and detaching and re-adding a
+    // pane that is already the centre pane makes the AUI manager relayout everything, which
+    // resizes the embedded player window -- the swapchain is recreated and the viewport blinks
+    // on every switch. The layout only has to change when the ROUTING changes.
+    wxAuiPaneInfo & unityPane = interfaceManager.GetPane(unityRendererHost);
+    const bool alreadyCentre = unityPane.IsOk() && unityPane.IsShown() &&
+                               unityPane.dock_direction == wxAUI_DOCK_CENTER &&
+                               !interfaceManager.GetPane(canvas).IsShown();
+    if (alreadyCentre)
+      return;
+
     interfaceManager.DetachPane(unityRendererHost);
     interfaceManager.AddPane(unityRendererHost, wxAuiPaneInfo().
                              Name(wxT("unityRenderer")).Caption(wxT("Unity Renderer")).
@@ -1818,6 +1887,24 @@ void ModelViewer::UpdatePrimaryViewport()
 // Put the OpenGL canvas back in the centre, and the Unity pane back to being a side pane.
 void ModelViewer::UncoverOpenGLViewport()
 {
+  // ALREADY THERE: do nothing. This runs on every load the Unity viewport cannot show (a
+  // character model, or Unity not the main viewport), and detaching and re-adding the Unity pane
+  // as a side pane, then relaying out, blinked the whole window each time exactly as the centre
+  // re-dock used to: see CommitLayoutIfChanged for what an Update() costs. The layout only has
+  // to change when the ROUTING changes.
+  {
+    const bool canvasShown = interfaceManager.GetPane(canvas).IsShown();
+    bool unityAside = true;
+    if (unityRendererHost)
+    {
+      wxAuiPaneInfo & up = interfaceManager.GetPane(unityRendererHost);
+      unityAside = up.IsOk() && up.dock_direction != wxAUI_DOCK_CENTER &&
+                   up.IsShown() == unityRendererHost->isRunning();
+    }
+    if (canvasShown && unityAside)
+      return;
+  }
+
   interfaceManager.GetPane(canvas).Show(true);
   if (unityRendererHost)
   {
@@ -1834,7 +1921,9 @@ void ModelViewer::OnUnityPrimaryViewport(wxCommandEvent & event)
   UpdatePrimaryViewport();
 }
 
-void ModelViewer::SendCurrentModelToUnity()
+// Just the load. LoadModel sends this before the animation control initialises, so that the
+// selection and state the control then pushes are about a model the player already expects.
+void ModelViewer::SendLoadToUnity()
 {
   if (!unityRendererHost || !unityRendererHost->ipc() || !unityRendererHost->ipc()->isConnected())
     return;
@@ -1843,6 +1932,20 @@ void ModelViewer::SendCurrentModelToUnity()
   WoWModel * m = const_cast<WoWModel *>(canvas->model());
   GameFile * gf = m->gamefile;
   unityRendererHost->ipc()->sendLoadWoWModel(gf->fullname(), gf->fileDataId() > 0 ? gf->fileDataId() : 0);
+}
+
+// The load AND what is showing: for a player that connects while a model is already up
+// (onUnityReady), which missed the pushes LoadModel's own path would have made.
+void ModelViewer::SendCurrentModelToUnity()
+{
+  SendLoadToUnity();
+  // ... its skin -- the display's textures, geosets and particle colour, as the animation
+  // control pushes them on a load -- so a player that connects with a model already up shows
+  // the geosets the file-list path would give it. After the load, which is what the player's
+  // guard for the model being loaded requires.
+  if (unityRendererHost && unityRendererHost->ipc() && unityRendererHost->ipc()->isConnected() &&
+      canvas && canvas->model() && canvas->model()->gamefile)
+    unityRendererHost->ipc()->sendModelSkin((int)canvas->model()->gamefile->fileDataId());
   // ... and which animation it is showing, so the player starts on the app's selection instead of
   // picking its own idle and being corrected a moment later.
   SendCurrentAnimationToUnity();
@@ -1935,7 +2038,8 @@ void ModelViewer::SendAnimationStateToUnity(bool force)
   }
 
   unityRendererHost->ipc()->sendModelAnimationState((int)m->gamefile->fileDataId(), index,
-                                                    playing, timeMs, speed, true);
+                                                    playing, timeMs, speed, true,
+                                                    /* explicitState */ force);
 }
 
 // Menu button press events

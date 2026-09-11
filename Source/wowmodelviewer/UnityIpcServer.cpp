@@ -377,7 +377,7 @@ void UnityIpcServer::sendModelAnimation(int m2FileDataID, int sequenceIndex, int
 }
 
 void UnityIpcServer::sendModelAnimationState(int m2FileDataID, int sequenceIndex, bool playing,
-                                             int timeMs, float speed, bool loop)
+                                             int timeMs, float speed, bool loop, bool explicitState)
 {
   if (!m_client || !m_unityReady || sequenceIndex < 0)
     return;
@@ -390,6 +390,7 @@ void UnityIpcServer::sendModelAnimationState(int m2FileDataID, int sequenceIndex
   msg["timeMs"] = timeMs;
   msg["speed"] = speed;
   msg["loop"] = loop;
+  msg["explicitState"] = explicitState;
   m_stats.statePushes++;
   m_stats.lastState = QString("%1 %2ms x%3").arg(playing ? "playing" : "paused")
                                             .arg(timeMs).arg(speed, 0, 'f', 2);
