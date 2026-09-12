@@ -24,7 +24,9 @@
 //   modelTextures { requestId, ok, fileDataID, textures:[{ index, type, fileDataID, source }] }
 //   modelSkin     { fileDataID, textures:[...], geosets:[...], hasGeosets }        (pushed, no request)
 //   modelAnimation { fileDataID, sequenceIndex, animID, durationMs, loop }         (pushed, no request)
-//   modelAnimationState { fileDataID, sequenceIndex, playing, timeMs, speed, loop } (pushed, no request)
+//   modelAnimationState { fileDataID, sequenceIndex, playing, timeMs, speed, loop, explicitState } (pushed, no request)
+//     explicitState: true when a control set the state (play, pause, a frame step, a scrub,
+//     the start of a load), false for the heartbeat
 //
 // getModelTextures exists because a modern M2 does not name its replaceable textures (a
 // creature skin's TXID entry is 0 and its texture array carries no filename) -- the skin comes
@@ -155,6 +157,8 @@ public class WmvIpcClient : MonoBehaviour
         public int timeMs;
         public float speed;
         public bool loop;
+        public bool explicitState;
+        public double receivedSeconds;
     }
 
     [Serializable] class MsgTexture
@@ -188,6 +192,8 @@ public class WmvIpcClient : MonoBehaviour
         public int animID;
         public int durationMs;
         public bool loop;
+        public bool explicitState;
+        public double receivedSeconds;
         public bool playing;
         public int timeMs;
         public float speed;
@@ -201,6 +207,16 @@ public class WmvIpcClient : MonoBehaviour
     volatile bool connected;
     readonly object sendLock = new object();
     readonly Queue<Msg> inbox = new Queue<Msg>();
+
+    /// <summary>
+    /// One clock for "when did this message arrive" and "what time is it now", readable from
+    /// any thread (Unity's Time is main-thread only). A message is stamped on the reader thread
+    /// the moment it is parsed, so a state that waits in the inbox through a long frame -- the
+    /// frame a big model is parsed or its textures decoded in -- is still projected from when
+    /// the app sent it, not from when the main thread got round to it.
+    /// </summary>
+    static readonly System.Diagnostics.Stopwatch clock = System.Diagnostics.Stopwatch.StartNew();
+    public static double NowSeconds { get { return clock.Elapsed.TotalSeconds; } }
     readonly Queue<string> statusQueue = new Queue<string>();
     int nextRequestId = 1;
 
@@ -245,7 +261,10 @@ public class WmvIpcClient : MonoBehaviour
                     try { msg = JsonUtility.FromJson<Msg>(line); }
                     catch (Exception e) { Debug.LogWarning("WMV IPC: bad JSON line: " + e.Message); }
                     if (msg != null)
+                    {
+                        msg.receivedSeconds = NowSeconds;
                         lock (inbox) inbox.Enqueue(msg);
+                    }
                 }
             }
         }
@@ -339,6 +358,8 @@ public class WmvIpcClient : MonoBehaviour
                     timeMs = msg.timeMs,
                     speed = msg.speed,
                     loop = msg.loop,
+                    explicitState = msg.explicitState,
+                    receivedSeconds = msg.receivedSeconds,
                 });
                 break;
 

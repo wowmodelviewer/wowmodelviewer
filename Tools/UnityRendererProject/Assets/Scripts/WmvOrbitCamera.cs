@@ -55,8 +55,19 @@ public class WmvOrbitCamera : MonoBehaviour
 {
     public Vector3 pivot = Vector3.zero;
     public float distance = 4f;
-    public float yaw = 30f;
-    public float pitch = 15f;
+    /// <summary>
+    /// The default view is the model's FRONT. A WoW model faces +X in its own space, which the
+    /// converter maps to Unity +Z (WowCoordinateConverter); a camera at yaw 0 sits on -Z looking
+    /// down +Z, at the model's back -- and the old three-quarter default of 30 was that back
+    /// from slightly to one side. The legacy OpenGL viewport looks at the front (its camera
+    /// starts on the model's +X axis: OrbitCamera.cpp, yaw 0 / pitch 90), so yaw 180 here is
+    /// what the app has always shown. Pitch stays a little above eye level.
+    /// </summary>
+    public const float FrontYaw = 180f;
+    public const float DefaultPitch = 15f;
+
+    public float yaw = FrontYaw;
+    public float pitch = DefaultPitch;
 
     const float OrbitSpeed = 0.25f;    // degrees per pixel
     const float PanSpeed = 0.0025f;    // world units per pixel, scaled by distance
@@ -112,6 +123,8 @@ public class WmvOrbitCamera : MonoBehaviour
 
     Vector3 lastMouse;
     bool warnedNoInput;
+    bool leftWasHeld, rightWasHeld;
+    bool dragFromViewport;      // the current press began over the player's own client area
 
     void Start()
     {
@@ -120,7 +133,7 @@ public class WmvOrbitCamera : MonoBehaviour
     }
 
     /// <summary>
-    /// Point the camera at a model's bounds from a three-quarter angle, far enough back that
+    /// Point the camera at a model's bounds from the front, a little above, far enough back that
     /// the whole thing fits the vertical field of view with a small margin.
     /// </summary>
     public void Frame(Bounds bounds)
@@ -132,7 +145,14 @@ public class WmvOrbitCamera : MonoBehaviour
 
         var cam = GetComponent<Camera>();
         float fov = (cam != null ? cam.fieldOfView : 60f) * Mathf.Deg2Rad;
-        framedDistance = radius / Mathf.Max(0.05f, Mathf.Sin(fov * 0.5f)) * 1.25f;
+        // The narrower half-angle of the two: fieldOfView is the VERTICAL one, and a viewport
+        // taller than it is wide -- the Unity pane docked beside the tool panels is exactly that
+        // -- has a smaller horizontal angle, which is what clipped the sides of a wide model that
+        // "fit" vertically. Still one rule from the bounds and the camera, nothing per model.
+        float halfV = fov * 0.5f;
+        float aspect = (cam != null && cam.aspect > 0.001f) ? cam.aspect : 1f;
+        float halfH = Mathf.Atan(Mathf.Tan(halfV) * aspect);
+        framedDistance = radius / Mathf.Max(0.05f, Mathf.Sin(Mathf.Min(halfV, halfH))) * 1.25f;
 
         // THE ZOOM RANGE COMES FROM THE MODEL. See MinDistanceFactor.
         minDistance = Mathf.Max(framedDistance * MinDistanceFactor, AbsoluteMinDistance);
@@ -141,8 +161,8 @@ public class WmvOrbitCamera : MonoBehaviour
         distance = Mathf.Clamp(framedDistance, minDistance, maxDistance);
         targetDistance = distance;          // a new model starts settled, not gliding
 
-        yaw = 30f;
-        pitch = 15f;
+        yaw = FrontYaw;
+        pitch = DefaultPitch;
         Apply();
     }
 
@@ -240,7 +260,7 @@ public class WmvOrbitCamera : MonoBehaviour
     /// pointer is over WMV's other panels. Zooming the model because the user scrolled a list
     /// next to it would be wrong, so the notch is only taken when the pointer is inside the
     /// player's own client area -- which is what "scrolling over the viewport controls zoom"
-    /// means. Orbit and pan need no such test: they already require a button to be held.
+    /// means. Orbit and pan use it too, once per press: see Update.
     /// </summary>
     static bool PointerOverViewport(Vector3 position)
     {
@@ -280,13 +300,26 @@ public class WmvOrbitCamera : MonoBehaviour
             return;    // first frame: no meaningful DRAG delta yet
         }
 
-        if (leftHeld)
+        // ORBIT AND PAN ONLY FROM A PRESS THAT STARTED OVER THE VIEWPORT. The buttons are read
+        // from the device, like the wheel, so a press made on the file list or a slider beside
+        // the viewport reads as held here too -- and the pointer's travel to that control became
+        // an orbit or, worse, a pan that carried the pivot away from the model just framed. The
+        // gate is decided once, on the frame the button goes down, and holds for that press, so
+        // a drag that starts inside and wanders outside keeps working.
+        if ((leftHeld && !leftWasHeld) || (rightHeld && !rightWasHeld))
+            dragFromViewport = PointerOverViewport(mouse);
+        if (!leftHeld && !rightHeld)
+            dragFromViewport = false;
+        leftWasHeld = leftHeld;
+        rightWasHeld = rightHeld;
+
+        if (leftHeld && dragFromViewport)
         {
             yaw += delta.x * OrbitSpeed;
             pitch = Mathf.Clamp(pitch - delta.y * OrbitSpeed, -89f, 89f);
             changed = true;
         }
-        else if (rightHeld)
+        else if (rightHeld && dragFromViewport)
         {
             pivot -= transform.right * (delta.x * PanSpeed * distance);
             pivot -= transform.up * (delta.y * PanSpeed * distance);

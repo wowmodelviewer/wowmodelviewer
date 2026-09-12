@@ -376,6 +376,12 @@ Attachment* ModelCanvas::LoadModel(GameFile * file)
 
   camera.reset(model_);
 
+  // The model's clock starts on the first tick after this load, not now: see tick(). This is the
+  // START of a load -- ModelViewer::LoadModel goes on to initialise the animation control, which
+  // costs half a second of database work and ends by choosing the animation and zeroing its
+  // frame -- and a clock started here still charged all of that to the new model.
+  restartClock = true;
+
   return att;
 }
 
@@ -1503,6 +1509,23 @@ void ModelCanvas::tick()
   ddt = (timeGetTime() - lastTime);// * animSpeed;
   lastTime = timeGetTime();
   // --
+
+  if (restartClock)
+  {
+    // THE FIRST TICK AFTER A LOAD. lastTime dates from before it, so ddt is the whole wall time
+    // the load took -- reading the model, half a second of database work in the animation
+    // control, the layout -- and all of it was going to an AnimManager that was created at
+    // frame 0 partway through and had that frame reported to the embedded viewport as the
+    // model's state. Loading is not animation time: the animation starts from this tick, at
+    // the frame it was left at (0), and the viewport is told so NOW, when it is true. The
+    // states pushed during the load said "frame 0" at instants the app's clock then never ran
+    // from; a player that started from one of those was half a second behind by its first
+    // heartbeat and was snapped forward, on every load.
+    ddt = 0;
+    restartClock = false;
+    if (g_modelViewer)
+      g_modelViewer->SendAnimationStateToUnity(true);
+  }
 
   globalTime += (ddt);
 

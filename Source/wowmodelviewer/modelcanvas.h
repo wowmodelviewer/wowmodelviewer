@@ -172,6 +172,9 @@ private:
 
   float time;
   DWORD lastTime;
+  // Set by LoadModel; the first tick after it starts the animation clock from that tick
+  // instead of charging the model the wall time its load took. See tick().
+  bool restartClock = false;
   //DWORD pauseTime;
   SceneState sceneState[4]; // 4 scene states for F1-F4
 

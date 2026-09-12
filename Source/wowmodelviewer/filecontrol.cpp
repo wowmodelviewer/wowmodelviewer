@@ -576,8 +576,10 @@ void FileControl::UpdateInterface()
     modelviewer->charMenu->Enable(ID_AUTOHIDE_GEOSETS_FOR_HEAD_ITEMS, false);
   }
 
-  // Update the layout
-  modelviewer->interfaceManager.Update();
+  // Update the layout -- only if a pane's shown state changed. This runs after every selection
+  // in the file list, and an unconditional Update() blinked the whole window each time: see
+  // ModelViewer::CommitLayoutIfChanged.
+  modelviewer->CommitLayoutIfChanged();
 }
 
 void FileControl::OnTreeSelect(wxTreeEvent &event)

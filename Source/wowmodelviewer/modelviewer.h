@@ -179,6 +179,9 @@ public:
   // OpenGL canvas. Called after every model load, and when the View toggle changes, so the two
   // can never disagree about who owns the middle of the window.
   void UpdatePrimaryViewport();
+  // Lay the panes out again ONLY if a pane's shown state changed. See the definition for why
+  // an unconditional interfaceManager.Update() is a whole-window blink on Windows.
+  bool CommitLayoutIfChanged();
 
   // Open and start the Unity viewport at APP LAUNCH, before any model exists, so that picking
   // the first creature does not also pay for starting a game engine. No-op in batch mode, when
@@ -211,6 +214,7 @@ public:
   // Runtime command to the embedded Unity player: "this is the active model" (path +
   // FileDataID of the model on the canvas). No-op when no player is connected. Called after
   // every model load and when the player announces unityReady.
+  void SendLoadToUnity();
   void SendCurrentModelToUnity();
   void SendCurrentSkinToUnity();
   void SendCurrentAnimationToUnity();

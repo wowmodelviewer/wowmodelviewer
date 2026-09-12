@@ -32,7 +32,7 @@
  *     { "type":"modelAnimation", "fileDataID":1521037, "sequenceIndex":2, "animID":0,
  *       "durationMs":2000, "loop":true }
  *     { "type":"modelAnimationState", "fileDataID":1521037, "sequenceIndex":2, "playing":true,
- *       "timeMs":840, "speed":1.0, "loop":true }
+ *       "timeMs":840, "speed":1.0, "loop":true, "explicitState":false }
  *
  * getModelTextures exists because modern M2s do NOT name their replaceable textures (a
  * creature skin's TXID entry is 0 and the texture array carries no filename) -- the skin comes
@@ -123,9 +123,13 @@ public:
   void sendModelAnimation(int m2FileDataID, int sequenceIndex, int animID, int durationMs, bool loop);
 
   // Runtime command: the playback state of that animation changed (or a heartbeat while it runs).
-  // timeMs is the app's current position in the sequence. No-op when the player is not connected.
+  // timeMs is the app's current position in the sequence. explicitState is true for a push made
+  // by a control -- play, pause, a frame step, the frame or speed slider, the start of a load --
+  // and false for the heartbeat: the player applies an explicit position as given, however small
+  // the step, and holds heartbeats to a dead band so transport jitter cannot make it twitch.
+  // No-op when the player is not connected.
   void sendModelAnimationState(int m2FileDataID, int sequenceIndex, bool playing, int timeMs,
-                               float speed, bool loop);
+                               float speed, bool loop, bool explicitState);
 
   // Raised (on the GUI thread) when the player's unityReady arrives -- the host uses it to
   // push the currently displayed model.
