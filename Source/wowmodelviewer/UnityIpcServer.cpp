@@ -334,10 +334,14 @@ void UnityIpcServer::sendModelSkin(int m2FileDataID)
   QString error;
   if (!UnityAssetAccess::resolveModelTextures(m2FileDataID, textures, error))
   {
-    // Not an error worth shouting about: a model with no resolvable skin simply has nothing to
-    // follow, and the player keeps what it already has.
-    LOG_INFO << "[unityipc] modelSkin for" << m2FileDataID << "not sent:" << error;
-    return;
+    // NO TEXTURE IS NOT NO ANSWER. A model with no creature display and no conventional skin
+    // (felreavergolem, the cinematic models) resolves no texture at all -- but it still has
+    // geosets the application is displaying, and the player needs them or it falls back to
+    // "geoset 0 only" and drops submeshes the OpenGL viewport draws. The message goes out with
+    // an empty texture list; the player leaves its textures alone and takes the geometry.
+    LOG_INFO << "[unityipc] modelSkin for" << m2FileDataID
+             << "carries geosets only:" << error;
+    textures.clear();
   }
 
   QJsonObject msg;
@@ -348,11 +352,23 @@ void UnityIpcServer::sendModelSkin(int m2FileDataID)
   addGeosets(msg, m2FileDataID);
   addParticleColor(msg, m2FileDataID);
   m_stats.skinPushes++;
-  m_stats.lastSkin = QString("%1 (%2)").arg(textures[0].fileDataID)
-                                       .arg(UnityAssetAccess::sourceName(textures[0].source));
-  LOG_INFO << "[unityipc] -> modelSkin fileDataID=" << m2FileDataID << "textures=" << (int)textures.size()
-           << "source=" << UnityAssetAccess::sourceName(textures[0].source)
-           << "first=" << textures[0].fileDataID;
+  // A model can resolve NO texture and still have something to say -- the geosets its display
+  // switches on, and its particle colour -- so the message goes out either way, and nothing
+  // here may index an empty list. (It used to read textures[0] unconditionally.)
+  if (textures.empty())
+  {
+    m_stats.lastSkin = QString("no texture (geosets only)");
+    LOG_INFO << "[unityipc] -> modelSkin fileDataID=" << m2FileDataID
+             << "textures= 0 (geosets and particle colour only)";
+  }
+  else
+  {
+    m_stats.lastSkin = QString("%1 (%2)").arg(textures[0].fileDataID)
+                                         .arg(UnityAssetAccess::sourceName(textures[0].source));
+    LOG_INFO << "[unityipc] -> modelSkin fileDataID=" << m2FileDataID << "textures=" << (int)textures.size()
+             << "source=" << UnityAssetAccess::sourceName(textures[0].source)
+             << "first=" << textures[0].fileDataID;
+  }
   queueJson(msg);
 }
 

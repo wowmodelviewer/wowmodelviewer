@@ -1162,6 +1162,15 @@ void ModelViewer::LoadModel(GameFile * file)
   // from the choices the control makes; nothing re-sends them afterwards.
   animControl->UpdateModel(m);
 
+  // WHAT THE MODEL DISPLAYS, always. AnimControl::SetSkin pushes the skin -- which carries the
+  // displayed geosets and the particle colour, not just textures -- but only for a model that
+  // HAS a skin group in the database. A creature with none (felreavergolem, the cinematic
+  // models) pushed nothing, so the player never learned which submeshes the app is drawing and
+  // fell back to "geoset 0 only": parts the OpenGL viewport shows were missing in the Unity
+  // one. Pushing here covers both cases; a model whose skin was already pushed simply gets the
+  // same answer twice, which the player treats as the state it already has.
+  SendCurrentSkinToUnity();
+
   // The centre of the window, if the Unity viewport can show this model. A no-op when the pane
   // is already where it should be: see UpdatePrimaryViewport. FIRST: when the routing does
   // change, its one relayout also commits the character panel shown or hidden above, and the

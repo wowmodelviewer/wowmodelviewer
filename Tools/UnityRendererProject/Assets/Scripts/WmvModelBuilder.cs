@@ -1672,6 +1672,19 @@ public static class WmvModelBuilder
         if (runtime.Emitters != null && !runtime.Emitters.Rebind(model) && log != null)
             log("emitters: the re-parsed model has a different emitter count -- the existing "
                 + "emitters were left as they were");
+        // NO BONES TO POSE: a static mesh, or a model whose rig this renderer could not
+        // reproduce. Only the clock matters for it -- its materials and emitters follow the
+        // sequence, its geometry does not -- and everything below this block is about bones.
+        //
+        // THE CONDITION IS THE FIX. This block used to be entered unconditionally (a bare
+        // scope), so every animation change on every model took the static-mesh path and the
+        // skinned path below was dead code: a model with emitters or animated materials had its
+        // animator re-bound with an EMPTY bone array, which left the skeleton holding the last
+        // pose of the previous animation while the clock ran on ("0 of 129 bone(s) move" in the
+        // log, against "56 of 129" on the load), and a model with neither had its animator
+        // destroyed and the change reported as "could not be played". Either way the model froze
+        // the moment the user picked a different animation.
+        if (!runtime.Skinned || runtime.Bones == null || runtime.Bones.Length == 0)
         {
             // (-wmvNoAnim never reaches here -- SwitchToSequence returns first -- but the rule
             // "no clock under -wmvNoAnim" is kept explicit rather than implied.)

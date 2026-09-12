@@ -169,6 +169,15 @@ public class WmvMain : MonoBehaviour
         if (WmvModelBuilder.Debug_.LifecycleTest)
             WmvLifecycleSelfTest.RunAll(s => Debug.Log("WMV: " + s));
 
+        {   // SCRATCH: give the harness player a real screen BEFORE anything frames to it.
+            string sz = System.Environment.GetEnvironmentVariable("WMV_VIEWPORT_SIZE");
+            string want = System.Environment.GetEnvironmentVariable("WMV_VIEWPORT_SHOT");
+            int v = 1024;
+            if (!string.IsNullOrEmpty(sz)) int.TryParse(sz, out v);
+            if (!string.IsNullOrEmpty(want) && v >= 128 && v <= 4096)
+                Screen.SetResolution(v, v, false);
+        }
+
         var cam = Camera.main;
         if (cam == null)
         {
@@ -563,6 +572,12 @@ public class WmvMain : MonoBehaviour
             // and reported a few stray pixels as a reading.
             if (WmvModelBuilder.Debug_.LightCheck)
                 ReportLighting();
+
+            {   // SCRATCH: capture the REAL viewport, post-processing included.
+                string shot = System.Environment.GetEnvironmentVariable("WMV_VIEWPORT_SHOT");
+                if (!string.IsNullOrEmpty(shot))
+                    StartCoroutine(CaptureViewport(shot));
+            }
 
             // Independent of the model just loaded -- it brings its own geometry, materials and
             // camera -- but hung off the same hook so one headless run produces both readings.
@@ -1572,6 +1587,30 @@ public class WmvMain : MonoBehaviour
     static Color ClearColour(Color displayed)
     {
         return ClearInAuthoredDomain ? displayed.gamma : displayed;
+    }
+
+    /// <summary>SCRATCH: the frame the embedded viewport actually presented.</summary>
+    System.Collections.IEnumerator CaptureViewport(string name)
+    {
+        for (int i = 0; i < 40; i++)
+            yield return new WaitForEndOfFrame();
+        Texture2D tex = null;
+        try
+        {
+            tex = ScreenCapture.CaptureScreenshotAsTexture();
+            string path = System.IO.Path.Combine(Application.dataPath, "../" + name + ".png");
+            System.IO.File.WriteAllBytes(path, ImageConversion.EncodeToPNG(tex));
+            var rt = current != null ? current.Emitters : null;
+            Debug.Log(string.Format(
+                "WMV: viewport shot {0} -- {1}x{2}, HDR camera {3}; emitters p={4} r={5} live={6} "
+                + "segs={7} draws={8} skipped={9}",
+                name, tex.width, tex.height, Camera.main != null && Camera.main.allowHDR,
+                rt != null ? rt.ParticleEmitterCount : 0, rt != null ? rt.RibbonEmitterCount : 0,
+                rt != null ? rt.LiveParticleCount : 0, rt != null ? rt.RibbonSegmentCount : 0,
+                rt != null ? rt.DrawCallCount : 0, rt != null ? rt.SkippedEmitterCount : 0));
+        }
+        catch (System.Exception e) { Debug.LogWarning("WMV: viewport shot failed: " + e.Message); }
+        if (tex != null) Destroy(tex);
     }
 
     void DumpPng(Color32[] px, int w, int h, string name)

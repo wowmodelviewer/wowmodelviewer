@@ -1,3 +1,4 @@
+#include <map>
 #include "WoWModel.h"
 
 #include <algorithm>
@@ -1618,34 +1619,74 @@ void WoWModel::setLOD(int index)
     rawGeosets.push_back(hdgeo);
   }
 
-  // Legacy MPQ baked-model geoset visibility.
+  // Baked-model geoset visibility.
   //
   // Character geoset groups (hair 0xx, facial-hair 1xx, gloves 4xx, boots 5xx, ears 7xx, ...) appear
   // not only on playable-character models but on character-BASED creature/NPC models -- e.g.
   // creature/band/* (the L70ETC band: bandorcmale sings into a mic, bandtaurenmale has a full drum
   // kit) and creature/akama. Loaded as plain models these are isChar=0, so refresh()'s character
   // show-rules never run and the default display=(id==0) hides every non-zero-id submesh: the NPC
-  // renders bald / earless / missing its baked hair, beard and instruments.
+  // renders bald / earless / missing its baked hair, beard and instruments. Akama loses his hair
+  // (geoset 2), his beard (401) and 1501, three of eleven submeshes, in BOTH viewports.
   //
-  // A creature model's non-zero geosets are the FIXED, additive parts of its one baked look, so every
-  // submesh should be drawn (a drum kit legitimately puts several additive pieces in the same group --
-  // that is not the same as a choice). A RAW character model (character/<race>/<sex>/*) instead carries
-  // MANY mutually-exclusive variants per group (13 hairstyles, 9 beards, ...) meant to be chosen one at
-  // a time via the character-customization path; showing them all overlaps into a garbled blob. The two
-  // cases are indistinguishable from geoset structure alone (both have several geosets per group), so
-  // scope this to creature models by location. Force every submesh visible for MPQ models under
-  // "creature/". Storage==MPQ only (Retail/CASC untouched); character/, item/ and world models keep the
-  // default rule (character customization still works); plain single-geoset creatures
-  // (chicken/wolf/kelthuzad, all id 0) are unaffected -- there is nothing hidden to reveal.
-  if ((GAMEDIRECTORY.clientProfile().storage == core::StorageType::MPQ)
-      && !charModelDetails.isChar
-      && name().startsWith("creature/", Qt::CaseInsensitive))
+  // A RAW character model (character/<race>/<sex>/*) instead carries MANY mutually-exclusive
+  // variants per group (13 hairstyles, 9 beards, ...) meant to be chosen one at a time through the
+  // character-customization path; showing them all overlaps into a garbled blob. The two cases are
+  // indistinguishable from geoset structure alone, so this is scoped to models under "creature/"
+  // by location, as it always has been; character/, item/ and world models keep the default rule.
+  //
+  // MPQ (Vanilla/TBC/WotLK): every submesh, unchanged. Those models' non-zero geosets are the fixed
+  // ADDITIVE parts of one baked look -- a drum kit legitimately puts several pieces in one group.
+  //
+  // CASC (Retail): geoset 0 plus the FIRST variant of each group. Retail creature models do carry
+  // groups that are a CHOICE rather than additive parts: in a 60-model sample of retail creature
+  // models, ten had non-zero geosets and three of those had several distinct ids in one group
+  // (deepstrider 101/102/103/104 and 201/202, nerubianskitterling 201/202 and 301/302,
+  // humanmalenoble 701/702) -- drawing all of them at once would overlap variants that are meant
+  // to be picked between. The lowest id in a group is the conventional default variant, and for a
+  // model whose groups hold one variant each (akama, and the other seven of those ten) it is the
+  // whole baked look. A display record still overrides this afterwards: setCreatureGeosetData
+  // rewrites ids 1..899 from the creature's own data.
+  if (!charModelDetails.isChar && name().startsWith("creature/", Qt::CaseInsensitive))
   {
-    for (ModelGeosetHD * g : rawGeosets)
-      g->display = true;
-    if (geosetDump)
-      LOG_INFO << "[geodump]   -> legacy MPQ creature model: forcing all"
-               << (int)rawGeosets.size() << "submeshes visible";
+    const bool mpq = (GAMEDIRECTORY.clientProfile().storage == core::StorageType::MPQ);
+    if (mpq)
+    {
+      for (ModelGeosetHD * g : rawGeosets)
+        g->display = true;
+      if (geosetDump)
+        LOG_INFO << "[geodump]   -> legacy MPQ creature model: forcing all"
+                 << (int)rawGeosets.size() << "submeshes visible";
+    }
+    else
+    {
+      std::map<int, int> firstOfGroup;      // geoset group -> the lowest id seen in it
+      for (const ModelGeosetHD * g : rawGeosets)
+      {
+        if (g->id == 0)
+          continue;
+        const int group = g->id / 100;
+        auto it = firstOfGroup.find(group);
+        if (it == firstOfGroup.end() || g->id < it->second)
+          firstOfGroup[group] = g->id;
+      }
+      int shown = 0;
+      for (ModelGeosetHD * g : rawGeosets)
+      {
+        if (g->id == 0)
+          continue;
+        auto it = firstOfGroup.find(g->id / 100);
+        if (it != firstOfGroup.end() && it->second == g->id)
+        {
+          g->display = true;
+          shown++;
+        }
+      }
+      if (geosetDump)
+        LOG_INFO << "[geodump]   -> creature model with no display data: showing geoset 0 plus the"
+                 << "first variant of each group --" << shown << "extra submesh(es) of"
+                 << (int)rawGeosets.size();
+    }
   }
 
   restoreRawGeosets();
