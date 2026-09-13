@@ -4,7 +4,7 @@
 // localhost TCP listener before launching the player and passes the port on the player
 // command line ("-wmvPort <n>"); the player connects back, announces itself and then asks
 // WMV for whatever it needs. Transport: newline-delimited JSON (one object per line),
-// protocol version 2.
+// protocol version 3.
 //
 // The player is WMV's new renderer foundation and renders directly from WoW data: it
 // requests raw assets and metadata from WMV -- which owns the app UI, the active
@@ -21,9 +21,18 @@
 //     the answer to modelGeosets (and, with revision 0, a report after a load or a skin push
 //     applied the host's per-submesh state): what the viewport now draws, so the host's
 //     checkboxes can follow the renderer rather than assume it
+//   characterSceneApplied { fileDataID, load, revision,
+//                           status:"applied"|"pending"|"superseded"|"rejected", reason,
+//                           merged, attachments, missing:[key,...], ms }
+//     the answer to characterScene: the character on screen now wears that scene (less any part
+//     named in missing), or why not. load is the serial of the loadWoWModel the scene belonged to
+//     (0 when it matched no load). "superseded" means a newer scene or a new load replaced it before
+//     it was applied, which is not a failure; "rejected" is a real refusal
 //
 // WMV -> player
-//   loadWoWModel  { path, fileDataID, client }
+//   loadWoWModel  { path, fileDataID, client, character, load }
+//     character: a playable character, dressed by the characterScene that follows
+//     load: the host's serial for this load (> 0), echoed in every characterSceneApplied about it
 //   assetResponse { requestId, ok, path, fileDataID, byteLength, sha1, encoding:"base64", data }
 //   assetResponse { requestId, ok:false, error }
 //   modelTextures { requestId, ok, fileDataID, textures:[{ index, type, fileDataID, source }] }
@@ -37,6 +46,15 @@
 //   modelAnimationState { fileDataID, sequenceIndex, playing, timeMs, speed, loop, explicitState } (pushed, no request)
 //     explicitState: true when a control set the state (play, pause, a frame step, a scrub,
 //     the start of a load), false for the heartbeat
+//   characterImage { hash, kind, width, height, format:"bgra8", encoding:"base64", data }
+//     a host-composited texture (the body, the eyes), rows top first, bytes B,G,R,A; named by
+//     hash in the scenes that follow. The player keeps the newest image of each kind for the
+//     life of the connection -- the host sends a kind again only when its pixels change -- and
+//     an older one for as long as a scene not yet applied still names it
+//   characterScene { fileDataID, revision, body:{...}, merged:[...], attachments:[...] }
+//     the resolved state of the character on display: per model the texture each slot binds, the
+//     geoset display flags, the host's bone table for a merged model and the attachment it hangs
+//     from for an attached one (see UnityCharacterScene.h in the host)
 //
 // getModelTextures exists because a modern M2 does not name its replaceable textures (a
 // creature skin's TXID entry is 0 and its texture array carries no filename) -- the skin comes
@@ -60,16 +78,18 @@ using UnityEngine;
 
 public class WmvIpcClient : MonoBehaviour
 {
-    public const int ProtocolVersion = 2;
+    public const int ProtocolVersion = 3;
 
     // Raised on the main thread.
-    public Action<string, int, string> OnLoadWoWModel;        // (path, fileDataID, client)
+    public Action<string, int, string, bool, int> OnLoadWoWModel;  // (path, fileDataID, client, character, load)
     public Action<AssetResponse> OnAssetResponse;
     public Action<ModelTexturesResponse> OnModelTextures;
     public Action<ModelTexturesResponse> OnModelSkin;          // pushed when the displayed skin changes
     public Action<AnimationSelection> OnModelAnimation;        // pushed when the displayed animation changes
     public Action<AnimationState> OnModelAnimationState;       // pushed on play/pause/speed/time changes
     public Action<GeosetVisibility> OnModelGeosets;            // pushed when the user switches a geoset
+    public Action<CharacterImage> OnCharacterImage;            // a host-composited texture
+    public Action<CharacterScene> OnCharacterScene;            // the character's resolved state
     public Action<string> OnStatus;                            // human-readable connection/state text
 
     public bool Connected { get { return connected; } }
@@ -193,6 +213,77 @@ public class WmvIpcClient : MonoBehaviour
         public double receivedSeconds;
     }
 
+    // ---- characterScene -------------------------------------------------------------------------
+    // Field names are the wire's; JsonUtility fills absent fields with defaults.
+
+    /// <summary>One texture slot's binding: a FileDataID, or the hash of a characterImage.</summary>
+    [Serializable] public class SceneTexture
+    {
+        public int slot;
+        public int type;
+        public int fileDataID;
+        public string image;
+    }
+
+    [Serializable] public class SceneBody
+    {
+        public SceneTexture[] textures = new SceneTexture[0];
+        public int submeshCount;
+        public int[] submeshVisible = new int[0];
+        public bool closeRightHand;
+        public bool closeLeftHand;
+        public int fistSequence;
+        public int fistTimeMs;
+        public int[] rightFingerBones = new int[0];
+        public int[] leftFingerBones = new int[0];
+    }
+
+    [Serializable] public class SceneMerged
+    {
+        public string key;
+        public int fileDataID;
+        public int mergeIndex;
+        public SceneTexture[] textures = new SceneTexture[0];
+        public int[] handSubmeshes = new int[0];
+        public SceneTexture handTexture;
+        public int submeshCount;
+        public int[] submeshVisible = new int[0];
+        public int[] boneMap = new int[0];
+    }
+
+    [Serializable] public class SceneAttachment
+    {
+        public string key;
+        public int fileDataID;
+        public int attachmentId;
+        public int bone;
+        public float[] position = new float[0];
+        public bool mirrored;
+        public bool visible;
+        public float scale;
+        public SceneTexture[] textures = new SceneTexture[0];
+        public int submeshCount;
+        public int[] submeshVisible = new int[0];
+    }
+
+    public class CharacterScene
+    {
+        public int fileDataID;
+        public int revision;
+        public SceneBody body;
+        public SceneMerged[] merged = new SceneMerged[0];
+        public SceneAttachment[] attachments = new SceneAttachment[0];
+        public double receivedSeconds;
+    }
+
+    public class CharacterImage
+    {
+        public string hash;
+        public string kind;
+        public Wmv.Wow.BlpImage image;     // converted to the renderer's RGBA on the reader thread
+        public string error;
+    }
+
     [Serializable] class MsgTexture
     {
         public int index;
@@ -233,6 +324,19 @@ public class WmvIpcClient : MonoBehaviour
         public bool hasSubmeshVisible;
         public int submeshCount;
         public int[] submeshVisible;
+        public bool character;
+        public int load;
+        // characterImage
+        public string hash;
+        public string kind;
+        public int width;
+        public int height;
+        public string format;
+        // characterScene
+        public SceneBody body;
+        public SceneMerged[] merged;
+        public SceneAttachment[] attachments;
+        [NonSerialized] public CharacterImage decodedImage;
     }
 
     int port = -1;
@@ -299,6 +403,13 @@ public class WmvIpcClient : MonoBehaviour
                     if (msg != null)
                     {
                         msg.receivedSeconds = NowSeconds;
+                        // A composited image is megabytes of base64. Decoded HERE, on the reader
+                        // thread, so the frame it lands in only swaps a reference.
+                        if (msg.type == "characterImage")
+                        {
+                            msg.decodedImage = DecodeCharacterImage(msg);
+                            msg.data = null;
+                        }
                         lock (inbox) inbox.Enqueue(msg);
                     }
                 }
@@ -340,6 +451,47 @@ public class WmvIpcClient : MonoBehaviour
             try { Dispatch(msg); }
             catch (Exception e) { Debug.LogWarning("WMV IPC: handler failed: " + e.Message); }
         }
+    }
+
+    /// <summary>
+    /// A characterImage payload as the renderer's image: B,G,R,A bytes become R,G,B,A, rows stay top
+    /// first (BlpImage's order). The alpha is whatever the host composited -- a premultiplied image
+    /// is taken as it is, exactly as the OpenGL upload took it.
+    /// </summary>
+    static CharacterImage DecodeCharacterImage(Msg msg)
+    {
+        var result = new CharacterImage { hash = msg.hash ?? "", kind = msg.kind ?? "" };
+        try
+        {
+            if (msg.encoding != "base64" || msg.format != "bgra8" || string.IsNullOrEmpty(msg.data))
+            {
+                result.error = "unsupported characterImage (" + msg.encoding + ", " + msg.format + ")";
+                return result;
+            }
+            byte[] bytes = Convert.FromBase64String(msg.data);
+            if (msg.width <= 0 || msg.height <= 0 || bytes.Length != msg.width * msg.height * 4)
+            {
+                result.error = string.Format("characterImage {0}x{1} carries {2} bytes", msg.width, msg.height, bytes.Length);
+                return result;
+            }
+            bool alpha = false;
+            for (int i = 0; i < bytes.Length; i += 4)
+            {
+                byte b = bytes[i];
+                bytes[i] = bytes[i + 2];
+                bytes[i + 2] = b;
+                if (bytes[i + 3] != 255) alpha = true;
+            }
+            result.image = new Wmv.Wow.BlpImage
+            {
+                Width = msg.width, Height = msg.height, Rgba = bytes, Encoding = "host composite", HasAlpha = alpha,
+            };
+        }
+        catch (Exception e)
+        {
+            result.error = "characterImage decode failed: " + e.Message;
+        }
+        return result;
     }
 
     static ModelTexturesResponse ReadTextures(Msg msg)
@@ -385,7 +537,23 @@ public class WmvIpcClient : MonoBehaviour
         switch (msg.type)
         {
             case "loadWoWModel":
-                OnLoadWoWModel?.Invoke(msg.path ?? "", msg.fileDataID, msg.client ?? "active");
+                OnLoadWoWModel?.Invoke(msg.path ?? "", msg.fileDataID, msg.client ?? "active", msg.character, msg.load);
+                break;
+
+            case "characterImage":
+                OnCharacterImage?.Invoke(msg.decodedImage ?? new CharacterImage { hash = msg.hash, error = "not decoded" });
+                break;
+
+            case "characterScene":
+                OnCharacterScene?.Invoke(new CharacterScene
+                {
+                    fileDataID = msg.fileDataID,
+                    revision = msg.revision,
+                    body = msg.body ?? new SceneBody(),
+                    merged = msg.merged ?? new SceneMerged[0],
+                    attachments = msg.attachments ?? new SceneAttachment[0],
+                    receivedSeconds = msg.receivedSeconds,
+                });
                 break;
 
             case "modelTextures":
@@ -525,6 +693,34 @@ public class WmvIpcClient : MonoBehaviour
         sb.Append('}');
         Send(sb.ToString());
     }
+
+    /// <summary>
+    /// What became of a characterScene. load is the serial of the loadWoWModel the scene belonged to
+    /// (0 when it matched none), so the host can tell an answer about an earlier load from one about
+    /// the character it is showing now. missing names the parts that could not be built.
+    /// </summary>
+    public void ReportCharacterSceneApplied(int fileDataID, int load, int revision, string status, string reason,
+                                            int merged, int attachments, IList<string> missing, long ms)
+    {
+        var sb = new StringBuilder();
+        sb.Append("{\"type\":\"characterSceneApplied\",\"fileDataID\":").Append(fileDataID)
+          .Append(",\"load\":").Append(load)
+          .Append(",\"revision\":").Append(revision)
+          .Append(",\"status\":\"").Append(Escape(status)).Append('"')
+          .Append(",\"reason\":\"").Append(Escape(reason ?? "")).Append('"')
+          .Append(",\"merged\":").Append(merged)
+          .Append(",\"attachments\":").Append(attachments)
+          .Append(",\"ms\":").Append(ms)
+          .Append(",\"missing\":[");
+        if (missing != null)
+            for (int i = 0; i < missing.Count; i++)
+                sb.Append(i > 0 ? "," : "").Append('"').Append(Escape(missing[i])).Append('"');
+        sb.Append("]}");
+        Send(sb.ToString());
+    }
+
+    /// <summary>The 0/1 submesh flags the host sends, as booleans.</summary>
+    public static bool[] Flags(int[] values) { return ToBools(values); }
 
     string NewRequestId() { return "u" + (nextRequestId++); }
 

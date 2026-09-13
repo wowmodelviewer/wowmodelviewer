@@ -59,6 +59,14 @@ class _CHARTEXTURE_API_ CharTexture
 
     void compose(GLuint texID);
 
+    // The image the last compose() uploaded, exactly as uploaded (QImage::Format_ARGB32 memory
+    // layout, top row first), or a null image before the first compose. Kept for the embedded Unity
+    // viewport, which renders the same character from the host's resolved state and has no GL
+    // context to read texture name 0 back from. It shares its pixels with the image compose() uploaded
+    // (the upload reads them through constBits(), so keeping this copies nothing), but it does keep one
+    // full composite alive per character -- 8 MB for a 2048 x 1024 body -- for as long as it exists.
+    const QImage & lastImage() const { return lastImage_; }
+
     void reset(unsigned int _layoutSizeId);
 
     static void initRegions();
@@ -70,13 +78,16 @@ class _CHARTEXTURE_API_ CharTexture
     // than overwrite each other in one replaceTextures slot. Layers are applied in 'layer'
     // order (lowest first = base); 'region' is ignored (each layer fills the whole image).
     // The caller OWNS the returned texture and must glDeleteTextures() it.
-    static GLuint composeStackToTexture(const std::vector<CharTextureComponent> & layers);
+    // outImage, when given, receives the composited image as uploaded (see lastImage()).
+    static GLuint composeStackToTexture(const std::vector<CharTextureComponent> & layers,
+                                        QImage * outImage = nullptr);
 
   private:
     void burnComponent(QImage & destImage, CharTextureComponent &) const;
     static QImage * gameFileToQImage(GameFile * file);
     unsigned int layoutSizeId;
     std::vector<CharTextureComponent> m_components;
+    QImage lastImage_;
     static std::map<int, std::pair<LayoutSize, std::map<int,CharRegionCoords> > > LAYOUTS;
 };
 

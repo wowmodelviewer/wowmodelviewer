@@ -1535,6 +1535,12 @@ void ModelCanvas::tick()
   if (g_modelViewer)
     g_modelViewer->SendAnimationStateToUnity(false);
 
+  // Likewise the character's resolved appearance: whatever changed it -- a customization, an item,
+  // a render toggle, a geoset checkbox -- has finished by the time the next tick runs, so this is
+  // where one push per change is sent, however many refreshes the change took.
+  if (g_modelViewer)
+    g_modelViewer->SendCharacterSceneToUnity(false);
+
   if (model_) {
     if (model_->animManager && !wmo) {
       if (model_->animManager->IsPaused())

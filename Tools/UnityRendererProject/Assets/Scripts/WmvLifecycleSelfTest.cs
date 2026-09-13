@@ -17,6 +17,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Reflection;
 using UnityEngine;
 using Wmv.Wow;
 
@@ -689,6 +690,550 @@ public static class WmvLifecycleSelfTest
         rt.Dispose();
     }
 
+    // ---------------------------------------------------------------- characters
+
+    static bool NearV(Vector3 a, Vector3 b, float eps)
+    {
+        return Mathf.Abs(a.x - b.x) < eps && Mathf.Abs(a.y - b.y) < eps && Mathf.Abs(a.z - b.z) < eps;
+    }
+
+    /// <summary>One rotation, whichever of its two signs each quaternion carries.</summary>
+    static bool SameRotation(Quaternion a, Quaternion b)
+    {
+        float dot = a.x * b.x + a.y * b.y + a.z * b.z + a.w * b.w;
+        return Mathf.Abs(dot) > 1f - 1e-5f;
+    }
+
+    static bool SameMatrix(Matrix4x4 a, Matrix4x4 b)
+    {
+        for (int i = 0; i < 16; i++)
+            if (Mathf.Abs(a[i] - b[i]) > 1e-5f)
+                return false;
+        return true;
+    }
+
+    static bool PoseIs(Transform t, Vector3 position, Quaternion rotation, Vector3 scale)
+    {
+        return t != null && NearV(t.localPosition, position, 1e-4f) && SameRotation(t.localRotation, rotation) &&
+               NearV(t.localScale, scale, 1e-4f);
+    }
+
+    static Vector3 UnityPosition(WowVec3 v)
+    {
+        float x, y, z;
+        WowCoordinateConverter.ConvertPosition(v, out x, out y, out z);
+        return new Vector3(x, y, z);
+    }
+
+    static Vector3 UnityScale(WowVec3 v)
+    {
+        float x, y, z;
+        WowCoordinateConverter.ConvertScale(v, out x, out y, out z);
+        return new Vector3(x, y, z);
+    }
+
+    static Quaternion UnityRotation(WowQuat q)
+    {
+        float x, y, z, w;
+        WowCoordinateConverter.ConvertRotation(q, out x, out y, out z, out w);
+        return new Quaternion(x, y, z, w);
+    }
+
+    /// <summary>Total weight a vertex gives one bone, over its four slots in whatever order the mesh
+    /// keeps them.</summary>
+    static float WeightOn(BoneWeight w, int bone)
+    {
+        float s = 0f;
+        if (w.boneIndex0 == bone) s += w.weight0;
+        if (w.boneIndex1 == bone) s += w.weight1;
+        if (w.boneIndex2 == bone) s += w.weight2;
+        if (w.boneIndex3 == bone) s += w.weight3;
+        return s;
+    }
+
+    /// <summary>Two influences on one parsed vertex, the other two slots cleared.</summary>
+    static void Influence(M2ParsedModel model, int vertex, byte bone0, byte weight0, byte bone1, byte weight1)
+    {
+        model.Vertices[vertex].BoneIndex0 = bone0; model.Vertices[vertex].BoneWeight0 = weight0;
+        model.Vertices[vertex].BoneIndex1 = bone1; model.Vertices[vertex].BoneWeight1 = weight1;
+        model.Vertices[vertex].BoneIndex2 = 0; model.Vertices[vertex].BoneWeight2 = 0;
+        model.Vertices[vertex].BoneIndex3 = 0; model.Vertices[vertex].BoneWeight3 = 0;
+    }
+
+    /// <summary>A 2x2 texture of one opaque colour, so which image a material ended up with can be told
+    /// from a single texel.</summary>
+    static BlpImage SolidTexture(byte r, byte g, byte b)
+    {
+        var img = new BlpImage { Width = 2, Height = 2, Rgba = new byte[2 * 2 * 4], Encoding = "test" };
+        for (int i = 0; i < img.Rgba.Length; i += 4)
+        {
+            img.Rgba[i] = r; img.Rgba[i + 1] = g; img.Rgba[i + 2] = b; img.Rgba[i + 3] = 255;
+        }
+        return img;
+    }
+
+    /// <summary>Which colour a material's base texture holds: 'r', 'g', 'b', or '?' when there is no
+    /// readable base texture at all.</summary>
+    static char BaseColour(Material m)
+    {
+        var tex = m != null ? m.mainTexture as Texture2D : null;
+        if (tex == null)
+            return '?';
+        Color c = tex.GetPixel(0, 0);
+        if (c.r > 0.5f && c.g < 0.5f && c.b < 0.5f) return 'r';
+        if (c.g > 0.5f && c.r < 0.5f && c.b < 0.5f) return 'g';
+        if (c.b > 0.5f && c.r < 0.5f && c.g < 0.5f) return 'b';
+        return '?';
+    }
+
+    static M2Track<WowVec3> VectorKey(float x, float y, float z)
+    {
+        return new M2Track<WowVec3>
+        {
+            Interpolation = M2Interpolation.Linear, GlobalSequence = -1,
+            Times = new uint[] { 0 }, Values = new[] { new WowVec3(x, y, z) },
+        };
+    }
+
+    static M2Track<WowQuat> RotationKey(float x, float y, float z, float w)
+    {
+        return new M2Track<WowQuat>
+        {
+            Interpolation = M2Interpolation.Linear, GlobalSequence = -1,
+            Times = new uint[] { 0 }, Values = new[] { new WowQuat(x, y, z, w) },
+        };
+    }
+
+    /// <summary>
+    /// A PLAYABLE CHARACTER is several builds that lean on each other: a body, merged parts skinned to
+    /// the body's bones, attached items hanging off them, and a closed hand posed from another
+    /// sequence. Each of those joints is checked here on synthetic models built by the real builder;
+    /// what a character wears is the host's business and is not.
+    /// </summary>
+    static void CharacterTests(Action<string> log)
+    {
+        ExternalSkeletonTests(log);
+        BaseTextureOverrideTests(log);
+        PoseOverrideTests(log);
+        GlobalClockTests(log);
+        AttachmentPlacementTests(log);
+    }
+
+    /// <summary>
+    /// A MERGED PART, skinned to another model's skeleton (WmvBuildOptions.Skeleton).
+    ///
+    /// The part has no bones of its own: renderer bone i is the body's bone BoneMap[i], bound with that
+    /// bone's bind pose, and an influence on a bone the map cannot place is dropped. Every way that goes
+    /// wrong is quiet on screen -- an off-by-one in the map puts a sleeve on the other arm, a bind pose
+    /// taken by the part's own index drags it across the body, an influence left on the stand-in bone
+    /// pulls vertices toward it -- so each is read back from the renderer and mesh the builder made,
+    /// and the skinning itself from a CPU bake.
+    /// </summary>
+    static void ExternalSkeletonTests(Action<string> log)
+    {
+        const int skelId = 777001, skinId = 777003;
+        byte[] bodyM2 = M2Synthetic.SkeletonModel(skelId, skinId);
+        M2ParsedSkin bodySkin = M2SkinParser.Parse(M2Synthetic.TransformSwitchSkin());
+
+        // The body's bones live in a .skel. Unapplied, that model cannot be skinned; applied, it must be,
+        // or a character body would never have bones to merge anything onto.
+        M2ParsedModel unapplied = M2Parser.Parse(bodyM2);
+        WmvRuntimeModel still = WmvModelBuilder.Build(unapplied, bodySkin, new Dictionary<int, BlpImage>(),
+                                                      "SkidUnapplied", s => log("  " + s));
+        Check(still != null && !still.Skinned, "character: an SKID model whose skeleton was not applied is drawn static", log);
+        if (still != null) still.Dispose();
+
+        M2ParsedModel bodyModel = M2Parser.Parse(bodyM2);
+        M2Parser.ApplySkeleton(bodyModel, M2Synthetic.Skeleton(0), null, -1);
+        WmvRuntimeModel body = WmvModelBuilder.Build(bodyModel, bodySkin, new Dictionary<int, BlpImage>(),
+                                                     "ExternalSkeletonBody", s => log("  " + s));
+        bool bodyOk = body != null && body.Skinned && body.Bones.Length == 3 && body.BindPoses.Length == 3;
+        Check(bodyOk, "character: an SKID model whose skeleton WAS applied is skinned, with a bind pose per bone", log);
+        if (!bodyOk) { if (body != null) body.Dispose(); return; }
+        Check(!SameMatrix(body.BindPoses[2], body.BindPoses[0]),
+              "character: the body's bind poses differ per bone, so a wrong mapping would show", log);
+
+        // The part: two triangles and no bones. Its influences are written here rather than in a fixture
+        // because they are the test. Part bone 0 -> body bone 2 (the leaf), part bone 1 -> body bone 0
+        // (the root), part bone 2 -> 99, which the body does not have.
+        M2ParsedModel partModel = M2Parser.Parse(M2Synthetic.GeosetModel(2), 0);
+        M2ParsedSkin partSkin = M2SkinParser.Parse(M2Synthetic.GeosetSkin(new[] { 0, 0 }));
+        for (int i = 0; i < 3; i++)
+            Influence(partModel, i, 0, 255, 0, 0);        // first triangle: all on part bone 0
+        Influence(partModel, 3, 1, 255, 0, 0);            // on part bone 1
+        Influence(partModel, 4, 1, 128, 2, 127);          // split between a placeable and an unplaceable bone
+        Influence(partModel, 5, 2, 255, 0, 0);            // only on the unplaceable bone
+
+        var options = new WmvBuildOptions
+        {
+            NoAnimation = true,
+            Skeleton = new WmvExternalSkeleton
+            {
+                Bones = body.Bones, BindPoses = body.BindPoses, BoneMap = new[] { 2, 0, 99 }, LocalBounds = body.Bounds,
+            },
+        };
+        WmvRuntimeModel part = WmvModelBuilder.Build(partModel, partSkin, new Dictionary<int, BlpImage>(),
+                                                     "ExternalSkeletonPart", s => log("  " + s), null, null, options);
+        Check(part != null && part.Skin != null && part.Skin.sharedMesh == part.Mesh,
+              "character: the part is built as a skinned renderer over its own mesh", log);
+        if (part == null || part.Skin == null) { if (part != null) part.Dispose(); body.Dispose(); return; }
+        part.Root.transform.SetParent(body.Root.transform, false);     // where the dresser hangs it
+
+        Transform[] bones = part.Skin.bones;
+        Check(bones.Length == 3 && bones[0] == body.Bones[2] && bones[1] == body.Bones[0],
+              "character: renderer bone i is the body bone the map names (0 -> body 2, 1 -> body 0)", log);
+        Check(bones.Length == 3 && bones[2] != null,
+              "character: the entry the map cannot place still holds a transform (a null bone stops the renderer)", log);
+        Matrix4x4[] poses = part.Mesh.bindposes;
+        Check(poses.Length == 3 && SameMatrix(poses[0], body.BindPoses[2]) && SameMatrix(poses[1], body.BindPoses[0]),
+              "character: bind pose i is the mapped body bone's bind pose, not the one at the part's own index", log);
+
+        BoneWeight[] w = part.Mesh.boneWeights;
+        bool sixWeights = w.Length == 6;
+        bool noneOnUnplaceable = sixWeights;
+        for (int i = 0; noneOnUnplaceable && i < w.Length; i++)
+            noneOnUnplaceable = WeightOn(w[i], 2) == 0f;
+        Check(noneOnUnplaceable, "character: no vertex keeps any weight on the bone the map cannot place", log);
+        Check(sixWeights && Near(WeightOn(w[0], 0), 1f) && Near(WeightOn(w[3], 1), 1f),
+              "character: influences on placeable bones are kept as they were", log);
+        Check(sixWeights && Near(WeightOn(w[4], 1), 1f),
+              "character: a vertex split with an unplaceable bone is renormalised onto the placeable one", log);
+        Check(sixWeights && Near(WeightOn(w[5], 0), 1f),
+              "character: a vertex weighted only to an unplaceable bone falls back to bone 0 at full weight", log);
+
+        Check(!part.Skinned && part.Bones.Length == 0 && part.BoneRestPositions.Length == 0 && part.BindPoses.Length == 0,
+              "character: the part owns no bones, so a sequence change never poses the body's through it", log);
+        Check(part.Animator == null && part.Emitters == null && part.Root.GetComponent<WmvM2Animator>() == null,
+              "character: NoAnimation -- the part has no animator and no emitters", log);
+
+        // The skinning, baked on the CPU. With the body at rest its bind poses cancel and the part lands
+        // where its file put it; move one body bone and exactly the vertices mapped to it follow, by
+        // exactly that much.
+        if (body.Animator != null)
+            body.Animator.RestorePose();
+        Vector3[] file = part.Mesh.vertices;
+        var baked = new Mesh();
+        part.Skin.BakeMesh(baked, true);
+        Vector3[] rest = baked.vertices;
+        bool atRest = rest.Length == file.Length && rest.Length == 6;
+        for (int i = 0; atRest && i < rest.Length; i++)
+            atRest = NearV(rest[i], file[i], 1e-3f);
+        Check(atRest, "character: with the body at rest the part bakes to its own vertex positions", log);
+
+        var delta = new Vector3(0f, 0.75f, 0f);
+        Transform leaf = body.Bones[2];
+        leaf.position = leaf.position + delta;
+        part.Skin.BakeMesh(baked, true);
+        Vector3[] moved = baked.vertices;
+        bool follows = moved.Length == 6 && rest.Length == 6, stays = follows;
+        for (int i = 0; follows && i < 3; i++)
+            follows = NearV(moved[i], rest[i] + delta, 1e-3f);
+        for (int i = 3; stays && i < 5; i++)
+            stays = NearV(moved[i], rest[i], 1e-3f);
+        Check(follows, "character: moving body bone 2 moves the part's vertices mapped to it by the same amount", log);
+        Check(stays, "character: ... and leaves the vertices mapped to body bone 0 where they were", log);
+
+        UnityEngine.Object.Destroy(baked);
+        part.Dispose();
+        body.Dispose();
+    }
+
+    /// <summary>
+    /// THE HAND-TEXTURE RULE (WmvBuildOptions.BaseTextureOverride). A merged part's hand submeshes bind
+    /// an image the host names instead of their own slot. The override is keyed by SKIN submesh, and
+    /// the binding has to remember the key or the next texture rebind would put the part's own slot
+    /// back on the hands.
+    /// </summary>
+    static void BaseTextureOverrideTests(Action<string> log)
+    {
+        const int overrideKey = 100000;      // far outside any M2 texture table, as the dresser's hand key is
+        M2ParsedModel model = M2Parser.Parse(M2Synthetic.GeosetModel(2), 0);
+        M2ParsedSkin skin = M2SkinParser.Parse(M2Synthetic.GeosetSkin(new[] { 0, 0 }));
+        var textures = new Dictionary<int, BlpImage>
+        {
+            { 0, SolidTexture(0, 255, 0) },                  // slot 0, which both batches name
+            { overrideKey, SolidTexture(255, 0, 0) },
+        };
+        var options = new WmvBuildOptions { BaseTextureOverride = new Dictionary<int, int> { { 1, overrideKey } } };
+        WmvRuntimeModel rt = WmvModelBuilder.Build(model, skin, textures, "BaseTextureOverrideTest",
+                                                   s => log("  " + s), null, null, options);
+        Check(rt != null && rt.SubmeshIndices.Length == 2 && rt.Materials.Length == 2 && rt.Bindings.Length == 2,
+              "texture override: two-submesh model built", log);
+        if (rt == null || rt.SubmeshIndices.Length != 2 || rt.Materials.Length != 2 || rt.Bindings.Length != 2)
+        {
+            if (rt != null) rt.Dispose();
+            return;
+        }
+        int own = rt.SubmeshIndices[0] == 0 ? 0 : 1;
+        int over = 1 - own;
+
+        Check(BaseColour(rt.Materials[own]) == 'g',
+              "texture override: a submesh the override does not name binds its own slot", log);
+        Check(BaseColour(rt.Materials[over]) == 'r',
+              "texture override: the named submesh binds the override key's image on unit 0", log);
+        Check(rt.Materials[own].mainTexture != rt.Materials[over].mainTexture,
+              "texture override: ... which is a different texture from the one its own slot gives", log);
+        Check(rt.Bindings[over].BaseSlot == overrideKey && rt.Bindings[own].BaseSlot == 0,
+              "texture override: the binding records the key, not the slot", log);
+
+        // What the dresser does when the hand image changes: the same keys, a new image behind one.
+        textures[overrideKey] = SolidTexture(0, 0, 255);
+        WmvModelBuilder.RebindTextures(rt, textures, "BaseTextureOverrideTest", null);
+        Check(BaseColour(rt.Materials[over]) == 'b' && BaseColour(rt.Materials[own]) == 'g',
+              "texture override: a rebind keeps the override -- the new hand image lands on the named submesh only", log);
+        rt.Dispose();
+    }
+
+    /// <summary>
+    /// THE CLOSED HAND (WmvM2Animator.SetPoseOverride). Some bones take a fixed pose from another
+    /// sequence over whatever the playing one does, on every frame, and give it back when released.
+    ///
+    /// Three bones: 0 and 1 are moved by the playing sequence, 2 is made still in it here. Bones 1 and
+    /// 2 are overridden. Bone 1 shows the override REPLACING a sequence pose; bone 2 shows that clearing
+    /// really resets, because nothing in the sequence would put it back otherwise; bone 0 shows the rest
+    /// of the skeleton keeps playing throughout.
+    /// </summary>
+    static void PoseOverrideTests(Action<string> log)
+    {
+        M2ParsedModel model = M2Parser.Parse(M2Synthetic.InFileSkeletonModel(473370), 0);
+        model.Bones[2].Translation = new M2Track<WowVec3> { GlobalSequence = -1 };
+        model.Bones[2].Rotation = new M2Track<WowQuat> { GlobalSequence = -1 };
+        model.Bones[2].Scale = new M2Track<WowVec3> { GlobalSequence = -1 };
+        WmvRuntimeModel rt = WmvModelBuilder.Build(model, M2SkinParser.Parse(M2Synthetic.TransformSwitchSkin()),
+                                                   new Dictionary<int, BlpImage>(), "PoseOverrideTest",
+                                                   s => log("  " + s));
+        bool built = rt != null && rt.Skinned && rt.Animator != null && rt.Bones.Length == 3;
+        Check(built, "pose override: skinned three-bone model with an animator built", log);
+        if (!built) { if (rt != null) rt.Dispose(); return; }
+        WmvM2Animator anim = rt.Animator;
+        Check(anim.AnimatedBoneCount == 2, "pose override: the sequence moves bones 0 and 1, not bone 2", log);
+
+        // Bone 1's rotation runs on a global sequence. Hold that clock where the track has turned it 90
+        // degrees, so the override's identity rotation differs from what the sequence writes.
+        double globalWas = WmvM2Animator.GlobalTimeMs;
+        WmvM2Animator.GlobalTimeMs = 250.0;
+
+        float[] times = { 0f, 250f, 500f, 750f };
+        var pos = new Vector3[times.Length, 3];
+        var rot = new Quaternion[times.Length, 3];
+        var scl = new Vector3[times.Length, 3];
+        for (int k = 0; k < times.Length; k++)
+        {
+            anim.ApplyPose(times[k]);
+            for (int b = 0; b < 3; b++)
+            {
+                pos[k, b] = rt.Bones[b].localPosition;
+                rot[k, b] = rt.Bones[b].localRotation;
+                scl[k, b] = rt.Bones[b].localScale;
+            }
+        }
+        Check(!NearV(pos[1, 0], pos[0, 0], 1e-3f),
+              "pose override: the sequence moves bone 0 between 0 and 250 ms, so following it is visible", log);
+        Check(!SameRotation(rot[0, 1], Quaternion.identity),
+              "pose override: the global track turns bone 1, so an identity override is visible", log);
+
+        var tracks = new M2BoneDef[3];
+        tracks[1].Translation = VectorKey(0f, 0f, 2f);
+        tracks[1].Scale = VectorKey(1f, 2f, 3f);
+        tracks[2].Translation = VectorKey(0f, 1f, 0f);
+        tracks[2].Rotation = RotationKey(0f, 0f, 0.70710677f, 0.70710677f);
+        // Channels with no keys come out at rest: bone 1 unrotated, bone 2 at unit scale.
+        Vector3 pos1 = rt.BoneRestPositions[1] + UnityPosition(new WowVec3(0f, 0f, 2f));
+        Vector3 scl1 = UnityScale(new WowVec3(1f, 2f, 3f));
+        Vector3 pos2 = rt.BoneRestPositions[2] + UnityPosition(new WowVec3(0f, 1f, 0f));
+        Quaternion rot2 = UnityRotation(new WowQuat(0f, 0f, 0.70710677f, 0.70710677f));
+
+        // Put the animator's own clock at 250 ms (paused, so it holds there). Setting and clearing the
+        // override re-pose the skeleton at THAT time, not at the override's instant: the parameter once
+        // hid the clock field and snapped the whole body to the fist's 1 ms.
+        anim.StartFromApp(false, 250f, 1f);
+        Check(PoseIs(rt.Bones[0], pos[1, 0], rot[1, 0], scl[1, 0]),
+              "pose override: the animator's clock is at 250 ms before the override is set", log);
+
+        Check(anim.PoseOverrideCount == 0, "pose override: none before one is set", log);
+        anim.SetPoseOverride(rt.Bones, rt.BoneRestPositions, new[] { 1, 2 }, tracks, 1f);
+        Check(anim.PoseOverrideCount == 2, "pose override: PoseOverrideCount = 2 after overriding two bones", log);
+        Check(PoseIs(rt.Bones[1], pos1, Quaternion.identity, scl1) && PoseIs(rt.Bones[2], pos2, rot2, Vector3.one),
+              "pose override: setting it poses the bones at once, without waiting for a frame", log);
+        Check(PoseIs(rt.Bones[0], pos[1, 0], rot[1, 0], scl[1, 0]),
+              "pose override: ... and the rest of the skeleton stays on the animator's clock (250 ms), not the override's 1 ms", log);
+
+        bool held1 = true, held2 = true, follows0 = true;
+        for (int k = 0; k < times.Length; k++)
+        {
+            anim.ApplyPose(times[k]);
+            held1 &= PoseIs(rt.Bones[1], pos1, Quaternion.identity, scl1);
+            held2 &= PoseIs(rt.Bones[2], pos2, rot2, Vector3.one);
+            follows0 &= PoseIs(rt.Bones[0], pos[k, 0], rot[k, 0], scl[k, 0]);
+        }
+        Check(held1, "pose override: a bone the sequence moves holds the override at 0/250/500/750 ms", log);
+        Check(held2, "pose override: a bone the sequence leaves alone holds the override at every instant too", log);
+        Check(follows0, "pose override: the bone not overridden follows the sequence meanwhile", log);
+
+        // The loop above left the bones at 750 ms; clearing re-poses at the clock's 250 ms, not at the 0 passed.
+        anim.SetPoseOverride(rt.Bones, rt.BoneRestPositions, new int[0], tracks, 0f);
+        Check(anim.PoseOverrideCount == 0, "pose override: an empty index list removes it", log);
+        Check(PoseIs(rt.Bones[2], rt.BoneRestPositions[2], Quaternion.identity, Vector3.one),
+              "pose override: clearing returns a released bone to rest (rest position, identity, unit scale)", log);
+        Check(PoseIs(rt.Bones[1], pos[1, 1], rot[1, 1], scl[1, 1]) && PoseIs(rt.Bones[0], pos[1, 0], rot[1, 0], scl[1, 0]),
+              "pose override: ... and a released bone the sequence moves is back on the sequence at once, at the animator's clock (250 ms)", log);
+        anim.ApplyPose(500f);
+        Check(PoseIs(rt.Bones[1], pos[2, 1], rot[2, 1], scl[2, 1]) && PoseIs(rt.Bones[0], pos[2, 0], rot[2, 0], scl[2, 0]) &&
+              PoseIs(rt.Bones[2], rt.BoneRestPositions[2], Quaternion.identity, Vector3.one),
+              "pose override: the next ApplyPose follows the sequence again", log);
+
+        WmvM2Animator.GlobalTimeMs = globalWas;
+        rt.Dispose();
+    }
+
+    /// <summary>
+    /// THE GLOBAL CLOCK MOVES ONCE PER FRAME, however many animators run it. A character is a body plus
+    /// an animator per attached item, and when each advanced the shared clock the global sequences ran
+    /// that many times too fast.
+    ///
+    /// Time.frameCount cannot advance inside this synchronous test, which is exactly what makes "the
+    /// same frame" possible to arrange: LateUpdate (a private Unity message) is invoked through
+    /// reflection on two animators back to back. Three private fields are set the same way so the result
+    /// does not hang on timing: the global clock's last wall-clock reading and each animator's own are
+    /// put in the past, so each call sees a real elapsed time, and the frame stamp is put on the previous
+    /// frame so the first call is the frame's first. "The next frame" is the stamp moved back once more.
+    ///
+    /// The first animator's own reading is put back to the player's start, at least two seconds ago -- an
+    /// attached item hidden and shown again -- while the global clock's is 400 ms back: the global clock must take the frame's step
+    /// from its own reading, not jump by the minute that one animator was away.
+    /// </summary>
+    static void GlobalClockTests(Action<string> log)
+    {
+        if (WmvModelBuilder.Debug_.AnimTime >= 0f)
+        {
+            log("lifecycle-test SKIP: global clock: -wmvAnimTime pins the clock, so LateUpdate never advances it");
+            return;
+        }
+        const BindingFlags instance = BindingFlags.Instance | BindingFlags.NonPublic;
+        const BindingFlags statics = BindingFlags.Static | BindingFlags.NonPublic;
+        MethodInfo lateUpdate = typeof(WmvM2Animator).GetMethod("LateUpdate", instance);
+        FieldInfo lastRealtime = typeof(WmvM2Animator).GetField("lastRealtime", instance);
+        FieldInfo advancedFrame = typeof(WmvM2Animator).GetField("globalAdvancedFrame", statics);
+        FieldInfo lastGlobalRealtime = typeof(WmvM2Animator).GetField("lastGlobalRealtime", statics);
+        Check(lateUpdate != null && lastRealtime != null && advancedFrame != null && lastGlobalRealtime != null,
+              "global clock: LateUpdate and the three clock fields are reachable by reflection", log);
+        if (lateUpdate == null || lastRealtime == null || advancedFrame == null || lastGlobalRealtime == null)
+            return;
+
+        byte[] m2 = M2Synthetic.InFileSkeletonModel(473370);
+        M2ParsedSkin skin = M2SkinParser.Parse(M2Synthetic.TransformSwitchSkin());
+        WmvRuntimeModel a = WmvModelBuilder.Build(M2Parser.Parse(m2, 0), skin, new Dictionary<int, BlpImage>(),
+                                                  "GlobalClockA", s => log("  " + s));
+        WmvRuntimeModel b = WmvModelBuilder.Build(M2Parser.Parse(m2, 0), skin, new Dictionary<int, BlpImage>(),
+                                                  "GlobalClockB", s => log("  " + s));
+        bool built = a != null && b != null && a.Animator != null && b.Animator != null;
+        Check(built, "global clock: two animated models built", log);
+        if (!built)
+        {
+            if (a != null) a.Dispose();
+            if (b != null) b.Dispose();
+            return;
+        }
+
+        double globalWas = WmvM2Animator.GlobalTimeMs;
+        object stampWas = advancedFrame.GetValue(null);
+        object readingWas = lastGlobalRealtime.GetValue(null);
+        try
+        {
+            // The readings are put in the past, and a reading below zero means "no reading yet" to the
+            // animator. This runs from Awake, a fraction of a second after the player started, when
+            // 0.4 s ago is still below zero; wait until the past the test needs exists.
+            double wait = 2.0 - Time.realtimeSinceStartupAsDouble;
+            if (wait > 0.0)
+                System.Threading.Thread.Sleep((int)(wait * 1000.0) + 1);
+
+            WmvM2Animator.GlobalTimeMs = 0.0;
+            advancedFrame.SetValue(null, Time.frameCount - 1);
+            double now = Time.realtimeSinceStartupAsDouble;
+            lastGlobalRealtime.SetValue(null, now - 0.4);
+            lastRealtime.SetValue(a.Animator, 0.0);
+            lastRealtime.SetValue(b.Animator, now - 0.4);
+            double bBefore = b.Animator.TimeMs;
+
+            lateUpdate.Invoke(a.Animator, null);
+            double afterA = WmvM2Animator.GlobalTimeMs;
+            lateUpdate.Invoke(b.Animator, null);
+            double afterB = WmvM2Animator.GlobalTimeMs;
+
+            Check(afterA >= 399.0,
+                  "global clock: the frame's first animator advances it by the elapsed time (" + afterA.ToString("F1") + " ms)", log);
+            Check(afterA < 1000.0,
+                  "global clock: ... measured by the global clock's own reading, not by that animator's " +
+                  (now * 1000.0).ToString("F0") + " ms away (" + afterA.ToString("F1") + " ms)", log);
+            Check(afterB == afterA,
+                  "global clock: a second animator in the SAME frame does not advance it again (" + afterB.ToString("F1") +
+                  " ms, not about twice that)", log);
+            double bMoved = b.Animator.TimeMs - bBefore;
+            if (bMoved < 0.0) bMoved += b.Animator.LengthMs;
+            Check(bMoved >= 399.0,
+                  "global clock: ... while that animator's own sequence clock did advance, so its LateUpdate ran (" +
+                  bMoved.ToString("F1") + " ms)", log);
+
+            advancedFrame.SetValue(null, Time.frameCount - 1);
+            lastGlobalRealtime.SetValue(null, Time.realtimeSinceStartupAsDouble - 0.4);
+            lastRealtime.SetValue(b.Animator, Time.realtimeSinceStartupAsDouble - 0.4);
+            lateUpdate.Invoke(b.Animator, null);
+            Check(WmvM2Animator.GlobalTimeMs - afterB >= 399.0,
+                  "global clock: the next frame advances it again (" + WmvM2Animator.GlobalTimeMs.ToString("F1") + " ms)", log);
+        }
+        finally
+        {
+            WmvM2Animator.GlobalTimeMs = globalWas;
+            advancedFrame.SetValue(null, stampWas);
+            lastGlobalRealtime.SetValue(null, readingWas);
+        }
+        a.Dispose();
+        b.Dispose();
+    }
+
+    /// <summary>
+    /// WHERE AN ATTACHED ITEM HANGS (WmvCharacterDresser.AttachmentLocalPosition, which Place uses). The
+    /// host multiplies the character's bone matrix by a translation to the attachment position; a Unity
+    /// bone stands at its pivot, so the same point is the position less the pivot in the bone's space.
+    /// Checked on the leaf of a three-bone chain, so the offsets have to telescope through two parents.
+    /// </summary>
+    static void AttachmentPlacementTests(Action<string> log)
+    {
+        M2ParsedModel model = M2Parser.Parse(M2Synthetic.InFileSkeletonModel(473370), 0);
+        // NoAnimation on an ordinary skinned build: no animator, so the bones stay exactly at rest.
+        WmvRuntimeModel body = WmvModelBuilder.Build(model, M2SkinParser.Parse(M2Synthetic.TransformSwitchSkin()),
+                                                     new Dictionary<int, BlpImage>(), "AttachmentBody",
+                                                     s => log("  " + s), null, null,
+                                                     new WmvBuildOptions { NoAnimation = true });
+        bool built = body != null && body.Skinned && body.Bones.Length == 3;
+        Check(built, "attachment: skinned three-bone body built", log);
+        if (!built) { if (body != null) body.Dispose(); return; }
+        Check(body.Animator == null && body.Emitters == null && body.Root.GetComponent<WmvM2Animator>() == null,
+              "attachment: NoAnimation on a skinned build leaves no animator and no emitters", log);
+
+        M2AttachmentDef att;
+        bool found = M2Parser.AttachmentFor(model, 11, out att);
+        Check(found && att.Bone == 2, "attachment: id 11 resolves to bone 2, under two parents", log);
+        if (!found || att.Bone != 2) { body.Dispose(); return; }
+
+        Vector3 local = WmvCharacterDresser.AttachmentLocalPosition(att.Position, model.Bones[att.Bone].Pivot);
+        Check(NearV(local, UnityPosition(att.Position) - UnityPosition(model.Bones[att.Bone].Pivot), 1e-5f),
+              "attachment: local position = Convert(attachment position) - Convert(bone pivot)", log);
+
+        Transform probe = new GameObject("AttachmentProbe").transform;
+        probe.SetParent(body.Bones[att.Bone], false);
+        probe.localPosition = local;
+        Check(NearV(probe.position, UnityPosition(att.Position), 1e-4f),
+              "attachment: parented under the bone at rest, it sits on the attachment point", log);
+
+        body.Root.transform.position = new Vector3(3f, -1f, 2f);
+        body.Root.transform.rotation = Quaternion.Euler(0f, 90f, 0f);
+        Check(NearV(probe.position, body.Root.transform.TransformPoint(UnityPosition(att.Position)), 1e-4f),
+              "attachment: ... and moves with the character's root", log);
+
+        body.Dispose();         // the probe is under the body's bones and goes with them
+    }
+
     public static void RunAll(Action<string> log)
     {
         passed = failed = 0;
@@ -699,6 +1244,7 @@ public static class WmvLifecycleSelfTest
         SubmeshVisibilityTests(log);
         OutputGateTests(log);
         EmitterTests(log);
+        CharacterTests(log);
         ZoomTests(log);
         log(string.Format("lifecycle-test: {0} passed, {1} failed", passed, failed));
     }

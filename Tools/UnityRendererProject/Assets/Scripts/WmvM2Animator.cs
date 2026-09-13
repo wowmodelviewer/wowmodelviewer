@@ -45,6 +45,37 @@ public class WmvM2Animator : MonoBehaviour
     /// </summary>
     public static double GlobalTimeMs;
 
+    /// <summary>The frame GlobalTimeMs was last advanced in. A character is several models, each with
+    /// its own animator (the body, every attached item); the global clock is ONE clock and must move
+    /// once per frame, not once per animator -- three animators ran global sequences three times too
+    /// fast.</summary>
+    static int globalAdvancedFrame = -1;
+
+    /// <summary>The wall clock when GlobalTimeMs was last advanced, in seconds, or -1 before the first
+    /// frame. The global clock's step is measured from this, and never from an animator's own
+    /// lastRealtime: whichever animator runs first in a frame advances it, and that one may have been
+    /// inactive for a minute (an attached item hidden and shown again) or have had its clock re-anchored
+    /// earlier in the frame (a scene commit, a scrub), which made the shared clock jump or stall.</summary>
+    static double lastGlobalRealtime = -1.0;
+
+    /// <summary>
+    /// Bones posed from a DIFFERENT sequence at a fixed instant, over whatever the playing one does:
+    /// the legacy's closed hand (WoWModel::calcBones), whose finger key bones take the HandsClosed
+    /// sequence at time 1 while a weapon is held. The pose is sampled once when set -- it is a still
+    /// pose -- as a full local transform per bone (rest where the sequence has no keys for a channel,
+    /// exactly as Bone::calcMatrix leaves a channel with none), and written at the end of ApplyPose,
+    /// so paused, scrubbed and playing frames all carry it.
+    /// </summary>
+    struct PoseOverride
+    {
+        public Transform Transform;
+        public Vector3 Position;
+        public Quaternion Rotation;
+        public Vector3 Scale;
+        public Vector3 RestLocalPosition;
+    }
+    PoseOverride[] overrides = new PoseOverride[0];
+
     /// <summary>One track, with its keys already in Unity space.</summary>
     struct Track<T>
     {
@@ -391,8 +422,16 @@ public class WmvM2Animator : MonoBehaviour
         // is not an oversight copied by accident: the legacy viewport advances its global clock
         // before it decides whether the animation is paused, and its speed multiplier lives inside
         // the animation tick alone (ModelCanvas::tick / AnimManager::Tick). A torch keeps
-        // flickering while the creature is held still.
-        GlobalTimeMs += dt;
+        // flickering while the creature is held still. Once per frame, however many models
+        // (animators) are on screen, by the wall clock's step since the last advance rather than by
+        // this animator's own dt (see lastGlobalRealtime).
+        if (Time.frameCount != globalAdvancedFrame)
+        {
+            globalAdvancedFrame = Time.frameCount;
+            if (lastGlobalRealtime >= 0.0)
+                GlobalTimeMs += (now - lastGlobalRealtime) * 1000.0;
+            lastGlobalRealtime = now;
+        }
 
         double beforeTimeMs = timeMs;
 
@@ -558,10 +597,67 @@ public class WmvM2Animator : MonoBehaviour
                 b.Transform.localScale = EvalVector(b.Scale, TrackTime(b.Scale.GlobalSequence, t));
         }
 
+        // The fixed-pose bones replace what the playing sequence just wrote for them.
+        for (int i = 0; i < overrides.Length; i++)
+        {
+            if (overrides[i].Transform == null)
+                continue;
+            overrides[i].Transform.localPosition = overrides[i].Position;
+            overrides[i].Transform.localRotation = overrides[i].Rotation;
+            overrides[i].Transform.localScale = overrides[i].Scale;
+        }
+
         // LAST, so it is the animated pose that gets turned. A billboard bone may also be an
         // animated one, and the flag overrides the track's rotation rather than composing with it.
         ApplyBillboards();
     }
+
+    /// <summary>
+    /// Pose these bones from <paramref name="tracks"/> (a whole-skeleton bone array holding another
+    /// sequence's keys, M2Parser.ReadBoneTracksForSequence) at <paramref name="overrideTimeMs"/>, over
+    /// the playing sequence. An empty index list removes the override. Bones that leave the override go
+    /// back to rest; the playing sequence poses them again from the next ApplyPose if it moves them.
+    /// The rest of the skeleton is re-posed at once at the animator's OWN clock, not at the override's
+    /// instant: the parameter used to be called timeMs, hid the clock field, and snapped the whole body
+    /// and its material gates to the fist's 1 ms for the frame of every weapon change.
+    /// </summary>
+    public void SetPoseOverride(Transform[] boneTransforms, Vector3[] restLocalPositions, int[] boneIndices,
+                                M2BoneDef[] tracks, float overrideTimeMs)
+    {
+        for (int i = 0; i < overrides.Length; i++)
+        {
+            if (overrides[i].Transform == null)
+                continue;
+            overrides[i].Transform.localPosition = overrides[i].RestLocalPosition;
+            overrides[i].Transform.localRotation = Quaternion.identity;
+            overrides[i].Transform.localScale = Vector3.one;
+        }
+        var list = new List<PoseOverride>();
+        if (boneIndices != null && tracks != null && boneTransforms != null)
+        {
+            foreach (int b in boneIndices)
+            {
+                if (b < 0 || b >= boneTransforms.Length || b >= tracks.Length || b >= restLocalPositions.Length)
+                    continue;
+                M2BoneDef def = tracks[b];
+                var t = ConvertVectorTrack(def.Translation, false);
+                var r = ConvertRotationTrack(def.Rotation);
+                var s = ConvertVectorTrack(def.Scale, true);
+                PoseOverride o;
+                o.Transform = boneTransforms[b];
+                o.RestLocalPosition = restLocalPositions[b];
+                o.Position = restLocalPositions[b] + (t.HasData ? EvalVector(t, TrackTime(t.GlobalSequence, overrideTimeMs)) : Vector3.zero);
+                o.Rotation = r.HasData ? EvalRotation(r, TrackTime(r.GlobalSequence, overrideTimeMs)) : Quaternion.identity;
+                o.Scale = s.HasData ? EvalVector(s, TrackTime(s.GlobalSequence, overrideTimeMs)) : Vector3.one;
+                list.Add(o);
+            }
+        }
+        overrides = list.ToArray();
+        ApplyPose((float)this.timeMs);
+    }
+
+    /// <summary>How many bones hold a fixed pose over the playing sequence.</summary>
+    public int PoseOverrideCount { get { return overrides.Length; } }
 
     /// <summary>
     /// The bones carrying bone flag 0x08, ordered parents before children.

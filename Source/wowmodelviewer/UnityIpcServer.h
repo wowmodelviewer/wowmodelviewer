@@ -1,7 +1,7 @@
 /*
  * UnityIpcServer.h
  *
- * Localhost IPC server for the embedded Unity renderer (protocol v2). WMV is the SERVER:
+ * Localhost IPC server for the embedded Unity renderer (protocol v3). WMV is the SERVER:
  * UnityRendererHost starts this listener BEFORE launching the player and passes the port on
  * the player's command line (-wmvPort <n>); the player connects back, announces itself with
  * unityReady and then asks WMV for the raw WoW assets/metadata it renders from. This is the
@@ -15,14 +15,17 @@
  * replace it later without changing the request side.
  *
  *   player -> WMV
- *     { "type":"unityReady", "protocolVersion":2 }
+ *     { "type":"unityReady", "protocolVersion":3 }
  *     { "type":"getAsset",             "requestId":"abc123", "path":"creature/chicken/chicken.m2" }
  *     { "type":"getAssetByFileDataID", "requestId":"abc124", "fileDataID":123456 }
  *     { "type":"getModelTextures",     "requestId":"abc125", "fileDataID":123200 }
  *     { "type":"modelGeosetsApplied", "fileDataID":1521037, "revision":7, "status":"applied",
  *       "reason":"", "submeshVisible":[1,0,1], "triangles":2364, "animTimeMs":840 }
+ *     { "type":"characterSceneApplied", "fileDataID":1011653, "revision":4, "load":12, "status":"applied",
+ *       "reason":"", "merged":3, "attachments":4, "missing":[], "ms":212 }
  *   WMV -> player
- *     { "type":"loadWoWModel", "path":"creature/chicken/chicken.m2", "fileDataID":0, "client":"active" }
+ *     { "type":"loadWoWModel", "path":"creature/chicken/chicken.m2", "fileDataID":0, "client":"active",
+ *       "character":false, "load":12 }
  *     { "type":"assetResponse", "requestId":"abc123", "ok":true, "path":"...", "fileDataID":n,
  *       "byteLength":123456, "sha1":"...", "encoding":"base64", "data":"..." }
  *     { "type":"assetResponse", "requestId":"abc123", "ok":false, "error":"not found" }
@@ -38,6 +41,15 @@
  *       "durationMs":2000, "loop":true }
  *     { "type":"modelAnimationState", "fileDataID":1521037, "sequenceIndex":2, "playing":true,
  *       "timeMs":840, "speed":1.0, "loop":true, "explicitState":false }
+ *     { "type":"characterImage", "hash":"body-3", "width":2048, "height":1024, "format":"bgra8",
+ *       "encoding":"base64", "data":"..." }
+ *     { "type":"characterScene", "fileDataID":1011653, "revision":4,
+ *       "body":{ "textures":[ {"slot":0,"type":1,"image":"body-3"}, {"slot":1,"type":6,"fileDataID":1234} ],
+ *                "submeshCount":120, "submeshVisible":[1,0,...], "closeRightHand":true, "closeLeftHand":false },
+ *       "merged":[ {"key":"m4353217","fileDataID":4353217,"mergeIndex":1,"textures":[...],
+ *                   "submeshCount":6,"submeshVisible":[...],"boneMap":[0,1,2,...]} ],
+ *       "attachments":[ {"key":"a11:1234567","fileDataID":1234567,"attachmentId":11,"mirrored":false,
+ *                        "visible":true,"textures":[...],"submeshCount":2,"submeshVisible":[1,1]} ] }
  *
  * getModelTextures exists because modern M2s do NOT name their replaceable textures (a
  * creature skin's TXID entry is 0 and the texture array carries no filename) -- the skin comes
@@ -63,6 +75,26 @@
  * (kept for the model still loading) or "rejected" (with why; nothing changed) -- and sends the same
  * report with revision 0 after a load or a skin push applied a per-submesh state, so the host always
  * knows what the renderer is drawing rather than assuming it.
+ *
+ * CHARACTERS (protocol 3). A playable character is not one model: the OpenGL canvas draws its body
+ * with a host-composited texture, the collection armour and customization parts refreshMerging laid
+ * into it, and the item models attached at its attachment points. loadWoWModel carries
+ * "character":true for one, and characterScene carries the RESOLVED state of all of it (see
+ * UnityCharacterScene.h): per model, the texture each slot binds -- a FileDataID, or an image the host
+ * composited -- the geoset display flags, the host's bone table for a merged model, and the attachment
+ * id for an attached one. It is sent whole whenever any of that changes (a customization, equipment,
+ * a render toggle, a geoset checkbox); the player dresses the body it built from the same load and
+ * applies each scene as a whole, and answers characterSceneApplied: "applied" (with the parts it could
+ * not build in "missing"), "rejected" (a real refusal: the load failed -- the reason then starts with
+ * "load failed" -- the scene is not about the character on screen or being loaded, or it does not fit)
+ * or "superseded" (dropped because a newer scene or a new load replaced it, which is answered in its
+ * own right; not a failure). "load" in loadWoWModel is the host's load serial, increasing with every
+ * load and never 0; each characterSceneApplied names the serial of the load its scene belonged to (0
+ * when it belonged to none), so an answer about an earlier load -- often of the same body model, and
+ * so the same fileDataID -- is never taken for one about the load on display. characterImage carries a
+ * composited image once, before the first scene that names it; a scene naming an image the player
+ * already holds does not resend the pixels. Rows are top row first, bytes B,G,R,A -- the memory
+ * layout of the QImage the OpenGL texture was uploaded from.
  *
  * modelAnimation is pushed the same way whenever the animation on display changes, and once after
  * loadWoWModel so the player starts on the animation the app is showing rather than on its own
@@ -95,21 +127,25 @@
 #endif
 
 #include <functional>
+#include <initializer_list>
+#include <map>
 #include <string>
 
 #include <vector>
 
 #include <QByteArray>
+#include <QImage>
 #include <QJsonArray>
 #include <QJsonObject>
 #include <QString>
+#include <QStringList>
 
 #include "UnityAssetAccess.h"
 
 class UnityIpcServer : public wxEvtHandler
 {
 public:
-  static const int PROTOCOL_VERSION = 2;
+  static const int PROTOCOL_VERSION = 3;
 
   UnityIpcServer();
   ~UnityIpcServer();
@@ -127,10 +163,24 @@ public:
   // protocol 2 cannot switch submeshes: sendModelGeosets sends it nothing, since it would never answer.
   int  playerProtocolVersion() const { return m_playerProtocol; }
   bool playerSwitchesSubmeshes() const { return m_client && m_unityReady && m_playerProtocol >= 2; }
+  // The player can dress a character from a characterScene (protocol 3).
+  bool playerDressesCharacters() const { return m_client && m_unityReady && m_playerProtocol >= 3; }
 
   // Runtime command: tell the player which model is active. Either path or fileDataID may be
   // empty/0. Queued if the player is connected; dropped (logged) otherwise.
-  void sendLoadWoWModel(const QString & path, int fileDataID, const QString & client = QStringLiteral("active"));
+  // character: the model is a playable character, dressed by the characterScene that follows.
+  // load: the host's load serial for this load (> 0), which the player's characterSceneApplied echoes.
+  void sendLoadWoWModel(const QString & path, int fileDataID, const QString & client = QStringLiteral("active"),
+                        bool character = false, int load = 0);
+
+  // Runtime command: the resolved state of the character on display (UnityCharacterScene::build).
+  // False when the player cannot dress characters or nothing was sent.
+  bool sendCharacterScene(int m2FileDataID, int revision, const QJsonObject & scene);
+
+  // The id a composited image travels under. kind names the image's role ("body", "eyes"); while
+  // its pixels are the ones last sent under that kind the same id comes back and nothing is sent,
+  // otherwise the image goes out (characterImage) under a new id first.
+  QString shareCharacterImage(const QString & kind, const QImage & image);
 
   // Runtime command: the skin on display changed. Resolves the model's textures the same way
   // getModelTextures does -- so the push and the reply can never disagree -- and sends them
@@ -173,6 +223,21 @@ public:
   // Raised on the GUI thread for every modelGeosetsApplied.
   std::function<void(const GeosetAck &)> onGeosetsApplied;
 
+  // The player's answer to a characterScene.
+  struct SceneAck
+  {
+    int fileDataID = 0;
+    int revision = 0;
+    int load = 0;                // the load serial the scene belonged to (0: none the player knew)
+    QString status;              // "applied" / "pending" / "rejected" / "superseded"
+    QString reason;
+    int merged = 0;
+    int attachments = 0;
+    QStringList missing;         // parts the player could not build (key)
+    int ms = 0;
+  };
+  std::function<void(const SceneAck &)> onCharacterSceneApplied;
+
   // Raised (on the GUI thread) when the player's unityReady arrives -- the host uses it to
   // push the currently displayed model.
   std::function<void()> onUnityReady;
@@ -197,6 +262,13 @@ public:
     int geosetRejects = 0;  // ... of which "rejected"
     QString lastGeosets;    // "rev <n> hidden [i,j]" of the last modelGeosets sent
     QString lastGeosetAck;  // "rev <n> <status> <reason>" of the last answer
+    int scenePushes = 0;    // characterScene messages sent
+    int imagePushes = 0;    // characterImage messages sent
+    long long imageBytes = 0;
+    int sceneAcks = 0;      // characterSceneApplied received, any status
+    int sceneApplied = 0;   // ... of which "applied"
+    QString lastScene;      // "rev <n>: <merged> merged, <attachments> attached"
+    QString lastSceneAck;   // "rev <n> <status> <merged>/<attachments> <reason>"
     QString lastRequest;    // "path" or "fileDataID n"
     QString lastProvider;   // "CASC" / "MPQ" / ""
     QString lastError;
@@ -215,6 +287,11 @@ private:
   void handleGetAsset(const QJsonObject & msg, bool byFileDataID);
   void handleGetModelTextures(const QJsonObject & msg);
   void handleGeosetsApplied(const QJsonObject & msg);
+  void handleCharacterSceneApplied(const QJsonObject & msg);
+  void queueLine(const QByteArray & line);
+  // One line assembled from pieces straight in the send buffer: a characterImage line is ~11 MB, and
+  // joining it into one QByteArray first would copy all of it once more.
+  void queueLineParts(std::initializer_list<QByteArray> parts);
   static QJsonArray textureArray(const std::vector<UnityAssetAccess::ModelTexture> & textures);
   // Adds "geosets"/"hasGeosets" to a message about one model, when a selection is known.
   static void addGeosets(QJsonObject & msg, int m2FileDataID);
@@ -232,8 +309,16 @@ private:
   int m_port = 0;
   bool m_unityReady = false;
   int m_playerProtocol = 0;          // protocolVersion from the player's unityReady
+  // The composited images this connection has been sent, by kind, and the id each went under.
+  std::map<QString, QImage> m_sentImages;
+  std::map<QString, QString> m_sentImageIds;
+  int m_imageSerial = 0;
   std::string m_inBuf;               // partial incoming line
   std::string m_outBuf;              // pending bytes to send (partial sends are normal for big assets)
+  // How much of m_outBuf has gone out. Sent bytes are dropped from the front only when they are more
+  // than half the buffer (or all of it): erasing them after every send moved the whole unsent rest
+  // each time, which for an 11 MB image line sent 256 KB at a time was hundreds of MB of memmove.
+  size_t m_outPos = 0;
   Stats m_stats;
 };
 

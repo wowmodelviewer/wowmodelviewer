@@ -97,6 +97,41 @@ struct WmvDrawOrderKey
     public int Built;        // the order this batch was built in: the final tiebreaker
 }
 
+/// <summary>
+/// A skeleton the built mesh is skinned to instead of its own: the bones of ANOTHER model. The host
+/// merges collection armour and customization parts into a character by rebinding their vertices
+/// onto the character's bones (WoWModel::refreshMerging); BoneMap is that table (this model's bone
+/// index -> the other model's), and the parts then move with the character's animation and have none
+/// of their own.
+/// </summary>
+public class WmvExternalSkeleton
+{
+    public Transform[] Bones;
+    public Matrix4x4[] BindPoses;
+    public int[] BoneMap;
+    public Bounds LocalBounds;
+}
+
+/// <summary>How one build differs from a standalone model. Null means a standalone model.</summary>
+public class WmvBuildOptions
+{
+    public WmvExternalSkeleton Skeleton;
+    /// <summary>No animator and no emitters: the part is posed by someone else's skeleton and the host
+    /// runs none of its emitters (refreshMerging copies geometry, passes and textures only).</summary>
+    public bool NoAnimation;
+    /// <summary>Skin submesh index -> the texture key its batches bind on unit 0 INSTEAD of their own
+    /// slot (the host's hand-texture rule for merged parts). The key indexes the decoded textures
+    /// dictionary like a slot does; the wrap flags still come from the batch's own slot.</summary>
+    public Dictionary<int, int> BaseTextureOverride;
+}
+
+/// <summary>One texture upload and the decoded image it was made from.</summary>
+public struct WmvTextureUpload
+{
+    public BlpImage Image;
+    public Texture2D Texture;
+}
+
 public class WmvRuntimeModel
 {
     public GameObject Root;
@@ -104,6 +139,11 @@ public class WmvRuntimeModel
     public Material[] Materials = new Material[0];
     public Texture2D[] Textures = new Texture2D[0];
     public WmvMaterialBinding[] Bindings = new WmvMaterialBinding[0];
+
+    /// <summary>Every upload in Textures by the key GetTexture files it under (slot, alpha treatment,
+    /// wrap), with the image it was made from. A rebind keeps the upload of every key whose image
+    /// object has not changed instead of copying and uploading the same pixels again.</summary>
+    public Dictionary<int, WmvTextureUpload> TextureUploads = new Dictionary<int, WmvTextureUpload>();
 
     /// <summary>Geoset number of each submesh, parallel to Materials. 0 = always drawn.</summary>
     public int[] SubmeshGeosets = new int[0];
@@ -131,6 +171,10 @@ public class WmvRuntimeModel
 
     /// <summary>True when the model is drawn through a SkinnedMeshRenderer.</summary>
     public bool Skinned;
+
+    /// <summary>The bind pose of each bone in Bones, as the mesh was bound. A merged part skinned to
+    /// this model's skeleton binds its vertices with these (see WmvBuildOptions.Skeleton).</summary>
+    public Matrix4x4[] BindPoses = new Matrix4x4[0];
 
     /// <summary>The animator driving the bones, or null when nothing is playing.</summary>
     public WmvM2Animator Animator;
@@ -194,6 +238,7 @@ public class WmvRuntimeModel
         Skin = null;
         Materials = new Material[0];
         Textures = new Texture2D[0];
+        TextureUploads = new Dictionary<int, WmvTextureUpload>();
     }
 }
 
@@ -689,7 +734,7 @@ public static class WmvModelBuilder
             p.Reason = "-wmvNoSkin was passed";
             return p;
         }
-        if (model.SkeletonFileDataID != 0)
+        if (model.SkeletonFileDataID != 0 && !model.SkeletonApplied)
         {
             // The bones are in a .skel named by the SKID chunk (and possibly in ITS parent, via
             // SKPD). Fetching that is another asset round-trip and another chunked format; over a
@@ -794,6 +839,14 @@ public static class WmvModelBuilder
     static BoneWeight[] BuildBoneWeights(M2ParsedModel model, int boneCount,
                                          out int droppedInfluences, out int unweightedVertices)
     {
+        return BuildBoneWeights(model, boneCount, null, out droppedInfluences, out unweightedVertices);
+    }
+
+    /// <summary>usable, when given, marks bone indices an influence may use; one pointing at an
+    /// unusable bone is dropped like one past the end of the array.</summary>
+    static BoneWeight[] BuildBoneWeights(M2ParsedModel model, int boneCount, bool[] usable,
+                                         out int droppedInfluences, out int unweightedVertices)
+    {
         droppedInfluences = 0;
         unweightedVertices = 0;
         int n = model.Vertices.Length;
@@ -811,7 +864,8 @@ public static class WmvModelBuilder
             for (int k = 0; k < 4; k++)
             {
                 if (w[k] <= 0f) { w[k] = 0f; idx[k] = 0; continue; }
-                if (idx[k] >= boneCount) { droppedInfluences++; w[k] = 0f; idx[k] = 0; continue; }
+                if (idx[k] >= boneCount || (usable != null && !usable[idx[k]]))
+                { droppedInfluences++; w[k] = 0f; idx[k] = 0; continue; }
                 sum += w[k];
             }
 
@@ -838,7 +892,8 @@ public static class WmvModelBuilder
                                         Dictionary<int, BlpImage> decodedTextures,
                                         string objectName, Action<string> log,
                                         HashSet<int> geosets = null,
-                                        bool[] submeshVisible = null)
+                                        bool[] submeshVisible = null,
+                                        WmvBuildOptions options = null)
     {
         if (model == null || skin == null)
             throw new WowParseException("builder: nothing to build");
@@ -908,7 +963,7 @@ public static class WmvModelBuilder
         var textures = new List<Texture2D>();
         // Keyed by slot AND by whether the alpha channel was discarded, because the same slot
         // can feed an opaque batch (alpha thrown away) and a blended one (alpha kept).
-        var textureCache = new Dictionary<int, Texture2D>();
+        var textureCache = new Dictionary<int, WmvTextureUpload>();
         var drawOrder = new List<WmvDrawOrderKey>();
         var animBindings = new List<WmvMaterialAnimBinding>();
         var gateHidden = new List<bool>();
@@ -1009,6 +1064,11 @@ public static class WmvModelBuilder
                             combinerAvailable && !Debug_.ForceSolid;
 
             int textureSlot = ResolveTextureSlot(model, batch, 0);
+            int wrapSlot = textureSlot;
+            int overrideKey;
+            if (options != null && options.BaseTextureOverride != null &&
+                options.BaseTextureOverride.TryGetValue(batch.SubmeshIndex, out overrideKey))
+                textureSlot = overrideKey;
             int unit1Slot = useUnit1 ? ResolveTextureSlot(model, batch, 1) : -1;
             // The third unit. Only a combiner that actually consumes it asks for it, so no other
             // material pays for the extra sampler or the extra upload.
@@ -1029,8 +1089,8 @@ public static class WmvModelBuilder
             M2UvSource unit0Uv = shader.UvSource.Length > 0 ? shader.UvSource[0] : M2UvSource.TexCoord0;
             bool unit0Env = unit0Uv == M2UvSource.Environment;
             bool baseWrapX, baseWrapY;
-            TextureWrap(model, textureSlot, unit0Env, out baseWrapX, out baseWrapY);
-            Texture2D tex = GetTexture(decodedTextures, textureCache, textures, textureSlot,
+            TextureWrap(model, wrapSlot, unit0Env, out baseWrapX, out baseWrapY);
+            Texture2D tex = GetTexture(decodedTextures, textureCache, textures, null, textureSlot,
                                        dropAlpha, baseWrapX, baseWrapY, objectName);
             // An environment unit is sampled by generated sphere-map coordinates, which must not
             // wrap; a unit fed by a stored UV set is a normal repeating texture. Its own alpha is
@@ -1042,7 +1102,7 @@ public static class WmvModelBuilder
                                     plan.AlphaMode == 5 || plan.Mode == 4 || plan.Lobe2 > 0);
             bool unit1WrapX, unit1WrapY;
             TextureWrap(model, unit1Slot, unit1Env, out unit1WrapX, out unit1WrapY);
-            Texture2D unit1Tex = GetTexture(decodedTextures, textureCache, textures, unit1Slot,
+            Texture2D unit1Tex = GetTexture(decodedTextures, textureCache, textures, null, unit1Slot,
                                             unit1DropAlpha, unit1WrapX, unit1WrapY, objectName);
             // Unit 2 keeps ITS OWN coordinate source and address mode. On the armour benchmark
             // the host binds the same file to unit 0 and unit 2, but the M2 gives them different
@@ -1053,7 +1113,7 @@ public static class WmvModelBuilder
             bool unit2Env = unit2Uv == M2UvSource.Environment;
             bool unit2WrapX, unit2WrapY;
             TextureWrap(model, unit2Slot, unit2Env, out unit2WrapX, out unit2WrapY);
-            Texture2D unit2Tex = GetTexture(decodedTextures, textureCache, textures, unit2Slot,
+            Texture2D unit2Tex = GetTexture(decodedTextures, textureCache, textures, null, unit2Slot,
                                             false, unit2WrapX, unit2WrapY, objectName);
 
             if (log != null)
@@ -1336,6 +1396,56 @@ public static class WmvModelBuilder
         var boneTransforms = new Transform[0];
         var restPositions = new Vector3[0];
 
+        if (options != null && options.Skeleton != null)
+        {
+            // SKINNED TO ANOTHER MODEL'S SKELETON. The vertices are in the same model space as that
+            // model's (the host merges them without moving them), so its bind poses bind them too:
+            // bone i of this mesh is the other model's bone BoneMap[i], with that bone's bind pose.
+            // An influence on a bone the map cannot place is dropped, as the host's skinning would
+            // read past its own bone array for it.
+            WmvExternalSkeleton ext = options.Skeleton;
+            int nb = ext.BoneMap != null ? ext.BoneMap.Length : 0;
+            var mapped = new Transform[Math.Max(nb, 1)];
+            var poses = new Matrix4x4[mapped.Length];
+            var usable = new bool[mapped.Length];
+            for (int i = 0; i < mapped.Length; i++)
+            {
+                int target = i < nb ? ext.BoneMap[i] : -1;
+                usable[i] = target >= 0 && target < ext.Bones.Length && target < ext.BindPoses.Length;
+                mapped[i] = usable[i] ? ext.Bones[target] : (ext.Bones.Length > 0 ? ext.Bones[0] : go.transform);
+                poses[i] = usable[i] ? ext.BindPoses[target]
+                                     : (ext.BindPoses.Length > 0 ? ext.BindPoses[0] : Matrix4x4.identity);
+            }
+            int dropped, unweighted;
+            mesh.boneWeights = BuildBoneWeights(model, mapped.Length, usable, out dropped, out unweighted);
+            mesh.bindposes = poses;
+            var smr = go.AddComponent<SkinnedMeshRenderer>();
+            smr.sharedMesh = mesh;
+            smr.bones = mapped;
+            smr.sharedMaterials = materials.ToArray();
+            // Culled against the skeleton owner's box, in this object's space (a child of that model
+            // at the identity): the part moves with that model, never outside what it can reach.
+            smr.localBounds = ext.LocalBounds;
+            smr.updateWhenOffscreen = false;
+            result.Skin = smr;
+            if (log != null)
+                log(string.Format("skin: bound to an external skeleton through a {0}-entry bone map; {1} influence(s) " +
+                                  "dropped, {2} vertex/vertices left on the first mapped bone", nb, dropped, unweighted));
+            // No emitters, no animator: see WmvBuildOptions.NoAnimation.
+            result.Root = go;
+            result.Bones = new Transform[0];
+            result.BoneRestPositions = new Vector3[0];
+            result.Skinned = false;       // its bones are not its own: ApplySequence must not pose them
+            result.Bindings = bindings.ToArray();
+            result.Textures = textures.ToArray();
+            result.TextureUploads = textureCache;
+            result.Bounds = displayBounds;
+            result.VertexCount = n;
+            result.TriangleCount = totalTriangles;
+            result.SubmeshCount = triangleSets.Count;
+            return result;
+        }
+
         if (skinPlan.CanSkin)
         {
             Transform rootBone;
@@ -1353,6 +1463,7 @@ public static class WmvModelBuilder
             for (int i = 0; i < boneTransforms.Length; i++)
                 bindPoses[i] = boneTransforms[i].worldToLocalMatrix * go.transform.localToWorldMatrix;
             mesh.bindposes = bindPoses;
+            result.BindPoses = bindPoses;
 
             var smr = go.AddComponent<SkinnedMeshRenderer>();
             smr.sharedMesh = mesh;
@@ -1375,8 +1486,9 @@ public static class WmvModelBuilder
             // Emitters BEFORE the animation block, because whether the model has any is one of
             // the reasons to keep an animator: the emitters run on its clock, so a model whose
             // idle moves no bone but which trails fire still needs one.
-            BuildEmitters(result, model, go, boneTransforms, decodedTextures, textureCache,
-                          textures, objectName, log);
+            if (options == null || !options.NoAnimation)
+                BuildEmitters(result, model, go, boneTransforms, decodedTextures, textureCache,
+                              textures, objectName, log);
 
             if (log != null)
             {
@@ -1395,10 +1507,11 @@ public static class WmvModelBuilder
             // ---- animation ------------------------------------------------------------
             // The bind poses above are read from the rest pose, so they must be taken BEFORE
             // anything moves a bone. Adding the animator last keeps that ordering obvious.
-            if (Debug_.NoAnim)
+            if (Debug_.NoAnim || (options != null && options.NoAnimation))
             {
                 if (log != null)
-                    log("anim: not playing -- -wmvNoAnim was passed");
+                    log(options != null && options.NoAnimation ? "anim: not playing -- posed by its owner"
+                                                               : "anim: not playing -- -wmvNoAnim was passed");
             }
             else if (model.AnimatedSequence >= 0 && model.AnimatedSequence < model.Sequences.Length)
             {
@@ -1491,6 +1604,7 @@ public static class WmvModelBuilder
         result.Skinned = skinPlan.CanSkin;
         result.Bindings = bindings.ToArray();
         result.Textures = textures.ToArray();
+        result.TextureUploads = textureCache;
         result.Bounds = displayBounds;
         result.VertexCount = n;
         result.TriangleCount = totalTriangles;
@@ -1620,6 +1734,10 @@ public static class WmvModelBuilder
             bool any = false;
             Vector3 mn = Vector3.zero, mx = Vector3.zero;
             float globalSpan = animator.MaxGlobalSequenceMs;
+            // One list for every sample, filled in place. Mesh.vertices returns a new array on each
+            // read: eight of those on a character body of about 250k vertices were some 24 MB of
+            // garbage per load.
+            var v = new List<Vector3>();
             for (int s = 0; s < Samples; s++)
             {
                 // A part on a global sequence follows the global clock, not the sequence time,
@@ -1630,17 +1748,18 @@ public static class WmvModelBuilder
                     WmvM2Animator.GlobalTimeMs = globalSpan * (float)((s * 0.6180339887) % 1.0);
                 animator.ApplyPose(animator.LengthMs * s / Samples);
                 smr.BakeMesh(baked, true);
-                Vector3[] v = baked.vertices;
-                for (int i = 0; i < v.Length; i++)
+                baked.GetVertices(v);
+                for (int i = 0; i < v.Count; i++)
                 {
                     // Only what is drawn. The mesh carries every vertex of the file -- batches
                     // the build skipped included -- and mesh.bounds leaves those out too.
                     if (drawn != null && i < drawn.Length && !drawn[i])
                         continue;
-                    if (!any) { mn = v[i]; mx = v[i]; any = true; continue; }
-                    if (v[i].x < mn.x) mn.x = v[i].x; else if (v[i].x > mx.x) mx.x = v[i].x;
-                    if (v[i].y < mn.y) mn.y = v[i].y; else if (v[i].y > mx.y) mx.y = v[i].y;
-                    if (v[i].z < mn.z) mn.z = v[i].z; else if (v[i].z > mx.z) mx.z = v[i].z;
+                    Vector3 p = v[i];
+                    if (!any) { mn = p; mx = p; any = true; continue; }
+                    if (p.x < mn.x) mn.x = p.x; else if (p.x > mx.x) mx.x = p.x;
+                    if (p.y < mn.y) mn.y = p.y; else if (p.y > mx.y) mx.y = p.y;
+                    if (p.z < mn.z) mn.z = p.z; else if (p.z > mx.z) mx.z = p.z;
                 }
             }
             if (!any)
@@ -2012,7 +2131,10 @@ public static class WmvModelBuilder
     ///
     /// decodedTextures is the model's CURRENT texture set keyed by M2 slot -- the caller replaces
     /// the entries the new skin changed and leaves the rest alone, so slots the skin does not
-    /// touch (an environment map named by the M2 itself, say) are simply re-uploaded unchanged.
+    /// touch (an environment map named by the M2 itself, say) keep the upload they have: a slot
+    /// whose image is the same object as the one it was uploaded from is not copied or uploaded
+    /// again, which on a character spared every unchanged body texture on each appearance change.
+    /// A slot missing from the set leaves its materials on the texture they already sample.
     /// </summary>
     public static void RebindTextures(WmvRuntimeModel runtime, Dictionary<int, BlpImage> decodedTextures,
                                       string objectName, Action<string> log)
@@ -2027,7 +2149,8 @@ public static class WmvModelBuilder
         }
 
         var fresh = new List<Texture2D>();
-        var cache = new Dictionary<int, Texture2D>();
+        var cache = new Dictionary<int, WmvTextureUpload>();
+        Dictionary<int, WmvTextureUpload> previous = runtime.TextureUploads ?? new Dictionary<int, WmvTextureUpload>();
 
         for (int i = 0; i < runtime.Materials.Length; i++)
         {
@@ -2036,7 +2159,7 @@ public static class WmvModelBuilder
                 continue;
             WmvMaterialBinding b = runtime.Bindings[i];
 
-            Texture2D tex = GetTexture(decodedTextures, cache, fresh, b.BaseSlot, b.DropAlpha,
+            Texture2D tex = GetTexture(decodedTextures, cache, fresh, previous, b.BaseSlot, b.DropAlpha,
                                        b.BaseWrapX, b.BaseWrapY, objectName);
             if (tex != null && !Debug_.MatColors)
                 m.mainTexture = tex;
@@ -2045,7 +2168,7 @@ public static class WmvModelBuilder
             // it is re-uploaded. Re-deriving the plan here would risk the two paths drifting.
             if (b.EnvSlot >= 0 && m.HasProperty(CombinerModeProperty))
             {
-                Texture2D unit1 = GetTexture(decodedTextures, cache, fresh, b.EnvSlot,
+                Texture2D unit1 = GetTexture(decodedTextures, cache, fresh, previous, b.EnvSlot,
                                              b.Unit1DropAlpha, b.Unit1WrapX, b.Unit1WrapY, objectName);
                 if (unit1 != null && !Debug_.MatColors)
                     m.SetTexture(SecondTexProperty, unit1);
@@ -2055,7 +2178,7 @@ public static class WmvModelBuilder
             // so a skin change re-points it exactly as it re-points unit 0.
             if (b.ThirdSlot >= 0 && m.HasProperty(ThirdTexProperty))
             {
-                Texture2D unit2 = GetTexture(decodedTextures, cache, fresh, b.ThirdSlot,
+                Texture2D unit2 = GetTexture(decodedTextures, cache, fresh, previous, b.ThirdSlot,
                                              false, b.Unit2WrapX, b.Unit2WrapY, objectName);
                 if (unit2 != null && !Debug_.MatColors)
                     m.SetTexture(ThirdTexProperty, unit2);
@@ -2068,12 +2191,26 @@ public static class WmvModelBuilder
                                   b.ThirdSlot >= 0 ? ", third slot " + b.ThirdSlot : ""));
         }
 
-        // Only now destroy the old uploads: a material that ended up keeping its texture would
-        // otherwise be left pointing at a destroyed one.
+        // An upload this rebind did not replace is still in use: a material whose slot is missing from
+        // the new set kept it (see above), or the emitters sample it. It stays, under its key. The
+        // cleanup below used to destroy every old upload not created by this call, so such a material
+        // was left sampling a destroyed texture and drew untextured.
+        foreach (var kv in previous)
+        {
+            if (cache.ContainsKey(kv.Key) || kv.Value.Texture == null)
+                continue;
+            cache[kv.Key] = kv.Value;
+            if (!fresh.Contains(kv.Value.Texture))
+                fresh.Add(kv.Value.Texture);
+        }
+
+        // Only now destroy the old uploads that were replaced: a material that ended up keeping its
+        // texture would otherwise be left pointing at a destroyed one.
         foreach (var old in runtime.Textures)
             if (old != null && !fresh.Contains(old))
                 UnityEngine.Object.Destroy(old);
         runtime.Textures = fresh.ToArray();
+        runtime.TextureUploads = cache;
     }
 
     /// <summary>
@@ -2752,7 +2889,7 @@ public static class WmvModelBuilder
     static void BuildEmitters(WmvRuntimeModel result, M2ParsedModel model, GameObject go,
                               Transform[] boneTransforms,
                               Dictionary<int, BlpImage> decodedTextures,
-                              Dictionary<int, Texture2D> textureCache, List<Texture2D> owned,
+                              Dictionary<int, WmvTextureUpload> textureCache, List<Texture2D> owned,
                               string objectName, Action<string> log)
     {
         if (Debug_.NoEmitters)
@@ -2789,7 +2926,7 @@ public static class WmvModelBuilder
                 return null;
             bool wrapX = model.Textures[slot].WrapX;
             bool wrapY = model.Textures[slot].WrapY;
-            return GetTexture(decodedTextures, textureCache, owned, slot, false, wrapX, wrapY,
+            return GetTexture(decodedTextures, textureCache, owned, null, slot, false, wrapX, wrapY,
                               objectName);
         };
         runtime.SetGlobalSequences(model.GlobalSequences);
@@ -2899,9 +3036,13 @@ public static class WmvModelBuilder
     /// Upload (or reuse) one texture slot. Slots are shared between batches, so the cache is keyed
     /// by slot AND by how the alpha channel was treated -- the same slot can feed one batch whose
     /// alpha is the combiner mask and another where it is discarded.
+    ///
+    /// reuse, when given, is a previous set of uploads (a rebind's): a key whose image is the very
+    /// same object as the one it was uploaded from hands back that upload instead of a new copy.
     /// </summary>
     static Texture2D GetTexture(Dictionary<int, BlpImage> decodedTextures,
-                                Dictionary<int, Texture2D> cache, List<Texture2D> owned,
+                                Dictionary<int, WmvTextureUpload> cache, List<Texture2D> owned,
+                                Dictionary<int, WmvTextureUpload> reuse,
                                 int slot, bool dropAlpha, bool wrapX, bool wrapY, string objectName)
     {
         if (slot < 0 || decodedTextures == null)
@@ -2914,19 +3055,26 @@ public static class WmvModelBuilder
         // batch that repeats it and another that clamps it. Keyed on the alpha treatment alone,
         // whichever batch was built first would silently decide the wrap for both.
         int key = slot * 8 + (dropAlpha ? 4 : 0) + (wrapX ? 2 : 0) + (wrapY ? 1 : 0);
-        Texture2D tex;
-        if (cache.TryGetValue(key, out tex))
-            return tex;
+        WmvTextureUpload upload;
+        if (cache.TryGetValue(key, out upload))
+            return upload.Texture;
+        if (reuse != null && reuse.TryGetValue(key, out upload) && ReferenceEquals(upload.Image, decoded) &&
+            upload.Texture != null)
+        {
+            cache[key] = upload;
+            owned.Add(upload.Texture);
+            return upload.Texture;
+        }
 
-        tex = CreateTexture(decoded, objectName + "_tex" + slot + (dropAlpha ? "_opaque" : ""),
-                            dropAlpha);
+        Texture2D tex = CreateTexture(decoded, objectName + "_tex" + slot + (dropAlpha ? "_opaque" : ""),
+                                      dropAlpha);
         // Per axis, from the texture's own flags: the legacy viewport sets GL_REPEAT on the axis
         // whose bit is set and restores GL_CLAMP_TO_EDGE otherwise
         // (Source/games/wow/ModelRenderPass.cpp:537-540 and :324-328), reading the same two bits
         // (Source/games/wow/WoWModel.cpp:1836-1837, TEXTURE_WRAPX = 1, TEXTURE_WRAPY = 2).
         tex.wrapModeU = wrapX ? TextureWrapMode.Repeat : TextureWrapMode.Clamp;
         tex.wrapModeV = wrapY ? TextureWrapMode.Repeat : TextureWrapMode.Clamp;
-        cache[key] = tex;
+        cache[key] = new WmvTextureUpload { Image = decoded, Texture = tex };
         owned.Add(tex);
         return tex;
     }

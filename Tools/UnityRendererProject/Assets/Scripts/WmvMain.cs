@@ -9,13 +9,18 @@
 //
 // LOAD PIPELINE (all bytes arrive over IPC; nothing is read from or written to disk):
 //
-//   loadWoWModel(path, fileDataID)
+//   loadWoWModel(path, fileDataID, character)
 //     -> getAsset(path)                     the .m2 itself
-//     -> M2Parser                           header, vertices, textures, materials, SFID/TXID
+//     -> M2Parser                           header, vertices, textures, materials, SFID/TXID/SKID
+//     -> getAssetByFileDataID(SKID)         the .skel (and ITS parent, SKPD) when the model keeps its
+//                                           bones, sequences and attachments there -- every playable
+//                                           character does
 //     -> getAssetByFileDataID(SFID[0])      the .skin profile (LOD 0)
 //     -> M2SkinParser                       lookup, triangles, submeshes, batches
 //     -> textures: TXID entry when the M2 names one, otherwise getModelTextures so WMV can
-//        resolve the replaceable creature skin from the client database
+//        resolve the replaceable creature skin from the client database. A CHARACTER instead waits
+//        for the host's characterScene, which names every body slot's texture (a file, or an image
+//        the host composited), and is dressed by WmvCharacterDresser before it goes on screen
 //     -> getAssetByFileDataID(texture)      the .blp
 //     -> BlpDecoder                         RGBA32 in memory
 //     -> WmvModelBuilder                    Mesh + Materials + Texture2D + GameObject
@@ -36,6 +41,18 @@ public class WmvMain : MonoBehaviour
     WmvOrbitCamera orbit;
 
     WmvRuntimeModel current;          // the model on screen (disposed when replaced)
+    WmvCharacterDresser dresser;      // what the character on screen wears, when it is one
+
+    /// <summary>
+    /// Host-composited images by the id scenes name them by, each with its kind ("body", "eyes"). The
+    /// newest image of each kind is kept for the life of the connection, NEVER dropped with a model: the
+    /// host sends a kind again only when its pixels change, so a character loaded a second time names the
+    /// image it already sent. An older image of a kind is dropped when a newer one arrives, unless a scene
+    /// not yet applied still names it: the host sends the new image as soon as it has composited it, and
+    /// a scene still being prepared would otherwise lose its body texture and commit without it.
+    /// </summary>
+    readonly Dictionary<string, KeyValuePair<string, BlpImage>> characterImages =
+        new Dictionary<string, KeyValuePair<string, BlpImage>>();
     WmvShadowRig shadowRig;           // renders the cast-shadow depth map (see WmvShadowRig.cs)
 
     /// <summary>
@@ -151,6 +168,8 @@ public class WmvMain : MonoBehaviour
     {
         public string Path;
         public int FileDataID;
+        public int Load;            // the host's serial for this loadWoWModel, echoed in characterSceneApplied
+        public int ParsedSequence = -1;   // the selection the sequence was resolved for (Parse, ApplySkeleton)
         public System.Diagnostics.Stopwatch Clock = System.Diagnostics.Stopwatch.StartNew();
         public long M2Ms, SkinMs, TextureMs, ParseMs, BuildMs;
 
@@ -160,6 +179,17 @@ public class WmvMain : MonoBehaviour
         public readonly Dictionary<int, BlpImage> Textures = new Dictionary<int, BlpImage>();
 
         public string PendingM2, PendingSkin, PendingTextureList;
+        public string PendingSkel, PendingParentSkel;
+        public byte[] SkelBytes;
+
+        // A playable character: textures come from the host's scene, and the body is dressed before it
+        // replaces the model on screen.
+        public bool Character;
+        public WmvIpcClient.CharacterScene Scene;
+        public WmvIpcClient.CharacterScene TexturesScene;   // the scene the body's textures were taken from
+        public bool SceneTexturesRequested;
+        public WmvRuntimeModel Staged;
+        public WmvCharacterDresser Dresser;
         public bool AskedHost;      // getModelTextures was sent: the answer carries the display's geosets
         public readonly Dictionary<string, int> PendingTextures = new Dictionary<string, int>(); // requestId -> slot
         public int TexturesExpected;
@@ -262,11 +292,13 @@ public class WmvMain : MonoBehaviour
         ipc.OnModelAnimation = HandleModelAnimation;
         ipc.OnModelAnimationState = HandleModelAnimationState;
         ipc.OnModelGeosets = HandleModelGeosets;
+        ipc.OnCharacterImage = HandleCharacterImage;
+        ipc.OnCharacterScene = HandleCharacterScene;
     }
 
     // ---------------------------------------------------------------- load pipeline
 
-    void HandleLoadWoWModel(string path, int fileDataID, string client)
+    void HandleLoadWoWModel(string path, int fileDataID, string client, bool character, int load)
     {
         status.Set("Active client received (" + client + ")");
         if (string.IsNullOrEmpty(path) && fileDataID <= 0)
@@ -274,6 +306,13 @@ public class WmvMain : MonoBehaviour
             status.Set("loadWoWModel without path or fileDataID -- ignored");
             return;
         }
+        // A character still being dressed for the previous load will never be shown.
+        AbandonCharacterJob("superseded by a new load");
+        // Nor will a scene the character ON SCREEN is still preparing. Left running, it committed whenever
+        // its last file landed, in the middle of the new load, and against images the new load's scene
+        // may already have replaced. What it already wears stays until the new model takes its place.
+        if (dresser != null)
+            dresser.CancelTarget("superseded by a new load");
 
         // A sequence index means nothing across models -- entry 14 is a different animation in
         // each -- so forget the previous one. The app pushes its selection for the NEW model right
@@ -305,7 +344,7 @@ public class WmvMain : MonoBehaviour
         haveLoadSubmeshVisible = false;
         loadGeosetRevision = 0;
 
-        job = new LoadJob { Path = path, FileDataID = fileDataID };
+        job = new LoadJob { Path = path, FileDataID = fileDataID, Character = character, Load = load };
         status.Set("Requested " + (string.IsNullOrEmpty(path) ? ("fileDataID " + fileDataID) : path));
         job.PendingM2 = string.IsNullOrEmpty(path)
             ? ipc.RequestAssetByFileDataID(fileDataID)
@@ -314,6 +353,17 @@ public class WmvMain : MonoBehaviour
 
     void HandleAssetResponse(WmvIpcClient.AssetResponse r)
     {
+        // The dresser's own requests: a part's .m2, skin, skeleton and textures.
+        if (job != null && job.Dresser != null && job.Dresser.Owns(r.requestId))
+        {
+            job.Dresser.OnAsset(r);
+            return;
+        }
+        if (dresser != null && dresser.Owns(r.requestId))
+        {
+            dresser.OnAsset(r);
+            return;
+        }
         // A skin change is answered by the same assetResponse messages as a load, so claim ours
         // before the load path sees them.
         if (skinJob != null && skinJob.Pending.ContainsKey(r.requestId))
@@ -330,6 +380,12 @@ public class WmvMain : MonoBehaviour
         }
         if (job == null)
             return;
+
+        if (r.requestId == job.PendingSkel || r.requestId == job.PendingParentSkel)
+        {
+            OnSkeletonBytes(r);
+            return;
+        }
 
         if (!r.ok)
         {
@@ -354,6 +410,7 @@ public class WmvMain : MonoBehaviour
         {
             long t0 = job.Clock.ElapsedMilliseconds;
             job.M2Bytes = r.data;
+            job.ParsedSequence = selectedSequence;
             job.Model = M2Parser.Parse(r.data, selectedSequence);
             job.ParseMs += job.Clock.ElapsedMilliseconds - t0;
             if (job.FileDataID <= 0) job.FileDataID = r.fileDataID;
@@ -365,7 +422,61 @@ public class WmvMain : MonoBehaviour
             Fail("model has no skin profile (SFID chunk missing) -- nothing to render");
             return;
         }
+        // The bones, sequences and attachments of a model with a skeleton file are not in the .m2.
+        if (job.Model.SkeletonFileDataID != 0)
+        {
+            job.PendingSkel = ipc.RequestAssetByFileDataID(job.Model.SkeletonFileDataID);
+            return;
+        }
         // SFID[0] is the highest-detail profile.
+        job.PendingSkin = ipc.RequestAssetByFileDataID(job.Model.SkinFileDataIDs[0]);
+    }
+
+    /// <summary>
+    /// The model's .skel, then the .skel's parent when it names one (SKPD). The skeleton is applied
+    /// the way the host applies it (M2Parser.ApplySkeleton); a skeleton that cannot be read leaves the
+    /// model drawn static, as before this existed, rather than failing the load.
+    /// </summary>
+    void OnSkeletonBytes(WmvIpcClient.AssetResponse r)
+    {
+        bool parentReply = r.requestId == job.PendingParentSkel;
+        if (parentReply) job.PendingParentSkel = null; else job.PendingSkel = null;
+
+        if (!r.ok || r.data == null)
+        {
+            Debug.LogWarning("WMV: skeleton file " + (parentReply ? "(parent) " : "") + "could not be read: " + r.error);
+            if (!parentReply || job.SkelBytes == null)
+            {
+                job.PendingSkin = ipc.RequestAssetByFileDataID(job.Model.SkinFileDataIDs[0]);
+                return;
+            }
+        }
+        else if (!parentReply)
+        {
+            job.SkelBytes = r.data;
+            int parent = M2Parser.ReadSkeletonParentId(r.data);
+            if (parent > 0)
+            {
+                job.PendingParentSkel = ipc.RequestAssetByFileDataID(parent);
+                return;
+            }
+        }
+
+        long t0 = job.Clock.ElapsedMilliseconds;
+        try
+        {
+            job.ParsedSequence = selectedSequence;
+            M2Parser.ApplySkeleton(job.Model, job.SkelBytes, parentReply && r.ok ? r.data : null, selectedSequence);
+            Debug.Log(string.Format("WMV: skeleton {0} applied: {1} bone(s), {2} sequence(s), {3} attachment(s){4}",
+                                    job.Model.SkeletonFileDataID, job.Model.Bones.Length, job.Model.Sequences.Length,
+                                    job.Model.Attachments.Length,
+                                    job.Model.ParentSkeletonFileDataID > 0 ? ", parent " + job.Model.ParentSkeletonFileDataID : ""));
+        }
+        catch (WowParseException e)
+        {
+            Debug.LogWarning("WMV: skeleton " + job.Model.SkeletonFileDataID + " not applied -- drawn static: " + e.Message);
+        }
+        job.ParseMs += job.Clock.ElapsedMilliseconds - t0;
         job.PendingSkin = ipc.RequestAssetByFileDataID(job.Model.SkinFileDataIDs[0]);
     }
 
@@ -389,6 +500,11 @@ public class WmvMain : MonoBehaviour
     /// </summary>
     void RequestTextures()
     {
+        if (job.Character)
+        {
+            RequestCharacterBodyTextures();
+            return;
+        }
         var direct = new List<KeyValuePair<int, int>>();   // slot -> fileDataID
         bool needsHost = false;
         for (int i = 0; i < job.Model.Textures.Length; i++)
@@ -413,6 +529,120 @@ public class WmvMain : MonoBehaviour
         }
         else if (direct.Count == 0)
             BuildIfReady();
+    }
+
+    /// <summary>
+    /// A character's body textures, as the host's scene binds them: files are fetched like any texture,
+    /// composited images are already here. Waits for the scene when it has not arrived yet.
+    /// </summary>
+    void RequestCharacterBodyTextures()
+    {
+        if (job == null || job.Skin == null || job.SceneTexturesRequested)
+            return;
+        if (job.Scene == null)
+        {
+            status.Set("Waiting for the character's appearance");
+            return;
+        }
+        job.SceneTexturesRequested = true;
+        job.TexturesScene = job.Scene;
+        List<KeyValuePair<int, int>> files;
+        var missing = new List<string>();
+        WmvCharacterDresser.BodyTexturesFrom(job.Scene, ImageByHash, out files, job.Textures, missing);
+        foreach (string m in missing)
+            Debug.LogWarning("WMV: character: " + m + " is not available -- that slot draws untextured");
+        job.TexturesExpected = files.Count;
+        foreach (var f in files)
+        {
+            job.PendingTextures[ipc.RequestAssetByFileDataID(f.Value)] = f.Key;
+            currentTextureIds[f.Key] = f.Value;
+        }
+        if (files.Count == 0)
+            BuildIfReady();
+    }
+
+    BlpImage ImageByHash(string hash)
+    {
+        KeyValuePair<string, BlpImage> entry;
+        return hash != null && characterImages.TryGetValue(hash, out entry) ? entry.Value : null;
+    }
+
+    /// <summary>Does a scene that has not been applied yet -- the load's, or one either dresser is still
+    /// preparing -- name this image?</summary>
+    bool ImageStillNamed(string hash)
+    {
+        if (job != null && WmvCharacterDresser.SceneNamesImage(job.Scene, hash))
+            return true;
+        if (job != null && job.Dresser != null && job.Dresser.WantsImage(hash))
+            return true;
+        return dresser != null && dresser.WantsImage(hash);
+    }
+
+    void HandleCharacterImage(WmvIpcClient.CharacterImage img)
+    {
+        if (img.image == null)
+        {
+            Debug.LogWarning("WMV: character image " + img.hash + " rejected: " + img.error);
+            return;
+        }
+        string kind = string.IsNullOrEmpty(img.kind) ? img.hash : img.kind;
+        characterImages[img.hash] = new KeyValuePair<string, BlpImage>(kind, img.image);
+        // The images this one replaces, unless a scene still waiting to be applied names them.
+        List<string> replaced = null;
+        foreach (var kv in characterImages)
+        {
+            if (kv.Key == img.hash || kv.Value.Key != kind || ImageStillNamed(kv.Key))
+                continue;
+            if (replaced == null) replaced = new List<string>();
+            replaced.Add(kv.Key);
+        }
+        if (replaced != null)
+            foreach (string h in replaced)
+                characterImages.Remove(h);
+        Debug.Log(string.Format("WMV: character image {0} ({1}) {2}x{3}{4}", img.hash, img.kind, img.image.Width,
+                                img.image.Height, img.image.HasAlpha ? ", alpha" : ""));
+        if (job != null && job.Dresser != null) job.Dresser.OnImage();
+        if (dresser != null) dresser.OnImage();
+    }
+
+    /// <summary>
+    /// The host's resolved character. Either it belongs to the character being loaded -- the body build
+    /// waits for its textures, and the dresser for its parts -- or to the character on screen, which is
+    /// re-dressed. A scene about neither is refused.
+    /// </summary>
+    void HandleCharacterScene(WmvIpcClient.CharacterScene scene)
+    {
+        if (job != null && job.Character && scene.fileDataID == job.FileDataID)
+        {
+            job.Scene = scene;
+            if (job.Dresser != null)
+                job.Dresser.Retarget(scene);
+            else if (job.Skin != null)
+                RequestCharacterBodyTextures();
+            return;
+        }
+        if (job == null && dresser != null && current != null && scene.fileDataID == currentFileDataID)
+        {
+            dresser.Retarget(scene);
+            return;
+        }
+        // Matches no load, so no load serial.
+        ipc.ReportCharacterSceneApplied(scene.fileDataID, 0, scene.revision, "rejected",
+                                        "not the character on screen or being loaded", 0, 0, null, 0);
+    }
+
+    /// <summary>Drop a character load that will not be shown, and everything it built. Its scene was
+    /// replaced, not refused, so it is answered "superseded".</summary>
+    void AbandonCharacterJob(string reason)
+    {
+        if (job == null || !job.Character)
+            return;
+        if (job.Dresser != null) job.Dresser.Dispose();
+        if (job.Staged != null) job.Staged.Dispose();
+        if (job.Scene != null)
+            ipc.ReportCharacterSceneApplied(job.FileDataID, job.Load, job.Scene.revision, "superseded", reason, 0, 0, null, 0);
+        job.Dresser = null;
+        job.Staged = null;
     }
 
     void HandleModelTextures(WmvIpcClient.ModelTexturesResponse r)
@@ -493,7 +723,9 @@ public class WmvMain : MonoBehaviour
     {
         if (job == null || job.Model == null || job.Skin == null) return;
         if (job.PendingTextureList != null || job.PendingTextures.Count > 0) return;
+        if (job.Character && (!job.SceneTexturesRequested || job.Staged != null)) return;
 
+        bool staging = false;
         try
         {
             // THE APP'S SKIN PUSH FOR THIS MODEL, when the load did not ask the host itself. A
@@ -508,12 +740,34 @@ public class WmvMain : MonoBehaviour
             haveLoadSkin = false;
 
             long t0 = job.Clock.ElapsedMilliseconds;
+            bool[] buildFlags = haveLoadSubmeshVisible ? loadSubmeshVisible : null;
+            if (job.Character && job.Scene != null)
+                buildFlags = WmvIpcClient.Flags(job.Scene.body.submeshVisible);
             var built = WmvModelBuilder.Build(job.Model, job.Skin, job.Textures,
                                               string.IsNullOrEmpty(job.Model.Name) ? "WoWModel" : job.Model.Name,
                                               s => Debug.LogWarning("WMV: " + s),
-                                              currentGeosets,
-                                              haveLoadSubmeshVisible ? loadSubmeshVisible : null);
+                                              job.Character ? null : currentGeosets,
+                                              buildFlags);
             job.BuildMs = job.Clock.ElapsedMilliseconds - t0;
+            if (job.Character)
+            {
+                // A CHARACTER IS SHOWN DRESSED. The body stays hidden, and the model on screen stays
+                // where it is, until the dresser has built every part the scene names; then the whole
+                // character replaces it in one frame (AdoptStaged).
+                haveLoadSubmeshVisible = false;
+                loadSubmeshVisible = null;
+                loadGeosetRevision = 0;
+                built.Root.SetActive(false);
+                job.Staged = built;
+                job.Dresser = new WmvCharacterDresser(ipc, job.Load, ImageByHash, s => Debug.Log("WMV: " + s));
+                LoadJob staged = job;
+                staging = true;
+                Debug.Log(string.Format("WMV: character body built in {0} ms ({1} submeshes, {2} materials) -- dressing it",
+                                        job.BuildMs, built.SubmeshCount, built.Materials.Length));
+                job.Dresser.BeginStaged(built, job.Model, job.FileDataID, job.Scene, job.TexturesScene, job.Textures,
+                                        () => AdoptStaged(staged));
+                return;
+            }
             if (haveLoadSubmeshVisible)
             {
                 // Build ignores a list that does not fit the skin, and says so; report which it was.
@@ -528,6 +782,54 @@ public class WmvMain : MonoBehaviour
             loadSubmeshVisible = null;
             loadGeosetRevision = 0;
 
+            AdoptBuilt(built);
+        }
+        catch (WowParseException e) { Fail("mesh creation failed: " + e.Message); }
+        catch (System.Exception e)
+        {
+            // Anything else out of Build used to escape to the IPC client's catch, which logged
+            // "handler failed" and left the previous model and camera on screen with a job that
+            // never completed. Same outcome as a parse failure: reported, and the load is over.
+            Fail("mesh creation failed: " + e.GetType().Name + ": " + e.Message);
+        }
+        finally { if (!staging) job = null; }
+    }
+
+    /// <summary>The dresser has finished the character it was staged with: put it on screen.</summary>
+    void AdoptStaged(LoadJob staged)
+    {
+        if (job != staged || staged.Staged == null)
+            return;                                  // superseded while it was being dressed
+        WmvRuntimeModel built = staged.Staged;
+        WmvCharacterDresser dressedBy = staged.Dresser;
+        staged.Staged = null;
+        staged.Dresser = null;
+        try
+        {
+            built.Root.SetActive(true);
+            AdoptBuilt(built);
+            dresser = dressedBy;
+            int renderers, materials, textures;
+            dresser.Measure(out renderers, out materials, out textures);
+            Debug.Log(string.Format("WMV: character on screen {0} ms after the load began: body {1} material(s), " +
+                                    "{2} part(s) with {3} renderer(s), {4} material(s), {5} texture(s)",
+                                    staged.Clock.ElapsedMilliseconds, built.Materials.Length, dresser.PartCount,
+                                    renderers, materials, textures));
+        }
+        catch (System.Exception e)
+        {
+            Fail("character adoption failed: " + e.GetType().Name + ": " + e.Message);
+            return;
+        }
+        job = null;
+    }
+
+    /// <summary>Replace the model on screen with a freshly built one, and bring it up to the app's state.</summary>
+    void AdoptBuilt(WmvRuntimeModel built)
+    {
+        {
+            // What the previous character wore is parented to its body, which goes next.
+            if (dresser != null) { dresser.Dispose(); dresser = null; }
             if (current != null) current.Dispose();      // never leak the previous model
             current = built;
             // The emitters were created by that build; the override arrived with the textures.
@@ -543,11 +845,6 @@ public class WmvMain : MonoBehaviour
             currentTextures.Clear();
             foreach (var kv in job.Textures) currentTextures[kv.Key] = kv.Value;
             skinJob = null;
-
-            // Ask for this creature's .anim files now rather than when one is first played, so no
-            // animation switch ever waits on a round trip. They arrive while the user is looking
-            // at the model, not while they are waiting for the animation they just picked.
-            PrefetchAnimFiles();
 
             // THE APP'S PLAYBACK STATE FOR THIS MODEL, pushed while it was still loading. Without
             // it the fresh animator starts at 0 and playing at 1x whatever the app is doing, and
@@ -571,7 +868,45 @@ public class WmvMain : MonoBehaviour
                     current.Animator.SetTransportOnly(loadState.playing, loadState.speed);
                 }
             }
+
+            // AN ANIMATION PICKED WHILE THE MODEL WAS LOADING. The sequence was resolved when the .m2 --
+            // or a character's .skel -- was parsed, and a selection that arrived after that was only
+            // stored: a character is fetched, built and dressed for seconds after its .skel, nothing
+            // asked for the selection again, and the host played one animation while this viewport
+            // played another until the user picked again. A selection whose keys are in a .anim had
+            // the same fate, because the parse has no .anim to read and falls back to the idle. Both
+            // go through the ordinary switch, which fetches the .anim when there is one and then
+            // applies the app's playback state. A selection already playing is not touched, and one
+            // the parse fell back from for a reason a second read cannot change is not read again.
+            int selected = selectedSequence;
+            if (selected >= 0 && selected != currentModel.AnimatedSequence && !WmvModelBuilder.Debug_.NoAnim &&
+                (selected != job.ParsedSequence || M2Parser.ExternalAnimFileId(currentModel, selected) != 0))
+            {
+                // The switch applies the app's state from lastAppState; the push kept for this load is the
+                // newest word on it (the block above has already taken it when the build made an animator).
+                if (haveLoadState)
+                {
+                    lastAppState = loadState;
+                    haveAppState = true;
+                }
+                Debug.Log("WMV: anim: sequence " + selected + " was selected while the model was loading -- switching to it");
+                // Contained here, unlike a pick on a model already on screen: this runs in the middle of the
+                // adoption, and anything escaping it would leave the model unframed and report a character
+                // that IS on screen as a failed load. The load completes and the failed switch is logged.
+                try { SwitchToSequence(selected); }
+                catch (System.Exception e)
+                {
+                    Debug.LogWarning("WMV: anim: switching to sequence " + selected + " failed: " +
+                                     e.GetType().Name + ": " + e.Message);
+                }
+            }
             haveLoadState = false;
+
+            // Ask for this creature's .anim files now rather than when one is first played, so no
+            // animation switch ever waits on a round trip. They arrive while the user is looking
+            // at the model, not while they are waiting for the animation they just picked. After
+            // the switch above, so a file that switch is already fetching is not asked for twice.
+            PrefetchAnimFiles();
 
             // -wmvFrameBounds pins EVERYTHING that frames from the bounds -- the orbit camera, the
             // light rig and the light check -- so two builds that disagree about the bounds
@@ -635,15 +970,6 @@ public class WmvMain : MonoBehaviour
                 job.Path, built.VertexCount, built.TriangleCount, built.SubmeshCount, job.Textures.Count,
                 built.Bounds, job.Clock.ElapsedMilliseconds));
         }
-        catch (WowParseException e) { Fail("mesh creation failed: " + e.Message); }
-        catch (System.Exception e)
-        {
-            // Anything else out of Build used to escape to the IPC client's catch, which logged
-            // "handler failed" and left the previous model and camera on screen with a job that
-            // never completed. Same outcome as a parse failure: reported, and the load is over.
-            Fail("mesh creation failed: " + e.GetType().Name + ": " + e.Message);
-        }
-        finally { job = null; }
     }
 
     /// <summary>
@@ -1722,6 +2048,10 @@ public class WmvMain : MonoBehaviour
         foreach (var e in currentModel.AnimFileIds)
             if (e.FileDataID > 0)
                 wanted.Add(e.FileDataID);
+        // A switch waiting on its .anim has already asked for that file.
+        foreach (int waiting in pendingAnimFetch.Values)
+            if (waiting >= 0)
+                wanted.Remove(M2Parser.ExternalAnimFileId(currentModel, waiting));
         if (wanted.Count == 0)
             return;
         foreach (int fileId in wanted)
@@ -2208,6 +2538,16 @@ public class WmvMain : MonoBehaviour
     {
         status.Set("FAILED: " + reason);
         Debug.LogError("WMV: " + reason);
+        // The host takes a character it hears could not be built back to its own canvas.
+        if (job != null && job.Character)
+        {
+            if (job.Dresser != null) job.Dresser.Dispose();
+            if (job.Staged != null) job.Staged.Dispose();
+            job.Dresser = null;
+            job.Staged = null;
+            ipc.ReportCharacterSceneApplied(job.FileDataID, job.Load, job.Scene != null ? job.Scene.revision : 0, "rejected",
+                                            "load failed: " + reason, 0, 0, null, job.Clock.ElapsedMilliseconds);
+        }
         if (haveLoadSubmeshVisible && loadGeosetRevision > 0 && job != null)
             ipc.ReportGeosetsApplied(job.FileDataID, loadGeosetRevision, "rejected", "the load failed: " + reason,
                                      null, 0, 0.0);
@@ -2219,6 +2559,9 @@ public class WmvMain : MonoBehaviour
 
     void OnDestroy()
     {
+        if (job != null && job.Dresser != null) job.Dresser.Dispose();
+        if (job != null && job.Staged != null) job.Staged.Dispose();
+        if (dresser != null) dresser.Dispose();
         if (current != null) current.Dispose();
     }
 
@@ -2247,11 +2590,17 @@ public class WmvMain : MonoBehaviour
 
     void Update()
     {
+        if (dresser != null)
+            dresser.Tick();
         if (allocProbe == null || allocProbe.Done || current == null)
             return;
         if (!allocProbe.Started)
         {
-            if (Time.frameCount < allocProbe.StartFrame)
+            // The window measures the FRAME LOOP. The load's own traffic -- the .anim files it
+            // prefetches, a character's parts still arriving -- is decoding on this thread for a
+            // while after the build and would be charged to the frames otherwise.
+            if (Time.frameCount < allocProbe.StartFrame || pendingAnimFetch.Count > 0 ||
+                (dresser != null && dresser.Busy))
                 return;
             allocProbe.Started = true;
             allocProbe.HeapAtStart = System.GC.GetTotalMemory(false);

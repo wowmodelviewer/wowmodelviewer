@@ -64,14 +64,18 @@ void CharTexture::compose(GLuint texID)
 #endif
   }
 
-  // good, upload this to video
+  lastImage_ = img;
+
+  // good, upload this to video. constBits(), not bits(): img now shares its pixels with lastImage_,
+  // and the non-const accessor would detach -- deep-copy the whole composite -- just to be read.
   glBindTexture(GL_TEXTURE_2D, texID);
-  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, img.width(), img.height(), 0, GL_BGRA_EXT, GL_UNSIGNED_BYTE, img.bits());
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, img.width(), img.height(), 0, GL_BGRA_EXT, GL_UNSIGNED_BYTE, img.constBits());
   glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR);
   glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR);
 }
 
-GLuint CharTexture::composeStackToTexture(const std::vector<CharTextureComponent> & layersIn)
+GLuint CharTexture::composeStackToTexture(const std::vector<CharTextureComponent> & layersIn,
+                                          QImage * outImage)
 {
   std::vector<CharTextureComponent> layers = layersIn;
   std::sort(layers.begin(), layers.end()); // by layer (lowest = base)
@@ -114,10 +118,14 @@ GLuint CharTexture::composeStackToTexture(const std::vector<CharTextureComponent
   if (composite.isNull())
     return 0;
 
+  if (outImage)
+    *outImage = composite;
+
+  // constBits(): composite may share its pixels with *outImage, as in compose().
   GLuint id = 0;
   glGenTextures(1, &id);
   glBindTexture(GL_TEXTURE_2D, id);
-  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, composite.width(), composite.height(), 0, GL_BGRA_EXT, GL_UNSIGNED_BYTE, composite.bits());
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, composite.width(), composite.height(), 0, GL_BGRA_EXT, GL_UNSIGNED_BYTE, composite.constBits());
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
   return id;

@@ -34,6 +34,8 @@
 #include "logger/LogOutputConsole.h"
 #include "logger/LogOutputFile.h"
 
+#include <QElapsedTimer>
+
 #include <QCoreApplication>
 #include <QFile>
 #include <QSettings>
@@ -915,7 +917,8 @@ static void doHeadlessUnityIpcTest(ModelViewer * frame)
       {
         WoWModel * gm = const_cast<WoWModel *>(frame->canvas->model());
         const size_t owned = gm ? std::min(gm->ownGeosetCount(), gm->geosets.size()) : 0;
-        if (owned < 2 || !frame->unityCanShowCurrentModel() || !ipc->playerSwitchesSubmeshes())
+        if (owned < 2 || !frame->unityCanShowCurrentModel() || !ipc->playerSwitchesSubmeshes() ||
+            frame->canvasShowsCharacter())
         {
           LOG_INFO << "[unityipc-test] geoset-live check: skipped (" << (int)owned
                    << "submesh(es), unity can show=" << (frame->unityCanShowCurrentModel() ? 1 : 0)
@@ -994,6 +997,68 @@ static void doHeadlessUnityIpcTest(ModelViewer * frame)
     }
   }
 
+  // A CHARACTER. Its body load waits for the host's characterScene; the player dresses it and answers
+  // characterSceneApplied. Checked: the dressed character was applied, then two live changes -- a body
+  // geoset switched off and back on, and a new random appearance (a new composited body image) --
+  // each answered "applied" with the time it took.
+  bool characterOk = true;
+  if (frame->canvasShowsCharacter() && ipc->playerDressesCharacters())
+  {
+    auto waitApplied = [&](int before, long limitMs) {
+      wxStopWatch w;
+      while (w.Time() < limitMs)
+      {
+        ipc->poll();
+        wxTheApp->Yield(true);
+        wxMilliSleep(10);
+        if (ipc->stats().sceneApplied > before && frame->m_sceneAwaitingRevision == 0)
+          return (long)w.Time();
+      }
+      return -1L;
+    };
+    const long first = waitApplied(0, 60000);
+    LOG_INFO << "[unityipc-test] character: first scene" << (first >= 0 ? "applied" : "NOT applied") << "after"
+             << first << "ms; scenes sent" << ipc->stats().scenePushes << "images" << ipc->stats().imagePushes
+             << "(" << ipc->stats().imageBytes << "base64 bytes); last" << ipc->stats().lastScene << "| ack"
+             << ipc->stats().lastSceneAck;
+    characterOk = first >= 0;
+
+    WoWModel * cm = const_cast<WoWModel *>(frame->canvas->model());
+    if (characterOk && cm)
+    {
+      size_t index = cm->geosets.size();
+      for (size_t i = 0; i < std::min(cm->ownGeosetCount(), cm->geosets.size()); i++)
+        if (cm->geosets[i]->display && cm->geosets[i]->id != 0) { index = i; break; }
+      if (index < cm->geosets.size())
+      {
+        int before = ipc->stats().sceneApplied;
+        cm->showGeoset((uint)index, false);
+        frame->SendCharacterSceneToUnity(true);
+        const long off = waitApplied(before, 20000);
+        before = ipc->stats().sceneApplied;
+        cm->showGeoset((uint)index, true);
+        frame->SendCharacterSceneToUnity(true);
+        const long on = waitApplied(before, 20000);
+        LOG_INFO << "[unityipc-test] character: body geoset" << (int)cm->geosets[index]->id << "off applied in" << off
+                 << "ms, back on in" << on << "ms";
+        characterOk = characterOk && off >= 0 && on >= 0;
+      }
+      int before = ipc->stats().sceneApplied;
+      const int imagesBefore = ipc->stats().imagePushes;
+      QElapsedTimer refreshClock;
+      refreshClock.start();
+      cm->cd.randomise();
+      const qint64 refreshMs = refreshClock.elapsed();
+      frame->SendCharacterSceneToUnity(true);
+      const long random = waitApplied(before, 30000);
+      LOG_INFO << "[unityipc-test] character: random appearance -- host refresh" << refreshMs << "ms, applied in"
+               << random << "ms," << (ipc->stats().imagePushes - imagesBefore) << "new image(s); ack"
+               << ipc->stats().lastSceneAck;
+      characterOk = characterOk && random >= 0;
+    }
+    LOG_INFO << "[unityipc-test] character check:" << (characterOk ? "(OK)" : "(FAIL)");
+  }
+
   // A model with a skin selector must have pushed at least one skin; one without simply has
   // nothing to sync, so the condition only bites when there was something to send.
   const bool skinsOk = (frame->animControl == NULL) || (frame->animControl->skinCount() == 0) ||
@@ -1007,7 +1072,7 @@ static void doHeadlessUnityIpcTest(ModelViewer * frame)
   const bool stateOk = (frame->animControl == NULL) || (frame->animControl->animationCount() == 0) ||
                        (ipc->stats().statePushes >= 1);
   const bool pass = st.connections >= 1 && ipc->isUnityReady() && st.requests >= 1 &&
-                    st.responsesOk >= 1 && skinsOk && animsOk && stateOk && geosetLiveOk;
+                    st.responsesOk >= 1 && skinsOk && animsOk && stateOk && geosetLiveOk && characterOk;
   LOG_INFO << "[unityipc-test] RESULT:" << (pass ? "PASS" : "FAIL");
 
   // Close the player now (what app shutdown does) and confirm the child process is gone.
