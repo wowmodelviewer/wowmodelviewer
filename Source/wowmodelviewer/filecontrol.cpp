@@ -2,6 +2,7 @@
 
 #include <wx/filename.h>
 #include <wx/msgdlg.h>
+#include <wx/srchctrl.h>
 
 #include <QDirIterator>
 #include <QImage>
@@ -14,6 +15,7 @@
 #include "modelviewer.h"
 #include "RaceInfos.h"
 #include "Texture.h"
+#include "UiStyle.h"
 
 IMPLEMENT_CLASS(FileControl, wxWindow)
 
@@ -21,10 +23,8 @@ BEGIN_EVENT_TABLE(FileControl, wxWindow)
   // model tree
   EVT_TREE_SEL_CHANGED(ID_FILELIST, FileControl::OnTreeSelect)
   EVT_TREE_ITEM_EXPANDING(ID_FILELIST, FileControl::OnTreeItemExpanding)
-  EVT_TREE_ITEM_EXPANDED(ID_FILELIST, FileControl::OnTreeCollapsedOrExpanded)
-  EVT_TREE_ITEM_COLLAPSED(ID_FILELIST, FileControl::OnTreeCollapsedOrExpanded)
-  EVT_BUTTON(ID_FILELIST_SEARCH, FileControl::OnButton)
-  EVT_TEXT_ENTER(ID_FILELIST_CONTENT, FileControl::OnButton)
+  EVT_SEARCH(ID_FILELIST_CONTENT, FileControl::OnButton)
+  EVT_SEARCH_CANCEL(ID_FILELIST_CONTENT, FileControl::OnButton)
   EVT_TEXT(ID_FILELIST_CONTENT, FileControl::OnSearchText)
   EVT_TIMER(ID_FILELIST_SEARCHTIMER, FileControl::OnSearchTimer)
   EVT_CHOICE(ID_FILELIST_FILTER, FileControl::OnChoice)
@@ -81,19 +81,48 @@ FileControl::FileControl(wxWindow* parent, wxWindowID id)
   modelviewer = NULL;
   filterMode = FILE_FILTER_MODEL;
   m_treeRoot = NULL;
+  fileTree = NULL;
   m_searchTimer.SetOwner(this, ID_FILELIST_SEARCHTIMER);
 
-  if (Create(parent, id, wxDefaultPosition, wxSize(170,700), 0, wxT("ModelControlFrame")) == false) {
+  if (Create(parent, id, wxDefaultPosition, wxSize(260,700), 0, wxT("ModelControlFrame")) == false) {
     LOG_ERROR << "Failed to create a window for our FileControl!";
     return;
   }
 
   try {
-    txtContent = new wxTextCtrl(this, ID_FILELIST_CONTENT, wxEmptyString, wxPoint(10, 10), wxSize(110, 20), wxTE_PROCESS_ENTER, wxDefaultValidator);
-    btnSearch = new wxButton(this, ID_FILELIST_SEARCH, _("Clear"), wxPoint(120, 10), wxSize(46,20));
-    fileTree = new wxTreeCtrl(this, ID_FILELIST, wxPoint(0, 35), wxSize(400,580), wxTR_HIDE_ROOT|wxTR_HAS_BUTTONS|wxTR_LINES_AT_ROOT|wxTR_FULL_ROW_HIGHLIGHT|wxTR_NO_LINES);
-    choFilter = new wxChoice(this, ID_FILELIST_FILTER, wxPoint(10, 620), wxSize(130, -1), WXSIZEOF(chos), chos);
+    const int xs = FromDIP(UiStyle::XS);
+    const int sp = FromDIP(UiStyle::S);
+
+    // Search: the box, then one line under it that explains the minimum length while typing and
+    // reports how many files matched afterwards.
+    wxStaticText * searchLabel = new wxStaticText(this, wxID_ANY, _("Search"));
+    txtContent = new wxSearchCtrl(this, ID_FILELIST_CONTENT, wxEmptyString, wxDefaultPosition, wxDefaultSize,
+                                  wxTE_PROCESS_ENTER);
+    txtContent->ShowSearchButton(true);
+    txtContent->ShowCancelButton(true);
+    txtContent->SetDescriptiveText(_("Name or path"));
+    txtContent->SetToolTip(_("Searches as you type from 3 characters; press Enter to search a shorter term"));
+    searchStatus = UiStyle::secondaryLabel(this, wxEmptyString);
+
+    wxStaticText * filterLabel = new wxStaticText(this, wxID_ANY, _("Show"));
+    choFilter = new wxChoice(this, ID_FILELIST_FILTER, wxDefaultPosition, wxDefaultSize, WXSIZEOF(chos), chos);
     choFilter->SetSelection(filterMode);
+
+    fileTree = new wxTreeCtrl(this, ID_FILELIST, wxDefaultPosition, wxDefaultSize, wxTR_HIDE_ROOT|wxTR_HAS_BUTTONS|wxTR_LINES_AT_ROOT|wxTR_FULL_ROW_HIGHLIGHT|wxTR_NO_LINES);
+
+    wxBoxSizer * top = new wxBoxSizer(wxVERTICAL);
+    top->Add(searchLabel, 0, wxLEFT | wxRIGHT | wxTOP, sp);
+    (void)xs;
+    top->Add(txtContent, 0, wxEXPAND | wxLEFT | wxRIGHT | wxTOP, sp);
+    top->Add(searchStatus, 0, wxEXPAND | wxLEFT | wxRIGHT | wxTOP, sp);
+    wxBoxSizer * filterRow = new wxBoxSizer(wxHORIZONTAL);
+    filterRow->Add(filterLabel, 0, wxALIGN_CENTER_VERTICAL | wxRIGHT, sp);
+    filterRow->Add(choFilter, 1, wxALIGN_CENTER_VERTICAL);
+    top->Add(filterRow, 0, wxEXPAND | wxLEFT | wxRIGHT | wxTOP, sp);
+    top->Add(fileTree, 1, wxEXPAND | wxTOP, sp);
+    SetSizer(top);
+
+    SetSearchStatus(_("Load a World of Warcraft client to browse its files."));
   } catch(...) {};
 }
 
@@ -104,8 +133,17 @@ FileControl::~FileControl()
     fileTree = NULL;
   }
   txtContent->Destroy();
-  btnSearch->Destroy();
   choFilter->Destroy();
+}
+
+void FileControl::SetSearchStatus(const wxString & text)
+{
+  if (searchStatus->GetLabel() == text)
+    return;
+  searchStatus->SetLabel(text);
+  searchStatus->Wrap(wxMax(FromDIP(100), GetClientSize().x - 2 * FromDIP(UiStyle::S)));
+  searchStatus->Show(!text.IsEmpty());
+  Layout();
 }
 
 bool filterSearch(QString s)
@@ -158,6 +196,7 @@ void FileControl::Init(ModelViewer* mv)
   // this matches the prior behaviour while letting branches be filled in on expand).
   m_treeRoot = new TreeStackItem();
   TreeStackItem & root = *m_treeRoot;
+  size_t listed = 0;
   for (std::set<GameFile *>::iterator it = files.begin(); it != files.end(); ++it)
   {
     // fullname() may use '/' or '\\'; normalise like beautifyFileName before testing
@@ -198,6 +237,7 @@ void FileControl::Init(ModelViewer* mv)
     child->file = *it;
     child->setName(Items[Items.size()-1]);
     curparent->addChild(child);
+    listed++;
   }
 
   // Add a race-categorised "Characters" section (Playable / NPC), driven by
@@ -269,6 +309,13 @@ void FileControl::Init(ModelViewer* mv)
     fileTree->ExpandAll();
   }
   fileTree->Thaw();
+
+  if (content.isEmpty())
+    SetSearchStatus(wxEmptyString);
+  else if (listed == 0)
+    SetSearchStatus(_("No files match."));
+  else
+    SetSearchStatus(wxString::Format(listed == 1 ? _("%u file found") : _("%u files found"), (unsigned)listed));
 
   LOG_INFO << "Initializing File Controls - END";
 }
@@ -576,6 +623,9 @@ void FileControl::UpdateInterface()
     modelviewer->charMenu->Enable(ID_AUTOHIDE_GEOSETS_FOR_HEAD_ITEMS, false);
   }
 
+  // The Model panel follows whatever was just opened (a model, a WMO, a map tile, nothing).
+  modelviewer->DisplayedContentChanged();
+
   // Update the layout -- only if a pane's shown state changed. This runs after every selection
   // in the file list, and an unconditional Update() blinked the whole window each time: see
   // ModelViewer::CommitLayoutIfChanged.
@@ -652,9 +702,6 @@ void FileControl::OnTreeSelect(wxTreeEvent &event)
     modelviewer->canvas->wmo->loadGroup(id);
     modelviewer->animControl->UpdateWMO(modelviewer->canvas->wmo, id);
 
-    // wxAUI
-    modelviewer->interfaceManager.GetPane(modelviewer->charControl).Show(false);
-
     UpdateInterface();
   } else if (filterMode == FILE_FILTER_IMAGE) {
     ClearCanvas();
@@ -683,30 +730,13 @@ void FileControl::OnTreeSelect(wxTreeEvent &event)
   }
 }
 
-// bg recolor
-void FileControl::OnTreeCollapsedOrExpanded(wxTreeEvent &)
-{
-  wxTreeItemId h;
-  size_t i = 0;
-  for(h=fileTree->GetFirstVisibleItem();h.IsOk();h=fileTree->GetNextVisible(h)) {
-    if (!fileTree->IsVisible(h))
-      break;
-    if (i++%2==1)
-      fileTree->SetItemBackgroundColour(h, wxColour(237,243,254));
-    else
-      fileTree->SetItemBackgroundColour(h, *wxWHITE);
-  }
-}
-
+// Enter or the search button runs the search at any length; the cancel button clears it and
+// brings the browse tree back.
 void FileControl::OnButton(wxCommandEvent &event)
 {
-  int id = event.GetId();
-  if (id == ID_FILELIST_CONTENT)
-    Init();
-  else if (id == ID_FILELIST_SEARCH) {
+  if (event.GetEventType() == wxEVT_SEARCH_CANCEL)
     txtContent->SetValue(wxEmptyString);
-    Init();
-  }
+  Init();
 }
 
 // Fires on every keystroke in the search box. Rather than searching immediately (the filter
@@ -717,6 +747,10 @@ void FileControl::OnButton(wxCommandEvent &event)
 void FileControl::OnSearchText(wxCommandEvent &event)
 {
   m_searchTimer.Start(300, wxTIMER_ONE_SHOT);
+
+  const QString term = QString::fromWCharArray(txtContent->GetValue().c_str()).trimmed();
+  if (!term.isEmpty() && term.length() < 3)
+    SetSearchStatus(_("Type 3 or more characters, or press Enter."));
 }
 
 void FileControl::OnSearchTimer(wxTimerEvent &event)

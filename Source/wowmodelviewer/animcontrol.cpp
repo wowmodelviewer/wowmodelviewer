@@ -2,165 +2,403 @@
 
 #include <wx/wx.h>
 #include <algorithm>
+#include <cmath>
+#include <wx/collpane.h>
 #include <wx/combobox.h>
+#include <wx/listctrl.h>
+#include <wx/scrolwin.h>
+#include <wx/srchctrl.h>
+#include <wx/statline.h>
 #include "logger/Logger.h"
 #include "FileTreeItem.h"
 #include "Game.h"
 #include "globalvars.h"
+#include "ModelInspector.h"
 #include "modelviewer.h"
+#include "UiStyle.h"
 #include "UserSkins.h"
 #include "util.h"
 #include "WoWDatabase.h"
 #include "WotlkDbc.h"
 #include "WMOGroup.h"
 
+// The clip list. Virtual, because a model can have several hundred animations and the filter
+// rebuilds the visible set on every keystroke: the control only ever asks for the rows on screen.
+class AnimClipList : public wxListCtrl
+{
+public:
+  AnimClipList(wxWindow * parent, wxWindowID id, AnimControl * owner)
+    : wxListCtrl(parent, id, wxDefaultPosition, wxDefaultSize,
+                 wxLC_REPORT | wxLC_VIRTUAL | wxLC_SINGLE_SEL | wxBORDER_THEME),
+      m_owner(owner)
+  {
+    AppendColumn(_("Animation"), wxLIST_FORMAT_LEFT, FromDIP(140));
+    AppendColumn(wxT("#"), wxLIST_FORMAT_RIGHT, FromDIP(40));
+    AppendColumn(_("Length"), wxLIST_FORMAT_RIGHT, FromDIP(60));
+    Bind(wxEVT_SIZE, &AnimClipList::OnSize, this);
+  }
+
+protected:
+  wxString OnGetItemText(long item, long column) const override
+  {
+    return m_owner->ClipText(item, column);
+  }
+
+public:
+  // The name column takes whatever the two narrow columns leave. Also after the row count
+  // changes, which can add or remove the vertical scrollbar without a size event.
+  void FitColumns()
+  {
+    // Room is kept for a vertical scrollbar whether or not one is showing: a column that fits the
+    // width exactly brings up a horizontal scrollbar the moment the vertical one appears.
+    const int w = GetClientSize().x - GetColumnWidth(1) - GetColumnWidth(2) -
+                  wxSystemSettings::GetMetric(wxSYS_VSCROLL_X, this) - FromDIP(2);
+    if (w > FromDIP(40) && w != GetColumnWidth(0))
+      SetColumnWidth(0, w);
+  }
+
+private:
+  void OnSize(wxSizeEvent & event)
+  {
+    event.Skip();
+    // After the layout has settled: during a resize the list passes through sizes too small to fit.
+    CallAfter([this]() { FitColumns(); });
+  }
+
+  AnimControl * m_owner;
+};
 
 IMPLEMENT_CLASS(AnimControl, wxWindow)
 
 BEGIN_EVENT_TABLE(AnimControl, wxWindow)
-  EVT_COMBOBOX(ID_ANIM, AnimControl::OnAnim)
   EVT_COMBOBOX(ID_ANIM_SECONDARY, AnimControl::OnAnim)
   EVT_TEXT_ENTER(ID_ANIM_SECONDARY_TEXT, AnimControl::OnButton)
   EVT_COMBOBOX(ID_ANIM_MOUTH, AnimControl::OnAnim)
 
   EVT_COMBOBOX(ID_LOOPS, AnimControl::OnLoop)
-  EVT_COMBOBOX(ID_SKIN, AnimControl::OnSkin)
-  EVT_COMBOBOX(ID_ITEMSET, AnimControl::OnItemSet)
-
-  EVT_COMBOBOX(ID_BLP_SKIN1, AnimControl::OnBLPSkin)
-  EVT_COMBOBOX(ID_BLP_SKIN2, AnimControl::OnBLPSkin)
-  EVT_COMBOBOX(ID_BLP_SKIN3, AnimControl::OnBLPSkin)
 
   EVT_CHECKBOX(ID_OLDSTYLE, AnimControl::OnCheck)
   EVT_CHECKBOX(ID_ANIM_LOCK, AnimControl::OnCheck)
   EVT_CHECKBOX(ID_ANIM_NEXT, AnimControl::OnCheck)
 
-  EVT_BUTTON(ID_SHOW_BLP_SKINLIST, AnimControl::OnButton)
   EVT_BUTTON(ID_PLAY, AnimControl::OnButton)
   EVT_BUTTON(ID_PAUSE, AnimControl::OnButton)
+  EVT_BUTTON(ID_ANIM_PLAYPAUSE, AnimControl::OnButton)
   EVT_BUTTON(ID_STOP, AnimControl::OnButton)
   EVT_BUTTON(ID_ADDANIM, AnimControl::OnButton)
   EVT_BUTTON(ID_CLEARANIM, AnimControl::OnButton)
   EVT_BUTTON(ID_PREVANIM, AnimControl::OnButton)
   EVT_BUTTON(ID_NEXTANIM, AnimControl::OnButton)
+  EVT_BUTTON(ID_ANIM_SPEED_RESET, AnimControl::OnButton)
 
   EVT_SLIDER(ID_SPEED, AnimControl::OnSliderUpdate)
   EVT_SLIDER(ID_SPEED_MOUTH, AnimControl::OnSliderUpdate)
   EVT_SLIDER(ID_FRAME, AnimControl::OnSliderUpdate)
+
+  EVT_LIST_ITEM_SELECTED(ID_ANIM_CLIP_LIST, AnimControl::OnClipSelected)
+  EVT_LIST_ITEM_ACTIVATED(ID_ANIM_CLIP_LIST, AnimControl::OnClipSelected)
+  EVT_TEXT(ID_ANIM_CLIP_FILTER, AnimControl::OnClipFilter)
+  EVT_SEARCHCTRL_CANCEL_BTN(ID_ANIM_CLIP_FILTER, AnimControl::OnClipFilter)
+  EVT_COLLAPSIBLEPANE_CHANGED(wxID_ANY, AnimControl::OnAdvancedToggled)
+  EVT_TIMER(ID_ANIM_UI_TIMER, AnimControl::OnUiTimer)
 END_EVENT_TABLE()
 
-AnimControl::AnimControl(wxWindow* parent, wxWindowID id)
+namespace
+{
+  // Transport glyphs, drawn rather than taken from a font: the symbol characters are not in
+  // every UI font, and a missing glyph is a box on a button. 4x4 supersampled coverage gives
+  // clean edges at any DPI, in the button text colour.
+  enum TransportIcon { ICON_PLAY, ICON_PAUSE, ICON_STOP };
+
+  bool insideIcon(TransportIcon kind, double x, double y)
+  {
+    switch (kind)
+    {
+      case ICON_PLAY:   // right-pointing triangle
+        return x >= 0.22 && x <= 0.86 && std::abs(y - 0.5) <= (0.86 - x) * 0.56;
+      case ICON_PAUSE:
+        return y >= 0.18 && y <= 0.82 && ((x >= 0.22 && x <= 0.42) || (x >= 0.58 && x <= 0.78));
+      case ICON_STOP:
+        return x >= 0.24 && x <= 0.76 && y >= 0.24 && y <= 0.76;
+    }
+    return false;
+  }
+
+  wxBitmap transportBitmap(const wxWindow * win, TransportIcon kind)
+  {
+    const int size = win->FromDIP(12);
+    const wxColour ink = wxSystemSettings::GetColour(wxSYS_COLOUR_BTNTEXT);
+    wxImage img(size, size);
+    img.InitAlpha();
+    for (int py = 0; py < size; py++)
+      for (int px = 0; px < size; px++)
+      {
+        int hits = 0;
+        for (int sy = 0; sy < 4; sy++)
+          for (int sx = 0; sx < 4; sx++)
+            if (insideIcon(kind, (px + (sx + 0.5) / 4.0) / size, (py + (sy + 0.5) / 4.0) / size))
+              hits++;
+        img.SetRGB(px, py, ink.Red(), ink.Green(), ink.Blue());
+        img.SetAlpha(px, py, (unsigned char)(hits * 255 / 16));
+      }
+    return wxBitmap(img);
+  }
+
+  void setLabelIfChanged(wxWindow * w, const wxString & text)
+  {
+    if (w && w->GetLabel() != text)
+      w->SetLabel(text);
+  }
+}
+
+AnimControl::AnimControl(wxWindow* parent, wxWindowID id, wxWindow * skinParent, wxWindow * overridesParent,
+                         wxWindow * doodadParent)
 {
   LOG_INFO << "Creating Anim Control...";
 
-  if(Create(parent, id, wxDefaultPosition, wxSize(700,120), 0, wxT("AnimControlFrame")) == false)
+  if(Create(parent, id, wxDefaultPosition, wxSize(700,160), 0, wxT("AnimControlFrame")) == false)
   {
     wxMessageBox(wxT("Failed to create a window for our AnimControl!"), wxT("Error"));
     LOG_ERROR << "Failed to create a window for our AnimControl!";
     return;
   }
 
+  if (!skinParent)
+    skinParent = this;
+  if (!overridesParent)
+    overridesParent = skinParent;
+  if (!doodadParent)
+    doodadParent = this;
+
+  const int xs = FromDIP(UiStyle::XS);
+  const int sp = FromDIP(UiStyle::S);
+  const int md = FromDIP(UiStyle::M);
+
   const wxString strLoops[10] = { wxT("0"), wxT("1"), wxT("2"), wxT("3"), wxT("4"),
                                   wxT("5"), wxT("6"), wxT("7"), wxT("8"), wxT("9")};
-  
-  animCList = new wxComboBox(this, ID_ANIM, _("Animation"), wxPoint(10,10), wxSize(150,-1), 0,
-                             NULL, wxCB_READONLY|wxCB_SORT, wxDefaultValidator, wxT("Animation"));
-  animCList2 = new wxComboBox(this, ID_ANIM_SECONDARY, _("Secondary"), wxPoint(10,95), wxSize(150,-1), 0,
+
+  // ---- Clips: filter + list ------------------------------------------------------------------
+  clipFilter = new wxSearchCtrl(this, ID_ANIM_CLIP_FILTER, wxEmptyString, wxDefaultPosition,
+                                wxDefaultSize, wxTE_PROCESS_ENTER);
+  clipFilter->ShowCancelButton(true);
+  clipFilter->SetDescriptiveText(_("Filter animations"));
+  clipCount = UiStyle::secondaryLabel(this, _("No animations"));
+  clipList = new AnimClipList(this, ID_ANIM_CLIP_LIST, this);
+  clipList->SetMinSize(FromDIP(wxSize(200, 60)));
+
+  wxBoxSizer * clipsCol = new wxBoxSizer(wxVERTICAL);
+  {
+    wxBoxSizer * row = new wxBoxSizer(wxHORIZONTAL);
+    row->Add(clipFilter, 1, wxALIGN_CENTER_VERTICAL);
+    row->Add(clipCount, 0, wxALIGN_CENTER_VERTICAL | wxLEFT, sp);
+    clipsCol->Add(row, 0, wxEXPAND | wxBOTTOM, xs);
+  }
+  clipsCol->Add(clipList, 1, wxEXPAND);
+
+  // ---- Playback: transport, state, scrubber, speed -------------------------------------------
+  btnPrev = new wxButton(this, ID_PREVANIM, wxT("\u2039 Frame"), wxDefaultPosition, wxDefaultSize, wxBU_EXACTFIT);
+  btnPrev->SetToolTip(_("Step back one frame"));
+  btnPlayPause = new wxButton(this, ID_ANIM_PLAYPAUSE, _("Pause"), wxDefaultPosition, wxDefaultSize, wxBU_EXACTFIT);
+  btnPlayPause->SetBitmap(transportBitmap(this, ICON_PAUSE));
+  btnPlayPause->SetBitmapMargins(FromDIP(wxSize(4, 0)));
+  btnPlayPause->SetMinSize(wxSize(FromDIP(70), -1));
+  btnPlayPause->SetToolTip(_("Play or pause the animation"));
+  btnStop = new wxButton(this, ID_STOP, _("Stop"), wxDefaultPosition, wxDefaultSize, wxBU_EXACTFIT);
+  btnStop->SetBitmap(transportBitmap(this, ICON_STOP));
+  btnStop->SetBitmapMargins(FromDIP(wxSize(4, 0)));
+  btnStop->SetMinSize(wxSize(FromDIP(62), -1));
+  btnStop->SetToolTip(_("Stop and return to the first frame"));
+  btnNext = new wxButton(this, ID_NEXTANIM, wxT("Frame \u203A"), wxDefaultPosition, wxDefaultSize, wxBU_EXACTFIT);
+  btnNext->SetToolTip(_("Step forward one frame"));
+
+  stateLabel = new wxStaticText(this, wxID_ANY, _("No animation"), wxDefaultPosition, wxDefaultSize,
+                                wxST_ELLIPSIZE_END | wxST_NO_AUTORESIZE);
+  frameSlider = new wxSlider(this, ID_FRAME, 0, 0, 10);
+  frameSlider->SetToolTip(_("Scrub through the animation"));
+  // While the thumb is held, the playback timer must not move it out from under the mouse.
+  frameSlider->Bind(wxEVT_SCROLL_THUMBTRACK, [this](wxScrollEvent & e) { m_scrubbing = true; e.Skip(); });
+  frameSlider->Bind(wxEVT_SCROLL_THUMBRELEASE, [this](wxScrollEvent & e) { m_scrubbing = false; e.Skip(); });
+
+  speedSlider = new wxSlider(this, ID_SPEED, 10, 1, 40);
+  speedSlider->SetToolTip(_("Playback speed (keys 1-9 and 0 in the OpenGL viewport)"));
+  speedLabel = new wxStaticText(this, wxID_ANY, wxT("1.0\u00D7"), wxDefaultPosition, wxDefaultSize,
+                                wxALIGN_RIGHT | wxST_NO_AUTORESIZE);
+  speedLabel->SetMinSize(wxSize(GetTextExtent(wxT("0.0\u00D7 ")).x, -1));
+  btnSpeedReset = new wxButton(this, ID_ANIM_SPEED_RESET, _("Reset"), wxDefaultPosition, wxDefaultSize, wxBU_EXACTFIT);
+  btnSpeedReset->SetToolTip(_("Back to normal speed"));
+
+  wxBoxSizer * playCol = new wxBoxSizer(wxVERTICAL);
+  {
+    wxBoxSizer * transport = new wxBoxSizer(wxHORIZONTAL);
+    transport->Add(btnPrev, 0, wxALIGN_CENTER_VERTICAL);
+    transport->Add(btnPlayPause, 0, wxALIGN_CENTER_VERTICAL | wxLEFT, xs);
+    transport->Add(btnStop, 0, wxALIGN_CENTER_VERTICAL | wxLEFT, xs);
+    transport->Add(btnNext, 0, wxALIGN_CENTER_VERTICAL | wxLEFT, xs);
+    playCol->Add(transport, 0, wxBOTTOM, sp);
+  }
+  playCol->Add(stateLabel, 0, wxEXPAND | wxBOTTOM, xs);
+  playCol->Add(frameSlider, 0, wxEXPAND | wxBOTTOM, sp);
+  {
+    wxBoxSizer * speed = new wxBoxSizer(wxHORIZONTAL);
+    speed->Add(new wxStaticText(this, wxID_ANY, _("Speed")), 0, wxALIGN_CENTER_VERTICAL | wxRIGHT, xs);
+    speed->Add(speedSlider, 1, wxALIGN_CENTER_VERTICAL);
+    speed->Add(speedLabel, 0, wxALIGN_CENTER_VERTICAL | wxLEFT, xs);
+    speed->Add(btnSpeedReset, 0, wxALIGN_CENTER_VERTICAL | wxLEFT, sp);
+    playCol->Add(speed, 0, wxEXPAND);
+  }
+
+  // ---- Queue & advanced (collapsed by default) -----------------------------------------------
+  advancedScroll = new wxScrolledWindow(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxVSCROLL);
+  advancedScroll->SetScrollRate(0, FromDIP(8));
+  advancedPane = new wxCollapsiblePane(advancedScroll, wxID_ANY, _("Queue && advanced"), wxDefaultPosition,
+                                       wxDefaultSize, wxCP_DEFAULT_STYLE | wxCP_NO_TLW_RESIZE,
+                                       wxDefaultValidator, wxT("animQueueAdvanced"));
+  wxWindow * adv = advancedPane->GetPane();
+
+  oldStyle = new wxCheckBox(adv, ID_OLDSTYLE, _("Auto animate"));
+  oldStyle->SetToolTip(_("Play an animation as soon as it is picked"));
+  bOldStyle = true;
+  oldStyle->SetValue(bOldStyle);
+
+  nextAnims = new wxCheckBox(adv, ID_ANIM_NEXT, _("Queue follow-up animations"));
+  nextAnims->SetToolTip(_("Also queue the animations the model chains after the picked one"));
+  bNextAnims = false;
+  nextAnims->SetValue(bNextAnims);
+
+  loopList = new wxComboBox(adv, ID_LOOPS, wxT("0"), wxDefaultPosition, wxDefaultSize, 10,
+                            strLoops, wxCB_READONLY, wxDefaultValidator, wxT("Loops"));
+  btnAdd = new wxButton(adv, ID_ADDANIM, _("Add to queue"), wxDefaultPosition, wxDefaultSize, wxBU_EXACTFIT);
+  btnAdd->SetToolTip(_("Queue the selected animation for the number of loops shown"));
+  btnClear = new wxButton(adv, ID_CLEARANIM, _("Clear queue"), wxDefaultPosition, wxDefaultSize, wxBU_EXACTFIT);
+
+  lockAnims = new wxCheckBox(adv, ID_ANIM_LOCK, _("Lock animations"));
+  lockAnims->SetToolTip(_("Untick to play a separate upper-body and mouth animation"));
+  bLockAnims = true;
+  lockAnims->SetValue(bLockAnims);
+
+  animCList2Label = new wxStaticText(adv, wxID_ANY, _("Upper body"));
+  animCList2 = new wxComboBox(adv, ID_ANIM_SECONDARY, _("Secondary"), wxDefaultPosition, wxDefaultSize, 0,
                              NULL, wxCB_READONLY|wxCB_SORT, wxDefaultValidator, wxT("Secondary"));
   animCList2->Enable(false);
-  animCList2->Show(false);
 
-  lockText = new wxTextCtrl(this, ID_ANIM_SECONDARY_TEXT, wxEmptyString, wxPoint(300, 64),
-                            wxSize(20, 20), wxTE_PROCESS_ENTER, wxDefaultValidator);
+  lockTextLabel = new wxStaticText(adv, wxID_ANY, _("Bones"));
+  lockText = new wxTextCtrl(adv, ID_ANIM_SECONDARY_TEXT, wxEmptyString, wxDefaultPosition,
+                            wxDefaultSize, wxTE_PROCESS_ENTER, wxDefaultValidator);
   lockText->SetValue(wxString::Format(wxT("%d"), UPPER_BODY_BONES));
+  lockText->SetMinSize(wxSize(FromDIP(48), -1));
+  lockText->SetToolTip(_("Bones driven by the upper-body animation (press Enter to apply)"));
   lockText->Enable(false);
-  lockText->Show(false);
 
   // Our hidden head/mouth related controls
-  animCList3 = new wxComboBox(this, ID_ANIM_MOUTH, _("Mouth"), wxPoint(170,95), wxSize(150,-1), 0,
+  animCList3Label = new wxStaticText(adv, wxID_ANY, _("Mouth"));
+  animCList3 = new wxComboBox(adv, ID_ANIM_MOUTH, _("Mouth"), wxDefaultPosition, wxDefaultSize, 0,
                               NULL, wxCB_READONLY|wxCB_SORT, wxDefaultValidator, wxT("Secondary"));
   animCList3->Enable(false);
-  animCList3->Show(false);
 
-  //btnPauseMouth = new wxButton(this, ID_PAUSE_MOUTH, wxT("Pause"), wxPoint(160,100), wxSize(45,20));
-  //btnPauseMouth->Show(false);
+  speedMouthLabel = new wxStaticText(adv, -1, wxT("Speed: 1.0x"));
+  speedMouthSlider = new wxSlider(adv, ID_SPEED_MOUTH, 10, 0, 40);
 
-  speedMouthLabel = new wxStaticText(this, -1, wxT("Speed: 1.0x"), wxPoint(340,95), wxDefaultSize);
-  speedMouthLabel->Show(false);
+  {
+    wxBoxSizer * col = new wxBoxSizer(wxVERTICAL);
+    col->Add(oldStyle, 0, wxBOTTOM, xs);
+    col->Add(nextAnims, 0, wxBOTTOM, sp);
+    wxBoxSizer * queue = new wxBoxSizer(wxHORIZONTAL);
+    queue->Add(new wxStaticText(adv, wxID_ANY, _("Loops")), 0, wxALIGN_CENTER_VERTICAL | wxRIGHT, xs);
+    queue->Add(loopList, 0, wxALIGN_CENTER_VERTICAL);
+    queue->Add(btnAdd, 0, wxALIGN_CENTER_VERTICAL | wxLEFT, xs);
+    queue->Add(btnClear, 0, wxALIGN_CENTER_VERTICAL | wxLEFT, xs);
+    col->Add(queue, 0, wxBOTTOM, sp);
+    col->Add(lockAnims, 0, wxBOTTOM, xs);
+    wxFlexGridSizer * lock = new wxFlexGridSizer(2, xs, sp);
+    lock->AddGrowableCol(1);
+    lock->Add(animCList2Label, 0, wxALIGN_CENTER_VERTICAL);
+    lock->Add(animCList2, 1, wxEXPAND);
+    lock->Add(lockTextLabel, 0, wxALIGN_CENTER_VERTICAL);
+    lock->Add(lockText, 0);
+    lock->Add(animCList3Label, 0, wxALIGN_CENTER_VERTICAL);
+    lock->Add(animCList3, 1, wxEXPAND);
+    lock->Add(speedMouthLabel, 0, wxALIGN_CENTER_VERTICAL);
+    lock->Add(speedMouthSlider, 1, wxEXPAND);
+    col->Add(lock, 0, wxEXPAND | wxLEFT, md);
+    adv->SetSizer(col);
+  }
+  // Locked by default: the secondary/mouth rows appear only when it is unticked.
+  for (wxWindow * w : { (wxWindow *)animCList2Label, (wxWindow *)animCList2, (wxWindow *)lockTextLabel,
+                        (wxWindow *)lockText, (wxWindow *)animCList3Label, (wxWindow *)animCList3,
+                        (wxWindow *)speedMouthLabel, (wxWindow *)speedMouthSlider })
+    w->Show(false);
 
-  speedMouthSlider = new wxSlider(this, ID_SPEED_MOUTH, 10, 0, 40, wxPoint(415,95), wxSize(100,38), wxSL_AUTOTICKS);
-  speedMouthSlider->SetTickFreq(10);
-  speedMouthSlider->Show(false);
+  {
+    wxBoxSizer * s = new wxBoxSizer(wxVERTICAL);
+    s->Add(advancedPane, 0, wxEXPAND);
+    advancedScroll->SetSizer(s);
+    advancedScroll->FitInside();
+  }
 
-  // ---
+  // ---- Three columns -------------------------------------------------------------------------
+  wxBoxSizer * top = new wxBoxSizer(wxHORIZONTAL);
+  top->Add(clipsCol, 5, wxEXPAND | wxALL, sp);
+  top->Add(new wxStaticLine(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxLI_VERTICAL), 0, wxEXPAND | wxTOP | wxBOTTOM, sp);
+  top->Add(playCol, 5, wxEXPAND | wxALL, sp);
+  top->Add(new wxStaticLine(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxLI_VERTICAL), 0, wxEXPAND | wxTOP | wxBOTTOM, sp);
+  top->Add(advancedScroll, 0, wxEXPAND | wxALL, sp);
+  SetSizer(top);
+  RelayoutAdvanced();
 
-  loopList = new wxComboBox(this, ID_LOOPS, wxT("0"), wxPoint(330, 10), wxSize(40,-1), 10,
-                            strLoops, wxCB_READONLY, wxDefaultValidator, wxT("Loops"));
-  btnAdd = new wxButton(this, ID_ADDANIM, _("Add"), wxPoint(380, 10), wxSize(45,20));
-
-  skinList = new wxComboBox(this, ID_SKIN, _("Skin"), wxPoint(170,10), wxSize(150,-1), 0, NULL, wxCB_READONLY);
+  // ---- Appearance controls (laid out by the Model inspector) ---------------------------------
+  // Created on the Appearance page, so their events travel up THAT window's parents rather than
+  // this one's; each is bound here directly to the handler it has always had.
+  skinList = new wxComboBox(skinParent, ID_SKIN, _("Skin"), wxDefaultPosition, wxDefaultSize, 0, NULL, wxCB_READONLY);
   skinList->Show(false);
+  skinList->Bind(wxEVT_COMBOBOX, &AnimControl::OnSkin, this);
 
-  BLPSkinsLabel = new wxStaticText(this, wxID_ANY, wxT("All skins in folder :"), wxPoint(600,5), wxSize(150,16));
+  BLPSkinsLabel = UiStyle::secondaryLabel(overridesParent, _("Any texture from this model's folder:"));
   BLPSkinsLabel->Show(false);
 
-  showBLPList = new wxButton(this, ID_SHOW_BLP_SKINLIST, _("Show skin list (LONG!)"), wxPoint(635,25), wxSize(150,22));
+  showBLPList = new wxButton(overridesParent, ID_SHOW_BLP_SKINLIST, _("List folder textures (slow)"));
+  showBLPList->SetToolTip(_("This folder has many textures; listing them takes a moment"));
   showBLPList->Show(false);
+  showBLPList->Bind(wxEVT_BUTTON, &AnimControl::OnButton, this);
 
-  BLPSkinLabel1 = new wxStaticText(this, wxID_ANY, wxT("Skin 1"), wxPoint(600,29), wxSize(30,16));
+  BLPSkinLabel1 = new wxStaticText(overridesParent, wxID_ANY, _("Texture 1"));
   BLPSkinLabel1->Show(false);
-  BLPSkinList1 = new wxComboBox(this, ID_BLP_SKIN1, _("Skin"), wxPoint(635,25), wxSize(150,-1), 0, NULL, wxCB_READONLY);
+  BLPSkinList1 = new wxComboBox(overridesParent, ID_BLP_SKIN1, _("Skin"), wxDefaultPosition, wxDefaultSize, 0, NULL, wxCB_READONLY);
   BLPSkinList1->Show(false);
 
-  BLPSkinLabel2 = new wxStaticText(this, wxID_ANY, wxT("Skin 2"), wxPoint(600,59), wxSize(30,16));
+  BLPSkinLabel2 = new wxStaticText(overridesParent, wxID_ANY, _("Texture 2"));
   BLPSkinLabel2->Show(false);
-  BLPSkinList2 = new wxComboBox(this, ID_BLP_SKIN2, _("Skin"), wxPoint(635,55), wxSize(150,-1), 0, NULL, wxCB_READONLY);
+  BLPSkinList2 = new wxComboBox(overridesParent, ID_BLP_SKIN2, _("Skin"), wxDefaultPosition, wxDefaultSize, 0, NULL, wxCB_READONLY);
   BLPSkinList2->Show(false);
 
-  BLPSkinLabel3 = new wxStaticText(this, wxID_ANY, wxT("Skin 3"), wxPoint(600,89), wxSize(30,16));
+  BLPSkinLabel3 = new wxStaticText(overridesParent, wxID_ANY, _("Texture 3"));
   BLPSkinLabel3->Show(false);
-  BLPSkinList3 = new wxComboBox(this, ID_BLP_SKIN3, _("Skin"), wxPoint(635,85), wxSize(150,-1), 0, NULL, wxCB_READONLY);
+  BLPSkinList3 = new wxComboBox(overridesParent, ID_BLP_SKIN3, _("Skin"), wxDefaultPosition, wxDefaultSize, 0, NULL, wxCB_READONLY);
   BLPSkinList3->Show(false);
+
+  for (wxComboBox * cb : { BLPSkinList1, BLPSkinList2, BLPSkinList3 })
+    cb->Bind(wxEVT_COMBOBOX, &AnimControl::OnBLPSkin, this);
 
   defaultDoodads = true;
   modelFolderChanged = true;
   BLPListFilled = false;
 
-  wmoList = new wxComboBox(this, ID_ITEMSET, _("Item set"), wxPoint(220,10), wxSize(128,-1), 0, NULL, wxCB_READONLY);
+  wmoList = new wxComboBox(doodadParent, ID_ITEMSET, _("Item set"), wxDefaultPosition, wxDefaultSize, 0, NULL, wxCB_READONLY);
   wmoList->Show(FALSE);
-  wmoLabel = new wxStaticText(this, -1, wxEmptyString, wxPoint(10,15), wxSize(192,16));
+  wmoList->Bind(wxEVT_COMBOBOX, &AnimControl::OnItemSet, this);
+  wmoLabel = new wxStaticText(doodadParent, -1, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxST_ELLIPSIZE_END);
   wmoLabel->Show(FALSE);
 
-  speedSlider = new wxSlider(this, ID_SPEED, 10, 1, 40, wxPoint(490,56), wxSize(100,38), wxSL_AUTOTICKS);
-  speedSlider->SetTickFreq(10);
-  speedLabel = new wxStaticText(this, -1, wxT("Speed: 1.0x"), wxPoint(490,40), wxDefaultSize);
-
-  frameLabel = new wxStaticText(this, -1, wxT("Frame: 0"), wxPoint(330,40), wxDefaultSize);
-  frameSlider = new wxSlider(this, ID_FRAME, 1, 1, 10, wxPoint(330,56), wxSize(160,38), wxSL_AUTOTICKS);
-  frameSlider->SetTickFreq(2);
-
-  btnPlay = new wxButton(this, ID_PLAY, _("Play"), wxPoint(10,40), wxSize(45,20));
-  btnPause = new wxButton(this, ID_PAUSE, _("Pause"), wxPoint(62,40), wxSize(45,20));
-  btnStop = new wxButton(this, ID_STOP, _("Stop"), wxPoint(115,40), wxSize(45,20));
-  
-  btnClear = new wxButton(this, ID_CLEARANIM, _("Clear"), wxPoint(10,64), wxSize(45,20));
-  btnPrev = new wxButton(this, ID_PREVANIM, wxT("<<"), wxPoint(62,64), wxSize(45,20));
-  btnNext = new wxButton(this, ID_NEXTANIM, wxT(">>"), wxPoint(115,64), wxSize(45,20));
-  
-  lockAnims = new wxCheckBox(this, ID_ANIM_LOCK, _("Lock Animations"), wxPoint(170,64), wxDefaultSize, 0);
-  bLockAnims = true;
-  lockAnims->SetValue(bLockAnims);
-
-  oldStyle = new wxCheckBox(this, ID_OLDSTYLE, _("Auto Animate"), wxPoint(170,40), wxDefaultSize, 0);
-  bOldStyle = true;
-  oldStyle->SetValue(bOldStyle);
-  nextAnims = new wxCheckBox(this, ID_ANIM_NEXT, _("Next Animations"), wxPoint(430,10), wxDefaultSize, 0);
-  bNextAnims = false;
-  nextAnims->SetValue(bNextAnims);
+  // Keeps the state line, the play/pause button and the scrubber in step with the clock the
+  // canvas advances. UI only: it reads the animation manager and changes nothing.
+  m_uiTimer.SetOwner(this, ID_ANIM_UI_TIMER);
+  m_uiTimer.Start(100);
+  RefreshPlaybackState();
 }
 
 AnimControl::~AnimControl()
 {
+  m_uiTimer.Stop();
+
   // Free the memory that was allocated (fixed: memory leak)
   for (size_t i=0; i<skinList->GetCount(); i++)
   {
@@ -168,7 +406,6 @@ AnimControl::~AnimControl()
     wxDELETE(grp);
   }
 
-  animCList->Clear();
   animCList2->Clear();
   animCList3->Clear();
   skinList->Clear();
@@ -176,7 +413,6 @@ AnimControl::~AnimControl()
   BLPSkinList2->Clear();
   BLPSkinList3->Clear();
 
-  animCList->Destroy();
   animCList2->Destroy();
   animCList3->Destroy();
   skinList->Destroy();
@@ -216,7 +452,9 @@ void AnimControl::UpdateModel(WoWModel *m)
   selectedAnim2 = -1;
   selectedAnim3 = -1;
 
-  animCList->Clear();
+  m_clips.clear();
+  m_visibleClips.clear();
+  clipList->SetItemCount(0);
   animCList2->Clear();
   animCList3->Clear();
 
@@ -298,9 +536,7 @@ void AnimControl::UpdateModel(WoWModel *m)
   // Animation stuff
   if (m->animated && m->anims.size() > 0)
   {
-    wxString strName;
     wxString strStand;
-    int selectAnim = 0;
 
     map<int, wstring> animsVal = m->getAnimsMap();
 
@@ -312,6 +548,7 @@ void AnimControl::UpdateModel(WoWModel *m)
     // control updates into 3 and makes the load near-instant.
     wxArrayString names;
     names.Alloc(m->anims.size());
+    m_clips.reserve(m->anims.size());
     for (size_t i=0; i<m->anims.size(); i++)
     {
       std::wstringstream label;
@@ -328,17 +565,27 @@ void AnimControl::UpdateModel(WoWModel *m)
       }
 
       names.Add(StrName);
+
+      Clip clip;
+      clip.animIndex = (int)i;
+      clip.name = animsVal[m->anims[i].animID];
+      if (clip.name.IsEmpty())
+        clip.name = wxString::Format(_("Animation %u"), (unsigned)m->anims[i].animID);
+      clip.label = StrName;
+      clip.length = m->anims[i].length;
+      m_clips.push_back(clip);
     }
 
-    // Populate the primary (visible) animation combo now; the model's default
-    // animation is selected from it just below. The two "next animation" blend
-    // combos are only needed when chaining animations, so fill them AFTER the model
-    // is shown rather than blocking the load on two more 405-item native combos
-    // (~1s). CallAfter runs them on the next event-loop turn.
-    animCList->Freeze();
-    animCList->Append(names);
-    animCList->Thaw();
+    // The list reads alphabetically, variations of one animation together in table order.
+    std::stable_sort(m_clips.begin(), m_clips.end(), [](const Clip & a, const Clip & b) {
+      const int c = a.name.CmpNoCase(b.name);
+      return c != 0 ? c < 0 : a.animIndex < b.animIndex;
+    });
 
+    // The secondary and mouth selectors are only needed when animations are unlocked, so fill
+    // them AFTER the model is shown rather than blocking the load on two more native combos with
+    // hundreds of items each (~1s). CallAfter runs them on the next event-loop turn; Freeze/Thaw
+    // batches the appends (per-item Append re-measured the control every time).
     wxComboBox * cb2 = animCList2;
     wxComboBox * cb3 = animCList3;
     CallAfter([cb2, cb3, names]()
@@ -351,25 +598,11 @@ void AnimControl::UpdateModel(WoWModel *m)
       }
     });
 
-    if (useanim != -1)
-    {
-      for(unsigned int i=0; i<animCList->GetCount(); i++)
-      {
-        strName = animCList->GetString(i);
-        if (strName == strStand)
-        {
-          selectAnim = i;
-          break;
-        }
-      }
-    }
-
     if (useanim==-1)
       useanim = 0;
-    //return;
 
-    animCList->Select(selectAnim); // anim position in selection
-    animCList->Show(true);
+    m_listedAnim = useanim;
+    ApplyClipFilter();             // fills the list and highlights the default clip's row
 
     UpdateFrameSlider(g_selModel->anims[useanim].length - 1, g_selModel->anims[useanim].playSpeed);
 
@@ -389,8 +622,21 @@ void AnimControl::UpdateModel(WoWModel *m)
     g_selModel->animManager->Play();
     PushAnimationState();          // as in OnAnim: the selection was pushed while stopped
   }
+  else
+  {
+    ApplyClipFilter();             // no animations: an empty list that says so
+  }
+
+  // A WMO hides the queue controls (UpdateWMO); a model has them again.
+  loopList->Show(true);
+  btnAdd->Show(true);
+  advancedScroll->Layout();
+
   wmoList->Show(false);
   wmoLabel->Show(false);
+  m_sliderAnim = -1;
+  RefreshPlaybackState();
+  RelayoutAppearance();
 }
 
 void AnimControl::UpdateWMO(WMO *w, int group)
@@ -412,7 +658,11 @@ void AnimControl::UpdateWMO(WMO *w, int group)
 
   UpdateFrameSlider(10, 2);
   PCRList.clear();
-  animCList->Show(false);
+  // A WMO has no animations of its own: empty the clip list rather than leave the last model's.
+  m_clips.clear();
+  m_visibleClips.clear();
+  clipList->SetItemCount(0);
+  ApplyClipFilter();
   skinList->Show(false);
   showBLPList->Show(false);
   BLPSkinList1->Show(false);
@@ -457,6 +707,8 @@ void AnimControl::UpdateWMO(WMO *w, int group)
     wmoLabel->SetLabel(wxT("This group has been removed from the WMO"));
   }
   wmoLabel->Show(TRUE);
+  advancedScroll->Layout();
+  RelayoutAppearance();
 }
 
 void AnimControl::SetSkinByDisplayID(int cdi)
@@ -1086,6 +1338,7 @@ void AnimControl::ActivateBLPSkinList()
     FillBLPSkinSelector(BLPskins, true);
     BLPSkinList1->Show(true);
     SyncBLPSkinList();
+    RelayoutAppearance();
   }
 }
 
@@ -1222,6 +1475,25 @@ void AnimControl::OnButton(wxCommandEvent &event)
         g_selModel->animManager->Pause();
         PushAnimationState();
         break;
+    case ID_ANIM_PLAYPAUSE :
+        // One button for both: exactly the Play or the Pause case above, by current state.
+        if (!ModelInspector::IsLiveModel(g_selModel))
+          break;
+        if (g_selModel->animManager->IsPaused())
+        {
+          g_selModel->currentAnim = g_selModel->animManager->GetAnim();
+          g_selModel->animManager->Play();
+        }
+        else
+        {
+          g_selModel->animManager->Pause();
+        }
+        PushAnimationState();
+        break;
+    case ID_ANIM_SPEED_RESET :
+        if (ModelInspector::IsLiveModel(g_selModel))
+          SetAnimSpeed(1.0f);
+        break;
     case ID_STOP :
         g_selModel->animManager->Stop();
         PushAnimationState();
@@ -1255,6 +1527,7 @@ void AnimControl::OnButton(wxCommandEvent &event)
         ActivateBLPSkinList();
         break;
   }
+  RefreshPlaybackState();
 }
 
 void AnimControl::OnCheck(wxCommandEvent &event)
@@ -1267,10 +1540,13 @@ void AnimControl::OnCheck(wxCommandEvent &event)
     if (bLockAnims == false) {
       animCList2->Enable(true);
       animCList2->Show(true);
+      animCList2Label->Show(true);
       lockText->Enable(true);
       lockText->Show(true);
+      lockTextLabel->Show(true);
       animCList3->Enable(true);
       animCList3->Show(true);
+      animCList3Label->Show(true);
       speedMouthSlider->Show(true);
       speedMouthLabel->Show(true);
       //btnPauseMouth->Show(true);
@@ -1279,14 +1555,18 @@ void AnimControl::OnCheck(wxCommandEvent &event)
         g_selModel->animManager->ClearSecondary();
       animCList2->Enable(false);
       animCList2->Show(false);
+      animCList2Label->Show(false);
       lockText->Enable(false);
       lockText->Show(false);
+      lockTextLabel->Show(false);
       animCList3->Enable(false);
       animCList3->Show(false);
+      animCList3Label->Show(false);
       speedMouthSlider->Show(false);
       speedMouthLabel->Show(false);
       //btnPauseMouth->Show(false);
     }
+    RelayoutAdvanced();
   } else if  (event.GetId() == ID_ANIM_NEXT) {
     bNextAnims = event.IsChecked();
     if (bNextAnims && g_selModel) {
@@ -1304,46 +1584,58 @@ void AnimControl::OnCheck(wxCommandEvent &event)
   }
 }
 
-void AnimControl::OnAnim(wxCommandEvent &event)
+// The clip list's pick. Everything the old dropdown handler did lives here, so the list, a
+// double-click and the -unityipctest "pick like the user" path all run the same code.
+void AnimControl::ChooseAnimation(int animIndex)
 {
-  if (event.GetId() == ID_ANIM) {
-    if (g_selModel) {
-      wxString val = animCList->GetValue();
-      int first = val.Find('[')+1;
-      int last = val.Find(']');
-      selectedAnim = wxAtoi(val.Mid(first, last-first));
-      
-      if (bLockAnims) {
-        //selectedAnim2 = -1;
-        animCList2->SetSelection(event.GetSelection());
-      }
+  // g_selModel outlives the model it points at (an image or map tile selected in Browse deletes
+  // the model and leaves this list up), so a pick is only acted on for a model still on the canvas.
+  if (!ModelInspector::IsLiveModel(g_selModel) || animIndex < 0 || animIndex >= (int)g_selModel->anims.size())
+    return;
 
-      if (bOldStyle == true) {
-        g_selModel->animManager->Stop();
-        SelectAnimation(selectedAnim, loopList->GetSelection());
-        if (bNextAnims && g_selModel) {
-          int NextAnimation = selectedAnim;
-          for(size_t i=1; i<4; i++) {
-            NextAnimation = g_selModel->anims[NextAnimation].NextAnimation;
-            if (NextAnimation >= 0)
-              g_selModel->animManager->AddAnim(NextAnimation, loopList->GetSelection());
-            else
-              break;
-          }
-        }
-        g_selModel->animManager->Play();
-        // Stop() paused the model before the selection, so the state that travelled with the
-        // selection said "not running". Play() undoes that in the app; without this it was
-        // never undone in the embedded renderer until the next heartbeat -- the half-second-
-        // odd hold the viewport showed after every animation change.
-        PushAnimationState();
-        
-        UpdateFrameSlider(g_selModel->anims[selectedAnim].length - 1, g_selModel->anims[selectedAnim].playSpeed);
+  selectedAnim = animIndex;
+  m_listedAnim = animIndex;
+
+  if (bLockAnims) {
+    //selectedAnim2 = -1;
+    for (const Clip & clip : m_clips)
+      if (clip.animIndex == animIndex)
+      {
+        const int pos = animCList2->FindString(clip.label, true);
+        if (pos != wxNOT_FOUND)
+          animCList2->SetSelection(pos);
+        break;
+      }
+  }
+
+  if (bOldStyle == true) {
+    g_selModel->animManager->Stop();
+    SelectAnimation(selectedAnim, loopList->GetSelection());
+    if (bNextAnims && g_selModel) {
+      int NextAnimation = selectedAnim;
+      for(size_t i=1; i<4; i++) {
+        NextAnimation = g_selModel->anims[NextAnimation].NextAnimation;
+        if (NextAnimation >= 0)
+          g_selModel->animManager->AddAnim(NextAnimation, loopList->GetSelection());
+        else
+          break;
       }
     }
+    g_selModel->animManager->Play();
+    // Stop() paused the model before the selection, so the state that travelled with the
+    // selection said "not running". Play() undoes that in the app; without this it was
+    // never undone in the embedded renderer until the next heartbeat -- the half-second-
+    // odd hold the viewport showed after every animation change.
+    PushAnimationState();
 
-    //canvas->resetTime();
-  } else if (event.GetId() == ID_ANIM_SECONDARY) {
+    UpdateFrameSlider(g_selModel->anims[selectedAnim].length - 1, g_selModel->anims[selectedAnim].playSpeed);
+  }
+  RefreshPlaybackState();
+}
+
+void AnimControl::OnAnim(wxCommandEvent &event)
+{
+  if (event.GetId() == ID_ANIM_SECONDARY) {
     wxString val = animCList2->GetValue();
     int first = val.Find('[')+1;
     int last = val.Find(']');
@@ -1679,25 +1971,210 @@ void AnimControl::PushAnimationState()
 
 void AnimControl::pickAnimationLikeUser(int index)
 {
-  if (!animCList || index < 0 || index >= (int)animCList->GetCount())
+  if (index < 0 || index >= (int)m_clips.size())
     return;
-  animCList->SetSelection(index);
-  wxCommandEvent pick(wxEVT_COMBOBOX, ID_ANIM);
-  pick.SetEventObject(animCList);
-  pick.SetInt(index);
-  OnAnim(pick);
+  const int animIndex = m_clips[index].animIndex;
+  SelectClipRow(animIndex);
+  ChooseAnimation(animIndex);
 }
 
 int AnimControl::animationCount()
 {
-  return animCList ? (int)animCList->GetCount() : 0;
+  return (int)m_clips.size();
 }
 
 wxString AnimControl::animationName(int index)
 {
-  if (!animCList || index < 0 || index >= (int)animCList->GetCount())
+  if (index < 0 || index >= (int)m_clips.size())
     return wxEmptyString;
-  return animCList->GetString(index);
+  return m_clips[index].label;
+}
+
+wxString AnimControl::ClipText(long row, long column) const
+{
+  if (row < 0 || row >= (long)m_visibleClips.size())
+    return wxEmptyString;
+  if (m_visibleClips[row] < 0 || m_visibleClips[row] >= (int)m_clips.size())
+    return wxEmptyString;
+  const Clip & clip = m_clips[m_visibleClips[row]];
+  switch (column)
+  {
+    case 0: return clip.name;
+    case 1: return wxString::Format(wxT("%d"), clip.animIndex);
+    case 2: return wxString::Format(wxT("%.2f s"), clip.length / 1000.0);
+  }
+  return wxEmptyString;
+}
+
+void AnimControl::ApplyClipFilter()
+{
+  wxString needle = clipFilter->GetValue();
+  needle.Trim(true).Trim(false);
+  needle.MakeLower();
+
+  m_visibleClips.clear();
+  for (size_t i = 0; i < m_clips.size(); i++)
+  {
+    if (needle.IsEmpty() || m_clips[i].name.Lower().Contains(needle) ||
+        wxString::Format(wxT("%d"), m_clips[i].animIndex) == needle)
+      m_visibleClips.push_back((int)i);
+  }
+
+  clipList->SetItemCount((long)m_visibleClips.size());
+  clipList->Refresh();
+  CallAfter([this]() { clipList->FitColumns(); });
+
+  if (m_clips.empty())
+    clipCount->SetLabel(_("No animations"));
+  else if (needle.IsEmpty())
+    clipCount->SetLabel(wxString::Format(_("%u animations"), (unsigned)m_clips.size()));
+  else
+    clipCount->SetLabel(wxString::Format(_("%u of %u"), (unsigned)m_visibleClips.size(), (unsigned)m_clips.size()));
+  if (clipCount->GetContainingSizer())
+    clipCount->GetContainingSizer()->Layout();
+
+  SelectClipRow(m_listedAnim);
+}
+
+// Show which clip is selected without choosing it again: the list's selection event is ignored
+// while this runs.
+void AnimControl::SelectClipRow(int animIndex)
+{
+  m_syncingClipSelection = true;
+  const long selected = clipList->GetNextItem(-1, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED);
+  long row = -1;
+  for (size_t r = 0; r < m_visibleClips.size(); r++)
+    if (m_clips[m_visibleClips[r]].animIndex == animIndex)
+    {
+      row = (long)r;
+      break;
+    }
+  if (selected != row)
+  {
+    if (selected >= 0)
+      clipList->SetItemState(selected, 0, wxLIST_STATE_SELECTED);
+    if (row >= 0)
+      clipList->SetItemState(row, wxLIST_STATE_SELECTED | wxLIST_STATE_FOCUSED,
+                             wxLIST_STATE_SELECTED | wxLIST_STATE_FOCUSED);
+  }
+  if (row >= 0)
+    clipList->EnsureVisible(row);
+  m_syncingClipSelection = false;
+}
+
+void AnimControl::OnClipSelected(wxListEvent & event)
+{
+  if (m_syncingClipSelection)
+    return;
+  const long row = event.GetIndex();
+  if (row < 0 || row >= (long)m_visibleClips.size())
+    return;
+  ChooseAnimation(m_clips[m_visibleClips[row]].animIndex);
+}
+
+void AnimControl::OnClipFilter(wxCommandEvent & event)
+{
+  if (event.GetEventType() == wxEVT_SEARCHCTRL_CANCEL_BTN)
+    clipFilter->ChangeValue(wxEmptyString);
+  ApplyClipFilter();
+}
+
+void AnimControl::OnAdvancedToggled(wxCollapsiblePaneEvent & event)
+{
+  RelayoutAdvanced();
+  event.Skip();
+}
+
+// Collapsed, the column is only as wide as its header, leaving the room to the clip list and the
+// transport; expanded, it takes a share and scrolls vertically if the panel is short.
+void AnimControl::RelayoutAdvanced()
+{
+  advancedPane->GetPane()->InvalidateBestSize();
+  advancedPane->InvalidateBestSize();
+  advancedPane->GetPane()->Layout();
+
+  if (wxSizerItem * item = GetSizer() ? GetSizer()->GetItem(advancedScroll) : nullptr)
+  {
+    const bool expanded = !advancedPane->IsCollapsed();
+    item->SetProportion(expanded ? 4 : 0);
+    advancedScroll->SetMinSize(wxSize(expanded ? FromDIP(240) : advancedPane->GetBestSize().x + FromDIP(8), -1));
+  }
+  advancedScroll->FitInside();
+  advancedScroll->Layout();
+  Layout();
+}
+
+void AnimControl::OnUiTimer(wxTimerEvent &)
+{
+  if (IsShownOnScreen())
+    RefreshPlaybackState();
+}
+
+// The state line ("Playing - Stand - 1.24 / 2.67 s"), the play/pause button and the scrubber,
+// read back from the animation manager. Reads only.
+void AnimControl::RefreshPlaybackState()
+{
+  // g_selModel is not cleared when a model is unloaded, so it is only read while it is still one
+  // of the models on the canvas.
+  WoWModel * m = ModelInspector::IsLiveModel(g_selModel) ? g_selModel : nullptr;
+  const bool has = m && m->animManager && !m->anims.empty();
+
+  for (wxWindow * w : { (wxWindow *)btnPrev, (wxWindow *)btnPlayPause, (wxWindow *)btnStop,
+                        (wxWindow *)btnNext, (wxWindow *)frameSlider })
+    if (w->IsEnabled() != has)
+      w->Enable(has);
+
+  if (!has)
+  {
+    setLabelIfChanged(stateLabel, _("No animation"));
+    return;
+  }
+
+  const int index = (int)m->animManager->GetAnim();
+  if (index < 0 || index >= (int)m->anims.size())
+    return;
+
+  const bool paused = m->animManager->IsPaused();
+  const unsigned length = m->anims[index].length;
+  const size_t frame = std::min<size_t>(m->animManager->GetFrame(), length);
+
+  wxString name;
+  for (const Clip & clip : m_clips)
+    if (clip.animIndex == index)
+    {
+      name = clip.name;
+      break;
+    }
+
+  setLabelIfChanged(stateLabel, wxString::Format(wxT("%s  \u00B7  %s  \u00B7  %.2f / %.2f s"),
+                                                 paused ? _("Paused") : _("Playing"), name,
+                                                 frame / 1000.0, length / 1000.0));
+
+  const wxString playLabel = paused ? _("Play") : _("Pause");
+  if (btnPlayPause->GetLabel() != playLabel)
+  {
+    btnPlayPause->SetLabel(playLabel);
+    btnPlayPause->SetBitmap(transportBitmap(this, paused ? ICON_PLAY : ICON_PAUSE));
+    if (btnPlayPause->GetContainingSizer())
+      btnPlayPause->GetContainingSizer()->Layout();
+  }
+
+  if (!m_scrubbing)
+  {
+    if (index != m_sliderAnim)
+    {
+      frameSlider->SetRange(0, length > 1 ? (int)length - 1 : 1);
+      m_sliderAnim = index;
+    }
+    if (frameSlider->GetValue() != (int)frame)
+      frameSlider->SetValue((int)frame);
+  }
+}
+
+void AnimControl::RelayoutAppearance()
+{
+  if (g_modelViewer && g_modelViewer->modelInspector)
+    g_modelViewer->modelInspector->RefreshAppearance();
 }
 
 void AnimControl::SetSingleSkin(int num, int texnum)
@@ -1749,8 +2226,12 @@ void AnimControl::SetAnimSpeed(float speed)
     return;
 
   g_selModel->animManager->SetSpeed(speed);
-  
-  speedLabel->SetLabel(wxString::Format(_("Speed: %.1fx"), speed));
+
+  // The slider follows too: the speed keys in the OpenGL viewport come through here.
+  const int sliderValue = (int)(speed * 10.0f + 0.5f);
+  if (speedSlider->GetValue() != sliderValue)
+    speedSlider->SetValue(sliderValue);
+  speedLabel->SetLabel(wxString::Format(wxT("%.1f\u00D7"), speed));
   PushAnimationState();
 }
 
@@ -1761,11 +2242,11 @@ void AnimControl::SetAnimFrame(size_t frame)
 
   g_selModel->animManager->SetFrame(frame);
 
-  frameLabel->SetLabel(wxString::Format(_("Frame: %i"), frame));
   frameSlider->SetValue((int)frame);
   // Scrubbing is the one case where the app's time jumps rather than advances, so the renderer
   // has to be told: nothing about it is derivable from the clock it is running.
   PushAnimationState();
+  RefreshPlaybackState();
 }
 
 void AnimControl::UpdateFrameSlider(int maxRange, int tickFreq)
@@ -1773,5 +2254,5 @@ void AnimControl::UpdateFrameSlider(int maxRange, int tickFreq)
   frameSlider->SetRange(0, maxRange);
   frameSlider->SetTickFreq(tickFreq);
   frameSlider->SetValue(0);
-  frameLabel->SetLabel(L"Frame: 0");
+  m_sliderAnim = -1;
 }

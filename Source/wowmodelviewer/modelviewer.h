@@ -32,6 +32,8 @@
 #include <QString>
 
 class SettingsControl;
+class ModelInspector;
+class wxAuiToolBar;
 class ExportJobManager;
 class ImageSequenceExporter;
 class UnityRendererHost;
@@ -63,6 +65,8 @@ public:
   EnchantsDialog *enchants;
   LightControl *lightControl;
   ModelControl *modelControl;
+  // The "Model" panel: Appearance / Geosets / Info for whatever is loaded. See ModelInspector.h.
+  ModelInspector *modelInspector;
   ImageControl *imageControl;
   //SoundControl *soundControl;
   SettingsControl *settingsControl;
@@ -86,6 +90,8 @@ public:
 
   // wxAUI - new docking lib (now part of wxWidgets 2.8.0)
   wxAuiManager interfaceManager;
+  wxAuiToolBar * commandBar = nullptr;
+  wxStaticText * commandModelLabel = nullptr;
 
   // Boolean flags
   bool isWoWLoaded;
@@ -129,6 +135,9 @@ public:
   void LoadLayout();
   void SaveLayout();
   void ResetLayout();
+  // Bumped when the panel arrangement changes, so an older saved perspective is not applied to
+  // panes it does not describe. See LoadLayout.
+  static const int LAYOUT_VERSION = 2;
   // save + load character *.CHR files
   void LoadChar(QString fn, bool equipmentOnly = false);
   void SaveChar(QString fn, bool equipmentOnly = false);
@@ -200,6 +209,28 @@ public:
 
   // Put the OpenGL canvas back in the centre and the Unity pane back to a side pane.
   void UncoverOpenGLViewport();
+  bool unityAsidePaneShown();
+
+  // Whether the Unity viewport is the one on screen (the centre pane, with the canvas hidden).
+  bool isUnityViewportOnScreen();
+  // Whether a Unity viewport is showing the loaded model anywhere -- the centre, or the side pane
+  // when it is not the main viewport -- with the player connected.
+  bool isUnityViewportShowingModel();
+
+  // Something new is on screen (a model, character, WMO or map tile): the Model panel, the
+  // command bar's model name, the status bar facts and the empty viewport follow it. The one
+  // place every load path reports to.
+  void DisplayedContentChanged();
+
+  // The command bar along the top: open, reset camera, screenshot, fullscreen, the current model
+  // and the three panel toggles.
+  void InitCommandBar();
+  void OnCommandBar(wxCommandEvent & event);
+  void OnUpdateCommandUI(wxUpdateUIEvent & event);
+  void OnKeyboardShortcuts(wxCommandEvent & event);
+  void UpdateStatusFacts();
+  // The empty viewport's prompt, which depends on whether a client is loaded yet.
+  void UpdateEmptyState();
 
   // Can the Unity viewport show what is currently loaded? Creature M2s, for now: no characters
   // (no equipment pipeline yet) and nothing that is not an M2.

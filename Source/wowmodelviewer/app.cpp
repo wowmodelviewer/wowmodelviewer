@@ -1358,6 +1358,12 @@ bool WowModelViewApp::OnInit()
   {
     frame->batchMode = true; // non-interactive run: suppress modal dialogs that would block it
 
+    // The command bar and the Model panel did not exist when the batch outputs were settled; keep
+    // them out of a non-interactive run so its canvas is laid out as it was.
+    frame->interfaceManager.GetPane(wxT("commandBar")).Show(false);
+    frame->interfaceManager.GetPane(wxT("modelInspector")).Show(false);
+    frame->interfaceManager.Update();
+
     // Read-only forensic dump of an existing FBX -- reads the file only, so handle it before
     // LoadWoW (no game data needed) and exit. Plugins are already loaded (ModelViewer ctor).
     if (!fbxInspectPath.isEmpty())

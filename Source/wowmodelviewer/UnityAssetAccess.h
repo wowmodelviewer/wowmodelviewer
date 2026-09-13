@@ -133,6 +133,9 @@ public:
     ClientLoadGuard();
     ~ClientLoadGuard();
   };
+
+  // True while a ClientLoadGuard is alive: a client load is in progress.
+  static bool isClientLoading();
 };
 
 #endif // UNITYASSETACCESS_H

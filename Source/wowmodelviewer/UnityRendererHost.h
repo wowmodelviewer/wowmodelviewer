@@ -33,6 +33,7 @@
 #ifndef WX_PRECOMP
     #include <wx/wx.h>
 #endif
+#include <wx/timer.h>
 
 #ifdef _WINDOWS
 #include <windows.h>
@@ -83,10 +84,30 @@ public:
   void setPlayerReady(bool ready);
   bool isPlayerReady() const { return m_playerReady; }
 
+  // THE EMPTY VIEWER. Until the first model is loaded the panel shows a short prompt and one
+  // button (load a client, or go to Browse) instead of the player's idle, empty window. This is
+  // the host panel's own painting: the player's window is only hidden meanwhile (and shown again
+  // the moment something is loaded); nothing is sent to the player and nothing in it changes.
+  // The button posts ID_UI_OPEN_MODEL to the frame.
+  void setEmptyState(bool empty);
+  void setEmptyStateText(const wxString & title, const wxString & detail, const wxString & action);
+  bool isEmptyState() const { return m_empty; }
+
 private:
   void OnSize(wxSizeEvent & event);
   void OnSetFocus(wxFocusEvent & event);
   void OnPaint(wxPaintEvent & event);
+  void OnEmptyTimer(wxTimerEvent & event);
+  void layoutEmptyState();
+  // Hide the player's window while empty, show it otherwise. Asynchronous, so a player that is
+  // busy starting up can never stall this thread.
+  void applyEmbeddedVisibility();
+
+  bool m_empty = false;
+  wxString m_emptyTitle, m_emptyDetail;
+  wxButton * m_emptyButton = nullptr;
+  wxTimer m_emptyTimer;   // the player creates its window some time after launch: hide it when it appears
+  int m_emptyTicksLeft = -1;
 
   // False until the player reports in. Only affects what this panel paints underneath it.
   bool m_playerReady = false;

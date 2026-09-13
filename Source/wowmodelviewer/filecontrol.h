@@ -9,6 +9,9 @@ class ModelViewer;
 #include <wx/treectrl.h> // wxTreeItemId
 #include <wx/timer.h>    // wxTimer for debounced as-you-type search
 
+class wxSearchCtrl;
+class wxStaticText;
+
 #include "metaclasses/Container.h"
 
 class TreeStackItem; // defined below
@@ -92,7 +95,6 @@ public:
 
   void Init(ModelViewer* mv=NULL);
   void OnTreeSelect(wxTreeEvent &event);
-  void OnTreeCollapsedOrExpanded(wxTreeEvent &event);
   void OnTreeItemExpanding(wxTreeEvent &event);
   void OnButton(wxCommandEvent &event);
   void OnSearchText(wxCommandEvent &event);  // restarts the debounce timer on each keystroke
@@ -105,8 +107,8 @@ public:
   void UpdateInterface();
 
   wxTreeCtrl *fileTree;
-  wxButton *btnSearch;
-  wxTextCtrl *txtContent;
+  wxSearchCtrl *txtContent;
+  wxStaticText *searchStatus;
   wxChoice *choFilter;
   int filterMode;
   wxTreeItemId CurrentItem;
@@ -115,6 +117,8 @@ public:
 
 private:
   void ClearCanvas();
+  // The line under the search box: the minimum-length hint, or the result count.
+  void SetSearchStatus(const wxString & text);
 
   // Persistent file-tree hierarchy (rebuilt each Init/search). It must outlive
   // Init() so collapsed branches can be filled in lazily on expand.

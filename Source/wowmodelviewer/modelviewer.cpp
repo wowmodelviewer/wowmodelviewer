@@ -5,6 +5,9 @@
 #include "AnimManager.h"
 
 #include <wx/aboutdlg.h>
+#include <wx/aui/auibar.h>
+#include <wx/numformatter.h>
+#include <wx/srchctrl.h>
 #include <wx/busyinfo.h>
 #include <wx/colordlg.h>
 #include <wx/dirdlg.h>
@@ -32,13 +35,16 @@
 #include "GlobalSettings.h"
 #include "globalvars.h"
 #include "ImporterPlugin.h"
+#include "KeyboardShortcutsDialog.h"
 #include "LoadingDialog.h"
 #include "MemoryUtils.h"
+#include "ModelInspector.h"
 #include "ModelRenderPass.h"
 #include "NPCImporterDialog.h"
 #include "PluginManager.h"
 #include "RaceInfos.h"
 #include "SettingsControl.h"
+#include "UiStyle.h"
 #include "UnityAssetAccess.h"
 #include "UnityIpcServer.h"
 #include "UnityRendererHost.h"
@@ -70,6 +76,59 @@ const static float def_ambience[4] = { 1.0f, 1.0f, 1.0f, 1.0f };
 const static float def_diffuse[4] = { 1.0f, 1.0f, 1.0f, 1.0f };
 const static float def_emission[4] = { 0.0f, 0.0f, 0.0f, 1.0f };
 const static float def_specular[4] = { 1.0f, 1.0f, 1.0f, 1.0f };
+
+namespace
+{
+  // The frame's keyboard accelerators, in one table: InitMenu installs it, and Help > Keyboard
+  // Shortcuts lists the entries no menu item already shows (description set). Menu shortcuts that
+  // are also written in a menu label are listed from the menu bar itself.
+  struct AppAccelerator
+  {
+    int flags;
+    int key;
+    int id;
+    const wchar_t * keys;         // as shown to the user; null when a menu label already shows it
+    const wchar_t * description;
+    const wchar_t * where;
+  };
+
+  const AppAccelerator kAppAccelerators[] =
+  {
+    { wxACCEL_NORMAL, WXK_F5, ID_SAVE_EQUIPMENT, nullptr, nullptr, nullptr },
+    { wxACCEL_NORMAL, WXK_F6, ID_LOAD_EQUIPMENT, nullptr, nullptr, nullptr },
+    { wxACCEL_NORMAL, WXK_F7, ID_SAVE_CHAR, nullptr, nullptr, nullptr },
+    { wxACCEL_NORMAL, WXK_F8, ID_LOAD_CHAR, nullptr, nullptr, nullptr },
+    { wxACCEL_CTRL, (int)'b', ID_SHOW_BOUNDS, L"Ctrl+B", L"Show or hide the bounding box", L"OpenGL viewport" },
+    { wxACCEL_CTRL, (int)'X', ID_FILE_EXIT, nullptr, nullptr, nullptr },
+    { wxACCEL_NORMAL, WXK_F12, ID_FILE_SCREENSHOT, nullptr, nullptr, nullptr },
+    { wxACCEL_CTRL, (int)'e', ID_SHOW_EARS, nullptr, nullptr, nullptr },
+    { wxACCEL_CTRL, (int)'h', ID_SHOW_HAIR, nullptr, nullptr, nullptr },
+    { wxACCEL_CTRL, (int)'f', ID_SHOW_FACIALHAIR, nullptr, nullptr, nullptr },
+    { wxACCEL_CTRL, (int)'z', ID_SHEATHE, nullptr, nullptr, nullptr },
+    { wxACCEL_CTRL, (int)'l', ID_BACKGROUND, nullptr, nullptr, nullptr },
+    // Ctrl +/- are bound, but their handler is commented out (OnToggleCommand): not listed.
+    { wxACCEL_CTRL, (int)'+', ID_ZOOM_IN, nullptr, nullptr, nullptr },
+    { wxACCEL_CTRL, (int)'-', ID_ZOOM_OUT, nullptr, nullptr, nullptr },
+    { wxACCEL_NORMAL, WXK_F9, ID_CLEAR_EQUIPMENT, nullptr, nullptr, nullptr },
+    { wxACCEL_NORMAL, WXK_F10, ID_CHAR_RANDOMISE, nullptr, nullptr, nullptr },
+    // F11 is Fullscreen (View menu). It was also bound here to the OpenGL debug toggle, which made
+    // the two fight over the key; that toggle is a View menu item now.
+
+    // Temporary saves
+    { wxACCEL_NORMAL, WXK_F1, ID_SAVE_TEMP1, L"F1 \u2013 F4", L"Save the camera view to slot 1-4", L"OpenGL viewport" },
+    { wxACCEL_NORMAL, WXK_F2, ID_SAVE_TEMP2, nullptr, nullptr, nullptr },
+    { wxACCEL_NORMAL, WXK_F3, ID_SAVE_TEMP3, nullptr, nullptr, nullptr },
+    { wxACCEL_NORMAL, WXK_F4, ID_SAVE_TEMP4, nullptr, nullptr, nullptr },
+
+    // Temp loads
+    { wxACCEL_CTRL, WXK_F1, ID_LOAD_TEMP1, L"Ctrl+F1 \u2013 F4", L"Restore the camera view from slot 1-4", L"OpenGL viewport" },
+    { wxACCEL_CTRL, WXK_F2, ID_LOAD_TEMP2, nullptr, nullptr, nullptr },
+    { wxACCEL_CTRL, WXK_F3, ID_LOAD_TEMP3, nullptr, nullptr, nullptr },
+    { wxACCEL_CTRL, WXK_F4, ID_LOAD_TEMP4, nullptr, nullptr, nullptr },
+
+    { wxACCEL_CTRL | wxACCEL_SHIFT, (int)'R', ID_RESTART, nullptr, nullptr, nullptr },
+  };
+}
 
 // Class event handler/importer
 IMPLEMENT_CLASS(ModelViewer, wxFrame)
@@ -104,6 +163,16 @@ EVT_MENU(ID_VIEW_UNITY_RENDERER, ModelViewer::OnUnityRenderer)
 EVT_MENU(ID_VIEW_UNITY_PRIMARY, ModelViewer::OnUnityPrimaryViewport)
 EVT_MENU(ID_VIEW_FULLSCREEN, ModelViewer::OnToggleFullScreen)
 EVT_CHAR_HOOK(ModelViewer::OnCharHook)
+
+// Command bar (and the panel toggles it shares with the View menu)
+EVT_MENU(ID_UI_OPEN_MODEL, ModelViewer::OnCommandBar)
+EVT_MENU(ID_UI_RESET_CAMERA, ModelViewer::OnCommandBar)
+EVT_MENU(ID_UI_SCREENSHOT, ModelViewer::OnCommandBar)
+EVT_UPDATE_UI(ID_SHOW_FILE_LIST, ModelViewer::OnUpdateCommandUI)
+EVT_UPDATE_UI(ID_SHOW_CHAR, ModelViewer::OnUpdateCommandUI)
+EVT_UPDATE_UI(ID_SHOW_ANIM, ModelViewer::OnUpdateCommandUI)
+EVT_UPDATE_UI(ID_UI_RESET_CAMERA, ModelViewer::OnUpdateCommandUI)
+EVT_UPDATE_UI(ID_UI_SCREENSHOT, ModelViewer::OnUpdateCommandUI)
 // --
 //EVT_MENU(ID_SHOW_WIREFRAME, ModelViewer::OnToggleCommand)
 //EVT_MENU(ID_SHOW_BONES, ModelViewer::OnToggleCommand)
@@ -192,6 +261,7 @@ EVT_MENU(ID_CHAR_RANDOMISE, ModelViewer::OnSetEquipment)
 EVT_MENU(ID_LANGUAGE, ModelViewer::OnLanguage)
 EVT_MENU(ID_HELP, ModelViewer::OnAbout)
 EVT_MENU(ID_ABOUT, ModelViewer::OnAbout)
+EVT_MENU(ID_KEYBOARD_SHORTCUTS, ModelViewer::OnKeyboardShortcuts)
 
 // Hidden menu items
 // Temporary saves
@@ -228,6 +298,7 @@ ModelViewer::ModelViewer()
   enchants = NULL;
   lightControl = NULL;
   modelControl = NULL;
+  modelInspector = NULL;
   imageControl = NULL;
   settingsControl = NULL;
   unityRendererHost = NULL;
@@ -379,10 +450,11 @@ void ModelViewer::InitMenu()
   viewMenu->Append(ID_VIEW_NPC, _("View NPC"));
   viewMenu->Append(ID_VIEW_ITEM, _("View Item"));
   viewMenu->AppendSeparator();
-  viewMenu->Append(ID_SHOW_FILE_LIST, _("Show file list"));
-  viewMenu->Append(ID_SHOW_ANIM, _("Show animation control"));
-  viewMenu->Append(ID_SHOW_CHAR, _("Show character control"));
-  viewMenu->Append(ID_SHOW_MODEL, _("Show model control"));
+  // The three panels are toggles, checked while shown (the command bar has the same three).
+  viewMenu->AppendCheckItem(ID_SHOW_FILE_LIST, _("Browse panel"));
+  viewMenu->AppendCheckItem(ID_SHOW_CHAR, _("Model panel"));
+  viewMenu->AppendCheckItem(ID_SHOW_ANIM, _("Animation panel"));
+  viewMenu->Append(ID_SHOW_MODEL, _("Render options (OpenGL viewport)..."));
   viewMenu->AppendSeparator();
   viewMenu->Append(ID_VIEW_UNITY_RENDERER, _("Unity Renderer"));
   viewMenu->AppendCheckItem(ID_VIEW_UNITY_PRIMARY, _("Unity as main viewport"));
@@ -428,6 +500,8 @@ void ModelViewer::InitMenu()
     setSize->Append(ID_CANVASM1200, wxT("(8:5) 1920 x 1200"), _("Misc (8:5)"));
 
     viewMenu->Append(ID_CANVASSIZE, wxT("Set Canvas Size"), setSize);
+    // Was only reachable through an F11 accelerator that collided with Fullscreen (F11).
+    viewMenu->Append(ID_OPENGL_DEBUG, _("OpenGL debug info in title bar"));
 
     //lightMenu->Append(ID_LT_COLOR, wxT("Lighting Color..."));
 
@@ -527,9 +601,9 @@ void ModelViewer::InitMenu()
 
 
     wxMenu *aboutMenu = new wxMenu;
+    aboutMenu->Append(ID_KEYBOARD_SHORTCUTS, _("Keyboard Shortcuts..."));
+    aboutMenu->AppendSeparator();
     aboutMenu->Append(ID_LANGUAGE, _("Language"));
-    aboutMenu->Append(ID_HELP, _("Help"));
-    aboutMenu->Enable(ID_HELP, false);
     aboutMenu->Append(ID_ABOUT, _("About"));
 
     menuBar = new wxMenuBar();
@@ -537,7 +611,7 @@ void ModelViewer::InitMenu()
     menuBar->Append(viewMenu, _("&View"));
     menuBar->Append(charMenu, _("&Character"));
     menuBar->Append(optMenu, _("&Options"));
-    menuBar->Append(aboutMenu, _("&About"));
+    menuBar->Append(aboutMenu, _("&Help"));
     SetMenuBar(menuBar);
   }
   catch (...) {};
@@ -545,42 +619,12 @@ void ModelViewer::InitMenu()
   // Disable our "Character" menu, only accessible when a character model is being displayed
   // menuBar->EnableTop(2, false);
 
-  // Hotkeys / shortcuts
-  wxAcceleratorEntry entries[27];
-  int keys = 0;
-  entries[keys++].Set(wxACCEL_NORMAL, WXK_F5, ID_SAVE_EQUIPMENT);
-  entries[keys++].Set(wxACCEL_NORMAL, WXK_F6, ID_LOAD_EQUIPMENT);
-  entries[keys++].Set(wxACCEL_NORMAL, WXK_F7, ID_SAVE_CHAR);
-  entries[keys++].Set(wxACCEL_NORMAL, WXK_F8, ID_LOAD_CHAR);
-  entries[keys++].Set(wxACCEL_CTRL, (int)'b', ID_SHOW_BOUNDS);
-  entries[keys++].Set(wxACCEL_CTRL, (int)'X', ID_FILE_EXIT);
-  entries[keys++].Set(wxACCEL_NORMAL, WXK_F12, ID_FILE_SCREENSHOT);
-  entries[keys++].Set(wxACCEL_CTRL, (int)'e', ID_SHOW_EARS);
-  entries[keys++].Set(wxACCEL_CTRL, (int)'h', ID_SHOW_HAIR);
-  entries[keys++].Set(wxACCEL_CTRL, (int)'f', ID_SHOW_FACIALHAIR);
-  entries[keys++].Set(wxACCEL_CTRL, (int)'z', ID_SHEATHE);
-  entries[keys++].Set(wxACCEL_CTRL, (int)'l', ID_BACKGROUND);
-  entries[keys++].Set(wxACCEL_CTRL, (int)'+', ID_ZOOM_IN);
-  entries[keys++].Set(wxACCEL_CTRL, (int)'-', ID_ZOOM_OUT);
-  entries[keys++].Set(wxACCEL_NORMAL, WXK_F9, ID_CLEAR_EQUIPMENT);
-  entries[keys++].Set(wxACCEL_NORMAL, WXK_F10, ID_CHAR_RANDOMISE);
-  entries[keys++].Set(wxACCEL_NORMAL, WXK_F11, ID_OPENGL_DEBUG);
+  // Hotkeys / shortcuts (the table is kAppAccelerators, near the top of this file)
+  std::vector<wxAcceleratorEntry> entries;
+  for (const AppAccelerator & a : kAppAccelerators)
+    entries.push_back(wxAcceleratorEntry(a.flags, a.key, a.id));
 
-  // Temporary saves
-  entries[keys++].Set(wxACCEL_NORMAL, WXK_F1, ID_SAVE_TEMP1);
-  entries[keys++].Set(wxACCEL_NORMAL, WXK_F2, ID_SAVE_TEMP2);
-  entries[keys++].Set(wxACCEL_NORMAL, WXK_F3, ID_SAVE_TEMP3);
-  entries[keys++].Set(wxACCEL_NORMAL, WXK_F4, ID_SAVE_TEMP4);
-
-  // Temp loads
-  entries[keys++].Set(wxACCEL_CTRL, WXK_F1, ID_LOAD_TEMP1);
-  entries[keys++].Set(wxACCEL_CTRL, WXK_F2, ID_LOAD_TEMP2);
-  entries[keys++].Set(wxACCEL_CTRL, WXK_F3, ID_LOAD_TEMP3);
-  entries[keys++].Set(wxACCEL_CTRL, WXK_F4, ID_LOAD_TEMP4);
-
-  entries[keys++].Set(wxACCEL_CTRL | wxACCEL_SHIFT, (int)'R', ID_RESTART);
-
-  wxAcceleratorTable accel(keys, entries);
+  wxAcceleratorTable accel((int)entries.size(), entries.data());
   this->SetAcceleratorTable(accel);
 }
 
@@ -590,8 +634,12 @@ void ModelViewer::InitObjects()
 
   fileControl = new FileControl(this, ID_FILELIST_FRAME);
 
-  animControl = new AnimControl(this, ID_ANIM_FRAME);
-  charControl = new CharControl(this, ID_CHAR_FRAME);
+  // The Model panel first: the skin, doodad and character controls are created on its pages.
+  modelInspector = new ModelInspector(this, wxID_ANY);
+  animControl = new AnimControl(this, ID_ANIM_FRAME, modelInspector->skinParent(),
+                                modelInspector->overridesParent(), modelInspector->doodadParent());
+  charControl = new CharControl(modelInspector->characterParent(), ID_CHAR_FRAME);
+  modelInspector->AttachAppearance(animControl, charControl);
   lightControl = new LightControl(this, ID_LIGHT_FRAME);
   lightControl->Show(false);   // kept only to drive the default scene light; never shown as UI
   modelControl = new ModelControl(this, ID_MODEL_FRAME);
@@ -694,43 +742,126 @@ void ModelViewer::InitDatabase()
   SetStatusText(wxT("Finished initiating database files."));;
 }
 
+// The panel arrangement, in one place so InitDocking and ResetLayout cannot disagree:
+//
+//   +--------------------------------------------------------------+
+//   | command bar                                                  |
+//   +---------+--------------------------------------+-------------+
+//   | Browse  |              viewport                |   Model     |
+//   |         |                                      | Appearance  |
+//   |         +--------------------------------------+ Geosets     |
+//   |         |  Animation                           | Info        |
+//   +---------+--------------------------------------+-------------+
+//
+// Browse and Model are the outer layer so they run the full height; Animation sits under the
+// viewport between them. Every panel can be closed (its command bar button and View menu item
+// bring it back), resized at its sash, or floated.
+static wxAuiPaneInfo buildCommandBarPaneInfo(const wxWindow * frame)
+{
+  const int height = frame->FromDIP(34);
+  return wxAuiPaneInfo().
+         Name(wxT("commandBar")).Caption(wxT("Command bar")).
+         Top().Layer(10).Row(0).Position(0).
+         CaptionVisible(false).PaneBorder(false).Gripper(false).CloseButton(false).
+         Floatable(false).Movable(false).DockFixed(true).
+         MinSize(wxSize(-1, height)).BestSize(wxSize(-1, height)).MaxSize(wxSize(-1, height));
+}
+
+static wxAuiPaneInfo buildBrowsePaneInfo(const wxWindow * frame)
+{
+  return wxAuiPaneInfo().
+         Name(wxT("fileControl")).Caption(wxT("Browse")).
+         BestSize(frame->FromDIP(wxSize(230, 700))).MinSize(frame->FromDIP(wxSize(180, 200))).
+         FloatingSize(frame->FromDIP(wxSize(300, 700))).
+         Left().Layer(2);
+}
+
+static wxAuiPaneInfo buildAnimationPaneInfo(const wxWindow * frame)
+{
+  return wxAuiPaneInfo().
+         Name(wxT("animControl")).Caption(wxT("Animation")).
+         BestSize(frame->FromDIP(wxSize(700, 160))).MinSize(frame->FromDIP(wxSize(360, 128))).
+         FloatingSize(frame->FromDIP(wxSize(900, 220))).
+         Bottom().Layer(1);
+}
+
+static wxAuiPaneInfo buildInspectorPaneInfo(const wxWindow * frame)
+{
+  return wxAuiPaneInfo().
+         Name(wxT("modelInspector")).Caption(wxT("Model")).
+         BestSize(frame->FromDIP(wxSize(270, 700))).MinSize(frame->FromDIP(wxSize(240, 200))).
+         FloatingSize(frame->FromDIP(wxSize(320, 700))).
+         Right().Layer(2);
+}
+
+// The OpenGL-only render flags (alpha, scale, bones, wireframe, bounds...) and the attachment the
+// animation controls drive: the floating window View > "Render options" opens.
+static wxAuiPaneInfo buildRenderOptionsPaneInfo()
+{
+  return wxAuiPaneInfo().
+         Name(wxT("Models")).Caption(wxT("Render Options (OpenGL viewport)")).
+         FloatingSize(wxSize(180, 300)).Float().TopDockable(false).LeftDockable(false).
+         RightDockable(false).BottomDockable(false).Show(false).
+         DestroyOnClose(false);
+}
+
+void ModelViewer::InitCommandBar()
+{
+  // Text commands, few of them: the viewport is the thing to look at. The three panel buttons are
+  // check tools, pressed while their panel is shown (OnUpdateCommandUI keeps them in step with the
+  // panels however those were opened or closed).
+  commandBar = new wxAuiToolBar(this, wxID_ANY, wxDefaultPosition, wxDefaultSize,
+                                wxAUI_TB_TEXT | wxAUI_TB_HORZ_TEXT | wxAUI_TB_PLAIN_BACKGROUND |
+                                wxAUI_TB_NO_AUTORESIZE);
+  commandBar->SetToolBorderPadding(FromDIP(6));
+  commandBar->SetMargins(FromDIP(wxSize(UiStyle::S, 2)));
+
+  commandBar->AddTool(ID_UI_OPEN_MODEL, _("Open model"), wxNullBitmap,
+                      _("Find a model in Browse (loads a World of Warcraft client first if none is loaded)"));
+  commandBar->AddSeparator();
+  commandBar->AddTool(ID_UI_RESET_CAMERA, _("Reset camera"), wxNullBitmap, _("Reset the camera to frame the model"));
+  commandBar->AddTool(ID_UI_SCREENSHOT, _("Screenshot"), wxNullBitmap, _("Save a screenshot (F12)"));
+  commandBar->AddTool(ID_VIEW_FULLSCREEN, _("Fullscreen"), wxNullBitmap, _("Fullscreen (F11; Esc leaves)"));
+  commandBar->AddSeparator();
+
+  commandModelLabel = new wxStaticText(commandBar, ID_UI_MODEL_LABEL, _("No model loaded"), wxDefaultPosition,
+                                       FromDIP(wxSize(320, -1)), wxST_ELLIPSIZE_MIDDLE | wxST_NO_AUTORESIZE);
+  commandModelLabel->SetForegroundColour(UiStyle::secondaryText());
+  commandBar->AddControl(commandModelLabel);
+
+  commandBar->AddStretchSpacer();
+  commandBar->AddTool(ID_SHOW_FILE_LIST, _("Browse"), wxNullBitmap, _("Show or hide the Browse panel"), wxITEM_CHECK);
+  commandBar->AddTool(ID_SHOW_CHAR, _("Model"), wxNullBitmap, _("Show or hide the Model panel"), wxITEM_CHECK);
+  commandBar->AddTool(ID_SHOW_ANIM, _("Animation"), wxNullBitmap, _("Show or hide the Animation panel"), wxITEM_CHECK);
+  commandBar->Realize();
+}
+
 void ModelViewer::InitDocking()
 {
   LOG_INFO << "Initializing GUI Docking.";
 
   // wxAUI stuff
-  //interfaceManager.SetFrame(this); 
+  //interfaceManager.SetFrame(this);
   interfaceManager.SetManagedWindow(this);
+  UiStyle::applyDockArt(interfaceManager, this);
+
+  InitCommandBar();
+  interfaceManager.AddPane(commandBar, buildCommandBarPaneInfo(this));
 
   // OpenGL Canvas
   interfaceManager.AddPane(canvas, wxAuiPaneInfo().
                            Name(wxT("canvas")).Caption(wxT("OpenGL Canvas")).
                            CenterPane());
 
-  // Tree list control
-  interfaceManager.AddPane(fileControl, wxAuiPaneInfo().
-                           Name(wxT("fileControl")).Caption(wxT("File List")).
-                           BestSize(wxSize(170, 700)).Left().Layer(2));
-
-  // Animation frame
-  interfaceManager.AddPane(animControl, wxAuiPaneInfo().
-                           Name(wxT("animControl")).Caption(wxT("Animation")).
-                           Bottom().Layer(1));
-
-  // Character frame
-  interfaceManager.AddPane(charControl, wxAuiPaneInfo().
-                           Name(wxT("charControl")).Caption(wxT("Character")).
-                           BestSize(wxSize(170, 700)).Right().Layer(2).Show(isChar));
+  interfaceManager.AddPane(fileControl, buildBrowsePaneInfo(this));
+  interfaceManager.AddPane(animControl, buildAnimationPaneInfo(this));
+  interfaceManager.AddPane(modelInspector, buildInspectorPaneInfo(this));
 
   // Lighting control panel removed (lighting feature pulled). lightControl still exists and
   // provides the default scene light, but it is no longer shown as a dockable pane.
 
   // model control
-  interfaceManager.AddPane(modelControl, wxAuiPaneInfo().
-                           Name(wxT("Models")).Caption(wxT("Models")).
-                           FloatingSize(wxSize(160, 460)).TopDockable(false).BottomDockable(false).Float().Show(false).
-                           DestroyOnClose(false));
-
+  interfaceManager.AddPane(modelControl, buildRenderOptionsPaneInfo());
 
   // settings frame
   interfaceManager.AddPane(settingsControl, wxAuiPaneInfo().
@@ -747,43 +878,40 @@ static wxAuiPaneInfo buildUnityRendererPaneInfo();
 
 void ModelViewer::ResetLayout()
 {
+  // The Unity viewport keeps the role it has: a reset rearranges the panels, it does not move the
+  // model from one renderer to the other.
+  bool unityCentre = false;
+  if (unityRendererHost)
+  {
+    wxAuiPaneInfo & up = interfaceManager.GetPane(unityRendererHost);
+    unityCentre = up.IsOk() && up.IsShown() && up.dock_direction == wxAUI_DOCK_CENTER;
+  }
+
+  interfaceManager.DetachPane(commandBar);
   interfaceManager.DetachPane(fileControl);
   if (unityRendererHost)
     interfaceManager.DetachPane(unityRendererHost);
   interfaceManager.DetachPane(animControl);
-  interfaceManager.DetachPane(charControl);
+  interfaceManager.DetachPane(modelInspector);
   interfaceManager.DetachPane(lightControl);
   interfaceManager.DetachPane(modelControl);
   interfaceManager.DetachPane(settingsControl);
   interfaceManager.DetachPane(canvas);
 
+  interfaceManager.AddPane(commandBar, buildCommandBarPaneInfo(this));
+
   // OpenGL Canvas
   interfaceManager.AddPane(canvas, wxAuiPaneInfo().
                            Name(wxT("canvas")).Caption(wxT("OpenGL Canvas")).
-                           CenterPane());
+                           CenterPane().Show(!unityCentre));
 
-  // Tree list control
-  interfaceManager.AddPane(fileControl, wxAuiPaneInfo().
-                           Name(wxT("fileControl")).Caption(wxT("File List")).
-                           BestSize(wxSize(170, 700)).Left().Layer(2));
-
-  // Animation frame
-  interfaceManager.AddPane(animControl, wxAuiPaneInfo().
-                           Name(wxT("animControl")).Caption(wxT("Animation")).
-                           Bottom().Layer(1));
-
-  // Character frame
-  interfaceManager.AddPane(charControl, wxAuiPaneInfo().
-                           Name(wxT("charControl")).Caption(wxT("Character")).
-                           BestSize(wxSize(170, 700)).Right().Layer(2).Show(isChar));
+  interfaceManager.AddPane(fileControl, buildBrowsePaneInfo(this).Show(true));
+  interfaceManager.AddPane(animControl, buildAnimationPaneInfo(this).Show(true));
+  interfaceManager.AddPane(modelInspector, buildInspectorPaneInfo(this).Show(true));
 
   // (Lighting pane removed; lightControl still provides the default scene light.)
 
-  interfaceManager.AddPane(modelControl, wxAuiPaneInfo().
-                           Name(wxT("Models")).Caption(wxT("Models")).
-                           FloatingSize(wxSize(160, 460)).Float().TopDockable(false).LeftDockable(false).
-                           RightDockable(false).TopDockable(false).BottomDockable(false).Show(false).
-                           DestroyOnClose(false));
+  interfaceManager.AddPane(modelControl, buildRenderOptionsPaneInfo());
 
   interfaceManager.AddPane(settingsControl, wxAuiPaneInfo().
                            Name(wxT("Settings")).Caption(wxT("Settings")).
@@ -792,8 +920,15 @@ void ModelViewer::ResetLayout()
 
   // Unity viewport pane (only exists once View > Unity Renderer has been used)
   if (unityRendererHost)
-    interfaceManager.AddPane(unityRendererHost,
-                             buildUnityRendererPaneInfo().Show(unityRendererHost->isRunning()));
+  {
+    if (unityCentre)
+      interfaceManager.AddPane(unityRendererHost, wxAuiPaneInfo().
+                               Name(wxT("unityRenderer")).Caption(wxT("Unity Renderer")).
+                               CenterPane().Show(true));
+    else
+      interfaceManager.AddPane(unityRendererHost,
+                               buildUnityRendererPaneInfo().Show(unityAsidePaneShown()));
+  }
 
   // tell the manager to "commit" all the changes just made
   interfaceManager.Update();
@@ -886,27 +1021,10 @@ void ModelViewer::SaveSession()
 
   if (canvas)
   {
+    // The canvas's own client size. (It used to add the character panel's width back, because
+    // that panel came and went with character models; the Model panel does not.)
     int canvx = 0, canvy = 0;
     canvas->GetClientSize(&canvx, &canvy);
-    if (charControl->IsShown() == true)
-    {
-      wxAuiPaneInfo info = interfaceManager.GetPane(wxT("charControl"));
-      if (info.IsFloating() == false)
-      {
-        if (info.IsDocked() == true && (info.dock_direction == wxAUI_DOCK_RIGHT || info.dock_direction == wxAUI_DOCK_LEFT))
-        {
-          int x = 0;
-          charControl->GetClientSize(&x, NULL);
-          canvx += x + 6; // 6 seems to cover margins and borders...
-        }
-        else if (info.IsDocked() == true && (info.dock_direction == wxAUI_DOCK_TOP || info.dock_direction == wxAUI_DOCK_BOTTOM))
-        {
-          int y = 0;
-          charControl->GetClientSize(NULL, &y);
-          canvy += y + 23; // 23 covers the margins, borders, and title bar...
-        }
-      }
-    }
 
     config.setValue("Session/CanvasWidth", canvx);
     config.setValue("Session/CanvasHeight", canvy);
@@ -956,9 +1074,16 @@ void ModelViewer::LoadLayout()
   SetPosition(wxPoint(posx, posy));
 
   wxString layout = config.value("Session/Layout", "").toString().toStdWString();
+  const int layoutVersion = config.value("Session/LayoutVersion", 0).toInt();
 
-  // if the layout data exists,  load it.
-  if (!layout.IsNull() // something goes wrong
+  // if the layout data exists,  load it. A layout saved by the previous panel arrangement (no
+  // version) names panes that no longer exist and lacks the ones that do, so it is ignored and
+  // the default arrangement used instead.
+  if (layoutVersion < LAYOUT_VERSION && !layout.IsEmpty())
+  {
+    LOG_INFO << "Saved GUI layout is from an earlier panel arrangement; using the default layout.";
+  }
+  else if (!layout.IsNull() // something goes wrong
       && !layout.IsEmpty() // empty value
       && !layout.EndsWith(L"canvas")) // old saving badly read by Qt, ignore
   {
@@ -972,8 +1097,10 @@ void ModelViewer::LoadLayout()
       interfaceManager.GetPane(modelControl).Show(false);
       interfaceManager.GetPane(settingsControl).Show(false);
 
-      // If character panel is showing,  hide it
-      interfaceManager.GetPane(charControl).Show(isChar);
+      // The command bar is not something a saved layout can take away. Browse, Model and
+      // Animation keep whatever shown state the layout saved: that is how the panels a user
+      // closed stay closed next time.
+      interfaceManager.GetPane(wxT("commandBar")).Show(true);
 #ifndef  _LINUX // buggy
       interfaceManager.Update();
 #endif
@@ -995,6 +1122,7 @@ void ModelViewer::SaveLayout()
   QSettings config(QString::fromWCharArray(cfgPath.c_str()), QSettings::IniFormat);
 
   config.setValue("Session/Layout", QString::fromWCharArray(interfaceManager.SavePerspective().c_str()));
+  config.setValue("Session/LayoutVersion", LAYOUT_VERSION);
 
   wxPoint pos = GetPosition();
   config.setValue("Session/PositionX", pos.x);
@@ -1079,8 +1207,9 @@ void ModelViewer::LoadModel(GameFile * file)
     return;
   }
 
-  SetStatusText(canvas->model()->name().toStdWString());
-  // Also show the loaded model in the title bar -- the status bar at the bottom is easy to miss,
+  // The loaded model's name goes in the title bar and the command bar; the status bar gets its
+  // facts (vertices, triangles...) from DisplayedContentChanged below.
+  // Show the loaded model in the title bar -- the status bar at the bottom is easy to miss,
   // so this makes "what am I looking at" obvious at a glance.
   SetTitle(wxString(GLOBALSETTINGS.appTitle()) + wxT("  -  ") +
            wxString(canvas->model()->name().toStdWString()));
@@ -1094,9 +1223,6 @@ void ModelViewer::LoadModel(GameFile * file)
     viewMenu->Check(ID_USE_CAMERA, false);
   }
 
-  // wxAUI
-  interfaceManager.GetPane(charControl).Show(isChar);
-  interfaceManager.GetPane(charControl).Show(isChar);
   if (isChar)
   {
     charMenu->Check(ID_SHOW_UNDERWEAR, true);
@@ -1177,9 +1303,13 @@ void ModelViewer::LoadModel(GameFile * file)
   // commit below then finds nothing to do -- one relayout per switch, not two.
   UpdatePrimaryViewport();
 
-  // The character panel was shown or hidden above according to the model; lay out ONLY if that
-  // actually changed and the routing did not. An unconditional Update() here erased and
-  // repainted the whole window, player included, on every load: see CommitLayoutIfChanged.
+  // The Model panel, the command bar and the status bar follow the new model. After the
+  // routing, so they know which viewport it is on.
+  DisplayedContentChanged();
+
+  // Lay out ONLY if a pane's shown state actually changed and the routing did not. An
+  // unconditional Update() here erased and repainted the whole window, player included, on every
+  // load: see CommitLayoutIfChanged.
   CommitLayoutIfChanged();
 }
 
@@ -1219,7 +1349,7 @@ void ModelViewer::LoadNPC(unsigned int modelid)
                        "than the data you have loaded."),
                    wxT("NPC unavailable"), wxOK | wxICON_INFORMATION);
     fileControl->UpdateInterface();
-    interfaceManager.GetPane(charControl).Show(isChar);
+    DisplayedContentChanged();
     CommitLayoutIfChanged();
   };
 
@@ -1289,10 +1419,7 @@ void ModelViewer::LoadNPC(unsigned int modelid)
   m_exportNpcDisplayId = 0; // child re-resolves DisplayID1; overridden by LoadNPCByDisplay
 
   fileControl->UpdateInterface();
-
-  // wxAUI
-  // hide charControl if current model is not a Character one.
-  interfaceManager.GetPane(charControl).Show(isChar);
+  DisplayedContentChanged();
 
   CommitLayoutIfChanged();
 }
@@ -1431,8 +1558,7 @@ void ModelViewer::LoadItem(unsigned int id)
   }
   catch (...) {}
 
-  // wxAUI
-  interfaceManager.GetPane(charControl).Show(isChar);
+  DisplayedContentChanged();
   CommitLayoutIfChanged();
 }
 
@@ -1582,6 +1708,12 @@ ModelViewer::~ModelViewer()
     modelControl = NULL;
   }
 
+  // After the animation and character controls: some of their controls live on its pages.
+  if (modelInspector) {
+    modelInspector->Destroy();
+    modelInspector = NULL;
+  }
+
   if (unityRendererHost) {
     unityRendererHost->Destroy();
     unityRendererHost = NULL;
@@ -1598,15 +1730,19 @@ void ModelViewer::OnToggleDock(wxCommandEvent &event)
 {
   int id = event.GetId();
 
-  // wxAUI Stuff
+  // wxAUI Stuff. Browse, Model and Animation toggle: the View menu items and the command bar
+  // buttons are checked while their panel is shown (OnUpdateCommandUI).
   if (id == ID_SHOW_FILE_LIST) {
-    interfaceManager.GetPane(fileControl).Show(true);
+    wxAuiPaneInfo & pane = interfaceManager.GetPane(fileControl);
+    pane.Show(!pane.IsShown());
   }
   else if (id == ID_SHOW_ANIM) {
-    interfaceManager.GetPane(animControl).Show(true);
+    wxAuiPaneInfo & pane = interfaceManager.GetPane(animControl);
+    pane.Show(!pane.IsShown());
   }
   else if (id == ID_SHOW_CHAR) {
-    interfaceManager.GetPane(charControl).Show(true);
+    wxAuiPaneInfo & pane = interfaceManager.GetPane(modelInspector);
+    pane.Show(!pane.IsShown());
   }
   else if (id == ID_SHOW_LIGHT) {
     interfaceManager.GetPane(lightControl).Show(true);
@@ -1710,20 +1846,12 @@ void ModelViewer::ApplyViewerStartupLayout()
   if (batchMode || !unityPrimaryViewport || !canvas)
     return;
 
-  // START AS A VIEWER, NOT AS A WORKBENCH. The file tree and the animation controls are how you
-  // drive the thing once you are using it, but on an empty application they are chrome around a
-  // viewport with nothing in it.
-  //
-  // Only HIDDEN, never removed: View > "Show file list" / "Show animation control" / "Show
-  // character control" bring each back, and they stay for the session. They are hidden again on
-  // the NEXT launch, deliberately -- "not visible by default on launch" is the point of the mode,
-  // so it starts clean every time rather than remembering the last time it was untidy.
-  interfaceManager.GetPane(fileControl).Show(false);
-  interfaceManager.GetPane(animControl).Show(false);
-  interfaceManager.GetPane(charControl).Show(false);
-  interfaceManager.Update();
+  // The panels come up as they were left: Browse, Model and Animation keep the shown state the
+  // saved layout restored (LoadLayout), all three on a first run. The empty viewport says what to
+  // do next itself (UnityRendererHost's empty state), so hiding the panels that do it is no
+  // longer the way to make an empty application look tidy.
 
-  // ...and take the screen. A viewer that opens in a small window in the corner is not one.
+  // Take the screen. A viewer that opens in a small window in the corner is not one.
   EnterViewerFullScreen(true);
 }
 
@@ -1751,6 +1879,10 @@ void ModelViewer::WarmStartUnityViewport()
 
   if (!ShowUnityRenderer())
     return;                       // already reported; the OpenGL canvas keeps the centre
+
+  // Nothing is loaded yet: the viewport shows what to do first instead of an empty dark panel.
+  unityRendererHost->setEmptyState(true);
+  UpdateEmptyState();
 
   // Take the centre, so the viewport the user is going to use is the one they can see.
   interfaceManager.DetachPane(unityRendererHost);
@@ -1862,7 +1994,12 @@ void ModelViewer::UpdatePrimaryViewport()
   {
     // Launching can fail (no player build, or a broken one). ShowUnityRenderer has already told
     // the user why; the centre simply stays where it is rather than going blank.
-    if (!ShowUnityRenderer())
+    //
+    // A player that is already running does not need ShowUnityRenderer at all -- it is re-docked
+    // just below -- and skipping it spares the relayout that would first show its pane at the
+    // side (the pane is hidden while an OpenGL-only model is up: see UncoverOpenGLViewport).
+    const bool running = unityRendererHost && unityRendererHost->isRunning();
+    if (!running && !ShowUnityRenderer())
     {
       LOG_INFO << "Unity viewport unavailable -- the OpenGL canvas remains the main viewport.";
       UncoverOpenGLViewport();
@@ -1908,7 +2045,7 @@ void ModelViewer::UncoverOpenGLViewport()
     {
       wxAuiPaneInfo & up = interfaceManager.GetPane(unityRendererHost);
       unityAside = up.IsOk() && up.dock_direction != wxAUI_DOCK_CENTER &&
-                   up.IsShown() == unityRendererHost->isRunning();
+                   up.IsShown() == unityAsidePaneShown();
     }
     if (canvasShown && unityAside)
       return;
@@ -1917,11 +2054,23 @@ void ModelViewer::UncoverOpenGLViewport()
   interfaceManager.GetPane(canvas).Show(true);
   if (unityRendererHost)
   {
-    const bool wasRunning = unityRendererHost->isRunning();
+    const bool showAside = unityAsidePaneShown();
     interfaceManager.DetachPane(unityRendererHost);
-    interfaceManager.AddPane(unityRendererHost, buildUnityRendererPaneInfo().Show(wasRunning));
+    interfaceManager.AddPane(unityRendererHost, buildUnityRendererPaneInfo().Show(showAside));
   }
   interfaceManager.Update();
+}
+
+// Whether the Unity pane, once it is not the centre, is shown at the side.
+//
+// When Unity is the main viewport, a model it cannot show (a character, a WMO) moves the canvas to
+// the centre -- and the side pane used to stay up showing the PREVIOUS model, frozen, taking a
+// third of a small window. It is hidden instead; the player keeps running and takes the centre
+// back on the next model it can show. With the main-viewport option off, the side pane is the
+// optional comparison view it always was, shown while the player runs.
+bool ModelViewer::unityAsidePaneShown()
+{
+  return unityRendererHost && unityRendererHost->isRunning() && !unityPrimaryViewport;
 }
 
 void ModelViewer::OnUnityPrimaryViewport(wxCommandEvent & event)
@@ -2162,6 +2311,7 @@ void ModelViewer::OnToggleCommand(wxCommandEvent &event)
   */
     case ID_OPENGL_DEBUG:
       canvas->toggleOpenGLDebug();
+      break;   // (fell through into "save view to slot 1")
 
     case ID_SAVE_TEMP1:
       canvas->SaveSceneState(1);
@@ -2642,6 +2792,9 @@ int ModelViewer::LoadWoWFromMpq(const QString & dataFolder, const QString & loca
   // untouched here.)
   fileControl->Init(this);
   fileControl->Enable();
+  // The empty viewport points at Browse now rather than at loading a client -- once the load has
+  // returned, since the client does not count as active while it is still inside it.
+  CallAfter([this]() { UpdateEmptyState(); });
 
   SetStatusText(wxString(GAMEDIRECTORY.version().toStdWString()), 1);
   SetStatusText(wxT("Legacy MPQ"), 2);
@@ -3001,6 +3154,9 @@ void ModelViewer::LoadWoW(const core::GameConfig * chosenConfig, const QString &
     SetStatusText(wxT("Error Initializing the Character Controls."));
   };
   fileControl->Enable();
+  // The empty viewport points at Browse now rather than at loading a client -- once the load has
+  // returned, since the client does not count as active while it is still inside it.
+  CallAfter([this]() { UpdateEmptyState(); });
   SetStatusText(wxT("File Control Initialized."));
 
   if (progress)
@@ -3543,12 +3699,247 @@ void ModelViewer::SetCanvasSize(uint32 sizex, uint32 sizey)
   }
 }
 
+bool ModelViewer::isUnityViewportOnScreen()
+{
+  if (!unityRendererHost || !canvas)
+    return false;
+  wxAuiPaneInfo & up = interfaceManager.GetPane(unityRendererHost);
+  return up.IsOk() && up.IsShown() && up.dock_direction == wxAUI_DOCK_CENTER &&
+         !interfaceManager.GetPane(canvas).IsShown();
+}
+
+bool ModelViewer::isUnityViewportShowingModel()
+{
+  if (!unityRendererHost || !canvas || !unityRendererHost->ipc() || !unityRendererHost->ipc()->isConnected())
+    return false;
+  wxAuiPaneInfo & up = interfaceManager.GetPane(unityRendererHost);
+  return up.IsOk() && up.IsShown() && unityCanShowCurrentModel();
+}
+
+// The size of the viewport the user is looking at, whichever renderer that is. Called by the
+// canvas and the Unity host whenever either is resized.
 void ModelViewer::UpdateCanvasStatus()
 {
-  // called by ModelCanvas::OnSize() to display updated canvas dimensions on the status bar
-  int canvx = 0, canvy = 0;
-  canvas->GetClientSize(&canvx, &canvy);
-  SetStatusText(wxString::Format(wxT("Canvas: %i x %i"), canvx, canvy), 3);
+  if (!canvas || !GetStatusBar())
+    return;
+  const wxWindow * viewport = isUnityViewportOnScreen() ? (wxWindow *)unityRendererHost : (wxWindow *)canvas;
+  const wxSize size = viewport->GetClientSize();
+  SetStatusText(wxString::Format(wxT("Viewport %i \u00D7 %i"), size.x, size.y), 3);
+}
+
+// Facts about what is loaded, for the status bar: the model's name is already in the title bar
+// and the command bar, so this says what it is made of instead. Counts that do not apply are
+// left out rather than shown as zero.
+void ModelViewer::UpdateStatusFacts()
+{
+  if (!GetStatusBar() || !canvas)
+    return;
+
+  wxArrayString parts;
+  auto count = [&parts](size_t n, const wxString & one, const wxString & many) {
+    if (n > 0)
+      parts.Add(wxNumberFormatter::ToString((long)n, wxNumberFormatter::Style_WithThousandsSep) +
+                wxT(" ") + (n == 1 ? one : many));
+  };
+
+  if (isWMO && canvas->wmo)
+  {
+    count(canvas->wmo->nGroups, _("group"), _("groups"));
+    count(canvas->wmo->doodadsets.size(), _("doodad set"), _("doodad sets"));
+  }
+  else if (canvas->model())
+  {
+    const WoWModel * m = canvas->model();
+    count(m->origVertices.size(), _("vertex"), _("vertices"));
+    count(m->indices.size() / 3, _("triangle"), _("triangles"));
+    count(m->geosets.size(), _("submesh"), _("submeshes"));
+    count(m->anims.size(), _("animation"), _("animations"));
+  }
+
+  wxString text;
+  for (size_t i = 0; i < parts.size(); i++)
+    text += (i ? wxT("  \u00B7  ") : wxT("")) + parts[i];
+  SetStatusText(text, 0);
+}
+
+void ModelViewer::UpdateEmptyState()
+{
+  if (!unityRendererHost)
+    return;
+  if (UnityAssetAccess::hasActiveClient())
+    unityRendererHost->setEmptyStateText(_("No model loaded"),
+                                         _("Choose a model in Browse, or search for one by name."),
+                                         _("Browse models"));
+  else
+    unityRendererHost->setEmptyStateText(_("No model loaded"),
+                                         _("Load a World of Warcraft client to browse its models."),
+                                         _("Load World of Warcraft..."));
+}
+
+void ModelViewer::DisplayedContentChanged()
+{
+  if (!canvas)
+    return;
+
+  const bool loaded = canvas->model() || canvas->wmo || canvas->adt;
+  if (unityRendererHost)
+  {
+    if (loaded)
+      unityRendererHost->setEmptyState(false);
+    else
+      UpdateEmptyState();
+  }
+
+  if (commandModelLabel)
+  {
+    wxString path;
+    if (isWMO && canvas->wmo)
+      path = canvas->wmo->itemName().toStdWString();
+    else if (isADT && canvas->adt)
+      path = canvas->adt->name;
+    else if (canvas->model())
+      path = canvas->model()->gamefile ? canvas->model()->gamefile->fullname().toStdWString()
+                                       : const_cast<WoWModel *>(canvas->model())->name().toStdWString();
+    wxString name = path;
+    name.Replace(wxT("/"), wxT("\\"));
+    name = name.AfterLast('\\');
+    commandModelLabel->SetLabel(name.IsEmpty() ? wxString(_("No model loaded")) : name);
+    commandModelLabel->SetForegroundColour(name.IsEmpty() ? UiStyle::secondaryText()
+                                                          : wxSystemSettings::GetColour(wxSYS_COLOUR_WINDOWTEXT));
+    commandModelLabel->SetToolTip(path);
+    commandModelLabel->Refresh();
+  }
+
+  if (modelInspector)
+    modelInspector->ContentChanged();
+
+  UpdateStatusFacts();
+  UpdateCanvasStatus();
+}
+
+// Open model: without a client there is nothing to browse, so this is "load a client"; with one,
+// it is "go to Browse", with the search box ready for typing.
+void ModelViewer::OnCommandBar(wxCommandEvent & event)
+{
+  switch (event.GetId())
+  {
+    case ID_UI_OPEN_MODEL:
+    {
+      // A client load yields to the event loop (its progress dialog), so this can be clicked in
+      // the middle of one; starting another there is the double load that brings the app down.
+      if (UnityAssetAccess::isClientLoading())
+        return;
+      if (!UnityAssetAccess::hasActiveClient())
+      {
+        PromptAndLoadClient();
+        UpdateEmptyState();
+        if (!UnityAssetAccess::hasActiveClient())
+          return;
+      }
+      wxAuiPaneInfo & browse = interfaceManager.GetPane(fileControl);
+      if (!browse.IsShown())
+      {
+        browse.Show(true);
+        interfaceManager.Update();
+      }
+      if (fileControl->txtContent)
+        fileControl->txtContent->SetFocus();
+      break;
+    }
+
+    // The same commands as View > Camera > "Reset to default" and File > "Save Screenshot".
+    // Both act on the OpenGL canvas, so the buttons are only enabled while that is the viewport
+    // on screen (OnUpdateCommandUI).
+    case ID_UI_RESET_CAMERA:
+    {
+      wxCommandEvent reset(wxEVT_MENU, ID_CAM_RESET);
+      OnCamMenu(reset);
+      break;
+    }
+    case ID_UI_SCREENSHOT:
+    {
+      wxCommandEvent shot(wxEVT_MENU, ID_FILE_SCREENSHOT);
+      OnSave(shot);
+      break;
+    }
+  }
+}
+
+void ModelViewer::OnUpdateCommandUI(wxUpdateUIEvent & event)
+{
+  switch (event.GetId())
+  {
+    case ID_SHOW_FILE_LIST:
+      event.Check(fileControl && interfaceManager.GetPane(fileControl).IsShown());
+      break;
+    case ID_SHOW_CHAR:
+      event.Check(modelInspector && interfaceManager.GetPane(modelInspector).IsShown());
+      break;
+    case ID_SHOW_ANIM:
+      event.Check(animControl && interfaceManager.GetPane(animControl).IsShown());
+      break;
+
+    // Neither command reaches the Unity viewport (it frames models itself and has no screenshot
+    // path), so neither pretends to while it is the one on screen.
+    case ID_UI_RESET_CAMERA:
+    {
+      const bool openGL = canvas && !isUnityViewportOnScreen();
+      event.Enable(openGL && canvas->model());
+      if (commandBar)
+        commandBar->SetToolShortHelp(ID_UI_RESET_CAMERA, openGL
+          ? _("Reset the camera to frame the model")
+          : _("Reset camera works in the OpenGL viewport; the Unity viewport frames each model itself"));
+      break;
+    }
+    case ID_UI_SCREENSHOT:
+    {
+      const bool openGL = canvas && !isUnityViewportOnScreen();
+      event.Enable(openGL && (canvas->model() || canvas->wmo));
+      if (commandBar)
+        commandBar->SetToolShortHelp(ID_UI_SCREENSHOT, openGL
+          ? _("Save a screenshot (F12)")
+          : _("Screenshots are taken from the OpenGL viewport, which is not the one on screen"));
+      break;
+    }
+  }
+}
+
+void ModelViewer::OnKeyboardShortcuts(wxCommandEvent & WXUNUSED(event))
+{
+  std::vector<ShortcutInfo> extra;
+  auto add = [&extra](const wxString & section, const wxString & keys, const wxString & action) {
+    ShortcutInfo info;
+    info.section = section;
+    info.keys = keys;
+    info.action = action;
+    extra.push_back(info);
+  };
+
+  for (const AppAccelerator & a : kAppAccelerators)
+    if (a.keys && a.description)
+      add(a.where, a.keys, a.description);
+
+  add(_("Window"), _("Esc"), _("Leave fullscreen"));
+
+  const wxString unity = _("Unity viewport");
+  add(unity, _("Left drag"), _("Orbit around the model"));
+  add(unity, _("Right drag"), _("Pan"));
+  add(unity, _("Mouse wheel"), _("Zoom"));
+
+  const wxString gl = _("OpenGL viewport");
+  add(gl, _("Left drag"), _("Orbit around the model"));
+  add(gl, _("Right drag"), _("Pan"));
+  add(gl, _("Mouse wheel, middle drag"), _("Zoom"));
+  add(gl, _("Shift + drag or wheel"), _("Finer movement"));
+  add(gl, _("Numpad 4 / 6"), _("Rotate left / right"));
+  add(gl, _("Numpad 8 / 2"), _("Rotate back / front"));
+  add(gl, _("Numpad 7 / 9"), _("Raise / lower the view"));
+  add(gl, _("Numpad 1 / 3"), _("Pan left / right"));
+  add(gl, _("Numpad 5"), _("Reset the camera"));
+  add(gl, _("1 \u2013 9, 0"), _("Animation speed 0.1\u00D7 \u2013 0.9\u00D7, 0 = normal"));
+
+  KeyboardShortcutsDialog dialog(this, GetMenuBar(), extra);
+  dialog.ShowModal();
 }
 
 void ModelViewer::ModelInfo()
