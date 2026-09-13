@@ -8,6 +8,7 @@
 #include "Game.h"
 #include "globalvars.h"
 #include "RaceInfos.h"
+#include "UiStyle.h"
 #include "itemselection.h"
 #include "modelviewer.h"
 #include "util.h"
@@ -72,15 +73,22 @@ CharControl::CharControl(wxWindow* parent, wxWindowID id)
 {
   LOG_INFO << "Creating Char Control...";
 
-  if (Create(parent, id, wxDefaultPosition, wxSize(100, 700), 0, wxT("CharControl")) == false) {
+  if (Create(parent, id, wxDefaultPosition, wxSize(100, 700), wxVSCROLL, wxT("CharControl")) == false) {
     LOG_ERROR << "Failed to create a window frame for the Character Control!";
     return;
   }
 
-  auto * top = new wxFlexGridSizer(1);
+  // Laid out as the Model panel's Appearance page for a character: Customization, Equipment and
+  // Tabard sections, left-aligned, on the shared spacing scale. The controls and their IDs are the
+  // ones this panel always had.
+  const int xs = FromDIP(UiStyle::XS);
+  const int sp = FromDIP(UiStyle::S);
+  const int md = FromDIP(UiStyle::M);
+
+  auto * top = new wxBoxSizer(wxVERTICAL);
 
   cdFrame = new CharDetailsFrame(this);
-  top->Add(cdFrame, wxSizerFlags(1).Align(wxALIGN_CENTER));
+  top->Add(cdFrame, wxSizerFlags().Expand().Border(wxLEFT | wxRIGHT | wxTOP, md));
 
   for (ssize_t i = 0; i < NUM_CHAR_SLOTS; i++) {
     buttons[i] = NULL;
@@ -88,20 +96,20 @@ CharControl::CharControl(wxWindow* parent, wxWindowID id)
     labels[i] = NULL;
   }
 
-  top->Add(new wxStaticText(this, -1, _("Equipment"), wxDefaultPosition, wxSize(200, 20), wxALIGN_CENTRE), wxSizerFlags().Border(wxTOP, 5));
-  auto * gs2 = new wxFlexGridSizer(4, 5, 5);
+  top->Add(UiStyle::sectionHeader(this, _("Equipment")), wxSizerFlags().Expand().Border(wxLEFT | wxRIGHT | wxTOP, md));
+  auto * gs2 = new wxFlexGridSizer(4, xs, xs);
   gs2->AddGrowableCol(3);
 
 #define ADD_CONTROLS(type, caption) \
     { \
-  gs2->Add(buttons[type]=new wxButton(this, ID_EQUIPMENT + type, caption)); \
+  gs2->Add(buttons[type]=new wxButton(this, ID_EQUIPMENT + type, caption), wxSizerFlags().Expand()); \
   gs2->Add(levelboxes[type]=new wxComboBox(this, ID_EQUIPMENT + 1000 + type, caption)); \
   levelboxes[type]->SetMinSize(wxSize(15, -1)); \
   levelboxes[type]->SetMaxSize(wxSize(15, -1)); \
-  clearButtons[type]=new wxButton(this, ID_EQUIPMENT + 2000 + type, wxT("X"), wxDefaultPosition, wxSize(24, -1)); \
+  clearButtons[type]=new wxButton(this, ID_EQUIPMENT + 2000 + type, wxT("X"), wxDefaultPosition, wxSize(FromDIP(24), -1)); \
   clearButtons[type]->SetToolTip(_("Remove this item")); \
   gs2->Add(clearButtons[type], wxSizerFlags().Align(wxALIGN_CENTER_VERTICAL)); \
-  gs2->Add(labels[type]=new wxStaticText(this, -1, _("---- None ----")), wxSizerFlags().Align(wxALIGN_CENTER_VERTICAL)); \
+  gs2->Add(labels[type]=new wxStaticText(this, -1, _("---- None ----"), wxDefaultPosition, wxDefaultSize, wxST_ELLIPSIZE_END), wxSizerFlags().Expand().Align(wxALIGN_CENTER_VERTICAL)); \
     }
 
   ADD_CONTROLS(CS_HEAD, _("Head"))
@@ -124,47 +132,77 @@ CharControl::CharControl(wxWindow* parent, wxWindowID id)
   ADD_CONTROLS(CS_TABARD, _("Tabard"))
 #undef ADD_CONTROLS
 
-  top->Add(gs2, wxSizerFlags(1).Align(wxALIGN_CENTER));
+  top->Add(gs2, wxSizerFlags().Expand().Border(wxLEFT | wxRIGHT | wxTOP, md));
 
   // Strip every equipped item at once (same action as the Character > Clear Equipment menu / F9),
   // exposed here as a button so it is discoverable right beside the slots.
   auto * clearAllBtn = new wxButton(this, ID_CLEAR_EQUIPMENT, _("Clear all equipment"));
   clearAllBtn->SetToolTip(_("Remove every equipped item (shortcut: F9)"));
-  top->Add(clearAllBtn, wxSizerFlags(1).Align(wxALIGN_CENTRE).Border(wxTOP, 6));
+  top->Add(clearAllBtn, wxSizerFlags().Border(wxLEFT | wxRIGHT | wxTOP, md));
 
   // Create our tabard customisation spin buttons
-  auto * gs3 = new wxGridSizer(3);
+  m_tabardHeader = UiStyle::sectionHeader(this, _("Tabard"));
+  top->Add(m_tabardHeader, wxSizerFlags().Expand().Border(wxLEFT | wxRIGHT | wxTOP, md));
+  auto * gs3 = new wxFlexGridSizer(3, xs, sp);
+  m_tabardGrid = gs3;
+  gs3->AddGrowableCol(2);
 #define ADD_CONTROLS(type, id, caption) \
-  gs3->Add(new wxStaticText(this, wxID_ANY, caption), wxSizerFlags().Align(wxALIGN_RIGHT|wxALIGN_CENTER_VERTICAL)); \
-  gs3->Add(tabardSpins[type]=new wxSpinButton(this, id, wxDefaultPosition, wxSize(30,16), wxSP_HORIZONTAL|wxSP_WRAP), wxSizerFlags(1).Align(wxALIGN_CENTER|wxALIGN_CENTER_VERTICAL)); \
-  gs3->Add(spinTbLabels[type] = new wxStaticText(this, wxID_ANY, wxT("0")), wxSizerFlags(2).Align(wxALIGN_LEFT|wxALIGN_CENTER_VERTICAL));
+  gs3->Add(new wxStaticText(this, wxID_ANY, caption), wxSizerFlags().Align(wxALIGN_LEFT|wxALIGN_CENTER_VERTICAL)); \
+  gs3->Add(tabardSpins[type]=new wxSpinButton(this, id, wxDefaultPosition, FromDIP(wxSize(30,16)), wxSP_HORIZONTAL|wxSP_WRAP), wxSizerFlags().Align(wxALIGN_CENTER_VERTICAL)); \
+  gs3->Add(spinTbLabels[type] = new wxStaticText(this, wxID_ANY, wxT("0")), wxSizerFlags().Align(wxALIGN_LEFT|wxALIGN_CENTER_VERTICAL));
 
   ADD_CONTROLS(SPIN_TABARD_ICON, ID_TABARD_ICON, _("Icon"))
-  ADD_CONTROLS(SPIN_TABARD_ICONCOLOR, ID_TABARD_ICONCOLOR, _("Icon Color"))
+  ADD_CONTROLS(SPIN_TABARD_ICONCOLOR, ID_TABARD_ICONCOLOR, _("Icon color"))
   ADD_CONTROLS(SPIN_TABARD_BORDER, ID_TABARD_BORDER, _("Border"))
-  ADD_CONTROLS(SPIN_TABARD_BORDERCOLOR, ID_TABARD_BORDERCOLOR, _("Border Color"))
-  ADD_CONTROLS(SPIN_TABARD_BACKGROUND, ID_TABARD_BACKGROUND, _("BG Color"))
+  ADD_CONTROLS(SPIN_TABARD_BORDERCOLOR, ID_TABARD_BORDERCOLOR, _("Border color"))
+  ADD_CONTROLS(SPIN_TABARD_BACKGROUND, ID_TABARD_BACKGROUND, _("Background color"))
 
 #undef ADD_CONTROLS
 
-  top->Add(new wxStaticText(this, -1, _("Tabard details")), wxSizerFlags(1).Align(wxALIGN_CENTRE).Border(wxALL, 1));
-  top->Add(gs3, wxSizerFlags(1).Align(wxALIGN_CENTER));
-  top->Add(new wxButton(this, ID_MOUNT, _("Mount / dismount")), wxSizerFlags(1).Align(wxALIGN_CENTRE).Border(wxTOP, 10));
+  top->Add(gs3, wxSizerFlags().Expand().Border(wxLEFT | wxRIGHT | wxTOP, md));
+  m_mountHeader = UiStyle::sectionHeader(this, _("Mount"));
+  top->Add(m_mountHeader, wxSizerFlags().Expand().Border(wxLEFT | wxRIGHT | wxTOP, md));
+  m_mountButton = new wxButton(this, ID_MOUNT, _("Mount / dismount"));
+  top->Add(m_mountButton, wxSizerFlags().Border(wxALL, md));
 
   //p->SetSizer(top);
 
-  top->SetSizeHints(this);
   Show(true);
   //SetAutoLayout(true);
   SetSizer(top);
   Layout();
   FitInside(); // ask the sizer about the needed size
-  SetScrollRate(5, 5);
+  SetScrollRate(0, FromDIP(8));
 
   choosingSlot = 0;
   itemDialog = 0;
   model = 0;
   charAtt = 0;
+}
+
+// A creature or item has only the two hand slots (ModelViewer::LoadModel gives every other model
+// those two items), so for one the panel shows just those rows and "Clear all equipment": no
+// customization, no body slots, no tabard, no mount. A character gets everything back.
+void CharControl::SetHandsOnly(bool handsOnly)
+{
+  if (m_handsOnly == handsOnly)
+    return;
+  m_handsOnly = handsOnly;
+
+  cdFrame->Show(!handsOnly);
+  for (ssize_t i = 0; i < NUM_CHAR_SLOTS; i++)
+  {
+    const bool show = !handsOnly || i == CS_HAND_RIGHT || i == CS_HAND_LEFT;
+    for (wxWindow * w : { (wxWindow *)buttons[i], (wxWindow *)levelboxes[i], (wxWindow *)clearButtons[i], (wxWindow *)labels[i] })
+      if (w)
+        w->Show(show);
+  }
+  GetSizer()->Show(m_tabardHeader, !handsOnly, true);
+  GetSizer()->Show(m_tabardGrid, !handsOnly, true);
+  GetSizer()->Show(m_mountHeader, !handsOnly, true);
+  m_mountButton->Show(!handsOnly);
+  Layout();
+  FitInside();
 }
 
 CharControl::~CharControl()
@@ -577,7 +615,7 @@ void CharControl::selectItem(ssize_t type, ssize_t slot, const wxChar *caption)
     itemDialog->SetSize(w, -1);
   }
 
-  itemDialog->Move(itemDialog->GetParent()->GetPosition() + wxPoint(4, 64));
+  itemDialog->Move(itemDialog->GetParent()->GetScreenPosition() + wxPoint(4, 64));
   itemDialog->Show();
   choosingSlot = slot;
 }
@@ -616,7 +654,7 @@ void CharControl::selectSet()
   }
 
   itemDialog = new FilteredChoiceDialog(this, UPDATE_SET, g_modelViewer, wxT("Choose an item set"), wxT("Item sets"), choices, NULL);
-  itemDialog->Move(itemDialog->GetParent()->GetPosition() + wxPoint(4, 64));
+  itemDialog->Move(itemDialog->GetParent()->GetScreenPosition() + wxPoint(4, 64));
   itemDialog->Show();
 }
 
@@ -648,7 +686,7 @@ void CharControl::selectStart()
   }
 
   itemDialog = new ChoiceDialog(this, UPDATE_START, g_modelViewer, wxT("Choose a class"), wxT("Classes"), choices);
-  itemDialog->Move(itemDialog->GetParent()->GetPosition() + wxPoint(4, 64));
+  itemDialog->Move(itemDialog->GetParent()->GetScreenPosition() + wxPoint(4, 64));
   itemDialog->Show();
 }
 
@@ -720,7 +758,7 @@ void CharControl::selectMount()
 
   itemDialog = new CategoryChoiceDialog(this, UPDATE_MOUNT, g_modelViewer, wxT("Choose a mount"),
                                         wxT("Mounts"), choices, cats, catnames, 0, true);
-  itemDialog->Move(itemDialog->GetParent()->GetPosition() + wxPoint(4, 64));
+  itemDialog->Move(itemDialog->GetParent()->GetScreenPosition() + wxPoint(4, 64));
   itemDialog->Check(1, false);
   itemDialog->DoFilter();
   itemDialog->Show();
@@ -799,7 +837,7 @@ void CharControl::selectNPC(ssize_t type)
     itemDialog->SetSize(w, -1);
   }
 
-  itemDialog->Move(itemDialog->GetParent()->GetPosition() + wxPoint(4, 64));
+  itemDialog->Move(itemDialog->GetParent()->GetScreenPosition() + wxPoint(4, 64));
   itemDialog->Show();
 }
 

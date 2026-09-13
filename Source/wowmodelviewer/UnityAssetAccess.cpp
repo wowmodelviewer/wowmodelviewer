@@ -27,6 +27,7 @@ namespace
 
 UnityAssetAccess::ClientLoadGuard::ClientLoadGuard() { g_clientLoadDepth++; }
 UnityAssetAccess::ClientLoadGuard::~ClientLoadGuard() { g_clientLoadDepth--; }
+bool UnityAssetAccess::isClientLoading() { return g_clientLoadDepth > 0; }
 
 QString UnityAssetAccess::normalizePath(const QString & path)
 {

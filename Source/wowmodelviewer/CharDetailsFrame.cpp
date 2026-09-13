@@ -6,6 +6,7 @@
 */
 
 #include "CharDetailsFrame.h"
+#include "UiStyle.h"
 
 #include <wx/sizer.h>
 
@@ -36,13 +37,14 @@ CharDetailsFrame::CharDetailsFrame(wxWindow* parent)
 
   charCustomizationGS_ = new wxFlexGridSizer(1);
   charCustomizationGS_->AddGrowableCol(0);
-  top->Add(new wxStaticText(this, -1, _("Model Customization"), wxDefaultPosition, wxSize(-1, 20), wxALIGN_CENTER),
-           wxSizerFlags().Border(wxBOTTOM, 5).Align(wxALIGN_CENTER));
+  top->Add(UiStyle::sectionHeader(this, _("Customization")), wxSizerFlags().Border(wxBOTTOM, FromDIP(UiStyle::S)).Expand());
 
   top->Add(charCustomizationGS_, wxSizerFlags().Border(wxBOTTOM, 5).Expand());
-  top->Add(new wxButton(this, wxID_ANY, wxT("Randomise"), wxDefaultPosition, wxDefaultSize), wxSizerFlags().Align(wxALIGN_CENTER).Border(wxALL, 2));
+  auto * row = new wxBoxSizer(wxHORIZONTAL);
+  row->Add(new wxButton(this, wxID_ANY, wxT("Randomise"), wxDefaultPosition, wxDefaultSize), wxSizerFlags().Align(wxALIGN_CENTER_VERTICAL));
   dhMode_ = new wxCheckBox(this, wxID_ANY, wxT("Demon Hunter"), wxDefaultPosition, wxDefaultSize);
-  top->Add(dhMode_, wxSizerFlags().Align(wxALIGN_CENTER).Border(wxALL, 2));
+  row->Add(dhMode_, wxSizerFlags().Align(wxALIGN_CENTER_VERTICAL).Border(wxLEFT, FromDIP(UiStyle::M)));
+  top->Add(row, wxSizerFlags().Border(wxTOP, FromDIP(UiStyle::XS)));
   SetAutoLayout(true);
   top->SetSizeHints(this);
   SetSizer(top);

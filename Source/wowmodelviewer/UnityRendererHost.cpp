@@ -8,6 +8,7 @@
 #include <wx/stdpaths.h>
 
 #include "enums.h"
+#include "modelviewer.h"
 #include "UnityIpcServer.h"
 #include "util.h"
 
@@ -19,6 +20,7 @@ BEGIN_EVENT_TABLE(UnityRendererHost, wxPanel)
   EVT_SIZE(UnityRendererHost::OnSize)
   EVT_SET_FOCUS(UnityRendererHost::OnSetFocus)
   EVT_PAINT(UnityRendererHost::OnPaint)
+  EVT_TIMER(wxID_ANY, UnityRendererHost::OnEmptyTimer)
 END_EVENT_TABLE()
 
 // What the viewport area shows before the player's own window covers it: nothing but the
@@ -38,6 +40,97 @@ void UnityRendererHost::OnPaint(wxPaintEvent & WXUNUSED(event))
   wxPaintDC dc(this);
   dc.SetBackground(wxBrush(wxColour(35, 31, 32)));
   dc.Clear();
+
+  if (!m_empty || m_emptyTitle.IsEmpty())
+    return;
+
+  // The empty viewer's prompt, centred above its button (layoutEmptyState places the button).
+  const wxRect area = GetClientRect();
+  wxFont titleFont = GetFont();
+  titleFont.SetPointSize(titleFont.GetPointSize() + 5);
+  wxFont detailFont = GetFont();
+  detailFont.SetPointSize(detailFont.GetPointSize() + 1);
+
+  dc.SetFont(titleFont);
+  const wxSize titleSize = dc.GetTextExtent(m_emptyTitle);
+  dc.SetFont(detailFont);
+  const wxSize detailSize = dc.GetTextExtent(m_emptyDetail);
+
+  const int gap = FromDIP(8);
+  const int buttonHeight = m_emptyButton ? m_emptyButton->GetSize().y : 0;
+  const int total = titleSize.y + gap + detailSize.y + FromDIP(20) + buttonHeight;
+  int y = area.y + (area.height - total) / 2;
+
+  dc.SetFont(titleFont);
+  dc.SetTextForeground(wxColour(226, 222, 218));
+  dc.DrawText(m_emptyTitle, area.x + (area.width - titleSize.x) / 2, y);
+  y += titleSize.y + gap;
+  dc.SetFont(detailFont);
+  dc.SetTextForeground(wxColour(160, 154, 150));
+  dc.DrawText(m_emptyDetail, area.x + (area.width - detailSize.x) / 2, y);
+}
+
+void UnityRendererHost::setEmptyStateText(const wxString & title, const wxString & detail, const wxString & action)
+{
+  m_emptyTitle = title;
+  m_emptyDetail = detail;
+  if (!m_emptyButton)
+  {
+    m_emptyButton = new wxButton(this, wxID_ANY, action);
+    m_emptyButton->Bind(wxEVT_BUTTON, [this](wxCommandEvent &) {
+      wxCommandEvent open(wxEVT_MENU, ID_UI_OPEN_MODEL);
+      if (GetParent())
+        wxPostEvent(GetParent(), open);
+    });
+  }
+  m_emptyButton->SetLabel(action);
+  m_emptyButton->SetSize(m_emptyButton->GetBestSize());
+  m_emptyButton->Show(m_empty);
+  layoutEmptyState();
+  Refresh();
+}
+
+void UnityRendererHost::setEmptyState(bool empty)
+{
+  if (m_empty == empty)
+    return;
+  m_empty = empty;
+  if (m_emptyButton)
+    m_emptyButton->Show(empty);
+  // Keep re-asserting for a moment after leaving the empty state too: a hide queued to a busy
+  // player thread can still be pending, and must not be the last word.
+  m_emptyTicksLeft = empty ? -1 : 20;
+  m_emptyTimer.Start(100);
+  applyEmbeddedVisibility();
+  layoutEmptyState();
+  Refresh();
+}
+
+void UnityRendererHost::layoutEmptyState()
+{
+  if (!m_emptyButton)
+    return;
+  const wxRect area = GetClientRect();
+  wxClientDC dc(this);
+  wxFont titleFont = GetFont();
+  titleFont.SetPointSize(titleFont.GetPointSize() + 5);
+  wxFont detailFont = GetFont();
+  detailFont.SetPointSize(detailFont.GetPointSize() + 1);
+  dc.SetFont(titleFont);
+  const int titleHeight = dc.GetTextExtent(m_emptyTitle.IsEmpty() ? wxString(wxT("X")) : m_emptyTitle).y;
+  dc.SetFont(detailFont);
+  const int detailHeight = dc.GetTextExtent(m_emptyDetail.IsEmpty() ? wxString(wxT("X")) : m_emptyDetail).y;
+  const wxSize button = m_emptyButton->GetSize();
+  const int total = titleHeight + FromDIP(8) + detailHeight + FromDIP(20) + button.y;
+  const int y = area.y + (area.height - total) / 2 + titleHeight + FromDIP(8) + detailHeight + FromDIP(20);
+  m_emptyButton->Move(area.x + (area.width - button.x) / 2, y);
+}
+
+void UnityRendererHost::OnEmptyTimer(wxTimerEvent & WXUNUSED(event))
+{
+  applyEmbeddedVisibility();
+  if (!m_empty && m_emptyTicksLeft > 0 && --m_emptyTicksLeft == 0)
+    m_emptyTimer.Stop();
 }
 
 void UnityRendererHost::setPlayerReady(bool ready)
@@ -59,6 +152,7 @@ UnityRendererHost::UnityRendererHost(wxWindow * parent, wxWindowID id)
   Create(parent, id, wxDefaultPosition, wxSize(640, 480), wxNO_BORDER | wxCLIP_CHILDREN, wxT("UnityRendererHost"));
   SetBackgroundColour(*wxBLACK);
   m_ipc = new UnityIpcServer();
+  m_emptyTimer.SetOwner(this);
 }
 
 UnityRendererHost::~UnityRendererHost()
@@ -279,12 +373,29 @@ void UnityRendererHost::resizeEmbeddedWindow()
   }
 }
 
+void UnityRendererHost::applyEmbeddedVisibility()
+{
+  if (!m_process)
+    return;
+  if (HWND wnd = findEmbeddedWindow())
+  {
+    // The window's own visible flag, not IsWindowVisible (which also folds in the parents').
+    // Its size is kept up to date by OnSize whether or not it is shown.
+    const bool visible = (GetWindowLongPtr(wnd, GWL_STYLE) & WS_VISIBLE) != 0;
+    if (m_empty && visible)
+      ShowWindowAsync(wnd, SW_HIDE);
+    else if (!m_empty && !visible)
+      ShowWindowAsync(wnd, SW_SHOWNA);
+  }
+}
+
 void UnityRendererHost::OnSetFocus(wxFocusEvent & event)
 {
   // Hand keyboard focus straight to the embedded player so its input works when the
-  // pane is clicked/activated.
-  if (HWND wnd = findEmbeddedWindow())
-    ::SetFocus(wnd);
+  // pane is clicked/activated (not while it is hidden behind the empty viewer).
+  if (!m_empty)
+    if (HWND wnd = findEmbeddedWindow())
+      ::SetFocus(wnd);
   event.Skip();
 }
 
@@ -301,6 +412,7 @@ bool UnityRendererHost::launch(bool showErrors, bool selfTest)
 bool UnityRendererHost::isRunning() { return false; }
 void UnityRendererHost::shutdown() {}
 void UnityRendererHost::resizeEmbeddedWindow() {}
+void UnityRendererHost::applyEmbeddedVisibility() {}
 void UnityRendererHost::OnSetFocus(wxFocusEvent & event) { event.Skip(); }
 
 #endif // _WINDOWS
@@ -308,5 +420,11 @@ void UnityRendererHost::OnSetFocus(wxFocusEvent & event) { event.Skip(); }
 void UnityRendererHost::OnSize(wxSizeEvent & event)
 {
   resizeEmbeddedWindow();
+  layoutEmptyState();
+  if (m_empty)
+    Refresh();
+  // The status bar reports the size of the viewport on screen, which may be this one.
+  if (ModelViewer * frame = wxDynamicCast(GetParent(), ModelViewer))
+    frame->UpdateCanvasStatus();
   event.Skip();
 }

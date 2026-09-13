@@ -10,6 +10,9 @@
 //#include "wmo.h"
 #include "modelcanvas.h"
 
+#include <wx/collpane.h>
+#include <wx/timer.h>
+
 extern float animSpeed;
 
 // AnimationData.dbc
@@ -120,22 +123,55 @@ typedef std::vector<particleColorSet> particleColorReplacements; // Holds 3 colo
                                                                  // colour set from 0, 1 or 2, depending on whether its
                                                                  // ParticleColorIndex is set to 11, 12 or 13
 
+class AnimClipList;
+class wxListEvent;
+class wxScrolledWindow;
+class wxSearchCtrl;
+
 class AnimControl: public wxWindow
 {
   DECLARE_CLASS(AnimControl)
   DECLARE_EVENT_TABLE()
 
-  wxComboBox *animCList, *animCList2, *animCList3, *wmoList, *loopList;
+  // The skin, texture-override and doodad-set controls are created here, because this class
+  // drives them, but they live on the Model inspector's Appearance page. It lays them out.
+  friend class ModelInspector;
+
+  wxComboBox *animCList2, *animCList3, *wmoList, *loopList;
   wxButton *showBLPList;
-  wxStaticText *wmoLabel,*speedLabel, *speedMouthLabel, *frameLabel;
+  wxStaticText *wmoLabel,*speedLabel, *speedMouthLabel;
   wxStaticText *BLPSkinsLabel, *BLPSkinLabel1, *BLPSkinLabel2, *BLPSkinLabel3;
   wxSlider *speedSlider, *speedMouthSlider, *frameSlider;
   wxButton *btnAdd;
   wxCheckBox *lockAnims, *nextAnims;
   wxTextCtrl *lockText;
 
-  wxButton *btnPlay, *btnPause, *btnStop, *btnClear, *btnPrev, *btnNext;
+  wxButton *btnPlayPause, *btnStop, *btnClear, *btnPrev, *btnNext, *btnSpeedReset;
   wxCheckBox *oldStyle;
+
+  // The clip list: every animation of the model, one row each, sorted by name. m_clips is that
+  // sorted table; m_visibleClips indexes into it for the rows the filter lets through.
+  struct Clip
+  {
+    int animIndex;      // position in WoWModel::anims -- what the animation manager takes
+    wxString name;      // AnimationData name
+    wxString label;     // "Name [animIndex]", the form the secondary/mouth selectors use
+    unsigned length;    // milliseconds
+  };
+  AnimClipList * clipList;
+  wxSearchCtrl * clipFilter;
+  wxStaticText * clipCount;
+  wxStaticText * stateLabel;
+  wxStaticText * lockTextLabel, * animCList2Label, * animCList3Label;
+  wxScrolledWindow * advancedScroll;
+  wxCollapsiblePane * advancedPane;
+  std::vector<Clip> m_clips;
+  std::vector<int> m_visibleClips;
+  bool m_syncingClipSelection = false;
+  bool m_scrubbing = false;
+  int m_sliderAnim = -1;
+  int m_listedAnim = -1;   // the clip whose row is highlighted (the last one picked or loaded)
+  wxTimer m_uiTimer;
 
   bool UpdateCreatureModel(WoWModel *m);
   bool UpdateItemModel(WoWModel *m);
@@ -143,9 +179,30 @@ class AnimControl: public wxWindow
   bool FillBLPSkinSelector(TextureSet &skins, bool item = false);
   void UpdateFrameSlider(int maxRange, int tickFreq);
 
+  // What picking a clip does -- the old dropdown handler's body, shared by the list and by
+  // pickAnimationLikeUser so both exercise exactly the same path.
+  void ChooseAnimation(int animIndex);
+  void ApplyClipFilter();
+  void SelectClipRow(int animIndex);
+  void OnClipSelected(wxListEvent & event);
+  void OnClipFilter(wxCommandEvent & event);
+  void OnAdvancedToggled(wxCollapsiblePaneEvent & event);
+  void RelayoutAdvanced();
+  void OnUiTimer(wxTimerEvent & event);
+  void RefreshPlaybackState();
+  // The texture-override rows sit in a collapsed section of the Appearance page; it has to be
+  // laid out again whenever this class shows or hides one of them.
+  void RelayoutAppearance();
+
 public:
-  AnimControl(wxWindow* parent, wxWindowID id);
+  // skinParent / overridesParent / doodadParent: where the skin selector, the per-slot texture
+  // overrides and the doodad-set selector are created (sections of the Model inspector's
+  // Appearance page). Null puts them on this window.
+  AnimControl(wxWindow* parent, wxWindowID id, wxWindow * skinParent, wxWindow * overridesParent,
+              wxWindow * doodadParent);
   ~AnimControl();
+
+  wxString ClipText(long row, long column) const;
 
   wxComboBox *skinList, *BLPSkinList1, *BLPSkinList2, *BLPSkinList3;
 

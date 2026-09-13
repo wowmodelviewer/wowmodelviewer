@@ -9,6 +9,9 @@
 
 #include "Attachment.h"
 #include "enums.h"
+#include "globalvars.h"
+#include "ModelInspector.h"
+#include "modelviewer.h"
 #include "WoWItem.h"
 
 #include "logger/Logger.h"
@@ -18,8 +21,6 @@
 IMPLEMENT_CLASS(ModelControl, wxWindow)
 
 BEGIN_EVENT_TABLE(ModelControl, wxWindow)
-  EVT_TREE_ITEM_ACTIVATED(ID_MODEL_GEOSETS, ModelControl::OnList)
-
   EVT_COMBOBOX(ID_MODEL_NAME, ModelControl::OnCombo)
   EVT_COMBOBOX(ID_MODEL_LOD, ModelControl::OnCombo)
 
@@ -100,25 +101,13 @@ ModelControl::ModelControl(wxWindow* parent, wxWindowID id)
   gbox->Add(particles);
   top->Add(gbox, 1, wxEXPAND);
 
-  top->AddSpacer(5);
-  top->Add(new wxStaticLine(this, wxID_ANY), 1, wxEXPAND);
-  top->AddSpacer(5);
-
-  top->Add(new wxStaticText(this, wxID_ANY, wxT("Geosets")), 1, wxEXPAND);
-  top->Add(new wxStaticText(this, wxID_ANY, wxT("Double click to toggle on/off")), 1, wxEXPAND);
-  clbGeosets = new wxTreeCtrl(this, ID_MODEL_GEOSETS, wxDefaultPosition, wxSize(150,150));
-  top->Add(clbGeosets, 1, wxEXPAND);
-  // Let the geoset list absorb the panel's spare height and grow when the Model Control window is
-  // resized, instead of being pinned to a 150px box you have to scroll. GetItemCount()-1 is the
-  // geoset tree's row (it is the last item added to this single-column sizer).
+  // The geoset list that used to follow here is the Model panel's Geosets tab now.
   top->AddGrowableCol(0);
-  top->AddGrowableRow(top->GetItemCount() - 1);
   top->SetSizeHints(this);
   Show(true);
   SetAutoLayout(true);
   padding->Add(top, 1, wxEXPAND|wxLEFT|wxTOP, 10);
-  padding->AddGrowableCol(0); // propagate the window's spare space down to the growable geoset row
-  padding->AddGrowableRow(0);
+  padding->AddGrowableCol(0);
   SetSizer(padding);
   Layout();
 }
@@ -135,7 +124,6 @@ ModelControl::~ModelControl()
   wireframe->Destroy();
   texture->Destroy();
   particles->Destroy();
-  clbGeosets->Destroy();
 }
 
 // Iterates through all the models counting and creating a list
@@ -257,39 +245,6 @@ void ModelControl::Update()
   cbLod->SetSelection(0);
 */
 
-  // Loop through all the geosets.
-  wxArrayString geosetItems;
-  //geosets->Clear();
-  // enum CharGeosets
-
-  std::map <size_t,wxTreeItemId> geosetGroupsMap;
-  GeosetTreeItemIds.clear();
-  clbGeosets->DeleteAllItems();
-  clbGeosets->SetWindowStyle(wxTR_HIDE_ROOT);
-  wxTreeItemId root = clbGeosets->AddRoot(_("Model Geosets"));
-  for (size_t i = 0; i < model->geosets.size(); i++)
-  {
-    size_t mesh = model->geosets[i]->id / 100;
-    if (geosetGroupsMap.find(mesh) == geosetGroupsMap.end())
-    {
-      wxString name = WoWModel::getCGGroupName((CharGeosets)mesh).toStdWString().c_str();
-      if (name != _T(""))
-        geosetGroupsMap[mesh] = clbGeosets->AppendItem(root, name);
-      else
-        geosetGroupsMap[mesh] = clbGeosets->AppendItem(root, wxString::Format(wxT("%i"), mesh));
-    }
-
-    GeosetTreeItemData * data = new GeosetTreeItemData();
-    data->geosetId = i;
-    wxTreeItemId item = clbGeosets->AppendItem(geosetGroupsMap[mesh], wxString::Format(wxT("%i [%i, %i, %i]"), i, mesh, (model->geosets[i]->id % 100), model->geosets[i]->id), -1, -1, data);
-    if (model->isGeosetDisplayed(i) == true)
-      clbGeosets->SetItemBackgroundColour(item, *wxGREEN);
-    GeosetTreeItemIds.push_back(item);
-  }
-
-  //for (size_t i=0; i<model->geosets.size(); i++)
-  //  clbGeosets->Check((unsigned int)i, model->showGeosets[i]);
-
   bones->SetValue(model->showBones);
   box->SetValue(model->showBounds);
   render->SetValue(model->showModel);
@@ -304,20 +259,13 @@ void ModelControl::Update()
 
 }
 
+// The geoset checkboxes live in the Model panel's Geosets tab; callers that changed the display
+// flags (a skin change) still come through here.
 void ModelControl::UpdateGeosetSelection()
 {
-  // Sets background colour on geoset tree based on whether geoset is currently displayed on model
-  if (!GeosetTreeItemIds.size())
-    return;
-  for (auto it = begin (GeosetTreeItemIds); it != end (GeosetTreeItemIds); ++it)
-  {
-    GeosetTreeItemData * data = (GeosetTreeItemData *)clbGeosets->GetItemData(*it);
-    size_t id = data->geosetId;
-    clbGeosets->SetItemBackgroundColour(*it,
-                                        (model->isGeosetDisplayed(id)) ? *wxGREEN : *wxWHITE);
-  }
+  if (g_modelViewer && g_modelViewer->modelInspector)
+    g_modelViewer->modelInspector->UpdateGeosetSelection();
 }
-
 
 void ModelControl::OnCheck(wxCommandEvent &event)
 {
@@ -401,33 +349,6 @@ void ModelControl::OnCombo(wxCommandEvent &event)
       animControl->UpdateModel(model);
       modelname->SetSelection(CurrentSelection);
     }
-  }
-}
-
-void ModelControl::OnList(wxTreeEvent &event)
-{
-  if (!init || !model)
-    return;
-
-  int id = event.GetId();
-
-  if (id == ID_MODEL_GEOSETS)
-  {
-    wxTreeItemId curItem = clbGeosets->GetSelection();
-    GeosetTreeItemData * data = (GeosetTreeItemData *)clbGeosets->GetItemData(curItem);
-    if(data)
-    {
-      size_t geosetIndex = data->geosetId;
-      model->showGeoset(geosetIndex, !model->isGeosetDisplayed(geosetIndex));
-      clbGeosets->SetItemBackgroundColour(curItem,
-                                          (model->isGeosetDisplayed(geosetIndex)) ? *wxGREEN : *wxWHITE);
-    }
-    else
-      std::cout << "data is null !!!" << std::endl;
-    clbGeosets->Layout();
-    clbGeosets->Fit();
-    Layout();
-    Fit();
   }
 }
 

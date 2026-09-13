@@ -305,6 +305,26 @@ enum ObjectID {
 
   ID_CHAR_RANDOMISE,
 
+  // Command bar and Help menu
+  ID_UI_OPEN_MODEL,        // "Open model": load a client first if none, otherwise go to Browse
+  ID_UI_RESET_CAMERA,      // command bar: View > Camera > Reset, while that camera is on screen
+  ID_UI_SCREENSHOT,        // command bar: File > Save Screenshot, while that viewport is on screen
+  ID_UI_MODEL_LABEL,
+  ID_KEYBOARD_SHORTCUTS,
+
+  // Model inspector
+  ID_INSPECTOR_NOTEBOOK,
+  ID_INSPECTOR_GEOSET_TREE,
+  ID_INSPECTOR_GEOSET_FILTER,
+  ID_INSPECTOR_ATTACHMENT,
+
+  // Animation panel
+  ID_ANIM_CLIP_LIST,
+  ID_ANIM_CLIP_FILTER,
+  ID_ANIM_PLAYPAUSE,
+  ID_ANIM_SPEED_RESET,
+  ID_ANIM_UI_TIMER,
+
   ID_EQUIPMENT = 5000
 };
 

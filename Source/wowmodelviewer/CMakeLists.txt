@@ -30,6 +30,7 @@ set(src  AnimationExportChoiceDialog.cpp
          MiniExr.cpp
          ItemImporterDialog.cpp
          itemselection.cpp
+         KeyboardShortcutsDialog.cpp
          lightcontrol.cpp
          LoadingDialog.cpp
          liquid.cpp
@@ -38,6 +39,7 @@ set(src  AnimationExportChoiceDialog.cpp
          maptile.cpp
          modelcanvas.cpp
          modelcontrol.cpp
+         ModelInspector.cpp
          modelviewer.cpp
          NPCImporterDialog.cpp
          OrbitCamera.cpp
@@ -74,6 +76,7 @@ set(headers AnimationExportChoiceDialog.h
             MiniExr.h
             ItemImporterDialog.h
             itemselection.h
+            KeyboardShortcutsDialog.h
             lightcontrol.h
             LoadingDialog.h
             liquid.h
@@ -81,6 +84,7 @@ set(headers AnimationExportChoiceDialog.h
             maptile.h
             modelcanvas.h
             modelcontrol.h
+            ModelInspector.h
             modelviewer.h
             NPCImporterDialog.h
             OrbitCamera.h
@@ -88,6 +92,7 @@ set(headers AnimationExportChoiceDialog.h
             resource1.h
             SettingsControl.h
             shaders.h
+            UiStyle.h
             UnityAssetAccess.h
             UnityIpcServer.h
             UnityRendererHost.h

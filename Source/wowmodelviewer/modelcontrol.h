@@ -30,21 +30,12 @@ class ModelControl: public wxWindow
 {
   DECLARE_CLASS(ModelControl)
   DECLARE_EVENT_TABLE()
-  class GeosetTreeItemData : public wxTreeItemData
-  {
-    public:
-      size_t geosetId;
-  };
-  
+
   wxComboBox *modelname;
   // wxComboBox *cbLod;
   wxSlider *alpha, *scale;
   wxCheckBox *bones, *box, *render, *wireframe, *texture, *particles;
-  //wxCheckListBox *clbGeosets;
-  wxTreeCtrl *clbGeosets;
   wxTextCtrl *txtsize;
-
-  std::vector<wxTreeItemId> GeosetTreeItemIds;  // track items added to clbGeosets 
 
   // List of models in the scene.
   //std::vector<Model*> models;
@@ -64,7 +55,6 @@ public:
   void RefreshModel(Attachment *root);
   void OnCheck(wxCommandEvent &event);
   void OnCombo(wxCommandEvent &event);
-  void OnList(wxTreeEvent &event);
   void OnSlider(wxScrollEvent &event);
   void OnEnter(wxCommandEvent &event);
 };

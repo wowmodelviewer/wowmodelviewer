@@ -71,6 +71,18 @@ class CharControl : public wxScrolledWindow, public Observer
 
   void ClearItemDialog();
 
+  // Only the two hand slots, for a creature or item on the Model panel. See the definition.
+  void SetHandsOnly(bool handsOnly);
+
+  private:
+  bool m_handsOnly = false;
+  wxSizer * m_tabardHeader = nullptr;
+  wxSizer * m_tabardGrid = nullptr;
+  wxSizer * m_mountHeader = nullptr;
+  wxWindow * m_mountButton = nullptr;
+
+  public:
+
   void selectItem(ssize_t type, ssize_t slot, const wxChar *caption = wxT("Item"));
   void selectSet();
   void selectStart();
