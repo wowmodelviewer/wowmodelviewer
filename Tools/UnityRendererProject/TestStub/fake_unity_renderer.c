@@ -11,12 +11,15 @@
  *   - does NOT resize itself; the host resizes it (MoveWindow) on pane resize
  *   - exits its message loop when it receives WM_CLOSE (the host's polite shutdown)
  *
- *   IPC (protocol v1, newline-delimited JSON over localhost TCP; WMV is the server):
- *   - connects to 127.0.0.1:<wmvPort>, sends {"type":"unityReady","protocolVersion":1}
+ *   IPC (protocol v2, newline-delimited JSON over localhost TCP; WMV is the server):
+ *   - connects to 127.0.0.1:<wmvPort>, sends {"type":"unityReady","protocolVersion":2}
  *   - on {"type":"loadWoWModel","path":...,"fileDataID":...} requests the asset with
  *     {"type":"getAsset","requestId":...,"path":...} (or getAssetByFileDataID when no path)
  *   - on {"type":"assetResponse",...} logs ok / byteLength / sha1 / error and checks that the
  *     base64 payload decodes to byteLength bytes
+ *   - on {"type":"modelGeosets","fileDataID":...,"revision":...,"submeshVisible":[...]} answers
+ *     {"type":"modelGeosetsApplied",...,"status":"applied","submeshVisible":[...]} with the state it
+ *     was sent (it draws nothing, so "applied" is the whole of what it can report)
  *   - with -wmvSelfTest ONLY: additionally probes the protocol's negative paths (the same
  *     asset by FileDataID, a missing path, an unknown message type). WMV passes that flag
  *     just for its -unityipctest diagnostic run, so a normal viewport launch shows nothing
@@ -263,6 +266,49 @@ static void handle_line(const char * line)
     logf("recv: modelSkin for %lld -> %.400s", fdid, line);
     status("Skin changed");
   }
+  else if (strcmp(type, "modelGeosets") == 0)
+  {
+    /* A Geosets checkbox was switched: the host sends the model's whole per-submesh state and waits
+     * for the answer. The stub has no mesh to apply it to; it echoes the state as applied, so the
+     * host side of the exchange (revisions, answers, the -unityipctest live check) runs end to end. */
+    long long fdid = 0, revision = 0;
+    const char * a = json_value(line, "submeshVisible");
+    const char * e = a;
+    json_get_int(line, "fileDataID", &fdid);
+    json_get_int(line, "revision", &revision);
+    if (a && *a == '[')
+    {
+      e = a + 1;
+      while (*e == '0' || *e == '1' || *e == ',' || *e == ' ')
+        e++;
+    }
+    if (!a || *a != '[' || *e != ']')
+    {
+      char req[256];
+      _snprintf(req, sizeof(req),
+                "{\"type\":\"modelGeosetsApplied\",\"fileDataID\":%lld,\"revision\":%lld,\"status\":\"rejected\","
+                "\"reason\":\"no submesh list\",\"triangles\":0,\"animTimeMs\":0}", fdid, revision);
+      logf("recv: modelGeosets for %lld revision %lld without a submesh list", fdid, revision);
+      ipc_send(req);
+    }
+    else
+    {
+      size_t listLen = (size_t)(e - a) + 1;
+      size_t cap = listLen + 256;
+      char * req = (char *)malloc(cap);
+      if (!req)
+        return;
+      _snprintf(req, cap,
+                "{\"type\":\"modelGeosetsApplied\",\"fileDataID\":%lld,\"revision\":%lld,\"status\":\"applied\","
+                "\"reason\":\"\",\"submeshVisible\":%.*s,\"triangles\":0,\"animTimeMs\":0}",
+                fdid, revision, (int)listLen, a);
+      req[cap - 1] = 0;
+      logf("recv: modelGeosets for %lld revision %lld -> %.*s", fdid, revision, (int)listLen, a);
+      status("Geosets switched (revision %lld)", revision);
+      ipc_send(req);
+      free(req);
+    }
+  }
   else if (strcmp(type, "assetResponse") == 0)
   {
     int ok = 0;
@@ -353,7 +399,7 @@ static DWORD WINAPI ipc_thread(LPVOID param)
     return 1;
   }
   status("Connected to WMV (127.0.0.1:%d)", g_wmvPort);
-  ipc_send("{\"type\":\"unityReady\",\"protocolVersion\":1}");
+  ipc_send("{\"type\":\"unityReady\",\"protocolVersion\":2}");
 
   buf = (char *)malloc(cap);
   if (!buf) { status("out of memory"); closesocket(g_sock); g_sock = INVALID_SOCKET; return 1; }

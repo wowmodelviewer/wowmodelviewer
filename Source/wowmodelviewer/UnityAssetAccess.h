@@ -80,6 +80,15 @@ public:
   // knowing; false means there is no displayed model to ask about.
   static bool selectedModelGeosets(int m2FileDataID, std::vector<int> & out);
 
+  // The displayed model's display flag for EACH of its own submeshes, in skin order -- index i is
+  // WoWModel::geosets[i] for i < ownGeosetCount(), which is the renderer's skin submesh i (both load
+  // the model's first skin profile). These are the flags the OpenGL viewport draws from and the
+  // Geosets checkboxes write, so unlike the id list above they can say "this id-0 submesh is
+  // hidden" or "one of the two submeshes with id 2701 is hidden". Merged or attached models'
+  // submeshes are never included: the canvas's own model is asked, and only what it owns.
+  // False when m2FileDataID is not the model on the canvas.
+  static bool displayedSubmeshVisibility(int m2FileDataID, std::vector<bool> & out);
+
   // Resolve the texture(s) of a model that the M2 itself does not name.
   //
   // Tries, in order:

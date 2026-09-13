@@ -250,6 +250,17 @@ public:
   void SendCurrentSkinToUnity();
   void SendCurrentAnimationToUnity();
 
+  // The displayed model's per-submesh geoset state changed (a Geosets checkbox, or a load path that
+  // set flags after the skin push went out): send the whole state to the Unity player. Returns the
+  // revision sent -- the player's modelGeosetsApplied answer names it -- or 0 when nothing was sent
+  // (no player connected and ready, or nothing on the canvas the Unity viewport can show).
+  int SendCurrentGeosetsToUnity();
+  int m_geosetRevision = 0;
+  // A player is connected and has announced itself; ...and speaks protocol 2, so it switches
+  // submeshes live and answers every state it is sent.
+  bool unityPlayerReady() const;
+  bool unityPlayerSwitchesSubmeshes() const;
+
   // The playback state of that animation: playing/paused, speed, and where in the sequence the
   // app is. force pushes unconditionally (a control was used); without it this is the heartbeat,
   // which pushes only while something is playing and only every so often. Safe and cheap to call

@@ -1558,6 +1558,11 @@ void ModelViewer::LoadItem(unsigned int id)
   }
   catch (...) {}
 
+  // applyItemComponentGeosets set this component's flags AFTER LoadModel's skin push went out, and
+  // a skin push follows only when the display resolves a skin (SetSkinByDisplayID). Send the state
+  // the host decided, so the Unity viewport draws the item the way the Geosets tab lists it.
+  SendCurrentGeosetsToUnity();
+
   DisplayedContentChanged();
   CommitLayoutIfChanged();
 }
@@ -1796,7 +1801,16 @@ bool ModelViewer::ShowUnityRenderer(bool selfTest)
     unityRendererHost->ipc()->onUnityReady = [this]() {
       if (unityRendererHost)
         unityRendererHost->setPlayerReady(true);
+      // A (re)started player knows nothing of the states sent to the one before it; the model push
+      // below carries the current state, and its build answers for it.
+      if (modelInspector)
+        modelInspector->UnityPlayerRestarted();
       SendCurrentModelToUnity();
+    };
+    // ... and what it did with a geoset state, so the Geosets checkboxes follow the renderer.
+    unityRendererHost->ipc()->onGeosetsApplied = [this](const UnityIpcServer::GeosetAck & ack) {
+      if (modelInspector)
+        modelInspector->OnUnityGeosetsApplied(ack);
     };
   }
 
@@ -2121,6 +2135,28 @@ void ModelViewer::SendCurrentSkinToUnity()
     return;
   WoWModel * m = const_cast<WoWModel *>(canvas->model());
   unityRendererHost->ipc()->sendModelSkin((int)m->gamefile->fileDataId());
+}
+
+bool ModelViewer::unityPlayerReady() const
+{
+  return unityRendererHost && unityRendererHost->ipc() && unityRendererHost->ipc()->isConnected() &&
+         unityRendererHost->ipc()->isUnityReady();
+}
+
+bool ModelViewer::unityPlayerSwitchesSubmeshes() const
+{
+  return unityRendererHost && unityRendererHost->ipc() && unityRendererHost->ipc()->playerSwitchesSubmeshes();
+}
+
+int ModelViewer::SendCurrentGeosetsToUnity()
+{
+  if (!unityRendererHost || !unityRendererHost->ipc() || !unityRendererHost->ipc()->isConnected())
+    return 0;
+  if (!canvas || !canvas->model() || !canvas->model()->gamefile || !unityCanShowCurrentModel())
+    return 0;
+  const int revision = ++m_geosetRevision;
+  return unityRendererHost->ipc()->sendModelGeosets((int)canvas->model()->gamefile->fileDataId(), revision)
+           ? revision : 0;
 }
 
 // The animation on display changed (the dropdown, or the default picked on model load). Same

@@ -226,6 +226,10 @@ public class WmvM2Animator : MonoBehaviour
     public bool IsPlaying { get { return playing; } }
     public float Speed { get { return speed; } }
 
+    /// <summary>Where the sequence clock is, in ms. Read-only; reported with a geoset change so a
+    /// run can show the animation carried on through it.</summary>
+    public double TimeMs { get { return timeMs; } }
+
     /// <summary>Sequence index and AnimId, for the log and for nothing else.</summary>
     public int SequenceIndex { get; private set; }
     public int AnimId { get; private set; }

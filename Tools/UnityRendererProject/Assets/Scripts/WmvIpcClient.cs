@@ -4,7 +4,7 @@
 // localhost TCP listener before launching the player and passes the port on the player
 // command line ("-wmvPort <n>"); the player connects back, announces itself and then asks
 // WMV for whatever it needs. Transport: newline-delimited JSON (one object per line),
-// protocol version 1.
+// protocol version 2.
 //
 // The player is WMV's new renderer foundation and renders directly from WoW data: it
 // requests raw assets and metadata from WMV -- which owns the app UI, the active
@@ -16,13 +16,23 @@
 //   getAsset             { requestId, path }
 //   getAssetByFileDataID { requestId, fileDataID }
 //   getModelTextures     { requestId, fileDataID }
+//   modelGeosetsApplied  { fileDataID, revision, status:"applied"|"pending"|"rejected", reason,
+//                          submeshVisible:[0|1,...], triangles, animTimeMs }
+//     the answer to modelGeosets (and, with revision 0, a report after a load or a skin push
+//     applied the host's per-submesh state): what the viewport now draws, so the host's
+//     checkboxes can follow the renderer rather than assume it
 //
 // WMV -> player
 //   loadWoWModel  { path, fileDataID, client }
 //   assetResponse { requestId, ok, path, fileDataID, byteLength, sha1, encoding:"base64", data }
 //   assetResponse { requestId, ok:false, error }
 //   modelTextures { requestId, ok, fileDataID, textures:[{ index, type, fileDataID, source }] }
-//   modelSkin     { fileDataID, textures:[...], geosets:[...], hasGeosets }        (pushed, no request)
+//   modelSkin     { fileDataID, textures:[...], geosets:[...], hasGeosets,
+//                   hasSubmeshVisible, submeshCount, submeshVisible:[0|1,...] }  (pushed, no request)
+//     (modelTextures replies carry the same geoset fields)
+//   modelGeosets  { fileDataID, revision, submeshCount, submeshVisible:[0|1,...] } (pushed, no request)
+//     the host's whole per-submesh display state for the displayed model, sent when the user
+//     switches a geoset; indexed by skin submesh index (SFID[0])
 //   modelAnimation { fileDataID, sequenceIndex, animID, durationMs, loop }         (pushed, no request)
 //   modelAnimationState { fileDataID, sequenceIndex, playing, timeMs, speed, loop, explicitState } (pushed, no request)
 //     explicitState: true when a control set the state (play, pause, a frame step, a scrub,
@@ -50,7 +60,7 @@ using UnityEngine;
 
 public class WmvIpcClient : MonoBehaviour
 {
-    public const int ProtocolVersion = 1;
+    public const int ProtocolVersion = 2;
 
     // Raised on the main thread.
     public Action<string, int, string> OnLoadWoWModel;        // (path, fileDataID, client)
@@ -59,6 +69,7 @@ public class WmvIpcClient : MonoBehaviour
     public Action<ModelTexturesResponse> OnModelSkin;          // pushed when the displayed skin changes
     public Action<AnimationSelection> OnModelAnimation;        // pushed when the displayed animation changes
     public Action<AnimationState> OnModelAnimationState;       // pushed on play/pause/speed/time changes
+    public Action<GeosetVisibility> OnModelGeosets;            // pushed when the user switches a geoset
     public Action<string> OnStatus;                            // human-readable connection/state text
 
     public bool Connected { get { return connected; } }
@@ -129,6 +140,27 @@ public class WmvIpcClient : MonoBehaviour
         /// </summary>
         public int[] particleColor = new int[0];
         public int particleColorId;
+
+        /// <summary>
+        /// The host's per-SUBMESH display state, when it sent one (protocol 2): one entry per skin
+        /// submesh, true = drawn. It is the host's final answer and decides instead of the geoset
+        /// ids; null when hasSubmeshVisible is false.
+        /// </summary>
+        public bool hasSubmeshVisible;
+        public int submeshCount;
+        public bool[] submeshVisible;
+    }
+
+    /// <summary>
+    /// The host's whole per-submesh display state for one model, pushed when the user switches a
+    /// geoset. revision numbers the push so its acknowledgement can be matched to it.
+    /// </summary>
+    public struct GeosetVisibility
+    {
+        public int fileDataID;
+        public int revision;
+        public int submeshCount;
+        public bool[] visible;
     }
 
     /// <summary>
@@ -197,6 +229,10 @@ public class WmvIpcClient : MonoBehaviour
         public bool playing;
         public int timeMs;
         public float speed;
+        public int revision;
+        public bool hasSubmeshVisible;
+        public int submeshCount;
+        public int[] submeshVisible;
     }
 
     int port = -1;
@@ -328,7 +364,20 @@ public class WmvIpcClient : MonoBehaviour
         if (msg.geosets != null) r.geosets = msg.geosets;
         if (msg.particleColor != null) r.particleColor = msg.particleColor;
         r.particleColorId = msg.particleColorId;
+        r.hasSubmeshVisible = msg.hasSubmeshVisible;
+        r.submeshCount = msg.submeshCount;
+        r.submeshVisible = msg.hasSubmeshVisible ? ToBools(msg.submeshVisible) : null;
         return r;
+    }
+
+    /// <summary>The wire carries 0/1 so the line stays short; JsonUtility gives an absent array
+    /// back as null or empty, so both come out as an empty list.</summary>
+    static bool[] ToBools(int[] values)
+    {
+        if (values == null) return new bool[0];
+        var result = new bool[values.Length];
+        for (int i = 0; i < values.Length; i++) result[i] = values[i] != 0;
+        return result;
     }
 
     void Dispatch(Msg msg)
@@ -347,6 +396,16 @@ public class WmvIpcClient : MonoBehaviour
             // reply, minus the requestId -- nothing asked for it.
             case "modelSkin":
                 OnModelSkin?.Invoke(ReadTextures(msg));
+                break;
+
+            case "modelGeosets":
+                OnModelGeosets?.Invoke(new GeosetVisibility
+                {
+                    fileDataID = msg.fileDataID,
+                    revision = msg.revision,
+                    submeshCount = msg.submeshCount,
+                    visible = ToBools(msg.submeshVisible),
+                });
                 break;
 
             case "modelAnimationState":
@@ -440,6 +499,31 @@ public class WmvIpcClient : MonoBehaviour
         var id = NewRequestId();
         Send("{\"type\":\"getModelTextures\",\"requestId\":\"" + id + "\",\"fileDataID\":" + fileDataID + "}");
         return id;
+    }
+
+    /// <summary>
+    /// Tell WMV what became of its per-submesh state: "applied" (and what is now drawn), "pending"
+    /// (kept for the model still loading) or "rejected" (with the reason; nothing changed).
+    /// </summary>
+    public void ReportGeosetsApplied(int fileDataID, int revision, string status, string reason,
+                                     bool[] visible, int triangles, double animTimeMs)
+    {
+        var sb = new StringBuilder();
+        sb.Append("{\"type\":\"modelGeosetsApplied\",\"fileDataID\":").Append(fileDataID)
+          .Append(",\"revision\":").Append(revision)
+          .Append(",\"status\":\"").Append(Escape(status)).Append('"')
+          .Append(",\"reason\":\"").Append(Escape(reason ?? "")).Append('"')
+          .Append(",\"triangles\":").Append(triangles)
+          .Append(",\"animTimeMs\":").Append(((long)animTimeMs).ToString(System.Globalization.CultureInfo.InvariantCulture));
+        if (visible != null)
+        {
+            sb.Append(",\"submeshVisible\":[");
+            for (int i = 0; i < visible.Length; i++)
+                sb.Append(i > 0 ? "," : "").Append(visible[i] ? '1' : '0');
+            sb.Append(']');
+        }
+        sb.Append('}');
+        Send(sb.ToString());
     }
 
     string NewRequestId() { return "u" + (nextRequestId++); }

@@ -120,6 +120,18 @@ public class WmvMain : MonoBehaviour
     HashSet<int> currentGeosets;
 
     /// <summary>
+    /// The host's per-submesh display state for the model being LOADED, the latest of whatever
+    /// carried one (a modelGeosets push, the modelTextures reply, a modelSkin push), handed to
+    /// Build. Latest wins and it is never dropped at build: each of those messages carries the
+    /// host's whole state at the time it was sent, and they arrive in the order they were sent.
+    /// loadGeosetRevision is the modelGeosets push it came from (0 = a reply or a skin push),
+    /// acknowledged once the build has applied it.
+    /// </summary>
+    bool[] loadSubmeshVisible;
+    bool haveLoadSubmeshVisible;
+    int loadGeosetRevision;
+
+    /// <summary>
     /// The item ParticleColor override the host last reported, as three RGB stops, or null when
     /// the displayed item names none. Kept alongside currentGeosets because it arrives on the
     /// same two messages and describes the same displayed state.
@@ -249,6 +261,7 @@ public class WmvMain : MonoBehaviour
         ipc.OnModelSkin = HandleModelSkin;
         ipc.OnModelAnimation = HandleModelAnimation;
         ipc.OnModelAnimationState = HandleModelAnimationState;
+        ipc.OnModelGeosets = HandleModelGeosets;
     }
 
     // ---------------------------------------------------------------- load pipeline
@@ -284,6 +297,13 @@ public class WmvMain : MonoBehaviour
         currentParticleColor = null;
         skinJob = null;
         currentTextureIds.Clear();
+        // A push still waiting for the previous load is about a model that will never be built.
+        if (haveLoadSubmeshVisible && loadGeosetRevision > 0 && job != null)
+            ipc.ReportGeosetsApplied(job.FileDataID, loadGeosetRevision, "rejected",
+                                     "superseded by a new load", null, 0, 0.0);
+        loadSubmeshVisible = null;
+        haveLoadSubmeshVisible = false;
+        loadGeosetRevision = 0;
 
         job = new LoadJob { Path = path, FileDataID = fileDataID };
         status.Set("Requested " + (string.IsNullOrEmpty(path) ? ("fileDataID " + fileDataID) : path));
@@ -402,6 +422,8 @@ public class WmvMain : MonoBehaviour
         job.PendingTextureList = null;
         AdoptGeosets(r);
         AdoptParticleColor(r);
+        if (r.hasSubmeshVisible)
+            KeepLoadSubmeshVisible(r.submeshVisible, 0);
 
         if (!r.ok || r.textures.Length == 0)
         {
@@ -489,8 +511,22 @@ public class WmvMain : MonoBehaviour
             var built = WmvModelBuilder.Build(job.Model, job.Skin, job.Textures,
                                               string.IsNullOrEmpty(job.Model.Name) ? "WoWModel" : job.Model.Name,
                                               s => Debug.LogWarning("WMV: " + s),
-                                              currentGeosets);
+                                              currentGeosets,
+                                              haveLoadSubmeshVisible ? loadSubmeshVisible : null);
             job.BuildMs = job.Clock.ElapsedMilliseconds - t0;
+            if (haveLoadSubmeshVisible)
+            {
+                // Build ignores a list that does not fit the skin, and says so; report which it was.
+                bool used = built.SubmeshVisible != null;
+                ipc.ReportGeosetsApplied(job.FileDataID, loadGeosetRevision, used ? "applied" : "rejected",
+                                         used ? "" : string.Format("the host listed {0} submeshes, the skin has {1}",
+                                                                   loadSubmeshVisible.Length, built.SkinSubmeshCount),
+                                         WmvModelBuilder.EffectiveSubmeshVisibility(built),
+                                         WmvModelBuilder.DrawnTriangleCount(built), 0.0);
+            }
+            haveLoadSubmeshVisible = false;
+            loadSubmeshVisible = null;
+            loadGeosetRevision = 0;
 
             if (current != null) current.Dispose();      // never leak the previous model
             current = built;
@@ -1894,26 +1930,33 @@ public class WmvMain : MonoBehaviour
             // display, so it is kept and adopted at build. See BuildIfReady.
             loadSkin = r;
             haveLoadSkin = true;
+            if (r.hasSubmeshVisible)
+                KeepLoadSubmeshVisible(r.submeshVisible, 0);
             return;
         }
         if (current == null || currentModel == null)
             return;                                     // nothing built yet; the load will pick it up
         if (!AboutThisModel(r.fileDataID))
             return;                                     // about a different model
-        if (!r.ok || r.textures.Length == 0)
-            return;
 
-        // Geometry first: a variant can change which submeshes are drawn as well as which texture
-        // they wear, and the two are independent -- a variant that only swaps geosets has no
-        // texture to fetch and would otherwise be dropped by the no-op check below.
-        if (AdoptParticleColor(r))
-            ApplyParticleColor();
+        // Geometry first, and whether or not the push carries textures: a variant can change which
+        // submeshes are drawn as well as which texture they wear, and the two are independent. A
+        // push for a model that resolves no texture at all is still the host's word on its
+        // geometry (UnityIpcServer::sendModelSkin sends it for exactly that), and it used to be
+        // dropped before this point.
+        if (r.hasSubmeshVisible)
+            ApplyHostSubmeshVisibility(r.submeshVisible, 0, "skin push");
         if (AdoptGeosets(r))
         {
             WmvModelBuilder.ApplyGeosets(current, currentGeosets, s => Debug.Log("WMV: " + s));
             status.Set(string.Format("Geosets applied ({0} triangles, mesh unchanged)",
                                      current.TriangleCount));
         }
+        if (!r.ok || r.textures.Length == 0)
+            return;
+
+        if (AdoptParticleColor(r))
+            ApplyParticleColor();
 
         var wanted = new Dictionary<int, int>();         // slot -> FileDataID
         foreach (var t in r.textures)
@@ -2007,6 +2050,82 @@ public class WmvMain : MonoBehaviour
     }
 
     /// <summary>
+    /// The user switched a geoset in WMV: the host's whole per-submesh state for the model it is
+    /// displaying. Applied to the model on screen at once through the triangle arrays it already
+    /// holds -- no reload, no rebuild, no camera, animation, material or emitter change -- and
+    /// answered, so the host's checkboxes show what is actually drawn.
+    /// </summary>
+    void HandleModelGeosets(WmvIpcClient.GeosetVisibility g)
+    {
+        if (g.fileDataID <= 0)
+        {
+            ipc.ReportGeosetsApplied(g.fileDataID, g.revision, "rejected", "no fileDataID", null, 0, 0.0);
+            return;
+        }
+        if (AboutTheLoad(g.fileDataID))
+        {
+            // Still loading: the build takes it, and acknowledges it then.
+            KeepLoadSubmeshVisible(g.visible, g.revision);
+            ipc.ReportGeosetsApplied(g.fileDataID, g.revision, "pending", "the model is still loading", null, 0, 0.0);
+            return;
+        }
+        if (current == null || currentModel == null)
+        {
+            ipc.ReportGeosetsApplied(g.fileDataID, g.revision, "rejected", "no model is built", null, 0, 0.0);
+            return;
+        }
+        if (g.fileDataID != currentFileDataID)
+        {
+            ipc.ReportGeosetsApplied(g.fileDataID, g.revision, "rejected",
+                                     "the viewport shows fileDataID " + currentFileDataID, null, 0, 0.0);
+            return;
+        }
+        if (g.visible == null || g.visible.Length != g.submeshCount)
+        {
+            ipc.ReportGeosetsApplied(g.fileDataID, g.revision, "rejected", "malformed submesh list", null, 0, 0.0);
+            return;
+        }
+        ApplyHostSubmeshVisibility(g.visible, g.revision, "geoset switch");
+    }
+
+    /// <summary>Apply the host's per-submesh state to the model on screen and report the outcome.</summary>
+    void ApplyHostSubmeshVisibility(bool[] visible, int revision, string what)
+    {
+        double animMs = current.Animator != null ? current.Animator.TimeMs : 0.0;
+        int drawn = WmvModelBuilder.ApplySubmeshVisibility(current, visible, s => Debug.Log("WMV: " + s));
+        if (drawn < 0)
+        {
+            ipc.ReportGeosetsApplied(currentFileDataID, revision, "rejected",
+                                     string.Format("the host listed {0} submeshes, the skin has {1}",
+                                                   visible != null ? visible.Length : 0, current.SkinSubmeshCount),
+                                     WmvModelBuilder.EffectiveSubmeshVisibility(current),
+                                     WmvModelBuilder.DrawnTriangleCount(current), animMs);
+            return;
+        }
+        Debug.Log(string.Format("WMV: {0} applied (revision {1}) at animation time {2:F0} ms, playing={3}",
+                                what, revision, animMs, current.Animator != null && current.Animator.IsPlaying));
+        status.Set(string.Format("Submesh visibility applied ({0} triangles, mesh unchanged)", drawn));
+        ipc.ReportGeosetsApplied(currentFileDataID, revision, "applied", "",
+                                 WmvModelBuilder.EffectiveSubmeshVisibility(current), drawn, animMs);
+    }
+
+    /// <summary>
+    /// Hold the host's per-submesh state for the model being loaded. Latest wins: every message
+    /// that carries it carries the host's WHOLE state at the time, so a later one already includes
+    /// an earlier switch. The newest switch's revision is kept for the acknowledgement at build, even
+    /// when a skin push or the texture reply (revision 0) brought the newer copy.
+    /// </summary>
+    void KeepLoadSubmeshVisible(bool[] visible, int revision)
+    {
+        if (visible == null)
+            return;
+        loadSubmeshVisible = visible;
+        haveLoadSubmeshVisible = true;
+        if (revision > loadGeosetRevision)
+            loadGeosetRevision = revision;
+    }
+
+    /// <summary>
     /// Take the geoset set out of a host message, if it reported one. Returns true when the set
     /// actually CHANGED, so the caller only touches the mesh when there is something to do.
     /// A message with hasGeosets false is silence, not an empty answer: the host had no creature
@@ -2089,6 +2208,12 @@ public class WmvMain : MonoBehaviour
     {
         status.Set("FAILED: " + reason);
         Debug.LogError("WMV: " + reason);
+        if (haveLoadSubmeshVisible && loadGeosetRevision > 0 && job != null)
+            ipc.ReportGeosetsApplied(job.FileDataID, loadGeosetRevision, "rejected", "the load failed: " + reason,
+                                     null, 0, 0.0);
+        haveLoadSubmeshVisible = false;
+        loadSubmeshVisible = null;
+        loadGeosetRevision = 0;
         job = null;
     }
 
