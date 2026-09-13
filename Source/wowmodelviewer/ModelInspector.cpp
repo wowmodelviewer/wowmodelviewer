@@ -11,6 +11,9 @@
 #include <wx/srchctrl.h>
 #include <wx/treelist.h>
 
+#include <wx/time.h>
+
+#include <algorithm>
 #include <functional>
 #include <map>
 #include <set>
@@ -23,7 +26,6 @@
 #include "maptile.h"
 #include "modelviewer.h"
 #include "UiStyle.h"
-#include "UnityAssetAccess.h"
 #include "wmo.h"
 #include "WoWModel.h"
 
@@ -525,6 +527,7 @@ void ModelInspector::SetGeosetNotice(const wxString & text)
 {
   if (m_geosetNotice->GetLabel() == text && m_geosetNotice->IsShown() == !text.IsEmpty())
     return;
+  m_noticeIsUnconfirmed = false;
   m_geosetNotice->SetLabel(text);
   m_geosetNotice->Wrap(std::max(FromDIP(120), m_geosets->GetClientSize().x - 2 * FromDIP(UiStyle::M)));
   m_geosetNotice->Show(!text.IsEmpty());
@@ -534,18 +537,19 @@ void ModelInspector::SetGeosetNotice(const wxString & text)
 // A checkbox was clicked: set those submeshes' display flags -- the same WoWModel::showGeoset the
 // old tree's double-click called -- and make the change reach whichever viewport is on screen.
 //
-// THE UNITY VIEWPORT IS TOLD, AND ONLY WHAT IT CAN SHOW. It draws a submesh when its geoset id is
-// 0 or is in the list of displayed ids the skin message carries (UnityAssetAccess::
-// selectedModelGeosets, read from these same flags). So every change it can represent is pushed
-// through SendCurrentSkinToUnity, like any other geoset change. A change it cannot represent --
-// hiding id 0, splitting one id's submeshes, an attachment or a merged part -- would leave the
-// checkbox saying one thing and the viewport showing another, so it is undone and the reason is
-// shown instead. In the OpenGL viewport every change applies, as before.
+// THE UNITY VIEWPORT GETS THE FLAGS THEMSELVES. It used to receive only the list of switched-on
+// geoset IDS and draw id 0 unconditionally, so hiding a base-mesh submesh, or one of several
+// submeshes that share an id, could not be expressed and those clicks were undone. Protocol 2
+// sends the displayed model's whole per-submesh state (UnityIpcServer::sendModelGeosets), which the
+// player applies to the mesh it already built -- no reload -- and ANSWERS: the checkboxes are only
+// left as clicked when the renderer reports it applied the state (or is about to, for a model still
+// loading). A rejection puts the flags back to what the renderer last confirmed and says why.
 //
-// One more case it cannot show today: the player adopts geosets from a skin message only when that
-// message also carries textures (WmvMain.HandleModelSkin returns before AdoptGeosets on an empty
-// texture list). A model whose textures cannot be resolved therefore keeps the geosets it was
-// built with until it is loaded again, so its checkboxes are refused in the Unity viewport too.
+// Ownership: the state sent is the canvas model's OWN submeshes by index, so an attachment or a
+// merged part that happens to use the same geoset number is never part of it. An attachment's own
+// checkboxes change only that attachment -- which the OpenGL viewport draws and the Unity viewport
+// does not, so there they are refused while Unity is the viewport on screen. So is every click while
+// the player on screen is an older build that cannot switch submeshes (protocol 1).
 void ModelInspector::OnGeosetChecked(wxTreeListEvent & event)
 {
   if (m_updatingChecks)
@@ -571,76 +575,223 @@ void ModelInspector::OnGeosetChecked(wxTreeListEvent & event)
   }
 
   wxString problem;
-  if (g_modelViewer && g_modelViewer->isUnityViewportShowingModel())
+  const bool unityOnScreen = g_modelViewer && g_modelViewer->isUnityViewportOnScreen();
+  if (m != canvasModel())
   {
-    if (m != canvasModel())
-    {
+    if (unityOnScreen)
       problem = _("The Unity viewport does not draw attachments, so this change would not be visible. "
                   "Nothing was changed.");
-    }
-    else
+  }
+  else
+  {
+    bool merged = false;
+    for (size_t index : parts)
+      merged = merged || index >= m->ownGeosetCount();
+    if (merged && unityOnScreen)
+      problem = _("The Unity viewport does not draw merged parts, so this change would not be visible. "
+                  "Nothing was changed.");
+    else if (unityOnScreen && g_modelViewer->unityPlayerReady() && !g_modelViewer->unityPlayerSwitchesSubmeshes())
+      problem = _("The Unity renderer in use is an older build that cannot switch geosets. Rebuild it to "
+                  "switch them here. Nothing was changed.");
+    else if (g_modelViewer)
     {
-      // The skin message reports the geosets of the model the animation controls are on; while
-      // those follow an attachment (Render Options), the displayed model's are not sent at all.
-      if (g_selModel != m)
-        problem = _("The animation controls are on an attachment (Render Options), so the Unity viewport "
-                    "would not receive this change. Nothing was changed.");
-      const size_t owned = m->ownGeosetCount();
-      std::set<int> ids;
-      for (size_t index : parts)
+      const int revision = g_modelViewer->SendCurrentGeosetsToUnity();
+      if (revision > 0)
       {
-        if (!problem.IsEmpty())
-          break;
-        if (index >= owned)
-        {
-          problem = _("The Unity viewport does not draw merged parts, so this change would not be visible. "
-                      "Nothing was changed.");
-          break;
-        }
-        ids.insert((int)m->geosets[index]->id);
-      }
-      if (problem.IsEmpty())
-      {
-        std::vector<UnityAssetAccess::ModelTexture> textures;
-        QString error;
-        const int fdid = m->gamefile ? (int)m->gamefile->fileDataId() : 0;
-        if (!UnityAssetAccess::resolveModelTextures(fdid, textures, error) || textures.empty())
-          problem = _("The Unity viewport applies geoset changes together with the model's textures, and "
-                      "none could be resolved for this model, so the change would not be visible. "
-                      "Nothing was changed.");
-      }
-      for (size_t j = 0; problem.IsEmpty() && j < owned && j < m->geosets.size(); j++)
-      {
-        const int id = (int)m->geosets[j]->id;
-        if (!ids.count(id))
-          continue;
-        bool unityDraws = (id == 0);
-        for (size_t k = 0; !unityDraws && k < owned && k < m->geosets.size(); k++)
-          unityDraws = ((int)m->geosets[k]->id == id && m->geosets[k]->display);
-        if (unityDraws != m->geosets[j]->display)
-          problem = (id == 0)
-            ? _("The Unity viewport always draws the base mesh (geoset 0). Nothing was changed.")
-            : wxString::Format(_("The Unity viewport shows geoset %d as a whole, so its submeshes cannot "
-                                 "differ. Nothing was changed."), id);
+        PendingGeosetChange change;
+        change.revision = revision;
+        change.fileDataID = (int)m->gamefile->fileDataId();
+        change.sentAtMs = wxGetUTCTimeMillis().GetValue();
+        for (size_t i = 0; i < parts.size(); i++)
+          if (parts[i] < m->ownGeosetCount())
+            change.undo.push_back(std::make_pair(parts[i], (bool)before[i]));
+        m_pendingGeosets.push_back(change);
+        if (m_pendingGeosets.size() > 64)
+          m_pendingGeosets.erase(m_pendingGeosets.begin());
       }
     }
+  }
 
-    if (!problem.IsEmpty())
-    {
-      for (size_t i = 0; i < parts.size(); i++)
-        m->showGeoset((uint)parts[i], before[i]);
-      LOG_INFO << "[inspector] geoset change not representable in the Unity viewport; reverted";
-    }
-    else
-    {
-      g_modelViewer->SendCurrentSkinToUnity();
-    }
+  if (!problem.IsEmpty())
+  {
+    for (size_t i = 0; i < parts.size(); i++)
+      m->showGeoset((uint)parts[i], before[i]);
+    LOG_INFO << "[inspector] geoset change not shown by the Unity viewport; reverted";
   }
 
   SyncGeosetChecks();
   UpdateGeosetSummary();
   SetGeosetNotice(problem.IsEmpty() ? standingGeosetNote() : problem);
   m_geosetSig = geosetSignature();
+}
+
+// The renderer's answer to a geoset state: "applied" with what it now draws, "pending" (the model is
+// still loading; the build will apply it and answer again), or "rejected" with why.
+void ModelInspector::OnUnityGeosetsApplied(const UnityIpcServer::GeosetAck & ack)
+{
+  WoWModel * root = canvasModel();
+  if (!root || !root->gamefile || (int)root->gamefile->fileDataId() != ack.fileDataID)
+    return;   // about a model that is no longer displayed
+
+  const size_t owned = std::min(root->ownGeosetCount(), root->geosets.size());
+  auto findChange = [this](int revision) {
+    for (size_t i = 0; i < m_pendingGeosets.size(); i++)
+      if (m_pendingGeosets[i].revision == revision)
+        return (int)i;
+    return -1;
+  };
+
+  wxString notice;
+  if (ack.status == "pending")
+  {
+    const int at = findChange(ack.revision);
+    if (at >= 0)
+      m_pendingGeosets[at].acknowledged = true;
+    return;   // nothing to show yet: the build applies it and answers "applied" or "rejected"
+  }
+
+  if (ack.status == "applied")
+  {
+    // States go out whole and in order, so an answer settles its revision and every earlier one.
+    bool answersResync = false;
+    while (!m_pendingGeosets.empty() && ack.revision != 0 && m_pendingGeosets.front().revision <= ack.revision)
+    {
+      answersResync = answersResync || (m_pendingGeosets.front().revision == ack.revision && m_pendingGeosets.front().resync);
+      m_pendingGeosets.erase(m_pendingGeosets.begin());
+    }
+    m_lastSettledRevision = std::max(m_lastSettledRevision, ack.revision);
+    if (ack.hasVisible)
+    {
+      m_unityConfirmed = ack.visible;
+      m_unityConfirmedFileDataID = ack.fileDataID;
+    }
+    // Nothing newer on its way: what the renderer draws must now be what the checkboxes say. If it
+    // is not -- the flags changed after that state was sent, by something that did not send -- send
+    // the current state again rather than leave the two disagreeing. Once: when the answer to that
+    // resend still disagrees, sending again would only repeat it, so it is logged and left.
+    // Only for a model the Unity viewport shows: a character is loaded into the player too, but drawn
+    // by the OpenGL canvas, and its flags keep changing as the character is composed.
+    if (m_pendingGeosets.empty() && ack.hasVisible && g_modelViewer && g_modelViewer->unityCanShowCurrentModel())
+    {
+      bool same = ack.visible.size() == owned;
+      for (size_t i = 0; same && i < owned; i++)
+        same = (ack.visible[i] == root->geosets[i]->display);
+      if (!same && answersResync)
+      {
+        LOG_ERROR << "[inspector] the Unity viewport still reports a different submesh state after the current"
+                     " state was sent again (revision" << ack.revision << ") -- not sending it a third time";
+      }
+      else if (!same)
+      {
+        const int revision = g_modelViewer->SendCurrentGeosetsToUnity();
+        LOG_INFO << "[inspector] the Unity viewport reported a submesh state the Geosets tab no longer shows"
+                    " -- current state sent again (revision" << revision << ")";
+        if (revision > 0)
+        {
+          PendingGeosetChange change;
+          change.revision = revision;
+          change.fileDataID = ack.fileDataID;
+          change.sentAtMs = wxGetUTCTimeMillis().GetValue();
+          change.resync = true;
+          m_pendingGeosets.push_back(change);
+        }
+      }
+    }
+  }
+  else if (ack.status == "rejected")
+  {
+    const int at = findChange(ack.revision);
+    if (at < 0 && ack.revision != 0 && ack.revision <= m_lastSettledRevision)
+      return;   // already settled by a later answer
+    if (at < 0 && ack.revision != 0 && !m_pendingGeosets.empty() && m_pendingGeosets.back().revision > ack.revision)
+      return;   // a state no click owns, with a newer whole state on its way that settles it
+    const bool newest = at < 0 || at == (int)m_pendingGeosets.size() - 1;
+    // Only a click the Unity viewport ON SCREEN did not take is undone. When the OpenGL canvas is the
+    // viewport, it already draws the flags as clicked; the side pane falling behind is said, not undone.
+    const bool unityOnScreen = g_modelViewer && g_modelViewer->isUnityViewportOnScreen();
+    if (ack.revision != 0)
+      m_lastSettledRevision = std::max(m_lastSettledRevision, ack.revision);
+    if (at >= 0 && !newest)
+    {
+      // An older state, with a newer (whole) one still on its way: nothing to change yet, but should
+      // the newer one be rejected too, this click has to come off with it -- its undo goes first in
+      // the next change's list, so undoing newest to oldest still restores the original flags.
+      PendingGeosetChange & next = m_pendingGeosets[at + 1];
+      next.undo.insert(next.undo.begin(), m_pendingGeosets[at].undo.begin(), m_pendingGeosets[at].undo.end());
+      m_pendingGeosets.erase(m_pendingGeosets.begin() + at);
+    }
+    else if (ack.revision != 0)
+    {
+      // The newest state -- a click's (tracked) or one a load path sent (not tracked) -- was not taken.
+      // Undo on the host what the renderer did not take: back to the state it last confirmed when
+      // that is known for this model, otherwise the pending clicks' own before-values.
+      if (unityOnScreen)
+      {
+        if (m_unityConfirmedFileDataID == ack.fileDataID && m_unityConfirmed.size() == owned)
+        {
+          for (size_t i = 0; i < owned; i++)
+            root->showGeoset((uint)i, m_unityConfirmed[i]);
+        }
+        else
+        {
+          for (auto it = m_pendingGeosets.rbegin(); it != m_pendingGeosets.rend(); ++it)
+            for (auto u = it->undo.rbegin(); u != it->undo.rend(); ++u)
+              root->showGeoset((uint)u->first, u->second);
+        }
+        notice = wxString::Format(_("The Unity viewport did not apply this change (%s). The checkboxes show "
+                                    "what it draws."), wxString(ack.reason.toStdWString()));
+        LOG_INFO << "[inspector] geoset state rejected by the Unity viewport:" << ack.reason << "-- reverted";
+      }
+      else
+      {
+        notice = wxString::Format(_("The Unity pane did not apply this geoset change (%s); the viewport shows "
+                                    "it."), wxString(ack.reason.toStdWString()));
+        LOG_INFO << "[inspector] geoset state rejected by the Unity side pane:" << ack.reason
+                 << "-- kept, the OpenGL viewport draws it";
+      }
+      m_pendingGeosets.clear();
+    }
+    else
+    {
+      // Revision 0: the state that came with a load or a skin push did not fit the renderer's skin,
+      // so it is drawing the geoset-id default for this model instead.
+      notice = wxString::Format(_("The Unity viewport could not take this model's submesh state (%s) and "
+                                  "shows its default geosets."), wxString(ack.reason.toStdWString()));
+    }
+  }
+
+  if (geosetModel() == root)
+  {
+    SyncGeosetChecks();
+    UpdateGeosetSummary();
+    m_geosetSig = geosetSignature();
+  }
+  if (!notice.IsEmpty())
+    SetGeosetNotice(notice);
+  else if (m_noticeIsUnconfirmed && m_pendingGeosets.empty())
+    SetGeosetNotice(standingGeosetNote());
+}
+
+void ModelInspector::UnityPlayerRestarted()
+{
+  ForgetUnityGeosetState();
+}
+
+// Answers the Unity player can no longer give -- it restarted, disconnected, or the model changed --
+// are not waited for. The state it draws next comes with the model push and is answered by its build.
+void ModelInspector::ForgetUnityGeosetState()
+{
+  m_pendingGeosets.clear();
+  m_unityConfirmed.clear();
+  m_unityConfirmedFileDataID = 0;
+  m_lastSettledRevision = 0;
+  if (m_noticeIsUnconfirmed)
+    SetGeosetNotice(standingGeosetNote());
+}
+
+wxString ModelInspector::UnconfirmedNotice()
+{
+  return _("Waiting for the Unity viewport to confirm the last geoset change.");
 }
 
 void ModelInspector::OnGeosetFilter(wxCommandEvent & event)
@@ -801,6 +952,12 @@ void ModelInspector::RebuildInfo()
 
 void ModelInspector::ContentChanged()
 {
+  // Answers about the previous model mean nothing now; its own load and skin pushes report again.
+  // (RebuildGeosetTree below sets the notice afresh.)
+  m_pendingGeosets.clear();
+  m_unityConfirmed.clear();
+  m_unityConfirmedFileDataID = 0;
+  m_lastSettledRevision = 0;
   RefreshAppearance();
   RebuildAttachments();
   RebuildGeosetTree();
@@ -826,6 +983,29 @@ void ModelInspector::OnPageChanged(wxBookCtrlEvent & event)
 // only for the tab that is actually on screen.
 void ModelInspector::OnWatchTimer(wxTimerEvent & WXUNUSED(event))
 {
+  // A geoset state the Unity viewport has not answered for a while is said so, rather than the
+  // checkboxes quietly implying it was applied. Not undone: the player may simply be busy, and its
+  // answer, when it comes, settles the checkboxes either way.
+  // A player that has gone away will not answer at all: stop waiting (its restart resends the state).
+  if (!m_pendingGeosets.empty() && !(g_modelViewer && g_modelViewer->unityPlayerReady()))
+  {
+    LOG_INFO << "[inspector] the Unity player went away with" << (int)m_pendingGeosets.size()
+             << "geoset state(s) unanswered -- no longer waiting";
+    ForgetUnityGeosetState();
+  }
+  if (!m_pendingGeosets.empty())
+  {
+    const long long now = wxGetUTCTimeMillis().GetValue();
+    bool late = false;
+    for (const PendingGeosetChange & change : m_pendingGeosets)
+      late = late || (!change.acknowledged && now - change.sentAtMs > 2500);
+    if (late && !m_noticeIsUnconfirmed)
+    {
+      SetGeosetNotice(UnconfirmedNotice());
+      m_noticeIsUnconfirmed = true;
+    }
+  }
+
   if (!IsShownOnScreen())
     return;
 

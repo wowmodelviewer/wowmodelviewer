@@ -475,6 +475,7 @@ static void doHeadlessUnityIpcTest(ModelViewer * frame)
   for (int i = 0; i < 50; i++) { ipc->poll(); wxTheApp->Yield(true); wxMilliSleep(10); }
 
   const UnityIpcServer::Stats & st = ipc->stats();
+  bool geosetLiveOk = true;   // set by the live geoset check below, when the model has submeshes to switch
   LOG_INFO << "[unityipc-test] connections=" << st.connections << "unityReady=" << (ipc->isUnityReady() ? 1 : 0)
            << "requests=" << st.requests << "ok=" << st.responsesOk << "errors=" << st.responsesError
            << "bytesServed=" << (qlonglong)st.bytesServed << "provider=" << st.lastProvider
@@ -905,6 +906,91 @@ static void doHeadlessUnityIpcTest(ModelViewer * frame)
                    << "lastState=" << ipc->stats().lastState;
         }
       }
+
+      // LIVE GEOSET SWITCHING. A Geosets checkbox sends the displayed model's whole per-submesh
+      // state (modelGeosets) and the player answers with what it now draws. Switched here the way
+      // the checkboxes do -- a submesh with geoset id 0 first, which the id list alone could never
+      // hide -- in the order A off, B off, A on, then back to the original state; every answer must
+      // be "applied" and must match the host's own flags exactly.
+      {
+        WoWModel * gm = const_cast<WoWModel *>(frame->canvas->model());
+        const size_t owned = gm ? std::min(gm->ownGeosetCount(), gm->geosets.size()) : 0;
+        if (owned < 2 || !frame->unityCanShowCurrentModel() || !ipc->playerSwitchesSubmeshes())
+        {
+          LOG_INFO << "[unityipc-test] geoset-live check: skipped (" << (int)owned
+                   << "submesh(es), unity can show=" << (frame->unityCanShowCurrentModel() ? 1 : 0)
+                   << ", player protocol" << ipc->playerProtocolVersion() << ")";
+        }
+        else
+        {
+          std::vector<UnityIpcServer::GeosetAck> acks;
+          auto previous = ipc->onGeosetsApplied;
+          ipc->onGeosetsApplied = [&acks, previous](const UnityIpcServer::GeosetAck & a) {
+            acks.push_back(a);
+            if (previous)
+              previous(a);
+          };
+
+          size_t idxA = 0;
+          for (size_t i = 0; i < owned; i++)
+            if (gm->geosets[i]->id == 0) { idxA = i; break; }
+          const size_t idxB = (idxA == owned - 1) ? 0 : owned - 1;
+          std::vector<bool> original;
+          for (size_t i = 0; i < owned; i++)
+            original.push_back(gm->geosets[i]->display);
+
+          int geoPass = 0, geoFail = 0;
+          long long firstAnim = -1, lastAnim = -1;
+          auto step = [&](const char * what, size_t index, bool value, bool restoreAll) {
+            if (restoreAll)
+              for (size_t i = 0; i < owned; i++)
+                gm->showGeoset((uint)i, original[i]);
+            else
+              gm->showGeoset((uint)index, value);
+            const int revision = frame->SendCurrentGeosetsToUnity();
+            const UnityIpcServer::GeosetAck * got = nullptr;
+            wxStopWatch wait;
+            while (revision > 0 && !got && wait.Time() < 5000)
+            {
+              ipc->poll();
+              wxTheApp->Yield(true);
+              wxMilliSleep(10);
+              for (const UnityIpcServer::GeosetAck & a : acks)
+                if (a.revision == revision && a.status != "pending")
+                  got = &a;
+            }
+            bool match = got && got->status == "applied" && got->hasVisible && got->visible.size() == owned;
+            QString bits;
+            for (size_t i = 0; match && i < owned; i++)
+              match = (got->visible[i] == gm->geosets[i]->display);
+            for (size_t i = 0; got && i < got->visible.size(); i++)
+              bits += got->visible[i] ? "1" : "0";
+            if (got && got->status == "applied")
+            {
+              if (firstAnim < 0) firstAnim = got->animTimeMs;
+              lastAnim = got->animTimeMs;
+            }
+            (match ? geoPass : geoFail)++;
+            LOG_INFO << "[unityipc-test]   geoset" << what << "submesh" << (int)index << "id"
+                     << (int)gm->geosets[index]->id << "revision" << revision
+                     << "-> status=" << (got ? got->status : QString("NO ANSWER"))
+                     << "drawn=" << bits << "triangles=" << (got ? got->triangles : 0)
+                     << "animTimeMs=" << (got ? (qlonglong)got->animTimeMs : -1)
+                     << (match ? "(matches the host flags)" : "(MISMATCH)");
+          };
+
+          step("A off", idxA, false, false);
+          step("B off", idxB, false, false);
+          step("A on ", idxA, true, false);
+          step("restore", idxA, true, true);
+          ipc->onGeosetsApplied = previous;
+
+          geosetLiveOk = (geoFail == 0 && geoPass == 4);
+          LOG_INFO << "[unityipc-test] geoset-live check:" << geoPass << "applied and matching," << geoFail
+                   << "failed; animation clock" << (qlonglong)firstAnim << "->" << (qlonglong)lastAnim << "ms"
+                   << (geosetLiveOk ? "(OK)" : "(FAIL)");
+        }
+      }
     }
   }
 
@@ -921,7 +1007,7 @@ static void doHeadlessUnityIpcTest(ModelViewer * frame)
   const bool stateOk = (frame->animControl == NULL) || (frame->animControl->animationCount() == 0) ||
                        (ipc->stats().statePushes >= 1);
   const bool pass = st.connections >= 1 && ipc->isUnityReady() && st.requests >= 1 &&
-                    st.responsesOk >= 1 && skinsOk && animsOk && stateOk;
+                    st.responsesOk >= 1 && skinsOk && animsOk && stateOk && geosetLiveOk;
   LOG_INFO << "[unityipc-test] RESULT:" << (pass ? "PASS" : "FAIL");
 
   // Close the player now (what app shutdown does) and confirm the child process is gone.

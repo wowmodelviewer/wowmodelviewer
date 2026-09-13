@@ -219,6 +219,23 @@ const char * UnityAssetAccess::sourceName(ModelTexture::Source source)
   }
 }
 
+bool UnityAssetAccess::displayedSubmeshVisibility(int m2FileDataID, std::vector<bool> & out)
+{
+  out.clear();
+  if (m2FileDataID <= 0 || !hasActiveClient() || !g_canvas)
+    return false;
+  // The CANVAS model -- the one loadWoWModel named to the renderer -- not g_selModel, which follows
+  // the animation controls and can be an attachment picked in Render Options.
+  const WoWModel * m = g_canvas->model();
+  if (!m || !m->gamefile || (int)m->gamefile->fileDataId() != m2FileDataID)
+    return false;
+  const size_t owned = std::min(m->ownGeosetCount(), m->geosets.size());
+  out.reserve(owned);
+  for (size_t i = 0; i < owned; i++)
+    out.push_back(m->geosets[i]->display);
+  return true;
+}
+
 bool UnityAssetAccess::selectedModelGeosets(int m2FileDataID, std::vector<int> & out)
 {
   out.clear();

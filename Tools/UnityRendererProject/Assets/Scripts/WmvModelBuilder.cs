@@ -160,6 +160,21 @@ public class WmvRuntimeModel
 
     /// <summary>The geoset numbers currently switched on, or null when the host has not said.</summary>
     public HashSet<int> Geosets;
+
+    /// <summary>
+    /// The host's own per-SUBMESH display state, indexed by skin submesh index (SFID[0], the same
+    /// order WoWModel::geosets holds its owned entries in), or null when the host has not sent one.
+    /// When present it decides instead of the geoset-id rule: it is the host's final answer -- the
+    /// flags the OpenGL viewport draws from -- so it can hide an id-0 submesh, or one of several
+    /// submeshes that share an id, which the id rule cannot express. See SubmeshDrawn.
+    /// </summary>
+    public bool[] SubmeshVisible;
+
+    /// <summary>The skin's submesh count and each skin submesh's geoset id, kept from the build so
+    /// an incoming per-submesh list can be checked against the skin, and so the state reported
+    /// back covers submeshes that have no built entry (a batch skipped as hidden at rest).</summary>
+    public int SkinSubmeshCount;
+    public int[] SkinSubmeshIds = new int[0];
     public Bounds Bounds;
     public int VertexCount, TriangleCount, SubmeshCount;
 
@@ -618,8 +633,21 @@ public static class WmvModelBuilder
     /// </summary>
     public static bool SubmeshDrawn(int submeshIndex, int geosetId, HashSet<int> geosets)
     {
+        return SubmeshDrawn(submeshIndex, geosetId, geosets, null);
+    }
+
+    /// <summary>
+    /// The same question with the host's per-submesh state available. -wmvOnlySubmesh still wins;
+    /// then the host's explicit answer for this skin submesh, when it sent one that covers it; then
+    /// the geoset-id rule, exactly as before. The explicit list does not add a rule of its own: it
+    /// is the host's display flags, which the id rule is a lossy summary of (per id, never id 0).
+    /// </summary>
+    public static bool SubmeshDrawn(int submeshIndex, int geosetId, HashSet<int> geosets, bool[] submeshVisible)
+    {
         if (Debug_.OnlySubmeshes != null)
             return Debug_.SubmeshAllowed(submeshIndex);
+        if (submeshVisible != null && submeshIndex >= 0 && submeshIndex < submeshVisible.Length)
+            return submeshVisible[submeshIndex];
         return GeosetVisible(geosetId, geosets);
     }
 
@@ -809,10 +837,20 @@ public static class WmvModelBuilder
     public static WmvRuntimeModel Build(M2ParsedModel model, M2ParsedSkin skin,
                                         Dictionary<int, BlpImage> decodedTextures,
                                         string objectName, Action<string> log,
-                                        HashSet<int> geosets = null)
+                                        HashSet<int> geosets = null,
+                                        bool[] submeshVisible = null)
     {
         if (model == null || skin == null)
             throw new WowParseException("builder: nothing to build");
+        // The host's per-submesh list only means something against the skin it was made for.
+        if (submeshVisible != null && submeshVisible.Length != skin.Submeshes.Length)
+        {
+            if (log != null)
+                log(string.Format("geosets: the host's per-submesh list has {0} entries but the skin has {1} " +
+                                  "submeshes -- ignored, the geoset-id rule decides", submeshVisible.Length,
+                                  skin.Submeshes.Length));
+            submeshVisible = null;
+        }
         if (model.Vertices.Length == 0)
             throw new WowParseException("builder: model has no vertices");
         if (skin.Batches.Length == 0)
@@ -954,7 +992,7 @@ public static class WmvModelBuilder
             // rebuilding anything. Counted through the same rule the mesh is built with, so the
             // triangle count and the summary below agree with what was actually drawn even when
             // -wmvOnlySubmesh is deciding.
-            if (SubmeshDrawn(batch.SubmeshIndex, submesh.Id, geosets))
+            if (SubmeshDrawn(batch.SubmeshIndex, submesh.Id, geosets, submeshVisible))
                 totalTriangles += indices.Length / 3;
             else
                 hiddenByGeoset++;
@@ -1166,7 +1204,7 @@ public static class WmvModelBuilder
 
         mesh.subMeshCount = triangleSets.Count;
         for (int i = 0; i < triangleSets.Count; i++)
-            mesh.SetTriangles(SubmeshDrawn(submeshIndices[i], submeshGeosets[i], geosets) && !gateHidden[i]
+            mesh.SetTriangles(SubmeshDrawn(submeshIndices[i], submeshGeosets[i], geosets, submeshVisible) && !gateHidden[i]
                                   ? triangleSets[i] : EmptyTriangles,
                               i, false);
         // Bounds come from the WHOLE model, not from what is currently visible, so switching a
@@ -1186,6 +1224,11 @@ public static class WmvModelBuilder
         result.SubmeshGeosets = submeshGeosets.ToArray();
         result.SubmeshIndices = submeshIndices.ToArray();
         result.Geosets = geosets;
+        result.SubmeshVisible = submeshVisible;
+        result.SkinSubmeshCount = skin.Submeshes.Length;
+        result.SkinSubmeshIds = new int[skin.Submeshes.Length];
+        for (int i = 0; i < skin.Submeshes.Length; i++)
+            result.SkinSubmeshIds[i] = skin.Submeshes[i].Id;
         result.MaterialAnim = animBindings.ToArray();
         result.GateHidden = gateHidden.ToArray();
         // The material animator is created UNCONDITIONALLY -- under -wmvNoAnim as well: the state
@@ -1250,8 +1293,22 @@ public static class WmvModelBuilder
                     "named submesh list for this run");
             int shownSets = 0;
             for (int i = 0; i < submeshGeosets.Count; i++)
-                if (SubmeshDrawn(submeshIndices[i], submeshGeosets[i], geosets))
+                if (SubmeshDrawn(submeshIndices[i], submeshGeosets[i], geosets, submeshVisible))
                     shownSets++;
+            if (submeshVisible != null)
+            {
+                // The explicit list replaces the id rule, so say whether it changed anything: at a
+                // load it should agree with the id rule everywhere (the host's rules decide both),
+                // and a disagreement is a manual toggle or a rule the id list could not express.
+                int on = 0, agree = 0;
+                for (int i = 0; i < submeshVisible.Length; i++)
+                {
+                    if (submeshVisible[i]) on++;
+                    if (submeshVisible[i] == GeosetVisible(skin.Submeshes[i].Id, geosets)) agree++;
+                }
+                log(string.Format("geosets: the host's per-submesh state decides -- {0} of {1} skin submesh(es) on; " +
+                                  "it agrees with the geoset-id rule on {2} of {1}", on, submeshVisible.Length, agree));
+            }
             string how = geosets != null
                 ? "the displayed variant [" + GeosetList(geosets) + "]"
                 : "no variant reported -- geoset 0 only, as the legacy viewport defaults";
@@ -1827,7 +1884,7 @@ public static class WmvModelBuilder
         for (int i = 0; i < runtime.SubmeshTriangles.Length; i++)
         {
             bool on = (i < runtime.SubmeshIndices.Length
-                       ? SubmeshDrawn(runtime.SubmeshIndices[i], runtime.SubmeshGeosets[i], geosets)
+                       ? SubmeshDrawn(runtime.SubmeshIndices[i], runtime.SubmeshGeosets[i], geosets, runtime.SubmeshVisible)
                        : GeosetVisible(runtime.SubmeshGeosets[i], geosets))
                       && !(i < runtime.GateHidden.Length && runtime.GateHidden[i]);
             runtime.Mesh.SetTriangles(on ? runtime.SubmeshTriangles[i] : EmptyTriangles, i, false);
@@ -1836,9 +1893,116 @@ public static class WmvModelBuilder
         }
         runtime.TriangleCount = visible;
         if (log != null)
-            log(string.Format("geosets [{0}]: {1} submesh(es) shown, {2} hidden, {3} triangles drawn",
-                              GeosetList(geosets), shown, hidden, visible));
+            log(string.Format("geosets [{0}]: {1} submesh(es) shown, {2} hidden, {3} triangles drawn{4}",
+                              GeosetList(geosets), shown, hidden, visible,
+                              runtime.SubmeshVisible != null ? " (the host's per-submesh state decides)" : ""));
         return visible;
+    }
+
+    /// <summary>
+    /// Switch individual skin submeshes on or off -- the host's Geosets checkboxes. visible is the
+    /// host's whole per-submesh state (indexed by skin submesh index), or null to hand the decision
+    /// back to the geoset-id rule.
+    ///
+    /// Incremental: only the built entries whose drawn state actually changes get SetTriangles, and
+    /// each of those hands the mesh either the triangle array it already keeps or the shared empty
+    /// one. Nothing is rebuilt -- vertices, bounds, materials, textures, bones, the animator, the
+    /// emitters and the camera are all untouched -- and a batch whose material gate is closed
+    /// right now stays withheld whichever way its submesh is switched.
+    ///
+    /// Returns the triangles now drawn, or -1 when the list does not fit this model (nothing is
+    /// changed then).
+    /// </summary>
+    public static int ApplySubmeshVisibility(WmvRuntimeModel runtime, bool[] visible, Action<string> log)
+    {
+        if (runtime == null || runtime.Mesh == null ||
+            runtime.SubmeshTriangles.Length != runtime.Mesh.subMeshCount)
+            return -1;
+        if (visible != null && visible.Length != runtime.SkinSubmeshCount)
+        {
+            if (log != null)
+                log(string.Format("submesh visibility: REFUSED -- {0} entries for a skin of {1} submeshes",
+                                  visible.Length, runtime.SkinSubmeshCount));
+            return -1;
+        }
+
+        bool[] before = runtime.SubmeshVisible;
+        runtime.SubmeshVisible = visible == null ? null : (bool[])visible.Clone();
+
+        int drawn = 0, changed = 0, shown = 0;
+        for (int i = 0; i < runtime.SubmeshTriangles.Length; i++)
+        {
+            bool gate = i < runtime.GateHidden.Length && runtime.GateHidden[i];
+            int skinIndex = i < runtime.SubmeshIndices.Length ? runtime.SubmeshIndices[i] : -1;
+            bool wasOn = SubmeshDrawn(skinIndex, runtime.SubmeshGeosets[i], runtime.Geosets, before) && !gate;
+            bool isOn = SubmeshDrawn(skinIndex, runtime.SubmeshGeosets[i], runtime.Geosets, runtime.SubmeshVisible) && !gate;
+            if (wasOn != isOn)
+            {
+                runtime.Mesh.SetTriangles(isOn ? runtime.SubmeshTriangles[i] : EmptyTriangles, i, false);
+                changed++;
+            }
+            if (isOn) { drawn += runtime.SubmeshTriangles[i].Length / 3; shown++; }
+        }
+        runtime.TriangleCount = drawn;
+
+        if (log != null)
+        {
+            string hiddenList = "";
+            int hiddenCount = 0;
+            bool[] now = EffectiveSubmeshVisibility(runtime);
+            for (int i = 0; i < now.Length; i++)
+                if (!now[i]) { hiddenList += (hiddenCount++ > 0 ? "," : "") + i; }
+            log(string.Format("submesh visibility: {0} of {1} skin submesh(es) switched off [{2}]; {3} built " +
+                              "entr(ies) changed, {4} of {5} drawn, {6} triangles -- mesh, materials, animator and " +
+                              "emitters untouched{7}",
+                              hiddenCount, now.Length, hiddenList.Length > 0 ? hiddenList : "none", changed, shown,
+                              runtime.SubmeshTriangles.Length, drawn,
+                              visible == null ? " (explicit state cleared: the geoset-id rule decides again)" : ""));
+        }
+        return drawn;
+    }
+
+    /// <summary>
+    /// Which skin submeshes the SELECTION switches on: the host's per-submesh state when there is
+    /// one, else the geoset-id rule. Indexed by skin submesh index. This is what is reported back to
+    /// the host, so it describes the selection only: material gates (a batch invisible at this
+    /// instant) are the model's own animation, and -wmvOnlySubmesh is a diagnostic override of what
+    /// is drawn -- folding that in would make the report disagree with the host's flags for as long
+    /// as the switch is set, and the host would keep re-sending its state.
+    /// </summary>
+    public static bool[] EffectiveSubmeshVisibility(WmvRuntimeModel runtime)
+    {
+        if (runtime == null)
+            return new bool[0];
+        var result = new bool[runtime.SkinSubmeshCount];
+        bool[] explicitState = runtime.SubmeshVisible;
+        for (int i = 0; i < result.Length; i++)
+        {
+            int id = i < runtime.SkinSubmeshIds.Length ? runtime.SkinSubmeshIds[i] : 0;
+            result[i] = explicitState != null && i < explicitState.Length ? explicitState[i]
+                                                                           : GeosetVisible(id, runtime.Geosets);
+        }
+        return result;
+    }
+
+    /// <summary>
+    /// Triangles the mesh is drawing right now: the built entries the selection switches on whose
+    /// material gate is open. The same count ApplySubmeshVisibility returns, so every report about
+    /// one state gives one number.
+    /// </summary>
+    public static int DrawnTriangleCount(WmvRuntimeModel runtime)
+    {
+        if (runtime == null)
+            return 0;
+        int drawn = 0;
+        for (int i = 0; i < runtime.SubmeshTriangles.Length; i++)
+        {
+            bool gate = i < runtime.GateHidden.Length && runtime.GateHidden[i];
+            int skinIndex = i < runtime.SubmeshIndices.Length ? runtime.SubmeshIndices[i] : -1;
+            if (!gate && SubmeshDrawn(skinIndex, runtime.SubmeshGeosets[i], runtime.Geosets, runtime.SubmeshVisible))
+                drawn += runtime.SubmeshTriangles[i].Length / 3;
+        }
+        return drawn;
     }
 
     /// <summary>
@@ -2557,7 +2721,8 @@ public static class WmvModelBuilder
         if (runtime == null || i < 0 || i >= runtime.SubmeshGeosets.Length)
             return true;
         if (i < runtime.SubmeshIndices.Length)
-            return SubmeshDrawn(runtime.SubmeshIndices[i], runtime.SubmeshGeosets[i], runtime.Geosets);
+            return SubmeshDrawn(runtime.SubmeshIndices[i], runtime.SubmeshGeosets[i], runtime.Geosets,
+                                runtime.SubmeshVisible);
         return GeosetVisible(runtime.SubmeshGeosets[i], runtime.Geosets);
     }
 

@@ -1,7 +1,7 @@
 /*
  * UnityIpcServer.h
  *
- * Localhost IPC server for the embedded Unity renderer (protocol v1). WMV is the SERVER:
+ * Localhost IPC server for the embedded Unity renderer (protocol v2). WMV is the SERVER:
  * UnityRendererHost starts this listener BEFORE launching the player and passes the port on
  * the player's command line (-wmvPort <n>); the player connects back, announces itself with
  * unityReady and then asks WMV for the raw WoW assets/metadata it renders from. This is the
@@ -15,10 +15,12 @@
  * replace it later without changing the request side.
  *
  *   player -> WMV
- *     { "type":"unityReady", "protocolVersion":1 }
+ *     { "type":"unityReady", "protocolVersion":2 }
  *     { "type":"getAsset",             "requestId":"abc123", "path":"creature/chicken/chicken.m2" }
  *     { "type":"getAssetByFileDataID", "requestId":"abc124", "fileDataID":123456 }
  *     { "type":"getModelTextures",     "requestId":"abc125", "fileDataID":123200 }
+ *     { "type":"modelGeosetsApplied", "fileDataID":1521037, "revision":7, "status":"applied",
+ *       "reason":"", "submeshVisible":[1,0,1], "triangles":2364, "animTimeMs":840 }
  *   WMV -> player
  *     { "type":"loadWoWModel", "path":"creature/chicken/chicken.m2", "fileDataID":0, "client":"active" }
  *     { "type":"assetResponse", "requestId":"abc123", "ok":true, "path":"...", "fileDataID":n,
@@ -28,7 +30,10 @@
  *       "textures":[ { "index":0, "type":11, "fileDataID":123199, "source":"selection" } ] }
  *     { "type":"modelSkin", "fileDataID":1521037,
  *       "textures":[ { "index":0, "type":11, "fileDataID":1521061, "source":"selection" } ],
- *       "geosets":[ 101 ], "hasGeosets":true }
+ *       "geosets":[ 101 ], "hasGeosets":true,
+ *       "hasSubmeshVisible":true, "submeshCount":3, "submeshVisible":[1,1,0] }
+ *     { "type":"modelGeosets", "fileDataID":1521037, "revision":7, "submeshCount":3,
+ *       "submeshVisible":[1,0,1] }
  *     { "type":"modelAnimation", "fileDataID":1521037, "sequenceIndex":2, "animID":0,
  *       "durationMs":2000, "loop":true }
  *     { "type":"modelAnimationState", "fileDataID":1521037, "sequenceIndex":2, "playing":true,
@@ -47,6 +52,17 @@
  * modelSkin is pushed whenever the displayed skin changes (the dropdown, or the default chosen on
  * model load). Same payload as modelTextures, no request: the player swaps the texture and keeps
  * the mesh it already built.
+ *
+ * GEOSETS. "geosets" is the id summary the renderer has always taken (non-zero ids on); protocol 2
+ * adds "submeshVisible", the host's own display flag for each of the displayed model's submeshes in
+ * skin order, which the renderer uses instead when it is present. modelSkin and the modelTextures
+ * reply carry both, so a load, a skin change and a reconnect all deliver the current state.
+ * modelGeosets carries only the per-submesh state and is pushed when the user switches a geoset
+ * (Model > Geosets): no texture or particle-colour lookup, applied to the built mesh at once. The
+ * player answers each with modelGeosetsApplied -- "applied" (with what it now draws), "pending"
+ * (kept for the model still loading) or "rejected" (with why; nothing changed) -- and sends the same
+ * report with revision 0 after a load or a skin push applied a per-submesh state, so the host always
+ * knows what the renderer is drawing rather than assuming it.
  *
  * modelAnimation is pushed the same way whenever the animation on display changes, and once after
  * loadWoWModel so the player starts on the animation the app is showing rather than on its own
@@ -93,7 +109,7 @@
 class UnityIpcServer : public wxEvtHandler
 {
 public:
-  static const int PROTOCOL_VERSION = 1;
+  static const int PROTOCOL_VERSION = 2;
 
   UnityIpcServer();
   ~UnityIpcServer();
@@ -107,6 +123,10 @@ public:
   bool isConnected() const { return m_client != 0; }
   bool isUnityReady() const { return m_unityReady; }
   int  port() const { return m_port; }
+  // The protocol the connected player announced in unityReady (0 until then). A player older than
+  // protocol 2 cannot switch submeshes: sendModelGeosets sends it nothing, since it would never answer.
+  int  playerProtocolVersion() const { return m_playerProtocol; }
+  bool playerSwitchesSubmeshes() const { return m_client && m_unityReady && m_playerProtocol >= 2; }
 
   // Runtime command: tell the player which model is active. Either path or fileDataID may be
   // empty/0. Queued if the player is connected; dropped (logged) otherwise.
@@ -131,6 +151,28 @@ public:
   void sendModelAnimationState(int m2FileDataID, int sequenceIndex, bool playing, int timeMs,
                                float speed, bool loop, bool explicitState);
 
+  // Runtime command: the displayed model's per-submesh display state changed (a Geosets
+  // checkbox). Sends the WHOLE current state (UnityAssetAccess::displayedSubmeshVisibility), numbered
+  // by revision so the player's modelGeosetsApplied answer can be matched to it. False (nothing
+  // sent) when the player is not connected and ready, speaks a protocol older than 2, or
+  // m2FileDataID is not the canvas model.
+  bool sendModelGeosets(int m2FileDataID, int revision);
+
+  // The player's answer to modelGeosets, or its report after a load / skin push (revision 0).
+  struct GeosetAck
+  {
+    int fileDataID = 0;
+    int revision = 0;
+    QString status;              // "applied" / "pending" / "rejected"
+    QString reason;
+    bool hasVisible = false;
+    std::vector<bool> visible;   // what the renderer now switches on, per skin submesh
+    int triangles = 0;
+    long long animTimeMs = 0;
+  };
+  // Raised on the GUI thread for every modelGeosetsApplied.
+  std::function<void(const GeosetAck &)> onGeosetsApplied;
+
   // Raised (on the GUI thread) when the player's unityReady arrives -- the host uses it to
   // push the currently displayed model.
   std::function<void()> onUnityReady;
@@ -150,6 +192,11 @@ public:
     int skinPushes = 0;     // modelSkin messages sent (the displayed skin changed)
     int animPushes = 0;     // modelAnimation messages sent (the displayed animation changed)
     int statePushes = 0;    // modelAnimationState messages sent (play/pause/speed/time)
+    int geosetPushes = 0;   // modelGeosets messages sent (a geoset was switched)
+    int geosetAcks = 0;     // modelGeosetsApplied received, any status
+    int geosetRejects = 0;  // ... of which "rejected"
+    QString lastGeosets;    // "rev <n> hidden [i,j]" of the last modelGeosets sent
+    QString lastGeosetAck;  // "rev <n> <status> <reason>" of the last answer
     QString lastRequest;    // "path" or "fileDataID n"
     QString lastProvider;   // "CASC" / "MPQ" / ""
     QString lastError;
@@ -167,6 +214,7 @@ private:
   void handleLine(const std::string & line);
   void handleGetAsset(const QJsonObject & msg, bool byFileDataID);
   void handleGetModelTextures(const QJsonObject & msg);
+  void handleGeosetsApplied(const QJsonObject & msg);
   static QJsonArray textureArray(const std::vector<UnityAssetAccess::ModelTexture> & textures);
   // Adds "geosets"/"hasGeosets" to a message about one model, when a selection is known.
   static void addGeosets(QJsonObject & msg, int m2FileDataID);
@@ -183,6 +231,7 @@ private:
   unsigned long long m_client = 0;
   int m_port = 0;
   bool m_unityReady = false;
+  int m_playerProtocol = 0;          // protocolVersion from the player's unityReady
   std::string m_inBuf;               // partial incoming line
   std::string m_outBuf;              // pending bytes to send (partial sends are normal for big assets)
   Stats m_stats;

@@ -107,6 +107,7 @@ bool UnityIpcServer::start()
   m_listen = (unsigned long long)s;
   m_port = ntohs(addr.sin_port);
   m_unityReady = false;
+  m_playerProtocol = 0;
   m_stats = Stats();
   m_timer.Start(POLL_INTERVAL_MS);
   LOG_INFO << "[unityipc] listening on 127.0.0.1:" << m_port << "(protocol v" << PROTOCOL_VERSION << ")";
@@ -129,6 +130,7 @@ void UnityIpcServer::stop()
   }
   m_port = 0;
   m_unityReady = false;
+  m_playerProtocol = 0;
   m_inBuf.clear();
   m_outBuf.clear();
 }
@@ -168,6 +170,7 @@ void UnityIpcServer::pollAccept()
   setsockopt(c, IPPROTO_TCP, TCP_NODELAY, reinterpret_cast<const char *>(&noDelay), sizeof(noDelay));
   m_client = (unsigned long long)c;
   m_unityReady = false;
+  m_playerProtocol = 0;
   m_inBuf.clear();
   m_outBuf.clear();
   m_stats.connections++;
@@ -182,6 +185,7 @@ void UnityIpcServer::dropClient(const char * why)
   closesocket((SOCKET)m_client);
   m_client = 0;
   m_unityReady = false;
+  m_playerProtocol = 0;
   m_inBuf.clear();
   m_outBuf.clear();
 }
@@ -306,6 +310,80 @@ void UnityIpcServer::addGeosets(QJsonObject & msg, int m2FileDataID)
   for (size_t i = 0; i < geosets.size(); i++)
     arr.append(geosets[i]);
   msg["geosets"] = arr;
+
+  // Protocol 2: the per-submesh flags themselves, which the id list above summarises lossily (per
+  // id, never id 0). The renderer uses these when present. At a load they agree with the id list
+  // (the host's rules set flags per id and never hide id 0 on a model this viewport shows); after
+  // a Geosets checkbox they may not, and then they are the truth.
+  std::vector<bool> visible;
+  const bool haveVisible = UnityAssetAccess::displayedSubmeshVisibility(m2FileDataID, visible);
+  msg["hasSubmeshVisible"] = haveVisible;
+  if (haveVisible)
+  {
+    QJsonArray bits;
+    for (size_t i = 0; i < visible.size(); i++)
+      bits.append(visible[i] ? 1 : 0);
+    msg["submeshCount"] = (int)visible.size();
+    msg["submeshVisible"] = bits;
+  }
+}
+
+bool UnityIpcServer::sendModelGeosets(int m2FileDataID, int revision)
+{
+  if (!playerSwitchesSubmeshes() || m2FileDataID <= 0)
+    return false;
+  std::vector<bool> visible;
+  if (!UnityAssetAccess::displayedSubmeshVisibility(m2FileDataID, visible))
+    return false;
+
+  QJsonObject msg;
+  msg["type"] = "modelGeosets";
+  msg["fileDataID"] = m2FileDataID;
+  msg["revision"] = revision;
+  msg["submeshCount"] = (int)visible.size();
+  QJsonArray bits;
+  QString hidden;
+  for (size_t i = 0; i < visible.size(); i++)
+  {
+    bits.append(visible[i] ? 1 : 0);
+    if (!visible[i])
+      hidden += (hidden.isEmpty() ? "" : ",") + QString::number((int)i);
+  }
+  msg["submeshVisible"] = bits;
+  m_stats.geosetPushes++;
+  m_stats.lastGeosets = QString("rev %1 hidden [%2]").arg(revision).arg(hidden.isEmpty() ? "none" : hidden);
+  LOG_INFO << "[unityipc] -> modelGeosets fileDataID=" << m2FileDataID << "revision=" << revision
+           << "submeshes=" << (int)visible.size() << "hidden=" << (hidden.isEmpty() ? QString("none") : hidden);
+  queueJson(msg);
+  return true;
+}
+
+void UnityIpcServer::handleGeosetsApplied(const QJsonObject & msg)
+{
+  GeosetAck ack;
+  ack.fileDataID = msg.value("fileDataID").toInt();
+  ack.revision = msg.value("revision").toInt();
+  ack.status = msg.value("status").toString();
+  ack.reason = msg.value("reason").toString();
+  ack.triangles = msg.value("triangles").toInt();
+  ack.animTimeMs = (long long)msg.value("animTimeMs").toDouble();
+  if (msg.value("submeshVisible").isArray())
+  {
+    ack.hasVisible = true;
+    const QJsonArray bits = msg.value("submeshVisible").toArray();
+    for (int i = 0; i < bits.size(); i++)
+      ack.visible.push_back(bits.at(i).toInt() != 0);
+  }
+  m_stats.geosetAcks++;
+  if (ack.status == "rejected")
+    m_stats.geosetRejects++;
+  m_stats.lastGeosetAck = QString("rev %1 %2%3").arg(ack.revision).arg(ack.status)
+                            .arg(ack.reason.isEmpty() ? QString() : " (" + ack.reason + ")");
+  LOG_INFO << "[unityipc] <- modelGeosetsApplied fileDataID=" << ack.fileDataID << "revision=" << ack.revision
+           << "status=" << ack.status << "triangles=" << ack.triangles << "animTimeMs=" << (qlonglong)ack.animTimeMs
+           << (ack.reason.isEmpty() ? QString() : "reason=" + ack.reason);
+  if (onGeosetsApplied)
+    onGeosetsApplied(ack);
 }
 
 void UnityIpcServer::addParticleColor(QJsonObject & msg, int m2FileDataID)
@@ -442,6 +520,7 @@ void UnityIpcServer::handleLine(const std::string & line)
   {
     const int version = msg.value("protocolVersion").toInt(0);
     m_unityReady = true;
+    m_playerProtocol = version;
     LOG_INFO << "[unityipc] <- unityReady (protocolVersion" << version << ")";
     if (version != PROTOCOL_VERSION)
       LOG_ERROR << "[unityipc] player speaks protocol v" << version << "but WMV expects v" << PROTOCOL_VERSION;
@@ -459,6 +538,10 @@ void UnityIpcServer::handleLine(const std::string & line)
   else if (type == "getModelTextures")
   {
     handleGetModelTextures(msg);
+  }
+  else if (type == "modelGeosetsApplied")
+  {
+    handleGeosetsApplied(msg);
   }
   else
   {

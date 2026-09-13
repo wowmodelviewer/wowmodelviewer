@@ -469,6 +469,159 @@ public static class WmvLifecycleSelfTest
         raw.Dispose(); item.Dispose(); alt.Dispose();
     }
 
+    static string Bits(bool[] v)
+    {
+        var sb = new System.Text.StringBuilder();
+        foreach (bool b in v) sb.Append(b ? '1' : '0');
+        return sb.ToString();
+    }
+
+    /// <summary>What the mesh itself holds for each built entry right now: 1 = its triangles, 0 = the
+    /// empty list. Read back from the mesh, so the incremental SetTriangles bookkeeping is what is
+    /// tested, not the predicate alone.</summary>
+    static string MeshBits(WmvRuntimeModel rt)
+    {
+        var sb = new System.Text.StringBuilder();
+        for (int i = 0; i < rt.Mesh.subMeshCount; i++)
+            sb.Append(rt.Mesh.GetIndexCount(i) > 0 ? '1' : '0');
+        return sb.ToString();
+    }
+
+    /// <summary>Triangles the built entries of these on-skin-submeshes contribute, gate ignored.</summary>
+    static int TrianglesOf(WmvRuntimeModel rt, bool[] on)
+    {
+        int n = 0;
+        for (int i = 0; i < rt.SubmeshIndices.Length; i++)
+            if (on[rt.SubmeshIndices[i]]) n += rt.SubmeshTriangles[i].Length / 3;
+        return n;
+    }
+
+    /// <summary>
+    /// THE HOST'S PER-SUBMESH STATE -- the Geosets checkboxes -- applied live.
+    ///
+    /// The geoset-id rule cannot say "hide this id-0 submesh" or "hide one of the two submeshes that
+    /// share id 2701"; the host's own display flags can, and they are what the OpenGL viewport draws
+    /// from. So: the explicit state decides when it is present, the id rule still decides when it is
+    /// not, a switch is incremental (nothing is recreated), a list that does not fit the skin is
+    /// refused without touching anything, the last of a sequence of switches is what shows, and a
+    /// material gate that is closed right now still withholds its batch.
+    /// </summary>
+    static void SubmeshVisibilityTests(Action<string> log)
+    {
+        // id 0 twice, 2701 twice (two submeshes share one id), 2702 once.
+        byte[] m2 = M2Synthetic.GeosetModel(5);
+        byte[] sk = M2Synthetic.GeosetSkin(new[] { 0, 0, 2701, 2701, 2702 });
+        M2ParsedModel model = M2Parser.Parse(m2, 0);
+        M2ParsedSkin skin = M2SkinParser.Parse(sk);
+        var ids = new HashSet<int>(new[] { 2701 });
+
+        // No explicit state: the id rule, exactly as before.
+        WmvRuntimeModel rt = WmvModelBuilder.Build(model, skin, new Dictionary<int, BlpImage>(),
+                                                   "SubmeshVisTest", log, ids, null);
+        Check(rt != null, "submesh vis: model built", log);
+        if (rt == null) return;
+        Check(rt.SkinSubmeshCount == 5 && rt.SubmeshVisible == null,
+              "submesh vis: no explicit state at build, skin submesh count kept (5)", log);
+        Check(Bits(WmvModelBuilder.EffectiveSubmeshVisibility(rt)) == "11110",
+              "submesh vis: without it the id rule decides (id 0 + both 2701, not 2702) = " +
+              Bits(WmvModelBuilder.EffectiveSubmeshVisibility(rt)), log);
+
+        var meshBefore = rt.Mesh;
+        var matsBefore = rt.Materials;
+        var mat0Before = rt.Materials.Length > 0 ? rt.Materials[0] : null;
+        var triBefore = rt.SubmeshTriangles;
+
+        // Hide an id-0 submesh -- impossible under the id rule.
+        bool[] a = { false, true, true, true, false };
+        int tri = WmvModelBuilder.ApplySubmeshVisibility(rt, a, log);
+        Check(Bits(WmvModelBuilder.EffectiveSubmeshVisibility(rt)) == "01110",
+              "submesh vis: an id-0 submesh can be switched off", log);
+        Check(tri == TrianglesOf(rt, a) && rt.TriangleCount == tri,
+              "submesh vis: triangles drawn = the switched-on entries' (" + tri + ")", log);
+        Check(MeshBits(rt) == "01110", "submesh vis: the MESH holds exactly those entries (" + MeshBits(rt) + ")", log);
+        Check(!WmvModelBuilder.GeosetVisibleFor(rt, 0) && WmvModelBuilder.GeosetVisibleFor(rt, 1),
+              "submesh vis: the material animator's predicate agrees (entry 0 off, entry 1 on)", log);
+
+        // Hide ONE of the two submeshes that share id 2701.
+        bool[] b = { false, true, true, false, false };
+        tri = WmvModelBuilder.ApplySubmeshVisibility(rt, b, log);
+        Check(Bits(WmvModelBuilder.EffectiveSubmeshVisibility(rt)) == "01100",
+              "submesh vis: one of two submeshes sharing an id switched off alone", log);
+        Check(tri == TrianglesOf(rt, b), "submesh vis: triangle count follows", log);
+        Check(MeshBits(rt) == "01100", "submesh vis: the mesh follows (" + MeshBits(rt) + ")", log);
+
+        // A off, B off, A on: the last state is what shows.
+        bool[] s1 = { true, true, false, true, true };   // A (2) off
+        bool[] s2 = { true, false, false, true, true };  // B (1) off
+        bool[] s3 = { true, false, true, true, true };   // A on again
+        WmvModelBuilder.ApplySubmeshVisibility(rt, s1, log);
+        WmvModelBuilder.ApplySubmeshVisibility(rt, s2, log);
+        tri = WmvModelBuilder.ApplySubmeshVisibility(rt, s3, log);
+        Check(Bits(WmvModelBuilder.EffectiveSubmeshVisibility(rt)) == "10111",
+              "submesh vis: A off, B off, A on ends with A on and B off", log);
+        Check(tri == TrianglesOf(rt, s3), "submesh vis: and draws exactly those triangles", log);
+        Check(MeshBits(rt) == "10111", "submesh vis: the mesh holds A and not B (" + MeshBits(rt) + ")", log);
+
+        // Nothing was recreated by any of it.
+        Check(ReferenceEquals(rt.Mesh, meshBefore), "submesh vis: the mesh was NOT recreated", log);
+        Check(ReferenceEquals(rt.Materials, matsBefore) &&
+              (mat0Before == null || ReferenceEquals(rt.Materials[0], mat0Before)),
+              "submesh vis: the materials were NOT recreated", log);
+        Check(ReferenceEquals(rt.SubmeshTriangles, triBefore), "submesh vis: the kept triangle arrays were reused", log);
+
+        // A list that does not fit the skin is refused, and nothing changes.
+        int refused = WmvModelBuilder.ApplySubmeshVisibility(rt, new[] { true, true }, log);
+        Check(refused == -1 && Bits(WmvModelBuilder.EffectiveSubmeshVisibility(rt)) == "10111" &&
+              MeshBits(rt) == "10111",
+              "submesh vis: a list of the wrong length is refused and the state and mesh are kept", log);
+
+        // A closed material gate still withholds its batch, whatever the switch says. The gate is
+        // closed the way the material animator closes one: the flag, and its triangles withheld.
+        rt.GateHidden[2] = true;
+        WmvModelBuilder.ApplyGeosets(rt, rt.Geosets, log);
+        Check(MeshBits(rt) == "10011", "submesh vis: closing entry 2's gate withholds it (" + MeshBits(rt) + ")", log);
+        bool[] allOn = { true, true, true, true, true };
+        tri = WmvModelBuilder.ApplySubmeshVisibility(rt, allOn, log);
+        bool[] notEntry2 = { true, true, false, true, true };
+        Check(tri == TrianglesOf(rt, notEntry2) && tri == WmvModelBuilder.DrawnTriangleCount(rt),
+              "submesh vis: a batch whose gate is closed stays withheld when switched on", log);
+        Check(MeshBits(rt) == "11011", "submesh vis: ...and the mesh does not hold it (" + MeshBits(rt) + ")", log);
+        Check(WmvModelBuilder.GeosetVisibleFor(rt, 2),
+              "submesh vis: ...while the selection still says it is on, so the gate re-opens it later", log);
+        rt.GateHidden[2] = false;
+        // What the material animator does when a gate opens: re-apply the entries (full pass).
+        WmvModelBuilder.ApplyGeosets(rt, rt.Geosets, log);
+        Check(MeshBits(rt) == "11111", "submesh vis: the opened gate draws the switched-on entry (" + MeshBits(rt) + ")", log);
+
+        // null hands the decision back to the id rule.
+        WmvModelBuilder.ApplySubmeshVisibility(rt, null, log);
+        Check(rt.SubmeshVisible == null && Bits(WmvModelBuilder.EffectiveSubmeshVisibility(rt)) == "11110",
+              "submesh vis: clearing the explicit state restores the id rule", log);
+
+        // A skin push's id change does not override an explicit state that is present.
+        WmvModelBuilder.ApplySubmeshVisibility(rt, b, log);
+        WmvModelBuilder.ApplyGeosets(rt, new HashSet<int>(new[] { 2702 }), log);
+        Check(Bits(WmvModelBuilder.EffectiveSubmeshVisibility(rt)) == "01100",
+              "submesh vis: a geoset-id change leaves the explicit state deciding", log);
+
+        // Built WITH an explicit state: honoured from the first frame; a wrong-length one is ignored.
+        WmvRuntimeModel built = WmvModelBuilder.Build(model, skin, new Dictionary<int, BlpImage>(),
+                                                      "SubmeshVisBuilt", log, ids, b);
+        Check(built != null && built.SubmeshVisible != null &&
+              Bits(WmvModelBuilder.EffectiveSubmeshVisibility(built)) == "01100" &&
+              built.TriangleCount == TrianglesOf(built, b),
+              "submesh vis: a model built with the host's state draws it from the start", log);
+        WmvRuntimeModel wrong = WmvModelBuilder.Build(model, skin, new Dictionary<int, BlpImage>(),
+                                                      "SubmeshVisWrong", log, ids, new[] { true });
+        Check(wrong != null && wrong.SubmeshVisible == null &&
+              Bits(WmvModelBuilder.EffectiveSubmeshVisibility(wrong)) == "11110",
+              "submesh vis: a build with a list that does not fit the skin falls back to the id rule", log);
+
+        rt.Dispose();
+        if (built != null) built.Dispose();
+        if (wrong != null) wrong.Dispose();
+    }
+
     /// <summary>
     /// THE OUTPUT GATE, tested against real materials rather than against a copy of the arithmetic.
     ///
@@ -543,6 +696,7 @@ public static class WmvLifecycleSelfTest
             foreach (int keyed in new[] { 1, 0 })
                 Run(skinned, keyed, log);
         GeosetTests(log);
+        SubmeshVisibilityTests(log);
         OutputGateTests(log);
         EmitterTests(log);
         ZoomTests(log);

@@ -27,7 +27,10 @@
 #include <wx/collpane.h>
 #include <wx/timer.h>
 
+#include <utility>
 #include <vector>
+
+#include "UnityIpcServer.h"
 
 class AnimControl;
 class CharControl;
@@ -83,6 +86,12 @@ public:
   // The model's geoset display flags were changed by something else (a skin, a customization):
   // update the checkboxes without rebuilding the tree.
   void UpdateGeosetSelection();
+
+  // The Unity player's answer to a geoset state (UnityIpcServer::onGeosetsApplied): keeps the
+  // checkboxes on what it actually draws.
+  void OnUnityGeosetsApplied(const UnityIpcServer::GeosetAck & ack);
+  // The Unity player (re)announced itself: states sent to an earlier player will never be answered.
+  void UnityPlayerRestarted();
 
   void ShowPage(Page page);
 
@@ -154,6 +163,26 @@ private:
 
   wxTimer m_watch;
   bool m_updatingChecks = false;
+
+  // Geoset states sent to the Unity viewport and not yet answered, oldest first. Each keeps the
+  // flags its click replaced, for the case where the renderer rejects it and never confirmed any
+  // state for this model that the checkboxes could fall back to.
+  struct PendingGeosetChange
+  {
+    int revision = 0;
+    int fileDataID = 0;
+    long long sentAtMs = 0;
+    bool acknowledged = false;                          // answered "pending": the model is loading
+    bool resync = false;                                // sent because an answer disagreed, not a click
+    std::vector<std::pair<size_t, bool> > undo;         // submesh index -> flag before the click, oldest first
+  };
+  std::vector<PendingGeosetChange> m_pendingGeosets;
+  std::vector<bool> m_unityConfirmed;                   // what the renderer last said it switches on
+  int m_unityConfirmedFileDataID = 0;
+  int m_lastSettledRevision = 0;                        // newest revision answered applied or rejected
+  bool m_noticeIsUnconfirmed = false;                   // the notice shows UnconfirmedNotice()
+  void ForgetUnityGeosetState();
+  static wxString UnconfirmedNotice();
 
   wxDECLARE_EVENT_TABLE();
 };
