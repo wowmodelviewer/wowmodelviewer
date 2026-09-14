@@ -501,8 +501,8 @@ public static class WmvLifecycleSelfTest
     /// THE HOST'S PER-SUBMESH STATE -- the Geosets checkboxes -- applied live.
     ///
     /// The geoset-id rule cannot say "hide this id-0 submesh" or "hide one of the two submeshes that
-    /// share id 2701"; the host's own display flags can, and they are what the OpenGL viewport draws
-    /// from. So: the explicit state decides when it is present, the id rule still decides when it is
+    /// share id 2701"; the host's own display flags can, and they are what the host's (archived) OpenGL
+    /// renderer drew from. So: the explicit state decides when it is present, the id rule still decides when it is
     /// not, a switch is incremental (nothing is recreated), a list that does not fit the skin is
     /// refused without touching anything, the last of a sequence of switches is what shows, and a
     /// material gate that is closed right now still withholds its batch.

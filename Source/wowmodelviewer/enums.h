@@ -8,11 +8,6 @@ enum ObjectID {
 
   // Model Viewer Frame
   ID_MODELVIEWERFRAME, // = 2000,
-  ID_FILE_SCREENSHOT,
-  ID_FILE_SCREENSHOTCONFIG,
-  ID_FILE_EXPORTGIF,
-  ID_FILE_EXPORTAVI,
-  ID_FILE_EXPORTIMGSEQ,
   ID_FILE_MODEL_INFO,
   ID_EXPORT_MODEL,
   ID_FILE_RESETLAYOUT,
@@ -42,7 +37,6 @@ enum ObjectID {
   ID_SHOW_ANIM,
   ID_SHOW_CHAR,
   ID_SHOW_VIEW,
-  ID_SHOW_LIGHT,
   ID_SHOW_MODEL,
   ID_SHOW_MODELBANK,
 
@@ -50,73 +44,23 @@ enum ObjectID {
 
   ID_VIEW_NPC,
   ID_VIEW_ITEM,
-  ID_VIEW_UNITY_RENDERER,
-  ID_VIEW_UNITY_PRIMARY,
+  ID_VIEW_UNITY_RESTART,
   ID_VIEW_FULLSCREEN,
 
   ID_LOAD_WOW,
   ID_LOAD_MPQ,
   ID_FILE_VIEWLOG,
 
-  //ID_SHOW_BONES,
-  ID_SHOW_BOUNDS,
-  //ID_SHOW_PARTICLES,
-  //ID_SHOW_WIREFRAME,
-  ID_USE_CAMERA,
-
-  ID_CAMERA,
+  // The archived OpenGL viewport's camera presets: ModelCanvas::OnCamMenu still names them, though
+  // nothing sends them any more.
   ID_CAM_FRONT,
   ID_CAM_SIDE,
   ID_CAM_BACK,
   ID_CAM_ISO,
   ID_CAM_RESET,
 
-  ID_LT_AMBIENT,
-  ID_LT_DIRECTIONAL,
-  ID_LT_MODEL,
-  ID_LT_COLOR,
-  ID_LT_DIRECTION,
-  ID_LT_TRUE,
-  ID_LT_SAVE,
-  ID_LT_LOAD,
-  
-  ID_BACKGROUND,
-  ID_BG_COLOR,
-  ID_SKYBOX,
-  ID_SHOW_GRID,
-  ID_CANVASSIZE,
-
-  // Square Aspects
-  ID_CANVASS120,
-  ID_CANVASS512,
-  ID_CANVASS1024,
-
-  // Fullscreen Aspects
-  ID_CANVASF480,
-  ID_CANVASF600,
-  ID_CANVASF768,
-  ID_CANVASF864,
-  ID_CANVASF1200,
-
-  // Widescreen Aspects
-  ID_CANVASW480,
-  ID_CANVASW720,
-  ID_CANVASW1080,
-
-  // Misc Aspects
-  ID_CANVASM768,    // 1280x768
-  ID_CANVASM1200,    // 1920x1200
-
-  ID_ZOOM_IN,
-  ID_ZOOM_OUT,
-  ID_OPENGL_DEBUG,
-
   ID_ENCHANTS,
 
-  ID_DEFAULT_DOODADS,
-  ID_USE_ANTIALIAS,
-  ID_USE_ENVMAP,
-  ID_USE_HWACC,
   ID_SHOW_SETTINGS,
   //ID_RESET,
 
@@ -125,15 +69,6 @@ enum ObjectID {
   ID_ABOUT,
 
   ID_MOUNT_CHARACTER,
-
-  ID_SAVE_TEMP1,
-  ID_SAVE_TEMP2,
-  ID_SAVE_TEMP3,
-  ID_SAVE_TEMP4,
-  ID_LOAD_TEMP1,
-  ID_LOAD_TEMP2,
-  ID_LOAD_TEMP3,
-  ID_LOAD_TEMP4,
 
   // -------------------------------------
   // GIF Exporter frame
@@ -210,14 +145,8 @@ enum ObjectID {
   ID_UNITY_FRAME,
   ID_MODEL_NAME,
   ID_MODEL_LOD,
-  ID_MODEL_ALPHA,
   ID_MODEL_SCALE,
-  ID_MODEL_BONES,
-  ID_MODEL_BOUNDS,
   ID_MODEL_RENDER,
-  ID_MODEL_WIREFRAME,
-  ID_MODEL_PARTICLES,
-  ID_MODEL_TEXTURE,
   ID_MODEL_GEOSETS,
   ID_MODEL_X,
   ID_MODEL_Y,
@@ -253,7 +182,6 @@ enum ObjectID {
 
   // -----------------------------------------
   // Image Control Frame
-  ID_IMAGE_FRAME,
   ID_IMAGE_FILENAME,
   ID_IMAGE_CANVASWIDTH,
   ID_IMAGE_CANVASHEIGHT,
@@ -307,8 +235,6 @@ enum ObjectID {
 
   // Command bar and Help menu
   ID_UI_OPEN_MODEL,        // "Open model": load a client first if none, otherwise go to Browse
-  ID_UI_RESET_CAMERA,      // command bar: View > Camera > Reset, while that camera is on screen
-  ID_UI_SCREENSHOT,        // command bar: File > Save Screenshot, while that viewport is on screen
   ID_UI_MODEL_LABEL,
   ID_KEYBOARD_SHORTCUTS,
 

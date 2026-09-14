@@ -146,8 +146,8 @@ public class WmvOrbitCamera : MonoBehaviour
         var cam = GetComponent<Camera>();
         float fov = (cam != null ? cam.fieldOfView : 60f) * Mathf.Deg2Rad;
         // The narrower half-angle of the two: fieldOfView is the VERTICAL one, and a viewport
-        // taller than it is wide -- the Unity pane docked beside the tool panels is exactly that
-        // -- has a smaller horizontal angle, which is what clipped the sides of a wide model that
+        // taller than it is wide -- as the viewport becomes with wide panels docked beside it, and
+        // as the old side pane always was -- has a smaller horizontal angle, which is what clipped the sides of a wide model that
         // "fit" vertically. Still one rule from the bounds and the camera, nothing per model.
         float halfV = fov * 0.5f;
         float aspect = (cam != null && cam.aspect > 0.001f) ? cam.aspect : 1f;

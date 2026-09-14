@@ -31,11 +31,15 @@ BEGIN_EVENT_TABLE(FileControl, wxWindow)
   EVT_TREE_ITEM_MENU(ID_FILELIST, FileControl::OnTreeMenu)
 END_EVENT_TABLE()
 
+// One entry per filter in the choice list below (chos, filterStrings), in the same order: the
+// selected index IS the filter mode. OGG and SKIN were missing, which put every later entry one out
+// of step -- "MP3s" ran the image branch and "Images (*.blp)" only cleared the model.
 enum FilterModes {
   FILE_FILTER_MODEL=0,
   FILE_FILTER_WMO,
   FILE_FILTER_ADT,
   FILE_FILTER_WAV,
+  FILE_FILTER_OGG,
   FILE_FILTER_MP3,
   FILE_FILTER_IMAGE,
   FILE_FILTER_BLS,
@@ -43,6 +47,7 @@ enum FilterModes {
   FILE_FILTER_DB2,
   FILE_FILTER_LUA,
   FILE_FILTER_XML,
+  FILE_FILTER_SKIN,
 
   FILE_FILTER_MAX
 };
@@ -488,6 +493,9 @@ void FileControl::OnTreeMenu(wxTreeEvent &event)
 
 void FileControl::ClearCanvas()
 {
+  // Whatever is picked next replaces a Browse image too, which none of the flags below records.
+  modelviewer->m_browseImageName.Clear();
+
   if (!modelviewer->isModel && !modelviewer->isWMO && !modelviewer->isADT)
     return;
 
@@ -706,13 +714,13 @@ void FileControl::OnTreeSelect(wxTreeEvent &event)
   } else if (filterMode == FILE_FILTER_IMAGE) {
     ClearCanvas();
 
-    // For Graphics
-    wxString val(data->file->fullname().toStdWString());
-    ExportPNG(val);
-    wxFileName fn(val);
-    wxString temp(wxGetCwd()+SLASH+wxT("Export")+SLASH+fn.GetName()+wxT(".png"));
-    modelviewer->canvas->LoadBackground(temp);
-    wxRemoveFile(temp);
+    // The Unity viewport cannot show an image; remembering the pick lets it say so instead of
+    // showing the empty viewer's prompt as though nothing had been chosen. That is all a pick does
+    // now. It used to write the image out as a PNG (ExportPNG, which asks where to save it) and load
+    // that file as the OpenGL canvas's background, and the canvas is archived: nothing draws that
+    // background, so every pick -- stepping through the tree with the arrow keys included -- would
+    // have opened a save dialog for nothing. Saving an image is the right-click menu's job (Save, View).
+    modelviewer->m_browseImageName = wxString(data->file->fullname().toStdWString());
 
     UpdateInterface();
   } else if (filterMode == FILE_FILTER_ADT) {

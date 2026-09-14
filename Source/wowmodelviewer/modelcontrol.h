@@ -12,19 +12,9 @@
 #include "modelcanvas.h"
 #include "animcontrol.h"
 
-// ModelName
-// LevelOfDetail
-// Opacity
-// Bones
-// Bounding Box
-// Render
-// Wireframe
-// Geosets
-// Future Additions:
-//    - Pos
-//    - Rotation
-//    - Scale
-//    - Attach model
+// View > "Attachments": pick the model or attachment the Animation panel drives, and set Render and Scale
+// for an item attached to a character (the Unity viewport receives both in the character scene). See
+// modelcontrol.cpp for what was removed with the OpenGL viewport.
 
 class ModelControl: public wxWindow
 {
@@ -33,9 +23,14 @@ class ModelControl: public wxWindow
 
   wxComboBox *modelname;
   // wxComboBox *cbLod;
-  wxSlider *alpha, *scale;
-  wxCheckBox *bones, *box, *render, *wireframe, *texture, *particles;
+  wxSlider *scale;
+  wxCheckBox *render;
   wxTextCtrl *txtsize;
+  wxStaticText *hint;
+
+  // Whether Render and Scale on the current selection reach the viewport: it is an item attached
+  // directly to a character.
+  bool selectionReachesViewport() const;
 
   // List of models in the scene.
   //std::vector<Model*> models;

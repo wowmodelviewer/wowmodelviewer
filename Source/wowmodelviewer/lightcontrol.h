@@ -1,3 +1,7 @@
+// archived: the lighting pane's UI is unreachable since the OpenGL viewport was archived (it is never shown).
+// NOT all of it is dead: one LightControl is still created, and ModelCanvas::InitGL and the start-up code in
+// app.cpp still call Init() and UpdateGL(). InitGL marks the canvas initialised -- which starts the animation
+// clock the Unity viewport mirrors -- only after them, so those two must keep working.
 #ifndef LIGHTCONTROL_H
 #define LIGHTCONTROL_H
 

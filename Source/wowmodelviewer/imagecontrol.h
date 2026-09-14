@@ -1,3 +1,4 @@
+// archived: unreachable since the OpenGL viewport was archived (the sized-screenshot pane; nothing creates one).
 
 #ifndef IMAGECONTROL_H
 #define IMAGECONTROL_H

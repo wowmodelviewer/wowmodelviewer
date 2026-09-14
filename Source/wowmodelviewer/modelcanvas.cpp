@@ -40,8 +40,8 @@ BEGIN_EVENT_TABLE(ModelCanvas, wxGLCanvas)
   EVT_PAINT(ModelCanvas::Render)
   EVT_ERASE_BACKGROUND(ModelCanvas::OnEraseBackground)
   EVT_TIMER(ID_TIMER, ModelCanvas::OnTimer)
-  EVT_MOUSE_EVENTS(ModelCanvas::OnMouse)
-  EVT_KEY_DOWN(ModelCanvas::OnKey)
+  // No mouse or key handlers: the canvas's mouse camera and its 0-9 animation speed keys belonged to the
+  // archived viewport (OnMouse and OnKey are kept, unreferenced).
 END_EVENT_TABLE()
 
 
@@ -171,22 +171,35 @@ ModelCanvas::ModelCanvas(wxWindow *parent, VideoCaps *caps)
   useCamera = false;
 
   openGLDebug_ = false;
-  
-  //wxNO_BORDER|wxCLIP_CHILDREN|wxFULL_REPAINT_ON_RESIZE
+
+  // ARCHIVED VIEWPORT: this window is created hidden and is never shown, laid out or painted. It is
+  // kept because it owns the application's only GL (WGL) context -- every texture decode and upload,
+  // the character body and eye composites the Unity viewport is sent, and the exporters' texture
+  // read-backs need that context -- and because this object owns the loaded model and the animation
+  // clock (OnTimer -> tick). On Windows a GL context works on a window that is not visible: the device
+  // context and wglMakeCurrent do not depend on WS_VISIBLE, and the headless self-test (-unityipctest)
+  // runs with this window hidden and fails unless the GL context initialised (canvas init, video.render)
+  // and, for a character, the composited body image was sent and the character scene applied.
 #ifdef _WINDOWS
+  // Hide() before Create() creates the native window without WS_VISIBLE, so it never appears even
+  // for the moment between creation and a later hide.
+  Hide();
   if(!Create(parent, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxNO_BORDER|wxCLIP_CHILDREN|wxFULL_REPAINT_ON_RESIZE, wxT("ModelCanvas"))) {
     LOG_ERROR << "Unable to create a window to handle our OpenGL rendering. Won't be able to continue.";
     parent->Close();
     return;
-  } else 
+  } else
+#else
+  // The wxGLCanvas base was created (visible) by the initialiser list; hide it straight away. Whether
+  // a never-shown wxGLCanvas is a valid drawable on these platforms is not verified.
+  Hide();
 #endif
   {
 #ifndef  _LINUX // buggy
     SetBackgroundStyle(wxBG_STYLE_CUSTOM);
 #endif
-    Show(true);
 
-    // Initiate the timer that handles our animation and setting the canvas to redraw
+    // Initiate the timer that drives the animation clock (it never redraws: the canvas is archived)
     timer.SetOwner(this, ID_TIMER);
     timer.Start(TIME_STEP);
 
@@ -240,11 +253,9 @@ void ModelCanvas::OnSize(wxSizeEvent& event)
 {
   event.Skip();
 
-  if (init) 
+  // The status bar reports the Unity viewport's size, not this hidden window's.
+  if (init)
     InitView();
-
-  if(g_modelViewer)
-    g_modelViewer->UpdateCanvasStatus();
 }
 
 void ModelCanvas::InitView()
@@ -353,6 +364,11 @@ Attachment* ModelCanvas::LoadModel(GameFile * file)
   root->setModel(nullptr);
   delete wmo;
   wmo = nullptr;
+  // A model replaces a map tile the same way it replaces a WMO. Only FileControl::ClearCanvas used to
+  // drop one, so a model loaded from a menu (an NPC, an item, a character file, an import) left the
+  // tile behind -- and the viewport, which shows a notice for a map tile, kept showing that notice in
+  // front of the model. The root was detached above, so nothing still points at it.
+  wxDELETE(adt);
 
   // Free the previously displayed model. clearAttachments()/setModel(nullptr) only
   // detach it and delete the Attachment wrappers -- the WoWModel itself was never
@@ -779,11 +795,27 @@ inline void ModelCanvas::RenderBackground()
   glMatrixMode(GL_MODELVIEW);
 }
 
+bool ModelCanvas::s_renderEntered = false;
+unsigned long ModelCanvas::s_clockTicks = 0;
+
+// The paint handler of an archived viewport: it never draws. The window is never shown, so Windows
+// never sends it WM_PAINT; should something show it anyway, this still validates the paint (the
+// wxPaintDC -- without it Windows would resend the message forever) and reports it once, loudly,
+// instead of putting an OpenGL frame on screen. The drawing it used to do is RenderArchivedFrame.
 void ModelCanvas::Render(wxPaintEvent& WXUNUSED(event))
 {
-  // Set this window handler as the reference to draw to.
   wxPaintDC dc(this);
+  if (!s_renderEntered)
+  {
+    s_renderEntered = true;
+    LOG_ERROR << "ModelCanvas::Render was entered: the archived OpenGL canvas received a paint. It must never be "
+                 "shown; nothing was drawn.";
+  }
+}
 
+// archived: unreachable since the OpenGL viewport was archived. The on-screen frame Render used to draw.
+void ModelCanvas::RenderArchivedFrame()
+{
   if (!init)
     InitGL();
 
@@ -1491,12 +1523,21 @@ void ModelCanvas::RenderToBuffer()
 
 
 
+// The animation clock, 100 times a second. Only tick() runs: the canvas is archived, so there is no
+// frame to request (Refresh) and no camera for the numpad to move (CheckMovement) -- both used to act
+// on a viewport nobody can see. The clock itself is what the Unity viewport mirrors (heartbeat, scene
+// pushes, mount changes), so it runs whether or not anything is drawn.
 void ModelCanvas::OnTimer(wxTimerEvent& event)
 {
   if (video.render && init) {
-    CheckMovement();
+    static bool reported = false;
+    if (!reported)
+    {
+      reported = true;
+      LOG_INFO << "ModelCanvas: animation clock running (archived canvas, hidden and never painted).";
+    }
+    s_clockTicks++;
     tick();
-    Refresh(false);
   }
 }
 
@@ -1531,7 +1572,7 @@ void ModelCanvas::tick()
 
   // The embedded Unity viewport times itself, so it drifts against this clock. This is the only
   // place that runs every frame with the animation state to hand; the call rate-limits itself to
-  // a heartbeat and does nothing at all when the Unity pane was never opened.
+  // a heartbeat and does nothing at all while no player is connected.
   if (g_modelViewer)
     g_modelViewer->SendAnimationStateToUnity(false);
 
@@ -1560,6 +1601,8 @@ void ModelCanvas::tick()
 
 }
 
+// archived: unreachable since the OpenGL viewport was archived (Load Background and the Browse image pick
+// both loaded the canvas background through here).
 void ModelCanvas::LoadBackground(wxString filename)
 {
   if (!wxFile::Exists(filename))

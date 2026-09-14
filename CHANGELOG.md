@@ -6,17 +6,18 @@ Format loosely based on [Keep a Changelog](https://keepachangelog.com/).
 ## [Unreleased]
 
 ### Added
-- **Embedded Unity renderer: playable characters stay in the Unity viewport.** Selecting a
-  character no longer sends the centre back to the OpenGL canvas. The Unity viewport draws the same
+- **Embedded Unity renderer: playable characters are drawn in the Unity viewport.** The Unity
+  viewport draws the same
   character from the state the host has already resolved -- the composited body and eye textures,
   the geoset flags after every customization, equipment and helm rule, the collection armour and
   customization parts merged into the character (skinned to its bones through the host's own bone
   table), the item models attached at its attachment points (sheathed weapons and shields included)
-  and the closed hand around a held weapon. Model > Appearance, equipment changes, Model Control's
-  render toggle and Model > Geosets (the character's own geosets, its merged parts' and its items')
-  update the viewport in place: one `characterScene` per change, applied whole, no reload, no camera
-  reset and no animation restart. The OpenGL canvas remains the viewport for a mounted character, for
-  a player build older than protocol 3, and for a character the player reports it could not build.
+  and the closed hand around a held weapon. Model > Appearance, equipment changes, the render toggle
+  in View > Attachments (formerly Model Control) and Model > Geosets (the character's own geosets,
+  its merged parts' and its items') update the viewport in place: one `characterScene` per change,
+  applied whole, no reload, no camera reset and no animation restart. A mounted character, a
+  character on a player build older than protocol 3, and a character the player reports it could
+  not build get a notice in the viewport instead (see Changed).
 - **Embedded Unity renderer: models whose skeleton lives in a separate file animate.** Every
   playable race keeps its bones, sequences and attachments in a `.skel` (the SKID chunk, and the
   SKPD parent it may defer to); the player now reads them the way the host does instead of drawing
@@ -24,7 +25,8 @@ Format loosely based on [Keep a Changelog](https://keepachangelog.com/).
 - **Embedded Unity renderer: alias sequences play.** A sequence flagged as an alias (0x40) with no
   keyframes of its own now plays the keys of the sequence its alias chain ends on, fetching that
   sequence's `.anim` file. Every HD race has seven of these, and many creatures have more; they used
-  to fall back to Stand. (The OpenGL canvas does not follow aliases yet.)
+  to fall back to Stand. (The host's own bone evaluation, which now only poses exports, does not
+  follow aliases yet.)
 
 ### Changed
 - **Embedded Unity renderer: large files reach the player sooner.** The host's socket to the player now
@@ -50,36 +52,72 @@ Format loosely based on [Keep a Changelog](https://keepachangelog.com/).
   nothing to ask — it already seeds itself from the saved folder and detects the client, so pressing
   Load was the only thing left to do. It still appears when there is a real question (first run, a
   moved install), centred over a running application, and File > Client Choice is untouched.
-- **Unity-primary startup is now viewer-first.** An interactive launch opens maximised on the
-  viewport alone: file tree, animation controls and character pane start hidden (View brings any of
-  them back, and F11 gives real fullscreen). The viewport area is plain dark while the player
-  starts — the "Starting Unity renderer..." caption is gone, because a message that is on screen
-  for exactly as long as it takes to read is worse than nothing being there. And the spinning
-  placeholder cube no longer appears at all unless `-wmvPlaceholder` asks for it: it was there to
-  prove the embedded player was alive, which stopped being the question a long time ago.
-- **The Unity viewport is now the main one for creature models, and it is ready before you need
-  it.** The renderer is started when the application starts rather than when the first creature is
-  picked. It is a game engine and takes about a second to come up (~1.1 s, measured); started on
-  demand, that second sat between picking a creature and seeing it, which made loading a model look
-  slow when the model had nothing to do with it. While it starts, the viewport says
-  "Starting Unity renderer..." rather than showing an empty rectangle. The player is also now built
-  with its splash screen disabled — a "Made with Unity" logo belongs in a game, not in the middle
-  of a model viewer — so the logo is gone rather than merely moved.
-- **The Unity viewport is now the main one for creature models.** Opening a creature puts the
-  Unity renderer in the centre of the window instead of leaving it as a side pane you had to go
-  and find. The OpenGL canvas is not removed, replaced, or stopped -- it is uncovered:
-  View > "Unity as main viewport" hands the centre straight back to it for comparison, the
-  preference is remembered, and anything the Unity viewport cannot show yet never leaves it.
-  **This is a routing change, not a renderer swap, and deliberately so.** The OpenGL canvas still
-  loads the model, still owns the animation clock, and is still what every push to the Unity
-  renderer reads from; the Unity viewport mirrors it. Making it the visible one is therefore a
-  question of which pane holds the centre, not of moving ownership -- which is what keeps this
-  small enough to be safe.
-  What still belongs to OpenGL: a mounted character (see Added), WMOs, anything that is not
-  an M2, every screenshot and image-sequence path, and every headless run -- a non-interactive
-  run keeps the viewport it was given, so `-mo` regressions render exactly as they did.
+- **Startup is viewer-first.** An interactive launch goes straight to fullscreen on the viewport (F11
+  or Esc leaves it), and the Browse, Model and Animation panels come up as they were left. The
+  "Starting Unity renderer..." caption is gone: a model loaded while the player starts simply
+  appears when it is built, because a message that is on screen for exactly as long as it takes to
+  read is worse than nothing being there, and with nothing loaded the empty viewer's prompt says what
+  to do next. And the spinning placeholder cube no longer appears at all unless `-wmvPlaceholder`
+  asks for it: it was there to prove the embedded player was alive, which stopped being the question
+  a long time ago.
+- **The Unity viewport is ready before you need it.** The renderer is started when the application
+  starts rather than when the first model is picked. It is a game engine and takes about a second to
+  come up (~1.1 s, measured); started on demand, that second sat between picking a creature and
+  seeing it, which made loading a model look slow when the model had nothing to do with it. The
+  player is also now built with its splash screen disabled -- a "Made with Unity" logo belongs in a
+  game, not in the middle of a model viewer -- so the logo is gone rather than merely moved.
+- **Unity is the only viewport; the OpenGL viewport is archived.** The Unity viewport is the centre
+  of the window from startup, with no option to turn it off: File > Reset Layout keeps it in the
+  centre, layouts saved by earlier builds are discarded once, and an old
+  `Tools/UnityPrimaryViewport` setting is ignored. No menu item, setting, layout, command-line switch
+  or failure path can show the OpenGL canvas any more. The canvas object is kept as a hidden internal
+  service -- it still owns the GL context textures are decoded with, the loaded model and the
+  animation clock the Unity viewport mirrors -- but it is never shown and never paints, and
+  `-unityipctest` fails if it does. Exports no longer take their pose from the last drawn frame: the
+  pose at the Animation panel's current frame is computed just before an OBJ or FBX export reads it,
+  and scrubbing updates the pose without drawing anything.
+- **What the Unity viewport cannot show yet gets a notice, not another viewport.** The content still
+  loads -- the panels, Info and the exporters keep working on it -- and the viewport says what is
+  loaded and that it cannot be shown yet: an image picked in Browse, a WMO, a map tile, a mounted
+  character, a model with no FileDataID (legacy clients), a character the player could not build
+  (with its reason), and a character on a player build too old to dress one. A missing player build,
+  one that will not start, one that crashes or loses its connection, and one that is still running
+  but has not answered 30 seconds after launch -- caught by a two-second check, not at the next
+  load -- get a notice with a "Restart Unity renderer" button instead of a
+  dialog; View > "Restart Unity Renderer" does the same. With nothing loaded the empty viewer's
+  prompt stays. A build without the Unity player (not Windows) says the viewport is not available on
+  this platform.
+- **Model Control is now View > "Attachments...".** It keeps what reaches the viewport: the list of
+  the model and its attachments, which picks the model the Animation panel drives, and Render and
+  Scale, enabled for items attached directly to a character (the only ones the viewport is sent).
+
+### Removed
+- **The main-viewport toggle.** View > "Unity as main viewport" and its `Tools/UnityPrimaryViewport`
+  setting, and the View > "Unity Renderer" item, which is now View > "Restart Unity Renderer".
+- **Screenshots and image sequences, until the Unity viewport has a capture of its own.** File >
+  Save Screenshot (F12), the command bar's Screenshot button and File > Export Image Sequence all
+  captured the OpenGL viewport. Their implementation stays in the tree, unreferenced.
+- **Controls that only changed the OpenGL viewport's drawing.** View > Background Color and Load
+  Background (Ctrl+L), the Camera submenu (Front, Back, Side, Perspective, Reset, Use model camera)
+  and the command bar's Reset camera button, Set Canvas Size, OpenGL debug info in the title bar,
+  Ctrl+B (bounds), F1-F4 and Ctrl+F1-F4 (saved views), the canvas's mouse camera, numpad camera keys
+  and 0-9 speed keys, the Lighting menu remnants, Options > "Always show default doodads in WMOs",
+  the Settings > Display page, Settings > General's "Show Particle" and "Zero Particle", Model
+  Control's alpha, bones, wireframe, bounds, texture and particle options, and the Help > Keyboard
+  Shortcuts rows for the OpenGL viewport. None of them reached the Unity viewport. The settings they
+  kept (canvas size, background colour and image, particle flags, `Graphics/*`, the screenshot
+  counter and format) are no longer read or written; old values in `Config.ini` are ignored.
+- **Batch screenshots.** Headless `-mo`, `-item`, `-npc`, `-armory` and `.chr` runs no longer write an
+  `ss_*.png`; they log one line saying screenshots are not available in the Unity-only viewer. The
+  `-imgseq` smoke test is gone. `-unityipctest` and `-fbxexport` still run.
 
 ### Fixed
+- **Browse's file-type list picks the type it names.** "OGGs" and "SKINs" were missing from the
+  list the selection is matched against, so every later entry was one out: "MP3s" ran the image
+  handling and "Images (*.blp)" did nothing. Picking an image now names it in the viewport's notice
+  (saving one stays the right-click menu's job).
+- **A model loaded from a menu replaces a map tile.** Loading an NPC, an item, a character file or
+  an import after picking an ADT in Browse left the map tile loaded behind the new model.
 - **Embedded Unity renderer: bone keyframes stored in `.anim` files are read again.** The emitter
   work had routed bone tracks through the model-buffer-only reader meant for emitters, so every
   sequence whose keys live in an external `.anim` file posed its bones from the wrong buffer. The
@@ -357,26 +395,26 @@ Format loosely based on [Keep a Changelog](https://keepachangelog.com/).
   on the player command line), the player connects back and announces itself, the app tells it
   which model is active (`loadWoWModel`, re-sent on every model load), and the player fetches the
   raw WoW files it needs (`getAsset` by path / `getAssetByFileDataID`) straight from the **active
-  client** -- CASC or legacy MPQ, through the same file providers the OpenGL viewport uses -- with
+  client** -- CASC or legacy MPQ, through the same file providers the rest of the app uses -- with
   byte length + SHA-1 so the player can verify what it received. Missing files, unsupported
   lookups (FileDataID on an MPQ client) and a client that is still loading come back as clear
   errors. Nothing is exported or written to disk; this is the runtime channel the Unity renderer
-  will render from directly (no M2 parsing/rendering in Unity yet -- next step). Unity remains
-  optional at build and run time. New headless self-test: `-mo <model> -unityipctest` drives the
+  will render from directly (no M2 parsing/rendering in Unity yet -- next step). Nothing in the
+  build depends on Unity. New headless self-test: `-mo <model> -unityipctest` drives the
   whole exchange against the installed player (the Unity-free TestStub speaks the protocol too).
-- **Embedded Unity renderer viewport — View → Unity Renderer (first step of the new renderer).**
-  The viewer can now host a separately built Unity standalone player inside a dockable pane.
-  This is the foundation of WMV's **new rendering pipeline**: long term the Unity viewport
-  becomes the primary viewport and future rendering features (characters, equipment, maps, fog,
-  OBS scenes, stream features) target it first, while the classic OpenGL viewport is kept as the
-  legacy/fallback renderer during the migration. Unity renders directly from WoW data -- it
-  requests raw assets/metadata from the app over IPC (no OBJ/FBX/GLB export step); the app
+- **Embedded Unity renderer viewport (first step of the new renderer).**
+  The viewer can now host a separately built Unity standalone player inside its window.
+  This is the foundation of WMV's **new rendering pipeline**: the Unity viewport is the
+  application's viewport (the OpenGL viewport is archived, see Changed), and every rendering
+  feature (characters, equipment, maps, fog, stream features) targets it. Unity renders
+  directly from WoW data -- it requests raw assets/metadata from the app over IPC (no
+  OBJ/FBX/GLB export step); the app
   remains responsible for the UI, the active client/profile, CASC/MPQ access,
   databases/metadata and runtime commands. The player is launched embedded (parent-window mode),
-  resizes with its pane and is shut down with the app. **For now it is optional:** nothing in the
-  normal build depends on Unity, and if no player build is found (default location
+  resizes with its pane and is shut down with the app. Nothing in the normal build depends on
+  Unity; the player is needed at run time, and if no player build is found (default location
   `tools\unity-renderer\UnityRenderer.exe` next to the exe, or the `Tools/UnityRendererPath`
-  setting) a clear message is shown and the app carries on with the OpenGL viewport. The player
+  setting) the viewport shows a notice saying so, with a button that tries again. The player
   project sources and a Unity-free test stub live in `Tools/UnityRendererProject/`; the direction
   and migration roadmap are in `docs/unity-renderer/`.
 - **Legacy WotLK creatures and items now show their real, database-driven textures.** For a loaded

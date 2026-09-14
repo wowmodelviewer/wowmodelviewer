@@ -257,6 +257,14 @@ public:
 
   void update(int dt);
 
+  // Compute the pose of the current animation at the animation clock's current frame -- bone
+  // matrices, skinned vertices and normals, anim/animtime -- without drawing anything. draw() is the
+  // only other place this happens, and nothing draws since the OpenGL viewport was archived, so
+  // anything that reads the pose (the exporters) asks for it here first. No GL calls are made: VBOs are
+  // disabled (video.cpp), so the skinned vertices land in the CPU arrays. Non-virtual, so adding it
+  // leaves the class layout unchanged.
+  void updatePose();
+
   // -------------------------------
 
   CharTexture tex;
@@ -340,7 +348,7 @@ public:
   size_t ownGeosetCount() const { return rawGeosets.size(); }
 
   // ---- read-only access for the embedded Unity viewport (UnityCharacterScene) ----------------
-  // Everything below reads state refresh()/refreshMerging() already computed for the OpenGL draw;
+  // Everything below reads state refresh()/refreshMerging() already computed for the model;
   // nothing re-derives a rule.
   const std::vector<MergedPart> & mergedParts() const { return mergedParts_; }
   unsigned int stateVersion() const { return stateVersion_; }

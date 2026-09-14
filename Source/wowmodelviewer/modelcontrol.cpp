@@ -24,32 +24,19 @@ BEGIN_EVENT_TABLE(ModelControl, wxWindow)
   EVT_COMBOBOX(ID_MODEL_NAME, ModelControl::OnCombo)
   EVT_COMBOBOX(ID_MODEL_LOD, ModelControl::OnCombo)
 
-  EVT_CHECKBOX(ID_MODEL_BONES, ModelControl::OnCheck)
-  EVT_CHECKBOX(ID_MODEL_BOUNDS, ModelControl::OnCheck)
   EVT_CHECKBOX(ID_MODEL_RENDER, ModelControl::OnCheck)
-  EVT_CHECKBOX(ID_MODEL_WIREFRAME, ModelControl::OnCheck)
-  EVT_CHECKBOX(ID_MODEL_PARTICLES, ModelControl::OnCheck)
-  EVT_CHECKBOX(ID_MODEL_TEXTURE, ModelControl::OnCheck)
 
-  EVT_COMMAND_SCROLL(ID_MODEL_ALPHA, ModelControl::OnSlider)
   EVT_COMMAND_SCROLL(ID_MODEL_SCALE, ModelControl::OnSlider)
   EVT_TEXT_ENTER(ID_MODEL_SIZE, ModelControl::OnEnter)
 
 END_EVENT_TABLE()
 
 
-// ModelName
-// LevelOfDetail
-// Opacity
-// Bones
-// Bounding Box
-// Render
-// Geosets
-// Future Additions:
-//    - Pos
-//    - Rotation
-//    - Scale
-//    - Attach model
+// View > "Attachments": the model and its attachments, the one the Animation panel drives, and Render and
+// Scale for an item attached to a character -- the two settings the Unity viewport receives (they travel
+// in the character scene). The controls that only changed the archived OpenGL viewport's drawing -- alpha,
+// bones, wireframe, bounds, texture and particles -- were removed with it; the WoWModel flags they set
+// are still there and simply stay at their defaults.
 
 ModelControl::ModelControl(wxWindow* parent, wxWindowID id)
  : wxWindow(parent, id, wxDefaultPosition, wxSize(120, 550), 0,  wxT("ModelControlFrame"))
@@ -73,9 +60,8 @@ ModelControl::ModelControl(wxWindow* parent, wxWindowID id)
 */
 
   top->AddSpacer(5);
-  alpha = new wxSlider(this, ID_MODEL_ALPHA, 100, 0, 100);
-  top->Add(new wxStaticText(this, wxID_ANY, wxT("Alpha")), 1, wxEXPAND);
-  top->Add(alpha, 1, wxEXPAND);
+  render = new wxCheckBox(this, ID_MODEL_RENDER, wxT("Render"));
+  top->Add(render, 1, wxEXPAND);
 
   wxFlexGridSizer * gbox = new wxFlexGridSizer(2, 5, 5);
   gbox->Add(new wxStaticText(this, wxID_ANY, wxT("Scale")), 1, wxALIGN_CENTER_VERTICAL);
@@ -86,20 +72,13 @@ ModelControl::ModelControl(wxWindow* parent, wxWindowID id)
   top->Add(scale, 1, wxEXPAND);
 
   top->AddSpacer(5);
-  gbox = new wxFlexGridSizer(2, 5, 5);
-  bones = new wxCheckBox(this, ID_MODEL_BONES, wxT("Bones"));
-  wireframe = new wxCheckBox(this, ID_MODEL_WIREFRAME, wxT("Wireframe"));
-  gbox->Add(bones);
-  gbox->Add(wireframe);
-  box = new wxCheckBox(this, ID_MODEL_BOUNDS, wxT("Bounds"));
-  texture = new wxCheckBox(this, ID_MODEL_TEXTURE, wxT("Texture"));
-  gbox->Add(box);
-  gbox->Add(texture);
-  render = new wxCheckBox(this, ID_MODEL_RENDER, wxT("Render"));
-  particles = new wxCheckBox(this, ID_MODEL_PARTICLES, wxT("Particles"));
-  gbox->Add(render);
-  gbox->Add(particles);
-  top->Add(gbox, 1, wxEXPAND);
+  hint = new wxStaticText(this, wxID_ANY, wxT("Render and Scale apply to items attached to a character."));
+  hint->Wrap(160);
+  top->Add(hint, 1, wxEXPAND);
+  // Nothing is selected yet; Update enables them for a selection they reach the viewport for.
+  render->Enable(false);
+  scale->Enable(false);
+  txtsize->Enable(false);
 
   // The geoset list that used to follow here is the Model panel's Geosets tab now.
   top->AddGrowableCol(0);
@@ -116,14 +95,9 @@ ModelControl::~ModelControl()
 {
   modelname->Destroy();
   // cbLod->Destroy();
-  alpha->Destroy();
   scale->Destroy();
-  bones->Destroy();
-  box->Destroy();
   render->Destroy();
-  wireframe->Destroy();
-  texture->Destroy();
-  particles->Destroy();
+  hint->Destroy();
 }
 
 // Iterates through all the models counting and creating a list
@@ -245,18 +219,27 @@ void ModelControl::Update()
   cbLod->SetSelection(0);
 */
 
-  bones->SetValue(model->showBones);
-  box->SetValue(model->showBounds);
   render->SetValue(model->showModel);
-  wireframe->SetValue(model->showWireframe);
-  particles->SetValue(model->showParticles);
-  texture->SetValue(model->showTexture);
-
-  alpha->SetValue(int(model->alpha_ * 100));
   scale->SetValue(model->scale_*100);
-
   txtsize->SetValue(wxString::Format(wxT("%.2f"), model->scale_));
 
+  // Render and Scale only do anything for an item attached to a character: the character scene is the
+  // one place they are read. For the character itself, a creature, or an attachment of an attachment
+  // they would change nothing on screen, so they are not offered.
+  const bool reachesViewport = selectionReachesViewport();
+  render->Enable(reachesViewport);
+  scale->Enable(reachesViewport);
+  txtsize->Enable(reachesViewport);
+}
+
+bool ModelControl::selectionReachesViewport() const
+{
+  // The character scene (UnityCharacterScene) lists the item models attached directly to the character's
+  // own attachment node, so the selection must be one of those.
+  if (!att || !att->parent || att->model() != model)
+    return false;
+  const WoWModel * owner = dynamic_cast<WoWModel *>(att->parent->model());
+  return owner && owner->charModelDetails.isChar;
 }
 
 // The geoset checkboxes live in the Model panel's Geosets tab; callers that changed the display
@@ -276,12 +259,6 @@ void ModelControl::OnCheck(wxCommandEvent &event)
   bool check = event.IsChecked();
   switch (id)
   {
-    case ID_MODEL_BONES :
-          model->showBones = check;
-          break;
-    case ID_MODEL_BOUNDS :
-          model->showBounds = check;
-          break;
     case ID_MODEL_RENDER :
           model->showModel = check;
           {
@@ -294,15 +271,6 @@ void ModelControl::OnCheck(wxCommandEvent &event)
             if (charModel && charModel != model && charModel->isEquippedHeadModel(model))
               charModel->refresh();
           }
-          break;
-    case ID_MODEL_WIREFRAME :
-          model->showWireframe = check;
-          break;
-    case ID_MODEL_PARTICLES :
-          model->showParticles = check;
-          break;
-    case ID_MODEL_TEXTURE :
-          model->showTexture = check;
           break;
   }
 }
@@ -358,9 +326,7 @@ void ModelControl::OnSlider(wxScrollEvent &event)
     return;
 
   int id = event.GetId();
-  if (id == ID_MODEL_ALPHA) {
-    model->alpha_ = event.GetInt() / 100.0f;
-  } else if (id == ID_MODEL_SCALE) {
+  if (id == ID_MODEL_SCALE) {
     model->scale_ = event.GetInt() / 100.0f;
     txtsize->SetValue(wxString::Format(wxT("%.2f"), model->scale_));
   }

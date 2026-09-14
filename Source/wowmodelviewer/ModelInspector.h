@@ -92,6 +92,8 @@ public:
   void OnUnityGeosetsApplied(const UnityIpcServer::GeosetAck & ack);
   // The Unity player (re)announced itself: states sent to an earlier player will never be answered.
   void UnityPlayerRestarted();
+  // The Unity viewport put up, changed or cleared its notice: the Geosets tab's standing note follows.
+  void ViewportNoticeChanged();
 
   void ShowPage(Page page);
 
@@ -137,6 +139,7 @@ private:
   wxStaticText * m_noSkinsNote = nullptr;
   wxCollapsiblePane * m_overridesPane = nullptr;
   wxPanel * m_wmoBox = nullptr;         // doodad set
+  wxStaticText * m_doodadNote = nullptr; // why the doodad set cannot be chosen while no WMO is drawn
   Context m_lastContext = CONTEXT_NONE;
   AnimControl * m_anim = nullptr;
   CharControl * m_char = nullptr;

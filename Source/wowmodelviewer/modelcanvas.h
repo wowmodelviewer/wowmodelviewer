@@ -73,8 +73,18 @@ public:
 
   // Event Handlers
   void OnPaint(wxPaintEvent& WXUNUSED(event));
+  // Never draws (the canvas is archived and never shown); see the definition.
   void Render(wxPaintEvent& WXUNUSED(event));
+  // archived: unreachable since the OpenGL viewport was archived. The on-screen frame Render drew.
+  void RenderArchivedFrame();
+  // Set the first time Render is entered at all. It never should be; the headless self-test checks.
+  static bool s_renderEntered;
+  // How many times the timer has advanced the animation clock (OnTimer with GL initialised). The
+  // headless self-test reads it to show the hidden canvas's clock runs.
+  static unsigned long s_clockTicks;
   void OnSize(wxSizeEvent& event);
+  // archived: unreachable since the OpenGL viewport was archived (the canvas's mouse camera, 0-9 speed
+  // keys and View > Camera commands).
   void OnMouse(wxMouseEvent& event);
   void OnKey(wxKeyEvent &event);
   void OnCamMenu(wxCommandEvent &event);
@@ -91,6 +101,10 @@ public:
   void InitShaders();
   void UninitShaders();
 
+  // archived: unreachable since the OpenGL viewport was archived -- the render routines below, the
+  // captures (Screenshot, CaptureSequenceFrame), the saved scene states, CheckMovement and
+  // toggleOpenGLDebug. RenderTexture itself is still live: the FBX exporter bakes combiner textures
+  // with it.
   // Main render routines which call the sub routines
   void RenderToTexture();
   void RenderModel();

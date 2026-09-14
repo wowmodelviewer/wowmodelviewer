@@ -1,5 +1,7 @@
 # WoW Model Viewer - 2026 UI Overhaul Exploration
 
+> **Superseded in part (2026-09-14):** the OpenGL viewport this exploration keeps at the centre has been archived. The centre viewport is now the embedded Unity renderer, with no OpenGL option, and the screenshot, image-sequence and OpenGL display controls mentioned below are gone from the application. See `docs/unity-renderer/README.md`. The rest of this document is kept as it was written.
+
 This document records a UI-overhaul exploration for WoW Model Viewer: Midnight (v0.3.2). It is backed by three standalone HTML design prototypes that illustrate different directions for a modernized shell. These are static mockups only — the live C++/wxWidgets application is unchanged, and nothing here alters model loading, customization, or export behavior.
 
 ## Current UI audit

@@ -6,7 +6,7 @@
  *
  * It goes through the same GAMEDIRECTORY file providers the rest of the app uses (CASC for
  * modern clients, the MoPaQ chain for legacy MPQ clients), so the Unity viewport renders
- * from exactly the data the legacy OpenGL viewport renders from. Nothing is written to disk
+ * from exactly the data the host's own model is loaded from. Nothing is written to disk
  * and nothing is converted: this is runtime access, not an export workflow.
  *
  * Must be called on the GUI thread (GAMEDIRECTORY is not thread-safe); the IPC server polls
@@ -82,7 +82,7 @@ public:
 
   // The displayed model's display flag for EACH of its own submeshes, in skin order -- index i is
   // WoWModel::geosets[i] for i < ownGeosetCount(), which is the renderer's skin submesh i (both load
-  // the model's first skin profile). These are the flags the OpenGL viewport draws from and the
+  // the model's first skin profile). These are the flags the host keeps for its model and the
   // Geosets checkboxes write, so unlike the id list above they can say "this id-0 submesh is
   // hidden" or "one of the two submeshes with id 2701 is hidden". Merged or attached models'
   // submeshes are never included: the canvas's own model is asked, and only what it owns.

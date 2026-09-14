@@ -79,7 +79,7 @@ namespace
   }
 
   // One texture binding, from the GL texture a render pass binds -- WoWModel::getGLTexture, the call
-  // ModelRenderPass::init makes -- so the answer is the OpenGL viewport's by construction.
+  // ModelRenderPass::init makes -- so the answer is the host's own binding by construction.
   //   name 0                     the body composite (CharTexture::compose uploads into name 0)
   //   the eye composite's name   the eye composite
   //   INVALID_TEX                nothing bound: false
@@ -302,7 +302,7 @@ quint64 UnityCharacterScene::signature(WoWModel * character)
     f.add(character->geosets[i] && character->geosets[i]->display ? 1 : 0);
   for (int slot = 0; slot < ownTextureCount(character); slot++)
     f.add(character->getGLTexture((uint16)slot));
-  // Attached items change without the character refreshing: Model Control's render and scale, a
+  // Attached items change without the character refreshing: View > Attachments' render and scale, a
   // selection that re-skins an item model, its own geoset checkboxes.
   for (const AttachedModel & a : attachedModels(character))
   {

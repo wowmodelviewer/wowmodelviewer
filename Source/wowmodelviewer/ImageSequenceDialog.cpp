@@ -1,3 +1,4 @@
+// archived: unreachable since the OpenGL viewport was archived (File > Export Image Sequence was removed).
 /*----------------------------------------------------------------------*\
 | This file is part of WoW Model Viewer                                  |
 | If not, see <http://www.gnu.org/licenses/>.                            |
