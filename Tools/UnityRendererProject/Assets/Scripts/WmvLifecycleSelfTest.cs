@@ -1246,6 +1246,148 @@ public static class WmvLifecycleSelfTest
         EmitterTests(log);
         CharacterTests(log);
         ZoomTests(log);
+        MapObjectTests(log);
         log(string.Format("lifecycle-test: {0} passed, {1} failed", passed, failed));
+    }
+
+    // ---------------------------------------------------------------- world models
+
+    static bool SameInts(int[] a, int[] b)
+    {
+        if (a == null || b == null || a.Length != b.Length) return false;
+        for (int i = 0; i < a.Length; i++) if (a[i] != b[i]) return false;
+        return true;
+    }
+
+    /// <summary>
+    /// The world-model builder on the synthetic "squares" WMO (WmoSynthetic): three groups, one batch
+    /// each, material 0 an opaque textured shader-0 surface, material 1 two-sided (flag 0x04) with blend
+    /// 1 and no texture. Checked through the real parser and builder: one object per group, one submesh
+    /// per batch, the winding flipped exactly as the M2 path flips it, the provisional material rule, the
+    /// verdicts, the converted bounds, a missing group, disposal, and the camera's world-model framing
+    /// handing a model back its own planes.
+    /// </summary>
+    static void MapObjectTests(Action<string> log)
+    {
+        const uint firstGroup = 900000, texture = 910000;
+        int liveBefore = WmvRuntimeMapObject.Live;
+        WmoRoot root = WmoParser.ParseRoot(WmoSynthetic.SquaresRoot(3, firstGroup, texture), "squares root");
+        var groups = new WmoGroup[3];
+        for (int i = 0; i < 3; i++)
+            groups[i] = WmoParser.ParseGroup(WmoSynthetic.SquaresGroup(i), "squares group " + i, i);
+        var textures = new Dictionary<uint, WmvWmoTexture>
+        {
+            { texture, new WmvWmoTexture { FileDataID = texture, Image = FlatTexture(), Decoded = true, Width = 2, Height = 2 } },
+        };
+
+        WmvRuntimeMapObject rt = WmvWmoBuilder.Build(root, groups, textures, "WmoTest", null);
+        Check(rt != null && rt.Root != null, "wmo: built", log);
+        if (rt == null || rt.Root == null) return;
+        Check(!rt.Root.activeSelf, "wmo: the root is built inactive (staged until adopted)", log);
+        Check(rt.GroupObjects.Length == 3 && rt.Renderers == 3, "wmo: one object and one renderer per group (" + rt.Renderers + ")", log);
+        bool oneSubmesh = true;
+        for (int g = 0; g < 3; g++)
+            oneSubmesh = oneSubmesh && rt.Meshes[g] != null && rt.Meshes[g].subMeshCount == 1 && rt.SubmeshTriangles[g].Length == 1;
+        Check(oneSubmesh, "wmo: one submesh per MOBA batch", log);
+        Check(rt.Submeshes == 3 && rt.Batches == 3 && rt.TriangleCount == 6 && rt.VertexCount == 12,
+              "wmo: counts (submeshes " + rt.Submeshes + ", triangles " + rt.TriangleCount + ", vertices " + rt.VertexCount + ")", log);
+        // MOVI (0,1,2, 0,2,3) with the second and third index of each triangle swapped.
+        Check(SameInts(rt.SubmeshTriangles[0][0], new[] { 0, 2, 1, 0, 3, 2 }), "wmo: batch winding flipped like the M2 path", log);
+        Check(SameInts(rt.Meshes[0].GetTriangles(0), new[] { 0, 2, 1, 0, 3, 2 }), "wmo: the mesh holds the flipped triangles", log);
+        Check(rt.SubmeshMaterialIds[0][0] == 0 && rt.SubmeshMaterialIds[1][0] == 1,
+              "wmo: batch material ids follow the 0x2 rule (group 0 -> 0, group 1 -> 1)", log);
+
+        Material opaque = rt.Materials.Length > 0 ? rt.Materials[0] : null;
+        Material keyed = rt.Materials.Length > 1 ? rt.Materials[1] : null;
+        Check(opaque != null && keyed != null && rt.ProvisionalMaterials == 2, "wmo: one provisional material per used MOMT entry", log);
+        if (opaque != null && keyed != null)
+        {
+            Check(opaque.mainTexture != null, "wmo: material 0 samples texture slot +0x0C", log);
+            Check(opaque.renderQueue == (int)UnityEngine.Rendering.RenderQueue.Geometry && opaque.GetFloat("_AlphaMode") == 0f,
+                  "wmo: blend 0 is opaque", log);
+            Check(opaque.GetFloat("_Cull") == (float)UnityEngine.Rendering.CullMode.Back, "wmo: flag 0x04 clear culls back faces", log);
+            Check(keyed.mainTexture == null, "wmo: empty slot +0x0C draws white", log);
+            Check(keyed.renderQueue == (int)UnityEngine.Rendering.RenderQueue.AlphaTest && keyed.GetFloat("_AlphaMode") == 1f &&
+                  Mathf.Abs(keyed.GetFloat("_Cutoff") - 128f / 255f) < 1e-4f,
+                  "wmo: blend 1 is an alpha key at the M2 cutoff 128/255", log);
+            Check(keyed.GetFloat("_Cull") == (float)UnityEngine.Rendering.CullMode.Off, "wmo: flag 0x04 turns culling off", log);
+            Check(opaque.GetFloat("_CombinerMode") == 0f && opaque.GetFloat("_VertexColour") == 0f,
+                  "wmo: no combiner and no vertex colour in normal rendering", log);
+        }
+        Check(rt.Textures.Length == 1, "wmo: one Texture2D for the one referenced file", log);
+        Check(rt.UnresolvedMaterials == 0 && rt.MaterialInfo[0].Verdict == "baseline" && rt.MaterialInfo[1].Verdict == "baseline",
+              "wmo: both synthetic materials are baseline", log);
+
+        // Group 2 spans WoW x 24..34, y 0..10, z 0 -> Unity x = -y, y = z, z = x.
+        Bounds b = rt.Bounds;
+        Check(rt.HasBounds && Near(b.min.x, -10f) && Near(b.max.x, 0f) && Near(b.min.y, 0f) && Near(b.max.y, 0f) &&
+              Near(b.min.z, 0f) && Near(b.max.z, 34f), "wmo: bounds are the converted drawn geometry (" + b.min + " .. " + b.max + ")", log);
+        Check(Near(rt.Meshes[0].uv[2].x, 1f) && Near(rt.Meshes[0].uv[2].y, 0f), "wmo: UV set 0 converted with V flipped", log);
+        rt.Dispose();
+        Check(rt.Root == null && WmvRuntimeMapObject.Live == liveBefore, "wmo: dispose releases the runtime (live " + WmvRuntimeMapObject.Live + ")", log);
+        rt.Dispose();
+        Check(WmvRuntimeMapObject.Live == liveBefore, "wmo: a second dispose does not count twice", log);
+
+        // A group whose file never arrived: its slot stays empty, the others still build.
+        groups[1] = null;
+        WmvRuntimeMapObject partial = WmvWmoBuilder.Build(root, groups, textures, "WmoTestMissing", null);
+        Check(partial.GroupsMissing == 1 && partial.Renderers == 2 && partial.GroupObjects[1] == null,
+              "wmo: a missing group builds nothing and the rest still build", log);
+        partial.Dispose();
+
+        // Verdicts on data the baseline cannot represent.
+        WmoMaterial m23 = MaterialFrom(WmoSynthetic.Material(0, 23, 0, 0, 5001), 0);
+        WmvWmoMaterialInfo v23 = WmvWmoBuilder.ClassifyMaterial(m23);
+        Check(v23.Unresolved && v23.PrimaryTexture == 0 && v23.TextureSlots[1] == 5001,
+              "wmo: shader 23 with +0x0C empty and a later slot is unresolved", log);
+        WmoMaterial blend2 = MaterialFrom(WmoSynthetic.Material(0, 0, 2, 5002), 1);
+        WmvWmoMaterialInfo vb = WmvWmoBuilder.ClassifyMaterial(blend2);
+        Check(vb.Unresolved && vb.Cutout && vb.TrueBlend, "wmo: blend 2 is unresolved and drawn as the key", log);
+
+        // Framing: a world model frames with planes that cover it, and a model gets its own back.
+        GameObject go;
+        WmvOrbitCamera cam = NewCamera(out go);
+        var big = new Bounds(new Vector3(100f, 50f, -20f), new Vector3(15000f, 3000f, 15000f));
+        cam.FrameMapObject(big);
+        Camera c = go.GetComponent<Camera>();
+        float radius = big.extents.magnitude;
+        Check(cam.MapObjectPlanes && c.farClipPlane >= cam.distance + radius, "wmo: far plane covers the whole object when framed (" + c.farClipPlane + ")", log);
+        for (int n = 0; n < 400; n++) cam.ZoomByNotches(1f);
+        for (int f = 0; f < 400; f++) cam.AdvanceZoom(1f / 60f);
+        // AdvanceZoom only moves the distance; the frame loop re-applies the view. SetView with no
+        // distance scale re-applies it here without touching the distance, so the planes checked are
+        // the ones of the zoomed camera and not the framed one's.
+        cam.SetView(cam.yaw, cam.pitch, 0f);
+        Check(c.farClipPlane >= cam.distance + radius, "wmo: ... and still at the closest zoom (distance " + cam.distance + ")", log);
+        Check(cam.MinDistance < cam.FramedDistance * 0.02f, "wmo: a world model zooms closer than a model's 2% floor", log);
+        // A pan moves the pivot off the object's centre; zoomed in there, far must still reach the far
+        // side of the OBJECT, which is further away than distance + radius.
+        cam.FrameMapObject(big);
+        cam.pivot += Vector3.right * radius;
+        for (int n = 0; n < 400; n++) cam.ZoomByNotches(1f);
+        for (int f = 0; f < 400; f++) cam.AdvanceZoom(1f / 60f);
+        cam.SetView(cam.yaw, cam.pitch, 0f);
+        float reach = Vector3.Distance(go.transform.position, big.center) + radius;
+        Check(c.farClipPlane >= reach && reach > cam.distance + radius,
+              "wmo: far plane covers the whole object with the pivot panned off-centre (far " + c.farClipPlane + ", reach " + reach + ")", log);
+        cam.Frame(new Bounds(Vector3.zero, Vector3.one * 2f));
+        Check(!cam.MapObjectPlanes && Mathf.Abs(cam.MinDistance / cam.FramedDistance - 0.02f) < 1e-3f &&
+              Mathf.Abs(c.farClipPlane - Mathf.Max(100f, cam.distance * 20f)) < 1e-3f,
+              "wmo: framing a model restores the model's zoom range and clip planes", log);
+        UnityEngine.Object.DestroyImmediate(go);
+    }
+
+    static WmoMaterial MaterialFrom(byte[] record, int index)
+    {
+        WmoRoot r = WmoParser.ParseRoot(WmoSynthetic.BuildRoot(new WmoSynthetic.RootSpec
+        {
+            Materials = new[] { record },
+            GroupInfos = new[] { WmoSynthetic.GroupInfo(WmoGroupFlags.Outdoor, new WowVec3(0f, 0f, 0f), new WowVec3(1f, 1f, 1f), 0) },
+            GroupFileDataIDs = new uint[] { 1 },
+            GroupNames = new string[0],
+        }), "verdict root");
+        WmoMaterial m = r.Materials[0];
+        m.Index = index;
+        return m;
     }
 }

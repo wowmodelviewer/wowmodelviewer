@@ -101,8 +101,8 @@ public:
   // THE VIEWPORT NOTICE. Whenever the player's own window is not what should be on screen, the
   // panel paints a title, a detail line and (optionally) one button instead:
   //   - nothing is loaded yet: the empty viewer's prompt, whose button opens a model;
-  //   - what is loaded is something the Unity viewport cannot draw yet (a WMO, a map tile, a
-  //     mounted character...): what it is and that it cannot be shown, no button;
+  //   - what is loaded is something the Unity viewport cannot draw yet (a map tile, a mounted
+  //     character, a WMO on an older player...): what it is and that it cannot be shown, no button;
   //   - the player is missing, could not start, exited or disconnected: why, with a button that
   //     restarts it.
   // This is the host panel's own painting. The player's window is only HIDDEN meanwhile -- the

@@ -4,7 +4,7 @@
 // localhost TCP listener before launching the player and passes the port on the player
 // command line ("-wmvPort <n>"); the player connects back, announces itself and then asks
 // WMV for whatever it needs. Transport: newline-delimited JSON (one object per line),
-// protocol version 3.
+// protocol version 4 (4 added world models: loadWoWModel "kind", mapObjectLoaded and runtimeState).
 //
 // The player is WMV's new renderer foundation and renders directly from WoW data: it
 // requests raw assets and metadata from WMV -- which owns the app UI, the active
@@ -28,11 +28,28 @@
 //     named in missing), or why not. load is the serial of the loadWoWModel the scene belonged to
 //     (0 when it matched no load). "superseded" means a newer scene or a new load replaced it before
 //     it was applied, which is not a failure; "rejected" is a real refusal
+//   mapObjectLoaded       { fileDataID, load, status:"built"|"failed"|"superseded", reason,
+//                           groups, groupFilesRequested, groupFilesMissing, batches, submeshes,
+//                           renderers, materials, provisionalMaterials, unresolvedMaterials,
+//                           blendedMaterials, texturesReferenced, texturesDecoded, texturesMissing,
+//                           vertices, triangles, boundsMin:[x,y,z], boundsMax:[x,y,z],
+//                           timings:{ rootMs, groupsMs, texturesMs, buildMs, totalMs },
+//                           liveMapObjects, liveModels }
+//     sent once per world-model load outcome. Bounds are Unity space; liveMapObjects / liveModels
+//     count the runtimes the player holds once the outcome was adopted, so a lifecycle test can
+//     prove a switch left nothing behind
+//   runtimeState          { query, liveMapObjects, liveModels, modelFileDataID, mapObjectFileDataID, loading }
+//     the answer to runtimeState: what the player holds right now -- the runtimes alive, the
+//     fileDataID of the model and of the world model on screen (0 for none) and whether a load of
+//     either kind is in flight. A test's question, answered from the main thread in message order
 //
 // WMV -> player
-//   loadWoWModel  { path, fileDataID, client, character, load }
+//   loadWoWModel  { path, fileDataID, client, character, load, kind }
 //     character: a playable character, dressed by the characterScene that follows
 //     load: the host's serial for this load (> 0), echoed in every characterSceneApplied about it
+//     kind: "m2" (also when absent) or "wmo" -- a world model: path/fileDataID name the ROOT file
+//   runtimeState  { query }                                                        (protocol 4)
+//     asks for a runtimeState answer carrying the same query number
 //   assetResponse { requestId, ok, path, fileDataID, byteLength, sha1, encoding:"base64", data }
 //   assetResponse { requestId, ok:false, error }
 //   modelTextures { requestId, ok, fileDataID, textures:[{ index, type, fileDataID, source }] }
@@ -78,10 +95,13 @@ using UnityEngine;
 
 public class WmvIpcClient : MonoBehaviour
 {
-    public const int ProtocolVersion = 3;
+    public const int ProtocolVersion = 4;
+
+    /// <summary>The loadWoWModel kind of a world model; anything else is an M2.</summary>
+    public const string KindMapObject = "wmo";
 
     // Raised on the main thread.
-    public Action<string, int, string, bool, int> OnLoadWoWModel;  // (path, fileDataID, client, character, load)
+    public Action<string, int, string, bool, int, string> OnLoadWoWModel;  // (path, fileDataID, client, character, load, kind)
     public Action<AssetResponse> OnAssetResponse;
     public Action<ModelTexturesResponse> OnModelTextures;
     public Action<ModelTexturesResponse> OnModelSkin;          // pushed when the displayed skin changes
@@ -90,6 +110,7 @@ public class WmvIpcClient : MonoBehaviour
     public Action<GeosetVisibility> OnModelGeosets;            // pushed when the user switches a geoset
     public Action<CharacterImage> OnCharacterImage;            // a host-composited texture
     public Action<CharacterScene> OnCharacterScene;            // the character's resolved state
+    public Action<int> OnRuntimeState;                         // the host asks what is held (query number)
     public Action<string> OnStatus;                            // human-readable connection/state text
 
     public bool Connected { get { return connected; } }
@@ -326,9 +347,10 @@ public class WmvIpcClient : MonoBehaviour
         public int[] submeshVisible;
         public bool character;
         public int load;
+        public int query;             // runtimeState
         // characterImage
         public string hash;
-        public string kind;
+        public string kind;           // also loadWoWModel's "m2" / "wmo" -- the same wire name
         public int width;
         public int height;
         public string format;
@@ -537,7 +559,9 @@ public class WmvIpcClient : MonoBehaviour
         switch (msg.type)
         {
             case "loadWoWModel":
-                OnLoadWoWModel?.Invoke(msg.path ?? "", msg.fileDataID, msg.client ?? "active", msg.character, msg.load);
+                // An absent kind is an M2: that is what every host before protocol 4 meant.
+                OnLoadWoWModel?.Invoke(msg.path ?? "", msg.fileDataID, msg.client ?? "active", msg.character, msg.load,
+                                       string.IsNullOrEmpty(msg.kind) ? "m2" : msg.kind);
                 break;
 
             case "characterImage":
@@ -558,6 +582,10 @@ public class WmvIpcClient : MonoBehaviour
 
             case "modelTextures":
                 OnModelTextures?.Invoke(ReadTextures(msg));
+                break;
+
+            case "runtimeState":
+                OnRuntimeState?.Invoke(msg.query);
                 break;
 
             // Unsolicited: the skin on display in WMV changed. Same payload as a modelTextures
@@ -717,6 +745,87 @@ public class WmvIpcClient : MonoBehaviour
                 sb.Append(i > 0 ? "," : "").Append('"').Append(Escape(missing[i])).Append('"');
         sb.Append("]}");
         Send(sb.ToString());
+    }
+
+    /// <summary>
+    /// The outcome of one world-model load, as mapObjectLoaded carries it. Counts the player did not
+    /// reach (a load that failed before its groups arrived) stay 0; bounds are only written when
+    /// HasBounds, so a failed load does not claim a box at the origin.
+    /// </summary>
+    public class MapObjectReport
+    {
+        public int FileDataID;
+        public int Load;
+        public string Status = "failed";     // "built" | "failed" | "superseded"
+        public string Reason = "";
+        public int Groups, GroupFilesRequested, GroupFilesMissing;
+        public int Batches, Submeshes, Renderers;
+        public int Materials, ProvisionalMaterials, UnresolvedMaterials, BlendedMaterials;
+        public int TexturesReferenced, TexturesDecoded, TexturesMissing;
+        public long Vertices, Triangles;
+        public bool HasBounds;
+        public Vector3 BoundsMin, BoundsMax;
+        public double RootMs, GroupsMs, TexturesMs, BuildMs, TotalMs;
+        public int LiveMapObjects, LiveModels;
+    }
+
+    /// <summary>Tell WMV what became of a world-model load (see MapObjectReport).</summary>
+    public void ReportMapObjectLoaded(MapObjectReport r)
+    {
+        var inv = System.Globalization.CultureInfo.InvariantCulture;
+        var sb = new StringBuilder();
+        sb.Append("{\"type\":\"mapObjectLoaded\",\"fileDataID\":").Append(r.FileDataID)
+          .Append(",\"load\":").Append(r.Load)
+          .Append(",\"status\":\"").Append(Escape(r.Status)).Append('"')
+          .Append(",\"reason\":\"").Append(Escape(r.Reason ?? "")).Append('"')
+          .Append(",\"groups\":").Append(r.Groups)
+          .Append(",\"groupFilesRequested\":").Append(r.GroupFilesRequested)
+          .Append(",\"groupFilesMissing\":").Append(r.GroupFilesMissing)
+          .Append(",\"batches\":").Append(r.Batches)
+          .Append(",\"submeshes\":").Append(r.Submeshes)
+          .Append(",\"renderers\":").Append(r.Renderers)
+          .Append(",\"materials\":").Append(r.Materials)
+          .Append(",\"provisionalMaterials\":").Append(r.ProvisionalMaterials)
+          .Append(",\"unresolvedMaterials\":").Append(r.UnresolvedMaterials)
+          .Append(",\"blendedMaterials\":").Append(r.BlendedMaterials)
+          .Append(",\"texturesReferenced\":").Append(r.TexturesReferenced)
+          .Append(",\"texturesDecoded\":").Append(r.TexturesDecoded)
+          .Append(",\"texturesMissing\":").Append(r.TexturesMissing)
+          .Append(",\"vertices\":").Append(r.Vertices)
+          .Append(",\"triangles\":").Append(r.Triangles);
+        if (r.HasBounds)
+        {
+            // "R" keeps a float exact through the text; the invariant culture keeps a comma locale
+            // from writing 1,5 into the JSON.
+            sb.Append(",\"boundsMin\":[").Append(r.BoundsMin.x.ToString("R", inv)).Append(',')
+              .Append(r.BoundsMin.y.ToString("R", inv)).Append(',').Append(r.BoundsMin.z.ToString("R", inv)).Append(']')
+              .Append(",\"boundsMax\":[").Append(r.BoundsMax.x.ToString("R", inv)).Append(',')
+              .Append(r.BoundsMax.y.ToString("R", inv)).Append(',').Append(r.BoundsMax.z.ToString("R", inv)).Append(']');
+        }
+        sb.Append(",\"timings\":{\"rootMs\":").Append(r.RootMs.ToString("0.#", inv))
+          .Append(",\"groupsMs\":").Append(r.GroupsMs.ToString("0.#", inv))
+          .Append(",\"texturesMs\":").Append(r.TexturesMs.ToString("0.#", inv))
+          .Append(",\"buildMs\":").Append(r.BuildMs.ToString("0.#", inv))
+          .Append(",\"totalMs\":").Append(r.TotalMs.ToString("0.#", inv)).Append('}')
+          .Append(",\"liveMapObjects\":").Append(r.LiveMapObjects)
+          .Append(",\"liveModels\":").Append(r.LiveModels)
+          .Append('}');
+        Send(sb.ToString());
+    }
+
+    /// <summary>
+    /// Answer a runtimeState question: the runtimes alive now, the fileDataID of the model and of the world
+    /// model on screen (0 for none), and whether a load is in flight. query echoes the question's number.
+    /// </summary>
+    public void ReportRuntimeState(int query, int liveMapObjects, int liveModels, int modelFileDataID,
+                                   int mapObjectFileDataID, bool loading)
+    {
+        Send("{\"type\":\"runtimeState\",\"query\":" + query +
+             ",\"liveMapObjects\":" + liveMapObjects +
+             ",\"liveModels\":" + liveModels +
+             ",\"modelFileDataID\":" + modelFileDataID +
+             ",\"mapObjectFileDataID\":" + mapObjectFileDataID +
+             ",\"loading\":" + (loading ? "true" : "false") + "}");
     }
 
     /// <summary>The 0/1 submesh flags the host sends, as booleans.</summary>

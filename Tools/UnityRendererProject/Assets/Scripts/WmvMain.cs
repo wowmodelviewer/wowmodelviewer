@@ -29,12 +29,15 @@
 // What is built is then animated and dressed by other components: WmvM2Animator (bones, following the
 // app's animation selection and transport), WmvMaterialAnimator and WmvEmitterRuntime (animated
 // materials and particles), and for a character WmvCharacterDresser (the host's characterScene).
+//
+// A WORLD MODEL (loadWoWModel kind "wmo") takes its own pipeline -- root, GFID LOD0 groups, material
+// textures, WmvWmoBuilder -- which lives in WmvMainMapObject.cs. The two jobs supersede each other.
 
 using System.Collections.Generic;
 using UnityEngine;
 using Wmv.Wow;
 
-public class WmvMain : MonoBehaviour
+public partial class WmvMain : MonoBehaviour
 {
     WmvIpcClient ipc;
     GameObject placeholder;
@@ -295,11 +298,12 @@ public class WmvMain : MonoBehaviour
         ipc.OnModelGeosets = HandleModelGeosets;
         ipc.OnCharacterImage = HandleCharacterImage;
         ipc.OnCharacterScene = HandleCharacterScene;
+        ipc.OnRuntimeState = HandleRuntimeState;
     }
 
     // ---------------------------------------------------------------- load pipeline
 
-    void HandleLoadWoWModel(string path, int fileDataID, string client, bool character, int load)
+    void HandleLoadWoWModel(string path, int fileDataID, string client, bool character, int load, string kind)
     {
         status.Set("Active client received (" + client + ")");
         if (string.IsNullOrEmpty(path) && fileDataID <= 0)
@@ -307,6 +311,9 @@ public class WmvMain : MonoBehaviour
             status.Set("loadWoWModel without path or fileDataID -- ignored");
             return;
         }
+        // A world model still loading will never be shown, whichever kind replaces it.
+        SupersedeMapObjectJob("superseded by a new load");
+        bool mapObject = IsMapObjectKind(kind);
         // A character still being dressed for the previous load will never be shown.
         AbandonCharacterJob("superseded by a new load");
         // Nor will a scene the character ON SCREEN is still preparing. Left running, it committed whenever
@@ -345,6 +352,16 @@ public class WmvMain : MonoBehaviour
         haveLoadSubmeshVisible = false;
         loadGeosetRevision = 0;
 
+        if (mapObject)
+        {
+            // Everything above -- an M2 load in flight, a character being dressed, the previous model's
+            // display state -- is over just the same; the model on screen stays until the world model
+            // is built (AdoptMapObject).
+            job = null;
+            StartMapObjectLoad(path, fileDataID, load);
+            return;
+        }
+
         job = new LoadJob { Path = path, FileDataID = fileDataID, Character = character, Load = load };
         status.Set("Requested " + (string.IsNullOrEmpty(path) ? ("fileDataID " + fileDataID) : path));
         job.PendingM2 = string.IsNullOrEmpty(path)
@@ -354,6 +371,9 @@ public class WmvMain : MonoBehaviour
 
     void HandleAssetResponse(WmvIpcClient.AssetResponse r)
     {
+        // The world-model job's root, group files and textures.
+        if (HandleMapObjectAsset(r))
+            return;
         // The dresser's own requests: a part's .m2, skin, skeleton and textures.
         if (job != null && job.Dresser != null && job.Dresser.Owns(r.requestId))
         {
@@ -832,6 +852,7 @@ public class WmvMain : MonoBehaviour
             // What the previous character wore is parented to its body, which goes next.
             if (dresser != null) { dresser.Dispose(); dresser = null; }
             if (current != null) current.Dispose();      // never leak the previous model
+            DisposeMapObject();                          // ... nor a world model it replaces
             current = built;
             // The emitters were created by that build; the override arrived with the textures.
             ApplyParticleColor();
@@ -1008,6 +1029,8 @@ public class WmvMain : MonoBehaviour
 
     void HandleModelAnimation(WmvIpcClient.AnimationSelection a)
     {
+        if (PushIsAboutMapObject(a.fileDataID))
+            return;                                     // a world model has no animation
         if (!AboutThisModel(a.fileDataID))
             return;                                     // about a different model
         if (a.sequenceIndex < 0)
@@ -2206,6 +2229,8 @@ public class WmvMain : MonoBehaviour
     /// </summary>
     void HandleModelAnimationState(WmvIpcClient.AnimationState s)
     {
+        if (PushIsAboutMapObject(s.fileDataID))
+            return;                                     // a world model has no animation
         if (!AboutThisModel(s.fileDataID))
             return;                                     // about a different model
         if (AboutTheLoad(s.fileDataID))
@@ -2253,6 +2278,8 @@ public class WmvMain : MonoBehaviour
     /// </summary>
     void HandleModelSkin(WmvIpcClient.ModelTexturesResponse r)
     {
+        if (PushIsAboutMapObject(r.fileDataID))
+            return;                                     // a world model has no skin
         if (AboutTheLoad(r.fileDataID))
         {
             // For the model being loaded. If the load asks the host for its textures, the answer
@@ -2391,6 +2418,11 @@ public class WmvMain : MonoBehaviour
         if (g.fileDataID <= 0)
         {
             ipc.ReportGeosetsApplied(g.fileDataID, g.revision, "rejected", "no fileDataID", null, 0, 0.0);
+            return;
+        }
+        if (PushIsAboutMapObject(g.fileDataID))
+        {
+            ipc.ReportGeosetsApplied(g.fileDataID, g.revision, "rejected", "a world model has no geosets", null, 0, 0.0);
             return;
         }
         if (AboutTheLoad(g.fileDataID))
@@ -2564,6 +2596,8 @@ public class WmvMain : MonoBehaviour
         if (job != null && job.Staged != null) job.Staged.Dispose();
         if (dresser != null) dresser.Dispose();
         if (current != null) current.Dispose();
+        if (wmoJob != null) wmoJob.Dead = true;
+        DisposeMapObject();
     }
 
     // ---------------------------------------------------------------- -wmvAllocCheck
@@ -2591,9 +2625,13 @@ public class WmvMain : MonoBehaviour
 
     void Update()
     {
+        PumpMapObjectWork();
         if (dresser != null)
             dresser.Tick();
-        if (allocProbe == null || allocProbe.Done || current == null)
+        // A world model on screen is measured too (AdoptMapObject starts the probe): it has no animator,
+        // material animator or emitters, so its window shows what the frame loop itself allocates
+        // while a static WMO is displayed.
+        if (allocProbe == null || allocProbe.Done || (current == null && currentMapObject == null))
             return;
         if (!allocProbe.Started)
         {
@@ -2606,7 +2644,8 @@ public class WmvMain : MonoBehaviour
             allocProbe.Started = true;
             allocProbe.HeapAtStart = System.GC.GetTotalMemory(false);
             allocProbe.Gen0AtStart = System.GC.CollectionCount(0);
-            allocProbe.TogglesAtStart = current.MaterialAnimator != null ? current.MaterialAnimator.GateToggles : 0;
+            allocProbe.TogglesAtStart = current != null && current.MaterialAnimator != null
+                ? current.MaterialAnimator.GateToggles : 0;
             allocProbe.Frames = 0;
             return;
         }
@@ -2616,20 +2655,21 @@ public class WmvMain : MonoBehaviour
         allocProbe.Done = true;
         long heap = System.GC.GetTotalMemory(false) - allocProbe.HeapAtStart;
         int gen0 = System.GC.CollectionCount(0) - allocProbe.Gen0AtStart;
-        WmvMaterialAnimator ma = current.MaterialAnimator;
-        WmvEmitterRuntime em = current.Emitters;
+        WmvMaterialAnimator ma = current != null ? current.MaterialAnimator : null;
+        WmvEmitterRuntime em = current != null ? current.Emitters : null;
         Debug.Log(string.Format(
             "WMV: alloccheck: {0} frames with {1}; managed heap delta {2} bytes ({3:F1} bytes/frame), "
             + "gen-0 collections {4}; material bindings evaluated per frame {5} ({6} colour, {7} colour-alpha, "
             + "{8} weight, {9} transform), gate toggles in the window {10}, bones moving {11}",
             allocProbe.Frames,
-            current.Animator != null ? "the animator running" : "no animator",
+            current == null ? "a static world model on screen (no animator)"
+                : current.Animator != null ? "the animator running" : "no animator",
             heap, heap / (double)allocProbe.Frames, gen0,
             ma != null ? ma.AnimatedCount : 0, ma != null ? ma.ColorCount : 0,
             ma != null ? ma.OpacityCount : 0, ma != null ? ma.WeightCount : 0,
             ma != null ? ma.TransformCount : 0,
             ma != null ? ma.GateToggles - allocProbe.TogglesAtStart : 0,
-            current.Animator != null ? current.Animator.AnimatedBoneCount : 0));
+            current != null && current.Animator != null ? current.Animator.AnimatedBoneCount : 0));
 
         // The emitters, in the same window and on the same clock. Reported separately because
         // "no allocation per frame" is a claim about THEM more than about anything else here:

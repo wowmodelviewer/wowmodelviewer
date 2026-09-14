@@ -1542,6 +1542,9 @@ void ModelViewer::CreateUnityViewport()
     // restarted after a failed build is given the character again.
     m_unityCharacterFailed = 0;
     m_unityCharacterFailReason.clear();
+    // ... nor a world model (it is loaded again below, and the new player answers for it).
+    m_unityWmoFailed = 0;
+    m_unityWmoFailReason.clear();
     SendCurrentModelToUnity();
     // What the player announced may change what the viewport can show: a character gets a notice
     // when the player is an older build that cannot dress it. With nothing loaded, the empty
@@ -1550,6 +1553,9 @@ void ModelViewer::CreateUnityViewport()
   };
   unityRendererHost->ipc()->onCharacterSceneApplied = [this](const UnityIpcServer::SceneAck & ack) {
     OnCharacterSceneApplied(ack);
+  };
+  unityRendererHost->ipc()->onMapObjectLoaded = [this](const UnityIpcServer::MapObjectReport & report) {
+    OnMapObjectLoaded(report);
   };
   // ... and what it did with a geoset state, so the Geosets checkboxes follow the renderer.
   unityRendererHost->ipc()->onGeosetsApplied = [this](const UnityIpcServer::GeosetAck & ack) {
@@ -1677,8 +1683,13 @@ void ModelViewer::OnCharHook(wxKeyEvent & event)
 
 // WHAT THE UNITY PLAYER CAN DRAW. Every M2 addressed by FileDataID, playable characters included:
 // the character's resolved appearance, merged armour and attached items reach it as a characterScene
-// (protocol 3). What it cannot draw yet, each with the notice the viewport shows instead:
-//   - an image picked in Browse, a WMO or a map tile (ADT): none of them is an M2;
+// (protocol 3). A world model (WMO) root addressed by FileDataID, as static group geometry with a
+// provisional material and no doodads, liquids or lights yet (protocol 4). What it cannot draw yet,
+// each with the notice the viewport shows instead:
+//   - an image picked in Browse or a map tile (ADT);
+//   - a WMO whose root the host could not read, one with no FileDataID (a legacy client), one the player
+//     reported it could not build (while that load is on display), and any WMO when the connected
+//     player is an older build that cannot draw world models;
 //   - a character riding a mount -- the canvas model is then the mount, with the character hung from
 //     one of its attachments, and the player has no mount rig;
 //   - a model with no FileDataID (a legacy MPQ client): the player addresses every asset by one;
@@ -1713,10 +1724,44 @@ bool ModelViewer::unityCanDrawCurrentModel(ViewportNotice * notice) const
   // did not clear it must never put a notice in front of the model that replaced it.
   if (isWMO && canvas->wmo)
   {
-    out.title = _("World model loaded");
-    out.detail = wxString::Format(_("%s is a world model (WMO). The Unity viewport cannot show world models yet."),
-                                  fileName(wxString(canvas->wmo->itemName().toStdWString())));
-    return false;
+    const WMO * w = canvas->wmo;
+    const wxString name = fileName(wxString(const_cast<WMO *>(w)->itemName().toStdWString()));
+    // The host reads the same root the player would fetch: one it cannot open or that is not a root is
+    // not worth a load the player can only fail.
+    if (!w->ok)
+    {
+      out.title = _("World model cannot be read");
+      out.detail = wxString::Format(_("%s could not be read as a world model (WMO) root, so there is nothing "
+                                      "to show."), name);
+      return false;
+    }
+    if (w->fileDataID == 0)
+    {
+      out.title = _("Legacy client world model");
+      out.detail = wxString::Format(_("%s has no FileDataID (it comes from a legacy client). The Unity viewport "
+                                      "can only show world models that have one."), name);
+      return false;
+    }
+    if (m_unityWmoFailed != 0 && m_unityWmoFailed == (int)w->fileDataID && m_unityWmoFailedLoad == m_unityLoadSerial)
+    {
+      out.title = _("World model could not be built");
+      out.detail = m_unityWmoFailReason.isEmpty()
+        ? wxString::Format(_("The Unity viewport could not build %s."), name)
+        : wxString::Format(_("The Unity viewport could not build %s (%s)."), name,
+                           wxString(m_unityWmoFailReason.toStdWString()));
+      return false;
+    }
+    // As for characters: a player not known yet is assumed current, and one that announces an older
+    // protocol gets this notice when it does (onUnityReady decides again).
+    const bool playerKnown = unityRendererHost && unityRendererHost->ipc() && unityRendererHost->ipc()->isUnityReady();
+    if (playerKnown && !unityRendererHost->ipc()->playerDrawsMapObjects())
+    {
+      out.title = _("Unity renderer out of date");
+      out.detail = wxString::Format(_("The Unity renderer build in use cannot show world models. Rebuild the player "
+                                      "from Tools\\UnityRendererProject to show %s."), name);
+      return false;
+    }
+    return true;
   }
   if (isADT && canvas->adt)
   {
@@ -1918,6 +1963,32 @@ void ModelViewer::SendLoadToUnity()
 {
   if (!unityRendererHost || !unityRendererHost->ipc() || !unityRendererHost->ipc()->isConnected())
     return;
+  if (isWMO && canvas && canvas->wmo)
+  {
+    // A WORLD MODEL: its root, by FileDataID, and nothing after it -- no skin, animation or geoset push
+    // exists for a WMO. Only to a player that has said it draws them; a player not ready yet is sent
+    // this by onUnityReady, and an older one gets the out-of-date notice instead.
+    WMO * w = canvas->wmo;
+    UnityIpcServer * ipc = unityRendererHost->ipc();
+    if (!ipc->playerDrawsMapObjects() || !w->ok || w->fileDataID == 0)
+    {
+      LOG_INFO << "[unity-wmo] not sending" << w->itemName() << "to the player:"
+               << (!ipc->isUnityReady() ? "the player has not announced itself yet"
+                   : !ipc->playerDrawsMapObjects() ? "the player is older than protocol 4"
+                   : !w->ok ? "the root could not be read" : "the root has no FileDataID");
+      return;
+    }
+    const int load = ++m_unityLoadSerial;
+    ipc->sendLoadWoWModel(w->itemName(), (int)w->fileDataID, QStringLiteral("active"), false, load,
+                          QStringLiteral("wmo"));
+    m_unityLoadedFileDataID = (int)w->fileDataID;
+    m_unityLoadedCharacter = false;
+    // Whatever a character scene was waiting for belongs to a load the player now drops.
+    m_lastSceneSignature = 0;
+    m_sceneAwaitingRevision = 0;
+    m_unityCharacterFailed = 0;
+    return;
+  }
   if (!canvas || !canvas->model() || !canvas->model()->gamefile)
     return;
   WoWModel * m = const_cast<WoWModel *>(canvas->model());
@@ -2161,6 +2232,36 @@ void ModelViewer::OnCharacterSceneApplied(const UnityIpcServer::SceneAck & ack)
   // Whatever changed while this scene was being applied goes out now.
   m_lastSceneCheck = 0;
   SendCharacterSceneToUnity(false);
+}
+
+void ModelViewer::OnMapObjectLoaded(const UnityIpcServer::MapObjectReport & report)
+{
+  // Only an answer about the load on display says anything about the WMO on display: a "superseded"
+  // report, or any report naming an earlier serial, is about a load the player was told to drop.
+  const bool current = isWMO && canvas && canvas->wmo && report.load != 0 && report.load == m_unityLoadSerial &&
+                       (int)canvas->wmo->fileDataID == report.fileDataID;
+  if (!current)
+    return;
+  if (report.status == "built")
+  {
+    LOG_INFO << "[unity-wmo] the Unity viewport built" << canvas->wmo->itemName() << ":" << report.groups << "group(s),"
+             << report.submeshes << "submesh(es)," << report.materials << "material(s) ("
+             << report.unresolvedMaterials << "unresolved)," << report.texturesDecoded << "/" << report.texturesReferenced
+             << "texture(s) in" << report.totalMs << "ms; doodads, liquids and lights are not drawn yet";
+    if (report.groups >= 0 && report.groups != (int)canvas->wmo->nGroups)
+      LOG_ERROR << "[unity-wmo] the player built" << report.groups << "group(s) but the root's header names"
+                << canvas->wmo->nGroups;
+  }
+  else if (report.status == "failed")
+  {
+    // The player is still showing whatever it had before, which must not pass for this WMO.
+    LOG_ERROR << "[unity-wmo] the Unity viewport could not build" << canvas->wmo->itemName() << "(" << report.reason
+              << ") -- showing a notice instead";
+    m_unityWmoFailed = report.fileDataID;
+    m_unityWmoFailedLoad = report.load;
+    m_unityWmoFailReason = report.reason;
+    UpdateUnityViewportState();
+  }
 }
 
 // The animation on display changed (the dropdown, or the default picked on model load). Same
@@ -3110,13 +3211,10 @@ void ModelViewer::LoadChar(QString fn, bool equipmentOnly /* = false */)
 
   if (!equipmentOnly)
   {
-    // Clear the existing model
+    // Clear the existing model. ClearWMO detaches canvas->root and clears g_selWMO before the delete;
+    // a plain delete here left both dangling.
     if (isWMO)
-    {
-      //canvas->clearAttachments();
-      wxDELETE(canvas->wmo);
-      canvas->wmo = NULL;
-    }
+      canvas->ClearWMO();
   }
 
   bool loadCharDetails = true;

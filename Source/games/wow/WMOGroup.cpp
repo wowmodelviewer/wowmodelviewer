@@ -598,10 +598,17 @@ void WMOGroup::setupFog()
   */
 }
 
+// Every member starts defined. A root opened for its metadata only (WMO::metadataOnly, the normal
+// path now that the Unity player draws WMOs) never calls initDisplayList, which is where most of
+// these used to be set first -- and ~WMOGroup -> cleanup() still reads dl_light and deletes
+// batches, so leaving them to chance deleted an uninitialised pointer when the WMO was replaced.
 WMOGroup::WMOGroup() :
-dl(0), ddr(0), vertices(NULL), normals(NULL), texcoords(NULL),
+wmo(NULL), flags(0), dl(0), dl_light(0), center(0.0f), rad(0.0f), num(-1), fog(-1), nDoodads(0),
+ddr(0), vertices(NULL), normals(NULL), texcoords(NULL),
 indices(NULL), materials(NULL), nTriangles(0), nVertices(0),
-nIndices(0), nBatches(0)
+nIndices(0), nBatches(0), cv(NULL), batches(NULL), VertexColors(NULL),
+v1(0.0f), v2(0.0f), b1(0.0f), b2(0.0f), vmin(0.0f), vmax(0.0f),
+indoor(false), hascv(false), visible(false), ok(false), outdoorLights(true)
 {
 }
 

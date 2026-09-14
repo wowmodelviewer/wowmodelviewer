@@ -17,7 +17,6 @@
 #include "animcontrol.h"
 #include "Attachment.h"
 #include "GlobalSettings.h"
-#include "WMOGroup.h" // full WMOGroup definition (for per-group bounds when framing a WMO)
 #include "globalvars.h"
 #include "modelviewer.h"
 #include "shaders.h"
@@ -231,9 +230,13 @@ ModelCanvas::~ModelCanvas()
   // Clear model attachments
   clearAttachments();
 
+  // A WMO still loaded at exit: detached from the root before the root goes (~Attachment writes into
+  // its model) and freed. A metadata-only WMO makes no GL calls on the way out, so the order relative
+  // to the texture clear above does not matter.
+  ClearWMO();
+
   wxDELETE(root);
   wxDELETE(sky);
-  //wxDELETE(wmo);
   //wxDELETE(model);
 
 #ifdef _WINDOWS
@@ -362,8 +365,7 @@ Attachment* ModelCanvas::LoadModel(GameFile * file)
 {
   clearAttachments();
   root->setModel(nullptr);
-  delete wmo;
-  wmo = nullptr;
+  ClearWMO();
   // A model replaces a map tile the same way it replaces a WMO. Only FileControl::ClearCanvas used to
   // drop one, so a model loaded from a menu (an NPC, an item, a character file, an import) left the
   // tile behind -- and the viewport, which shows a notice for a map tile, kept showing that notice in
@@ -422,39 +424,43 @@ void ModelCanvas::LoadADT(wxString fn)
   }
 }
 
-void ModelCanvas::LoadWMO(wxString fn)
+void ModelCanvas::LoadWMO(wxString fn, int fileDataID)
 {
-  if (!wmo) {
-    wmo = new WMO(QString::fromWCharArray(fn.c_str()));
-    root->setModel(wmo);
+  // A WMO still here would be replaced without anything being told (its pointer was simply
+  // overwritten before): drop it the one safe way first.
+  ClearWMO();
 
-    // Frame the camera to the whole WMO. A WMO isn't a WoWModel, so the usual camera.reset()
-    // never sizes to it -- without this a building loads filling (and overflowing) the view.
-    // Group vmin/vmax are already in render space (the MOVT loader applies the X,Z,-Y swizzle),
-    // so aggregate the bounds of the groups that actually have geometry.
-    if (wmo->ok && wmo->nGroups > 0) {
-      glm::vec3 mn(1e9f), mx(-1e9f);
-      bool any = false;
-      for (size_t i = 0; i < wmo->nGroups; i++) {
-        if (wmo->groups[i].nVertices == 0)
-          continue; // empty group: vmin/vmax aren't meaningful
-        const glm::vec3 & gmin = wmo->groups[i].vmin;
-        const glm::vec3 & gmax = wmo->groups[i].vmax;
-        if (gmin.x < mn.x) mn.x = gmin.x;
-        if (gmin.y < mn.y) mn.y = gmin.y;
-        if (gmin.z < mn.z) mn.z = gmin.z;
-        if (gmax.x > mx.x) mx.x = gmax.x;
-        if (gmax.y > mx.y) mx.y = gmax.y;
-        if (gmax.z > mx.z) mx.z = gmax.z;
-        any = true;
-      }
-      if (any) {
-        const glm::vec3 center = (mn + mx) * 0.5f;
-        const glm::vec3 d = mx - center;
-        camera.frameBounds(center, sqrtf(d.x * d.x + d.y * d.y + d.z * d.z));
-      }
-    }
+  // Metadata only (WMO::metadataOnly): the Unity player draws the WMO from the files it fetches, and
+  // this canvas never paints, so no group file, display list or GL texture is built for it here.
+  wmo = new WMO(QString::fromWCharArray(fn.c_str()), fileDataID > 0 ? (uint32)fileDataID : 0, true);
+  root->setModel(wmo);
+
+  // The archived camera keeps a sensible framing for whatever is loaded; nothing draws through it. The
+  // root's MOHD bounds stand in for the group geometry, which is not loaded in this mode.
+  if (wmo->ok && wmo->nGroups > 0) {
+    const glm::vec3 mn = glm::min(wmo->v1, wmo->v2);
+    const glm::vec3 mx = glm::max(wmo->v1, wmo->v2);
+    const glm::vec3 center = (mn + mx) * 0.5f;
+    const glm::vec3 d = mx - center;
+    const float radius = sqrtf(d.x * d.x + d.y * d.y + d.z * d.z);
+    if (radius > 0.0f)
+      camera.frameBounds(center, radius);
   }
+}
+
+void ModelCanvas::ClearWMO()
+{
+  if (!wmo)
+    return;
+  // Detach the root first: Attachment::setModel and ~Attachment both write into the model they hold,
+  // so a root left on a deleted WMO was a use-after-free write on the next load of anything, or at exit.
+  if (root && root->model() == wmo)
+    root->setModel(nullptr);
+  // The doodad-set list acts on g_selWMO; one left on a deleted WMO dangled until the next WMO.
+  if (g_selWMO == wmo)
+    g_selWMO = nullptr;
+  delete wmo;
+  wmo = nullptr;
 }
 
 

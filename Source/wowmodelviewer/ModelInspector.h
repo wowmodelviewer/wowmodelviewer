@@ -139,7 +139,7 @@ private:
   wxStaticText * m_noSkinsNote = nullptr;
   wxCollapsiblePane * m_overridesPane = nullptr;
   wxPanel * m_wmoBox = nullptr;         // doodad set
-  wxStaticText * m_doodadNote = nullptr; // why the doodad set cannot be chosen while no WMO is drawn
+  wxStaticText * m_doodadNote = nullptr; // what the doodad-set choice does: nothing visible yet (doodads are not drawn)
   Context m_lastContext = CONTEXT_NONE;
   AnimControl * m_anim = nullptr;
   CharControl * m_char = nullptr;

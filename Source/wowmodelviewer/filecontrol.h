@@ -106,6 +106,11 @@ public:
   wxString ExportPNG(wxString val);
   void UpdateInterface();
 
+  // What picking a row under the "Models" / "WMOs" filter does, callable without a tree event so the
+  // headless self-test (-unityipctest with -wmo, and its lifecycle sequence) selects exactly as Browse.
+  void SelectModelFile(GameFile * file);
+  void SelectWMOFile(GameFile * file);
+
   wxTreeCtrl *fileTree;
   wxSearchCtrl *txtContent;
   wxStaticText *searchStatus;

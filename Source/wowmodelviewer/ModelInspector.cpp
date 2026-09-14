@@ -237,8 +237,8 @@ void ModelInspector::AttachAppearance(AnimControl * anim, CharControl * chr)
     doodads->Add(UiStyle::sectionHeader(m_wmoBox, _("Doodad set")), 0, wxEXPAND | wxBOTTOM, sp);
     doodads->Add(anim->wmoLabel, 0, wxEXPAND | wxBOTTOM, xs);
     doodads->Add(anim->wmoList, 0, wxEXPAND | wxBOTTOM, xs);
-    m_doodadNote = UiStyle::secondaryLabel(m_wmoBox, _("The Unity viewport cannot show world models yet, so the "
-                                                       "doodad set cannot be chosen here."));
+    // The text is chosen in RefreshAppearance: it depends on whether the viewport draws this WMO.
+    m_doodadNote = UiStyle::secondaryLabel(m_wmoBox, wxEmptyString);
     doodads->Add(m_doodadNote, 0, wxEXPAND);
     m_wmoBox->SetSizer(doodads);
   }
@@ -274,12 +274,20 @@ void ModelInspector::RefreshAppearance()
   m_wmoBox->Show(ctx == CONTEXT_WMO);
   if (m_anim && m_doodadNote)
   {
-    // The doodad set only changes what a renderer draws -- no export reads it -- and the Unity viewport
-    // shows a notice instead of a WMO, so a choice here would change nothing anyone can see. The list
-    // stays visible (it names the sets) but is disabled until the Unity viewport draws world models.
+    // The doodad set only changes what a renderer draws -- no export reads it. The Unity viewport now
+    // draws a WMO's group geometry but no doodads yet, so even there a choice changes nothing anyone can
+    // see; the note says exactly that. The list stays enabled while the WMO is drawn (the choice is
+    // kept on the WMO, ready for when doodads are drawn) and is disabled behind a notice, where the
+    // WMO itself is not on screen.
     const bool drawn = ctx == CONTEXT_WMO && g_modelViewer && g_modelViewer->unityCanDrawCurrentModel();
     m_anim->wmoList->Enable(drawn);
-    m_doodadNote->Show(ctx == CONTEXT_WMO && !drawn);
+    const wxString note = drawn
+      ? _("The Unity viewport draws this world model's geometry but not its doodads yet, so the doodad set "
+          "chosen here has no visible effect.")
+      : _("The Unity viewport cannot show this world model, so the doodad set cannot be chosen here.");
+    if (m_doodadNote->GetLabel() != note)
+      m_doodadNote->SetLabel(note);
+    m_doodadNote->Show(ctx == CONTEXT_WMO);
   }
   if (m_char)
   {
@@ -800,6 +808,10 @@ void ModelInspector::UnityPlayerRestarted()
 
 void ModelInspector::ViewportNoticeChanged()
 {
+  // A WMO's doodad-set list and note follow whether the viewport draws it (a player that turns out to be
+  // older, or reports the WMO could not be built, changes that without a load).
+  if (m_appearance && currentContext() == CONTEXT_WMO)
+    RefreshAppearance();
   // The standing note says whether the viewport shows this model, which a player that stops, restarts
   // or turns out to be an older build changes without any load. A wait for the renderer's answer keeps
   // its own notice: the answer, or ForgetUnityGeosetState, settles that one.

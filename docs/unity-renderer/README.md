@@ -335,8 +335,8 @@ The decision is `ModelViewer::unityViewportNotice` (the content cases come from
 `unityCanDrawCurrentModel`, which also gates the geoset pushes), applied by
 `UpdateUnityViewportState` on every path that changes what is loaded -- model, NPC, item and
 character loads and their failures, Browse selections, clearing -- on mount and dismount (the
-canvas tick notices those), when the player announces itself or reports a character it could not
-build, and when a stopped player is noticed. The first case that applies wins:
+canvas tick notices those), when the player announces itself or reports a character or a world model
+it could not build, and when a stopped player is noticed. The first case that applies wins:
 
 | what is loaded, or what is wrong | notice | button |
 |---|---|---|
@@ -344,7 +344,10 @@ build, and when a stopped player is noticed. The first case that applies wins:
 | the GL context never initialised, so no texture can be decoded for the player | "Textures cannot be decoded" | -- |
 | no player build at the configured path, an IPC listener that could not open, a player that would not start, exited unexpectedly, lost its connection or never announced itself | "The Unity renderer is not running", with the reason | Restart Unity renderer |
 | an image picked in Browse (BLP) | "Image selected" | -- |
-| a WMO | "World model loaded" | -- |
+| a WMO whose root the host could not read (the file will not open, or it is not a root) | "World model cannot be read" | -- |
+| a WMO with no FileDataID (a legacy client; the player fetches the root and its groups by FileDataID) | "Legacy client world model" | -- |
+| a WMO the player reported it could not build, while that load is the one on display (until the next load or a player restart) | "World model could not be built", with the player's reason | -- |
+| a WMO, with a connected player older than protocol 4 | "Unity renderer out of date" | -- |
 | a map tile (ADT) | "Map tile loaded" | -- |
 | a model with no game file behind it | "Model cannot be shown" | -- |
 | a character riding a mount (the loaded model is then the mount, and the player has no mount rig) | "Mounted character" | -- |
@@ -383,6 +386,59 @@ All of it travels as one `characterScene` per change (see `UnityIpcServer.h`), s
 canvas's clock tick when anything it describes has changed and never faster than the player
 answers; the player applies a scene whole, in one frame, without reloading the body, re-framing
 the camera or restarting the animation.
+
+**World models (WMOs).** A WMO picked in Browse stays in the Unity viewport too, as **static
+geometry**. This is the foundation stage, and it is deliberately narrow:
+
+- **What is drawn:** every full-detail (LOD0) group of the root, found through the root's GFID
+  chunk -- the first MOHD group-count entries, never the later LOD blocks and never a group file
+  name -- with one mesh per group and a submesh per render batch, in the same coordinate
+  conversion as M2 models.
+- **Materials are provisional.** A surface shows the material's first texture slot (+0x0C) or
+  plain white, is two-sided when material flag 0x04 says so, and is alpha-keyed for a non-zero
+  blend value; everything else is opaque. That is roughly what the archived OpenGL renderer drew,
+  and it is **not** how the game draws a WMO: the shader ids, the later texture slots (shader 23
+  keeps its real textures there, so those surfaces show white or the wrong image), the true blend
+  modes and the vertex colours are fetched or kept but not used yet, and the player logs every
+  material it could not resolve.
+- **One line per material** in the player log: its index, shader id, blend value, flags, every
+  non-zero texture slot, what the provisional material made of it, and a verdict -- `baseline`
+  (textures only in +0x0C, blend 0 or 1) or `unresolved` (a texture in a later slot, +0x0C empty
+  while later slots are not, or blend 2/3/5/6), with the reason.
+- **Textures.** Every non-zero texture FileDataID of the root is fetched once, after the groups.
+  Only the +0x0C texture of a material some LOD0 batch draws is decoded -- on worker threads, a few
+  at a time -- because that is the only image the provisional material samples; every other file
+  is fetched and its BLP header checked. Decoding them all cost the Blood Elf tower 67 s of CPU and
+  380 MB of heap for the 19 images it draws, and an 86-group cave 2,550 s of CPU and 2.2 GB for one.
+- **Framing.** From the drawn geometry's bounds, as a model is, but from a three-quarter view 30
+  degrees above the horizon (the audit's OpenGL reference view). The far clip plane reaches past
+  the far side of the whole object at every zoom, so there is no fixed ceiling like the archived
+  far plane of 6400, and the wheel zooms in to 0.1 % of the framing distance; loading a model
+  restores a model's framing, zoom range and clip planes. The cast-shadow map keeps its 4096 texels
+  over the whole object, so on a very large WMO its shadows are coarse (about 7 units a texel at a
+  10,000-unit radius); the light rig itself is unchanged.
+- **Diagnostic only:** `-wmvWmoVertexColour` multiplies MOCV colour set 1 into the provisional
+  material; normal rendering never uses vertex colours.
+- **What is not drawn yet:** doodads (so the doodad-set choice in Model > Appearance has no visible
+  effect, and the panel says so), liquids, WMO lights, fog, portal culling, LOD switching and the
+  skybox.
+- **The host sends no geometry.** It sends the root's FileDataID (`loadWoWModel` with
+  `"kind":"wmo"`), and the player fetches the root, its LOD0 group files and the material textures
+  with `getAssetByFileDataID`, then answers `mapObjectLoaded` (see the IPC section). No skin,
+  animation or geoset message is ever sent about a WMO.
+- **The host keeps only the root's metadata.** Selecting a WMO used to open every group file,
+  compile it into an OpenGL display list for the hidden canvas, upload the material textures to GL,
+  and then do all of it a second time. Now the host parses the root chunks alone (`WMO` with
+  `metadataOnly`): counts, bounds, materials, group info, GFID, doodad sets and placements, lights,
+  fog and portals -- what Model > Info, the doodad-set list and the status bar read. No group file is
+  opened, no display list is built and no texture is uploaded for a selection. No host feature
+  needs a WMO's group geometry today (no exporter reads a WMO); one that does must build its own
+  full `WMO` on demand.
+- **Switching is clean on the host.** A WMO is deleted only through `ModelCanvas::ClearWMO`, which
+  first detaches the canvas root and clears `g_selWMO`: both used to be left pointing at the freed
+  WMO, so the next load of anything (or application exit) wrote into freed memory. The counts a
+  root that fails to open reports are now zero rather than uninitialised, and a WMO picked again
+  after another model gets its doodad-set list applied again.
 
 ## Responsibility split
 
@@ -459,8 +515,8 @@ yet:
   context bound to its window. A window that was never shown holds that context on Windows; the
   headless self-test runs with it. If the context never initialises, the viewport's notice says
   that textures cannot be decoded.
-- **It owns what is loaded:** the model and its attachments (`canvas->root`, `model()`), a WMO or
-  a map tile. An image picked in Browse is no longer loaded at all: the pick is only remembered,
+- **It owns what is loaded:** the model and its attachments (`canvas->root`, `model()`), a WMO (its
+  root metadata only; see "World models") or a map tile. An image picked in Browse is no longer loaded at all: the pick is only remembered,
   so the viewport can name it in its notice (saving the image is the Browse right-click menu's
   job).
 - **It owns the animation clock.** Its 10 ms timer calls `tick()` and nothing else -- no redraw
@@ -523,7 +579,7 @@ to WMV's own log). The player is built locally from `Tools/UnityRendererProject/
 repository contains **no** Unity build output, and nothing in the installer or the CMake
 install rules ships one yet.
 
-## IPC (implemented; the current player announces protocol 3)
+## IPC (implemented; protocol 4)
 
 **WMV is the server.** `UnityRendererHost` starts a TCP listener bound to `127.0.0.1` on an
 ephemeral port *before* launching the player and passes the port on the player's command
@@ -538,11 +594,48 @@ application uses). Player side: `Tools/UnityRendererProject/Assets/Scripts/WmvIp
 **Player -> WMV**
 
 ```json
-{ "type": "unityReady", "protocolVersion": 3 }
+{ "type": "unityReady", "protocolVersion": 4 }
 { "type": "getAsset", "requestId": "abc123", "path": "creature/chicken/chicken.m2" }
 { "type": "getAssetByFileDataID", "requestId": "abc124", "fileDataID": 123456 }
 { "type": "getModelTextures", "requestId": "abc125", "fileDataID": 123200 }
+{ "type": "mapObjectLoaded", "fileDataID": 115058, "load": 1, "status": "built", "reason": "",
+  "groups": 1, "groupFilesRequested": 1, "groupFilesMissing": 0, "batches": 3, "submeshes": 3,
+  "renderers": 1, "materials": 3, "provisionalMaterials": 3, "unresolvedMaterials": 0,
+  "blendedMaterials": 0, "texturesReferenced": 3, "texturesDecoded": 3, "texturesMissing": 0,
+  "vertices": 946, "triangles": 854, "boundsMin": [-11.75, -10.41, -12.54], "boundsMax": [11.72, 13.60, 11.85],
+  "timings": { "rootMs": 46.7, "groupsMs": 40.3, "texturesMs": 81.8, "buildMs": 14.6, "totalMs": 189.8 },
+  "liveMapObjects": 1, "liveModels": 0 }
+{ "type": "runtimeState", "query": 3, "liveMapObjects": 1, "liveModels": 0, "modelFileDataID": 0,
+  "mapObjectFileDataID": 115058, "loading": false }
 ```
+
+(The `mapObjectLoaded` line is a logged report of a headless run on `it_trollhouse03.wmo`, bounds
+rounded to two decimals as the host logs them.)
+
+`mapObjectLoaded` answers each world-model load once: `"built"`, `"failed"` (with `reason`) or
+`"superseded"` (a newer load of either kind replaced it first -- not a failure). `load` is the serial
+of the `loadWoWModel` it answers, so a late answer about an earlier load is never taken for the one
+on display. The counts describe what was built (bounds in Unity space, timings in milliseconds):
+`materials` is the root's MOMT count, `provisionalMaterials` the entries LOD0 batches draw, and
+`unresolvedMaterials` / `blendedMaterials` how many of those carry the `unresolved` verdict / a
+non-zero blend value (drawn as an alpha key); `vertices` counts every group vertex uploaded and
+`triangles` only the batch triangles; `texturesDecoded` counts decoded images only (the drawn
++0x0C textures), and `texturesMissing` a fetch, decode or header check that failed; `groupsMs`
+runs from the group requests to the last group parsed and `texturesMs` from the texture requests
+(sent once the groups are parsed) to the last texture landed.
+`liveMapObjects` and `liveModels` are the world models and models (a character's parts included)
+built and not yet disposed in the player once the outcome was adopted, which is how a lifecycle
+test proves that nothing leaked or doubled. The host logs every
+field (`[unityipc] <- mapObjectLoaded ...`); a count the player leaves out reads -1. A `"failed"`
+report about the WMO on display puts the "World model could not be built" notice up.
+
+`runtimeState` (protocol 4) answers the host's `runtimeState { query }` question with what the player
+holds at that moment: `liveMapObjects` and `liveModels` as above, `modelFileDataID` and
+`mapObjectFileDataID` of the model and the world model on screen (0 for none), and whether a load of
+either kind is in flight (`loading`); `query` echoes the question's number. The player answers in
+message order on its main thread, so a question sent after an answer about a build sees that build
+adopted. Only the headless self-test asks it (see the lifecycle sequence below), and only a player that
+announced protocol 4.
 
 `getModelTextures` answers with `modelTextures { requestId, ok, fileDataID, textures:[{ index,
 type, fileDataID, source }] }`. It exists because a modern M2 does **not** name its replaceable
@@ -578,7 +671,11 @@ The response carries metadata only; bytes are still fetched with `getAssetByFile
 **WMV -> player**
 
 ```json
-{ "type": "loadWoWModel", "path": "creature/chicken/chicken.m2", "fileDataID": 123200, "client": "active" }
+{ "type": "loadWoWModel", "path": "creature/chicken/chicken.m2", "fileDataID": 123200, "client": "active",
+  "character": false, "load": 12, "kind": "m2" }
+{ "type": "loadWoWModel", "path": "world/wmo/northrend/buildings/icetroll/it_trollhouse03.wmo",
+  "fileDataID": 115058, "client": "active", "character": false, "load": 13, "kind": "wmo" }
+{ "type": "runtimeState", "query": 3 }
 { "type": "assetResponse", "requestId": "abc123", "ok": true, "path": "creature/chicken/chicken.m2",
   "fileDataID": 123200, "byteLength": 101840, "sha1": "1dc88a19...", "encoding": "base64", "data": "TUQyMb..." }
 { "type": "assetResponse", "requestId": "abc123", "ok": false, "error": "not found" }
@@ -596,6 +693,14 @@ Semantics:
 - `unityReady` is answered by a `loadWoWModel` for whatever model is loaded (and every later
   model load pushes a new one). `client` is `"active"` -- the player never chooses a client;
   WMV's active client/profile is the only data source.
+- `kind` says what `loadWoWModel` names: `"m2"` (a model; also what an absent field means) or
+  `"wmo"` (a world-model ROOT, by FileDataID). A WMO load goes only to a player that announced
+  protocol 4 or later; an older player gets the out-of-date notice instead, and ignores the field
+  for models, which is what it assumed anyway. The player fetches the root, then the LOD0 group
+  files the root's GFID names (the first MOHD group-count entries), then every non-zero material
+  texture, all with `getAssetByFileDataID`, and answers `mapObjectLoaded`. A new load of either kind
+  replaces a world-model load still in flight, and the old runtime is destroyed only when the new
+  one is ready.
 - `modelSkin` is **pushed, not requested**: the skin on display changed. Same payload as a
   `modelTextures` reply, built by the same resolver, so the push and the pull cannot disagree.
   The player re-uploads only the textures that actually changed and keeps the mesh it built --
@@ -728,7 +833,51 @@ centre pane, no menu item offers a "main viewport" choice, the canvas is neither
 a shown window, the hidden canvas's GL context initialised (`canvas->init` and `video.render`),
 the viewport decision for the loaded model is "the model" with no notice up, and the canvas's
 animation clock advances while the model plays. For a character, its check also fails unless at
-least one composited `characterImage` was sent. That clock is measured inside an
+least one composited `characterImage` was sent.
+
+**World models in the self-test.** `wowmodelviewer.exe -dbfromfile -wmo 115058 -unityipctest` (a root
+listfile path works too) selects the WMO through `FileControl::SelectWMOFile`, the code a pick under
+Browse's WMO filter runs, and its **world-model check** waits for the player's `mapObjectLoaded` for
+that load, logs every field, and fails unless it is `"built"`, names the root, built the root
+header's group count with no group file missing, and left the player holding exactly one world model
+and no model (`liveMapObjects` 1, `liveModels` 0); the host side must also have loaded no group
+geometry and must point the canvas root and `g_selWMO` at the WMO. A player older than protocol 4
+fails this check (and gets the out-of-date notice).
+
+**Lifecycle sequence (opt-in).** With `WMV_IPCTEST_SEQUENCE` set, after every other check the test
+selects each entry exactly as Browse does and checks the outcome, for example
+`WMV_IPCTEST_SEQUENCE="m2:creature/bear/bear.m2;wmo:115058;m2:creature/bear/bear.m2;wmo:108538;wmo:248820"`.
+Entries are `m2:` or `wmo:` followed by a listfile path or a FileDataID:
+
+- a `wmo:` step passes the same checks as the world-model check for its own load, with no notice up,
+  and the player's `runtimeState` answer afterwards must name the root as the world model on screen,
+  no model, `liveMapObjects` 1 and `liveModels` 0;
+- an `m2:` step requires the host to hold the model and no WMO (`canvas->wmo`, `g_selWMO` and the
+  canvas root all cleared), the player to confirm the model is built where it can -- a character by
+  its scene answer for the load, any other model with geosets by answering a geoset state for its
+  FileDataID `"applied"` -- and then, for every model, the player's `runtimeState` answer to name the
+  model as the one on screen with no world model, `liveMapObjects` 0 and `liveModels` 1 (a character:
+  at least 1, its parts count too). That answer is the only evidence that the step left no world model
+  alive: the next `wmo:` step cannot stand in for it, because adopting a world model disposes any model
+  and any world model still alive before the counts in `mapObjectLoaded` are taken;
+- `m2!:` / `wmo!:` is a quick step: selected and left at once, so the next load replaces one still
+  in flight; the next waited step also requires an answer for each quick world-model load
+  (`"superseded"`, or `"built"` if it finished first -- never `"failed"` or none). A sequence that
+  ends on a quick step fails, since nothing would check it;
+- no step may produce a `"failed"` world-model report.
+
+Each step logs one `[unityipc-test]   step n/N ...` line with the host's state after it.
+
+**Capture hooks (validation only).** Three environment variables let a headless run capture the real
+viewport without a window on screen; unset, none of them changes anything. `WMV_VIEWPORT_SHOT=<name>`
+writes `<name>.png` beside the player's data folder, 40 frames after each model or world model is put on
+screen; with it, `WMV_VIEWPORT_SIZE=<n>` (128 to 4096, default 1024) asks for an n x n screen before
+anything is framed (the operating system may clamp it to the display), and
+`WMV_VIEWPORT_ORBIT="yaw:pitch[:distanceScale]"` re-aims the camera after a world
+model is framed (angles in the player's orbit terms, the distance as a multiple of the framing distance),
+so a capture can be taken from a named view: the WMO audit's reference views are `135:30` and `315:30`.
+
+The canvas animation clock of the viewport check is measured inside an
 event loop activated for the measurement: the self-test runs inside `OnInit`, before the
 application's loop exists, and a bare `wxYield` there dispatches no timer messages at all (which
 is why an earlier version reported that the canvas does not tick headlessly). At the end of the
@@ -782,6 +931,9 @@ are not available in the Unity-only viewer, and write no image; the `-imgseq` sm
   animation selector makes and is not sequence 0. A sequence whose keyframes are not in the .m2 falls back
   to that idle and says so. `-wmvNoAnim` returns the model to the rest pose.
 - Bounds-driven camera framing, so a loaded model is visible immediately.
+- Static WMO geometry (protocol 4): the LOD0 groups a root's GFID names, one mesh per group with a
+  submesh per render batch, a provisional first-texture material, framed from the WMO's bounds. The
+  host keeps only the root's metadata and sends only its FileDataID. See "World models".
 
 **Not yet implemented**
 
@@ -798,7 +950,11 @@ are not available in the Unity-only viewer, and write no image; the `-imgseq` sm
   armour are drawn (see "Characters").
 - For characters: secondary (upper-body) and mouth animations, and a mount (a mounted character
   gets a notice).
-- Maps, terrain, WMOs, fog; BLP images picked in Browse. Each of these loads and gets a notice.
+- Maps, terrain, fog; BLP images picked in Browse. Each of these loads and gets a notice.
+- For WMOs: doodads and doodad sets, liquids, WMO lights, fog, portal culling, LOD switching, the
+  skybox, and the WMO material system (shader ids, the later texture slots, true blending, vertex
+  colours). Modern materials -- shader 23 above all -- are drawn visibly wrong until then, and the
+  player logs them as unresolved.
 - Full parity with the archived OpenGL renderer.
 
 There is no fallback: the Unity viewport is the only renderer the user sees, and what it cannot
@@ -845,4 +1001,4 @@ the same `-parentHWND` embedding contract AND speaks the asset-access part of th
 decode/length checks), so both the WMV-side host and the runtime asset access can be exercised
 without any Unity install -- see the headless self-test in the IPC section. It is a test tool,
 not a viewer: it draws status text only, so installed as the player it shows no model, and a
-character gets the out-of-date notice.
+character or a WMO gets the out-of-date notice.

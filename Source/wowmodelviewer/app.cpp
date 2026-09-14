@@ -28,6 +28,10 @@
 #include "WoWFolder.h"
 #include "animcontrol.h"
 #include "AnimManager.h"
+#include "Attachment.h"
+#include "filecontrol.h"
+#include "wmo.h"
+#include "WMOGroup.h"
 #include "WoWModel.h"
 
 #include "logger/Logger.h"
@@ -434,6 +438,412 @@ static void doHeadlessDumpTexture(int fileDataId, const QString & outPath)
   std::fflush(stdout);
 }
 
+// A game file named on the command line: all digits is a FileDataID, anything else a listfile path.
+static GameFile * resolveGameFileArg(const QString & arg)
+{
+  const QString a = arg.trimmed();
+  bool numeric = false;
+  const int id = a.toInt(&numeric);
+  return numeric ? GAMEDIRECTORY.getFile(id) : GAMEDIRECTORY.getFile(a);
+}
+
+// Pump the IPC server and the wx queue for n * 10 ms (no event loop runs inside OnInit).
+static void pumpIpc(UnityIpcServer * ipc, int n)
+{
+  for (int i = 0; i < n; i++) { ipc->poll(); wxTheApp->Yield(true); wxMilliSleep(10); }
+}
+
+// The player's report on the world-model load with this serial, from the reports gathered so far, pumping
+// until it arrives or limitMs passes. "superseded" does not end the wait for a later-serial report, and
+// a report for another serial is never taken for this one.
+static bool waitMapObjectReport(UnityIpcServer * ipc, const std::vector<UnityIpcServer::MapObjectReport> & reports,
+                                int load, long limitMs, UnityIpcServer::MapObjectReport & out)
+{
+  wxStopWatch w;
+  while (true)
+  {
+    for (const UnityIpcServer::MapObjectReport & r : reports)
+      if (r.load == load)
+      {
+        out = r;
+        return true;
+      }
+    if (w.Time() >= limitMs)
+      return false;
+    pumpIpc(ipc, 1);
+  }
+}
+
+// Ask the player what it holds (runtimeState, protocol 4) until an answer satisfies holds or limitMs passes.
+// out is the last answer, answered whether any came at all. The player answers in message order after
+// whatever the step already waited for, so a switch is normally settled on the first answer; the retry
+// covers a character adopted a frame after its scene answer. A runtime left behind stays and still fails.
+static bool waitRuntimeState(UnityIpcServer * ipc, const std::vector<UnityIpcServer::RuntimeState> & states,
+                             const std::function<bool(const UnityIpcServer::RuntimeState &)> & holds, long limitMs,
+                             UnityIpcServer::RuntimeState & out, bool & answered)
+{
+  answered = false;
+  wxStopWatch total;
+  while (true)
+  {
+    const int query = ipc->requestRuntimeState();
+    if (query == 0)
+      return false;
+    wxStopWatch w;
+    bool got = false;
+    while (!got && w.Time() < 5000)
+    {
+      pumpIpc(ipc, 1);
+      for (const UnityIpcServer::RuntimeState & s : states)
+        if (s.query == query)
+        {
+          out = s;
+          got = true;
+        }
+    }
+    answered = answered || got;
+    if (got && holds(out))
+      return true;
+    if (total.Time() >= limitMs)
+      return false;
+    pumpIpc(ipc, 20);
+  }
+}
+
+// THE WORLD-MODEL ASSERTIONS shared by the -wmo main check and every wmo step of the lifecycle sequence:
+// the report is about this root and this load, it was built, it built the header's group count with no
+// group file missing, and afterwards the player holds exactly one runtime -- this world model -- and no
+// model. why collects what failed. The host side is checked too: the WMO is what the canvas root and the
+// doodad-set list point at, and no model is left on the canvas.
+static bool checkMapObjectReport(ModelViewer * frame, const UnityIpcServer::MapObjectReport & r, int load, QString & why)
+{
+  const WMO * w = frame->canvas ? frame->canvas->wmo : nullptr;
+  QStringList bad;
+  if (!w)
+    bad << "no WMO on the canvas";
+  if (r.load != load)
+    bad << QString("report is for load %1, expected %2").arg(r.load).arg(load);
+  if (r.status != "built")
+    bad << QString("status %1 (%2)").arg(r.status, r.reason);
+  if (w && r.fileDataID != (int)w->fileDataID)
+    bad << QString("fileDataID %1, expected %2").arg(r.fileDataID).arg(w->fileDataID);
+  if (w && r.groups != (int)w->nGroups)
+    bad << QString("groups %1, MOHD says %2").arg(r.groups).arg(w->nGroups);
+  if (r.groupFilesMissing != 0)
+    bad << QString("groupFilesMissing %1").arg(r.groupFilesMissing);
+  if (r.liveMapObjects != 1)
+    bad << QString("liveMapObjects %1, expected 1").arg(r.liveMapObjects);
+  if (r.liveModels != 0)
+    bad << QString("liveModels %1, expected 0").arg(r.liveModels);
+  if (w && g_selWMO != w)
+    bad << "g_selWMO is not the canvas WMO";
+  if (w && (!frame->canvas->root || frame->canvas->root->model() != (Displayable *)const_cast<WMO *>(w)))
+    bad << "canvas root is not attached to the canvas WMO";
+  if (frame->canvas && frame->canvas->model())
+    bad << "a model is still on the canvas";
+  why = bad.join("; ");
+  return bad.isEmpty();
+}
+
+// WMV_IPCTEST_SEQUENCE="m2:creature/bear/bear.m2;wmo:115058;m2:...;wmo:...;wmo:<another>": after the
+// main checks, select each entry exactly as Browse does (FileControl::SelectModelFile / SelectWMOFile) and
+// check after each step that the player ended up showing exactly that, with nothing left over:
+//   wmo step -- the mapObjectLoaded for the step's load serial passes checkMapObjectReport (built, the
+//     right root and group count, no missing group file, liveMapObjects 1 and liveModels 0), the
+//     viewport shows it (no notice), and the player's runtimeState answer then still names this root as
+//     the world model on screen, no model, and 1 / 0 live runtimes;
+//   m2 step -- the host holds the model and no WMO (canvas->wmo, g_selWMO and the root all cleared), the
+//     player confirms the model is built and current where it can (a character by its scene answer for the
+//     load, any other model with geosets by answering a geoset state for its FileDataID "applied"), and
+//     then -- for every model -- its runtimeState answer names this model as the one on screen, no world
+//     model, liveMapObjects 0, and liveModels 1 (a character: at least 1, its parts count too). That answer
+//     is the only evidence for this step: the next wmo step cannot stand in for it, because adopting a world
+//     model disposes any model AND any world model still alive before the counts are taken, so a WMO kept
+//     alive under this model would pass there.
+//   no step may produce a "failed" world-model report.
+// Entries are "m2:" or "wmo:" followed by a listfile path or a FileDataID. "m2!:" / "wmo!:" is a QUICK step:
+// selected and left at once, the way a user steps through the Browse tree, so the next load replaces one
+// still in flight. It asserts nothing itself; the next waited step then also requires an answer for every
+// quick world-model load ("superseded", or "built" if it won the race -- never "failed" or none), and its
+// own checks prove the replaced load left nothing behind. So a quick step must be followed by a waited
+// one: a sequence ending on a quick step is rejected. Returns whether all steps passed.
+static bool doIpcTestLifecycleSequence(ModelViewer * frame, UnityIpcServer * ipc, const QString & spec,
+                                       const std::vector<UnityIpcServer::MapObjectReport> & reports)
+{
+  const QStringList steps = spec.split(';', QString::SkipEmptyParts);
+  LOG_INFO << "[unityipc-test] lifecycle sequence:" << steps.size() << "step(s):" << spec;
+
+  std::vector<UnityIpcServer::SceneAck> sceneAcks;
+  std::vector<UnityIpcServer::GeosetAck> geoAcks;
+  std::vector<UnityIpcServer::RuntimeState> runtimeStates;
+  auto previousScene = ipc->onCharacterSceneApplied;
+  auto previousGeo = ipc->onGeosetsApplied;
+  auto previousRuntime = ipc->onRuntimeState;
+  ipc->onRuntimeState = [&runtimeStates, previousRuntime](const UnityIpcServer::RuntimeState & s) {
+    runtimeStates.push_back(s);
+    if (previousRuntime)
+      previousRuntime(s);
+  };
+  ipc->onCharacterSceneApplied = [&sceneAcks, previousScene](const UnityIpcServer::SceneAck & a) {
+    sceneAcks.push_back(a);
+    if (previousScene)
+      previousScene(a);
+  };
+  ipc->onGeosetsApplied = [&geoAcks, previousGeo](const UnityIpcServer::GeosetAck & a) {
+    geoAcks.push_back(a);
+    if (previousGeo)
+      previousGeo(a);
+  };
+
+  int failed = 0;
+  // A quick step asserts nothing and relies on the waited step after it (see above); as the last step it
+  // would never be checked at all.
+  if (!steps.isEmpty() && steps.last().trimmed().section(':', 0, 0).trimmed().endsWith('!'))
+  {
+    LOG_ERROR << "[unityipc-test]   the sequence ends on a quick step, which nothing would check: end it on a waited step";
+    failed++;
+  }
+  std::vector<int> quickWmoLoads;   // quick world-model loads not yet answered for
+  for (int s = 0; s < steps.size(); s++)
+  {
+    const QString step = steps[s].trimmed();
+    const int colon = step.indexOf(':');
+    const QString rawKind = colon > 0 ? step.left(colon).trimmed().toLower() : QString();
+    const bool quick = rawKind.endsWith('!');
+    const QString kind = quick ? rawKind.left(rawKind.size() - 1) : rawKind;
+    const QString target = colon > 0 ? step.mid(colon + 1).trimmed() : QString();
+    GameFile * file = target.isEmpty() ? nullptr : resolveGameFileArg(target);
+    const size_t reportsBefore = reports.size();
+    const int serialBefore = frame->m_unityLoadSerial;
+    QElapsedTimer clock;
+    clock.start();
+    QString why;
+    bool ok = true;
+
+    if ((kind != "m2" && kind != "wmo") || !file)
+    {
+      ok = false;
+      why = (kind != "m2" && kind != "wmo") ? "unknown step kind (use m2:, wmo:, m2!: or wmo!:)" : "file not found";
+    }
+    else if (quick)
+    {
+      if (kind == "wmo")
+        frame->fileControl->SelectWMOFile(file);
+      else
+        frame->fileControl->SelectModelFile(file);
+      pumpIpc(ipc, 5);
+      if (kind == "wmo" && frame->m_unityLoadSerial != serialBefore)
+        quickWmoLoads.push_back(frame->m_unityLoadSerial);
+      LOG_INFO << "[unityipc-test]   step" << (s + 1) << "quick: selected and not waited for";
+    }
+    else if (kind == "wmo")
+    {
+      frame->fileControl->SelectWMOFile(file);
+      const WMO * w = frame->canvas->wmo;
+      const int load = frame->m_unityLoadSerial;
+      UnityIpcServer::MapObjectReport r;
+      if (!ipc->playerDrawsMapObjects())
+      {
+        ok = false;
+        why = QString("the player (protocol %1) cannot load world models").arg(ipc->playerProtocolVersion());
+      }
+      else if (!w || load == serialBefore)
+      {
+        ok = false;
+        why = !w ? "no WMO on the canvas after the selection" : "no world-model load was sent";
+      }
+      else if (!waitMapObjectReport(ipc, reports, load, 180000, r))
+      {
+        ok = false;
+        why = QString("no mapObjectLoaded for load %1 within 180 s").arg(load);
+      }
+      else
+      {
+        LOG_INFO << "[unityipc-test]   step" << (s + 1) << "mapObjectLoaded:" << r.describe();
+        ok = checkMapObjectReport(frame, r, load, why);
+        // The player's own account after the report: this root on screen, no model, one world model.
+        const int rootId = (int)w->fileDataID;
+        UnityIpcServer::RuntimeState st;
+        bool answered = false;
+        const bool held = waitRuntimeState(ipc, runtimeStates, [rootId](const UnityIpcServer::RuntimeState & x) {
+          return x.liveMapObjects == 1 && x.liveModels == 0 && x.mapObjectFileDataID == rootId && x.modelFileDataID == 0;
+        }, 30000, st, answered);
+        if (!held)
+        {
+          ok = false;
+          why += QString(why.isEmpty() ? "" : "; ") +
+                 (answered ? "the player holds " + st.describe() +
+                               QString(", expected world model %1, no model, liveMapObjects 1, liveModels 0").arg(rootId)
+                           : QString("the player never answered runtimeState"));
+        }
+        else
+          LOG_INFO << "[unityipc-test]   step" << (s + 1) << "runtime state:" << st.describe();
+        pumpIpc(ipc, 10);   // the notice decision that follows a report
+        ModelViewer::ViewportNotice notice;
+        if (!frame->unityCanDrawCurrentModel(&notice) || frame->unityRendererHost->hasNotice())
+        {
+          ok = false;
+          why += QString(why.isEmpty() ? "" : "; ") + "viewport shows a notice: " +
+                 QString::fromWCharArray(frame->unityRendererHost->noticeTitle().c_str());
+        }
+      }
+    }
+    else
+    {
+      frame->fileControl->SelectModelFile(file);
+      const WoWModel * m = frame->canvas->model();
+      const int fdid = file->fileDataId();
+      QStringList bad;
+      if (!m || !m->gamefile || m->gamefile->fileDataId() != fdid)
+        bad << "the canvas does not hold the model";
+      if (frame->canvas->wmo || frame->isWMO)
+        bad << "a WMO is still loaded on the host";
+      if (g_selWMO)
+        bad << "g_selWMO still set";
+      if (frame->canvas->root && frame->canvas->root->model())
+        bad << "the canvas root still holds a model object";
+
+      QString confirmed = "unconfirmed";
+      if (bad.isEmpty() && frame->canvasShowsCharacter() && ipc->playerDressesCharacters())
+      {
+        const int load = frame->m_unityLoadSerial;
+        wxStopWatch w;
+        bool got = false;
+        while (!got && w.Time() < 60000)
+        {
+          pumpIpc(ipc, 1);
+          for (const UnityIpcServer::SceneAck & a : sceneAcks)
+            got = got || (a.load == load && a.status == "applied");
+        }
+        if (got)
+          confirmed = QString("character scene applied for load %1").arg(load);
+        else
+          bad << QString("no applied character scene for load %1 within 60 s").arg(load);
+      }
+      else if (bad.isEmpty() && ipc->playerSwitchesSubmeshes() && m->geosets.size() > 0)
+      {
+        wxStopWatch w;
+        bool got = false;
+        QString last;
+        while (!got && w.Time() < 60000)
+        {
+          const int revision = frame->SendCurrentGeosetsToUnity();
+          if (revision == 0)
+            break;
+          wxStopWatch answer;
+          bool settled = false;
+          while (!settled && answer.Time() < 10000)
+          {
+            pumpIpc(ipc, 1);
+            for (const UnityIpcServer::GeosetAck & a : geoAcks)
+              if (a.revision == revision && a.status != "pending")
+              {
+                settled = true;
+                got = a.status == "applied" && a.fileDataID == fdid;
+                last = QString("rev %1 %2 %3").arg(revision).arg(a.status, a.reason);
+              }
+          }
+          if (!got)
+            pumpIpc(ipc, 30);
+        }
+        if (got)
+          confirmed = "geoset state applied for fileDataID " + QString::number(fdid) + " (" + last + ")";
+        else
+          bad << "the player never answered a geoset state for the model as built (" + last + ")";
+      }
+      else if (bad.isEmpty())
+      {
+        // Nothing the player answers for this model: wait for its fetching to go quiet instead.
+        int requests = ipc->stats().requests;
+        wxStopWatch quiet, total;
+        while (quiet.Time() < 2000 && total.Time() < 60000)
+        {
+          pumpIpc(ipc, 5);
+          if (ipc->stats().requests != requests)
+          {
+            requests = ipc->stats().requests;
+            quiet.Start();
+          }
+        }
+      }
+
+      // WHAT THE PLAYER HOLDS NOW: this model and no world model. The answers above carry no counts, and
+      // for a model with neither geosets nor a character scene this is the only confirmation there is.
+      // A player older than protocol 4 cannot answer, and cannot have drawn a world model either.
+      if (bad.isEmpty() && ipc->playerDrawsMapObjects())
+      {
+        const bool character = frame->canvasShowsCharacter();
+        UnityIpcServer::RuntimeState st;
+        bool answered = false;
+        const bool held = waitRuntimeState(ipc, runtimeStates, [fdid, character](const UnityIpcServer::RuntimeState & x) {
+          return x.liveMapObjects == 0 && x.mapObjectFileDataID == 0 && x.modelFileDataID == fdid &&
+                 (character ? x.liveModels >= 1 : x.liveModels == 1);
+        }, 30000, st, answered);
+        if (!answered)
+          bad << "the player never answered runtimeState";
+        else if (!held)
+          bad << "the player holds " + st.describe() +
+                   QString(", expected model %1, no world model, liveMapObjects 0, liveModels %2")
+                     .arg(fdid).arg(character ? ">= 1" : "1");
+        else
+          confirmed = (confirmed == "unconfirmed" ? QString() : confirmed + "; ") + "runtime state " + st.describe();
+      }
+      ok = bad.isEmpty();
+      why = bad.join("; ");
+      LOG_INFO << "[unityipc-test]   step" << (s + 1) << "model:" << confirmed;
+    }
+
+    // Every quick world-model load before a waited step must have been answered by now, and not "failed".
+    if (!quick && file && (kind == "m2" || kind == "wmo"))
+    {
+      for (int quickLoad : quickWmoLoads)
+      {
+        UnityIpcServer::MapObjectReport q;
+        if (!waitMapObjectReport(ipc, reports, quickLoad, 5000, q))
+        {
+          ok = false;
+          why += QString(why.isEmpty() ? "" : "; ") + QString("no answer for the replaced load %1").arg(quickLoad);
+        }
+        else
+          LOG_INFO << "[unityipc-test]   step" << (s + 1) << "replaced quick load" << quickLoad << "answered:"
+                   << q.status << q.reason;
+      }
+      quickWmoLoads.clear();
+    }
+
+    // A failed world-model build anywhere in the step fails it, whichever load it names.
+    for (size_t i = reportsBefore; i < reports.size(); i++)
+      if (reports[i].status == "failed")
+      {
+        ok = false;
+        why += QString(why.isEmpty() ? "" : "; ") + "failed report: " + reports[i].describe();
+      }
+
+    if (!ok)
+      failed++;
+    // Free text (the step, the reasons) is concatenated, never passed through arg().
+    const QString line = QString("step %1/%2 ").arg(s + 1).arg(steps.size()) + step +
+                         QString(" -> %1 in %2 ms; host wmo=%3 g_selWMO=%4 model=%5 load serial %6 -> %7")
+                           .arg(ok ? "OK" : "FAIL").arg(clock.elapsed())
+                           .arg(frame->canvas->wmo ? 1 : 0).arg(g_selWMO ? 1 : 0).arg(frame->canvas->model() ? 1 : 0)
+                           .arg(serialBefore).arg(frame->m_unityLoadSerial) +
+                         (why.isEmpty() ? QString() : " -- " + why);
+    if (ok)
+      LOG_INFO << "[unityipc-test]  " << line;
+    else
+      LOG_ERROR << "[unityipc-test]  " << line;
+    pumpIpc(ipc, 20);
+  }
+
+  ipc->onCharacterSceneApplied = previousScene;
+  ipc->onGeosetsApplied = previousGeo;
+  ipc->onRuntimeState = previousRuntime;
+  const bool pass = failed == 0 && !steps.isEmpty();
+  LOG_INFO << "[unityipc-test] lifecycle sequence:" << steps.size() << "step(s)," << failed << "failed"
+           << (pass ? "(OK)" : "(FAIL)");
+  return pass;
+}
+
 // -mo <model> -unityipctest: end-to-end self-test of the embedded Unity renderer's runtime
 // asset access, using whatever player build is installed (the Unity-free TestStub or a real
 // Unity build). Launches the player into the Unity viewport (already the centre pane) exactly as
@@ -448,6 +858,11 @@ static void doHeadlessDumpTexture(int fileDataId, const QString & outPath)
 // logged with the [unityipc-test] prefix. The asset exchange itself touches no files on disk
 // (runtime access, not an export). The frame is parked off-screen in this mode, so nothing shows up
 // on the desktop.
+//
+// With -wmo <root path or FileDataID> instead of -mo, the world model is selected exactly as Browse does
+// (FileControl::SelectWMOFile) and the WORLD-MODEL check waits for the player's mapObjectLoaded for that
+// load and asserts it (checkMapObjectReport), logging every field. WMV_IPCTEST_SEQUENCE adds the lifecycle
+// sequence (doIpcTestLifecycleSequence) after all other checks, in either mode.
 static void doHeadlessUnityIpcTest(ModelViewer * frame)
 {
   LOG_INFO << "[unityipc-test] starting -- player:" << QString::fromWCharArray(UnityRendererHost::resolveUnityExePath().c_str());
@@ -464,6 +879,14 @@ static void doHeadlessUnityIpcTest(ModelViewer * frame)
     LOG_ERROR << "[unityipc-test] RESULT: FAIL (IPC server not listening)";
     return;
   }
+  // Every world-model report of the run, in arrival order (the app's own handler still runs).
+  std::vector<UnityIpcServer::MapObjectReport> mapReports;
+  const auto previousMapObject = ipc->onMapObjectLoaded;
+  ipc->onMapObjectLoaded = [&mapReports, previousMapObject](const UnityIpcServer::MapObjectReport & r) {
+    mapReports.push_back(r);
+    if (previousMapObject)
+      previousMapObject(r);
+  };
 
   // Pump: no event loop runs inside OnInit, so drive the server + the wx message queue by hand.
   const long timeoutMs = 20000;
@@ -476,6 +899,10 @@ static void doHeadlessUnityIpcTest(ModelViewer * frame)
     const UnityIpcServer::Stats & st = ipc->stats();
     if (st.responsesOk + st.responsesError >= 1)
       break;
+    // A world model the player was not sent (an older player, an unreadable root) fetches nothing; the
+    // load decision is made synchronously on unityReady, so there is nothing more to wait for.
+    if (ipc->isUnityReady() && frame->isWMO && frame->canvas && frame->canvas->wmo && st.mapObjectLoads == 0)
+      break;
     if (!frame->unityRendererHost->isRunning())
     {
       LOG_ERROR << "[unityipc-test] player exited before completing the exchange";
@@ -484,6 +911,53 @@ static void doHeadlessUnityIpcTest(ModelViewer * frame)
   }
   // let the response drain and the player log it before we look at the counters
   for (int i = 0; i < 50; i++) { ipc->poll(); wxTheApp->Yield(true); wxMilliSleep(10); }
+
+  // A WORLD MODEL (-wmo): selected exactly as Browse does before this test started, so the player was
+  // sent the root when it announced itself. Wait for its answer to that load and check it: built, the
+  // root's own group count (MOHD) with no group file missing, the right root, and the player holding this
+  // one runtime and no model. Every field of the report is logged. Checked before the viewport, whose
+  // decision a failed build changes.
+  bool wmoOk = true;
+  const bool wmoMode = frame->isWMO && frame->canvas && frame->canvas->wmo;
+  if (wmoMode)
+  {
+    WMO * w = frame->canvas->wmo;
+    const int load = frame->m_unityLoadSerial;
+    LOG_INFO << "[unityipc-test] world-model check:" << w->itemName() << "root FileDataID" << w->fileDataID
+             << "host metadata: ok=" << (w->ok ? 1 : 0) << "metadataOnly=" << (w->metadataOnly ? 1 : 0)
+             << "groups=" << w->nGroups << "materials=" << w->nTextures << "doodadSets=" << (int)w->doodadsets.size()
+             << "doodads=" << (int)w->modelis.size() << "lights=" << (int)w->lights.size()
+             << "GFID=" << (int)w->groupFileDataIDs.size() << "| player protocol" << ipc->playerProtocolVersion()
+             << "wmo loads sent" << ipc->stats().mapObjectLoads << "load serial" << load;
+    // The metadata-only promise: no group file opened, so no group holds geometry or a display list.
+    bool groupsEmpty = true;
+    for (size_t g = 0; w->groups && g < w->nGroups; g++)
+      groupsEmpty = groupsEmpty && w->groups[g].nVertices == 0 && !w->groups[g].ok;
+    UnityIpcServer::MapObjectReport report;
+    QString why;
+    if (!ipc->playerDrawsMapObjects())
+      why = QString("the player (protocol %1) cannot load world models").arg(ipc->playerProtocolVersion());
+    else if (ipc->stats().mapObjectLoads < 1 || load <= 0)
+      why = "no world-model load was sent";
+    else if (!waitMapObjectReport(ipc, mapReports, load, 180000, report))
+      why = QString("no mapObjectLoaded for load %1 within 180 s").arg(load);
+    else
+    {
+      LOG_INFO << "[unityipc-test]   mapObjectLoaded:" << report.describe();
+      checkMapObjectReport(frame, report, load, why);
+      pumpIpc(ipc, 20);   // the notice decision a report may cause
+    }
+    if (!groupsEmpty)
+      why += QString(why.isEmpty() ? "" : "; ") + "the host built group geometry (metadata-only expected)";
+    for (const UnityIpcServer::MapObjectReport & r : mapReports)
+      if (r.status == "failed")
+        why += QString(why.isEmpty() ? "" : "; ") + "failed report for load " + QString::number(r.load);
+    wmoOk = why.isEmpty();
+    if (wmoOk)
+      LOG_INFO << "[unityipc-test] world-model check: (OK)";
+    else
+      LOG_ERROR << "[unityipc-test] world-model check: (FAIL)" << why;
+  }
 
   const UnityIpcServer::Stats & st = ipc->stats();
   bool geosetLiveOk = true;   // set by the live geoset check below, when the model has submeshes to switch
@@ -1101,6 +1575,17 @@ static void doHeadlessUnityIpcTest(ModelViewer * frame)
     LOG_INFO << "[unityipc-test] character check:" << (characterOk ? "(OK)" : "(FAIL)");
   }
 
+  // THE LIFECYCLE SEQUENCE, opt-in (see doIpcTestLifecycleSequence): after everything above.
+  bool sequenceOk = true;
+  const QString sequenceSpec = qEnvironmentVariable("WMV_IPCTEST_SEQUENCE").trimmed();
+  if (!sequenceSpec.isEmpty())
+    sequenceOk = doIpcTestLifecycleSequence(frame, ipc, sequenceSpec, mapReports);
+  else
+    LOG_INFO << "[unityipc-test] lifecycle sequence: not requested (set WMV_IPCTEST_SEQUENCE)";
+  LOG_INFO << "[unityipc-test] world-model reports in the run:" << ipc->stats().mapObjectReports << "("
+           << ipc->stats().mapObjectBuilt << "built," << ipc->stats().mapObjectFailed << "failed,"
+           << ipc->stats().mapObjectSuperseded << "superseded) of" << ipc->stats().mapObjectLoads << "load(s) sent";
+
   // A model with a skin selector must have pushed at least one skin; one without simply has
   // nothing to sync, so the condition only bites when there was something to send.
   const bool skinsOk = (frame->animControl == NULL) || (frame->animControl->skinCount() == 0) ||
@@ -1121,10 +1606,11 @@ static void doHeadlessUnityIpcTest(ModelViewer * frame)
            << (neverPainted ? "(OK)" : "(FAIL)");
   const bool pass = st.connections >= 1 && ipc->isUnityReady() && st.requests >= 1 &&
                     st.responsesOk >= 1 && skinsOk && animsOk && stateOk && geosetLiveOk && characterOk &&
-                    viewportOk && neverPainted;
+                    wmoOk && sequenceOk && viewportOk && neverPainted;
   LOG_INFO << "[unityipc-test] RESULT:" << (pass ? "PASS" : "FAIL");
 
   // Close the player now (what app shutdown does) and confirm the child process is gone.
+  ipc->onMapObjectLoaded = previousMapObject;
   frame->unityRendererHost->shutdown();
   LOG_INFO << "[unityipc-test] player shut down; still running=" << (frame->unityRendererHost->isRunning() ? 1 : 0);
 }
@@ -1160,7 +1646,7 @@ bool WowModelViewApp::OnInit()
     QString a = QString::fromWCharArray(argv[ai]);
     if (a == "-m" || a == "-mo" || a == "-armory" || a == "-npc" || a == "-fbxexport" ||
         a == "-animdump" || a == "-fbxinspect" || a == "-dbfromfile" || a == "-dumptex" ||
-        a == "-m2inspect" || a == "-matrestest" || a == "-mpq" || a == "-item" || a.endsWith(".chr"))
+        a == "-m2inspect" || a == "-matrestest" || a == "-mpq" || a == "-item" || a == "-wmo" || a.endsWith(".chr"))
     {
       earlyHeadless = true;
       break;
@@ -1312,6 +1798,7 @@ bool WowModelViewApp::OnInit()
   QString cmd;
   QString snapModelPath; // -mo: defer the load until after LoadWoW
   int snapItemId = 0;    // -item: defer an item/display-context load until after LoadWoW
+  QString snapWmoArg;    // -wmo <root path|FileDataID>: defer a Browse-style WMO selection until after LoadWoW
   QString snapArmoryUrl; // -armory <url>: headless import (test harness)
   QString snapNpcArg;    // -npc <id|id:displayId>: headless NPC load (test harness)
   QString fbxExportPath; // -fbxexport <out.fbx>: headless FBX export of the -mo model (test harness)
@@ -1329,7 +1816,7 @@ bool WowModelViewApp::OnInit()
   int optMesh = 1, optSkel = 1, optSkin = 1, optAnim = 1;
   int optComponent = 0;   // -fbxcomponent : opt-in raw/node-based item-component export (UV2 + raw units + sidecar v2)
   int itemSkinFileId = 0; // -itemskin <fileDataID> : re-bind an item/weapon's on-screen skin after -mo load
-  bool unityIpcTest = false; // -unityipctest : with -mo, run the embedded Unity renderer IPC self-test (see doHeadlessUnityIpcTest)
+  bool unityIpcTest = false; // -unityipctest : with -mo, -item or -wmo, run the embedded Unity renderer IPC self-test (see doHeadlessUnityIpcTest)
   QString fbxClipsArg;    // -fbxclips i,j,k : ModelAnimation.Index values to export
   for (int i = 0; i<argc; i++) {
     cmd = QString::fromWCharArray(argv[i]);
@@ -1366,6 +1853,12 @@ bool WowModelViewApp::OnInit()
       // item's display, its component model and its component geoset state -- can be captured and
       // regressed. Composes with -unityipctest exactly as -mo does.
       if (i + 1 < argc) { i++; snapItemId = QString::fromWCharArray(argv[i]).toInt(); }
+    }
+    else if (cmd == "-wmo") {
+      // Headless world-model selection: "-wmo <root listfile path or FileDataID>" selects the WMO through
+      // FileControl::SelectWMOFile, the same code a pick under Browse's WMO filter runs. Composes with
+      // -unityipctest (the world-model check); see doHeadlessUnityIpcTest.
+      if (i + 1 < argc) { i++; snapWmoArg = QString::fromWCharArray(argv[i]); }
     }
     else if (cmd == "-mpq") {
       // Headless legacy-MPQ load: "-mpq <DataFolder> [locale] -mo <path\model.m2>" opens a
@@ -1516,7 +2009,7 @@ bool WowModelViewApp::OnInit()
   for (int i = 1; i < argc; i++)
   {
     QString a = QString::fromWCharArray(argv[i]);
-    if (a == "-m" || a == "-mo" || a == "-armory" || a == "-npc" || a == "-fbxexport" || a == "-animdump" || a == "-fbxinspect" || a == "-dbfromfile" || a == "-dumptex" || a == "-m2inspect" || a == "-matrestest" || a == "-mpq" || a == "-item" || a.endsWith(".chr"))
+    if (a == "-m" || a == "-mo" || a == "-armory" || a == "-npc" || a == "-fbxexport" || a == "-animdump" || a == "-fbxinspect" || a == "-dbfromfile" || a == "-dumptex" || a == "-m2inspect" || a == "-matrestest" || a == "-mpq" || a == "-item" || a == "-wmo" || a.endsWith(".chr"))
     {
       headlessLoad = true;
       break;
@@ -1574,6 +2067,21 @@ bool WowModelViewApp::OnInit()
     {
       doHeadlessDumpTexture(dumpTexFileDataId, dumpTexOutPath);
       return false; // forensic dump done -> exit
+    }
+
+    if (!snapWmoArg.isEmpty())
+    {
+      GameFile * wmoFile = resolveGameFileArg(snapWmoArg);
+      if (!wmoFile)
+        LOG_ERROR << "[wmo] no game file for" << snapWmoArg;
+      else if (!frame->fileControl)
+        LOG_ERROR << "[wmo] no Browse control to select" << snapWmoArg << "with";
+      else
+        frame->fileControl->SelectWMOFile(wmoFile);
+      if (unityIpcTest)
+        doHeadlessUnityIpcTest(frame);
+      logNoHeadlessScreenshot();
+      return false; // headless run done -> exit
     }
 
     if (snapItemId > 0)

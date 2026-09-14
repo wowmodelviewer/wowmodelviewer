@@ -501,9 +501,8 @@ void FileControl::ClearCanvas()
 
   // Delete any previous models that were loaded.
   if (modelviewer->isWMO) {
-    //canvas->clearAttachments();
-    wxDELETE(modelviewer->canvas->wmo);
-    modelviewer->canvas->wmo = NULL;
+    // Detaches canvas->root and clears g_selWMO before the delete (it used to leave both dangling).
+    modelviewer->canvas->ClearWMO();
   } else if (modelviewer->isModel) {
     modelviewer->canvas->clearAttachments();
 
@@ -659,58 +658,9 @@ void FileControl::OnTreeSelect(wxTreeEvent &event)
   CurrentItem = item;
 
   if (filterMode == FILE_FILTER_MODEL) {
-    wxString rootfn(data->file->fullname().toStdWString());
-    // Exit, if its the same model thats currently loaded
-    if (modelviewer->canvas->model() && !modelviewer->canvas->model()->name().isEmpty() && modelviewer->canvas->model()->name().toStdWString() == std::wstring(rootfn.c_str()))
-      return; // clicked on the same model thats currently loaded, no need to load it again - exit
-
-    ClearCanvas();
-    LOG_INFO << "Selecting model in tree selector:" << QString::fromWCharArray(rootfn.c_str());
-
-    // Check to make sure the selected item is a model (an *.m2 file).
-    modelviewer->isModel = (rootfn.Last() == '2');
-
-    // not functional yet.
-    //if (wxGetKeyState(WXK_SHIFT)) 
-    //  canvas->AddModel(rootfn);
-    //else
-    modelviewer->LoadModel(GAMEDIRECTORY.getFile(QString::fromWCharArray(rootfn.c_str())));  // Load the model.
-
-    UpdateInterface();
+    SelectModelFile(data->file);
   } else if (filterMode == FILE_FILTER_WMO) {
-    ClearCanvas();
-
-    modelviewer->isWMO = true;
-    wxString rootfn(data->file->fullname().toStdWString());
-
-    //modelviewer->canvas->model->modelType = MT_WMO;
-
-    // if we have selected a non-root wmo, find the root filename
-    char dash = rootfn[rootfn.length() - 8];
-    char num = rootfn[rootfn.length() - 7];
-    bool isroot = !((dash=='_') && (num>='0') && (num<='9'));
-    if (!isroot) {
-      rootfn.erase(rootfn.length()-8);
-      rootfn.append(wxT(".wmo"));
-    }
-
-    modelviewer->canvas->LoadWMO(rootfn);
-
-    int id = -1;
-    if (!isroot) {
-      wchar_t idnum[4];
-      _tcsncpy(idnum, rootfn.c_str() + wcslen(rootfn.c_str()) - 7, 3);
-      //wxString(data->fn.Substr((data->fn.Length() - 7), 3)).ToLong(&id);
-      idnum[3]=0;
-      swscanf(idnum,L"%d",&id);
-    }
-
-    LOG_INFO << __FUNCTION__ << "wmo =" << modelviewer->canvas->wmo;
-
-    modelviewer->canvas->wmo->loadGroup(id);
-    modelviewer->animControl->UpdateWMO(modelviewer->canvas->wmo, id);
-
-    UpdateInterface();
+    SelectWMOFile(data->file);
   } else if (filterMode == FILE_FILTER_IMAGE) {
     ClearCanvas();
 
@@ -736,6 +686,79 @@ void FileControl::OnTreeSelect(wxTreeEvent &event)
 
     UpdateInterface();
   }
+}
+
+void FileControl::SelectModelFile(GameFile * file)
+{
+  if (!file || !modelviewer || !modelviewer->canvas)
+    return;
+  wxString rootfn(file->fullname().toStdWString());
+  // Exit, if its the same model thats currently loaded
+  if (modelviewer->canvas->model() && !modelviewer->canvas->model()->name().isEmpty() && modelviewer->canvas->model()->name().toStdWString() == std::wstring(rootfn.c_str()))
+    return; // clicked on the same model thats currently loaded, no need to load it again - exit
+
+  ClearCanvas();
+  LOG_INFO << "Selecting model in tree selector:" << QString::fromWCharArray(rootfn.c_str());
+
+  // Check to make sure the selected item is a model (an *.m2 file).
+  modelviewer->isModel = (rootfn.Last() == '2');
+
+  // not functional yet.
+  //if (wxGetKeyState(WXK_SHIFT))
+  //  canvas->AddModel(rootfn);
+  //else
+  modelviewer->LoadModel(GAMEDIRECTORY.getFile(QString::fromWCharArray(rootfn.c_str())));  // Load the model.
+
+  UpdateInterface();
+}
+
+void FileControl::SelectWMOFile(GameFile * file)
+{
+  if (!file || !modelviewer || !modelviewer->canvas)
+    return;
+  ClearCanvas();
+
+  modelviewer->isWMO = true;
+  wxString rootfn(file->fullname().toStdWString());
+
+  //modelviewer->canvas->model->modelType = MT_WMO;
+
+  // THE PICKED FILE IS TRIED AS A ROOT FIRST. Whether a .wmo is a root is its MOHD chunk, not its name:
+  // real roots are named "<name>_NNN.wmo" (11xt_rockbridge_003.wmo, FileDataID 5569224) with no
+  // "<name>.wmo" beside them, and guessing from the name first turned such a root into a file that does
+  // not exist. Groups belong to a root through its GFID list, never through names.
+  int rootFileDataID = file->fileDataId() > 0 ? file->fileDataId() : 0;
+  modelviewer->canvas->LoadWMO(rootfn, rootFileDataID);
+
+  // Only a file that turned out not to be a root (no MOHD) and is named like a group file falls back to the
+  // old name rule, "<name>_NNN.wmo" -> "<name>.wmo": a convenience for a group file picked by hand (Browse
+  // hides them), not how groups are found. The group index the old code took from the name is not kept: it
+  // was read after the suffix had been cut off, i.e. from the root's own name, so the label is the root's (-1).
+  const size_t len = rootfn.length();
+  const bool groupName = len > 8 && rootfn[len - 8] == '_' && rootfn[len - 7] >= '0' && rootfn[len - 7] <= '9';
+  if (groupName && (!modelviewer->canvas->wmo || !modelviewer->canvas->wmo->ok))
+  {
+    wxString stripped = rootfn.Left(len - 8) + wxT(".wmo");
+    GameFile * rootFile = GAMEDIRECTORY.getFile(QString::fromWCharArray(stripped.c_str()));
+    rootFileDataID = (rootFile && rootFile->fileDataId() > 0) ? rootFile->fileDataId() : 0;
+    LOG_INFO << __FUNCTION__ << QString::fromWCharArray(rootfn.c_str()) << "is not a root WMO; trying"
+             << QString::fromWCharArray(stripped.c_str());
+    rootfn = stripped;
+    modelviewer->canvas->LoadWMO(rootfn, rootFileDataID);
+  }
+  const int id = -1;
+
+  LOG_INFO << __FUNCTION__ << "wmo =" << modelviewer->canvas->wmo << "root FileDataID" << rootFileDataID;
+
+  // No wmo->loadGroup(id) any more: it rebuilt every group a second time (after the constructor's own
+  // build) purely for the hidden OpenGL canvas, and a metadata-only root has no groups to build.
+  modelviewer->animControl->UpdateWMO(modelviewer->canvas->wmo, id);
+
+  // The Unity player is told before the viewport decides (UpdateInterface), as ModelViewer::LoadModel
+  // does for a model; with no player ready yet, onUnityReady sends it.
+  modelviewer->SendLoadToUnity();
+
+  UpdateInterface();
 }
 
 // Enter or the search button runs the search at any length; the cancel button clears it and

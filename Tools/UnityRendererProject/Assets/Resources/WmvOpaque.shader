@@ -60,6 +60,10 @@ Shader "WMV/Opaque Textured"
         _OpaqueAlpha ("Force opaque alpha", Float) = 1
 
         _Color ("Tint", Color) = (1,1,1,1)
+        // DIAGNOSTIC ONLY (-wmvWmoVertexColour): 1 multiplies the mesh's vertex colour into the
+        // albedo. Nothing sets it in normal rendering, and a mesh with no colours is never drawn with
+        // it on, so every material keeps exactly the colour it had without this.
+        _VertexColour ("Diagnostic vertex colour", Float) = 0
 
         // THE M2 TEXTURE TRANSFORM, per unit, as a 2x2 matrix plus an offset in THIS renderer's
         // UV space (the V axis is already flipped by the mesh builder; the animator conjugates the
@@ -119,6 +123,7 @@ Shader "WMV/Opaque Textured"
                 float3 normal : NORMAL;
                 float2 uv     : TEXCOORD0;
                 float2 uv2    : TEXCOORD1;
+                fixed4 color  : COLOR;       // read only by the _VertexColour diagnostic
             };
 
             struct v2f
@@ -130,6 +135,7 @@ Shader "WMV/Opaque Textured"
                 float2 uv1    : TEXCOORD3;
                 half3  viewN  : TEXCOORD4;   // view-space normal: z is the facing ratio
                 float3 wpos   : TEXCOORD5;   // world position, for the cast-shadow lookup
+                fixed4 vcol   : TEXCOORD6;   // vertex colour, for the _VertexColour diagnostic only
             };
 
             // ---- PREVIEW RIG CONSTANTS -------------------------------------------------
@@ -596,6 +602,7 @@ Shader "WMV/Opaque Textured"
             // -----------------------------------------------------------------------------
             fixed4 _Color;
             fixed _Cutoff;
+            fixed _VertexColour;
 
             v2f vert (appdata v)
             {
@@ -605,6 +612,7 @@ Shader "WMV/Opaque Textured"
                 o.uv1 = v.uv2;
                 o.normal = UnityObjectToWorldNormal(v.normal);
                 o.wpos = mul(unity_ObjectToWorld, v.vertex).xyz;
+                o.vcol = v.color;
 
                 // ENVIRONMENT UNIT. The M2 vertex shader for a combiner material names where each
                 // texture unit takes its coordinates from, and "Env" means the unit is fed by a
@@ -730,6 +738,8 @@ Shader "WMV/Opaque Textured"
                 else if (_CombinerMode > 0.5)                   // 1: unit0 * unit1
                     rgb = t1.rgb * t2.rgb;
                 fixed4 c = fixed4(rgb * _Color.rgb, 1.0);
+                if (_VertexColour > 0.5)
+                    c.rgb *= i.vcol.rgb;
 
                 // ALPHA. The combiner builds a "discard alpha" the blend mode then either uses as
                 // the output opacity or only tests against. Opaque and alpha-key output 1 and the

@@ -133,15 +133,77 @@ public class WmvOrbitCamera : MonoBehaviour
     }
 
     /// <summary>
+    /// A WORLD MODEL'S VIEW. A building or a cave has no "front" the way a creature does, and seen
+    /// level from yaw 180 most of one is a wall; a three-quarter view from 30 degrees above the
+    /// horizon shows its footprint and two sides. It is also the audit's OpenGL reference view A
+    /// (archived camera yaw 45, pitch 60 -- 30 degrees up -- which maps to this yaw and pitch through
+    /// the coordinate converter), so the default picture can be laid beside those captures.
+    /// </summary>
+    public const float MapObjectYaw = 135f;
+    public const float MapObjectPitch = 30f;
+
+    /// <summary>
+    /// How far a world model can be zoomed in, as a fraction of its framing distance. The model's
+    /// 2 % is too far out for a building: the orbit pivot is the middle of the object, and 2 % of a
+    /// 10,000-unit cave's framing distance keeps the camera 500 units from it. 0.1 % lets the camera
+    /// reach a wall (panning moves the pivot, and pan speed scales with distance).
+    /// </summary>
+    const float MapObjectMinDistanceFactor = 0.001f;
+
+    /// <summary>True while a world model is framed: its clip planes follow its size as well as the
+    /// distance (see UpdateClipPlanes). Frame() for a model turns it off again.</summary>
+    bool mapObjectPlanes;
+    float framedRadius = 1f;
+    /// <summary>Centre of the framed bounds. The pivot starts there but a pan moves it without limit,
+    /// so the world-model far plane is measured from the object itself (see UpdateClipPlanes).</summary>
+    Vector3 framedCenter = Vector3.zero;
+
+    /// <summary>
     /// Point the camera at a model's bounds from the front, a little above, far enough back that
     /// the whole thing fits the vertical field of view with a small margin.
     /// </summary>
     public void Frame(Bounds bounds)
     {
+        FrameWith(bounds, false);
+    }
+
+    /// <summary>
+    /// Frame a world model: the same bounds rule as Frame, from the map-object view, with a closer
+    /// zoom floor and clip planes that cover the whole object (see UpdateClipPlanes). A later Frame()
+    /// for a model restores everything a model had.
+    /// </summary>
+    public void FrameMapObject(Bounds bounds)
+    {
+        FrameWith(bounds, true);
+    }
+
+    /// <summary>
+    /// Re-aim the framed camera from a given angle, at a multiple of the framing distance (clamped to
+    /// the zoom range), settled at once; a distanceScale of 0 or less keeps the current distance. For
+    /// the WMV_VIEWPORT_ORBIT capture hook and the runtime self-test only: nothing in normal viewing
+    /// calls it.
+    /// </summary>
+    public void SetView(float newYaw, float newPitch, float distanceScale)
+    {
+        yaw = newYaw;
+        pitch = Mathf.Clamp(newPitch, -89f, 89f);
+        if (distanceScale > 0f)
+            distance = targetDistance = Mathf.Clamp(framedDistance * distanceScale, minDistance, maxDistance);
+        Apply();
+    }
+
+    /// <summary>Whether the clip planes currently follow a framed world model, for the self-test and the log.</summary>
+    public bool MapObjectPlanes { get { return mapObjectPlanes; } }
+
+    void FrameWith(Bounds bounds, bool mapObject)
+    {
         pivot = bounds.center;
+        mapObjectPlanes = mapObject;
 
         float radius = bounds.extents.magnitude;
         if (radius <= 0.0001f) radius = 1f;
+        framedRadius = radius;
+        framedCenter = bounds.center;
 
         var cam = GetComponent<Camera>();
         float fov = (cam != null ? cam.fieldOfView : 60f) * Mathf.Deg2Rad;
@@ -155,14 +217,15 @@ public class WmvOrbitCamera : MonoBehaviour
         framedDistance = radius / Mathf.Max(0.05f, Mathf.Sin(Mathf.Min(halfV, halfH))) * 1.25f;
 
         // THE ZOOM RANGE COMES FROM THE MODEL. See MinDistanceFactor.
-        minDistance = Mathf.Max(framedDistance * MinDistanceFactor, AbsoluteMinDistance);
+        minDistance = Mathf.Max(framedDistance * (mapObject ? MapObjectMinDistanceFactor : MinDistanceFactor),
+                                AbsoluteMinDistance);
         maxDistance = framedDistance * MaxDistanceFactor;
 
         distance = Mathf.Clamp(framedDistance, minDistance, maxDistance);
         targetDistance = distance;          // a new model starts settled, not gliding
 
-        yaw = FrontYaw;
-        pitch = DefaultPitch;
+        yaw = mapObject ? MapObjectYaw : FrontYaw;
+        pitch = mapObject ? MapObjectPitch : DefaultPitch;
         Apply();
     }
 
@@ -178,8 +241,28 @@ public class WmvOrbitCamera : MonoBehaviour
     {
         if (cam == null)
             return;
-        cam.nearClipPlane = Mathf.Max(0.001f, distance * 0.01f);
-        cam.farClipPlane = Mathf.Max(100f, distance * 20f);
+        if (!mapObjectPlanes)
+        {
+            cam.nearClipPlane = Mathf.Max(0.001f, distance * 0.01f);
+            cam.farClipPlane = Mathf.Max(100f, distance * 20f);
+            return;
+        }
+        // A WORLD MODEL. The model rule ties far to the distance alone, which is right while the
+        // camera is outside the object -- and a world model is where the camera goes INSIDE: zoomed to
+        // a wall of a 10,000-unit cave, 20x the distance to the pivot cuts away most of the cave behind
+        // it. Far therefore also reaches past the far side of the whole object: the camera's distance to
+        // the CENTRE OF THE FRAMED BOUNDS plus their radius, with a 20 % margin, so a 15,000-unit WMO
+        // stays whole at every zoom and there is no fixed ceiling like the old 6400 far plane. It is
+        // measured from the object, not from the pivot, because a right-drag pans the pivot without
+        // limit: zoomed in on a pivot panned off-centre, distance + radius falls short of the far side
+        // and a hard cut sweeps across the object while orbiting. Apply has already placed the camera.
+        // Near keeps the model's 1 % of the distance, which is what gives a small WMO its precision,
+        // but never drops below 1/10000 of far: that ratio keeps the depth buffer meaningful across the
+        // whole range when the camera is close to a huge object.
+        float reach = Vector3.Distance(cam.transform.position, framedCenter) + framedRadius;
+        float far = Mathf.Max(Mathf.Max(100f, distance * 20f), reach * 1.2f);
+        cam.farClipPlane = far;
+        cam.nearClipPlane = Mathf.Max(Mathf.Max(0.001f, distance * 0.01f), far * 1e-4f);
     }
 
     // ---------------------------------------------------------------- input backends

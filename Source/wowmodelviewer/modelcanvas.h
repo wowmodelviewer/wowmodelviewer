@@ -143,7 +143,13 @@ public:
   
   Attachment* LoadModel(GameFile *);
 
-  void LoadWMO(wxString fn);
+  // Replaces any WMO with the root at fn (fileDataID: the root's, when known -- it is opened by it and
+  // sent to the Unity player). Metadata only: see WMO::metadataOnly.
+  void LoadWMO(wxString fn, int fileDataID = 0);
+  // Deletes the WMO, if any, and every pointer to it first: canvas->root (whose next setModel or
+  // destructor writes into the model it holds) and g_selWMO (the doodad-set list's target). The only
+  // way a WMO may be deleted.
+  void ClearWMO();
   void LoadADT(wxString fn);
   //void TogglePause();
   
