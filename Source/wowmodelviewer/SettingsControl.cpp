@@ -4,7 +4,6 @@
 #include <wx/notebook.h>
 
 #include "logger/Logger.h"
-#include "DisplaySettings.h"
 #include "ExportSettings.h"
 #include "GeneralSettings.h"
 
@@ -27,11 +26,11 @@ SettingsControl::SettingsControl(wxWindow* parent, wxWindowID id)
   notebook = new wxNotebook(this, ID_SETTINGS_TABS, wxPoint(0,0), wxSize(415,740), wxNB_TOP|wxNB_FIXEDWIDTH|wxNB_NOPAGETHEME);
   
   page1 = new GeneralSettings(notebook, ID_GENERAL_SETTINGS);
-  page2 = new DisplaySettings(notebook, ID_DISPLAY_SETTINGS);
   page3 = new ExportSettings(notebook, ID_EXPORT_SETTINGS);
 
+  // No Display page: its OpenGL display mode, field of view, GL capability and environment-mapping
+  // options only ever configured the OpenGL viewport, which is archived (DisplaySettings is unreferenced).
   notebook->AddPage(page1, _("General"), false, -1);
-  notebook->AddPage(page2, _("Display"), false);
   notebook->AddPage(page3, _("Export"), false);
 }
 
@@ -48,7 +47,6 @@ void SettingsControl::Open()
   Show(true);
 
   page1->Update();
-  page2->Update();
   page3->Update();
 }
 

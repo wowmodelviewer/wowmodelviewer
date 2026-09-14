@@ -12,7 +12,6 @@ class wxNotebook;
 
 // Custom headers
 
-class DisplaySettings;
 class ExportSettings;
 class GeneralSettings;
 
@@ -21,7 +20,6 @@ enum
   // Settings
   ID_SETTINGS_FRAME,
   ID_GENERAL_SETTINGS,
-  ID_DISPLAY_SETTINGS,
   ID_EXPORT_SETTINGS,
   ID_SETTINGS_TABS
 };
@@ -34,7 +32,6 @@ class SettingsControl: public wxWindow
 
   wxNotebook *notebook;
   GeneralSettings *page1;
-  DisplaySettings *page2;
   ExportSettings *page3;
 
 public:

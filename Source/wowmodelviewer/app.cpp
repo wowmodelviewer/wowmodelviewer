@@ -46,6 +46,7 @@
 #include "UnityIpcServer.h"
 #include "UnityRendererHost.h"
 
+#include <wx/evtloop.h>
 #include <wx/stopwatch.h>
 
 
@@ -55,7 +56,8 @@ the wxApp initiates our program (takes over the role of main())
 When our wxApp loads,  it creates our ModelViewer class object,
 which is a wxWindow.  From there ModelViewer object then creates
 our menu bar, character control, view control, filetree control,
-animation control, and the canvas control (opengl).  Once those
+animation control, and the hidden canvas control (the archived OpenGL
+viewport, kept for its GL context, the model and the animation clock).  Once those
 controls are created it then loads saved variables from the config.ini
 file.  Then it proceeds  to create and open the MPQ archives,  creating
 a file list of the contents from all files within all of the opened mpq archives.
@@ -161,6 +163,9 @@ static void doHeadlessFbxExport(ModelViewer * frame, const QString & outPath,
     }
   }
   plugin->setAnimationsToExport(clips);
+
+  // The pose the exporter reads is computed, not left over from a drawn frame; see UpdateExportPose.
+  frame->UpdateExportPose();
 
   std::printf("WMVEXPORT-PROGRESS: STAGE START\n"); std::fflush(stdout);
   const bool ok = plugin->exportModel(m, outPath.toStdWString());
@@ -431,22 +436,26 @@ static void doHeadlessDumpTexture(int fileDataId, const QString & outPath)
 
 // -mo <model> -unityipctest: end-to-end self-test of the embedded Unity renderer's runtime
 // asset access, using whatever player build is installed (the Unity-free TestStub or a real
-// Unity build). Opens the Unity pane and launches the player exactly as View > Unity Renderer
-// does, then pumps until the player has connected, announced unityReady, received loadWoWModel
-// for the loaded model, requested it and got an assetResponse (or a timeout). The player is
-// launched with -wmvSelfTest, so a diagnostic-capable player (the TestStub) also probes the
-// error paths -- a missing asset and an unknown message type -- which a normal View > Unity
-// Renderer launch never does. The missing-asset and by-FileDataID paths are additionally
-// exercised in-process. Everything is logged with the [unityipc-test]
-// prefix. The asset exchange itself touches no files on disk (runtime access, not an export);
-// the surrounding -mo run still writes its usual screenshot + logs. The frame is parked
-// off-screen in this mode, so nothing shows up on the desktop.
+// Unity build). Launches the player into the Unity viewport (already the centre pane) exactly as
+// the app's own start-up does (ModelViewer::StartUnityRenderer), then pumps until the player has
+// connected, announced unityReady, received loadWoWModel for the loaded model, requested it and got
+// an assetResponse (or a timeout). The player is launched with -wmvSelfTest, so a diagnostic-capable
+// player (the TestStub) also probes the error paths -- a missing asset and an unknown message type --
+// which a normal launch never does. The missing-asset and by-FileDataID paths are additionally
+// exercised in-process, and the VIEWPORT check confirms the Unity viewport is the centre pane, that
+// no viewport toggle exists, that the archived canvas is hidden, unmanaged and never painted, that
+// its clock still ticks, and that the loaded model is shown rather than a notice. Everything is
+// logged with the [unityipc-test] prefix. The asset exchange itself touches no files on disk
+// (runtime access, not an export). The frame is parked off-screen in this mode, so nothing shows up
+// on the desktop.
 static void doHeadlessUnityIpcTest(ModelViewer * frame)
 {
   LOG_INFO << "[unityipc-test] starting -- player:" << QString::fromWCharArray(UnityRendererHost::resolveUnityExePath().c_str());
-  if (!frame->ShowUnityRenderer(/* selfTest */ true) || !frame->unityRendererHost)
+  if (!frame->unityRendererHost || !frame->StartUnityRenderer(/* selfTest */ true))
   {
-    LOG_ERROR << "[unityipc-test] RESULT: FAIL (player could not be launched)";
+    LOG_ERROR << "[unityipc-test] RESULT: FAIL (player could not be launched:"
+              << QString::fromWCharArray(frame->unityRendererHost ? frame->unityRendererHost->playerProblem().c_str()
+                                                                    : L"no viewport") << ")";
     return;
   }
   UnityIpcServer * ipc = frame->unityRendererHost->ipc();
@@ -483,6 +492,90 @@ static void doHeadlessUnityIpcTest(ModelViewer * frame)
            << "bytesServed=" << (qlonglong)st.bytesServed << "provider=" << st.lastProvider
            << "lastRequest=" << st.lastRequest << "lastError=" << st.lastError
            << "elapsedMs=" << (long)sw.Time();
+
+  // THE VIEWPORT. The Unity viewport is the only viewport: it must be the shown centre pane, no toggle
+  // may exist to hand the centre to anything else, and the archived OpenGL canvas must be neither a
+  // pane nor a shown window -- and must never have been painted. The canvas is still the model owner
+  // and the clock the renderer mirrors, so its clock must keep ticking with nothing drawn (the state
+  // pushes that clock drives must keep arriving too). And for the loaded model, the viewport decision
+  // must be "the model", not a notice. A frozen clock here would look exactly like a frozen viewport.
+  bool viewportOk = true;
+  {
+    ModelViewer::ViewportNotice notice;
+    const bool drawable = frame->unityCanDrawCurrentModel(&notice);
+    const bool noticeUp = frame->unityRendererHost->hasNotice();
+    const bool centre = frame->isUnityViewportCentre();
+
+    bool canvasPane = false;
+    wxAuiPaneInfoArray & panes = frame->interfaceManager.GetAllPanes();
+    for (size_t i = 0; i < panes.GetCount(); i++)
+      canvasPane = canvasPane || panes.Item(i).window == frame->canvas || panes.Item(i).name == wxT("canvas");
+    const bool canvasShown = frame->canvas && frame->canvas->IsShown();
+
+    // A toggle is a menu item; look for the old one by its label, and for any item that would name a
+    // main-viewport choice.
+    bool toggle = false;
+    if (frame->menuBar)
+      for (size_t m = 0; m < frame->menuBar->GetMenuCount(); m++)
+      {
+        const wxMenuItemList & items = frame->menuBar->GetMenu(m)->GetMenuItems();
+        for (wxMenuItemList::compatibility_iterator it = items.GetFirst(); it; it = it->GetNext())
+        {
+          const wxString label = it->GetData()->GetItemLabelText().Lower();
+          toggle = toggle || label.Contains(wxT("main viewport"));
+        }
+      }
+
+    const wxSize hostSize = frame->unityRendererHost->GetClientSize();
+    LOG_INFO << "[unityipc-test] viewport check: unityCentre=" << (centre ? 1 : 0)
+             << "hostSize=" << hostSize.x << "x" << hostSize.y
+             << "viewportToggle=" << (toggle ? 1 : 0)
+             << "canvasPane=" << (canvasPane ? 1 : 0) << "canvasShown=" << (canvasShown ? 1 : 0)
+             << "canvasInit=" << ((frame->canvas && frame->canvas->init) ? 1 : 0)
+             << "videoRender=" << (video.render ? 1 : 0)
+             << "decision=" << (drawable ? "model" : "notice")
+             << "notice=" << QString::fromWCharArray((drawable ? frame->unityRendererHost->noticeTitle()
+                                                               : notice.title).c_str())
+             << "noticeUp=" << (noticeUp ? 1 : 0);
+
+    // The clock: read the loaded model's frame across a stretch of pumping, playing.
+    const WoWModel * cm = frame->canvas ? frame->canvas->model() : NULL;
+    bool clockOk = true;
+    if (cm && cm->animManager && !cm->anims.empty())
+    {
+      const bool paused = cm->animManager->IsPaused();
+      const size_t before = cm->animManager->GetFrame();
+      const int statesBefore = ipc->stats().statePushes;
+      const unsigned long ticksBefore = ModelCanvas::s_clockTicks;
+      {
+        // This runs inside OnInit, before the application's event loop exists, and wxYield without an
+        // active loop does not dispatch the timer's messages: the clock cannot move however long the
+        // pump runs (0 ticks over 300 ms when tried; the reason this measurement used to read "not
+        // ticking in a headless run"). A loop activated for the measurement dispatches like the running
+        // app does -- timers, and any paint the hidden canvas might receive, which the paint check at
+        // the end of the run would then catch.
+        wxGUIEventLoop measureLoop;
+        wxEventLoopActivator activate(&measureLoop);
+        for (int i = 0; i < 120; i++) { ipc->poll(); wxTheApp->Yield(true); wxMilliSleep(10); }
+      }
+      const size_t after = cm->animManager->GetFrame();
+      const unsigned long ticks = ModelCanvas::s_clockTicks - ticksBefore;
+      clockOk = paused || after != before;
+      LOG_INFO << "[unityipc-test]   canvas clock (hidden, never painted):" << (qulonglong)ticks << "timer ticks, frame"
+               << (int)before << "->" << (int)after
+               << (paused ? "(paused, not measured)" : (after != before ? "(ticking)" : "(NOT TICKING)"))
+               << "| statePushes +" << (ipc->stats().statePushes - statesBefore)
+               << "timerRunning=" << ((frame->canvas && frame->canvas->timer.IsRunning()) ? 1 : 0);
+    }
+    else
+      LOG_INFO << "[unityipc-test]   canvas clock: the model has no animation to measure it with";
+
+    // The hidden canvas must still hold a working GL context: every texture the player is sent and the
+    // character's composited images are decoded through it.
+    const bool glOk = frame->canvas && frame->canvas->init && video.render;
+    viewportOk = centre && !toggle && !canvasPane && !canvasShown && drawable && !noticeUp && clockOk && glOk;
+    LOG_INFO << "[unityipc-test] viewport check:" << (viewportOk ? "(OK)" : "(FAIL)");
+  }
 
   // Direct checks (no player involved): a clean error for a missing asset, and the by-FileDataID path.
   {
@@ -625,10 +718,10 @@ static void doHeadlessUnityIpcTest(ModelViewer * frame)
                  << "lastAnimation=" << ipc->stats().lastAnimation;
 
         // EXTERNAL ANIMATIONS. A sequence without flag 0x20 keeps its keyframes in a .anim file
-        // rather than in the .m2; the legacy viewport reads those files (WoWModel::readAnimsFromFile)
+        // rather than in the .m2; the host's model code reads those files (WoWModel::readAnimsFromFile)
         // and plays such a sequence normally, so the embedded renderer has to as well. These are
-        // the sequences that used to fall back to the idle in the Unity pane while playing fine in
-        // the OpenGL one -- Agronn's SitGroundDown among them -- so the self-test drives them
+        // the sequences that used to fall back to the idle in the Unity viewport while playing fine in
+        // the old OpenGL one -- Agronn's SitGroundDown among them -- so the self-test drives them
         // explicitly rather than hoping the sampled walk lands on one.
         if (mdl2 && ac)
         {
@@ -651,62 +744,6 @@ static void doHeadlessUnityIpcTest(ModelViewer * frame)
           }
           LOG_INFO << "[unityipc-test] external-anim check: drove" << externalDriven
                    << "sequence(s) whose keyframes are in .anim files";
-
-          // PRIMARY VIEWPORT. Promote the Unity viewport to the centre the way a model load does
-          // outside batch mode, then check the two things that could break: the canvas must keep
-          // ticking (it owns the clock the renderer mirrors) and the state pushes must keep
-          // arriving. A frozen canvas here would look exactly like a frozen Unity viewport.
-          {
-            const bool supported = frame->unityCanShowCurrentModel();
-
-            // CONTROL FIRST. If the clock is not running before the promotion either, then a
-            // stopped clock afterwards says nothing about hiding the canvas -- it says the canvas
-            // never started ticking in this run. Without this the measurement is unreadable.
-            const size_t ctrlBefore = mdl2->animManager->GetFrame();
-            const int ctrlStates = ipc->stats().statePushes;
-            for (int i = 0; i < 60; i++) { ipc->poll(); wxTheApp->Yield(true); wxMilliSleep(10); }
-            const size_t ctrlAfter = mdl2->animManager->GetFrame();
-            LOG_INFO << "[unityipc-test] primary-viewport CONTROL (OpenGL still centre): frame"
-                     << (int)ctrlBefore << "->" << (int)ctrlAfter
-                     << (ctrlAfter != ctrlBefore ? "(ticking)" : "(not ticking in this run)")
-                     << "| statePushes +" << (ipc->stats().statePushes - ctrlStates);
-
-            const size_t frameBefore = mdl2->animManager->GetFrame();
-            const int statesBefore = ipc->stats().statePushes;
-
-            // The promotion deliberately does nothing in batch mode, so lift that for the check:
-            // this must exercise the real path, not a stand-in for it.
-            const bool wasBatch = frame->batchMode;
-            frame->batchMode = false;
-            frame->UpdatePrimaryViewport();
-            frame->batchMode = wasBatch;
-            const bool hidden = !frame->interfaceManager.GetPane(frame->canvas).IsShown();
-            LOG_INFO << "[unityipc-test] primary-viewport check: supported=" << (supported ? 1 : 0)
-                     << "unityPrimaryViewport=" << (unityPrimaryViewport ? 1 : 0)
-                     << "openGLPaneHidden=" << (hidden ? 1 : 0);
-
-            for (int i = 0; i < 120; i++) { ipc->poll(); wxTheApp->Yield(true); wxMilliSleep(10); }
-            const size_t frameAfter = mdl2->animManager->GetFrame();
-            const int statesAfter = ipc->stats().statePushes;
-            const bool controlTicked = (ctrlAfter != ctrlBefore);
-            const bool tickedNow = (frameAfter != frameBefore);
-            // Read against the control, not on its own. A clock that was already still before the
-            // promotion says nothing about the promotion; only a clock that stopped BECAUSE of it
-            // would be a fault, and that is the comparison this reports.
-            LOG_INFO << "[unityipc-test]   canvas clock with Unity in the centre: frame"
-                     << (int)frameBefore << "->" << (int)frameAfter
-                     << (!controlTicked
-                         ? "(not measurable: the canvas does not tick in a headless run either --"
-                           " video.render is off, so this needs the GUI)"
-                         : (tickedNow ? "(still ticking -- unaffected by hiding the pane)"
-                                      : "(STOPPED BY THE PROMOTION -- regression)"))
-                     << "| statePushes +" << (statesAfter - statesBefore);
-
-            // Hand it back, so the rest of the run and any screenshot behave as before.
-            frame->UncoverOpenGLViewport();
-            LOG_INFO << "[unityipc-test]   OpenGL viewport restored: openGLPaneShown="
-                     << (frame->interfaceManager.GetPane(frame->canvas).IsShown() ? 1 : 0);
-          }
 
           // THE DROPDOWN PATH. AnimControl::OnAnim is what the user actually operates, and it is
           // NOT SelectAnimation: it stops the model, selects, and plays again. Only the selection
@@ -917,11 +954,14 @@ static void doHeadlessUnityIpcTest(ModelViewer * frame)
       {
         WoWModel * gm = const_cast<WoWModel *>(frame->canvas->model());
         const size_t owned = gm ? std::min(gm->ownGeosetCount(), gm->geosets.size()) : 0;
-        if (owned < 2 || !frame->unityCanShowCurrentModel() || !ipc->playerSwitchesSubmeshes() ||
+        if (owned < 2 || !frame->unityCanDrawCurrentModel() || !ipc->playerSwitchesSubmeshes() ||
             frame->canvasShowsCharacter())
         {
+          // A character's geosets travel in its scene (the character check below); a model the Unity
+          // viewport cannot draw has a notice in front of it and no state to switch.
           LOG_INFO << "[unityipc-test] geoset-live check: skipped (" << (int)owned
-                   << "submesh(es), unity can show=" << (frame->unityCanShowCurrentModel() ? 1 : 0)
+                   << "submesh(es), unity can draw=" << (frame->unityCanDrawCurrentModel() ? 1 : 0)
+                   << ", character=" << (frame->canvasShowsCharacter() ? 1 : 0)
                    << ", player protocol" << ipc->playerProtocolVersion() << ")";
         }
         else
@@ -1021,7 +1061,9 @@ static void doHeadlessUnityIpcTest(ModelViewer * frame)
              << first << "ms; scenes sent" << ipc->stats().scenePushes << "images" << ipc->stats().imagePushes
              << "(" << ipc->stats().imageBytes << "base64 bytes); last" << ipc->stats().lastScene << "| ack"
              << ipc->stats().lastSceneAck;
-    characterOk = first >= 0;
+    // The body the player dresses is the host's composite, made in the hidden canvas's GL context: no
+    // characterImage sent means the composite was not produced.
+    characterOk = first >= 0 && ipc->stats().imagePushes >= 1;
 
     WoWModel * cm = const_cast<WoWModel *>(frame->canvas->model());
     if (characterOk && cm)
@@ -1071,8 +1113,15 @@ static void doHeadlessUnityIpcTest(ModelViewer * frame)
   // playing them at least once.
   const bool stateOk = (frame->animControl == NULL) || (frame->animControl->animationCount() == 0) ||
                        (ipc->stats().statePushes >= 1);
+  // The archived canvas must not have received a single paint in the whole run (ModelCanvas::Render
+  // also logs an error the first time it is entered).
+  const bool neverPainted = !ModelCanvas::s_renderEntered;
+  LOG_INFO << "[unityipc-test] archived canvas paint handler entered during the run=" << (neverPainted ? 0 : 1)
+           << "| clock ticks in total=" << (qulonglong)ModelCanvas::s_clockTicks
+           << (neverPainted ? "(OK)" : "(FAIL)");
   const bool pass = st.connections >= 1 && ipc->isUnityReady() && st.requests >= 1 &&
-                    st.responsesOk >= 1 && skinsOk && animsOk && stateOk && geosetLiveOk && characterOk;
+                    st.responsesOk >= 1 && skinsOk && animsOk && stateOk && geosetLiveOk && characterOk &&
+                    viewportOk && neverPainted;
   LOG_INFO << "[unityipc-test] RESULT:" << (pass ? "PASS" : "FAIL");
 
   // Close the player now (what app shutdown does) and confirm the child process is gone.
@@ -1080,35 +1129,12 @@ static void doHeadlessUnityIpcTest(ModelViewer * frame)
   LOG_INFO << "[unityipc-test] player shut down; still running=" << (frame->unityRendererHost->isRunning() ? 1 : 0);
 }
 
-// Headless smoke-test for the Image Sequence Exporter pipeline (off-screen, no GUI/timer): loads
-// the model, scrubs the current clip, and writes a handful of PNG + one EXR frame via the same
-// ModelCanvas::CaptureSequenceFrame() the GUI uses. Validates capture/alpha/EXR/naming without the
-// event loop. NOTE: composited character textures don't bake off-screen, so frames may be
-// untextured -- this checks geometry/alpha/format/naming, not final colour. -imgseq <folder>
-static void doHeadlessImageSeq(ModelViewer * frame, const QString & folder)
+// A batch run that loads something and has no other job ends here. It used to write an ss_*.png
+// screenshot of the OpenGL viewport; that viewport is archived and the Unity viewport has no capture
+// yet, so the run says so once instead of writing a picture of a renderer nobody sees.
+static void logNoHeadlessScreenshot()
 {
-  WoWModel * m = (frame && frame->canvas) ? const_cast<WoWModel *>(frame->canvas->model()) : NULL;
-  if (!m || !m->animManager)
-  {
-    std::printf("WMVIMGSEQ: ERROR no model/anim\n"); std::fflush(stdout);
-    return;
-  }
-  const size_t ai = m->animManager->GetAnim();
-  const unsigned len = (ai < m->anims.size() && m->anims[ai].length > 0) ? m->anims[ai].length : 1000;
-  const int n = 6;                  // sample 6 frames across the clip
-  m->animManager->Pause(true);
-  for (int i = 0; i < n; i++)
-  {
-    const unsigned t = (unsigned)((double)i / (n - 1) * len);
-    m->animManager->SetFrame(t);
-    const int fmt = (i == 0) ? 2 : 0; // first frame EXR, rest PNG
-    const QString path = folder + (folder.endsWith("/") || folder.endsWith("\\") ? "" : "/")
-                       + QString("imgseqtest_%1.%2").arg(i, 4, 10, QChar('0')).arg(fmt == 2 ? "exr" : "png");
-    const bool ok = frame->canvas->CaptureSequenceFrame(wxString(path.toStdWString()), 640, 360, fmt, true /* transparent */);
-    std::printf("WMVIMGSEQ: frame %d t=%u -> %s %s\n", i, t, qPrintable(path), ok ? "ok" : "FAILED");
-    std::fflush(stdout);
-  }
-  std::printf("WMVIMGSEQ: DONE\n"); std::fflush(stdout);
+  LOG_INFO << "Headless run done: screenshots are not available in the Unity-only viewer, so no ss_*.png was written.";
 }
 
 bool WowModelViewApp::OnInit()
@@ -1218,8 +1244,9 @@ bool WowModelViewApp::OnInit()
   SetTopWindow(frame);
 
   // Park a non-interactive run (background FBX export child / CLI harness) off-screen before the
-  // window is shown, so it never flashes in front of the user. It stays "shown" (a valid GL
-  // drawable, needed for FBX texture read-back) -- just positioned beyond the desktop.
+  // window is shown, so it never flashes in front of the user. The frame itself stays "shown", just
+  // positioned beyond the desktop; the archived OpenGL canvas inside it is never shown in any run
+  // (its GL context does not need it to be -- see ModelCanvas's constructor).
   // (earlyHeadless was computed above, before the splash screen, which it also gates.)
   if (earlyHeadless)
     frame->Move(-32000, -32000);
@@ -1269,9 +1296,9 @@ bool WowModelViewApp::OnInit()
   frame->interfaceManager.Update();
 #endif
 
+  // The archived canvas: initialise its GL state and lights WITHOUT showing it. It is never shown --
+  // not here, not in a headless run -- and its clock (OnTimer) starts ticking once init is set.
   if (frame->canvas) {
-    frame->canvas->Show(true);
-
     if (!frame->canvas->init)
       frame->canvas->InitGL();
 
@@ -1283,15 +1310,14 @@ bool WowModelViewApp::OnInit()
   // TODO: Improve this feature and expand on it.
   // Command arguments
   QString cmd;
-  QString snapModelPath; // -mo: defer load+screenshot until after LoadWoW
+  QString snapModelPath; // -mo: defer the load until after LoadWoW
   int snapItemId = 0;    // -item: defer an item/display-context load until after LoadWoW
-  QString snapArmoryUrl; // -armory <url>: headless import + screenshot (test harness)
-  QString snapNpcArg;    // -npc <id|id:displayId>: headless NPC load + screenshot (test harness)
+  QString snapArmoryUrl; // -armory <url>: headless import (test harness)
+  QString snapNpcArg;    // -npc <id|id:displayId>: headless NPC load (test harness)
   QString fbxExportPath; // -fbxexport <out.fbx>: headless FBX export of the -mo model (test harness)
-  QString imgSeqFolder;  // -imgseq <folder>: headless image-sequence capture smoke test
   QString fbxInspectPath; // -fbxinspect <in.fbx>: read-only forensic dump of an existing FBX (no game data)
   QString animDumpName;   // -animdump <animName>: source-vs-exported per-bone pose diff for the -mo model
-  QString snapCharPath;   // <file.chr>: defer LoadChar until AFTER LoadWoW (export/screenshot)
+  QString snapCharPath;   // <file.chr>: defer LoadChar until AFTER LoadWoW (export)
   QString mpqDataFolder;  // -mpq <DataFolder> [locale]: load a legacy MPQ client instead of CASC
   QString mpqLocale;      // optional locale for -mpq (auto-detected when empty)
   int dumpTexFileDataId = 0; QString dumpTexOutPath; // -dumptex <fileDataID> <out.png>: forensic-only
@@ -1329,7 +1355,7 @@ bool WowModelViewApp::OnInit()
         if (!fn.endsWith("2")) // Its not an M2 file, exit
           break;
 
-        // Defer load + screenshot until AFTER LoadWoW() below -- the game data
+        // Defer the load until AFTER LoadWoW() below -- the game data
         // must be loaded before a model can be resolved/composed.
         snapModelPath = fn;
       }
@@ -1380,17 +1406,9 @@ bool WowModelViewApp::OnInit()
         i += 2;
       }
     }
-    else if (cmd == "-imgseq") {
-      // Headless image-sequence capture smoke test: "<asset> -imgseq <folder>" writes a few
-      // PNG + EXR frames via ModelCanvas::CaptureSequenceFrame and exits.
-      if (i + 1 < argc) {
-        i++;
-        imgSeqFolder = QString::fromWCharArray(argv[i]);
-      }
-    }
     else if (cmd == "-armory") {
-      // Headless armory import for testing: load the character from the URL and
-      // screenshot it after LoadWoW(). Mirrors -mo. importChar sets hasTransmogGear
+      // Headless armory import for testing: load the character from the URL after
+      // LoadWoW(). Mirrors -mo. importChar sets hasTransmogGear
       // false so no modal dialog blocks the run.
       if (i + 1 < argc) {
         i++;
@@ -1509,8 +1527,8 @@ bool WowModelViewApp::OnInit()
   {
     frame->batchMode = true; // non-interactive run: suppress modal dialogs that would block it
 
-    // The command bar and the Model panel did not exist when the batch outputs were settled; keep
-    // them out of a non-interactive run so its canvas is laid out as it was.
+    // The command bar and the Model panel did not exist when the batch runs were settled; keep them
+    // out of a non-interactive run so its viewport keeps the size those runs have always had.
     frame->interfaceManager.GetPane(wxT("commandBar")).Show(false);
     frame->interfaceManager.GetPane(wxT("modelInspector")).Show(false);
     frame->interfaceManager.Update();
@@ -1565,9 +1583,8 @@ bool WowModelViewApp::OnInit()
       frame->LoadItem((unsigned int)snapItemId);
       if (unityIpcTest)
         doHeadlessUnityIpcTest(frame);
-      QString out = QString("ss_item_%1.png").arg(snapItemId);
-      frame->canvas->Screenshot(out.toStdWString());
-      return false; // headless capture done -> exit
+      logNoHeadlessScreenshot();
+      return false; // headless run done -> exit
     }
 
     if (!snapModelPath.isEmpty())
@@ -1614,22 +1631,16 @@ bool WowModelViewApp::OnInit()
         doHeadlessFbxExport(frame, fbxExportPath, optMesh != 0, optSkel != 0, optSkin != 0, optAnim != 0, fbxClipsArg, optComponent != 0);
         return false; // headless export done -> exit
       }
-      if (!imgSeqFolder.isEmpty())
-      {
-        doHeadlessImageSeq(frame, imgSeqFolder);
-        return false;
-      }
 
       // Embedded Unity renderer runtime asset access self-test (needs the loaded model above).
       if (unityIpcTest)
         doHeadlessUnityIpcTest(frame);
 
-      QString out = "ss_" + QString(snapModelPath).replace('\\', '_').replace('/', '_') + ".png";
-      frame->canvas->Screenshot(out.toStdWString());
-      return false; // headless capture done -> exit
+      logNoHeadlessScreenshot();
+      return false; // headless run done -> exit
     }
 
-    // Character (.chr) headless branch -- compose the saved character, then export or screenshot.
+    // Character (.chr) headless branch -- compose the saved character, then export.
     if (!snapCharPath.isEmpty())
     {
       frame->LoadChar(snapCharPath);
@@ -1638,21 +1649,14 @@ bool WowModelViewApp::OnInit()
         doHeadlessFbxExport(frame, fbxExportPath, optMesh != 0, optSkel != 0, optSkin != 0, optAnim != 0, fbxClipsArg, optComponent != 0);
         return false;
       }
-      if (!imgSeqFolder.isEmpty())
-      {
-        doHeadlessImageSeq(frame, imgSeqFolder);
-        return false;
-      }
-      QString out = "ss_chr_" + QString(snapCharPath).section('/', -1).section('\\', -1) + ".png";
-      frame->canvas->Screenshot(out.toStdWString());
+      logNoHeadlessScreenshot();
       return false;
     }
     if (!snapArmoryUrl.isEmpty())
     {
       frame->ImportArmoury(wxString::FromUTF8(snapArmoryUrl.toUtf8().constData()));
-      QString out = "ss_armory_" + QString(snapArmoryUrl).section('/', -1).replace('?', '_') + ".png";
-      frame->canvas->Screenshot(out.toStdWString());
-      return false; // headless capture done -> exit
+      logNoHeadlessScreenshot();
+      return false; // headless run done -> exit
     }
     if (!snapNpcArg.isEmpty())
     {
@@ -1664,9 +1668,8 @@ bool WowModelViewApp::OnInit()
         doHeadlessFbxExport(frame, fbxExportPath, optMesh != 0, optSkel != 0, optSkin != 0, optAnim != 0, fbxClipsArg, optComponent != 0);
         return false;
       }
-      QString out = "ss_npc_" + QString(snapNpcArg).replace(':', '_') + ".png";
-      frame->canvas->Screenshot(out.toStdWString());
-      return false; // headless capture done -> exit
+      logNoHeadlessScreenshot();
+      return false; // headless run done -> exit
     }
   }
   else
@@ -1733,18 +1736,22 @@ void WowModelViewApp::LoadSettings()
 {
   QSettings config(QString::fromWCharArray(cfgPath.c_str()), QSettings::IniFormat);
 
-  // graphic settings
-  video.curCap.aaSamples = config.value("Graphics/FSAA", 0).toInt();
-  video.curCap.accum = config.value("Graphics/AccumulationBuffer", 0).toInt();
-  video.curCap.alpha = config.value("Graphics/AlphaBits", 0).toInt();
-  video.curCap.colour = config.value("Graphics/ColourBits", 24).toInt();
-  video.curCap.doubleBuffer = config.value("Graphics/DoubleBuffer", 1).toInt();
+  // The GL pixel format the archived canvas's context asks for. It was a user setting (Settings > Display,
+  // saved as Graphics/*) while the OpenGL viewport existed; now the context only decodes textures for
+  // the Unity viewport, so it always asks for the defaults a fresh install used, and old Graphics/* values
+  // are ignored -- a bad saved mode can no longer break texture decoding with no page left to fix it on.
+  // (SetHandle still adjusts this to a mode the display supports.)
+  video.curCap.aaSamples = 0;
+  video.curCap.accum = 0;
+  video.curCap.alpha = 0;
+  video.curCap.colour = 24;
+  video.curCap.doubleBuffer = 1;
 #ifdef _WINDOWS
-  video.curCap.hwAcc = config.value("Graphics/HWAcceleration", WGL_FULL_ACCELERATION_ARB).toInt();
+  video.curCap.hwAcc = WGL_FULL_ACCELERATION_ARB;
 #endif
-  video.curCap.sampleBuffer = config.value("Graphics/SampleBuffer", 0).toInt();
-  video.curCap.stencil = config.value("Graphics/StencilBuffer", 0).toInt();
-  video.curCap.zBuffer = config.value("Graphics/ZBuffer", 16).toInt();
+  video.curCap.sampleBuffer = 0;
+  video.curCap.stencil = 0;
+  video.curCap.zBuffer = 16;
 
   // Application locale info
   langID = config.value("Locale/LanguageID", 1).toInt();
@@ -1756,17 +1763,16 @@ void WowModelViewApp::LoadSettings()
   customDirectoryPath = config.value("Settings/CustomDirPath", "").toString().toStdWString();
   customFilesConflictPolicy = config.value("Settings/CustomFilesConflictPolicy", 0).toInt();
   displayItemAndNPCId = config.value("Settings/displayItemAndNPCId", 0).toInt();
-  ssCounter = config.value("Settings/SSCounter", 100).toInt();
-  imgFormat = config.value("Settings/DefaultFormat", 1).toInt();
+  // Settings/SSCounter and Settings/DefaultFormat (the screenshot file counter and format) are no longer
+  // read or written: Save Screenshot went with the OpenGL viewport.
 
   // Optional override for the embedded Unity renderer player exe. Empty (the default) ->
   // resolved at use-time as tools\unity-renderer\UnityRenderer.exe next to the WMV
   // executable, so a moved install keeps finding its bundled player.
   unityRendererPath = config.value("Tools/UnityRendererPath", "").toString().toStdWString();
 
-  // Which viewport is the main one. Defaults to the Unity renderer for the models it supports;
-  // View > "Unity as main viewport" turns it off and hands the centre back to the OpenGL canvas.
-  unityPrimaryViewport = config.value("Tools/UnityPrimaryViewport", true).toBool();
+  // Tools/UnityPrimaryViewport is no longer read: the Unity viewport is the only viewport, so an
+  // old value left in a Config.ini has nothing left to choose between.
 
   // Optional override for the armory importer's proxy URL (the proxy holds the
   // Blizzard credentials server-side). Pushed into the core singleton so the Qt
@@ -1790,11 +1796,8 @@ void WowModelViewApp::SaveSettings()
   config.setValue("Settings/CustomDirPath", QString::fromWCharArray(customDirectoryPath.c_str()));
   config.setValue("Settings/CustomFilesConflictPolicy", customFilesConflictPolicy);
   config.setValue("Settings/displayItemAndNPCId", displayItemAndNPCId);
-  config.setValue("Settings/SSCounter", ssCounter);
-  config.setValue("Settings/DefaultFormat", imgFormat);
 
   config.setValue("Tools/UnityRendererPath", QString::fromWCharArray(unityRendererPath.c_str()));
-  config.setValue("Tools/UnityPrimaryViewport", unityPrimaryViewport);
 
   config.setValue("Armory/ProxyURL", QString::fromStdString(GLOBALSETTINGS.armoryProxyURL()));
   config.sync();

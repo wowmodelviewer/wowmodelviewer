@@ -1,3 +1,4 @@
+// archived: unreachable since the OpenGL viewport was archived (the Settings > Display page is no longer added).
 /*
  * DisplaySettings.cpp
  *

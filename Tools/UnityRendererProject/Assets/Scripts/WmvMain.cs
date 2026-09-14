@@ -1,8 +1,8 @@
 // WmvMain.cs
 //
-// Bootstrap and load orchestration for the WMV Unity viewport player -- WMV's new renderer
-// foundation and intended primary viewport (the OpenGL canvas is the legacy/fallback viewport
-// during the migration; see docs/unity-renderer/README.md).
+// Bootstrap and load orchestration for the WMV Unity viewport player -- WMV's only viewport (the
+// host's OpenGL viewport is archived and cannot be shown; content this player cannot draw yet gets
+// a notice painted by the host instead; see docs/unity-renderer/README.md).
 //
 // Add this component to one empty GameObject in an otherwise-empty scene; at runtime it builds
 // the camera rig, a light, the status overlay and the IPC client that connects back to WMV.
@@ -26,8 +26,9 @@
 //     -> WmvModelBuilder                    Mesh + Materials + Texture2D + GameObject
 //     -> frame the camera on the mesh bounds
 //
-// This milestone renders a STATIC model: bone data is parsed and preserved but no animation,
-// no skinning, no attachments, no particles.
+// What is built is then animated and dressed by other components: WmvM2Animator (bones, following the
+// app's animation selection and transport), WmvMaterialAnimator and WmvEmitterRuntime (animated
+// materials and particles), and for a character WmvCharacterDresser (the host's characterScene).
 
 using System.Collections.Generic;
 using UnityEngine;

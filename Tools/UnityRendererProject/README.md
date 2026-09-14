@@ -1,17 +1,20 @@
 # UnityRendererProject — the WMV Unity viewport player
 
 This folder holds the **source-only** pieces of the Unity standalone player that WMV embeds
-via `View → Unity Renderer`. The repo contains no Unity project boilerplate and no build
+as its viewport. The repo contains no Unity project boilerplate and no build
 output — you create the project locally with your own Unity install and drop these
 scripts in.
 
-**Direction:** this player is WMV's **new renderer foundation and intended primary
-viewport**; the OpenGL canvas remains the legacy/fallback viewport during the migration.
+**Direction:** this player is **WMV's only viewport**. The OpenGL viewport is archived: it
+cannot be shown, and content the player cannot draw yet gets a notice in the viewport instead.
 It renders **directly from WoW data**: it requests raw assets and metadata from WMV over
 IPC (no OBJ/FBX/GLB export workflow). WMV provides the app UI, the active client/profile,
 CASC/MPQ access, DB/metadata and the runtime commands; the player provides the modern
-rendering pipeline. See `docs/unity-renderer/README.md`. For now the player is optional at
-build and run time.
+rendering pipeline. See `docs/unity-renderer/README.md`. Nothing in the WMV build depends on
+the player, but without a player build WMV has no picture: its viewport shows a notice with the
+path it looked at and a restart button. Where this README or the scripts compare against "the
+OpenGL viewport" or "the legacy viewport", they mean WMV's archived OpenGL rendering code, which
+is still the reference for rules such as geoset visibility and the M2 combiners.
 
 ## Build steps
 
@@ -399,7 +402,7 @@ to (or why it was not).
 | File | Role |
 |---|---|
 | `WmvMain.cs` | Bootstrap (camera rig, light, placeholder, status overlay) and the load pipeline: on `loadWoWModel` it fetches the .m2, parses it, fetches the .skin profile named by SFID, resolves and fetches textures, builds the mesh and frames the camera. |
-| `WmvIpcClient.cs` | IPC client (protocol v1): connects back to the WMV server given by `-wmvPort`, sends `unityReady`, receives `loadWoWModel` and `modelSkin`, sends `getAsset` / `getAssetByFileDataID` / `getModelTextures`, decodes + hash-checks `assetResponse`. |
+| `WmvIpcClient.cs` | IPC client (protocol 3): connects back to the WMV server given by `-wmvPort`, sends `unityReady`, receives `loadWoWModel` and `modelSkin`, sends `getAsset` / `getAssetByFileDataID` / `getModelTextures`, decodes + hash-checks `assetResponse`. |
 | `WmvModelBuilder.cs` | Parsed model + skin + decoded textures -> Unity `Mesh` (one submesh per WoW batch), `Material` and `Texture2D`; owns and disposes those runtime resources so repeated loads do not leak. `RebindTextures` re-uploads the textures behind the materials it already made, for when WMV's selected skin changes. |
 | `Wow/M2Parser.cs` | Chunked M2 (MD21/MD20 v272): header, vertices, textures, materials, lookups, SFID/TXID. |
 | `Wow/M2SkinParser.cs` | .skin profile: vertex lookup, triangles, submeshes, batches, and the two-level index resolution into model vertices. |
@@ -431,7 +434,7 @@ window whenever the pane resizes and sends it `WM_CLOSE` on shutdown.
 
 **WMV is the server.** It listens on `127.0.0.1` (ephemeral port) before launching the player
 and passes `-wmvPort <n>` on the command line; `WmvIpcClient` connects back, sends
-`unityReady { protocolVersion: 1 }`, and then requests raw WoW files with `getAsset` /
+`unityReady { protocolVersion: 3 }`, and then requests raw WoW files with `getAsset` /
 `getAssetByFileDataID` (answered by `assetResponse` with base64 bytes + SHA-1). Newline-delimited
 JSON; full vocabulary and semantics in `docs/unity-renderer/README.md`. Run the player without
 `-wmvPort` and it runs standalone (test scene, no WMV connection).
@@ -439,21 +442,23 @@ JSON; full vocabulary and semantics in `docs/unity-renderer/README.md`. Run the 
 ## TestStub
 
 `TestStub/` contains a small Win32 program that honours the same contracts as the player:
-the `-parentHWND` embedding (child window, fills the parent, exits on `WM_CLOSE`) AND the v1
-IPC (connects to `-wmvPort`, sends `unityReady`, answers `loadWoWModel` with `getAsset`, logs
+the `-parentHWND` embedding (child window, fills the parent, exits on `WM_CLOSE`) AND the
+asset-access IPC (connects to `-wmvPort`, sends `unityReady`, answers `loadWoWModel` with `getAsset`, logs
 and displays the `assetResponse` byte length / SHA-1 / decode check). It also accepts
 `-wmvSelfTest`, which WMV passes **only** for its `-unityipctest` diagnostic run: the stub then
 additionally probes the negative paths (the same asset by FileDataID, a missing path, an
-unknown message type). Without that flag -- i.e. every normal `View -> Unity Renderer` launch
--- it makes exactly one request per model and the viewport shows only the real exchange.
-Build it with any MSVC prompt:
+unknown message type). Without that flag -- i.e. every normal launch, at application start or
+from View > "Restart Unity Renderer" -- it makes exactly one request per model and shows only
+the real exchange. It is an IPC test tool, not a viewer: it announces protocol 2 and draws
+status text only, so installed as the player it shows no model, and a character gets WMV's
+out-of-date notice. Build it with any MSVC prompt:
 
 ```
 cl fake_unity_renderer.c user32.lib gdi32.lib shell32.lib ws2_32.lib /Fe:UnityRenderer.exe
 ```
 
 Drop the result at `tools\unity-renderer\UnityRenderer.exe` to test the WMV side without
-installing Unity -- interactively via `View -> Unity Renderer`, or headlessly with
+installing Unity, headlessly with
 `wowmodelviewer.exe -mo creature/chicken2/chicken2.m2 -unityipctest` (logs `[unityipc-test]
 RESULT: PASS|FAIL` in `userSettings\log.txt`; the stub own log is
 `userSettings\unityRenderer.log`). `creature/chicken2/chicken2.m2` is the primary target

@@ -2,9 +2,9 @@
  * UnityCharacterScene.h
  *
  * The RESOLVED state of a playable character, as the embedded Unity viewport needs it to draw the
- * same character the OpenGL canvas draws. Nothing here decides anything about a character: every
+ * same character the host has resolved. Nothing here decides anything about a character: every
  * value is read from what WoWModel::refresh(), CharDetails, WoWItem and refreshMerging() already
- * computed for the OpenGL draw --
+ * computed on the host's model (the archived OpenGL canvas's, which no longer draws) --
  *
  *   body         the character model's own texture slots, bound exactly as its render passes bind
  *                them (a FileDataID, or the host-composited body / eye image), its own geoset

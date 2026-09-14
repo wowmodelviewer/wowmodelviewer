@@ -2,15 +2,17 @@
 
 ## Direction (read this first)
 
-The embedded Unity viewport is the **new renderer foundation for WMV** and its **intended
-primary viewport**. The existing OpenGL viewport (`ModelCanvas`) remains the **legacy /
-fallback renderer during the migration** and is not where new rendering work goes.
+The embedded Unity viewport is **WMV's only viewport**. The OpenGL viewport (`ModelCanvas`) is
+**archived**: it cannot be shown or used, and no menu item, setting, saved layout, command-line
+switch or failure path brings it back. The canvas object still exists as a hidden internal
+service; what it still does is listed in "Archived OpenGL viewport" below.
 
 Concretely:
 
-- **Unity first.** Future rendering features — characters, equipment, maps, fog, OBS
-  scenes and stream features — target the Unity viewport first. The OpenGL path receives
-  maintenance only.
+- **Unity only.** Every rendering feature -- characters, equipment, maps, fog, capture and
+  stream features -- is built in the Unity viewport. Content it cannot draw yet is not removed
+  from the application: it still loads, and the viewport shows a notice saying what is loaded
+  and that it cannot be shown yet (see "What the viewport shows").
 - **Unity renders directly from WoW data.** There is **no OBJ / FBX / GLB export workflow**
   between WMV and Unity. Unity requests the raw WoW assets (M2, skins, BLP textures, …) and
   metadata it needs from WMV over IPC and builds the scene from them. (WMV's export plugins
@@ -18,12 +20,12 @@ Concretely:
 - **Responsibility split** (detailed below): **WMV provides the application UI, the active
   client/profile, CASC/MPQ access, DB/metadata and the runtime commands; Unity provides the
   modern rendering pipeline and asks WMV for assets/metadata.**
-- **Optional for now.** While the migration is in progress the Unity viewport is optional at
-  build and run time: nothing in the normal WMV build depends on Unity (no Unity SDK, no
-  binaries in the repo; the IPC server only adds the standard Windows socket library), and a
-  missing player build produces a clear
-  message while the app — and the legacy OpenGL viewport — carry on unchanged. "Optional"
-  describes the current migration stage, not the destination.
+- **The player is needed at run time, not at build time.** Nothing in the normal WMV build
+  depends on Unity (no Unity SDK, no binaries in the repo; the IPC server only adds the standard
+  Windows socket library). Without a player build there is no picture: the application still
+  runs, and the viewport shows a notice naming the path it looked at, with a button that tries
+  again. Nothing ships the player yet -- neither the installer nor the CMake install rules
+  include it -- so it is built locally (see "Locating the player").
 
 ## Lighting
 
@@ -268,21 +270,25 @@ and the reported average falls. Measured on the real models, that mask understat
 shipped gain by 11 % to **98 %**, while its sample size moved by up to 63 %. With the skin pinned
 and the mask geometric, three consecutive runs of the same model now agree to every printed digit.
 
-## Which viewport owns the centre
+## What the viewport shows
 
-The Unity renderer is the **main viewport for the models it supports** -- creature M2s. Loading one
-puts it in the centre of the window; View > "Unity as main viewport" turns that off and hands the
-centre back to the OpenGL canvas, and the choice is remembered (`Tools/UnityPrimaryViewport` in
-Config.ini).
+**The Unity viewport is always the centre of the window.** Its host panel is docked as the centre
+pane when the main window is built, before any player exists, and nothing can take that place:
+there is no toggle, File > Reset Layout docks it in the centre again, and a saved layout is
+corrected to it when it is loaded. Layouts saved before the archive (layout version below 3, which
+could name a "canvas" pane) are discarded, and an old `Tools/UnityPrimaryViewport` value left in
+`Config.ini` is ignored.
 
 **It is started when the app starts, not when a model needs it.** The player is a game engine: it
 takes about a second to come up (measured at ~1.1 s to the point where it reports ready). Started on
 first use, the user picked a creature and then watched that happen, with the model appearing
 afterwards — so the wait was attributed to the model, which had nothing to do with it. Starting it
 during app launch spends the same second while the user is still looking at an empty application,
-and the first creature goes straight into a player that is already connected. Until it reports in,
-the pane paints "Starting Unity renderer..." on the player's own background colour, so the handover
-is not a visible flash and an empty viewport never looks broken.
+and the first creature goes straight into a player that is already connected. With nothing loaded
+the viewport shows the empty viewer's prompt (below). A drawable model loaded before the player has
+reported in gets no "starting" caption: the area stays the player's own background colour until the
+model is built, so the handover is not a visible flash and a caption is never on screen for exactly
+as long as it takes to read.
 
 **Nothing is loaded until you ask.** The application opens as an empty fullscreen viewer: no
 client is read and no dialog is put in front of you before you have seen the program. Choosing a
@@ -298,13 +304,12 @@ worked, loading it is exactly what pressing Load would have done. It still appea
 question (first run, a moved install, a folder with no client in it), now centred over a running
 application, and File > Client Choice is unchanged.
 
-**Startup is viewer-first.** With the Unity viewport primary, an interactive launch opens
-maximised showing the viewport and nothing else: the file tree, animation controls and character
-pane start hidden, and the viewport area is plain dark until the player is up — no caption, no
-logo, no placeholder object. Every hidden pane is one item away on the View menu and stays for the
-session; the next launch starts clean again, which is the point of the mode. Launch goes straight to borderless fullscreen; F11 or Esc leaves it, and the menu bar
-survives it deliberately — without the caption there would otherwise be no visible way out, or
-back to View > "Unity as main viewport".
+**Startup is viewer-first.** An interactive launch goes straight to borderless fullscreen on the
+viewport. The Browse, Model and Animation panels come up as they were left (all three on a first
+run): the empty viewport's prompt already says what to do next, so hiding the panels that do it is
+not needed to make an empty application look tidy. There is no logo and no placeholder object. F11
+or Esc leaves fullscreen, and the menu bar survives it deliberately — without the caption there
+would otherwise be no visible way out, or to View > "Restart Unity Renderer".
 
 **No test objects in a normal run.** The spinning cube that used to fill the viewport before a
 model was chosen is off unless `-wmvPlaceholder` is passed. It answered "is the embedded player
@@ -316,28 +321,54 @@ a game engine announcing itself in the middle of a model viewer. Unity 6 makes t
 every licence tier, so there is no reason to keep it. A player built with it on still works — the
 user just sees the logo during app startup instead of during model selection.
 
-**The OpenGL canvas is never torn down, only uncovered.** It still loads the model, still owns the
-animation clock, and is still what every `Send*ToUnity` call reads from — the Unity viewport
-mirrors it rather than replacing it. Promoting it is therefore a routing change of one pane, not a
-renderer migration, and that is what makes the fallback trivial: the canvas is a `Show(true)` away.
+**The model still lives in the host.** The archived OpenGL canvas is a hidden object now, not a
+viewport, but it still loads the model, still owns the animation clock, and is still what every
+`Send*ToUnity` call reads from -- the Unity viewport mirrors it. See "Archived OpenGL viewport".
 
-Deliberately still OpenGL:
+**What the Unity viewport cannot show yet gets a notice, not another viewport.** Content the player
+cannot draw stays loaded -- the panels, the Info tab and the exporters keep working on it -- and the
+host panel paints a notice over the viewport area instead: a title, a line saying what is loaded and
+why it cannot be shown, and a button where there is something to do. Behind a notice the player's
+window is only hidden, never closed, so the next drawable model is on screen as soon as it is built.
 
-| | why |
-|---|---|
-| a character riding a mount | the Unity viewport has no mount rig; the character itself is shown in Unity (see "Characters" below) |
-| a character, with an older player build | a player older than protocol 3 cannot dress one |
-| WMOs, anything not an M2 | not modelled by the Unity renderer at all |
-| screenshots, image sequences, `-mo` runs | they render through the canvas; a non-interactive run keeps the viewport it was given |
-| comparison and debugging | one menu item away, on purpose |
+The decision is `ModelViewer::unityViewportNotice` (the content cases come from
+`unityCanDrawCurrentModel`, which also gates the geoset pushes), applied by
+`UpdateUnityViewportState` on every path that changes what is loaded -- model, NPC, item and
+character loads and their failures, Browse selections, clearing -- on mount and dismount (the
+canvas tick notices those), when the player announces itself or reports a character it could not
+build, and when a stopped player is noticed. The first case that applies wins:
 
-If the player cannot be launched (no build, or a broken one) the centre stays with the OpenGL
-canvas and the log says so — a missing Unity build costs you the new viewport, not the app. A
-character the player reports it could not build goes back to the canvas the same way, until the
-next load.
+| what is loaded, or what is wrong | notice | button |
+|---|---|---|
+| a build without the Unity player (not Windows) | "Unity viewport unavailable" | -- |
+| the GL context never initialised, so no texture can be decoded for the player | "Textures cannot be decoded" | -- |
+| no player build at the configured path, an IPC listener that could not open, a player that would not start, exited unexpectedly, lost its connection or never announced itself | "The Unity renderer is not running", with the reason | Restart Unity renderer |
+| an image picked in Browse (BLP) | "Image selected" | -- |
+| a WMO | "World model loaded" | -- |
+| a map tile (ADT) | "Map tile loaded" | -- |
+| a model with no game file behind it | "Model cannot be shown" | -- |
+| a character riding a mount (the loaded model is then the mount, and the player has no mount rig) | "Mounted character" | -- |
+| a model with no FileDataID (a legacy MPQ client; the player addresses every asset by one) | "Legacy client model" | -- |
+| a character the player reported it could not build, until the next load or a player restart | "Character could not be built", with the player's reason | -- |
+| a character, with a connected player older than protocol 3 | "Unity renderer out of date" | -- |
+| nothing loaded | "No model loaded" | Browse models (Load World of Warcraft... while no client is loaded) |
+
+A player that has not connected yet is assumed to be the current build; one that then announces an
+older protocol gets the out-of-date notice when it does.
+
+**A stopped player is noticed without a load.** A player that crashes, is closed from outside or
+drops its connection (before or after announcing itself), or that is still running but has not
+announced itself 30 seconds after launch, is caught on the status bar's existing two-second timer
+(`UnityRendererHost::checkPlayerHealth`); a player closed on purpose -- application shutdown, a
+restart -- is not reported. A player that was only slow and announces itself after all clears its
+"did not respond" notice. When WMV cannot open the IPC listener the player is not started at all:
+without a port it could never be told what to draw. None of this opens a dialog: the reason is in the notice and in the log.
+View > "Restart Unity Renderer" does what the notice's button does: it closes the player if one is
+still running, launches it again and decides the notice again, and the new player is sent the
+current model when it announces itself.
 
 **Characters.** A playable character stays in the Unity viewport, drawn from the state the host
-has already resolved for the OpenGL canvas rather than from a second customization system:
+has already resolved on its own model rather than from a second customization system:
 
 - the body's texture slots as its render passes bind them -- a file, or the body and eye images
   the host composited (`CharTexture`), sent as pixels;
@@ -348,10 +379,10 @@ has already resolved for the OpenGL canvas rather than from a second customizati
   on the body bone and offset of the character's own attachment table;
 - the closed hand while a weapon is held (the finger key bones posed from HandsClosed).
 
-All of it travels as one `characterScene` per change (see `UnityIpcServer.h`), sent from the canvas
-tick when anything it describes has changed and never faster than the player answers; the player
-applies a scene whole, in one frame, without reloading the body, re-framing the camera or
-restarting the animation.
+All of it travels as one `characterScene` per change (see `UnityIpcServer.h`), sent from the hidden
+canvas's clock tick when anything it describes has changed and never faster than the player
+answers; the player applies a scene whole, in one frame, without reloading the body, re-framing
+the camera or restarting the animation.
 
 ## Responsibility split
 
@@ -359,10 +390,10 @@ restarting the animation.
 |---|---|
 | Application UI (menus, panes, dialogs, settings) | Modern rendering pipeline (materials, lighting, post, HDR/PBR) |
 | Active client / profile (retail, PTR, classic, legacy MPQ) | Scene graph: models, attachments, equipment, maps, fog |
-| CASC / MPQ access — the only component that reads game archives | Cameras, orbit/controls, capture-friendly output (OBS, transparent/solid backgrounds, stream features) |
+| CASC / MPQ access — the only component that reads game archives | Cameras, orbit/controls, capture-friendly output (transparent/solid backgrounds, stream features) |
 | Databases / metadata (DB2, DBC, listfiles, customization, display info) | Animation playback / skinning on the GPU |
 | Runtime commands: what to show, customization/equipment, camera, capture | Requests raw assets / metadata from WMV (`getAsset`, `getAssetByFileDataID`); announces itself (`unityReady`) |
-| Legacy OpenGL viewport (fallback during migration) | — |
+| The archived OpenGL canvas, as a hidden internal service: GL context, loaded model, animation clock (see "Archived OpenGL viewport") | — |
 
 Unity never parses CASC/MPQ itself and never depends on files WMV writes to disk: it
 **asks WMV** for what it needs (raw file bytes by path or FileDataID, resolved metadata)
@@ -372,19 +403,23 @@ over the IPC channel, and WMV serves it from its existing file providers and dat
 
 ```
 +----------------------------- WMV (wxWidgets) ------------------------------+
-|  ModelCanvas (OpenGL)              |  UnityRendererHost (wxPanel)          |
-|  LEGACY / FALLBACK during the      |  NEW RENDERER FOUNDATION              |
-|  migration; maintenance only       |  - launches UnityRenderer.exe with    |
-|  - app's single WGL context bound  |    "-parentHWND <hwnd> delayed        |
-|    to this canvas' own HWND        |    -wmvPort <n>" (player reparents    |
-|                                    |    itself INTO this panel, own        |
-|                                    |    process + device)                  |
-|                                    |  - resizes the embedded child window  |
-|                                    |  - WM_CLOSE (+terminate fallback)     |
-|                                    |    on app shutdown                    |
+|  UnityRendererHost (wxPanel) -- THE VIEWPORT, always the centre pane       |
+|  - launches UnityRenderer.exe with "-parentHWND <hwnd> delayed             |
+|    -wmvPort <n>" (the player reparents itself INTO this panel; own         |
+|    process + device)                                                       |
+|  - resizes the embedded child window                                       |
+|  - paints a notice (and hides the player's window) when it cannot show     |
+|    what is loaded; notices a player that exited or disconnected            |
+|  - WM_CLOSE (+terminate fallback) on app shutdown and on a restart         |
+|                                                                            |
+|  ModelCanvas (OpenGL) -- ARCHIVED: hidden, never painted, not a pane       |
+|  - the app's single WGL context, bound to this canvas' own HWND            |
+|    (texture decode/upload, character composites, exporter read-backs)      |
+|  - owns the loaded model and the animation clock whose tick drives the     |
+|    heartbeat and character-scene pushes                                    |
 +----------------------------------------------------------------------------+
         ^ state                               | runtime commands      ^ asset/metadata requests
-        | (unityReady)                         v (loadWoWModel)        | (getAsset,
+        | (unityReady, ...Applied)             v (loadWoWModel, ...)   | (getAsset,
         |                                                              |  getAssetByFileDataID)
         |                                                              v assetResponse (bytes)
    +----+---------------------------------------+----------------------+-----------+
@@ -394,31 +429,101 @@ over the IPC channel, and WMV serves it from its existing file providers and dat
                                    |
                                    v
    UnityRenderer.exe (separate process, own graphics device)
-   - V0: blank scene + test cube (embedding proof)
-   - V1: connects back, fetches the active model's raw bytes via getAsset (verified by
-     byte length + SHA-1) -- runtime asset access proven, no parsing yet
-   - V2+: M2 / skin / BLP / DB-driven loaders that build the scene straight from the
-     bytes and metadata WMV serves -- no intermediate files
+   - M2 / skin / .skel / .anim / BLP / DB-driven loaders that build the scene straight
+     from the bytes and metadata WMV serves -- no intermediate files
+   - materials, lighting and shadows of its own; animation that follows the app's selection
+     and transport; characters dressed from the host's characterScene
 ```
 
-Why this is safe for the legacy viewport today: on Windows the OpenGL context is a single
-process-global WGL context bound to the ModelCanvas's own HWND/HDC. The player runs
-**out of process** and renders into **its own** child window with its own device, so the
-two never share a device, context or pixel format. The Unity panel is a *sibling* of the
-canvas in the wxAUI layout (the canvas stays the CenterPane for now; as the migration
-progresses the Unity pane is expected to take over the primary viewport position, with
-the OpenGL canvas retained as a fallback).
+Why the two never collide: on Windows the OpenGL context is a single process-global WGL
+context bound to the hidden ModelCanvas's own HWND/HDC. The player runs **out of process**
+and renders into **its own** child window with its own device, so the two never share a
+device, context or pixel format, and nothing in `UnityRendererHost` calls into GL. The
+canvas is a child window of the frame but not a wxAUI pane: the Unity panel is the only thing
+in the centre.
 
-## Locating the player (current, optional stage)
+## Archived OpenGL viewport
+
+The OpenGL viewport cannot be shown or used, but the `ModelCanvas` object is still created at
+startup as a hidden internal service. It is created hidden (`Hide()` before `Create()`) and is
+never shown, in an interactive run or a headless one. It is not a wxAUI pane, so no saved
+layout, reset or pane toggle can reach it (and nothing may call `GetPane(canvas)`: for a window
+the manager does not know, wx hands back one shared, writable "null" pane). It never paints: its
+paint handler draws nothing and logs an error the first time it is entered, and the headless
+self-test fails if that ever happens. It is kept because it still does jobs nothing else does
+yet:
+
+- **It owns the only GL context.** Every texture decode and upload, the character body and eye
+  composites the viewport is sent as `characterImage` pixels, and the exporters' texture
+  read-backs (the FBX exporter bakes combiner textures through `RenderTexture`) need the WGL
+  context bound to its window. A window that was never shown holds that context on Windows; the
+  headless self-test runs with it. If the context never initialises, the viewport's notice says
+  that textures cannot be decoded.
+- **It owns what is loaded:** the model and its attachments (`canvas->root`, `model()`), a WMO or
+  a map tile. An image picked in Browse is no longer loaded at all: the pick is only remembered,
+  so the viewport can name it in its notice (saving the image is the Browse right-click menu's
+  job).
+- **It owns the animation clock.** Its 10 ms timer calls `tick()` and nothing else -- no redraw
+  and no numpad camera. The tick sends the playback heartbeat and the character scene, and is
+  where a mount or a dismount is noticed.
+- **It is where exports read the pose from,** and that pose is now computed rather than left
+  behind by a drawn frame: `ModelViewer::UpdateExportPose` poses the model and its attachments
+  (parents first, `WoWModel::updatePose`) at the Animation panel's current animation and frame
+  just before an in-app export and the out-of-process FBX export read it, and scrubbing
+  (`AnimManager::ForceModelUpdate`) updates the pose without drawing.
+
+`LightControl` is still created, and never shown, only because `ModelCanvas::InitGL` requires
+one before it marks the canvas initialised -- and the clock runs only once it is.
+
+**Archived implementation.** The rest stays in the tree, compiled but unreferenced, each marked
+with an "archived: unreachable since the OpenGL viewport was archived" note:
+
+| where | what it was |
+|---|---|
+| `modelcanvas.cpp/.h`: `RenderArchivedFrame`, the `Render*` routines, `RenderToBuffer`, `Screenshot`, `CaptureSequenceFrame`, the saved scene states, `OnMouse` / `OnKey` / `OnCamMenu`, `CheckMovement`, `toggleOpenGLDebug` | the on-screen frame, screenshots and capture, the mouse and keyboard camera |
+| `ImageSequenceExporter.*`, `ImageSequenceDialog.*` | File > Export Image Sequence |
+| `AnimExporter.*` | GIF / AVI export |
+| `imagecontrol.*` | the sized-screenshot pane |
+| `DisplaySettings.*` | Settings > Display: display mode, field of view, GL capabilities, environment mapping |
+| `lightcontrol.*` | the lighting pane (one is still created, see above) |
+| `ColorPickerDialog.*` | View > Background Color |
+
+**What went with it.** Everything that only drove the OpenGL drawing is gone from the UI: File >
+Save Screenshot (F12) and Export Image Sequence, the command bar's Reset camera and Screenshot
+buttons, View > Background Color, Load Background (Ctrl+L), the Camera submenu with Use model
+camera, Set Canvas Size and OpenGL debug info, Ctrl+B (bounds), F1-F4 and Ctrl+F1-F4 (saved
+views), the canvas's mouse camera, numpad camera keys and 0-9 speed keys, the Lighting menu
+remnants, Options > "Always show default doodads in WMOs", the Settings > Display page, Settings >
+General's "Show Particle" and "Zero Particle" (they only changed the host's own particle
+simulation; the player runs its own emitters), and the Keyboard Shortcuts rows for the OpenGL
+viewport. The former Model Control panel is View > "Attachments...": the model/attachment list
+that re-targets the Animation panel, plus Render and Scale, which are enabled only for an item
+attached directly to a character, because that is what the character scene carries.
+
+The session and config keys that only served the canvas are no longer read or written
+(`Session/CanvasWidth`/`CanvasHeight`, the background colour and image, the particle flags,
+`Graphics/*`, `Settings/SSCounter`, `Settings/DefaultFormat`); old values in an existing
+`Config.ini` are ignored. Headless batch runs no longer write `ss_*.png` screenshots (see
+"Headless self-test"), and `-imgseq` is gone.
+
+Where this document, the player's README or the player's comments compare against "the legacy
+(OpenGL) viewport", they mean this archived host code, which is still the reference for rules
+such as geoset visibility, texture selection and the M2 combiners. Those comparisons can no
+longer be made by eye in the application, only by reading that code.
+
+## Locating the player
 
 1. `Tools/UnityRendererPath` in `userSettings\Config.ini` (when non-empty), else
 2. `tools\unity-renderer\UnityRenderer.exe` next to the WMV executable.
 
-Player logs go to `userSettings\unityRenderer.log` (next to WMV's own log). The player is
-built locally from `Tools/UnityRendererProject/` — the repository contains **no** Unity
-build output.
+The player is required for a picture: without one at that path the viewport shows the
+"not running" notice naming the path it looked at, and View > "Restart Unity Renderer" (or
+the notice's button) looks again. Player logs go to `userSettings\unityRenderer.log` (next
+to WMV's own log). The player is built locally from `Tools/UnityRendererProject/` — the
+repository contains **no** Unity build output, and nothing in the installer or the CMake
+install rules ships one yet.
 
-## IPC (protocol v1 -- implemented)
+## IPC (implemented; the current player announces protocol 3)
 
 **WMV is the server.** `UnityRendererHost` starts a TCP listener bound to `127.0.0.1` on an
 ephemeral port *before* launching the player and passes the port on the player's command
@@ -427,13 +532,13 @@ player). Transport: newline-delimited JSON, one object per line, UTF-8. Implemen
 `Source/wowmodelviewer/UnityIpcServer.*` (plain Winsock, polled from the GUI thread by a
 wxTimer -- the app has no Qt event loop, and the game-file providers must be used from the
 GUI thread anyway) on top of `UnityAssetAccess.*` (the narrow "raw bytes from the active
-client" layer: CASC or legacy MPQ through the same `GAMEDIRECTORY` providers the OpenGL
-viewport uses). Player side: `Tools/UnityRendererProject/Assets/Scripts/WmvIpcClient.cs`.
+client" layer: CASC or legacy MPQ through the same `GAMEDIRECTORY` providers the rest of the
+application uses). Player side: `Tools/UnityRendererProject/Assets/Scripts/WmvIpcClient.cs`.
 
 **Player -> WMV**
 
 ```json
-{ "type": "unityReady", "protocolVersion": 1 }
+{ "type": "unityReady", "protocolVersion": 3 }
 { "type": "getAsset", "requestId": "abc123", "path": "creature/chicken/chicken.m2" }
 { "type": "getAssetByFileDataID", "requestId": "abc124", "fileDataID": 123456 }
 { "type": "getModelTextures", "requestId": "abc125", "fileDataID": 123200 }
@@ -453,9 +558,9 @@ agree, so the renderer matches this against the type each M2 texture declares.
 - **`source: "selection"` -- what the viewport is actually showing.** A creature normally has
   several skins (`chicken2` offers seven, plus a folder texture), and the database can only say
   which is the *default*. Which one is on screen is a UI fact, so WMV answers from its own skin
-  selector -- the same `TextureGroup` the OpenGL viewport hands to `WoWModel::updateTextureList`.
-  Without this the two viewports disagree the moment the user touches the dropdown, or whenever
-  "Random Skins" picks something other than the first display.
+  selector -- the same `TextureGroup` the host hands to `WoWModel::updateTextureList` for its own
+  model. Without this the viewport would show the database default the moment the user touches
+  the dropdown, or whenever "Random Skins" picks something other than the first display.
 - **`source: "database"` -- the model's default skin.** `CreatureDisplayInfo` joined to
   `CreatureModelData` on the model's FileDataID: the same relation the viewer's own skin list is
   built from. Used when there is no selection to read -- a model with no skin list, or a request
@@ -488,7 +593,7 @@ The response carries metadata only; bytes are still fetched with `getAssetByFile
 
 Semantics:
 
-- `unityReady` is answered by a `loadWoWModel` for whatever is on the canvas (and every later
+- `unityReady` is answered by a `loadWoWModel` for whatever model is loaded (and every later
   model load pushes a new one). `client` is `"active"` -- the player never chooses a client;
   WMV's active client/profile is the only data source.
 - `modelSkin` is **pushed, not requested**: the skin on display changed. Same payload as a
@@ -527,12 +632,12 @@ Semantics:
   sequence keeps them -- but those offsets address a separate .anim file. The AFID chunk says which
   file: `animId, subAnimId, fileId`, matched on BOTH ids because two sequences routinely share an
   animId as sub-animations of one action. So playing one needs nothing but the right buffer to read
-  the entries from, which is precisely the split the legacy viewport makes
+  the entries from, which is precisely the split the host's own model code makes
   (`WoWModel::readAnimsFromFile` fills a map keyed by animID, and the track reader picks the buffer
   from it). The bytes come over the existing asset channel and are cached per file, so a sequence is
   fetched at most once per model. Without them the sequence falls back to the idle and says which
-  file it was waiting for. **This is what made Agronn's SitGroundDown play in the OpenGL viewport
-  and not in this one.**
+  file it was waiting for. **This is what made Agronn's SitGroundDown play in the old OpenGL
+  viewport and not in this one.**
   Those files are fetched **when the model loads**, not when an animation first needs one. Fetching
   on demand cost 16-18 ms of round trip on the first switch to each external animation, during
   which the PREVIOUS animation stayed on screen -- so picking one did not appear to do anything
@@ -559,8 +664,8 @@ Semantics:
   Unlike the skin and the animation choice there is **no single funnel** to hook: play, pause,
   stop, clear, the two step buttons, the speed slider and the frame slider each change it, and the
   time advances every frame with no control involved at all. So it is pushed two ways -- forced
-  from each of those controls, and on a **one-per-second heartbeat** from the canvas tick while
-  something is playing.
+  from each of those controls, and on a **one-per-second heartbeat** from the (hidden) canvas's
+  clock tick while something is playing.
   The heartbeat is the correction channel for two renderers timing themselves independently. The
   **player** decides whether a given `timeMs` is worth acting on, because only it knows where its
   own clock is: a difference under about a frame (40 ms) is ignored, and anything larger snaps. That
@@ -568,7 +673,7 @@ Semantics:
   once a second, and never snapping would let the two drift apart. A scrub or a stop arrives with
   the app's time already far from the player's, so it snaps without needing to be marked special.
   **Global sequences keep running while the animation is paused, and ignore the speed.** That is
-  the legacy viewport's own behaviour, not an accident: it advances its global clock before it
+  the host clock's own behaviour, not an accident: it advances its global clock before it
   decides whether the animation is paused, and the speed multiplier lives inside the animation
   tick alone (`ModelCanvas::tick`, `AnimManager::Tick`). A torch keeps flickering on a creature
   held still.
@@ -577,7 +682,7 @@ Semantics:
   is the worked example: three of its dropdown entries share one texture and differ only in
   whether geoset 101, 102 or 103 is switched on -- a long mane and tail, or a cropped one.
   A submesh is drawn when **its geoset number is 0, or the variant switches that number on**,
-  which is the legacy viewport's own rule (`WoWModel::setCreatureGeosetData`: every geoset in
+  which is the host's own rule (`WoWModel::setCreatureGeosetData`: every geoset in
   `[1, 900)` is shown iff the set names it, and `setLOD` starts them at `display = (id == 0)`).
   The renderer already knows every submesh's number from the .skin it parsed, so only the SET
   travels.
@@ -602,19 +707,38 @@ WMV logs every step with the `[unityipc]` prefix: listening port, player connect
 returned or the error. The player logs the same exchange (`userSettings\unityRenderer.log`
 for the TestStub) and shows it as status text in the viewport.
 
-**Normal launch vs. self-test.** A normal `View -> Unity Renderer` launch drives only the
-happy path: the player connects, announces `unityReady`, receives `loadWoWModel` and issues a
-single `getAsset` for that model. The protocol's error paths are exercised only in diagnostic
+**Normal launch vs. self-test.** A normal launch -- the warm start when the application opens
+(`ModelViewer::WarmStartUnityViewport`), or View > "Restart Unity Renderer" -- drives only the
+happy path: the player connects, announces `unityReady`, receives `loadWoWModel` for whatever is
+loaded and requests that model's files. The protocol's error paths are exercised only in diagnostic
 mode, where WMV appends `-wmvSelfTest` to the player command line and a diagnostic-capable
 player (the TestStub) additionally probes a missing asset and an unknown message type. WMV's
 handling of both is always present -- only the test *requests* are gated.
 
 **Headless self-test.** `wowmodelviewer.exe -mo creature/chicken/chicken.m2 -unityipctest`
-launches the installed player (TestStub or a real build) embedded in the off-screen frame with
-`-wmvSelfTest`, drives the full exchange (connect, `unityReady`, `loadWoWModel`, `getAsset`,
+launches the installed player (TestStub or a real build) into the Unity viewport of the
+off-screen frame with `-wmvSelfTest`, through the same `ModelViewer::StartUnityRenderer` the
+application uses, drives the full exchange (connect, `unityReady`, `loadWoWModel`, `getAsset`,
 `assetResponse`) plus the negative probes, checks the missing-asset and by-FileDataID paths
 in-process, and shuts the player down. Result lines carry the `[unityipc-test]` prefix
 (`RESULT: PASS|FAIL`).
+
+Its **viewport check** holds the archive in place. It fails unless the Unity viewport is the shown
+centre pane, no menu item offers a "main viewport" choice, the canvas is neither a wxAUI pane nor
+a shown window, the hidden canvas's GL context initialised (`canvas->init` and `video.render`),
+the viewport decision for the loaded model is "the model" with no notice up, and the canvas's
+animation clock advances while the model plays. For a character, its check also fails unless at
+least one composited `characterImage` was sent. That clock is measured inside an
+event loop activated for the measurement: the self-test runs inside `OnInit`, before the
+application's loop exists, and a bare `wxYield` there dispatches no timer messages at all (which
+is why an earlier version reported that the canvas does not tick headlessly). At the end of the
+run it also fails if the canvas's paint handler was entered even once.
+
+Other headless batch runs (`-mo`, `-item`, `-npc`, `-armory`, a `.chr` file) used to finish by
+writing an `ss_*.png` screenshot of the OpenGL viewport. They now log one line saying screenshots
+are not available in the Unity-only viewer, and write no image; the `-imgseq` smoke test is gone.
+`-fbxexport` (the out-of-process FBX export child) is unchanged, and computes its pose with
+`UpdateExportPose` before exporting.
 
 ## Status
 
@@ -654,8 +778,8 @@ in-process, and shuts the player down. Result lines carry the `[unityipc-test]` 
   position in the sequence, including scrubbing the frame slider. Bone tracks are evaluated the
   way the legacy evaluator does, including the global sequences that run on their own clock and
   keep running while the animation is held. With nothing selected yet the model's default idle
-  plays -- the first sequence whose AnimId is "Stand", which is the same choice the OpenGL
-  viewport makes and is not sequence 0. A sequence whose keyframes are not in the .m2 falls back
+  plays -- the first sequence whose AnimId is "Stand", which is the same choice the app's own
+  animation selector makes and is not sequence 0. A sequence whose keyframes are not in the .m2 falls back
   to that idle and says so. `-wmvNoAnim` returns the model to the rest pose.
 - Bounds-driven camera framing, so a loaded model is visible immediately.
 
@@ -664,22 +788,29 @@ in-process, and shuts the player down. Result lines carry the `[unityipc-test]` 
 - Animation UI of the renderer's own: the viewport follows WMV's selector and transport
   (play/pause, speed, current time and looping are synced) and has no controls of its own.
   Blending between sequences and following a queued "next animation" chain are not synced.
-- Animation of anything but bones: texture animation, colour and transparency tracks beyond the
-  rest-pose visibility gate, particles, ribbons and attachments.
-- The rest of the WoW material system: texture animation, colour and transparency tracks beyond
-  the rest-pose visibility gate, the specular lobes the legacy viewport leaves unweighted by
-  default, and the few combiners that mix more than two contributing units.
-- Particles and ribbons.
-- For characters: secondary (upper-body) and mouth animations, a mount, and Model Control's
-  per-model scale, position, rotation and transparency on the character or its items.
-- Maps, terrain, WMOs, fog.
-- Full parity with the legacy OpenGL renderer.
+- Material animation, in part: colour, colour alpha, texture weight and texture translation and
+  scale tracks are evaluated (`WmvMaterialAnimator.cs`), but texture rotation tracks are parsed
+  and not applied, and lit passes get no animated tint or opacity (see that file's header).
+  Particle and ribbon emitters are drawn (`WmvEmitterRuntime.cs`).
+- The rest of the WoW material system: the specular lobes the archived OpenGL renderer leaves
+  unweighted by default, and the few combiners that mix more than two contributing units.
+- Attachments on a model that is not a playable character. A character's items and merged
+  armour are drawn (see "Characters").
+- For characters: secondary (upper-body) and mouth animations, and a mount (a mounted character
+  gets a notice).
+- Maps, terrain, WMOs, fog; BLP images picked in Browse. Each of these loads and gets a notice.
+- Full parity with the archived OpenGL renderer.
 
-Unity remains the migration target and the intended primary renderer; the OpenGL viewport
-remains the legacy/fallback renderer during the migration. There is no asset-export workflow:
-every byte the renderer uses arrives over IPC at runtime and nothing is written to disk.
+There is no fallback: the Unity viewport is the only renderer the user sees, and what it cannot
+draw yet is named in the viewport's notice (see "What the viewport shows") rather than drawn by
+another renderer. There is no asset-export workflow: every byte the renderer uses arrives over IPC
+at runtime and nothing is written to disk.
 
-## Migration roadmap
+## Migration roadmap (historical)
+
+Kept as the record of how the renderer was built up. The cut-over at the end has happened, and not
+as this list planned it: the OpenGL viewport was archived rather than kept as a fallback, ahead of
+parity (see "Archived OpenGL viewport").
 
 - **V0 (merged):** `View -> Unity Renderer` opens a dockable pane, launches the player
   embedded in it, resize/shutdown work, missing player handled gracefully; player shows a
@@ -696,10 +827,11 @@ every byte the renderer uses arrives over IPC at runtime and nothing is written 
   `CreatureDisplayInfo` to a 256x256 DXT5 texture. Binary framing for asset payloads is still
   open.
 - **V3+ (Unity first):** characters + customization, equipment/attachments, animation,
-  maps/terrain/fog, OBS-friendly backgrounds and scene/stream features -- each built on the
-  Unity pipeline, with the legacy OpenGL viewport kept as fallback until parity.
-- **Cut-over:** once Unity covers the baseline feature set, it becomes the default /
-  primary viewport; the OpenGL canvas remains available as legacy/fallback.
+  maps/terrain/fog, capture-friendly backgrounds and scene/stream features -- each built on the
+  Unity pipeline.
+- **Cut-over (done):** Unity is the only viewport, with no toggle; the OpenGL viewport is
+  archived and cannot be shown. Content Unity cannot draw yet shows a notice in the viewport
+  instead of falling back to the canvas.
 
 Explicitly deferred until the direct renderer is solid: full maps/ADT terrain, WMO
 placement, volumetric fog, armory donations, equipment.
@@ -708,7 +840,9 @@ placement, volumetric fog, armory donations, equipment.
 
 Source-only player pieces live in `Tools/UnityRendererProject/` (see its README for build
 steps). `Tools/UnityRendererProject/TestStub/` contains a tiny Win32 stand-in that honours
-the same `-parentHWND` embedding contract AND speaks the v1 IPC protocol (`unityReady`,
-`getAsset` on `loadWoWModel`, `assetResponse` decode/length checks), so both the WMV-side
-host and the runtime asset access can be exercised without any Unity install -- see the
-headless self-test in the IPC section.
+the same `-parentHWND` embedding contract AND speaks the asset-access part of the IPC protocol
+(it announces protocol 2: `unityReady`, `getAsset` on `loadWoWModel`, `assetResponse`
+decode/length checks), so both the WMV-side host and the runtime asset access can be exercised
+without any Unity install -- see the headless self-test in the IPC section. It is a test tool,
+not a viewer: it draws status text only, so installed as the player it shows no model, and a
+character gets the out-of-date notice.

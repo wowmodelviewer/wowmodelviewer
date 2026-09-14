@@ -483,7 +483,7 @@ void UnityIpcServer::sendModelSkin(int m2FileDataID)
     // NO TEXTURE IS NOT NO ANSWER. A model with no creature display and no conventional skin
     // (felreavergolem, the cinematic models) resolves no texture at all -- but it still has
     // geosets the application is displaying, and the player needs them or it falls back to
-    // "geoset 0 only" and drops submeshes the OpenGL viewport draws. The message goes out with
+    // "geoset 0 only" and drops submeshes the host displays. The message goes out with
     // an empty texture list; the player leaves its textures alone and takes the geometry.
     LOG_INFO << "[unityipc] modelSkin for" << m2FileDataID
              << "carries geosets only:" << error;

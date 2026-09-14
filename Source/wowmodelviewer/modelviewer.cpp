@@ -9,7 +9,6 @@
 #include <wx/numformatter.h>
 #include <wx/srchctrl.h>
 #include <wx/busyinfo.h>
-#include <wx/colordlg.h>
 #include <wx/dirdlg.h>
 #include <wx/colour.h>
 #include <wx/filedlg.h>
@@ -23,8 +22,6 @@
 #include "CharInfos.h"
 #include "ExporterPlugin.h"
 #include "ExportJobManager.h"
-#include "ImageSequenceExporter.h"
-#include "ImageSequenceDialog.h"
 #include "Game.h"
 
 #include <wx/dir.h>
@@ -73,12 +70,6 @@
 
 
 
-// default colour values
-const static float def_ambience[4] = { 1.0f, 1.0f, 1.0f, 1.0f };
-const static float def_diffuse[4] = { 1.0f, 1.0f, 1.0f, 1.0f };
-const static float def_emission[4] = { 0.0f, 0.0f, 0.0f, 1.0f };
-const static float def_specular[4] = { 1.0f, 1.0f, 1.0f, 1.0f };
-
 namespace
 {
   // The frame's keyboard accelerators, in one table: InitMenu installs it, and Help > Keyboard
@@ -100,33 +91,18 @@ namespace
     { wxACCEL_NORMAL, WXK_F6, ID_LOAD_EQUIPMENT, nullptr, nullptr, nullptr },
     { wxACCEL_NORMAL, WXK_F7, ID_SAVE_CHAR, nullptr, nullptr, nullptr },
     { wxACCEL_NORMAL, WXK_F8, ID_LOAD_CHAR, nullptr, nullptr, nullptr },
-    { wxACCEL_CTRL, (int)'b', ID_SHOW_BOUNDS, L"Ctrl+B", L"Show or hide the bounding box", L"OpenGL viewport" },
     { wxACCEL_CTRL, (int)'X', ID_FILE_EXIT, nullptr, nullptr, nullptr },
-    { wxACCEL_NORMAL, WXK_F12, ID_FILE_SCREENSHOT, nullptr, nullptr, nullptr },
     { wxACCEL_CTRL, (int)'e', ID_SHOW_EARS, nullptr, nullptr, nullptr },
     { wxACCEL_CTRL, (int)'h', ID_SHOW_HAIR, nullptr, nullptr, nullptr },
     { wxACCEL_CTRL, (int)'f', ID_SHOW_FACIALHAIR, nullptr, nullptr, nullptr },
     { wxACCEL_CTRL, (int)'z', ID_SHEATHE, nullptr, nullptr, nullptr },
-    { wxACCEL_CTRL, (int)'l', ID_BACKGROUND, nullptr, nullptr, nullptr },
-    // Ctrl +/- are bound, but their handler is commented out (OnToggleCommand): not listed.
-    { wxACCEL_CTRL, (int)'+', ID_ZOOM_IN, nullptr, nullptr, nullptr },
-    { wxACCEL_CTRL, (int)'-', ID_ZOOM_OUT, nullptr, nullptr, nullptr },
     { wxACCEL_NORMAL, WXK_F9, ID_CLEAR_EQUIPMENT, nullptr, nullptr, nullptr },
     { wxACCEL_NORMAL, WXK_F10, ID_CHAR_RANDOMISE, nullptr, nullptr, nullptr },
-    // F11 is Fullscreen (View menu). It was also bound here to the OpenGL debug toggle, which made
-    // the two fight over the key; that toggle is a View menu item now.
-
-    // Temporary saves
-    { wxACCEL_NORMAL, WXK_F1, ID_SAVE_TEMP1, L"F1 \u2013 F4", L"Save the camera view to slot 1-4", L"OpenGL viewport" },
-    { wxACCEL_NORMAL, WXK_F2, ID_SAVE_TEMP2, nullptr, nullptr, nullptr },
-    { wxACCEL_NORMAL, WXK_F3, ID_SAVE_TEMP3, nullptr, nullptr, nullptr },
-    { wxACCEL_NORMAL, WXK_F4, ID_SAVE_TEMP4, nullptr, nullptr, nullptr },
-
-    // Temp loads
-    { wxACCEL_CTRL, WXK_F1, ID_LOAD_TEMP1, L"Ctrl+F1 \u2013 F4", L"Restore the camera view from slot 1-4", L"OpenGL viewport" },
-    { wxACCEL_CTRL, WXK_F2, ID_LOAD_TEMP2, nullptr, nullptr, nullptr },
-    { wxACCEL_CTRL, WXK_F3, ID_LOAD_TEMP3, nullptr, nullptr, nullptr },
-    { wxACCEL_CTRL, WXK_F4, ID_LOAD_TEMP4, nullptr, nullptr, nullptr },
+    // F11 is Fullscreen (View menu).
+    //
+    // The keys that only drove the OpenGL viewport are gone with it: F12 (screenshot), Ctrl+L
+    // (background image), Ctrl+B (bounding box), Ctrl +/- (zoom, whose handler was already disabled)
+    // and F1-F4 / Ctrl+F1-F4 (saved views). The Unity viewport has none of these yet.
 
     { wxACCEL_CTRL | wxACCEL_SHIFT, (int)'R', ID_RESTART, nullptr, nullptr, nullptr },
   };
@@ -145,8 +121,6 @@ EVT_MENU(ID_LOAD_MPQ, ModelViewer::OnLoadLegacyMpq)
 EVT_MENU(ID_FILE_VIEWLOG, ModelViewer::OnViewLog)
 EVT_MENU(ID_VIEW_NPC, ModelViewer::OnCharToggle)
 EVT_MENU(ID_VIEW_ITEM, ModelViewer::OnCharToggle)
-EVT_MENU(ID_FILE_SCREENSHOT, ModelViewer::OnSave)
-EVT_MENU(ID_FILE_EXPORTIMGSEQ, ModelViewer::OnExportImageSequence)
 // --
 EVT_MENU(ID_FILE_MODEL_INFO, ModelViewer::OnExportOther)
 //--
@@ -159,68 +133,18 @@ EVT_MENU(ID_RESTART, ModelViewer::OnRestart)
 EVT_MENU(ID_SHOW_FILE_LIST, ModelViewer::OnToggleDock)
 EVT_MENU(ID_SHOW_ANIM, ModelViewer::OnToggleDock)
 EVT_MENU(ID_SHOW_CHAR, ModelViewer::OnToggleDock)
-EVT_MENU(ID_SHOW_LIGHT, ModelViewer::OnToggleDock)
 EVT_MENU(ID_SHOW_MODEL, ModelViewer::OnToggleDock)
-EVT_MENU(ID_VIEW_UNITY_RENDERER, ModelViewer::OnUnityRenderer)
-EVT_MENU(ID_VIEW_UNITY_PRIMARY, ModelViewer::OnUnityPrimaryViewport)
+EVT_MENU(ID_VIEW_UNITY_RESTART, ModelViewer::OnRestartUnityRenderer)
 EVT_MENU(ID_VIEW_FULLSCREEN, ModelViewer::OnToggleFullScreen)
 EVT_CHAR_HOOK(ModelViewer::OnCharHook)
 
 // Command bar (and the panel toggles it shares with the View menu)
 EVT_MENU(ID_UI_OPEN_MODEL, ModelViewer::OnCommandBar)
-EVT_MENU(ID_UI_RESET_CAMERA, ModelViewer::OnCommandBar)
-EVT_MENU(ID_UI_SCREENSHOT, ModelViewer::OnCommandBar)
 EVT_UPDATE_UI(ID_SHOW_FILE_LIST, ModelViewer::OnUpdateCommandUI)
 EVT_UPDATE_UI(ID_SHOW_CHAR, ModelViewer::OnUpdateCommandUI)
 EVT_UPDATE_UI(ID_SHOW_ANIM, ModelViewer::OnUpdateCommandUI)
-EVT_UPDATE_UI(ID_UI_RESET_CAMERA, ModelViewer::OnUpdateCommandUI)
-EVT_UPDATE_UI(ID_UI_SCREENSHOT, ModelViewer::OnUpdateCommandUI)
-// --
-//EVT_MENU(ID_SHOW_WIREFRAME, ModelViewer::OnToggleCommand)
-//EVT_MENU(ID_SHOW_BONES, ModelViewer::OnToggleCommand)
-EVT_MENU(ID_SHOW_BOUNDS, ModelViewer::OnToggleCommand)
-//EVT_MENU(ID_SHOW_PARTICLES, ModelViewer::OnToggleCommand)
-
-EVT_MENU(ID_BACKGROUND, ModelViewer::OnBackground)
-EVT_MENU(ID_BG_COLOR, ModelViewer::OnSetColor)
-
-EVT_MENU(ID_USE_CAMERA, ModelViewer::OnToggleCommand)
-
-// Cam
-EVT_MENU(ID_CAM_FRONT, ModelViewer::OnCamMenu)
-EVT_MENU(ID_CAM_SIDE, ModelViewer::OnCamMenu)
-EVT_MENU(ID_CAM_BACK, ModelViewer::OnCamMenu)
-EVT_MENU(ID_CAM_ISO, ModelViewer::OnCamMenu)
-EVT_MENU(ID_CAM_RESET, ModelViewer::OnCamMenu)
-
-EVT_MENU(ID_CANVASS120, ModelViewer::OnCanvasSize)
-EVT_MENU(ID_CANVASS512, ModelViewer::OnCanvasSize)
-EVT_MENU(ID_CANVASS1024, ModelViewer::OnCanvasSize)
-EVT_MENU(ID_CANVASF480, ModelViewer::OnCanvasSize)
-EVT_MENU(ID_CANVASF600, ModelViewer::OnCanvasSize)
-EVT_MENU(ID_CANVASF768, ModelViewer::OnCanvasSize)
-EVT_MENU(ID_CANVASF864, ModelViewer::OnCanvasSize)
-EVT_MENU(ID_CANVASF1200, ModelViewer::OnCanvasSize)
-EVT_MENU(ID_CANVASW480, ModelViewer::OnCanvasSize)
-EVT_MENU(ID_CANVASW720, ModelViewer::OnCanvasSize)
-EVT_MENU(ID_CANVASW1080, ModelViewer::OnCanvasSize)
-EVT_MENU(ID_CANVASM768, ModelViewer::OnCanvasSize)
-EVT_MENU(ID_CANVASM1200, ModelViewer::OnCanvasSize)
-
-// hidden hotkeys for zooming
-EVT_MENU(ID_ZOOM_IN, ModelViewer::OnToggleCommand)
-EVT_MENU(ID_ZOOM_OUT, ModelViewer::OnToggleCommand)
-EVT_MENU(ID_OPENGL_DEBUG, ModelViewer::OnToggleCommand)
-
-// Light Menu
-EVT_MENU(ID_LT_SAVE, ModelViewer::OnLightMenu)
-EVT_MENU(ID_LT_LOAD, ModelViewer::OnLightMenu)
-//EVT_MENU(ID_LT_COLOR, ModelViewer::OnSetColor)
-EVT_MENU(ID_LT_TRUE, ModelViewer::OnLightMenu)
-EVT_MENU(ID_LT_AMBIENT, ModelViewer::OnLightMenu)
-EVT_MENU(ID_LT_DIRECTIONAL, ModelViewer::OnLightMenu)
-EVT_MENU(ID_LT_MODEL, ModelViewer::OnLightMenu)
-EVT_MENU(ID_LT_DIRECTION, ModelViewer::OnLightMenu)
+// (The OpenGL viewport's commands -- background, camera, canvas size, bounds, debug info, saved views,
+// lighting -- were removed with it; their ModelCanvas implementations are archived, unreferenced.)
 
 // Effects
 EVT_MENU(ID_ENCHANTS, ModelViewer::OnEffects)
@@ -231,10 +155,6 @@ EVT_MENU(ID_LOAD_CHAR, ModelViewer::OnToggleCommand)
 EVT_MENU(ID_IMPORT_CHAR, ModelViewer::OnToggleCommand)
 EVT_MENU(ID_IMPORT_NPC, ModelViewer::OnImportNPCFromURL)
 
-EVT_MENU(ID_DEFAULT_DOODADS, ModelViewer::OnToggleCommand)
-EVT_MENU(ID_USE_ANTIALIAS, ModelViewer::OnToggleCommand)
-EVT_MENU(ID_USE_HWACC, ModelViewer::OnToggleCommand)
-EVT_MENU(ID_USE_ENVMAP, ModelViewer::OnToggleCommand)
 EVT_MENU(ID_SHOW_SETTINGS, ModelViewer::OnToggleDock)
 
 // char controls:
@@ -265,19 +185,6 @@ EVT_MENU(ID_HELP, ModelViewer::OnAbout)
 EVT_MENU(ID_ABOUT, ModelViewer::OnAbout)
 EVT_MENU(ID_KEYBOARD_SHORTCUTS, ModelViewer::OnKeyboardShortcuts)
 
-// Hidden menu items
-// Temporary saves
-EVT_MENU(ID_SAVE_TEMP1, ModelViewer::OnToggleCommand)
-EVT_MENU(ID_SAVE_TEMP2, ModelViewer::OnToggleCommand)
-EVT_MENU(ID_SAVE_TEMP3, ModelViewer::OnToggleCommand)
-EVT_MENU(ID_SAVE_TEMP4, ModelViewer::OnToggleCommand)
-
-// Temp loads
-EVT_MENU(ID_LOAD_TEMP1, ModelViewer::OnToggleCommand)
-EVT_MENU(ID_LOAD_TEMP2, ModelViewer::OnToggleCommand)
-EVT_MENU(ID_LOAD_TEMP3, ModelViewer::OnToggleCommand)
-EVT_MENU(ID_LOAD_TEMP4, ModelViewer::OnToggleCommand)
-
 // Export
 EVT_MENU(ID_EXPORT_MODEL, ModelViewer::OnExport)
 
@@ -301,11 +208,9 @@ ModelViewer::ModelViewer()
   lightControl = NULL;
   modelControl = NULL;
   modelInspector = NULL;
-  imageControl = NULL;
   settingsControl = NULL;
   unityRendererHost = NULL;
   m_lastAnimStatePush = 0;
-  animExporter = NULL;
   fileControl = NULL;
 
   //wxWidget objects
@@ -314,10 +219,8 @@ ModelViewer::ModelViewer()
   charGlowMenu = NULL;
   viewMenu = NULL;
   optMenu = NULL;
-  lightMenu = NULL;
   exportMenu = NULL;
   fileMenu = NULL;
-  camMenu = NULL;
 
   isWoWLoaded = false;
   isModel = false;
@@ -411,9 +314,8 @@ void ModelViewer::InitMenu()
     fileMenu->Enable(ID_LOAD_WOW, false);
   fileMenu->Append(ID_FILE_VIEWLOG, _("View Log"));
   fileMenu->AppendSeparator();
-  fileMenu->Append(ID_FILE_SCREENSHOT, _("Save Screenshot\tF12"));
-  fileMenu->Append(ID_FILE_EXPORTIMGSEQ, _("Export Image Sequence..."));
-  fileMenu->AppendSeparator();
+  // No Save Screenshot or Export Image Sequence: both captured the OpenGL viewport, which is archived,
+  // and the Unity viewport has no capture of its own yet.
 
   // --== Continue regular menu ==--
 
@@ -456,69 +358,18 @@ void ModelViewer::InitMenu()
   viewMenu->AppendCheckItem(ID_SHOW_FILE_LIST, _("Browse panel"));
   viewMenu->AppendCheckItem(ID_SHOW_CHAR, _("Model panel"));
   viewMenu->AppendCheckItem(ID_SHOW_ANIM, _("Animation panel"));
-  viewMenu->Append(ID_SHOW_MODEL, _("Render options (OpenGL viewport)..."));
+  viewMenu->Append(ID_SHOW_MODEL, _("Attachments..."));
   viewMenu->AppendSeparator();
-  viewMenu->Append(ID_VIEW_UNITY_RENDERER, _("Unity Renderer"));
-  viewMenu->AppendCheckItem(ID_VIEW_UNITY_PRIMARY, _("Unity as main viewport"));
-  viewMenu->Check(ID_VIEW_UNITY_PRIMARY, unityPrimaryViewport);
+  // The Unity viewport is always the viewport; this is the discoverable way to bring its player back
+  // (the notice of a stopped player has the same command on a button).
+  viewMenu->Append(ID_VIEW_UNITY_RESTART, _("Restart Unity Renderer"));
   viewMenu->Append(ID_VIEW_FULLSCREEN, _("Fullscreen\tF11"));
-  if (canvas) {
-    viewMenu->Append(ID_BG_COLOR, _("Background Color..."));
-    viewMenu->AppendCheckItem(ID_BACKGROUND, _("Load Background\tCTRL+L"));
-    viewMenu->Check(ID_BACKGROUND, canvas->drawBackground);
-
-
-    viewMenu->AppendSeparator();
-  }
+  // The OpenGL viewport's own View items -- Background Color, Load Background, the Camera submenu,
+  // Set Canvas Size and OpenGL debug info -- went with that viewport: none of them reaches the Unity
+  // viewport, which frames each model itself. The Lighting menu that was built here (and never put on
+  // the menu bar) is gone too.
 
   try {
-
-    // Camera Menu
-    wxMenu *CamMenu = new wxMenu;
-    CamMenu->AppendCheckItem(ID_USE_CAMERA, _("Use model camera"));
-    CamMenu->AppendSeparator();
-    CamMenu->Append(ID_CAM_FRONT, _("Front"));
-    CamMenu->Append(ID_CAM_BACK, _("Back"));
-    CamMenu->Append(ID_CAM_SIDE, _("Side"));
-    CamMenu->Append(ID_CAM_ISO, _("Perspective"));
-    CamMenu->Append(ID_CAM_RESET, _("Reset to default"));
-
-    viewMenu->Append(ID_CAMERA, _("Camera"), CamMenu);
-    viewMenu->AppendSeparator();
-
-    wxMenu *setSize = new wxMenu;
-    setSize->Append(ID_CANVASS120, wxT("(1:1) 120 x 120"), _("Square (1:1)"));
-    setSize->Append(ID_CANVASS512, wxT("(1:1) 512 x 512"), _("Square (1:1)"));
-    setSize->Append(ID_CANVASS1024, wxT("(1:1) 1024 x 1024"), _("Square (1:1)"));
-    setSize->Append(ID_CANVASF480, wxT("(4:3) 640 x 480"), _("Fullscreen (4:3)"));
-    setSize->Append(ID_CANVASF600, wxT("(4:3) 800 x 600"), _("Fullscreen (4:3)"));
-    setSize->Append(ID_CANVASF768, wxT("(4:3) 1024 x 768"), _("Fullscreen (4:3)"));
-    setSize->Append(ID_CANVASF864, wxT("(4:3) 1152 x 864"), _("Fullscreen (4:3)"));
-    setSize->Append(ID_CANVASF1200, wxT("(4:3) 1600 x 1200"), _("Fullscreen (4:3)"));
-    setSize->Append(ID_CANVASW480, wxT("(16:9) 864 x 480"), _("Widescreen (16:9)"));
-    setSize->Append(ID_CANVASW720, wxT("(16:9) 1280 x 720"), _("Widescreen (16:9)"));
-    setSize->Append(ID_CANVASW1080, wxT("(16:9) 1920 x 1080"), _("Widescreen (16:9)"));
-    setSize->Append(ID_CANVASM768, wxT("(5:3) 1280 x 768"), _("Misc (5:3)"));
-    setSize->Append(ID_CANVASM1200, wxT("(8:5) 1920 x 1200"), _("Misc (8:5)"));
-
-    viewMenu->Append(ID_CANVASSIZE, wxT("Set Canvas Size"), setSize);
-    // Was only reachable through an F11 accelerator that collided with Fullscreen (F11).
-    viewMenu->Append(ID_OPENGL_DEBUG, _("OpenGL debug info in title bar"));
-
-    //lightMenu->Append(ID_LT_COLOR, wxT("Lighting Color..."));
-
-    lightMenu = new wxMenu;
-    lightMenu->Append(ID_LT_SAVE, _("Save Lighting"));
-    lightMenu->Append(ID_LT_LOAD, _("Load Lighting"));
-    lightMenu->AppendSeparator();
-    lightMenu->AppendCheckItem(ID_LT_DIRECTION, _("Render Light Objects"));
-    lightMenu->AppendSeparator();
-    lightMenu->AppendCheckItem(ID_LT_TRUE, _("Use true lighting"));
-    lightMenu->Check(ID_LT_TRUE, false);
-    lightMenu->AppendRadioItem(ID_LT_DIRECTIONAL, _("Use dynamic light"));
-    lightMenu->Check(ID_LT_DIRECTIONAL, true);
-    lightMenu->AppendRadioItem(ID_LT_AMBIENT, _("Use ambient light"));
-    lightMenu->AppendRadioItem(ID_LT_MODEL, _("Model lights only"));
 
     charMenu = new wxMenu;
     charMenu->Append(ID_LOAD_CHAR, _("Load Character\tF8"));
@@ -596,9 +447,8 @@ void ModelViewer::InitMenu()
 
     // Options menu
     optMenu = new wxMenu;
-    optMenu->AppendCheckItem(ID_DEFAULT_DOODADS, _("Always show default doodads in WMOs"));
-    optMenu->Check(ID_DEFAULT_DOODADS, true);
-    optMenu->AppendSeparator();
+    // ("Always show default doodads in WMOs" is gone: only the archived OpenGL viewport drew WMOs, and
+    // the Unity viewport shows a notice for one. Default doodads stay included, as the item defaulted.)
     optMenu->Append(ID_SHOW_SETTINGS, _("Settings..."));
 
 
@@ -642,8 +492,10 @@ void ModelViewer::InitObjects()
                                 modelInspector->overridesParent(), modelInspector->doodadParent());
   charControl = new CharControl(modelInspector->characterParent(), ID_CHAR_FRAME);
   modelInspector->AttachAppearance(animControl, charControl);
+  // Never shown. It only still exists because ModelCanvas::InitGL will not set init -- and the canvas
+  // clock the Unity viewport mirrors will not tick -- without it.
   lightControl = new LightControl(this, ID_LIGHT_FRAME);
-  lightControl->Show(false);   // kept only to drive the default scene light; never shown as UI
+  lightControl->Show(false);
   modelControl = new ModelControl(this, ID_MODEL_FRAME);
   settingsControl = new SettingsControl(this, ID_SETTINGS_FRAME);
   settingsControl->Show(false);
@@ -664,8 +516,6 @@ void ModelViewer::InitObjects()
   modelControl->animControl = animControl;
 
   enchants = new EnchantsDialog(this, charControl);
-
-  animExporter = new CAnimationExporter(this, wxID_ANY, wxT("Animation Exporter"), wxDefaultPosition, wxSize(350, 220), wxCAPTION | wxSTAY_ON_TOP | wxFRAME_NO_TASKBAR);
 }
 
 void ModelViewer::InitDatabase()
@@ -796,12 +646,13 @@ static wxAuiPaneInfo buildInspectorPaneInfo(const wxWindow * frame)
          Right().Layer(2);
 }
 
-// The OpenGL-only render flags (alpha, scale, bones, wireframe, bounds...) and the attachment the
-// animation controls drive: the floating window View > "Render options" opens.
+// The model and attachment the animation controls drive, and Render / Scale for the items attached to a
+// character (they travel to the Unity viewport in the character scene): the floating window
+// View > "Attachments" opens. The pane keeps its old name so a saved perspective still finds it.
 static wxAuiPaneInfo buildRenderOptionsPaneInfo()
 {
   return wxAuiPaneInfo().
-         Name(wxT("Models")).Caption(wxT("Render Options (OpenGL viewport)")).
+         Name(wxT("Models")).Caption(wxT("Attachments")).
          FloatingSize(wxSize(180, 300)).Float().TopDockable(false).LeftDockable(false).
          RightDockable(false).BottomDockable(false).Show(false).
          DestroyOnClose(false);
@@ -821,8 +672,8 @@ void ModelViewer::InitCommandBar()
   commandBar->AddTool(ID_UI_OPEN_MODEL, _("Open model"), wxNullBitmap,
                       _("Find a model in Browse (loads a World of Warcraft client first if none is loaded)"));
   commandBar->AddSeparator();
-  commandBar->AddTool(ID_UI_RESET_CAMERA, _("Reset camera"), wxNullBitmap, _("Reset the camera to frame the model"));
-  commandBar->AddTool(ID_UI_SCREENSHOT, _("Screenshot"), wxNullBitmap, _("Save a screenshot (F12)"));
+  // (No Reset camera or Screenshot: both acted on the archived OpenGL viewport. The Unity viewport frames
+  // each model itself and has no capture yet.)
   commandBar->AddTool(ID_VIEW_FULLSCREEN, _("Fullscreen"), wxNullBitmap, _("Fullscreen (F11; Esc leaves)"));
   commandBar->AddSeparator();
 
@@ -850,19 +701,24 @@ void ModelViewer::InitDocking()
   InitCommandBar();
   interfaceManager.AddPane(commandBar, buildCommandBarPaneInfo(this));
 
-  // OpenGL Canvas
-  interfaceManager.AddPane(canvas, wxAuiPaneInfo().
-                           Name(wxT("canvas")).Caption(wxT("OpenGL Canvas")).
-                           CenterPane());
+  // THE VIEWPORT: the Unity host panel, the centre pane from the start, before any player exists.
+  //
+  // The OpenGL canvas is deliberately NOT a pane. It is archived: a hidden window that is never
+  // shown and never painted, kept for the GL context every texture decode needs, the loaded model
+  // and the animation clock (see ModelCanvas). Keeping it out of the manager altogether means no
+  // saved perspective, reset or pane toggle can ever put it on screen -- and nothing may call
+  // GetPane(canvas): for a window the manager does not know, wx hands back one shared, writable
+  // "null" pane, and a Show() on that would change the answer to every later unknown lookup.
+  CreateUnityViewport();
+  interfaceManager.AddPane(unityRendererHost, unityViewportPaneInfo());
 
   interfaceManager.AddPane(fileControl, buildBrowsePaneInfo(this));
   interfaceManager.AddPane(animControl, buildAnimationPaneInfo(this));
   interfaceManager.AddPane(modelInspector, buildInspectorPaneInfo(this));
 
-  // Lighting control panel removed (lighting feature pulled). lightControl still exists and
-  // provides the default scene light, but it is no longer shown as a dockable pane.
+  // (No lighting pane: lightControl is never shown; see InitObjects.)
 
-  // model control
+  // model control (View > Attachments)
   interfaceManager.AddPane(modelControl, buildRenderOptionsPaneInfo());
 
   // settings frame
@@ -875,43 +731,24 @@ void ModelViewer::InitDocking()
   //interfaceManager.Update();
 }
 
-// forward decl (defined next to OnUnityRenderer): shared Unity pane settings
-static wxAuiPaneInfo buildUnityRendererPaneInfo();
-
 void ModelViewer::ResetLayout()
 {
-  // The Unity viewport keeps the role it has: a reset rearranges the panels, it does not move the
-  // model from one renderer to the other.
-  bool unityCentre = false;
-  if (unityRendererHost)
-  {
-    wxAuiPaneInfo & up = interfaceManager.GetPane(unityRendererHost);
-    unityCentre = up.IsOk() && up.IsShown() && up.dock_direction == wxAUI_DOCK_CENTER;
-  }
-
+  // Every panel goes back to where InitDocking put it. The Unity viewport stays the centre pane; the
+  // archived canvas is not a pane and is not touched.
   interfaceManager.DetachPane(commandBar);
   interfaceManager.DetachPane(fileControl);
-  if (unityRendererHost)
-    interfaceManager.DetachPane(unityRendererHost);
+  interfaceManager.DetachPane(unityRendererHost);
   interfaceManager.DetachPane(animControl);
   interfaceManager.DetachPane(modelInspector);
-  interfaceManager.DetachPane(lightControl);
   interfaceManager.DetachPane(modelControl);
   interfaceManager.DetachPane(settingsControl);
-  interfaceManager.DetachPane(canvas);
 
   interfaceManager.AddPane(commandBar, buildCommandBarPaneInfo(this));
-
-  // OpenGL Canvas
-  interfaceManager.AddPane(canvas, wxAuiPaneInfo().
-                           Name(wxT("canvas")).Caption(wxT("OpenGL Canvas")).
-                           CenterPane().Show(!unityCentre));
+  interfaceManager.AddPane(unityRendererHost, unityViewportPaneInfo());
 
   interfaceManager.AddPane(fileControl, buildBrowsePaneInfo(this).Show(true));
   interfaceManager.AddPane(animControl, buildAnimationPaneInfo(this).Show(true));
   interfaceManager.AddPane(modelInspector, buildInspectorPaneInfo(this).Show(true));
-
-  // (Lighting pane removed; lightControl still provides the default scene light.)
 
   interfaceManager.AddPane(modelControl, buildRenderOptionsPaneInfo());
 
@@ -919,18 +756,6 @@ void ModelViewer::ResetLayout()
                            Name(wxT("Settings")).Caption(wxT("Settings")).
                            FloatingSize(wxSize(400, 550)).Float().TopDockable(false).LeftDockable(false).
                            RightDockable(false).BottomDockable(false).Show(false));
-
-  // Unity viewport pane (only exists once View > Unity Renderer has been used)
-  if (unityRendererHost)
-  {
-    if (unityCentre)
-      interfaceManager.AddPane(unityRendererHost, wxAuiPaneInfo().
-                               Name(wxT("unityRenderer")).Caption(wxT("Unity Renderer")).
-                               CenterPane().Show(true));
-    else
-      interfaceManager.AddPane(unityRendererHost,
-                               buildUnityRendererPaneInfo().Show(unityAsidePaneShown()));
-  }
 
   // tell the manager to "commit" all the changes just made
   interfaceManager.Update();
@@ -945,103 +770,36 @@ void ModelViewer::LoadSession()
 
   // Application Config Settings
   useRandomLooks = config.value("Session/RandomLooks", true).toBool();
-  GLOBALSETTINGS.bShowParticle = config.value("Session/ShowParticle", true).toBool();
-  GLOBALSETTINGS.bZeroParticle = config.value("Session/ZeroParticle", true).toBool();
   GLOBALSETTINGS.bInitPoseOnlyExport = config.value("Session/InitPoseOnlyExport", false).toBool();
 
   // Last legacy-MPQ folder picked via File > Load Legacy MPQ Client... (defaults the dir picker).
   m_lastMpqFolder = config.value("Session/LastMpqFolder", "").toString();
 
-  // Background and Custom Colours
-  wxString colStr;
-  wxColour bgCol;
-  colStr = config.value("Session/bgCol", "#475F79").toString().toStdWString(); // #475F79 = (71, 95, 121)
-  if (!bgCol.Set(colStr))
-    bgCol = wxColour(71, 95, 121);
-  bgDialogData.SetColour(bgCol);
-  for (int i = 0; i < 16; i++)
-  {
-    wxColour custCol;
-    colStr = config.value(QString("Session/bgCustCol%1").arg(i), wxEmptyString).toString().toStdWString();
-    if ((colStr != wxEmptyString) && custCol.Set(colStr))
-      bgDialogData.SetCustomColour(i, custCol);
-  }
-  // Other session settings
-  if (canvas)
-  {
-    // Set canvas background Colour
-    canvas->vecBGColor.x = bgCol.Red() / 255.0f;
-    canvas->vecBGColor.y = bgCol.Green() / 255.0f;
-    canvas->vecBGColor.z = bgCol.Blue() / 255.0f;
-
-    // boolean vars
-    canvas->drawBackground = config.value("Session/DBackground", false).toBool();
-    bgImagePath = config.value("Session/BackgroundImage", false).toString().toStdWString();
-
-    if (!bgImagePath.IsEmpty())
-      canvas->LoadBackground(bgImagePath);
-  }
+  // The archived OpenGL viewport's session keys are no longer read: Session/ShowParticle and
+  // Session/ZeroParticle (particle options that only changed its drawing), Session/bgCol and
+  // Session/bgCustCol0-15 (background colour), Session/DBackground and Session/BackgroundImage (a
+  // background image, which used to be decoded into GL at every start for nobody to see). Values left in
+  // an existing Config.ini are ignored.
 }
 
 void ModelViewer::SaveSession()
 {
   QSettings config(QString::fromWCharArray(cfgPath.c_str()), QSettings::IniFormat);
 
-  config.setValue("Graphics/FSAA", video.curCap.aaSamples);
-  config.setValue("Graphics/AccumulationBuffer", video.curCap.accum);
-  config.setValue("Graphics/AlphaBits", video.curCap.alpha);
-  config.setValue("Graphics/ColourBits", video.curCap.colour);
-  config.setValue("Graphics/DoubleBuffer", video.curCap.doubleBuffer);
-  config.setValue("Graphics/HWAcceleration", video.curCap.hwAcc);
-  config.setValue("Graphics/SampleBuffer", video.curCap.sampleBuffer);
-  config.setValue("Graphics/StencilBuffer", video.curCap.stencil);
-  config.setValue("Graphics/ZBuffer", video.curCap.zBuffer);
-  config.setValue("Graphics/UseEnvMapping", video.useEnvMapping);
-  config.setValue("Graphics/Fov", (double)video.fov);
+  // Nothing of the archived OpenGL viewport is written any more: not its display mode, field of view or
+  // environment mapping (Graphics/*, which the Settings > Display page edited), its particle options,
+  // background colour and image, or canvas size (Session/CanvasWidth/CanvasHeight).
 
   config.setValue("Session/RandomLooks", useRandomLooks);
-  config.setValue("Session/ShowParticle", GLOBALSETTINGS.bShowParticle);
-  config.setValue("Session/ZeroParticle", GLOBALSETTINGS.bZeroParticle);
   config.setValue("Session/InitPoseOnlyExport", GLOBALSETTINGS.bInitPoseOnlyExport);
   config.setValue("Session/LastMpqFolder", m_lastMpqFolder);
 
   // Armory importer proxy URL override (entered in General Settings).
   config.setValue("Armory/ProxyURL", QString::fromStdString(GLOBALSETTINGS.armoryProxyURL()));
 
-  // Background and Custom Colours
-  wxColour bgCol;
-  bgCol = bgDialogData.GetColour();
-  config.setValue("Session/bgCol", QString::fromWCharArray(bgCol.GetAsString(wxC2S_HTML_SYNTAX).c_str()));
-  for (int i = 0; i < 16; i++)
-  {
-    bgCol = bgDialogData.GetCustomColour(i);
-    if (!bgCol.IsOk())  // skip undefined custom colours
-      continue;
-    config.setValue(QString("Session/bgCustCol%1").arg(i), QString::fromWCharArray(bgCol.GetAsString(wxC2S_HTML_SYNTAX).c_str()));
-  }
-
-
-  if (canvas)
-  {
-    // The canvas's own client size. (It used to add the character panel's width back, because
-    // that panel came and went with character models; the Model panel does not.)
-    int canvx = 0, canvy = 0;
-    canvas->GetClientSize(&canvx, &canvy);
-
-    config.setValue("Session/CanvasWidth", canvx);
-    config.setValue("Session/CanvasHeight", canvy);
-
-    config.setValue("Session/DBackground", canvas->drawBackground);
-
-    if (canvas->drawBackground)
-      config.setValue("Session/BackgroundImage", QString::fromWCharArray(bgImagePath.c_str()));
-    else
-      config.setValue("Session/BackgroundImage", "");
-
-    // model file
-    if (canvas->model())
-      config.setValue("Session/Model", canvas->model()->name());
-  }
+  // model file
+  if (canvas && canvas->model())
+    config.setValue("Session/Model", canvas->model()->name());
 }
 
 void ModelViewer::LoadLayout()
@@ -1095,14 +853,17 @@ void ModelViewer::LoadLayout()
     }
     else
     {
-      // No need to display these windows on startup
-      interfaceManager.GetPane(modelControl).Show(false);
+      // No need to display these windows on startup. A perspective stores captions too, and one saved
+      // before the Attachments window was renamed would bring back its old OpenGL caption.
+      interfaceManager.GetPane(modelControl).Show(false).Caption(wxT("Attachments"));
       interfaceManager.GetPane(settingsControl).Show(false);
 
       // The command bar is not something a saved layout can take away. Browse, Model and
       // Animation keep whatever shown state the layout saved: that is how the panels a user
       // closed stay closed next time.
       interfaceManager.GetPane(wxT("commandBar")).Show(true);
+      // Nor is the viewport: whatever the perspective says, the Unity viewport is the shown centre.
+      EnsureUnityViewportCentre();
 #ifndef  _LINUX // buggy
       interfaceManager.Update();
 #endif
@@ -1110,13 +871,10 @@ void ModelViewer::LoadLayout()
     }
   }
 
-  // Restore saved canvas size:
-  if (canvas)
-  {
-    int canvx = config.value("Session/CanvasWidth", 800).toInt();
-    int canvy = config.value("Session/CanvasHeight", 600).toInt();
-    SetCanvasSize(canvx, canvy);
-  }
+  // The saved canvas size (Session/CanvasWidth/CanvasHeight) is no longer restored. It sized the frame
+  // around the OpenGL canvas with Fit(), and Fit() only measures windows that are shown -- with the
+  // canvas archived and hidden, it shrank the frame around the panels and left the Unity viewport a
+  // strip a few dozen pixels high.
 }
 
 void ModelViewer::SaveLayout()
@@ -1145,6 +903,12 @@ void ModelViewer::LoadModel(GameFile * file)
     return;
 
   isModel = true;
+  // A model replaces whatever Browse image, WMO or map tile was shown (canvas->LoadModel below drops
+  // the WMO and the map tile themselves). Only FileControl::ClearCanvas used to reset these, and the
+  // menu loads -- an NPC, an item, a character file, an import -- do not go through it.
+  m_browseImageName.Clear();
+  isWMO = false;
+  isADT = false;
 
   // A direct model load is not an NPC; clear any NPC export descriptor. (LoadNPC calls us and
   // then re-sets it afterwards, so the NPC case is unaffected.) Same for the item skin: a raw
@@ -1164,6 +928,9 @@ void ModelViewer::LoadModel(GameFile * file)
     if (!modelAtt)
     {
       LOG_ERROR << "Failed to load the model" << file->fullname();
+      // The previous model is gone (canvas->LoadModel dropped it), so everything that shows what is
+      // loaded -- the viewport included -- has to hear about it, or it keeps describing that model.
+      DisplayedContentChanged();
       return;
     }
 
@@ -1193,6 +960,7 @@ void ModelViewer::LoadModel(GameFile * file)
     if (!modelAtt)
     {
       LOG_ERROR << "Failed to load the model" << file->fullname();
+      DisplayedContentChanged();   // see the character branch above
       return;
     }
     // creature model, keep left/right hand only as equipment
@@ -1206,6 +974,7 @@ void ModelViewer::LoadModel(GameFile * file)
   if (!canvas->model())
   {
     LOG_ERROR << "[ModelViewer::LoadModel()]  Model* Canvas::model is null!";
+    DisplayedContentChanged();
     return;
   }
 
@@ -1217,13 +986,6 @@ void ModelViewer::LoadModel(GameFile * file)
            wxString(canvas->model()->name().toStdWString()));
   WoWModel * m = const_cast<WoWModel *>(canvas->model());
   m->charModelDetails.isChar = isChar;
-
-  viewMenu->Enable(ID_USE_CAMERA, canvas->model()->hasCamera);
-  if (canvas->useCamera && !canvas->model()->hasCamera)
-  {
-    canvas->useCamera = false;
-    viewMenu->Check(ID_USE_CAMERA, false);
-  }
 
   if (isChar)
   {
@@ -1298,24 +1060,17 @@ void ModelViewer::LoadModel(GameFile * file)
   // displayed geosets and the particle colour, not just textures -- but only for a model that
   // HAS a skin group in the database. A creature with none (felreavergolem, the cinematic
   // models) pushed nothing, so the player never learned which submeshes the app is drawing and
-  // fell back to "geoset 0 only": parts the OpenGL viewport shows were missing in the Unity
-  // one. Pushing here covers both cases; a model whose skin was already pushed simply gets the
+  // fell back to "geoset 0 only": parts the host displays were missing in the Unity
+  // viewport. Pushing here covers both cases; a model whose skin was already pushed simply gets the
   // same answer twice, which the player treats as the state it already has.
   SendCurrentSkinToUnity();
 
-  // The centre of the window, if the Unity viewport can show this model. A no-op when the pane
-  // is already where it should be: see UpdatePrimaryViewport. FIRST: when the routing does
-  // change, its one relayout also commits the character panel shown or hidden above, and the
-  // commit below then finds nothing to do -- one relayout per switch, not two.
-  UpdatePrimaryViewport();
-
-  // The Model panel, the command bar and the status bar follow the new model. After the
-  // routing, so they know which viewport it is on.
+  // The Model panel, the command bar, the status bar and the viewport (the model, or a notice when
+  // the Unity viewport cannot draw it yet) follow the new model.
   DisplayedContentChanged();
 
-  // Lay out ONLY if a pane's shown state actually changed and the routing did not. An
-  // unconditional Update() here erased and repainted the whole window, player included, on every
-  // load: see CommitLayoutIfChanged.
+  // Lay out ONLY if a pane's shown state actually changed. An unconditional Update() here erased and
+  // repainted the whole window, player included, on every load: see CommitLayoutIfChanged.
   CommitLayoutIfChanged();
 }
 
@@ -1652,18 +1407,13 @@ ModelViewer::~ModelViewer()
     delete m_exportJobManager;
     m_exportJobManager = nullptr;
   }
-  if (m_imgSeqExporter) {
-    delete m_imgSeqExporter;
-    m_imgSeqExporter = nullptr;
-  }
-
   // If we have a canvas (which we always should)
   // Stop rendering, give more power back to the CPU to close this sucker down!
   //if (canvas)
   //  canvas->timer.Stop();
 
   // Persist the GUI layout/session only for real interactive runs. A headless/CLI run
-  // (FBX export child, screenshot/test harness) parks its window off-screen at (-32000,-32000)
+  // (FBX export child, test harness) parks its window off-screen at (-32000,-32000)
   // and never touches the UI, so saving here would overwrite the shared Config.ini with that
   // off-screen position -- which then strands the next interactive launch's window off-screen.
   if (!batchMode)
@@ -1680,11 +1430,6 @@ ModelViewer::~ModelViewer()
 
   if (!batchMode)
     SaveSession();
-
-  if (animExporter) {
-    animExporter->Destroy();
-    wxDELETE(animExporter);
-  }
 
   if (canvas) {
     canvas->Disable();
@@ -1758,9 +1503,6 @@ void ModelViewer::OnToggleDock(wxCommandEvent &event)
     wxAuiPaneInfo & pane = interfaceManager.GetPane(modelInspector);
     pane.Show(!pane.IsShown());
   }
-  else if (id == ID_SHOW_LIGHT) {
-    interfaceManager.GetPane(lightControl).Show(true);
-  }
   else if (id == ID_SHOW_MODEL) {
     interfaceManager.GetPane(modelControl).Show(true);
     modelControl->Update();
@@ -1772,94 +1514,109 @@ void ModelViewer::OnToggleDock(wxCommandEvent &event)
   interfaceManager.Update();
 }
 
-// The Unity viewport's docking setup, shared by the lazy creation below and ResetLayout so
-// both register the pane identically (an initially-hidden, dockable/floatable side pane).
-// For now the OpenGL canvas stays the one CenterPane; as the Unity renderer becomes the
-// primary viewport this pane is expected to take over that position, with the OpenGL
-// canvas retained as the legacy/fallback viewport.
-static wxAuiPaneInfo buildUnityRendererPaneInfo()
+// The Unity viewport's docking setup, shared by InitDocking, ResetLayout and LoadLayout. A centre
+// pane has no caption and no close button, so the user cannot close it; nothing else docks there.
+wxAuiPaneInfo ModelViewer::unityViewportPaneInfo() const
 {
   return wxAuiPaneInfo().
-         Name(wxT("unityRenderer")).Caption(wxT("Unity Renderer")).
-         BestSize(wxSize(640, 480)).FloatingSize(wxSize(800, 600)).
-         Right().Layer(2).Show(false).DestroyOnClose(false);
+         Name(wxT("unityRenderer")).Caption(wxT("Viewport")).
+         CenterPane().Show(true);
 }
 
-// View > Unity Renderer: the embedded Unity viewport -- the new renderer foundation for WMV
-// (the OpenGL canvas is the legacy/fallback viewport during the migration; see
-// docs/unity-renderer/README.md). At this stage it is still OPTIONAL: the host panel and its
-// pane are created lazily on FIRST use (same pattern as the Screenshot pane) so normal
-// startup does not construct them (headless runs only do so for the -unityipctest self-test),
-// and the player itself is an external
-// exe launched by UnityRendererHost -- nothing in the WMV build depends on Unity being
-// installed.
-void ModelViewer::OnUnityRenderer(wxCommandEvent &event)
+void ModelViewer::CreateUnityViewport()
 {
-  ShowUnityRenderer();
+  if (unityRendererHost)
+    return;
+  unityRendererHost = new UnityRendererHost(this, ID_UNITY_FRAME);
+
+  // Runtime IPC: as soon as the player announces itself, tell it what is on the canvas.
+  unityRendererHost->ipc()->onUnityReady = [this]() {
+    if (unityRendererHost)
+      unityRendererHost->setPlayerReady(true);
+    // A (re)started player knows nothing of the states sent to the one before it; the model push
+    // below carries the current state, and its build answers for it.
+    if (modelInspector)
+      modelInspector->UnityPlayerRestarted();
+    m_sceneAwaitingRevision = 0;
+    // ... nor could the one before it build a character this one never tried: a player rebuilt or
+    // restarted after a failed build is given the character again.
+    m_unityCharacterFailed = 0;
+    m_unityCharacterFailReason.clear();
+    SendCurrentModelToUnity();
+    // What the player announced may change what the viewport can show: a character gets a notice
+    // when the player is an older build that cannot dress it. With nothing loaded, the empty
+    // viewer's prompt simply stays.
+    UpdateUnityViewportState();
+  };
+  unityRendererHost->ipc()->onCharacterSceneApplied = [this](const UnityIpcServer::SceneAck & ack) {
+    OnCharacterSceneApplied(ack);
+  };
+  // ... and what it did with a geoset state, so the Geosets checkboxes follow the renderer.
+  unityRendererHost->ipc()->onGeosetsApplied = [this](const UnityIpcServer::GeosetAck & ack) {
+    if (modelInspector)
+      modelInspector->OnUnityGeosetsApplied(ack);
+  };
 }
 
-bool ModelViewer::ShowUnityRenderer(bool selfTest)
+bool ModelViewer::EnsureUnityViewportCentre()
 {
-  bool justAdded = false;
   if (!unityRendererHost)
-  {
-    justAdded = true;
-    unityRendererHost = new UnityRendererHost(this, ID_UNITY_FRAME);
-    interfaceManager.AddPane(unityRendererHost, buildUnityRendererPaneInfo());
-    // Runtime IPC: as soon as the player announces itself, tell it what is on the canvas.
-    unityRendererHost->ipc()->onUnityReady = [this]() {
-      if (unityRendererHost)
-        unityRendererHost->setPlayerReady(true);
-      // A (re)started player knows nothing of the states sent to the one before it; the model push
-      // below carries the current state, and its build answers for it.
-      if (modelInspector)
-        modelInspector->UnityPlayerRestarted();
-      m_sceneAwaitingRevision = 0;
-      // ... nor could the one before it build a character this one never tried: a player rebuilt or
-      // restarted after a failed build is given the character again.
-      m_unityCharacterFailed = 0;
-      SendCurrentModelToUnity();
-      // What the player announced may change where the model belongs: a character goes back to the
-      // canvas when the player is an older build that cannot dress it.
-      UpdatePrimaryViewport();
-    };
-    unityRendererHost->ipc()->onCharacterSceneApplied = [this](const UnityIpcServer::SceneAck & ack) {
-      OnCharacterSceneApplied(ack);
-    };
-    // ... and what it did with a geoset state, so the Geosets checkboxes follow the renderer.
-    unityRendererHost->ipc()->onGeosetsApplied = [this](const UnityIpcServer::GeosetAck & ack) {
-      if (modelInspector)
-        modelInspector->OnUnityGeosetsApplied(ack);
-    };
-  }
-
-  // Show the pane first so the panel is realized at its docked size, then embed the player
-  // into it (the player parents itself to the panel's HWND). This runs on every load, so the
-  // layout is committed only when the pane was not already shown: see CommitLayoutIfChanged.
-  wxAuiPaneInfo & unityPane = interfaceManager.GetPane(unityRendererHost);
-  const bool wasShown = unityPane.IsShown();
-  unityPane.Show(true);
-  // Only the change made HERE is committed: the pane appearing, or -- just added -- never laid
-  // out at all (AddPane puts it in the manager's list, not in a dock, and its window was
-  // created shown, so a shown-state test would see nothing to do and leave a bare 640 x 480
-  // panel at the frame's origin). A caller about to re-dock the pane commits everything else
-  // -- the character panel LoadModel showed or hid -- in that one relayout; committing it here
-  // first made every routing switch relayout twice.
-  if (justAdded || !wasShown)
-    interfaceManager.Update();
-
-  if (!unityRendererHost->isRunning() && !unityRendererHost->launch(!batchMode, selfTest))
-  {
-    // Launch failed (missing/broken player build): the host already told the user; hide the
-    // empty pane again and carry on -- the rest of the app is unaffected.
-    interfaceManager.GetPane(unityRendererHost).Show(false);
-    interfaceManager.Update();
     return false;
-  }
+  if (isUnityViewportCentre())
+    return false;
+  interfaceManager.DetachPane(unityRendererHost);
+  interfaceManager.AddPane(unityRendererHost, unityViewportPaneInfo());
   return true;
 }
 
-// Start the Unity viewport before it is needed.
+void ModelViewer::OnRestartUnityRenderer(wxCommandEvent & WXUNUSED(event))
+{
+  RestartUnityRenderer();
+}
+
+void ModelViewer::RestartUnityRenderer()
+{
+  if (!unityRendererHost)
+    return;
+  LOG_INFO << "Restarting the Unity renderer.";
+  // A player that is still running (frozen, disconnected, or simply asked to restart) is closed first:
+  // launch() is a no-op while a process is alive.
+  unityRendererHost->shutdown();
+  StartUnityRenderer();
+  // The notice follows at once: the restart's own outcome (a missing build is reported again), or the
+  // content state. The player, once connected, is sent the current model by onUnityReady.
+  UpdateUnityViewportState();
+}
+
+bool ModelViewer::StartUnityRenderer(bool selfTest)
+{
+  if (!unityRendererHost)
+    return false;
+  if (unityRendererHost->isRunning())
+    return true;
+  // The host panel is already laid out as the centre pane, so the player parents itself to a window
+  // of the right size from its first frame.
+  return unityRendererHost->launch(selfTest);
+}
+
+// The half of the viewer-first startup that touches NO player and NO IPC: take the screen. Runs
+// BEFORE the client is loaded, which is what makes the first thing on screen a clean fullscreen
+// viewer instead of a small window behind a dialog.
+void ModelViewer::ApplyViewerStartupLayout()
+{
+  if (batchMode || !canvas)
+    return;
+
+  // The panels come up as they were left: Browse, Model and Animation keep the shown state the
+  // saved layout restored (LoadLayout), all three on a first run. The empty viewport says what to
+  // do next itself (the Unity viewport's notice), so hiding the panels that do it is no longer the
+  // way to make an empty application look tidy.
+
+  // Take the screen. A viewer that opens in a small window in the corner is not one.
+  EnterViewerFullScreen(true);
+}
+
+// Start the player, at launch, before any client is loaded.
 //
 // It used to be created and launched by the first model load that wanted it, which meant the user
 // picked a creature and then watched a game engine boot -- process start, engine init and the
@@ -1868,68 +1625,30 @@ bool ModelViewer::ShowUnityRenderer(bool selfTest)
 // still looking at an empty app, and by the time a creature is picked the player is already
 // connected and waiting.
 //
-// Deliberately quiet: a missing player build is not worth a dialog at startup (the viewport is
-// still optional), so this checks for the exe itself rather than letting launch() complain. The
-// menu item still reports properly when the user asks for it explicitly.
-// The half of the viewer-first startup that touches NO player and NO IPC: hide the panes and take
-// the screen. Runs BEFORE the client is loaded, which is what makes the first thing on screen a
-// clean fullscreen viewer instead of a small window behind a dialog.
-void ModelViewer::ApplyViewerStartupLayout()
-{
-  if (batchMode || !unityPrimaryViewport || !canvas)
-    return;
-
-  // The panels come up as they were left: Browse, Model and Animation keep the shown state the
-  // saved layout restored (LoadLayout), all three on a first run. The empty viewport says what to
-  // do next itself (UnityRendererHost's empty state), so hiding the panels that do it is no
-  // longer the way to make an empty application look tidy.
-
-  // Take the screen. A viewer that opens in a small window in the corner is not one.
-  EnterViewerFullScreen(true);
-}
-
-// Start the player, at launch, before any client is loaded.
-//
 // Nothing it does needs game data: it talks to WMV over the local IPC channel and is told what to
-// show, so with nothing loaded it simply sits connected and idle on a dark viewport. That leaves
-// its one-second start-up overlapping the time the user spends deciding what to open, rather than
-// the moment they open it.
+// show, so with nothing loaded it simply sits connected and idle behind the empty viewer's prompt.
 //
 // Loading a client afterwards, with the player already running, is the normal case and was
 // verified as such -- unityReady lands in the middle of CASC and database initialisation and the
 // load completes untroubled. (The launch crash this branch had along the way was a double client
 // load, and it reproduced with no player running at all.)
+//
+// A player build that is missing or will not start is not a dialog: the viewport's notice says why
+// and offers a restart.
 void ModelViewer::WarmStartUnityViewport()
 {
-  if (batchMode || !unityPrimaryViewport)
+  if (batchMode)
     return;
-  if (!wxFileName::FileExists(UnityRendererHost::resolveUnityExePath()))
-  {
-    LOG_INFO << "Unity viewport not warm-started: no player build installed. The OpenGL canvas "
-                "remains the main viewport.";
-    return;
-  }
-
-  if (!ShowUnityRenderer())
-    return;                       // already reported; the OpenGL canvas keeps the centre
-
-  // Nothing is loaded yet: the viewport shows what to do first instead of an empty dark panel.
-  unityRendererHost->setEmptyState(true);
-  UpdateEmptyState();
-
-  // Take the centre, so the viewport the user is going to use is the one they can see.
-  interfaceManager.DetachPane(unityRendererHost);
-  interfaceManager.AddPane(unityRendererHost, wxAuiPaneInfo().
-                           Name(wxT("unityRenderer")).Caption(wxT("Unity Renderer")).
-                           CenterPane().Show(true));
-  interfaceManager.GetPane(canvas).Show(false);
-  interfaceManager.Update();
+  if (!StartUnityRenderer())
+    LOG_INFO << "Unity viewport not started:" << QString::fromWCharArray(unityRendererHost ?
+                                                   unityRendererHost->playerProblem().c_str() : L"no host");
+  UpdateUnityViewportState();
 }
 
 // Borderless fullscreen, keeping the MENU BAR.
 //
 // Dropping the caption removes the window's own close and restore buttons, so without the menu
-// there would be no visible way back out -- and no way to reach View > "Unity as main viewport"
+// there would be no visible way back out -- and no way to reach View > "Restart Unity Renderer"
 // either. Keeping it costs one strip of chrome and means the mode can always be left: F11 or Esc
 // from anywhere, or View > Fullscreen.
 void ModelViewer::EnterViewerFullScreen(bool full)
@@ -1956,30 +1675,154 @@ void ModelViewer::OnCharHook(wxKeyEvent & event)
   event.Skip();
 }
 
-// Every M2 the canvas shows, playable characters included: the character's resolved appearance,
-// merged armour and attached items reach the Unity viewport as a characterScene (protocol 3). What
-// stays on the OpenGL canvas:
-//   - a WMO, which is not an M2 at all;
-//   - a character riding a mount -- the canvas model is then the mount, with the character hung
-//     from one of its attachments, and the Unity viewport has no mount rig;
+// WHAT THE UNITY PLAYER CAN DRAW. Every M2 addressed by FileDataID, playable characters included:
+// the character's resolved appearance, merged armour and attached items reach it as a characterScene
+// (protocol 3). What it cannot draw yet, each with the notice the viewport shows instead:
+//   - an image picked in Browse, a WMO or a map tile (ADT): none of them is an M2;
+//   - a character riding a mount -- the canvas model is then the mount, with the character hung from
+//     one of its attachments, and the player has no mount rig;
+//   - a model with no FileDataID (a legacy MPQ client): the player addresses every asset by one;
+//   - a character the player reported it could not build, until another load or a player restart;
 //   - a character when the connected player is an older build that cannot dress one.
-// A player that is not connected yet is assumed to be the current build: this decides the layout
-// before the player exists, and a player that then turns out older sends the model back here when it
-// announces itself (onUnityReady re-routes).
-bool ModelViewer::unityCanShowCurrentModel() const
+// A player that is not connected yet is assumed to be the current build: this decides before the
+// player exists, and a player that then turns out older gets the notice when it announces itself
+// (onUnityReady). Nothing loaded is not drawable either, but has no notice of its own here: the
+// empty viewer's prompt is the caller's (unityViewportNotice).
+bool ModelViewer::unityCanDrawCurrentModel(ViewportNotice * notice) const
 {
-  if (!canvas || !canvas->model() || !canvas->model()->gamefile)
+  ViewportNotice ignored;
+  ViewportNotice & out = notice ? *notice : ignored;
+  out = ViewportNotice();
+  const auto fileName = [](const wxString & path) {
+    wxString name = path;
+    name.Replace(wxT("/"), wxT("\\"));
+    return name.AfterLast('\\');
+  };
+
+  if (!canvas)
     return false;
-  if (canvas->wmo)
+  if (!m_browseImageName.IsEmpty())
+  {
+    out.title = _("Image selected");
+    out.detail = wxString::Format(_("%s is an image. The Unity viewport cannot show images yet."),
+                                  fileName(m_browseImageName));
     return false;
+  }
+  // The flags as well as the pointers, as everything else that says what is loaded tests them
+  // (DisplayedContentChanged, UpdateStatusFacts, the Model panel): a pointer left behind by a load that
+  // did not clear it must never put a notice in front of the model that replaced it.
+  if (isWMO && canvas->wmo)
+  {
+    out.title = _("World model loaded");
+    out.detail = wxString::Format(_("%s is a world model (WMO). The Unity viewport cannot show world models yet."),
+                                  fileName(wxString(canvas->wmo->itemName().toStdWString())));
+    return false;
+  }
+  if (isADT && canvas->adt)
+  {
+    out.title = _("Map tile loaded");
+    out.detail = wxString::Format(_("%s is a map tile (ADT). The Unity viewport cannot show map tiles yet."),
+                                  fileName(canvas->adt->name));
+    return false;
+  }
+  if (!canvas->model())
+    return false;   // nothing loaded: the empty viewer, not a notice about content
+  const WoWModel * m = canvas->model();
+  const wxString name = m->gamefile ? fileName(wxString(m->gamefile->fullname().toStdWString()))
+                                    : wxString(const_cast<WoWModel *>(m)->name().toStdWString());
+  if (!m->gamefile)
+  {
+    out.title = _("Model cannot be shown");
+    out.detail = wxString::Format(_("%s has no game file the Unity viewport can load."), name);
+    return false;
+  }
+  if (isChar && !m->charModelDetails.isChar)
+  {
+    out.title = _("Mounted character");
+    out.detail = _("The character is riding a mount. The Unity viewport cannot show mounted characters yet; "
+                   "dismount to see the character again.");
+    return false;
+  }
+  if (m->gamefile->fileDataId() <= 0)
+  {
+    out.title = _("Legacy client model");
+    out.detail = wxString::Format(_("%s has no FileDataID (it comes from a legacy client). The Unity viewport "
+                                    "can only show models that have one."), name);
+    return false;
+  }
   if (!isChar)
     return true;
-  if (!canvasShowsCharacter())
+  // From here canvasShowsCharacter() holds: a model, its game file, isChar, a character model that is
+  // not mounted and a FileDataID were all established above.
+  if (m_unityCharacterFailed != 0 && m_unityCharacterFailed == (int)m->gamefile->fileDataId())
+  {
+    out.title = _("Character could not be built");
+    out.detail = m_unityCharacterFailReason.isEmpty()
+      ? wxString::Format(_("The Unity viewport could not build %s."), name)
+      : wxString::Format(_("The Unity viewport could not build %s (%s)."), name,
+                         wxString(m_unityCharacterFailReason.toStdWString()));
     return false;
-  if (m_unityCharacterFailed != 0 && m_unityCharacterFailed == (int)canvas->model()->gamefile->fileDataId())
-    return false;
+  }
   const bool playerKnown = unityRendererHost && unityRendererHost->ipc() && unityRendererHost->ipc()->isUnityReady();
-  return !playerKnown || unityRendererHost->ipc()->playerDressesCharacters();
+  if (playerKnown && !unityRendererHost->ipc()->playerDressesCharacters())
+  {
+    out.title = _("Unity renderer out of date");
+    out.detail = wxString::Format(_("The Unity renderer build in use cannot dress characters. Rebuild the player "
+                                    "from Tools\\UnityRendererProject to show %s."), name);
+    return false;
+  }
+  return true;
+}
+
+// THE WHOLE VIEWPORT DECISION, most fundamental first: a platform with no player, texture services
+// that never started (nothing can be prepared for the player then), a player that is missing or has
+// stopped, content the player cannot draw yet, and finally nothing loaded (the empty viewer's prompt).
+bool ModelViewer::unityViewportNotice(ViewportNotice & notice) const
+{
+  notice = ViewportNotice();
+#ifndef _WINDOWS
+  notice.title = _("Unity viewport unavailable");
+  notice.detail = _("The Unity viewport is not available on this platform.");
+  return true;
+#else
+  if (!canvas || !video.render || !canvas->init)
+  {
+    notice.title = _("Textures cannot be decoded");
+    notice.detail = _("The OpenGL services this viewer decodes textures with did not start, so nothing can be "
+                      "prepared for the Unity viewport. Check the graphics driver, then restart the application.");
+    return true;
+  }
+  if (unityRendererHost && !unityRendererHost->playerProblem().IsEmpty())
+  {
+    notice.title = _("The Unity renderer is not running");
+    notice.detail = unityRendererHost->playerProblem();
+    notice.actionLabel = _("Restart Unity renderer");
+    notice.actionId = ID_VIEW_UNITY_RESTART;
+    return true;
+  }
+  ViewportNotice content;
+  if (unityCanDrawCurrentModel(&content))
+    return false;
+  if (!content.title.IsEmpty())
+  {
+    notice = content;
+    return true;
+  }
+  // Nothing loaded: the empty viewer's prompt, which depends on whether a client is loaded yet.
+  notice.title = _("No model loaded");
+  if (UnityAssetAccess::hasActiveClient())
+  {
+    notice.detail = _("Choose a model in Browse, or search for one by name.");
+    notice.actionLabel = _("Browse models");
+  }
+  else
+  {
+    notice.detail = _("Load a World of Warcraft client to browse its models.");
+    notice.actionLabel = _("Load World of Warcraft...");
+  }
+  notice.actionId = ID_UI_OPEN_MODEL;
+  return true;
+#endif
 }
 
 // The scene and the player's asset requests both address files by FileDataID, so a character with
@@ -1995,16 +1838,6 @@ bool ModelViewer::unityPlayerDressesCharacters() const
   return unityRendererHost && unityRendererHost->ipc() && unityRendererHost->ipc()->playerDressesCharacters();
 }
 
-// Hand the centre of the window to whichever viewport should own it.
-//
-// This is a ROUTING change, not a renderer swap: the OpenGL canvas still loads the model, still
-// owns the animation clock, and is still what every Send*ToUnity call reads from. It keeps
-// running when it is not the visible one -- its timer is independent of whether the pane is
-// shown, and it has already initialised by the time any model is loaded -- which matters,
-// because the playback state the Unity viewport mirrors is driven from ModelCanvas::tick.
-//
-// So the OpenGL viewport is never torn down, only uncovered: View > "Unity as main viewport"
-// hands the centre straight back to it for comparison, and unsupported models never leave it.
 // THE WHOLE WINDOW BLINKED ON EVERY MODEL LOAD, and this is why. On Windows, wxAuiManager::Update()
 // wraps its relayout in a wxWindowUpdateLocker on the frame (wx 3.2.10, framemanager.cpp: "only
 // under MSW and only when not using live resizing" -- which this manager does not use). The lock
@@ -2012,7 +1845,7 @@ bool ModelViewer::unityPlayerDressesCharacters() const
 // RedrawWindow(RDW_INVALIDATE | RDW_ALLCHILDREN | RDW_ERASE): every window in the frame is
 // invalidated and ERASED, the embedded player's child window included, and everything repaints.
 // The load path called Update() two or three times per model -- after the animation control,
-// from FileControl::UpdateInterface, from ShowUnityRenderer -- with nothing to lay out: the same
+// from FileControl::UpdateInterface, from the viewport routing -- with nothing to lay out: the same
 // panes, in the same places, at the same sizes.
 //
 // So the layout is committed only when something a load can change has changed: whether a pane
@@ -2038,110 +1871,45 @@ bool ModelViewer::CommitLayoutIfChanged()
   return changed;
 }
 
-void ModelViewer::UpdatePrimaryViewport()
-{
-  // The routing is decided here for what the canvas shows now, so this is what the tick compares
-  // against to notice a mount or a dismount (SendCharacterSceneToUnity). Recorded before any early
-  // return: a load routes itself, and the tick that follows it must not route it again.
-  m_lastShowsCharacter = canvasShowsCharacter();
-  if (!canvas)
-    return;
-
-  // A non-interactive run keeps the viewport it was given. -mo screenshots and the OpenGL
-  // regression render through the canvas and must not have a player process appear underneath
-  // them; -unityipctest opens the Unity viewport explicitly and is unaffected by this.
-  if (batchMode)
-    return;
-
-  const bool wantUnity = unityPrimaryViewport && unityCanShowCurrentModel();
-
-  if (wantUnity)
-  {
-    // Launching can fail (no player build, or a broken one). ShowUnityRenderer has already told
-    // the user why; the centre simply stays where it is rather than going blank.
-    //
-    // A player that is already running does not need ShowUnityRenderer at all -- it is re-docked
-    // just below -- and skipping it spares the relayout that would first show its pane at the
-    // side (the pane is hidden while an OpenGL-only model is up: see UncoverOpenGLViewport).
-    const bool running = unityRendererHost && unityRendererHost->isRunning();
-    if (!running && !ShowUnityRenderer())
-    {
-      LOG_INFO << "Unity viewport unavailable -- the OpenGL canvas remains the main viewport.";
-      UncoverOpenGLViewport();
-      return;
-    }
-
-    // ALREADY THERE: do nothing. This runs on every model load, and detaching and re-adding a
-    // pane that is already the centre pane makes the AUI manager relayout everything, which
-    // resizes the embedded player window -- the swapchain is recreated and the viewport blinks
-    // on every switch. The layout only has to change when the ROUTING changes.
-    wxAuiPaneInfo & unityPane = interfaceManager.GetPane(unityRendererHost);
-    const bool alreadyCentre = unityPane.IsOk() && unityPane.IsShown() &&
-                               unityPane.dock_direction == wxAUI_DOCK_CENTER &&
-                               !interfaceManager.GetPane(canvas).IsShown();
-    if (alreadyCentre)
-      return;
-
-    interfaceManager.DetachPane(unityRendererHost);
-    interfaceManager.AddPane(unityRendererHost, wxAuiPaneInfo().
-                             Name(wxT("unityRenderer")).Caption(wxT("Unity Renderer")).
-                             CenterPane().Show(true));
-    // The canvas is hidden, NOT stopped: see the note above.
-    interfaceManager.GetPane(canvas).Show(false);
-    interfaceManager.Update();
-    return;
-  }
-
-  UncoverOpenGLViewport();
-}
-
-// Put the OpenGL canvas back in the centre, and the Unity pane back to being a side pane.
-void ModelViewer::UncoverOpenGLViewport()
-{
-  // ALREADY THERE: do nothing. This runs on every load the Unity viewport cannot show (a
-  // character model, or Unity not the main viewport), and detaching and re-adding the Unity pane
-  // as a side pane, then relaying out, blinked the whole window each time exactly as the centre
-  // re-dock used to: see CommitLayoutIfChanged for what an Update() costs. The layout only has
-  // to change when the ROUTING changes.
-  {
-    const bool canvasShown = interfaceManager.GetPane(canvas).IsShown();
-    bool unityAside = true;
-    if (unityRendererHost)
-    {
-      wxAuiPaneInfo & up = interfaceManager.GetPane(unityRendererHost);
-      unityAside = up.IsOk() && up.dock_direction != wxAUI_DOCK_CENTER &&
-                   up.IsShown() == unityAsidePaneShown();
-    }
-    if (canvasShown && unityAside)
-      return;
-  }
-
-  interfaceManager.GetPane(canvas).Show(true);
-  if (unityRendererHost)
-  {
-    const bool showAside = unityAsidePaneShown();
-    interfaceManager.DetachPane(unityRendererHost);
-    interfaceManager.AddPane(unityRendererHost, buildUnityRendererPaneInfo().Show(showAside));
-  }
-  interfaceManager.Update();
-}
-
-// Whether the Unity pane, once it is not the centre, is shown at the side.
+// What the viewport shows is decided here and nowhere else. It is not a routing: the Unity viewport
+// is the only viewport, and the archived OpenGL canvas behind it still loads the model, owns the
+// animation clock and is what every Send*ToUnity call reads from -- it is simply never shown. Content
+// the player cannot draw yet stays loaded (the panels, exports and Info keep working on it) and the
+// viewport paints a notice in front of the player instead, whose window is hidden, not closed, so the
+// next drawable model is on screen as soon as it is built.
 //
-// When Unity is the main viewport, a model it cannot show (a character, a WMO) moves the canvas to
-// the centre -- and the side pane used to stay up showing the PREVIOUS model, frozen, taking a
-// third of a small window. It is hidden instead; the player keeps running and takes the centre
-// back on the next model it can show. With the main-viewport option off, the side pane is the
-// optional comparison view it always was, shown while the player runs.
-bool ModelViewer::unityAsidePaneShown()
+// Cheap, and safe from the canvas tick: it launches nothing and opens no dialog, and setting the
+// notice already on screen again repaints nothing.
+void ModelViewer::UpdateUnityViewportState()
 {
-  return unityRendererHost && unityRendererHost->isRunning() && !unityPrimaryViewport;
-}
+  // Recorded for the tick, which compares against it to notice a mount or a dismount
+  // (SendCharacterSceneToUnity). Recorded before any early return: a load decides here, and the tick
+  // that follows it must not decide it again.
+  m_lastShowsCharacter = canvasShowsCharacter();
+  if (!unityRendererHost)
+    return;
 
-void ModelViewer::OnUnityPrimaryViewport(wxCommandEvent & event)
-{
-  unityPrimaryViewport = event.IsChecked();
-  UpdatePrimaryViewport();
+  ViewportNotice notice;
+  bool changed = false;
+  if (unityViewportNotice(notice))
+  {
+    changed = !unityRendererHost->hasNotice() || unityRendererHost->noticeTitle() != notice.title;
+    if (changed)
+      LOG_INFO << "[viewport] notice:" << QString::fromWCharArray(notice.title.c_str()) << "--"
+               << QString::fromWCharArray(notice.detail.c_str());
+    unityRendererHost->setNotice(notice.title, notice.detail, notice.actionLabel, notice.actionId);
+  }
+  else
+  {
+    changed = unityRendererHost->hasNotice();
+    if (changed)
+      LOG_INFO << "[viewport] showing the model";
+    unityRendererHost->clearNotice();
+  }
+  // The Geosets tab says whether the viewport shows the model; a stopped or restarted player changes
+  // that without a load, so the tab is told here rather than only on content changes.
+  if (changed && modelInspector)
+    modelInspector->ViewportNoticeChanged();
 }
 
 // Just the load. LoadModel sends this before the animation control initialises, so that the
@@ -2210,21 +1978,17 @@ void ModelViewer::SendCurrentSkinToUnity()
 void ModelViewer::SendCharacterSceneToUnity(bool force)
 {
   // Mounting puts the mount on the canvas and dismounting takes it off again, with no load: the
-  // viewport routing follows here, where every tick passes. Only a change the routing has not already
-  // followed counts -- UpdatePrimaryViewport records what it routed -- so a load is not routed twice.
+  // viewport follows here, where every tick passes. Only a change the viewport has not already followed
+  // counts -- UpdateUnityViewportState records what it decided -- so a load is not decided twice.
   const bool showsCharacter = canvasShowsCharacter();
   if (!force && showsCharacter != m_lastShowsCharacter)
   {
     m_lastShowsCharacter = showsCharacter;
-    // From here a player is re-docked, never launched: a launch that fails shows a message box, and a
-    // modal loop opened inside the canvas timer keeps running the tick beneath it. Handing the centre
-    // back to the canvas (mounting) launches nothing and always follows.
-    const bool running = unityRendererHost && unityRendererHost->isRunning();
-    if (isChar && (running || !showsCharacter))
+    if (isChar)
     {
       // Dismounting. The player may not have THIS character loaded -- one that connected while the
       // character was mounted was sent the mount -- and it refuses a scene for a model it is not
-      // building, so the character's load goes out again before the viewport is handed back.
+      // building, so the character's load goes out again before the notice is taken down.
       if (showsCharacter && unityPlayerReady())
       {
         const bool character = unityRendererHost->ipc()->playerDressesCharacters();
@@ -2232,7 +1996,9 @@ void ModelViewer::SendCharacterSceneToUnity(bool force)
             m_unityLoadedCharacter != character)
           SendCurrentModelToUnity();
       }
-      UpdatePrimaryViewport();
+      // Mounting puts the mounted-character notice up; dismounting takes it down. Nothing here launches
+      // or opens a dialog, so it is safe inside the canvas timer.
+      UpdateUnityViewportState();
     }
   }
 
@@ -2315,7 +2081,7 @@ int ModelViewer::SendCurrentGeosetsToUnity()
 {
   if (!unityRendererHost || !unityRendererHost->ipc() || !unityRendererHost->ipc()->isConnected())
     return 0;
-  if (!canvas || !canvas->model() || !canvas->model()->gamefile || !unityCanShowCurrentModel())
+  if (!canvas || !canvas->model() || !canvas->model()->gamefile || !unityCanDrawCurrentModel())
     return 0;
   // A character's geosets -- its own, its merged parts' and its items' -- reach the player in its
   // scene, which the signature sends on the next tick. One channel: a modelGeosets for the body
@@ -2341,7 +2107,7 @@ void ModelViewer::OnCharacterSceneApplied(const UnityIpcServer::SceneAck & ack)
   // load made it drop, and a failed build reports after the next load may already have gone out -- as
   // often as not of the same body model (NPCs of one race and sex share it), so the fileDataID alone
   // took either for news about the character on display: a false notice in the Geosets tab, or a
-  // character that builds fine kept on the canvas. Load 0 is a scene the player could tie to no load at
+  // character that builds fine kept behind a notice. Load 0 is a scene the player could tie to no load at
   // all (the serial sent is never 0). "superseded" is a scene dropped for a newer scene or a new load,
   // which is answered in its own right: no failure either.
   if (ack.load == 0 || ack.load != m_unityLoadSerial || ack.status == "superseded")
@@ -2358,21 +2124,23 @@ void ModelViewer::OnCharacterSceneApplied(const UnityIpcServer::SceneAck & ack)
   if (current && ack.status == "applied" && m_unityCharacterFailed == ack.fileDataID)
   {
     // A later load of the model whose build failed (another NPC on the same body, say) was dressed, so
-    // the viewport takes the character back.
+    // the notice comes down and the viewport shows the character.
     m_unityCharacterFailed = 0;
-    UpdatePrimaryViewport();
+    m_unityCharacterFailReason.clear();
+    UpdateUnityViewportState();
   }
   if (current && ack.status == "rejected")
   {
     if (ack.reason.startsWith("load failed"))
     {
-      // The player could not build this character at all and is still showing whatever it showed
-      // before. The canvas takes it back until something else is loaded.
+      // The player could not build this character at all and is still holding whatever it showed
+      // before. The viewport says so, in front of it, until something else is loaded.
       LOG_ERROR << "[unity-character] the Unity viewport could not build" << canvas->model()->gamefile->fullname()
-                << "(" << ack.reason << ") -- showing it on the OpenGL canvas";
+                << "(" << ack.reason << ") -- showing a notice instead";
       m_unityCharacterFailed = ack.fileDataID;
       m_unityCharacterFailedLoad = ack.load;
-      UpdatePrimaryViewport();
+      m_unityCharacterFailReason = ack.reason;
+      UpdateUnityViewportState();
       return;
     }
     // A scene the player refused as a whole (a submesh list that does not fit, say): the Geosets tab
@@ -2483,29 +2251,6 @@ void ModelViewer::OnToggleCommand(wxCommandEvent &event)
       ResetLayout();
       break;
 
-
-    case ID_SHOW_BOUNDS:
-      if (canvas->model())
-      {
-        WoWModel * m = const_cast<WoWModel *>(canvas->model());
-        m->showBounds = !m->showBounds;
-      }
-      break;
-
-
-    case ID_USE_CAMERA:
-      canvas->useCamera = event.IsChecked();
-      break;
-
-    case ID_DEFAULT_DOODADS:
-      // if we have a model...
-      if (canvas->wmo) {
-        canvas->wmo->includeDefaultDoodads = event.IsChecked();
-        canvas->wmo->updateModels();
-      }
-      animControl->defaultDoodads = event.IsChecked();
-      break;
-
     case ID_SAVE_CHAR:
     {
       wxFileDialog saveDialog(this, wxT("Save character"), wxEmptyString, wxEmptyString, wxT("Character files (*.chr)|*.chr"), wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
@@ -2571,200 +2316,6 @@ void ModelViewer::OnToggleCommand(wxCommandEvent &event)
       }
     }
     break;
-
-    /*
-  case ID_ZOOM_IN:
-  canvas->Zoom(0.5f, false);
-  break;
-
-  case ID_ZOOM_OUT:
-  canvas->Zoom(-0.5f, false);
-  break;
-  */
-    case ID_OPENGL_DEBUG:
-      canvas->toggleOpenGLDebug();
-      break;   // (fell through into "save view to slot 1")
-
-    case ID_SAVE_TEMP1:
-      canvas->SaveSceneState(1);
-      break;
-    case ID_SAVE_TEMP2:
-      canvas->SaveSceneState(2);
-      break;
-    case ID_SAVE_TEMP3:
-      canvas->SaveSceneState(3);
-      break;
-    case ID_SAVE_TEMP4:
-      canvas->SaveSceneState(4);
-      break;
-    case ID_LOAD_TEMP1:
-      canvas->LoadSceneState(1);
-      break;
-    case ID_LOAD_TEMP2:
-      canvas->LoadSceneState(2);
-      break;
-    case ID_LOAD_TEMP3:
-      canvas->LoadSceneState(3);
-      break;
-    case ID_LOAD_TEMP4:
-      canvas->LoadSceneState(4);
-      break;
-  }
-}
-
-void ModelViewer::OnLightMenu(wxCommandEvent &event)
-{
-  int id = event.GetId();
-
-  switch (id) {
-    case ID_LT_SAVE:
-    {
-      wxFileDialog dialog(this, wxT("Save Lighting"), wxEmptyString, wxEmptyString, wxT("Scene Lighting (*.lit)|*.lit"), wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
-      if (dialog.ShowModal() == wxID_OK) {
-        wxString fn = dialog.GetPath();
-
-        // FIXME: ofstream is not compatible with multibyte path name
-        std::ofstream f(fn.fn_str(), ios_base::out | ios_base::trunc);
-
-        f << lightMenu->IsChecked(ID_LT_DIRECTION) << " " << lightMenu->IsChecked(ID_LT_TRUE) << " " << lightMenu->IsChecked(ID_LT_DIRECTIONAL) << " " << lightMenu->IsChecked(ID_LT_AMBIENT) << " " << lightMenu->IsChecked(ID_LT_MODEL) << endl;
-        for (size_t i = 0; i < MAX_LIGHTS; i++) {
-          f << lightControl->lights[i].ambience.x << " " << lightControl->lights[i].ambience.y << " " << lightControl->lights[i].ambience.z << " " << lightControl->lights[i].arc << " " << lightControl->lights[i].constant_int << " " << lightControl->lights[i].diffuse.x << " " << lightControl->lights[i].diffuse.y << " " << lightControl->lights[i].diffuse.z << " " << lightControl->lights[i].enabled << " " << lightControl->lights[i].linear_int << " " << lightControl->lights[i].pos.x << " " << lightControl->lights[i].pos.y << " " << lightControl->lights[i].pos.z << " " << lightControl->lights[i].quadradic_int << " " << lightControl->lights[i].relative << " " << lightControl->lights[i].specular.x << " " << lightControl->lights[i].specular.y << " " << lightControl->lights[i].specular.z << " " << lightControl->lights[i].target.x << " " << lightControl->lights[i].target.y << " " << lightControl->lights[i].target.z << " " << lightControl->lights[i].type << endl;
-        }
-        f.close();
-      }
-
-      return;
-
-    }
-    case ID_LT_LOAD:
-    {
-      wxFileDialog dialog(this, wxT("Load Lighting"), wxEmptyString, wxEmptyString, wxT("Scene Lighting (*.lit)|*.lit"), wxFD_OPEN | wxFD_FILE_MUST_EXIST);
-
-      if (dialog.ShowModal() == wxID_OK) {
-        wxString fn = dialog.GetFilename();
-        // FIXME: ifstream is not compitable with multibyte path name
-        ifstream f(fn.fn_str());
-
-        bool lightObj, lightTrue, lightDir, lightAmb, lightModel;
-
-        //lightMenu->IsChecked(ID_LT_AMBIENT)
-        f >> lightObj >> lightTrue >> lightDir >> lightAmb >> lightModel;
-
-        lightMenu->Check(ID_LT_DIRECTION, lightObj);
-        lightMenu->Check(ID_LT_TRUE, lightTrue);
-        lightMenu->Check(ID_LT_DIRECTIONAL, lightDir);
-        lightMenu->Check(ID_LT_AMBIENT, lightAmb);
-        lightMenu->Check(ID_LT_MODEL, lightModel);
-
-        for (size_t i = 0; i < MAX_LIGHTS; i++) {
-          f >> lightControl->lights[i].ambience.x >> lightControl->lights[i].ambience.y >> lightControl->lights[i].ambience.z >> lightControl->lights[i].arc >> lightControl->lights[i].constant_int >> lightControl->lights[i].diffuse.x >> lightControl->lights[i].diffuse.y >> lightControl->lights[i].diffuse.z >> lightControl->lights[i].enabled >> lightControl->lights[i].linear_int >> lightControl->lights[i].pos.x >> lightControl->lights[i].pos.y >> lightControl->lights[i].pos.z >> lightControl->lights[i].quadradic_int >> lightControl->lights[i].relative >> lightControl->lights[i].specular.x >> lightControl->lights[i].specular.y >> lightControl->lights[i].specular.z >> lightControl->lights[i].target.x >> lightControl->lights[i].target.y >> lightControl->lights[i].target.z >> lightControl->lights[i].type;
-        }
-        f.close();
-
-        if (lightObj)
-          canvas->drawLightDir = true;
-
-        if (lightDir) {
-          canvas->lightType = LIGHT_DYNAMIC; //LT_DIRECTIONAL;
-
-          /*
-          if (lightTrue) {
-          if (event.IsChecked()){
-          // Need to reset all our colour, lighting, material back to 'default'
-          //GLfloat b[] = {0.5f, 0.4f, 0.4f, 1.0f};
-          //glColor4fv(b);
-          glDisable(GL_COLOR_MATERIAL);
-
-          glMaterialfv(GL_FRONT, GL_EMISSION, def_emission);
-
-          glMaterialfv(GL_FRONT, GL_AMBIENT, def_ambience);
-          //glLightModelfv(GL_LIGHT_MODEL_AMBIENT, def_ambience);
-
-          glMaterialfv(GL_FRONT, GL_DIFFUSE, def_diffuse);
-          glMaterialfv(GL_FRONT, GL_SPECULAR, def_specular);
-          } else {
-          glEnable(GL_COLOR_MATERIAL);
-          }
-          }
-          */
-        }
-        else if (lightAmb) {
-          //glEnable(GL_COLOR_MATERIAL);
-          canvas->lightType = LIGHT_AMBIENT;
-        }
-        else if (lightModel) {
-          canvas->lightType = LIGHT_MODEL_ONLY;
-        }
-
-        lightControl->UpdateGL();
-        lightControl->Update();
-      }
-
-      return;
-    }
-    /* case ID_USE_LIGHTS:
-      canvas->useLights = event.IsChecked();
-      return;
-      */
-    case ID_LT_DIRECTION:
-      canvas->drawLightDir = event.IsChecked();
-      return;
-    case ID_LT_TRUE:
-      if (event.IsChecked()){
-        // Need to reset all our colour, lighting, material back to 'default'
-        //GLfloat b[] = {0.5f, 0.4f, 0.4f, 1.0f};
-        //glColor4fv(b);
-        glDisable(GL_COLOR_MATERIAL);
-
-        glMaterialfv(GL_FRONT, GL_EMISSION, def_emission);
-        glMaterialfv(GL_FRONT, GL_AMBIENT, def_ambience);
-        //glLightModelfv(GL_LIGHT_MODEL_AMBIENT, def_ambience);
-
-        glMaterialfv(GL_FRONT, GL_DIFFUSE, def_diffuse);
-        glMaterialfv(GL_FRONT, GL_SPECULAR, def_specular);
-      }
-      else {
-        glEnable(GL_COLOR_MATERIAL);
-        //glLightModelfv(GL_LIGHT_MODEL_AMBIENT, glm::value_ptr(glm::vec4(0.4f,0.4f,0.4f,1.0f)));
-      }
-
-      lightControl->Update();
-
-      return;
-
-      // Ambient lighting
-    case ID_LT_AMBIENT:
-      //glEnable(GL_COLOR_MATERIAL);
-      canvas->lightType = LIGHT_AMBIENT;
-      return;
-
-      // Dynamic lighting
-    case ID_LT_DIRECTIONAL:
-      //glLightModelfv(GL_LIGHT_MODEL_AMBIENT, def_ambience);
-      canvas->lightType = LIGHT_DYNAMIC;
-      return;
-
-      // Model's ambient lighting
-    case ID_LT_MODEL:
-      canvas->lightType = LIGHT_MODEL_ONLY;
-      return;
-  }
-}
-
-void ModelViewer::OnCamMenu(wxCommandEvent &event)
-{
-  canvas->OnCamMenu(event);
-}
-
-// Menu button press events
-void ModelViewer::OnSetColor(wxCommandEvent &event)
-{
-  int id = event.GetId();
-  if (id == ID_BG_COLOR) {
-    canvas->vecBGColor = DoSetColor(canvas->vecBGColor);
-    canvas->drawBackground = false;
-    //} else if (id==ID_LT_COLOR) {
-    //  canvas->ltColor = DoSetColor(canvas->ltColor);
   }
 }
 
@@ -2775,21 +2326,6 @@ void ModelViewer::OnEffects(wxCommandEvent &event)
 
   if (id == ID_ENCHANTS)
     enchants->Display();
-}
-
-glm::vec3 ModelViewer::DoSetColor(const glm::vec3 &defColor)
-{
-  wxColour dcol(roundf(defColor.x*255.0f), roundf(defColor.y*255.0f), roundf(defColor.z*255.0f));
-
-  // Modern Photoshop-style picker (replaces the outdated native Win32 wxColourDialog).
-  ColorPickerDialog dialog(this, dcol);
-  if (dialog.ShowModal() == wxID_OK)
-  {
-    wxColour col = dialog.GetColour();
-    bgDialogData.SetColour(col); // keep the session "bgCol" persistence in sync
-    return glm::vec3(col.Red() / 255.0f, col.Green() / 255.0f, col.Blue() / 255.0f);
-  }
-  return defColor;
 }
 
 void ModelViewer::OnSetEquipment(wxCommandEvent &event)
@@ -3066,7 +2602,7 @@ int ModelViewer::LoadWoWFromMpq(const QString & dataFolder, const QString & loca
   fileControl->Enable();
   // The empty viewport points at Browse now rather than at loading a client -- once the load has
   // returned, since the client does not count as active while it is still inside it.
-  CallAfter([this]() { UpdateEmptyState(); });
+  CallAfter([this]() { UpdateUnityViewportState(); });
 
   SetStatusText(wxString(GAMEDIRECTORY.version().toStdWString()), 1);
   SetStatusText(wxT("Legacy MPQ"), 2);
@@ -3428,7 +2964,7 @@ void ModelViewer::LoadWoW(const core::GameConfig * chosenConfig, const QString &
   fileControl->Enable();
   // The empty viewport points at Browse now rather than at loading a client -- once the load has
   // returned, since the client does not count as active while it is still inside it.
-  CallAfter([this]() { UpdateEmptyState(); });
+  CallAfter([this]() { UpdateUnityViewportState(); });
   SetStatusText(wxT("File Control Initialized."));
 
   if (progress)
@@ -3515,109 +3051,6 @@ void ModelViewer::OnMount(wxCommandEvent &event)
   */
 
   charControl->selectMount();
-}
-
-void ModelViewer::OnSave(wxCommandEvent &event)
-{
-  static wxFileName dir = cfgPath;
-
-  if (!canvas || (!canvas->model() && !canvas->wmo))
-    return;
-
-  if (event.GetId() == ID_FILE_SCREENSHOT) {
-    wxString tmp = wxT("screenshot_");
-    tmp << ssCounter;
-    wxFileDialog dialog(this, wxT("Save screenshot"), dir.GetPath(wxPATH_GET_VOLUME), tmp, wxT("Bitmap Images (*.bmp)|*.bmp|TGA Images (*.tga)|*.tga|JPEG Images (*.jpg)|*.jpg|PNG Images (*.png)|*.png"), wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
-    dialog.SetFilterIndex(imgFormat);
-
-    if (dialog.ShowModal() == wxID_OK) {
-      imgFormat = dialog.GetFilterIndex();
-      tmp = dialog.GetPath();
-      dialog.Show(false);
-      canvas->Screenshot(tmp);
-      dir.SetPath(tmp);
-      ssCounter++;
-    }
-
-    //canvas->InitView();
-
-  }
-  else if (event.GetId() == ID_FILE_EXPORTGIF) {
-    if (canvas->wmo)
-      return;
-
-    if (!canvas->model())
-      return;
-
-    if (!video.supportFBO && !video.supportPBO) {
-      wxMessageBox(wxT("This function is currently disabled for video cards that don't\nsupport the FrameBufferObject or PixelBufferObject OpenGL extensions"), wxT("Error"));
-      return;
-    }
-
-    wxFileDialog dialog(this, wxT("Save Animation"), dir.GetPath(wxPATH_GET_VOLUME), wxT("filename"), wxT("Animation"), wxFD_SAVE | wxFD_OVERWRITE_PROMPT, wxDefaultPosition);
-
-    if (dialog.ShowModal() == wxID_OK) {
-      // Save the folder location for next time
-      dir.SetPath(dialog.GetPath());
-
-      // Show our exporter window      
-      animExporter->Init(dialog.GetPath());
-      animExporter->Show(true);
-    }
-
-  }
-  else if (event.GetId() == ID_FILE_EXPORTAVI) {
-    if (canvas->wmo && !canvas->model())
-      return;
-
-    if (!video.supportFBO && !video.supportPBO) {
-      wxMessageBox(wxT("This function is currently disabled for video cards that don't\nsupport the FrameBufferObject or PixelBufferObject OpenGL extensions"), wxT("Error"));
-      return;
-    }
-
-    wxFileDialog dialog(this, wxT("Save AVI"), dir.GetPath(wxPATH_GET_VOLUME), wxT("animation.avi"), wxT("animation (*.avi)|*.avi"), wxFD_SAVE | wxFD_OVERWRITE_PROMPT, wxDefaultPosition);
-
-    if (dialog.ShowModal() == wxID_OK) {
-      animExporter->CreateAvi(dialog.GetPath());
-    }
-
-  }
-  else if (event.GetId() == ID_FILE_SCREENSHOTCONFIG) {
-    if (!imageControl) {
-      imageControl = new ImageControl(this, ID_IMAGE_FRAME, canvas);
-
-      interfaceManager.AddPane(imageControl, wxAuiPaneInfo().
-                               Name(wxT("Screenshot")).Caption(wxT("Screenshot")).
-                               FloatingSize(wxSize(295, 145)).Float().Fixed().
-                               Dockable(false)); //.FloatingPosition(GetStartPosition())
-    }
-
-    imageControl->OnShow(&interfaceManager);
-  }
-}
-
-void ModelViewer::OnBackground(wxCommandEvent &event)
-{
-  static wxFileName dir = cfgPath;
-
-  int id = event.GetId();
-
-  if (id == ID_BACKGROUND) {
-    if (event.IsChecked()) {
-      wxFileDialog dialog(this, wxT("Load Background"), dir.GetPath(wxPATH_GET_VOLUME), wxEmptyString, wxT("All (*.bmp;*.jpg;*.png;*.avi)|*.bmp;*.jpg;*.png;*.avi|Bitmap Images (*.bmp)|*.bmp|Jpeg Images (*.jpg)|*.jpg|PNG Images (*.png)|*.png|AVI Video file(*.avi)|*.avi"));
-      if (dialog.ShowModal() == wxID_OK) {
-        canvas->LoadBackground(dialog.GetPath());
-        dir.SetPath(dialog.GetPath());
-        viewMenu->Check(ID_BACKGROUND, canvas->drawBackground);
-      }
-      else {
-        viewMenu->Check(ID_BACKGROUND, false);
-      }
-    }
-    else {
-      canvas->drawBackground = false;
-    }
-  }
 }
 
 void ModelViewer::SaveChar(QString fn, bool equipmentOnly /*= false*/)
@@ -3839,7 +3272,7 @@ void ModelViewer::LoadChar(QString fn, bool equipmentOnly /* = false */)
 
   charControl->RefreshModel();
   charControl->RefreshEquipment();
-  // Rebuild the Model Control attachment list so a loaded character's helm/shoulders/weapon models
+  // Rebuild the attachment list (View > Attachments) so a loaded character's helm/shoulders/weapon models
   // are selectable immediately (previously the list stayed empty until an item was re-equipped).
   if (canvas && canvas->root)
     modelControl->RefreshModel(canvas->root);
@@ -3928,77 +3361,34 @@ void ModelViewer::OnAbout(wxCommandEvent &event)
   wxAboutBox(info);
 }
 
-void ModelViewer::OnCanvasSize(wxCommandEvent &event)
+bool ModelViewer::isUnityViewportCentre()
 {
-  switch (event.GetId())
-  {
-    case ID_CANVASS120:  SetCanvasSize(120, 120);
-      break;
-    case ID_CANVASS512:  SetCanvasSize(512, 512);
-      break;
-    case ID_CANVASS1024:  SetCanvasSize(1024, 1024);
-      break;
-    case ID_CANVASF480:  SetCanvasSize(640, 480);
-      break;
-    case ID_CANVASF600:  SetCanvasSize(800, 600);
-      break;
-    case ID_CANVASF768:  SetCanvasSize(1024, 768);
-      break;
-    case ID_CANVASF864:  SetCanvasSize(1152, 864);
-      break;
-    case ID_CANVASF1200:  SetCanvasSize(1600, 1200);
-      break;
-    case ID_CANVASW480:  SetCanvasSize(864, 480);
-      break;
-    case ID_CANVASW720:  SetCanvasSize(1280, 720);
-      break;
-    case ID_CANVASW1080:  SetCanvasSize(1920, 1080);
-      break;
-    case ID_CANVASM768:  SetCanvasSize(1280, 768);
-      break;
-    case ID_CANVASM1200:  SetCanvasSize(1900, 1200);
-      break;
-  }
-}
-
-void ModelViewer::SetCanvasSize(uint32 sizex, uint32 sizey)
-{
-  if (canvas && sizex && sizey)
-  {
-    canvas->SetMinSize(wxSize(sizex, sizey));
-    // Fit() needs to be called twice to ensure it resizes properly for small sizes.
-    // (At 120x120 the menu will wrap and impinge on the canvas, so need to call Fit() again!)
-    // It's clunky, but it's the only way I can think of to do it - Wain
-    Fit();
-    Fit();
-  }
-}
-
-bool ModelViewer::isUnityViewportOnScreen()
-{
-  if (!unityRendererHost || !canvas)
+  if (!unityRendererHost)
     return false;
+  // The host is always managed (InitDocking), so this lookup never lands on wx's shared null pane.
   wxAuiPaneInfo & up = interfaceManager.GetPane(unityRendererHost);
-  return up.IsOk() && up.IsShown() && up.dock_direction == wxAUI_DOCK_CENTER &&
-         !interfaceManager.GetPane(canvas).IsShown();
+  return up.IsOk() && up.IsShown() && up.dock_direction == wxAUI_DOCK_CENTER;
 }
 
 bool ModelViewer::isUnityViewportShowingModel()
 {
   if (!unityRendererHost || !canvas || !unityRendererHost->ipc() || !unityRendererHost->ipc()->isConnected())
     return false;
-  wxAuiPaneInfo & up = interfaceManager.GetPane(unityRendererHost);
-  return up.IsOk() && up.IsShown() && unityCanShowCurrentModel();
+  return !unityRendererHost->hasNotice() && unityCanDrawCurrentModel();
 }
 
-// The size of the viewport the user is looking at, whichever renderer that is. Called by the
-// canvas and the Unity host whenever either is resized.
+bool ModelViewer::unityViewportHasNotice() const
+{
+  return !unityRendererHost || unityRendererHost->hasNotice();
+}
+
+// The size of the viewport, which is the Unity viewport's host panel (the archived canvas is hidden and
+// has no meaningful size). Called by the host whenever it is resized.
 void ModelViewer::UpdateCanvasStatus()
 {
-  if (!canvas || !GetStatusBar())
+  if (!unityRendererHost || !GetStatusBar())
     return;
-  const wxWindow * viewport = isUnityViewportOnScreen() ? (wxWindow *)unityRendererHost : (wxWindow *)canvas;
-  const wxSize size = viewport->GetClientSize();
+  const wxSize size = unityRendererHost->GetClientSize();
   SetStatusText(wxString::Format(wxT("Viewport %i \u00D7 %i"), size.x, size.y), 3);
 }
 
@@ -4037,33 +3427,13 @@ void ModelViewer::UpdateStatusFacts()
   SetStatusText(text, 0);
 }
 
-void ModelViewer::UpdateEmptyState()
-{
-  if (!unityRendererHost)
-    return;
-  if (UnityAssetAccess::hasActiveClient())
-    unityRendererHost->setEmptyStateText(_("No model loaded"),
-                                         _("Choose a model in Browse, or search for one by name."),
-                                         _("Browse models"));
-  else
-    unityRendererHost->setEmptyStateText(_("No model loaded"),
-                                         _("Load a World of Warcraft client to browse its models."),
-                                         _("Load World of Warcraft..."));
-}
-
 void ModelViewer::DisplayedContentChanged()
 {
   if (!canvas)
     return;
 
-  const bool loaded = canvas->model() || canvas->wmo || canvas->adt;
-  if (unityRendererHost)
-  {
-    if (loaded)
-      unityRendererHost->setEmptyState(false);
-    else
-      UpdateEmptyState();
-  }
+  // The viewport first: the model, the empty viewer, or a notice for what it cannot draw yet.
+  UpdateUnityViewportState();
 
   if (commandModelLabel)
   {
@@ -4107,7 +3477,7 @@ void ModelViewer::OnCommandBar(wxCommandEvent & event)
       if (!UnityAssetAccess::hasActiveClient())
       {
         PromptAndLoadClient();
-        UpdateEmptyState();
+        UpdateUnityViewportState();
         if (!UnityAssetAccess::hasActiveClient())
           return;
       }
@@ -4119,22 +3489,6 @@ void ModelViewer::OnCommandBar(wxCommandEvent & event)
       }
       if (fileControl->txtContent)
         fileControl->txtContent->SetFocus();
-      break;
-    }
-
-    // The same commands as View > Camera > "Reset to default" and File > "Save Screenshot".
-    // Both act on the OpenGL canvas, so the buttons are only enabled while that is the viewport
-    // on screen (OnUpdateCommandUI).
-    case ID_UI_RESET_CAMERA:
-    {
-      wxCommandEvent reset(wxEVT_MENU, ID_CAM_RESET);
-      OnCamMenu(reset);
-      break;
-    }
-    case ID_UI_SCREENSHOT:
-    {
-      wxCommandEvent shot(wxEVT_MENU, ID_FILE_SCREENSHOT);
-      OnSave(shot);
       break;
     }
   }
@@ -4153,29 +3507,6 @@ void ModelViewer::OnUpdateCommandUI(wxUpdateUIEvent & event)
     case ID_SHOW_ANIM:
       event.Check(animControl && interfaceManager.GetPane(animControl).IsShown());
       break;
-
-    // Neither command reaches the Unity viewport (it frames models itself and has no screenshot
-    // path), so neither pretends to while it is the one on screen.
-    case ID_UI_RESET_CAMERA:
-    {
-      const bool openGL = canvas && !isUnityViewportOnScreen();
-      event.Enable(openGL && canvas->model());
-      if (commandBar)
-        commandBar->SetToolShortHelp(ID_UI_RESET_CAMERA, openGL
-          ? _("Reset the camera to frame the model")
-          : _("Reset camera works in the OpenGL viewport; the Unity viewport frames each model itself"));
-      break;
-    }
-    case ID_UI_SCREENSHOT:
-    {
-      const bool openGL = canvas && !isUnityViewportOnScreen();
-      event.Enable(openGL && (canvas->model() || canvas->wmo));
-      if (commandBar)
-        commandBar->SetToolShortHelp(ID_UI_SCREENSHOT, openGL
-          ? _("Save a screenshot (F12)")
-          : _("Screenshots are taken from the OpenGL viewport, which is not the one on screen"));
-      break;
-    }
   }
 }
 
@@ -4200,18 +3531,8 @@ void ModelViewer::OnKeyboardShortcuts(wxCommandEvent & WXUNUSED(event))
   add(unity, _("Left drag"), _("Orbit around the model"));
   add(unity, _("Right drag"), _("Pan"));
   add(unity, _("Mouse wheel"), _("Zoom"));
-
-  const wxString gl = _("OpenGL viewport");
-  add(gl, _("Left drag"), _("Orbit around the model"));
-  add(gl, _("Right drag"), _("Pan"));
-  add(gl, _("Mouse wheel, middle drag"), _("Zoom"));
-  add(gl, _("Shift + drag or wheel"), _("Finer movement"));
-  add(gl, _("Numpad 4 / 6"), _("Rotate left / right"));
-  add(gl, _("Numpad 8 / 2"), _("Rotate back / front"));
-  add(gl, _("Numpad 7 / 9"), _("Raise / lower the view"));
-  add(gl, _("Numpad 1 / 3"), _("Pan left / right"));
-  add(gl, _("Numpad 5"), _("Reset the camera"));
-  add(gl, _("1 \u2013 9, 0"), _("Animation speed 0.1\u00D7 \u2013 0.9\u00D7, 0 = normal"));
+  // (The OpenGL viewport's section -- its mouse camera, numpad camera keys and 0-9 speed keys -- is gone
+  // with that viewport.)
 
   KeyboardShortcutsDialog dialog(this, GetMenuBar(), extra);
   dialog.ShowModal();
@@ -4365,7 +3686,7 @@ void ModelViewer::ImportArmoury(wxString strURL)
 
     g_charControl->RefreshModel();
     g_charControl->RefreshEquipment();
-    // Rebuild the Model Control attachment list so the imported helm/shoulders/weapon models are
+    // Rebuild the attachment list (View > Attachments) so the imported helm/shoulders/weapon models are
     // selectable immediately (previously the list stayed empty until an item was re-equipped).
     if (canvas && canvas->root)
       modelControl->RefreshModel(canvas->root);
@@ -4524,6 +3845,8 @@ void ModelViewer::OnExport(wxCommandEvent &event)
       plugin->setAnimationsToExport(animsToExport);
 
       WoWModel * m = const_cast<WoWModel *>(canvas->model());
+      // The pose the Animation panel is on, computed now: see UpdateExportPose.
+      UpdateExportPose();
       if (!plugin->exportModel(m, std::wstring(outPath.c_str())))
       {
         // Surface the exporter's specific reason (missing skeleton, unwritable path, ...) so the
@@ -4543,36 +3866,38 @@ void ModelViewer::OnExport(wxCommandEvent &event)
   }
 }
 
-void ModelViewer::OnExportImageSequence(wxCommandEvent & WXUNUSED(event))
+// Pose every model in the scene -- the root and everything attached to it, parents before children --
+// at the animation clock's current frame.
+static void updateAttachmentPose(Attachment * att)
 {
-  if (!canvas || !canvas->model())
-  {
-    wxMessageBox(wxT("Load a model before exporting an image sequence."),
-                 wxT("Export Image Sequence"), wxOK | wxICON_ERROR, this);
+  if (!att)
     return;
-  }
+  if (WoWModel * m = dynamic_cast<WoWModel *>(att->model()))
+    m->updatePose();
+  for (Attachment * child : att->children)
+    updateAttachmentPose(child);
+}
 
-  if (!m_imgSeqExporter)
-    m_imgSeqExporter = new ImageSequenceExporter(this);
-
-  if (m_imgSeqExporter->isRunning())
-  {
-    wxMessageBox(wxT("An image-sequence export is already running."),
-                 wxT("Export Image Sequence"), wxOK | wxICON_INFORMATION, this);
-    return;
-  }
-
-  ImageSequenceDialog dlg(this);
-  if (dlg.ShowModal() != wxID_OK)
-    return;
-
-  ImageSequenceExporter::Settings s;
-  if (dlg.getSettings(s))
-    m_imgSeqExporter->start(s); // non-blocking: renders one frame per event-loop tick
+// The exporters read the pose: OBJ writes the skinned vertices (unless Settings > Export "Init pose only
+// export" is set) and places equipped items with the bone matrices, and both OBJ and FBX pick render
+// passes and texture scrolling by the current animation. That pose used to be whatever the OpenGL viewport
+// had last drawn -- and nothing draws since it was archived, so without this an export would silently
+// fall back to the bind pose and animation 0. It is computed here instead, for the animation and frame the
+// Animation panel shows, just before an export reads it.
+void ModelViewer::UpdateExportPose()
+{
+  if (canvas && canvas->root)
+    updateAttachmentPose(canvas->root);
 }
 
 void ModelViewer::OnStatusBarRefreshTimer(wxTimerEvent& event)
 {
   SetStatusText(wxString::Format(wxT("Memory: %i Mo"), core::getMemoryUsed()), 4);
+
+  // A player that crashed, was closed from outside or dropped its connection is noticed here, on this
+  // existing two-second timer, rather than at the next model load: the viewport shows the restart
+  // notice instead of a frozen or empty rectangle.
+  if (unityRendererHost && unityRendererHost->checkPlayerHealth())
+    UpdateUnityViewportState();
 }
 

@@ -21,10 +21,7 @@
 #include "charcontrol.h"
 #include "lightcontrol.h"
 #include "modelcontrol.h"
-#include "imagecontrol.h"
-#include "AnimExporter.h"
 #include "effects.h"
-#include "ColorPickerDialog.h"
 #include "filecontrol.h"
 #include "UnityIpcServer.h"
 
@@ -36,7 +33,6 @@ class SettingsControl;
 class ModelInspector;
 class wxAuiToolBar;
 class ExportJobManager;
-class ImageSequenceExporter;
 class UnityRendererHost;
 
 namespace core { class GameConfig; }
@@ -68,26 +64,25 @@ public:
   ModelControl *modelControl;
   // The "Model" panel: Appearance / Geosets / Info for whatever is loaded. See ModelInspector.h.
   ModelInspector *modelInspector;
-  ImageControl *imageControl;
   //SoundControl *soundControl;
   SettingsControl *settingsControl;
-  // Embedded Unity viewport pane -- the new renderer foundation (the OpenGL canvas is the
-  // legacy/fallback viewport during the migration). Currently optional: created lazily on
-  // first View > Unity Renderer use or by the -unityipctest self-test (nullptr until then).
-  // See UnityRendererHost.h and docs/unity-renderer/README.md.
+  // The Unity viewport: the application's only viewport, docked as the centre pane at construction
+  // (InitDocking) and never removed. The player it embeds is started by WarmStartUnityViewport (or
+  // by the -unityipctest self-test); what the panel shows instead of the player -- the empty viewer,
+  // a notice for content it cannot draw yet, a stopped player -- is decided by
+  // UpdateUnityViewportState. The canvas above is archived: hidden, never painted, kept for its GL
+  // context, the loaded model and the animation clock. See UnityRendererHost.h and
+  // docs/unity-renderer/README.md.
   UnityRendererHost *unityRendererHost;
   // timeGetTime() of the last playback-state push, for the heartbeat in
   // SendAnimationStateToUnity. 0 until the first push.
   unsigned long m_lastAnimStatePush;
 
-  CAnimationExporter *animExporter;
-
   FileControl *fileControl;
 
   //wxWidget objects
   wxMenuBar *menuBar;
-  wxMenu *fileMenu, *exportMenu, *camMenu, *charMenu, *charGlowMenu, *viewMenu, *optMenu, *lightMenu;
-  wxColourData bgDialogData;
+  wxMenu *fileMenu, *exportMenu, *charMenu, *charGlowMenu, *viewMenu, *optMenu;
 
   // wxAUI - new docking lib (now part of wxWidgets 2.8.0)
   wxAuiManager interfaceManager;
@@ -121,7 +116,6 @@ public:
   int m_exportItemSkinFileId = 0;
 
   ExportJobManager * m_exportJobManager = nullptr;
-  ImageSequenceExporter * m_imgSeqExporter = nullptr;
 
   // Initialising related functions
   void InitMenu();
@@ -137,8 +131,9 @@ public:
   void SaveLayout();
   void ResetLayout();
   // Bumped when the panel arrangement changes, so an older saved perspective is not applied to
-  // panes it does not describe. See LoadLayout.
-  static const int LAYOUT_VERSION = 2;
+  // panes it does not describe. See LoadLayout. 3: the OpenGL canvas is no longer a pane and the
+  // Unity viewport is always the centre pane, so a perspective naming a "canvas" pane is discarded.
+  static const int LAYOUT_VERSION = 3;
   // save + load character *.CHR files
   void LoadChar(QString fn, bool equipmentOnly = false);
   void SaveChar(QString fn, bool equipmentOnly = false);
@@ -159,47 +154,55 @@ public:
   void OnExit(wxCommandEvent &event);
   void OnRestart(wxCommandEvent &event); // File > Restart: relaunch the app in one click
   void UpdateCanvasStatus();
-  void SetCanvasSize(uint32 sizex, uint32 sizey);
 
   // menu commands
   void OnToggleDock(wxCommandEvent &event);
   void OnToggleCommand(wxCommandEvent &event);
-  void OnSetColor(wxCommandEvent &event);
   void OnEffects(wxCommandEvent &event);
-  void OnLightMenu(wxCommandEvent &event);
-  void OnCamMenu(wxCommandEvent &event);
 
   // Wrapper function for character stuff (forwards events to charcontrol)
   void OnSetEquipment(wxCommandEvent &event);
   void OnCharToggle(wxCommandEvent &event);
   void OnImportNPCFromURL(wxCommandEvent &event);  // direct "Import NPC from URL" menu entry
 
-  // View > Unity Renderer: show the embedded Unity viewport -- the new renderer foundation,
-  // optional at this migration stage (lazy pane + player launch). See UnityRendererHost.h.
-  void OnUnityRenderer(wxCommandEvent &event);
-  // Create the Unity pane on first use, show it and launch the player (the body of the menu
-  // handler, also used by the headless -unityipctest run). selfTest asks a diagnostic-capable
-  // player to also exercise the protocol's error paths -- never set for a normal menu launch.
-  // Returns false if the player could not be started (already reported unless batchMode).
-  bool ShowUnityRenderer(bool selfTest = false);
+  // Create the Unity viewport's host panel and wire its IPC callbacks. Called once, by InitDocking,
+  // which docks it as the centre pane before any player exists.
+  void CreateUnityViewport();
+  // The centre pane's settings, shared by InitDocking, ResetLayout and LoadLayout so all three dock
+  // the viewport identically.
+  wxAuiPaneInfo unityViewportPaneInfo() const;
+  // Make sure the Unity viewport is the shown centre pane (a saved perspective or a reset must never
+  // leave the middle of the window to anything else). Returns true if the layout had to change.
+  bool EnsureUnityViewportCentre();
 
-  // WHICH VIEWPORT IS THE MAIN ONE for what is currently loaded.
-  //
-  // The Unity renderer takes the centre for the models it supports; everything else stays on the
-  // OpenGL canvas. Called after every model load, and when the View toggle changes, so the two
-  // can never disagree about who owns the middle of the window.
-  void UpdatePrimaryViewport();
+  // View > "Restart Unity Renderer", and the button on a stopped-player notice.
+  void OnRestartUnityRenderer(wxCommandEvent &event);
+  // Close the player (if any) and start it again; the viewport's state follows.
+  void RestartUnityRenderer();
+  // Launch the player into the viewport unless it is already running (also used by the headless
+  // -unityipctest run). selfTest asks a diagnostic-capable player to also exercise the protocol's
+  // error paths -- never set for a normal launch. Returns false if the player could not be started;
+  // the reason is in unityRendererHost->playerProblem() and the viewport's notice, never a dialog.
+  bool StartUnityRenderer(bool selfTest = false);
+
+  // WHAT THE UNITY VIEWPORT SHOWS for what is currently loaded: the model (the player's window), or a
+  // notice painted by the host panel -- the empty viewer's prompt, content it cannot draw yet, a
+  // missing or stopped player. Never a different viewport. Called on every path that changes what
+  // is loaded (model, NPC, item and character loads and their failures, Browse selections, clearing),
+  // when a mount is put on or taken off (from the canvas tick), when the player announces itself or
+  // reports a character it could not build, and when a stopped player is noticed.
+  void UpdateUnityViewportState();
   // Lay the panes out again ONLY if a pane's shown state changed. See the definition for why
   // an unconditional interfaceManager.Update() is a whole-window blink on Windows.
   bool CommitLayoutIfChanged();
 
-  // Open and start the Unity viewport at APP LAUNCH, before any model exists, so that picking
-  // the first creature does not also pay for starting a game engine. No-op in batch mode, when
-  // the user has turned the primary viewport off, or when no player build is installed.
+  // Start the Unity viewport's player at APP LAUNCH, before any model exists, so that picking the
+  // first creature does not also pay for starting a game engine. No-op in batch mode. A missing
+  // player build is reported by the viewport's notice.
   void WarmStartUnityViewport();
 
-  // The parts of the viewer-first startup that involve NO player and NO IPC: hide the panes and
-  // take the screen. Safe to call before a client is loaded, which is the point -- see the note
+  // The part of the viewer-first startup that involves NO player and NO IPC: take the screen (the
+  // panels keep the shown state the saved layout restored). Safe to call before a client is loaded, which is the point -- see the note
   // on WarmStartUnityViewport for why the player itself must wait.
   void ApplyViewerStartupLayout();
 
@@ -208,36 +211,49 @@ public:
   // startup. Loops so a failed legacy-MPQ pick returns to the dialog rather than giving up.
   void PromptAndLoadClient();
 
-  // Put the OpenGL canvas back in the centre and the Unity pane back to a side pane.
-  void UncoverOpenGLViewport();
-  bool unityAsidePaneShown();
-
-  // Whether the Unity viewport is the one on screen (the centre pane, with the canvas hidden).
-  bool isUnityViewportOnScreen();
-  // Whether a Unity viewport is showing the loaded model anywhere -- the centre, or the side pane
-  // when it is not the main viewport -- with the player connected.
+  // Whether the Unity viewport is the shown centre pane (it always should be; the self-test checks).
+  bool isUnityViewportCentre();
+  // Whether the Unity viewport is showing the loaded model: the player is connected and what is
+  // loaded is something it can draw (no notice in front of it).
   bool isUnityViewportShowingModel();
+  // Whether the Unity viewport has a notice in front of the player (content it cannot draw yet, a
+  // player that is not running, nothing loaded), as last decided by UpdateUnityViewportState. True
+  // when there is no viewport at all.
+  bool unityViewportHasNotice() const;
 
   // Something new is on screen (a model, character, WMO or map tile): the Model panel, the
-  // command bar's model name, the status bar facts and the empty viewport follow it. The one
+  // command bar's model name, the status bar facts and the viewport (model or notice) follow it. The one
   // place every load path reports to.
   void DisplayedContentChanged();
 
-  // The command bar along the top: open, reset camera, screenshot, fullscreen, the current model
-  // and the three panel toggles.
+  // The command bar along the top: open, fullscreen, the current model and the three panel toggles.
   void InitCommandBar();
   void OnCommandBar(wxCommandEvent & event);
   void OnUpdateCommandUI(wxUpdateUIEvent & event);
   void OnKeyboardShortcuts(wxCommandEvent & event);
   void UpdateStatusFacts();
-  // The empty viewport's prompt, which depends on whether a client is loaded yet.
-  void UpdateEmptyState();
 
-  // Can the Unity viewport show what is currently loaded? Creature M2s, for now: no characters
-  // (no equipment pipeline yet) and nothing that is not an M2.
-  bool unityCanShowCurrentModel() const;
+  // What the Unity viewport paints instead of the player: a title, a detail line and an optional
+  // button (the menu command it posts, 0 for none).
+  struct ViewportNotice
+  {
+    wxString title;
+    wxString detail;
+    wxString actionLabel;
+    int actionId = 0;
+  };
+  // Can the Unity player draw what is currently loaded? False for nothing loaded and for content it
+  // cannot draw yet; notice (when given) then says what it is and why. This also gates the geoset
+  // pushes, so a state is never sent about content the player is not building.
+  bool unityCanDrawCurrentModel(ViewportNotice * notice = nullptr) const;
+  // The whole decision UpdateUnityViewportState applies: true with the notice to paint, or false when
+  // the player's window should be on screen.
+  bool unityViewportNotice(ViewportNotice & notice) const;
+  // The name of the image last picked in Browse, for the viewport's notice; empty otherwise. The image
+  // itself is not loaded anywhere, so nothing else records that an image, not a model, is what the
+  // user picked.
+  wxString m_browseImageName;
 
-  void OnUnityPrimaryViewport(wxCommandEvent & event);
   void OnToggleFullScreen(wxCommandEvent & event);
   void OnCharHook(wxKeyEvent & event);
 
@@ -266,7 +282,7 @@ public:
   // The playback state of that animation: playing/paused, speed, and where in the sequence the
   // app is. force pushes unconditionally (a control was used); without it this is the heartbeat,
   // which pushes only while something is playing and only every so often. Safe and cheap to call
-  // every frame -- it rate-limits itself and no-ops when the Unity pane was never opened.
+  // every frame -- it rate-limits itself and no-ops while no player is connected.
   void SendAnimationStateToUnity(bool force = false);
 
   // The resolved state of the character on the canvas (UnityCharacterScene), whenever it differs
@@ -291,13 +307,15 @@ public:
   // A character loaded and dressed in several steps (a .chr, an Armory import, an NPC) is described to
   // the player once, when it is complete, rather than after each step: see SceneHold.
   int m_sceneHold = 0;
-  // Whether the canvas showed a character the viewport can dress when the routing was last decided
-  // (UpdatePrimaryViewport records it): mounting and dismounting change it without a load, and the
-  // viewport routing has to follow from the tick.
+  // Whether the canvas showed a character the viewport can dress when the viewport state was last
+  // decided (UpdateUnityViewportState records it): mounting and dismounting change it without a load,
+  // and the viewport has to follow from the tick.
   bool m_lastShowsCharacter = false;
-  // The character model the Unity player could not build: the canvas keeps it until a load of another
-  // model, a player (re)start, or a later load of the same model that the player does dress.
+  // The character model the Unity player could not build: the viewport shows a notice for it until a
+  // load of another model, a player (re)start, or a later load of the same model that the player does
+  // dress. m_unityCharacterFailReason is the player's reason, for that notice.
   int m_unityCharacterFailed = 0;
+  QString m_unityCharacterFailReason;
   // The load serial that build belonged to. No scene is sent while it is still the load on display: the
   // player has dropped that load. A later load of the same model is a new attempt, and its body build
   // waits for a scene, so that one is sent.
@@ -325,22 +343,20 @@ public:
   static const unsigned long ANIM_STATE_HEARTBEAT_MS = 1000;
 
   void OnMount(wxCommandEvent &event);
-  void OnSave(wxCommandEvent &event);
-  void OnBackground(wxCommandEvent &event);
   void OnLanguage(wxCommandEvent &event);
   void OnAbout(wxCommandEvent &event);
-  void OnCanvasSize(wxCommandEvent &event);
   void OnTest(wxCommandEvent &event);
   void OnExport(wxCommandEvent &event);
   void OnExportOther(wxCommandEvent &event);
-  void OnExportImageSequence(wxCommandEvent &event);
+  // Compute the pose of everything in the scene for the current animation frame, without drawing, so
+  // an export reads the pose the Animation panel shows. Called before every export (the in-process ones
+  // and the headless FBX export child); see the definition.
+  void UpdateExportPose();
   
   void UpdateControls();
    
   void ImportArmoury(wxString strURL);
   void ModelInfo();
-
-  glm::vec3 DoSetColor(const glm::vec3 &defColor);
 
   void OnGameToggle(wxCommandEvent &event);
   void OnViewLog(wxCommandEvent &event);

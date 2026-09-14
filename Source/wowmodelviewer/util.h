@@ -30,11 +30,6 @@ extern wxString customDirectoryPath;
 // Optional override for the embedded Unity renderer player exe; empty -> resolved at
 // use-time as tools\unity-renderer\UnityRenderer.exe next to the WMV executable.
 extern wxString unityRendererPath;
-
-// Show the embedded Unity viewport as the MAIN viewport for the models it supports, rather than
-// as a side pane. On by default; the OpenGL canvas stays loaded either way and is one menu item
-// away, because it is still what the app renders from and compares against.
-extern bool unityPrimaryViewport;
 extern int customFilesConflictPolicy;
 extern int displayItemAndNPCId;
 
@@ -47,6 +42,8 @@ extern long langID;
 extern wxString langName;
 extern long langOffset;
 extern long interfaceID;
+// The screenshot file counter and format. Only the archived ImageControl still names them; nothing loads
+// or saves them since Save Screenshot went with the OpenGL viewport.
 extern int ssCounter;
 extern int imgFormat;
 extern long versionID;

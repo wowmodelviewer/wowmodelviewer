@@ -220,7 +220,7 @@ AnimControl::AnimControl(wxWindow* parent, wxWindowID id, wxWindow * skinParent,
   frameSlider->Bind(wxEVT_SCROLL_THUMBRELEASE, [this](wxScrollEvent & e) { m_scrubbing = false; e.Skip(); });
 
   speedSlider = new wxSlider(this, ID_SPEED, 10, 1, 40);
-  speedSlider->SetToolTip(_("Playback speed (keys 1-9 and 0 in the OpenGL viewport)"));
+  speedSlider->SetToolTip(_("Playback speed"));
   speedLabel = new wxStaticText(this, wxID_ANY, wxT("1.0\u00D7"), wxDefaultPosition, wxDefaultSize,
                                 wxALIGN_RIGHT | wxST_NO_AUTORESIZE);
   speedLabel->SetMinSize(wxSize(GetTextExtent(wxT("0.0\u00D7 ")).x, -1));
@@ -1936,7 +1936,7 @@ void AnimControl::SetSkin(int num, int displayIdOverride)
   // The embedded Unity viewport draws the same model from the same data, so it has to follow
   // the same selection. This is the one funnel every skin change goes through -- the default
   // chosen on model load, the dropdown, and SetSkinByDisplayID -- so hooking it here covers
-  // all three. No-op when the Unity pane was never opened.
+  // all three. No-op while no player is connected.
   if (g_modelViewer)
     g_modelViewer->SendCurrentSkinToUnity();
 }
@@ -2227,7 +2227,7 @@ void AnimControl::SetAnimSpeed(float speed)
 
   g_selModel->animManager->SetSpeed(speed);
 
-  // The slider follows too: the speed keys in the OpenGL viewport come through here.
+  // The slider follows too, for callers other than the slider itself (a reset, the self-test).
   const int sliderValue = (int)(speed * 10.0f + 0.5f);
   if (speedSlider->GetValue() != sliderValue)
     speedSlider->SetValue(sliderValue);

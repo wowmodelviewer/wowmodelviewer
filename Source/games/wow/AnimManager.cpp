@@ -253,8 +253,11 @@ void AnimManager::Clear()
 
 void AnimManager::ForceModelUpdate(float dt)
 {
+  // Advance the model and recompute its pose for the new frame. This used to draw the model and its
+  // particles as well, into whatever GL context was current, on every frame step and scrub -- the
+  // OpenGL viewport's way of getting the pose computed. That viewport is archived and nothing reads
+  // those pixels; the pose is what a frame step needs, and updatePose computes it without drawing.
   model.update(dt);
-  model.drawParticles();
-  model.draw();
+  model.updatePose();
 }
 

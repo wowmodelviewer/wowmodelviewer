@@ -209,7 +209,7 @@ public class WmvRuntimeModel
     /// The host's own per-SUBMESH display state, indexed by skin submesh index (SFID[0], the same
     /// order WoWModel::geosets holds its owned entries in), or null when the host has not sent one.
     /// When present it decides instead of the geoset-id rule: it is the host's final answer -- the
-    /// flags the OpenGL viewport draws from -- so it can hide an id-0 submesh, or one of several
+    /// flags the host keeps for its model -- so it can hide an id-0 submesh, or one of several
     /// submeshes that share an id, which the id rule cannot express. See SubmeshDrawn.
     /// </summary>
     public bool[] SubmeshVisible;

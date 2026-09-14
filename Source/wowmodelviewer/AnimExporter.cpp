@@ -1,3 +1,4 @@
+// archived: unreachable since the OpenGL viewport was archived (GIF/AVI export had no menu entry left; nothing creates one).
 
 #include "AnimExporter.h"
 

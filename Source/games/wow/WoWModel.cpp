@@ -2690,6 +2690,16 @@ void WoWModel::update(int dt) // (float dt)
   updateEmitters((dt/1000.0f));
 }
 
+void WoWModel::updatePose()
+{
+  // The same pose draw() computes before drawing an animated model. draw() assumes an animation manager
+  // and a valid current animation; a model forced to animate (an item, say) can lack either, and this is
+  // called on every model in an attachment tree, so it checks.
+  if (!ok || !animated || !animManager || currentAnim >= anims.size())
+    return;
+  animate(currentAnim);
+}
+
 void WoWModel::updateTextureList(GameFile * Tex, int special)
 {
   for (size_t i = 0; i < specialTextures.size(); i++)
@@ -3599,7 +3609,7 @@ void WoWModel::refresh()
   // which the "*01" default rule turns back on regardless of the helmet).
   const auto headItemId = getItemId(CS_HEAD);
   // The helm's geosets should only be hidden while the helm is actually on screen. If the helm
-  // has its own attached model(s) and the user has hidden them (Model Control > Render off),
+  // has its own attached model(s) and the user has hidden them (View > Attachments > Render off),
   // the covered hair/ears/horns must come back. Helms with no separate model (merged/geoset-only)
   // have nothing to toggle, so they keep hiding as before.
   bool helmDrawn = true;

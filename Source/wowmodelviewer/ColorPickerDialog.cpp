@@ -1,3 +1,4 @@
+// archived: unreachable since the OpenGL viewport was archived (View > Background Color was removed; nothing creates one).
 /*----------------------------------------------------------------------*\
 | This file is part of WoW Model Viewer                                  |
 |                                                                        |

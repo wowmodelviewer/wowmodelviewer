@@ -76,9 +76,9 @@
  * report with revision 0 after a load or a skin push applied a per-submesh state, so the host always
  * knows what the renderer is drawing rather than assuming it.
  *
- * CHARACTERS (protocol 3). A playable character is not one model: the OpenGL canvas draws its body
- * with a host-composited texture, the collection armour and customization parts refreshMerging laid
- * into it, and the item models attached at its attachment points. loadWoWModel carries
+ * CHARACTERS (protocol 3). A playable character is not one model: it is a body with a host-composited
+ * texture, the collection armour and customization parts refreshMerging laid into it, and the item
+ * models attached at its attachment points. loadWoWModel carries
  * "character":true for one, and characterScene carries the RESOLVED state of all of it (see
  * UnityCharacterScene.h): per model, the texture each slot binds -- a FileDataID, or an image the host
  * composited -- the geoset display flags, the host's bone table for a merged model, and the attachment
@@ -94,7 +94,7 @@
  * so the same fileDataID -- is never taken for one about the load on display. characterImage carries a
  * composited image once, before the first scene that names it; a scene naming an image the player
  * already holds does not resend the pixels. Rows are top row first, bytes B,G,R,A -- the memory
- * layout of the QImage the OpenGL texture was uploaded from.
+ * layout of the QImage the host's GL texture was uploaded from.
  *
  * modelAnimation is pushed the same way whenever the animation on display changes, and once after
  * loadWoWModel so the player starts on the animation the app is showing rather than on its own
