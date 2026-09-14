@@ -576,9 +576,13 @@ void ModelInspector::OnGeosetChecked(wxTreeListEvent & event)
 
   wxString problem;
   const bool unityOnScreen = g_modelViewer && g_modelViewer->isUnityViewportOnScreen();
+  // A character's items and merged parts ARE drawn by a player that dresses it: their flags reach it
+  // in the character's scene (ModelViewer::SendCharacterSceneToUnity), sent on the next tick.
+  const bool unityDressesIt = unityOnScreen && g_modelViewer->canvasShowsCharacter() &&
+                              g_modelViewer->unityPlayerDressesCharacters();
   if (m != canvasModel())
   {
-    if (unityOnScreen)
+    if (unityOnScreen && !unityDressesIt)
       problem = _("The Unity viewport does not draw attachments, so this change would not be visible. "
                   "Nothing was changed.");
   }
@@ -587,7 +591,7 @@ void ModelInspector::OnGeosetChecked(wxTreeListEvent & event)
     bool merged = false;
     for (size_t index : parts)
       merged = merged || index >= m->ownGeosetCount();
-    if (merged && unityOnScreen)
+    if (merged && unityOnScreen && !unityDressesIt)
       problem = _("The Unity viewport does not draw merged parts, so this change would not be visible. "
                   "Nothing was changed.");
     else if (unityOnScreen && g_modelViewer->unityPlayerReady() && !g_modelViewer->unityPlayerSwitchesSubmeshes())

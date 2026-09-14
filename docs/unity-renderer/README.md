@@ -325,13 +325,33 @@ Deliberately still OpenGL:
 
 | | why |
 |---|---|
-| characters | no equipment pipeline in the Unity renderer yet |
+| a character riding a mount | the Unity viewport has no mount rig; the character itself is shown in Unity (see "Characters" below) |
+| a character, with an older player build | a player older than protocol 3 cannot dress one |
 | WMOs, anything not an M2 | not modelled by the Unity renderer at all |
 | screenshots, image sequences, `-mo` runs | they render through the canvas; a non-interactive run keeps the viewport it was given |
 | comparison and debugging | one menu item away, on purpose |
 
 If the player cannot be launched (no build, or a broken one) the centre stays with the OpenGL
-canvas and the log says so — a missing Unity build costs you the new viewport, not the app.
+canvas and the log says so — a missing Unity build costs you the new viewport, not the app. A
+character the player reports it could not build goes back to the canvas the same way, until the
+next load.
+
+**Characters.** A playable character stays in the Unity viewport, drawn from the state the host
+has already resolved for the OpenGL canvas rather than from a second customization system:
+
+- the body's texture slots as its render passes bind them -- a file, or the body and eye images
+  the host composited (`CharTexture`), sent as pixels;
+- its geoset display flags, after every customization, equipment and helm rule has run;
+- every model `WoWModel::refreshMerging` laid into it (collection armour, customization parts),
+  each skinned to the body's bones through the bone table the host computed;
+- every item model attached to it, at the attachment id the host attached it at (sheathed or not),
+  on the body bone and offset of the character's own attachment table;
+- the closed hand while a weapon is held (the finger key bones posed from HandsClosed).
+
+All of it travels as one `characterScene` per change (see `UnityIpcServer.h`), sent from the canvas
+tick when anything it describes has changed and never faster than the player answers; the player
+applies a scene whole, in one frame, without reloading the body, re-framing the camera or
+restarting the animation.
 
 ## Responsibility split
 
@@ -644,16 +664,14 @@ in-process, and shuts the player down. Result lines carry the `[unityipc-test]` 
 - Animation UI of the renderer's own: the viewport follows WMV's selector and transport
   (play/pause, speed, current time and looping are synced) and has no controls of its own.
   Blending between sequences and following a queued "next animation" chain are not synced.
-- Bones from a separate skeleton file (the SKID chunk and the SKPD parent it can defer to). A
-  model that needs one is drawn from what it does have -- unskinned, or skinned but still -- and
-  says which. (Keyframes in external .anim files named by the AFID chunk ARE read.)
 - Animation of anything but bones: texture animation, colour and transparency tracks beyond the
   rest-pose visibility gate, particles, ribbons and attachments.
 - The rest of the WoW material system: texture animation, colour and transparency tracks beyond
   the rest-pose visibility gate, the specular lobes the legacy viewport leaves unweighted by
   default, and the few combiners that mix more than two contributing units.
 - Particles and ribbons.
-- The character / equipment pipeline (customization, attachments, geoset rules).
+- For characters: secondary (upper-body) and mouth animations, a mount, and Model Control's
+  per-model scale, position, rotation and transparency on the character or its items.
 - Maps, terrain, WMOs, fog.
 - Full parity with the legacy OpenGL renderer.
 

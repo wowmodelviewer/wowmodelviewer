@@ -46,6 +46,7 @@
 #include "SettingsControl.h"
 #include "UiStyle.h"
 #include "UnityAssetAccess.h"
+#include "UnityCharacterScene.h"
 #include "UnityIpcServer.h"
 #include "UnityRendererHost.h"
 #include "UserSkins.h"
@@ -59,6 +60,7 @@
 #include <QFileInfo>
 #include <QDir>
 #include <QDateTime>
+#include <QElapsedTimer>
 #include <QSettings>
 #include <QXmlStreamWriter>
 #include <QNetworkAccessManager>
@@ -1283,6 +1285,10 @@ void ModelViewer::LoadModel(GameFile * file)
   // the new animation unsynchronised. Sending the load first is also what a player that is not
   // open yet gets on connect (onUnityReady -> SendCurrentModelToUnity), so the two paths agree.
   SendLoadToUnity();
+  // ... and, for a character, what it looks like: refresh() has already run (charControl above), so
+  // the scene the body load waits for goes out with it. An import that dresses the character further
+  // holds this until it is done (SceneHold); later changes follow from the canvas tick.
+  SendCharacterSceneToUnity(true);
 
   // Update the animations / skins. This is where the skin and animation pushes happen, once,
   // from the choices the control makes; nothing re-sends them afterwards.
@@ -1316,6 +1322,9 @@ void ModelViewer::LoadModel(GameFile * file)
 // Load an NPC model
 void ModelViewer::LoadNPC(unsigned int modelid)
 {
+  // Described to the Unity viewport once, dressed, when this returns: see SceneHold.
+  SceneHold sceneHold(this);
+
   canvas->clearAttachments();
   canvas->setModel(NULL);
 
@@ -1805,7 +1814,17 @@ bool ModelViewer::ShowUnityRenderer(bool selfTest)
       // below carries the current state, and its build answers for it.
       if (modelInspector)
         modelInspector->UnityPlayerRestarted();
+      m_sceneAwaitingRevision = 0;
+      // ... nor could the one before it build a character this one never tried: a player rebuilt or
+      // restarted after a failed build is given the character again.
+      m_unityCharacterFailed = 0;
       SendCurrentModelToUnity();
+      // What the player announced may change where the model belongs: a character goes back to the
+      // canvas when the player is an older build that cannot dress it.
+      UpdatePrimaryViewport();
+    };
+    unityRendererHost->ipc()->onCharacterSceneApplied = [this](const UnityIpcServer::SceneAck & ack) {
+      OnCharacterSceneApplied(ack);
     };
     // ... and what it did with a geoset state, so the Geosets checkboxes follow the renderer.
     unityRendererHost->ipc()->onGeosetsApplied = [this](const UnityIpcServer::GeosetAck & ack) {
@@ -1937,15 +1956,43 @@ void ModelViewer::OnCharHook(wxKeyEvent & event)
   event.Skip();
 }
 
-// Creature M2s only, for now. A character needs the equipment pipeline the Unity viewport does
-// not have yet, and a WMO is not an M2 at all -- both stay where they already render correctly.
+// Every M2 the canvas shows, playable characters included: the character's resolved appearance,
+// merged armour and attached items reach the Unity viewport as a characterScene (protocol 3). What
+// stays on the OpenGL canvas:
+//   - a WMO, which is not an M2 at all;
+//   - a character riding a mount -- the canvas model is then the mount, with the character hung
+//     from one of its attachments, and the Unity viewport has no mount rig;
+//   - a character when the connected player is an older build that cannot dress one.
+// A player that is not connected yet is assumed to be the current build: this decides the layout
+// before the player exists, and a player that then turns out older sends the model back here when it
+// announces itself (onUnityReady re-routes).
 bool ModelViewer::unityCanShowCurrentModel() const
 {
   if (!canvas || !canvas->model() || !canvas->model()->gamefile)
     return false;
   if (canvas->wmo)
     return false;
-  return !isChar;
+  if (!isChar)
+    return true;
+  if (!canvasShowsCharacter())
+    return false;
+  if (m_unityCharacterFailed != 0 && m_unityCharacterFailed == (int)canvas->model()->gamefile->fileDataId())
+    return false;
+  const bool playerKnown = unityRendererHost && unityRendererHost->ipc() && unityRendererHost->ipc()->isUnityReady();
+  return !playerKnown || unityRendererHost->ipc()->playerDressesCharacters();
+}
+
+// The scene and the player's asset requests both address files by FileDataID, so a character with
+// none (a legacy MPQ client) is not one the viewport can dress.
+bool ModelViewer::canvasShowsCharacter() const
+{
+  return isChar && canvas && canvas->model() && canvas->model()->charModelDetails.isChar &&
+         canvas->model()->gamefile && canvas->model()->gamefile->fileDataId() > 0;
+}
+
+bool ModelViewer::unityPlayerDressesCharacters() const
+{
+  return unityRendererHost && unityRendererHost->ipc() && unityRendererHost->ipc()->playerDressesCharacters();
 }
 
 // Hand the centre of the window to whichever viewport should own it.
@@ -1993,6 +2040,10 @@ bool ModelViewer::CommitLayoutIfChanged()
 
 void ModelViewer::UpdatePrimaryViewport()
 {
+  // The routing is decided here for what the canvas shows now, so this is what the tick compares
+  // against to notice a mount or a dismount (SendCharacterSceneToUnity). Recorded before any early
+  // return: a load routes itself, and the tick that follows it must not route it again.
+  m_lastShowsCharacter = canvasShowsCharacter();
   if (!canvas)
     return;
 
@@ -2103,7 +2154,20 @@ void ModelViewer::SendLoadToUnity()
     return;
   WoWModel * m = const_cast<WoWModel *>(canvas->model());
   GameFile * gf = m->gamefile;
-  unityRendererHost->ipc()->sendLoadWoWModel(gf->fullname(), gf->fileDataId() > 0 ? gf->fileDataId() : 0);
+  const bool character = canvasShowsCharacter() && unityRendererHost->ipc()->playerDressesCharacters();
+  const int fileDataID = gf->fileDataId() > 0 ? (int)gf->fileDataId() : 0;
+  // Answers about any earlier load are told apart from answers about this one by this number.
+  const int load = ++m_unityLoadSerial;
+  unityRendererHost->ipc()->sendLoadWoWModel(gf->fullname(), fileDataID, QStringLiteral("active"), character, load);
+  m_unityLoadedFileDataID = fileDataID;
+  m_unityLoadedCharacter = character;
+  // A new load is dressed from scratch: the next tick sends this character's scene even when its
+  // fingerprint happens to equal the previous one (the same character loaded again), and it does not
+  // wait for an answer about the previous model's scene -- the player drops that one for this load.
+  m_lastSceneSignature = 0;
+  m_sceneAwaitingRevision = 0;
+  if (!character || (int)gf->fileDataId() != m_unityCharacterFailed)
+    m_unityCharacterFailed = 0;
 }
 
 // The load AND what is showing: for a player that connects while a model is already up
@@ -2111,12 +2175,14 @@ void ModelViewer::SendLoadToUnity()
 void ModelViewer::SendCurrentModelToUnity()
 {
   SendLoadToUnity();
+  SendCharacterSceneToUnity(true);
   // ... its skin -- the display's textures, geosets and particle colour, as the animation
   // control pushes them on a load -- so a player that connects with a model already up shows
   // the geosets the file-list path would give it. After the load, which is what the player's
   // guard for the model being loaded requires.
+  // (Not for a character: its scene carries every texture and geoset, and follows on the next tick.)
   if (unityRendererHost && unityRendererHost->ipc() && unityRendererHost->ipc()->isConnected() &&
-      canvas && canvas->model() && canvas->model()->gamefile)
+      canvas && canvas->model() && canvas->model()->gamefile && !canvasShowsCharacter())
     unityRendererHost->ipc()->sendModelSkin((int)canvas->model()->gamefile->fileDataId());
   // ... and which animation it is showing, so the player starts on the app's selection instead of
   // picking its own idle and being corrected a moment later.
@@ -2133,8 +2199,105 @@ void ModelViewer::SendCurrentSkinToUnity()
     return;
   if (!canvas || !canvas->model() || !canvas->model()->gamefile)
     return;
+  // A character's textures and geosets travel in its scene (SendCharacterSceneToUnity), which the
+  // host's own refresh keeps current; a skin push would only repeat part of it.
+  if (canvasShowsCharacter())
+    return;
   WoWModel * m = const_cast<WoWModel *>(canvas->model());
   unityRendererHost->ipc()->sendModelSkin((int)m->gamefile->fileDataId());
+}
+
+void ModelViewer::SendCharacterSceneToUnity(bool force)
+{
+  // Mounting puts the mount on the canvas and dismounting takes it off again, with no load: the
+  // viewport routing follows here, where every tick passes. Only a change the routing has not already
+  // followed counts -- UpdatePrimaryViewport records what it routed -- so a load is not routed twice.
+  const bool showsCharacter = canvasShowsCharacter();
+  if (!force && showsCharacter != m_lastShowsCharacter)
+  {
+    m_lastShowsCharacter = showsCharacter;
+    // From here a player is re-docked, never launched: a launch that fails shows a message box, and a
+    // modal loop opened inside the canvas timer keeps running the tick beneath it. Handing the centre
+    // back to the canvas (mounting) launches nothing and always follows.
+    const bool running = unityRendererHost && unityRendererHost->isRunning();
+    if (isChar && (running || !showsCharacter))
+    {
+      // Dismounting. The player may not have THIS character loaded -- one that connected while the
+      // character was mounted was sent the mount -- and it refuses a scene for a model it is not
+      // building, so the character's load goes out again before the viewport is handed back.
+      if (showsCharacter && unityPlayerReady())
+      {
+        const bool character = unityRendererHost->ipc()->playerDressesCharacters();
+        if (m_unityLoadedFileDataID != (int)canvas->model()->gamefile->fileDataId() ||
+            m_unityLoadedCharacter != character)
+          SendCurrentModelToUnity();
+      }
+      UpdatePrimaryViewport();
+    }
+  }
+
+  if (!unityRendererHost || !unityRendererHost->ipc() || !unityRendererHost->ipc()->playerDressesCharacters())
+    return;
+  if (!showsCharacter || m_sceneHold > 0)
+    return;
+  // The player reported it could not build this character from the load on display, and the canvas has
+  // it: another scene would only be refused again, with the composited body image sent for nothing. A
+  // later load of the same body model is another attempt, whose build waits for its scene -- held back,
+  // that load would never finish, never answer, and the character would stay on the canvas for good.
+  if (m_unityCharacterFailed != 0 && m_unityCharacterFailed == (int)canvas->model()->gamefile->fileDataId() &&
+      m_unityCharacterFailedLoad == m_unityLoadSerial)
+    return;
+  const unsigned long now = timeGetTime();
+  if (!force)
+  {
+    if (m_lastSceneCheck != 0 && (now - m_lastSceneCheck) < SCENE_CHECK_MS)
+      return;
+    m_lastSceneCheck = now;
+  }
+  if (m_sceneAwaitingRevision != 0 && (now - m_sceneSentAt) < SCENE_ACK_TIMEOUT_MS)
+  {
+    // The previous scene is still being applied. Whatever changes meanwhile goes out when it is
+    // answered (OnCharacterSceneApplied); a forced send is remembered by clearing the fingerprint.
+    if (force)
+      m_lastSceneSignature = 0;
+    return;
+  }
+  if (m_sceneAwaitingRevision != 0)
+  {
+    // No answer in time. The wait ends HERE, once: left in place, every tick after this one would find
+    // the same expired wait and log it again, twenty times a second, while nothing changed. The current
+    // state goes out once more, and the next wait is timed from now.
+    LOG_ERROR << "[unity-character] no answer to scene revision" << m_sceneAwaitingRevision << "after"
+              << (now - m_sceneSentAt) << "ms -- sending the current state";
+    m_sceneAwaitingRevision = 0;
+    m_sceneSentAt = now;
+    m_lastSceneSignature = 0;
+  }
+
+  WoWModel * m = const_cast<WoWModel *>(canvas->model());
+  const quint64 signature = UnityCharacterScene::signature(m);
+  if (!force && signature == m_lastSceneSignature)
+    return;
+  m_lastSceneSignature = signature;
+
+  QElapsedTimer clock;
+  clock.start();
+  UnityIpcServer * ipc = unityRendererHost->ipc();
+  UnityCharacterScene::Summary summary;
+  const QJsonObject scene = UnityCharacterScene::build(
+    m, [ipc](const QString & kind, const QImage & image) { return ipc->shareCharacterImage(kind, image); },
+    summary);
+  const int revision = ++m_sceneRevision;
+  if (ipc->sendCharacterScene((int)m->gamefile->fileDataId(), revision, scene))
+  {
+    m_sceneAwaitingRevision = revision;
+    m_sceneSentAt = now;
+  }
+  if (m_sceneAwaitingRevision == revision)
+    LOG_INFO << "[unity-character] scene revision" << revision << "for" << m->gamefile->fullname() << ":"
+             << summary.bodyTextures << "body texture(s)," << summary.images << "composited image reference(s),"
+             << summary.merged << "merged," << summary.attachments << "attached; built and queued in"
+             << clock.elapsed() << "ms";
 }
 
 bool ModelViewer::unityPlayerReady() const
@@ -2154,9 +2317,82 @@ int ModelViewer::SendCurrentGeosetsToUnity()
     return 0;
   if (!canvas || !canvas->model() || !canvas->model()->gamefile || !unityCanShowCurrentModel())
     return 0;
+  // A character's geosets -- its own, its merged parts' and its items' -- reach the player in its
+  // scene, which the signature sends on the next tick. One channel: a modelGeosets for the body
+  // would race the scene that also carries the body's flags.
+  if (canvasShowsCharacter())
+    return 0;
   const int revision = ++m_geosetRevision;
   return unityRendererHost->ipc()->sendModelGeosets((int)canvas->model()->gamefile->fileDataId(), revision)
            ? revision : 0;
+}
+
+void ModelViewer::OnCharacterSceneApplied(const UnityIpcServer::SceneAck & ack)
+{
+  if (ack.status == "pending")
+    return;   // the body is still building; the final answer follows
+  // Revisions are numbered across loads, so the wait for one ends with its answer whichever load that
+  // answer names.
+  const bool endsWait = ack.revision != 0 && ack.revision == m_sceneAwaitingRevision;
+  if (endsWait)
+    m_sceneAwaitingRevision = 0;
+
+  // AN ANSWER ABOUT AN EARLIER LOAD SAYS NOTHING ABOUT THIS ONE. The player answers for the scene a new
+  // load made it drop, and a failed build reports after the next load may already have gone out -- as
+  // often as not of the same body model (NPCs of one race and sex share it), so the fileDataID alone
+  // took either for news about the character on display: a false notice in the Geosets tab, or a
+  // character that builds fine kept on the canvas. Load 0 is a scene the player could tie to no load at
+  // all (the serial sent is never 0). "superseded" is a scene dropped for a newer scene or a new load,
+  // which is answered in its own right: no failure either.
+  if (ack.load == 0 || ack.load != m_unityLoadSerial || ack.status == "superseded")
+  {
+    if (endsWait)
+    {
+      m_lastSceneCheck = 0;
+      SendCharacterSceneToUnity(false);
+    }
+    return;
+  }
+
+  const bool current = canvasShowsCharacter() && (int)canvas->model()->gamefile->fileDataId() == ack.fileDataID;
+  if (current && ack.status == "applied" && m_unityCharacterFailed == ack.fileDataID)
+  {
+    // A later load of the model whose build failed (another NPC on the same body, say) was dressed, so
+    // the viewport takes the character back.
+    m_unityCharacterFailed = 0;
+    UpdatePrimaryViewport();
+  }
+  if (current && ack.status == "rejected")
+  {
+    if (ack.reason.startsWith("load failed"))
+    {
+      // The player could not build this character at all and is still showing whatever it showed
+      // before. The canvas takes it back until something else is loaded.
+      LOG_ERROR << "[unity-character] the Unity viewport could not build" << canvas->model()->gamefile->fullname()
+                << "(" << ack.reason << ") -- showing it on the OpenGL canvas";
+      m_unityCharacterFailed = ack.fileDataID;
+      m_unityCharacterFailedLoad = ack.load;
+      UpdatePrimaryViewport();
+      return;
+    }
+    // A scene the player refused as a whole (a submesh list that does not fit, say): the Geosets tab
+    // says so rather than implying the checkboxes are on screen.
+    if (modelInspector)
+    {
+      UnityIpcServer::GeosetAck geo;
+      geo.fileDataID = ack.fileDataID;
+      geo.revision = 0;
+      geo.status = "rejected";
+      geo.reason = ack.reason;
+      modelInspector->OnUnityGeosetsApplied(geo);
+    }
+  }
+  if (current && !ack.missing.isEmpty())
+    LOG_ERROR << "[unity-character] scene revision" << ack.revision << "applied without" << ack.missing.join(", ");
+
+  // Whatever changed while this scene was being applied goes out now.
+  m_lastSceneCheck = 0;
+  SendCharacterSceneToUnity(false);
 }
 
 // The animation on display changed (the dropdown, or the default picked on model load). Same
@@ -3421,6 +3657,9 @@ void ModelViewer::SaveChar(QString fn, bool equipmentOnly /*= false*/)
 
 void ModelViewer::LoadChar(QString fn, bool equipmentOnly /* = false */)
 {
+  // Described to the Unity viewport once, dressed, when this returns: see SceneHold.
+  SceneHold sceneHold(this);
+
   QFile file(fn);
   if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
   {
@@ -4028,6 +4267,9 @@ void ModelViewer::UpdateControls()
 
 void ModelViewer::ImportArmoury(wxString strURL)
 {
+  // Described to the Unity viewport once, dressed, when this returns: see SceneHold.
+  SceneHold sceneHold(this);
+
   CharInfos * result = NULL;
 
   QString url = strURL.utf8_str();

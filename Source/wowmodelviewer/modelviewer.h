@@ -26,6 +26,7 @@
 #include "effects.h"
 #include "ColorPickerDialog.h"
 #include "filecontrol.h"
+#include "UnityIpcServer.h"
 
 #include "glm/glm.hpp"
 
@@ -260,12 +261,64 @@ public:
   // submeshes live and answers every state it is sent.
   bool unityPlayerReady() const;
   bool unityPlayerSwitchesSubmeshes() const;
+  bool unityPlayerDressesCharacters() const;
 
   // The playback state of that animation: playing/paused, speed, and where in the sequence the
   // app is. force pushes unconditionally (a control was used); without it this is the heartbeat,
   // which pushes only while something is playing and only every so often. Safe and cheap to call
   // every frame -- it rate-limits itself and no-ops when the Unity pane was never opened.
   void SendAnimationStateToUnity(bool force = false);
+
+  // The resolved state of the character on the canvas (UnityCharacterScene), whenever it differs
+  // from what the player was last sent: a customization, equipment, a render toggle, a geoset
+  // checkbox. Cheap to call every canvas tick -- it rate-limits itself and compares a fingerprint
+  // before building anything. force sends regardless of the fingerprint.
+  void SendCharacterSceneToUnity(bool force = false);
+  // The canvas shows a playable character the Unity viewport can dress (not a mount carrying one).
+  bool canvasShowsCharacter() const;
+  int m_sceneRevision = 0;
+  quint64 m_lastSceneSignature = 0;
+  unsigned long m_lastSceneCheck = 0;
+  static const unsigned long SCENE_CHECK_MS = 50;
+  // FLOW CONTROL: one scene at a time. A scene can carry an 8 MB composited image, and cycling
+  // through customization choices would otherwise queue one per 50 ms faster than the player can
+  // decode them; the next scene goes out when the player has answered this one, and it describes the
+  // state at THAT moment. A player silent for SCENE_ACK_TIMEOUT_MS is no longer waited for: the timeout
+  // is logged once and the current state is sent once more.
+  int m_sceneAwaitingRevision = 0;
+  unsigned long m_sceneSentAt = 0;
+  static const unsigned long SCENE_ACK_TIMEOUT_MS = 8000;
+  // A character loaded and dressed in several steps (a .chr, an Armory import, an NPC) is described to
+  // the player once, when it is complete, rather than after each step: see SceneHold.
+  int m_sceneHold = 0;
+  // Whether the canvas showed a character the viewport can dress when the routing was last decided
+  // (UpdatePrimaryViewport records it): mounting and dismounting change it without a load, and the
+  // viewport routing has to follow from the tick.
+  bool m_lastShowsCharacter = false;
+  // The character model the Unity player could not build: the canvas keeps it until a load of another
+  // model, a player (re)start, or a later load of the same model that the player does dress.
+  int m_unityCharacterFailed = 0;
+  // The load serial that build belonged to. No scene is sent while it is still the load on display: the
+  // player has dropped that load. A later load of the same model is a new attempt, and its body build
+  // waits for a scene, so that one is sent.
+  int m_unityCharacterFailedLoad = 0;
+  // THE LOAD SERIAL: raised for every loadWoWModel sent (SendLoadToUnity), which carries it, and named
+  // by every characterSceneApplied. An answer naming another load is about a model the player has
+  // since been told to replace -- often the same body model, so the same fileDataID -- and says nothing
+  // about the one on display.
+  int m_unityLoadSerial = 0;
+  // What the last loadWoWModel sent named: the model's fileDataID and whether it went as a character.
+  // Dismounting hands the viewport back without a load, and a player that connected while the mount was
+  // up was sent the mount.
+  int m_unityLoadedFileDataID = 0;
+  bool m_unityLoadedCharacter = false;
+  void OnCharacterSceneApplied(const UnityIpcServer::SceneAck & ack);
+  struct SceneHold
+  {
+    explicit SceneHold(ModelViewer * v) : viewer(v) { viewer->m_sceneHold++; }
+    ~SceneHold() { if (--viewer->m_sceneHold == 0) viewer->SendCharacterSceneToUnity(true); }
+    ModelViewer * viewer;
+  };
 
   // How often the heartbeat above may push while an animation runs. One a second is far below
   // anything a viewer would notice and far above what clock drift needs.

@@ -82,6 +82,10 @@ class _WOWMODEL_API_ WoWModel : public ManagedItem, public Displayable, public M
   // slot, so they are layered into this one texture instead of overwriting each other.
   // Recreated each refresh, freed here and in ~WoWModel.
   GLuint eyeCompositeTex_ = 0;
+  QImage eyeCompositeImage_;     // the pixels uploaded into eyeCompositeTex_ (see eyeCompositeImage)
+
+  // Bumped whenever refresh() or refreshMerging() has rebuilt what the model draws; see stateVersion().
+  unsigned int stateVersion_ = 0;
 
   inline void drawModel();
   void initCommon();
@@ -102,6 +106,27 @@ class _WOWMODEL_API_ WoWModel : public ManagedItem, public Displayable, public M
 
   void refreshMerging();
   std::set<WoWModel *> mergedModels;
+
+public:
+  // One merged model as refreshMerging laid it into this model, in the order it was merged (which
+  // decides its texture-slot stride, mergeIndex * TEXTURE_MAX). geosetStart/geosetCount are the
+  // range of THIS model's geosets[] holding the copies of its geosets; boneMap is the table that
+  // rebound its vertices onto this model's skeleton (merged bone index -> this model's bone index).
+  struct MergedPart
+  {
+    WoWModel * model = nullptr;
+    unsigned int mergeIndex = 0;
+    size_t geosetStart = 0;
+    size_t geosetCount = 0;
+    std::vector<int16> boneMap;
+    // The passes refreshMerging re-pointed at this model's hand texture instead of the merged
+    // model's own (the "hands" rule, see refreshMerging): their geoset index in the MERGED model, and
+    // the texture index they bind in this model.
+    std::vector<int> handSubmeshes;
+    uint16 handTexIndex = 0xFFFF;
+  };
+private:
+  std::vector<MergedPart> mergedParts_;
 
   // Cache of previously-merged-then-unmerged models, keyed by FileDataID. Re-merging a
   // model from here reuses the parsed M2 + GPU buffers instead of re-reading the file
@@ -313,6 +338,18 @@ public:
   // criterion in setGeosetGroupDisplay, setCreatureGeosetData and refreshSkinnedModels; this
   // exposes it so code outside the class can respect the same boundary.
   size_t ownGeosetCount() const { return rawGeosets.size(); }
+
+  // ---- read-only access for the embedded Unity viewport (UnityCharacterScene) ----------------
+  // Everything below reads state refresh()/refreshMerging() already computed for the OpenGL draw;
+  // nothing re-derives a rule.
+  const std::vector<MergedPart> & mergedParts() const { return mergedParts_; }
+  unsigned int stateVersion() const { return stateVersion_; }
+  const QImage & eyeCompositeImage() const { return eyeCompositeImage_; }
+  GLuint eyeCompositeTexture() const { return eyeCompositeTex_; }
+  // The M2 texture TYPE of this model's own texture slot (0 = a file texture), or -1 out of range.
+  int textureTypeForSlot(size_t slot) const;
+  // The FileDataID behind a GL texture id the texture manager created, or 0.
+  static int fileDataIdForGLTexture(GLuint id);
   bool isGeosetDisplayed(uint geosetindex);
   void setGeosetGroupDisplay(CharGeosets group, int val);
   void setGeosetDisplayById(int geosetId, bool display); // toggle the exact geoset id(s); never id 0

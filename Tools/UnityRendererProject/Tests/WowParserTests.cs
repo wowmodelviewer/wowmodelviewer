@@ -357,6 +357,10 @@ namespace Wmv.Wow.Tests
             AnimationTests();
             log.Add("Emitters");
             EmitterTests();
+            log.Add("Skeletons and character lookups");
+            SkeletonTests();
+            HeaderLookupTests();
+            AliasSequenceTests();
 
             log.Add(failures == 0 ? "ALL TESTS PASSED" : (failures + " TEST(S) FAILED"));
             if (output != null)
@@ -1956,5 +1960,506 @@ namespace Wmv.Wow.Tests
                          (payload[0x12E] << 16) | (payload[0x12F] << 24));
         }
 
+        static M2BoneDef Bone(M2BoneDef[] bones, int i)
+        {
+            if (bones != null && i >= 0 && i < bones.Length)
+                return bones[i];
+            var none = new M2BoneDef();                  // absent: empty tracks, not null ones
+            none.Translation.Times = new uint[0]; none.Translation.Values = new WowVec3[0];
+            none.Rotation.Times = new uint[0]; none.Rotation.Values = new WowQuat[0];
+            none.Scale.Times = new uint[0]; none.Scale.Values = new WowVec3[0];
+            return none;
+        }
+
+        static M2AttachmentDef Att(M2ParsedModel model, int i)
+        {
+            return i >= 0 && i < model.Attachments.Length ? model.Attachments[i] : new M2AttachmentDef();
+        }
+
+        /// <summary>Key k of a track, or NaN (which fails every comparison) when it is absent, so a
+        /// missing key is a FAIL line rather than an exception that stops the run.</summary>
+        static WowVec3 TKey(M2Track<WowVec3> t, int k)
+        {
+            return t.Values != null && k < t.Values.Length ? t.Values[k] : new WowVec3(float.NaN, float.NaN, float.NaN);
+        }
+
+        static WowQuat RKey(M2Track<WowQuat> t, int k)
+        {
+            return t.Values != null && k < t.Values.Length ? t.Values[k] : new WowQuat(float.NaN, float.NaN, float.NaN, float.NaN);
+        }
+
+        static bool NoTracks(M2BoneDef[] bones)
+        {
+            foreach (M2BoneDef b in bones)
+                if (b.IsAnimated) return false;
+            return true;
+        }
+
+        /// <summary>
+        /// Skeleton files, the way every retail playable race ships: the .m2 names a .skel with
+        /// SKID, and the bones, sequences, lookups and attachments all come from there (or, with
+        /// an SKPD, partly from a parent skeleton). See M2Synthetic's skeleton section for the
+        /// fixture's values; tag 0 is a skeleton, tag 1 its parent.
+        /// </summary>
+        static void SkeletonTests()
+        {
+            const int skelId = 777001, parentId = 777002, skinId = 777003;
+            byte[] m2 = M2Synthetic.SkeletonModel(skelId, skinId);
+            byte[] skel = M2Synthetic.Skeleton(0);
+            byte[] parentSkel = M2Synthetic.Skeleton(1);
+            byte[] childSkel = M2Synthetic.Skeleton(0, parentId);
+            byte[] anim = M2Synthetic.SkeletonAnimFile(0, true);
+            float z2 = M2Synthetic.ExternalZ(2, 0);
+
+            M2ParsedModel m = M2Parser.Parse(m2);
+            Check(m.SkeletonFileDataID == skelId && m.SkinFileDataIDs.Length == 1 && m.SkinFileDataIDs[0] == skinId,
+                  "skel: the synthetic model carries SKID and SFID");
+            Check(m.Bones.Length == 0 && !m.SkeletonApplied && m.AnimationSkipReason != null,
+                  "skel: Parse leaves an SKID model without bones until its skeleton is applied");
+            Check(M2Parser.ReadSkeletonParentId(childSkel) == parentId && M2Parser.ReadSkeletonParentId(skel) == 0 &&
+                  M2Parser.ReadSkeletonParentId(m2) == 0 && M2Parser.ReadSkeletonParentId(null) == 0,
+                  "skel: SKPD names the parent, and anything without one reads 0");
+
+            // ---- a skeleton with no parent ----
+            M2Parser.ApplySkeleton(m, skel, null, -1);
+            Check(m.SkeletonApplied && m.ParentSkeletonFileDataID == 0, "skel: applied, no parent");
+            Check(m.Bones.Length == 3 && m.BoneCount == 3, "skel: bones come from SKB1");
+            Check(Bone(m.Bones, 0).Parent == -1 && Bone(m.Bones, 1).Parent == 0 && Bone(m.Bones, 2).Parent == 1,
+                  "skel: parent chain read");
+            Near(Bone(m.Bones, 2).Pivot.X, 2f, "skel: pivot read");
+            Check(Bone(m.Bones, 2).NameCrc == M2Synthetic.SkelBoneCrc(2, 0) && Bone(m.Bones, 0).NameCrc == M2Synthetic.SkelBoneCrc(0, 0),
+                  "skel: bone name hash read from bone+12");
+            Check(Bone(m.Bones, 2).KeyBoneId == 8 && Bone(m.Bones, 1).KeyBoneId == -1, "skel: keyBoneId read");
+            Check(m.Sequences.Length == 2 && m.Sequences[1].AnimId == M2Synthetic.SkelExternalAnimId &&
+                  m.Sequences[1].Length == 800 && !m.Sequences[1].PrimarySequence && m.Sequences[0].PrimarySequence,
+                  "skel: sequences come from SKS1");
+            Check(m.GlobalSequences.Length == 2 && m.GlobalSequences[0] == 1000 && m.GlobalSequences[1] == 2000,
+                  "skel: global sequences come from SKS1");
+            Check(m.AnimationLookup.Length == 6 && m.AnimationLookup[5] == 1 && m.AnimationLookup[0] == 0,
+                  "skel: animation lookup read");
+            Check(M2Parser.ExternalAnimFileId(m, 1) == M2Synthetic.SkelAnimFileIdBase,
+                  "skel: AFID comes from the skeleton");
+            Check(m.KeyBoneLookup.Length == 10 && m.KeyBoneLookup[8] == 2 && m.KeyBoneLookup[0] == 0,
+                  "skel: key-bone lookup read");
+            Check(m.KeyBoneLookup[9] == -1, "skel: a key-bone entry past the bones is sanitised to -1");
+            Check(m.Attachments.Length == 2 && m.AttachmentLookup.Length == 12, "skel: attachments come from SKA1");
+            Check(Att(m, 0).Id == 11 && Att(m, 0).Bone == 2,
+                  "skel: attachment bone is the low 16 bits of the field");
+            Check(m.AnimatedSequence == 0 && m.AnimationSkipReason == null && m.RequiredAnimFileId == 0,
+                  "skel: the idle resolves and the skip reason is cleared");
+            Check(Bone(m.Bones, 2).Translation.Times.Length == 2 && Bone(m.Bones, 2).Translation.Times[1] == 500,
+                  "skel: idle translation keys read from SKB1");
+            Near(TKey(Bone(m.Bones, 2).Translation, 1).X, 3f, "skel: idle translation value");
+            Check(Bone(m.Bones, 1).Rotation.IsGlobal && Bone(m.Bones, 1).Rotation.GlobalSequence == 1 &&
+                  Bone(m.Bones, 1).Rotation.Values.Length == 2, "skel: global-sequence rotation read");
+            Near(RKey(Bone(m.Bones, 1).Rotation, 1).W, 0.7071f, "skel: packed quaternion from SKB1", 1e-3f);
+            Check(m.TextureTransforms.Length == 1 && m.TextureTransforms[0].Translation.HasData,
+                  "skel: the .m2's material tracks are read for the skeleton's sequence");
+
+            // ---- the helpers ----
+            Check(M2Parser.SequenceForAnimId(m, 5) == 1 && M2Parser.SequenceForAnimId(m, 0) == 0,
+                  "helpers: SequenceForAnimId goes through the animation lookup");
+            Check(M2Parser.SequenceForAnimId(m, 3) == -1 && M2Parser.SequenceForAnimId(m, 500) == -1 &&
+                  M2Parser.SequenceForAnimId(m, -1) == -1, "helpers: an animation the model lacks is -1");
+            short[] savedLookup = m.AnimationLookup;
+            m.AnimationLookup = new short[0];
+            Check(M2Parser.SequenceForAnimId(m, 5) == 1, "helpers: without a lookup the first matching AnimId answers");
+            m.AnimationLookup = savedLookup;
+            Check(M2Parser.BoneForKeyBone(m, 8) == 2 && M2Parser.BoneForKeyBone(m, 0) == 0,
+                  "helpers: BoneForKeyBone maps a key bone");
+            Check(M2Parser.BoneForKeyBone(m, 9) == -1 && M2Parser.BoneForKeyBone(m, 3) == -1 &&
+                  M2Parser.BoneForKeyBone(m, 99) == -1 && M2Parser.BoneForKeyBone(m, -1) == -1 &&
+                  M2Parser.BoneForKeyBone(null, 8) == -1, "helpers: BoneForKeyBone refuses anything not a real bone");
+            M2AttachmentDef att;
+            Check(M2Parser.AttachmentFor(m, 11, out att) && att.Bone == 2, "helpers: AttachmentFor resolves id 11");
+            Near(att.Position.Z, 1.5f, "helpers: attachment position");
+            Check(M2Parser.AttachmentFor(m, 5, out att) && att.Bone == 1 && Math.Abs(att.Position.Y + 0.25f) < 1e-4f,
+                  "helpers: AttachmentFor resolves id 5");
+            Check(!M2Parser.AttachmentFor(m, 1, out att) && !M2Parser.AttachmentFor(m, 400, out att) &&
+                  !M2Parser.AttachmentFor(m, -3, out att), "helpers: AttachmentFor is false for an absent id");
+
+            // ---- an external sequence ----
+            M2Parser.ReadAnimationInto(m2, 1, m);
+            Check(m.AnimatedSequence == 0 && m.AnimationSkipReason != null && m.AnimationSkipReason.Contains(".anim"),
+                  "skel anim: without the .anim the external sequence falls back to the idle");
+            M2Parser.ReadAnimationInto(m2, 1, m, anim);
+            Check(m.AnimatedSequence == 1 && m.AnimationSkipReason == null &&
+                  m.RequiredAnimFileId == M2Synthetic.SkelAnimFileIdBase,
+                  "skel anim: ReadAnimationInto switches a skeleton model to its external sequence");
+            Check(Bone(m.Bones, 2).Translation.Times.Length == 2 && Bone(m.Bones, 2).Translation.Times[1] == 400,
+                  "skel anim: external key times read");
+            Near(TKey(Bone(m.Bones, 2).Translation, 1).Z, z2, "skel anim: keys come from AFSB, not the AFM2 decoy");
+            Check(Bone(m.Bones, 1).Rotation.Values.Length == 2,
+                  "skel anim: a global track still reads entry 0 from the skeleton while an external sequence plays");
+            Check(!m.TextureTransforms[0].Translation.HasData,
+                  "skel anim: the .m2's material tracks follow the sequence change");
+            M2Parser.ReadAnimationInto(m2, 0, m);
+            Check(m.AnimatedSequence == 0 && m.TextureTransforms[0].Translation.HasData, "skel anim: and back to the idle");
+            Near(TKey(Bone(m.Bones, 2).Translation, 1).X, 3f, "skel anim: idle keys again");
+
+            // The .anim rule: AFSB when present, the sole chunk when there is one, else the file.
+            byte[] raw = M2Synthetic.SkeletonAnimFile(0, false);
+            M2ParsedModel u = M2Parser.Parse(m2);
+            M2Parser.ApplySkeleton(u, skel, null, 1, raw);
+            Check(u.AnimatedSequence == 1 && Bone(u.Bones, 2).Translation.Values.Length == 2 &&
+                  Math.Abs(TKey(Bone(u.Bones, 2).Translation, 1).Z - z2) < 1e-4f,
+                  "anim file: an unchunked .anim is itself the keyframe buffer");
+            M2ParsedModel single = M2Parser.Parse(m2);
+            M2Parser.ApplySkeleton(single, skel, null, 1, M2Synthetic.SingleChunkAnimFile(0, "AFM2"));
+            Check(single.AnimatedSequence == 1 && Bone(single.Bones, 2).Translation.Values.Length == 2 &&
+                  Math.Abs(TKey(Bone(single.Bones, 2).Translation, 1).Z - z2) < 1e-4f,
+                  "anim file: a chunked .anim with one chunk reads that chunk");
+            Check(ReferenceEquals(M2Parser.AnimKeyframeBuffer(raw), raw) && M2Parser.AnimKeyframeBuffer(null) == null,
+                  "anim file: nothing to narrow returns the same bytes");
+            byte[] narrowed = M2Parser.AnimKeyframeBuffer(anim);
+            bool same = narrowed.Length == raw.Length;
+            for (int i = 0; same && i < raw.Length; i++) same = narrowed[i] == raw[i];
+            Check(same, "anim file: AFM2 + AFSB narrows to the AFSB payload");
+            byte[] noAfsb = (byte[])anim.Clone();
+            int second = 8 + (int)BitConverter.ToUInt32(anim, 4);
+            PutMagic(noAfsb, second, "AFSA");
+            Check(ReferenceEquals(M2Parser.AnimKeyframeBuffer(noAfsb), noAfsb),
+                  "anim file: two chunks and no AFSB reads the whole file");
+
+            // ---- override tracks ----
+            M2BoneDef[] before = m.Bones;
+            M2BoneDef[] other = M2Parser.ReadBoneTracksForSequence(m, 1, anim);
+            Check(!ReferenceEquals(other, m.Bones) && ReferenceEquals(before, m.Bones) && m.AnimatedSequence == 0,
+                  "override: ReadBoneTracksForSequence leaves the model alone");
+            Near(TKey(Bone(m.Bones, 2).Translation, 1).X, 3f, "override: the model keeps its own keys");
+            Check(other.Length == 3 && Bone(other, 2).Parent == 1 && Bone(other, 2).NameCrc == M2Synthetic.SkelBoneCrc(2, 0) &&
+                  Bone(other, 2).KeyBoneId == 8 && Math.Abs(Bone(other, 2).Pivot.X - 2f) < 1e-4f,
+                  "override: same hierarchy, pivots and name hashes");
+            Check(Bone(other, 2).Translation.Times.Length == 2 && Bone(other, 2).Translation.Times[1] == 400 &&
+                  Math.Abs(TKey(Bone(other, 2).Translation, 1).Z - z2) < 1e-4f,
+                  "override: the other sequence's keys");
+            Check(NoTracks(M2Parser.ReadBoneTracksForSequence(m, 1, null)),
+                  "override: an external sequence without its bytes gives empty tracks");
+            M2BoneDef[] bad = M2Parser.ReadBoneTracksForSequence(m, 99, null);
+            Check(bad.Length == 3 && NoTracks(bad) && NoTracks(M2Parser.ReadBoneTracksForSequence(m, -1, null)),
+                  "override: a bad sequence index gives empty tracks, not an exception");
+            Check(M2Parser.ReadBoneTracksForSequence(null, 0, null).Length == 0, "override: no model, no bones");
+
+            // ---- a skeleton with a parent ----
+            M2ParsedModel p = M2Parser.Parse(m2);
+            M2Parser.ApplySkeleton(p, childSkel, parentSkel, -1);
+            Check(p.SkeletonApplied && p.ParentSkeletonFileDataID == parentId, "parent: the SKPD parent is recorded");
+            Check(p.Bones.Length == 4 && Bone(p.Bones, 3).NameCrc == M2Synthetic.SkelBoneCrc(3, 1) &&
+                  Math.Abs(Bone(p.Bones, 0).Pivot.Z - 1f) < 1e-4f, "parent: bones come from the parent's SKB1");
+            Check(p.KeyBoneLookup.Length == 10 && p.KeyBoneLookup[8] == 3, "parent: key-bone lookup from the parent");
+            Check(p.Sequences.Length == 2 && p.Sequences[1].Length == 801, "parent: sequences come from the parent");
+            Check(p.AnimationLookup.Length == 7, "parent: animation lookup comes from the parent");
+            Check(M2Parser.ExternalAnimFileId(p, 1) == M2Synthetic.SkelAnimFileIdBase + 1, "parent: AFID comes from the parent");
+            Check(p.GlobalSequences.Length == 4 && p.GlobalSequences[0] == 1000 && p.GlobalSequences[1] == 2000 &&
+                  p.GlobalSequences[2] == 1100 && p.GlobalSequences[3] == 2100,
+                  "parent: global sequences are the child's followed by the parent's");
+            Check(p.Attachments.Length == 2 && p.AttachmentLookup.Length == 12 &&
+                  Math.Abs(Att(p, 0).Position.Z - 1.5f) < 1e-4f,
+                  "parent: attachments come from the child only");
+            Check(p.AnimatedSequence == 0 && Bone(p.Bones, 3).Translation.Values.Length == 2 &&
+                  Math.Abs(TKey(Bone(p.Bones, 3).Translation, 1).X - 5f) < 1e-4f,
+                  "parent: idle keys read from the parent's SKB1");
+            M2Parser.ReadAnimationInto(m2, 1, p, M2Synthetic.SkeletonAnimFile(1, true));
+            Check(p.AnimatedSequence == 1 && Bone(p.Bones, 3).Translation.Values.Length == 2 &&
+                  Math.Abs(TKey(Bone(p.Bones, 3).Translation, 1).Z - M2Synthetic.ExternalZ(3, 1)) < 1e-4f,
+                  "parent: an external sequence reads its keys against the parent's bone headers");
+
+            // ---- optional and malformed chunks ----
+            M2ParsedModel q = M2Parser.Parse(m2);
+            M2Parser.ApplySkeleton(q, M2Synthetic.Skeleton(0, 0, false, true, false), null, -1);
+            Check(q.SkeletonApplied && q.Attachments.Length == 0 && q.AttachmentLookup.Length == 0 && q.Bones.Length == 3,
+                  "skel: no SKA1 (and no SKL1) means no attachments, not an error");
+            M2ParsedModel mal = M2Parser.Parse(m2);
+            Throws<WowParseException>(() => M2Parser.ApplySkeleton(mal, M2Synthetic.Skeleton(0, 0, true, false), null, -1),
+                                      "skel: a skeleton without SKB1 is rejected");
+            Check(!mal.SkeletonApplied && mal.Bones.Length == 0 && mal.Sequences.Length == 2 && mal.AnimationLookup.Length == 0,
+                  "skel: a rejected skeleton leaves the model untouched");
+            Throws<WowParseException>(() => M2Parser.ApplySkeleton(mal, m2, null, -1),
+                                      "skel: bytes that are not a chunked skeleton are rejected");
+            Throws<WowParseException>(() => M2Parser.ApplySkeleton(mal, null, null, -1),
+                                      "skel: no skeleton bytes are rejected");
+            Throws<WowParseException>(() => M2Parser.ApplySkeleton(mal, childSkel, M2Synthetic.Skeleton(1, 0, true, false), -1),
+                                      "skel: a parent without SKB1 is rejected");
+
+            // An SKID model whose skeleton was never applied keeps today's refusal.
+            M2ParsedModel unapplied = M2Parser.Parse(m2);
+            M2Parser.ReadAnimationInto(m2, 0, unapplied);
+            Check(unapplied.AnimatedSequence == -1 && unapplied.Bones.Length == 0 &&
+                  unapplied.AnimationSkipReason != null && unapplied.AnimationSkipReason.Contains("skeleton file"),
+                  "skel: ReadAnimationInto still refuses an SKID model without its skeleton");
+            Check(NoTracks(M2Parser.ReadBoneTracksForSequence(unapplied, 0, null)),
+                  "override: an unapplied SKID model gives no tracks");
+        }
+
+        /// <summary>
+        /// The same lookups on a model that keeps its skeleton in its own header, and the bone
+        /// keyframe regression: bone tracks must take their keys from the .anim for a sequence
+        /// stored there, as the legacy viewport does.
+        /// </summary>
+        static void HeaderLookupTests()
+        {
+            byte[] inFile = M2Synthetic.InFileSkeletonModel(473370);
+            byte[] anim = M2Synthetic.SkeletonAnimFile(0, true);
+            float z2 = M2Synthetic.ExternalZ(2, 0);
+
+            M2ParsedModel h = M2Parser.Parse(inFile);
+            Check(h.AnimationLookup.Length == 6 && h.AnimationLookup[5] == 1, "header: animation lookup read (0x24)");
+            Check(h.KeyBoneLookup.Length == 10 && h.KeyBoneLookup[8] == 2 && h.KeyBoneLookup[9] == -1,
+                  "header: key-bone lookup read (0x34) and sanitised");
+            Check(h.Attachments.Length == 2 && h.AttachmentLookup.Length == 12,
+                  "header: attachments (0xF0) and their lookup (0xF8) read");
+            M2AttachmentDef att;
+            Check(M2Parser.AttachmentFor(h, 11, out att) && att.Bone == 2 && Math.Abs(att.Position.Z - 1.5f) < 1e-4f,
+                  "header: AttachmentFor on an in-file model");
+            Check(M2Parser.SequenceForAnimId(h, 5) == 1 && M2Parser.BoneForKeyBone(h, 8) == 2,
+                  "header: SequenceForAnimId and BoneForKeyBone on an in-file model");
+            Check(Bone(h.Bones, 2).NameCrc == M2Synthetic.SkelBoneCrc(2, 0), "header: bone name hash read");
+            Check(!h.SkeletonApplied, "header: an in-file skeleton is not an applied one");
+
+            // THE REGRESSION. Sequence 1's bone keys exist only in the .anim.
+            M2ParsedModel r = M2Parser.Parse(inFile, 1, anim);
+            Check(r.AnimatedSequence == 1 && Bone(r.Bones, 2).Translation.Values.Length == 2 &&
+                  Math.Abs(TKey(Bone(r.Bones, 2).Translation, 1).Z - z2) < 1e-4f,
+                  "regression: Parse reads bone keys from the chunked .anim's AFSB");
+            Check(Bone(r.Bones, 1).Rotation.Values.Length == 2,
+                  "regression: a global bone track still reads entry 0 from the .m2");
+            M2Parser.ReadAnimationInto(inFile, 1, h, anim);
+            Check(h.AnimatedSequence == 1 && Bone(h.Bones, 2).Translation.Values.Length == 2 &&
+                  Math.Abs(TKey(Bone(h.Bones, 2).Translation, 1).Z - z2) < 1e-4f,
+                  "regression: ReadAnimationInto reads bone keys from the .anim too");
+            M2ParsedModel rawModel = M2Parser.Parse(inFile, 1, M2Synthetic.SkeletonAnimFile(0, false));
+            Check(Bone(rawModel.Bones, 2).Translation.Values.Length == 2 &&
+                  Math.Abs(TKey(Bone(rawModel.Bones, 2).Translation, 1).Z - z2) < 1e-4f,
+                  "regression: an unchunked .anim works the same way");
+            M2Parser.ReadAnimationInto(inFile, 0, h);
+            M2BoneDef[] other = M2Parser.ReadBoneTracksForSequence(h, 1, anim);
+            Check(h.AnimatedSequence == 0 && Bone(other, 2).Translation.Values.Length == 2 &&
+                  Math.Abs(TKey(Bone(other, 2).Translation, 1).Z - z2) < 1e-4f &&
+                  Math.Abs(TKey(Bone(h.Bones, 2).Translation, 1).X - 3f) < 1e-4f,
+                  "override: ReadBoneTracksForSequence works on an in-file model");
+
+            // A header that stops before the attachment entries, and lookups that do not fit:
+            // empty arrays, never an exception.
+            var shortHeader = new byte[0xF4];
+            PutMagic(shortHeader, 0, "MD20");
+            PutU32(shortHeader, 0x04, 272);
+            PutU32(shortHeader, 0x24, 5); PutU32(shortHeader, 0x28, 0x1000);
+            PutU32(shortHeader, 0x34, 3); PutU32(shortHeader, 0x38, 0xF0);
+            PutU32(shortHeader, 0xF0, 2);
+            M2ParsedModel sh = M2Parser.Parse(shortHeader);
+            Check(sh.AnimationLookup.Length == 0 && sh.KeyBoneLookup.Length == 0 &&
+                  sh.Attachments.Length == 0 && sh.AttachmentLookup.Length == 0,
+                  "header: a short header yields empty lookup arrays");
+        }
+
+        /// <summary>The payload offset of the first chunk with this magic, or -1.</summary>
+        static int ChunkPayload(byte[] file, string magic)
+        {
+            for (int o = 0; o + 8 <= file.Length; o += 8 + (int)BitConverter.ToUInt32(file, o + 4))
+                if (file[o] == magic[0] && file[o + 1] == magic[1] && file[o + 2] == magic[2] && file[o + 3] == magic[3])
+                    return o + 8;
+            return -1;
+        }
+
+        /// <summary>Give sequence `seq` of the 64-byte table at `table` these flags and alias target.</summary>
+        static void PutAlias(byte[] b, int table, int seq, uint flags, int target)
+        {
+            PutU32(b, table + seq * 64 + 12, flags);
+            PutU16(b, table + seq * 64 + 62, unchecked((ushort)target));
+        }
+
+        /// <summary>
+        /// Copy each bone's translation entry `from` over entry `to`, in both nested arrays, the way
+        /// retail stores an alias's entries identical to its target's. Translation is the fixture's
+        /// only per-sequence track (its rotation is on a global sequence). Nested offsets are
+        /// relative to `payload`; `bones` is the absolute offset of the bone records.
+        /// </summary>
+        static void CopyTranslationEntry(byte[] b, int payload, int bones, int boneCount, int from, int to)
+        {
+            for (int i = 0; i < boneCount; i++)
+            {
+                int track = bones + i * BoneStride + 16;
+                foreach (int nested in new[] { 4, 12 })
+                {
+                    int entries = payload + (int)BitConverter.ToUInt32(b, track + nested + 4);
+                    Buffer.BlockCopy(b, entries + from * 8, b, entries + to * 8, 8);
+                }
+            }
+        }
+
+        /// <summary>A copy of a chunked file whose AFID chunk has one more entry, placed first.</summary>
+        static byte[] WithAfidEntry(byte[] file, int animId, int subAnimId, int fileId)
+        {
+            int payload = ChunkPayload(file, "AFID");
+            var b = new byte[file.Length + 8];
+            Buffer.BlockCopy(file, 0, b, 0, payload);
+            PutU16(b, payload, (ushort)animId);
+            PutU16(b, payload + 2, (ushort)subAnimId);
+            PutU32(b, payload + 4, (uint)fileId);
+            Buffer.BlockCopy(file, payload, b, payload + 8, file.Length - payload);
+            PutU32(b, payload - 4, BitConverter.ToUInt32(file, payload - 4) + 8);
+            return b;
+        }
+
+        static M2Sequence Seq(int animId, uint flags, int aliasNext)
+        {
+            return new M2Sequence { AnimId = (short)animId, Length = 1000, Flags = flags, AliasNext = (short)aliasNext };
+        }
+
+        /// <summary>
+        /// Alias sequences (flag 0x40 without 0x20): retail character skeletons ship several
+        /// animations as an alias of another sequence -- humanfemale's 139 aliases 138, and 66
+        /// aliases 67, which aliases 65 -- with no AFID entry of their own and track entries
+        /// identical to the target's. They play from the target's keys: its .anim, or the file
+        /// itself when the target is primary. A chain that loops or leaves the table plays nothing.
+        /// </summary>
+        static void AliasSequenceTests()
+        {
+            const int skelId = 777001, skinId = 777003;
+            byte[] m2 = M2Synthetic.SkeletonModel(skelId, skinId);
+            byte[] anim = M2Synthetic.SkeletonAnimFile(0, true);
+            float z2 = M2Synthetic.ExternalZ(2, 0);
+            int afidBase = M2Synthetic.SkelAnimFileIdBase;
+
+            // ---- the resolution rule, on a table shaped like the retail ones ----
+            var t = new M2ParsedModel();
+            t.Sequences = new[]
+            {
+                Seq(0, 0x20, -1),      //  0 Stand, in the file
+                Seq(123, 0, -1),       //  1 keys in .anim 1000760 (humanfemale 65)
+                Seq(63, 0x40, 3),      //  2 alias -> 3 -> 1 (66)
+                Seq(138, 0x40, 1),     //  3 alias -> 1 (67)
+                Seq(60, 0, -1),        //  4 keys in .anim 1000789 (138)
+                Seq(208, 0xC1, 4),     //  5 alias -> 4 (139)
+                Seq(400, 0x40, 0),     //  6 alias of the in-file Stand
+                Seq(401, 0x40, 7),     //  7 alias of itself
+                Seq(402, 0x40, 9),     //  8 alias -> 9 -> 8
+                Seq(403, 0x40, 8),     //  9
+                Seq(404, 0x40, 50),    // 10 alias past the table
+                Seq(405, 0x40, -1),    // 11 alias of a negative index
+                Seq(406, 0, -1),       // 12 no keys anywhere, not an alias
+                Seq(407, 0x40, 12),    // 13 alias -> 12, a dead end
+                Seq(300, 0x40, 4),     // 14 alias with an AFID entry of its own
+                Seq(409, 0x60, 4),     // 15 alias that is also primary
+            };
+            t.AnimFileIds = new[]
+            {
+                new AfidEntry { AnimId = 123, SubAnimId = 0, FileDataID = 1000760 },
+                new AfidEntry { AnimId = 60, SubAnimId = 0, FileDataID = 1000789 },
+                new AfidEntry { AnimId = 300, SubAnimId = 0, FileDataID = 555 },
+            };
+            Check(M2Parser.ExternalAnimFileId(t, 5) == 1000789,
+                  "alias: an alias with no AFID entry names its target's .anim (139 -> 138)");
+            Check(M2Parser.ExternalAnimFileId(t, 2) == 1000760 && M2Parser.ExternalAnimFileId(t, 3) == 1000760,
+                  "alias: a chain is followed to the sequence with the keys (66 -> 67 -> 65)");
+            Check(M2Parser.ExternalAnimFileId(t, 1) == 1000760 && M2Parser.ExternalAnimFileId(t, 4) == 1000789 &&
+                  M2Parser.ExternalAnimFileId(t, 0) == 0, "alias: sequences that are not aliases are unchanged");
+            Check(M2Parser.ExternalAnimFileId(t, 6) == 0, "alias: an alias of an in-file sequence needs no .anim");
+            Check(M2Parser.ExternalAnimFileId(t, 7) == 0 && M2Parser.ExternalAnimFileId(t, 8) == 0 &&
+                  M2Parser.ExternalAnimFileId(t, 9) == 0, "alias: a chain that loops names no file and does not hang");
+            Check(M2Parser.ExternalAnimFileId(t, 10) == 0 && M2Parser.ExternalAnimFileId(t, 11) == 0,
+                  "alias: a target outside the table names no file");
+            Check(M2Parser.ExternalAnimFileId(t, 13) == 0, "alias: a chain ending on a sequence without keys names no file");
+            Check(M2Parser.ExternalAnimFileId(t, 14) == 555, "alias: an alias with its own AFID entry keeps its own file");
+            Check(M2Parser.ExternalAnimFileId(t, 15) == 0, "alias: an alias that is primary keeps its own in-file keys");
+
+            // ---- alias of an external sequence, through a skeleton (the humanfemale case) ----
+            byte[] skel = M2Synthetic.Skeleton(0);
+            int sks1 = ChunkPayload(skel, "SKS1"), skb1 = ChunkPayload(skel, "SKB1");
+            int skelSeqs = sks1 + (int)BitConverter.ToUInt32(skel, sks1 + 12);
+            int skelBones = skb1 + (int)BitConverter.ToUInt32(skel, skb1 + 4);
+            PutAlias(skel, skelSeqs, 0, 0xC1, 1);
+            CopyTranslationEntry(skel, skb1, skelBones, 3, 1, 0);
+            M2ParsedModel a = M2Parser.Parse(m2);
+            M2Parser.ApplySkeleton(a, skel, null, -1);
+            Check(a.Sequences[0].Alias && a.Sequences[0].AliasNext == 1 && !a.Sequences[0].PrimarySequence &&
+                  !a.Sequences[1].Alias, "alias: the 0x40 flag and the alias target are read from the sequence entry");
+            Check(M2Parser.ExternalAnimFileId(a, 0) == afidBase,
+                  "alias: through a skeleton, the alias names its target's .anim");
+            Check(a.AnimatedSequence == -1 && a.AnimationSkipReason != null &&
+                  a.AnimationSkipReason.Contains("alias of sequence 1"),
+                  "alias: without the target's .anim the alias is not played, and the reason names the target");
+            M2Parser.ReadAnimationInto(m2, 0, a, anim);
+            Check(a.AnimatedSequence == 0 && a.AnimationSkipReason == null && a.RequiredAnimFileId == afidBase,
+                  "alias: with the target's .anim, ReadAnimationInto plays the alias itself");
+            Check(Bone(a.Bones, 2).Translation.HasData && Bone(a.Bones, 2).Translation.Times.Length == 2 &&
+                  Bone(a.Bones, 2).Translation.Times[1] == 400 &&
+                  Math.Abs(TKey(Bone(a.Bones, 2).Translation, 1).Z - z2) < 1e-4f,
+                  "alias: the alias's own entries are read against the target's .anim keys");
+            M2BoneDef[] fist = M2Parser.ReadBoneTracksForSequence(a, 0, anim);
+            Check(Math.Abs(TKey(Bone(fist, 2).Translation, 1).Z - z2) < 1e-4f &&
+                  NoTracks(M2Parser.ReadBoneTracksForSequence(a, 0, null)),
+                  "alias: ReadBoneTracksForSequence judges an alias by its target too");
+
+            // The same table with a two-step chain in between: 0 -> 2 -> 1.
+            a.Sequences = new[] { Seq(63, 0x40, 2), Seq(M2Synthetic.SkelExternalAnimId, 0, -1), Seq(138, 0x40, 1) };
+            M2Parser.ReadAnimationInto(m2, 0, a);
+            Check(a.AnimatedSequence == -1 && M2Parser.ExternalAnimFileId(a, 0) == afidBase,
+                  "alias chain: without the .anim nothing plays, and the file named is the end of the chain");
+            M2Parser.ReadAnimationInto(m2, 0, a, anim);
+            Check(a.AnimatedSequence == 0 && a.RequiredAnimFileId == afidBase &&
+                  Math.Abs(TKey(Bone(a.Bones, 2).Translation, 1).Z - z2) < 1e-4f,
+                  "alias chain: the alias plays from the .anim at the end of its chain");
+
+            // An AFID entry whose fileId is 0 names no file. Retail creatures give many aliases
+            // one (ladyalexstrasa2's sequence 53 aliases 52, which names 575107), and the host's
+            // readAFIDSFromFile drops it. Kept, it would make the alias look like it holds its
+            // own keys, so its target's .anim would never be named.
+            byte[] zeroSkel = WithAfidEntry(skel, BitConverter.ToUInt16(skel, skelSeqs),
+                                            BitConverter.ToUInt16(skel, skelSeqs + 2), 0);
+            M2ParsedModel z = M2Parser.Parse(m2);
+            M2Parser.ApplySkeleton(z, zeroSkel, null, 0, anim);
+            Check(z.AnimFileIds.Length == 1 && z.AnimFileIds[0].FileDataID == afidBase,
+                  "afid: an entry whose fileId is 0 is dropped, as the host drops it");
+            Check(M2Parser.ExternalAnimFileId(z, 0) == afidBase && z.AnimatedSequence == 0 &&
+                  Math.Abs(TKey(Bone(z.Bones, 2).Translation, 1).Z - z2) < 1e-4f,
+                  "alias: an alias with a file-less AFID entry of its own still plays its target's .anim");
+
+            // ---- alias of an in-file sequence ----
+            byte[] inFile = M2Synthetic.InFileSkeletonModel(473370);
+            int md21 = ChunkPayload(inFile, "MD21"), afid = ChunkPayload(inFile, "AFID");
+            int seqs = md21 + (int)BitConverter.ToUInt32(inFile, md21 + 0x20);
+            int bones = md21 + (int)BitConverter.ToUInt32(inFile, md21 + 0x30);
+            byte[] toStand = (byte[])inFile.Clone();
+            PutAlias(toStand, seqs, 1, 0x40, 0);
+            CopyTranslationEntry(toStand, md21, bones, 3, 0, 1);
+            PutU16(toStand, afid, 99);                           // no AFID entry names the alias
+            M2ParsedModel h = M2Parser.Parse(toStand, 1);
+            Check(h.AnimatedSequence == 1 && h.AnimationSkipReason == null && h.RequiredAnimFileId == 0 &&
+                  M2Parser.ExternalAnimFileId(h, 1) == 0,
+                  "alias: an alias of an in-file sequence plays without any .anim");
+            Check(Bone(h.Bones, 2).Translation.HasData && Bone(h.Bones, 2).Translation.Times[1] == 500 &&
+                  Math.Abs(TKey(Bone(h.Bones, 2).Translation, 1).X - 3f) < 1e-4f,
+                  "alias: and its keys are read from the .m2");
+            Check(Math.Abs(TKey(Bone(M2Parser.ReadBoneTracksForSequence(h, 1, null), 2).Translation, 1).X - 3f) < 1e-4f,
+                  "alias: ReadBoneTracksForSequence reads an in-file alias without bytes");
+
+            // ---- broken chains fall back to the idle ----
+            var broken = new[] { new[] { 1, 1 }, new[] { 1, 7 }, new[] { 1, -1 } };
+            string[] what = { "an alias of itself", "a target past the table", "a negative target" };
+            for (int i = 0; i < broken.Length; i++)
+            {
+                byte[] bad = (byte[])inFile.Clone();
+                PutAlias(bad, seqs, broken[i][0], 0x40, broken[i][1]);
+                PutU16(bad, afid, 99);
+                M2ParsedModel bm = M2Parser.Parse(bad, 1, anim);
+                M2ParsedModel bn = M2Parser.Parse(bad, 1);
+                Check(bn.AnimatedSequence == 0 && bn.AnimationSkipReason != null &&
+                      bn.AnimationSkipReason.Contains("never reaches") && M2Parser.ExternalAnimFileId(bn, 1) == 0 &&
+                      NoTracks(M2Parser.ReadBoneTracksForSequence(bn, 1, null)),
+                      "alias: " + what[i] + " is not played; the idle plays and the reason says why");
+                Check(bm.AnimatedSequence == 1,
+                      "alias: " + what[i] + " is still played from bytes the caller supplies, as before");
+            }
+            byte[] loop = (byte[])inFile.Clone();
+            PutAlias(loop, seqs, 0, 0x40, 1);
+            PutAlias(loop, seqs, 1, 0x40, 0);
+            PutU16(loop, afid, 99);
+            M2ParsedModel lm = M2Parser.Parse(loop, 1);
+            Check(lm.AnimatedSequence == -1 && lm.AnimationSkipReason != null &&
+                  lm.AnimationSkipReason.Contains("never reaches") &&
+                  M2Parser.ExternalAnimFileId(lm, 0) == 0 && M2Parser.ExternalAnimFileId(lm, 1) == 0,
+                  "alias: two sequences aliasing each other play nothing and do not hang");
+        }
     }
 }

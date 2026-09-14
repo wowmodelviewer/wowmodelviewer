@@ -47,6 +47,7 @@ set(src  AnimationExportChoiceDialog.cpp
          SettingsControl.cpp
          shaders.cpp
          UnityAssetAccess.cpp
+         UnityCharacterScene.cpp
          UnityIpcServer.cpp
          UnityRendererHost.cpp
          UserSkins.cpp
@@ -94,6 +95,7 @@ set(headers AnimationExportChoiceDialog.h
             shaders.h
             UiStyle.h
             UnityAssetAccess.h
+            UnityCharacterScene.h
             UnityIpcServer.h
             UnityRendererHost.h
             UserSkins.h

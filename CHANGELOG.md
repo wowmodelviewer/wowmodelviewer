@@ -5,7 +5,32 @@ Format loosely based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+### Added
+- **Embedded Unity renderer: playable characters stay in the Unity viewport.** Selecting a
+  character no longer sends the centre back to the OpenGL canvas. The Unity viewport draws the same
+  character from the state the host has already resolved -- the composited body and eye textures,
+  the geoset flags after every customization, equipment and helm rule, the collection armour and
+  customization parts merged into the character (skinned to its bones through the host's own bone
+  table), the item models attached at its attachment points (sheathed weapons and shields included)
+  and the closed hand around a held weapon. Model > Appearance, equipment changes, Model Control's
+  render toggle and Model > Geosets (the character's own geosets, its merged parts' and its items')
+  update the viewport in place: one `characterScene` per change, applied whole, no reload, no camera
+  reset and no animation restart. The OpenGL canvas remains the viewport for a mounted character, for
+  a player build older than protocol 3, and for a character the player reports it could not build.
+- **Embedded Unity renderer: models whose skeleton lives in a separate file animate.** Every
+  playable race keeps its bones, sequences and attachments in a `.skel` (the SKID chunk, and the
+  SKPD parent it may defer to); the player now reads them the way the host does instead of drawing
+  such a model static.
+- **Embedded Unity renderer: alias sequences play.** A sequence flagged as an alias (0x40) with no
+  keyframes of its own now plays the keys of the sequence its alias chain ends on, fetching that
+  sequence's `.anim` file. Every HD race has seven of these, and many creatures have more; they used
+  to fall back to Stand. (The OpenGL canvas does not follow aliases yet.)
+
 ### Changed
+- **Embedded Unity renderer: large files reach the player sooner.** The host's socket to the player now
+  has a 4 MB send buffer. With the default, a 12-19 MB model or skeleton spent most of its transfer
+  waiting for the next 20 ms poll; a character now reaches the Unity viewport in about a second instead
+  of nearly two.
 - **Nothing loads until you ask it to.** Launching opens an empty fullscreen viewer; the client is
   chosen from File > "Load World of Warcraft", which is now the only path in the application that
   loads one. Previously the picker was the first thing on screen, and briefly after that the saved
@@ -50,11 +75,18 @@ Format loosely based on [Keep a Changelog](https://keepachangelog.com/).
   renderer reads from; the Unity viewport mirrors it. Making it the visible one is therefore a
   question of which pane holds the centre, not of moving ownership -- which is what keeps this
   small enough to be safe.
-  What still belongs to OpenGL: characters (no equipment pipeline yet), WMOs, anything that is not
+  What still belongs to OpenGL: a mounted character (see Added), WMOs, anything that is not
   an M2, every screenshot and image-sequence path, and every headless run -- a non-interactive
   run keeps the viewport it was given, so `-mo` regressions render exactly as they did.
 
 ### Fixed
+- **Embedded Unity renderer: bone keyframes stored in `.anim` files are read again.** The emitter
+  work had routed bone tracks through the model-buffer-only reader meant for emitters, so every
+  sequence whose keys live in an external `.anim` file posed its bones from the wrong buffer. The
+  keys are taken from the file's AFSB chunk, as the host takes them.
+- **Embedded Unity renderer: global sequences ran faster with every animated model on screen.** The
+  shared global clock was advanced by every animator each frame; a character with a weapon and two
+  shoulder models ran them four times too fast. It now advances once per frame.
 - **Embedded Unity renderer: the viewport no longer holds for about a second after every animation
   change.** The dropdown handler does three things -- `Stop()`, then select, then `Play()` -- and
   only the middle one told the renderer anything. So the state that travelled with the selection

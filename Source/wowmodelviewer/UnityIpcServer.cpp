@@ -14,6 +14,8 @@
 
 #include "UnityIpcServer.h"
 
+#include <cstring>
+
 #include <QCryptographicHash>
 #include <QJsonArray>
 #include <QJsonDocument>
@@ -108,6 +110,8 @@ bool UnityIpcServer::start()
   m_port = ntohs(addr.sin_port);
   m_unityReady = false;
   m_playerProtocol = 0;
+  m_sentImages.clear();
+  m_sentImageIds.clear();
   m_stats = Stats();
   m_timer.Start(POLL_INTERVAL_MS);
   LOG_INFO << "[unityipc] listening on 127.0.0.1:" << m_port << "(protocol v" << PROTOCOL_VERSION << ")";
@@ -131,8 +135,11 @@ void UnityIpcServer::stop()
   m_port = 0;
   m_unityReady = false;
   m_playerProtocol = 0;
+  m_sentImages.clear();
+  m_sentImageIds.clear();
   m_inBuf.clear();
   m_outBuf.clear();
+  m_outPos = 0;
 }
 
 void UnityIpcServer::onPoll(wxTimerEvent & WXUNUSED(event))
@@ -168,11 +175,19 @@ void UnityIpcServer::pollAccept()
   setNonBlocking(c);
   BOOL noDelay = TRUE;
   setsockopt(c, IPPROTO_TCP, TCP_NODELAY, reinterpret_cast<const char *>(&noDelay), sizeof(noDelay));
+  // The send buffer decides how much of a queued line leaves per poll: once it is full the rest waits
+  // for the next timer tick (POLL_INTERVAL_MS). With the default, a 16 MB .skel response or an 11 MB
+  // body image spent most of its transfer waiting on ticks -- over half a second per character load.
+  int sendBuffer = 4 * 1024 * 1024;
+  setsockopt(c, SOL_SOCKET, SO_SNDBUF, reinterpret_cast<const char *>(&sendBuffer), sizeof(sendBuffer));
   m_client = (unsigned long long)c;
   m_unityReady = false;
   m_playerProtocol = 0;
+  m_sentImages.clear();
+  m_sentImageIds.clear();
   m_inBuf.clear();
   m_outBuf.clear();
+  m_outPos = 0;
   m_stats.connections++;
   LOG_INFO << "[unityipc] Unity connected (connection #" << m_stats.connections << ")";
 }
@@ -186,8 +201,11 @@ void UnityIpcServer::dropClient(const char * why)
   m_client = 0;
   m_unityReady = false;
   m_playerProtocol = 0;
+  m_sentImages.clear();
+  m_sentImageIds.clear();
   m_inBuf.clear();
   m_outBuf.clear();
+  m_outPos = 0;
 }
 
 void UnityIpcServer::pollReceive()
@@ -234,21 +252,33 @@ void UnityIpcServer::pollReceive()
 
 void UnityIpcServer::pollSend()
 {
-  while (!m_outBuf.empty())
+  while (m_outPos < m_outBuf.size())
   {
-    const int chunk = (int)std::min<size_t>(m_outBuf.size(), 256 * 1024);
-    const int n = send((SOCKET)m_client, m_outBuf.data(), chunk, 0);
+    const int chunk = (int)std::min<size_t>(m_outBuf.size() - m_outPos, 256 * 1024);
+    const int n = send((SOCKET)m_client, m_outBuf.data() + m_outPos, chunk, 0);
     if (n > 0)
     {
-      m_outBuf.erase(0, (size_t)n);
+      m_outPos += (size_t)n;
       continue;
     }
     const int err = WSAGetLastError();
     if (n < 0 && err == WSAEWOULDBLOCK)
-      return; // kernel buffer full; the rest goes out on the next poll
+    {
+      // Kernel buffer full; the rest goes out on the next poll. The sent front is dropped only once it
+      // is the larger part of the buffer, so a compaction never moves more bytes than were sent since
+      // the last one (see m_outPos).
+      if (m_outPos > m_outBuf.size() / 2)
+      {
+        m_outBuf.erase(0, m_outPos);
+        m_outPos = 0;
+      }
+      return;
+    }
     dropClient("send error");
     return;
   }
+  m_outBuf.clear();
+  m_outPos = 0;
 }
 
 #else // !_WINDOWS
@@ -273,8 +303,20 @@ void UnityIpcServer::queueJson(const QJsonObject & obj)
     LOG_INFO << "[unityipc] no client connected -- dropping" << obj.value("type").toString();
     return;
   }
-  const QByteArray line = QJsonDocument(obj).toJson(QJsonDocument::Compact);
-  m_outBuf.append(line.constData(), (size_t)line.size());
+  queueLine(QJsonDocument(obj).toJson(QJsonDocument::Compact));
+}
+
+void UnityIpcServer::queueLine(const QByteArray & line)
+{
+  queueLineParts({ line });
+}
+
+void UnityIpcServer::queueLineParts(std::initializer_list<QByteArray> parts)
+{
+  if (!m_client)
+    return;
+  for (const QByteArray & part : parts)
+    m_outBuf.append(part.constData(), (size_t)part.size());
   m_outBuf.push_back('\n');
 #ifdef _WINDOWS
   pollSend(); // try to push it out right away; leftovers go on the next poll
@@ -356,6 +398,32 @@ bool UnityIpcServer::sendModelGeosets(int m2FileDataID, int revision)
            << "submeshes=" << (int)visible.size() << "hidden=" << (hidden.isEmpty() ? QString("none") : hidden);
   queueJson(msg);
   return true;
+}
+
+void UnityIpcServer::handleCharacterSceneApplied(const QJsonObject & msg)
+{
+  SceneAck ack;
+  ack.fileDataID = msg.value("fileDataID").toInt(0);
+  ack.revision = msg.value("revision").toInt(0);
+  ack.load = msg.value("load").toInt(0);
+  ack.status = msg.value("status").toString();
+  ack.reason = msg.value("reason").toString();
+  ack.merged = msg.value("merged").toInt(0);
+  ack.attachments = msg.value("attachments").toInt(0);
+  ack.ms = msg.value("ms").toInt(0);
+  const QJsonArray missing = msg.value("missing").toArray();
+  for (const QJsonValue & v : missing)
+    ack.missing << v.toString();
+
+  m_stats.sceneAcks++;
+  if (ack.status == "applied")
+    m_stats.sceneApplied++;
+  m_stats.lastSceneAck = QString("rev %1 %2 %3/%4 %5").arg(ack.revision).arg(ack.status)
+                           .arg(ack.merged).arg(ack.attachments).arg(ack.reason);
+  LOG_INFO << "[unityipc] <- characterSceneApplied fileDataID=" << ack.fileDataID << "load=" << ack.load
+           << m_stats.lastSceneAck << "in" << ack.ms << "ms" << (ack.missing.isEmpty() ? QString() : "missing: " + ack.missing.join(","));
+  if (onCharacterSceneApplied)
+    onCharacterSceneApplied(ack);
 }
 
 void UnityIpcServer::handleGeosetsApplied(const QJsonObject & msg)
@@ -493,15 +561,95 @@ void UnityIpcServer::sendModelAnimationState(int m2FileDataID, int sequenceIndex
   queueJson(msg);
 }
 
-void UnityIpcServer::sendLoadWoWModel(const QString & path, int fileDataID, const QString & client)
+void UnityIpcServer::sendLoadWoWModel(const QString & path, int fileDataID, const QString & client,
+                                      bool character, int load)
 {
   QJsonObject msg;
   msg["type"] = "loadWoWModel";
   msg["path"] = UnityAssetAccess::normalizePath(path);
   msg["fileDataID"] = fileDataID;
   msg["client"] = client;
-  LOG_INFO << "[unityipc] -> loadWoWModel path=" << msg["path"].toString() << "fileDataID=" << fileDataID;
+  msg["character"] = character;
+  msg["load"] = load;
+  LOG_INFO << "[unityipc] -> loadWoWModel path=" << msg["path"].toString() << "fileDataID=" << fileDataID
+           << "load=" << load << (character ? "(character)" : "");
   queueJson(msg);
+}
+
+QString UnityIpcServer::shareCharacterImage(const QString & kind, const QImage & image)
+{
+  if (image.isNull())
+    return QString();
+
+  // The same pixels as last time under this kind: the player has them. A refresh composes a NEW
+  // image every time, so pointer identity is only the fast path; equal contents are compared too,
+  // and only a real change is re-sent -- the body is 8 MB of pixels.
+  auto sent = m_sentImages.find(kind);
+  if (sent != m_sentImages.end() && m_sentImageIds.count(kind))
+  {
+    const QImage & previous = sent->second;
+    if (previous.cacheKey() == image.cacheKey())
+      return m_sentImageIds[kind];
+    if (previous.size() == image.size() && previous.format() == image.format() &&
+        previous.sizeInBytes() == image.sizeInBytes() &&
+        memcmp(previous.constBits(), image.constBits(), (size_t)image.sizeInBytes()) == 0)
+    {
+      // Keep THIS image in its place: a build names the body several times (its own slot, merged
+      // parts that sample the composite, their hand passes), and every later build does too, and each
+      // would otherwise compare all 8 MB again rather than match on the key.
+      sent->second = image;
+      return m_sentImageIds[kind];
+    }
+  }
+
+  // 32 bits per pixel, no row padding, rows top first: exactly what the OpenGL upload handed the
+  // driver as GL_BGRA_EXT. Anything else is converted to that layout rather than sent as is.
+  QImage pixels = image;
+  if (pixels.depth() != 32 || pixels.bytesPerLine() != pixels.width() * 4)
+    pixels = pixels.convertToFormat(QImage::Format_ARGB32);
+
+  const QString id = QString("%1-%2").arg(kind).arg(++m_imageSerial);
+  const QByteArray data = QByteArray::fromRawData((const char *)pixels.constBits(),
+                                                  pixels.width() * pixels.height() * 4).toBase64();
+  // Written out by hand rather than through QJsonDocument: the payload is a single ~11 MB string,
+  // and a JSON document would copy it twice more for nothing. The base64 goes into the send buffer as
+  // its own piece, not joined into a line first, for the same reason.
+  QByteArray head;
+  head.append("{\"type\":\"characterImage\",\"hash\":\"");
+  head.append(id.toLatin1());
+  head.append("\",\"kind\":\"");
+  head.append(kind.toLatin1());
+  head.append("\",\"width\":");
+  head.append(QByteArray::number(pixels.width()));
+  head.append(",\"height\":");
+  head.append(QByteArray::number(pixels.height()));
+  head.append(",\"format\":\"bgra8\",\"encoding\":\"base64\",\"data\":\"");
+  queueLineParts({ head, data, QByteArray("\"}") });
+
+  m_sentImages[kind] = image;
+  m_sentImageIds[kind] = id;
+  m_stats.imagePushes++;
+  m_stats.imageBytes += data.size();
+  LOG_INFO << "[unityipc] -> characterImage" << id << pixels.width() << "x" << pixels.height()
+           << "format" << (int)image.format() << "base64 bytes" << data.size();
+  return id;
+}
+
+bool UnityIpcServer::sendCharacterScene(int m2FileDataID, int revision, const QJsonObject & scene)
+{
+  if (!playerDressesCharacters() || m2FileDataID <= 0)
+    return false;
+  QJsonObject msg = scene;
+  msg["type"] = "characterScene";
+  msg["fileDataID"] = m2FileDataID;
+  msg["revision"] = revision;
+  m_stats.scenePushes++;
+  m_stats.lastScene = QString("rev %1: %2 merged, %3 attached")
+                        .arg(revision).arg(scene.value("merged").toArray().size())
+                        .arg(scene.value("attachments").toArray().size());
+  LOG_INFO << "[unityipc] -> characterScene fileDataID=" << m2FileDataID << m_stats.lastScene;
+  queueJson(msg);
+  return true;
 }
 
 void UnityIpcServer::handleLine(const std::string & line)
@@ -542,6 +690,10 @@ void UnityIpcServer::handleLine(const std::string & line)
   else if (type == "modelGeosetsApplied")
   {
     handleGeosetsApplied(msg);
+  }
+  else if (type == "characterSceneApplied")
+  {
+    handleCharacterSceneApplied(msg);
   }
   else
   {

@@ -2772,7 +2772,11 @@ int WoWModel::boundSpecialFileDataId(int special) const
   if (special < 0 || (size_t)special >= replaceTextures.size())
     return 0;
 
-  const GLuint id = replaceTextures[special];
+  return fileDataIdForGLTexture(replaceTextures[special]);
+}
+
+int WoWModel::fileDataIdForGLTexture(GLuint id)
+{
   if (id == ModelRenderPass::INVALID_TEX)
     return 0;
 
@@ -2784,6 +2788,13 @@ int WoWModel::boundSpecialFileDataId(int special) const
 
   const Texture * tex = static_cast<const Texture *>(it->second);
   return (tex && tex->file) ? (int)tex->file->fileDataId() : 0;
+}
+
+int WoWModel::textureTypeForSlot(size_t slot) const
+{
+  if (slot >= specialTextures.size())
+    return -1;
+  return specialTextures[slot] < 0 ? 0 : specialTextures[slot];
 }
 
 std::map<int, std::wstring> WoWModel::getAnimsMap()
@@ -3108,6 +3119,7 @@ void WoWModel::refreshMerging()
   replaceTextures.resize(TEXTURE_MAX);
   specialTextures.resize(TEXTURE_MAX);
 
+  mergedParts_.clear();
   uint mergeIndex = 0;
   for (auto modelsIt : mergedModels)
   {
@@ -3161,6 +3173,16 @@ void WoWModel::refreshMerging()
     for (uint i = 0; i < nbBonesInNewModel; ++i)
       LOG_INFO << i << "=>" << boneConvertTable[i];
 #endif
+
+    {
+      MergedPart part;
+      part.model = modelsIt;
+      part.mergeIndex = mergeIndex;
+      part.geosetStart = nbGeosets;
+      part.geosetCount = modelsIt->geosets.size();
+      part.boneMap.assign(boneConvertTable, boneConvertTable + nbBonesInNewModel);
+      mergedParts_.push_back(part);
+    }
 
     // change bone from new model to character one
     for (auto & it : modelsIt->origVertices)
@@ -3226,7 +3248,11 @@ void WoWModel::refreshMerging()
         if (p->tex4 != ModelRenderPass::INVALID_TEX) p->tex4 += (mergeIndex * TEXTURE_MAX);
       }
       else
+      {
         p->tex = handTex; // use regular model texture instead
+        mergedParts_.back().handSubmeshes.push_back(it->geoIndex);
+        mergedParts_.back().handTexIndex = handTex;
+      }
 
       passes.push_back(p);
     }
@@ -3315,6 +3341,8 @@ void WoWModel::refreshMerging()
     // clean bind
     glBindBufferARB(GL_ARRAY_BUFFER_ARB, 0);
   }
+
+  stateVersion_++;
 }
 
 void WoWModel::unmergeModel(QString & name, bool noRefresh)
@@ -3436,6 +3464,7 @@ void WoWModel::refresh()
   {
     glDeleteTextures(1, &eyeCompositeTex_);
     eyeCompositeTex_ = 0;
+    eyeCompositeImage_ = QImage();
   }
   {
     std::vector<CharTextureComponent> eyeLayers;
@@ -3445,7 +3474,7 @@ void WoWModel::refresh()
 
     if (!eyeLayers.empty())
     {
-      eyeCompositeTex_ = CharTexture::composeStackToTexture(eyeLayers);
+      eyeCompositeTex_ = CharTexture::composeStackToTexture(eyeLayers, &eyeCompositeImage_);
       if (eyeCompositeTex_ != 0)
         for (size_t i = 0; i < specialTextures.size(); i++)
           if (specialTextures[i] == TEXTURE_TYPE_EYES)
@@ -3620,6 +3649,8 @@ void WoWModel::refresh()
   // refresh merged models
   refreshMerging();
 
+  stateVersion_++;
+
   const auto refreshMs = std::chrono::duration_cast<std::chrono::milliseconds>(
                            std::chrono::steady_clock::now() - refreshStart).count();
   LOG_INFO << "WoWModel::refresh took " << refreshMs << " ms (merge cache holds "
@@ -3640,7 +3671,7 @@ GLuint WoWModel::getGLTexture(uint16 Tex) const
     return ModelRenderPass::INVALID_TEX;
 
   if (specialTextures[Tex] == -1)
-    return textures[Tex];
+    return Tex < textures.size() ? textures[Tex] : ModelRenderPass::INVALID_TEX;
 
   // specialTextures[Tex] indexes replaceTextures[]; for merged models it can carry a
   // value beyond replaceTextures.size() (it + mergeIndex*TEXTURE_MAX), so bound it.

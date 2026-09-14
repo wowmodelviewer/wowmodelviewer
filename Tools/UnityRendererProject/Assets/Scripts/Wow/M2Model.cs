@@ -73,6 +73,20 @@ namespace Wmv.Wow
         /// no amount of looking for the keys distinguishes it. The flag does.
         /// </summary>
         public bool PrimarySequence { get { return (Flags & 0x20) != 0; } }
+
+        /// <summary>
+        /// The entry's last field (offset 62, the host's ModelAnimation::Index): with the 0x40
+        /// flag, the index of the sequence this one is an alias of. Retail character skeletons
+        /// ship several animations this way -- humanfemale's sequence 139 (flags 0xC1) aliases 138,
+        /// and 66 aliases 67, which aliases 65 -- with per-sequence track entries byte-identical
+        /// to the target's, no AFID entry naming a file of their own, and the keyframes in the
+        /// target's .anim.
+        /// M2Parser follows the chain to the sequence that holds the keys.
+        /// </summary>
+        public short AliasNext;
+
+        /// <summary>Bit 0x40: AliasNext names the sequence whose keyframes this one plays.</summary>
+        public bool Alias { get { return (Flags & 0x40) != 0; } }
     }
 
     /// <summary>One M2 vertex (48 bytes on disk).</summary>
@@ -104,6 +118,12 @@ namespace Wmv.Wow
         public uint Flags;
         public short Parent;         // -1 for a root bone
         public ushort SubmeshId;
+
+        /// <summary>The uint32 at bone+12, which the host's ModelBoneDef calls "unknown". It is
+        /// the bone's name hash, and together with the pivot it is how the host matches a merged
+        /// model's bones to the character's (WoWModel.cpp refreshMerging).</summary>
+        public uint NameCrc;
+
         public WowVec3 Pivot;        // model space, the point this bone rotates about
 
         /// <summary>The three tracks that move this bone, narrowed to the sequence that was
@@ -455,6 +475,21 @@ namespace Wmv.Wow
         public int MaterialIndex;
     }
 
+    /// <summary>
+    /// One attachment point (40 bytes on disk): an id the item slots refer to, the bone it rides
+    /// on and its position in model space. The host places an attached model at
+    /// bones[Bone].mat * T(Position) (ModelAttachment.cpp). The trailing animation block, an
+    /// int32 track the host never evaluates, is not kept.
+    /// </summary>
+    public struct M2AttachmentDef
+    {
+        public int Id;
+        /// <summary>The low 16 bits of the stored uint32; the high half is not a bone index.
+        /// Not range-checked here, exactly as the host leaves it.</summary>
+        public int Bone;
+        public WowVec3 Position;
+    }
+
     /// <summary>One AFID entry: which file holds animation (animId, subAnimId)'s keyframes.</summary>
     public struct AfidEntry
     {
@@ -569,6 +604,17 @@ namespace Wmv.Wow
         public AfidEntry[] AnimFileIds = new AfidEntry[0];
 
         /// <summary>
+        /// Parser cache: the sequence each sequence's keyframes are read from (M2Parser.AliasTarget),
+        /// worked out once from the two tables named beside it. The track readers ask for every
+        /// sequence of every track, and a walk that searched the AFID table at each step cost a
+        /// character load over half a second. A skeleton applied later replaces both tables, which is
+        /// what makes the parser work the answers out again.
+        /// </summary>
+        internal int[] AliasTargets;
+        internal M2Sequence[] AliasTargetsSequences;
+        internal AfidEntry[] AliasTargetsAnimFileIds;
+
+        /// <summary>
         /// The external .anim FileDataID the CURRENTLY selected sequence needs, or 0 when its
         /// keyframes are in the .m2. The renderer fetches this over the asset channel and hands
         /// the bytes back to the parser.
@@ -591,10 +637,48 @@ namespace Wmv.Wow
         /// <summary>
         /// The SKID chunk: the FileDataID of a separate skeleton (.skel) file. Non-zero means the
         /// bone array in the header is not the one the renderer must use -- the real one lives in
-        /// that file's SKB1 chunk (or, when it carries an SKPD, in its parent skeleton's). This
-        /// milestone does not fetch it; a model that has one is drawn unskinned and says so.
+        /// that file's SKB1 chunk (or, when it carries an SKPD, in its parent skeleton's). Parse
+        /// leaves such a model without bones; M2Parser.ApplySkeleton completes it once the
+        /// skeleton bytes have been fetched.
         /// </summary>
         public int SkeletonFileDataID;
+
+        /// <summary>
+        /// Bones, sequences, global sequences, lookups and attachments came from a .skel through
+        /// M2Parser.ApplySkeleton. An SKID model without this is still unanimated.
+        /// </summary>
+        public bool SkeletonApplied;
+
+        /// <summary>The SKPD parent FileDataID of the applied skeleton, 0 when it has none.</summary>
+        public int ParentSkeletonFileDataID;
+
+        /// <summary>
+        /// The SKB1 chunk payload the applied skeleton's bones were read from (the parent's when
+        /// there is one). Kept for the same reason as Md21Payload: a sequence change re-reads the
+        /// bone tracks, and their headers -- and in-skeleton keys -- are addressed relative to it.
+        /// </summary>
+        public byte[] SkeletonBonesPayload;
+
+        /// <summary>
+        /// Animation id -> index into Sequences, -1 where the model has no such animation. From
+        /// the MD20 header (0x24) or the applied skeleton's SKS1. See M2Parser.SequenceForAnimId.
+        /// </summary>
+        public short[] AnimationLookup = new short[0];
+
+        /// <summary>
+        /// Key bone (hand, jaw, finger...) -> bone index. From the header (0x34) or the applied
+        /// skeleton's SKB1, and sanitised the way the host sanitises it: an entry that is not a
+        /// real bone index is -1. See M2Parser.BoneForKeyBone.
+        /// </summary>
+        public short[] KeyBoneLookup = new short[0];
+
+        /// <summary>Attachment points: header 0xF0, or the applied skeleton's SKA1 (never its
+        /// parent's).</summary>
+        public M2AttachmentDef[] Attachments = new M2AttachmentDef[0];
+
+        /// <summary>Attachment id -> index into Attachments, -1 when absent. See
+        /// M2Parser.AttachmentFor.</summary>
+        public short[] AttachmentLookup = new short[0];
 
         /// <summary>Model-space bounds of the vertex positions (WoW axes).</summary>
         public WowVec3 BoundsMin, BoundsMax;

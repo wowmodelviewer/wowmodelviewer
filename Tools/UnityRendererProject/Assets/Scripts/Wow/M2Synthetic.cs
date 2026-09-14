@@ -543,5 +543,330 @@ namespace Wmv.Wow
             PutU16(b, batchOffset + 22, 0);                   // transform combo -> lookup[0] -> transform 0
             return b;
         }
+
+        // -----------------------------------------------------------------------------------
+        // Skeleton (.skel) and chunked .anim fixtures
+        // -----------------------------------------------------------------------------------
+        //
+        // One bone layout serves a .skel's SKB1 and an in-file MD20 bone array alike, because the
+        // format stores the same record in both. `tag` tells a skeleton from its parent: 0 for the
+        // child, 1 for the parent, and every count and value below moves with it so a test can
+        // see which file a field came from.
+        //
+        //   bones        3 + tag; bone i: parent i - 1, pivot (i, 0, tag), name hash SkelBoneCrc
+        //                (i, tag), keyBoneId 0 on bone 0 and 8 on the last bone, -1 otherwise
+        //   sequences    0: Stand, 1000 ms, 0x20 (keys in this file)
+        //                1: animId 5, 800 + tag ms, no 0x20 (keys in the .anim, AFID 900000 + tag)
+        //   globals      1000 + 100 * tag, 2000 + 100 * tag
+        //   translation  every bone; sequence 0 keys here at t = 0, 500: (0,0,0), (i + 1 + tag, 0, 0);
+        //                sequence 1 keys in the .anim at t = 0, 400: (0,0,0), (0, 0, ExternalZ(i, tag))
+        //   rotation     bone 1 only, bound to global sequence 1: identity then 90 degrees about Z,
+        //                at t = 0, 250, stored at entry 0 in this file
+        //   anim lookup  6 + tag entries: [0] = 0, [5] = 1, the rest -1
+        //   key bones    10 entries: [0] = 0, [8] = last bone, [9] = 77 (garbage the parser must
+        //                reject), the rest -1
+        //   attachments  2 + tag: id 11 on the last bone at (0.5, 0, 1.5 + tag), stored with the
+        //                high half of the bone field set; id 5 on bone 1 at (0, -0.25, 1 + tag);
+        //                a parent's extra one is id 1 on bone 0. Lookup 12 + tag entries.
+
+        public const int SkelStandSequence = 0;
+        public const int SkelExternalSequence = 1;
+        public const int SkelExternalAnimId = 5;
+        public const int SkelAnimFileIdBase = 900000;
+
+        public static int SkelBoneCount(int tag) { return 3 + tag; }
+        public static uint SkelBoneCrc(int bone, int tag) { return 0xC0DE0000u | (uint)(tag << 8) | (uint)bone; }
+        public static float ExternalZ(int bone, int tag) { return 10f * (bone + 1) + tag; }
+
+        /// <summary>Where bone i's external keys sit in the .anim keyframe buffer: 8 bytes of
+        /// times then 24 of values. Starts past a pad so no offset is 0.</summary>
+        static int AnimKeysAt(int bone) { return 16 + bone * 32; }
+
+        static void PutQuat16(byte[] b, int o, float x, float y, float z, float w)
+        {
+            float[] v = { x, y, z, w };
+            for (int i = 0; i < 4; i++)
+            {
+                int s = v[i] >= 0.9999f ? -1 : (int)Math.Round(v[i] * 32767f) + 32767;
+                PutU16(b, o + i * 2, unchecked((ushort)s));
+            }
+        }
+
+        static void PutArray(byte[] b, int o, int count, int offset)
+        {
+            PutU32(b, o, (uint)count); PutU32(b, o + 4, (uint)offset);
+        }
+
+        /// <summary>Write the sequence table (2 entries) at oSeqs.</summary>
+        static void WriteSkelSequences(byte[] b, int oSeqs, int tag)
+        {
+            PutU16(b, oSeqs, 0);
+            PutU32(b, oSeqs + 4, 1000);
+            PutU32(b, oSeqs + 12, 0x20);
+            PutU16(b, oSeqs + 64, (ushort)SkelExternalAnimId);
+            PutU32(b, oSeqs + 64 + 4, (uint)(800 + tag));
+            PutU32(b, oSeqs + 64 + 12, 0);
+        }
+
+        /// <summary>Write the bone records at oBones and their in-file keys into the pool.</summary>
+        static void WriteSkelBones(Image f, int oBones, int tag)
+        {
+            int n = SkelBoneCount(tag);
+            for (int i = 0; i < n; i++)
+            {
+                int o = oBones + i * BoneStride;
+                PutU32(f.B, o, unchecked((uint)(i == 0 ? 0 : i == n - 1 ? 8 : -1)));
+                PutU16(f.B, o + 8, unchecked((ushort)(i - 1)));
+                PutU32(f.B, o + 12, SkelBoneCrc(i, tag));
+                PutF32(f.B, o + 76, i); PutF32(f.B, o + 80, 0f); PutF32(f.B, o + 84, tag);
+
+                // Translation: sequence 0's keys in this image, sequence 1's entry pointing into
+                // the .anim, whose bytes are not in this image at all.
+                int tr = o + 16;
+                PutU16(f.B, tr, 1);
+                PutU16(f.B, tr + 2, 0xFFFF);
+                int th = f.Take(16), vh = f.Take(16);
+                int t0 = f.Take(8), v0 = f.Take(24);
+                PutArray(f.B, tr + 4, 2, th);
+                PutArray(f.B, tr + 12, 2, vh);
+                PutArray(f.B, th, 2, t0);
+                PutArray(f.B, vh, 2, v0);
+                PutU32(f.B, t0 + 4, 500);
+                PutF32(f.B, v0 + 12, i + 1 + tag);
+                PutArray(f.B, th + 8, 2, AnimKeysAt(i));
+                PutArray(f.B, vh + 8, 2, AnimKeysAt(i) + 8);
+
+                if (i == 1)
+                {
+                    int rot = o + 36;
+                    PutU16(f.B, rot, 1);
+                    PutU16(f.B, rot + 2, 1);                  // global sequence 1
+                    int rth = f.Take(16), rvh = f.Take(16);
+                    int rt = f.Take(8), rv = f.Take(16);
+                    PutArray(f.B, rot + 4, 2, rth);
+                    PutArray(f.B, rot + 12, 2, rvh);
+                    PutArray(f.B, rth, 2, rt);
+                    PutArray(f.B, rvh, 2, rv);
+                    PutU32(f.B, rt + 4, 250);
+                    PutQuat16(f.B, rv, 0f, 0f, 0f, 1f);
+                    PutQuat16(f.B, rv + 8, 0f, 0f, 0.70710677f, 0.70710677f);
+                }
+            }
+        }
+
+        static int WriteInt16Array(Image f, short[] values)
+        {
+            int o = f.Take(values.Length * 2);
+            for (int i = 0; i < values.Length; i++)
+                PutU16(f.B, o + i * 2, unchecked((ushort)values[i]));
+            return o;
+        }
+
+        static short[] SkelAnimLookup(int tag)
+        {
+            var v = new short[6 + tag];
+            for (int i = 0; i < v.Length; i++) v[i] = -1;
+            v[0] = 0; v[SkelExternalAnimId] = 1;
+            return v;
+        }
+
+        static short[] SkelKeyBoneLookup(int tag)
+        {
+            var v = new short[10];
+            for (int i = 0; i < v.Length; i++) v[i] = -1;
+            v[0] = 0; v[8] = (short)(SkelBoneCount(tag) - 1); v[9] = 77;
+            return v;
+        }
+
+        /// <summary>Write the attachments and their lookup; returns (attachments, lookup) offsets.</summary>
+        static void WriteSkelAttachments(Image f, int tag, out int oAtt, out int oLookup, out int count, out int lookupCount)
+        {
+            count = 2 + tag;
+            oAtt = f.Take(count * 40);
+            int last = SkelBoneCount(tag) - 1;
+            PutU32(f.B, oAtt, 11); PutU32(f.B, oAtt + 4, 0x00010000u | (uint)last);
+            PutF32(f.B, oAtt + 8, 0.5f); PutF32(f.B, oAtt + 12, 0f); PutF32(f.B, oAtt + 16, 1.5f + tag);
+            PutU32(f.B, oAtt + 40, 5); PutU32(f.B, oAtt + 44, 1);
+            PutF32(f.B, oAtt + 48, 0f); PutF32(f.B, oAtt + 52, -0.25f); PutF32(f.B, oAtt + 56, 1f + tag);
+            if (tag > 0) { PutU32(f.B, oAtt + 80, 1); PutU32(f.B, oAtt + 84, 0); }
+            var lookup = new short[12 + tag];
+            for (int i = 0; i < lookup.Length; i++) lookup[i] = -1;
+            lookup[11] = 0; lookup[5] = 1;
+            if (tag > 0) lookup[1] = 2;
+            lookupCount = lookup.Length;
+            oLookup = WriteInt16Array(f, lookup);
+        }
+
+        static byte[] Chunk(string magic, byte[] payload)
+        {
+            var b = new byte[8 + payload.Length];
+            PutMagic(b, 0, magic);
+            PutU32(b, 4, (uint)payload.Length);
+            Buffer.BlockCopy(payload, 0, b, 8, payload.Length);
+            return b;
+        }
+
+        static byte[] IdChunk(string magic, params int[] ids)
+        {
+            var p = new byte[ids.Length * 4];
+            for (int i = 0; i < ids.Length; i++) PutU32(p, i * 4, (uint)ids[i]);
+            return Chunk(magic, p);
+        }
+
+        static byte[] AfidChunk(int tag)
+        {
+            var p = new byte[8];
+            PutU16(p, 0, (ushort)SkelExternalAnimId);
+            PutU32(p, 4, (uint)(SkelAnimFileIdBase + tag));
+            return Chunk("AFID", p);
+        }
+
+        /// <summary>
+        /// A .skel file as described above. parentFileId non-zero adds an SKPD naming it; the
+        /// flags drop chunks for the malformed-file tests.
+        /// </summary>
+        public static byte[] Skeleton(int tag, int parentFileId = 0, bool withSkl1 = true,
+                                      bool withSkb1 = true, bool withSka1 = true)
+        {
+            // SKS1: header(24) globals(8) sequences(128) then the lookup.
+            var s = new Image(24 + 8 + 128);
+            PutArray(s.B, 0, 2, 24);
+            PutU32(s.B, 24, (uint)(1000 + 100 * tag)); PutU32(s.B, 28, (uint)(2000 + 100 * tag));
+            PutArray(s.B, 8, 2, 32);
+            WriteSkelSequences(s.B, 32, tag);
+            short[] animLookup = SkelAnimLookup(tag);
+            int oLookup = WriteInt16Array(s, animLookup);
+            PutArray(s.B, 16, animLookup.Length, oLookup);
+
+            // SKB1: header(16) then the bone records.
+            int nBones = SkelBoneCount(tag);
+            var k = new Image(16 + nBones * BoneStride);
+            PutArray(k.B, 0, nBones, 16);
+            WriteSkelBones(k, 16, tag);
+            short[] keyBones = SkelKeyBoneLookup(tag);
+            int oKeyBones = WriteInt16Array(k, keyBones);
+            PutArray(k.B, 8, keyBones.Length, oKeyBones);
+
+            // SKA1: header(16), attachments, lookup.
+            var a = new Image(16);
+            int oAtt, oAttLookup, nAtt, nAttLookup;
+            WriteSkelAttachments(a, tag, out oAtt, out oAttLookup, out nAtt, out nAttLookup);
+            PutArray(a.B, 0, nAtt, oAtt);
+            PutArray(a.B, 8, nAttLookup, oAttLookup);
+
+            var parts = new System.Collections.Generic.List<byte[]>();
+            if (withSkl1) parts.Add(Chunk("SKL1", new byte[16]));
+            parts.Add(Chunk("SKS1", s.Done()));
+            if (withSkb1) parts.Add(Chunk("SKB1", k.Done()));
+            if (withSka1) parts.Add(Chunk("SKA1", a.Done()));
+            if (parentFileId != 0)
+            {
+                var pd = new byte[12];
+                PutU32(pd, 8, (uint)parentFileId);
+                parts.Add(Chunk("SKPD", pd));
+            }
+            parts.Add(AfidChunk(tag));
+            return Concat(parts.ToArray());
+        }
+
+        /// <summary>
+        /// The keyframe bytes of the external sequence for boneCount bones, laid out at
+        /// AnimKeysAt. chunked wraps them the modern way, AFM2 then AFSB, where the AFM2 holds a
+        /// decoy with the same layout and NEGATED values -- reading the wrong chunk is visible.
+        /// Unchunked is the older form: the file is the keyframe buffer.
+        /// </summary>
+        public static byte[] SkeletonAnimFile(int tag, bool chunked)
+        {
+            byte[] afsb = AnimKeys(SkelBoneCount(tag), tag, 1f);
+            if (!chunked)
+                return afsb;
+            return Concat(Chunk("AFM2", AnimKeys(SkelBoneCount(tag), tag, -1f)), Chunk("AFSB", afsb));
+        }
+
+        /// <summary>A chunked .anim with a single chunk of the given magic holding the keys.</summary>
+        public static byte[] SingleChunkAnimFile(int tag, string magic)
+        {
+            return Chunk(magic, AnimKeys(SkelBoneCount(tag), tag, 1f));
+        }
+
+        static byte[] AnimKeys(int boneCount, int tag, float sign)
+        {
+            var b = new byte[AnimKeysAt(boneCount)];
+            for (int i = 0; i < boneCount; i++)
+            {
+                int o = AnimKeysAt(i);
+                PutU32(b, o + 4, 400);
+                PutF32(b, o + 8 + 12 + 8, sign * ExternalZ(i, tag));
+            }
+            return b;
+        }
+
+        /// <summary>
+        /// A retail-shaped character M2 whose skeleton lives elsewhere: TransformSwitchModel's
+        /// skinned MD20 (texture transform keyed in sequence 0) in MD21, with SFID and SKID.
+        /// </summary>
+        public static byte[] SkeletonModel(int skeletonFileId, int skinFileId)
+        {
+            return Concat(Chunk("MD21", TransformSwitchModel(0, true)),
+                          IdChunk("SFID", skinFileId), IdChunk("SKID", skeletonFileId));
+        }
+
+        /// <summary>
+        /// The in-file counterpart: an MD20 whose own header carries the skeleton above (tag 0) --
+        /// bones, sequences, globals, animation lookup, key-bone lookup, attachments and their
+        /// lookup -- wrapped with SFID and AFID. Its external sequence's bone keys exist only in
+        /// SkeletonAnimFile(0, ...), which is the case the bone-track regression is about.
+        /// </summary>
+        public static byte[] InFileSkeletonModel(int skinFileId)
+        {
+            const int tag = 0;
+            int nBones = SkelBoneCount(tag);
+            int oVerts = HeaderSize;
+            int oTex = oVerts + 3 * 48;
+            int oMat = oTex + 16;
+            int oTexLookup = oMat + 4;
+            int oGlobals = oTexLookup + 2;
+            int oSeqs = oGlobals + 8;
+            int oBones = oSeqs + 2 * 64;
+            int fixedEnd = oBones + nBones * BoneStride;
+
+            var f = new Image(fixedEnd);
+            PutMagic(f.B, 0, "MD20");
+            PutU32(f.B, 0x04, 272);
+            PutArray(f.B, 0x14, 2, oGlobals);
+            PutU32(f.B, oGlobals, 1000); PutU32(f.B, oGlobals + 4, 2000);
+            PutArray(f.B, 0x1C, 2, oSeqs);
+            WriteSkelSequences(f.B, oSeqs, tag);
+            PutArray(f.B, 0x2C, nBones, oBones);
+            PutArray(f.B, 0x3C, 3, oVerts);
+            for (int i = 0; i < 3; i++)
+            {
+                int o = oVerts + i * 48;
+                PutF32(f.B, o + 0, i == 1 ? 1f : 0f);
+                PutF32(f.B, o + 4, i == 2 ? 1f : 0f);
+                f.B[o + 12] = 255;                            // fully weighted to bone 0
+                PutF32(f.B, o + 28, 1f);
+            }
+            PutU32(f.B, 0x44, 1);
+            PutArray(f.B, 0x50, 1, oTex);
+            PutU32(f.B, oTex + 4, 3);
+            PutArray(f.B, 0x70, 1, oMat);
+            PutU16(f.B, oMat, 0x01);
+            PutArray(f.B, 0x80, 1, oTexLookup);
+            WriteSkelBones(f, oBones, tag);
+
+            short[] animLookup = SkelAnimLookup(tag);
+            int oAnimLookup = WriteInt16Array(f, animLookup);
+            PutArray(f.B, 0x24, animLookup.Length, oAnimLookup);
+            short[] keyBones = SkelKeyBoneLookup(tag);
+            int oKeyBones = WriteInt16Array(f, keyBones);
+            PutArray(f.B, 0x34, keyBones.Length, oKeyBones);
+            int oAtt, oAttLookup, nAtt, nAttLookup;
+            WriteSkelAttachments(f, tag, out oAtt, out oAttLookup, out nAtt, out nAttLookup);
+            PutArray(f.B, 0xF0, nAtt, oAtt);
+            PutArray(f.B, 0xF8, nAttLookup, oAttLookup);
+
+            return Concat(Chunk("MD21", f.Done()), IdChunk("SFID", skinFileId), AfidChunk(tag));
+        }
     }
 }
