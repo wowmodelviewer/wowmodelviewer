@@ -1,6 +1,6 @@
 // WowParserTests.cs
 //
-// Unit tests for the runtime parsing layer (M2, skin, BLP, coordinate conversion).
+// Unit tests for the runtime parsing layer (M2, skin, BLP, WMO, coordinate conversion).
 //
 // Deliberately framework-free: the parsers are plain C# with no UnityEngine dependency, so
 // these run anywhere a C# compiler exists -- `WowParserTests.RunAll()` returns the failure
@@ -361,6 +361,19 @@ namespace Wmv.Wow.Tests
             SkeletonTests();
             HeaderLookupTests();
             AliasSequenceTests();
+            log.Add("WmoParser root");
+            WmoRootTests();
+            WmoMaterialTests();
+            WmoPreservedChunkTests();
+            WmoMalformedRootTests();
+            log.Add("WmoParser group");
+            WmoGroupTests();
+            WmoStreamTests();
+            WmoBatchRuleTests();
+            WmoEmptyGroupTests();
+            WmoMalformedGroupTests();
+            log.Add("WmoParser safety");
+            WmoNoUnsafeReadTests();
 
             log.Add(failures == 0 ? "ALL TESTS PASSED" : (failures + " TEST(S) FAILED"));
             if (output != null)
@@ -2460,6 +2473,824 @@ namespace Wmv.Wow.Tests
                   lm.AnimationSkipReason.Contains("never reaches") &&
                   M2Parser.ExternalAnimFileId(lm, 0) == 0 && M2Parser.ExternalAnimFileId(lm, 1) == 0,
                   "alias: two sequences aliasing each other play nothing and do not hang");
+        }
+
+        // ================================================================ WMO (root + group)
+        //
+        // Fixtures come from WmoSynthetic: format structure only, no client content. The real
+        // client files were checked separately against an independent reference parse.
+
+        static void ThrowsWmo(Action action, string chunk, string name)
+        {
+            try
+            {
+                action();
+                log.Add("  FAIL  " + name + " (expected WmoParseException in " + chunk + ", nothing was thrown)");
+                failures++;
+            }
+            catch (WmoParseException e)
+            {
+                if (e.Chunk == chunk && e.Message.Contains(chunk)) log.Add("  PASS  " + name);
+                else
+                {
+                    log.Add("  FAIL  " + name + " (expected chunk " + chunk + ", got " + e.Chunk + ": " + e.Message + ")");
+                    failures++;
+                }
+            }
+            catch (Exception e)
+            {
+                log.Add("  FAIL  " + name + " (expected WmoParseException, got " + e.GetType().Name + ": " + e.Message + ")");
+                failures++;
+            }
+        }
+
+        static WowVec3 WV(float x, float y, float z) { return new WowVec3(x, y, z); }
+
+        static KeyValuePair<string, byte[]> Kv(string tag, byte[] payload) { return new KeyValuePair<string, byte[]>(tag, payload); }
+
+        static bool SameU32(uint[] a, params uint[] b)
+        {
+            if (a == null || a.Length != b.Length) return false;
+            for (int i = 0; i < a.Length; i++) if (a[i] != b[i]) return false;
+            return true;
+        }
+
+        static bool SameBytes(byte[] a, byte[] b, int bOffset = 0, int count = -1)
+        {
+            if (a == null || b == null) return false;
+            if (count < 0) count = b.Length - bOffset;
+            if (a.Length != count) return false;
+            for (int i = 0; i < count; i++) if (a[i] != b[bOffset + i]) return false;
+            return true;
+        }
+
+        static string Tags(WmoChunkInfo[] chunks)
+        {
+            var t = new string[chunks.Length];
+            for (int i = 0; i < chunks.Length; i++) t[i] = chunks[i].Tag;
+            return string.Join(",", t);
+        }
+
+        /// <summary>Replace the u32 size of the n-th top-level chunk with `size`.</summary>
+        static byte[] WithChunkSize(byte[] file, string tag, uint size)
+        {
+            byte[] b = (byte[])file.Clone();
+            int p = 0;
+            while (p + 8 <= b.Length)
+            {
+                string t = new string(new[] { (char)b[p + 3], (char)b[p + 2], (char)b[p + 1], (char)b[p] });
+                uint s = (uint)(b[p + 4] | (b[p + 5] << 8) | (b[p + 6] << 16) | (b[p + 7] << 24));
+                if (t == tag) { PutU32(b, p + 4, size); return b; }
+                p += 8 + (int)s;
+            }
+            throw new InvalidOperationException("fixture has no " + tag);
+        }
+
+        static WmoSynthetic.RootSpec TwoGroupRootSpec()
+        {
+            return new WmoSynthetic.RootSpec
+            {
+                Materials = new[]
+                {
+                    WmoSynthetic.Material(0x00, 0, 0, 1001, tail: new uint[] { 0x3D4CCCCD }),
+                    WmoSynthetic.Material(0x44, 23, 1, 0, 2002, 2003, new uint[] { 3001, 3002, 2002, 3004, 3005, 3006 },
+                                          sidnColor: 0xFF112233, diffColor: 0xFF959595, groundType: 10),
+                    WmoSynthetic.Material(0x80, 5, 3, 1001, 2002),
+                },
+                GroupInfos = new[]
+                {
+                    WmoSynthetic.GroupInfo(0x8, WV(-1f, -2f, -3f), WV(4f, 5f, 6f), 1),
+                    WmoSynthetic.GroupInfo(0x2000, WV(10f, 0f, 0f), WV(20f, 5f, 5f), 7),
+                },
+                // two groups x three LOD levels; zero entries only past LOD0, as on retail
+                GroupFileDataIDs = new uint[] { 5001, 5002, 6001, 6002, 0, 7002 },
+                LodCount = 3,
+                Flags = 0x041F,
+                BoundsMin = WV(-1f, -2f, -3f),
+                BoundsMax = WV(20f, 5f, 6f),
+                Ambient = 0xFF102030,
+                WmoId = 77,
+                GroupNames = new[] { "alpha", "beta" },   // MOGN offsets 1 and 7
+            };
+        }
+
+        static void WmoRootTests()
+        {
+            byte[] file = WmoSynthetic.BuildRoot(TwoGroupRootSpec());
+            WmoRoot r = WmoParser.ParseRoot(file, "synthetic root");
+
+            // MVER
+            Check(r.Version == 17, "wmo root MVER: version 17 read");
+            ThrowsWmo(() => WmoParser.ParseRoot(WmoSynthetic.Concat(WmoSynthetic.Mver(16), file.SkipBytes(12)), "v16"),
+                      "MVER", "wmo root MVER: another version is rejected by name");
+            ThrowsWmo(() => WmoParser.ParseRoot(file.SkipBytes(12), "no mver"), "MVER",
+                      "wmo root MVER: a file not starting with MVER is rejected");
+
+            // MOHD
+            Check(r.Header.MaterialCount == 3 && r.Header.GroupCount == 2 && r.Materials.Length == 3 && r.GroupCount == 2,
+                  "wmo root MOHD: material and group counts");
+            Check(r.Header.Flags == 0x041F, "wmo root MOHD: u16 flags at 0x3C");
+            Check(r.Header.LodCountRaw == 3 && r.Header.EffectiveLodCount == 3 && r.LodCount == 3,
+                  "wmo root MOHD: u16 LOD count at 0x3E");
+            Check(r.Header.AmbientColor == 0xFF102030 && r.Header.WmoId == 77, "wmo root MOHD: ambient colour and WMO id");
+            Check(r.Header.BoundsMin.X == -1f && r.Header.BoundsMin.Z == -3f && r.Header.BoundsMax.X == 20f &&
+                  r.Header.BoundsMax.Z == 6f, "wmo root MOHD: bounds read unconverted");
+            byte[] mohd = WmoSynthetic.Mohd(1, 2, 0x8, 0, WV(0f, 0f, 0f), WV(1f, 1f, 1f), 3, 4, 5, 6, 7, 8, 9);
+            WmoRoot counts = WmoParser.ParseRoot(WmoSynthetic.Concat(WmoSynthetic.Mver(), WmoSynthetic.Chunk("MOHD", mohd),
+                WmoSynthetic.Chunk("MOMT", WmoSynthetic.Material(0, 0, 0, 0)),
+                WmoSynthetic.Chunk("MOGI", WmoSynthetic.Concat(WmoSynthetic.GroupInfo(0, WV(0f, 0f, 0f), WV(1f, 1f, 1f), -1),
+                                                               WmoSynthetic.GroupInfo(0, WV(0f, 0f, 0f), WV(1f, 1f, 1f), -1))),
+                WmoSynthetic.Chunk("GFID", WmoSynthetic.U32s(11, 12))), "counts");
+            Check(counts.Header.PortalCount == 3 && counts.Header.LightCount == 4 && counts.Header.DoodadNameCount == 5 &&
+                  counts.Header.DoodadDefCount == 6 && counts.Header.DoodadSetCount == 7 && counts.Header.AmbientColor == 8 &&
+                  counts.Header.WmoId == 9 && counts.Header.Flags == 0x8, "wmo root MOHD: every u32 field in order");
+            Check(counts.Header.LodCountRaw == 0 && counts.LodCount == 1 && SameU32(counts.Lod0GroupFileDataIDs, 11, 12),
+                  "wmo root MOHD: a LOD count of 0 means one GFID block");
+            Check(counts.Warnings.Length == 1 && counts.Warnings[0].StartsWith("MOGN"),
+                  "wmo root MOGN: a missing name table is a warning, not a failure");
+
+            // GFID
+            Check(SameU32(r.GroupFileDataIDs, 5001, 5002, 6001, 6002, 0, 7002), "wmo root GFID: every entry kept, LOD blocks included");
+            Check(SameU32(r.Lod0GroupFileDataIDs, 5001, 5002), "wmo root GFID: LOD0 slice is [0 .. nGroups-1]");
+            Check(SameU32(r.GetGroupFileDataIDsForLod(1), 6001, 6002) && SameU32(r.GetGroupFileDataIDsForLod(2), 0, 7002),
+                  "wmo root GFID: later LOD blocks addressable separately");
+            Check(r.GetGroupFileDataIDsForLod(3).Length == 0 && r.GetGroupFileDataIDsForLod(-1).Length == 0,
+                  "wmo root GFID: a block past the list is empty, not an unsafe read");
+            Check(r.GetGroupFileDataIDsForLod(int.MaxValue).Length == 0,
+                  "wmo root GFID: a huge LOD index is empty, not a wrapped copy offset");
+            Check(r.Warnings.Length == 0, "wmo root: a well-formed root has no warnings");
+
+            var shortGfid = TwoGroupRootSpec();
+            shortGfid.GroupFileDataIDs = new uint[] { 5001 };
+            ThrowsWmo(() => WmoParser.ParseRoot(WmoSynthetic.BuildRoot(shortGfid), "short gfid"), "GFID",
+                      "wmo root GFID: fewer entries than groups is rejected");
+            var oddGfid = TwoGroupRootSpec();
+            oddGfid.LodCount = 0;
+            oddGfid.GroupFileDataIDs = new uint[] { 5001, 5002, 6001 };
+            WmoRoot odd = WmoParser.ParseRoot(WmoSynthetic.BuildRoot(oddGfid), "odd gfid");
+            Check(SameU32(odd.Lod0GroupFileDataIDs, 5001, 5002) && odd.Warnings.Length == 1 && odd.Warnings[0].StartsWith("GFID"),
+                  "wmo root GFID: a count off the groups x LOD rule still resolves LOD0, with a warning");
+            var zeroGfid = TwoGroupRootSpec();
+            zeroGfid.GroupFileDataIDs = new uint[] { 5001, 0, 6001, 6002, 0, 7002 };
+            WmoRoot zero = WmoParser.ParseRoot(WmoSynthetic.BuildRoot(zeroGfid), "zero gfid");
+            Check(zero.Lod0GroupFileDataIDs[1] == 0 && zero.Warnings.Length == 1 && zero.Warnings[0].Contains("group 1"),
+                  "wmo root GFID: a zero full-detail entry is reported, left to the loader to count as missing");
+            byte[] noGfid = WmoSynthetic.Concat(WmoSynthetic.Mver(), WmoSynthetic.Chunk("MOHD", WmoSynthetic.Mohd(0, 1)),
+                WmoSynthetic.Chunk("MOGI", WmoSynthetic.GroupInfo(0, WV(0f, 0f, 0f), WV(1f, 1f, 1f), 0)));
+            ThrowsWmo(() => WmoParser.ParseRoot(noGfid, "no gfid"), "GFID",
+                      "wmo root GFID: a root without GFID is rejected (no filename-based group lookup)");
+            ThrowsWmo(() => WmoParser.ParseRoot(WithChunkSize(file, "GFID", 22), "gfid 22"), "root",
+                      "wmo root GFID: a size that cuts into the next header is rejected");
+
+            // MOGI / MOGN
+            Check(r.GroupInfos.Length == 2 && r.GroupInfos[0].Flags == 0x8 && r.GroupInfos[1].Flags == 0x2000,
+                  "wmo root MOGI: flags per group");
+            Check(r.GroupInfos[1].BoundsMin.X == 10f && r.GroupInfos[1].BoundsMax.X == 20f && r.GroupInfos[0].BoundsMin.Y == -2f,
+                  "wmo root MOGI: bounds per group");
+            Check(r.GroupInfos[0].NameOffset == 1 && r.GroupInfos[1].NameOffset == 7, "wmo root MOGI: name offsets");
+            Check(r.GetGroupName(1) == "alpha" && r.GetGroupName(7) == "beta" && r.GetGroupName(r.GroupInfos[1].NameOffset) == "beta",
+                  "wmo root MOGN: names resolve by offset");
+            Check(r.GetGroupName(-1) == null && r.GetGroupName(4096) == null, "wmo root MOGN: bad offsets give null, not a read");
+            Check(r.GroupNames.Length == 2 && r.GroupNames[0].Offset == 1 && r.GroupNames[0].Name == "alpha" &&
+                  r.GroupNames[1].Offset == 7 && r.GroupNames[1].Name == "beta", "wmo root MOGN: every name listed with its offset");
+
+            Check(Tags(r.Chunks) == "MVER,MOHD,MOMT,MOGN,MOGI,GFID", "wmo root: every chunk listed in file order");
+            Check(r.Chunks[1].HeaderOffset == 12 && r.Chunks[1].DataOffset == 20 && r.Chunks[1].Size == 64,
+                  "wmo root: chunk offsets index the source bytes");
+            Check(ReferenceEquals(r.Data, file), "wmo root: the model keeps the parsed bytes, not a copy");
+        }
+
+        static void WmoMaterialTests()
+        {
+            WmoSynthetic.RootSpec spec = TwoGroupRootSpec();
+            byte[] file = WmoSynthetic.BuildRoot(spec);
+            WmoRoot r = WmoParser.ParseRoot(file, "materials");
+
+            WmoMaterial m0 = r.Materials[0], m1 = r.Materials[1], m2 = r.Materials[2];
+            Check(m1.Raw != null && m1.Raw.Length == 64 && SameBytes(m1.Raw, spec.Materials[1]),
+                  "wmo MOMT: the complete 64-byte record is kept");
+            Check(m1.Index == 1 && m1.Flags == 0x44 && m1.Shader == 23 && m1.BlendMode == 1,
+                  "wmo MOMT: flags u32@0x00, shader u32@0x04, blend u32@0x08");
+            Check(m1.Texture1 == 0 && m1.Texture2 == 2002 && m1.Texture3 == 2003,
+                  "wmo MOMT: texture FileDataIDs u32@0x0C, @0x18, @0x24");
+            Check(m1.SidnColor == 0xFF112233 && m1.DiffColor == 0xFF959595 && m1.GroundType == 10 && m1.FrameSidnColor == 0,
+                  "wmo MOMT: colours and ground type");
+            Check(SameU32(m1.Tail, 3001, 3002, 2002, 3004, 3005, 3006), "wmo MOMT: every u32 of the tail 0x28..0x3C");
+            Check(m1.Color3 == 3001 && m1.Flags2 == 3002 && SameU32(m1.RuntimeData, 2002, 3004, 3005, 3006),
+                  "wmo MOMT: color3, flags2 and runtime fields are the same tail bytes");
+            Check(m1.GetSlot(0) == 0 && m1.GetSlot(1) == 2002 && m1.GetSlot(2) == 2003 && m1.GetSlot(3) == 3001 &&
+                  m1.GetSlot(8) == 3006 && m1.GetSlot(9) == 0 && m1.GetSlot(-1) == 0,
+                  "wmo MOMT: nine texture slots addressable, out-of-range slots read as 0");
+            Check(m1.TailHoldsTextures && SameU32(m1.GetTextureFileDataIDs(), 2002, 2003, 3001, 3002, 3004, 3005, 3006),
+                  "wmo MOMT: shader 23 with slot 1 == 0 still exposes every later texture, deduplicated");
+            Check(!m0.TailHoldsTextures && m0.Color3 == 0x3D4CCCCD && SameU32(m0.GetTextureFileDataIDs(), 1001),
+                  "wmo MOMT: a shader-0 color3 value (0.05f) is kept but not taken for a texture");
+            Check(m2.Flags == 0x80 && m2.BlendMode == 3 && SameU32(m2.GetTextureFileDataIDs(), 1001, 2002),
+                  "wmo MOMT: blend values are kept as stored");
+            Check(SameU32(r.GetAllTextureFileDataIDs(), 1001, 2002, 2003, 3001, 3002, 3004, 3005, 3006),
+                  "wmo MOMT: textures deduplicated across the whole WMO");
+            WmoMaterial found;
+            Check(r.TryGetMaterial(2, out found) && found.Shader == 5 && !r.TryGetMaterial(3, out found) &&
+                  !r.TryGetMaterial(-1, out found), "wmo MOMT: TryGetMaterial guards the index");
+
+            var tailShaders = TwoGroupRootSpec();
+            tailShaders.Materials = new[]
+            {
+                WmoSynthetic.Material(0, 22, 0, 1, 2, 3, new uint[] { 4, 5, 6 }),
+                WmoSynthetic.Material(0, 24, 0, 1, 0, 0, new uint[] { 0, 0, 0, 0, 0, 9 }),
+                WmoSynthetic.Material(0, 21, 0, 1, 2, 3, new uint[] { 0, 0, 7 }),
+            };
+            WmoRoot ts = WmoParser.ParseRoot(WmoSynthetic.BuildRoot(tailShaders), "tail shaders");
+            Check(SameU32(ts.Materials[0].GetTextureFileDataIDs(), 1, 2, 3, 4, 5, 6), "wmo MOMT: shader 22 tail slots are textures");
+            Check(SameU32(ts.Materials[1].GetTextureFileDataIDs(), 1, 9), "wmo MOMT: an unknown shader id keeps tail texture ids");
+            Check(SameU32(ts.Materials[2].GetTextureFileDataIDs(), 1, 2, 3) && ts.Materials[2].Tail[2] == 7,
+                  "wmo MOMT: shaders 0..21 use slots 1-3 only, the tail still preserved");
+
+            var mismatch = TwoGroupRootSpec();
+            byte[] mm = WmoSynthetic.BuildRoot(mismatch);
+            byte[] withFour = (byte[])mm.Clone();
+            PutU32(withFour, 20, 4);   // MOHD material count 4, MOMT holds 3
+            ThrowsWmo(() => WmoParser.ParseRoot(withFour, "mat count"), "MOMT", "wmo MOMT: a record count unlike MOHD is rejected");
+            byte[] noMomt = WmoSynthetic.Concat(WmoSynthetic.Mver(), WmoSynthetic.Chunk("MOHD", WmoSynthetic.Mohd(1, 0)));
+            ThrowsWmo(() => WmoParser.ParseRoot(noMomt, "no momt"), "MOMT", "wmo MOMT: missing while MOHD declares materials");
+            byte[] partial = WmoSynthetic.Concat(WmoSynthetic.Mver(), WmoSynthetic.Chunk("MOHD", WmoSynthetic.Mohd(1, 0)),
+                WmoSynthetic.Chunk("MOMT", new byte[63]));
+            ThrowsWmo(() => WmoParser.ParseRoot(partial, "momt 63"), "MOMT", "wmo MOMT: a partial record is rejected");
+        }
+
+        static void WmoPreservedChunkTests()
+        {
+            var spec = TwoGroupRootSpec();
+            var modd = new byte[80];
+            PutU32(modd, 0, 0x12000001);                       // MODI index 1, flags 0x12
+            PutF32(modd, 4, 1f); PutF32(modd, 8, 2f); PutF32(modd, 12, 3f);
+            PutF32(modd, 16, 0f); PutF32(modd, 20, 0f); PutF32(modd, 24, 0.7071f); PutF32(modd, 28, 0.7071f);
+            PutF32(modd, 32, 1.5f);
+            PutU32(modd, 36, 0x02FFEBDA);
+            PutU32(modd, 40, 0x00000000);
+            PutF32(modd, 72, 1f);
+            PutF32(modd, 68, 1f);                              // identity quaternion x,y,z,w = 0,0,0,1
+            var mods = new byte[32];
+            string setName = "Set_$DefaultGlobal";
+            for (int i = 0; i < setName.Length; i++) mods[i] = (byte)setName[i];
+            PutU32(mods, 20, 0); PutU32(mods, 24, 2);
+            var molt = new byte[96];
+            molt[0] = 1; molt[48] = 2;
+            var mfog = new byte[48];
+            PutU32(mfog, 0, 0x1000);
+            var mopv = WmoSynthetic.F32s(0, 0, 0, 1, 0, 0, 1, 0, 1, 0, 0, 1, 5, 5, 5, 6, 5, 5, 6, 5, 6, 5, 5, 6);
+            var mopt = new byte[40];
+            PutU16(mopt, 0, 0); PutU16(mopt, 2, 4); PutF32(mopt, 12, 1f); PutF32(mopt, 16, -2.5f);
+            PutU16(mopt, 20, 4); PutU16(mopt, 22, 4);
+            var mopr = new byte[16];
+            PutU16(mopr, 0, 0); PutU16(mopr, 2, 1); PutU16(mopr, 4, unchecked((ushort)-1));
+            PutU16(mopr, 8, 1); PutU16(mopr, 10, 0); PutU16(mopr, 12, 1);
+            var mnld = new byte[184];
+            mnld[5] = 0xAB;
+            // MODD deliberately BEFORE MODI: resolution must not depend on chunk order
+            spec.ExtraChunks.Add(Kv("MODS", mods));
+            spec.ExtraChunks.Add(Kv("MODD", modd));
+            spec.ExtraChunks.Add(Kv("MOLT", molt));
+            spec.ExtraChunks.Add(Kv("MFOG", mfog));
+            spec.ExtraChunks.Add(Kv("MOPV", mopv));
+            spec.ExtraChunks.Add(Kv("MOPT", mopt));
+            spec.ExtraChunks.Add(Kv("MOPR", mopr));
+            spec.ExtraChunks.Add(Kv("MNLD", mnld));
+            spec.ExtraChunks.Add(Kv("MODI", WmoSynthetic.U32s(0, 9001)));
+            byte[] file = WmoSynthetic.BuildRoot(spec);
+            WmoRoot r = WmoParser.ParseRoot(file, "preserved");
+
+            Check(r.DoodadSets.Length == 1 && r.DoodadSets[0].Name == setName && r.DoodadSets[0].StartIndex == 0 &&
+                  r.DoodadSets[0].Count == 2, "wmo root MODS: set name, start and count");
+            Check(r.DoodadDefs.Length == 2 && r.DoodadFileDataIDs.Length == 2 &&
+                  r.DoodadFileDataIDs[r.DoodadDefs[0].NameIndex] == 9001,
+                  "wmo root MODD/MODI: MODI after MODD still resolves the doodad FileDataID");
+            WmoDoodadDef d0 = r.DoodadDefs[0];
+            Check(d0.NameIndexAndFlags == 0x12000001 && d0.NameIndex == 1 && d0.Flags == 0x12,
+                  "wmo root MODD: 24-bit index and 8-bit flags split");
+            Check(d0.Position.Y == 2f && d0.Rotation.Z == 0.7071f && d0.Rotation.W == 0.7071f && d0.Rotation.X == 0f &&
+                  d0.Scale == 1.5f && d0.Color == 0x02FFEBDA, "wmo root MODD: position, x,y,z,w rotation, scale, colour");
+            Check(r.Lights.Count == 2 && r.Lights.GetRecord(1)[0] == 2 && r.Lights.GetRecord(2) == null,
+                  "wmo root MOLT: raw 48-byte records preserved");
+            Check(r.Fogs.Count == 1 && r.Fogs.Bytes.Length == 48 && r.Fogs.GetRecord(0)[1] == 0x10,
+                  "wmo root MFOG: raw 48-byte records preserved");
+            Check(r.PortalVertices.Length == 8 && r.PortalVertices[4].X == 5f, "wmo root MOPV: portal vertices");
+            Check(r.Portals.Length == 2 && r.Portals[1].StartVertex == 4 && r.Portals[1].VertexCount == 4 &&
+                  r.Portals[0].PlaneNormal.Z == 1f && r.Portals[0].PlaneDistance == -2.5f, "wmo root MOPT: portal info");
+            Check(r.PortalRefs.Length == 2 && r.PortalRefs[0].GroupIndex == 1 && r.PortalRefs[0].Side == -1 &&
+                  r.PortalRefs[1].Side == 1, "wmo root MOPR: portal references");
+            WmoChunkInfo unknown;
+            Check(r.TryGetChunk("MNLD", out unknown) && unknown.Size == 184 && r.CopyChunkBytes(unknown)[5] == 0xAB,
+                  "wmo root: an undecoded chunk is kept as (tag, offset, size) with its bytes reachable");
+            Check(Tags(r.Chunks) == "MVER,MOHD,MOMT,MOGN,MOGI,GFID,MODS,MODD,MOLT,MFOG,MOPV,MOPT,MOPR,MNLD,MODI",
+                  "wmo root: preserved chunks listed in file order");
+            Check(!r.HasMotx && !r.HasModn && r.Warnings.Length == 0, "wmo root: no historical name tables");
+
+            var hist = TwoGroupRootSpec();
+            hist.ExtraChunks.Add(Kv("MOTX", new byte[] { (byte)'a', 0 }));
+            hist.ExtraChunks.Add(Kv("MODN", new byte[] { (byte)'b', 0 }));
+            WmoRoot h = WmoParser.ParseRoot(WmoSynthetic.BuildRoot(hist), "historical");
+            Check(h.HasMotx && h.HasModn && h.Warnings.Length == 2 && h.Materials[0].Texture1 == 1001,
+                  "wmo root MOTX/MODN: presence recorded, textures still FileDataIDs");
+
+            var bad = TwoGroupRootSpec();
+            bad.ExtraChunks.Add(Kv("MOLT", new byte[47]));
+            bad.ExtraChunks.Add(Kv("MODD", new byte[41]));
+            WmoRoot b = WmoParser.ParseRoot(WmoSynthetic.BuildRoot(bad), "bad preserved");
+            WmoChunkInfo molt2;
+            Check(b.Lights.Count == 0 && b.DoodadDefs.Length == 0 && b.Warnings.Length == 2 && b.TryGetChunk("MOLT", out molt2) &&
+                  molt2.Size == 47, "wmo root: a malformed preserved chunk is a warning and stays listed, not a failed load");
+        }
+
+        static void WmoMalformedRootTests()
+        {
+            byte[] file = WmoSynthetic.BuildRoot(TwoGroupRootSpec());
+            ThrowsWmo(() => WmoParser.ParseRoot(null, "null"), "root", "wmo root malformed: null data");
+            ThrowsWmo(() => WmoParser.ParseRoot(new byte[0], "empty"), "MVER", "wmo root malformed: empty file");
+            ThrowsWmo(() => WmoParser.ParseRoot(WithChunkSize(file, "GFID", 0xFFFFFFFF), "huge"), "GFID",
+                      "wmo root malformed: a chunk claiming more bytes than the file names that chunk");
+            ThrowsWmo(() => WmoParser.ParseRoot(WithChunkSize(file, "MOMT", 1000), "momt past"), "MOMT",
+                      "wmo root malformed: MOMT running past the end of file");
+            ThrowsWmo(() => WmoParser.ParseRoot(WmoSynthetic.Concat(file, new byte[] { 1, 2, 3 }), "trailing"), "root",
+                      "wmo root malformed: trailing bytes that cannot hold a chunk header");
+            ThrowsWmo(() => WmoParser.ParseRoot(file.TakeBytes(file.Length - 1), "truncated"), "GFID",
+                      "wmo root malformed: a truncated last chunk");
+            byte[] shortMohd = WmoSynthetic.Concat(WmoSynthetic.Mver(), WmoSynthetic.Chunk("MOHD", new byte[60]));
+            ThrowsWmo(() => WmoParser.ParseRoot(shortMohd, "short mohd"), "MOHD", "wmo root malformed: MOHD shorter than 64 bytes");
+            ThrowsWmo(() => WmoParser.ParseRoot(WmoSynthetic.Mver(), "mver only"), "MOHD", "wmo root malformed: MOHD missing");
+            byte[] hugeCount = (byte[])file.Clone();
+            PutU32(hugeCount, 24, 0x7FFFFFFF);   // MOHD group count
+            ThrowsWmo(() => WmoParser.ParseRoot(hugeCount, "huge count"), "MOHD", "wmo root malformed: implausible group count");
+            byte[] groups3 = (byte[])file.Clone();
+            PutU32(groups3, 24, 3);
+            ThrowsWmo(() => WmoParser.ParseRoot(groups3, "mogi count"), "MOGI", "wmo root malformed: MOGI count unlike MOHD");
+            var badMogi = TwoGroupRootSpec();
+            badMogi.GroupInfos[1] = new byte[31];
+            ThrowsWmo(() => WmoParser.ParseRoot(WmoSynthetic.BuildRoot(badMogi), "mogi 63"), "MOGI",
+                      "wmo root malformed: MOGI not a whole number of records");
+            var dup = TwoGroupRootSpec();
+            dup.ExtraChunks.Add(Kv("MOMT", new byte[64 * 3]));
+            ThrowsWmo(() => WmoParser.ParseRoot(WmoSynthetic.BuildRoot(dup), "dup momt"), "MOMT",
+                      "wmo root malformed: a second MOMT is ambiguous and rejected");
+            ThrowsWmo(() => WmoParser.ParseRoot(WmoSynthetic.SquaresGroup(0), "group as root"), "MOHD",
+                      "wmo root malformed: a group file passed as a root names the missing MOHD");
+        }
+
+        /// <summary>A group exercising every stream: 4 vertices, 2 triangles, 4 MOTV, 2 MOCV, MOC2, MPY2.</summary>
+        static WmoSynthetic.GroupSpec FullGroupSpec()
+        {
+            var s = new WmoSynthetic.GroupSpec
+            {
+                Flags = WmoGroupFlags.Indoor | WmoGroupFlags.ColorSet1 | WmoGroupFlags.ColorSet2 |
+                        WmoGroupFlags.TwoTexCoordSets | WmoGroupFlags.ThreeTexCoordSets | WmoGroupFlags.DoodadRefs,
+                Positions = new[] { 0f, 0f, 0f, 4f, 0f, 0f, 4f, 2f, 0f, 0f, 2f, 1f },
+                Normals = new[] { 0f, 0f, 1f, 0f, 0f, 1f, 0f, 1f, 0f, 1f, 0f, 0f },
+                Indices = new ushort[] { 0, 1, 2, 0, 2, 3 },
+                Batches = new[]
+                {
+                    WmoSynthetic.Batch(0, 3, 0, 2, 0, 1, decoyLarge: 77),
+                    WmoSynthetic.Batch(3, 3, 0, 3, WmoBatch.FlagLargeMaterialId, 2, decoySmall: 5),
+                },
+                BatchCounts = new ushort[] { 1, 1, 0 },
+                Mpy2 = WmoSynthetic.U16s(0x20, 1, 0x20, 300),
+                Moc2 = new byte[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16 },
+                NameOffset = 1,
+                DescriptiveNameOffset = 7,
+                UniqueId = 4242,
+                GroupLiquid = 15,
+                Flags2 = 0x240,
+            };
+            for (int k = 0; k < 4; k++)
+                s.TexCoordSets.Add(new[] { k + 0.1f, -k - 0.2f, k + 1.5f, 0f, 11.25f * (k + 1), -9.5f, 0.25f, 3f + k });
+            s.ColorSets.Add(new byte[] { 10, 20, 30, 255, 11, 21, 31, 255, 12, 22, 32, 255, 13, 23, 33, 255 });
+            s.ColorSets.Add(new byte[] { 0, 0, 0, 128, 0, 0, 0, 0, 1, 1, 1, 64, 2, 2, 2, 255 });
+            s.ExtraChunks.Add(Kv("MOBN", new byte[16]));
+            s.ExtraChunks.Add(Kv("MODR", WmoSynthetic.U16s(0, 1)));
+            return s;
+        }
+
+        static void WmoGroupTests()
+        {
+            // MOGP header: every field, written through the header builder directly
+            byte[] header = WmoSynthetic.MogpHeader(0x80202005, WV(-1f, -2f, -3f), WV(1f, 2f, 3f), 2, 3, 4, 16, 20,
+                                                    portalStart: 5, portalCount: 6, fogIds: new byte[] { 1, 2, 3, 4 },
+                                                    groupLiquid: 941, uniqueId: 123456, flags2: 0x280,
+                                                    splitParent: -1, splitNext: 7, batchesD: 0);
+            byte[] hfile = WmoSynthetic.Concat(WmoSynthetic.Mver(), WmoSynthetic.Chunk("MOGP", header));
+            WmoGroup h = WmoParser.ParseGroup(hfile, "header only", 3);
+            WmoGroupHeader gh = h.Header;
+            Check(h.Version == 17 && h.GroupIndex == 3, "wmo group MVER: version read, caller's group index recorded");
+            Check(gh.GroupNameOffset == 16 && gh.DescriptiveNameOffset == 20 && gh.Flags == 0x80202005,
+                  "wmo group MOGP: name offsets and flags");
+            Check(gh.BoundsMin.X == -1f && gh.BoundsMin.Z == -3f && gh.BoundsMax.Y == 2f, "wmo group MOGP: bounds");
+            Check(gh.PortalStart == 5 && gh.PortalCount == 6, "wmo group MOGP: portal start and count");
+            Check(gh.BatchCountA == 2 && gh.BatchCountB == 3 && gh.BatchCountC == 4 && gh.BatchCountD == 0 && gh.TotalBatchCount == 9,
+                  "wmo group MOGP: batch counts A/B/C");
+            Check(gh.FogId0 == 1 && gh.FogId1 == 2 && gh.FogId2 == 3 && gh.FogId3 == 4, "wmo group MOGP: fog ids");
+            Check(gh.GroupLiquid == 941 && gh.UniqueId == 123456 && gh.Flags2 == 0x280, "wmo group MOGP: liquid u32@52, unique id, flags2");
+            Check(gh.SplitGroupParent == -1 && gh.SplitGroupNext == 7, "wmo group MOGP: split-group indices");
+            Check(gh.Raw != null && gh.Raw.Length == 68 && SameBytes(gh.Raw, header), "wmo group MOGP: raw 68-byte header kept");
+            Check(h.Warnings.Length == 2 && h.Warnings[0].StartsWith("MOCV") && h.Warnings[1].StartsWith("MOBA"),
+                  "wmo group MOGP: flags announcing colours and counts announcing batches that are absent are warnings");
+
+            WmoSynthetic.GroupSpec spec = FullGroupSpec();
+            byte[] file = WmoSynthetic.BuildGroup(spec);
+            WmoGroup g = WmoParser.ParseGroup(file, "full group");
+
+            // MOVT / MONR / MOVI
+            Check(g.VertexCount == 4 && g.Positions[1].X == 4f && g.Positions[3].Z == 1f && g.Positions[2].Y == 2f,
+                  "wmo group MOVT: positions read unconverted");
+            Check(g.Normals.Length == 4 && g.Normals[2].Y == 1f && g.Normals[3].X == 1f, "wmo group MONR: one normal per vertex");
+            Check(g.Indices.Length == 6 && g.Indices[4] == 2 && g.Indices[5] == 3, "wmo group MOVI: u16 triangle indices");
+            Check(g.Header.BoundsMax.X == 4f && g.Header.BoundsMax.Z == 1f && g.Header.UniqueId == 4242 &&
+                  g.Header.GroupLiquid == 15 && g.Header.Flags2 == 0x240, "wmo group MOGP: header of a built group");
+            Check(g.HasRenderGeometry && g.Warnings.Length == 0, "wmo group: a well-formed group has geometry and no warnings");
+            Check(Tags(g.TopChunks) == "MVER,MOGP", "wmo group: MVER then one MOGP");
+            Check(Tags(g.Chunks) == "MPY2,MOVI,MOVT,MONR,MOTV,MOBA,MOBN,MODR,MOCV,MOTV,MOTV,MOTV,MOCV,MOC2",
+                  "wmo group: every sub-chunk listed in file order, undecoded ones included");
+            WmoChunkInfo modr;
+            Check(g.TryGetChunk("MODR", out modr) && modr.Size == 4 && g.CopyChunkBytes(modr)[2] == 1,
+                  "wmo group: an undecoded sub-chunk keeps its bytes reachable");
+            Check(g.Chunks[0].DataOffset == 8 + 4 + 8 + 68 + 8, "wmo group: sub-chunks start after the 68-byte header");
+            WowVec3 bmin, bmax;
+            Check(g.TryGetBatchBounds(out bmin, out bmax) && bmin.X == 0f && bmax.X == 4f && bmax.Z == 1f,
+                  "wmo group: bounds of the batched vertices");
+
+            var badNormals = FullGroupSpec();
+            badNormals.Normals = new[] { 0f, 0f, 1f };
+            ThrowsWmo(() => WmoParser.ParseGroup(WmoSynthetic.BuildGroup(badNormals), "normals"), "MONR",
+                      "wmo group MONR: a count unlike the vertex count is rejected");
+            var noNormals = FullGroupSpec();
+            noNormals.Normals = null;
+            WmoGroup nn = WmoParser.ParseGroup(WmoSynthetic.BuildGroup(noNormals), "no normals");
+            Check(nn.Normals != null && nn.Normals.Length == 0 && nn.HasRenderGeometry, "wmo group MONR: absent normals are an empty array");
+        }
+
+        static void WmoStreamTests()
+        {
+            WmoSynthetic.GroupSpec spec = FullGroupSpec();
+            WmoGroup g = WmoParser.ParseGroup(WmoSynthetic.BuildGroup(spec), "streams");
+
+            // MOTV: all four streams, file order, even though three follow other chunks
+            Check(g.TexCoordSets.Length == 4, "wmo group MOTV: all four UV streams kept");
+            bool uvOk = true;
+            for (int k = 0; k < 4; k++)
+                for (int v = 0; v < 4; v++)
+                    uvOk &= g.TexCoordSets[k][v].X == spec.TexCoordSets[k][v * 2] && g.TexCoordSets[k][v].Y == spec.TexCoordSets[k][v * 2 + 1];
+            Check(uvOk, "wmo group MOTV: each stream's values in file order (no stream overwrites another)");
+            Check(g.TexCoordSets[2][2].X == 33.75f && g.TexCoordSets[0][2].Y == -9.5f,
+                  "wmo group MOTV: coordinates outside 0..1 kept as stored");
+            var badUv = FullGroupSpec();
+            badUv.TexCoordSets[3] = new[] { 0f, 0f, 1f, 1f };
+            ThrowsWmo(() => WmoParser.ParseGroup(WmoSynthetic.BuildGroup(badUv), "uv count"), "MOTV",
+                      "wmo group MOTV: a stream shorter than the vertex count is rejected");
+
+            // MOCV: two streams with their set numbers
+            Check(g.ColorSets.Length == 2 && g.ColorSets[0].SetNumber == 1 && g.ColorSets[1].SetNumber == 2 &&
+                  g.ColorSets[0].FileOrder == 0 && g.ColorSets[1].FileOrder == 1, "wmo group MOCV: two streams are sets 1 and 2");
+            Check(g.ColorSet1 != null && SameBytes(g.ColorSet1.Bgra, spec.ColorSets[0]) &&
+                  SameBytes(g.ColorSet2.Bgra, spec.ColorSets[1]) && g.ColorSet2.Count == 4,
+                  "wmo group MOCV: BGRA bytes per set kept as stored");
+            var lone1 = FullGroupSpec();
+            lone1.Flags = WmoGroupFlags.Indoor | WmoGroupFlags.ColorSet1;
+            lone1.ColorSets.RemoveAt(1);
+            WmoGroup l1 = WmoParser.ParseGroup(WmoSynthetic.BuildGroup(lone1), "lone set 1");
+            Check(l1.ColorSets.Length == 1 && l1.ColorSets[0].SetNumber == 1 && l1.ColorSet2 == null && l1.Warnings.Length == 0,
+                  "wmo group MOCV: a lone stream with flag 0x4 is set 1");
+            var lone2 = FullGroupSpec();
+            lone2.Flags = WmoGroupFlags.Outdoor | WmoGroupFlags.ColorSet2;
+            lone2.ColorSets.RemoveAt(1);
+            WmoGroup l2 = WmoParser.ParseGroup(WmoSynthetic.BuildGroup(lone2), "lone set 2");
+            Check(l2.ColorSets.Length == 1 && l2.ColorSets[0].SetNumber == 2 && l2.ColorSet1 == null && l2.Warnings.Length == 0,
+                  "wmo group MOCV: a lone stream with flag 0x4 clear is set 2");
+            var unannounced = FullGroupSpec();
+            unannounced.Flags = WmoGroupFlags.Outdoor;
+            unannounced.ColorSets.RemoveAt(1);
+            WmoGroup un = WmoParser.ParseGroup(WmoSynthetic.BuildGroup(unannounced), "unannounced");
+            Check(un.ColorSets.Length == 1 && un.ColorSets[0].SetNumber == 2 && un.Warnings.Length == 1 &&
+                  un.Warnings[0].StartsWith("MOCV"), "wmo group MOCV: a stream the flags do not announce is kept, with a warning");
+            Check(un.Warnings.Length == 1 && un.Warnings[0].Contains("assigned set(s) 2 "),
+                  "wmo group MOCV: the warning names the set number actually assigned, not file order");
+            Check(WmoParser.AssignColorSetNumbers(0x4, 1)[0] == 1 && WmoParser.AssignColorSetNumbers(0x1000000, 1)[0] == 2 &&
+                  WmoParser.AssignColorSetNumbers(0x1000004, 2)[1] == 2 && WmoParser.AssignColorSetNumbers(0, 0).Length == 0 &&
+                  WmoParser.AssignColorSetNumbers(0x1000004, 3)[2] == 3, "wmo group MOCV: set-number rule");
+            var badCv = FullGroupSpec();
+            badCv.ColorSets[1] = new byte[12];
+            ThrowsWmo(() => WmoParser.ParseGroup(WmoSynthetic.BuildGroup(badCv), "cv count"), "MOCV",
+                      "wmo group MOCV: a stream shorter than the vertex count is rejected");
+
+            // MOC2
+            Check(g.Moc2 != null && SameBytes(g.Moc2, spec.Moc2), "wmo group MOC2: kept as stored");
+            var noMoc2 = FullGroupSpec();
+            noMoc2.Moc2 = null;
+            Check(WmoParser.ParseGroup(WmoSynthetic.BuildGroup(noMoc2), "no moc2").Moc2 == null, "wmo group MOC2: null when absent");
+            var shortMoc2 = FullGroupSpec();
+            shortMoc2.Moc2 = new byte[8];
+            WmoGroup sm = WmoParser.ParseGroup(WmoSynthetic.BuildGroup(shortMoc2), "short moc2");
+            Check(sm.Moc2.Length == 8 && sm.Warnings.Length == 1 && sm.Warnings[0].StartsWith("MOC2"),
+                  "wmo group MOC2: a count unlike the vertex count is a warning (not rendered)");
+
+            // MPY2 / MOPY
+            Check(g.HasMpy2 && !g.HasMopy && g.PolyMaterials2.Length == 2 && g.PolyMaterials2[0].Flags == 0x20 &&
+                  g.PolyMaterials2[1].MaterialId == 300 && g.PolyMaterials.Length == 0,
+                  "wmo group MPY2: u16 flags + u16 material per triangle");
+            var mopy = FullGroupSpec();
+            mopy.Mpy2 = null;
+            mopy.Mopy = new byte[] { 0x20, 1, 0x08, 0xFF };
+            WmoGroup mp = WmoParser.ParseGroup(WmoSynthetic.BuildGroup(mopy), "mopy");
+            Check(mp.HasMopy && !mp.HasMpy2 && mp.PolyMaterials.Length == 2 && mp.PolyMaterials[0].MaterialId == 1 &&
+                  mp.PolyMaterials[1].Flags == 0x08 && mp.PolyMaterials[1].MaterialId == 0xFF,
+                  "wmo group MOPY: u8 flags + u8 material per triangle");
+            var both = FullGroupSpec();
+            both.Mopy = new byte[] { 0x20, 1, 0x20, 2 };
+            WmoGroup bt = WmoParser.ParseGroup(WmoSynthetic.BuildGroup(both), "both");
+            Check(bt.HasMopy && bt.HasMpy2 && bt.PolyMaterials.Length == 2 && bt.PolyMaterials2.Length == 2,
+                  "wmo group MOPY/MPY2: both retained when both are present");
+            var oddMopy = FullGroupSpec();
+            oddMopy.Mpy2 = null;
+            oddMopy.Mopy = new byte[3];
+            WmoGroup om = WmoParser.ParseGroup(WmoSynthetic.BuildGroup(oddMopy), "mopy 3");
+            Check(om.HasMopy && om.PolyMaterials.Length == 0 && om.HasRenderGeometry && om.Warnings.Length == 1 &&
+                  om.Warnings[0].StartsWith("MOPY"), "wmo group MOPY: a partial record is a warning, the group still draws");
+            var oddMpy2 = FullGroupSpec();
+            oddMpy2.Mpy2 = new byte[6];
+            WmoGroup o2 = WmoParser.ParseGroup(WmoSynthetic.BuildGroup(oddMpy2), "mpy2 6");
+            Check(o2.HasMpy2 && o2.PolyMaterials2.Length == 0 && o2.HasRenderGeometry && o2.Warnings.Length == 1 &&
+                  o2.Warnings[0].StartsWith("MPY2"), "wmo group MPY2: a partial record is a warning, the group still draws");
+            var oddMoc2 = FullGroupSpec();
+            oddMoc2.Moc2 = new byte[6];
+            WmoGroup oc = WmoParser.ParseGroup(WmoSynthetic.BuildGroup(oddMoc2), "moc2 6");
+            Check(oc.Moc2 == null && oc.HasRenderGeometry && oc.Warnings.Length == 1 && oc.Warnings[0].StartsWith("MOC2"),
+                  "wmo group MOC2: a partial entry is a warning, the group still draws");
+            var fewMopy = FullGroupSpec();
+            fewMopy.Mpy2 = WmoSynthetic.U16s(0x20, 1);
+            WmoGroup fm = WmoParser.ParseGroup(WmoSynthetic.BuildGroup(fewMopy), "few mpy2");
+            Check(fm.PolyMaterials2.Length == 1 && fm.Warnings.Length == 1 && fm.Warnings[0].StartsWith("MPY2"),
+                  "wmo group MPY2: a count unlike the triangle count is a warning (not needed to draw)");
+        }
+
+        static void WmoBatchRuleTests()
+        {
+            Check(WmoBatch.ResolveMaterialId(0x02, 300, 7) == 300, "wmo MOBA rule: flag 0x2 reads the u16 at 0x0A");
+            Check(WmoBatch.ResolveMaterialId(0x00, 300, 7) == 7, "wmo MOBA rule: flag 0x2 clear reads the u8 at 0x17");
+            Check(WmoBatch.ResolveMaterialId(0x02, 0x0102, 0x02) == 258,
+                  "wmo MOBA rule: the 16-bit id is not replaced by its low byte");
+
+            var spec = FullGroupSpec();
+            spec.Indices = new ushort[] { 0, 1, 2, 0, 2, 3, 1, 2, 3, 3, 2, 1 };
+            spec.Mpy2 = null;
+            spec.Batches = new[]
+            {
+                WmoSynthetic.Batch(0, 3, 0, 2, 0x00, 5, decoyLarge: 999),
+                WmoSynthetic.Batch(3, 3, 0, 3, 0x02, 300, decoySmall: 44),
+                WmoSynthetic.Batch(6, 5, 1, 3, 0x02, 0, decoySmall: 9),
+            };
+            spec.BatchCounts = new ushort[] { 1, 1, 1 };
+            byte[] file = WmoSynthetic.BuildGroup(spec);
+            WmoGroup g = WmoParser.ParseGroup(file, "batches");
+            Check(g.Batches.Length == 3, "wmo MOBA: 24-byte records read");
+            Check(g.Batches[0].MaterialId == 5 && g.Batches[0].MaterialIdLarge == 999 && g.Batches[0].MaterialIdSmall == 5,
+                  "wmo MOBA: flag clear -> u8 @0x17, the u16 @0x0A (box value) ignored");
+            Check(g.Batches[1].MaterialId == 300 && g.Batches[1].MaterialIdSmall == 44,
+                  "wmo MOBA: flag 0x2 -> u16 @0x0A (above 255), the u8 @0x17 ignored");
+            Check(g.Batches[2].MaterialId == 0 && g.Batches[2].MaterialIdSmall == 9, "wmo MOBA: flag 0x2 with id 0");
+            Check(g.Batches[1].StartIndex == 3 && g.Batches[1].IndexCount == 3 && g.Batches[1].MinVertex == 0 &&
+                  g.Batches[1].MaxVertex == 3 && g.Batches[1].Flags == 0x02, "wmo MOBA: start index u32@0x0C, count, min/max vertex, flags");
+            Check(g.Batches[0].Raw.Length == 24 && SameBytes(g.Batches[1].Raw, spec.Batches[1]), "wmo MOBA: raw record kept");
+            Check(g.Batches[2].IndexCount == 5 && g.Batches[2].TriangleIndexCount == 3,
+                  "wmo MOBA: an index count off a whole triangle draws whole triangles only");
+            Check(g.Warnings.Length == 1 && g.Warnings[0].Contains("batch 2"), "wmo MOBA: and says so in a warning");
+            var box = new byte[24];
+            PutU16(box, 0, unchecked((ushort)-2)); PutU16(box, 2, unchecked((ushort)-3)); PutU16(box, 4, unchecked((ushort)-1));
+            PutU16(box, 6, 2); PutU16(box, 8, 3); PutU16(box, 10, 4); PutU16(box, 0x10, 3); PutU16(box, 0x14, 2);
+            spec.Batches = new[] { box };
+            spec.BatchCounts = new ushort[] { 1, 0, 0 };
+            WmoBatch bb = WmoParser.ParseGroup(WmoSynthetic.BuildGroup(spec), "box").Batches[0];
+            Check(bb.BoxMinX == -2 && bb.BoxMinY == -3 && bb.BoxMinZ == -1 && bb.BoxMaxX == 2 && bb.BoxMaxY == 3 &&
+                  bb.MaterialIdLarge == 4 && bb.MaterialId == 0, "wmo MOBA: box fields signed, material from u8 when flag clear");
+            var miscount = FullGroupSpec();
+            miscount.BatchCounts = new ushort[] { 0, 0, 5 };
+            WmoGroup mc = WmoParser.ParseGroup(WmoSynthetic.BuildGroup(miscount), "miscount");
+            Check(mc.Batches.Length == 2 && mc.Warnings.Length == 1 && mc.Warnings[0].StartsWith("MOBA"),
+                  "wmo MOBA: a record count unlike A+B+C is a warning; the records win");
+        }
+
+        static void WmoEmptyGroupTests()
+        {
+            byte[] noGeo = WmoSynthetic.Concat(WmoSynthetic.Mver(), WmoSynthetic.Chunk("MOGP",
+                WmoSynthetic.MogpHeader(WmoGroupFlags.NoVertices | WmoGroupFlags.Outdoor | 0x80, WV(0f, 0f, 0f), WV(0f, 0f, 0f), 0, 0, 0)));
+            WmoGroup g = WmoParser.ParseGroup(noGeo, "no geometry");
+            Check(g.Positions.Length == 0 && g.Normals.Length == 0 && g.Indices.Length == 0 && g.TexCoordSets.Length == 0 &&
+                  g.ColorSets.Length == 0 && g.Batches.Length == 0 && g.PolyMaterials.Length == 0 && g.Moc2 == null,
+                  "wmo group empty: a group without MOVT parses to empty arrays, never null");
+            Check(!g.HasRenderGeometry && g.Warnings.Length == 0 && g.Chunks.Length == 0, "wmo group empty: nothing to draw, nothing wrong");
+            WowVec3 mn, mx;
+            Check(!g.TryGetBatchBounds(out mn, out mx), "wmo group empty: no batch bounds");
+
+            var antiportal = new WmoSynthetic.GroupSpec
+            {
+                Flags = WmoGroupFlags.NoBatches | WmoGroupFlags.Outdoor,
+                Positions = new[] { 0f, 0f, 0f, 1f, 0f, 0f, 0f, 1f, 0f },
+                Normals = new[] { 0f, 0f, 1f, 0f, 0f, 1f, 0f, 0f, 1f },
+                Indices = new ushort[] { 0, 1, 2 },
+                Mopy = new byte[] { 0x08, 0xFF },
+            };
+            WmoGroup a = WmoParser.ParseGroup(WmoSynthetic.BuildGroup(antiportal), "no batches");
+            Check(a.VertexCount == 3 && a.Batches.Length == 0 && !a.HasRenderGeometry && a.Warnings.Length == 0,
+                  "wmo group empty: vertices without batches draw nothing (collision-only triangles)");
+
+            var zeroCount = new WmoSynthetic.GroupSpec { Batches = new[] { WmoSynthetic.Batch(0, 0, 0, 0, 0, 0) } };
+            WmoGroup z = WmoParser.ParseGroup(WmoSynthetic.BuildGroup(zeroCount), "empty batch");
+            Check(z.Batches.Length == 1 && z.VertexCount == 0 && !z.HasRenderGeometry, "wmo group empty: an empty batch over no vertices is harmless");
+
+            byte[] squaresRoot = WmoSynthetic.SquaresRoot(3, 900000, 700000);
+            WmoRoot sr = WmoParser.ParseRoot(squaresRoot, "squares root");
+            WmoGroup sg = WmoParser.ParseGroup(WmoSynthetic.SquaresGroup(2), "squares group", 2);
+            Check(sr.GroupCount == 3 && SameU32(sr.Lod0GroupFileDataIDs, 900000, 900001, 900002) && sr.GetGroupName(sr.GroupInfos[2].NameOffset) == "square2" &&
+                  SameU32(sr.GetAllTextureFileDataIDs(), 700000) && sr.Warnings.Length == 0,
+                  "wmo synthetic: the canned self-test root parses cleanly");
+            Check(sg.HasRenderGeometry && sg.Batches[0].MaterialId == 0 && sg.Positions[0].X == 24f && sg.Warnings.Length == 0 &&
+                  WmoParser.ParseGroup(WmoSynthetic.SquaresGroup(1), "sq1").Batches[0].MaterialId == 1,
+                  "wmo synthetic: the canned self-test groups parse cleanly");
+        }
+
+        static void WmoMalformedGroupTests()
+        {
+            var past = FullGroupSpec();
+            past.Batches[1] = WmoSynthetic.Batch(3, 6, 0, 3, 0x02, 2);
+            ThrowsWmo(() => WmoParser.ParseGroup(WmoSynthetic.BuildGroup(past), "past movi"), "MOBA",
+                      "wmo group malformed: a batch range past the end of MOVI");
+            var huge = FullGroupSpec();
+            huge.Batches[1] = WmoSynthetic.Batch(0xFFFFFFFF, 3, 0, 3, 0x02, 2);
+            ThrowsWmo(() => WmoParser.ParseGroup(WmoSynthetic.BuildGroup(huge), "huge start"), "MOBA",
+                      "wmo group malformed: a batch start index near 2^32 does not wrap around");
+            var badIndex = FullGroupSpec();
+            badIndex.Indices = new ushort[] { 0, 1, 2, 0, 2, 4 };
+            ThrowsWmo(() => WmoParser.ParseGroup(WmoSynthetic.BuildGroup(badIndex), "bad index"), "MOVI",
+                      "wmo group malformed: a batched index naming a vertex past MOVT");
+            var stray = FullGroupSpec();
+            stray.Indices = new ushort[] { 0, 1, 2, 0, 2, 3, 9, 9, 9 };
+            stray.Mpy2 = WmoSynthetic.U16s(0x20, 1, 0x20, 300, 0x20, 1);
+            WmoGroup st = WmoParser.ParseGroup(WmoSynthetic.BuildGroup(stray), "stray");
+            Check(st.Batches.Length == 2 && st.Warnings.Length == 1 && st.Warnings[0].StartsWith("MOVI"),
+                  "wmo group malformed: a bad index outside every batch is a warning (collision data, never drawn)");
+            var oddIdx = FullGroupSpec();
+            oddIdx.ExtraChunks.Clear();
+            byte[] oi = WmoSynthetic.BuildGroup(oddIdx);
+            ThrowsWmo(() => WmoParser.ParseGroup(ResizeSubChunk(oi, "MOVI", 11), "movi 11"), "MOVI",
+                      "wmo group malformed: MOVI with an odd byte count");
+            ThrowsWmo(() => WmoParser.ParseGroup(ResizeSubChunk(oi, "MOVT", 13), "movt 13"), "MOVT",
+                      "wmo group malformed: MOVT not a whole number of positions");
+            ThrowsWmo(() => WmoParser.ParseGroup(ResizeSubChunk(oi, "MOBA", 47), "moba 47"), "MOBA",
+                      "wmo group malformed: MOBA not a whole number of records");
+            var nan = FullGroupSpec();
+            nan.Positions[4] = float.NaN;
+            ThrowsWmo(() => WmoParser.ParseGroup(WmoSynthetic.BuildGroup(nan), "nan"), "MOVT",
+                      "wmo group malformed: a non-finite position (it would poison bounds and framing)");
+            var dup = FullGroupSpec();
+            dup.ExtraChunks.Add(Kv("MOVT", new byte[48]));
+            ThrowsWmo(() => WmoParser.ParseGroup(WmoSynthetic.BuildGroup(dup), "dup movt"), "MOVT",
+                      "wmo group malformed: two MOVT chunks are ambiguous");
+
+            // a sub-chunk that overruns MOGP must fail even when the FILE has bytes to spare
+            byte[] overrun = WmoSynthetic.Concat(WmoSynthetic.Mver(), WmoSynthetic.Chunk("MOGP", WmoSynthetic.Concat(
+                WmoSynthetic.MogpHeader(0x8, WV(0f, 0f, 0f), WV(1f, 1f, 1f), 0, 0, 0),
+                WmoSynthetic.Chunk("MOVT", new byte[12]))), WmoSynthetic.Chunk("ZZZZ", new byte[200]));
+            PutU32(overrun, 12 + 8 + 68 + 4, 100);   // MOVT claims 100 bytes, MOGP holds 12
+            ThrowsWmo(() => WmoParser.ParseGroup(overrun, "overrun"), "MOVT",
+                      "wmo group malformed: a sub-chunk overrunning MOGP (reads are bounded by the chunk, not the file)");
+            byte[] trailing = WmoSynthetic.Concat(WmoSynthetic.Mver(), WmoSynthetic.Chunk("MOGP", WmoSynthetic.Concat(
+                WmoSynthetic.MogpHeader(0x8, WV(0f, 0f, 0f), WV(1f, 1f, 1f), 0, 0, 0), new byte[5])));
+            ThrowsWmo(() => WmoParser.ParseGroup(trailing, "trailing"), "MOGP",
+                      "wmo group malformed: bytes inside MOGP that cannot hold a sub-chunk header");
+            byte[] shortHeader = WmoSynthetic.Concat(WmoSynthetic.Mver(), WmoSynthetic.Chunk("MOGP", new byte[67]));
+            ThrowsWmo(() => WmoParser.ParseGroup(shortHeader, "short header"), "MOGP", "wmo group malformed: MOGP shorter than its header");
+            ThrowsWmo(() => WmoParser.ParseGroup(WmoSynthetic.Mver(), "mver only"), "MOGP", "wmo group malformed: no MOGP");
+            ThrowsWmo(() => WmoParser.ParseGroup(WmoSynthetic.BuildRoot(TwoGroupRootSpec()), "root as group"), "MOGP",
+                      "wmo group malformed: a root passed as a group names the missing MOGP");
+            byte[] full = WmoSynthetic.BuildGroup(FullGroupSpec());
+            ThrowsWmo(() => WmoParser.ParseGroup(full.SkipBytes(12), "no mver"), "MVER", "wmo group malformed: no MVER first");
+            ThrowsWmo(() => WmoParser.ParseGroup(full.TakeBytes(full.Length - 3), "cut"), "MOGP", "wmo group malformed: truncated file");
+            ThrowsWmo(() => WmoParser.ParseGroup(null, "null"), "group", "wmo group malformed: null data");
+            byte[] twoMogp = WmoSynthetic.Concat(full, WmoSynthetic.Chunk("MOGP", new byte[68]));
+            ThrowsWmo(() => WmoParser.ParseGroup(twoMogp, "two mogp"), "MOGP", "wmo group malformed: two MOGP chunks");
+        }
+
+        /// <summary>Set the size of the first MOGP sub-chunk `tag` to `size` and move the MOGP end to match
+        /// by truncating or padding the file, so only that one chunk is malformed.</summary>
+        static byte[] ResizeSubChunk(byte[] groupFile, string tag, int size)
+        {
+            WmoGroup g = WmoParser.ParseGroup(groupFile, "resize");
+            WmoChunkInfo c;
+            if (!g.TryGetChunk(tag, out c)) throw new InvalidOperationException("fixture has no " + tag);
+            var before = new byte[c.DataOffset];
+            Buffer.BlockCopy(groupFile, 0, before, 0, c.DataOffset);
+            var payload = new byte[size];
+            Buffer.BlockCopy(groupFile, c.DataOffset, payload, 0, Math.Min(size, c.Size));
+            int afterStart = c.DataOffset + c.Size;
+            var after = new byte[groupFile.Length - afterStart];
+            Buffer.BlockCopy(groupFile, afterStart, after, 0, after.Length);
+            byte[] r = WmoSynthetic.Concat(before, payload, after);
+            PutU32(r, c.HeaderOffset + 4, (uint)size);
+            PutU32(r, 12 + 4, (uint)(r.Length - 20));   // MOGP size
+            return r;
+        }
+
+        static void WmoNoUnsafeReadTests()
+        {
+            var rootSpec = TwoGroupRootSpec();
+            rootSpec.ExtraChunks.Add(Kv("MODS", new byte[32]));
+            rootSpec.ExtraChunks.Add(Kv("MODD", new byte[40]));
+            rootSpec.ExtraChunks.Add(Kv("MODI", WmoSynthetic.U32s(1)));
+            rootSpec.ExtraChunks.Add(Kv("MOLT", new byte[48]));
+            rootSpec.ExtraChunks.Add(Kv("MFOG", new byte[48]));
+            rootSpec.ExtraChunks.Add(Kv("MOPV", new byte[48]));
+            rootSpec.ExtraChunks.Add(Kv("MOPT", new byte[20]));
+            rootSpec.ExtraChunks.Add(Kv("MOPR", new byte[16]));
+            byte[] root = WmoSynthetic.BuildRoot(rootSpec);
+            byte[] group = WmoSynthetic.BuildGroup(FullGroupSpec());
+
+            int other = 0, rejected = 0, accepted = 0;
+            string firstOther = null;
+            Action<byte[], bool> run = (bytes, isRoot) =>
+            {
+                try
+                {
+                    if (isRoot) WmoParser.ParseRoot(bytes, "fuzz"); else WmoParser.ParseGroup(bytes, "fuzz");
+                    accepted++;
+                }
+                catch (WmoParseException) { rejected++; }
+                catch (Exception e)
+                {
+                    other++;
+                    if (firstOther == null) firstOther = e.GetType().Name + ": " + e.Message;
+                }
+            };
+
+            int rootCutsRejected = 0;
+            for (int len = 0; len < root.Length; len++)
+            {
+                int before = rejected;
+                run(root.TakeBytes(len), true);
+                if (rejected > before) rootCutsRejected++;
+            }
+            int groupCutsRejected = 0;
+            for (int len = 0; len < group.Length; len++)
+            {
+                int before = rejected;
+                run(group.TakeBytes(len), false);
+                if (rejected > before) groupCutsRejected++;
+            }
+            Check(other == 0, "wmo safety: every truncation of a root and a group throws only WmoParseException" +
+                              (firstOther != null ? " (got " + firstOther + ")" : ""));
+            Check(groupCutsRejected == group.Length, "wmo safety: every truncated group is rejected (MOGP runs to end of file)");
+            Check(rootCutsRejected >= root.Length - 16, "wmo safety: truncated roots are rejected unless cut at a chunk boundary");
+
+            var rnd = new Random(20260914);
+            for (int i = 0; i < 3000; i++)
+            {
+                bool isRoot = (i & 1) == 0;
+                byte[] b = (byte[])(isRoot ? root : group).Clone();
+                int flips = 1 + rnd.Next(6);
+                for (int f = 0; f < flips; f++) b[rnd.Next(b.Length)] = (byte)rnd.Next(256);
+                run(b, isRoot);
+            }
+            for (int p = 0; p < group.Length; p++)
+            {
+                byte[] b = (byte[])group.Clone();
+                b[p] = 0xFF;
+                run(b, false);
+            }
+            for (int p = 0; p < root.Length; p++)
+            {
+                byte[] b = (byte[])root.Clone();
+                b[p] = 0xFF;
+                run(b, true);
+            }
+            Check(other == 0, "wmo safety: random corruption and every byte set to 0xFF throw only WmoParseException" +
+                              (firstOther != null ? " (got " + firstOther + ")" : ""));
+            Check(accepted > 0 && rejected > 0, "wmo safety: the corruption sweep exercised both outcomes");
+            WowParseException asBase = null;
+            try { WmoParser.ParseGroup(new byte[3], "base"); }
+            catch (WowParseException e) { asBase = e; }
+            Check(asBase is WmoParseException, "wmo safety: WmoParseException is a WowParseException for existing handlers");
+        }
+    }
+
+    static class WmoTestBytes
+    {
+        public static byte[] SkipBytes(this byte[] b, int n)
+        {
+            var r = new byte[Math.Max(0, b.Length - n)];
+            Buffer.BlockCopy(b, Math.Min(n, b.Length), r, 0, r.Length);
+            return r;
+        }
+
+        public static byte[] TakeBytes(this byte[] b, int n)
+        {
+            var r = new byte[Math.Min(n, b.Length)];
+            Buffer.BlockCopy(b, 0, r, 0, r.Length);
+            return r;
         }
     }
 }

@@ -644,7 +644,11 @@ void AnimControl::UpdateWMO(WMO *w, int group)
   if (!w || w->itemName().size()==0)
     return;
 
-  bool newwmo = (oldname != w->itemName().toStdString());
+  // A new WMO object needs the list and its set applied even when it has the previous one's name:
+  // WMO A, a model, then WMO A again creates a fresh object (doodad set -1) that the name test alone
+  // skipped, leaving the list showing a choice the object never received. g_selWMO is cleared when a
+  // WMO is deleted (ModelCanvas::ClearWMO), so a different pointer here always means a new object.
+  bool newwmo = (oldname != w->itemName().toStdString()) || (g_selWMO != w);
   oldname = w->itemName().toStdString();
 
   //Model *m = static_cast<Model*>(canvas->root->children[0]);

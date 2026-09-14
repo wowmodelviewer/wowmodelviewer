@@ -19,16 +19,39 @@ void WMO::flipcc(QString & cc)
   cc = QString(d);
 }
 
-WMO::WMO(QString name) : 
+WMO::WMO(QString name, uint32 rootFileDataID, bool metadata) :
   ManagedItem(name),
-  maxCoord(), 
-  minCoord()
+  maxCoord(0.0f),
+  minCoord(0.0f),
+  fileDataID(rootFileDataID),
+  metadataOnly(metadata)
 {
-  CASCFile f(name);
+  // Everything the UI and the destructor read is defined BEFORE the file is opened. The early return
+  // below, taken when the root cannot be opened, used to leave the counts and the groups/mat/groupnames
+  // pointers uninitialised -- and the status bar, Model > Info and the doodad-set list all read the
+  // counts of whatever WMO is selected, failed or not.
+  // Default the header counts to 0 as well because they are only assigned by the MOHD chunk; a file
+  // WITHOUT one (a WMO *group* file like "<name>_000.wmo", which shares the .wmo extension) would
+  // otherwise drive the material/group loops with garbage counts against null arrays.
+  nTextures = nGroups = nP = nLights = nModels = nDoodads = nDoodadSets = 0;
+  col = 0;
+  nX = 0;
+  v1 = v2 = glm::vec3(0.0f);
+  LiquidType = 0;
+  groupnames = 0;
+  skybox = 0;
+  sbid = 0;
+  groups = 0;
+  mat = 0;
+  doodadset = -1;
+  includeDefaultDoodads = true;
+
+  // By FileDataID when the caller knows it (CASCFile falls back to the name otherwise).
+  CASCFile f(name, fileDataID > 0 ? (int)fileDataID : -1);
   f.open();
   ok = !f.isEof();
   if (!ok) {
-    LOG_ERROR << "Couldn't load WMO" << name;
+    LOG_ERROR << "Couldn't load WMO" << name << "(FileDataID" << fileDataID << ")";
     f.close();
     return;
   }
@@ -37,18 +60,6 @@ WMO::WMO(QString name) :
   float ff[3];
 
   char *ddnames = NULL;
-  groupnames = 0;
-  skybox = 0;
-  groups = 0;
-  mat = 0;
-  doodadset = -1;
-  includeDefaultDoodads = true;
-
-  // Default the header counts to 0. They are only assigned by the MOHD chunk; a file WITHOUT
-  // one (a WMO *group* file like "<name>_000.wmo", which shares the .wmo extension and shows
-  // up in the file tree) would otherwise drive the material/group loops with uninitialised
-  // garbage counts against the still-null mat[]/groups[] arrays -> access violation.
-  nTextures = nGroups = nP = nLights = nModels = nDoodads = nDoodadSets = 0;
 
   char *texbuf=0;
 
@@ -293,6 +304,20 @@ WMO::WMO(QString name) :
     return;
   }
 
+  if (metadataOnly) {
+    // No texture lookups, no GL uploads, no group files, no display lists: see wmo.h. The material
+    // table keeps its raw fields (the Info tab and any later feature can read them); its GL handle is
+    // simply none.
+    for (size_t i = 0; i < nTextures; i++)
+      mat[i].tex = 0;
+    delete[] texbuf;
+    LOG_INFO << "WMO" << name << "(FileDataID" << fileDataID << ") root metadata:" << nGroups << "group(s),"
+             << nTextures << "material(s)," << (int)doodadsets.size() << "doodad set(s)," << (int)modelis.size()
+             << "doodad placement(s)," << (int)lights.size() << "light(s)," << (int)groupFileDataIDs.size()
+             << "GFID entries -- group files not loaded (the Unity player fetches them)";
+    return;
+  }
+
   // Resolve material textures now that the whole root has been parsed. If a MOTX string
   // block was present (texbuf) this is a classic WMO and each material's nameStart is a byte
   // offset into it. Modern/retail WMOs ship no MOTX and instead store the texture's
@@ -373,6 +398,9 @@ WMO::~WMO()
 
 void WMO::loadGroup(int id)
 {
+  // A metadata-only root never builds groups (see wmo.h): the Unity player loads them itself.
+  if (metadataOnly || !ok || !groups)
+    return;
   if (id==-1) {
     for (size_t i = 0; i < nGroups; i++) {
       groups[i].initDisplayList();

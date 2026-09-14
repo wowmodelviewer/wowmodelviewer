@@ -144,7 +144,22 @@ public:
   WoWModel *skybox;
   int sbid;
 
-  WMO(QString name);
+  // The root's own FileDataID (0 when unknown, e.g. a legacy client). The root is opened by it when
+  // known -- the Browse tree already holds it -- and it is what the Unity player is sent to load.
+  uint32 fileDataID;
+
+  // METADATA ONLY: the root chunks are parsed (counts, bounds, materials, group info, GFID, doodad
+  // sets and placements, lights, fog, portals) but no group file is opened, no OpenGL display list is
+  // compiled and no material texture is uploaded. The Unity player draws WMOs from the raw files it
+  // fetches itself, and the archived OpenGL canvas never paints, so a full build did nothing but cost
+  // time and memory (every group was built twice) on every selection. The host UI -- Model > Info, the
+  // doodad-set list, the status bar -- needs only the root tables. A future host feature that really
+  // needs group geometry must construct its own full WMO on demand, not rely on the selection.
+  // Group objects exist in both modes (from MOGI); in this mode their geometry stays empty and ok false.
+  bool metadataOnly;
+
+  // fileDataID > 0 opens the root by FileDataID (the name is then only the fallback and the label).
+  WMO(QString name, uint32 fileDataID = 0, bool metadataOnly = false);
   ~WMO();
   
   int doodadset;

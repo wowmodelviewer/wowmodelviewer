@@ -1,7 +1,7 @@
 /*
  * UnityIpcServer.h
  *
- * Localhost IPC server for the embedded Unity renderer (protocol v3). WMV is the SERVER:
+ * Localhost IPC server for the embedded Unity renderer (protocol v4). WMV is the SERVER:
  * UnityRendererHost starts this listener BEFORE launching the player and passes the port on
  * the player's command line (-wmvPort <n>); the player connects back, announces itself with
  * unityReady and then asks WMV for the raw WoW assets/metadata it renders from. This is the
@@ -15,7 +15,7 @@
  * replace it later without changing the request side.
  *
  *   player -> WMV
- *     { "type":"unityReady", "protocolVersion":3 }
+ *     { "type":"unityReady", "protocolVersion":4 }
  *     { "type":"getAsset",             "requestId":"abc123", "path":"creature/chicken/chicken.m2" }
  *     { "type":"getAssetByFileDataID", "requestId":"abc124", "fileDataID":123456 }
  *     { "type":"getModelTextures",     "requestId":"abc125", "fileDataID":123200 }
@@ -23,9 +23,21 @@
  *       "reason":"", "submeshVisible":[1,0,1], "triangles":2364, "animTimeMs":840 }
  *     { "type":"characterSceneApplied", "fileDataID":1011653, "revision":4, "load":12, "status":"applied",
  *       "reason":"", "merged":3, "attachments":4, "missing":[], "ms":212 }
+ *     { "type":"mapObjectLoaded", "fileDataID":115058, "load":13, "status":"built", "reason":"",
+ *       "groups":1, "groupFilesRequested":1, "groupFilesMissing":0, "batches":3, "submeshes":3, "renderers":1,
+ *       "materials":3, "provisionalMaterials":3, "unresolvedMaterials":0, "blendedMaterials":0,
+ *       "texturesReferenced":3, "texturesDecoded":3, "texturesMissing":0, "vertices":1234, "triangles":987,
+ *       "boundsMin":[x,y,z], "boundsMax":[x,y,z],
+ *       "timings":{"rootMs":5,"groupsMs":40,"texturesMs":60,"buildMs":12,"totalMs":130},
+ *       "liveMapObjects":1, "liveModels":0 }
+ *     { "type":"runtimeState", "query":3, "liveMapObjects":0, "liveModels":1, "modelFileDataID":1234567,
+ *       "mapObjectFileDataID":0, "loading":false }
  *   WMV -> player
  *     { "type":"loadWoWModel", "path":"creature/chicken/chicken.m2", "fileDataID":0, "client":"active",
- *       "character":false, "load":12 }
+ *       "character":false, "load":12, "kind":"m2" }
+ *     { "type":"loadWoWModel", "path":"world/wmo/.../it_trollhouse03.wmo", "fileDataID":115058,
+ *       "client":"active", "character":false, "load":13, "kind":"wmo" }
+ *     { "type":"runtimeState", "query":3 }
  *     { "type":"assetResponse", "requestId":"abc123", "ok":true, "path":"...", "fileDataID":n,
  *       "byteLength":123456, "sha1":"...", "encoding":"base64", "data":"..." }
  *     { "type":"assetResponse", "requestId":"abc123", "ok":false, "error":"not found" }
@@ -96,6 +108,22 @@
  * already holds does not resend the pixels. Rows are top row first, bytes B,G,R,A -- the memory
  * layout of the QImage the host's GL texture was uploaded from.
  *
+ * WORLD MODELS (protocol 4). A WMO travels as a loadWoWModel with "kind":"wmo" naming the ROOT file
+ * ("kind" absent, or "m2", is a model as before); the host sends it only to a player that announced
+ * protocol 4 or later, and an older player gets the out-of-date notice instead. The player fetches the
+ * root, its LOD0 group files (the first MOHD group-count entries of GFID) and the material textures
+ * with getAssetByFileDataID -- the host sends no geometry -- and answers each load once with
+ * mapObjectLoaded: "built", "failed" (with the reason) or "superseded" (a newer load of either kind
+ * replaced it before it was built; not a failure). "load" is the serial of the loadWoWModel it answers.
+ * The counts describe what was built (bounds in Unity space; timings in milliseconds), and
+ * liveMapObjects / liveModels are the runtime roots alive in the player after the outcome was adopted,
+ * which is how a lifecycle test proves nothing leaked or doubled. No skin, animation or geoset message
+ * is sent about a WMO: it has none. runtimeState (also protocol 4) is a test's question: the player
+ * answers it with the runtimes alive right now and the fileDataID of the model and of the world model on
+ * screen (0 for none), "query" echoing the question's number. It is what shows a world model left alive
+ * under a model -- a step that ends on a model has no mapObjectLoaded, and the next world-model adoption
+ * disposes whatever is left before it counts.
+ *
  * modelAnimation is pushed the same way whenever the animation on display changes, and once after
  * loadWoWModel so the player starts on the animation the app is showing rather than on its own
  * idle. "sequenceIndex" is what the player must act on: it indexes the model's animation table,
@@ -145,7 +173,7 @@
 class UnityIpcServer : public wxEvtHandler
 {
 public:
-  static const int PROTOCOL_VERSION = 3;
+  static const int PROTOCOL_VERSION = 4;
 
   UnityIpcServer();
   ~UnityIpcServer();
@@ -165,13 +193,18 @@ public:
   bool playerSwitchesSubmeshes() const { return m_client && m_unityReady && m_playerProtocol >= 2; }
   // The player can dress a character from a characterScene (protocol 3).
   bool playerDressesCharacters() const { return m_client && m_unityReady && m_playerProtocol >= 3; }
+  // The player draws world models: it takes loadWoWModel "kind":"wmo" and answers mapObjectLoaded (protocol 4).
+  bool playerDrawsMapObjects() const { return m_client && m_unityReady && m_playerProtocol >= 4; }
 
   // Runtime command: tell the player which model is active. Either path or fileDataID may be
   // empty/0. Queued if the player is connected; dropped (logged) otherwise.
   // character: the model is a playable character, dressed by the characterScene that follows.
-  // load: the host's load serial for this load (> 0), which the player's characterSceneApplied echoes.
+  // load: the host's load serial for this load (> 0), which the player's characterSceneApplied and
+  // mapObjectLoaded echo.
+  // kind: "m2" (a model) or "wmo" (a world model ROOT, fileDataID required; see WORLD MODELS above).
+  // Callers send "wmo" only when playerDrawsMapObjects().
   void sendLoadWoWModel(const QString & path, int fileDataID, const QString & client = QStringLiteral("active"),
-                        bool character = false, int load = 0);
+                        bool character = false, int load = 0, const QString & kind = QStringLiteral("m2"));
 
   // Runtime command: the resolved state of the character on display (UnityCharacterScene::build).
   // False when the player cannot dress characters or nothing was sent.
@@ -238,6 +271,63 @@ public:
   };
   std::function<void(const SceneAck &)> onCharacterSceneApplied;
 
+  // The player's report on a world-model load (mapObjectLoaded). Every field of the message; a count
+  // the player did not send reads -1, so a check can tell "absent" from zero.
+  struct MapObjectReport
+  {
+    int fileDataID = 0;
+    int load = 0;                  // the loadWoWModel serial this answers
+    QString status;                // "built" / "failed" / "superseded"
+    QString reason;
+    int groups = -1;
+    int groupFilesRequested = -1;
+    int groupFilesMissing = -1;
+    int batches = -1;
+    int submeshes = -1;
+    int renderers = -1;
+    int materials = -1;
+    int provisionalMaterials = -1;
+    int unresolvedMaterials = -1;
+    int blendedMaterials = -1;
+    int texturesReferenced = -1;
+    int texturesDecoded = -1;
+    int texturesMissing = -1;
+    long long vertices = -1;
+    long long triangles = -1;
+    bool hasBounds = false;        // both arrays present with three numbers each
+    double boundsMin[3] = { 0.0, 0.0, 0.0 };
+    double boundsMax[3] = { 0.0, 0.0, 0.0 };
+    double rootMs = -1.0;
+    double groupsMs = -1.0;
+    double texturesMs = -1.0;
+    double buildMs = -1.0;
+    double totalMs = -1.0;
+    int liveMapObjects = -1;       // world-model runtime roots alive in the player after adoption
+    int liveModels = -1;           // model/character runtime roots alive in the player after adoption
+    // The whole report on one line, every field, for logs.
+    QString describe() const;
+  };
+  // Raised on the GUI thread for every mapObjectLoaded.
+  std::function<void(const MapObjectReport &)> onMapObjectLoaded;
+
+  // The player's answer to runtimeState: what it holds at the moment it answered. A field the player did
+  // not send reads -1.
+  struct RuntimeState
+  {
+    int query = 0;                 // the number of the question this answers
+    int liveMapObjects = -1;       // world-model runtimes alive
+    int liveModels = -1;           // model runtimes alive (a character's parts included)
+    int modelFileDataID = -1;      // the model on screen, 0 for none
+    int mapObjectFileDataID = -1;  // the world model on screen, 0 for none
+    bool loading = false;          // a load of either kind in flight
+    QString describe() const;
+  };
+  // Ask the player what it holds (runtimeState). Returns the question's number, which the answer echoes,
+  // or 0 when nothing was sent (no player, or one older than protocol 4).
+  int requestRuntimeState();
+  // Raised on the GUI thread for every runtimeState answer.
+  std::function<void(const RuntimeState &)> onRuntimeState;
+
   // Raised (on the GUI thread) when the player's unityReady arrives -- the host uses it to
   // push the currently displayed model.
   std::function<void()> onUnityReady;
@@ -269,6 +359,12 @@ public:
     int sceneApplied = 0;   // ... of which "applied"
     QString lastScene;      // "rev <n>: <merged> merged, <attachments> attached"
     QString lastSceneAck;   // "rev <n> <status> <merged>/<attachments> <reason>"
+    int mapObjectLoads = 0;       // loadWoWModel "kind":"wmo" sent
+    int mapObjectReports = 0;     // mapObjectLoaded received, any status
+    int mapObjectBuilt = 0;       // ... of which "built"
+    int mapObjectFailed = 0;      // ... of which "failed"
+    int mapObjectSuperseded = 0;  // ... of which "superseded"
+    QString lastMapObject;        // "<fileDataID> load <n> <status> <groups> groups <reason>" of the last report
     QString lastRequest;    // "path" or "fileDataID n"
     QString lastProvider;   // "CASC" / "MPQ" / ""
     QString lastError;
@@ -288,6 +384,8 @@ private:
   void handleGetModelTextures(const QJsonObject & msg);
   void handleGeosetsApplied(const QJsonObject & msg);
   void handleCharacterSceneApplied(const QJsonObject & msg);
+  void handleMapObjectLoaded(const QJsonObject & msg);
+  void handleRuntimeState(const QJsonObject & msg);
   void queueLine(const QByteArray & line);
   // One line assembled from pieces straight in the send buffer: a characterImage line is ~11 MB, and
   // joining it into one QByteArray first would copy all of it once more.
@@ -313,7 +411,8 @@ private:
   std::map<QString, QImage> m_sentImages;
   std::map<QString, QString> m_sentImageIds;
   int m_imageSerial = 0;
-  std::string m_inBuf;               // partial incoming line
+  int m_runtimeQuery = 0;            // the last runtimeState question's number
+  std::string m_inBuf;              // partial incoming line
   std::string m_outBuf;              // pending bytes to send (partial sends are normal for big assets)
   // How much of m_outBuf has gone out. Sent bytes are dropped from the front only when they are more
   // than half the buffer (or all of it): erasing them after every send moved the whole unsent rest

@@ -260,8 +260,10 @@ public:
   // Borderless fullscreen that keeps the menu bar, so the mode can always be left.
   void EnterViewerFullScreen(bool full);
   // Runtime command to the embedded Unity player: "this is the active model" (path +
-  // FileDataID of the model on the canvas). No-op when no player is connected. Called after
-  // every model load and when the player announces unityReady.
+  // FileDataID of the model on the canvas), or for a WMO the root's path + FileDataID with kind "wmo"
+  // (only to a player that is ready and speaks protocol 4). No-op when no player is connected. Called
+  // after every model load, after a WMO selection (FileControl::SelectWMOFile) and when the player
+  // announces unityReady. Raises the load serial for whatever it sends.
   void SendLoadToUnity();
   void SendCurrentModelToUnity();
   void SendCurrentSkinToUnity();
@@ -331,6 +333,15 @@ public:
   int m_unityLoadedFileDataID = 0;
   bool m_unityLoadedCharacter = false;
   void OnCharacterSceneApplied(const UnityIpcServer::SceneAck & ack);
+  // The world model (root FileDataID) the Unity player reported it could not build, the load serial that
+  // build belonged to and the player's reason. The viewport shows a notice for it while that load is the
+  // one on display -- the player keeps showing whatever it had before, which must not pass for the WMO --
+  // until another load or a player (re)start.
+  int m_unityWmoFailed = 0;
+  int m_unityWmoFailedLoad = 0;
+  QString m_unityWmoFailReason;
+  // Every mapObjectLoaded: logged, and a failure of the WMO on display becomes the notice above.
+  void OnMapObjectLoaded(const UnityIpcServer::MapObjectReport & report);
   struct SceneHold
   {
     explicit SceneHold(ModelViewer * v) : viewer(v) { viewer->m_sceneHold++; }

@@ -222,9 +222,24 @@ public class WmvRuntimeModel
     public Bounds Bounds;
     public int VertexCount, TriangleCount, SubmeshCount;
 
+    /// <summary>
+    /// Models built and not yet disposed, across the whole player: the body on screen, a character's
+    /// parts, anything staged. Counted here rather than inferred from the scene because Destroy is
+    /// deferred to the end of the frame, so a scene walk right after a switch still finds the object
+    /// that was just released. mapObjectLoaded reports it (liveModels), which is how the lifecycle
+    /// test proves a switch to a world model left no model behind.
+    /// </summary>
+    public static int Live { get { return live; } }
+    static int live;
+    bool disposed;
+
+    public WmvRuntimeModel() { live++; }
+
     /// <summary>Destroy every runtime resource this model owns.</summary>
     public void Dispose()
     {
+        // Idempotent for the count: a part can be disposed by the dresser and again by its owner.
+        if (!disposed) { disposed = true; live--; }
         if (Root != null) UnityEngine.Object.Destroy(Root);
         if (Mesh != null) UnityEngine.Object.Destroy(Mesh);
         foreach (var m in Materials) if (m != null) UnityEngine.Object.Destroy(m);
@@ -317,6 +332,9 @@ public static class WmvModelBuilder
     ///                    the submeshes of a SINGLE renderer -- and reading the render loop's
     ///                    sorting rules is not the same as measuring it. See
     ///                    WmvMain.ReportQueueOrder.
+    ///   -wmvWmoVertexColour
+    ///                    world models only, diagnostic: multiply MOCV colour set 1 into the
+    ///                    provisional material. Never on by default (see WmoVertexColour).
     /// </summary>
     public static class Debug_
     {
@@ -336,6 +354,7 @@ public static class WmvModelBuilder
         static int[] onlySubmeshes;                      // -wmvOnlySubmesh: null = draw them all
         static int[] pinnedTextures = new int[0];        // -wmvSkinTexture: slot, file, slot, file
         static int rig;
+        static bool wmoVertexColour;
         static bool lightDump;
         static float lightYaw = 30f;
         static float lightPitch = 15f;
@@ -364,6 +383,7 @@ public static class WmvModelBuilder
                 else if (a == "-wmvMatDump") matDump = true;
                 else if (a == "-wmvAllocCheck") allocCheck = true;
                 else if (a == "-wmvLifecycleTest") lifecycleTest = true;
+                else if (a == "-wmvWmoVertexColour") wmoVertexColour = true;
                 else if (a.StartsWith("-wmvSeqPath="))
                 {
                     // a:b:c -- sequences to switch through, in order, before the light check
@@ -543,6 +563,7 @@ public static class WmvModelBuilder
         /// <summary>
         /// Measure managed allocation per frame while the animators run (-wmvAllocCheck): the
         /// material animator adds per-frame work, and "it is cheap" is a number or it is nothing.
+        /// A static world model is measured the same way after it is adopted (no animators run for it).
         /// </summary>
         public static bool AllocCheck { get { Parse(); return allocCheck; } }
 
@@ -568,6 +589,15 @@ public static class WmvModelBuilder
         /// real build and switch paths. Result lines are logged for the regression to read.
         /// </summary>
         public static bool LifecycleTest { get { Parse(); return lifecycleTest; } }
+
+        /// <summary>
+        /// DIAGNOSTIC ONLY: multiply a world model's MOCV colour set 1 into its provisional material
+        /// (-wmvWmoVertexColour), to look at what the baked colours hold. Normal rendering never uses
+        /// vertex colours: the audit showed a plain texture x MOCV product darkens interiors plausibly
+        /// but turns modern exteriors nearly black, so their real meaning waits for material research.
+        /// A group without set 1 draws unmodified under the switch.
+        /// </summary>
+        public static bool WmoVertexColour { get { Parse(); return wmoVertexColour; } }
 
         /// <summary>
         /// Which preview light rig the viewport draws with (-wmvRig=N), for a visual A/B:
@@ -2512,8 +2542,8 @@ public static class WmvModelBuilder
     /// alpha the combiner built (they output mesh opacity, 1 for a static pose); every other mode
     /// outputs it.
     /// </summary>
-    static void ApplyBlendMode(Material m, M2BlendMode mode, bool depthWriteDisabled,
-                               float cutoff, out string described)
+    internal static void ApplyBlendMode(Material m, M2BlendMode mode, bool depthWriteDisabled,
+                                        float cutoff, out string described)
     {
         var src = UnityEngine.Rendering.BlendMode.One;
         var dst = UnityEngine.Rendering.BlendMode.Zero;
@@ -3154,7 +3184,7 @@ public static class WmvModelBuilder
     /// </summary>
     public static bool AuthoredTextureDomain = true;
 
-    static Texture2D CreateTexture(BlpImage img, string name, bool dropAlpha)
+    internal static Texture2D CreateTexture(BlpImage img, string name, bool dropAlpha)
     {
         // ROW ORDER: a BLP stores its rows top-down (row 0 = top of the image), but a Unity
         // texture's raw data starts at the BOTTOM-left. Uploading the decoded bytes as-is

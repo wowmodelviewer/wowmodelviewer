@@ -426,6 +426,138 @@ void UnityIpcServer::handleCharacterSceneApplied(const QJsonObject & msg)
     onCharacterSceneApplied(ack);
 }
 
+QString UnityIpcServer::MapObjectReport::describe() const
+{
+  const auto ms = [](double v) { return v < 0.0 ? QString("-") : QString::number(v, 'f', 1); };
+  QString bounds = "-";
+  if (hasBounds)
+    bounds = QString("[%1,%2,%3]..[%4,%5,%6]")
+               .arg(boundsMin[0], 0, 'f', 2).arg(boundsMin[1], 0, 'f', 2).arg(boundsMin[2], 0, 'f', 2)
+               .arg(boundsMax[0], 0, 'f', 2).arg(boundsMax[1], 0, 'f', 2).arg(boundsMax[2], 0, 'f', 2);
+  // The player's free text is appended, never passed through arg(): a "%1" in it would be substituted.
+  return QString("fileDataID=%1 load=%2 status=%3 groups=%4 groupFilesRequested=%5 "
+                 "groupFilesMissing=%6 batches=%7 submeshes=%8")
+           .arg(fileDataID).arg(load).arg(status).arg(groups).arg(groupFilesRequested)
+           .arg(groupFilesMissing).arg(batches).arg(submeshes) +
+         QString(" renderers=%1 materials=%2 provisionalMaterials=%3 unresolvedMaterials=%4 blendedMaterials=%5 "
+                 "texturesReferenced=%6 texturesDecoded=%7 texturesMissing=%8")
+           .arg(renderers).arg(materials).arg(provisionalMaterials).arg(unresolvedMaterials).arg(blendedMaterials)
+           .arg(texturesReferenced).arg(texturesDecoded).arg(texturesMissing) +
+         QString(" vertices=%1 triangles=%2 bounds=%3 rootMs=%4 groupsMs=%5 texturesMs=%6 buildMs=%7 totalMs=%8 "
+                 "liveMapObjects=%9")
+           .arg(vertices).arg(triangles).arg(bounds).arg(ms(rootMs)).arg(ms(groupsMs)).arg(ms(texturesMs))
+           .arg(ms(buildMs)).arg(ms(totalMs)).arg(liveMapObjects) +
+         QString(" liveModels=%1").arg(liveModels) + " reason=\"" + reason + "\"";
+}
+
+void UnityIpcServer::handleMapObjectLoaded(const QJsonObject & msg)
+{
+  // Counts the player did not send stay -1 (see MapObjectReport); toDouble keeps 64-bit vertex and
+  // triangle totals intact where toInt would clip them.
+  const auto count = [&msg](const char * key) {
+    const QJsonValue v = msg.value(QLatin1String(key));
+    return v.isDouble() ? (int)v.toDouble() : -1;
+  };
+  const auto count64 = [&msg](const char * key) {
+    const QJsonValue v = msg.value(QLatin1String(key));
+    return v.isDouble() ? (long long)v.toDouble() : -1LL;
+  };
+
+  MapObjectReport r;
+  r.fileDataID = msg.value("fileDataID").toInt(0);
+  r.load = msg.value("load").toInt(0);
+  r.status = msg.value("status").toString();
+  r.reason = msg.value("reason").toString();
+  r.groups = count("groups");
+  r.groupFilesRequested = count("groupFilesRequested");
+  r.groupFilesMissing = count("groupFilesMissing");
+  r.batches = count("batches");
+  r.submeshes = count("submeshes");
+  r.renderers = count("renderers");
+  r.materials = count("materials");
+  r.provisionalMaterials = count("provisionalMaterials");
+  r.unresolvedMaterials = count("unresolvedMaterials");
+  r.blendedMaterials = count("blendedMaterials");
+  r.texturesReferenced = count("texturesReferenced");
+  r.texturesDecoded = count("texturesDecoded");
+  r.texturesMissing = count("texturesMissing");
+  r.vertices = count64("vertices");
+  r.triangles = count64("triangles");
+  const QJsonArray bmin = msg.value("boundsMin").toArray();
+  const QJsonArray bmax = msg.value("boundsMax").toArray();
+  r.hasBounds = bmin.size() == 3 && bmax.size() == 3;
+  for (int i = 0; r.hasBounds && i < 3; i++)
+  {
+    r.boundsMin[i] = bmin.at(i).toDouble();
+    r.boundsMax[i] = bmax.at(i).toDouble();
+  }
+  const QJsonObject timings = msg.value("timings").toObject();
+  const auto timing = [&timings](const char * key) {
+    const QJsonValue v = timings.value(QLatin1String(key));
+    return v.isDouble() ? v.toDouble() : -1.0;
+  };
+  r.rootMs = timing("rootMs");
+  r.groupsMs = timing("groupsMs");
+  r.texturesMs = timing("texturesMs");
+  r.buildMs = timing("buildMs");
+  r.totalMs = timing("totalMs");
+  r.liveMapObjects = count("liveMapObjects");
+  r.liveModels = count("liveModels");
+
+  m_stats.mapObjectReports++;
+  if (r.status == "built")
+    m_stats.mapObjectBuilt++;
+  else if (r.status == "failed")
+    m_stats.mapObjectFailed++;
+  else if (r.status == "superseded")
+    m_stats.mapObjectSuperseded++;
+  m_stats.lastMapObject = QString("%1 load %2 %3 %4 groups ").arg(r.fileDataID).arg(r.load).arg(r.status)
+                            .arg(r.groups) + r.reason;
+  if (r.status == "failed")
+    LOG_ERROR << "[unityipc] <- mapObjectLoaded" << r.describe();
+  else
+    LOG_INFO << "[unityipc] <- mapObjectLoaded" << r.describe();
+  if (onMapObjectLoaded)
+    onMapObjectLoaded(r);
+}
+
+QString UnityIpcServer::RuntimeState::describe() const
+{
+  return QString("query=%1 liveMapObjects=%2 liveModels=%3 modelFileDataID=%4 mapObjectFileDataID=%5 loading=%6")
+           .arg(query).arg(liveMapObjects).arg(liveModels).arg(modelFileDataID).arg(mapObjectFileDataID)
+           .arg(loading ? "true" : "false");
+}
+
+int UnityIpcServer::requestRuntimeState()
+{
+  if (!playerDrawsMapObjects())
+    return 0;
+  QJsonObject msg;
+  msg["type"] = "runtimeState";
+  msg["query"] = ++m_runtimeQuery;
+  LOG_INFO << "[unityipc] -> runtimeState query=" << m_runtimeQuery;
+  queueJson(msg);
+  return m_runtimeQuery;
+}
+
+void UnityIpcServer::handleRuntimeState(const QJsonObject & msg)
+{
+  const auto count = [&msg](const char * key) {
+    const QJsonValue v = msg.value(QLatin1String(key));
+    return v.isDouble() ? (int)v.toDouble() : -1;
+  };
+  RuntimeState s;
+  s.query = msg.value("query").toInt(0);
+  s.liveMapObjects = count("liveMapObjects");
+  s.liveModels = count("liveModels");
+  s.modelFileDataID = count("modelFileDataID");
+  s.mapObjectFileDataID = count("mapObjectFileDataID");
+  s.loading = msg.value("loading").toBool(false);
+  LOG_INFO << "[unityipc] <- runtimeState" << s.describe();
+  if (onRuntimeState)
+    onRuntimeState(s);
+}
+
 void UnityIpcServer::handleGeosetsApplied(const QJsonObject & msg)
 {
   GeosetAck ack;
@@ -562,7 +694,7 @@ void UnityIpcServer::sendModelAnimationState(int m2FileDataID, int sequenceIndex
 }
 
 void UnityIpcServer::sendLoadWoWModel(const QString & path, int fileDataID, const QString & client,
-                                      bool character, int load)
+                                      bool character, int load, const QString & kind)
 {
   QJsonObject msg;
   msg["type"] = "loadWoWModel";
@@ -571,8 +703,13 @@ void UnityIpcServer::sendLoadWoWModel(const QString & path, int fileDataID, cons
   msg["client"] = client;
   msg["character"] = character;
   msg["load"] = load;
+  // Always stated. A player older than protocol 4 ignores the field (its message reader skips names it
+  // does not know), which is harmless for "m2": that is what it assumes. "wmo" never goes to one.
+  msg["kind"] = kind;
+  if (kind == "wmo")
+    m_stats.mapObjectLoads++;
   LOG_INFO << "[unityipc] -> loadWoWModel path=" << msg["path"].toString() << "fileDataID=" << fileDataID
-           << "load=" << load << (character ? "(character)" : "");
+           << "load=" << load << "kind=" << kind << (character ? "(character)" : "");
   queueJson(msg);
 }
 
@@ -670,7 +807,13 @@ void UnityIpcServer::handleLine(const std::string & line)
     m_unityReady = true;
     m_playerProtocol = version;
     LOG_INFO << "[unityipc] <- unityReady (protocolVersion" << version << ")";
-    if (version != PROTOCOL_VERSION)
+    // An older player is supported for what it can do -- the host checks the version before every
+    // feature that needs a newer one and shows the out-of-date notice instead -- so it is worth a
+    // warning, not an error. A newer or unknown one is.
+    if (version > 0 && version < PROTOCOL_VERSION)
+      LOG_WARNING << "[unityipc] player speaks protocol v" << version << ", older than WMV's v" << PROTOCOL_VERSION
+                  << "-- what it cannot do (world models below v4, characters below v3) gets a notice";
+    else if (version != PROTOCOL_VERSION)
       LOG_ERROR << "[unityipc] player speaks protocol v" << version << "but WMV expects v" << PROTOCOL_VERSION;
     if (onUnityReady)
       onUnityReady();
@@ -694,6 +837,14 @@ void UnityIpcServer::handleLine(const std::string & line)
   else if (type == "characterSceneApplied")
   {
     handleCharacterSceneApplied(msg);
+  }
+  else if (type == "mapObjectLoaded")
+  {
+    handleMapObjectLoaded(msg);
+  }
+  else if (type == "runtimeState")
+  {
+    handleRuntimeState(msg);
   }
   else
   {

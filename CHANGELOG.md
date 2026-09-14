@@ -6,6 +6,21 @@ Format loosely based on [Keep a Changelog](https://keepachangelog.com/).
 ## [Unreleased]
 
 ### Added
+- **Embedded Unity renderer: world models (WMOs) are drawn, as static geometry.** Picking a WMO in
+  Browse keeps the Unity viewport on screen instead of showing a notice. The host sends the root's
+  FileDataID (`loadWoWModel` with `"kind":"wmo"`, protocol 4) and the player fetches the root, the
+  full-detail groups its GFID chunk names and the material textures itself, then reports what it built
+  (`mapObjectLoaded`). This is a foundation stage: materials are provisional (first texture slot or
+  white, two-sided and alpha-keyed from the material's flags and blend value), so modern materials --
+  shader 23 in particular -- are visibly wrong and are logged as unresolved; doodads (so the doodad-set
+  choice has no visible effect yet, as the Model panel now says), liquids, WMO lights, fog, portal
+  culling, LOD switching and the skybox are not drawn. A player older than protocol 4 gets the
+  "Unity renderer out of date" notice for a WMO, a root the host cannot read gets "World model cannot
+  be read", and a WMO the player reports it could not build gets "World model could not be built".
+  `-dbfromfile -wmo <root path or FileDataID> -unityipctest` checks the player's report headlessly, and
+  `WMV_IPCTEST_SEQUENCE` adds a model/world-model switching sequence that checks the player holds
+  exactly one runtime of the right kind after every step (asked with the new `runtimeState` question,
+  so a world model left alive under a model fails too).
 - **Embedded Unity renderer: playable characters are drawn in the Unity viewport.** The Unity
   viewport draws the same
   character from the state the host has already resolved -- the composited body and eye textures,
@@ -78,7 +93,7 @@ Format loosely based on [Keep a Changelog](https://keepachangelog.com/).
   and scrubbing updates the pose without drawing anything.
 - **What the Unity viewport cannot show yet gets a notice, not another viewport.** The content still
   loads -- the panels, Info and the exporters keep working on it -- and the viewport says what is
-  loaded and that it cannot be shown yet: an image picked in Browse, a WMO, a map tile, a mounted
+  loaded and that it cannot be shown yet: an image picked in Browse, a map tile, a mounted
   character, a model with no FileDataID (legacy clients), a character the player could not build
   (with its reason), and a character on a player build too old to dress one. A missing player build,
   one that will not start, one that crashes or loses its connection, and one that is still running
@@ -112,6 +127,16 @@ Format loosely based on [Keep a Changelog](https://keepachangelog.com/).
   `-imgseq` smoke test is gone. `-unityipctest` and `-fbxexport` still run.
 
 ### Fixed
+- **Selecting a WMO no longer builds it for OpenGL, twice.** The host opened every group file,
+  compiled it into a display list for the hidden canvas, uploaded the material textures to GL, and
+  then rebuilt every group again (leaking the first build) -- all for a canvas that never paints. It
+  now reads the root's metadata only (what Model > Info, the doodad-set list and the status bar use).
+- **Switching away from a WMO no longer writes into freed memory.** Deleting a WMO left the canvas root
+  and the doodad-set list's target pointing at it, so the next load of anything, or closing the
+  application, wrote into the freed object. A WMO is now detached from both before it is deleted, and
+  one still loaded at exit is freed properly. A root that fails to open reports zero groups instead of
+  uninitialised counts, and a WMO picked again after another model gets its doodad-set list applied
+  again.
 - **Browse's file-type list picks the type it names.** "OGGs" and "SKINs" were missing from the
   list the selection is matched against, so every later entry was one out: "MP3s" ran the image
   handling and "Images (*.blp)" did nothing. Picking an image now names it in the viewport's notice
