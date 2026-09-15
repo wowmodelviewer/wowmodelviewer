@@ -1571,6 +1571,59 @@ static void doHeadlessUnityIpcTest(ModelViewer * frame)
                << random << "ms," << (ipc->stats().imagePushes - imagesBefore) << "new image(s); ack"
                << ipc->stats().lastSceneAck;
       characterOk = characterOk && random >= 0;
+
+      // DISMOUNT. Choosing "None" in the mount list must hand the canvas back to the character without
+      // freeing it: first with no mount up (the canvas model IS the character), then with one up, set up
+      // the way the mount choice sets it up (the mount on the root and on the canvas, the character kept
+      // on its attachment). Checked: canvas and root afterwards, the scale the character takes back from
+      // the mount, and the player dressing the character again.
+      CharControl * cc = frame->charControl;
+      const std::vector<int> savedNumbers = cc->numbers, savedCats = cc->cats;
+      cc->numbers.assign(1, -1);   // the list's "None" entry
+      cc->cats.assign(1, 0);
+      cc->OnUpdateItem(UPDATE_MOUNT, 0);
+      const bool unmountedOk = frame->canvas->model() == cm && frame->canvas->root->model() == nullptr &&
+                               cc->model == cm && !cm->geosets.empty();
+      LOG_INFO << "[unityipc-test] character: \"None\" with no mount up -> canvas keeps the character"
+               << (unmountedOk ? "(OK)" : "(FAIL)");
+
+      bool mountedOk = false;
+      GameFile * mountFile = GAMEDIRECTORY.getFile(QString("creature/bear/bear.m2"));
+      WoWModel * mount = mountFile ? new WoWModel(mountFile, false) : nullptr;
+      if (mount && mount->ok)
+      {
+        const float savedScale = cm->scale_;
+        const float mountScale = 1.25f;
+        mount->isMount = true;
+        mount->scale_ = mountScale;
+        frame->canvas->root->setModel(mount);
+        frame->canvas->setModel(mount, true);
+        wxStopWatch mounted;   // let the viewport routing see the mount before it goes again
+        while (mounted.Time() < 1000)
+        {
+          ipc->poll();
+          wxTheApp->Yield(true);
+          wxMilliSleep(10);
+        }
+        const int beforeDismount = ipc->stats().sceneApplied;
+        cc->OnUpdateItem(UPDATE_MOUNT, 0);   // frees the mount
+        const bool handedBack = frame->canvas->model() == cm && frame->canvas->root->model() == nullptr;
+        const bool scaleBack = cc->charAtt == nullptr || cm->scale_ == mountScale;
+        cm->scale_ = savedScale;
+        frame->SendCharacterSceneToUnity(true);
+        const long redressed = waitApplied(beforeDismount, 60000);
+        LOG_INFO << "[unityipc-test] character: \"None\" with a mount up -> canvas back to the character="
+                 << handedBack << "scale taken back=" << scaleBack << "| scene applied again after" << redressed << "ms";
+        mountedOk = handedBack && scaleBack && redressed >= 0;
+      }
+      else
+      {
+        delete mount;
+        LOG_ERROR << "[unityipc-test] character: dismount with a mount up NOT checked (creature/bear/bear.m2 did not load)";
+      }
+      cc->numbers = savedNumbers;
+      cc->cats = savedCats;
+      characterOk = characterOk && unmountedOk && mountedOk;
     }
     LOG_INFO << "[unityipc-test] character check:" << (characterOk ? "(OK)" : "(FAIL)");
   }
