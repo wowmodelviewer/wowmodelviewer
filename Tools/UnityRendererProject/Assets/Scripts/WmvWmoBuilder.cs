@@ -14,8 +14,9 @@
 //   resolved-partial  the same, with an input the client reads whose source is not established (the
 //                     reason codes say which), drawn with the established part -- every id-23, id-7 and
 //                     id-5 material is one, their env emissives (and id 23's MOC2 byte-3 lerp) not being
-//                     established; so is a material some of whose vertices lack a stream it reads (U-V4,
-//                     added by this builder once the groups are counted);
+//                     established; so is a material some of whose vertices lack a stream it reads (U-V4),
+//                     and one whose F_UNLIT light bypass is drawn in an interior group (U-F3), both added
+//                     by this builder once the groups are counted;
 //   unresolved        the PROVISIONAL archived baseline the static stage drew -- slot +0x0C on UV
 //                     channel 0, a non-zero blend drawn as the 128/255 key, flag 0x04 for culling --
 //                     with the reason codes logged per material; or a labelled PROVISIONAL fallback of
@@ -23,14 +24,15 @@
 //                     (U-23b), an id-0/16/4/5 material with an empty +0x0C or an id-13/7 material with an
 //                     empty layer slot (U-23b), an id-4/5/7/13/23 material with blend 2 or above (U-B2..U-B5,
 //                     drawn opaque because its case alpha is 1). No blend value of 2 or more is given a
-//                     guessed Src/Dst.
+//                     guessed Src/Dst: the client's blend row is logged with its evidence, never applied.
 //
 // MOCV set 1, the set-2 RGB, the MOMT colours and the tail slots nobody samples stay parsed, kept in the
 // runtime data and logged -- not interpreted. Two vertex streams are uploaded, each only for groups a
 // material reading it draws in, because they are material inputs, not light: MOC2 (UV channel 4, the
 // four-layer weights) and the alpha of MOCV set 2 (UV channel 5, the two-layer factor). -wmvWmoMaterialDiag prints
-// the plan and the created material read back, one line per drawn material; -wmvWmoView,
-// -wmvWmoUvOverride and -wmvWmoOnlyMaterials are verification views (see WmvModelBuilder.Debug_).
+// the plan and the created material read back, one line per drawn material, and one line per drawn batch
+// (range, submesh, material, queue, depth write, verdict); -wmvWmoView, -wmvWmoUvOverride and
+// -wmvWmoOnlyMaterials are verification views (see WmvModelBuilder.Debug_).
 //
 // Geometry goes through WowCoordinateConverter exactly as an M2 does (the audit proved WMO group space
 // uses the M2 convention): positions, normals, every MOTV set into UV channels 0..3, and the triangle
@@ -150,6 +152,9 @@ public struct WmvWmoMaterialInfo
     /// and are drawn with the stated default there (U-V4). GapStreams names which streams were missing.</summary>
     public long StreamGapVertices;
     public string GapStreams;
+    /// <summary>The batches drawing this material in interior groups (MOGP flag 0x2000). Where the plan's
+    /// F_UNLIT light bypass applies, any such batch adds U-F3 (WmoMaterialSemantics.NoteUnlitInInteriorGroups).</summary>
+    public int InteriorBatches;
 }
 
 /// <summary>A built world model and everything it owns.</summary>
@@ -603,6 +608,8 @@ public static class WmvWmoBuilder
                                                           ownedTextures, objectName, rt, log);
                     mat = rt.Materials[id];
                     batchUses[id]++;
+                    if ((g.Header.Flags & WmoGroupFlags.Indoor) != 0)
+                        rt.MaterialInfo[id].InteriorBatches++;
                     if (rt.MaterialInfo[id].Plan.ReadsMoc2)
                         CountFourLayerInputs(rt, g, id, b, gi, tris, log);
                     if (rt.MaterialInfo[id].Plan.ReadsSet2Alpha)
@@ -701,11 +708,13 @@ public static class WmvWmoBuilder
         for (int i = 0; i < nMat; i++)
         {
             WmvWmoMaterialInfo info = rt.MaterialInfo[i];
-            if (info.StreamGapVertices > 0)
+            if (info.StreamGapVertices > 0 || info.InteriorBatches > 0)
             {
-                // Only the data says whether a stream the permutation reads is missing, so the code joins the
-                // plan here, before anything counts or prints the verdict.
+                // Only the data says whether a stream the permutation reads is missing, and only the groups
+                // whether a light-bypassed batch is interior, so those codes join the plan here, before anything
+                // counts or prints the verdict. Neither changes what is drawn.
                 WmoMaterialSemantics.NoteAbsentStream(info.Plan, info.StreamGapVertices, info.GapStreams);
+                WmoMaterialSemantics.NoteUnlitInInteriorGroups(info.Plan, info.InteriorBatches);
                 info.Verdict = info.Plan.Verdict;
                 info.Why = string.Join("; ", info.Plan.Notes);
                 rt.MaterialInfo[i] = info;
@@ -736,6 +745,12 @@ public static class WmvWmoBuilder
             }
         }
 
+        // ---- the per-batch record: which object draws each batch, once every verdict is final ------------
+        if (log != null && diag)
+            for (int gi = 0; gi < groups.Length; gi++)
+                for (int k = 0; groups[gi] != null && k < rt.SubmeshBatches[gi].Length; k++)
+                    log(DescribeBatchDiag(rt, groups[gi], gi, rt.SubmeshBatches[gi][k], k, rt.SubmeshMaterialIds[gi][k]));
+
         rt.Textures = ownedTextures.ToArray();
         rt.HasBounds = haveBounds;
         if (haveBounds)
@@ -760,13 +775,13 @@ public static class WmvWmoBuilder
                 "{24}: {25} resolved, {26} resolved-partial, {10} unresolved ({27} drawn " +
                 "PROVISIONALLY, {29} of them by a labelled fallback), {30} four-layer (MOC2 uploaded for {31} group(s)), " +
                 "{34} two-layer (MOCV set-2 alpha uploaded for {35} group(s)), {36} drawn without the env emissive of " +
-                "their client case (U-G1/U-E2/U-E3), {32} group(s) with a stream gap (a stream such a " +
+                "their client case (U-G1/U-E2/U-E3/U-E4/U-P1), {32} group(s) with a stream gap (a stream such a " +
                 "material reads is missing, U-V4), {11} with a non-zero blend of which {12} blend 2+ (state " +
-                "unresolved), {23} sampler(s) drawn white because their texture is missing, {28} sampler(s) with an empty " +
+                "unresolved, client blend row logged only), {23} sampler(s) drawn white because their texture is missing, {28} sampler(s) with an empty " +
                 "slot, {13} Texture2D upload(s) (GPU only, no CPU-readable copy), {14} batch(es) with a material id past MOMT; drawn bounds {15}; MOHD " +
                 "bounds converted min ({16:F2},{17:F2},{18:F2}) max ({19:F2},{20:F2},{21:F2}){22}; not applied to any " +
                 "material: MOCV set-1 shading and the set-2 RGB (U-V1..U-V5), MOMT colours (U-C6, U-F2), env emissives " +
-                "(U-G1, U-E2, U-E3){33}",
+                "(U-G1, U-E2, U-E3, U-E4, U-P1), blend factors of 2 and above (U-B2..U-B5, U-B7){33}",
                 objectName, rt.GroupCount, rt.GroupsMissing, rt.Renderers, rt.Batches, rt.Submeshes, rt.VertexCount,
                 rt.TriangleCount, usedMaterials, nMat, rt.UnresolvedMaterials, rt.BlendedMaterials,
                 rt.TrueBlendMaterials, rt.Textures.Length, outOfRangeBatches, rt.Bounds,
@@ -1041,8 +1056,10 @@ public static class WmvWmoBuilder
     /// surfaces a stage touches; =weights and =blend draw a four-layer material's stored MOC2 weights and
     /// its effective weights after the height blend (rgb = layers 1..3, black = layer 4); =va draws a
     /// two-layer material's set-2 alpha as grey; =diffuse the combiner diffuse of every material; =t0 and
-    /// =t1 the first and second register as sampled. -wmvWmoOnlyMaterials=a:b:c discards every other
-    /// material in every camera, so a close-up isolates the surfaces a check is about.
+    /// =t1 the first and second register as sampled; =envmask the emissive mask of ids 5, 7 and 23 (the
+    /// factor the client multiplies each env map by -- no env map is bound or sampled for it).
+    /// -wmvWmoOnlyMaterials=a:b:c discards every other material in every camera, so a close-up isolates the
+    /// surfaces a check is about.
     /// </summary>
     static void ApplyDiagnosticView(Material m, WmoMaterialPlan plan, int materialIndex)
     {
@@ -1074,12 +1091,20 @@ public static class WmvWmoBuilder
         }
     }
 
+    /// <summary>The -wmvWmoView value of the envmask view (WmvWmo.shader's _WmoDiagView 8).</summary>
+    public const int EnvMaskView = 8;
+
     /// <summary>"" normally; the active verification switches, for the build summary, otherwise.</summary>
     static string DiagnosticViewNote()
     {
         var parts = new List<string>();
         int view = WmvModelBuilder.Debug_.WmoView;
-        if (view > 0) parts.Add("-wmvWmoView=" + WmvModelBuilder.Debug_.WmoViewName(view));
+        if (view == EnvMaskView)
+            parts.Add("-wmvWmoView=" + WmvModelBuilder.Debug_.WmoViewName(view) + " (DIAGNOSTIC: client emissive masks; equations " +
+                      "CLIENT, on the diffuse's texture coordinates, which assume the cb0[5].y override does not replace them " +
+                      "(U-G1); env map not sampled: coordinate U-G1/U-E2, address mode U-E4, distance fade U-E3, program " +
+                      "presence U-P1)");
+        else if (view > 0) parts.Add("-wmvWmoView=" + WmvModelBuilder.Debug_.WmoViewName(view));
         if (WmvModelBuilder.Debug_.WmoUvOverride >= 0)
             parts.Add("-wmvWmoUvOverride=" + WmvModelBuilder.Debug_.WmoUvOverride + " (every four-layer and two-layer register on that UV channel)");
         if (WmvModelBuilder.Debug_.WmoOnlyMaterials != null)
@@ -1262,10 +1287,13 @@ public static class WmvWmoBuilder
     }
 
     /// <summary>
-    /// -wmvWmoMaterialDiag: the plan (WmoMaterialSemantics.Describe), what each sampler's file became, and
-    /// the created Unity material READ BACK -- shader, queue, tag, every render-state property, and each
-    /// bound register's texture with its size and addressing -- so a claim about a material is checked
-    /// against the object that draws, not against the code that meant to build it.
+    /// -wmvWmoMaterialDiag: the plan (WmoMaterialSemantics.Describe: shader id, blend value, the realised
+    /// factors, depth write and queue, the client's blend row for a blend of 2 or above, the env emissive of
+    /// ids 5/7/23 with its equation, mask, env map and coordinate status, the codes and the resolution), how
+    /// many batches draw it (and how many of those are interior), what each sampler's file became, and the
+    /// created Unity material READ BACK -- shader, queue, tag, every render-state property, and each bound
+    /// register's texture with its size and addressing -- so a claim about a material is checked against the
+    /// object that draws, not against the code that meant to build it.
     /// </summary>
     public static string DescribeMaterialDiag(WmvWmoMaterialInfo info, Material m, int batchUses,
                                               Dictionary<uint, WmvWmoTexture> textures)
@@ -1273,6 +1301,8 @@ public static class WmvWmoBuilder
         var inv = System.Globalization.CultureInfo.InvariantCulture;
         var sb = new System.Text.StringBuilder("wmo material-diag ");
         sb.Append(WmoMaterialSemantics.Describe(info.Plan)).Append(" | batches ").Append(batchUses);
+        if (info.InteriorBatches > 0)
+            sb.Append(" (").Append(info.InteriorBatches).Append(" in interior groups, MOGP 0x2000)");
         sb.Append(" | decode [");
         for (int i = 0; i < info.Plan.Samplers.Length; i++)
         {
@@ -1307,5 +1337,27 @@ public static class WmvWmoBuilder
         if (!m.HasProperty("_WmoPermutation") && m.mainTexture != null)
             sb.Append(", baseline fallback mainTexture '").Append(m.mainTexture.name).Append('\'');
         return sb.ToString();
+    }
+
+    /// <summary>
+    /// -wmvWmoMaterialDiag, one drawn batch: "wmo batch g&lt;group&gt;.b&lt;MOBA index&gt; range A|B|C -&gt; submesh k -&gt;
+    /// material m (shader, blend, queue, ZWrite, verdict)". The range is the batch's place among the group
+    /// header's A/B/C counts ("?" past them); queue and depth write are READ BACK from the material that draws
+    /// the submesh, so a later ordering or blend stage is checked against the object that draws.
+    /// </summary>
+    public static string DescribeBatchDiag(WmvRuntimeMapObject rt, WmoGroup g, int gi, int batchIndex, int submesh, int materialId)
+    {
+        int a = g.Header.BatchCountA, b = g.Header.BatchCountB, c = g.Header.BatchCountC;
+        string range = batchIndex < a ? "A" : batchIndex < a + b ? "B" : batchIndex < a + b + c ? "C" : "?";
+        bool inTable = materialId >= 0 && materialId < rt.MaterialInfo.Length && materialId < rt.Materials.Length;
+        Material m = inTable ? rt.Materials[materialId] : rt.FallbackMaterial;
+        string queue = m != null ? m.renderQueue.ToString() : "?";
+        string zwrite = m != null && m.HasProperty("_ZWrite") ? (m.GetFloat("_ZWrite") > 0.5f ? "on" : "off") : "?";
+        string head = string.Format("wmo batch g{0}.b{1} range {2} -> submesh {3} -> material {4}", gi, batchIndex, range, submesh, materialId);
+        if (!inTable)
+            return head + string.Format(" (past MOMT: the plain white fallback, queue {0}, ZWrite {1})", queue, zwrite);
+        WmvWmoMaterialInfo info = rt.MaterialInfo[materialId];
+        return head + string.Format(" (shader {0}, blend {1}, queue {2}, ZWrite {3}, {4})", info.Shader, info.Blend, queue, zwrite,
+                                    info.Verdict);
     }
 }

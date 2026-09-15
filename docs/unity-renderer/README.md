@@ -411,7 +411,8 @@ geometry**. This is the foundation stage, and it is deliberately narrow:
   1, 0 for layers 1-3, layer 4 the remainder), each times its height, sharpened against the largest
   and normalised; never alpha-tested. An empty layer gets weight 0, which equals the client only where
   its stored weight is 0, so such a material also carries U-23b. Its +0x0C is an env map for an
-  emissive that is **not drawn** (camera-space axes and fade not established, U-E2/U-E3), is never
+  emissive that is **not drawn** (camera-space axes, sampler addressing, fade and presence in the
+  client's program not established, U-E2/U-E4/U-E3/U-P1), is never
   drawn as a diffuse and is not decoded, and the client's pull of the diffuse toward an unknown colour
   by MOC2 byte 3 is not applied (U-23a) -- so every id-23 material is at best `resolved-partial`. One
   with a layer but no height map for it is `unresolved: U-23b` and drawn by the same arithmetic with
@@ -426,27 +427,43 @@ geometry**. This is the foundation stage, and it is deliberately narrow:
   alpha-tested; **shader id 5** (env metal) draws the diffuse part of case 5, which is case 4's +0x0C
   with its alpha (a reflectivity mask) unread. Their env emissives -- the diffuse times its alpha times
   the env map (+0x24 for id 7, +0x18 for id 5) on a generated coordinate, added after light -- are
-  **not drawn** and those env maps are not decoded: the client's coordinate generator (U-G1) and
-  distance fade (U-E3) are not established, so every id-7 and id-5 material is `resolved-partial:
-  U-G1,U-E3`, and F_UNLIT is not honoured on them (U-F1). An id-7 material with an empty +0x0C or +0x18
+  **not drawn** and those env maps are not decoded: the client's coordinate generator (U-G1), the
+  camera axes a reflection or planar coordinate depends on (U-E2), the env sampler's addressing (U-E4),
+  the distance fade (U-E3) and whether the program the client picks for the batch adds the emissive at
+  all (U-P1: a permutation without it, the single-texture map-object family, or the edge selector that
+  tints or replaces it) are not established, so every id-7 and id-5 material is `resolved-partial:
+  U-G1,U-E2,U-E3,U-E4,U-P1`, and F_UNLIT is not honoured on them (U-F1). Id 23's emissive (its +0x0C on
+  a per-pixel sphere map, times the weighted layer colour and alpha) carries U-E2, U-E3, U-E4 and U-P1
+  the same way. **These emissives stay undrawn by decision**: their client equations are logged, pinned
+  by the tests and shown by the `envmask` view, and nothing more. An id-7 material with an empty +0x0C or +0x18
   is `unresolved: U-23b` and drawn by the same labelled fallback as id 13, and an id-5 material with an
   empty +0x0C by the fallback of id 4. Ids 4, 5, 7, 13 and 23 with blend 2 or above are `unresolved:
   U-B2..U-B5` and keep their case arithmetic in a provisional fallback drawn opaque (no blend factors
-  are guessed). Every other material is drawn by the **provisional** archived baseline -- slot +0x0C
+  are applied). Every other material is drawn by the **provisional** archived baseline -- slot +0x0C
   or white, a non-zero blend as the 128/255 key, flag 0x04 for culling -- and says why: `unresolved`
   with the research reason codes for blend values 2 and above on ids 0 and 16 (U-B2..U-B5: no blend
-  factors are guessed), for id 23 without any layer texture (U-23b; drawn white, its env map not
-  bound) and for ids outside the plan (OUT-OF-PLAN). MOC2 is uploaded (UV channel 4) only for groups a
+  factors are applied), for id 23 without any layer texture (U-23b; drawn white, its env map not
+  bound) and for ids outside the plan (OUT-OF-PLAN). **Blend 2 and above also stays provisional by
+  decision**, drawn exactly as before; what is logged for it is the row of the client's blend-state
+  table (the four factors the 12.1 executable's read-only data holds for that EGxBlend index) with its
+  evidence level. That MOMT value n selects row n is documented only for older clients: not contradicted
+  for 2, contested for 3 and above in 12.1, which adds `U-B7`; `U-B1` is added only past the table's 17
+  rows. MOC2 is uploaded (UV channel 4) only for groups a
   four-layer material draws in, and the MOCV set-2 alpha (UV channel 5) only for groups an id-13 or id-7
   material draws in; where a group lacks a stream such a material reads (MOC2, MOCV set 2 or a MOTV
   set) it draws a stated default, logs the group, and the material gains `U-V4` with the vertex count
-  (a resolved one becomes `resolved-partial`). MOCV colour set 1, the set-2 RGB and MOMT colours are kept
+  (a resolved one becomes `resolved-partial`). The F_UNLIT light bypass (ids 0, 4, 13, 16) is kept
+  wherever it is drawn, but older-client documentation honours the flag only for exterior-lit batches,
+  so a material the load finds drawn in an interior group (MOGP flag 0x2000) gains `U-F3` with the batch
+  count (a resolved one becomes `resolved-partial`). MOCV colour set 1, the set-2 RGB and MOMT colours are kept
   but not used.
 - **One line per material** in the player log: its index, shader id, blend value, flags, every
   non-zero texture slot with what became of the file, the permutation and sampler bindings the plan
   chose, the render state, and a verdict -- `resolved`, `resolved-partial` (an input the client reads
-  has no established source, e.g. an env emissive: U-G1,U-E3) or `unresolved` (the baseline or a
-  labelled fallback) -- with its reason codes and notes.
+  has no established source, e.g. an env emissive: U-G1,U-E2,U-E3,U-E4,U-P1) or `unresolved` (the
+  baseline or a labelled fallback) -- with its reason codes and notes: for blend 2 and above the client
+  blend row with its evidence level, for ids 5, 7 and 23 the emissive's client equation, the coordinate
+  it would need and every open input, and U-F3 with its interior batch count.
 - **Textures.** Every non-zero texture FileDataID of the root is fetched once, after the groups.
   Only the textures a drawn material's plan samples are decoded -- once per FileDataID, on worker
   threads, a few at a time; every other file is fetched and its BLP header checked. Decoding them
@@ -465,9 +482,18 @@ geometry**. This is the foundation stage, and it is deliberately narrow:
   material; normal rendering never uses vertex colours. `-wmvWmoMaterialDiag` (also through
   `WMV_DEBUG`) adds one `wmo material-diag` line per drawn material: shader id, blend, flags, every
   texture FileDataID, the permutation, each sampler's role, slot and UV channel, the vertex-colour
-  use, Src/Dst for colour and alpha, ZWrite, the alpha test, cull, addressing, queue, the light
-  bypass, the resolution with its reason codes, what each sampled file became, and the created
-  material read back; for a four-layer batch also its mean stored MOC2 weights and how many of its
+  use, the realised Src/Dst for colour and alpha, ZWrite, the alpha test, cull, addressing, queue, the
+  light bypass; for blend 2 and above the client's EGxBlend row (`client blend: ...`, its four factors
+  with the evidence level: the factor row is the client's own, the value-to-row hop older-client
+  documentation, contested from 3 up, U-B7) beside the realised state it is not applied to; for ids 5,
+  7 and 23 the emissive that is not drawn -- its client equation, its mask and the texture coordinates
+  the mask assumes, the env map's FileDataID ("not decoded, not drawn"), what is known of the env
+  coordinate and the codes that keep it undrawn; how many of the material's batches sit in interior
+  groups; the resolution with its reason codes, what each sampled file became, and the created
+  material read back. It also adds one `wmo batch g<group>.b<MOBA index> range A|B|C -> submesh k ->
+  material m (shader, blend, queue, ZWrite, verdict)` line per drawn batch, with the queue and depth
+  write read back from the material that draws it, so an ordering or blend question can be checked
+  against the object that draws. For a four-layer batch also its mean stored MOC2 weights and how many of its
   vertices carry a non-zero byte 3 (U-23a) or a weight on an empty layer (U-23b), and the UV span of
   each layer's MOTV set over the vertices that weight it (a span of 0 samples one texel); for a two-layer
   batch its set-2 alpha range and mean, how many vertices show layer 2 or weight an empty slot, and
@@ -479,6 +505,12 @@ geometry**. This is the foundation stage, and it is deliberately narrow:
   draw a four-layer material's stored MOC2 weights / its effective weights after the height blend
   (red, green, blue = layers 1-3, black = layer 4); `=va` an id-13 or id-7 material's set-2 alpha as grey;
   `=diffuse` every material's combiner diffuse; `=t0` / `=t1` the first / second register as sampled;
+  `=envmask` the emissive mask of ids 5, 7 and 23 -- the factor the client multiplies each env map by:
+  t0.rgb * t0.a (id 5), c.rgb * c.a with c the rgba lerp of the two layers (id 7), mix.rgb * mix.a with
+  mix the weighted layers (id 23) -- on the texture coordinates the diffuse uses, which assume the
+  client's cb0[5].y override replaces none of them (U-G1); the env map itself is never bound or sampled
+  (its coordinate, addressing, fade and presence are U-G1/U-E2, U-E4, U-E3, U-P1), every other material
+  draws dark grey, and the build summary names the view;
   `-wmvWmoUvOverride=N` makes every four-layer and two-layer register read UV channel N (the swap test
   for per-layer UV sets); `-wmvWmoOnlyMaterials=a:b:c` draws only those MOMT entries.
 - **What is not drawn yet:** doodads (so the doodad-set choice in Model > Appearance has no visible
@@ -1020,7 +1052,9 @@ are not available in the Unity-only viewer, and write no image; the `-imgseq` sm
   skybox, and the rest of the WMO material system (shader ids other than 0/4/5/7/13/16/23, the env-map
   emissives of ids 5, 7 and 23, the MOC2 byte-3 colour pull of id 23, blend values 2 and above, MOCV
   set-1 vertex colours). Those materials are drawn provisionally or without the missing term, and the
-  player logs them as resolved-partial or unresolved with the reason codes.
+  player logs them as resolved-partial or unresolved with the reason codes. The env emissives stay
+  undrawn and blend 2 and above provisional by decision: their open inputs (U-G1, U-E2, U-E3, U-E4,
+  U-P1; U-B2..U-B5, U-B7) are per-draw client state that no available source establishes.
 - Full parity with the archived OpenGL renderer.
 
 There is no fallback: the Unity viewport is the only renderer the user sees, and what it cannot

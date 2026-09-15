@@ -74,8 +74,9 @@ Shader "WMV/Map Object"
         _WmoVertexColourDiag ("Diagnostic vertex colour", Float) = 0
         // DIAGNOSTIC ONLY (-wmvWmoView, -wmvWmoOnlyMaterials): 0 draws normally. 1 flat plan colour,
         // 2 stored MOC2 weights, 3 effective four-layer weights, 4 the two-layer factor va, 5 the combiner
-        // diffuse, 6 register t0 as sampled, 7 register t1 as sampled (two-layer) -- all unlit;
-        // _WmoDiagHide 1 discards the material in every camera. Never set otherwise.
+        // diffuse, 6 register t0 as sampled, 7 register t1 as sampled (two-layer), 8 the emissive mask of
+        // permutations 6, 5 and 2 (the factor the client multiplies its env map by; no env map is sampled)
+        // -- all unlit; _WmoDiagHide 1 discards the material in every camera. Never set otherwise.
         _WmoDiagView ("Diagnostic view", Float) = 0
         _WmoDiagColour ("Diagnostic plan colour", Color) = (1,1,1,1)
         _WmoDiagHide ("Diagnostic hide", Float) = 0
@@ -391,7 +392,8 @@ Shader "WMV/Map Object"
                     layerB = b / max(total, 1e-6);
                     float4 mixc = l1 * layerB.x + l2 * layerB.y + l3 * layerB.z + l4 * layerB.w;
                     // Diffuse = the weighted sum. Not applied: the client's lerp toward an exe-side colour
-                    // by MOC2 byte 3 (U-23a) and the env emissive env.rgb * mix.rgb * mix.a (U-E2, U-E3).
+                    // by MOC2 byte 3 (U-23a) and the env emissive env.rgb * mix.rgb * mix.a (U-E2, U-E3,
+                    // U-E4, U-P1).
                     albedo = mixc.rgb;
                     caseAlpha = 1.0;
                 }
@@ -403,7 +405,10 @@ Shader "WMV/Map Object"
                 // Permutation 5, the client's pixel case 7, lerps the same registers by the same factor (rgba;
                 // only its emissive reads the alpha). That emissive -- the lerped colour times its alpha times
                 // an env map on a generated coordinate, added after light -- is NOT added: the generator
-                // (U-G1) and the distance fade (U-E3) are exe-side, so its register is never bound.
+                // (U-G1), the distance fade (U-E3), the env sampler's addressing (U-E4) and whether the client's
+                // program adds it at all (U-P1) are exe-side, and a reflection or planar coordinate also needs
+                // the camera axes (U-E2), so its register is never bound. The rgba lerp exists only in the
+                // envmask view below.
                 [branch]
                 if (twoLayer)
                 {
@@ -415,8 +420,8 @@ Shader "WMV/Map Object"
                 // Permutation 4, the client's pixel case 4: t0.rgb as permutation 1 draws it, but the case
                 // alpha is the constant 1, so the texture's alpha can never reach the test. Permutation 6, the
                 // client's pixel case 5, has the same diffuse and alpha; its emissive t0.rgb * t0.a * env is
-                // NOT added (U-G1, U-E3), so t0's alpha (the reflectivity mask) is read by nothing here.
-                // Permutation 5 already set its case alpha above.
+                // NOT added (U-G1, U-E2, U-E3, U-E4, U-P1), so t0's alpha (the reflectivity mask) is read by
+                // nothing here but the envmask view. Permutation 5 already set its case alpha above.
                 if (_WmoPermutation > 3.5)
                     caseAlpha = 1.0;
 
@@ -428,19 +433,41 @@ Shader "WMV/Map Object"
 
                 // DIAGNOSTIC ONLY (-wmvWmoView): unlit views of the plan, of the four-layer weights (rgb =
                 // layers 1..3, black = layer 4), of the two-layer factor va (grey level, permutations 3 and 5), of the combiner
-                // diffuse and of registers t0 / t1 as sampled. Materials a view does not apply to draw dark
-                // grey.
+                // diffuse, of registers t0 / t1 as sampled, and of the emissive masks. Materials a view does not
+                // apply to draw dark grey.
                 if (_WmoDiagView > 0.5)
                 {
                     bool fourLayer = _WmoPermutation > 1.5 && _WmoPermutation < 2.5;
                     fixed3 na = fixed3(0.1, 0.1, 0.1);
+                    // View 8 (envmask): the factor the client's cases multiply their env map's rgb by -- case 5
+                    // t0.rgb * t0.a (permutation 6), case 7 c.rgb * c.a with c the rgba lerp of the two layers
+                    // (permutation 5), case 23 mix.rgb * mix.a (permutation 2) -- on the texture coordinates the
+                    // diffuse uses, which assume the client's cb0[5].y override replaces none of them (U-G1). The
+                    // env map itself is never sampled: its coordinate (U-G1, U-E2), addressing (U-E4), fade (U-E3)
+                    // and presence (U-P1) are not established. Everything is computed here only, so nothing drawn
+                    // changes: the drawn diffuse needs neither case 7's lerped alpha nor case 23's weighted layer
+                    // alpha, so the layer alphas are sampled again here, at the coordinates and with the weights
+                    // the diffuse used.
+                    fixed4 cLerp = lerp(t1, t0, i.va);
+                    float mixA = 0.0;
+                    [branch]
+                    if (fourLayer && _WmoDiagView > 7.5)
+                        mixA = tex2Dgrad(_WmoTex1, WmoPick(_WmoUv1, i.uv01, i.uv23), WmoPick(_WmoUv1, dx01, dx23), WmoPick(_WmoUv1, dy01, dy23)).a * layerB.x
+                             + tex2Dgrad(_WmoTex2, WmoPick(_WmoUv2, i.uv01, i.uv23), WmoPick(_WmoUv2, dx01, dx23), WmoPick(_WmoUv2, dy01, dy23)).a * layerB.y
+                             + tex2Dgrad(_WmoTex3, WmoPick(_WmoUv3, i.uv01, i.uv23), WmoPick(_WmoUv3, dx01, dx23), WmoPick(_WmoUv3, dy01, dy23)).a * layerB.z
+                             + tex2Dgrad(_WmoTex4, WmoPick(_WmoUv4, i.uv01, i.uv23), WmoPick(_WmoUv4, dx01, dx23), WmoPick(_WmoUv4, dy01, dy23)).a * layerB.w;
+                    fixed3 envMask = fourLayer ? albedo * mixA
+                                   : abs(_WmoPermutation - 5.0) < 0.5 ? cLerp.rgb * cLerp.a
+                                   : abs(_WmoPermutation - 6.0) < 0.5 ? t0.rgb * t0.a
+                                   : na;
                     fixed3 v = _WmoDiagView < 1.5 ? _WmoDiagColour.rgb
                              : _WmoDiagView < 2.5 ? (fourLayer ? layerW.xyz : na)
                              : _WmoDiagView < 3.5 ? (fourLayer ? layerB.xyz : na)
                              : _WmoDiagView < 4.5 ? (twoLayer ? (fixed3)i.va : na)
                              : _WmoDiagView < 5.5 ? albedo
                              : _WmoDiagView < 6.5 ? t0.rgb
-                             :                      (twoLayer ? t1.rgb : na);
+                             : _WmoDiagView < 7.5 ? (twoLayer ? t1.rgb : na)
+                             :                      envMask;
                     return fixed4(_WmvShaderEncode > 0.5 ? WmvAuthoredToLinear(v) : v, 1.0);
                 }
 
@@ -512,7 +539,14 @@ Shader "WMV/Map Object"
 
                 c.rgb = c.rgb * lum + spec;
 
-                // Blend 0 and 1 output alpha 1 (blending is off for both).
+                // Here, after light and unscaled by it, the client adds the env emissive of cases 5, 7 and 23.
+                // It is NOT added: its coordinate (U-G1, ids 5 and 7), the camera axes (U-E2), the env sampler's
+                // addressing (U-E4), the distance fade (U-E3) and whether the client's program adds it at all
+                // (U-P1) are not established. The envmask view shows its mask.
+
+                // Blend 0 and 1 output alpha 1 (blending is off for both). Blend 2 and above is a provisional
+                // fallback with blending off too: the client's blend row is logged, never applied (U-B2..U-B5,
+                // and U-B7 from 3).
                 c.a = 1.0;
 
                 if (_WmvShaderEncode > 0.5)
