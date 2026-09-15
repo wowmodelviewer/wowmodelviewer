@@ -394,22 +394,66 @@ geometry**. This is the foundation stage, and it is deliberately narrow:
   chunk -- the first MOHD group-count entries, never the later LOD blocks and never a group file
   name -- with one mesh per group and a submesh per render batch, in the same coordinate
   conversion as M2 models.
-- **Materials are provisional.** A surface shows the material's first texture slot (+0x0C) or
-  plain white, is two-sided when material flag 0x04 says so, and is alpha-keyed for a non-zero
-  blend value; everything else is opaque. That is roughly what the archived OpenGL renderer drew,
-  and it is **not** how the game draws a WMO: the shader ids, the later texture slots (shader 23
-  keeps its real textures there, so those surfaces show white or the wrong image), the true blend
-  modes and the vertex colours are fetched or kept but not used yet, and the player logs every
-  material it could not resolve.
+- **Materials follow a material plan, drawn by a world-model shader.** Every MOMT entry is
+  turned into a plan by `Wow/WmoMaterialSemantics.cs` (pure C#, covered by the parser tests) and
+  drawn by `Resources/WmvWmo.shader` ("WMV/Map Object"), never by the M2 combiner shader. The
+  shader copies the preview light rig of `WmvOpaque.shader` code for code, so a world model is lit
+  exactly like a model and `WmvOpaque.shader` itself is untouched. Established so far, from the
+  client's own map-object shader: **shader ids 0 and 16** (diffuse = texture slot +0x0C on MOTV set
+  1), **blend 0** (opaque, depth write) and **blend 1** (the same plus a discard below 128/255 on
+  that texture's alpha), flag **0x04** (two-sided), flags **0x40 / 0x80** (clamp texture addressing
+  on U / V) and flag **0x01** on those ids (the preview light is not applied). An id-0/16 material
+  whose +0x0C is empty is `unresolved: U-23b` -- its whole surface would be whatever the client binds
+  to an unused register -- and drawn white as a labelled **provisional fallback**. **Shader id 23**
+  (the modern four-layer material) is drawn as the client's pixel case 23 without its
+  emissive: layers +0x18/+0x24/+0x28/+0x2C, each with the alpha of its height map
+  +0x30/+0x34/+0x38/+0x3C, layer k and height k on MOTV set k; per-vertex weights from MOC2 (bytes 2,
+  1, 0 for layers 1-3, layer 4 the remainder), each times its height, sharpened against the largest
+  and normalised; never alpha-tested. An empty layer gets weight 0, which equals the client only where
+  its stored weight is 0, so such a material also carries U-23b. Its +0x0C is an env map for an
+  emissive that is **not drawn** (camera-space axes and fade not established, U-E2/U-E3), is never
+  drawn as a diffuse and is not decoded, and the client's pull of the diffuse toward an unknown colour
+  by MOC2 byte 3 is not applied (U-23a) -- so every id-23 material is at best `resolved-partial`. One
+  with a layer but no height map for it is `unresolved: U-23b` and drawn by the same arithmetic with
+  the missing height reading 1, labelled a provisional fallback. **Shader id 13** (two-layer opaque) is drawn as the client's pixel case
+  13: +0x0C on MOTV set 1 and +0x18 on MOTV set 2, lerped per vertex by the alpha of MOCV colour set 2
+  (the stored byte / 255, no fix-up; 1 draws +0x0C, 0 draws +0x18); its alpha is 1, so blend 1 is never
+  alpha-tested. One with an empty +0x0C or +0x18 is `unresolved: U-23b` (what the client binds to an
+  unused register is unknown) and drawn by the same arithmetic with that register white, labelled a
+  provisional fallback. **Shader id 4** (opaque) is the client's pixel case 4: +0x0C on MOTV set 1,
+  its alpha never read or tested; with +0x0C empty it is the same labelled fallback as id 0. **Shader id 7** (two-layer env metal) draws the diffuse part of the
+  client's pixel case 7, which is case 13's lerp of +0x0C and +0x18 by the set-2 alpha, never
+  alpha-tested; **shader id 5** (env metal) draws the diffuse part of case 5, which is case 4's +0x0C
+  with its alpha (a reflectivity mask) unread. Their env emissives -- the diffuse times its alpha times
+  the env map (+0x24 for id 7, +0x18 for id 5) on a generated coordinate, added after light -- are
+  **not drawn** and those env maps are not decoded: the client's coordinate generator (U-G1) and
+  distance fade (U-E3) are not established, so every id-7 and id-5 material is `resolved-partial:
+  U-G1,U-E3`, and F_UNLIT is not honoured on them (U-F1). An id-7 material with an empty +0x0C or +0x18
+  is `unresolved: U-23b` and drawn by the same labelled fallback as id 13, and an id-5 material with an
+  empty +0x0C by the fallback of id 4. Ids 4, 5, 7, 13 and 23 with blend 2 or above are `unresolved:
+  U-B2..U-B5` and keep their case arithmetic in a provisional fallback drawn opaque (no blend factors
+  are guessed). Every other material is drawn by the **provisional** archived baseline -- slot +0x0C
+  or white, a non-zero blend as the 128/255 key, flag 0x04 for culling -- and says why: `unresolved`
+  with the research reason codes for blend values 2 and above on ids 0 and 16 (U-B2..U-B5: no blend
+  factors are guessed), for id 23 without any layer texture (U-23b; drawn white, its env map not
+  bound) and for ids outside the plan (OUT-OF-PLAN). MOC2 is uploaded (UV channel 4) only for groups a
+  four-layer material draws in, and the MOCV set-2 alpha (UV channel 5) only for groups an id-13 or id-7
+  material draws in; where a group lacks a stream such a material reads (MOC2, MOCV set 2 or a MOTV
+  set) it draws a stated default, logs the group, and the material gains `U-V4` with the vertex count
+  (a resolved one becomes `resolved-partial`). MOCV colour set 1, the set-2 RGB and MOMT colours are kept
+  but not used.
 - **One line per material** in the player log: its index, shader id, blend value, flags, every
-  non-zero texture slot, what the provisional material made of it, and a verdict -- `baseline`
-  (textures only in +0x0C, blend 0 or 1) or `unresolved` (a texture in a later slot, +0x0C empty
-  while later slots are not, or blend 2/3/5/6), with the reason.
+  non-zero texture slot with what became of the file, the permutation and sampler bindings the plan
+  chose, the render state, and a verdict -- `resolved`, `resolved-partial` (an input the client reads
+  has no established source, e.g. an env emissive: U-G1,U-E3) or `unresolved` (the baseline or a
+  labelled fallback) -- with its reason codes and notes.
 - **Textures.** Every non-zero texture FileDataID of the root is fetched once, after the groups.
-  Only the +0x0C texture of a material some LOD0 batch draws is decoded -- on worker threads, a few
-  at a time -- because that is the only image the provisional material samples; every other file
-  is fetched and its BLP header checked. Decoding them all cost the Blood Elf tower 67 s of CPU and
-  380 MB of heap for the 19 images it draws, and an 86-group cave 2,550 s of CPU and 2.2 GB for one.
+  Only the textures a drawn material's plan samples are decoded -- once per FileDataID, on worker
+  threads, a few at a time; every other file is fetched and its BLP header checked. Decoding them
+  all cost the Blood Elf tower 67 s of CPU and 380 MB of heap for the 19 images it draws, and an
+  86-group cave 2,550 s of CPU and 2.2 GB for one. Uploads are shared per (file, U addressing, V
+  addressing) and keep the alpha channel, because the world-model shader reads alpha only in the terms
+  a material's plan enables; they are GPU-only, with no CPU-readable copy.
 - **Framing.** From the drawn geometry's bounds, as a model is, but from a three-quarter view 30
   degrees above the horizon (the audit's OpenGL reference view). The far clip plane reaches past
   the far side of the whole object at every zoom, so there is no fixed ceiling like the archived
@@ -417,8 +461,26 @@ geometry**. This is the foundation stage, and it is deliberately narrow:
   restores a model's framing, zoom range and clip planes. The cast-shadow map keeps its 4096 texels
   over the whole object, so on a very large WMO its shadows are coarse (about 7 units a texel at a
   10,000-unit radius); the light rig itself is unchanged.
-- **Diagnostic only:** `-wmvWmoVertexColour` multiplies MOCV colour set 1 into the provisional
-  material; normal rendering never uses vertex colours.
+- **Diagnostic only:** `-wmvWmoVertexColour` multiplies MOCV colour set 1 into every world-model
+  material; normal rendering never uses vertex colours. `-wmvWmoMaterialDiag` (also through
+  `WMV_DEBUG`) adds one `wmo material-diag` line per drawn material: shader id, blend, flags, every
+  texture FileDataID, the permutation, each sampler's role, slot and UV channel, the vertex-colour
+  use, Src/Dst for colour and alpha, ZWrite, the alpha test, cull, addressing, queue, the light
+  bypass, the resolution with its reason codes, what each sampled file became, and the created
+  material read back; for a four-layer batch also its mean stored MOC2 weights and how many of its
+  vertices carry a non-zero byte 3 (U-23a) or a weight on an empty layer (U-23b), and the UV span of
+  each layer's MOTV set over the vertices that weight it (a span of 0 samples one texel); for a two-layer
+  batch its set-2 alpha range and mean, how many vertices show layer 2 or weight an empty slot, and
+  how far MOTV set 2 differs from set 1 there. It only logs.
+  Verification views, all unlit and off by default: `-wmvWmoView=plan` draws each material flat in
+  the colour of how it is drawn (red archived baseline, green diffuse, blue four-layer, orange
+  two-layer, yellow two-layer env metal (id 7), cyan opaque, white env metal (id 5), magenta a
+  provisional fallback of those); `-wmvWmoView=weights` / `=blend`
+  draw a four-layer material's stored MOC2 weights / its effective weights after the height blend
+  (red, green, blue = layers 1-3, black = layer 4); `=va` an id-13 or id-7 material's set-2 alpha as grey;
+  `=diffuse` every material's combiner diffuse; `=t0` / `=t1` the first / second register as sampled;
+  `-wmvWmoUvOverride=N` makes every four-layer and two-layer register read UV channel N (the swap test
+  for per-layer UV sets); `-wmvWmoOnlyMaterials=a:b:c` draws only those MOMT entries.
 - **What is not drawn yet:** doodads (so the doodad-set choice in Model > Appearance has no visible
   effect, and the panel says so), liquids, WMO lights, fog, portal culling, LOD switching and the
   skybox.
@@ -600,10 +662,10 @@ application uses). Player side: `Tools/UnityRendererProject/Assets/Scripts/WmvIp
 { "type": "getModelTextures", "requestId": "abc125", "fileDataID": 123200 }
 { "type": "mapObjectLoaded", "fileDataID": 115058, "load": 1, "status": "built", "reason": "",
   "groups": 1, "groupFilesRequested": 1, "groupFilesMissing": 0, "batches": 3, "submeshes": 3,
-  "renderers": 1, "materials": 3, "provisionalMaterials": 3, "unresolvedMaterials": 0,
+  "renderers": 1, "materials": 3, "provisionalMaterials": 0, "unresolvedMaterials": 0,
   "blendedMaterials": 0, "texturesReferenced": 3, "texturesDecoded": 3, "texturesMissing": 0,
   "vertices": 946, "triangles": 854, "boundsMin": [-11.75, -10.41, -12.54], "boundsMax": [11.72, 13.60, 11.85],
-  "timings": { "rootMs": 46.7, "groupsMs": 40.3, "texturesMs": 81.8, "buildMs": 14.6, "totalMs": 189.8 },
+  "timings": { "rootMs": 45.8, "groupsMs": 41.7, "texturesMs": 47.0, "buildMs": 17.6, "totalMs": 158.9 },
   "liveMapObjects": 1, "liveModels": 0 }
 { "type": "runtimeState", "query": 3, "liveMapObjects": 1, "liveModels": 0, "modelFileDataID": 0,
   "mapObjectFileDataID": 115058, "loading": false }
@@ -616,11 +678,12 @@ rounded to two decimals as the host logs them.)
 `"superseded"` (a newer load of either kind replaced it first -- not a failure). `load` is the serial
 of the `loadWoWModel` it answers, so a late answer about an earlier load is never taken for the one
 on display. The counts describe what was built (bounds in Unity space, timings in milliseconds):
-`materials` is the root's MOMT count, `provisionalMaterials` the entries LOD0 batches draw, and
-`unresolvedMaterials` / `blendedMaterials` how many of those carry the `unresolved` verdict / a
-non-zero blend value (drawn as an alpha key); `vertices` counts every group vertex uploaded and
-`triangles` only the batch triangles; `texturesDecoded` counts decoded images only (the drawn
-+0x0C textures), and `texturesMissing` a fetch, decode or header check that failed; `groupsMs`
+`materials` is the root's MOMT count; of the entries LOD0 batches draw, `provisionalMaterials` counts
+those drawn provisionally (by the archived baseline or a labelled fallback), `unresolvedMaterials`
+those with any open question (verdict `resolved-partial` or `unresolved`), and `blendedMaterials`
+those with a non-zero MOMT blend value; `vertices` counts every group vertex uploaded and
+`triangles` only the batch triangles; `texturesDecoded` counts decoded images only (the files some
+drawn material's plan samples), and `texturesMissing` a fetch, decode or header check that failed; `groupsMs`
 runs from the group requests to the last group parsed and `texturesMs` from the texture requests
 (sent once the groups are parsed) to the last texture landed.
 `liveMapObjects` and `liveModels` are the world models and models (a character's parts included)
@@ -932,8 +995,10 @@ are not available in the Unity-only viewer, and write no image; the `-imgseq` sm
   to that idle and says so. `-wmvNoAnim` returns the model to the rest pose.
 - Bounds-driven camera framing, so a loaded model is visible immediately.
 - Static WMO geometry (protocol 4): the LOD0 groups a root's GFID names, one mesh per group with a
-  submesh per render batch, a provisional first-texture material, framed from the WMO's bounds. The
-  host keeps only the root's metadata and sends only its FileDataID. See "World models".
+  submesh per render batch, framed from the WMO's bounds, with materials from the WMO material plan
+  (shader ids 0/16, 4 and 13 resolved; the diffuse parts of 5, 7 and 23 resolved-partial, their env
+  emissives not drawn; blend 0/1, cull, clamp and unlit flags established; blend 2 and above, MOCV set-1
+  shading and other ids provisional and logged). The host keeps only the root's metadata and sends only its FileDataID. See "World models".
 
 **Not yet implemented**
 
@@ -952,9 +1017,10 @@ are not available in the Unity-only viewer, and write no image; the `-imgseq` sm
   gets a notice).
 - Maps, terrain, fog; BLP images picked in Browse. Each of these loads and gets a notice.
 - For WMOs: doodads and doodad sets, liquids, WMO lights, fog, portal culling, LOD switching, the
-  skybox, and the WMO material system (shader ids, the later texture slots, true blending, vertex
-  colours). Modern materials -- shader 23 above all -- are drawn visibly wrong until then, and the
-  player logs them as unresolved.
+  skybox, and the rest of the WMO material system (shader ids other than 0/4/5/7/13/16/23, the env-map
+  emissives of ids 5, 7 and 23, the MOC2 byte-3 colour pull of id 23, blend values 2 and above, MOCV
+  set-1 vertex colours). Those materials are drawn provisionally or without the missing term, and the
+  player logs them as resolved-partial or unresolved with the reason codes.
 - Full parity with the archived OpenGL renderer.
 
 There is no fallback: the Unity viewport is the only renderer the user sees, and what it cannot

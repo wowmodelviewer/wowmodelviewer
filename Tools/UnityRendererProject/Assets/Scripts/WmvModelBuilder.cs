@@ -333,8 +333,28 @@ public static class WmvModelBuilder
     ///                    sorting rules is not the same as measuring it. See
     ///                    WmvMain.ReportQueueOrder.
     ///   -wmvWmoVertexColour
-    ///                    world models only, diagnostic: multiply MOCV colour set 1 into the
-    ///                    provisional material. Never on by default (see WmoVertexColour).
+    ///                    world models only, diagnostic: multiply MOCV colour set 1 into every
+    ///                    world-model material. Never on by default (see WmoVertexColour).
+    ///   -wmvWmoMaterialDiag
+    ///                    world models only: one extra log line per drawn material with its plan
+    ///                    (shader id, blend, flags, texture slots, permutation, sampler slots and UV
+    ///                    channels, vertex-colour use, blend state, queue, resolution and reason codes)
+    ///                    and the created material read back. Logging only; nothing drawn changes.
+    ///   -wmvWmoView=plan|weights|blend|va|diffuse|t0|t1
+    ///                    world models only, diagnostic: draw every material unlit in the colour of how
+    ///                    it is drawn (plan: red baseline, green diffuse, blue four-layer, orange
+    ///                    two-layer, yellow two-layer env metal, cyan opaque, white env metal, magenta
+    ///                    a fallback of those), or a four-layer
+    ///                    material's stored MOC2 weights / its effective weights after the height blend
+    ///                    (rgb = layers 1..3, black = layer 4), or a two-layer (id 13 or 7) material's set-2 alpha
+    ///                    (grey), or any material's combiner diffuse, or its register t0 / t1 as sampled.
+    ///   -wmvWmoUvOverride=N
+    ///                    world models only, diagnostic: every register of a four-layer or two-layer
+    ///                    material reads mesh UV channel N (0..3) instead of the channel its plan names
+    ///                    -- the swap test that shows which surfaces depend on per-layer UV sets.
+    ///   -wmvWmoOnlyMaterials=a:b:c
+    ///                    world models only, diagnostic: draw only these MOMT indices; every other
+    ///                    material is discarded in every camera.
     /// </summary>
     public static class Debug_
     {
@@ -355,6 +375,10 @@ public static class WmvModelBuilder
         static int[] pinnedTextures = new int[0];        // -wmvSkinTexture: slot, file, slot, file
         static int rig;
         static bool wmoVertexColour;
+        static bool wmoMaterialDiag;
+        static int wmoView;                              // -wmvWmoView: 0 off, else an index into WmoViewNames
+        static int wmoUvOverride = -1;                   // -wmvWmoUvOverride: -1 off
+        static int[] wmoOnlyMaterials;                   // -wmvWmoOnlyMaterials: null = draw them all
         static bool lightDump;
         static float lightYaw = 30f;
         static float lightPitch = 15f;
@@ -384,6 +408,31 @@ public static class WmvModelBuilder
                 else if (a == "-wmvAllocCheck") allocCheck = true;
                 else if (a == "-wmvLifecycleTest") lifecycleTest = true;
                 else if (a == "-wmvWmoVertexColour") wmoVertexColour = true;
+                else if (a == "-wmvWmoMaterialDiag") wmoMaterialDiag = true;
+                else if (a.StartsWith("-wmvWmoView="))
+                {
+                    string v = a.Substring("-wmvWmoView=".Length);
+                    wmoView = Math.Max(0, Array.IndexOf(WmoViewNames, v));
+                }
+                else if (a.StartsWith("-wmvWmoUvOverride="))
+                {
+                    int c;
+                    if (int.TryParse(a.Substring("-wmvWmoUvOverride=".Length), out c) && c >= 0 && c <= 3)
+                        wmoUvOverride = c;
+                }
+                else if (a.StartsWith("-wmvWmoOnlyMaterials="))
+                {
+                    // i:j:k -- colons, because WMV_DEBUG itself is split on commas. An empty or unparsable
+                    // list draws no material at all, a legitimate control (the background alone).
+                    string[] p = a.Substring("-wmvWmoOnlyMaterials=".Length).Split(':');
+                    var keep = new List<int>();
+                    for (int i = 0; i < p.Length; i++)
+                    {
+                        int v;
+                        if (int.TryParse(p[i], out v) && v >= 0) keep.Add(v);
+                    }
+                    wmoOnlyMaterials = keep.ToArray();
+                }
                 else if (a.StartsWith("-wmvSeqPath="))
                 {
                     // a:b:c -- sequences to switch through, in order, before the light check
@@ -591,13 +640,48 @@ public static class WmvModelBuilder
         public static bool LifecycleTest { get { Parse(); return lifecycleTest; } }
 
         /// <summary>
-        /// DIAGNOSTIC ONLY: multiply a world model's MOCV colour set 1 into its provisional material
+        /// DIAGNOSTIC ONLY: multiply a world model's MOCV colour set 1 into its materials
         /// (-wmvWmoVertexColour), to look at what the baked colours hold. Normal rendering never uses
         /// vertex colours: the audit showed a plain texture x MOCV product darkens interiors plausibly
         /// but turns modern exteriors nearly black, so their real meaning waits for material research.
         /// A group without set 1 draws unmodified under the switch.
         /// </summary>
         public static bool WmoVertexColour { get { Parse(); return wmoVertexColour; } }
+
+        /// <summary>
+        /// Log every drawn world-model material's plan and its created material read back
+        /// (-wmvWmoMaterialDiag): which permutation, which texture slot on which UV channel, which render
+        /// state, and why a material is not resolved. A log switch only -- no material or frame changes.
+        /// </summary>
+        public static bool WmoMaterialDiag { get { Parse(); return wmoMaterialDiag; } }
+
+        /// <summary>
+        /// World-model verification view (-wmvWmoView=plan|weights|blend|va|diffuse|t0|t1): 0 off, 1 the plan
+        /// colour, 2 a four-layer material's stored MOC2 weights, 3 its effective weights, 4 a two-layer
+        /// material's set-2 alpha, 5 the combiner diffuse, 6 register t0 as sampled, 7 register t1 as sampled
+        /// (two-layer). The value is what WmvWmo.shader's _WmoDiagView switches on. Unlit, diagnostic only.
+        /// </summary>
+        public static int WmoView { get { Parse(); return wmoView; } }
+
+        static readonly string[] WmoViewNames = { "", "plan", "weights", "blend", "va", "diffuse", "t0", "t1" };
+
+        /// <summary>The -wmvWmoView name of a view value ("" for 0 or an unknown value).</summary>
+        public static string WmoViewName(int view)
+        {
+            return view > 0 && view < WmoViewNames.Length ? WmoViewNames[view] : "";
+        }
+
+        /// <summary>
+        /// The mesh UV channel every four-layer and two-layer register reads instead of its plan's
+        /// (-wmvWmoUvOverride=N), or -1. The swap test of the per-layer UV sets; diagnostic only.
+        /// </summary>
+        public static int WmoUvOverride { get { Parse(); return wmoUvOverride; } }
+
+        /// <summary>
+        /// The only world-model materials drawn (-wmvWmoOnlyMaterials=a:b:c), or null for all. Isolates the
+        /// surfaces a close-up check is about; diagnostic only.
+        /// </summary>
+        public static int[] WmoOnlyMaterials { get { Parse(); return wmoOnlyMaterials; } }
 
         /// <summary>
         /// Which preview light rig the viewport draws with (-wmvRig=N), for a visual A/B:
@@ -3184,7 +3268,12 @@ public static class WmvModelBuilder
     /// </summary>
     public static bool AuthoredTextureDomain = true;
 
-    internal static Texture2D CreateTexture(BlpImage img, string name, bool dropAlpha)
+    /// <summary>A decoded BLP as a mip-chained Texture2D (see the comments inside). makeNoLongerReadable
+    /// hands the pixels to the GPU without keeping the CPU copy; M2 callers leave it off (that path stays
+    /// exactly as it was, and the lifecycle self-test reads a model texture's texel back), and the
+    /// world-model builder turns it on,
+    /// because nothing reads a world-model texel and a modern WMO uploads hundreds of megabytes.</summary>
+    internal static Texture2D CreateTexture(BlpImage img, string name, bool dropAlpha, bool makeNoLongerReadable = false)
     {
         // ROW ORDER: a BLP stores its rows top-down (row 0 = top of the image), but a Unity
         // texture's raw data starts at the BOTTOM-left. Uploading the decoded bytes as-is
@@ -3221,7 +3310,7 @@ public static class WmvModelBuilder
         var tex = new Texture2D(img.Width, img.Height, TextureFormat.RGBA32, true,
                                 AuthoredTextureDomain) { name = name };
         tex.SetPixelData(pixels, 0);
-        tex.Apply(true, false);
+        tex.Apply(true, makeNoLongerReadable);
         tex.wrapMode = TextureWrapMode.Repeat;
         tex.filterMode = FilterMode.Bilinear;
         return tex;

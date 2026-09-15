@@ -1263,8 +1263,9 @@ public static class WmvLifecycleSelfTest
     /// The world-model builder on the synthetic "squares" WMO (WmoSynthetic): three groups, one batch
     /// each, material 0 an opaque textured shader-0 surface, material 1 two-sided (flag 0x04) with blend
     /// 1 and no texture. Checked through the real parser and builder: one object per group, one submesh
-    /// per batch, the winding flipped exactly as the M2 path flips it, the provisional material rule, the
-    /// verdicts, the converted bounds, a missing group, disposal, and the camera's world-model framing
+    /// per batch, the winding flipped exactly as the M2 path flips it, the material plans on the
+    /// world-model shader, the verdicts, the converted bounds, a missing group, disposal, the per-row
+    /// material checks (MapObjectMaterialRowTests), and the camera's world-model framing
     /// handing a model back its own planes.
     /// </summary>
     static void MapObjectTests(Action<string> log)
@@ -1299,24 +1300,39 @@ public static class WmvLifecycleSelfTest
 
         Material opaque = rt.Materials.Length > 0 ? rt.Materials[0] : null;
         Material keyed = rt.Materials.Length > 1 ? rt.Materials[1] : null;
-        Check(opaque != null && keyed != null && rt.ProvisionalMaterials == 2, "wmo: one provisional material per used MOMT entry", log);
+        Check(opaque != null && keyed != null && rt.ResolvedMaterials == 1 && rt.PartialMaterials == 0 && rt.UnresolvedMaterials == 1 &&
+              rt.ProvisionalMaterials == 1,
+              "wmo: one material per used MOMT entry, the empty-+0x0C one a labelled fallback (resolved " + rt.ResolvedMaterials +
+              ", partial " + rt.PartialMaterials + ", unresolved " + rt.UnresolvedMaterials + ", provisional " + rt.ProvisionalMaterials + ")", log);
+        Check(WmvWmoBuilder.ResolveMapObjectShader(null) != null, "wmo: the world-model shader ships in Resources", log);
         if (opaque != null && keyed != null)
         {
-            Check(opaque.mainTexture != null, "wmo: material 0 samples texture slot +0x0C", log);
-            Check(opaque.renderQueue == (int)UnityEngine.Rendering.RenderQueue.Geometry && opaque.GetFloat("_AlphaMode") == 0f,
-                  "wmo: blend 0 is opaque", log);
+            Check(opaque.shader != null && opaque.shader.name == "WMV/Map Object",
+                  "wmo: materials use the world-model shader, not the M2 combiner shader", log);
+            Check(opaque.GetTexture("_WmoTex0") != null && opaque.GetFloat("_WmoUv0") == 0f &&
+                  opaque.GetFloat("_WmoPermutation") == (float)(int)WmoPermutation.Diffuse,
+                  "wmo: id 0 binds slot +0x0C to register t0 on UV channel 0, permutation diffuse", log);
+            Check(opaque.renderQueue == (int)UnityEngine.Rendering.RenderQueue.Geometry && opaque.GetFloat("_AlphaTest") == 0f &&
+                  opaque.GetFloat("_ZWrite") == 1f && opaque.GetTag("RenderType", false, "") == "Opaque" &&
+                  opaque.GetFloat("_SrcBlend") == (float)(int)UnityEngine.Rendering.BlendMode.One &&
+                  opaque.GetFloat("_DstBlend") == (float)(int)UnityEngine.Rendering.BlendMode.Zero &&
+                  opaque.GetFloat("_SrcBlendA") == (float)(int)UnityEngine.Rendering.BlendMode.One &&
+                  opaque.GetFloat("_DstBlendA") == (float)(int)UnityEngine.Rendering.BlendMode.Zero,
+                  "wmo: blend 0 is One/Zero with depth write, no test, Geometry queue", log);
             Check(opaque.GetFloat("_Cull") == (float)UnityEngine.Rendering.CullMode.Back, "wmo: flag 0x04 clear culls back faces", log);
-            Check(keyed.mainTexture == null, "wmo: empty slot +0x0C draws white", log);
-            Check(keyed.renderQueue == (int)UnityEngine.Rendering.RenderQueue.AlphaTest && keyed.GetFloat("_AlphaMode") == 1f &&
-                  Mathf.Abs(keyed.GetFloat("_Cutoff") - 128f / 255f) < 1e-4f,
-                  "wmo: blend 1 is an alpha key at the M2 cutoff 128/255", log);
+            Check(keyed.GetTexture("_WmoTex0") == null, "wmo: empty slot +0x0C keeps the register's white default", log);
+            Check(keyed.renderQueue == (int)UnityEngine.Rendering.RenderQueue.AlphaTest && keyed.GetFloat("_AlphaTest") == 1f &&
+                  Mathf.Abs(keyed.GetFloat("_Cutoff") - 128f / 255f) < 1e-4f && keyed.GetFloat("_ZWrite") == 1f &&
+                  keyed.GetTag("RenderType", false, "") == "TransparentCutout",
+                  "wmo: blend 1 is the client's 128/255 key with depth write", log);
             Check(keyed.GetFloat("_Cull") == (float)UnityEngine.Rendering.CullMode.Off, "wmo: flag 0x04 turns culling off", log);
-            Check(opaque.GetFloat("_CombinerMode") == 0f && opaque.GetFloat("_VertexColour") == 0f,
-                  "wmo: no combiner and no vertex colour in normal rendering", log);
+            Check(opaque.GetFloat("_WmoLightBypass") == 0f && opaque.GetFloat("_WmoVertexColourDiag") == 0f,
+                  "wmo: no light bypass without F_UNLIT, and no vertex colour in normal rendering", log);
         }
         Check(rt.Textures.Length == 1, "wmo: one Texture2D for the one referenced file", log);
-        Check(rt.UnresolvedMaterials == 0 && rt.MaterialInfo[0].Verdict == "baseline" && rt.MaterialInfo[1].Verdict == "baseline",
-              "wmo: both synthetic materials are baseline", log);
+        Check(rt.MaterialInfo[0].Verdict == "resolved" && rt.MaterialInfo[1].Verdict == "unresolved: U-23b" &&
+              rt.MaterialInfo[1].Plan.ProvisionalFallback && rt.EmptySamplerSlots == 1,
+              "wmo: material 0 resolved, material 1 (+0x0C empty: the whole surface is an unbound register) unresolved U-23b", log);
 
         // Group 2 spans WoW x 24..34, y 0..10, z 0 -> Unity x = -y, y = z, z = x.
         Bounds b = rt.Bounds;
@@ -1335,14 +1351,22 @@ public static class WmvLifecycleSelfTest
               "wmo: a missing group builds nothing and the rest still build", log);
         partial.Dispose();
 
-        // Verdicts on data the baseline cannot represent.
+        // Verdicts on data the established rules do not cover.
         WmoMaterial m23 = MaterialFrom(WmoSynthetic.Material(0, 23, 0, 0, 5001), 0);
         WmvWmoMaterialInfo v23 = WmvWmoBuilder.ClassifyMaterial(m23);
-        Check(v23.Unresolved && v23.PrimaryTexture == 0 && v23.TextureSlots[1] == 5001,
-              "wmo: shader 23 with +0x0C empty and a later slot is unresolved", log);
+        Check(v23.Unresolved && v23.Plan.Resolution == WmoResolution.Unresolved && v23.Plan.ProvisionalFallback &&
+              v23.Plan.Permutation == WmoPermutation.FourLayer && v23.PrimaryTexture == 0 && v23.TextureSlots[1] == 5001,
+              "wmo: shader 23 with a layer but no height map is unresolved (U-23b), drawn by the labelled fallback", log);
         WmoMaterial blend2 = MaterialFrom(WmoSynthetic.Material(0, 0, 2, 5002), 1);
         WmvWmoMaterialInfo vb = WmvWmoBuilder.ClassifyMaterial(blend2);
-        Check(vb.Unresolved && vb.Cutout && vb.TrueBlend, "wmo: blend 2 is unresolved and drawn as the key", log);
+        Check(vb.Unresolved && vb.Cutout && vb.TrueBlend && vb.Verdict == "unresolved: U-B2,U-B3,U-B4,U-B5",
+              "wmo: blend 2 is unresolved (U-B2..U-B5) and drawn as the provisional key", log);
+
+        MapObjectMaterialRowTests(log);
+        MapObjectFourLayerTests(log);
+        MapObjectTwoLayerAndOpaqueTests(log);
+        MapObjectEnvMetalTests(log);
+        MapObjectShaderRenderTests(log);
 
         // Framing: a world model frames with planes that cover it, and a model gets its own back.
         GameObject go;
@@ -1375,6 +1399,782 @@ public static class WmvLifecycleSelfTest
               Mathf.Abs(c.farClipPlane - Mathf.Max(100f, cam.distance * 20f)) < 1e-3f,
               "wmo: framing a model restores the model's zoom range and clip planes", log);
         UnityEngine.Object.DestroyImmediate(go);
+    }
+
+    /// <summary>
+    /// One synthetic WMO whose eight groups each draw one material, one per material-table row this stage
+    /// implements or deliberately leaves provisional, through the real parser, fetch policy and builder:
+    /// clamp U, clamp V, id 16 keyed with F_UNLIT, blend 2 (unresolved), shader 23 with blend 2 (unresolved,
+    /// its four-layer arithmetic in the labelled opaque fallback), plain id 0, id 5 with F_UNLIT (its
+    /// diffuse part, the bypass not honoured) and shader 23 with an env map and no layer (the baseline,
+    /// its env map neither bound nor decoded). Read back from the created materials: permutation, register
+    /// binding and UV channel, alpha test, queue, cull, per-axis addressing, the light bypass, the upload
+    /// sharing and GPU-only uploads, and the decode set. The complete four-layer rows have their own WMO
+    /// (MapObjectFourLayerTests), because they need MOC2.
+    /// </summary>
+    static void MapObjectMaterialRowTests(Action<string> log)
+    {
+        const uint T = 920000, T2 = 920001, T3 = 920002, TEnv = 920003;
+        byte[][] records =
+        {
+            WmoSynthetic.Material(0x40, 0, 0, T),                                    // 0 clamp U
+            WmoSynthetic.Material(0x80, 0, 0, T),                                    // 1 clamp V
+            WmoSynthetic.Material(0x01, 16, 1, T),                                   // 2 id 16, key, F_UNLIT
+            WmoSynthetic.Material(0xC4, 0, 2, T),                                    // 3 blend 2, two-sided, clamp flags
+            WmoSynthetic.Material(0, 23, 2, 0, T2, T3, new uint[] { T2, T3, T2, T3, T2, T3 }), // 4 shader 23, blend 2, +0x0C empty
+            WmoSynthetic.Material(0, 0, 0, T),                                       // 5 plain id 0
+            WmoSynthetic.Material(0x01, 5, 0, T, T2),                                // 6 id 5 with F_UNLIT
+            WmoSynthetic.Material(0, 23, 1, TEnv),                                   // 7 shader 23, env map, no layer
+        };
+        int n = records.Length;
+        var spec = new WmoSynthetic.RootSpec
+        {
+            Materials = records,
+            GroupInfos = new byte[n][],
+            GroupFileDataIDs = new uint[n],
+            GroupNames = new string[0],
+        };
+        var groups = new WmoGroup[n];
+        for (int i = 0; i < n; i++)
+        {
+            spec.GroupInfos[i] = WmoSynthetic.GroupInfo(WmoGroupFlags.Outdoor, new WowVec3(12f * i, 0f, 0f),
+                                                        new WowVec3(12f * i + 10f, 10f, 0f), 0);
+            spec.GroupFileDataIDs[i] = 930000u + (uint)i;
+            float x = 12f * i;
+            var gs = new WmoSynthetic.GroupSpec
+            {
+                Positions = new[] { x, 0f, 0f, x + 10f, 0f, 0f, x + 10f, 10f, 0f, x, 10f, 0f },
+                Normals = new[] { 0f, 0f, 1f, 0f, 0f, 1f, 0f, 0f, 1f, 0f, 0f, 1f },
+                Indices = new ushort[] { 0, 1, 2, 0, 2, 3 },
+                Batches = new[] { WmoSynthetic.Batch(0, 6, 0, 3, WmoBatch.FlagLargeMaterialId, i) },
+                Mpy2 = new byte[] { 0x20, 0, (byte)i, 0, 0x20, 0, (byte)i, 0 },
+            };
+            gs.TexCoordSets.Add(new[] { 0f, 0f, 1f, 0f, 1f, 1f, 0f, 1f });
+            groups[i] = WmoParser.ParseGroup(WmoSynthetic.BuildGroup(gs), "row group " + i, i);
+        }
+        WmoRoot root = WmoParser.ParseRoot(WmoSynthetic.BuildRoot(spec), "row root");
+
+        // The decode set the load computes: only what the drawn plans sample.
+        var sampled = new HashSet<uint>();
+        for (int i = 0; i < n; i++)
+            WmoMaterialSemantics.CollectSampledTextures(WmoMaterialSemantics.Plan(root.Materials[i]), sampled);
+        Check(sampled.Count == 3 && sampled.Contains(T) && sampled.Contains(T2) && sampled.Contains(T3) && !sampled.Contains(TEnv),
+              "wmo rows: the decode set is what the plans sample (the blend-2 id-23 layers and heights; never an id-23 env map)", log);
+
+        var textures = new Dictionary<uint, WmvWmoTexture>
+        {
+            { T, new WmvWmoTexture { FileDataID = T, Image = FlatTexture(), Decoded = true, Width = 2, Height = 2 } },
+            { T2, new WmvWmoTexture { FileDataID = T2, Image = FlatTexture(), Decoded = true, Width = 2, Height = 2 } },
+            { T3, new WmvWmoTexture { FileDataID = T3, Image = FlatTexture(), Decoded = true, Width = 2, Height = 2 } },
+            { TEnv, new WmvWmoTexture { FileDataID = TEnv, HeaderOnly = true, Width = 2, Height = 2 } },
+        };
+        WmvRuntimeMapObject rt = WmvWmoBuilder.Build(root, groups, textures, "WmoRows", null);
+        Check(rt != null && rt.Materials.Length == n, "wmo rows: built", log);
+        if (rt == null || rt.Materials.Length != n) return;
+        bool all = true;
+        foreach (Material m in rt.Materials) all = all && m != null && m.shader != null && m.shader.name == "WMV/Map Object";
+        Check(all, "wmo rows: every material, provisional ones included, uses the world-model shader", log);
+        if (!all) { rt.Dispose(); return; }
+
+        Material mClampU = rt.Materials[0], mClampV = rt.Materials[1], mKey16 = rt.Materials[2], mBlend2 = rt.Materials[3];
+        Material m23 = rt.Materials[4], mPlain = rt.Materials[5], mId5 = rt.Materials[6], m23Env = rt.Materials[7];
+        var tClampU = mClampU.GetTexture("_WmoTex0") as Texture2D;
+        var tClampV = mClampV.GetTexture("_WmoTex0") as Texture2D;
+        var tKey16 = mKey16.GetTexture("_WmoTex0") as Texture2D;
+        var tBlend2 = mBlend2.GetTexture("_WmoTex0") as Texture2D;
+        var tPlain = mPlain.GetTexture("_WmoTex0") as Texture2D;
+        var tId5 = mId5.GetTexture("_WmoTex0") as Texture2D;
+
+        Check(tClampU != null && tClampU.wrapModeU == TextureWrapMode.Clamp && tClampU.wrapModeV == TextureWrapMode.Repeat,
+              "wmo rows: flag 0x40 clamps U and repeats V", log);
+        Check(tClampV != null && tClampV.wrapModeU == TextureWrapMode.Repeat && tClampV.wrapModeV == TextureWrapMode.Clamp,
+              "wmo rows: flag 0x80 repeats U and clamps V", log);
+        Check(tPlain != null && tPlain.wrapModeU == TextureWrapMode.Repeat && tPlain.wrapModeV == TextureWrapMode.Repeat,
+              "wmo rows: no clamp flag repeats both axes", log);
+        Check(mKey16.GetFloat("_WmoPermutation") == (float)(int)WmoPermutation.Diffuse && mKey16.GetFloat("_AlphaTest") == 1f &&
+              mKey16.renderQueue == (int)UnityEngine.Rendering.RenderQueue.AlphaTest && mKey16.GetFloat("_WmoLightBypass") == 1f,
+              "wmo rows: id 16 blend 1 with F_UNLIT is the diffuse permutation, keyed, light bypassed", log);
+        Check(mBlend2.GetFloat("_WmoPermutation") == (float)(int)WmoPermutation.ProvisionalBaseline && mBlend2.GetFloat("_AlphaTest") == 1f &&
+              mBlend2.GetFloat("_Cull") == (float)UnityEngine.Rendering.CullMode.Off && mBlend2.GetFloat("_ZWrite") == 1f &&
+              tBlend2 != null && tBlend2.wrapModeU == TextureWrapMode.Repeat && tBlend2.wrapModeV == TextureWrapMode.Repeat &&
+              rt.MaterialInfo[3].Plan.Resolution == WmoResolution.Unresolved,
+              "wmo rows: blend 2 is unresolved: provisional key, cull from 0x04, its clamp flags not applied", log);
+        Check(m23.GetFloat("_WmoPermutation") == (float)(int)WmoPermutation.FourLayer && m23.GetFloat("_AlphaTest") == 0f &&
+              m23.GetTexture("_WmoTex0") == null && m23.GetTexture("_WmoTex1") != null && m23.GetTexture("_WmoTex8") != null &&
+              m23.GetFloat("_ZWrite") == 1f && m23.GetFloat("_SrcBlend") == (float)UnityEngine.Rendering.BlendMode.One &&
+              m23.GetFloat("_DstBlend") == (float)UnityEngine.Rendering.BlendMode.Zero &&
+              rt.MaterialInfo[4].Plan.ProvisionalFallback && rt.MaterialInfo[4].Verdict == "unresolved: U-B2,U-B3,U-B4,U-B5,U-23a,U-E2,U-E3,U-V4",
+              "wmo rows: shader 23 with blend 2 keeps its four-layer arithmetic in the labelled opaque fallback, env map unbound " +
+              "(U-V4: its one-set group has no MOC2)", log);
+        Check(m23Env.GetFloat("_WmoPermutation") == (float)(int)WmoPermutation.ProvisionalBaseline && m23Env.GetTexture("_WmoTex0") == null &&
+              rt.MaterialInfo[7].Verdict == "unresolved: U-23b",
+              "wmo rows: shader 23 without a layer is the baseline drawing the register's white, its env map never bound as a diffuse", log);
+        Check(mId5.GetFloat("_WmoPermutation") == (float)(int)WmoPermutation.EnvMetal && mId5.GetFloat("_WmoLightBypass") == 0f &&
+              mId5.GetTexture("_WmoTex1") == null && rt.MaterialInfo[6].Verdict == "resolved-partial: U-G1,U-E3,U-F1",
+              "wmo rows: id 5 with F_UNLIT draws its diffuse part without the bypass (its emissive is not drawn, U-F1)", log);
+        Check(mPlain.GetFloat("_WmoPermutation") == (float)(int)WmoPermutation.Diffuse && mPlain.GetFloat("_WmoLightBypass") == 0f &&
+              mPlain.GetFloat("_AlphaTest") == 0f, "wmo rows: plain id 0 is the lit, untested diffuse permutation", log);
+
+        // Uploads: one per (file, U, V), alpha kept. File T three times -- clamp U, clamp V, repeat (the id-16
+        // key, the blend-2 key, plain id 0 and id 5's diffuse share the last) -- plus T2 and T3 for the id-23
+        // layers and heights; none keeps a CPU-readable copy.
+        bool gpuOnly = true;
+        foreach (Texture2D t in rt.Textures) gpuOnly = gpuOnly && t != null && !t.isReadable;
+        Check(rt.Textures.Length == 5 && ReferenceEquals(tKey16, tBlend2) && ReferenceEquals(tPlain, tId5) && ReferenceEquals(tKey16, tPlain) &&
+              !ReferenceEquals(tClampU, tClampV) && !ReferenceEquals(tPlain, tClampU) && gpuOnly,
+              "wmo rows: uploads are shared per (file, U, V) and GPU-only -- 3 textures for one file, 5 in all (" + rt.Textures.Length + ")", log);
+        Check(rt.ResolvedMaterials == 4 && rt.UnresolvedMaterials == 3 && rt.PartialMaterials == 1 &&
+              rt.ProvisionalMaterials == 3 && rt.EmptySamplerSlots == 0 && rt.PrimaryTexturesMissing == 0,
+              "wmo rows: counters (resolved " + rt.ResolvedMaterials + ", unresolved " +
+              rt.UnresolvedMaterials + ", provisional " + rt.ProvisionalMaterials + ", empty slots " + rt.EmptySamplerSlots + ")", log);
+
+        string diag = WmvWmoBuilder.DescribeMaterialDiag(rt.MaterialInfo[0], mClampU, 1, textures);
+        Check(diag.Contains("t0 diffuse <- +0x0C " + T + " @ UV0") && diag.Contains("readback: shader 'WMV/Map Object', queue 2000") &&
+              diag.Contains("_WmoPermutation 1") && diag.Contains("wrap Clamp/Repeat") && diag.Contains("| RESOLVED"),
+              "wmo rows: the material diagnostic reads the plan and the created material back", log);
+        rt.Dispose();
+    }
+
+    /// <summary>
+    /// The four-layer permutation through the real parser, fetch policy and builder, on a synthetic WMO of
+    /// four groups: g0 draws a complete id-23 material with non-contiguous layers (1011, its layer-2 height
+    /// present but unread), four MOTV sets and MOC2; g1 an id-23 material with a layer and no height map (the
+    /// U-23b fallback); g2 a plain id 0 with one MOTV set; g3 the complete material again in a group with one
+    /// MOTV set and no MOC2 (a stream gap). Read back: decode set, register bindings and UV channels 0..3,
+    /// the layer mask, the unbound env and empty-layer registers, upload sharing between a layer and a height
+    /// map, the MOC2 channel's values and where it is uploaded, the counters and the diagnostic line.
+    /// </summary>
+    static void MapObjectFourLayerTests(Action<string> log)
+    {
+        const uint Env = 940000, TA = 940001, TB = 940002, TC = 940003;
+        byte[][] records =
+        {
+            WmoSynthetic.Material(0, 23, 0, Env, TA, 0, new uint[] { TB, TA, TA, TC, TB, TA }),   // 0 layers 1011, heights 1111
+            WmoSynthetic.Material(0, 23, 0, 0, TB, 0, new uint[] { 0, 0, 0, 0, 0, 0 }),          // 1 layer 1, no height: U-23b
+            WmoSynthetic.Material(0, 0, 0, TA),                                                  // 2 plain id 0
+        };
+        int[] groupMaterial = { 0, 1, 2, 0 };
+        int[] groupUvSets = { 4, 4, 1, 1 };
+        int n = groupMaterial.Length;
+        var spec = new WmoSynthetic.RootSpec
+        {
+            Materials = records,
+            GroupInfos = new byte[n][],
+            GroupFileDataIDs = new uint[n],
+            GroupNames = new string[0],
+        };
+        var groups = new WmoGroup[n];
+        // MOC2 per vertex as stored (B, G, R, A): vertex 0 all layer 1 (byte 2), vertex 1 a layer-2 weight on
+        // the empty layer (byte 1) and a non-zero byte 3, vertex 2 all layer 3 (byte 0), vertex 3 all layer 4.
+        byte[] moc2 = { 0, 0, 255, 0,   0, 200, 55, 9,   255, 0, 0, 0,   0, 0, 0, 0 };
+        for (int i = 0; i < n; i++)
+        {
+            spec.GroupInfos[i] = WmoSynthetic.GroupInfo(WmoGroupFlags.Outdoor, new WowVec3(12f * i, 0f, 0f),
+                                                        new WowVec3(12f * i + 10f, 10f, 0f), 0);
+            spec.GroupFileDataIDs[i] = 950000u + (uint)i;
+            float x = 12f * i;
+            var gs = new WmoSynthetic.GroupSpec
+            {
+                Positions = new[] { x, 0f, 0f, x + 10f, 0f, 0f, x + 10f, 10f, 0f, x, 10f, 0f },
+                Normals = new[] { 0f, 0f, 1f, 0f, 0f, 1f, 0f, 0f, 1f, 0f, 0f, 1f },
+                Indices = new ushort[] { 0, 1, 2, 0, 2, 3 },
+                Batches = new[] { WmoSynthetic.Batch(0, 6, 0, 3, WmoBatch.FlagLargeMaterialId, groupMaterial[i]) },
+                Mpy2 = new byte[] { 0x20, 0, (byte)groupMaterial[i], 0, 0x20, 0, (byte)groupMaterial[i], 0 },
+                Moc2 = groupUvSets[i] == 4 ? moc2 : null,
+            };
+            // Set k is offset by k so a sampler on the wrong set reads a different coordinate.
+            for (int s = 0; s < groupUvSets[i]; s++)
+                gs.TexCoordSets.Add(new[] { s, 0f, 1f + s, 0f, 1f + s, 1f, s, 1f });
+            groups[i] = WmoParser.ParseGroup(WmoSynthetic.BuildGroup(gs), "four-layer group " + i, i);
+        }
+        WmoRoot root = WmoParser.ParseRoot(WmoSynthetic.BuildRoot(spec), "four-layer root");
+
+        var sampled = new HashSet<uint>();
+        for (int i = 0; i < records.Length; i++)
+            WmoMaterialSemantics.CollectSampledTextures(WmoMaterialSemantics.Plan(root.Materials[i]), sampled);
+        Check(sampled.Count == 2 && sampled.Contains(TA) && sampled.Contains(TB),
+              "wmo 23 rows: the decode set is the layers and heights read (not the env map, not the empty layer's height)", log);
+
+        var textures = new Dictionary<uint, WmvWmoTexture>
+        {
+            { TA, new WmvWmoTexture { FileDataID = TA, Image = FlatTexture(), Decoded = true, Width = 2, Height = 2 } },
+            { TB, new WmvWmoTexture { FileDataID = TB, Image = FlatTexture(), Decoded = true, Width = 2, Height = 2 } },
+            { TC, new WmvWmoTexture { FileDataID = TC, HeaderOnly = true, Width = 2, Height = 2 } },
+            { Env, new WmvWmoTexture { FileDataID = Env, HeaderOnly = true, Width = 2, Height = 2 } },
+        };
+        var lines = new List<string>();
+        WmvRuntimeMapObject rt = WmvWmoBuilder.Build(root, groups, textures, "WmoFourLayer", s => lines.Add(s));
+        Check(rt != null && rt.Materials.Length == 3 && rt.Materials[0] != null && rt.Materials[1] != null,
+              "wmo 23 rows: built", log);
+        if (rt == null || rt.Materials.Length != 3 || rt.Materials[0] == null || rt.Materials[1] == null) return;
+
+        Material m = rt.Materials[0], fb = rt.Materials[1];
+        // Registers 2 and 6 (the empty layer 2 and its height) are not bound, so only the others are set.
+        bool uv = true;
+        foreach (int r in new[] { 1, 3, 4, 5, 7, 8 })
+            uv = uv && m.GetFloat("_WmoUv" + r) == (float)((r - 1) % 4);
+        Check(m.GetFloat("_WmoPermutation") == (float)(int)WmoPermutation.FourLayer && uv && m.GetFloat("_AlphaTest") == 0f &&
+              m.renderQueue == (int)UnityEngine.Rendering.RenderQueue.Geometry,
+              "wmo 23 rows: four-layer permutation, bound registers 1/3/4 and 5/7/8 on UV channels 0/2/3, untested, Geometry queue", log);
+        Vector4 mask = m.GetVector("_WmoLayerMask");
+        Check(mask.x == 1f && mask.y == 0f && mask.z == 1f && mask.w == 1f, "wmo 23 rows: layer mask (1,0,1,1) for layers 1011", log);
+        var l1 = m.GetTexture("_WmoTex1") as Texture2D;
+        var h1 = m.GetTexture("_WmoTex5") as Texture2D;
+        var l3 = m.GetTexture("_WmoTex3") as Texture2D;
+        Check(l1 != null && l3 != null && ReferenceEquals(l1, h1) && ReferenceEquals(l1, m.GetTexture("_WmoTex4")) &&
+              ReferenceEquals(l3, m.GetTexture("_WmoTex7")) && m.GetTexture("_WmoTex0") == null &&
+              m.GetTexture("_WmoTex2") == null && m.GetTexture("_WmoTex6") == null,
+              "wmo 23 rows: a file used as a layer and a height map shares one upload; env, empty layer and its height unbound", log);
+        Check(fb.GetFloat("_WmoPermutation") == (float)(int)WmoPermutation.FourLayer && fb.GetTexture("_WmoTex5") == null &&
+              fb.GetTexture("_WmoTex1") != null && fb.GetVector("_WmoLayerMask").x == 1f && fb.GetVector("_WmoLayerMask").y == 0f &&
+              rt.MaterialInfo[1].Plan.ProvisionalFallback && rt.MaterialInfo[1].Verdict == "unresolved: U-23b,U-23a,U-E2,U-E3",
+              "wmo 23 rows: a layer without its height map is the labelled fallback, the height register left white", log);
+
+        var weights = new List<Vector4>();
+        rt.Meshes[0].GetUVs(WmvWmoBuilder.Moc2UvChannel, weights);
+        Check(weights.Count == 4 && Near(weights[0].x, 1f) && Near(weights[0].y, 0f) && Near(weights[0].z, 0f) &&
+              Near(weights[1].x, 55f / 255f) && Near(weights[1].y, 200f / 255f) && Near(weights[1].w, 9f / 255f) &&
+              Near(weights[2].z, 1f) && Near(weights[3].x + weights[3].y + weights[3].z, 0f),
+              "wmo 23 rows: MOC2 uploads as (byte 2, byte 1, byte 0, byte 3) / 255", log);
+        var none = new List<Vector4>();
+        rt.Meshes[2].GetUVs(WmvWmoBuilder.Moc2UvChannel, none);
+        Check(none.Count == 0, "wmo 23 rows: a group without a four-layer batch gets no MOC2 channel", log);
+        Check(rt.FourLayerMaterials == 2 && rt.FallbackMaterials == 1 && rt.PartialMaterials == 1 && rt.UnresolvedMaterials == 1 &&
+              rt.ResolvedMaterials == 1 && rt.ProvisionalMaterials == 1 && rt.Moc2Groups == 3 && rt.StreamGapGroups == 1 &&
+              rt.Textures.Length == 2 && rt.PrimaryTexturesMissing == 0 && rt.EmptySamplerSlots == 1,
+              "wmo 23 rows: counters (four-layer " + rt.FourLayerMaterials + ", fallback " + rt.FallbackMaterials + ", MOC2 groups " +
+              rt.Moc2Groups + ", stream gaps " + rt.StreamGapGroups + ", uploads " + rt.Textures.Length + ", empty slots " +
+              rt.EmptySamplerSlots + ")", log);
+        Check(rt.MaterialInfo[0].Moc2Vertices == 8 && rt.MaterialInfo[0].Moc2AlphaVertices == 1 &&
+              rt.MaterialInfo[0].EmptyLayerWeightVertices == 1,
+              "wmo 23 rows: per-material MOC2 exposure (U-23a byte 3, U-23b empty-layer weight) counted over drawn vertices", log);
+        bool gapLogged = false;
+        foreach (string line in lines) gapLogged = gapLogged || (line.Contains("group 3") && line.Contains("U-V4"));
+        Check(gapLogged && rt.MaterialInfo[0].StreamGapVertices == 4 && rt.MaterialInfo[0].GapStreams == "MOC2 and MOTV set 4" &&
+              rt.MaterialInfo[0].Verdict == "resolved-partial: U-23b,U-23a,U-E2,U-E3,U-V4",
+              "wmo 23 rows: a four-layer batch in a group without MOC2 / MOTV sets is logged per group and as U-V4 on its material", log);
+        string diag = WmvWmoBuilder.DescribeMaterialDiag(rt.MaterialInfo[0], m, 2, textures);
+        Check(diag.Contains("_WmoLayerMask (1,0,1,1)") && diag.Contains("t5 (client t17) height 1") &&
+              diag.Contains("RESOLVED-PARTIAL: U-23b,U-23a,U-E2,U-E3,U-V4") && diag.Contains("t0 " + Env + " not bound"),
+              "wmo 23 rows: the diagnostic reads back the mask, the client registers and the unbound env map", log);
+        rt.Dispose();
+    }
+
+    /// <summary>
+    /// The two-layer (id 13) and opaque (id 4) permutations through the real parser, fetch policy and
+    /// builder, on a synthetic WMO of five groups: g0 draws a complete id-13 material with blend 1, two MOTV
+    /// sets and a lone MOCV set 2 (flag 0x4 clear); g1 an id-13 material whose +0x18 is empty (the U-23b
+    /// fallback); g2 an id-4 material with blend 1 and flag 0x04, one MOTV set and no MOCV; g3 the complete
+    /// id-13 material again in a group with two MOTV sets and no MOCV (a stream gap); g4 an id-4 material with
+    /// blend 2 (the opaque fallback). Read back: decode set, permutations, register bindings and UV channels,
+    /// no alpha test anywhere, the set-2 alpha channel's values and where it is uploaded, the gap default and
+    /// its log line, upload sharing, the counters, the exposure counts and the diagnostic line.
+    /// </summary>
+    static void MapObjectTwoLayerAndOpaqueTests(Action<string> log)
+    {
+        const uint TA = 960001, TB = 960002;
+        byte[][] records =
+        {
+            WmoSynthetic.Material(0, 13, 1, TA, TB),       // 0 complete id 13, blend 1
+            WmoSynthetic.Material(0, 13, 0, TB, 0),        // 1 id 13 with +0x18 empty: U-23b fallback
+            WmoSynthetic.Material(0x04, 4, 1, TA),         // 2 id 4, blend 1, two-sided
+            WmoSynthetic.Material(0, 4, 2, TA),            // 3 id 4, blend 2: U-B2..U-B5 fallback
+        };
+        int[] groupMaterial = { 0, 1, 2, 0, 3 };
+        int[] groupUvSets = { 2, 2, 1, 2, 1 };
+        bool[] groupSet2 = { true, true, false, false, false };
+        int n = groupMaterial.Length;
+        var spec = new WmoSynthetic.RootSpec
+        {
+            Materials = records,
+            GroupInfos = new byte[n][],
+            GroupFileDataIDs = new uint[n],
+            GroupNames = new string[0],
+        };
+        var groups = new WmoGroup[n];
+        // MOCV set 2 as stored (B, G, R, A): the RGB is noise the permutation must ignore; the alphas are
+        // va = 1, 128/255, 0 and 64/255.
+        byte[] set2 = { 9, 8, 7, 255,   50, 60, 70, 128,   255, 255, 255, 0,   1, 2, 3, 64 };
+        for (int i = 0; i < n; i++)
+        {
+            spec.GroupInfos[i] = WmoSynthetic.GroupInfo(WmoGroupFlags.Outdoor, new WowVec3(12f * i, 0f, 0f),
+                                                        new WowVec3(12f * i + 10f, 10f, 0f), 0);
+            spec.GroupFileDataIDs[i] = 970000u + (uint)i;
+            float x = 12f * i;
+            var gs = new WmoSynthetic.GroupSpec
+            {
+                Flags = WmoGroupFlags.Outdoor | (groupSet2[i] ? WmoGroupFlags.ColorSet2 : 0u) |
+                        (groupUvSets[i] >= 2 ? WmoGroupFlags.TwoTexCoordSets : 0u),
+                Positions = new[] { x, 0f, 0f, x + 10f, 0f, 0f, x + 10f, 10f, 0f, x, 10f, 0f },
+                Normals = new[] { 0f, 0f, 1f, 0f, 0f, 1f, 0f, 0f, 1f, 0f, 0f, 1f },
+                Indices = new ushort[] { 0, 1, 2, 0, 2, 3 },
+                Batches = new[] { WmoSynthetic.Batch(0, 6, 0, 3, WmoBatch.FlagLargeMaterialId, groupMaterial[i]) },
+                Mpy2 = new byte[] { 0x20, 0, (byte)groupMaterial[i], 0, 0x20, 0, (byte)groupMaterial[i], 0 },
+            };
+            if (groupSet2[i])
+                gs.ColorSets.Add(set2);
+            for (int t = 0; t < groupUvSets[i]; t++)
+                gs.TexCoordSets.Add(new[] { t, 0f, 1f + t, 0f, 1f + t, 1f, t, 1f });
+            groups[i] = WmoParser.ParseGroup(WmoSynthetic.BuildGroup(gs), "two-layer group " + i, i);
+        }
+        WmoRoot root = WmoParser.ParseRoot(WmoSynthetic.BuildRoot(spec), "two-layer root");
+        Check(groups[0].ColorSet2 != null && groups[0].ColorSet1 == null && groups[0].ColorSet2.Count == 4,
+              "wmo 13 rows: a lone MOCV with flag 0x4 clear parses as set 2", log);
+
+        var sampled = new HashSet<uint>();
+        for (int i = 0; i < records.Length; i++)
+            WmoMaterialSemantics.CollectSampledTextures(WmoMaterialSemantics.Plan(root.Materials[i]), sampled);
+        Check(sampled.Count == 2 && sampled.Contains(TA) && sampled.Contains(TB),
+              "wmo 13 rows: the decode set is the two files the plans sample, each once", log);
+
+        var textures = new Dictionary<uint, WmvWmoTexture>
+        {
+            { TA, new WmvWmoTexture { FileDataID = TA, Image = FlatTexture(), Decoded = true, Width = 2, Height = 2 } },
+            { TB, new WmvWmoTexture { FileDataID = TB, Image = FlatTexture(), Decoded = true, Width = 2, Height = 2 } },
+        };
+        var lines = new List<string>();
+        WmvRuntimeMapObject rt = WmvWmoBuilder.Build(root, groups, textures, "WmoTwoLayer", s2 => lines.Add(s2));
+        bool built = rt != null && rt.Materials.Length == 4;
+        for (int i = 0; built && i < 4; i++) built = rt.Materials[i] != null;
+        Check(built, "wmo 13 rows: built", log);
+        if (!built) return;
+
+        Material m13 = rt.Materials[0], fb13 = rt.Materials[1], m4 = rt.Materials[2], fb4 = rt.Materials[3];
+        Check(m13.GetFloat("_WmoPermutation") == (float)(int)WmoPermutation.TwoLayer && m13.GetFloat("_WmoUv0") == 0f &&
+              m13.GetFloat("_WmoUv1") == 1f && m13.GetFloat("_AlphaTest") == 0f &&
+              m13.renderQueue == (int)UnityEngine.Rendering.RenderQueue.Geometry && rt.MaterialInfo[0].Verdict == "resolved-partial: U-V4",
+              "wmo 13 rows: id 13 blend 1 is the two-layer permutation, t0 on UV0 and t1 on UV1, untested, Geometry queue " +
+              "(resolved-partial only because g3 lacks MOCV set 2)", log);
+        var t0 = m13.GetTexture("_WmoTex0") as Texture2D;
+        var t1 = m13.GetTexture("_WmoTex1") as Texture2D;
+        Check(t0 != null && t1 != null && !ReferenceEquals(t0, t1) && m13.GetTexture("_WmoTex2") == null,
+              "wmo 13 rows: registers 0 and 1 bound to +0x0C and +0x18, nothing else", log);
+        Check(fb13.GetFloat("_WmoPermutation") == (float)(int)WmoPermutation.TwoLayer && fb13.GetTexture("_WmoTex0") != null &&
+              fb13.GetTexture("_WmoTex1") == null && rt.MaterialInfo[1].Plan.ProvisionalFallback &&
+              rt.MaterialInfo[1].Verdict == "unresolved: U-23b",
+              "wmo 13 rows: an empty +0x18 is the labelled fallback, its register left white", log);
+        Check(m4.GetFloat("_WmoPermutation") == (float)(int)WmoPermutation.Opaque && m4.GetFloat("_AlphaTest") == 0f &&
+              m4.GetFloat("_Cull") == (float)UnityEngine.Rendering.CullMode.Off && m4.GetFloat("_ZWrite") == 1f &&
+              m4.renderQueue == (int)UnityEngine.Rendering.RenderQueue.Geometry && rt.MaterialInfo[2].Verdict == "resolved",
+              "wmo 4 rows: id 4 blend 1 is the opaque permutation, never clipped, two-sided from 0x04", log);
+        Check(fb4.GetFloat("_WmoPermutation") == (float)(int)WmoPermutation.Opaque && fb4.GetFloat("_AlphaTest") == 0f &&
+              fb4.GetFloat("_SrcBlend") == (float)UnityEngine.Rendering.BlendMode.One &&
+              fb4.GetFloat("_DstBlend") == (float)UnityEngine.Rendering.BlendMode.Zero &&
+              rt.MaterialInfo[3].Plan.ProvisionalFallback && rt.MaterialInfo[3].Verdict == "unresolved: U-B2,U-B3,U-B4,U-B5",
+              "wmo 4 rows: id 4 blend 2 is the labelled opaque fallback, unresolved U-B2..U-B5, untested", log);
+        // One upload per (file, alpha, U, V): +0x0C of id 13 and both id-4 materials read TA opaque with
+        // repeat addressing, so they share it; TB is a second upload.
+        Check(ReferenceEquals(t0, m4.GetTexture("_WmoTex0")) && ReferenceEquals(t0, fb4.GetTexture("_WmoTex0")) &&
+              ReferenceEquals(t1, fb13.GetTexture("_WmoTex0")) && rt.Textures.Length == 2,
+              "wmo 13 rows: uploads shared per (file, alpha, U, V) -- " + rt.Textures.Length + " textures", log);
+
+        var va = new List<Vector2>();
+        rt.Meshes[0].GetUVs(WmvWmoBuilder.Set2AlphaUvChannel, va);
+        Check(va.Count == 4 && Near(va[0].x, 1f) && Near(va[1].x, 128f / 255f) && Near(va[2].x, 0f) && Near(va[3].x, 64f / 255f) &&
+              Near(va[1].y, 0f), "wmo 13 rows: the set-2 alpha uploads as (alpha / 255, 0), RGB ignored", log);
+        var none = new List<Vector2>();
+        rt.Meshes[2].GetUVs(WmvWmoBuilder.Set2AlphaUvChannel, none);
+        Check(none.Count == 0, "wmo 13 rows: a group without a two-layer batch gets no set-2 channel", log);
+        var gap = new List<Vector2>();
+        rt.Meshes[3].GetUVs(WmvWmoBuilder.Set2AlphaUvChannel, gap);
+        bool ones = gap.Count == 4;
+        foreach (Vector2 g in gap) ones = ones && Near(g.x, 1f);
+        bool gapLogged = false;
+        foreach (string line in lines) gapLogged = gapLogged || (line.Contains("group 3") && line.Contains("set-2") && line.Contains("U-V4"));
+        Check(ones && gapLogged && rt.MaterialInfo[0].StreamGapVertices == 4 && rt.MaterialInfo[0].GapStreams == "MOCV set 2",
+              "wmo 13 rows: a two-layer batch in a group without MOCV set 2 reads va = 1 and is logged per group and as U-V4 on its material", log);
+
+        Check(rt.TwoLayerMaterials == 2 && rt.Set2Groups == 3 && rt.StreamGapGroups == 1 && rt.FallbackMaterials == 2 &&
+              rt.ResolvedMaterials == 1 && rt.PartialMaterials == 1 && rt.UnresolvedMaterials == 2 && rt.ProvisionalMaterials == 2 &&
+              rt.EmptySamplerSlots == 1 && rt.PrimaryTexturesMissing == 0 && rt.Moc2Groups == 0,
+              "wmo 13 rows: counters (two-layer " + rt.TwoLayerMaterials + ", set-2 groups " + rt.Set2Groups + ", gaps " +
+              rt.StreamGapGroups + ", fallbacks " + rt.FallbackMaterials + ", empty slots " + rt.EmptySamplerSlots + ")", log);
+        WmvWmoMaterialInfo i0 = rt.MaterialInfo[0], i1 = rt.MaterialInfo[1];
+        Check(i0.Set2Vertices == 8 && i0.Set2PartialVertices == 3 && i0.Set2ZeroVertices == 1 && i0.UnboundLayerVertices == 0 &&
+              i1.Set2Vertices == 4 && i1.UnboundLayerVertices == 3,
+              "wmo 13 rows: per-material set-2 exposure over drawn vertices (layer 2 shows on 3, an empty +0x18 weighted on 3)", log);
+        string diag = WmvWmoBuilder.DescribeMaterialDiag(i0, m13, 2, textures);
+        Check(diag.Contains("_WmoPermutation 3") && diag.Contains("t1 layer 2 (va = 0) <- +0x18 " + TB + " @ UV1") &&
+              diag.Contains("on UV1") && diag.Contains("vertex colour MOCV set-2 alpha") && diag.Contains("| RESOLVED-PARTIAL: U-V4") &&
+              diag.Contains("lack MOCV set 2"),
+              "wmo 13 rows: the diagnostic reads back the two registers, their UV channels and the vertex stream", log);
+        rt.Dispose();
+    }
+
+    /// <summary>
+    /// The diffuse parts of ids 7 and 5 through the real parser, fetch policy and builder, on a synthetic WMO
+    /// of four groups: g0 draws a complete id-7 material with blend 1 and an env map on +0x24, two MOTV sets
+    /// and MOCV set 2; g1 an id-7 material whose +0x18 is empty, in a group whose set-2 alpha is 255 on every
+    /// vertex (the U-23b fallback that weights its empty register nowhere); g2 an id-5 material with blend 1,
+    /// flag 0x01 and an env map on +0x18, one MOTV set and no MOCV; g3 an id-7 material with blend 3 (the
+    /// opaque fallback). Read back: decode set (no env map), permutations 5 and 6, register bindings and UV
+    /// channels, unbound env registers, no alpha test anywhere, no light bypass on the emissive ids, where the
+    /// set-2 channel is uploaded, upload sharing with the ids 13/4 treatment, counters, exposure counts and
+    /// the diagnostic line.
+    /// </summary>
+    static void MapObjectEnvMetalTests(Action<string> log)
+    {
+        const uint TA = 980001, TB = 980002, Env = 980003;
+        byte[][] records =
+        {
+            WmoSynthetic.Material(0, 7, 1, TA, TB, Env),      // 0 complete id 7, blend 1, env +0x24
+            WmoSynthetic.Material(0, 7, 0, TB, 0, Env),       // 1 id 7 with +0x18 empty: U-23b fallback
+            WmoSynthetic.Material(0x01, 5, 1, TA, Env),       // 2 id 5, blend 1, F_UNLIT, env +0x18
+            WmoSynthetic.Material(0, 7, 3, TA, TB, Env),      // 3 id 7, blend 3: U-B2..U-B5 fallback
+        };
+        int[] groupMaterial = { 0, 1, 2, 3 };
+        int[] groupUvSets = { 2, 2, 1, 2 };
+        bool[] groupSet2 = { true, true, false, true };
+        int n = groupMaterial.Length;
+        var spec = new WmoSynthetic.RootSpec
+        {
+            Materials = records,
+            GroupInfos = new byte[n][],
+            GroupFileDataIDs = new uint[n],
+            GroupNames = new string[0],
+        };
+        var groups = new WmoGroup[n];
+        // MOCV set 2 as stored (B, G, R, A): va = 1, 128/255, 0, 64/255; the g1 copy is 255 everywhere.
+        byte[] set2 = { 9, 8, 7, 255,   50, 60, 70, 128,   255, 255, 255, 0,   1, 2, 3, 64 };
+        byte[] set2Full = { 0, 0, 0, 255,   0, 0, 0, 255,   0, 0, 0, 255,   0, 0, 0, 255 };
+        for (int i = 0; i < n; i++)
+        {
+            spec.GroupInfos[i] = WmoSynthetic.GroupInfo(WmoGroupFlags.Outdoor, new WowVec3(12f * i, 0f, 0f),
+                                                        new WowVec3(12f * i + 10f, 10f, 0f), 0);
+            spec.GroupFileDataIDs[i] = 990000u + (uint)i;
+            float x = 12f * i;
+            var gs = new WmoSynthetic.GroupSpec
+            {
+                Flags = WmoGroupFlags.Outdoor | (groupSet2[i] ? WmoGroupFlags.ColorSet2 : 0u) |
+                        (groupUvSets[i] >= 2 ? WmoGroupFlags.TwoTexCoordSets : 0u),
+                Positions = new[] { x, 0f, 0f, x + 10f, 0f, 0f, x + 10f, 10f, 0f, x, 10f, 0f },
+                Normals = new[] { 0f, 0f, 1f, 0f, 0f, 1f, 0f, 0f, 1f, 0f, 0f, 1f },
+                Indices = new ushort[] { 0, 1, 2, 0, 2, 3 },
+                Batches = new[] { WmoSynthetic.Batch(0, 6, 0, 3, WmoBatch.FlagLargeMaterialId, groupMaterial[i]) },
+                Mpy2 = new byte[] { 0x20, 0, (byte)groupMaterial[i], 0, 0x20, 0, (byte)groupMaterial[i], 0 },
+            };
+            if (groupSet2[i])
+                gs.ColorSets.Add(i == 1 ? set2Full : set2);
+            for (int t = 0; t < groupUvSets[i]; t++)
+                gs.TexCoordSets.Add(new[] { t, 0f, 1f + t, 0f, 1f + t, 1f, t, 1f });
+            groups[i] = WmoParser.ParseGroup(WmoSynthetic.BuildGroup(gs), "env metal group " + i, i);
+        }
+        WmoRoot root = WmoParser.ParseRoot(WmoSynthetic.BuildRoot(spec), "env metal root");
+
+        var sampled = new HashSet<uint>();
+        for (int i = 0; i < records.Length; i++)
+            WmoMaterialSemantics.CollectSampledTextures(WmoMaterialSemantics.Plan(root.Materials[i]), sampled);
+        Check(sampled.Count == 2 && sampled.Contains(TA) && sampled.Contains(TB) && !sampled.Contains(Env),
+              "wmo 7/5 rows: the decode set is the two diffuse files, never the env map", log);
+
+        var textures = new Dictionary<uint, WmvWmoTexture>
+        {
+            { TA, new WmvWmoTexture { FileDataID = TA, Image = FlatTexture(), Decoded = true, Width = 2, Height = 2 } },
+            { TB, new WmvWmoTexture { FileDataID = TB, Image = FlatTexture(), Decoded = true, Width = 2, Height = 2 } },
+            { Env, new WmvWmoTexture { FileDataID = Env, HeaderOnly = true, Width = 2, Height = 2 } },
+        };
+        var lines = new List<string>();
+        WmvRuntimeMapObject rt = WmvWmoBuilder.Build(root, groups, textures, "WmoEnvMetal", s2 => lines.Add(s2));
+        bool built = rt != null && rt.Materials.Length == 4;
+        for (int i = 0; built && i < 4; i++) built = rt.Materials[i] != null;
+        Check(built, "wmo 7/5 rows: built", log);
+        if (!built) return;
+
+        Material m7 = rt.Materials[0], fb7 = rt.Materials[1], m5 = rt.Materials[2], fbBlend = rt.Materials[3];
+        Check(m7.GetFloat("_WmoPermutation") == (float)(int)WmoPermutation.TwoLayerEnvMetal && m7.GetFloat("_WmoUv0") == 0f &&
+              m7.GetFloat("_WmoUv1") == 1f && m7.GetFloat("_AlphaTest") == 0f &&
+              m7.renderQueue == (int)UnityEngine.Rendering.RenderQueue.Geometry && rt.MaterialInfo[0].Verdict == "resolved-partial: U-G1,U-E3",
+              "wmo 7 rows: id 7 blend 1 is permutation 5, t0 on UV0 and t1 on UV1, untested, resolved-partial U-G1,U-E3", log);
+        var t0 = m7.GetTexture("_WmoTex0") as Texture2D;
+        var t1 = m7.GetTexture("_WmoTex1") as Texture2D;
+        Check(t0 != null && t1 != null && !ReferenceEquals(t0, t1) && m7.GetTexture("_WmoTex2") == null,
+              "wmo 7 rows: registers 0 and 1 bound to +0x0C and +0x18, the env register t2 left unbound", log);
+        Check(fb7.GetFloat("_WmoPermutation") == (float)(int)WmoPermutation.TwoLayerEnvMetal && fb7.GetTexture("_WmoTex0") != null &&
+              fb7.GetTexture("_WmoTex1") == null && rt.MaterialInfo[1].Plan.ProvisionalFallback &&
+              rt.MaterialInfo[1].Verdict == "unresolved: U-23b,U-G1,U-E3",
+              "wmo 7 rows: an empty +0x18 is the labelled fallback, its register left white", log);
+        Check(m5.GetFloat("_WmoPermutation") == (float)(int)WmoPermutation.EnvMetal && m5.GetFloat("_AlphaTest") == 0f &&
+              m5.GetFloat("_WmoLightBypass") == 0f && m5.GetTexture("_WmoTex1") == null &&
+              rt.MaterialInfo[2].Verdict == "resolved-partial: U-G1,U-E3,U-F1",
+              "wmo 5 rows: id 5 blend 1 with F_UNLIT is permutation 6, never clipped, no bypass, env register unbound", log);
+        Check(fbBlend.GetFloat("_WmoPermutation") == (float)(int)WmoPermutation.TwoLayerEnvMetal && fbBlend.GetFloat("_AlphaTest") == 0f &&
+              fbBlend.GetFloat("_SrcBlend") == (float)UnityEngine.Rendering.BlendMode.One &&
+              fbBlend.GetFloat("_DstBlend") == (float)UnityEngine.Rendering.BlendMode.Zero && fbBlend.GetFloat("_ZWrite") == 1f &&
+              rt.MaterialInfo[3].Plan.ProvisionalFallback && rt.MaterialInfo[3].Verdict == "unresolved: U-B2,U-B3,U-B4,U-B5,U-G1,U-E3",
+              "wmo 7 rows: id 7 blend 3 is the labelled opaque fallback, untested, no factors guessed", log);
+        // Repeat addressing on every diffuse register: TA and TB are one upload each, shared by all four
+        // materials.
+        Check(ReferenceEquals(t0, m5.GetTexture("_WmoTex0")) && ReferenceEquals(t0, fbBlend.GetTexture("_WmoTex0")) &&
+              ReferenceEquals(t1, fb7.GetTexture("_WmoTex0")) && ReferenceEquals(t1, fbBlend.GetTexture("_WmoTex1")) &&
+              rt.Textures.Length == 2,
+              "wmo 7/5 rows: uploads shared per (file, alpha, U, V) -- " + rt.Textures.Length + " textures", log);
+
+        var va = new List<Vector2>();
+        rt.Meshes[0].GetUVs(WmvWmoBuilder.Set2AlphaUvChannel, va);
+        Check(va.Count == 4 && Near(va[0].x, 1f) && Near(va[1].x, 128f / 255f) && Near(va[2].x, 0f) && Near(va[3].x, 64f / 255f),
+              "wmo 7 rows: the set-2 alpha uploads as (alpha / 255, 0) for the id-7 group", log);
+        var none = new List<Vector2>();
+        rt.Meshes[2].GetUVs(WmvWmoBuilder.Set2AlphaUvChannel, none);
+        Check(none.Count == 0, "wmo 5 rows: the id-5 group gets no set-2 channel (case 5 reads no vertex stream)", log);
+
+        Check(rt.TwoLayerMaterials == 3 && rt.EnvEmissiveOmittedMaterials == 4 && rt.Set2Groups == 3 && rt.StreamGapGroups == 0 &&
+              rt.FallbackMaterials == 2 && rt.ResolvedMaterials == 0 && rt.PartialMaterials == 2 && rt.UnresolvedMaterials == 2 &&
+              rt.ProvisionalMaterials == 2 && rt.EmptySamplerSlots == 1 && rt.PrimaryTexturesMissing == 0,
+              "wmo 7/5 rows: counters (two-layer " + rt.TwoLayerMaterials + ", env emissive omitted " + rt.EnvEmissiveOmittedMaterials +
+              ", set-2 groups " + rt.Set2Groups + ", fallbacks " + rt.FallbackMaterials + ", empty slots " + rt.EmptySamplerSlots + ")", log);
+        WmvWmoMaterialInfo i0 = rt.MaterialInfo[0], i1 = rt.MaterialInfo[1];
+        Check(i0.Set2Vertices == 4 && i0.Set2PartialVertices == 3 && i0.Set2ZeroVertices == 1 &&
+              i1.Set2Vertices == 4 && i1.Set2PartialVertices == 0 && i1.UnboundLayerVertices == 0,
+              "wmo 7 rows: per-material set-2 exposure (layer 2 shows on 3 vertices; the empty +0x18 is weighted on none)", log);
+        string diag = WmvWmoBuilder.DescribeMaterialDiag(i0, m7, 1, textures);
+        Check(diag.Contains("_WmoPermutation 5") && diag.Contains("t2 env map (emissive, not drawn) <- +0x24 " + Env + ", not bound") &&
+              diag.Contains("t2 " + Env + " not bound") && diag.Contains("NOT drawn (U-G1, U-E3)") &&
+              diag.Contains("| RESOLVED-PARTIAL: U-G1,U-E3"),
+              "wmo 7 rows: the diagnostic reads back the permutation, the unbound env map and what is not drawn", log);
+        bool summary = false;
+        foreach (string line in lines) summary = summary || (line.Contains("wmo built") && line.Contains("4 drawn without the env emissive"));
+        Check(summary, "wmo 7/5 rows: the build summary counts the materials drawn without their env emissive", log);
+        rt.Dispose();
+    }
+
+    /// <summary>
+    /// The pixel arithmetic of permutations 2 (four-layer, client case 23) and 3 (two-layer, client case 13)
+    /// as the GPU runs it, against the C# reference transcriptions the parser tests pin
+    /// (WmoMaterialSemantics.FourLayerWeights / TwoLayerMix). Without it a lerp flipped in WmvWmo.shader, or a
+    /// component dropped from the four-layer maximum, would pass every other check.
+    ///
+    /// A synthetic WMO of three flat quads: a four-layer material with flat-colour layers, height maps of
+    /// known alpha and the same MOC2 bytes on every vertex; a two-layer material with the same MOCV set-2
+    /// alpha on every vertex; and a plain id-0 reference. Constant vertex streams mean interpolation cannot
+    /// move the sample. Each quad is drawn unlit through a diagnostic view (3 effective weights, 4 va, 5 the
+    /// combiner diffuse) by an orthographic camera of this test's own into a render texture, and its centre
+    /// pixel is compared with the REFERENCE quad drawn through the same view with a flat texture holding the
+    /// value the C# function predicts. Comparing against a reference drawn by the same shader, camera and
+    /// target, rather than against the bare number, cancels whatever display transform, target encoding or
+    /// readback conversion the frame passes through: both pixels take the same path.
+    /// </summary>
+    static void MapObjectShaderRenderTests(Action<string> log)
+    {
+        if (WmvWmoBuilder.ResolveMapObjectShader(null) == null)
+        {
+            Check(false, "wmo render: the world-model shader is missing, nothing to render", log);
+            return;
+        }
+        if (!WmvModelBuilder.AuthoredTextureDomain)
+        {
+            // The C# mix is taken over the stored bytes; a player sampling textures sRGB-decoded
+            // (WMV_DISPLAY) mixes decoded values, so the comparison would not be the same arithmetic.
+            log("wmo render: skipped -- textures are sampled sRGB-decoded in this run, the byte-domain mix does not apply");
+            return;
+        }
+        const uint L1 = 985001, L2 = 985002, L3 = 985003, L4 = 985004, H1 = 985005, H2 = 985006, H3 = 985007, H4 = 985008;
+        const uint TA = 985011, TB = 985012, TR = 985013;
+        byte[][] records =
+        {
+            WmoSynthetic.Material(0, 23, 0, 0, L1, L2, new uint[] { L3, L4, H1, H2, H3, H4 }),   // 0 four-layer
+            WmoSynthetic.Material(0x04, 13, 0, TA, TB),                                       // 1 two-layer
+            WmoSynthetic.Material(0x04, 0, 0, TR),                                            // 2 reference
+        };
+        // MOC2 as stored (B, G, R, A): layer weights 40, 80, 100 of 255 for layers 1..3 (layer 4 takes 35).
+        // Layer 3 carries the largest weighted height, so a maximum that skipped it would move every weight.
+        const byte W1 = 40, W2 = 80, W3 = 100, Va = 90;
+        byte[] moc2 = new byte[16], set2 = new byte[16];
+        for (int v = 0; v < 4; v++)
+        {
+            moc2[v * 4] = W3; moc2[v * 4 + 1] = W2; moc2[v * 4 + 2] = W1; moc2[v * 4 + 3] = 0;
+            set2[v * 4] = 11; set2[v * 4 + 1] = 22; set2[v * 4 + 2] = 33; set2[v * 4 + 3] = Va;
+        }
+        int n = records.Length;
+        var spec = new WmoSynthetic.RootSpec
+        {
+            Materials = records,
+            GroupInfos = new byte[n][],
+            GroupFileDataIDs = new uint[n],
+            GroupNames = new string[0],
+        };
+        var groups = new WmoGroup[n];
+        for (int i = 0; i < n; i++)
+        {
+            spec.GroupInfos[i] = WmoSynthetic.GroupInfo(WmoGroupFlags.Outdoor, new WowVec3(12f * i, 0f, 0f),
+                                                        new WowVec3(12f * i + 10f, 10f, 0f), 0);
+            spec.GroupFileDataIDs[i] = 986000u + (uint)i;
+            float x = 12f * i;
+            var gs = new WmoSynthetic.GroupSpec
+            {
+                Flags = WmoGroupFlags.Outdoor | (i == 1 ? WmoGroupFlags.ColorSet2 | WmoGroupFlags.TwoTexCoordSets : 0u),
+                Positions = new[] { x, 0f, 0f, x + 10f, 0f, 0f, x + 10f, 10f, 0f, x, 10f, 0f },
+                Normals = new[] { 0f, 0f, 1f, 0f, 0f, 1f, 0f, 0f, 1f, 0f, 0f, 1f },
+                Indices = new ushort[] { 0, 1, 2, 0, 2, 3 },
+                Batches = new[] { WmoSynthetic.Batch(0, 6, 0, 3, WmoBatch.FlagLargeMaterialId, i) },
+                Mpy2 = new byte[] { 0x20, 0, (byte)i, 0, 0x20, 0, (byte)i, 0 },
+                Moc2 = i == 0 ? moc2 : null,
+            };
+            if (i == 1)
+                gs.ColorSets.Add(set2);
+            int sets = i == 0 ? 4 : i == 1 ? 2 : 1;
+            for (int s = 0; s < sets; s++)
+                gs.TexCoordSets.Add(new[] { 0f, 0f, 1f, 0f, 1f, 1f, 0f, 1f });
+            groups[i] = WmoParser.ParseGroup(WmoSynthetic.BuildGroup(gs), "render group " + i, i);
+        }
+        WmoRoot root = WmoParser.ParseRoot(WmoSynthetic.BuildRoot(spec), "render root");
+
+        // Layer colours and height alphas. Layer 4 is yellow, so every channel of the mix mixes two layers.
+        byte[][] layerRgb = { new byte[] { 255, 0, 0 }, new byte[] { 0, 255, 0 }, new byte[] { 0, 0, 255 }, new byte[] { 255, 255, 0 } };
+        byte[] heightAlpha = { 255, 128, 255, 200 };
+        byte[] l1 = { 230, 40, 90 }, l2 = { 20, 200, 160 };
+        var textures = new Dictionary<uint, WmvWmoTexture>();
+        uint[] layerIds = { L1, L2, L3, L4 }, heightIds = { H1, H2, H3, H4 };
+        for (int k = 0; k < 4; k++)
+        {
+            AddRenderTexture(textures, layerIds[k], SolidTexture(layerRgb[k][0], layerRgb[k][1], layerRgb[k][2]));
+            AddRenderTexture(textures, heightIds[k], SolidTextureAlpha(90, 90, 90, heightAlpha[k]));
+        }
+        AddRenderTexture(textures, TA, SolidTexture(l1[0], l1[1], l1[2]));
+        AddRenderTexture(textures, TB, SolidTexture(l2[0], l2[1], l2[2]));
+        AddRenderTexture(textures, TR, SolidTexture(0, 0, 0));
+
+        // What the C# transcriptions predict, as the bytes of a flat reference texture.
+        var heights = new float[4];
+        for (int k = 0; k < 4; k++) heights[k] = heightAlpha[k] / 255f;
+        float[] b = WmoMaterialSemantics.FourLayerWeights(W1 / 255f, W2 / 255f, W3 / 255f, heights, new[] { 1f, 1f, 1f, 1f });
+        var mix = new float[3];
+        for (int c = 0; c < 3; c++)
+            for (int k = 0; k < 4; k++)
+                mix[c] += b[k] * layerRgb[k][c] / 255f;
+        float va = WmoMaterialSemantics.SetTwoAlpha(Va);
+        var twoMix = new float[3];
+        for (int c = 0; c < 3; c++)
+            twoMix[c] = WmoMaterialSemantics.TwoLayerMix(l1[c] / 255f, l2[c] / 255f, va);
+
+        WmvRuntimeMapObject rt = null;
+        GameObject camGo = null;
+        RenderTexture target = null;
+        RenderTexture prevActive = RenderTexture.active;
+        var refs = new List<Texture2D>();
+        try
+        {
+            rt = WmvWmoBuilder.Build(root, groups, textures, "WmoRender", null);
+            bool built = rt != null && rt.Materials.Length == 3 && rt.Materials[0] != null && rt.Materials[1] != null && rt.Materials[2] != null;
+            Check(built, "wmo render: built", log);
+            if (!built) return;
+            // Far from anything the viewport can see, and switched off again before this method returns:
+            // Destroy is deferred to the end of the frame, and the viewport camera must never draw these.
+            Vector3 origin = new Vector3(-20000f, 20000f, -20000f);
+            rt.Root.transform.position = origin;
+            rt.Root.SetActive(true);
+            foreach (Material m in rt.Materials)
+                m.SetFloat("_Cull", (float)UnityEngine.Rendering.CullMode.Off);
+
+            camGo = new GameObject("WmvWmoRenderTestCamera");
+            Camera cam = camGo.AddComponent<Camera>();
+            cam.enabled = false;
+            cam.clearFlags = CameraClearFlags.SolidColor;
+            cam.backgroundColor = new Color(0.5f, 0f, 0.5f, 1f);
+            cam.orthographic = true;
+            cam.orthographicSize = 1f;          // the quads are 10 units across: every pixel is inside one
+            cam.nearClipPlane = 0.1f;
+            cam.farClipPlane = 20f;
+            cam.allowHDR = false;
+            cam.allowMSAA = false;
+            const int Size = 16;
+            target = RenderTexture.GetTemporary(Size, Size, 24, RenderTextureFormat.ARGB32, RenderTextureReadWrite.Linear);
+
+            Material four = rt.Materials[0], two = rt.Materials[1], reference = rt.Materials[2];
+            // The reference: a flat texture of the predicted value, drawn by the diffuse permutation's view 5.
+            Func<float, float, float, Color32> refPixel = (r, g, bl) =>
+            {
+                Texture2D t = WmvModelBuilder.CreateTexture(SolidTexture(ToByte(r), ToByte(g), ToByte(bl)), "WmoRenderRef", true, true);
+                refs.Add(t);
+                reference.SetTexture("_WmoTex0", t);
+                reference.SetFloat("_WmoDiagView", 5f);
+                return RenderQuadCentre(cam, target, origin, 2, Size);
+            };
+            Func<Material, int, float, Color32> quadPixel = (m, group, view) =>
+            {
+                m.SetFloat("_WmoDiagView", view);
+                return RenderQuadCentre(cam, target, origin, group, Size);
+            };
+
+            Color32 black = refPixel(0f, 0f, 0f), white = refPixel(1f, 1f, 1f);
+            bool rendering = white.r > black.r + 100 && white.g > black.g + 100 && white.b > black.b + 100;
+            Check(rendering, "wmo render: the test camera draws the reference quad (black " + Px(black) + ", white " + Px(white) + ")", log);
+            if (!rendering) return;
+
+            Color32 weights = quadPixel(four, 0, 3f), weightsRef = refPixel(b[0], b[1], b[2]);
+            Check(SamePixel(weights, weightsRef, 3),
+                  "wmo render: four-layer effective weights match FourLayerWeights (" + Px(weights) + " vs " + Px(weightsRef) + ")", log);
+            Color32 fourDiffuse = quadPixel(four, 0, 5f), fourRef = refPixel(mix[0], mix[1], mix[2]);
+            Check(SamePixel(fourDiffuse, fourRef, 3),
+                  "wmo render: four-layer diffuse matches the C# weighted layer sum (" + Px(fourDiffuse) + " vs " + Px(fourRef) + ")", log);
+            Color32 vaPixel = quadPixel(two, 1, 4f), vaRef = refPixel(va, va, va);
+            Check(SamePixel(vaPixel, vaRef, 3),
+                  "wmo render: the two-layer factor is the stored set-2 alpha / 255 (" + Px(vaPixel) + " vs " + Px(vaRef) + ")", log);
+            Color32 twoDiffuse = quadPixel(two, 1, 5f), twoRef = refPixel(twoMix[0], twoMix[1], twoMix[2]);
+            Check(SamePixel(twoDiffuse, twoRef, 3),
+                  "wmo render: two-layer diffuse matches TwoLayerMix, va 1 toward +0x0C (" + Px(twoDiffuse) + " vs " + Px(twoRef) + ")", log);
+        }
+        finally
+        {
+            RenderTexture.active = prevActive;
+            if (target != null) RenderTexture.ReleaseTemporary(target);
+            if (camGo != null) UnityEngine.Object.DestroyImmediate(camGo);
+            foreach (Texture2D t in refs) UnityEngine.Object.DestroyImmediate(t);
+            if (rt != null)
+            {
+                if (rt.Root != null) rt.Root.SetActive(false);
+                rt.Dispose();
+            }
+        }
+    }
+
+    static void AddRenderTexture(Dictionary<uint, WmvWmoTexture> into, uint id, BlpImage img)
+    {
+        into[id] = new WmvWmoTexture { FileDataID = id, Image = img, Decoded = true, Width = img.Width, Height = img.Height };
+    }
+
+    /// <summary>SolidTexture with a chosen alpha: a height map's only input is its alpha.</summary>
+    static BlpImage SolidTextureAlpha(byte r, byte g, byte b, byte a)
+    {
+        BlpImage img = SolidTexture(r, g, b);
+        for (int i = 3; i < img.Rgba.Length; i += 4) img.Rgba[i] = a;
+        return img;
+    }
+
+    static byte ToByte(float v)
+    {
+        return (byte)Mathf.Clamp(Mathf.RoundToInt(v * 255f), 0, 255);
+    }
+
+    static bool SamePixel(Color32 a, Color32 b, int tolerance)
+    {
+        return Math.Abs(a.r - b.r) <= tolerance && Math.Abs(a.g - b.g) <= tolerance && Math.Abs(a.b - b.b) <= tolerance;
+    }
+
+    static string Px(Color32 c)
+    {
+        return c.r + "," + c.g + "," + c.b;
+    }
+
+    /// <summary>
+    /// Render the test camera straight down onto synthetic group quad `group` (WoW x 12*group..+10, y 0..10,
+    /// which the converter puts at Unity x -10..0, z 12*group..+10) and read back the centre pixel.
+    /// </summary>
+    static Color32 RenderQuadCentre(Camera cam, RenderTexture target, Vector3 origin, int group, int size)
+    {
+        cam.transform.position = origin + new Vector3(-5f, 5f, 12f * group + 5f);
+        cam.transform.rotation = Quaternion.Euler(90f, 0f, 0f);
+        cam.targetTexture = target;
+        cam.Render();
+        cam.targetTexture = null;
+        RenderTexture prev = RenderTexture.active;
+        RenderTexture.active = target;
+        var tex = new Texture2D(size, size, TextureFormat.RGBA32, false, true);
+        tex.ReadPixels(new Rect(0, 0, size, size), 0, 0);
+        tex.Apply(false);
+        RenderTexture.active = prev;
+        Color32 c = tex.GetPixels32()[(size / 2) * size + size / 2];
+        UnityEngine.Object.DestroyImmediate(tex);
+        return c;
     }
 
     static WmoMaterial MaterialFrom(byte[] record, int index)

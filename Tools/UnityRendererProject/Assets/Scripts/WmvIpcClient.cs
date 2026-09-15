@@ -35,7 +35,11 @@
 //                           vertices, triangles, boundsMin:[x,y,z], boundsMax:[x,y,z],
 //                           timings:{ rootMs, groupsMs, texturesMs, buildMs, totalMs },
 //                           liveMapObjects, liveModels }
-//     sent once per world-model load outcome. Bounds are Unity space; liveMapObjects / liveModels
+//     sent once per world-model load outcome. provisionalMaterials counts the drawn materials
+//     that are drawn provisionally (the archived baseline or a labelled fallback), unresolvedMaterials those with any
+//     open question (resolved-partial or unresolved; see Wow.WmoMaterialSemantics), blendedMaterials those with a
+//     non-zero MOMT blend, texturesDecoded the files some drawn material's plan samples.
+//     Bounds are Unity space; liveMapObjects / liveModels
 //     count the runtimes the player holds once the outcome was adopted, so a lifecycle test can
 //     prove a switch left nothing behind
 //   runtimeState          { query, liveMapObjects, liveModels, modelFileDataID, mapObjectFileDataID, loading }
