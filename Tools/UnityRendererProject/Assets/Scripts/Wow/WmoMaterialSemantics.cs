@@ -25,12 +25,13 @@
 //                 matrix; per-vertex weights from MOC2 (bytes 2, 1, 0 for layers 1..3, layer 4 = 1 -
 //                 saturate(sum)); each weight times its height, sharpened against the largest of all
 //                 four, normalised; diffuse = the weighted layer sum; case alpha 1. Its env emissive
-//                 (+0x0C on a camera-space sphere map) and the lerp of the diffuse toward an exe-side
-//                 colour by MOC2 byte 3 are NOT drawn (U-E2, U-E3, U-23a). An empty layer has its weight
-//                 forced to 0 -- the client's result wherever the stored weight is 0, a viewer rule
-//                 elsewhere, so it carries U-23b. A material with a layer but no height texture for it
-//                 is not established (U-23b) and is drawn by a labelled provisional fallback of the same
-//                 arithmetic; so is one whose blend value is 2 or above (U-B2..U-B5). Its +0x0C env map is
+//                 (+0x0C on a per-pixel sphere map, times the weighted layer colour and its alpha) and
+//                 the lerp of the diffuse toward an exe-side colour by MOC2 byte 3 are NOT drawn (U-E2,
+//                 U-E3, U-E4, U-P1, U-23a). An empty layer has its weight forced to 0 -- the client's
+//                 result wherever the stored weight is 0, a viewer rule elsewhere, so it carries U-23b. A
+//                 material with a layer but no height texture for it is not established (U-23b) and is
+//                 drawn by a labelled provisional fallback of the same arithmetic; so is one whose blend
+//                 value is 2 or above (U-B2..U-B5, and U-B7 from 3). Its +0x0C env map is
 //                 never drawn as a diffuse, not even by the baseline an id-23 material with no layer at
 //                 all falls back to.
 //   id 13         the client's pixel case 13: two layers, +0x0C on MOTV set 1 and +0x18 on MOTV set 2,
@@ -45,13 +46,18 @@
 //                 and +0x18 (MOTV set 2) by the MOCV set-2 alpha, case alpha 1. Its emissive -- the
 //                 lerped colour times its alpha times the env map +0x24 on a generated coordinate, added
 //                 after light -- is NOT drawn and +0x24 is not decoded: which coordinate generator the
-//                 client selects for that register (U-G1) and the distance fade it is scaled by (U-E3)
-//                 are exe-side. So every id-7 material is at best resolved-partial; one with either layer
-//                 slot empty is the same labelled provisional fallback as id 13 (U-23b).
+//                 client selects for that register (U-G1), the env sampler's addressing (U-E4), the
+//                 distance fade it is scaled by (U-E3) and whether the program the client picks adds it
+//                 at all (U-P1) are exe-side, and the camera axes a reflection or planar generator would
+//                 depend on (U-E2) are not established. So every id-7 material is at best
+//                 resolved-partial; one with either layer slot empty is the same labelled provisional
+//                 fallback as id 13 (U-23b).
 //   id 5          the DIFFUSE PART of the client's pixel case 5: t0.rgb of +0x0C on MOTV set 1, case
 //                 alpha 1. Its emissive t0.rgb * t0.a * env(+0x18) is not drawn for the same reasons
-//                 (U-G1, U-E3), so t0's alpha (the reflectivity mask) and +0x18 are not read. An empty
-//                 +0x0C is the labelled fallback of id 4 (U-23b).
+//                 (U-G1, U-E2, U-E3, U-E4, U-P1), so t0's alpha (the reflectivity mask) and +0x18 are not
+//                 read. An empty +0x0C is the labelled fallback of id 4 (U-23b).
+//                 The emissive masks of ids 5, 7 and 23 (the factor each env map is multiplied by) are
+//                 transcribed below for the tests and the envmask diagnostic view only.
 //   blend 0 / 1   opaque, depth write on; 1 additionally discards where that alpha is below 128/255,
 //                 the only map-object alpha-test constant in the client shader (forward, alpha-to-
 //                 coverage and alpha-tested prepass permutations all use it). Ids whose case alpha is
@@ -59,19 +65,23 @@
 //   flag 0x04     culling off, else back faces culled.
 //   flags 0x40/80 clamp texture addressing on U / V for every texture of the material (default repeat).
 //   flag 0x01     the preview light rig is bypassed on ids whose combiner has no emissive term: the
-//                 client's unlit lighting mode returns the albedo unchanged.
+//                 client's unlit lighting mode returns the albedo unchanged. Older-client documentation
+//                 honours the flag only for exterior-lit batches, so a material the load finds drawn in
+//                 an interior group keeps the bypass and gains U-F3 (NoteUnlitInInteriorGroups).
 //
 // Everything else keeps the ARCHIVED BASELINE the static stage drew (slot +0x0C on UV channel 0, a
 // non-zero blend drawn as the 128/255 key, flag 0x04 for culling, nothing more) and is labelled
 // PROVISIONAL, with the reasons it is not resolved:
 //
-//   unresolved   blend values 2 and above: the blend factors are documented, but depth write (U-B2),
-//                draw order (U-B3), the output-alpha modifier (U-B4) and the discard rule (U-B5) are
-//                not, so no Src/Dst mapping is guessed. Ids 4, 5, 7, 13 and 23 with such a blend keep
-//                their established case arithmetic in a labelled fallback drawn opaque (their case
-//                alpha is 1, so the baseline's key would discard what the client never discards); ids
-//                0 and 16 keep the baseline, whose +0x0C is their diffuse. Every other shader id is
-//                outside the plan.
+//   unresolved   blend values 2 and above: the client's blend-state table gives the four factors of
+//                every row, and older-client documentation maps MOMT value n to row n (not contradicted
+//                for 2; contested for 3 and above in 12.1, U-B7). Depth write (U-B2), draw order (U-B3),
+//                the output-alpha modifier (U-B4) and the discard rule (U-B5) are not established, so
+//                the row is only logged and no Src/Dst mapping is applied. Ids 4, 5, 7, 13 and 23 with
+//                such a blend keep their established case arithmetic in a labelled fallback drawn opaque
+//                (their case alpha is 1, so the baseline's key would discard what the client never
+//                discards); ids 0 and 16 keep the baseline, whose +0x0C is their diffuse. Every other
+//                shader id is outside the plan.
 //
 // All six staged ids (0/16, 23, 13, 4, 7, 5) have their established part wired; what each still lacks is
 // a reason code on the material, never a later stage.
@@ -128,6 +138,18 @@ namespace Wmv.Wow
     {
         Zero = 0, One = 1, DstColor = 2, SrcColor = 3, OneMinusDstColor = 4, SrcAlpha = 5,
         OneMinusSrcColor = 6, DstAlpha = 7, OneMinusDstAlpha = 8, SrcAlphaSaturate = 9, OneMinusSrcAlpha = 10,
+    }
+
+    /// <summary>One row of the client's blend-state table (EGxBlend): the colour and alpha factors the
+    /// executable's read-only data holds for that index, under the client's factor names. For the log only --
+    /// the factors are strings, not WmoBlendFactor values, so no row can reach a material's render state.</summary>
+    public struct WmoClientBlendRow
+    {
+        /// <summary>The EGxBlend index (0..16), not a MOMT blend value.</summary>
+        public int Index;
+        /// <summary>The documented enumeration name of rows 0..13; "" for rows 14..16, which no source names.</summary>
+        public string Name;
+        public string SrcColor, DstColor, SrcAlpha, DstAlpha;
     }
 
     /// <summary>One sampler register of the material and what feeds it.</summary>
@@ -245,6 +267,79 @@ namespace Wmv.Wow
         public const uint FlagUnlit = 0x01, FlagUnfogged = 0x02, FlagUnculled = 0x04, FlagExtLight = 0x08,
                           FlagSidn = 0x10, FlagWindow = 0x20, FlagClampS = 0x40, FlagClampT = 0x80, Flag100 = 0x100;
 
+        /// <summary>Rows in the 12.1 client's blend-state table (EGxBlend 0..16).</summary>
+        public const int ClientBlendRowCount = 17;
+
+        /// <summary>
+        /// The client's blend-state table, keyed by EGxBlend index: source colour, destination colour, source
+        /// alpha and destination alpha of every row, as the 12.1 executable's read-only data stores them (its
+        /// D3D and Metal encodings agree on all 68 cells). The names of rows 0..13 are the documented
+        /// enumeration names of a 7.x client; rows 14..16 have no named source. That MOMT blend value n selects
+        /// row n is older-client documentation only -- not contradicted for 2, contested for 3 and above in
+        /// 12.1 (U-B7) -- so the table is logged for blend 2 and above (ClientBlendNote) and never read by
+        /// ApplyEstablishedBlend or ApplyUnresolvedBlend.
+        /// </summary>
+        static readonly WmoClientBlendRow[] ClientBlend =
+        {
+            BlendRow(0, "Opaque", "ONE", "ZERO", "ONE", "ZERO"),
+            BlendRow(1, "AlphaKey", "ONE", "ZERO", "ONE", "ZERO"),
+            BlendRow(2, "Alpha", "SRC_ALPHA", "INV_SRC_ALPHA", "ONE", "INV_SRC_ALPHA"),
+            BlendRow(3, "Add", "SRC_ALPHA", "ONE", "ZERO", "ONE"),
+            BlendRow(4, "Mod", "DEST_COLOR", "ZERO", "DEST_ALPHA", "ZERO"),
+            BlendRow(5, "Mod2x", "DEST_COLOR", "SRC_COLOR", "DEST_ALPHA", "SRC_ALPHA"),
+            BlendRow(6, "ModAdd", "DEST_COLOR", "ONE", "DEST_ALPHA", "ONE"),
+            BlendRow(7, "InvSrcAlphaAdd", "INV_SRC_ALPHA", "ONE", "INV_SRC_ALPHA", "ONE"),
+            BlendRow(8, "InvSrcAlphaOpaque", "INV_SRC_ALPHA", "ZERO", "INV_SRC_ALPHA", "ZERO"),
+            BlendRow(9, "SrcAlphaOpaque", "SRC_ALPHA", "ZERO", "SRC_ALPHA", "ZERO"),
+            BlendRow(10, "NoAlphaAdd", "ONE", "ONE", "ZERO", "ONE"),
+            BlendRow(11, "ConstantAlpha", "BLEND_FACTOR", "INV_BLEND_FACTOR", "BLEND_FACTOR", "INV_BLEND_FACTOR"),
+            BlendRow(12, "Screen", "INV_DEST_COLOR", "ONE", "ONE", "ZERO"),
+            BlendRow(13, "BlendAdd", "ONE", "INV_SRC_ALPHA", "ONE", "INV_SRC_ALPHA"),
+            BlendRow(14, "", "ONE", "ONE", "ONE", "ONE"),
+            BlendRow(15, "", "DEST_ALPHA", "INV_SRC_ALPHA", "ONE", "ONE"),
+            BlendRow(16, "", "ZERO", "SRC_COLOR", "ZERO", "SRC_ALPHA"),
+        };
+
+        static WmoClientBlendRow BlendRow(int index, string name, string srcColor, string dstColor, string srcAlpha, string dstAlpha)
+        {
+            return new WmoClientBlendRow { Index = index, Name = name, SrcColor = srcColor, DstColor = dstColor,
+                                           SrcAlpha = srcAlpha, DstAlpha = dstAlpha };
+        }
+
+        /// <summary>Row `index` of the client's blend-state table; false past its last row (16).</summary>
+        public static bool TryClientBlend(uint index, out WmoClientBlendRow row)
+        {
+            if (index < ClientBlend.Length)
+            {
+                row = ClientBlend[index];
+                return true;
+            }
+            row = default(WmoClientBlendRow);
+            return false;
+        }
+
+        /// <summary>
+        /// What the log says about the client's blend row for a blend value of 2 or above, with its evidence:
+        /// the factor row is the client's own, the hop from the MOMT value to that row is older-client
+        /// documentation (contested from 3 up, U-B7), and nothing of it is applied. "" below 2.
+        /// </summary>
+        public static string ClientBlendNote(uint blend)
+        {
+            if (blend < 2)
+                return "";
+            WmoClientBlendRow row;
+            if (!TryClientBlend(blend, out row))
+                return "no client EGxBlend row " + blend + " (the 12.1 table has " + ClientBlendRowCount + " rows)";
+            const string notApplied = "not applied: depth write, discard, order and output alpha are not established";
+            string factors = "Src " + row.SrcColor + " Dst " + row.DstColor + " SrcA " + row.SrcAlpha + " DstA " + row.DstAlpha;
+            if (blend == 2)
+                return "client EGxBlend row 2 " + row.Name + ": " + factors + " (factor row CLIENT 12.1; value 2 -> row 2 per " +
+                       "older-client documentation, not contradicted; " + notApplied + ")";
+            return "candidate client EGxBlend row " + blend + " " + (row.Name.Length > 0 ? row.Name : "unnamed") + ": " + factors +
+                   " (factor row CLIENT 12.1; value " + blend + " -> row " + blend + " only per older-client documentation, " +
+                   "contested for 12.1: U-B7; " + notApplied + ")";
+        }
+
         static readonly string[] SlotNames = { "+0x0C", "+0x18", "+0x24", "+0x28", "+0x2C", "+0x30", "+0x34", "+0x38", "+0x3C" };
 
         /// <summary>The name of texture slot 0..8 ("+0x0C" ...), or "?" outside the range.</summary>
@@ -291,7 +386,7 @@ namespace Wmv.Wow
         }
 
         /// <summary>
-        /// The one reason code a plan cannot know by itself: the load found that some vertices a draw covers
+        /// A reason code a plan cannot know by itself: the load found that some vertices a draw covers
         /// lack a stream the permutation reads (MOC2, the MOCV set-2 alpha, or a MOTV set), and fed the stated
         /// default there. What the client reads for an absent stream is not established (U-V4), so the code
         /// and a note with the vertex count go on the material, and a resolved material becomes
@@ -311,6 +406,35 @@ namespace Wmv.Wow
             {
                 string.Format("{0} drawn vertex(es) lack {1}: drawn with the stated default there; what the client reads " +
                               "for an absent stream is unknown (U-V4)", vertices, streams),
+            };
+            p.Notes = notes.ToArray();
+            if (p.Resolution == WmoResolution.Resolved)
+                p.Resolution = WmoResolution.ResolvedPartial;
+        }
+
+        /// <summary>
+        /// A second reason code a plan cannot know by itself: the load found batches drawing a material whose
+        /// F_UNLIT preview-light bypass applies (ids 0, 4, 13, 16) in interior groups (MOGP flag 0x2000).
+        /// Older-client documentation honours F_UNLIT only for exterior-lit batches, the interior branch
+        /// ignoring it; what the 12.1 client does in an interior group is not established (U-F3). The bypass
+        /// stays as drawn: the code and a note with the batch count go on the material, and a resolved
+        /// material becomes resolved-partial, as with U-V4. Called once per material by the builder, after
+        /// every batch was counted; no-op without the bypass or for 0 batches.
+        /// </summary>
+        public static void NoteUnlitInInteriorGroups(WmoMaterialPlan p, int interiorBatches)
+        {
+            if (p == null || !p.LightBypass || interiorBatches <= 0)
+                return;
+            if (Array.IndexOf(p.Codes, "U-F3") < 0)
+            {
+                var codes = new List<string>(p.Codes) { "U-F3" };
+                p.Codes = codes.ToArray();
+            }
+            var notes = new List<string>(p.Notes)
+            {
+                string.Format("flag 0x01 F_UNLIT bypass kept on {0} drawn batch(es) in interior groups (MOGP 0x2000): " +
+                              "older-client documentation limits F_UNLIT to exterior-lit batches; its scope in 12.1 is " +
+                              "not established (U-F3)", interiorBatches),
             };
             p.Notes = notes.ToArray();
             if (p.Resolution == WmoResolution.Resolved)
@@ -398,15 +522,25 @@ namespace Wmv.Wow
         /// Blend 2 and above on an id whose case alpha is 1 (4, 5, 7, 13, 23): the case arithmetic is established,
         /// the blend state is not. Drawn by a labelled fallback in the same opaque state the archived
         /// baseline uses -- One/Zero, depth write -- but without its 128/255 key, which on these ids would
-        /// discard pixels the client's case never discards. No Src/Dst mapping is chosen.
+        /// discard pixels the client's case never discards. No Src/Dst mapping is chosen; the client's blend
+        /// row is logged with its evidence (ClientBlendNote), U-B7 from 3 up, U-B1 only past the table's last row.
         /// </summary>
         static void ApplyUnresolvedBlend(WmoMaterialPlan p, List<string> codes, List<string> notes)
         {
-            if (p.Blend > 13) codes.Add("U-B1");
-            codes.Add("U-B2"); codes.Add("U-B3"); codes.Add("U-B4"); codes.Add("U-B5");
+            AddUnresolvedBlendCodes(p, codes);
             notes.Add("blend " + p.Blend + ": depth write (U-B2), draw order (U-B3), output alpha (U-B4) and discard (U-B5) are " +
                       "not established; PROVISIONAL fallback: the client case drawn opaque with depth write, no alpha test " +
                       "(case alpha 1), no blend factors guessed");
+            notes.Add(ClientBlendNote(p.Blend));
+        }
+
+        /// <summary>The codes of an unresolved blend value (2 and above), in log order: U-B1 when even the
+        /// older-client reading finds no row (past 16), U-B2..U-B5, and U-B7 when the value's row is contested (3 up).</summary>
+        static void AddUnresolvedBlendCodes(WmoMaterialPlan p, List<string> codes)
+        {
+            if (p.Blend >= ClientBlendRowCount) codes.Add("U-B1");
+            codes.Add("U-B2"); codes.Add("U-B3"); codes.Add("U-B4"); codes.Add("U-B5");
+            if (p.Blend >= 3) codes.Add("U-B7");
         }
 
         /// <summary>
@@ -415,7 +549,8 @@ namespace Wmv.Wow
         /// Id 7 (envMetal), the diffuse part of the client's pixel case 7: the same two registers, the same
         /// lerp (case 7 lerps rgba, and only the emissive reads the lerped alpha), case alpha 1. Its emissive
         /// -- the lerped colour times its alpha times the env map +0x24 (t2) on a generated coordinate, added
-        /// after light -- is not drawn, so t2 is listed unread and every id-7 material carries U-G1 and U-E3.
+        /// after light -- is not drawn, so t2 is listed unread and every id-7 material carries U-G1, U-E2,
+        /// U-E3, U-E4 and U-P1.
         /// </summary>
         static void PlanTwoLayer(WmoMaterialPlan p, WmoMaterial m, bool envMetal)
         {
@@ -476,8 +611,7 @@ namespace Wmv.Wow
                           "register's white default wherever va weights it");
             }
             if (envMetal)
-                NoteEnvEmissiveNotDrawn(p, codes, notes, "+0x24",
-                                        "the lerped colour times its alpha times the env map +0x24", env != 0);
+                NoteEnvEmissiveNotDrawn(p, codes, notes, "+0x24", TwoLayerEnvEmissive, "VS generator cb2[1].z (U-G1)", env != 0);
             NoteUnestablishedFields(p, m, codes, notes);
             if (p.Blend == 1)
                 notes.Add("blend 1: " + caseName + "'s alpha is 1, so the client's 128/255 test never discards; drawn untested, blending off");
@@ -499,26 +633,47 @@ namespace Wmv.Wow
 
         /// <summary>
         /// Ids 5 and 7: the env emissive the client adds after light is not drawn. Its texture's coordinate
-        /// comes from a generator the exe selects per register (U-G1), and it is scaled by a distance fade whose
-        /// constants are exe-side (U-E3), so both codes go on every such material. F_UNLIT is not honoured on
-        /// these ids either: the client's unlit mode still adds the emissive, which the preview-light bypass
-        /// alone would not reproduce (U-F1).
+        /// comes from a generator the exe selects per register (U-G1) and, for every reflection or planar
+        /// generator, depends on the client's camera axes (U-E2); the env sampler's addressing is exe-side
+        /// (U-E4); it is scaled by a distance fade whose constants are exe-side (U-E3); and the client may
+        /// draw the batch with a program that has no emissive or tints it (U-P1). Every such material carries
+        /// all five codes. F_UNLIT is not honoured on these ids either: the client's unlit mode still adds the
+        /// emissive, which the preview-light bypass alone would not reproduce (U-F1).
         /// </summary>
         static void NoteEnvEmissiveNotDrawn(WmoMaterialPlan p, List<string> codes, List<string> notes, string envSlot,
-                                            string emissive, bool envPresent)
+                                            string emissive, string coordinate, bool envPresent)
         {
             codes.Add("U-G1");
+            codes.Add("U-E2");
             codes.Add("U-E3");
-            notes.Add(envPresent
-                ? "the env emissive (" + emissive + " on a generated coordinate, added after light) is not drawn and " +
-                  envSlot + " is not decoded: the coordinate generator (U-G1) and the distance fade (U-E3) are not established"
-                : envSlot + " is empty: no env map to draw (the emissive is not drawn in any case, U-G1/U-E3; what the client " +
-                  "binds to the empty register is unknown, U-23b)");
+            codes.Add("U-E4");
+            codes.Add("U-P1");
+            notes.Add(EnvEmissiveNote(envSlot, emissive, coordinate + ", camera axes U-E2", "U-G1, U-E2, U-E3, U-E4, U-P1", envPresent));
             if ((p.Flags & FlagUnlit) != 0)
             {
                 codes.Add("U-F1");
                 notes.Add("flag 0x01 F_UNLIT on an id with an emissive term: not applied (U-F1)");
             }
+        }
+
+        // The client's emissive equations (pixel cases 5, 7 and 23), in register terms, for the log.
+        const string EnvMetalEmissive = "t0.rgb * t0.a * env(t1).rgb";
+        const string TwoLayerEnvEmissive = "c.rgb * c.a * env(t2).rgb, c = lerp(t1, t0, va) as rgba";
+        const string FourLayerEnvEmissive = "env(t0).rgb * mix.rgb * mix.a, mix = the weighted four-layer rgba";
+
+        /// <summary>
+        /// The note on an env emissive that is not drawn (ids 5, 7 and 23): the client's equation, the coordinate
+        /// it would be sampled at, and every input that is not established, each with its code.
+        /// </summary>
+        static string EnvEmissiveNote(string envSlot, string emissive, string coordinate, string codes, bool envPresent)
+        {
+            if (!envPresent)
+                return envSlot + " is empty: no env map to draw (the emissive " + emissive + " is not drawn in any case: " + codes +
+                       "; what the client binds to the empty register is unknown, U-23b)";
+            return "emissive " + emissive + " (CLIENT), added after light: NOT drawn, and " + envSlot + " is not decoded -- " +
+                   "coordinate " + coordinate + "; env sampler address mode exe-side (U-E4); distance fade saturate(z*s+b) per " +
+                   "instance (U-E3); the client may draw the batch with a program without the emissive (bit6, or the " +
+                   "single-texture family), or tint or replace it via the edge selector (U-P1)";
         }
 
         /// <summary>
@@ -539,12 +694,39 @@ namespace Wmv.Wow
             return stored / 255f;
         }
 
+        // The emissive MASKS of client pixel cases 5, 7 and 23: the factor each case multiplies its env map's
+        // rgb by before adding it after light. Reference transcriptions of the client's equations, not called
+        // by the draw (no emissive is drawn): the parser tests pin them on hand vectors, and the lifecycle
+        // self-test renders the envmask view (8) of permutations 6, 5 and 2 against them. Each returns rgb.
+
+        /// <summary>Case 5 (id 5): t0.rgb * t0.a -- the +0x0C colour times its alpha.</summary>
+        public static float[] EnvMetalMask(float r, float g, float b, float a)
+        {
+            return new[] { r * a, g * a, b * a };
+        }
+
+        /// <summary>Case 7 (id 7): c.rgb * c.a with c = layer2 + va * (layer1 - layer2) per channel, alpha included
+        /// (layer1 = +0x0C, layer2 = +0x18, each rgba; va the MOCV set-2 alpha as 0..1) -- so both layer alphas count.</summary>
+        public static float[] TwoLayerEnvMask(float[] layer1, float[] layer2, float va)
+        {
+            float a = TwoLayerMix(layer1[3], layer2[3], va);
+            return new[] { TwoLayerMix(layer1[0], layer2[0], va) * a, TwoLayerMix(layer1[1], layer2[1], va) * a,
+                           TwoLayerMix(layer1[2], layer2[2], va) * a };
+        }
+
+        /// <summary>Case 23 (id 23): mix.rgb * mix.a with mix the weighted four-layer rgba (the layers times
+        /// FourLayerWeights, before the client's byte-3 lerp).</summary>
+        public static float[] FourLayerEnvMask(float[] mix)
+        {
+            return new[] { mix[0] * mix[3], mix[1] * mix[3], mix[2] * mix[3] };
+        }
+
         /// <summary>
         /// Id 4, the client's pixel case 4: diffuse = t0.rgb of +0x0C on MOTV set 1, case alpha 1.
         /// Id 5 (envMetal), the diffuse part of the client's pixel case 5: the same t0.rgb, case alpha 1. Its
         /// emissive -- t0.rgb times t0.a (the reflectivity mask) times the env map +0x18 (t1) on a generated
         /// coordinate, added after light -- is not drawn, so t0's alpha is dropped, t1 is listed unread and
-        /// every id-5 material carries U-G1 and U-E3.
+        /// every id-5 material carries U-G1, U-E2, U-E3, U-E4 and U-P1.
         /// </summary>
         static void PlanOpaque(WmoMaterialPlan p, WmoMaterial m, bool envMetal)
         {
@@ -585,8 +767,8 @@ namespace Wmv.Wow
                 // exe-side.
                 NoteEmptyWholeOutputRegister(p, codes, notes);
             if (envMetal)
-                NoteEnvEmissiveNotDrawn(p, codes, notes, "+0x18", "t0.rgb times t0.a times the env map +0x18",
-                                        p.TextureSlots[1] != 0);
+                NoteEnvEmissiveNotDrawn(p, codes, notes, "+0x18", EnvMetalEmissive,
+                                        "VS generator cb2[1].y or the cb0[5].y PS sphere map (U-G1)", p.TextureSlots[1] != 0);
             NoteUnestablishedFields(p, m, codes, notes);
             if (p.Blend == 1)
                 notes.Add("blend 1: " + caseName + "'s alpha is 1, so the client's 128/255 test never discards; drawn untested, blending off");
@@ -703,13 +885,15 @@ namespace Wmv.Wow
             codes.Add("U-23a");
             codes.Add("U-E2");
             codes.Add("U-E3");
+            codes.Add("U-E4");
+            codes.Add("U-P1");
             notes.Add("diffuse = the weighted layer sum; the client also lerps it toward an exe-side colour by MOC2 byte 3 " +
                       "-- not applied (U-23a)");
-            notes.Add(p.TextureSlots[0] != 0
-                ? "the +0x0C env emissive (a camera-space sphere map added after light) is not drawn and not decoded: " +
-                  "camera-space axes (U-E2) and distance fade (U-E3) are not established"
-                : "+0x0C is empty: no env map to draw (the emissive is not drawn in any case, U-E2/U-E3; what the client " +
-                  "binds to the empty register is unknown, U-23b)");
+            // Always sampled by the client's case, on a per-pixel sphere map of the transformed position and its
+            // normal (that their space is camera space is inference): no generator question (U-G1), but the camera
+            // axes, the addressing, the fade and the program are open.
+            notes.Add(EnvEmissiveNote("+0x0C", FourLayerEnvEmissive, "per-pixel sphere map (camera axes U-E2)",
+                                      "U-E2, U-E3, U-E4, U-P1", p.TextureSlots[0] != 0));
             if (emptyLayers.Count > 0)
                 notes.Add("layer(s) " + string.Join(", ", emptyLayers.ToArray()) + " empty: weight forced to 0 before the " +
                           "height blend (equal to the client wherever the stored MOC2 weight of that layer is 0; elsewhere " +
@@ -839,12 +1023,13 @@ namespace Wmv.Wow
             bool blendUnresolved = p.Blend >= 2;
             if (blendUnresolved)
             {
-                // The factors of 2/3/5/6 are documented; the state around them is not. No Src/Dst is
-                // guessed: the provisional key stays until U-B2..U-B5 are settled.
-                if (p.Blend > 13) codes.Add("U-B1");
-                codes.Add("U-B2"); codes.Add("U-B3"); codes.Add("U-B4"); codes.Add("U-B5");
+                // The client's factor rows are known, which row a value selects only from older-client
+                // documentation (contested from 3 up, U-B7), and the state around them not at all. No Src/Dst
+                // is applied: the provisional key stays until U-B2..U-B5 are settled, and the row is logged.
+                AddUnresolvedBlendCodes(p, codes);
                 notes.Add("blend " + p.Blend + ": depth write (U-B2), draw order (U-B3), output alpha (U-B4) and discard " +
                           "(U-B5) are not established; PROVISIONAL alpha key 128/255 on t0's alpha, depth write on");
+                notes.Add(ClientBlendNote(p.Blend));
             }
 
             // Ids 4, 5, 7, 13 and 23-with-a-layer keep their case arithmetic even with an unresolved blend, so
@@ -937,10 +1122,56 @@ namespace Wmv.Wow
         }
 
         /// <summary>
+        /// The Describe text of an env permutation's emissive (ids 5, 7 and 23), "" for any other permutation: the
+        /// client's equation; its mask, with the coordinate assumption the mask rests on; the env map and that it is
+        /// neither decoded nor drawn; what is known of its coordinate; and the codes that keep it undrawn.
+        /// </summary>
+        static string DescribeEnvEmissive(WmoMaterialPlan p)
+        {
+            string emissive, mask, coordinate, codes;
+            int envSlot;
+            switch (p.Permutation)
+            {
+                case WmoPermutation.EnvMetal:
+                    emissive = EnvMetalEmissive;
+                    envSlot = 1;
+                    mask = "t0.rgb * t0.a on the MOTV set the diffuse reads, assuming the cb0[5].y override does not replace uvA (U-G1)";
+                    coordinate = "VS generator cb2[1].y or the cb0[5].y per-pixel sphere map, not established (U-G1), camera axes U-E2, " +
+                                 "address mode U-E4";
+                    codes = "U-G1, U-E2, U-E3, U-E4, U-P1";
+                    break;
+                case WmoPermutation.TwoLayerEnvMetal:
+                    emissive = TwoLayerEnvEmissive;
+                    envSlot = 2;
+                    mask = "c.rgb * c.a on the MOTV sets the diffuse reads, assuming the cb0[5].y override replaces neither uvA nor uvB (U-G1)";
+                    coordinate = "VS generator cb2[1].z, not established (U-G1), camera axes U-E2, address mode U-E4";
+                    codes = "U-G1, U-E2, U-E3, U-E4, U-P1";
+                    break;
+                case WmoPermutation.FourLayer:
+                    emissive = FourLayerEnvEmissive;
+                    envSlot = 0;
+                    mask = "mix.rgb * mix.a on the MOTV sets the layers read, assuming the cb0[5].y override replaces neither uvA nor " +
+                           "uvB, which layers 1 and 2 read (U-G1)";
+                    coordinate = "per-pixel sphere map of the transformed position and its normal (CLIENT equation; that the space " +
+                                 "is camera space is inference), its Unity coordinate not established (camera axes U-E2, address " +
+                                 "mode U-E4)";
+                    codes = "U-E2, U-E3, U-E4, U-P1";
+                    break;
+                default:
+                    return "";
+            }
+            uint env = p.TextureSlots[envSlot];
+            return "emissive " + emissive + " (CLIENT); mask " + mask + "; env map " + SlotName(envSlot) + " " +
+                   (env != 0 ? env + ": not decoded, not drawn" : "empty: nothing to decode or draw (U-23b)") +
+                   "; env coordinate: " + coordinate + "; NOT drawn (" + codes + ")";
+        }
+
+        /// <summary>
         /// The semantic half of the material diagnostic, one line: shader id, blend, flags, every texture
         /// slot, the permutation, each sampler's role, slot, UV channel and whether its alpha is read, the vertex-colour
-        /// use, the render state and the verdict with its reason codes. The builder appends what only the
-        /// player knows (decode outcome, the created material read back).
+        /// use, the combiner and -- for ids 5, 7 and 23 -- the emissive that is not drawn, the render state, the
+        /// client's blend row for a blend of 2 or above, and the verdict with its reason codes. The builder appends
+        /// what only the player knows (decode outcome, the created material read back).
         /// </summary>
         public static string Describe(WmoMaterialPlan p)
         {
@@ -976,23 +1207,34 @@ namespace Wmv.Wow
                 sb.Append(" | combiner diffuse = lerp(t1.rgb, t0.rgb, va), case alpha 1");
             else if (p.Permutation == WmoPermutation.Opaque || p.Permutation == WmoPermutation.EnvMetal)
                 sb.Append(" | combiner diffuse = t0.rgb, case alpha 1");
+            else if (p.Permutation == WmoPermutation.FourLayer)
+                sb.Append(" | combiner diffuse = the weighted layer sum mix.rgb, case alpha 1");
             // Said on the combiner itself, so a reader never takes an env id's drawing for the whole case.
-            if (p.Permutation == WmoPermutation.TwoLayerEnvMetal)
-                sb.Append("; emissive c.rgb * c.a * env(t2) NOT drawn (U-G1, U-E3)");
-            else if (p.Permutation == WmoPermutation.EnvMetal)
-                sb.Append("; emissive t0.rgb * t0.a * env(t1) NOT drawn (U-G1, U-E3)");
+            string emissive = DescribeEnvEmissive(p);
+            if (emissive.Length > 0)
+                sb.Append("; ").Append(emissive);
             sb.AppendFormat(" | blend Src {0} Dst {1} SrcA {2} DstA {3}, ZWrite {4}, alpha test {5}, cull {6}, wrap U {7} V {8}, " +
                             "queue {9} {10}, light bypass {11}",
                 p.SrcColor, p.DstColor, p.SrcAlpha, p.DstAlpha, p.ZWrite ? "on" : "off",
                 p.AlphaTest ? "clip < " + p.Cutoff.ToString("0.#####", System.Globalization.CultureInfo.InvariantCulture) : "off",
                 p.CullOff ? "off" : "back", p.ClampU ? "clamp" : "repeat", p.ClampV ? "clamp" : "repeat",
                 p.RenderQueue, p.RenderType, p.LightBypass ? "on" : "off");
+            // Beside the realised state, so the two are never read as one: the client's row is logged, not applied.
+            string blendNote = ClientBlendNote(p.Blend);
+            if (blendNote.Length > 0)
+                sb.Append(" | client blend: ").Append(blendNote);
             // The resolution word in capitals so a reader scanning the log finds it; the codes as written.
             sb.Append(" | ").Append(p.ResolutionName.ToUpperInvariant());
             if (p.ProvisionalFallback) sb.Append(" (PROVISIONAL fallback)");
             if (p.Codes.Length > 0) sb.Append(": ").Append(string.Join(",", p.Codes));
-            if (p.Notes.Length > 0)
-                sb.Append(" -- ").Append(string.Join("; ", p.Notes));
+            bool firstNote = true;
+            foreach (string note in p.Notes)
+            {
+                if (blendNote.Length > 0 && note == blendNote)
+                    continue;   // already printed as the client blend field
+                sb.Append(firstNote ? " -- " : "; ").Append(note);
+                firstNote = false;
+            }
             return sb.ToString();
         }
     }

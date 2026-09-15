@@ -338,16 +338,21 @@ public static class WmvModelBuilder
     ///   -wmvWmoMaterialDiag
     ///                    world models only: one extra log line per drawn material with its plan
     ///                    (shader id, blend, flags, texture slots, permutation, sampler slots and UV
-    ///                    channels, vertex-colour use, blend state, queue, resolution and reason codes)
-    ///                    and the created material read back. Logging only; nothing drawn changes.
-    ///   -wmvWmoView=plan|weights|blend|va|diffuse|t0|t1
+    ///                    channels, vertex-colour use, the undrawn env emissive of ids 5/7/23, blend
+    ///                    state, queue, the client's blend row for blend 2 and above, resolution and
+    ///                    reason codes) and the created material read back, plus one line per drawn
+    ///                    batch (group range, submesh, material, queue, depth write, verdict).
+    ///                    Logging only; nothing drawn changes.
+    ///   -wmvWmoView=plan|weights|blend|va|diffuse|t0|t1|envmask
     ///                    world models only, diagnostic: draw every material unlit in the colour of how
     ///                    it is drawn (plan: red baseline, green diffuse, blue four-layer, orange
     ///                    two-layer, yellow two-layer env metal, cyan opaque, white env metal, magenta
     ///                    a fallback of those), or a four-layer
     ///                    material's stored MOC2 weights / its effective weights after the height blend
     ///                    (rgb = layers 1..3, black = layer 4), or a two-layer (id 13 or 7) material's set-2 alpha
-    ///                    (grey), or any material's combiner diffuse, or its register t0 / t1 as sampled.
+    ///                    (grey), or any material's combiner diffuse, or its register t0 / t1 as sampled,
+    ///                    or the emissive mask of an id-5, id-7 or id-23 material (the factor its env
+    ///                    map is multiplied by; the env map itself is never sampled).
     ///   -wmvWmoUvOverride=N
     ///                    world models only, diagnostic: every register of a four-layer or two-layer
     ///                    material reads mesh UV channel N (0..3) instead of the channel its plan names
@@ -656,14 +661,15 @@ public static class WmvModelBuilder
         public static bool WmoMaterialDiag { get { Parse(); return wmoMaterialDiag; } }
 
         /// <summary>
-        /// World-model verification view (-wmvWmoView=plan|weights|blend|va|diffuse|t0|t1): 0 off, 1 the plan
-        /// colour, 2 a four-layer material's stored MOC2 weights, 3 its effective weights, 4 a two-layer
+        /// World-model verification view (-wmvWmoView=plan|weights|blend|va|diffuse|t0|t1|envmask): 0 off, 1 the
+        /// plan colour, 2 a four-layer material's stored MOC2 weights, 3 its effective weights, 4 a two-layer
         /// material's set-2 alpha, 5 the combiner diffuse, 6 register t0 as sampled, 7 register t1 as sampled
-        /// (two-layer). The value is what WmvWmo.shader's _WmoDiagView switches on. Unlit, diagnostic only.
+        /// (two-layer), 8 the emissive mask of ids 5, 7 and 23. The value is what WmvWmo.shader's _WmoDiagView
+        /// switches on. Unlit, diagnostic only.
         /// </summary>
         public static int WmoView { get { Parse(); return wmoView; } }
 
-        static readonly string[] WmoViewNames = { "", "plan", "weights", "blend", "va", "diffuse", "t0", "t1" };
+        static readonly string[] WmoViewNames = { "", "plan", "weights", "blend", "va", "diffuse", "t0", "t1", "envmask" };
 
         /// <summary>The -wmvWmoView name of a view value ("" for 0 or an unknown value).</summary>
         public static string WmoViewName(int view)

@@ -1366,6 +1366,7 @@ public static class WmvLifecycleSelfTest
         MapObjectFourLayerTests(log);
         MapObjectTwoLayerAndOpaqueTests(log);
         MapObjectEnvMetalTests(log);
+        MapObjectUnlitInteriorTests(log);
         MapObjectShaderRenderTests(log);
 
         // Framing: a world model frames with planes that cover it, and a model gets its own back.
@@ -1503,14 +1504,15 @@ public static class WmvLifecycleSelfTest
               m23.GetTexture("_WmoTex0") == null && m23.GetTexture("_WmoTex1") != null && m23.GetTexture("_WmoTex8") != null &&
               m23.GetFloat("_ZWrite") == 1f && m23.GetFloat("_SrcBlend") == (float)UnityEngine.Rendering.BlendMode.One &&
               m23.GetFloat("_DstBlend") == (float)UnityEngine.Rendering.BlendMode.Zero &&
-              rt.MaterialInfo[4].Plan.ProvisionalFallback && rt.MaterialInfo[4].Verdict == "unresolved: U-B2,U-B3,U-B4,U-B5,U-23a,U-E2,U-E3,U-V4",
+              rt.MaterialInfo[4].Plan.ProvisionalFallback &&
+              rt.MaterialInfo[4].Verdict == "unresolved: U-B2,U-B3,U-B4,U-B5,U-23a,U-E2,U-E3,U-E4,U-P1,U-V4",
               "wmo rows: shader 23 with blend 2 keeps its four-layer arithmetic in the labelled opaque fallback, env map unbound " +
               "(U-V4: its one-set group has no MOC2)", log);
         Check(m23Env.GetFloat("_WmoPermutation") == (float)(int)WmoPermutation.ProvisionalBaseline && m23Env.GetTexture("_WmoTex0") == null &&
               rt.MaterialInfo[7].Verdict == "unresolved: U-23b",
               "wmo rows: shader 23 without a layer is the baseline drawing the register's white, its env map never bound as a diffuse", log);
         Check(mId5.GetFloat("_WmoPermutation") == (float)(int)WmoPermutation.EnvMetal && mId5.GetFloat("_WmoLightBypass") == 0f &&
-              mId5.GetTexture("_WmoTex1") == null && rt.MaterialInfo[6].Verdict == "resolved-partial: U-G1,U-E3,U-F1",
+              mId5.GetTexture("_WmoTex1") == null && rt.MaterialInfo[6].Verdict == "resolved-partial: U-G1,U-E2,U-E3,U-E4,U-P1,U-F1",
               "wmo rows: id 5 with F_UNLIT draws its diffuse part without the bypass (its emissive is not drawn, U-F1)", log);
         Check(mPlain.GetFloat("_WmoPermutation") == (float)(int)WmoPermutation.Diffuse && mPlain.GetFloat("_WmoLightBypass") == 0f &&
               mPlain.GetFloat("_AlphaTest") == 0f, "wmo rows: plain id 0 is the lit, untested diffuse permutation", log);
@@ -1627,7 +1629,7 @@ public static class WmvLifecycleSelfTest
               "wmo 23 rows: a file used as a layer and a height map shares one upload; env, empty layer and its height unbound", log);
         Check(fb.GetFloat("_WmoPermutation") == (float)(int)WmoPermutation.FourLayer && fb.GetTexture("_WmoTex5") == null &&
               fb.GetTexture("_WmoTex1") != null && fb.GetVector("_WmoLayerMask").x == 1f && fb.GetVector("_WmoLayerMask").y == 0f &&
-              rt.MaterialInfo[1].Plan.ProvisionalFallback && rt.MaterialInfo[1].Verdict == "unresolved: U-23b,U-23a,U-E2,U-E3",
+              rt.MaterialInfo[1].Plan.ProvisionalFallback && rt.MaterialInfo[1].Verdict == "unresolved: U-23b,U-23a,U-E2,U-E3,U-E4,U-P1",
               "wmo 23 rows: a layer without its height map is the labelled fallback, the height register left white", log);
 
         var weights = new List<Vector4>();
@@ -1651,12 +1653,13 @@ public static class WmvLifecycleSelfTest
         bool gapLogged = false;
         foreach (string line in lines) gapLogged = gapLogged || (line.Contains("group 3") && line.Contains("U-V4"));
         Check(gapLogged && rt.MaterialInfo[0].StreamGapVertices == 4 && rt.MaterialInfo[0].GapStreams == "MOC2 and MOTV set 4" &&
-              rt.MaterialInfo[0].Verdict == "resolved-partial: U-23b,U-23a,U-E2,U-E3,U-V4",
+              rt.MaterialInfo[0].Verdict == "resolved-partial: U-23b,U-23a,U-E2,U-E3,U-E4,U-P1,U-V4",
               "wmo 23 rows: a four-layer batch in a group without MOC2 / MOTV sets is logged per group and as U-V4 on its material", log);
         string diag = WmvWmoBuilder.DescribeMaterialDiag(rt.MaterialInfo[0], m, 2, textures);
         Check(diag.Contains("_WmoLayerMask (1,0,1,1)") && diag.Contains("t5 (client t17) height 1") &&
-              diag.Contains("RESOLVED-PARTIAL: U-23b,U-23a,U-E2,U-E3,U-V4") && diag.Contains("t0 " + Env + " not bound"),
-              "wmo 23 rows: the diagnostic reads back the mask, the client registers and the unbound env map", log);
+              diag.Contains("RESOLVED-PARTIAL: U-23b,U-23a,U-E2,U-E3,U-E4,U-P1,U-V4") && diag.Contains("t0 " + Env + " not bound") &&
+              diag.Contains("env map +0x0C " + Env + ": not decoded, not drawn") && diag.Contains("NOT drawn (U-E2, U-E3, U-E4, U-P1)"),
+              "wmo 23 rows: the diagnostic reads back the mask, the client registers, the unbound env map and why its emissive is not drawn", log);
         rt.Dispose();
     }
 
@@ -1883,25 +1886,27 @@ public static class WmvLifecycleSelfTest
         Material m7 = rt.Materials[0], fb7 = rt.Materials[1], m5 = rt.Materials[2], fbBlend = rt.Materials[3];
         Check(m7.GetFloat("_WmoPermutation") == (float)(int)WmoPermutation.TwoLayerEnvMetal && m7.GetFloat("_WmoUv0") == 0f &&
               m7.GetFloat("_WmoUv1") == 1f && m7.GetFloat("_AlphaTest") == 0f &&
-              m7.renderQueue == (int)UnityEngine.Rendering.RenderQueue.Geometry && rt.MaterialInfo[0].Verdict == "resolved-partial: U-G1,U-E3",
-              "wmo 7 rows: id 7 blend 1 is permutation 5, t0 on UV0 and t1 on UV1, untested, resolved-partial U-G1,U-E3", log);
+              m7.renderQueue == (int)UnityEngine.Rendering.RenderQueue.Geometry &&
+              rt.MaterialInfo[0].Verdict == "resolved-partial: U-G1,U-E2,U-E3,U-E4,U-P1",
+              "wmo 7 rows: id 7 blend 1 is permutation 5, t0 on UV0 and t1 on UV1, untested, resolved-partial U-G1,U-E2,U-E3,U-E4,U-P1", log);
         var t0 = m7.GetTexture("_WmoTex0") as Texture2D;
         var t1 = m7.GetTexture("_WmoTex1") as Texture2D;
         Check(t0 != null && t1 != null && !ReferenceEquals(t0, t1) && m7.GetTexture("_WmoTex2") == null,
               "wmo 7 rows: registers 0 and 1 bound to +0x0C and +0x18, the env register t2 left unbound", log);
         Check(fb7.GetFloat("_WmoPermutation") == (float)(int)WmoPermutation.TwoLayerEnvMetal && fb7.GetTexture("_WmoTex0") != null &&
               fb7.GetTexture("_WmoTex1") == null && rt.MaterialInfo[1].Plan.ProvisionalFallback &&
-              rt.MaterialInfo[1].Verdict == "unresolved: U-23b,U-G1,U-E3",
+              rt.MaterialInfo[1].Verdict == "unresolved: U-23b,U-G1,U-E2,U-E3,U-E4,U-P1",
               "wmo 7 rows: an empty +0x18 is the labelled fallback, its register left white", log);
         Check(m5.GetFloat("_WmoPermutation") == (float)(int)WmoPermutation.EnvMetal && m5.GetFloat("_AlphaTest") == 0f &&
               m5.GetFloat("_WmoLightBypass") == 0f && m5.GetTexture("_WmoTex1") == null &&
-              rt.MaterialInfo[2].Verdict == "resolved-partial: U-G1,U-E3,U-F1",
+              rt.MaterialInfo[2].Verdict == "resolved-partial: U-G1,U-E2,U-E3,U-E4,U-P1,U-F1",
               "wmo 5 rows: id 5 blend 1 with F_UNLIT is permutation 6, never clipped, no bypass, env register unbound", log);
         Check(fbBlend.GetFloat("_WmoPermutation") == (float)(int)WmoPermutation.TwoLayerEnvMetal && fbBlend.GetFloat("_AlphaTest") == 0f &&
               fbBlend.GetFloat("_SrcBlend") == (float)UnityEngine.Rendering.BlendMode.One &&
               fbBlend.GetFloat("_DstBlend") == (float)UnityEngine.Rendering.BlendMode.Zero && fbBlend.GetFloat("_ZWrite") == 1f &&
-              rt.MaterialInfo[3].Plan.ProvisionalFallback && rt.MaterialInfo[3].Verdict == "unresolved: U-B2,U-B3,U-B4,U-B5,U-G1,U-E3",
-              "wmo 7 rows: id 7 blend 3 is the labelled opaque fallback, untested, no factors guessed", log);
+              rt.MaterialInfo[3].Plan.ProvisionalFallback &&
+              rt.MaterialInfo[3].Verdict == "unresolved: U-B2,U-B3,U-B4,U-B5,U-B7,U-G1,U-E2,U-E3,U-E4,U-P1",
+              "wmo 7 rows: id 7 blend 3 is the labelled opaque fallback, untested, no factors applied (U-B7: its client row contested)", log);
         // Repeat addressing on every diffuse register: TA and TB are one upload each, shared by all four
         // materials.
         Check(ReferenceEquals(t0, m5.GetTexture("_WmoTex0")) && ReferenceEquals(t0, fbBlend.GetTexture("_WmoTex0")) &&
@@ -1928,9 +1933,16 @@ public static class WmvLifecycleSelfTest
               "wmo 7 rows: per-material set-2 exposure (layer 2 shows on 3 vertices; the empty +0x18 is weighted on none)", log);
         string diag = WmvWmoBuilder.DescribeMaterialDiag(i0, m7, 1, textures);
         Check(diag.Contains("_WmoPermutation 5") && diag.Contains("t2 env map (emissive, not drawn) <- +0x24 " + Env + ", not bound") &&
-              diag.Contains("t2 " + Env + " not bound") && diag.Contains("NOT drawn (U-G1, U-E3)") &&
-              diag.Contains("| RESOLVED-PARTIAL: U-G1,U-E3"),
-              "wmo 7 rows: the diagnostic reads back the permutation, the unbound env map and what is not drawn", log);
+              diag.Contains("t2 " + Env + " not bound") && diag.Contains("emissive c.rgb * c.a * env(t2).rgb") &&
+              diag.Contains("env map +0x24 " + Env + ": not decoded, not drawn") && diag.Contains("env coordinate: VS generator cb2[1].z") &&
+              diag.Contains("NOT drawn (U-G1, U-E2, U-E3, U-E4, U-P1)") && diag.Contains("| RESOLVED-PARTIAL: U-G1,U-E2,U-E3,U-E4,U-P1") &&
+              diag.Contains("readback: shader 'WMV/Map Object', queue 2000"),
+              "wmo 7 rows: the diagnostic reads back the permutation, the unbound env map, the emissive's equation and coordinate status, and what is not drawn", log);
+        string blendDiag = WmvWmoBuilder.DescribeMaterialDiag(rt.MaterialInfo[3], fbBlend, 1, textures);
+        Check(blendDiag.Contains("Src One Dst Zero SrcA One DstA Zero, ZWrite on") && blendDiag.Contains("queue 2000 Opaque") &&
+              blendDiag.Contains(" | client blend: " + WmoMaterialSemantics.ClientBlendNote(3)) &&
+              blendDiag.Contains("readback: shader 'WMV/Map Object', queue 2000") && blendDiag.Contains("_SrcBlend 1, _DstBlend 0"),
+              "wmo 7 rows: a blend-3 diagnostic line holds the realised factors, the read-back state and the client row it does not apply", log);
         bool summary = false;
         foreach (string line in lines) summary = summary || (line.Contains("wmo built") && line.Contains("4 drawn without the env emissive"));
         Check(summary, "wmo 7/5 rows: the build summary counts the materials drawn without their env emissive", log);
@@ -1938,20 +1950,131 @@ public static class WmvLifecycleSelfTest
     }
 
     /// <summary>
-    /// The pixel arithmetic of permutations 2 (four-layer, client case 23) and 3 (two-layer, client case 13)
-    /// as the GPU runs it, against the C# reference transcriptions the parser tests pin
-    /// (WmoMaterialSemantics.FourLayerWeights / TwoLayerMix). Without it a lerp flipped in WmvWmo.shader, or a
-    /// component dropped from the four-layer maximum, would pass every other check.
+    /// U-F3 and the per-batch diagnostic line through the real parser and builder, on a synthetic WMO of four
+    /// groups: g0, an interior group (MOGP 0x2000), draws an id-4 material with F_UNLIT (its light bypass
+    /// applies); g1, interior too, draws an id-5 material with F_UNLIT (no bypass: its emissive keeps it out);
+    /// g2, exterior, draws an id-0 material with F_UNLIT; g3 carries 0x40 beside 0x2000 and draws a second id-0
+    /// material with F_UNLIT. A rule that called a group interior only when it has neither 0x8 nor 0x40 would
+    /// read g3 as exterior, so that material's U-F3 shows that interior is decided by 0x2000 alone. Read back:
+    /// the interior batch counts, the U-F3 verdict only where the bypass is drawn in an interior group, the
+    /// bypass itself unchanged on the created materials, the counters, the material diagnostic and the per-batch
+    /// line with its range, submesh, queue and depth write.
+    /// </summary>
+    static void MapObjectUnlitInteriorTests(Action<string> log)
+    {
+        const uint TA = 987001, Env = 987002;
+        byte[][] records =
+        {
+            WmoSynthetic.Material(0x01, 4, 0, TA),          // 0 id 4, F_UNLIT: bypass, in an interior group
+            WmoSynthetic.Material(0x01, 5, 0, TA, Env),     // 1 id 5, F_UNLIT: no bypass, in an interior group
+            WmoSynthetic.Material(0x01, 0, 0, TA),          // 2 id 0, F_UNLIT: bypass, in an exterior group
+            WmoSynthetic.Material(0x01, 0, 0, TA),          // 3 id 0, F_UNLIT: bypass, in an interior group that also has 0x40
+        };
+        // Retail files hold 0x2000 groups that also carry 0x40, the second bit a group-type rule may read as exterior.
+        const uint InteriorWith40 = WmoGroupFlags.Indoor | 0x40u;
+        uint[] groupFlags = { WmoGroupFlags.Indoor, WmoGroupFlags.Indoor, WmoGroupFlags.Outdoor, InteriorWith40 };
+        ushort[][] batchCounts = { null, new ushort[] { 0, 1, 0 }, new ushort[] { 1, 0, 0 }, null };
+        int n = records.Length;
+        var spec = new WmoSynthetic.RootSpec
+        {
+            Materials = records,
+            GroupInfos = new byte[n][],
+            GroupFileDataIDs = new uint[n],
+            GroupNames = new string[0],
+        };
+        var groups = new WmoGroup[n];
+        for (int i = 0; i < n; i++)
+        {
+            spec.GroupInfos[i] = WmoSynthetic.GroupInfo(groupFlags[i], new WowVec3(12f * i, 0f, 0f), new WowVec3(12f * i + 10f, 10f, 0f), 0);
+            spec.GroupFileDataIDs[i] = 988000u + (uint)i;
+            float x = 12f * i;
+            var gs = new WmoSynthetic.GroupSpec
+            {
+                Flags = groupFlags[i],
+                Positions = new[] { x, 0f, 0f, x + 10f, 0f, 0f, x + 10f, 10f, 0f, x, 10f, 0f },
+                Normals = new[] { 0f, 0f, 1f, 0f, 0f, 1f, 0f, 0f, 1f, 0f, 0f, 1f },
+                Indices = new ushort[] { 0, 1, 2, 0, 2, 3 },
+                Batches = new[] { WmoSynthetic.Batch(0, 6, 0, 3, WmoBatch.FlagLargeMaterialId, i) },
+                BatchCounts = batchCounts[i],
+                Mpy2 = new byte[] { 0x20, 0, (byte)i, 0, 0x20, 0, (byte)i, 0 },
+            };
+            gs.TexCoordSets.Add(new[] { 0f, 0f, 1f, 0f, 1f, 1f, 0f, 1f });
+            groups[i] = WmoParser.ParseGroup(WmoSynthetic.BuildGroup(gs), "unlit group " + i, i);
+        }
+        WmoRoot root = WmoParser.ParseRoot(WmoSynthetic.BuildRoot(spec), "unlit root");
+        var textures = new Dictionary<uint, WmvWmoTexture>
+        {
+            { TA, new WmvWmoTexture { FileDataID = TA, Image = FlatTexture(), Decoded = true, Width = 2, Height = 2 } },
+            { Env, new WmvWmoTexture { FileDataID = Env, HeaderOnly = true, Width = 2, Height = 2 } },
+        };
+        var lines = new List<string>();
+        WmvRuntimeMapObject rt = WmvWmoBuilder.Build(root, groups, textures, "WmoUnlit", s2 => lines.Add(s2));
+        bool built = rt != null && rt.Materials.Length == 4;
+        for (int i = 0; built && i < 4; i++) built = rt.Materials[i] != null;
+        Check(built && (groups[0].Header.Flags & WmoGroupFlags.Indoor) != 0 && (groups[2].Header.Flags & WmoGroupFlags.Indoor) == 0 &&
+              (groups[3].Header.Flags & InteriorWith40) == InteriorWith40,
+              "wmo U-F3 rows: built, g0/g1 interior, g2 exterior and g3 interior with 0x40 by the MOGP flags", log);
+        if (!built) return;
+
+        WmvWmoMaterialInfo i0 = rt.MaterialInfo[0], i1 = rt.MaterialInfo[1], i2 = rt.MaterialInfo[2], i3 = rt.MaterialInfo[3];
+        Check(i0.InteriorBatches == 1 && i1.InteriorBatches == 1 && i2.InteriorBatches == 0 && i3.InteriorBatches == 1,
+              "wmo U-F3 rows: batches are counted per material by their group's interior flag (0x40 beside 0x2000 still interior)", log);
+        Check(i0.Verdict == "resolved-partial: U-F3" && i0.Plan.LightBypass && rt.Materials[0].GetFloat("_WmoLightBypass") == 1f &&
+              i0.Why.Contains("F_UNLIT bypass kept on 1 drawn batch(es) in interior groups (MOGP 0x2000)"),
+              "wmo U-F3 rows: an id-4 F_UNLIT material drawn in an interior group keeps its bypass and is resolved-partial U-F3", log);
+        Check(i1.Verdict == "resolved-partial: U-G1,U-E2,U-E3,U-E4,U-P1,U-F1" && !i1.Plan.LightBypass &&
+              rt.Materials[1].GetFloat("_WmoLightBypass") == 0f,
+              "wmo U-F3 rows: an id-5 F_UNLIT material in an interior group has no bypass, so no U-F3", log);
+        Check(i2.Verdict == "resolved" && rt.Materials[2].GetFloat("_WmoLightBypass") == 1f,
+              "wmo U-F3 rows: an id-0 F_UNLIT material in an exterior group stays resolved, bypassed", log);
+        Check(i3.Verdict == "resolved-partial: U-F3" && i3.Plan.LightBypass && rt.Materials[3].GetFloat("_WmoLightBypass") == 1f &&
+              i3.Why.Contains("F_UNLIT bypass kept on 1 drawn batch(es) in interior groups (MOGP 0x2000)"),
+              "wmo U-F3 rows: an id-0 F_UNLIT material drawn only in a group with 0x40 beside 0x2000 is interior by 0x2000 alone: " +
+              "resolved-partial U-F3, bypass kept", log);
+        Check(rt.ResolvedMaterials == 1 && rt.PartialMaterials == 3 && rt.UnresolvedMaterials == 0,
+              "wmo U-F3 rows: counters take the U-F3 verdict (resolved " + rt.ResolvedMaterials + ", partial " + rt.PartialMaterials + ")", log);
+        bool materialLine = false;
+        foreach (string line in lines) materialLine = materialLine || (line.StartsWith("wmo material 0:") && line.Contains("(U-F3)"));
+        string diag = WmvWmoBuilder.DescribeMaterialDiag(i0, rt.Materials[0], 1, textures);
+        Check(materialLine && diag.Contains("| batches 1 (1 in interior groups, MOGP 0x2000)") && diag.Contains("RESOLVED-PARTIAL: U-F3") &&
+              diag.Contains("light bypass on"),
+              "wmo U-F3 rows: the material line and the diagnostic carry the code and the interior batch count", log);
+
+        string b0 = WmvWmoBuilder.DescribeBatchDiag(rt, groups[0], 0, rt.SubmeshBatches[0][0], 0, rt.SubmeshMaterialIds[0][0]);
+        string b1 = WmvWmoBuilder.DescribeBatchDiag(rt, groups[1], 1, rt.SubmeshBatches[1][0], 0, rt.SubmeshMaterialIds[1][0]);
+        string b2 = WmvWmoBuilder.DescribeBatchDiag(rt, groups[2], 2, rt.SubmeshBatches[2][0], 0, rt.SubmeshMaterialIds[2][0]);
+        string b3 = WmvWmoBuilder.DescribeBatchDiag(rt, groups[3], 3, rt.SubmeshBatches[3][0], 0, rt.SubmeshMaterialIds[3][0]);
+        string past = WmvWmoBuilder.DescribeBatchDiag(rt, groups[2], 2, 5, 3, 7);
+        Check(b0 == "wmo batch g0.b0 range C -> submesh 0 -> material 0 (shader 4, blend 0, queue 2000, ZWrite on, resolved-partial: U-F3)" &&
+              b1 == "wmo batch g1.b0 range B -> submesh 0 -> material 1 (shader 5, blend 0, queue 2000, ZWrite on, " +
+                    "resolved-partial: U-G1,U-E2,U-E3,U-E4,U-P1,U-F1)" &&
+              b2 == "wmo batch g2.b0 range A -> submesh 0 -> material 2 (shader 0, blend 0, queue 2000, ZWrite on, resolved)" &&
+              b3 == "wmo batch g3.b0 range C -> submesh 0 -> material 3 (shader 0, blend 0, queue 2000, ZWrite on, resolved-partial: U-F3)" &&
+              past == "wmo batch g2.b5 range ? -> submesh 3 -> material 7 (past MOMT: the plain white fallback, queue ?, ZWrite ?)",
+              "wmo U-F3 rows: the per-batch line names the range, submesh and material, and reads queue and depth write back (" + b0 + ")", log);
+        rt.Dispose();
+    }
+
+    /// <summary>
+    /// The pixel arithmetic of permutations 2 (four-layer, client case 23), 3 (two-layer, client case 13), 5 and
+    /// 6 (the diffuse parts of cases 7 and 5) and of the envmask view (8) as the GPU runs it, against the C#
+    /// reference transcriptions the parser tests pin (WmoMaterialSemantics.FourLayerWeights / TwoLayerMix /
+    /// EnvMetalMask / TwoLayerEnvMask / FourLayerEnvMask). Without it a lerp flipped in WmvWmo.shader, a
+    /// component dropped from the four-layer maximum, or a wrong alpha in an emissive mask would pass every
+    /// other check.
     ///
-    /// A synthetic WMO of three flat quads: a four-layer material with flat-colour layers, height maps of
-    /// known alpha and the same MOC2 bytes on every vertex; a two-layer material with the same MOCV set-2
-    /// alpha on every vertex; and a plain id-0 reference. Constant vertex streams mean interpolation cannot
-    /// move the sample. Each quad is drawn unlit through a diagnostic view (3 effective weights, 4 va, 5 the
-    /// combiner diffuse) by an orthographic camera of this test's own into a render texture, and its centre
-    /// pixel is compared with the REFERENCE quad drawn through the same view with a flat texture holding the
-    /// value the C# function predicts. Comparing against a reference drawn by the same shader, camera and
-    /// target, rather than against the bare number, cancels whatever display transform, target encoding or
-    /// readback conversion the frame passes through: both pixels take the same path.
+    /// A synthetic WMO of five flat quads: a four-layer material with flat-colour layers of known alpha, height
+    /// maps of known alpha, the same MOC2 bytes on every vertex and an env map on +0x0C; a two-layer material with
+    /// the same MOCV set-2 alpha on every vertex; a plain id-0 reference; an id-5 material whose +0x0C has an
+    /// alpha below 255, with an env map on +0x18; and an id-7 material with two layers of different alphas, the
+    /// same set-2 alpha and an env map on +0x24. Every env map is a decoded image the builder could bind -- and
+    /// must not. Constant vertex streams mean interpolation cannot move the sample. Each quad is drawn unlit
+    /// through a diagnostic view (3 effective weights, 4 va, 5 the combiner diffuse, 8 the emissive mask) by an
+    /// orthographic camera of this test's own into a render texture, and its centre pixel is compared with the
+    /// REFERENCE quad drawn through view 5 with a flat texture holding the value the C# function predicts.
+    /// Comparing against a reference drawn by the same shader, camera and target, rather than against the bare
+    /// number, cancels whatever display transform, target encoding or readback conversion the frame passes
+    /// through: both pixels take the same path.
     /// </summary>
     static void MapObjectShaderRenderTests(Action<string> log)
     {
@@ -1969,11 +2092,14 @@ public static class WmvLifecycleSelfTest
         }
         const uint L1 = 985001, L2 = 985002, L3 = 985003, L4 = 985004, H1 = 985005, H2 = 985006, H3 = 985007, H4 = 985008;
         const uint TA = 985011, TB = 985012, TR = 985013;
+        const uint Env23 = 985021, T5 = 985022, Env5 = 985023, T7A = 985024, T7B = 985025, Env7 = 985026;
         byte[][] records =
         {
-            WmoSynthetic.Material(0, 23, 0, 0, L1, L2, new uint[] { L3, L4, H1, H2, H3, H4 }),   // 0 four-layer
-            WmoSynthetic.Material(0x04, 13, 0, TA, TB),                                       // 1 two-layer
-            WmoSynthetic.Material(0x04, 0, 0, TR),                                            // 2 reference
+            WmoSynthetic.Material(0, 23, 0, Env23, L1, L2, new uint[] { L3, L4, H1, H2, H3, H4 }),   // 0 four-layer, env on +0x0C
+            WmoSynthetic.Material(0x04, 13, 0, TA, TB),                                           // 1 two-layer
+            WmoSynthetic.Material(0x04, 0, 0, TR),                                                // 2 reference
+            WmoSynthetic.Material(0x04, 5, 0, T5, Env5),                                          // 3 env metal, env on +0x18
+            WmoSynthetic.Material(0x04, 7, 0, T7A, T7B, Env7),                                    // 4 two-layer env metal, env on +0x24
         };
         // MOC2 as stored (B, G, R, A): layer weights 40, 80, 100 of 255 for layers 1..3 (layer 4 takes 35).
         // Layer 3 carries the largest weighted height, so a maximum that skipped it would move every weight.
@@ -1999,9 +2125,10 @@ public static class WmvLifecycleSelfTest
                                                         new WowVec3(12f * i + 10f, 10f, 0f), 0);
             spec.GroupFileDataIDs[i] = 986000u + (uint)i;
             float x = 12f * i;
+            bool twoLayers = i == 1 || i == 4;
             var gs = new WmoSynthetic.GroupSpec
             {
-                Flags = WmoGroupFlags.Outdoor | (i == 1 ? WmoGroupFlags.ColorSet2 | WmoGroupFlags.TwoTexCoordSets : 0u),
+                Flags = WmoGroupFlags.Outdoor | (twoLayers ? WmoGroupFlags.ColorSet2 | WmoGroupFlags.TwoTexCoordSets : 0u),
                 Positions = new[] { x, 0f, 0f, x + 10f, 0f, 0f, x + 10f, 10f, 0f, x, 10f, 0f },
                 Normals = new[] { 0f, 0f, 1f, 0f, 0f, 1f, 0f, 0f, 1f, 0f, 0f, 1f },
                 Indices = new ushort[] { 0, 1, 2, 0, 2, 3 },
@@ -2009,29 +2136,41 @@ public static class WmvLifecycleSelfTest
                 Mpy2 = new byte[] { 0x20, 0, (byte)i, 0, 0x20, 0, (byte)i, 0 },
                 Moc2 = i == 0 ? moc2 : null,
             };
-            if (i == 1)
+            if (twoLayers)
                 gs.ColorSets.Add(set2);
-            int sets = i == 0 ? 4 : i == 1 ? 2 : 1;
+            int sets = i == 0 ? 4 : twoLayers ? 2 : 1;
             for (int s = 0; s < sets; s++)
                 gs.TexCoordSets.Add(new[] { 0f, 0f, 1f, 0f, 1f, 1f, 0f, 1f });
             groups[i] = WmoParser.ParseGroup(WmoSynthetic.BuildGroup(gs), "render group " + i, i);
         }
         WmoRoot root = WmoParser.ParseRoot(WmoSynthetic.BuildRoot(spec), "render root");
 
-        // Layer colours and height alphas. Layer 4 is yellow, so every channel of the mix mixes two layers.
+        // Layer colours, layer alphas and height alphas. Layer 4 is yellow, so every channel of the mix mixes two
+        // layers; the layer alphas differ, so the emissive mask's mix.a is a real weighted sum.
         byte[][] layerRgb = { new byte[] { 255, 0, 0 }, new byte[] { 0, 255, 0 }, new byte[] { 0, 0, 255 }, new byte[] { 255, 255, 0 } };
+        byte[] layerAlpha = { 180, 90, 250, 30 };
         byte[] heightAlpha = { 255, 128, 255, 200 };
         byte[] l1 = { 230, 40, 90 }, l2 = { 20, 200, 160 };
+        // Id 5's +0x0C (alpha below 255) and id 7's two layers (different alphas, so a mask reading one layer's
+        // alpha for both cannot match).
+        byte[] t5 = { 200, 120, 60, 100 }, l7a = { 230, 40, 90, 200 }, l7b = { 20, 200, 160, 60 };
         var textures = new Dictionary<uint, WmvWmoTexture>();
         uint[] layerIds = { L1, L2, L3, L4 }, heightIds = { H1, H2, H3, H4 };
         for (int k = 0; k < 4; k++)
         {
-            AddRenderTexture(textures, layerIds[k], SolidTexture(layerRgb[k][0], layerRgb[k][1], layerRgb[k][2]));
+            AddRenderTexture(textures, layerIds[k], SolidTextureAlpha(layerRgb[k][0], layerRgb[k][1], layerRgb[k][2], layerAlpha[k]));
             AddRenderTexture(textures, heightIds[k], SolidTextureAlpha(90, 90, 90, heightAlpha[k]));
         }
         AddRenderTexture(textures, TA, SolidTexture(l1[0], l1[1], l1[2]));
         AddRenderTexture(textures, TB, SolidTexture(l2[0], l2[1], l2[2]));
         AddRenderTexture(textures, TR, SolidTexture(0, 0, 0));
+        AddRenderTexture(textures, T5, SolidTextureAlpha(t5[0], t5[1], t5[2], t5[3]));
+        AddRenderTexture(textures, T7A, SolidTextureAlpha(l7a[0], l7a[1], l7a[2], l7a[3]));
+        AddRenderTexture(textures, T7B, SolidTextureAlpha(l7b[0], l7b[1], l7b[2], l7b[3]));
+        // The env maps decode like any texture: were an env binding ever readable, the builder would bind them.
+        AddRenderTexture(textures, Env23, SolidTexture(255, 255, 255));
+        AddRenderTexture(textures, Env5, SolidTexture(255, 255, 255));
+        AddRenderTexture(textures, Env7, SolidTexture(255, 255, 255));
 
         // What the C# transcriptions predict, as the bytes of a flat reference texture.
         var heights = new float[4];
@@ -2045,6 +2184,25 @@ public static class WmvLifecycleSelfTest
         var twoMix = new float[3];
         for (int c = 0; c < 3; c++)
             twoMix[c] = WmoMaterialSemantics.TwoLayerMix(l1[c] / 255f, l2[c] / 255f, va);
+        // The emissive masks: the layers' rgba weighted exactly as the diffuse is (alpha included) for id 23, t0 for
+        // id 5, the rgba lerp of the two layers for id 7 -- and id 7's diffuse, which the alpha lerp must not touch.
+        var mixRgba = new float[4];
+        for (int c = 0; c < 4; c++)
+            for (int k = 0; k < 4; k++)
+                mixRgba[c] += b[k] * (c < 3 ? layerRgb[k][c] : layerAlpha[k]) / 255f;
+        float[] mask23 = WmoMaterialSemantics.FourLayerEnvMask(mixRgba);
+        float[] mask5 = WmoMaterialSemantics.EnvMetalMask(t5[0] / 255f, t5[1] / 255f, t5[2] / 255f, t5[3] / 255f);
+        var layer7a = new float[4];
+        var layer7b = new float[4];
+        for (int c = 0; c < 4; c++)
+        {
+            layer7a[c] = l7a[c] / 255f;
+            layer7b[c] = l7b[c] / 255f;
+        }
+        float[] mask7 = WmoMaterialSemantics.TwoLayerEnvMask(layer7a, layer7b, va);
+        var diffuse7 = new float[3];
+        for (int c = 0; c < 3; c++)
+            diffuse7[c] = WmoMaterialSemantics.TwoLayerMix(layer7a[c], layer7b[c], va);
 
         WmvRuntimeMapObject rt = null;
         GameObject camGo = null;
@@ -2054,9 +2212,23 @@ public static class WmvLifecycleSelfTest
         try
         {
             rt = WmvWmoBuilder.Build(root, groups, textures, "WmoRender", null);
-            bool built = rt != null && rt.Materials.Length == 3 && rt.Materials[0] != null && rt.Materials[1] != null && rt.Materials[2] != null;
+            bool built = rt != null && rt.Materials.Length == 5;
+            for (int i = 0; built && i < 5; i++) built = rt.Materials[i] != null;
             Check(built, "wmo render: built", log);
             if (!built) return;
+
+            // Normal rendering is untouched by the envmask view: whatever view this run has, the env maps of ids 5,
+            // 7 and 23 are listed unread by their plans and never bound, while their diffuse registers are.
+            Material env5 = rt.Materials[3], env7 = rt.Materials[4];
+            int runView = WmvModelBuilder.Debug_.WmoView;
+            string runViewName = runView > 0 ? "-wmvWmoView=" + WmvModelBuilder.Debug_.WmoViewName(runView) : "no view switch";
+            Check(WmvModelBuilder.Debug_.WmoViewName(WmvWmoBuilder.EnvMaskView) == "envmask" &&
+                  env5.GetTexture("_WmoTex1") == null && env7.GetTexture("_WmoTex2") == null && rt.Materials[0].GetTexture("_WmoTex0") == null &&
+                  env5.GetTexture("_WmoTex0") != null && env7.GetTexture("_WmoTex0") != null && env7.GetTexture("_WmoTex1") != null &&
+                  rt.Materials[0].GetTexture("_WmoTex1") != null && rt.Textures.Length == 14 &&
+                  env5.GetFloat("_WmoDiagView") == (float)runView && env7.GetFloat("_WmoDiagView") == (float)runView,
+                  "wmo render: the env maps of ids 5 (_WmoTex1), 7 (_WmoTex2) and 23 (_WmoTex0) are never bound, their diffuse " +
+                  "registers are, 14 uploads and no env map among them (" + rt.Textures.Length + " uploads; " + runViewName + ")", log);
             // Far from anything the viewport can see, and switched off again before this method returns:
             // Destroy is deferred to the end of the frame, and the viewport camera must never draw these.
             Vector3 origin = new Vector3(-20000f, 20000f, -20000f);
@@ -2112,6 +2284,36 @@ public static class WmvLifecycleSelfTest
             Color32 twoDiffuse = quadPixel(two, 1, 5f), twoRef = refPixel(twoMix[0], twoMix[1], twoMix[2]);
             Check(SamePixel(twoDiffuse, twoRef, 3),
                   "wmo render: two-layer diffuse matches TwoLayerMix, va 1 toward +0x0C (" + Px(twoDiffuse) + " vs " + Px(twoRef) + ")", log);
+
+            // The envmask view against the C# masks: id 5 t0.rgb * t0.a, id 7 c.rgb * c.a with both layer alphas
+            // lerped, id 23 mix.rgb * mix.a; id 13, whose case has no emissive, draws the view's dark grey.
+            float envView = WmvWmoBuilder.EnvMaskView;
+            Color32 mask5Pixel = quadPixel(env5, 3, envView), mask5Ref = refPixel(mask5[0], mask5[1], mask5[2]);
+            Check(SamePixel(mask5Pixel, mask5Ref, 3),
+                  "wmo render: the id-5 envmask view matches EnvMetalMask, t0.rgb * t0.a (" + Px(mask5Pixel) + " vs " + Px(mask5Ref) + ")", log);
+            Color32 mask7Pixel = quadPixel(env7, 4, envView), mask7Ref = refPixel(mask7[0], mask7[1], mask7[2]);
+            Check(SamePixel(mask7Pixel, mask7Ref, 3),
+                  "wmo render: the id-7 envmask view matches TwoLayerEnvMask, c.rgb * c.a with both layer alphas lerped by va (" +
+                  Px(mask7Pixel) + " vs " + Px(mask7Ref) + ")", log);
+            Color32 mask23Pixel = quadPixel(four, 0, envView), mask23Ref = refPixel(mask23[0], mask23[1], mask23[2]);
+            Check(SamePixel(mask23Pixel, mask23Ref, 3),
+                  "wmo render: the id-23 envmask view matches FourLayerEnvMask of the weighted layer rgba (" + Px(mask23Pixel) + " vs " +
+                  Px(mask23Ref) + ")", log);
+            Color32 mask13Pixel = quadPixel(two, 1, envView), naRef = refPixel(0.1f, 0.1f, 0.1f);
+            Check(SamePixel(mask13Pixel, naRef, 3),
+                  "wmo render: the envmask view draws id 13 (no emissive) as not applicable (" + Px(mask13Pixel) + " vs " + Px(naRef) + ")", log);
+            // Id 7's diffuse is still the two-layer lerp of rgb: the rgba lerp exists only in the view.
+            Color32 diffuse7Pixel = quadPixel(env7, 4, 5f), diffuse7Ref = refPixel(diffuse7[0], diffuse7[1], diffuse7[2]);
+            Check(SamePixel(diffuse7Pixel, diffuse7Ref, 3),
+                  "wmo render: the id-7 diffuse (view 5) is still TwoLayerMix, the alpha lerp leaks into nothing drawn (" +
+                  Px(diffuse7Pixel) + " vs " + Px(diffuse7Ref) + ")", log);
+            // Id 5's diffuse is still t0.rgb: the +0x0C alpha (100 here) the mask reads reaches nothing drawn.
+            Color32 diffuse5Pixel = quadPixel(env5, 3, 5f), diffuse5Ref = refPixel(t5[0] / 255f, t5[1] / 255f, t5[2] / 255f);
+            Check(SamePixel(diffuse5Pixel, diffuse5Ref, 3),
+                  "wmo render: the id-5 diffuse (view 5) is still t0.rgb, its alpha reaches nothing drawn (" +
+                  Px(diffuse5Pixel) + " vs " + Px(diffuse5Ref) + ")", log);
+            Check(env5.GetTexture("_WmoTex1") == null && env7.GetTexture("_WmoTex2") == null && rt.Materials[0].GetTexture("_WmoTex0") == null,
+                  "wmo render: drawing the envmask view bound no env map", log);
         }
         finally
         {

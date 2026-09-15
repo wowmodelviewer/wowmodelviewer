@@ -33,6 +33,22 @@ Format loosely based on [Keep a Changelog](https://keepachangelog.com/).
   uploaded GPU-only. New diagnostic switches: `-wmvWmoMaterialDiag` (one plan-and-readback line per
   drawn material), `-wmvWmoView=plan|weights|blend|va|diffuse|t0|t1`, `-wmvWmoUvOverride=N` and
   `-wmvWmoOnlyMaterials=a:b:c`.
+- **Embedded Unity renderer: world-model material logs name the client's blend row and the undrawn env
+  emissives.** Nothing drawn changes. For a blend value of 2 or above the material line and
+  `-wmvWmoMaterialDiag` give the row of the client's blend-state table (the four factors the 12.1
+  executable holds for that EGxBlend index) beside the realised state, with its evidence level: value 2
+  selecting row 2 is older-client documentation, not contradicted; from 3 up that hop is contested for
+  12.1 and the material gains `U-B7`, and `U-B1` now marks only values past the table's 17 rows. Ids 5,
+  7 and 23 log the client equation of their env emissive, the coordinate it would need and every input
+  that keeps it undrawn: `U-E2` (camera axes, now on ids 5 and 7 too), `U-E4` (the env sampler's
+  addressing) and `U-P1` (whether the program the client picks adds the emissive at all) join U-G1 and
+  U-E3. An F_UNLIT light bypass drawn in an interior group (MOGP flag 0x2000) gains `U-F3`, because
+  older-client documentation honours the flag only for exterior-lit batches; the bypass itself is kept.
+  Blend 2 and above keep their provisional drawing and the env emissives stay undrawn, by decision.
+  `-wmvWmoMaterialDiag` also adds one `wmo batch` line per drawn batch (its range, submesh and material,
+  the queue and depth write read back, the verdict), and `-wmvWmoView=envmask` draws the emissive masks
+  of ids 5, 7 and 23 (t0.rgb * t0.a, c.rgb * c.a, mix.rgb * mix.a) without binding or sampling any env
+  map.
 - **Embedded Unity renderer: playable characters are drawn in the Unity viewport.** The Unity
   viewport draws the same
   character from the state the host has already resolved -- the composited body and eye textures,
