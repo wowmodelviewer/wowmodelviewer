@@ -43,7 +43,11 @@ private:
   void onRandomise(wxCommandEvent &event);
   void onDHMode(wxCommandEvent &event);
 
+  // One row per option the character can use now (CharDetails::getCustomizationOptions).
+  void buildRows();
+
   WoWModel * model_;
+  bool rebuildPending_ = false;
 };
 
 

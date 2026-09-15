@@ -256,6 +256,39 @@ Format loosely based on [Keep a Changelog](https://keepachangelog.com/).
   or changing an item's level, while the character rides a mount loaded the item but refreshed the
   mount's (empty) equipment instead of the character's, so the change only appeared at the character's
   next refresh. The refresh now follows the character the controls act on.
+- **Model > Appearance offers the customization options and choices the character can use.** An Undead
+  male listed 1 of its 11 Jaw Features, had lost Skin Type "Bony", showed an empty "Eye Style" row, and
+  offered every Skin Color, both "Rotting" Face Features and Eyesight whatever the choices they depend on.
+  The requirement rows were read wrong: `ChrCustomizationReq.RaceMasks`, two uint32 in the file, was
+  loaded as one 64-bit value taken from half a pallet entry with its high half copied out of uninitialised
+  memory, and a heuristic then read meaning into those bits. The loader now stores `RaceMasks1` and
+  `RaceMasks2` at the file's own pallet stride, widens 64-bit columns instead of copying eight bytes out of
+  a four-byte value, sign-extends bitpacked signed values (a ClassMask of -1 no longer reads 65535) and
+  reads short ids and values without over-reading them (ChrClasses ids are 1-15 again). It also loads
+  `ReqType`, `RegionGroupMask`, `OverrideArchive`, `ChrCustomizationOption.Requirement`,
+  `ChrRaces.PlayableRaceBit` and `ChrCustomizationReqChoice` (database schema 13: the cached database is
+  rebuilt once).
+  One evaluator decides for options and choices alike: ReqType bit 0 (a player requirement -- the classic
+  races' NPC "Eye Style" and the "Transmog" placeholder are not), the race's PlayableRaceBit in RaceMasks
+  (not the race ID - 1), ClassMask against the class context (the Demon Hunter checkbox, otherwise every
+  class but Death Knight and Demon Hunter, so a Death Knight eye glow is no longer offered to every
+  class), the achievement, quest and item unlock gates as before, and prerequisite choices (one of the
+  listed choices of the option they belong to must be current; a list spanning several options is logged
+  and not evaluated). OverrideArchive and RegionGroupMask are loaded but not evaluated.
+  The panel builds a row only for an option the character can use, and rebuilds rows and lists when a
+  choice changes them: Skin Color follows Skin Type, Face Features offers the "Rotting" the Jaw allows,
+  Eyesight goes with Eye Color "Sockets". A current choice that stops being valid gives way to the first
+  valid one, and a saved character is resolved as a whole once it is read. What the character wears is
+  rebuilt from its current choices after every change, so changing Face, Hair Style or Eye Color no longer
+  leaves the previous choice's face, scalp or iris texture in the composite; equal texture layers keep the
+  order they were added in; one change refreshes the model once instead of twice. New headless check:
+  `-dbfromfile -customizationtest` (the stored requirement values, the rules, and an Undead male, a Night
+  Elf male, a Dracthyr and a Dark Iron Dwarf as the panel sees them).
+  Still open: the default lower jaw (geoset 101) stays drawn under every Jaw Features choice, which shows on
+  "Drooler"; "Sockets" still draws the eye mesh (it names geoset 3300, which the model does not have), and
+  the Unity viewport keeps the previous eye texture when "Sockets" is picked live; six of a Human's skin
+  tones are listed only once a Face they require is chosen; Face bone shapes (BoneSet) and
+  ChrCustItemGeoModify are not applied.
 - **Choosing "None" in the mount list no longer crashes.** Dismounting read the mount's scale from the
   canvas root after the mount had been detached and freed, and with no mount up it freed the character
   itself (the canvas model it was replacing was the same character). The mount's scale is now read before

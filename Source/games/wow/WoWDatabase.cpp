@@ -278,6 +278,7 @@ void wow::WoWDatabase::createIndices()
     "CREATE INDEX IF NOT EXISTS idx_ccelem_choice   ON ChrCustomizationElement(ChrCustomizationChoiceID)",
     "CREATE INDEX IF NOT EXISTS idx_ccchoice_option ON ChrCustomizationChoice(ChrCustomizationOptionID)",
     "CREATE INDEX IF NOT EXISTS idx_ccchoice_req    ON ChrCustomizationChoice(ChrCustomizationReqID)",
+    "CREATE INDEX IF NOT EXISTS idx_ccreqchoice_req ON ChrCustomizationReqChoice(ChrCustomizationReqID)",
     "CREATE INDEX IF NOT EXISTS idx_cdigd_cdi       ON CreatureDisplayInfoGeosetData(CreatureDisplayInfoID)",
     "CREATE INDEX IF NOT EXISTS idx_cmd_fdid        ON CreatureModelData(FileDataID)",
     "CREATE INDEX IF NOT EXISTS idx_cdi_model       ON CreatureDisplayInfo(ModelID)",

@@ -47,7 +47,9 @@ void CharTexture::compose(GLuint texID)
   if (m_components.empty())
     return;
 
-  std::sort(m_components.begin(), m_components.end());
+  // Stable: layers that share a layer number keep the order they were added in (customization
+  // elements in option then element order, then equipment), rather than an unspecified one.
+  std::stable_sort(m_components.begin(), m_components.end());
 
   QImage img;
 
@@ -78,7 +80,7 @@ GLuint CharTexture::composeStackToTexture(const std::vector<CharTextureComponent
                                           QImage * outImage)
 {
   std::vector<CharTextureComponent> layers = layersIn;
-  std::sort(layers.begin(), layers.end()); // by layer (lowest = base)
+  std::stable_sort(layers.begin(), layers.end()); // by layer (lowest = base), equal layers in order added
 
   QImage composite;
   for (const auto & c : layers)

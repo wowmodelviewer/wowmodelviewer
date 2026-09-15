@@ -37,12 +37,13 @@ class CharDetailsCustomizationChoice : public wxWindow, public Observer
     void buildList();
 
     uint ID_;
-    std::vector<uint> values_;
+    std::vector<uint> values_;        // the choice ID behind each dropdown item (same index)
+    std::vector<uint> listedChoices_; // the valid choices the list was last built from
 
     CharDetails & details_;
-    
 
-    wxBitmapComboBox * choice_;
+
+    wxBitmapComboBox * choice_ = nullptr;
 };
 
 
