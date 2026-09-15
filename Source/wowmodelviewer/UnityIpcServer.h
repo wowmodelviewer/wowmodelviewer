@@ -25,7 +25,7 @@
  *       "reason":"", "merged":3, "attachments":4, "missing":[], "ms":212 }
  *     { "type":"mapObjectLoaded", "fileDataID":115058, "load":13, "status":"built", "reason":"",
  *       "groups":1, "groupFilesRequested":1, "groupFilesMissing":0, "batches":3, "submeshes":3, "renderers":1,
- *       "materials":3, "provisionalMaterials":3, "unresolvedMaterials":0, "blendedMaterials":0,
+ *       "materials":3, "provisionalMaterials":0, "unresolvedMaterials":0, "blendedMaterials":0,
  *       "texturesReferenced":3, "texturesDecoded":3, "texturesMissing":0, "vertices":1234, "triangles":987,
  *       "boundsMin":[x,y,z], "boundsMax":[x,y,z],
  *       "timings":{"rootMs":5,"groupsMs":40,"texturesMs":60,"buildMs":12,"totalMs":130},

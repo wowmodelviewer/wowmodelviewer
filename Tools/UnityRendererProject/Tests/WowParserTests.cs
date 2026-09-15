@@ -364,6 +364,7 @@ namespace Wmv.Wow.Tests
             log.Add("WmoParser root");
             WmoRootTests();
             WmoMaterialTests();
+            WmoMaterialSemanticsTests();
             WmoPreservedChunkTests();
             WmoMalformedRootTests();
             log.Add("WmoParser group");
@@ -2716,6 +2717,548 @@ namespace Wmv.Wow.Tests
             byte[] partial = WmoSynthetic.Concat(WmoSynthetic.Mver(), WmoSynthetic.Chunk("MOHD", WmoSynthetic.Mohd(1, 0)),
                 WmoSynthetic.Chunk("MOMT", new byte[63]));
             ThrowsWmo(() => WmoParser.ParseRoot(partial, "momt 63"), "MOMT", "wmo MOMT: a partial record is rejected");
+        }
+
+        // ---------------------------------------------------------------- WMO material mapping layer
+
+        /// <summary>The plan for one synthetic MOMT record, parsed through a real root so the record takes the
+        /// same path a retail one does.</summary>
+        static WmoMaterialPlan PlanOf(byte[] record)
+        {
+            WmoSynthetic.RootSpec spec = TwoGroupRootSpec();
+            spec.Materials = new[] { record };
+            WmoRoot r = WmoParser.ParseRoot(WmoSynthetic.BuildRoot(spec), "plan root");
+            return WmoMaterialSemantics.Plan(r.Materials[0]);
+        }
+
+        static bool SameCodes(WmoMaterialPlan p, params string[] codes)
+        {
+            if (p.Codes.Length != codes.Length) return false;
+            for (int i = 0; i < codes.Length; i++) if (p.Codes[i] != codes[i]) return false;
+            return true;
+        }
+
+        static bool HasNote(WmoMaterialPlan p, string fragment)
+        {
+            foreach (string n in p.Notes) if (n.Contains(fragment)) return true;
+            return false;
+        }
+
+        static void WmoMaterialSemanticsTests()
+        {
+            const uint T = 1001;
+            float key = 128f / 255f;
+
+            // ---- id 0, blend 0: the client's pixel case 0 -----------------------------------------
+            WmoMaterialPlan p = PlanOf(WmoSynthetic.Material(0, 0, 0, T));
+            Check(p.Resolution == WmoResolution.Resolved && p.Verdict == "resolved" && p.Codes.Length == 0 &&
+                  p.Permutation == WmoPermutation.Diffuse && !p.Provisional,
+                  "wmo plan: id 0 blend 0 is resolved, permutation diffuse");
+            Check(p.Samplers.Length == 1 && p.Samplers[0].Register == 0 && p.Samplers[0].Slot == 0 &&
+                  p.Samplers[0].FileDataID == T && p.Samplers[0].UvChannel == 0 && !p.Samplers[0].KeepAlpha,
+                  "wmo plan: id 0 samples only +0x0C, on UV channel 0 (MOTV set 1), alpha dropped when opaque");
+            Check(p.SrcColor == WmoBlendFactor.One && p.DstColor == WmoBlendFactor.Zero && p.SrcAlpha == WmoBlendFactor.One &&
+                  p.DstAlpha == WmoBlendFactor.Zero && p.ZWrite && !p.AlphaTest &&
+                  p.RenderQueue == WmoMaterialSemantics.QueueGeometry && p.RenderType == "Opaque",
+                  "wmo plan: blend 0 is One/Zero, depth write on, no test, Geometry queue");
+            Check(!p.CullOff && !p.ClampU && !p.ClampV && !p.LightBypass && p.VertexColour == "none",
+                  "wmo plan: no flags -> cull back, repeat addressing, lit, no vertex colour");
+
+            // ---- blend 1: the 128/255 key on t0.a --------------------------------------------------
+            p = PlanOf(WmoSynthetic.Material(0, 0, 1, T));
+            Check(p.Resolution == WmoResolution.Resolved && p.AlphaTest && Math.Abs(p.Cutoff - key) < 1e-6f &&
+                  Math.Abs(WmoMaterialSemantics.AlphaKeyThreshold - 0.501961f) < 1e-5f &&
+                  p.RenderQueue == WmoMaterialSemantics.QueueAlphaTest && p.RenderType == "TransparentCutout" &&
+                  p.ZWrite && p.SrcColor == WmoBlendFactor.One && p.DstColor == WmoBlendFactor.Zero && p.Samplers[0].KeepAlpha,
+                  "wmo plan: id 0 blend 1 keys at 128/255 on t0.a, blending off, depth write on, alpha kept");
+            Check(HasNote(p, "U-B1"), "wmo plan: the blend-1 note names the non-blocking U-B1");
+
+            // ---- id 16 is case 0 ---------------------------------------------------------------------
+            p = PlanOf(WmoSynthetic.Material(0, 16, 0, T));
+            Check(p.Resolution == WmoResolution.Resolved && p.Permutation == WmoPermutation.Diffuse &&
+                  p.PermutationName.Contains("16") && p.Samplers.Length == 1 && p.Samplers[0].Slot == 0 &&
+                  p.Samplers[0].UvChannel == 0, "wmo plan: id 16 is an alias of case 0");
+
+            // ---- flags --------------------------------------------------------------------------------
+            Check(PlanOf(WmoSynthetic.Material(0x04, 0, 0, T)).CullOff, "wmo plan: flag 0x04 turns culling off");
+            p = PlanOf(WmoSynthetic.Material(0x40, 0, 0, T));
+            Check(p.ClampU && !p.ClampV && p.Resolution == WmoResolution.Resolved, "wmo plan: flag 0x40 clamps U only");
+            p = PlanOf(WmoSynthetic.Material(0x80, 16, 1, T));
+            Check(!p.ClampU && p.ClampV, "wmo plan: flag 0x80 clamps V only");
+            p = PlanOf(WmoSynthetic.Material(0x01, 0, 0, T));
+            Check(p.LightBypass && p.Resolution == WmoResolution.Resolved && HasNote(p, "F_UNLIT"),
+                  "wmo plan: flag 0x01 bypasses the preview light on id 0");
+            Check(PlanOf(WmoSynthetic.Material(0x01, 16, 0, T)).LightBypass, "wmo plan: ... and on id 16");
+            p = PlanOf(WmoSynthetic.Material(0x02, 0, 0, T));
+            Check(p.Resolution == WmoResolution.Resolved && HasNote(p, "no fog"), "wmo plan: flag 0x02 has no effect without fog");
+
+            // ---- resolved-partial: inputs the client reads with no established source ----------------
+            p = PlanOf(WmoSynthetic.Material(0, 0, 0, 0));
+            Check(p.Resolution == WmoResolution.Unresolved && p.ProvisionalFallback && p.Provisional && SameCodes(p, "U-23b") &&
+                  p.Verdict == "unresolved: U-23b" && p.Permutation == WmoPermutation.Diffuse &&
+                  p.PermutationName.StartsWith("PROVISIONAL diffuse fallback (client pixel case 0") &&
+                  p.Samplers.Length == 1 && p.Samplers[0].FileDataID == 0 && !p.Samplers[0].Unread && p.Samplers[0].Role.Contains("MISSING"),
+                  "wmo plan: id 0 with +0x0C empty is unresolved U-23b, a labelled fallback (the whole surface is an unbound register)");
+            p = PlanOf(WmoSynthetic.Material(0x04, 16, 1, 0));
+            Check(p.Resolution == WmoResolution.Unresolved && p.ProvisionalFallback && SameCodes(p, "U-23b") && p.AlphaTest && p.CullOff &&
+                  p.PermutationName.Contains("case 16"), "wmo plan: ... id 16 with blend 1 too (keyed on the white default, never cut)");
+            p = PlanOf(WmoSynthetic.Material(0x10, 0, 0, T));
+            Check(p.Resolution == WmoResolution.ResolvedPartial && SameCodes(p, "U-F2") && HasNote(p, "F_SIDN"),
+                  "wmo plan: F_SIDN on id 0 is resolved-partial U-F2");
+            p = PlanOf(WmoSynthetic.Material(0x28, 0, 0, T, tail: new uint[] { 0x3D4CCCCD }));
+            Check(p.Resolution == WmoResolution.ResolvedPartial && SameCodes(p, "U-F2") && HasNote(p, "0x3D4CCCCD") &&
+                  HasNote(p, "F_EXTLIGHT") && HasNote(p, "F_WINDOW"),
+                  "wmo plan: +0x28 = 0.05f and flags 0x08/0x20 give one U-F2, every cause in the notes");
+
+            // ---- blend 2 and above: unresolved, provisional, no Src/Dst guessed ----------------------
+            foreach (uint blend in new uint[] { 2, 3, 5, 6 })
+            {
+                p = PlanOf(WmoSynthetic.Material(0xC5, 0, blend, T));
+                Check(p.Resolution == WmoResolution.Unresolved && p.Provisional &&
+                      SameCodes(p, "U-B2", "U-B3", "U-B4", "U-B5") &&
+                      p.AlphaTest && p.Samplers[0].KeepAlpha && p.SrcColor == WmoBlendFactor.One && p.DstColor == WmoBlendFactor.Zero &&
+                      p.ZWrite && p.CullOff && !p.ClampU && !p.ClampV && !p.LightBypass,
+                      "wmo plan: id 0 blend " + blend + " is unresolved U-B2..U-B5, drawn by the provisional key, flags 0x40/0x80/0x01 not applied");
+            }
+            Check(SameCodes(PlanOf(WmoSynthetic.Material(0, 0, 14, T)), "U-B1", "U-B2", "U-B3", "U-B4", "U-B5"),
+                  "wmo plan: a blend value past the documented table adds U-B1");
+
+            // ---- every verdict is one of three words; an id-23 env map is never read as a diffuse ------------
+            // Every staged id (0/16, 23, 13, 4, 7, 5) plans its established part; what is left open is a code.
+            bool threeWords = true, envNeverDiffuse = true;
+            foreach (uint sh in new uint[] { 0, 4, 5, 7, 13, 16, 23, 6, 3, 25 })
+                foreach (uint bl in new uint[] { 0, 1, 2, 3 })
+                    foreach (bool layers in new[] { true, false })
+                    {
+                        WmoMaterialPlan q = layers
+                            ? PlanOf(WmoSynthetic.Material(0, sh, bl, T, 2002, 2003, new uint[] { 2004, 2005, 2006, 2007, 2008, 2009 }))
+                            : PlanOf(WmoSynthetic.Material(0, sh, bl, T));
+                        threeWords = threeWords && (q.Verdict.StartsWith("resolved") || q.Verdict.StartsWith("unresolved"));
+                        if (sh == 23)
+                            foreach (WmoSamplerBinding sb in q.Samplers)
+                                envNeverDiffuse = envNeverDiffuse && (sb.Slot != 0 || sb.Unread);
+                    }
+            Check(threeWords, "wmo plan: every shader id / blend combination is resolved, resolved-partial or unresolved");
+            Check(envNeverDiffuse, "wmo plan: no id-23 plan, whatever its blend or layers, binds its +0x0C env map to a register");
+            // A still-unsupported id keeps the provisional key and every reason, the blend state's included.
+            p = PlanOf(WmoSynthetic.Material(0, 6, 3, T, 2002));
+            Check(p.Resolution == WmoResolution.Unresolved && p.Permutation == WmoPermutation.ProvisionalBaseline && p.AlphaTest &&
+                  SameCodes(p, "U-B2", "U-B3", "U-B4", "U-B5", WmoMaterialSemantics.OutOfPlan),
+                  "wmo plan: an unsupported id with blend 3 is unresolved on the provisional key, blend and scope codes both logged");
+
+            // ---- ids outside the plan -------------------------------------------------------------------
+            Check(SameCodes(PlanOf(WmoSynthetic.Material(0, 6, 0, T, 2002)), WmoMaterialSemantics.OutOfPlan) &&
+                  PlanOf(WmoSynthetic.Material(0, 6, 0, T, 2002)).Resolution == WmoResolution.Unresolved,
+                  "wmo plan: id 6 is unresolved OUT-OF-PLAN");
+            Check(SameCodes(PlanOf(WmoSynthetic.Material(0, 3, 0, T, 2002)), WmoMaterialSemantics.OutOfPlan, "U-G1", "U-E2"),
+                  "wmo plan: env id 3 carries U-G1 and U-E2");
+            Check(SameCodes(PlanOf(WmoSynthetic.Material(0, 25, 0, T)), WmoMaterialSemantics.OutOfPlan, "U-C1"),
+                  "wmo plan: an id with no client case carries U-C1");
+
+            // ---- decode set and diagnostic line ---------------------------------------------------------
+            var set = new HashSet<uint>();
+            WmoMaterialSemantics.CollectSampledTextures(PlanOf(WmoSynthetic.Material(0, 0, 0, T)), set);
+            WmoMaterialSemantics.CollectSampledTextures(PlanOf(WmoSynthetic.Material(0x40, 16, 1, T)), set);
+            WmoMaterialSemantics.CollectSampledTextures(PlanOf(WmoSynthetic.Material(0, 0, 2, T)), set);
+            Check(set.Count == 1 && set.Contains(T), "wmo plan: one FileDataID sampled by three materials is decoded once");
+            string d = WmoMaterialSemantics.Describe(PlanOf(WmoSynthetic.Material(0xC0, 0, 1, T)));
+            Check(d.Contains("shader 0 blend 1 flags 0x000000C0") && d.Contains("+0x0C 1001") &&
+                  d.Contains("t0 diffuse <- +0x0C 1001 @ UV0 (MOTV set 1), alpha read") && d.Contains("vertex colour none") &&
+                  d.Contains("Src One Dst Zero SrcA One DstA Zero") && d.Contains("ZWrite on") && d.Contains("clip < 0.50196") &&
+                  d.Contains("wrap U clamp V clamp") && d.Contains("queue 2450 TransparentCutout") && d.Contains("| RESOLVED"),
+                  "wmo plan: the diagnostic line carries every field");
+            d = WmoMaterialSemantics.Describe(PlanOf(WmoSynthetic.Material(0, 0, 3, T)));
+            Check(d.Contains("permutation 0 PROVISIONAL") && d.Contains("| UNRESOLVED: U-B2,U-B3,U-B4,U-B5"),
+                  "wmo plan: the diagnostic labels a provisional material and its codes");
+
+            // The numbering the builder hands to Unity's blend properties.
+            Check((int)WmoBlendFactor.Zero == 0 && (int)WmoBlendFactor.One == 1 && (int)WmoBlendFactor.DstColor == 2 &&
+                  (int)WmoBlendFactor.SrcColor == 3 && (int)WmoBlendFactor.SrcAlpha == 5 && (int)WmoBlendFactor.OneMinusSrcAlpha == 10,
+                  "wmo plan: blend factors use Unity's BlendMode numbering");
+
+            WmoFourLayerPlanTests();
+            WmoTwoLayerAndOpaquePlanTests();
+            WmoEnvMetalPlanTests();
+        }
+
+        /// <summary>Ids 7 and 5: the diffuse parts of client pixel cases 7 and 5 (10.1 I4/I5); their env
+        /// emissives stay unresolved (U-G1, U-E3) and their env maps are neither bound nor decoded.</summary>
+        static void WmoEnvMetalPlanTests()
+        {
+            const uint L1 = 7001, L2 = 7002, Env = 7003;
+
+            // ---- id 7, blend 0: the diffuse part of the client's pixel case 7 ------------------------------
+            WmoMaterialPlan p = PlanOf(WmoSynthetic.Material(0, 7, 0, L1, L2, Env));
+            Check(p.Permutation == WmoPermutation.TwoLayerEnvMetal && p.Resolution == WmoResolution.ResolvedPartial &&
+                  p.Verdict == "resolved-partial: U-G1,U-E3" && !p.Provisional && !p.ProvisionalFallback &&
+                  p.PermutationName.Contains("case 7") && p.PermutationName.Contains("without its env emissive"),
+                  "wmo 7: id 7 with both layers is the two-layer env metal permutation, resolved-partial U-G1,U-E3");
+            Check(p.Samplers.Length == 3 &&
+                  p.Samplers[0].Register == 0 && p.Samplers[0].Slot == 0 && p.Samplers[0].FileDataID == L1 && p.Samplers[0].UvChannel == 0 &&
+                  !p.Samplers[0].KeepAlpha && !p.Samplers[0].Unread &&
+                  p.Samplers[1].Register == 1 && p.Samplers[1].Slot == 1 && p.Samplers[1].FileDataID == L2 && p.Samplers[1].UvChannel == 1 &&
+                  !p.Samplers[1].KeepAlpha && !p.Samplers[1].Unread &&
+                  p.Samplers[2].Register == 2 && p.Samplers[2].Slot == 2 && p.Samplers[2].FileDataID == Env && p.Samplers[2].Unread,
+                  "wmo 7: t0 = +0x0C on UV 0 (MOTV set 1), t1 = +0x18 on UV 1 (MOTV set 2), alphas not read; env +0x24 listed, unread");
+            Check(p.ReadsSet2Alpha && !p.ReadsMoc2 && p.VertexColour.StartsWith("MOCV set-2 alpha") &&
+                  !p.AlphaTest && p.ZWrite && p.SrcColor == WmoBlendFactor.One && p.DstColor == WmoBlendFactor.Zero &&
+                  p.RenderQueue == WmoMaterialSemantics.QueueGeometry && !p.CullOff && !p.LightBypass,
+                  "wmo 7: reads the set-2 alpha; opaque, depth write, no test");
+            var sampled = new List<uint>();
+            WmoMaterialSemantics.CollectSampledTextures(p, sampled);
+            Check(sampled.Count == 2 && sampled.Contains(L1) && sampled.Contains(L2) && !sampled.Contains(Env),
+                  "wmo 7: the decode set is +0x0C and +0x18, never the env map");
+            Check(HasNote(p, "U-G1") && HasNote(p, "U-E3") && HasNote(p, "+0x24 is not decoded"),
+                  "wmo 7: the note says why the env emissive is not drawn");
+            string d = WmoMaterialSemantics.Describe(p);
+            Check(d.Contains("permutation 5 two-layer env metal") && d.Contains("t0 layer 1 (va = 1) <- +0x0C 7001 @ UV0 (MOTV set 1), alpha not read") &&
+                  d.Contains("t1 layer 2 (va = 0) <- +0x18 7002 @ UV1 (MOTV set 2), alpha not read") &&
+                  d.Contains("t2 env map (emissive, not drawn) <- +0x24 7003, not bound") &&
+                  d.Contains("lerp(t1.rgb, t0.rgb, va)") && d.Contains("emissive c.rgb * c.a * env(t2) NOT drawn (U-G1, U-E3)") &&
+                  d.Contains("| RESOLVED-PARTIAL: U-G1,U-E3"),
+                  "wmo 7: the diagnostic line shows the registers, the unbound env map, the combiner and what is not drawn");
+
+            // ---- id 7: blend 1, flags, empty slots, blend >= 2 -------------------------------------------------
+            p = PlanOf(WmoSynthetic.Material(0, 7, 1, L1, L2, Env));
+            Check(p.Permutation == WmoPermutation.TwoLayerEnvMetal && !p.AlphaTest && p.RenderQueue == WmoMaterialSemantics.QueueGeometry &&
+                  p.Resolution == WmoResolution.ResolvedPartial && HasNote(p, "case 7's alpha is 1") && HasNote(p, "never discards"),
+                  "wmo 7: blend 1 is never clipped (case alpha 1), unlike the archived baseline's key");
+            p = PlanOf(WmoSynthetic.Material(0xC5, 7, 0, L1, L2, Env));
+            Check(p.CullOff && p.ClampU && p.ClampV && !p.LightBypass && SameCodes(p, "U-G1", "U-E3", "U-F1") && HasNote(p, "F_UNLIT"),
+                  "wmo 7: flags 0x04/0x40/0x80 apply; F_UNLIT is not honoured on an emissive id (U-F1)");
+            p = PlanOf(WmoSynthetic.Material(0, 7, 0, L1, 0, Env));
+            Check(p.Permutation == WmoPermutation.TwoLayerEnvMetal && p.Resolution == WmoResolution.Unresolved && p.ProvisionalFallback &&
+                  SameCodes(p, "U-23b", "U-G1", "U-E3") && p.PermutationName.StartsWith("PROVISIONAL two-layer env metal fallback") &&
+                  HasNote(p, "+0x18 is empty") && p.Samplers[1].FileDataID == 0 && !p.Samplers[1].Unread,
+                  "wmo 7: an empty +0x18 is unresolved U-23b, drawn by the labelled fallback (its register reads white)");
+            sampled.Clear();
+            WmoMaterialSemantics.CollectSampledTextures(p, sampled);
+            Check(sampled.Count == 1 && sampled.Contains(L1), "wmo 7: the fallback decodes only what it samples");
+            p = PlanOf(WmoSynthetic.Material(0, 7, 0, L1, L2, 0));
+            Check(p.Resolution == WmoResolution.ResolvedPartial && SameCodes(p, "U-G1", "U-E3") && HasNote(p, "+0x24 is empty"),
+                  "wmo 7: an empty env slot changes nothing drawn (the emissive is not drawn in any case)");
+            p = PlanOf(WmoSynthetic.Material(0, 7, 3, L1, L2, Env));
+            Check(p.Permutation == WmoPermutation.TwoLayerEnvMetal && p.Resolution == WmoResolution.Unresolved && p.ProvisionalFallback &&
+                  SameCodes(p, "U-B2", "U-B3", "U-B4", "U-B5", "U-G1", "U-E3") && !p.AlphaTest && p.ZWrite &&
+                  p.SrcColor == WmoBlendFactor.One && p.DstColor == WmoBlendFactor.Zero && HasNote(p, "no blend factors guessed"),
+                  "wmo 7: blend 3 is unresolved U-B2..U-B5 (plus U-G1,U-E3), the case diffuse drawn opaque, no Src/Dst guessed");
+            p = PlanOf(WmoSynthetic.Material(0x10, 7, 0, L1, L2, Env, tail: new uint[] { 0x3D4CCCCD }));
+            Check(SameCodes(p, "U-G1", "U-E3", "U-F2") && HasNote(p, "F_SIDN") && HasNote(p, "0x3D4CCCCD"),
+                  "wmo 7: F_SIDN and a non-zero +0x28 add U-F2");
+
+            // ---- id 5, blend 0: the diffuse part of the client's pixel case 5 ------------------------------------
+            p = PlanOf(WmoSynthetic.Material(0, 5, 0, L1, Env));
+            Check(p.Permutation == WmoPermutation.EnvMetal && p.Resolution == WmoResolution.ResolvedPartial &&
+                  p.Verdict == "resolved-partial: U-G1,U-E3" && !p.Provisional && p.PermutationName.Contains("case 5") &&
+                  !p.ReadsSet2Alpha && !p.ReadsMoc2 && p.VertexColour == "none",
+                  "wmo 5: id 5 is the env metal permutation, resolved-partial U-G1,U-E3, no vertex stream");
+            Check(p.Samplers.Length == 2 && p.Samplers[0].Slot == 0 && p.Samplers[0].FileDataID == L1 && p.Samplers[0].UvChannel == 0 &&
+                  !p.Samplers[0].KeepAlpha && !p.Samplers[0].Unread && p.Samplers[1].Register == 1 && p.Samplers[1].Slot == 1 &&
+                  p.Samplers[1].FileDataID == Env && p.Samplers[1].Unread,
+                  "wmo 5: t0 = +0x0C on UV 0 with its reflectivity-mask alpha dropped; env +0x18 listed, unread");
+            Check(!p.AlphaTest && p.ZWrite && p.RenderQueue == WmoMaterialSemantics.QueueGeometry && p.RenderType == "Opaque",
+                  "wmo 5: opaque, depth write, no test");
+            sampled.Clear();
+            WmoMaterialSemantics.CollectSampledTextures(p, sampled);
+            Check(sampled.Count == 1 && sampled.Contains(L1), "wmo 5: the decode set is +0x0C only");
+            d = WmoMaterialSemantics.Describe(p);
+            Check(d.Contains("permutation 6 env metal") && d.Contains("<- +0x0C 7001 @ UV0 (MOTV set 1), alpha not read") &&
+                  d.Contains("t1 env map (emissive, not drawn) <- +0x18 7003, not bound") &&
+                  d.Contains("combiner diffuse = t0.rgb, case alpha 1; emissive t0.rgb * t0.a * env(t1) NOT drawn (U-G1, U-E3)") &&
+                  d.Contains("| RESOLVED-PARTIAL: U-G1,U-E3"),
+                  "wmo 5: the diagnostic line");
+
+            // ---- id 5: blend 1, flags, empty +0x0C, blend >= 2 ---------------------------------------------------
+            p = PlanOf(WmoSynthetic.Material(0, 5, 1, L1, Env));
+            Check(p.Permutation == WmoPermutation.EnvMetal && !p.AlphaTest && !p.Samplers[0].KeepAlpha &&
+                  p.Resolution == WmoResolution.ResolvedPartial && HasNote(p, "case 5's alpha is 1"),
+                  "wmo 5: blend 1 is never clipped (the reflectivity mask is not transparency)");
+            p = PlanOf(WmoSynthetic.Material(0x05, 5, 0, L1, Env));
+            Check(p.CullOff && !p.LightBypass && SameCodes(p, "U-G1", "U-E3", "U-F1"),
+                  "wmo 5: two-sided from 0x04; F_UNLIT not honoured (U-F1)");
+            p = PlanOf(WmoSynthetic.Material(0, 5, 0, 0, Env));
+            Check(p.Permutation == WmoPermutation.EnvMetal && p.Resolution == WmoResolution.Unresolved && p.ProvisionalFallback &&
+                  SameCodes(p, "U-23b", "U-G1", "U-E3") && p.PermutationName.StartsWith("PROVISIONAL env metal fallback") &&
+                  p.PermutationName.Contains("an empty +0x0C reads white"),
+                  "wmo 5: an empty +0x0C is unresolved U-23b, the labelled fallback (as id 4), drawn white");
+            p = PlanOf(WmoSynthetic.Material(0, 5, 2, 0, Env));
+            Check(SameCodes(p, "U-B2", "U-B3", "U-B4", "U-B5", "U-23b", "U-G1", "U-E3") && p.ProvisionalFallback,
+                  "wmo 5: blend 2 with an empty +0x0C carries both reasons");
+            p = PlanOf(WmoSynthetic.Material(0, 5, 2, L1, Env));
+            Check(p.Permutation == WmoPermutation.EnvMetal && p.Resolution == WmoResolution.Unresolved && p.ProvisionalFallback &&
+                  !p.AlphaTest && SameCodes(p, "U-B2", "U-B3", "U-B4", "U-B5", "U-G1", "U-E3") &&
+                  p.PermutationName.StartsWith("PROVISIONAL env metal fallback"),
+                  "wmo 5: blend 2 is unresolved U-B2..U-B5, the case diffuse drawn opaque and untested");
+
+            Check((int)WmoPermutation.TwoLayerEnvMetal == 5 && (int)WmoPermutation.EnvMetal == 6,
+                  "wmo 7/5: permutation numbers match the shader's _WmoPermutation switch");
+        }
+
+        static void WmoTwoLayerAndOpaquePlanTests()
+        {
+            const uint L1 = 6001, L2 = 6002;
+
+            // ---- id 13, blend 0: the client's pixel case 13 -----------------------------------------------
+            WmoMaterialPlan p = PlanOf(WmoSynthetic.Material(0, 13, 0, L1, L2));
+            Check(p.Permutation == WmoPermutation.TwoLayer && p.Resolution == WmoResolution.Resolved && p.Verdict == "resolved" &&
+                  !p.Provisional && !p.ProvisionalFallback && p.PermutationName.Contains("case 13"),
+                  "wmo 13: id 13 with both layers and blend 0 is the resolved two-layer permutation");
+            Check(p.Samplers.Length == 2 &&
+                  p.Samplers[0].Register == 0 && p.Samplers[0].Slot == 0 && p.Samplers[0].FileDataID == L1 && p.Samplers[0].UvChannel == 0 &&
+                  !p.Samplers[0].KeepAlpha && !p.Samplers[0].Unread &&
+                  p.Samplers[1].Register == 1 && p.Samplers[1].Slot == 1 && p.Samplers[1].FileDataID == L2 && p.Samplers[1].UvChannel == 1 &&
+                  !p.Samplers[1].KeepAlpha && !p.Samplers[1].Unread,
+                  "wmo 13: t0 = +0x0C on UV channel 0 (MOTV set 1), t1 = +0x18 on UV channel 1 (MOTV set 2), neither alpha read");
+            Check(p.ReadsSet2Alpha && !p.ReadsMoc2 && p.VertexColour.StartsWith("MOCV set-2 alpha"),
+                  "wmo 13: reads the MOCV set-2 alpha (not MOC2, not set 1)");
+            Check(!p.AlphaTest && p.ZWrite && p.SrcColor == WmoBlendFactor.One && p.DstColor == WmoBlendFactor.Zero &&
+                  p.RenderQueue == WmoMaterialSemantics.QueueGeometry && p.RenderType == "Opaque" && !p.CullOff && !p.LightBypass,
+                  "wmo 13: blend 0 is opaque, depth write, no test");
+            var sampled = new List<uint>();
+            WmoMaterialSemantics.CollectSampledTextures(p, sampled);
+            Check(sampled.Count == 2 && sampled.Contains(L1) && sampled.Contains(L2), "wmo 13: the decode set is +0x0C and +0x18");
+            string d = WmoMaterialSemantics.Describe(p);
+            Check(d.Contains("t0 layer 1 (va = 1) <- +0x0C 6001 @ UV0 (MOTV set 1), alpha not read") &&
+                  d.Contains("t1 layer 2 (va = 0) <- +0x18 6002 @ UV1 (MOTV set 2), alpha not read") &&
+                  d.Contains("vertex colour MOCV set-2 alpha") && d.Contains("lerp(t1.rgb, t0.rgb, va)") && d.Contains("| RESOLVED"),
+                  "wmo 13: the diagnostic line shows both registers, their UV sets, va and the combiner");
+
+            // ---- blend 1: case alpha 1, never clipped ---------------------------------------------------------
+            p = PlanOf(WmoSynthetic.Material(0, 13, 1, L1, L2));
+            Check(p.Permutation == WmoPermutation.TwoLayer && !p.AlphaTest && p.RenderQueue == WmoMaterialSemantics.QueueGeometry &&
+                  p.Resolution == WmoResolution.Resolved && !p.Samplers[0].KeepAlpha && HasNote(p, "never discards"),
+                  "wmo 13: blend 1 draws untested (case alpha 1 never reaches 128/255)");
+
+            // ---- flags ----------------------------------------------------------------------------------------
+            p = PlanOf(WmoSynthetic.Material(0xC5, 13, 0, L1, L2));
+            Check(p.CullOff && p.ClampU && p.ClampV && p.LightBypass && p.Resolution == WmoResolution.Resolved && HasNote(p, "F_UNLIT"),
+                  "wmo 13: flags 0x04/0x40/0x80 apply and F_UNLIT bypasses the preview light (no emissive term)");
+            p = PlanOf(WmoSynthetic.Material(0x20, 13, 0, L1, L2, tail: new uint[] { 0x3D4CCCCD }));
+            Check(p.Resolution == WmoResolution.ResolvedPartial && SameCodes(p, "U-F2") && HasNote(p, "F_WINDOW") && HasNote(p, "0x3D4CCCCD"),
+                  "wmo 13: F_WINDOW and a non-zero +0x28 are resolved-partial U-F2");
+
+            // ---- an empty layer slot: U-23b, labelled fallback --------------------------------------------------
+            p = PlanOf(WmoSynthetic.Material(0, 13, 0, L1, 0));
+            Check(p.Permutation == WmoPermutation.TwoLayer && p.Resolution == WmoResolution.Unresolved && p.ProvisionalFallback &&
+                  p.Provisional && SameCodes(p, "U-23b") && p.PermutationName.StartsWith("PROVISIONAL two-layer fallback") &&
+                  HasNote(p, "+0x18 is empty") && p.Samplers[1].FileDataID == 0 && !p.Samplers[1].Unread &&
+                  p.Samplers[1].Role.Contains("MISSING"),
+                  "wmo 13: an empty +0x18 is unresolved U-23b, drawn by the labelled two-layer fallback (the register reads white)");
+            sampled.Clear();
+            WmoMaterialSemantics.CollectSampledTextures(p, sampled);
+            Check(sampled.Count == 1 && sampled.Contains(L1), "wmo 13: the fallback decodes only what it samples");
+            p = PlanOf(WmoSynthetic.Material(0, 13, 0, 0, L2));
+            Check(p.ProvisionalFallback && HasNote(p, "+0x0C is empty") && SameCodes(p, "U-23b"),
+                  "wmo 13: an empty +0x0C is the same fallback");
+            d = WmoMaterialSemantics.Describe(p);
+            Check(d.Contains("| UNRESOLVED (PROVISIONAL fallback): U-23b") && d.Contains("<- +0x0C empty @ UV0"),
+                  "wmo 13: the diagnostic labels the fallback and the empty register");
+
+            // ---- blend 2 and above: the case kept, opaque, unresolved ------------------------------------------
+            foreach (uint blend in new uint[] { 2, 3 })
+            {
+                p = PlanOf(WmoSynthetic.Material(0x04, 13, blend, L1, L2));
+                Check(p.Permutation == WmoPermutation.TwoLayer && p.Resolution == WmoResolution.Unresolved && p.ProvisionalFallback &&
+                      SameCodes(p, "U-B2", "U-B3", "U-B4", "U-B5") && !p.AlphaTest && p.ZWrite &&
+                      p.SrcColor == WmoBlendFactor.One && p.DstColor == WmoBlendFactor.Zero && p.CullOff &&
+                      HasNote(p, "no blend factors guessed"),
+                      "wmo 13: blend " + blend + " is unresolved U-B2..U-B5, the case drawn opaque and untested (no Src/Dst guessed)");
+            }
+            p = PlanOf(WmoSynthetic.Material(0, 13, 3, L1, 0));
+            Check(SameCodes(p, "U-B2", "U-B3", "U-B4", "U-B5", "U-23b"), "wmo 13: blend 3 with an empty layer carries both reasons");
+
+            // ---- the case-13 arithmetic: polarity -------------------------------------------------------------
+            Check(Math.Abs(WmoMaterialSemantics.TwoLayerMix(0.8f, 0.2f, 1f) - 0.8f) < 1e-6f &&
+                  Math.Abs(WmoMaterialSemantics.TwoLayerMix(0.8f, 0.2f, 0f) - 0.2f) < 1e-6f &&
+                  Math.Abs(WmoMaterialSemantics.TwoLayerMix(0.8f, 0.2f, 0.25f) - 0.35f) < 1e-6f,
+                  "wmo 13 mix: va 1 draws layer 1 (+0x0C), va 0 layer 2 (+0x18), linear between");
+            Check(WmoMaterialSemantics.SetTwoAlpha(255) == 1f && WmoMaterialSemantics.SetTwoAlpha(0) == 0f &&
+                  Math.Abs(WmoMaterialSemantics.SetTwoAlpha(127) - 127f / 255f) < 1e-7f,
+                  "wmo 13 mix: the layer factor is the stored set-2 alpha / 255, no fix-up");
+
+            // ---- id 4: the client's pixel case 4 ------------------------------------------------------------------
+            p = PlanOf(WmoSynthetic.Material(0, 4, 0, L1));
+            Check(p.Permutation == WmoPermutation.Opaque && p.Resolution == WmoResolution.Resolved && p.Verdict == "resolved" &&
+                  !p.Provisional && p.PermutationName.Contains("case 4") && p.Samplers.Length == 1 && p.Samplers[0].Slot == 0 &&
+                  p.Samplers[0].FileDataID == L1 && p.Samplers[0].UvChannel == 0 && !p.Samplers[0].KeepAlpha &&
+                  !p.ReadsSet2Alpha && !p.ReadsMoc2 && p.VertexColour == "none",
+                  "wmo 4: id 4 is the resolved opaque permutation: +0x0C on UV channel 0, alpha dropped, no vertex stream");
+            Check(!p.AlphaTest && p.ZWrite && p.RenderQueue == WmoMaterialSemantics.QueueGeometry && p.RenderType == "Opaque",
+                  "wmo 4: opaque, depth write, no test");
+            p = PlanOf(WmoSynthetic.Material(0, 4, 1, L1));
+            Check(p.Permutation == WmoPermutation.Opaque && !p.AlphaTest && !p.Samplers[0].KeepAlpha && p.Resolution == WmoResolution.Resolved &&
+                  HasNote(p, "never discards"), "wmo 4: blend 1 is never clipped (case alpha 1)");
+            p = PlanOf(WmoSynthetic.Material(0xC5, 4, 0, L1));
+            Check(p.CullOff && p.ClampU && p.ClampV && p.LightBypass && p.Resolution == WmoResolution.Resolved,
+                  "wmo 4: flags 0x04/0x40/0x80 apply, F_UNLIT bypasses the preview light");
+            p = PlanOf(WmoSynthetic.Material(0, 4, 0, 0));
+            Check(p.Permutation == WmoPermutation.Opaque && p.Resolution == WmoResolution.Unresolved && SameCodes(p, "U-23b") &&
+                  p.ProvisionalFallback && p.PermutationName.StartsWith("PROVISIONAL opaque fallback") &&
+                  HasNote(p, "whole surface"), "wmo 4: an empty +0x0C is unresolved U-23b, the labelled fallback (as ids 0/16)");
+            sampled.Clear();
+            WmoMaterialSemantics.CollectSampledTextures(p, sampled);
+            Check(sampled.Count == 0, "wmo 4: ... which decodes nothing");
+            p = PlanOf(WmoSynthetic.Material(0, 4, 2, L1));
+            Check(p.Permutation == WmoPermutation.Opaque && p.Resolution == WmoResolution.Unresolved && p.ProvisionalFallback &&
+                  !p.AlphaTest && SameCodes(p, "U-B2", "U-B3", "U-B4", "U-B5") && p.PermutationName.StartsWith("PROVISIONAL opaque fallback"),
+                  "wmo 4: blend 2 is unresolved U-B2..U-B5, the case drawn opaque and untested");
+            d = WmoMaterialSemantics.Describe(PlanOf(WmoSynthetic.Material(0, 4, 0, L1)));
+            Check(d.Contains("permutation 4 opaque (client pixel case 4)") && d.Contains("t0 diffuse (alpha not read) <- +0x0C 6001 @ UV0") &&
+                  d.Contains("combiner diffuse = t0.rgb, case alpha 1"), "wmo 4: the diagnostic line");
+            Check((int)WmoPermutation.TwoLayer == 3 && (int)WmoPermutation.Opaque == 4,
+                  "wmo 13/4: permutation numbers match the shader's _WmoPermutation switch");
+        }
+
+        static void WmoFourLayerPlanTests()
+        {
+            const uint Env = 351431, L1 = 4001, L2 = 4002, L3 = 4003, L4 = 4004, H1 = 5001, H2 = 5002, H3 = 5003, H4 = 5004;
+
+            // ---- complete id 23: four layers, four heights --------------------------------------------
+            WmoMaterialPlan p = PlanOf(WmoSynthetic.Material(0, 23, 0, Env, L1, L2, new uint[] { L3, L4, H1, H2, H3, H4 }));
+            Check(p.Permutation == WmoPermutation.FourLayer && p.Resolution == WmoResolution.ResolvedPartial && !p.Provisional &&
+                  !p.ProvisionalFallback && SameCodes(p, "U-23a", "U-E2", "U-E3") &&
+                  p.Verdict == "resolved-partial: U-23a,U-E2,U-E3" && p.PermutationName.Contains("case 23"),
+                  "wmo 23: a complete id-23 material is the four-layer permutation, resolved-partial U-23a,U-E2,U-E3");
+            bool bindings = p.Samplers.Length == 9;
+            uint[] layers = { L1, L2, L3, L4 }, heights = { H1, H2, H3, H4 };
+            for (int k = 0; bindings && k < 4; k++)
+            {
+                WmoSamplerBinding l = p.Samplers[1 + k], h = p.Samplers[5 + k];
+                bindings = l.Register == 1 + k && l.ClientRegister == 1 + k && l.Slot == 1 + k && l.FileDataID == layers[k] &&
+                           l.UvChannel == k && !l.KeepAlpha && !l.Unread &&
+                           h.Register == 5 + k && h.ClientRegister == 17 + k && h.Slot == 5 + k && h.FileDataID == heights[k] &&
+                           h.UvChannel == k && h.KeepAlpha && !h.Unread;
+            }
+            Check(bindings, "wmo 23: layer k = +0x18/+0x24/+0x28/+0x2C in t1..t4 and height k = +0x30..+0x3C in 5..8 (client " +
+                            "t17..t20), both on UV channel k-1 (MOTV set k); only the height alpha is read");
+            Check(p.Samplers[0].Register == 0 && p.Samplers[0].FileDataID == Env && p.Samplers[0].Unread,
+                  "wmo 23: the +0x0C env map is listed but not bound (its emissive is not drawn)");
+            Check(p.ReadsMoc2 && p.VertexColour.StartsWith("MOC2") && p.LayerMask[0] == 1f && p.LayerMask[1] == 1f &&
+                  p.LayerMask[2] == 1f && p.LayerMask[3] == 1f,
+                  "wmo 23: reads MOC2, every layer present in the mask");
+            Check(!p.AlphaTest && p.ZWrite && p.SrcColor == WmoBlendFactor.One && p.DstColor == WmoBlendFactor.Zero &&
+                  p.RenderQueue == WmoMaterialSemantics.QueueGeometry && p.RenderType == "Opaque" && !p.LightBypass,
+                  "wmo 23: blend 0 is opaque, depth write, no test");
+            var sampled = new List<uint>();
+            WmoMaterialSemantics.CollectSampledTextures(p, sampled);
+            Check(sampled.Count == 8 && !sampled.Contains(Env), "wmo 23: the decode set is the four layers and four heights, not the env map");
+            Check(HasNote(p, "U-23a") && HasNote(p, "not decoded"), "wmo 23: the notes name the byte-3 lerp and the undrawn env emissive");
+
+            // ---- blend 1: case alpha 1, no test -----------------------------------------------------------
+            p = PlanOf(WmoSynthetic.Material(0, 23, 1, Env, L1, L2, new uint[] { L3, L4, H1, H2, H3, H4 }));
+            Check(p.Permutation == WmoPermutation.FourLayer && !p.AlphaTest && p.RenderQueue == WmoMaterialSemantics.QueueGeometry &&
+                  p.Resolution == WmoResolution.ResolvedPartial && HasNote(p, "never discards"),
+                  "wmo 23: blend 1 draws untested (case alpha 1 never reaches 128/255)");
+
+            // ---- non-contiguous layers 1011: empty layer masked, its height not read ----------------------
+            p = PlanOf(WmoSynthetic.Material(0, 23, 0, 0, L1, 0, new uint[] { L3, L4, H1, H2, H3, H4 }));
+            Check(p.Resolution == WmoResolution.ResolvedPartial && SameCodes(p, "U-23b", "U-23a", "U-E2", "U-E3") &&
+                  p.Verdict == "resolved-partial: U-23b,U-23a,U-E2,U-E3" && !p.ProvisionalFallback &&
+                  p.LayerMask[0] == 1f && p.LayerMask[1] == 0f && p.LayerMask[2] == 1f && p.LayerMask[3] == 1f &&
+                  p.Samplers[2].Unread && p.Samplers[6].Unread && p.Samplers[6].FileDataID == H2 && !p.Samplers[3].Unread,
+                  "wmo 23: layers 1011 mask layer 2 and leave its (present) height unread; resolved-partial with U-23b for the forced weight");
+            sampled.Clear();
+            WmoMaterialSemantics.CollectSampledTextures(p, sampled);
+            Check(sampled.Count == 6 && !sampled.Contains(H2), "wmo 23: an empty layer's height map is not decoded");
+            Check(HasNote(p, "layer(s) 2 empty") && HasNote(p, "+0x0C is empty"), "wmo 23: the notes name the empty layer and empty env");
+
+            // ---- a present layer without its height: U-23b, labelled fallback -----------------------------
+            p = PlanOf(WmoSynthetic.Material(0, 23, 0, Env, L1, L2, new uint[] { L3, L4, 0, 0, 0, 0 }));
+            Check(p.Permutation == WmoPermutation.FourLayer && p.Resolution == WmoResolution.Unresolved && p.ProvisionalFallback &&
+                  p.Provisional && SameCodes(p, "U-23b", "U-23a", "U-E2", "U-E3") && p.PermutationName.StartsWith("PROVISIONAL") &&
+                  HasNote(p, "PROVISIONAL fallback") && p.Samplers[5].FileDataID == 0 && !p.Samplers[5].Unread,
+                  "wmo 23: layers without height maps are unresolved U-23b, drawn by the labelled four-layer fallback");
+            sampled.Clear();
+            WmoMaterialSemantics.CollectSampledTextures(p, sampled);
+            Check(sampled.Count == 4, "wmo 23: the fallback decodes only what it samples (the four layers)");
+            p = PlanOf(WmoSynthetic.Material(0, 23, 0, 0, L1, L2, new uint[] { 0, 0, H1, 0, 0, 0 }));
+            Check(p.Resolution == WmoResolution.Unresolved && p.ProvisionalFallback && HasNote(p, "layer(s) 2 have"),
+                  "wmo 23: one present layer missing its height is enough for U-23b");
+            string d = WmoMaterialSemantics.Describe(p);
+            Check(d.Contains("t6 (client t18) height 2 MISSING") && d.Contains("| UNRESOLVED (PROVISIONAL fallback): U-23b") &&
+                  d.Contains("t3 layer 3 (empty: weight forced to 0) <- +0x28 empty, not bound") && d.Contains("layer mask (1,1,0,0)"),
+                  "wmo 23: the diagnostic line shows client registers, the missing height, unbound layers and the mask");
+
+            // ---- no layer at all, blend 2+, flags -----------------------------------------------------------
+            p = PlanOf(WmoSynthetic.Material(0, 23, 0, Env, 0, 0, new uint[] { 0, 0, H1, 0, 0, 0 }));
+            Check(p.Permutation == WmoPermutation.ProvisionalBaseline && p.Resolution == WmoResolution.Unresolved &&
+                  SameCodes(p, "U-23b") && p.Samplers.Length == 1 && p.Samplers[0].FileDataID == Env && p.Samplers[0].Unread,
+                  "wmo 23: no layer texture at all stays on the baseline, unresolved U-23b, its env map listed but not bound");
+            sampled.Clear();
+            WmoMaterialSemantics.CollectSampledTextures(p, sampled);
+            Check(sampled.Count == 0, "wmo 23: ... and not decoded (the baseline draws the register's white, never the env map)");
+            p = PlanOf(WmoSynthetic.Material(0, 23, 3, Env, 0, 0));
+            Check(p.Permutation == WmoPermutation.ProvisionalBaseline && p.AlphaTest && !p.Samplers[0].KeepAlpha &&
+                  SameCodes(p, "U-B2", "U-B3", "U-B4", "U-B5", "U-23b"),
+                  "wmo 23: no layer and blend 3 carries both reasons on the baseline");
+            p = PlanOf(WmoSynthetic.Material(0, 23, 2, Env, L1, L2, new uint[] { L3, L4, H1, H2, H3, H4 }));
+            Check(p.Permutation == WmoPermutation.FourLayer && p.Resolution == WmoResolution.Unresolved && p.ProvisionalFallback &&
+                  SameCodes(p, "U-B2", "U-B3", "U-B4", "U-B5", "U-23a", "U-E2", "U-E3") && !p.AlphaTest && p.ZWrite &&
+                  p.SrcColor == WmoBlendFactor.One && p.DstColor == WmoBlendFactor.Zero &&
+                  p.RenderQueue == WmoMaterialSemantics.QueueGeometry && HasNote(p, "no blend factors guessed") &&
+                  p.PermutationName.StartsWith("PROVISIONAL four-layer fallback") && p.PermutationName.Contains("blend state not established") &&
+                  p.Samplers[0].Unread,
+                  "wmo 23: blend 2 keeps the four-layer arithmetic in the labelled opaque fallback, unresolved U-B2..U-B5 (no Src/Dst guessed)");
+            sampled.Clear();
+            WmoMaterialSemantics.CollectSampledTextures(p, sampled);
+            Check(sampled.Count == 8 && !sampled.Contains(Env), "wmo 23: ... decoding its layers and heights, never the env map");
+            p = PlanOf(WmoSynthetic.Material(0, 23, 5, 0, L1, 0, new uint[] { L3, L4, H1, 0, H3, H4 }));
+            Check(SameCodes(p, "U-B2", "U-B3", "U-B4", "U-B5", "U-23b", "U-23a", "U-E2", "U-E3") && p.ProvisionalFallback,
+                  "wmo 23: blend 5 with an empty layer carries the blend codes and U-23b once");
+            p = PlanOf(WmoSynthetic.Material(0xC5, 23, 0, Env, L1, L2, new uint[] { L3, L4, H1, H2, H3, H4 }));
+            Check(p.CullOff && p.ClampU && p.ClampV && !p.LightBypass && SameCodes(p, "U-23a", "U-E2", "U-E3", "U-F1"),
+                  "wmo 23: flags 0x04/0x40/0x80 apply; F_UNLIT is not a bypass on an id with an emissive (U-F1)");
+            p = PlanOf(WmoSynthetic.Material(0x10, 23, 0, Env, L1, L2, new uint[] { L3, L4, H1, H2, H3, H4 }));
+            Check(SameCodes(p, "U-23a", "U-E2", "U-E3", "U-F2"), "wmo 23: F_SIDN adds U-F2");
+
+            // ---- the E23 weight arithmetic on hand vectors -------------------------------------------------
+            float[] one = { 1f, 1f, 1f, 1f }, all = { 1f, 1f, 1f, 1f };
+            Check(Near4(WmoMaterialSemantics.FourLayerWeights(1f, 0f, 0f, one, all), 1f, 0f, 0f, 0f) &&
+                  Near4(WmoMaterialSemantics.FourLayerWeights(0f, 1f, 0f, one, all), 0f, 1f, 0f, 0f) &&
+                  Near4(WmoMaterialSemantics.FourLayerWeights(0f, 0f, 1f, one, all), 0f, 0f, 1f, 0f) &&
+                  Near4(WmoMaterialSemantics.FourLayerWeights(0f, 0f, 0f, one, all), 0f, 0f, 0f, 1f),
+                  "wmo 23 weights: the four one-hot cases (layer 4 takes 1 - sum)");
+            // Equal stored weights (layer 4 takes the remaining 0.25), unequal heights, the last below the
+            // 0.004 floor: aw = (0.25, 0.125, 0.0625, 0.001); the strongest keeps aw, the others
+            // (1 - (max - aw)) * aw, then all four are normalised.
+            float[] b = WmoMaterialSemantics.FourLayerWeights(0.25f, 0.25f, 0.25f, new[] { 1f, 0.5f, 0.25f, 0f }, all);
+            float a1 = 0.25f, a2 = 0.125f, a3 = 0.0625f, a4 = 0.25f * 0.004f;
+            float r1 = a1, r2 = (1f - (a1 - a2)) * a2, r3 = (1f - (a1 - a3)) * a3, r4 = (1f - (a1 - a4)) * a4, t = r1 + r2 + r3 + r4;
+            Check(Near4(b, r1 / t, r2 / t, r3 / t, r4 / t) && b[0] > b[1] && b[1] > b[2] && b[2] > b[3],
+                  "wmo 23 weights: equal weights with unequal heights favour the higher height map (height floor 0.004)");
+            // Byte sum above 255: layer 4 is saturated to 0, the rest are used as stored.
+            b = WmoMaterialSemantics.FourLayerWeights(200f / 255f, 100f / 255f, 0f, one, all);
+            float s1 = 200f / 255f, s2 = 100f / 255f, q2 = (1f - (s1 - s2)) * s2;
+            Check(Near4(b, s1 / (s1 + q2), q2 / (s1 + q2), 0f, 0f), "wmo 23 weights: a byte sum above 255 saturates layer 4 to 0");
+            // All four in the maximum: a strong layer 3 pulls the others down to (1 - 0.7) * 0.1 each, giving
+            // (0.03, 0.03, 0.8, 0) / 0.86. A maximum that skipped the third component would give 0.8 for it.
+            b = WmoMaterialSemantics.FourLayerWeights(0.1f, 0.1f, 0.8f, one, all);
+            Check(Near4(b, 0.03f / 0.86f, 0.03f / 0.86f, 0.8f / 0.86f, 0f), "wmo 23 weights: the third layer enters the maximum");
+            // The mask: an empty layer's stored weight is ignored; everything masked gives zeros, not NaN.
+            b = WmoMaterialSemantics.FourLayerWeights(0.5f, 0.5f, 0f, one, new[] { 1f, 0f, 1f, 1f });
+            Check(Near4(b, 1f, 0f, 0f, 0f), "wmo 23 weights: a masked layer gets no weight");
+            b = WmoMaterialSemantics.FourLayerWeights(0f, 1f, 0f, one, new[] { 1f, 0f, 1f, 1f });
+            Check(Near4(b, 0f, 0f, 0f, 0f) && !float.IsNaN(b[0]), "wmo 23 weights: all weight on masked layers gives zeros, not NaN");
+
+            // ---- an absent stream the load found: U-V4 joins the plan -------------------------------------
+            p = PlanOf(WmoSynthetic.Material(0, 13, 0, 6001, 6002));
+            WmoMaterialSemantics.NoteAbsentStream(p, 0, "MOCV set 2");
+            Check(p.Verdict == "resolved", "wmo U-V4: no absent-stream vertex changes nothing");
+            WmoMaterialSemantics.NoteAbsentStream(p, 12, "MOCV set 2");
+            WmoMaterialSemantics.NoteAbsentStream(p, 3, "MOTV set 2");
+            Check(p.Resolution == WmoResolution.ResolvedPartial && p.Verdict == "resolved-partial: U-V4" &&
+                  HasNote(p, "12 drawn vertex(es) lack MOCV set 2") && HasNote(p, "3 drawn vertex(es) lack MOTV set 2"),
+                  "wmo U-V4: a resolved material with vertices lacking a stream becomes resolved-partial U-V4, the code once");
+            p = PlanOf(WmoSynthetic.Material(0, 13, 0, 6001, 0));
+            WmoMaterialSemantics.NoteAbsentStream(p, 4, "MOCV set 2");
+            Check(p.Resolution == WmoResolution.Unresolved && p.Verdict == "unresolved: U-23b,U-V4",
+                  "wmo U-V4: an unresolved fallback stays unresolved, the code appended");
+        }
+
+        static bool Near4(float[] v, float a, float b, float c, float d)
+        {
+            return v.Length == 4 && Math.Abs(v[0] - a) < 1e-5f && Math.Abs(v[1] - b) < 1e-5f &&
+                   Math.Abs(v[2] - c) < 1e-5f && Math.Abs(v[3] - d) < 1e-5f;
         }
 
         static void WmoPreservedChunkTests()

@@ -10,17 +10,29 @@ Format loosely based on [Keep a Changelog](https://keepachangelog.com/).
   Browse keeps the Unity viewport on screen instead of showing a notice. The host sends the root's
   FileDataID (`loadWoWModel` with `"kind":"wmo"`, protocol 4) and the player fetches the root, the
   full-detail groups its GFID chunk names and the material textures itself, then reports what it built
-  (`mapObjectLoaded`). This is a foundation stage: materials are provisional (first texture slot or
-  white, two-sided and alpha-keyed from the material's flags and blend value), so modern materials --
-  shader 23 in particular -- are visibly wrong and are logged as unresolved; doodads (so the doodad-set
-  choice has no visible effect yet, as the Model panel now says), liquids, WMO lights, fog, portal
-  culling, LOD switching and the skybox are not drawn. A player older than protocol 4 gets the
-  "Unity renderer out of date" notice for a WMO, a root the host cannot read gets "World model cannot
+  (`mapObjectLoaded`). Doodads (so the doodad-set choice has no visible effect yet, as the Model panel
+  now says), liquids, WMO lights, fog, portal culling, LOD switching and the skybox are not drawn. A
+  player older than protocol 4 gets the "Unity renderer out of date" notice for a WMO, a root the host cannot read gets "World model cannot
   be read", and a WMO the player reports it could not build gets "World model could not be built".
   `-dbfromfile -wmo <root path or FileDataID> -unityipctest` checks the player's report headlessly, and
   `WMV_IPCTEST_SEQUENCE` adds a model/world-model switching sequence that checks the player holds
   exactly one runtime of the right kind after every step (asked with the new `runtimeState` question,
   so a world model left alive under a model fails too).
+- **Embedded Unity renderer: world-model materials follow the client's map-object shader cases.** Each
+  MOMT entry is planned by `WmoMaterialSemantics` and drawn by its own world-model shader
+  (`Resources/WmvWmo.shader`), not the M2 combiner shader. Shader ids 0/16, 4 and 13 are drawn as their
+  client cases (13: +0x0C and +0x18 on MOTV sets 1 and 2, lerped by the MOCV set-2 alpha). The diffuse
+  parts of ids 23, 7 and 5 are drawn without their env-map emissives (U-G1, U-E2, U-E3), and id 23
+  without its MOC2 byte-3 colour pull (U-23a): its four layers and height maps on MOTV sets 1-4,
+  weighted by MOC2, so its +0x0C env map is no longer drawn as the surface and an empty +0x0C no longer
+  turns it white. Blend 0 is opaque and blend 1 keys at 128/255 only on ids whose case alpha is the
+  texture's; flag 0x04 turns culling off, 0x40/0x80 clamp texture addressing, and 0x01 bypasses the
+  preview light on ids without an emissive. Blend values 2 and above, MOCV set-1 vertex colours, empty
+  registers a draw weights and every other shader id stay provisional and are logged per material with
+  their reason codes. Only the textures a drawn material samples are decoded, once per FileDataID, and
+  uploaded GPU-only. New diagnostic switches: `-wmvWmoMaterialDiag` (one plan-and-readback line per
+  drawn material), `-wmvWmoView=plan|weights|blend|va|diffuse|t0|t1`, `-wmvWmoUvOverride=N` and
+  `-wmvWmoOnlyMaterials=a:b:c`.
 - **Embedded Unity renderer: playable characters are drawn in the Unity viewport.** The Unity
   viewport draws the same
   character from the state the host has already resolved -- the composited body and eye textures,

@@ -15,10 +15,11 @@
 //                                             FileDataID of the whole WMO, once each -- the tail slots of
 //                                             shader 22/23 included
 //     -> BlpDecoder                           on worker threads, at most a few at a time, and ONLY for the
-//                                             +0x0C texture of a material some LOD0 batch draws -- the one
-//                                             image the provisional material samples. Every other file is
-//                                             fetched and its header checked, not decoded (HandleMapObjectAsset
-//                                             has the measurements that decided it)
+//                                             textures a material some LOD0 batch draws actually SAMPLES,
+//                                             as its plan (Wow.WmoMaterialSemantics) binds them -- once per
+//                                             FileDataID however many slots or materials name it. Every other
+//                                             file is fetched and its header checked, not decoded
+//                                             (HandleMapObjectAsset has the measurements that decided it)
 //     -> WmvWmoBuilder                        staged: built inactive, then swapped in within one frame
 //     -> mapObjectLoaded                      the outcome, once per load
 //
@@ -58,7 +59,7 @@ public partial class WmvMain
         public readonly Dictionary<string, int> PendingGroups = new Dictionary<string, int>();   // requestId -> group
         public readonly Dictionary<string, uint> PendingTextures = new Dictionary<string, uint>(); // requestId -> fileDataID
         public readonly Dictionary<uint, WmvWmoTexture> Textures = new Dictionary<uint, WmvWmoTexture>();
-        /// <summary>The files the provisional material samples (slot +0x0C of a material a LOD0 batch draws): the only ones decoded.</summary>
+        /// <summary>The files the drawn materials' plans sample: the only ones decoded, each once.</summary>
         public readonly HashSet<uint> SampledTextures = new HashSet<uint>();
         public int GroupsOutstanding, TexturesOutstanding;   // requested or decoding, not yet landed
         public bool TexturesRequested;                        // after the groups: see RequestMapObjectTextures
@@ -191,12 +192,13 @@ public partial class WmvMain
             j.TextureBytes += r.data.Length;
             if (!j.SampledTextures.Contains(textureId))
             {
-                // FETCHED, CHECKED, NOT DECODED. Nothing drawn samples this file (a later slot -- shader
-                // 22/23 keeps its real textures in the tail -- or the +0x0C texture of a material no LOD0
-                // batch uses), so decoding it would only burn time and memory: decoding every referenced
-                // file took the modern tower 67 s of CPU and 380 MB of heap for the 19 images it draws,
-                // and an 86-group cave 2,550 s of CPU and 2.2 GB for one. The header proves the id is a
-                // real texture; a material stage that samples it fetches it again.
+                // FETCHED, CHECKED, NOT DECODED. No drawn material's plan samples this file (a slot the
+                // material's permutation does not read -- shader 23's env map in +0x0C, whose emissive is
+                // not drawn -- or any texture of a material no LOD0 batch uses), so decoding it would
+                // only burn time and memory: decoding every referenced file took the modern tower 67 s of
+                // CPU and 380 MB of heap for the 19 images it draws, and an 86-group cave 2,550 s of CPU and
+                // 2.2 GB for one. The header proves the id is a real texture; a material stage that samples
+                // it fetches it again.
                 string headerError;
                 if (WmvWmoTexture.ReadHeader(r.data, tex, out headerError))
                     tex.HeaderOnly = true;
@@ -291,8 +293,8 @@ public partial class WmvMain
 
     /// <summary>
     /// Every non-zero texture FileDataID of the whole WMO, requested once each -- after the groups,
-    /// because only the groups say which materials are drawn, and only the +0x0C texture of a drawn
-    /// material is decoded (see HandleMapObjectAsset). Every other file is still fetched.
+    /// because only the groups say which materials are drawn, and only the textures a drawn material's
+    /// plan samples are decoded (see HandleMapObjectAsset). Every other file is still fetched.
     /// </summary>
     void RequestMapObjectTextures(MapObjectJob j)
     {
@@ -308,9 +310,13 @@ public partial class WmvMain
                 if (b.TriangleIndexCount > 0 && b.MaterialId >= 0 && b.MaterialId < root.Materials.Length)
                     usedMaterials.Add(b.MaterialId);
         }
+        // The same plan the builder draws from, so what is decoded and what is sampled cannot drift
+        // apart: a material decodes the registers its permutation reads (a four-layer one its layers and
+        // height maps, not its env map; a two-layer one +0x0C and +0x18, not id 7's env map +0x24; id 5 only
+        // +0x0C, not its env map +0x18), a provisional one only the +0x0C
+        // texture its baseline draws. The set keeps one entry per FileDataID.
         foreach (int id in usedMaterials)
-            if (root.Materials[id].Texture1 != 0)
-                j.SampledTextures.Add(root.Materials[id].Texture1);
+            WmoMaterialSemantics.CollectSampledTextures(WmoMaterialSemantics.Plan(root.Materials[id]), j.SampledTextures);
 
         uint[] textureIds = root.GetAllTextureFileDataIDs();
         j.TexturesStartMs = j.Clock.Elapsed.TotalMilliseconds;
@@ -322,7 +328,7 @@ public partial class WmvMain
         if (j.TexturesOutstanding == 0) j.TexturesDoneMs = j.TexturesStartMs;
         status.Set(string.Format("World model groups parsed: {0} texture(s) requested", textureIds.Length));
         Debug.Log(string.Format("WMV: wmo: {0} of {1} material(s) drawn by LOD0 batches; requested {2} texture(s): " +
-                                "{3} sampled by the provisional material (decoded, at most {4} at a time), {5} fetched " +
+                                "{3} sampled by the drawn materials' plans (decoded once each, at most {4} at a time), {5} fetched " +
                                 "and header-checked only", usedMaterials.Count, root.Materials.Length, textureIds.Length,
                                 j.SampledTextures.Count, MaxParallelDecodes, textureIds.Length - j.SampledTextures.Count));
     }
@@ -645,8 +651,13 @@ public partial class WmvMain
             r.Batches = built.Batches;
             r.Submeshes = built.Submeshes;
             r.Renderers = built.Renderers;
+            // provisionalMaterials: drawn provisionally -- by the archived baseline or by a labelled fallback
+            // (id 23 missing a height map, an empty register the draw weights, a blend of 2 or above on ids
+            // 4/5/7/13/23). unresolvedMaterials: drawn materials with ANY open question -- resolved-partial
+            // and unresolved -- so the host's count only reaches 0 when every drawn material is fully
+            // established.
             r.ProvisionalMaterials = built.ProvisionalMaterials;
-            r.UnresolvedMaterials = built.UnresolvedMaterials;
+            r.UnresolvedMaterials = built.PartialMaterials + built.UnresolvedMaterials;
             r.BlendedMaterials = built.BlendedMaterials;
             r.Vertices = built.VertexCount;
             r.Triangles = built.TriangleCount;
@@ -656,7 +667,7 @@ public partial class WmvMain
         }
         Debug.Log(string.Format(
             "WMV: wmo: mapObjectLoaded load {0} root {1} {2}{3}: groups {4} (requested {5}, missing {6}), batches {7}, " +
-            "submeshes {8}, renderers {9}, materials {10} (provisional {11}, unresolved {12}, alpha-keyed {13}), " +
+            "submeshes {8}, renderers {9}, materials {10} (provisional {11}, not fully resolved {12}, non-zero blend {13}), " +
             "textures {14} referenced / {15} decoded / {16} missing, vertices {17}, triangles {18}, " +
             "timings root {19:F0} groups {20:F0} textures {21:F0} build {22:F0} total {23:F0} ms, live world models {24}, live models {25}",
             r.Load, r.FileDataID, r.Status, string.IsNullOrEmpty(r.Reason) ? "" : " (" + r.Reason + ")", r.Groups,
