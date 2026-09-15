@@ -139,6 +139,12 @@ Format loosely based on [Keep a Changelog](https://keepachangelog.com/).
   `-imgseq` smoke test is gone. `-unityipctest` and `-fbxexport` still run.
 
 ### Fixed
+- **Choosing "None" in the mount list no longer crashes.** Dismounting read the mount's scale from the
+  canvas root after the mount had been detached and freed, and with no mount up it freed the character
+  itself (the canvas model it was replacing was the same character). The mount's scale is now read before
+  it is freed, and the character is handed back to the canvas without being deleted. The `-unityipctest`
+  character check now dismounts twice, with no mount up and with a mount up, and checks the character
+  is still the canvas model and is dressed in the Unity viewport again.
 - **Selecting a WMO no longer builds it for OpenGL, twice.** The host opened every group file,
   compiled it into a display list for the hidden canvas, uploaded the material textures to GL, and
   then rebuilt every group again (leaking the first build) -- all for a canvas that never paints. It

@@ -940,6 +940,11 @@ void CharControl::OnUpdateItem(int type, int id)
 
       if (!model)
         return;
+      // The mount, if any, is the root's model. Read its scale before it is detached and freed below:
+      // the character takes it back on dismount, and afterwards the root holds no model to read it from.
+      const WoWModel * mount = dynamic_cast<WoWModel *>(g_canvas->root->model());
+      const bool mounted = mount != nullptr;
+      const float mountScale = mounted ? mount->scale_ : 1.0f;
       if (g_canvas->root->model())
       {
         g_canvas->root->setModel(0);
@@ -948,10 +953,13 @@ void CharControl::OnUpdateItem(int type, int id)
       if (numbers[id] < 0)  // The user selected "None". Remove existing mount.
       {
         // clearing the mount
-        g_canvas->setModel(model);
+        // keepPrevious: when no mount was up the canvas model IS the character, and replacing it with
+        // itself must not free it.
+        g_canvas->setModel(model, true);
         if (charAtt)
         {
-          model->scale_ = dynamic_cast<WoWModel *>(g_canvas->root->model())->scale_;
+          if (mounted)
+            model->scale_ = mountScale;
           charAtt->id = 0;
         }
         g_animControl->UpdateModel(model);
