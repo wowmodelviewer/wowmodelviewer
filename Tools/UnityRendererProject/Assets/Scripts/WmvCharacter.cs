@@ -17,7 +17,8 @@
 //
 // Nothing here decides what a character wears or looks like. The dresser fetches what a scene names,
 // builds what is new, and then applies the whole scene in one frame: no half-dressed frame, no part
-// removed before its replacement is ready.
+// removed before its replacement is ready. A scene that also names what the character RIDES waits for
+// that too (CommitGate), and the mount goes on in the same frame (OnCommitted; see WmvMountedScene.cs).
 
 using System;
 using System.Collections.Generic;
@@ -96,6 +97,22 @@ public class WmvCharacterDresser
     Action onFirstApplied;
     bool staged;
 
+    /// <summary>
+    /// What the scene being prepared waits on OUTSIDE the dresser, asked on every pump: the scene is applied
+    /// only once its own parts are ready AND this says so. A mounted character's scene waits here for its mount
+    /// and the riding sequence, so the character, the mount and the pose go on screen in one frame
+    /// (WmvMountedScene). Null, or true for a scene with nothing outside to wait on: applied as soon as its
+    /// parts are ready, as always. When what it waits on arrives, the owner calls Repump.
+    /// </summary>
+    public Func<WmvIpcClient.CharacterScene, bool> CommitGate;
+
+    /// <summary>
+    /// Raised in the frame a scene is applied, after its parts (and, for a staged body, after onFirstApplied has
+    /// put the character on screen), before the answer goes out: the owner applies what else the scene describes
+    /// -- its mount -- and says what became of it, which the answer carries. Null: the answer says "none".
+    /// </summary>
+    public Func<WmvIpcClient.CharacterScene, WmvIpcClient.MountAnswer> OnCommitted;
+
     public WmvCharacterDresser(WmvIpcClient ipc, int load, Func<string, BlpImage> imageByHash, Action<string> log)
     {
         this.ipc = ipc;
@@ -108,6 +125,10 @@ public class WmvCharacterDresser
     /// <summary>A scene is being prepared or files are still on their way.</summary>
     public bool Busy { get { return target != null || pending.Count > 0; } }
     public int AppliedRevision { get { return appliedRevision; } }
+
+    /// <summary>How often an applied scene bound the body's textures again (a changed composited image or texture slot).
+    /// runtimeState reports it (bodyRebinds): mounting, dismounting or swapping a mount must not change it.</summary>
+    public int BodyRebinds { get; private set; }
 
     /// <summary>
     /// Dress a body that has just been built and is not on screen yet. The body was built with this
@@ -150,7 +171,7 @@ public class WmvCharacterDresser
         if (target != null && target.revision != scene.revision)
             ipc.ReportCharacterSceneApplied(target.fileDataID, Load, target.revision, "superseded",
                                             "superseded by revision " + scene.revision, parts.Count, 0, null,
-                                            clock.ElapsedMilliseconds);
+                                            clock.ElapsedMilliseconds, WmvIpcClient.MountKeyOf(target), "none", "");
         target = scene;
         clock.Reset();
         clock.Start();
@@ -182,7 +203,8 @@ public class WmvCharacterDresser
         if (target == null)
             return;
         ipc.ReportCharacterSceneApplied(target.fileDataID, Load, target.revision, "superseded", reason,
-                                        parts.Count, 0, null, clock.ElapsedMilliseconds);
+                                        parts.Count, 0, null, clock.ElapsedMilliseconds,
+                                        WmvIpcClient.MountKeyOf(target), "none", "");
         target = null;
         preps.Clear();
         clock.Stop();
@@ -260,6 +282,9 @@ public class WmvCharacterDresser
     /// <summary>A composited image arrived: a scene may be waiting on it.</summary>
     public void OnImage() { if (target != null) Pump(); }
 
+    /// <summary>Something the scene waits on outside the dresser (CommitGate) arrived: look again.</summary>
+    public void Repump() { if (target != null) Pump(); }
+
     /// <summary>Per frame: attached items follow the body's play/pause, as the host ticks them with the
     /// character's frame delta (zero while paused) at their own speed. Merged parts follow the body's
     /// culling.</summary>
@@ -307,6 +332,8 @@ public class WmvCharacterDresser
         requested.Clear();
         target = null;
         onFirstApplied = null;
+        CommitGate = null;
+        OnCommitted = null;
     }
 
     /// <summary>Counts for the performance log: renderers, materials and textures of every part.</summary>
@@ -364,7 +391,9 @@ public class WmvCharacterDresser
                 ready &= Prepare(a.key, a.fileDataID, 0);
         }
 
-        if (ready)
+        // Asked whether or not the parts are ready, so what the gate has to fetch starts now, beside them.
+        bool outsideReady = CommitGate == null || CommitGate(target);
+        if (ready && outsideReady)
             Commit();
     }
 
@@ -491,6 +520,7 @@ public class WmvCharacterDresser
             var dict = TexturesFor(scene.body.textures, missing, "body");
             WmvModelBuilder.RebindTextures(Body, dict, "body", null);
             bodyTextureSignature = bodySig;
+            BodyRebinds++;
             Log("body textures re-bound (" + dict.Count + " slot(s))");
         }
         bool[] bodyFlags = WmvIpcClient.Flags(scene.body.submeshVisible);
@@ -541,8 +571,11 @@ public class WmvCharacterDresser
             onFirstApplied = null;
             if (done != null) done();
         }
+        // Still this frame: what the scene describes beyond the character (its mount) goes on with it.
+        Func<WmvIpcClient.CharacterScene, WmvIpcClient.MountAnswer> committed = OnCommitted;
+        WmvIpcClient.MountAnswer mount = committed != null ? committed(scene) : WmvIpcClient.MountAnswer.None(scene);
         ipc.ReportCharacterSceneApplied(BodyFileDataID, Load, scene.revision, "applied", "", merged, attached, missing,
-                                        clock.ElapsedMilliseconds);
+                                        clock.ElapsedMilliseconds, mount.Key, mount.Status, mount.Reason);
     }
 
     void ApplyFist(WmvIpcClient.CharacterScene scene, List<string> missing)
@@ -757,6 +790,10 @@ public class WmvCharacterDresser
         // The host's left-hand mirror negates the model's Y axis (WoWModel::drawModel), which is Unity's X.
         t.localScale = new Vector3(a.mirrored ? -scale : scale, scale, scale);
         part.Runtime.Root.SetActive(a.visible);
+        // A part placed before and moved now (sheathed or drawn, say) is said; a new part's build line says where it went.
+        if (part.PlacementSignature.Length > 0)
+            Log(string.Format("attached part {0} moved to attachment {1} (bone {2}){3}", a.fileDataID, a.attachmentId, a.bone,
+                              a.visible ? "" : ", hidden"));
         part.PlacementSignature = sig;
     }
 

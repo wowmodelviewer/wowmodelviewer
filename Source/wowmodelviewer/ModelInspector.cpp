@@ -546,8 +546,8 @@ wxString ModelInspector::standingGeosetNote() const
   if (g_modelViewer->unityViewportHasNotice())
     return _("The Unity viewport is not showing this model, so geoset changes here are not visible.");
   // No notice: the player draws this model, or is about to (one still starting is assumed to be the
-  // current build, which dresses a character with its items).
-  if (m != canvasModel() && !g_modelViewer->canvasShowsCharacter())
+  // current build, which dresses a character with its items and seats a mounted one on its mount).
+  if (m != canvasModel() && !g_modelViewer->canvasShowsCharacter() && !g_modelViewer->canvasShowsMountedCharacter())
     return _("The Unity viewport does not draw attachments yet, so changes here are not visible.");
   return wxEmptyString;
 }
@@ -614,9 +614,11 @@ void ModelInspector::OnGeosetChecked(wxTreeListEvent & event)
   // notice, a character is dressed by the player -- its items' and merged parts' flags reach it in the
   // character's scene (ModelViewer::SendCharacterSceneToUnity), sent on the next tick or, for a player
   // still starting, when it announces itself -- so only a model that is not a character has attachments
-  // and merged parts the player does not draw.
+  // and merged parts the player does not draw. A character riding a mount is one too: with no notice the
+  // player seats it (protocol 5), and the scene carries the rider's flags and the mount's own.
   const bool viewportShowsContent = g_modelViewer && !g_modelViewer->unityViewportHasNotice();
-  const bool partsNotDrawn = viewportShowsContent && !g_modelViewer->canvasShowsCharacter();
+  const bool partsNotDrawn = viewportShowsContent && !g_modelViewer->canvasShowsCharacter() &&
+                             !g_modelViewer->canvasShowsMountedCharacter();
   if (m != canvasModel())
   {
     if (partsNotDrawn)

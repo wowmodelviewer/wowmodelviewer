@@ -29,6 +29,19 @@
 // What is built is then animated and dressed by other components: WmvM2Animator (bones, following the
 // app's animation selection and transport), WmvMaterialAnimator and WmvEmitterRuntime (animated
 // materials and particles), and for a character WmvCharacterDresser (the host's characterScene).
+// What the player keeps about the model on screen -- the parsed model and its bytes, the selection,
+// the sequence caches, the app's playback state, the display state -- is one WmvModelSlot
+// (WmvModelSlot.cs), and the sequence code (WmvSlotAnimation.cs) takes the slot it acts on.
+//
+// A CHARACTER RIDING A MOUNT (protocol 5) is still the character: the model on screen and its dresser stay
+// the rider's, and the mount its scene describes is a second model, held by WmvMountedScene
+// (WmvMountedScene.cs) -- built beside the character, with the character's body hung from the mount's bone
+// in the frame the scene is applied. A mount for a character still being loaded belongs to that load, as
+// its dresser does, and replaces the mount on screen only when the character does. The two models animate
+// on their own clocks, and the host's animation pushes say which one they are about (a role, and the rider
+// nested in the mount's playback state): HandleModelAnimation and HandleModelAnimationState route them.
+// In the frame the mount under the character changes, the camera and the shadow window are fitted to both
+// models together, or to the character again once it is off (FrameRiddenScene).
 //
 // A WORLD MODEL (loadWoWModel kind "wmo") takes its own pipeline -- root, GFID LOD0 groups, material
 // textures, WmvWmoBuilder -- which lives in WmvMainMapObject.cs. The two jobs supersede each other.
@@ -44,8 +57,29 @@ public partial class WmvMain : MonoBehaviour
     WmvStatusOverlay status;
     WmvOrbitCamera orbit;
 
-    WmvRuntimeModel current;          // the model on screen (disposed when replaced)
+    /// <summary>
+    /// The model on screen: its runtime (disposed when replaced), the parsed model and bytes it was built
+    /// from, the app's selection and playback state for it, the sequence caches and its display state
+    /// (see WmvModelSlot). A load fills this same slot. Its selection, sequence caches, texture ids and
+    /// display state are reset when loadWoWModel arrives and from then on describe the model being
+    /// loaded; its runtime, parsed model, name, FileDataID and textures stay the previous model's until
+    /// AdoptBuilt or AdoptMapObject replaces them.
+    /// </summary>
+    readonly WmvModelSlot currentSlot = new WmvModelSlot();
     WmvCharacterDresser dresser;      // what the character on screen wears, when it is one
+    WmvMountedScene mounted;          // what the character on screen rides, or is about to (protocol 5)
+    WmvSlotAnimation anim;            // the app's animation choice and playback, applied to a slot
+
+    // A RIDDEN MOUNT'S ANIMATION PUSHES (protocol 5) that cannot be applied when they arrive, kept for the frame a
+    // mount goes on or comes off (CommitMount). All of it is dropped with the load it belongs to.
+    WmvIpcClient.AnimationState lastMountState;        // the newest ridden state: its top level is the host's mount
+    bool haveLastMountState;
+    WmvIpcClient.AnimationSelection keptMountPick;     // a selection for a mount still being prepared
+    bool haveKeptMountPick;
+    double riderPickAt = -1.0;        // when the newest role "rider" selection arrived (WmvIpcClient.NowSeconds)
+    bool riderSelectionHeld;          // a selection with no role for the riding character: the host dismounted it
+    Bounds riddenFrame;               // what FrameRiddenScene last fitted the camera to
+    WmvMountProbe mountProbe;         // -wmvMountCheck, while it measures
 
     /// <summary>
     /// Host-composited images by the id scenes name them by, each with its kind ("body", "eyes"). The
@@ -59,33 +93,8 @@ public partial class WmvMain : MonoBehaviour
         new Dictionary<string, KeyValuePair<string, BlpImage>>();
     WmvShadowRig shadowRig;           // renders the cast-shadow depth map (see WmvShadowRig.cs)
 
-    /// <summary>
-    /// The .m2 bytes of the model on screen. Kept because only ONE animation's keyframes are
-    /// parsed at a time -- a track on disk is an array of per-sequence arrays -- so following the
-    /// app to a different animation means parsing these again with a different sequence in mind.
-    /// A creature .m2 is a few hundred KB; re-fetching it over IPC for every dropdown change
-    /// would cost a round-trip to save that.
-    /// </summary>
-    byte[] currentM2Bytes;
-
-    /// <summary>
-    /// The sequence the app says it is showing, or -1 when it has not said. Remembered because the
-    /// push can arrive before the model finishes loading -- it is sent right after loadWoWModel --
-    /// and then it decides which animation the model is built playing, rather than the model
-    /// starting on its own idle and being corrected a frame later.
-    /// </summary>
-    int selectedSequence = -1;
     LoadJob job;                      // in-flight load, if any
-
-    // Kept after a successful load so the SKIN can change without reloading anything. A creature
-    // normally has several skins -- chicken2 has seven -- and WMV lets the user pick among them;
-    // when they do, only the textures behind the existing materials need re-uploading.
-    M2ParsedModel currentModel;
-    string currentName = "WoWModel";
-    int currentFileDataID;
-    readonly Dictionary<int, BlpImage> currentTextures = new Dictionary<int, BlpImage>();
-    readonly Dictionary<int, int> currentTextureIds = new Dictionary<int, int>();   // slot -> FileDataID
-    SkinJob skinJob;                  // in-flight skin change, if any
+    SkinJob skinJob;                  // in-flight skin change of the model on screen, if any
     // The app's playback state for the model being LOADED, kept until its animator exists.
     WmvIpcClient.AnimationState loadState;
     bool haveLoadState;
@@ -94,51 +103,6 @@ public partial class WmvMain : MonoBehaviour
     // build when the load did not ask the host for its textures itself.
     WmvIpcClient.ModelTexturesResponse loadSkin;
     bool haveLoadSkin;
-
-    /// <summary>
-    /// Bone tracks already read, keyed by sequence index.
-    ///
-    /// Reading a sequence's keyframes allocates its track arrays, and doing that again every time
-    /// the user returns to an animation they have already watched is both wasted work and -- more
-    /// to the point -- wasted garbage, which is what a switch is felt as. Cached, going back to a
-    /// sequence costs one dictionary lookup and no allocation at all.
-    ///
-    /// Bounded by what the user actually plays, and strictly lighter than the legacy viewport,
-    /// which reads EVERY sequence's tracks at load and holds them for the model's lifetime.
-    /// </summary>
-    readonly Dictionary<int, M2BoneDef[]> boneTrackCache = new Dictionary<int, M2BoneDef[]>();
-    struct MaterialTrackSet { public M2ColorDef[] Colors; public M2TextureTransform[] Transforms; public M2MaterialTrackSurvey Survey; }
-    readonly Dictionary<int, MaterialTrackSet> materialTrackCache = new Dictionary<int, MaterialTrackSet>();
-
-    /// <summary>
-    /// External .anim files already fetched, keyed by FileDataID. A sequence whose keyframes are
-    /// not in the .m2 needs its .anim bytes; fetching them again on every visit would put a
-    /// network round trip in front of an animation the renderer already has.
-    /// </summary>
-    readonly Dictionary<int, byte[]> animFileCache = new Dictionary<int, byte[]>();
-
-    /// <summary>The .anim fetch in flight, if any: requestId -> the sequence waiting on it.</summary>
-    readonly Dictionary<string, int> pendingAnimFetch = new Dictionary<string, int>();
-
-    /// <summary>
-    /// The last playback state the app sent, whether or not it could be applied when it arrived.
-    ///
-    /// A state message names the sequence it is about, and it used to be dropped whenever the
-    /// renderer was not already on that sequence. That is exactly the moment it matters most: a
-    /// selection that fell back to the idle, or one still waiting on its .anim file, would lose
-    /// the app's play/pause, speed and position entirely and keep whatever the previous animation
-    /// happened to be doing. Kept here, it can be applied to whatever ends up playing.
-    /// </summary>
-    WmvIpcClient.AnimationState lastAppState;
-    bool haveAppState;
-
-    /// <summary>
-    /// The geoset numbers the displayed creature variant switches on, or null when the host has
-    /// not reported any. Two variants of the same creature can differ by GEOMETRY rather than
-    /// texture -- one horse's mane instead of another -- and this is what decides which submeshes
-    /// are drawn. See WmvModelBuilder.GeosetVisible.
-    /// </summary>
-    HashSet<int> currentGeosets;
 
     /// <summary>
     /// The host's per-submesh display state for the model being LOADED, the latest of whatever
@@ -151,13 +115,6 @@ public partial class WmvMain : MonoBehaviour
     bool[] loadSubmeshVisible;
     bool haveLoadSubmeshVisible;
     int loadGeosetRevision;
-
-    /// <summary>
-    /// The item ParticleColor override the host last reported, as three RGB stops, or null when
-    /// the displayed item names none. Kept alongside currentGeosets because it arrives on the
-    /// same two messages and describes the same displayed state.
-    /// </summary>
-    Color[][] currentParticleColor;
 
     /// <summary>Textures still on their way for a skin change. Requests are keyed to the M2
     /// texture slot they will land in.</summary>
@@ -194,6 +151,10 @@ public partial class WmvMain : MonoBehaviour
         public bool SceneTexturesRequested;
         public WmvRuntimeModel Staged;
         public WmvCharacterDresser Dresser;
+        // The mount its scene describes (a character loaded while it rides one: a reconnect, a load while
+        // mounted). Built for this load, never put in place of the mount on screen before the character is
+        // adopted: AdoptBuilt disposes that one with the character it carries.
+        public WmvMountedScene Mount;
         public bool AskedHost;      // getModelTextures was sent: the answer carries the display's geosets
         public readonly Dictionary<string, int> PendingTextures = new Dictionary<string, int>(); // requestId -> slot
         public int TexturesExpected;
@@ -288,6 +249,8 @@ public partial class WmvMain : MonoBehaviour
         status.Set("Starting ...");
 
         ipc = gameObject.AddComponent<WmvIpcClient>();
+        anim = new WmvSlotAnimation(ipc.RequestAssetByFileDataID, s => status.Set(s));
+        anim.SequenceApplied = OnSequenceApplied;
         ipc.OnStatus = s => status.Set(s);
         ipc.OnLoadWoWModel = HandleLoadWoWModel;
         ipc.OnAssetResponse = HandleAssetResponse;
@@ -321,29 +284,37 @@ public partial class WmvMain : MonoBehaviour
         // may already have replaced. What it already wears stays until the new model takes its place.
         if (dresser != null)
             dresser.CancelTarget("superseded by a new load");
+        // ... and the same for a mount being prepared for it. The mount it rides stays, with it.
+        if (mounted != null)
+            mounted.CancelTarget();
 
         // A sequence index means nothing across models -- entry 14 is a different animation in
         // each -- so forget the previous one. The app pushes its selection for the NEW model right
         // after this message, so the value is refilled before the .m2 arrives to be parsed.
-        selectedSequence = -1;
-        currentM2Bytes = null;
+        currentSlot.SelectedSequence = -1;
+        currentSlot.M2Bytes = null;
         // Sequence indices and file ids mean nothing across models.
-        boneTrackCache.Clear();
-        materialTrackCache.Clear();
-        animFileCache.Clear();
-        pendingAnimFetch.Clear();
-        haveAppState = false;
+        currentSlot.BoneTrackCache.Clear();
+        currentSlot.MaterialTrackCache.Clear();
+        currentSlot.AnimFileCache.Clear();
+        currentSlot.AbandonAnimFetches();
+        currentSlot.HaveAppState = false;
         haveLoadState = false;
         haveLoadSkin = false;
+        // Nor do a ridden mount's pushes kept for a mount going on or a character coming off (CommitMount).
+        haveLastMountState = false;
+        haveKeptMountPick = false;
+        riderPickAt = -1.0;
+        riderSelectionHeld = false;
         // Neither does the previous model's DISPLAY state, and it was being carried across: the
         // geoset set chosen for the last creature was handed to the next Build as its own, hiding
         // submeshes -- or the whole model -- on any file the host is never asked to describe
         // (one whose textures all name files). Same for the particle recolour, an in-flight skin
         // change and the texture ids the skin change reads.
-        currentGeosets = null;
-        currentParticleColor = null;
+        currentSlot.Geosets = null;
+        currentSlot.ParticleColor = null;
         skinJob = null;
-        currentTextureIds.Clear();
+        currentSlot.TextureIds.Clear();
         // A push still waiting for the previous load is about a model that will never be built.
         if (haveLoadSubmeshVisible && loadGeosetRevision > 0 && job != null)
             ipc.ReportGeosetsApplied(job.FileDataID, loadGeosetRevision, "rejected",
@@ -385,6 +356,17 @@ public partial class WmvMain : MonoBehaviour
             dresser.OnAsset(r);
             return;
         }
+        // A mount's own requests: its .m2, skeleton, .anim, skin and textures, and the .anim of the riding sequence.
+        if (job != null && job.Mount != null && job.Mount.Owns(r.requestId))
+        {
+            job.Mount.OnAsset(r);
+            return;
+        }
+        if (mounted != null && mounted.Owns(r.requestId))
+        {
+            mounted.OnAsset(r);
+            return;
+        }
         // A skin change is answered by the same assetResponse messages as a load, so claim ours
         // before the load path sees them.
         if (skinJob != null && skinJob.Pending.ContainsKey(r.requestId))
@@ -392,13 +374,24 @@ public partial class WmvMain : MonoBehaviour
             OnSkinTextureBytes(r);
             return;
         }
-        // An external .anim answer belongs to an animation change, not to a load.
+        // An external .anim answer belongs to an animation change, not to a load -- of the model on screen, or of the
+        // mount it rides.
         int waitingSequence;
-        if (pendingAnimFetch.TryGetValue(r.requestId, out waitingSequence))
+        if (currentSlot.PendingAnimFetch.TryGetValue(r.requestId, out waitingSequence))
         {
-            OnAnimFileBytes(r, waitingSequence);
+            anim.OnAnimFileBytes(currentSlot, r, waitingSequence);
             return;
         }
+        if (mounted != null && mounted.Mount.PendingAnimFetch.TryGetValue(r.requestId, out waitingSequence))
+        {
+            anim.OnAnimFileBytes(mounted.Mount, r, waitingSequence);
+            return;
+        }
+        // A .anim answer for a slot that was given another model while it was out: claimed and dropped here, so it is
+        // never read as an answer to the load in flight.
+        if (currentSlot.AbandonedAnimFetch.Remove(r.requestId) ||
+            (mounted != null && mounted.Mount.AbandonedAnimFetch.Remove(r.requestId)))
+            return;
         if (job == null)
             return;
 
@@ -431,8 +424,8 @@ public partial class WmvMain : MonoBehaviour
         {
             long t0 = job.Clock.ElapsedMilliseconds;
             job.M2Bytes = r.data;
-            job.ParsedSequence = selectedSequence;
-            job.Model = M2Parser.Parse(r.data, selectedSequence);
+            job.ParsedSequence = currentSlot.SelectedSequence;
+            job.Model = M2Parser.Parse(r.data, currentSlot.SelectedSequence);
             job.ParseMs += job.Clock.ElapsedMilliseconds - t0;
             if (job.FileDataID <= 0) job.FileDataID = r.fileDataID;
         }
@@ -486,8 +479,9 @@ public partial class WmvMain : MonoBehaviour
         long t0 = job.Clock.ElapsedMilliseconds;
         try
         {
-            job.ParsedSequence = selectedSequence;
-            M2Parser.ApplySkeleton(job.Model, job.SkelBytes, parentReply && r.ok ? r.data : null, selectedSequence);
+            job.ParsedSequence = currentSlot.SelectedSequence;
+            M2Parser.ApplySkeleton(job.Model, job.SkelBytes, parentReply && r.ok ? r.data : null,
+                                   currentSlot.SelectedSequence);
             Debug.Log(string.Format("WMV: skeleton {0} applied: {1} bone(s), {2} sequence(s), {3} attachment(s){4}",
                                     job.Model.SkeletonFileDataID, job.Model.Bones.Length, job.Model.Sequences.Length,
                                     job.Model.Attachments.Length,
@@ -534,7 +528,7 @@ public partial class WmvMain : MonoBehaviour
             if (t.FileDataID > 0)
             {
                 direct.Add(new KeyValuePair<int, int>(i, t.FileDataID));
-                currentTextureIds[i] = t.FileDataID;   // the M2 named this one itself
+                currentSlot.TextureIds[i] = t.FileDataID;   // the M2 named this one itself
             }
             else if (t.IsReplaceable) needsHost = true;
         }
@@ -576,7 +570,7 @@ public partial class WmvMain : MonoBehaviour
         foreach (var f in files)
         {
             job.PendingTextures[ipc.RequestAssetByFileDataID(f.Value)] = f.Key;
-            currentTextureIds[f.Key] = f.Value;
+            currentSlot.TextureIds[f.Key] = f.Value;
         }
         if (files.Count == 0)
             BuildIfReady();
@@ -633,23 +627,368 @@ public partial class WmvMain : MonoBehaviour
     /// </summary>
     void HandleCharacterScene(WmvIpcClient.CharacterScene scene)
     {
+        // The mount first, in both cases: the dresser may apply the scene the moment it is retargeted, and a scene
+        // with a mount is only applied once its mount is ready (MountReady).
         if (job != null && job.Character && scene.fileDataID == job.FileDataID)
         {
             job.Scene = scene;
+            RetargetMount(ref job.Mount, scene);
             if (job.Dresser != null)
                 job.Dresser.Retarget(scene);
             else if (job.Skin != null)
                 RequestCharacterBodyTextures();
             return;
         }
-        if (job == null && dresser != null && current != null && scene.fileDataID == currentFileDataID)
+        if (job == null && dresser != null && currentSlot.Runtime != null && scene.fileDataID == currentSlot.FileDataID)
         {
+            RetargetMount(ref mounted, scene);
             dresser.Retarget(scene);
             return;
         }
         // Matches no load, so no load serial.
         ipc.ReportCharacterSceneApplied(scene.fileDataID, 0, scene.revision, "rejected",
-                                        "not the character on screen or being loaded", 0, 0, null, 0);
+                                        "not the character on screen or being loaded", 0, 0, null, 0,
+                                        WmvIpcClient.MountKeyOf(scene), "none", "");
+    }
+
+    /// <summary>Hand a scene's mount to the mounted scene of the character it belongs to -- created for the first
+    /// mount -- or, for a scene without one, drop the mount being prepared there. The mount on screen stays until the
+    /// scene without it is applied: that is the dismount (CommitMount).</summary>
+    void RetargetMount(ref WmvMountedScene holder, WmvIpcClient.CharacterScene scene)
+    {
+        if (WmvIpcClient.HasMount(scene))
+        {
+            if (holder == null)
+                holder = new WmvMountedScene(ipc.RequestAssetByFileDataID, s => Debug.Log("WMV: " + s), RepumpMountWaiters);
+            holder.Retarget(scene.mount, scene.receivedSeconds);
+        }
+        else if (holder != null)
+        {
+            holder.CancelTarget();
+        }
+    }
+
+    /// <summary>A mount's file arrived: a dresser whose scene waits on it (CommitGate) looks again.</summary>
+    void RepumpMountWaiters()
+    {
+        if (job != null && job.Dresser != null)
+            job.Dresser.Repump();
+        if (dresser != null)
+            dresser.Repump();
+    }
+
+    /// <summary>
+    /// The CommitGate of a character's dresser: may its scene be applied now? Always, for a scene without a mount --
+    /// exactly as before mounts existed. For one with a mount, once the mount is built (or failed for good) and the
+    /// keys of the character's riding sequence are here, so the character, the mount and the pose go on together.
+    /// The load's dresser waits on the load's mount, the dresser on screen on the mount on screen.
+    /// </summary>
+    bool MountReady(WmvCharacterDresser from, WmvIpcClient.CharacterScene scene)
+    {
+        if (!WmvIpcClient.HasMount(scene))
+            return true;
+        if (job != null && job.Dresser == from)
+            return job.Mount == null || job.Mount.ReadyFor(scene.mount, currentSlot, job.Model);
+        if (from == dresser)
+            return mounted == null || mounted.ReadyFor(scene.mount, currentSlot, currentSlot.Model);
+        return true;
+    }
+
+    /// <summary>
+    /// The OnCommitted of a character's dresser, in the frame its scene is applied (for a load, after AdoptStaged put
+    /// the character on screen): seat the character on the scene's mount, swap mounts, or take it off the one it
+    /// rides; start both clocks when a different mount went on, and play the character's own selection when it came
+    /// off; fit the view to what the character is now when the mount under it changed (FrameRiddenScene); and say what
+    /// became of the mount for the answer.
+    /// </summary>
+    WmvIpcClient.MountAnswer CommitMount(WmvCharacterDresser from, WmvIpcClient.CharacterScene scene)
+    {
+        if (from != dresser || dresser.Body == null)
+            return WmvIpcClient.MountAnswer.None(scene);     // not the character on screen (its adoption failed)
+        if (!WmvIpcClient.HasMount(scene))
+        {
+            string rode = mounted != null && mounted.Mount.Runtime != null ? mounted.Key : null;
+            WmvIpcClient.MountAnswer none = mounted != null ? mounted.Dismount() : WmvIpcClient.MountAnswer.None(scene);
+            haveKeptMountPick = false;
+            if (riderSelectionHeld)
+                ApplyHeldRiderSelection();
+            if (rode != null)
+                FrameRiddenScene("the character came off " + rode);
+            string key = WmvIpcClient.MountKeyOf(scene);
+            if (key.Length > 0)
+            {
+                // A key with no file: nothing the player can fetch. Said, rather than read as no mount.
+                Debug.LogWarning("WMV: mount: " + key + " names no fileDataID -- the character is shown without it");
+                return new WmvIpcClient.MountAnswer { Key = key, Status = "failed", Reason = "the mount names no fileDataID" };
+            }
+            return none;
+        }
+        if (mounted == null)
+        {
+            // Every scene with a mount reaches its mounted scene before its dresser (HandleCharacterScene).
+            Debug.LogWarning("WMV: mount: " + scene.mount.key + " reached no mounted scene -- the character is shown without it");
+            return new WmvIpcClient.MountAnswer { Key = scene.mount.key, Status = "failed", Reason = "the mount was never prepared" };
+        }
+        bool newMount;
+        double describedAt = mounted.PreparingDescribedAt;   // read before the commit takes the prepared mount on screen
+        WmvRuntimeModel mountBefore = mounted.Mount.Runtime;
+        string keyBefore = mountBefore != null ? mounted.Key : "";
+        WmvIpcClient.MountAnswer answer = mounted.Commit(scene.mount, dresser.Body, out newMount);
+        if (newMount)
+        {
+            riderSelectionHeld = false;
+            double mountRanMs = StartMountClock(scene.mount);
+            StartRidingSequence(scene.mount.riderSequenceIndex, describedAt, scene.receivedSeconds, mountRanMs);
+            PoseMountedAtPinnedTime();
+        }
+        // After the clocks and any pinned pose: the character's box is carried through the mount bone as it now stands.
+        if (mounted.Mount.Runtime != mountBefore)
+            FrameRiddenScene(mounted.Mount.Runtime != null
+                             ? mounted.Key + " went on" + (keyBefore.Length > 0 ? " in place of " + keyBefore : "")
+                             : scene.mount.key + " could not be built, and the character came off " + keyBefore);
+        else if (mounted.RiddenFileDataID != 0)
+            RequestViewportShot();                           // what the character wears changed on its mount: the view stays
+        return answer;
+    }
+
+    /// <summary>A sequence switch completed on a slot (WmvSlotAnimation.SequenceApplied). While the character rides, a
+    /// capture waits for a switch on either model.</summary>
+    void OnSequenceApplied(WmvModelSlot slot)
+    {
+        if (mounted != null && mounted.RiddenFileDataID != 0 && (slot == currentSlot || slot == mounted.Mount))
+            RequestViewportShot();
+    }
+
+    /// <summary>
+    /// How many times the view has been fitted to what is on screen: a model or a world model adopted, and every change
+    /// of the mount under a character (FrameRiddenScene). runtimeState reports it, which is how a lifecycle test tells
+    /// a mount change -- which fits the view exactly once -- from an appearance change on a riding character, which must
+    /// not move the camera at all. A capture that has to ask for its size again re-fits the SAME box
+    /// (CaptureViewportWhenSettled) and is deliberately not counted: it follows the display, not what is on screen.
+    /// </summary>
+    public int ViewFramings { get; private set; }
+
+    /// <summary>
+    /// The frame the mount under the character changes -- a mount goes on, another replaces it, the character comes off
+    /// (a dismount, or a new mount that could not be built taking it off the one it rode): the camera and the shadow
+    /// window are fitted again, as they are for a model put on screen, to the mount and the character together while it
+    /// rides (WmvMountedScene.UnionBounds) and to the character alone once it is off. Not for a newer description of the
+    /// same mount -- an appearance change must not move the view -- and never per frame: an animation that later carries
+    /// either model past the box is not followed. -wmvFrameBounds still pins the box; WMV_VIEWPORT_ORBIT re-aims the
+    /// camera after it; -wmvLightCheck measures (in the next frame), -wmvAllocCheck counts and WMV_VIEWPORT_SHOT captures
+    /// what is now on screen, and -wmvMountCheck measures the frames that follow while the character rides.
+    /// </summary>
+    void FrameRiddenScene(string what)
+    {
+        WmvRuntimeModel body = dresser != null ? dresser.Body : null;
+        if (body == null || body.Root == null)
+            return;
+        ViewFramings++;
+        Bounds own;
+        bool riding = false;
+        if (mounted != null)
+            riding = mounted.UnionBounds(body, out own);     // the character's own box when it rides nothing
+        else
+            own = WmvMountedScene.WorldBounds(body.Bounds, body.Root.transform.localToWorldMatrix);
+        Bounds frame = own;
+        if (WmvModelBuilder.Debug_.HasFrameBounds)
+        {
+            Debug.Log(string.Format("WMV: mount: bounds pinned by -wmvFrameBounds for framing and the light rig ({0}: centre {1} extents {2})",
+                                    riding ? "the mount and the character together" : "the character's own", own.center, own.extents));
+            frame = WmvModelBuilder.Debug_.FrameBounds;
+        }
+        orbit.Frame(frame);
+        KeepFramed(frame);
+        ApplyViewportOrbitOverride("mount: ");
+        if (shadowRig != null)
+            shadowRig.SetBounds(frame);
+        riddenFrame = frame;
+        Debug.Log(string.Format("WMV: mount: {0} -- the view is fitted to {1}: centre {2} extents {3}, distance {4:F2}, yaw {5} pitch {6}",
+                                what, riding ? "the mount and the character together" : "the character alone", frame.center,
+                                frame.extents, orbit.distance, orbit.yaw, orbit.pitch));
+
+        if (WmvModelBuilder.Debug_.AllocCheck)
+            allocProbe = new AllocProbe { StartFrame = Time.frameCount + 10 };
+        if (WmvModelBuilder.Debug_.LightCheck)
+            StartCoroutine(ReportLightingNextFrame(own, riding, mounted != null ? mounted.Mount.Runtime : null));
+        RequestViewportShot();
+        if (riding)
+            StartMountProbe(what);
+    }
+
+    /// <summary>
+    /// -wmvLightCheck after the mount under the character changed, in the next frame rather than in the one the mount went
+    /// on: the mount a swap replaces is disposed in that frame, and Object.Destroy removes its objects only at the end of
+    /// it, so a check rendered then drew the old mount too (measured: the Highland Drake put on in place of the Brutosaur
+    /// read a mask of 31,665 px when checked in its commit frame, and 2,451 px checked a frame later -- the same mounts,
+    /// box and camera). A mount changed again in between is not measured.
+    /// </summary>
+    System.Collections.IEnumerator ReportLightingNextFrame(Bounds framed, bool riding, WmvRuntimeModel mountThen)
+    {
+        yield return null;
+        WmvRuntimeModel mountNow = mounted != null ? mounted.Mount.Runtime : null;
+        if (mountNow != mountThen || currentSlot.Runtime == null)
+        {
+            Debug.Log("WMV: lightcheck: the mount under the character changed again before the check ran -- not measured");
+            yield break;
+        }
+        ReportLighting(framed, riding);
+    }
+
+    /// <summary>-wmvMountCheck: measure the frames that follow on the mount on screen and the character riding it
+    /// (WmvMountProbe), in place of a window still running.</summary>
+    void StartMountProbe(string what)
+    {
+        if (WmvModelBuilder.Debug_.MountCheckFrames <= 0 || mounted == null || mounted.Rider == null ||
+            mounted.Mount.Runtime == null || dresser == null || dresser.Body == null)
+            return;
+        if (mountProbe != null)
+            mountProbe.Stop("a new window begins: " + what);
+        mountProbe = WmvMountProbe.Begin(gameObject, mounted.Key + " (" + what + ")", mounted.Mount.Runtime, dresser.Body,
+                                         riddenFrame, WmvModelBuilder.Debug_.MountCheckFrames,
+                                         WmvModelBuilder.Debug_.MountCheckMountFirst, s => Debug.Log("WMV: " + s));
+    }
+
+    /// <summary>
+    /// The mount's clock in the frame it goes on. The commit started it at its first frame, playing at 1x, as the host
+    /// starts the fresh model the mount choice loads; the host has run it since, and what it said about it is newer: the
+    /// newest ridden state naming this mount's file (sampled after the host put that mount on) is where the clock starts,
+    /// projected to now, and a selection made for it while it was being prepared is switched to, through the slot's own
+    /// caches or a .anim fetched once, as any switch is. Its .anim files are then fetched up front, as the character's
+    /// are. Returns how long that clock says the host has run the mount on the sequence the scene started it on -- the
+    /// position it started at over its speed -- or -1 when it did not start from such a state.
+    /// </summary>
+    double StartMountClock(WmvIpcClient.SceneMount described)
+    {
+        WmvModelSlot mount = mounted.Mount;
+        int pick = haveKeptMountPick && keptMountPick.load == dresser.Load && keptMountPick.fileDataID == mount.FileDataID
+                   ? keptMountPick.sequenceIndex : -1;
+        haveKeptMountPick = false;
+        if (mount.Runtime == null || mount.Model == null)
+            return -1.0;                                     // it could not be built
+        if (haveLastMountState && lastMountState.load == dresser.Load && lastMountState.fileDataID == mount.FileDataID)
+        {
+            mount.LastAppState = lastMountState;
+            mount.HaveAppState = true;
+        }
+        double ranMs = -1.0;
+        if (pick >= 0 && pick < mount.Model.Sequences.Length && pick != mount.Model.AnimatedSequence)
+        {
+            Debug.Log("WMV: mount: " + mounted.Key + " was given sequence " + pick + " while it was prepared -- switching to it");
+            mount.SelectedSequence = pick;
+            try { anim.SwitchToSequence(mount, pick); }
+            catch (System.Exception e)
+            {
+                Debug.LogWarning("WMV: mount: switching " + mounted.Key + " to sequence " + pick + " failed: " +
+                                 e.GetType().Name + ": " + e.Message);
+            }
+        }
+        else if (mount.HaveAppState)
+        {
+            float at = WmvSlotAnimation.StartClock(mount, 0.0, true, 1f);
+            WmvIpcClient.AnimationState s = mount.LastAppState;
+            if (s.sequenceIndex == described.sequenceIndex && s.sequenceIndex == mount.Model.AnimatedSequence && s.speed > 0f &&
+                s.receivedSeconds > 0.0)
+                ranMs = at / s.speed;
+            Debug.Log(string.Format("WMV: mount: {0} plays sequence {1} from the app's state for it: {2} at {3:F0} ms, speed {4:0.##}",
+                                    mounted.Key, mount.Model.AnimatedSequence, s.playing ? "playing" : "paused", at, s.speed));
+        }
+        anim.PrefetchAnimFiles(mount);
+        return ranMs;
+    }
+
+    /// <summary>
+    /// The character's clock when a different mount goes on: the host stops the rider, sets the sequence the mount
+    /// choice selected for it (riderSequenceIndex -- the host's own result, applied as given) at its first frame, and
+    /// lets the canvas tick run it with the mount's: playing, at the rider's own speed. Its keys are already here
+    /// (MountReady), so the switch completes in this frame. A state for that sequence the host sent after the first
+    /// scene describing this mount arrived (describedAt) is newer than that restart -- a heartbeat during a long build,
+    /// or any state of a character loaded while it rides -- so the clock starts from it. Without one, the character is
+    /// started in step with the mount: the host set both at their first frames in the one mount choice and has run both
+    /// on the same ticks since, so it is as far into its sequence as the mount's clock says the mount is (mountRanMs,
+    /// StartMountClock), at its own speed; a state from before that scene is about the clip before, and only its speed
+    /// carries over. A selection the character was given after this scene arrived (sceneArrivedAt) is newer than
+    /// riderSequenceIndex, and stays.
+    /// </summary>
+    void StartRidingSequence(int sequence, double describedAt, double sceneArrivedAt, double mountRanMs)
+    {
+        WmvModelSlot rider = currentSlot;
+        if (sequence < 0 || rider.Model == null || rider.Runtime == null || sequence >= rider.Model.Sequences.Length)
+            return;
+        if (riderPickAt > sceneArrivedAt)
+        {
+            Debug.Log("WMV: mount: the character keeps sequence " + rider.SelectedSequence + ", selected for it after " +
+                      "this scene was sent, rather than the riding sequence " + sequence);
+            return;
+        }
+        rider.SelectedSequence = sequence;
+        if (rider.Runtime.Animator == null || rider.Runtime.Animator.SequenceIndex != sequence ||
+            rider.Model.AnimatedSequence != sequence)
+        {
+            try { anim.SwitchToSequence(rider, sequence); }
+            catch (System.Exception e)
+            {
+                Debug.LogWarning("WMV: mount: switching the character to its riding sequence " + sequence + " failed: " +
+                                 e.GetType().Name + ": " + e.Message);
+            }
+        }
+        WmvM2Animator animator = rider.Runtime.Animator;
+        if (animator != null && rider.Model.AnimatedSequence == sequence)
+        {
+            bool newer = rider.HaveAppState && rider.LastAppState.sequenceIndex == sequence &&
+                         rider.LastAppState.receivedSeconds >= describedAt;
+            float at;
+            string from;
+            if (!newer && mountRanMs >= 0.0 && mounted != null && mounted.Mount.HaveAppState)
+            {
+                at = WmvSlotAnimation.StartInStep(rider, mountRanMs, mounted.Mount.LastAppState.playing, animator.Speed);
+                from = "in step with the mount, at " + at.ToString("F0") + " ms";
+            }
+            else
+            {
+                at = WmvSlotAnimation.StartClock(rider, describedAt, true, animator.Speed);
+                from = newer ? "from the app's state for it, at " + at.ToString("F0") + " ms" : "from its first frame";
+            }
+            Debug.Log("WMV: mount: the character plays its riding sequence " + sequence + " (animID " +
+                      rider.Model.Sequences[sequence].AnimId + ") " + from);
+        }
+    }
+
+    /// <summary>
+    /// The frame the character comes off its mount: the selection the host made for it as it took it off, held until
+    /// now (HandleModelAnimation), is played, with the state the host sent for it -- so the character's own idle starts
+    /// on the ground, not on the mount's back the frame before.
+    /// </summary>
+    void ApplyHeldRiderSelection()
+    {
+        riderSelectionHeld = false;
+        int sequence = currentSlot.SelectedSequence;
+        if (sequence < 0 || currentSlot.Runtime == null)
+            return;
+        Debug.Log("WMV: anim: the character is off its mount -- sequence " + sequence + ", selected by the host as it took it off");
+        try { anim.SelectSequence(currentSlot, sequence, false); }
+        catch (System.Exception e)
+        {
+            Debug.LogWarning("WMV: anim: switching the dismounted character to sequence " + sequence + " failed: " +
+                             e.GetType().Name + ": " + e.Message);
+        }
+        PoseMountedAtPinnedTime();
+    }
+
+    /// <summary>
+    /// -wmvAnimTime holds every clock at one instant. When a mount goes on or the character comes off one, the models are
+    /// posed there in that frame, before anything measures them: the mount first, then the character, whose billboard
+    /// bones take their facing under the bone the mount's pose has just placed (WmvSlotAnimation.PoseMountedAt).
+    /// </summary>
+    void PoseMountedAtPinnedTime()
+    {
+        float t = WmvModelBuilder.Debug_.AnimTime;
+        if (t < 0f)
+            return;
+        WmvRuntimeModel mount = mounted != null ? mounted.Mount.Runtime : null;
+        WmvSlotAnimation.PoseMountedAt(mount, currentSlot.Runtime, t);
+        Debug.Log("WMV: anim: -wmvAnimTime " + t + " ms: " +
+                  (mount != null ? "the mount posed at it, then the character" : "the character posed at it"));
     }
 
     /// <summary>Drop a character load that will not be shown, and everything it built. Its scene was
@@ -658,10 +997,13 @@ public partial class WmvMain : MonoBehaviour
     {
         if (job == null || !job.Character)
             return;
+        if (job.Mount != null) job.Mount.Dispose();
         if (job.Dresser != null) job.Dresser.Dispose();
         if (job.Staged != null) job.Staged.Dispose();
         if (job.Scene != null)
-            ipc.ReportCharacterSceneApplied(job.FileDataID, job.Load, job.Scene.revision, "superseded", reason, 0, 0, null, 0);
+            ipc.ReportCharacterSceneApplied(job.FileDataID, job.Load, job.Scene.revision, "superseded", reason, 0, 0, null, 0,
+                                            WmvIpcClient.MountKeyOf(job.Scene), "none", "");
+        job.Mount = null;
         job.Dresser = null;
         job.Staged = null;
     }
@@ -671,8 +1013,8 @@ public partial class WmvMain : MonoBehaviour
         if (job == null || r.requestId != job.PendingTextureList)
             return;
         job.PendingTextureList = null;
-        AdoptGeosets(r);
-        AdoptParticleColor(r);
+        AdoptGeosets(currentSlot, r);
+        AdoptParticleColor(currentSlot, r);
         if (r.hasSubmeshVisible)
             KeepLoadSubmeshVisible(r.submeshVisible, 0);
 
@@ -692,7 +1034,7 @@ public partial class WmvMain : MonoBehaviour
                 int fdid = PinTexture(slot, t.fileDataID);
                 job.TexturesExpected++;
                 job.PendingTextures[ipc.RequestAssetByFileDataID(fdid)] = slot;
-                currentTextureIds[slot] = fdid;
+                currentSlot.TextureIds[slot] = fdid;
                 Debug.Log("WMV: texture slot " + slot + " (type " + t.type + ") -> fileDataID " +
                           fdid + " (" + (fdid == t.fileDataID ? t.source
                                          : "-wmvSkinTexture, host offered " + t.fileDataID) + ")");
@@ -755,8 +1097,8 @@ public partial class WmvMain : MonoBehaviour
             // particles take; it used to be dropped, and every geoset was drawn.
             if (haveLoadSkin && !job.AskedHost)
             {
-                AdoptGeosets(loadSkin);
-                AdoptParticleColor(loadSkin);
+                AdoptGeosets(currentSlot, loadSkin);
+                AdoptParticleColor(currentSlot, loadSkin);
             }
             haveLoadSkin = false;
 
@@ -767,7 +1109,7 @@ public partial class WmvMain : MonoBehaviour
             var built = WmvModelBuilder.Build(job.Model, job.Skin, job.Textures,
                                               string.IsNullOrEmpty(job.Model.Name) ? "WoWModel" : job.Model.Name,
                                               s => Debug.LogWarning("WMV: " + s),
-                                              job.Character ? null : currentGeosets,
+                                              job.Character ? null : currentSlot.Geosets,
                                               buildFlags);
             job.BuildMs = job.Clock.ElapsedMilliseconds - t0;
             if (job.Character)
@@ -781,6 +1123,10 @@ public partial class WmvMain : MonoBehaviour
                 built.Root.SetActive(false);
                 job.Staged = built;
                 job.Dresser = new WmvCharacterDresser(ipc, job.Load, ImageByHash, s => Debug.Log("WMV: " + s));
+                // Before BeginStaged, which may apply the scene at once: a scene with a mount waits for it.
+                WmvCharacterDresser dressedBy = job.Dresser;
+                dressedBy.CommitGate = scene => MountReady(dressedBy, scene);
+                dressedBy.OnCommitted = scene => CommitMount(dressedBy, scene);
                 LoadJob staged = job;
                 staging = true;
                 Debug.Log(string.Format("WMV: character body built in {0} ms ({1} submeshes, {2} materials) -- dressing it",
@@ -823,13 +1169,19 @@ public partial class WmvMain : MonoBehaviour
             return;                                  // superseded while it was being dressed
         WmvRuntimeModel built = staged.Staged;
         WmvCharacterDresser dressedBy = staged.Dresser;
+        WmvMountedScene mount = staged.Mount;
         staged.Staged = null;
         staged.Dresser = null;
+        staged.Mount = null;
         try
         {
             built.Root.SetActive(true);
             AdoptBuilt(built);
             dresser = dressedBy;
+            // The load's own mount replaces the one on screen only now, after AdoptBuilt disposed that one with the
+            // character it carried; the dresser's commit, still in this frame, seats the new character on it.
+            mounted = mount;
+            mount = null;
             int renderers, materials, textures;
             dresser.Measure(out renderers, out materials, out textures);
             Debug.Log(string.Format("WMV: character on screen {0} ms after the load began: body {1} material(s), " +
@@ -839,6 +1191,7 @@ public partial class WmvMain : MonoBehaviour
         }
         catch (System.Exception e)
         {
+            if (mount != null) mount.Dispose();          // never adopted: nothing else holds it
             Fail("character adoption failed: " + e.GetType().Name + ": " + e.Message);
             return;
         }
@@ -849,23 +1202,26 @@ public partial class WmvMain : MonoBehaviour
     void AdoptBuilt(WmvRuntimeModel built)
     {
         {
+            // A mount the previous character rode goes first, and it takes the character off before its root is
+            // destroyed (WmvMountedScene.Dispose); a mount built for THIS load is not it (LoadJob.Mount).
+            if (mounted != null) { mounted.Dispose(); mounted = null; }
             // What the previous character wore is parented to its body, which goes next.
             if (dresser != null) { dresser.Dispose(); dresser = null; }
-            if (current != null) current.Dispose();      // never leak the previous model
-            DisposeMapObject();                          // ... nor a world model it replaces
-            current = built;
+            if (currentSlot.Runtime != null) currentSlot.Runtime.Dispose();   // never leak the previous model
+            DisposeMapObject();                                               // ... nor a world model it replaces
+            currentSlot.Runtime = built;
             // The emitters were created by that build; the override arrived with the textures.
-            ApplyParticleColor();
+            ApplyParticleColor(currentSlot);
             if (placeholder != null) placeholder.SetActive(false);
 
             // Keep what a later skin change needs: the parsed model (to map a texture type onto
             // slots) and the decoded textures (so untouched slots are not re-fetched).
-            currentModel = job.Model;
-            currentM2Bytes = job.M2Bytes;
-            currentName = string.IsNullOrEmpty(job.Model.Name) ? "WoWModel" : job.Model.Name;
-            currentFileDataID = job.FileDataID;
-            currentTextures.Clear();
-            foreach (var kv in job.Textures) currentTextures[kv.Key] = kv.Value;
+            currentSlot.Model = job.Model;
+            currentSlot.M2Bytes = job.M2Bytes;
+            currentSlot.Name = string.IsNullOrEmpty(job.Model.Name) ? "WoWModel" : job.Model.Name;
+            currentSlot.FileDataID = job.FileDataID;
+            currentSlot.Textures.Clear();
+            foreach (var kv in job.Textures) currentSlot.Textures[kv.Key] = kv.Value;
             skinJob = null;
 
             // THE APP'S PLAYBACK STATE FOR THIS MODEL, pushed while it was still loading. Without
@@ -873,21 +1229,21 @@ public partial class WmvMain : MonoBehaviour
             // the first heartbeat -- a second later -- snaps it forward by however long the load
             // took: the visible restart on every switch. The position is projected by the time
             // the push has been waiting, at the app's own speed, so the two clocks meet.
-            if (current.Animator != null && haveLoadState)
+            if (currentSlot.Runtime.Animator != null && haveLoadState)
             {
-                lastAppState = loadState;
-                haveAppState = true;
-                int playingSeq = currentModel.AnimatedSequence;
+                currentSlot.LastAppState = loadState;
+                currentSlot.HaveAppState = true;
+                int playingSeq = currentSlot.Model.AnimatedSequence;
                 if (loadState.sequenceIndex < 0 || loadState.sequenceIndex == playingSeq)
                 {
                     float elapsed = loadState.playing && loadStateAt > 0.0
                         ? (float)((WmvIpcClient.NowSeconds - loadStateAt) * 1000.0) * Mathf.Max(loadState.speed, 0f)
                         : 0f;
-                    current.Animator.StartFromApp(loadState.playing, loadState.timeMs + elapsed, loadState.speed);
+                    currentSlot.Runtime.Animator.StartFromApp(loadState.playing, loadState.timeMs + elapsed, loadState.speed);
                 }
                 else
                 {
-                    current.Animator.SetTransportOnly(loadState.playing, loadState.speed);
+                    currentSlot.Runtime.Animator.SetTransportOnly(loadState.playing, loadState.speed);
                 }
             }
 
@@ -900,22 +1256,22 @@ public partial class WmvMain : MonoBehaviour
             // go through the ordinary switch, which fetches the .anim when there is one and then
             // applies the app's playback state. A selection already playing is not touched, and one
             // the parse fell back from for a reason a second read cannot change is not read again.
-            int selected = selectedSequence;
-            if (selected >= 0 && selected != currentModel.AnimatedSequence && !WmvModelBuilder.Debug_.NoAnim &&
-                (selected != job.ParsedSequence || M2Parser.ExternalAnimFileId(currentModel, selected) != 0))
+            int selected = currentSlot.SelectedSequence;
+            if (selected >= 0 && selected != currentSlot.Model.AnimatedSequence && !WmvModelBuilder.Debug_.NoAnim &&
+                (selected != job.ParsedSequence || M2Parser.ExternalAnimFileId(currentSlot.Model, selected) != 0))
             {
-                // The switch applies the app's state from lastAppState; the push kept for this load is the
+                // The switch applies the app's state from LastAppState; the push kept for this load is the
                 // newest word on it (the block above has already taken it when the build made an animator).
                 if (haveLoadState)
                 {
-                    lastAppState = loadState;
-                    haveAppState = true;
+                    currentSlot.LastAppState = loadState;
+                    currentSlot.HaveAppState = true;
                 }
                 Debug.Log("WMV: anim: sequence " + selected + " was selected while the model was loading -- switching to it");
                 // Contained here, unlike a pick on a model already on screen: this runs in the middle of the
                 // adoption, and anything escaping it would leave the model unframed and report a character
                 // that IS on screen as a failed load. The load completes and the failed switch is logged.
-                try { SwitchToSequence(selected); }
+                try { anim.SwitchToSequence(currentSlot, selected); }
                 catch (System.Exception e)
                 {
                     Debug.LogWarning("WMV: anim: switching to sequence " + selected + " failed: " +
@@ -928,7 +1284,7 @@ public partial class WmvMain : MonoBehaviour
             // animation switch ever waits on a round trip. They arrive while the user is looking
             // at the model, not while they are waiting for the animation they just picked. After
             // the switch above, so a file that switch is already fetching is not asked for twice.
-            PrefetchAnimFiles();
+            anim.PrefetchAnimFiles(currentSlot);
 
             // -wmvFrameBounds pins EVERYTHING that frames from the bounds -- the orbit camera, the
             // light rig and the light check -- so two builds that disagree about the bounds
@@ -939,7 +1295,10 @@ public partial class WmvMain : MonoBehaviour
                                         built.Bounds.center, built.Bounds.extents));
                 built.Bounds = WmvModelBuilder.Debug_.FrameBounds;
             }
+            ViewFramings++;
             orbit.Frame(built.Bounds);
+            KeepFramed(built.Bounds);
+            ApplyViewportOrbitOverride("");
             if (shadowRig != null)
                 shadowRig.SetBounds(built.Bounds);
 
@@ -952,10 +1311,10 @@ public partial class WmvMain : MonoBehaviour
             for (int i = 0; i < seqPath.Length; i++)
             {
                 Debug.Log("WMV: seqpath: switching to sequence " + seqPath[i]);
-                SwitchToSequence(seqPath[i]);
+                anim.SwitchToSequence(currentSlot, seqPath[i]);
             }
             if (WmvModelBuilder.Debug_.AnimTime >= 0f)
-                WmvModelBuilder.PoseAt(current, WmvModelBuilder.Debug_.AnimTime);
+                WmvModelBuilder.PoseAt(currentSlot.Runtime, WmvModelBuilder.Debug_.AnimTime);
 
             if (WmvModelBuilder.Debug_.AllocCheck)
                 allocProbe = new AllocProbe { StartFrame = Time.frameCount + 10 };
@@ -966,11 +1325,8 @@ public partial class WmvMain : MonoBehaviour
             if (WmvModelBuilder.Debug_.LightCheck)
                 ReportLighting();
 
-            {   // SCRATCH: capture the REAL viewport, post-processing included.
-                string shot = System.Environment.GetEnvironmentVariable("WMV_VIEWPORT_SHOT");
-                if (!string.IsNullOrEmpty(shot))
-                    StartCoroutine(CaptureViewport(shot));
-            }
+            // SCRATCH: capture the REAL viewport, post-processing included.
+            RequestViewportShot();
 
             // Independent of the model just loaded -- it brings its own geometry, materials and
             // camera -- but hung off the same hook so one headless run produces both readings.
@@ -980,9 +1336,9 @@ public partial class WmvMain : MonoBehaviour
             status.Set("Loaded " + job.Path);
             status.Set(string.Format("Vertices {0}  Triangles {1}  Submeshes {2}  Textures {3}",
                                      built.VertexCount, built.TriangleCount, built.SubmeshCount, job.Textures.Count));
-            if (currentGeosets != null)
-                status.Set("Geosets " + (currentGeosets.Count == 0 ? "none" : string.Join(",",
-                           new List<int>(currentGeosets).ConvertAll(x => x.ToString()).ToArray())));
+            if (currentSlot.Geosets != null)
+                status.Set("Geosets " + (currentSlot.Geosets.Count == 0 ? "none" : string.Join(",",
+                           new List<int>(currentSlot.Geosets).ConvertAll(x => x.ToString()).ToArray())));
             status.Set(string.Format("Bounds {0} size {1}", built.Bounds.center, built.Bounds.size));
             status.Set(string.Format("Load {0} ms (m2 {1}, skin {2}, tex {3}, parse {4}, build {5})",
                                      job.Clock.ElapsedMilliseconds, job.M2Ms, job.SkinMs, job.TextureMs,
@@ -994,15 +1350,6 @@ public partial class WmvMain : MonoBehaviour
         }
     }
 
-    /// <summary>
-    /// WMV's displayed animation changed. The renderer draws the same model from the same data, so
-    /// it plays what the app plays rather than the idle it would pick for itself.
-    ///
-    /// Only one sequence's keyframes are held at a time, so this re-parses the .m2 kept from the
-    /// load with the new sequence in mind and re-binds the animator to the result. Nothing else
-    /// moves: the mesh, its materials, its textures and its geoset selection are all untouched by
-    /// which animation is playing.
-    /// </summary>
     /// <summary>
     /// Is a push about the model on screen, or about the one being loaded?
     ///
@@ -1018,7 +1365,7 @@ public partial class WmvMain : MonoBehaviour
             return true;
         if (job != null && job.FileDataID == fileDataID)
             return true;
-        return currentFileDataID == 0 || fileDataID == currentFileDataID;
+        return currentSlot.FileDataID == 0 || fileDataID == currentSlot.FileDataID;
     }
 
     /// <summary>About the load in flight, specifically -- as opposed to the model on screen.</summary>
@@ -1027,8 +1374,27 @@ public partial class WmvMain : MonoBehaviour
         return job != null && (fileDataID == 0 || fileDataID == job.FileDataID);
     }
 
+    /// <summary>
+    /// WMV's displayed animation changed. The renderer draws the same model from the same data, so
+    /// it plays what the app plays rather than the idle it would pick for itself.
+    ///
+    /// Only one sequence's keyframes are held at a time, so this re-parses the .m2 kept from the
+    /// load with the new sequence in mind and re-binds the animator to the result. Nothing else
+    /// moves: the mesh, its materials, its textures and its geoset selection are all untouched by
+    /// which animation is playing.
+    ///
+    /// A push with a role is about one of a ridden mount's two models (HandleRoleSelection). One without is about the
+    /// model it names, as always -- except while the character on screen rides: a host that seats characters sends
+    /// those pushes with a role, so the character's own selection without one comes from the host taking it off its
+    /// mount, a tick before the scene without the mount, and is held for the frame that scene is applied.
+    /// </summary>
     void HandleModelAnimation(WmvIpcClient.AnimationSelection a)
     {
+        if (!string.IsNullOrEmpty(a.role))
+        {
+            HandleRoleSelection(a);
+            return;
+        }
         if (PushIsAboutMapObject(a.fileDataID))
             return;                                     // a world model has no animation
         if (!AboutThisModel(a.fileDataID))
@@ -1036,97 +1402,87 @@ public partial class WmvMain : MonoBehaviour
         if (a.sequenceIndex < 0)
             return;
 
-        selectedSequence = a.sequenceIndex;
-
-        if (current == null || currentM2Bytes == null || AboutTheLoad(a.fileDataID))
+        string why;
+        if (WmvSlotAnimation.RouteSelection(a.role, a.load, a.fileDataID, Holding(), out why) ==
+            WmvSlotAnimation.Route.HeldForDismount)
         {
-            // Still loading. The parse below will use this selection when it gets there.
-            status.Set("Animation " + a.sequenceIndex + " selected (model still loading)");
+            currentSlot.SelectedSequence = a.sequenceIndex;
+            riderSelectionHeld = true;
+            Debug.Log("WMV: anim: sequence " + a.sequenceIndex + " for the character, with no role while it rides -- " +
+                      "the host has taken it off its mount; held until the scene without the mount is applied");
             return;
         }
-        // A re-push of what is PLAYING is a no-op: the animator is not re-bound and its clock is
-        // not touched. Judged by what is playing, not by what was last asked for, so a request
-        // that fell back to the idle is retried when it is asked for again.
-        if (current.Animator != null && current.Animator.SequenceIndex == a.sequenceIndex &&
-            currentModel != null && currentModel.AnimatedSequence == a.sequenceIndex)
-        {
-            status.Set("Animation unchanged");
-            return;
-        }
-
-        SwitchToSequence(a.sequenceIndex);
+        anim.SelectSequence(currentSlot, a.sequenceIndex, AboutTheLoad(a.fileDataID));
     }
 
     /// <summary>
-    /// Show a different animation of the model already loaded.
-    ///
-    /// NOTHING is rebuilt here. The .m2 is not re-requested or re-parsed, the mesh, materials,
-    /// textures, geoset selection and skeleton are untouched, and the animator is re-bound to the
-    /// new tracks rather than recreated. Only loadWoWModel builds anything.
-    ///
-    /// Three ways this can go, cheapest first:
-    ///   1. the sequence has been played before  -> its tracks come from the cache, no allocation
-    ///   2. its keyframes are in the .m2         -> read them, cache them
-    ///   3. its keyframes are in a .anim file    -> fetch that once, then as (2)
-    /// The previous animation stays on screen throughout, including while a fetch is in flight.
+    /// A selection about one of a ridden mount's two models (protocol 5), routed by WmvSlotAnimation.RouteSelection:
+    /// role "rider" is the character, on screen or -- by its load serial -- being loaded, and plays or waits exactly as a
+    /// selection for the model on screen or the load does; role "mount" is the mount the character rides on screen. A
+    /// mount still being prepared, for either, keeps the selection for the frame it goes on (StartMountClock). Anything
+    /// else -- a mount role while the character rides no mount of that file, a push about a character not here -- is
+    /// ignored, and logged.
     /// </summary>
-    void SwitchToSequence(int sequenceIndex)
+    void HandleRoleSelection(WmvIpcClient.AnimationSelection a)
     {
-        // -wmvNoAnim means nothing is going to be played, so nothing is worth reading or -- more
-        // to the point -- fetching. ApplySequence would refuse this anyway, but only after a .anim
-        // round trip had already been spent on a sequence that will not move a bone.
-        if (WmvModelBuilder.Debug_.NoAnim)
+        if (a.sequenceIndex < 0)
             return;
-
-        // 1. Already read once. This becomes the common case as soon as the user goes back and
-        //    forth between a few animations, and it is deliberately the cheapest path there is:
-        //    no parse, no fetch, no allocation.
-        M2BoneDef[] cached;
-        if (boneTrackCache.TryGetValue(sequenceIndex, out cached))
+        string why;
+        switch (WmvSlotAnimation.RouteSelection(a.role, a.load, a.fileDataID, Holding(), out why))
         {
-            // The material tracks that FOLLOW the sequence (colour alpha, texture transforms)
-            // were re-read with the bones the first time; restore that read too, or the
-            // materials would keep the keys of whichever sequence was read last.
-            MaterialTrackSet mats;
-            if (materialTrackCache.TryGetValue(sequenceIndex, out mats))
-            {
-                currentModel.Colors = mats.Colors;
-                currentModel.TextureTransforms = mats.Transforms;
-                currentModel.MaterialSurvey = mats.Survey;   // its per-sequence counts, for the log
-            }
-            long heapBefore = System.GC.GetTotalMemory(false);
-            int gcBefore = System.GC.CollectionCount(0);
-            var swc = System.Diagnostics.Stopwatch.StartNew();
-            currentModel.Bones = cached;
-            currentModel.AnimatedSequence = sequenceIndex;
-            currentModel.AnimationSkipReason = null;
-            ApplyResolvedSequence(sequenceIndex, "cached");
-            if (WmvModelBuilder.Debug_.AnimCheck)
-                Debug.Log(string.Format(
-                    "WMV: anim switch timing (cached): read 0 ms, total {0} ms, allocated {1} KB, "
-                    + "gen0 collections {2} (no reload, no fetch, no parse)",
-                    swc.ElapsedMilliseconds,
-                    (System.GC.GetTotalMemory(false) - heapBefore) / 1024,
-                    System.GC.CollectionCount(0) - gcBefore));
-            return;
+            case WmvSlotAnimation.Route.Rider:
+                riderSelectionHeld = false;
+                riderPickAt = a.receivedSeconds;
+                Debug.Log("WMV: anim: role \"rider\" sequence " + a.sequenceIndex + " -> the character");
+                anim.SelectSequence(currentSlot, a.sequenceIndex, false);
+                break;
+            case WmvSlotAnimation.Route.RiderOfLoad:
+                riderPickAt = a.receivedSeconds;
+                Debug.Log("WMV: anim: role \"rider\" sequence " + a.sequenceIndex + " -> the character being loaded");
+                anim.SelectSequence(currentSlot, a.sequenceIndex, true);
+                break;
+            case WmvSlotAnimation.Route.Mount:
+                Debug.Log("WMV: anim: role \"mount\" sequence " + a.sequenceIndex + " -> the mount the character rides (" +
+                          mounted.Key + ")");
+                anim.SelectSequence(mounted.Mount, a.sequenceIndex, false);
+                StartMountProbe("the mount was given sequence " + a.sequenceIndex);
+                break;
+            case WmvSlotAnimation.Route.MountPreparing:
+                keptMountPick = a;
+                haveKeptMountPick = true;
+                Debug.Log("WMV: anim: mount sequence " + a.sequenceIndex + " for fileDataID " + a.fileDataID +
+                          ", still being prepared -- kept for the frame it goes on");
+                break;
+            default:
+                Debug.Log("WMV: anim: role \"" + a.role + "\" sequence " + a.sequenceIndex + " for fileDataID " +
+                          a.fileDataID + " (load " + a.load + ") ignored: " + why);
+                break;
         }
+    }
 
-        // 3. Keys in a .anim file. Fetch it once; the switch completes when the bytes arrive.
-        int animFileId = M2Parser.ExternalAnimFileId(currentModel, sequenceIndex);
-        byte[] external = null;
-        if (animFileId != 0 && !animFileCache.TryGetValue(animFileId, out external))
+    /// <summary>What the player holds, as WmvSlotAnimation.RouteSelection routes a push by it.</summary>
+    WmvSlotAnimation.Holding Holding()
+    {
+        var h = new WmvSlotAnimation.Holding();
+        if (job != null || wmoJob != null)
         {
-            foreach (int waiting in pendingAnimFetch.Values)
-                if (waiting == sequenceIndex)
-                    return;                          // already on its way
-            string req = ipc.RequestAssetByFileDataID(animFileId);
-            pendingAnimFetch[req] = sequenceIndex;
-            status.Set(string.Format("Animation {0}: fetching its .anim file ({1})",
-                                     sequenceIndex, animFileId));
-            return;
+            h.Loading = true;
+            h.LoadIsCharacter = job != null && job.Character;
+            h.LoadSerial = job != null ? job.Load : 0;
+            h.LoadMountPreparing = job != null && job.Mount != null ? job.Mount.PreparingFileDataID : 0;
         }
-
-        ReadAndApplySequence(sequenceIndex, external, animFileId == 0 ? "in-file" : "from .anim");
+        if (dresser != null && currentSlot.Runtime != null)
+        {
+            h.RiderLoad = dresser.Load;
+            h.RiderFileDataID = currentSlot.FileDataID;
+            h.RiderMounted = mounted != null && mounted.Rider != null;
+        }
+        if (mounted != null)
+        {
+            h.MountFileDataID = mounted.RiddenFileDataID;
+            h.MountPreparing = mounted.PreparingFileDataID;
+        }
+        return h;
     }
 
     /// <summary>
@@ -1162,12 +1518,22 @@ public partial class WmvMain : MonoBehaviour
     /// </summary>
     void ReportLighting()
     {
+        ReportLighting(currentSlot.Runtime != null ? currentSlot.Runtime.Bounds : new Bounds(), false);
+    }
+
+    /// <param name="framed">The box the check frames: the model's own, or, for a character riding its mount, both
+    /// models together in the world (FrameRiddenScene). -wmvFrameBounds still takes its place.</param>
+    /// <param name="riding">The character rides the mount on screen: the mount is named and its textures listed too.</param>
+    void ReportLighting(Bounds framed, bool riding)
+    {
         Camera src = Camera.main;
-        if (src == null || current == null)
+        WmvRuntimeModel onScreen = currentSlot.Runtime;
+        if (src == null || onScreen == null)
         {
             Debug.Log("WMV: lightcheck: no camera or no model -- nothing measured");
             return;
         }
+        riding = riding && mounted != null && mounted.Mount.Runtime != null;
 
         const int W = 512, H = 512;
         const float Fov = 60f;
@@ -1177,11 +1543,11 @@ public partial class WmvMain : MonoBehaviour
         // FRAMING, from the bounds and two fixed angles. Not from the orbit: the viewport camera
         // may have been moved by a Frame() call, a drag or a wheel, and a measurement that moves
         // with it compares two different pictures.
-        Bounds b = WmvModelBuilder.Debug_.HasFrameBounds ? WmvModelBuilder.Debug_.FrameBounds : current.Bounds;
+        Bounds b = WmvModelBuilder.Debug_.HasFrameBounds ? WmvModelBuilder.Debug_.FrameBounds : framed;
         if (WmvModelBuilder.Debug_.HasFrameBounds)
             Debug.Log(string.Format("WMV: lightcheck: framing bounds pinned by -wmvFrameBounds (model's own: centre ({0:F2},{1:F2},{2:F2}) extents ({3:F2},{4:F2},{5:F2}))",
-                                    current.Bounds.center.x, current.Bounds.center.y, current.Bounds.center.z,
-                                    current.Bounds.extents.x, current.Bounds.extents.y, current.Bounds.extents.z));
+                                    framed.center.x, framed.center.y, framed.center.z,
+                                    framed.extents.x, framed.extents.y, framed.extents.z));
         Quaternion rot = Quaternion.Euler(Pitch, Yaw, 0f);
         Vector3 up = rot * Vector3.up, right = rot * Vector3.right, fwd = rot * Vector3.forward;
         Vector3 e = b.extents;
@@ -1272,12 +1638,21 @@ public partial class WmvMain : MonoBehaviour
             // before/after pair taken in two processes is therefore not comparable unless this
             // line matches, and until it was printed there was no way to notice that it did not.
             var skinIds = new List<string>();
-            foreach (var kv in currentTextureIds) skinIds.Add(kv.Key + ":" + kv.Value);
+            foreach (var kv in currentSlot.TextureIds) skinIds.Add(kv.Key + ":" + kv.Value);
             skinIds.Sort();
+            if (riding)
+            {
+                // The mount's slots after the character's: both models are in the frame and in the mask.
+                var mountIds = new List<string>();
+                foreach (var kv in mounted.Mount.TextureIds) mountIds.Add("mount " + kv.Key + ":" + kv.Value);
+                mountIds.Sort();
+                skinIds.AddRange(mountIds);
+            }
             Debug.Log(string.Format(
                 "WMV: lightcheck: {0} | camera yaw {1} pitch {2} fov {3} dist {4:F3} "
                 + "| bounds extents ({5:F2},{6:F2},{7:F2}) | background {8:F4} | textures {9}",
-                currentName, Yaw, Pitch, Fov, dist, e.x, e.y, e.z, bgLum,
+                riding ? currentSlot.Name + " riding " + mounted.Mount.Name + " (" + mounted.Key + ")" : currentSlot.Name,
+                Yaw, Pitch, Fov, dist, e.x, e.y, e.z, bgLum,
                 skinIds.Count > 0 ? string.Join(",", skinIds.ToArray()) : "(none recorded)"));
             Debug.Log(string.Format(
                 "WMV: lightcheck: mask {0} px ({1:P2} of frame), {2} px dropped as saturated, "
@@ -1975,28 +2350,229 @@ public partial class WmvMain : MonoBehaviour
         return ClearInAuthoredDomain ? displayed.gamma : displayed;
     }
 
-    /// <summary>SCRATCH: the frame the embedded viewport actually presented.</summary>
+    // SCRATCH: THE MODEL CAPTURE (WMV_VIEWPORT_SHOT). One capture waits at a time; a newer request moves it on.
+    const int ViewportShotFrames = 40;         // frames between the last change on screen and the capture
+    const double ViewportShotBusyLimitSeconds = 30.0;
+    int viewportShotDue = -1;                  // the frame the waiting capture may be taken from, -1 for none
+    bool viewportShotWaiting;
+    int viewportShots;                         // captures taken, numbered in the log
+    Bounds lastFramed;                         // the box the camera was last framed on, and the aspect it was framed at
+    float lastFramedAspect;
+    bool haveLastFramed;
+
+    /// <summary>
+    /// SCRATCH: capture the viewport (WMV_VIEWPORT_SHOT) once what is on screen has settled: 40 frames after the last
+    /// request, and not while a load, a character's scene, a mount being prepared or a sequence switch waiting for its
+    /// .anim is still on its way (for at most 30 seconds). A request is made when a model is put on screen, when the
+    /// mount under a character changes, and while a character rides, when either model's sequence switch completes
+    /// and when a newer scene is applied to the character -- so the capture shows the mount's commit, the clip asked
+    /// for (and a pinned -wmvAnimTime pose), not a moment before them. A request while one waits moves it on.
+    /// </summary>
+    void RequestViewportShot()
+    {
+        string shot = System.Environment.GetEnvironmentVariable("WMV_VIEWPORT_SHOT");
+        if (string.IsNullOrEmpty(shot))
+            return;
+        viewportShotDue = Time.frameCount + ViewportShotFrames;
+        if (!viewportShotWaiting)
+            StartCoroutine(CaptureViewportWhenSettled(shot));
+    }
+
+    /// <summary>What the viewport is still waiting on before a capture shows a settled state, or null.</summary>
+    string ViewportBusy()
+    {
+        if (job != null || wmoJob != null)
+            return "a load is in flight";
+        if (dresser != null && dresser.Busy)
+            return "the character's scene is being prepared";
+        if (mounted != null && mounted.PreparingFileDataID != 0)
+            return "a mount is being prepared";
+        if (currentSlot.PendingAnimFetch.Count > CountPrefetches(currentSlot))
+            return "the model's sequence switch waits for its .anim";
+        if (mounted != null && mounted.Mount.PendingAnimFetch.Count > CountPrefetches(mounted.Mount))
+            return "the mount's sequence switch waits for its .anim";
+        return null;
+    }
+
+    /// <summary>The .anim fetches of a slot nothing waits on (prefetches, -1).</summary>
+    static int CountPrefetches(WmvModelSlot slot)
+    {
+        int n = 0;
+        foreach (int waiting in slot.PendingAnimFetch.Values)
+            if (waiting < 0) n++;
+        return n;
+    }
+
+    System.Collections.IEnumerator CaptureViewportWhenSettled(string name)
+    {
+        viewportShotWaiting = true;
+        string busy = null;
+        while (true)
+        {
+            double busySince = -1.0;
+            while (true)
+            {
+                yield return new WaitForEndOfFrame();
+                if (Time.frameCount < viewportShotDue)
+                    continue;
+                busy = ViewportBusy();
+                if (busy == null)
+                    break;
+                if (busySince < 0.0)
+                    busySince = Time.realtimeSinceStartupAsDouble;
+                else if (Time.realtimeSinceStartupAsDouble - busySince > ViewportShotBusyLimitSeconds)
+                    break;                                   // taken anyway, and said
+            }
+            // THE SIZE ASKED FOR. The host lays out its panes again when, say, a saved character is loaded, and resizes
+            // the player to its pane: the capture asks for its size again, and when that changes the camera's aspect the
+            // last box is framed again the way it was (the orbit override re-applied after it).
+            int want = RequestedViewportSize();
+            if (want > 0 && (Screen.width != want || Screen.height != want))
+            {
+                int fromW = Screen.width, fromH = Screen.height;
+                Screen.SetResolution(want, want, false);
+                for (int i = 0; i < 30 && (Screen.width != want || Screen.height != want); i++)
+                    yield return null;
+                Debug.Log(string.Format("WMV: viewport shot {0}: the screen was {1}x{2}, asked for {3}x{3} again -> {4}x{5}",
+                                        name, fromW, fromH, want, Screen.width, Screen.height));
+                Camera cam = Camera.main;
+                if (haveLastFramed && cam != null && Mathf.Abs(cam.aspect - lastFramedAspect) > 1e-3f)
+                {
+                    orbit.Frame(lastFramed);
+                    lastFramedAspect = cam.aspect;
+                    ApplyViewportOrbitOverride("shot: ");
+                }
+                for (int i = 0; i < 5; i++)
+                    yield return new WaitForEndOfFrame();
+            }
+            if (Time.frameCount >= viewportShotDue)
+                break;                                       // no newer request came in meanwhile
+        }
+        viewportShotDue = -1;
+        viewportShotWaiting = false;
+        TakeViewportShot(name, busy);
+    }
+
+    /// <summary>SCRATCH: the box a model or a mounted character was just framed on, and the camera's aspect then, for a
+    /// capture that has to ask for its size again (CaptureViewportWhenSettled). Nothing else reads it.</summary>
+    void KeepFramed(Bounds framed)
+    {
+        Camera cam = Camera.main;
+        lastFramed = framed;
+        lastFramedAspect = cam != null ? cam.aspect : 1f;
+        haveLastFramed = true;
+    }
+
+    /// <summary>The n x n size a capture asks for: WMV_VIEWPORT_SIZE, 1024 by default (as Awake), 0 when out of range.</summary>
+    static int RequestedViewportSize()
+    {
+        int v = 1024;
+        string sz = System.Environment.GetEnvironmentVariable("WMV_VIEWPORT_SIZE");
+        if (!string.IsNullOrEmpty(sz)) int.TryParse(sz, out v);
+        return v >= 128 && v <= 4096 ? v : 0;
+    }
+
+    /// <summary>SCRATCH: a world model's capture, 40 frames after it went on screen (unchanged).</summary>
     System.Collections.IEnumerator CaptureViewport(string name)
     {
-        for (int i = 0; i < 40; i++)
+        for (int i = 0; i < ViewportShotFrames; i++)
             yield return new WaitForEndOfFrame();
+        TakeViewportShot(name, null);
+    }
+
+    /// <summary>SCRATCH: the frame the embedded viewport actually presented, with what it shows in the log: the
+    /// emitters of the model on screen and of the mount the character rides, then the camera, and for a character on a
+    /// mount its key, the seat, both sequences and their clocks. busy says what the capture stopped waiting for.</summary>
+    void TakeViewportShot(string name, string busy)
+    {
         Texture2D tex = null;
         try
         {
             tex = ScreenCapture.CaptureScreenshotAsTexture();
             string path = System.IO.Path.Combine(Application.dataPath, "../" + name + ".png");
             System.IO.File.WriteAllBytes(path, ImageConversion.EncodeToPNG(tex));
-            var rt = current != null ? current.Emitters : null;
+            viewportShots++;
+            var rt = currentSlot.Runtime != null ? currentSlot.Runtime.Emitters : null;
+            WmvRuntimeModel ridden = currentSlot.Runtime != null && mounted != null && mounted.RiddenFileDataID != 0
+                                     ? mounted.Mount.Runtime : null;
+            var mt = ridden != null ? ridden.Emitters : null;
             Debug.Log(string.Format(
                 "WMV: viewport shot {0} -- {1}x{2}, HDR camera {3}; emitters p={4} r={5} live={6} "
-                + "segs={7} draws={8} skipped={9}",
+                + "segs={7} draws={8} skipped={9}{10}",
                 name, tex.width, tex.height, Camera.main != null && Camera.main.allowHDR,
                 rt != null ? rt.ParticleEmitterCount : 0, rt != null ? rt.RibbonEmitterCount : 0,
                 rt != null ? rt.LiveParticleCount : 0, rt != null ? rt.RibbonSegmentCount : 0,
-                rt != null ? rt.DrawCallCount : 0, rt != null ? rt.SkippedEmitterCount : 0));
+                rt != null ? rt.DrawCallCount : 0, rt != null ? rt.SkippedEmitterCount : 0,
+                ridden == null ? "" : string.Format(
+                    "; the mount {0} ({1}) emitters p={2} r={3} live={4} segs={5} draws={6} skipped={7}",
+                    mounted.Key, mounted.RiddenFileDataID,
+                    mt != null ? mt.ParticleEmitterCount : 0, mt != null ? mt.RibbonEmitterCount : 0,
+                    mt != null ? mt.LiveParticleCount : 0, mt != null ? mt.RibbonSegmentCount : 0,
+                    mt != null ? mt.DrawCallCount : 0, mt != null ? mt.SkippedEmitterCount : 0)));
+
+            Camera cam = Camera.main;
+            var inv = System.Globalization.CultureInfo.InvariantCulture;
+            string animTime = WmvModelBuilder.Debug_.AnimTime >= 0f
+                              ? "every clock pinned at " + WmvModelBuilder.Debug_.AnimTime.ToString("0.##", inv) + " ms (-wmvAnimTime)"
+                              : "clocks running";
+            Debug.Log(string.Format(inv,
+                "WMV: viewport shot {0} #{1}: camera at ({2:F3}, {3:F3}, {4:F3}) on pivot ({5:F3}, {6:F3}, {7:F3}), yaw {8:0.##} " +
+                "pitch {9:0.##} distance {10:F3}, field of view {11:0.##}, aspect {12:F3}; {13}; {14}; {15}{16}",
+                name, viewportShots,
+                cam != null ? cam.transform.position.x : 0f, cam != null ? cam.transform.position.y : 0f,
+                cam != null ? cam.transform.position.z : 0f, orbit.pivot.x, orbit.pivot.y, orbit.pivot.z, orbit.yaw, orbit.pitch,
+                orbit.distance, cam != null ? cam.fieldOfView : 0f, cam != null ? cam.aspect : 0f,
+                DescribeClock("the character " + currentSlot.FileDataID, currentSlot),
+                ridden == null ? "no mount"
+                    : string.Format(inv, "the mount {0} ({1}) seat {2} bone {3} at ({4:F4}, {5:F4}, {6:F4}) scale {7}, {8}",
+                                    mounted.Key, mounted.RiddenFileDataID,
+                                    mounted.SeatCase == WmvMountedScene.CaseBone ? "B (under its bone)"
+                                    : mounted.SeatCase == WmvMountedScene.CaseNoBoneTransform ? "C (on its root, no bone transform)"
+                                    : mounted.SeatCase == WmvMountedScene.CaseNoAttachment ? "A (at its origin, no attachment)"
+                                    : "none", mounted.SeatBone, mounted.SeatLocalPosition.x, mounted.SeatLocalPosition.y,
+                                    mounted.SeatLocalPosition.z, mounted.SeatScale, DescribeClock("its clock", mounted.Mount)),
+                animTime, busy == null ? "" : "; taken while " + busy));
         }
         catch (System.Exception e) { Debug.LogWarning("WMV: viewport shot failed: " + e.Message); }
         if (tex != null) Destroy(tex);
+    }
+
+    /// <summary>"what: sequence n (animID a) at t of l ms, playing|paused xS" for a slot's animator, for the capture log.</summary>
+    static string DescribeClock(string what, WmvModelSlot slot)
+    {
+        WmvM2Animator a = slot != null && slot.Runtime != null ? slot.Runtime.Animator : null;
+        if (a == null)
+            return what + ": not animated";
+        return string.Format(System.Globalization.CultureInfo.InvariantCulture,
+                             "{0}: sequence {1} (animID {2}) at {3:F0} of {4:F0} ms, {5} x{6:0.##}", what, a.SequenceIndex, a.AnimId,
+                             a.TimeMs, a.LengthMs, a.IsPlaying ? "playing" : "paused", a.Speed);
+    }
+
+    /// <summary>
+    /// SCRATCH: WMV_VIEWPORT_ORBIT="yaw:pitch[:distanceScale]" re-aims the camera just framed -- a world model, a model,
+    /// or a character with the mount it rides -- so a capture can be taken from a named view: the audit's OpenGL
+    /// references of world models are yaw 135 / pitch 30 and yaw 315 / pitch 30 in this camera's terms, and the archived
+    /// viewport's yaw Y and pitch P are yaw 180 - Y and pitch 90 - P here (OrbitCamera::updatePosition through
+    /// WowCoordinateConverter). Unset, nothing changes. Documented with WMV_VIEWPORT_SHOT and WMV_VIEWPORT_SIZE under
+    /// "Capture hooks" in docs/unity-renderer/README.md. what prefixes the log line ("wmo: ", "mount: ", or "" for a model).
+    /// </summary>
+    void ApplyViewportOrbitOverride(string what)
+    {
+        string v = System.Environment.GetEnvironmentVariable("WMV_VIEWPORT_ORBIT");
+        if (string.IsNullOrEmpty(v))
+            return;
+        string[] p = v.Split(':');
+        var inv = System.Globalization.CultureInfo.InvariantCulture;
+        float yaw, pitch, scale = 1f;
+        if (p.Length < 2 ||
+            !float.TryParse(p[0], System.Globalization.NumberStyles.Float, inv, out yaw) ||
+            !float.TryParse(p[1], System.Globalization.NumberStyles.Float, inv, out pitch))
+            return;
+        if (p.Length > 2 && !float.TryParse(p[2], System.Globalization.NumberStyles.Float, inv, out scale))
+            scale = 1f;
+        orbit.SetView(yaw, pitch, scale);
+        Debug.Log(string.Format("WMV: {0}WMV_VIEWPORT_ORBIT {1} -> yaw {2} pitch {3} distance {4:F1}", what, v, orbit.yaw,
+                                orbit.pitch, orbit.distance));
     }
 
     void DumpPng(Color32[] px, int w, int h, string name)
@@ -2051,174 +2627,6 @@ public partial class WmvMain : MonoBehaviour
     }
 
     /// <summary>
-    /// Fetch every external .anim file this model names, as soon as it is built.
-    ///
-    /// A sequence whose keyframes are in a .anim used to fetch them the first time it was played,
-    /// which meant the FIRST switch to each such animation was deferred: the previous animation
-    /// stayed on screen until the bytes landed. Measured at 16-18 ms each -- about a frame, so not
-    /// a stall in itself, but it is the one part of a switch that is not instant, and there is no
-    /// reason for it to be on the interactive path at all. A creature names a handful of these
-    /// (Agronn 8, ~300 KB in total) and they are what its animations ARE.
-    ///
-    /// Everything else about it is unchanged: the bytes land in the same cache the on-demand path
-    /// fills, a sequence still falls back gracefully if its file never arrives, and nothing is
-    /// parsed until an animation actually asks for it.
-    /// </summary>
-    void PrefetchAnimFiles()
-    {
-        if (currentModel == null || WmvModelBuilder.Debug_.NoAnim)
-            return;
-        var wanted = new HashSet<int>();
-        foreach (var e in currentModel.AnimFileIds)
-            if (e.FileDataID > 0)
-                wanted.Add(e.FileDataID);
-        // A switch waiting on its .anim has already asked for that file.
-        foreach (int waiting in pendingAnimFetch.Values)
-            if (waiting >= 0)
-                wanted.Remove(M2Parser.ExternalAnimFileId(currentModel, waiting));
-        if (wanted.Count == 0)
-            return;
-        foreach (int fileId in wanted)
-        {
-            if (animFileCache.ContainsKey(fileId))
-                continue;
-            string req = ipc.RequestAssetByFileDataID(fileId);
-            pendingAnimFetch[req] = -1;          // -1: nothing is waiting on it, just fill the cache
-        }
-        Debug.Log(string.Format("WMV: anim: fetching {0} .anim file(s) up front so switching to "
-                                + "one never waits", wanted.Count));
-    }
-
-    /// <summary>The .anim bytes arrived. Cache them and finish the switch that was waiting.</summary>
-    void OnAnimFileBytes(WmvIpcClient.AssetResponse r, int sequenceIndex)
-    {
-        pendingAnimFetch.Remove(r.requestId);
-        if (sequenceIndex < 0 && (!r.ok || r.data == null))
-        {
-            pendingAnimFetch.Remove(r.requestId);
-            return;                              // a prefetch that failed; the switch will retry
-        }
-        if (!r.ok || r.data == null || r.data.Length == 0)
-        {
-            // Graceful for the viewer -- the previous animation keeps running rather than the
-            // model dropping to its rest pose -- but loud for whoever has to fix it. LogWarning
-            // rather than a status line: ordinary logs no longer carry a stack trace, and this is
-            // exactly the kind of thing worth having one for.
-            Debug.LogWarning(string.Format(
-                "WMV: anim: sequence {0} wanted .anim file {1}, which could not be read: {2}",
-                sequenceIndex, M2Parser.ExternalAnimFileId(currentModel, sequenceIndex),
-                r.error ?? "empty response"));
-            status.Set(string.Format("Animation {0}: its .anim file could not be read",
-                                     sequenceIndex));
-            return;
-        }
-        if (sequenceIndex < 0)
-        {
-            // A prefetch: nothing is waiting on it, it just belongs in the cache. The reply names
-            // the file, so it can be filed without a sequence to look it up from.
-            animFileCache[r.fileDataID] = r.data;
-            return;
-        }
-        int animFileId = M2Parser.ExternalAnimFileId(currentModel, sequenceIndex);
-        if (animFileId != 0)
-            animFileCache[animFileId] = r.data;
-        // Only apply if this is still what the app wants: the user may have moved on while the
-        // bytes were in flight.
-        if (sequenceIndex != selectedSequence)
-            return;
-        ReadAndApplySequence(sequenceIndex, r.data, "from .anim");
-    }
-
-    /// <summary>Read one sequence's bone tracks, cache them, and put them on screen.</summary>
-    void ReadAndApplySequence(int sequenceIndex, byte[] external, string source)
-    {
-        try
-        {
-            // Time AND bytes. The time is what the switch costs now; the allocation is what it
-            // costs a frame or two later, when the collector runs -- and it is the collector, not
-            // the reading, that a viewer feels as a stutter.
-            long heapBefore = System.GC.GetTotalMemory(false);
-            int gcBefore = System.GC.CollectionCount(0);
-            var sw = System.Diagnostics.Stopwatch.StartNew();
-            M2Parser.ReadAnimationInto(currentM2Bytes, sequenceIndex, currentModel, external);
-            long readMs = sw.ElapsedMilliseconds;
-
-            // Cache under the sequence that RESOLVED, not the one asked for: a request that fell
-            // back to the idle must not be remembered as though it had played.
-            if (currentModel.AnimatedSequence >= 0)
-            {
-                boneTrackCache[currentModel.AnimatedSequence] = currentModel.Bones;
-                // Copies: the parser refills these arrays in place on the next read.
-                materialTrackCache[currentModel.AnimatedSequence] = new MaterialTrackSet
-                {
-                    Colors = (M2ColorDef[])currentModel.Colors.Clone(),
-                    Transforms = (M2TextureTransform[])currentModel.TextureTransforms.Clone(),
-                    Survey = currentModel.MaterialSurvey
-                };
-            }
-
-            ApplyResolvedSequence(sequenceIndex, source);
-            if (WmvModelBuilder.Debug_.AnimCheck)
-                Debug.Log(string.Format(
-                    "WMV: anim switch timing ({0}): read {1} ms, total {2} ms, allocated {3} KB, "
-                    + "gen0 collections {4} (no reload, no mesh/material/texture rebuild)",
-                    source, readMs, sw.ElapsedMilliseconds,
-                    (System.GC.GetTotalMemory(false) - heapBefore) / 1024,
-                    System.GC.CollectionCount(0) - gcBefore));
-        }
-        catch (WowParseException e)
-        {
-            Debug.LogWarning("WMV: anim: reading sequence " + sequenceIndex + " (" + source +
-                             ") failed: " + e.Message);
-            status.Set("Animation change failed: " + e.Message);
-        }
-    }
-
-    /// <summary>Bind whatever currentModel now holds, and say what is actually playing.</summary>
-    void ApplyResolvedSequence(int requested, string source)
-    {
-        if (!WmvModelBuilder.ApplySequence(current, currentModel, s => Debug.Log("WMV: " + s)))
-        {
-            status.Set("Animation " + requested + " could not be played");
-            return;
-        }
-        // Report what is PLAYING, not what was asked for: a sequence whose keyframes cannot be
-        // read falls back to the idle, and saying "animation 20" while the idle plays is the kind
-        // of log that costs an hour later.
-        int playing = currentModel.AnimatedSequence;
-        status.Set(string.Format("Animation {0} (animID {1}, {2} ms, {3}){4}",
-                                 playing, currentModel.Sequences[playing].AnimId,
-                                 currentModel.Sequences[playing].Length, source,
-                                 playing == requested ? "" : " -- fell back from " + requested));
-        if (playing != requested && currentModel.AnimationSkipReason != null)
-            Debug.Log("WMV: anim: " + currentModel.AnimationSkipReason);
-
-        // The app's playback state applies to whatever is now on screen. Without this a switch
-        // starts from the animator's own defaults -- playing, at 1x -- which is wrong whenever the
-        // app is paused or the speed slider is not at 1, and is not corrected until the next
-        // heartbeat. The heartbeat is meant to correct DRIFT, not to start the animation.
-        if (haveAppState && current.Animator != null)
-        {
-            // The app's position for this sequence, projected by the time the state has been
-            // waiting -- a .anim fetch can take a while, and a heartbeat may be a second old --
-            // and applied as given: a freshly bound sequence is a fresh clock, and a difference
-            // held to the dead band here would stay for the life of the sequence.
-            float at = 0f;
-            if (lastAppState.sequenceIndex == playing)
-            {
-                at = lastAppState.timeMs;
-                if (lastAppState.playing && lastAppState.receivedSeconds > 0.0)
-                    at += (float)((WmvIpcClient.NowSeconds - lastAppState.receivedSeconds) * 1000.0)
-                          * Mathf.Max(lastAppState.speed, 0f);
-            }
-            current.Animator.StartFromApp(lastAppState.playing, at, lastAppState.speed);
-        }
-        // Watch whether it actually starts moving; see WmvM2Animator.BeginAdvanceWatch.
-        if (current.Animator != null)
-            current.Animator.BeginAdvanceWatch();
-    }
-
-    /// <summary>
     /// WMV's playback state changed, or the heartbeat arrived. Hand it to the animator, which
     /// decides what to do with the time.
     ///
@@ -2229,6 +2637,11 @@ public partial class WmvMain : MonoBehaviour
     /// </summary>
     void HandleModelAnimationState(WmvIpcClient.AnimationState s)
     {
+        if (s.hasRider)
+        {
+            HandleRiddenState(s);
+            return;
+        }
         if (PushIsAboutMapObject(s.fileDataID))
             return;                                     // a world model has no animation
         if (!AboutThisModel(s.fileDataID))
@@ -2243,32 +2656,42 @@ public partial class WmvMain : MonoBehaviour
             haveLoadState = true;
             return;
         }
-        if (current == null || current.Animator == null)
-            return;                                     // nothing playing to apply it to
-        // Remember it even when it cannot be applied yet -- a deferred or fallen-back switch
-        // will ask for it as soon as it knows what is playing.
-        lastAppState = s;
-        haveAppState = true;
+        anim.ApplyAnimationState(currentSlot, s);
+    }
 
-        if (s.sequenceIndex >= 0 && current.Animator.SequenceIndex != s.sequenceIndex)
+    /// <summary>
+    /// A ridden mount's playback (protocol 5): the mount's state in the top level, the character's nested beside it, both
+    /// sampled by the host in one call. They are routed as selections with a role are (WmvSlotAnimation.RouteRiddenState)
+    /// and applied in this one pass, each to its own animator (WmvSlotAnimation.ApplyRidden). The rider's half of a state
+    /// about the character being loaded waits for its animator, as any load's state does. The top level is kept too, as
+    /// the newest word on the host's mount, for the frame a mount of its file goes on (StartMountClock).
+    /// </summary>
+    void HandleRiddenState(WmvIpcClient.AnimationState s)
+    {
+        WmvSlotAnimation.Route mountRoute, riderRoute;
+        WmvSlotAnimation.RouteRiddenState(s.load, s.fileDataID, Holding(), out mountRoute, out riderRoute);
+        if (riderRoute != WmvSlotAnimation.Route.Rider && riderRoute != WmvSlotAnimation.Route.RiderOfLoad)
+            return;                                     // about a character that is not here
+        lastMountState = s;
+        haveLastMountState = true;
+        if (riderRoute == WmvSlotAnimation.Route.RiderOfLoad)
         {
-            // Not about what is on screen. The play/pause and speed still are, though: they are
-            // the app's, not the sequence's, and dropping them here is what left a switch running
-            // at the wrong speed or moving while the app was paused.
-            current.Animator.SetTransportOnly(s.playing, s.speed);
+            loadState = s.RiderState();
+            loadStateAt = s.receivedSeconds;
+            haveLoadState = true;
             return;
         }
-
-        bool wasPlaying = current.Animator.IsPlaying;
-        float wasSpeed = current.Animator.Speed;
-        current.Animator.SetPlaybackState(s.playing, s.timeMs, s.speed, s.explicitState);
-
-        // Only the changes worth reading are surfaced: the heartbeat would otherwise write a line
-        // a second for the whole session.
-        if (s.playing != wasPlaying)
-            status.Set(s.playing ? "Playing" : "Paused");
-        else if (System.Math.Abs(s.speed - wasSpeed) > 0.001f)
-            status.Set(string.Format("Speed {0:0.##}x", s.speed));
+        WmvModelSlot mount = mountRoute == WmvSlotAnimation.Route.Mount ? mounted.Mount : null;
+        WmvM2Animator mountAnimator = mount != null && mount.Runtime != null ? mount.Runtime.Animator : null;
+        WmvM2Animator riderAnimator = currentSlot.Runtime != null ? currentSlot.Runtime.Animator : null;
+        bool mountWas = mountAnimator != null && mountAnimator.IsPlaying, riderWas = riderAnimator != null && riderAnimator.IsPlaying;
+        anim.ApplyRidden(mount, currentSlot, s);
+        // Said only when either model starts or stops, so a paused mount -- which stops the character too -- shows.
+        if ((mountAnimator != null && mountAnimator.IsPlaying != mountWas) || (riderAnimator != null && riderAnimator.IsPlaying != riderWas))
+            Debug.Log(string.Format("WMV: anim: ridden state: the mount {0} (sequence {1}), the character {2} (sequence {3})",
+                                    mountAnimator == null ? "not on screen" : mountAnimator.IsPlaying ? "playing" : "paused",
+                                    s.sequenceIndex, riderAnimator == null ? "not animated" : riderAnimator.IsPlaying ? "playing" : "paused",
+                                    s.rider.sequenceIndex));
     }
 
     /// <summary>
@@ -2292,7 +2715,7 @@ public partial class WmvMain : MonoBehaviour
                 KeepLoadSubmeshVisible(r.submeshVisible, 0);
             return;
         }
-        if (current == null || currentModel == null)
+        if (currentSlot.Runtime == null || currentSlot.Model == null)
             return;                                     // nothing built yet; the load will pick it up
         if (!AboutThisModel(r.fileDataID))
             return;                                     // about a different model
@@ -2304,23 +2727,23 @@ public partial class WmvMain : MonoBehaviour
         // dropped before this point.
         if (r.hasSubmeshVisible)
             ApplyHostSubmeshVisibility(r.submeshVisible, 0, "skin push");
-        if (AdoptGeosets(r))
+        if (AdoptGeosets(currentSlot, r))
         {
-            WmvModelBuilder.ApplyGeosets(current, currentGeosets, s => Debug.Log("WMV: " + s));
+            WmvModelBuilder.ApplyGeosets(currentSlot.Runtime, currentSlot.Geosets, s => Debug.Log("WMV: " + s));
             status.Set(string.Format("Geosets applied ({0} triangles, mesh unchanged)",
-                                     current.TriangleCount));
+                                     currentSlot.Runtime.TriangleCount));
         }
         if (!r.ok || r.textures.Length == 0)
             return;
 
-        if (AdoptParticleColor(r))
-            ApplyParticleColor();
+        if (AdoptParticleColor(currentSlot, r))
+            ApplyParticleColor(currentSlot);
 
         var wanted = new Dictionary<int, int>();         // slot -> FileDataID
         foreach (var t in r.textures)
         {
             if (t.fileDataID <= 0) continue;
-            foreach (int slot in SlotsForTexture(currentModel, t))
+            foreach (int slot in SlotsForTexture(currentSlot.Model, t))
                 wanted[slot] = PinTexture(slot, t.fileDataID);
         }
 
@@ -2328,8 +2751,8 @@ public partial class WmvMain : MonoBehaviour
         foreach (var kv in wanted)
         {
             int have;
-            if (currentTextureIds.TryGetValue(kv.Key, out have) && have == kv.Value &&
-                currentTextures.ContainsKey(kv.Key))
+            if (currentSlot.TextureIds.TryGetValue(kv.Key, out have) && have == kv.Value &&
+                currentSlot.Textures.ContainsKey(kv.Key))
                 continue;                                // this slot already holds that texture
             fetch.Add(kv);
         }
@@ -2344,7 +2767,7 @@ public partial class WmvMain : MonoBehaviour
         foreach (var kv in fetch)
         {
             skinJob.Pending[ipc.RequestAssetByFileDataID(kv.Value)] = kv.Key;
-            currentTextureIds[kv.Key] = kv.Value;
+            currentSlot.TextureIds[kv.Key] = kv.Value;
             Debug.Log("WMV: skin change -> slot " + kv.Key + " becomes fileDataID " + kv.Value);
         }
         status.Set("Skin changed (" + fetch.Count + " texture(s))");
@@ -2363,10 +2786,10 @@ public partial class WmvMain : MonoBehaviour
         {
             try
             {
-                currentTextures[slot] = BlpDecoder.Decode(r.data);
+                currentSlot.Textures[slot] = BlpDecoder.Decode(r.data);
                 skinJob.Applied++;
-                Debug.Log("WMV: skin texture slot " + slot + ": " + currentTextures[slot].Width + "x" +
-                          currentTextures[slot].Height + " " + currentTextures[slot].Encoding);
+                Debug.Log("WMV: skin texture slot " + slot + ": " + currentSlot.Textures[slot].Width + "x" +
+                          currentSlot.Textures[slot].Height + " " + currentSlot.Textures[slot].Encoding);
             }
             catch (WowParseException e)
             {
@@ -2379,7 +2802,7 @@ public partial class WmvMain : MonoBehaviour
 
         if (skinJob.Applied > 0)
         {
-            WmvModelBuilder.RebindTextures(current, currentTextures, currentName,
+            WmvModelBuilder.RebindTextures(currentSlot.Runtime, currentSlot.Textures, currentSlot.Name,
                                            s => Debug.Log("WMV: " + s));
             status.Set("Skin applied (" + skinJob.Applied + " texture(s), mesh unchanged)");
         }
@@ -2432,15 +2855,15 @@ public partial class WmvMain : MonoBehaviour
             ipc.ReportGeosetsApplied(g.fileDataID, g.revision, "pending", "the model is still loading", null, 0, 0.0);
             return;
         }
-        if (current == null || currentModel == null)
+        if (currentSlot.Runtime == null || currentSlot.Model == null)
         {
             ipc.ReportGeosetsApplied(g.fileDataID, g.revision, "rejected", "no model is built", null, 0, 0.0);
             return;
         }
-        if (g.fileDataID != currentFileDataID)
+        if (g.fileDataID != currentSlot.FileDataID)
         {
             ipc.ReportGeosetsApplied(g.fileDataID, g.revision, "rejected",
-                                     "the viewport shows fileDataID " + currentFileDataID, null, 0, 0.0);
+                                     "the viewport shows fileDataID " + currentSlot.FileDataID, null, 0, 0.0);
             return;
         }
         if (g.visible == null || g.visible.Length != g.submeshCount)
@@ -2454,22 +2877,23 @@ public partial class WmvMain : MonoBehaviour
     /// <summary>Apply the host's per-submesh state to the model on screen and report the outcome.</summary>
     void ApplyHostSubmeshVisibility(bool[] visible, int revision, string what)
     {
-        double animMs = current.Animator != null ? current.Animator.TimeMs : 0.0;
-        int drawn = WmvModelBuilder.ApplySubmeshVisibility(current, visible, s => Debug.Log("WMV: " + s));
+        WmvRuntimeModel onScreen = currentSlot.Runtime;
+        double animMs = onScreen.Animator != null ? onScreen.Animator.TimeMs : 0.0;
+        int drawn = WmvModelBuilder.ApplySubmeshVisibility(onScreen, visible, s => Debug.Log("WMV: " + s));
         if (drawn < 0)
         {
-            ipc.ReportGeosetsApplied(currentFileDataID, revision, "rejected",
+            ipc.ReportGeosetsApplied(currentSlot.FileDataID, revision, "rejected",
                                      string.Format("the host listed {0} submeshes, the skin has {1}",
-                                                   visible != null ? visible.Length : 0, current.SkinSubmeshCount),
-                                     WmvModelBuilder.EffectiveSubmeshVisibility(current),
-                                     WmvModelBuilder.DrawnTriangleCount(current), animMs);
+                                                   visible != null ? visible.Length : 0, onScreen.SkinSubmeshCount),
+                                     WmvModelBuilder.EffectiveSubmeshVisibility(onScreen),
+                                     WmvModelBuilder.DrawnTriangleCount(onScreen), animMs);
             return;
         }
         Debug.Log(string.Format("WMV: {0} applied (revision {1}) at animation time {2:F0} ms, playing={3}",
-                                what, revision, animMs, current.Animator != null && current.Animator.IsPlaying));
+                                what, revision, animMs, onScreen.Animator != null && onScreen.Animator.IsPlaying));
         status.Set(string.Format("Submesh visibility applied ({0} triangles, mesh unchanged)", drawn));
-        ipc.ReportGeosetsApplied(currentFileDataID, revision, "applied", "",
-                                 WmvModelBuilder.EffectiveSubmeshVisibility(current), drawn, animMs);
+        ipc.ReportGeosetsApplied(currentSlot.FileDataID, revision, "applied", "",
+                                 WmvModelBuilder.EffectiveSubmeshVisibility(onScreen), drawn, animMs);
     }
 
     /// <summary>
@@ -2489,12 +2913,12 @@ public partial class WmvMain : MonoBehaviour
     }
 
     /// <summary>
-    /// Take the geoset set out of a host message, if it reported one. Returns true when the set
-    /// actually CHANGED, so the caller only touches the mesh when there is something to do.
+    /// Take the geoset set out of a host message into a slot, if it reported one. Returns true when
+    /// the set actually CHANGED, so the caller only touches the mesh when there is something to do.
     /// A message with hasGeosets false is silence, not an empty answer: the host had no creature
     /// selection to report, and whatever is on screen stays.
     /// </summary>
-    bool AdoptGeosets(WmvIpcClient.ModelTexturesResponse r)
+    bool AdoptGeosets(WmvModelSlot slot, WmvIpcClient.ModelTexturesResponse r)
     {
         if (!r.hasGeosets)
             return false;
@@ -2503,21 +2927,21 @@ public partial class WmvMain : MonoBehaviour
         foreach (int g in r.geosets)
             next.Add(g);
 
-        if (currentGeosets != null && currentGeosets.Count == next.Count)
+        if (slot.Geosets != null && slot.Geosets.Count == next.Count)
         {
             bool same = true;
             foreach (int g in next)
-                if (!currentGeosets.Contains(g)) { same = false; break; }
+                if (!slot.Geosets.Contains(g)) { same = false; break; }
             if (same)
                 return false;
         }
 
-        currentGeosets = next;
+        slot.Geosets = next;
         return true;
     }
 
     /// <summary>
-    /// Take the ParticleColor override out of a host message.
+    /// Take the ParticleColor override out of a host message into a slot.
     ///
     /// The host sends nine bytes -- start, middle and end as RGB 0..255 -- and an emitter's
     /// ParticleColorIndex of 11, 12 or 13 selects one of the three as ITS ramp. So each of the
@@ -2528,7 +2952,7 @@ public partial class WmvMain : MonoBehaviour
     /// An absent field means "no override", which is different from black: it must leave the
     /// emitters on their authored colours rather than tint them to nothing.
     /// </summary>
-    bool AdoptParticleColor(WmvIpcClient.ModelTexturesResponse r)
+    bool AdoptParticleColor(WmvModelSlot slot, WmvIpcClient.ModelTexturesResponse r)
     {
         Color[][] next = null;
         if (r.particleColor != null && r.particleColor.Length >= 9)
@@ -2546,25 +2970,25 @@ public partial class WmvMain : MonoBehaviour
             next[2] = new[] { stops[2], stops[0], stops[1] };
         }
 
-        bool changed = (next == null) != (currentParticleColor == null);
+        bool changed = (next == null) != (slot.ParticleColor == null);
         if (!changed && next != null)
             for (int i = 0; i < 3 && !changed; i++)
                 for (int j = 0; j < 3 && !changed; j++)
-                    if (next[i][j].r != currentParticleColor[i][j].r ||
-                        next[i][j].g != currentParticleColor[i][j].g ||
-                        next[i][j].b != currentParticleColor[i][j].b)
+                    if (next[i][j].r != slot.ParticleColor[i][j].r ||
+                        next[i][j].g != slot.ParticleColor[i][j].g ||
+                        next[i][j].b != slot.ParticleColor[i][j].b)
                         changed = true;
-        currentParticleColor = next;
+        slot.ParticleColor = next;
         if (changed && r.particleColorId > 0)
             Debug.Log("WMV: ParticleColor " + r.particleColorId + " applies to this model's emitters");
         return changed;
     }
 
-    /// <summary>Push whatever override is current onto the model on screen.</summary>
-    void ApplyParticleColor()
+    /// <summary>Push a slot's current override onto that slot's model.</summary>
+    void ApplyParticleColor(WmvModelSlot slot)
     {
-        if (current != null && current.Emitters != null)
-            current.Emitters.SetParticleColorOverride(currentParticleColor);
+        if (slot.Runtime != null && slot.Runtime.Emitters != null)
+            slot.Runtime.Emitters.SetParticleColorOverride(slot.ParticleColor);
     }
 
     void Fail(string reason)
@@ -2574,12 +2998,15 @@ public partial class WmvMain : MonoBehaviour
         // The host takes a character it hears could not be built back to its own canvas.
         if (job != null && job.Character)
         {
+            if (job.Mount != null) job.Mount.Dispose();
             if (job.Dresser != null) job.Dresser.Dispose();
             if (job.Staged != null) job.Staged.Dispose();
+            job.Mount = null;
             job.Dresser = null;
             job.Staged = null;
             ipc.ReportCharacterSceneApplied(job.FileDataID, job.Load, job.Scene != null ? job.Scene.revision : 0, "rejected",
-                                            "load failed: " + reason, 0, 0, null, job.Clock.ElapsedMilliseconds);
+                                            "load failed: " + reason, 0, 0, null, job.Clock.ElapsedMilliseconds,
+                                            WmvIpcClient.MountKeyOf(job.Scene), "none", "");
         }
         if (haveLoadSubmeshVisible && loadGeosetRevision > 0 && job != null)
             ipc.ReportGeosetsApplied(job.FileDataID, loadGeosetRevision, "rejected", "the load failed: " + reason,
@@ -2592,10 +3019,12 @@ public partial class WmvMain : MonoBehaviour
 
     void OnDestroy()
     {
+        if (job != null && job.Mount != null) job.Mount.Dispose();
         if (job != null && job.Dresser != null) job.Dresser.Dispose();
         if (job != null && job.Staged != null) job.Staged.Dispose();
+        if (mounted != null) mounted.Dispose();         // the character comes off before the mount goes
         if (dresser != null) dresser.Dispose();
-        if (current != null) current.Dispose();
+        if (currentSlot.Runtime != null) currentSlot.Runtime.Dispose();
         if (wmoJob != null) wmoJob.Dead = true;
         DisposeMapObject();
     }
@@ -2607,7 +3036,9 @@ public partial class WmvMain : MonoBehaviour
     /// the animators running. Started 30 frames after the build so the load's own garbage is not
     /// charged to the frame loop (ten frames in); reported once, with the material animator's
     /// counters beside it. WmvMain has no other per-frame work of its own -- the IPC client and the animators run
-    /// their own -- so this Update exists for the probe alone and does nothing without it.
+    /// their own -- so this Update exists for the probe alone and does nothing without it. A character riding a
+    /// mount is measured with the mount's animator and emitters running too, from ten frames after the mount under
+    /// it changed (FrameRiddenScene), and not while a mount is still being prepared for it.
     /// </summary>
     class AllocProbe
     {
@@ -2616,6 +3047,8 @@ public partial class WmvMain : MonoBehaviour
         public long HeapAtStart;
         public int Gen0AtStart;
         public int TogglesAtStart;
+        public WmvRuntimeModel Mount;          // the mount on screen when the window started, or null
+        public int MountTogglesAtStart;
         public bool Started, Done;
     }
     AllocProbe allocProbe;
@@ -2631,21 +3064,26 @@ public partial class WmvMain : MonoBehaviour
         // A world model on screen is measured too (AdoptMapObject starts the probe): it has no animator,
         // material animator or emitters, so its window shows what the frame loop itself allocates
         // while a static WMO is displayed.
-        if (allocProbe == null || allocProbe.Done || (current == null && currentMapObject == null))
+        WmvRuntimeModel onScreen = currentSlot.Runtime;
+        if (allocProbe == null || allocProbe.Done || (onScreen == null && currentMapObject == null))
             return;
         if (!allocProbe.Started)
         {
             // The window measures the FRAME LOOP. The load's own traffic -- the .anim files it
-            // prefetches, a character's parts still arriving -- is decoding on this thread for a
-            // while after the build and would be charged to the frames otherwise.
-            if (Time.frameCount < allocProbe.StartFrame || pendingAnimFetch.Count > 0 ||
-                (dresser != null && dresser.Busy))
+            // prefetches, a character's parts still arriving, a mount being fetched and built for it --
+            // is decoding on this thread for a while after the build and would be charged to the frames otherwise.
+            if (Time.frameCount < allocProbe.StartFrame || currentSlot.PendingAnimFetch.Count > 0 ||
+                (dresser != null && dresser.Busy) ||
+                (mounted != null && (mounted.PreparingFileDataID != 0 || mounted.Mount.PendingAnimFetch.Count > 0)))
                 return;
             allocProbe.Started = true;
             allocProbe.HeapAtStart = System.GC.GetTotalMemory(false);
             allocProbe.Gen0AtStart = System.GC.CollectionCount(0);
-            allocProbe.TogglesAtStart = current != null && current.MaterialAnimator != null
-                ? current.MaterialAnimator.GateToggles : 0;
+            allocProbe.TogglesAtStart = onScreen != null && onScreen.MaterialAnimator != null
+                ? onScreen.MaterialAnimator.GateToggles : 0;
+            allocProbe.Mount = onScreen != null && mounted != null && mounted.RiddenFileDataID != 0 ? mounted.Mount.Runtime : null;
+            allocProbe.MountTogglesAtStart = allocProbe.Mount != null && allocProbe.Mount.MaterialAnimator != null
+                ? allocProbe.Mount.MaterialAnimator.GateToggles : 0;
             allocProbe.Frames = 0;
             return;
         }
@@ -2655,21 +3093,22 @@ public partial class WmvMain : MonoBehaviour
         allocProbe.Done = true;
         long heap = System.GC.GetTotalMemory(false) - allocProbe.HeapAtStart;
         int gen0 = System.GC.CollectionCount(0) - allocProbe.Gen0AtStart;
-        WmvMaterialAnimator ma = current != null ? current.MaterialAnimator : null;
-        WmvEmitterRuntime em = current != null ? current.Emitters : null;
+        WmvMaterialAnimator ma = onScreen != null ? onScreen.MaterialAnimator : null;
+        WmvEmitterRuntime em = onScreen != null ? onScreen.Emitters : null;
         Debug.Log(string.Format(
             "WMV: alloccheck: {0} frames with {1}; managed heap delta {2} bytes ({3:F1} bytes/frame), "
             + "gen-0 collections {4}; material bindings evaluated per frame {5} ({6} colour, {7} colour-alpha, "
             + "{8} weight, {9} transform), gate toggles in the window {10}, bones moving {11}",
             allocProbe.Frames,
-            current == null ? "a static world model on screen (no animator)"
-                : current.Animator != null ? "the animator running" : "no animator",
+            onScreen == null ? "a static world model on screen (no animator)"
+                : onScreen.Animator != null ? (allocProbe.Mount != null ? "the character's animator running, on its mount" : "the animator running")
+                : "no animator",
             heap, heap / (double)allocProbe.Frames, gen0,
             ma != null ? ma.AnimatedCount : 0, ma != null ? ma.ColorCount : 0,
             ma != null ? ma.OpacityCount : 0, ma != null ? ma.WeightCount : 0,
             ma != null ? ma.TransformCount : 0,
             ma != null ? ma.GateToggles - allocProbe.TogglesAtStart : 0,
-            current != null && current.Animator != null ? current.Animator.AnimatedBoneCount : 0));
+            onScreen != null && onScreen.Animator != null ? onScreen.Animator.AnimatedBoneCount : 0));
 
         // The emitters, in the same window and on the same clock. Reported separately because
         // "no allocation per frame" is a claim about THEM more than about anything else here:
@@ -2680,6 +3119,32 @@ public partial class WmvMain : MonoBehaviour
                             + "{3} live particle(s) of {4} slot(s) reserved; {5} ribbon segment(s)",
                             em.ParticleEmitterCount, em.RibbonEmitterCount, em.DrawCallCount,
                             em.LiveParticleCount, em.ParticleCapacity, em.RibbonSegmentCount));
+
+        // The mount the character rode through the window: its animator and emitters ran in the same frames, so the heap
+        // delta above covers them; their own counters follow.
+        WmvRuntimeModel mountRt = allocProbe.Mount;
+        if (mountRt == null)
+            return;
+        if (mounted == null || mounted.Mount.Runtime != mountRt || mountRt.Root == null)
+        {
+            Debug.Log("WMV: alloccheck: the mount the window began with was swapped or taken off during it -- its counters are not reported");
+            return;
+        }
+        WmvMaterialAnimator mma = mountRt.MaterialAnimator;
+        WmvEmitterRuntime mem = mountRt.Emitters;
+        Debug.Log(string.Format(
+            "WMV: alloccheck: the mount {0} (fileDataID {1}) in the same window: {2}; material bindings evaluated per frame {3} "
+            + "({4} colour, {5} colour-alpha, {6} weight, {7} transform), gate toggles in the window {8}, bones moving {9}; "
+            + "emitters {10}",
+            mounted.Key, mounted.RiddenFileDataID, mountRt.Animator != null ? "its animator running" : "no animator",
+            mma != null ? mma.AnimatedCount : 0, mma != null ? mma.ColorCount : 0, mma != null ? mma.OpacityCount : 0,
+            mma != null ? mma.WeightCount : 0, mma != null ? mma.TransformCount : 0,
+            mma != null ? mma.GateToggles - allocProbe.MountTogglesAtStart : 0,
+            mountRt.Animator != null ? mountRt.Animator.AnimatedBoneCount : 0,
+            mem == null ? "none"
+                : string.Format("{0} particle + {1} ribbon = {2} draw call(s); {3} live particle(s) of {4} slot(s) reserved; "
+                                + "{5} ribbon segment(s)", mem.ParticleEmitterCount, mem.RibbonEmitterCount, mem.DrawCallCount,
+                                mem.LiveParticleCount, mem.ParticleCapacity, mem.RibbonSegmentCount)));
     }
 }
 

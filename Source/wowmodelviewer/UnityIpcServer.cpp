@@ -414,14 +414,34 @@ void UnityIpcServer::handleCharacterSceneApplied(const QJsonObject & msg)
   const QJsonArray missing = msg.value("missing").toArray();
   for (const QJsonValue & v : missing)
     ack.missing << v.toString();
+  ack.mountKey = msg.value("mountKey").toString();
+  ack.mountStatus = msg.value("mountStatus").toString();
+  ack.mountReason = msg.value("mountReason").toString();
 
   m_stats.sceneAcks++;
   if (ack.status == "applied")
     m_stats.sceneApplied++;
   m_stats.lastSceneAck = QString("rev %1 %2 %3/%4 %5").arg(ack.revision).arg(ack.status)
                            .arg(ack.merged).arg(ack.attachments).arg(ack.reason);
-  LOG_INFO << "[unityipc] <- characterSceneApplied fileDataID=" << ack.fileDataID << "load=" << ack.load
-           << m_stats.lastSceneAck << "in" << ack.ms << "ms" << (ack.missing.isEmpty() ? QString() : "missing: " + ack.missing.join(","));
+  const QString missingText = ack.missing.isEmpty() ? QString() : "missing: " + ack.missing.join(",");
+  if (ack.mountStatus.isEmpty())
+  {
+    LOG_INFO << "[unityipc] <- characterSceneApplied fileDataID=" << ack.fileDataID << "load=" << ack.load
+             << m_stats.lastSceneAck << "in" << ack.ms << "ms" << missingText;
+  }
+  else
+  {
+    // The mount's outcome, from a player that reports one (protocol 5). The player's text is appended, never
+    // passed through arg().
+    if (ack.mountStatus == "applied")
+      m_stats.mountApplied++;
+    else if (ack.mountStatus == "failed")
+      m_stats.mountFailed++;
+    m_stats.lastMountAck = (ack.mountKey.isEmpty() ? QString("-") : ack.mountKey) + " " + ack.mountStatus +
+                           (ack.mountReason.isEmpty() ? QString() : " " + ack.mountReason);
+    LOG_INFO << "[unityipc] <- characterSceneApplied fileDataID=" << ack.fileDataID << "load=" << ack.load
+             << m_stats.lastSceneAck << "in" << ack.ms << "ms" << missingText << "mount" << m_stats.lastMountAck;
+  }
   if (onCharacterSceneApplied)
     onCharacterSceneApplied(ack);
 }
@@ -523,9 +543,16 @@ void UnityIpcServer::handleMapObjectLoaded(const QJsonObject & msg)
 
 QString UnityIpcServer::RuntimeState::describe() const
 {
-  return QString("query=%1 liveMapObjects=%2 liveModels=%3 modelFileDataID=%4 mapObjectFileDataID=%5 loading=%6")
+  // The player's key is appended, never passed through arg().
+  return QString("query=%1 liveMapObjects=%2 liveModels=%3 modelFileDataID=%4 mapObjectFileDataID=%5 loading=%6 "
+                 "mountFileDataID=%7")
            .arg(query).arg(liveMapObjects).arg(liveModels).arg(modelFileDataID).arg(mapObjectFileDataID)
-           .arg(loading ? "true" : "false");
+           .arg(loading ? "true" : "false").arg(mountFileDataID) +
+         " mountKey=\"" + mountKey + "\"" +
+         QString(" liveMounts=%1 mountsBuilt=%2 mountSeat=%3 mountSeatBone=%4 modelSequence=%5 mountSequence=%6")
+           .arg(liveMounts).arg(mountsBuilt).arg(mountSeat).arg(mountSeatBone).arg(modelSequence).arg(mountSequence) +
+         QString(" mountEmitters=%1 mountRibbons=%2 mountParticles=%3 bodyRebinds=%4 viewFramings=%5")
+           .arg(mountEmitters).arg(mountRibbons).arg(mountParticles).arg(bodyRebinds).arg(viewFramings);
 }
 
 int UnityIpcServer::requestRuntimeState()
@@ -553,6 +580,19 @@ void UnityIpcServer::handleRuntimeState(const QJsonObject & msg)
   s.modelFileDataID = count("modelFileDataID");
   s.mapObjectFileDataID = count("mapObjectFileDataID");
   s.loading = msg.value("loading").toBool(false);
+  s.mountFileDataID = count("mountFileDataID");
+  s.mountKey = msg.value("mountKey").toString();
+  s.liveMounts = count("liveMounts");
+  s.mountsBuilt = count("mountsBuilt");
+  s.mountSeat = count("mountSeat");
+  s.mountSeatBone = count("mountSeatBone");
+  s.modelSequence = count("modelSequence");
+  s.mountSequence = count("mountSequence");
+  s.mountEmitters = count("mountEmitters");
+  s.mountRibbons = count("mountRibbons");
+  s.mountParticles = count("mountParticles");
+  s.bodyRebinds = count("bodyRebinds");
+  s.viewFramings = count("viewFramings");
   LOG_INFO << "[unityipc] <- runtimeState" << s.describe();
   if (onRuntimeState)
     onRuntimeState(s);
@@ -651,7 +691,7 @@ void UnityIpcServer::sendModelSkin(int m2FileDataID)
 }
 
 void UnityIpcServer::sendModelAnimation(int m2FileDataID, int sequenceIndex, int animID,
-                                        int durationMs, bool loop)
+                                        int durationMs, bool loop, const QString & role, int load)
 {
   if (!m_client || !m_unityReady || sequenceIndex < 0)
     return;
@@ -663,15 +703,28 @@ void UnityIpcServer::sendModelAnimation(int m2FileDataID, int sequenceIndex, int
   msg["animID"] = animID;
   msg["durationMs"] = durationMs;
   msg["loop"] = loop;
+  // A ridden mount's two models (protocol 5): which one the selection changed. Not sent about any other model.
+  if (!role.isEmpty())
+  {
+    msg["role"] = role;
+    msg["load"] = load;
+    m_stats.rolePushes++;
+  }
   m_stats.animPushes++;
   m_stats.lastAnimation = QString("seq %1 animID %2 %3ms").arg(sequenceIndex).arg(animID).arg(durationMs);
-  LOG_INFO << "[unityipc] -> modelAnimation fileDataID=" << m2FileDataID
-           << "sequenceIndex=" << sequenceIndex << "animID=" << animID << "durationMs=" << durationMs;
+  if (role.isEmpty())
+    LOG_INFO << "[unityipc] -> modelAnimation fileDataID=" << m2FileDataID
+             << "sequenceIndex=" << sequenceIndex << "animID=" << animID << "durationMs=" << durationMs;
+  else
+    LOG_INFO << "[unityipc] -> modelAnimation fileDataID=" << m2FileDataID
+             << "sequenceIndex=" << sequenceIndex << "animID=" << animID << "durationMs=" << durationMs
+             << "role=" << role << "load=" << load;
   queueJson(msg);
 }
 
 void UnityIpcServer::sendModelAnimationState(int m2FileDataID, int sequenceIndex, bool playing,
-                                             int timeMs, float speed, bool loop, bool explicitState)
+                                             int timeMs, float speed, bool loop, bool explicitState,
+                                             const RiderState * rider, int load)
 {
   if (!m_client || !m_unityReady || sequenceIndex < 0)
     return;
@@ -685,6 +738,24 @@ void UnityIpcServer::sendModelAnimationState(int m2FileDataID, int sequenceIndex
   msg["speed"] = speed;
   msg["loop"] = loop;
   msg["explicitState"] = explicitState;
+  // A ridden mount (protocol 5): the rider's clock, sampled in the same call as the mount's above. "hasRider"
+  // says it is there; a nested object's absence is not something every reader can tell apart from defaults.
+  if (rider)
+  {
+    QJsonObject r;
+    r["sequenceIndex"] = rider->sequenceIndex;
+    r["playing"] = rider->playing;
+    r["timeMs"] = rider->timeMs;
+    r["speed"] = rider->speed;
+    r["loop"] = rider->loop;
+    msg["load"] = load;
+    msg["hasRider"] = true;
+    msg["rider"] = r;
+    m_stats.riderStatePushes++;
+    m_stats.lastRiderState = QString("seq %1 %2 %3ms x%4").arg(rider->sequenceIndex)
+                               .arg(rider->playing ? "playing" : "paused").arg(rider->timeMs)
+                               .arg(rider->speed, 0, 'f', 2);
+  }
   m_stats.statePushes++;
   m_stats.lastState = QString("%1 %2ms x%3").arg(playing ? "playing" : "paused")
                                             .arg(timeMs).arg(speed, 0, 'f', 2);
@@ -784,7 +855,28 @@ bool UnityIpcServer::sendCharacterScene(int m2FileDataID, int revision, const QJ
   m_stats.lastScene = QString("rev %1: %2 merged, %3 attached")
                         .arg(revision).arg(scene.value("merged").toArray().size())
                         .arg(scene.value("attachments").toArray().size());
-  LOG_INFO << "[unityipc] -> characterScene fileDataID=" << m2FileDataID << m_stats.lastScene;
+  if (scene.contains("mount"))
+  {
+    // A ridden mount (protocol 5; the caller sends one only to a player that rides mounts).
+    const QJsonObject mount = scene.value("mount").toObject();
+    const QJsonArray position = mount.value("position").toArray();
+    m_stats.mountScenes++;
+    m_stats.lastMountScene = QString("%1 %2 bone %3 seq %4 rider seq %5").arg(mount.value("key").toString())
+                               .arg(mount.value("fileDataID").toInt()).arg(mount.value("bone").toInt())
+                               .arg(mount.value("sequenceIndex").toInt()).arg(mount.value("riderSequenceIndex").toInt());
+    LOG_INFO << "[unityipc] -> characterScene fileDataID=" << m2FileDataID << m_stats.lastScene << "| mount"
+             << mount.value("key").toString() << "fileDataID=" << mount.value("fileDataID").toInt()
+             << "attachmentId=" << mount.value("attachmentId").toInt() << "bone=" << mount.value("bone").toInt()
+             << "position=" << position.at(0).toDouble() << position.at(1).toDouble() << position.at(2).toDouble()
+             << "riderScale=" << mount.value("riderScale").toDouble()
+             << "textures=" << mount.value("textures").toArray().size()
+             << "submeshes=" << mount.value("submeshCount").toInt()
+             << "particleColorSets=" << (mount.contains("particleColorSets") ? 1 : 0)
+             << "sequenceIndex=" << mount.value("sequenceIndex").toInt()
+             << "riderSequenceIndex=" << mount.value("riderSequenceIndex").toInt();
+  }
+  else
+    LOG_INFO << "[unityipc] -> characterScene fileDataID=" << m2FileDataID << m_stats.lastScene;
   queueJson(msg);
   return true;
 }
@@ -812,7 +904,8 @@ void UnityIpcServer::handleLine(const std::string & line)
     // warning, not an error. A newer or unknown one is.
     if (version > 0 && version < PROTOCOL_VERSION)
       LOG_WARNING << "[unityipc] player speaks protocol v" << version << ", older than WMV's v" << PROTOCOL_VERSION
-                  << "-- what it cannot do (world models below v4, characters below v3) gets a notice";
+                  << "-- what it cannot do (mounted characters below v5, world models below v4, characters below v3)"
+                     " gets a notice";
     else if (version != PROTOCOL_VERSION)
       LOG_ERROR << "[unityipc] player speaks protocol v" << version << "but WMV expects v" << PROTOCOL_VERSION;
     if (onUnityReady)

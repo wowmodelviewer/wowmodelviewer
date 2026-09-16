@@ -327,17 +327,20 @@ the skeleton; the animator is re-bound to the new tracks. The MD21 slice the tra
 cut once at load and kept, because cutting it again is by far the biggest allocation a switch could
 make. Only `loadWoWModel` builds anything.
 
-**And everything it reads is cached, per sequence.** Both the raw tracks (`WmvMain.boneTrackCache`)
+**And everything it reads is cached, per sequence.** Both the raw tracks (`WmvModelSlot.BoneTrackCache`)
 and the tracks converted into renderer space (`WmvM2Animator.convertedBySequence`). Going back to an
 animation already watched costs a dictionary lookup and allocates nothing — measured at 0 ms and 0
 collections — which matters because comparing two animations means switching between them
 repeatedly. The caches are keyed per model and dropped when a different model loads, since a
-sequence index means nothing across models.
+sequence index means nothing across models. They belong to the model's `WmvModelSlot`, with its
+parsed file, the app's selection and playback state and its display state; the switch code
+(`WmvSlotAnimation`) takes the slot it acts on -- the model on screen's, or the mount a character rides,
+whose clock and caches are its own.
 
 **Animations stored in .anim files.** A sequence without flag 0x20 keeps its track headers in the
 .m2 but its keyframe ENTRIES in a separate file, named by the AFID chunk. Those bytes are fetched
 over the ordinary asset channel the first time such a sequence is played and cached per file
-(`WmvMain.animFileCache`), so switching back never refetches. The parser reads the headers from the
+(`WmvModelSlot.AnimFileCache`), so switching back never refetches. The parser reads the headers from the
 .m2 and the entries from the .anim — the same split the legacy viewport makes. A sequence whose
 .anim cannot be served falls back to the idle, names the file, and leaves the previous animation
 running rather than dropping the model to its rest pose.
@@ -391,6 +394,7 @@ process inherits the environment:
 | `-wmvSkinCheck` | bake the skinned result and report the largest distance between a baked vertex and the position the file gave it. Pair it with `-wmvNoAnim`: a moving model is not in its rest pose |
 | `-wmvNoAnim` | do not play anything. The model is still skinned, and still sits in the rest pose the bind poses describe |
 | `-wmvAnimCheck` | sample the idle across its length and report how far the skinned mesh moves from its rest pose, next to the model's own size. Zero everywhere means nothing animates; a number far larger than the model means the rig is being applied wrongly — both look like an ordinary still frame otherwise. Also logs every playback-state message the app sends, which is how to see what the transport controls actually pushed |
+| `-wmvMountCheck[=frames[:mountfirst]]` | a character riding a mount, over the frames (60 unless given, 3600 at most) after a mount goes on or its clip is switched: per frame, where the mount's, the character's and its items' LateUpdates fell, how far behind the drawn frame the character's animator and the shadow map saw the mount's attachment bone and the character's farthest bone, and the mount bone's turn; per window, the same as rates and as one frame at 60 frames a second, how far the animation carries both models past the framed box, and whether drawing the two models' blended batches (and emitters) one after the other or the other way round changes a pixel of the view, with controls that show the check sees the queues. `:mountfirst` poses the mount before every other LateUpdate for the window, for comparison (`WmvMountProbe.cs`) |
 
 Each model load also logs its UV sample, per-batch material/blend/texture-slot mapping, the alpha
 treatment per texture, which batches are hidden at rest and why, the resolved combiner and per-unit
@@ -401,8 +405,12 @@ to (or why it was not).
 
 | File | Role |
 |---|---|
-| `WmvMain.cs` | Bootstrap (camera rig, light, placeholder, status overlay) and the load pipeline: on `loadWoWModel` it fetches the .m2, parses it, fetches the .skin profile named by SFID, resolves and fetches textures, builds the mesh and frames the camera. |
-| `WmvIpcClient.cs` | IPC client (protocol 3): connects back to the WMV server given by `-wmvPort`, sends `unityReady`, receives `loadWoWModel` and `modelSkin`, sends `getAsset` / `getAssetByFileDataID` / `getModelTextures`, decodes + hash-checks `assetResponse`. |
+| `WmvMain.cs` | Bootstrap (camera rig, light, placeholder, status overlay) and the load pipeline: on `loadWoWModel` it fetches the .m2, parses it, fetches the .skin profile named by SFID, resolves and fetches textures, builds the mesh and frames the camera. `ViewFramings` counts every such fitting -- a model, a world model, a change of the mount under a character -- and `runtimeState` reports it, so a test can hold a step to "the camera did not move". |
+| `WmvModelSlot.cs` | What the player keeps about one model: its runtime objects, the parsed model and .m2 bytes, FileDataID, name and textures, the app's selected sequence, the per-sequence track caches, the `.anim` files fetched and still in flight, the app's last playback state, geosets and particle colour. A slot given another model abandons the `.anim` fetches still out for the last one (`AbandonAnimFetches`) without forgetting their request ids, so their answers are claimed and dropped rather than read as an answer to something else. `WmvMain` keeps one for the model on screen, and the sequence code (`WmvSlotAnimation`) takes the slot it acts on. A plain holder: no Unity lifecycle, no IPC. |
+| `WmvSlotAnimation.cs` | The app's animation choice and playback applied to the model in a slot: select, switch (cached tracks, in-file read, or a `.anim` fetched once and cached), prefetch `.anim` files, and apply play/pause, speed and position. For a mounted character (protocol 5) it also routes a push to one of the two models -- `RouteSelection` by `role` and `load`, never by FileDataID -- applies a ridden state's two halves in one pass (`ApplyRidden`), starts a clock that has just gone on from the app's state or in step with the model started with it (`StartClock`, `StartInStep`), and poses the mount and then the character for `-wmvAnimTime` (`PoseMountedAt`). `SequenceApplied` says when a slot's switch is on screen, which a capture waits for. No per-frame code; the lifecycle self-test drives it directly. |
+| `WmvMountedScene.cs` | What a character rides (protocol 5): the scene's `mount` built as a second, separately animated model -- its own slot, fetched under request ids it owns, built inactive -- and the character's body root hung from the mount bone the host resolved (the bone at the attachment position less its pivot; the mount's root at zero when the mount has no such attachment; the root at the converted position when the build has no Transform for the bone), with identity rotation and the rider scale. It goes on in the frame the character's scene is applied, through the dresser's commit gate; swaps move the character onto the new mount before the old one is disposed, a dismount takes it off with the identity, and disposal always takes the character off first. A mount for a character still being loaded belongs to that load (`LoadJob.Mount`). `UnionBounds` is what the camera, the shadow window and the light check frame while the character rides: the mount's box and the character's body box, each carried through its root into the world (eight corners, no allocation), measured in the frame the mount under the character changes. It also carries what `runtimeState` reports about a mount: the mount runtimes alive and built since the player started, and the seat the character hangs by (its case, bone, local position and scale). A target that is superseded drops the work done for it but keeps the account of the files still on the wire, as the dresser does, so their answers are still claimed here and a mount described again never asks twice for one already coming. |
+| `WmvMountProbe.cs` | Diagnostics for a mounted character (`-wmvMountCheck`): the order of the mount's and the character's LateUpdates and what it costs frame by frame (told by `WmvM2Animator.LateUpdated`, a hook that is null otherwise), how far the animation leaves the framed box, and whether the two models' transparent draw order changes the picture. Exists only while it measures. |
+| `WmvIpcClient.cs` | IPC client (protocol 5): connects back to the WMV server given by `-wmvPort`, sends `unityReady`, receives `loadWoWModel`, `modelSkin`, the character's `characterScene` (with its optional `mount`, present when its `key` is non-empty and it names a `fileDataID`), sends `getAsset` / `getAssetByFileDataID` / `getModelTextures`, answers `characterSceneApplied` with `mountKey` / `mountStatus` / `mountReason` and `runtimeState` with the mount it rides, that mount's key, the mount runtimes alive and built, the seat, both animators' sequences, the mount's emitters, the character's body texture binds and how often the view was fitted to what is on screen (`RuntimeReport`), reads `modelAnimation`'s `role` / `load` and `modelAnimationState`'s `load` / `hasRider` / `rider` (a ridden mount's two models; the rider counts only with `hasRider`), decodes + hash-checks `assetResponse`. |
 | `WmvModelBuilder.cs` | Parsed model + skin + decoded textures -> Unity `Mesh` (one submesh per WoW batch), `Material` and `Texture2D`; owns and disposes those runtime resources so repeated loads do not leak. `RebindTextures` re-uploads the textures behind the materials it already made, for when WMV's selected skin changes. |
 | `Wow/M2Parser.cs` | Chunked M2 (MD21/MD20 v272): header, vertices, textures, materials, lookups, SFID/TXID. |
 | `Wow/M2SkinParser.cs` | .skin profile: vertex lookup, triangles, submeshes, batches, and the two-level index resolution into model vertices. |
@@ -413,7 +421,7 @@ to (or why it was not).
 | `Assets/Resources/WmvWmo.shader` | The world-model material shader ("WMV/Map Object"), also under `Resources/` so a player build cannot strip it. One variant: sampler registers `_WmoTex0..8` with their mesh UV channels `_WmoUv0..8`, the pixel permutation `_WmoPermutation` (0 provisional baseline, 1 diffuse, 2 four-layer with MOC2 weights on UV channel 4 and `_WmoLayerMask`, 3 two-layer lerped by the MOCV set-2 alpha on UV channel 5, 4 opaque, 5 the diffuse of id 7 (the lerp of 3), 6 the diffuse of id 5 (the t0.rgb of 4); the env emissives of 2, 5 and 6 are not drawn, by decision), `_AlphaTest`/`_Cutoff`, `_SrcBlend`/`_DstBlend`/`_SrcBlendA`/`_DstBlendA`/`_ZWrite`/`_Cull` as real properties and the `_WmoLightBypass` flag. Blend 2 and above is drawn by a provisional One/Zero fallback, also by decision: the client's blend row for it is only logged. The diagnostic `_WmoDiagView` (`-wmvWmoView`) draws views 1-8 unlit; view 8 (`envmask`) is the emissive mask of permutations 2, 5 and 6 (mix.rgb * mix.a, c.rgb * c.a, t0.rgb * t0.a), computed inside the view block only -- no env map is bound or sampled and nothing drawn normally changes. Its preview light rig is a code copy of the one in `WmvOpaque.shader` and must change with it. What each material binds comes from `Assets/Scripts/Wow/WmoMaterialSemantics.cs`. |
 | `Wow/ByteCursor.cs` | Bounds-checked little-endian reader shared by the parsers. |
 | `WmvM2Animator.cs` | Plays one animation by writing bone transforms each frame: track evaluation, global sequences and looping. Re-bound whenever the app's selection changes. No Animator Controller, no clips, nothing written to disk. |
-| `WmvOrbitCamera.cs` | Orbit / pan / zoom controls plus bounds-driven framing of a loaded model. |
+| `WmvOrbitCamera.cs` | Orbit / pan / zoom controls plus bounds-driven framing of a loaded model -- or of a character and its mount together, framed from their union. |
 
 The parsing layer under `Assets/Scripts/Wow/` deliberately has no `UnityEngine` dependency, so
 it can be compiled and unit-tested outside the editor -- see `Tests/WowParserTests.cs`, which is
@@ -435,7 +443,7 @@ window whenever the pane resizes and sends it `WM_CLOSE` on shutdown.
 
 **WMV is the server.** It listens on `127.0.0.1` (ephemeral port) before launching the player
 and passes `-wmvPort <n>` on the command line; `WmvIpcClient` connects back, sends
-`unityReady { protocolVersion: 3 }`, and then requests raw WoW files with `getAsset` /
+`unityReady { protocolVersion: 5 }`, and then requests raw WoW files with `getAsset` /
 `getAssetByFileDataID` (answered by `assetResponse` with base64 bytes + SHA-1). Newline-delimited
 JSON; full vocabulary and semantics in `docs/unity-renderer/README.md`. Run the player without
 `-wmvPort` and it runs standalone (test scene, no WMV connection).

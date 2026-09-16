@@ -332,6 +332,15 @@ public static class WmvModelBuilder
     ///                    the submeshes of a SINGLE renderer -- and reading the render loop's
     ///                    sorting rules is not the same as measuring it. See
     ///                    WmvMain.ReportQueueOrder.
+    ///   -wmvMountCheck[=frames[:mountfirst]]
+    ///                    a character riding a mount, over the frames (60 unless given, 3600 at most) after a mount
+    ///                    goes on or its clip is switched: where the mount's and the character's
+    ///                    LateUpdates fell, how far behind the drawn frame the character's animator
+    ///                    and the shadow map saw the mount's bone and the character, how far the
+    ///                    animation carries both out of the framed box, and whether the order between
+    ///                    the two models' blended batches changes a pixel of the view. :mountfirst
+    ///                    poses the mount before every other LateUpdate for the window, for
+    ///                    comparison. See WmvMountProbe.
     ///   -wmvWmoVertexColour
     ///                    world models only, diagnostic: multiply MOCV colour set 1 into every
     ///                    world-model material. Never on by default (see WmoVertexColour).
@@ -387,6 +396,8 @@ public static class WmvModelBuilder
         static bool lightDump;
         static float lightYaw = 30f;
         static float lightPitch = 15f;
+        static int mountCheckFrames;                     // -wmvMountCheck: 0 off
+        static bool mountCheckMountFirst;
 
         static void Parse()
         {
@@ -523,6 +534,15 @@ public static class WmvModelBuilder
                     int r;
                     if (int.TryParse(a.Substring("-wmvRig=".Length), out r)) rig = r;
                 }
+                else if (a == "-wmvMountCheck") mountCheckFrames = 60;
+                else if (a.StartsWith("-wmvMountCheck="))
+                {
+                    // frames[:mountfirst] -- colons, because WMV_DEBUG itself is split on commas
+                    string[] p = a.Substring("-wmvMountCheck=".Length).Split(':');
+                    int f;
+                    mountCheckFrames = int.TryParse(p[0], out f) && f > 0 ? Math.Min(f, 3600) : 60;
+                    mountCheckMountFirst = Array.IndexOf(p, "mountfirst") > 0;
+                }
                 else if (a == "-wmvNoSkin") noSkin = true;
                 else if (a == "-wmvSkinCheck") skinCheck = true;
                 else if (a == "-wmvNoAnim") noAnim = true;
@@ -617,9 +637,20 @@ public static class WmvModelBuilder
         /// <summary>
         /// Measure managed allocation per frame while the animators run (-wmvAllocCheck): the
         /// material animator adds per-frame work, and "it is cheap" is a number or it is nothing.
-        /// A static world model is measured the same way after it is adopted (no animators run for it).
+        /// A static world model is measured the same way after it is adopted (no animators run for it),
+        /// and a character with its mount after the mount goes on, comes off or is swapped.
         /// </summary>
         public static bool AllocCheck { get { Parse(); return allocCheck; } }
+
+        /// <summary>
+        /// Measure a character riding a mount over this many frames after the mount goes on or its clip is
+        /// switched (-wmvMountCheck[=frames[:mountfirst]]); 0 when not passed. See WmvMountProbe.
+        /// </summary>
+        public static int MountCheckFrames { get { Parse(); return mountCheckFrames; } }
+
+        /// <summary>-wmvMountCheck=frames:mountfirst: the mount is posed before every other LateUpdate for the
+        /// window, the explicit mount-first order the measurement is compared with.</summary>
+        public static bool MountCheckMountFirst { get { Parse(); return mountCheckMountFirst; } }
 
         /// <summary>
         /// Frame the light check from given bounds (-wmvFrameBounds=cx:cy:cz:ex:ey:ez) rather than

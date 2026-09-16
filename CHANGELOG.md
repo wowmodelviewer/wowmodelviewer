@@ -6,6 +6,88 @@ Format loosely based on [Keep a Changelog](https://keepachangelog.com/).
 ## [Unreleased]
 
 ### Added
+- **Embedded Unity renderer, host side: a character riding a mount is described to the player (protocol
+  5).** To a player that announces protocol 5 the host keeps the character loaded (`loadWoWModel` names
+  the rider, not the mount) and adds an optional `mount` to its `characterScene`: a key from a host mount
+  serial raised for every mount model the mount choice installs, the mount's FileDataID, path and display,
+  the attachment id with the bone and position the mount's own attachment table gives it (-1 and zero
+  when it has none), the rider's scale, the mount's own texture bindings (a slot bound to nothing is left
+  out, never sent as the rider's body image), its geoset flags, its display's particle colour
+  replacement, and the sequence each model plays. Mounting, dismounting and swapping mounts send a new
+  scene, never a new load, and the mount's skin and geosets travel only there. `characterSceneApplied`
+  gains `mountKey`, `mountStatus` and `mountReason` (a mount the player cannot build is logged and never
+  marks the character as failed), `modelAnimation` gains `role` and `load`, `modelAnimationState` gains
+  `load`, `hasRider` and the rider's `sequenceIndex`, `playing` (the mount's pause), `timeMs`, `speed` and
+  `loop`, and `runtimeState` gains `mountFileDataID`. A player older than protocol 5 keeps the "Mounted
+  character" notice. Each mount ridden is logged once with `[unity-mount]`.
+- **Embedded Unity renderer: a mounted character rides its mount in the Unity viewport (player,
+  protocol 5).** The player keeps the dressed character it has and builds the scene's mount beside it as
+  a second, separately animated model (`WmvMountedScene`), then hangs the character's body root from the
+  mount bone the host resolved -- at the attachment position less the bone's pivot, on the mount's origin
+  when the mount has no such attachment, or at the converted position when the build has no bone for it
+  -- so the character and everything it wears follow the animated bone through the hierarchy. The mount,
+  the seat and the riding sequence go on in one frame: the character's scene waits for the mount and for
+  the riding sequence's `.anim` keys, and both clocks start where the host's are. Swapping mounts moves
+  the character onto the new mount before the old one is disposed; a dismount takes it off without
+  reloading anything; a mount that cannot be built is answered `failed` and leaves the character on
+  screen; a character loaded while it rides builds its mount with the load. Every disposal takes the
+  character off the mount first. Answers carry `mountKey`, `mountStatus` and `mountReason`, and
+  `runtimeState` the `mountFileDataID`. The lifecycle self-test adds 70 checks, among them a skinned
+  model under an animated bone of another model, compared with its bake at the origin.
+- **Embedded Unity renderer: a mounted character's two models follow the Animation panel, each on its own
+  clock (player, protocol 5).** An animation choice reaches the model its `role` names -- `"mount"` the
+  mount the character rides, `"rider"` the character on screen or, by its `load`, the one being loaded --
+  and never the model that merely shares its FileDataID, so a mount built from a playable race's body is
+  told apart from its rider. A ridden `modelAnimationState` is applied in one pass: its top level to the
+  mount's animator, the nested `rider` (whose `playing` is the mount's pause, as the host's tick gates the
+  whole tree) to the character's. Picking a mount clip switches only the mount, through its own slot's
+  track cache and `.anim` files (fetched up front when the mount goes on); picking a character clip in View
+  > Attachments switches only the character. When a mount goes on, it starts from the host's newest state
+  for it, and the character's riding sequence from the host's state for it or, without one, in step with
+  the mount. A mount choice sent before its scene is logged and ignored, one made while the mount is being
+  built is applied when it goes on, and the character's own idle selected at a dismount is held for the
+  frame it comes off. `-wmvAnimTime` poses the mount, then the character. The sequence code moved from
+  `WmvMain` to `WmvSlotAnimation` so both slots run it; the lifecycle self-test adds 67 checks (routing,
+  the nested state, both clocks under switches of either model, the start rules, the pinned pose).
+- **Embedded Unity renderer: a mounted character is framed with its mount (player, protocol 5).** When a
+  mount goes on, is swapped or comes off, the camera and the shadow window are fitted to one world box
+  around the mount and the character -- the character's box carried through its body root, which hangs
+  from the mount's bone, so a large mount no longer runs out of the view -- and after a dismount to the
+  character again. An appearance or equipment change while mounted keeps the view, nothing is re-framed
+  per frame, and `-wmvFrameBounds` still pins the box. `WMV_VIEWPORT_ORBIT` now re-aims the camera after a
+  model or a mounted character is framed as well as a world model, `WMV_VIEWPORT_SHOT` also captures after
+  the mount under a character changes and logs the mount's emitters, `-wmvAllocCheck` waits for a mount
+  being prepared and reports its animator, material bindings and emitters, and `-wmvLightCheck` measures
+  both models. New diagnostic `-wmvMountCheck[=frames[:mountfirst]]` measures the LateUpdate order under a
+  mounted character, how far the animation leaves the framed box and whether the two models' transparent
+  draw order changes a pixel: Unity poses the character (and its items) before the mount, which leaves
+  billboard facings and the shadow map at most 0.6 degrees / 0.04 units behind at 60 frames a second on
+  the benchmark clips, and no draw-order-dependent pixel was found, so neither was changed. The lifecycle
+  self-test adds 17 checks.
+- **Embedded Unity renderer: the headless test drives a mounted character end to end.** `-unityipctest` now
+  checks the mounted character it puts up by hand -- the scene answered with the mount applied and no notice,
+  the player holding the character with that mount under it, and nothing left of it after the mount is taken
+  off -- and a run that ends mounted no longer fails for the ridden mount's absent skin pushes (its skin
+  travels in the character's scene). `WMV_IPCTEST_SEQUENCE` gains steps that act on the character already on
+  the canvas, through the menus, panels and dialogs a user acts through, and load nothing: `chr:<file.chr>`,
+  `mount:<displayId>`, `dismount`, `manim:`/`ranim:<animId>` (or `#<sequence>`), `equip:<slot>=<item>`,
+  `custom:<option>[=<choice>]`, `sheath`, `reconnect` and `wait:<ms>`. Each requires the player's answer to the
+  scene it caused and its `runtimeState` account afterwards to match what the host shows: the character on
+  screen with no load in flight, the mount by key and file with exactly one mount runtime alive, the seat the
+  host's resolved attachment gives, both animators on the host's sequences and the mount's emitters its own.
+  No mounted step may send an ordinary `modelSkin` or `modelGeosets` either -- what a ridden mount displays
+  travels in the character's scene and nowhere else -- and each one is held to how often the player fitted the
+  view: exactly once for a mount going on, being swapped or coming off, and not at all for a clip change or a
+  change of what the character wears. `runtimeState` gains `mountKey`, `liveMounts`, `mountsBuilt`,
+  `mountSeat`, `mountSeatBone`, `modelSequence`, `mountSequence`, `mountEmitters`, `mountRibbons`,
+  `mountParticles`, `bodyRebinds` and `viewFramings`, so a stale, doubled or rebuilt mount, a needless
+  character re-composite and a camera that re-aims itself fail a step; an `m2:` step now also requires no
+  mount to be left alive. `CharControl::selectMount` keeps its rows in `fillMountChoices`, so a test picks the
+  row the dialog would (no behaviour change), and an attached item moved between attachments is logged.
+  `WMV_VIEWPORT_SHOT` waits for what it was asked for -- the mount committed, a sequence switch finished, the
+  pose `-wmvAnimTime` pins -- asks for its size again and re-frames the last box when the aspect changed, and
+  logs the camera, both models' clocks and the seat beside the emitter counts. The lifecycle self-test adds 10
+  checks for the counts it reports.
 - **Embedded Unity renderer: world models (WMOs) are drawn, as static geometry.** Picking a WMO in
   Browse keeps the Unity viewport on screen instead of showing a notice. The host sends the root's
   FileDataID (`loadWoWModel` with `"kind":"wmo"`, protocol 4) and the player fetches the root, the
@@ -72,6 +154,12 @@ Format loosely based on [Keep a Changelog](https://keepachangelog.com/).
   follow aliases yet.)
 
 ### Changed
+- **Embedded Unity renderer: the player keeps a model's state in one slot.** The parsed model and its
+  .m2 bytes, the selected animation, the per-sequence track caches, the `.anim` files fetched and in
+  flight, the app's last playback state and the display state (geosets, particle colour) of the model on
+  screen now live together in a `WmvModelSlot`, and the code that selects, switches and plays a sequence
+  acts on the slot it is given, so a second model can be driven by the same code. Nothing the viewport
+  shows, logs or reports changes.
 - **Embedded Unity renderer: large files reach the player sooner.** The host's socket to the player now
   has a 4 MB send buffer. With the default, a 12-19 MB model or skeleton spent most of its transfer
   waiting for the next 20 ms poll; a character now reaches the Unity viewport in about a second instead
@@ -155,6 +243,19 @@ Format loosely based on [Keep a Changelog](https://keepachangelog.com/).
   `-imgseq` smoke test is gone. `-unityipctest` and `-fbxexport` still run.
 
 ### Fixed
+- **A model that fails to load no longer reads the character it replaced after it was freed.** Loading a
+  model frees whatever was on the canvas before the character control is given the new one, and the
+  viewport state -- which now asks whether a mounted character is on screen -- is refreshed in between when
+  the new model cannot be opened. The character control's two pointers into the freed model are cleared as
+  soon as the canvas may have freed them, so that window reads nothing.
+- **A mount being prepared that is superseded no longer costs a second fetch.** Dropping the mount a newer
+  scene replaced also forgot the files already on the wire for it, so the same mount chosen again asked for
+  every one of them a second time and the first answers were reported against whatever load was in flight.
+  The work is dropped; the account of what is still coming is kept, as the character dresser already did.
+- **An item equipped on a mounted character is put on at once.** Picking an item for an equipment slot,
+  or changing an item's level, while the character rides a mount loaded the item but refreshed the
+  mount's (empty) equipment instead of the character's, so the change only appeared at the character's
+  next refresh. The refresh now follows the character the controls act on.
 - **Choosing "None" in the mount list no longer crashes.** Dismounting read the mount's scale from the
   canvas root after the mount had been detached and freed, and with no mount up it freed the character
   itself (the canvas model it was replacing was the same character). The mount's scale is now read before

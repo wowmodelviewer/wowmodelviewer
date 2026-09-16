@@ -924,6 +924,12 @@ void ModelViewer::LoadModel(GameFile * file)
   if (isChar)
   {
     modelAtt = canvas->LoadModel(file);
+    // THE MODEL THAT WAS ON THE CANVAS IS FREED BY THAT CALL (ModelCanvas::LoadModel clears the attachments,
+    // which deletes charAtt, and then deletes the model itself), so the character control's two pointers into
+    // it are stale from here until UpdateModel below re-points them. Everything that reads them in between --
+    // the viewport state a failed load goes on to refresh (DisplayedContentChanged) -- would read freed memory.
+    charControl->charAtt = nullptr;
+    charControl->model = nullptr;
     // error check
     if (!modelAtt)
     {
@@ -955,6 +961,8 @@ void ModelViewer::LoadModel(GameFile * file)
   else
   {
     modelAtt = canvas->LoadModel(file); //  change it from LoadModel, don't sure it's right or not.
+    charControl->charAtt = nullptr;   // freed with the model they pointed at: see the character branch above
+    charControl->model = nullptr;
 
     // error check
     if (!modelAtt)
@@ -1684,14 +1692,16 @@ void ModelViewer::OnCharHook(wxKeyEvent & event)
 // WHAT THE UNITY PLAYER CAN DRAW. Every M2 addressed by FileDataID, playable characters included:
 // the character's resolved appearance, merged armour and attached items reach it as a characterScene
 // (protocol 3). A world model (WMO) root addressed by FileDataID, as static group geometry with a
-// provisional material and no doodads, liquids or lights yet (protocol 4). What it cannot draw yet,
-// each with the notice the viewport shows instead:
+// provisional material and no doodads, liquids or lights yet (protocol 4). A character riding a mount:
+// the canvas model is then the mount, with the character hung from one of its attachments, and the player
+// is still loaded with the character and seats it on the mount its scene describes (protocol 5). What it
+// cannot draw yet, each with the notice the viewport shows instead:
 //   - an image picked in Browse or a map tile (ADT);
 //   - a WMO whose root the host could not read, one with no FileDataID (a legacy client), one the player
 //     reported it could not build (while that load is on display), and any WMO when the connected
 //     player is an older build that cannot draw world models;
-//   - a character riding a mount -- the canvas model is then the mount, with the character hung from
-//     one of its attachments, and the player has no mount rig;
+//   - a character riding a mount when the connected player is an older build that cannot seat one, or
+//     when the rider is not a character model with a FileDataID;
 //   - a model with no FileDataID (a legacy MPQ client): the player addresses every asset by one;
 //   - a character the player reported it could not build, until another load or a player restart;
 //   - a character when the connected player is an older build that cannot dress one.
@@ -1773,8 +1783,8 @@ bool ModelViewer::unityCanDrawCurrentModel(ViewportNotice * notice) const
   if (!canvas->model())
     return false;   // nothing loaded: the empty viewer, not a notice about content
   const WoWModel * m = canvas->model();
-  const wxString name = m->gamefile ? fileName(wxString(m->gamefile->fullname().toStdWString()))
-                                    : wxString(const_cast<WoWModel *>(m)->name().toStdWString());
+  wxString name = m->gamefile ? fileName(wxString(m->gamefile->fullname().toStdWString()))
+                              : wxString(const_cast<WoWModel *>(m)->name().toStdWString());
   if (!m->gamefile)
   {
     out.title = _("Model cannot be shown");
@@ -1783,10 +1793,20 @@ bool ModelViewer::unityCanDrawCurrentModel(ViewportNotice * notice) const
   }
   if (isChar && !m->charModelDetails.isChar)
   {
-    out.title = _("Mounted character");
-    out.detail = _("The character is riding a mount. The Unity viewport cannot show mounted characters yet; "
-                   "dismount to see the character again.");
-    return false;
+    // A MOUNTED CHARACTER. As for characters and world models, a player not known yet is assumed current, and
+    // one that announces an older protocol gets this notice when it does (onUnityReady decides again).
+    const bool playerKnown = unityRendererHost && unityRendererHost->ipc() && unityRendererHost->ipc()->isUnityReady();
+    if (!canvasShowsMountedCharacter() || (playerKnown && !unityRendererHost->ipc()->playerRidesMounts()))
+    {
+      out.title = _("Mounted character");
+      out.detail = _("The character is riding a mount. The Unity viewport cannot show mounted characters yet; "
+                     "dismount to see the character again.");
+      return false;
+    }
+    // From here on the question is about the rider, which is what the player is loaded with and dresses; its
+    // mount travels in the rider's scene.
+    m = riderModel();
+    name = fileName(wxString(m->gamefile->fullname().toStdWString()));
   }
   if (m->gamefile->fileDataId() <= 0)
   {
@@ -1797,8 +1817,9 @@ bool ModelViewer::unityCanDrawCurrentModel(ViewportNotice * notice) const
   }
   if (!isChar)
     return true;
-  // From here canvasShowsCharacter() holds: a model, its game file, isChar, a character model that is
-  // not mounted and a FileDataID were all established above.
+  // From here m is the character: a model, its game file, isChar, a character model -- the canvas model, or
+  // the rider of a mount when the player is not known to be too old to seat it -- and a FileDataID were all
+  // established above.
   if (m_unityCharacterFailed != 0 && m_unityCharacterFailed == (int)m->gamefile->fileDataId())
   {
     out.title = _("Character could not be built");
@@ -1878,6 +1899,52 @@ bool ModelViewer::canvasShowsCharacter() const
          canvas->model()->gamefile && canvas->model()->gamefile->fileDataId() > 0;
 }
 
+// CharControl::UpdateModel takes the model and its node together (charcontrol.cpp), and mounting changes
+// neither: the mount choice puts the mount on the canvas root, the node's parent. The node is compared with
+// the model's own pointer back to its node before anything reads through it: clearing the canvas deletes the
+// node and leaves charAtt dangling until the next load, but the model's pointer back to it is cleared with it
+// (Attachment::~Attachment), so the two no longer agree. A LOAD frees the model itself as well, which no
+// comparison here could survive, so ModelViewer::LoadModel nulls both the moment the canvas may have freed
+// them.
+WoWModel * ModelViewer::riderModel() const
+{
+  if (!isChar || !charControl || !charControl->model || !charControl->charAtt)
+    return nullptr;
+  if (charControl->model->attachment != charControl->charAtt)
+    return nullptr;
+  return charControl->model;
+}
+
+WoWModel * ModelViewer::riderMount() const
+{
+  WoWModel * rider = riderModel();
+  if (!rider || !charControl->charAtt->parent)
+    return nullptr;
+  WoWModel * mount = dynamic_cast<WoWModel *>(charControl->charAtt->parent->model());
+  return mount != rider ? mount : nullptr;
+}
+
+bool ModelViewer::canvasShowsMountedCharacter() const
+{
+  const WoWModel * rider = riderModel();
+  return rider && rider->charModelDetails.isChar && rider->gamefile && rider->gamefile->fileDataId() > 0 &&
+         riderMount() != nullptr;
+}
+
+bool ModelViewer::unityPlayerRidesMounts() const
+{
+  return unityRendererHost && unityRendererHost->ipc() && unityRendererHost->ipc()->playerRidesMounts();
+}
+
+WoWModel * ModelViewer::unityCharacter() const
+{
+  if (canvasShowsCharacter())
+    return const_cast<WoWModel *>(canvas->model());
+  if (canvasShowsMountedCharacter() && unityPlayerRidesMounts())
+    return riderModel();
+  return nullptr;
+}
+
 bool ModelViewer::unityPlayerDressesCharacters() const
 {
   return unityRendererHost && unityRendererHost->ipc() && unityRendererHost->ipc()->playerDressesCharacters();
@@ -1931,6 +1998,7 @@ void ModelViewer::UpdateUnityViewportState()
   // (SendCharacterSceneToUnity). Recorded before any early return: a load decides here, and the tick
   // that follows it must not decide it again.
   m_lastShowsCharacter = canvasShowsCharacter();
+  m_lastShowsMountedCharacter = canvasShowsMountedCharacter();
   if (!unityRendererHost)
     return;
 
@@ -1991,9 +2059,13 @@ void ModelViewer::SendLoadToUnity()
   }
   if (!canvas || !canvas->model() || !canvas->model()->gamefile)
     return;
-  WoWModel * m = const_cast<WoWModel *>(canvas->model());
+  // A CHARACTER RIDING A MOUNT is loaded as the character -- the rider, not the canvas model -- when the player
+  // seats characters on mounts (protocol 5): the mount travels in the rider's scene. An older player is sent the
+  // canvas model, the mount, as before, behind the mounted-character notice.
+  const bool riding = canvasShowsMountedCharacter() && unityRendererHost->ipc()->playerRidesMounts();
+  WoWModel * m = riding ? riderModel() : const_cast<WoWModel *>(canvas->model());
   GameFile * gf = m->gamefile;
-  const bool character = canvasShowsCharacter() && unityRendererHost->ipc()->playerDressesCharacters();
+  const bool character = (riding || canvasShowsCharacter()) && unityRendererHost->ipc()->playerDressesCharacters();
   const int fileDataID = gf->fileDataId() > 0 ? (int)gf->fileDataId() : 0;
   // Answers about any earlier load are told apart from answers about this one by this number.
   const int load = ++m_unityLoadSerial;
@@ -2019,9 +2091,11 @@ void ModelViewer::SendCurrentModelToUnity()
   // control pushes them on a load -- so a player that connects with a model already up shows
   // the geosets the file-list path would give it. After the load, which is what the player's
   // guard for the model being loaded requires.
-  // (Not for a character: its scene carries every texture and geoset, and follows on the next tick.)
+  // (Not for a character: its scene carries every texture and geoset, and follows on the next tick. Nor for the
+  // mount a character rides, to a player that seats it: the rider's scene carries the mount's too.)
   if (unityRendererHost && unityRendererHost->ipc() && unityRendererHost->ipc()->isConnected() &&
-      canvas && canvas->model() && canvas->model()->gamefile && !canvasShowsCharacter())
+      canvas && canvas->model() && canvas->model()->gamefile && !canvasShowsCharacter() &&
+      !(canvasShowsMountedCharacter() && unityPlayerRidesMounts()))
     unityRendererHost->ipc()->sendModelSkin((int)canvas->model()->gamefile->fileDataId());
   // ... and which animation it is showing, so the player starts on the app's selection instead of
   // picking its own idle and being corrected a moment later.
@@ -2039,49 +2113,124 @@ void ModelViewer::SendCurrentSkinToUnity()
   if (!canvas || !canvas->model() || !canvas->model()->gamefile)
     return;
   // A character's textures and geosets travel in its scene (SendCharacterSceneToUnity), which the
-  // host's own refresh keeps current; a skin push would only repeat part of it.
-  if (canvasShowsCharacter())
+  // host's own refresh keeps current; a skin push would only repeat part of it. So do those of the mount a
+  // character rides, to a player that seats it (the scene's "mount"): one channel for its display state.
+  if (canvasShowsCharacter() || (canvasShowsMountedCharacter() && unityPlayerRidesMounts()))
     return;
   WoWModel * m = const_cast<WoWModel *>(canvas->model());
   unityRendererHost->ipc()->sendModelSkin((int)m->gamefile->fileDataId());
+}
+
+namespace
+{
+  // The mount the rider rides, as a character scene describes it: the model on the rider node's parent, the
+  // node's attachment id, and CharControl's serial and display id for it. model is null when none is ridden.
+  UnityCharacterScene::Mount riddenMount(const ModelViewer * viewer)
+  {
+    UnityCharacterScene::Mount mount;
+    mount.model = viewer->riderMount();
+    if (mount.model)
+    {
+      mount.attachmentId = viewer->charControl->charAtt->id;
+      mount.serial = viewer->charControl->mountSerial;
+      mount.displayId = viewer->charControl->mountDisplayId;
+    }
+    return mount;
+  }
+
+  // One line about a scene's "mount" (UnityCharacterScene::buildMount), for the [unity-mount] log. The animation
+  // ids of the two sequences are looked up for the reader; the scene itself carries only the indices.
+  QString describeMount(const QJsonObject & o, const WoWModel * mount, const WoWModel * rider)
+  {
+    const auto animId = [](const WoWModel * m, int index) {
+      return (m && index >= 0 && index < (int)m->anims.size()) ? QString::number(m->anims[index].animID)
+                                                                 : QString("-");
+    };
+    const QJsonArray p = o.value("position").toArray();
+    const int sequence = o.value("sequenceIndex").toInt(-1);
+    const int riderSequence = o.value("riderSequenceIndex").toInt(-1);
+    // Concatenated rather than passed through arg(): a path is free text.
+    return o.value("key").toString() + " " + o.value("path").toString() +
+           QString(" fileDataID=%1 displayID=%2 attachmentId=%3 bone=%4 position=(%5, %6, %7) riderScale=%8")
+             .arg(o.value("fileDataID").toInt()).arg(o.value("displayID").toInt()).arg(o.value("attachmentId").toInt())
+             .arg(o.value("bone").toInt()).arg(p.at(0).toDouble(), 0, 'g', 6).arg(p.at(1).toDouble(), 0, 'g', 6)
+             .arg(p.at(2).toDouble(), 0, 'g', 6).arg(o.value("riderScale").toDouble(), 0, 'g', 6) +
+           QString(" textures=%1 submeshes=%2 particleColorSets=%3 sequenceIndex=%4 (animID %5) "
+                   "riderSequenceIndex=%6 (animID %7)")
+             .arg(o.value("textures").toArray().size()).arg(o.value("submeshCount").toInt())
+             .arg(o.contains("particleColorSets") ? "yes" : "no").arg(sequence).arg(animId(mount, sequence))
+             .arg(riderSequence).arg(animId(rider, riderSequence));
+  }
 }
 
 void ModelViewer::SendCharacterSceneToUnity(bool force)
 {
   // Mounting puts the mount on the canvas and dismounting takes it off again, with no load: the
   // viewport follows here, where every tick passes. Only a change the viewport has not already followed
-  // counts -- UpdateUnityViewportState records what it decided -- so a load is not decided twice.
+  // counts -- UpdateUnityViewportState records what it decided -- so a load is not decided twice. Swapping
+  // one mount for another changes neither: the scene below describes the new mount.
   const bool showsCharacter = canvasShowsCharacter();
-  if (!force && showsCharacter != m_lastShowsCharacter)
+  const bool showsMounted = canvasShowsMountedCharacter();
+  if (!force && (showsCharacter != m_lastShowsCharacter || showsMounted != m_lastShowsMountedCharacter))
   {
     m_lastShowsCharacter = showsCharacter;
+    m_lastShowsMountedCharacter = showsMounted;
     if (isChar)
     {
-      // Dismounting. The player may not have THIS character loaded -- one that connected while the
-      // character was mounted was sent the mount -- and it refuses a scene for a model it is not
-      // building, so the character's load goes out again before the notice is taken down.
-      if (showsCharacter && unityPlayerReady())
+      // The character is in front of the player again: dismounted, or mounted with a player that seats it on
+      // the mount (protocol 5) and so keeps the character it was loaded with. The player may not have THIS
+      // character loaded -- one that connected while the character rode a mount it could not seat was sent
+      // the mount -- and it refuses a scene for a model it is not building, so the character's load goes out
+      // again before the notice is taken down. A player that has it loaded is not sent it again: mounting,
+      // dismounting and swapping load nothing on the host either.
+      const WoWModel * character = unityCharacter();
+      if (character && unityPlayerReady())
       {
-        const bool character = unityRendererHost->ipc()->playerDressesCharacters();
-        if (m_unityLoadedFileDataID != (int)canvas->model()->gamefile->fileDataId() ||
-            m_unityLoadedCharacter != character)
+        const bool dresses = unityRendererHost->ipc()->playerDressesCharacters();
+        if (m_unityLoadedFileDataID != (int)character->gamefile->fileDataId() || m_unityLoadedCharacter != dresses)
           SendCurrentModelToUnity();
       }
-      // Mounting puts the mounted-character notice up; dismounting takes it down. Nothing here launches
-      // or opens a dialog, so it is safe inside the canvas timer.
+      // Mounting puts the mounted-character notice up for a player that cannot seat the character; dismounting
+      // takes it down. Nothing here launches or opens a dialog, so it is safe inside the canvas timer.
       UpdateUnityViewportState();
     }
   }
 
+  // THE MOUNT IN THE LOG: each mount model the character rides is described once, as a scene would carry it,
+  // whatever the player can do with it.
+  if (showsMounted)
+  {
+    const UnityCharacterScene::Mount mount = riddenMount(this);
+    if (mount.model != m_loggedMount || mount.serial != m_loggedMountSerial)
+    {
+      m_loggedMount = mount.model;
+      m_loggedMountSerial = mount.serial;
+      const WoWModel * rider = riderModel();
+      LOG_INFO << "[unity-mount] the character" << rider->gamefile->fullname() << "rides"
+               << describeMount(UnityCharacterScene::buildMount(riderModel(), mount), mount.model, rider)
+               << (unityPlayerRidesMounts() ? "-- described in the character's scene"
+                   : unityPlayerReady() ? "-- the player cannot seat it (older than protocol 5): mounted-character notice"
+                                        : "-- no player ready yet");
+    }
+  }
+  else if (m_loggedMount)
+  {
+    LOG_INFO << "[unity-mount] no mount is ridden any more (was" << QString("M%1").arg(m_loggedMountSerial).toLatin1().constData()
+             << ")";
+    m_loggedMount = nullptr;
+  }
+
   if (!unityRendererHost || !unityRendererHost->ipc() || !unityRendererHost->ipc()->playerDressesCharacters())
     return;
-  if (!showsCharacter || m_sceneHold > 0)
+  // The character the player is loaded with: the canvas model, or the rider of a mount the player seats.
+  WoWModel * m = unityCharacter();
+  if (!m || m_sceneHold > 0)
     return;
   // The player reported it could not build this character from the load on display, and the canvas has
   // it: another scene would only be refused again, with the composited body image sent for nothing. A
   // later load of the same body model is another attempt, whose build waits for its scene -- held back,
   // that load would never finish, never answer, and the character would stay on the canvas for good.
-  if (m_unityCharacterFailed != 0 && m_unityCharacterFailed == (int)canvas->model()->gamefile->fileDataId() &&
+  if (m_unityCharacterFailed != 0 && m_unityCharacterFailed == (int)m->gamefile->fileDataId() &&
       m_unityCharacterFailedLoad == m_unityLoadSerial)
     return;
   const unsigned long now = timeGetTime();
@@ -2111,8 +2260,11 @@ void ModelViewer::SendCharacterSceneToUnity(bool force)
     m_lastSceneSignature = 0;
   }
 
-  WoWModel * m = const_cast<WoWModel *>(canvas->model());
-  const quint64 signature = UnityCharacterScene::signature(m);
+  // The rider's mount goes in its scene: m is the rider, not the canvas model, only while it rides one the player
+  // seats (unityCharacter).
+  const UnityCharacterScene::Mount mount = riddenMount(this);
+  const UnityCharacterScene::Mount * ridden = (m != canvas->model() && mount.model) ? &mount : nullptr;
+  const quint64 signature = UnityCharacterScene::signature(m, ridden);
   if (!force && signature == m_lastSceneSignature)
     return;
   m_lastSceneSignature = signature;
@@ -2123,7 +2275,7 @@ void ModelViewer::SendCharacterSceneToUnity(bool force)
   UnityCharacterScene::Summary summary;
   const QJsonObject scene = UnityCharacterScene::build(
     m, [ipc](const QString & kind, const QImage & image) { return ipc->shareCharacterImage(kind, image); },
-    summary);
+    summary, ridden);
   const int revision = ++m_sceneRevision;
   if (ipc->sendCharacterScene((int)m->gamefile->fileDataId(), revision, scene))
   {
@@ -2131,10 +2283,15 @@ void ModelViewer::SendCharacterSceneToUnity(bool force)
     m_sceneSentAt = now;
   }
   if (m_sceneAwaitingRevision == revision)
+  {
     LOG_INFO << "[unity-character] scene revision" << revision << "for" << m->gamefile->fullname() << ":"
              << summary.bodyTextures << "body texture(s)," << summary.images << "composited image reference(s),"
              << summary.merged << "merged," << summary.attachments << "attached; built and queued in"
              << clock.elapsed() << "ms";
+    if (summary.mount)
+      LOG_INFO << "[unity-mount] scene revision" << revision << "load" << m_unityLoadSerial << "mount"
+               << describeMount(scene.value("mount").toObject(), mount.model, m);
+  }
 }
 
 bool ModelViewer::unityPlayerReady() const
@@ -2156,8 +2313,9 @@ int ModelViewer::SendCurrentGeosetsToUnity()
     return 0;
   // A character's geosets -- its own, its merged parts' and its items' -- reach the player in its
   // scene, which the signature sends on the next tick. One channel: a modelGeosets for the body
-  // would race the scene that also carries the body's flags.
-  if (canvasShowsCharacter())
+  // would race the scene that also carries the body's flags. The same holds for the mount a character
+  // rides: the canvas model is then the mount, and its flags travel in the rider's scene.
+  if (canvasShowsCharacter() || canvasShowsMountedCharacter())
     return 0;
   const int revision = ++m_geosetRevision;
   return unityRendererHost->ipc()->sendModelGeosets((int)canvas->model()->gamefile->fileDataId(), revision)
@@ -2191,7 +2349,17 @@ void ModelViewer::OnCharacterSceneApplied(const UnityIpcServer::SceneAck & ack)
     return;
   }
 
-  const bool current = canvasShowsCharacter() && (int)canvas->model()->gamefile->fileDataId() == ack.fileDataID;
+  // The character the player is loaded with: the canvas model, or the rider of a mount the player seats.
+  const WoWModel * character = unityCharacter();
+  const bool current = character && (int)character->gamefile->fileDataId() == ack.fileDataID;
+  // THE MOUNT (protocol 5) is answered in the same ack but is not the character: a mount the player could not
+  // build leaves the character built and on screen, so it is logged here and changes no notice.
+  if (current && ack.mountStatus == "failed")
+    LOG_ERROR << "[unity-mount] the Unity viewport could not build mount" << ack.mountKey << "of scene revision"
+              << ack.revision << "(" << ack.mountReason << ") -- the character is shown without it";
+  else if (current && (!ack.mountKey.isEmpty() || (!ack.mountStatus.isEmpty() && ack.mountStatus != "none")))
+    LOG_INFO << "[unity-mount] scene revision" << ack.revision << "load" << ack.load << "mount"
+             << (ack.mountKey.isEmpty() ? QString("-") : ack.mountKey) << ack.mountStatus;
   if (current && ack.status == "applied" && m_unityCharacterFailed == ack.fileDataID)
   {
     // A later load of the model whose build failed (another NPC on the same body, say) was dressed, so
@@ -2206,7 +2374,7 @@ void ModelViewer::OnCharacterSceneApplied(const UnityIpcServer::SceneAck & ack)
     {
       // The player could not build this character at all and is still holding whatever it showed
       // before. The viewport says so, in front of it, until something else is loaded.
-      LOG_ERROR << "[unity-character] the Unity viewport could not build" << canvas->model()->gamefile->fullname()
+      LOG_ERROR << "[unity-character] the Unity viewport could not build" << character->gamefile->fullname()
                 << "(" << ack.reason << ") -- showing a notice instead";
       m_unityCharacterFailed = ack.fileDataID;
       m_unityCharacterFailedLoad = ack.load;
@@ -2277,6 +2445,24 @@ void ModelViewer::SendCurrentAnimationToUnity()
   if (!canvas || !canvas->model() || !canvas->model()->gamefile)
     return;
   WoWModel * m = const_cast<WoWModel *>(canvas->model());
+  // A CHARACTER RIDING A MOUNT the player seats (protocol 5): two models animate, and the Animation panel acts on
+  // one of them -- g_selModel, the mount after the mount choice, the rider once View > Attachments picked it --
+  // so the push is about that model and says which of the two it is. Its FileDataID cannot say: a mount model
+  // can also be a playable race's body. Any other pick there (an item model) is nothing the player animates on
+  // its own, and is not pushed.
+  QString role;
+  if (canvasShowsMountedCharacter() && unityPlayerRidesMounts())
+  {
+    if (g_selModel && g_selModel == riderMount())
+      role = QStringLiteral("mount");
+    else if (g_selModel && g_selModel == riderModel())
+      role = QStringLiteral("rider");
+    else
+      return;
+    m = g_selModel;
+    if (!m->gamefile)
+      return;
+  }
   if (!m->animManager || m->anims.empty())
     return;
 
@@ -2285,7 +2471,7 @@ void ModelViewer::SendCurrentAnimationToUnity()
     return;
   unityRendererHost->ipc()->sendModelAnimation((int)m->gamefile->fileDataId(), index,
                                                m->anims[index].animID, (int)m->anims[index].length,
-                                               true);
+                                               true, role, role.isEmpty() ? 0 : m_unityLoadSerial);
   // A new selection restarts at frame 0 and keeps whatever play/pause and speed were in force;
   // send that alongside so the renderer does not briefly run an animation the app has paused.
   SendAnimationStateToUnity(true);
@@ -2334,6 +2520,31 @@ void ModelViewer::SendAnimationStateToUnity(bool force)
   else
   {
     m_lastAnimStatePush = timeGetTime();
+  }
+
+  // A CHARACTER RIDING A MOUNT the player seats (protocol 5): the fields above stay the canvas model's, the
+  // mount's, and the rider's clock rides along, sampled in this same call so the player can apply both at once.
+  // Both advance by the same tick but on their own clocks (ModelCanvas::tick -> Attachment::tick). The rider's
+  // "playing" is the MOUNT's: the tick stops the time of the whole tree when the canvas model is paused and never
+  // reads the rider's own flag -- which the mount choice leaves set by stopping the rider (AnimManager::Stop)
+  // while its time keeps advancing (AnimManager::Tick does not read it).
+  if (canvasShowsMountedCharacter() && unityPlayerRidesMounts())
+  {
+    WoWModel * rider = riderModel();
+    const int riderIndex = (rider->animManager && !rider->anims.empty()) ? (int)rider->animManager->GetAnim() : -1;
+    if (riderIndex >= 0 && riderIndex < (int)rider->anims.size())
+    {
+      UnityIpcServer::RiderState state;
+      state.sequenceIndex = riderIndex;
+      state.playing = playing;
+      state.timeMs = (int)rider->animManager->GetFrame();
+      state.speed = rider->animManager->GetSpeed();
+      state.loop = true;
+      unityRendererHost->ipc()->sendModelAnimationState((int)m->gamefile->fileDataId(), index,
+                                                        playing, timeMs, speed, true,
+                                                        /* explicitState */ force, &state, m_unityLoadSerial);
+      return;
+    }
   }
 
   unityRendererHost->ipc()->sendModelAnimationState((int)m->gamefile->fileDataId(), index,
@@ -3671,7 +3882,11 @@ void ModelViewer::UpdateControls()
     return;
 
   WoWModel * m = const_cast<WoWModel *>(canvas->model());
-  if (m->modelType == MT_CHAR)
+  // A character riding a mount is refreshed as the character it is. The canvas model is then the mount, whose
+  // item list is empty, while the character controls act on the rider (CharControl::model): an equipment slot
+  // pick or an item level change loads the item into the rider and relies on this refresh to put it on, which
+  // refreshing the mount's items never did -- the change only appeared at the rider's next refresh.
+  if (m->modelType == MT_CHAR || (riderModel() && riderMount() == m))
     charControl->RefreshModel();
   else
   {
