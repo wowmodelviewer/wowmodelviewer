@@ -734,7 +734,12 @@ void AnimControl::SetSkinByDisplayID(int cdi)
     // note that these aren't the same group, just equivalent:
     if (gp == *(static_cast<TextureGroup *> (skinList->GetClientData(i))))
     {
-      SetSkin(i, cdi);
+      // The override is an ItemDisplayInfo id, and only an item group carries one (gp.displayId,
+      // 0 for a group built from CreatureDisplayInfo). The id this was called with is a
+      // CreatureDisplayInfo id for a creature, an NPC or a mount, and ItemDisplayInfoModelMatRes
+      // can hold an unrelated item under the same number, whose per-slot pass would then clear the
+      // creature skin just bound above.
+      SetSkin(i, gp.displayId);
       return;
     }
   }
@@ -775,8 +780,9 @@ bool AnimControl::UpdateCreatureModel(WoWModel *m)
   // branch take ParticleColorID for the display id and TextureVariationFileDataID4 for the
   // particle colour.
   //
-  // The first TextureGroup::num columns are always the texture variations in every branch,
+  // The first variationCols columns are always the texture variations in every branch,
   // which is why the texture loop below can stay positional.
+  size_t variationCols = 3;
   int colParticleColor = 3;
   int colDisplayId = 4;
   int colGeosetData = -1;   // only Legion packs the geoset data into the row itself
@@ -808,6 +814,7 @@ bool AnimControl::UpdateCreatureModel(WoWModel *m)
                       "ON CreatureDisplayInfo.ModelID = CreatureModelData.ID "
                       "WHERE CreatureModelData.FileDataID = %1")
                       .arg(m->gamefile->fileDataId());
+      variationCols = 4;
       colParticleColor = 4;
       colDisplayId = 5;
   }
@@ -832,7 +839,7 @@ bool AnimControl::UpdateCreatureModel(WoWModel *m)
 
       TextureGroup grp;
       int count = 0;
-      for (size_t skin = 0; skin < TextureGroup::num; skin++)
+      for (size_t skin = 0; skin < variationCols; skin++)
       {
         if(!r.values[i][skin].isEmpty())
         {
@@ -1819,7 +1826,7 @@ bool AnimControl::selectedSkinTextures(std::vector<std::pair<int, int> > & out)
           continue;
         const int fdid = (int)tex->fileDataId();
         if (fdid > 0)
-          byType[grp->base + (int)i] = fdid;
+          byType[grp->textureType(i)] = fdid;
       }
     }
   }
@@ -1849,7 +1856,7 @@ bool AnimControl::selectedSkinTextures(std::vector<std::pair<int, int> > & out)
 
 void AnimControl::SetSkin(int num, int displayIdOverride)
 {
-  std::vector<wxString> currTextures(3);
+  std::vector<wxString> currTextures(TextureGroup::num);
 
   // Choosing a whole skin replaces anything picked slot-by-slot before it.
   singleSkinOverrides.clear();
@@ -1886,8 +1893,7 @@ void AnimControl::SetSkin(int num, int displayIdOverride)
     }
     currTextures[i] = texname;
 
-    int base = grp->base + i;
-    g_selModel->updateTextureList(tex, base);
+    g_selModel->updateTextureList(tex, grp->textureType(i));
   }
 
   // Remember the applied item/weapon skin so an out-of-process FBX export re-binds EXACTLY this

@@ -9,6 +9,7 @@
 //#include "model.h"
 //#include "wmo.h"
 #include "modelcanvas.h"
+#include "wow_enums.h"
 
 #include <wx/collpane.h>
 #include <wx/timer.h>
@@ -23,7 +24,24 @@ typedef int GeosetNum;
 class TextureGroup
 {
   public:
-    static const size_t num = 3;
+    // Room for all four CreatureDisplayInfo texture variations.
+    static const size_t num = 4;
+
+    // The M2 texture type CreatureDisplayInfo.TextureVariationFileDataID[i] fills: 11, 12 and 13 for
+    // the first three, and type 5 for the fourth -- not 14. In the client data, 812 of the 946 displays
+    // that set the fourth variation use a model declaring type 5, the others a model with no slot for
+    // it, and no creature model declares type 14.
+    static int creatureVariationType(size_t i)
+    {
+      return i == 3 ? TEXTURE_ENVIRONMENT : TEXTURE_GAMEOBJECT1 + (int)i;
+    }
+
+    // The texture type entry i of this group fills.
+    int textureType(size_t i) const
+    {
+      return base == TEXTURE_GAMEOBJECT1 ? creatureVariationType(i) : base + (int)i;
+    }
+
     size_t count;
     int base;
     GameFile * tex[num];

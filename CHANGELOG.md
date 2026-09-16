@@ -264,6 +264,20 @@ Format loosely based on [Keep a Changelog](https://keepachangelog.com/).
   `-imgseq` smoke test is gone. `-unityipctest` and `-fbxexport` still run.
 
 ### Fixed
+- **A mount, NPC or creature whose display id is also an item display id keeps its skin.** Picking a skin by
+  display id (a mount, an NPC, an Armory import) passed that CreatureDisplayInfo id on as the ItemDisplayInfo id
+  the per-slot material table is keyed on. Where an unrelated item had a row under the same number, that item's
+  pass counted as authoritative and cleared the creature skin textures bound a moment earlier, so the mount went
+  to Unity without them and drew white (Primeval Skyfriend, display 144856). `AnimControl::SetSkinByDisplayID`
+  now passes the group's own item display id, which is 0 for a group built from CreatureDisplayInfo; item skins
+  are unchanged.
+- **A creature's fourth texture variation is applied.** CreatureDisplayInfo has four texture variations, but the
+  skin list kept three, so a model slot that takes the fourth stayed unbound: Primeval Skyfriend's saddle drew
+  white. The fourth variation fills texture type 5, not 14: in the client data 812 of the 946 displays that
+  set it use a model declaring type 5, the others a model with no slot for it, and no creature model
+  declares type 14. The skin list, the skin sent to the Unity viewport and the database fallback in
+  `UnityAssetAccess` now use that mapping (`TextureGroup::textureType`) for mounts, `-mo` creatures and NPCs.
+  Older clients whose table has three variations, and user skin files, still read three.
 - **A long equipment item name no longer makes Model > Appearance wider than the panel.** The name is cut
   short with an ellipsis where the panel ends. The full width of a name such as "Thunderfury, Blessed Blade
   of the Windseeker" used to become the page's minimum width the next time the page was laid out -- mounting

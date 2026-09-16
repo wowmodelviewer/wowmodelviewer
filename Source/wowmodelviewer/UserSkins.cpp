@@ -65,7 +65,7 @@ void UserSkins::LoadFile(const wxString &filename)
     for (size_t g=0; g < numGroups; ++g) {
       TextureGroup grp;
       int count = 0;
-      for (size_t i=0; i < TextureGroup::num; ++i) {
+      for (size_t i=0; i < 3; ++i) { // the file lists three textures per group
         if (!readline(in, line, lineNr)) {
           LOG_ERROR << "UserSkins: unexpected EOF at line" << lineNr;
           return;
