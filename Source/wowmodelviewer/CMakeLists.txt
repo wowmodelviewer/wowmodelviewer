@@ -41,6 +41,7 @@ set(src  AnimationExportChoiceDialog.cpp
          modelcontrol.cpp
          ModelInspector.cpp
          modelviewer.cpp
+         MountCard.cpp
          NPCImporterDialog.cpp
          OrbitCamera.cpp
          Quantize.cpp
@@ -87,6 +88,7 @@ set(headers AnimationExportChoiceDialog.h
             modelcontrol.h
             ModelInspector.h
             modelviewer.h
+            MountCard.h
             NPCImporterDialog.h
             OrbitCamera.h
             Quantize.h

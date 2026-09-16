@@ -45,6 +45,12 @@ namespace UiStyle
     return label;
   }
 
+  // A card: a few controls that belong together and have to stand out from the rows around them (the
+  // Model panel's Mount card). The system window colour inside a hairline in the docking manager's pane
+  // border colour, so it follows the theme like the rest and stays apart from the face-coloured sections.
+  inline wxColour cardBackground() { return wxSystemSettings::GetColour(wxSYS_COLOUR_WINDOW); }
+  inline wxColour cardBorder() { return wxSystemSettings::GetColour(wxSYS_COLOUR_3DFACE).ChangeLightness(82); }
+
   // A section title: a bold label followed by a hairline across the remaining width.
   inline wxSizer * sectionHeader(wxWindow * parent, const wxString & title, wxStaticText ** labelOut = nullptr)
   {

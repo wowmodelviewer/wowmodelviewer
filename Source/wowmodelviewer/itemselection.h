@@ -40,6 +40,9 @@ public:
   virtual void DoFilter() { };
   virtual void Check(int index, bool state) { };
 
+protected:
+  // Set while FilteredChoiceDialog::SelectChoiceRow moves the selection: the selection event chooses nothing.
+  bool m_syncingSelection = false;
 };
 
 
@@ -77,6 +80,9 @@ public:
   virtual int GetSelection() const { return m_indices[m_selection]; }
   virtual bool FilterFunc(int index);
   virtual void DoFilter();
+  // Show which choice is chosen -- choices[index], chosen somewhere else -- without choosing it again: its row is
+  // selected and scrolled to, or no row is selected while the filter hides it.
+  void SelectChoiceRow(int index);
 };
 
 

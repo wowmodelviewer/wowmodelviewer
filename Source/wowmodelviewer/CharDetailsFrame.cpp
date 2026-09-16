@@ -37,7 +37,7 @@ CharDetailsFrame::CharDetailsFrame(wxWindow* parent)
 
   charCustomizationGS_ = new wxFlexGridSizer(1);
   charCustomizationGS_->AddGrowableCol(0);
-  top->Add(UiStyle::sectionHeader(this, _("Customization")), wxSizerFlags().Border(wxBOTTOM, FromDIP(UiStyle::S)).Expand());
+  top->Add(UiStyle::sectionHeader(this, _("Character Appearance")), wxSizerFlags().Border(wxBOTTOM, FromDIP(UiStyle::S)).Expand());
 
   top->Add(charCustomizationGS_, wxSizerFlags().Border(wxBOTTOM, 5).Expand());
   auto * row = new wxBoxSizer(wxHORIZONTAL);

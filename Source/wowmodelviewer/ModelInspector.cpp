@@ -296,6 +296,7 @@ void ModelInspector::RefreshAppearance()
                            (m_char->model->getItem(CS_HAND_RIGHT) || m_char->model->getItem(CS_HAND_LEFT));
     m_char->SetHandsOnly(ctx != CONTEXT_CHARACTER);
     m_char->Show(ctx == CONTEXT_CHARACTER || handSlots);
+    MountStateChanged();
   }
 
   if (m_anim)
@@ -319,6 +320,22 @@ void ModelInspector::OnOverridesToggled(wxCollapsiblePaneEvent & WXUNUSED(event)
 {
   m_modelBox->Layout();
   m_appearance->Layout();
+}
+
+void ModelInspector::MountStateChanged()
+{
+  if (!m_char || !m_notebook)
+    return;
+  m_mountRider = g_modelViewer ? g_modelViewer->riderModel() : nullptr;
+  m_mountModel = m_mountRider ? g_modelViewer->riderMount() : nullptr;
+  m_mountSerial = m_char->mountSerial;
+  m_char->RefreshMountCard();
+
+  // A quiet mark on the tab itself, so a mounted character is plain from the Geosets and Info tabs too.
+  const wxString label = m_mountModel ? wxString(_("Appearance")) + wxT(" \u00B7 ") + _("Mounted")
+                                      : wxString(_("Appearance"));
+  if (m_notebook->GetPageText(PAGE_APPEARANCE) != label)
+    m_notebook->SetPageText(PAGE_APPEARANCE, label);
 }
 
 // ---- Geosets ---------------------------------------------------------------------------------
@@ -1049,6 +1066,16 @@ void ModelInspector::OnWatchTimer(wxTimerEvent & WXUNUSED(event))
       SetGeosetNotice(UnconfirmedNotice());
       m_noticeIsUnconfirmed = true;
     }
+  }
+
+  // A mount put up, swapped or taken off without a call here (MountStateChanged): the card and the tab label,
+  // whichever tab is open.
+  if (m_char && g_modelViewer)
+  {
+    const WoWModel * rider = g_modelViewer->riderModel();
+    const WoWModel * mount = rider ? g_modelViewer->riderMount() : nullptr;
+    if (rider != m_mountRider || mount != m_mountModel || m_char->mountSerial != m_mountSerial)
+      MountStateChanged();
   }
 
   if (!IsShownOnScreen())

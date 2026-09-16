@@ -10,7 +10,9 @@
 #include "RaceInfos.h"
 #include "UiStyle.h"
 #include "itemselection.h"
+#include "ModelInspector.h"
 #include "modelviewer.h"
+#include "MountCard.h"
 #include "util.h"
 #include "WoWDatabase.h"
 #include "WoWModel.h"
@@ -28,7 +30,6 @@ EVT_SPIN(ID_TABARD_BORDER, CharControl::OnTabardSpin)
 EVT_SPIN(ID_TABARD_BORDERCOLOR, CharControl::OnTabardSpin)
 EVT_SPIN(ID_TABARD_BACKGROUND, CharControl::OnTabardSpin)
 
-EVT_BUTTON(ID_MOUNT, CharControl::OnButton)
 EVT_BUTTON(ID_CLEAR_EQUIPMENT, CharControl::OnButton) // in-panel "Clear all equipment" button
 
 // Per-slot "X" remove buttons occupy the ID_EQUIPMENT + 2000 + slot range (slot buttons are
@@ -78,14 +79,19 @@ CharControl::CharControl(wxWindow* parent, wxWindowID id)
     return;
   }
 
-  // Laid out as the Model panel's Appearance page for a character: Customization, Equipment and
-  // Tabard sections, left-aligned, on the shared spacing scale. The controls and their IDs are the
-  // ones this panel always had.
+  // Laid out as the Model panel's Appearance page for a character: the Mount card, then Character
+  // Appearance (the customization), Equipment and Tabard sections, left-aligned, on the shared spacing
+  // scale. The controls and their IDs are the ones this panel always had.
   const int xs = FromDIP(UiStyle::XS);
   const int sp = FromDIP(UiStyle::S);
   const int md = FromDIP(UiStyle::M);
 
   auto * top = new wxBoxSizer(wxVERTICAL);
+
+  // First, so how to put the character on a mount is the first thing the page shows. It shows itself
+  // for a playable character only (MountCard::Sync).
+  m_mountCard = new MountCard(this, this);
+  top->Add(m_mountCard, wxSizerFlags().Expand().Border(wxLEFT | wxRIGHT | wxTOP, md));
 
   cdFrame = new CharDetailsFrame(this);
   top->Add(cdFrame, wxSizerFlags().Expand().Border(wxLEFT | wxRIGHT | wxTOP, md));
@@ -100,6 +106,9 @@ CharControl::CharControl(wxWindow* parent, wxWindowID id)
   auto * gs2 = new wxFlexGridSizer(4, xs, xs);
   gs2->AddGrowableCol(3);
 
+  // An item's name is cut short with an ellipsis where the panel ends. Its full width never becomes the
+  // page's minimum width: a long one ("Thunderfury, Blessed Blade of the Windseeker") laid the whole page
+  // out wider than the panel, pushing the customization rows off its right edge.
 #define ADD_CONTROLS(type, caption) \
     { \
   gs2->Add(buttons[type]=new wxButton(this, ID_EQUIPMENT + type, caption), wxSizerFlags().Expand()); \
@@ -109,7 +118,8 @@ CharControl::CharControl(wxWindow* parent, wxWindowID id)
   clearButtons[type]=new wxButton(this, ID_EQUIPMENT + 2000 + type, wxT("X"), wxDefaultPosition, wxSize(FromDIP(24), -1)); \
   clearButtons[type]->SetToolTip(_("Remove this item")); \
   gs2->Add(clearButtons[type], wxSizerFlags().Align(wxALIGN_CENTER_VERTICAL)); \
-  gs2->Add(labels[type]=new wxStaticText(this, -1, _("---- None ----"), wxDefaultPosition, wxDefaultSize, wxST_ELLIPSIZE_END), wxSizerFlags().Expand().Align(wxALIGN_CENTER_VERTICAL)); \
+  gs2->Add(labels[type]=new wxStaticText(this, -1, _("---- None ----"), wxDefaultPosition, wxDefaultSize, wxST_ELLIPSIZE_END | wxST_NO_AUTORESIZE), wxSizerFlags().Expand().Align(wxALIGN_CENTER_VERTICAL)); \
+  labels[type]->SetMinSize(wxSize(FromDIP(40), -1)); \
     }
 
   ADD_CONTROLS(CS_HEAD, _("Head"))
@@ -159,11 +169,7 @@ CharControl::CharControl(wxWindow* parent, wxWindowID id)
 
 #undef ADD_CONTROLS
 
-  top->Add(gs3, wxSizerFlags().Expand().Border(wxLEFT | wxRIGHT | wxTOP, md));
-  m_mountHeader = UiStyle::sectionHeader(this, _("Mount"));
-  top->Add(m_mountHeader, wxSizerFlags().Expand().Border(wxLEFT | wxRIGHT | wxTOP, md));
-  m_mountButton = new wxButton(this, ID_MOUNT, _("Mount / dismount"));
-  top->Add(m_mountButton, wxSizerFlags().Border(wxALL, md));
+  top->Add(gs3, wxSizerFlags().Expand().Border(wxLEFT | wxRIGHT | wxTOP | wxBOTTOM, md));
 
   //p->SetSizer(top);
 
@@ -199,10 +205,15 @@ void CharControl::SetHandsOnly(bool handsOnly)
   }
   GetSizer()->Show(m_tabardHeader, !handsOnly, true);
   GetSizer()->Show(m_tabardGrid, !handsOnly, true);
-  GetSizer()->Show(m_mountHeader, !handsOnly, true);
-  m_mountButton->Show(!handsOnly);
+  RefreshMountCard();
   Layout();
   FitInside();
+}
+
+void CharControl::RefreshMountCard()
+{
+  if (m_mountCard)
+    m_mountCard->Sync(!m_handsOnly);
 }
 
 CharControl::~CharControl()
@@ -233,6 +244,9 @@ void CharControl::UpdateModel(Attachment *a)
 
   charAtt = a;
   model = dynamic_cast<WoWModel*>(charAtt->model());
+  // The mount list is read again for the next mount choice: a model loaded after another client was loaded
+  // must not be offered the previous client's mounts.
+  m_mountChoicesRead = false;
 
   Init();
 
@@ -450,11 +464,6 @@ void CharControl::OnButton(wxCommandEvent &event)
       selectStart();
       break;
     }
-    case ID_MOUNT:
-    {
-      selectMount();
-      break;
-    }
     default:
     {
       for (ssize_t i = 0; i < NUM_CHAR_SLOTS; i++)
@@ -531,6 +540,7 @@ void CharControl::ClearItemDialog()
     itemDialog->Destroy();
     wxDELETE(itemDialog);
   }
+  m_itemDialogIsMount = false;
 }
 
 
@@ -703,6 +713,7 @@ void CharControl::selectMount()
 
   itemDialog = new CategoryChoiceDialog(this, UPDATE_MOUNT, g_modelViewer, wxT("Choose a mount"),
                                         wxT("Mounts"), choices, cats, catnames, 0, true);
+  m_itemDialogIsMount = true;
   itemDialog->Move(itemDialog->GetParent()->GetScreenPosition() + wxPoint(4, 64));
   itemDialog->Check(1, false);
   itemDialog->DoFilter();
@@ -710,6 +721,30 @@ void CharControl::selectMount()
   const int w = 250;
   itemDialog->SetSizeHints(w, -1, -1, -1, -1, -1);
   itemDialog->SetSize(w, -1);
+}
+
+const std::vector<CharControl::MountChoice> & CharControl::mountChoices()
+{
+  if (!m_mountChoicesRead)
+  {
+    m_mountChoices.clear();
+    sqlResult mountQuery = GAMEDATABASE.sqlQuery(
+      "SELECT MountXDisplay.CreatureDisplayInfoID, Mount.Name_Lang FROM Mount LEFT JOIN MountXDisplay ON Mount.ID = MountXDisplay.MountID");
+    if (mountQuery.valid && !mountQuery.empty())
+    {
+      for (int i = 0, imax = mountQuery.values.size(); i < imax; i++)
+      {
+        MountChoice p;
+        p.displayId = mountQuery.values[i][0].toInt();
+        p.name = mountQuery.values[i][1].toStdWString();
+        m_mountChoices.push_back(p);
+      }
+    }
+    std::sort(m_mountChoices.begin(), m_mountChoices.end(),
+              [](const MountChoice & a, const MountChoice & b) { return a.name < b.name; });
+    m_mountChoicesRead = mountQuery.valid;
+  }
+  return m_mountChoices;
 }
 
 void CharControl::fillMountChoices()
@@ -720,7 +755,6 @@ void CharControl::fillMountChoices()
   catnames.Clear();
   catnames.Add(wxT("Player mounts"));
   catnames.Add(wxT("All Creature/* models"));
-  std::vector<NumStringPair> mounts;
 
   // the "always show first" flag to CategoryChoiceDialog will ensure this is always shown, regardless of category:
   choices.Add(_("---- None ----"));
@@ -728,23 +762,10 @@ void CharControl::fillMountChoices()
   numbers.push_back(-1);
 
   // Proper player mounts:
-  sqlResult mountQuery = GAMEDATABASE.sqlQuery(
-    "SELECT MountXDisplay.CreatureDisplayInfoID, Mount.Name_Lang FROM Mount LEFT JOIN MountXDisplay ON Mount.ID = MountXDisplay.MountID");
-  if (mountQuery.valid && !mountQuery.empty())
+  for (const MountChoice & mount : mountChoices())
   {
-    for (int i = 0, imax = mountQuery.values.size(); i < imax; i++)
-    {
-      NumStringPair p;
-      p.id = mountQuery.values[i][0].toInt();
-      p.name = mountQuery.values[i][1].toStdWString();
-      mounts.push_back(p);
-    }
-  }
-  std::sort(mounts.begin(), mounts.end());
-  for (std::vector<NumStringPair>::iterator it = mounts.begin(); it != mounts.end(); it++)
-  {
-    choices.Add(it->name);
-    numbers.push_back(it->id);
+    choices.Add(mount.name);
+    numbers.push_back(mount.displayId);
     cats.push_back(0);
   }
 
@@ -770,6 +791,58 @@ void CharControl::fillMountChoices()
     numbers.push_back(i);
     cats.push_back(1);
   }
+}
+
+// numbers/cats/choices are shared by every picker dialog, and an open one reads its rows from them. An item,
+// set, class or NPC dialog is closed before they are replaced with the mount rows; the mount dialog lists
+// exactly these rows and stays open, its highlight moved to the row chosen (OnUpdateItem).
+void CharControl::listMountRows()
+{
+  if (itemDialog && !m_itemDialogIsMount)
+    ClearItemDialog();
+  fillMountChoices();
+}
+
+bool CharControl::selectMountChoice(size_t index)
+{
+  // A mount with no display (the list has a few, nameless) is not offered: its model cannot be found, and the
+  // mount choice would already have taken the current mount off by the time it finds that out.
+  if (!model || index >= mountChoices().size() || mountChoices()[index].displayId <= 0)
+    return false;
+  listMountRows();
+  OnUpdateItem(UPDATE_MOUNT, (int)index + 1);   // row 0 is "---- None ----"; the player mounts follow in order
+  return true;
+}
+
+void CharControl::dismount()
+{
+  if (!model)
+    return;
+  listMountRows();
+  OnUpdateItem(UPDATE_MOUNT, 0);
+}
+
+wxString CharControl::ridingMountName() const
+{
+  const WoWModel * mount = g_modelViewer ? g_modelViewer->riderMount() : nullptr;
+  if (!mount)
+    return wxEmptyString;
+  if (mountNameSerial == mountSerial && !mountName.IsEmpty())
+    return mountName;
+  wxString path((mount->gamefile ? mount->gamefile->fullname() : mount->name()).toStdWString());
+  path.Replace(wxT("\\"), wxT("/"));
+  return path.AfterLast('/');
+}
+
+int CharControl::ridingMountChoice()
+{
+  if (!g_modelViewer || !g_modelViewer->riderMount() || mountNameSerial != mountSerial || mountDisplayId <= 0)
+    return -1;
+  const std::vector<MountChoice> & list = mountChoices();
+  for (size_t i = 0; i < list.size(); i++)
+    if (list[i].displayId == mountDisplayId && list[i].name == mountName)
+      return (int)i;
+  return -1;
 }
 
 void CharControl::selectNPC(ssize_t type)
@@ -955,6 +1028,7 @@ void CharControl::OnUpdateItem(int type, int id)
         g_canvas->root->setModel(0);
         g_canvas->setModel(0);
         mountDisplayId = 0;
+        mountName.Clear();
       }
       if (numbers[id] < 0)  // The user selected "None". Remove existing mount.
       {
@@ -1006,6 +1080,10 @@ void CharControl::OnUpdateItem(int type, int id)
       // A new mount model is up: a new identity for the Unity viewport's scene, even for the same file.
       mountSerial++;
       mountDisplayId = morphID;
+      // The name it was listed by, which the Mount card shows: a display can belong to several mounts, so the
+      // name is not looked up again from the display.
+      mountName = id < (int)choices.size() ? choices[id] : wxString();
+      mountNameSerial = mountSerial;
       LOG_INFO << "[unity-mount] mount serial" << mountSerial << "installed:"
                << (modelFile ? modelFile->fullname() : QString("(no file)")) << "fileDataID"
                << (modelFile ? (int)modelFile->fileDataId() : 0) << "display" << morphID << "ok" << (m->ok ? 1 : 0);
@@ -1064,6 +1142,16 @@ void CharControl::OnUpdateItem(int type, int id)
 
   //  Update controls associated
   g_modelViewer->UpdateControls();
+  // Whichever route chose it -- the mount dialog, the Mount card, a test step -- an open mount dialog highlights
+  // the row chosen, and the card and the Appearance tab show the mount the character now rides.
+  if (type == UPDATE_MOUNT)
+  {
+    FilteredChoiceDialog * dialog = m_itemDialogIsMount ? dynamic_cast<FilteredChoiceDialog *>(itemDialog) : nullptr;
+    if (dialog)
+      dialog->SelectChoiceRow(id);
+    if (g_modelViewer->modelInspector)
+      g_modelViewer->modelInspector->MountStateChanged();
+  }
 }
 
 void CharControl::OnTabardSpin(wxSpinEvent &event)

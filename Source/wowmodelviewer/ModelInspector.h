@@ -4,9 +4,9 @@
  * The "Model" panel on the right of the window: everything about the thing on screen, in three
  * tabs, adapting to what is loaded.
  *
- *   Appearance  a creature or item's skins and per-slot texture overrides; a character's
+ *   Appearance  a creature or item's skins and per-slot texture overrides; a character's mount,
  *               customization, equipment and tabard (the character control lives here now); a
- *               WMO's doodad sets.
+ *               WMO's doodad sets. The tab's label says when the character rides a mount.
  *   Geosets     the model's submeshes by geoset group, with a checkbox each.
  *   Info        name, path, FileDataID and the model's sizes.
  *
@@ -83,6 +83,10 @@ public:
   // are visible.
   void RefreshAppearance();
 
+  // The character got on a mount, onto another one or off, or a load replaced it: the Mount card and the
+  // Appearance tab's label follow what the host holds now. Cheap when nothing changed.
+  void MountStateChanged();
+
   // The model's geoset display flags were changed by something else (a skin, a customization):
   // update the checkboxes without rebuilding the tree.
   void UpdateGeosetSelection();
@@ -143,6 +147,11 @@ private:
   Context m_lastContext = CONTEXT_NONE;
   AnimControl * m_anim = nullptr;
   CharControl * m_char = nullptr;
+  // The rider, the mount and the mount serial MountStateChanged last showed, compared by the watch timer so a
+  // mount changed by any route is picked up on whichever tab is open.
+  const WoWModel * m_mountRider = nullptr;
+  const WoWModel * m_mountModel = nullptr;
+  unsigned int m_mountSerial = 0;
 
   // Geosets
   wxPanel * m_geosets = nullptr;

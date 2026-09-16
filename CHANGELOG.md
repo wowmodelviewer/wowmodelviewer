@@ -6,6 +6,24 @@ Format loosely based on [Keep a Changelog](https://keepachangelog.com/).
 ## [Unreleased]
 
 ### Added
+- **Model > Appearance: a Mount card at the top of the page, with a searchable mount picker.** For a playable
+  character the first thing on the Appearance page is a Mount card. Without a mount it says "Add a mount to this
+  character" and offers Choose Mount, in bold; on one it names the mount the character rides and offers Change
+  Mount and Dismount. Choose Mount and Change Mount open a floating picker anchored just below the card -- the
+  Appearance page does not expand or scroll -- with a focused search field over the player mounts: the list
+  filters on every keystroke (any part of the name, upper or lower case), Up and Down move the highlight, and
+  Enter or a click puts the character on that mount at once and closes the picker -- there is no OK. Escape or a
+  click outside the picker closes it with nothing changed. Enter with nothing highlighted takes the only mount
+  left, never any other, and a search that matches nothing says "No mounts found" and stays open. Change Mount
+  starts on the current mount and swaps straight to the new one; Dismount takes the character off in one click.
+  The list is the Character > Mount / Dismount dialog's player mounts (a few nameless entries with no display are
+  left out), read from the database once per loaded model and filtered in memory, and the card and the dialog
+  mount through the same choice: `CharControl::selectMountChoice` and `dismount` hand
+  `OnUpdateItem(UPDATE_MOUNT)` the dialog's own row, so each shows what the other did: an open dialog moves its
+  highlight to the mount the card chose, or to None, without choosing it again. What the card shows is read from
+  the host every time -- after the dialog, a load, or a creature or world model picked in Browse -- and it is
+  hidden for anything that is not a playable character. While the character rides, the tab reads
+  "Appearance · Mounted".
 - **Embedded Unity renderer, host side: a character riding a mount is described to the player (protocol
   5).** To a player that announces protocol 5 the host keeps the character loaded (`loadWoWModel` names
   the rider, not the mount) and adds an optional `mount` to its `characterScene`: a key from a host mount
@@ -154,6 +172,9 @@ Format loosely based on [Keep a Changelog](https://keepachangelog.com/).
   follow aliases yet.)
 
 ### Changed
+- **Model > Appearance: "Customization" is now "Character Appearance", under the Mount card.** The "Mount /
+  dismount" button at the bottom of the page is gone: the Mount card replaces it. Character > Mount /
+  Dismount stays.
 - **Embedded Unity renderer: the player keeps a model's state in one slot.** The parsed model and its
   .m2 bytes, the selected animation, the per-sequence track caches, the `.anim` files fetched and in
   flight, the app's last playback state and the display state (geosets, particle colour) of the model on
@@ -243,6 +264,10 @@ Format loosely based on [Keep a Changelog](https://keepachangelog.com/).
   `-imgseq` smoke test is gone. `-unityipctest` and `-fbxexport` still run.
 
 ### Fixed
+- **A long equipment item name no longer makes Model > Appearance wider than the panel.** The name is cut
+  short with an ellipsis where the panel ends. The full width of a name such as "Thunderfury, Blessed Blade
+  of the Windseeker" used to become the page's minimum width the next time the page was laid out -- mounting
+  the character did that -- which pushed the customization rows off the panel's right edge.
 - **A model that fails to load no longer reads the character it replaced after it was freed.** Loading a
   model frees whatever was on the canvas before the character control is given the new one, and the
   viewport state -- which now asks whether a mounted character is on screen -- is refreshed in between when
