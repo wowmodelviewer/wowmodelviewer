@@ -59,6 +59,9 @@
     <field type="int8"  name="FemaleModelFallbackSex" pos="44" />
     <field type="int8"  name="MaleTextureFallbackSex" pos="46" />
     <field type="int8"  name="FemaleTextureFallbackSex" pos="48" />
+    <!-- The race's bit in ChrCustomizationReq.RaceMasks (-1: none). It is not ID - 1 for every race:
+         Dark Iron Dwarf 34 is bit 11, Dracthyr 52 is bit 16. -->
+    <field type="int32"  name="PlayableRaceBit" pos="28" />
   </table>
   <table name="ChrRaceXChrModel">
     <field type="int32" name="ID" primary="yes" />
@@ -93,6 +96,8 @@
     <field type="int32" name="ChrCustomizationCategoryID" pos="6" />
     <field type="int32" name="OptionType" pos="7" />
     <field type="int32" name="ChrCustomizationID" pos="9" />
+    <!-- The option's own ChrCustomizationReq (0: none), evaluated like a choice's requirement. -->
+    <field type="int32" name="Requirement" pos="10" />
   </table>
   <table name="ChrCustomizationChoice">
     <field type="text" name="Name_Lang" pos="0" />
@@ -106,20 +111,34 @@
   </table>
   <table name="ChrCustomizationReq">
     <!-- ID is noninline (id-list), so record fields start at index 0. Positions are
-         the 12.0.7 layout CA154412 (build 68235): ClassMask is field index 3 -> pos 2,
-         and RaceMask is the RaceMasks<32>[2] field at DBD index 9 -> pos 8 (read as a
-         64-bit mask). The old 12.0.5 (216BEF26) positions (RaceMask=0, ClassMask=3) read
+         the layout CA154412 (12.0.7 and 12.1.0): ReqType 1, ClassMask 2, RegionGroupMask 3,
+         ReqAchievementID 4, ReqQuestID 5, OverrideArchive 6, ReqItemModifiedAppearanceID 7,
+         RaceMasks 8. The old 12.0.5 (216BEF26) positions (RaceMask=0, ClassMask=3) read
          a string offset as RaceMask -> garbage race-gating -> wrong customization choices. -->
     <field type="int32" name="ID" primary="yes" />
-    <field type="int64" name="RaceMask" pos="8" />
+    <field type="int32" name="ReqType" pos="1" />
     <field type="int32" name="ClassMask" pos="2" />
+    <field type="int32" name="RegionGroupMask" pos="3" />
     <!-- Unlock gates (CA154412 record positions): a choice with any of these set is a
          conditional/collectible appearance the account must earn (achievement, quest, or
          a transmog item appearance). The in-game creator hides those by default, so we use
          them to drop "borrowed" entries instead of guessing from the race mask. -->
     <field type="int32" name="ReqAchievementID" pos="4" />
     <field type="int32" name="ReqQuestID" pos="5" />
+    <field type="int32" name="OverrideArchive" pos="6" />
     <field type="int32" name="ReqItemModifiedAppearanceID" pos="7" />
+    <!-- RaceMasks is two uint32 in the file (a pallet array of 2): RaceMasks1 is the low and
+         RaceMasks2 the high half of the 64-bit race mask, indexed by ChrRaces.PlayableRaceBit. -->
+    <field type="uint32" name="RaceMasks" arraySize="2" pos="8" />
+  </table>
+  <!-- A requirement's prerequisite choices: the requirement holds only while one of them is the
+       current choice of its option. No field definition exists for this table in the bundled set;
+       the relationship value is always a ChrCustomizationReq ID and the one record field always a
+       ChrCustomizationChoice ID (every row of 12.1.0 resolves both ways). -->
+  <table name="ChrCustomizationReqChoice">
+    <field type="int32" name="ID" primary="yes" />
+    <field type="int32" name="ChrCustomizationChoiceID" pos="0" />
+    <field type="int32" name="ChrCustomizationReqID" relationshipData="yes" />
   </table>
   <table name="ChrCustomizationElement">
     <field type="int32" name="ID" primary="yes" />

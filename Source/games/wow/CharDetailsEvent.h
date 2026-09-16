@@ -53,7 +53,8 @@ class CharDetailsEvent : public Event
     enum EventType
     {
       DH_MODE_CHANGED = 0x10000000,
-      CHOICE_LIST_CHANGED = 0x10000001
+      CHOICE_LIST_CHANGED = 0x10000001, // one option's valid choices or current choice changed
+      OPTION_LIST_CHANGED = 0x10000002  // the set of options the character can use changed
     };
 
   // Constructors

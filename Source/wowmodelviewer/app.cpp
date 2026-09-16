@@ -54,6 +54,14 @@
 #include <wx/evtloop.h>
 #include <wx/stopwatch.h>
 
+#include <QBuffer>
+#include <QDir>
+#include <QXmlStreamWriter>
+#include "CharDetailsCustomizationChoice.h"
+#include "CharDetailsFrame.h"
+#include "dbfile.h"
+#include "RaceInfos.h"
+
 
 /*  THIS IS OUR MAIN "START UP" FILE.
 App.cpp creates our wxApp class object.
@@ -312,6 +320,615 @@ static int doHeadlessMatResTest()
   std::printf("WMVMATRES: %d failure(s)\n", failures);
   std::fflush(stdout);
   return failures;
+}
+
+// -customizationtest: regression checks for modern character customization, in the idiom of
+// -matrestest: checks against the installed client's data, one [customization-test] PASS or FAIL line
+// each, then "RESULT: PASS|FAIL (<passed> passed, <failed> failed)" (the return value is the failure
+// count). It covers what the loader stores for ChrCustomizationReq (the race-mask census of the whole
+// table and representative rows, among them rows the old loader stored with a garbage high half or a
+// wrong pallet entry), the loader's value path read directly, ChrCustomizationOption.Requirement,
+// ChrRaces.PlayableRaceBit and ChrCustomizationReqChoice, the requirement rules on their own, and then
+// loaded characters as CharDetails and the Appearance panel see them: an Undead male (option and choice
+// lists, lists that follow Skin Type, Jaw Features and Eye Color, the textures applied after repeated
+// changes, one model refresh per change, a saved invalid combination), a Night Elf male's Demon Hunter
+// context, the Dracthyr's own Eye Style and a Dark Iron Dwarf's race bit.
+//
+// Every expected value was read from the 12.1.0.69814 client's DB2 files by a reader independent of this
+// loader. A later client may legitimately re-author them: a failure then means "the data moved, go look",
+// not necessarily "the code broke".
+static int doHeadlessCustomizationTest(ModelViewer * frame)
+{
+  int passed = 0, failed = 0;
+  const auto check = [&passed, &failed](const QString & what, bool ok, const QString & detail) {
+    ok ? passed++ : failed++;
+    const QString line = QString("[customization-test] %1 %2%3").arg(ok ? "PASS" : "FAIL").arg(what)
+                           .arg(detail.isEmpty() ? QString() : QString(" -- ") + detail);
+    if (ok)
+      LOG_INFO << line;
+    else
+      LOG_ERROR << line;
+  };
+  const auto ids = [](const std::vector<uint> & v) {
+    QStringList parts;
+    for (const uint id : v)
+      parts << QString::number(id);
+    return parts.join(QLatin1Char(','));
+  };
+  const auto queryIDs = [](const QString & sql) {
+    std::vector<uint> v;
+    sqlResult r = GAMEDATABASE.sqlQuery(sql);
+    for (size_t i = 0; r.valid && i < r.values.size(); i++)
+      v.push_back(r.values[i][0].toUInt());
+    return v;
+  };
+
+  // ---- 1. ChrCustomizationReq as stored ------------------------------------------------------------
+  // The (RaceMasks[0], RaceMasks[1]) pairs of all 1117 rows (694 records and 423 copies): every row's
+  // pallet entry, whole.
+  struct RacePair { uint low; uint high; int rows; };
+  static const RacePair censusExpected[] = {
+    { 0xFFFFFFFFU, 0xFFFFFFFFU, 881 }, { 0xC83800A8U, 0x00000000U,  61 }, { 0x00180000U, 0x00000000U,  39 },
+    { 0x80000000U, 0xFFFFFFFFU,  19 }, { 0x40000000U, 0x00000000U,  17 }, { 0x00000080U, 0x00000000U,  15 },
+    { 0x00200000U, 0x00000000U,  15 }, { 0x00000008U, 0x00000000U,  14 }, { 0x00000020U, 0x00000000U,  14 },
+    { 0x08000000U, 0x00000000U,  12 }, { 0x00000000U, 0x00000000U,   7 }, { 0x00180008U, 0x00000000U,   4 },
+    { 0x40000080U, 0x00000000U,   4 }, { 0x08000020U, 0x00000000U,   3 }, { 0x80200000U, 0xFFFFFFFFU,   3 },
+    { 0x00000400U, 0x00000000U,   2 }, { 0x000000A0U, 0x00000000U,   1 }, { 0x00200008U, 0x00000000U,   1 },
+    { 0x082000A8U, 0x00000000U,   1 }, { 0x4E0AB3B2U, 0xAA2AAAAAU,   1 }, { 0x80000000U, 0x00000000U,   1 },
+    { 0x88000020U, 0xFFFFFFFFU,   1 }, { 0xB1354C4DU, 0x55155555U,   1 },
+  };
+  {
+    std::map<std::pair<quint64, quint64>, int> expected, got;
+    for (const RacePair & p : censusExpected)
+      expected[std::make_pair((quint64)p.low, (quint64)p.high)] = p.rows;
+    sqlResult r = GAMEDATABASE.sqlQuery("SELECT RaceMasks1, RaceMasks2, COUNT(*) FROM ChrCustomizationReq GROUP BY RaceMasks1, RaceMasks2");
+    int rows = 0;
+    for (size_t i = 0; r.valid && i < r.values.size(); i++)
+    {
+      got[std::make_pair(r.values[i][0].toULongLong(), r.values[i][1].toULongLong())] = r.values[i][2].toInt();
+      rows += r.values[i][2].toInt();
+    }
+    QString diff;
+    for (const auto & e : expected)
+      if (got.count(e.first) == 0 || got[e.first] != e.second)
+        diff += QString(" [%1,%2] expected %3 got %4").arg(e.first.first, 8, 16, QLatin1Char('0')).arg(e.first.second, 8, 16, QLatin1Char('0'))
+                  .arg(e.second).arg(got.count(e.first) ? got[e.first] : 0);
+    for (const auto & g : got)
+      if (expected.count(g.first) == 0)
+        diff += QString(" unexpected [%1,%2] x%3").arg(g.first.first, 16, 16, QLatin1Char('0')).arg(g.first.second, 16, 16, QLatin1Char('0')).arg(g.second);
+    check("database: ChrCustomizationReq RaceMasks census of the whole table (23 pallet pairs, 1117 rows)",
+          r.valid && diff.isEmpty() && rows == 1117, QString("%1 rows, %2 pairs%3").arg(rows).arg(got.size()).arg(diff));
+  }
+
+  struct ReqRow { uint id; int reqType; int classMask; int regionGroupMask; int overrideArchive; uint raceLow; uint raceHigh; int achievement; int quest; int item; };
+  static const ReqRow reqExpected[] = {
+    //  id  type  class  region  OA  RaceMasks[0]  RaceMasks[1]  achievement quest item
+    {   10, 4,      0,     0, -1, 0xFFFFFFFFU, 0xFFFFFFFFU,     0,     0, 0 }, // the "Transmog" placeholder
+    {   12, 2,      0,     0, -1, 0xFFFFFFFFU, 0xFFFFFFFFU,     0,     0, 0 }, // NPC Eye Style; old loader 0x29F0D4A0FFFFFFFF
+    {   35, 3,     -1,     0, -1, 0xFFFFFFFFU, 0xFFFFFFFFU,     0,     0, 0 }, // old loader 0x29F0D4A0FFFFFFFF
+    {   53, 3,     32,     0, -1, 0xFFFFFFFFU, 0xFFFFFFFFU,     0,     0, 0 }, // old loader 0x29F0D4A0FFFFFFFF
+    {   55, 3,     -1,     0,  0, 0xFFFFFFFFU, 0xFFFFFFFFU,     0,     0, 0 }, // Undead jaws and Bony; old loader garbage
+    {   61, 3,     -1,     0,  0, 0xFFFFFFFFU, 0xFFFFFFFFU,     0,     0, 0 }, // Bony skin colours
+    {  141, 3,     -1,     0, -1, 0xFFFFFFFFU, 0xFFFFFFFFU,     0,     0, 0 }, // old loader 0x00000000FFFFFFFF
+    {  142, 3,     32,     0, -1, 0xFFFFFFFFU, 0xFFFFFFFFU,     0,     0, 0 }, // Death Knight only
+    {  143, 3,   2048,     0, -1, 0xFFFFFFFFU, 0xFFFFFFFFU,     0,     0, 0 }, // Demon Hunter only
+    {  144, 3,  30687,     0, -1, 0xFFFFFFFFU, 0xFFFFFFFFU,     0,     0, 0 }, // not DK, not DH
+    {  146, 3,  32735,     0, -1, 0xFFFFFFFFU, 0xFFFFFFFFU,     0,     0, 0 }, // not DK
+    { 4103, 3,      0,     0, -1, 0xFFFFFFFFU, 0xFFFFFFFFU,     0,     0, 0 }, // a copy row (of 322): the Eyesight option
+    { 4120, 3,     -1,     0, -1, 0x00000008U, 0x00000000U,     0,     0, 0 }, // pallet entry 2; old loader 0x400
+    { 4121, 3,     -1,     0, -1, 0x80000000U, 0xFFFFFFFFU,     0,     0, 0 }, // old loader 0
+    { 4244, 3,   1024,     0, -1, 0xC83800A8U, 0x00000000U, 15228,     0, 0 }, // old loader 0
+    { 4509, 3,     -1,     0, -1, 0x4E0AB3B2U, 0xAA2AAAAAU,     0, 82194, 0 }, // the horde races
+    { 4576, 3,     -1,     0, -1, 0x00000000U, 0x00000000U,     0, 88814, 0 },
+    { 4603, 3,     -1,     0, -1, 0xB1354C4DU, 0x55155555U,     0, 82192, 0 }, // the alliance races; old loader 0x80200000
+    { 4604, 3,     -1, -2048, -1, 0x00000000U, 0x00000000U,     0,     0, 0 },
+  };
+  for (const ReqRow & e : reqExpected)
+  {
+    sqlResult r = GAMEDATABASE.sqlQuery(QString("SELECT ReqType, ClassMask, RegionGroupMask, OverrideArchive, RaceMasks1, RaceMasks2, "
+                                                "ReqAchievementID, ReqQuestID, ReqItemModifiedAppearanceID FROM ChrCustomizationReq WHERE ID = %1").arg(e.id));
+    const bool found = r.valid && !r.values.empty();
+    const std::vector<QString> v = found ? r.values[0] : std::vector<QString>(9);
+    const bool ok = found && v[0].toInt() == e.reqType && v[1].toInt() == e.classMask && v[2].toInt() == e.regionGroupMask &&
+                    v[3].toInt() == e.overrideArchive && v[4].toULongLong() == e.raceLow && v[5].toULongLong() == e.raceHigh &&
+                    v[6].toInt() == e.achievement && v[7].toInt() == e.quest && v[8].toInt() == e.item;
+    check(QString("database: ChrCustomizationReq %1 equals the client row").arg(e.id), ok,
+          QString("stored ReqType %1 ClassMask %2 RegionGroupMask %3 OverrideArchive %4 RaceMasks [%5, %6] achievement %7 quest %8 item %9")
+            .arg(v[0]).arg(v[1]).arg(v[2]).arg(v[3]).arg(v[4].toULongLong(), 8, 16, QLatin1Char('0')).arg(v[5].toULongLong(), 8, 16, QLatin1Char('0'))
+            .arg(v[6]).arg(v[7]).arg(v[8]));
+  }
+
+  // ---- 2. The loader's value path, read directly ---------------------------------------------------
+  // ChrCustomizationReq.db2 read through the loader with RaceMasks declared four ways: as its two uint32,
+  // as two int64 and two uint64 (each element must come back as that uint32 widened -- the old int64 path
+  // copied eight bytes out of a four-byte value), and as ONE uint32 (element 0 through the file's own
+  // pallet stride, which the old arraySize-1 declaration broke for every pallet entry past the first).
+  {
+    core::TableStructure * tbl = GAMEDATABASE.createTableStructure();
+    tbl->name = QStringLiteral("ChrCustomizationReq");
+    tbl->file = tbl->name;
+    const auto addField = [tbl](const char * name, const char * type, int pos, unsigned int arraySize, bool key) {
+      core::FieldStructure * f = GAMEDATABASE.createFieldStructure();
+      f->name = QString::fromLatin1(name);
+      f->type = QString::fromLatin1(type);
+      f->arraySize = arraySize;
+      f->isKey = key;
+      if (wow::FieldStructure * wf = dynamic_cast<wow::FieldStructure *>(f))
+        wf->pos = pos;
+      tbl->fields.push_back(f);
+    };
+    addField("ID", "int32", -1, 1, true);            // [0]
+    addField("RaceMasks", "uint32", 8, 2, false);    // [1] [2]
+    addField("RaceMasks", "int64", 8, 2, false);     // [3] [4]
+    addField("RaceMasks", "uint64", 8, 2, false);    // [5] [6]
+    addField("RaceMask", "uint32", 8, 1, false);     // [7]
+    addField("ClassMask", "int32", 2, 1, false);     // [8]
+    addField("OverrideArchive", "int32", 6, 1, false); // [9]
+
+    std::map<uint, std::vector<QString> > stored;
+    sqlResult db = GAMEDATABASE.sqlQuery("SELECT ID, RaceMasks1, RaceMasks2, ClassMask, OverrideArchive FROM ChrCustomizationReq");
+    for (size_t i = 0; db.valid && i < db.values.size(); i++)
+      stored[db.values[i][0].toUInt()] = db.values[i];
+
+    DBFile * file = tbl->createDBFile();
+    const bool opened = file && file->open();
+    int rows = 0, widenMismatch = 0, strideMismatch = 0, storedMismatch = 0;
+    QString firstMismatch, row4120;
+    for (size_t i = 0; opened && i < file->getRecordCount(); i++)
+    {
+      const std::vector<std::string> s = file->get((unsigned int)i, tbl);
+      if (s.size() != 10)
+      {
+        widenMismatch++;
+        continue;
+      }
+      rows++;
+      const auto q = [&s](size_t k) { return QString::fromStdString(s[k]); };
+      const quint64 low = q(1).toULongLong(), high = q(2).toULongLong();
+      const bool widened = q(3).toLongLong() == (qint64)(qint32)(quint32)low && q(4).toLongLong() == (qint64)(qint32)(quint32)high &&
+                           q(5).toULongLong() == low && q(6).toULongLong() == high;
+      if (!widened)
+      {
+        widenMismatch++;
+        if (firstMismatch.isEmpty())
+          firstMismatch = QString("ID %1: uint32 [%2,%3] int64 [%4,%5] uint64 [%6,%7]").arg(q(0)).arg(q(1)).arg(q(2)).arg(q(3)).arg(q(4)).arg(q(5)).arg(q(6));
+      }
+      if (q(7).toULongLong() != low)
+        strideMismatch++;
+      if (q(0).toUInt() == 4120)
+        row4120 = QString("ID 4120 read as one uint32 = 0x%1").arg(q(7).toULongLong(), 0, 16);
+      const auto st = stored.find(q(0).toUInt());
+      if (st == stored.end() || st->second[1].toULongLong() != low || st->second[2].toULongLong() != high ||
+          st->second[3] != q(8) || st->second[4] != q(9))
+        storedMismatch++;
+    }
+    delete file;
+    delete tbl;
+    check("loader: RaceMasks read as int64/uint64 is each uint32 element widened, never a four-byte value copied as eight",
+          opened && rows == 1117 && widenMismatch == 0, QString("%1 rows read, %2 mismatching%3").arg(rows).arg(widenMismatch)
+            .arg(firstMismatch.isEmpty() ? QString() : "; first " + firstMismatch));
+    check("loader: a one-element RaceMasks read uses the file's pallet stride (element 0 of the right entry)",
+          opened && rows == 1117 && strideMismatch == 0 && row4120 == "ID 4120 read as one uint32 = 0x8",
+          QString("%1 mismatching; %2").arg(strideMismatch).arg(row4120));
+    check("loader: the database holds exactly what a direct read gives (RaceMasks, sign-extended ClassMask and OverrideArchive)",
+          opened && rows == 1117 && storedMismatch == 0 && stored.size() == 1117, QString("%1 of %2 rows differ").arg(storedMismatch).arg(stored.size()));
+  }
+
+  // ---- 3. Option requirements, race bits, prerequisite choices --------------------------------------
+  {
+    // ChrClasses keeps its id inline in 8 bits: read whole, it came back with three bytes of heap on top.
+    sqlResult r = GAMEDATABASE.sqlQuery("SELECT ID, Filename FROM ChrClasses ORDER BY ID");
+    QStringList got;
+    for (size_t i = 0; r.valid && i < r.values.size(); i++)
+      got << r.values[i][0] + ":" + r.values[i][1];
+    check("loader: short inline ids read exactly (ChrClasses 1-15)",
+          got.join(" ") == "1:WARRIOR 2:PALADIN 3:HUNTER 4:ROGUE 5:PRIEST 6:DEATHKNIGHT 7:SHAMAN 8:MAGE 9:WARLOCK 10:MONK 11:DRUID "
+                           "12:DEMONHUNTER 13:EVOKER 14:Adventurer 15:TRAVELER", got.join(" "));
+  }
+  {
+    sqlResult r = GAMEDATABASE.sqlQuery("SELECT ID, Requirement FROM ChrCustomizationOption WHERE ID IN (59, 62, 567, 1584, 6346, 8530) ORDER BY ID");
+    QStringList got;
+    for (size_t i = 0; r.valid && i < r.values.size(); i++)
+      got << r.values[i][0] + ":" + r.values[i][1];
+    check("database: ChrCustomizationOption.Requirement", got.join(" ") == "59:0 62:0 567:0 1584:0 6346:4103 8530:12", got.join(" "));
+  }
+  {
+    sqlResult r = GAMEDATABASE.sqlQuery("SELECT ID, PlayableRaceBit FROM ChrRaces WHERE ID IN (1, 2, 5, 12, 22, 34, 35, 36, 37, 52, 70, 86, 91) ORDER BY ID");
+    QStringList got;
+    for (size_t i = 0; r.valid && i < r.values.size(); i++)
+      got << r.values[i][0] + ":" + r.values[i][1];
+    check("database: ChrRaces.PlayableRaceBit (not ID - 1 past race 32)",
+          got.join(" ") == "1:0 2:1 5:4 12:-1 22:21 34:11 35:12 36:13 37:14 52:16 70:15 86:20 91:19", got.join(" "));
+  }
+  {
+    sqlResult count = GAMEDATABASE.sqlQuery("SELECT COUNT(*), COUNT(DISTINCT ChrCustomizationReqID) FROM ChrCustomizationReqChoice");
+    const bool countOk = count.valid && !count.values.empty() && count.values[0][0].toInt() == 2050 && count.values[0][1].toInt() == 342;
+    check("database: ChrCustomizationReqChoice 2050 rows over 342 requirements", countOk,
+          countOk ? QString() : (count.valid && !count.values.empty() ? count.values[0][0] + " rows, " + count.values[0][1] + " requirements" : QString("query failed")));
+    const std::pair<uint, const char *> lists[] = {
+      { 58, "967,968,975,977,979" }, { 59, "969,971,976,978,980,983" }, { 61, "6527" }, { 62, "6528" }, { 63, "6529" },
+      { 4103, "5330,5331,5332,5333,5334,5335,5344" },
+    };
+    for (const auto & l : lists)
+    {
+      const QString got = ids(queryIDs(QString("SELECT ChrCustomizationChoiceID FROM ChrCustomizationReqChoice WHERE ChrCustomizationReqID = %1 "
+                                               "ORDER BY ChrCustomizationChoiceID").arg(l.first)));
+      check(QString("database: ChrCustomizationReqChoice of Req %1").arg(l.first), got == QLatin1String(l.second), got);
+    }
+  }
+
+  // ---- 4. The rules on their own, fed stored values ------------------------------------------------
+  {
+    std::map<uint, std::vector<QString> > req;
+    sqlResult r = GAMEDATABASE.sqlQuery("SELECT ID, ReqType, ClassMask, RaceMasks1, RaceMasks2 FROM ChrCustomizationReq "
+                                        "WHERE ID IN (10, 12, 55, 141, 142, 143, 144, 146, 4103, 4509, 4576, 4603)");
+    for (size_t i = 0; r.valid && i < r.values.size(); i++)
+      req[r.values[i][0].toUInt()] = r.values[i];
+    const auto reqType = [&req](uint id) { return req.count(id) ? req[id][1].toInt() : -99; };
+    const auto classMask = [&req](uint id) { return req.count(id) ? req[id][2].toInt() : -99; };
+    const auto raceMask = [&req](uint id) {
+      return req.count(id) ? ((req[id][4].toULongLong() & 0xFFFFFFFFull) << 32) | (req[id][3].toULongLong() & 0xFFFFFFFFull) : 0ull;
+    };
+    const auto raceBit = [](int raceID) {
+      sqlResult b = GAMEDATABASE.sqlQuery(QString("SELECT PlayableRaceBit FROM ChrRaces WHERE ID = %1").arg(raceID));
+      return (b.valid && !b.values.empty()) ? b.values[0][0].toInt() : -99;
+    };
+
+    check("rule: ReqType bit 0 is the player requirement (Req 141 and 55 yes; Req 12 NPC-only and Req 10 no)",
+          CharDetails::isPlayerRequirement(reqType(141)) && CharDetails::isPlayerRequirement(reqType(55)) &&
+            !CharDetails::isPlayerRequirement(reqType(12)) && !CharDetails::isPlayerRequirement(reqType(10)),
+          QString("ReqType 141=%1 55=%2 12=%3 10=%4").arg(reqType(141)).arg(reqType(55)).arg(reqType(12)).arg(reqType(10)));
+
+    // Alliance (Req 4603) and horde (Req 4509) masks: Dark Iron Dwarf 34 and Vulpera 35 are where the
+    // playable bit and ID - 1 disagree; Human 1, Orc 2, Mag'har 36 and Mechagnome 37 agree either way.
+    const int races[] = { 1, 2, 34, 35, 36, 37 };
+    const bool allianceExpected[] = { true, false, true, false, false, true };
+    QString raceDetail;
+    bool racesOk = true;
+    for (size_t i = 0; i < 6; i++)
+    {
+      const int bit = raceBit(races[i]);
+      const bool alliance = CharDetails::raceMaskAllows(raceMask(4603), bit);
+      const bool horde = CharDetails::raceMaskAllows(raceMask(4509), bit);
+      const bool allianceByID = CharDetails::raceMaskAllows(raceMask(4603), races[i] - 1);
+      racesOk = racesOk && alliance == allianceExpected[i] && horde == !allianceExpected[i];
+      raceDetail += QString(" race %1 bit %2: alliance %3 horde %4 (ID-1 would say alliance %5)").arg(races[i]).arg(bit)
+                      .arg(alliance ? 1 : 0).arg(horde ? 1 : 0).arg(allianceByID ? 1 : 0);
+    }
+    check("rule: RaceMasks tested at ChrRaces.PlayableRaceBit (faction masks, allied races whose bit is not ID - 1)", racesOk, raceDetail.trimmed());
+
+    bool allRaces = raceMask(141) == ~0ull;
+    for (int bit = 0; bit < 64; bit++)
+      allRaces = allRaces && CharDetails::raceMaskAllows(raceMask(141), bit);
+    allRaces = allRaces && CharDetails::raceMaskAllows(raceMask(141), -1);
+    check("rule: the all-races mask passes every bit and a race without one", allRaces, QString("Req 141 mask 0x%1").arg(raceMask(141), 16, 16, QLatin1Char('0')));
+    check("rule: an empty race mask passes nobody (Req 4576)",
+          raceMask(4576) == 0 && !CharDetails::raceMaskAllows(raceMask(4576), 4) && !CharDetails::raceMaskAllows(raceMask(4576), -1), QString());
+
+    const struct { uint id; bool ordinary; bool demonHunter; } classes[] = {
+      { 141, true, true }, { 4103, true, true }, { 146, true, true }, { 144, true, false }, { 142, false, false }, { 143, false, true },
+    };
+    QString classDetail;
+    bool classesOk = true;
+    for (const auto & c : classes)
+    {
+      const bool ordinary = CharDetails::classMaskAllows(classMask(c.id), false);
+      const bool demonHunter = CharDetails::classMaskAllows(classMask(c.id), true);
+      classesOk = classesOk && ordinary == c.ordinary && demonHunter == c.demonHunter;
+      classDetail += QString(" Req %1 ClassMask %2: ordinary %3 DH %4").arg(c.id).arg(classMask(c.id)).arg(ordinary ? 1 : 0).arg(demonHunter ? 1 : 0);
+    }
+    check("rule: ClassMask bit classID-1 against the class context (ordinary = every class but DK and DH; DH checkbox)", classesOk, classDetail.trimmed());
+  }
+
+  // ---- 5. Undead male ---------------------------------------------------------------------------------
+  const auto loadCharacter = [frame](int raceID, int sex) -> WoWModel * {
+    const int fileID = RaceInfos::getFileIDForRaceSex(raceID, sex);
+    GameFile * file = fileID > 0 ? GAMEDIRECTORY.getFile(fileID) : nullptr;
+    if (!file)
+      return nullptr;
+    frame->LoadModel(file);
+    for (int i = 0; i < 20; i++)
+      wxTheApp->Yield(true);
+    WoWModel * m = frame->canvas ? const_cast<WoWModel *>(frame->canvas->model()) : nullptr;
+    return (m && m->infos.raceID == raceID) ? m : nullptr;
+  };
+  // The Appearance panel's customization rows, in order: label and dropdown item count.
+  const auto panelRows = [frame]() {
+    std::vector<std::pair<QString, int> > rows;
+    CharDetailsFrame * details = nullptr;
+    std::vector<wxWindow *> pending(1, frame->charControl);
+    while (!pending.empty() && !details && pending.back())
+    {
+      wxWindow * w = pending.back();
+      pending.pop_back();
+      for (wxWindowList::compatibility_iterator node = w->GetChildren().GetFirst(); node; node = node->GetNext())
+      {
+        if ((details = wxDynamicCast(node->GetData(), CharDetailsFrame)) != nullptr)
+          break;
+        pending.push_back(node->GetData());
+      }
+    }
+    if (!details)
+      return rows;
+    for (wxWindowList::compatibility_iterator node = details->GetChildren().GetFirst(); node; node = node->GetNext())
+    {
+      CharDetailsCustomizationChoice * row = wxDynamicCast(node->GetData(), CharDetailsCustomizationChoice);
+      if (!row)
+        continue;
+      QString label;
+      int items = -1;
+      for (wxWindowList::compatibility_iterator c = row->GetChildren().GetFirst(); c; c = c->GetNext())
+      {
+        if (wxStaticText * text = wxDynamicCast(c->GetData(), wxStaticText))
+          label = QString::fromStdWString(text->GetLabel().ToStdWstring());
+        if (wxBitmapComboBox * combo = wxDynamicCast(c->GetData(), wxBitmapComboBox))
+          items = (int)combo->GetCount();
+      }
+      rows.emplace_back(label, items);
+    }
+    return rows;
+  };
+  const auto pumpEvents = []() {
+    for (int i = 0; i < 20; i++)
+    {
+      wxTheApp->Yield(true);
+      wxTheApp->ProcessPendingEvents(); // the panel rebuilds its rows after the event that changed them
+    }
+  };
+  const auto optionName = [](uint optionID) {
+    sqlResult r = GAMEDATABASE.sqlQuery(QString("SELECT Name_Lang FROM ChrCustomizationOption WHERE ID = %1").arg(optionID));
+    return (r.valid && !r.values.empty()) ? r.values[0][0] : QString();
+  };
+  const auto rowsDescribe = [](const std::vector<std::pair<QString, int> > & rows) {
+    QStringList parts;
+    for (const auto & r : rows)
+      parts << QString("%1(%2)").arg(r.first).arg(r.second);
+    return parts.join(QLatin1Char(' '));
+  };
+  // The rows the panel should show: one per available option, as many items as valid choices.
+  const auto panelMatches = [&](CharDetails & cd) {
+    const std::vector<std::pair<QString, int> > rows = panelRows();
+    const std::vector<uint> options = cd.getCustomizationOptions();
+    bool same = rows.size() == options.size();
+    for (size_t i = 0; same && i < rows.size(); i++)
+      same = rows[i].first == optionName(options[i]) && rows[i].second == (int)cd.getCustomizationChoices(options[i]).size();
+    return same;
+  };
+  const auto textureFiles = [](const CharDetails & cd, uint type, uint layer) {
+    std::vector<uint> files;
+    for (const CharDetails::TextureCustomization & t : cd.textures)
+      if (t.type == type && t.layer == layer)
+        files.push_back(t.fileId);
+    return files;
+  };
+
+  if (WoWModel * m = loadCharacter(5, 0))
+  {
+    CharDetails & cd = m->cd;
+    check("undead male: identity", m->infos.ChrModelID.size() == 1 && m->infos.ChrModelID[0] == 9 && cd.playableRaceBit() == 4,
+          QString("ChrModel %1, PlayableRaceBit %2").arg(m->infos.ChrModelID.empty() ? -1 : m->infos.ChrModelID[0]).arg(cd.playableRaceBit()));
+
+    const QString options = ids(cd.getCustomizationOptions());
+    check("undead male: options Face, Skin Type, Skin Color, Hair Style, Hair Color, Jaw Features, Face Features, Eye Color, Eyesight",
+          options == "59,567,58,60,61,62,563,534,6346", options);
+    check("undead male: Eye Style 8530 excluded by its own requirement (Req 12, not a player requirement)",
+          !cd.isOptionAvailable(8530) && cd.getCustomizationChoices(8530).empty() &&
+            cd.evaluateRequirement(12, std::map<uint, uint>()) == CharDetails::REQUIREMENT_NOT_PLAYER, QString());
+
+    const QString jaw = ids(cd.getCustomizationChoices(62));
+    check("undead male: Jaw Features 11 choices in client order", jaw == "967,968,971,983,969,975,976,977,978,979,980", jaw);
+    const QString skinType = ids(cd.getCustomizationChoices(567));
+    check("undead male: Skin Type Bony, Mottled, Fresh", skinType == "6527,6528,6529", skinType);
+    const QString eyeColor = ids(cd.getCustomizationChoices(534));
+    check("undead male: Eye Color 7 (Death Knight 5344 excluded by class, 21648-21661 and Primalist by ReqType, Transmog 15786 by ReqType)",
+          eyeColor == "5330,5331,5332,5333,5334,5335,6304", eyeColor);
+    const QString eyesight = ids(cd.getCustomizationChoices(6346));
+    check("undead male: Eyesight Both, Right, Left, Neither", eyesight == "45118,45119,45120,45121", eyesight);
+    check("undead male: Face 11, Hair Style 21, Hair Color 17 (Transmog 966 excluded)",
+          cd.getCustomizationChoices(59).size() == 11 && cd.getCustomizationChoices(60).size() == 21 && cd.getCustomizationChoices(61).size() == 17,
+          QString("%1 %2 %3").arg(cd.getCustomizationChoices(59).size()).arg(cd.getCustomizationChoices(60).size()).arg(cd.getCustomizationChoices(61).size()));
+    check("undead male: defaults are the first valid choices in resolution order",
+          cd.get(567) == 6527 && cd.get(58) == 913 && cd.get(62) == 967 && cd.get(563) == 6287 && cd.get(534) == 5330 && cd.get(6346) == 45118 && cd.get(8530) == 0,
+          QString("567:%1 58:%2 62:%3 563:%4 534:%5 6346:%6 8530:%7").arg(cd.get(567)).arg(cd.get(58)).arg(cd.get(62)).arg(cd.get(563))
+            .arg(cd.get(534)).arg(cd.get(6346)).arg(cd.get(8530)));
+    pumpEvents();
+    check("undead male: the Appearance panel has one row per available option, each listing the valid choices",
+          panelMatches(cd), rowsDescribe(panelRows()));
+
+    unsigned int version = m->stateVersion();
+    m->refresh();
+    const unsigned int perRefresh = m->stateVersion() - version;
+    // One refresh per change; re-selecting the current choice changes nothing and refreshes nothing.
+    int asExpected = 0, changes = 0, unchanged = 0;
+    const auto change = [&](uint option, uint choice) {
+      const bool same = cd.get(option) == choice;
+      const unsigned int before = m->stateVersion();
+      cd.set(option, choice);
+      changes++;
+      unchanged += same ? 1 : 0;
+      if (m->stateVersion() - before == (same ? 0 : perRefresh))
+        asExpected++;
+    };
+
+    const QString bony = "913,914,915,916,917,918,6420,6421,6422,6423,6424,50245,50246,50247,50248,50249";
+    const QString mottled = "6436,6437,6438,6439,6440,6441,6442,6443,6444,6445,6446,50543,50544,50545,50546,50547";
+    const QString fresh = "6425,6426,6427,6428,6429,6430,6431,6432,6433,6434,6435,50538,50539,50540,50541,50542";
+    change(567, 6528);
+    const QString colours1 = ids(cd.getCustomizationChoices(58));
+    const uint colour1 = cd.get(58);
+    change(567, 6529);
+    const QString colours2 = ids(cd.getCustomizationChoices(58));
+    const uint colour2 = cd.get(58);
+    change(567, 6527);
+    const QString colours3 = ids(cd.getCustomizationChoices(58));
+    const uint colour3 = cd.get(58);
+    check("undead male: Skin Color follows Skin Type (16 Mottled, 16 Fresh, 16 Bony; an invalid colour gives way to the first valid)",
+          colours1 == mottled && colour1 == 6436 && colours2 == fresh && colour2 == 6425 && colours3 == bony && colour3 == 913,
+          QString("Mottled [%1] -> %2; Fresh [%3] -> %4; Bony [%5] -> %6").arg(colours1).arg(colour1).arg(colours2).arg(colour2).arg(colours3).arg(colour3));
+
+    change(62, 967);
+    const QString ffIntact = ids(cd.getCustomizationChoices(563));
+    change(563, 6289);
+    change(62, 971);
+    const QString ffDrooler = ids(cd.getCustomizationChoices(563));
+    const uint ffAfterDrooler = cd.get(563);
+    pumpEvents();
+    const std::vector<std::pair<QString, int> > rowsDrooler = panelRows();
+    change(563, 6292);
+    change(62, 975);
+    const QString ffBonejawed = ids(cd.getCustomizationChoices(563));
+    const uint ffAfterBonejawed = cd.get(563);
+    check("undead male: Face Features offers the Rotting (6289 or 6292) that the current Jaw allows, and drops the other when the Jaw changes",
+          ffIntact == "6287,6288,6289,6293" && ffDrooler == "6287,6288,6292,6293" && ffAfterDrooler == 6287 &&
+            ffBonejawed == "6287,6288,6289,6293" && ffAfterBonejawed == 6287,
+          QString("Intact [%1]; Drooler [%2] current %3; Bonejawed [%4] current %5").arg(ffIntact).arg(ffDrooler).arg(ffAfterDrooler)
+            .arg(ffBonejawed).arg(ffAfterBonejawed));
+    {
+      int rottingItems = -1;
+      for (const auto & r : rowsDrooler)
+        if (r.first == optionName(563))
+          rottingItems = r.second;
+      check("undead male: the Face Features dropdown is rebuilt for the new Jaw (4 items)", rottingItems == 4, rowsDescribe(rowsDrooler));
+    }
+
+    change(534, 6304);
+    const bool eyesightGone = !cd.isOptionAvailable(6346) && cd.get(6346) == 0 && ids(cd.getCustomizationOptions()) == "59,567,58,60,61,62,563,534";
+    pumpEvents();
+    const std::vector<std::pair<QString, int> > rowsSockets = panelRows();
+    const bool panelSockets = panelMatches(cd);
+    check("undead male: Eye Color Sockets makes Eyesight unavailable (Req 4103), its row goes and no eye layer stays",
+          eyesightGone && panelSockets && rowsSockets.size() == 8 && textureFiles(cd, 19, 9).empty() && textureFiles(cd, 19, 10).empty(),
+          QString("options [%1]; rows %2").arg(ids(cd.getCustomizationOptions())).arg(rowsDescribe(rowsSockets)));
+    change(534, 5331);
+    pumpEvents();
+    check("undead male: Eyesight comes back with its first valid choice when the Eye Color allows it again",
+          cd.isOptionAvailable(6346) && cd.get(6346) == 45118 && panelMatches(cd) && panelRows().size() == 9,
+          QString("Eyesight %1; rows %2").arg(cd.get(6346)).arg(rowsDescribe(panelRows())));
+
+    // Textures after repeated changes: exactly the current choices' layers, related gates judged now.
+    change(59, 921);
+    const QString face921 = ids(textureFiles(cd, 1, 4));
+    change(59, 922);
+    const QString face922 = ids(textureFiles(cd, 1, 4));
+    change(59, 921);
+    const QString face921again = ids(textureFiles(cd, 1, 4));
+    check("undead male: one Face texture after Face 921 -> 922 -> 921 (Skin Color 913: files 959222, 959228, 959222)",
+          face921 == "959222" && face922 == "959228" && face921again == "959222", QString("%1 | %2 | %3").arg(face921).arg(face922).arg(face921again));
+
+    change(61, 956);
+    change(60, 941);
+    const QString scalp941 = ids(textureFiles(cd, 1, 6));
+    change(60, 940);
+    const QString scalpBald = ids(textureFiles(cd, 1, 6));
+    check("undead male: the Hair Style scalp texture goes with the style (941 with Hair Color 956: 3457610; Bald: none)",
+          scalp941 == "3457610" && scalpBald.isEmpty(), QString("941 [%1] Bald [%2]").arg(scalp941).arg(scalpBald));
+
+    change(534, 5330);
+    change(534, 5332);
+    const QString iris = ids(textureFiles(cd, 19, 9));
+    change(6346, 45119);
+    const QString irisRight = ids(textureFiles(cd, 19, 9)) + "/" + ids(textureFiles(cd, 19, 10));
+    change(6346, 45118);
+    const QString irisBoth = ids(textureFiles(cd, 19, 9)) + "/" + ids(textureFiles(cd, 19, 10));
+    check("undead male: one iris layer after Eye Color 5330 -> 5332 (3484669); Eyesight Right adds its layer (4705409) and Both removes it",
+          iris == "3484669" && irisRight == "3484669/4705409" && irisBoth == "3484669/", QString("%1 | %2 | %3").arg(iris).arg(irisRight).arg(irisBoth));
+
+    check("undead male: every change refreshed the model exactly once (a re-selected current choice not at all)",
+          asExpected == changes && perRefresh > 0 && changes > unchanged,
+          QString("%1 of %2 selections as expected (%3 re-selected the current choice); one refresh advances the state by %4")
+            .arg(asExpected).arg(changes).arg(unchanged).arg(perRefresh));
+
+    {
+      QBuffer buffer;
+      buffer.open(QIODevice::WriteOnly);
+      QXmlStreamWriter writer(&buffer);
+      writer.writeStartDocument();
+      cd.save(writer);
+      writer.writeEndDocument();
+      const QString xml = QString::fromUtf8(buffer.data());
+      check("undead male: a saved character names only available options (no Eye Style 8530 entry)",
+          xml.count("<customization ") == 9 && !xml.contains("id=\"8530\""), QString("%1 customization entries").arg(xml.count("<customization ")));
+    }
+
+    {
+      // A saved character with the combination the old viewer produced (Mottled with a Bony colour,
+      // Eye Style 0) and a choice of an option its Eye Color makes unavailable.
+      const QString path = QDir::temp().filePath("wmv_customization_test.chr");
+      QFile chr(path);
+      if (chr.open(QIODevice::WriteOnly | QIODevice::Truncate | QIODevice::Text))
+      {
+        chr.write("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<SavedCharacter version=\"2.0\"><model><CharDetails>"
+                  "<customization id=\"58\" value=\"913\"/><customization id=\"534\" value=\"6304\"/>"
+                  "<customization id=\"567\" value=\"6528\"/><customization id=\"6346\" value=\"45119\"/>"
+                  "<customization id=\"8530\" value=\"0\"/><isDemonHunter value=\"0\"/>"
+                  "</CharDetails></model></SavedCharacter>\n");
+        chr.close();
+      }
+      QString loadPath = path;
+      const unsigned int before = m->stateVersion();
+      cd.load(loadPath);
+      const unsigned int loadRefreshes = (m->stateVersion() - before) / (perRefresh ? perRefresh : 1);
+      QFile::remove(path);
+      check("undead male: loading Mottled + Bony colour 913 + Sockets + Eyesight Right resolves to a valid set with one refresh",
+            cd.get(567) == 6528 && cd.get(58) == 6436 && cd.get(534) == 6304 && cd.get(6346) == 0 && cd.get(8530) == 0 && loadRefreshes == 1,
+            QString("567:%1 58:%2 534:%3 6346:%4 8530:%5, %6 refresh(es)").arg(cd.get(567)).arg(cd.get(58)).arg(cd.get(534)).arg(cd.get(6346))
+              .arg(cd.get(8530)).arg(loadRefreshes));
+    }
+  }
+  else
+    check("undead male: model loaded (race 5, sex 0)", false, QString());
+
+  // ---- 6. Night Elf male: the Demon Hunter context ---------------------------------------------------
+  if (WoWModel * m = loadCharacter(4, 0))
+  {
+    CharDetails & cd = m->cd;
+    // 709: Skin Color, Req 143 (Demon Hunter only). 45111: Eyesight Right, Req 144 (not DK, not DH).
+    // Eye Color 682: 7603 (Req 648, not DK/DH) is valid only without the DH context, and the current
+    // choice must be re-validated when the context changes.
+    const bool ordinary = !cd.isChoiceAvailable(709) && cd.isChoiceAvailable(45111) && cd.get(682) == 7603;
+    cd.setDemonHunterMode(true);
+    pumpEvents();
+    const uint eyeDH = cd.get(682);
+    const bool demonHunter = cd.isChoiceAvailable(709) && !cd.isChoiceAvailable(45111) && eyeDH != 7603 && cd.isChoiceAvailable(eyeDH) && panelMatches(cd);
+    cd.setDemonHunterMode(false);
+    pumpEvents();
+    const uint eyeBack = cd.get(682);
+    const bool back = !cd.isChoiceAvailable(709) && cd.isChoiceAvailable(45111) && cd.isChoiceAvailable(eyeBack) && panelMatches(cd);
+    check("night elf male: the Demon Hunter checkbox context admits DH-only choices and drops choices that exclude DH, both ways",
+          ordinary && demonHunter && back, QString("ordinary %1, DH %2 (Eye Color %3), back %4 (Eye Color %5)").arg(ordinary ? 1 : 0)
+            .arg(demonHunter ? 1 : 0).arg(eyeDH).arg(back ? 1 : 0).arg(eyeBack));
+  }
+  else
+    check("night elf male: model loaded (race 4, sex 0)", false, QString());
+
+  // ---- 7. Dracthyr: its own Eye Style stays ----------------------------------------------------------
+  // Races 52 and 70 share the dragon model (ChrModel 89, Sex 3); the race map keeps whichever row came first.
+  WoWModel * dracthyr = loadCharacter(52, 3);
+  if (!dracthyr)
+    dracthyr = loadCharacter(70, 3);
+  if (WoWModel * m = dracthyr)
+  {
+    CharDetails & cd = m->cd;
+    const QString eyeStyle = ids(cd.getCustomizationChoices(1584));
+    check("dracthyr: its own Eye Style (option 1584, Requirement 0, choices of Req 141) is offered",
+          cd.isOptionAvailable(1584) && eyeStyle == "19386,19387,19388", QString("[%1], PlayableRaceBit %2").arg(eyeStyle).arg(cd.playableRaceBit()));
+  }
+  else
+    check("dracthyr: model loaded (race 52 or 70, sex 3)", false, QString());
+
+  // ---- 8. Dark Iron Dwarf: an allied race whose bit is not ID - 1 ------------------------------------
+  if (WoWModel * m = loadCharacter(34, 0))
+  {
+    CharDetails & cd = m->cd;
+    check("dark iron dwarf: PlayableRaceBit 11 (not 33), options offered, no Eye Style",
+          cd.playableRaceBit() == 11 && cd.getCustomizationOptions().size() >= 5 && !cd.isOptionAvailable(8560),
+          QString("PlayableRaceBit %1, options [%2]").arg(cd.playableRaceBit()).arg(ids(cd.getCustomizationOptions())));
+  }
+  else
+    check("dark iron dwarf: model loaded (race 34, sex 0)", false, QString());
+
+  LOG_INFO << QString("[customization-test] RESULT: %1 (%2 passed, %3 failed)").arg(failed == 0 ? "PASS" : "FAIL").arg(passed).arg(failed);
+  return failed;
 }
 
 static void doHeadlessM2Inspect(const QString & listPath, const QString & outPath)
@@ -2388,7 +3005,8 @@ bool WowModelViewApp::OnInit()
     QString a = QString::fromWCharArray(argv[ai]);
     if (a == "-m" || a == "-mo" || a == "-armory" || a == "-npc" || a == "-fbxexport" ||
         a == "-animdump" || a == "-fbxinspect" || a == "-dbfromfile" || a == "-dumptex" ||
-        a == "-m2inspect" || a == "-matrestest" || a == "-mpq" || a == "-item" || a == "-wmo" || a.endsWith(".chr"))
+        a == "-m2inspect" || a == "-matrestest" || a == "-customizationtest" || a == "-mpq" || a == "-item" || a == "-wmo" ||
+        a.endsWith(".chr"))
     {
       earlyHeadless = true;
       break;
@@ -2551,6 +3169,7 @@ bool WowModelViewApp::OnInit()
   QString mpqLocale;      // optional locale for -mpq (auto-detected when empty)
   int dumpTexFileDataId = 0; QString dumpTexOutPath; // -dumptex <fileDataID> <out.png>: forensic-only
   bool matResTest = false;                           // -matrestest: replaceable-material checks
+  bool customizationTest = false;                    // -customizationtest: character customization checks
   QString m2InspectList, m2InspectOut;               // -m2inspect <list.txt> [out.csv]: forensic-only
   // Export content selection + clip list for the headless FBX export (the parent process passes
   // these so the child reproduces the user's exact options). Defaults: full content, no explicit
@@ -2619,6 +3238,10 @@ bool WowModelViewApp::OnInit()
     else if (cmd == "-matrestest") {
       // Regression checks for retail replaceable-material selection; see doHeadlessMatResTest.
       matResTest = true;
+    }
+    else if (cmd == "-customizationtest") {
+      // Regression checks for character customization requirements; see doHeadlessCustomizationTest.
+      customizationTest = true;
     }
     else if (cmd == "-m2inspect") {
       // Forensic-only: "-m2inspect <list.txt> [out.csv]" reads each listed model's M2 header,
@@ -2751,7 +3374,7 @@ bool WowModelViewApp::OnInit()
   for (int i = 1; i < argc; i++)
   {
     QString a = QString::fromWCharArray(argv[i]);
-    if (a == "-m" || a == "-mo" || a == "-armory" || a == "-npc" || a == "-fbxexport" || a == "-animdump" || a == "-fbxinspect" || a == "-dbfromfile" || a == "-dumptex" || a == "-m2inspect" || a == "-matrestest" || a == "-mpq" || a == "-item" || a == "-wmo" || a.endsWith(".chr"))
+    if (a == "-m" || a == "-mo" || a == "-armory" || a == "-npc" || a == "-fbxexport" || a == "-animdump" || a == "-fbxinspect" || a == "-dbfromfile" || a == "-dumptex" || a == "-m2inspect" || a == "-matrestest" || a == "-customizationtest" || a == "-mpq" || a == "-item" || a == "-wmo" || a.endsWith(".chr"))
     {
       headlessLoad = true;
       break;
@@ -2796,6 +3419,12 @@ bool WowModelViewApp::OnInit()
     if (matResTest)
     {
       doHeadlessMatResTest();
+      return false; // checks done -> exit
+    }
+
+    if (customizationTest)
+    {
+      doHeadlessCustomizationTest(frame);
       return false; // checks done -> exit
     }
 

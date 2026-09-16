@@ -136,8 +136,20 @@ public:
 
   // accessors to customization
   uint get(uint chrCustomizationOptionID) const;
+  // Makes the choice current for its option, re-validates the options whose requirements name
+  // that option's choices (keeping each current choice that stays valid, otherwise taking the first
+  // valid one in client order), rebuilds the applied elements from the resulting choices and
+  // refreshes the model once. A choice that is not one of the option's choices on this model, or an
+  // option whose own requirement fails with the current choices, is ignored.
   void set(uint chrCustomizationOptionID, uint chrCustomizationChoiceID);
-  std::vector<uint> getCustomizationChoices(const uint chrCustomizationOptionID);
+  // The choices of an option that are valid with the current choices, in client order (OrderIndex,
+  // ID); empty when the option itself is not available.
+  std::vector<uint> getCustomizationChoices(const uint chrCustomizationOptionID) const;
+  // The options this character can use with the current choices, in client order (OrderIndex, ID):
+  // an option is listed when its own requirement holds and at least one of its choices is valid.
+  std::vector<uint> getCustomizationOptions() const;
+  bool isOptionAvailable(uint chrCustomizationOptionID) const;
+  bool isChoiceAvailable(uint chrCustomizationChoiceID) const;
 
   // True if chrCustomizationOptionID is one of THIS model's customization options
   // (i.e. it belongs to the model's ChrModelID). Used to reject foreign options --
@@ -149,9 +161,10 @@ public:
   void setDemonHunterMode(bool val);
   bool isDemonHunter() const { return isDemonHunter_; }
 
-  // True while reset()/randomise() are applying a choice to every option in one
-  // pass. Listeners (e.g. CharControl) must NOT trigger a full model refresh per
-  // CHOICE_LIST_CHANGED during a batch -- the batch refreshes once at the end.
+  // True while a change is being recorded or announced before its single model refresh: while
+  // load() records the saved choices, and while set()/reset()/randomise()/setDemonHunterMode()
+  // send their CHOICE_LIST_CHANGED / OPTION_LIST_CHANGED events. Listeners (e.g. CharControl)
+  // must NOT trigger a full model refresh per event during a batch -- it refreshes once at the end.
   bool isBatching() const { return batchUpdate_; }
 
   // True if a customization option for this model drives the given geoset GROUP
@@ -168,6 +181,46 @@ public:
   // other choices' geoset(s); geosets not referenced by a choice keep their
   // default visibility. Call after the default geoset rule, before equipment.
   void applyCustomizationGeosets();
+
+  // ---- Requirements (ChrCustomizationReq) -----------------------------------------------------
+  // One evaluator decides for options (ChrCustomizationOption.Requirement) and choices
+  // (ChrCustomizationChoice.ChrCustomizationReqID) alike; see evaluateRequirement().
+
+  // A requirement row as this character's options and choices use it.
+  struct Requirement
+  {
+    uint id = 0;
+    int reqType = 0;
+    int classMask = 0;
+    int regionGroupMask = 0;          // loaded and reported, not evaluated
+    int overrideArchive = 0;          // loaded and reported, not evaluated
+    unsigned long long raceMask = 0;  // RaceMasks[1] << 32 | RaceMasks[0]
+    bool unlockGated = false;         // ReqAchievementID, ReqQuestID or ReqItemModifiedAppearanceID set
+    std::vector<uint> prerequisiteChoices; // ChrCustomizationReqChoice rows, in table order
+  };
+
+  enum RequirementResult
+  {
+    REQUIREMENT_MET = 0,
+    REQUIREMENT_NOT_PLAYER,   // ReqType bit 0 clear
+    REQUIREMENT_RACE,         // the race's PlayableRaceBit is not set in RaceMasks
+    REQUIREMENT_CLASS,        // ClassMask does not admit the class context
+    REQUIREMENT_UNLOCK,       // an achievement, quest or item appearance unlocks it
+    REQUIREMENT_PREREQUISITE  // none of its prerequisite choices is current
+  };
+
+  // The rules, one function each (see their definitions for the evidence behind them).
+  static bool isPlayerRequirement(int reqType);
+  static bool raceMaskAllows(unsigned long long raceMask, int playableRaceBit);
+  static bool classMaskAllows(int classMask, bool demonHunter);
+
+  // A requirement of this character's options or choices, evaluated against a selection
+  // (ChrCustomizationOption::ID -> ChrCustomizationChoice::ID). 0 is no requirement and is met.
+  RequirementResult evaluateRequirement(uint requirementID, const std::map<uint, uint> & selection) const;
+  // The loaded row, or nullptr when no option or choice of this character uses the requirement.
+  const Requirement * requirement(uint requirementID) const;
+  // ChrRaces.PlayableRaceBit of the character's race (-1: none).
+  int playableRaceBit() const { return playableRaceBit_; }
 
 private:
 
@@ -193,21 +246,61 @@ private:
     }
   };
 
-  void fillCustomizationMapForOption(uint chrCustomizationOption);
+  // One ChrCustomizationElement row of a choice. Its effect is resolved (for this model's texture
+  // layout) the first time it is applied.
+  struct ChoiceElementRow
+  {
+    uint id = 0;
+    uint related = 0; // RelatedChrCustomizationChoiceID: applies only while that choice is current (0 = always)
+    uint geosetID = 0, skinnedModelID = 0, materialID = 0, boneSetID = 0, condModelID = 0, displayInfoID = 0;
+  };
+  std::map<uint, std::vector<ChoiceElementRow> > choiceElementRows_; // ChrCustomizationChoice::ID -> its rows, by element ID
+  std::map<uint, CustomizationElements> resolvedElements_;          // ChrCustomizationElement::ID -> its effect
+  const std::vector<ChoiceElementRow> & getChoiceElementRows(uint chrCustomizationChoiceID);
+  const CustomizationElements & resolveElement(const ChoiceElementRow & row);
 
-  bool applyChrCustomizationElements(uint chrCustomizationOption, sqlResult &);
   static int bitMaskToSectionType(int mask);
-  std::vector<int> getParentOptions(uint chrCustomizationOption);
-  std::vector<int> getChildOptions(uint chrCustomizationOption);
 
-  void initLinkedOptionsMap();
+  // The choices of an option valid with a selection, in client order; empty when the option's own
+  // requirement fails.
+  std::vector<uint> validChoices(uint chrCustomizationOptionID, const std::map<uint, uint> & selection) const;
+  // The options whose requirements name choices of this option, directly or through another such
+  // option.
+  std::set<uint> dependentOptions(uint chrCustomizationOptionID) const;
+  // Re-validates the options in scope (all when null) in resolution order: no valid choice -> the
+  // option has no current choice; a current choice still valid -> kept; otherwise the first valid
+  // choice in client order. Records choices only; nothing is applied or refreshed.
+  void resolveSelection(const std::set<uint> * scope);
+  // Replaces every option's applied elements with the elements of the current choices, related
+  // gates judged against the current choices.
+  void rebuildCustomizationElements();
+
+  struct SelectionState
+  {
+    std::map<uint, uint> selection;
+    std::map<uint, std::vector<uint> > choices; // option -> valid choices
+  };
+  SelectionState captureSelectionState() const;
+  // After the choices changed: rebuild the elements, tell observers which options changed (and
+  // whether the set of available options did), then refresh the model once.
+  void applySelection(const SelectionState & before, uint changedOption);
+  void logUnresolvedRequirement(uint requirementID, const QString & why) const;
 
   void refreshGeosets();
   void refreshTextures();
   void refreshSkinnedModels();
 
-  std::map<uint, std::vector<uint> > choicesPerOptionMap_; // map < ChrCustomizationOption::ID, vector <ChrCustomizationChoice::ID> >
+  std::map<uint, std::vector<uint> > choicesPerOptionMap_; // map < ChrCustomizationOption::ID, vector <ChrCustomizationChoice::ID> > (client order)
   std::map<uint, uint> optionFlags_; // map < ChrCustomizationOption::ID, ChrCustomizationOption::Flags >
+  std::vector<uint> optionClientOrder_;   // this model's options by OrderIndex, ID
+  std::vector<uint> optionResolveOrder_;  // the same, each option after the options its requirements name
+  std::map<uint, std::set<uint> > dependentOptions_; // option -> options whose requirements name its choices
+  std::map<uint, uint> optionRequirement_;  // ChrCustomizationOption::ID -> ChrCustomizationReq::ID (0: none)
+  std::map<uint, uint> choiceRequirement_;  // ChrCustomizationChoice::ID -> ChrCustomizationReq::ID
+  std::map<uint, uint> choiceOption_;       // ChrCustomizationChoice::ID -> ChrCustomizationOption::ID
+  std::map<uint, Requirement> requirements_;
+  int playableRaceBit_ = -1;
+  mutable std::set<uint> unresolvedRequirementsLogged_;
 
   // Geoset GROUPS (GeosetType) that any customization option for this model drives.
   // Computed once in fillCustomizationMap(); lets fixed geometry be told from
@@ -221,37 +314,18 @@ private:
   std::map<uint, std::vector<std::pair<int, uint> > > choiceGeosetElements_;
   const std::vector<std::pair<int, uint> > & getChoiceGeosetElements(uint chrCustomizationChoiceID);
 
-  // ChrCustomizationChoice::ID -> its ChrCustomizationReq fields. Used to hide choices
-  // that don't apply to this character: class/race-gated (e.g. Demon-Hunter-only
-  // horns/blindfold on a non-DH) and "borrowed"/collectible appearances the account
-  // would have to unlock (achievement/quest/transmog-item). A choice absent from the
-  // map has no requirement and is always available. See isChoiceAvailable().
-  struct ChoiceReq
-  {
-    long long raceMask = 0;
-    long long classMask = 0;
-    bool unlockGated = false; // ReqAchievementID / ReqQuestID / ReqItemModifiedAppearanceID set
-  };
-  std::map<uint, ChoiceReq> choiceReq_;
-  bool isChoiceAvailable(uint chrCustomizationChoiceID) const;
-
   // When a choice adds a skinned model whose texture comes from a direct-bind material
   // gated by another option (e.g. the DH blindfold texture is gated by the DH eye-glow
   // colour), switch that gating option to a compatible value so the model isn't merged
-  // untextured (white). Mirrors the in-game texture-gating behaviour.
+  // untextured (white). Mirrors the in-game texture-gating behaviour. Records the choice
+  // (and re-validates the options depending on it); the caller applies.
   void autoSelectTextureGating(uint chrCustomizationChoiceID);
-  bool autoSelectInProgress_ = false;
 
-  // When true, set() applies the choice but skips the expensive model_->refresh()
-  // (texture re-composite + skinned-model reload + geoset merge). randomise() uses
-  // this to apply all ~45 options and refresh ONCE at the end instead of per option.
+  // True while load() records the saved choices: set() only records them, and load() resolves
+  // and applies the whole selection once at the end.
   bool batchUpdate_ = false;
-  std::map<uint, CustomizationElements> customizationElementsPerOption_; // keep track of current elements applied for a given option
+  std::map<uint, CustomizationElements> customizationElementsPerOption_; // the elements applied for each option's current choice
   std::vector<std::pair<uint, std::pair<uint, uint> > > models_; // vector < pair < GameFileId, pair <GeosetType, GeosetID> > >
-
-  static std::multimap<uint, int> LINKED_OPTIONS_MAP_; // multimap < child ChrCustomizationOption::ID, parent ChrCustomizationOption::ID>
-                                                       // (ie, <markings color, markings> or <tattoo color, tattoo>)
-                                                       // some child options are multi parent (ie Tauren facial Markings & body markings are sharing same color)
 };
 
 

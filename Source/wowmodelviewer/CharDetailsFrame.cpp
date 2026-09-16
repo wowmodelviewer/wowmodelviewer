@@ -59,40 +59,38 @@ void CharDetailsFrame::setModel(WoWModel * model)
   model_ = model;
   model_->cd.attach(this);
 
-  charCustomizationGS_->Clear(true);
+  buildRows();
 
-  const auto infos = model_->infos;
-  if (infos.ChrModelID.empty())
-    return;
-
-  // Build a dropdown for EVERY customization option of this model, regardless of
-  // ChrCustomizationID. The old filter (ChrCustomizationID != 0, falling back to the
-  // unfiltered set only when EMPTY) dropped every ChrCustomizationID == 0 option on models
-  // that also have a few tagged ones -- a mixed case the all-empty fallback never caught --
-  // so the panel was missing real options. Worst hit: the Dracthyr VISAGE female (ChrModelID
-  // 128) showed only Skin Color + Eyesight and lost Face/Hair/Horns/Eye Color/etc.; drakes
-  // lost their armour options; allied races lost Eyesight + Eye Style. These options are
-  // legitimate (the visage MALE and the all-zero forms already proved it via the old
-  // fallback), so list them all. Mirrors CharDetails::fillCustomizationMap.
-  auto options = GAMEDATABASE.sqlQuery(QString("SELECT ID FROM ChrCustomizationOption WHERE ChrModelID = %1 ORDER BY OrderIndex").arg(infos.ChrModelID[0]));
-
-  if(options.valid && !options.values.empty())
-  {
-    for(auto& option : options.values)
-      charCustomizationGS_->Add(new CharDetailsCustomizationChoice(this, model_->cd, option[0].toUInt()), wxSizerFlags(1).Align(wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL));
-  }
-
-  if (infos.raceID == RACE_NIGHTELF || infos.raceID == RACE_BLOODELF)
+  if (model_->infos.raceID == RACE_NIGHTELF || model_->infos.raceID == RACE_BLOODELF)
     dhMode_->Enable(true);
   else
     dhMode_->Enable(false);
 
   dhMode_->SetValue(model->cd.isDemonHunter());
+}
+
+void CharDetailsFrame::buildRows()
+{
+  charCustomizationGS_->Clear(true);
+
+  if (model_ && !model_->infos.ChrModelID.empty())
+  {
+    // One dropdown for each option the character can use with its current choices, in client order:
+    // an option whose own requirement fails (the NPC-only "Eye Style" of the classic races) or that
+    // has no valid choice gets no row, rather than an empty dropdown. Which options those are can
+    // change with a choice (Eyesight goes with Eye Color "Sockets"); see onEvent. Options are no longer
+    // filtered by ChrCustomizationID either -- that dropped real options on models mixing tagged and
+    // untagged ones (the Dracthyr visage female lost Face, Hair, Horns, Eye Color...).
+    for (const uint option : model_->cd.getCustomizationOptions())
+      charCustomizationGS_->Add(new CharDetailsCustomizationChoice(this, model_->cd, option), wxSizerFlags(1).Align(wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL));
+  }
 
   SetAutoLayout(true);
   GetSizer()->SetSizeHints(this);
   Layout();
   GetParent()->Layout();
+  if (auto * scrolled = wxDynamicCast(GetParent(), wxScrolledWindow))
+    scrolled->FitInside();
 }
 
 void CharDetailsFrame::onRandomise(wxCommandEvent &)
@@ -108,13 +106,13 @@ void CharDetailsFrame::onDHMode(wxCommandEvent &event)
   if (!model_)
     return;
 
+  // Re-validates every option for the new class context and refreshes the model once.
   if (event.IsChecked())
     model_->cd.setDemonHunterMode(true);
   else
     model_->cd.setDemonHunterMode(false);
 
   setModel(model_);
-  model_->refresh();
 }
 
 void CharDetailsFrame::onEvent(Event * event)
@@ -123,6 +121,22 @@ void CharDetailsFrame::onEvent(Event * event)
   {
     dhMode_->SetValue(model_->cd.isDemonHunter());
     setModel(model_);
+  }
+  else if (event->type() == CharDetailsEvent::OPTION_LIST_CHANGED && model_)
+  {
+    // The options the character can use changed (e.g. Eyesight after Eye Color "Sockets"). The rows
+    // are rebuilt after the current event has been handled: the change usually comes from one of
+    // these rows' own dropdown, whose control must not be destroyed while its handler runs.
+    if (!rebuildPending_)
+    {
+      rebuildPending_ = true;
+      const WoWModel * model = model_;
+      CallAfter([this, model]() {
+        rebuildPending_ = false;
+        if (model_ == model)
+          buildRows();
+      });
+    }
   }
 }
 

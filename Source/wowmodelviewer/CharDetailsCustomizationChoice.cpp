@@ -92,7 +92,10 @@ CharDetailsCustomizationChoice::CharDetailsCustomizationChoice(wxWindow* parent,
 void CharDetailsCustomizationChoice::onChoice(wxCommandEvent& event)
 {
   LOG_INFO << __FUNCTION__ << event.GetSelection();
-  details_.set(ID_, values_[event.GetSelection()]);
+  const int selection = event.GetSelection();
+  if (selection < 0 || selection >= static_cast<int>(values_.size()))
+    return;
+  details_.set(ID_, values_[selection]); // identity is the choice ID behind the item, never its label
 }
 
 void CharDetailsCustomizationChoice::onEvent(Event * e)
@@ -100,9 +103,12 @@ void CharDetailsCustomizationChoice::onEvent(Event * e)
   auto * event = dynamic_cast<CharDetailsEvent *>(e);
   if (event && (event->type() == CharDetailsEvent::CHOICE_LIST_CHANGED) && (event->getCustomizationOptionId() == ID_))
   {
-    auto it = std::find(values_.begin(), values_.end(), details_.get(ID_));
-    if (it != values_.end())
-      choice_->SetSelection(it - values_.begin());
+    // The valid choices can change with another option's choice (a Skin Color list follows Skin
+    // Type, Face Features follows Jaw Features): rebuild the list when they did, then select the
+    // current choice. Neither step sets a choice, so this cannot start another change.
+    if (details_.getCustomizationChoices(ID_) != listedChoices_)
+      buildList();
+    refresh();
   }
 }
 
@@ -114,7 +120,8 @@ void CharDetailsCustomizationChoice::buildList()
     choice_->Clear();
     values_.clear();
 
-    auto ids = details_.getCustomizationChoices(ID_);
+    const auto ids = details_.getCustomizationChoices(ID_);
+    listedChoices_ = ids;
 
     LOG_INFO << __FUNCTION__ << ID_;
 
@@ -129,22 +136,34 @@ void CharDetailsCustomizationChoice::buildList()
     }
 
     query.chop(1);
-    query += ") ORDER BY OrderIndex";
+    query += ")";
 
     LOG_INFO << query;
 
-    auto choices = GAMEDATABASE.sqlQuery(query);
+    auto rows = GAMEDATABASE.sqlQuery(query);
 
-    if(choices.valid && !choices.values.empty())
+    if(rows.valid && !rows.values.empty())
     {
+      // Items follow the order getCustomizationChoices gives (client order: OrderIndex, then ID).
+      std::map<uint, std::vector<QString> > rowByID;
+      for (const auto & row : rows.values)
+        rowByID[row[2].toUInt()] = row;
+      std::vector<std::vector<QString> > choices;
+      for (const uint id : ids)
+      {
+        const auto it = rowByID.find(id);
+        if (it != rowByID.end())
+          choices.push_back(it->second);
+      }
+
       // colour options (Skin/Hair/Eye Colour ...) carry a SwatchColor on their
       // choices; show those as colour swatches instead of
       // the meaningless "Choice N" text.
       bool isColourOption = false;
-      for (auto v : choices.values)
+      for (auto v : choices)
         if (v[3].toLongLong() != 0 || v[4].toLongLong() != 0) { isColourOption = true; break; }
 
-      for(auto v:choices.values)
+      for(auto v:choices)
       {
         const wxString num = wxString::Format(wxT("%i"), v[0].toInt()); // OrderIndex, shown as a plain number
 
@@ -178,14 +197,10 @@ void CharDetailsCustomizationChoice::refresh()
 {
   if (choice_)
   {
-    uint pos = 0;
-
-    const auto currentValue = details_.get(ID_);
-
-    for (; pos < values_.size(); pos++)
-      if (currentValue == values_[pos]) break;
-
-    choice_->SetSelection(pos);
+    // Select the item of the current choice; a current choice the list does not show (none, or one
+    // set from outside the valid list, e.g. an imported class-specific choice) selects nothing.
+    const auto it = std::find(values_.begin(), values_.end(), details_.get(ID_));
+    choice_->SetSelection(it != values_.end() ? static_cast<int>(it - values_.begin()) : wxNOT_FOUND);
 
     Layout();
   }

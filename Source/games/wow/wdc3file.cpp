@@ -299,23 +299,17 @@ bool WDC3File::open()
       {
         case FIELD_COMPRESSION::NONE:
         {
-          unsigned char * val = new unsigned char[info.field_size_bits / 8];
-          memcpy(val, recordOffset + info.field_offset_bits / 8, info.field_size_bits / 8);
-          m_IDs.push_back((*reinterpret_cast<unsigned int*>(val)));
+          // Copy the id's own bytes (at most four) into a zeroed value: reading a whole unsigned int
+          // out of a shorter id (ChrClasses keeps an 8-bit one) took its high bytes from the heap.
+          uint32 id = 0;
+          const uint idBytes = info.field_size_bits / 8;
+          memcpy(&id, recordOffset + info.field_offset_bits / 8, idBytes < 4 ? idBytes : 4);
+          m_IDs.push_back(id);
           break;
         }
         case FIELD_COMPRESSION::BITPACKED:
         {
-          unsigned int Size = (info.field_size_bits + (info.field_offset_bits & 7) + 7) / 8;
-          unsigned int offset = info.field_offset_bits / 8;
-          unsigned char * val = new unsigned char[Size];
-
-          memcpy(val, recordOffset + offset, Size);
-
-          unsigned int id = (*reinterpret_cast<unsigned int*>(val));
-          id = id & ((1ull << info.field_size_bits) - 1);
-
-          m_IDs.push_back(id);
+          m_IDs.push_back(readBitpackedValue(info, recordOffset));
           break;
         }
         case FIELD_COMPRESSION::COMMON_DATA:
@@ -792,17 +786,18 @@ std::vector<std::string> WDC3File::get(unsigned int recordIndex, const core::Tab
       }
       else if (field->type == "int64")
       {
+          // readFieldValue yields one 32-bit value per element, so a 64-bit column is that value
+          // widened, never eight bytes copied out of the four-byte 'val' (which filled the high half
+          // with whatever followed it on the stack -- e.g. 0x29F0D4A0 on ChrCustomizationReq rows).
           std::stringstream ss;
-          std::int64_t intValue;
-          std::memcpy(&intValue, &val, sizeof(std::int64_t));
+          const std::int64_t intValue = static_cast<std::int32_t>(val);
           ss << intValue;
           result.push_back(ss.str());
       }
       else if (field->type == "uint64")
       {
           std::stringstream ss;
-          std::uint64_t uintValue;
-          std::memcpy(&uintValue, &val, sizeof(std::uint64_t));
+          const std::uint64_t uintValue = val;
           ss << uintValue;
           result.push_back(ss.str());
       }
@@ -873,34 +868,45 @@ bool WDC3File::readFieldValue(unsigned int recordIndex, unsigned int fieldIndex,
         fieldOffset += ((info.field_size_bits / 8 / arraySize) * arrayIndex);
       }
 
-      unsigned char * val = new unsigned char[fieldSize];
-      memcpy(val, fieldOffset, fieldSize);
-      
+      // Copy at most the four bytes the 32-bit result can hold: reading a whole unsigned int out of
+      // a shorter element over-read its buffer.
+      unsigned char val[4] = { 0, 0, 0, 0 };
+      const uint copied = fieldSize < 4 ? fieldSize : 4;
+      memcpy(val, fieldOffset, copied);
+
       // handle special case => when value is supposed to be 0, values read are all 0xFF
       // Don't understand why, so I use this ugly stuff...
       if (arraySize != 1)
       {
         uint nbFF = 0;
-        for (uint i = 0; i < fieldSize; i++)
+        for (uint i = 0; i < copied; i++)
         {
           if (val[i] == 0xFF)
             nbFF++;
         }
 
-        if (nbFF == fieldSize)
+        if (nbFF == copied)
         {
-          for (uint i = 0; i < fieldSize; i++)
+          for (uint i = 0; i < copied; i++)
             val[i] = 0;
         }
       }
-      result = (*reinterpret_cast<unsigned int*>(val));
-      result = result & ((1ull << (info.field_size_bits / arraySize)) - 1);
+      memcpy(&result, val, 4);
+      const uint elementBits = info.field_size_bits / arraySize;
+      if (elementBits < 32)
+        result = result & ((1u << elementBits) - 1);
       break;
     }
     case FIELD_COMPRESSION::BITPACKED:
-    case FIELD_COMPRESSION::BITPACKED_SIGNED:
     {
       result = readBitpackedValue(info, recordOffset);
+      break;
+    }
+    case FIELD_COMPRESSION::BITPACKED_SIGNED:
+    {
+      // A two's complement value of field_size_bits: its sign is extended to 32 bits, so -1 reads
+      // back as -1 and not as 2^bits - 1 (ChrCustomizationReq.ClassMask 65535, OverrideArchive 3).
+      result = static_cast<unsigned int>(readSignedBitpackedValue(info, recordOffset));
       break;
     }
     case FIELD_COMPRESSION::COMMON_DATA:
@@ -919,15 +925,30 @@ bool WDC3File::readFieldValue(unsigned int recordIndex, unsigned int fieldIndex,
     {                                          
       uint32 index = readBitpackedValue(info, recordOffset);
       auto it = m_palletBlockOffsets.find(fieldIndex);
+      if (it == m_palletBlockOffsets.end() || static_cast<size_t>(it->second) + static_cast<size_t>(index) * 4 + 4 > m_header.pallet_data_size)
+      {
+        result = 0;
+        return false;
+      }
       uint32 offset = it->second + index * 4;
       memcpy(&result, m_palletData + offset, 4);
       break;
     }
     case FIELD_COMPRESSION::BITPACKED_INDEXED_ARRAY:
     {
+      // Each pallet entry is val3 (the file's array count) uint32 elements, so entry 'index' starts at
+      // index * val3 * 4. The stride must be the file's count, not the schema's arraySize: with
+      // ChrCustomizationReq.RaceMasks<32>[2] declared as one value, index * 1 * 4 read half entries.
+      const uint32 count = info.val3 != 0 ? info.val3 : arraySize;
       uint32 index = readBitpackedValue(info, recordOffset);
       auto it = m_palletBlockOffsets.find(fieldIndex);
-      uint32 offset = it->second + index * arraySize * 4 + arrayIndex * 4;
+      const size_t offset = (it == m_palletBlockOffsets.end()) ? 0 :
+                            static_cast<size_t>(it->second) + static_cast<size_t>(index) * count * 4 + static_cast<size_t>(arrayIndex) * 4;
+      if (arrayIndex >= count || it == m_palletBlockOffsets.end() || offset + 4 > m_header.pallet_data_size)
+      {
+        result = 0;
+        return false;
+      }
       memcpy(&result, m_palletData + offset, 4);
       break;
     }
@@ -941,16 +962,28 @@ bool WDC3File::readFieldValue(unsigned int recordIndex, unsigned int fieldIndex,
 
 uint32 WDC3File::readBitpackedValue(field_storage_info info, unsigned char * recordOffset) const
 {
-  unsigned int Size = (info.field_size_bits + (info.field_offset_bits & 7) + 7) / 8;
-  unsigned int offset = info.field_offset_bits / 8;
-  unsigned char * v = new unsigned char[Size];
+  // The value occupies Size bytes from field_offset_bits / 8. Gather them into a 64-bit accumulator:
+  // a fixed four-byte read over-read the buffer of a shorter value and dropped the top bits of one
+  // that spills into a fifth byte (a wide field at an odd bit offset). At most 7 + 32 bits are
+  // needed for the 32-bit result, so eight bytes always cover it.
+  const unsigned int Size = (info.field_size_bits + (info.field_offset_bits & 7) + 7) / 8;
+  const unsigned int offset = info.field_offset_bits / 8;
+  uint64 v = 0;
+  memcpy(&v, recordOffset + offset, Size < 8 ? Size : 8);
 
-  memcpy(v, recordOffset + offset, Size);
+  v >>= (info.field_offset_bits & 7);
+  if (info.field_size_bits < 32)
+    v &= (1ull << info.field_size_bits) - 1;
+  return static_cast<uint32>(v);
+}
 
-  uint32 result = (*reinterpret_cast<unsigned int*>(v));
-  result = result >> (info.field_offset_bits & 7);
-  result = result & ((1ull << info.field_size_bits) - 1);
-  return result;
+int32 WDC3File::readSignedBitpackedValue(field_storage_info info, unsigned char * recordOffset) const
+{
+  uint32 value = readBitpackedValue(info, recordOffset);
+  const unsigned int bits = info.field_size_bits;
+  if (bits > 0 && bits < 32 && (value & (1u << (bits - 1))) != 0)
+    value |= ~((1u << bits) - 1);
+  return static_cast<int32>(value);
 }
 
 
