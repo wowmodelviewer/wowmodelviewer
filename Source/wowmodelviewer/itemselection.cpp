@@ -135,6 +135,8 @@ void ChoiceDialog::OnClick(wxCommandEvent &)
 
 void ChoiceDialog::OnSelect(wxListEvent &)
 {
+  if (m_syncingSelection)
+    return;
     // MacOS is buggy with GetFocusedItem(), use GetFirstSelected instead
     m_selection = m_listctrl->GetFirstSelected();
     if (m_selection == -1)
@@ -311,6 +313,28 @@ bool FilteredChoiceDialog::FilterFunc(int index)
     return true;
 
   return m_choices->Item(index).Lower().Matches(_T("*") + m_pattern->GetValue().Lower() + _T("*"));
+}
+
+void FilteredChoiceDialog::SelectChoiceRow(int index)
+{
+  // The list chooses on every selection change: its selection event is ignored while this moves it.
+  m_syncingSelection = true;
+  long row = -1;
+  for (size_t r = 0; r < m_indices.size(); r++)
+    if (m_indices[r] == index)
+    {
+      row = (long)r;
+      break;
+    }
+  for (long s = m_listctrl->GetFirstSelected(); s >= 0; s = m_listctrl->GetNextSelected(s))
+    if (s != row)
+      m_listctrl->Select(s, false);
+  if (row >= 0)
+  {
+    m_listctrl->Select(row);
+    m_listctrl->Focus(row);   // the arrow keys go on from here
+  }
+  m_syncingSelection = false;
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////

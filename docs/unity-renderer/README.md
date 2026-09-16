@@ -393,7 +393,11 @@ the canvas, and the character's node -- already a child of that root -- hangs fr
 attachment 0 from then on. The canvas model is the mount, so the host asks for the character
 through the rider accessor (`ModelViewer::riderModel`, the model of `CharControl::charAtt`), and
 `canvasShowsMountedCharacter` holds while the context is a character, the rider is a character model
-with a FileDataID and a mount is on its node's parent. To a player that announced protocol 5:
+with a FileDataID and a mount is on its node's parent. Every way of choosing a mount reaches that one
+choice with a row of the mount dialog's list (`CharControl::fillMountChoices`): Character > Mount /
+Dismount passes the row picked in its dialog, and the Model panel's Mount card passes the dialog's row for
+the mount picked in its own searchable list (`CharControl::selectMountChoice` and `dismount`, over the
+player mounts of `CharControl::mountChoices`). To a player that announced protocol 5:
 
 - `loadWoWModel` keeps naming the rider as a character, so mounting, dismounting and swapping mounts
   never send a new load; the next canvas tick sends a scene instead, because its fingerprint includes
