@@ -58,6 +58,11 @@ public class WmvM2Animator : MonoBehaviour
     /// earlier in the frame (a scene commit, a scrub), which made the shared clock jump or stall.</summary>
     static double lastGlobalRealtime = -1.0;
 
+    /// <summary>DIAGNOSTICS ONLY: told at the end of each animator's LateUpdate, with the animator, while
+    /// -wmvMountCheck measures where the LateUpdates of a mount and the character riding it fall in a frame
+    /// (WmvMountProbe). Null at every other time, so a frame pays one null test for it.</summary>
+    public static Action<WmvM2Animator> LateUpdated;
+
     /// <summary>
     /// Bones posed from a DIFFERENT sequence at a fixed instant, over whatever the playing one does:
     /// the legacy's closed hand (WoWModel::calcBones), whose finger key bones take the HandsClosed
@@ -414,6 +419,8 @@ public class WmvM2Animator : MonoBehaviour
                     Emitters.Tick(0f, (float)timeMs, pinned);
                 }
             }
+            if (LateUpdated != null)
+                LateUpdated(this);
             return;
         }
         pinnedEmittersAt = -1f;
@@ -453,6 +460,8 @@ public class WmvM2Animator : MonoBehaviour
                           (float)timeMs, (float)GlobalTimeMs);
 
         AdvanceWatchTick(beforeTimeMs, dt);
+        if (LateUpdated != null)
+            LateUpdated(this);
     }
 
     /// <summary>

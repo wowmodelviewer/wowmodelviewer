@@ -9,9 +9,11 @@
 #include <vector>
 
 #include <QJsonArray>
+#include <QtGlobal>
 
 #include "Attachment.h"
 #include "ModelRenderPass.h"
+#include "UnityAssetAccess.h"
 #include "wow_enums.h"
 #include "WoWItem.h"
 #include "WoWModel.h"
@@ -121,6 +123,68 @@ namespace
       out.append(t);
   }
 
+  // A MOUNT's texture binding, and deliberately not binding(): name 0 is the character's composited body only
+  // for the character's own passes (CharTexture::compose uploads into it). A mount slot holds name 0 when the
+  // texture it was given did not resolve -- TextureManager::add(nullptr) returns 0, and WoWModel::updateTextureList
+  // stores it (a display with no second or third texture variation gives exactly that) -- and INVALID_TEX when
+  // it was given none. Either way nothing is bound to it, never the rider's body.
+  bool mountBinding(QJsonObject & t, GLuint id)
+  {
+    if (id == ModelRenderPass::INVALID_TEX || id == 0)
+      return false;
+    const int fdid = WoWModel::fileDataIdForGLTexture(id);
+    if (fdid <= 0)
+      return false;
+    t["fileDataID"] = fdid;
+    return true;
+  }
+
+  // WHERE THE RIDER SITS, as the host draws it: Attachment::setup has the MOUNT look the rider node's id up
+  // (WoWModel::setupAtt), and ModelAttachment::setup multiplies that entry's bone matrix by a translation to its
+  // position. An id the mount's table has no entry for gets no transform at all: bone -1, position zero -- the
+  // rider at the mount's origin.
+  void mountSeat(const WoWModel * mount, int attachmentId, int & bone, glm::vec3 & pos)
+  {
+    bone = -1;
+    pos = glm::vec3(0.0f);
+    if (!mount || attachmentId < 0 || attachmentId >= (int)WoWModel::ATT_MAX)
+      return;
+    const int l = mount->attLookup[attachmentId];
+    if (l > -1 && l < (int)mount->atts.size())
+    {
+      bone = mount->atts[l].bone;
+      pos = mount->atts[l].pos;
+    }
+  }
+
+  // The ParticleColor replacement a mount's display applies (AnimControl::SetSkin), when there is one: three
+  // sets -- for emitter ParticleColorIndex 11, 12 and 13 -- of start, mid and end colours, which is the shape
+  // AnimControl::UpdateCreatureModel builds and ParticleSystem::update reads.
+  bool replacesParticleColors(const WoWModel * m)
+  {
+    if (!m->replaceParticleColors || m->particleColorReplacements.size() < 3)
+      return false;
+    for (size_t set = 0; set < 3; set++)
+      if (m->particleColorReplacements[set].size() < 3)
+        return false;
+    return true;
+  }
+
+  // One colour channel as the byte it was stored as (AnimControl::fromARGB divides each by 255).
+  int colourByte(float v)
+  {
+    return qBound(0, qRound(v * 255.0f), 255);
+  }
+
+  // The sequence a model's clock is playing (the index into its animation table), or -1.
+  int playingSequence(const WoWModel * m)
+  {
+    if (!m || !m->animManager || m->anims.empty())
+      return -1;
+    const int index = (int)m->animManager->GetAnim();
+    return (index >= 0 && index < (int)m->anims.size()) ? index : -1;
+  }
+
   QJsonArray bits(const std::vector<ModelGeosetHD *> & geosets, size_t start, size_t count)
   {
     QJsonArray arr;
@@ -144,7 +208,8 @@ namespace
   };
 }
 
-QJsonObject UnityCharacterScene::build(WoWModel * character, const ImageRef & imageRef, Summary & summary)
+QJsonObject UnityCharacterScene::build(WoWModel * character, const ImageRef & imageRef, Summary & summary,
+                                       const Mount * mount)
 {
   QJsonObject scene;
   if (!character || !character->gamefile)
@@ -284,10 +349,75 @@ QJsonObject UnityCharacterScene::build(WoWModel * character, const ImageRef & im
     scene["attachments"] = attachments;
   }
 
+  // ---- the mount the character rides (protocol 5) ------------------------------------------------
+  if (mount && mount->model)
+  {
+    scene["mount"] = buildMount(character, *mount);
+    summary.mount = true;
+  }
+
   return scene;
 }
 
-quint64 UnityCharacterScene::signature(WoWModel * character)
+QJsonObject UnityCharacterScene::buildMount(WoWModel * character, const Mount & mount)
+{
+  QJsonObject o;
+  WoWModel * m = mount.model;
+  if (!character || !m)
+    return o;
+
+  // The host's identity for this mount model: a serial, never its address (see UnityIpcServer.h).
+  o["key"] = QString("M%1").arg(mount.serial);
+  o["fileDataID"] = m->gamefile ? (int)m->gamefile->fileDataId() : 0;
+  o["path"] = m->gamefile ? UnityAssetAccess::normalizePath(m->gamefile->fullname()) : QString();
+  o["displayID"] = mount.displayId;
+  o["attachmentId"] = mount.attachmentId;
+  int bone = -1;
+  glm::vec3 pos(0.0f);
+  mountSeat(m, mount.attachmentId, bone, pos);
+  o["bone"] = bone;
+  o["position"] = QJsonArray{ pos.x, pos.y, pos.z };
+  // The one mount-dependent adjustment the host makes to the rider (CharControl::OnUpdateItem sets it on the
+  // rider model). Applied by the host to the rider mesh.
+  o["riderScale"] = character->scale_;
+
+  // The mount's own slots, as its render passes bind them (WoWModel::getGLTexture). A model that did not load
+  // has no texture table to read.
+  QJsonArray textures;
+  const int slotCount = m->ok ? ownTextureCount(m) : 0;
+  for (int slot = 0; slot < slotCount; slot++)
+  {
+    QJsonObject t;
+    t["slot"] = slot;
+    t["type"] = m->textureTypeForSlot(slot);
+    if (mountBinding(t, m->getGLTexture((uint16)slot)))
+      textures.append(t);
+  }
+  o["textures"] = textures;
+  const size_t own = std::min(m->ownGeosetCount(), m->geosets.size());
+  o["submeshCount"] = (int)own;
+  o["submeshVisible"] = bits(m->geosets, 0, own);
+
+  if (replacesParticleColors(m))
+  {
+    // [set 0 start r,g,b, set 0 mid r,g,b, set 0 end r,g,b, set 1 start ..., set 2 end b]: 27 bytes. The alpha is
+    // not sent: the host keeps each emitter's own alpha under a replacement (ParticleSystem::update).
+    QJsonArray sets;
+    for (size_t set = 0; set < 3; set++)
+      for (size_t stop = 0; stop < 3; stop++)
+        for (int ch = 0; ch < 3; ch++)
+          sets.append(colourByte(m->particleColorReplacements[set][stop][ch]));
+    o["particleColorSets"] = sets;
+  }
+
+  // What both clocks play right now. The rider's is what the mount choice selected for it from its animation
+  // lookup (CharControl::OnUpdateItem), read back rather than looked up again.
+  o["sequenceIndex"] = playingSequence(m);
+  o["riderSequenceIndex"] = playingSequence(character);
+  return o;
+}
+
+quint64 UnityCharacterScene::signature(WoWModel * character, const Mount * mount)
 {
   Fnv f;
   if (!character)
@@ -315,6 +445,30 @@ quint64 UnityCharacterScene::signature(WoWModel * character)
       f.add(a.model->getGLTexture((uint16)slot));
     for (size_t i = 0; i < a.model->geosets.size(); i++)
       f.add(a.model->geosets[i] && a.model->geosets[i]->display ? 1 : 0);
+  }
+  // The mount: a new mount model (its serial -- an address can repeat after a swap), a seat or rider scale
+  // change, and the display state a skin selection or a Geosets checkbox changes on it without a load.
+  if (mount && mount->model)
+  {
+    const WoWModel * m = mount->model;
+    f.add(mount->serial);
+    f.add((quint64)(qint64)mount->attachmentId);
+    int bone = -1;
+    glm::vec3 pos(0.0f);
+    mountSeat(m, mount->attachmentId, bone, pos);
+    f.add((quint64)(qint64)bone);
+    f.add((quint64)(qint64)(character->scale_ * 1000.0f));
+    const int slotCount = m->ok ? ownTextureCount(m) : 0;
+    for (int slot = 0; slot < slotCount; slot++)
+      f.add(m->getGLTexture((uint16)slot));
+    for (size_t i = 0; i < m->geosets.size(); i++)
+      f.add(m->geosets[i] && m->geosets[i]->display ? 1 : 0);
+    const bool colours = replacesParticleColors(m);
+    f.add(colours ? 1 : 0);
+    for (size_t set = 0; colours && set < 3; set++)
+      for (size_t stop = 0; stop < 3; stop++)
+        for (int ch = 0; ch < 3; ch++)
+          f.add((quint64)colourByte(m->particleColorReplacements[set][stop][ch]));
   }
   return f.h;
 }

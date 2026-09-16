@@ -47,6 +47,7 @@
 
 #include "TextureManager.h"
 #include "UnityAssetAccess.h"
+#include "UnityCharacterScene.h"
 #include "UnityIpcServer.h"
 #include "UnityRendererHost.h"
 
@@ -545,6 +546,576 @@ static bool checkMapObjectReport(ModelViewer * frame, const UnityIpcServer::MapO
   return bad.isEmpty();
 }
 
+// Pump the IPC server and the wx queue for ms milliseconds inside an activated event loop, so the canvas timer ticks
+// as it does in the running application. A mount choice, a dismount and a change to what a mounted character wears
+// load nothing, so no load sends their scene: the canvas tick does (ModelViewer::SendCharacterSceneToUnity), and
+// inside OnInit a bare wxYield dispatches no timer message (see the canvas clock of the viewport check).
+static void pumpTicking(UnityIpcServer * ipc, long ms)
+{
+  wxGUIEventLoop loop;
+  wxEventLoopActivator activate(&loop);
+  wxStopWatch w;
+  while (w.Time() < ms)
+  {
+    ipc->poll();
+    wxTheApp->Yield(true);
+    wxMilliSleep(10);
+  }
+}
+
+// The player's answer to the newest scene sent after revision `after` for the character's current load, with the canvas
+// ticking while it waits: it must be applied, name the mount key and mount status expected, and no newer scene may be
+// out waiting for its own answer. out is that newest answer, seen whether there was one (both for the reason when the
+// wait fails). Returns false after limitMs.
+static bool waitSceneAnswer(ModelViewer * frame, UnityIpcServer * ipc, const std::vector<UnityIpcServer::SceneAck> & acks,
+                            int after, const QString & mountKey, const QString & mountStatus, long limitMs,
+                            UnityIpcServer::SceneAck & out, bool & seen)
+{
+  wxGUIEventLoop loop;
+  wxEventLoopActivator activate(&loop);
+  wxStopWatch w;
+  seen = false;
+  while (w.Time() < limitMs)
+  {
+    ipc->poll();
+    wxTheApp->Yield(true);
+    wxMilliSleep(10);
+    for (size_t i = acks.size(); i-- > 0;)
+    {
+      const UnityIpcServer::SceneAck & a = acks[i];
+      if (a.revision <= after || a.load != frame->m_unityLoadSerial)
+        continue;
+      out = a;
+      seen = true;
+      if (a.status == "applied" && a.mountKey == mountKey && a.mountStatus == mountStatus &&
+          frame->m_sceneAwaitingRevision == 0)
+        return true;
+      break;
+    }
+  }
+  return false;
+}
+
+// The sequence a host model plays, as a character scene names it; -1 without one.
+static int hostSequence(const WoWModel * m)
+{
+  if (!m || !m->animManager || m->anims.empty())
+    return -1;
+  const int index = (int)m->animManager->GetAnim();
+  return (index >= 0 && index < (int)m->anims.size()) ? index : -1;
+}
+
+// The first sequence of a host model with this animation id, or -1.
+static int firstSequenceWithAnimId(const WoWModel * m, int animId)
+{
+  for (size_t i = 0; m && i < m->anims.size(); i++)
+    if ((int)m->anims[i].animID == animId)
+      return (int)i;
+  return -1;
+}
+
+// WHAT THE HOST SHOWS after a mounted-character step, as the player must hold it: the character model (the rider) and
+// what it plays; the mount its node hangs from, described exactly as the character's scene describes it -- the key, the
+// file, and the bone the MOUNT's attachment lookup gives the character's attachment (UnityCharacterScene::buildMount) --
+// with what the mount plays; and whether the mount model declares particle and ribbon emitters. All zero / -1 / empty
+// for what is not there.
+struct RiddenHost
+{
+  int character = 0;
+  int characterSequence = -1;
+  int mount = 0;
+  QString key;
+  int bone = -1;
+  int mountSequence = -1;
+  bool mountParticles = false;
+  bool mountRibbons = false;
+};
+
+static RiddenHost riddenHost(ModelViewer * frame)
+{
+  RiddenHost h;
+  WoWModel * character = frame->riderModel();
+  if (!character || !character->gamefile)
+    return h;
+  h.character = (int)character->gamefile->fileDataId();
+  h.characterSequence = hostSequence(character);
+  WoWModel * mount = frame->riderMount();
+  if (!mount)
+    return h;
+  UnityCharacterScene::Mount described;
+  described.model = mount;
+  described.attachmentId = frame->charControl->charAtt->id;
+  described.serial = frame->charControl->mountSerial;
+  described.displayId = frame->charControl->mountDisplayId;
+  const QJsonObject o = UnityCharacterScene::buildMount(character, described);
+  h.mount = o.value("fileDataID").toInt();
+  h.key = o.value("key").toString();
+  h.bone = o.value("bone").toInt(-1);
+  h.mountSequence = o.value("sequenceIndex").toInt(-1);
+  h.mountParticles = mount->header.nParticleEmitters > 0;
+  h.mountRibbons = mount->header.nRibbonEmitters > 0;
+  return h;
+}
+
+// Every way a runtimeState answer differs from what the host shows; empty when the player holds exactly that: the
+// character on screen with no load in flight; the host's mount under it by key and file, with exactly one mount runtime
+// alive (none without a mount); the character seated where the host's resolved attachment puts it -- at the mount's
+// origin when the mount has no such attachment, otherwise under the named bone, or at the attachment's position on the
+// root of a mount built without bone transforms; both animators on the host's sequences; the mount's emitters those of
+// this mount (none drawn for a mount that declares none, some for one that does) and, while the player's clock runs,
+// particle emitters with live particles (a clock pinned by -wmvAnimTime has only spawned up to its instant).
+static QStringList riddenMismatches(const UnityIpcServer::RuntimeState & s, const RiddenHost & h)
+{
+  QStringList bad;
+  if (s.modelFileDataID != h.character)
+    bad << QString("model on screen %1, the host's character is %2").arg(s.modelFileDataID).arg(h.character);
+  if (s.loading)
+    bad << "a load is still in flight";
+  if (s.mountFileDataID != h.mount)
+    bad << QString("mount %1, the host's is %2").arg(s.mountFileDataID).arg(h.mount);
+  if (s.mountKey != h.key)
+    bad << "mount key \"" + s.mountKey + "\", the host's is \"" + h.key + "\"";
+  if (s.liveMounts != (h.mount ? 1 : 0))
+    bad << QString("%1 mount runtime(s) alive, expected %2").arg(s.liveMounts).arg(h.mount ? 1 : 0);
+  if (!h.mount && s.mountSeat != -1)
+    bad << QString("seated (%1) with no mount").arg(s.mountSeat);
+  if (h.mount && h.bone < 0 && (s.mountSeat != 0 || s.mountSeatBone != -1))
+    bad << QString("seat %1 bone %2: the mount has no such attachment, so the character belongs at its origin (seat 0)")
+             .arg(s.mountSeat).arg(s.mountSeatBone);
+  if (h.mount && h.bone >= 0 && !(s.mountSeat == 1 && s.mountSeatBone == h.bone) && s.mountSeat != 2)
+    bad << QString("seat %1 bone %2: the host's attachment is on bone %3").arg(s.mountSeat).arg(s.mountSeatBone).arg(h.bone);
+  if (s.modelSequence != h.characterSequence)
+    bad << QString("the character plays sequence %1, the host's %2").arg(s.modelSequence).arg(h.characterSequence);
+  if (s.mountSequence != h.mountSequence)
+    bad << QString("the mount plays sequence %1, the host's %2").arg(s.mountSequence).arg(h.mountSequence);
+  if (s.mountEmitters < 0 || s.mountRibbons < 0 || s.mountParticles < 0)
+    bad << "no emitter counts in the answer";
+  else
+  {
+    if (h.mountParticles != (s.mountEmitters > 0))
+      bad << QString("%1 particle emitter(s) drawn on a mount that declares %2").arg(s.mountEmitters)
+               .arg(h.mountParticles ? "some" : "none");
+    if (h.mountRibbons != (s.mountRibbons > 0))
+      bad << QString("%1 ribbon emitter(s) drawn on a mount that declares %2").arg(s.mountRibbons)
+               .arg(h.mountRibbons ? "some" : "none");
+    if (s.mountEmitters > 0 && s.mountParticles == 0 && !qEnvironmentVariable("WMV_DEBUG").contains("-wmvAnimTime"))
+      bad << QString("the mount's %1 particle emitter(s) have no live particle").arg(s.mountEmitters);
+  }
+  return bad;
+}
+
+// THE MOUNTED-CHARACTER STEPS of the lifecycle sequence (see doIpcTestLifecycleSequence), protocol 5. Each drives the
+// code a user's action runs, then requires the player's answer to the scene it caused (when it causes one) and its
+// runtimeState account afterwards to match the host (riddenMismatches), plus what the step itself must or must not
+// change against the account before it. what describes the step's outcome for the log; why collects what failed.
+static bool doIpcTestMountStep(ModelViewer * frame, UnityIpcServer * ipc, const QString & kind, const QString & target,
+                               const std::vector<UnityIpcServer::SceneAck> & acks,
+                               const std::vector<UnityIpcServer::RuntimeState> & states, QString & what, QString & why)
+{
+  QStringList bad;
+  CharControl * cc = frame->charControl;
+  if (kind == "wait")
+  {
+    bool number = false;
+    const int ms = target.toInt(&number);
+    if (!number || ms < 0)
+    {
+      why = "wait: takes a number of milliseconds";
+      return false;
+    }
+    pumpTicking(ipc, ms);
+    what = QString("waited %1 ms").arg(ms);
+    return true;
+  }
+  if (!ipc->playerRidesMounts())
+  {
+    why = QString("the player (protocol %1) cannot seat characters on mounts").arg(ipc->playerProtocolVersion());
+    return false;
+  }
+  const int revision = frame->m_sceneRevision;
+  const int load = frame->m_unityLoadSerial;
+  const long answerLimitMs = 120000;
+  // The player's account after the step, asked again while it differs: a sequence whose keys are in a .anim, or a
+  // mount's first particles, can land a little after the scene's answer.
+  const auto settle = [&](const std::function<QStringList(const UnityIpcServer::RuntimeState &)> & differs,
+                          UnityIpcServer::RuntimeState & after) {
+    bool answered = false;
+    waitRuntimeState(ipc, states, [&differs](const UnityIpcServer::RuntimeState & x) { return differs(x).isEmpty(); },
+                     30000, after, answered);
+    if (!answered)
+      bad << "the player never answered runtimeState";
+    else
+      bad << differs(after);
+  };
+  // The player's answer to the scene the step caused. Its text is concatenated, never passed through arg().
+  const auto answer = [&](const QString & key, const QString & status) {
+    UnityIpcServer::SceneAck ack;
+    bool seen = false;
+    wxStopWatch w;
+    const bool matched = waitSceneAnswer(frame, ipc, acks, revision, key, status, answerLimitMs, ack, seen);
+    const QString text = seen ? QString("rev %1 in %2 ms: ").arg(ack.revision).arg(w.Time()) + ack.status + ", mount \"" +
+                                  ack.mountKey + "\" " + ack.mountStatus +
+                                  (ack.mountReason.isEmpty() ? QString() : " (" + ack.mountReason + ")")
+                              : QString("no answer");
+    if (!matched)
+      bad << (seen ? "the scene was answered " + text + ", expected applied with mount \"" + key + "\" " + status
+                   : QString("no scene answered for load %1 within %2 s").arg(frame->m_unityLoadSerial)
+                       .arg(answerLimitMs / 1000));
+    return text;
+  };
+
+  if (kind == "chr")
+  {
+    // LOAD CHARACTER, as the menu does: the character's own scene answers for it, riding nothing.
+    if (!QFile::exists(target))
+    {
+      why = "no such character file: " + target;
+      return false;
+    }
+    frame->LoadChar(target);
+    if (!frame->canvasShowsCharacter())
+      bad << "the host shows no character after loading it";
+    const QString answered = answer(QString(), QStringLiteral("none"));
+    UnityIpcServer::RuntimeState after;
+    const RiddenHost now = riddenHost(frame);
+    settle([&now](const UnityIpcServer::RuntimeState & x) { return riddenMismatches(x, now); }, after);
+    what = QString("character %1 loaded (load %2 -> %3): ").arg(now.character).arg(load).arg(frame->m_unityLoadSerial) +
+           answered + "; the player holds " + after.describe();
+    why = bad.join("; ");
+    return bad.isEmpty();
+  }
+
+  WoWModel * rider = frame->riderModel();
+  if (!rider || !rider->charModelDetails.isChar || !rider->gamefile)
+  {
+    why = "no character is loaded";
+    return false;
+  }
+  // The player's account before the step, which the one after it is compared with.
+  UnityIpcServer::RuntimeState before;
+  bool answeredBefore = false;
+  waitRuntimeState(ipc, states, [](const UnityIpcServer::RuntimeState &) { return true; }, 5000, before, answeredBefore);
+  if (!answeredBefore)
+  {
+    why = "the player never answered runtimeState before the step";
+    return false;
+  }
+  const RiddenHost was = riddenHost(frame);
+  const int images = ipc->stats().imagePushes;
+  const int skins = ipc->stats().skinPushes;
+  const int geosets = ipc->stats().geosetPushes;
+  const int parts = before.liveModels - before.liveMounts;     // the character's body and what it wears
+  // ONE CHANNEL for what a ridden mount displays (user 25): its skin, geosets and particle colour travel in the
+  // character's scene, so no step that acts on a riding character sends an ordinary modelSkin or modelGeosets --
+  // the Animation panel sits on the mount throughout, and a second channel for the same state is what this
+  // forbids. Checked after the step has settled, so a push that arrives late is caught too.
+  const auto oneChannel = [&]() {
+    if (ipc->stats().skinPushes != skins || ipc->stats().geosetPushes != geosets)
+      bad << QString("%1 modelSkin and %2 modelGeosets push(es) during the step: what the mount displays belongs in "
+                     "the character's scene alone").arg(ipc->stats().skinPushes - skins)
+               .arg(ipc->stats().geosetPushes - geosets);
+  };
+  // What must not change when the character itself does not: its parts, its body's textures and composited images.
+  const auto sameCharacter = [&](const UnityIpcServer::RuntimeState & x) {
+    QStringList d;
+    if (x.liveModels - x.liveMounts != parts)
+      d << QString("%1 character runtime(s), %2 before").arg(x.liveModels - x.liveMounts).arg(parts);
+    if (x.bodyRebinds != before.bodyRebinds)
+      d << QString("the body's textures were bound again (%1 -> %2)").arg(before.bodyRebinds).arg(x.bodyRebinds);
+    if (ipc->stats().imagePushes != images)
+      d << QString("%1 composited image(s) sent").arg(ipc->stats().imagePushes - images);
+    return d;
+  };
+  const auto noticeUp = [&]() {
+    if (frame->unityRendererHost->hasNotice())
+      bad << "the viewport shows a notice: " + QString::fromWCharArray(frame->unityRendererHost->noticeTitle().c_str());
+  };
+  UnityIpcServer::RuntimeState after;
+  RiddenHost now;
+
+  if (kind == "mount")
+  {
+    // THE MOUNT DIALOG'S ROW for this CreatureDisplayInfo id, chosen as the dialog chooses it.
+    bool number = false;
+    const int display = target.toInt(&number);
+    cc->fillMountChoices();
+    int row = -1;
+    for (size_t i = 0; number && i < cc->numbers.size() && i < cc->cats.size() && row < 0; i++)
+      if (cc->cats[i] == 0 && cc->numbers[i] == display)
+        row = (int)i;
+    if (row < 0)
+    {
+      why = "no player mount row for display " + target + " in the mount list";
+      return false;
+    }
+    const unsigned serial = cc->mountSerial;
+    cc->OnUpdateItem(UPDATE_MOUNT, row);
+    now = riddenHost(frame);
+    if (!frame->canvasShowsMountedCharacter())
+      bad << "the host shows no mounted character after the choice";
+    if (cc->mountSerial != serial + 1)
+      bad << "the host's mount serial was not raised";
+    if (cc->mountDisplayId != display)
+      bad << QString("the host keeps display %1").arg(cc->mountDisplayId);
+    if (frame->m_unityLoadSerial != load)
+      bad << "a load was sent";
+    if (now.key == was.key)
+      bad << "the mount key did not change: " + now.key;
+    if (!g_selModel || g_selModel != frame->riderMount())
+      bad << "the Animation panel is not on the mount";
+    const QString answered = answer(now.key, QStringLiteral("applied"));
+    noticeUp();
+    settle([&](const UnityIpcServer::RuntimeState & x) {
+      QStringList d = riddenMismatches(x, now) + sameCharacter(x);
+      if (x.mountsBuilt != before.mountsBuilt + 1)
+        d << QString("%1 mount(s) built, expected one more than %2").arg(x.mountsBuilt).arg(before.mountsBuilt);
+      // The view is fitted to the mount and the character together, once (users 26, 47: no camera flicker, no reset loop).
+      if (x.viewFramings != before.viewFramings + 1)
+        d << QString("the view was fitted %1 time(s), expected one more than %2").arg(x.viewFramings)
+                 .arg(before.viewFramings);
+      return d;
+    }, after);
+    const WoWModel * ridden = frame->riderMount();
+    what = QString("row %1 display %2 -> ").arg(row).arg(display) + now.key + " " +
+           (ridden && ridden->gamefile ? ridden->gamefile->fullname() : QString("-")) +
+           QString(" fileDataID %1 bone %2, the character on sequence %3, the mount on %4 (was \"")
+             .arg(now.mount).arg(now.bone).arg(now.characterSequence).arg(now.mountSequence) + was.key + "\"): " + answered;
+  }
+  else if (kind == "dismount")
+  {
+    // THE MOUNT DIALOG'S "---- None ----" ROW (row 0).
+    cc->fillMountChoices();
+    cc->OnUpdateItem(UPDATE_MOUNT, 0);
+    now = riddenHost(frame);
+    if (frame->canvasShowsMountedCharacter() || !frame->canvasShowsCharacter())
+      bad << "the host still shows a mount, or no character";
+    if (frame->canvas->root->model() != nullptr || cc->mountDisplayId != 0)
+      bad << "the host kept a mount on the canvas root, or its display";
+    if (frame->m_unityLoadSerial != load)
+      bad << "a load was sent";
+    // With no mount up the choice changes nothing, and no scene follows.
+    const QString answered = was.mount ? answer(QString(), QStringLiteral("none")) : QString("nothing was ridden");
+    noticeUp();
+    settle([&](const UnityIpcServer::RuntimeState & x) {
+      QStringList d = riddenMismatches(x, now) + sameCharacter(x);
+      if (x.mountsBuilt != before.mountsBuilt)
+        d << QString("%1 mount(s) built, %2 before").arg(x.mountsBuilt).arg(before.mountsBuilt);
+      // Fitted to the character alone, once -- and not at all when there was nothing to come off.
+      const int framings = before.viewFramings + (was.mount ? 1 : 0);
+      if (x.viewFramings != framings)
+        d << QString("the view was fitted %1 time(s), expected %2").arg(x.viewFramings).arg(framings);
+      return d;
+    }, after);
+    what = "off \"" + was.key + QString("\", the character on sequence %1: ").arg(now.characterSequence) + answered;
+  }
+  else if (kind == "manim" || kind == "ranim")
+  {
+    // THE ANIMATION PANEL, on the mount (manim) or on the character (ranim). When it is on the other model it is moved
+    // first, as View > Attachments moves it (AnimControl::UpdateModel), then the clip is picked as a user picks it.
+    const bool onMount = kind == "manim";
+    WoWModel * model = onMount ? frame->riderMount() : rider;
+    WoWModel * other = onMount ? rider : frame->riderMount();
+    if (!model || !other)
+    {
+      why = "the character rides no mount";
+      return false;
+    }
+    bool number = false;
+    const int sequence = target.startsWith('#') ? target.mid(1).toInt(&number)
+                                                : firstSequenceWithAnimId(model, target.toInt(&number));
+    if (!number || sequence < 0 || sequence >= (int)model->anims.size())
+    {
+      why = QString("the %1 has no sequence for %2").arg(onMount ? "mount" : "character", target);
+      return false;
+    }
+    if (g_selModel != model)
+    {
+      frame->animControl->UpdateModel(model);
+      pumpTicking(ipc, 300);
+    }
+    const int otherSequence = hostSequence(other);
+    const QString suffix = QString("[%1]").arg(sequence);
+    int clip = -1;
+    for (int i = 0; i < frame->animControl->animationCount() && clip < 0; i++)
+      if (QString::fromWCharArray(frame->animControl->animationName(i).c_str()).endsWith(suffix))
+        clip = i;
+    if (clip < 0)
+    {
+      why = "the Animation panel lists no clip for sequence " + QString::number(sequence);
+      return false;
+    }
+    const int roles = ipc->stats().rolePushes;
+    frame->animControl->pickAnimationLikeUser(clip);
+    pumpTicking(ipc, 200);
+    now = riddenHost(frame);
+    if (hostSequence(model) != sequence)
+      bad << QString("the host's %1 plays %2").arg(onMount ? "mount" : "character").arg(hostSequence(model));
+    if (hostSequence(other) != otherSequence)
+      bad << QString("the host's %1 went from sequence %2 to %3").arg(onMount ? "character" : "mount")
+               .arg(otherSequence).arg(hostSequence(other));
+    if (ipc->stats().rolePushes <= roles)
+      bad << "no animation push with a role";
+    settle([&](const UnityIpcServer::RuntimeState & x) {
+      QStringList d = riddenMismatches(x, now) + sameCharacter(x);
+      if (x.mountsBuilt != before.mountsBuilt)
+        d << QString("%1 mount(s) built, %2 before").arg(x.mountsBuilt).arg(before.mountsBuilt);
+      if (x.viewFramings != before.viewFramings)
+        d << QString("the view was fitted again (%1 -> %2): a clip change moves nothing on screen")
+                 .arg(before.viewFramings).arg(x.viewFramings);
+      return d;
+    }, after);
+    what = QString("%1 sequence %2 (animID %3, %4 ms) picked, the %5 stays on sequence %6")
+             .arg(onMount ? "mount" : "character").arg(sequence).arg(model->anims[sequence].animID)
+             .arg(model->anims[sequence].length).arg(onMount ? "character" : "mount").arg(otherSequence);
+  }
+  else if (kind == "equip" || kind == "custom" || kind == "sheath")
+  {
+    // WHAT THE CHARACTER WEARS OR LOOKS LIKE, changed while it rides (or not): an equipment slot pick as the item dialog
+    // makes it (OnUpdateItem(UPDATE_ITEM) for the slot being chosen), a choice in the Appearance panel (CharDetails::set),
+    // or Character > Sheathe weapons (ModelViewer::OnCharToggle). The character's scene carries it; the mount stays --
+    // the same key, nothing built -- and the character's parts, body textures and images may change with it.
+    QString change;
+    if (kind == "equip")
+    {
+      bool slotNumber = false, itemNumber = false;
+      const int slot = target.section('=', 0, 0).toInt(&slotNumber);
+      const int item = target.section('=', 1).toInt(&itemNumber);
+      WoWItem * worn = slotNumber && slot >= 0 && slot < NUM_CHAR_SLOTS ? rider->getItem((CharSlots)slot) : nullptr;
+      if (!worn || !itemNumber)
+      {
+        why = "equip: takes <slot>=<item id> (0 takes the item off)";
+        return false;
+      }
+      const int wore = worn->id();
+      cc->choosingSlot = slot;
+      cc->numbers.assign(1, item);
+      cc->cats.assign(1, 0);
+      cc->OnUpdateItem(UPDATE_ITEM, 0);
+      if (worn->id() != item)
+        bad << QString("the host's slot %1 holds item %2").arg(slot).arg(worn->id());
+      change = QString("slot %1: item %2 -> %3").arg(slot).arg(wore).arg(item);
+    }
+    else if (kind == "custom")
+    {
+      bool optionNumber = false, choiceNumber = true;
+      const uint option = target.section('=', 0, 0).toUInt(&optionNumber);
+      const std::vector<uint> choices = optionNumber ? rider->cd.getCustomizationChoices(option) : std::vector<uint>();
+      const uint current = rider->cd.get(option);
+      uint choice = target.contains('=') ? target.section('=', 1).toUInt(&choiceNumber) : 0;
+      if (!target.contains('=') && !choices.empty())
+      {
+        // The option's next choice in its list, after the current one.
+        size_t at = 0;
+        while (at < choices.size() && choices[at] != current)
+          at++;
+        choice = choices[at < choices.size() ? (at + 1) % choices.size() : 0];
+      }
+      if (!optionNumber || !choiceNumber || choices.empty() || choice == current)
+      {
+        why = "custom: takes <option id>[=<choice id>] of an option of the character with another choice";
+        return false;
+      }
+      rider->cd.set(option, choice);
+      if (rider->cd.get(option) != choice)
+        bad << QString("the host's option %1 holds choice %2").arg(option).arg(rider->cd.get(option));
+      change = QString("option %1: choice %2 -> %3").arg(option).arg(current).arg(choice);
+    }
+    else
+    {
+      const bool sheathe = !rider->bSheathe;
+      frame->charMenu->Check(ID_SHEATHE, sheathe);
+      wxCommandEvent toggle(wxEVT_MENU, ID_SHEATHE);
+      toggle.SetInt(sheathe ? 1 : 0);
+      frame->OnCharToggle(toggle);
+      if (rider->bSheathe != sheathe)
+        bad << "the host's sheathe flag did not follow";
+      change = sheathe ? QString("weapons sheathed") : QString("weapons in hand");
+    }
+    now = riddenHost(frame);
+    if (now.key != was.key)
+      bad << "the mount key changed: \"" + was.key + "\" -> \"" + now.key + "\"";
+    if (frame->m_unityLoadSerial != load)
+      bad << "a load was sent";
+    const QString answered = answer(now.key, now.mount ? QStringLiteral("applied") : QStringLiteral("none"));
+    noticeUp();
+    const bool sheathing = kind == "sheath";
+    settle([&](const UnityIpcServer::RuntimeState & x) {
+      QStringList d = riddenMismatches(x, now);
+      if (x.mountsBuilt != before.mountsBuilt)
+        d << QString("%1 mount(s) built, %2 before: the mount was built again").arg(x.mountsBuilt).arg(before.mountsBuilt);
+      // An appearance change must not move the camera (user 26: no camera flicker).
+      if (x.viewFramings != before.viewFramings)
+        d << QString("the view was fitted again (%1 -> %2): what the character wears does not re-aim the camera")
+                 .arg(before.viewFramings).arg(x.viewFramings);
+      // Sheathing moves what is in the hands and changes neither what is worn nor the body.
+      if (sheathing)
+        d << sameCharacter(x);
+      return d;
+    }, after);
+    what = change + ": " + answered +
+           QString("; character runtimes %1 -> %2, body texture binds %3 -> %4, composited images sent %5")
+             .arg(parts).arg(after.liveModels - after.liveMounts).arg(before.bodyRebinds).arg(after.bodyRebinds)
+             .arg(ipc->stats().imagePushes - images);
+  }
+  else if (kind == "reconnect")
+  {
+    // VIEW > RESTART UNITY RENDERER: a new player connects and is sent what the host shows -- the character's load, then
+    // its scene with the mount it rides. It builds both for that load (a job's mount) and holds exactly what the one
+    // before it held. The new player starts its log afresh, so the log so far is copied beside it first.
+    static int reconnects = 0;
+    const QString logDir = QString::fromWCharArray(wxFileName(wxStandardPaths::Get().GetExecutablePath())
+                                                     .GetPath(wxPATH_GET_VOLUME).c_str()) + "/userSettings/";
+    const QString kept = logDir + QString("unityRenderer.before-reconnect-%1.log").arg(++reconnects);
+    QFile::remove(kept);
+    const bool copied = QFile::copy(logDir + "unityRenderer.log", kept);
+    frame->RestartUnityRenderer();
+    {
+      wxGUIEventLoop loop;
+      wxEventLoopActivator activate(&loop);
+      wxStopWatch w;
+      while (w.Time() < 90000 && !(ipc->isUnityReady() && frame->m_unityLoadSerial > load))
+      {
+        ipc->poll();
+        wxTheApp->Yield(true);
+        wxMilliSleep(10);
+      }
+    }
+    now = riddenHost(frame);
+    if (!ipc->playerRidesMounts() || frame->m_unityLoadSerial <= load)
+      bad << QString("the restarted player (protocol %1) was sent no load").arg(ipc->playerProtocolVersion());
+    if (frame->m_unityLoadedFileDataID != was.character || !frame->m_unityLoadedCharacter)
+      bad << QString("the load named %1 %2, not the character %3").arg(frame->m_unityLoadedFileDataID)
+               .arg(frame->m_unityLoadedCharacter ? "(character)" : "(model)").arg(was.character);
+    if (now.key != was.key)
+      bad << "the mount key changed: \"" + was.key + "\" -> \"" + now.key + "\"";
+    const QString answered = answer(now.key, now.mount ? QStringLiteral("applied") : QStringLiteral("none"));
+    noticeUp();
+    settle([&](const UnityIpcServer::RuntimeState & x) {
+      QStringList d = riddenMismatches(x, now);
+      if (x.liveModels != before.liveModels)
+        d << QString("%1 model runtime(s), the player before held %2").arg(x.liveModels).arg(before.liveModels);
+      if (x.mountsBuilt != (now.mount ? 1 : 0))
+        d << QString("%1 mount(s) built by the new player, expected %2").arg(x.mountsBuilt).arg(now.mount ? 1 : 0);
+      // The new player fits the view once for the model it puts on screen, and once more when the mount goes under it.
+      if (x.viewFramings != (now.mount ? 2 : 1))
+        d << QString("the new player fitted the view %1 time(s), expected %2").arg(x.viewFramings).arg(now.mount ? 2 : 1);
+      return d;
+    }, after);
+    what = QString("load %1 -> %2 names %3 as a character; ").arg(load).arg(frame->m_unityLoadSerial)
+             .arg(frame->m_unityLoadedFileDataID) + answered +
+           (copied ? "; the log before it kept as " + kept : QString("; the log before it could not be copied"));
+  }
+  else
+  {
+    why = "unknown step kind";
+    return false;
+  }
+  oneChannel();
+  what += "; the player holds " + after.describe();
+  why = bad.join("; ");
+  return bad.isEmpty();
+}
+
 // WMV_IPCTEST_SEQUENCE="m2:creature/bear/bear.m2;wmo:115058;m2:...;wmo:...;wmo:<another>": after the
 // main checks, select each entry exactly as Browse does (FileControl::SelectModelFile / SelectWMOFile) and
 // check after each step that the player ended up showing exactly that, with nothing left over:
@@ -559,7 +1130,8 @@ static bool checkMapObjectReport(ModelViewer * frame, const UnityIpcServer::MapO
 //     model, liveMapObjects 0, and liveModels 1 (a character: at least 1, its parts count too). That answer
 //     is the only evidence for this step: the next wmo step cannot stand in for it, because adopting a world
 //     model disposes any model AND any world model still alive before the counts are taken, so a WMO kept
-//     alive under this model would pass there.
+//     alive under this model would pass there. The answer must name no mount either, and no mount runtime may
+//     be alive (protocol 5).
 //   no step may produce a "failed" world-model report.
 // Entries are "m2:" or "wmo:" followed by a listfile path or a FileDataID. "m2!:" / "wmo!:" is a QUICK step:
 // selected and left at once, the way a user steps through the Browse tree, so the next load replaces one
@@ -567,6 +1139,38 @@ static bool checkMapObjectReport(ModelViewer * frame, const UnityIpcServer::MapO
 // quick world-model load ("superseded", or "built" if it won the race -- never "failed" or none), and its
 // own checks prove the replaced load left nothing behind. So a quick step must be followed by a waited
 // one: a sequence ending on a quick step is rejected. Returns whether all steps passed.
+//
+// MOUNTED CHARACTERS (protocol 5; doIpcTestMountStep). These steps act on the character on the canvas, as its
+// menus, panels and dialogs do, and then require the player's answer to the scene the step caused (when it causes
+// one) and its runtimeState account to match what the host shows (riddenMismatches): the character on screen, the
+// mount by key and file with exactly one mount runtime alive, the seat the host's resolved attachment gives, both
+// models on the host's sequences, the mount's emitters its own, and no notice. No step may send an ordinary
+// modelSkin or modelGeosets either: what a ridden mount displays travels in the character's scene and nowhere else.
+//   chr:<file.chr>        Load Character (ModelViewer::LoadChar); the character's scene answered, riding nothing;
+//   mount:<displayId>     the mount dialog's row for that CreatureDisplayInfo id, chosen as the dialog chooses it
+//                         (CharControl::fillMountChoices, OnUpdateItem(UPDATE_MOUNT, row)): the host rides it with a
+//                         new serial and sends no load; the scene answered with the new key applied; one mount more
+//                         built, none left over, the character's parts, body texture binds and images unchanged, and
+//                         the view fitted exactly once to the mount and the character together;
+//   dismount              the dialog's "---- None ----" row: the scene answered with mount "none", no mount runtime
+//                         alive, no mount built, the character unchanged, and the view fitted once to the character
+//                         alone (not at all when there was nothing to come off);
+//   manim:<animId>        the mount's first sequence with that animation id picked in the Animation panel (moved to
+//   ranim:<animId>        the mount first, as View > Attachments moves it, when it is on the character); ranim the
+//                         same for the character. "#<n>" names sequence n instead. The other model's sequence stays
+//                         and the view is not fitted again;
+//   equip:<slot>=<item>   an equipment slot pick (OnUpdateItem(UPDATE_ITEM), 0 takes the item off);
+//   custom:<option>[=<choice>]  an Appearance choice (CharDetails::set), by default the option's next choice;
+//   sheath                Character > Sheathe weapons toggled (ModelViewer::OnCharToggle); these three must reach
+//                         the player in a scene that keeps the mount's key, with no mount built and the view not
+//                         fitted again; sheathing also leaves the character's parts, body texture binds and images
+//                         as they were;
+//   reconnect             View > Restart Unity Renderer: the new player's load names the character as a character,
+//                         its scene answers with the same mount key, and it holds what the player before it held,
+//                         having built exactly the one mount and fitted the view twice -- once for the model it put
+//                         on screen, once for the mount that went under it (the log before the restart is copied
+//                         beside the new one's as unityRenderer.before-reconnect-<n>.log);
+//   wait:<ms>             pumps with the canvas ticking (lets a WMV_VIEWPORT_SHOT capture land before the test ends).
 static bool doIpcTestLifecycleSequence(ModelViewer * frame, UnityIpcServer * ipc, const QString & spec,
                                        const std::vector<UnityIpcServer::MapObjectReport> & reports)
 {
@@ -608,11 +1212,15 @@ static bool doIpcTestLifecycleSequence(ModelViewer * frame, UnityIpcServer * ipc
   {
     const QString step = steps[s].trimmed();
     const int colon = step.indexOf(':');
-    const QString rawKind = colon > 0 ? step.left(colon).trimmed().toLower() : QString();
+    // "dismount", "sheath" and "reconnect" take nothing after them.
+    const QString rawKind = (colon > 0 ? step.left(colon) : step).trimmed().toLower();
     const bool quick = rawKind.endsWith('!');
     const QString kind = quick ? rawKind.left(rawKind.size() - 1) : rawKind;
     const QString target = colon > 0 ? step.mid(colon + 1).trimmed() : QString();
-    GameFile * file = target.isEmpty() ? nullptr : resolveGameFileArg(target);
+    const bool mountKind = !quick && (kind == "chr" || kind == "mount" || kind == "dismount" || kind == "manim" ||
+                                      kind == "ranim" || kind == "equip" || kind == "custom" || kind == "sheath" ||
+                                      kind == "reconnect" || kind == "wait");
+    GameFile * file = (kind == "m2" || kind == "wmo") && !target.isEmpty() ? resolveGameFileArg(target) : nullptr;
     const size_t reportsBefore = reports.size();
     const int serialBefore = frame->m_unityLoadSerial;
     QElapsedTimer clock;
@@ -620,10 +1228,19 @@ static bool doIpcTestLifecycleSequence(ModelViewer * frame, UnityIpcServer * ipc
     QString why;
     bool ok = true;
 
-    if ((kind != "m2" && kind != "wmo") || !file)
+    if (mountKind)
+    {
+      QString what;
+      ok = doIpcTestMountStep(frame, ipc, kind, target, sceneAcks, runtimeStates, what, why);
+      LOG_INFO << "[unityipc-test]   step" << (s + 1) << kind.toLatin1().constData() << "--" << what;
+    }
+    else if ((kind != "m2" && kind != "wmo") || !file)
     {
       ok = false;
-      why = (kind != "m2" && kind != "wmo") ? "unknown step kind (use m2:, wmo:, m2!: or wmo!:)" : "file not found";
+      why = (kind != "m2" && kind != "wmo")
+              ? "unknown step kind (use m2:, wmo:, m2!:, wmo!:, chr:, mount:, dismount, manim:, ranim:, equip:, custom:, "
+                "sheath, reconnect or wait:)"
+              : "file not found";
     }
     else if (quick)
     {
@@ -775,15 +1392,17 @@ static bool doIpcTestLifecycleSequence(ModelViewer * frame, UnityIpcServer * ipc
         const bool character = frame->canvasShowsCharacter();
         UnityIpcServer::RuntimeState st;
         bool answered = false;
+        // No mount either: a model or character loaded after a mounted character rides nothing (a player older
+        // than protocol 5 reports no mount fields, -1).
         const bool held = waitRuntimeState(ipc, runtimeStates, [fdid, character](const UnityIpcServer::RuntimeState & x) {
           return x.liveMapObjects == 0 && x.mapObjectFileDataID == 0 && x.modelFileDataID == fdid &&
-                 (character ? x.liveModels >= 1 : x.liveModels == 1);
+                 (character ? x.liveModels >= 1 : x.liveModels == 1) && x.mountFileDataID <= 0 && x.liveMounts <= 0;
         }, 30000, st, answered);
         if (!answered)
           bad << "the player never answered runtimeState";
         else if (!held)
           bad << "the player holds " + st.describe() +
-                   QString(", expected model %1, no world model, liveMapObjects 0, liveModels %2")
+                   QString(", expected model %1, no world model, liveMapObjects 0, liveModels %2, no mount")
                      .arg(fdid).arg(character ? ">= 1" : "1");
         else
           confirmed = (confirmed == "unconfirmed" ? QString() : confirmed + "; ") + "runtime state " + st.describe();
@@ -794,7 +1413,7 @@ static bool doIpcTestLifecycleSequence(ModelViewer * frame, UnityIpcServer * ipc
     }
 
     // Every quick world-model load before a waited step must have been answered by now, and not "failed".
-    if (!quick && file && (kind == "m2" || kind == "wmo"))
+    if (mountKind || (!quick && file && (kind == "m2" || kind == "wmo")))
     {
       for (int quickLoad : quickWmoLoads)
       {
@@ -1594,17 +2213,68 @@ static void doHeadlessUnityIpcTest(ModelViewer * frame)
       {
         const float savedScale = cm->scale_;
         const float mountScale = 1.25f;
+        const int revisionBefore = frame->m_sceneRevision;
         mount->isMount = true;
         mount->scale_ = mountScale;
         frame->canvas->root->setModel(mount);
         frame->canvas->setModel(mount, true);
-        wxStopWatch mounted;   // let the viewport routing see the mount before it goes again
-        while (mounted.Time() < 1000)
+        // Every mount model the mount choice puts up gets a new serial, which the character's scene names it by
+        // (CharControl::mountSerial); this one too.
+        cc->mountSerial++;
+
+        // MOUNTED. The canvas tick decides the viewport, and it runs only inside an activated event loop (see the canvas
+        // clock above). A player that seats characters on mounts (protocol 5) keeps the viewport on the character and is
+        // sent the character's scene with the bear in it: it must answer it with the bear applied, show no notice, and
+        // hold the character with the bear under it. An older player must get the mounted-character notice instead.
+        std::vector<UnityIpcServer::SceneAck> acks;
+        std::vector<UnityIpcServer::RuntimeState> states;
+        const auto previousScene = ipc->onCharacterSceneApplied;
+        const auto previousRuntime = ipc->onRuntimeState;
+        ipc->onCharacterSceneApplied = [&acks, previousScene](const UnityIpcServer::SceneAck & a) {
+          acks.push_back(a);
+          if (previousScene)
+            previousScene(a);
+        };
+        ipc->onRuntimeState = [&states, previousRuntime](const UnityIpcServer::RuntimeState & s) {
+          states.push_back(s);
+          if (previousRuntime)
+            previousRuntime(s);
+        };
+        const bool seats = ipc->playerRidesMounts();
+        const int characterId = (int)cm->gamefile->fileDataId();
+        const int mountId = (int)mountFile->fileDataId();
+        const QString key = QString("M%1").arg(cc->mountSerial);
+        bool shownMounted = false;
+        QString mountedText;
+        if (seats)
         {
-          ipc->poll();
-          wxTheApp->Yield(true);
-          wxMilliSleep(10);
+          UnityIpcServer::SceneAck ack;
+          bool seen = false;
+          const bool applied = waitSceneAnswer(frame, ipc, acks, revisionBefore, key, QStringLiteral("applied"), 60000, ack, seen);
+          UnityIpcServer::RuntimeState held;
+          bool answered = false;
+          const bool holds = waitRuntimeState(ipc, states, [&](const UnityIpcServer::RuntimeState & x) {
+            return x.modelFileDataID == characterId && x.mountFileDataID == mountId && x.mountKey == key &&
+                   x.liveMounts == 1 && !x.loading;
+          }, 30000, held, answered);
+          const bool noticeUp = frame->unityRendererHost->hasNotice() || !frame->unityCanDrawCurrentModel();
+          shownMounted = applied && holds && !noticeUp;
+          mountedText = (seen ? "answered " + ack.status + " with mount \"" + ack.mountKey + "\" " + ack.mountStatus
+                              : QString("no scene answered")) +
+                        (noticeUp ? QString(", a notice is up") : QString(", no notice")) + "; the player holds " +
+                        held.describe();
         }
+        else
+        {
+          pumpTicking(ipc, 1000);
+          ModelViewer::ViewportNotice notice;
+          shownMounted = !frame->unityCanDrawCurrentModel(&notice) && frame->unityRendererHost->hasNotice();
+          mountedText = "notice: " + QString::fromWCharArray(notice.title.c_str());
+        }
+        LOG_INFO << "[unityipc-test] character: a bear put up by hand as" << key.toLatin1().constData() << "->"
+                 << (seats ? "seated in the Unity viewport:" : "an older player:") << mountedText
+                 << (shownMounted ? "(OK)" : "(FAIL)");
+
         const int beforeDismount = ipc->stats().sceneApplied;
         cc->OnUpdateItem(UPDATE_MOUNT, 0);   // frees the mount
         const bool handedBack = frame->canvas->model() == cm && frame->canvas->root->model() == nullptr;
@@ -1612,9 +2282,24 @@ static void doHeadlessUnityIpcTest(ModelViewer * frame)
         cm->scale_ = savedScale;
         frame->SendCharacterSceneToUnity(true);
         const long redressed = waitApplied(beforeDismount, 60000);
+        // Off again: to a player that seats mounts the scene answers with no mount, and the bear is gone from the player.
+        bool offOk = true;
+        if (seats)
+        {
+          UnityIpcServer::RuntimeState held;
+          bool answered = false;
+          offOk = ipc->stats().lastMountAck.startsWith("- none") &&
+                  waitRuntimeState(ipc, states, [&](const UnityIpcServer::RuntimeState & x) {
+                    return x.modelFileDataID == characterId && x.mountFileDataID == 0 && x.liveMounts == 0 && !x.loading;
+                  }, 30000, held, answered);
+          LOG_INFO << "[unityipc-test] character: the bear taken off -> last mount answer" << ipc->stats().lastMountAck
+                   << "; the player holds" << held.describe() << (offOk ? "(OK)" : "(FAIL)");
+        }
+        ipc->onCharacterSceneApplied = previousScene;
+        ipc->onRuntimeState = previousRuntime;
         LOG_INFO << "[unityipc-test] character: \"None\" with a mount up -> canvas back to the character="
                  << handedBack << "scale taken back=" << scaleBack << "| scene applied again after" << redressed << "ms";
-        mountedOk = handedBack && scaleBack && redressed >= 0;
+        mountedOk = handedBack && scaleBack && redressed >= 0 && shownMounted && offOk;
       }
       else
       {
@@ -1640,9 +2325,13 @@ static void doHeadlessUnityIpcTest(ModelViewer * frame)
            << ipc->stats().mapObjectSuperseded << "superseded) of" << ipc->stats().mapObjectLoads << "load(s) sent";
 
   // A model with a skin selector must have pushed at least one skin; one without simply has
-  // nothing to sync, so the condition only bites when there was something to send.
+  // nothing to sync, so the condition only bites when there was something to send. A run that ends on a
+  // character riding a mount has the Animation panel on the mount's skins, and to a player that seats it the
+  // mount's skin travels only in the character's scene (no modelSkin is sent for it): a scene answered with a
+  // mount applied is that push.
   const bool skinsOk = (frame->animControl == NULL) || (frame->animControl->skinCount() == 0) ||
-                       (st.skinPushes >= 1);
+                       (st.skinPushes >= 1) ||
+                       (frame->canvasShowsMountedCharacter() && ipc->playerRidesMounts() && ipc->stats().mountApplied >= 1);
   // A model with an animation selector must have pushed at least one animation; one without has
   // nothing to sync, so the condition only bites when there was something to send.
   const bool animsOk = (frame->animControl == NULL) || (frame->animControl->animationCount() == 0) ||

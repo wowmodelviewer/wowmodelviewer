@@ -4,7 +4,10 @@
 // localhost TCP listener before launching the player and passes the port on the player
 // command line ("-wmvPort <n>"); the player connects back, announces itself and then asks
 // WMV for whatever it needs. Transport: newline-delimited JSON (one object per line),
-// protocol version 4 (4 added world models: loadWoWModel "kind", mapObjectLoaded and runtimeState).
+// protocol version 5 (4 added world models: loadWoWModel "kind", mapObjectLoaded and runtimeState;
+// 5 added mounted characters: characterScene "mount", its answer's mount fields, runtimeState's
+// mountFileDataID, modelAnimation "role" and "load", and modelAnimationState "load", "hasRider" and
+// "rider").
 //
 // The player is WMV's new renderer foundation and renders directly from WoW data: it
 // requests raw assets and metadata from WMV -- which owns the app UI, the active
@@ -23,11 +26,16 @@
 //     checkboxes can follow the renderer rather than assume it
 //   characterSceneApplied { fileDataID, load, revision,
 //                           status:"applied"|"pending"|"superseded"|"rejected", reason,
-//                           merged, attachments, missing:[key,...], ms }
+//                           merged, attachments, missing:[key,...], ms,
+//                           mountKey, mountStatus:"applied"|"failed"|"none", mountReason }
 //     the answer to characterScene: the character on screen now wears that scene (less any part
 //     named in missing), or why not. load is the serial of the loadWoWModel the scene belonged to
 //     (0 when it matched no load). "superseded" means a newer scene or a new load replaced it before
-//     it was applied, which is not a failure; "rejected" is a real refusal
+//     it was applied, which is not a failure; "rejected" is a real refusal. mountKey is the key of
+//     the scene's mount ("" for none); mountStatus says whether that mount was put under the
+//     character ("applied"), could not be built ("failed", with mountReason -- the character itself
+//     is still applied) or was not applied at all ("none": the scene has no mount, or the scene was
+//     not applied)
 //   mapObjectLoaded       { fileDataID, load, status:"built"|"failed"|"superseded", reason,
 //                           groups, groupFilesRequested, groupFilesMissing, batches, submeshes,
 //                           renderers, materials, provisionalMaterials, unresolvedMaterials,
@@ -42,10 +50,17 @@
 //     Bounds are Unity space; liveMapObjects / liveModels
 //     count the runtimes the player holds once the outcome was adopted, so a lifecycle test can
 //     prove a switch left nothing behind
-//   runtimeState          { query, liveMapObjects, liveModels, modelFileDataID, mapObjectFileDataID, loading }
+//   runtimeState          { query, liveMapObjects, liveModels, modelFileDataID, mapObjectFileDataID, loading,
+//                           mountFileDataID, mountKey, liveMounts, mountsBuilt, mountSeat, mountSeatBone,
+//                           modelSequence, mountSequence, mountEmitters, mountRibbons, mountParticles,
+//                           bodyRebinds, viewFramings }
 //     the answer to runtimeState: what the player holds right now -- the runtimes alive, the
-//     fileDataID of the model and of the world model on screen (0 for none) and whether a load of
-//     either kind is in flight. A test's question, answered from the main thread in message order
+//     fileDataID of the model and of the world model on screen (0 for none), whether a load of
+//     either kind is in flight, and the mount the model on screen rides (0 for none) with its key,
+//     the mount runtimes alive and built so far, how the model hangs from it (RuntimeReport), what
+//     each animator plays, the mount's emitters and live particles, how often the character's
+//     body textures were bound again, and how often the view was fitted to what is on screen.
+//     A test's question, answered from the main thread in message order
 //
 // WMV -> player
 //   loadWoWModel  { path, fileDataID, client, character, load, kind }
@@ -63,19 +78,29 @@
 //   modelGeosets  { fileDataID, revision, submeshCount, submeshVisible:[0|1,...] } (pushed, no request)
 //     the host's whole per-submesh display state for the displayed model, sent when the user
 //     switches a geoset; indexed by skin submesh index (SFID[0])
-//   modelAnimation { fileDataID, sequenceIndex, animID, durationMs, loop }         (pushed, no request)
-//   modelAnimationState { fileDataID, sequenceIndex, playing, timeMs, speed, loop, explicitState } (pushed, no request)
+//   modelAnimation { fileDataID, sequenceIndex, animID, durationMs, loop, role, load } (pushed, no request)
+//   modelAnimationState { fileDataID, sequenceIndex, playing, timeMs, speed, loop, explicitState,
+//                         load, hasRider, rider:{ sequenceIndex, playing, timeMs, speed, loop } } (pushed, no request)
 //     explicitState: true when a control set the state (play, pause, a frame step, a scrub,
-//     the start of a load), false for the heartbeat
+//     the start of a load), false for the heartbeat. role, load, hasRider and rider (protocol 5) are
+//     sent only about a ridden mount's two models: role says which of them a selection changed
+//     ("mount" or "rider" -- a FileDataID cannot, a mount model can also be a race's body), load is
+//     the rider's load serial, and a state keeps the mount in its top level with the rider's state
+//     nested beside it, "playing" there being the mount's pause (see WmvSlotAnimation)
 //   characterImage { hash, kind, width, height, format:"bgra8", encoding:"base64", data }
 //     a host-composited texture (the body, the eyes), rows top first, bytes B,G,R,A; named by
 //     hash in the scenes that follow. The player keeps the newest image of each kind for the
 //     life of the connection -- the host sends a kind again only when its pixels change -- and
 //     an older one for as long as a scene not yet applied still names it
-//   characterScene { fileDataID, revision, body:{...}, merged:[...], attachments:[...] }
+//   characterScene { fileDataID, revision, body:{...}, merged:[...], attachments:[...], mount:{...} }
 //     the resolved state of the character on display: per model the texture each slot binds, the
 //     geoset display flags, the host's bone table for a merged model and the attachment it hangs
-//     from for an attached one (see UnityCharacterScene.h in the host)
+//     from for an attached one (see UnityCharacterScene.h in the host). mount (protocol 5) is the
+//     mount the character rides, as the host resolved it: its key, file, the bone and position of
+//     its attachment the character hangs from, the character's scale, its texture slots, geoset
+//     flags and particle colours, and the sequence each of the two models plays. It is there when
+//     its key is non-empty and it names a fileDataID (HasMount), never judged by the object being
+//     absent; a scene without one while a mount is ridden is the dismount (see WmvMountedScene)
 //
 // getModelTextures exists because a modern M2 does not name its replaceable textures (a
 // creature skin's TXID entry is 0 and its texture array carries no filename) -- the skin comes
@@ -99,7 +124,7 @@ using UnityEngine;
 
 public class WmvIpcClient : MonoBehaviour
 {
-    public const int ProtocolVersion = 4;
+    public const int ProtocolVersion = 5;
 
     /// <summary>The loadWoWModel kind of a world model; anything else is an M2.</summary>
     public const string KindMapObject = "wmo";
@@ -220,6 +245,23 @@ public class WmvIpcClient : MonoBehaviour
         public int animID;
         public int durationMs;
         public bool loop;
+        /// <summary>Protocol 5, a ridden mount's two models: which of them the selection changed, "mount" or "rider"
+        /// (WmvSlotAnimation.RoleMount / RoleRider); "" about any other model. load is the rider's load serial (0 with
+        /// no role).</summary>
+        public string role;
+        public int load;
+        public double receivedSeconds;
+    }
+
+    /// <summary>The rider's playback nested in a ridden mount's modelAnimationState (protocol 5). playing is the MOUNT's
+    /// pause, which is what gates the host's whole tree.</summary>
+    public struct RiderPlayback
+    {
+        public int sequenceIndex;
+        public bool playing;
+        public int timeMs;
+        public float speed;
+        public bool loop;
     }
 
     /// <summary>
@@ -236,6 +278,25 @@ public class WmvIpcClient : MonoBehaviour
         public bool loop;
         public bool explicitState;
         public double receivedSeconds;
+        /// <summary>Protocol 5, a ridden mount: the top-level fields are the mount's; hasRider says rider carries the
+        /// rider's state, sampled in the same host call; load is the rider's load serial. hasRider false: no rider, and
+        /// the state is about the model its FileDataID names, as before.</summary>
+        public int load;
+        public bool hasRider;
+        public RiderPlayback rider;
+
+        /// <summary>The nested rider's state as a state of its own: its sequence, play/pause, position, speed and loop,
+        /// with this message's explicitState, arrival time and load. FileDataID 0: the wire does not name the rider's
+        /// file there.</summary>
+        public AnimationState RiderState()
+        {
+            return new AnimationState
+            {
+                fileDataID = 0, sequenceIndex = rider.sequenceIndex, playing = rider.playing, timeMs = rider.timeMs,
+                speed = rider.speed, loop = rider.loop, explicitState = explicitState, receivedSeconds = receivedSeconds,
+                load = load,
+            };
+        }
     }
 
     // ---- characterScene -------------------------------------------------------------------------
@@ -291,6 +352,33 @@ public class WmvIpcClient : MonoBehaviour
         public int[] submeshVisible = new int[0];
     }
 
+    /// <summary>
+    /// The mount a character rides (protocol 5), as the host resolved it: key is "M" and the host's mount
+    /// serial (a new mount model gets a new one, a scene describing the same mount again keeps it); bone
+    /// and position are the entry of the MOUNT's attachment table the character's attachmentId gives (bone
+    /// -1 when it has none), position in WoW model space; riderScale is the character's scale; textures
+    /// are the mount's own slots (a slot bound to nothing is not listed); particleColorSets, when present,
+    /// the three ParticleColor sets (emitter index 11, 12, 13) as start, mid and end RGB, 27 numbers;
+    /// sequenceIndex and riderSequenceIndex what the mount and the character play when the scene was built.
+    /// </summary>
+    [Serializable] public class SceneMount
+    {
+        public string key;
+        public int fileDataID;
+        public string path;
+        public int displayID;
+        public int attachmentId;
+        public int bone;
+        public float[] position = new float[0];
+        public float riderScale;
+        public SceneTexture[] textures = new SceneTexture[0];
+        public int submeshCount;
+        public int[] submeshVisible = new int[0];
+        public int[] particleColorSets = new int[0];
+        public int sequenceIndex;
+        public int riderSequenceIndex;
+    }
+
     public class CharacterScene
     {
         public int fileDataID;
@@ -298,7 +386,37 @@ public class WmvIpcClient : MonoBehaviour
         public SceneBody body;
         public SceneMerged[] merged = new SceneMerged[0];
         public SceneAttachment[] attachments = new SceneAttachment[0];
+        /// <summary>The mount, as the line carried it. Whether there IS one is HasMount, never a null test:
+        /// what JsonUtility gives back for an absent nested object is not something to rely on.</summary>
+        public SceneMount mount;
         public double receivedSeconds;
+    }
+
+    /// <summary>Does the scene carry a mount the player can build? A non-empty key AND a fileDataID.</summary>
+    public static bool HasMount(CharacterScene scene)
+    {
+        return scene != null && scene.mount != null && !string.IsNullOrEmpty(scene.mount.key) && scene.mount.fileDataID > 0;
+    }
+
+    /// <summary>The key of the mount a scene names, "" when it names none -- what an answer about the scene
+    /// reports as mountKey.</summary>
+    public static string MountKeyOf(CharacterScene scene)
+    {
+        return scene != null && scene.mount != null && !string.IsNullOrEmpty(scene.mount.key) ? scene.mount.key : "";
+    }
+
+    /// <summary>The mount part of a characterSceneApplied answer (protocol 5).</summary>
+    public struct MountAnswer
+    {
+        public string Key;      // the scene's mount key, "" for none
+        public string Status;   // "applied" | "failed" | "none"
+        public string Reason;
+
+        /// <summary>Nothing was put under the character for this scene: it has no mount, or it was not applied.</summary>
+        public static MountAnswer None(CharacterScene scene)
+        {
+            return new MountAnswer { Key = MountKeyOf(scene), Status = "none", Reason = "" };
+        }
     }
 
     public class CharacterImage
@@ -315,6 +433,15 @@ public class WmvIpcClient : MonoBehaviour
         public int type;
         public int fileDataID;
         public string source;
+    }
+
+    [Serializable] class MsgRider
+    {
+        public int sequenceIndex;
+        public bool playing;
+        public int timeMs;
+        public float speed;
+        public bool loop;
     }
 
     [Serializable] class Msg
@@ -350,8 +477,12 @@ public class WmvIpcClient : MonoBehaviour
         public int submeshCount;
         public int[] submeshVisible;
         public bool character;
-        public int load;
+        public int load;              // also a ridden mount's animation pushes (protocol 5)
         public int query;             // runtimeState
+        // a ridden mount's animation pushes (protocol 5)
+        public string role;
+        public bool hasRider;
+        public MsgRider rider;
         // characterImage
         public string hash;
         public string kind;           // also loadWoWModel's "m2" / "wmo" -- the same wire name
@@ -362,6 +493,7 @@ public class WmvIpcClient : MonoBehaviour
         public SceneBody body;
         public SceneMerged[] merged;
         public SceneAttachment[] attachments;
+        public SceneMount mount;
         [NonSerialized] public CharacterImage decodedImage;
     }
 
@@ -548,6 +680,89 @@ public class WmvIpcClient : MonoBehaviour
         return r;
     }
 
+    static CharacterScene ToCharacterScene(Msg msg)
+    {
+        return new CharacterScene
+        {
+            fileDataID = msg.fileDataID,
+            revision = msg.revision,
+            body = msg.body ?? new SceneBody(),
+            merged = msg.merged ?? new SceneMerged[0],
+            attachments = msg.attachments ?? new SceneAttachment[0],
+            mount = msg.mount,
+            receivedSeconds = msg.receivedSeconds,
+        };
+    }
+
+    /// <summary>One characterScene line, parsed exactly as the reader thread and Dispatch parse it; null for
+    /// any other line. For the lifecycle self-test, which checks what a line without a mount comes back as.</summary>
+    public static CharacterScene ParseCharacterScene(string line)
+    {
+        Msg msg = JsonUtility.FromJson<Msg>(line);
+        return msg != null && msg.type == "characterScene" ? ToCharacterScene(msg) : null;
+    }
+
+    static AnimationSelection ToAnimationSelection(Msg msg)
+    {
+        return new AnimationSelection
+        {
+            fileDataID = msg.fileDataID,
+            sequenceIndex = msg.sequenceIndex,
+            animID = msg.animID,
+            durationMs = msg.durationMs,
+            loop = msg.loop,
+            role = msg.role ?? "",
+            load = msg.load,
+            receivedSeconds = msg.receivedSeconds,
+        };
+    }
+
+    /// <summary>A modelAnimationState as the handlers take it. The rider is there when the line says so (hasRider),
+    /// never judged by whether JsonUtility gave the nested object back.</summary>
+    static AnimationState ToAnimationState(Msg msg)
+    {
+        var s = new AnimationState
+        {
+            fileDataID = msg.fileDataID,
+            sequenceIndex = msg.sequenceIndex,
+            playing = msg.playing,
+            timeMs = msg.timeMs,
+            speed = msg.speed,
+            loop = msg.loop,
+            explicitState = msg.explicitState,
+            receivedSeconds = msg.receivedSeconds,
+            load = msg.load,
+            hasRider = msg.hasRider && msg.rider != null,
+        };
+        if (s.hasRider)
+            s.rider = new RiderPlayback
+            {
+                sequenceIndex = msg.rider.sequenceIndex, playing = msg.rider.playing, timeMs = msg.rider.timeMs,
+                speed = msg.rider.speed, loop = msg.rider.loop,
+            };
+        return s;
+    }
+
+    /// <summary>One modelAnimation line, parsed as Dispatch parses it; false for any other line. For the lifecycle
+    /// self-test.</summary>
+    public static bool ParseAnimationSelection(string line, out AnimationSelection selection)
+    {
+        Msg msg = JsonUtility.FromJson<Msg>(line);
+        bool ok = msg != null && msg.type == "modelAnimation";
+        selection = ok ? ToAnimationSelection(msg) : new AnimationSelection { role = "" };
+        return ok;
+    }
+
+    /// <summary>One modelAnimationState line, parsed as Dispatch parses it; false for any other line. For the lifecycle
+    /// self-test, which checks the nested rider and what a line without one comes back as.</summary>
+    public static bool ParseAnimationState(string line, out AnimationState state)
+    {
+        Msg msg = JsonUtility.FromJson<Msg>(line);
+        bool ok = msg != null && msg.type == "modelAnimationState";
+        state = ok ? ToAnimationState(msg) : new AnimationState();
+        return ok;
+    }
+
     /// <summary>The wire carries 0/1 so the line stays short; JsonUtility gives an absent array
     /// back as null or empty, so both come out as an empty list.</summary>
     static bool[] ToBools(int[] values)
@@ -573,15 +788,7 @@ public class WmvIpcClient : MonoBehaviour
                 break;
 
             case "characterScene":
-                OnCharacterScene?.Invoke(new CharacterScene
-                {
-                    fileDataID = msg.fileDataID,
-                    revision = msg.revision,
-                    body = msg.body ?? new SceneBody(),
-                    merged = msg.merged ?? new SceneMerged[0],
-                    attachments = msg.attachments ?? new SceneAttachment[0],
-                    receivedSeconds = msg.receivedSeconds,
-                });
+                OnCharacterScene?.Invoke(ToCharacterScene(msg));
                 break;
 
             case "modelTextures":
@@ -609,28 +816,11 @@ public class WmvIpcClient : MonoBehaviour
                 break;
 
             case "modelAnimationState":
-                OnModelAnimationState?.Invoke(new AnimationState
-                {
-                    fileDataID = msg.fileDataID,
-                    sequenceIndex = msg.sequenceIndex,
-                    playing = msg.playing,
-                    timeMs = msg.timeMs,
-                    speed = msg.speed,
-                    loop = msg.loop,
-                    explicitState = msg.explicitState,
-                    receivedSeconds = msg.receivedSeconds,
-                });
+                OnModelAnimationState?.Invoke(ToAnimationState(msg));
                 break;
 
             case "modelAnimation":
-                OnModelAnimation?.Invoke(new AnimationSelection
-                {
-                    fileDataID = msg.fileDataID,
-                    sequenceIndex = msg.sequenceIndex,
-                    animID = msg.animID,
-                    durationMs = msg.durationMs,
-                    loop = msg.loop,
-                });
+                OnModelAnimation?.Invoke(ToAnimationSelection(msg));
                 break;
 
             case "assetResponse":
@@ -729,10 +919,13 @@ public class WmvIpcClient : MonoBehaviour
     /// <summary>
     /// What became of a characterScene. load is the serial of the loadWoWModel the scene belonged to
     /// (0 when it matched none), so the host can tell an answer about an earlier load from one about
-    /// the character it is showing now. missing names the parts that could not be built.
+    /// the character it is showing now. missing names the parts that could not be built. mountKey,
+    /// mountStatus and mountReason (protocol 5) are the scene's mount: its key ("" for none), and whether
+    /// it went under the character ("applied"), could not be built ("failed") or was not applied ("none").
     /// </summary>
     public void ReportCharacterSceneApplied(int fileDataID, int load, int revision, string status, string reason,
-                                            int merged, int attachments, IList<string> missing, long ms)
+                                            int merged, int attachments, IList<string> missing, long ms,
+                                            string mountKey, string mountStatus, string mountReason)
     {
         var sb = new StringBuilder();
         sb.Append("{\"type\":\"characterSceneApplied\",\"fileDataID\":").Append(fileDataID)
@@ -747,7 +940,11 @@ public class WmvIpcClient : MonoBehaviour
         if (missing != null)
             for (int i = 0; i < missing.Count; i++)
                 sb.Append(i > 0 ? "," : "").Append('"').Append(Escape(missing[i])).Append('"');
-        sb.Append("]}");
+        sb.Append("]")
+          .Append(",\"mountKey\":\"").Append(Escape(mountKey ?? "")).Append('"')
+          .Append(",\"mountStatus\":\"").Append(Escape(mountStatus ?? "")).Append('"')
+          .Append(",\"mountReason\":\"").Append(Escape(mountReason ?? "")).Append('"')
+          .Append('}');
         Send(sb.ToString());
     }
 
@@ -817,19 +1014,49 @@ public class WmvIpcClient : MonoBehaviour
         Send(sb.ToString());
     }
 
+    /// <summary>What a runtimeState answer carries (ReportRuntimeState).</summary>
+    public struct RuntimeReport
+    {
+        public int LiveMapObjects, LiveModels;   // runtimes alive
+        public int ModelFileDataID;              // the model on screen, 0 for none
+        public int MapObjectFileDataID;          // the world model on screen, 0 for none
+        public bool Loading;                     // a load of either kind in flight
+        // Protocol 5: the mount the model on screen rides, and what the host's lifecycle test checks about it.
+        public int MountFileDataID;              // 0 for none
+        public string MountKey;                  // "" for none
+        public int LiveMounts, MountsBuilt;      // mount runtimes alive, and built since the player started
+        public int MountSeat, MountSeatBone;     // WmvMountedScene.SeatCase and SeatBone, -1 when not seated
+        public int ModelSequence, MountSequence; // what each animator plays, -1 for none
+        public int MountEmitters, MountRibbons, MountParticles;   // the mount's emitters as drawn, its live particles
+        public int BodyRebinds;                  // WmvCharacterDresser.BodyRebinds of the character on screen, 0 for none
+        public int ViewFramings;                 // WmvMain.ViewFramings: times the view was fitted to what is on screen
+    }
+
     /// <summary>
-    /// Answer a runtimeState question: the runtimes alive now, the fileDataID of the model and of the world
-    /// model on screen (0 for none), and whether a load is in flight. query echoes the question's number.
+    /// Answer a runtimeState question with what the player holds now (RuntimeReport). query echoes the question's
+    /// number.
     /// </summary>
-    public void ReportRuntimeState(int query, int liveMapObjects, int liveModels, int modelFileDataID,
-                                   int mapObjectFileDataID, bool loading)
+    public void ReportRuntimeState(int query, RuntimeReport r)
     {
         Send("{\"type\":\"runtimeState\",\"query\":" + query +
-             ",\"liveMapObjects\":" + liveMapObjects +
-             ",\"liveModels\":" + liveModels +
-             ",\"modelFileDataID\":" + modelFileDataID +
-             ",\"mapObjectFileDataID\":" + mapObjectFileDataID +
-             ",\"loading\":" + (loading ? "true" : "false") + "}");
+             ",\"liveMapObjects\":" + r.LiveMapObjects +
+             ",\"liveModels\":" + r.LiveModels +
+             ",\"modelFileDataID\":" + r.ModelFileDataID +
+             ",\"mapObjectFileDataID\":" + r.MapObjectFileDataID +
+             ",\"loading\":" + (r.Loading ? "true" : "false") +
+             ",\"mountFileDataID\":" + r.MountFileDataID +
+             ",\"mountKey\":\"" + Escape(r.MountKey) + "\"" +
+             ",\"liveMounts\":" + r.LiveMounts +
+             ",\"mountsBuilt\":" + r.MountsBuilt +
+             ",\"mountSeat\":" + r.MountSeat +
+             ",\"mountSeatBone\":" + r.MountSeatBone +
+             ",\"modelSequence\":" + r.ModelSequence +
+             ",\"mountSequence\":" + r.MountSequence +
+             ",\"mountEmitters\":" + r.MountEmitters +
+             ",\"mountRibbons\":" + r.MountRibbons +
+             ",\"mountParticles\":" + r.MountParticles +
+             ",\"bodyRebinds\":" + r.BodyRebinds +
+             ",\"viewFramings\":" + r.ViewFramings + "}");
     }
 
     /// <summary>The 0/1 submesh flags the host sends, as booleans.</summary>

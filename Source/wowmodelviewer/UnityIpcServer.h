@@ -1,7 +1,7 @@
 /*
  * UnityIpcServer.h
  *
- * Localhost IPC server for the embedded Unity renderer (protocol v4). WMV is the SERVER:
+ * Localhost IPC server for the embedded Unity renderer (protocol v5). WMV is the SERVER:
  * UnityRendererHost starts this listener BEFORE launching the player and passes the port on
  * the player's command line (-wmvPort <n>); the player connects back, announces itself with
  * unityReady and then asks WMV for the raw WoW assets/metadata it renders from. This is the
@@ -15,14 +15,15 @@
  * replace it later without changing the request side.
  *
  *   player -> WMV
- *     { "type":"unityReady", "protocolVersion":4 }
+ *     { "type":"unityReady", "protocolVersion":5 }
  *     { "type":"getAsset",             "requestId":"abc123", "path":"creature/chicken/chicken.m2" }
  *     { "type":"getAssetByFileDataID", "requestId":"abc124", "fileDataID":123456 }
  *     { "type":"getModelTextures",     "requestId":"abc125", "fileDataID":123200 }
  *     { "type":"modelGeosetsApplied", "fileDataID":1521037, "revision":7, "status":"applied",
  *       "reason":"", "submeshVisible":[1,0,1], "triangles":2364, "animTimeMs":840 }
  *     { "type":"characterSceneApplied", "fileDataID":1011653, "revision":4, "load":12, "status":"applied",
- *       "reason":"", "merged":3, "attachments":4, "missing":[], "ms":212 }
+ *       "reason":"", "merged":3, "attachments":4, "missing":[], "ms":212,
+ *       "mountKey":"M3", "mountStatus":"applied", "mountReason":"" }
  *     { "type":"mapObjectLoaded", "fileDataID":115058, "load":13, "status":"built", "reason":"",
  *       "groups":1, "groupFilesRequested":1, "groupFilesMissing":0, "batches":3, "submeshes":3, "renderers":1,
  *       "materials":3, "provisionalMaterials":0, "unresolvedMaterials":0, "blendedMaterials":0,
@@ -30,8 +31,10 @@
  *       "boundsMin":[x,y,z], "boundsMax":[x,y,z],
  *       "timings":{"rootMs":5,"groupsMs":40,"texturesMs":60,"buildMs":12,"totalMs":130},
  *       "liveMapObjects":1, "liveModels":0 }
- *     { "type":"runtimeState", "query":3, "liveMapObjects":0, "liveModels":1, "modelFileDataID":1234567,
- *       "mapObjectFileDataID":0, "loading":false }
+ *     { "type":"runtimeState", "query":3, "liveMapObjects":0, "liveModels":2, "modelFileDataID":1011653,
+ *       "mapObjectFileDataID":0, "loading":false, "mountFileDataID":126407, "mountKey":"M3", "liveMounts":1,
+ *       "mountsBuilt":1, "mountSeat":1, "mountSeatBone":50, "modelSequence":145, "mountSequence":1,
+ *       "mountEmitters":0, "mountRibbons":0, "mountParticles":0, "bodyRebinds":0, "viewFramings":2 }
  *   WMV -> player
  *     { "type":"loadWoWModel", "path":"creature/chicken/chicken.m2", "fileDataID":0, "client":"active",
  *       "character":false, "load":12, "kind":"m2" }
@@ -51,8 +54,13 @@
  *       "submeshVisible":[1,0,1] }
  *     { "type":"modelAnimation", "fileDataID":1521037, "sequenceIndex":2, "animID":0,
  *       "durationMs":2000, "loop":true }
+ *     { "type":"modelAnimation", "fileDataID":126407, "sequenceIndex":1, "animID":0,
+ *       "durationMs":4000, "loop":true, "role":"mount", "load":12 }
  *     { "type":"modelAnimationState", "fileDataID":1521037, "sequenceIndex":2, "playing":true,
  *       "timeMs":840, "speed":1.0, "loop":true, "explicitState":false }
+ *     { "type":"modelAnimationState", "fileDataID":126407, "sequenceIndex":1, "playing":true,
+ *       "timeMs":1840, "speed":1.0, "loop":true, "explicitState":false, "load":12, "hasRider":true,
+ *       "rider":{ "sequenceIndex":145, "playing":true, "timeMs":840, "speed":1.0, "loop":true } }
  *     { "type":"characterImage", "hash":"body-3", "width":2048, "height":1024, "format":"bgra8",
  *       "encoding":"base64", "data":"..." }
  *     { "type":"characterScene", "fileDataID":1011653, "revision":4,
@@ -61,7 +69,11 @@
  *       "merged":[ {"key":"m4353217","fileDataID":4353217,"mergeIndex":1,"textures":[...],
  *                   "submeshCount":6,"submeshVisible":[...],"boneMap":[0,1,2,...]} ],
  *       "attachments":[ {"key":"a11:1234567","fileDataID":1234567,"attachmentId":11,"mirrored":false,
- *                        "visible":true,"textures":[...],"submeshCount":2,"submeshVisible":[1,1]} ] }
+ *                        "visible":true,"textures":[...],"submeshCount":2,"submeshVisible":[1,1]} ],
+ *       "mount":{ "key":"M3","fileDataID":126407,"path":"creature/warhorse/warhorse.m2","displayID":8469,
+ *                 "attachmentId":0,"bone":50,"position":[0.2131,0.0,1.9284],"riderScale":1.0,
+ *                 "textures":[ {"slot":...,"type":11,"fileDataID":126406} ],"submeshCount":...,
+ *                 "submeshVisible":[...],"sequenceIndex":1,"riderSequenceIndex":145 } }
  *
  * getModelTextures exists because modern M2s do NOT name their replaceable textures (a
  * creature skin's TXID entry is 0 and the texture array carries no filename) -- the skin comes
@@ -124,6 +136,45 @@
  * under a model -- a step that ends on a model has no mapObjectLoaded, and the next world-model adoption
  * disposes whatever is left before it counts.
  *
+ * MOUNTED CHARACTERS (protocol 5). A character riding a mount is still the character: the host's mount
+ * choice hangs the character's node (CharControl::charAtt) under the canvas root and puts the mount on
+ * that root and on the canvas, without loading anything. So to a player that announced protocol 5,
+ * loadWoWModel keeps naming the RIDER ("character":true), and the mount travels as an optional "mount" in
+ * that character's scene, resolved as the host draws it: "key" is "M" and the host's mount serial, raised
+ * for every mount model the mount choice installs (never the model's address: the old mount is freed
+ * before its replacement is allocated, so an address can repeat), and unchanged when the same mount is
+ * described again; "fileDataID" and "path" are the mount model's; "displayID" the CreatureDisplayInfo it
+ * was chosen by (0 for a creature file; informational); "attachmentId" is the rider node's id, "bone" and
+ * "position" the entry the MOUNT's attachment lookup gives for it (WoWModel::setupAtt: -1 and [0,0,0]
+ * when it has none -- the rider then sits at the mount's origin); "riderScale" the rider model's scale;
+ * "textures" each mount slot's own binding, where a slot bound to nothing (GL name 0 or none) is left out
+ * rather than read as the character's body image; "submeshCount"/"submeshVisible" the mount's own geoset
+ * flags; "particleColorSets", present only while the mount's display replaces particle colours, the
+ * three ParticleColor sets (emitter ParticleColorIndex 11, 12, 13) as start, mid and end RGB, 0..255, 27
+ * numbers in that order; "sequenceIndex" and "riderSequenceIndex" what the mount and the rider are
+ * playing when the scene is built -- for the rider, whatever the mount choice selected from its animation
+ * lookup. Presence is "key" non-empty (and "fileDataID" > 0 for a mount the player can fetch), never the
+ * JSON object being absent. The mount's display state travels only there: no modelSkin or modelGeosets
+ * is sent for it while it is ridden. A scene without "mount" while one is ridden is the dismount.
+ * characterSceneApplied adds "mountKey" (the key of the mount in the scene it answers, "" for none),
+ * "mountStatus" ("applied", "failed" or "none") and "mountReason"; a mount that could not be built is
+ * reported there and never turns the character's own answer into "load failed". Two models animate, so
+ * modelAnimation adds "role" ("mount" or "rider": which of them the Animation panel changed -- a
+ * FileDataID cannot say, a mount model can also be a playable race's body) and "load" (the rider's load
+ * serial); modelAnimationState keeps describing the canvas model, the mount, and adds "load", "hasRider"
+ * and "rider" (the rider's sequenceIndex, timeMs, speed and loop, with "playing" following the MOUNT's
+ * pause, which is the host's clock gate for both). None of these fields is sent about a model that is not
+ * ridden, and none of it goes to an older player: it gets the mounted-character notice, as before.
+ * runtimeState adds "mountFileDataID", the mount the model on screen rides in the player (0 for none), and
+ * what a lifecycle test needs to tell a mount on screen from a stale or doubled one: "mountKey", "liveMounts"
+ * (mount runtimes alive, including one built for a scene not applied yet), "mountsBuilt" (since the player
+ * started), "mountSeat" and "mountSeatBone" (how the model hangs from it: 0 at the mount's origin, 1 under
+ * that bone, 2 on the mount's root at the attachment's position; -1 not seated), "modelSequence" and
+ * "mountSequence" (what each animator plays), "mountEmitters", "mountRibbons" and "mountParticles" (the
+ * mount's emitters as drawn and its live particles), "bodyRebinds" (how often the character's scenes
+ * bound its body textures again) and "viewFramings" (how often the player fitted the view to what is on
+ * screen: once per model, world model or mount change, and never for anything else).
+ *
  * modelAnimation is pushed the same way whenever the animation on display changes, and once after
  * loadWoWModel so the player starts on the animation the app is showing rather than on its own
  * idle. "sequenceIndex" is what the player must act on: it indexes the model's animation table,
@@ -173,7 +224,7 @@
 class UnityIpcServer : public wxEvtHandler
 {
 public:
-  static const int PROTOCOL_VERSION = 4;
+  static const int PROTOCOL_VERSION = 5;
 
   UnityIpcServer();
   ~UnityIpcServer();
@@ -195,6 +246,9 @@ public:
   bool playerDressesCharacters() const { return m_client && m_unityReady && m_playerProtocol >= 3; }
   // The player draws world models: it takes loadWoWModel "kind":"wmo" and answers mapObjectLoaded (protocol 4).
   bool playerDrawsMapObjects() const { return m_client && m_unityReady && m_playerProtocol >= 4; }
+  // The player seats a character on a mount: it takes a characterScene's "mount", the role and rider fields of
+  // the animation pushes, and answers the mount in characterSceneApplied (protocol 5; MOUNTED CHARACTERS above).
+  bool playerRidesMounts() const { return m_client && m_unityReady && m_playerProtocol >= 5; }
 
   // Runtime command: tell the player which model is active. Either path or fileDataID may be
   // empty/0. Queued if the player is connected; dropped (logged) otherwise.
@@ -223,16 +277,32 @@ public:
   // Runtime command: the animation on display changed. sequenceIndex indexes the model's
   // animation table (what the app's own selector picks); animID and durationMs come from that
   // entry. No-op when the player is not connected.
-  void sendModelAnimation(int m2FileDataID, int sequenceIndex, int animID, int durationMs, bool loop);
+  // role: for a ridden mount only (protocol 5), "mount" or "rider" -- which of the two models the selection
+  // changed -- sent with load, the rider's load serial. Empty: neither field is sent, as before.
+  void sendModelAnimation(int m2FileDataID, int sequenceIndex, int animID, int durationMs, bool loop,
+                          const QString & role = QString(), int load = 0);
+
+  // The rider's playback, sent inside a ridden mount's modelAnimationState (protocol 5).
+  struct RiderState
+  {
+    int sequenceIndex = -1;
+    bool playing = false;          // the mount's pause gate, not the rider's own flag (MOUNTED CHARACTERS)
+    int timeMs = 0;
+    float speed = 1.0f;
+    bool loop = true;
+  };
 
   // Runtime command: the playback state of that animation changed (or a heartbeat while it runs).
   // timeMs is the app's current position in the sequence. explicitState is true for a push made
   // by a control -- play, pause, a frame step, the frame or speed slider, the start of a load --
   // and false for the heartbeat: the player applies an explicit position as given, however small
   // the step, and holds heartbeats to a dead band so transport jitter cannot make it twitch.
+  // rider: while the model is a ridden mount (protocol 5), the rider's state, sent as "rider" with "hasRider"
+  // and load, the rider's load serial; null sends the message exactly as for any other model.
   // No-op when the player is not connected.
   void sendModelAnimationState(int m2FileDataID, int sequenceIndex, bool playing, int timeMs,
-                               float speed, bool loop, bool explicitState);
+                               float speed, bool loop, bool explicitState,
+                               const RiderState * rider = nullptr, int load = 0);
 
   // Runtime command: the displayed model's per-submesh display state changed (a Geosets
   // checkbox). Sends the WHOLE current state (UnityAssetAccess::displayedSubmeshVisibility), numbered
@@ -268,6 +338,10 @@ public:
     int attachments = 0;
     QStringList missing;         // parts the player could not build (key)
     int ms = 0;
+    // Protocol 5: the mount of the scene answered. An older player sends none of these (all empty).
+    QString mountKey;            // the scene's mount key, "" when it had none
+    QString mountStatus;         // "applied" / "failed" / "none"
+    QString mountReason;
   };
   std::function<void(const SceneAck &)> onCharacterSceneApplied;
 
@@ -320,6 +394,23 @@ public:
     int modelFileDataID = -1;      // the model on screen, 0 for none
     int mapObjectFileDataID = -1;  // the world model on screen, 0 for none
     bool loading = false;          // a load of either kind in flight
+    int mountFileDataID = -1;      // the mount the model on screen rides, 0 for none (protocol 5)
+    // Protocol 5 too, what the lifecycle test's mounted-character steps check (MOUNTED CHARACTERS above).
+    QString mountKey;              // that mount's key ("M<serial>"), "" for none
+    int liveMounts = -1;           // mount runtimes alive: on screen, or built for a scene not applied yet
+    int mountsBuilt = -1;          // mount runtimes built since the player started
+    int mountSeat = -1;            // how the model on screen hangs from its mount: 0 at the mount's origin (no
+                                   // such attachment), 1 under the attachment's bone, 2 at the attachment's
+                                   // position on the mount's root (no Transform for that bone); -1 not seated
+    int mountSeatBone = -1;        // the mount bone it hangs from (seat 1), otherwise -1
+    int modelSequence = -1;        // the sequence the model on screen's animator plays, -1 for none
+    int mountSequence = -1;        // the sequence the mount's animator plays, -1 for none
+    int mountEmitters = -1;        // the mount's particle emitters, as drawn
+    int mountRibbons = -1;         // the mount's ribbon emitters, as drawn
+    int mountParticles = -1;       // the mount's live particles
+    int bodyRebinds = -1;          // times the character on screen's body textures were bound again by its scenes
+    int viewFramings = -1;         // times the player fitted the view to what is on screen (a model, a world model or
+                                   // a mount change); an appearance change on a riding character must not raise it
     QString describe() const;
   };
   // Ask the player what it holds (runtimeState). Returns the question's number, which the answer echoes,
@@ -359,6 +450,14 @@ public:
     int sceneApplied = 0;   // ... of which "applied"
     QString lastScene;      // "rev <n>: <merged> merged, <attachments> attached"
     QString lastSceneAck;   // "rev <n> <status> <merged>/<attachments> <reason>"
+    int mountScenes = 0;          // characterScene messages sent with a "mount"
+    int mountApplied = 0;         // characterSceneApplied received with mountStatus "applied"
+    int mountFailed = 0;          // ... with mountStatus "failed"
+    QString lastMountScene;       // "<key> <fileDataID> bone <b> seq <s> rider seq <r>" of the last mount sent
+    QString lastMountAck;         // "<key> <status> <reason>" of the last answer that named a mount status
+    int rolePushes = 0;           // modelAnimation messages sent with a role (a ridden mount's models)
+    int riderStatePushes = 0;     // modelAnimationState messages sent with the rider's state
+    QString lastRiderState;       // "seq <n> playing|paused <ms>ms x<speed>" of the last rider state sent
     int mapObjectLoads = 0;       // loadWoWModel "kind":"wmo" sent
     int mapObjectReports = 0;     // mapObjectLoaded received, any status
     int mapObjectBuilt = 0;       // ... of which "built"

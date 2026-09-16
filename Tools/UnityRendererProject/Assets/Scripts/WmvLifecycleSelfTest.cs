@@ -1234,6 +1234,1229 @@ public static class WmvLifecycleSelfTest
         body.Dispose();         // the probe is under the body's bones and goes with them
     }
 
+    // ---------------------------------------------------------------- mounted characters
+
+    /// <summary>
+    /// A CHARACTER RIDING A MOUNT (WmvMountedScene): the character's body root hangs from a bone of a second,
+    /// separately animated model, and every joint of that is checked on synthetic models built by the real builder --
+    /// the skinning of a body under an animated ancestor, the scene's mount on the wire, the three placements, and
+    /// the lifecycle of the mount beside the character (mount, swap, dismount, disposal, a load's own mount).
+    /// </summary>
+    static void MountTests(Action<string> log)
+    {
+        SkinnedUnderAnimatedBoneTests(log);
+        MountSceneJsonTests(log);
+        MountPlacementTests(log);
+        MountLifecycleTests(log);
+        MountAnimationJsonTests(log);
+        MountRoutingTests(log);
+        MountClockTests(log);
+        MountFramingTests(log);
+    }
+
+    /// <summary>
+    /// A SKINNED BODY UNDER AN ANIMATED BONE OF ANOTHER MODEL stays correct: what a mounted character is. The body is
+    /// posed and baked at the world origin first; then it is parented under the leaf bone of a second model whose
+    /// sequence and global clock move and turn that bone, both models are posed again, and the bake is compared with
+    /// the at-origin bake carried through the parent bone's matrix and the body root's local offset and scale. The
+    /// skinning must come out the same in the body's own space and exactly there in the world, at two instants of the
+    /// parent's clock and at two scales.
+    /// </summary>
+    static void SkinnedUnderAnimatedBoneTests(Action<string> log)
+    {
+        if (WmvModelBuilder.Debug_.NoAnim)
+        {
+            log("lifecycle-test SKIP: skinning under an animated bone: -wmvNoAnim builds no animator to pose either model");
+            return;
+        }
+        byte[] m2 = M2Synthetic.InFileSkeletonModel(473370);
+        M2ParsedSkin skin = M2SkinParser.Parse(M2Synthetic.TransformSwitchSkin());
+        M2ParsedModel parentModel = M2Parser.Parse(m2, 0);
+        WmvRuntimeModel parent = WmvModelBuilder.Build(parentModel, skin, new Dictionary<int, BlpImage>(), "AncestorMount", null);
+        // The body's three vertices on the turning bone and its child, so its own pose rotates as well as moves them.
+        M2ParsedModel childModel = M2Parser.Parse(m2, 0);
+        Influence(childModel, 0, 2, 255, 0, 0);
+        Influence(childModel, 1, 1, 255, 0, 0);
+        Influence(childModel, 2, 1, 128, 2, 127);
+        WmvRuntimeModel child = WmvModelBuilder.Build(childModel, skin, new Dictionary<int, BlpImage>(), "AncestorRider", null);
+        bool built = parent != null && child != null && parent.Animator != null && child.Animator != null &&
+                     child.Skin != null && parent.Bones.Length == 3;
+        Check(built, "skinning under an animated bone: two skinned, animated three-bone models built", log);
+        if (!built)
+        {
+            if (parent != null) parent.Dispose();
+            if (child != null) child.Dispose();
+            return;
+        }
+
+        M2AttachmentDef att;
+        bool found = M2Parser.AttachmentFor(parentModel, 11, out att) && att.Bone == 2;
+        Check(found, "skinning under an animated bone: the parent's attachment 11 is on its leaf bone 2", log);
+        if (!found) { child.Dispose(); parent.Dispose(); return; }
+        Vector3 offset = WmvCharacterDresser.AttachmentLocalPosition(att.Position, parentModel.Bones[att.Bone].Pivot);
+        Transform bone = parent.Bones[att.Bone];
+
+        double globalWas = WmvM2Animator.GlobalTimeMs;
+        var baked = new Mesh();
+        try
+        {
+            // Bone 1 turns on global sequence 1: at 250 ms it has turned 90 degrees, in both models.
+            WmvM2Animator.GlobalTimeMs = 250.0;
+            child.Animator.ApplyPose(250f);
+            child.Skin.BakeMesh(baked, true);
+            Vector3[] atOrigin = baked.vertices;
+            Vector3[] file = child.Mesh.vertices;
+            bool posed = atOrigin.Length == 3 && file.Length == 3;
+            float moved = 0f;
+            for (int i = 0; posed && i < 3; i++)
+                moved = Mathf.Max(moved, Vector3.Distance(atOrigin[i], file[i]));
+            Check(posed && moved > 0.1f,
+                  "skinning under an animated bone: the body's own pose moves its vertices at the origin (" + moved.ToString("F3") + ")", log);
+
+            Vector3[] firstWorld = null;
+            foreach (float scale in new[] { 1f, 1.5f })
+            {
+                foreach (float parentMs in new[] { 125f, 375f })
+                {
+                    string at = "parent at " + parentMs + " ms, body scale " + scale;
+                    Transform root = child.Root.transform;
+                    root.SetParent(bone, false);
+                    root.localPosition = offset;
+                    root.localRotation = Quaternion.identity;
+                    root.localScale = new Vector3(scale, scale, scale);
+                    parent.Animator.ApplyPose(parentMs);
+                    child.Animator.ApplyPose(250f);
+
+                    Check(!SameRotation(bone.rotation, Quaternion.identity) &&
+                          !NearV(bone.position, UnityPosition(parentModel.Bones[att.Bone].Pivot), 1e-3f),
+                          "skinning under an animated bone: " + at + ": the parent bone is turned and moved from its rest", log);
+
+                    child.Skin.BakeMesh(baked, true);
+                    Vector3[] local = baked.vertices;
+                    Matrix4x4 bodyToWorld = root.localToWorldMatrix;
+                    Matrix4x4 expectedToWorld = bone.localToWorldMatrix *
+                                                Matrix4x4.TRS(offset, Quaternion.identity, new Vector3(scale, scale, scale));
+                    bool sameLocal = local.Length == atOrigin.Length;
+                    float worst = 0f;
+                    var world = new Vector3[local.Length];
+                    for (int i = 0; sameLocal && i < local.Length; i++)
+                    {
+                        sameLocal = NearV(local[i], atOrigin[i], 1e-3f);
+                        world[i] = bodyToWorld.MultiplyPoint3x4(local[i]);
+                        worst = Mathf.Max(worst, Vector3.Distance(world[i], expectedToWorld.MultiplyPoint3x4(atOrigin[i])));
+                    }
+                    Check(sameLocal,
+                          "skinning under an animated bone: " + at + ": the bake in the body's own space is the bake at the origin", log);
+                    Check(local.Length == atOrigin.Length && worst < 1e-3f,
+                          "skinning under an animated bone: " + at + ": in the world it is the at-origin bake carried through the " +
+                          "parent bone and the body's offset (largest difference " + worst.ToString("E2") + ")", log);
+                    if (firstWorld == null)
+                        firstWorld = world;
+                    else if (scale == 1f)
+                        Check(!NearV(world[0], firstWorld[0], 1e-2f),
+                              "skinning under an animated bone: the body follows the parent's clock (a different instant puts it elsewhere)", log);
+                }
+            }
+        }
+        finally
+        {
+            WmvM2Animator.GlobalTimeMs = globalWas;
+            UnityEngine.Object.Destroy(baked);
+        }
+        child.Root.transform.SetParent(null, false);
+        child.Dispose();
+        parent.Dispose();
+    }
+
+    /// <summary>
+    /// A characterScene LINE with and without a mount, parsed exactly as the IPC client parses it: presence is the
+    /// sentinel (a non-empty key and a fileDataID), never whether the nested object came back null -- which is
+    /// logged, since it was not established what JsonUtility does with an absent one.
+    /// </summary>
+    static void MountSceneJsonTests(Action<string> log)
+    {
+        const string head = "{\"type\":\"characterScene\",\"fileDataID\":1011653,\"revision\":4," +
+                            "\"body\":{\"textures\":[],\"submeshCount\":0,\"submeshVisible\":[]},\"merged\":[],\"attachments\":[]";
+        WmvIpcClient.CharacterScene without = WmvIpcClient.ParseCharacterScene(head + "}");
+        Check(without != null && without.fileDataID == 1011653 && without.revision == 4,
+              "mount json: a characterScene line without a mount parses", log);
+        Check(without != null && !WmvIpcClient.HasMount(without) && WmvIpcClient.MountKeyOf(without) == "",
+              "mount json: ... has no mount by the sentinel, and answers mountKey \"\"", log);
+        if (without != null)
+            log("lifecycle-test INFO: mount json: an absent \"mount\" comes back as " +
+                (without.mount == null ? "null"
+                 : "a default-filled object (key " + (without.mount.key == null ? "null" : "\"" + without.mount.key + "\"") +
+                   ", fileDataID " + without.mount.fileDataID + ")"));
+
+        const string mount = ",\"mount\":{\"key\":\"M3\",\"fileDataID\":126407,\"path\":\"creature/warhorse/warhorse.m2\"," +
+                             "\"displayID\":8469,\"attachmentId\":0,\"bone\":50,\"position\":[0.2131,0.0,1.9284],\"riderScale\":1.0," +
+                             "\"textures\":[{\"slot\":0,\"type\":11,\"fileDataID\":126406}],\"submeshCount\":2,\"submeshVisible\":[1,0]," +
+                             "\"sequenceIndex\":1,\"riderSequenceIndex\":145}";
+        WmvIpcClient.CharacterScene with = WmvIpcClient.ParseCharacterScene(head + mount + "}");
+        bool has = with != null && WmvIpcClient.HasMount(with);
+        Check(has, "mount json: the same line with a mount has one by the sentinel", log);
+        if (has)
+        {
+            WmvIpcClient.SceneMount m = with.mount;
+            Check(m.key == "M3" && m.fileDataID == 126407 && m.path == "creature/warhorse/warhorse.m2" && m.displayID == 8469 &&
+                  m.attachmentId == 0 && m.bone == 50 && m.sequenceIndex == 1 && m.riderSequenceIndex == 145,
+                  "mount json: key, file, path, display, attachment id, bone and both sequence indices are read", log);
+            Check(m.position != null && m.position.Length == 3 && Near(m.position[0], 0.2131f) && Near(m.position[1], 0f) &&
+                  Near(m.position[2], 1.9284f) && Near(m.riderScale, 1f),
+                  "mount json: the attachment position and the rider scale are read", log);
+            Check(m.textures != null && m.textures.Length == 1 && m.textures[0].slot == 0 && m.textures[0].type == 11 &&
+                  m.textures[0].fileDataID == 126406, "mount json: the mount's texture slot is read", log);
+            bool[] flags = WmvIpcClient.Flags(m.submeshVisible);
+            Check(m.submeshCount == 2 && flags.Length == 2 && flags[0] && !flags[1], "mount json: the mount's geoset flags are read", log);
+            Check(WmvMountedScene.ParticleSets(m.particleColorSets) == null,
+                  "mount json: no particleColorSets is no colour replacement (the authored colours stay)", log);
+            Check(WmvIpcClient.MountKeyOf(with) == "M3", "mount json: ... and its key is what the answer names", log);
+        }
+
+        WmvIpcClient.CharacterScene noKey = WmvIpcClient.ParseCharacterScene(head + ",\"mount\":{\"key\":\"\",\"fileDataID\":126407}}");
+        Check(noKey != null && !WmvIpcClient.HasMount(noKey), "mount json: a mount with an empty key is no mount", log);
+        WmvIpcClient.CharacterScene noFile = WmvIpcClient.ParseCharacterScene(head + ",\"mount\":{\"key\":\"M4\",\"fileDataID\":0}}");
+        Check(noFile != null && !WmvIpcClient.HasMount(noFile) && WmvIpcClient.MountKeyOf(noFile) == "M4",
+              "mount json: a key without a fileDataID is no mount the player can build, and its key is still answered", log);
+
+        // The host's 27 numbers: set 0..2 (emitter ParticleColorIndex 11..13), start/mid/end, r,g,b.
+        var values = new int[27];
+        for (int i = 0; i < values.Length; i++) values[i] = i * 9;
+        Color[][] sets = WmvMountedScene.ParticleSets(values);
+        Check(sets != null && sets.Length == 3 && sets[0].Length == 3 && Near(sets[0][0].r, 0f) && Near(sets[0][1].r, 27f / 255f) &&
+              Near(sets[1][2].b, 153f / 255f) && Near(sets[2][2].b, 234f / 255f) && Near(sets[2][0].a, 1f),
+              "mount json: particleColorSets become set i's start, mid and end colours, in the host's order", log);
+        Check(WmvMountedScene.ParticleSets(new int[26]) == null, "mount json: fewer than 27 numbers is no replacement", log);
+    }
+
+    /// <summary>
+    /// THE THREE PLACEMENTS (WmvMountedScene.Placement), on a skinned mount with bones and a static one without:
+    /// no attachment -> the mount's root at zero; a bone with a Transform -> that bone at the attachment position less
+    /// its pivot; a bone with no Transform in the build -> the mount's root at the converted position, which is not the
+    /// zero of the first case.
+    /// </summary>
+    static void MountPlacementTests(Action<string> log)
+    {
+        M2ParsedSkin skin = M2SkinParser.Parse(M2Synthetic.TransformSwitchSkin());
+        M2ParsedModel model = M2Parser.Parse(M2Synthetic.InFileSkeletonModel(473370), 0);
+        WmvRuntimeModel mount = WmvModelBuilder.Build(model, skin, new Dictionary<int, BlpImage>(), "PlacementMount", null, null, null,
+                                                      new WmvBuildOptions { NoAnimation = true });
+        M2ParsedModel flatModel = M2Parser.Parse(M2Synthetic.TransformSwitchModel(0, false), 0);
+        WmvRuntimeModel flat = WmvModelBuilder.Build(flatModel, skin, new Dictionary<int, BlpImage>(), "PlacementStatic", null);
+        bool built = mount != null && mount.Skinned && mount.Bones.Length == 3 && flat != null && !flat.Skinned && flat.Bones.Length == 0;
+        Check(built, "mount placement: a skinned three-bone mount and a static one without bones built", log);
+        M2AttachmentDef att;
+        bool found = built && M2Parser.AttachmentFor(model, 11, out att) && att.Bone == 2;
+        if (!found)
+        {
+            Check(false, "mount placement: attachment 11 resolves to bone 2", log);
+            if (mount != null) mount.Dispose();
+            if (flat != null) flat.Dispose();
+            return;
+        }
+        M2Parser.AttachmentFor(model, 11, out att);
+        float[] position = { att.Position.X, att.Position.Y, att.Position.Z };
+
+        Transform parent;
+        Vector3 local;
+        int placement = WmvMountedScene.Placement(-1, position, mount, model, out parent, out local);
+        Check(placement == WmvMountedScene.CaseNoAttachment && parent == mount.Root.transform && local == Vector3.zero,
+              "mount placement: bone -1 (the mount has no such attachment) -- the mount's root, zero offset (case A)", log);
+
+        placement = WmvMountedScene.Placement(att.Bone, position, mount, model, out parent, out local);
+        Check(placement == WmvMountedScene.CaseBone && parent == mount.Bones[att.Bone] &&
+              NearV(local, UnityPosition(att.Position) - UnityPosition(model.Bones[att.Bone].Pivot), 1e-5f),
+              "mount placement: a bone with a Transform -- that bone, at Convert(position) - Convert(pivot) (case B)", log);
+        Transform probe = new GameObject("MountPlacementProbe").transform;
+        probe.SetParent(parent, false);
+        probe.localPosition = local;
+        Check(NearV(probe.position, UnityPosition(att.Position), 1e-4f),
+              "mount placement: ... which at rest is exactly the attachment point", log);
+
+        placement = WmvMountedScene.Placement(att.Bone, position, flat, flatModel, out parent, out local);
+        Check(placement == WmvMountedScene.CaseNoBoneTransform && parent == flat.Root.transform &&
+              NearV(local, UnityPosition(att.Position), 1e-5f) && local != Vector3.zero,
+              "mount placement: a bone the static build has no Transform for -- the root at Convert(position) (case C, not case A)", log);
+
+        placement = WmvMountedScene.Placement(7, position, mount, model, out parent, out local);
+        Check(placement == WmvMountedScene.CaseNoBoneTransform && parent == mount.Root.transform &&
+              NearV(local, UnityPosition(att.Position), 1e-5f),
+              "mount placement: a bone past the build's skeleton is case C too", log);
+
+        mount.Dispose();        // the probe is under its bones and goes with them
+        flat.Dispose();
+    }
+
+    /// <summary>The host's asset channel, for a mounted scene under test: each request gets an id, and Deliver answers
+    /// the ones the scene owns -- and the ones its answers lead to -- from the files given, a file not given as missing.</summary>
+    class MountAssets
+    {
+        public readonly Dictionary<int, byte[]> Files = new Dictionary<int, byte[]>();
+        public readonly List<KeyValuePair<string, int>> Requests = new List<KeyValuePair<string, int>>();
+        readonly HashSet<string> answered = new HashSet<string>();
+        int next;
+
+        public string Request(int fileDataID)
+        {
+            string id = "mount-test-" + (++next);
+            Requests.Add(new KeyValuePair<string, int>(id, fileDataID));
+            return id;
+        }
+
+        public void Deliver(WmvMountedScene scene)
+        {
+            for (int round = 0; round < 16; round++)
+            {
+                bool any = false;
+                foreach (var kv in Requests.ToArray())
+                {
+                    if (answered.Contains(kv.Key) || !scene.Owns(kv.Key))
+                        continue;
+                    answered.Add(kv.Key);
+                    any = true;
+                    byte[] data;
+                    bool ok = Files.TryGetValue(kv.Value, out data);
+                    scene.OnAsset(new WmvIpcClient.AssetResponse
+                    {
+                        requestId = kv.Key, ok = ok, fileDataID = kv.Value, data = ok ? data : null, error = ok ? null : "not served",
+                    });
+                }
+                if (!any)
+                    return;
+            }
+        }
+    }
+
+    static WmvIpcClient.SceneMount MountOf(string key, int fileDataID, int bone, float[] position, float riderScale,
+                                          int sequence, int riderSequence, int textureFileDataID)
+    {
+        return new WmvIpcClient.SceneMount
+        {
+            key = key, fileDataID = fileDataID, path = "mount/test/" + fileDataID + ".m2", attachmentId = 0, bone = bone,
+            position = position, riderScale = riderScale, sequenceIndex = sequence, riderSequenceIndex = riderSequence,
+            textures = textureFileDataID > 0
+                ? new[] { new WmvIpcClient.SceneTexture { slot = 0, type = 0, fileDataID = textureFileDataID } }
+                : new WmvIpcClient.SceneTexture[0],
+        };
+    }
+
+    /// <summary>A chunked M2 of an MD20 image with an SFID naming skinFileId: what a mount fetch needs.</summary>
+    static byte[] WithSkinFile(byte[] md20, int skinFileId)
+    {
+        var b = new byte[8 + md20.Length + 12];
+        b[0] = (byte)'M'; b[1] = (byte)'D'; b[2] = (byte)'2'; b[3] = (byte)'1';
+        BitConverter.GetBytes(md20.Length).CopyTo(b, 4);
+        Buffer.BlockCopy(md20, 0, b, 8, md20.Length);
+        int o = 8 + md20.Length;
+        b[o] = (byte)'S'; b[o + 1] = (byte)'F'; b[o + 2] = (byte)'I'; b[o + 3] = (byte)'D';
+        BitConverter.GetBytes(4).CopyTo(b, o + 4);
+        BitConverter.GetBytes(skinFileId).CopyTo(b, o + 8);
+        return b;
+    }
+
+    /// <summary>A 2x2 palettized BLP2 of one opaque colour, so a mount texture fetched and decoded for real can be told
+    /// apart on the material it lands on.</summary>
+    static byte[] SolidBlp(byte r, byte g, byte b)
+    {
+        const int header = 0x494, pixels = 4;
+        var f = new byte[header + pixels * 2];
+        f[0] = (byte)'B'; f[1] = (byte)'L'; f[2] = (byte)'P'; f[3] = (byte)'2';
+        BitConverter.GetBytes(1).CopyTo(f, 0x04);
+        f[0x08] = 1;                                           // palettized
+        f[0x09] = 8;                                           // 8-bit alpha
+        BitConverter.GetBytes(2).CopyTo(f, 0x0C);
+        BitConverter.GetBytes(2).CopyTo(f, 0x10);
+        BitConverter.GetBytes(header).CopyTo(f, 0x14);         // mip 0 offset
+        BitConverter.GetBytes(pixels * 2).CopyTo(f, 0x54);     // mip 0 size
+        f[0x94 + 4] = b; f[0x94 + 5] = g; f[0x94 + 6] = r;      // palette entry 1, BGRA
+        for (int i = 0; i < pixels; i++) { f[header + i] = 1; f[header + pixels + i] = 0xFF; }
+        return f;
+    }
+
+    /// <summary>
+    /// THE MOUNT BESIDE THE CHARACTER, through WmvMountedScene's own fetch, build and commit, answered by MountAssets:
+    /// a mount's files and the riding sequence's .anim fetched before it goes on, the same key and file kept in flight,
+    /// the character hung from the attachment's bone, the mount's texture bound, the same mount described again not
+    /// rebuilt, swaps, dismounts and remounts leaving the live model count where it was and the character alive, a
+    /// mount that cannot be built, cases C and A through a commit, disposal taking the character off first, and a load's
+    /// own mount beside the one on screen: untouched when the on-screen one goes (AdoptBuilt), committed for the new
+    /// character (AdoptStaged), and released with its requests when its load is dropped (AbandonCharacterJob) -- the
+    /// calls WmvMain makes, in the order it makes them.
+    /// </summary>
+    static void MountLifecycleTests(Action<string> log)
+    {
+        const int mountA = 780001, mountB = 780002, mountStatic = 780004, unfetched = 780005, missing = 780099, skinId = 780003;
+        const int superseded = 780006;
+        const int red = 780010, blue = 780011;
+        int anim = M2Synthetic.SkelAnimFileIdBase;            // the fixture's .anim, for its external sequence 1
+        var assets = new MountAssets();
+        assets.Files[mountA] = M2Synthetic.InFileSkeletonModel(skinId);
+        assets.Files[mountB] = M2Synthetic.InFileSkeletonModel(skinId);
+        assets.Files[unfetched] = M2Synthetic.InFileSkeletonModel(skinId);
+        assets.Files[superseded] = M2Synthetic.InFileSkeletonModel(skinId);
+        assets.Files[mountStatic] = WithSkinFile(M2Synthetic.TransformSwitchModel(0, false), skinId);
+        assets.Files[skinId] = M2Synthetic.TransformSwitchSkin();
+        assets.Files[anim] = M2Synthetic.SkeletonAnimFile(0, true);
+        assets.Files[red] = SolidBlp(255, 0, 0);
+        assets.Files[blue] = SolidBlp(0, 0, 255);
+        float[] seat = { 0.5f, 0f, 1.5f };                      // the fixture's attachment 11, on bone 2
+        int external = M2Synthetic.SkelExternalSequence;
+
+        int liveAtStart = WmvRuntimeModel.Live;
+        int mountsAtStart = WmvMountedScene.LiveMounts, builtAtStart = WmvMountedScene.MountsBuilt;
+        M2ParsedSkin skin = M2SkinParser.Parse(M2Synthetic.TransformSwitchSkin());
+        M2ParsedModel riderModel = M2Parser.Parse(M2Synthetic.InFileSkeletonModel(473370), 0);
+        WmvRuntimeModel rider = WmvModelBuilder.Build(riderModel, skin, new Dictionary<int, BlpImage>(), "MountRider", null);
+        var riderSlot = new WmvModelSlot { Runtime = rider, Model = riderModel, FileDataID = 473370 };
+        int live = WmvRuntimeModel.Live;
+        int progress = 0;
+        var scene = new WmvMountedScene(assets.Request, s => log("  " + s), () => progress++);
+
+        // ---- a mount going on: its files, the riding sequence's .anim, then the commit ----
+        WmvIpcClient.SceneMount m1 = MountOf("M1", mountA, 2, seat, 1f, external, external, red);
+        scene.Retarget(m1);
+        Check(!scene.ReadyFor(m1, riderSlot, riderModel), "mount lifecycle: not ready before the mount's files are here", log);
+        int asked = assets.Requests.Count;
+        scene.Retarget(MountOf("M1", mountA, 2, seat, 1f, external, external, red));
+        Check(assets.Requests.Count == asked,
+              "mount lifecycle: the same key and file described again keeps the work in flight -- nothing is asked twice", log);
+        assets.Deliver(scene);
+        Check(progress > 0, "mount lifecycle: each answer taken in reports progress, so a waiting scene looks again", log);
+        Check(riderSlot.AnimFileCache.ContainsKey(anim),
+              "mount lifecycle: the .anim of the character's riding sequence landed in the character's slot", log);
+        Check(scene.Staged != null && scene.Staged.Root != null && !scene.Staged.Root.activeSelf && scene.RiddenFileDataID == 0,
+              "mount lifecycle: the mount is built, inactive and not ridden before the character's scene is applied", log);
+        Check(scene.ReadyFor(m1, riderSlot, riderModel), "mount lifecycle: ... and then the scene may be applied", log);
+        Check(WmvRuntimeModel.Live == live + 1, "mount lifecycle: one runtime more, the staged mount", log);
+        Check(WmvMountedScene.LiveMounts == mountsAtStart + 1 && WmvMountedScene.MountsBuilt == builtAtStart + 1 &&
+              scene.SeatCase == -1 && scene.SeatBone == -1,
+              "mount lifecycle: ... counted as one mount alive and one built, with nobody seated yet (runtimeState)", log);
+
+        bool newMount;
+        WmvIpcClient.MountAnswer answer = scene.Commit(m1, rider, out newMount);
+        Transform body = rider.Root.transform;
+        WmvRuntimeModel onScreen = scene.Mount.Runtime;
+        Check(answer.Status == "applied" && answer.Key == "M1" && answer.Reason == "" && newMount,
+              "mount lifecycle: committed -- applied, key M1, a new mount (both sequences start)", log);
+        bool up = onScreen != null && onScreen.Root.activeSelf && scene.Key == "M1" && scene.RiddenFileDataID == mountA;
+        Check(up, "mount lifecycle: the mount is on screen, active, and ridden", log);
+        if (!up)
+        {
+            scene.Dispose();
+            rider.Dispose();
+            return;
+        }
+        Check(body.parent == onScreen.Bones[2] && scene.Rider == body,
+              "mount lifecycle: the character's body root hangs from the attachment's bone (case B)", log);
+        Check(scene.SeatCase == WmvMountedScene.CaseBone && scene.SeatBone == 2 && scene.SeatScale == 1f &&
+              NearV(scene.SeatLocalPosition, body.localPosition, 1e-6f) && WmvMountedScene.LiveMounts == mountsAtStart + 1,
+              "mount lifecycle: ... and the scene reports that seat (case B, bone 2, its local position and scale), one mount alive", log);
+        Check(NearV(body.localPosition, WmvCharacterDresser.AttachmentLocalPosition(new WowVec3(0.5f, 0f, 1.5f),
+                                                                                    scene.Mount.Model.Bones[2].Pivot), 1e-5f) &&
+              SameRotation(body.localRotation, Quaternion.identity) && NearV(body.localScale, Vector3.one, 1e-6f),
+              "mount lifecycle: ... at the attachment position less the bone's pivot, identity rotation, the rider scale 1", log);
+        Check(scene.Mount.Model.AnimatedSequence == external && scene.Mount.AnimFileCache.ContainsKey(anim) &&
+              onScreen.Animator != null && onScreen.Animator.SequenceIndex == external,
+              "mount lifecycle: the mount plays the host's sequence, whose keys were in a .anim, from the start", log);
+        Check(onScreen.Materials.Length > 0 && BaseColour(onScreen.Materials[0]) == 'r' && scene.Mount.TextureIds[0] == red,
+              "mount lifecycle: the host's texture for slot 0 is bound on the mount", log);
+
+        // ---- the same mount described again: new texture, rider scale 2 ----
+        WmvIpcClient.SceneMount m1b = MountOf("M1", mountA, 2, seat, 2f, external, external, blue);
+        scene.Retarget(m1b);
+        Check(!scene.ReadyFor(m1b, riderSlot, riderModel), "mount lifecycle: a newer description waits for its new texture", log);
+        assets.Deliver(scene);
+        Check(scene.ReadyFor(m1b, riderSlot, riderModel), "mount lifecycle: ... which then arrives", log);
+        answer = scene.Commit(m1b, rider, out newMount);
+        Check(answer.Status == "applied" && !newMount && scene.Mount.Runtime == onScreen && WmvRuntimeModel.Live == live + 1 &&
+              WmvMountedScene.MountsBuilt == builtAtStart + 1 && WmvMountedScene.LiveMounts == mountsAtStart + 1,
+              "mount lifecycle: the same mount described again is applied without a rebuild (none counted) or a sequence restart", log);
+        Check(BaseColour(onScreen.Materials[0]) == 'b', "mount lifecycle: ... its new texture re-bound on the materials it has", log);
+        Check(NearV(body.localScale, new Vector3(2f, 2f, 2f), 1e-6f) && body.parent == onScreen.Bones[2],
+              "mount lifecycle: ... and the character re-seated at the new rider scale", log);
+
+        // ---- swaps: the character moves onto the new mount, the old one goes after it left ----
+        bool swapsOk = true;
+        for (int n = 0; n < 4; n++)
+        {
+            WmvIpcClient.SceneMount m = MountOf("M" + (10 + n), n % 2 == 0 ? mountB : mountA, 2, seat, 1f, 0, external, red);
+            WmvRuntimeModel old = scene.Mount.Runtime;
+            Transform oldRoot = old.Root.transform;
+            scene.Retarget(m);
+            assets.Deliver(scene);
+            swapsOk &= scene.ReadyFor(m, riderSlot, riderModel);
+            answer = scene.Commit(m, rider, out newMount);
+            swapsOk &= answer.Status == "applied" && answer.Key == m.key && newMount && scene.Mount.Runtime != old && old.Root == null;
+            swapsOk &= body.parent == scene.Mount.Runtime.Bones[2] && !body.IsChildOf(oldRoot) && rider.Root != null;
+            swapsOk &= WmvRuntimeModel.Live == live + 1 && scene.RiddenFileDataID == m.fileDataID;
+            swapsOk &= WmvMountedScene.LiveMounts == mountsAtStart + 1 && WmvMountedScene.MountsBuilt == builtAtStart + 2 + n &&
+                       scene.SeatCase == WmvMountedScene.CaseBone;
+        }
+        Check(swapsOk, "mount lifecycle: four swaps -- a new key each, the character moved onto each new mount before the " +
+                       "old one was disposed, one mount alive throughout (and counted so), one built per swap", log);
+
+        // ---- dismount and remount ----
+        WmvRuntimeModel last = scene.Mount.Runtime;
+        answer = scene.Dismount();
+        Check(answer.Status == "none" && answer.Key == "" && scene.RiddenFileDataID == 0 && scene.Mount.Runtime == null &&
+              last.Root == null, "mount lifecycle: dismounted -- the answer is none, the mount disposed", log);
+        Check(body.parent == null && body.localPosition == Vector3.zero && SameRotation(body.localRotation, Quaternion.identity) &&
+              NearV(body.localScale, Vector3.one, 1e-6f) && WmvRuntimeModel.Live == live,
+              "mount lifecycle: ... the character is off it with the identity, and the live count is back", log);
+        Check(scene.SeatCase == -1 && scene.SeatBone == -1 && WmvMountedScene.LiveMounts == mountsAtStart,
+              "mount lifecycle: ... nobody seated and no mount alive, as runtimeState reports it", log);
+        bool cyclesOk = true;
+        for (int n = 0; n < 3; n++)
+        {
+            WmvIpcClient.SceneMount m = MountOf("M" + (20 + n), mountA, 2, seat, 1f, 0, external, red);
+            scene.Retarget(m);
+            assets.Deliver(scene);
+            answer = scene.Commit(m, rider, out newMount);
+            cyclesOk &= answer.Status == "applied" && body.parent == scene.Mount.Runtime.Bones[2] && WmvRuntimeModel.Live == live + 1;
+            answer = scene.Dismount();
+            cyclesOk &= answer.Status == "none" && body.parent == null && WmvRuntimeModel.Live == live;
+        }
+        Check(cyclesOk && rider.Root != null && rider.Animator != null && rider.Skin != null,
+              "mount lifecycle: three mount/dismount cycles leave the live count unchanged and the character's body alive", log);
+
+        // ---- a mount that cannot be built ----
+        WmvIpcClient.SceneMount ok = MountOf("M30", mountA, 2, seat, 1f, 0, external, red);
+        scene.Retarget(ok);
+        assets.Deliver(scene);
+        scene.Commit(ok, rider, out newMount);
+        WmvRuntimeModel beforeFailure = scene.Mount.Runtime;
+        WmvIpcClient.SceneMount bad = MountOf("M31", missing, 2, seat, 1f, 0, external, 0);
+        scene.Retarget(bad);
+        assets.Deliver(scene);
+        Check(scene.ReadyFor(bad, riderSlot, riderModel), "mount lifecycle: a mount whose file cannot be read is ready to be answered", log);
+        answer = scene.Commit(bad, rider, out newMount);
+        Check(answer.Status == "failed" && answer.Key == "M31" && answer.Reason.Length > 0 && newMount,
+              "mount lifecycle: ... answered failed, with its reason (" + answer.Reason + ")", log);
+        Check(body.parent == null && scene.RiddenFileDataID == 0 && beforeFailure.Root == null && WmvRuntimeModel.Live == live,
+              "mount lifecycle: ... the character stays on screen off any mount, and the mount it rode is gone", log);
+
+        // ---- cases C and A through a commit ----
+        WmvIpcClient.SceneMount still = MountOf("M40", mountStatic, 2, seat, 1f, 0, external, red);
+        scene.Retarget(still);
+        assets.Deliver(scene);
+        answer = scene.Commit(still, rider, out newMount);
+        Check(answer.Status == "applied" && scene.Mount.Runtime != null && scene.Mount.Runtime.Bones.Length == 0 &&
+              body.parent == scene.Mount.Runtime.Root.transform && NearV(body.localPosition, UnityPosition(new WowVec3(0.5f, 0f, 1.5f)), 1e-5f),
+              "mount lifecycle: a static mount with a bone named -- the character at the converted position on its root (case C)", log);
+        Check(scene.SeatCase == WmvMountedScene.CaseNoBoneTransform && scene.SeatBone == -1,
+              "mount lifecycle: ... reported as case C, on no bone", log);
+        WmvIpcClient.SceneMount none = MountOf("M41", mountA, -1, new float[] { 0f, 0f, 0f }, 1f, 0, external, red);
+        scene.Retarget(none);
+        assets.Deliver(scene);
+        answer = scene.Commit(none, rider, out newMount);
+        Check(answer.Status == "applied" && body.parent == scene.Mount.Runtime.Root.transform && body.localPosition == Vector3.zero,
+              "mount lifecycle: a mount with no such attachment -- the character at its origin (case A)", log);
+        Check(scene.SeatCase == WmvMountedScene.CaseNoAttachment && scene.SeatBone == -1 && WmvMountedScene.LiveMounts == mountsAtStart + 1,
+              "mount lifecycle: ... reported as case A, on no bone, one mount alive", log);
+
+        // ---- a superseded target drops the work, not the answers still owed to it ----
+        int askedBeforeCancel = assets.Requests.Count;
+        scene.Retarget(MountOf("M43", superseded, 2, seat, 1f, 0, external, red));
+        string owed = null;
+        foreach (var kv in assets.Requests) if (scene.Owns(kv.Key)) owed = kv.Key;
+        scene.CancelTarget();
+        Check(owed != null && scene.Owns(owed) && WmvMountedScene.LiveMounts == mountsAtStart + 1,
+              "mount lifecycle: a cancelled target keeps claiming the answers it is owed, and the mount on screen stays", log);
+        int askedAfterCancel = assets.Requests.Count;
+        scene.Retarget(MountOf("M44", superseded, 2, seat, 1f, 0, external, red));
+        Check(askedAfterCancel > askedBeforeCancel && assets.Requests.Count == askedAfterCancel,
+              "mount lifecycle: ... so the same mount described again never asks twice for a file already coming", log);
+        scene.CancelTarget();
+
+        var abandoning = new WmvModelSlot();
+        abandoning.PendingAnimFetch["mount-test-anim"] = 3;
+        abandoning.AbandonAnimFetches();
+        Check(abandoning.PendingAnimFetch.Count == 0 && abandoning.AbandonedAnimFetch.Contains("mount-test-anim"),
+              "mount lifecycle: a slot given another model stops waiting for its .anim fetch but still claims its answer", log);
+
+        // ---- disposal takes the character off first ----
+        Transform mountRoot = scene.Mount.Runtime.Root.transform;
+        string pendingId = null;
+        scene.Retarget(MountOf("M42", unfetched, 2, seat, 1f, 0, external, red));     // its .m2 still out
+        foreach (var kv in assets.Requests) if (scene.Owns(kv.Key)) pendingId = kv.Key;
+        scene.Dispose();
+        Check(rider.Root != null && body.parent == null && !body.IsChildOf(mountRoot) && WmvRuntimeModel.Live == live,
+              "mount lifecycle: disposing a mounted scene takes the character off before the mount goes -- the body is alive", log);
+        Check(pendingId == null || !scene.Owns(pendingId), "mount lifecycle: ... and a disposed scene claims no answer", log);
+
+        // ---- a load's own mount beside the one on screen ----
+        var shown = new WmvMountedScene(assets.Request, null, null);
+        WmvIpcClient.SceneMount s1 = MountOf("M50", mountA, 2, seat, 1f, 0, external, red);
+        shown.Retarget(s1);
+        assets.Deliver(shown);
+        shown.Commit(s1, rider, out newMount);
+        M2ParsedModel nextModel = M2Parser.Parse(M2Synthetic.InFileSkeletonModel(473370), 0);
+        WmvRuntimeModel next = WmvModelBuilder.Build(nextModel, skin, new Dictionary<int, BlpImage>(), "MountNextRider", null);
+        next.Root.SetActive(false);                              // staged, as a loading character's body is
+        var ofLoad = new WmvMountedScene(assets.Request, null, null);
+        WmvIpcClient.SceneMount s2 = MountOf("M50", mountA, 2, seat, 1f, 0, external, red);   // reconnect: the same key
+        ofLoad.Retarget(s2);
+        assets.Deliver(ofLoad);
+        int liveBoth = WmvRuntimeModel.Live;
+        Check(ofLoad.Staged != null && !ofLoad.Staged.Root.activeSelf && shown.Rider == body,
+              "load mount: a load's mount is built beside the mount on screen, which still carries the character", log);
+        Check(WmvMountedScene.LiveMounts == mountsAtStart + 2 && ofLoad.SeatCase == -1 && shown.SeatCase == WmvMountedScene.CaseBone,
+              "load mount: ... both counted alive, the load's with nobody seated on it", log);
+        shown.Dispose();                                         // AdoptBuilt: the mount on screen goes with its character
+        Check(body.parent == null && ofLoad.Staged != null && ofLoad.Staged.Root != null && WmvRuntimeModel.Live == liveBoth - 1,
+              "load mount: the mount on screen is disposed, its character taken off first, and the load's mount survives it", log);
+        next.Root.SetActive(true);                               // AdoptStaged, then the dresser's commit
+        answer = ofLoad.Commit(s2, next, out newMount);
+        Check(answer.Status == "applied" && newMount && next.Root.transform.parent == ofLoad.Mount.Runtime.Bones[2] &&
+              ofLoad.Mount.Runtime.Root.activeSelf,
+              "load mount: ... becomes the mount on screen with the new character on it, its sequences started", log);
+        var dropped = new WmvMountedScene(assets.Request, null, null);
+        dropped.Retarget(MountOf("M51", mountB, 2, seat, 1f, 0, external, red));
+        string inFlight = null;
+        foreach (var kv in assets.Requests) if (dropped.Owns(kv.Key)) inFlight = kv.Key;
+        var built = new WmvMountedScene(assets.Request, null, null);
+        WmvIpcClient.SceneMount s3 = MountOf("M52", mountA, 2, seat, 1f, 0, external, red);
+        built.Retarget(s3);
+        assets.Deliver(built);
+        int liveDropping = WmvRuntimeModel.Live;
+        dropped.Dispose();                                       // AbandonCharacterJob, its mount still being fetched
+        built.Dispose();                                         // ... and one whose mount was already built
+        Check(inFlight != null && !dropped.Owns(inFlight) && WmvRuntimeModel.Live == liveDropping - 1,
+              "load mount: a dropped load's mount releases its requests and its staged build", log);
+        if (inFlight != null)
+            dropped.OnAsset(new WmvIpcClient.AssetResponse { requestId = inFlight, ok = true, fileDataID = mountB, data = assets.Files[mountB] });
+        Check(WmvRuntimeModel.Live == liveDropping - 1 && dropped.Staged == null,
+              "load mount: ... and a late answer for it builds nothing", log);
+
+        ofLoad.Dispose();
+        next.Dispose();
+        rider.Dispose();
+        Check(WmvRuntimeModel.Live == liveAtStart, "mount lifecycle: every runtime these tests made is released", log);
+        Check(WmvMountedScene.LiveMounts == mountsAtStart, "mount lifecycle: ... and no mount runtime is counted alive", log);
+    }
+
+    // ---------------------------------------------------------------- a ridden mount's animation
+
+    /// <summary>
+    /// A RIDDEN MOUNT'S ANIMATION PUSHES ON THE WIRE, parsed exactly as the IPC client parses them: a selection without a
+    /// role is about the model it names (role "", load 0) and one with a role carries it and the load; a state without a
+    /// rider says so, and a state with one keeps the mount in its top level and hands the rider back as a state of its own
+    /// with the message's explicitState, arrival time and load. The nested object counts only with hasRider.
+    /// </summary>
+    static void MountAnimationJsonTests(Action<string> log)
+    {
+        WmvIpcClient.AnimationSelection a;
+        bool ok = WmvIpcClient.ParseAnimationSelection("{\"type\":\"modelAnimation\",\"fileDataID\":1521037,\"sequenceIndex\":2," +
+                                                       "\"animID\":0,\"durationMs\":2000,\"loop\":true}", out a);
+        Check(ok && a.fileDataID == 1521037 && a.sequenceIndex == 2 && a.durationMs == 2000 && a.role == "" && a.load == 0,
+              "mount animation json: a selection without a role parses with role \"\" and load 0", log);
+        ok = WmvIpcClient.ParseAnimationSelection("{\"type\":\"modelAnimation\",\"fileDataID\":126407,\"sequenceIndex\":1,\"animID\":0," +
+                                                  "\"durationMs\":4000,\"loop\":true,\"role\":\"mount\",\"load\":12}", out a);
+        Check(ok && a.role == WmvSlotAnimation.RoleMount && a.load == 12 && a.fileDataID == 126407 && a.sequenceIndex == 1,
+              "mount animation json: a selection with role \"mount\" carries its role, load, file and sequence", log);
+        Check(!WmvIpcClient.ParseAnimationSelection("{\"type\":\"modelAnimationState\",\"fileDataID\":1}", out a),
+              "mount animation json: a line of another type is not taken for a selection", log);
+
+        const string top = "{\"type\":\"modelAnimationState\",\"fileDataID\":126407,\"sequenceIndex\":1,\"playing\":true," +
+                           "\"timeMs\":1840,\"speed\":1.0,\"loop\":true,\"explicitState\":true";
+        WmvIpcClient.AnimationState s;
+        ok = WmvIpcClient.ParseAnimationState(top + "}", out s);
+        Check(ok && !s.hasRider && s.load == 0 && s.fileDataID == 126407 && s.timeMs == 1840 && s.playing,
+              "mount animation json: a state without a rider has hasRider false and load 0", log);
+        ok = WmvIpcClient.ParseAnimationState(top + ",\"load\":12,\"hasRider\":true,\"rider\":{\"sequenceIndex\":145," +
+                                              "\"playing\":false,\"timeMs\":730,\"speed\":0.5,\"loop\":true}}", out s);
+        Check(ok && s.hasRider && s.load == 12 && s.fileDataID == 126407 && s.sequenceIndex == 1 && s.playing && s.timeMs == 1840 &&
+              s.explicitState, "mount animation json: a ridden state keeps the mount in its top level, with hasRider and load", log);
+        WmvIpcClient.AnimationState r = s.RiderState();
+        Check(r.sequenceIndex == 145 && !r.playing && r.timeMs == 730 && Near(r.speed, 0.5f) && r.loop && r.explicitState &&
+              r.load == 12 && r.fileDataID == 0 && r.receivedSeconds == s.receivedSeconds && !r.hasRider,
+              "mount animation json: ... and its rider as a state of its own (sequence 145, paused, 730 ms, 0.5x), with the " +
+              "message's explicitState, arrival and load", log);
+        ok = WmvIpcClient.ParseAnimationState(top + ",\"load\":12,\"rider\":{\"sequenceIndex\":145,\"playing\":true," +
+                                              "\"timeMs\":730,\"speed\":1.0,\"loop\":true}}", out s);
+        Check(ok && !s.hasRider, "mount animation json: a rider object without hasRider is not taken for a rider", log);
+    }
+
+    /// <summary>
+    /// WHICH MODEL A PUSH IS ABOUT (WmvSlotAnimation.RouteSelection), on every case WmvMain meets: no role is the model the
+    /// push names, unless it names the character riding on screen (the host has dismounted it); role "rider" is the
+    /// character and role "mount" its mount, picked by the role alone when both are built from ONE file; the load serial
+    /// decides between the character on screen and the one being loaded; a mount of that file still being prepared wins
+    /// over the one on screen; a mount role with no mount of that file, a push for a character that is not here and an
+    /// unknown role are ignored, with a reason.
+    /// </summary>
+    static void MountRoutingTests(Action<string> log)
+    {
+        const int rider = 1011653, mount = 126407, gryphon = 124298, shared = 535052;
+        string why;
+        var plain = new WmvSlotAnimation.Holding { RiderLoad = 7, RiderFileDataID = rider };
+        var riding = new WmvSlotAnimation.Holding { RiderLoad = 7, RiderFileDataID = rider, RiderMounted = true, MountFileDataID = mount };
+
+        Check(WmvSlotAnimation.RouteSelection("", 0, rider, plain, out why) == WmvSlotAnimation.Route.AsBefore,
+              "animation route: no role, character not riding -- about the model it names, as before", log);
+        Check(WmvSlotAnimation.RouteSelection("", 0, 99, new WmvSlotAnimation.Holding(), out why) == WmvSlotAnimation.Route.AsBefore,
+              "animation route: no role, nothing held -- as before", log);
+        Check(WmvSlotAnimation.RouteSelection("", 0, rider, riding, out why) == WmvSlotAnimation.Route.HeldForDismount,
+              "animation route: no role for the character riding on screen -- held for the dismount", log);
+        Check(WmvSlotAnimation.RouteSelection("", 0, mount, riding, out why) == WmvSlotAnimation.Route.AsBefore,
+              "animation route: no role for another file while riding -- as before", log);
+        var ridingWhileLoading = riding;
+        ridingWhileLoading.Loading = true;
+        ridingWhileLoading.LoadIsCharacter = true;
+        ridingWhileLoading.LoadSerial = 8;
+        Check(WmvSlotAnimation.RouteSelection("", 0, rider, ridingWhileLoading, out why) == WmvSlotAnimation.Route.AsBefore,
+              "animation route: no role while a load is in flight -- as before, never held", log);
+
+        Check(WmvSlotAnimation.RouteSelection("rider", 7, rider, riding, out why) == WmvSlotAnimation.Route.Rider,
+              "animation route: role rider, the load on screen -- the character", log);
+        Check(WmvSlotAnimation.RouteSelection("mount", 7, mount, riding, out why) == WmvSlotAnimation.Route.Mount,
+              "animation route: role mount, the load on screen and the mount's file -- the mount", log);
+        Check(WmvSlotAnimation.RouteSelection("rider", 6, rider, riding, out why) == WmvSlotAnimation.Route.Ignored && why.Length > 0,
+              "animation route: role rider for another load -- ignored (" + why + ")", log);
+        Check(WmvSlotAnimation.RouteSelection("rider", 7, mount, riding, out why) == WmvSlotAnimation.Route.Ignored,
+              "animation route: role rider naming a file other than the character's -- ignored (" + why + ")", log);
+        Check(WmvSlotAnimation.RouteSelection("mount", 7, gryphon, riding, out why) == WmvSlotAnimation.Route.Ignored,
+              "animation route: role mount naming a file the character does not ride -- ignored (" + why + ")", log);
+        Check(WmvSlotAnimation.RouteSelection("mount", 7, mount, plain, out why) == WmvSlotAnimation.Route.Ignored &&
+              why == "the character rides no mount", "animation route: role mount while the character rides nothing -- ignored (" + why + ")", log);
+        Check(WmvSlotAnimation.RouteSelection("mount", 7, mount, new WmvSlotAnimation.Holding(), out why) == WmvSlotAnimation.Route.Ignored,
+              "animation route: role mount with no character on screen -- ignored (" + why + ")", log);
+        Check(WmvSlotAnimation.RouteSelection("passenger", 7, mount, riding, out why) == WmvSlotAnimation.Route.Ignored,
+              "animation route: an unknown role -- ignored (" + why + ")", log);
+
+        // One file for both models: the role alone decides, and a push without one is the character's.
+        var sharedFile = new WmvSlotAnimation.Holding { RiderLoad = 7, RiderFileDataID = shared, RiderMounted = true, MountFileDataID = shared };
+        Check(WmvSlotAnimation.RouteSelection("mount", 7, shared, sharedFile, out why) == WmvSlotAnimation.Route.Mount &&
+              WmvSlotAnimation.RouteSelection("rider", 7, shared, sharedFile, out why) == WmvSlotAnimation.Route.Rider,
+              "animation route: rider and mount built from ONE file -- role mount is the mount, role rider the character", log);
+        WmvSlotAnimation.Route sharedMount, sharedRider;
+        WmvSlotAnimation.RouteRiddenState(7, shared, sharedFile, out sharedMount, out sharedRider);
+        Check(sharedMount == WmvSlotAnimation.Route.Mount && sharedRider == WmvSlotAnimation.Route.Rider,
+              "animation route: ... and a ridden state about that file puts its top level on the mount and its rider on the character", log);
+
+        // A mount being prepared (the host replaced the one on screen already) wins over the one on screen with its file.
+        var swapping = riding;
+        swapping.MountPreparing = gryphon;
+        Check(WmvSlotAnimation.RouteSelection("mount", 7, gryphon, swapping, out why) == WmvSlotAnimation.Route.MountPreparing,
+              "animation route: role mount naming the mount being prepared -- kept for it", log);
+        var sameFileSwap = riding;
+        sameFileSwap.MountPreparing = mount;
+        Check(WmvSlotAnimation.RouteSelection("mount", 7, mount, sameFileSwap, out why) == WmvSlotAnimation.Route.MountPreparing,
+              "animation route: ... also when it has the file of the mount it replaces", log);
+        WmvSlotAnimation.Route m, r;
+        WmvSlotAnimation.RouteRiddenState(7, gryphon, swapping, out m, out r);
+        Check(m == WmvSlotAnimation.Route.MountPreparing && r == WmvSlotAnimation.Route.Rider,
+              "animation route: a ridden state for the mount being prepared -- its rider is still the character on screen", log);
+        WmvSlotAnimation.RouteRiddenState(7, mount, riding, out m, out r);
+        Check(m == WmvSlotAnimation.Route.Mount && r == WmvSlotAnimation.Route.Rider,
+              "animation route: a ridden state about the mount on screen -- both halves on screen", log);
+        WmvSlotAnimation.RouteRiddenState(6, mount, riding, out m, out r);
+        Check(m == WmvSlotAnimation.Route.Ignored && r == WmvSlotAnimation.Route.Ignored,
+              "animation route: a ridden state for another load -- neither half", log);
+
+        // A character being loaded while it rides (a reconnect), beside the one on screen.
+        var reloading = riding;
+        reloading.Loading = true;
+        reloading.LoadIsCharacter = true;
+        reloading.LoadSerial = 8;
+        Check(WmvSlotAnimation.RouteSelection("rider", 8, rider, reloading, out why) == WmvSlotAnimation.Route.RiderOfLoad,
+              "animation route: role rider for the load in flight -- the character being loaded", log);
+        Check(WmvSlotAnimation.RouteSelection("mount", 8, mount, reloading, out why) == WmvSlotAnimation.Route.Ignored,
+              "animation route: role mount for the load before its scene brought a mount -- ignored (" + why + ")", log);
+        reloading.LoadMountPreparing = mount;
+        Check(WmvSlotAnimation.RouteSelection("mount", 8, mount, reloading, out why) == WmvSlotAnimation.Route.MountPreparing,
+              "animation route: role mount for the load's mount being prepared -- kept for it", log);
+        Check(WmvSlotAnimation.RouteSelection("rider", 7, rider, reloading, out why) == WmvSlotAnimation.Route.Ignored &&
+              WmvSlotAnimation.RouteSelection("mount", 7, mount, reloading, out why) == WmvSlotAnimation.Route.Ignored,
+              "animation route: a push for the character on screen while another load is in flight -- ignored (" + why + ")", log);
+        WmvSlotAnimation.RouteRiddenState(8, mount, reloading, out m, out r);
+        Check(m == WmvSlotAnimation.Route.MountPreparing && r == WmvSlotAnimation.Route.RiderOfLoad,
+              "animation route: a ridden state for the load -- the rider waits for the load, the mount is kept for its mount", log);
+        var otherLoad = riding;
+        otherLoad.Loading = true;
+        Check(WmvSlotAnimation.RouteSelection("rider", 0, rider, otherLoad, out why) == WmvSlotAnimation.Route.Ignored,
+              "animation route: a role while a model or world model that is no character loads -- ignored (" + why + ")", log);
+    }
+
+    /// <summary>Answer every .anim fetch a slot waits on from the files given, as WmvMain's asset routing hands an answer
+    /// to WmvSlotAnimation.OnAnimFileBytes. Returns how many were answered.</summary>
+    static int DeliverAnimFiles(WmvSlotAnimation anim, WmvModelSlot slot, MountAssets assets)
+    {
+        int answered = 0;
+        foreach (var kv in new List<KeyValuePair<string, int>>(slot.PendingAnimFetch))
+        {
+            int fdid = 0;
+            foreach (var q in assets.Requests)
+                if (q.Key == kv.Key) fdid = q.Value;
+            byte[] data;
+            bool ok = assets.Files.TryGetValue(fdid, out data);
+            anim.OnAnimFileBytes(slot, new WmvIpcClient.AssetResponse
+            {
+                requestId = kv.Key, ok = ok, fileDataID = fdid, data = ok ? data : null, error = ok ? null : "not served",
+            }, kv.Value);
+            answered++;
+        }
+        return answered;
+    }
+
+    static bool ClockIs(WmvM2Animator a, int sequence, double timeMs, bool playing, float speed)
+    {
+        return a != null && a.SequenceIndex == sequence && Math.Abs(a.TimeMs - timeMs) < 0.5 && a.IsPlaying == playing &&
+               Near(a.Speed, speed);
+    }
+
+    /// <summary>
+    /// THE TWO CLOCKS OF A MOUNTED CHARACTER, through WmvSlotAnimation -- the code the player runs -- on two slots built from
+    /// ONE synthetic file, as a mount and a rider can be: one ridden state applied in one pass puts each half on its own
+    /// animator; a frame advances each by its own speed and pause; switching the mount to a sequence whose keys are in a
+    /// .anim fetches into the mount's slot and leaves the character's sequence, clock, caches and fetches alone, and the
+    /// reverse; a cached switch asks for nothing; StartClock starts a model that just went on from the app's state only
+    /// when that state is about what plays and not older than the host's restart; the mounted scene reports what it is
+    /// preparing and when it was first described; and -wmvAnimTime poses the mount, then the character under its bone.
+    /// </summary>
+    static void MountClockTests(Action<string> log)
+    {
+        if (WmvModelBuilder.Debug_.NoAnim)
+        {
+            log("lifecycle-test SKIP: mount clocks: -wmvNoAnim builds no animator and switches nothing");
+            return;
+        }
+        const int file = 473370;
+        int animFile = M2Synthetic.SkelAnimFileIdBase;             // the fixture's .anim, for its external sequence 1
+        int external = M2Synthetic.SkelExternalSequence;
+        var assets = new MountAssets();
+        assets.Files[animFile] = M2Synthetic.SkeletonAnimFile(0, true);
+        byte[] m2 = M2Synthetic.InFileSkeletonModel(file);
+        M2ParsedSkin skin = M2SkinParser.Parse(M2Synthetic.TransformSwitchSkin());
+        int liveAtStart = WmvRuntimeModel.Live;
+        M2ParsedModel mountModel = M2Parser.Parse(m2, 0), riderModel = M2Parser.Parse(m2, 0);
+        WmvRuntimeModel mountRt = WmvModelBuilder.Build(mountModel, skin, new Dictionary<int, BlpImage>(), "ClockMount", null);
+        WmvRuntimeModel riderRt = WmvModelBuilder.Build(riderModel, skin, new Dictionary<int, BlpImage>(), "ClockRider", null);
+        bool built = mountRt != null && riderRt != null && mountRt.Animator != null && riderRt.Animator != null;
+        Check(built, "mount clocks: a mount and a rider built from one file, each with its animator", log);
+        if (!built)
+        {
+            if (mountRt != null) mountRt.Dispose();
+            if (riderRt != null) riderRt.Dispose();
+            return;
+        }
+        var mount = new WmvModelSlot { Runtime = mountRt, Model = mountModel, M2Bytes = m2, FileDataID = file, SelectedSequence = 0 };
+        var rider = new WmvModelSlot { Runtime = riderRt, Model = riderModel, M2Bytes = m2, FileDataID = file, SelectedSequence = 0 };
+        var statusLines = new List<string>();
+        var anim = new WmvSlotAnimation(assets.Request, s => statusLines.Add(s));
+        WmvM2Animator ma = mountRt.Animator, ra = riderRt.Animator;
+        double globalWas = WmvM2Animator.GlobalTimeMs;
+
+        // ---- one ridden state, both halves in one pass ----
+        var state = new WmvIpcClient.AnimationState
+        {
+            fileDataID = file, sequenceIndex = 0, playing = true, timeMs = 300, speed = 1f, loop = true, explicitState = true,
+            receivedSeconds = WmvIpcClient.NowSeconds, load = 7, hasRider = true,
+            rider = new WmvIpcClient.RiderPlayback { sequenceIndex = 0, playing = false, timeMs = 700, speed = 0.5f, loop = true },
+        };
+        anim.ApplyRidden(mount, rider, state);
+        Check(ClockIs(ma, 0, 300, true, 1f), "mount clocks: one ridden state -- the mount takes the top level (300 ms, playing, 1x)", log);
+        Check(ClockIs(ra, 0, 700, false, 0.5f), "mount clocks: ... and the character the nested rider, in the same pass (700 ms, paused, 0.5x)", log);
+        Check(mount.HaveAppState && mount.LastAppState.timeMs == 300 && rider.HaveAppState && rider.LastAppState.timeMs == 700 &&
+              !rider.LastAppState.hasRider, "mount clocks: ... each slot keeps its own half as its app state", log);
+        var riderOnly = state;
+        riderOnly.timeMs = 900;
+        riderOnly.rider.timeMs = 650;
+        anim.ApplyRidden(null, rider, riderOnly);
+        Check(ClockIs(ma, 0, 300, true, 1f) && ClockIs(ra, 0, 650, false, 0.5f),
+              "mount clocks: a ridden state whose mount is not on screen moves the character only", log);
+
+        // ---- a frame: each clock by its own speed and pause ----
+        const BindingFlags instance = BindingFlags.Instance | BindingFlags.NonPublic;
+        const BindingFlags statics = BindingFlags.Static | BindingFlags.NonPublic;
+        MethodInfo lateUpdate = typeof(WmvM2Animator).GetMethod("LateUpdate", instance);
+        FieldInfo lastRealtime = typeof(WmvM2Animator).GetField("lastRealtime", instance);
+        FieldInfo advancedFrame = typeof(WmvM2Animator).GetField("globalAdvancedFrame", statics);
+        FieldInfo lastGlobalRealtime = typeof(WmvM2Animator).GetField("lastGlobalRealtime", statics);
+        if (WmvModelBuilder.Debug_.AnimTime >= 0f)
+            log("lifecycle-test SKIP: mount clocks: -wmvAnimTime pins every clock, so a frame advances neither");
+        else if (lateUpdate == null || lastRealtime == null || advancedFrame == null || lastGlobalRealtime == null)
+            Check(false, "mount clocks: LateUpdate and the clock fields are reachable by reflection", log);
+        else
+        {
+            object stampWas = advancedFrame.GetValue(null), readingWas = lastGlobalRealtime.GetValue(null);
+            try
+            {
+                double wait = 2.0 - Time.realtimeSinceStartupAsDouble;      // a reading 0.2 s back must exist (see GlobalClockTests)
+                if (wait > 0.0)
+                    System.Threading.Thread.Sleep((int)(wait * 1000.0) + 1);
+                ra.SetTransportOnly(true, 0.5f);
+                double mountBefore = ma.TimeMs, riderBefore = ra.TimeMs;
+                advancedFrame.SetValue(null, Time.frameCount - 1);
+                lastGlobalRealtime.SetValue(null, Time.realtimeSinceStartupAsDouble - 0.2);
+                lastRealtime.SetValue(ma, Time.realtimeSinceStartupAsDouble - 0.2);
+                lateUpdate.Invoke(ma, null);
+                lastRealtime.SetValue(ra, Time.realtimeSinceStartupAsDouble - 0.2);
+                lateUpdate.Invoke(ra, null);
+                double mountStep = ma.TimeMs - mountBefore, riderStep = ra.TimeMs - riderBefore;
+                Check(mountStep >= 199.0 && mountStep < 260.0 && riderStep >= 99.5 && riderStep < 130.0,
+                      "mount clocks: a frame of 200 ms advances the mount by its 1x (" + mountStep.ToString("F1") + " ms) and the " +
+                      "character by its own 0.5x (" + riderStep.ToString("F1") + " ms), neither reading the other", log);
+                ma.SetTransportOnly(false, 1f);
+                mountBefore = ma.TimeMs;
+                riderBefore = ra.TimeMs;
+                advancedFrame.SetValue(null, Time.frameCount - 1);
+                lastRealtime.SetValue(ma, Time.realtimeSinceStartupAsDouble - 0.2);
+                lateUpdate.Invoke(ma, null);
+                lastRealtime.SetValue(ra, Time.realtimeSinceStartupAsDouble - 0.2);
+                lateUpdate.Invoke(ra, null);
+                Check(ma.TimeMs == mountBefore && ra.TimeMs - riderBefore >= 99.5,
+                      "mount clocks: the mount paused holds while the character's clock, told to play, still runs", log);
+            }
+            finally
+            {
+                advancedFrame.SetValue(null, stampWas);
+                lastGlobalRealtime.SetValue(null, readingWas);
+                WmvM2Animator.GlobalTimeMs = globalWas;
+            }
+        }
+
+        // ---- sequence switches: one model's never resets the other ----
+        anim.ApplyRidden(mount, rider, state);                  // back to 300 ms playing / 700 ms paused at 0.5x
+        int asked = assets.Requests.Count;
+        anim.SelectSequence(mount, external, false);
+        Check(assets.Requests.Count == asked + 1 && assets.Requests[asked].Value == animFile && mount.PendingAnimFetch.Count == 1 &&
+              rider.PendingAnimFetch.Count == 0, "mount clocks: the mount switched to a sequence keyed in a .anim fetches it into the mount's slot", log);
+        Check(ClockIs(ma, 0, 300, true, 1f) && ClockIs(ra, 0, 700, false, 0.5f),
+              "mount clocks: ... both models keep what they play while it is on its way", log);
+        Check(DeliverAnimFiles(anim, mount, assets) == 1 && ma.SequenceIndex == external && mountModel.AnimatedSequence == external &&
+              mount.AnimFileCache.ContainsKey(animFile) && mount.BoneTrackCache.ContainsKey(external),
+              "mount clocks: the .anim arrives -- the mount plays its sequence " + external + ", cached in the mount's slot", log);
+        Check(ClockIs(ma, external, 0, true, 1f),
+              "mount clocks: ... from its first frame at the app's play/pause and speed (the state named another sequence)", log);
+        Check(ClockIs(ra, 0, 700, false, 0.5f) && riderModel.AnimatedSequence == 0 && !rider.AnimFileCache.ContainsKey(animFile) &&
+              !rider.BoneTrackCache.ContainsKey(external) && rider.PendingAnimFetch.Count == 0,
+              "mount clocks: ... and the character's sequence, clock, caches and fetches are untouched", log);
+
+        WmvIpcClient.AnimationState mountOnExternal = state;
+        mountOnExternal.sequenceIndex = external;
+        mountOnExternal.timeMs = 250;
+        mountOnExternal.rider.timeMs = 710;
+        anim.ApplyRidden(mount, rider, mountOnExternal);
+        Check(ClockIs(ma, external, 250, true, 1f) && ClockIs(ra, 0, 710, false, 0.5f),
+              "mount clocks: the next ridden state puts each model at its own position again", log);
+
+        asked = assets.Requests.Count;
+        anim.SelectSequence(rider, external, false);
+        Check(assets.Requests.Count == asked + 1 && rider.PendingAnimFetch.Count == 1 && mount.PendingAnimFetch.Count == 0,
+              "mount clocks: the character switched to that sequence fetches the .anim into its own slot, not the mount's cache", log);
+        Check(DeliverAnimFiles(anim, rider, assets) == 1 && ra.SequenceIndex == external && riderModel.AnimatedSequence == external,
+              "mount clocks: ... the character plays it when it arrives", log);
+        Check(ClockIs(ma, external, 250, true, 1f) && mountModel.AnimatedSequence == external,
+              "mount clocks: ... and the mount's sequence and clock are untouched by the character's switch", log);
+
+        anim.SelectSequence(mount, 0, false);
+        Check(ma.SequenceIndex == 0 && ra.SequenceIndex == external && mount.BoneTrackCache.ContainsKey(0),
+              "mount clocks: the mount back to its in-file sequence 0 -- read and cached in its slot, the character stays on " + external, log);
+        asked = assets.Requests.Count;
+        anim.SelectSequence(mount, external, false);
+        Check(assets.Requests.Count == asked && ma.SequenceIndex == external && ra.SequenceIndex == external,
+              "mount clocks: ... and to " + external + " again from the mount's cache, with nothing asked for", log);
+        int statusBefore = statusLines.Count;
+        anim.SelectSequence(mount, external, false);
+        Check(statusLines.Count == statusBefore + 1 && statusLines[statusBefore] == "Animation unchanged" && ClockIs(ma, external, ma.TimeMs, true, 1f),
+              "mount clocks: a selection of what the mount already plays touches nothing", log);
+
+        // ---- the clock of a model that has just gone on ----
+        var fresh = new WmvModelSlot { Runtime = riderRt, Model = riderModel, M2Bytes = m2, FileDataID = file };
+        float at = WmvSlotAnimation.StartClock(fresh, 0.0, false, 0.75f);
+        Check(at == 0f && ClockIs(ra, external, 0, false, 0.75f), "start clock: no app state -- the first frame at the fallback's pause and speed", log);
+        // The IPC clock starts when it is first read, and an arrival at or below zero means "not known" to the projection:
+        // wait until a quarter of a second ago is a real reading.
+        double clockWait = 0.5 - WmvIpcClient.NowSeconds;
+        if (clockWait > 0.0)
+            System.Threading.Thread.Sleep((int)(clockWait * 1000.0) + 1);
+        double arrived = WmvIpcClient.NowSeconds - 0.25;
+        fresh.LastAppState = new WmvIpcClient.AnimationState { sequenceIndex = external, playing = true, timeMs = 100, speed = 1f, receivedSeconds = arrived };
+        fresh.HaveAppState = true;
+        at = WmvSlotAnimation.StartClock(fresh, arrived - 1.0, false, 0.75f);
+        Check(at >= 349f && at < 450f && ra.IsPlaying && Near(ra.Speed, 1f) && Math.Abs(ra.TimeMs - at) < 0.5,
+              "start clock: a state about what plays, newer than the restart -- its position projected to now (" + at.ToString("F0") + " ms)", log);
+        at = WmvSlotAnimation.StartClock(fresh, arrived + 1.0, false, 0.75f);
+        Check(at == 0f && ClockIs(ra, external, 0, true, 1f),
+              "start clock: the same state older than the restart -- the first frame, with its play/pause and speed", log);
+        fresh.LastAppState.sequenceIndex = 0;
+        fresh.LastAppState.playing = false;
+        at = WmvSlotAnimation.StartClock(fresh, 0.0, true, 0.75f);
+        Check(at == 0f && ClockIs(ra, external, 0, false, 1f),
+              "start clock: a state about another sequence -- the first frame, with that state's play/pause and speed", log);
+        fresh.LastAppState.speed = 0.5f;
+        at = WmvSlotAnimation.StartInStep(fresh, 600.0, true, 2f);
+        Check(Near(at, 300f) && ClockIs(ra, external, 300, true, 0.5f),
+              "start in step: 600 ms of the other model's playback -- this one 300 ms in at its own 0.5x, playing as given", log);
+        fresh.HaveAppState = false;
+        at = WmvSlotAnimation.StartInStep(fresh, 150.0, false, 2f);
+        Check(Near(at, 300f) && ClockIs(ra, external, 300, false, 2f),
+              "start in step: no state of its own -- the fallback speed (2x: 300 ms), paused as given", log);
+        at = WmvSlotAnimation.StartInStep(fresh, -40.0, true, 1f);
+        Check(at == 0f && ClockIs(ra, external, 0, true, 1f), "start in step: no time run -- its first frame", log);
+
+        // ---- what the mounted scene prepares, and when it was first described ----
+        var scene = new WmvMountedScene(assets.Request, null, null);
+        Check(scene.PreparingFileDataID == 0 && scene.PreparingDescribedAt == double.MaxValue,
+              "mount clocks: a mounted scene with nothing to prepare names no file and no time", log);
+        var described = new WmvIpcClient.SceneMount { key = "M9", fileDataID = 780001, sequenceIndex = 0, riderSequenceIndex = 0, bone = -1 };
+        scene.Retarget(described, 12.5);
+        scene.Retarget(new WmvIpcClient.SceneMount { key = "M9", fileDataID = 780001, sequenceIndex = 0, riderSequenceIndex = 0, bone = -1 }, 99.0);
+        Check(scene.PreparingFileDataID == 780001 && scene.PreparingDescribedAt == 12.5,
+              "mount clocks: a mount being prepared names its file and when its key was FIRST described (a later description keeps it)", log);
+        scene.Retarget(new WmvIpcClient.SceneMount { key = "M10", fileDataID = 780002, sequenceIndex = 0, riderSequenceIndex = 0, bone = -1 }, 40.0);
+        Check(scene.PreparingFileDataID == 780002 && scene.PreparingDescribedAt == 40.0,
+              "mount clocks: a new key is described anew", log);
+        scene.CancelTarget();
+        Check(scene.PreparingFileDataID == 0 && scene.PreparingDescribedAt == double.MaxValue,
+              "mount clocks: ... and nothing is prepared once the target is dropped", log);
+        scene.Dispose();
+
+        // ---- -wmvAnimTime: the mount posed, then the character under its bone ----
+        M2AttachmentDef att;
+        if (M2Parser.AttachmentFor(mountModel, 11, out att) && att.Bone == 2)
+        {
+            anim.SelectSequence(mount, 0, false);
+            anim.SelectSequence(rider, 0, false);
+            Transform body = riderRt.Root.transform;
+            Vector3 offset = WmvCharacterDresser.AttachmentLocalPosition(att.Position, mountModel.Bones[att.Bone].Pivot);
+            body.SetParent(mountRt.Bones[att.Bone], false);
+            body.localPosition = offset;
+            try
+            {
+                ma.ApplyPose(0f);
+                ra.ApplyPose(0f);
+                WmvSlotAnimation.PoseMountedAt(mountRt, riderRt, 250f);
+                // Sequence 0 moves bone i by (i + 1, 0, 0) at 500 ms, so by half of that at 250 ms.
+                Vector3 halfway0 = mountRt.BoneRestPositions[0] + UnityPosition(new WowVec3(0.5f, 0f, 0f));
+                bool bothAt = NearV(mountRt.Bones[0].localPosition, halfway0, 1e-4f) && NearV(riderRt.Bones[0].localPosition, halfway0, 1e-4f);
+                Check(bothAt && WmvM2Animator.GlobalTimeMs == 250.0,
+                      "pinned pose: both models at the instant (bone 0 halfway through its 500 ms key), the global clock with them", log);
+                Check(NearV(body.position, mountRt.Bones[att.Bone].localToWorldMatrix.MultiplyPoint3x4(offset), 1e-4f) &&
+                      !NearV(mountRt.Bones[att.Bone].position, UnityPosition(mountModel.Bones[att.Bone].Pivot), 1e-3f),
+                      "pinned pose: ... the character's root where the mount's posed bone carries it, off the bone's rest", log);
+                WmvSlotAnimation.PoseMountedAt(null, riderRt, 0f);
+                Check(NearV(riderRt.Bones[0].localPosition, mountRt.BoneRestPositions[0], 1e-4f) &&
+                      NearV(mountRt.Bones[0].localPosition, halfway0, 1e-4f),
+                      "pinned pose: with no mount, only the character is posed", log);
+            }
+            finally
+            {
+                body.SetParent(null, false);
+                WmvM2Animator.GlobalTimeMs = globalWas;
+            }
+        }
+        else
+            Check(false, "pinned pose: the fixture's attachment 11 is on bone 2", log);
+
+        mountRt.Dispose();
+        riderRt.Dispose();
+        Check(WmvRuntimeModel.Live == liveAtStart, "mount clocks: every runtime these tests made is released", log);
+    }
+
+    // ---------------------------------------------------------------- what the camera frames on a mount
+
+    /// <summary>A box's eight corners carried through a matrix one by one, grown into min/max: what the framing must
+    /// equal, worked out without it.</summary>
+    static void CornersByHand(Bounds local, Matrix4x4 toWorld, ref bool any, ref Vector3 min, ref Vector3 max)
+    {
+        for (int x = -1; x <= 1; x += 2)
+            for (int y = -1; y <= 1; y += 2)
+                for (int z = -1; z <= 1; z += 2)
+                {
+                    Vector3 p = toWorld.MultiplyPoint3x4(local.center + new Vector3(x * local.extents.x, y * local.extents.y,
+                                                                                    z * local.extents.z));
+                    if (!any) { min = p; max = p; any = true; }
+                    else { min = Vector3.Min(min, p); max = Vector3.Max(max, p); }
+                }
+    }
+
+    static bool SameBox(Bounds b, Vector3 min, Vector3 max, float eps)
+    {
+        return NearV(b.min, min, eps) && NearV(b.max, max, eps);
+    }
+
+    /// <summary>
+    /// WHAT THE CAMERA FRAMES WHILE A CHARACTER RIDES (WmvMountedScene.UnionBounds): a box in a body root's space carried
+    /// into the world corner by corner, under a parent that moves, turns and scales it; a skinned character hung from the
+    /// turned, moved bone of an animated mount, framed with the mount as one box -- the corners of both carried by hand,
+    /// never the two boxes joined in their own spaces -- measured again at another instant of the mount's clock and under a
+    /// moved mount root; the character alone once it is off; and the same through a mounted scene's commit and dismount.
+    /// Carrying the boxes allocates nothing, where the runtime counts allocations per thread.
+    /// </summary>
+    static void MountFramingTests(Action<string> log)
+    {
+        // ---- the arithmetic, on a plain hierarchy ----
+        var parentGo = new GameObject("MountFramingParent");
+        var childGo = new GameObject("MountFramingChild");
+        Transform parent = parentGo.transform, child = childGo.transform;
+        parent.position = new Vector3(3f, -2f, 5f);
+        parent.rotation = Quaternion.Euler(20f, 45f, -10f);
+        child.SetParent(parent, false);
+        child.localPosition = new Vector3(0.5f, 1f, -0.25f);
+        child.localRotation = Quaternion.Euler(0f, 30f, 0f);
+        child.localScale = new Vector3(1.5f, 1.5f, 1.5f);
+        var box = new Bounds(new Vector3(0.1f, 0.9f, 0f), new Vector3(0.8f, 1.8f, 0.4f));
+        bool any = false;
+        Vector3 min = Vector3.zero, max = Vector3.zero;
+        CornersByHand(box, child.localToWorldMatrix, ref any, ref min, ref max);
+        Bounds world = WmvMountedScene.WorldBounds(box, child.localToWorldMatrix);
+        Check(SameBox(world, min, max, 1e-4f),
+              "mount framing: a box under a moved, turned and scaled parent is the box around its eight corners carried by hand", log);
+        Check(!NearV(world.center, box.center, 0.5f) && world.size.y > box.size.y * 1.2f,
+              "mount framing: ... not the box in its own space: the parent's move, turn and scale are all applied", log);
+        Check(SameBox(WmvMountedScene.WorldBounds(box, Matrix4x4.identity), box.min, box.max, 1e-5f),
+              "mount framing: through the identity the box is unchanged", log);
+        Bounds quarter = WmvMountedScene.WorldBounds(box, Matrix4x4.TRS(Vector3.zero, Quaternion.Euler(0f, 90f, 0f), Vector3.one));
+        Check(Near(quarter.extents.x, box.extents.z) && Near(quarter.extents.z, box.extents.x) && Near(quarter.extents.y, box.extents.y),
+              "mount framing: a quarter turn about the vertical swaps the box's width and depth", log);
+        UnityEngine.Object.DestroyImmediate(childGo);
+        UnityEngine.Object.DestroyImmediate(parentGo);
+
+        if (WmvModelBuilder.Debug_.NoAnim)
+        {
+            log("lifecycle-test SKIP: mount framing on built models: -wmvNoAnim builds no animator to turn the mount's bone");
+            return;
+        }
+
+        // ---- a skinned character on the turned, moved bone of an animated mount ----
+        int liveAtStart = WmvRuntimeModel.Live;
+        byte[] m2 = M2Synthetic.InFileSkeletonModel(473370);
+        M2ParsedSkin skin = M2SkinParser.Parse(M2Synthetic.TransformSwitchSkin());
+        M2ParsedModel mountModel = M2Parser.Parse(m2, 0), riderModel = M2Parser.Parse(m2, 0);
+        WmvRuntimeModel mountRt = WmvModelBuilder.Build(mountModel, skin, new Dictionary<int, BlpImage>(), "FramingMount", null);
+        WmvRuntimeModel riderRt = WmvModelBuilder.Build(riderModel, skin, new Dictionary<int, BlpImage>(), "FramingRider", null);
+        M2AttachmentDef att;
+        bool built = mountRt != null && riderRt != null && mountRt.Animator != null && mountRt.Bones.Length == 3 &&
+                     M2Parser.AttachmentFor(mountModel, 11, out att) && att.Bone == 2;
+        Check(built, "mount framing: a mount and a character built, the mount's attachment 11 on its leaf bone 2", log);
+        if (!built)
+        {
+            if (mountRt != null) mountRt.Dispose();
+            if (riderRt != null) riderRt.Dispose();
+            return;
+        }
+        M2Parser.AttachmentFor(mountModel, 11, out att);
+        Transform bone = mountRt.Bones[att.Bone];
+        Transform body = riderRt.Root.transform;
+        Vector3 seat = WmvCharacterDresser.AttachmentLocalPosition(att.Position, mountModel.Bones[att.Bone].Pivot);
+        double globalWas = WmvM2Animator.GlobalTimeMs;
+        var mover = new GameObject("MountFramingMover");
+        try
+        {
+            body.SetParent(bone, false);
+            body.localPosition = seat;
+            body.localRotation = Quaternion.identity;
+            body.localScale = new Vector3(1.25f, 1.25f, 1.25f);
+            WmvM2Animator.GlobalTimeMs = 375.0;           // bone 1 turns on its global sequence, carrying bone 2
+            mountRt.Animator.ApplyPose(375f);
+            Check(!SameRotation(bone.rotation, Quaternion.identity) &&
+                  !NearV(bone.position, UnityPosition(mountModel.Bones[att.Bone].Pivot), 1e-3f),
+                  "mount framing: the mount's bone the character hangs from is turned and moved from its rest", log);
+
+            any = false;
+            CornersByHand(mountRt.Bounds, mountRt.Root.transform.localToWorldMatrix, ref any, ref min, ref max);
+            CornersByHand(riderRt.Bounds, body.localToWorldMatrix, ref any, ref min, ref max);
+            Bounds union = WmvMountedScene.UnionOf(mountRt, riderRt);
+            Check(SameBox(union, min, max, 1e-4f),
+                  "mount framing: the mount and the character on its bone frame as the box around both models' corners, each carried " +
+                  "through its root by hand", log);
+            Vector3 naiveMin = Vector3.Min(mountRt.Bounds.min, riderRt.Bounds.min), naiveMax = Vector3.Max(mountRt.Bounds.max, riderRt.Bounds.max);
+            Check(!SameBox(union, naiveMin, naiveMax, 1e-3f),
+                  "mount framing: ... which is not the two boxes joined in their own spaces", log);
+
+            WmvM2Animator.GlobalTimeMs = 125.0;
+            mountRt.Animator.ApplyPose(125f);
+            any = false;
+            CornersByHand(mountRt.Bounds, mountRt.Root.transform.localToWorldMatrix, ref any, ref min, ref max);
+            CornersByHand(riderRt.Bounds, body.localToWorldMatrix, ref any, ref min, ref max);
+            Bounds later = WmvMountedScene.UnionOf(mountRt, riderRt);
+            Check(SameBox(later, min, max, 1e-4f) && !SameBox(later, union.min, union.max, 1e-3f),
+                  "mount framing: at another instant of the mount's clock the box is measured where the bone has carried the character", log);
+
+            mover.transform.position = new Vector3(-4f, 1f, 2f);
+            mover.transform.rotation = Quaternion.Euler(0f, 60f, 15f);
+            mountRt.Root.transform.SetParent(mover.transform, false);
+            any = false;
+            CornersByHand(mountRt.Bounds, mountRt.Root.transform.localToWorldMatrix, ref any, ref min, ref max);
+            CornersByHand(riderRt.Bounds, body.localToWorldMatrix, ref any, ref min, ref max);
+            Bounds moved = WmvMountedScene.UnionOf(mountRt, riderRt);
+            Check(SameBox(moved, min, max, 1e-4f) && !NearV(moved.center, later.center, 0.5f),
+                  "mount framing: a mount root moved and turned carries the mount's box and the character's with it", log);
+            mountRt.Root.transform.SetParent(null, false);
+
+            // No allocation, where the runtime counts allocations per thread (checked first: a count that does not see a
+            // 4 KB array cannot see anything). Where it does not, -wmvAllocCheck's frame window is the evidence.
+            long calibrate = GC.GetAllocatedBytesForCurrentThread();
+            var sample = new byte[4096];
+            long counted = GC.GetAllocatedBytesForCurrentThread() - calibrate;
+            GC.KeepAlive(sample);
+            if (counted < 4096)
+                log("lifecycle-test SKIP: mount framing allocation: this runtime does not count allocations per thread (a 4 KB " +
+                    "array counted " + counted + " bytes)");
+            else
+            {
+                long before = GC.GetAllocatedBytesForCurrentThread();
+                Bounds last = new Bounds();
+                for (int i = 0; i < 1000; i++)
+                    last = WmvMountedScene.UnionOf(mountRt, riderRt);
+                long spent = GC.GetAllocatedBytesForCurrentThread() - before;
+                Check(spent == 0 && last.size.x > 0f,
+                      "mount framing: a thousand unions of the two models allocate nothing (" + spent + " bytes counted)", log);
+            }
+
+            body.SetParent(null, false);
+            body.localPosition = Vector3.zero;
+            body.localRotation = Quaternion.identity;
+            body.localScale = Vector3.one;
+            Check(SameBox(WmvMountedScene.WorldBounds(riderRt.Bounds, body.localToWorldMatrix), riderRt.Bounds.min, riderRt.Bounds.max, 1e-5f),
+                  "mount framing: off the mount, at the origin with the identity, the character frames as its own box", log);
+        }
+        finally
+        {
+            WmvM2Animator.GlobalTimeMs = globalWas;
+            body.SetParent(null, false);
+            if (mountRt.Root != null) mountRt.Root.transform.SetParent(null, false);
+            UnityEngine.Object.DestroyImmediate(mover);
+        }
+
+        // ---- through a mounted scene: both models while the character rides, the character alone after ----
+        const int mountFile = 780201, skinFile = 780203;
+        var assets = new MountAssets();
+        assets.Files[mountFile] = M2Synthetic.InFileSkeletonModel(skinFile);
+        assets.Files[skinFile] = M2Synthetic.TransformSwitchSkin();
+        var scene = new WmvMountedScene(assets.Request, null, null);
+        Bounds framedNow;
+        Check(!scene.UnionBounds(riderRt, out framedNow) && SameBox(framedNow, riderRt.Bounds.min, riderRt.Bounds.max, 1e-5f),
+              "mount framing: a mounted scene with no mount on screen frames the character alone", log);
+        WmvIpcClient.SceneMount m = MountOf("M70", mountFile, 2, new float[] { 0.5f, 0f, 1.5f }, 1.25f, 0, 0, 0);
+        scene.Retarget(m);
+        assets.Deliver(scene);
+        bool newMount;
+        WmvIpcClient.MountAnswer answer = scene.Commit(m, riderRt, out newMount);
+        bool rides = answer.Status == "applied" && scene.Mount.Runtime != null && body.parent == scene.Mount.Runtime.Bones[2];
+        Check(rides, "mount framing: a mount committed through a mounted scene, the character on its bone 2", log);
+        if (rides)
+        {
+            scene.Mount.Runtime.Animator.ApplyPose(250f);
+            any = false;
+            CornersByHand(scene.Mount.Runtime.Bounds, scene.Mount.Runtime.Root.transform.localToWorldMatrix, ref any, ref min, ref max);
+            CornersByHand(riderRt.Bounds, body.localToWorldMatrix, ref any, ref min, ref max);
+            Check(scene.UnionBounds(riderRt, out framedNow) && SameBox(framedNow, min, max, 1e-4f),
+                  "mount framing: ... the scene frames the mount and the character together, as worked out by hand", log);
+            Check(!scene.UnionBounds(mountRt, out framedNow),
+                  "mount framing: ... and a body that is not the one riding it is framed alone", log);
+        }
+        scene.Dismount();
+        Check(!scene.UnionBounds(riderRt, out framedNow) && SameBox(framedNow, riderRt.Bounds.min, riderRt.Bounds.max, 1e-5f),
+              "mount framing: after the dismount the scene frames the character alone again, its own box at the origin", log);
+        scene.Dispose();
+        mountRt.Dispose();
+        riderRt.Dispose();
+        Check(WmvRuntimeModel.Live == liveAtStart, "mount framing: every runtime these tests made is released", log);
+    }
+
     public static void RunAll(Action<string> log)
     {
         passed = failed = 0;
@@ -1245,6 +2468,7 @@ public static class WmvLifecycleSelfTest
         OutputGateTests(log);
         EmitterTests(log);
         CharacterTests(log);
+        MountTests(log);
         ZoomTests(log);
         MapObjectTests(log);
         log(string.Format("lifecycle-test: {0} passed, {1} failed", passed, failed));

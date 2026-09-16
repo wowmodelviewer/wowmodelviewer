@@ -125,7 +125,7 @@ public partial class WmvMain
             return false;
         if (wmoJob != null && (fileDataID == 0 || fileDataID == wmoJob.FileDataID))
             return true;
-        return current == null && currentMapObject != null &&
+        return currentSlot.Runtime == null && currentMapObject != null &&
                (fileDataID == 0 || fileDataID == currentMapObjectFileDataID);
     }
 
@@ -526,17 +526,18 @@ public partial class WmvMain
     /// <summary>Put a built world model on screen in place of whatever is there.</summary>
     void AdoptMapObject(MapObjectJob j, WmvRuntimeMapObject built)
     {
-        // The model on screen goes first -- a character takes its parts with it -- then any earlier
-        // world model, then the new one is shown: all in this frame, so nothing flickers and nothing
-        // is ever drawn twice.
+        // The model on screen goes first -- a mount it rides after taking the character off, a character
+        // with its parts -- then any earlier world model, then the new one is shown: all in this frame, so
+        // nothing flickers and nothing is ever drawn twice.
+        if (mounted != null) { mounted.Dispose(); mounted = null; }
         if (dresser != null) { dresser.Dispose(); dresser = null; }
-        if (current != null) { current.Dispose(); current = null; }
-        currentModel = null;
-        currentM2Bytes = null;
-        currentName = "WoWModel";
-        currentFileDataID = 0;
-        currentTextures.Clear();
-        currentTextureIds.Clear();
+        if (currentSlot.Runtime != null) { currentSlot.Runtime.Dispose(); currentSlot.Runtime = null; }
+        currentSlot.Model = null;
+        currentSlot.M2Bytes = null;
+        currentSlot.Name = "WoWModel";
+        currentSlot.FileDataID = 0;
+        currentSlot.Textures.Clear();
+        currentSlot.TextureIds.Clear();
         // -wmvAllocCheck measures the frames after a world model is adopted as it does after a model.
         allocProbe = WmvModelBuilder.Debug_.AllocCheck ? new AllocProbe { StartFrame = Time.frameCount + 10 } : null;
         if (currentMapObject != null) currentMapObject.Dispose();
@@ -552,8 +553,10 @@ public partial class WmvMain
                                     built.Bounds.center, built.Bounds.extents));
             frame = WmvModelBuilder.Debug_.FrameBounds;
         }
+        ViewFramings++;
         orbit.FrameMapObject(frame);
-        ApplyViewportOrbitOverride();
+        haveLastFramed = false;              // a model capture waiting does not frame the model's box again
+        ApplyViewportOrbitOverride("wmo: ");
         if (shadowRig != null)
             shadowRig.SetBounds(frame);
         Camera cam = Camera.main;
@@ -573,31 +576,6 @@ public partial class WmvMain
         status.Set("Loaded world model " + (string.IsNullOrEmpty(j.Path) ? j.FileDataID.ToString() : j.Path));
         status.Set(string.Format("Groups {0}  Submeshes {1}  Vertices {2}  Triangles {3}", built.GroupCount,
                                  built.Submeshes, built.VertexCount, built.TriangleCount));
-    }
-
-    /// <summary>
-    /// SCRATCH: WMV_VIEWPORT_ORBIT="yaw:pitch[:distanceScale]" re-aims the framed camera, so a capture can
-    /// be taken from a named view (the audit's OpenGL references are yaw 135 / pitch 30 and yaw 315 /
-    /// pitch 30 in this camera's terms). Unset, nothing changes. Documented with WMV_VIEWPORT_SHOT and
-    /// WMV_VIEWPORT_SIZE under "Capture hooks" in docs/unity-renderer/README.md.
-    /// </summary>
-    void ApplyViewportOrbitOverride()
-    {
-        string v = System.Environment.GetEnvironmentVariable("WMV_VIEWPORT_ORBIT");
-        if (string.IsNullOrEmpty(v))
-            return;
-        string[] p = v.Split(':');
-        var inv = System.Globalization.CultureInfo.InvariantCulture;
-        float yaw, pitch, scale = 1f;
-        if (p.Length < 2 ||
-            !float.TryParse(p[0], System.Globalization.NumberStyles.Float, inv, out yaw) ||
-            !float.TryParse(p[1], System.Globalization.NumberStyles.Float, inv, out pitch))
-            return;
-        if (p.Length > 2 && !float.TryParse(p[2], System.Globalization.NumberStyles.Float, inv, out scale))
-            scale = 1f;
-        orbit.SetView(yaw, pitch, scale);
-        Debug.Log(string.Format("WMV: wmo: WMV_VIEWPORT_ORBIT {0} -> yaw {1} pitch {2} distance {3:F1}", v, orbit.yaw,
-                                orbit.pitch, orbit.distance));
     }
 
     void FailMapObject(MapObjectJob j, string reason)
@@ -742,12 +720,46 @@ public partial class WmvMain
     /// </summary>
     void HandleRuntimeState(int query)
     {
-        int modelId = current != null ? currentFileDataID : 0;
-        int mapObjectId = currentMapObject != null ? currentMapObjectFileDataID : 0;
-        bool loading = job != null || wmoJob != null;
-        Debug.Log(string.Format("WMV: runtimeState {0}: live world models {1}, live models {2}, model {3}, world model {4}{5}",
-                                query, WmvRuntimeMapObject.Live, WmvRuntimeModel.Live, modelId, mapObjectId,
-                                loading ? ", a load in flight" : ""));
-        ipc.ReportRuntimeState(query, WmvRuntimeMapObject.Live, WmvRuntimeModel.Live, modelId, mapObjectId, loading);
+        var r = new WmvIpcClient.RuntimeReport
+        {
+            LiveMapObjects = WmvRuntimeMapObject.Live,
+            LiveModels = WmvRuntimeModel.Live,
+            ModelFileDataID = currentSlot.Runtime != null ? currentSlot.FileDataID : 0,
+            MapObjectFileDataID = currentMapObject != null ? currentMapObjectFileDataID : 0,
+            Loading = job != null || wmoJob != null,
+            // The mount the model on screen rides (protocol 5); a mount still being built for a load is not on screen.
+            MountFileDataID = currentSlot.Runtime != null && mounted != null ? mounted.RiddenFileDataID : 0,
+            MountKey = "",
+            LiveMounts = WmvMountedScene.LiveMounts,
+            MountsBuilt = WmvMountedScene.MountsBuilt,
+            MountSeat = -1,
+            MountSeatBone = -1,
+            ModelSequence = currentSlot.Runtime != null && currentSlot.Runtime.Animator != null
+                            ? currentSlot.Runtime.Animator.SequenceIndex : -1,
+            MountSequence = -1,
+            BodyRebinds = dresser != null ? dresser.BodyRebinds : 0,
+            ViewFramings = ViewFramings,
+        };
+        WmvRuntimeModel mount = r.MountFileDataID != 0 ? mounted.Mount.Runtime : null;
+        if (mount != null)
+        {
+            r.MountKey = mounted.Key;
+            r.MountSeat = mounted.SeatCase;
+            r.MountSeatBone = mounted.SeatBone;
+            r.MountSequence = mount.Animator != null ? mount.Animator.SequenceIndex : -1;
+            r.MountEmitters = mount.Emitters != null ? mount.Emitters.ParticleEmitterCount : 0;
+            r.MountRibbons = mount.Emitters != null ? mount.Emitters.RibbonEmitterCount : 0;
+            r.MountParticles = mount.Emitters != null ? mount.Emitters.LiveParticleCount : 0;
+        }
+        Debug.Log(string.Format("WMV: runtimeState {0}: live world models {1}, live models {2}, model {3}, world model {4}, " +
+                                "mount {5}{6}", query, r.LiveMapObjects, r.LiveModels, r.ModelFileDataID, r.MapObjectFileDataID,
+                                r.MountFileDataID, r.Loading ? ", a load in flight" : "") +
+                  (mount == null && r.LiveMounts == 0 ? "" : string.Format(
+                      " ({0}, {1} mount runtime(s) alive, {2} built; seat {3} on bone {4}; sequences {5} / {6}; emitters {7} " +
+                      "particle + {8} ribbon, {9} live particle(s))", r.MountKey.Length > 0 ? r.MountKey : "none", r.LiveMounts,
+                      r.MountsBuilt, r.MountSeat, r.MountSeatBone, r.ModelSequence, r.MountSequence, r.MountEmitters,
+                      r.MountRibbons, r.MountParticles)) +
+                  string.Format("; the view has been fitted {0} time(s)", r.ViewFramings));
+        ipc.ReportRuntimeState(query, r);
     }
 }

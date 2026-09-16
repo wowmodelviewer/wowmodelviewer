@@ -294,6 +294,27 @@ public:
   void SendCharacterSceneToUnity(bool force = false);
   // The canvas shows a playable character the Unity viewport can dress (not a mount carrying one).
   bool canvasShowsCharacter() const;
+  // THE RIDER: in a character context, the character model -- CharControl::model, the model of its attachment
+  // node CharControl::charAtt -- whether or not it rides a mount; null in any other context. While a mount is
+  // up the canvas model is the mount, so this, not canvas->model(), is the character.
+  WoWModel * riderModel() const;
+  // The mount the rider rides: the WoWModel on the rider node's parent (the canvas root, where the mount choice
+  // puts it), or null when that holds none.
+  WoWModel * riderMount() const;
+  // The canvas shows a playable character riding a mount: a character context, a rider that is a character
+  // model with a FileDataID, and a mount on its node's parent. The Unity viewport draws it when the player
+  // rides mounts (protocol 5); an older player gets the mounted-character notice.
+  bool canvasShowsMountedCharacter() const;
+  bool unityPlayerRidesMounts() const;
+  // The character the Unity player is told about -- loaded, dressed and answered for: the canvas model when
+  // it is the character, the rider while it rides a mount and the player rides mounts, otherwise null.
+  WoWModel * unityCharacter() const;
+  // Whether the canvas showed a mounted character when the viewport state was last decided (with
+  // m_lastShowsCharacter below).
+  bool m_lastShowsMountedCharacter = false;
+  // The mount last described in the log ([unity-mount]), so each new mount is described once.
+  const WoWModel * m_loggedMount = nullptr;
+  unsigned int m_loggedMountSerial = 0;
   int m_sceneRevision = 0;
   quint64 m_lastSceneSignature = 0;
   unsigned long m_lastSceneCheck = 0;
@@ -328,8 +349,8 @@ public:
   // about the one on display.
   int m_unityLoadSerial = 0;
   // What the last loadWoWModel sent named: the model's fileDataID and whether it went as a character.
-  // Dismounting hands the viewport back without a load, and a player that connected while the mount was
-  // up was sent the mount.
+  // Mounting and dismounting hand the viewport over without a load, and a player that connected while the
+  // mount was up was sent the rider if it seats characters on mounts (protocol 5), the mount if it does not.
   int m_unityLoadedFileDataID = 0;
   bool m_unityLoadedCharacter = false;
   void OnCharacterSceneApplied(const UnityIpcServer::SceneAck & ack);

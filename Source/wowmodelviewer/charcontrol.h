@@ -67,6 +67,14 @@ class CharControl : public wxScrolledWindow, public Observer
   Attachment *charAtt;
   WoWModel *model;
 
+  // The mount the character rides, for the Unity viewport's scene (ModelViewer::SendCharacterSceneToUnity).
+  // mountSerial is raised for every mount model the mount choice installs, never on a dismount: it is the
+  // mount's identity there, which the model's address cannot be -- the previous mount is freed before its
+  // replacement is allocated, so the same address can come back for a different mount. mountDisplayId is the
+  // CreatureDisplayInfo id that mount was chosen by: 0 for a creature file, and while no mount is up.
+  unsigned int mountSerial = 0;
+  int mountDisplayId = 0;
+
   wxString customSkin;
 
   void ClearItemDialog();
@@ -87,6 +95,11 @@ class CharControl : public wxScrolledWindow, public Observer
   void selectSet();
   void selectStart();
   void selectMount();
+  // The mount dialog's rows, as selectMount lists them: numbers/cats/choices, row 0 "None" (-1), then every player
+  // mount by name (its CreatureDisplayInfo id, category 0), then every creature model file (an index into the file
+  // list, category 1). OnUpdateItem(UPDATE_MOUNT, row) takes a row of these; the -unityipctest mount steps pick one
+  // the way the dialog does.
+  void fillMountChoices();
   void selectNPC(ssize_t type);
 
   const wxString selectCharModel();

@@ -350,7 +350,7 @@ it could not build, and when a stopped player is noticed. The first case that ap
 | a WMO, with a connected player older than protocol 4 | "Unity renderer out of date" | -- |
 | a map tile (ADT) | "Map tile loaded" | -- |
 | a model with no game file behind it | "Model cannot be shown" | -- |
-| a character riding a mount (the loaded model is then the mount, and the player has no mount rig) | "Mounted character" | -- |
+| a character riding a mount, with a connected player older than protocol 5, or whose rider is not a character model with a FileDataID (the canvas model is then the mount) | "Mounted character" | -- |
 | a model with no FileDataID (a legacy MPQ client; the player addresses every asset by one) | "Legacy client model" | -- |
 | a character the player reported it could not build, until the next load or a player restart | "Character could not be built", with the player's reason | -- |
 | a character, with a connected player older than protocol 3 | "Unity renderer out of date" | -- |
@@ -386,6 +386,225 @@ All of it travels as one `characterScene` per change (see `UnityIpcServer.h`), s
 canvas's clock tick when anything it describes has changed and never faster than the player
 answers; the player applies a scene whole, in one frame, without reloading the body, re-framing
 the camera or restarting the animation.
+
+**Mounted characters: the host side (protocol 5).** The mount choice (`CharControl::OnUpdateItem`,
+`UPDATE_MOUNT`) loads nothing for the character: it puts the mount model on the canvas root and on
+the canvas, and the character's node -- already a child of that root -- hangs from the mount's
+attachment 0 from then on. The canvas model is the mount, so the host asks for the character
+through the rider accessor (`ModelViewer::riderModel`, the model of `CharControl::charAtt`), and
+`canvasShowsMountedCharacter` holds while the context is a character, the rider is a character model
+with a FileDataID and a mount is on its node's parent. To a player that announced protocol 5:
+
+- `loadWoWModel` keeps naming the rider as a character, so mounting, dismounting and swapping mounts
+  never send a new load; the next canvas tick sends a scene instead, because its fingerprint includes
+  the mount;
+- the scene gains an optional `mount`: `key` ("M" and a host serial raised for every mount model the
+  mount choice installs -- never its address, which the next mount can reuse -- and kept when the
+  same mount is described again), the mount's `fileDataID`, `path` and `displayID` (0 for a creature
+  file), the rider node's `attachmentId` with the `bone` and `position` the MOUNT's attachment lookup
+  gives it (`WoWModel::setupAtt`; -1 and zero when the mount has no such entry, which puts the rider at
+  the mount's origin), `riderScale`, the mount's own `textures` (a slot bound to nothing, GL name 0 or
+  none, is left out rather than read as the rider's body composite), `submeshCount` /
+  `submeshVisible`, `particleColorSets` while its display replaces particle colours (three sets for
+  emitter indices 11-13, start, mid and end RGB, 27 bytes, the alpha left to the emitter as the host
+  does), and the `sequenceIndex` and `riderSequenceIndex` each model plays when the scene is built --
+  the rider's being what the mount choice selected from its animation lookup, read back, not looked up
+  again. Presence is a non-empty `key`, never the object's absence; a scene without `mount` while one
+  was ridden is the dismount;
+- `characterSceneApplied` adds `mountKey`, `mountStatus` (`"applied"`, `"failed"`, `"none"`) and
+  `mountReason`; answers are still matched by load and revision, and a failed mount is logged and
+  never turns the character into "load failed";
+- no `modelSkin` or `modelGeosets` is sent for the ridden mount: its display state has one channel,
+  the scene;
+- `modelAnimation` adds `role` (`"mount"` or `"rider"`: whichever of the two `g_selModel` is -- the
+  mount after the mount choice, the rider once View > Attachments picks it; any other pick is not
+  pushed) and `load`; `modelAnimationState` keeps the mount in its top-level fields and adds `load`,
+  `hasRider` and `rider { sequenceIndex, playing, timeMs, speed, loop }`, sampled in the same call.
+  The rider's `playing` is the mount's: the canvas tick stops the whole tree's time when the canvas
+  model is paused and never reads the rider's own flag, which the mount choice leaves set;
+- `runtimeState` answers carry `mountFileDataID`, `mountKey`, `liveMounts`, `mountsBuilt`, `mountSeat`,
+  `mountSeatBone`, `modelSequence`, `mountSequence`, `mountEmitters`, `mountRibbons`, `mountParticles` and
+  `bodyRebinds`.
+
+A player older than protocol 5 is sent exactly what it was before (the mount as the loaded model,
+behind the "Mounted character" notice). Every mount the character rides is logged once, whatever the
+player can do with it (`[unity-mount] the character ... rides M<n> <path> fileDataID=... bone=...
+position=(...) riderScale=... sequenceIndex=... riderSequenceIndex=...`), and so is every scene that
+carries one.
+While mounted, an equipment slot pick or an item level change refreshes the rider (it used to refresh
+the mount's empty equipment, so the item appeared only at the rider's next refresh), and the Geosets
+tab no longer refuses a change to the rider's parts behind no notice.
+
+**Mounted characters: the player side (protocol 5).** The player announces protocol 5 and keeps the
+character exactly as it is: the model on screen and its dresser stay the rider's, with everything it
+wears. The mount a scene describes is a second, separately animated model, held by
+`WmvMountedScene` (`WmvMountedScene.cs`), and the character's body root hangs from it in the Unity
+hierarchy, so the rider and its equipment follow the animated mount bone with no per-frame copying:
+
+- **Presence** is the sentinel -- a non-empty `key` and a `fileDataID` above 0 -- never a null test:
+  the lifecycle self-test parses a scene line without `mount`, and `JsonUtility` hands the absent
+  object back as a default-filled one (key null, fileDataID 0), not as null. A key with no FileDataID
+  is answered `failed`;
+- **the mount is built beside the character.** Its .m2, skeleton (and the skeleton's parent), the
+  `.anim` of the sequence the host's mount plays, its first skin profile and the textures the scene's
+  slots name are fetched under request ids the mounted scene owns, then built standalone -- skeleton,
+  bind poses, animator, emitters, posed bounds -- and kept inactive. A description of the same key and
+  file again (a newer revision, or the host re-sending after its wait) keeps what was fetched, parsed
+  or built; a new key starts over, beside the mount still on screen. Textures bind by the host's slot:
+  a slot the host bound to nothing is not listed and binds nothing. The geoset flags go to the build
+  (or, for the same mount described again, through the triangle arrays it keeps), and
+  `particleColorSets` to the mount's emitters (`WmvEmitterRuntime.SetParticleColorOverride`);
+- **one frame.** The character's dresser applies a scene only when its own parts are ready AND its
+  commit gate says so (`WmvCharacterDresser.CommitGate`): for a scene with a mount, once the mount is
+  built or has failed for good and the keys of the character's `riderSequenceIndex` are here (fetched
+  into the character's slot when they live in a `.anim`). A mount file arriving pumps the dresser
+  again. In the frame the scene is applied (`OnCommitted`) the mount is activated, the character is
+  seated, the character switches to `riderSequenceIndex` -- the host's own result, applied as given --
+  and both clocks start where the host's are (see "the animation of the two models" below). A scene
+  without a mount commits exactly as before;
+- **the seat**, from the host's resolved attachment: `bone` below 0 (the mount's table has no entry, as
+  on the Whelpling) puts the body root on the mount's root at zero; a bone the build has a Transform
+  for puts it under that bone at the attachment position less the bone's pivot, both converted -- the
+  same arithmetic as an attached item -- which reproduces the host's bone matrix times the attachment's
+  translation; a bone the build has no Transform for (a mount drawn as a static mesh) puts it on the
+  mount's root at the converted position. Rotation is the identity, the scale `riderScale` on all three
+  axes, and the case is logged (`mount: M<n>: the character hangs from attachment 0 -- ...`);
+- **swap, dismount, failure.** A new key moves the character onto the new mount before the old one is
+  disposed; a scene without a mount takes the character off (`SetParent(null)`, identity local
+  transform) and disposes the mount, leaving the character, its dresser and its animation alone; a
+  mount that cannot be built leaves the character on screen off any mount and is answered `failed` with
+  the reason, never as a failed character;
+- **a character loaded while it rides** (a player restarted while mounted, or the host sending the load
+  again) builds its scene's mount for that load (`LoadJob.Mount`, beside `LoadJob.Dresser`): the mount
+  on screen goes with the character it carries when the new character is adopted, and only then does
+  the load's mount take its place and receive the new character, in the same frame. A load that is
+  superseded or fails releases its mount and every request out for it;
+- **disposal order**, everywhere a mount goes -- a dismount, a swap, a new model, a world model, a new
+  character, a dropped load, shutdown: the character is taken off first, so a mount's root is never
+  destroyed with the character under it;
+- `characterSceneApplied` carries the mount's `mountKey`, and `mountStatus` `applied`, `failed` or `none`
+  (no mount, or the scene was not applied); `runtimeState` carries `mountFileDataID`, the mount the
+  character on screen rides (0 for none), with the mount's key, the mount runtimes alive and built, the
+  seat, both animators' sequences, the mount's emitters and the character's body texture binds.
+
+The lifecycle self-test (`-wmvLifecycleTest`) checks the joints on synthetic models: a skinned body
+parented under an animated, turning bone of another model bakes to the same vertices in its own space
+as at the origin and, in the world, to the at-origin bake carried through the parent bone and its
+offset (two instants, two scales); a scene line with and without a mount; the three seats; and the
+mounted scene's fetch, build, commit, swap, dismount, failure, disposal and a load's own mount,
+answered by a stand-in asset channel, with the live model count back where it started. Framing, the
+capture hooks and the measurements are in "Mounted characters: framing, capture and measurement" below.
+
+**Mounted characters: the animation of the two models (protocol 5).** The character and its mount
+animate on their own clocks -- one `WmvM2Animator` each, over each model's own slot and sequence caches
+-- and never share a frame counter; the global-sequence clock still moves once per frame. The host's
+pushes say which of the two they are about, and the player routes them (`WmvSlotAnimation.cs`, which
+holds the sequence code every slot runs):
+
+- **`modelAnimation` with a `role`.** `"rider"` is the character -- the one on screen, or the one being
+  loaded when `load` is that load's serial -- and plays or waits as any selection for it does;
+  `"mount"` is the mount the character rides on screen. The role decides, never the FileDataID (a mount
+  model can also be a playable race's body); the FileDataID only has to name the file of the model the
+  role picks. A mount role while the character rides no mount of that file -- the push the mount choice
+  sends a tick before the scene that carries the mount -- is ignored and logged; one naming a mount still
+  being prepared, for the character on screen or for a load, is kept and switched to in the frame that
+  mount goes on. A push without a role is about the model it names, as before, with one exception: the
+  character's own selection while it rides on screen is the host taking it off its mount, sent a tick
+  before the scene without the mount, and is held and played in the frame that scene is applied, so the
+  character's idle starts on the ground rather than on the mount's back;
+- **`modelAnimationState` with `hasRider`** is applied in one pass: the top level to the mount's animator
+  (when a mount of that file is on screen), the nested `rider` to the character's, each exactly as any
+  state is applied (explicit positions as given, heartbeats held to the dead band, play/pause and speed
+  as sent). The rider's `playing` is taken as sent -- the mount's pause, which on the host stops the whole
+  tree, while the rider's own animation manager is not consulted. For a character being loaded, the
+  rider's half waits for its animator as any load's state does;
+- **the clocks when a mount goes on.** The mount starts from the newest ridden state naming its file
+  (sampled after the host put that mount on), projected to now. The character switches to
+  `riderSequenceIndex` and starts from a state for that sequence sent after the scene first describing the
+  mount arrived -- a character loaded while it rides, or a heartbeat during a long build -- or, without
+  one, in step with the mount at its own speed: the host set both at their first frames in the one mount
+  choice and runs both on the same ticks. A state from before that scene describes the clip the character
+  played before, and only its play/pause and speed carry over; a selection made for the character after
+  the scene is kept;
+- **later switches** of either model use that model's slot: its cached tracks, its `.anim` files (the
+  mount's are fetched up front in the frame it goes on, as the character's are at its load) and its
+  fetches. A switch on one model never re-binds or moves the other's clock;
+- `-wmvAnimTime` poses the mount and then the character in the frame a mount goes on or the character
+  comes off, so the character's billboard bones take their facing under the posed mount bone.
+
+The lifecycle self-test checks the wire lines (a selection and a state with and without the rider fields),
+every routing case (no role, the dismount hold, a mount and a rider built from one file, a load in flight,
+a mount being prepared, pushes for a character that is not there), one ridden state applied to two slots
+built from one file, a frame advancing each clock at its own speed and pause, `.anim`-keyed switches on
+each model leaving the other's sequence, clock, caches and fetches alone, a cached switch asking for
+nothing, the start rules and the pinned pose. Known gap: the host's first canvas tick after a mount
+choice charges the choice's own wall time (loading the mount model and its display records) to both of
+its clocks, and no message carries that time, so the first heartbeat after mounting corrects both player
+clocks together by about that much (measured headless: about 600 ms on the Warhorse, 125 ms on the Highland
+Drake).
+
+**Mounted characters: framing, capture and measurement (protocol 5).** Once the character's body root
+hangs from a mount's bone its box is no longer a box in the world, so the view is fitted to both models as
+one world box (`WmvMountedScene.UnionBounds`): the mount's box carried through its root, and the
+character's body box carried corner by corner through `Body.Root.localToWorldMatrix` -- the mount bone as
+posed at that instant, the seat's offset and the rider scale -- with nothing allocated.
+
+- **When.** In the frame the mount under the character changes (`WmvMain.FrameRiddenScene`): a mount goes
+  on, a swap puts another in its place, the character comes off (a dismount, or a new mount that could not
+  be built taking it off the one it rode), and for a character loaded while it rides, in the frame its
+  mount goes on, right after the character's own framing. The camera is framed by the usual rule
+  (`WmvOrbitCamera.Frame`) and the shadow window takes the same box; after a dismount both are fitted to the
+  character alone again. A newer description of the same mount -- an appearance or equipment change while
+  mounted -- keeps the view, and nothing is framed per frame. `-wmvFrameBounds` still pins the box. The
+  archived viewport kept the character's framing when a mount went on, so a large mount ran out of the
+  view; here the mount is framed with the character. The camera controls are unchanged.
+- **What the box does not follow.** It is measured once, from the character's box (the posed range of the
+  sequence it was built with) and the mount's (the posed range of the sequence it went on with).
+  Measured with `-wmvMountCheck` over the frames after each change: on the Warhorse Walk the mount's
+  drawn bounds reach at most 0.62 past the box (radius 2.90) and the character's 0.20; on the Golden
+  Gryphon's Fly and MountFlightIdle the gryphon's drawn bounds reach 3.8 past the box (radius 3.16) and the
+  character's box carried through its root 1.2; on the Whelpling the seated character's drawn bounds reach
+  0.97 past it (radius 2.02); on the Brutosaur, Highland Drake, Argent Charger, Little Red Riding Goat,
+  Bloodfang Widow and Grand Expedition Yak less than 0.6. The view is not fitted again as the animation
+  goes on.
+- **The capture hooks and probes cover both models.** `WMV_VIEWPORT_SHOT` captures 40 frames after the
+  mount under the character changes, as after a load (once, when a character is adopted and seated in the
+  same frame), and again after a sequence switch or a newer scene while it rides; it waits for the commit and
+  for the clip it was asked for, and its log line adds the mount's emitter counts, the seat, both models'
+  clocks and the camera ("Capture hooks" below). `WMV_VIEWPORT_ORBIT` re-aims the camera
+  after this framing too. `-wmvAllocCheck` starts a window ten frames after the change, waits while a mount
+  is still being prepared, and reports the mount's animator, material bindings and emitters beside the
+  character's (measured: 12-16 KB of managed heap per 60 frames and no gen-0 collection with the Warhorse,
+  the Flameward Hippogryph and its 35 emitters, the Brutosaur or the Highland Drake under the character --
+  the same as the character alone). `-wmvLightCheck` measures the box of both models, one frame after the
+  change: in the frame of a swap the mount it replaced is only destroyed at the end of the frame and was
+  drawn into the check too.
+- **The order of the LateUpdates** (`-wmvMountCheck`, `WmvMountProbe.cs`). In every measured frame Unity ran
+  the character's animator, and the animators of what it wears, before the mount's, and the shadow rig
+  before every animator. What follows the mount bone through the hierarchy when the frame is drawn cannot
+  lag -- skinning, attachments, particle and ribbon positions -- so a late mount costs only what those
+  LateUpdates compute from world transforms: the world facing of billboard bones, the billboard axes of the
+  character's and its items' particles, and the shadow map, which already lags every animated model by a
+  frame. Measured with the equipped reference character: the mount's attachment bone turns at most 24
+  degrees a second on the Warhorse Walk, 35 on the Gryphon's Fly and 24 on its MountFlightIdle, so the
+  facing lags by at most 0.6 degrees at 60 frames a second (0.2 at the headless run's ~550), and the shadow
+  map places the character's farthest bone at most 0.04 units behind; with the mount posed before every
+  other LateUpdate (`-wmvMountCheck=N:mountfirst`) all of it is 0. The larger single-frame steps are the
+  mount's own pose jumps -- its first frame on, a heartbeat's clock correction -- not motion. The measured
+  body (humanmale_hd) has no billboard bone. No ordering was added.
+- **The transparent draw order between the two models.** Each model ranks its blended batches from queue
+  3000 and its emitters sit at 3900, so the two models' transparent draws share one band. Drawn offscreen
+  from the viewport's pose with the mount's blended batches wholly before the character's and wholly after,
+  and the two models' emitters likewise, the Flameward Hippogryph, Argent Charger, Highland Drake, Whelpling
+  and Bloodfang Widow under the equipped reference character changed no pixel from four views; the controls
+  (either model's transparent materials drawn before the opaque ones, run on two of the views) changed up to
+  2,107 pixels, so the check sees what the queues decide. No queue was changed.
+
+The lifecycle self-test checks the framing on synthetic models: a box under a moved, turned and scaled
+parent against its eight corners carried by hand, a skinned character on the turned, moved bone of an
+animated mount framed with the mount (not the two boxes in their own spaces), at another instant of the
+mount's clock and under a moved mount root, the character alone once it is off, and the same through a
+mounted scene's commit and dismount.
 
 **World models (WMOs).** A WMO picked in Browse stays in the Unity viewport too, as **static
 geometry**. This is the foundation stage, and it is deliberately narrow:
@@ -673,7 +892,7 @@ to WMV's own log). The player is built locally from `Tools/UnityRendererProject/
 repository contains **no** Unity build output, and nothing in the installer or the CMake
 install rules ships one yet.
 
-## IPC (implemented; protocol 4)
+## IPC (implemented; protocol 5)
 
 **WMV is the server.** `UnityRendererHost` starts a TCP listener bound to `127.0.0.1` on an
 ephemeral port *before* launching the player and passes the port on the player's command
@@ -688,7 +907,7 @@ application uses). Player side: `Tools/UnityRendererProject/Assets/Scripts/WmvIp
 **Player -> WMV**
 
 ```json
-{ "type": "unityReady", "protocolVersion": 4 }
+{ "type": "unityReady", "protocolVersion": 5 }
 { "type": "getAsset", "requestId": "abc123", "path": "creature/chicken/chicken.m2" }
 { "type": "getAssetByFileDataID", "requestId": "abc124", "fileDataID": 123456 }
 { "type": "getModelTextures", "requestId": "abc125", "fileDataID": 123200 }
@@ -700,7 +919,12 @@ application uses). Player side: `Tools/UnityRendererProject/Assets/Scripts/WmvIp
   "timings": { "rootMs": 45.8, "groupsMs": 41.7, "texturesMs": 47.0, "buildMs": 17.6, "totalMs": 158.9 },
   "liveMapObjects": 1, "liveModels": 0 }
 { "type": "runtimeState", "query": 3, "liveMapObjects": 1, "liveModels": 0, "modelFileDataID": 0,
-  "mapObjectFileDataID": 115058, "loading": false }
+  "mapObjectFileDataID": 115058, "loading": false, "mountFileDataID": 0, "mountKey": "", "liveMounts": 0,
+  "mountsBuilt": 0, "mountSeat": -1, "mountSeatBone": -1, "modelSequence": -1, "mountSequence": -1,
+  "mountEmitters": 0, "mountRibbons": 0, "mountParticles": 0, "bodyRebinds": 0, "viewFramings": 1 }
+{ "type": "characterSceneApplied", "fileDataID": 1011653, "revision": 4, "load": 12, "status": "applied",
+  "reason": "", "merged": 3, "attachments": 4, "missing": [], "ms": 212,
+  "mountKey": "M3", "mountStatus": "applied", "mountReason": "" }
 ```
 
 (The `mapObjectLoaded` line is a logged report of a headless run on `it_trollhouse03.wmo`, bounds
@@ -727,7 +951,19 @@ report about the WMO on display puts the "World model could not be built" notice
 `runtimeState` (protocol 4) answers the host's `runtimeState { query }` question with what the player
 holds at that moment: `liveMapObjects` and `liveModels` as above, `modelFileDataID` and
 `mapObjectFileDataID` of the model and the world model on screen (0 for none), and whether a load of
-either kind is in flight (`loading`); `query` echoes the question's number. The player answers in
+either kind is in flight (`loading`); `query` echoes the question's number. From protocol 5 it also
+carries `mountFileDataID`, the mount the model on screen rides (0 for none; the host logs -1 when the
+player does not send it), and what a lifecycle test needs to tell that mount from a stale or doubled one:
+`mountKey` ("" for none), `liveMounts` (mount runtimes alive, one built for a scene not applied yet
+included), `mountsBuilt` since the player started, `mountSeat` and `mountSeatBone` (how the model hangs
+from it: 0 at the mount's origin, 1 under that bone, 2 on the mount's root at the attachment's position;
+-1 not seated), `modelSequence` and `mountSequence` (what each animator plays), `mountEmitters`,
+`mountRibbons` and `mountParticles` (the mount's emitters as drawn and its live particles),
+`bodyRebinds` (how often a character's scenes bound its body textures again) and `viewFramings` (how
+often the player fitted the view to what is on screen -- once for each model and world model put up,
+once for each change of the mount under a character, and never for anything else, so a test can hold a
+step to "the camera did not move"). The mount fields of `characterSceneApplied` (protocol 5) are described under
+"Mounted characters: the host side" above. The player answers in
 message order on its main thread, so a question sent after an answer about a build sees that build
 adopted. Only the headless self-test asks it (see the lifecycle sequence below), and only a player that
 announced protocol 4.
@@ -781,7 +1017,14 @@ The response carries metadata only; bytes are still fetched with `getAssetByFile
   "durationMs": 2000, "loop": true }
 { "type": "modelAnimationState", "fileDataID": 1521037, "sequenceIndex": 2, "playing": true,
   "timeMs": 840, "speed": 1.0, "loop": true }
+{ "type": "modelAnimation", "fileDataID": 126407, "sequenceIndex": 1, "animID": 0, "durationMs": 4000,
+  "loop": true, "role": "mount", "load": 12 }
+{ "type": "modelAnimationState", "fileDataID": 126407, "sequenceIndex": 1, "playing": true, "timeMs": 1840,
+  "speed": 1.0, "loop": true, "explicitState": false, "load": 12, "hasRider": true,
+  "rider": { "sequenceIndex": 145, "playing": true, "timeMs": 840, "speed": 1.0, "loop": true } }
 ```
+
+(The last two are a ridden mount's pushes, protocol 5: see "Mounted characters: the host side".)
 
 Semantics:
 
@@ -827,6 +1070,10 @@ Semantics:
   **Everything a switch reads is then cached**, per sequence: the raw tracks, and the tracks
   converted into the renderer's space. Returning to an animation already watched costs a dictionary
   lookup and no allocation, which is what the user actually does when comparing two animations.
+  The player keeps those caches per model, in the model's slot (`WmvModelSlot`), together with the
+  .m2 bytes, the selection, the `.anim` files and the app's last playback state; the code that
+  selects, switches and plays a sequence (`WmvSlotAnimation`) acts on the slot it is given -- the model
+  on screen's, or a ridden mount's -- and a new load empties the slot's caches.
 - **Sequences whose keyframes live in a .anim file play too.** A sequence without flag 0x20 keeps
   its track HEADERS in the .m2 -- counts and offsets, per sequence, exactly where an in-file
   sequence keeps them -- but those offsets address a separate .anim file. The AFID chunk says which
@@ -877,6 +1124,10 @@ Semantics:
   decides whether the animation is paused, and the speed multiplier lives inside the animation
   tick alone (`ModelCanvas::tick`, `AnimManager::Tick`). A torch keeps flickering on a creature
   held still.
+- **A ridden mount's pushes (protocol 5)** carry `role` and `load` on the selection, and `load`,
+  `hasRider` and the nested `rider` on the state; the player applies the top level to the mount and
+  the rider to the character, each on its own clock, and never tells the two apart by FileDataID. See
+  "Mounted characters: the animation of the two models" above.
 - `geosets` / `hasGeosets` ride along with both `modelTextures` and `modelSkin`, because a display
   variant can differ from another by **geometry** rather than texture. `creature/horse3/horse3.m2`
   is the worked example: three of its dropdown entries share one texture and differ only in
@@ -942,7 +1193,8 @@ fails this check (and gets the out-of-date notice).
 **Lifecycle sequence (opt-in).** With `WMV_IPCTEST_SEQUENCE` set, after every other check the test
 selects each entry exactly as Browse does and checks the outcome, for example
 `WMV_IPCTEST_SEQUENCE="m2:creature/bear/bear.m2;wmo:115058;m2:creature/bear/bear.m2;wmo:108538;wmo:248820"`.
-Entries are `m2:` or `wmo:` followed by a listfile path or a FileDataID:
+Entries are `m2:` or `wmo:` followed by a listfile path or a FileDataID; the mounted-character steps
+below act on the character already on the canvas and load nothing:
 
 - a `wmo:` step passes the same checks as the world-model check for its own load, with no notice up,
   and the player's `runtimeState` answer afterwards must name the root as the world model on screen,
@@ -951,9 +1203,9 @@ Entries are `m2:` or `wmo:` followed by a listfile path or a FileDataID:
   canvas root all cleared), the player to confirm the model is built where it can -- a character by
   its scene answer for the load, any other model with geosets by answering a geoset state for its
   FileDataID `"applied"` -- and then, for every model, the player's `runtimeState` answer to name the
-  model as the one on screen with no world model, `liveMapObjects` 0 and `liveModels` 1 (a character:
-  at least 1, its parts count too). That answer is the only evidence that the step left no world model
-  alive: the next `wmo:` step cannot stand in for it, because adopting a world model disposes any model
+  model as the one on screen with no world model and no mount alive, `liveMapObjects` 0 and `liveModels` 1
+  (a character: at least 1, its parts count too). That answer is the only evidence that the step left no
+  world model alive: the next `wmo:` step cannot stand in for it, because adopting a world model disposes any model
   and any world model still alive before the counts in `mapObjectLoaded` are taken;
 - `m2!:` / `wmo!:` is a quick step: selected and left at once, so the next load replaces one still
   in flight; the next waited step also requires an answer for each quick world-model load
@@ -961,16 +1213,69 @@ Entries are `m2:` or `wmo:` followed by a listfile path or a FileDataID:
   ends on a quick step fails, since nothing would check it;
 - no step may produce a `"failed"` world-model report.
 
+**Mounted characters in the sequence (protocol 5).** These steps act through the menus, panels and dialogs a
+user acts through. Each one requires the player's answer to the scene it caused (when it causes one) and the
+`runtimeState` account afterwards to match what the host shows: the character on screen with no load in
+flight, the host's mount under it by key and file with exactly one mount runtime alive, the seat the host's
+resolved attachment gives (at the mount's origin when the mount has no such attachment, otherwise under the
+named bone), both animators on the host's sequences, the mount's emitters those the mount declares -- with
+live particles while the clock runs -- and no notice up. No step may send an ordinary `modelSkin` or
+`modelGeosets` either: what a ridden mount displays travels in the character's scene and nowhere else, so a
+second channel for the same state fails the step that opened it.
+
+- `chr:<file.chr>` loads a saved character (`ModelViewer::LoadChar`); its own scene answers, riding nothing;
+- `mount:<displayId>` picks the mount dialog's row for that `CreatureDisplayInfo` id the way the dialog picks
+  it (`CharControl::fillMountChoices`, then `OnUpdateItem(UPDATE_MOUNT, row)`): the host raises its mount
+  serial, keeps the display and sends no load; the scene is answered with the new key `applied`; the player
+  built exactly one mount more, holds one alive, fitted the view exactly once (to the mount and the character
+  together), and the character's runtimes, body texture binds and composited images are as they were;
+- `dismount` picks the dialog's `---- None ----` row: the scene is answered with mount `none`, no mount
+  runtime is alive, none was built, the view was fitted once to the character alone and the character is
+  unchanged; with nothing ridden the choice changes nothing, no scene follows and the view is not fitted;
+- `manim:<animId>` picks the mount's first sequence with that animation id in the Animation panel, moving the
+  panel onto the mount first when it is on the character, as `View > Attachments` moves it; `ranim:<animId>`
+  does the same for the character, and `#<n>` names sequence n instead. The other model must stay on its own
+  sequence, no mount may be built and the view must not be fitted again;
+- `equip:<slot>=<item>` picks an equipment slot's item (`OnUpdateItem(UPDATE_ITEM)`; item 0 takes it off),
+  `custom:<option>[=<choice>]` sets an Appearance choice (`CharDetails::set`, by default the option's next
+  choice) and `sheath` toggles `Character > Sheathe weapons`: each must reach the player in a scene that keeps
+  the mount's key, with no mount built and the view not fitted again, and the step line reports the
+  character's runtimes, body texture binds and composited images before and after (sheathing must leave all
+  three as they were);
+- `reconnect` restarts the player (`View > Restart Unity Renderer`): the new player's load must name the
+  character as a character, its scene must answer with the same mount key, and it must hold what the player
+  before it held, having built exactly the one mount and fitted the view twice -- once for the model it put on
+  screen, once for the mount that went under it. The log of the player before it is kept beside the new
+  one's as `unityRenderer.before-reconnect-<n>.log`;
+- `wait:<ms>` pumps the host with the canvas ticking, which lets a `WMV_VIEWPORT_SHOT` capture land before
+  the test ends.
+
+For example, on `-mo character/human/male/humanmale_hd.m2`:
+`WMV_IPCTEST_SEQUENCE="mount:8469;dismount;mount:8469;mount:17697;mount:83632;mount:8469;dismount"`.
+
 Each step logs one `[unityipc-test]   step n/N ...` line with the host's state after it.
 
 **Capture hooks (validation only).** Three environment variables let a headless run capture the real
 viewport without a window on screen; unset, none of them changes anything. `WMV_VIEWPORT_SHOT=<name>`
-writes `<name>.png` beside the player's data folder, 40 frames after each model or world model is put on
-screen; with it, `WMV_VIEWPORT_SIZE=<n>` (128 to 4096, default 1024) asks for an n x n screen before
-anything is framed (the operating system may clamp it to the display), and
-`WMV_VIEWPORT_ORBIT="yaw:pitch[:distanceScale]"` re-aims the camera after a world
-model is framed (angles in the player's orbit terms, the distance as a multiple of the framing distance),
-so a capture can be taken from a named view: the WMO audit's reference views are `135:30` and `315:30`.
+writes `<name>.png` beside the player's data folder, 40 frames after the last thing that changed what is on
+screen: a model or world model put up, the mount under a character changed, and while a character rides, a
+sequence switch completed on either model or a newer scene applied to the character. A newer request moves a
+capture that is waiting on, and the capture waits while a load, a character's scene, a mount being prepared or
+a sequence switch waiting for its keyframe file is still on its way (at most 30 seconds, after which it is
+taken and the log says what it was waiting for) -- so the image shows the mount committed and the clip asked
+for, or the pose `-wmvAnimTime` pins, not a moment before them. It asks for its size again first, and frames
+the last box again when that changed the camera's aspect. Its log line records the camera position, pivot,
+yaw, pitch, distance, field of view and aspect, each model's clock (sequence, animation id, position, length,
+playing or paused, speed) and, for a character on a mount, the mount's key and file, the seat case, its bone,
+local position and scale. With it, `WMV_VIEWPORT_SIZE=<n>` (128 to 4096, default 1024) asks for an n x n
+screen before anything is framed (the operating system may clamp it to the display, and the host resizes the
+player to its pane again when its layout changes -- seen after a saved character was loaded, which is why a
+capture asks for the size again), and `WMV_VIEWPORT_ORBIT="yaw:pitch[:distanceScale]"` re-aims the camera
+after it frames a world model, a model or a character with its mount (angles in the player's orbit terms,
+the distance as a multiple of the framing distance), so a capture can be taken from a named view: the WMO
+audit's reference views are `135:30` and `315:30`, and the archived viewport's yaw Y and pitch P are
+`180-Y:90-P` (its mount references' iso view, yaw 315 at pitch 90, is `225:0`; only the angles map -- that
+camera looks at the mount's own box and has a different field of view).
 
 The canvas animation clock of the viewport check is measured inside an
 event loop activated for the measurement: the self-test runs inside `OnInit`, before the
@@ -1045,8 +1350,8 @@ are not available in the Unity-only viewer, and write no image; the `-imgseq` sm
   unweighted by default, and the few combiners that mix more than two contributing units.
 - Attachments on a model that is not a playable character. A character's items and merged
   armour are drawn (see "Characters").
-- For characters: secondary (upper-body) and mouth animations, and a mount (a mounted character
-  gets a notice).
+- For characters: secondary (upper-body) and mouth animations. A mounted character rides its mount
+  in a player of protocol 5 or later (see "Mounted characters"); an older player gets a notice.
 - Maps, terrain, fog; BLP images picked in Browse. Each of these loads and gets a notice.
 - For WMOs: doodads and doodad sets, liquids, WMO lights, fog, portal culling, LOD switching, the
   skybox, and the rest of the WMO material system (shader ids other than 0/4/5/7/13/16/23, the env-map

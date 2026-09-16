@@ -699,6 +699,21 @@ bool filterCreatures(wxString fn)
 void CharControl::selectMount()
 {
   ClearItemDialog();
+  fillMountChoices();
+
+  itemDialog = new CategoryChoiceDialog(this, UPDATE_MOUNT, g_modelViewer, wxT("Choose a mount"),
+                                        wxT("Mounts"), choices, cats, catnames, 0, true);
+  itemDialog->Move(itemDialog->GetParent()->GetScreenPosition() + wxPoint(4, 64));
+  itemDialog->Check(1, false);
+  itemDialog->DoFilter();
+  itemDialog->Show();
+  const int w = 250;
+  itemDialog->SetSizeHints(w, -1, -1, -1, -1, -1);
+  itemDialog->SetSize(w, -1);
+}
+
+void CharControl::fillMountChoices()
+{
   numbers.clear();
   choices.Clear();
   cats.clear();
@@ -755,16 +770,6 @@ void CharControl::selectMount()
     numbers.push_back(i);
     cats.push_back(1);
   }
-
-  itemDialog = new CategoryChoiceDialog(this, UPDATE_MOUNT, g_modelViewer, wxT("Choose a mount"),
-                                        wxT("Mounts"), choices, cats, catnames, 0, true);
-  itemDialog->Move(itemDialog->GetParent()->GetScreenPosition() + wxPoint(4, 64));
-  itemDialog->Check(1, false);
-  itemDialog->DoFilter();
-  itemDialog->Show();
-  const int w = 250;
-  itemDialog->SetSizeHints(w, -1, -1, -1, -1, -1);
-  itemDialog->SetSize(w, -1);
 }
 
 void CharControl::selectNPC(ssize_t type)
@@ -949,6 +954,7 @@ void CharControl::OnUpdateItem(int type, int id)
       {
         g_canvas->root->setModel(0);
         g_canvas->setModel(0);
+        mountDisplayId = 0;
       }
       if (numbers[id] < 0)  // The user selected "None". Remove existing mount.
       {
@@ -997,6 +1003,12 @@ void CharControl::OnUpdateItem(int type, int id)
       m->isMount = true;
       g_canvas->root->setModel(m);
       g_canvas->setModel(m, true);
+      // A new mount model is up: a new identity for the Unity viewport's scene, even for the same file.
+      mountSerial++;
+      mountDisplayId = morphID;
+      LOG_INFO << "[unity-mount] mount serial" << mountSerial << "installed:"
+               << (modelFile ? modelFile->fullname() : QString("(no file)")) << "fileDataID"
+               << (modelFile ? (int)modelFile->fileDataId() : 0) << "display" << morphID << "ok" << (m->ok ? 1 : 0);
       g_animControl->UpdateModel(m);
 
       // for official mounts with display IDs:
