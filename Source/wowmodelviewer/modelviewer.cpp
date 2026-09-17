@@ -3289,9 +3289,11 @@ void ModelViewer::LoadWoW(const core::GameConfig * chosenConfig, const QString &
 void ModelViewer::OnCharToggle(wxCommandEvent &event)
 {
   int ID = event.GetId();
+  // One command each: View NPC used to fall through to the character toggles below, which changed nothing but
+  // refreshed the whole character and sent its scene again every time the NPC list was opened.
   if (ID == ID_VIEW_NPC)
     charControl->selectNPC(UPDATE_NPC);
-  if (ID == ID_VIEW_ITEM)
+  else if (ID == ID_VIEW_ITEM)
     charControl->selectItem(UPDATE_SINGLE_ITEM, -1);
   else if (isChar)
     charControl->OnCheck(event);

@@ -264,6 +264,17 @@ Format loosely based on [Keep a Changelog](https://keepachangelog.com/).
   `-imgseq` smoke test is gone. `-unityipctest` and `-fbxexport` still run.
 
 ### Fixed
+- **A character's animation no longer jumps back or restarts in the Unity viewport when an item or a
+  customization changes, or when View NPC is opened or closed.** The viewport's animation clock kept running
+  while the app's UI thread was busy, but the app's clock fell behind it in three ways, and the viewport snapped
+  back to the app's time at the next heartbeat (a jump of 200-470 ms in a one-second walk cycle, measured): the
+  heartbeat was sampled before the tick after the wait had advanced the clock, a looping animation that wrapped
+  in that tick restarted at frame 0 and dropped the time past its end, and a state that reached the viewport
+  behind a composited body image (a customization) was applied as if it had just been sampled. The tick now
+  samples after advancing, the time past the end carries into the next loop, and each playback state says when
+  it was sampled (`sampledAtMs`) so the viewport moves it on by the wait. View NPC also no longer refreshes the
+  whole character and sends its scene again, and its list opens in 0.7 s instead of 2.8 s for 22,991 NPCs: the
+  item and NPC choice dialogs no longer fill the hidden list box they replace with their own list.
 - **A mount, NPC or creature whose display id is also an item display id keeps its skin.** Picking a skin by
   display id (a mount, an NPC, an Armory import) passed that CreatureDisplayInfo id on as the ItemDisplayInfo id
   the per-slot material table is keyed on. Where an unrelated item had a row under the same number, that item's

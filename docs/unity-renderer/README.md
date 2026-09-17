@@ -1123,6 +1123,15 @@ Semantics:
   split is the whole design -- snapping to every message would trade drift for a visible stutter
   once a second, and never snapping would let the two drift apart. A scrub or a stop arrives with
   the app's time already far from the player's, so it snaps without needing to be marked special.
+  **A heartbeat must be as current as the player's clock, or the player snaps back to it.** The
+  host's clock goes on through anything that holds up its UI thread -- an item picked, a
+  customization, the View NPC list being built -- and the first tick after such a wait carries all of
+  it, so the tick advances the clock first and samples the heartbeat after (`ModelCanvas::tick`), and
+  a sequence that wraps keeps the time past its end (`AnimManager::Tick`) rather than restarting at
+  0, as the player's own clock does. Each state also carries `sampledAtMs`, when the host sampled
+  it on the system's performance counter, which the player reads too: a state read late -- behind a
+  composited body image of megabytes, say -- is moved on by the wait before it is applied
+  (`WmvIpcClient.ProjectFromSample`).
   **Global sequences keep running while the animation is paused, and ignore the speed.** That is
   the host clock's own behaviour, not an accident: it advances its global clock before it
   decides whether the animation is paused, and the speed multiplier lives inside the animation

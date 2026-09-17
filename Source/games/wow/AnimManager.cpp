@@ -180,7 +180,19 @@ int AnimManager::Tick(int time)
 
   if (Frame >= model.anims[animList[PlayIndex].AnimID].length)
   {
+    // The time past the end belongs to what plays next, as for the mouth and upper-body clocks above.
+    // Starting it at frame 0 dropped that time: a tick is normally a few ms past the end, but the first
+    // tick after the UI thread was busy carries the whole wait, and a looping animation fell back by
+    // up to that much at every such wrap -- the embedded Unity viewport, whose own clock wraps without
+    // losing time, was then snapped back to it at the next heartbeat. Not when Next() ends the queue
+    // (its Stop() holds frame 0); a rider's manager, stopped by the mount choice while the tick still
+    // runs it, loops on and carries the time like any other.
+    const size_t over = Frame - model.anims[animList[PlayIndex].AnimID].length;
+    const bool queueEnds = CurLoop == 1 && PlayIndex + 1 >= Count;
     Next();
+    const size_t length = GetFrameCount();
+    if (!queueEnds && length > 0)
+      Frame = over % length;
     return 1;
   }
 

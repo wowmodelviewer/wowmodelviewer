@@ -905,8 +905,6 @@ void CharControl::selectNPC(ssize_t type)
   else
     itemDialog = new FilteredChoiceDialog(this, (int)type, g_modelViewer, _("Select an NPC"), _("NPC Models"), choices, &quality, false);
 
-  itemDialog->SetSelection(0);
-
   wxSize s = itemDialog->GetSize();
   const int w = 250;
   if (s.GetWidth() > w)

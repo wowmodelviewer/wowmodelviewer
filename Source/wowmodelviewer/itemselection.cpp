@@ -53,7 +53,10 @@ ChoiceDialog::ChoiceDialog(CharControl *dest, int type,
                            const wxString& message,
                            const wxString& caption,
                            const wxArrayString& choices)
-    : wxSingleChoiceDialog(parent, message, caption, choices, (void**)NULL, wxCHOICEDLG_STYLE & ~wxCANCEL & ~wxCENTER, wxDefaultPosition)
+    // The choices go into the list control below, not into the base dialog's own list box, which this dialog takes
+    // out and hides straight away. Filling that box as well was most of the time the dialog took to open: 1.9 s of
+    // 2.8 s for View NPC's 22,991 rows, all of it on the UI thread.
+    : wxSingleChoiceDialog(parent, message, caption, wxArrayString(), (void**)NULL, wxCHOICEDLG_STYLE & ~wxCANCEL & ~wxCENTER, wxDefaultPosition)
 {
   cc = dest;
   this->type = type;

@@ -79,14 +79,16 @@
 //     the host's whole per-submesh display state for the displayed model, sent when the user
 //     switches a geoset; indexed by skin submesh index (SFID[0])
 //   modelAnimation { fileDataID, sequenceIndex, animID, durationMs, loop, role, load } (pushed, no request)
-//   modelAnimationState { fileDataID, sequenceIndex, playing, timeMs, speed, loop, explicitState,
+//   modelAnimationState { fileDataID, sequenceIndex, playing, timeMs, speed, loop, explicitState, sampledAtMs,
 //                         load, hasRider, rider:{ sequenceIndex, playing, timeMs, speed, loop } } (pushed, no request)
 //     explicitState: true when a control set the state (play, pause, a frame step, a scrub,
 //     the start of a load), false for the heartbeat. role, load, hasRider and rider (protocol 5) are
 //     sent only about a ridden mount's two models: role says which of them a selection changed
 //     ("mount" or "rider" -- a FileDataID cannot, a mount model can also be a race's body), load is
 //     the rider's load serial, and a state keeps the mount in its top level with the rider's state
-//     nested beside it, "playing" there being the mount's pause (see WmvSlotAnimation)
+//     nested beside it, "playing" there being the mount's pause (see WmvSlotAnimation). sampledAtMs is
+//     when the host sampled the state, on the system's performance counter, which this process reads
+//     too (ProjectFromSample)
 //   characterImage { hash, kind, width, height, format:"bgra8", encoding:"base64", data }
 //     a host-composited texture (the body, the eyes), rows top first, bytes B,G,R,A; named by
 //     hash in the scenes that follow. The player keeps the newest image of each kind for the
@@ -472,6 +474,7 @@ public class WmvIpcClient : MonoBehaviour
         public bool playing;
         public int timeMs;
         public float speed;
+        public double sampledAtMs;    // modelAnimationState: when the host sampled it (ProjectFromSample)
         public int revision;
         public bool hasSubmeshVisible;
         public int submeshCount;
@@ -515,6 +518,45 @@ public class WmvIpcClient : MonoBehaviour
     /// </summary>
     static readonly System.Diagnostics.Stopwatch clock = System.Diagnostics.Stopwatch.StartNew();
     public static double NowSeconds { get { return clock.Elapsed.TotalSeconds; } }
+
+    [System.Runtime.InteropServices.DllImport("kernel32.dll")] static extern bool QueryPerformanceCounter(out long count);
+    [System.Runtime.InteropServices.DllImport("kernel32.dll")] static extern bool QueryPerformanceFrequency(out long frequency);
+
+    /// <summary>The system's performance counter in milliseconds -- the clock the host stamps a playback state with
+    /// (sampledAtMs); this stopwatch counts from another start. 0 where it cannot be read.</summary>
+    public static double PerformanceCounterMs()
+    {
+        try
+        {
+            long count, frequency;
+            if (QueryPerformanceCounter(out count) && QueryPerformanceFrequency(out frequency) && frequency > 0)
+                return count * 1000.0 / frequency;
+        }
+        catch (Exception) { }   // no such library on this platform
+        return 0.0;
+    }
+
+    /// <summary>
+    /// A playback state is read here, on the reader thread, only after every line the host sent before it -- and a
+    /// composited body image sent with a customization is megabytes of base64, read and decoded first (measured: a
+    /// state 126 ms old by the time it was read). Positions applied as sent were that wait behind the host, and the
+    /// animator, whose own clock had kept running, snapped back to them. So a running clock's position is moved on by
+    /// the time since the host sampled it, at its speed, as the host's own clock has moved on meanwhile; from here on
+    /// the state is projected from when it was read (receivedSeconds), as before. A state without sampledAtMs (an
+    /// older host), or with an implausible wait, is left as sent.
+    /// </summary>
+    static void ProjectFromSample(Msg msg)
+    {
+        if (msg.type != "modelAnimationState" || msg.sampledAtMs <= 0.0)
+            return;
+        double waitedMs = PerformanceCounterMs() - msg.sampledAtMs;
+        if (waitedMs <= 0.0 || waitedMs > 10000.0)
+            return;
+        if (msg.playing)
+            msg.timeMs += (int)Math.Round(waitedMs * Math.Max(msg.speed, 0f));
+        if (msg.hasRider && msg.rider != null && msg.rider.playing)
+            msg.rider.timeMs += (int)Math.Round(waitedMs * Math.Max(msg.rider.speed, 0f));
+    }
     readonly Queue<string> statusQueue = new Queue<string>();
     int nextRequestId = 1;
 
@@ -561,6 +603,7 @@ public class WmvIpcClient : MonoBehaviour
                     if (msg != null)
                     {
                         msg.receivedSeconds = NowSeconds;
+                        ProjectFromSample(msg);
                         // A composited image is megabytes of base64. Decoded HERE, on the reader
                         // thread, so the frame it lands in only swaps a reference.
                         if (msg.type == "characterImage")
