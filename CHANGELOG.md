@@ -278,6 +278,12 @@ Format loosely based on [Keep a Changelog](https://keepachangelog.com/).
   declares type 14. The skin list, the skin sent to the Unity viewport and the database fallback in
   `UnityAssetAccess` now use that mapping (`TextureGroup::textureType`) for mounts, `-mo` creatures and NPCs.
   Older clients whose table has three variations, and user skin files, still read three.
+- **An item effect no longer draws as a black rectangle after the item level is changed.** A merged armour part
+  the host re-creates for a new level can come back under the same key. The Unity player then only re-pointed
+  its textures, but every material keeps the combiner and alpha it was built with, so a texture type the first
+  level did not name (the effect texture of Chosen Bloodslayer's Fanged Grips at levels 3-6) was drawn with no
+  second unit and an opaque alpha, and its alpha-blended card showed as a solid dark rectangle. A merged part
+  whose filled texture slots change is now built again; a change of files in the same slots is still rebound.
 - **A long equipment item name no longer makes Model > Appearance wider than the panel.** The name is cut
   short with an ellipsis where the panel ends. The full width of a name such as "Thunderfury, Blessed Blade
   of the Windseeker" used to become the page's minimum width the next time the page was laid out -- mounting
