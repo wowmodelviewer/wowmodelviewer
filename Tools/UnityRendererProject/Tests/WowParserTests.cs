@@ -1837,6 +1837,8 @@ namespace Wmv.Wow.Tests
             PutF32(b, pp + 104, 2f);      // scales.y
             PutF32(b, pp + 108, 519f);    // the third float: NOT a scale
             PutF32(b, pp + 112, 0.5f);    // slowdown
+            PutF32(b, pp + 116, 0.125f);  // base spin
+            PutF32(b, pp + 120, -3f);     // base spin variation: a magnitude, read as 3
             PutF32(b, pp + 124, 0.25f);   // sprite rotation
 
             // ---- the ribbon emitter ----
@@ -1891,6 +1893,8 @@ namespace Wmv.Wow.Tests
                   "particle: the third scales float is NOT applied to the last stop");
             Near(p.Slowdown, 0.5f, "particle: slowdown");
             Near(p.SpriteRotation, 0.25f, "particle: sprite rotation");
+            Near(p.BaseSpin, 0.125f, "particle: base spin read at params +116");
+            Near(p.BaseSpinVariation, 3f, "particle: base spin variation read at params +120, as a magnitude");
 
             M2RibbonEmitterDef rb = m.RibbonEmitters[0];
             Check(rb.Bone == 1, "ribbon: bone index (int32)");
@@ -1927,8 +1931,10 @@ namespace Wmv.Wow.Tests
 
             // Flags.
             M2ParticleEmitterDef f = M2Parser.Parse(
-                WrapChunked(BuildEmitterPayload(0x10 | 0x1000 | 0x800000 | 0x20000),
+                WrapChunked(BuildEmitterPayload(0x4 | 0x10 | 0x1000 | 0x800000 | 0x20000),
                             new[] { 1 }, new[] { 10, 11, 12, 13 })).ParticleEmitters[0];
+            Check(f.VelocityOrient, "particle: velocity-oriented flag 0x4");
+            Check(!sp.ParticleEmitters[0].VelocityOrient, "particle: no velocity orientation without 0x4");
             Check(f.DoNotTrail, "particle: DONOTTRAIL flag");
             Check(f.DoNotBillboard, "particle: DONOTBILLBOARD flag");
             Check(f.Outward, "particle: OUTWARD flag");

@@ -1576,13 +1576,7 @@ void ModelCanvas::tick()
 
   globalTime += (ddt);
 
-  // The embedded Unity viewport times itself, so it drifts against this clock. This is the only
-  // place that runs every frame with the animation state to hand; the call rate-limits itself to
-  // a heartbeat and does nothing at all while no player is connected.
-  if (g_modelViewer)
-    g_modelViewer->SendAnimationStateToUnity(false);
-
-  // Likewise the character's resolved appearance: whatever changed it -- a customization, an item,
+  // The character's resolved appearance: whatever changed it -- a customization, an item,
   // a render toggle, a geoset checkbox -- has finished by the time the next tick runs, so this is
   // where one push per change is sent, however many refreshes the change took.
   if (g_modelViewer)
@@ -1600,6 +1594,16 @@ void ModelCanvas::tick()
     
     root->tick(ddt);
   }
+
+  // The embedded Unity viewport times itself, so it drifts against this clock. This is the only
+  // place that runs every frame with the animation state to hand; the call rate-limits itself to
+  // a heartbeat and does nothing at all while no player is connected. It reads the clock AFTER this
+  // tick has advanced it: the first tick after the UI thread was busy (an item picked, a customization,
+  // the View NPC list being built) carries the whole wait in ddt, and a state sampled before the
+  // advance was that wait out of date -- the player, whose own clock kept running, took the difference
+  // for drift and jumped back.
+  if (g_modelViewer)
+    g_modelViewer->SendAnimationStateToUnity(false);
 
   if (drawSky && sky && skyModel) {
     sky->tick(ddt);

@@ -44,6 +44,7 @@ public class WmvCharacterDresser
         public Dictionary<int, BlpImage> Textures = new Dictionary<int, BlpImage>();
         public string TextureSignature = "";
         public string PlacementSignature = "";
+        public string FilledSlots = "";
     }
 
     /// <summary>A part being prepared for the scene in progress: its files, parsed. FileDataID is the
@@ -378,7 +379,8 @@ public class WmvCharacterDresser
             foreach (var t in m.textures) ready &= TextureReady(t);
             if (m.handTexture != null) ready &= TextureReady(m.handTexture);
             Part have;
-            if (!(parts.TryGetValue(m.key, out have) && have.FileDataID == m.fileDataID))
+            if (!(parts.TryGetValue(m.key, out have) && have.FileDataID == m.fileDataID &&
+                  have.FilledSlots == FilledSlotsOf(m.textures)))
                 ready &= Prepare(m.key, m.fileDataID, -1);
         }
         foreach (var a in target.attachments)
@@ -613,7 +615,10 @@ public class WmvCharacterDresser
     bool ApplyMerged(WmvIpcClient.SceneMerged m, List<string> missing)
     {
         Part part;
-        bool exists = parts.TryGetValue(m.key, out part) && part.FileDataID == m.fileDataID && part.Runtime != null;
+        // Built again, not rebound, when the slots the scene fills change: see FilledSlotsOf.
+        string filledSlots = FilledSlotsOf(m.textures);
+        bool exists = parts.TryGetValue(m.key, out part) && part.FileDataID == m.fileDataID && part.Runtime != null &&
+                      part.FilledSlots == filledSlots;
         string texSig = TextureSignature(m.textures) + "|hand:" + (m.handTexture != null ? TextureSignature(new[] { m.handTexture }) : "") +
                         "|" + string.Join(",", Array.ConvertAll(m.handSubmeshes ?? new int[0], x => x.ToString()));
         bool[] flags = WmvIpcClient.Flags(m.submeshVisible);
@@ -676,7 +681,7 @@ public class WmvCharacterDresser
             if (runtime.Skin != null)
                 runtime.Skin.updateWhenOffscreen = BodyBoundsFollowPose();
             part = new Part { Key = m.key, Merged = true, FileDataID = m.fileDataID, Runtime = runtime, Model = model,
-                              Textures = textures, TextureSignature = texSig };
+                              Textures = textures, TextureSignature = texSig, FilledSlots = filledSlots };
             parts[m.key] = part;
             Log(string.Format("merged part {0} built: {1} submesh(es), {2} material(s), bone map {3} entr(ies){4}",
                               m.fileDataID, runtime.SubmeshCount, runtime.Materials.Length, m.boneMap != null ? m.boneMap.Length : 0,
@@ -843,6 +848,24 @@ public class WmvCharacterDresser
         foreach (var t in list)
             if (t != null)
                 sb.Append(t.slot).Append('=').Append(string.IsNullOrEmpty(t.image) ? t.fileDataID.ToString() : "i" + t.image).Append(';');
+        return sb.ToString();
+    }
+
+    /// <summary>
+    /// The texture slots a scene fills for a part, without the files in them. The builder arms each material's
+    /// combiner and alpha from the textures present when it builds (WmvModelBuilder.CreateMaterial), and
+    /// RebindTextures only re-points images. A slot that was empty at the build and filled later -- an item level
+    /// whose display adds a texture type the first one did not name, on a model the host re-creates at the same
+    /// address -- would otherwise keep a combiner with no second unit and an opaque alpha: an effect card drawn as a
+    /// solid rectangle.
+    /// </summary>
+    static string FilledSlotsOf(WmvIpcClient.SceneTexture[] list)
+    {
+        if (list == null) return "";
+        var sb = new System.Text.StringBuilder();
+        foreach (var t in list)
+            if (t != null)
+                sb.Append(t.slot).Append(';');
         return sb.ToString();
     }
 

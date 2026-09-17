@@ -26,6 +26,18 @@
 
 namespace
 {
+  // The system's performance counter in milliseconds: one clock that the host and the player, two processes on one
+  // machine, both read. 0 where there is none.
+  double performanceCounterMs()
+  {
+#ifdef _WINDOWS
+    LARGE_INTEGER count, frequency;
+    if (QueryPerformanceCounter(&count) && QueryPerformanceFrequency(&frequency) && frequency.QuadPart > 0)
+      return (double)count.QuadPart * 1000.0 / (double)frequency.QuadPart;
+#endif
+    return 0.0;
+  }
+
   const int POLL_INTERVAL_MS = 20;
   const size_t RECV_CHUNK = 64 * 1024;
   const size_t MAX_LINE = 1024 * 1024;   // requests from the player are tiny; guard against junk
@@ -738,6 +750,10 @@ void UnityIpcServer::sendModelAnimationState(int m2FileDataID, int sequenceIndex
   msg["speed"] = speed;
   msg["loop"] = loop;
   msg["explicitState"] = explicitState;
+  // When these positions were sampled, on the clock the player reads too. The line can wait behind other traffic
+  // before the player reads it -- a composited body image is megabytes, read and decoded first -- and a position
+  // applied as sent after such a wait put the player back by the wait.
+  msg["sampledAtMs"] = performanceCounterMs();
   // A ridden mount (protocol 5): the rider's clock, sampled in the same call as the mount's above. "hasRider"
   // says it is there; a nested object's absence is not something every reader can tell apart from defaults.
   if (rider)

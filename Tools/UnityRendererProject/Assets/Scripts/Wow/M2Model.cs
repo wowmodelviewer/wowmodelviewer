@@ -386,11 +386,47 @@ namespace Wmv.Wow
 
         public float Slowdown;
         public float SpriteRotation;
+
+        /// <summary>
+        /// ModelParticleParams +116 and +120: the angle a particle's quad starts at, and how far
+        /// each particle's own start angle may vary from it, in radians. The legacy header leaves
+        /// both unnamed (unknown1[2], modelheaders.h:429) and the legacy runtime never reads them.
+        /// They are read here as a base spin and its variation, the pair just before the spin
+        /// speed and its variation at +124/+128 -- +124 being the field the legacy header calls the
+        /// sprite rotation.
+        ///
+        /// Measured over the 13,474 particle emitters of the client's creature models, they behave
+        /// as that pair: +116 is 0 on every one, and +120 is never negative -- a magnitude -- and is
+        /// 2*pi on 21 %, pi on 12 %, pi/2 on 2 % and 0 on 55 %. Without it every camera-facing quad
+        /// of an emitter is drawn at the same angle, so a stretched texture -- a needle, a streak --
+        /// stacks into parallel lines instead of scattering at random angles. A velocity-oriented
+        /// quad (VelocityOrient) takes its angle from its velocity instead, and neither is applied.
+        /// </summary>
+        public float BaseSpin;
+        public float BaseSpinVariation;
+
         /// <summary>ModelParticleParams.tailLength: how long a TAIL particle's streak is, as a
         /// multiple of its velocity -- the quad runs from the particle back along -velocity *
         /// TailLength. Meaningless for a head-only emitter.</summary>
         public float TailLength;
 
+        /// <summary>
+        /// Bit 0x4: a camera-facing quad lies along the particle's velocity as the camera sees it
+        /// -- its x axis, and the texture's U, along the motion -- rather than square to the screen.
+        /// The legacy table leaves the bit unnamed and the legacy runtime never tests it; the public
+        /// M2 format documentation calls it VelocityOrient.
+        ///
+        /// Measured over the 13,474 particle emitters of the client's creature models, it is the
+        /// stretched-particle bit: 55 % of the 1,285 emitters that set it author a size ramp more
+        /// than twice as long one way as the other, against 1.9 % of the rest, and on 92 % of those
+        /// the long axis is x (54 % without the bit) -- the axis that runs along the motion. A
+        /// reference render of Primeval Skyfriend's belly emitters (x 0.011 -> 0.61, y 0.48 -> 0.09,
+        /// falling away from the belly) draws exactly that: a flat blob that stretches into a strand
+        /// hanging along its fall, the droplet's round end leading, and no quad turned by the start
+        /// angle although +120 authors a full turn. Drawn square to the screen instead, the same
+        /// ramp is a needle that flattens into a level bar.
+        /// </summary>
+        public bool VelocityOrient { get { return (Flags & 0x4) != 0; } }
         public bool WorldSpace { get { return (Flags & 0x8) != 0; } }
         public bool DoNotTrail { get { return (Flags & 0x10) != 0; } }
         public bool ModelSpace { get { return (Flags & 0x80) != 0; } }
