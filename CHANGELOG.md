@@ -275,6 +275,22 @@ Format loosely based on [Keep a Changelog](https://keepachangelog.com/).
   it was sampled (`sampledAtMs`) so the viewport moves it on by the wait. View NPC also no longer refreshes the
   whole character and sends its scene again, and its list opens in 0.7 s instead of 2.8 s for 22,991 NPCs: the
   item and NPC choice dialogs no longer fill the hidden list box they replace with their own list.
+- **Stretched particles drip along their motion, or scatter at their own angles, in the Unity viewport.** A
+  camera-facing particle quad was always drawn square to the screen and turned only by the emitter's sprite
+  rotation (particle params +124), one angle for every particle of the emitter. Two authored settings were
+  ignored. Flag 0x4 (VelocityOrient in the public M2 format documentation; unnamed and never tested by the legacy
+  runtime) lays the quad along the particle's velocity as the camera sees it, with the size ramp's x and the
+  texture's U along the motion. Primeval Skyfriend's belly emitters author a ramp from 0.011 x 0.48 to 0.61 x 0.09
+  over a droplet texture: in a reference render each particle leaves the belly as a flat blob and draws out into
+  a strand hanging along its fall, round end first -- slime dripping -- where the viewport drew a needle that
+  flattened into a level bar. Across the client's 13,474 creature emitters, 55 % of the 1,285 that set 0x4 author
+  a stretched size ramp, against 1.9 % of the rest, and 92 % of those are long in x. The other setting is the
+  per-particle start angle, a base and a variation at params +116/+120 (baseSpin and baseSpinVariation in the same
+  documentation, never read by the legacy runtime): every other camera-facing quad now takes the base plus its own
+  random share of +/- the variation when it spawns, so a stretched texture no longer stacks into parallel lines.
+  A velocity-oriented quad takes neither angle, as the reference render shows on those belly emitters although
+  they author a full turn. An emitter that sets neither draws exactly as before, random numbers included; the spin
+  speed at +124 is still one fixed angle.
 - **A mount, NPC or creature whose display id is also an item display id keeps its skin.** Picking a skin by
   display id (a mount, an NPC, an Armory import) passed that CreatureDisplayInfo id on as the ItemDisplayInfo id
   the per-slot material table is keyed on. Where an unrelated item had a row under the same number, that item's

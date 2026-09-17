@@ -72,6 +72,15 @@
 //     59.8 % of emitters that are 1x1 the two are identical.
 // 10. RIBBON GEOMETRY -- see RibbonState, where the legacy's own TODO and two glm mistakes are
 //     set out in full.
+// 11. QUAD ROLL. The legacy draws every quad unrotated: it copies +124 into a member nothing
+//     reads (particle.cpp:60) and reads neither +116 nor +120. A camera-facing quad here is turned
+//     by the sprite rotation (+124), which is one angle for the whole emitter, plus the particle's
+//     own start angle: BaseSpin (+116) and a random share of +/- BaseSpinVariation (+120), drawn
+//     at spawn -- see ParticleState.Roll.
+// 12. VELOCITY-ORIENTED QUADS. The legacy never tests flag 0x4. Here a camera-facing quad of an
+//     emitter that sets it lies along the particle's velocity as the camera sees it, and is
+//     turned by neither angle of note 11 -- see M2ParticleEmitterDef.VelocityOrient and
+//     BuildParticleMesh.
 //
 // zSource is not implemented, exactly as the legacy does not implement it. It measures as 255.0
 // on the emitters that set it, and one line of header comment is not enough to build motion from.
@@ -153,6 +162,31 @@ public class WmvEmitterRuntime : MonoBehaviour
         public int[] TileSeed;              // the flipbook offset chosen at spawn
         public Vector3[] QuadRight;         // only allocated when the emitter does not billboard
         public Vector3[] QuadUp;
+
+        /// <summary>
+        /// Each particle's own start angle, in radians: BaseSpin plus a random share of
+        /// +/- BaseSpinVariation, picked at spawn. Only allocated when the emitter authors either and
+        /// its quads are not velocity-oriented.
+        ///
+        /// Without it every camera-facing quad of an emitter has the one angle of the sprite
+        /// rotation. On a round glow nobody can tell; on a stretched texture it is the difference
+        /// between a spray of needles at random angles and a stack of parallel bars. A reference
+        /// render of Mimiron's Head (+120 = pi, square quads, flag 0x4 clear) draws its quads at
+        /// angles spread over more than half a turn -- a draw from +/- the variation, not from 0 to
+        /// it. See M2ParticleEmitterDef.BaseSpin for what the two fields are and how they measure.
+        ///
+        /// NOT FOR A VELOCITY-ORIENTED EMITTER (flag 0x4). Its quad's angle is its velocity's, and
+        /// the same reference draws Primeval Skyfriend's belly emitters, which author a full turn
+        /// (2*pi) of variation with 0x4, with every quad along the fall and none turned. Such an
+        /// emitter draws no angle, so it takes exactly the random numbers it took before.
+        ///
+        /// Plus or minus the variation, the same convention Spawn applies to the speed variation.
+        /// Drawn as the LAST random number of a spawn, and only when the emitter authors a
+        /// variation, so an emitter without one takes exactly the random numbers it took before.
+        /// Applied to camera-facing head quads, where the sprite rotation is applied; an XY quad
+        /// (0x1000) and a tail streak are not turned by either.
+        /// </summary>
+        public float[] Roll;
 
         public float SpawnRemainder;
         public uint Rng;
@@ -409,6 +443,8 @@ public class WmvEmitterRuntime : MonoBehaviour
             s.QuadRight = new Vector3[s.Capacity];
             s.QuadUp = new Vector3[s.Capacity];
         }
+        if ((def.BaseSpin != 0f || def.BaseSpinVariation != 0f) && !def.VelocityOrient)
+            s.Roll = new float[s.Capacity];
 
         int quads = s.Capacity * s.QuadsPerParticle;
         s.Verts = new Vector3[quads * 4];
@@ -869,6 +905,8 @@ public class WmvEmitterRuntime : MonoBehaviour
                     s.QuadRight[i] = s.QuadRight[last];
                     s.QuadUp[i] = s.QuadUp[last];
                 }
+                if (s.Roll != null)
+                    s.Roll[i] = s.Roll[last];
                 s.Count--;
                 continue;
             }
@@ -945,6 +983,11 @@ public class WmvEmitterRuntime : MonoBehaviour
         s.MaxLife[i] = lifespan > 0f ? lifespan : 1f;
         s.TileSeed[i] = (s.Def.RandomTexture || s.Def.RandomStart)
                         ? (int)(RandUnit(s) * s.TileCount) % s.TileCount : 0;
+
+        // The quad's own start angle -- see ParticleState.Roll for why it is drawn last.
+        if (s.Roll != null)
+            s.Roll[i] = s.Def.BaseSpin + (s.Def.BaseSpinVariation != 0f
+                ? RandRange(s, -s.Def.BaseSpinVariation, s.Def.BaseSpinVariation) : 0f);
     }
 
     // =========================================================================================
@@ -1005,6 +1048,39 @@ public class WmvEmitterRuntime : MonoBehaviour
     /// </summary>
     const float TailDegenerateSq = 1.1e-5f;
 
+    /// <summary>The squared on-screen speed, in model units per second, below which a
+    /// velocity-oriented particle has no direction to lie along and is drawn as a plain quad.</summary>
+    const float VelocityOrientMinSq = 1e-10f;
+
+    /// <summary>
+    /// The axes of a velocity-oriented quad (flag 0x4, M2ParticleEmitterDef.VelocityOrient), or
+    /// false when the velocity has no length on screen -- straight at the camera, or none.
+    ///
+    /// x, and the texture's U, lie along the velocity as the camera sees it, U growing back from
+    /// where the particle is heading so that the tile's start leads; y lies across it, V running
+    /// to the left of the motion. That is the corner order a reference render gives Primeval
+    /// Skyfriend's belly drips, measured from its vertices: a mirror image of the plain quad's,
+    /// which the two-sided particle material draws the same. Neither the sprite rotation nor a
+    /// start angle is added -- the same render turns none of those quads, although the emitters
+    /// author a full turn of start angle.
+    /// </summary>
+    static bool AlongVelocity(Vector3 velocity, Vector3 camRight, Vector3 camUp, float halfX, float halfY,
+                              out Vector3 right, out Vector3 up)
+    {
+        float vx = Vector3.Dot(velocity, camRight), vy = Vector3.Dot(velocity, camUp);
+        float v2 = vx * vx + vy * vy;
+        if (v2 <= VelocityOrientMinSq)
+        {
+            right = up = Vector3.zero;
+            return false;
+        }
+        float inv = 1f / Mathf.Sqrt(v2);
+        float dx = vx * inv, dy = vy * inv;
+        right = (camRight * -dx + camUp * -dy) * halfX;
+        up = (camRight * -dy + camUp * dx) * halfY;
+        return true;
+    }
+
     void BuildParticleMesh(ParticleState s, Matrix4x4 boneMatrix, Vector3 camRight, Vector3 camUp)
     {
         int v = 0, quads = 0;
@@ -1032,11 +1108,24 @@ public class WmvEmitterRuntime : MonoBehaviour
             float halfY = size.Y;
 
             Vector3 right, up;
-            if (billboard)
+            if (billboard && s.Def.VelocityOrient
+                && AlongVelocity(s.BoneLocal ? boneMatrix.MultiplyVector(s.Vel[i]) : s.Vel[i],
+                                 camRight, camUp, halfX, halfY, out right, out up))
             {
-                // The sprite rotation turns the quad in the plane facing the camera.
-                right = (camRight * spinCos + camUp * spinSin) * halfX;
-                up = (camUp * spinCos - camRight * spinSin) * halfY;
+                // Flag 0x4: the quad lies along the velocity, turned by no angle (AlongVelocity).
+            }
+            else if (billboard)
+            {
+                // The sprite rotation turns the quad in the plane facing the camera, and the
+                // particle's own start angle turns it further (ParticleState.Roll).
+                float rollCos = spinCos, rollSin = spinSin;
+                if (s.Roll != null)
+                {
+                    rollCos = Mathf.Cos(spin + s.Roll[i]);
+                    rollSin = Mathf.Sin(spin + s.Roll[i]);
+                }
+                right = (camRight * rollCos + camUp * rollSin) * halfX;
+                up = (camUp * rollCos - camRight * rollSin) * halfY;
             }
             else
             {

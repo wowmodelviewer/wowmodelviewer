@@ -155,6 +155,7 @@ namespace Wmv.Wow
         const int OfsParamsScales = 100;         // see M2ParticleEmitterDef.ParticleScale
         const int OfsParamsTailLength = 88;
         const int OfsParamsSlowdown = 112;
+        const int OfsParamsBaseSpin = 116;        // then BaseSpinVariation at +120
         const int OfsParamsRotation = 124;
 
         // Field offsets inside ModelRibbonEmitterDef.
@@ -1720,6 +1721,12 @@ namespace Wmv.Wow
                 c.Seek(p + OfsParamsTailLength);
                 float tail = c.ReadSingle();
                 def.TailLength = IsFinite(tail) && tail > 0f ? tail : 0f;
+
+                c.Seek(p + OfsParamsBaseSpin);
+                float baseSpin = c.ReadSingle();
+                float baseSpinVariation = c.ReadSingle();
+                def.BaseSpin = IsFinite(baseSpin) ? baseSpin : 0f;
+                def.BaseSpinVariation = IsFinite(baseSpinVariation) ? Math.Abs(baseSpinVariation) : 0f;
 
                 c.Seek(p + OfsParamsRotation);
                 float rot = c.ReadSingle();

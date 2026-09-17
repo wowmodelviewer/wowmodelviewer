@@ -1359,6 +1359,11 @@ are not available in the Unity-only viewer, and write no image; the `-imgseq` sm
   scale tracks are evaluated (`WmvMaterialAnimator.cs`), but texture rotation tracks are parsed
   and not applied, and lit passes get no animated tint or opacity (see that file's header).
   Particle and ribbon emitters are drawn (`WmvEmitterRuntime.cs`).
+  A camera-facing particle lies along its velocity as the camera sees it when its emitter sets flag
+  0x4, and otherwise takes its own start angle when it spawns, from the emitter's base spin and its
+  variation (particle params +116/+120); the spin speed at +124 is still applied as one fixed angle
+  for the whole emitter, not per second, flag 0x200 (a random spin direction) is not read, and a
+  negative drag (params +112, which speeds a particle up over its life) is read as no drag.
 - The rest of the WoW material system: the specular lobes the archived OpenGL renderer leaves
   unweighted by default, and the few combiners that mix more than two contributing units.
 - Attachments on a model that is not a playable character. A character's items and merged
