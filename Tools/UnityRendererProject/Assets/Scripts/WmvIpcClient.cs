@@ -4,10 +4,10 @@
 // localhost TCP listener before launching the player and passes the port on the player
 // command line ("-wmvPort <n>"); the player connects back, announces itself and then asks
 // WMV for whatever it needs. Transport: newline-delimited JSON (one object per line),
-// protocol version 5 (4 added world models: loadWoWModel "kind", mapObjectLoaded and runtimeState;
+// protocol version 6 (4 added world models: loadWoWModel "kind", mapObjectLoaded and runtimeState;
 // 5 added mounted characters: characterScene "mount", its answer's mount fields, runtimeState's
 // mountFileDataID, modelAnimation "role" and "load", and modelAnimationState "load", "hasRider" and
-// "rider").
+// "rider"; 6 added captureScreenshot and its answer screenshotSaved).
 //
 // The player is WMV's new renderer foundation and renders directly from WoW data: it
 // requests raw assets and metadata from WMV -- which owns the app UI, the active
@@ -61,6 +61,10 @@
 //     each animator plays, the mount's emitters and live particles, how often the character's
 //     body textures were bound again, and how often the view was fitted to what is on screen.
 //     A test's question, answered from the main thread in message order
+//   screenshotSaved       { request, ok, error, path, width, height, bytes, renderMs, encodeMs, writeMs, totalMs }
+//     the answer to captureScreenshot (protocol 6): the PNG was written to path (ok, with its size in bytes and
+//     how long the off-screen render and readback, the PNG encode, the file write and the whole capture took,
+//     in milliseconds), or why not (error). request echoes the question's number
 //
 // WMV -> player
 //   loadWoWModel  { path, fileDataID, client, character, load, kind }
@@ -69,6 +73,10 @@
 //     kind: "m2" (also when absent) or "wmo" -- a world model: path/fileDataID name the ROOT file
 //   runtimeState  { query }                                                        (protocol 4)
 //     asks for a runtimeState answer carrying the same query number
+//   captureScreenshot { request, path, width, height }                             (protocol 6)
+//     render what the viewport shows once more, off screen, at width x height with a transparent
+//     background, and write it as a PNG to path (absolute, chosen and confirmed by the host's Save As);
+//     answered by screenshotSaved with the same request number (see WmvScreenshot.cs)
 //   assetResponse { requestId, ok, path, fileDataID, byteLength, sha1, encoding:"base64", data }
 //   assetResponse { requestId, ok:false, error }
 //   modelTextures { requestId, ok, fileDataID, textures:[{ index, type, fileDataID, source }] }
@@ -124,7 +132,7 @@ using UnityEngine;
 
 public class WmvIpcClient : MonoBehaviour
 {
-    public const int ProtocolVersion = 5;
+    public const int ProtocolVersion = 6;
 
     /// <summary>The loadWoWModel kind of a world model; anything else is an M2.</summary>
     public const string KindMapObject = "wmo";
@@ -140,6 +148,7 @@ public class WmvIpcClient : MonoBehaviour
     public Action<CharacterImage> OnCharacterImage;            // a host-composited texture
     public Action<CharacterScene> OnCharacterScene;            // the character's resolved state
     public Action<int> OnRuntimeState;                         // the host asks what is held (query number)
+    public Action<ScreenshotRequest> OnCaptureScreenshot;      // the host asks for a transparent PNG (protocol 6)
     public Action<string> OnStatus;                            // human-readable connection/state text
 
     public bool Connected { get { return connected; } }
@@ -297,6 +306,16 @@ public class WmvIpcClient : MonoBehaviour
                 load = load,
             };
         }
+    }
+
+    /// <summary>The host's captureScreenshot (protocol 6): the PNG to write, at which size. request numbers the
+    /// question so its screenshotSaved answer can be matched to it.</summary>
+    public struct ScreenshotRequest
+    {
+        public int request;
+        public string path;
+        public int width;
+        public int height;
     }
 
     // ---- characterScene -------------------------------------------------------------------------
@@ -479,6 +498,7 @@ public class WmvIpcClient : MonoBehaviour
         public bool character;
         public int load;              // also a ridden mount's animation pushes (protocol 5)
         public int query;             // runtimeState
+        public int request;           // captureScreenshot (protocol 6); its path, width and height are the fields above and below
         // a ridden mount's animation pushes (protocol 5)
         public string role;
         public bool hasRider;
@@ -799,6 +819,13 @@ public class WmvIpcClient : MonoBehaviour
                 OnRuntimeState?.Invoke(msg.query);
                 break;
 
+            case "captureScreenshot":
+                OnCaptureScreenshot?.Invoke(new ScreenshotRequest
+                {
+                    request = msg.request, path = msg.path ?? "", width = msg.width, height = msg.height,
+                });
+                break;
+
             // Unsolicited: the skin on display in WMV changed. Same payload as a modelTextures
             // reply, minus the requestId -- nothing asked for it.
             case "modelSkin":
@@ -1057,6 +1084,38 @@ public class WmvIpcClient : MonoBehaviour
              ",\"mountParticles\":" + r.MountParticles +
              ",\"bodyRebinds\":" + r.BodyRebinds +
              ",\"viewFramings\":" + r.ViewFramings + "}");
+    }
+
+    /// <summary>What a screenshotSaved answer carries (ReportScreenshotSaved). Times in milliseconds.</summary>
+    public struct ScreenshotReport
+    {
+        public int Request;
+        public bool Ok;
+        public string Error;                    // "" when Ok
+        public string Path;
+        public int Width, Height;
+        public long Bytes;                      // the PNG's size on disk, 0 when nothing was written
+        public double RenderMs, EncodeMs, WriteMs, TotalMs;
+    }
+
+    /// <summary>Answer a captureScreenshot (protocol 6) with what became of it; request echoes the question's number.</summary>
+    public void ReportScreenshotSaved(ScreenshotReport r)
+    {
+        var inv = System.Globalization.CultureInfo.InvariantCulture;
+        var sb = new StringBuilder();
+        sb.Append("{\"type\":\"screenshotSaved\",\"request\":").Append(r.Request)
+          .Append(",\"ok\":").Append(r.Ok ? "true" : "false")
+          .Append(",\"error\":\"").Append(Escape(r.Error ?? "")).Append('"')
+          .Append(",\"path\":\"").Append(Escape(r.Path ?? "")).Append('"')
+          .Append(",\"width\":").Append(r.Width)
+          .Append(",\"height\":").Append(r.Height)
+          .Append(",\"bytes\":").Append(r.Bytes)
+          .Append(",\"renderMs\":").Append(r.RenderMs.ToString("0.#", inv))
+          .Append(",\"encodeMs\":").Append(r.EncodeMs.ToString("0.#", inv))
+          .Append(",\"writeMs\":").Append(r.WriteMs.ToString("0.#", inv))
+          .Append(",\"totalMs\":").Append(r.TotalMs.ToString("0.#", inv))
+          .Append('}');
+        Send(sb.ToString());
     }
 
     /// <summary>The 0/1 submesh flags the host sends, as booleans.</summary>

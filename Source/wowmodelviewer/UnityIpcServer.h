@@ -1,7 +1,7 @@
 /*
  * UnityIpcServer.h
  *
- * Localhost IPC server for the embedded Unity renderer (protocol v5). WMV is the SERVER:
+ * Localhost IPC server for the embedded Unity renderer (protocol v6). WMV is the SERVER:
  * UnityRendererHost starts this listener BEFORE launching the player and passes the port on
  * the player's command line (-wmvPort <n>); the player connects back, announces itself with
  * unityReady and then asks WMV for the raw WoW assets/metadata it renders from. This is the
@@ -15,7 +15,7 @@
  * replace it later without changing the request side.
  *
  *   player -> WMV
- *     { "type":"unityReady", "protocolVersion":5 }
+ *     { "type":"unityReady", "protocolVersion":6 }
  *     { "type":"getAsset",             "requestId":"abc123", "path":"creature/chicken/chicken.m2" }
  *     { "type":"getAssetByFileDataID", "requestId":"abc124", "fileDataID":123456 }
  *     { "type":"getModelTextures",     "requestId":"abc125", "fileDataID":123200 }
@@ -35,12 +35,15 @@
  *       "mapObjectFileDataID":0, "loading":false, "mountFileDataID":126407, "mountKey":"M3", "liveMounts":1,
  *       "mountsBuilt":1, "mountSeat":1, "mountSeatBone":50, "modelSequence":145, "mountSequence":1,
  *       "mountEmitters":0, "mountRibbons":0, "mountParticles":0, "bodyRebinds":0, "viewFramings":2 }
+ *     { "type":"screenshotSaved", "request":1, "ok":true, "error":"", "path":"C:/Shots/bear.png", "width":3840,
+ *       "height":2160, "bytes":1545651, "renderMs":53.6, "encodeMs":183.8, "writeMs":4.3, "totalMs":248.1 }
  *   WMV -> player
  *     { "type":"loadWoWModel", "path":"creature/chicken/chicken.m2", "fileDataID":0, "client":"active",
  *       "character":false, "load":12, "kind":"m2" }
  *     { "type":"loadWoWModel", "path":"world/wmo/.../it_trollhouse03.wmo", "fileDataID":115058,
  *       "client":"active", "character":false, "load":13, "kind":"wmo" }
  *     { "type":"runtimeState", "query":3 }
+ *     { "type":"captureScreenshot", "request":1, "path":"C:/Shots/bear.png", "width":3840, "height":2160 }
  *     { "type":"assetResponse", "requestId":"abc123", "ok":true, "path":"...", "fileDataID":n,
  *       "byteLength":123456, "sha1":"...", "encoding":"base64", "data":"..." }
  *     { "type":"assetResponse", "requestId":"abc123", "ok":false, "error":"not found" }
@@ -175,6 +178,13 @@
  * bound its body textures again) and "viewFramings" (how often the player fitted the view to what is on
  * screen: once per model, world model or mount change, and never for anything else).
  *
+ * SCREENSHOTS (protocol 6). captureScreenshot asks the player to render what the viewport shows once more, off screen,
+ * at width x height with a transparent background, and to write it as an RGBA PNG to path -- an absolute path the
+ * host's Save As dialog chose and confirmed. The pixels never travel over this channel: the player writes the file
+ * itself and answers screenshotSaved with the same request number, "ok" and the file's size in bytes, or "ok":false
+ * and why ("error"), with how long the render and readback, the PNG encode, the write and the whole capture took (ms).
+ * The player's side is Tools/UnityRendererProject/Assets/Scripts/WmvScreenshot.cs. Nothing is sent to an older player.
+ *
  * modelAnimation is pushed the same way whenever the animation on display changes, and once after
  * loadWoWModel so the player starts on the animation the app is showing rather than on its own
  * idle. "sequenceIndex" is what the player must act on: it indexes the model's animation table,
@@ -224,7 +234,7 @@
 class UnityIpcServer : public wxEvtHandler
 {
 public:
-  static const int PROTOCOL_VERSION = 5;
+  static const int PROTOCOL_VERSION = 6;
 
   UnityIpcServer();
   ~UnityIpcServer();
@@ -249,6 +259,8 @@ public:
   // The player seats a character on a mount: it takes a characterScene's "mount", the role and rider fields of
   // the animation pushes, and answers the mount in characterSceneApplied (protocol 5; MOUNTED CHARACTERS above).
   bool playerRidesMounts() const { return m_client && m_unityReady && m_playerProtocol >= 5; }
+  // The player writes viewport screenshots: it takes captureScreenshot and answers screenshotSaved (protocol 6).
+  bool playerTakesScreenshots() const { return m_client && m_unityReady && m_playerProtocol >= 6; }
 
   // Runtime command: tell the player which model is active. Either path or fileDataID may be
   // empty/0. Queued if the player is connected; dropped (logged) otherwise.
@@ -419,6 +431,29 @@ public:
   // Raised on the GUI thread for every runtimeState answer.
   std::function<void(const RuntimeState &)> onRuntimeState;
 
+  // Ask the player for a width x height PNG of the viewport with a transparent background, written to path (absolute;
+  // see SCREENSHOTS above). Returns the request's number, which the answer echoes, or 0 when nothing was sent (no
+  // player, or one older than protocol 6).
+  int requestScreenshot(const QString & path, int width, int height);
+  // The player's answer to captureScreenshot. A number the player did not send reads -1.
+  struct ScreenshotResult
+  {
+    int request = 0;
+    bool ok = false;
+    QString error;                 // why not, when !ok
+    QString path;
+    int width = -1;
+    int height = -1;
+    long long bytes = -1;          // the PNG's size on disk
+    double renderMs = -1.0;        // the off-screen render and the readback
+    double encodeMs = -1.0;        // the PNG encode
+    double writeMs = -1.0;         // the file write
+    double totalMs = -1.0;         // the whole capture, from the end of the frame it was taken in
+    QString describe() const;
+  };
+  // Raised on the GUI thread for every screenshotSaved.
+  std::function<void(const ScreenshotResult &)> onScreenshotSaved;
+
   // Raised (on the GUI thread) when the player's unityReady arrives -- the host uses it to
   // push the currently displayed model.
   std::function<void()> onUnityReady;
@@ -485,6 +520,7 @@ private:
   void handleCharacterSceneApplied(const QJsonObject & msg);
   void handleMapObjectLoaded(const QJsonObject & msg);
   void handleRuntimeState(const QJsonObject & msg);
+  void handleScreenshotSaved(const QJsonObject & msg);
   void queueLine(const QByteArray & line);
   // One line assembled from pieces straight in the send buffer: a characterImage line is ~11 MB, and
   // joining it into one QByteArray first would copy all of it once more.
@@ -511,6 +547,7 @@ private:
   std::map<QString, QString> m_sentImageIds;
   int m_imageSerial = 0;
   int m_runtimeQuery = 0;            // the last runtimeState question's number
+  int m_screenshotRequest = 0;       // the last captureScreenshot request's number
   std::string m_inBuf;              // partial incoming line
   std::string m_outBuf;              // pending bytes to send (partial sends are normal for big assets)
   // How much of m_outBuf has gone out. Sent bytes are dropped from the front only when they are more

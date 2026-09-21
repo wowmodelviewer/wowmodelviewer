@@ -757,6 +757,40 @@ geometry**. This is the foundation stage, and it is deliberately narrow:
   root that fails to open reports are now zero rather than uninitialised, and a WMO picked again
   after another model gets its doodad-set list applied again.
 
+### Screenshot (protocol 6)
+
+The command bar's **Screenshot** saves what the viewport shows as a 3840 x 2160 PNG with a transparent
+background. Save As (PNG Image, overwrite confirmed) starts from `<model>_<yyyy-MM-dd_HHmmss>.png` -- the
+character's name while it rides a mount, reserved characters replaced -- and `.png` is added when the name lacks
+it; cancelling does nothing. The host (`ModelViewer::RequestUnityScreenshot`) sends the path in
+`captureScreenshot`; the player writes the file itself and answers `screenshotSaved`, and the status bar says
+"Screenshot saved: <file>" or why not (no player, a player older than protocol 6, nothing on screen, a folder that
+does not exist, a file that cannot be written, or no answer within 60 seconds). No message box is shown.
+
+The player (`WmvScreenshot.cs`) renders the live camera once more at the end of the frame the request arrives in,
+after every animator, emitter and billboard has updated and the viewport has drawn that frame, into an FP16 target
+cleared to (0,0,0,0); it reads that back through an 8-bit sRGB copy, encodes and writes the PNG synchronously, so
+no clock advances between the frame on screen and the file, and then puts the camera's target, clear, field of view,
+aspect and post-processing back and renders the shadow rig's maps for it again. Nothing is reloaded, restarted or
+hidden: the preview has no ground, backdrop or receiver geometry, so the clear colour is the whole background.
+The capture is 16:9 whatever the viewport's shape: a viewport as wide as that or narrower keeps its vertical field
+of view (more shows at the sides), a wider one keeps its horizontal field of view, so nothing it shows is cropped.
+Measured on an RTX 4090 over eight captures: 47 to 65 ms to render and read back, 167 to 186 ms to encode, 228 to
+248 ms in all;
+the capture's own textures are released at once, and the pipeline's pooled 4K targets within 60 frames.
+
+What the PNG cannot hold yet:
+
+- **Bloom.** URP's post-processing pass writes alpha 1 unless the pipeline asset enables post-process alpha
+  output, which the player's does not, so post-processing is off for the capture. Tone mapping and vignette are
+  already off in the viewport; bloom around bright additive effects is missing from the PNG.
+- **Blended alpha.** The materials blend alpha with the same factors as colour (`Blend [_SrcBlend] [_DstBlend]`),
+  and the frame is rendered over black, so colour is premultiplied while PNG alpha is straight. An additive batch
+  or particle whose texture alpha is 1 writes alpha 1 over its whole quad (an opaque dark shape around a glow), a
+  soft additive particle keeps only part of its light when composited, and an alpha-blended fragment over the
+  transparent background gets alpha a² rather than a. Opaque surfaces are exact (alpha 255) and the empty
+  background is exact (alpha 0, colour 0).
+
 ## Responsibility split
 
 | WMV (wxWidgets application) | Unity (embedded player) |
@@ -896,7 +930,7 @@ to WMV's own log). The player is built locally from `Tools/UnityRendererProject/
 repository contains **no** Unity build output, and nothing in the installer or the CMake
 install rules ships one yet.
 
-## IPC (implemented; protocol 5)
+## IPC (implemented; protocol 6)
 
 **WMV is the server.** `UnityRendererHost` starts a TCP listener bound to `127.0.0.1` on an
 ephemeral port *before* launching the player and passes the port on the player's command
@@ -911,7 +945,7 @@ application uses). Player side: `Tools/UnityRendererProject/Assets/Scripts/WmvIp
 **Player -> WMV**
 
 ```json
-{ "type": "unityReady", "protocolVersion": 5 }
+{ "type": "unityReady", "protocolVersion": 6 }
 { "type": "getAsset", "requestId": "abc123", "path": "creature/chicken/chicken.m2" }
 { "type": "getAssetByFileDataID", "requestId": "abc124", "fileDataID": 123456 }
 { "type": "getModelTextures", "requestId": "abc125", "fileDataID": 123200 }
@@ -929,6 +963,8 @@ application uses). Player side: `Tools/UnityRendererProject/Assets/Scripts/WmvIp
 { "type": "characterSceneApplied", "fileDataID": 1011653, "revision": 4, "load": 12, "status": "applied",
   "reason": "", "merged": 3, "attachments": 4, "missing": [], "ms": 212,
   "mountKey": "M3", "mountStatus": "applied", "mountReason": "" }
+{ "type": "screenshotSaved", "request": 1, "ok": true, "error": "", "path": "C:\\Shots\\humanmale_hd.png",
+  "width": 3840, "height": 2160, "bytes": 1545651, "renderMs": 53.6, "encodeMs": 183.8, "writeMs": 4.3, "totalMs": 248.1 }
 ```
 
 (The `mapObjectLoaded` line is a logged report of a headless run on `it_trollhouse03.wmo`, bounds
@@ -972,6 +1008,12 @@ message order on its main thread, so a question sent after an answer about a bui
 adopted. Only the headless self-test asks it (see the lifecycle sequence below), and only a player that
 announced protocol 4.
 
+`screenshotSaved` (protocol 6) answers the host's `captureScreenshot { request, path, width, height }`: the
+player rendered what the viewport shows off screen at that size with a transparent background and wrote the PNG
+to `path` itself -- no pixels travel over this channel -- or says why not (`ok` false, `error`). `request` echoes
+the question's number, `bytes` is the file's size, and the times are the off-screen render with its readback, the
+PNG encode, the write and the whole capture, in milliseconds. See "Screenshot" under "What the viewport shows".
+
 `getModelTextures` answers with `modelTextures { requestId, ok, fileDataID, textures:[{ index,
 type, fileDataID, source }] }`. It exists because a modern M2 does **not** name its replaceable
 textures: a creature skin's TXID entry is 0 and its texture array carries no filename, because
@@ -1011,6 +1053,7 @@ The response carries metadata only; bytes are still fetched with `getAssetByFile
 { "type": "loadWoWModel", "path": "world/wmo/northrend/buildings/icetroll/it_trollhouse03.wmo",
   "fileDataID": 115058, "client": "active", "character": false, "load": 13, "kind": "wmo" }
 { "type": "runtimeState", "query": 3 }
+{ "type": "captureScreenshot", "request": 1, "path": "C:\\Shots\\humanmale_hd.png", "width": 3840, "height": 2160 }
 { "type": "assetResponse", "requestId": "abc123", "ok": true, "path": "creature/chicken/chicken.m2",
   "fileDataID": 123200, "byteLength": 101840, "sha1": "1dc88a19...", "encoding": "base64", "data": "TUQyMb..." }
 { "type": "assetResponse", "requestId": "abc123", "ok": false, "error": "not found" }
@@ -1252,7 +1295,13 @@ second channel for the same state fails the step that opened it.
   screen, once for the mount that went under it. The log of the player before it is kept beside the new
   one's as `unityRenderer.before-reconnect-<n>.log`;
 - `wait:<ms>` pumps the host with the canvas ticking, which lets a `WMV_VIEWPORT_SHOT` capture land before
-  the test ends.
+  the test ends;
+- `screenshot:<path>` (protocol 6) does what the command bar's Screenshot does once its Save As dialog has
+  returned (`ModelViewer::RequestUnityScreenshot`, which shows no dialog), waits for the player's
+  `screenshotSaved`, and passes when it is `ok`, the file has the size it reports and its header is a
+  3840 x 2160, 8-bit RGBA, non-interlaced PNG. With `WMV_VIEWPORT_SHOT` set the player also captures the viewport
+  just before the off-screen render and a frame after it (`<name>-before-screenshot-<n>.png`,
+  `<name>-after-screenshot-<n>.png`), and with `WMV_VIEWPORT_SIZE` set it first asks for that screen size again.
 
 For example, on `-mo character/human/male/humanmale_hd.m2`:
 `WMV_IPCTEST_SEQUENCE="mount:8469;dismount;mount:8469;mount:17697;mount:83632;mount:8469;dismount"`.

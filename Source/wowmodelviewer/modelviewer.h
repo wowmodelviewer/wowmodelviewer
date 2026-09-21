@@ -233,6 +233,26 @@ public:
   void OnKeyboardShortcuts(wxCommandEvent & event);
   void UpdateStatusFacts();
 
+  // THE VIEWPORT SCREENSHOT. The command bar's Screenshot: a Save As dialog (PNG, overwrite confirmed, named after
+  // the model and the time), then RequestUnityScreenshot. Cancelling does nothing.
+  void SaveUnityScreenshot();
+  // Ask the Unity player for a SCREENSHOT_WIDTH x SCREENSHOT_HEIGHT PNG of what the viewport shows, with a transparent
+  // background, written to path (a full path; ".png" is added when it does not end in it). The outcome reaches the
+  // status bar when the player answers (OnUnityScreenshotSaved), or when it has not after SCREENSHOT_TIMEOUT_MS.
+  // Returns the request's number, or 0 with why when nothing was asked (and the status bar says why as well). No
+  // dialog or message box is ever shown here, so a headless test can call it directly.
+  int RequestUnityScreenshot(const wxString & path, wxString & why);
+  // The name Save As starts from: the model's (the character's, while it rides), sanitised, and the local time,
+  // "<model>_<yyyy-MM-dd_HHmmss>.png".
+  wxString DefaultScreenshotName() const;
+  void OnUnityScreenshotSaved(const UnityIpcServer::ScreenshotResult & result);
+  static const int SCREENSHOT_WIDTH = 3840;
+  static const int SCREENSHOT_HEIGHT = 2160;
+  static const unsigned long SCREENSHOT_TIMEOUT_MS = 60000;
+  int m_screenshotRequest = 0;             // the capture on its way (its request number), 0 for none
+  wxString m_screenshotPath;
+  unsigned long m_screenshotSentAt = 0;
+
   // What the Unity viewport paints instead of the player: a title, a detail line and an optional
   // button (the menu command it posts, 0 for none).
   struct ViewportNotice
