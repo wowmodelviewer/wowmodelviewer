@@ -344,9 +344,9 @@ bool UnityAssetAccess::resolveModelTextures(int m2FileDataID, std::vector<ModelT
       {
         ModelTexture t;
         t.index = (int)i;
-        // Variation i feeds creature-skin slot i, exactly as the viewer's own skin list does
-        // (TextureGroup::base is TEXTURE_GAMEOBJECT1 and SetSkin applies base + i).
-        t.type = TEXTURE_GAMEOBJECT1 + (int)i;
+        // Variation i fills the texture type the viewer's own skin list binds it to (SetSkin applies
+        // TextureGroup::textureType): 11, 12, 13, and type 5 for the fourth.
+        t.type = TextureGroup::creatureVariationType(i);
         t.fileDataID = id;
         t.source = ModelTexture::Database;
         out.push_back(t);

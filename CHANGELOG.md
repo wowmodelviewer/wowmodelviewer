@@ -264,6 +264,65 @@ Format loosely based on [Keep a Changelog](https://keepachangelog.com/).
   `-imgseq` smoke test is gone. `-unityipctest` and `-fbxexport` still run.
 
 ### Fixed
+- **Choosing, swapping or taking off a mount no longer makes the animation jump or start over in the Unity
+  viewport.** A mount choice holds the UI thread while the mount's model loads (1.5-1.9 s, measured) and starts the
+  mount and the character's riding animation in that wait. The first tick after it counted the whole wait into
+  both, so the viewport, which starts them when it is told, was snapped at the next heartbeat: by 1.8 s on a
+  four-second mount idle and 150-800 ms on the rider, and a dismount snapped the standing character by 360-400 ms.
+  The playback state sent during the wait also carried the rider's position from the tick before it (a jump of up
+  to 690 ms), and swapping one mount for another started the rider's riding animation over from its first frame.
+  A clock set outright -- a clip chosen, a stop, a mount choice -- now counts only from that moment, a state read
+  between ticks is carried on to the present, the first tick after such a change sends the playback state at once,
+  and a character already on its riding animation keeps it running when only the mount under it changes. Around
+  mounting, swapping and dismounting the viewport now makes no heartbeat correction at all (the largest difference
+  left is 4 ms); a clip picked again still starts from its first frame.
+- **A character's animation no longer jumps back or restarts in the Unity viewport when an item or a
+  customization changes, or when View NPC is opened or closed.** The viewport's animation clock kept running
+  while the app's UI thread was busy, but the app's clock fell behind it in three ways, and the viewport snapped
+  back to the app's time at the next heartbeat (a jump of 200-470 ms in a one-second walk cycle, measured): the
+  heartbeat was sampled before the tick after the wait had advanced the clock, a looping animation that wrapped
+  in that tick restarted at frame 0 and dropped the time past its end, and a state that reached the viewport
+  behind a composited body image (a customization) was applied as if it had just been sampled. The tick now
+  samples after advancing, the time past the end carries into the next loop, and each playback state says when
+  it was sampled (`sampledAtMs`) so the viewport moves it on by the wait. View NPC also no longer refreshes the
+  whole character and sends its scene again, and its list opens in 0.7 s instead of 2.8 s for 22,991 NPCs: the
+  item and NPC choice dialogs no longer fill the hidden list box they replace with their own list.
+- **Stretched particles drip along their motion, or scatter at their own angles, in the Unity viewport.** A
+  camera-facing particle quad was always drawn square to the screen and turned only by the emitter's sprite
+  rotation (particle params +124), one angle for every particle of the emitter. Two authored settings were
+  ignored. Flag 0x4 (VelocityOrient in the public M2 format documentation; unnamed and never tested by the legacy
+  runtime) lays the quad along the particle's velocity as the camera sees it, with the size ramp's x and the
+  texture's U along the motion. Primeval Skyfriend's belly emitters author a ramp from 0.011 x 0.48 to 0.61 x 0.09
+  over a droplet texture: in a reference render each particle leaves the belly as a flat blob and draws out into
+  a strand hanging along its fall, round end first -- slime dripping -- where the viewport drew a needle that
+  flattened into a level bar. Across the client's 13,474 creature emitters, 55 % of the 1,285 that set 0x4 author
+  a stretched size ramp, against 1.9 % of the rest, and 92 % of those are long in x. The other setting is the
+  per-particle start angle, a base and a variation at params +116/+120 (baseSpin and baseSpinVariation in the same
+  documentation, never read by the legacy runtime): every other camera-facing quad now takes the base plus its own
+  random share of +/- the variation when it spawns, so a stretched texture no longer stacks into parallel lines.
+  A velocity-oriented quad takes neither angle, as the reference render shows on those belly emitters although
+  they author a full turn. An emitter that sets neither draws exactly as before, random numbers included; the spin
+  speed at +124 is still one fixed angle.
+- **A mount, NPC or creature whose display id is also an item display id keeps its skin.** Picking a skin by
+  display id (a mount, an NPC, an Armory import) passed that CreatureDisplayInfo id on as the ItemDisplayInfo id
+  the per-slot material table is keyed on. Where an unrelated item had a row under the same number, that item's
+  pass counted as authoritative and cleared the creature skin textures bound a moment earlier, so the mount went
+  to Unity without them and drew white (Primeval Skyfriend, display 144856). `AnimControl::SetSkinByDisplayID`
+  now passes the group's own item display id, which is 0 for a group built from CreatureDisplayInfo; item skins
+  are unchanged.
+- **A creature's fourth texture variation is applied.** CreatureDisplayInfo has four texture variations, but the
+  skin list kept three, so a model slot that takes the fourth stayed unbound: Primeval Skyfriend's saddle drew
+  white. The fourth variation fills texture type 5, not 14: in the client data 812 of the 946 displays that
+  set it use a model declaring type 5, the others a model with no slot for it, and no creature model
+  declares type 14. The skin list, the skin sent to the Unity viewport and the database fallback in
+  `UnityAssetAccess` now use that mapping (`TextureGroup::textureType`) for mounts, `-mo` creatures and NPCs.
+  Older clients whose table has three variations, and user skin files, still read three.
+- **An item effect no longer draws as a black rectangle after the item level is changed.** A merged armour part
+  the host re-creates for a new level can come back under the same key. The Unity player then only re-pointed
+  its textures, but every material keeps the combiner and alpha it was built with, so a texture type the first
+  level did not name (the effect texture of Chosen Bloodslayer's Fanged Grips at levels 3-6) was drawn with no
+  second unit and an opaque alpha, and its alpha-blended card showed as a solid dark rectangle. A merged part
+  whose filled texture slots change is now built again; a change of files in the same slots is still rebound.
 - **A long equipment item name no longer makes Model > Appearance wider than the panel.** The name is cut
   short with an ellipsis where the panel ends. The full width of a name such as "Thunderfury, Blessed Blade
   of the Windseeker" used to become the page's minimum width the next time the page was laid out -- mounting

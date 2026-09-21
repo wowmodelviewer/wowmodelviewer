@@ -60,6 +60,12 @@ class _ANIMMANAGER_API_ AnimManager
   float Speed;    // The speed of which to multiply the time given for Tick();
   float mouthSpeed;
 
+  // When Frame was last current (milliseconds of a steady clock), and whether it was set outright -- a clip chosen,
+  // the animation stopped or scrubbed -- since the last Tick. See Tick and GetFrameNow.
+  double FrameTimeMs;
+  bool FrameSet;
+  void MarkFrameSet();
+
 public:
   AnimManager(WoWModel & m);
   ~AnimManager();
@@ -104,6 +110,12 @@ public:
 
   size_t GetFrameCount();
   size_t GetFrame() {return Frame;}
+  // The frame as of now while the animation runs (running: the canvas's own play state, which the tick follows).
+  size_t GetFrameNow(bool running);
+  // How many times any animation's frame was set outright, for a caller that has to tell the viewport after one.
+  static unsigned FrameSets();
+  // The canvas measures the time it passes to Tick now: every animation it ticks is current as of this moment.
+  static void StartTick();
   void SetFrame(size_t f);
   void SetSpeed(float speed) {Speed = speed;}
   float GetSpeed() {return Speed;}

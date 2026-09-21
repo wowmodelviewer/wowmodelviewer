@@ -57,9 +57,10 @@
  *     { "type":"modelAnimation", "fileDataID":126407, "sequenceIndex":1, "animID":0,
  *       "durationMs":4000, "loop":true, "role":"mount", "load":12 }
  *     { "type":"modelAnimationState", "fileDataID":1521037, "sequenceIndex":2, "playing":true,
- *       "timeMs":840, "speed":1.0, "loop":true, "explicitState":false }
+ *       "timeMs":840, "speed":1.0, "loop":true, "explicitState":false, "sampledAtMs":3629698.6 }
  *     { "type":"modelAnimationState", "fileDataID":126407, "sequenceIndex":1, "playing":true,
- *       "timeMs":1840, "speed":1.0, "loop":true, "explicitState":false, "load":12, "hasRider":true,
+ *       "timeMs":1840, "speed":1.0, "loop":true, "explicitState":false, "sampledAtMs":3629698.6,
+ *       "load":12, "hasRider":true,
  *       "rider":{ "sequenceIndex":145, "playing":true, "timeMs":840, "speed":1.0, "loop":true } }
  *     { "type":"characterImage", "hash":"body-3", "width":2048, "height":1024, "format":"bgra8",
  *       "encoding":"base64", "data":"..." }
@@ -189,7 +190,9 @@
  * is pushed on every control change AND on a slow heartbeat while playing. The heartbeat is the
  * only correction channel for clock drift between two independently-timed renderers; the player
  * decides whether a given "timeMs" is worth snapping to, because only it knows where its own
- * clock is.
+ * clock is. "sampledAtMs" is when the host sampled the state, in milliseconds of the system's performance
+ * counter (QueryPerformanceCounter), which the player reads too: a line that waited behind other traffic -- a
+ * composited image is megabytes -- is moved on by that wait before it is applied.
  *
  * Implementation: plain Winsock2, non-blocking, polled from the GUI thread by a wxTimer (the
  * app has no Qt event loop, so QTcpServer signals would never fire; and GAMEDIRECTORY must be

@@ -1191,6 +1191,15 @@ Semantics:
   split is the whole design -- snapping to every message would trade drift for a visible stutter
   once a second, and never snapping would let the two drift apart. A scrub or a stop arrives with
   the app's time already far from the player's, so it snaps without needing to be marked special.
+  **A heartbeat must be as current as the player's clock, or the player snaps back to it.** The
+  host's clock goes on through anything that holds up its UI thread -- an item picked, a
+  customization, the View NPC list being built -- and the first tick after such a wait carries all of
+  it, so the tick advances the clock first and samples the heartbeat after (`ModelCanvas::tick`), and
+  a sequence that wraps keeps the time past its end (`AnimManager::Tick`) rather than restarting at
+  0, as the player's own clock does. Each state also carries `sampledAtMs`, when the host sampled
+  it on the system's performance counter, which the player reads too: a state read late -- behind a
+  composited body image of megabytes, say -- is moved on by the wait before it is applied
+  (`WmvIpcClient.ProjectFromSample`).
   **Global sequences keep running while the animation is paused, and ignore the speed.** That is
   the host clock's own behaviour, not an accident: it advances its global clock before it
   decides whether the animation is paused, and the speed multiplier lives inside the animation
@@ -1418,6 +1427,11 @@ are not available in the Unity-only viewer, and write no image; the `-imgseq` sm
   scale tracks are evaluated (`WmvMaterialAnimator.cs`), but texture rotation tracks are parsed
   and not applied, and lit passes get no animated tint or opacity (see that file's header).
   Particle and ribbon emitters are drawn (`WmvEmitterRuntime.cs`).
+  A camera-facing particle lies along its velocity as the camera sees it when its emitter sets flag
+  0x4, and otherwise takes its own start angle when it spawns, from the emitter's base spin and its
+  variation (particle params +116/+120); the spin speed at +124 is still applied as one fixed angle
+  for the whole emitter, not per second, flag 0x200 (a random spin direction) is not read, and a
+  negative drag (params +112, which speeds a particle up over its life) is read as no drag.
 - The rest of the WoW material system: the specular lobes the archived OpenGL renderer leaves
   unweighted by default, and the few combiners that mix more than two contributing units.
 - Attachments on a model that is not a playable character. A character's items and merged

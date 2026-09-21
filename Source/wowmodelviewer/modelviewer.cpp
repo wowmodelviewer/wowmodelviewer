@@ -2504,7 +2504,9 @@ void ModelViewer::SendAnimationStateToUnity(bool force)
 
   const bool playing = !m->animManager->IsPaused();
   const float speed = m->animManager->GetSpeed();
-  const int timeMs = (int)m->animManager->GetFrame();
+  // The position now, not at the last canvas tick: a state forced in the middle of a UI-thread wait (a choice made
+  // while the mount's model loads) would otherwise send the viewport back by the wait (AnimManager::GetFrameNow).
+  const int timeMs = (int)m->animManager->GetFrameNow(playing);
 
   if (!force)
   {
@@ -2537,7 +2539,7 @@ void ModelViewer::SendAnimationStateToUnity(bool force)
       UnityIpcServer::RiderState state;
       state.sequenceIndex = riderIndex;
       state.playing = playing;
-      state.timeMs = (int)rider->animManager->GetFrame();
+      state.timeMs = (int)rider->animManager->GetFrameNow(playing);
       state.speed = rider->animManager->GetSpeed();
       state.loop = true;
       unityRendererHost->ipc()->sendModelAnimationState((int)m->gamefile->fileDataId(), index,
@@ -3289,9 +3291,11 @@ void ModelViewer::LoadWoW(const core::GameConfig * chosenConfig, const QString &
 void ModelViewer::OnCharToggle(wxCommandEvent &event)
 {
   int ID = event.GetId();
+  // One command each: View NPC used to fall through to the character toggles below, which changed nothing but
+  // refreshed the whole character and sent its scene again every time the NPC list was opened.
   if (ID == ID_VIEW_NPC)
     charControl->selectNPC(UPDATE_NPC);
-  if (ID == ID_VIEW_ITEM)
+  else if (ID == ID_VIEW_ITEM)
     charControl->selectItem(UPDATE_SINGLE_ITEM, -1);
   else if (isChar)
     charControl->OnCheck(event);

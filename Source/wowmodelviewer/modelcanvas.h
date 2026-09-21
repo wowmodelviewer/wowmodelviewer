@@ -195,6 +195,9 @@ private:
   // Set by LoadModel; the first tick after it starts the animation clock from that tick
   // instead of charging the model the wall time its load took. See tick().
   bool restartClock = false;
+  // AnimManager::FrameSets() as of the last playback state tick() sent: a frame set outright since then is
+  // told to the Unity viewport after the next advance. See tick().
+  unsigned framesSetSent = 0;
   //DWORD pauseTime;
   SceneState sceneState[4]; // 4 scene states for F1-F4
 
