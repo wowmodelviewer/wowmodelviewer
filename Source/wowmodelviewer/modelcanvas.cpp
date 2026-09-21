@@ -1555,6 +1555,7 @@ void ModelCanvas::tick()
   //time = float();
   ddt = (timeGetTime() - lastTime);// * animSpeed;
   lastTime = timeGetTime();
+  AnimManager::StartTick();
   // --
 
   if (restartClock)
@@ -1572,6 +1573,7 @@ void ModelCanvas::tick()
     restartClock = false;
     if (g_modelViewer)
       g_modelViewer->SendAnimationStateToUnity(true);
+    framesSetSent = AnimManager::FrameSets();
   }
 
   globalTime += (ddt);
@@ -1602,8 +1604,18 @@ void ModelCanvas::tick()
   // the View NPC list being built) carries the whole wait in ddt, and a state sampled before the
   // advance was that wait out of date -- the player, whose own clock kept running, took the difference
   // for drift and jumped back.
+  //
+  // After a frame was set outright -- a clip chosen, a stop, a mount choice starting the mount and the character's
+  // riding animation -- the state goes now rather than at the next heartbeat: the tick has just counted those
+  // clocks from the moment they were set (AnimManager::Tick), which the state sent with the choice, in the middle
+  // of the wait, could not say for a clock set after it. The viewport starts a mount it is still building, and the
+  // character on it, from the newest state it has.
   if (g_modelViewer)
-    g_modelViewer->SendAnimationStateToUnity(false);
+  {
+    const unsigned framesSet = AnimManager::FrameSets();
+    g_modelViewer->SendAnimationStateToUnity(framesSet != framesSetSent);
+    framesSetSent = framesSet;
+  }
 
   if (drawSky && sky && skyModel) {
     sky->tick(ddt);

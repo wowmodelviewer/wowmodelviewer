@@ -264,6 +264,18 @@ Format loosely based on [Keep a Changelog](https://keepachangelog.com/).
   `-imgseq` smoke test is gone. `-unityipctest` and `-fbxexport` still run.
 
 ### Fixed
+- **Choosing, swapping or taking off a mount no longer makes the animation jump or start over in the Unity
+  viewport.** A mount choice holds the UI thread while the mount's model loads (1.5-1.9 s, measured) and starts the
+  mount and the character's riding animation in that wait. The first tick after it counted the whole wait into
+  both, so the viewport, which starts them when it is told, was snapped at the next heartbeat: by 1.8 s on a
+  four-second mount idle and 150-800 ms on the rider, and a dismount snapped the standing character by 360-400 ms.
+  The playback state sent during the wait also carried the rider's position from the tick before it (a jump of up
+  to 690 ms), and swapping one mount for another started the rider's riding animation over from its first frame.
+  A clock set outright -- a clip chosen, a stop, a mount choice -- now counts only from that moment, a state read
+  between ticks is carried on to the present, the first tick after such a change sends the playback state at once,
+  and a character already on its riding animation keeps it running when only the mount under it changes. Around
+  mounting, swapping and dismounting the viewport now makes no heartbeat correction at all (the largest difference
+  left is 4 ms); a clip picked again still starts from its first frame.
 - **A character's animation no longer jumps back or restarts in the Unity viewport when an item or a
   customization changes, or when View NPC is opened or closed.** The viewport's animation clock kept running
   while the app's UI thread was busy, but the app's clock fell behind it in three ways, and the viewport snapped

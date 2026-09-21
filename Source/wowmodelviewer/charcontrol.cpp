@@ -1095,8 +1095,11 @@ void CharControl::OnUpdateItem(int type, int id)
       RefreshEquipment();
 
       // Alfred 2009.7.23 use animLookups to speed up
+      // A character already on its riding animation -- one mount swapped for another -- keeps it running: starting it
+      // again put the character back to its first frame at every swap, although only the mount under it changed.
       if (model->animLookups.size() >= ANIMATION_MOUNT &&
-          model->animLookups[ANIMATION_MOUNT] >= 0)
+          model->animLookups[ANIMATION_MOUNT] >= 0 &&
+          model->animManager->GetAnim() != (size_t)model->animLookups[ANIMATION_MOUNT])
       {
         model->animManager->Stop();
         model->currentAnim = model->animLookups[ANIMATION_MOUNT];
