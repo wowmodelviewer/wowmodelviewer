@@ -1321,6 +1321,99 @@ static QStringList riddenMismatches(const UnityIpcServer::RuntimeState & s, cons
   return bad;
 }
 
+// THE SCREENSHOT STEP of the lifecycle sequence, "screenshot:<path>" (protocol 6): what the command bar's Screenshot
+// does once its Save As dialog has returned a path -- ModelViewer::RequestUnityScreenshot, which shows no dialog --
+// then, with the canvas ticking, the player's screenshotSaved for that request. Passes when the answer is ok, the file
+// it names has the size it reports, and the file is what was asked for: a PNG signature, an IHDR of
+// SCREENSHOT_WIDTH x SCREENSHOT_HEIGHT, 8 bits per channel, colour type 6 (RGBA), not interlaced; and the status bar
+// request is settled. what carries the player's timings.
+static bool doIpcTestScreenshotStep(ModelViewer * frame, UnityIpcServer * ipc, const QString & target, QString & what,
+                                    QString & why)
+{
+  if (target.isEmpty())
+  {
+    why = "screenshot: takes the full path of the PNG to write";
+    return false;
+  }
+  std::vector<UnityIpcServer::ScreenshotResult> results;
+  auto previous = ipc->onScreenshotSaved;
+  ipc->onScreenshotSaved = [&results, previous](const UnityIpcServer::ScreenshotResult & r) {
+    results.push_back(r);
+    if (previous)
+      previous(r);
+  };
+  wxString whyNot;
+  const int request = frame->RequestUnityScreenshot(wxString(target.toStdWString()), whyNot);
+  const QString path = QString::fromWCharArray(frame->m_screenshotPath.wc_str());
+  UnityIpcServer::ScreenshotResult answer;
+  bool answered = false;
+  wxStopWatch w;
+  if (request != 0)
+  {
+    wxGUIEventLoop loop;
+    wxEventLoopActivator activate(&loop);
+    while (!answered && w.Time() < 120000)
+    {
+      ipc->poll();
+      wxTheApp->Yield(true);
+      wxMilliSleep(10);
+      for (const UnityIpcServer::ScreenshotResult & r : results)
+        if (r.request == request)
+        {
+          answer = r;
+          answered = true;
+        }
+    }
+  }
+  ipc->onScreenshotSaved = previous;
+
+  QStringList bad;
+  if (request == 0)
+    bad << "not requested: " + QString::fromWCharArray(whyNot.wc_str());
+  else if (!answered)
+    bad << QString("no screenshotSaved for request %1 within 120 s").arg(request);
+  else
+  {
+    what = QString("request %1 answered in %2 ms: ").arg(request).arg(w.Time()) + answer.describe();
+    if (!answer.ok)
+      bad << "the player did not save it: " + answer.error;
+    else
+    {
+      QFile png(path);
+      if (!png.open(QIODevice::ReadOnly))
+        bad << "cannot open " + path;
+      else
+      {
+        const QByteArray head = png.read(33);
+        const auto be32 = [&head](int at) {
+          return (quint32)(uchar)head[at] << 24 | (quint32)(uchar)head[at + 1] << 16 | (quint32)(uchar)head[at + 2] << 8 |
+                 (quint32)(uchar)head[at + 3];
+        };
+        if (png.size() != answer.bytes)
+          bad << QString("the file has %1 bytes, the player reported %2").arg(png.size()).arg(answer.bytes);
+        if (head.size() < 33 || !head.startsWith(QByteArray("\x89PNG\r\n\x1a\n", 8)) || head.mid(12, 4) != "IHDR")
+          bad << "not a PNG";
+        else
+        {
+          const quint32 width = be32(16), height = be32(20);
+          if (width != (quint32)ModelViewer::SCREENSHOT_WIDTH || height != (quint32)ModelViewer::SCREENSHOT_HEIGHT)
+            bad << QString("the PNG is %1 x %2").arg(width).arg(height);
+          if ((uchar)head[24] != 8 || (uchar)head[25] != 6)
+            bad << QString("bit depth %1, colour type %2 (expected 8 and 6, RGBA)").arg((uchar)head[24]).arg((uchar)head[25]);
+          if ((uchar)head[28] != 0)
+            bad << "the PNG is interlaced";
+          what += QString("; file %1 x %2, %3 bits, colour type %4, interlace %5").arg(width).arg(height)
+                    .arg((uchar)head[24]).arg((uchar)head[25]).arg((uchar)head[28]);
+        }
+      }
+    }
+    if (frame->m_screenshotRequest != 0)
+      bad << "the host still waits for the screenshot";
+  }
+  why = bad.join("; ");
+  return bad.isEmpty();
+}
+
 // THE MOUNTED-CHARACTER STEPS of the lifecycle sequence (see doIpcTestLifecycleSequence), protocol 5. Each drives the
 // code a user's action runs, then requires the player's answer to the scene it caused (when it causes one) and its
 // runtimeState account afterwards to match the host (riddenMismatches), plus what the step itself must or must not
@@ -1344,6 +1437,8 @@ static bool doIpcTestMountStep(ModelViewer * frame, UnityIpcServer * ipc, const 
     what = QString("waited %1 ms").arg(ms);
     return true;
   }
+  if (kind == "screenshot")
+    return doIpcTestScreenshotStep(frame, ipc, target, what, why);
   if (!ipc->playerRidesMounts())
   {
     why = QString("the player (protocol %1) cannot seat characters on mounts").arg(ipc->playerProtocolVersion());
@@ -1787,7 +1882,8 @@ static bool doIpcTestMountStep(ModelViewer * frame, UnityIpcServer * ipc, const 
 //                         having built exactly the one mount and fitted the view twice -- once for the model it put
 //                         on screen, once for the mount that went under it (the log before the restart is copied
 //                         beside the new one's as unityRenderer.before-reconnect-<n>.log);
-//   wait:<ms>             pumps with the canvas ticking (lets a WMV_VIEWPORT_SHOT capture land before the test ends).
+//   wait:<ms>             pumps with the canvas ticking (lets a WMV_VIEWPORT_SHOT capture land before the test ends);
+//   screenshot:<path>     the command bar's Screenshot without its Save As dialog (doIpcTestScreenshotStep, protocol 6).
 static bool doIpcTestLifecycleSequence(ModelViewer * frame, UnityIpcServer * ipc, const QString & spec,
                                        const std::vector<UnityIpcServer::MapObjectReport> & reports)
 {
@@ -1836,7 +1932,7 @@ static bool doIpcTestLifecycleSequence(ModelViewer * frame, UnityIpcServer * ipc
     const QString target = colon > 0 ? step.mid(colon + 1).trimmed() : QString();
     const bool mountKind = !quick && (kind == "chr" || kind == "mount" || kind == "dismount" || kind == "manim" ||
                                       kind == "ranim" || kind == "equip" || kind == "custom" || kind == "sheath" ||
-                                      kind == "reconnect" || kind == "wait");
+                                      kind == "reconnect" || kind == "wait" || kind == "screenshot");
     GameFile * file = (kind == "m2" || kind == "wmo") && !target.isEmpty() ? resolveGameFileArg(target) : nullptr;
     const size_t reportsBefore = reports.size();
     const int serialBefore = frame->m_unityLoadSerial;
@@ -1856,7 +1952,7 @@ static bool doIpcTestLifecycleSequence(ModelViewer * frame, UnityIpcServer * ipc
       ok = false;
       why = (kind != "m2" && kind != "wmo")
               ? "unknown step kind (use m2:, wmo:, m2!:, wmo!:, chr:, mount:, dismount, manim:, ranim:, equip:, custom:, "
-                "sheath, reconnect or wait:)"
+                "sheath, reconnect, wait: or screenshot:)"
               : "file not found";
     }
     else if (quick)

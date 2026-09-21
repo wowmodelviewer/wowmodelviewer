@@ -610,6 +610,56 @@ void UnityIpcServer::handleRuntimeState(const QJsonObject & msg)
     onRuntimeState(s);
 }
 
+QString UnityIpcServer::ScreenshotResult::describe() const
+{
+  // The path and the player's error are appended, never passed through arg().
+  return QString("request=%1 ok=%2 %3x%4 bytes=%5 renderMs=%6 encodeMs=%7 writeMs=%8 totalMs=%9")
+           .arg(request).arg(ok ? "true" : "false").arg(width).arg(height).arg(bytes)
+           .arg(renderMs, 0, 'f', 1).arg(encodeMs, 0, 'f', 1).arg(writeMs, 0, 'f', 1).arg(totalMs, 0, 'f', 1) +
+         " path=\"" + path + "\"" + (error.isEmpty() ? QString() : " error=\"" + error + "\"");
+}
+
+int UnityIpcServer::requestScreenshot(const QString & path, int width, int height)
+{
+  if (!playerTakesScreenshots())
+    return 0;
+  QJsonObject msg;
+  msg["type"] = "captureScreenshot";
+  msg["request"] = ++m_screenshotRequest;
+  msg["path"] = path;
+  msg["width"] = width;
+  msg["height"] = height;
+  LOG_INFO << "[unityipc] -> captureScreenshot request=" << m_screenshotRequest << width << "x" << height << "path" << path;
+  queueJson(msg);
+  return m_screenshotRequest;
+}
+
+void UnityIpcServer::handleScreenshotSaved(const QJsonObject & msg)
+{
+  const auto number = [&msg](const char * key) {
+    const QJsonValue v = msg.value(QLatin1String(key));
+    return v.isDouble() ? v.toDouble() : -1.0;
+  };
+  ScreenshotResult r;
+  r.request = msg.value("request").toInt(0);
+  r.ok = msg.value("ok").toBool(false);
+  r.error = msg.value("error").toString();
+  r.path = msg.value("path").toString();
+  r.width = (int)number("width");
+  r.height = (int)number("height");
+  r.bytes = (long long)number("bytes");
+  r.renderMs = number("renderMs");
+  r.encodeMs = number("encodeMs");
+  r.writeMs = number("writeMs");
+  r.totalMs = number("totalMs");
+  if (r.ok)
+    LOG_INFO << "[unityipc] <- screenshotSaved" << r.describe();
+  else
+    LOG_ERROR << "[unityipc] <- screenshotSaved" << r.describe();
+  if (onScreenshotSaved)
+    onScreenshotSaved(r);
+}
+
 void UnityIpcServer::handleGeosetsApplied(const QJsonObject & msg)
 {
   GeosetAck ack;
@@ -921,7 +971,7 @@ void UnityIpcServer::handleLine(const std::string & line)
     if (version > 0 && version < PROTOCOL_VERSION)
       LOG_WARNING << "[unityipc] player speaks protocol v" << version << ", older than WMV's v" << PROTOCOL_VERSION
                   << "-- what it cannot do (mounted characters below v5, world models below v4, characters below v3)"
-                     " gets a notice";
+                     " gets a notice, and a screenshot (below v6) a status message";
     else if (version != PROTOCOL_VERSION)
       LOG_ERROR << "[unityipc] player speaks protocol v" << version << "but WMV expects v" << PROTOCOL_VERSION;
     if (onUnityReady)
@@ -954,6 +1004,10 @@ void UnityIpcServer::handleLine(const std::string & line)
   else if (type == "runtimeState")
   {
     handleRuntimeState(msg);
+  }
+  else if (type == "screenshotSaved")
+  {
+    handleScreenshotSaved(msg);
   }
   else
   {

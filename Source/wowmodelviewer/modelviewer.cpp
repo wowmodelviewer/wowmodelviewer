@@ -140,6 +140,8 @@ EVT_CHAR_HOOK(ModelViewer::OnCharHook)
 
 // Command bar (and the panel toggles it shares with the View menu)
 EVT_MENU(ID_UI_OPEN_MODEL, ModelViewer::OnCommandBar)
+EVT_MENU(ID_UI_SCREENSHOT, ModelViewer::OnCommandBar)
+EVT_UPDATE_UI(ID_UI_SCREENSHOT, ModelViewer::OnUpdateCommandUI)
 EVT_UPDATE_UI(ID_SHOW_FILE_LIST, ModelViewer::OnUpdateCommandUI)
 EVT_UPDATE_UI(ID_SHOW_CHAR, ModelViewer::OnUpdateCommandUI)
 EVT_UPDATE_UI(ID_SHOW_ANIM, ModelViewer::OnUpdateCommandUI)
@@ -672,9 +674,11 @@ void ModelViewer::InitCommandBar()
   commandBar->AddTool(ID_UI_OPEN_MODEL, _("Open model"), wxNullBitmap,
                       _("Find a model in Browse (loads a World of Warcraft client first if none is loaded)"));
   commandBar->AddSeparator();
-  // (No Reset camera or Screenshot: both acted on the archived OpenGL viewport. The Unity viewport frames
-  // each model itself and has no capture yet.)
+  // (No Reset camera: it acted on the archived OpenGL viewport; the Unity viewport frames each model itself.)
   commandBar->AddTool(ID_VIEW_FULLSCREEN, _("Fullscreen"), wxNullBitmap, _("Fullscreen (F11; Esc leaves)"));
+  // The Unity viewport's own capture (SaveUnityScreenshot). Text like the other commands: the bar has no icons.
+  commandBar->AddTool(ID_UI_SCREENSHOT, _("Screenshot"), wxNullBitmap,
+                      _("Save the viewport as a 3840 x 2160 PNG with a transparent background"));
   commandBar->AddSeparator();
 
   commandModelLabel = new wxStaticText(commandBar, ID_UI_MODEL_LABEL, _("No model loaded"), wxDefaultPosition,
@@ -1569,6 +1573,10 @@ void ModelViewer::CreateUnityViewport()
   unityRendererHost->ipc()->onGeosetsApplied = [this](const UnityIpcServer::GeosetAck & ack) {
     if (modelInspector)
       modelInspector->OnUnityGeosetsApplied(ack);
+  };
+  // ... and what became of a screenshot, for the status bar.
+  unityRendererHost->ipc()->onScreenshotSaved = [this](const UnityIpcServer::ScreenshotResult & result) {
+    OnUnityScreenshotSaved(result);
   };
 }
 
@@ -3804,7 +3812,106 @@ void ModelViewer::OnCommandBar(wxCommandEvent & event)
         fileControl->txtContent->SetFocus();
       break;
     }
+    case ID_UI_SCREENSHOT:
+      SaveUnityScreenshot();
+      break;
   }
+}
+
+wxString ModelViewer::DefaultScreenshotName() const
+{
+  wxString path;
+  const WoWModel * rider = riderModel();
+  const WoWModel * m = rider ? rider : (canvas ? canvas->model() : nullptr);
+  if (isWMO && canvas && canvas->wmo)
+    path = wxString(canvas->wmo->itemName().toStdWString());
+  else if (m)
+    path = m->gamefile ? wxString(m->gamefile->fullname().toStdWString())
+                       : wxString(const_cast<WoWModel *>(m)->name().toStdWString());
+  path.Replace(wxT("/"), wxT("\\"));
+  wxString name = path.AfterLast('\\');
+  const int dot = name.Find('.', true);
+  if (dot > 0)
+    name = name.Left(dot);
+  // Nothing a Windows file name cannot hold: the reserved characters and the control characters.
+  wxString safe;
+  for (wxUniChar c : name)
+    safe += (c.GetValue() < 32 || wxString(wxT("<>:\"/\\|?*")).Find(c) != wxNOT_FOUND) ? wxUniChar('_') : c;
+  safe.Trim(true).Trim(false);
+  while (!safe.IsEmpty() && safe.Last() == '.')
+    safe.RemoveLast();
+  if (safe.IsEmpty())
+    safe = wxT("screenshot");
+  return safe + wxT("_") + wxDateTime::Now().Format(wxT("%Y-%m-%d_%H%M%S")) + wxT(".png");
+}
+
+void ModelViewer::SaveUnityScreenshot()
+{
+  if (m_screenshotRequest != 0)
+    return;
+  wxFileDialog dialog(this, _("Save screenshot"), wxEmptyString, DefaultScreenshotName(), _("PNG Image (*.png)|*.png"),
+                      wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
+  if (dialog.ShowModal() != wxID_OK)
+    return;
+  wxString why;
+  RequestUnityScreenshot(dialog.GetPath(), why);
+}
+
+int ModelViewer::RequestUnityScreenshot(const wxString & requested, wxString & why)
+{
+  why.clear();
+  wxFileName file(requested);
+  if (!file.GetExt().IsSameAs(wxT("png"), false))
+    file.SetFullName(file.GetFullName() + wxT(".png"));
+  if (m_screenshotRequest != 0)
+    why = _("a screenshot is already being saved");
+  else if (!unityRendererHost || !unityRendererHost->ipc() || !unityRendererHost->ipc()->isUnityReady())
+    why = _("the Unity viewport is not running");
+  else if (!unityRendererHost->ipc()->playerTakesScreenshots())
+    why = _("the Unity viewport player is too old to take screenshots; rebuild it");
+  else if (!isUnityViewportShowingModel())
+    why = _("nothing is shown in the viewport");
+  else if (!file.IsAbsolute() || file.GetName().IsEmpty())
+    why = _("not a full file name: ") + requested;
+  else if (!file.DirExists())
+    why = _("the folder does not exist: ") + file.GetPath();
+  if (!why.IsEmpty())
+  {
+    LOG_ERROR << "Screenshot not taken:" << QString::fromWCharArray(why.wc_str());
+    if (GetStatusBar())
+      SetStatusText(_("Screenshot failed: ") + why, 0);
+    return 0;
+  }
+  const wxString path = file.GetFullPath();
+  const int request = unityRendererHost->ipc()->requestScreenshot(QString::fromWCharArray(path.wc_str()), SCREENSHOT_WIDTH,
+                                                                  SCREENSHOT_HEIGHT);
+  if (request == 0)
+  {
+    why = _("the Unity viewport could not be asked");
+    if (GetStatusBar())
+      SetStatusText(_("Screenshot failed: ") + why, 0);
+    return 0;
+  }
+  m_screenshotRequest = request;
+  m_screenshotPath = path;
+  m_screenshotSentAt = timeGetTime();
+  if (GetStatusBar())
+    SetStatusText(_("Saving screenshot..."), 0);
+  return request;
+}
+
+void ModelViewer::OnUnityScreenshotSaved(const UnityIpcServer::ScreenshotResult & result)
+{
+  if (result.request != m_screenshotRequest || m_screenshotRequest == 0)
+    return;   // an answer nobody is waiting for any more (logged by the IPC server)
+  const wxString name = wxFileName(m_screenshotPath).GetFullName();
+  m_screenshotRequest = 0;
+  if (!GetStatusBar())
+    return;
+  if (result.ok)
+    SetStatusText(_("Screenshot saved: ") + name, 0);
+  else
+    SetStatusText(_("Screenshot failed: ") + wxString(result.error.toStdWString()), 0);
 }
 
 void ModelViewer::OnUpdateCommandUI(wxUpdateUIEvent & event)
@@ -3819,6 +3926,10 @@ void ModelViewer::OnUpdateCommandUI(wxUpdateUIEvent & event)
       break;
     case ID_SHOW_ANIM:
       event.Check(animControl && interfaceManager.GetPane(animControl).IsShown());
+      break;
+    case ID_UI_SCREENSHOT:
+      // Something to capture, and no capture on its way (an older player is told why on the click).
+      event.Enable(isUnityViewportShowingModel() && m_screenshotRequest == 0);
       break;
   }
 }
@@ -4216,5 +4327,20 @@ void ModelViewer::OnStatusBarRefreshTimer(wxTimerEvent& event)
   // notice instead of a frozen or empty rectangle.
   if (unityRendererHost && unityRendererHost->checkPlayerHealth())
     UpdateUnityViewportState();
+
+  // A screenshot the player never answered: it went away, or it is stuck.
+  if (m_screenshotRequest != 0)
+  {
+    const bool connected = unityRendererHost && unityRendererHost->ipc() && unityRendererHost->ipc()->isUnityReady();
+    if (!connected || timeGetTime() - m_screenshotSentAt >= SCREENSHOT_TIMEOUT_MS)
+    {
+      LOG_ERROR << "Screenshot request" << m_screenshotRequest << "was not answered"
+                << (connected ? "in time" : "before the Unity viewport went away");
+      m_screenshotRequest = 0;
+      if (GetStatusBar())
+        SetStatusText(connected ? _("Screenshot failed: the Unity viewport did not answer")
+                                : _("Screenshot failed: the Unity viewport is not running"), 0);
+    }
+  }
 }
 

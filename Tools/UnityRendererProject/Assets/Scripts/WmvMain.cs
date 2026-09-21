@@ -262,6 +262,7 @@ public partial class WmvMain : MonoBehaviour
         ipc.OnCharacterImage = HandleCharacterImage;
         ipc.OnCharacterScene = HandleCharacterScene;
         ipc.OnRuntimeState = HandleRuntimeState;
+        ipc.OnCaptureScreenshot = HandleCaptureScreenshot;
     }
 
     // ---------------------------------------------------------------- load pipeline
