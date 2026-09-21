@@ -70,6 +70,72 @@ The shipped key is fully vertical, which is the same geometry, and it reads as m
 because the range now comes from the floor-to-key ratio and the cast shadows rather than from the
 key's angle: measured light-only ranges are 1.7—2.9x on the nine test models.
 
+**A front light fills what the key misses.** A face is vertical, so its N·L against the
+world-vertical key is about zero: under the key alone it gets only the ambient bands while the
+shoulders and the top of the chest right below it take the key, and a head-and-shoulders view showed
+a grey face on a bright body. `WmvOpaque` (and its copy in `WmvWmo`) therefore adds one weaker
+directional, `FRONT_LEVEL` and `FRONT_DIR` in the constants block, built in the shader from the
+camera that draws the model. It comes straight from the camera and level with the ground, and that
+direction is a choice made by eye, not a measurement. A reference preview viewer's lit model shader,
+read while it ran, lights a model with an ambient of 0.35, a primary light of 1.0 and two secondaries
+of 0.35, all fixed to the camera and summed under a clamp to 1; the front light first took the
+viewer-side secondary's bearing (45 degrees to the viewer's right, 35.3 degrees up), which lifted a
+face by only 6 % and one side of it more than the other. Its level is a choice too: 0.35 of this
+rig's key (0.35 × `LIGHT_LEVEL` = 0.2065), where that viewer's secondary is 0.35 itself. Nor is it
+how that viewer lights a face: a face turned to its camera gets 0.457 from the primary, which comes
+from below eye level, and this rig leaves the primary out to keep its overhead key. Four rules fit the
+light to this rig. It is level in the world, so a camera below the model still finds the belly dark.
+It is scaled by the key's shadow side (1 − N·L), so the 1.25 peak does not move. It never lifts a
+surface past 1.0, the texture's own colour. And it is not occluded, because a light at the camera
+reaches everything the camera sees: contact occlusion does not scale it, and its ceiling is judged on
+the light that arrives, the ambient after that occlusion and the key after its cast shadow. It fills a
+contact shadow toward what an open surface gets, and a cast shadow as far as the shadowed surface's own
+shadow side allows, so a surface that faces the key keeps most of the map's depth. (Occluded like the
+ambient, it barely reached the skin under a fringe or a jaw: those surfaces tilt up into the key, so
+their unoccluded light already sat at the ceiling. With the ceiling judged on the key before its cast
+shadow, the upper cheeks under a brow, which tilt up into the key but lie in the brow's shadow, kept
+about a fifth of this light and were lit by the ambient alone: close up, a flat grey band ran from eye
+to eye between the key-lit forehead and the front-lit lower face.)
+
+**Cast shadows soften with their occluder's height.** The map's fixed 3x3 kernel gave every cast
+shadow the same few-texel edge, so the head's shadow on the chest, cast from 25 cm above, ended in a
+hard, stair-stepped line around a dark patch. `WmvShadowFactor` now judges each of the kernel's nine
+taps twice: as before, and against the receiver's own tangent plane along the key. A tap the fixed test
+counts that also stands above that plane is a real occluder, and its height is known. The fixed kernel
+also counts the receiver's own surface on any slope (a lit slope keeps about three quarters of its key),
+and the rig's exposure depends on that: counting it out clipped 12 % of the blood elf female's head box
+against 4 %. So with no real occluder in reach the fixed verdict is returned bit for bit, and where an
+occluder hides a tap the receiver's plane says what its own surface would have done there, so the inside
+of a shadow, its edge and the open slope beside it keep the same share. (The first version counted that
+share only on taps without an occluder: a faded shadow came out brighter than the lit skin at its edge,
+with a dark band along the edge.) Where an occluder is found, eight more taps search a disc
+`SHADOW_SEARCH` of the model radius wide, the edge's radius is the occluders' mean height times
+`SHADOW_PENUMBRA` (0.20, the key's angular radius as a tangent), and thirty-two taps over that disc give
+the occluded fraction. Every real occluder in reach is faded alike, by
+1 / (1 + mean height / (`SHADOW_FADE` × R)), with `SHADOW_FADE` four times the contact march's reach. The
+fade is one number per pixel, and weak, because the map holds the top of whatever stands over the
+receiver: under a head it reads the crown and at the shadow's edge the side of the head, so a fade judged
+tap by tap left a dark band along the edge, and a surface under a tall column (a foot under its leg, a
+lip under a hood) fades as if its shadow were cast from the column's top. The discs turn per pixel with
+the contact march's screen-space phase, which leaves a fine grain in wide edges. A surface facing away
+from the key skips the map entirely, since its direct term is zero.
+
+Measured on the blood elf female against the develop build, with the head framed on a head-sized box
+and, in brackets, zoomed in at the full body's radius as the viewport does: the face goes from 0.92
+(0.96) to 1.05 (1.09) of the shoulder tops, the brow comes up ×1.25, the skin under the eyes ×1.27–1.28
+(×1.18–1.20), the neck under the jaw ×1.20 (×1.27) and the upper chest under the head ×1.20 (×1.17). The
+shadowed chest sits at 0.82 (0.80) of the lit chest beside it, against 0.67 (0.65): the head's shadow
+keeps a little over half of its contrast, under a soft edge. About 2,200–2,300 pixels per head capture
+newly clip, nearly all of them the fringe's hair strands in the red channel, two thirds of which the
+front light alone already clips, while 1,800–3,000 stop clipping. The light check's map darkening sits
+12–27 % below the level front light alone on the blood elf female, 16 % on a hooded model and 5–15 % on
+the rat mount (a third seen from below, where its belly keeps its flat-albedo p05, 0.1176); Algalon's
+capture is byte-identical. The price is form: the light-only range (`-wmvLightCheck`, flat albedo) of
+the full body seen from the front goes from 1.62x to 1.39x and of the rat mount seen three-quarter from
+2.42x to 1.93x, where the level front light alone gave 1.52x and 2.13x. The front light's contact fill
+alone takes them to 1.49x and 1.98x, the soft edge takes the full body to 1.42x, the fade adds nothing
+to either, and counting the cast shadow in the front light's ceiling takes them to 1.39x and 1.93x.
+
 **The rig.** Every number is a `#define` at the top of `Assets/Resources/WmvOpaque.shader`, in one
 block, so a tuning pass edits constants and nothing else:
 
@@ -129,8 +195,10 @@ The model occludes its own key light: a rein across the mount's body, a horn acr
 rig's dot-product terms cannot produce that — they know which way a surface faces, not what stands
 between it and the light — so `WmvShadowRig` renders a depth map from the key's point of view every
 frame (one orthographic camera, fitted to the model bounds, 4096 px) and `WmvShadowFactor` in the
-shader compares each fragment against it with a 3x3 PCF kernel. `SHADOW_STRENGTH` says how much of
-the key an occluder removes and `SHADOW_SOFT` blurs the edge; both are in the constants block.
+shader compares each fragment against it with a 3x3 PCF kernel, widened into a soft edge where the
+occluder stands high above the receiver (see "Cast shadows soften with their occluder's height"
+above). `SHADOW_STRENGTH` says how much of the key an occluder removes and `SHADOW_SOFT` blurs the
+edge; both are in the constants block.
 
 Design points worth knowing:
 

@@ -154,10 +154,15 @@ Shader "WMV/Map Object"
             #define FILL_DIR    half3(0.059, 0.998, 0.032)
             #define SHADOW_STRENGTH 1.0h
             #define SHADOW_SOFT     4.0h
+            #define SHADOW_PENUMBRA 0.20
+            #define SHADOW_SEARCH   0.05
+            #define SHADOW_FADE     (4.0 * CONTACT_RANGE)
             #define CONTACT_STRENGTH 0.4h
             #define CONTACT_RANGE    0.36666667
             #define CONTACT_SOFTNESS 0.25
             #define CONTACT_TAPS     8
+            #define FRONT_LEVEL  0.2065h                           // derived: 0.35 * LIGHT_LEVEL
+            #define FRONT_DIR    half3(0.0, 0.0, 1.0)              // the camera's level frame
             // ---- END COPY ---------------------------------------------------------------------------
 
             sampler2D _WmoTex0, _WmoTex1, _WmoTex2, _WmoTex3, _WmoTex4, _WmoTex5, _WmoTex6, _WmoTex7, _WmoTex8;
@@ -181,11 +186,19 @@ Shader "WMV/Map Object"
             float     _WmvShadowTexel;        // 1 / map size
             float     _WmvShadowDepthBias;    // in [0,1] depth units
             float     _WmvShadowNormalBias;   // world units, along the surface normal
+            float4    _WmvKeyDirWorld;        // toward the light; w unused
+            float     _WmvModelRadius;        // world units; the map's half-window and the march's scale
 
-            half WmvShadowFactor(float3 wpos, half3 nrmWorld, half soft)
+            float WmvStepPhase(float2 pix);
+
+            half WmvShadowFactor(float3 wpos, half3 nrmWorld, half soft, float2 pix)
             {
                 if (_WmvShadowValid < 0.5h)
                     return 1.0h;
+
+                float nl = dot((float3)nrmWorld, _WmvKeyDirWorld.xyz);
+                if (nl <= 0.0)
+                    return 1.0h;              // the key cannot reach it: nothing to shadow
 
                 float4 sp = mul(_WmvShadowMatrix,
                                 float4(wpos + nrmWorld * _WmvShadowNormalBias, 1.0));
@@ -193,7 +206,27 @@ Shader "WMV/Map Object"
                 if (uv.x <= 0.0 || uv.x >= 1.0 || uv.y <= 0.0 || uv.y >= 1.0)
                     return 1.0h;              // outside the map: nothing recorded, so lit
 
-                float lit = 0.0;
+            #if UNITY_REVERSED_Z
+                float zr = sp.z;
+                float zs = 1.0;
+            #else
+                float zr = sp.z * 0.5 + 0.5;
+                float zs = -1.0;
+            #endif
+                float R     = max(_WmvModelRadius, 1e-4);
+                float span  = 2.0 * R;
+                float biasW = _WmvShadowDepthBias * span;   // the fixed depth bias, in world units
+                float fadeW = SHADOW_FADE * R;
+
+                float nlc   = max(nl, 0.2);
+                float3 axisU = 2.0 * R * R * _WmvShadowMatrix[0].xyz;
+                float3 axisV = 2.0 * R * R * _WmvShadowMatrix[1].xyz;
+                float2 plane = float2(-dot((float3)nrmWorld, axisU), -dot((float3)nrmWorld, axisV))
+                             / nlc;
+                float sink  = _WmvShadowNormalBias / nlc;
+
+                float lit = 0.0, own = 0.0, open = 0.0, under = 0.0, occN = 0.0, heightSum = 0.0,
+                      found = 0.0;
                 float r = _WmvShadowTexel * soft;
                 [unroll]
                 for (int y = -1; y <= 1; y++)
@@ -202,20 +235,84 @@ Shader "WMV/Map Object"
                     {
                         float stored = tex2D(_WmvShadowMap, uv + float2(x, y) * r).r;
             #if UNITY_REVERSED_Z
-                        lit += (sp.z >= stored - _WmvShadowDepthBias) ? 1.0 : 0.0;
+                        bool hit = !(sp.z >= stored - _WmvShadowDepthBias);
             #else
-                        lit += ((sp.z * 0.5 + 0.5) <= stored + _WmvShadowDepthBias) ? 1.0 : 0.0;
+                        bool hit = !((sp.z * 0.5 + 0.5) <= stored + _WmvShadowDepthBias);
             #endif
+                        lit += hit ? 0.0 : 1.0;
+                        float2 d = float2(x, y) * r;
+                        float rise = dot(d, plane);             // the receiver's plane at this tap
+                        float height = zs * (stored - zr) * span - rise;
+                        if (height > biasW && hit)
+                        {
+                            float ownHere = (rise - sink > biasW) ? 1.0 : 0.0;
+                            own       += ownHere;
+                            under     += 1.0 - ownHere;
+                            occN      += 1.0;
+                            heightSum += height;
+                            found     += 1.0;
+                        }
+                        else
+                        {
+                            own  += hit ? 1.0 : 0.0;
+                            open += hit ? 0.0 : 1.0;
+                        }
                     }
-                return (half)(lit / 9.0);
+                float fixedLit = lit / 9.0;
+
+                float searchUV = SHADOW_SEARCH * 0.5;       // SHADOW_SEARCH * R over the 2R window
+                float turn = WmvStepPhase(pix + float2(23.0, 11.0)) * 6.2831853;
+                float cs = cos(turn), sn = sin(turn);
+                [unroll]
+                for (int k = 0; k < 8; k++)
+                {
+                    float a = k * 2.3999632;                // the golden angle
+                    float2 d0 = float2(cos(a), sin(a)) * sqrt((k + 0.5) / 8.0);
+                    float2 d = float2(d0.x * cs - d0.y * sn, d0.x * sn + d0.y * cs) * searchUV;
+                    float stored = tex2Dlod(_WmvShadowMap, float4(uv + d, 0.0, 0.0)).r;
+                    float above = zs * (stored - zr) * span;
+                    float height = above - dot(d, plane);
+                    if (height > biasW && above > biasW)
+                    {
+                        heightSum += height;
+                        found     += 1.0;
+                    }
+                }
+                if (found < 0.5)
+                    return (half)fixedLit;            // no real occluder in reach: the fixed verdict
+
+                float fade = 1.0 / (1.0 + heightSum / found / fadeW);
+                float nearLit = (occN < 0.5) ? fixedLit : (open + under * (1.0 - fade)) / 9.0;
+
+                float radius = heightSum / found * SHADOW_PENUMBRA / span;
+                float widen = saturate((radius - r) / r);
+                if (widen <= 0.0)
+                    return (half)nearLit;
+                radius = min(radius, searchUV);
+
+                float turn2 = WmvStepPhase(pix + float2(5.0, 37.0)) * 6.2831853;
+                float c2 = cos(turn2), s2 = sin(turn2);
+                float shade = 0.0;
+                [unroll]
+                for (int j = 0; j < 32; j++)
+                {
+                    float a = j * 2.3999632;
+                    float2 d0 = float2(cos(a), sin(a)) * sqrt((j + 0.5) / 32.0);
+                    float2 d = float2(d0.x * c2 - d0.y * s2, d0.x * s2 + d0.y * c2) * radius;
+                    float stored = tex2Dlod(_WmvShadowMap, float4(uv + d, 0.0, 0.0)).r;
+                    float above = zs * (stored - zr) * span;
+                    float height = above - dot(d, plane);
+                    if (height > biasW && above > biasW)
+                        shade += fade;
+                }
+                float wideLit = (1.0 - shade / 32.0) * (1.0 - own / 9.0);
+                return (half)lerp(nearLit, wideLit, widen);
             }
 
             float     _WmvContactValid;
             float4x4  _WmvViewDepthMatrix;    // world -> the view-depth camera's clip space
             sampler2D_float _WmvViewDepth;
-            float4    _WmvKeyDirWorld;        // toward the light; w unused
-            float4    _WmvFillDirWorld;       // the sky fill, same handling; w unused
-            float     _WmvModelRadius;        // world units; scales the march to the model
+            float4    _WmvFillDirWorld;       // the sky fill, same handling as the key; w unused
             float     _WmvContactEps;         // self-hit guard, WORLD UNITS
             float     _WmvContactThick;       // occluder thickness assumption, WORLD UNITS
             float4    _WmvViewDepthParams;    // (near, far, far - near, near * far), world units
@@ -507,7 +604,8 @@ Shader "WMV/Map Object"
                     half castKey = 1.0h;                // the key's directional shadow
                     half occ = 1.0h;                    // near-field sky/ambient occlusion
                     if (shStr > 0.0h)
-                        castKey = 1.0h - shStr * (1.0h - WmvShadowFactor(i.wpos, n, shSoft));
+                        castKey = 1.0h - shStr * (1.0h - WmvShadowFactor(i.wpos, n, shSoft,
+                                                                         i.pos.xy));
                     if (cStr > 0.0h)
                     {
                         half contact = WmvContactFactor(i.wpos, n, cRange * _WmvModelRadius,
@@ -522,6 +620,18 @@ Shader "WMV/Map Object"
                     half ambient = band * (AMB_BASE + AMB_WRAP * (0.5h + 0.5h * ndlSigned));
                     half direct  = ndl * LIGHT_LEVEL;
                     lum = ambient * occ + direct * castKey;
+
+                    float3 camUp      = UNITY_MATRIX_V[1].xyz;
+                    float3 camBack    = UNITY_MATRIX_V[2].xyz;
+                    float3 levelBack  = camBack * camUp.y - camUp * camBack.y;
+                    levelBack.y = 0.0;
+                    levelBack *= rsqrt(max(dot(levelBack, levelBack), 1e-8));
+                    float3 levelRight = cross(levelBack, float3(0.0, 1.0, 0.0));
+                    float3 frontDir   = FRONT_DIR.x * levelRight + FRONT_DIR.z * levelBack
+                                      + float3(0.0, FRONT_DIR.y, 0.0);
+                    half facing   = saturate(dot(n, (half3)frontDir));
+                    half headroom = saturate((1.0h - lum) / FRONT_LEVEL);
+                    lum += FRONT_LEVEL * facing * shadowSide * headroom;
                 }
                 // ---- END COPY -----------------------------------------------------------------------
 

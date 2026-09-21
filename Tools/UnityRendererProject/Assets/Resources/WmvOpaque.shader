@@ -235,6 +235,42 @@ Shader "WMV/Opaque Textured"
             // and the blur radius of the shadow edge, in shadow-map texels.
             #define SHADOW_STRENGTH 1.0h
             #define SHADOW_SOFT     4.0h
+            // A CAST SHADOW'S EDGE WIDENS WITH ITS OCCLUDER'S HEIGHT, AND A LONG SHADOW IS A LITTLE PALER.
+            //
+            // NOT RETAIL-DERIVED -- a preview choice, like the front light below. A light of any size
+            // draws a sharp shadow right under its occluder and a soft one far below it. The fixed
+            // kernel drew every cast shadow with the same few-texel edge, so the head's shadow on the
+            // chest -- cast from 25 cm above -- ended in a hard, stair-stepped line around a dark
+            // patch, and a rope lying on a saddle got exactly the same edge. WmvShadowFactor measures
+            // how far above the receiver a real occluder stands and uses that height twice:
+            //
+            //   SHADOW_PENUMBRA  the key's angular radius, as a tangent: the edge's radius is the
+            //                    height times this, never narrower than SHADOW_SOFT texels. 0.20 (about
+            //                    11 degrees) gives the head's shadow on the chest an edge ~10 cm wide on a
+            //                    full-size character, and leaves an occluder within ~1.5 cm of its
+            //                    receiver there, or ~5 cm on a mount -- a strap, a rope on a saddle --
+            //                    on the fixed edge (the texel, and so the fixed edge, scales with R).
+            //   SHADOW_SEARCH    the widest edge looked for, as a fraction of the model radius R: 0.05 R
+            //                    is ~100 texels of the map at every model size.
+            //   SHADOW_FADE      the mean occluder height, as a fraction of R, at which a shadow keeps
+            //                    half its depth: every real occluder in reach is scaled by
+            //                    1 / (1 + mean height / (SHADOW_FADE * R)). Four times the contact march's
+            //                    reach, so the fade is weak: on a full-size character an occluder 3 cm
+            //                    above the skin keeps ~99 % of its shadow, and the head, which the map reads
+            //                    ~27 cm above the chest, ~90 %. Framed on a head-sized box, where R is a
+            //                    third as large, the head keeps ~73 %.
+            //
+            // Measured on the blood elf female against the level front light alone, its ceiling still
+            // judged on the key before this shadow (below): the upper chest under the head sits at 0.76
+            // of the lit chest beside it, framed on a head-sized box and at the full body's radius alike,
+            // against 0.67 and 0.65 -- about 70 % of that contrast kept, under a soft edge with no band
+            // along it. At the full body's radius the edge does most of the softening. Elsewhere the fade
+            // costs a little depth: the light check's [map] darkening sits 9-15 % below the front light
+            // alone on her and on a hooded model, and within 1 % on the rat mount. With the ceiling judged
+            // after this shadow, as it is now, the chest sits at 0.82 and 0.80.
+            #define SHADOW_PENUMBRA 0.20
+            #define SHADOW_SEARCH   0.05
+            #define SHADOW_FADE     (4.0 * CONTACT_RANGE)
             // Contact shadows: the screen-space near-field shadow. This is what puts the
             // hood's shadow ON the face right up to where they touch -- the shadow map's bias
             // makes it blind for the last few millimetres before a contact, and a shadow that
@@ -258,6 +294,90 @@ Shader "WMV/Opaque Textured"
             #define CONTACT_RANGE    0.36666667
             #define CONTACT_SOFTNESS 0.25
             #define CONTACT_TAPS     8
+            // THE FRONT LIGHT: A SECOND, WEAKER DIRECTIONAL THAT FOLLOWS THE CAMERA.
+            //
+            // NOT RETAIL-DERIVED -- a preview choice. Retail's lit path has one directional light
+            // (the header above), and so has the rest of this rig: the key, anchored to the
+            // world's vertical. But a preview camera looks at the FRONT of a model, and what it
+            // shows most closely -- a face above all -- is vertical. N.L against a vertical key is
+            // ~0 there, so a face gets the ambient bands and nothing else while the shoulders and
+            // the top of the chest right below it take the key. The bands cannot fix that: they
+            // follow the normal's up component alone, and a face sits on the horizon band
+            // whichever way it turns. On a head-and-shoulders view it read as a grey face on a
+            // bright body.
+            //
+            // IT COMES STRAIGHT FROM THE CAMERA, LEVEL -- A CHOICE, NOT A MEASUREMENT. FRONT_DIR is
+            // (0, 0, 1) of the camera's LEVEL frame: the horizontal direction toward the viewer. A
+            // reference preview viewer's lit model shader, read while it ran, lights a model with an
+            // ambient of 0.35, a primary light of 1.0 on normalize(5,-3,3) of view space and two
+            // secondaries of 0.35 on normalize(1,1,1) and on its opposite, all fixed to the camera and
+            // summed under a clamp to 1. This light first took that secondary's bearing, 45 degrees to
+            // the viewer's right and 35.3 up; it lifted a face by only 6 % and its right half more than
+            // its left. Straight from the camera it lifts a face evenly -- on the blood elf female's
+            // head-and-shoulders captures the brow x1.25 and the cheeks x1.16-1.18, which puts the face
+            // at the brightness of the shoulder tops -- and it was chosen by eye over the others.
+            //
+            //   FRONT_LEVEL  NOT MEASURED: 0.35 * LIGHT_LEVEL, the reference secondary's share of its
+            //                primary applied to THIS rig's key. A choice; that viewer's level is 0.35
+            //                itself, and under the ceiling below the two gave the same light check.
+            //
+            // IT IS NOT HOW THAT VIEWER LIGHTS A FACE. A face turned to its camera gets 0.35 of
+            // ambient, 0.457 from the primary and 0.202 from a secondary, clamped to 1.0: most of its
+            // light is the primary, which comes from 59 degrees to the viewer's right and 27 degrees
+            // BELOW eye level. That light is left out on purpose -- this rig keeps its overhead key as
+            // the one primary -- so the front light carries only the smaller share.
+            //
+            // FOUR RULES FIT IT TO THIS RIG. The clipping figures come from the blood elf female's
+            // head-and-shoulders light check seen from the front (-wmvLightYaw=180), where the key alone
+            // clips 3.9 % of the model's pixels.
+            //
+            //   * THE ELEVATION IS THE WORLD'S. FRONT_DIR is read in the camera's LEVEL frame -- x the
+            //     camera's right, y the world's up, z toward the viewer along the ground -- so the light
+            //     turns with the camera's yaw but stays on the horizon whatever its pitch. Fixed to the
+            //     view, it would swing under the model whenever the camera looks up from below and light
+            //     the belly, which is what anchoring the key was for (see WmvShadowRig). Level, it cannot
+            //     reach a surface that faces straight down.
+            //   * IT LIGHTS WHAT THE KEY MISSES: it is scaled by the key's shadow side, 1 - N.L, as this
+            //     rig's old sky fill was. Unscaled, the same light raised the lit peak from 1.25 to ~1.32
+            //     and clipped 23 % of the model; scaled, the peak stays at 1.25 (see LIGHT_LEVEL), and a
+            //     vertical face loses none of the light to the scale.
+            //   * IT NEVER LIFTS A SURFACE PAST 1.0, the texture's own colour -- the reference's clamp,
+            //     applied to this light alone, so every value this rig already puts above 1.0 stays
+            //     exactly as chosen. Scaled but not capped, it still clipped 11.1 %; capped, 4.2 %. It
+            //     fades out over the last FRONT_LEVEL below 1.0 rather than stopping there, so it leaves
+            //     no flat band.
+            //   * NOTHING THE CAMERA SEES IS HIDDEN FROM IT. The contact march asks whether something
+            //     within touching distance stands between a surface and the KEY; a light at the camera
+            //     reaches every surface the camera can see, so near-field occlusion does not scale this
+            //     light, and the ceiling is judged on the light that arrives (below). Under a fringe, a
+            //     jaw or a hood the sky is partly blocked, and this light fills toward what an open
+            //     surface gets -- never past 1.0. Occluded like the ambient it barely reached those
+            //     places, because they tilt up into the key and their unoccluded light was already near
+            //     the ceiling: the skin under the eyes x1.06-1.10 of the key alone on a head-sized
+            //     framing, x1.23-1.25 with this rule; the neck under the jaw at the full body's radius
+            //     x1.03, x1.23. A contact shadow keeps its shape and loses about an eighth of its depth
+            //     on surfaces facing the camera (light check [contact adds] 0.0588 -> 0.0511 on the rat
+            //     mount seen three-quarter); a belly seen from below gets none of this light.
+            //
+            // THE CEILING COUNTS THE LIGHT THAT ARRIVES: THE AMBIENT AFTER OCCLUSION, THE KEY AFTER ITS
+            // CAST SHADOW. Judged on the key before its shadow, it took this light from exactly the skin
+            // a cast shadow darkens. The upper cheeks tilt up into the key, and under a brow they lie in
+            // its shadow: the ceiling counted a key they never got and left them about a fifth of this
+            // light, so the ambient alone lit them -- and the ambient barely follows the normal. On the
+            // night elf female's face seen close up, that was a flat grey band from eye to eye between
+            // the key-lit forehead and the front-lit lower face: the upper cheeks came up x1.08-1.09 of
+            // the key alone where the lower cheeks came up x1.17-1.19. Judged on what arrives, they come
+            // up x1.19-1.20, with the shape this light gives them. The shadow-side scale still follows
+            // the surface's own N.L, so a shadowed surface gets less of this light the more it faces the
+            // key, and one the key cannot reach anyway -- a face under a hood -- gets practically what it
+            // got before. The price is on surfaces that face the key: the head's shadow on the blood elf
+            // female's chest, zoomed in at the full body's radius, sits at 0.80 of the lit chest
+            // against 0.76, and the light check's [map] darkening drops 4-15 % on her, 5-14 % on the rat
+            // mount seen from the front and three-quarter (a third seen from below, where its belly keeps
+            // its flat-albedo p05) and 1 % on a hooded model. How soft a cast shadow is belongs to the
+            // map -- see SHADOW_PENUMBRA.
+            #define FRONT_LEVEL  0.2065h                           // derived: 0.35 * LIGHT_LEVEL
+            #define FRONT_DIR    half3(0.0, 0.0, 1.0)              // the camera's level frame
             // ----------------------------------------------------------------------------
 
             sampler2D _MainTex;
@@ -323,14 +443,65 @@ Shader "WMV/Opaque Textured"
             float     _WmvShadowTexel;        // 1 / map size
             float     _WmvShadowDepthBias;    // in [0,1] depth units
             float     _WmvShadowNormalBias;   // world units, along the surface normal
+            // Shared with the contact march below.
+            float4    _WmvKeyDirWorld;        // toward the light; w unused
+            float     _WmvModelRadius;        // world units; the map's half-window and the march's scale
 
-            // 1 = fully lit, 0 = fully occluded (before strength is applied). 3x3 PCF: nine
-            // depth comparisons averaged, spread by "soft" texels, so the edge of the rope's
-            // shadow is a small gradient instead of a hard stairstep.
-            half WmvShadowFactor(float3 wpos, half3 nrmWorld, half soft)
+            float WmvStepPhase(float2 pix);           // the per-pixel phase, with the contact march below
+
+            // 1 = fully lit, 0 = fully occluded (before strength is applied).
+            //
+            // THE FIXED KERNEL'S NINE TAPS STAY, AND WITH NO REAL OCCLUDER IN REACH THEIR VERDICT IS
+            // RETURNED BIT FOR BIT. A 3x3 PCF spread by "soft" texels compares every tap with the
+            // receiver's own depth, so on a surface tilted away from the key the taps on its uphill
+            // side find the surface itself standing above the sample point and count it: an open
+            // slope keeps only part of its key (0.72 on the blood elf female's lit chest, where the
+            // same taps with her own surface counted out give 1.0). The rig's exposure was settled
+            // with that in -- counting it out clipped 12 % of her head box seen from the front,
+            // against 4 % -- so it stays. A tap is a REAL OCCLUDER when the fixed test counts it and
+            // it also stands above the receiver's own tangent plane along the key; its height above
+            // that plane is what the constants block calls the height.
+            //
+            // THAT SHARE IS THE RECEIVER'S, SO IT STAYS UNDER AN OCCLUDER. Where a real occluder
+            // covers a tap, the map no longer shows what the receiver's own surface does there, and
+            // the receiver's plane answers instead: the tap is its own when the plane there stands
+            // higher above the sample point than the fixed test's bias. The inside of a shadow, its
+            // edge and the open slope beside it therefore carry the same share. Counted only on taps
+            // without an occluder -- the first version -- it went missing from the whole inside of a
+            // shadow and stayed on the lit side of the edge, so a faded shadow came out brighter than
+            // the skin just outside it, with a dark band along the edge.
+            //
+            // A REAL OCCLUDER'S SHADOW GETS AN EDGE AS WIDE AS ITS HEIGHT ALLOWS (SHADOW_PENUMBRA),
+            // AND IS SHALLOWER THE HIGHER IT STANDS (SHADOW_FADE). Eight more taps search a disc as
+            // wide as the widest edge (SHADOW_SEARCH) for real occluders; their mean height times the
+            // key's tangent is the edge's radius, and thirty-two taps over a disc of that radius give
+            // the occluded fraction. Both discs are golden-angle spirals turned per pixel by the
+            // contact march's screen-space phase, which turns their taps into a fine grain instead of
+            // banded copies of the occluder. Where the edge is no wider than the fixed spread the
+            // nine taps decide alone, and they hand over to the wide filter as the edge grows to twice
+            // that spread, so there is no seam.
+            //
+            // ONE FADE PER PIXEL, FROM THE MEAN HEIGHT. The map holds the TOP of whatever stands over
+            // the receiver: under a head it reads the crown, and at the edge of the head's shadow the
+            // side of the head or a strand of hair, far lower. Faded tap by tap, the inside of the
+            // head's shadow lightened more than its edge, which kept a dark band; every real occluder
+            // in reach is therefore faded alike, by 1 / (1 + mean height / (SHADOW_FADE * R)). The
+            // same limit is why the fade is weak: a surface under a tall column -- a foot under its
+            // leg, a lip under a hood -- reads the column's top, and fades as if its shadow were cast
+            // from there.
+            //
+            // The cost: the nine reads it always took, eight more on every surface the key reaches,
+            // and thirty-two more only where a real occluder stands high enough to widen the edge. A
+            // surface facing away from the key takes none: its direct term is zero, so no shadow can
+            // change it.
+            half WmvShadowFactor(float3 wpos, half3 nrmWorld, half soft, float2 pix)
             {
                 if (_WmvShadowValid < 0.5h)
                     return 1.0h;
+
+                float nl = dot((float3)nrmWorld, _WmvKeyDirWorld.xyz);
+                if (nl <= 0.0)
+                    return 1.0h;              // the key cannot reach it: nothing to shadow
 
                 // Push the sample point out along the normal before projecting: a surface
                 // otherwise compares against its own depth and speckles ("acne"). The offset
@@ -348,7 +519,41 @@ Shader "WMV/Opaque Textured"
                 // lookup vertically, and the artefact is unmistakable once seen: the model's own
                 // silhouette stamped upside-down across itself.
 
-                float lit = 0.0;
+                // DEPTH AS HEIGHT. The light camera is orthographic, its window and its near-to-far
+                // span both 2R wide around the model (R = _WmvModelRadius, see WmvShadowRig), so one
+                // unit of stored depth and one unit of uv are each 2R world units along their axes.
+                // zs makes "the stored surface is nearer the light" positive under either depth
+                // convention.
+            #if UNITY_REVERSED_Z
+                float zr = sp.z;
+                float zs = 1.0;
+            #else
+                float zr = sp.z * 0.5 + 0.5;
+                float zs = -1.0;
+            #endif
+                float R     = max(_WmvModelRadius, 1e-4);
+                float span  = 2.0 * R;
+                float biasW = _WmvShadowDepthBias * span;   // the fixed depth bias, in world units
+                float fadeW = SHADOW_FADE * R;
+
+                // THE RECEIVER'S OWN PLANE. Rows 0 and 1 of the orthographic matrix are the map's uv
+                // axes in world space, each 1/R long, so a uv offset d is the world offset
+                // o = 2 R^2 (d.x row0 + d.y row1), and the tangent plane n.(o + L h) = 0 stands
+                // h = -n.o / n.L above it along the key L. A grazing surface is held at n.L = 0.2: the
+                // key barely lights it, and the height would run away. The surface itself runs below
+                // the pushed sample point by the normal push seen along L (sink).
+                float nlc   = max(nl, 0.2);
+                float3 axisU = 2.0 * R * R * _WmvShadowMatrix[0].xyz;
+                float3 axisV = 2.0 * R * R * _WmvShadowMatrix[1].xyz;
+                float2 plane = float2(-dot((float3)nrmWorld, axisU), -dot((float3)nrmWorld, axisV))
+                             / nlc;
+                float sink  = _WmvShadowNormalBias / nlc;
+
+                // THE NINE TAPS: the fixed verdict exactly as it always was (lit); how many taps the
+                // receiver's own surface hides (own); the taps the fixed test leaves lit (open); and,
+                // among the real occluders' taps, those the receiver itself would leave lit (under).
+                float lit = 0.0, own = 0.0, open = 0.0, under = 0.0, occN = 0.0, heightSum = 0.0,
+                      found = 0.0;
                 float r = _WmvShadowTexel * soft;
                 [unroll]
                 for (int y = -1; y <= 1; y++)
@@ -360,12 +565,81 @@ Shader "WMV/Opaque Textured"
                         // switch the projection matrix was built under (GetGPUProjectionMatrix),
                         // so the two always agree.
             #if UNITY_REVERSED_Z
-                        lit += (sp.z >= stored - _WmvShadowDepthBias) ? 1.0 : 0.0;
+                        bool hit = !(sp.z >= stored - _WmvShadowDepthBias);
             #else
-                        lit += ((sp.z * 0.5 + 0.5) <= stored + _WmvShadowDepthBias) ? 1.0 : 0.0;
+                        bool hit = !((sp.z * 0.5 + 0.5) <= stored + _WmvShadowDepthBias);
             #endif
+                        lit += hit ? 0.0 : 1.0;
+                        float2 d = float2(x, y) * r;
+                        float rise = dot(d, plane);             // the receiver's plane at this tap
+                        float height = zs * (stored - zr) * span - rise;
+                        if (height > biasW && hit)
+                        {
+                            float ownHere = (rise - sink > biasW) ? 1.0 : 0.0;
+                            own       += ownHere;
+                            under     += 1.0 - ownHere;
+                            occN      += 1.0;
+                            heightSum += height;
+                            found     += 1.0;
+                        }
+                        else
+                        {
+                            own  += hit ? 1.0 : 0.0;
+                            open += hit ? 0.0 : 1.0;
+                        }
                     }
-                return (half)(lit / 9.0);
+                float fixedLit = lit / 9.0;
+
+                // THE SEARCH: eight taps over a disc as wide as the widest edge, real occluders only.
+                float searchUV = SHADOW_SEARCH * 0.5;       // SHADOW_SEARCH * R over the 2R window
+                float turn = WmvStepPhase(pix + float2(23.0, 11.0)) * 6.2831853;
+                float cs = cos(turn), sn = sin(turn);
+                [unroll]
+                for (int k = 0; k < 8; k++)
+                {
+                    float a = k * 2.3999632;                // the golden angle
+                    float2 d0 = float2(cos(a), sin(a)) * sqrt((k + 0.5) / 8.0);
+                    float2 d = float2(d0.x * cs - d0.y * sn, d0.x * sn + d0.y * cs) * searchUV;
+                    float stored = tex2Dlod(_WmvShadowMap, float4(uv + d, 0.0, 0.0)).r;
+                    float above = zs * (stored - zr) * span;
+                    float height = above - dot(d, plane);
+                    if (height > biasW && above > biasW)
+                    {
+                        heightSum += height;
+                        found     += 1.0;
+                    }
+                }
+                if (found < 0.5)
+                    return (half)fixedLit;            // no real occluder in reach: the fixed verdict
+
+                // THE FADE: the share of the key a real occluder still removes, from their mean height.
+                float fade = 1.0 / (1.0 + heightSum / found / fadeW);
+                float nearLit = (occN < 0.5) ? fixedLit : (open + under * (1.0 - fade)) / 9.0;
+
+                // THE EDGE: the mean height times the key's tangent, as a uv radius.
+                float radius = heightSum / found * SHADOW_PENUMBRA / span;
+                float widen = saturate((radius - r) / r);
+                if (widen <= 0.0)
+                    return (half)nearLit;
+                radius = min(radius, searchUV);
+
+                float turn2 = WmvStepPhase(pix + float2(5.0, 37.0)) * 6.2831853;
+                float c2 = cos(turn2), s2 = sin(turn2);
+                float shade = 0.0;
+                [unroll]
+                for (int j = 0; j < 32; j++)
+                {
+                    float a = j * 2.3999632;
+                    float2 d0 = float2(cos(a), sin(a)) * sqrt((j + 0.5) / 32.0);
+                    float2 d = float2(d0.x * c2 - d0.y * s2, d0.x * s2 + d0.y * c2) * radius;
+                    float stored = tex2Dlod(_WmvShadowMap, float4(uv + d, 0.0, 0.0)).r;
+                    float above = zs * (stored - zr) * span;
+                    float height = above - dot(d, plane);
+                    if (height > biasW && above > biasW)
+                        shade += fade;
+                }
+                float wideLit = (1.0 - shade / 32.0) * (1.0 - own / 9.0);
+                return (half)lerp(nearLit, wideLit, widen);
             }
             // -----------------------------------------------------------------------------
 
@@ -377,9 +651,7 @@ Shader "WMV/Opaque Textured"
             float     _WmvContactValid;
             float4x4  _WmvViewDepthMatrix;    // world -> the view-depth camera's clip space
             sampler2D_float _WmvViewDepth;
-            float4    _WmvKeyDirWorld;        // toward the light; w unused
-            float4    _WmvFillDirWorld;       // the sky fill, same handling; w unused
-            float     _WmvModelRadius;        // world units; scales the march to the model
+            float4    _WmvFillDirWorld;       // the sky fill, same handling as the key; w unused
             float     _WmvContactEps;         // self-hit guard, WORLD UNITS
             float     _WmvContactThick;       // occluder thickness assumption, WORLD UNITS
             float4    _WmvViewDepthParams;    // (near, far, far - near, near * far), world units
@@ -876,7 +1148,8 @@ Shader "WMV/Opaque Textured"
                     half castKey = 1.0h;                // the key's directional shadow
                     half occ = 1.0h;                    // near-field sky/ambient occlusion
                     if (shStr > 0.0h)
-                        castKey = 1.0h - shStr * (1.0h - WmvShadowFactor(i.wpos, n, shSoft));
+                        castKey = 1.0h - shStr * (1.0h - WmvShadowFactor(i.wpos, n, shSoft,
+                                                                         i.pos.xy));
                     if (cStr > 0.0h)
                     {
                         half contact = WmvContactFactor(i.wpos, n, cRange * _WmvModelRadius,
@@ -901,6 +1174,35 @@ Shader "WMV/Opaque Textured"
                     half ambient = band * (AMB_BASE + AMB_WRAP * (0.5h + 0.5h * ndlSigned));
                     half direct  = ndl * LIGHT_LEVEL;
                     lum = ambient * occ + direct * castKey;
+
+                    // THE FRONT LIGHT. What it is, where its numbers come from and why it is
+                    // scaled the way it is: the constants block. It is built from the RENDERING
+                    // camera's view matrix, so every camera that draws the model -- the viewport,
+                    // a capture, the light check's own -- lights it from its own side, and nothing
+                    // is published from the CPU: where the rig never ran it applies unchanged,
+                    // scaled by the fallback key's N.L above.
+                    //
+                    // The level frame from the view matrix's rows (right, up, toward the viewer):
+                    // back*up.y - up*back.y is the toward-viewer axis with the pitch taken out,
+                    // horizontal and of unit length at every pitch of a camera without roll --
+                    // straight down included, where the forward vector has no horizontal part
+                    // left to normalise. The normalise matters only for a rolled camera.
+                    //
+                    // The ceiling is judged on lum as it stands here -- the ambient after near-field
+                    // occlusion and the key after its cast shadow, the light that actually arrives --
+                    // and the light itself is not occluded: a light at the camera reaches everything
+                    // the camera sees. The shadow-side scale stays on the surface's own N.L.
+                    float3 camUp      = UNITY_MATRIX_V[1].xyz;
+                    float3 camBack    = UNITY_MATRIX_V[2].xyz;
+                    float3 levelBack  = camBack * camUp.y - camUp * camBack.y;
+                    levelBack.y = 0.0;
+                    levelBack *= rsqrt(max(dot(levelBack, levelBack), 1e-8));
+                    float3 levelRight = cross(levelBack, float3(0.0, 1.0, 0.0));
+                    float3 frontDir   = FRONT_DIR.x * levelRight + FRONT_DIR.z * levelBack
+                                      + float3(0.0, FRONT_DIR.y, 0.0);
+                    half facing   = saturate(dot(n, (half3)frontDir));
+                    half headroom = saturate((1.0h - lum) / FRONT_LEVEL);
+                    lum += FRONT_LEVEL * facing * shadowSide * headroom;
 
                     // PREVIEW HIGHLIGHT, scaled by how bright the texture already is.
                     //
