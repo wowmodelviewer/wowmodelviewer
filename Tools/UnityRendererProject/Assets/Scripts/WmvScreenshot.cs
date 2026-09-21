@@ -1,43 +1,53 @@
 // WmvScreenshot.cs
 //
 // THE VIEWPORT SCREENSHOT (protocol 6). captureScreenshot { request, path, width, height } renders what the
-// viewport shows once more, off screen, into a width x height render texture with a transparent background, and
-// writes it to path as an RGBA PNG; screenshotSaved answers with the outcome and the timings. The host sends
+// viewport shows again, off screen, at width x height with a transparent background, and writes it to path as an
+// RGBA PNG; screenshotSaved answers with the outcome and the timings. The host sends
 // 3840 x 2160 and a path its Save As dialog chose (and confirmed, when the file exists).
 //
 // WHAT IS RENDERED. The live viewport camera itself: its pose, culling, pipeline, the frame decode
 // (WmvFrameDecodePass) and every renderer on screen -- the model, what a character wears, the mount it rides,
-// particles and ribbons as they are this frame. Nothing is rebuilt, reloaded, re-simulated or hidden. For that one
-// render the camera gets:
-//   - the render texture as its target. FP16 with alpha: URP renders straight into an external target's format
+// particles and ribbons as they are this frame. Nothing is rebuilt, reloaded, re-simulated or hidden. It is
+// rendered TWICE, once over black and once over white, and the two renders make the PNG's colour and alpha:
+//   - each into a width x height FP16 target: URP renders straight into an external target's format
 //     (UniversalRenderPipelineCore.CreateRenderTextureDescriptor), and FP16 is the precision the viewport's own
-//     buffer is given for the authored-domain blends (ConfigureDisplayTransform). The result is blitted into an
-//     8-bit sRGB texture to be read back -- the same encode the swapchain applies to the viewport;
-//   - a transparent clear, (0,0,0,0), instead of the viewport's (25,25,30). The clear IS the preview's whole
-//     background: the scene has no ground, backdrop or shadow-receiver geometry (the contact shadows are computed
-//     on the model's own surfaces, see WmvShadowRig), so there is nothing else to leave out;
+//     buffer is given for the authored-domain blends (ConfigureDisplayTransform);
+//   - cleared to (0,0,0,0) the first time and to (1,1,1,0) the second instead of the viewport's (25,25,30). Black
+//     and white come through ClearColour unchanged. The clear IS the preview's whole background: the scene has no
+//     ground, backdrop or shadow-receiver geometry (the contact shadows are computed on the model's own surfaces,
+//     see WmvShadowRig), so there is nothing else to leave out;
+//   - then the matte (Resources/WmvScreenshotMatte.shader) reads the same pixel of both, in the authored domain the
+//     blends ran in, and writes straight colour and coverage into an 8-bit target that is read back as the PNG's
+//     bytes. The rendered alpha is not used: the materials blend it with their colour factors, which made an
+//     additive glow's quad opaque and an alpha-blended edge a * a. Coverage is what a pixel lets the background
+//     through, 1 - max(W - B), raised where needed so the straight colour B / a fits in [0, 1]: the PNG over black
+//     is the black render, opaque stays 255, the empty background 0, and an additive glow's alpha follows its
+//     light. Light added over a background has no exact straight-alpha form: such a glow is exact over black,
+//     close over dark backgrounds and only approximate over light ones (a coloured glow shows its colour over
+//     white, where the render over white stays white);
 //   - the capture's aspect with the vertical field of view kept, so a viewport as wide as the capture or narrower
 //     shows everything it shows now, with more at the sides; a viewport wider than the capture keeps its
 //     horizontal field of view instead, so nothing it shows is cropped (CaptureFieldOfView);
-//   - no post-processing. URP writes alpha 1 from its post-processing pass unless the pipeline asset allows alpha
-//     output there, and the player's asset does not (UniversalRenderPipeline.InitializeAdditionalCameraData,
-//     UberPost.shader): with it on, a capture measured alpha 255 on every pixel. What that pass does for the viewport
-//     is bloom alone -- tone mapping and vignette are set to nothing (ConfigureDisplayTransform) -- so bloom is the
-//     one thing the PNG leaves out;
+//   - no post-processing. What that pass does for the viewport is bloom alone -- tone mapping and vignette are set
+//     to nothing (ConfigureDisplayTransform) -- and the PNG leaves bloom out. (URP's post pass also writes alpha 1
+//     unless the pipeline asset allows alpha output there, which the player's does not: UniversalRenderPipeline.
+//     InitializeAdditionalCameraData, UberPost.shader);
 //   - the shadow rig's maps rendered for that projection (WmvShadowRig.RenderFor), and for the live camera again
 //     afterwards.
-// Everything is put back in a finally and the textures are released, whatever failed, and the log line compares
-// the camera after the capture with the camera before it.
+// Everything is put back in a finally and the targets, the material and the texture are released, whatever
+// failed, and the log line compares the camera after the capture with the camera before it.
 //
 // WHEN. At the end of the frame the request arrives in: after every Update and LateUpdate -- the animators' clocks,
-// the poses, the emitters' step and their billboards -- and after the viewport has drawn that frame. The render, the
-// readback, the encode and the write run synchronously there, so no clock can advance in between and the PNG is
-// the frame the viewport presents. The frame after it takes the real time the capture took, as after any long frame
-// (WmvM2Animator.LateUpdate); nothing is restarted.
+// the poses, the emitters' step and their billboards -- and after the viewport has drawn that frame. Both renders,
+// the matte, the readback, the encode and the write run synchronously there, so no clock can advance between the
+// two renders or after them, and the PNG is the frame the viewport presents. The frame after it takes the real
+// time the capture took, as after any long frame (WmvM2Animator.LateUpdate); nothing is restarted.
 
 using System;
 using System.IO;
 using UnityEngine;
+using UnityEngine.Experimental.Rendering;
+using UnityEngine.Rendering;
 using UnityEngine.Rendering.Universal;
 
 public partial class WmvMain
@@ -240,6 +250,51 @@ public partial class WmvMain
         return s;
     }
 
+    static readonly int OverBlackId = Shader.PropertyToID("_WmvOverBlack");
+    static readonly int OverWhiteId = Shader.PropertyToID("_WmvOverWhite");
+
+    /// <summary>A render texture of the capture's, created now; destroyed again if it cannot be.</summary>
+    static RenderTexture NewScreenshotTexture(RenderTextureDescriptor desc, string name)
+    {
+        var rt = new RenderTexture(desc) { name = name };
+        if (rt.Create())
+            return rt;
+        DestroyImmediate(rt);
+        throw new InvalidOperationException(string.Format("could not create the {0} x {1} texture {2}", desc.width, desc.height, name));
+    }
+
+    /// <summary>A CPU-only texture ReadPixels fills and the encoder reads: never uploaded -- created normally, its
+    /// blank 33 MB would be (the D3D12 log warned about the upload's size).</summary>
+    static Texture2D NewScreenshotPixels(int width, int height, GraphicsFormat format, string name)
+    {
+        return new Texture2D(width, height, format, TextureCreationFlags.DontInitializePixels | TextureCreationFlags.DontUploadUponCreate)
+        {
+            name = name,
+        };
+    }
+
+    /// <summary>One of the capture's renders: the camera, already set up for the capture, into target over clear.</summary>
+    static void RenderScreenshotPass(Camera cam, RenderTexture target, Color clear)
+    {
+        cam.targetTexture = target;
+        cam.backgroundColor = clear;
+        cam.Render();
+    }
+
+    /// <summary>The matte (Resources/WmvScreenshotMatte.shader): straight colour and coverage from the render over
+    /// black and the render over white, into an 8-bit target.</summary>
+    static void DrawScreenshotMatte(Material matte, RenderTexture overBlack, RenderTexture overWhite, RenderTexture into)
+    {
+        matte.SetTexture(OverBlackId, overBlack);
+        matte.SetTexture(OverWhiteId, overWhite);
+        using (var cmd = new CommandBuffer { name = "WmvScreenshotMatte" })
+        {
+            cmd.SetRenderTarget(into);
+            cmd.DrawProcedural(Matrix4x4.identity, matte, 0, MeshTopology.Triangles, 3, 1);
+            Graphics.ExecuteCommandBuffer(cmd);
+        }
+    }
+
     /// <summary>One capture, synchronously, inside the end of the frame (see the file header). Never throws.</summary>
     WmvIpcClient.ScreenshotReport TakeScreenshot(WmvIpcClient.ScreenshotRequest req, int n)
     {
@@ -255,6 +310,8 @@ public partial class WmvMain
             return report;
         }
         UniversalAdditionalCameraData camData = cam.GetUniversalAdditionalCameraData();
+        // VALIDATION ONLY (WMV_SCREENSHOT_PASSES): the renders themselves, written beside the PNG (WriteScreenshotPasses).
+        string passes = Environment.GetEnvironmentVariable("WMV_SCREENSHOT_PASSES");
 
         // THE LIVE STATE, recorded before anything is touched and compared once everything is put back.
         ScreenshotCameraState live = ScreenshotCameraState.Of(cam, camData);
@@ -262,58 +319,71 @@ public partial class WmvMain
         int frameBefore = Time.frameCount;
         string sceneBefore = DescribeScreenshotScene();
         long gpuBefore = UnityEngine.Profiling.Profiler.GetAllocatedMemoryForGraphicsDriver();
+        long nativeBefore = UnityEngine.Profiling.Profiler.GetTotalAllocatedMemoryLong();
         long heapBefore = GC.GetTotalMemory(false);
         int texturesBefore = Resources.FindObjectsOfTypeAll<RenderTexture>().Length;
-        long gpuPeak = 0, heapPeak = 0;
+        long gpuPeak = 0, nativePeak = 0, heapPeak = 0;
         float captureAspect = (float)req.width / req.height;
         float captureFov = CaptureFieldOfView(live.FieldOfView, live.Aspect, captureAspect);
+        double blackMs = 0, whiteMs = 0, matteMs = 0, readbackMs = 0;
+        string passesLine = "";
 
-        RenderTexture target = null, readback = null;
+        RenderTexture overBlack = null, overWhite = null, matteTarget = null;
+        Material matte = null;
         Texture2D pixels = null;
         try
         {
-            var render = System.Diagnostics.Stopwatch.StartNew();
-            target = new RenderTexture(new RenderTextureDescriptor(req.width, req.height, RenderTextureFormat.ARGBHalf, 24)
-            {
-                msaaSamples = 1,
-            });
-            target.name = "WmvScreenshotTarget";
-            if (!target.Create())
-                throw new InvalidOperationException(string.Format("could not create a {0} x {1} render texture", req.width, req.height));
-            readback = new RenderTexture(req.width, req.height, 0, RenderTextureFormat.ARGB32, RenderTextureReadWrite.sRGB);
-            readback.name = "WmvScreenshotReadback";
-            if (!readback.Create())
-                throw new InvalidOperationException(string.Format("could not create a {0} x {1} readback texture", req.width, req.height));
+            Shader matteShader = Resources.Load<Shader>("WmvScreenshotMatte");
+            if (matteShader == null)
+                matteShader = Shader.Find("Wmv/ScreenshotMatte");
+            if (matteShader == null || !matteShader.isSupported)
+                throw new InvalidOperationException("the matte shader is missing from the player or not supported");
+            matte = new Material(matteShader) { name = "WmvScreenshotMatte", hideFlags = HideFlags.HideAndDontSave };
+            var passDesc = new RenderTextureDescriptor(req.width, req.height, RenderTextureFormat.ARGBHalf, 24) { msaaSamples = 1 };
+            overBlack = NewScreenshotTexture(passDesc, "WmvScreenshotOverBlack");
+            overWhite = NewScreenshotTexture(passDesc, "WmvScreenshotOverWhite");
+            matteTarget = NewScreenshotTexture(new RenderTextureDescriptor(req.width, req.height, RenderTextureFormat.ARGB32, 0)
+                                               {
+                                                   msaaSamples = 1, sRGB = false,
+                                               }, "WmvScreenshotMatte");
 
-            cam.targetTexture = target;
             cam.aspect = captureAspect;
             cam.fieldOfView = captureFov;
             cam.clearFlags = CameraClearFlags.SolidColor;
-            cam.backgroundColor = new Color(0f, 0f, 0f, 0f);
             if (camData != null)
-                camData.renderPostProcessing = false;   // see the file header: the post pass would write alpha 1
+                camData.renderPostProcessing = false;   // see the file header: no bloom in the PNG
             if (shadowRig != null)
                 shadowRig.RenderFor(cam);
-            cam.Render();
+
+            // Both renders back to back: nothing runs in between that could move a clock, a pose or a particle. The
+            // stage times are the CPU's; the readback waits for the GPU to finish all three passes.
+            var stage = System.Diagnostics.Stopwatch.StartNew();
+            RenderScreenshotPass(cam, overBlack, new Color(0f, 0f, 0f, 0f));
+            blackMs = stage.Elapsed.TotalMilliseconds;
+            stage.Restart();
+            RenderScreenshotPass(cam, overWhite, new Color(1f, 1f, 1f, 0f));
+            whiteMs = stage.Elapsed.TotalMilliseconds;
             cam.targetTexture = live.TargetTexture;
 
-            Graphics.Blit(target, readback);
-            RenderTexture.active = readback;
-            // CPU memory only: ReadPixels fills it and the encoder reads it, so it is never uploaded -- created normally,
-            // its blank 33 MB would be (the D3D12 log warned about the upload's size).
-            pixels = new Texture2D(req.width, req.height, UnityEngine.Experimental.Rendering.GraphicsFormat.R8G8B8A8_SRGB,
-                                   UnityEngine.Experimental.Rendering.TextureCreationFlags.DontInitializePixels |
-                                   UnityEngine.Experimental.Rendering.TextureCreationFlags.DontUploadUponCreate);
-            pixels.name = "WmvScreenshotPixels";
+            stage.Restart();
+            DrawScreenshotMatte(matte, overBlack, overWhite, matteTarget);
+            matteMs = stage.Elapsed.TotalMilliseconds;
+
+            stage.Restart();
+            RenderTexture.active = matteTarget;
+            pixels = NewScreenshotPixels(req.width, req.height, GraphicsFormat.R8G8B8A8_UNorm, "WmvScreenshotPixels");
             pixels.ReadPixels(new Rect(0, 0, req.width, req.height), 0, 0, false);
             RenderTexture.active = activeBefore;
-            report.RenderMs = render.Elapsed.TotalMilliseconds;
+            readbackMs = stage.Elapsed.TotalMilliseconds;
+            report.RenderMs = blackMs + whiteMs + matteMs + readbackMs;
             gpuPeak = UnityEngine.Profiling.Profiler.GetAllocatedMemoryForGraphicsDriver();
+            nativePeak = UnityEngine.Profiling.Profiler.GetTotalAllocatedMemoryLong();
 
             var encode = System.Diagnostics.Stopwatch.StartNew();
             byte[] png = ImageConversion.EncodeToPNG(pixels);
             report.EncodeMs = encode.Elapsed.TotalMilliseconds;
             heapPeak = GC.GetTotalMemory(false);
+            nativePeak = Math.Max(nativePeak, UnityEngine.Profiling.Profiler.GetTotalAllocatedMemoryLong());
             if (png == null || png.Length == 0)
                 throw new InvalidOperationException("the PNG encoder returned nothing");
 
@@ -322,6 +392,10 @@ public partial class WmvMain
             report.WriteMs = write.Elapsed.TotalMilliseconds;
             report.Bytes = new FileInfo(req.path).Length;
             report.Ok = true;
+            report.TotalMs = total.Elapsed.TotalMilliseconds;
+
+            if (!string.IsNullOrEmpty(passes))
+                passesLine = WriteScreenshotPasses(cam, req, overBlack, overWhite, live.Background);
         }
         catch (Exception e)
         {
@@ -344,20 +418,20 @@ public partial class WmvMain
             RenderTexture.active = activeBefore;
             if (shadowRig != null)
                 shadowRig.RenderFor(cam);            // the maps and globals for the live camera again
-            if (target != null)
+            foreach (RenderTexture rt in new[] { overBlack, overWhite, matteTarget })
             {
-                target.Release();
-                DestroyImmediate(target);
+                if (rt == null)
+                    continue;
+                rt.Release();
+                DestroyImmediate(rt);
             }
-            if (readback != null)
-            {
-                readback.Release();
-                DestroyImmediate(readback);
-            }
+            if (matte != null)
+                DestroyImmediate(matte);
             if (pixels != null)
                 DestroyImmediate(pixels);
         }
-        report.TotalMs = total.Elapsed.TotalMilliseconds;
+        if (!report.Ok)
+            report.TotalMs = total.Elapsed.TotalMilliseconds;
 
         string restored = ScreenshotCameraState.Of(cam, camData).DifferencesFrom(live);
         if (RenderTexture.active != activeBefore)
@@ -365,20 +439,75 @@ public partial class WmvMain
         string sceneAfter = DescribeScreenshotScene();
         var inv = System.Globalization.CultureInfo.InvariantCulture;
         string line = string.Format(inv,
-            "WMV: screenshot {0} (request {1}) {2}: {3} x {4}, {5} bytes, render and readback {6:F1} ms, PNG encode {7:F1} ms, " +
-            "write {8:F1} ms, total {9:F1} ms; capture field of view {10:0.###} at aspect {11:F4}; live {12}; after the capture " +
-            "{13}; frame {14} -> {15}; {16}{17}; graphics driver memory {18:F1} MB -> {19:F1} MB with the capture's textures -> " +
-            "{20:F1} MB after, managed heap {21:F1} MB -> {22:F1} MB after the encode, render textures {23} -> {24}",
+            "WMV: screenshot {0} (request {1}) {2}: {3} x {4}, {5} bytes, render over black {6:F1} ms, over white {7:F1} ms, " +
+            "matte {8:F1} ms, readback {9:F1} ms, PNG encode {10:F1} ms, write {11:F1} ms, total {12:F1} ms; capture field of view " +
+            "{13:0.###} at aspect {14:F4}; live {15}; after the capture {16}; frame {17} -> {18}; {19}{20}; graphics driver memory " +
+            "{21:F1} MB -> {22:F1} MB with the capture's textures -> {23:F1} MB after, Unity native memory {24:F1} MB -> {25:F1} MB " +
+            "at the peak, managed heap {26:F1} MB -> {27:F1} MB after the encode, render textures {28} -> {29}{30}",
             n, req.request, report.Ok ? "saved to " + req.path : "FAILED: " + report.Error, req.width, req.height, report.Bytes,
-            report.RenderMs, report.EncodeMs, report.WriteMs, report.TotalMs, captureFov, captureAspect, live.Describe(),
-            restored.Length == 0 ? "everything as it was" : "DIFFERENT: " + restored, frameBefore, Time.frameCount,
+            blackMs, whiteMs, matteMs, readbackMs, report.EncodeMs, report.WriteMs, report.TotalMs, captureFov, captureAspect,
+            live.Describe(), restored.Length == 0 ? "everything as it was" : "DIFFERENT: " + restored, frameBefore, Time.frameCount,
             sceneBefore, sceneAfter == sceneBefore ? " (unchanged by the capture)" : " -> CHANGED: " + sceneAfter,
             gpuBefore / 1048576.0, gpuPeak / 1048576.0, UnityEngine.Profiling.Profiler.GetAllocatedMemoryForGraphicsDriver() / 1048576.0,
-            heapBefore / 1048576.0, heapPeak / 1048576.0, texturesBefore, Resources.FindObjectsOfTypeAll<RenderTexture>().Length);
+            nativeBefore / 1048576.0, nativePeak / 1048576.0, heapBefore / 1048576.0, heapPeak / 1048576.0, texturesBefore,
+            Resources.FindObjectsOfTypeAll<RenderTexture>().Length, passesLine.Length > 0 ? "; " + passesLine : "");
         if (report.Ok && restored.Length == 0)
             Debug.Log(line);
         else
             Debug.LogWarning(line);
         return report;
+    }
+
+    /// <summary>
+    /// VALIDATION ONLY (WMV_SCREENSHOT_PASSES set): the renders the matte was made from, and two more, as 8-bit PNGs
+    /// beside the export, read back the way the viewport displays them (an sRGB copy of the FP16 target):
+    /// &lt;name&gt;-over-black.png and -over-white.png, then -over-background.png, rendered over the viewport's own clear
+    /// colour, and -over-black-again.png, rendered over black once more after the others. A run compares the PNG
+    /// composited over black, white and the viewport's background with the first three, and the last with the first,
+    /// to show that nothing moved between the renders. Still inside the capture: the camera is set up for it.
+    /// </summary>
+    string WriteScreenshotPasses(Camera cam, WmvIpcClient.ScreenshotRequest req, RenderTexture overBlack, RenderTexture overWhite,
+                                 Color liveBackground)
+    {
+        var watch = System.Diagnostics.Stopwatch.StartNew();
+        string stem = req.path.Substring(0, req.path.Length - 4);
+        RenderTexture readback = null;
+        Texture2D bytes = null;
+        try
+        {
+            readback = NewScreenshotTexture(new RenderTextureDescriptor(req.width, req.height, RenderTextureFormat.ARGB32, 0)
+                                            {
+                                                msaaSamples = 1, sRGB = true,
+                                            }, "WmvScreenshotPassReadback");
+            bytes = NewScreenshotPixels(req.width, req.height, GraphicsFormat.R8G8B8A8_SRGB, "WmvScreenshotPassPixels");
+            System.Action<RenderTexture, string> write = (rt, suffix) =>
+            {
+                Graphics.Blit(rt, readback);
+                RenderTexture.active = readback;
+                bytes.ReadPixels(new Rect(0, 0, req.width, req.height), 0, 0, false);
+                File.WriteAllBytes(stem + suffix, ImageConversion.EncodeToPNG(bytes));
+            };
+            write(overBlack, "-over-black.png");
+            write(overWhite, "-over-white.png");
+            RenderScreenshotPass(cam, overWhite, liveBackground);
+            write(overWhite, "-over-background.png");
+            RenderScreenshotPass(cam, overBlack, new Color(0f, 0f, 0f, 0f));
+            write(overBlack, "-over-black-again.png");
+        }
+        finally
+        {
+            RenderTexture.active = null;
+            if (readback != null)
+            {
+                readback.Release();
+                DestroyImmediate(readback);
+            }
+            if (bytes != null)
+                DestroyImmediate(bytes);
+        }
+        return string.Format(System.Globalization.CultureInfo.InvariantCulture,
+                             "validation: the renders written beside it as -over-black, -over-white, -over-background " +
+                             "(clear ({0:F4}, {1:F4}, {2:F4})) and -over-black-again.png in {3:F1} ms",
+                             liveBackground.r, liveBackground.g, liveBackground.b, watch.Elapsed.TotalMilliseconds);
     }
 }

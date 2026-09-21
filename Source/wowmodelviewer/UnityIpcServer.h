@@ -36,7 +36,7 @@
  *       "mountsBuilt":1, "mountSeat":1, "mountSeatBone":50, "modelSequence":145, "mountSequence":1,
  *       "mountEmitters":0, "mountRibbons":0, "mountParticles":0, "bodyRebinds":0, "viewFramings":2 }
  *     { "type":"screenshotSaved", "request":1, "ok":true, "error":"", "path":"C:/Shots/bear.png", "width":3840,
- *       "height":2160, "bytes":1545651, "renderMs":53.6, "encodeMs":183.8, "writeMs":4.3, "totalMs":248.1 }
+ *       "height":2160, "bytes":1591224, "renderMs":52.6, "encodeMs":165.7, "writeMs":3.2, "totalMs":224.6 }
  *   WMV -> player
  *     { "type":"loadWoWModel", "path":"creature/chicken/chicken.m2", "fileDataID":0, "client":"active",
  *       "character":false, "load":12, "kind":"m2" }
@@ -448,7 +448,7 @@ public:
     int width = -1;
     int height = -1;
     long long bytes = -1;          // the PNG's size on disk
-    double renderMs = -1.0;        // the off-screen render and the readback
+    double renderMs = -1.0;        // the two off-screen renders, the matte and the readback
     double encodeMs = -1.0;        // the PNG encode
     double writeMs = -1.0;         // the file write
     double totalMs = -1.0;         // the whole capture, from the end of the frame it was taken in

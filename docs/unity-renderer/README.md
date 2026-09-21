@@ -835,29 +835,41 @@ it; cancelling does nothing. The host (`ModelViewer::RequestUnityScreenshot`) se
 "Screenshot saved: <file>" or why not (no player, a player older than protocol 6, nothing on screen, a folder that
 does not exist, a file that cannot be written, or no answer within 60 seconds). No message box is shown.
 
-The player (`WmvScreenshot.cs`) renders the live camera once more at the end of the frame the request arrives in,
-after every animator, emitter and billboard has updated and the viewport has drawn that frame, into an FP16 target
-cleared to (0,0,0,0); it reads that back through an 8-bit sRGB copy, encodes and writes the PNG synchronously, so
-no clock advances between the frame on screen and the file, and then puts the camera's target, clear, field of view,
-aspect and post-processing back and renders the shadow rig's maps for it again. Nothing is reloaded, restarted or
-hidden: the preview has no ground, backdrop or receiver geometry, so the clear colour is the whole background.
+The player (`WmvScreenshot.cs`) renders the live camera twice more at the end of the frame the request arrives in,
+after every animator, emitter and billboard has updated and the viewport has drawn that frame: into an FP16 target
+cleared to black, then into a second one cleared to white, back to back, so both see the same pose, clocks and
+particles. A capture-only matte pass (`Resources/WmvScreenshotMatte.shader`) reads the same pixel of both, in the
+authored domain the blends ran in, and writes the PNG's straight colour and alpha into an 8-bit target. Alpha is
+what the pixel lets through of the background, 1 - max(W - B) over the channels, raised where needed to the
+brightest channel of B so that the straight colour B / alpha fits in 8 bits; the rendered alpha is not used,
+because the materials blend it with their colour factors (`Blend [_SrcBlend] [_DstBlend]`). The player reads that
+target back, encodes and writes the PNG synchronously, so no clock advances between the frame on screen and the
+file, and then puts the camera's target, clear, field of view, aspect and post-processing back and renders the
+shadow rig's maps for it again. Nothing is reloaded, restarted or hidden: the preview has no ground, backdrop or
+receiver geometry, so the clear colour is the whole background.
 The capture is 16:9 whatever the viewport's shape: a viewport as wide as that or narrower keeps its vertical field
 of view (more shows at the sides), a wider one keeps its horizontal field of view, so nothing it shows is cropped.
-Measured on an RTX 4090 over eight captures: 47 to 65 ms to render and read back, 167 to 186 ms to encode, 228 to
-248 ms in all;
-the capture's own textures are released at once, and the pipeline's pooled 4K targets within 60 frames.
 
-What the PNG cannot hold yet:
+Measured on an equipped character with a glowing sword, a creature with flame particles and a mounted character:
+opaque surfaces are 255 and the empty background is 0 with colour 0; the PNG composited over black matches the
+render over black to within one level everywhere; alpha-blended edges get their own alpha (within one or two levels
+over black, white and the viewport's background); and an additive glow's alpha follows its light, so the sword's
+glow fades into the background instead of sitting on an opaque dark disk, and the flames keep their light over
+black (99 % of it, against 45 to 51 % from a single render over transparent black).
+On an RTX 4090 over four captures: 53 to 70 ms for both renders, the matte and the readback, 149 to 166 ms to
+encode, 209 to 235 ms in all, and about 690 MB of graphics memory while it runs (the two FP16 targets with depth,
+the 8-bit target and the pipeline's pooled 4K intermediates); the capture's own textures are released at once, and
+the pipeline's pooled 4K targets within 60 frames.
 
-- **Bloom.** URP's post-processing pass writes alpha 1 unless the pipeline asset enables post-process alpha
-  output, which the player's does not, so post-processing is off for the capture. Tone mapping and vignette are
-  already off in the viewport; bloom around bright additive effects is missing from the PNG.
-- **Blended alpha.** The materials blend alpha with the same factors as colour (`Blend [_SrcBlend] [_DstBlend]`),
-  and the frame is rendered over black, so colour is premultiplied while PNG alpha is straight. An additive batch
-  or particle whose texture alpha is 1 writes alpha 1 over its whole quad (an opaque dark shape around a glow), a
-  soft additive particle keeps only part of its light when composited, and an alpha-blended fragment over the
-  transparent background gets alpha a² rather than a. Opaque surfaces are exact (alpha 255) and the empty
-  background is exact (alpha 0, colour 0).
+What the PNG cannot hold:
+
+- **Bloom.** Post-processing is off for the capture, so bloom around bright additive effects is missing from the
+  PNG. (URP's post pass also writes alpha 1 unless the pipeline asset enables post-process alpha output, which the
+  player's does not.) Tone mapping and vignette are already off in the viewport.
+- **Added light over a light background.** Light that an additive effect adds to whatever is behind it has no
+  exact straight-alpha form. The PNG is exact over black and close over dark backgrounds (within 32 levels over the
+  viewport's own background, 0.2 on average), but over white a coloured glow shows its colour where the render over
+  white stays white, and light whose brightest channel reaches 255 over black is stored opaque.
 
 ## Responsibility split
 
@@ -1032,7 +1044,7 @@ application uses). Player side: `Tools/UnityRendererProject/Assets/Scripts/WmvIp
   "reason": "", "merged": 3, "attachments": 4, "missing": [], "ms": 212,
   "mountKey": "M3", "mountStatus": "applied", "mountReason": "" }
 { "type": "screenshotSaved", "request": 1, "ok": true, "error": "", "path": "C:\\Shots\\humanmale_hd.png",
-  "width": 3840, "height": 2160, "bytes": 1545651, "renderMs": 53.6, "encodeMs": 183.8, "writeMs": 4.3, "totalMs": 248.1 }
+  "width": 3840, "height": 2160, "bytes": 1591224, "renderMs": 52.6, "encodeMs": 165.7, "writeMs": 3.2, "totalMs": 224.6 }
 ```
 
 (The `mapObjectLoaded` line is a logged report of a headless run on `it_trollhouse03.wmo`, bounds
@@ -1079,8 +1091,8 @@ announced protocol 4.
 `screenshotSaved` (protocol 6) answers the host's `captureScreenshot { request, path, width, height }`: the
 player rendered what the viewport shows off screen at that size with a transparent background and wrote the PNG
 to `path` itself -- no pixels travel over this channel -- or says why not (`ok` false, `error`). `request` echoes
-the question's number, `bytes` is the file's size, and the times are the off-screen render with its readback, the
-PNG encode, the write and the whole capture, in milliseconds. See "Screenshot" under "What the viewport shows".
+the question's number, `bytes` is the file's size, and the times are the two off-screen renders with the matte and
+the readback, the PNG encode, the write and the whole capture, in milliseconds. See "Screenshot" under "What the viewport shows".
 
 `getModelTextures` answers with `modelTextures { requestId, ok, fileDataID, textures:[{ index,
 type, fileDataID, source }] }`. It exists because a modern M2 does **not** name its replaceable
@@ -1379,6 +1391,10 @@ second channel for the same state fails the step that opened it.
   3840 x 2160, 8-bit RGBA, non-interlaced PNG. With `WMV_VIEWPORT_SHOT` set the player also captures the viewport
   just before the off-screen render and a frame after it (`<name>-before-screenshot-<n>.png`,
   `<name>-after-screenshot-<n>.png`), and with `WMV_VIEWPORT_SIZE` set it first asks for that screen size again.
+  With `WMV_SCREENSHOT_PASSES` set it writes the renders the matte was made from beside the PNG
+  (`<name>-over-black.png`, `<name>-over-white.png`), one over the viewport's own clear colour
+  (`<name>-over-background.png`) and one over black again after the others (`<name>-over-black-again.png`), so a
+  run can composite the PNG over each background and compare, and show that nothing moved between the renders.
 
 For example, on `-mo character/human/male/humanmale_hd.m2`:
 `WMV_IPCTEST_SEQUENCE="mount:8469;dismount;mount:8469;mount:17697;mount:83632;mount:8469;dismount"`.

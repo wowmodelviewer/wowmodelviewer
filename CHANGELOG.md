@@ -9,14 +9,18 @@ Format loosely based on [Keep a Changelog](https://keepachangelog.com/).
 - **Screenshot: a 3840 x 2160 PNG of the Unity viewport with a transparent background (protocol 6).** The command
   bar's Screenshot opens a Save As dialog (PNG Image, overwrite confirmed) named after the model and the time,
   `<model>_<yyyy-MM-dd_HHmmss>.png`, and adds `.png` when it is missing; cancelling does nothing. The host sends the
-  path in `captureScreenshot` and the player renders the live camera once more, off screen and at the end of the
+  path in `captureScreenshot` and the player renders the live camera twice more, off screen and at the end of the
   frame it is showing -- the same pose, animation frame, equipment, mount, particles and ribbons, with no clock
-  advancing -- into a 3840 x 2160 target cleared to transparent, reads it back and writes the PNG itself, then puts
-  the camera back and answers `screenshotSaved` with the outcome and its timings. The capture is 16:9 whatever the
-  viewport's shape and crops nothing the viewport shows. The status bar says "Screenshot saved: <file>" or why it
-  failed. Bloom is not in the PNG: post-processing is off for the capture, because the pipeline's post pass writes
-  opaque alpha. The headless lifecycle sequence gains `screenshot:<path>`, which takes the same path without the
-  dialog and checks the file it writes.
+  advancing -- once over black and once over white, into 3840 x 2160 targets. A capture-only matte pass turns the
+  two into straight colour and alpha: opaque surfaces are opaque, the background is empty, alpha-blended edges keep
+  their own alpha, and additive glows and soft particles fade with their light instead of sitting on opaque dark
+  shapes (the PNG over black is the render over black). The player reads that back and writes the PNG itself, then
+  puts the camera back and answers `screenshotSaved` with the outcome and its timings. The capture is 16:9 whatever
+  the viewport's shape and crops nothing the viewport shows. The status bar says "Screenshot saved: <file>" or why
+  it failed. Bloom is not in the PNG: post-processing is off for the capture. Light that an additive effect adds has
+  no exact straight-alpha form, so such effects are exact over black, close over dark backgrounds and only
+  approximate over light ones. The headless lifecycle sequence gains `screenshot:<path>`, which takes the same path
+  without the dialog and checks the file it writes.
 - **Model > Appearance: a Mount card at the top of the page, with a searchable mount picker.** For a playable
   character the first thing on the Appearance page is a Mount card. Without a mount it says "Add a mount to this
   character" and offers Choose Mount, in bold; on one it names the mount the character rides and offers Change
