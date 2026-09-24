@@ -4049,10 +4049,35 @@ void ModelViewer::ImportArmoury(wxString strURL)
 
     const auto sex = (result->gender == "Male") ? 0 : 1;
 
-    LoadModel(GAMEDIRECTORY.getFile(RaceInfos::getFileIDForRaceSex(result->raceId, sex)));
-
-    if (!g_canvas->model())
+    // The race has to resolve to a character model before anything is dressed. For a race
+    // this build has no model for (getFileIDForRaceSex returns -1, e.g. a race that shares
+    // its model file with another one), LoadModel() is handed nothing and does nothing --
+    // and the import would then put this character's customizations and equipment on
+    // whatever model happened to be on screen, or do nothing at all with an empty viewport.
+    const int raceModelFileID = RaceInfos::getFileIDForRaceSex(result->raceId, sex);
+    GameFile * raceModel = (raceModelFileID > 0) ? GAMEDIRECTORY.getFile(raceModelFileID) : nullptr;
+    if (!raceModel)
+    {
+      LOG_ERROR << "Armory import: no character model for race" << result->raceId << "sex" << sex
+                << "- nothing was imported.";
+      wxMessageBox(wxString::Format(wxT("This build has no character model for race %d (%s), so the character could not be imported.\n\nNothing on screen was changed."),
+                                    result->raceId, (sex == 0) ? wxT("male") : wxT("female")),
+                   wxT("Armory Import Failed"));
+      delete result;
       return;
+    }
+
+    LoadModel(raceModel);
+
+    if (!g_canvas->model() || !g_charControl->model)
+    {
+      LOG_ERROR << "Armory import: the character model" << raceModel->fullname()
+                << "did not load - nothing was imported.";
+      wxMessageBox(wxT("The character's model could not be loaded, so nothing was imported."),
+                   wxT("Armory Import Failed"));
+      delete result;
+      return;
+    }
 
     if (result->hasTransmogGear == true)
     {
