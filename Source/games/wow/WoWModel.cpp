@@ -912,6 +912,33 @@ void WoWModel::initRaceInfos()
   LOG_ERROR << "Unable to retrieve race infos for model" << gamefile->fullname() << gamefile->fileDataId();
 }
 
+bool WoWModel::setRaceSex(int raceID, int sexID)
+{
+  if (infos.raceID == raceID && infos.sexID == sexID)
+    return true; // already this race
+
+  RaceInfos wanted;
+  if (!RaceInfos::getRaceInfosForRaceSex(raceID, sexID, wanted))
+    return false;
+
+  // Only a race that actually wears this model can be applied on top of it. initRaceInfos()
+  // resolves a model file to a single race, so for a shared file (Orc / Mag'har Orc, Pandaren /
+  // its two faction races) the first race wins and this puts the right one back.
+  if (!gamefile || wanted.modelFileID != static_cast<int>(gamefile->fileDataId()))
+    return false;
+
+  infos = wanted;
+  cd.showFeet = infos.barefeet; // race default, as in initRaceInfos()
+
+  // Rebuild the customization options: they come from this race's ChrModel, and the model
+  // already has the other race's set.
+  cd.reset(this, true);
+
+  LOG_INFO << "Model" << gamefile->fullname() << "read as race" << raceID << "sex" << sexID
+           << "(ChrModel" << (infos.ChrModelID.empty() ? -1 : infos.ChrModelID[0]) << ")";
+  return true;
+}
+
 
 std::vector<TXID> WoWModel::readTXIDSFromFile(GameFile * f)
 {

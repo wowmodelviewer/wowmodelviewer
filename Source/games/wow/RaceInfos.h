@@ -3,6 +3,7 @@
 
 #include <map>
 #include <string>
+#include <utility>
 #include <vector>
 
 #ifdef _WIN32
@@ -33,6 +34,7 @@ class _RACEINFOS_API_ RaceInfos
     int modelFallbackSexID;
     int textureFallbackRaceID;
     int textureFallbackSexID;
+    int modelFileID = -1; // CreatureModelData FileDataID of this race+sex's character model
     std::vector<int> ChrModelID;
 
     // One row per race for the UI race browser (Playable vs NPC), built from the
@@ -54,9 +56,21 @@ class _RACEINFOS_API_ RaceInfos
     // fallback when a character model file isn't the canonical race model in the map.
     static bool getRaceInfosForName(const std::string & raceName, int sex, RaceInfos &);
     static int getFileIDForRaceSex(const int & race, const int & sex);
+    // The row for one race and sex, including the races that share a model file with another
+    // race and so cannot be found by that file id.
+    static bool getRaceInfosForRaceSex(int race, int sex, RaceInfos & out);
 
   private:
-    static std::map<int, RaceInfos> RACES;
+    // Every race and sex, one entry each, preferring the HD model where a race has more than
+    // one. Keyed by (raceID, sexID) rather than by model FileDataID: races that share their
+    // model file with another race -- Mag'har Orc with Orc, the two faction Pandaren with
+    // Pandaren -- collided under a file-id key and were dropped, which left them unloadable.
+    static std::map<std::pair<int, int>, RaceInfos> RACES;
+
+    // The same rows keyed by model FileDataID, first row for a file winning and later races
+    // on that file only adding their ChrModelIDs. This is what answers "which race is this
+    // model I just loaded", where a shared file can only mean one race.
+    static std::map<int, RaceInfos> RACES_BY_FILEID;
 };
 
 

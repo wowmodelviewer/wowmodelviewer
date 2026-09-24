@@ -4079,6 +4079,14 @@ void ModelViewer::ImportArmoury(wxString strURL)
       return;
     }
 
+    // A race that shares its model file with another one is read as that other race when the
+    // model is loaded (a Mag'har Orc as an Orc), and then offers only the other race's
+    // customization options -- every imported choice would be skipped below. Tell the model
+    // which race it really is, so the imported appearance has somewhere to land.
+    if (!g_charControl->model->setRaceSex(result->raceId, sex))
+      LOG_INFO << "Armory import: keeping race" << g_charControl->model->infos.raceID
+               << "for the imported race" << result->raceId << "- the model does not carry it.";
+
     if (result->hasTransmogGear == true)
     {
       LOG_INFO << "Transmogrified Gear was found. Switching items...";

@@ -291,13 +291,21 @@ Format loosely based on [Keep a Changelog](https://keepachangelog.com/).
   character's own link, a 404 names the character, realm and region and mentions hidden profiles, 401/403 points at
   the proxy's access key, 429 says to wait, and an unreachable proxy reports the network error. The log records the
   request URL, the HTTP status, the response size and the reason.
-- **An Armory import of a race this build has no model for says so, instead of dressing whatever was on
-  screen.** Races that share their model file with another race (Mag'har Orc, and the two faction Pandaren)
-  have no entry in the race/model table, so the model load was handed nothing and quietly did nothing -- and
-  the import then applied that character's customizations and equipment to the model already in the viewport,
-  or to nothing at all when the viewport was empty. The import now checks that the race resolves to a
-  character model, and that the model actually loaded, before it changes anything, and says which race it
-  could not load. (The missing races themselves are a separate gap in the race/model table.)
+- **Races that share a character model with another race are no longer missing from the race table.** It was
+  keyed by the model's FileDataID, so the second race on a model file was silently dropped -- and with it went
+  Mag'har Orc (on the Orc model), both faction Pandaren, and ten more: 46 of 58 races survived, 75 of 103
+  race-and-sex rows. Nothing could resolve those races to a model, so a Mag'har Orc could not be loaded at
+  all, and the Browse "Characters" tree never listed them. The table is now keyed by race and sex, keeping
+  the HD model where a race has several; a second table, keyed by model file as before, still answers "which
+  race is this model", so loading a model by file id resolves exactly as it did.
+- **An Armory import of a race that shares its model now imports that race's appearance, not the other
+  race's.** A character model is read as the first race on its file, and the customization options come from
+  that race's ChrModel -- so importing a Mag'har Orc applied 0 of her 9 customizations, leaving a default Orc
+  wearing her gear. The import now tells the model which race it is (`WoWModel::setRaceSex`) and rebuilds the
+  options before applying the appearance: the same import applies 9 of 9. An import of a race with no model
+  at all still stops with a message naming the race, instead of dressing whatever was on screen -- it used to
+  apply the character's customizations and equipment to the model already in the viewport, or do nothing
+  whatsoever when the viewport was empty.
 - **Choosing, swapping or taking off a mount no longer makes the animation jump or start over in the Unity
   viewport.** A mount choice holds the UI thread while the mount's model loads (1.5-1.9 s, measured) and starts the
   mount and the character's riding animation in that wait. The first tick after it counted the whole wait into

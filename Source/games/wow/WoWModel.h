@@ -94,6 +94,15 @@ class _WOWMODEL_API_ WoWModel : public ManagedItem, public Displayable, public M
   void initStatic();
   void initRaceInfos();
 
+public:
+  // Re-read this model as a particular race. Races that share a model file with another race
+  // (Mag'har Orc on the Orc model, the two faction Pandaren on the Pandaren one) resolve to
+  // that other race when the model is loaded by file id, and would then offer only that race's
+  // customization options. Returns false if the race is unknown or does not use this model.
+  bool setRaceSex(int raceID, int sexID);
+
+private:
+
 
   void animate(ssize_t anim);
   void calcBones(ssize_t anim, size_t time);
