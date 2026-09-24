@@ -33,8 +33,13 @@ class TreeStackItem : public Container<TreeStackItem>
     wxTreeItemId id;
     GameFile * file;
     bool loaded;   // have this node's children been added to the wxTreeCtrl yet?
+    // Set on the leaves of the "Characters" race browser, where the row names a race and sex
+    // rather than just a file: races sharing a model file (Mag'har Orc on the Orc model) are
+    // told apart only by this. -1 on every other row.
+    int raceID;
+    int sexID;
 
-    TreeStackItem() : file(0), loaded(false) {}
+    TreeStackItem() : file(0), loaded(false), raceID(-1), sexID(-1) {}
 
     bool hasChildren() const { return !m_childrenMap.empty(); }
 
@@ -108,7 +113,9 @@ public:
 
   // What picking a row under the "Models" / "WMOs" filter does, callable without a tree event so the
   // headless self-test (-unityipctest with -wmo, and its lifecycle sequence) selects exactly as Browse.
-  void SelectModelFile(GameFile * file);
+  // raceID/sexID come from a race-browser leaf and say which race the model is to be read as;
+  // -1 leaves that to the model (every ordinary file row).
+  void SelectModelFile(GameFile * file, int raceID = -1, int sexID = -1);
   void SelectWMOFile(GameFile * file);
 
   wxTreeCtrl *fileTree;

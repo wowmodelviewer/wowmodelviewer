@@ -896,7 +896,7 @@ void ModelViewer::SaveLayout()
 }
 
 
-void ModelViewer::LoadModel(GameFile * file)
+void ModelViewer::LoadModel(GameFile * file, int raceID, int sexID)
 {
   if (!canvas || !file)
     return;
@@ -904,7 +904,15 @@ void ModelViewer::LoadModel(GameFile * file)
   LOG_INFO << "Loading model:" << file->fullname();
 
   if (canvas->model() && canvas->model()->gamefile && (canvas->model()->gamefile->fullname() == file->fullname())) // don't reload same model
+  {
+    // One model file can carry more than one race (a Mag'har Orc wears the Orc model), so the
+    // same file may still be a different character: switch the race on the loaded model rather
+    // than reloading it, and rebuild the character panel around its customization options.
+    WoWModel * loaded = const_cast<WoWModel *>(canvas->model());
+    if (raceID >= 0 && loaded->setRaceSex(raceID, sexID) && charControl && charControl->charAtt)
+      charControl->UpdateModel(charControl->charAtt);
     return;
+  }
 
   isModel = true;
   // A model replaces whatever Browse image, WMO or map tile was shown (canvas->LoadModel below drops
@@ -961,6 +969,12 @@ void ModelViewer::LoadModel(GameFile * file)
     m->addChild(new WoWItem(CS_CAPE));
     m->addChild(new WoWItem(CS_QUIVER));
     m->modelType = MT_CHAR;
+
+    // A race that shares this model file with another one is read as that other race (the first
+    // race on the file), and would then offer only that race's customization options. Put the
+    // race that was asked for back, before the character panel is built from it below.
+    if (raceID >= 0)
+      m->setRaceSex(raceID, sexID);
   }
   else
   {
@@ -4067,7 +4081,11 @@ void ModelViewer::ImportArmoury(wxString strURL)
       return;
     }
 
-    LoadModel(raceModel);
+    // Load the model as this character's race: a race that shares its model file with another
+    // one (Mag'har Orc on the Orc model) is otherwise read as that other race, whose
+    // customization options are not the imported character's -- every choice below would be
+    // skipped, leaving a default character in the right gear.
+    LoadModel(raceModel, result->raceId, sex);
 
     if (!g_canvas->model() || !g_charControl->model)
     {
@@ -4079,13 +4097,10 @@ void ModelViewer::ImportArmoury(wxString strURL)
       return;
     }
 
-    // A race that shares its model file with another one is read as that other race when the
-    // model is loaded (a Mag'har Orc as an Orc), and then offers only the other race's
-    // customization options -- every imported choice would be skipped below. Tell the model
-    // which race it really is, so the imported appearance has somewhere to land.
-    if (!g_charControl->model->setRaceSex(result->raceId, sex))
-      LOG_INFO << "Armory import: keeping race" << g_charControl->model->infos.raceID
-               << "for the imported race" << result->raceId << "- the model does not carry it.";
+    if (g_charControl->model->infos.raceID != result->raceId)
+      LOG_INFO << "Armory import: the model is race" << g_charControl->model->infos.raceID
+               << "and the character is race" << result->raceId
+               << "- customizations that belong to the character's own race will be skipped.";
 
     if (result->hasTransmogGear == true)
     {

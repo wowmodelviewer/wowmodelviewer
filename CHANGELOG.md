@@ -298,6 +298,11 @@ Format loosely based on [Keep a Changelog](https://keepachangelog.com/).
   all, and the Browse "Characters" tree never listed them. The table is now keyed by race and sex, keeping
   the HD model where a race has several; a second table, keyed by model file as before, still answers "which
   race is this model", so loading a model by file id resolves exactly as it did.
+- **Picking a race in Browse > Characters loads that race, not the race that shares its model.** The race
+  browser's rows name a race and a sex, but the pick carried only the model file, so Mag'har Orc loaded an
+  Orc -- with Orc customization options in Model > Appearance. Each row now carries its race and sex through
+  to the model load, and picking a different race on the model already loaded (Orc to Mag'har Orc) switches
+  it in place instead of being ignored as "the same model".
 - **An Armory import of a race that shares its model now imports that race's appearance, not the other
   race's.** A character model is read as the first race on its file, and the customization options come from
   that race's ChrModel -- so importing a Mag'har Orc applied 0 of her 9 customizations, leaving a default Orc
