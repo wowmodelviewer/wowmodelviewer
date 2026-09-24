@@ -41,6 +41,7 @@
 #undef _IMPORTERPLUGIN_CPP_
 
 // Current library
+#include "ArmoryProxy.h"
 
 // Namespaces used
 //--------------------------------------------------------------------
@@ -85,19 +86,13 @@ class ArmoryImporter final : public ImporterPlugin
 
   private :
     // Constants / Enums
-    enum ImportType
-    {
-      CHARACTER,
-      ITEM
-    };
 
     // Constructors
 
     // Destructors
 
     // Methods
-    int readJSONValues(ImportType type, const QString & url, QJsonObject & result) const;
-    QByteArray getURLData(const QString & inputUrl) const;
+    static ArmoryProxy::Result gatherCharacter(const QString & url, ArmoryProxy::Character & character);
     static bool hasMember(const QJsonValueRef & check, const QString & lookfor);
     static bool hasTransmog(const QJsonValueRef & check);
 

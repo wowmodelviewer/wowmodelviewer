@@ -4040,7 +4040,7 @@ void ModelViewer::ImportArmoury(wxString strURL)
     if (!result->valid)
     {
       const wxString msg = result->errorMessage.empty()
-        ? wxString(wxT("Improperly Formatted URL.\nMake sure the link points to a character page (e.g. https://worldofwarcraft.blizzard.com/en-gb/character/eu/realm/name)."))
+        ? wxString(wxT("Improperly Formatted URL.\nMake sure the link points to a character page (e.g. https://worldofwarcraft.blizzard.com/en-gb/worldsoul/eu/armory/character/realm/name)."))
         : wxString::FromUTF8(result->errorMessage.c_str());
       wxMessageBox(msg, wxT("Armory Import Failed"));
       delete result;

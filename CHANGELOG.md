@@ -275,6 +275,22 @@ Format loosely based on [Keep a Changelog](https://keepachangelog.com/).
   `-imgseq` smoke test is gone. `-unityipctest` and `-fbxexport` still run.
 
 ### Fixed
+- **Armory character import reads the links the Armory hands out today, and says why an import failed instead of
+  importing nothing.** The Armory moved character pages to `/<locale>/worldsoul/<region>/armory/character/<realm>/<name>`
+  and put a search page at `/<locale>/worldsoul/<region>/armory?q=<name>`. The importer pulled the realm and name out
+  of a link by counting characters and slashes, so a search link -- the one a browser is showing while you look for
+  the character -- was read as realm "eu", character "armory", and a character page with a trailing slash was read as
+  having no name at all. Worse, the failure was silent: the profile API answers an unknown character with a 404 whose
+  body is JSON (`{"code":404,...}`), the importer only asked whether the body parsed as JSON, and so imported a
+  character with no race, no customizations and no equipment -- the model on screen simply never changed. Links are
+  now read as URLs (scheme, host, path segments, query), which handles the current form, the 2023
+  `/character/<region>/<realm>/<name>` form, the older `/character/<realm>/<name>` form whose region comes from the
+  locale (including `pt-br` and `es-mx`, which are US), classic realms, a trailing slash, a query string, a link
+  pasted without `https://`, and names with accents. The HTTP status and the payload are both checked, so an error
+  can never be dressed onto the model, and each failure names itself: a search link explains where to find the
+  character's own link, a 404 names the character, realm and region and mentions hidden profiles, 401/403 points at
+  the proxy's access key, 429 says to wait, and an unreachable proxy reports the network error. The log records the
+  request URL, the HTTP status, the response size and the reason.
 - **Choosing, swapping or taking off a mount no longer makes the animation jump or start over in the Unity
   viewport.** A mount choice holds the UI thread while the mount's model loads (1.5-1.9 s, measured) and starts the
   mount and the character's riding animation in that wait. The first tick after it counted the whole wait into

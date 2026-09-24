@@ -6,9 +6,9 @@ message(STATUS "Building armory importer")
 
 add_definitions(-DQT_PLUGIN)
 
-set(src ArmoryImporter.cpp)
+set(src ArmoryImporter.cpp ArmoryProxy.cpp)
 
-set(headers ArmoryImporter.h)
+set(headers ArmoryImporter.h ArmoryProxy.h)
 
 source_group("Header Files" FILES ${headers})
 
