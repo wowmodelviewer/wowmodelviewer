@@ -9,6 +9,7 @@ set(src animated.cpp
       Bone.cpp
       CASCFile.cpp
       CASCFolder.cpp
+      CDNPrefetch.cpp
       CascFileProvider.cpp
       CharDetails.cpp
       CharTexture.cpp
@@ -59,6 +60,7 @@ set(headers animated.h
       CASCChunks.h
       CASCFile.h
       CASCFolder.h
+      CDNPrefetch.h
       CascFileProvider.h
       CharDetails.h
       CharDetailsEvent.h
@@ -120,7 +122,7 @@ set(NAME wow)
 add_library(${NAME} SHARED ${src} ${headers})
 set_property(TARGET ${NAME} PROPERTY FOLDER "libraries")
 
-target_link_libraries(${NAME} Qt5::Core Qt5::Xml Qt5::Gui ${extralibs} glu32)
+target_link_libraries(${NAME} Qt5::Core Qt5::Network Qt5::Xml Qt5::Gui ${extralibs} glu32)
 add_dependencies(${NAME} casc_static storm)
 
 set(BIN_DIR "${CMAKE_SOURCE_DIR}/bin/")

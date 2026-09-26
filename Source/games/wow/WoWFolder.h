@@ -36,6 +36,16 @@ namespace wow
       WoWFolder(const QString & path);
       virtual ~WoWFolder() {}
 
+      // Online (CDN) mode, for a machine without a WoW install: the constructor's path is then
+      // the download cache instead of a Data folder. Call BEFORE Game::init() -- it calls init(),
+      // which is where the build is looked up (version service instead of .build.info).
+      void setOnline(const QString & product, const QString & region, const QString & locale);
+      bool isOnline() const { return m_online; }
+      // See CASCFolder: whether this start got fresh build information (false = offline, the
+      // cached build is served), and a thread-safe request to abandon a running online open.
+      bool onlineRefreshed() const { return m_CASCFolder.onlineRefreshed(); }
+      void cancelOnlineOpen() { m_CASCFolder.cancelOnlineOpen(); }
+
       void init() override;
       void initFromListfile(const QString & file) override;
       void addCustomFiles(const QString & path, bool bypassOriginalFiles) override;
@@ -66,6 +76,10 @@ namespace wow
       int fileID(QString fileName);
     private:
       CASCFolder m_CASCFolder;
+      bool m_online = false;
+      QString m_onlineProduct; // setOnline() arguments, handed to CASCFolder::initOnline() by init()
+      QString m_onlineRegion;
+      QString m_onlineLocale;
       // Storage backend behind openFile(). Created in setConfig() from the detected client
       // profile: a CascFileProvider (forwards to m_CASCFolder -- the modern default) or, for
       // an old MoPaQ client, the placeholder MpqFileProvider. Null until setConfig() runs, in
