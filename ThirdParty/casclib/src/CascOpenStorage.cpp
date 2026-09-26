@@ -1270,8 +1270,12 @@ static DWORD LoadCascStorage(TCascStorage * hs, PCASC_OPEN_STORAGE_ARGS pArgs, L
         dwErrCode = LoadEncodingManifest(hs);
     }
 
-    // We need to load the DOWNLOAD manifest
-    if(dwErrCode == ERROR_SUCCESS)
+    // We need to load the DOWNLOAD manifest. Online storages skip it: it only adds download
+    // priorities, tags and entries known by their EKey alone, while WoW files are found by
+    // name or FileDataID through ROOT and ENCODING. It costs 63 MB on the first open (WoW 12.1),
+    // and a cache without it must still open offline. Products whose ENCODING lists only some
+    // of their files (TVFS storages) would need it back.
+    if(dwErrCode == ERROR_SUCCESS && (hs->dwFeatures & CASC_FEATURE_ONLINE) == 0)
     {
         dwErrCode = LoadDownloadManifest(hs);
     }

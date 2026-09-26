@@ -27,9 +27,20 @@ wow::WoWFolder::WoWFolder(const QString & path)
 {
 }
 
+void wow::WoWFolder::setOnline(const QString & product, const QString & region, const QString & locale)
+{
+  m_online = true;
+  m_onlineProduct = product;
+  m_onlineRegion = region;
+  m_onlineLocale = locale;
+}
+
 void wow::WoWFolder::init()
 {
-  m_CASCFolder.init(path());
+  if (m_online)
+    m_CASCFolder.initOnline(path(), m_onlineProduct, m_onlineRegion, m_onlineLocale);
+  else
+    m_CASCFolder.init(path());
 }
 
 

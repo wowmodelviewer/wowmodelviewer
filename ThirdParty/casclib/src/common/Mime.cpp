@@ -654,8 +654,8 @@ DWORD CASC_MIME::Load(char * data, CASC_MIME_RESPONSE & MimeResponse)
     // Special handling of HTTP responses
     if(MimeResponse.http_presence == FieldPresencePresent)
     {
-        // Avoid parsing of failed HTTP requests
-        if(MimeResponse.http_code != 200)
+        // Avoid parsing of failed HTTP requests. A range request is answered with 206 (Partial Content)
+        if(MimeResponse.http_code != 200 && MimeResponse.http_code != 206)
             return ERROR_FILE_NOT_FOUND;
 
         // Directly setup the root item

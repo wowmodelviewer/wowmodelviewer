@@ -169,7 +169,6 @@ struct CASC_PATH
 
     bool AppendStringN(const xchar * szString, size_t nMaxchars, bool bWithSeparator)
     {
-        const xchar * szStringEnd = szString + nMaxchars;
         xchar chOneChar;
 
         if(szString && szString[0] && nMaxchars)
@@ -178,11 +177,12 @@ struct CASC_PATH
             if(m_szBufferPtr > m_szBufferBegin && bWithSeparator)
                 AppendChar(m_chSeparator);
 
-            // Append the characters from the string
-            while(szString[0] && szString < szStringEnd)
+            // Append the characters from the string. Count them instead of comparing with
+            // an end pointer: szString + nMaxchars may lie far beyond the end of the string.
+            for(size_t i = 0; i < nMaxchars && szString[i] != 0; i++)
             {
                 // Retrieve the single character
-                chOneChar = *szString++;
+                chOneChar = szString[i];
 
                 // Normalize the character
                 if(chOneChar == '/' || chOneChar == '\\')
@@ -203,7 +203,7 @@ struct CASC_PATH
 
     bool AppendEKey(LPBYTE pbEKey)
     {
-        xchar szEKey[MD5_STRING_SIZE + 1];
+        xchar szEKey[MD5_STRING_SIZE + 1] = {0};
 
         StringFromBinary(pbEKey, MD5_HASH_SIZE, szEKey);
         AppendStringN(szEKey, 2, true);

@@ -39,17 +39,17 @@ bool core::GameDatabase::initFromXML(const QString & file)
    // we can skip the ~20s DB2 -> SQLite rebuild on every launch. createDatabaseFromXML
    // only fill()s a table when create() succeeds, and create() ("CREATE TABLE")
    // fails for tables that already exist -- so an existing cache is reused as-is.
-   // We MUST invalidate the cache when the WoW build changes, otherwise we'd serve
-   // stale/mismatched table data, so the build version is recorded alongside it.
+   // We MUST invalidate the cache when the WoW build or the data language changes,
+   // otherwise we'd serve stale/mismatched table data, so both are recorded alongside it.
    static const char * DB_PATH  = "./wowdb.sqlite";
    static const char * VER_PATH = "./wowdb.sqlite.build";
    QString buildVersion;
 
    if(m_fastMode)
    {
-     // Cache key = WoW build + our schema version. Bump SCHEMA_VERSION whenever the
-     // table layout in database.xml (or how we read it) changes, so an old cache
-     // built with a different schema is rebuilt rather than queried and failing.
+     // Cache key = WoW build + data language + our schema version. Bump SCHEMA_VERSION
+     // whenever the table layout in database.xml (or how we read it) changes, so an old
+     // cache built with a different schema is rebuilt rather than queried and failing.
      // 13: ItemBonus added -- resolves a Wowhead dressing-room bonus-list id to its
      //     type-7 ItemAppearanceModifierID, the field that selects a tier set's
      //     Raid Finder/Heroic/Mythic tint on import.
@@ -62,7 +62,11 @@ bool core::GameDatabase::initFromXML(const QString & file)
   // most store="no") so the sparse walk reaches ExpansionID, ItemLevel and OverallQualityID --
   // expansion/quality filtering, and item quality colours that were previously always 0. // 11: ChrCustomizationReq adds ReqAchievementID/ReqQuestID/ReqItemModifiedAppearanceID (unlock-gate filter for customization choices). 10: corrected ItemSparse name-field positions (sparse-record string walk) for 12.0.7. 9: ChrCustomizationReq/ChrRaces/CreatureDisplayInfo/CreatureModelData. Bump forces a cache rebuild so the fix reaches installs upgraded over a prior build
      const QString build = GAMEDIRECTORY.version(); // current WoW build, e.g. "12.0.1.66220"
-     buildVersion = build.isEmpty() ? QString() : (build + "|schema" + QString::number(SCHEMA_VERSION));
+     // The language is part of the key: the *_lang columns (item, race and creature names) come
+     // from that language's DB2s, and the online mode can switch languages between two runs of
+     // the same build. setConfig() has set it by now, like the build ("deDE", "enUS", ...).
+     const QString locale = GAMEDIRECTORY.locale();
+     buildVersion = build.isEmpty() ? QString() : (build + "|" + locale + "|schema" + QString::number(SCHEMA_VERSION));
 
      QString cachedVersion;
      {

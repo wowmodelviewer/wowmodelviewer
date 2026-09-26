@@ -670,15 +670,18 @@ static DWORD BaseHttp_ParseURL(TFileStream * pStream, LPCTSTR szFileName, int * 
 //-----------------------------------------------------------------------------
 // Local functions - base HTTP file support
 
-static bool BaseHttp_Download(TFileStream * pStream)
+// Downloads the remote resource. With RangeLength != 0, only its bytes
+// [RangeOffset, RangeOffset + RangeLength) are requested (HTTP range request).
+static bool BaseHttp_Download(TFileStream * pStream, ULONGLONG RangeOffset = 0, DWORD RangeLength = 0)
 {
     CASC_MIME_RESPONSE MimeResponse;
     CASC_BLOB FileData;
     CASC_MIME Mime;
     const char * request_mask = "GET %s HTTP/1.1\r\nHost: %s\r\nConnection: Keep-Alive\r\n\r\n";
+    const char * range_mask = "GET %s HTTP/1.1\r\nHost: %s\r\nRange: bytes=%llu-%llu\r\nConnection: Keep-Alive\r\n\r\n";
     char * server_response;
     char * fileName = pStream->Base.Socket.fileName;
-    char request[0x100];
+    char request[0x200];
     size_t request_length = 0;
     DWORD dwErrCode = ERROR_SUCCESS;
 
@@ -690,16 +693,20 @@ static bool BaseHttp_Download(TFileStream * pStream)
         dwErrCode = ERROR_BAD_FORMAT;
 
         // Construct the request, either HTTP or Ribbit (https://wowdev.wiki/Ribbit).
-        // Note that Ribbit requests don't start with slash
+        // Note that Ribbit requests don't start with slash, and there are no ranges in Ribbit
         if((pStream->dwFlags & BASE_PROVIDER_MASK) == BASE_PROVIDER_RIBBIT)
         {
             if(fileName[0] == '/')
                 fileName++;
             request_mask = "%s\r\n";
+            RangeLength = 0;
         }
 
         // Send the request and receive decoded response
-        request_length = CascStrPrintf(request, _countof(request), request_mask, fileName, pStream->Base.Socket.hostName);
+        if(RangeLength != 0)
+            request_length = CascStrPrintf(request, _countof(request), range_mask, fileName, pStream->Base.Socket.hostName, (unsigned long long)(RangeOffset), (unsigned long long)(RangeOffset + RangeLength - 1));
+        else
+            request_length = CascStrPrintf(request, _countof(request), request_mask, fileName, pStream->Base.Socket.hostName);
         server_response = pStream->Base.Socket.pSocket->ReadResponse(request, request_length, MimeResponse);
         if(server_response != NULL)
         {
@@ -713,11 +720,21 @@ static bool BaseHttp_Download(TFileStream * pStream)
                     pStream->Base.Socket.fileDataLength = FileData.cbData;
                     pStream->Base.Socket.fileDataPos = 0;
                     FileData.Reset();
+
+                    // A range request is answered with 206 and just the requested bytes.
+                    // A server that ignores the range answers 200 with the whole resource.
+                    pStream->Base.Socket.fileDataOffset = (MimeResponse.http_code == 206) ? RangeOffset : 0;
                 }
             }
 
             // Free the buffer
             CASC_FREE(server_response);
+        }
+        else
+        {
+            // The request failed. Keep the reason that ReadResponse gave.
+            if((dwErrCode = GetCascError()) == ERROR_SUCCESS)
+                dwErrCode = ERROR_BAD_FORMAT;
         }
     }
 
@@ -742,6 +759,10 @@ static bool BaseHttp_Open(TFileStream * pStream, LPCTSTR szFileName, DWORD dwStr
             pStream->Base.Socket.pSocket = pSocket;
             return true;
         }
+
+        // The host name could not be resolved, or no address accepted the connection.
+        // This must not stay ERROR_SUCCESS: the caller would take the download as done.
+        dwErrCode = ERROR_NETWORK_NOT_AVAILABLE;
     }
 
     // Failure: set the last error and return false
@@ -764,20 +785,29 @@ static bool BaseHttp_Read(
         // Do we have to read anything at all?
         if(dwBytesToRead != 0)
         {
-            // Make sure that we have the file downloaded
-            if(!BaseHttp_Download(pStream))
+            // Make sure that we have the file downloaded. A read at a given offset
+            // from a stream that has no data yet only asks for the bytes it reads.
+            bool bRangeRequest = (pByteOffset != NULL && pStream->Base.Socket.fileData == NULL);
+            ULONGLONG DataBegin;
+            ULONGLONG DataEnd;
+
+            if(!BaseHttp_Download(pStream, bRangeRequest ? ByteOffset : 0, bRangeRequest ? dwBytesToRead : 0))
             {
                 CascUnlock(pStream->Lock);
                 return false;
             }
 
+            // The offsets are offsets in the remote file. The data begin at fileDataOffset.
+            DataBegin = pStream->Base.Socket.fileDataOffset;
+            DataEnd = DataBegin + pStream->Base.Socket.fileDataLength;
+
             // Are we trying to read more than available?
-            if(ByteOffset <= pStream->Base.Socket.fileDataLength)
+            if(DataBegin <= ByteOffset && ByteOffset <= DataEnd)
             {
-                if((ByteOffset + dwBytesToRead) > pStream->Base.Socket.fileDataLength)
+                if((ByteOffset + dwBytesToRead) > DataEnd)
                 {
                     bCanReadTheWholeRange = false;
-                    dwBytesToRead = (DWORD)(pStream->Base.Socket.fileDataLength - ByteOffset);
+                    dwBytesToRead = (DWORD)(DataEnd - ByteOffset);
                 }
             }
             else
@@ -789,7 +819,7 @@ static bool BaseHttp_Read(
             // Copy the data
             if(dwBytesToRead != 0)
             {
-                memcpy(pvBuffer, pStream->Base.Socket.fileData + ByteOffset, dwBytesToRead);
+                memcpy(pvBuffer, pStream->Base.Socket.fileData + (size_t)(ByteOffset - DataBegin), dwBytesToRead);
             }
         }
 

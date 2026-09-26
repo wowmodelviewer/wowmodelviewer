@@ -178,6 +178,7 @@ union TBaseProviderData
         char * fileName;                    // Name of the remote resource
         size_t fileDataLength;              // Length of the file data, in bytes
         size_t fileDataPos;                 // Current position in the data
+        ULONGLONG fileDataOffset;           // Offset of fileData[0] in the remote resource (non-zero after a range request)
     } Socket;
 };
 

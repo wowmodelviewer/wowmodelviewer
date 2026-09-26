@@ -15,12 +15,17 @@
 
 #ifdef CASCLIB_PLATFORM_WINDOWS
 #include <ws2tcpip.h>
+#else
+#include <sys/time.h>
 #endif
 
 //-----------------------------------------------------------------------------
 // Local variables
 
 #define BUFFER_INITIAL_SIZE 0x8000
+
+// Send and receive timeout, in milliseconds
+#define SOCKET_TIMEOUT      20000
 
 #ifndef INVALID_SOCKET
 #define INVALID_SOCKET (SOCKET)(-1)             // Not defined in Linux
@@ -42,6 +47,28 @@ static HANDLE inline SocketToHandle(SOCKET sock)
 }
 
 //-----------------------------------------------------------------------------
+// Local functions
+
+// Without timeouts, a server or a network path that stops answering blocks send()
+// and recv() forever. On Linux, the send timeout also limits connect(). On Windows,
+// connect() gives up after its own timeout (about 21 seconds).
+static void SetSocketTimeouts(SOCKET sock, DWORD dwTimeout)
+{
+#ifdef CASCLIB_PLATFORM_WINDOWS
+    // Windows takes the timeout as a DWORD, in milliseconds
+    setsockopt(sock, SOL_SOCKET, SO_RCVTIMEO, (const char *)&dwTimeout, (int)sizeof(DWORD));
+    setsockopt(sock, SOL_SOCKET, SO_SNDTIMEO, (const char *)&dwTimeout, (int)sizeof(DWORD));
+#else
+    struct timeval tv;
+
+    tv.tv_sec = dwTimeout / 1000;
+    tv.tv_usec = (dwTimeout % 1000) * 1000;
+    setsockopt(sock, SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof(tv));
+    setsockopt(sock, SOL_SOCKET, SO_SNDTIMEO, &tv, sizeof(tv));
+#endif
+}
+
+//-----------------------------------------------------------------------------
 // CASC_SOCKET functions
 
 // Guarantees that there is zero terminator after the response
@@ -54,6 +81,7 @@ char * CASC_SOCKET::ReadResponse(const char * request, size_t request_length, CA
     size_t buffer_delta = BUFFER_INITIAL_SIZE;
     DWORD dwErrCode = ERROR_SUCCESS;
     int bytes_received = 0;
+    bool response_complete = false;
 
     // Pre-set the result length
     if(request_length == 0)
@@ -69,6 +97,7 @@ char * CASC_SOCKET::ReadResponse(const char * request, size_t request_length, CA
         // If the connection was closed by the remote host, we try to reconnect
         if(ReconnectAfterShutdown(sock, remoteItem) == SocketToHandle(INVALID_SOCKET))
         {
+            Disconnect();
             SetCascError(ERROR_NETWORK_NOT_AVAILABLE);
             CascUnlock(Lock);
             return NULL;
@@ -120,7 +149,10 @@ char * CASC_SOCKET::ReadResponse(const char * request, size_t request_length, CA
 
             // Parse the MIME response
             if(MimeResponse.ParseResponse(server_response, total_received, false))
+            {
+                response_complete = true;
                 break;
+            }
 
             // If we know the content length (HTTP only), we temporarily increment
             // the buffer delta. This will make next reallocation to make buffer
@@ -145,6 +177,17 @@ char * CASC_SOCKET::ReadResponse(const char * request, size_t request_length, CA
             }
         }
     }
+    else
+    {
+        dwErrCode = ERROR_NOT_ENOUGH_MEMORY;
+    }
+
+    // A connection that ended before its response was complete cannot carry another request:
+    // the server closed or reset it, it stayed silent longer than the receive timeout, or the
+    // response could not be stored. Close it, so that the next request connects anew instead
+    // of failing on the dead connection again.
+    if(response_complete == false)
+        Disconnect();
 
     // Unlock the socket
     CascUnlock(Lock);
@@ -192,7 +235,7 @@ DWORD CASC_SOCKET::GetAddrInfoWrapper(const char * hostName, unsigned portNum, P
     CascStrPrintf(portNumString, _countof(portNumString), "%d", portNum);
 
     // Attempt to connect
-    for(;;)
+    for(DWORD dwRetryCount = 0; ; dwRetryCount++)
     {
         // Attempt to call the addrinfo
         DWORD dwErrCode = getaddrinfo(hostName, portNumString, hints, ppResult);
@@ -210,7 +253,11 @@ DWORD CASC_SOCKET::GetAddrInfoWrapper(const char * hostName, unsigned portNum, P
             }
 #endif
             case (DWORD)EAI_AGAIN:             // Temporary error, try again
-                continue;
+                // But only twice more: without a network, the resolver keeps answering
+                // EAI_AGAIN, and the caller would hang in this loop for good
+                if(dwRetryCount < 2)
+                    continue;
+                return dwErrCode;
 
             default:                    // Any other result, incl. ERROR_SUCCESS
                 return dwErrCode;
@@ -223,9 +270,12 @@ HANDLE CASC_SOCKET::CreateAndConnect(PADDRINFO remoteItem)
     SOCKET sock;
 
     // Create new socket
-    // On error, returns returns INVALID_SOCKET (0 on Windows, -1 on Linux)
-    if((sock = socket(remoteItem->ai_family, remoteItem->ai_socktype, remoteItem->ai_protocol)) > 0)
+    // On error, returns INVALID_SOCKET: ~0 on Windows, where SOCKET is unsigned, and -1 on Linux
+    if((sock = socket(remoteItem->ai_family, remoteItem->ai_socktype, remoteItem->ai_protocol)) != INVALID_SOCKET)
     {
+        // Give up on a connection that stops answering
+        SetSocketTimeouts(sock, SOCKET_TIMEOUT);
+
         // Connect to the remote host
         // On error, returns SOCKET_ERROR (-1) on Windows, -1 on Linux
         if(connect(sock, remoteItem->ai_addr, (int)remoteItem->ai_addrlen) == 0)
@@ -309,8 +359,9 @@ PCASC_SOCKET CASC_SOCKET::Connect(const char * hostName, unsigned portNum)
         // Try to connect to any address provided by the getaddrinfo()
         for(remoteItem = remoteList; remoteItem != NULL; remoteItem = remoteItem->ai_next)
         {
-            // Create new socket and connect to the remote host
-            if((sock = CreateAndConnect(remoteItem)) != 0)
+            // Create new socket and connect to the remote host. A failed connection
+            // gives INVALID_SOCKET, not zero; the next address must be tried then.
+            if((sock = CreateAndConnect(remoteItem)) != SocketToHandle(INVALID_SOCKET))
             {
                 // Create new instance of the CASC_SOCKET structure
                 if((pSocket = CASC_SOCKET::New(remoteList, remoteItem, hostName, portNum, sock)) != NULL)
@@ -323,12 +374,27 @@ PCASC_SOCKET CASC_SOCKET::Connect(const char * hostName, unsigned portNum)
             }
         }
 
+        // No socket owns the address list
+        freeaddrinfo(remoteList);
+
         // Couldn't find a network
         nErrCode = ERROR_NETWORK_NOT_AVAILABLE;
     }
 
     SetCascError(nErrCode);
     return NULL;
+}
+
+void CASC_SOCKET::Disconnect()
+{
+    // Close the connection, if any
+    if(sock != SocketToHandle(INVALID_SOCKET))
+        closesocket(HandleToSocket(sock));
+    sock = SocketToHandle(INVALID_SOCKET);
+
+    // A socket in the cache would be handed out again
+    if(pCache != NULL)
+        pCache->RemoveSocket(this);
 }
 
 void CASC_SOCKET::Delete()
@@ -340,10 +406,15 @@ void CASC_SOCKET::Delete()
         pCache->UnlinkSocket(this);
     pCache = NULL;
 
-    // Close the socket, if any
-    if(sock != 0)
+    // Close the socket, if any. Disconnect() leaves INVALID_SOCKET.
+    if(sock != SocketToHandle(INVALID_SOCKET))
         closesocket(HandleToSocket(sock));
-    sock = 0;
+    sock = SocketToHandle(INVALID_SOCKET);
+
+    // Free the address list that the socket got from Connect()
+    if(remoteList != NULL)
+        freeaddrinfo(remoteList);
+    remoteList = remoteItem = NULL;
 
     // Free the lock
     CascFreeLock(Lock);
@@ -407,6 +478,22 @@ PCASC_SOCKET CASC_SOCKET_CACHE::InsertSocket(PCASC_SOCKET pSocket)
     }
 
     return pSocket;
+}
+
+void CASC_SOCKET_CACHE::RemoveSocket(PCASC_SOCKET pSocket)
+{
+    // Only if the socket is in this cache
+    if(pSocket != NULL && pSocket->pCache == this)
+    {
+        UnlinkSocket(pSocket);
+        pSocket->pCache = NULL;
+        pSocket->pPrev = pSocket->pNext = NULL;
+
+        // The cache holds a reference to its sockets while caching is on (see SetCaching).
+        // The caller holds another one, so this never deletes the socket.
+        if(dwRefCount > 0)
+            pSocket->Release();
+    }
 }
 
 void CASC_SOCKET_CACHE::UnlinkSocket(PCASC_SOCKET pSocket)

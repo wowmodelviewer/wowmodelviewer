@@ -509,6 +509,7 @@ DWORD CascDecrypt(TCascStorage * hs, LPBYTE pbOutBuffer, PDWORD pcbOutBuffer, LP
 // Support for index files
 
 bool CopyEKeyEntry(TCascStorage * hs, PCASC_CKEY_ENTRY pCKeyEntry);
+bool VerifyArchiveIndexKey(LPBYTE pbIndexFile, size_t cbIndexFile, LPBYTE pbArchiveKey);
 
 DWORD LoadIndexFiles(TCascStorage * hs);
 void  FreeIndexFiles(TCascStorage * hs);
