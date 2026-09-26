@@ -22,6 +22,10 @@ static LPCTSTR szIndexFormat_V2 = _T("%02x%08x.idx");
 // Limit for "orphaned" items - those that are in index files, but are not in ENCODING manifest
 #define CASC_MAX_ORPHANED_ITEMS 0x100
 
+// Length of the part of an archive index that its name is the MD5 of: the footer from the
+// 8-byte TocHash to the 8-byte FooterHash. CaptureArchiveIndexFooter only accepts 8-byte hashes.
+#define CASC_ARCINDEX_FOOTER_SIZE (8 + 12 + 8)
+
 typedef bool (*EKEY_ENTRY_CALLBACK)(TCascStorage * hs, CASC_INDEX_HEADER & InHeader, LPBYTE pbEKeyEntry);
 
 //-----------------------------------------------------------------------------
@@ -755,15 +759,28 @@ static DWORD LoadArchiveIndexFiles(TCascStorage * hs)
             break;
         }
 
-        // Fetch and parse the archive index
-        dwErrCode = FetchCascFile(hs, PathTypeData, pbIndexHash, _T(".index"), LocalPath);
-        if(dwErrCode == ERROR_SUCCESS)
+        // Fetch and parse the archive index. A cached copy that cannot be loaded (cut short by
+        // a crash, damaged on disk) is deleted and fetched once more. Otherwise, that one file
+        // would make every later open of the storage fail.
+        for(DWORD dwAttempt = 0; dwAttempt < 2; dwAttempt++)
         {
-            // Load the index file to memory
+            dwErrCode = FetchCascFile(hs, PathTypeData, pbIndexHash, _T(".index"), LocalPath);
+            if(dwErrCode != ERROR_SUCCESS)
+                break;
+
+            // Load the index file to memory. It must be the index that the archive key names.
             if((dwErrCode = LoadFileToMemory(LocalPath, FileData)) == ERROR_SUCCESS)
             {
-                dwErrCode = LoadArchiveIndexFile(hs, FileData.pbData, FileData.cbData, i);
+                if(VerifyArchiveIndexKey(FileData.pbData, FileData.cbData, pbIndexHash))
+                    dwErrCode = LoadArchiveIndexFile(hs, FileData.pbData, FileData.cbData, i);
+                else
+                    dwErrCode = ERROR_FILE_CORRUPT;
             }
+
+            // Never delete anything outside the cache of an online storage
+            if(dwErrCode == ERROR_SUCCESS || dwErrCode == ERROR_NOT_ENOUGH_MEMORY || dwAttempt != 0 || (hs->dwFeatures & CASC_FEATURE_ONLINE) == 0)
+                break;
+            _tremove(LocalPath);
         }
 
         // Break if an error
@@ -798,6 +815,20 @@ bool CopyEKeyEntry(TCascStorage * hs, PCASC_CKEY_ENTRY pCKeyEntry)
     }
 
     return true;
+}
+
+// Checks that an archive index is the one named by the archive key: the MD5 of its footer.
+// CaptureArchiveIndexFooter only checks the footer against the hash stored in it, which
+// does not cover the TocHash.
+bool VerifyArchiveIndexKey(LPBYTE pbIndexFile, size_t cbIndexFile, LPBYTE pbArchiveKey)
+{
+    BYTE md5_hash[MD5_HASH_SIZE];
+
+    if(pbIndexFile == NULL || cbIndexFile < CASC_ARCINDEX_FOOTER_SIZE)
+        return false;
+
+    CascHash_MD5(pbIndexFile + cbIndexFile - CASC_ARCINDEX_FOOTER_SIZE, CASC_ARCINDEX_FOOTER_SIZE, md5_hash);
+    return (memcmp(md5_hash, pbArchiveKey, MD5_HASH_SIZE) == 0);
 }
 
 DWORD LoadIndexFiles(TCascStorage * hs)

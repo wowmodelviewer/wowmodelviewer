@@ -58,6 +58,9 @@ class CASC_SOCKET
     static PCASC_SOCKET New(PADDRINFO remoteList, PADDRINFO remoteItem, const char * hostName, unsigned portNum, HANDLE sock);
     static PCASC_SOCKET Connect(const char * hostName, unsigned portNum);
 
+    // Closes a connection that cannot carry another request and removes the socket from the cache
+    void Disconnect();
+
     // Frees all resources and deletes the socket
     void Delete();
 
@@ -90,6 +93,7 @@ class CASC_SOCKET_CACHE
 
     PCASC_SOCKET Find(const char * hostName, unsigned portNum);
     PCASC_SOCKET InsertSocket(PCASC_SOCKET pSocket);
+    void RemoveSocket(PCASC_SOCKET pSocket);
     void UnlinkSocket(PCASC_SOCKET pSocket);
 
     void SetCaching(bool bAddRef);

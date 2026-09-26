@@ -27,6 +27,16 @@ typedef DWORD (*PARSE_TEXT_FILE)(TCascStorage * hs, void * pvListFile);
 typedef DWORD (*PARSE_VARIABLE)(TCascStorage * hs, const char * szVariableName, const char * szDataBegin, const char * szDataEnd, void * pvParam);
 typedef DWORD (*PARSE_REGION_LINE)(TCascStorage * hs, CASC_CSV & Csv, size_t nLine);
 
+// How a file downloaded from the CDN is checked against the key it was requested by,
+// before it may enter the local cache (see VerifyDownloadedFile)
+typedef enum _CDN_KEY_CHECK
+{
+    CdnCheckNone,                                   // Not checked (the PATCH manifest, see GetCdnKeyCheck)
+    CdnCheckContent,                                // Key = MD5 of the whole file (config files)
+    CdnCheckArchiveIndex,                           // Key = MD5 of the index footer (archive indexes)
+    CdnCheckEncodedData                             // Key = MD5 of the BLTE header, which holds the MD5 of each frame (encoded data)
+} CDN_KEY_CHECK;
+
 static DWORD RibbitDownloadFile(LPCTSTR szCdnHostUrl, LPCTSTR szProduct, LPCTSTR szFileName, CASC_PATH<TCHAR> & LocalPath, CASC_BLOB & FileData);
 
 //-----------------------------------------------------------------------------
@@ -949,8 +959,14 @@ static DWORD LoadCsvFile(TCascStorage * hs, PARSE_REGION_LINE PfnParseRegionLine
         if(InvokeProgressCallback(hs, CascProgressDownloadingFile, szFileNameA, 0, 0))
             return ERROR_CANCELLED;
 
-        // Download the file using Ribbit/HTTP protocol
-        dwErrCode = RibbitDownloadFile(hs->szCdnHostUrl, hs->szCodeName, szFileName, LocalPath, FileData);
+        // Download the file using Ribbit/HTTP protocol. Without a version server from the caller,
+        // only the copy in the cache counts: the default server is plain HTTP on port 1119, which
+        // is blocked on many networks and made the open wait for minutes. The caller fetches
+        // "versions" and "cdns" into the cache instead (over HTTPS).
+        if(hs->szCdnHostUrl != NULL && hs->szCdnHostUrl[0] != 0)
+            dwErrCode = RibbitDownloadFile(hs->szCdnHostUrl, hs->szCodeName, szFileName, LocalPath, FileData);
+        else
+            dwErrCode = LoadFileToMemory(LocalPath, FileData);
     }
     else
     {
@@ -1080,22 +1096,43 @@ static DWORD ForcePathExist(LPCTSTR szFileName, bool bIsFileName)
     return dwErrCode;
 }
 
+// Gives a completely written file its final name. On Windows, rename() fails when
+// the target exists; MoveFileEx replaces it, as rename() does everywhere else.
+static bool ReplaceLocalFile(LPCTSTR szTempName, LPCTSTR szLocalName)
+{
+#ifdef CASCLIB_PLATFORM_WINDOWS
+    return MoveFileEx(szTempName, szLocalName, MOVEFILE_REPLACE_EXISTING) ? true : false;
+#else
+    return (rename(szTempName, szLocalName) == 0);
+#endif
+}
+
 static DWORD SaveLocalFile(LPCTSTR szLocalName, LPBYTE pbFileData, size_t cbFileData)
 {
+    CASC_PATH<TCHAR> TempName(szLocalName, NULL);
     TFileStream * pLocStream;
     DWORD dwErrCode = ERROR_DISK_FULL;
 
     // Make sure that the path exists
     ForcePathExist(szLocalName, true);
 
-    // Create local file
-    pLocStream = FileStream_CreateFile(szLocalName, BASE_PROVIDER_FILE | STREAM_PROVIDER_FLAT);
+    // Write the file under a temporary name and give it the real name only when it is complete.
+    // The cache takes any file with the right name as valid, so a file cut short by a crash,
+    // a full disk or a killed process must never get that name.
+    TempName.AppendString(_T(".part"), false);
+    pLocStream = FileStream_CreateFile(TempName, BASE_PROVIDER_FILE | STREAM_PROVIDER_FLAT);
     if(pLocStream != NULL)
     {
         if(FileStream_Write(pLocStream, NULL, pbFileData, (DWORD)(cbFileData)))
             dwErrCode = ERROR_SUCCESS;
 
         FileStream_Close(pLocStream);
+
+        // Rename the complete file, or remove what was written
+        if(dwErrCode == ERROR_SUCCESS && !ReplaceLocalFile(TempName, szLocalName))
+            dwErrCode = ERROR_CAN_NOT_COMPLETE;
+        if(dwErrCode != ERROR_SUCCESS)
+            _tremove(TempName);
     }
     else
         dwErrCode = GetCascError();
@@ -1130,19 +1167,27 @@ static LPCTSTR ExtractCdnServerName(LPTSTR szServerName, size_t cchServerName, L
     return NULL;
 }
 
-static bool FileAlreadyExists(LPCTSTR szFileName)
+// Returns the size of a local file, or zero if it cannot be opened. The file is opened
+// read-only and with write sharing, so that this also works on Windows while the file
+// is open elsewhere, e.g. by OpenDataStream.
+static ULONGLONG GetLocalFileSize(LPCTSTR szFileName)
 {
     TFileStream * pStream;
     ULONGLONG FileSize = 0;
 
-    // The file open must succeed and also must be of non-zero size
-    if((pStream = FileStream_OpenFile(szFileName, 0)) != NULL)
+    if((pStream = FileStream_OpenFile(szFileName, STREAM_FLAG_READ_ONLY | STREAM_FLAG_WRITE_SHARE)) != NULL)
     {
         FileStream_GetSize(pStream, &FileSize);
         FileStream_Close(pStream);
     }
 
-    return (FileSize != 0);
+    return FileSize;
+}
+
+static bool FileAlreadyExists(LPCTSTR szFileName)
+{
+    // The file open must succeed and also must be of non-zero size
+    return (GetLocalFileSize(szFileName) != 0);
 }
 
 static DWORD RibbitDownloadFile(LPCTSTR szCdnHostUrl, LPCTSTR szProduct, LPCTSTR szFileName, CASC_PATH<TCHAR> & LocalPath, CASC_BLOB & FileData)
@@ -1210,16 +1255,119 @@ static DWORD RibbitDownloadFile(LPCTSTR szCdnHostUrl, LPCTSTR szProduct, LPCTSTR
     return dwErrCode;
 }
 
+// Which check a file downloaded from the CDN must pass, by the place where it lives there
+static CDN_KEY_CHECK GetCdnKeyCheck(CPATH_TYPE PathType, LPCTSTR szExtension)
+{
+    // Config files: "config/xx/yy/<key>"
+    if(PathType == PathTypeConfig)
+        return CdnCheckContent;
+
+    // Encoded data ("data/xx/yy/<ekey>") and archive indexes ("data/xx/yy/<key>.index")
+    if(PathType == PathTypeData)
+    {
+        if(szExtension == NULL || szExtension[0] == 0)
+            return CdnCheckEncodedData;
+        if(!_tcsicmp(szExtension, _T(".index")))
+            return CdnCheckArchiveIndex;
+    }
+
+    // The PATCH manifest ("patch/xx/yy/<key>") is not BLTE-encoded, and its key is the MD5 of
+    // its own header, which is not parsed here. It is only read when a caller opens "PATCH".
+    return CdnCheckNone;
+}
+
+// Encoded data are named by the MD5 of their BLTE header, and the header holds the MD5 of
+// each frame. With a header size of zero there is no frame table, and the EKey is the MD5
+// of the whole blob. Checking the header and the frames covers every byte of the blob.
+static DWORD VerifyBlteData(LPBYTE pbEKey, LPBYTE pbFileData, size_t cbFileData)
+{
+    PBLTE_HEADER pBlteHeader = (PBLTE_HEADER)pbFileData;
+    PBLTE_FRAME pFrame;
+    LPBYTE pbFileEnd = pbFileData + cbFileData;
+    LPBYTE pbFrame;
+    BYTE md5_hash[MD5_HASH_SIZE];
+    size_t HeaderSize;
+    size_t FrameCount;
+
+    // The blob must begin with the BLTE signature and the header size
+    if(cbFileData < (size_t)FIELD_OFFSET(BLTE_HEADER, MustBe0F) || ConvertBytesToInteger_4_LE(pBlteHeader->Signature) != BLTE_HEADER_SIGNATURE)
+        return ERROR_FILE_CORRUPT;
+
+    // A single frame without a frame table
+    if((HeaderSize = ConvertBytesToInteger_4(pBlteHeader->HeaderSize)) == 0)
+    {
+        CascHash_MD5(pbFileData, cbFileData, md5_hash);
+        return (memcmp(md5_hash, pbEKey, MD5_HASH_SIZE) == 0) ? ERROR_SUCCESS : ERROR_FILE_CORRUPT;
+    }
+
+    // The header with the complete frame table
+    if(HeaderSize < sizeof(BLTE_HEADER) || HeaderSize > cbFileData || pBlteHeader->MustBe0F != 0x0F)
+        return ERROR_FILE_CORRUPT;
+    FrameCount = ConvertBytesToInteger_3(pBlteHeader->FrameCount);
+    if(HeaderSize != sizeof(BLTE_HEADER) + FrameCount * sizeof(BLTE_FRAME))
+        return ERROR_FILE_CORRUPT;
+    CascHash_MD5(pbFileData, HeaderSize, md5_hash);
+    if(memcmp(md5_hash, pbEKey, MD5_HASH_SIZE) != 0)
+        return ERROR_FILE_CORRUPT;
+
+    // The frames must match their hashes and fill the rest of the blob
+    pFrame = (PBLTE_FRAME)(pbFileData + sizeof(BLTE_HEADER));
+    pbFrame = pbFileData + HeaderSize;
+    for(size_t i = 0; i < FrameCount; i++, pFrame++)
+    {
+        DWORD EncodedSize = ConvertBytesToInteger_4(pFrame->EncodedSize);
+
+        if(EncodedSize > (size_t)(pbFileEnd - pbFrame) || !CascVerifyDataBlockHash(pbFrame, EncodedSize, pFrame->FrameHash.Value))
+            return ERROR_FILE_CORRUPT;
+        pbFrame += EncodedSize;
+    }
+    return (pbFrame == pbFileEnd) ? ERROR_SUCCESS : ERROR_FILE_CORRUPT;
+}
+
+// Checks a file from the CDN against the key it was requested by, before it may enter the cache.
+// Everything on the CDN is named by a hash: a config file by the MD5 of its content, an archive
+// index by the MD5 of its footer, and encoded data by the MD5 of their BLTE header. This keeps error
+// pages and block pages that come with status 200, and data damaged on the way, out of the cache.
+// Reading a cached file would not catch them: CascLib checks frame hashes only with
+// CASC_STRICT_DATA_CHECK, and never the EKey.
+static DWORD VerifyDownloadedFile(CDN_KEY_CHECK KeyCheck, LPBYTE pbKey, LPBYTE pbFileData, size_t cbFileData)
+{
+    BYTE md5_hash[MD5_HASH_SIZE];
+
+    switch(KeyCheck)
+    {
+        case CdnCheckContent:
+            CascHash_MD5(pbFileData, cbFileData, md5_hash);
+            return (memcmp(md5_hash, pbKey, MD5_HASH_SIZE) == 0) ? ERROR_SUCCESS : ERROR_FILE_CORRUPT;
+
+        case CdnCheckArchiveIndex:
+            return VerifyArchiveIndexKey(pbFileData, cbFileData, pbKey) ? ERROR_SUCCESS : ERROR_FILE_CORRUPT;
+
+        case CdnCheckEncodedData:
+            return VerifyBlteData(pbKey, pbFileData, cbFileData);
+
+        default:
+            return ERROR_SUCCESS;
+    }
+}
+
+//
+// Downloads a remote file into a local file. With PtrByteOffset, only the given
+// part of the remote file is downloaded (HTTP range request). Before anything
+// is saved, the data must pass the check against pbKey (see VerifyDownloadedFile).
+//
 static DWORD HttpDownloadFile(
     LPCTSTR szRemoteName,
     LPCTSTR szLocalName,
     PULONGLONG PtrByteOffset,
     DWORD cbReadSize,
-    DWORD dwPortFlags)
+    DWORD dwPortFlags,
+    CDN_KEY_CHECK KeyCheck,
+    LPBYTE pbKey)
 {
     TFileStream * pRemStream;
     LPBYTE pbFileData;
-    DWORD dwErrCode = ERROR_NOT_ENOUGH_MEMORY;
+    DWORD dwErrCode = ERROR_SUCCESS;
 
     // Open the remote stream
     pRemStream = FileStream_OpenFile(szRemoteName, BASE_PROVIDER_HTTP | STREAM_PROVIDER_FLAT | dwPortFlags);
@@ -1237,7 +1385,6 @@ static DWORD HttpDownloadFile(
                 if(0 < FileSize && FileSize < CASC_MAX_ONLINE_FILE_SIZE)
                 {
                     cbReadSize = (DWORD)FileSize;
-                    dwErrCode = ERROR_SUCCESS;
                 }
                 else
                 {
@@ -1250,15 +1397,42 @@ static DWORD HttpDownloadFile(
             }
         }
 
-        // Shall we read something?
-        if((dwErrCode == ERROR_SUCCESS) && (cbReadSize != 0) && (pbFileData = CASC_ALLOC<BYTE>(cbReadSize)) != NULL)
+        // A part of the file needs both the offset and the size
+        else if(cbReadSize == 0)
         {
-            // Read all required data from the remote file
-            if(FileStream_Read(pRemStream, PtrByteOffset, pbFileData, cbReadSize))
-                dwErrCode = SaveLocalFile(szLocalName, pbFileData, cbReadSize);
+            dwErrCode = ERROR_INVALID_PARAMETER;
+        }
 
-            // Free the data buffer
-            CASC_FREE(pbFileData);
+        // Shall we read something?
+        if(dwErrCode == ERROR_SUCCESS)
+        {
+            if((pbFileData = CASC_ALLOC<BYTE>(cbReadSize)) != NULL)
+            {
+                // Read all required data from the remote file. Save them only
+                // if they are what the key says.
+                if(FileStream_Read(pRemStream, PtrByteOffset, pbFileData, cbReadSize))
+                {
+                    if((dwErrCode = VerifyDownloadedFile(KeyCheck, pbKey, pbFileData, cbReadSize)) == ERROR_SUCCESS)
+                        dwErrCode = SaveLocalFile(szLocalName, pbFileData, cbReadSize);
+                }
+                else
+                {
+                    // A failed read must never pass for a successful download. A complete
+                    // answer that lacks the requested bytes (such as a block page sent with
+                    // status 200) is wrong data, like data that fail the check.
+                    if((dwErrCode = GetCascError()) == ERROR_SUCCESS)
+                        dwErrCode = ERROR_CAN_NOT_COMPLETE;
+                    if(dwErrCode == ERROR_HANDLE_EOF)
+                        dwErrCode = ERROR_FILE_CORRUPT;
+                }
+
+                // Free the data buffer
+                CASC_FREE(pbFileData);
+            }
+            else
+            {
+                dwErrCode = ERROR_NOT_ENOUGH_MEMORY;
+            }
         }
 
         // Close the remote stream
@@ -1269,6 +1443,60 @@ static DWORD HttpDownloadFile(
         dwErrCode = GetCascError();
     }
 
+    return dwErrCode;
+}
+
+//
+// Downloads a file from the first CDN server that delivers it, trying the servers in the
+// order of the "cdns" file. A server that sends data which do not match the key is passed
+// over like one that is down. The error tells the caller what went wrong: ERROR_FILE_CORRUPT
+// if a server sent wrong data, ERROR_FILE_NOT_FOUND if a server does not have the file,
+// otherwise the error of the last server (e.g. ERROR_NETWORK_NOT_AVAILABLE when offline).
+//
+static DWORD DownloadFromCdnServers(
+    TCascStorage * hs,
+    CPATH_TYPE PathType,
+    LPBYTE pbRemoteKey,
+    LPCTSTR szExtension,
+    LPCTSTR szLocalName,
+    PULONGLONG PtrByteOffset,
+    DWORD cbReadSize,
+    CDN_KEY_CHECK KeyCheck,
+    LPBYTE pbCheckKey)
+{
+    LPCTSTR szCdnServers = hs->szCdnServers;
+    TCHAR szCdnServer[MAX_PATH] = _T("");
+    DWORD dwErrCode = ERROR_FILE_NOT_FOUND;
+    bool bCorruptData = false;
+    bool bFileNotFound = false;
+
+    // Try all download servers
+    while(szCdnServers != NULL && (szCdnServers = ExtractCdnServerName(szCdnServer, _countof(szCdnServer), szCdnServers)) != NULL)
+    {
+        CASC_PATH<TCHAR> RemotePath(URL_SEP_CHAR);
+
+        // Construct the full remote URL path
+        RemotePath.Create(szCdnServer, hs->szCdnPath, GetSubFolder(PathType), NULL);
+        RemotePath.AppendEKey(pbRemoteKey);
+        RemotePath.AppendString(szExtension, false);
+
+        // Attempt to download the file
+        dwErrCode = HttpDownloadFile(RemotePath, szLocalName, PtrByteOffset, cbReadSize, 0, KeyCheck, pbCheckKey);
+
+        // Stop on low memory condition, as it will most likely
+        // end up with low memory on next download
+        if(dwErrCode == ERROR_SUCCESS || dwErrCode == ERROR_NOT_ENOUGH_MEMORY)
+            return dwErrCode;
+
+        // Remember the errors that say more than a failed connection
+        bCorruptData = bCorruptData || (dwErrCode == ERROR_FILE_CORRUPT);
+        bFileNotFound = bFileNotFound || (dwErrCode == ERROR_FILE_NOT_FOUND);
+    }
+
+    if(bCorruptData)
+        return ERROR_FILE_CORRUPT;
+    if(bFileNotFound)
+        return ERROR_FILE_NOT_FOUND;
     return dwErrCode;
 }
 
@@ -1297,9 +1525,7 @@ DWORD FetchCascFile(
     LPCTSTR szExtension,
     CASC_PATH<TCHAR> & LocalPath)
 {
-    LPCTSTR szCdnServers = hs->szCdnServers;
     DWORD dwErrCode = ERROR_SUCCESS;
-    TCHAR szCdnServer[MAX_PATH] = _T("");
 
     // First, construct the local path
     LocalPath.Create(szRootPath, GetSubFolder(PathType), NULL);
@@ -1318,28 +1544,63 @@ DWORD FetchCascFile(
             return dwErrCode;
 
         // Try all download servers
-        while((szCdnServers = ExtractCdnServerName(szCdnServer, _countof(szCdnServer), szCdnServers)) != NULL)
-        {
-            CASC_PATH<TCHAR> RemotePath(URL_SEP_CHAR);
-
-            // Construct the full remote URL path
-            RemotePath.Create(szCdnServer, hs->szCdnPath, GetSubFolder(PathType), NULL);
-            RemotePath.AppendEKey(pbEKey);
-            RemotePath.AppendString(szExtension, false);
-
-            // Attempt to download the file
-            dwErrCode = HttpDownloadFile(RemotePath, LocalPath, NULL, 0, 0);
-
-            // Stop on low memory condition, as it will most likely
-            // end up with low memory on next download
-            if(dwErrCode == ERROR_SUCCESS || dwErrCode == ERROR_NOT_ENOUGH_MEMORY)
-                return dwErrCode;
-        }
-        
-        // Sorry, the file was not found
-        dwErrCode = ERROR_FILE_NOT_FOUND;
+        dwErrCode = DownloadFromCdnServers(hs, PathType, pbEKey, szExtension, LocalPath, NULL, 0, GetCdnKeyCheck(PathType, szExtension), pbEKey);
     }
     return dwErrCode;
+}
+
+// Looks for a whole archive in the cache (stock CascLib downloaded whole archives).
+// It serves only if it reaches at least to the end of the wanted file.
+static bool FindCachedArchive(TCascStorage * hs, LPBYTE pbArchiveKey, ULONGLONG EndOffset, CASC_PATH<TCHAR> & LocalPath)
+{
+    LPCTSTR RootPaths[] = {hs->szDataPath, hs->szRootPath};
+
+    for(size_t i = 0; i < _countof(RootPaths); i++)
+    {
+        if(RootPaths[i] != NULL)
+        {
+            LocalPath.Create(RootPaths[i], GetSubFolder(PathTypeData), NULL);
+            LocalPath.AppendEKey(pbArchiveKey);
+            if(GetLocalFileSize(LocalPath) >= EndOffset)
+                return true;
+        }
+    }
+    return false;
+}
+
+//
+// Online storages: fetches one file out of a CDN archive with an HTTP range request and keeps
+// it as a loose file named by its own EKey ("data/xx/yy/<ekey>"). That is byte for byte the
+// BLTE blob a loose CDN file would be, so OpenDataStream reads it through its loose-file branch.
+// Without this, the first read of any archived file downloaded its whole archive (256 MB).
+//
+static DWORD FetchCascFileRange(TCascStorage * hs, LPBYTE pbEKey, LPBYTE pbArchiveKey, DWORD ArchiveOffs, DWORD EncodedSize, CASC_PATH<TCHAR> & LocalPath)
+{
+    ULONGLONG ByteOffset = ArchiveOffs;
+    ULONGLONG FileSize;
+    DWORD dwErrCode;
+
+    // The archive index must give the size of the file
+    if(EncodedSize == 0 || EncodedSize == CASC_INVALID_SIZE)
+        return ERROR_FILE_NOT_FOUND;
+
+    // Construct the local path of the file itself
+    LocalPath.Create(hs->szRootPath, GetSubFolder(PathTypeData), NULL);
+    LocalPath.AppendEKey(pbEKey);
+
+    // A copy from an earlier range request counts only if it has exactly the size that the
+    // archive index gives. Anything else is left over from an interrupted run: fetch it again.
+    if((FileSize = GetLocalFileSize(LocalPath)) == EncodedSize)
+        return ERROR_SUCCESS;
+    if(FileSize != 0)
+        _tremove(LocalPath);
+
+    // Force-create the local path
+    if((dwErrCode = ForcePathExist(LocalPath, true)) != ERROR_SUCCESS)
+        return dwErrCode;
+
+    // Download the file's bytes from the archive. They must be the BLTE blob that the EKey names.
+    return DownloadFromCdnServers(hs, PathTypeData, pbArchiveKey, NULL, LocalPath, &ByteOffset, EncodedSize, CdnCheckEncodedData, pbEKey);
 }
 
 DWORD FetchCascFile(TCascStorage * hs, CPATH_TYPE PathType, LPBYTE pbEKey, LPCTSTR szExtension, CASC_PATH<TCHAR> & LocalPath, PCASC_ARCHIVE_INFO pArchiveInfo)
@@ -1360,10 +1621,24 @@ DWORD FetchCascFile(TCascStorage * hs, CPATH_TYPE PathType, LPBYTE pbEKey, LPCTS
             pArchiveInfo->EncodedSize = pEKeyEntry->EncodedSize;
 
             // Fill-in the archive key
-            pbArchiveKey = pbEKey = hs->ArchivesKey.pbData + (MD5_HASH_SIZE * pArchiveInfo->ArchiveIndex);
+            pbArchiveKey = hs->ArchivesKey.pbData + (MD5_HASH_SIZE * pArchiveInfo->ArchiveIndex);
             memcpy(pArchiveInfo->ArchiveKey, pbArchiveKey, MD5_HASH_SIZE);
-            
+
+            // Online storages never download a whole archive. If it is in the cache already,
+            // the file is read from it. Otherwise, only the file is fetched out of the archive,
+            // and a zeroed archive info tells OpenDataStream that its copy is a loose file.
+            if(hs->dwFeatures & CASC_FEATURE_ONLINE)
+            {
+                if(FindCachedArchive(hs, pbArchiveKey, (ULONGLONG)pArchiveInfo->ArchiveOffs + pArchiveInfo->EncodedSize, LocalPath))
+                    return ERROR_SUCCESS;
+
+                dwErrCode = FetchCascFileRange(hs, pbEKey, pbArchiveKey, pArchiveInfo->ArchiveOffs, pArchiveInfo->EncodedSize, LocalPath);
+                memset(pArchiveInfo, 0, sizeof(CASC_ARCHIVE_INFO));
+                return dwErrCode;
+            }
+
             // Remap the path type to "data"
+            pbEKey = pbArchiveKey;
             PathType = PathTypeData;
         }
         else
@@ -1382,16 +1657,18 @@ DWORD FetchCascFile(TCascStorage * hs, CPATH_TYPE PathType, LPBYTE pbEKey, LPCTS
                 return ERROR_SUCCESS;
         }
 
-        // Try to download the file into the "data/<type>" path
-        if(hs->szDataPath != NULL)
+        // Try to download the file into the "data/<type>" path. Skip it if the local archives
+        // above have tried this very path: each attempt downloads the file again when it fails.
+        if(hs->szDataPath != NULL && (hs->dwFeatures & CASC_FEATURE_DATA_ARCHIVES) == 0)
         {
             dwErrCode = FetchCascFile(hs, hs->szDataPath, PathType, pbEKey, szExtension, LocalPath);
             if(dwErrCode == ERROR_SUCCESS)
                 return ERROR_SUCCESS;
         }
 
-        // Try to download the file into the "<type>" path
-        if(hs->szRootPath != NULL)
+        // Try to download the file into the "<type>" path. In a warm CDN cache, the data path
+        // is the root path itself (CheckArchiveFilesDirectories finds "config" and "data" there).
+        if(hs->szRootPath != NULL && (hs->szDataPath == NULL || _tcsicmp(hs->szRootPath, hs->szDataPath) != 0))
         {
             dwErrCode = FetchCascFile(hs, hs->szRootPath, PathType, pbEKey, szExtension, LocalPath);
             if(dwErrCode == ERROR_SUCCESS)
@@ -1407,28 +1684,41 @@ static DWORD FetchAndLoadConfigFile(TCascStorage * hs, PCASC_BLOB pFileKey, PARS
     void * pvListFile = NULL;
     DWORD dwErrCode;
 
-    // Make sure there is a local copy of the file
-    dwErrCode = FetchCascFile(hs, PathTypeConfig, pFileKey->pbData, NULL, LocalPath);
-    if(dwErrCode == ERROR_SUCCESS)
+    // An online storage deletes a cached copy that does not match its key and fetches it
+    // once more. Otherwise, one damaged file in the cache would make every later open fail.
+    for(DWORD dwAttempt = 0; dwAttempt < 2; dwAttempt++)
     {
-        // Load and verify the external listfile
-        pvListFile = ListFile_OpenExternal(LocalPath);
-        if(pvListFile != NULL)
+        bool bDamagedCopy = false;
+
+        // Make sure there is a local copy of the file
+        dwErrCode = FetchCascFile(hs, PathTypeConfig, pFileKey->pbData, NULL, LocalPath);
+        if(dwErrCode == ERROR_SUCCESS)
         {
-            if(ListFile_VerifyMD5(pvListFile, pFileKey->pbData))
+            // Load and verify the external listfile
+            pvListFile = ListFile_OpenExternal(LocalPath);
+            if(pvListFile != NULL)
             {
-                dwErrCode = PfnParseProc(hs, pvListFile);
+                if(ListFile_VerifyMD5(pvListFile, pFileKey->pbData))
+                {
+                    dwErrCode = PfnParseProc(hs, pvListFile);
+                }
+                else
+                {
+                    dwErrCode = ERROR_FILE_CORRUPT;
+                    bDamagedCopy = true;
+                }
+                CASC_FREE(pvListFile);
             }
             else
             {
-                dwErrCode = ERROR_FILE_CORRUPT;
+                dwErrCode = ERROR_FILE_NOT_FOUND;
             }
-            CASC_FREE(pvListFile);
         }
-        else
-        {
-            dwErrCode = ERROR_FILE_NOT_FOUND;
-        }
+
+        // Never delete anything outside the cache of an online storage
+        if(bDamagedCopy == false || dwAttempt != 0 || (hs->dwFeatures & CASC_FEATURE_ONLINE) == 0)
+            break;
+        _tremove(LocalPath);
     }
     return dwErrCode;
 }

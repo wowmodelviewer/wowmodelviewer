@@ -75,7 +75,9 @@ static DWORD OpenDataStream(TCascFile * hf, PCASC_FILE_SPAN pFileSpan, PCASC_CKE
         dwErrCode = FetchCascFile(hs, PathType, pCKeyEntry->EKey, NULL, LocalPath, &ArchiveInfo);
         if(dwErrCode == ERROR_SUCCESS)
         {
-            pStream = FileStream_OpenFile(LocalPath, BASE_PROVIDER_FILE | STREAM_PROVIDER_FLAT);
+            // Cached files are only read. Opening them read-only with write sharing lets the same
+            // file be open twice at a time on Windows, as the data files of a local storage are.
+            pStream = FileStream_OpenFile(LocalPath, STREAM_FLAG_READ_ONLY | STREAM_FLAG_WRITE_SHARE | STREAM_PROVIDER_FLAT | BASE_PROVIDER_FILE);
             if(pStream != NULL)
             {
                 // Initialize information about the position and size of the file in archive
@@ -116,6 +118,10 @@ static DWORD OpenDataStream(TCascFile * hf, PCASC_FILE_SPAN pFileSpan, PCASC_CKE
                 hf->bCloseFileStream = true;
                 return ERROR_SUCCESS;
             }
+
+            // Never report success without a stream: the caller would read through it
+            if((dwErrCode = GetCascError()) == ERROR_SUCCESS)
+                dwErrCode = ERROR_FILE_NOT_FOUND;
         }
         return dwErrCode;
     }
