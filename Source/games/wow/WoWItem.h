@@ -58,6 +58,8 @@ class _WOWITEM_API_ WoWItem : public Component
 
     void setId(int id);
     int id() const { return id_; }
+    // NPC equipment can have a display ID without an item ID; a new slot has neither.
+    bool isEquipped() const { return id_ > 0 || (id_ == -1 && displayId_ > 0); }
 
     void setDisplayId(int id);
     void setLevel(int level);
