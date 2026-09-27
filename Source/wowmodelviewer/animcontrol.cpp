@@ -33,7 +33,7 @@ public:
       m_owner(owner)
   {
     AppendColumn(_("Animation"), wxLIST_FORMAT_LEFT, FromDIP(140));
-    AppendColumn(wxT("#"), wxLIST_FORMAT_RIGHT, FromDIP(40));
+    AppendColumn(_("ID"), wxLIST_FORMAT_RIGHT, FromDIP(65));
     AppendColumn(_("Length"), wxLIST_FORMAT_RIGHT, FromDIP(60));
     Bind(wxEVT_SIZE, &AnimClipList::OnSize, this);
   }
@@ -97,6 +97,7 @@ BEGIN_EVENT_TABLE(AnimControl, wxWindow)
 
   EVT_LIST_ITEM_SELECTED(ID_ANIM_CLIP_LIST, AnimControl::OnClipSelected)
   EVT_LIST_ITEM_ACTIVATED(ID_ANIM_CLIP_LIST, AnimControl::OnClipSelected)
+  EVT_LIST_COL_CLICK(ID_ANIM_CLIP_LIST, AnimControl::OnClipColumnClick)
   EVT_TEXT(ID_ANIM_CLIP_FILTER, AnimControl::OnClipFilter)
   EVT_SEARCHCTRL_CANCEL_BTN(ID_ANIM_CLIP_FILTER, AnimControl::OnClipFilter)
   EVT_COLLAPSIBLEPANE_CHANGED(wxID_ANY, AnimControl::OnAdvancedToggled)
@@ -568,6 +569,7 @@ void AnimControl::UpdateModel(WoWModel *m)
 
       Clip clip;
       clip.animIndex = (int)i;
+      clip.animId = m->anims[i].animID;
       clip.name = animsVal[m->anims[i].animID];
       if (clip.name.IsEmpty())
         clip.name = wxString::Format(_("Animation %u"), (unsigned)m->anims[i].animID);
@@ -2010,7 +2012,7 @@ wxString AnimControl::ClipText(long row, long column) const
   switch (column)
   {
     case 0: return clip.name;
-    case 1: return wxString::Format(wxT("%d"), clip.animIndex);
+    case 1: return wxString::Format(wxT("%d"), clip.animId);
     case 2: return wxString::Format(wxT("%.2f s"), clip.length / 1000.0);
   }
   return wxEmptyString;
@@ -2022,14 +2024,38 @@ void AnimControl::ApplyClipFilter()
   needle.Trim(true).Trim(false);
   needle.MakeLower();
 
+  // Clear native row state before changing what each virtual row represents. Sorting or
+  // filtering must never select a different animation or restart playback.
+  m_syncingClipSelection = true;
+  clipList->SetItemState(-1, 0, wxLIST_STATE_SELECTED | wxLIST_STATE_FOCUSED);
   m_visibleClips.clear();
   for (size_t i = 0; i < m_clips.size(); i++)
   {
     if (needle.IsEmpty() || m_clips[i].name.Lower().Contains(needle) ||
-        wxString::Format(wxT("%d"), m_clips[i].animIndex) == needle)
+        wxString::Format(wxT("%d"), m_clips[i].animId) == needle)
       m_visibleClips.push_back((int)i);
   }
 
+  std::sort(m_visibleClips.begin(), m_visibleClips.end(), [this](int left, int right) {
+    const Clip & a = m_clips[left];
+    const Clip & b = m_clips[right];
+    int comparison = 0;
+    switch (m_clipSortColumn)
+    {
+      case 0: comparison = a.name.CmpNoCase(b.name); break;
+      case 1: comparison = (a.animId > b.animId) - (a.animId < b.animId); break;
+      case 2: comparison = (a.length > b.length) - (a.length < b.length); break;
+    }
+    if (comparison != 0)
+      return m_clipSortAscending ? comparison < 0 : comparison > 0;
+    // Keep ties deterministic, including the model's variants of an animation.
+    const int nameComparison = a.name.CmpNoCase(b.name);
+    return nameComparison != 0 ? nameComparison < 0 : a.animIndex < b.animIndex;
+  });
+
+#if wxCHECK_VERSION(3, 1, 0)
+  clipList->ShowSortIndicator(m_clipSortColumn, m_clipSortAscending);
+#endif
   clipList->SetItemCount((long)m_visibleClips.size());
   clipList->Refresh();
   CallAfter([this]() { clipList->FitColumns(); });
@@ -2086,6 +2112,16 @@ void AnimControl::OnClipFilter(wxCommandEvent & event)
 {
   if (event.GetEventType() == wxEVT_SEARCHCTRL_CANCEL_BTN)
     clipFilter->ChangeValue(wxEmptyString);
+  ApplyClipFilter();
+}
+
+void AnimControl::OnClipColumnClick(wxListEvent & event)
+{
+  const int column = event.GetColumn();
+  if (column < 0 || column > 2)
+    return;
+  m_clipSortAscending = column == m_clipSortColumn ? !m_clipSortAscending : true;
+  m_clipSortColumn = column;
   ApplyClipFilter();
 }
 

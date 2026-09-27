@@ -167,11 +167,12 @@ class AnimControl: public wxWindow
   wxButton *btnPlayPause, *btnStop, *btnClear, *btnPrev, *btnNext, *btnSpeedReset;
   wxCheckBox *oldStyle;
 
-  // The clip list: every animation of the model, one row each, sorted by name. m_clips is that
-  // sorted table; m_visibleClips indexes into it for the rows the filter lets through.
+  // m_clips keeps the model's animations in name order. m_visibleClips indexes into it
+  // for the filtered rows, ordered by the selected column.
   struct Clip
   {
     int animIndex;      // position in WoWModel::anims -- what the animation manager takes
+    int animId;         // AnimationData ID -- shared by variants of the same action
     wxString name;      // AnimationData name
     wxString label;     // "Name [animIndex]", the form the secondary/mouth selectors use
     unsigned length;    // milliseconds
@@ -185,6 +186,8 @@ class AnimControl: public wxWindow
   wxCollapsiblePane * advancedPane;
   std::vector<Clip> m_clips;
   std::vector<int> m_visibleClips;
+  int m_clipSortColumn = 0;
+  bool m_clipSortAscending = true;
   bool m_syncingClipSelection = false;
   bool m_scrubbing = false;
   int m_sliderAnim = -1;
@@ -203,6 +206,7 @@ class AnimControl: public wxWindow
   void ApplyClipFilter();
   void SelectClipRow(int animIndex);
   void OnClipSelected(wxListEvent & event);
+  void OnClipColumnClick(wxListEvent & event);
   void OnClipFilter(wxCommandEvent & event);
   void OnAdvancedToggled(wxCollapsiblePaneEvent & event);
   void RelayoutAdvanced();
