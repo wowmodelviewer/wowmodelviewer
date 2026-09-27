@@ -25,98 +25,41 @@
 
 #ifndef _ANIMATIONEXPORTCHOICEDIALOG_H_
 #define _ANIMATIONEXPORTCHOICEDIALOG_H_
+#include <wx/wx.h>
+#include <wx/listctrl.h>
+#include <wx/srchctrl.h>
+#include <vector>
 
-// Includes / class Declarations
-//--------------------------------------------------------------------
-// STL
-
-// Qt
-
-// Externals
-
-// Other libraries
-#ifndef WX_PRECOMP
-    #include <wx/wx.h>
-#endif
-#include <wx/choicdlg.h>
-
-class wxButton;
-
-// Current library
-
-// Namespaces used
-//--------------------------------------------------------------------
-
-// Class Declaration
-//--------------------------------------------------------------------
-class AnimationExportChoiceDialog : public wxMultiChoiceDialog
+class AnimationExportChoiceDialog : public wxDialog
 {
-  public :
-    // Constants / Enums
+public:
+  AnimationExportChoiceDialog(wxWindow *parent, const wxString &message, const wxString &caption,
+                              const wxArrayString &choices, const wxArrayInt &animationIds);
+  bool exportMesh() const;
+  bool exportSkeleton() const;
+  bool exportSkinning() const;
+  bool exportAnimations() const;
+  wxArrayInt GetAnimationSelections() const;
 
-    // Constructors
-    AnimationExportChoiceDialog(wxWindow *parent, const wxString &message, const wxString &caption, const wxArrayString &choices);
-
-    // Destructors
-    ~AnimationExportChoiceDialog() {}
-
-    // Methods
-    // Export-content toggles (the clip list below them is the animation selection). Read by
-    // OnExport to drive ExporterPlugin::setExportOptions / setAnimationsToExport.
-    bool exportMesh() const;
-    bool exportSkeleton() const;
-    bool exportSkinning() const;
-    bool exportAnimations() const;
-
-    // Members
-
-  protected :
-    // Constants / Enums
-
-    // Constructors
-
-    // Destructors
-
-    // Methods
-
-    // Members
-
-
-  private :
-    // Constants / Enums
-
-    // Constructors
-
-    // Destructors
-
-    // Methods
-    void updateButtons(wxCommandEvent& event);
-    void OnSelectAll(wxCommandEvent &event);
-    void OnUnselectAll(wxCommandEvent &event);
-    void onToggleAnimations(wxCommandEvent &event);
-
-
-    // Members
-    wxButton * m_selectall;
-    wxButton * m_unselectall;
-
-    // Export-content checkboxes (default all-on). "Export Animations" enables/disables the
-    // clip list + Select/Unselect buttons.
-    wxCheckBox * m_cbMesh;
-    wxCheckBox * m_cbSkeleton;
-    wxCheckBox * m_cbSkinning;
-    wxCheckBox * m_cbAnimations;
-
-    DECLARE_EVENT_TABLE();
-
-    // friend class declarations
+private:
+  void RefreshList();
+  void UpdateControls();
+  void FitColumns();
+  bool ReadRange(long &from, long &to) const;
+  wxArrayInt m_animationIds;
+  wxArrayString m_names;
+  std::vector<int> m_rows;
+  // Indexed by original model position, independently of filtering and sorting.
+  std::vector<bool> m_checked;
+  int m_sortColumn = 1;
+  bool m_sortAscending = true;
+  bool m_refreshing = false;
+  wxListCtrl *m_list;
+  wxSearchCtrl *m_search;
+  wxStaticText *m_count;
+  wxButton *m_selectall, *m_unselectall, *m_selectRange;
+  wxStaticText *m_rangeLabel, *m_rangeSeparator;
+  wxTextCtrl *m_rangeFrom, *m_rangeTo;
+  wxCheckBox *m_cbMesh, *m_cbSkeleton, *m_cbSkinning, *m_cbAnimations;
 };
-
-// static members definition
-#ifdef _ANIMATIONEXPORTCHOICEDIALOG_CPP_
-
 #endif
-
-
-
-#endif /* _ANIMATIONEXPORTCHOICEDIALOG_H_ */

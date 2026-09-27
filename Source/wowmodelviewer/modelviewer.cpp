@@ -4171,19 +4171,19 @@ void ModelViewer::OnExport(wxCommandEvent &event)
         std::map<int, std::wstring> animsMap = m->getAnimsMap();
         wxArrayString values;
         wxArrayInt selection;
+        wxArrayInt animationIds;
 
         for (size_t I = 0; I < canvas->model()->anims.size(); I++)
         {
-          wxString animName = animsMap[canvas->model()->anims[I].animID];
-          animName << L" [";
-          animName << I;
-          animName << L"]";
+          const int animationId = m->anims[I].animID;
+          wxString animName = animsMap[animationId];
+          if (animName.IsEmpty())
+            animName = wxString::Format(_("Animation %d"), animationId);
           values.Add(animName);
-          selection.Add(I);
+          animationIds.Add(animationId);
         }
 
-        AnimationExportChoiceDialog animChoiceDlg(this, L"", wxT("FBX Export Options"), values);
-        animChoiceDlg.SetSelections(selection);
+        AnimationExportChoiceDialog animChoiceDlg(this, L"", wxT("FBX Export Options"), values, animationIds);
         if (animChoiceDlg.ShowModal() == wxID_CANCEL)
           return;
 
@@ -4195,10 +4195,11 @@ void ModelViewer::OnExport(wxCommandEvent &event)
         // Clip selection only matters when animations are being exported.
         if (optAnim)
         {
-          selection = animChoiceDlg.GetSelections();
+          selection = animChoiceDlg.GetAnimationSelections();
           animsToExport.reserve(selection.GetCount());
           for (unsigned int I = 0; I < selection.GetCount(); I++)
-            animsToExport.push_back(canvas->model()->anims[selection[I]].Index);
+            // The exporter indexes the model's animation array, not its track Index field.
+            animsToExport.push_back(selection[I]);
         }
       }
 

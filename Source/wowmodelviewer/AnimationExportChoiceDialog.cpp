@@ -23,201 +23,212 @@
  *   Copyright: 2015, WoW Model Viewer (http://wowmodelviewer.net)
  */
 
-#define _ANIMATIONEXPORTCHOICEDIALOG_CPP_
 #include "AnimationExportChoiceDialog.h"
-#undef _ANIMATIONEXPORTCHOICEDIALOG_CPP_
+#include <wx/valtext.h>
+#include <algorithm>
+#include <climits>
 
-// Includes / class Declarations
-//--------------------------------------------------------------------
-// STL
-#include <iostream>
-
-// Qt
-
-// Externals
-#include <fbxsdk/fileio/fbx/fbxio.h>
-
-// Other libraries
-
-// Current library
-
-// Namespaces used
-//--------------------------------------------------------------------
-
-
-// Beginning of implementation
-//====================================================================
-const int ID_SELECT_ALL = wxNewId();
-const int ID_UNSELECT_ALL = wxNewId();
-const int ID_CB_ANIMATIONS = wxNewId();
-#define wxID_LISTBOX 3000 // from choicedgg.cpp
-
-BEGIN_EVENT_TABLE(AnimationExportChoiceDialog, wxMultiChoiceDialog)
-  EVT_CHECKLISTBOX(wxID_LISTBOX, AnimationExportChoiceDialog::updateButtons)
-  EVT_BUTTON(ID_SELECT_ALL,  AnimationExportChoiceDialog::OnSelectAll)
-  EVT_BUTTON(ID_UNSELECT_ALL,  AnimationExportChoiceDialog::OnUnselectAll)
-  EVT_CHECKBOX(ID_CB_ANIMATIONS, AnimationExportChoiceDialog::onToggleAnimations)
-END_EVENT_TABLE()
-
-// Constructors
-//--------------------------------------------------------------------
-AnimationExportChoiceDialog::AnimationExportChoiceDialog(wxWindow *parent, const wxString &message, const wxString &caption, const wxArrayString &choices)
- : wxMultiChoiceDialog (parent, message, caption, choices)
+AnimationExportChoiceDialog::AnimationExportChoiceDialog(wxWindow *parent, const wxString &message,
+    const wxString &caption, const wxArrayString &choices, const wxArrayInt &animationIds)
+  : wxDialog(parent, wxID_ANY, caption, wxDefaultPosition, wxDefaultSize,
+             wxDEFAULT_DIALOG_STYLE | wxRESIZE_BORDER),
+    m_animationIds(animationIds), m_names(choices), m_checked(choices.GetCount(), true)
 {
-  wxSizer *topsizer = GetSizer();
-
-  wxBoxSizer *sizer = new wxBoxSizer( wxHORIZONTAL );
-
-  wxStaticText * explain =  new wxStaticText(this, wxID_ANY, wxT("Select animations you want to export"));
-
-  // @TODO : to remove once bug corrected
-  // wxStaticText * bugexplain =  new wxStaticText(this, wxID_ANY, wxT("Due to FBX export bug, export only one at a time for now"));
-
-  // wxStaticText * fbxversionexplain = new wxStaticText(this, wxID_ANY, wxT("Select an FBX Compatibility Version"));
-  // wxComboBox * fbxVersionChoice = new wxComboBox(this, wxID_ANY);
-  // fbxVersionChoice->SetEditable(false);
-  // fbxVersionChoice->SetLabel(wxT("FBX Compatibility Version"));
-  // int i = 0;
-  // 
-  // fbxVersionChoice->Insert(wxString::FromAscii(FBX_2019_00_COMPATIBLE), i++);
-  // fbxVersionChoice->Insert(wxString::FromAscii(FBX_2018_00_COMPATIBLE), i++);
-  // fbxVersionChoice->Insert(wxString::FromAscii(FBX_2016_00_COMPATIBLE), i++);
-  // fbxVersionChoice->Insert(wxString::FromAscii(FBX_2014_00_COMPATIBLE), i++);
-  // fbxVersionChoice->Insert(wxString::FromAscii(FBX_2013_00_COMPATIBLE), i++);
-  // fbxVersionChoice->Insert(wxString::FromAscii(FBX_2012_00_COMPATIBLE), i++);
-  // fbxVersionChoice->Insert(wxString::FromAscii(FBX_2011_00_COMPATIBLE), i++);
-  // fbxVersionChoice->Insert(wxString::FromAscii(FBX_2010_00_COMPATIBLE), i++);
-  // fbxVersionChoice->Insert(wxString::FromAscii(FBX_2009_00_V7_COMPATIBLE), i++);
-  // fbxVersionChoice->Insert(wxString::FromAscii(FBX_2009_00_COMPATIBLE), i++);
-  // fbxVersionChoice->Insert(wxString::FromAscii(FBX_2006_11_COMPATIBLE), i++);
-  // fbxVersionChoice->Insert(wxString::FromAscii(FBX_2006_08_COMPATIBLE), i++);
-  // fbxVersionChoice->Insert(wxString::FromAscii(FBX_2006_02_COMPATIBLE), i++);
-  // fbxVersionChoice->Insert(wxString::FromAscii(FBX_2005_08_COMPATIBLE), i++);
-  // fbxVersionChoice->Insert(wxString::FromAscii(FBX_60_COMPATIBLE), i++);
-  // fbxVersionChoice->Insert(wxString::FromAscii(FBX_53_MB55_COMPATIBLE), i++);
-  // 
-  // fbxVersionChoice->SetSelection(0);
-
-  m_selectall = new wxButton(this, ID_SELECT_ALL,_("Select all"));
-  m_unselectall = new wxButton(this, ID_UNSELECT_ALL,_("Unselect all"));
-  sizer->Add(m_selectall, 0, wxLEFT|wxRIGHT|wxBOTTOM, 5);
-  sizer->Add(m_unselectall, 0, wxLEFT|wxRIGHT|wxBOTTOM, 5);
-
-  // Export-content options (Mesh / Skeleton / Skinning / Animations). The clip list below is
-  // the animation selection; "Export Animations" enables or greys it out.
-  wxBoxSizer * optsizer = new wxBoxSizer(wxHORIZONTAL);
+  wxASSERT_MSG(choices.GetCount() == animationIds.GetCount(), "Each animation needs an ID");
+  const int inset = FromDIP(14), gap = FromDIP(6);
+  auto root = new wxBoxSizer(wxVERTICAL);
+  auto content = new wxBoxSizer(wxVERTICAL);
+  auto options = new wxBoxSizer(wxHORIZONTAL);
   m_cbMesh = new wxCheckBox(this, wxID_ANY, _("Export Mesh"));
   m_cbSkeleton = new wxCheckBox(this, wxID_ANY, _("Export Skeleton"));
   m_cbSkinning = new wxCheckBox(this, wxID_ANY, _("Export Skinning"));
-  m_cbAnimations = new wxCheckBox(this, ID_CB_ANIMATIONS, _("Export Animations"));
-  // Component/raw (UV2 + raw per-unit textures + node-based sidecar for the Blender add-on) is the
-  // only FBX export mode now -- no checkbox; it is always on (see modelviewer.cpp OnExport).
-  m_cbMesh->SetValue(true);
-  m_cbSkeleton->SetValue(true);
-  m_cbSkinning->SetValue(true);
-  m_cbAnimations->SetValue(true);
-  optsizer->Add(m_cbMesh, 0, wxLEFT|wxRIGHT, 5);
-  optsizer->Add(m_cbSkeleton, 0, wxLEFT|wxRIGHT, 5);
-  optsizer->Add(m_cbSkinning, 0, wxLEFT|wxRIGHT, 5);
-  optsizer->Add(m_cbAnimations, 0, wxLEFT|wxRIGHT, 5);
+  m_cbAnimations = new wxCheckBox(this, wxID_ANY, _("Export Animations"));
+  for (auto box : {m_cbMesh, m_cbSkeleton, m_cbSkinning, m_cbAnimations})
+  {
+    box->SetValue(true);
+    options->Add(box, 0, wxRIGHT, FromDIP(8));
+  }
+  content->Add(options, 0, wxBOTTOM, gap);
+  content->Add(new wxStaticText(this, wxID_ANY,
+      message.IsEmpty() ? _("Select animations you want to export") : message), 0, wxBOTTOM, gap);
 
-  topsizer->Prepend(sizer, 0, wxEXPAND | wxALL, 0);
-  //topsizer->Prepend(bugexplain, 0, wxALL, 5);
-  //topsizer->Prepend(fbxVersionChoice, 0, wxALL, 5);
-  //topsizer->Prepend(fbxversionexplain, 0, wxALL, 5);
-  topsizer->Prepend(explain, 0, wxALL, 5);
-  topsizer->Prepend(optsizer, 0, wxEXPAND | wxALL, 5); // options row at the very top
-  topsizer->SetSizeHints( this );
-  topsizer->Fit( this );
+  auto selection = new wxBoxSizer(wxHORIZONTAL);
+  m_selectall = new wxButton(this, wxID_ANY, _("Select all"));
+  m_unselectall = new wxButton(this, wxID_ANY, _("Unselect all"));
+  selection->Add(m_selectall, 0, wxALIGN_CENTER_VERTICAL | wxRIGHT, FromDIP(4));
+  selection->Add(m_unselectall, 0, wxALIGN_CENTER_VERTICAL | wxRIGHT, FromDIP(8));
+  m_rangeLabel = new wxStaticText(this, wxID_ANY, _("ID range:"));
+  const auto field = [this](const wxString &value) {
+    auto text = new wxTextCtrl(this, wxID_ANY, value, wxDefaultPosition, wxDefaultSize,
+                              wxTE_RIGHT, wxTextValidator(wxFILTER_DIGITS));
+    // Match the native text field and row sizing used by the URL importer.
+    text->SetMinSize(FromDIP(wxSize(42, 10)));
+    return text;
+  };
+  m_rangeFrom = field(wxT("0"));
+  m_rangeTo = field(wxT("225"));
+  m_rangeFrom->SetToolTip(_("From"));
+  m_rangeTo->SetToolTip(_("To"));
+  m_rangeFrom->SetName(_("From ID"));
+  m_rangeTo->SetName(_("To ID"));
+  m_rangeSeparator = new wxStaticText(this, wxID_ANY, wxString::FromUTF8("\xE2\x80\x93"));
+  m_selectRange = new wxButton(this, wxID_ANY, _("Select"));
+  selection->Add(m_rangeLabel, 0, wxALIGN_CENTER_VERTICAL | wxRIGHT, FromDIP(4));
+  selection->Add(m_rangeFrom, 0, wxEXPAND);
+  selection->Add(m_rangeSeparator, 0, wxALIGN_CENTER_VERTICAL | wxLEFT | wxRIGHT, FromDIP(3));
+  selection->Add(m_rangeTo, 0, wxEXPAND);
+  selection->Add(m_selectRange, 0, wxALIGN_CENTER_VERTICAL | wxLEFT, FromDIP(4));
+  content->Add(selection, 0, wxBOTTOM, gap);
 
-  // by default everything is selected
-  m_selectall->Enable(false);
-  m_unselectall->Enable(true);
+  auto searchRow = new wxBoxSizer(wxHORIZONTAL);
+  m_search = new wxSearchCtrl(this, wxID_ANY);
+  m_search->SetDescriptiveText(_("Filter animations"));
+  m_search->ShowCancelButton(true);
+  m_count = new wxStaticText(this, wxID_ANY, wxEmptyString);
+  searchRow->Add(m_search, 1, wxEXPAND | wxRIGHT, gap);
+  searchRow->Add(m_count, 0, wxALIGN_CENTER_VERTICAL);
+  content->Add(searchRow, 0, wxEXPAND | wxBOTTOM, gap);
+
+  m_list = new wxListCtrl(this, wxID_ANY, wxDefaultPosition, FromDIP(wxSize(440, 205)),
+                         wxLC_REPORT | wxLC_SINGLE_SEL | wxBORDER_THEME);
+  m_list->SetMinSize(FromDIP(wxSize(440, 205)));
+  m_list->EnableCheckBoxes();
+  m_list->AppendColumn(_("Name"), wxLIST_FORMAT_LEFT, FromDIP(350));
+  m_list->AppendColumn(_("ID"), wxLIST_FORMAT_RIGHT, FromDIP(65));
+  content->Add(m_list, 1, wxEXPAND);
+  root->Add(content, 1, wxEXPAND | wxALL, inset);
+  root->Add(CreateSeparatedButtonSizer(wxOK | wxCANCEL), 0, wxEXPAND | wxLEFT | wxRIGHT | wxBOTTOM, inset);
+  SetSizer(root);
+
+  m_search->Bind(wxEVT_TEXT, [this](wxCommandEvent &) { RefreshList(); });
+  m_search->Bind(wxEVT_SEARCHCTRL_CANCEL_BTN, [this](wxCommandEvent &) {
+    m_search->ChangeValue(wxEmptyString);
+    RefreshList();
+  });
+  m_list->Bind(wxEVT_LIST_COL_CLICK, [this](wxListEvent &event) {
+    const int column = event.GetColumn();
+    if (column < 0 || column > 1) return;
+    m_sortAscending = column == m_sortColumn ? !m_sortAscending : true;
+    m_sortColumn = column;
+    RefreshList();
+  });
+  const auto onCheck = [this](wxListEvent &event) {
+    const long row = event.GetIndex();
+    if (m_refreshing || row < 0 || row >= (long)m_rows.size()) return;
+    m_checked[m_rows[row]] = m_list->IsItemChecked(row);
+    UpdateControls();
+  };
+  m_list->Bind(wxEVT_LIST_ITEM_CHECKED, onCheck);
+  m_list->Bind(wxEVT_LIST_ITEM_UNCHECKED, onCheck);
+  m_list->Bind(wxEVT_SIZE, [this](wxSizeEvent &event) { FitColumns(); event.Skip(); });
+  m_selectall->Bind(wxEVT_BUTTON, [this](wxCommandEvent &) {
+    std::fill(m_checked.begin(), m_checked.end(), true);
+    RefreshList();
+  });
+  m_unselectall->Bind(wxEVT_BUTTON, [this](wxCommandEvent &) {
+    std::fill(m_checked.begin(), m_checked.end(), false);
+    RefreshList();
+  });
+  m_selectRange->Bind(wxEVT_BUTTON, [this](wxCommandEvent &) {
+    long from, to;
+    if (!m_cbAnimations->GetValue() || !ReadRange(from, to)) return;
+    for (size_t i = 0; i < m_checked.size(); ++i)
+      m_checked[i] = m_animationIds[i] >= from && m_animationIds[i] <= to;
+    RefreshList();
+  });
+  for (auto text : {m_rangeFrom, m_rangeTo})
+    text->Bind(wxEVT_TEXT, [this](wxCommandEvent &) { UpdateControls(); });
+  m_cbAnimations->Bind(wxEVT_CHECKBOX, [this](wxCommandEvent &) { UpdateControls(); });
+
+  RefreshList();
+  root->SetSizeHints(this);
+  root->Fit(this);
+  FitColumns();
+  CentreOnParent();
 }
 
-// Destructor
-//--------------------------------------------------------------------
-
-
-// Public methods
-//--------------------------------------------------------------------
-
-
-// Protected methods
-//--------------------------------------------------------------------
-
-
-// Private methods
-//--------------------------------------------------------------------
-void AnimationExportChoiceDialog::updateButtons(wxCommandEvent&)
+bool AnimationExportChoiceDialog::ReadRange(long &from, long &to) const
 {
-  unsigned int nbselected = 0;
-
-  wxCheckListBox* checkListBox = wxDynamicCast(m_listbox, wxCheckListBox);
-
-  for (unsigned int n = 0; n < checkListBox->GetCount(); n++ )
-  {
-    if(checkListBox->IsChecked(n))
-      nbselected++;
-  }
-
-  if(m_listbox->GetCount() == nbselected)
-  {
-    m_selectall->Enable(false);
-    m_unselectall->Enable(true);
-  }
-  else if(nbselected == 0)
-  {
-    m_selectall->Enable(true);
-    m_unselectall->Enable(false);
-  }
-  else
-  {
-    m_selectall->Enable(true);
-    m_unselectall->Enable(true);
-  }
+  return m_animationIds.GetCount() == m_checked.size() &&
+         m_rangeFrom->GetValue().ToLong(&from) && m_rangeTo->GetValue().ToLong(&to) &&
+         from >= 0 && from <= to && to <= INT_MAX;
 }
 
-void AnimationExportChoiceDialog::OnSelectAll(wxCommandEvent&)
+void AnimationExportChoiceDialog::FitColumns()
 {
-  wxCheckListBox* checkListBox = wxDynamicCast(m_listbox, wxCheckListBox);
-
-  for (unsigned int n = 0; n < checkListBox->GetCount(); n++ )
-  {
-    if(!checkListBox->IsChecked(n))
-      checkListBox->Check(n,true);
-  }
-
-  m_selectall->Enable(false);
-  m_unselectall->Enable(true);
+  const int width = m_list->GetClientSize().x - m_list->GetColumnWidth(1) -
+                    wxSystemSettings::GetMetric(wxSYS_VSCROLL_X, this) - FromDIP(2);
+  if (width > FromDIP(40)) m_list->SetColumnWidth(0, width);
 }
 
-void AnimationExportChoiceDialog::OnUnselectAll(wxCommandEvent&)
+void AnimationExportChoiceDialog::UpdateControls()
 {
-  wxCheckListBox* checkListBox = wxDynamicCast(m_listbox, wxCheckListBox);
-
-  for (unsigned int n = 0; n < checkListBox->GetCount(); n++ )
-  {
-    if(checkListBox->IsChecked(n))
-      checkListBox->Check(n,false);
-  }
-
-  m_selectall->Enable(true);
-  m_unselectall->Enable(false);
-}
-
-void AnimationExportChoiceDialog::onToggleAnimations(wxCommandEvent&)
-{
-  // Grey out the clip list + select buttons when animations won't be exported.
   const bool on = m_cbAnimations->GetValue();
-  if (m_listbox)
-    m_listbox->Enable(on);
-  m_selectall->Enable(on);
-  m_unselectall->Enable(on);
+  const size_t checked = std::count(m_checked.begin(), m_checked.end(), true);
+  m_selectall->Enable(on && checked < m_checked.size());
+  m_unselectall->Enable(on && checked > 0);
+  m_rangeLabel->Enable(on);
+  m_rangeSeparator->Enable(on);
+  m_rangeFrom->Enable(on);
+  m_rangeTo->Enable(on);
+  long from, to;
+  m_selectRange->Enable(on && !m_checked.empty() && ReadRange(from, to));
+  m_search->Enable(on);
+  m_list->Enable(on);
+  m_count->Enable(on);
+  if (m_rows.size() == m_checked.size())
+    m_count->SetLabel(wxString::Format(_("%u animations"), (unsigned)m_checked.size()));
+  else
+    m_count->SetLabel(wxString::Format(_("%u of %u animations"),
+                                     (unsigned)m_rows.size(), (unsigned)m_checked.size()));
+  m_count->SetToolTip(wxString::Format(_("%u animations selected for export"), (unsigned)checked));
+  Layout();
+}
+
+void AnimationExportChoiceDialog::RefreshList()
+{
+  wxString needle = m_search->GetValue().Trim(true).Trim(false).Lower();
+  m_refreshing = true;
+  m_list->Freeze();
+  m_list->DeleteAllItems();
+  m_rows.clear();
+  for (size_t i = 0; i < m_checked.size(); ++i)
+    if (needle.IsEmpty() || m_names[i].Lower().Contains(needle) ||
+        wxString::Format(wxT("%d"), m_animationIds[i]) == needle)
+      m_rows.push_back((int)i);
+  std::sort(m_rows.begin(), m_rows.end(), [this](int a, int b) {
+    const int nameOrder = m_names[a].CmpNoCase(m_names[b]);
+    const int idOrder = (m_animationIds[a] > m_animationIds[b]) - (m_animationIds[a] < m_animationIds[b]);
+    const int order = m_sortColumn == 0 ? nameOrder : idOrder;
+    if (order != 0) return m_sortAscending ? order < 0 : order > 0;
+    if (nameOrder != 0) return nameOrder < 0;
+    if (idOrder != 0) return idOrder < 0;
+    return a < b;
+  });
+  for (size_t row = 0; row < m_rows.size(); ++row)
+  {
+    const int clip = m_rows[row];
+    m_list->InsertItem((long)row, m_names[clip]);
+    m_list->SetItem((long)row, 1, wxString::Format(wxT("%d"), m_animationIds[clip]));
+    m_list->CheckItem((long)row, m_checked[clip]);
+  }
+  m_list->ShowSortIndicator(m_sortColumn, m_sortAscending);
+  if (!m_rows.empty()) m_list->EnsureVisible(0);
+  m_list->Thaw();
+  m_refreshing = false;
+  UpdateControls();
+  FitColumns();
+}
+
+wxArrayInt AnimationExportChoiceDialog::GetAnimationSelections() const
+{
+  wxArrayInt result;
+  for (size_t i = 0; i < m_checked.size(); ++i)
+    if (m_checked[i]) result.Add((int)i);
+  return result;
 }
 
 bool AnimationExportChoiceDialog::exportMesh() const { return m_cbMesh->GetValue(); }
 bool AnimationExportChoiceDialog::exportSkeleton() const { return m_cbSkeleton->GetValue(); }
 bool AnimationExportChoiceDialog::exportSkinning() const { return m_cbSkinning->GetValue(); }
 bool AnimationExportChoiceDialog::exportAnimations() const { return m_cbAnimations->GetValue(); }
-
