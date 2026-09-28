@@ -1234,6 +1234,87 @@ public static class WmvLifecycleSelfTest
         body.Dispose();         // the probe is under the body's bones and goes with them
     }
 
+    // Exercise the actual equipment lifecycle on an ordinary NPC body, including invalid points.
+    static void NpcEquipmentTests(Action<string> log)
+    {
+        var parsed = WmvIpcClient.ParseCharacterScene("{\"type\":\"characterScene\",\"fileDataID\":4198151," +
+            "\"revision\":1,\"load\":17,\"attachmentsOnly\":true,\"attachments\":[]}");
+        Check(parsed.attachmentsOnly && parsed.load == 17 && parsed.attachments.Length == 0,
+              "NPC equipment: protocol preserves mode and load without a racial body payload", log);
+        const int skinId = 990001, itemId = 990002, otherItemId = 990003;
+        int live = WmvRuntimeModel.Live;
+        var ipcObject = new GameObject("NpcEquipmentTestIpc");
+        var ipc = ipcObject.AddComponent<WmvIpcClient>();
+        byte[] bytes = M2Synthetic.InFileSkeletonModel(skinId);
+        var model = M2Parser.Parse(bytes, 0);
+        var body = WmvModelBuilder.Build(model, M2SkinParser.Parse(M2Synthetic.TransformSwitchSkin()),
+                                        new Dictionary<int, BlpImage>(), "NpcBody", log);
+        var animator = body.Animator;
+        var material = body.Materials[0];
+        var messages = new List<string>();
+        var dresser = new WmvCharacterDresser(ipc, 17, hash => null, s => messages.Add(s));
+        var files = (Dictionary<int, byte[]>)typeof(WmvCharacterDresser)
+            .GetField("files", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(dresser);
+        files[skinId] = M2Synthetic.TransformSwitchSkin();
+        files[itemId] = bytes;
+        files[otherItemId] = bytes;
+        var left = new WmvIpcClient.SceneAttachment { key = "left", fileDataID = itemId,
+            attachmentId = 2, bone = 2, position = new[] { 1f, 2f, 3f }, scale = 1f, visible = true };
+        var right = new WmvIpcClient.SceneAttachment { key = "right", fileDataID = itemId,
+            attachmentId = 1, bone = 1, position = new[] { 2f, 3f, 4f }, scale = 1f, visible = true };
+        var scene = new WmvIpcClient.CharacterScene { attachmentsOnly = true, load = 17,
+            fileDataID = 4198151, revision = 1, attachments = new[] { left, right } };
+        try
+        {
+            dresser.BeginAttachments(body, model, scene.fileDataID, scene);
+            Check(dresser.PartCount == 2 && dresser.AppliedRevision == 1 && WmvRuntimeModel.Live == live + 3,
+                  "NPC equipment: both hands built exactly once", log);
+            var parts = (System.Collections.IDictionary)typeof(WmvCharacterDresser)
+                .GetField("parts", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(dresser);
+            object part = parts["left"];
+            var weapon = (WmvRuntimeModel)part.GetType().GetField("Runtime").GetValue(part);
+            Transform root = weapon.Root.transform;
+            Vector3 position = root.position;
+            body.Bones[2].localPosition += new Vector3(0.5f, 0f, 0f);
+            Check(root.parent == body.Bones[2] && !NearV(position, root.position, 1e-5f),
+                  "NPC equipment: weapon follows its attachment bone", log);
+            left.fileDataID = otherItemId;
+            scene.revision++;
+            dresser.Retarget(scene);
+            Check(dresser.PartCount == 2 && WmvRuntimeModel.Live == live + 3,
+                  "NPC equipment: replacing one hand leaves no duplicate", log);
+            left.bone = -1;
+            scene.revision++;
+            dresser.Retarget(scene);
+            Check(dresser.PartCount == 1 && WmvRuntimeModel.Live == live + 2 &&
+                  messages.Exists(s => s.Contains("no valid attachment bone/position")),
+                  "NPC equipment: absent point removes old item and reports it without root fallback", log);
+            left.bone = 9999;
+            scene.revision++;
+            dresser.Retarget(scene);
+            Check(dresser.PartCount == 1, "NPC equipment: out-of-range bone is safe", log);
+            left.bone = 2;
+            left.position[0] = float.NaN;
+            scene.revision++;
+            dresser.Retarget(scene);
+            Check(dresser.PartCount == 1, "NPC equipment: non-finite attachment position is safe", log);
+            scene.attachments = new WmvIpcClient.SceneAttachment[0];
+            scene.revision++;
+            dresser.Retarget(scene);
+            Check(dresser.PartCount == 0 && WmvRuntimeModel.Live == live + 1,
+                  "NPC equipment: removal leaves only the body", log);
+            Check(body.Animator == animator && body.Materials[0] == material && dresser.BodyRebinds == 0,
+                  "NPC equipment: original body material and animator are preserved", log);
+        }
+        finally
+        {
+            dresser.Dispose();
+            body.Dispose();
+            UnityEngine.Object.Destroy(ipcObject);
+        }
+        Check(WmvRuntimeModel.Live == live, "NPC equipment: disposal releases all runtimes", log);
+    }
+
     // ---------------------------------------------------------------- mounted characters
 
     /// <summary>
@@ -2468,6 +2549,7 @@ public static class WmvLifecycleSelfTest
         OutputGateTests(log);
         EmitterTests(log);
         CharacterTests(log);
+        NpcEquipmentTests(log);
         MountTests(log);
         ZoomTests(log);
         MapObjectTests(log);

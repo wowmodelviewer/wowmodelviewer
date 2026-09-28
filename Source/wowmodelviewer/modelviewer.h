@@ -329,6 +329,8 @@ public:
   // The character the Unity player is told about -- loaded, dressed and answered for: the canvas model when
   // it is the character, the rider while it rides a mount and the player rides mounts, otherwise null.
   WoWModel * unityCharacter() const;
+  // A racial character/rider or a live ordinary NPC with hands-only equipment controls.
+  WoWModel * unityEquipmentOwner() const;
   // Whether the canvas showed a mounted character when the viewport state was last decided (with
   // m_lastShowsCharacter below).
   bool m_lastShowsMountedCharacter = false;

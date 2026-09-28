@@ -4,10 +4,11 @@
 // localhost TCP listener before launching the player and passes the port on the player
 // command line ("-wmvPort <n>"); the player connects back, announces itself and then asks
 // WMV for whatever it needs. Transport: newline-delimited JSON (one object per line),
-// protocol version 6 (4 added world models: loadWoWModel "kind", mapObjectLoaded and runtimeState;
+// protocol version 7 (4 added world models: loadWoWModel "kind", mapObjectLoaded and runtimeState;
 // 5 added mounted characters: characterScene "mount", its answer's mount fields, runtimeState's
 // mountFileDataID, modelAnimation "role" and "load", and modelAnimationState "load", "hasRider" and
-// "rider"; 6 added captureScreenshot and its answer screenshotSaved).
+// "rider"; 6 added captureScreenshot and its answer screenshotSaved;
+// 7 adds characterScene "attachmentsOnly" and "load" for equipment on ordinary NPC models).
 //
 // The player is WMV's new renderer foundation and renders directly from WoW data: it
 // requests raw assets and metadata from WMV -- which owns the app UI, the active
@@ -134,7 +135,7 @@ using UnityEngine;
 
 public class WmvIpcClient : MonoBehaviour
 {
-    public const int ProtocolVersion = 6;
+    public const int ProtocolVersion = 7;
 
     /// <summary>The loadWoWModel kind of a world model; anything else is an M2.</summary>
     public const string KindMapObject = "wmo";
@@ -402,6 +403,8 @@ public class WmvIpcClient : MonoBehaviour
 
     public class CharacterScene
     {
+        public bool attachmentsOnly;
+        public int load;
         public int fileDataID;
         public int revision;
         public SceneBody body;
@@ -513,6 +516,7 @@ public class WmvIpcClient : MonoBehaviour
         public int height;
         public string format;
         // characterScene
+        public bool attachmentsOnly;
         public SceneBody body;
         public SceneMerged[] merged;
         public SceneAttachment[] attachments;
@@ -750,6 +754,8 @@ public class WmvIpcClient : MonoBehaviour
             fileDataID = msg.fileDataID,
             revision = msg.revision,
             body = msg.body ?? new SceneBody(),
+            attachmentsOnly = msg.attachmentsOnly,
+            load = msg.load,
             merged = msg.merged ?? new SceneMerged[0],
             attachments = msg.attachments ?? new SceneAttachment[0],
             mount = msg.mount,

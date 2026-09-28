@@ -27,6 +27,26 @@ Concretely:
   again. Nothing ships the player yet -- neither the installer nor the CMake install rules
   include it -- so it is built locally (see "Locating the player").
 
+## Equipment on exclusive NPC models (protocol 7)
+
+An exclusive NPC remains an ordinary `loadWoWModel` (`character: false`). Its equipment travels
+in `characterScene` with `attachmentsOnly: true` and the matching `load` serial. Unity queues
+this scene during the ordinary load, or updates the equipment on that same completed load.
+It does not apply racial body textures, merged geometry, fist poses or mounts to this model.
+The NPC's existing appearance and animation selection stay intact.
+
+Equipment uses the host's resolved attachment bone and position, with the position converted
+relative to that bone's pivot. Missing or invalid bones/positions are reported in the scene
+answer's `missing` list; any previous part at that key is removed, without a root fallback.
+Players older than protocol 7 retain their ordinary NPC rendering but receive no NPC equipment
+scenes. Racial character and mounted-character scenes retain their existing route.
+
+The runtime lifecycle suite (`-wmvLifecycleTest`) checks both hands, replacement, removal,
+invalid points, bone following and preservation of the body. The hidden host integration suite
+also accepts `npc-equip:<slot>=<item id>` in `WMV_IPCTEST_SEQUENCE`, for example
+`npc-equip:10=213160;npc-equip:10=0` with `-mo creature/tyrande3/tyrande3.m2 -unityipctest`.
+It checks the scene acknowledgement, live model count and unchanged body texture bindings.
+
 ## Lighting
 
 The viewport lights models with a **fixed preview rig in the renderer's own shader**, not with the
