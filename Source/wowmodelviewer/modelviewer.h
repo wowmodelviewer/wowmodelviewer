@@ -136,7 +136,10 @@ public:
   static const int LAYOUT_VERSION = 3;
   // save + load character *.CHR files
   void LoadChar(QString fn, bool equipmentOnly = false);
-  void SaveChar(QString fn, bool equipmentOnly = false);
+  bool SaveChar(QString fn, bool equipmentOnly = false);
+  // FBX child-process state; equipment restoration must not customize an exclusive NPC's body.
+  bool LoadFbxEquipment(QString fn);
+  bool PrepareFbxAsset(wxString & args, wxString & label, wxString & tempCharPath);
 
   void LoadModel(GameFile * f);
   void LoadItem(unsigned int displayID);
@@ -440,4 +443,3 @@ public:
 };
 
 #endif
-
