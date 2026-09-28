@@ -2746,6 +2746,24 @@ bool ModelViewer::unityPlayerDressesCharacters() const
   return unityRendererHost && unityRendererHost->ipc() && unityRendererHost->ipc()->playerDressesCharacters();
 }
 
+WoWModel * ModelViewer::unityEquipmentOwner() const
+{
+  if (WoWModel * character = unityCharacter())
+    return character;
+  if (!unityRendererHost || !unityRendererHost->ipc() ||
+      !unityRendererHost->ipc()->playerAttachesNpcEquipment() || isWMO ||
+      !canvas || !canvas->model() || !charControl)
+    return nullptr;
+  WoWModel * model = const_cast<WoWModel *>(canvas->model());
+  // SetHandsOnly supplies equipment controls for exclusive NPCs. Require the live
+  // canvas model and its own node, never a stale character or a rider's parent.
+  if (model->charModelDetails.isChar || charControl->model != model ||
+      !model->attachment || charControl->charAtt != model->attachment ||
+      !model->gamefile || model->gamefile->fileDataId() <= 0)
+    return nullptr;
+  return model;
+}
+
 // THE WHOLE WINDOW BLINKED ON EVERY MODEL LOAD, and this is why. On Windows, wxAuiManager::Update()
 // wraps its relayout in a wxWindowUpdateLocker on the frame (wx 3.3.3 as 3.2.10, framemanager.cpp: "only
 // under MSW and only when not using live resizing" -- which this manager does not use). The lock
@@ -3109,7 +3127,7 @@ void ModelViewer::SendCharacterSceneToUnity(bool force)
   if (!unityRendererHost || !unityRendererHost->ipc() || !unityRendererHost->ipc()->playerDressesCharacters())
     return;
   // The character the player is loaded with: the canvas model, or the rider of a mount the player seats.
-  WoWModel * m = unityCharacter();
+  WoWModel * m = unityEquipmentOwner();
   if (!m || m_sceneHold > 0)
     return;
   // The player reported it could not build this character from the load on display, and the canvas has
@@ -3159,9 +3177,10 @@ void ModelViewer::SendCharacterSceneToUnity(bool force)
   clock.start();
   UnityIpcServer * ipc = unityRendererHost->ipc();
   UnityCharacterScene::Summary summary;
-  const QJsonObject scene = UnityCharacterScene::build(
+  QJsonObject scene = UnityCharacterScene::build(
     m, [ipc](const QString & kind, const QImage & image) { return ipc->shareCharacterImage(kind, image); },
-    summary, ridden);
+    summary, ridden, !m->charModelDetails.isChar);
+  scene["load"] = m_unityLoadSerial;
   const int revision = ++m_sceneRevision;
   if (ipc->sendCharacterScene((int)m->gamefile->fileDataId(), revision, scene))
   {
@@ -3236,7 +3255,7 @@ void ModelViewer::OnCharacterSceneApplied(const UnityIpcServer::SceneAck & ack)
   }
 
   // The character the player is loaded with: the canvas model, or the rider of a mount the player seats.
-  const WoWModel * character = unityCharacter();
+  const WoWModel * character = unityEquipmentOwner();
   const bool current = character && (int)character->gamefile->fileDataId() == ack.fileDataID;
   // On screen now: its other model generation is fetched by the player while nothing waits for it, so a switch to it
   // finds its files there. Decided here, not at the load: an NPC is known as one only once its load returned.

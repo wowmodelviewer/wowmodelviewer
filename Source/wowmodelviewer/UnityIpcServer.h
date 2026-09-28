@@ -1,7 +1,7 @@
 /*
  * UnityIpcServer.h
  *
- * Localhost IPC server for the embedded Unity renderer (protocol v10). WMV is the SERVER:
+ * Localhost IPC server for the embedded Unity renderer (protocol v11). WMV is the SERVER:
  * UnityRendererHost starts this listener BEFORE launching the player and passes the port on
  * the player's command line (-wmvPort <n>); the player connects back, announces itself with
  * unityReady and then asks WMV for the raw WoW assets/metadata it renders from. This is the
@@ -24,7 +24,7 @@
  * docs/unity-renderer/README.md, "The asset cache".
  *
  *   player -> WMV
- *     { "type":"unityReady", "protocolVersion":10 }
+ *     { "type":"unityReady", "protocolVersion":11 }
  *     { "type":"getAsset",             "requestId":"abc123", "path":"creature/chicken/chicken.m2" }
  *     { "type":"getAssetByFileDataID", "requestId":"abc124", "fileDataID":123456 }
  *     { "type":"getModelTextures",     "requestId":"abc125", "fileDataID":123200 }
@@ -209,6 +209,13 @@
  * player shows it from its first frame. runtimeState adds "backgroundR", "backgroundG" and "backgroundB", the colour
  * the player holds. Nothing is sent to an older player, which keeps its own default.
  *
+ * NPC EQUIPMENT (protocol 11). An NPC on its own model (not a playable race's body) stays an ordinary loadWoWModel
+ * ("character":false); the weapons it holds travel in a characterScene with "attachmentsOnly":true and that load's
+ * "load" serial. The player puts only the attachments on the model -- no body textures, merged parts, fist pose or
+ * mount -- and answers characterSceneApplied as for a character; an attachment point it cannot resolve is named in
+ * "missing" and nothing is left at its key. An older player gets no such scene and shows the NPC without its weapons,
+ * as before. See docs/unity-renderer/README.md, "Equipment on exclusive NPC models".
+ *
  * modelAnimation is pushed the same way whenever the animation on display changes, and once after
  * loadWoWModel so the player starts on the animation the app is showing rather than on its own
  * idle. "sequenceIndex" is what the player must act on: it indexes the model's animation table,
@@ -260,7 +267,7 @@
 class UnityIpcServer : public wxEvtHandler
 {
 public:
-  static const int PROTOCOL_VERSION = 10;
+  static const int PROTOCOL_VERSION = 11;
 
   UnityIpcServer();
   ~UnityIpcServer();
@@ -296,6 +303,9 @@ public:
   bool playerCachesAssets() const { return m_client && m_unityReady && m_playerProtocol >= 9; }
   // Protocol 10: the player reads binary payloads (TRANSPORT above), so files and images go raw, not as base64.
   bool playerTakesBinaryFrames() const { return m_client && m_unityReady && m_playerProtocol >= 10; }
+  // Protocol 11: the player puts an ordinary NPC model's weapons on it from a characterScene "attachmentsOnly" (NPC
+  // EQUIPMENT above).
+  bool playerAttachesNpcEquipment() const { return m_client && m_unityReady && m_playerProtocol >= 11; }
 
   // Runtime command: tell the player which model is active. Either path or fileDataID may be
   // empty/0. Queued if the player is connected; dropped (logged) otherwise.

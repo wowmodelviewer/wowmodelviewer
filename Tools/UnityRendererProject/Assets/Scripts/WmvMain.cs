@@ -66,6 +66,8 @@ public partial class WmvMain : MonoBehaviour
     /// AdoptBuilt or AdoptMapObject replaces them.
     /// </summary>
     readonly WmvModelSlot currentSlot = new WmvModelSlot();
+    int currentModelLoad;
+    bool currentModelIsCharacter;
     WmvCharacterDresser dresser;      // what the character on screen wears, when it is one
     WmvMountedScene mounted;          // what the character on screen rides, or is about to (protocol 5)
     WmvSlotAnimation anim;            // the app's animation choice and playback, applied to a slot
@@ -665,6 +667,26 @@ public partial class WmvMain : MonoBehaviour
     /// </summary>
     void HandleCharacterScene(WmvIpcClient.CharacterScene scene)
     {
+        // NPC equipment belongs to an ordinary model load. Never rebuild/dress its body.
+        if (scene.attachmentsOnly)
+        {
+            if (!WmvIpcClient.HasMount(scene) && job != null && !job.Character &&
+                scene.fileDataID == job.FileDataID && scene.load == job.Load)
+            {
+                job.Scene = scene;
+                return;
+            }
+            if (!WmvIpcClient.HasMount(scene) && job == null && !currentModelIsCharacter &&
+                currentSlot.Runtime != null && scene.fileDataID == currentSlot.FileDataID &&
+                scene.load == currentModelLoad)
+            {
+                ApplyNpcEquipment(scene);
+                return;
+            }
+            ipc.ReportCharacterSceneApplied(scene.fileDataID, scene.load, scene.revision, "rejected",
+                "not the ordinary model load on screen", 0, 0, null, 0, "", "none", "");
+            return;
+        }
         // The mount first, in both cases: the dresser may apply the scene the moment it is retargeted, and a scene
         // with a mount is only applied once its mount is ready (MountReady).
         if (job != null && job.Character && scene.fileDataID == job.FileDataID)
@@ -677,7 +699,7 @@ public partial class WmvMain : MonoBehaviour
                 RequestCharacterBodyTextures();
             return;
         }
-        if (job == null && dresser != null && currentSlot.Runtime != null && scene.fileDataID == currentSlot.FileDataID)
+        if (job == null && dresser != null && !dresser.AttachmentsOnly && currentSlot.Runtime != null && scene.fileDataID == currentSlot.FileDataID)
         {
             RetargetMount(ref mounted, scene);
             dresser.Retarget(scene);
@@ -687,6 +709,17 @@ public partial class WmvMain : MonoBehaviour
         ipc.ReportCharacterSceneApplied(scene.fileDataID, 0, scene.revision, "rejected",
                                         "not the character on screen or being loaded", 0, 0, null, 0,
                                         WmvIpcClient.MountKeyOf(scene), "none", "");
+    }
+
+    void ApplyNpcEquipment(WmvIpcClient.CharacterScene scene)
+    {
+        if (dresser == null)
+        {
+            dresser = new WmvCharacterDresser(ipc, currentModelLoad, ImageByHash, s => Debug.Log("WMV: " + s));
+            dresser.BeginAttachments(currentSlot.Runtime, currentSlot.Model, currentSlot.FileDataID, scene);
+        }
+        else
+            dresser.Retarget(scene);
     }
 
     /// <summary>Hand a scene's mount to the mounted scene of the character it belongs to -- created for the first
@@ -1029,11 +1062,11 @@ public partial class WmvMain : MonoBehaviour
                   (mount != null ? "the mount posed at it, then the character" : "the character posed at it"));
     }
 
-    /// <summary>Drop a character load that will not be shown, and everything it built. Its scene was
+    /// <summary>Drop a character/equipment scene that will not be shown, and everything it built. Its scene was
     /// replaced, not refused, so it is answered "superseded".</summary>
     void AbandonCharacterJob(string reason)
     {
-        if (job == null || !job.Character)
+        if (job == null || (!job.Character && (job.Scene == null || !job.Scene.attachmentsOnly)))
             return;
         if (job.Mount != null) job.Mount.Dispose();
         if (job.Dresser != null) job.Dresser.Dispose();
@@ -1200,6 +1233,8 @@ public partial class WmvMain : MonoBehaviour
             loadGeosetRevision = 0;
 
             AdoptBuilt(built);
+            if (job.Scene != null && job.Scene.attachmentsOnly)
+                ApplyNpcEquipment(job.Scene);
         }
         catch (WowParseException e) { Fail("mesh creation failed: " + e.Message); }
         catch (System.Exception e)
@@ -1316,6 +1351,8 @@ public partial class WmvMain : MonoBehaviour
             currentSlot.M2Bytes = job.M2Bytes;
             currentSlot.Name = string.IsNullOrEmpty(job.Model.Name) ? "WoWModel" : job.Model.Name;
             currentSlot.FileDataID = job.FileDataID;
+            currentModelLoad = job.Load;
+            currentModelIsCharacter = job.Character;
             currentSlot.Textures.Clear();
             foreach (var kv in job.Textures) currentSlot.Textures[kv.Key] = kv.Value;
             skinJob = null;
@@ -1578,7 +1615,7 @@ public partial class WmvMain : MonoBehaviour
             h.LoadSerial = job != null ? job.Load : 0;
             h.LoadMountPreparing = job != null && job.Mount != null ? job.Mount.PreparingFileDataID : 0;
         }
-        if (dresser != null && currentSlot.Runtime != null)
+        if (dresser != null && !dresser.AttachmentsOnly && currentSlot.Runtime != null)
         {
             h.RiderLoad = dresser.Load;
             h.RiderFileDataID = currentSlot.FileDataID;
@@ -3211,7 +3248,7 @@ public partial class WmvMain : MonoBehaviour
         status.Set("FAILED: " + reason);
         Debug.LogError("WMV: " + reason);
         // The host takes a character it hears could not be built back to its own canvas.
-        if (job != null && job.Character)
+        if (job != null && (job.Character || (job.Scene != null && job.Scene.attachmentsOnly)))
         {
             if (job.Mount != null) job.Mount.Dispose();
             if (job.Dresser != null) job.Dresser.Dispose();
