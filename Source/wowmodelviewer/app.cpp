@@ -51,6 +51,8 @@
 #include <QFile>
 #include <QSettings>
 #include <QImage>
+#include <QJsonDocument>
+#include <QJsonObject>
 
 #include "TextureManager.h"
 #include "ModelIdLookup.h"
@@ -154,8 +156,14 @@ static void writeFbxStatus(const QString & outPath, const std::string & content)
 // to stdout, and write the status sidecar. Shared by every headless asset branch (-mo/.chr/-npc).
 static void doHeadlessFbxExport(ModelViewer * frame, const QString & outPath,
                                 bool mesh, bool skel, bool skin, bool anim, const QString & clipsCsv,
-                                bool component = false)
+                                bool component = false, const QString & equipmentPath = QString())
 {
+  if (!equipmentPath.isEmpty() && !frame->LoadFbxEquipment(equipmentPath))
+  {
+    LOG_ERROR << "[fbxequipment] invalid or unrestorable snapshot:" << equipmentPath;
+    writeFbxStatus(outPath, "ERROR\tCould not restore equipment snapshot");
+    return;
+  }
   WoWModel * m = (frame && frame->canvas) ? const_cast<WoWModel *>(frame->canvas->model()) : NULL;
   ExporterPlugin * plugin = NULL;
   for (PluginManager::iterator pit = PLUGINMANAGER.begin(); pit != PLUGINMANAGER.end(); ++pit)
@@ -167,6 +175,26 @@ static void doHeadlessFbxExport(ModelViewer * frame, const QString & outPath,
   {
     LOG_ERROR << "[fbxexport] model or FBX exporter plugin unavailable";
     writeFbxStatus(outPath, "ERROR\tModel or FBX exporter plugin unavailable");
+    return;
+  }
+
+  // Diagnostic producer: exercise the GUI descriptor builder, then let the regression harness
+  // launch the resulting command in a fresh process and remove its temporary snapshot.
+  const QString descriptorPath = QString::fromLocal8Bit(qgetenv("WMV_FBX_DESCRIBE"));
+  if (!descriptorPath.isEmpty())
+  {
+    wxString args, label, snapshot;
+    const bool prepared = frame->PrepareFbxAsset(args, label, snapshot);
+    QJsonObject descriptor;
+    descriptor["assetArgs"] = QString::fromStdWString(args.ToStdWstring());
+    descriptor["snapshot"] = QString::fromStdWString(snapshot.ToStdWstring());
+    descriptor["build"] = frame->m_loadedBuild;
+    QFile output(descriptorPath);
+    const QByteArray json = QJsonDocument(descriptor).toJson();
+    const bool written = prepared && output.open(QIODevice::WriteOnly) &&
+                         output.write(json) == json.size() && output.flush();
+    if (!written && !snapshot.IsEmpty()) wxRemoveFile(snapshot);
+    writeFbxStatus(outPath, written ? "OK" : "ERROR\tCould not prepare export descriptor");
     return;
   }
 
@@ -4878,6 +4906,7 @@ bool WowModelViewApp::OnInit()
   QString fbxInspectPath; // -fbxinspect <in.fbx>: read-only forensic dump of an existing FBX (no game data)
   QString animDumpName;   // -animdump <animName>: source-vs-exported per-bone pose diff for the -mo model
   QString snapCharPath;   // <file.chr>: defer LoadChar until AFTER LoadWoW (export)
+  QString fbxEquipmentPath; // -fbxequipment <snapshot.chr>: restore equipment after -mo/-npc
   QString mpqDataFolder;  // -mpq <DataFolder> [locale]: load a legacy MPQ client instead of CASC
   QString mpqLocale;      // optional locale for -mpq (auto-detected when empty)
   int dumpTexFileDataId = 0; QString dumpTexOutPath; // -dumptex <fileDataID> <out.png>: forensic-only
@@ -5002,6 +5031,9 @@ bool WowModelViewApp::OnInit()
         i++;
         fbxExportPath = QString::fromWCharArray(argv[i]);
       }
+    }
+    else if (cmd == "-fbxequipment") {
+      if (i + 1 < argc) { i++; fbxEquipmentPath = QString::fromWCharArray(argv[i]); }
     }
     else if (cmd == "-animdump") {
       // "-mo <model.m2> -animdump <animName>": pose the source skeleton vs the exported animation
@@ -5233,7 +5265,7 @@ bool WowModelViewApp::OnInit()
       // Headless FBX export of the loaded model (out-of-process export child runs this path).
       if (!fbxExportPath.isEmpty())
       {
-        doHeadlessFbxExport(frame, fbxExportPath, optMesh != 0, optSkel != 0, optSkin != 0, optAnim != 0, fbxClipsArg, optComponent != 0);
+        doHeadlessFbxExport(frame, fbxExportPath, optMesh != 0, optSkel != 0, optSkin != 0, optAnim != 0, fbxClipsArg, optComponent != 0, fbxEquipmentPath);
         return false; // headless export done -> exit
       }
 
@@ -5251,7 +5283,7 @@ bool WowModelViewApp::OnInit()
       frame->LoadChar(snapCharPath);
       if (!fbxExportPath.isEmpty())
       {
-        doHeadlessFbxExport(frame, fbxExportPath, optMesh != 0, optSkel != 0, optSkin != 0, optAnim != 0, fbxClipsArg, optComponent != 0);
+        doHeadlessFbxExport(frame, fbxExportPath, optMesh != 0, optSkel != 0, optSkin != 0, optAnim != 0, fbxClipsArg, optComponent != 0, fbxEquipmentPath);
         return false;
       }
       logNoHeadlessScreenshot();
@@ -5270,7 +5302,7 @@ bool WowModelViewApp::OnInit()
       frame->LoadNPCByDisplay(npcId, dispId);
       if (!fbxExportPath.isEmpty())
       {
-        doHeadlessFbxExport(frame, fbxExportPath, optMesh != 0, optSkel != 0, optSkin != 0, optAnim != 0, fbxClipsArg, optComponent != 0);
+        doHeadlessFbxExport(frame, fbxExportPath, optMesh != 0, optSkel != 0, optSkin != 0, optAnim != 0, fbxClipsArg, optComponent != 0, fbxEquipmentPath);
         return false;
       }
       logNoHeadlessScreenshot();
@@ -5410,5 +5442,3 @@ void WowModelViewApp::SaveSettings()
   config.setValue("Armory/ProxyURL", QString::fromStdString(GLOBALSETTINGS.armoryProxyURL()));
   config.sync();
 }
-
-
