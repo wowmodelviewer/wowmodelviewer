@@ -269,17 +269,23 @@ void FileControl::Init(ModelViewer* mv)
         raceNode->setName(QString::fromStdString(e.name));
 
         bool hasModel = false;
-        const std::pair<int, const char *> sexes[2] = { { e.maleFileID, "Male" }, { e.femaleFileID, "Female" } };
+        // sexID follows ChrModel.Sex: 0 male, 1 female. It is carried on the leaf because
+        // several races can share one model file, and the file alone cannot say which race
+        // (and so which set of customization options) was picked.
+        struct SexLeaf { int fileID; const char * label; int sexID; };
+        const SexLeaf sexes[2] = { { e.maleFileID, "Male", 0 }, { e.femaleFileID, "Female", 1 } };
         for (const auto & s : sexes)
         {
-          if (s.first <= 0)
+          if (s.fileID <= 0)
             continue;
-          GameFile * f = GAMEDIRECTORY.getFile(s.first);
+          GameFile * f = GAMEDIRECTORY.getFile(s.fileID);
           if (!f)
             continue;
           TreeStackItem * leaf = new TreeStackItem();
           leaf->file = f;
-          leaf->setName(s.second);
+          leaf->setName(s.label);
+          leaf->raceID = e.raceID;
+          leaf->sexID = s.sexID;
           raceNode->addChild(leaf);
           hasModel = true;
         }
@@ -658,7 +664,10 @@ void FileControl::OnTreeSelect(wxTreeEvent &event)
   CurrentItem = item;
 
   if (filterMode == FILE_FILTER_MODEL) {
-    SelectModelFile(data->file);
+    // A race-browser leaf names the race and sex it stands for; an ordinary file row does not.
+    SelectModelFile(data->file,
+                    data->node ? data->node->raceID : -1,
+                    data->node ? data->node->sexID : -1);
   } else if (filterMode == FILE_FILTER_WMO) {
     SelectWMOFile(data->file);
   } else if (filterMode == FILE_FILTER_IMAGE) {
@@ -688,13 +697,19 @@ void FileControl::OnTreeSelect(wxTreeEvent &event)
   }
 }
 
-void FileControl::SelectModelFile(GameFile * file)
+void FileControl::SelectModelFile(GameFile * file, int raceID, int sexID)
 {
   if (!file || !modelviewer || !modelviewer->canvas)
     return;
   wxString rootfn(file->fullname().toStdWString());
-  // Exit, if its the same model thats currently loaded
-  if (modelviewer->canvas->model() && !modelviewer->canvas->model()->name().isEmpty() && modelviewer->canvas->model()->name().toStdWString() == std::wstring(rootfn.c_str()))
+  // Exit, if its the same model thats currently loaded -- unless a different race was picked on
+  // it: races that share a model file (Mag'har Orc and Orc) are the same file but not the same
+  // character, and the pick has to go through so the race can change.
+  const WoWModel * loaded = modelviewer->canvas->model();
+  const bool sameFile = loaded && !loaded->name().isEmpty() &&
+                        loaded->name().toStdWString() == std::wstring(rootfn.c_str());
+  const bool sameRace = (raceID < 0) || (loaded && loaded->infos.raceID == raceID && loaded->infos.sexID == sexID);
+  if (sameFile && sameRace)
     return; // clicked on the same model thats currently loaded, no need to load it again - exit
 
   ClearCanvas();
@@ -707,7 +722,7 @@ void FileControl::SelectModelFile(GameFile * file)
   //if (wxGetKeyState(WXK_SHIFT))
   //  canvas->AddModel(rootfn);
   //else
-  modelviewer->LoadModel(GAMEDIRECTORY.getFile(QString::fromWCharArray(rootfn.c_str())));  // Load the model.
+  modelviewer->LoadModel(GAMEDIRECTORY.getFile(QString::fromWCharArray(rootfn.c_str())), raceID, sexID);  // Load the model.
 
   UpdateInterface();
 }

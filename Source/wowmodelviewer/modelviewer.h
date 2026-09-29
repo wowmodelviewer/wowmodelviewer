@@ -138,7 +138,9 @@ public:
   void LoadChar(QString fn, bool equipmentOnly = false);
   void SaveChar(QString fn, bool equipmentOnly = false);
 
-  void LoadModel(GameFile * f);
+  // raceID/sexID name the race the model should be read as, for the races that share a model
+  // file with another race (Mag'har Orc on the Orc model); -1 leaves the model to resolve it.
+  void LoadModel(GameFile * f, int raceID = -1, int sexID = -1);
   void LoadItem(unsigned int displayID);
   // The component-geoset state an item's own model should be shown with. See the definition.
   void applyItemComponentGeosets(unsigned int itemId);

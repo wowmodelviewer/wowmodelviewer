@@ -896,7 +896,7 @@ void ModelViewer::SaveLayout()
 }
 
 
-void ModelViewer::LoadModel(GameFile * file)
+void ModelViewer::LoadModel(GameFile * file, int raceID, int sexID)
 {
   if (!canvas || !file)
     return;
@@ -904,7 +904,15 @@ void ModelViewer::LoadModel(GameFile * file)
   LOG_INFO << "Loading model:" << file->fullname();
 
   if (canvas->model() && canvas->model()->gamefile && (canvas->model()->gamefile->fullname() == file->fullname())) // don't reload same model
+  {
+    // One model file can carry more than one race (a Mag'har Orc wears the Orc model), so the
+    // same file may still be a different character: switch the race on the loaded model rather
+    // than reloading it, and rebuild the character panel around its customization options.
+    WoWModel * loaded = const_cast<WoWModel *>(canvas->model());
+    if (raceID >= 0 && loaded->setRaceSex(raceID, sexID) && charControl && charControl->charAtt)
+      charControl->UpdateModel(charControl->charAtt);
     return;
+  }
 
   isModel = true;
   // A model replaces whatever Browse image, WMO or map tile was shown (canvas->LoadModel below drops
@@ -961,6 +969,12 @@ void ModelViewer::LoadModel(GameFile * file)
     m->addChild(new WoWItem(CS_CAPE));
     m->addChild(new WoWItem(CS_QUIVER));
     m->modelType = MT_CHAR;
+
+    // A race that shares this model file with another one is read as that other race (the first
+    // race on the file), and would then offer only that race's customization options. Put the
+    // race that was asked for back, before the character panel is built from it below.
+    if (raceID >= 0)
+      m->setRaceSex(raceID, sexID);
   }
   else
   {
@@ -4040,7 +4054,7 @@ void ModelViewer::ImportArmoury(wxString strURL)
     if (!result->valid)
     {
       const wxString msg = result->errorMessage.empty()
-        ? wxString(wxT("Improperly Formatted URL.\nMake sure the link points to a character page (e.g. https://worldofwarcraft.blizzard.com/en-gb/character/eu/realm/name)."))
+        ? wxString(wxT("Improperly Formatted URL.\nMake sure the link points to a character page (e.g. https://worldofwarcraft.blizzard.com/en-gb/worldsoul/eu/armory/character/realm/name)."))
         : wxString::FromUTF8(result->errorMessage.c_str());
       wxMessageBox(msg, wxT("Armory Import Failed"));
       delete result;
@@ -4049,10 +4063,44 @@ void ModelViewer::ImportArmoury(wxString strURL)
 
     const auto sex = (result->gender == "Male") ? 0 : 1;
 
-    LoadModel(GAMEDIRECTORY.getFile(RaceInfos::getFileIDForRaceSex(result->raceId, sex)));
-
-    if (!g_canvas->model())
+    // The race has to resolve to a character model before anything is dressed. For a race
+    // this build has no model for (getFileIDForRaceSex returns -1, e.g. a race that shares
+    // its model file with another one), LoadModel() is handed nothing and does nothing --
+    // and the import would then put this character's customizations and equipment on
+    // whatever model happened to be on screen, or do nothing at all with an empty viewport.
+    const int raceModelFileID = RaceInfos::getFileIDForRaceSex(result->raceId, sex);
+    GameFile * raceModel = (raceModelFileID > 0) ? GAMEDIRECTORY.getFile(raceModelFileID) : nullptr;
+    if (!raceModel)
+    {
+      LOG_ERROR << "Armory import: no character model for race" << result->raceId << "sex" << sex
+                << "- nothing was imported.";
+      wxMessageBox(wxString::Format(wxT("This build has no character model for race %d (%s), so the character could not be imported.\n\nNothing on screen was changed."),
+                                    result->raceId, (sex == 0) ? wxT("male") : wxT("female")),
+                   wxT("Armory Import Failed"));
+      delete result;
       return;
+    }
+
+    // Load the model as this character's race: a race that shares its model file with another
+    // one (Mag'har Orc on the Orc model) is otherwise read as that other race, whose
+    // customization options are not the imported character's -- every choice below would be
+    // skipped, leaving a default character in the right gear.
+    LoadModel(raceModel, result->raceId, sex);
+
+    if (!g_canvas->model() || !g_charControl->model)
+    {
+      LOG_ERROR << "Armory import: the character model" << raceModel->fullname()
+                << "did not load - nothing was imported.";
+      wxMessageBox(wxT("The character's model could not be loaded, so nothing was imported."),
+                   wxT("Armory Import Failed"));
+      delete result;
+      return;
+    }
+
+    if (g_charControl->model->infos.raceID != result->raceId)
+      LOG_INFO << "Armory import: the model is race" << g_charControl->model->infos.raceID
+               << "and the character is race" << result->raceId
+               << "- customizations that belong to the character's own race will be skipped.";
 
     if (result->hasTransmogGear == true)
     {

@@ -10,7 +10,18 @@
 
 #define DEBUG_RACEINFOS 1
 
-std::map<int, RaceInfos> RaceInfos::RACES;
+std::map<std::pair<int, int>, RaceInfos> RaceInfos::RACES;
+std::map<int, RaceInfos> RaceInfos::RACES_BY_FILEID;
+
+namespace
+{
+  // Collect a ChrModelID on an entry that already exists, without repeating one.
+  void addChrModelID(RaceInfos & infos, int chrModelID)
+  {
+    if (std::find(infos.ChrModelID.begin(), infos.ChrModelID.end(), chrModelID) == infos.ChrModelID.end())
+      infos.ChrModelID.push_back(chrModelID);
+  }
+}
 
 void RaceInfos::init()
 {
@@ -78,24 +89,45 @@ void RaceInfos::init()
     if (!modelFile)
       continue;
     infos.isHD = modelFile->fullname().contains("_hd") ? true : false;
+    infos.modelFileID = modelfileid;
 
-    if (RACES.find(modelfileid) == RACES.end())
+    const int chrModelID = race[14].toInt();
+
+    // One entry per race and sex. A race with several models (an HD one beside the old one,
+    // or a second form) keeps the HD model and collects the other's ChrModelID.
+    const auto key = std::make_pair(infos.raceID, infos.sexID);
+    const auto existing = RACES.find(key);
+    if (existing == RACES.end())
     {
-      RACES[modelfileid] = infos;
+      RACES[key] = infos;
     }
-    else // if a race is already inserted, capture any additional ChrModelID
+    else if (infos.isHD && !existing->second.isHD)
     {
-      auto id = race[14].toInt();
-      if (std::find(RACES[modelfileid].ChrModelID.begin(), RACES[modelfileid].ChrModelID.end(), id) == RACES[modelfileid].ChrModelID.end())
-        RACES[modelfileid].ChrModelID.push_back(id);
+      const std::vector<int> collected = existing->second.ChrModelID;
+      existing->second = infos;
+      for (const auto id : collected)
+        addChrModelID(existing->second, id);
     }
+    else
+    {
+      addChrModelID(existing->second, chrModelID);
+    }
+
+    // Keyed by model file: the first race on a file wins, and the races that share it only
+    // add their ChrModelIDs, so a model loaded by file id still resolves to one race and to
+    // every customization set that model can wear.
+    const auto byFile = RACES_BY_FILEID.find(modelfileid);
+    if (byFile == RACES_BY_FILEID.end())
+      RACES_BY_FILEID[modelfileid] = infos;
+    else
+      addChrModelID(byFile->second, chrModelID);
   }
 
 #if DEBUG_RACEINFOS > 0
   for (const auto & r : RACES)
   {
     LOG_INFO << "---------------------------";
-    LOG_INFO << "modelfileid ->" << r.first;
+    LOG_INFO << "modelfileid ->" << r.second.modelFileID;
     LOG_INFO << "infos.prefix =" << r.second.prefix.c_str();
     LOG_INFO << "infos.textureLayoutID =" << r.second.textureLayoutID;
     LOG_INFO << "infos.raceID =" << r.second.raceID;
@@ -116,20 +148,13 @@ int RaceInfos::getHDModelForFileID(int fileid)
 {
   auto result = fileid; // return same file id by default
 
-  const auto it = RACES.find(fileid);
-  if (it != RACES.end() && !it->second.isHD)
+  const auto it = RACES_BY_FILEID.find(fileid);
+  if (it != RACES_BY_FILEID.end() && !it->second.isHD)
   {
-    const auto raceID = it->second.raceID;
-    const auto sexID = it->second.sexID;
-
-    for (auto &r : RACES)
-    {
-      if (r.second.raceID == raceID && r.second.sexID == sexID && r.second.isHD)
-      {
-        result = r.first;
-        break;
-      }
-    }
+    // RACES holds the HD model for a race and sex when there is one.
+    const auto hd = RACES.find(std::make_pair(it->second.raceID, it->second.sexID));
+    if (hd != RACES.end() && hd->second.isHD)
+      result = hd->second.modelFileID;
   }
 
   return result;
@@ -137,9 +162,9 @@ int RaceInfos::getHDModelForFileID(int fileid)
 
 bool RaceInfos::getRaceInfosForFileID(int fileid, RaceInfos & infos)
 {
-  const auto raceInfosIt = RaceInfos::RACES.find(fileid);
+  const auto raceInfosIt = RaceInfos::RACES_BY_FILEID.find(fileid);
 
-  if (raceInfosIt != RaceInfos::RACES.end())
+  if (raceInfosIt != RaceInfos::RACES_BY_FILEID.end())
   {
     infos = raceInfosIt->second;
     return true;
@@ -166,13 +191,19 @@ bool RaceInfos::getRaceInfosForName(const std::string & raceName, int sex, RaceI
 
 int RaceInfos::getFileIDForRaceSex(const int & race, const int & sex)
 {
-  for (auto &r : RACES)
-  {
-    if (r.second.raceID == race && r.second.sexID == sex)
-      return r.first;
-  }
+  const auto it = RACES.find(std::make_pair(race, sex));
 
-  return -1;
+  return (it != RACES.end()) ? it->second.modelFileID : -1;
+}
+
+bool RaceInfos::getRaceInfosForRaceSex(int race, int sex, RaceInfos & out)
+{
+  const auto it = RACES.find(std::make_pair(race, sex));
+  if (it == RACES.end())
+    return false;
+
+  out = it->second;
+  return true;
 }
 
 std::vector<RaceInfos::RaceMenuEntry> RaceInfos::getRaceMenu()
@@ -182,8 +213,8 @@ std::vector<RaceInfos::RaceMenuEntry> RaceInfos::getRaceMenu()
   std::map<int, RaceMenuEntry> byRace;
   for (const auto & kv : RACES)
   {
-    const int fileID = kv.first;
     const RaceInfos & r = kv.second;
+    const int fileID = r.modelFileID;
     if (r.raceID < 0)
       continue;
 

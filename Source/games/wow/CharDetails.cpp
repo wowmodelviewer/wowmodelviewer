@@ -160,9 +160,9 @@ void CharDetails::load(QString & f)
   applySelection(before, 0);
 }
 
-void CharDetails::reset(WoWModel * model)
+void CharDetails::reset(WoWModel * model, bool refillCustomizations)
 {
-  if ((model != nullptr) & (model != model_))
+  if ((model != nullptr) && ((model != model_) || refillCustomizations))
   {
     model_ = model;
     fillCustomizationMap();

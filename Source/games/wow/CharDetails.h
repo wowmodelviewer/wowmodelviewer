@@ -131,7 +131,9 @@ public:
   void save(QXmlStreamWriter &);
   void load(QString &);
 
-  void reset(WoWModel * m = nullptr);
+  // refillCustomizations rebuilds the option list even for the model already set, for when the
+  // model's race changed underneath it (see WoWModel::setRaceSex).
+  void reset(WoWModel * m = nullptr, bool refillCustomizations = false);
   void randomise();
 
   // accessors to customization
