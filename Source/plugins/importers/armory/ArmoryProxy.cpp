@@ -29,6 +29,7 @@
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
 #include <QNetworkRequest>
+#include <QRegularExpression>
 #include <QScopedPointer>
 #include <QStringList>
 #include <QTimer>
@@ -123,6 +124,18 @@ namespace ArmoryProxy
   QString defaultProxyTemplate()
   {
     return DEFAULT_PROXY_URL;
+  }
+
+  QString redactSecrets(const QString & text)
+  {
+    // Qt's own network error strings quote the URL they failed on, so this has to run over
+    // messages as well as over the URL we build ourselves.
+    static const QRegularExpression secret(
+      "([?&](?:key|token|secret|password|passwd|apikey|api_key|access_key)=)[^&\\s\"']*",
+      QRegularExpression::CaseInsensitiveOption);
+
+    QString safe = text;
+    return safe.replace(secret, "\\1<hidden>");
   }
 
   Status parseCharacterUrl(const QString & url, Character & out)
@@ -269,7 +282,7 @@ namespace ArmoryProxy
     {
       result.status = Status::BadLink;
       result.detail = url.errorString();
-      LOG_ERROR << "Armory: refusing to request an invalid URL:" << qPrintable(result.detail);
+      LOG_ERROR << "Armory: refusing to request an invalid URL:" << qPrintable(redactSecrets(result.detail));
       return result;
     }
 
@@ -308,7 +321,8 @@ namespace ArmoryProxy
       // Nothing came back: DNS, connection, TLS or timeout. Report the transport error
       // rather than an empty-JSON complaint that hides it.
       result.status = Status::NetworkError;
-      result.detail = reply->errorString();
+      // Qt's error string quotes the URL it failed on, access key and all.
+      result.detail = redactSecrets(reply->errorString());
       LOG_ERROR << "Armory: could not reach the proxy:" << qPrintable(result.detail);
       return result;
     }

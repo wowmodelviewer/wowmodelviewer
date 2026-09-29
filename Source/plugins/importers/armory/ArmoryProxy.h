@@ -88,6 +88,11 @@ namespace ArmoryProxy
 
   // The proxy this build calls when Settings > General has no override.
   QString defaultProxyTemplate();
+
+  // A copy of text with the value of any secret-looking query parameter masked. Use it on
+  // anything that carries a request URL into a log or a message: the proxy's access key is a
+  // shared credential, and a log gets pasted into bug reports.
+  QString redactSecrets(const QString & text);
 }
 
 #endif /* _ARMORYPROXY_H_ */

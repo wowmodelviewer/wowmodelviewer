@@ -595,7 +595,8 @@ ArmoryProxy::Result ArmoryImporter::gatherCharacter(const QString & url, ArmoryP
   }
 
   const QString requestUrl = ArmoryProxy::buildRequestUrl(proxyTemplate, character);
-  LOG_INFO << "Final API Page:" << qPrintable(requestUrl);
+  // Never log the access key: the log is the first thing pasted into a bug report.
+  LOG_INFO << "Final API Page:" << qPrintable(ArmoryProxy::redactSecrets(requestUrl));
 
   response = ArmoryProxy::fetchJson(requestUrl);
   if (response.status != ArmoryProxy::Status::Ok)
