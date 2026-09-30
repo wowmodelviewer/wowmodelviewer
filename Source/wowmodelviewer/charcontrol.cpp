@@ -21,6 +21,15 @@
 #include "logger/Logger.h"
 
 static wxArrayString creaturemodels;
+
+static void UpdateEquipmentLabel(wxStaticText * label, const WoWItem * item = nullptr)
+{
+  const bool equipped = item && item->isEquipped();
+  label->SetForegroundColour(equipped ? ItemQualityColour(item->quality()) : *wxBLACK);
+  label->SetLabel(item ? wxString(item->name().toStdWString()) : _("---- None ----"));
+  label->Refresh();
+}
+
 IMPLEMENT_CLASS(CharControl, wxWindow)
 
 BEGIN_EVENT_TABLE(CharControl, wxWindow)
@@ -120,6 +129,7 @@ CharControl::CharControl(wxWindow* parent, wxWindowID id)
   gs2->Add(clearButtons[type], wxSizerFlags().Align(wxALIGN_CENTER_VERTICAL)); \
   gs2->Add(labels[type]=new wxStaticText(this, -1, _("---- None ----"), wxDefaultPosition, wxDefaultSize, wxST_ELLIPSIZE_END | wxST_NO_AUTORESIZE), wxSizerFlags().Expand().Align(wxALIGN_CENTER_VERTICAL)); \
   labels[type]->SetMinSize(wxSize(FromDIP(40), -1)); \
+  UpdateEquipmentLabel(labels[type]); \
     }
 
   ADD_CONTROLS(CS_HEAD, _("Head"))
@@ -332,8 +342,7 @@ void CharControl::UpdateModel(Attachment *a)
 
     if (labels[i])
     {
-      labels[i]->SetLabel(_("---- None ----"));
-      labels[i]->SetForegroundColour(*wxBLACK);
+      UpdateEquipmentLabel(labels[i]);
     }
     if (levelboxes[i])
     {
@@ -393,12 +402,11 @@ void CharControl::RefreshEquipment()
       WoWItem * item = model->getItem((CharSlots)i);
       if (item)
       {
-        labels[i]->SetLabel(item->name().toStdWString());
-        labels[i]->SetForegroundColour(ItemQualityColour(item->quality()));
+        UpdateEquipmentLabel(labels[i], item);
 
         // refresh level combo box
         levelboxes[i]->Clear();
-        if (item->nbLevels() > 1)
+        if (item->isEquipped() && item->nbLevels() > 1)
         {
           levelboxes[i]->Enable(true);
           for (unsigned int level = 0; level < item->nbLevels(); level++)
@@ -411,7 +419,7 @@ void CharControl::RefreshEquipment()
       }
 
       if (clearButtons[i]) // enable the "X" only when there is actually something to remove
-        clearButtons[i]->Enable(item && item->id() != 0);
+        clearButtons[i]->Enable(item && item->isEquipped());
 
       if (item && (i == CS_TABARD) && (model->td.showCustom == true))
       {
@@ -487,7 +495,7 @@ void CharControl::OnClearSlot(wxCommandEvent &event)
   if (slot < 0 || slot >= NUM_CHAR_SLOTS)
     return;
   WoWItem * item = model->getItem((CharSlots)slot);
-  if (!item || item->id() == 0)
+  if (!item || !item->isEquipped())
     return; // nothing equipped in this slot -> nothing to do (avoids a wasted model refresh)
   item->setId(0);
   RefreshEquipment();
@@ -928,12 +936,14 @@ void CharControl::OnUpdateItem(int type, int id)
       {
         item->setId(numbers[id]);
 
-        labels[choosingSlot]->SetLabel(item->name().toStdWString());
-        labels[choosingSlot]->SetForegroundColour(ItemQualityColour(item->quality()));
+        UpdateEquipmentLabel(labels[choosingSlot], item);
+
+        if (clearButtons[choosingSlot])
+          clearButtons[choosingSlot]->Enable(item->isEquipped());
 
         // refresh level combo box
         levelboxes[choosingSlot]->Clear();
-        if (item->nbLevels() > 1)
+        if (item->isEquipped() && item->nbLevels() > 1)
         {
           levelboxes[choosingSlot]->Enable(true);
           for (unsigned int i = 0; i < item->nbLevels(); i++)
@@ -1278,12 +1288,11 @@ void CharControl::tryToEquipItem(int id)
       if (item)
       {
         item->setId(id);
-        labels[itemSlot]->SetLabel(item->name().toStdWString());
-        labels[itemSlot]->SetForegroundColour(ItemQualityColour(item->quality()));
+        UpdateEquipmentLabel(labels[itemSlot], item);
 
         // refresh level combo box
         levelboxes[itemSlot]->Clear();
-        if (item->nbLevels() > 1)
+        if (item->isEquipped() && item->nbLevels() > 1)
         {
           levelboxes[itemSlot]->Enable(true);
           for (unsigned int i = 0; i < item->nbLevels(); i++)
