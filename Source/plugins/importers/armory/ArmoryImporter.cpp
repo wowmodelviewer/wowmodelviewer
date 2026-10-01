@@ -444,9 +444,87 @@ As you can see, this will give us almost all the data we need to properly rebuil
 
 */
 
+namespace
+{
+  // A name in the appearance document: a plain string when the request named a locale (the
+  // proxy always does), or a { "en_GB": ..., ... } object when it did not.
+  QString textOf(const QJsonValue & value)
+  {
+    if (value.isString())
+      return value.toString();
+    const QJsonObject names = value.toObject();
+    for (const char * locale : { "en_GB", "en_US" })
+      if (names.value(locale).isString())
+        return names.value(locale).toString();
+    for (const auto & name : names)
+      if (name.isString())
+        return name.toString();
+    return QString();
+  }
+}
+
+QVariantMap ArmoryImporter::lastCharacter() const
+{
+  return m_lastCharacter;
+}
+
+QVariantMap ArmoryImporter::realmList(const QString & region) const
+{
+  QVariantMap answer;
+  answer["ok"] = false;
+  answer["unsupported"] = false;
+
+  const QString base = proxyTemplate();
+  if (base.isEmpty())
+  {
+    answer["message"] = QString("No Armory proxy is configured.");
+    return answer;
+  }
+
+  const QString requestUrl = ArmoryProxy::buildRealmListUrl(base, region);
+  LOG_INFO << "Armory: realm list request:" << qPrintable(ArmoryProxy::redactSecrets(requestUrl));
+
+  const ArmoryProxy::Result response = ArmoryProxy::fetchJson(requestUrl);
+  QVector<ArmoryProxy::Realm> realms;
+  ArmoryProxy::Status status = response.status;
+  if (status == ArmoryProxy::Status::Ok)
+    status = ArmoryProxy::parseRealmList(response.json, realms);
+
+  if (status != ArmoryProxy::Status::Ok)
+  {
+    // A proxy without the route reads the empty realm as a bad slug (400); a proxy that
+    // answers 200 with something else has no list either.
+    const bool unsupported = (status == ArmoryProxy::Status::InvalidRequest ||
+                              status == ArmoryProxy::Status::UnexpectedPayload);
+    answer["unsupported"] = unsupported;
+    answer["message"] = response.detail.isEmpty()
+      ? QString("HTTP %1").arg(response.httpStatus)
+      : response.detail;
+    LOG_INFO << "Armory: no realm list for" << qPrintable(region) << "-"
+             << (unsupported ? "the proxy does not serve one" : "the request failed")
+             << "(" << qPrintable(answer["message"].toString()) << ")";
+    return answer;
+  }
+
+  QVariantList list;
+  for (const auto & realm : realms)
+  {
+    QVariantMap entry;
+    entry["slug"] = realm.slug;
+    entry["name"] = realm.name;
+    entry["id"] = realm.id;
+    list.push_back(entry);
+  }
+  answer["ok"] = true;
+  answer["realms"] = list;
+  LOG_INFO << "Armory: realm list for" << qPrintable(region) << "-" << list.size() << "realms";
+  return answer;
+}
+
 CharInfos * ArmoryImporter::importChar(QString url) const
 {
   auto * result = new CharInfos();
+  m_lastCharacter.clear();
 
   ArmoryProxy::Character character;
   const ArmoryProxy::Result response = gatherCharacter(url, character);
@@ -514,6 +592,18 @@ CharInfos * ArmoryImporter::importChar(QString url) const
     }
 
     result->valid = true;
+
+    // For the import dialog's summary: the names exactly as the server spells them, plus
+    // the region that was asked for. Nothing is requested specially; it is all in the answer.
+    const QJsonObject who = root.value("character").toObject();
+    const QJsonObject realm = who.value("realm").toObject();
+    m_lastCharacter["name"] = textOf(who.value("name"));
+    m_lastCharacter["realmName"] = textOf(realm.value("name"));
+    m_lastCharacter["realmSlug"] = realm.value("slug").toString();
+    m_lastCharacter["region"] = character.region;
+    m_lastCharacter["raceName"] = textOf(root.value("playable_race").toObject().value("name"));
+    m_lastCharacter["className"] = textOf(root.value("playable_class").toObject().value("name"));
+    m_lastCharacter["genderName"] = textOf(root.value("gender").toObject().value("name"));
   }
   else {
     // Say exactly what went wrong -- which link, which character, which HTTP status --
@@ -580,21 +670,15 @@ ArmoryProxy::Result ArmoryImporter::gatherCharacter(const QString & url, ArmoryP
            << ", Realm:" << qPrintable(character.realm)
            << ", Character:" << qPrintable(character.name);
 
-  // The client ships no Blizzard credentials: it calls a proxy that holds them
-  // server-side, does the OAuth handshake and returns the appearance JSON. A runtime
-  // override (Settings > General) wins over the URL built into this build.
-  QString proxyTemplate = QString::fromStdString(GLOBALSETTINGS.armoryProxyURL());
-  if (proxyTemplate.isEmpty())
-    proxyTemplate = ArmoryProxy::defaultProxyTemplate();
-
-  if (proxyTemplate.isEmpty())
+  const QString base = proxyTemplate();
+  if (base.isEmpty())
   {
     LOG_ERROR << "Armory: no proxy URL (none built in, and none set in Settings > General).";
     response.status = ArmoryProxy::Status::NoProxy;
     return response;
   }
 
-  const QString requestUrl = ArmoryProxy::buildRequestUrl(proxyTemplate, character);
+  const QString requestUrl = ArmoryProxy::buildRequestUrl(base, character);
   // Never log the access key: the log is the first thing pasted into a bug report.
   LOG_INFO << "Final API Page:" << qPrintable(ArmoryProxy::redactSecrets(requestUrl));
 
@@ -612,6 +696,15 @@ ArmoryProxy::Result ArmoryImporter::gatherCharacter(const QString & url, ArmoryP
   }
 
   return response;
+}
+
+// The client ships no Blizzard credentials: it calls a proxy that holds them server-side,
+// does the OAuth handshake and returns the JSON. A runtime override (Settings > General)
+// wins over the URL built into this build.
+QString ArmoryImporter::proxyTemplate()
+{
+  const QString overridden = QString::fromStdString(GLOBALSETTINGS.armoryProxyURL());
+  return overridden.isEmpty() ? ArmoryProxy::defaultProxyTemplate() : overridden;
 }
 
 bool ArmoryImporter::hasMember(const QJsonValueRef & check, const QString & lookfor)

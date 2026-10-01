@@ -31,6 +31,7 @@
 // Qt
 #include <QJsonObject>
 #include <QString>
+#include <QVector>
 
 namespace ArmoryProxy
 {
@@ -46,6 +47,7 @@ namespace ArmoryProxy
     NotFound,          // 404: no such character, or the profile is hidden
     AccessDenied,      // 401/403: the proxy refused the request (access key)
     RateLimited,       // 429: too many requests
+    InvalidRequest,    // 400: the proxy refused the values themselves (realm, name, region)
     ServerError,       // any other non-2xx
     UnexpectedPayload  // 2xx, but not the appearance document we expect
   };
@@ -57,6 +59,14 @@ namespace ArmoryProxy
     QString region; // us, eu, kr or tw, optionally with a classic-/classic1x- prefix
     QString realm;  // realm slug
     QString name;   // character name
+  };
+
+  // One realm of a region's realm list.
+  struct Realm
+  {
+    QString slug; // as the profile API wants it, e.g. "argent-dawn"
+    QString name; // display name, e.g. "Argent Dawn"
+    int id = 0;
   };
 
   // The outcome of one proxy request.
@@ -74,6 +84,14 @@ namespace ArmoryProxy
 
   // Fill a proxy URL template ("...?region=%s&realm=%s&character=%s") with a character.
   QString buildRequestUrl(const QString & proxyTemplate, const Character & character);
+
+  // The same template asking for a region's realm list instead ("...&realms=1"), so the
+  // list travels the same proxy, access key and override as a character does.
+  QString buildRealmListUrl(const QString & proxyTemplate, const QString & region);
+
+  // Read the realm list out of the proxy's answer ({"region":..,"realms":[{id,slug,name}]}).
+  // UnexpectedPayload when the document has no realm list.
+  Status parseRealmList(const QJsonObject & json, QVector<Realm> & out);
 
   // GET the URL and classify the answer: HTTP status, JSON validity and error payloads
   // all end up in Result::status, so an error document can never pass as a character.

@@ -24,6 +24,7 @@
 
 // Qt
 #include <QEventLoop>
+#include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonParseError>
 #include <QNetworkAccessManager>
@@ -246,6 +247,37 @@ namespace ArmoryProxy
     return Status::Ok;
   }
 
+  QString buildRealmListUrl(const QString & proxyTemplate, const QString & region)
+  {
+    // realm and character stay empty: the proxy's realm list route reads only the region.
+    QString url = buildRequestUrl(proxyTemplate, Character{ region, QString(), QString() });
+    url += url.contains('?') ? "&realms=1" : "?realms=1";
+    return url;
+  }
+
+  Status parseRealmList(const QJsonObject & json, QVector<Realm> & out)
+  {
+    out.clear();
+    const QJsonValue list = json.value("realms");
+    if (!list.isArray())
+      return Status::UnexpectedPayload;
+
+    for (const auto & value : list.toArray())
+    {
+      const QJsonObject entry = value.toObject();
+      Realm realm;
+      realm.slug = entry.value("slug").toString();
+      realm.name = entry.value("name").toString();
+      realm.id = entry.value("id").toInt();
+      if (realm.slug.isEmpty())
+        continue;
+      if (realm.name.isEmpty())
+        realm.name = realm.slug;
+      out.push_back(realm);
+    }
+    return Status::Ok;
+  }
+
   QString buildRequestUrl(const QString & proxyTemplate, const Character & character)
   {
     QString filled = proxyTemplate;
@@ -342,6 +374,8 @@ namespace ArmoryProxy
         result.status = Status::AccessDenied;
       else if (result.httpStatus == 429)
         result.status = Status::RateLimited;
+      else if (result.httpStatus == 400)
+        result.status = Status::InvalidRequest;
       else
         result.status = Status::ServerError;
 
@@ -367,10 +401,9 @@ namespace ArmoryProxy
 
   QString describe(const Result & result, const Character & character)
   {
-    const QString who = QString("%1 on %2 (%3)")
-      .arg(QUrl::fromPercentEncoding(character.name.toUtf8()))
-      .arg(character.realm)
-      .arg(character.region);
+    const QString name = QUrl::fromPercentEncoding(character.name.toUtf8());
+    const QString realm = QUrl::fromPercentEncoding(character.realm.toUtf8());
+    const QString who = QString("%1 on %2 (%3)").arg(name).arg(realm).arg(character.region);
     const QString tail = result.detail.isEmpty()
       ? QString()
       : QString("\n\nDetails: %1").arg(result.detail.left(MAX_DETAIL_CHARS));
@@ -406,7 +439,7 @@ namespace ArmoryProxy
 
       case Status::NotFound:
         return QString("The Armory has no profile for %1.\n\n"
-                       "Check the name, realm and region in the link. A character also has to have "
+                       "Check the name, realm and region. A character also has to have "
                        "been logged in recently, and its profile must not be hidden.%2").arg(who).arg(tail);
 
       case Status::AccessDenied:
@@ -417,6 +450,19 @@ namespace ArmoryProxy
       case Status::RateLimited:
         return QString("The Armory proxy is rate limited right now.\n\nWait a moment and try %1 again.%2")
           .arg(who).arg(tail);
+
+      case Status::InvalidRequest:
+        // The proxy names what it refused; say which value it was rather than calling a
+        // malformed request a temporary outage.
+        if (result.detail.contains("realm", Qt::CaseInsensitive))
+          return QString("The Armory proxy did not accept the realm \"%1\".\n\n"
+                         "Pick the realm from the list, or type it as it appears in a character's "
+                         "Armory link, for example argent-dawn.").arg(realm);
+        if (result.detail.contains("character", Qt::CaseInsensitive))
+          return QString("The Armory proxy did not accept the character name \"%1\".\n\n"
+                         "A character name has no spaces and none of / ? #.").arg(name);
+        return QString("The Armory proxy rejected the request for %1 (HTTP 400).\n\n"
+                       "Check the name, realm and region.%2").arg(who).arg(tail);
 
       case Status::ServerError:
         return QString("The Armory proxy or Blizzard's API returned an error (HTTP %1) for %2.\n\n"
