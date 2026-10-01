@@ -17,6 +17,27 @@ https://<your-proxy>/?region=%s&realm=%s&character=%s
 `%s` placeholders are region, realm-slug, character-name (the client fills them in,
 URL-encoded).
 
+The import dialog also asks the same URL for a region's **realm list**, so people can
+pick a realm instead of knowing its slug. It fills the region, leaves realm and
+character empty and adds `&realms=1`:
+
+```
+https://<your-proxy>/?region=eu&realm=&character=&realms=1&key=<ACCESS_KEY>
+```
+
+The proxy answers from Blizzard's Game Data realm index (`/data/wow/realm/index`,
+namespace `dynamic-<region>`) with `{"region":"eu","realms":[{"id":560,"slug":"stormscale","name":"Stormscale"}, …]}`,
+sorted by name and cached for a day, so a region costs one upstream call a day however
+many people open the dialog. The client caches each region's list for a week. A proxy
+deployed before this route existed answers the request with `400 invalid realm slug`;
+the dialog then falls back to typing the realm, so **redeploy the proxy** to get the
+realm picker.
+
+Realm slugs may contain accented letters (`pozzo-delleternità`, `festung-der-stürme`,
+`aggra-português`, …). The proxy accepts any letters, digits and hyphens and
+percent-encodes the slug on the way upstream; earlier versions accepted only ASCII and
+could not import characters on those realms at all.
+
 > **This single endpoint spends your one Blizzard quota.** It is public by design
 > (the URL ships inside the app), so treat it as a shared credential: set an
 > `ACCESS_KEY` and add a rate limit (steps below). Blizzard caps a client to roughly
@@ -78,18 +99,23 @@ URL-encoded).
 
 ### Verify it works
 ```
-curl "https://<your-proxy>/?region=eu&realm=twisting-nether&character=firekatdrei&key=<ACCESS_KEY>"
+curl "https://<your-proxy>/?region=eu&realm=<realm-slug>&character=<a character you know>&key=<ACCESS_KEY>"
 ```
 You should get the appearance JSON (playable_race, gender, items, customizations…).
+
+```
+curl "https://<your-proxy>/?region=eu&realms=1&key=<ACCESS_KEY>"
+```
+should return the realm list (`{"region":"eu","realms":[…]}`).
 
 ---
 
 ## Step 3 — Bake the URL into WMV
 
-Open `Source/plugins/importers/armory/ArmoryImporter.cpp`, set:
+Open `Source/plugins/importers/armory/ArmoryProxy.cpp`, set:
 
 ```cpp
-static const QString DEFAULT_ARMORY_PROXY_URL = "https://<your-proxy>/?region=%s&realm=%s&character=%s&key=<ACCESS_KEY>";
+const QString DEFAULT_PROXY_URL = "https://<your-proxy>/?region=%s&realm=%s&character=%s&key=<ACCESS_KEY>";
 ```
 
 Rebuild (`_build.bat`) and redeploy (`_run.bat`). Now every user's import "just

@@ -183,6 +183,25 @@ Format loosely based on [Keep a Changelog](https://keepachangelog.com/).
   follow aliases yet.)
 
 ### Changed
+- **Character > Import Armory Character: pick the region, realm and name instead of pasting a link.** The
+  dialog asks for a region (Europe, Americas & Oceania, Korea, Taiwan -- the regions the importer serves),
+  a realm and a character name, and imports with Enter or the bold Import character button; pasting an
+  Armory link stays available underneath and reads every link shape it did before. The fields become the
+  character link the importer already understands, so both go through the same request. The realm comes
+  from the region's realm list when the Armory proxy serves one (typing completes from the list); otherwise
+  it is typed, and a realm's name is turned into its slug the way the game's own slugs are made ("Mal'Ganis"
+  -> malganis), with the result shown under the field. Looking up, imported and failed are all shown in the
+  dialog, which stays open: the success line names the character, race, class, realm and region from the
+  answer itself, and failures say what was wrong (no such character, realm not accepted, proxy unreachable,
+  a search page instead of a character page) without a message box. Import is disabled while fields are
+  empty or a request runs, and the request cannot be started twice. The last region and realm that
+  imported, and the last eight characters, are remembered in Config.ini ([Armory]); realm lists are cached
+  for a week in userSettings/ArmoryRealms.json. An -armory import that fails now logs why and exits instead
+  of waiting on a message box.
+- **Armory proxy: a realm list route, and realms with accented slugs.** `?region=<r>&realms=1` returns the
+  region's realm list from Blizzard's realm index (cached for a day), and the realm check accepts accented
+  slugs such as `pozzo-delleternità` and `festung-der-stürme`, which it used to refuse -- characters on
+  those realms could not be imported at all. Both need the proxy redeployed (armory-proxy/README.md).
 - **Model > Appearance: "Customization" is now "Character Appearance", under the Mount card.** The "Mount /
   dismount" button at the bottom of the page is gone: the Mount card replaces it. Character > Mount /
   Dismount stays.

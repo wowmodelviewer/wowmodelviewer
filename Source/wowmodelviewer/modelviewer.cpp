@@ -2,6 +2,7 @@
 #include "ClientChoiceDialog.h"   // File > Load World of Warcraft opens it
 
 #include "AnimationExportChoiceDialog.h"
+#include "ArmoryImportDialog.h"
 #include "AnimManager.h"
 
 #include <wx/aboutdlg.h>
@@ -67,6 +68,7 @@
 #include <QUrl>
 
 #include <fstream>
+#include <memory>
 
 
 
@@ -2645,11 +2647,8 @@ void ModelViewer::OnToggleCommand(wxCommandEvent &event)
 
     case ID_IMPORT_CHAR:
     {
-      wxTextEntryDialog dialog(this, wxT("Please paste in the URL to the character you wish to import."), wxT("Please enter text"), armoryPath, wxOK | wxCANCEL | wxCENTRE, wxDefaultPosition);
-      if (dialog.ShowModal() == wxID_OK){
-        armoryPath = dialog.GetValue();
-        ImportArmoury(armoryPath);
-      }
+      ArmoryImportDialog dialog(this);
+      dialog.ShowModal();
     }
     break;
   }
@@ -4028,59 +4027,129 @@ void ModelViewer::UpdateControls()
   modelControl->RefreshModel(canvas->root);
 }
 
-void ModelViewer::ImportArmoury(wxString strURL)
+namespace
 {
-  // Described to the Unity viewport once, dressed, when this returns: see SceneHold.
-  SceneHold sceneHold(this);
-
-  CharInfos * result = NULL;
-
-  QString url = strURL.utf8_str();
-  LOG_INFO << "Importing character from the Armory:" << url;
-
-  for (PluginManager::iterator it = PLUGINMANAGER.begin();
-       it != PLUGINMANAGER.end();
-       ++it)
+  // The character model for an imported race and sex, or null when this build has none.
+  GameFile * armoryRaceModel(const CharInfos & info, int & sex)
   {
-    const auto * plugin = dynamic_cast<ImporterPlugin *>(*it);
-    if (plugin && plugin->acceptURL(url))
-    {
-      result = plugin->importChar(url);
-    }
+    sex = (info.gender == "Male") ? 0 : 1;
+    const int raceModelFileID = RaceInfos::getFileIDForRaceSex(info.raceId, sex);
+    return (raceModelFileID > 0) ? GAMEDIRECTORY.getFile(raceModelFileID) : nullptr;
   }
 
-  if (result)
+  // The Armory importer among the loaded plugins: the first one that takes a character link.
+  ImporterPlugin * armoryImporter(const QString & url)
   {
-    if (!result->valid)
+    for (PluginManager::iterator it = PLUGINMANAGER.begin(); it != PLUGINMANAGER.end(); ++it)
     {
-      const wxString msg = result->errorMessage.empty()
-        ? wxString(wxT("Improperly Formatted URL.\nMake sure the link points to a character page (e.g. https://worldofwarcraft.blizzard.com/en-gb/worldsoul/eu/armory/character/realm/name)."))
-        : wxString::FromUTF8(result->errorMessage.c_str());
-      wxMessageBox(msg, wxT("Armory Import Failed"));
-      delete result;
-      return;
+      auto * plugin = dynamic_cast<ImporterPlugin *>(*it);
+      if (plugin && plugin->acceptURL(url))
+        return plugin;
     }
+    return nullptr;
+  }
+}
 
-    const auto sex = (result->gender == "Male") ? 0 : 1;
+CharInfos * ModelViewer::FetchArmoryCharacter(const wxString & strURL, wxString & error, QVariantMap * summary)
+{
+  error.clear();
+  if (summary)
+    summary->clear();
 
-    // The race has to resolve to a character model before anything is dressed. For a race
-    // this build has no model for (getFileIDForRaceSex returns -1, e.g. a race that shares
-    // its model file with another one), LoadModel() is handed nothing and does nothing --
-    // and the import would then put this character's customizations and equipment on
-    // whatever model happened to be on screen, or do nothing at all with an empty viewport.
-    const int raceModelFileID = RaceInfos::getFileIDForRaceSex(result->raceId, sex);
-    GameFile * raceModel = (raceModelFileID > 0) ? GAMEDIRECTORY.getFile(raceModelFileID) : nullptr;
-    if (!raceModel)
-    {
-      LOG_ERROR << "Armory import: no character model for race" << result->raceId << "sex" << sex
-                << "- nothing was imported.";
-      wxMessageBox(wxString::Format(wxT("This build has no character model for race %d (%s), so the character could not be imported.\n\nNothing on screen was changed."),
-                                    result->raceId, (sex == 0) ? wxT("male") : wxT("female")),
-                   wxT("Armory Import Failed"));
-      delete result;
-      return;
-    }
+  const QString url = QString::fromUtf8(strURL.utf8_str());
+  LOG_INFO << "Importing character from the Armory:" << url;
 
+  // Only the first plugin that takes the link is asked: a second one would overwrite (and
+  // leak) the first one's answer.
+  ImporterPlugin * importer = armoryImporter(url);
+  CharInfos * result = importer ? importer->importChar(url) : nullptr;
+  if (!result)
+  {
+    LOG_ERROR << "Armory import: no importer took the link.";
+    error = _("That is not an Armory character link.\n\n"
+              "Paste the address of a character's Armory page: it has /character/ in it.");
+    return nullptr;
+  }
+
+  if (!result->valid)
+  {
+    error = result->errorMessage.empty()
+      ? wxString(_("Could not read the character link.\n\nPaste the address of a character's Armory page."))
+      : wxString::FromUTF8(result->errorMessage.c_str());
+    delete result;
+    return nullptr;
+  }
+
+  // The race has to resolve to a character model before anything is dressed. For a race
+  // this build has no model for (getFileIDForRaceSex returns -1), LoadModel() would be handed
+  // nothing and the character's customizations and equipment would land on whatever model
+  // happened to be on screen. Checked here, before anything on screen changes.
+  int sex = 0;
+  if (!armoryRaceModel(*result, sex))
+  {
+    LOG_ERROR << "Armory import: no character model for race" << result->raceId << "sex" << sex
+              << "- nothing was imported.";
+    error = wxString::Format(_("This build has no character model for race %d (%s), so the character could not be imported.\n\n"
+                               "Nothing on screen was changed."),
+                             result->raceId, (sex == 0) ? _("male") : _("female"));
+    delete result;
+    return nullptr;
+  }
+
+  // What the importer read beyond CharInfos, through Qt's meta-object system so neither the
+  // plugin interface nor CharInfos changes shape. An importer without it leaves this empty.
+  if (summary && !QMetaObject::invokeMethod(importer, "lastCharacter", Qt::DirectConnection,
+                                            Q_RETURN_ARG(QVariantMap, *summary)))
+    summary->clear();
+
+  return result;
+}
+
+QVariantMap ModelViewer::ArmoryRealmList(const QString & region)
+{
+  QVariantMap answer;
+  answer["ok"] = false;
+  ImporterPlugin * importer = armoryImporter("https://worldofwarcraft.blizzard.com/");
+  if (!importer || !QMetaObject::invokeMethod(importer, "realmList", Qt::DirectConnection,
+                                              Q_RETURN_ARG(QVariantMap, answer), Q_ARG(QString, region)))
+  {
+    answer.clear();
+    answer["ok"] = false;
+    answer["unsupported"] = true;
+    answer["message"] = QString("the Armory importer has no realm list");
+  }
+  return answer;
+}
+
+bool ModelViewer::ImportArmoury(wxString strURL)
+{
+  wxString error;
+  std::unique_ptr<CharInfos> info(FetchArmoryCharacter(strURL, error));
+  if (info && ApplyArmoryCharacter(*info, error))
+    return true;
+
+  LOG_ERROR << "Armory import failed:" << QString::fromWCharArray(error.wc_str());
+  return false;
+}
+
+bool ModelViewer::ApplyArmoryCharacter(CharInfos & info, wxString & error)
+{
+  CharInfos * result = &info;
+  error.clear();
+
+  // Described to the Unity viewport once, dressed, when this returns: see SceneHold. Held for
+  // the dressing only -- the network wait is over by now.
+  SceneHold sceneHold(this);
+
+  int sex = 0;
+  GameFile * raceModel = armoryRaceModel(info, sex);
+  if (!raceModel)
+  {
+    error = _("This build has no character model for the character's race, so nothing was imported.");
+    return false;
+  }
+
+  {
     // Load the model as this character's race: a race that shares its model file with another
     // one (Mag'har Orc on the Orc model) is otherwise read as that other race, whose
     // customization options are not the imported character's -- every choice below would be
@@ -4091,10 +4160,8 @@ void ModelViewer::ImportArmoury(wxString strURL)
     {
       LOG_ERROR << "Armory import: the character model" << raceModel->fullname()
                 << "did not load - nothing was imported.";
-      wxMessageBox(wxT("The character's model could not be loaded, so nothing was imported."),
-                   wxT("Armory Import Failed"));
-      delete result;
-      return;
+      error = _("The character's model could not be loaded, so nothing was imported.");
+      return false;
     }
 
     if (g_charControl->model->infos.raceID != result->raceId)
@@ -4103,10 +4170,7 @@ void ModelViewer::ImportArmoury(wxString strURL)
                << "- customizations that belong to the character's own race will be skipped.";
 
     if (result->hasTransmogGear == true)
-    {
       LOG_INFO << "Transmogrified Gear was found. Switching items...";
-      wxMessageBox(wxT("We found Transmogrified gear on your character. The items your character is wearing will be exchanged for the items they look like."), wxT("Transmog Notice"));
-    }
 
     // The appearance API returns EVERY customization on the account's character record,
     // which today includes the character's dragonriding-drake mounts (Worn Wylderdrake,
@@ -4166,15 +4230,8 @@ void ModelViewer::ImportArmoury(wxString strURL)
     // selectable immediately (previously the list stayed empty until an item was re-equipped).
     if (canvas && canvas->root)
       modelControl->RefreshModel(canvas->root);
-
-    delete result;
   }
-  else
-  {
-    LOG_ERROR << "There were errors gathering the Armory page.";
-    wxMessageBox(wxT("There was an error when gathering the Armory data.\nPlease try again later."), wxT("Armory Error"));
-
-  }
+  return true;
 }
 
 void ModelViewer::OnExport(wxCommandEvent &event)

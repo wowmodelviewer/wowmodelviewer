@@ -8,6 +8,7 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
 # add wmv source files compilation
 set(src  AnimationExportChoiceDialog.cpp
+         ArmoryImportDialog.cpp
          animcontrol.cpp
          AnimExporter.cpp
          app.cpp
@@ -55,6 +56,7 @@ set(src  AnimationExportChoiceDialog.cpp
          util.cpp)
 
 set(headers AnimationExportChoiceDialog.h
+            ArmoryImportDialog.h
             animcontrol.h
             AnimExporter.h
             app.h

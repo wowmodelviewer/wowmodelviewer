@@ -32,6 +32,7 @@
 
 // Qt
 #include <QtPlugin>
+#include <QVariantMap>
 
 // Externals
 
@@ -71,6 +72,20 @@ class ArmoryImporter final : public ImporterPlugin
     CharInfos * importChar(QString url) const override;
     ItemRecord * importItem(QString url) const override;
 
+    // Reached from the viewer through Qt's meta-object system (QMetaObject::invokeMethod),
+    // so neither the ImporterPlugin interface nor CharInfos changes shape, and an older
+    // viewer or plugin simply does without them.
+    //
+    // What the last successful importChar() read about the character beyond what CharInfos
+    // carries, for the import dialog's summary: name, realmName, realmSlug, region, raceName,
+    // className, genderName. Empty after a failed import.
+    Q_INVOKABLE QVariantMap lastCharacter() const;
+
+    // A region's realm list from the proxy, for the import dialog's realm picker:
+    // { ok, unsupported, message, realms: [ { slug, name, id }, ... ] }. unsupported is true
+    // when the proxy answers but has no realm list route (an older deployment).
+    Q_INVOKABLE QVariantMap realmList(const QString & region) const;
+
     // Members
 
   protected :
@@ -93,10 +108,12 @@ class ArmoryImporter final : public ImporterPlugin
 
     // Methods
     static ArmoryProxy::Result gatherCharacter(const QString & url, ArmoryProxy::Character & character);
+    static QString proxyTemplate();
     static bool hasMember(const QJsonValueRef & check, const QString & lookfor);
     static bool hasTransmog(const QJsonValueRef & check);
 
     // Members
+    mutable QVariantMap m_lastCharacter;
 
     // friend class declarations
 
