@@ -275,6 +275,19 @@ Format loosely based on [Keep a Changelog](https://keepachangelog.com/).
   `-imgseq` smoke test is gone. `-unityipctest` and `-fbxexport` still run.
 
 ### Fixed
+- **Glowing eye colours glow in the Unity viewport.** A character's eye pass is a Mod_Add material (pixel
+  shader 8): the iris, plus a second texture added on top of the lit colour. That second unit reads, through the
+  mesh's second UV set, a small glow cell at the bottom of the eye image. On 97 of the client's 272 eye textures --
+  every blood elf, night elf, void elf and vulpera colour, and orc clan eyes such as `claneyes00_01` -- the cell
+  holds a glow sprite; on the rest it is black. The renderer had the addition implemented but held it back for
+  every Mod_Add material, so a glowing eye drew as a flat orange iris with a dark pupil. It is now drawn wherever
+  that second unit is the character eye (M2 texture type 19). On a Mag'har Orc with `claneyes00_01`, in a
+  full-body view next to the game's own render of the same character, the eye's brightest pixels go from
+  (234, 187, 36) to (254, 254, 68) against the game's (255, 255, 53), and its peak luminance from 188 to 241
+  against 241. On an eye colour whose cell is black nothing changes, to the pixel, and changing the eye colour
+  moves the glow with it without a reload. The other Mod_Add batches -- about 1,140 on creatures, spells, items and world models -- are left as
+  they were on purpose until they have references of their own: `-wmvModAddLobe=off|eyes|all` overrides the scope
+  at run time, and `off` draws exactly what the renderer drew before.
 - **Armory character import reads the links the Armory hands out today, and says why an import failed instead of
   importing nothing.** The Armory moved character pages to `/<locale>/worldsoul/<region>/armory/character/<realm>/<name>`
   and put a search page at `/<locale>/worldsoul/<region>/armory?q=<name>`. The importer pulled the realm and name out

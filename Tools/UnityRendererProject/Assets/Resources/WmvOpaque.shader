@@ -1289,7 +1289,8 @@ Shader "WMV/Opaque Textured"
                 // THE SECOND UNIT'S LUMINOUS LOBE -- the same idea, one unit over, and far commoner.
                 //
                 // Eight M2 combiners add their SECOND texture as an additive term rather than
-                // combining it into the diffuse. Two of them are wired here:
+                // combining it into the diffuse. All eight are wired here; ps8 is drawn only
+                // within the builder's ModAddLobeShippedScope (the character eye, for now):
                 //
                 //   1  ps13  Combiners_Opaque_AddAlpha        += t2.rgb * t2.a
                 //   2  ps14  Combiners_Opaque_AddAlpha_Alpha  += t2.rgb * t2.a * (1 - t1.a)
@@ -1304,7 +1305,7 @@ Shader "WMV/Opaque Textured"
                 // reference genuinely omits the lobe texture's own alpha where every other masked
                 // one multiplies by it, and ps8/ps10 attenuate by nothing whatsoever.
                 //
-                // ALL SIX ARE NOW CONFIRMED AGAINST RETAIL BYTECODE, not just against the legacy
+                // ALL EIGHT ARE NOW CONFIRMED AGAINST RETAIL BYTECODE, not just against the legacy
                 // GLSL: combiners_uber_2_2.bls (FileDataID 5221412) switches on cb1[0].x with one
                 // case per combiner, and cases 8, 10, 13, 14, 16, 20, 21 and 23 decode to exactly
                 // these expressions. Its lobe register is added to the lit colour at the end, the
@@ -1322,8 +1323,9 @@ Shader "WMV/Opaque Textured"
                 // ON ps14 THIS IS THE WHOLE MATERIAL. Its combiner is otherwise identical to plain
                 // Combiners_Opaque, so without the lobe the batch is an inert flat surface. 6,482
                 // batches on 5,036 models were drawing that way.
-                // _SecondUnitWeight is unit 1's own texture weight, which 20 and 23 scale their
-                // lobe by and 13 and 14 do not -- so it stays at its default of 1 for those two.
+                // _SecondUnitWeight is unit 1's own texture weight, which 10, 20 and 23 scale
+                // their lobe by and 8, 13, 14, 16 and 21 do not -- so it stays at its default of 1
+                // for those.
                 // It is the same per-unit vector ps15 reads at unit 2, one channel over: the
                 // legacy names it u_tex_sample_alpha and indexes .r/.g/.b for units 1/2/3
                 // (ModelRenderPass.cpp:122,127,130,131,132), then pins the whole thing to (1,1,1)
@@ -1347,8 +1349,6 @@ Shader "WMV/Opaque Textured"
 
                 if (_SecondUnitLobe > 0.5)
                 {
-                    // la: the lobe texture's own alpha -- every shape but 3 uses it.
-                    // lm: the inverse of the diffuse alpha -- shapes 2 and 3 use it.
                     // la: the lobe texture's own alpha -- shapes 1 and 2 only.
                     // lm: the inverse of the diffuse alpha -- shapes 2 and 3 only.
                     half la = (_SecondUnitLobe > 2.5) ? 1.0h : t2.a;

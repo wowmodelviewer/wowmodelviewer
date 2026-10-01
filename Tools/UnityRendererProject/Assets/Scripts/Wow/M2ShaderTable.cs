@@ -198,5 +198,36 @@ namespace Wmv.Wow
             r.UvSource = UvSourceForVertexShaderName(r.VertexShaderName);
             return r;
         }
+
+        /// <summary>
+        /// M2 texture type 19: the character's eye image, which the host composites from the iris
+        /// and any Eyesight layers before it reaches the renderer. Besides the iris it carries a
+        /// small glow cell at the bottom centre, which a Mod_Add eye pass reads through UV set 1;
+        /// on most eye colours that cell is black.
+        /// </summary>
+        public const int CharacterEyeTextureType = 19;
+
+        /// <summary>
+        /// Where the Mod_Add (pixel shader 8) second-unit lobe is drawn. This is a VERIFICATION
+        /// scope, not a decode: the game draws the lobe on every Mod_Add batch, and the scope
+        /// records how far our evidence reaches. See WmvModelBuilder.ModAddLobeShippedScope.
+        /// </summary>
+        public enum ModAddLobeScope { Off = 0, Eyes = 1, All = 2 }
+
+        /// <summary>
+        /// May a batch with this pixel shader draw its second-unit lobe? Every combiner other than
+        /// Mod_Add answers yes unconditionally, so the scope can never reach another combiner's
+        /// lobe. A Mod_Add batch answers by scope: Eyes admits it only when its texture unit 1
+        /// resolves to an M2 slot of the character-eye type. Pass -1 for unit1TextureType when unit
+        /// 1 is not bound -- not 0, which is a real slot type (a hardcoded file).
+        /// </summary>
+        public static bool SecondUnitLobeInScope(int pixelShader, int unit1TextureType, ModAddLobeScope scope)
+        {
+            if (pixelShader != 8)
+                return true;
+            if (scope == ModAddLobeScope.All)
+                return true;
+            return scope == ModAddLobeScope.Eyes && unit1TextureType == CharacterEyeTextureType;
+        }
     }
 }
