@@ -959,6 +959,30 @@ namespace Wmv.Wow.Tests
                   "shader: single texture, mod flag");
             Check(M2ShaderTable.GetVertexShaderName(2, 0x8) == "Diffuse_T1_Env",
                   "shader: two textures, env flag");
+
+            // The character eye's own pass (geoset 3301 on every player race): Mod_Add, and unit
+            // 1 reads UV set 1 -- the glow cell -- rather than re-reading the iris through UV 0.
+            var eye = M2ShaderTable.Resolve(2, 0x4013);
+            Check(eye.PixelShader == 8, "shader: 0x4013 -> combiner id 8");
+            Check(eye.PixelShaderName == "Combiners_Mod_Add", "shader: 0x4013 -> Combiners_Mod_Add");
+            Check(eye.VertexShaderName == "Diffuse_T1_T2", "shader: 0x4013 -> Diffuse_T1_T2");
+            Check(eye.UvSource[1] == M2UvSource.TexCoord1, "shader: 0x4013 unit 1 samples uv set 1");
+
+            // Where the Mod_Add lobe is drawn. Eyes admits a ps8 batch only when unit 1 is the
+            // character-eye type; -1 (unit 1 not bound) and 0 (a real, hardcoded slot type) are
+            // both refused; and no scope can reach another combiner's lobe.
+            var eyes = M2ShaderTable.ModAddLobeScope.Eyes;
+            var off = M2ShaderTable.ModAddLobeScope.Off;
+            var all = M2ShaderTable.ModAddLobeScope.All;
+            Check(M2ShaderTable.SecondUnitLobeInScope(8, 19, eyes), "modadd scope: ps8 on the eye, eyes -> drawn");
+            Check(!M2ShaderTable.SecondUnitLobeInScope(8, 11, eyes), "modadd scope: ps8 on type 11, eyes -> withheld");
+            Check(!M2ShaderTable.SecondUnitLobeInScope(8, 0, eyes), "modadd scope: ps8 on type 0, eyes -> withheld");
+            Check(!M2ShaderTable.SecondUnitLobeInScope(8, -1, eyes), "modadd scope: ps8, unit 1 unbound, eyes -> withheld");
+            Check(!M2ShaderTable.SecondUnitLobeInScope(8, 19, off), "modadd scope: ps8 on the eye, off -> withheld");
+            Check(M2ShaderTable.SecondUnitLobeInScope(8, 11, all), "modadd scope: ps8 on type 11, all -> drawn");
+            Check(M2ShaderTable.SecondUnitLobeInScope(10, 11, off), "modadd scope: off leaves ps10 alone");
+            Check(M2ShaderTable.SecondUnitLobeInScope(13, 0, off), "modadd scope: off leaves ps13 alone");
+            Check(M2ShaderTable.SecondUnitLobeInScope(21, 19, off), "modadd scope: off leaves ps21 alone");
         }
 
         /// <summary>

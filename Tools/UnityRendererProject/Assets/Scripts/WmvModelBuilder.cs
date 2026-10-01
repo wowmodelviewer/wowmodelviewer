@@ -52,7 +52,7 @@ public struct WmvMaterialAnimBinding
     public int Submesh;           // the skin's submesh number, for the log
     public int Color;             // model.Colors, or -1
     public int Weight;            // model.TextureWeightTracks, or -1 -- unit 0, the pass opacity
-    public int Weight1;           // ... unit 1's own weight track, or -1 -- the ps20/23 lobe's gain
+    public int Weight1;           // ... unit 1's own weight track, or -1 -- a weighted second-unit lobe's gain
     public int Weight2;           // ... unit 2's own weight track, or -1 -- the third unit's gain
     public int Transform2;        // ... unit 2
     public int Transform0;        // model.TextureTransforms for unit 0, or -1 (STATIC, env, none)
@@ -318,6 +318,13 @@ public static class WmvModelBuilder
     ///                    together with -wmvNoAnim: a moving model is not in its rest pose.
     ///   -wmvNoEmitters   draw no particles and no ribbons: the control for every emitter
     ///                    measurement, and the BEFORE of a before/after pair.
+    ///   -wmvModAddLobe=off|eyes|all
+    ///                    where the Mod_Add (pixel shader 8) second-unit lobe is drawn, overriding
+    ///                    ModAddLobeShippedScope. off: on no Mod_Add batch, which draws exactly what
+    ///                    the renderer drew before the lobe was restored -- the BEFORE of a pair, on
+    ///                    the same player. eyes: only where texture unit 1 is the character eye
+    ///                    (the shipped default). all: on every Mod_Add batch, the widening
+    ///                    experiment. Every other combiner is untouched by all three.
     ///   -wmvNoAnim       do not play anything. The model is still skinned, and still sits in the
     ///                    rest pose the bind poses describe, which is what the milestone before
     ///                    this one shipped.
@@ -386,6 +393,7 @@ public static class WmvModelBuilder
         static bool matDump;
         static bool allocCheck;
         static int[] onlySubmeshes;                      // -wmvOnlySubmesh: null = draw them all
+        static int modAddLobe = -1;                      // -wmvModAddLobe: -1 = ModAddLobeShippedScope
         static int[] pinnedTextures = new int[0];        // -wmvSkinTexture: slot, file, slot, file
         static int rig;
         static bool wmoVertexColour;
@@ -460,6 +468,11 @@ public static class WmvModelBuilder
                         if (int.TryParse(p[i], out v) && v >= 0) path.Add(v);
                     }
                     seqPath = path.ToArray();
+                }
+                else if (a.StartsWith("-wmvModAddLobe="))
+                {
+                    string v = a.Substring("-wmvModAddLobe=".Length);
+                    modAddLobe = v == "off" ? 0 : v == "eyes" ? 1 : v == "all" ? 2 : -1;
                 }
                 else if (a.StartsWith("-wmvOnlySubmesh="))
                 {
@@ -562,6 +575,16 @@ public static class WmvModelBuilder
 
         /// <summary>The submeshes -wmvOnlySubmesh named, or null when it was not passed.</summary>
         public static int[] OnlySubmeshes { get { Parse(); return onlySubmeshes; } }
+
+        /// <summary>Where the Mod_Add lobe is drawn: -wmvModAddLobe, or the shipped scope.</summary>
+        public static M2ShaderTable.ModAddLobeScope ModAddLobe
+        {
+            get
+            {
+                Parse();
+                return modAddLobe < 0 ? ModAddLobeShippedScope : (M2ShaderTable.ModAddLobeScope)modAddLobe;
+            }
+        }
 
         /// <summary>
         /// Is this skin submesh drawn? True for everything unless -wmvOnlySubmesh was passed, in
@@ -1221,6 +1244,17 @@ public static class WmvModelBuilder
                 options.BaseTextureOverride.TryGetValue(batch.SubmeshIndex, out overrideKey))
                 textureSlot = overrideKey;
             int unit1Slot = useUnit1 ? ResolveTextureSlot(model, batch, 1) : -1;
+            // Where the Mod_Add lobe ships (ModAddLobeShippedScope). Keyed on the M2-declared type
+            // of unit 1's slot, so it is fixed at build time, unaffected by a pinned or overridden
+            // texture, and kept through a rebind -- an eye-colour change swaps the image, and the
+            // glow follows it. PlanCombiner stays the table of what each combiner IS; this says
+            // what is drawn. It runs before every reader of Lobe2.
+            int unit1Type = unit1Slot >= 0 && unit1Slot < model.Textures.Length
+                            ? (int)model.Textures[unit1Slot].Type : -1;
+            bool modAddLobeInScope = M2ShaderTable.SecondUnitLobeInScope(shader.PixelShader, unit1Type,
+                                                                         Debug_.ModAddLobe);
+            if (!modAddLobeInScope)
+                plan.Lobe2 = 0;
             // The third unit. Only a combiner that actually consumes it asks for it, so no other
             // material pays for the extra sampler or the extra upload.
             bool useUnit2 = plan.Lobe && batch.TextureCount >= 3 &&
@@ -1317,6 +1351,17 @@ public static class WmvModelBuilder
                 log(string.Format("batch: submesh {0} geoset {1}, texture combo {2}, {3} unit(s) -- {4}",
                                   batch.SubmeshIndex, submesh.Id, batch.TextureComboIndex,
                                   batch.TextureCount, units));
+                // Mod_Add batches only, so no other batch's log changes: whether its lobe is drawn
+                // and why. This is the line a sweep greps for.
+                if (shader.PixelShader == 8)
+                    log(string.Format("modadd: submesh {0} Mod_Add lobe {1} (scope {2}) -- unit 1 {3}",
+                                      batch.SubmeshIndex,
+                                      !modAddLobeInScope ? "WITHHELD" : useUnit1 ? "DRAWN" : "NOT DRAWN",
+                                      Debug_.ModAddLobe,
+                                      unit1Slot < 0 ? "not bound"
+                                      : "slot " + unit1Slot + " is M2 type " + unit1Type +
+                                        (unit1Type == M2ShaderTable.CharacterEyeTextureType
+                                         ? ", the composited character eye" : ", not the character eye")));
                 if (!plan.Known)
                     log(string.Format("material: pixel shader {0} ({1}) is not implemented -- drawing " +
                                       "unit 0 alone with its own alpha",
@@ -2436,6 +2481,31 @@ public static class WmvModelBuilder
     static CombinerPlan WithLobe0(CombinerPlan p) { p.Lobe0 = true; return p; }
 
     /// <summary>
+    /// WHERE THE ps8 (Mod_Add) SECOND-UNIT LOBE IS DRAWN: the character eye only, for now.
+    ///
+    /// This scope records how far our evidence reaches, NOT a property of the material: the game
+    /// draws the lobe on every Mod_Add batch, and the decode in PlanCombiner says so. The eye is
+    /// the one population whose every input has been measured (see case 8) and checked against a
+    /// reference picture. -wmvModAddLobe=off|eyes|all overrides it at run time, so a before and an
+    /// after come from one player.
+    ///
+    /// EXIT CRITERION for setting it to All -- due in the next stage, not open-ended:
+    ///   1. ps10's unit-1 weighting is decided (the knife diagnosis in case 10's note), so ps8
+    ///      and ps10 are settled together rather than in opposite directions.
+    ///   2. An off-vs-all pair on one player has been judged for each kind of batch this withholds:
+    ///      a luminous unit 1 over a dark unit 0 (darkwellphoenixmount, phoenix2darkwell,
+    ///      cosmicdragonmount, dimensiusboss01-03, which should GAIN their glowing layer);
+    ///      the same texture on both units, where the colour doubles (stormcrowmount,
+    ///      ironjuggernaut's godrays); and surfaces that go wholly above 1.0
+    ///      (highspeakereirich batch 8, the igc_orweyna batches, netherwingmount batch 16,
+    ///      ancientofarcane batch 4), which must not read as white sheets.
+    /// If no reference for those can be had within that stage, widen on the decode alone, as
+    /// every sibling lobe was. A gate like this one goes stale quietly -- ThirdUnitLobeArmed's
+    /// "Currently NO" above a true is the precedent.
+    /// </summary>
+    const M2ShaderTable.ModAddLobeScope ModAddLobeShippedScope = M2ShaderTable.ModAddLobeScope.Eyes;
+
+    /// <summary>
     /// What one M2 pixel shader reduces to here. Ported case by case from the legacy viewport's
     /// own GLSL combiner (ModelRenderPass.cpp), not from the shader NAMES -- "Combiners_Mod_Mod2x"
     /// says nothing until you read that it is unit0 * unit1 * 2 with a discard of u0.a * u1.a * 2.
@@ -2445,11 +2515,12 @@ public static class WmvModelBuilder
     /// variable is set (ModelRenderPass.cpp:661-662). This table used to reproduce that default
     /// and drop the lobe, collapsing those cases onto plain single-texture colour. That is a
     /// default of the legacy viewport, not a property of the material, and the lobes are being
-    /// restored one at a time. DONE: 15 (third unit, weighted at unit 2), 8, 10, 13, 14, 16 and
-    /// 21 (second unit, unweighted), 20 and 23 (second unit, weighted at unit 1). STILL
-    /// COLLAPSING: only 8 and 10, and those are held back on purpose rather than undecoded --
-    /// see their cases below. Every other combiner in this table that carries an additive term now
-    /// computes it. What remains unimplemented (18, 26, 28, 30, 31, 32, 34, 35, 36 and the rest of
+    /// restored one at a time. DONE: 15 (third unit, weighted at unit 2), 13, 14, 16 and 21
+    /// (second unit, unweighted), 8 (second unit, unweighted, drawn only within
+    /// ModAddLobeShippedScope), 10, 20 and 23 (second unit, weighted at unit 1 -- on 10 a knowing
+    /// deviation, see its case). STILL COLLAPSING: ps8 outside the character eye, by verification
+    /// scope rather than decode. Every other combiner in this table that carries an additive term
+    /// now computes it. What remains unimplemented (18, 26, 28, 30, 31, 32, 34, 35, 36 and the rest of
     /// the default arm) has no dropped lobe -- those are diffuse shapes we have not written, not
     /// terms we are throwing away.
     /// </summary>
@@ -2574,8 +2645,8 @@ public static class WmvModelBuilder
             //
             //   the legacy GLSL transcription    specular = tex2.rgb   (ModelRenderPass.cpp:117)
             //   retail's own DXBC                no cb0[22] multiply on the ps10 lobe
-            //   Wowhead's WebGL viewer           _specular = tex1.rgb, captured live from the
-            //                                    running page on this exact FileDataID
+            //   an independent browser renderer  _specular = tex1.rgb, its shader captured live
+            //                                    while drawing this exact FileDataID
             //
             // What holds it in place is one model: raw, knife_1h_naxx25_d_01 blows out. Since the
             // weight resolves to 1 wherever nothing binds it, the two forms differ ONLY on batches
@@ -2584,12 +2655,26 @@ public static class WmvModelBuilder
             // to Plan(0, 1, 1f, true, false, 4) is the correct end state; it needs the knife's
             // blowout diagnosed first, and that has not been done.
             //
-            // ps8 IS STILL HELD BACK, and now for a reason that is about coverage rather than
-            // correctness: its 1,277 batches include the character EYES geoset (3301), which
-            // 52,180 of 120,978 CreatureDisplayInfo rows resolve to, and none of that has been
-            // looked at. The shape is identical -- Plan(0, 4, 1f, true, false, 4, true). It is a
-            // validation job, not a decode one.
-            case 8:  return Plan(0, 4, 1f, true);    // Mod_Add   -- lobe held back, see above
+            // ps8 IS RESTORED UNWEIGHTED, as every reference has it, and DRAWN ONLY WITHIN
+            // ModAddLobeShippedScope -- for now, the character eye. The weighting question above
+            // is ps10's and stays open; on the eye it is moot, because no eye binds a unit-1
+            // weight (the matanim line says so per batch).
+            //
+            // Why the eye first. Its batches are one shape everywhere -- shader 0x4013,
+            // Diffuse_T1_T2, alpha key, both units on the same type-19 slot -- and unit 1 does NOT
+            // re-read the iris: it samples through UV set 1, which maps the eye's vertices into a
+            // small glow cell at the bottom centre of the eye image (measured on the orc, human
+            // and blood elf meshes: UV1 equals UV0 on none of their eye vertices). That cell is
+            // black on 175 of the client's 272 eye textures, so there the lobe adds exactly zero;
+            // on the other 97 it holds the authored glow sprite, which is the saturated core the
+            // game draws in a glowing eye and this renderer did not. It is also the only ps8
+            // population with an independent reference picture.
+            //
+            // What is withheld, deliberately: about 1,140 other ps8 batches in skin 0. Some are
+            // KNOWN to be too dark without the lobe -- models whose luminous layer IS unit 1 over
+            // a near-black unit 0 -- and some will push whole surfaces above 1.0, and none of them
+            // has a reference yet. -wmvModAddLobe=all draws them for the widening experiment.
+            case 8:  return Plan(0, 4, 1f, true, false, 4);    // Mod_Add -- drawn within ModAddLobeShippedScope
             // Mod_Add_Alpha. THE ONE THAT DOES NOT FOLLOW THE PATTERN:
             //   specular = tex2.rgb * (1.0 - tex1.a)   (ModelRenderPass.cpp:128)
             // There is no tex2.a in it. Every other second-unit lobe in the table multiplies by
@@ -2976,12 +3061,17 @@ public static class WmvModelBuilder
             log(string.Format("matanim: submesh {0} unit-2 weight (the ps15 lobe's gain): {1} " +
                               "(weight combo {2} -> lookup[{3}]={4})",
                               batch.SubmeshIndex, w2, wcombo, wcombo + 2, wl));
-            if (plan.Lobe2Weighted)
+            // Stated for every armed second-unit lobe, weighted or not: for an unweighted one the
+            // track is resolved here for the log alone, so "would weighting it change anything on
+            // this batch" is answered by a run rather than by reasoning about the lookup.
+            if (plan.Lobe2 > 0 && useUnit1)
             {
+                int w1Index = plan.Lobe2Weighted ? b.Weight1
+                                                 : M2MaterialEval.ResolveWeightIndex(model, batch, 1);
                 string w1 = "none";
-                if (b.Weight1 >= 0 && b.Weight1 < model.TextureWeightTracks.Length)
+                if (w1Index >= 0 && w1Index < model.TextureWeightTracks.Length)
                 {
-                    M2Track<float> wt1 = model.TextureWeightTracks[b.Weight1];
+                    M2Track<float> wt1 = model.TextureWeightTracks[w1Index];
                     float lo1 = 1f, hi1 = 1f;
                     for (int k = 0; k < wt1.Values.Length; k++)
                     {
@@ -2989,15 +3079,17 @@ public static class WmvModelBuilder
                         if (k == 0 || wt1.Values[k] > hi1) hi1 = wt1.Values[k];
                     }
                     w1 = string.Format("track {0}, {1} key(s), {2}, range {3:F4}..{4:F4}",
-                                       b.Weight1, wt1.Values.Length,
+                                       w1Index, wt1.Values.Length,
                                        wt1.IsGlobal ? "global sequence " + wt1.GlobalSequence : "sequence-local",
                                        lo1, hi1);
                 }
                 string wl1 = wcombo + 1 < model.TextureWeightLookup.Length
                     ? model.TextureWeightLookup[wcombo + 1].ToString() : "past lookup";
-                log(string.Format("matanim: submesh {0} unit-1 weight (the ps20/23 lobe's gain): {1} " +
-                                  "(weight combo {2} -> lookup[{3}]={4})",
-                                  batch.SubmeshIndex, w1, wcombo, wcombo + 1, wl1));
+                log(string.Format("matanim: submesh {0} unit-1 weight (the second-unit lobe's gain): {1} " +
+                                  "(weight combo {2} -> lookup[{3}]={4}); {5}",
+                                  batch.SubmeshIndex, w1, wcombo, wcombo + 1, wl1,
+                                  plan.Lobe2Weighted ? "applied to the lobe"
+                                                     : "NOT applied -- this combiner's lobe is unweighted"));
             }
         }
         return b;
@@ -3510,6 +3602,9 @@ public static class WmvModelBuilder
             // The third unit: which coordinate it samples, and whether its luminous lobe is armed.
             // _ThirdUnitLobe 1 means a real host-forwarded type-3 texture reached this material.
             "_Unit2UV {23} _ThirdUnitLobe {24}; " +
+            // The second unit's additive lobe: its shape (0 = not drawn) and its gain. Without
+            // these a run cannot say whether a combiner's lobe was armed on this material at all.
+            "_SecondUnitLobe {25} _SecondUnitWeight {26}; " +
             "WoW blend {15} depthWriteOff {16} twoSided {17} unlit {22}",
             m.name, s != null ? s.name : "<none>", s != null ? s.renderQueue : -1, treatedAs,
             m.renderQueue, m.GetTag("RenderType", false, "<unset>"),
@@ -3517,7 +3612,8 @@ public static class WmvModelBuilder
             Prop(m, "_DstBlend"), Prop(m, "_ZWrite"), Prop(m, "_Cull"), Prop(m, CombinerModeProperty),
             string.Join(",", m.shaderKeywords), mode, def.DepthWriteDisabled, def.TwoSided,
             Prop(m, "_AlphaMode"), Prop(m, "_Emissive"), Prop(m, "_Unit0UV"), Prop(m, "_Unit1UV"),
-            def.Unlit, Prop(m, "_Unit2UV"), Prop(m, ThirdUnitLobeProperty)));
+            def.Unlit, Prop(m, "_Unit2UV"), Prop(m, ThirdUnitLobeProperty),
+            Prop(m, SecondUnitLobeProperty), Prop(m, SecondUnitWeightProperty)));
 
         if (!shaderCanRenderOpaque)
             log("material '" + m.name + "': the resolved shader bakes blending, depth and culling " +
