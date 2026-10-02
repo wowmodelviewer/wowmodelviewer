@@ -29,7 +29,7 @@ class _GAMEFILE_API_ GameFile : public Component
     GameFile(QString path, int id = -1) 
       : eof(true), buffer(nullptr), pointer(0), size(0), 
         filepath(path), m_useMemoryBuffer(true), m_fileDataId(id),
-        originalBuffer(nullptr), curChunk("")
+        originalBuffer(nullptr), originalSize(0), curChunk("")
     {}
 
     virtual ~GameFile() {}
@@ -56,20 +56,9 @@ class _GAMEFILE_API_ GameFile : public Component
     bool setChunk(std::string chunkName, bool resetToStart = true);
     bool isChunked() { return chunks.size() > 0; }
 
-    // Raw (un-chunked) view of the whole file in memory mode. doPostOpenOperation() may have
-    // re-pointed buffer/size to a single chunk's payload via setChunk(); these always return
-    // the full file (the chunk parser walks the file to its end, so the end of the last chunk
-    // is the file size when chunked). The multi-chunk end is additionally clamped to the
-    // allocation (`size` still holds the whole file there) so a corrupt trailing chunk header
-    // can never claim bytes past the buffer. Inline and non-virtual: no layout/ABI change.
+    // Whole memory allocation, independent of the selected chunk and its declared size.
     const unsigned char * rawBuffer() const { return originalBuffer; }
-    size_t rawSize() const
-    {
-      if (chunks.empty())
-        return (size_t)size;
-      const size_t end = (size_t)chunks.back().start + chunks.back().size;
-      return (chunks.size() > 1 && end > (size_t)size) ? (size_t)size : end;
-    }
+    size_t rawSize() const { return originalSize; }
 
     virtual void dumpStructure();
 
@@ -110,6 +99,7 @@ class _GAMEFILE_API_ GameFile : public Component
     GameFile(const GameFile &);
     void operator=(const GameFile &);
     unsigned char * originalBuffer;
+    size_t originalSize;
     std::string curChunk;
 };
 
