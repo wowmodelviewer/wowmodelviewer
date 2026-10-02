@@ -1,3 +1,4 @@
+#include "AnimationFileSnapshot.h"
 #include <map>
 #include "WoWModel.h"
 
@@ -1036,14 +1037,16 @@ void WoWModel::readAnimsFromFile(GameFile * f, std::vector<AFID> & afids, modelA
     anims.push_back(a);
 
     GameFile * Anim = 0;
+    bool declaredExternal = false;
 
     // if we have animation file ids from AFID chunk, use them
     if (afids.size() > 0)
     {
       for (auto it : afids)
       {
-        if ((it.animId == anims[i].animID) && (it.subAnimId == anims[i].subAnimID))
+        if ((it.animId == a.animID) && (it.subAnimId == a.subAnimID))
         {
+          declaredExternal = true;
           Anim = GAMEDIRECTORY.getFile(it.fileId);
           break;
         }
@@ -1052,29 +1055,20 @@ void WoWModel::readAnimsFromFile(GameFile * f, std::vector<AFID> & afids, modelA
     else // else use file naming to get them
     {
       QString tempname = QString::fromStdString(modelname).replace(".m2", "");
-      tempname = QString("%1%2-%3.anim").arg(tempname).arg(anims[i].animID, 4, 10, QChar('0')).arg(anims[i].subAnimID, 2, 10, QChar('0'));
+      tempname = QString("%1%2-%3.anim").arg(tempname).arg(a.animID, 4, 10, QChar('0')).arg(a.subAnimID, 2, 10, QChar('0'));
       Anim = GAMEDIRECTORY.getFile(tempname);
     }
 
-    if (Anim && Anim->open())
+    if ((Anim || declaredExternal) && !(a.flags & 0x20))
     {
-      Anim->setChunk("AFSB"); // try to set chunk if it exist, no effect if there is no AFSB chunk present
-      {     
-        auto animIt = data.animfiles.find(anims[i].animID);
-        if (animIt != data.animfiles.end())
-          LOG_INFO << "WARNING - replacing" << data.animfiles[anims[i].animID].first->fullname() << "by" << Anim->fullname();
-      }
-      
-      data.animfiles[anims[i].animID] = std::make_pair(Anim, f);
-    }
-    else if (Anim && !(anims.back().flags & 0x20))
-    {
-      // The sequence's keyframes are in this .anim (flag 0x20 would put them in the model), and
-      // it cannot be read: the sequence gets empty tracks rather than a read of the skeleton or
-      // model at offsets meant for the .anim.
-      data.unreadableSequences.insert((uint)(anims.size() - 1));
+      // Keep a declared external source even when it cannot be read: an unavailable
+      // .anim must never make its offsets fall back to the skeleton buffer.
+      auto &bytes = data.animfiles[anims.size() - 1];
+      if (!Anim || !readAnimationSnapshot(*Anim, bytes))
+        LOG_ERROR << "Unable to read external animation" << a.animID << a.subAnimID;
     }
   }
+  data.sequences = anims;
 
   // Index at ofsAnimations which represents the animation in AnimationData.dbc. -1 if none.
   if (nAnimationLookup > 0)
@@ -1190,8 +1184,6 @@ void WoWModel::initAnimated()
           bones.resize(skb1.nBones);
           ModelBoneDef *mb = (ModelBoneDef*)(fileToUse->getBuffer() + skb1.ofsBones);
 
-          for (uint i = 0; i < anims.size(); i++)
-            data.animIndexToAnimId[i] = anims[i].animID;
 
           for (size_t i = 0; i < skb1.nBones; i++)
             bones[i].initV3(*fileToUse, mb[i], data);
@@ -1240,8 +1232,6 @@ void WoWModel::initAnimated()
     bones.resize(header.nBones);
     ModelBoneDef *mb = (ModelBoneDef*)(gamefile->getBuffer() + header.ofsBones);
 
-    for (uint i = 0; i < anims.size(); i++)
-      data.animIndexToAnimId[i] = anims[i].animID;
 
     for (uint i = 0; i < bones.size(); i++)
       bones[i].initV3(*gamefile, mb[i], data);
@@ -1285,13 +1275,6 @@ void WoWModel::initAnimated()
                 << "(bones=" << bones.size() << "); treating as root.";
       bones[b].parent = -1;
     }
-  }
-
-  // free MPQFile
-  for (auto it : data.animfiles)
-  {
-    if (it.second.first != 0)
-      it.second.first->close();
   }
 
   const size_t size = (origVertices.size() * sizeof(float));

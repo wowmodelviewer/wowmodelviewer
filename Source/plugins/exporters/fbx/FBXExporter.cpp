@@ -454,7 +454,7 @@ void FBXExporter::createAnimations()
     m_exportedClipNames.push_back(name.toStdString());
 
     wmvProgress("CLIP " + std::to_string(++clipNum) + " " + std::to_string(m_animsToExport.size()) + " " + name.toStdString());
-    FBXHeaders::createAnimation(m_p_model, m_p_scene, name, anim, m_boneNodes);
+    FBXHeaders::createAnimation(m_p_model, m_p_scene, name, animIdx, m_boneNodes);
   }
 }
 
@@ -1668,9 +1668,9 @@ namespace
     if (tr)
     {
       mm = glm::translate(mm, bone.pivot);
-      if (bone.trans.uses(anim)) mm = glm::translate(mm, bone.trans.getValue(anim, time));
-      if (bone.rot.uses(anim))   mm = mm * glm::toMat4(bone.rot.getValue(anim, time));
-      if (bone.scale.uses(anim)) mm = glm::scale(mm, bone.scale.getValue(anim, time));
+      if (bone.trans.uses(anim)) mm = glm::translate(mm, bone.trans.getValueAtGlobalTime(anim, time, time));
+      if (bone.rot.uses(anim))   mm = mm * glm::toMat4(bone.rot.getValueAtGlobalTime(anim, time, time));
+      if (bone.scale.uses(anim)) mm = glm::scale(mm, bone.scale.getValueAtGlobalTime(anim, time, time));
       mm = glm::translate(mm, bone.pivot * -1.0f);
     }
     cache[b] = (bone.parent > -1) ? srcBoneWorld(mdl, bone.parent, anim, time, cache, done) * mm : mm;
@@ -1826,7 +1826,7 @@ void FBXExporter::dumpSourcePose(Model * model, const std::wstring & animName) c
     return;
   }
   ModelAnimation anim = m->anims[ai];
-  LOG_INFO << "[animdump] anim '" << qPrintable(want) << "' arrayIdx=" << ai << " trackIdx=" << anim.Index << " length=" << anim.length << "ms";
+  LOG_INFO << "[animdump] anim '" << qPrintable(want) << "' sequenceIndex=" << ai << " length=" << anim.length << "ms";
 
   // Build a throwaway scene with ONLY the skeleton + this one animation, using the REAL export
   // code (createSkeleton/createAnimation -- unroll filter and all). Then we evaluate the exported
@@ -1841,7 +1841,7 @@ void FBXExporter::dumpSourcePose(Model * model, const std::wstring & animName) c
   std::map<int, FbxNode*> boneNodes;
   FBXHeaders::createSkeleton(m, scene, skelRoot, boneNodes);
   scene->GetRootNode()->AddChild(skelRoot);
-  FBXHeaders::createAnimation(m, scene, want, anim, boneNodes);
+  FBXHeaders::createAnimation(m, scene, want, ai, boneNodes);
 
   FbxAnimStack * stack = nullptr;
   for (int i = 0; i < scene->GetSrcObjectCount(); i++)
@@ -1856,12 +1856,13 @@ void FBXExporter::dumpSourcePose(Model * model, const std::wstring & animName) c
   for (int fi = 0; fi < 3; fi++)
   {
     const uint32 t = frames[fi];
+    const uint32 sampleTime = (anim.length > 1 && t >= anim.length) ? anim.length - 1 : t;
 
     // SOURCE pose: replicate Bone::calcMatrix for all bones at this time (wow.dll doesn't export it).
     std::vector<glm::mat4> world(m->bones.size());
     std::vector<char> wdone(m->bones.size(), 0);
     for (size_t b = 0; b < m->bones.size(); b++)
-      srcBoneWorld(m, (int)b, anim.Index, (size_t)t, world, wdone);
+      srcBoneWorld(m, (int)b, ai, sampleTime, world, wdone);
 
     FbxTime ft; ft.SetSecondDouble((double)t / 1000.0);
 
