@@ -57,6 +57,7 @@ private:
   wxListCtrl *m_list;
   wxSearchCtrl *m_search;
   wxStaticText *m_count;
+  wxStaticText *m_selectedCount;
   wxButton *m_selectall, *m_unselectall, *m_selectRange;
   wxStaticText *m_rangeLabel, *m_rangeSeparator;
   wxTextCtrl *m_rangeFrom, *m_rangeTo;

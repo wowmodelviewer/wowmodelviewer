@@ -96,6 +96,8 @@ AnimationExportChoiceDialog::AnimationExportChoiceDialog(wxWindow *parent, const
   m_list->AppendColumn(_("Name"), wxLIST_FORMAT_LEFT, FromDIP(350));
   m_list->AppendColumn(_("ID"), wxLIST_FORMAT_RIGHT, FromDIP(65));
   content->Add(m_list, 1, wxEXPAND);
+  m_selectedCount = new wxStaticText(this, wxID_ANY, wxEmptyString);
+  content->Add(m_selectedCount, 0, wxEXPAND | wxTOP, gap);
   root->Add(content, 1, wxEXPAND | wxALL, inset);
   root->Add(CreateSeparatedButtonSizer(wxOK | wxCANCEL), 0, wxEXPAND | wxLEFT | wxRIGHT | wxBOTTOM, inset);
   SetSizer(root);
@@ -176,6 +178,8 @@ void AnimationExportChoiceDialog::UpdateControls()
   m_search->Enable(on);
   m_list->Enable(on);
   m_count->Enable(on);
+  m_selectedCount->Enable(on);
+  m_selectedCount->SetLabel(wxString::Format(_("%u animations selected for export"), (unsigned)checked));
   if (m_rows.size() == m_checked.size())
     m_count->SetLabel(wxString::Format(_("%u animations"), (unsigned)m_checked.size()));
   else
