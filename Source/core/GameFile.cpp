@@ -58,17 +58,31 @@ bool GameFile::open(bool useMemoryBuffer /* = true */)
 
   m_useMemoryBuffer = useMemoryBuffer;
 
-  if (getFileSize(size))
+  // A file whose size cannot be read is not open. Reporting success here used to hand the
+  // caller an object with no buffer that still counted as open (its handle was obtained), and
+  // whose size could be a backend's "invalid size" value: every "getSize() < offset" check
+  // then passed and the first read through the null buffer crashed. Seen with character .anim
+  // files the game storage lists but cannot size (WoWModel::readAnimsFromFile only tests
+  // open(), and Animated<T>::init read the keyframes). Release the handle so a later open()
+  // tries again, and let the caller skip the file as it does for one that does not open.
+  unsigned long long fileSize = 0;
+  if (!getFileSize(fileSize))
   {
-    if (m_useMemoryBuffer)
-    {
-      allocate(size);
+    close();
+    size = 0;
+    pointer = 0;
+    return false;
+  }
+  size = fileSize;
 
-      if (readFile() != 0)
-        eof = false;
+  if (m_useMemoryBuffer)
+  {
+    allocate(size);
 
-      doPostOpenOperation();
-    }
+    if (readFile() != 0)
+      eof = false;
+
+    doPostOpenOperation();
   }
 
   return true;

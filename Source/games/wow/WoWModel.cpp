@@ -1015,6 +1015,13 @@ void WoWModel::readAnimsFromFile(GameFile * f, std::vector<AFID> & afids, modelA
       
       data.animfiles[anims[i].animID] = std::make_pair(Anim, f);
     }
+    else if (Anim && !(anims.back().flags & 0x20))
+    {
+      // The sequence's keyframes are in this .anim (flag 0x20 would put them in the model), and
+      // it cannot be read: the sequence gets empty tracks rather than a read of the skeleton or
+      // model at offsets meant for the .anim.
+      data.unreadableSequences.insert((uint)(anims.size() - 1));
+    }
   }
 
   // Index at ofsAnimations which represents the animation in AnimationData.dbc. -1 if none.
@@ -1054,15 +1061,21 @@ void WoWModel::initAnimated()
 
         // let's try if there is a parent skel file to read
         GameFile * parentFile = 0;
+        bool hasParent = false;
+        bool parentRead = false;
+        uint32 parentId = 0;
         if (skelFile->setChunk("SKPD"))
         {
           SKPD skpd;
           skelFile->read(&skpd, sizeof(skpd));
 
+          hasParent = true;
+          parentId = skpd.parentFileId;
           parentFile = GAMEDIRECTORY.getFile(skpd.parentFileId);
 
           if (parentFile && parentFile->open())
           {
+            parentRead = true;
             // parentFile->dumpStructure();
             afids = readAFIDSFromFile(parentFile);
 
@@ -1086,17 +1099,39 @@ void WoWModel::initAnimated()
         animManager = new AnimManager(*this);
         
         // init bones...
-        if (skelFile->setChunk("SKB1"))
+        GameFile * fileToUse = skelFile->setChunk("SKB1") ? skelFile : 0;
+        if (fileToUse && hasParent)
         {
-          GameFile * fileToUse = skelFile;
-          if (parentFile)
+          // The bones are the parent's, and their tracks index the parent's animations, so the
+          // child's own SKB1 cannot stand in. When the parent is missing or cannot be read, the
+          // model is left as when its own skeleton does not open: no bones, no animations (the
+          // animation manager goes below) and no attachment points (read from this skeleton in
+          // initCommon, they name bones). Reading through the unopened file crashed here.
+          if (parentFile && parentRead && parentFile->open() && parentFile->setChunk("SKB1"))
           {
-            parentFile->open();
-            parentFile->setChunk("SKB1");
             skelFile->close();
             fileToUse = parentFile;
           }
+          else
+          {
+            LOG_ERROR << "Parent skeleton" << (parentFile ? parentFile->fullname() : QString("ID %1").arg(parentId))
+                      << "of" << skelFile->fullname()
+                      << "could not be read; the model is loaded without bones or animations.";
+            if (parentFile)
+              parentFile->close();
+            fileToUse = 0;
+            anims.clear();
+            animLookups.clear();
+            atts.clear();
+            header.nAttachments = 0;
+            header.nAttachLookup = 0;
+            for (size_t i = 0; i < ATT_MAX; i++)
+              attLookup[i] = -1;
+          }
+        }
 
+        if (fileToUse)
+        {
           SKB1 skb1;
           fileToUse->read(&skb1, sizeof(skb1));
           memcpy(&skb1, fileToUse->getBuffer(), sizeof(SKB1));
@@ -1120,6 +1155,15 @@ void WoWModel::initAnimated()
             LOG_ERROR << "KeyBone number" << skb1.nKeyBoneLookup << "over" << BONE_MAX;
           }
           fileToUse->close();
+        }
+
+        // An animation manager crashes at its first tick when there are no animations (it reads
+        // the first one), so a skeleton that gives none leaves the model without one, as when the
+        // skeleton does not open.
+        if (anims.empty())
+        {
+          delete animManager;
+          animManager = 0;
         }
       }
       skelFile->close();
@@ -1254,8 +1298,15 @@ void WoWModel::initAnimated()
   // skip emitter parsing for MPQ clients. Retail (CASC) is unaffected.
   const bool legacyMpqModel = (GAMEDIRECTORY.clientProfile().storage == core::StorageType::MPQ);
 
+  // Emitters hang from a bone (an index out of range falls back to bone 0). A model left without
+  // bones -- its skeleton, or the parent skeleton, could not be read -- gets no emitters: they
+  // would point into the empty bone list and crash at the first clock tick that moves them.
+  const bool emitterBones = !bones.empty();
+  if ((header.nParticleEmitters || header.nRibbonEmitters) && !legacyMpqModel && !emitterBones)
+    LOG_ERROR << "Particle and ribbon emitters of" << modelname.c_str() << "skipped: the model has no bones.";
+
   // particle systems
-  if (header.nParticleEmitters && !legacyMpqModel)
+  if (header.nParticleEmitters && !legacyMpqModel && emitterBones)
   {
     M2ParticleDef *pdefs = (M2ParticleDef *)(gamefile->getBuffer() + header.ofsParticleEmitters);
     M2ParticleDef *pdef;
@@ -1275,7 +1326,7 @@ void WoWModel::initAnimated()
   }
 
   // ribbons (same legacy-format caveat as particle emitters above)
-  if (header.nRibbonEmitters && !legacyMpqModel)
+  if (header.nRibbonEmitters && !legacyMpqModel && emitterBones)
   {
     ModelRibbonEmitterDef *rdefs = (ModelRibbonEmitterDef *)(gamefile->getBuffer() + header.ofsRibbonEmitters);
     ribbons.resize(header.nRibbonEmitters);

@@ -2,6 +2,7 @@
 #define ANIMATED_H
 
 #include <map>
+#include <set>
 #include <utility>
 #include <vector>
 
@@ -29,6 +30,10 @@ public:
   std::map<uint, int16> animIndexToAnimId;
   std::map<int16, std::pair<GameFile *, GameFile *> > animfiles;
   std::vector<uint32> globalSequences;  
+  // Sequences (indices into WoWModel::anims) whose keyframes live in an .anim file that exists
+  // but could not be read. Their tracks stay empty: the offsets in the skeleton point into that
+  // file, so reading them from any other buffer gives meaningless keyframes.
+  std::set<uint> unreadableSequences;
 };
 
 // interpolation functions
@@ -318,11 +323,20 @@ public:
       uint32 *ptimes;
       AnimationBlockHeader* pHeadTimes;
       size_t bufSize = 0;
+      // Keyframes kept in an .anim that could not be read exist nowhere else: leave the track
+      // empty. A global-sequence track is not tied to one animation and is read as before.
+      if (b.seq < 0 && modelData.unreadableSequences.count((uint)j))
+        continue;
       auto it = modelData.animfiles.find(modelData.animIndexToAnimId.at(j));
       if (it != modelData.animfiles.end())
       {
         GameFile * animfile = it->second.first;
         GameFile * skelfile = it->second.second;
+        // A file without a buffer has nothing to read, whatever its size says (a closed file
+        // keeps its last size), and every offset check below would pass with a null base.
+        // Leave this sequence's track empty.
+        if (!animfile->getBuffer() || !skelfile->getBuffer())
+          continue;
         skelfile->setChunk("SKB1");
         pHeadTimes = (AnimationBlockHeader*)(skelfile->getBuffer() + b.ofsTimes + j*sizeof(AnimationBlockHeader));
         ptimes = (uint32*)(animfile->getBuffer() + pHeadTimes->ofsEntrys);
@@ -358,11 +372,15 @@ public:
       D *keys;
       AnimationBlockHeader* pHeadKeys;
       size_t bufSize = 0;
+      if (b.seq < 0 && modelData.unreadableSequences.count((uint)j)) // see the times loop above
+        continue;
       auto it = modelData.animfiles.find(modelData.animIndexToAnimId.at(j));
       if (it != modelData.animfiles.end())
       {
         GameFile * animfile = it->second.first;
         GameFile * skelfile = it->second.second;
+        if (!animfile->getBuffer() || !skelfile->getBuffer()) // see the times loop above
+          continue;
         skelfile->setChunk("SKB1");
         pHeadKeys = (AnimationBlockHeader*)(skelfile->getBuffer() + b.ofsKeys + j*sizeof(AnimationBlockHeader));
         keys = (D*)(animfile->getBuffer() + pHeadKeys->ofsEntrys);
