@@ -59,7 +59,7 @@ void UnityRendererHost::OnPaint(wxPaintEvent & WXUNUSED(event))
   dc.SetBackground(wxBrush(wxColour(35, 31, 32)));   // the player's own background colour
   dc.Clear();
 
-  if (!m_notice || m_noticeTitle.IsEmpty())
+  if (!m_notice || m_noticeTitle.IsEmpty() || m_contentShown)
     return;
 
   // The notice, centred above its button (layoutNotice places the button).
@@ -128,7 +128,7 @@ void UnityRendererHost::setNotice(const wxString & title, const wxString & detai
       m_noticeActionId == actionId)
     return;   // the same notice: nothing to repaint, and no timer to restart
 
-  const bool wasNotice = m_notice;
+  const bool wasCovered = playerCovered();
   m_notice = true;
   m_noticeTitle = title;
   m_noticeDetail = detail;
@@ -152,14 +152,7 @@ void UnityRendererHost::setNotice(const wxString & title, const wxString & detai
     m_noticeButton->Show(wantButton);
   }
 
-  if (!wasNotice)
-  {
-    // The player's window may not exist yet (it is created some time after launch), so the hide is
-    // re-asserted from the timer for as long as the notice is up.
-    m_noticeTicksLeft = -1;
-    m_noticeTimer.Start(100);
-    applyEmbeddedVisibility();
-  }
+  watchEmbeddedVisibility(wasCovered);
   layoutNotice();
   Refresh();
 }
@@ -168,14 +161,69 @@ void UnityRendererHost::clearNotice()
 {
   if (!m_notice)
     return;
+  const bool wasCovered = playerCovered();
   m_notice = false;
   if (m_noticeButton)
     m_noticeButton->Show(false);
-  // Keep re-asserting for a moment after the notice goes too: a hide queued to a busy player thread
-  // can still be pending, and must not be the last word.
-  m_noticeTicksLeft = 20;
-  m_noticeTimer.Start(100);
+  watchEmbeddedVisibility(wasCovered);
+  Refresh();
+}
+
+void UnityRendererHost::watchEmbeddedVisibility(bool wasCovered)
+{
+  if (playerCovered() && !wasCovered)
+  {
+    // The player's window may not exist yet (it is created some time after launch), so the hide is
+    // re-asserted from the timer for as long as it is covered.
+    m_noticeTicksLeft = -1;
+    m_noticeTimer.Start(100);
+  }
+  else if (!playerCovered() && wasCovered)
+  {
+    // Keep re-asserting for a moment after it is uncovered too: a hide queued to a busy player
+    // thread can still be pending, and must not be the last word.
+    m_noticeTicksLeft = 20;
+    m_noticeTimer.Start(100);
+  }
   applyEmbeddedVisibility();
+}
+
+void UnityRendererHost::setContent(wxWindow * content)
+{
+  m_content = content;
+  if (m_content)
+  {
+    m_content->Show(m_contentShown);
+    m_content->SetSize(GetClientRect());
+  }
+}
+
+void UnityRendererHost::showContent(bool show)
+{
+  if (!m_content || m_contentShown == show)
+    return;
+  const bool wasCovered = playerCovered();
+  m_contentShown = show;
+  if (show)
+  {
+    m_content->SetSize(GetClientRect());
+    m_content->Show();
+    m_content->Raise();
+  }
+  else
+  {
+    // The keyboard leaves with it, or it would stay in a hidden window. (A panel's SetFocus keeps the
+    // focus where it is when a child of it has it.)
+    wxWindow * focus = wxWindow::FindFocus();
+    for (wxWindow * w = focus; w; w = w->GetParent())
+      if (w == m_content)
+      {
+        SetFocusIgnoringChildren();
+        break;
+      }
+    m_content->Hide();
+  }
+  watchEmbeddedVisibility(wasCovered);
   Refresh();
 }
 
@@ -198,7 +246,7 @@ void UnityRendererHost::layoutNotice()
 void UnityRendererHost::OnNoticeTimer(wxTimerEvent & WXUNUSED(event))
 {
   applyEmbeddedVisibility();
-  if (!m_notice && m_noticeTicksLeft > 0 && --m_noticeTicksLeft == 0)
+  if (!playerCovered() && m_noticeTicksLeft > 0 && --m_noticeTicksLeft == 0)
     m_noticeTimer.Stop();
 }
 
@@ -466,9 +514,9 @@ void UnityRendererHost::applyEmbeddedVisibility()
     // The window's own visible flag, not IsWindowVisible (which also folds in the parents').
     // Its size is kept up to date by OnSize whether or not it is shown.
     const bool visible = (GetWindowLongPtr(wnd, GWL_STYLE) & WS_VISIBLE) != 0;
-    if (m_notice && visible)
+    if (playerCovered() && visible)
       ShowWindowAsync(wnd, SW_HIDE);
-    else if (!m_notice && !visible)
+    else if (!playerCovered() && !visible)
       ShowWindowAsync(wnd, SW_SHOWNA);
   }
 }
@@ -476,8 +524,11 @@ void UnityRendererHost::applyEmbeddedVisibility()
 void UnityRendererHost::OnSetFocus(wxFocusEvent & event)
 {
   // Hand keyboard focus straight to the embedded player so its input works when the
-  // pane is clicked/activated (not while it is hidden behind a notice).
-  if (!m_notice)
+  // pane is clicked/activated (not while it is hidden behind a notice or the content window; the
+  // content window takes it then).
+  if (m_contentShown && m_content)
+    m_content->SetFocus();
+  else if (!m_notice)
     if (HWND wnd = findEmbeddedWindow())
       ::SetFocus(wnd);
   event.Skip();
@@ -541,6 +592,8 @@ bool UnityRendererHost::checkPlayerHealth()
 void UnityRendererHost::OnSize(wxSizeEvent & event)
 {
   resizeEmbeddedWindow();
+  if (m_content)
+    m_content->SetSize(GetClientRect());
   layoutNotice();
   if (m_notice)
     Refresh();

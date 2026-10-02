@@ -234,7 +234,8 @@ enum ObjectID {
   ID_CHAR_RANDOMISE,
 
   // Command bar and Help menu
-  ID_UI_OPEN_MODEL,        // "Open model": load a client first if none, otherwise go to Browse
+  ID_UI_MODELS,            // the viewer selector's "Models" (and the empty viewer's button): Models mode
+  ID_UI_TEXTURES,          // its "Textures": Textures mode
   ID_UI_SCREENSHOT,        // "Screenshot": a 3840 x 2160 transparent PNG of the Unity viewport, saved where Save As says
   ID_UI_MODEL_LABEL,
   ID_KEYBOARD_SHORTCUTS,

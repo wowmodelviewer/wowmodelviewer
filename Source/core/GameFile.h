@@ -44,6 +44,10 @@ class _GAMEFILE_API_ GameFile : public Component
     void seekRelative(size_t offset);
     bool open(bool useMemoryBuffer = true);
     bool close();
+    // After open() in memory mode: whether the whole file was read into the buffer. open() still
+    // succeeds after a short read, as its callers expect; one that must not pass partial data on
+    // checks this.
+    bool readComplete() const { return m_readComplete; }
     // True while the file is open (shared, folder-owned objects: another component may hold
     // it open; opening/closing it again from outside would corrupt that reader's state).
     bool isCurrentlyOpen() { return isAlreadyOpened(); }
@@ -111,6 +115,7 @@ class _GAMEFILE_API_ GameFile : public Component
     void operator=(const GameFile &);
     unsigned char * originalBuffer;
     std::string curChunk;
+    bool m_readComplete = false;
 };
 
 

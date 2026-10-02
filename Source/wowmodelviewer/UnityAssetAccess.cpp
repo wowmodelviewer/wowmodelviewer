@@ -123,7 +123,11 @@ namespace
           r.data = bytes;
           return true;
         }
-        if (got > 0)
+        // Nothing read from a storage file, which does have a stream read, is a failed read too (an
+        // encrypted file without its key, data the game has not downloaded). It must not be retried
+        // in memory mode below: that open does not report a failed read, and the bytes returned
+        // would be whatever the buffer held before.
+        if (got > 0 || dynamic_cast<CASCFile *>(file) != nullptr)
         {
           r.error = QString("short read (%1 of %2 bytes) -- file may be encrypted or damaged").arg((qulonglong)got).arg((qulonglong)size);
           return false;
@@ -148,6 +152,14 @@ namespace
     {
       file->close();
       r.error = "file is empty or could not be read";
+      return false;
+    }
+    // The memory-mode open succeeds after a short read (an archive that fails part way); the rest
+    // of the buffer is whatever it held before.
+    if (!file->readComplete())
+    {
+      file->close();
+      r.error = "incomplete read -- file may be damaged";
       return false;
     }
     if ((qint64)rawSize > MAX_ASSET_SIZE)

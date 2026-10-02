@@ -35,6 +35,8 @@ class ModelInspector;
 class wxAuiToolBar;
 class ExportJobManager;
 class UnityRendererHost;
+class TextureView;
+struct TextureEntry;
 class CharInfos;
 
 namespace core { class GameConfig; }
@@ -118,6 +120,9 @@ public:
   int m_exportItemSkinFileId = 0;
 
   ExportJobManager * m_exportJobManager = nullptr;
+  // A texture picked in Browse (Show: Textures), shown in the viewport's place: the Unity host's
+  // content window (UnityRendererHost::showContent). Created with the viewport.
+  TextureView * textureView = nullptr;
 
   // Initialising related functions
   void InitMenu();
@@ -161,6 +166,7 @@ public:
 
   // menu commands
   void OnToggleDock(wxCommandEvent &event);
+  void OnPaneClose(wxAuiManagerEvent &event);
   void OnToggleCommand(wxCommandEvent &event);
   void OnEffects(wxCommandEvent &event);
 
@@ -214,6 +220,21 @@ public:
   // loads a client now -- File > "Load World of Warcraft" calls it, and nothing calls it at
   // startup. Loops so a failed legacy-MPQ pick returns to the dialog rather than giving up.
   void PromptAndLoadClient();
+  // THE VIEWER MODE: Models (the Unity viewport and the model panels) or Textures (the texture viewer in
+  // the viewport's place, the model panels put away). The command bar's Models | Textures selector,
+  // Browse's category and the centre all follow it, and SetViewerMode is the one way to change it: the
+  // selector, Browse's Show list (Textures, or any other category), and a model loaded from a menu
+  // (Models). A model stays loaded behind Textures mode and the texture selected stays selected behind
+  // Models mode, so going back shows each as it was, without loading anything again.
+  enum class ViewerMode { Models, Textures };
+  void SetViewerMode(ViewerMode mode);
+  ViewerMode viewerMode() const { return m_viewerMode; }
+  bool isTextureMode() const { return m_viewerMode == ViewerMode::Textures; }
+  // Select a texture picked in Browse (Textures mode): the texture view reads and shows it.
+  void ShowTexture(const TextureEntry & entry, bool lookup);
+  // The texture view's selection changed, or its facts arrived: the command bar's label, the status bar
+  // and the Model panel follow (not the whole interface: nothing else depends on it).
+  void TextureSelectionChanged();
 
   // Whether the Unity viewport is the shown centre pane (it always should be; the self-test checks).
   bool isUnityViewportCentre();
@@ -221,8 +242,8 @@ public:
   // loaded is something it can draw (no notice in front of it).
   bool isUnityViewportShowingModel();
   // Whether the Unity viewport has a notice in front of the player (content it cannot draw yet, a
-  // player that is not running, nothing loaded), as last decided by UpdateUnityViewportState. True
-  // when there is no viewport at all.
+  // player that is not running, nothing loaded) or a texture, as last decided by
+  // UpdateUnityViewportState. True when there is no viewport at all.
   bool unityViewportHasNotice() const;
 
   // Something new is on screen (a model, character, WMO or map tile): the Model panel, the
@@ -236,6 +257,9 @@ public:
   void OnUpdateCommandUI(wxUpdateUIEvent & event);
   void OnKeyboardShortcuts(wxCommandEvent & event);
   void UpdateStatusFacts();
+  // Help text in the status bar's first field, as wx gives it for menu items and toolbar buttons -- only
+  // where there is some: see the definition.
+  void DoGiveHelp(const wxString & text, bool show) wxOVERRIDE;
 
   // THE VIEWPORT SCREENSHOT. The command bar's Screenshot: a Save As dialog (PNG, overwrite confirmed, named after
   // the model and the time), then RequestUnityScreenshot. Cancelling does nothing.
@@ -273,10 +297,38 @@ public:
   // The whole decision UpdateUnityViewportState applies: true with the notice to paint, or false when
   // the player's window should be on screen.
   bool unityViewportNotice(ViewportNotice & notice) const;
-  // The name of the image last picked in Browse, for the viewport's notice; empty otherwise. The image
-  // itself is not loaded anywhere, so nothing else records that an image, not a model, is what the
-  // user picked.
-  wxString m_browseImageName;
+  ViewerMode m_viewerMode = ViewerMode::Models;
+  bool m_helpInStatus = false;   // DoGiveHelp has help text in the status bar, to take away
+  // THE TEXTURE WORKSPACE. While a texture is on screen, the panels that only act on a model are put
+  // away so the texture gets the room: the ones in modelOnlyPanes() that are shown. Each is recorded
+  // and given back as it was -- shown, at the size it had -- when the texture goes (both decided with
+  // the viewport, in UpdateUnityViewportState, and laid out at once). Browse stays. A panel the user
+  // shows or closes meanwhile is theirs again and is left as they put it. The layout saved on exit is
+  // the user's: SaveLayout writes the panels given back. 'commit' false: the caller lays out.
+  static const wxChar * const * modelOnlyPanes();
+  void enterTextureWorkspace(bool commit = true);
+  void leaveTextureWorkspace();
+  // Drop a panel from the record (the user shows or closes it); the record is handed back when asked.
+  struct TextureWorkspacePane;
+  bool forgetTextureWorkspacePane(const wxString & name, TextureWorkspacePane * taken = nullptr);
+  // Lay the panes out with docks made again at the size their panels' best size says, larger than the
+  // 30% of the window a new dock is otherwise capped at (a sash may have made them larger than that).
+  void commitDocksAtTheirSize();
+  // The layout as the user has it: SavePerspective, with the panels a texture put away given back.
+  wxString userPerspective();
+  struct TextureWorkspacePane
+  {
+    wxString name;
+    wxSize bestSize;    // the pane's own best size, put back once it is shown again
+    wxSize shownSize;   // its window's size when it went (a dock made again is sized from it)
+  };
+  bool m_textureWorkspace = false;
+  std::vector<TextureWorkspacePane> m_textureWorkspacePanes;
+  wxString m_textureWorkspaceLayout;   // SavePerspective when they went: the sizes of the docks they took
+  // A client load is starting or has ended: the texture view and Browse's Textures category follow
+  // (Textures mode stays: its selection and cache go with the old client).
+  void TexturesClientLoadStarting();
+  void TexturesClientLoaded();
 
   void OnToggleFullScreen(wxCommandEvent & event);
   void OnCharHook(wxKeyEvent & event);

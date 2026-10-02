@@ -9,6 +9,7 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 # add wmv source files compilation
 set(src  AnimationExportChoiceDialog.cpp
          ArmoryImportDialog.cpp
+         BlpInfo.cpp
          animcontrol.cpp
          AnimExporter.cpp
          app.cpp
@@ -48,6 +49,11 @@ set(src  AnimationExportChoiceDialog.cpp
          Quantize.cpp
          SettingsControl.cpp
          shaders.cpp
+         TextureBrowse.cpp
+         TextureCatalog.cpp
+         TextureDecode.cpp
+         TexturePreview.cpp
+         TextureView.cpp
          UnityAssetAccess.cpp
          UnityCharacterScene.cpp
          UnityIpcServer.cpp
@@ -57,6 +63,7 @@ set(src  AnimationExportChoiceDialog.cpp
 
 set(headers AnimationExportChoiceDialog.h
             ArmoryImportDialog.h
+            BlpInfo.h
             animcontrol.h
             AnimExporter.h
             app.h
@@ -97,6 +104,11 @@ set(headers AnimationExportChoiceDialog.h
             resource1.h
             SettingsControl.h
             shaders.h
+            TextureBrowse.h
+            TextureCatalog.h
+            TextureDecode.h
+            TexturePreview.h
+            TextureView.h
             UiStyle.h
             UnityAssetAccess.h
             UnityCharacterScene.h

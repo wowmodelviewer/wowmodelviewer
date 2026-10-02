@@ -11,6 +11,7 @@ class ModelViewer;
 
 class wxSearchCtrl;
 class wxStaticText;
+class TextureBrowse;
 
 #include "metaclasses/Container.h"
 
@@ -40,6 +41,14 @@ class TreeStackItem : public Container<TreeStackItem>
     int sexID;
 
     TreeStackItem() : file(0), loaded(false), raceID(-1), sexID(-1) {}
+
+    // The rows went (the tree showed another category): nothing below is in the tree any more.
+    void resetLoaded()
+    {
+      loaded = false;
+      for (std::map<QString, TreeStackItem *>::iterator it = m_childrenMap.begin(); it != m_childrenMap.end(); ++it)
+        it->second->resetLoaded();
+    }
 
     bool hasChildren() const { return !m_childrenMap.empty(); }
 
@@ -106,9 +115,9 @@ public:
   void OnSearchTimer(wxTimerEvent &event);   // runs the actual search after typing pauses
   void OnChoice(wxCommandEvent &event);
   void OnTreeMenu(wxTreeEvent &event);
+  void OnTreeActivated(wxTreeEvent &event);
   void OnPopupClick(wxCommandEvent &evt);
   void Export(wxString val, int select);
-  wxString ExportPNG(wxString val);
   void UpdateInterface();
 
   // What picking a row under the "Models" / "WMOs" filter does, callable without a tree event so the
@@ -117,6 +126,22 @@ public:
   // -1 leaves that to the model (every ordinary file row).
   void SelectModelFile(GameFile * file, int raceID = -1, int sexID = -1);
   void SelectWMOFile(GameFile * file);
+
+  // Browse follows the viewer mode (ModelViewer::SetViewerMode): Textures, or the category other than
+  // Textures shown last (Models at first). Each comes back as it was left (see setCategory).
+  void FollowViewerMode(bool textures);
+  // The Models selector and the empty viewer's "Browse models": Browse lists models, world models or map
+  // tiles (whichever of them it listed), not another kind of file.
+  void ShowModels();
+  // An arrow key repeating in the tree (true), or let go: told to the texture view.
+  void KeysRepeating(bool repeating);
+  // The Textures category (TextureBrowse): told when a client load starts and ends, and when a
+  // FileDataID looked up from its search has been read.
+  bool ShowsTextures() const;
+  TextureBrowse * textureBrowse() const { return m_textures; }
+  void TexturesClientLoadStarting();
+  void TexturesClientLoaded();
+  void TextureLookupResolved(int fileDataId, const QString & indexName);
 
   wxTreeCtrl *fileTree;
   wxSearchCtrl *txtContent;
@@ -129,6 +154,19 @@ public:
 
 private:
   void ClearCanvas();
+  // Switch the Show category (the choice list, the viewer mode). The Textures category keeps its own
+  // search text and open folders while another is shown, and the others theirs (one search text, as
+  // before) while Textures are. The model categories' tree left for Textures is kept, and comes back as
+  // it was -- rows rebuilt from the same hierarchy, the same folders open -- without listing the files
+  // again (which also left the old hierarchy behind, never freed).
+  void setCategory(int mode);
+  void keepModelTree();
+  bool reuseModelTree();
+  void reopenModelRows(wxTreeItemId parent, wxTreeItemId & top);
+  // The Textures category's Init, row picks and right-click menu.
+  void InitTextures();
+  void SelectTextureRow(wxTreeItemId item);
+  void ShowTextureMenu(wxTreeItemId item);
   // The line under the search box: the minimum-length hint, or the result count.
   void SetSearchStatus(const wxString & text);
 
@@ -139,6 +177,23 @@ private:
   // One-shot debounce for the as-you-type search: each keystroke restarts it, and the
   // expensive filter + tree rebuild (Init) runs only when it fires after a brief pause.
   wxTimer m_searchTimer;
+
+  // The Textures category's tree source, and a check from a client load's start until it has ended
+  // (the load's own notice can come while it is still finishing, and a failed load sends none).
+  TextureBrowse * m_textures = nullptr;
+  wxTimer m_texturesLoadWatch;
+  wxString m_texturesSearch;   // the Textures category's search text while another category is shown
+  wxString m_filesSearch;      // the other categories' while Textures are
+  wxString m_texturesApplied;  // the search each tree was last built with (a short text typed but never
+  wxString m_filesApplied;     // run -- the search waits for 3 characters -- is not what it shows)
+  int m_lastFilesCategory = 0; // the category other than Textures shown last (Models)
+  // The model categories' tree as it was when Textures took the tree (keepModelTree).
+  int m_treeRootFilter = -1;   // the category m_treeRoot was built for, and with which search
+  QString m_treeRootContent;
+  wxString m_treeRootStatus;
+  bool m_modelTreeKept = false;
+  std::set<TreeStackItem *> m_modelOpenNodes;
+  TreeStackItem * m_modelTopNode = nullptr;
 };
 
 #endif

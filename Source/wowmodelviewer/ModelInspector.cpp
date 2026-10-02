@@ -25,6 +25,7 @@
 #include "globalvars.h"
 #include "maptile.h"
 #include "modelviewer.h"
+#include "TextureView.h"
 #include "UiStyle.h"
 #include "wmo.h"
 #include "WoWModel.h"
@@ -164,6 +165,9 @@ ModelInspector::Context ModelInspector::currentContext() const
 {
   if (!g_modelViewer || !g_canvas)
     return CONTEXT_NONE;
+  // A texture picked in Browse is on screen (a model may be loaded behind it, and is back when picked).
+  if (g_modelViewer->isTextureMode())
+    return CONTEXT_TEXTURE;
   if (g_modelViewer->isWMO && g_canvas->wmo)
     return CONTEXT_WMO;
   if (g_modelViewer->isADT && g_canvas->adt)
@@ -266,9 +270,10 @@ void ModelInspector::RefreshAppearance()
   {
     case CONTEXT_NONE:  m_contextNote->SetLabel(_("No model loaded. Pick one in Browse.")); break;
     case CONTEXT_OTHER: m_contextNote->SetLabel(_("Nothing to adjust for a map tile.")); break;
+    case CONTEXT_TEXTURE: m_contextNote->SetLabel(_("Nothing to adjust for a texture.")); break;
     default: break;
   }
-  m_contextNote->Show(ctx == CONTEXT_NONE || ctx == CONTEXT_OTHER);
+  m_contextNote->Show(ctx == CONTEXT_NONE || ctx == CONTEXT_OTHER || ctx == CONTEXT_TEXTURE);
 
   m_modelBox->Show(ctx == CONTEXT_MODEL);
   m_wmoBox->Show(ctx == CONTEXT_WMO);
@@ -1003,6 +1008,26 @@ void ModelInspector::RebuildInfo()
     AddInfoRow(_("Type"), _("Map tile (ADT)"));
     AddInfoRow(_("Path"), t->name);
   }
+  else if (ctx == CONTEXT_TEXTURE && g_modelViewer->textureView)
+  {
+    // What the file is; its pixels' facts are under the texture itself.
+    const TextureView::Current & c = g_modelViewer->textureView->current();
+    const TextureEntry & e = c.entry;
+    m_infoFor = g_modelViewer->textureView;
+    if (g_modelViewer->textureView->selection() == TextureView::Selection::None)
+      AddInfoRow(_("Texture"), _("None selected"));
+    else
+    {
+      AddInfoRow(_("Name"), g_modelViewer->textureView->displayName());
+      // Until it is read, a texture of the list is a BLP by its name.
+      const bool blp = TextureView::isBlp(c);
+      AddInfoRow(_("Type"), blp ? _("Texture (BLP)") : _("File (not a BLP texture)"));
+      if (!e.unnamed && !e.path.isEmpty())
+        AddInfoRow(_("Path"), wxString(e.path.toStdWString()));
+      if (e.fileDataId > 0)
+        AddInfoRow(_("FileDataID"), wxString::Format(wxT("%d"), e.fileDataId));
+    }
+  }
 
   m_infoEmpty->Show(ctx == CONTEXT_NONE);
   m_info->Layout();
@@ -1118,6 +1143,7 @@ void ModelInspector::OnWatchTimer(wxTimerEvent & WXUNUSED(event))
       const Context ctx = currentContext();
       const void * shown = (ctx == CONTEXT_WMO) ? (const void *)g_canvas->wmo
                          : (ctx == CONTEXT_OTHER) ? (const void *)g_canvas->adt
+                         : (ctx == CONTEXT_TEXTURE) ? (const void *)g_modelViewer->textureView
                          : (const void *)(g_canvas ? g_canvas->model() : nullptr);
       if (ctx != m_infoContext || shown != m_infoFor)
         RebuildInfo();

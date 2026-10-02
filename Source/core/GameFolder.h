@@ -58,6 +58,10 @@ namespace core
       virtual GameFile * getFile(QString filename);
       virtual GameFile * getFile(int id) = 0;
 
+      // Every file in the index by full path, in path order: the map getFile(QString) looks up,
+      // one entry per path (the newest object when a path was added twice). Read-only.
+      const std::map<QString, GameFile *> & filesByPath() const { return m_nameMap; }
+
       virtual bool openFile(std::string file, void ** result) = 0;
       virtual bool openFile(int id, void ** result) = 0;
       
