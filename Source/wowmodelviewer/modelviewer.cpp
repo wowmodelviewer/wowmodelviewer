@@ -4303,7 +4303,7 @@ void ModelViewer::OnExport(wxCommandEvent &event)
           selection = animChoiceDlg.GetSelections();
           animsToExport.reserve(selection.GetCount());
           for (unsigned int I = 0; I < selection.GetCount(); I++)
-            animsToExport.push_back(canvas->model()->anims[selection[I]].Index);
+            animsToExport.push_back(selection[I]);
         }
       }
 

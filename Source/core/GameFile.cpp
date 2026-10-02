@@ -78,6 +78,7 @@ bool GameFile::close()
 {
   delete[] originalBuffer;
   originalBuffer = 0;
+  originalSize = 0;
   buffer = 0;
   eof = true;
   chunks.clear();
@@ -92,6 +93,7 @@ void GameFile::allocate(unsigned long long s)
   size = s;
 
   originalBuffer = new unsigned char[size];
+  originalSize = static_cast<size_t>(size);
   buffer = originalBuffer;
 
   if (size == 0)

@@ -2,6 +2,7 @@
 #define ANIMATED_H
 
 #include <map>
+#include <cstring>
 #include <utility>
 #include <vector>
 
@@ -26,9 +27,26 @@
 class modelAnimData
 {
 public:
-  std::map<uint, int16> animIndexToAnimId;
-  std::map<int16, std::pair<GameFile *, GameFile *> > animfiles;
-  std::vector<uint32> globalSequences;  
+  // Sequence indices preserve animID + subAnimID; buffers are independent snapshots,
+  // so no GameFile remains open while tracks or Unity consume the animation.
+  std::vector<ModelAnimation> sequences;
+  std::map<size_t, std::vector<unsigned char>> animfiles;
+  std::vector<uint32> globalSequences;
+
+  int keySequence(size_t index) const
+  {
+    for (size_t steps = 0; steps < sequences.size(); ++steps)
+    {
+      if (index >= sequences.size()) return -1;
+      const auto &s = sequences[index];
+      if ((s.flags & 0x20) || animfiles.count(index)) return (int)index;
+      if (!(s.flags & 0x40)) return steps == 0 ? (int)index : -1;
+      if (s.Index < 0) return -1;
+      index = (size_t)s.Index;
+    }
+    return -1; // Invalid target or cyclic alias; never read unrelated keys.
+  }
+
 };
 
 // interpolation functions
@@ -162,6 +180,12 @@ public:
 
   T getValue(ssize_t anim, size_t time)
   {
+    return getValueAtGlobalTime(anim, time, globalTime);
+  }
+
+  // Exporters use a deterministic global clock without modifying the live viewer's.
+  T getValueAtGlobalTime(ssize_t anim, size_t time, size_t globalClock)
+  {
     // obtain a time value and a data range
     if (seq >= 0 && seq < (int)globals.size()) {
       // TODO
@@ -170,7 +194,7 @@ public:
       if (globals[seq]==0)
         time = 0;
       else
-        time = globalTime % globals[seq];
+        time = globalClock % globals[seq];
       anim = 0;
     }
     if (anim < 0 || anim >= MAX_ANIMATED)
@@ -313,99 +337,48 @@ public:
     // runs past the fixed-size times[]/data[]/in[]/out[] arrays (heap corruption).
     const size_t nAnim = (b.nTimes > MAX_ANIMATED) ? (size_t)MAX_ANIMATED : (size_t)b.nTimes;
 
-    for(size_t j=0; j < nAnim; j++)
+    // Resolve the sequence and buffer once for both arrays. A truncated track
+    // cannot be sampled safely: timestamps and keys must remain paired.
+    for (size_t j = 0; j < nAnim; ++j)
     {
-      uint32 *ptimes;
-      AnimationBlockHeader* pHeadTimes;
-      size_t bufSize = 0;
-      auto it = modelData.animfiles.find(modelData.animIndexToAnimId.at(j));
-      if (it != modelData.animfiles.end())
-      {
-        GameFile * animfile = it->second.first;
-        GameFile * skelfile = it->second.second;
-        skelfile->setChunk("SKB1");
-        pHeadTimes = (AnimationBlockHeader*)(skelfile->getBuffer() + b.ofsTimes + j*sizeof(AnimationBlockHeader));
-        ptimes = (uint32*)(animfile->getBuffer() + pHeadTimes->ofsEntrys);
-        if (animfile->getSize() < pHeadTimes->ofsEntrys)
-          continue;
-        bufSize = animfile->getSize();
-      }
-      else
-      {
-        pHeadTimes = (AnimationBlockHeader*)(f.getBuffer() + b.ofsTimes + j*sizeof(AnimationBlockHeader));
-        ptimes = (uint32*)(f.getBuffer() + pHeadTimes->ofsEntrys);
-        if (f.getSize() < pHeadTimes->ofsEntrys)
-          continue;
-        bufSize = f.getSize();
-      }
+      const int source = seq >= 0 ? 0 : modelData.keySequence(j);
+      if (source < 0 || (size_t)source >= b.nTimes) continue;
+      const auto headerAt = [&](uint32 offset, AnimationBlockHeader &header) {
+        const size_t at = (size_t)offset + (size_t)source * sizeof(header);
+        if (!f.getBuffer() || at > f.getSize() || sizeof(header) > f.getSize() - at)
+          return false;
+        std::memcpy(&header, f.getBuffer() + at, sizeof(header));
+        return true;
+      };
+      AnimationBlockHeader th, kh;
+      if (!headerAt(b.ofsTimes, th) || !headerAt(b.ofsKeys, kh) ||
+          th.nEntrys != kh.nEntrys) continue;
 
-      // nEntrys is read from the file and can over-report (a modern/malformed rig, or
-      // ofsEntrys sitting near EOF). The guard above only validated the START offset, so
-      // this loop ran past the end of the animation buffer -- an ASan heap-buffer-overflow
-      // that read garbage into the bone's animation track, producing a garbage bone matrix
-      // and flinging attached gear (helm/shoulders/weapon) off-screen. Clamp to the entries
-      // that actually fit in the buffer.
-      size_t nT = pHeadTimes->nEntrys;
-      const size_t availT = (bufSize - pHeadTimes->ofsEntrys) / sizeof(uint32);
-      if (nT > availT) nT = availT;
-      for (size_t i=0; i < nT; i++)
-        times[j].push_back(ptimes[i]);
-    }
-
-    // keyframes
-    for(size_t j=0; j < nAnim; j++)
-    {
-      D *keys;
-      AnimationBlockHeader* pHeadKeys;
-      size_t bufSize = 0;
-      auto it = modelData.animfiles.find(modelData.animIndexToAnimId.at(j));
-      if (it != modelData.animfiles.end())
+      const unsigned char *buffer = f.getBuffer();
+      size_t size = f.getSize();
+      if (seq < 0 && !(modelData.sequences[source].flags & 0x20))
       {
-        GameFile * animfile = it->second.first;
-        GameFile * skelfile = it->second.second;
-        skelfile->setChunk("SKB1");
-        pHeadKeys = (AnimationBlockHeader*)(skelfile->getBuffer() + b.ofsKeys + j*sizeof(AnimationBlockHeader));
-        keys = (D*)(animfile->getBuffer() + pHeadKeys->ofsEntrys);
-        if (animfile->getSize() < pHeadKeys->ofsEntrys)
-          continue;
-        bufSize = animfile->getSize();
+        const auto it = modelData.animfiles.find(source);
+        if (it == modelData.animfiles.end() || it->second.empty()) continue;
+        buffer = it->second.data();
+        size = it->second.size();
       }
-      else
+      const size_t stride = (type == INTERPOLATION_HERMITE || type == INTERPOLATION_BEZIER) ? 3 : 1;
+      if (th.ofsEntrys > size || th.nEntrys > (size - th.ofsEntrys) / sizeof(uint32) ||
+          kh.ofsEntrys > size || kh.nEntrys > (size - kh.ofsEntrys) / sizeof(D) / stride)
+        continue;
+      for (size_t i = 0; i < th.nEntrys; ++i)
       {
-        pHeadKeys = (AnimationBlockHeader*)(f.getBuffer() + b.ofsKeys + j*sizeof(AnimationBlockHeader));
-        keys = (D*)(f.getBuffer() + pHeadKeys->ofsEntrys);
-        if (f.getSize() < pHeadKeys->ofsEntrys)
-          continue;
-        bufSize = f.getSize();
-      }
-
-      // Same clamp as the times loop above: nEntrys can over-report and run the read off the
-      // end of the buffer. Hermite/Bezier consume 3 D-sized entries (value + in/out tangents)
-      // per keyframe, so divide the budget by 3 for those.
-      const size_t availK = (bufSize - pHeadKeys->ofsEntrys) / sizeof(D);
-      switch (type)
-      {
-        case INTERPOLATION_NONE:
-        case INTERPOLATION_LINEAR:
+        uint32 time;
+        D key[3];
+        std::memcpy(&time, buffer + th.ofsEntrys + i * sizeof(time), sizeof(time));
+        std::memcpy(key, buffer + kh.ofsEntrys + i * sizeof(D) * stride, sizeof(D) * stride);
+        times[j].push_back(time);
+        data[j].push_back(Conv::conv(key[0]));
+        if (stride == 3)
         {
-          size_t nK = pHeadKeys->nEntrys;
-          if (nK > availK) nK = availK;
-          for (size_t i = 0; i < nK; i++)
-            data[j].push_back(Conv::conv(keys[i]));
-          break;
-        }
-        case INTERPOLATION_HERMITE:
-        case INTERPOLATION_BEZIER:
-        {
-          size_t nK = pHeadKeys->nEntrys;
-          if (nK > availK / 3) nK = availK / 3;
-          for (size_t i = 0; i < nK; i++)
-          {
-            data[j].push_back(Conv::conv(keys[i*3]));
-            in[j].push_back(Conv::conv(keys[i*3+1]));
-            out[j].push_back(Conv::conv(keys[i*3+2]));
-          }
-          break;
+          in[j].push_back(Conv::conv(key[1]));
+          out[j].push_back(Conv::conv(key[2]));
         }
       }
     }
