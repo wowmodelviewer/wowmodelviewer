@@ -294,6 +294,21 @@ Format loosely based on [Keep a Changelog](https://keepachangelog.com/).
   `-imgseq` smoke test is gone. `-unityipctest` and `-fbxexport` still run.
 
 ### Fixed
+- **A model no longer crashes the viewer when one of its files cannot be read.** Loading a character could
+  crash with "Attachment::tick" in the log -- a mislabel: the release build names each frame after the nearest
+  exported function. The game storage sometimes lists an animation (.anim) file whose size it cannot report;
+  `GameFile::open` still answered "open" with no data behind it, and the bone setup
+  (`Animated<T>::init`) read the keyframes through a null buffer. Such a file now counts as not opened
+  (logged as `Size query for "<path>" (ID: n) failed`), and the model loads without it. The same failure
+  hit elsewhere in model loading is handled the same way:
+  - an animation whose file cannot be read keeps empty tracks, instead of keyframes read from the skeleton at
+    offsets meant for the missing file (playing one left 219 of a dwarf's 231 bones non-finite);
+  - a parent skeleton (the allied races' shared rigs) that cannot be read, or is not listed, leaves the model
+    without bones or animations, as when its own skeleton does not open, instead of crashing on the unopened
+    file or an `std::out_of_range`;
+  - a model with no animations gets no animation manager (its clock read the first animation and crashed);
+  - a model without bones gets no particle or ribbon emitters (they pointed into the empty bone list).
+  Normal loads are unchanged: eight characters and creatures log exactly as before.
 - **Glowing eye colours glow in the Unity viewport.** A character's eye pass is a Mod_Add material (pixel
   shader 8): the iris, plus a second texture added on top of the lit colour. That second unit reads, through the
   mesh's second UV set, a small glow cell at the bottom of the eye image. On 97 of the client's 272 eye textures --

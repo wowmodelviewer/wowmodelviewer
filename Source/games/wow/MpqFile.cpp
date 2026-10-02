@@ -55,8 +55,9 @@ bool wow::MpqFile::getFileSize(unsigned long long & s)
   if (low == SFILE_INVALID_SIZE)
   {
     LOG_ERROR << "[mpq] Size query for" << filepath << "failed.";
-    // GameFile::open() returns success as long as openFile() succeeded, so close the handle
-    // here on a size failure (corrupt entry) rather than holding it open until destruction.
+    // GameFile::open() closes the file and reports failure when this returns false. Releasing
+    // the handle here as well is harmless (doPostCloseOperation() skips a null handle) and keeps
+    // a corrupt entry from staying open whatever the caller does.
     SFileCloseFile(m_handle);
     m_handle = 0;
     return false;

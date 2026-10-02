@@ -151,12 +151,19 @@ bool CASCFile::getFileSize(unsigned long long & s)
   
   if (m_handle)
   {
-    s = CascGetFileSize(m_handle, 0);
-  
-    if (s == CASC_INVALID_SIZE)
-      LOG_ERROR << "Opening" << filepath << "failed." << "Error" << GetLastError();
+    // s is only written for a real size: the caller must never see CASC_INVALID_SIZE as one.
+    const DWORD fileSize = CascGetFileSize(m_handle, 0);
+    const DWORD error = GetLastError(); // before logging, which can reset it
+
+    if (fileSize == CASC_INVALID_SIZE)
+    {
+      LOG_ERROR << "Size query for" << filepath << "(ID:" << m_fileDataId << ")" << "failed." << "Error" << error;
+    }
     else
+    {
+      s = fileSize;
       result = true;
+    }
   }
 
   return result;
