@@ -1439,6 +1439,43 @@ static bool doIpcTestMountStep(ModelViewer * frame, UnityIpcServer * ipc, const 
   }
   if (kind == "screenshot")
     return doIpcTestScreenshotStep(frame, ipc, target, what, why);
+  if (kind == "npc-equip")
+  {
+    WoWModel * model = cc ? cc->model : nullptr;
+    bool slotOk = false, itemOk = false;
+    const int slot = target.section('=', 0, 0).toInt(&slotOk);
+    const int item = target.section('=', 1).toInt(&itemOk);
+    if (!model || model->charModelDetails.isChar || !ipc->playerAttachesNpcEquipment() ||
+        !slotOk || (slot != CS_HAND_RIGHT && slot != CS_HAND_LEFT) || !itemOk || item < 0)
+    {
+      why = "npc-equip requires an exclusive NPC and <hand slot>=<item id>";
+      return false;
+    }
+    const int revision = frame->m_sceneRevision;
+    cc->choosingSlot = slot;
+    cc->numbers.assign(1, item);
+    cc->cats.assign(1, 0);
+    cc->OnUpdateItem(UPDATE_ITEM, 0);
+    UnityIpcServer::SceneAck ack;
+    bool seen = false;
+    const bool applied = waitSceneAnswer(frame, ipc, acks, revision, QString(), QStringLiteral("none"),
+                                         120000, ack, seen);
+    int expected = 0;
+    for (WoWItem * worn : *model)
+      if (worn) expected += (int)worn->models().size();
+    UnityIpcServer::RuntimeState state;
+    bool answered = false;
+    const bool held = waitRuntimeState(ipc, states, [&](const UnityIpcServer::RuntimeState & x) {
+      return x.modelFileDataID == (int)model->gamefile->fileDataId() && x.liveModels == 1 + expected &&
+             x.liveMounts == 0 && x.bodyRebinds == 0 && !x.loading;
+    }, 30000, state, answered);
+    const bool ok = applied && ack.missing.isEmpty() && ack.attachments == expected && held &&
+                    model->getItem((CharSlots)slot)->id() == item && !model->charModelDetails.isChar;
+    what = QString("NPC slot %1 item %2: attachments %3/%4; ").arg(slot).arg(item).arg(ack.attachments).arg(expected)
+             + state.describe();
+    if (!ok) why = "equipment scene/runtime mismatch: " + ack.reason + " " + ack.missing.join(", ");
+    return ok;
+  }
   if (!ipc->playerRidesMounts())
   {
     why = QString("the player (protocol %1) cannot seat characters on mounts").arg(ipc->playerProtocolVersion());
@@ -1932,7 +1969,7 @@ static bool doIpcTestLifecycleSequence(ModelViewer * frame, UnityIpcServer * ipc
     const QString target = colon > 0 ? step.mid(colon + 1).trimmed() : QString();
     const bool mountKind = !quick && (kind == "chr" || kind == "mount" || kind == "dismount" || kind == "manim" ||
                                       kind == "ranim" || kind == "equip" || kind == "custom" || kind == "sheath" ||
-                                      kind == "reconnect" || kind == "wait" || kind == "screenshot");
+                                      kind == "reconnect" || kind == "wait" || kind == "screenshot" || kind == "npc-equip");
     GameFile * file = (kind == "m2" || kind == "wmo") && !target.isEmpty() ? resolveGameFileArg(target) : nullptr;
     const size_t reportsBefore = reports.size();
     const int serialBefore = frame->m_unityLoadSerial;
