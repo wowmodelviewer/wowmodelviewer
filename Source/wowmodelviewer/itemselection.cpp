@@ -284,6 +284,11 @@ void FilteredChoiceDialog::OnImportItem(wxCommandEvent& event){
 
 void FilteredChoiceDialog::DoFilter()
 {
+  const long selectedRow = m_listctrl->GetFirstSelected();
+  const int selectedChoice = selectedRow >= 0 && static_cast<size_t>(selectedRow) < m_indices.size()
+    ? m_indices[selectedRow] : wxNOT_FOUND;
+  m_syncingSelection = true;
+  m_selection = wxNOT_FOUND;
   m_indices.clear();
 
   // Freeze the control across the clear + re-insert so a keystroke in the filter box
@@ -296,7 +301,7 @@ void FilteredChoiceDialog::DoFilter()
   {
     if (FilterFunc(i))
     {
-      item.SetId(i); 
+      item.SetId(static_cast<long>(m_indices.size()));
       item.SetText(m_choices->Item(i));
       m_indices.push_back((int)i);
       if ((i%2)==0)
@@ -307,7 +312,9 @@ void FilteredChoiceDialog::DoFilter()
       m_listctrl->InsertItem(item);
     }
   }
+  SelectChoiceRow(selectedChoice);
   m_listctrl->Thaw();
+  m_syncingSelection = false;
 }
 
 bool FilteredChoiceDialog::FilterFunc(int index)
@@ -321,6 +328,7 @@ bool FilteredChoiceDialog::FilterFunc(int index)
 void FilteredChoiceDialog::SelectChoiceRow(int index)
 {
   // The list chooses on every selection change: its selection event is ignored while this moves it.
+  const bool wasSyncing = m_syncingSelection;
   m_syncingSelection = true;
   long row = -1;
   for (size_t r = 0; r < m_indices.size(); r++)
@@ -337,7 +345,8 @@ void FilteredChoiceDialog::SelectChoiceRow(int index)
     m_listctrl->Select(row);
     m_listctrl->Focus(row);   // the arrow keys go on from here
   }
-  m_syncingSelection = false;
+  m_selection = row;
+  m_syncingSelection = wasSyncing;
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////
