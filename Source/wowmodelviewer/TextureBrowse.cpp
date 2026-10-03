@@ -73,6 +73,7 @@ void TextureBrowse::clientLoadStarting()
   m_openRows.clear();
   m_topRow.clear();
   m_pickedRow.clear();
+  m_searchKept.clear();
   m_treeIsOurs = false;
 }
 
@@ -193,7 +194,7 @@ QString TextureBrowse::rowKey(const TextureRowData & d) const
   }
 }
 
-void TextureBrowse::collectOpen(wxTreeItemId parent)
+void TextureBrowse::collectOpen(wxTreeItemId parent, std::set<QString> & open)
 {
   wxTreeItemIdValue cookie;
   for (wxTreeItemId child = m_tree->GetFirstChild(parent, cookie); child.IsOk(); child = m_tree->GetNextChild(parent, cookie))
@@ -201,29 +202,47 @@ void TextureBrowse::collectOpen(wxTreeItemId parent)
     const TextureRowData * data = dynamic_cast<const TextureRowData *>(m_tree->GetItemData(child));
     if (!data || !m_tree->IsExpanded(child))
       continue;
-    m_openRows.insert(rowKey(*data));
-    collectOpen(child);
+    open.insert(rowKey(*data));
+    collectOpen(child, open);
   }
+}
+
+void TextureBrowse::rememberBrowsing()
+{
+  if (!m_treeIsOurs || m_treeIsSearch || !m_tree->GetRootItem().IsOk())
+    return;
+  m_openRows.clear();
+  collectOpen(m_tree->GetRootItem(), m_openRows);
+  const wxTreeItemId first = m_tree->GetFirstVisibleItem();
+  const TextureRowData * data = first.IsOk() ? dynamic_cast<const TextureRowData *>(m_tree->GetItemData(first)) : nullptr;
+  m_topRow = data ? rowKey(*data) : QString();
+  const wxTreeItemId chosen = m_tree->GetSelection();
+  const TextureRowData * picked = chosen.IsOk() ? dynamic_cast<const TextureRowData *>(m_tree->GetItemData(chosen)) : nullptr;
+  m_pickedRow = picked ? rowKey(*picked) : QString();
 }
 
 void TextureBrowse::rememberOpenFolders()
 {
-  // Only the browsing tree: a search's results are opened by the search itself.
-  if (m_treeIsOurs && !m_treeIsSearch && m_tree->GetRootItem().IsOk())
+  if (m_treeIsOurs && m_treeIsSearch && m_tree->GetRootItem().IsOk())
   {
-    m_openRows.clear();
-    collectOpen(m_tree->GetRootItem());
+    // A search's results, for that search only: the search box gives it back with Textures.
+    m_searchKept = m_lastResult.query;
+    m_searchOpenRows.clear();
+    collectOpen(m_tree->GetRootItem(), m_searchOpenRows);
     const wxTreeItemId first = m_tree->GetFirstVisibleItem();
     const TextureRowData * data = first.IsOk() ? dynamic_cast<const TextureRowData *>(m_tree->GetItemData(first)) : nullptr;
-    m_topRow = data ? rowKey(*data) : QString();
+    m_searchTopRow = data ? rowKey(*data) : QString();
     const wxTreeItemId chosen = m_tree->GetSelection();
     const TextureRowData * picked = chosen.IsOk() ? dynamic_cast<const TextureRowData *>(m_tree->GetItemData(chosen)) : nullptr;
-    m_pickedRow = picked ? rowKey(*picked) : QString();
+    m_searchPickedRow = picked ? rowKey(*picked) : QString();
   }
+  else
+    rememberBrowsing();
   m_treeIsOurs = false;
 }
 
-void TextureBrowse::reopen(wxTreeItemId parent, wxTreeItemId & top, wxTreeItemId & picked)
+void TextureBrowse::reopen(wxTreeItemId parent, const std::set<QString> & open, const QString & topKey,
+                           const QString & pickedKey, wxTreeItemId & top, wxTreeItemId & picked)
 {
   wxTreeItemIdValue cookie;
   for (wxTreeItemId child = m_tree->GetFirstChild(parent, cookie); child.IsOk(); child = m_tree->GetNextChild(parent, cookie))
@@ -232,14 +251,14 @@ void TextureBrowse::reopen(wxTreeItemId parent, wxTreeItemId & top, wxTreeItemId
     if (!data)
       continue;
     const QString key = rowKey(*data);
-    if (!m_topRow.isEmpty() && key == m_topRow)
+    if (!topKey.isEmpty() && key == topKey)
       top = child;
-    if (!m_pickedRow.isEmpty() && key == m_pickedRow)
+    if (!pickedKey.isEmpty() && key == pickedKey)
       picked = child;
-    if (m_openRows.count(key))
+    if (open.count(key))
     {
       m_tree->Expand(child);   // filled by expanding()
-      reopen(child, top, picked);
+      reopen(child, open, topKey, pickedKey, top, picked);
     }
   }
 }
@@ -249,8 +268,7 @@ void TextureBrowse::reopen(wxTreeItemId parent, wxTreeItemId & top, wxTreeItemId
 wxString TextureBrowse::populate(const QString & search)
 {
   // The browsing tree being replaced (by a search, or the same tree again) is kept for its return.
-  if (m_treeIsOurs && !m_treeIsSearch)
-    rememberOpenFolders();
+  rememberBrowsing();
   Busy guard(*this);
   QElapsedTimer timer;
   timer.start();
@@ -258,6 +276,9 @@ wxString TextureBrowse::populate(const QString & search)
   m_tree->DeleteAllItems();
   const wxTreeItemId root = m_tree->AddRoot(wxT("Root"));
   const QString query = TextureCatalog::normalise(search);
+  // The search left for the models comes back as it was left only as the next tree built.
+  const bool searchComesBack = !m_searchKept.isEmpty() && m_searchKept == query;
+  m_searchKept.clear();
   wxString status;
   m_treeIsOurs = true;
   m_treeIsSearch = !query.isEmpty();
@@ -274,7 +295,7 @@ wxString TextureBrowse::populate(const QString & search)
     // As it was left: the same folders open, the same row picked (busy: not picked again), the same row
     // at the top.
     wxTreeItemId topRow, picked;
-    reopen(root, topRow, picked);
+    reopen(root, m_openRows, m_topRow, m_pickedRow, topRow, picked);
     if (picked.IsOk())
       m_tree->SelectItem(picked);
     if (topRow.IsOk())
@@ -342,10 +363,20 @@ wxString TextureBrowse::populate(const QString & search)
         addTexture(parent, index, depth);
     };
   addResults(top, root, QString(), 0);
-  m_tree->ExpandAll();
+  // The search left for the models, coming back with Textures: its rows as they were left (once).
+  // Otherwise every folder of the results open, from the first row.
+  wxTreeItemId topRow, picked;
+  if (searchComesBack)
+    reopen(root, m_searchOpenRows, m_searchTopRow, m_searchPickedRow, topRow, picked);
+  else
+    m_tree->ExpandAll();
+  if (picked.IsOk())
+    m_tree->SelectItem(picked);   // busy: not picked again
   wxTreeItemIdValue cookie;
   const wxTreeItemId first = m_tree->GetFirstChild(root, cookie);
-  if (first.IsOk())
+  if (topRow.IsOk())
+    m_tree->ScrollTo(topRow);
+  else if (first.IsOk())
     m_tree->ScrollTo(first);
   scrollLeft();
   m_tree->Thaw();

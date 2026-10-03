@@ -12,10 +12,10 @@ Format loosely based on [Keep a Changelog](https://keepachangelog.com/).
   loaded client's textures in the same tree and search box as the models, the texture view takes the viewport's
   place saying "Select a texture in Browse", and the panels that only act on a model (Animation, Model, the
   Attachments window) are put away. Models gives the viewport, the model and those panels back at once, each as it
-  was, shown or closed and at its size; the layout saved on exit is always the user's. Browse's Show list, loading a
-  model, an NPC, an item or a character, and picking a texture switch the mode too. Each mode keeps its own search,
-  and each tree comes back with the folders that were open. (Browse's Show list has the category "Textures
-  (*.blp)", last, which replaces "Images (*.blp)".) The list
+  was, shown or closed and at its size; the layout saved on exit is always the user's. Loading a model, an NPC, an
+  item or a character from a menu switches to Models too. Each mode keeps its own search, and each tree -- or
+  search result -- comes back as it was left: the same folders open, the same row at the top, the same row picked
+  (the model's row only while that model is still the one loaded). The list
   is filled from the app's own file index -- every `.blp` the loaded client names, 789,146 on 12.1, listed in under a
   second, once per client. Folders are filled in as they are opened, and a folder of more than 1,000 textures shows
   them in ranges of 1,000 named like a dictionary's guide words, so even textures/bakednpctextures (83,178
@@ -316,6 +316,17 @@ Format loosely based on [Keep a Changelog](https://keepachangelog.com/).
   Scale, enabled for items attached directly to a character (the only ones the viewport is sent).
 
 ### Removed
+- **Browse's Show list.** Browse lists what the viewer mode shows, with no category of its own to choose: in
+  Models mode the models and the world models the viewport draws -- the WMO roots "WMOs (*.wmo)" listed are now in
+  the same tree as the models, in their folders (group and LOD files stay hidden) -- and in Textures mode the
+  textures. Viewer = Textures with Browse listing models can no longer happen. The other categories are gone:
+  ADTs, WAVs, OGGs, MP3s, Shaders (*.bls), DBCs, DB2s, LUAs, XMLs and SKINs had no viewer -- picking one of their
+  rows only unloaded the model on screen, and a map tile's reader has long been commented out (the Unity viewport
+  cannot draw one either) -- and their only working action was the row's right-click Save... of the raw file. On
+  a client with FileDataIDs any such file can still be saved as it is from Textures mode: search its FileDataID,
+  pick the "Look up FileDataID" row it gets, Export original file. Browse's search box says what it searches
+  ("Search models" / "Search textures"), its status line is under the tree, and the room the Show row and the
+  "Search" label took goes to the tree.
 - **The main-viewport toggle.** View > "Unity as main viewport" and its `Tools/UnityPrimaryViewport`
   setting, and the View > "Unity Renderer" item, which is now View > "Restart Unity Renderer".
 - **Screenshots and image sequences, until the Unity viewport has a capture of its own.** File >

@@ -20,7 +20,6 @@ enum ObjectID {
   ID_FILELIST,
   ID_FILELIST_SEARCH,
   ID_FILELIST_CONTENT,
-  ID_FILELIST_FILTER,
   ID_FILELIST_SEARCHTIMER, // debounce timer for as-you-type file search
 
   // Client Choice (startup launcher)
