@@ -5,7 +5,8 @@
 #include "ModelInspector.h"
 
 #include <wx/collpane.h>
-#include <wx/notebook.h>
+#include <wx/dataview.h>
+#include <wx/simplebook.h>
 #include <wx/numformatter.h>
 #include <wx/scrolwin.h>
 #include <wx/srchctrl.h>
@@ -26,6 +27,7 @@
 #include "maptile.h"
 #include "modelviewer.h"
 #include "TextureView.h"
+#include "UiControls.h"
 #include "UiStyle.h"
 #include "wmo.h"
 #include "WoWModel.h"
@@ -33,7 +35,7 @@
 #include "logger/Logger.h"
 
 wxBEGIN_EVENT_TABLE(ModelInspector, wxPanel)
-  EVT_NOTEBOOK_PAGE_CHANGED(ID_INSPECTOR_NOTEBOOK, ModelInspector::OnPageChanged)
+  EVT_BOOKCTRL_PAGE_CHANGED(ID_INSPECTOR_NOTEBOOK, ModelInspector::OnPageChanged)
   EVT_TREELIST_ITEM_CHECKED(ID_INSPECTOR_GEOSET_TREE, ModelInspector::OnGeosetChecked)
   EVT_TEXT(ID_INSPECTOR_GEOSET_FILTER, ModelInspector::OnGeosetFilter)
   EVT_SEARCHCTRL_CANCEL_BTN(ID_INSPECTOR_GEOSET_FILTER, ModelInspector::OnGeosetFilter)
@@ -122,14 +124,23 @@ namespace
 ModelInspector::ModelInspector(wxWindow * parent, wxWindowID id)
   : wxPanel(parent, id, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL, wxT("modelInspector"))
 {
-  m_notebook = new wxNotebook(this, ID_INSPECTOR_NOTEBOOK, wxDefaultPosition, wxDefaultSize, 0,
-                              wxT("modelInspectorNotebook"));
+  // The pages under a flat tab strip (UiTabBar) rather than the native property-sheet tabs: the same
+  // book API and page events (wxSimplebook), the pages on the pane's own colour with no frame around them.
+  UiStyle::applyPanel(this);
+  m_notebook = new wxSimplebook(this, ID_INSPECTOR_NOTEBOOK, wxDefaultPosition, wxDefaultSize, 0,
+                                wxT("modelInspectorNotebook"));
+  UiStyle::applyPanel(m_notebook);
   BuildAppearancePage();
   BuildGeosetsPage();
   BuildInfoPage();
+  m_tabs = new UiTabBar(this, m_notebook);
+  m_tabs->SetName(wxT("modelInspectorTabs"));
+  m_tabs->SetLabel(_("Model panel pages"));   // what a screen reader calls the strip
+  m_tabs->MoveBeforeInTabOrder(m_notebook);   // Tab reaches the strip before the page under it
 
   wxBoxSizer * sizer = new wxBoxSizer(wxVERTICAL);
-  sizer->Add(m_notebook, 1, wxEXPAND | wxALL, FromDIP(UiStyle::XS));
+  sizer->Add(m_tabs, 0, wxEXPAND);
+  sizer->Add(m_notebook, 1, wxEXPAND);
   SetSizer(sizer);
 
   m_watch.SetOwner(this);
@@ -184,19 +195,23 @@ void ModelInspector::BuildAppearancePage()
   const int md = FromDIP(UiStyle::M);
 
   m_appearance = new wxPanel(m_notebook, wxID_ANY);
+  UiStyle::applyPanel(m_appearance);
   m_appearanceSizer = new wxBoxSizer(wxVERTICAL);
 
   m_contextNote = UiStyle::secondaryLabel(m_appearance, _("No model loaded. Pick one in Browse."));
   m_appearanceSizer->Add(m_contextNote, 0, wxEXPAND | wxALL, md);
 
   m_modelBox = new wxPanel(m_appearance, wxID_ANY);
+  UiStyle::applyPanel(m_modelBox);
   m_noSkinsNote = UiStyle::secondaryLabel(m_modelBox, _("This model has no alternative skins."));
   m_overridesPane = new wxCollapsiblePane(m_modelBox, wxID_ANY, _("Texture overrides"), wxDefaultPosition,
                                           wxDefaultSize, wxCP_DEFAULT_STYLE | wxCP_NO_TLW_RESIZE);
+  UiStyle::applyPanelWithChildren(m_overridesPane);
   m_modelBox->Show(false);
   m_appearanceSizer->Add(m_modelBox, 0, wxEXPAND | wxLEFT | wxRIGHT | wxTOP, md);
 
   m_wmoBox = new wxPanel(m_appearance, wxID_ANY);
+  UiStyle::applyPanel(m_wmoBox);
   m_wmoBox->Show(false);
   m_appearanceSizer->Add(m_wmoBox, 0, wxEXPAND | wxLEFT | wxRIGHT | wxTOP, md);
 
@@ -340,7 +355,11 @@ void ModelInspector::MountStateChanged()
   const wxString label = m_mountModel ? wxString(_("Appearance")) + wxT(" \u00B7 ") + _("Mounted")
                                       : wxString(_("Appearance"));
   if (m_notebook->GetPageText(PAGE_APPEARANCE) != label)
+  {
     m_notebook->SetPageText(PAGE_APPEARANCE, label);
+    if (m_tabs)
+      m_tabs->Sync();
+  }
 }
 
 // ---- Geosets ---------------------------------------------------------------------------------
@@ -352,6 +371,7 @@ void ModelInspector::BuildGeosetsPage()
   const int md = FromDIP(UiStyle::M);
 
   m_geosets = new wxPanel(m_notebook, wxID_ANY);
+  UiStyle::applyPanel(m_geosets);
   wxBoxSizer * sizer = new wxBoxSizer(wxVERTICAL);
 
   wxBoxSizer * attach = new wxBoxSizer(wxHORIZONTAL);
@@ -362,10 +382,10 @@ void ModelInspector::BuildGeosetsPage()
   attach->Add(m_attachmentChoice, 1, wxALIGN_CENTER_VERTICAL);
   sizer->Add(attach, 0, wxEXPAND | wxLEFT | wxRIGHT | wxTOP, md);
 
-  m_geosetFilter = new wxSearchCtrl(m_geosets, ID_INSPECTOR_GEOSET_FILTER);
+  UiSearchFrame * filterFrame = new UiSearchFrame(m_geosets, ID_INSPECTOR_GEOSET_FILTER, _("Filter by group or ID"), 0);
+  m_geosetFilter = filterFrame->search();
   m_geosetFilter->ShowCancelButton(true);
-  m_geosetFilter->SetDescriptiveText(_("Filter by group or ID"));
-  sizer->Add(m_geosetFilter, 0, wxEXPAND | wxLEFT | wxRIGHT | wxTOP, md);
+  sizer->Add(filterFrame, 0, wxEXPAND | wxLEFT | wxRIGHT | wxTOP, md);
 
   m_geosetSummary = UiStyle::secondaryLabel(m_geosets, wxEmptyString);
   sizer->Add(m_geosetSummary, 0, wxEXPAND | wxLEFT | wxRIGHT | wxTOP, md);
@@ -374,6 +394,7 @@ void ModelInspector::BuildGeosetsPage()
                                     wxTL_CHECKBOX | wxTL_3STATE | wxTL_SINGLE);
   m_geosetTree->AppendColumn(_("Geoset"), FromDIP(150), wxALIGN_LEFT, wxCOL_RESIZABLE);
   m_geosetTree->AppendColumn(_("ID"), FromDIP(52), wxALIGN_RIGHT, wxCOL_RESIZABLE);
+  UiStyle::setRole(m_geosetTree->GetDataView(), UiStyle::Role::Field);
   // wxTreeListCtrl gives the first column whatever the others leave, but the data view stretches
   // its LAST column to fill, and that stretched width would then be taken as the ID column's own.
   // Pin it first, so the name column is the one that grows.
@@ -381,10 +402,10 @@ void ModelInspector::BuildGeosetsPage()
     m_geosetTree->SetColumnWidth(1, FromDIP(52));
     e.Skip();
   });
-  sizer->Add(m_geosetTree, 1, wxEXPAND | wxLEFT | wxRIGHT | wxTOP, xs);
+  sizer->Add(m_geosetTree, 1, wxEXPAND | wxLEFT | wxRIGHT | wxTOP, md);
 
   m_geosetNotice = new wxStaticText(m_geosets, wxID_ANY, wxEmptyString);
-  m_geosetNotice->SetForegroundColour(wxColour(170, 90, 0));
+  UiStyle::setRole(m_geosetNotice, UiStyle::Role::WarningText);
   m_geosetNotice->Show(false);
   sizer->Add(m_geosetNotice, 0, wxEXPAND | wxALL, md);
 
@@ -913,6 +934,7 @@ void ModelInspector::BuildInfoPage()
   const int md = FromDIP(UiStyle::M);
 
   m_info = new wxScrolledWindow(m_notebook, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxVSCROLL);
+  UiStyle::applyPanel(m_info);
   m_info->SetScrollRate(0, FromDIP(8));
   wxBoxSizer * sizer = new wxBoxSizer(wxVERTICAL);
   m_infoEmpty = UiStyle::secondaryLabel(m_info, _("No model loaded."));

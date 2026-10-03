@@ -2,6 +2,8 @@
 
 > **Superseded in part (2026-09-14):** the OpenGL viewport this exploration keeps at the centre has been archived. The centre viewport is now the embedded Unity renderer, with no OpenGL option, and the screenshot, image-sequence and OpenGL display controls mentioned below are gone from the application. See `docs/unity-renderer/README.md`. The rest of this document is kept as it was written.
 
+> **Since (2026-10-03):** the token system of next step 3 below exists: `Source/wowmodelviewer/UiStyle.h` (spacing, control sizes, type roles, colour roles), with the flat pane chrome and toolbars in `UiArt.h` and the shell's buttons, search field and tab strip in `UiControls.h`, in the direction of prototype A. The palette is light only; a dark one is a second set of values (see `UiStyle.cpp`).
+
 This document records a UI-overhaul exploration for WoW Model Viewer: Midnight (v0.3.2). It is backed by three standalone HTML design prototypes that illustrate different directions for a modernized shell. These are static mockups only — the live C++/wxWidgets application is unchanged, and nothing here alters model loading, customization, or export behavior.
 
 ## Current UI audit

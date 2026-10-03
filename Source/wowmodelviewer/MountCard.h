@@ -25,6 +25,8 @@
 
 #include <vector>
 
+class UiButton;
+
 class CharControl;
 class MountPickerList;
 class MountPickerPopup;
@@ -66,8 +68,8 @@ private:
   wxStaticText * m_title = nullptr;
   wxStaticText * m_hint = nullptr;      // unmounted: what the card is for
   wxStaticText * m_name = nullptr;      // mounted: the mount's name
-  wxButton * m_choose = nullptr;        // "Choose Mount", or "Change Mount" while mounted
-  wxButton * m_dismount = nullptr;
+  UiButton * m_choose = nullptr;        // "Choose Mount", or "Change Mount" while mounted
+  UiButton * m_dismount = nullptr;
 
   // The picker's own window and what it holds.
   MountPickerPopup * m_popup = nullptr;

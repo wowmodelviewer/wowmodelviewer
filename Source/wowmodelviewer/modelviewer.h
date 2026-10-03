@@ -166,6 +166,37 @@ public:
 
   // menu commands
   void OnToggleDock(wxCommandEvent &event);
+  void OnChildFocus(wxChildFocusEvent & event);
+  void OnAppearance(wxCommandEvent & event);
+  void OnSysColourChanged(wxSysColourChangedEvent & event);
+  void OnThemeRecheck(wxTimerEvent & event);
+  WXLRESULT MSWWindowProc(WXUINT message, WXWPARAM wParam, WXLPARAM lParam) wxOVERRIDE;
+  // The palette resolved again (preference, Windows' app mode, high contrast) and, when it changed or
+  // force is set, applied to every window; ApplyNativeTheme does the parts Windows draws itself.
+  void ApplyTheme(bool force = false);
+  void ApplyNativeTheme();
+  // The status bar of the theme in use: Windows' own in the light theme and in high contrast (as
+  // always), wx's own in the dark theme, where it can take the palette (Windows' is light in every
+  // theme). Made again, with its fields' text, when the theme changes between them.
+  void CreateThemedStatusBar();
+  bool m_genericStatusBar = false;
+  void OnWindowCreated(wxWindowCreateEvent & event);
+
+  // THE LAYOUT BATCH (a viewer-mode switch). While one is open, CommitLayoutIfChanged and
+  // commitDocksAtTheirSize only note that the layout has to be committed; closing the outermost batch
+  // commits it with exactly one wxAuiManager::Update(). See SetViewerMode.
+  void beginLayoutBatch();
+  void endLayoutBatch();
+  int m_layoutBatch = 0;
+  bool m_layoutPending = false;          // an Update is due when the batch closes
+  bool m_layoutUncapped = false;         // ... with the dock size cap lifted (docks made again)
+  bool m_finishLeavingPending = false;   // leaveTextureWorkspace's second half, after that Update
+  bool m_uncoverPending = false;         // the texture view put away once the layout is committed
+  void finishLeavingTextureWorkspace();
+  // Every shown window of the frame painted now, top to bottom (not the player's: another process).
+  void PaintNow();
+  void OnActivateFrame(wxActivateEvent & event);
+  void UpdateActivePaneCaption(bool frameActive);
   void OnPaneClose(wxAuiManagerEvent &event);
   void OnToggleCommand(wxCommandEvent &event);
   void OnEffects(wxCommandEvent &event);
@@ -227,7 +258,7 @@ public:
   // stays loaded behind Textures mode and the texture selected stays selected behind
   // Models mode, so going back shows each as it was, without loading anything again.
   enum class ViewerMode { Models, Textures };
-  void SetViewerMode(ViewerMode mode);
+  void SetViewerMode(ViewerMode mode, bool openBrowse = false, bool paintNow = false);
   ViewerMode viewerMode() const { return m_viewerMode; }
   bool isTextureMode() const { return m_viewerMode == ViewerMode::Textures; }
   // Select a texture picked in Browse (Textures mode): the texture view reads and shows it.
@@ -299,6 +330,9 @@ public:
   bool unityViewportNotice(ViewportNotice & notice) const;
   ViewerMode m_viewerMode = ViewerMode::Models;
   bool m_helpInStatus = false;   // DoGiveHelp has help text in the status bar, to take away
+  wxTimer m_themeRecheck;          // ApplyTheme once more after a burst of Windows' colour messages
+  bool m_frameActive = true;     // the window is the active one (its last activate event): a pane's caption
+                                 // reads as active only then (UpdateActivePaneCaption)
   // THE TEXTURE WORKSPACE. While a texture is on screen, the panels that only act on a model are put
   // away so the texture gets the room: the ones in modelOnlyPanes() that are shown. Each is recorded
   // and given back as it was -- shown, at the size it had -- when the texture goes (both decided with

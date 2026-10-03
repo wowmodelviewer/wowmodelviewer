@@ -8,13 +8,13 @@
 #include <wx/listctrl.h>
 #include <wx/scrolwin.h>
 #include <wx/srchctrl.h>
-#include <wx/statline.h>
 #include "logger/Logger.h"
 #include "FileTreeItem.h"
 #include "Game.h"
 #include "globalvars.h"
 #include "ModelInspector.h"
 #include "modelviewer.h"
+#include "UiControls.h"
 #include "UiStyle.h"
 #include "UserSkins.h"
 #include "util.h"
@@ -35,6 +35,7 @@ public:
     AppendColumn(_("Animation"), wxLIST_FORMAT_LEFT, FromDIP(140));
     AppendColumn(wxT("#"), wxLIST_FORMAT_RIGHT, FromDIP(40));
     AppendColumn(_("Length"), wxLIST_FORMAT_RIGHT, FromDIP(60));
+    UiStyle::setRole(this, UiStyle::Role::Field);
     Bind(wxEVT_SIZE, &AnimClipList::OnSize, this);
   }
 
@@ -105,45 +106,6 @@ END_EVENT_TABLE()
 
 namespace
 {
-  // Transport glyphs, drawn rather than taken from a font: the symbol characters are not in
-  // every UI font, and a missing glyph is a box on a button. 4x4 supersampled coverage gives
-  // clean edges at any DPI, in the button text colour.
-  enum TransportIcon { ICON_PLAY, ICON_PAUSE, ICON_STOP };
-
-  bool insideIcon(TransportIcon kind, double x, double y)
-  {
-    switch (kind)
-    {
-      case ICON_PLAY:   // right-pointing triangle
-        return x >= 0.22 && x <= 0.86 && std::abs(y - 0.5) <= (0.86 - x) * 0.56;
-      case ICON_PAUSE:
-        return y >= 0.18 && y <= 0.82 && ((x >= 0.22 && x <= 0.42) || (x >= 0.58 && x <= 0.78));
-      case ICON_STOP:
-        return x >= 0.24 && x <= 0.76 && y >= 0.24 && y <= 0.76;
-    }
-    return false;
-  }
-
-  wxBitmap transportBitmap(const wxWindow * win, TransportIcon kind)
-  {
-    const int size = win->FromDIP(12);
-    const wxColour ink = wxSystemSettings::GetColour(wxSYS_COLOUR_BTNTEXT);
-    wxImage img(size, size);
-    img.InitAlpha();
-    for (int py = 0; py < size; py++)
-      for (int px = 0; px < size; px++)
-      {
-        int hits = 0;
-        for (int sy = 0; sy < 4; sy++)
-          for (int sx = 0; sx < 4; sx++)
-            if (insideIcon(kind, (px + (sx + 0.5) / 4.0) / size, (py + (sy + 0.5) / 4.0) / size))
-              hits++;
-        img.SetRGB(px, py, ink.Red(), ink.Green(), ink.Blue());
-        img.SetAlpha(px, py, (unsigned char)(hits * 255 / 16));
-      }
-    return wxBitmap(img);
-  }
-
   void setLabelIfChanged(wxWindow * w, const wxString & text)
   {
     if (w && w->GetLabel() != text)
@@ -162,6 +124,7 @@ AnimControl::AnimControl(wxWindow* parent, wxWindowID id, wxWindow * skinParent,
     LOG_ERROR << "Failed to create a window for our AnimControl!";
     return;
   }
+  UiStyle::applyPanel(this);
 
   if (!skinParent)
     skinParent = this;
@@ -178,10 +141,9 @@ AnimControl::AnimControl(wxWindow* parent, wxWindowID id, wxWindow * skinParent,
                                   wxT("5"), wxT("6"), wxT("7"), wxT("8"), wxT("9")};
 
   // ---- Clips: filter + list ------------------------------------------------------------------
-  clipFilter = new wxSearchCtrl(this, ID_ANIM_CLIP_FILTER, wxEmptyString, wxDefaultPosition,
-                                wxDefaultSize, wxTE_PROCESS_ENTER);
+  UiSearchFrame * clipFilterFrame = new UiSearchFrame(this, ID_ANIM_CLIP_FILTER, _("Filter animations"));
+  clipFilter = clipFilterFrame->search();
   clipFilter->ShowCancelButton(true);
-  clipFilter->SetDescriptiveText(_("Filter animations"));
   clipCount = UiStyle::secondaryLabel(this, _("No animations"));
   clipList = new AnimClipList(this, ID_ANIM_CLIP_LIST, this);
   clipList->SetMinSize(FromDIP(wxSize(200, 60)));
@@ -189,42 +151,58 @@ AnimControl::AnimControl(wxWindow* parent, wxWindowID id, wxWindow * skinParent,
   wxBoxSizer * clipsCol = new wxBoxSizer(wxVERTICAL);
   {
     wxBoxSizer * row = new wxBoxSizer(wxHORIZONTAL);
-    row->Add(clipFilter, 1, wxALIGN_CENTER_VERTICAL);
+    row->Add(clipFilterFrame, 1, wxALIGN_CENTER_VERTICAL);
     row->Add(clipCount, 0, wxALIGN_CENTER_VERTICAL | wxLEFT, sp);
     clipsCol->Add(row, 0, wxEXPAND | wxBOTTOM, xs);
   }
   clipsCol->Add(clipList, 1, wxEXPAND);
 
   // ---- Playback: transport, state, scrubber, speed -------------------------------------------
-  btnPrev = new wxButton(this, ID_PREVANIM, wxT("\u2039 Frame"), wxDefaultPosition, wxDefaultSize, wxBU_EXACTFIT);
+  // Play / Pause is the transport's primary action; the steps and Stop sit beside it as secondary
+  // buttons, all at the compact height and as wide as the longer of their labels.
+  UiButton * prev = new UiButton(this, ID_PREVANIM, _("Frame"), UiButton::Kind::Secondary, UiIcon::StepBack);
+  prev->SetCompact(true);
+  btnPrev = prev;
   btnPrev->SetToolTip(_("Step back one frame"));
-  btnPlayPause = new wxButton(this, ID_ANIM_PLAYPAUSE, _("Pause"), wxDefaultPosition, wxDefaultSize, wxBU_EXACTFIT);
-  btnPlayPause->SetBitmap(transportBitmap(this, ICON_PAUSE));
-  btnPlayPause->SetBitmapMargins(FromDIP(wxSize(4, 0)));
-  btnPlayPause->SetMinSize(wxSize(FromDIP(70), -1));
+  UiSetAccessibleName(btnPrev, _("Previous frame"));   // the direction is only in its icon
+  UiButton * playPause = new UiButton(this, ID_ANIM_PLAYPAUSE, _("Pause"), UiButton::Kind::Primary, UiIcon::Pause);
+  playPause->SetCompact(true);
+  btnPlayPause = playPause;
+  {
+    // As wide as "Play" or "Pause", whichever is shown, so the transport does not shift as it toggles.
+    playPause->SetLabel(_("Play"));
+    const int playWidth = playPause->GetBestSize().x;
+    playPause->SetLabel(_("Pause"));
+    btnPlayPause->SetMinSize(wxSize((std::max)(playWidth, playPause->GetBestSize().x), -1));
+  }
   btnPlayPause->SetToolTip(_("Play or pause the animation"));
-  btnStop = new wxButton(this, ID_STOP, _("Stop"), wxDefaultPosition, wxDefaultSize, wxBU_EXACTFIT);
-  btnStop->SetBitmap(transportBitmap(this, ICON_STOP));
-  btnStop->SetBitmapMargins(FromDIP(wxSize(4, 0)));
-  btnStop->SetMinSize(wxSize(FromDIP(62), -1));
+  UiButton * stop = new UiButton(this, ID_STOP, _("Stop"), UiButton::Kind::Secondary, UiIcon::Stop);
+  stop->SetCompact(true);
+  btnStop = stop;
   btnStop->SetToolTip(_("Stop and return to the first frame"));
-  btnNext = new wxButton(this, ID_NEXTANIM, wxT("Frame \u203A"), wxDefaultPosition, wxDefaultSize, wxBU_EXACTFIT);
+  UiButton * next = new UiButton(this, ID_NEXTANIM, _("Frame"), UiButton::Kind::Secondary, UiIcon::StepForward);
+  next->SetCompact(true);
+  next->SetIconAfter(true);
+  btnNext = next;
   btnNext->SetToolTip(_("Step forward one frame"));
+  UiSetAccessibleName(btnNext, _("Next frame"));
 
   stateLabel = new wxStaticText(this, wxID_ANY, _("No animation"), wxDefaultPosition, wxDefaultSize,
                                 wxST_ELLIPSIZE_END | wxST_NO_AUTORESIZE);
-  frameSlider = new wxSlider(this, ID_FRAME, 0, 0, 10);
+  frameSlider = new UiSlider(this, ID_FRAME, 0, 0, 10);
   frameSlider->SetToolTip(_("Scrub through the animation"));
   // While the thumb is held, the playback timer must not move it out from under the mouse.
   frameSlider->Bind(wxEVT_SCROLL_THUMBTRACK, [this](wxScrollEvent & e) { m_scrubbing = true; e.Skip(); });
   frameSlider->Bind(wxEVT_SCROLL_THUMBRELEASE, [this](wxScrollEvent & e) { m_scrubbing = false; e.Skip(); });
 
-  speedSlider = new wxSlider(this, ID_SPEED, 10, 1, 40);
+  speedSlider = new UiSlider(this, ID_SPEED, 10, 1, 40);
   speedSlider->SetToolTip(_("Playback speed"));
   speedLabel = new wxStaticText(this, wxID_ANY, wxT("1.0\u00D7"), wxDefaultPosition, wxDefaultSize,
                                 wxALIGN_RIGHT | wxST_NO_AUTORESIZE);
   speedLabel->SetMinSize(wxSize(GetTextExtent(wxT("0.0\u00D7 ")).x, -1));
-  btnSpeedReset = new wxButton(this, ID_ANIM_SPEED_RESET, _("Reset"), wxDefaultPosition, wxDefaultSize, wxBU_EXACTFIT);
+  UiButton * speedReset = new UiButton(this, ID_ANIM_SPEED_RESET, _("Reset"), UiButton::Kind::Subtle, UiIcon::Reset, wxBU_EXACTFIT);
+  speedReset->SetCompact(true);
+  btnSpeedReset = speedReset;
   btnSpeedReset->SetToolTip(_("Back to normal speed"));
 
   wxBoxSizer * playCol = new wxBoxSizer(wxVERTICAL);
@@ -249,10 +227,12 @@ AnimControl::AnimControl(wxWindow* parent, wxWindowID id, wxWindow * skinParent,
 
   // ---- Queue & advanced (collapsed by default) -----------------------------------------------
   advancedScroll = new wxScrolledWindow(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxVSCROLL);
+  UiStyle::applyPanel(advancedScroll);
   advancedScroll->SetScrollRate(0, FromDIP(8));
   advancedPane = new wxCollapsiblePane(advancedScroll, wxID_ANY, _("Queue && advanced"), wxDefaultPosition,
                                        wxDefaultSize, wxCP_DEFAULT_STYLE | wxCP_NO_TLW_RESIZE,
                                        wxDefaultValidator, wxT("animQueueAdvanced"));
+  UiStyle::applyPanelWithChildren(advancedPane);
   wxWindow * adv = advancedPane->GetPane();
 
   oldStyle = new wxCheckBox(adv, ID_OLDSTYLE, _("Auto animate"));
@@ -267,9 +247,13 @@ AnimControl::AnimControl(wxWindow* parent, wxWindowID id, wxWindow * skinParent,
 
   loopList = new wxComboBox(adv, ID_LOOPS, wxT("0"), wxDefaultPosition, wxDefaultSize, 10,
                             strLoops, wxCB_READONLY, wxDefaultValidator, wxT("Loops"));
-  btnAdd = new wxButton(adv, ID_ADDANIM, _("Add to queue"), wxDefaultPosition, wxDefaultSize, wxBU_EXACTFIT);
+  UiButton * add = new UiButton(adv, ID_ADDANIM, _("Add to queue"), UiButton::Kind::Secondary);
+  add->SetCompact(true);
+  btnAdd = add;
   btnAdd->SetToolTip(_("Queue the selected animation for the number of loops shown"));
-  btnClear = new wxButton(adv, ID_CLEARANIM, _("Clear queue"), wxDefaultPosition, wxDefaultSize, wxBU_EXACTFIT);
+  UiButton * clear = new UiButton(adv, ID_CLEARANIM, _("Clear queue"), UiButton::Kind::Secondary);
+  clear->SetCompact(true);
+  btnClear = clear;
 
   lockAnims = new wxCheckBox(adv, ID_ANIM_LOCK, _("Lock animations"));
   lockAnims->SetToolTip(_("Untick to play a separate upper-body and mouth animation"));
@@ -282,7 +266,7 @@ AnimControl::AnimControl(wxWindow* parent, wxWindowID id, wxWindow * skinParent,
   animCList2->Enable(false);
 
   lockTextLabel = new wxStaticText(adv, wxID_ANY, _("Bones"));
-  lockText = new wxTextCtrl(adv, ID_ANIM_SECONDARY_TEXT, wxEmptyString, wxDefaultPosition,
+  lockText = new UiTextCtrl(adv, ID_ANIM_SECONDARY_TEXT, wxEmptyString, wxDefaultPosition,
                             wxDefaultSize, wxTE_PROCESS_ENTER, wxDefaultValidator);
   lockText->SetValue(wxString::Format(wxT("%d"), UPPER_BODY_BONES));
   lockText->SetMinSize(wxSize(FromDIP(48), -1));
@@ -296,7 +280,7 @@ AnimControl::AnimControl(wxWindow* parent, wxWindowID id, wxWindow * skinParent,
   animCList3->Enable(false);
 
   speedMouthLabel = new wxStaticText(adv, -1, wxT("Speed: 1.0x"));
-  speedMouthSlider = new wxSlider(adv, ID_SPEED_MOUTH, 10, 0, 40);
+  speedMouthSlider = new UiSlider(adv, ID_SPEED_MOUTH, 10, 0, 40);
 
   {
     wxBoxSizer * col = new wxBoxSizer(wxVERTICAL);
@@ -338,9 +322,9 @@ AnimControl::AnimControl(wxWindow* parent, wxWindowID id, wxWindow * skinParent,
   // ---- Three columns -------------------------------------------------------------------------
   wxBoxSizer * top = new wxBoxSizer(wxHORIZONTAL);
   top->Add(clipsCol, 5, wxEXPAND | wxALL, sp);
-  top->Add(new wxStaticLine(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxLI_VERTICAL), 0, wxEXPAND | wxTOP | wxBOTTOM, sp);
+  top->Add(UiStyle::separator(this, wxVERTICAL), 0, wxEXPAND | wxTOP | wxBOTTOM, sp);
   top->Add(playCol, 5, wxEXPAND | wxALL, sp);
-  top->Add(new wxStaticLine(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxLI_VERTICAL), 0, wxEXPAND | wxTOP | wxBOTTOM, sp);
+  top->Add(UiStyle::separator(this, wxVERTICAL), 0, wxEXPAND | wxTOP | wxBOTTOM, sp);
   top->Add(advancedScroll, 0, wxEXPAND | wxALL, sp);
   SetSizer(top);
   RelayoutAdvanced();
@@ -355,7 +339,7 @@ AnimControl::AnimControl(wxWindow* parent, wxWindowID id, wxWindow * skinParent,
   BLPSkinsLabel = UiStyle::secondaryLabel(overridesParent, _("Any texture from this model's folder:"));
   BLPSkinsLabel->Show(false);
 
-  showBLPList = new wxButton(overridesParent, ID_SHOW_BLP_SKINLIST, _("List folder textures (slow)"));
+  showBLPList = new UiButton(overridesParent, ID_SHOW_BLP_SKINLIST, _("List folder textures (slow)"), UiButton::Kind::Secondary);
   showBLPList->SetToolTip(_("This folder has many textures; listing them takes a moment"));
   showBLPList->Show(false);
   showBLPList->Bind(wxEVT_BUTTON, &AnimControl::OnButton, this);
@@ -2164,7 +2148,7 @@ void AnimControl::RefreshPlaybackState()
   if (btnPlayPause->GetLabel() != playLabel)
   {
     btnPlayPause->SetLabel(playLabel);
-    btnPlayPause->SetBitmap(transportBitmap(this, paused ? ICON_PLAY : ICON_PAUSE));
+    static_cast<UiButton *>(btnPlayPause)->SetIcon(paused ? UiIcon::Play : UiIcon::Pause);
     if (btnPlayPause->GetContainingSizer())
       btnPlayPause->GetContainingSizer()->Layout();
   }

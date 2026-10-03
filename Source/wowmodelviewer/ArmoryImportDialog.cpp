@@ -693,7 +693,7 @@ void ArmoryImportDialog::refreshState()
     hint = realmHint; // "Sent as ...", or nothing
   }
 
-  m_hint->SetForegroundColour(warn ? NoticeColour : UiStyle::secondaryText());
+  m_hint->SetForegroundColour(warn ? NoticeColour : UiStyle::secondaryText(this));
   m_hint->SetLabelText(hint.empty() ? wxString(wxT(" ")) : wrapToWidth(m_hint, hint, m_contentWidth));
   // The line is reserved at one line high; a hint that wraps needs the room for all of it.
   m_hint->InvalidateBestSize();
@@ -922,7 +922,7 @@ void ArmoryImportDialog::showStatus(Tone tone, const wxString & title, const wxS
   m_statusTitle->SetForegroundColour(tone == Tone::Error ? NoticeColour
                                                          : wxSystemSettings::GetColour(wxSYS_COLOUR_WINDOWTEXT));
   m_statusDetail->SetForegroundColour(tone == Tone::Success ? wxSystemSettings::GetColour(wxSYS_COLOUR_WINDOWTEXT)
-                                                            : UiStyle::secondaryText());
+                                                            : UiStyle::secondaryText(this));
   m_statusTitle->SetLabelText(wrapToWidth(m_statusTitle, title, m_contentWidth));
   m_statusDetail->SetLabelText(wrapToWidth(m_statusDetail, detail, m_contentWidth));
 

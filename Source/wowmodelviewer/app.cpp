@@ -22,6 +22,7 @@
 #include "globalvars.h"
 #include "LogStackWalker.h"
 #include "PluginManager.h"
+#include "UiStyle.h"
 #include "UserSkins.h"
 #include "util.h"
 #include "WoWDatabase.h"
@@ -3738,6 +3739,10 @@ void WowModelViewApp::LoadSettings()
   customDirectoryPath = config.value("Settings/CustomDirPath", "").toString().toStdWString();
   customFilesConflictPolicy = config.value("Settings/CustomFilesConflictPolicy", 0).toInt();
   displayItemAndNPCId = config.value("Settings/displayItemAndNPCId", 0).toInt();
+  // The appearance (View > Appearance): 0 System (follow Windows' app mode), 1 Light, 2 Dark. Known
+  // before the main window is made, so its first paint already uses the right palette.
+  UiStyle::setThemePreference(UiStyle::themeFromSetting(config.value("Settings/Appearance", 0).toInt()));
+  UiStyle::refreshPalette();   // in case anything resolved the palette before the preference was known
   // Settings/SSCounter and Settings/DefaultFormat (the screenshot file counter and format) are no longer
   // read or written: Save Screenshot went with the OpenGL viewport.
 
@@ -3771,6 +3776,7 @@ void WowModelViewApp::SaveSettings()
   config.setValue("Settings/CustomDirPath", QString::fromWCharArray(customDirectoryPath.c_str()));
   config.setValue("Settings/CustomFilesConflictPolicy", customFilesConflictPolicy);
   config.setValue("Settings/displayItemAndNPCId", displayItemAndNPCId);
+  config.setValue("Settings/Appearance", UiStyle::themeToSetting(UiStyle::themePreference()));
 
   config.setValue("Tools/UnityRendererPath", QString::fromWCharArray(unityRendererPath.c_str()));
 

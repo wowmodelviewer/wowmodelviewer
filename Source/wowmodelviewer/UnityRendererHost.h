@@ -126,6 +126,15 @@ public:
   void showContent(bool show);
   bool isShowingContent() const { return m_contentShown; }
 
+  // THE HOLD (a viewer-mode switch). While held, the player's window is neither shown, hidden nor
+  // resized; releasing the last hold applies what is due -- its size, then shown; or hidden -- after the
+  // new workspace has been painted, so the switch is one change on screen. The player's window is not
+  // resized while the texture view covers it (it keeps the Models viewport's size), nor behind a notice
+  // until its hide has landed (it would draw at the new size first); it is sized to the viewport again
+  // just before it is shown.
+  void holdPlayer();
+  void releasePlayer();
+
 private:
   void OnSize(wxSizeEvent & event);
   void OnSetFocus(wxFocusEvent & event);
@@ -152,6 +161,7 @@ private:
   wxButton * m_noticeButton = nullptr;
   wxTimer m_noticeTimer;   // the player creates its window some time after launch: hide it when it appears
   int m_noticeTicksLeft = -1;
+  int m_playerHold = 0;     // holdPlayer() count
 
   // See playerProblem(). m_playerExpected is true from a successful launch until shutdown(), so an
   // exit in between is told apart from a player that was closed on purpose.

@@ -225,6 +225,50 @@ Format loosely based on [Keep a Changelog](https://keepachangelog.com/).
   follow aliases yet.)
 
 ### Changed
+- **A modern, flat look for the main window, from one design system (`UiStyle.h`).** Spacing, control heights,
+  type roles and colour roles live in one place, and the shell takes them from there instead of picking its own
+  pixels and RGB values; the colours are roles (`palette().text`, `.separator`, `.accent`...), with one set of
+  values for the light palette and one for the dark (see the Appearance entry below). The command bar is drawn flat (`UiToolBarArt`): "VIEWER" then Models | Textures
+  as one segmented control whose selected half is filled in the accent colour, Fullscreen and Screenshot as quiet
+  utilities, and the Browse / Model / Animation pane toggles at the right, a pressed toggle on a soft fill. Pane
+  captions (`UiDockArt`) are flat, the pane with the keyboard named in the text colour with an accent line under its
+  title and the others in grey, with a quiet close button and thin sashes; the caption, sash and border sizes are the
+  ones the docked layout always had, so saved layouts and the viewport's size are unchanged. Buttons come in three
+  kinds (`UiButton`, still native Windows buttons, only painted: keyboard, focus, tooltips and screen readers stay
+  the system's): Primary in the accent for the action an area is for (Export PNG, Choose Mount, Play / Pause, the
+  viewport notice's action), Secondary outlined (Export BLP, the equipment slots, the transport steps, the queue
+  buttons), Subtle with no frame until the mouse is over it (Copy path, Copy FileDataID, Reset, an equipment slot's
+  remove), each with hover, pressed, disabled and a keyboard-only focus ring, at two heights. Search fields (Browse,
+  the animation filter, the geoset filter) are 28 px tall with a rounded outline that turns to the accent while the
+  field has the keyboard. Browse's tree uses the Explorer style (chevrons, hover, soft selection) with 22 px rows and
+  no border of its own. The Model panel's pages sit under a flat tab strip (`UiTabBar`: the selected page in
+  semibold with an accent underline; Left / Right / Home / End move between them) instead of property-sheet tabs. The
+  texture view's Alpha On / Off / Only is a segmented control too, its name a title, its exports a primary and a
+  secondary button with an export icon. Panels are on one panel colour, section titles semibold, hints and
+  counts in a secondary grey. A few icons (16 px, from the open-source Lucide set, ISC licence; see
+  `docs/third-party-notices.md`) mark the modes, the utilities, the pane toggles, the transport and the exports; no
+  other images were added. Native controls Windows draws well (combo boxes, check boxes, sliders, list headers,
+  menus, the status bar) stay native.
+- **View > Appearance: System, Light or Dark, switched at once, no restart.** System (the default) follows
+  Windows' app mode (Settings > Personalization > Colors), also when it changes while the viewer runs; Light and
+  Dark keep their palette whatever Windows uses; the choice is kept in Config.ini (`Settings/Appearance`: 0 System,
+  1 Light, 2 Dark). Windows' high-contrast mode still wins over every choice: the shell then takes the system
+  colours, as before. The dark palette is a restrained near-neutral grey (window 22,22,24, panels 36,36,39, fields
+  46,46,50, text 230,230,232) with an accent blue close to the light one's (38,118,204: white text on it, and on
+  its hover and pressed shades, at least 4.5:1); icons are the same drawings recoloured from the palette, and the
+  viewport, its background and the texture view's own checkerboard / black / white / grey backgrounds are the same
+  in both themes. Item names in the rare blue and epic purple are lightened in their own hue on the dark panel so
+  they read. Native controls follow through the themes Windows ships for its own dark mode (title bar, scroll bars,
+  combo boxes and their lists, check boxes, list views and their headers, trees, text and search fields, spin
+  buttons; the Geosets list's selected row is drawn from the palette). In Dark the status bar is wxWidgets' own,
+  so it can take the panel colour (3 px less tall than Windows' own, so the viewport is 3 px taller; a screen
+  reader is still told a status bar and its fields, and a cut-off field shows its full text as a tooltip, but it
+  has no size grip); Light and high contrast keep Windows' own status bar. The Attachments pane (View >
+  Attachments) is on the panel colours too, in both themes. What stays light in Dark: the menu bar and its menus,
+  message boxes and the Open / Save dialogs, which wxWidgets 3.2 and Windows offer no supported dark mode for; the
+  viewer's own dialogs and Settings, whose native tabs and group boxes Windows draws light in every theme (each
+  stays a whole light window, title bar included, rather than a half-dark one); and the grey placeholder text of
+  an empty search field, which the native control draws.
 - **Character > Import Armory Character: pick the region, realm and name instead of pasting a link.** The
   dialog asks for a region (Europe, Americas & Oceania, Korea, Taiwan -- the regions the importer serves),
   a realm and a character name, and imports with Enter or the bold Import character button; pasting an
@@ -347,6 +391,17 @@ Format loosely based on [Keep a Changelog](https://keepachangelog.com/).
   `-imgseq` smoke test is gone. `-unityipctest` and `-fbxexport` still run.
 
 ### Fixed
+- **Switching between Models and Textures happens in one step.** The switch hid and showed the panes, the texture
+  view and the Unity player's window one at a time and laid the window out more than once, so the viewport
+  briefly grew into the space a closed pane left, the panes folded away one after another, and on the way back
+  the player's window could stay at the size it had while hidden. Now the panes are frozen, every layout change
+  of the switch (panes, texture view, viewport) is committed in a single `wxAuiManager::Update`, the player's
+  window keeps its place and size until that layout is final and is hidden or shown together with the one
+  repaint, and the panes that were closed before the switch stay closed after it.
+- **Typing in Browse's search box no longer loses the keyboard to the tree when the results come in.** Emptying
+  the tree to refill it gave the Windows tree control the keyboard focus, so after the first results a key typed
+  went to the tree (jumping to a row) instead of the search box; the search box (or whatever had the keyboard)
+  has it again after the tree is refilled.
 - **A game file whose storage read returns nothing is a failed read, not a buffer of leftover memory.** The
   shared file reader (`UnityAssetAccess::readByPath` / `readByFileDataID`) retried a storage file whose stream read
   returned zero bytes -- an encrypted file without its key, data the game has not downloaded -- in memory mode,

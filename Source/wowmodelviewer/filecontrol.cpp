@@ -19,7 +19,10 @@
 #include "RaceInfos.h"
 #include "TextureBrowse.h"
 #include "TextureView.h"
+#include "UiControls.h"
 #include "UiStyle.h"
+
+#include <commctrl.h>
 #include "UnityAssetAccess.h"
 
 IMPLEMENT_CLASS(FileControl, wxWindow)
@@ -95,16 +98,32 @@ FileControl::FileControl(wxWindow* parent, wxWindowID id)
   try {
     const int sp = FromDIP(UiStyle::S);
 
+    UiStyle::applyPanel(this);
+
     // The search box, the tree, and one line under the tree: the minimum length while typing, how many
     // files a search found, or why there is nothing to list. The search is the viewer mode's (its hint
     // says which: UpdateSearchHint).
-    txtContent = new wxSearchCtrl(this, ID_FILELIST_CONTENT, wxEmptyString, wxDefaultPosition, wxDefaultSize,
-                                  wxTE_PROCESS_ENTER);
+    UiSearchFrame * searchFrame = new UiSearchFrame(this, ID_FILELIST_CONTENT, wxEmptyString, wxTE_PROCESS_ENTER);
+    txtContent = searchFrame->search();
     txtContent->ShowSearchButton(true);
     txtContent->ShowCancelButton(true);
     searchStatus = UiStyle::secondaryLabel(this, wxEmptyString);
 
-    fileTree = new wxTreeCtrl(this, ID_FILELIST, wxDefaultPosition, wxDefaultSize, wxTR_HIDE_ROOT|wxTR_HAS_BUTTONS|wxTR_LINES_AT_ROOT|wxTR_FULL_ROW_HIGHLIGHT|wxTR_NO_LINES);
+    // The tree in the Explorer style (chevrons, hover, the soft selection), on the pane's own colour with
+    // no border of its own (the pane has one), rows a little taller than the native minimum.
+    fileTree = new wxTreeCtrl(this, ID_FILELIST, wxDefaultPosition, wxDefaultSize,
+                              wxTR_HIDE_ROOT | wxTR_HAS_BUTTONS | wxTR_LINES_AT_ROOT | wxTR_FULL_ROW_HIGHLIGHT |
+                              wxTR_NO_LINES | wxTR_TWIST_BUTTONS | wxBORDER_NONE);
+    fileTree->EnableSystemTheme();
+    fileTree->SetDoubleBuffered(true);
+    fileTree->SetBackgroundColour(UiStyle::palette().panelBackground);
+    fileTree->SetForegroundColour(UiStyle::palette().text);
+    {
+      const HWND tree = (HWND)fileTree->GetHWND();
+      const int row = FromDIP(UiStyle::TreeRowHeight) & ~1;   // an even height: Windows rounds odd ones down
+      if (TreeView_GetItemHeight(tree) < row)
+        TreeView_SetItemHeight(tree, row);
+    }
     m_textures = new TextureBrowse(fileTree);
     m_texturesLoadWatch.Bind(wxEVT_TIMER, [this](wxTimerEvent &) { TexturesClientLoaded(); });
     // An arrow key held down in the texture tree: the rows it passes wait to be decoded until it is let
@@ -114,7 +133,7 @@ FileControl::FileControl(wxWindow* parent, wxWindowID id)
     fileTree->Bind(wxEVT_KILL_FOCUS, [this](wxFocusEvent & e) { KeysRepeating(false); e.Skip(); });
 
     wxBoxSizer * top = new wxBoxSizer(wxVERTICAL);
-    top->Add(txtContent, 0, wxEXPAND | wxLEFT | wxRIGHT | wxTOP, sp);
+    top->Add(searchFrame, 0, wxEXPAND | wxLEFT | wxRIGHT | wxTOP, sp);
     top->Add(fileTree, 1, wxEXPAND | wxTOP, sp);
     top->Add(searchStatus, 0, wxEXPAND | wxALL, sp);
     SetSizer(top);
@@ -133,7 +152,9 @@ FileControl::~FileControl()
     fileTree->Destroy();
     fileTree = NULL;
   }
-  txtContent->Destroy();
+  // The search field together with its frame (UiSearchFrame), which refers to it.
+  txtContent->GetParent()->Destroy();
+  txtContent = NULL;
 }
 
 void FileControl::SetSearchStatus(const wxString & text)
@@ -163,10 +184,37 @@ void FileControl::UpdateSearchHint()
   }
 }
 
+namespace
+{
+  // Emptying the tree hands it the keyboard: the Windows tree control takes the focus while its rows are
+  // deleted, from the search box too. Typing on in the search box must not land in the tree, so whatever
+  // had the keyboard before the tree was refilled has it again afterwards.
+  class KeepFocusOffTree
+  {
+  public:
+    explicit KeepFocusOffTree(wxWindow * tree) : m_tree((HWND)tree->GetHWND()), m_before(::GetFocus()) {}
+    ~KeepFocusOffTree()
+    {
+      // Shown by wx's account, not IsWindowVisible: inside a frozen frame (a viewer-mode switch) every
+      // window reads as invisible to Windows.
+      wxWindow * before = m_before && ::IsWindow(m_before) ? wxFindWinFromHandle(m_before) : nullptr;
+      const bool shown = before ? before->IsShownOnScreen() : (m_before && ::IsWindowVisible(m_before));
+      if (m_before && m_before != m_tree && ::GetFocus() == m_tree && ::IsWindow(m_before) && shown &&
+          ::IsWindowEnabled(m_before))
+        ::SetFocus(m_before);
+    }
+
+  private:
+    HWND m_tree;
+    HWND m_before;
+  };
+}
+
 void FileControl::Init(ModelViewer* mv)
 {
   if (modelviewer == NULL)
     modelviewer = mv;
+  KeepFocusOffTree keepFocus(fileTree);
 
   // A search is running now, so cancel any pending debounced one (Enter/Clear/timer all
   // funnel through here -- this stops a queued timer from re-searching the same text).

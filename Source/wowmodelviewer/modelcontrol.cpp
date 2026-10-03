@@ -12,6 +12,8 @@
 #include "globalvars.h"
 #include "ModelInspector.h"
 #include "modelviewer.h"
+#include "UiControls.h"
+#include "UiStyle.h"
 #include "WoWItem.h"
 
 #include "logger/Logger.h"
@@ -45,6 +47,9 @@ ModelControl::ModelControl(wxWindow* parent, wxWindowID id)
   att = NULL;
 
   LOG_INFO << "Creating Model Control...";
+  // A pane like Model and Animation: the panel colours of the theme in use (its labels and check box
+  // take the text colour as they are made).
+  UiStyle::setRole(this, UiStyle::Role::Panel);
 
   wxFlexGridSizer *padding = new wxFlexGridSizer(1,1,0);
 
@@ -65,10 +70,11 @@ ModelControl::ModelControl(wxWindow* parent, wxWindowID id)
 
   wxFlexGridSizer * gbox = new wxFlexGridSizer(2, 5, 5);
   gbox->Add(new wxStaticText(this, wxID_ANY, wxT("Scale")), 1, wxALIGN_CENTER_VERTICAL);
-  txtsize = new wxTextCtrl(this, ID_MODEL_SIZE, wxT("1.00"));
+  txtsize = new UiTextCtrl(this, ID_MODEL_SIZE, wxT("1.00"));
+  UiStyle::setRole(txtsize, UiStyle::Role::Field);
   gbox->Add(txtsize);
   top->Add(gbox, 1, wxEXPAND);
-  scale = new wxSlider(this, ID_MODEL_SCALE, 100, 10, 300);
+  scale = new UiSlider(this, ID_MODEL_SCALE, 100, 10, 300);
   top->Add(scale, 1, wxEXPAND);
 
   top->AddSpacer(5);
