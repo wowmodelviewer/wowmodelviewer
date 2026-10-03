@@ -425,7 +425,7 @@ loaded behind it, and Models, or picking that model again, shows it again withou
 | a WMO with no FileDataID (a legacy client; the player fetches the root and its groups by FileDataID) | "Legacy client world model" | -- |
 | a WMO the player reported it could not build, while that load is the one on display (until the next load or a player restart) | "World model could not be built", with the player's reason | -- |
 | a WMO, with a connected player older than protocol 4 | "Unity renderer out of date" | -- |
-| a map tile (ADT) | "Map tile loaded" | -- |
+| a map tile (ADT) -- nothing loads one any more: Browse lists no map tiles | "Map tile loaded" | -- |
 | a model with no game file behind it | "Model cannot be shown" | -- |
 | a character riding a mount, with a connected player older than protocol 5, or whose rider is not a character model with a FileDataID (the canvas model is then the mount) | "Mounted character" | -- |
 | a model with no FileDataID (a legacy MPQ client; the player addresses every asset by one) | "Legacy client model" | -- |
@@ -944,7 +944,7 @@ yet:
   headless self-test runs with it. If the context never initialises, the viewport's notice says
   that textures cannot be decoded.
 - **It owns what is loaded:** the model and its attachments (`canvas->root`, `model()`), a WMO (its
-  root metadata only; see "World models") or a map tile. A texture picked in Browse is not loaded
+  root metadata only; see "World models"). A texture picked in Browse is not loaded
   here: the texture view reads and decodes it (through this context) and shows it in the
   viewport's place, with whatever was loaded left loaded behind it.
 - **It owns the animation clock.** Its 10 ms timer calls `tick()` and nothing else -- no redraw
@@ -1315,8 +1315,8 @@ animation clock advances while the model plays. For a character, its check also 
 least one composited `characterImage` was sent.
 
 **World models in the self-test.** `wowmodelviewer.exe -dbfromfile -wmo 115058 -unityipctest` (a root
-listfile path works too) selects the WMO through `FileControl::SelectWMOFile`, the code a pick under
-Browse's WMO filter runs, and its **world-model check** waits for the player's `mapObjectLoaded` for
+listfile path works too) selects the WMO through `FileControl::SelectWMOFile`, the code picking a world
+model in Browse (Models mode) runs, and its **world-model check** waits for the player's `mapObjectLoaded` for
 that load, logs every field, and fails unless it is `"built"`, names the root, built the root
 header's group count with no group file missing, and left the player holding exactly one world model
 and no model (`liveMapObjects` 1, `liveModels` 0); the host side must also have loaded no group
@@ -1496,8 +1496,8 @@ are not available in the Unity-only viewer, and write no image; the `-imgseq` sm
   armour are drawn (see "Characters").
 - For characters: secondary (upper-body) and mouth animations. A mounted character rides its mount
   in a player of protocol 5 or later (see "Mounted characters"); an older player gets a notice.
-- Maps, terrain, fog. Each of these loads and gets a notice. (A texture picked in Browse is shown by the
-  texture view in the viewport's place; see the notices above.)
+- Maps, terrain, fog. Browse lists no map tiles, so none is loaded. (A texture picked in Browse is shown
+  by the texture view in the viewport's place; see the notices above.)
 - For WMOs: doodads and doodad sets, liquids, WMO lights, fog, portal culling, LOD switching, the
   skybox, and the rest of the WMO material system (shader ids other than 0/4/5/7/13/16/23, the env-map
   emissives of ids 5, 7 and 23, the MOC2 byte-3 colour pull of id 23, blend values 2 and above, MOCV

@@ -120,7 +120,7 @@ public:
   int m_exportItemSkinFileId = 0;
 
   ExportJobManager * m_exportJobManager = nullptr;
-  // A texture picked in Browse (Show: Textures), shown in the viewport's place: the Unity host's
+  // A texture picked in Browse (Textures mode), shown in the viewport's place: the Unity host's
   // content window (UnityRendererHost::showContent). Created with the viewport.
   TextureView * textureView = nullptr;
 
@@ -222,9 +222,9 @@ public:
   void PromptAndLoadClient();
   // THE VIEWER MODE: Models (the Unity viewport and the model panels) or Textures (the texture viewer in
   // the viewport's place, the model panels put away). The command bar's Models | Textures selector,
-  // Browse's category and the centre all follow it, and SetViewerMode is the one way to change it: the
-  // selector, Browse's Show list (Textures, or any other category), and a model loaded from a menu
-  // (Models). A model stays loaded behind Textures mode and the texture selected stays selected behind
+  // what Browse lists (FileControl::FollowViewerMode) and the centre all follow it, and SetViewerMode is
+  // the one way to change it: the selector, and a model loaded from a menu or a file (Models). A model
+  // stays loaded behind Textures mode and the texture selected stays selected behind
   // Models mode, so going back shows each as it was, without loading anything again.
   enum class ViewerMode { Models, Textures };
   void SetViewerMode(ViewerMode mode);
@@ -325,7 +325,7 @@ public:
   bool m_textureWorkspace = false;
   std::vector<TextureWorkspacePane> m_textureWorkspacePanes;
   wxString m_textureWorkspaceLayout;   // SavePerspective when they went: the sizes of the docks they took
-  // A client load is starting or has ended: the texture view and Browse's Textures category follow
+  // A client load is starting or has ended: the texture view and Browse's texture tree follow
   // (Textures mode stays: its selection and cache go with the old client).
   void TexturesClientLoadStarting();
   void TexturesClientLoaded();

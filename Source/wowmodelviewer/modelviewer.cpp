@@ -4047,6 +4047,8 @@ void ModelViewer::DisplayedContentChanged()
 
   if (modelInspector)
     modelInspector->ContentChanged();
+  if (fileControl)
+    fileControl->PickedRowFollowsLoad();
 
   UpdateStatusFacts();
   UpdateCanvasStatus();
@@ -4058,7 +4060,7 @@ void ModelViewer::SetViewerMode(ViewerMode mode)
     return;
   m_viewerMode = mode;
   LOG_INFO << "[viewport] viewer mode:" << (mode == ViewerMode::Textures ? "Textures" : "Models");
-  // The selector at once: a switch from Browse's Show list or a menu does not come through the toolbar.
+  // The selector at once: a switch made by a load from a menu does not come through the toolbar.
   if (commandBar)
   {
     commandBar->ToggleTool(mode == ViewerMode::Textures ? ID_UI_TEXTURES : ID_UI_MODELS, true);
@@ -4150,9 +4152,6 @@ void ModelViewer::OnCommandBar(wxCommandEvent & event)
       // From the id only, never the tool's checked state: a click on the active radio tool, a double-click
       // and the empty viewer's posted command all arrive unchecked.
       const bool textures = event.GetId() == ID_UI_TEXTURES;
-      // Models is about models whatever Browse listed (DBCs, say): Browse lists them again.
-      if (!textures && fileControl)
-        fileControl->ShowModels();
       SetViewerMode(textures ? ViewerMode::Textures : ViewerMode::Models);
       if (!UnityAssetAccess::hasActiveClient())
       {
@@ -4167,8 +4166,9 @@ void ModelViewer::OnCommandBar(wxCommandEvent & event)
         browse.Show(true);
         interfaceManager.Update();
       }
-      if (textures && textureView && textureView->selection() != TextureView::Selection::None &&
-          fileControl->fileTree->GetSelection().IsOk())
+      // The keyboard to Browse: its tree when a row is picked there (the model loaded, the texture shown),
+      // to go on from it; otherwise its search box.
+      if (fileControl->fileTree->GetSelection().IsOk())
         fileControl->fileTree->SetFocus();
       else if (fileControl->txtContent)
         fileControl->txtContent->SetFocus();
@@ -4293,8 +4293,8 @@ void ModelViewer::OnUpdateCommandUI(wxUpdateUIEvent & event)
       // Something to capture, and no capture on its way (an older player is told why on the click).
       event.Enable(isUnityViewportShowingModel() && m_screenshotRequest == 0);
       break;
-    // The viewer selector: both answered every time, so a switch made elsewhere (Browse's Show list, a
-    // menu load) or refused (during a client load) shows right.
+    // The viewer selector: both answered every time, so a switch made elsewhere (a menu load) or refused
+    // (during a client load) shows right.
     case ID_UI_MODELS:
       event.Check(m_viewerMode == ViewerMode::Models);
       break;

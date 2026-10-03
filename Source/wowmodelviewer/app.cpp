@@ -3313,7 +3313,7 @@ bool WowModelViewApp::OnInit()
     }
     else if (cmd == "-wmo") {
       // Headless world-model selection: "-wmo <root listfile path or FileDataID>" selects the WMO through
-      // FileControl::SelectWMOFile, the same code a pick under Browse's WMO filter runs. Composes with
+      // FileControl::SelectWMOFile, the same code picking a world model in Browse (Models mode) runs. Composes with
       // -unityipctest (the world-model check); see doHeadlessUnityIpcTest.
       if (i + 1 < argc) { i++; snapWmoArg = QString::fromWCharArray(argv[i]); }
     }

@@ -1,12 +1,12 @@
 /*
  * TextureBrowse.h
  *
- * Browse's "Textures (*.blp)" category: the client's textures in Browse's own tree -- FileControl's
- * wxTreeCtrl, its search box and its status line -- filled from the TextureCatalog instead of the
- * TreeStackItem hierarchy the other categories build.
+ * Browse in Textures mode: the client's textures in Browse's own tree -- FileControl's wxTreeCtrl, its
+ * search box and its status line -- filled from the TextureCatalog instead of the TreeStackItem
+ * hierarchy the models' tree is built from.
  *
  * Why not that hierarchy: measured on client 12.1 (789,146 textures), building it took 2.9 s and 536 MB
- * on every entry into the category and every cleared search (it is never freed); a search for "_hd"
+ * on every entry into Textures and every cleared search (it is never freed); a search for "_hd"
  * took 6.5 s; and expanding textures/bakednpctextures appended 83,178 rows in 17 s. Here:
  *   - folders are filled in when they are expanded, from the catalogue's sorted paths (TextureCatalog::
  *     list), nothing is built up front, and the catalogue is built once per client;
@@ -16,8 +16,8 @@
  *     matches in their folders, expanded, as Browse lists its search results;
  *   - files the index knows only by FileDataID sit in one group at the end, and a FileDataID typed in the
  *     search that the list does not have is offered as a look-up row;
- *   - the folders open in the tree (and its scroll position) are kept while a search or another
- *     category replaces it, and opened again when it comes back.
+ *   - the folders open in the tree (its scroll position and its picked row) are kept while a search or
+ *     the models replace it, and opened again when it comes back.
  *
  * Rows carry a TextureRowData (a FileTreeData with no GameFile, so Browse's handlers never take one
  * for a file of theirs). GUI thread only, like the index.
@@ -89,10 +89,11 @@ public:
   void lookupResolved(int fileDataId, const QString & indexName);
   // True while the tree is being rebuilt or revealed: selection changes then are not picks.
   bool busy() const { return m_busy > 0; }
-  // Browse is about to show another category in the tree: the folders open now (and the row at the
-  // top) are kept, for the next populate without a search.
+  // Browse is about to show something else in the tree (the models): the folders open now, the row at
+  // the top and the row picked are kept -- the browsing tree's for the next populate without a search, a
+  // search's results' for that search coming back (once).
   void rememberOpenFolders();
-  // The tree holds this category's search results.
+  // The tree holds a texture search's results.
   bool showsSearch() const { return m_treeIsOurs && m_treeIsSearch; }
 
 private:
@@ -109,8 +110,11 @@ private:
   void scrollLeft();
   // A row's identity across rebuilds ("" for one that has none).
   QString rowKey(const TextureRowData & d) const;
-  void collectOpen(wxTreeItemId parent);
-  void reopen(wxTreeItemId parent, wxTreeItemId & top, wxTreeItemId & picked);
+  void collectOpen(wxTreeItemId parent, std::set<QString> & open);
+  // The browsing tree replaced by a search: its open folders, top row and picked row.
+  void rememberBrowsing();
+  void reopen(wxTreeItemId parent, const std::set<QString> & open, const QString & topKey, const QString & pickedKey,
+              wxTreeItemId & top, wxTreeItemId & picked);
 
   struct Busy
   {
@@ -124,11 +128,15 @@ private:
   bool m_catalogCurrent = false;
   TextureCatalog::SearchResult m_lastResult;   // narrowed when the next search extends it
   int m_busy = 0;
-  bool m_treeIsOurs = false;       // the tree holds this category's rows
+  bool m_treeIsOurs = false;       // the tree holds the textures' rows
   bool m_treeIsSearch = false;     // ... and they are a search's results
   std::set<QString> m_openRows;    // rowKey of the rows open when the browsing tree was last replaced
   QString m_topRow;                // rowKey of its first visible row
   QString m_pickedRow;             // rowKey of its selected row
+  QString m_searchKept;            // the search whose results were left for the models, and theirs:
+  std::set<QString> m_searchOpenRows;
+  QString m_searchTopRow;
+  QString m_searchPickedRow;
 };
 
 #endif // TEXTUREBROWSE_H
