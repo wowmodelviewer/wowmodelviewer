@@ -54,7 +54,8 @@ public:
     CONTEXT_MODEL,       // a creature, item or other plain M2
     CONTEXT_CHARACTER,
     CONTEXT_WMO,
-    CONTEXT_OTHER        // a map tile, an image
+    CONTEXT_OTHER,       // a map tile
+    CONTEXT_TEXTURE      // a texture picked in Browse, shown in the viewport's place
   };
 
   enum Page { PAGE_APPEARANCE = 0, PAGE_GEOSETS, PAGE_INFO };

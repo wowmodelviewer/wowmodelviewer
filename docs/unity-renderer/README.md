@@ -406,12 +406,21 @@ character loads and their failures, Browse selections, clearing -- on mount and 
 canvas tick notices those), when the player announces itself or reports a character or a world model
 it could not build, and when a stopped player is noticed. The first case that applies wins:
 
+The Textures viewer mode (`ModelViewer::SetViewerMode`, the command bar's "Viewer: Models | Textures")
+is decided before all of these and is not a notice: the texture view (`TextureView`) takes the
+viewport's place as the host panel's content window (`UnityRendererHost::showContent`) as soon as the
+mode is entered, with or without a texture picked, the player's window hidden behind it as behind a
+notice. It needs no player, so nothing about the player is said over it. The panels that only act on
+a model are put away meanwhile and given back as they were when the mode is left
+(`ModelViewer::enterTextureWorkspace` / `leaveTextureWorkspace`, laid out while the texture view still
+covers the player, so the player is never seen at the other size). Any model loaded before stays
+loaded behind it, and Models, or picking that model again, shows it again without reloading it.
+
 | what is loaded, or what is wrong | notice | button |
 |---|---|---|
 | a build without the Unity player (not Windows) | "Unity viewport unavailable" | -- |
 | the GL context never initialised, so no texture can be decoded for the player | "Textures cannot be decoded" | -- |
 | no player build at the configured path, an IPC listener that could not open, a player that would not start, exited unexpectedly, lost its connection or never announced itself | "The Unity renderer is not running", with the reason | Restart Unity renderer |
-| an image picked in Browse (BLP) | "Image selected" | -- |
 | a WMO whose root the host could not read (the file will not open, or it is not a root) | "World model cannot be read" | -- |
 | a WMO with no FileDataID (a legacy client; the player fetches the root and its groups by FileDataID) | "Legacy client world model" | -- |
 | a WMO the player reported it could not build, while that load is the one on display (until the next load or a player restart) | "World model could not be built", with the player's reason | -- |
@@ -935,9 +944,9 @@ yet:
   headless self-test runs with it. If the context never initialises, the viewport's notice says
   that textures cannot be decoded.
 - **It owns what is loaded:** the model and its attachments (`canvas->root`, `model()`), a WMO (its
-  root metadata only; see "World models") or a map tile. An image picked in Browse is no longer loaded at all: the pick is only remembered,
-  so the viewport can name it in its notice (saving the image is the Browse right-click menu's
-  job).
+  root metadata only; see "World models") or a map tile. A texture picked in Browse is not loaded
+  here: the texture view reads and decodes it (through this context) and shows it in the
+  viewport's place, with whatever was loaded left loaded behind it.
 - **It owns the animation clock.** Its 10 ms timer calls `tick()` and nothing else -- no redraw
   and no numpad camera. The tick sends the playback heartbeat and the character scene, and is
   where a mount or a dismount is noticed.
@@ -1487,7 +1496,8 @@ are not available in the Unity-only viewer, and write no image; the `-imgseq` sm
   armour are drawn (see "Characters").
 - For characters: secondary (upper-body) and mouth animations. A mounted character rides its mount
   in a player of protocol 5 or later (see "Mounted characters"); an older player gets a notice.
-- Maps, terrain, fog; BLP images picked in Browse. Each of these loads and gets a notice.
+- Maps, terrain, fog. Each of these loads and gets a notice. (A texture picked in Browse is shown by the
+  texture view in the viewport's place; see the notices above.)
 - For WMOs: doodads and doodad sets, liquids, WMO lights, fog, portal culling, LOD switching, the
   skybox, and the rest of the WMO material system (shader ids other than 0/4/5/7/13/16/23, the env-map
   emissives of ids 5, 7 and 23, the MOC2 byte-3 colour pull of id 23, blend values 2 and above, MOCV

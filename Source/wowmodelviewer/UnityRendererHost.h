@@ -109,7 +109,7 @@ public:
   // process keeps running with whatever it last built -- and is shown again the moment the notice
   // is cleared. Nothing is sent to the player and nothing in it changes.
   //
-  // actionId is the menu command the button posts to the frame (for example ID_UI_OPEN_MODEL);
+  // actionId is the menu command the button posts to the frame (for example ID_UI_MODELS);
   // 0 or an empty label means no button. Setting the same notice again is cheap and repaints
   // nothing.
   void setNotice(const wxString & title, const wxString & detail, const wxString & actionLabel = wxString(),
@@ -117,6 +117,14 @@ public:
   void clearNotice();
   bool hasNotice() const { return m_notice; }
   const wxString & noticeTitle() const { return m_noticeTitle; }
+
+  // THE CONTENT WINDOW. A window of the app's own that takes the viewport's place -- the texture view,
+  // for a texture picked in Browse -- covering the panel, the player and any notice. As with a notice,
+  // the player's window is only hidden meanwhile and nothing is sent to it. The window is a child of
+  // this panel, sized with it; showContent(false) gives the viewport back.
+  void setContent(wxWindow * content);
+  void showContent(bool show);
+  bool isShowingContent() const { return m_contentShown; }
 
 private:
   void OnSize(wxSizeEvent & event);
@@ -130,6 +138,13 @@ private:
   // Hide the player's window while a notice is up, show it otherwise. Asynchronous, so a player
   // that is busy starting up can never stall this thread.
   void applyEmbeddedVisibility();
+  // The player's window is hidden while a notice or the content window is in front of it.
+  bool playerCovered() const { return m_notice || m_contentShown; }
+  // The hide is re-asserted for as long as the player is covered, and for a moment after.
+  void watchEmbeddedVisibility(bool wasCovered);
+
+  wxWindow * m_content = nullptr;
+  bool m_contentShown = false;
 
   bool m_notice = false;
   wxString m_noticeTitle, m_noticeDetail, m_noticeActionLabel;

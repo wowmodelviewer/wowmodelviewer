@@ -6,6 +6,48 @@ Format loosely based on [Keep a Changelog](https://keepachangelog.com/).
 ## [Unreleased]
 
 ### Added
+- **Textures: a second viewer mode beside Models, for the client's BLP textures, shown in the viewport.**
+  The command bar starts with the viewer selector, "Viewer: Models | Textures", one of the two always pressed.
+  Textures switches at once, before anything is picked: Browse shows (opening it if it was closed) listing the
+  loaded client's textures in the same tree and search box as the models, the texture view takes the viewport's
+  place saying "Select a texture in Browse", and the panels that only act on a model (Animation, Model, the
+  Attachments window) are put away. Models gives the viewport, the model and those panels back at once, each as it
+  was, shown or closed and at its size; the layout saved on exit is always the user's. Browse's Show list, loading a
+  model, an NPC, an item or a character, and picking a texture switch the mode too. Each mode keeps its own search,
+  and each tree comes back with the folders that were open. (Browse's Show list has the category "Textures
+  (*.blp)", last, which replaces "Images (*.blp)".) The list
+  is filled from the app's own file index -- every `.blp` the loaded client names, 789,146 on 12.1, listed in under a
+  second, once per client. Folders are filled in as they are opened, and a folder of more than 1,000 textures shows
+  them in ranges of 1,000 named like a dictionary's guide words, so even textures/bakednpctextures (83,178
+  textures; 17 s as plain rows) opens at once. The search matches file name, path or FileDataID: every word must
+  occur, a word with `/` matches the path, a number also finds the file with that FileDataID even when the file
+  list has no name for it, Enter on a FileDataID opens that file, and a FileDataID the list does not have is offered
+  as a row that looks it up. It lists the first 500 matches in their folders, and clearing it opens the folders down
+  to the texture on screen. Files known only by FileDataID are one group at the end. Selecting a texture shows it
+  in the viewport's place -- no second window. Moving through textures has no pause and no blank frame: the name,
+  folder and FileDataID change at once (size and format say "Reading..."), the texture on screen stays until the
+  next is decoded and is then swapped whole, and the decode waits only for the input already queued and the
+  repaint of the row, so of several quick clicks only the last is decoded. While an arrow key repeats in Browse
+  the rows go by without decoding, and the row it stops on is decoded when the key is let go. A 512 texture shows
+  33 ms after the click (181 ms before this change), a 4096 one 225 ms (534 ms). The last textures decoded are
+  kept, up to 128 MB, so one seen again shows in 5-34 ms. A texture drawn at half its
+  size or less is drawn from the smallest mip level at least as large as it is drawn (Alpha On and Only; Alpha Off
+  shows level 0, whose colour under transparent pixels the smaller levels do not keep); its alpha facts still come
+  from level 0, and Export PNG always writes level 0. The texture is sized by itself, with no
+  zoom: one larger than the area is scaled down to fit it, a smaller one is enlarged only by a whole number, at most
+  twice and not past 512 pixels (the size 95% of the client's textures are at most), so a 64 x 64 icon is shown at
+  128 and a 512 texture at its own size. It is drawn over a checkerboard, dark or light background, with Alpha On /
+  Off / Only (display only), its name, folder, FileDataID, size, format, mip levels, alpha and file size, Copy path /
+  Copy FileDataID, and two buttons: Export PNG, the full-size texture with its alpha (Ctrl+S), and Export BLP, the
+  original file byte for byte (Ctrl+Shift+S), named after the texture or `<FileDataID>.png` / `.blp`; both wait for
+  a texture. Pixels come
+  from the app's own texture decoder; a texture it would decode wrongly -- uncompressed BGRA, palettised with 4-bit
+  alpha, DXT kinds the decoder only guesses at (among them 139 whose blocks are twice the size it would read), a
+  damaged first mip level -- is not shown and gets no PNG (Export PNG is disabled), with the reason said, though its
+  original still exports (2,811 of the 789,146). The model loaded before stays loaded behind the textures, and the
+  texture picked stays picked behind the models: Models, or picking the model again in Browse, shows it again at
+  once, without loading it again. The command bar, the status bar and the menus follow the mode. Background, alpha
+  view and export folder are remembered.
 - **Screenshot: a 3840 x 2160 PNG of the Unity viewport with a transparent background (protocol 6).** The command
   bar's Screenshot opens a Save As dialog (PNG Image, overwrite confirmed) named after the model and the time,
   `<model>_<yyyy-MM-dd_HHmmss>.png`, and adds `.png` when it is missing; cancelling does nothing. The host sends the
@@ -294,6 +336,14 @@ Format loosely based on [Keep a Changelog](https://keepachangelog.com/).
   `-imgseq` smoke test is gone. `-unityipctest` and `-fbxexport` still run.
 
 ### Fixed
+- **A game file whose storage read returns nothing is a failed read, not a buffer of leftover memory.** The
+  shared file reader (`UnityAssetAccess::readByPath` / `readByFileDataID`) retried a storage file whose stream read
+  returned zero bytes -- an encrypted file without its key, data the game has not downloaded -- in memory mode,
+  whose open does not report the failure, and handed back whatever the buffer held before. It now reports
+  "short read ... file may be encrypted or damaged" for such a file. The memory-mode read itself (legacy MPQ
+  clients, files from a custom folder) had the same hole when an archive failed part way: `GameFile` now notes
+  whether its memory-mode open read the whole file (`readComplete()`; `open()` behaves as before for every other
+  caller), and the reader reports "incomplete read" instead of passing the buffer on.
 - **A model no longer crashes the viewer when one of its files cannot be read.** Loading a character could
   crash with "Attachment::tick" in the log -- a mislabel: the release build names each frame after the nearest
   exported function. The game storage sometimes lists an animation (.anim) file whose size it cannot report;

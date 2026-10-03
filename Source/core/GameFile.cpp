@@ -52,6 +52,7 @@ bool GameFile::open(bool useMemoryBuffer /* = true */)
     return true;
 
   eof = true;
+  m_readComplete = false;
 
   if (!openFile())
     return false;
@@ -79,7 +80,11 @@ bool GameFile::open(bool useMemoryBuffer /* = true */)
   {
     allocate(size);
 
-    if (readFile() != 0)
+    // A short read still opens, as it always has (callers use the buffer either way); it is noted
+    // for the ones that must not pass partial data on.
+    const unsigned long got = readFile();
+    m_readComplete = got == size;
+    if (got != 0)
       eof = false;
 
     doPostOpenOperation();
@@ -94,6 +99,7 @@ bool GameFile::close()
   originalBuffer = 0;
   buffer = 0;
   eof = true;
+  m_readComplete = false;
   chunks.clear();
   return doPostCloseOperation();
 }

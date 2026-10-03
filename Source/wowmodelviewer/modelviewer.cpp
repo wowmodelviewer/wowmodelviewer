@@ -3,6 +3,7 @@
 
 #include "AnimationExportChoiceDialog.h"
 #include "ArmoryImportDialog.h"
+#include "TextureView.h"
 #include "AnimManager.h"
 
 #include <wx/aboutdlg.h>
@@ -141,7 +142,11 @@ EVT_MENU(ID_VIEW_FULLSCREEN, ModelViewer::OnToggleFullScreen)
 EVT_CHAR_HOOK(ModelViewer::OnCharHook)
 
 // Command bar (and the panel toggles it shares with the View menu)
-EVT_MENU(ID_UI_OPEN_MODEL, ModelViewer::OnCommandBar)
+EVT_MENU(ID_UI_MODELS, ModelViewer::OnCommandBar)
+EVT_UPDATE_UI(ID_UI_MODELS, ModelViewer::OnUpdateCommandUI)
+EVT_UPDATE_UI(ID_UI_TEXTURES, ModelViewer::OnUpdateCommandUI)
+EVT_MENU(ID_UI_TEXTURES, ModelViewer::OnCommandBar)
+EVT_AUI_PANE_CLOSE(ModelViewer::OnPaneClose)
 EVT_MENU(ID_UI_SCREENSHOT, ModelViewer::OnCommandBar)
 EVT_UPDATE_UI(ID_UI_SCREENSHOT, ModelViewer::OnUpdateCommandUI)
 EVT_UPDATE_UI(ID_SHOW_FILE_LIST, ModelViewer::OnUpdateCommandUI)
@@ -489,6 +494,8 @@ void ModelViewer::InitObjects()
   LOG_INFO << "Initializing Objects...";
 
   fileControl = new FileControl(this, ID_FILELIST_FRAME);
+  // Known from the start (not only once a client's files are listed): the viewer mode goes through it.
+  fileControl->modelviewer = this;
 
   // The Model panel first: the skin, doodad and character controls are created on its pages.
   modelInspector = new ModelInspector(this, wxID_ANY);
@@ -673,8 +680,15 @@ void ModelViewer::InitCommandBar()
   commandBar->SetToolBorderPadding(FromDIP(6));
   commandBar->SetMargins(FromDIP(wxSize(UiStyle::S, 2)));
 
-  commandBar->AddTool(ID_UI_OPEN_MODEL, _("Open model"), wxNullBitmap,
-                      _("Find a model in Browse (loads a World of Warcraft client first if none is loaded)"));
+  // The viewer selector: two radio tools, the active one pressed (OnUpdateCommandUI keeps them on the
+  // viewer mode). Nothing may stand between them: that would split them into two groups.
+  commandBar->AddControl(UiStyle::secondaryLabel(commandBar, _("Viewer")));
+  commandBar->AddTool(ID_UI_MODELS, _("Models"), wxNullBitmap,
+                      _("The model viewer: the viewport and the model panels, Browse listing models (asks for a World "
+                        "of Warcraft client first if none is loaded)"), wxITEM_RADIO);
+  commandBar->AddTool(ID_UI_TEXTURES, _("Textures"), wxNullBitmap,
+                      _("The texture viewer: the game client's textures (BLP) in Browse, the selected one in the "
+                        "viewport's place"), wxITEM_RADIO);
   commandBar->AddSeparator();
   // (No Reset camera: it acted on the archived OpenGL viewport; the Unity viewport frames each model itself.)
   commandBar->AddTool(ID_VIEW_FULLSCREEN, _("Fullscreen"), wxNullBitmap, _("Fullscreen (F11; Esc leaves)"));
@@ -693,6 +707,8 @@ void ModelViewer::InitCommandBar()
   commandBar->AddTool(ID_SHOW_CHAR, _("Model"), wxNullBitmap, _("Show or hide the Model panel"), wxITEM_CHECK);
   commandBar->AddTool(ID_SHOW_ANIM, _("Animation"), wxNullBitmap, _("Show or hide the Animation panel"), wxITEM_CHECK);
   commandBar->Realize();
+  // No radio tool is checked by itself.
+  commandBar->ToggleTool(ID_UI_MODELS, true);
 }
 
 void ModelViewer::InitDocking()
@@ -740,7 +756,12 @@ void ModelViewer::InitDocking()
 void ModelViewer::ResetLayout()
 {
   // Every panel goes back to where InitDocking put it. The Unity viewport stays the centre pane; the
-  // archived canvas is not a pane and is not touched.
+  // archived canvas is not a pane and is not touched. With a texture on screen, the default layout is
+  // what its panels are given back to, and they are put away again until it goes.
+  const bool textureWorkspace = isTextureMode();
+  m_textureWorkspace = false;
+  m_textureWorkspacePanes.clear();
+  m_textureWorkspaceLayout.Clear();
   interfaceManager.DetachPane(commandBar);
   interfaceManager.DetachPane(fileControl);
   interfaceManager.DetachPane(unityRendererHost);
@@ -762,6 +783,9 @@ void ModelViewer::ResetLayout()
                            Name(wxT("Settings")).Caption(wxT("Settings")).
                            FloatingSize(wxSize(400, 550)).Float().TopDockable(false).LeftDockable(false).
                            RightDockable(false).BottomDockable(false).Show(false));
+
+  if (textureWorkspace)
+    enterTextureWorkspace(false);
 
   // tell the manager to "commit" all the changes just made
   interfaceManager.Update();
@@ -887,7 +911,8 @@ void ModelViewer::SaveLayout()
 {
   QSettings config(QString::fromWCharArray(cfgPath.c_str()), QSettings::IniFormat);
 
-  config.setValue("Session/Layout", QString::fromWCharArray(interfaceManager.SavePerspective().c_str()));
+  // The user's layout, with the panels a texture on screen has put away given back.
+  config.setValue("Session/Layout", QString::fromWCharArray(userPerspective().c_str()));
   config.setValue("Session/LayoutVersion", LAYOUT_VERSION);
 
   wxPoint pos = GetPosition();
@@ -903,6 +928,9 @@ void ModelViewer::LoadModel(GameFile * file, int raceID, int sexID)
   if (!canvas || !file)
     return;
 
+  // A model loaded -- from Browse, or from a menu while textures were on screen -- is the model viewer's.
+  SetViewerMode(ViewerMode::Models);
+
   LOG_INFO << "Loading model:" << file->fullname();
 
   if (canvas->model() && canvas->model()->gamefile && (canvas->model()->gamefile->fullname() == file->fullname())) // don't reload same model
@@ -917,10 +945,9 @@ void ModelViewer::LoadModel(GameFile * file, int raceID, int sexID)
   }
 
   isModel = true;
-  // A model replaces whatever Browse image, WMO or map tile was shown (canvas->LoadModel below drops
-  // the WMO and the map tile themselves). Only FileControl::ClearCanvas used to reset these, and the
-  // menu loads -- an NPC, an item, a character file, an import -- do not go through it.
-  m_browseImageName.Clear();
+  // A model replaces whatever WMO or map tile was shown (canvas->LoadModel below drops them). Only
+  // FileControl::ClearCanvas used to reset these, and the menu loads -- an NPC, an item, a character file,
+  // an import -- do not go through it.
   isWMO = false;
   isADT = false;
 
@@ -1105,6 +1132,8 @@ void ModelViewer::LoadModel(GameFile * file, int raceID, int sexID)
 // Load an NPC model
 void ModelViewer::LoadNPC(unsigned int modelid)
 {
+  // A model from a menu: the model viewer's, even when it turns out to have no model.
+  SetViewerMode(ViewerMode::Models);
   // Described to the Unity viewport once, dressed, when this returns: see SceneHold.
   SceneHold sceneHold(this);
 
@@ -1292,6 +1321,7 @@ void ModelViewer::applyItemComponentGeosets(unsigned int itemId)
 
 void ModelViewer::LoadItem(unsigned int id)
 {
+  SetViewerMode(ViewerMode::Models);
   canvas->clearAttachments();
   canvas->setModel(NULL);
 
@@ -1459,6 +1489,11 @@ ModelViewer::~ModelViewer()
   if (!batchMode)
     SaveSession();
 
+  // The texture view decodes through the canvas's GL context: stop it before that goes (the window
+  // itself goes with the viewport's host, after the canvas).
+  if (textureView)
+    textureView->shutdown();
+
   if (canvas) {
     canvas->Disable();
     canvas->Destroy();
@@ -1517,6 +1552,13 @@ void ModelViewer::OnToggleDock(wxCommandEvent &event)
 {
   int id = event.GetId();
 
+  // A panel a texture put away, shown (or hidden) by the user meanwhile: theirs again, left as they
+  // put it when the texture goes. Shown again, it comes back at the size it had.
+  const wxChar * putAway = id == ID_SHOW_ANIM ? wxT("animControl") : id == ID_SHOW_CHAR ? wxT("modelInspector")
+                         : id == ID_SHOW_MODEL ? wxT("Models") : nullptr;
+  TextureWorkspacePane given;
+  const bool wasPutAway = putAway && forgetTextureWorkspacePane(putAway, &given);
+
   // wxAUI Stuff. Browse, Model and Animation toggle: the View menu items and the command bar
   // buttons are checked while their panel is shown (OnUpdateCommandUI).
   if (id == ID_SHOW_FILE_LIST) {
@@ -1530,6 +1572,10 @@ void ModelViewer::OnToggleDock(wxCommandEvent &event)
   else if (id == ID_SHOW_CHAR) {
     wxAuiPaneInfo & pane = interfaceManager.GetPane(modelInspector);
     pane.Show(!pane.IsShown());
+    // Opened in Textures mode: its Info names the texture picked while it was away (TextureSelectionChanged
+    // rebuilds it only while it is open).
+    if (pane.IsShown() && isTextureMode())
+      modelInspector->ContentChanged();
   }
   else if (id == ID_SHOW_MODEL) {
     interfaceManager.GetPane(modelControl).Show(true);
@@ -1539,7 +1585,141 @@ void ModelViewer::OnToggleDock(wxCommandEvent &event)
     interfaceManager.GetPane(settingsControl).Show(true);
     settingsControl->Open();
   }
+  if (wasPutAway)
+  {
+    wxAuiPaneInfo & pane = interfaceManager.GetPane(given.name);
+    if (pane.IsOk() && pane.IsShown() && pane.IsDocked() && given.shownSize != wxDefaultSize)
+      pane.BestSize(given.shownSize);
+    commitDocksAtTheirSize();
+    if (pane.IsOk())
+      pane.BestSize(given.bestSize);
+    return;
+  }
   interfaceManager.Update();
+}
+
+// A panel closed with its own close button while a texture is on screen stays closed afterwards.
+void ModelViewer::OnPaneClose(wxAuiManagerEvent & event)
+{
+  if (event.GetPane())
+    forgetTextureWorkspacePane(event.GetPane()->name);
+  event.Skip();
+}
+
+const wxChar * const * ModelViewer::modelOnlyPanes()
+{
+  // Animation, the Model panel (its texture rows repeat what the texture view shows) and the
+  // Attachments window. Not Browse, not Settings.
+  static const wxChar * const names[] = { wxT("animControl"), wxT("modelInspector"), wxT("Models"), nullptr };
+  return names;
+}
+
+void ModelViewer::enterTextureWorkspace(bool commit)
+{
+  if (m_textureWorkspace)
+    return;
+  m_textureWorkspace = true;
+  m_textureWorkspacePanes.clear();
+  m_textureWorkspaceLayout = interfaceManager.SavePerspective();
+  for (const wxChar * const * name = modelOnlyPanes(); *name; name++)
+  {
+    wxAuiPaneInfo & pane = interfaceManager.GetPane(*name);
+    if (!pane.IsOk() || !pane.IsShown())
+      continue;
+    TextureWorkspacePane p;
+    p.name = *name;
+    p.bestSize = pane.best_size;
+    // (A window not laid out yet -- a panel ResetLayout has just added -- comes back at its best size.)
+    p.shownSize = pane.window && pane.window->IsShown() ? pane.window->GetSize() : wxDefaultSize;
+    m_textureWorkspacePanes.push_back(p);
+    pane.Show(false);
+  }
+  LOG_INFO << "[viewport] texture workspace:" << (int)m_textureWorkspacePanes.size() << "panels put away";
+  if (commit && !m_textureWorkspacePanes.empty())
+    CommitLayoutIfChanged();
+}
+
+void ModelViewer::leaveTextureWorkspace()
+{
+  if (!m_textureWorkspace)
+    return;
+  m_textureWorkspace = false;
+  bool changed = false;
+  for (const TextureWorkspacePane & p : m_textureWorkspacePanes)
+  {
+    wxAuiPaneInfo & pane = interfaceManager.GetPane(p.name);
+    if (!pane.IsOk() || pane.IsShown())
+      continue;
+    // Its dock went with it, and one made again is sized from the pane's best size (plus its border and
+    // caption): the window's size when it went brings it back exactly as wide or tall.
+    if (pane.IsDocked() && p.shownSize != wxDefaultSize)
+      pane.BestSize(p.shownSize);
+    pane.Show(true);
+    changed = true;
+  }
+  if (changed)
+    commitDocksAtTheirSize();
+  // The dock has its size now; the pane's own best size is what it was, so nothing else changes.
+  for (const TextureWorkspacePane & p : m_textureWorkspacePanes)
+  {
+    wxAuiPaneInfo & pane = interfaceManager.GetPane(p.name);
+    if (pane.IsOk())
+      pane.BestSize(p.bestSize);
+  }
+  LOG_INFO << "[viewport] texture workspace left:" << (int)m_textureWorkspacePanes.size() << "panels given back";
+  m_textureWorkspacePanes.clear();
+  m_textureWorkspaceLayout.Clear();
+}
+
+bool ModelViewer::forgetTextureWorkspacePane(const wxString & name, TextureWorkspacePane * taken)
+{
+  for (size_t i = 0; i < m_textureWorkspacePanes.size(); i++)
+    if (m_textureWorkspacePanes[i].name == name)
+    {
+      if (taken)
+        *taken = m_textureWorkspacePanes[i];
+      m_textureWorkspacePanes.erase(m_textureWorkspacePanes.begin() + i);
+      return true;
+    }
+  return false;
+}
+
+void ModelViewer::commitDocksAtTheirSize()
+{
+  // wxAUI caps only a dock it makes anew, and only in this layout: the cap goes back right after.
+  double capX = 0.3, capY = 0.3;
+  interfaceManager.GetDockSizeConstraint(&capX, &capY);
+  interfaceManager.SetDockSizeConstraint(1.0, 1.0);
+  interfaceManager.Update();
+  interfaceManager.SetDockSizeConstraint(capX, capY);
+}
+
+wxString ModelViewer::userPerspective()
+{
+  if (!m_textureWorkspace)
+    return interfaceManager.SavePerspective();
+  // The panels a texture put away, set shown for the saving only (nothing is laid out, so nothing on
+  // screen changes), and the sizes of the docks they took, which went with them.
+  std::vector<wxString> hidden;
+  for (const TextureWorkspacePane & p : m_textureWorkspacePanes)
+  {
+    wxAuiPaneInfo & pane = interfaceManager.GetPane(p.name);
+    if (!pane.IsOk() || pane.IsShown())
+      continue;
+    pane.Show(true);
+    hidden.push_back(p.name);
+  }
+  wxString perspective = interfaceManager.SavePerspective();
+  for (const wxString & name : hidden)
+    interfaceManager.GetPane(name).Show(false);
+  for (const wxString & part : wxSplit(m_textureWorkspaceLayout, '|', '\0'))
+  {
+    if (!part.StartsWith(wxT("dock_size(")))
+      continue;
+    if (!perspective.Contains(part.BeforeFirst('=') + wxT("=")))
+      perspective += part + wxT("|");
+  }
+  return perspective;
 }
 
 // The Unity viewport's docking setup, shared by InitDocking, ResetLayout and LoadLayout. A centre
@@ -1556,6 +1736,14 @@ void ModelViewer::CreateUnityViewport()
   if (unityRendererHost)
     return;
   unityRendererHost = new UnityRendererHost(this, ID_UNITY_FRAME);
+
+  // A texture picked in Browse is shown in the viewport's place.
+  textureView = new TextureView(unityRendererHost, this);
+  unityRendererHost->setContent(textureView);
+  textureView->onLookupResolved = [this](int fileDataId, const QString & indexName) {
+    if (fileControl)
+      fileControl->TextureLookupResolved(fileDataId, indexName);
+  };
 
   // Runtime IPC: as soon as the player announces itself, tell it what is on the canvas.
   unityRendererHost->ipc()->onUnityReady = [this]() {
@@ -1710,6 +1898,16 @@ void ModelViewer::OnCharHook(wxKeyEvent & event)
     EnterViewerFullScreen(false);
     return;
   }
+  // A texture in the viewport is exported from wherever the keyboard is, Browse included (the texture
+  // view takes the same keys itself when it has the keyboard).
+  if (isTextureMode() && textureView && event.ControlDown() && !event.AltDown() && event.GetKeyCode() == 'S')
+  {
+    if (event.ShiftDown())
+      textureView->exportBlpInteractive();
+    else
+      textureView->exportPngInteractive();
+    return;
+  }
   event.Skip();
 }
 
@@ -1746,13 +1944,6 @@ bool ModelViewer::unityCanDrawCurrentModel(ViewportNotice * notice) const
 
   if (!canvas)
     return false;
-  if (!m_browseImageName.IsEmpty())
-  {
-    out.title = _("Image selected");
-    out.detail = wxString::Format(_("%s is an image. The Unity viewport cannot show images yet."),
-                                  fileName(m_browseImageName));
-    return false;
-  }
   // The flags as well as the pointers, as everything else that says what is loaded tests them
   // (DisplayedContentChanged, UpdateStatusFacts, the Model panel): a pointer left behind by a load that
   // did not clear it must never put a notice in front of the model that replaced it.
@@ -1910,7 +2101,7 @@ bool ModelViewer::unityViewportNotice(ViewportNotice & notice) const
     notice.detail = _("Load a World of Warcraft client to browse its models.");
     notice.actionLabel = _("Load World of Warcraft...");
   }
-  notice.actionId = ID_UI_OPEN_MODEL;
+  notice.actionId = ID_UI_MODELS;
   return true;
 #endif
 }
@@ -2026,23 +2217,52 @@ void ModelViewer::UpdateUnityViewportState()
   if (!unityRendererHost)
     return;
 
+  // A texture picked in Browse: the texture view covers the viewport. It needs no player, so nothing
+  // about the player -- missing, stopped, still starting -- is said over it.
+  if (isTextureMode() && textureView)
+  {
+    const bool changed = !unityRendererHost->isShowingContent();
+    unityRendererHost->showContent(true);
+    unityRendererHost->clearNotice();
+    // The model's panels go once the texture covers the viewport, so the player is never seen
+    // resized to the larger area.
+    enterTextureWorkspace();
+    if (changed)
+    {
+      LOG_INFO << "[viewport] showing a texture";
+      if (modelInspector)
+        modelInspector->ViewportNoticeChanged();
+    }
+    return;
+  }
+
   ViewportNotice notice;
-  bool changed = false;
+  bool changed = unityRendererHost->isShowingContent();
+  if (changed)
+    LOG_INFO << "[viewport] the texture view is put away";
   if (unityViewportNotice(notice))
   {
-    changed = !unityRendererHost->hasNotice() || unityRendererHost->noticeTitle() != notice.title;
-    if (changed)
+    const bool newNotice = !unityRendererHost->hasNotice() || unityRendererHost->noticeTitle() != notice.title;
+    if (newNotice)
       LOG_INFO << "[viewport] notice:" << QString::fromWCharArray(notice.title.c_str()) << "--"
                << QString::fromWCharArray(notice.detail.c_str());
+    changed = changed || newNotice;
     unityRendererHost->setNotice(notice.title, notice.detail, notice.actionLabel, notice.actionId);
   }
   else
   {
-    changed = unityRendererHost->hasNotice();
-    if (changed)
+    if (unityRendererHost->hasNotice() || unityRendererHost->isShowingContent())
+    {
       LOG_INFO << "[viewport] showing the model";
+      changed = true;
+    }
     unityRendererHost->clearNotice();
   }
+  // The model's panels come back first, while the texture view still covers the viewport, so the
+  // player is uncovered at its final size; then it is put away, after the notice is decided, so the
+  // player's window is not shown for a moment between.
+  leaveTextureWorkspace();
+  unityRendererHost->showContent(false);
   // The Geosets tab says whether the viewport shows the model; a stopped or restarted player changes
   // that without a load, so the tab is told here rather than only on content changes.
   if (changed && modelInspector)
@@ -2909,6 +3129,7 @@ int ModelViewer::LoadWoWFromMpq(const QString & dataFolder, const QString & loca
 {
   UnityAssetAccess::ClientLoadGuard unityAssetGuard; // refuse Unity asset requests while the folder is rebuilt
   fileControl->Disable();
+  TexturesClientLoadStarting();
 
   // Always install a FRESH folder for the legacy client -- never reuse an already-loaded Retail
   // (or previous MPQ) folder. Reusing the Retail folder would mix CASC + MPQ entries in one tree
@@ -2937,7 +3158,10 @@ int ModelViewer::LoadWoWFromMpq(const QString & dataFolder, const QString & loca
   fileControl->Enable();
   // The empty viewport points at Browse now rather than at loading a client -- once the load has
   // returned, since the client does not count as active while it is still inside it.
-  CallAfter([this]() { UpdateUnityViewportState(); });
+  CallAfter([this]() {
+    UpdateUnityViewportState();
+    TexturesClientLoaded();
+  });
 
   SetStatusText(wxString(GAMEDIRECTORY.version().toStdWString()), 1);
   SetStatusText(wxT("Legacy MPQ"), 2);
@@ -3016,6 +3240,7 @@ void ModelViewer::LoadWoW(const core::GameConfig * chosenConfig, const QString &
 {
   UnityAssetAccess::ClientLoadGuard unityAssetGuard; // refuse Unity asset requests while the folder is rebuilt
   fileControl->Disable();
+  TexturesClientLoadStarting();
   if (gamePath.IsEmpty() || !wxDirExists(gamePath)) {
     getGamePath();
   }
@@ -3299,7 +3524,10 @@ void ModelViewer::LoadWoW(const core::GameConfig * chosenConfig, const QString &
   fileControl->Enable();
   // The empty viewport points at Browse now rather than at loading a client -- once the load has
   // returned, since the client does not count as active while it is still inside it.
-  CallAfter([this]() { UpdateUnityViewportState(); });
+  CallAfter([this]() {
+    UpdateUnityViewportState();
+    TexturesClientLoaded();
+  });
   SetStatusText(wxT("File Control Initialized."));
 
   if (progress)
@@ -3427,6 +3655,7 @@ void ModelViewer::SaveChar(QString fn, bool equipmentOnly /*= false*/)
 
 void ModelViewer::LoadChar(QString fn, bool equipmentOnly /* = false */)
 {
+  SetViewerMode(ViewerMode::Models);
   // Described to the Unity viewport once, dressed, when this returns: see SceneHold.
   SceneHold sceneHold(this);
 
@@ -3708,12 +3937,12 @@ bool ModelViewer::isUnityViewportShowingModel()
 {
   if (!unityRendererHost || !canvas || !unityRendererHost->ipc() || !unityRendererHost->ipc()->isConnected())
     return false;
-  return !unityRendererHost->hasNotice() && unityCanDrawCurrentModel();
+  return !unityRendererHost->hasNotice() && !unityRendererHost->isShowingContent() && unityCanDrawCurrentModel();
 }
 
 bool ModelViewer::unityViewportHasNotice() const
 {
-  return !unityRendererHost || unityRendererHost->hasNotice();
+  return !unityRendererHost || unityRendererHost->hasNotice() || unityRendererHost->isShowingContent();
 }
 
 // The size of the viewport, which is the Unity viewport's host panel (the archived canvas is hidden and
@@ -3733,6 +3962,13 @@ void ModelViewer::UpdateStatusFacts()
 {
   if (!GetStatusBar() || !canvas)
     return;
+
+  // Textures mode: the selected texture's size, format and alpha (nothing before it is decoded).
+  if (isTextureMode() && textureView)
+  {
+    SetStatusText(textureView->statusFacts(), 0);
+    return;
+  }
 
   wxArrayString parts;
   auto count = [&parts](size_t n, const wxString & one, const wxString & many) {
@@ -3761,6 +3997,20 @@ void ModelViewer::UpdateStatusFacts()
   SetStatusText(text, 0);
 }
 
+// The status bar's first field says what is on screen (UpdateStatusFacts). wx blanks it while the mouse is
+// over a menu item or toolbar button that has no help text, and on leaving puts back what the field said
+// when the mouse arrived: after a click that changed what is on screen, the facts of what was there before
+// (the model's counts over the Textures viewer, which has none to show until a texture is picked). Help
+// text, where there is some, is still shown and taken away (an item without any that follows it clears it,
+// as wx does); otherwise an item without help leaves the field alone. No menu item or tool has help today.
+void ModelViewer::DoGiveHelp(const wxString & text, bool show)
+{
+  if (!m_helpInStatus && (!show || text.IsEmpty()))
+    return;
+  m_helpInStatus = show;
+  wxFrame::DoGiveHelp(text, show);
+}
+
 void ModelViewer::DisplayedContentChanged()
 {
   if (!canvas)
@@ -3769,10 +4019,16 @@ void ModelViewer::DisplayedContentChanged()
   // The viewport first: the model, the empty viewer, or a notice for what it cannot draw yet.
   UpdateUnityViewportState();
 
+  // The Animation panel drives the model: greyed while a texture is shown in its place.
+  if (animControl)
+    animControl->Enable(!isTextureMode());
+
   if (commandModelLabel)
   {
     wxString path;
-    if (isWMO && canvas->wmo)
+    if (isTextureMode() && textureView)
+      path = textureView->displayPath().IsEmpty() ? textureView->displayName() : textureView->displayPath();
+    else if (isWMO && canvas->wmo)
       path = canvas->wmo->itemName().toStdWString();
     else if (isADT && canvas->adt)
       path = canvas->adt->name;
@@ -3782,7 +4038,7 @@ void ModelViewer::DisplayedContentChanged()
     wxString name = path;
     name.Replace(wxT("/"), wxT("\\"));
     name = name.AfterLast('\\');
-    commandModelLabel->SetLabel(name.IsEmpty() ? wxString(_("No model loaded")) : name);
+    commandModelLabel->SetLabel(name.IsEmpty() ? wxString(isTextureMode() ? _("No texture selected") : _("No model loaded")) : name);
     commandModelLabel->SetForegroundColour(name.IsEmpty() ? UiStyle::secondaryText()
                                                           : wxSystemSettings::GetColour(wxSYS_COLOUR_WINDOWTEXT));
     commandModelLabel->SetToolTip(path);
@@ -3796,18 +4052,108 @@ void ModelViewer::DisplayedContentChanged()
   UpdateCanvasStatus();
 }
 
-// Open model: without a client there is nothing to browse, so this is "load a client"; with one,
-// it is "go to Browse", with the search box ready for typing.
+void ModelViewer::SetViewerMode(ViewerMode mode)
+{
+  if (mode == m_viewerMode)
+    return;
+  m_viewerMode = mode;
+  LOG_INFO << "[viewport] viewer mode:" << (mode == ViewerMode::Textures ? "Textures" : "Models");
+  // The selector at once: a switch from Browse's Show list or a menu does not come through the toolbar.
+  if (commandBar)
+  {
+    commandBar->ToggleTool(mode == ViewerMode::Textures ? ID_UI_TEXTURES : ID_UI_MODELS, true);
+    commandBar->Refresh(false);
+  }
+  if (textureView)
+  {
+    if (mode == ViewerMode::Textures)
+      textureView->entered();
+    else
+      textureView->left();
+  }
+  // The centre, the panels and the menus first (UpdateInterface -> DisplayedContentChanged ->
+  // UpdateUnityViewportState puts the panels away or gives them back), painted at once; then Browse's
+  // tree, which the first entry into Textures after a client load lists from a catalogue built there.
+  if (fileControl)
+    fileControl->UpdateInterface();
+  else
+    DisplayedContentChanged();
+  Update();
+  if (fileControl)
+    fileControl->FollowViewerMode(mode == ViewerMode::Textures);
+}
+
+void ModelViewer::ShowTexture(const TextureEntry & entry, bool lookup)
+{
+  if (!textureView)
+    return;
+  SetViewerMode(ViewerMode::Textures);
+  textureView->show(entry, lookup);
+}
+
+void ModelViewer::TextureSelectionChanged()
+{
+  if (!isTextureMode())
+    return;
+  if (commandModelLabel && textureView)
+  {
+    const wxString path = textureView->displayPath().IsEmpty() ? textureView->displayName() : textureView->displayPath();
+    wxString name = path;
+    name.Replace(wxT("/"), wxT("\\"));
+    name = name.AfterLast('\\');
+    commandModelLabel->SetLabel(name.IsEmpty() ? wxString(_("No texture selected")) : name);
+    commandModelLabel->SetForegroundColour(name.IsEmpty() ? UiStyle::secondaryText()
+                                                          : wxSystemSettings::GetColour(wxSYS_COLOUR_WINDOWTEXT));
+    commandModelLabel->SetToolTip(path);
+    commandModelLabel->Refresh();
+  }
+  UpdateStatusFacts();
+  // The Model panel's Info names the texture, when the user has the panel open in Textures mode (opened
+  // later, OnToggleDock rebuilds it; not on every pick, which would rebuild its other pages for nothing).
+  if (modelInspector && interfaceManager.GetPane(modelInspector).IsShown())
+    modelInspector->ContentChanged();
+}
+
+void ModelViewer::TexturesClientLoadStarting()
+{
+  // The old client's texture and cache go with it; Textures mode stays (the view says the client is
+  // loading meanwhile).
+  if (textureView)
+    textureView->clientLoadStarting();
+  if (fileControl)
+    fileControl->TexturesClientLoadStarting();
+  TextureSelectionChanged();
+}
+
+void ModelViewer::TexturesClientLoaded()
+{
+  // (Browse's watch tells the texture view once the load has really ended.)
+  if (fileControl)
+    fileControl->TexturesClientLoaded();
+}
+
+// The viewer selector, Models | Textures (and the empty viewer's button, which is "Models"): the mode at
+// once; then, with no client, the client prompt (also when the mode was already this one: that is how the
+// empty viewer's "Load World of Warcraft..." works); then Browse, shown, with the keyboard.
 void ModelViewer::OnCommandBar(wxCommandEvent & event)
 {
   switch (event.GetId())
   {
-    case ID_UI_OPEN_MODEL:
+    case ID_UI_MODELS:
+    case ID_UI_TEXTURES:
     {
-      // A client load yields to the event loop (its progress dialog), so this can be clicked in
-      // the middle of one; starting another there is the double load that brings the app down.
+      // A client load yields to the event loop (its progress dialog), so this can be clicked in the middle
+      // of one; switching Browse's lists then, or starting another load, is not safe. The selector goes
+      // back to the mode at the next idle update.
       if (UnityAssetAccess::isClientLoading())
         return;
+      // From the id only, never the tool's checked state: a click on the active radio tool, a double-click
+      // and the empty viewer's posted command all arrive unchecked.
+      const bool textures = event.GetId() == ID_UI_TEXTURES;
+      // Models is about models whatever Browse listed (DBCs, say): Browse lists them again.
+      if (!textures && fileControl)
+        fileControl->ShowModels();
+      SetViewerMode(textures ? ViewerMode::Textures : ViewerMode::Models);
       if (!UnityAssetAccess::hasActiveClient())
       {
         PromptAndLoadClient();
@@ -3821,7 +4167,10 @@ void ModelViewer::OnCommandBar(wxCommandEvent & event)
         browse.Show(true);
         interfaceManager.Update();
       }
-      if (fileControl->txtContent)
+      if (textures && textureView && textureView->selection() != TextureView::Selection::None &&
+          fileControl->fileTree->GetSelection().IsOk())
+        fileControl->fileTree->SetFocus();
+      else if (fileControl->txtContent)
         fileControl->txtContent->SetFocus();
       break;
     }
@@ -3944,6 +4293,14 @@ void ModelViewer::OnUpdateCommandUI(wxUpdateUIEvent & event)
       // Something to capture, and no capture on its way (an older player is told why on the click).
       event.Enable(isUnityViewportShowingModel() && m_screenshotRequest == 0);
       break;
+    // The viewer selector: both answered every time, so a switch made elsewhere (Browse's Show list, a
+    // menu load) or refused (during a client load) shows right.
+    case ID_UI_MODELS:
+      event.Check(m_viewerMode == ViewerMode::Models);
+      break;
+    case ID_UI_TEXTURES:
+      event.Check(m_viewerMode == ViewerMode::Textures);
+      break;
   }
 }
 
@@ -3968,6 +4325,11 @@ void ModelViewer::OnKeyboardShortcuts(wxCommandEvent & WXUNUSED(event))
   add(unity, _("Left drag"), _("Orbit around the model"));
   add(unity, _("Right drag"), _("Pan"));
   add(unity, _("Mouse wheel"), _("Zoom"));
+
+  const wxString textures = _("Textures (the Textures viewer)");
+  add(textures, _("Ctrl+S"), _("Export the texture shown as PNG"));
+  add(textures, _("Ctrl+Shift+S"), _("Export the original BLP file"));
+  add(textures, _("A / Shift+A"), _("Alpha on and off / alpha only (in the texture)"));
   // (The OpenGL viewport's section -- its mouse camera, numpad camera keys and 0-9 speed keys -- is gone
   // with that viewport.)
 
@@ -4134,6 +4496,7 @@ bool ModelViewer::ImportArmoury(wxString strURL)
 
 bool ModelViewer::ApplyArmoryCharacter(CharInfos & info, wxString & error)
 {
+  SetViewerMode(ViewerMode::Models);
   CharInfos * result = &info;
   error.clear();
 

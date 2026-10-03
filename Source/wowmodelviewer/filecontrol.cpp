@@ -4,7 +4,10 @@
 #include <wx/msgdlg.h>
 #include <wx/srchctrl.h>
 
+#include <functional>
+
 #include <QDirIterator>
+#include <QElapsedTimer>
 #include <QImage>
 #include <QRegularExpression>
 
@@ -14,8 +17,10 @@
 #include "logger/Logger.h"
 #include "modelviewer.h"
 #include "RaceInfos.h"
-#include "Texture.h"
+#include "TextureBrowse.h"
+#include "TextureView.h"
 #include "UiStyle.h"
+#include "UnityAssetAccess.h"
 
 IMPLEMENT_CLASS(FileControl, wxWindow)
 
@@ -29,11 +34,14 @@ BEGIN_EVENT_TABLE(FileControl, wxWindow)
   EVT_TIMER(ID_FILELIST_SEARCHTIMER, FileControl::OnSearchTimer)
   EVT_CHOICE(ID_FILELIST_FILTER, FileControl::OnChoice)
   EVT_TREE_ITEM_MENU(ID_FILELIST, FileControl::OnTreeMenu)
+  EVT_TREE_ITEM_ACTIVATED(ID_FILELIST, FileControl::OnTreeActivated)
 END_EVENT_TABLE()
 
 // One entry per filter in the choice list below (chos, filterStrings), in the same order: the
 // selected index IS the filter mode. OGG and SKIN were missing, which put every later entry one out
 // of step -- "MP3s" ran the image branch and "Images (*.blp)" only cleared the model.
+// Textures is last: choosing it is the texture viewer (ModelViewer::SetViewerMode), so stepping through
+// the file categories with the arrow keys must not pass it on the way.
 enum FilterModes {
   FILE_FILTER_MODEL=0,
   FILE_FILTER_WMO,
@@ -41,13 +49,13 @@ enum FilterModes {
   FILE_FILTER_WAV,
   FILE_FILTER_OGG,
   FILE_FILTER_MP3,
-  FILE_FILTER_IMAGE,
   FILE_FILTER_BLS,
   FILE_FILTER_DBC,
   FILE_FILTER_DB2,
   FILE_FILTER_LUA,
   FILE_FILTER_XML,
   FILE_FILTER_SKIN,
+  FILE_FILTER_TEXTURE,
 
   FILE_FILTER_MAX
 };
@@ -62,9 +70,9 @@ All suffixs in MPQ:
 static QString content;
 static QString filterString;
 static QString filterStrings[] = {"m2", "wmo", "adt", "wav", "ogg", "mp3",
-  "blp", "bls", "dbc", "db2", "lua", "xml", "skin"};
-static wxString chos[] = {wxT("Models (*.m2)"), wxT("WMOs (*.wmo)"), wxT("ADTs (*.adt)"), wxT("WAVs (*.wav)"), wxT("OGGs (*.ogg)"), wxT("MP3s (*.mp3)"), 
-  wxT("Images (*.blp)"), wxT("Shaders (*.bls)"), wxT("DBCs (*.dbc)"), wxT("DB2s (*.db2)"), wxT("LUAs (*.lua)"), wxT("XMLs (*.xml)"), wxT("SKINs (*.skin)")};
+  "bls", "dbc", "db2", "lua", "xml", "skin", "blp"};
+static wxString chos[] = {wxT("Models (*.m2)"), wxT("WMOs (*.wmo)"), wxT("ADTs (*.adt)"), wxT("WAVs (*.wav)"), wxT("OGGs (*.ogg)"), wxT("MP3s (*.mp3)"),
+  wxT("Shaders (*.bls)"), wxT("DBCs (*.dbc)"), wxT("DB2s (*.db2)"), wxT("LUAs (*.lua)"), wxT("XMLs (*.xml)"), wxT("SKINs (*.skin)"), wxT("Textures (*.blp)")};
 
 void beautifyFileName(QString & file)
 {
@@ -114,6 +122,13 @@ FileControl::FileControl(wxWindow* parent, wxWindowID id)
     choFilter->SetSelection(filterMode);
 
     fileTree = new wxTreeCtrl(this, ID_FILELIST, wxDefaultPosition, wxDefaultSize, wxTR_HIDE_ROOT|wxTR_HAS_BUTTONS|wxTR_LINES_AT_ROOT|wxTR_FULL_ROW_HIGHLIGHT|wxTR_NO_LINES);
+    m_textures = new TextureBrowse(fileTree);
+    m_texturesLoadWatch.Bind(wxEVT_TIMER, [this](wxTimerEvent &) { TexturesClientLoaded(); });
+    // An arrow key held down in the texture tree: the rows it passes wait to be decoded until it is let
+    // go (TextureView::setKeysRepeating). Focus leaving the tree lets go too: the key-up goes elsewhere.
+    fileTree->Bind(wxEVT_KEY_DOWN, [this](wxKeyEvent & e) { KeysRepeating(e.IsAutoRepeat()); e.Skip(); });
+    fileTree->Bind(wxEVT_KEY_UP, [this](wxKeyEvent & e) { KeysRepeating(false); e.Skip(); });
+    fileTree->Bind(wxEVT_KILL_FOCUS, [this](wxFocusEvent & e) { KeysRepeating(false); e.Skip(); });
 
     wxBoxSizer * top = new wxBoxSizer(wxVERTICAL);
     top->Add(searchLabel, 0, wxLEFT | wxRIGHT | wxTOP, sp);
@@ -133,6 +148,9 @@ FileControl::FileControl(wxWindow* parent, wxWindowID id)
 
 FileControl::~FileControl()
 {
+  m_texturesLoadWatch.Stop();
+  delete m_textures;
+  m_textures = NULL;
   if (fileTree) {
     fileTree->Destroy();
     fileTree = NULL;
@@ -175,6 +193,26 @@ void FileControl::Init(ModelViewer* mv)
   // A search is running now, so cancel any pending debounced one (Enter/Clear/timer all
   // funnel through here -- this stops a queued timer from re-searching the same text).
   m_searchTimer.Stop();
+
+  if (filterMode == FILE_FILTER_TEXTURE)
+  {
+    InitTextures();
+    return;
+  }
+
+  // No client yet: there is no file index to list (choosing a category in Show before loading one).
+  if (!core::Game::instance().initDone())
+  {
+    fileTree->DeleteAllItems();
+    m_filesApplied.Clear();
+    SetSearchStatus(_("Load a World of Warcraft client to browse its files."));
+    return;
+  }
+  m_filesApplied = txtContent->GetValue();
+  content = QString(QString::fromWCharArray(txtContent->GetValue().c_str()).toLower().trimmed());
+  if (reuseModelTree())
+    return;
+  m_modelTreeKept = false;
 
   LOG_INFO << "Initializing File Controls - Start";
 
@@ -327,6 +365,9 @@ void FileControl::Init(ModelViewer* mv)
     SetSearchStatus(_("No files match."));
   else
     SetSearchStatus(wxString::Format(listed == 1 ? _("%u file found") : _("%u files found"), (unsigned)listed));
+  m_treeRootFilter = filterMode;
+  m_treeRootContent = content;
+  m_treeRootStatus = searchStatus->GetLabel();
 
   LOG_INFO << "Initializing File Controls - END";
 }
@@ -338,6 +379,11 @@ void FileControl::OnTreeItemExpanding(wxTreeEvent &event)
   const wxTreeItemId item = event.GetItem();
   if (!item.IsOk())
     return;
+  if (filterMode == FILE_FILTER_TEXTURE)
+  {
+    m_textures->expanding(item);
+    return;
+  }
   FileTreeData * data = (FileTreeData *)fileTree->GetItemData(item);
   if (data && data->node)
     data->node->appendChildren(fileTree);
@@ -348,9 +394,18 @@ void FileControl::OnChoice(wxCommandEvent &event)
   int id = event.GetId();
   if (id == ID_FILELIST_FILTER) {
     int curSelection = choFilter->GetCurrentSelection();
-    if (curSelection >= 0 && curSelection != filterMode) {
-      filterMode = curSelection;
-      Init();
+    if (curSelection >= 0 && curSelection != filterMode)
+    {
+      // Into or out of Textures: that is the viewer mode, which brings Browse along.
+      const bool toTextures = curSelection == FILE_FILTER_TEXTURE;
+      if (modelviewer && toTextures != (filterMode == FILE_FILTER_TEXTURE))
+      {
+        if (!toTextures)
+          m_lastFilesCategory = curSelection;
+        modelviewer->SetViewerMode(toTextures ? ModelViewer::ViewerMode::Textures : ModelViewer::ViewerMode::Models);
+      }
+      else
+        setCategory(curSelection);
     }
   }
 }
@@ -412,59 +467,15 @@ void FileControl::Export(wxString val, int select)
   f->close();
 }
 
-wxString FileControl::ExportPNG(wxString val)
-{
-  if (val.IsEmpty())
-    return _T("");
-
-  wxFileName fn(val);
-  if (fn.GetExt().Lower() != wxT("blp"))
-    return _T("");
-
-  TextureID temptex = TEXTUREMANAGER.add(GAMEDIRECTORY.getFile(QString::fromWCharArray(val.c_str())));
-  Texture &tex = *((Texture*)TEXTUREMANAGER.items[temptex]);
-  if (tex.w == 0 || tex.h == 0)
-    return _T("");
-
-  wxString filename;
-  filename = wxFileSelector(wxT("Save PNG ..."), wxGetCwd(), fn.GetName(), _T("png"),wxT("PNG Files (.png)|*.png"));
-
-  if ( filename.empty() ){
-    filename = wxGetCwd()+SLASH+wxT("Export")+SLASH+fn.GetName()+wxT(".png");
-  }
-
-  unsigned char *tempbuf = (unsigned char*)malloc(tex.w*tex.h*4);
-  tex.getPixels(tempbuf, GL_BGRA_EXT);
-
-  QImage PNGFile(tempbuf, tex.w, tex.h, QImage::Format_RGBA8888);
-  PNGFile.save(QString::fromWCharArray(filename.c_str()));
-
-  free(tempbuf);
-  return filename;
-}
-
 void FileControl::OnPopupClick(wxCommandEvent &evt)
 {
   FileTreeData *data = (FileTreeData*)(static_cast<wxMenu *>(evt.GetEventObject())->GetClientData());
+  if (!data || !data->file)
+    return;
   wxString val(data->file->fullname().toStdWString());
 
-  int id = evt.GetId();
-  if (id == ID_FILELIST_SAVE) { 
+  if (evt.GetId() == ID_FILELIST_SAVE)
     Export(val, 1);
-  } else if (id == ID_FILELIST_VIEW) {
-    wxString temp = ExportPNG(val);
-
-    if(!temp.IsEmpty())
-    {
-      ScrWindow *sw = new ScrWindow(temp);
-      sw->Show(true);
-    }
-    else
-    {
-      wxMessageDialog dial(NULL, wxT("Error during file export."));
-      dial.ShowModal();
-    }
-  }
 }
 
 void FileControl::OnTreeMenu(wxTreeEvent &event)
@@ -474,24 +485,24 @@ void FileControl::OnTreeMenu(wxTreeEvent &event)
   if (!item.IsOk() || !modelviewer->canvas) // make sure that a valid Tree Item was actually selected.
     return;
 
+  if (filterMode == FILE_FILTER_TEXTURE)
+  {
+    ShowTextureMenu(item);
+    return;
+  }
+
   void *data = reinterpret_cast<void *>(fileTree->GetItemData(item));
   FileTreeData *tdata = (FileTreeData*)data;
 
-  // make sure the data (file name) is valid
-  if (!data)
+  // make sure the data (file name) is valid: folder rows carry no file
+  if (!data || !tdata->file)
     return; // isn't valid, exit.
-  
-  // Make a menu to show item Info or export it
+
+  // Make a menu to export it (a texture is looked at in the viewport: Show: Textures)
   wxMenu infoMenu;
   infoMenu.SetClientData( data );
   infoMenu.Append(ID_FILELIST_SAVE, wxT("&Save..."), wxT("Save this object"));
   // TODO: if is music, a Play option
-  wxString temp(tdata->file->fullname().toStdWString());
-  temp.MakeLower();
-
-  // if is graphic, a View option
-  if (temp.EndsWith(wxT("blp")))
-    infoMenu.Append(ID_FILELIST_VIEW, wxT("&View"), wxT("View this object"));
 
   infoMenu.Connect(wxEVT_COMMAND_MENU_SELECTED, (wxObjectEventFunction)&FileControl::OnPopupClick, NULL, this);
   PopupMenu(&infoMenu);
@@ -499,9 +510,6 @@ void FileControl::OnTreeMenu(wxTreeEvent &event)
 
 void FileControl::ClearCanvas()
 {
-  // Whatever is picked next replaces a Browse image too, which none of the flags below records.
-  modelviewer->m_browseImageName.Clear();
-
   if (!modelviewer->isModel && !modelviewer->isWMO && !modelviewer->isADT)
     return;
 
@@ -569,7 +577,8 @@ void FileControl::UpdateInterface()
 
   // You MUST put true in one if the other is false! Otherwise, if they open the other model type and go back,
   // your function will still be disabled!!
-  if (modelviewer->isModel == true){
+  // A model kept loaded behind a texture is not on screen: its character commands wait until it is.
+  if (modelviewer->isModel == true && !modelviewer->isTextureMode()){
     // If it's an M2 file...
     // Enable Controls for Characters
     modelviewer->charMenu->Enable(ID_SAVE_CHAR, true);
@@ -635,6 +644,17 @@ void FileControl::UpdateInterface()
     modelviewer->charMenu->Enable(ID_MOUNT_CHARACTER, false);
     modelviewer->charMenu->Enable(ID_AUTOHIDE_GEOSETS_FOR_HEAD_ITEMS, false);
   }
+  // Randomise and eye glow (LoadModel enables them for a character) wait in Textures mode too.
+  if (modelviewer->isTextureMode())
+  {
+    modelviewer->charMenu->Enable(ID_CHAR_RANDOMISE, false);
+    modelviewer->charMenu->Enable(ID_CHAREYEGLOW, false);
+  }
+  else if (modelviewer->isModel && modelviewer->isChar)
+  {
+    modelviewer->charMenu->Enable(ID_CHAR_RANDOMISE, true);
+    modelviewer->charMenu->Enable(ID_CHAREYEGLOW, true);
+  }
 
   // The Model panel follows whatever was just opened (a model, a WMO, a map tile, nothing).
   modelviewer->DisplayedContentChanged();
@@ -654,6 +674,12 @@ void FileControl::OnTreeSelect(wxTreeEvent &event)
     return;
   }
 
+  if (filterMode == FILE_FILTER_TEXTURE)
+  {
+    SelectTextureRow(item);
+    return;
+  }
+
   FileTreeData *data = (FileTreeData*)fileTree->GetItemData(item);
 
   // make sure the data (file name) is valid
@@ -670,18 +696,6 @@ void FileControl::OnTreeSelect(wxTreeEvent &event)
                     data->node ? data->node->sexID : -1);
   } else if (filterMode == FILE_FILTER_WMO) {
     SelectWMOFile(data->file);
-  } else if (filterMode == FILE_FILTER_IMAGE) {
-    ClearCanvas();
-
-    // The Unity viewport cannot show an image; remembering the pick lets it say so instead of
-    // showing the empty viewer's prompt as though nothing had been chosen. That is all a pick does
-    // now. It used to write the image out as a PNG (ExportPNG, which asks where to save it) and load
-    // that file as the OpenGL canvas's background, and the canvas is archived: nothing draws that
-    // background, so every pick -- stepping through the tree with the arrow keys included -- would
-    // have opened a save dialog for nothing. Saving an image is the right-click menu's job (Save, View).
-    modelviewer->m_browseImageName = wxString(data->file->fullname().toStdWString());
-
-    UpdateInterface();
   } else if (filterMode == FILE_FILTER_ADT) {
     ClearCanvas();
 
@@ -783,6 +797,24 @@ void FileControl::OnButton(wxCommandEvent &event)
   if (event.GetEventType() == wxEVT_SEARCH_CANCEL)
     txtContent->SetValue(wxEmptyString);
   Init();
+  // Textures: Enter on a FileDataID opens that file (its texture row, or the row that looks it up).
+  if (ShowsTextures() && event.GetEventType() == wxEVT_SEARCH)
+  {
+    const QString term = QString::fromWCharArray(txtContent->GetValue().c_str()).trimmed();
+    bool digits = !term.isEmpty();
+    for (const QChar c : term)
+      digits = digits && c.isDigit();
+    wxTreeItemIdValue cookie;
+    const wxTreeItemId first = fileTree->GetRootItem().IsOk() ? fileTree->GetFirstChild(fileTree->GetRootItem(), cookie)
+                                                               : wxTreeItemId();
+    TextureEntry entry;
+    bool lookup = false;
+    if (digits && first.IsOk() && m_textures->textureOf(first, entry, lookup) && entry.fileDataId == term.toInt())
+    {
+      fileTree->SelectItem(first);
+      SelectTextureRow(first);
+    }
+  }
 }
 
 // Fires on every keystroke in the search box. Rather than searching immediately (the filter
@@ -810,5 +842,257 @@ void FileControl::OnSearchTimer(wxTimerEvent &event)
     Init();
 }
 
+// ------------------------------------------------------------------------------- the viewer mode
+void FileControl::FollowViewerMode(bool textures)
+{
+  setCategory(textures ? FILE_FILTER_TEXTURE : m_lastFilesCategory);
+}
 
+void FileControl::ShowModels()
+{
+  // What the viewport shows -- models, world models, map tiles -- stays; anything else becomes the models.
+  auto shown = [](int mode) { return mode == FILE_FILTER_MODEL || mode == FILE_FILTER_WMO || mode == FILE_FILTER_ADT; };
+  if (filterMode == FILE_FILTER_TEXTURE)
+  {
+    if (!shown(m_lastFilesCategory))
+      m_lastFilesCategory = FILE_FILTER_MODEL;   // where leaving Textures goes (FollowViewerMode)
+  }
+  else if (!shown(filterMode))
+    setCategory(FILE_FILTER_MODEL);
+}
 
+void FileControl::KeysRepeating(bool repeating)
+{
+  if (modelviewer && modelviewer->textureView)
+    modelviewer->textureView->setKeysRepeating(repeating && filterMode == FILE_FILTER_TEXTURE);
+}
+
+void FileControl::setCategory(int mode)
+{
+  if (mode == filterMode)
+    return;
+  const bool fromTextures = filterMode == FILE_FILTER_TEXTURE, toTextures = mode == FILE_FILTER_TEXTURE;
+  if (fromTextures)
+    m_textures->rememberOpenFolders();
+  else
+  {
+    m_lastFilesCategory = filterMode;
+    if (toTextures)
+      keepModelTree();
+  }
+  if (fromTextures != toTextures)
+  {
+    // What its tree shows, not text typed and not run: that one could be a 1-character search over
+    // every model, which takes seconds.
+    (fromTextures ? m_texturesSearch : m_filesSearch) = fromTextures ? m_texturesApplied : m_filesApplied;
+    txtContent->ChangeValue(toTextures ? m_texturesSearch : m_filesSearch);
+  }
+  filterMode = mode;
+  choFilter->SetSelection(filterMode);
+  Init();
+}
+
+void FileControl::keepModelTree()
+{
+  // Only the tree built for this category and search, and only while that hierarchy is the client's.
+  m_modelTreeKept = false;
+  m_modelOpenNodes.clear();
+  m_modelTopNode = nullptr;
+  if (!m_treeRoot || m_treeRootFilter != filterMode || !fileTree->GetRootItem().IsOk())
+    return;
+  std::function<void(wxTreeItemId)> collect = [&](wxTreeItemId parent) {
+    wxTreeItemIdValue cookie;
+    for (wxTreeItemId c = fileTree->GetFirstChild(parent, cookie); c.IsOk(); c = fileTree->GetNextChild(parent, cookie))
+    {
+      FileTreeData * data = dynamic_cast<FileTreeData *>(fileTree->GetItemData(c));
+      if (!data || !data->node || !fileTree->IsExpanded(c))
+        continue;
+      m_modelOpenNodes.insert(data->node);
+      collect(c);
+    }
+  };
+  collect(fileTree->GetRootItem());
+  const wxTreeItemId top = fileTree->GetFirstVisibleItem();
+  FileTreeData * topData = top.IsOk() ? dynamic_cast<FileTreeData *>(fileTree->GetItemData(top)) : nullptr;
+  m_modelTopNode = topData ? topData->node : nullptr;
+  m_modelTreeKept = true;
+}
+
+void FileControl::reopenModelRows(wxTreeItemId parent, wxTreeItemId & top)
+{
+  wxTreeItemIdValue cookie;
+  for (wxTreeItemId c = fileTree->GetFirstChild(parent, cookie); c.IsOk(); c = fileTree->GetNextChild(parent, cookie))
+  {
+    FileTreeData * data = dynamic_cast<FileTreeData *>(fileTree->GetItemData(c));
+    if (!data || !data->node)
+      continue;
+    if (data->node == m_modelTopNode)
+      top = c;
+    if (m_modelOpenNodes.count(data->node))
+    {
+      fileTree->Expand(c);   // filled by OnTreeItemExpanding
+      reopenModelRows(c, top);
+    }
+  }
+}
+
+bool FileControl::reuseModelTree()
+{
+  if (!m_modelTreeKept || !m_treeRoot || m_treeRootFilter != filterMode || m_treeRootContent != content)
+    return false;
+  m_modelTreeKept = false;
+  QElapsedTimer timer;
+  timer.start();
+  TreeStackItem & root = *m_treeRoot;
+  root.resetLoaded();
+  fileTree->Freeze();
+  fileTree->DeleteAllItems();
+  root.id = fileTree->AddRoot(wxT("Root"));
+  wxTreeItemId top;
+  if (content.isEmpty())
+  {
+    root.appendChildren(fileTree);
+    reopenModelRows(root.id, top);
+  }
+  else
+  {
+    root.createTreeItems(fileTree);
+    fileTree->ExpandAll();
+  }
+  if (top.IsOk())
+    fileTree->ScrollTo(top);
+  fileTree->Thaw();
+  SetSearchStatus(m_treeRootStatus);
+  LOG_INFO << "Initializing File Controls - the tree kept, rows again in" << timer.elapsed() << "ms,"
+           << (int)m_modelOpenNodes.size() << "folders opened again";
+  return true;
+}
+
+// ----------------------------------------------------------------------------------- Show: Textures
+// The client's textures from the texture catalogue (TextureBrowse), in this tree, with this search
+// box: see TextureBrowse.h for why not the hierarchy the other categories build.
+
+bool FileControl::ShowsTextures() const
+{
+  return filterMode == FILE_FILTER_TEXTURE;
+}
+
+void FileControl::InitTextures()
+{
+  const QString term = QString::fromWCharArray(txtContent->GetValue().c_str()).trimmed();
+  if (!m_textures->ensureCatalog())
+  {
+    m_textures->clear();
+    m_texturesApplied.Clear();
+    SetSearchStatus(UnityAssetAccess::isClientLoading() ? _("Loading the game client...")
+                                                         : _("Load a World of Warcraft client to browse its files."));
+    return;
+  }
+  const bool fromSearch = m_textures->showsSearch();
+  m_texturesApplied = txtContent->GetValue();
+  SetSearchStatus(m_textures->populate(term));
+
+  // Browsing again after a search: open the folders down to the texture on screen, so a texture found by
+  // searching is found in its place too. Coming back from the models, the tree is as it was left instead
+  // (populate opens the same folders, at the same row, with the same row picked).
+  const bool selected = modelviewer && modelviewer->textureView &&
+                        modelviewer->textureView->selection() != TextureView::Selection::None;
+  if (term.isEmpty() && selected && fromSearch)
+  {
+    const TextureView::Current & shown = modelviewer->textureView->current();
+    if (!shown.entry.path.isEmpty() || shown.entry.fileDataId > 0)
+      m_textures->reveal(shown.entry, true);
+  }
+}
+
+void FileControl::SelectTextureRow(wxTreeItemId item)
+{
+  if (m_textures->busy() || !modelviewer)
+    return;
+  TextureEntry entry;
+  bool lookup = false;
+  if (!m_textures->textureOf(item, entry, lookup))
+    return;   // a folder, a range or a group: nothing to show
+  // The selection only: Textures mode already has its menus and panels (nothing else to update).
+  modelviewer->ShowTexture(entry, lookup);
+}
+
+void FileControl::ShowTextureMenu(wxTreeItemId item)
+{
+  TextureEntry entry;
+  bool lookup = false;
+  if (!modelviewer || !modelviewer->textureView || !m_textures->textureOf(item, entry, lookup))
+    return;
+  enum { ID_TEX_PNG = wxID_HIGHEST + 6400, ID_TEX_BLP, ID_TEX_COPY_PATH, ID_TEX_COPY_ID };
+  wxMenu menu;
+  menu.Append(ID_TEX_PNG, _("Export PNG..."));
+  menu.Append(ID_TEX_BLP, _("Export original BLP..."));
+  menu.AppendSeparator();
+  menu.Append(ID_TEX_COPY_PATH, _("Copy path"));
+  menu.Append(ID_TEX_COPY_ID, _("Copy FileDataID"));
+  menu.Enable(ID_TEX_COPY_PATH, !entry.unnamed && !entry.path.isEmpty());
+  menu.Enable(ID_TEX_COPY_ID, entry.fileDataId > 0);
+  // A search waiting to run would rebuild the tree, row included, while the menu is open.
+  const bool searchPending = m_searchTimer.IsRunning();
+  m_searchTimer.Stop();
+  const int id = GetPopupMenuSelectionFromUser(menu);
+  if (searchPending)
+    m_searchTimer.StartOnce(300);
+  if (id == wxID_NONE)
+    return;
+  // The texture acted on is the one selected: selected first (decoded now, for an export).
+  fileTree->SelectItem(item);
+  modelviewer->ShowTexture(entry, lookup);
+  TextureView * view = modelviewer->textureView;
+  view->showNow(entry, lookup);
+  switch (id)
+  {
+    case ID_TEX_PNG: view->exportPngInteractive(); break;
+    case ID_TEX_BLP: view->exportBlpInteractive(); break;
+    case ID_TEX_COPY_PATH: view->copyPath(); break;
+    case ID_TEX_COPY_ID: view->copyFileDataId(); break;
+    default: break;
+  }
+}
+
+void FileControl::TexturesClientLoadStarting()
+{
+  // The kept model tree points into the old client's files.
+  m_modelTreeKept = false;
+  m_modelOpenNodes.clear();
+  m_modelTopNode = nullptr;
+  m_treeRootFilter = -1;
+  m_textures->clientLoadStarting();
+  if (ShowsTextures())
+    m_textures->clear();
+  m_texturesLoadWatch.Start(250);
+}
+
+void FileControl::TexturesClientLoaded()
+{
+  if (UnityAssetAccess::isClientLoading())
+    return;
+  m_texturesLoadWatch.Stop();
+  if (ShowsTextures())
+    Init();
+  // The load is over, whether it succeeded or not: the texture view leaves its "loading" state, and the
+  // viewport, the command bar and the menus follow what is loaded now (a failed load queues no call of
+  // its own, and a finished one makes its call while it is still under way).
+  if (modelviewer && modelviewer->textureView)
+    modelviewer->textureView->clientLoaded();
+  UpdateInterface();
+}
+
+void FileControl::OnTreeActivated(wxTreeEvent &event)
+{
+  // Enter or a double-click on a texture row selects it (a click on the row that is already selected is
+  // no selection change; the view keeps a texture already selected as it is).
+  if (filterMode == FILE_FILTER_TEXTURE)
+    SelectTextureRow(event.GetItem());
+  event.Skip();
+}
+
+void FileControl::TextureLookupResolved(int fileDataId, const QString & indexName)
+{
+  m_textures->lookupResolved(fileDataId, indexName);
+}
