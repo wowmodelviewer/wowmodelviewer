@@ -3274,7 +3274,7 @@ bool WowModelViewApp::OnInit()
   int optComponent = 0;   // -fbxcomponent : opt-in raw/node-based item-component export (UV2 + raw units + sidecar v2)
   int itemSkinFileId = 0; // -itemskin <fileDataID> : re-bind an item/weapon's on-screen skin after -mo load
   bool unityIpcTest = false; // -unityipctest : with -mo, -item or -wmo, run the embedded Unity renderer IPC self-test (see doHeadlessUnityIpcTest)
-  QString fbxClipsArg;    // -fbxclips i,j,k : ModelAnimation.Index values to export
+  QString fbxClipsArg;    // -fbxclips i,j,k : positions in the model's animation array
   for (int i = 0; i<argc; i++) {
     cmd = QString::fromWCharArray(argv[i]);
 
