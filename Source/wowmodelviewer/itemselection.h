@@ -77,7 +77,7 @@ public:
   virtual void OnFilter(wxCommandEvent& event);
   virtual void OnImportNPC(wxCommandEvent& event);
   virtual void OnImportItem(wxCommandEvent& event);
-  virtual int GetSelection() const { return m_indices[m_selection]; }
+  virtual int GetSelection() const { return m_selection >= 0 && static_cast<size_t>(m_selection) < m_indices.size() ? m_indices[m_selection] : wxNOT_FOUND; }
   virtual bool FilterFunc(int index);
   virtual void DoFilter();
   // Show which choice is chosen -- choices[index], chosen somewhere else -- without choosing it again: its row is
