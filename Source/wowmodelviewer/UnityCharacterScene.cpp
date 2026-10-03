@@ -209,13 +209,17 @@ namespace
 }
 
 QJsonObject UnityCharacterScene::build(WoWModel * character, const ImageRef & imageRef, Summary & summary,
-                                       const Mount * mount)
+                                       const Mount * mount, bool attachmentsOnly)
 {
   QJsonObject scene;
   if (!character || !character->gamefile)
     return scene;
+  scene["attachmentsOnly"] = attachmentsOnly;
 
+  // Exclusive NPCs keep their ordinary creature appearance and animation pipeline.
+  // Only their equipment travels in this scene; no racial body or hand overrides.
   // ---- the character's own model ----------------------------------------------------------
+  if (!attachmentsOnly)
   {
     QJsonObject body;
     QJsonArray textures;
@@ -256,6 +260,7 @@ QJsonObject UnityCharacterScene::build(WoWModel * character, const ImageRef & im
   }
 
   // ---- merged models, in merge order ---------------------------------------------------------
+  if (!attachmentsOnly)
   {
     QJsonArray merged;
     for (const WoWModel::MergedPart & part : character->mergedParts())
@@ -350,7 +355,7 @@ QJsonObject UnityCharacterScene::build(WoWModel * character, const ImageRef & im
   }
 
   // ---- the mount the character rides (protocol 5) ------------------------------------------------
-  if (mount && mount->model)
+  if (!attachmentsOnly && mount && mount->model)
   {
     scene["mount"] = buildMount(character, *mount);
     summary.mount = true;

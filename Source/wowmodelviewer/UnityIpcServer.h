@@ -1,7 +1,7 @@
 /*
  * UnityIpcServer.h
  *
- * Localhost IPC server for the embedded Unity renderer (protocol v6). WMV is the SERVER:
+ * Localhost IPC server for the embedded Unity renderer (protocol v7). WMV is the SERVER:
  * UnityRendererHost starts this listener BEFORE launching the player and passes the port on
  * the player's command line (-wmvPort <n>); the player connects back, announces itself with
  * unityReady and then asks WMV for the raw WoW assets/metadata it renders from. This is the
@@ -15,7 +15,7 @@
  * replace it later without changing the request side.
  *
  *   player -> WMV
- *     { "type":"unityReady", "protocolVersion":6 }
+ *     { "type":"unityReady", "protocolVersion":7 }
  *     { "type":"getAsset",             "requestId":"abc123", "path":"creature/chicken/chicken.m2" }
  *     { "type":"getAssetByFileDataID", "requestId":"abc124", "fileDataID":123456 }
  *     { "type":"getModelTextures",     "requestId":"abc125", "fileDataID":123200 }
@@ -237,7 +237,7 @@
 class UnityIpcServer : public wxEvtHandler
 {
 public:
-  static const int PROTOCOL_VERSION = 6;
+  static const int PROTOCOL_VERSION = 7;
 
   UnityIpcServer();
   ~UnityIpcServer();
@@ -257,6 +257,7 @@ public:
   bool playerSwitchesSubmeshes() const { return m_client && m_unityReady && m_playerProtocol >= 2; }
   // The player can dress a character from a characterScene (protocol 3).
   bool playerDressesCharacters() const { return m_client && m_unityReady && m_playerProtocol >= 3; }
+  bool playerAttachesNpcEquipment() const { return m_client && m_unityReady && m_playerProtocol >= 7; }
   // The player draws world models: it takes loadWoWModel "kind":"wmo" and answers mapObjectLoaded (protocol 4).
   bool playerDrawsMapObjects() const { return m_client && m_unityReady && m_playerProtocol >= 4; }
   // The player seats a character on a mount: it takes a characterScene's "mount", the role and rider fields of

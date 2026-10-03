@@ -1,0 +1,10 @@
+cmake_minimum_required(VERSION 3.16)
+project(FbxEquipmentInspect LANGUAGES CXX)
+set(CMAKE_CXX_STANDARD 14)
+set(FBX_SDK_ROOT "" CACHE PATH "FBX SDK directory containing include/ and lib/libfbxsdk.lib")
+add_executable(fbx-equipment-inspect inspect.cpp)
+target_include_directories(fbx-equipment-inspect PRIVATE "${FBX_SDK_ROOT}/include")
+target_compile_definitions(fbx-equipment-inspect PRIVATE FBXSDK_SHARED)
+target_link_libraries(fbx-equipment-inspect PRIVATE "${FBX_SDK_ROOT}/lib/libfbxsdk.lib")
+add_custom_command(TARGET fbx-equipment-inspect POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy_if_different
+  "${FBX_SDK_ROOT}/lib/libfbxsdk.dll" "$<TARGET_FILE_DIR:fbx-equipment-inspect>")

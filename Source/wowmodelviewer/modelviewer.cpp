@@ -61,6 +61,7 @@
 #include <QElapsedTimer>
 #include <QSettings>
 #include <QXmlStreamWriter>
+#include <QDomDocument>
 #include <QNetworkAccessManager>
 #include <QNetworkRequest>
 #include <QNetworkReply>
@@ -1974,6 +1975,24 @@ bool ModelViewer::unityPlayerDressesCharacters() const
   return unityRendererHost && unityRendererHost->ipc() && unityRendererHost->ipc()->playerDressesCharacters();
 }
 
+WoWModel * ModelViewer::unityEquipmentOwner() const
+{
+  if (WoWModel * character = unityCharacter())
+    return character;
+  if (!unityRendererHost || !unityRendererHost->ipc() ||
+      !unityRendererHost->ipc()->playerAttachesNpcEquipment() || isWMO ||
+      !canvas || !canvas->model() || !charControl)
+    return nullptr;
+  WoWModel * model = const_cast<WoWModel *>(canvas->model());
+  // SetHandsOnly supplies equipment controls for exclusive NPCs. Require the live
+  // canvas model and its own node, never a stale character or a rider's parent.
+  if (model->charModelDetails.isChar || charControl->model != model ||
+      !model->attachment || charControl->charAtt != model->attachment ||
+      !model->gamefile || model->gamefile->fileDataId() <= 0)
+    return nullptr;
+  return model;
+}
+
 // THE WHOLE WINDOW BLINKED ON EVERY MODEL LOAD, and this is why. On Windows, wxAuiManager::Update()
 // wraps its relayout in a wxWindowUpdateLocker on the frame (wx 3.2.10, framemanager.cpp: "only
 // under MSW and only when not using live resizing" -- which this manager does not use). The lock
@@ -2247,7 +2266,7 @@ void ModelViewer::SendCharacterSceneToUnity(bool force)
   if (!unityRendererHost || !unityRendererHost->ipc() || !unityRendererHost->ipc()->playerDressesCharacters())
     return;
   // The character the player is loaded with: the canvas model, or the rider of a mount the player seats.
-  WoWModel * m = unityCharacter();
+  WoWModel * m = unityEquipmentOwner();
   if (!m || m_sceneHold > 0)
     return;
   // The player reported it could not build this character from the load on display, and the canvas has
@@ -2297,9 +2316,10 @@ void ModelViewer::SendCharacterSceneToUnity(bool force)
   clock.start();
   UnityIpcServer * ipc = unityRendererHost->ipc();
   UnityCharacterScene::Summary summary;
-  const QJsonObject scene = UnityCharacterScene::build(
+  QJsonObject scene = UnityCharacterScene::build(
     m, [ipc](const QString & kind, const QImage & image) { return ipc->shareCharacterImage(kind, image); },
-    summary, ridden);
+    summary, ridden, !m->charModelDetails.isChar);
+  scene["load"] = m_unityLoadSerial;
   const int revision = ++m_sceneRevision;
   if (ipc->sendCharacterScene((int)m->gamefile->fileDataId(), revision, scene))
   {
@@ -2374,7 +2394,7 @@ void ModelViewer::OnCharacterSceneApplied(const UnityIpcServer::SceneAck & ack)
   }
 
   // The character the player is loaded with: the canvas model, or the rider of a mount the player seats.
-  const WoWModel * character = unityCharacter();
+  const WoWModel * character = unityEquipmentOwner();
   const bool current = character && (int)character->gamefile->fileDataId() == ack.fileDataID;
   // THE MOUNT (protocol 5) is answered in the same ack but is not the character: a mount the player could not
   // build leaves the character built and on screen, so it is logged here and changes no notice.
@@ -3390,13 +3410,16 @@ void ModelViewer::OnMount(wxCommandEvent &event)
   charControl->selectMount();
 }
 
-void ModelViewer::SaveChar(QString fn, bool equipmentOnly /*= false*/)
+bool ModelViewer::SaveChar(QString fn, bool equipmentOnly /*= false*/)
 {
+  WoWModel * m = canvas ? const_cast<WoWModel *>(canvas->model()) : nullptr;
+  if (!m)
+    return false;
   QFile file(fn);
   if (!file.open(QIODevice::WriteOnly | QIODevice::Text))
   {
     LOG_ERROR << "Fail to open" << fn;
-    return;
+    return false;
   }
 
   QXmlStreamWriter stream(&file);
@@ -3405,7 +3428,8 @@ void ModelViewer::SaveChar(QString fn, bool equipmentOnly /*= false*/)
   stream.writeStartElement("SavedCharacter");
   stream.writeAttribute("version", "2.0");
   // save model itself
-  WoWModel * m = const_cast<WoWModel *>(canvas->model());
+  if (equipmentOnly)
+    stream.writeAttribute("equipmentModel", QString::fromStdString(m->modelname));
   if (!equipmentOnly)
     m->save(stream);
 
@@ -3422,7 +3446,130 @@ void ModelViewer::SaveChar(QString fn, bool equipmentOnly /*= false*/)
   stream.writeEndElement(); // SavedCharacter
   stream.writeEndDocument();
 
+  const bool ok = !stream.hasError() && file.flush();
   file.close();
+  return ok;
+}
+
+bool ModelViewer::LoadFbxEquipment(QString fn)
+{
+  WoWModel * m = canvas ? const_cast<WoWModel *>(canvas->model()) : nullptr;
+  QFile file(fn);
+  QDomDocument doc;
+  if (!m || m->charModelDetails.isChar || !file.open(QIODevice::ReadOnly) || !doc.setContent(&file))
+    return false;
+  const QDomElement root = doc.documentElement();
+  if (root.tagName() != "SavedCharacter" || root.attribute("version") != "2.0" ||
+      root.attribute("equipmentModel") != QString::fromStdString(m->modelname))
+    return false;
+
+  // Validate the entire snapshot before applying it. Empty slots are authoritative too:
+  // a fresh -npc load may supply default weapons that the user has since removed.
+  struct SavedItem { int id; int display; };
+  std::map<int, SavedItem> saved;
+  const QDomElement equipment = root.firstChildElement("equipment");
+  for (QDomElement e = equipment.firstChildElement("item"); !e.isNull(); e = e.nextSiblingElement("item"))
+  {
+    bool slotOk = false, idOk = false, displayOk = false, levelOk = false;
+    const int slot = e.firstChildElement("slot").attribute("value").toInt(&slotOk);
+    const int id = e.firstChildElement("id").attribute("value").toInt(&idOk);
+    const int display = e.firstChildElement("displayId").attribute("value").toInt(&displayOk);
+    const int level = e.firstChildElement("level").attribute("value").toInt(&levelOk);
+    if (!slotOk || !idOk || !displayOk || !levelOk || slot < 0 || slot >= NUM_CHAR_SLOTS ||
+        id < -1 || display < -1 || level < 0 || saved.count(slot) || !m->getItem((CharSlots)slot))
+      return false;
+    saved[slot] = { id, display };
+  }
+  size_t expectedSlots = 0;
+  for (auto it = m->begin(); it != m->end(); ++it)
+    ++expectedSlots;
+  if (saved.size() != expectedSlots)
+    return false;
+  file.close();
+
+  for (const auto & entry : saved)
+  {
+    WoWItem * item = m->getItem((CharSlots)entry.first);
+    item->setId(0);
+    const bool equipped = entry.second.id > 0 || (entry.second.id == -1 && entry.second.display > 0);
+    if (equipped)
+    {
+      // Reuse .chr's exact display/variant restoration, independently of racial customization.
+      if (entry.second.id == -1)
+      {
+        // setId(0) unloads geometry but retains the old display ID. Force a new display load
+        // even when a default NPC weapon already had the display we are restoring.
+        item->setDisplayId(-1);
+        item->setDisplayId(entry.second.display);
+      }
+      item->load(fn);
+      item->refresh();
+      if (!item->isEquipped() ||
+          ((entry.first == CS_HAND_LEFT || entry.first == CS_HAND_RIGHT) && item->models().empty()))
+      {
+        LOG_ERROR << "[fbxequipment] could not restore slot" << entry.first;
+        return false;
+      }
+    }
+    LOG_INFO << "[fbxequipment] slot" << entry.first << "id" << entry.second.id
+             << "display" << entry.second.display << "models" << (int)item->models().size();
+  }
+  // Do not call LoadChar/RefreshModel: they also apply body/geoset customization.
+  return true;
+}
+
+bool ModelViewer::PrepareFbxAsset(wxString & args, wxString & label, wxString & tempCharPath)
+{
+  args.clear();
+  label.clear();
+  tempCharPath.clear();
+  WoWModel * m = canvas ? const_cast<WoWModel *>(canvas->model()) : nullptr;
+  if (!m || m->modelname.empty())
+    return false;
+
+  if (!isChar)
+  {
+    if (m_exportNpcId > 0)
+    {
+      args = wxString::Format(wxT("-npc %d:%d"), m_exportNpcId, m_exportNpcDisplayId);
+      label = wxString::Format(wxT("NPC %d"), m_exportNpcId);
+    }
+    else
+    {
+      label = wxString::FromUTF8(m->modelname.c_str());
+      label.Replace(wxT("\\"), wxT("/"));
+      args = wxT("-mo \"") + label + wxT("\"");
+      if (m_exportItemSkinFileId > 0)
+        args << wxString::Format(wxT(" -itemskin %d"), m_exportItemSkinFileId);
+    }
+  }
+
+  // Non-racial models retain their original load route, plus an equipment-only snapshot.
+  // Never route an exclusive NPC through the racial character customization loader.
+  const bool equipmentOwner = charControl && charControl->model == m && m->attachment &&
+                              charControl->charAtt == m->attachment;
+  if (isChar || equipmentOwner)
+  {
+    const wxString base = wxFileName::CreateTempFileName(wxT("wmvexport"));
+    if (base.IsEmpty())
+      return false;
+    wxRemoveFile(base);
+    tempCharPath = base + wxT(".chr");
+    if (!SaveChar(QString::fromStdWString(tempCharPath.ToStdWstring()), !isChar))
+    {
+      if (wxFileName::FileExists(tempCharPath)) wxRemoveFile(tempCharPath);
+      tempCharPath.clear();
+      return false;
+    }
+    if (isChar)
+    {
+      args = wxT("\"") + tempCharPath + wxT("\"");
+      label = wxT("character");
+    }
+    else
+      args << wxT(" -fbxequipment \"") << tempCharPath << wxT("\"");
+  }
+  return !args.IsEmpty();
 }
 
 void ModelViewer::LoadChar(QString fn, bool equipmentOnly /* = false */)
@@ -4310,38 +4457,9 @@ void ModelViewer::OnExport(wxCommandEvent &event)
       // ---------- Out-of-process FBX export ----------
       if (isFbx && m_exportJobManager)
       {
-        WoWModel * m = const_cast<WoWModel *>(canvas->model());
-
         // Build the descriptor a fresh process needs to reload exactly this asset.
         wxString assetArgs, assetLabel, tempCharPath;
-        if (isChar)
-        {
-          // Serialise the live customisation + equipment to a temp .chr the child reloads.
-          wxString base = wxFileName::CreateTempFileName(wxT("wmvexport"));
-          if (!base.IsEmpty() && wxFileName::FileExists(base))
-            wxRemoveFile(base);
-          tempCharPath = base + wxT(".chr");
-          SaveChar(QString::fromStdWString(tempCharPath.ToStdWstring()));
-          assetArgs  = wxT("\"") + tempCharPath + wxT("\"");
-          assetLabel = wxT("character");
-        }
-        else if (m_exportNpcId > 0)
-        {
-          assetArgs  = wxString::Format(wxT("-npc %d:%d"), m_exportNpcId, m_exportNpcDisplayId);
-          assetLabel = wxString::Format(wxT("NPC %d"), m_exportNpcId);
-        }
-        else if (m && !m->modelname.empty())
-        {
-          wxString gp = wxString::FromUTF8(m->modelname.c_str());
-          gp.Replace(wxT("\\"), wxT("/"));
-          assetArgs  = wxT("-mo \"") + gp + wxT("\"");
-          // Carry the on-screen item skin so the child re-binds it instead of the default one.
-          if (m_exportItemSkinFileId > 0)
-            assetArgs << wxString::Format(wxT(" -itemskin %d"), m_exportItemSkinFileId);
-          assetLabel = gp;
-        }
-
-        if (!assetArgs.IsEmpty())
+        if (PrepareFbxAsset(assetArgs, assetLabel, tempCharPath))
         {
           ExportJobManager::Request req;
           req.assetArgs    = assetArgs;
@@ -4362,15 +4480,14 @@ void ModelViewer::OnExport(wxCommandEvent &event)
           }
           req.clipsCsv = csv;
 
-          m_exportJobManager->startExport(req);
+          if (!m_exportJobManager->startExport(req) && !tempCharPath.IsEmpty())
+            wxRemoveFile(tempCharPath);
           return; // async: the manager owns progress, completion, and cleanup from here
         }
 
-        // Couldn't build a re-loadable descriptor (e.g. an unnamed model) -> fall through to
-        // the in-process export below so the user still gets their file.
-        if (!tempCharPath.IsEmpty() && wxFileName::FileExists(tempCharPath))
-          wxRemoveFile(tempCharPath);
-        LOG_WARNING << "[export] no asset descriptor for out-of-process FBX; exporting in-process.";
+        wxMessageBox(wxT("Could not save the model and equipment for export."),
+                     wxT("Export Error"), wxOK | wxICON_ERROR, this);
+        return;
       }
 
       // ---------- In-process export (non-FBX, or FBX fallback) ----------
@@ -4448,4 +4565,3 @@ void ModelViewer::OnStatusBarRefreshTimer(wxTimerEvent& event)
     }
   }
 }
-

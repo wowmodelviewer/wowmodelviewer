@@ -66,6 +66,19 @@ public class WmvCharacterDresser
     public WmvRuntimeModel Body { get; private set; }
     public M2ParsedModel BodyModel { get; private set; }
     public int BodyFileDataID { get; private set; }
+    public bool AttachmentsOnly { get; private set; }
+
+    // An exclusive NPC already has its appearance and animation on screen. Reuse
+    // only the equipment lifecycle, without re-dressing or re-posing its body.
+    public void BeginAttachments(WmvRuntimeModel body, M2ParsedModel model, int fileDataID,
+                                 WmvIpcClient.CharacterScene scene)
+    {
+        Body = body;
+        BodyModel = model;
+        BodyFileDataID = fileDataID;
+        AttachmentsOnly = true;
+        Retarget(scene);
+    }
 
     /// <summary>The host's serial of the loadWoWModel this character came from. Every answer about a
     /// scene carries it, so the host can tell an answer about an earlier load from one about the
@@ -179,7 +192,8 @@ public class WmvCharacterDresser
         // A prepared part the new scene no longer names is dropped; one it still names keeps its work, but
         // only when the scene names it for the same file.
         var wanted = new Dictionary<string, int>();
-        foreach (var m in scene.merged) if (m != null && !string.IsNullOrEmpty(m.key)) wanted[m.key] = m.fileDataID;
+        if (!AttachmentsOnly)
+            foreach (var m in scene.merged) if (m != null && !string.IsNullOrEmpty(m.key)) wanted[m.key] = m.fileDataID;
         foreach (var a in scene.attachments) if (a != null && !string.IsNullOrEmpty(a.key)) wanted[a.key] = a.fileDataID;
         var drop = new List<string>();
         foreach (var kv in preps)
@@ -362,18 +376,18 @@ public class WmvCharacterDresser
         bool ready = true;
 
         // Body textures.
-        foreach (var t in target.body.textures)
+        foreach (var t in AttachmentsOnly ? new WmvIpcClient.SceneTexture[0] : target.body.textures)
             ready &= TextureReady(t);
 
         // The closed hand's pose may live in a .anim file.
-        int fistAnim = FistAnimFile();
+        int fistAnim = AttachmentsOnly ? 0 : FistAnimFile();
         if (fistAnim > 0)
         {
             byte[] ignored;
             ready &= FileReady(fistAnim, out ignored) || failedFiles.Contains(fistAnim);
         }
 
-        foreach (var m in target.merged)
+        foreach (var m in AttachmentsOnly ? new WmvIpcClient.SceneMerged[0] : target.merged)
         {
             if (m == null) continue;
             foreach (var t in m.textures) ready &= TextureReady(t);
@@ -386,6 +400,7 @@ public class WmvCharacterDresser
         foreach (var a in target.attachments)
         {
             if (a == null) continue;
+            if (!HasAttachmentBone(a)) continue;
             foreach (var t in a.textures) ready &= TextureReady(t);
             Part have;
             if (!(parts.TryGetValue(a.key, out have) && have.FileDataID == a.fileDataID))
@@ -516,23 +531,27 @@ public class WmvCharacterDresser
         var sw = System.Diagnostics.Stopwatch.StartNew();
 
         // ---- the body -----------------------------------------------------------------------
-        string bodySig = BodyTextureSignature(scene);
-        if (bodySig != bodyTextureSignature)
+        if (!AttachmentsOnly)
         {
-            var dict = TexturesFor(scene.body.textures, missing, "body");
-            WmvModelBuilder.RebindTextures(Body, dict, "body", null);
-            bodyTextureSignature = bodySig;
-            BodyRebinds++;
-            Log("body textures re-bound (" + dict.Count + " slot(s))");
+            string bodySig = BodyTextureSignature(scene);
+            if (bodySig != bodyTextureSignature)
+            {
+                var dict = TexturesFor(scene.body.textures, missing, "body");
+                WmvModelBuilder.RebindTextures(Body, dict, "body", null);
+                bodyTextureSignature = bodySig;
+                BodyRebinds++;
+                Log("body textures re-bound (" + dict.Count + " slot(s))");
+            }
+            bool[] bodyFlags = WmvIpcClient.Flags(scene.body.submeshVisible);
+            if (bodyFlags.Length > 0 && WmvModelBuilder.ApplySubmeshVisibility(Body, bodyFlags, null) < 0)
+                missing.Add("body geosets (" + bodyFlags.Length + " listed, skin has " + Body.SkinSubmeshCount + ")");
+            ApplyFist(scene, missing);
         }
-        bool[] bodyFlags = WmvIpcClient.Flags(scene.body.submeshVisible);
-        if (bodyFlags.Length > 0 && WmvModelBuilder.ApplySubmeshVisibility(Body, bodyFlags, null) < 0)
-            missing.Add("body geosets (" + bodyFlags.Length + " listed, skin has " + Body.SkinSubmeshCount + ")");
-        ApplyFist(scene, missing);
 
         // ---- parts: remove what the scene no longer names -------------------------------------
         var named = new HashSet<string>();
-        foreach (var m in scene.merged) if (m != null) named.Add(m.key);
+        if (!AttachmentsOnly)
+            foreach (var m in scene.merged) if (m != null) named.Add(m.key);
         foreach (var a in scene.attachments) if (a != null) named.Add(a.key);
         var remove = new List<string>();
         foreach (var kv in parts)
@@ -545,7 +564,7 @@ public class WmvCharacterDresser
 
         // ---- merged parts ----------------------------------------------------------------------
         int merged = 0, attached = 0;
-        foreach (var m in scene.merged)
+        foreach (var m in AttachmentsOnly ? new WmvIpcClient.SceneMerged[0] : scene.merged)
         {
             if (m == null) continue;
             if (ApplyMerged(m, missing)) merged++;
@@ -709,6 +728,14 @@ public class WmvCharacterDresser
 
     bool ApplyAttachment(WmvIpcClient.SceneAttachment a, List<string> missing)
     {
+        if (!HasAttachmentBone(a))
+        {
+            Part stale;
+            if (parts.TryGetValue(a.key, out stale) && stale.Runtime != null) stale.Runtime.Dispose();
+            parts.Remove(a.key);
+            missing.Add(a.key + " (attachment " + a.attachmentId + ": no valid attachment bone/position)");
+            return false;
+        }
         Part part;
         bool exists = parts.TryGetValue(a.key, out part) && part.FileDataID == a.fileDataID && part.Runtime != null;
         string texSig = TextureSignature(a.textures);
@@ -780,15 +807,10 @@ public class WmvCharacterDresser
         if (sig == part.PlacementSignature)
             return;
         Transform t = part.Runtime.Root.transform;
-        Vector3 local = Vector3.zero;
-        Transform parent = Body.Root.transform;
-        if (a.bone >= 0 && a.bone < Body.Bones.Length && BodyModel != null && a.bone < BodyModel.Bones.Length &&
-            a.position != null && a.position.Length >= 3)
-        {
-            parent = Body.Bones[a.bone];
-            local = AttachmentLocalPosition(new WowVec3(a.position[0], a.position[1], a.position[2]),
-                                            BodyModel.Bones[a.bone].Pivot);
-        }
+        // ApplyAttachment validated the point; there is deliberately no root fallback.
+        Transform parent = Body.Bones[a.bone];
+        Vector3 local = AttachmentLocalPosition(new WowVec3(a.position[0], a.position[1], a.position[2]),
+                                                BodyModel.Bones[a.bone].Pivot);
         t.SetParent(parent, false);
         t.localPosition = local;
         t.localRotation = Quaternion.identity;
@@ -800,6 +822,17 @@ public class WmvCharacterDresser
             Log(string.Format("attached part {0} moved to attachment {1} (bone {2}){3}", a.fileDataID, a.attachmentId, a.bone,
                               a.visible ? "" : ", hidden"));
         part.PlacementSignature = sig;
+    }
+
+    bool HasAttachmentBone(WmvIpcClient.SceneAttachment a)
+    {
+        if (a == null || Body == null || BodyModel == null || Body.Bones == null ||
+            a.bone < 0 || a.bone >= Body.Bones.Length || a.bone >= BodyModel.Bones.Length ||
+            Body.Bones[a.bone] == null || a.position == null || a.position.Length != 3)
+            return false;
+        foreach (float v in a.position)
+            if (float.IsNaN(v) || float.IsInfinity(v)) return false;
+        return true;
     }
 
     /// <summary>

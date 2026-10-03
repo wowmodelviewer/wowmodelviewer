@@ -138,7 +138,10 @@ public:
   static const int LAYOUT_VERSION = 3;
   // save + load character *.CHR files
   void LoadChar(QString fn, bool equipmentOnly = false);
-  void SaveChar(QString fn, bool equipmentOnly = false);
+  bool SaveChar(QString fn, bool equipmentOnly = false);
+  // FBX child-process state; equipment restoration must not customize an exclusive NPC's body.
+  bool LoadFbxEquipment(QString fn);
+  bool PrepareFbxAsset(wxString & args, wxString & label, wxString & tempCharPath);
 
   // raceID/sexID name the race the model should be read as, for the races that share a model
   // file with another race (Mag'har Orc on the Orc model); -1 leaves the model to resolve it.
@@ -333,6 +336,8 @@ public:
   // The character the Unity player is told about -- loaded, dressed and answered for: the canvas model when
   // it is the character, the rider while it rides a mount and the player rides mounts, otherwise null.
   WoWModel * unityCharacter() const;
+  // A racial character/rider or a live ordinary NPC with hands-only equipment controls.
+  WoWModel * unityEquipmentOwner() const;
   // Whether the canvas showed a mounted character when the viewport state was last decided (with
   // m_lastShowsCharacter below).
   bool m_lastShowsMountedCharacter = false;
@@ -455,4 +460,3 @@ public:
 };
 
 #endif
-
