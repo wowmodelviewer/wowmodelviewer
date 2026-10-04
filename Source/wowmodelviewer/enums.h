@@ -223,7 +223,7 @@ enum ObjectID {
   ID_SAVE_CHAR,
   ID_LOAD_CHAR,
   ID_IMPORT_CHAR, // From Blizzards Armory website
-  ID_IMPORT_NPC,  // NPC model from a Wowhead link (direct menu entry)
+  ID_IMPORT_NPC,  // Character > Load NPC / Model...: an NPC from a Wowhead link, or a model by its ID
 
   ID_LOAD_SET,
   ID_LOAD_START,

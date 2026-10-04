@@ -235,7 +235,7 @@ void FilteredChoiceDialog::OnFilter(wxCommandEvent& event){
 }
 
 void FilteredChoiceDialog::OnImportNPC(wxCommandEvent& event){
-  NPCimporterDialog *dlg = new NPCimporterDialog();
+  NPCimporterDialog *dlg = new NPCimporterDialog(this, NPCimporterDialog::Use::ImportLink);
   if ( dlg->ShowModal() == wxID_OK ) {
     int modelid = dlg->getImportedId();
     if(modelid != -1) {

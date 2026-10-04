@@ -41,6 +41,7 @@ set(src  AnimationExportChoiceDialog.cpp
          maptile.cpp
          modelcanvas.cpp
          modelcontrol.cpp
+         ModelIdLookup.cpp
          ModelInspector.cpp
          modelviewer.cpp
          MountCard.cpp
@@ -102,6 +103,7 @@ set(headers AnimationExportChoiceDialog.h
             maptile.h
             modelcanvas.h
             modelcontrol.h
+            ModelIdLookup.h
             ModelInspector.h
             modelviewer.h
             MountCard.h

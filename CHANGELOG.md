@@ -6,6 +6,34 @@ Format loosely based on [Keep a Changelog](https://keepachangelog.com/).
 ## [Unreleased]
 
 ### Added
+- **Character > Load NPC / Model...: a model by its ID, looked up in the loaded client, beside the Wowhead NPC link.**
+  The command was "Import NPC from URL"; it keeps its place in the Character menu and is still a Models command
+  (greyed in the Textures viewer). One compact window with two ways in under a tab strip: **URL**, a Wowhead NPC link,
+  loaded exactly as before (the same importer, the same NPC, model, display and equipment -- checked against the
+  previous build on four links, the viewport's captures byte-identical); and **ID**, an ID type chosen explicitly
+  and a number. Nothing is guessed: the same number often means different things (3876 is a Creature Display ID
+  showing a Scourge male and a Creature Model ID naming the Pyrogryph), so the type is never tried in turn. The types,
+  named as the client's tables name them:
+  - **M2 FileDataID** -- the file itself, on its own, as Browse shows a model, also when the listfile does not name it
+    (the Unity viewport is then sent the FileDataID alone). It must be in the loaded client, be an M2 (a listfile path
+    ending in `.m2`, or data starting with `MD21`/`MD20`) and be readable.
+  - **Creature Display ID** -- `CreatureDisplayInfo.ID -> ModelID -> CreatureModelData.ID -> FileDataID`, shown with
+    that display's appearance as View NPC shows it: its texture variations, geosets and particle colours, or, for a
+    display with `ExtendedDisplayInfoID`, the race's HD character model wearing the NPC's equipment
+    (`NpcModelItemSlotDisplayInfo`). Model scale is not applied: the client's scale tables are not loaded.
+  - **Creature Model ID** -- `CreatureModelData.ID -> FileDataID`: the model file on its own, as Browse shows a model;
+    a model row is no NPC and chooses no appearance.
+  An ID is always loaded afresh, even when its file is the one on show, so it never keeps the skin or equipment that
+  file was last given.
+  NPC (Creature) IDs are not offered: the client's `Creature` table holds only part of the NPCs, and an NPC can have up
+  to four displays whose probabilities are not loaded -- the URL page and View > View NPC cover NPCs. Everything is
+  looked up offline in the loaded client. When an ID cannot be loaded the window stays open and says why, naming the
+  step: no ID, not digits only, 0, negative, too large, no such row, a row with no model (`ModelID` or `FileDataID`
+  0), a file not in the loaded client (or in the file list only), a file that is not an M2 (and what it is, e.g. a
+  `.blp`), a file that cannot be read (encrypted with no key in the client, or not downloaded), no client loaded yet;
+  the model on show is left as it was. The page and ID type last chosen are remembered until the viewer is closed;
+  the ID is not. Cancel works while a link is being read (what the read brings back is dropped). View > View NPC's
+  "Import from URL" uses the same window's link page alone.
 - **View > Swap Background Color: the Models viewport's background colour,** in a small window that can stay open
   while the model is turned; it first opens at the viewport's top right, clear of the viewport's centre. A Models
   command: greyed in the Textures viewer, which puts the window away, and Models gives it back. A colour picker in the

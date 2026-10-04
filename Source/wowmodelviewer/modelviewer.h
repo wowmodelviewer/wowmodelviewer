@@ -39,6 +39,7 @@ class ExportJobManager;
 class UnityRendererHost;
 class TextureView;
 class BackgroundColorDialog;
+namespace ModelIdLookup { struct Resolved; }
 struct TextureEntry;
 class CharInfos;
 
@@ -158,8 +159,14 @@ public:
   void applyItemComponentGeosets(unsigned int itemId);
   void LoadNPC(unsigned int modelid);
   // Register an NPC in the in-memory DB (if not already present) and load it. Shared by the
-  // "Import NPC from URL" dialog flow and the -npc headless test harness.
+  // Load NPC / Model dialog's link flow and the -npc headless test harness.
   void LoadNPCByDisplay(int npcId, int displayId, int type = 0, const QString & name = QString("npc"));
+  // A creature display's model and appearance, for an NPC (LoadNPC) and a Creature Display ID; see the definition. Only
+  // on a cleared canvas (both callers clear it first): LoadModel keeps a model already showing the same file.
+  bool ShowCreatureDisplay(int fileDataId, int extraId, int displayId);
+  // Character > Load NPC / Model..., by ID: shows what ModelIdLookup::resolve found. False, with why, when the model on
+  // the canvas afterwards is not that file.
+  bool LoadModelById(const ModelIdLookup::Resolved & resolved, wxString & why);
 
   // Window GUI event related functions
   //void OnIdle();
@@ -218,7 +225,7 @@ public:
   // Wrapper function for character stuff (forwards events to charcontrol)
   void OnSetEquipment(wxCommandEvent &event);
   void OnCharToggle(wxCommandEvent &event);
-  void OnImportNPCFromURL(wxCommandEvent &event);  // direct "Import NPC from URL" menu entry
+  void OnImportNPCFromURL(wxCommandEvent &event);  // Character > Load NPC / Model... (a Wowhead link, or an ID)
 
   // Create the Unity viewport's host panel and wire its IPC callbacks. Called once, by InitDocking,
   // which docks it as the centre pane before any player exists.
