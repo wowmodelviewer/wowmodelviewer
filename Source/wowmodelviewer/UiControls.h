@@ -10,6 +10,8 @@
  *                  keyboard (Space, Enter, Tab), focus, wxEVT_BUTTON, tooltips and accessibility (a
  *                  screen reader sees a push button with its label) stay the system's. The focus ring
  *                  shows for keyboard focus only, as Windows does.
+ *   UiColourSwatch a colour to pick (View > Swap Background Color): the same native button, painted as the colour.
+ *   UiColourPicker a colour chosen by eye (the same window): a saturation x brightness square and a hue strip.
  *   UiSearchFrame  the search field: a native search control without its border, framed here at a
  *                  comfortable height with a rounded outline that turns to the accent while the field
  *                  has the keyboard. Its text, hint, clear button and events are the native control's.
@@ -73,6 +75,94 @@ private:
   bool m_iconOnly = false;
   bool m_hot = false;
 };
+
+// A colour to pick. Like UiButton it IS a native push button, only painted here: Space, Enter, Tab, focus,
+// wxEVT_BUTTON, wxEVT_CONTEXT_MENU and tooltips stay the system's, and a screen reader says its label (the colour's
+// name), which is never drawn. Painted as the colour in a rounded frame with the outline the controls have (the strong
+// one under the mouse), so a colour equal to the panel still has an edge. Selected: an accent ring with a gap of the
+// surface between it and the colour, and a check mark in black or white, whichever reads on the colour -- so the mark
+// does not depend on the ring's hue. Keyboard focus: a ring in the text colour inside the gap. Pressed: the colour
+// drawn a pixel smaller. Disabled: the colour faded towards what the swatch stands on, the outline quiet.
+class UiColourSwatch : public wxButton
+{
+public:
+  // sizeDip: the whole swatch, ring and gap included (they are always reserved, so selecting one moves nothing).
+  UiColourSwatch(wxWindow * parent, wxWindowID id, const wxColour & colour, const wxSize & sizeDip,
+                 const wxString & accessibleName);
+
+  void SetColour(const wxColour & colour);
+  const wxColour & GetColour() const { return m_colour; }
+  void SetSelected(bool selected);
+  bool IsSelected() const { return m_selected; }
+
+  bool MSWOnDraw(WXDRAWITEMSTRUCT * item) wxOVERRIDE;
+
+protected:
+  wxSize DoGetBestSize() const wxOVERRIDE;
+
+private:
+  void paint(wxDC & dc, const wxSize & size, bool pressed, bool hot, bool focusRing, bool disabled);
+
+  wxColour m_colour;
+  wxSize m_sizeDip;
+  bool m_selected = false;
+  bool m_hot = false;
+};
+
+// A colour chosen by eye, in place of the system's colour dialog: a square of saturation (left to right) by brightness
+// (bottom to top) for one hue, and a strip of hues beside it -- HSV over sRGB bytes, as colour pickers are. Click or
+// drag in either (a quick second press too); with the keyboard (Tab reaches each part, a focus ring shows which) the
+// arrow keys move the focused part a step, ten with Shift, and Home / End go to the strip's ends. Drawn from the
+// palette (outline, focus ring) and the colours themselves; the markers are a white ring in a dark one, so they show
+// on any colour. A screen reader hears each part as a slider with its value, and is told when it changes.
+//
+// While the colour moves (a drag, a key held) the picker sends UI_EVT_COLOUR_CHANGING, at most once per new set of
+// bytes; when it settles (the mouse let go, the key let up, the focus gone, settle()) UI_EVT_COLOUR_CHANGED. SetColour
+// from outside sends nothing and is ignored during a drag; a grey, black or white keeps the hue the picker had (they
+// have none of their own), so the strip does not jump to red.
+//
+// The colours are drawn Bleed DIP inside the picker's outer edges (room for a marker at an edge, and the focus ring):
+// laid out that much wider than a column on each side, its colours line up with the column.
+class UiColourPickerPart;
+
+class UiColourPicker : public wxPanel
+{
+public:
+  static const int Bleed = 7;   // DIP
+  // The strip's width and the gap before it (DIP): the square is the rest.
+  static const int StripWidth = 23;
+  static const int StripGap = 4;
+
+  // fieldSizeDip: the square's window (its colours Bleed inside it on the outer sides); the strip is as tall.
+  UiColourPicker(wxWindow * parent, wxWindowID id, const wxSize & fieldSizeDip, const wxString & accessibleName);
+
+  void SetColour(const wxColour & colour);
+  wxColour GetColour() const;
+  double GetHue() const { return m_h; }          // 0..360
+  double GetSaturation() const { return m_s; }   // 0..1
+  double GetBrightness() const { return m_v; }   // 0..1
+  bool IsDragging() const;
+  // A drag or a held key ends here and now, with UI_EVT_COLOUR_CHANGED (the window it is in is closing or hiding).
+  void settle();
+  // ... or without any event (the window it is in is being destroyed).
+  void abandon();
+  // The two parts: the square and the strip.
+  wxWindow * Field() const;
+  wxWindow * Strip() const;
+
+private:
+  friend class UiColourPickerPart;
+  // A part moved the colour; settled: the mouse or key was let go.
+  void partChanged(bool settled);
+
+  UiColourPickerPart * m_field = nullptr;
+  UiColourPickerPart * m_strip = nullptr;
+  double m_h = 0.0, m_s = 0.0, m_v = 0.0;
+  wxColour m_sent;   // the bytes of the last UI_EVT_COLOUR_CHANGING
+};
+
+wxDECLARE_EVENT(UI_EVT_COLOUR_CHANGING, wxCommandEvent);
+wxDECLARE_EVENT(UI_EVT_COLOUR_CHANGED, wxCommandEvent);
 
 class UiSearchFrame : public wxPanel
 {

@@ -4,10 +4,11 @@
 // localhost TCP listener before launching the player and passes the port on the player
 // command line ("-wmvPort <n>"); the player connects back, announces itself and then asks
 // WMV for whatever it needs. Transport: newline-delimited JSON (one object per line),
-// protocol version 6 (4 added world models: loadWoWModel "kind", mapObjectLoaded and runtimeState;
+// protocol version 7 (4 added world models: loadWoWModel "kind", mapObjectLoaded and runtimeState;
 // 5 added mounted characters: characterScene "mount", its answer's mount fields, runtimeState's
 // mountFileDataID, modelAnimation "role" and "load", and modelAnimationState "load", "hasRider" and
-// "rider"; 6 added captureScreenshot and its answer screenshotSaved).
+// "rider"; 6 added captureScreenshot and its answer screenshotSaved; 7 added viewportBackground and
+// runtimeState's background fields).
 //
 // The player is WMV's new renderer foundation and renders directly from WoW data: it
 // requests raw assets and metadata from WMV -- which owns the app UI, the active
@@ -53,14 +54,15 @@
 //   runtimeState          { query, liveMapObjects, liveModels, modelFileDataID, mapObjectFileDataID, loading,
 //                           mountFileDataID, mountKey, liveMounts, mountsBuilt, mountSeat, mountSeatBone,
 //                           modelSequence, mountSequence, mountEmitters, mountRibbons, mountParticles,
-//                           bodyRebinds, viewFramings }
+//                           bodyRebinds, viewFramings, backgroundR, backgroundG, backgroundB }
 //     the answer to runtimeState: what the player holds right now -- the runtimes alive, the
 //     fileDataID of the model and of the world model on screen (0 for none), whether a load of
 //     either kind is in flight, and the mount the model on screen rides (0 for none) with its key,
 //     the mount runtimes alive and built so far, how the model hangs from it (RuntimeReport), what
 //     each animator plays, the mount's emitters and live particles, how often the character's
-//     body textures were bound again, and how often the view was fitted to what is on screen.
-//     A test's question, answered from the main thread in message order
+//     body textures were bound again, how often the view was fitted to what is on screen, and the
+//     viewport background as displayed (protocol 7). A test's question, answered from the main thread in
+//     message order
 //   screenshotSaved       { request, ok, error, path, width, height, bytes, renderMs, encodeMs, writeMs, totalMs }
 //     the answer to captureScreenshot (protocol 6): the PNG was written to path (ok, with its size in bytes and
 //     how long the off-screen render and readback, the PNG encode, the file write and the whole capture took,
@@ -77,6 +79,11 @@
 //     render what the viewport shows once more, off screen, at width x height with a transparent
 //     background, and write it as a PNG to path (absolute, chosen and confirmed by the host's Save As);
 //     answered by screenshotSaved with the same request number (see WmvScreenshot.cs)
+//   viewportBackground { r, g, b }                                                 (protocol 7)
+//     the Models viewport's background, opaque, as the sRGB bytes it is to display as (0..255 each; a
+//     line with a channel outside that is refused). The player keeps it until the next one, a model load
+//     does not reset it; the host sends it at every unityReady, and also passes it on the command line
+//     ("-wmvBackground RRGGBB") so the first frame already shows it (WmvMain.ApplyViewportBackground)
 //   assetResponse { requestId, ok, path, fileDataID, byteLength, sha1, encoding:"base64", data }
 //   assetResponse { requestId, ok:false, error }
 //   modelTextures { requestId, ok, fileDataID, textures:[{ index, type, fileDataID, source }] }
@@ -134,7 +141,7 @@ using UnityEngine;
 
 public class WmvIpcClient : MonoBehaviour
 {
-    public const int ProtocolVersion = 6;
+    public const int ProtocolVersion = 7;
 
     /// <summary>The loadWoWModel kind of a world model; anything else is an M2.</summary>
     public const string KindMapObject = "wmo";
@@ -151,6 +158,7 @@ public class WmvIpcClient : MonoBehaviour
     public Action<CharacterScene> OnCharacterScene;            // the character's resolved state
     public Action<int> OnRuntimeState;                         // the host asks what is held (query number)
     public Action<ScreenshotRequest> OnCaptureScreenshot;      // the host asks for a transparent PNG (protocol 6)
+    public Action<Color32> OnViewportBackground;               // the Models viewport's background, as displayed (protocol 7)
     public Action<string> OnStatus;                            // human-readable connection/state text
 
     public bool Connected { get { return connected; } }
@@ -502,6 +510,7 @@ public class WmvIpcClient : MonoBehaviour
         public int load;              // also a ridden mount's animation pushes (protocol 5)
         public int query;             // runtimeState
         public int request;           // captureScreenshot (protocol 6); its path, width and height are the fields above and below
+        public int r, g, b;           // viewportBackground (protocol 7): the sRGB bytes the background displays as
         // a ridden mount's animation pushes (protocol 5)
         public string role;
         public bool hasRider;
@@ -806,6 +815,33 @@ public class WmvIpcClient : MonoBehaviour
         return s;
     }
 
+    /// <summary>One viewportBackground line, checked as Dispatch checks it; false for any other line and for a channel
+    /// outside 0..255. For the lifecycle self-test.</summary>
+    public static bool ParseViewportBackground(string line, out Color32 colour)
+    {
+        Msg msg = JsonUtility.FromJson<Msg>(line);
+        bool ok = msg != null && msg.type == "viewportBackground" && IsByte(msg.r) && IsByte(msg.g) && IsByte(msg.b);
+        colour = ok ? new Color32((byte)msg.r, (byte)msg.g, (byte)msg.b, 255) : new Color32(0, 0, 0, 0);
+        return ok;
+    }
+
+    static bool IsByte(int v) { return v >= 0 && v <= 255; }
+
+    /// <summary>The colour of the "-wmvBackground RRGGBB" launch argument: exactly six hex digits, either case, an
+    /// optional leading '#'. False (and opaque black) for anything else.</summary>
+    public static bool ParseBackgroundArgument(string text, out Color32 colour)
+    {
+        colour = new Color32(0, 0, 0, 255);
+        if (text == null) return false;
+        if (text.StartsWith("#")) text = text.Substring(1);
+        if (text.Length != 6) return false;
+        foreach (char c in text)
+            if (!Uri.IsHexDigit(c)) return false;
+        int v = Convert.ToInt32(text, 16);
+        colour = new Color32((byte)(v >> 16), (byte)(v >> 8), (byte)v, 255);
+        return true;
+    }
+
     /// <summary>One modelAnimation line, parsed as Dispatch parses it; false for any other line. For the lifecycle
     /// self-test.</summary>
     public static bool ParseAnimationSelection(string line, out AnimationSelection selection)
@@ -867,6 +903,16 @@ public class WmvIpcClient : MonoBehaviour
                 {
                     request = msg.request, path = msg.path ?? "", width = msg.width, height = msg.height,
                 });
+                break;
+
+            // The Models viewport's background (protocol 7). A channel outside 0..255 is refused rather than clamped:
+            // only the host sends this, so a bad value is a fault to see in the log, not a colour to guess at.
+            case "viewportBackground":
+                if (IsByte(msg.r) && IsByte(msg.g) && IsByte(msg.b))
+                    OnViewportBackground?.Invoke(new Color32((byte)msg.r, (byte)msg.g, (byte)msg.b, 255));
+                else
+                    Debug.LogWarning("WMV IPC: viewportBackground refused, a channel is outside 0..255: " + msg.r + "," +
+                                     msg.g + "," + msg.b);
                 break;
 
             // Unsolicited: the skin on display in WMV changed. Same payload as a modelTextures
@@ -1100,6 +1146,7 @@ public class WmvIpcClient : MonoBehaviour
         public int MountEmitters, MountRibbons, MountParticles;   // the mount's emitters as drawn, its live particles
         public int BodyRebinds;                  // WmvCharacterDresser.BodyRebinds of the character on screen, 0 for none
         public int ViewFramings;                 // WmvMain.ViewFramings: times the view was fitted to what is on screen
+        public Color32 Background;               // the viewport background the player holds, as displayed (protocol 7)
     }
 
     /// <summary>
@@ -1126,7 +1173,10 @@ public class WmvIpcClient : MonoBehaviour
              ",\"mountRibbons\":" + r.MountRibbons +
              ",\"mountParticles\":" + r.MountParticles +
              ",\"bodyRebinds\":" + r.BodyRebinds +
-             ",\"viewFramings\":" + r.ViewFramings + "}");
+             ",\"viewFramings\":" + r.ViewFramings +
+             ",\"backgroundR\":" + r.Background.r +
+             ",\"backgroundG\":" + r.Background.g +
+             ",\"backgroundB\":" + r.Background.b + "}");
     }
 
     /// <summary>What a screenshotSaved answer carries (ReportScreenshotSaved). Times in milliseconds.</summary>

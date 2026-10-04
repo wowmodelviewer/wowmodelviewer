@@ -64,6 +64,8 @@ set(src  AnimationExportChoiceDialog.cpp
          UnityRendererHost.cpp
          UserSkins.cpp
          util.cpp
+         BackgroundColorDialog.cpp
+         ViewportBackground.cpp
          WinTheme.cpp)
 
 set(headers AnimationExportChoiceDialog.h
@@ -124,6 +126,8 @@ set(headers AnimationExportChoiceDialog.h
             UnityRendererHost.h
             UserSkins.h
             util.h
+            BackgroundColorDialog.h
+            ViewportBackground.h
             WinTheme.h)
 
 source_group("Header Files" FILES ${headers})

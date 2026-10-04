@@ -74,7 +74,7 @@ namespace UiStyle
       p.accentPressed = sys(wxSYS_COLOUR_HIGHLIGHT);
       p.textOnAccent = sys(wxSYS_COLOUR_HIGHLIGHTTEXT);
       p.warning = sys(wxSYS_COLOUR_WINDOWTEXT);
-      // The viewport keeps the Unity player's own dark, whatever the theme.
+      // The viewport's own dark (behind its notices) is the same whatever the theme.
       p.viewport = wxColour(35, 31, 32);
       p.viewportText = wxColour(226, 222, 218);
       p.viewportTextSecondary = wxColour(160, 154, 150);
@@ -101,8 +101,8 @@ namespace UiStyle
       p.accentPressed = wxColour(15, 84, 140);
       p.textOnAccent = wxColour(255, 255, 255);
       p.warning = wxColour(170, 90, 0);
-      // The viewport's own dark: the Unity player's background, so the handover to its picture is not
-      // a flash.
+      // The viewport's own dark, behind its notices. Under the player the host panel paints the Models
+      // viewport's background instead (UnityRendererHost::setBackdrop), so the handover is not a flash.
       p.viewport = wxColour(35, 31, 32);
       p.viewportText = wxColour(226, 222, 218);
       p.viewportTextSecondary = wxColour(160, 154, 150);
@@ -131,7 +131,7 @@ namespace UiStyle
       p.accentPressed = wxColour(30, 96, 166);
       p.textOnAccent = wxColour(255, 255, 255);
       p.warning = wxColour(232, 166, 80);
-      // The viewport is the Unity player's, the same in every theme.
+      // The viewport's own dark, the same in every theme.
       p.viewport = wxColour(35, 31, 32);
       p.viewportText = wxColour(226, 222, 218);
       p.viewportTextSecondary = wxColour(160, 154, 150);

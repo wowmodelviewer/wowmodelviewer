@@ -564,7 +564,8 @@ QString UnityIpcServer::RuntimeState::describe() const
          QString(" liveMounts=%1 mountsBuilt=%2 mountSeat=%3 mountSeatBone=%4 modelSequence=%5 mountSequence=%6")
            .arg(liveMounts).arg(mountsBuilt).arg(mountSeat).arg(mountSeatBone).arg(modelSequence).arg(mountSequence) +
          QString(" mountEmitters=%1 mountRibbons=%2 mountParticles=%3 bodyRebinds=%4 viewFramings=%5")
-           .arg(mountEmitters).arg(mountRibbons).arg(mountParticles).arg(bodyRebinds).arg(viewFramings);
+           .arg(mountEmitters).arg(mountRibbons).arg(mountParticles).arg(bodyRebinds).arg(viewFramings) +
+         QString(" background=%1,%2,%3").arg(backgroundR).arg(backgroundG).arg(backgroundB);
 }
 
 int UnityIpcServer::requestRuntimeState()
@@ -605,6 +606,9 @@ void UnityIpcServer::handleRuntimeState(const QJsonObject & msg)
   s.mountParticles = count("mountParticles");
   s.bodyRebinds = count("bodyRebinds");
   s.viewFramings = count("viewFramings");
+  s.backgroundR = count("backgroundR");
+  s.backgroundG = count("backgroundG");
+  s.backgroundB = count("backgroundB");
   LOG_INFO << "[unityipc] <- runtimeState" << s.describe();
   if (onRuntimeState)
     onRuntimeState(s);
@@ -632,6 +636,27 @@ int UnityIpcServer::requestScreenshot(const QString & path, int width, int heigh
   LOG_INFO << "[unityipc] -> captureScreenshot request=" << m_screenshotRequest << width << "x" << height << "path" << path;
   queueJson(msg);
   return m_screenshotRequest;
+}
+
+bool UnityIpcServer::sendViewportBackground(int r, int g, int b)
+{
+  if (!playerPaintsBackground())
+    return false;
+  if (r < 0 || r > 255 || g < 0 || g > 255 || b < 0 || b > 255)
+  {
+    LOG_ERROR << "[unityipc] viewportBackground not sent, a channel is outside 0..255:" << r << g << b;
+    return false;
+  }
+  QJsonObject msg;
+  msg["type"] = "viewportBackground";
+  msg["r"] = r;
+  msg["g"] = g;
+  msg["b"] = b;
+  m_stats.backgroundPushes++;
+  m_stats.lastBackground = QString::asprintf("#%02X%02X%02X", r, g, b);
+  LOG_INFO << "[unityipc] -> viewportBackground" << m_stats.lastBackground;
+  queueJson(msg);
+  return true;
 }
 
 void UnityIpcServer::handleScreenshotSaved(const QJsonObject & msg)
@@ -971,7 +996,8 @@ void UnityIpcServer::handleLine(const std::string & line)
     if (version > 0 && version < PROTOCOL_VERSION)
       LOG_WARNING << "[unityipc] player speaks protocol v" << version << ", older than WMV's v" << PROTOCOL_VERSION
                   << "-- what it cannot do (mounted characters below v5, world models below v4, characters below v3)"
-                     " gets a notice, and a screenshot (below v6) a status message";
+                     " gets a notice, a screenshot (below v6) a status message, and the viewport background (below v7)"
+                     " stays the player's own default";
     else if (version != PROTOCOL_VERSION)
       LOG_ERROR << "[unityipc] player speaks protocol v" << version << "but WMV expects v" << PROTOCOL_VERSION;
     if (onUnityReady)

@@ -258,6 +258,9 @@ enum ObjectID {
   ID_VIEW_APPEARANCE_DARK,
   ID_THEME_RECHECK_TIMER,
 
+  // View > Swap Background Color (the Models viewport's background)
+  ID_VIEW_BACKGROUND_COLOR,
+
   ID_EQUIPMENT = 5000
 };
 

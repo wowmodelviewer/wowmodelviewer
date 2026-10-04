@@ -868,6 +868,71 @@ What the PNG cannot hold yet:
   transparent background gets alpha a² rather than a. Opaque surfaces are exact (alpha 255) and the empty
   background is exact (alpha 0, colour 0).
 
+### Background (protocol 7)
+
+**View > Swap Background Color...** sets the colour behind the model in the Models viewer, in a small window of its
+own that can stay open while the model is turned. It first opens at the viewport's top right with its left edge right
+of the viewport's centre (centred over the frame when the viewport is less than twice its width), and stays where it
+is moved; Close, Escape or the title bar hide it, and the menu shows it again as it was, with the keyboard in the
+`#RRGGBB` field. Hidden during a drag or a held key, the colour reached is kept. It is a Models
+command: greyed in the Textures viewer, which puts the window away like the model panels, and Models gives it back if
+it was open. The Texture Viewer keeps its own Checkerboard / Dark / Light backgrounds (`TextureViewer/*`), and the
+screenshot stays transparent: neither reads it.
+
+- **The picker** is in the window itself (`UiColourPicker`): a square of saturation (across) by brightness (up)
+  for one hue, and a hue strip beside it -- HSV over sRGB bytes. Click or drag in either; the viewport follows a
+  drag (sent the newest colour at most every 33 ms) and the colour is kept when the mouse is let go. With the
+  keyboard each part takes focus (a focus ring shows which): the arrows move it a step (ten with Shift), Home / End
+  go to the strip's ends, and the colour is kept when the key is let go. A grey keeps the hue the strip had. The
+  system's colour dialog is no longer used.
+- **The colour as `#RRGGBB`**, beside a chip of the colour on show. The field takes six hex digits in either case, with
+  or without `#`; Enter or leaving the field applies it, written back as `#RRGGBB` in upper case. While it is typed
+  the line under it says what is missing, and a character that cannot be hex is shown as a warning; Enter on
+  something that is not a colour says so and changes nothing, leaving the field puts the colour on show back, and
+  Escape does the same. Switching to another program is not leaving the field, and a click on the picker, a preset
+  or Reset decides the colour itself (what was typed is put back, not applied first). Nothing that is not a colour
+  reaches the player.
+- **Built-in presets**, which cannot be removed: Default `#19191E` (the colour the viewport has always had:
+  `WmvMain.ViewportClear` (0.10, 0.10, 0.12) as it displays), Dark `#000000`, Slate `#202428`, Neutral Grey
+  `#808080` and Light `#BBBBBB`.
+- **The user's own presets**: Save as preset keeps the colour on show (up to 18); saving a colour that already is a
+  preset selects that preset instead. Right-click one, or select it and press Remove, to remove it. The preset with
+  the colour on show is marked with a ring and a check.
+- **Undo** goes back to the colour the window was opened with (from the menu), however it moved since -- the
+  system dialog's Cancel, for the picker, the field and the presets alike. **Reset** goes back to `#19191E`; both
+  keep the user's presets.
+- Every change shows at once; there is no Apply. A change is sent only when the colour differs from the one on
+  show, and a player that announces itself is sent the colour once (below). While the viewport shows a notice
+  instead of a model (nothing loaded, a model it cannot draw, a player problem) the notice keeps its own dark: the
+  colour shows behind a model.
+- Kept in `Config.ini` when it is chosen (not at exit, so a headless run that only shows a colour leaves the file
+  alone): `ModelViewport/BackgroundColor` (`#RRGGBB`) and `ModelViewport/BackgroundPresets` (a list of `#RRGGBB`).
+  The archived OpenGL viewport's `Session/bgCol` is not read.
+
+**How it gets there.** The host panel paints the colour wherever the player's window does not cover it and no
+notice is up (a notice keeps its own dark), so a player started under a model is not a change of colour; the player is
+launched with `-wmvBackground RRGGBB`, so its first frame already shows it; and `viewportBackground { r, g, b }` is
+sent at every `unityReady` and whenever the colour changes. A player older than protocol 7 is sent nothing and
+keeps its own default.
+
+**What it displays as.** A colour is the sRGB bytes it is to show: `#808080` is 128 on screen. The camera clear
+goes through the frame's whole colour path -- linearised by URP, the frame decode, URP's internal LDR grading LUT
+(32 nodes of 8-bit values, applied by uber post to every frame even with no grading) and the swapchain's sRGB
+encode -- and the LUT alone puts a flat colour up to one step low between its nodes (modelled: 49 of the 256
+greys, #404040 among them as 63).
+`WmvMain.ViewportBackgroundClear` inverts it: per channel, the linear value the swapchain must receive, back
+through the LUT's straight line between its two nodes, to sRGB, then into the frame's domain (`ClearColour`). It
+holds while that LUT is what the clear reaches unchanged: LDR grading, post-processing on, and not `legacy` (its tone
+curve and vignette come before the LUT). It is exact in the default `full` mode; the A/B modes `fragment` and
+`notonemap` keep a 32-bit colour buffer that can still put a colour a step off. The default keeps the exact
+float the viewport always cleared to, so its frames are byte-identical to before. Measured on the swapchain capture
+(`WMV_VIEWPORT_SHOT`), on an RTX 4090: every grey from `#000000` to `#D8D8D8` and every point of an R, G and B ramp
+up to `#D2` shows exactly as asked, as do `#19191E`, `#202428`, `#4A6FA5` and `#BBBBBB`. Above `#D8` the
+background is bright enough to feed URP's bloom, which is left as it is: it shows one to three steps lighter, and
+the frame's own ceiling is 254 (`#FFFFFF` shows as 254). Every built-in is below that. Only the clear changes:
+nothing that lights, fogs or reflects in the scene reads it, and the light check keeps measuring against the fixed
+default. Blended effects composite over it as they would over any background.
+
 ## Responsibility split
 
 | WMV (wxWidgets application) | Unity (embedded player) |
@@ -1007,7 +1072,7 @@ to WMV's own log). The player is built locally from `Tools/UnityRendererProject/
 repository contains **no** Unity build output, and nothing in the installer or the CMake
 install rules ships one yet.
 
-## IPC (implemented; protocol 6)
+## IPC (implemented; protocol 7)
 
 **WMV is the server.** `UnityRendererHost` starts a TCP listener bound to `127.0.0.1` on an
 ephemeral port *before* launching the player and passes the port on the player's command
@@ -1022,7 +1087,7 @@ application uses). Player side: `Tools/UnityRendererProject/Assets/Scripts/WmvIp
 **Player -> WMV**
 
 ```json
-{ "type": "unityReady", "protocolVersion": 6 }
+{ "type": "unityReady", "protocolVersion": 7 }
 { "type": "getAsset", "requestId": "abc123", "path": "creature/chicken/chicken.m2" }
 { "type": "getAssetByFileDataID", "requestId": "abc124", "fileDataID": 123456 }
 { "type": "getModelTextures", "requestId": "abc125", "fileDataID": 123200 }
@@ -1036,7 +1101,8 @@ application uses). Player side: `Tools/UnityRendererProject/Assets/Scripts/WmvIp
 { "type": "runtimeState", "query": 3, "liveMapObjects": 1, "liveModels": 0, "modelFileDataID": 0,
   "mapObjectFileDataID": 115058, "loading": false, "mountFileDataID": 0, "mountKey": "", "liveMounts": 0,
   "mountsBuilt": 0, "mountSeat": -1, "mountSeatBone": -1, "modelSequence": -1, "mountSequence": -1,
-  "mountEmitters": 0, "mountRibbons": 0, "mountParticles": 0, "bodyRebinds": 0, "viewFramings": 1 }
+  "mountEmitters": 0, "mountRibbons": 0, "mountParticles": 0, "bodyRebinds": 0, "viewFramings": 1,
+  "backgroundR": 25, "backgroundG": 25, "backgroundB": 30 }
 { "type": "characterSceneApplied", "fileDataID": 1011653, "revision": 4, "load": 12, "status": "applied",
   "reason": "", "merged": 3, "attachments": 4, "missing": [], "ms": 212,
   "mountKey": "M3", "mountStatus": "applied", "mountReason": "" }
@@ -1085,6 +1151,11 @@ message order on its main thread, so a question sent after an answer about a bui
 adopted. Only the headless self-test asks it (see the lifecycle sequence below), and only a player that
 announced protocol 4.
 
+`viewportBackground` (protocol 7) sets the Models viewport's background, opaque, as the sRGB bytes it is to display
+as (0..255 each; a line with a channel outside that is refused and logged). The player keeps it until the next one; a
+model load does not reset it. `runtimeState` carries it back as `backgroundR`, `backgroundG` and `backgroundB`. See
+"Background" under "What the viewport shows".
+
 `screenshotSaved` (protocol 6) answers the host's `captureScreenshot { request, path, width, height }`: the
 player rendered what the viewport shows off screen at that size with a transparent background and wrote the PNG
 to `path` itself -- no pixels travel over this channel -- or says why not (`ok` false, `error`). `request` echoes
@@ -1131,6 +1202,7 @@ The response carries metadata only; bytes are still fetched with `getAssetByFile
   "fileDataID": 115058, "client": "active", "character": false, "load": 13, "kind": "wmo" }
 { "type": "runtimeState", "query": 3 }
 { "type": "captureScreenshot", "request": 1, "path": "C:\\Shots\\humanmale_hd.png", "width": 3840, "height": 2160 }
+{ "type": "viewportBackground", "r": 74, "g": 111, "b": 165 }
 { "type": "assetResponse", "requestId": "abc123", "ok": true, "path": "creature/chicken/chicken.m2",
   "fileDataID": 123200, "byteLength": 101840, "sha1": "1dc88a19...", "encoding": "base64", "data": "TUQyMb..." }
 { "type": "assetResponse", "requestId": "abc123", "ok": false, "error": "not found" }
@@ -1387,7 +1459,11 @@ second channel for the same state fails the step that opened it.
   `screenshotSaved`, and passes when it is `ok`, the file has the size it reports and its header is a
   3840 x 2160, 8-bit RGBA, non-interlaced PNG. With `WMV_VIEWPORT_SHOT` set the player also captures the viewport
   just before the off-screen render and a frame after it (`<name>-before-screenshot-<n>.png`,
-  `<name>-after-screenshot-<n>.png`), and with `WMV_VIEWPORT_SIZE` set it first asks for that screen size again.
+  `<name>-after-screenshot-<n>.png`), and with `WMV_VIEWPORT_SIZE` set it first asks for that screen size again;
+- `background:<#RRGGBB|default>` (protocol 7) sets the Models viewport's background as View > Swap Background
+  Color does, without keeping it, and passes when the player's `runtimeState` holds exactly that colour and one
+  `viewportBackground` was sent (none for the colour already on show). With `screenshot:` after it, the
+  `-before-screenshot-` capture shows the colour as displayed.
 
 For example, on `-mo character/human/male/humanmale_hd.m2`:
 `WMV_IPCTEST_SEQUENCE="mount:8469;dismount;mount:8469;mount:17697;mount:83632;mount:8469;dismount"`.

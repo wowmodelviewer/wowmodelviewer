@@ -193,7 +193,7 @@ public partial class WmvMain : MonoBehaviour
             camGo.tag = "MainCamera";
         }
         cam.clearFlags = CameraClearFlags.SolidColor;
-        cam.backgroundColor = ViewportClear;    // re-set in the composited domain by ConfigureDisplayTransform
+        cam.backgroundColor = ViewportClear;    // re-set for the frame's colour path by ConfigureDisplayTransform
         cam.nearClipPlane = 0.01f;
         orbit = cam.gameObject.GetComponent<WmvOrbitCamera>() ?? cam.gameObject.AddComponent<WmvOrbitCamera>();
 
@@ -210,6 +210,20 @@ public partial class WmvMain : MonoBehaviour
         Shader.SetGlobalFloat("_WmvRig", WmvModelBuilder.Debug_.Rig);
 
         ConfigureDisplayTransform();
+
+        // The background the host chose, from the command line, so the first frame already shows it; the host sends it
+        // again once connected (viewportBackground). Without the argument the default stays.
+        string[] launchArgs = System.Environment.GetCommandLineArgs();
+        for (int i = 0; i + 1 < launchArgs.Length; i++)
+        {
+            if (launchArgs[i] != "-wmvBackground") continue;
+            Color32 launchBackground;
+            if (WmvIpcClient.ParseBackgroundArgument(launchArgs[i + 1], out launchBackground))
+                ApplyViewportBackground(launchBackground, "command line");
+            else
+                Debug.LogWarning("WMV: -wmvBackground '" + launchArgs[i + 1] + "' is not RRGGBB -- the default stays");
+            break;
+        }
 
         // Cast shadows: the model occluding its own key light (a rein across the mount's body).
         // The rig renders a depth map from the key's viewpoint each frame; the shader attenuates
@@ -263,6 +277,7 @@ public partial class WmvMain : MonoBehaviour
         ipc.OnCharacterScene = HandleCharacterScene;
         ipc.OnRuntimeState = HandleRuntimeState;
         ipc.OnCaptureScreenshot = HandleCaptureScreenshot;
+        ipc.OnViewportBackground = c => ApplyViewportBackground(c, "host");
     }
 
     // ---------------------------------------------------------------- load pipeline
@@ -2299,8 +2314,32 @@ public partial class WmvMain : MonoBehaviour
         }
 
         var mainCam = Camera.main;
+
+        // THE BACKGROUND HAS TO SURVIVE URP'S GRADING LUT. Uber post applies the internal colour-grading LUT to every
+        // frame, even with no grading: with LDR grading that is a 32-node table of 8-bit values, so a flat colour
+        // between two nodes comes out up to one step dark (modelled: #404040 would show as 63).
+        // ViewportBackgroundClear inverts the table for any colour but the default. That needs the table to be what the
+        // clear reaches unchanged: LDR grading (URP grades LDR whenever the asset has no HDR, whatever its mode), on a
+        // camera that runs post-processing, and not 'legacy', whose Neutral tone curve and vignette come before the
+        // table. Exact in 'full'; the A/B modes 'fragment' and 'notonemap' keep the 32-bit buffer (above), whose
+        // 5- and 6-bit mantissas can still put a colour a step off.
+        ClearLutNodes = 0;
+        if (!legacy && mainCam != null)
+        {
+            var rpAsset = UnityEngine.Rendering.GraphicsSettings.currentRenderPipeline
+                          as UnityEngine.Rendering.Universal.UniversalRenderPipelineAsset;
+            UnityEngine.Rendering.Universal.UniversalAdditionalCameraData camData;
+            if (rpAsset != null
+                && (rpAsset.colorGradingMode == UnityEngine.Rendering.Universal.ColorGradingMode.LowDynamicRange
+                    || !rpAsset.supportsHDR)
+                && mainCam.TryGetComponent(out camData) && camData.renderPostProcessing)
+                ClearLutNodes = rpAsset.colorGradingLutSize;
+        }
+        Debug.Log(ClearLutNodes > 1
+                  ? string.Format("WMV: viewport background compensated for the {0}-node LDR grading LUT", ClearLutNodes)
+                  : "WMV: viewport background not compensated (no neutral LDR grading LUT on the main camera)");
         if (mainCam != null)
-            mainCam.backgroundColor = ClearColour(ViewportClear);
+            mainCam.backgroundColor = ViewportBackgroundClear(viewportBackground);
 
         int touched = 0;
         var vols = UnityEngine.Object.FindObjectsByType<UnityEngine.Rendering.Volume>(
@@ -2337,8 +2376,80 @@ public partial class WmvMain : MonoBehaviour
             touched, vols != null ? vols.Length : 0));
     }
 
-    /// <summary>The viewport's background, as displayed: (25,25,30).</summary>
+    /// <summary>The viewport's default background, as displayed: (25,25,30), #19191E. Also the fixed reference the
+    /// light check measures against, whatever background the user chose.</summary>
     static readonly Color ViewportClear = new Color(0.10f, 0.10f, 0.12f);
+
+    /// <summary>ViewportClear as the sRGB bytes it displays as: the host's Default preset, #19191E.</summary>
+    public static readonly Color32 DefaultViewportBackground = new Color32(25, 25, 30, 255);
+
+    /// <summary>The Models viewport's background as the host chose it (viewportBackground, -wmvBackground): the
+    /// opaque sRGB bytes it is to display as. A model load does not reset it.</summary>
+    static Color32 viewportBackground = DefaultViewportBackground;
+
+    /// <summary>The background the player holds now, as displayed (runtimeState).</summary>
+    public static Color32 ViewportBackground { get { return viewportBackground; } }
+
+    /// <summary>Nodes of the neutral LDR grading LUT the main camera's frame goes through, 0 when it does not go
+    /// through one (ConfigureDisplayTransform).</summary>
+    static int ClearLutNodes;
+
+    /// <summary>
+    /// Show the Models viewport's background as the sRGB bytes srgb, opaque. Only the main camera's clear colour
+    /// changes: nothing that lights, fogs or reflects in the scene reads it, the light check keeps measuring against
+    /// the fixed ViewportClear, and the transparent screenshot clears to its own colours. Blended effects (additive
+    /// glows, alpha-blended particles and ribbons) do composite over it, as they would over any background.
+    /// A channel above #BB (sRGB 187, 0.5 linear) feeds bloom's soft knee; bloom is left as it is. Measured on the
+    /// swapchain, the lift reaches a whole step from #D9 (217) and three steps near white, and dark edges of the model
+    /// are veiled a little; up to #D8 every grey shows exactly.
+    /// </summary>
+    void ApplyViewportBackground(Color32 srgb, string source)
+    {
+        srgb.a = 255;
+        viewportBackground = srgb;
+        Color clear = ViewportBackgroundClear(srgb);
+        var cam = Camera.main;
+        if (cam != null) cam.backgroundColor = clear;
+        Debug.Log(string.Format("WMV: viewport background #{0:X2}{1:X2}{2:X2} from the {3}{4} -- camera clear "
+                                + "({5:F5}, {6:F5}, {7:F5})", srgb.r, srgb.g, srgb.b, source,
+                                cam != null ? "" : " (no main camera yet)", clear.r, clear.g, clear.b));
+    }
+
+    /// <summary>
+    /// The camera clear colour that displays as the sRGB bytes srgb. The default keeps the exact float the viewport
+    /// has always cleared to, so its frames stay byte-identical (the formula lands it on the same bytes too). Any
+    /// other colour, per channel: the linear value the swapchain must receive, through the inverse of the grading LUT
+    /// when the frame goes through one (ClearLutNodes), back to sRGB, then into the frame's domain (ClearColour).
+    /// </summary>
+    static Color ViewportBackgroundClear(Color32 srgb)
+    {
+        if (srgb.r == DefaultViewportBackground.r && srgb.g == DefaultViewportBackground.g
+            && srgb.b == DefaultViewportBackground.b)
+            return ClearColour(ViewportClear);
+        return ClearColour(new Color(ClearChannel(srgb.r), ClearChannel(srgb.g), ClearChannel(srgb.b), 1f));
+    }
+
+    /// <summary>One channel of ViewportBackgroundClear, as displayed (sRGB, before ClearColour).</summary>
+    static float ClearChannel(byte value)
+    {
+        float linear = Mathf.GammaToLinearSpace(value / 255f);
+        int n = ClearLutNodes;
+        if (n > 1)
+        {
+            // The LUT stores node k's linear coordinate k/(n-1) in an 8-bit UNORM texel and is sampled bilinearly
+            // between nodes, so what comes out is a straight line between round(255*k/(n-1))/255 and its neighbour.
+            // Find the stretch the wanted value lies on and walk it back to the coordinate that produces it.
+            for (int k = 0; k < n - 1; k++)
+            {
+                float lo = Mathf.Round(255f * k / (n - 1)) / 255f;
+                float hi = Mathf.Round(255f * (k + 1) / (n - 1)) / 255f;
+                if (linear > hi && k < n - 2) continue;
+                linear = (k + (hi > lo ? Mathf.Clamp01((linear - lo) / (hi - lo)) : 0f)) / (n - 1);
+                break;
+            }
+        }
+        return Mathf.LinearToGammaSpace(linear);
+    }
 
     /// <summary>True while WmvFrameDecodePass is decoding the frame, so a clear colour has to be
     /// left in the buffer in the authored domain. See ConfigureDisplayTransform.</summary>

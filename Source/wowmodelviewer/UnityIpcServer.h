@@ -186,6 +186,14 @@
  * and why ("error"), with how long the render and readback, the PNG encode, the write and the whole capture took (ms).
  * The player's side is Tools/UnityRendererProject/Assets/Scripts/WmvScreenshot.cs. Nothing is sent to an older player.
  *
+ * VIEWPORT BACKGROUND (protocol 7). viewportBackground { r, g, b } sets the Models viewport's background: opaque, as
+ * the sRGB bytes it is to display as (0..255 each; the player refuses a line with a channel outside that). The player
+ * keeps it until the next one -- a model load does not reset it -- and works out the camera clear that shows exactly
+ * those bytes (WmvMain.ApplyViewportBackground). The host sends it whenever the user's choice changes and again at every
+ * unityReady, and passes it on the player's command line too ("-wmvBackground RRGGBB"), so a started or restarted
+ * player shows it from its first frame. runtimeState adds "backgroundR", "backgroundG" and "backgroundB", the colour
+ * the player holds. Nothing is sent to an older player, which keeps its own default.
+ *
  * modelAnimation is pushed the same way whenever the animation on display changes, and once after
  * loadWoWModel so the player starts on the animation the app is showing rather than on its own
  * idle. "sequenceIndex" is what the player must act on: it indexes the model's animation table,
@@ -237,7 +245,7 @@
 class UnityIpcServer : public wxEvtHandler
 {
 public:
-  static const int PROTOCOL_VERSION = 6;
+  static const int PROTOCOL_VERSION = 7;
 
   UnityIpcServer();
   ~UnityIpcServer();
@@ -264,6 +272,8 @@ public:
   bool playerRidesMounts() const { return m_client && m_unityReady && m_playerProtocol >= 5; }
   // The player writes viewport screenshots: it takes captureScreenshot and answers screenshotSaved (protocol 6).
   bool playerTakesScreenshots() const { return m_client && m_unityReady && m_playerProtocol >= 6; }
+  // The player clears the Models viewport to the colour the host sends: it takes viewportBackground (protocol 7).
+  bool playerPaintsBackground() const { return m_client && m_unityReady && m_playerProtocol >= 7; }
 
   // Runtime command: tell the player which model is active. Either path or fileDataID may be
   // empty/0. Queued if the player is connected; dropped (logged) otherwise.
@@ -426,6 +436,9 @@ public:
     int bodyRebinds = -1;          // times the character on screen's body textures were bound again by its scenes
     int viewFramings = -1;         // times the player fitted the view to what is on screen (a model, a world model or
                                    // a mount change); an appearance change on a riding character must not raise it
+    int backgroundR = -1;          // the viewport background the player holds, as displayed (protocol 7)
+    int backgroundG = -1;
+    int backgroundB = -1;
     QString describe() const;
   };
   // Ask the player what it holds (runtimeState). Returns the question's number, which the answer echoes,
@@ -438,6 +451,10 @@ public:
   // see SCREENSHOTS above). Returns the request's number, which the answer echoes, or 0 when nothing was sent (no
   // player, or one older than protocol 6).
   int requestScreenshot(const QString & path, int width, int height);
+
+  // Runtime command: the Models viewport's background, as the sRGB bytes it is to display as (VIEWPORT BACKGROUND
+  // above). False (nothing sent) when the player is not connected and ready, or speaks a protocol older than 7.
+  bool sendViewportBackground(int r, int g, int b);
   // The player's answer to captureScreenshot. A number the player did not send reads -1.
   struct ScreenshotResult
   {
@@ -502,6 +519,8 @@ public:
     int mapObjectFailed = 0;      // ... of which "failed"
     int mapObjectSuperseded = 0;  // ... of which "superseded"
     QString lastMapObject;        // "<fileDataID> load <n> <status> <groups> groups <reason>" of the last report
+    int backgroundPushes = 0;     // viewportBackground messages sent
+    QString lastBackground;       // "#RRGGBB" of the last viewportBackground sent
     QString lastRequest;    // "path" or "fileDataID n"
     QString lastProvider;   // "CASC" / "MPQ" / ""
     QString lastError;
