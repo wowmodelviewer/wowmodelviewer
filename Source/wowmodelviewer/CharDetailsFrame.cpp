@@ -6,6 +6,7 @@
 */
 
 #include "CharDetailsFrame.h"
+#include "UiControls.h"
 #include "UiStyle.h"
 
 #include <wx/sizer.h>
@@ -31,6 +32,7 @@ CharDetailsFrame::CharDetailsFrame(wxWindow* parent)
 : wxWindow(parent, wxID_ANY), model_(nullptr)
 {
   LOG_INFO << "Creating CharDetailsFrame...";
+  UiStyle::applyPanel(this);
 
   auto top = new wxFlexGridSizer(1);
   top->AddGrowableCol(0);
@@ -41,7 +43,7 @@ CharDetailsFrame::CharDetailsFrame(wxWindow* parent)
 
   top->Add(charCustomizationGS_, wxSizerFlags().Border(wxBOTTOM, 5).Expand());
   auto * row = new wxBoxSizer(wxHORIZONTAL);
-  row->Add(new wxButton(this, wxID_ANY, wxT("Randomise"), wxDefaultPosition, wxDefaultSize), wxSizerFlags().Align(wxALIGN_CENTER_VERTICAL));
+  row->Add(new UiButton(this, wxID_ANY, _("Randomise"), UiButton::Kind::Secondary), wxSizerFlags().Align(wxALIGN_CENTER_VERTICAL));
   dhMode_ = new wxCheckBox(this, wxID_ANY, wxT("Demon Hunter"), wxDefaultPosition, wxDefaultSize);
   row->Add(dhMode_, wxSizerFlags().Align(wxALIGN_CENTER_VERTICAL).Border(wxLEFT, FromDIP(UiStyle::M)));
   top->Add(row, wxSizerFlags().Border(wxTOP, FromDIP(UiStyle::XS)));
@@ -82,7 +84,15 @@ void CharDetailsFrame::buildRows()
     // filtered by ChrCustomizationID either -- that dropped real options on models mixing tagged and
     // untagged ones (the Dracthyr visage female lost Face, Hair, Horns, Eye Color...).
     for (const uint option : model_->cd.getCustomizationOptions())
-      charCustomizationGS_->Add(new CharDetailsCustomizationChoice(this, model_->cd, option), wxSizerFlags(1).Align(wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL));
+    {
+      CharDetailsCustomizationChoice * row = new CharDetailsCustomizationChoice(this, model_->cd, option);
+      UiStyle::applyPanel(row);   // on the panel's colour, like the rest of the page
+      // Its label was made before the row had a colour: the text colour, as every label on the page.
+      for (wxWindow * child : row->GetChildren())
+        if (wxDynamicCast(child, wxStaticText))
+          UiStyle::setRole(child, UiStyle::Role::Text);
+      charCustomizationGS_->Add(row, wxSizerFlags(1).Align(wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL));
+    }
   }
 
   SetAutoLayout(true);

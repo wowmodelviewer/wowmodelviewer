@@ -8,6 +8,7 @@
 #include "Game.h"
 #include "globalvars.h"
 #include "RaceInfos.h"
+#include "UiControls.h"
 #include "UiStyle.h"
 #include "itemselection.h"
 #include "ModelInspector.h"
@@ -70,6 +71,21 @@ EVT_COMBOBOX(ID_EQUIPMENT + 1000 + CS_TABARD, CharControl::OnItemLevelChange)
 
 END_EVENT_TABLE()
 
+namespace
+{
+  // An item's name in its quality's colour; a common item's (black in the game's table) in the text
+  // colour, so it reads in the dark theme too.
+  wxColour SlotLabelColour(int quality)
+  {
+    const wxColour colour = ItemQualityColour(quality);
+    if (colour == *wxBLACK)
+      return UiStyle::palette().text;
+    // The game's rare blue and epic purple are too dark to read on the dark panel (about 3:1): lightened
+    // in their own hue until they read.
+    return UiStyle::darkActive() ? UiStyle::readableOn(colour, UiStyle::palette().panelBackground) : colour;
+  }
+}
+
 CharControl::CharControl(wxWindow* parent, wxWindowID id)
 {
   LOG_INFO << "Creating Char Control...";
@@ -78,6 +94,7 @@ CharControl::CharControl(wxWindow* parent, wxWindowID id)
     LOG_ERROR << "Failed to create a window frame for the Character Control!";
     return;
   }
+  UiStyle::applyPanel(this);
 
   // Laid out as the Model panel's Appearance page for a character: the Mount card, then Character
   // Appearance (the customization), Equipment and Tabard sections, left-aligned, on the shared spacing
@@ -111,11 +128,21 @@ CharControl::CharControl(wxWindow* parent, wxWindowID id)
   // out wider than the panel, pushing the customization rows off its right edge.
 #define ADD_CONTROLS(type, caption) \
     { \
-  gs2->Add(buttons[type]=new wxButton(this, ID_EQUIPMENT + type, caption), wxSizerFlags().Expand()); \
+  { \
+    UiButton * slot = new UiButton(this, ID_EQUIPMENT + type, caption, UiButton::Kind::Secondary); \
+    slot->SetCompact(true); \
+    buttons[type] = slot; \
+  } \
+  gs2->Add(buttons[type], wxSizerFlags().Expand()); \
   gs2->Add(levelboxes[type]=new wxComboBox(this, ID_EQUIPMENT + 1000 + type, caption)); \
   levelboxes[type]->SetMinSize(wxSize(15, -1)); \
   levelboxes[type]->SetMaxSize(wxSize(15, -1)); \
-  clearButtons[type]=new wxButton(this, ID_EQUIPMENT + 2000 + type, wxT("X"), wxDefaultPosition, wxSize(FromDIP(24), -1)); \
+  { \
+    UiButton * clear = new UiButton(this, ID_EQUIPMENT + 2000 + type, _("Remove") + wxT(" ") + caption, UiButton::Kind::Subtle, UiIcon::Close); \
+    clear->SetCompact(true); \
+    clear->SetIconOnly(true); \
+    clearButtons[type] = clear; \
+  } \
   clearButtons[type]->SetToolTip(_("Remove this item")); \
   gs2->Add(clearButtons[type], wxSizerFlags().Align(wxALIGN_CENTER_VERTICAL)); \
   gs2->Add(labels[type]=new wxStaticText(this, -1, _("---- None ----"), wxDefaultPosition, wxDefaultSize, wxST_ELLIPSIZE_END | wxST_NO_AUTORESIZE), wxSizerFlags().Expand().Align(wxALIGN_CENTER_VERTICAL)); \
@@ -146,7 +173,7 @@ CharControl::CharControl(wxWindow* parent, wxWindowID id)
 
   // Strip every equipped item at once (same action as the Character > Clear Equipment menu / F9),
   // exposed here as a button so it is discoverable right beside the slots.
-  auto * clearAllBtn = new wxButton(this, ID_CLEAR_EQUIPMENT, _("Clear all equipment"));
+  auto * clearAllBtn = new UiButton(this, ID_CLEAR_EQUIPMENT, _("Clear all equipment"), UiButton::Kind::Secondary);
   clearAllBtn->SetToolTip(_("Remove every equipped item (shortcut: F9)"));
   top->Add(clearAllBtn, wxSizerFlags().Border(wxLEFT | wxRIGHT | wxTOP, md));
 
@@ -333,7 +360,7 @@ void CharControl::UpdateModel(Attachment *a)
     if (labels[i])
     {
       labels[i]->SetLabel(_("---- None ----"));
-      labels[i]->SetForegroundColour(*wxBLACK);
+      labels[i]->SetForegroundColour(UiStyle::palette().text);
     }
     if (levelboxes[i])
     {
@@ -394,7 +421,7 @@ void CharControl::RefreshEquipment()
       if (item)
       {
         labels[i]->SetLabel(item->name().toStdWString());
-        labels[i]->SetForegroundColour(ItemQualityColour(item->quality()));
+        labels[i]->SetForegroundColour(SlotLabelColour(item->quality()));
 
         // refresh level combo box
         levelboxes[i]->Clear();
@@ -929,7 +956,7 @@ void CharControl::OnUpdateItem(int type, int id)
         item->setId(numbers[id]);
 
         labels[choosingSlot]->SetLabel(item->name().toStdWString());
-        labels[choosingSlot]->SetForegroundColour(ItemQualityColour(item->quality()));
+        labels[choosingSlot]->SetForegroundColour(SlotLabelColour(item->quality()));
 
         // refresh level combo box
         levelboxes[choosingSlot]->Clear();
@@ -1279,7 +1306,7 @@ void CharControl::tryToEquipItem(int id)
       {
         item->setId(id);
         labels[itemSlot]->SetLabel(item->name().toStdWString());
-        labels[itemSlot]->SetForegroundColour(ItemQualityColour(item->quality()));
+        labels[itemSlot]->SetForegroundColour(SlotLabelColour(item->quality()));
 
         // refresh level combo box
         levelboxes[itemSlot]->Clear();

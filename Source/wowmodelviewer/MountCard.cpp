@@ -14,6 +14,7 @@
 #include "charcontrol.h"
 #include "globalvars.h"
 #include "modelviewer.h"
+#include "UiControls.h"
 #include "UiStyle.h"
 #include "WoWModel.h"
 
@@ -30,6 +31,7 @@ public:
       m_card(card)
   {
     AppendColumn(wxEmptyString, wxLIST_FORMAT_LEFT, FromDIP(200));
+    UiStyle::setRole(this, UiStyle::Role::Field);
     // After the layout has settled: during a resize the list passes through sizes too small to fit.
     Bind(wxEVT_SIZE, [this](wxSizeEvent & e) {
       e.Skip();
@@ -137,27 +139,23 @@ MountCard::MountCard(wxWindow * parent, CharControl * owner)
   const int md = FromDIP(UiStyle::M);
 
   // The card's own colour, not passed on: the labels on it are drawn on it.
-  SetOwnBackgroundColour(UiStyle::cardBackground());
+  UiStyle::setRole(this, UiStyle::Role::Card);   // its labels, made below, take its text colour
   Bind(wxEVT_PAINT, &MountCard::OnPaint, this);
 
   m_title = new wxStaticText(this, wxID_ANY, _("Mount"));
-  wxFont titleFont = m_title->GetFont().Bold();
-  titleFont.SetPointSize(titleFont.GetPointSize() + 1);
-  m_title->SetFont(titleFont);
+  m_title->SetFont(UiStyle::font(UiStyle::Type::Section));
 
   m_hint = UiStyle::secondaryLabel(this, _("Add a mount to this character"));
   m_name = new wxStaticText(this, wxID_ANY, _("Mount"), wxDefaultPosition, wxDefaultSize,
                             wxST_ELLIPSIZE_END | wxST_NO_AUTORESIZE);
-  m_name->SetFont(m_name->GetFont().Bold());
+  m_name->SetFont(UiStyle::font(UiStyle::Type::Strong));
   // A long name is cut short with an ellipsis rather than widening the panel; the tooltip has all of it.
   m_name->SetMinSize(wxSize(FromDIP(40), m_name->GetBestSize().y));
 
-  m_choose = new wxButton(this, wxID_ANY, _("Choose Mount"));
-  m_choose->SetMinSize(wxSize(-1, FromDIP(UiStyle::ControlHeight)));
+  // The call to action while unmounted (see Sync).
+  m_choose = new UiButton(this, wxID_ANY, _("Choose Mount"), UiButton::Kind::Primary);
   m_choose->SetToolTip(_("Put this character on a mount"));
-  m_choose->SetFont(m_choose->GetFont().Bold());   // the call to action while unmounted (see Sync)
-  m_dismount = new wxButton(this, wxID_ANY, _("Dismount"));
-  m_dismount->SetMinSize(wxSize(-1, FromDIP(UiStyle::ControlHeight)));
+  m_dismount = new UiButton(this, wxID_ANY, _("Dismount"), UiButton::Kind::Secondary);
   m_dismount->SetToolTip(_("Take the character off its mount"));
 
   // The picker: a search field over the list, or "No mounts found" in its place, on a panel in the card's
@@ -165,12 +163,13 @@ MountCard::MountCard(wxWindow * parent, CharControl * owner)
   m_popup = new MountPickerPopup(this);
   m_pickerPanel = new wxPanel(m_popup, wxID_ANY, wxDefaultPosition, wxDefaultSize,
                               wxTAB_TRAVERSAL | wxFULL_REPAINT_ON_RESIZE);
-  m_pickerPanel->SetOwnBackgroundColour(UiStyle::cardBackground());
+  UiStyle::setRole(m_pickerPanel, UiStyle::Role::Card);
   m_pickerPanel->Bind(wxEVT_PAINT, &MountCard::OnPickerPaint, this);
   m_search = new wxSearchCtrl(m_pickerPanel, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize,
                               wxTE_PROCESS_ENTER);
   m_search->ShowCancelButton(true);
   m_search->SetDescriptiveText(_("Search mounts"));
+  UiStyle::setRole(m_search, UiStyle::Role::Field);
   m_list = new MountPickerList(m_pickerPanel, this);
   m_list->SetMinSize(wxSize(FromDIP(60), FromDIP(60)));
   m_noMatch = UiStyle::secondaryLabel(m_pickerPanel, _("No mounts found"));
@@ -277,9 +276,9 @@ void MountCard::Sync(bool characterPanel)
     m_dismount->Show(mounted);
     m_choose->SetLabel(mounted ? _("Change Mount") : _("Choose Mount"));
     m_choose->SetToolTip(mounted ? _("Put the character on a different mount") : _("Put this character on a mount"));
-    // Unmounted, Choose Mount is what the card is for and reads bold; on a mount the name stands out, and
-    // Change Mount reads like Dismount beside it.
-    m_choose->SetFont(mounted ? m_dismount->GetFont() : m_dismount->GetFont().Bold());
+    // Unmounted, Choose Mount is what the card is for: the primary action. On a mount the name stands
+    // out, and Change Mount reads like Dismount beside it.
+    m_choose->SetKind(mounted ? UiButton::Kind::Secondary : UiButton::Kind::Primary);
     changed = true;
   }
   m_rider = rider;
@@ -526,10 +525,10 @@ void MountCard::OnPickerPaint(wxPaintEvent & WXUNUSED(event))
   dc.SetBrush(*wxTRANSPARENT_BRUSH);
   dc.DrawRectangle(m_pickerPanel->GetClientRect());
 
-  // The focus ring: the theme's selection colour just outside the search field, while it has the focus.
+  // The focus ring: the accent just outside the search field, while it has the focus.
   if (m_open && SearchHasFocus())
   {
-    dc.SetPen(wxPen(wxSystemSettings::GetColour(wxSYS_COLOUR_HIGHLIGHT)));
+    dc.SetPen(wxPen(UiStyle::palette().accent));
     const wxRect field = m_search->GetRect();
     for (int i = 1; i <= FromDIP(2); i++)
       dc.DrawRectangle(wxRect(field).Inflate(i));

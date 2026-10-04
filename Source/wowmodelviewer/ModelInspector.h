@@ -39,7 +39,8 @@ class Attachment;
 class wxBookCtrlEvent;
 class wxChoice;
 class wxFlexGridSizer;
-class wxNotebook;
+class wxSimplebook;
+class UiTabBar;
 class wxScrolledWindow;
 class wxSearchCtrl;
 class wxTreeListCtrl;
@@ -134,7 +135,8 @@ private:
   wxString standingGeosetNote() const;
   void SetGeosetNotice(const wxString & text);
 
-  wxNotebook * m_notebook = nullptr;
+  wxSimplebook * m_notebook = nullptr;
+  UiTabBar * m_tabs = nullptr;
 
   // Appearance
   wxPanel * m_appearance = nullptr;

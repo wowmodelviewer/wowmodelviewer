@@ -10,6 +10,19 @@
 #include "ItemImporterDialog.h"
 #include "modelviewer.h"
 #include "NPCImporterDialog.h"
+#include "UiStyle.h"
+
+namespace
+{
+  // A row's background, alternating: white and a pale blue in a light run, two of the palette's greys in
+  // a dark one (wxWidgets' dark list draws its light text on them).
+  wxColour RowColour(int row)
+  {
+    if (UiStyle::darkActive())
+      return (row % 2) == 0 ? UiStyle::palette().controlBackground : UiStyle::palette().hover;
+    return (row % 2) == 0 ? *wxWHITE : wxColour(237, 243, 254);
+  }
+}
 
 // HACK: this is the ID for the single choice dialog listbox in the wx src
 // - if it changes this code may break
@@ -104,10 +117,7 @@ ChoiceDialog::ChoiceDialog(CharControl *dest, int type,
     else
       item.SetTextColour(*wxBLACK);
 */
-    if ((i%2)==0)
-      item.SetBackgroundColour(*wxWHITE);
-    else
-      item.SetBackgroundColour(wxColour(237,243,254));
+    item.SetBackgroundColour(RowColour(i));
 
     m_listctrl->InsertItem(item);
     //m_listctrl->InsertItem(i, choices[i]);
@@ -299,10 +309,7 @@ void FilteredChoiceDialog::DoFilter()
       item.SetId(i); 
       item.SetText(m_choices->Item(i));
       m_indices.push_back((int)i);
-      if ((i%2)==0)
-        item.SetBackgroundColour(*wxWHITE);
-      else
-        item.SetBackgroundColour(wxColour(237,243,254));
+      item.SetBackgroundColour(RowColour(i));
 
       m_listctrl->InsertItem(item);
     }

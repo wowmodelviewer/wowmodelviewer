@@ -11,6 +11,8 @@
 
 #include "enums.h"
 #include "modelviewer.h"
+#include "UiControls.h"
+#include "UiStyle.h"
 #include "UnityIpcServer.h"
 #include "util.h"
 
@@ -56,7 +58,7 @@ namespace
 void UnityRendererHost::OnPaint(wxPaintEvent & WXUNUSED(event))
 {
   wxPaintDC dc(this);
-  dc.SetBackground(wxBrush(wxColour(35, 31, 32)));   // the player's own background colour
+  dc.SetBackground(wxBrush(UiStyle::palette().viewport));   // the player's own background colour
   dc.Clear();
 
   if (!m_notice || m_noticeTitle.IsEmpty() || m_contentShown)
@@ -80,11 +82,11 @@ void UnityRendererHost::OnPaint(wxPaintEvent & WXUNUSED(event))
   int y = area.y + (area.height - total) / 2;
 
   dc.SetFont(titleFont);
-  dc.SetTextForeground(wxColour(226, 222, 218));
+  dc.SetTextForeground(UiStyle::palette().viewportText);
   dc.DrawText(m_noticeTitle, area.x + (area.width - titleSize.x) / 2, y);
   y += titleSize.y + gap;
   dc.SetFont(detailFont);
-  dc.SetTextForeground(wxColour(160, 154, 150));
+  dc.SetTextForeground(UiStyle::palette().viewportTextSecondary);
   for (size_t i = 0; i < lines.size(); i++)
   {
     const int width = dc.GetTextExtent(lines[i]).x;
@@ -137,7 +139,7 @@ void UnityRendererHost::setNotice(const wxString & title, const wxString & detai
 
   if (wantButton && !m_noticeButton)
   {
-    m_noticeButton = new wxButton(this, wxID_ANY, actionLabel);
+    m_noticeButton = new UiButton(this, wxID_ANY, actionLabel, UiButton::Kind::Primary);
     m_noticeButton->Bind(wxEVT_BUTTON, [this](wxCommandEvent &) {
       if (m_noticeActionId == 0 || !GetParent())
         return;
@@ -243,6 +245,17 @@ void UnityRendererHost::layoutNotice()
   m_noticeButton->Move(area.x + (area.width - button.x) / 2, y);
 }
 
+void UnityRendererHost::holdPlayer()
+{
+  m_playerHold++;
+}
+
+void UnityRendererHost::releasePlayer()
+{
+  if (m_playerHold > 0 && --m_playerHold == 0)
+    applyEmbeddedVisibility();
+}
+
 void UnityRendererHost::OnNoticeTimer(wxTimerEvent & WXUNUSED(event))
 {
   applyEmbeddedVisibility();
@@ -272,10 +285,10 @@ void UnityRendererHost::setPlayerReady(bool ready)
 UnityRendererHost::UnityRendererHost(wxWindow * parent, wxWindowID id)
 {
   // A plain panel: the player reparents its own window into this one and paints it
-  // entirely, so no wx-side drawing is needed. Black background = unobtrusive while
-  // the player is still starting up (or after it exited).
+  // entirely, so no wx-side drawing is needed. The player's own dark background = unobtrusive while
+  // the player is still starting up (or after it exited), and what the notice button stands on.
   Create(parent, id, wxDefaultPosition, wxSize(640, 480), wxNO_BORDER | wxCLIP_CHILDREN, wxT("UnityRendererHost"));
-  SetBackgroundColour(*wxBLACK);
+  SetBackgroundColour(UiStyle::palette().viewport);
   m_ipc = new UnityIpcServer();
   m_noticeTimer.SetOwner(this);
 }
@@ -496,11 +509,22 @@ HWND UnityRendererHost::findEmbeddedWindow()
 
 void UnityRendererHost::resizeEmbeddedWindow()
 {
-  if (!isRunning())
+  // Not while held, nor while the texture view covers it: back in Models it must have the Models
+  // viewport's size, and the player has been seen to put back a size it was given while hidden. Behind a
+  // notice it follows the viewport once its hide has landed (not before: it would grow into a larger
+  // viewport, and draw there, before a hide it has not handled yet -- the resize is sent, the hide only
+  // posted), so a model it frames behind the notice is framed for the viewport's shape. It is sized
+  // once more as it is uncovered.
+  if (!isRunning() || m_playerHold > 0 || m_contentShown)
     return;
   if (HWND wnd = findEmbeddedWindow())
   {
+    if (m_notice && (GetWindowLongPtr(wnd, GWL_STYLE) & WS_VISIBLE) != 0)
+      return;
     const wxSize size = GetClientSize();
+    RECT rect;
+    if (::GetWindowRect(wnd, &rect) && rect.right - rect.left == size.GetWidth() && rect.bottom - rect.top == size.GetHeight())
+      return;
     MoveWindow(wnd, 0, 0, size.GetWidth(), size.GetHeight(), TRUE);
   }
 }
@@ -511,13 +535,20 @@ void UnityRendererHost::applyEmbeddedVisibility()
     return;
   if (HWND wnd = findEmbeddedWindow())
   {
+    if (m_playerHold > 0)
+      return;
     // The window's own visible flag, not IsWindowVisible (which also folds in the parents').
-    // Its size is kept up to date by OnSize whether or not it is shown.
     const bool visible = (GetWindowLongPtr(wnd, GWL_STYLE) & WS_VISIBLE) != 0;
     if (playerCovered() && visible)
       ShowWindowAsync(wnd, SW_HIDE);
-    else if (!playerCovered() && !visible)
-      ShowWindowAsync(wnd, SW_SHOWNA);
+    else if (!playerCovered())
+    {
+      // Uncovered: its size first (sent, so handled before the posted show), then shown. Checked again
+      // on each re-assert: the player has been seen to put back a size it was given while hidden.
+      resizeEmbeddedWindow();
+      if (!visible)
+        ShowWindowAsync(wnd, SW_SHOWNA);
+    }
   }
 }
 

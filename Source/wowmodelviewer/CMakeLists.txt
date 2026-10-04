@@ -54,12 +54,17 @@ set(src  AnimationExportChoiceDialog.cpp
          TextureDecode.cpp
          TexturePreview.cpp
          TextureView.cpp
+         UiArt.cpp
+         UiControls.cpp
+         UiIcons.cpp
+         UiStyle.cpp
          UnityAssetAccess.cpp
          UnityCharacterScene.cpp
          UnityIpcServer.cpp
          UnityRendererHost.cpp
          UserSkins.cpp
-         util.cpp)
+         util.cpp
+         WinTheme.cpp)
 
 set(headers AnimationExportChoiceDialog.h
             ArmoryImportDialog.h
@@ -109,13 +114,17 @@ set(headers AnimationExportChoiceDialog.h
             TextureDecode.h
             TexturePreview.h
             TextureView.h
+            UiArt.h
+            UiControls.h
+            UiIcons.h
             UiStyle.h
             UnityAssetAccess.h
             UnityCharacterScene.h
             UnityIpcServer.h
             UnityRendererHost.h
             UserSkins.h
-            util.h)
+            util.h
+            WinTheme.h)
 
 source_group("Header Files" FILES ${headers})
 

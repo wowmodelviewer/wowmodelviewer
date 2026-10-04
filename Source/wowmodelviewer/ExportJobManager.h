@@ -118,6 +118,9 @@ class ExportJobManager : public wxEvtHandler
     // asset+target is already running, or if the child could not be launched.
     bool startExport(const Request & req);
 
+    // An export is still running (a restart waits for it).
+    bool hasActiveJobs() const { return !m_jobs.empty(); }
+
     // Called by the per-process wxProcess subclass when the child exits.
     void onProcessTerminated(ExportJob * job, int exitCode);
 

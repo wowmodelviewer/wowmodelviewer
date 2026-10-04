@@ -21,6 +21,8 @@
 
 #include "modelcanvas.h"
 #include "modelviewer.h"
+#include "UiArt.h"
+#include "UiControls.h"
 #include "UiStyle.h"
 #include "UnityAssetAccess.h"
 #include "util.h"
@@ -90,15 +92,20 @@ void TextureView::shutdown()
 void TextureView::buildLayout()
 {
   const int xs = FromDIP(UiStyle::XS), s = FromDIP(UiStyle::S), m = FromDIP(UiStyle::M);
-  SetBackgroundColour(wxSystemSettings::GetColour(wxSYS_COLOUR_3DFACE));
+  UiStyle::applyPanel(this);
 
-  // The view controls, above the texture: how it is drawn, nothing else (it is sized by itself).
+  // The view controls, above the texture: how it is drawn, nothing else (it is sized by itself). Alpha is
+  // one segmented control (UiToolBarArt), the background a native choice beside it.
   m_tools = new wxAuiToolBar(this, wxID_ANY, wxDefaultPosition, wxDefaultSize,
                              wxAUI_TB_TEXT | wxAUI_TB_HORZ_TEXT | wxAUI_TB_PLAIN_BACKGROUND | wxAUI_TB_NO_AUTORESIZE);
   m_tools->SetName(wxT("textureTools"));
-  m_tools->SetToolBorderPadding(FromDIP(4));
-  m_tools->SetMargins(FromDIP(wxSize(UiStyle::S, 2)));
-  m_tools->AddControl(UiStyle::secondaryLabel(m_tools, _("Alpha")));
+  m_tools->SetArtProvider(new UiToolBarArt(true));
+  m_tools->SetBackgroundColour(UiStyle::palette().panelBackground);
+  m_tools->SetToolBorderPadding(0);
+  m_tools->SetToolPacking(0);
+  m_tools->SetToolSeparation(25);   // DIPs: wxWidgets 3.3 scales it itself
+  m_tools->SetMargins(m, s, s, s);
+  m_tools->AddLabel(wxID_ANY, _("Alpha"));
   m_tools->AddTool(ID_TV_ALPHA_ON, _("On"), wxNullBitmap, _("Alpha on: the texture over the background, as RGBA (A)"),
                    wxITEM_RADIO);
   m_tools->AddTool(ID_TV_ALPHA_OFF, _("Off"), wxNullBitmap,
@@ -106,8 +113,9 @@ void TextureView::buildLayout()
   m_tools->AddTool(ID_TV_ALPHA_ONLY, _("Only"), wxNullBitmap,
                    _("Alpha only: the alpha channel as grey, white = opaque (Shift+A)"), wxITEM_RADIO);
   m_tools->AddSeparator();
-  m_tools->AddControl(UiStyle::secondaryLabel(m_tools, _("Background")));
+  m_tools->AddLabel(wxID_ANY, _("Background"));
   m_background = new wxChoice(m_tools, wxID_ANY);
+  UiSetAccessibleName(m_background, _("Background"));   // its label is drawn by the toolbar, not a window
   m_background->SetName(wxT("textureBackground"));
   m_background->Append(_("Checkerboard"));
   m_background->Append(_("Dark"));
@@ -139,13 +147,13 @@ void TextureView::buildLayout()
   m_name = new wxStaticText(this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize,
                             wxST_ELLIPSIZE_MIDDLE | wxST_NO_AUTORESIZE);
   m_name->SetName(wxT("textureName"));
-  m_name->SetFont(m_name->GetFont().Bold());
+  m_name->SetFont(UiStyle::font(UiStyle::Type::Title));
   wxBoxSizer * pathRow = new wxBoxSizer(wxHORIZONTAL);
   m_path = new wxStaticText(this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize,
                             wxST_ELLIPSIZE_MIDDLE | wxST_NO_AUTORESIZE);
   m_path->SetName(wxT("texturePath"));
-  m_path->SetForegroundColour(UiStyle::secondaryText());
-  m_copyPath = new wxButton(this, wxID_ANY, _("Copy path"), wxDefaultPosition, wxDefaultSize, wxBU_EXACTFIT);
+  UiStyle::setRole(m_path, UiStyle::Role::SecondaryText);
+  m_copyPath = new UiButton(this, wxID_ANY, _("Copy path"), UiButton::Kind::Subtle, UiIcon::Copy, wxBU_EXACTFIT | wxBU_LEFT);
   m_copyPath->SetName(wxT("textureCopyPath"));
   pathRow->Add(m_path, 1, wxALIGN_CENTER_VERTICAL | wxRIGHT, s);
   pathRow->Add(m_copyPath, 0, wxALIGN_CENTER_VERTICAL);
@@ -153,25 +161,28 @@ void TextureView::buildLayout()
   m_facts = new wxStaticText(this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize,
                              wxST_ELLIPSIZE_END | wxST_NO_AUTORESIZE);
   m_facts->SetName(wxT("textureFacts"));
-  m_copyId = new wxButton(this, wxID_ANY, _("Copy FileDataID"), wxDefaultPosition, wxDefaultSize, wxBU_EXACTFIT);
+  m_copyId = new UiButton(this, wxID_ANY, _("Copy FileDataID"), UiButton::Kind::Subtle, UiIcon::Copy, wxBU_EXACTFIT | wxBU_LEFT);
   m_copyId->SetName(wxT("textureCopyId"));
   // The two copy buttons, one above the other, as wide as each other.
-  const int copyWidth = (std::max)(m_copyPath->GetBestSize().x, m_copyId->GetBestSize().x) + FromDIP(16);
+  const int copyWidth = (std::max)(m_copyPath->GetBestSize().x, m_copyId->GetBestSize().x);
   m_copyPath->SetMinSize(wxSize(copyWidth, -1));
   m_copyId->SetMinSize(wxSize(copyWidth, -1));
   factsRow->Add(m_facts, 1, wxALIGN_CENTER_VERTICAL | wxRIGHT, s);
   factsRow->Add(m_copyId, 0, wxALIGN_CENTER_VERTICAL);
 
-  // The exports, under what they save: full-size buttons, the PNG first and in bold (the usual one),
-  // the original file beside it.
-  m_exportPng = new wxButton(this, wxID_ANY, _("Export PNG"));
+  // The exports, under what they save: the PNG first as the primary action (the usual one), the
+  // original file beside it as a secondary one, as wide as each other.
+  m_exportPng = new UiButton(this, wxID_ANY, _("Export PNG"), UiButton::Kind::Primary, UiIcon::Export);
   m_exportPng->SetName(wxT("textureExportPng"));
-  m_exportPng->SetFont(m_exportPng->GetFont().Bold());
   m_exportPng->SetToolTip(_("Save the texture as a PNG at its full resolution, with its alpha (Ctrl+S)"));
-  m_exportBlp = new wxButton(this, wxID_ANY, _("Export BLP"));
+  m_exportBlp = new UiButton(this, wxID_ANY, _("Export BLP"), UiButton::Kind::Secondary, UiIcon::Export);
   m_exportBlp->SetName(wxT("textureExportBlp"));
   m_exportBlp->SetToolTip(_("Save the original file from the game client, byte for byte (Ctrl+Shift+S)"));
-  const wxSize exportSize(FromDIP(132), FromDIP(UiStyle::ControlHeight + 8));
+  // (Wide enough for the original-file label a file that is not a BLP gets: showInfo.)
+  m_exportBlp->SetLabel(_("Export original file"));
+  const int widest = (std::max)(m_exportPng->GetBestSize().x, m_exportBlp->GetBestSize().x);
+  m_exportBlp->SetLabel(_("Export BLP"));
+  const wxSize exportSize((std::max)(FromDIP(132), widest), FromDIP(UiStyle::ButtonHeight));
   m_exportPng->SetMinSize(exportSize);
   m_exportBlp->SetMinSize(exportSize);
   wxBoxSizer * exportRow = new wxBoxSizer(wxHORIZONTAL);
@@ -186,9 +197,8 @@ void TextureView::buildLayout()
 
   wxBoxSizer * sizer = new wxBoxSizer(wxVERTICAL);
   sizer->Add(m_tools, 0, wxEXPAND);
-  sizer->Add(new wxStaticLine(this, wxID_ANY), 0, wxEXPAND);
   sizer->Add(m_preview, 1, wxEXPAND);
-  sizer->Add(new wxStaticLine(this, wxID_ANY), 0, wxEXPAND);
+  sizer->Add(UiStyle::separator(this), 0, wxEXPAND);
   sizer->Add(info, 0, wxEXPAND | wxALL, m);
   SetSizer(sizer);
 

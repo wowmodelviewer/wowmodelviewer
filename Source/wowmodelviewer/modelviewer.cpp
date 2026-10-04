@@ -6,8 +6,16 @@
 #include "TextureView.h"
 #include "AnimManager.h"
 
+#include <functional>
+
 #include <wx/aboutdlg.h>
 #include <wx/aui/auibar.h>
+#include <wx/choice.h>
+#include <wx/combobox.h>
+#include <wx/listctrl.h>
+#include <wx/treectrl.h>
+#include <wx/wupdlock.h>
+#include <wx/evtloop.h>
 #include <wx/numformatter.h>
 #include <wx/srchctrl.h>
 #include <wx/busyinfo.h>
@@ -43,7 +51,10 @@
 #include "PluginManager.h"
 #include "RaceInfos.h"
 #include "SettingsControl.h"
+#include "UiArt.h"
+#include "UiControls.h"
 #include "UiStyle.h"
+#include "WinTheme.h"
 #include "UnityAssetAccess.h"
 #include "UnityCharacterScene.h"
 #include "UnityIpcServer.h"
@@ -115,6 +126,12 @@ namespace
 IMPLEMENT_CLASS(ModelViewer, wxFrame)
 
 BEGIN_EVENT_TABLE(ModelViewer, wxFrame)
+  EVT_CHILD_FOCUS(ModelViewer::OnChildFocus)
+  EVT_ACTIVATE(ModelViewer::OnActivateFrame)
+  EVT_MENU_RANGE(ID_VIEW_APPEARANCE_SYSTEM, ID_VIEW_APPEARANCE_DARK, ModelViewer::OnAppearance)
+  EVT_UPDATE_UI_RANGE(ID_VIEW_APPEARANCE_SYSTEM, ID_VIEW_APPEARANCE_DARK, ModelViewer::OnUpdateCommandUI)
+  EVT_SYS_COLOUR_CHANGED(ModelViewer::OnSysColourChanged)
+  EVT_TIMER(ID_THEME_RECHECK_TIMER, ModelViewer::OnThemeRecheck)
 EVT_CLOSE(ModelViewer::OnClose)
 //EVT_SIZE(ModelViewer::OnSize)
 
@@ -206,8 +223,15 @@ ModelViewer::ModelViewer()
 #ifdef _LINUX
 // Transparency in interfaceManager crashes with Linux compositing
 : interfaceManager(0, wxAUI_MGR_ALLOW_FLOATING | wxAUI_MGR_VENETIAN_BLINDS_HINT)
+#else
+// wxWidgets 3.2's default flags. 3.3's default adds live resizing: a sash drag would resize the Unity
+// player's window at every mouse move, and wxAuiManager::Update would lay out an unfrozen frame, which
+// the one-step viewer-mode switch (SetViewerMode) relies on it not doing. (It also drops the docking
+// hint's fade-in, which these keep.)
+: interfaceManager(0, wxAUI_MGR_ALLOW_FLOATING | wxAUI_MGR_TRANSPARENT_HINT | wxAUI_MGR_HINT_FADE)
 #endif
 {
+  m_themeRecheck.SetOwner(this, ID_THEME_RECHECK_TIMER);
   PLUGINMANAGER.init("./plugins");
   // our main class objects
   animControl = nullptr;
@@ -309,9 +333,7 @@ void ModelViewer::InitMenu()
   LOG_INFO << "Initializing File Menu...";
 
   if (GetStatusBar() == NULL){
-    CreateStatusBar(5);
-    int widths[] = { -1, 100, 50, 125, 125 };
-    SetStatusWidths(5, widths);
+    CreateThemedStatusBar();
     SetStatusText(wxT("Initializing File Menu..."));
   }
 
@@ -373,6 +395,13 @@ void ModelViewer::InitMenu()
   // (the notice of a stopped player has the same command on a button).
   viewMenu->Append(ID_VIEW_UNITY_RESTART, _("Restart Unity Renderer"));
   viewMenu->Append(ID_VIEW_FULLSCREEN, _("Fullscreen\tF11"));
+  viewMenu->AppendSeparator();
+  // The colours of the viewer's own window (the viewport draws the same in every theme).
+  wxMenu * appearanceMenu = new wxMenu;
+  appearanceMenu->AppendRadioItem(ID_VIEW_APPEARANCE_SYSTEM, _("System"), _("Light or dark as Windows' app mode is"));
+  appearanceMenu->AppendRadioItem(ID_VIEW_APPEARANCE_LIGHT, _("Light"), _("Always the light theme"));
+  appearanceMenu->AppendRadioItem(ID_VIEW_APPEARANCE_DARK, _("Dark"), _("Always the dark theme"));
+  viewMenu->AppendSubMenu(appearanceMenu, _("Appearance"));
   // The OpenGL viewport's own View items -- Background Color, Load Background, the Camera submenu,
   // Set Canvas Size and OpenGL debug info -- went with that viewport: none of them reaches the Unity
   // viewport, which frames each model itself. The Lighting menu that was built here (and never put on
@@ -474,6 +503,8 @@ void ModelViewer::InitMenu()
     menuBar->Append(optMenu, _("&Options"));
     menuBar->Append(aboutMenu, _("&Help"));
     SetMenuBar(menuBar);
+    m_menuBarTitles.reset(new UiMenuBarTitles);
+    m_menuBarTitles->attach(this);
   }
   catch (...) {};
 
@@ -621,7 +652,7 @@ void ModelViewer::InitDatabase()
 // bring it back), resized at its sash, or floated.
 static wxAuiPaneInfo buildCommandBarPaneInfo(const wxWindow * frame)
 {
-  const int height = frame->FromDIP(34);
+  const int height = frame->FromDIP(UiStyle::ToolbarHeight);
   return wxAuiPaneInfo().
          Name(wxT("commandBar")).Caption(wxT("Command bar")).
          Top().Layer(10).Row(0).Position(0).
@@ -671,18 +702,33 @@ static wxAuiPaneInfo buildRenderOptionsPaneInfo()
 
 void ModelViewer::InitCommandBar()
 {
-  // Text commands, few of them: the viewport is the thing to look at. The three panel buttons are
-  // check tools, pressed while their panel is shown (OnUpdateCommandUI keeps them in step with the
-  // panels however those were opened or closed).
+  // Few commands, by importance (drawn by UiToolBarArt): the viewer selector first, as one segmented
+  // control with the active mode in the accent; then the utility commands as quiet buttons; the name of
+  // what is shown; and at the right the three panel buttons, check tools pressed while their panel is
+  // shown (OnUpdateCommandUI keeps them in step with the panels however those were opened or closed).
   commandBar = new wxAuiToolBar(this, wxID_ANY, wxDefaultPosition, wxDefaultSize,
                                 wxAUI_TB_TEXT | wxAUI_TB_HORZ_TEXT | wxAUI_TB_PLAIN_BACKGROUND |
                                 wxAUI_TB_NO_AUTORESIZE);
-  commandBar->SetToolBorderPadding(FromDIP(6));
-  commandBar->SetMargins(FromDIP(wxSize(UiStyle::S, 2)));
+  UiToolBarArt * art = new UiToolBarArt(true);
+  art->SetToolIcon(ID_UI_MODELS, UiIcon::Models);
+  art->SetToolIcon(ID_UI_TEXTURES, UiIcon::Textures);
+  art->SetToolIcon(ID_VIEW_FULLSCREEN, UiIcon::Fullscreen);
+  art->SetToolIcon(ID_UI_SCREENSHOT, UiIcon::Screenshot);
+  art->SetToolIcon(ID_SHOW_FILE_LIST, UiIcon::Browse);
+  art->SetToolIcon(ID_SHOW_CHAR, UiIcon::ModelPanel);
+  art->SetToolIcon(ID_SHOW_ANIM, UiIcon::Animation);
+  commandBar->SetArtProvider(art);
+  commandBar->SetBackgroundColour(UiStyle::palette().panelBackground);
+  // The tools touch (the segments join); the gaps between groups are explicit.
+  commandBar->SetToolBorderPadding(0);
+  commandBar->SetToolPacking(0);
+  commandBar->SetToolSeparation(17);   // DIPs: wxWidgets 3.3 scales it itself
+  const int margin = (FromDIP(UiStyle::ToolbarHeight) - FromDIP(UiStyle::ToolHeight)) / 2;
+  commandBar->SetMargins(FromDIP(UiStyle::M), FromDIP(UiStyle::S), margin, margin);
 
   // The viewer selector: two radio tools, the active one pressed (OnUpdateCommandUI keeps them on the
   // viewer mode). Nothing may stand between them: that would split them into two groups.
-  commandBar->AddControl(UiStyle::secondaryLabel(commandBar, _("Viewer")));
+  commandBar->AddLabel(wxID_ANY, _("Viewer"));
   commandBar->AddTool(ID_UI_MODELS, _("Models"), wxNullBitmap,
                       _("The model viewer: the viewport and the model panels, Browse listing models (asks for a World "
                         "of Warcraft client first if none is loaded)"), wxITEM_RADIO);
@@ -692,19 +738,24 @@ void ModelViewer::InitCommandBar()
   commandBar->AddSeparator();
   // (No Reset camera: it acted on the archived OpenGL viewport; the Unity viewport frames each model itself.)
   commandBar->AddTool(ID_VIEW_FULLSCREEN, _("Fullscreen"), wxNullBitmap, _("Fullscreen (F11; Esc leaves)"));
-  // The Unity viewport's own capture (SaveUnityScreenshot). Text like the other commands: the bar has no icons.
+  commandBar->AddSpacer(FromDIP(2));
+  // The Unity viewport's own capture (SaveUnityScreenshot).
   commandBar->AddTool(ID_UI_SCREENSHOT, _("Screenshot"), wxNullBitmap,
                       _("Save the viewport as a 3840 x 2160 PNG with a transparent background"));
   commandBar->AddSeparator();
 
+  // What the viewer shows: the document's name, the bar's one piece of content.
   commandModelLabel = new wxStaticText(commandBar, ID_UI_MODEL_LABEL, _("No model loaded"), wxDefaultPosition,
                                        FromDIP(wxSize(320, -1)), wxST_ELLIPSIZE_MIDDLE | wxST_NO_AUTORESIZE);
-  commandModelLabel->SetForegroundColour(UiStyle::secondaryText());
+  commandModelLabel->SetFont(UiStyle::font(UiStyle::Type::Strong));
+  UiStyle::setRole(commandModelLabel, UiStyle::Role::SecondaryText);
   commandBar->AddControl(commandModelLabel);
 
   commandBar->AddStretchSpacer();
   commandBar->AddTool(ID_SHOW_FILE_LIST, _("Browse"), wxNullBitmap, _("Show or hide the Browse panel"), wxITEM_CHECK);
+  commandBar->AddSpacer(FromDIP(2));
   commandBar->AddTool(ID_SHOW_CHAR, _("Model"), wxNullBitmap, _("Show or hide the Model panel"), wxITEM_CHECK);
+  commandBar->AddSpacer(FromDIP(2));
   commandBar->AddTool(ID_SHOW_ANIM, _("Animation"), wxNullBitmap, _("Show or hide the Animation panel"), wxITEM_CHECK);
   commandBar->Realize();
   // No radio tool is checked by itself.
@@ -879,7 +930,9 @@ void ModelViewer::LoadLayout()
   {
     if (!interfaceManager.LoadPerspective(layout, false))
     {
+      // wxWidgets 3.3 can give up halfway, with the panes already hidden: the default layout then.
       LOG_ERROR << "Could not load the layout.";
+      ResetLayout();
     }
     else
     {
@@ -892,6 +945,11 @@ void ModelViewer::LoadLayout()
       // Animation keep whatever shown state the layout saved: that is how the panels a user
       // closed stay closed next time.
       interfaceManager.GetPane(wxT("commandBar")).Show(true);
+      // It keeps today's height, too: a layout saved before the bar grew stores the old one.
+      {
+        const wxAuiPaneInfo bar = buildCommandBarPaneInfo(this);
+        interfaceManager.GetPane(wxT("commandBar")).MinSize(bar.min_size).BestSize(bar.best_size).MaxSize(bar.max_size);
+      }
       // Nor is the viewport: whatever the perspective says, the Unity viewport is the shown centre.
       EnsureUnityViewportCentre();
 #ifndef  _LINUX // buggy
@@ -1403,10 +1461,34 @@ void ModelViewer::OnExit(wxCommandEvent &event)
 // File > Restart: quit and reopen the application in one click (no manual exit + relaunch).
 void ModelViewer::OnRestart(wxCommandEvent & WXUNUSED(event))
 {
+  if (exportRunning() || !canCloseNow())
+  {
+    wxMessageBox(exportRunning() ? _("An export is still running: restart once it has finished.")
+                                 : _("Restart once the viewer has finished what it is doing."),
+                 _("Restart"), wxOK | wxICON_INFORMATION, this);
+    return;
+  }
   if (wxMessageBox(_("Restart WoW Model Viewer now?\n\nThe current scene is reloaded fresh; your saved settings are kept."),
                    _("Restart"), wxYES_NO | wxYES_DEFAULT | wxICON_QUESTION, this) != wxYES)
     return;
+  Relaunch();
+}
 
+bool ModelViewer::exportRunning() const
+{
+  return m_exportJobManager && m_exportJobManager->hasActiveJobs();
+}
+
+bool ModelViewer::canCloseNow() const
+{
+  // Not from a modal dialog's loop (it disables the window; closing would delete the window under the
+  // dialog) nor from inside a yield (code further up the stack still uses the window).
+  const wxEventLoopBase * loop = wxEventLoopBase::GetActive();
+  return ::IsWindowEnabled((HWND)GetHWND()) && !(loop && loop->IsYielding());
+}
+
+void ModelViewer::Relaunch()
+{
   const wxString exe = wxStandardPaths::Get().GetExecutablePath();
 
   // Development build: a "_relaunch.bat" sits a few folders above the exe (next to _run.bat). It
@@ -1426,7 +1508,30 @@ void ModelViewer::OnRestart(wxCommandEvent & WXUNUSED(event))
   if (!relaunchBat.IsEmpty())
     wxExecute(wxString::Format(wxT("cmd /c \"\"%s\" %lu\""), relaunchBat, wxGetProcessId()), wxEXEC_ASYNC);
   else
-    wxExecute(wxString::Format(wxT("\"%s\""), exe), wxEXEC_ASYNC);
+  {
+    // The new instance waits for this one to have exited (-waitpid, WowModelViewApp::OnInit) before it
+    // reads Config.ini or opens the log: this one saves its layout and settings as it closes.
+    wxString command = wxString::Format(wxT("\"%s\" -waitpid %lu"), exe, wxGetProcessId());
+    for (int i = 1; i < wxTheApp->argc; i++)
+      if (wxTheApp->argv[i] == wxT("-console"))
+        command += wxT(" -console");
+    STARTUPINFOW startup = {};
+    startup.cb = sizeof(startup);
+    PROCESS_INFORMATION process = {};
+    std::wstring line = command.ToStdWstring();
+    if (!::CreateProcessW(nullptr, &line[0], nullptr, nullptr, FALSE, 0, nullptr, m_startDirectory.wc_str(), &startup, &process))
+    {
+      // This instance stays: closing it would leave nothing running.
+      const DWORD error = ::GetLastError();
+      LOG_ERROR << "Restart: could not start" << QString::fromWCharArray(command.wc_str()) << "error" << (unsigned)error;
+      wxMessageBox(wxString::Format(_("The viewer could not be started again (Windows error %lu), so it stays open."), (unsigned long)error),
+                   _("Restart"), wxOK | wxICON_ERROR, this);
+      return;
+    }
+    ::AllowSetForegroundWindow(process.dwProcessId);
+    ::CloseHandle(process.hThread);
+    ::CloseHandle(process.hProcess);
+  }
 
   // Tear down like File > Exit; OnClose saves the session as usual before the process exits.
   video.render = false;
@@ -1457,6 +1562,10 @@ void ModelViewer::OnSize(wxSizeEvent &event)
 ModelViewer::~ModelViewer()
 {
   LOG_INFO << "Shutting down the program...";
+
+  // The menu bar's titles back to Windows' own before the window goes (wxFrame's own procedure would
+  // take their data for its menu items).
+  m_menuBarTitles.reset();
 
   video.render = false;
 
@@ -1544,6 +1653,53 @@ ModelViewer::~ModelViewer()
   if (enchants) {
     enchants->Destroy();
     enchants = NULL;
+  }
+}
+
+// The docked pane whose window holds the keyboard reads as active (UiDockArt draws its caption in the
+// text colour with an accent line); while the window itself is not the active one, none does. Only the
+// two captions involved are repainted: a whole-frame refresh would repaint the Unity viewport's window too.
+void ModelViewer::OnChildFocus(wxChildFocusEvent & event)
+{
+  event.Skip();
+  UpdateActivePaneCaption(m_frameActive);
+}
+
+void ModelViewer::OnActivateFrame(wxActivateEvent & event)
+{
+  event.Skip();
+  m_frameActive = event.GetActive();
+  UpdateActivePaneCaption(m_frameActive);
+}
+
+void ModelViewer::UpdateActivePaneCaption(bool frameActive)
+{
+  UiDockArt * art = dynamic_cast<UiDockArt *>(interfaceManager.GetArtProvider());
+  if (!art)
+    return;
+  const wxAuiPaneInfoArray & panes = interfaceManager.GetAllPanes();
+  wxString active;
+  for (wxWindow * w = frameActive ? wxWindow::FindFocus() : nullptr; w && active.IsEmpty() && w != this; w = w->GetParent())
+    for (size_t i = 0; i < panes.GetCount(); i++)
+      if (panes[i].window == w && panes[i].HasCaption() && panes[i].IsShown() && panes[i].IsDocked())
+      {
+        active = panes[i].name;
+        break;
+      }
+  const wxString before = art->activePane();
+  if (!art->SetActivePane(active))
+    return;
+  // A pane's rect is its window's; the caption sits on top of it, inside the pane's border.
+  const int caption = art->GetMetricForWindow(wxAUI_DOCKART_CAPTION_SIZE, this);
+  const int border = art->GetMetric(wxAUI_DOCKART_PANE_BORDER_SIZE);
+  for (const wxString & name : { before, active })
+  {
+    if (name.IsEmpty())
+      continue;
+    const wxAuiPaneInfo & pane = interfaceManager.GetPane(name);
+    if (pane.IsOk() && pane.IsShown() && pane.IsDocked())
+      RefreshRect(wxRect(pane.rect.x - border, pane.rect.y - caption - border, pane.rect.width + 2 * border,
+                         caption + border + 1), false);
   }
 }
 
@@ -1659,6 +1815,14 @@ void ModelViewer::leaveTextureWorkspace()
   }
   if (changed)
     commitDocksAtTheirSize();
+  if (m_layoutBatch > 0)
+    m_finishLeavingPending = true;   // after the batch's one Update
+  else
+    finishLeavingTextureWorkspace();
+}
+
+void ModelViewer::finishLeavingTextureWorkspace()
+{
   // The dock has its size now; the pane's own best size is what it was, so nothing else changes.
   for (const TextureWorkspacePane & p : m_textureWorkspacePanes)
   {
@@ -1686,6 +1850,12 @@ bool ModelViewer::forgetTextureWorkspacePane(const wxString & name, TextureWorks
 
 void ModelViewer::commitDocksAtTheirSize()
 {
+  if (m_layoutBatch > 0)
+  {
+    m_layoutPending = true;
+    m_layoutUncapped = true;
+    return;
+  }
   // wxAUI caps only a dock it makes anew, and only in this layout: the cap goes back right after.
   double capX = 0.3, capY = 0.3;
   interfaceManager.GetDockSizeConstraint(&capX, &capY);
@@ -1700,18 +1870,20 @@ wxString ModelViewer::userPerspective()
     return interfaceManager.SavePerspective();
   // The panels a texture put away, set shown for the saving only (nothing is laid out, so nothing on
   // screen changes), and the sizes of the docks they took, which went with them.
-  std::vector<wxString> hidden;
+  // (The panes, not copies of their names: wxWidgets 3.3 exports std::vector<wxString> from its DLL,
+  // whose prebuilt binaries lack members a newer MSVC library calls.)
+  std::vector<const TextureWorkspacePane *> hidden;
   for (const TextureWorkspacePane & p : m_textureWorkspacePanes)
   {
     wxAuiPaneInfo & pane = interfaceManager.GetPane(p.name);
     if (!pane.IsOk() || pane.IsShown())
       continue;
     pane.Show(true);
-    hidden.push_back(p.name);
+    hidden.push_back(&p);
   }
   wxString perspective = interfaceManager.SavePerspective();
-  for (const wxString & name : hidden)
-    interfaceManager.GetPane(name).Show(false);
+  for (const TextureWorkspacePane * p : hidden)
+    interfaceManager.GetPane(p->name).Show(false);
   for (const wxString & part : wxSplit(m_textureWorkspaceLayout, '|', '\0'))
   {
     if (!part.StartsWith(wxT("dock_size(")))
@@ -2166,7 +2338,7 @@ bool ModelViewer::unityPlayerDressesCharacters() const
 }
 
 // THE WHOLE WINDOW BLINKED ON EVERY MODEL LOAD, and this is why. On Windows, wxAuiManager::Update()
-// wraps its relayout in a wxWindowUpdateLocker on the frame (wx 3.2.10, framemanager.cpp: "only
+// wraps its relayout in a wxWindowUpdateLocker on the frame (wx 3.3.3 as 3.2.10, framemanager.cpp: "only
 // under MSW and only when not using live resizing" -- which this manager does not use). The lock
 // is Freeze/Thaw, and wxWindowMSW::DoThaw is SendSetRedraw(true) followed by Refresh(), which is
 // RedrawWindow(RDW_INVALIDATE | RDW_ALLCHILDREN | RDW_ERASE): every window in the frame is
@@ -2194,7 +2366,12 @@ bool ModelViewer::CommitLayoutIfChanged()
       changed = (p.window->IsShown() != p.IsShown());
   }
   if (changed)
-    interfaceManager.Update();
+  {
+    if (m_layoutBatch > 0)
+      m_layoutPending = true;
+    else
+      interfaceManager.Update();
+  }
   return changed;
 }
 
@@ -2262,7 +2439,10 @@ void ModelViewer::UpdateUnityViewportState()
   // player is uncovered at its final size; then it is put away, after the notice is decided, so the
   // player's window is not shown for a moment between.
   leaveTextureWorkspace();
-  unityRendererHost->showContent(false);
+  if (m_layoutBatch > 0)
+    m_uncoverPending = true;   // SetViewerMode puts it away after its one layout
+  else
+    unityRendererHost->showContent(false);
   // The Geosets tab says whether the viewport shows the model; a stopped or restarted player changes
   // that without a load, so the tab is told here rather than only on content changes.
   if (changed && modelInspector)
@@ -4039,8 +4219,7 @@ void ModelViewer::DisplayedContentChanged()
     name.Replace(wxT("/"), wxT("\\"));
     name = name.AfterLast('\\');
     commandModelLabel->SetLabel(name.IsEmpty() ? wxString(isTextureMode() ? _("No texture selected") : _("No model loaded")) : name);
-    commandModelLabel->SetForegroundColour(name.IsEmpty() ? UiStyle::secondaryText()
-                                                          : wxSystemSettings::GetColour(wxSYS_COLOUR_WINDOWTEXT));
+    UiStyle::setRole(commandModelLabel, name.IsEmpty() ? UiStyle::Role::SecondaryText : UiStyle::Role::Text);
     commandModelLabel->SetToolTip(path);
     commandModelLabel->Refresh();
   }
@@ -4054,35 +4233,135 @@ void ModelViewer::DisplayedContentChanged()
   UpdateCanvasStatus();
 }
 
-void ModelViewer::SetViewerMode(ViewerMode mode)
+// ONE CHANGE ON SCREEN. A switch changes the whole workspace -- the selector, the centre (texture view
+// or the player), the panels put away or given back, Browse's list -- and the screen goes from the old
+// workspace straight to the new one, with nothing in between: no panel going before another, no centre
+// growing into the space they leave, no captions drawn over the old contents. So every change is made
+// with the frame's windows frozen and laid out once (the layout batch: one wxAuiManager::Update, with the dock cap
+// lifted when panels come back) and everything is painted at once (PaintNow). The player's window --
+// another process, which the freeze does not stop -- changes with that repaint (the hold): hidden going
+// to Textures once the texture view under it is painted, sized and shown going to Models as the repaint
+// starts. It is never resized while covered, so it never draws at the larger size before its hide lands.
+void ModelViewer::beginLayoutBatch()
+{
+  m_layoutBatch++;
+}
+
+void ModelViewer::endLayoutBatch()
+{
+  if (m_layoutBatch <= 0 || --m_layoutBatch > 0)
+    return;
+  if (m_layoutPending)
+  {
+    m_layoutPending = false;
+    if (m_layoutUncapped)
+    {
+      m_layoutUncapped = false;
+      commitDocksAtTheirSize();
+    }
+    else
+      interfaceManager.Update();
+  }
+  if (m_finishLeavingPending)
+  {
+    m_finishLeavingPending = false;
+    finishLeavingTextureWorkspace();
+  }
+}
+
+void ModelViewer::PaintNow()
+{
+  std::function<void(wxWindow *)> paint = [&](wxWindow * w) {
+    if (!w->IsShown())
+      return;
+    w->Update();
+    for (wxWindow * child : w->GetChildren())
+      if (!child->IsTopLevel())
+        paint(child);
+  };
+  paint(this);
+}
+
+void ModelViewer::SetViewerMode(ViewerMode mode, bool openBrowse, bool paintNow)
 {
   if (mode == m_viewerMode)
     return;
   m_viewerMode = mode;
   LOG_INFO << "[viewport] viewer mode:" << (mode == ViewerMode::Textures ? "Textures" : "Models");
-  // The selector at once: a switch made by a load from a menu does not come through the toolbar.
-  if (commandBar)
+  const bool textures = mode == ViewerMode::Textures;
+  struct PlayerHold
   {
-    commandBar->ToggleTool(mode == ViewerMode::Textures ? ID_UI_TEXTURES : ID_UI_MODELS, true);
-    commandBar->Refresh(false);
-  }
-  if (textureView)
+    UnityRendererHost * host;
+    explicit PlayerHold(UnityRendererHost * h) : host(h) { if (host) host->holdPlayer(); }
+    ~PlayerHold() { release(); }
+    void release() { if (host) host->releasePlayer(); host = nullptr; }
+  } hold(unityRendererHost);
   {
-    if (mode == ViewerMode::Textures)
-      textureView->entered();
+    // Every window of the frame frozen, hidden ones too (a panel shown during the switch stays frozen) --
+    // but not the frame itself: a frozen top-level window is invisible to Windows' hit-testing, and a
+    // click during a long switch (the first Textures listing) would go to the window behind it.
+    std::vector<std::unique_ptr<wxWindowUpdateLocker>> freeze;
+    for (wxWindow * child : GetChildren())
+      if (!child->IsTopLevel())
+        freeze.emplace_back(new wxWindowUpdateLocker(child));
+    beginLayoutBatch();
+    // The selector: a switch made by a load from a menu does not come through the toolbar.
+    if (commandBar)
+      commandBar->ToggleTool(textures ? ID_UI_TEXTURES : ID_UI_MODELS, true);
+    if (textureView)
+    {
+      if (textures)
+        textureView->entered();
+      else
+        textureView->left();
+    }
+    // The centre, the panels and the menus (UpdateInterface -> DisplayedContentChanged ->
+    // UpdateUnityViewportState puts the panels away or gives them back), Browse opened when asked, and
+    // Browse's list, which the first entry into Textures after a client load lists from a catalogue
+    // built there.
+    if (fileControl)
+      fileControl->UpdateInterface();
     else
-      textureView->left();
+      DisplayedContentChanged();
+    if (openBrowse && fileControl)
+    {
+      wxAuiPaneInfo & browse = interfaceManager.GetPane(fileControl);
+      if (!browse.IsShown())
+      {
+        browse.Show(true);
+        m_layoutPending = true;
+      }
+    }
+    if (fileControl)
+      fileControl->FollowViewerMode(textures);
+    endLayoutBatch();
+    if (m_uncoverPending)
+    {
+      m_uncoverPending = false;
+      unityRendererHost->showContent(false);
+    }
+    // The panel toggles answered now, not one idle later, so they change with everything else.
+    if (commandBar)
+      commandBar->UpdateWindowUI(wxUPDATE_UI_FROMIDLE);
   }
-  // The centre, the panels and the menus first (UpdateInterface -> DisplayedContentChanged ->
-  // UpdateUnityViewportState puts the panels away or gives them back), painted at once; then Browse's
-  // tree, which the first entry into Textures after a client load lists from a catalogue built there.
-  if (fileControl)
-    fileControl->UpdateInterface();
-  else
-    DisplayedContentChanged();
-  Update();
-  if (fileControl)
-    fileControl->FollowViewerMode(mode == ViewerMode::Textures);
+  // Going to Models the player is let go as the repaint starts: its show lands while the panels paint,
+  // rather than after them on an empty viewport. Going to Textures it is hidden after the repaint, so the
+  // texture view it uncovers is already painted.
+  // A window that had the keyboard and was put away while frozen keeps it (a hidden window's hide moves
+  // the focus away only when Windows sees it hidden, and frozen it already reads so): the keyboard to
+  // Browse's search box, or the frame.
+  if (wxWindow * focus = wxWindow::FindFocus())
+    if (!focus->IsShownOnScreen())
+    {
+      if (fileControl && fileControl->txtContent && fileControl->txtContent->IsShownOnScreen())
+        fileControl->txtContent->SetFocus();
+      else
+        SetFocus();
+    }
+  if (!textures)
+    hold.release();
+  if (paintNow)
+    PaintNow();
 }
 
 void ModelViewer::ShowTexture(const TextureEntry & entry, bool lookup)
@@ -4104,8 +4383,7 @@ void ModelViewer::TextureSelectionChanged()
     name.Replace(wxT("/"), wxT("\\"));
     name = name.AfterLast('\\');
     commandModelLabel->SetLabel(name.IsEmpty() ? wxString(_("No texture selected")) : name);
-    commandModelLabel->SetForegroundColour(name.IsEmpty() ? UiStyle::secondaryText()
-                                                          : wxSystemSettings::GetColour(wxSYS_COLOUR_WINDOWTEXT));
+    UiStyle::setRole(commandModelLabel, name.IsEmpty() ? UiStyle::Role::SecondaryText : UiStyle::Role::Text);
     commandModelLabel->SetToolTip(path);
     commandModelLabel->Refresh();
   }
@@ -4152,7 +4430,9 @@ void ModelViewer::OnCommandBar(wxCommandEvent & event)
       // From the id only, never the tool's checked state: a click on the active radio tool, a double-click
       // and the empty viewer's posted command all arrive unchecked.
       const bool textures = event.GetId() == ID_UI_TEXTURES;
-      SetViewerMode(textures ? ViewerMode::Textures : ViewerMode::Models);
+      // Browse (closed) opens in the same layout as the switch, when there is a client to list in it.
+      const bool openBrowse = UnityAssetAccess::hasActiveClient() && !interfaceManager.GetPane(fileControl).IsShown();
+      SetViewerMode(textures ? ViewerMode::Textures : ViewerMode::Models, openBrowse, true);
       if (!UnityAssetAccess::hasActiveClient())
       {
         PromptAndLoadClient();
@@ -4301,7 +4581,169 @@ void ModelViewer::OnUpdateCommandUI(wxUpdateUIEvent & event)
     case ID_UI_TEXTURES:
       event.Check(m_viewerMode == ViewerMode::Textures);
       break;
+    case ID_VIEW_APPEARANCE_SYSTEM:
+      event.Check(UiStyle::themePreference() == UiStyle::Theme::System);
+      break;
+    case ID_VIEW_APPEARANCE_LIGHT:
+      event.Check(UiStyle::themePreference() == UiStyle::Theme::Light);
+      break;
+    case ID_VIEW_APPEARANCE_DARK:
+      event.Check(UiStyle::themePreference() == UiStyle::Theme::Dark);
+      break;
   }
+}
+
+// THE THEME. The palette in use (UiStyle) follows the Appearance preference, Windows' app mode (for
+// System) and high contrast (which overrides both). Light or dark is fixed for a run -- wxWidgets' dark
+// mode, which darkens everything Windows draws, is decided before the first window -- so a change that
+// asks for the other one is offered as a restart (OfferThemeRestart); a light run follows high contrast
+// at once (ApplyTheme: every window's colours, the pane chrome, the toolbars, then one repaint). The
+// viewport is not touched: it draws the same in every theme.
+void ModelViewer::OnAppearance(wxCommandEvent & event)
+{
+  const UiStyle::Theme theme = event.GetId() == ID_VIEW_APPEARANCE_LIGHT  ? UiStyle::Theme::Light
+                             : event.GetId() == ID_VIEW_APPEARANCE_DARK   ? UiStyle::Theme::Dark
+                                                                          : UiStyle::Theme::System;
+  if (theme == UiStyle::themePreference())
+    return;
+  UiStyle::setThemePreference(theme);
+  // Kept at once (and again at exit), so a restart straight after reads it.
+  QSettings config(QString::fromWCharArray(cfgPath.c_str()), QSettings::IniFormat);
+  config.setValue("Settings/Appearance", UiStyle::themeToSetting(theme));
+  config.sync();
+  ApplyTheme();
+  if (UiStyle::restartWanted())
+    OfferThemeRestart(true);
+  else
+    m_themeRestartOffered = -1;   // back to this run's: a later change is offered again
+}
+
+// Light and dark are fixed for a run (wxWidgets' dark mode is decided before the first window): a
+// change that asks for the other one is offered as a restart. Asked about every time the user chooses
+// an appearance; for Windows' own changes (System following the app mode, high contrast in a dark run)
+// once per change, not at every message of the burst Windows sends.
+void ModelViewer::OfferThemeRestart(bool chosen)
+{
+  if (batchMode)
+    return;   // a headless run (an export's child process, a command-line load) never asks
+  if (!canCloseNow())
+  {
+    // Asked again once the dialog or the load in progress is done (OnThemeRecheck), as the user's own
+    // choice if it was one.
+    m_themeOfferChosen = m_themeOfferChosen || chosen;
+    m_themeRecheck.StartOnce(1000);
+    return;
+  }
+  chosen = chosen || m_themeOfferChosen;
+  m_themeOfferChosen = false;
+  const bool wantDark = UiStyle::darkWanted();
+  if (!chosen && m_themeRestartOffered == (wantDark ? 1 : 0))
+    return;
+  m_themeRestartOffered = wantDark ? 1 : 0;
+  const wxString what = wantDark ? _("the dark appearance")
+                      : UiStyle::highContrastOn() ? _("Windows' high-contrast colours") : _("the light appearance");
+  if (exportRunning())
+  {
+    wxMessageBox(wxString::Format(_("The viewer changes to %s when it next starts (an export is still running)."), what),
+                 _("Appearance"), wxOK | wxICON_INFORMATION, this);
+    return;
+  }
+  // Yes by default only when the user just chose it; a change of Windows' never restarts on Enter.
+  if (wxMessageBox(wxString::Format(_("The viewer changes to %s when it restarts. The model on screen is closed; "
+                                      "your settings are kept.\n\nRestart now?"), what),
+                   _("Appearance"), wxYES_NO | (chosen ? wxYES_DEFAULT : wxNO_DEFAULT) | wxICON_QUESTION, this) == wxYES)
+    Relaunch();
+  else
+    SetStatusText(wxString::Format(_("The viewer changes to %s at its next start (or File > Restart)."), what), 0);
+}
+
+void ModelViewer::ApplyTheme()
+{
+  const UiStyle::Palette previous = UiStyle::palette();
+  if (!UiStyle::refreshPalette())
+    return;
+  Freeze();
+  UiStyle::retheme(previous);
+  if (UiDockArt * art = dynamic_cast<UiDockArt *>(interfaceManager.GetArtProvider()))
+    art->applyPalette();
+  // The toolbars (the command bar, the texture view's) keep their background in a bitmap, which wx
+  // only makes again for a resize or Windows' own colour change: the same event makes it again now.
+  std::function<void(wxWindow *)> toolbars = [&](wxWindow * w) {
+    if (wxAuiToolBar * bar = dynamic_cast<wxAuiToolBar *>(w))
+    {
+      wxSysColourChangedEvent changed;
+      changed.SetEventObject(bar);
+      bar->GetEventHandler()->ProcessEvent(changed);
+    }
+    for (wxWindow * child : w->GetChildren())
+      if (!child->IsTopLevel())
+        toolbars(child);
+  };
+  toolbars(this);
+  // Colours the shell does not take from a role: the item names' quality colours.
+  if (isChar && charControl && charControl->model)
+    charControl->RefreshEquipment();
+  Thaw();
+  ::RedrawWindow((HWND)GetHWND(), nullptr, nullptr, RDW_INVALIDATE | RDW_ERASE | RDW_FRAME | RDW_ALLCHILDREN);
+}
+
+void ModelViewer::OnThemeChangedOutside()
+{
+  // Windows' app mode or high contrast changed: a light run follows high contrast at once (ApplyTheme);
+  // what would need the other of light and dark is offered as a restart, once.
+  ApplyTheme();
+  if (UiStyle::restartWanted())
+    OfferThemeRestart(false);
+  else
+    m_themeRestartOffered = -1;   // back to this run's: a later change is offered again
+}
+
+void ModelViewer::CreateThemedStatusBar()
+{
+  const bool generic = UiStyle::darkActive();
+  const int fields = 5;
+  // wx shows a cut-off field's full text itself only on its native bar (and refuses a tooltip set by
+  // hand while it would): UiEquipGenericStatusBar does it for its own.
+  UseNativeStatusBar(!generic);
+  CreateStatusBar(fields, generic ? (wxSTB_DEFAULT_STYLE & ~wxSTB_SHOW_TIPS) : wxSTB_DEFAULT_STYLE);
+  UseNativeStatusBar(true);
+  wxStatusBar * bar = GetStatusBar();
+  int widths[fields] = { -1, 100, 50, 125, 125 };
+  SetStatusWidths(fields, widths);
+  // Flat fields: text, not a row of sunken boxes.
+  int styles[fields] = { wxSB_FLAT, wxSB_FLAT, wxSB_FLAT, wxSB_FLAT, wxSB_FLAT };
+  bar->SetStatusStyles(fields, styles);
+  if (generic)
+  {
+    UiStyle::setRole(bar, UiStyle::Role::Panel);
+    UiEquipGenericStatusBar(bar);
+  }
+}
+
+void ModelViewer::OnSysColourChanged(wxSysColourChangedEvent & event)
+{
+  // Windows' colours changed (high contrast on or off): once wx has passed the change on, the palette is
+  // resolved again.
+  event.Skip();
+  CallAfter([this] { OnThemeChangedOutside(); });
+}
+
+void ModelViewer::OnThemeRecheck(wxTimerEvent & WXUNUSED(event))
+{
+  OnThemeChangedOutside();
+}
+
+WXLRESULT ModelViewer::MSWWindowProc(WXUINT message, WXWPARAM wParam, WXLPARAM lParam)
+{
+  // Windows' app mode or high contrast changed. wxWidgets passes the app mode's message on as a
+  // wxEVT_SYS_COLOUR_CHANGED (OnSysColourChanged); checked once more a moment later for both: Windows sends
+  // these in bursts, and the values they announce are not always readable at the first one.
+  if (WinTheme::isColourSettingChange(message, wParam, lParam))
+    m_themeRecheck.StartOnce(500);
+  WXLRESULT result = 0;
+  if (m_menuBarTitles && m_menuBarTitles->handle(message, wParam, lParam, &result))
+    return result;
+  return wxFrame::MSWWindowProc(message, wParam, lParam);
 }
 
 void ModelViewer::OnKeyboardShortcuts(wxCommandEvent & WXUNUSED(event))
