@@ -63,12 +63,12 @@ int main() {
     if(sql.contains("FROM TransmogSet S")) return related;
     return ItemSets::Rows{};
   });
-  for(const auto& set:filtered) require(set.id!=300,"covered reward fragment must be omitted");
-  for(int id : {100,200,201,301,302,303,304,305,306,307}) {
+  for(const auto& set:filtered) require(set.id!=300 && set.id!=306,"covered reward fragments must be omitted even with different names");
+  for(int id : {100,200,201,301,302,303,304,305,307}) {
     bool found=false; for(const auto& set:filtered) found |= set.id==id;
     require(found,"unique, incomplete, differently related or full sets must remain");
   }
-  require(filtered.size()==11,"only the proven redundant record is removed");
+  require(filtered.size()==10,"only proven redundant records are removed");
   for(auto& row:related) { row[13]="0"; row[14]="0"; }
   auto oldSchema=ItemSets::read([&](const QString& sql) {
     if(sql.startsWith("PRAGMA")) return ItemSets::Rows{{"0","ID"},{"1","Name_Lang"}};

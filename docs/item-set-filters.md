@@ -71,3 +71,27 @@ Grouped records, full outfits, fragments with exclusive sources, incomplete reco
 The local Astral Gladiator's Chain Armor case keeps complete records 4102/4103/4109/4115/4116/4122 and omits fragments 4069–4083. Cosmic Dreadplate keeps 2352/2353 and omits 2420–2424. The real-data catalog contains 4,360 named transmog records, down from 5,095, plus all 1,008 traditional sets. Synthetic coverage fixtures verify same-group union, exclusive sources, different class/name/group relationships, incomplete sources and full ungrouped variants. Schema 15 requires a one-time cache rebuild after installation.
 
 Full hidden validation after fragment filtering passed 233,795 assertions: 5,103 usable filtered selections, 17,597 item changes and 1,089 appearance changes. Both Release x64 builds passed. Shipped XML/DBD extraction from client 12.1.0.69933 confirmed Astral fragment 4074 has class mask 4/group 0 and variants 4103/4116 have class mask 4/group 284. Eleven installed files were backed up and SHA-256 verified. No application was reopened and no commit or push was made.
+
+
+### Differently named reward fragments — 2026-10-04
+
+The redundancy guard no longer requires matching localized names. Draconic Plate
+fragments 3608–3622 reuse exact sources from complete Verdant Plate variants
+3216/3218/3220; Dread Vestment fragments 1706/1708/1709/1726/1728/1729 reuse
+complete Dread Plate variants 1731/1735. Names alone are not reliable family keys.
+Every source must still be covered by complete, resolvable variants in one real
+catalog group with the same class mask. Different groups are never combined.
+Unique sources, incomplete records and full outfits remain available. The omitted
+fragment names are not aliases in name search; find these outfits under the
+retained complete catalog names (Verdant Plate and Dread Plate).
+
+The real-data catalog now retains 4,240 transmogs and all 1,008 traditional sets.
+Regression tests explicitly reject the reported fragments and require the five
+complete donor records to remain selectable with their equipment slots. Synthetic
+fixtures verify differently named duplicates and preserve unrelated records.
+
+Validation passed: 242,436 hidden integration assertions, 4,983 filtered selections,
+17,489 item changes and 1,088 appearance changes; opening took 1,123 ms and four
+queries. All 194 individual-picker/category regressions and catalog fixtures passed.
+Both Release x64 builds passed; the daily executable was backed up, installed and
+SHA-256 verified. Visual verification of these two families remains pending.
