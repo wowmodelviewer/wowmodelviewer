@@ -12,7 +12,6 @@
 #include "CharDetails.h"
 #include "CharDetailsEvent.h"
 #include "Game.h"
-#include "UiControls.h"   // UiBitmapComboBox: the dark theme's colours
 
 #include "logger/Logger.h"
 
@@ -76,7 +75,7 @@ CharDetailsCustomizationChoice::CharDetailsCustomizationChoice(wxWindow* parent,
     top->Add(new wxStaticText(this, wxID_ANY, option.values[0][0].toStdWString()),
       wxSizerFlags().Align(wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL).Border(wxRIGHT, 5));
 
-    choice_ = new UiBitmapComboBox(this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0, NULL, wxCB_READONLY);
+    choice_ = new wxBitmapComboBox(this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0, NULL, wxCB_READONLY);
 
     top->Add(choice_, wxSizerFlags().Align(wxALIGN_CENTER | wxALIGN_CENTER_VERTICAL).Border(wxRIGHT, 5));
 

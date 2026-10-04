@@ -33,6 +33,8 @@
 #include <wx/aui/aui.h>
 #include <wx/statline.h>
 
+class wxDarkModeSettings;
+
 namespace UiStyle
 {
   // ---- Spacing scale (DIP). XS between a label and its control, S between rows, M around a
@@ -84,13 +86,14 @@ namespace UiStyle
   };
   // ---- Themes. The preference (View > Appearance; Config.ini Settings/Appearance): System follows
   // Windows' app mode (Settings > Personalisation > Colours), Light and Dark are fixed. Windows'
-  // high-contrast mode overrides all three: the palette is then made of the system colours.
+  // high-contrast mode overrides all three: the palette is then made of the system colours (in a dark run,
+  // from the next start: see fixSessionTheme).
   enum class Theme { System, Light, Dark };
   // As kept in Config.ini (Settings/Appearance): 0 System, 1 Light, 2 Dark (anything else reads as System).
   Theme themeFromSetting(int value);
   int themeToSetting(Theme theme);
   Theme themePreference();
-  // Sets the preference; refreshPalette() then makes it the palette in use.
+  // Sets the preference. Once the run is fixed (fixSessionTheme) it changes only what restartWanted() says.
   void setThemePreference(Theme theme);
   // Windows' app mode is dark (the documented-in-practice AppsUseLightTheme value; light when unknown).
   bool systemAppsDark();
@@ -102,16 +105,24 @@ namespace UiStyle
 
   // The palette in use.
   const Palette & palette();
-  // The palette a window is drawn with: the one in use, or -- for a window the shell leaves to Windows'
-  // light look (inside a dialog, or kept light: keepLight) -- the light one (the system colours in high
-  // contrast). Roles take their colours from it.
-  const Palette & paletteOf(const wxWindow * window);
-  // True while the palette in use is the dark one (Windows' title bar and native themes follow it).
+  // True in a dark run (wxWidgets' dark mode on).
   bool darkActive();
-  // Resolves the palette again from the preference and Windows' state (app mode, high contrast); true
-  // when it changed. Called at start-up, when the preference changes and when Windows' colours or
-  // app mode change.
+  // Resolves the palette again; true when it changed. Before the run is fixed, from the preference and
+  // Windows' state; after, a dark run keeps the dark palette and a light run follows high contrast.
   bool refreshPalette();
+
+  // ---- This run's theme. wxWidgets' dark mode is decided once, before the first window, and cannot be
+  // switched while the viewer runs. darkWanted(): the preference, Windows' app mode and high contrast now
+  // ask for the dark theme. fixSessionTheme(dark, locked) fixes, for this run, whether it is light or dark:
+  // darkActive() keeps that answer, a light run still follows high contrast, and a change of the
+  // preference or of Windows that asks for the other one waits for a restart (restartWanted()) -- unless
+  // the run is locked: a restart would give the same (no dark mode on this Windows, or wxWidgets' own
+  // msw.dark-mode option forcing it).
+  bool darkWanted();
+  void fixSessionTheme(bool dark, bool locked);
+  bool restartWanted();
+  // wxWidgets' dark mode settings in the palette's colours, for wxApp::MSWEnableDarkMode (which owns it).
+  wxDarkModeSettings * newDarkModeSettings();
 
   // ---- Type roles: one family (the system UI font), hierarchy by weight, size and colour.
   enum class Type
@@ -146,16 +157,6 @@ namespace UiStyle
   // (a label that inherited its panel's text colour when it was made). Then everything is repainted.
   void retheme(const Palette & previous);
 
-  // A native window in the theme in use (the dark theme: Windows' own dark styles where it has them,
-  // the palette's colours where the control takes colours, simple borders where Windows' themed border
-  // stays light; the light theme: as Windows draws it). For one window, not its children: the frame
-  // walks its windows on a theme change and themes every window made afterwards as it is created.
-  void themeNativeWindow(wxWindow * window);
-  // A window the shell leaves to Windows' light look in every theme, with everything in it and the
-  // floating frame it is shown in: Settings, whose native tabs and group boxes Windows draws light in
-  // every theme -- a whole light window rather than a half-dark one, as the dialogs are.
-  void keepLight(wxWindow * window);
-
   // A colour as close to the given one as reads on a background: mixed towards white (on a dark
   // background) or black until its contrast is at least ratio (WCAG: 4.5 for text). The colour itself when
   // it already reads.
@@ -163,7 +164,6 @@ namespace UiStyle
 
   // ---- Helpers the panels share.
   inline wxColour secondaryText() { return palette().textSecondary; }
-  inline wxColour secondaryText(const wxWindow * window) { return paletteOf(window).textSecondary; }
   wxStaticText * secondaryLabel(wxWindow * parent, const wxString & text, wxWindowID id = wxID_ANY);
 
   // A panel's body: its background and text colour (inherited by its labels and check boxes).

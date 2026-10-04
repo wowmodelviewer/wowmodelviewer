@@ -249,38 +249,48 @@ Format loosely based on [Keep a Changelog](https://keepachangelog.com/).
   `docs/third-party-notices.md`) mark the modes, the utilities, the pane toggles, the transport and the exports; no
   other images were added. Native controls Windows draws well (combo boxes, check boxes, sliders, list headers,
   menus, the status bar) stay native.
-- **View > Appearance: System, Light or Dark, switched at once, no restart.** System (the default) follows
-  Windows' app mode (Settings > Personalization > Colors), also when it changes while the viewer runs; Light and
-  Dark keep their palette whatever Windows uses; the choice is kept in Config.ini (`Settings/Appearance`: 0 System,
-  1 Light, 2 Dark). Windows' high-contrast mode still wins over every choice: the shell then takes the system
-  colours, as before. The dark palette is a restrained near-neutral grey (window 22,22,24, panels 36,36,39, fields
-  46,46,50, text 230,230,232) with an accent blue close to the light one's (38,118,204: white text on it, and on
-  its hover and pressed shades, at least 4.5:1); icons are the same drawings recoloured from the palette, and the
-  viewport, its background and the texture view's own checkerboard / black / white / grey backgrounds are the same
-  in both themes. Item names in the rare blue and epic purple are lightened in their own hue on the dark panel so
-  they read. Native controls follow through the themes Windows ships for its own dark mode (title bar, scroll bars,
-  combo boxes and their lists, check boxes, list views and their headers, trees, text and search fields, spin
-  buttons; the Geosets list's selected row is drawn from the palette). In Dark the status bar is wxWidgets' own,
-  so it can take the panel colour (3 px less tall than Windows' own, so the viewport is 3 px taller; a screen
-  reader is still told a status bar and its fields, and a cut-off field shows its full text as a tooltip, but it
-  has no size grip); Light and high contrast keep Windows' own status bar. The Attachments pane (View >
-  Attachments) is on the panel colours too, in both themes. What stays light in Dark: the menu bar and its menus,
-  message boxes and the Open / Save dialogs, which Windows offers no supported dark mode for; the
-  viewer's own dialogs and Settings, whose native tabs and group boxes Windows draws light in every theme (each
-  stays a whole light window, title bar included, rather than a half-dark one); and the grey placeholder text of
-  an empty search field, which the native control draws.
+- **View > Appearance: System, Light or Dark, the whole window dark in Dark -- menus and dialogs too.** System
+  (the default) follows Windows' app mode (Settings > Personalization > Colors); Light and Dark keep their palette
+  whatever Windows uses; the choice is kept in Config.ini (`Settings/Appearance`: 0 System, 1 Light, 2 Dark).
+  Windows' high-contrast mode still wins over every choice: the shell then takes the system colours, as before.
+  A dark run uses wxWidgets' dark mode, which darkens most of what Windows draws: the native controls, the
+  menu bar, Settings and the viewer's own dialogs in the palette's colours; the title bars, the menus' items,
+  message boxes and the Open / Save dialogs in Windows' own dark. It is decided once, as the viewer starts,
+  so choosing the other of light and dark (or Windows changing its app mode under System) asks to restart:
+  "Restart now" closes the viewer,
+  saving as usual, and the new one starts once the old one has gone; "No" keeps this run as it is until the next
+  start. A light run follows high contrast at once; a dark run asks to restart for it. The dark palette is a
+  restrained near-neutral grey (window 22,22,24, panels 36,36,39, fields 46,46,50, text 230,230,232) with an
+  accent blue close to the light one's (38,118,204: white text on it, and on its hover and pressed shades, at
+  least 4.5:1); icons are the same drawings recoloured from the palette, and the viewport, its background and
+  the texture view's own checkerboard / black / white / grey backgrounds are the same in both themes. Item names
+  in the rare blue and epic purple are lightened in their own hue on the dark panel so they read. Three parts are
+  drawn by the viewer in a dark run: the slider's channel (Windows has no dark slider); the status bar, which
+  is wxWidgets' own there so it can take the panel colour instead of Windows' black one (3 px less tall, so the
+  viewport is 3 px taller; a screen reader is still told a status bar and its fields, and a cut-off field shows
+  its full text as a tooltip, but it has no size grip); and the menu bar's titles (File, View, ...). Windows draws
+  a menu bar through the theme wxWidgets darkens only while the window has a title bar, so in the viewer's
+  fullscreen -- how it starts -- the bar came out dark grey with black titles. The titles are owner-drawn now,
+  the same in fullscreen and in a window: the palette's text, its secondary text while another window is active
+  (wxWidgets' own was the disabled grey), the hover colour under the mouse and while a title's menu is open,
+  on the panel colour; Windows' widths, Alt with the underlined letter and the names a screen reader reads are
+  unchanged. Light and high contrast keep Windows' own status bar and menu bar.
+  The Attachments pane (View > Attachments) is on the panel colours too, in both themes. What stays light in
+  Dark: the colour, font, find and print dialogs (none of which the viewer opens today). On Windows 10 before
+  1903 (build 18362), where wxWidgets has no dark mode, a dark choice gives a light run (and no restart is
+  offered).
 - **wxWidgets 3.3.3 (from 3.2.10).** The interface toolkit's official prebuilt x64 DLLs (vc14x, from the
   v3.3.3 release: headers, Dev, ReleaseDLL and ReleasePDB) go in `ThirdParty/wxWidgets33`, next to the 3.2.10
   tree in `ThirdParty/wxWidgets3`, so branches still on 3.2 keep building; the viewer needs
-  `wxbase333u_vc14x_x64.dll`, `wxmsw333u_core_vc14x_x64.dll` and `wxmsw333u_aui_vc14x_x64.dll` next to it. Its
-  own dark mode is not turned on. Kept as it was: the docking manager gets wxWidgets 3.2's flags (3.3's default
+  `wxbase333u_vc14x_x64.dll`, `wxmsw333u_core_vc14x_x64.dll` and `wxmsw333u_aui_vc14x_x64.dll` next to it. It
+  brings the dark mode above. Kept as it was: the docking manager gets wxWidgets 3.2's flags (3.3's default
   resizes live -- the Unity player at every mouse move of a sash drag -- and lays the window out unfrozen,
   which the one-step Models / Textures switch relies on it not doing); a status line or Geosets notice
   that changes keeps wrapping (3.3 skips a re-wrap at an unchanged width); the About box's icon is scaled
-  as before. The search fields' magnifier and clear icons are wxWidgets 3.3's, drawn dark (also on the
-  Dark appearance's fields). A layout saved before loads unchanged, but a layout saved by this version is
-  not read by a 3.2 build (it then starts with the default layout once). A headless run that ends without
-  a window now exits with code 255 instead of -1.
+  as before. The search fields' magnifier and clear icons are wxWidgets 3.3's (white in a dark run). A
+  layout saved before loads unchanged, but a layout saved by this version is not read by a 3.2 build (it
+  then starts with the default layout once). A headless run that ends without a window now exits with code
+  255 instead of -1.
 - **Character > Import Armory Character: pick the region, realm and name instead of pasting a link.** The
   dialog asks for a region (Europe, Americas & Oceania, Korea, Taiwan -- the regions the importer serves),
   a realm and a character name, and imports with Enter or the bold Import character button; pasting an

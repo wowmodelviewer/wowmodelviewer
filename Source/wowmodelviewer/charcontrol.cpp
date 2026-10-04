@@ -134,7 +134,7 @@ CharControl::CharControl(wxWindow* parent, wxWindowID id)
     buttons[type] = slot; \
   } \
   gs2->Add(buttons[type], wxSizerFlags().Expand()); \
-  gs2->Add(levelboxes[type]=new UiComboBox(this, ID_EQUIPMENT + 1000 + type, caption)); \
+  gs2->Add(levelboxes[type]=new wxComboBox(this, ID_EQUIPMENT + 1000 + type, caption)); \
   levelboxes[type]->SetMinSize(wxSize(15, -1)); \
   levelboxes[type]->SetMaxSize(wxSize(15, -1)); \
   { \

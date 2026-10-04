@@ -25,17 +25,12 @@
 #ifndef WX_PRECOMP
     #include <wx/wx.h>
 #endif
-#include <wx/bitmap.h>
-#include <wx/bmpcbox.h>
 #include <wx/bookctrl.h>
-#include <wx/combobox.h>
-#include <wx/odcombo.h>
-#include <wx/renderer.h>
 #include <wx/slider.h>
 #include <wx/srchctrl.h>
 #include <wx/statusbr.h>
-#include <wx/textctrl.h>
 
+#include <memory>
 #include <vector>
 
 #include "UiIcons.h"
@@ -128,36 +123,9 @@ private:
   int m_hot = -1;
 };
 
-// NATIVE CONTROLS IN THE DARK THEME (see UiStyle::themeNativeWindow for the rest). Four native controls
-// paint a part with Windows' light colours whatever their theme; these draw that part from the palette in
-// the dark theme and leave the light one as Windows draws it.
-//   UiComboBox        a combo box whose field, disabled, Windows fills with the light button face
-//   UiTextCtrl        a one-line text field, likewise when disabled
-//   UiBitmapComboBox  wxBitmapComboBox, which wx owner-draws in the light window colours
-//   UiSlider          a slider whose channel Windows draws light (there is no dark trackbar theme)
-class UiComboBox : public wxComboBox
-{
-public:
-  using wxComboBox::wxComboBox;
-  WXHBRUSH MSWControlColor(WXHDC pDC, WXHWND hWnd) wxOVERRIDE;
-};
-
-class UiTextCtrl : public wxTextCtrl
-{
-public:
-  using wxTextCtrl::wxTextCtrl;
-  WXHBRUSH MSWControlColor(WXHDC pDC, WXHWND hWnd) wxOVERRIDE;
-};
-
-class UiBitmapComboBox : public wxBitmapComboBox
-{
-public:
-  using wxBitmapComboBox::wxBitmapComboBox;
-
-protected:
-  bool MSWOnDraw(WXDRAWITEMSTRUCT * item) wxOVERRIDE;
-};
-
+// THREE NATIVE PARTS IN THE DARK RUN that wxWidgets' dark mode leaves as they are (see UiStyle.cpp): a
+// slider's channel, which Windows draws light (there is no dark trackbar theme), drawn here from the
+// palette; the status bar; and the menu bar's titles, below.
 class UiSlider : public wxSlider
 {
 public:
@@ -165,14 +133,41 @@ public:
   bool MSWOnNotify(int idCtrl, WXLPARAM lParam, WXLPARAM * result) wxOVERRIDE;
 };
 
-// wx's own drawing of native-looking items (the Geosets tree list's rows) in the dark theme: wx asks
-// Windows for the light Explorer list's selection and gives a selected row the system's black text.
-// Installed while the dark palette is in use (wxRendererNative::Set), removed with the light one.
-void UiSetDarkRenderer(bool dark);
-
-// The status bar of the dark theme is wx's own (Windows' is light in every theme); this gives it what
-// Windows' own gives and wx's lacks on Windows: a status bar for screen readers, the fields' text as its
-// parts, and the full text of a cut-off field as a tooltip. (Its size grip wx draws on GTK only.)
+// The status bar of the dark run is wx's own, in the panel colour (Windows' own dark status bar is black,
+// and ignores a colour); this gives it what Windows' own gives and wx's lacks on Windows: a status bar
+// for screen readers, the fields' text as its parts, and the full text of a cut-off field as a tooltip.
+// (Its size grip wx draws on GTK only.)
 void UiEquipGenericStatusBar(wxStatusBar * bar);
+
+// The menu bar's titles (File, View, ...) of the dark run. wxWidgets darkens the menu bar through Windows'
+// themed menu bar, and Windows draws a window's menu bar themed only while the window has a caption: in
+// the viewer's fullscreen (no caption, no border) Windows draws the bar itself, dark grey with BLACK titles.
+// So in the dark run the titles are drawn here, owner-drawn, in both window states alike: the palette's
+// text (its secondary text while another window is the active one), the hover colour under the mouse and
+// while the title's menu is open, on the panel colour, which is also the bar's. The menus stay wxWidgets'
+// and Windows'. The items keep their text, so Alt with the underlined letter still opens a menu, and a
+// screen reader reads each title (MSAA's name for an owner-drawn menu item).
+class UiMenuBarTitles
+{
+public:
+  UiMenuBarTitles();
+  ~UiMenuBarTitles();
+  // Once the frame's menu bar is set (does nothing outside the dark run); again after a title changes.
+  void attach(wxFrame * frame);
+  // The frame's MSWWindowProc asks this FIRST: wxWidgets would take an owner-drawn item's data for a
+  // wxMenuItem of its own. True when the message was a title's (the result in *result).
+  bool handle(WXUINT message, WXWPARAM wParam, WXLPARAM lParam, WXLRESULT * result);
+
+private:
+  struct Title;
+  // The titles back to Windows' own (the frame keeps its menu bar until its window is destroyed).
+  void detach();
+
+  std::vector<std::unique_ptr<Title>> m_titles;
+  wxFrame * m_owner = nullptr;
+  WXHWND m_frame = nullptr;
+  WXHMENU m_bar = nullptr;
+  WXHBRUSH m_background = nullptr;
+};
 
 #endif // UICONTROLS_H

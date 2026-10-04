@@ -12,6 +12,8 @@
 #include <wx/mstream.h>
 #include <wx/splash.h>
 #include <wx/stdpaths.h>
+#include <wx/msw/darkmode.h>
+#include <wx/sysopt.h>
 
 #include <windows.h>
 
@@ -3081,6 +3083,28 @@ static void logNoHeadlessScreenshot()
 
 bool WowModelViewApp::OnInit()
 {
+  // A restart (ModelViewer::Relaunch): wait for the instance that started this one to have exited, so it
+  // has saved its layout and settings and let go of the log before this one reads and opens them.
+  for (int ai = 1; ai + 1 < argc; ai++)
+    if (wxString(argv[ai]) == wxT("-waitpid"))
+    {
+      unsigned long pid = 0;
+      if (wxString(argv[ai + 1]).ToULong(&pid) && pid != 0)
+        if (HANDLE previous = ::OpenProcess(SYNCHRONIZE | PROCESS_QUERY_LIMITED_INFORMATION, FALSE, (DWORD)pid))
+        {
+          // Only the instance that started this one: a process started after this one has merely been
+          // given its number again.
+          FILETIME created, mine, unused;
+          const bool older = ::GetProcessTimes(previous, &created, &unused, &unused, &unused) &&
+                             ::GetProcessTimes(::GetCurrentProcess(), &mine, &unused, &unused, &unused) &&
+                             ::CompareFileTime(&created, &mine) < 0;
+          if (older)
+            ::WaitForSingleObject(previous, 15000);
+          ::CloseHandle(previous);
+        }
+      break;
+    }
+
   bool displayConsole = false;
 
   // init next-gen stuff
@@ -3108,6 +3132,33 @@ bool WowModelViewApp::OnInit()
       earlyHeadless = true;
       break;
     }
+  }
+
+  // THE THEME, before the first window (the splash): wxWidgets' dark mode is decided once, for the
+  // whole run, and only before any window exists. So the appearance is read from Config.ini here
+  // (LoadSettings reads the rest later), and the run is fixed light or dark (UiStyle::fixSessionTheme);
+  // changing it later asks for a restart.
+  {
+    const wxString settingsFile = wxFileName(wxStandardPaths::Get().GetExecutablePath()).GetPath(wxPATH_GET_VOLUME) +
+                                  SLASH + wxT("userSettings") + SLASH + wxT("Config.ini");
+    QSettings config(QString::fromWCharArray(settingsFile.wc_str()), QSettings::IniFormat);
+    UiStyle::setThemePreference(UiStyle::themeFromSetting(config.value("Settings/Appearance", 0).toInt()));
+    // wxWidgets has dark mode from Windows 10 1903 (build 18362); its own msw.dark-mode option (also from
+    // the environment) may have turned it on already, before this: then the run is dark whatever is asked.
+    const bool possible = wxCheckOsVersion(10, 0, 18362);
+    const int option = wxSystemOptions::GetOptionInt(wxT("msw.dark-mode"));
+    const bool forced = possible && (option > 1 || (option == 1 && UiStyle::systemAppsDark()));
+    bool dark = false;
+    if (possible && (forced || UiStyle::darkWanted()))
+    {
+      wxDarkModeSettings * settings = UiStyle::newDarkModeSettings();
+      dark = MSWEnableDarkMode(DarkMode_Always, settings);   // owns the settings when it succeeds
+      if (!dark)
+        delete settings;
+    }
+    // Locked (no restart offered): when a restart would give the same, or when wx's own option decides
+    // (with option 1 wx follows Windows' app mode itself).
+    UiStyle::fixSessionTheme(dark, option != 0 || !possible || (UiStyle::darkWanted() && !dark));
   }
 
   wxSplashScreen* splash = NULL;
@@ -3169,6 +3220,9 @@ bool WowModelViewApp::OnInit()
   LOGGER.addChild(new WMVLog::LogOutputFile("userSettings/log.txt"));
 
   // Just a little header to start off the log file.
+  LOG_INFO << "[theme] appearance" << UiStyle::themeToSetting(UiStyle::themePreference()) << "(0 System, 1 Light, 2 Dark):"
+           << (UiStyle::darkActive() ? "dark run (wxWidgets dark mode)" : UiStyle::darkWanted() ? "light run (no dark mode on this Windows)" : "light run")
+           << (UiStyle::highContrastOn() ? ", high contrast" : "");
   LOG_INFO << "Starting:" << QString::fromStdWString(GLOBALSETTINGS.appName().c_str())
     << QString::fromStdWString(GLOBALSETTINGS.appVersion().c_str())
     << QString::fromStdWString(GLOBALSETTINGS.buildName().c_str());
@@ -3739,10 +3793,8 @@ void WowModelViewApp::LoadSettings()
   customDirectoryPath = config.value("Settings/CustomDirPath", "").toString().toStdWString();
   customFilesConflictPolicy = config.value("Settings/CustomFilesConflictPolicy", 0).toInt();
   displayItemAndNPCId = config.value("Settings/displayItemAndNPCId", 0).toInt();
-  // The appearance (View > Appearance): 0 System (follow Windows' app mode), 1 Light, 2 Dark. Known
-  // before the main window is made, so its first paint already uses the right palette.
-  UiStyle::setThemePreference(UiStyle::themeFromSetting(config.value("Settings/Appearance", 0).toInt()));
-  UiStyle::refreshPalette();   // in case anything resolved the palette before the preference was known
+  // The appearance (View > Appearance; Settings/Appearance: 0 System, 1 Light, 2 Dark) is read before the
+  // first window, in WowModelViewApp::OnInit: wxWidgets' dark mode is decided there.
   // Settings/SSCounter and Settings/DefaultFormat (the screenshot file counter and format) are no longer
   // read or written: Save Screenshot went with the OpenGL viewport.
 

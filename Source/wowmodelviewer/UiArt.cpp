@@ -65,8 +65,8 @@ void UiDockArt::applyPalette()
 void UiDockArt::UpdateColoursFromSystem()
 {
   // The manager calls this when Windows' colours change: the palette's colours, not the system's as the
-  // default art would take them. (Which palette is in use -- light, dark, high contrast -- the frame
-  // decides: ModelViewer::ApplyTheme.)
+  // default art would take them. (Which palette is in use -- light, dark, high contrast -- is the run's:
+  // UiStyle::refreshPalette, ModelViewer::ApplyTheme.)
   wxAuiDefaultDockArt::UpdateColoursFromSystem();
   applyPalette();
 }

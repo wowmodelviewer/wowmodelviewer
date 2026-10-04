@@ -27,6 +27,8 @@
 
 #include "glm/glm.hpp"
 
+#include <memory>
+
 #include <QString>
 #include <QVariantMap>
 
@@ -45,6 +47,8 @@ namespace WMVLog
 {
   class Logger;
 }
+
+class UiMenuBarTitles;
 
 class ModelViewer: public wxFrame
 {    
@@ -162,6 +166,10 @@ public:
   void OnSize(wxSizeEvent &event);
   void OnExit(wxCommandEvent &event);
   void OnRestart(wxCommandEvent &event); // File > Restart: relaunch the app in one click
+  void Relaunch();                       // close this instance and start a new one
+  bool exportRunning() const;            // an export's child process is still at work
+  bool canCloseNow() const;              // not inside a modal dialog's loop or a yield
+  wxString m_startDirectory = wxGetCwd(); // the working directory the viewer was started in
   void UpdateCanvasStatus();
 
   // menu commands
@@ -171,16 +179,17 @@ public:
   void OnSysColourChanged(wxSysColourChangedEvent & event);
   void OnThemeRecheck(wxTimerEvent & event);
   WXLRESULT MSWWindowProc(WXUINT message, WXWPARAM wParam, WXLPARAM lParam) wxOVERRIDE;
-  // The palette resolved again (preference, Windows' app mode, high contrast) and, when it changed or
-  // force is set, applied to every window; ApplyNativeTheme does the parts Windows draws itself.
-  void ApplyTheme(bool force = false);
-  void ApplyNativeTheme();
-  // The status bar of the theme in use: Windows' own in the light theme and in high contrast (as
-  // always), wx's own in the dark theme, where it can take the palette (Windows' is light in every
-  // theme). Made again, with its fields' text, when the theme changes between them.
+  // The palette resolved again (in a light run: high contrast on or off) and, when it changed, applied to
+  // every window. Light and dark themselves are fixed for the run (UiStyle.h).
+  void ApplyTheme();
+  // Light and dark are fixed for a run: a change that asks for the other one is offered as a restart.
+  void OfferThemeRestart(bool chosen);
+  void OnThemeChangedOutside();
+  int m_themeRestartOffered = -1;   // the appearance (0 light, 1 dark) a restart was last offered for
+  bool m_themeOfferChosen = false;  // a restart offer for the user's own choice, put off (canCloseNow)
+  // The status bar of the run: Windows' own in a light run and in high contrast (as always), wx's own in
+  // a dark run, where it can take the palette (Windows' own dark status bar is black).
   void CreateThemedStatusBar();
-  bool m_genericStatusBar = false;
-  void OnWindowCreated(wxWindowCreateEvent & event);
 
   // THE LAYOUT BATCH (a viewer-mode switch). While one is open, CommitLayoutIfChanged and
   // commitDocksAtTheirSize only note that the layout has to be committed; closing the outermost batch
@@ -330,7 +339,8 @@ public:
   bool unityViewportNotice(ViewportNotice & notice) const;
   ViewerMode m_viewerMode = ViewerMode::Models;
   bool m_helpInStatus = false;   // DoGiveHelp has help text in the status bar, to take away
-  wxTimer m_themeRecheck;          // ApplyTheme once more after a burst of Windows' colour messages
+  wxTimer m_themeRecheck;          // the theme checked once more after a burst of Windows' colour messages
+  std::unique_ptr<UiMenuBarTitles> m_menuBarTitles;  // the menu bar's titles in the dark run (UiControls.h)
   bool m_frameActive = true;     // the window is the active one (its last activate event): a pane's caption
                                  // reads as active only then (UpdateActivePaneCaption)
   // THE TEXTURE WORKSPACE. While a texture is on screen, the panels that only act on a model are put

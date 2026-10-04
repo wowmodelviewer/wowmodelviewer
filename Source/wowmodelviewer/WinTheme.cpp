@@ -16,17 +16,12 @@
 #include <cwchar>
 
 #include <windows.h>
-#include <commctrl.h>
-#include <dwmapi.h>
 #include <roapi.h>
-#include <uxtheme.h>
 #include <windows.ui.viewmanagement.h>
 #include <wrl/client.h>
 #include <wrl/wrappers/corewrappers.h>
 
-#pragma comment(lib, "dwmapi.lib")
 #pragma comment(lib, "runtimeobject.lib")
-#pragma comment(lib, "uxtheme.lib")
 
 namespace WinTheme
 {
@@ -109,69 +104,5 @@ namespace WinTheme
       return true;
     const wchar_t * what = reinterpret_cast<const wchar_t *>(lParam);
     return what && (std::wcscmp(what, L"ImmersiveColorSet") == 0 || std::wcscmp(what, L"WindowsThemeElement") == 0);
-  }
-
-  bool setDarkTitleBar(void * hwnd, bool dark, unsigned long caption)
-  {
-    if (!hwnd)
-      return false;
-    const HWND h = static_cast<HWND>(hwnd);
-    const BOOL value = dark ? TRUE : FALSE;
-    // 20 = DWMWA_USE_IMMERSIVE_DARK_MODE (Windows 10 2004 and later, documented for Windows 11); the
-    // same attribute was 19 on Windows 10 1809 to 1909.
-    bool ok = SUCCEEDED(::DwmSetWindowAttribute(h, 20, &value, sizeof(value))) ||
-              SUCCEEDED(::DwmSetWindowAttribute(h, 19, &value, sizeof(value)));
-    // 35 = DWMWA_CAPTION_COLOR (Windows 11 22000 and later; refused before, which changes nothing).
-    const COLORREF colour = static_cast<COLORREF>(caption);
-    ::DwmSetWindowAttribute(h, 35, &colour, sizeof(colour));
-    ::SetWindowPos(h, nullptr, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER | SWP_NOACTIVATE | SWP_FRAMECHANGED);
-    return ok;
-  }
-
-  void setTheme(void * hwnd, const wchar_t * app)
-  {
-    if (!hwnd)
-      return;
-    const HWND h = static_cast<HWND>(hwnd);
-    ::SetWindowTheme(h, app, nullptr);
-    ::SetWindowPos(h, nullptr, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER | SWP_NOACTIVATE | SWP_FRAMECHANGED);
-    ::RedrawWindow(h, nullptr, nullptr, RDW_INVALIDATE | RDW_FRAME | RDW_ERASE);
-  }
-
-  void setComboListTheme(void * combo, const wchar_t * app)
-  {
-    COMBOBOXINFO info = {};
-    info.cbSize = sizeof(info);
-    if (combo && ::GetComboBoxInfo(static_cast<HWND>(combo), &info) && info.hwndList)
-      setTheme(info.hwndList, app);
-  }
-
-  void setListHeaderTheme(void * list, const wchar_t * app)
-  {
-    if (list)
-      if (HWND header = ListView_GetHeader(static_cast<HWND>(list)))
-        setTheme(header, app);
-  }
-
-  void * findChild(void * parent, const wchar_t * windowClass)
-  {
-    return parent ? ::FindWindowExW(static_cast<HWND>(parent), nullptr, windowClass, nullptr) : nullptr;
-  }
-
-  void setTooltipTheme(const wchar_t * app)
-  {
-    ::EnumThreadWindows(::GetCurrentThreadId(), [](HWND h, LPARAM data) -> BOOL {
-      wchar_t name[32];
-      if (::GetClassNameW(h, name, 32) && std::wcscmp(name, TOOLTIPS_CLASSW) == 0)
-        ::SetWindowTheme(h, reinterpret_cast<const wchar_t *>(data), nullptr);
-      return TRUE;
-    }, reinterpret_cast<LPARAM>(app));
-  }
-
-  void setTreeTooltipTheme(void * tree, const wchar_t * app)
-  {
-    if (tree)
-      if (HWND tip = TreeView_GetToolTips(static_cast<HWND>(tree)))
-        ::SetWindowTheme(tip, app, nullptr);
   }
 }

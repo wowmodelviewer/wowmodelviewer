@@ -12,9 +12,13 @@
 
 #include <wx/access.h>
 #include <wx/dcbuffer.h>
-#include <wx/msw/dcclient.h>
 #include <wx/graphics.h>
 #include <wx/msw/wrapwin.h>
+#include <oleacc.h>
+#include <uxtheme.h>
+#include <vssym32.h>
+
+#pragma comment(lib, "uxtheme.lib")
 
 #include "UiStyle.h"
 
@@ -696,60 +700,7 @@ void UiTabBar::select(int page)
   SetFocus();
 }
 
-// ===================================================================== native controls, dark theme
-
-WXHBRUSH UiComboBox::MSWControlColor(WXHDC pDC, WXHWND hWnd)
-{
-  if (!IsEnabled() && UiStyle::darkActive())
-  {
-    const UiStyle::Palette & p = palette();
-    HDC hdc = (HDC)pDC;
-    ::SetTextColor(hdc, p.textDisabled.GetPixel());
-    ::SetBkColor(hdc, p.controlBackground.GetPixel());
-    return (WXHBRUSH)wxTheBrushList->FindOrCreateBrush(p.controlBackground)->GetResourceHandle();
-  }
-  return wxComboBox::MSWControlColor(pDC, hWnd);
-}
-
-WXHBRUSH UiTextCtrl::MSWControlColor(WXHDC pDC, WXHWND hWnd)
-{
-  if (!IsThisEnabled() && !HasFlag(wxTE_MULTILINE) && UiStyle::darkActive())
-  {
-    const UiStyle::Palette & p = palette();
-    HDC hdc = (HDC)pDC;
-    ::SetTextColor(hdc, p.textDisabled.GetPixel());
-    ::SetBkColor(hdc, p.controlBackground.GetPixel());
-    return (WXHBRUSH)wxTheBrushList->FindOrCreateBrush(p.controlBackground)->GetResourceHandle();
-  }
-  return wxTextCtrl::MSWControlColor(pDC, hWnd);
-}
-
-bool UiBitmapComboBox::MSWOnDraw(WXDRAWITEMSTRUCT * item)
-{
-  if (!UiStyle::darkActive())
-    return wxBitmapComboBox::MSWOnDraw(item);
-  // As wxBitmapComboBox draws an item, in the palette's colours instead of the system's light ones.
-  const DRAWITEMSTRUCT * dis = reinterpret_cast<const DRAWITEMSTRUCT *>(item);
-  const int pos = (int)dis->itemID;
-  if (pos == -1)
-    return false;
-  int flags = 0;
-  if (dis->itemState & ODS_COMBOBOXEDIT)
-    flags |= wxODCB_PAINTING_CONTROL;
-  if (dis->itemState & ODS_SELECTED)
-    flags |= wxODCB_PAINTING_SELECTED;
-  const UiStyle::Palette & p = palette();
-  const bool selected = (flags & wxODCB_PAINTING_SELECTED) != 0;
-  wxPaintDCEx dc(this, (WXHDC)dis->hDC);
-  const wxRect rect(dis->rcItem.left, dis->rcItem.top, dis->rcItem.right - dis->rcItem.left,
-                    dis->rcItem.bottom - dis->rcItem.top);
-  dc.SetPen(*wxTRANSPARENT_PEN);
-  dc.SetBrush(wxBrush(selected ? p.accent : p.controlBackground));
-  dc.DrawRectangle(rect);
-  dc.SetTextForeground(selected ? p.textOnAccent : p.text);
-  DrawItem(dc, rect, pos, GetString(pos), flags);
-  return true;
-}
+// ======================================================================= dark run: slider, status bar
 
 bool UiSlider::MSWOnNotify(int idCtrl, WXLPARAM lParam, WXLPARAM * result)
 {
@@ -779,32 +730,6 @@ bool UiSlider::MSWOnNotify(int idCtrl, WXLPARAM lParam, WXLPARAM * result)
 
 namespace
 {
-  class UiDarkRenderer : public wxDelegateRendererNative
-  {
-  public:
-    UiDarkRenderer() : wxDelegateRendererNative(wxRendererNative::GetDefault()) {}
-    void DrawItemText(wxWindow * win, wxDC & dc, const wxString & text, const wxRect & rect, int align, int flags,
-                      wxEllipsizeMode ellipsizeMode) wxOVERRIDE
-    {
-      // The text in the palette's colours, a selected row's too (wx would draw it in the system's
-      // black list text), on the selection drawn below.
-      wxDCTextColourChanger colour(dc, (flags & wxCONTROL_DISABLED) ? palette().textDisabled : palette().text);
-      wxRendererNative::GetGeneric().DrawItemText(win, dc, text, rect, align,
-                                                  flags & ~(wxCONTROL_SELECTED | wxCONTROL_DISABLED), ellipsizeMode);
-    }
-    void DrawItemSelectionRect(wxWindow * WXUNUSED(win), wxDC & dc, const wxRect & rect, int flags) wxOVERRIDE
-    {
-      // A selected row in the palette's greys, as Windows' dark Explorer style draws Browse's tree: wx
-      // asks Windows for the light Explorer list's ("EXPLORER::LISTVIEW", whatever the window's theme).
-      if (!(flags & wxCONTROL_SELECTED))
-        return;
-      const UiStyle::Palette & p = palette();
-      wxDCPenChanger pen(dc, *wxTRANSPARENT_PEN);
-      wxDCBrushChanger brush(dc, wxBrush((flags & wxCONTROL_FOCUSED) ? p.pressed : p.hover));
-      dc.DrawRectangle(rect);
-    }
-  };
-
   // What Windows' own status bar tells a screen reader: a status bar whose parts are its fields, each
   // named by its text.
   class StatusBarAccessible : public wxAccessible
@@ -891,11 +816,181 @@ void UiEquipGenericStatusBar(wxStatusBar * bar)
   });
 }
 
-void UiSetDarkRenderer(bool dark)
+// ==================================================================================== dark run: menu bar
+
+// A title's item data. MSAA reads an owner-drawn item's name from an MSAAMENUINFO at the start of it.
+struct UiMenuBarTitles::Title
 {
-  static bool installed = false;
-  if (dark == installed)
+  MSAAMENUINFO msaa;
+  std::wstring label;  // with the mnemonic's &
+  std::wstring name;   // as read out
+  int width;           // of the text: Windows adds the menu font's average character width either side
+};
+
+UiMenuBarTitles::UiMenuBarTitles() = default;
+
+UiMenuBarTitles::~UiMenuBarTitles()
+{
+  detach();
+}
+
+void UiMenuBarTitles::attach(wxFrame * frame)
+{
+  wxMenuBar * bar = frame->GetMenuBar();
+  if (!UiStyle::darkActive() || !bar)
     return;
-  installed = dark;
-  delete wxRendererNative::Set(dark ? new UiDarkRenderer : nullptr);
+  const HWND hwnd = (HWND)frame->GetHWND();
+  const HMENU hmenu = (HMENU)bar->GetHMenu();
+
+  // Each title as wide as Windows makes it: its text in the menu font (and Windows' margins).
+  NONCLIENTMETRICSW metrics = {};
+  metrics.cbSize = sizeof(metrics);
+  ::SystemParametersInfoW(SPI_GETNONCLIENTMETRICS, sizeof(metrics), &metrics, 0);
+  const HFONT font = ::CreateFontIndirectW(&metrics.lfMenuFont);
+  const HDC dc = ::GetDC(hwnd);
+  const HGDIOBJ oldFont = ::SelectObject(dc, font);
+
+  std::vector<std::unique_ptr<Title>> titles;
+  for (size_t i = 0; i < bar->GetMenuCount(); i++)
+  {
+    std::unique_ptr<Title> title(new Title);
+    title->label = bar->GetMenuLabel(i).ToStdWstring();
+    title->name = wxStripMenuCodes(bar->GetMenuLabel(i), wxStrip_Mnemonics).ToStdWstring();
+    SIZE text = {};
+    ::GetTextExtentPoint32W(dc, title->name.c_str(), (int)title->name.size(), &text);
+    title->width = text.cx;
+    title->msaa.dwMSAASignature = MSAA_MENU_SIG;
+    title->msaa.cchWText = (DWORD)title->name.size();
+    title->msaa.pszWText = &title->name[0];
+    titles.push_back(std::move(title));
+  }
+  ::SelectObject(dc, oldFont);
+  ::ReleaseDC(hwnd, dc);
+  ::DeleteObject(font);
+
+  // handle() answers for the new titles from here on (an item's data is only read once it has been
+  // set below); the previous ones live until no item points at them.
+  std::vector<std::unique_ptr<Title>> previous;
+  previous.swap(m_titles);
+  m_titles.swap(titles);
+  m_owner = frame;
+  m_frame = hwnd;
+  m_bar = hmenu;
+  for (size_t i = 0; i < m_titles.size(); i++)
+  {
+    MENUITEMINFOW item = {};
+    item.cbSize = sizeof(item);
+    item.fMask = MIIM_FTYPE | MIIM_DATA;
+    item.fType = MFT_OWNERDRAW;
+    item.dwItemData = (ULONG_PTR)m_titles[i].get();
+    ::SetMenuItemInfoW(hmenu, (UINT)i, TRUE, &item);
+  }
+
+  // The bar around the titles: Windows' themed bar is wx's (the panel colour already); this is the one
+  // Windows draws itself.
+  if (!m_background)
+    m_background = (WXHBRUSH)::CreateSolidBrush(palette().panelBackground.GetPixel());
+  MENUINFO info = {};
+  info.cbSize = sizeof(info);
+  info.fMask = MIM_BACKGROUND;
+  info.hbrBack = (HBRUSH)m_background;
+  ::SetMenuInfo(hmenu, &info);
+  ::DrawMenuBar(hwnd);
+}
+
+void UiMenuBarTitles::detach()
+{
+  if (m_bar && ::IsMenu((HMENU)m_bar))
+  {
+    for (size_t i = 0; i < m_titles.size(); i++)
+    {
+      MENUITEMINFOW item = {};
+      item.cbSize = sizeof(item);
+      item.fMask = MIIM_FTYPE | MIIM_DATA | MIIM_STRING;
+      item.fType = MFT_STRING;
+      item.dwItemData = 0;
+      item.dwTypeData = &m_titles[i]->label[0];
+      ::SetMenuItemInfoW((HMENU)m_bar, (UINT)i, TRUE, &item);
+    }
+    MENUINFO info = {};
+    info.cbSize = sizeof(info);
+    info.fMask = MIM_BACKGROUND;
+    info.hbrBack = nullptr;
+    ::SetMenuInfo((HMENU)m_bar, &info);
+  }
+  m_titles.clear();
+  m_bar = nullptr;
+  if (m_background)
+    ::DeleteObject((HBRUSH)m_background);
+  m_background = nullptr;
+}
+
+bool UiMenuBarTitles::handle(WXUINT message, WXWPARAM wParam, WXLPARAM lParam, WXLRESULT * result)
+{
+  if (m_titles.empty())
+    return false;
+  // The menu font changed (Windows' text size): the titles measured again. Not the message's end.
+  if (message == WM_SETTINGCHANGE && wParam == SPI_SETNONCLIENTMETRICS)
+  {
+    attach(m_owner);
+    return false;
+  }
+  const auto ours = [this](ULONG_PTR data) -> Title * {
+    for (const auto & title : m_titles)
+      if ((ULONG_PTR)title.get() == data)
+        return title.get();
+    return nullptr;
+  };
+
+  if (message == WM_MEASUREITEM)
+  {
+    MEASUREITEMSTRUCT * measure = (MEASUREITEMSTRUCT *)lParam;
+    const Title * title = measure->CtlType == ODT_MENU ? ours(measure->itemData) : nullptr;
+    if (!title)
+      return false;
+    measure->itemWidth = title->width;
+    measure->itemHeight = ::GetSystemMetrics(SM_CYMENU);   // Windows keeps the bar's own height
+    *result = TRUE;
+    return true;
+  }
+
+  if (message == WM_DRAWITEM)
+  {
+    const DRAWITEMSTRUCT * draw = (const DRAWITEMSTRUCT *)lParam;
+    if (draw->CtlType != ODT_MENU || draw->hwndItem != (HWND)m_bar)
+      return false;
+    // Every title on the bar is drawn here, never by wx (which would take its data for a wxMenuItem).
+    *result = TRUE;
+    const Title * title = ours(draw->itemData);
+    if (!title)
+      return true;
+    const UiStyle::Palette & p = palette();
+    const UINT state = draw->itemState;
+    const bool open = (state & (ODS_HOTLIGHT | ODS_SELECTED)) != 0;
+    const wxColour & text = (state & (ODS_GRAYED | ODS_DISABLED)) ? p.textDisabled
+                            : (state & ODS_INACTIVE) ? p.textSecondary : p.text;
+    const HBRUSH back = ::CreateSolidBrush((open ? p.hover : p.panelBackground).GetPixel());
+    ::FillRect(draw->hDC, &draw->rcItem, back);
+    ::DeleteObject(back);
+    RECT rect = draw->rcItem;
+    const DWORD format = DT_CENTER | DT_SINGLELINE | DT_VCENTER | ((state & ODS_NOACCEL) ? DT_HIDEPREFIX : 0);
+    // As wx draws the themed bar's titles: the menu theme's font and text rendering, in our colour.
+    if (const HTHEME theme = ::OpenThemeData((HWND)m_frame, L"Menu"))
+    {
+      DTTOPTS options = {};
+      options.dwSize = sizeof(options);
+      options.dwFlags = DTT_TEXTCOLOR;
+      options.crText = text.GetPixel();
+      ::DrawThemeTextEx(theme, draw->hDC, MENU_BARITEM, MBI_NORMAL, title->label.c_str(), -1, format, &rect, &options);
+      ::CloseThemeData(theme);
+    }
+    else
+    {
+      ::SetBkMode(draw->hDC, TRANSPARENT);
+      ::SetTextColor(draw->hDC, text.GetPixel());
+      ::DrawTextW(draw->hDC, title->label.c_str(), -1, &rect, format);
+    }
+    return true;
+  }
+  return false;
 }

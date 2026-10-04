@@ -15,8 +15,8 @@
 #include <wx/listctrl.h>
 #include <wx/treectrl.h>
 #include <wx/wupdlock.h>
+#include <wx/evtloop.h>
 #include <wx/numformatter.h>
-#include <wx/popupwin.h>
 #include <wx/srchctrl.h>
 #include <wx/busyinfo.h>
 #include <wx/dirdlg.h>
@@ -131,7 +131,6 @@ BEGIN_EVENT_TABLE(ModelViewer, wxFrame)
   EVT_MENU_RANGE(ID_VIEW_APPEARANCE_SYSTEM, ID_VIEW_APPEARANCE_DARK, ModelViewer::OnAppearance)
   EVT_UPDATE_UI_RANGE(ID_VIEW_APPEARANCE_SYSTEM, ID_VIEW_APPEARANCE_DARK, ModelViewer::OnUpdateCommandUI)
   EVT_SYS_COLOUR_CHANGED(ModelViewer::OnSysColourChanged)
-  EVT_WINDOW_CREATE(ModelViewer::OnWindowCreated)
   EVT_TIMER(ID_THEME_RECHECK_TIMER, ModelViewer::OnThemeRecheck)
 EVT_CLOSE(ModelViewer::OnClose)
 //EVT_SIZE(ModelViewer::OnSize)
@@ -232,6 +231,7 @@ ModelViewer::ModelViewer()
 : interfaceManager(0, wxAUI_MGR_ALLOW_FLOATING | wxAUI_MGR_TRANSPARENT_HINT | wxAUI_MGR_HINT_FADE)
 #endif
 {
+  m_themeRecheck.SetOwner(this, ID_THEME_RECHECK_TIMER);
   PLUGINMANAGER.init("./plugins");
   // our main class objects
   animControl = nullptr;
@@ -292,7 +292,6 @@ ModelViewer::ModelViewer()
 
     // GUI and Canvas Stuff
     InitDocking();
-    ApplyNativeTheme();   // the title bar and the native controls in the theme the window starts with
 
     // Ensure that the docking windows are properly positioned (otherwise it starts with a mess of overlapping windows)
     interfaceManager.Update();
@@ -321,7 +320,6 @@ ModelViewer::ModelViewer()
 
     timer.SetOwner(this, ID_STATUS_REFRESH_TIMER);
     timer.Start(2000);
-    m_themeRecheck.SetOwner(this, ID_THEME_RECHECK_TIMER);
   }
   else 
   {
@@ -505,6 +503,8 @@ void ModelViewer::InitMenu()
     menuBar->Append(optMenu, _("&Options"));
     menuBar->Append(aboutMenu, _("&Help"));
     SetMenuBar(menuBar);
+    m_menuBarTitles.reset(new UiMenuBarTitles);
+    m_menuBarTitles->attach(this);
   }
   catch (...) {};
 
@@ -541,8 +541,6 @@ void ModelViewer::InitObjects()
   modelControl = new ModelControl(this, ID_MODEL_FRAME);
   settingsControl = new SettingsControl(this, ID_SETTINGS_FRAME);
   settingsControl->Show(false);
-  // Settings keeps Windows' light look in the dark theme too (its tabs have no dark style): see keepLight.
-  UiStyle::keepLight(settingsControl);
 
   canvas = new ModelCanvas(this);
 
@@ -1463,10 +1461,34 @@ void ModelViewer::OnExit(wxCommandEvent &event)
 // File > Restart: quit and reopen the application in one click (no manual exit + relaunch).
 void ModelViewer::OnRestart(wxCommandEvent & WXUNUSED(event))
 {
+  if (exportRunning() || !canCloseNow())
+  {
+    wxMessageBox(exportRunning() ? _("An export is still running: restart once it has finished.")
+                                 : _("Restart once the viewer has finished what it is doing."),
+                 _("Restart"), wxOK | wxICON_INFORMATION, this);
+    return;
+  }
   if (wxMessageBox(_("Restart WoW Model Viewer now?\n\nThe current scene is reloaded fresh; your saved settings are kept."),
                    _("Restart"), wxYES_NO | wxYES_DEFAULT | wxICON_QUESTION, this) != wxYES)
     return;
+  Relaunch();
+}
 
+bool ModelViewer::exportRunning() const
+{
+  return m_exportJobManager && m_exportJobManager->hasActiveJobs();
+}
+
+bool ModelViewer::canCloseNow() const
+{
+  // Not from a modal dialog's loop (it disables the window; closing would delete the window under the
+  // dialog) nor from inside a yield (code further up the stack still uses the window).
+  const wxEventLoopBase * loop = wxEventLoopBase::GetActive();
+  return ::IsWindowEnabled((HWND)GetHWND()) && !(loop && loop->IsYielding());
+}
+
+void ModelViewer::Relaunch()
+{
   const wxString exe = wxStandardPaths::Get().GetExecutablePath();
 
   // Development build: a "_relaunch.bat" sits a few folders above the exe (next to _run.bat). It
@@ -1486,7 +1508,30 @@ void ModelViewer::OnRestart(wxCommandEvent & WXUNUSED(event))
   if (!relaunchBat.IsEmpty())
     wxExecute(wxString::Format(wxT("cmd /c \"\"%s\" %lu\""), relaunchBat, wxGetProcessId()), wxEXEC_ASYNC);
   else
-    wxExecute(wxString::Format(wxT("\"%s\""), exe), wxEXEC_ASYNC);
+  {
+    // The new instance waits for this one to have exited (-waitpid, WowModelViewApp::OnInit) before it
+    // reads Config.ini or opens the log: this one saves its layout and settings as it closes.
+    wxString command = wxString::Format(wxT("\"%s\" -waitpid %lu"), exe, wxGetProcessId());
+    for (int i = 1; i < wxTheApp->argc; i++)
+      if (wxTheApp->argv[i] == wxT("-console"))
+        command += wxT(" -console");
+    STARTUPINFOW startup = {};
+    startup.cb = sizeof(startup);
+    PROCESS_INFORMATION process = {};
+    std::wstring line = command.ToStdWstring();
+    if (!::CreateProcessW(nullptr, &line[0], nullptr, nullptr, FALSE, 0, nullptr, m_startDirectory.wc_str(), &startup, &process))
+    {
+      // This instance stays: closing it would leave nothing running.
+      const DWORD error = ::GetLastError();
+      LOG_ERROR << "Restart: could not start" << QString::fromWCharArray(command.wc_str()) << "error" << (unsigned)error;
+      wxMessageBox(wxString::Format(_("The viewer could not be started again (Windows error %lu), so it stays open."), (unsigned long)error),
+                   _("Restart"), wxOK | wxICON_ERROR, this);
+      return;
+    }
+    ::AllowSetForegroundWindow(process.dwProcessId);
+    ::CloseHandle(process.hThread);
+    ::CloseHandle(process.hProcess);
+  }
 
   // Tear down like File > Exit; OnClose saves the session as usual before the process exits.
   video.render = false;
@@ -1517,6 +1562,10 @@ void ModelViewer::OnSize(wxSizeEvent &event)
 ModelViewer::~ModelViewer()
 {
   LOG_INFO << "Shutting down the program...";
+
+  // The menu bar's titles back to Windows' own before the window goes (wxFrame's own procedure would
+  // take their data for its menu items).
+  m_menuBarTitles.reset();
 
   video.render = false;
 
@@ -4545,10 +4594,11 @@ void ModelViewer::OnUpdateCommandUI(wxUpdateUIEvent & event)
 }
 
 // THE THEME. The palette in use (UiStyle) follows the Appearance preference, Windows' app mode (for
-// System) and high contrast (which overrides both). A change is applied everywhere at once, without a
-// restart: every window's colours (UiStyle::retheme), the pane chrome, the native parts Windows draws
-// dark itself (ApplyNativeTheme), then one repaint. The viewport is not touched: it draws the same in
-// every theme.
+// System) and high contrast (which overrides both). Light or dark is fixed for a run -- wxWidgets' dark
+// mode, which darkens everything Windows draws, is decided before the first window -- so a change that
+// asks for the other one is offered as a restart (OfferThemeRestart); a light run follows high contrast
+// at once (ApplyTheme: every window's colours, the pane chrome, the toolbars, then one repaint). The
+// viewport is not touched: it draws the same in every theme.
 void ModelViewer::OnAppearance(wxCommandEvent & event)
 {
   const UiStyle::Theme theme = event.GetId() == ID_VIEW_APPEARANCE_LIGHT  ? UiStyle::Theme::Light
@@ -4562,12 +4612,55 @@ void ModelViewer::OnAppearance(wxCommandEvent & event)
   config.setValue("Settings/Appearance", UiStyle::themeToSetting(theme));
   config.sync();
   ApplyTheme();
+  if (UiStyle::restartWanted())
+    OfferThemeRestart(true);
+  else
+    m_themeRestartOffered = -1;   // back to this run's: a later change is offered again
 }
 
-void ModelViewer::ApplyTheme(bool force)
+// Light and dark are fixed for a run (wxWidgets' dark mode is decided before the first window): a
+// change that asks for the other one is offered as a restart. Asked about every time the user chooses
+// an appearance; for Windows' own changes (System following the app mode, high contrast in a dark run)
+// once per change, not at every message of the burst Windows sends.
+void ModelViewer::OfferThemeRestart(bool chosen)
+{
+  if (batchMode)
+    return;   // a headless run (an export's child process, a command-line load) never asks
+  if (!canCloseNow())
+  {
+    // Asked again once the dialog or the load in progress is done (OnThemeRecheck), as the user's own
+    // choice if it was one.
+    m_themeOfferChosen = m_themeOfferChosen || chosen;
+    m_themeRecheck.StartOnce(1000);
+    return;
+  }
+  chosen = chosen || m_themeOfferChosen;
+  m_themeOfferChosen = false;
+  const bool wantDark = UiStyle::darkWanted();
+  if (!chosen && m_themeRestartOffered == (wantDark ? 1 : 0))
+    return;
+  m_themeRestartOffered = wantDark ? 1 : 0;
+  const wxString what = wantDark ? _("the dark appearance")
+                      : UiStyle::highContrastOn() ? _("Windows' high-contrast colours") : _("the light appearance");
+  if (exportRunning())
+  {
+    wxMessageBox(wxString::Format(_("The viewer changes to %s when it next starts (an export is still running)."), what),
+                 _("Appearance"), wxOK | wxICON_INFORMATION, this);
+    return;
+  }
+  // Yes by default only when the user just chose it; a change of Windows' never restarts on Enter.
+  if (wxMessageBox(wxString::Format(_("The viewer changes to %s when it restarts. The model on screen is closed; "
+                                      "your settings are kept.\n\nRestart now?"), what),
+                   _("Appearance"), wxYES_NO | (chosen ? wxYES_DEFAULT : wxNO_DEFAULT) | wxICON_QUESTION, this) == wxYES)
+    Relaunch();
+  else
+    SetStatusText(wxString::Format(_("The viewer changes to %s at its next start (or File > Restart)."), what), 0);
+}
+
+void ModelViewer::ApplyTheme()
 {
   const UiStyle::Palette previous = UiStyle::palette();
-  if (!UiStyle::refreshPalette() && !force)
+  if (!UiStyle::refreshPalette())
     return;
   Freeze();
   UiStyle::retheme(previous);
@@ -4587,61 +4680,33 @@ void ModelViewer::ApplyTheme(bool force)
         toolbars(child);
   };
   toolbars(this);
-  CreateThemedStatusBar();
-  ApplyNativeTheme();
-  // Colours the shell does not take from a role: the item names' quality colours (lightened on dark).
+  // Colours the shell does not take from a role: the item names' quality colours.
   if (isChar && charControl && charControl->model)
     charControl->RefreshEquipment();
   Thaw();
   ::RedrawWindow((HWND)GetHWND(), nullptr, nullptr, RDW_INVALIDATE | RDW_ERASE | RDW_FRAME | RDW_ALLCHILDREN);
 }
 
-// The parts Windows draws itself, in the theme in use where Windows can draw them dark: the title bars
-// (DWM), the Explorer-styled controls -- Browse's tree, the lists and their headers, the scroll bars of
-// every scrolling window, the tooltips -- in Windows' own dark Explorer style, the combo boxes and text
-// fields in its dark combo style. What Windows cannot draw dark without unsupported calls (the menu bar
-// and menus, message boxes, the file dialogs) stays light, and so does Settings: see UiStyle.cpp.
-void ModelViewer::ApplyNativeTheme()
+void ModelViewer::OnThemeChangedOutside()
 {
-  const bool dark = UiStyle::darkActive();
-  UiSetDarkRenderer(dark);
-  std::function<void(wxWindow *)> walk = [&](wxWindow * w) {
-    UiStyle::themeNativeWindow(w);
-    // Its children, and a popup it owns (the Mount picker), which is not among the top-level windows.
-    for (wxWindow * child : w->GetChildren())
-      if (!child->IsTopLevel() || dynamic_cast<wxPopupWindow *>(child))
-        walk(child);
-  };
-  // Not the dialogs (a hidden one is kept, the Enchants dialog; the item pickers are not modal): the shell
-  // does not style them, so they keep Windows' light look whole -- wx keeps their windows' creation from
-  // reaching OnWindowCreated too (wxWS_EX_BLOCK_EVENTS).
-  for (wxWindow * top : wxTopLevelWindows)
-    if (!dynamic_cast<wxDialog *>(top))
-      walk(top);
-  WinTheme::setTooltipTheme(dark ? L"DarkMode_Explorer" : nullptr);
+  // Windows' app mode or high contrast changed: a light run follows high contrast at once (ApplyTheme);
+  // what would need the other of light and dark is offered as a restart, once.
+  ApplyTheme();
+  if (UiStyle::restartWanted())
+    OfferThemeRestart(false);
+  else
+    m_themeRestartOffered = -1;   // back to this run's: a later change is offered again
 }
 
 void ModelViewer::CreateThemedStatusBar()
 {
   const bool generic = UiStyle::darkActive();
-  wxStatusBar * old = GetStatusBar();
-  if (old && generic == m_genericStatusBar)
-    return;
   const int fields = 5;
-  wxString texts[fields];
-  if (old)
-  {
-    for (int i = 0; i < fields && i < old->GetFieldsCount(); i++)
-      texts[i] = old->GetStatusText(i);
-    SetStatusBar(nullptr);
-    old->Destroy();
-  }
   // wx shows a cut-off field's full text itself only on its native bar (and refuses a tooltip set by
   // hand while it would): UiEquipGenericStatusBar does it for its own.
   UseNativeStatusBar(!generic);
   CreateStatusBar(fields, generic ? (wxSTB_DEFAULT_STYLE & ~wxSTB_SHOW_TIPS) : wxSTB_DEFAULT_STYLE);
   UseNativeStatusBar(true);
-  m_genericStatusBar = generic;
   wxStatusBar * bar = GetStatusBar();
   int widths[fields] = { -1, 100, 50, 125, 125 };
   SetStatusWidths(fields, widths);
@@ -4653,30 +4718,6 @@ void ModelViewer::CreateThemedStatusBar()
     UiStyle::setRole(bar, UiStyle::Role::Panel);
     UiEquipGenericStatusBar(bar);
   }
-  for (int i = 0; i < fields; i++)
-    if (!texts[i].IsEmpty())
-      SetStatusText(texts[i], i);
-  if (old)
-    SendSizeEvent();   // the panes and the viewport laid out again above a bar of another height
-}
-
-void ModelViewer::OnWindowCreated(wxWindowCreateEvent & event)
-{
-  // A window made after the theme was applied (a customization row for a new character, the notice
-  // button): themed as it is created. The event comes up from every window inside the frame.
-  event.Skip();
-  wxWindow * w = event.GetWindow();
-  if (!w || w == this)
-    return;
-  UiStyle::themeNativeWindow(w);
-  // A floating pane's frame is made before the pane is put in it: its title bar again as it is shown,
-  // when what it holds (Settings, kept light, or a pane) is known.
-  if (w->IsTopLevel())
-    w->Bind(wxEVT_SHOW, [w](wxShowEvent & e) {
-      if (e.IsShown())
-        UiStyle::themeNativeWindow(w);
-      e.Skip();
-    });
 }
 
 void ModelViewer::OnSysColourChanged(wxSysColourChangedEvent & event)
@@ -4684,25 +4725,24 @@ void ModelViewer::OnSysColourChanged(wxSysColourChangedEvent & event)
   // Windows' colours changed (high contrast on or off): once wx has passed the change on, the palette is
   // resolved again.
   event.Skip();
-  CallAfter([this] { ApplyTheme(); });
+  CallAfter([this] { OnThemeChangedOutside(); });
 }
 
 void ModelViewer::OnThemeRecheck(wxTimerEvent & WXUNUSED(event))
 {
-  ApplyTheme();
+  OnThemeChangedOutside();
 }
 
 WXLRESULT ModelViewer::MSWWindowProc(WXUINT message, WXWPARAM wParam, WXLPARAM lParam)
 {
-  // Windows' app mode or high contrast changed. wxWidgets 3.3 passes the app mode's message on as a
-  // wxEVT_SYS_COLOUR_CHANGED too (OnSysColourChanged), and ApplyTheme then finds nothing new. Checked
-  // once the message has been handled, and once more a moment later: Windows sends it in bursts, and the
-  // values it announces are not always readable at the first one.
-  if (WinTheme::isColourSettingChange(message, wParam, lParam) || message == WM_THEMECHANGED)
-  {
-    CallAfter([this] { ApplyTheme(); });
+  // Windows' app mode or high contrast changed. wxWidgets passes the app mode's message on as a
+  // wxEVT_SYS_COLOUR_CHANGED (OnSysColourChanged); checked once more a moment later for both: Windows sends
+  // these in bursts, and the values they announce are not always readable at the first one.
+  if (WinTheme::isColourSettingChange(message, wParam, lParam))
     m_themeRecheck.StartOnce(500);
-  }
+  WXLRESULT result = 0;
+  if (m_menuBarTitles && m_menuBarTitles->handle(message, wParam, lParam, &result))
+    return result;
   return wxFrame::MSWWindowProc(message, wParam, lParam);
 }
 

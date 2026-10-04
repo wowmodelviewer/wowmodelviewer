@@ -70,7 +70,7 @@ ModelControl::ModelControl(wxWindow* parent, wxWindowID id)
 
   wxFlexGridSizer * gbox = new wxFlexGridSizer(2, 5, 5);
   gbox->Add(new wxStaticText(this, wxID_ANY, wxT("Scale")), 1, wxALIGN_CENTER_VERTICAL);
-  txtsize = new UiTextCtrl(this, ID_MODEL_SIZE, wxT("1.00"));
+  txtsize = new wxTextCtrl(this, ID_MODEL_SIZE, wxT("1.00"));
   UiStyle::setRole(txtsize, UiStyle::Role::Field);
   gbox->Add(txtsize);
   top->Add(gbox, 1, wxEXPAND);

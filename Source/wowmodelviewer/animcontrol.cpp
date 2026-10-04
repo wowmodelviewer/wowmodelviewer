@@ -267,7 +267,7 @@ AnimControl::AnimControl(wxWindow* parent, wxWindowID id, wxWindow * skinParent,
   animCList2->Enable(false);
 
   lockTextLabel = new wxStaticText(adv, wxID_ANY, _("Bones"));
-  lockText = new UiTextCtrl(adv, ID_ANIM_SECONDARY_TEXT, wxEmptyString, wxDefaultPosition,
+  lockText = new wxTextCtrl(adv, ID_ANIM_SECONDARY_TEXT, wxEmptyString, wxDefaultPosition,
                             wxDefaultSize, wxTE_PROCESS_ENTER, wxDefaultValidator);
   lockText->SetValue(wxString::Format(wxT("%d"), UPPER_BODY_BONES));
   lockText->SetMinSize(wxSize(FromDIP(48), -1));
