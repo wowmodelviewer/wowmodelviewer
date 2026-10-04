@@ -11,6 +11,7 @@
 #include "UiControls.h"
 #include "UiStyle.h"
 #include "itemselection.h"
+#include "ItemSetChoiceDialog.h"
 #include "ItemSetCategory.h"
 #include "ModelInspector.h"
 #include "modelviewer.h"
@@ -703,65 +704,41 @@ void CharControl::selectItem(ssize_t type, ssize_t slot, const wxChar *caption)
 void CharControl::selectSet()
 {
   ClearItemDialog();
-
-  std::vector<NumStringPair> Items;
-
-  // Adds "none" to select
-  NumStringPair n;
-  n.id = -1;
-  n.name = wxT("---- None ----");
-  Items.push_back(n);
-
-  // One indexed bulk query: do not use the displayable-items cache (it omits
-  // unnamed items), or query individual pieces while opening/filtering.
-  QString query = "SELECT S.ID, S.Name_Lang";
-  QString joins;
-  for (int slot = 1; slot <= ItemSetCategory::ItemCount; ++slot)
-  {
-    query += QString(", S.ItemID%1, COALESCE(I%1.ClassID,-1), "
-                     "COALESCE(I%1.SubclassID,-1), COALESCE(I%1.InventoryType,-1)").arg(slot);
-    joins += QString(" LEFT JOIN Item I%1 ON I%1.ID = S.ItemID%1").arg(slot);
-  }
-  sqlResult itemSet = GAMEDATABASE.sqlQuery(query + " FROM ItemSet S" + joins);
-  std::map<int, int> categories;
-
-  if (itemSet.valid && !itemSet.empty())
-  {
-    for (int i = 0, imax = itemSet.values.size(); i < imax; i++)
-    {
-      NumStringPair p;
-      p.id = itemSet.values[i][0].toInt();
-      p.name = itemSet.values[i][1].toStdWString();
-      Items.push_back(p);
-      ItemSetCategory::Classifier classifier;
-      for (int slot = 0; slot < ItemSetCategory::ItemCount; ++slot)
-      {
-        const auto& row = itemSet.values[i];
-        const int offset = 2 + slot * 4;
-        classifier.add(row[offset].toInt(), row[offset + 1].toInt(),
-                       row[offset + 2].toInt(), row[offset + 3].toInt());
-      }
-      categories[p.id] = classifier.category();
-    }
-  }
-
-  // Keep the synthetic None entry at index zero, independently of localized names.
-  std::sort(Items.begin() + 1, Items.end());
-  numbers.clear();
-  choices.Clear();
-  cats.clear();
-  catnames.clear();
+  m_itemSets = ItemSets::read([](const QString& query) {
+    auto rows = GAMEDATABASE.sqlQuery(query);
+    return rows.valid ? rows.values : ItemSets::Rows{};
+  });
+  choices.Clear(); cats.clear(); catnames.Clear(); numbers.clear();
   for (const auto* name : {"Cloth", "Leather", "Mail", "Plate", "Mixed", "Other", "Unknown"})
     catnames.Add(wxString::FromUTF8(name));
-  for (std::vector<NumStringPair>::iterator it = Items.begin(); it != Items.end(); ++it) {
-    choices.Add(it->name);
-    numbers.push_back(it->id);
-    cats.push_back(it->id == -1 ? ItemSetCategory::Unknown : categories.at(it->id));
+  for (const auto& set : m_itemSets) {
+    // Keep source identity: ItemSet and TransmogSet IDs occupy different namespaces.
+    wxString name = set.name.toStdWString();
+    if (set.id) name += wxString::Format(set.transmog ? " [Transmog %d]" : " [Item set %d]", set.id);
+    choices.Add(name); cats.push_back(set.category); numbers.push_back(set.id);
   }
-
-  itemDialog = new CategoryChoiceDialog(this, UPDATE_SET, g_modelViewer, wxT("Choose an item set"), wxT("Item sets"), choices, cats, catnames, NULL);
+  itemDialog = new ItemSetChoiceDialog(g_modelViewer, choices, cats, catnames, m_itemSets,
+    [this](const std::vector<ItemSets::Equipped>& pieces, bool replaceAll) { applySetPieces(pieces, replaceAll); });
   itemDialog->Move(itemDialog->GetParent()->GetScreenPosition() + wxPoint(4, 64));
   itemDialog->Show();
+}
+
+void CharControl::applySetPieces(const std::vector<ItemSets::Equipped>& pieces, bool replaceAll)
+{
+  if (!model) return;
+  if (replaceAll)
+    for (auto* item : *model) item->setId(0);
+  for (const auto& piece : pieces) {
+    if (piece.slot < 0 || piece.slot >= NUM_CHAR_SLOTS) continue;
+    if (auto* item = model->getItem(static_cast<CharSlots>(piece.slot))) {
+      item->setId(piece.itemId);
+      if (!item->setAppearanceId(piece.appearanceId))
+        LOG_WARNING << "Cannot apply set appearance" << piece.appearanceId << "to item" << piece.itemId;
+    }
+  }
+  RefreshEquipment();
+  RefreshModel();
+  g_modelViewer->UpdateControls();
 }
 
 void CharControl::selectStart()
@@ -1043,36 +1020,8 @@ void CharControl::OnUpdateItem(int type, int id)
       break;
     }
     case UPDATE_SET:
-    {
-      id = numbers[id];
-
-      if (id && model)
-      {
-        QString query = "SELECT ItemID1";
-        for (int slot = 2; slot <= ItemSetCategory::ItemCount; ++slot)
-          query += QString(", ItemID%1").arg(slot);
-        query += QString(" FROM ItemSet WHERE ID = %1").arg(id);
-
-        sqlResult itemSet = GAMEDATABASE.sqlQuery(query);
-
-        if (itemSet.valid && !itemSet.empty())
-        {
-          // reset previously equipped items
-
-          for (WoWModel::iterator it = model->begin();
-               it != model->end();
-               ++it)
-               (*it)->setId(0);
-
-          for (unsigned i = 0; i < ItemSetCategory::ItemCount; i++)
-            tryToEquipItem(itemSet.values[0][i].toInt());
-
-          RefreshEquipment();
-          RefreshModel();
-        }
-      }
+      // Set dialogs apply their source-aware slot choices through applySetPieces().
       break;
-    }
     case UPDATE_START:
       id = numbers[id];
 

@@ -315,6 +315,19 @@
     <field type="int" name="ItemID" arraySize="17" pos="4" />
   </table>
 
+  <table name="TransmogSet">
+    <field type="text" name="Name_Lang" pos="0" />
+    <field type="int32" name="ID" primary="yes" pos="1" />
+    <field type="int32" name="ClassMask" pos="2" />
+    <field type="uint32" name="TransmogSetGroupID" pos="5" />
+  </table>
+  <table name="TransmogSetItem">
+    <field type="int32" name="ID" primary="yes" />
+    <field type="uint32" name="TransmogSetID" pos="0" />
+    <field type="uint32" name="ItemModifiedAppearanceID" pos="1" />
+    <field type="int32" name="Flags" pos="2" />
+  </table>
+
   <!-- Item tables - END -->
   
   <!-- Misc tables - BEGIN -->
