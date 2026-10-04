@@ -73,8 +73,9 @@ std::vector<Set> read(const Query& query)
     // Ungrouped reward records can list fragments of several variants. Hide one
     // only when a real catalog group covers every exact source it references.
     // ClassMask is a relationship guard here, never a character/class filter.
-    using Family = std::pair<QString, int>;
-    std::map<Family, std::map<int, std::set<int>>> completeGroups;
+    // Reward fragments can have a different localized name (e.g. Draconic
+    // versus Verdant). Exact source membership establishes the relationship.
+    std::map<int, std::map<int, std::set<int>>> completeGroups;
     for (const auto& pair : sets) {
       const auto& set = pair.second;
       const auto& member = coverage[pair.first];
@@ -86,7 +87,7 @@ std::vector<Set> read(const Query& query)
       // Conservative completeness guard: retain fragments when no full outfit
       // with head, shoulders, chest, legs and feet is available in the catalog.
       if (body.size() != 5) continue;
-      auto& sources = completeGroups[{set.name, member.classMask}][member.group];
+      auto& sources = completeGroups[member.classMask][member.group];
       sources.insert(member.sources.begin(), member.sources.end());
     }
     std::set<int> redundant;
@@ -99,7 +100,7 @@ std::vector<Set> read(const Query& query)
         if (slot.id == CS_HEAD || slot.id == CS_SHOULDER || slot.id == CS_CHEST ||
             slot.id == CS_PANTS || slot.id == CS_BOOTS) body.insert(slot.id);
       if (body.size() == 5) continue; // Never discard another full variant.
-      const auto family = completeGroups.find({set.name, member.classMask});
+      const auto family = completeGroups.find(member.classMask);
       if (family == completeGroups.end()) continue;
       for (const auto& group : family->second)
         if (std::includes(group.second.begin(), group.second.end(), member.sources.begin(), member.sources.end())) {
