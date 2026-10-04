@@ -6,6 +6,23 @@ Format loosely based on [Keep a Changelog](https://keepachangelog.com/).
 ## [Unreleased]
 
 ### Added
+- **View > Swap Background Color: the Models viewport's background colour,** in a small window that can stay open
+  while the model is turned; it first opens at the viewport's top right, clear of the viewport's centre. A Models
+  command: greyed in the Textures viewer, which puts the window away, and Models gives it back. A colour picker in the
+  window (a saturation x brightness square and a hue strip, keyboard too; the viewport follows a drag live and the
+  colour is kept when it is let go), a `#RRGGBB` field (either case, `#` optional; Enter or leaving the field applies
+  it; checked as it is typed, and nothing that is not a colour is sent), built-in presets that cannot be removed --
+  Default `#19191E` (the viewport's colour until now), Dark `#000000`, Slate `#202428`, Neutral Grey `#808080`, Light
+  `#BBBBBB` -- and presets of your own (Save as preset; a duplicate selects the preset it duplicates; remove by
+  right-click or Remove), with the preset on show marked. Undo goes back to the color the window was opened with;
+  Reset goes back to `#19191E`; both keep your presets. Every change shows at once behind the model (a notice --
+  nothing loaded, a player problem -- keeps its own dark). Kept in `Config.ini` as `ModelViewport/BackgroundColor` and
+  `ModelViewport/BackgroundPresets`. The colour shows on screen exactly as given (measured on the viewport's own
+  capture for every grey up to `#D8D8D8`; brighter ones are lifted one to three steps by the viewport's bloom, and
+  `#FFFFFF` shows as 254). The Texture Viewer's backgrounds, the transparent screenshot, lighting and materials are
+  unchanged, and at the default the viewport's frames are byte-identical to before; the panel under a starting player
+  now paints the same `#19191E` (it was `#231F20`). The player speaks protocol 7 (`viewportBackground`); an older
+  player keeps its own default.
 - **Textures: a second viewer mode beside Models, for the client's BLP textures, shown in the viewport.**
   The command bar starts with the viewer selector, "Viewer: Models | Textures", one of the two always pressed.
   Textures switches at once, before anything is picked: Browse shows (opening it if it was closed) listing the

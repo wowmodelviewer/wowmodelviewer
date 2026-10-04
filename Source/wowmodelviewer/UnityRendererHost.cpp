@@ -46,7 +46,7 @@ namespace
 
 // What the viewport area shows while the player's own window is not covering it.
 //
-// With no notice: nothing but the player's own background colour. Deliberately silent while the
+// With no notice: nothing but the player's background colour (the backdrop). Deliberately silent while the
 // player starts. The wait is about a second and the viewer is meant to look like a viewer, so a
 // caption explaining that a renderer is starting would be on screen for exactly as long as it takes
 // to read and would be the first thing the user ever sees. A dark rectangle that becomes the model
@@ -58,10 +58,12 @@ namespace
 void UnityRendererHost::OnPaint(wxPaintEvent & WXUNUSED(event))
 {
   wxPaintDC dc(this);
-  dc.SetBackground(wxBrush(UiStyle::palette().viewport));   // the player's own background colour
+  const bool notice = m_notice && !m_noticeTitle.IsEmpty() && !m_contentShown;
+  // The player's background, or the dark the notice's text and button are made for.
+  dc.SetBackground(wxBrush(!notice && m_backdrop.IsOk() ? m_backdrop : UiStyle::palette().viewport));
   dc.Clear();
 
-  if (!m_notice || m_noticeTitle.IsEmpty() || m_contentShown)
+  if (!notice)
     return;
 
   // The notice, centred above its button (layoutNotice places the button).
@@ -282,12 +284,23 @@ void UnityRendererHost::setPlayerReady(bool ready)
   Refresh(false);
 }
 
+void UnityRendererHost::setBackdrop(const wxColour & colour)
+{
+  if (colour == m_backdrop)
+    return;
+  m_backdrop = colour;
+  Refresh(false);
+}
+
 UnityRendererHost::UnityRendererHost(wxWindow * parent, wxWindowID id)
 {
   // A plain panel: the player reparents its own window into this one and paints it
   // entirely, so no wx-side drawing is needed. The player's own dark background = unobtrusive while
   // the player is still starting up (or after it exited), and what the notice button stands on.
   Create(parent, id, wxDefaultPosition, wxSize(640, 480), wxNO_BORDER | wxCLIP_CHILDREN, wxT("UnityRendererHost"));
+  // OnPaint fills every pixel, with the backdrop or the notice's dark: no erase first, which would flash this colour.
+  SetBackgroundStyle(wxBG_STYLE_PAINT);
+  // Still the panel's colour, not the backdrop's: the notice button's corners are drawn in it.
   SetBackgroundColour(UiStyle::palette().viewport);
   m_ipc = new UnityIpcServer();
   m_noticeTimer.SetOwner(this);
@@ -374,6 +387,10 @@ bool UnityRendererHost::launch(bool selfTest)
     return false;
   }
   cmdLine += wxString::Format(wxT(" -wmvPort %d"), m_ipc->port());
+  // The background, so the player's first frame already shows it (it is sent again once the player connects).
+  if (m_backdrop.IsOk())
+    cmdLine += wxString::Format(wxT(" -wmvBackground %02X%02X%02X"), m_backdrop.Red(), m_backdrop.Green(),
+                                m_backdrop.Blue());
 
   // Diagnostic runs only: ask the player to also probe the protocol's error paths.
   if (selfTest)

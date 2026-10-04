@@ -51,6 +51,8 @@
 #include "PluginManager.h"
 #include "RaceInfos.h"
 #include "SettingsControl.h"
+#include "BackgroundColorDialog.h"
+#include "ViewportBackground.h"
 #include "UiArt.h"
 #include "UiControls.h"
 #include "UiStyle.h"
@@ -155,6 +157,8 @@ EVT_MENU(ID_SHOW_ANIM, ModelViewer::OnToggleDock)
 EVT_MENU(ID_SHOW_CHAR, ModelViewer::OnToggleDock)
 EVT_MENU(ID_SHOW_MODEL, ModelViewer::OnToggleDock)
 EVT_MENU(ID_VIEW_UNITY_RESTART, ModelViewer::OnRestartUnityRenderer)
+EVT_MENU(ID_VIEW_BACKGROUND_COLOR, ModelViewer::OnBackgroundColor)
+EVT_UPDATE_UI(ID_VIEW_BACKGROUND_COLOR, ModelViewer::OnUpdateCommandUI)
 EVT_MENU(ID_VIEW_FULLSCREEN, ModelViewer::OnToggleFullScreen)
 EVT_CHAR_HOOK(ModelViewer::OnCharHook)
 
@@ -409,6 +413,10 @@ void ModelViewer::InitMenu()
   // (the notice of a stopped player has the same command on a button).
   viewMenu->Append(ID_VIEW_UNITY_RESTART, _("Restart Unity Renderer"));
   viewMenu->Append(ID_VIEW_FULLSCREEN, _("Fullscreen\tF11"));
+  // The colour behind the model in the Models viewer (BackgroundColorDialog): a window of its own, so it can stay open
+  // beside the viewport while colours are tried.
+  viewMenu->Append(ID_VIEW_BACKGROUND_COLOR, _("Swap Background Color..."),
+                   _("Choose the color behind the model in the Models viewer"));
   viewMenu->AppendSeparator();
   // The colours of the viewer's own window (the viewport draws the same in every theme).
   wxMenu * appearanceMenu = new wxMenu;
@@ -418,7 +426,7 @@ void ModelViewer::InitMenu()
   viewMenu->AppendSubMenu(appearanceMenu, _("Appearance"));
   // The OpenGL viewport's own View items -- Background Color, Load Background, the Camera submenu,
   // Set Canvas Size and OpenGL debug info -- went with that viewport: none of them reaches the Unity
-  // viewport, which frames each model itself. The Lighting menu that was built here (and never put on
+  // viewport, which frames each model itself. (Swap Background Color, above, is the Unity viewport's.) The Lighting menu that was built here (and never put on
   // the menu bar) is gone too.
 
   try {
@@ -869,6 +877,10 @@ void ModelViewer::LoadSession()
 
   // Last legacy-MPQ folder picked via File > Load Legacy MPQ Client... (defaults the dir picker).
   m_lastMpqFolder = config.value("Session/LastMpqFolder", "").toString();
+
+  // The Models viewport's background (ModelViewport/BackgroundColor), before the viewport exists.
+  m_viewportBackground = ViewportBackground::loadColour();
+  m_viewportBackgroundKept = m_viewportBackground;
 
   // The archived OpenGL viewport's session keys are no longer read: Session/ShowParticle and
   // Session/ZeroParticle (particle options that only changed its drawing), Session/bgCol and
@@ -1556,6 +1568,13 @@ void ModelViewer::Relaunch()
 // This is called when the window is closing
 void ModelViewer::OnClose(wxCloseEvent &event)
 {
+  // The background window goes with the frame, first: left open it would stay on screen, unresponsive, while the
+  // frame tears down (the player's shutdown waits seconds), and be destroyed after the frame state it reads.
+  if (m_backgroundDialog)
+  {
+    m_backgroundDialog->Destroy();
+    m_backgroundDialog = nullptr;
+  }
   Destroy();
 }
 
@@ -1576,6 +1595,13 @@ void ModelViewer::OnSize(wxSizeEvent &event)
 ModelViewer::~ModelViewer()
 {
   LOG_INFO << "Shutting down the program...";
+
+  // Not closed through OnClose: the background window still goes before anything it reads.
+  if (m_backgroundDialog)
+  {
+    delete m_backgroundDialog;
+    m_backgroundDialog = nullptr;
+  }
 
   // The menu bar's titles back to Windows' own before the window goes (wxFrame's own procedure would
   // take their data for its menu items).
@@ -1925,6 +1951,8 @@ void ModelViewer::CreateUnityViewport()
   if (unityRendererHost)
     return;
   unityRendererHost = new UnityRendererHost(this, ID_UNITY_FRAME);
+  // Under the player while it starts, and on its command line, so the first frame is already this colour.
+  unityRendererHost->setBackdrop(m_viewportBackground);
 
   // A texture picked in Browse is shown in the viewport's place.
   textureView = new TextureView(unityRendererHost, this);
@@ -1950,6 +1978,11 @@ void ModelViewer::CreateUnityViewport()
     // ... nor a world model (it is loaded again below, and the new player answers for it).
     m_unityWmoFailed = 0;
     m_unityWmoFailReason.clear();
+    // The background before the model: a player started before the colour last changed has an older one from its
+    // command line, and a restarted one may have been started by another run's settings.
+    if (m_viewportBackground.IsOk())
+      unityRendererHost->ipc()->sendViewportBackground(m_viewportBackground.Red(), m_viewportBackground.Green(),
+                                                       m_viewportBackground.Blue());
     SendCurrentModelToUnity();
     // What the player announced may change what the viewport can show: a character gets a notice
     // when the player is an older build that cannot dress it. With nothing loaded, the empty
@@ -1984,6 +2017,19 @@ bool ModelViewer::EnsureUnityViewportCentre()
   return true;
 }
 
+void ModelViewer::OnBackgroundColor(wxCommandEvent & WXUNUSED(event))
+{
+  if (!m_backgroundDialog)
+  {
+    m_backgroundDialog = new BackgroundColorDialog(this);
+    if (unityRendererHost)
+      m_backgroundDialog->placeBeside(unityRendererHost->GetScreenRect());
+  }
+  m_backgroundDialog->Show();
+  m_backgroundDialog->Raise();
+  m_backgroundDialog->opened();
+}
+
 void ModelViewer::OnRestartUnityRenderer(wxCommandEvent & WXUNUSED(event))
 {
   RestartUnityRenderer();
@@ -2001,6 +2047,31 @@ void ModelViewer::RestartUnityRenderer()
   // The notice follows at once: the restart's own outcome (a missing build is reported again), or the
   // content state. The player, once connected, is sent the current model by onUnityReady.
   UpdateUnityViewportState();
+}
+
+void ModelViewer::setViewportBackground(const wxColour & colour, bool persist)
+{
+  if (!colour.IsOk())
+    return;
+  const wxColour opaque(colour.Red(), colour.Green(), colour.Blue());
+  if (!ViewportBackground::sameColour(opaque, m_viewportBackground))
+  {
+    m_viewportBackground = opaque;
+    LOG_INFO << "[viewport] background" << QString::fromWCharArray(ViewportBackground::formatHex(opaque).c_str());
+    if (unityRendererHost)
+    {
+      unityRendererHost->setBackdrop(opaque);
+      // A player not ready yet gets it on connect (onUnityReady); one older than protocol 7 keeps its own default.
+      unityRendererHost->ipc()->sendViewportBackground(opaque.Red(), opaque.Green(), opaque.Blue());
+    }
+    if (m_backgroundDialog)
+      m_backgroundDialog->Sync();
+  }
+  if (persist && !ViewportBackground::sameColour(opaque, m_viewportBackgroundKept))
+  {
+    ViewportBackground::saveColour(opaque);
+    m_viewportBackgroundKept = opaque;
+  }
 }
 
 bool ModelViewer::StartUnityRenderer(bool selfTest)
@@ -4337,6 +4408,24 @@ void ModelViewer::SetViewerMode(ViewerMode mode, bool openBrowse, bool paintNow)
     // behind the texture. It is not opened again in Models.
     if (textures && charControl)
       charControl->ClearItemDialog();
+    // The Models viewport's background window is put away like the model panels: what it sets cannot be seen from the
+    // Textures viewer, where its command is greyed. Models gives it back if it was open (without taking the keyboard
+    // from the viewer).
+    if (m_backgroundDialog)
+    {
+      if (textures)
+      {
+        m_backgroundDialogPutAway = m_backgroundDialog->IsShown();
+        if (m_backgroundDialogPutAway)
+          m_backgroundDialog->Hide();
+      }
+      else if (m_backgroundDialogPutAway)
+      {
+        m_backgroundDialogPutAway = false;
+        m_backgroundDialog->Sync();
+        m_backgroundDialog->ShowWithoutActivating();
+      }
+    }
     // The centre, the panels and the menus (UpdateInterface -> DisplayedContentChanged ->
     // UpdateUnityViewportState puts the panels away or gives them back), Browse opened when asked, and
     // Browse's list, which the first entry into Textures after a client load lists from a catalogue
@@ -4637,6 +4726,7 @@ bool ModelViewer::needsModelViewer(int id) const
     case ID_IMPORT_NPC:
     case ID_EXPORT_MODEL:       // exporting the model: the submenu, ModelInfo.xml and each exporter
     case ID_FILE_MODEL_INFO:
+    case ID_VIEW_BACKGROUND_COLOR:   // the Models viewport's background, not seen from the Textures viewer
       return true;
   }
   return id >= m_exportMenuFirst && id < m_exportMenuEnd;

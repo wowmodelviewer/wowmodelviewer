@@ -2471,7 +2471,108 @@ public static class WmvLifecycleSelfTest
         MountTests(log);
         ZoomTests(log);
         MapObjectTests(log);
+        BackgroundTests(log);
         log(string.Format("lifecycle-test: {0} passed, {1} failed", passed, failed));
+    }
+
+    // ---------------------------------------------------------------- the Models viewport's background
+
+    static float Eotf(float s) { return s <= 0.04045f ? s / 12.92f : Mathf.Pow((s + 0.055f) / 1.055f, 2.4f); }
+    static float Oetf(float l) { return l <= 0.0031308f ? l * 12.92f : 1.055f * Mathf.Pow(l, 1f / 2.4f) - 0.055f; }
+
+    /// <summary>What a clear channel displays as, in sRGB 0..255, on the frame's path in the default 'full' mode: the
+    /// buffer holds the authored value (Unity linearises the gamma'd clear), the frame decode applies the EOTF, the
+    /// neutral LDR LUT of n nodes (8-bit node values, linear between them) and the swapchain's OETF follow.</summary>
+    static float ShownThroughLut(float authored, int n)
+    {
+        float x = Mathf.Clamp01(Eotf(authored)) * (n - 1);
+        int i = Mathf.Min((int)x, n - 2);
+        float f = x - i;
+        float lo = Mathf.Round(255f * i / (n - 1)) / 255f, hi = Mathf.Round(255f * (i + 1) / (n - 1)) / 255f;
+        return Oetf(lo + (hi - lo) * f) * 255f;
+    }
+
+    /// <summary>
+    /// The background message and launch argument as the player reads them, and the clear colour it derives
+    /// (WmvMain.ViewportBackgroundClear), checked against a model of the frame's colour path: every byte comes back
+    /// as itself through the 32-node LUT, the default keeps the exact float the viewport always cleared to, and
+    /// without a LUT a colour is passed through unchanged. The model is the player's own arithmetic; what the GPU
+    /// shows is measured on real captures by the host's test.
+    /// </summary>
+    static void BackgroundTests(Action<string> log)
+    {
+        Color32 c;
+        Check(WmvIpcClient.ParseViewportBackground("{\"type\":\"viewportBackground\",\"r\":74,\"g\":111,\"b\":165}", out c)
+              && c.r == 74 && c.g == 111 && c.b == 165 && c.a == 255,
+              "background json: a viewportBackground line gives its opaque colour", log);
+        Check(!WmvIpcClient.ParseViewportBackground("{\"type\":\"viewportBackground\",\"r\":256,\"g\":0,\"b\":0}", out c)
+              && !WmvIpcClient.ParseViewportBackground("{\"type\":\"viewportBackground\",\"r\":0,\"g\":-1,\"b\":0}", out c),
+              "background json: a channel outside 0..255 is refused", log);
+        Check(!WmvIpcClient.ParseViewportBackground("{\"type\":\"runtimeState\",\"r\":1,\"g\":2,\"b\":3}", out c),
+              "background json: a line of another type is not taken for a background", log);
+
+        Check(WmvIpcClient.ParseBackgroundArgument("4A6FA5", out c) && c.r == 0x4A && c.g == 0x6F && c.b == 0xA5 && c.a == 255
+              && WmvIpcClient.ParseBackgroundArgument("#4a6fa5", out c) && c.r == 0x4A && c.g == 0x6F && c.b == 0xA5,
+              "background argument: RRGGBB in either case, with or without '#'", log);
+        Check(!WmvIpcClient.ParseBackgroundArgument("4A6FA", out c) && !WmvIpcClient.ParseBackgroundArgument("4A6FA5F", out c)
+              && !WmvIpcClient.ParseBackgroundArgument("GG6FA5", out c) && !WmvIpcClient.ParseBackgroundArgument("", out c)
+              && !WmvIpcClient.ParseBackgroundArgument(null, out c) && !WmvIpcClient.ParseBackgroundArgument("#", out c),
+              "background argument: a wrong length, a non-hex digit, empty and null are refused", log);
+
+        const BindingFlags statics = BindingFlags.Static | BindingFlags.NonPublic;
+        FieldInfo lutNodes = typeof(WmvMain).GetField("ClearLutNodes", statics);
+        FieldInfo authoredDomain = typeof(WmvMain).GetField("ClearInAuthoredDomain", statics);
+        MethodInfo clearOf = typeof(WmvMain).GetMethod("ViewportBackgroundClear", statics);
+        MethodInfo channelOf = typeof(WmvMain).GetMethod("ClearChannel", statics);
+        if (lutNodes == null || authoredDomain == null || clearOf == null || channelOf == null)
+        {
+            Check(false, "background clear: WmvMain's clear-colour members are where the test expects them", log);
+            return;
+        }
+        object hadNodes = lutNodes.GetValue(null), hadDomain = authoredDomain.GetValue(null);
+        try
+        {
+            lutNodes.SetValue(null, 32);
+            authoredDomain.SetValue(null, true);
+            int off = 0, worst = -1;
+            float worstErr = 0f;
+            for (int b = 0; b < 256; b++)
+            {
+                float shown = ShownThroughLut((float)channelOf.Invoke(null, new object[] { (byte)b }), 32);
+                float err = Mathf.Abs(shown - b);
+                if (Mathf.RoundToInt(shown) != b || err > 0.25f) off++;
+                if (err > worstErr) { worstErr = err; worst = b; }
+            }
+            Check(off == 0, string.Format("background clear: through the 32-node LUT every byte 0..255 comes back as itself " +
+                                          "(worst {0:F3} of a step, at {1})", worstErr, worst), log);
+            int plainOff = 0;
+            for (int b = 0; b < 256; b++)
+                if (Mathf.RoundToInt(ShownThroughLut(b / 255f, 32)) != b) plainOff++;
+            Check(plainOff > 0, string.Format("background clear: ... where the colour passed straight through would miss {0} " +
+                                              "byte(s), so the compensation is doing the work", plainOff), log);
+
+            Color def = (Color)clearOf.Invoke(null, new object[] { WmvMain.DefaultViewportBackground });
+            Color legacy = new Color(0.10f, 0.10f, 0.12f).gamma;
+            Check(def == legacy, "background clear: the default #19191E clears to the exact float the viewport always " +
+                                 "cleared to, so its frames are unchanged", log);
+            Check(Mathf.RoundToInt(ShownThroughLut(def.linear.r, 32)) == 25 && Mathf.RoundToInt(ShownThroughLut(def.linear.b, 32)) == 30,
+                  "background clear: ... and that float shows as (25,25,30) through the LUT, as measured", log);
+            Color grey = (Color)clearOf.Invoke(null, new object[] { new Color32(128, 128, 128, 255) });
+            Check(Mathf.RoundToInt(ShownThroughLut(grey.linear.r, 32)) == 128 && grey.r == grey.g && grey.g == grey.b && grey.a == 1f,
+                  "background clear: #808080 is an opaque neutral grey that shows as 128", log);
+
+            lutNodes.SetValue(null, 0);
+            authoredDomain.SetValue(null, false);
+            Color plain = (Color)clearOf.Invoke(null, new object[] { new Color32(64, 128, 200, 255) });
+            Check(Mathf.Abs(plain.r - 64 / 255f) < 1e-5f && Mathf.Abs(plain.g - 128 / 255f) < 1e-5f &&
+                  Mathf.Abs(plain.b - 200 / 255f) < 1e-5f,
+                  "background clear: with no LUT and no frame decode the colour is passed through as it is", log);
+        }
+        finally
+        {
+            lutNodes.SetValue(null, hadNodes);
+            authoredDomain.SetValue(null, hadDomain);
+        }
     }
 
     // ---------------------------------------------------------------- world models

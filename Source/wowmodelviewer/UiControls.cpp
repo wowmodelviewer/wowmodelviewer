@@ -7,6 +7,7 @@
 #include "UiControls.h"
 
 #include <algorithm>
+#include <cmath>
 #include <functional>
 #include <memory>
 
@@ -258,6 +259,590 @@ void UiButton::paint(wxDC & dc, const wxSize & size, bool pressed, bool hot, boo
   }
   if (iconSize && m_iconAfter)
     drawIcon(x);
+}
+
+// ================================================================================== colour swatch
+
+UiColourSwatch::UiColourSwatch(wxWindow * parent, wxWindowID id, const wxColour & colour, const wxSize & sizeDip,
+                               const wxString & accessibleName)
+  : m_colour(colour), m_sizeDip(sizeDip)
+{
+  Create(parent, id, accessibleName, wxDefaultPosition, wxDefaultSize, wxBORDER_NONE);
+  MakeOwnerDrawn();
+  Bind(wxEVT_ENTER_WINDOW, [this](wxMouseEvent & e) {
+    m_hot = true;
+    Refresh(false);
+    e.Skip();
+  });
+  Bind(wxEVT_LEAVE_WINDOW, [this](wxMouseEvent & e) {
+    m_hot = false;
+    Refresh(false);
+    e.Skip();
+  });
+  SetInitialSize();
+}
+
+void UiColourSwatch::SetColour(const wxColour & colour)
+{
+  if (colour == m_colour)
+    return;
+  m_colour = colour;
+  Refresh(false);
+}
+
+void UiColourSwatch::SetSelected(bool selected)
+{
+  if (selected == m_selected)
+    return;
+  m_selected = selected;
+  Refresh(false);
+}
+
+wxSize UiColourSwatch::DoGetBestSize() const
+{
+  return FromDIP(m_sizeDip);
+}
+
+bool UiColourSwatch::MSWOnDraw(WXDRAWITEMSTRUCT * item)
+{
+  const DRAWITEMSTRUCT * dis = reinterpret_cast<const DRAWITEMSTRUCT *>(item);
+  const wxSize size(dis->rcItem.right - dis->rcItem.left, dis->rcItem.bottom - dis->rcItem.top);
+  if (size.x <= 0 || size.y <= 0)
+    return true;
+  const UINT state = dis->itemState;
+  wxBitmap buffer(size, 24);
+  {
+    wxMemoryDC mem(buffer);
+    paint(mem, size, (state & ODS_SELECTED) != 0, m_hot, (state & ODS_FOCUS) && !(state & ODS_NOFOCUSRECT),
+          (state & ODS_DISABLED) != 0 || !IsEnabled());
+    ::BitBlt(dis->hDC, dis->rcItem.left, dis->rcItem.top, size.x, size.y, (HDC)mem.GetHDC(), 0, 0, SRCCOPY);
+  }
+  return true;
+}
+
+void UiColourSwatch::paint(wxDC & dc, const wxSize & size, bool pressed, bool hot, bool focusRing, bool disabled)
+{
+  const UiStyle::Palette & p = palette();
+  const wxColour under = GetParent() ? GetParent()->GetBackgroundColour() : p.panelBackground;
+  dc.SetBackground(wxBrush(under));
+  dc.Clear();
+
+  hot = hot && !disabled;
+  pressed = pressed && !disabled;
+  wxColour fill = m_colour.IsOk() ? m_colour : under;
+  if (disabled)
+    fill = wxColour((fill.Red() + under.Red()) / 2, (fill.Green() + under.Green()) / 2,
+                    (fill.Blue() + under.Blue()) / 2);
+
+  std::unique_ptr<wxGraphicsContext> gc = graphicsFor(dc);
+  if (!gc)
+    return;
+  const double ring = std::max(2, FromDIP(2));
+  const double gap = std::max(2, FromDIP(2));
+  const double radius = FromDIP(UiStyle::Radius);
+  const double inset = ring + gap + (pressed ? 1.0 : 0.0);
+  const double w = size.x - 2 * inset, h = size.y - 2 * inset;
+
+  // The colour, with the controls' outline.
+  gc->SetBrush(wxBrush(fill));
+  gc->SetPen(wxPen(disabled ? p.separator : hot ? p.borderStrong : p.border));
+  gc->DrawRoundedRectangle(inset + 0.5, inset + 0.5, w - 1.0, h - 1.0, radius);
+
+  gc->SetBrush(*wxTRANSPARENT_BRUSH);
+  if (m_selected)
+  {
+    gc->SetPen(gc->CreatePen(wxGraphicsPenInfo(disabled ? p.textDisabled : p.accent, ring)));
+    gc->DrawRoundedRectangle(ring / 2, ring / 2, size.x - ring, size.y - ring, radius + gap + ring / 2);
+    // The check: black or white, whichever has the higher contrast on the colour (WCAG's relative luminance).
+    const auto channel = [](unsigned char v) {
+      const double c = v / 255.0;
+      return c <= 0.04045 ? c / 12.92 : std::pow((c + 0.055) / 1.055, 2.4);
+    };
+    const double lum = 0.2126 * channel(fill.Red()) + 0.7152 * channel(fill.Green()) + 0.0722 * channel(fill.Blue());
+    const wxColour mark = (lum + 0.05) / 0.05 >= 1.05 / (lum + 0.05) ? *wxBLACK : *wxWHITE;
+    const double s = std::min(w, h) * 0.22;
+    const double cx = size.x / 2.0, cy = size.y / 2.0;
+    wxGraphicsPath check = gc->CreatePath();
+    check.MoveToPoint(cx - s, cy);
+    check.AddLineToPoint(cx - s * 0.3, cy + s * 0.7);
+    check.AddLineToPoint(cx + s, cy - s * 0.7);
+    gc->SetPen(gc->CreatePen(
+      wxGraphicsPenInfo(mark, std::max(1.5, FromDIP(2) * 0.9)).Cap(wxCAP_ROUND).Join(wxJOIN_ROUND)));
+    gc->StrokePath(check);
+  }
+  if (focusRing)
+  {
+    // Inside the gap, so it shows with or without the selection ring.
+    const double f = std::max(1, FromDIP(1));
+    gc->SetPen(gc->CreatePen(wxGraphicsPenInfo(p.text, f)));
+    gc->DrawRoundedRectangle(ring + f / 2, ring + f / 2, size.x - 2 * ring - f, size.y - 2 * ring - f, radius + gap / 2);
+  }
+}
+
+// ================================================================================== colour picker
+
+wxDEFINE_EVENT(UI_EVT_COLOUR_CHANGING, wxCommandEvent);
+wxDEFINE_EVENT(UI_EVT_COLOUR_CHANGED, wxCommandEvent);
+
+namespace
+{
+  // HSV (h 0..360, s and v 0..1) to sRGB bytes, and back. A grey has no hue: hue is left as given.
+  wxColour hsvToColour(double h, double s, double v)
+  {
+    h = std::fmod(h, 360.0);
+    if (h < 0)
+      h += 360.0;
+    const double c = v * s;
+    const double x = c * (1.0 - std::fabs(std::fmod(h / 60.0, 2.0) - 1.0));
+    const double m = v - c;
+    double r = 0, g = 0, b = 0;
+    if (h < 60) { r = c; g = x; }
+    else if (h < 120) { r = x; g = c; }
+    else if (h < 180) { g = c; b = x; }
+    else if (h < 240) { g = x; b = c; }
+    else if (h < 300) { r = x; b = c; }
+    else { r = c; b = x; }
+    const auto byte = [](double u) { return (unsigned char)std::lround(std::max(0.0, std::min(1.0, u)) * 255.0); };
+    return wxColour(byte(r + m), byte(g + m), byte(b + m));
+  }
+
+  void colourToHsv(const wxColour & c, double & h, double & s, double & v)
+  {
+    const double r = c.Red() / 255.0, g = c.Green() / 255.0, b = c.Blue() / 255.0;
+    const double mx = std::max(r, std::max(g, b)), mn = std::min(r, std::min(g, b)), d = mx - mn;
+    v = mx;
+    s = mx > 0 ? d / mx : 0.0;
+    if (d <= 0)
+      return;   // a grey: the hue stays
+    if (mx == r)
+      h = 60.0 * std::fmod((g - b) / d, 6.0);
+    else if (mx == g)
+      h = 60.0 * ((b - r) / d + 2.0);
+    else
+      h = 60.0 * ((r - g) / d + 4.0);
+    if (h < 0)
+      h += 360.0;
+  }
+
+  // Fills what lies outside a rounded rectangle with the surface colour (corners of an image drawn square).
+  void roundCorners(wxGraphicsContext * gc, const wxRect & r, double radius, const wxColour & under)
+  {
+    wxGraphicsPath path = gc->CreatePath();
+    path.AddRectangle(r.x - 1, r.y - 1, r.width + 2, r.height + 2);
+    path.AddRoundedRectangle(r.x, r.y, r.width, r.height, radius);
+    gc->SetBrush(wxBrush(under));
+    gc->SetPen(*wxTRANSPARENT_PEN);
+    gc->FillPath(path, wxODDEVEN_RULE);
+  }
+}
+
+class UiColourPickerPart;
+
+// What a screen reader gets for a part: a slider, its name and its value.
+class UiColourPickerPartAccessible : public wxAccessible
+{
+public:
+  explicit UiColourPickerPartAccessible(UiColourPickerPart * part);
+  wxAccStatus GetName(int childId, wxString * name) wxOVERRIDE;
+  wxAccStatus GetRole(int childId, wxAccRole * role) wxOVERRIDE;
+  wxAccStatus GetValue(int childId, wxString * value) wxOVERRIDE;
+
+private:
+  UiColourPickerPart * m_part;
+};
+
+// One part of the picker: the square (Field) or the strip (Strip). Owner-drawn, takes the keyboard (the arrows too).
+class UiColourPickerPart : public wxWindow
+{
+public:
+  enum class Kind { Field, Strip };
+
+  UiColourPickerPart(UiColourPicker * owner, Kind kind, const wxSize & sizeDip)
+    : wxWindow(owner, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxWANTS_CHARS | wxFULL_REPAINT_ON_RESIZE | wxBORDER_NONE,
+               kind == Kind::Field ? wxT("colourPickerField") : wxT("colourPickerStrip")),
+      m_owner(owner), m_kind(kind), m_sizeDip(sizeDip)
+  {
+    SetBackgroundStyle(wxBG_STYLE_PAINT);
+    SetAccessible(new UiColourPickerPartAccessible(this));
+    SetToolTip(kind == Kind::Field ? _("Saturation (across) and brightness (up): click, drag or use the arrow keys")
+                                   : _("Hue: click, drag or use the arrow keys"));
+    Bind(wxEVT_PAINT, &UiColourPickerPart::OnPaint, this);
+    Bind(wxEVT_LEFT_DOWN, &UiColourPickerPart::OnMouse, this);
+    // A second press within the double-click time arrives as a double click, not a press: it starts a drag all the same.
+    Bind(wxEVT_LEFT_DCLICK, &UiColourPickerPart::OnMouse, this);
+    Bind(wxEVT_MOTION, &UiColourPickerPart::OnMouse, this);
+    Bind(wxEVT_LEFT_UP, &UiColourPickerPart::OnMouse, this);
+    Bind(wxEVT_MOUSE_CAPTURE_LOST, [this](wxMouseCaptureLostEvent &) { endDrag(); });
+    Bind(wxEVT_KEY_DOWN, &UiColourPickerPart::OnKeyDown, this);
+    Bind(wxEVT_KEY_UP, &UiColourPickerPart::OnKeyUp, this);
+    Bind(wxEVT_SET_FOCUS, [this](wxFocusEvent & e) { Refresh(false); e.Skip(); });
+    Bind(wxEVT_KILL_FOCUS, [this](wxFocusEvent & e) {
+      // A key held while the focus went elsewhere never lets up here: what it moved is settled now.
+      settleKeys();
+      Refresh(false);
+      e.Skip();
+    });
+    SetInitialSize();
+  }
+
+  // The value a screen reader hears.
+  wxString valueText() const
+  {
+    if (m_kind == Kind::Field)
+      return wxString::Format(_("Saturation %d%%, brightness %d%%"), (int)std::lround(m_owner->m_s * 100.0),
+                              (int)std::lround(m_owner->m_v * 100.0));
+    return wxString::Format(_("Hue %d degrees"), (int)std::lround(m_owner->m_h));
+  }
+  Kind kind() const { return m_kind; }
+
+  void settleKeys()
+  {
+    if (!m_keyMoved)
+      return;
+    m_keyMoved = false;
+    m_owner->partChanged(true);
+  }
+  // Ends a drag (settled: with UI_EVT_COLOUR_CHANGED) or drops it.
+  void stopDrag(bool settled)
+  {
+    if (settled)
+    {
+      endDrag();
+      return;
+    }
+    m_dragging = false;
+    m_keyMoved = false;
+    if (HasCapture())
+      ReleaseMouse();
+  }
+
+  bool AcceptsFocusFromKeyboard() const wxOVERRIDE { return IsEnabled(); }
+  WXLRESULT MSWWindowProc(WXUINT message, WXWPARAM wParam, WXLPARAM lParam) wxOVERRIDE
+  {
+    // The arrow keys are this part's (moving the colour), not the dialog navigation's; Tab still moves on.
+    if (message == WM_GETDLGCODE)
+      return DLGC_WANTARROWS;
+    return wxWindow::MSWWindowProc(message, wParam, lParam);
+  }
+
+  bool dragging() const { return m_dragging; }
+
+protected:
+  wxSize DoGetBestSize() const wxOVERRIDE { return FromDIP(m_sizeDip); }
+
+private:
+  // Room kept around the colours for a marker at an edge and the focus ring (UiColourPicker::Bleed); the strip's
+  // colours are a narrow band at its right, Bleed in, so they end where the column does.
+  wxRect area() const
+  {
+    const wxSize size = GetClientSize();
+    const int bleed = FromDIP(UiColourPicker::Bleed);
+    const int height = std::max(2, size.y - 2 * bleed);
+    if (m_kind == Kind::Field)
+      return wxRect(bleed, bleed, std::max(2, size.x - 2 * bleed), height);
+    const int w = std::max(2, FromDIP(12));
+    return wxRect(std::max(0, size.x - bleed - w), bleed, w, height);
+  }
+
+  void fromPoint(const wxPoint & at)
+  {
+    const wxRect a = area();
+    const double fx = std::max(0.0, std::min(1.0, (at.x - a.x) / double(a.width - 1)));
+    const double fy = std::max(0.0, std::min(1.0, (at.y - a.y) / double(a.height - 1)));
+    if (m_kind == Kind::Field)
+    {
+      m_owner->m_s = fx;
+      m_owner->m_v = 1.0 - fy;
+    }
+    else
+      m_owner->m_h = fy * 360.0;
+  }
+
+  void OnMouse(wxMouseEvent & e)
+  {
+    if (e.LeftDown() || e.LeftDClick())
+    {
+      SetFocus();
+      if (!HasCapture())
+        CaptureMouse();
+      m_dragging = true;
+      fromPoint(e.GetPosition());
+      m_owner->partChanged(false);
+    }
+    else if (e.Dragging() && m_dragging)
+    {
+      fromPoint(e.GetPosition());
+      m_owner->partChanged(false);
+    }
+    else if (e.LeftUp() && m_dragging)
+    {
+      fromPoint(e.GetPosition());
+      endDrag();
+    }
+    e.Skip();
+  }
+
+  void endDrag()
+  {
+    if (!m_dragging)
+      return;
+    m_dragging = false;
+    if (HasCapture())
+      ReleaseMouse();
+    m_owner->partChanged(true);
+  }
+
+  void OnKeyDown(wxKeyEvent & e)
+  {
+    const double step = e.ShiftDown() ? 10.0 : 1.0;
+    bool moved = true;
+    switch (e.GetKeyCode())
+    {
+      case WXK_LEFT:
+      case WXK_NUMPAD_LEFT:
+        if (m_kind == Kind::Field) m_owner->m_s = std::max(0.0, m_owner->m_s - step / 100.0); else moved = false;
+        break;
+      case WXK_RIGHT:
+      case WXK_NUMPAD_RIGHT:
+        if (m_kind == Kind::Field) m_owner->m_s = std::min(1.0, m_owner->m_s + step / 100.0); else moved = false;
+        break;
+      case WXK_UP:
+      case WXK_NUMPAD_UP:
+        if (m_kind == Kind::Field) m_owner->m_v = std::min(1.0, m_owner->m_v + step / 100.0);
+        else m_owner->m_h = std::max(0.0, m_owner->m_h - step);
+        break;
+      case WXK_DOWN:
+      case WXK_NUMPAD_DOWN:
+        if (m_kind == Kind::Field) m_owner->m_v = std::max(0.0, m_owner->m_v - step / 100.0);
+        else m_owner->m_h = std::min(360.0, m_owner->m_h + step);
+        break;
+      case WXK_HOME:
+      case WXK_NUMPAD_HOME:
+        if (m_kind == Kind::Strip) m_owner->m_h = 0.0; else moved = false;
+        break;
+      case WXK_END:
+      case WXK_NUMPAD_END:
+        if (m_kind == Kind::Strip) m_owner->m_h = 360.0; else moved = false;
+        break;
+      default:
+        moved = false;
+    }
+    if (!moved)
+    {
+      e.Skip();
+      return;
+    }
+    showFocusCues(this);
+    m_keyMoved = true;
+    m_owner->partChanged(false);
+  }
+
+  void OnKeyUp(wxKeyEvent & e)
+  {
+    settleKeys();
+    e.Skip();
+  }
+
+  // The square's colours for one hue at one size, made again only when either changes.
+  const wxBitmap & fieldBitmap(const wxRect & a)
+  {
+    if (!m_cache.IsOk() || m_cacheHue != m_owner->m_h || m_cache.GetWidth() != a.width || m_cache.GetHeight() != a.height)
+    {
+      wxImage image(a.width, a.height, false);
+      unsigned char * px = image.GetData();
+      for (int y = 0; y < a.height; y++)
+      {
+        const double v = 1.0 - y / double(a.height - 1);
+        for (int x = 0; x < a.width; x++)
+        {
+          const wxColour c = hsvToColour(m_owner->m_h, x / double(a.width - 1), v);
+          *px++ = c.Red();
+          *px++ = c.Green();
+          *px++ = c.Blue();
+        }
+      }
+      m_cache = wxBitmap(image);
+      m_cacheHue = m_owner->m_h;
+    }
+    return m_cache;
+  }
+
+  const wxBitmap & stripBitmap(const wxRect & a)
+  {
+    if (!m_cache.IsOk() || m_cache.GetWidth() != a.width || m_cache.GetHeight() != a.height)
+    {
+      wxImage image(a.width, a.height, false);
+      unsigned char * px = image.GetData();
+      for (int y = 0; y < a.height; y++)
+      {
+        const wxColour c = hsvToColour(360.0 * y / double(a.height - 1), 1.0, 1.0);
+        for (int x = 0; x < a.width; x++)
+        {
+          *px++ = c.Red();
+          *px++ = c.Green();
+          *px++ = c.Blue();
+        }
+      }
+      m_cache = wxBitmap(image);
+    }
+    return m_cache;
+  }
+
+  void OnPaint(wxPaintEvent &)
+  {
+    wxAutoBufferedPaintDC dc(this);
+    const UiStyle::Palette & p = palette();
+    const wxColour under = GetParent()->GetBackgroundColour();
+    dc.SetBackground(wxBrush(under));
+    dc.Clear();
+    const wxRect a = area();
+    dc.DrawBitmap(m_kind == Kind::Field ? fieldBitmap(a) : stripBitmap(a), a.x, a.y);
+    std::unique_ptr<wxGraphicsContext> gc = graphicsFor(dc);
+    if (!gc)
+      return;
+    const double radius = FromDIP(UiStyle::Radius);
+    roundCorners(gc.get(), a, radius, under);
+    // The outline the controls have, so a light square has an edge on a light panel.
+    gc->SetBrush(*wxTRANSPARENT_BRUSH);
+    gc->SetPen(wxPen(IsEnabled() ? p.border : p.separator));
+    gc->DrawRoundedRectangle(a.x + 0.5, a.y + 0.5, a.width - 1.0, a.height - 1.0, radius);
+    // Keyboard focus: the accent ring just outside, as on the other controls.
+    if (HasFocus() && focusCuesShown(this))
+    {
+      const double w = std::max(2, FromDIP(2));
+      gc->SetPen(gc->CreatePen(wxGraphicsPenInfo(p.accent, w)));
+      const double o = w / 2 + 1;
+      gc->DrawRoundedRectangle(a.x - o, a.y - o, a.width + 2 * o, a.height + 2 * o, radius + o);
+    }
+    // The marker: the colour itself in a white ring, in a dark one, so it shows on any colour.
+    const wxColour colour = m_kind == Kind::Field ? m_owner->GetColour() : hsvToColour(m_owner->m_h, 1.0, 1.0);
+    const wxGraphicsPen dark = gc->CreatePen(wxGraphicsPenInfo(wxColour(0, 0, 0, 150), std::max(1, FromDIP(1)) * 3.5));
+    const wxGraphicsPen light = gc->CreatePen(wxGraphicsPenInfo(*wxWHITE, std::max(1, FromDIP(1)) * 2.0));
+    if (m_kind == Kind::Field)
+    {
+      const double cx = a.x + m_owner->m_s * (a.width - 1), cy = a.y + (1.0 - m_owner->m_v) * (a.height - 1);
+      const double r = FromDIP(6);
+      gc->SetBrush(wxBrush(colour));
+      gc->SetPen(dark);
+      gc->DrawEllipse(cx - r, cy - r, 2 * r, 2 * r);
+      gc->SetPen(light);
+      gc->DrawEllipse(cx - r, cy - r, 2 * r, 2 * r);
+    }
+    else
+    {
+      const double cy = a.y + std::min(360.0, m_owner->m_h) / 360.0 * (a.height - 1);
+      const double h = FromDIP(6), x0 = a.x - FromDIP(3), w = a.width + 2 * FromDIP(3);
+      gc->SetBrush(wxBrush(colour));
+      gc->SetPen(dark);
+      gc->DrawRoundedRectangle(x0, cy - h / 2, w, h, h / 3);
+      gc->SetPen(light);
+      gc->DrawRoundedRectangle(x0, cy - h / 2, w, h, h / 3);
+    }
+  }
+
+  UiColourPicker * m_owner;
+  Kind m_kind;
+  wxSize m_sizeDip;
+  bool m_dragging = false;
+  bool m_keyMoved = false;
+  wxBitmap m_cache;
+  double m_cacheHue = -1.0;
+};
+
+UiColourPickerPartAccessible::UiColourPickerPartAccessible(UiColourPickerPart * part) : wxAccessible(part), m_part(part) {}
+
+wxAccStatus UiColourPickerPartAccessible::GetName(int childId, wxString * name)
+{
+  if (childId != wxACC_SELF)
+    return wxACC_NOT_IMPLEMENTED;
+  *name = m_part->kind() == UiColourPickerPart::Kind::Field ? _("Saturation and brightness") : _("Hue");
+  return wxACC_OK;
+}
+
+wxAccStatus UiColourPickerPartAccessible::GetRole(int childId, wxAccRole * role)
+{
+  if (childId != wxACC_SELF)
+    return wxACC_NOT_IMPLEMENTED;
+  *role = wxROLE_SYSTEM_SLIDER;
+  return wxACC_OK;
+}
+
+wxAccStatus UiColourPickerPartAccessible::GetValue(int childId, wxString * value)
+{
+  if (childId != wxACC_SELF)
+    return wxACC_NOT_IMPLEMENTED;
+  *value = m_part->valueText();
+  return wxACC_OK;
+}
+
+UiColourPicker::UiColourPicker(wxWindow * parent, wxWindowID id, const wxSize & fieldSizeDip,
+                               const wxString & accessibleName)
+  : wxPanel(parent, id, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL | wxBORDER_NONE, wxT("colourPicker"))
+{
+  // What the picker stands on, between and around its parts (wx would give a panel the system's face colour).
+  SetBackgroundColour(parent->GetBackgroundColour());
+  UiSetAccessibleName(this, accessibleName);
+  m_field = new UiColourPickerPart(this, UiColourPickerPart::Kind::Field, fieldSizeDip);
+  m_strip = new UiColourPickerPart(this, UiColourPickerPart::Kind::Strip, wxSize(StripWidth, fieldSizeDip.y));
+  wxBoxSizer * row = new wxBoxSizer(wxHORIZONTAL);
+  row->Add(m_field, 1, wxEXPAND);
+  row->Add(m_strip, 0, wxEXPAND | wxLEFT, FromDIP(StripGap));
+  SetSizer(row);
+}
+
+wxColour UiColourPicker::GetColour() const
+{
+  return hsvToColour(m_h, m_s, m_v);
+}
+
+bool UiColourPicker::IsDragging() const
+{
+  return m_field->dragging() || m_strip->dragging();
+}
+
+void UiColourPicker::settle()
+{
+  m_field->stopDrag(true);
+  m_strip->stopDrag(true);
+  m_field->settleKeys();
+  m_strip->settleKeys();
+}
+
+void UiColourPicker::abandon()
+{
+  m_field->stopDrag(false);
+  m_strip->stopDrag(false);
+}
+
+wxWindow * UiColourPicker::Field() const { return m_field; }
+wxWindow * UiColourPicker::Strip() const { return m_strip; }
+
+void UiColourPicker::SetColour(const wxColour & colour)
+{
+  // The bytes already shown keep the position they were picked at (a byte rounds many positions together).
+  if (!colour.IsOk() || IsDragging() || colour == GetColour())
+    return;
+  colourToHsv(colour, m_h, m_s, m_v);
+  m_sent = GetColour();
+  m_field->Refresh(false);
+  m_strip->Refresh(false);
+}
+
+void UiColourPicker::partChanged(bool settled)
+{
+  m_field->Refresh(false);
+  m_strip->Refresh(false);
+  const wxColour colour = GetColour();
+  if (!settled && colour == m_sent)
+    return;
+  m_sent = colour;
+  // A screen reader hears the new value of the part that moved, and of the other when it follows (the square's
+  // colours follow the hue).
+  for (wxWindow * part : { (wxWindow *)m_field, (wxWindow *)m_strip })
+    wxAccessible::NotifyEvent(wxACC_EVENT_OBJECT_VALUECHANGE, part, wxOBJID_CLIENT, wxACC_SELF);
+  wxCommandEvent e(settled ? UI_EVT_COLOUR_CHANGED : UI_EVT_COLOUR_CHANGING, GetId());
+  e.SetEventObject(this);
+  ProcessWindowEvent(e);
 }
 
 // =================================================================================== search field

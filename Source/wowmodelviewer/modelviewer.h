@@ -38,6 +38,7 @@ class wxAuiToolBar;
 class ExportJobManager;
 class UnityRendererHost;
 class TextureView;
+class BackgroundColorDialog;
 struct TextureEntry;
 class CharInfos;
 
@@ -231,6 +232,8 @@ public:
 
   // View > "Restart Unity Renderer", and the button on a stopped-player notice.
   void OnRestartUnityRenderer(wxCommandEvent &event);
+  // View > Swap Background Color: the Models viewport's background window, made the first time and shown again after.
+  void OnBackgroundColor(wxCommandEvent & event);
   // Close the player (if any) and start it again; the viewport's state follows.
   void RestartUnityRenderer();
   // Launch the player into the viewport unless it is already running (also used by the headless
@@ -275,8 +278,8 @@ public:
   ViewerMode viewerMode() const { return m_viewerMode; }
   bool isTextureMode() const { return m_viewerMode == ViewerMode::Textures; }
   // The commands that act on a model -- the Animation, Model and Attachments panels, View NPC, View
-  // Item, Load Character, the Armory and NPC imports and every export of the model -- are the Models
-  // viewer's. In Textures their menu items and command-bar tools are greyed (OnUpdateCommandUI, answered
+  // Item, Load Character, the Armory and NPC imports, every export of the model, and Swap Background
+  // Color (the Models viewport's) -- are the Models viewer's. In Textures their menu items and command-bar tools are greyed (OnUpdateCommandUI, answered
   // again at every switch) and the commands are refused however they arrive (TryBefore).
   bool needsModelViewer(int id) const;
   // Select a texture picked in Browse (Textures mode): the texture view reads and shows it.
@@ -309,6 +312,14 @@ public:
   // Help text in the status bar's first field, as wx gives it for menu items and toolbar buttons -- only
   // where there is some: see the definition.
   void DoGiveHelp(const wxString & text, bool show) wxOVERRIDE;
+
+  // THE MODELS VIEWPORT'S BACKGROUND (View > Swap Background Color; ViewportBackground.h): the colour the Unity player clears
+  // the Models viewport to, as the sRGB bytes it displays as. Loaded with the session; the host panel paints it under
+  // the player, a player started later is given it on its command line, and one that announces itself is sent it.
+  const wxColour & viewportBackground() const { return m_viewportBackground; }
+  // Show colour now. Sent to the player only when it differs from the colour on show (and the player speaks protocol
+  // 7); kept in Config.ini when persist and it differs from what is kept there. The background window follows.
+  void setViewportBackground(const wxColour & colour, bool persist);
 
   // THE VIEWPORT SCREENSHOT. The command bar's Screenshot: a Save As dialog (PNG, overwrite confirmed, named after
   // the model and the time), then RequestUnityScreenshot. Cancelling does nothing.
@@ -560,6 +571,14 @@ public:
 
   // Last legacy-MPQ folder the user picked (persisted in the session config).
   QString m_lastMpqFolder;
+
+  // The Models viewport's background (viewportBackground), and what Config.ini holds for it.
+  wxColour m_viewportBackground;
+  wxColour m_viewportBackgroundKept;
+  // Its window (View > Swap Background Color), made when first asked for; hidden, not destroyed, when closed.
+  BackgroundColorDialog * m_backgroundDialog = nullptr;
+  // The window was open when the Textures viewer put it away: Models gives it back.
+  bool m_backgroundDialogPutAway = false;
 
 };
 

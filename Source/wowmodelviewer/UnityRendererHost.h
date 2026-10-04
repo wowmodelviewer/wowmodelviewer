@@ -98,6 +98,13 @@ public:
   void setPlayerReady(bool ready);
   bool isPlayerReady() const { return m_playerReady; }
 
+  // THE BACKDROP: the Models viewport's background (ModelViewer::viewportBackground). The panel paints it wherever
+  // the player's window does not cover it and no notice is up -- while the player starts, so its first frame is not a
+  // change of colour -- and a player launched after this is given it on its command line ("-wmvBackground RRGGBB").
+  // A notice keeps the palette's viewport colour, which its text and button are made for. Invalid: that colour too,
+  // and nothing on the command line.
+  void setBackdrop(const wxColour & colour);
+
   // THE VIEWPORT NOTICE. Whenever the player's own window is not what should be on screen, the
   // panel paints a title, a detail line and (optionally) one button instead:
   //   - nothing is loaded yet: the empty viewer's prompt, whose button opens a model;
@@ -170,6 +177,7 @@ private:
 
   // False until the player reports in. Only affects what this panel paints underneath it.
   bool m_playerReady = false;
+  wxColour m_backdrop;   // setBackdrop
   // When the process was started, so the log can say how long the user waited for it. That
   // number is the whole reason the viewport is started at app launch rather than on demand.
   unsigned long m_launchedAtMs = 0;

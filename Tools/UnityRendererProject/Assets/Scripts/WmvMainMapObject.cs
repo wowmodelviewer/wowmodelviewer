@@ -739,6 +739,7 @@ public partial class WmvMain
             MountSequence = -1,
             BodyRebinds = dresser != null ? dresser.BodyRebinds : 0,
             ViewFramings = ViewFramings,
+            Background = ViewportBackground,
         };
         WmvRuntimeModel mount = r.MountFileDataID != 0 ? mounted.Mount.Runtime : null;
         if (mount != null)
@@ -759,7 +760,8 @@ public partial class WmvMain
                       "particle + {8} ribbon, {9} live particle(s))", r.MountKey.Length > 0 ? r.MountKey : "none", r.LiveMounts,
                       r.MountsBuilt, r.MountSeat, r.MountSeatBone, r.ModelSequence, r.MountSequence, r.MountEmitters,
                       r.MountRibbons, r.MountParticles)) +
-                  string.Format("; the view has been fitted {0} time(s)", r.ViewFramings));
+                  string.Format("; the view has been fitted {0} time(s); background #{1:X2}{2:X2}{3:X2}", r.ViewFramings,
+                                r.Background.r, r.Background.g, r.Background.b));
         ipc.ReportRuntimeState(query, r);
     }
 }

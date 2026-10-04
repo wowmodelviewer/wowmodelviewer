@@ -21,6 +21,7 @@
 #include "Game.h"
 #include "GameFolder.h" // core::GameConfig
 #include "GlobalSettings.h"
+#include "ViewportBackground.h"
 #include "globalvars.h"
 #include "LogStackWalker.h"
 #include "PluginManager.h"
@@ -1417,6 +1418,49 @@ static bool doIpcTestScreenshotStep(ModelViewer * frame, UnityIpcServer * ipc, c
   return bad.isEmpty();
 }
 
+// THE BACKGROUND STEP of the lifecycle sequence, "background:<#RRGGBB|default>" (protocol 7): what picking a colour in
+// View > Swap Background Color does (ModelViewer::setViewportBackground; not kept in Config.ini, so a test leaves the
+// file as it was), then the player's runtimeState, which must hold exactly that colour. Exactly one viewportBackground
+// is sent for a colour that is not on show, and none for the one that is.
+static bool doIpcTestBackgroundStep(ModelViewer * frame, UnityIpcServer * ipc, const QString & target,
+                                    const std::vector<UnityIpcServer::RuntimeState> & states, QString & what, QString & why)
+{
+  wxColour colour;
+  if (target.compare("default", Qt::CaseInsensitive) == 0)
+    colour = ViewportBackground::defaultColour();
+  else if (!ViewportBackground::parseHex(wxString(target.toStdWString()), colour))
+  {
+    why = "background: takes #RRGGBB or default";
+    return false;
+  }
+  if (!ipc->playerPaintsBackground())
+  {
+    why = QString("the player (protocol %1) does not take a background").arg(ipc->playerProtocolVersion());
+    return false;
+  }
+  const bool onShow = ViewportBackground::sameColour(colour, frame->viewportBackground());
+  const int sentBefore = ipc->stats().backgroundPushes;
+  frame->setViewportBackground(colour, false);
+  const int sent = ipc->stats().backgroundPushes - sentBefore;
+  UnityIpcServer::RuntimeState held;
+  bool answered = false;
+  const bool holds = waitRuntimeState(ipc, states, [&colour](const UnityIpcServer::RuntimeState & x) {
+    return x.backgroundR == colour.Red() && x.backgroundG == colour.Green() && x.backgroundB == colour.Blue();
+  }, 10000, held, answered);
+  const QString hex = QString::fromWCharArray(ViewportBackground::formatHex(colour).wc_str());
+  what = QString("%1 (%2 on show), %3 viewportBackground sent; the player holds %4,%5,%6")
+           .arg(hex).arg(onShow ? "already" : "not").arg(sent).arg(held.backgroundR).arg(held.backgroundG).arg(held.backgroundB);
+  QStringList bad;
+  if (!answered)
+    bad << "no runtimeState answer";
+  else if (!holds)
+    bad << "the player does not hold " + hex;
+  if (sent != (onShow ? 0 : 1))
+    bad << QString("%1 viewportBackground sent, expected %2").arg(sent).arg(onShow ? 0 : 1);
+  why = bad.join("; ");
+  return bad.isEmpty();
+}
+
 // THE MOUNTED-CHARACTER STEPS of the lifecycle sequence (see doIpcTestLifecycleSequence), protocol 5. Each drives the
 // code a user's action runs, then requires the player's answer to the scene it caused (when it causes one) and its
 // runtimeState account afterwards to match the host (riddenMismatches), plus what the step itself must or must not
@@ -1442,6 +1486,8 @@ static bool doIpcTestMountStep(ModelViewer * frame, UnityIpcServer * ipc, const 
   }
   if (kind == "screenshot")
     return doIpcTestScreenshotStep(frame, ipc, target, what, why);
+  if (kind == "background")
+    return doIpcTestBackgroundStep(frame, ipc, target, states, what, why);
   if (!ipc->playerRidesMounts())
   {
     why = QString("the player (protocol %1) cannot seat characters on mounts").arg(ipc->playerProtocolVersion());
@@ -1886,7 +1932,9 @@ static bool doIpcTestMountStep(ModelViewer * frame, UnityIpcServer * ipc, const 
 //                         on screen, once for the mount that went under it (the log before the restart is copied
 //                         beside the new one's as unityRenderer.before-reconnect-<n>.log);
 //   wait:<ms>             pumps with the canvas ticking (lets a WMV_VIEWPORT_SHOT capture land before the test ends);
-//   screenshot:<path>     the command bar's Screenshot without its Save As dialog (doIpcTestScreenshotStep, protocol 6).
+//   screenshot:<path>     the command bar's Screenshot without its Save As dialog (doIpcTestScreenshotStep, protocol 6);
+//   background:<colour>   the Models viewport's background, #RRGGBB or default, as View > Swap Background Color
+//                         sets it but not kept (doIpcTestBackgroundStep, protocol 7).
 static bool doIpcTestLifecycleSequence(ModelViewer * frame, UnityIpcServer * ipc, const QString & spec,
                                        const std::vector<UnityIpcServer::MapObjectReport> & reports)
 {
@@ -1935,7 +1983,8 @@ static bool doIpcTestLifecycleSequence(ModelViewer * frame, UnityIpcServer * ipc
     const QString target = colon > 0 ? step.mid(colon + 1).trimmed() : QString();
     const bool mountKind = !quick && (kind == "chr" || kind == "mount" || kind == "dismount" || kind == "manim" ||
                                       kind == "ranim" || kind == "equip" || kind == "custom" || kind == "sheath" ||
-                                      kind == "reconnect" || kind == "wait" || kind == "screenshot");
+                                      kind == "reconnect" || kind == "wait" || kind == "screenshot" ||
+                                      kind == "background");
     GameFile * file = (kind == "m2" || kind == "wmo") && !target.isEmpty() ? resolveGameFileArg(target) : nullptr;
     const size_t reportsBefore = reports.size();
     const int serialBefore = frame->m_unityLoadSerial;
@@ -1955,7 +2004,7 @@ static bool doIpcTestLifecycleSequence(ModelViewer * frame, UnityIpcServer * ipc
       ok = false;
       why = (kind != "m2" && kind != "wmo")
               ? "unknown step kind (use m2:, wmo:, m2!:, wmo!:, chr:, mount:, dismount, manim:, ranim:, equip:, custom:, "
-                "sheath, reconnect, wait: or screenshot:)"
+                "sheath, reconnect, wait:, screenshot: or background:)"
               : "file not found";
     }
     else if (quick)
@@ -3029,6 +3078,33 @@ static void doHeadlessUnityIpcTest(ModelViewer * frame)
     LOG_INFO << "[unityipc-test] character check:" << (characterOk ? "(OK)" : "(FAIL)");
   }
 
+  // THE BACKGROUND (protocol 7): the player was sent the Models viewport's background when it announced itself, and
+  // holds exactly that colour. An older player keeps its own default and is not asked.
+  bool backgroundOk = true;
+  if (ipc->playerPaintsBackground())
+  {
+    std::vector<UnityIpcServer::RuntimeState> backgroundStates;
+    auto previousRuntime = ipc->onRuntimeState;
+    ipc->onRuntimeState = [&backgroundStates, previousRuntime](const UnityIpcServer::RuntimeState & x) {
+      backgroundStates.push_back(x);
+      if (previousRuntime)
+        previousRuntime(x);
+    };
+    const wxColour want = frame->viewportBackground();
+    UnityIpcServer::RuntimeState held;
+    bool answered = false;
+    backgroundOk = ipc->stats().backgroundPushes >= 1 &&
+                   waitRuntimeState(ipc, backgroundStates, [&want](const UnityIpcServer::RuntimeState & x) {
+                     return x.backgroundR == want.Red() && x.backgroundG == want.Green() && x.backgroundB == want.Blue();
+                   }, 10000, held, answered);
+    ipc->onRuntimeState = previousRuntime;
+    LOG_INFO << "[unityipc-test] background:" << QString::fromWCharArray(ViewportBackground::formatHex(want).wc_str())
+             << "sent" << ipc->stats().backgroundPushes << "time(s); the player holds" << held.backgroundR
+             << held.backgroundG << held.backgroundB << (backgroundOk ? "(OK)" : "(FAIL)");
+  }
+  else
+    LOG_INFO << "[unityipc-test] background: not checked, the player speaks protocol" << ipc->playerProtocolVersion();
+
   // THE LIFECYCLE SEQUENCE, opt-in (see doIpcTestLifecycleSequence): after everything above.
   bool sequenceOk = true;
   const QString sequenceSpec = qEnvironmentVariable("WMV_IPCTEST_SEQUENCE").trimmed();
@@ -3064,7 +3140,7 @@ static void doHeadlessUnityIpcTest(ModelViewer * frame)
            << (neverPainted ? "(OK)" : "(FAIL)");
   const bool pass = st.connections >= 1 && ipc->isUnityReady() && st.requests >= 1 &&
                     st.responsesOk >= 1 && skinsOk && animsOk && stateOk && geosetLiveOk && characterOk &&
-                    wmoOk && sequenceOk && viewportOk && neverPainted;
+                    wmoOk && sequenceOk && viewportOk && neverPainted && backgroundOk;
   LOG_INFO << "[unityipc-test] RESULT:" << (pass ? "PASS" : "FAIL");
 
   // Close the player now (what app shutdown does) and confirm the child process is gone.
