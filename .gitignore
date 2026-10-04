@@ -27,8 +27,10 @@ installer/dist
 # x64 AddressSanitizer build tree (out-of-source, regenerated for debugging)
 /build64-asan
 
-# wxWidgets 3.x prebuilt x64 tree (~200MB, re-acquired from github v3.2.10 vc14x_x64 assets)
+# wxWidgets 3.x prebuilt x64 trees, re-acquired from the github release assets: v3.2.10 vc14x_x64 for
+# wxWidgets3 (~400 MB), v3.3.3 headers + vc14x_x64 Dev/ReleaseDLL/ReleasePDB for wxWidgets33 (~1 GB with its PDBs)
 /ThirdParty/wxWidgets3
+/ThirdParty/wxWidgets33
 
 # aqt Qt-download log
 aqtinstall.log

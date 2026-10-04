@@ -182,7 +182,7 @@ wxBitmap* getBitmapFromMemory(const char* t_data, const DWORD t_size, long type,
   wxImage newImage(wxImage(a_is, (wxBitmapType)type, -1));
   
   if((width != 0) && (height != 0))
-  newImage.Rescale(width,height);
+  newImage.Rescale(width, height, wxIMAGE_QUALITY_NEAREST);   // as wxWidgets 3.2's default (3.3 smooths)
   return new wxBitmap(newImage, -1);
 }
 

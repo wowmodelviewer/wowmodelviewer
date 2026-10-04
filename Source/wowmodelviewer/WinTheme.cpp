@@ -7,7 +7,7 @@
  * light foreground means the dark mode ("Support Dark and Light themes in Win32 apps"). It is called
  * through WRL here, which works in C++14 (C++/WinRT would need C++17 coroutines). When it cannot be
  * asked, the AppsUseLightTheme registry value decides -- not formally documented, but what wxWidgets'
- * own wxSystemAppearance::IsDark, Chromium and File Explorer's neighbours read. Neither answering means
+ * own wxSystemAppearance::AreAppsDark, Chromium and File Explorer's neighbours read. Neither answering means
  * Unknown, which the viewer treats as light.
  */
 

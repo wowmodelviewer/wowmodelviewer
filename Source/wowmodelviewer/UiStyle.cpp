@@ -7,8 +7,8 @@
  * (the dock behind the panes, the panes, the fields and cards on them), one accent for what is selected
  * or primary, and the text greys. The values are fixed rather than derived from the Windows system
  * colours: on Windows 10 and 11 those stay the classic light values whatever the user's theme
- * (wxWidgets 3.2 has no dark mode), and colours made by lightening or darkening them only work on a
- * light base.
+ * (wxWidgets' own dark mode is not turned on), and colours made by lightening or darkening them only
+ * work on a light base.
  *
  * THE DARK PALETTE is the same roles a step apart in the other direction: neutral, slightly cool greys
  * (the dock darkest, the panes above it, the fields above those), light text, and the accent a little
@@ -28,10 +28,10 @@
  * dark-mode attribute. With the palette's colours where the control takes colours, simple borders where
  * the themed border stays light (themeNativeWindow), a few controls drawing one light part themselves and
  * wx's own status bar instead of Windows' (UiControls.h, ModelViewer::CreateThemedStatusBar). What stays
- * light, because Windows offers no supported dark mode for it and wxWidgets 3.2 none either: the menu bar
- * and its menus (wxWidgets 3.3 darkens them through undocumented uxtheme entry points), message boxes and
- * the Open / Save dialogs, and the grey placeholder text of an empty search field (drawn by the edit
- * control). The viewer's own dialogs and Settings keep Windows' light look whole (paletteOf, keepLight):
+ * light, because Windows offers no supported dark mode for it: the menu bar and its menus (wxWidgets
+ * 3.3's dark mode, not turned on here, darkens them through undocumented uxtheme entry points), message
+ * boxes and the Open / Save dialogs, and the grey placeholder text of an empty search field (drawn by the
+ * edit control). The viewer's own dialogs and Settings keep Windows' light look whole (paletteOf, keepLight):
  * their native tabs and group boxes have no dark style, and a whole light window reads better than a
  * half-dark one.
  *

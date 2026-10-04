@@ -2,6 +2,7 @@
 
 #include <wx/wx.h>
 #include <algorithm>
+#include <array>
 #include <cmath>
 #include <wx/collpane.h>
 #include <wx/combobox.h>
@@ -1344,7 +1345,9 @@ void AnimControl::SyncBLPSkinList()
   BLPSkinList3->SetSelection(wxNOT_FOUND);
 
   // Configure BLPSkinLists (single skin selectors) to show same skins as the main texture selector, if possible
-  std::vector<wxString> currTextures(3);
+  // std::array, not std::vector: wxWidgets 3.3 exports std::vector<wxString> (the base of wxArrayString)
+  // from its DLL, whose prebuilt binaries lack members a newer MSVC library calls.
+  std::array<wxString, 3> currTextures;
 
   int sel = skinList->GetSelection();
   if (sel < 0) // model not currently using a proper texture set, possibly custom
@@ -1840,7 +1843,7 @@ bool AnimControl::selectedSkinTextures(std::vector<std::pair<int, int> > & out)
 
 void AnimControl::SetSkin(int num, int displayIdOverride)
 {
-  std::vector<wxString> currTextures(TextureGroup::num);
+  std::array<wxString, TextureGroup::num> currTextures;   // std::array: see above
 
   // Choosing a whole skin replaces anything picked slot-by-slot before it.
   singleSkinOverrides.clear();

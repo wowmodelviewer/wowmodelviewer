@@ -224,6 +224,12 @@ ModelViewer::ModelViewer()
 #ifdef _LINUX
 // Transparency in interfaceManager crashes with Linux compositing
 : interfaceManager(0, wxAUI_MGR_ALLOW_FLOATING | wxAUI_MGR_VENETIAN_BLINDS_HINT)
+#else
+// wxWidgets 3.2's default flags. 3.3's default adds live resizing: a sash drag would resize the Unity
+// player's window at every mouse move, and wxAuiManager::Update would lay out an unfrozen frame, which
+// the one-step viewer-mode switch (SetViewerMode) relies on it not doing. (It also drops the docking
+// hint's fade-in, which these keep.)
+: interfaceManager(0, wxAUI_MGR_ALLOW_FLOATING | wxAUI_MGR_TRANSPARENT_HINT | wxAUI_MGR_HINT_FADE)
 #endif
 {
   PLUGINMANAGER.init("./plugins");
@@ -718,7 +724,7 @@ void ModelViewer::InitCommandBar()
   // The tools touch (the segments join); the gaps between groups are explicit.
   commandBar->SetToolBorderPadding(0);
   commandBar->SetToolPacking(0);
-  commandBar->SetToolSeparation(FromDIP(17));
+  commandBar->SetToolSeparation(17);   // DIPs: wxWidgets 3.3 scales it itself
   const int margin = (FromDIP(UiStyle::ToolbarHeight) - FromDIP(UiStyle::ToolHeight)) / 2;
   commandBar->SetMargins(FromDIP(UiStyle::M), FromDIP(UiStyle::S), margin, margin);
 
@@ -926,7 +932,9 @@ void ModelViewer::LoadLayout()
   {
     if (!interfaceManager.LoadPerspective(layout, false))
     {
+      // wxWidgets 3.3 can give up halfway, with the panes already hidden: the default layout then.
       LOG_ERROR << "Could not load the layout.";
+      ResetLayout();
     }
     else
     {
@@ -1633,7 +1641,7 @@ void ModelViewer::UpdateActivePaneCaption(bool frameActive)
   if (!art->SetActivePane(active))
     return;
   // A pane's rect is its window's; the caption sits on top of it, inside the pane's border.
-  const int caption = art->GetMetric(wxAUI_DOCKART_CAPTION_SIZE);
+  const int caption = art->GetMetricForWindow(wxAUI_DOCKART_CAPTION_SIZE, this);
   const int border = art->GetMetric(wxAUI_DOCKART_PANE_BORDER_SIZE);
   for (const wxString & name : { before, active })
   {
@@ -1813,18 +1821,20 @@ wxString ModelViewer::userPerspective()
     return interfaceManager.SavePerspective();
   // The panels a texture put away, set shown for the saving only (nothing is laid out, so nothing on
   // screen changes), and the sizes of the docks they took, which went with them.
-  std::vector<wxString> hidden;
+  // (The panes, not copies of their names: wxWidgets 3.3 exports std::vector<wxString> from its DLL,
+  // whose prebuilt binaries lack members a newer MSVC library calls.)
+  std::vector<const TextureWorkspacePane *> hidden;
   for (const TextureWorkspacePane & p : m_textureWorkspacePanes)
   {
     wxAuiPaneInfo & pane = interfaceManager.GetPane(p.name);
     if (!pane.IsOk() || pane.IsShown())
       continue;
     pane.Show(true);
-    hidden.push_back(p.name);
+    hidden.push_back(&p);
   }
   wxString perspective = interfaceManager.SavePerspective();
-  for (const wxString & name : hidden)
-    interfaceManager.GetPane(name).Show(false);
+  for (const TextureWorkspacePane * p : hidden)
+    interfaceManager.GetPane(p->name).Show(false);
   for (const wxString & part : wxSplit(m_textureWorkspaceLayout, '|', '\0'))
   {
     if (!part.StartsWith(wxT("dock_size(")))
@@ -2279,7 +2289,7 @@ bool ModelViewer::unityPlayerDressesCharacters() const
 }
 
 // THE WHOLE WINDOW BLINKED ON EVERY MODEL LOAD, and this is why. On Windows, wxAuiManager::Update()
-// wraps its relayout in a wxWindowUpdateLocker on the frame (wx 3.2.10, framemanager.cpp: "only
+// wraps its relayout in a wxWindowUpdateLocker on the frame (wx 3.3.3 as 3.2.10, framemanager.cpp: "only
 // under MSW and only when not using live resizing" -- which this manager does not use). The lock
 // is Freeze/Thaw, and wxWindowMSW::DoThaw is SendSetRedraw(true) followed by Refresh(), which is
 // RedrawWindow(RDW_INVALIDATE | RDW_ALLCHILDREN | RDW_ERASE): every window in the frame is
@@ -4563,6 +4573,20 @@ void ModelViewer::ApplyTheme(bool force)
   UiStyle::retheme(previous);
   if (UiDockArt * art = dynamic_cast<UiDockArt *>(interfaceManager.GetArtProvider()))
     art->applyPalette();
+  // The toolbars (the command bar, the texture view's) keep their background in a bitmap, which wx
+  // only makes again for a resize or Windows' own colour change: the same event makes it again now.
+  std::function<void(wxWindow *)> toolbars = [&](wxWindow * w) {
+    if (wxAuiToolBar * bar = dynamic_cast<wxAuiToolBar *>(w))
+    {
+      wxSysColourChangedEvent changed;
+      changed.SetEventObject(bar);
+      bar->GetEventHandler()->ProcessEvent(changed);
+    }
+    for (wxWindow * child : w->GetChildren())
+      if (!child->IsTopLevel())
+        toolbars(child);
+  };
+  toolbars(this);
   CreateThemedStatusBar();
   ApplyNativeTheme();
   // Colours the shell does not take from a role: the item names' quality colours (lightened on dark).
@@ -4670,7 +4694,8 @@ void ModelViewer::OnThemeRecheck(wxTimerEvent & WXUNUSED(event))
 
 WXLRESULT ModelViewer::MSWWindowProc(WXUINT message, WXWPARAM wParam, WXLPARAM lParam)
 {
-  // Windows' app mode or high contrast changed. wxWidgets 3.2 turns this message into no event. Checked
+  // Windows' app mode or high contrast changed. wxWidgets 3.3 passes the app mode's message on as a
+  // wxEVT_SYS_COLOUR_CHANGED too (OnSysColourChanged), and ApplyTheme then finds nothing new. Checked
   // once the message has been handled, and once more a moment later: Windows sends it in bursts, and the
   // values it announces are not always readable at the first one.
   if (WinTheme::isColourSettingChange(message, wParam, lParam) || message == WM_THEMECHANGED)

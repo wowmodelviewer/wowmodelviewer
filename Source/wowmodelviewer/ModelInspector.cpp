@@ -601,6 +601,7 @@ void ModelInspector::SetGeosetNotice(const wxString & text)
     return;
   m_noticeIsUnconfirmed = false;
   m_geosetNotice->SetLabel(text);
+  m_geosetNotice->Wrap(-1);   // wxWidgets 3.3 skips a Wrap at the width it last wrapped at, whatever the text
   m_geosetNotice->Wrap(std::max(FromDIP(120), m_geosets->GetClientSize().x - 2 * FromDIP(UiStyle::M)));
   m_geosetNotice->Show(!text.IsEmpty());
   m_geosets->Layout();

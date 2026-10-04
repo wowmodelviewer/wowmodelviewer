@@ -32,12 +32,12 @@ namespace
 UiDockArt::UiDockArt(const wxWindow * frame) : m_frame(frame)
 {
   // The sizes the docked layout has always had (UiStyle.h), so the viewport keeps its size; a square
-  // close button the caption's height.
+  // close button the caption's height. In DIPs: wxWidgets 3.3 scales these itself (GetMetricForWindow).
   SetMetric(wxAUI_DOCKART_GRADIENT_TYPE, wxAUI_GRADIENT_NONE);
-  SetMetric(wxAUI_DOCKART_CAPTION_SIZE, UiStyle::dip(frame, UiStyle::CaptionHeight));
-  SetMetric(wxAUI_DOCKART_SASH_SIZE, UiStyle::dip(frame, UiStyle::SashSize));
+  SetMetric(wxAUI_DOCKART_CAPTION_SIZE, UiStyle::CaptionHeight);
+  SetMetric(wxAUI_DOCKART_SASH_SIZE, UiStyle::SashSize);
   SetMetric(wxAUI_DOCKART_PANE_BORDER_SIZE, 1);
-  SetMetric(wxAUI_DOCKART_PANE_BUTTON_SIZE, UiStyle::dip(frame, UiStyle::CaptionHeight));
+  SetMetric(wxAUI_DOCKART_PANE_BUTTON_SIZE, UiStyle::CaptionHeight);
   applyPalette();
 }
 
@@ -124,7 +124,7 @@ void UiDockArt::DrawCaption(wxDC & dc, wxWindow * window, const wxString & text,
     buttons++;
   const wxWindow * scale = window ? window : m_frame;
   const int pad = UiStyle::dip(scale, UiStyle::S);
-  const int available = std::max(0, rect.width - pad - buttons * GetMetric(wxAUI_DOCKART_PANE_BUTTON_SIZE) -
+  const int available = std::max(0, rect.width - pad - buttons * GetMetricForWindow(wxAUI_DOCKART_PANE_BUTTON_SIZE, const_cast<wxWindow *>(scale)) -
                                         UiStyle::dip(scale, UiStyle::XS));
   dc.SetFont(GetFont(wxAUI_DOCKART_CAPTION_FONT));
   const wxString shown = wxControl::Ellipsize(text, dc, wxELLIPSIZE_END, available);
@@ -243,7 +243,7 @@ void UiToolBarArt::DrawPlainBackground(wxDC & dc, wxWindow * WXUNUSED(wnd), cons
   }
 }
 
-wxSize UiToolBarArt::GetLabelSize(wxDC & dc, wxWindow * wnd, const wxAuiToolBarItem & item)
+wxSize UiToolBarArt::GetLabelSize(wxReadOnlyDC & dc, wxWindow * wnd, const wxAuiToolBarItem & item)
 {
   dc.SetFont(UiStyle::font(UiStyle::Type::Strong));
   const int width = dc.GetTextExtent(item.GetLabel().Upper()).x;
@@ -261,7 +261,7 @@ void UiToolBarArt::DrawLabel(wxDC & dc, wxWindow * WXUNUSED(wnd), const wxAuiToo
   dc.DrawText(text, rect.x, rect.y + (rect.height - extent.y) / 2);
 }
 
-wxSize UiToolBarArt::GetToolSize(wxDC & dc, wxWindow * wnd, const wxAuiToolBarItem & item)
+wxSize UiToolBarArt::GetToolSize(wxReadOnlyDC & dc, wxWindow * wnd, const wxAuiToolBarItem & item)
 {
   const Role role = roleOf(item);
   const UiIcon icon = iconOf(item);

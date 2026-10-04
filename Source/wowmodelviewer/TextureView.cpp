@@ -103,7 +103,7 @@ void TextureView::buildLayout()
   m_tools->SetBackgroundColour(UiStyle::palette().panelBackground);
   m_tools->SetToolBorderPadding(0);
   m_tools->SetToolPacking(0);
-  m_tools->SetToolSeparation(FromDIP(25));
+  m_tools->SetToolSeparation(25);   // DIPs: wxWidgets 3.3 scales it itself
   m_tools->SetMargins(m, s, s, s);
   m_tools->AddLabel(wxID_ANY, _("Alpha"));
   m_tools->AddTool(ID_TV_ALPHA_ON, _("On"), wxNullBitmap, _("Alpha on: the texture over the background, as RGBA (A)"),

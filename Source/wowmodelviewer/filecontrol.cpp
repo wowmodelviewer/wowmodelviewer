@@ -162,6 +162,7 @@ void FileControl::SetSearchStatus(const wxString & text)
   if (searchStatus->GetLabel() == text)
     return;
   searchStatus->SetLabel(text);
+  searchStatus->Wrap(-1);   // wxWidgets 3.3 skips a Wrap at the width it last wrapped at, whatever the text
   searchStatus->Wrap(wxMax(FromDIP(100), GetClientSize().x - 2 * FromDIP(UiStyle::S)));
   searchStatus->Show(!text.IsEmpty());
   Layout();

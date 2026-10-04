@@ -24,12 +24,13 @@ find_package(Qt5 5.13.2 COMPONENTS Core Network Widgets Xml Gui REQUIRED)
 
 #wxwidgets
 if(WMV_X64)
-  # wxWidgets 3.2.x prebuilt x64 DLL build (vc14x). Point FindwxWidgets at its lib dir; it derives
+  # wxWidgets 3.3.x prebuilt x64 DLL build (vc14x), in ThirdParty/wxWidgets33 (3.2 builds use
+  # ThirdParty/wxWidgets3, so both can sit side by side). Point FindwxWidgets at its lib dir; it derives
   # the rest (setup.h under <libdir>/mswu, WXUSINGDLL) from there.
-  SET(wxWidgets_ROOT_DIR ${CMAKE_SOURCE_DIR}/ThirdParty/wxWidgets3)
-  SET(wxWidgets_LIB_DIR ${CMAKE_SOURCE_DIR}/ThirdParty/wxWidgets3/lib/vc14x_x64_dll)
+  SET(wxWidgets_ROOT_DIR ${CMAKE_SOURCE_DIR}/ThirdParty/wxWidgets33)
+  SET(wxWidgets_LIB_DIR ${CMAKE_SOURCE_DIR}/ThirdParty/wxWidgets33/lib/vc14x_x64_dll)
   SET(wxWidgets_CONFIGURATION mswu)
-  SET(CMAKE_PREFIX_PATH ${CMAKE_SOURCE_DIR}/ThirdParty/wxWidgets3)
+  SET(CMAKE_PREFIX_PATH ${CMAKE_SOURCE_DIR}/ThirdParty/wxWidgets33)
 else()
   SET(CMAKE_PREFIX_PATH ThirdParty/wxWidgets)
 endif()

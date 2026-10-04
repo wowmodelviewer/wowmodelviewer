@@ -265,10 +265,22 @@ Format loosely based on [Keep a Changelog](https://keepachangelog.com/).
   reader is still told a status bar and its fields, and a cut-off field shows its full text as a tooltip, but it
   has no size grip); Light and high contrast keep Windows' own status bar. The Attachments pane (View >
   Attachments) is on the panel colours too, in both themes. What stays light in Dark: the menu bar and its menus,
-  message boxes and the Open / Save dialogs, which wxWidgets 3.2 and Windows offer no supported dark mode for; the
+  message boxes and the Open / Save dialogs, which Windows offers no supported dark mode for; the
   viewer's own dialogs and Settings, whose native tabs and group boxes Windows draws light in every theme (each
   stays a whole light window, title bar included, rather than a half-dark one); and the grey placeholder text of
   an empty search field, which the native control draws.
+- **wxWidgets 3.3.3 (from 3.2.10).** The interface toolkit's official prebuilt x64 DLLs (vc14x, from the
+  v3.3.3 release: headers, Dev, ReleaseDLL and ReleasePDB) go in `ThirdParty/wxWidgets33`, next to the 3.2.10
+  tree in `ThirdParty/wxWidgets3`, so branches still on 3.2 keep building; the viewer needs
+  `wxbase333u_vc14x_x64.dll`, `wxmsw333u_core_vc14x_x64.dll` and `wxmsw333u_aui_vc14x_x64.dll` next to it. Its
+  own dark mode is not turned on. Kept as it was: the docking manager gets wxWidgets 3.2's flags (3.3's default
+  resizes live -- the Unity player at every mouse move of a sash drag -- and lays the window out unfrozen,
+  which the one-step Models / Textures switch relies on it not doing); a status line or Geosets notice
+  that changes keeps wrapping (3.3 skips a re-wrap at an unchanged width); the About box's icon is scaled
+  as before. The search fields' magnifier and clear icons are wxWidgets 3.3's, drawn dark (also on the
+  Dark appearance's fields). A layout saved before loads unchanged, but a layout saved by this version is
+  not read by a 3.2 build (it then starts with the default layout once). A headless run that ends without
+  a window now exits with code 255 instead of -1.
 - **Character > Import Armory Character: pick the region, realm and name instead of pasting a link.** The
   dialog asks for a region (Europe, Americas & Oceania, Korea, Taiwan -- the regions the importer serves),
   a realm and a character name, and imports with Enter or the bold Import character button; pasting an

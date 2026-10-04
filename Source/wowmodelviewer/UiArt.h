@@ -12,8 +12,10 @@
  *                 only show a fill under the mouse, panel toggles with a neutral pressed state, group
  *                 labels in small capitals, hairline separators. Tools may carry an icon (UiIcons).
  *
- * Every colour comes from UiStyle::palette(), read when drawing, so a palette change needs nothing
- * here; UpdateColoursFromSystem puts the palette back if Windows' colours change while running.
+ * Every colour comes from UiStyle::palette(), read when drawing. A wxAuiToolBar keeps its background in
+ * a bitmap, made again only for a resize or Windows' colour change, so a palette change while running
+ * also sends the toolbars that event (ModelViewer::ApplyTheme); UpdateColoursFromSystem puts the
+ * palette back if Windows' colours change while running.
  */
 
 #ifndef UIART_H
@@ -76,8 +78,8 @@ public:
   void DrawLabel(wxDC & dc, wxWindow * wnd, const wxAuiToolBarItem & item, const wxRect & rect) wxOVERRIDE;
   void DrawButton(wxDC & dc, wxWindow * wnd, const wxAuiToolBarItem & item, const wxRect & rect) wxOVERRIDE;
   void DrawSeparator(wxDC & dc, wxWindow * wnd, const wxRect & rect) wxOVERRIDE;
-  wxSize GetLabelSize(wxDC & dc, wxWindow * wnd, const wxAuiToolBarItem & item) wxOVERRIDE;
-  wxSize GetToolSize(wxDC & dc, wxWindow * wnd, const wxAuiToolBarItem & item) wxOVERRIDE;
+  wxSize GetLabelSize(wxReadOnlyDC & dc, wxWindow * wnd, const wxAuiToolBarItem & item) wxOVERRIDE;
+  wxSize GetToolSize(wxReadOnlyDC & dc, wxWindow * wnd, const wxAuiToolBarItem & item) wxOVERRIDE;
 
 private:
   Role roleOf(const wxAuiToolBarItem & item) const;
