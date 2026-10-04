@@ -157,6 +157,23 @@ void WoWItem::setLevel(int level)
   }
 }
 
+bool WoWItem::setAppearanceId(int appearanceId)
+{
+  // Keep the ItemID and validate that this appearance belongs to it. Resolve the
+  // display even if level_ already matches: setModifierId can change the display
+  // independently of that legacy index.
+  for (const auto& entry : levelDisplayMap_)
+    if (entry.second == appearanceId) {
+      auto rows = GAMEDATABASE.sqlQuery(QString("SELECT ItemDisplayInfoID FROM ItemAppearance WHERE ID=%1").arg(appearanceId));
+      if (!rows.valid || rows.empty() || rows.values[0][0].toInt() <= 0) return false;
+      level_ = entry.first;
+      const int display = rows.values[0][0].toInt();
+      if (displayId_ != display) { displayId_ = display; load(); }
+      return true;
+    }
+  return false;
+}
+
 void WoWItem::setModifierId(int id)
 {
   const auto it = modifierIdDisplayMap_.find(id);

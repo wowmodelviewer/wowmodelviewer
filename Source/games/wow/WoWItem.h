@@ -61,6 +61,7 @@ class _WOWITEM_API_ WoWItem : public Component
 
     void setDisplayId(int id);
     void setLevel(int level);
+    bool setAppearanceId(int appearanceId);
     void setModifierId(int id);
 
     CharSlots slot() const { return slot_; }

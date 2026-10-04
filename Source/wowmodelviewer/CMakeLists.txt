@@ -31,6 +31,8 @@ set(src  AnimationExportChoiceDialog.cpp
          ImageSequenceExporter.cpp
          MiniExr.cpp
          ItemImporterDialog.cpp
+         ItemSetCatalog.cpp
+         ItemSetChoiceDialog.cpp
          itemselection.cpp
          KeyboardShortcutsDialog.cpp
          lightcontrol.cpp
@@ -86,6 +88,8 @@ set(headers AnimationExportChoiceDialog.h
             ImageSequenceExporter.h
             MiniExr.h
             ItemImporterDialog.h
+            ItemSetCatalog.h
+            ItemSetChoiceDialog.h
             ItemSetCategory.h
             itemselection.h
             KeyboardShortcutsDialog.h

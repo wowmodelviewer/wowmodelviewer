@@ -13,6 +13,7 @@
 #include "CharDetails.h"
 #include "CharDetailsFrame.h"
 #include "database.h"
+#include "ItemSetCatalog.h"
 #include "enums.h"
 #include "WoWModel.h"
 
@@ -39,6 +40,8 @@ class CharControl : public wxScrolledWindow, public Observer
   CharDetailsFrame * cdFrame;
 
   void tryToEquipItem(int id);
+  std::vector<ItemSets::Set> m_itemSets;
+  void applySetPieces(const std::vector<ItemSets::Equipped>& pieces, bool replaceAll);
 
   public:
   // Item selection stuff

@@ -23,23 +23,36 @@ add_executable(item-set-filters regression.cpp "${CMAKE_CURRENT_BINARY_DIR}/dial
 target_include_directories(item-set-filters PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}" "${WMV_ROOT}/Source/wowmodelviewer" "${WMV_ROOT}/Source/games/wow")
 target_link_libraries(item-set-filters PRIVATE ${wxWidgets_LIBRARIES})
 
-# Also exercise the actual set query, sorting, category assignment and UPDATE_SET
-# branch against SQLite, recording equipment requests instead of loading assets.
+# Read the real catalog and exercise its two-level panel without loading assets.
 set(QT_ROOT "" CACHE PATH "Qt installation")
 find_package(Qt5Core REQUIRED PATHS "${QT_ROOT}/lib/cmake/Qt5Core")
-file(READ "${WMV_ROOT}/Source/wowmodelviewer/charcontrol.cpp" control)
-string(FIND "${control}" "void CharControl::selectSet()" begin)
-string(FIND "${control}" "void CharControl::selectStart()" end)
-math(EXPR length "${end} - ${begin}")
-string(SUBSTRING "${control}" ${begin} ${length} selectSet)
-string(REPLACE "itemDialog->Show();" "/* Keep the test dialog hidden. */" selectSet "${selectSet}")
-string(REPLACE "itemDialog->Move(itemDialog->GetParent()->GetScreenPosition() + wxPoint(4, 64));" "/* No screen placement for a hidden parent. */" selectSet "${selectSet}")
-string(FIND "${control}" "    case UPDATE_SET:" begin)
-string(FIND "${control}" "    case UPDATE_START:" end)
-math(EXPR length "${end} - ${begin}")
-string(SUBSTRING "${control}" ${begin} ${length} updateSet)
-file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/sets.cpp" "#include \"integration.h\"\n${selectSet}\nvoid CharControl::OnUpdateItem(int type, int id) { ++calls; selected = id; switch(type) { ${updateSet} } }\n")
-add_executable(item-set-integration integration.cpp "${CMAKE_CURRENT_BINARY_DIR}/sets.cpp" "${CMAKE_CURRENT_BINARY_DIR}/dialog.cpp" "${WMV_ROOT}/Source/core/sqlite3.c")
-target_compile_definitions(item-set-integration PRIVATE SET_INTEGRATION)
-target_include_directories(item-set-integration PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}" "${WMV_ROOT}/Source/wowmodelviewer" "${WMV_ROOT}/Source/games/wow" "${WMV_ROOT}/Source/core")
+add_executable(item-set-integration integration.cpp
+  "${CMAKE_CURRENT_BINARY_DIR}/dialog.cpp"
+  "${WMV_ROOT}/Source/wowmodelviewer/ItemSetCatalog.cpp"
+  "${WMV_ROOT}/Source/wowmodelviewer/ItemSetChoiceDialog.cpp"
+  "${WMV_ROOT}/Source/core/sqlite3.c")
+target_include_directories(item-set-integration PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}"
+  "${WMV_ROOT}/Source/wowmodelviewer" "${WMV_ROOT}/Source/games/wow" "${WMV_ROOT}/Source/core")
 target_link_libraries(item-set-integration PRIVATE ${wxWidgets_LIBRARIES} Qt5::Core)
+
+file(READ "${WMV_ROOT}/Source/games/wow/WoWItem.cpp" item)
+string(FIND "${item}" "bool WoWItem::setAppearanceId" begin)
+string(FIND "${item}" "void WoWItem::setModifierId" end)
+math(EXPR length "${end} - ${begin}")
+string(SUBSTRING "${item}" ${begin} ${length} appearance)
+file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/appearance-method.inc" "${appearance}")
+add_executable(item-set-appearance appearance.cpp)
+target_include_directories(item-set-appearance PRIVATE "${CMAKE_CURRENT_BINARY_DIR}")
+target_link_libraries(item-set-appearance PRIVATE Qt5::Core)
+
+file(READ "${WMV_ROOT}/Source/wowmodelviewer/charcontrol.cpp" control)
+string(FIND "${control}" "void CharControl::applySetPieces" begin)
+string(FIND "${control}" "void CharControl::selectStart" end)
+math(EXPR length "${end} - ${begin}")
+string(SUBSTRING "${control}" ${begin} ${length} equipment)
+file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/equipment-method.inc" "${equipment}")
+target_include_directories(item-set-appearance PRIVATE "${WMV_ROOT}/Source/wowmodelviewer" "${WMV_ROOT}/Source/games/wow")
+
+add_executable(item-set-catalog catalog.cpp "${WMV_ROOT}/Source/wowmodelviewer/ItemSetCatalog.cpp")
+target_include_directories(item-set-catalog PRIVATE "${WMV_ROOT}/Source/wowmodelviewer" "${WMV_ROOT}/Source/games/wow")
+target_link_libraries(item-set-catalog PRIVATE Qt5::Core)
