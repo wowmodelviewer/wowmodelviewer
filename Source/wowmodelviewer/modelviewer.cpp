@@ -169,6 +169,15 @@ EVT_UPDATE_UI(ID_UI_SCREENSHOT, ModelViewer::OnUpdateCommandUI)
 EVT_UPDATE_UI(ID_SHOW_FILE_LIST, ModelViewer::OnUpdateCommandUI)
 EVT_UPDATE_UI(ID_SHOW_CHAR, ModelViewer::OnUpdateCommandUI)
 EVT_UPDATE_UI(ID_SHOW_ANIM, ModelViewer::OnUpdateCommandUI)
+// The other commands that act on a model: greyed in the Textures viewer (needsModelViewer).
+EVT_UPDATE_UI(ID_SHOW_MODEL, ModelViewer::OnUpdateCommandUI)
+EVT_UPDATE_UI(ID_VIEW_NPC, ModelViewer::OnUpdateCommandUI)
+EVT_UPDATE_UI(ID_VIEW_ITEM, ModelViewer::OnUpdateCommandUI)
+EVT_UPDATE_UI(ID_LOAD_CHAR, ModelViewer::OnUpdateCommandUI)
+EVT_UPDATE_UI(ID_IMPORT_CHAR, ModelViewer::OnUpdateCommandUI)
+EVT_UPDATE_UI(ID_IMPORT_NPC, ModelViewer::OnUpdateCommandUI)
+EVT_UPDATE_UI(ID_EXPORT_MODEL, ModelViewer::OnUpdateCommandUI)
+EVT_UPDATE_UI(ID_FILE_MODEL_INFO, ModelViewer::OnUpdateCommandUI)
 // (The OpenGL viewport's commands -- background, camera, canvas size, bounds, debug info, saved views,
 // lighting -- were removed with it; their ModelCanvas implementations are archived, unreferenced.)
 
@@ -356,6 +365,7 @@ void ModelViewer::InitMenu()
 
   PluginManager::iterator it = PLUGINMANAGER.begin();
   int subMenuId = 10000;
+  m_exportMenuFirst = subMenuId;
   for (; it != PLUGINMANAGER.end(); ++it, subMenuId++)
   {
     ExporterPlugin * plugin = dynamic_cast<ExporterPlugin *>(*it);
@@ -366,8 +376,12 @@ void ModelViewer::InitMenu()
       Connect(subMenuId,
               wxEVT_COMMAND_MENU_SELECTED,
               wxCommandEventHandler(ModelViewer::OnExport));
+      Connect(subMenuId,
+              wxEVT_UPDATE_UI,
+              wxUpdateUIEventHandler(ModelViewer::OnUpdateCommandUI));
     }
   }
+  m_exportMenuEnd = subMenuId;
   fileMenu->Append(ID_EXPORT_MODEL, wxT("Export Model"), ExportMenu);
 
 
@@ -1709,7 +1723,9 @@ void ModelViewer::OnToggleDock(wxCommandEvent &event)
   int id = event.GetId();
 
   // A panel a texture put away, shown (or hidden) by the user meanwhile: theirs again, left as they
-  // put it when the texture goes. Shown again, it comes back at the size it had.
+  // put it when the texture goes. Shown again, it comes back at the size it had. (The panels it puts
+  // away are Animation, Model and Attachments, whose toggles the Textures viewer refuses --
+  // needsModelViewer -- so this is kept for safety, not reached today.)
   const wxChar * putAway = id == ID_SHOW_ANIM ? wxT("animControl") : id == ID_SHOW_CHAR ? wxT("modelInspector")
                          : id == ID_SHOW_MODEL ? wxT("Models") : nullptr;
   TextureWorkspacePane given;
@@ -1728,8 +1744,9 @@ void ModelViewer::OnToggleDock(wxCommandEvent &event)
   else if (id == ID_SHOW_CHAR) {
     wxAuiPaneInfo & pane = interfaceManager.GetPane(modelInspector);
     pane.Show(!pane.IsShown());
-    // Opened in Textures mode: its Info names the texture picked while it was away (TextureSelectionChanged
-    // rebuilds it only while it is open).
+    // Opened in Textures mode -- not possible while its toggle is the Models viewer's (needsModelViewer) --
+    // its Info would name the texture picked while it was away (TextureSelectionChanged rebuilds it only
+    // while it is open).
     if (pane.IsShown() && isTextureMode())
       modelInspector->ContentChanged();
   }
@@ -4315,6 +4332,11 @@ void ModelViewer::SetViewerMode(ViewerMode mode, bool openBrowse, bool paintNow)
       else
         textureView->left();
     }
+    // A chooser a model command left open (View NPC, View Item, an equipment slot, an item set, a start
+    // outfit, a mount): picked from in Textures, it would load into the Models viewer or change the model
+    // behind the texture. It is not opened again in Models.
+    if (textures && charControl)
+      charControl->ClearItemDialog();
     // The centre, the panels and the menus (UpdateInterface -> DisplayedContentChanged ->
     // UpdateUnityViewportState puts the panels away or gives them back), Browse opened when asked, and
     // Browse's list, which the first entry into Textures after a client load lists from a catalogue
@@ -4340,9 +4362,11 @@ void ModelViewer::SetViewerMode(ViewerMode mode, bool openBrowse, bool paintNow)
       m_uncoverPending = false;
       unityRendererHost->showContent(false);
     }
-    // The panel toggles answered now, not one idle later, so they change with everything else.
+    // The panel toggles answered now, not one idle later, so they change with everything else; and the
+    // menus, which wx answers only when one opens, while a shortcut is checked against its menu item.
     if (commandBar)
       commandBar->UpdateWindowUI(wxUPDATE_UI_FROMIDLE);
+    DoMenuUpdates();
   }
   // Going to Models the player is let go as the repaint starts: its show lands while the panels paint,
   // rather than after them on an empty viewport. Going to Textures it is hidden after the repaint, so the
@@ -4388,8 +4412,9 @@ void ModelViewer::TextureSelectionChanged()
     commandModelLabel->Refresh();
   }
   UpdateStatusFacts();
-  // The Model panel's Info names the texture, when the user has the panel open in Textures mode (opened
-  // later, OnToggleDock rebuilds it; not on every pick, which would rebuild its other pages for nothing).
+  // The Model panel's Info names the texture, were the panel open in Textures mode (it cannot be: its
+  // toggle is the Models viewer's, needsModelViewer; not on every pick otherwise, which would rebuild its
+  // other pages for nothing).
   if (modelInspector && interfaceManager.GetPane(modelInspector).IsShown())
     modelInspector->ContentChanged();
 }
@@ -4558,6 +4583,11 @@ void ModelViewer::OnUnityScreenshotSaved(const UnityIpcServer::ScreenshotResult 
 
 void ModelViewer::OnUpdateCommandUI(wxUpdateUIEvent & event)
 {
+  // A command that acts on a model: available in the Models viewer only. None of these has a condition of
+  // its own to keep (Export Model checks for a model when chosen), so this is their whole state; a
+  // command given one later combines it with this.
+  if (needsModelViewer(event.GetId()))
+    event.Enable(!isTextureMode());
   switch (event.GetId())
   {
     case ID_SHOW_FILE_LIST:
@@ -4591,6 +4621,39 @@ void ModelViewer::OnUpdateCommandUI(wxUpdateUIEvent & event)
       event.Check(UiStyle::themePreference() == UiStyle::Theme::Dark);
       break;
   }
+}
+
+bool ModelViewer::needsModelViewer(int id) const
+{
+  switch (id)
+  {
+    case ID_SHOW_ANIM:          // the panels a texture puts away
+    case ID_SHOW_CHAR:
+    case ID_SHOW_MODEL:
+    case ID_VIEW_NPC:           // the loads, which would switch back to Models
+    case ID_VIEW_ITEM:
+    case ID_LOAD_CHAR:
+    case ID_IMPORT_CHAR:
+    case ID_IMPORT_NPC:
+    case ID_EXPORT_MODEL:       // exporting the model: the submenu, ModelInfo.xml and each exporter
+    case ID_FILE_MODEL_INFO:
+      return true;
+  }
+  return id >= m_exportMenuFirst && id < m_exportMenuEnd;
+}
+
+// The one place a model command is refused in the Textures viewer, however it arrives: a menu, a
+// shortcut, the command bar or an event posted to the frame. Its menu item and tool are greyed there
+// as well, and the menus are answered at every switch, so a shortcut is normally dropped by wx before
+// it gets here. Nothing switches back to Models.
+bool ModelViewer::TryBefore(wxEvent & event)
+{
+  if (event.GetEventType() == wxEVT_MENU && isTextureMode() && needsModelViewer(event.GetId()))
+  {
+    LOG_INFO << "[viewport] a Models command refused in the Textures viewer, id" << event.GetId();
+    return true;
+  }
+  return wxFrame::TryBefore(event);
 }
 
 // THE THEME. The palette in use (UiStyle) follows the Appearance preference, Windows' app mode (for

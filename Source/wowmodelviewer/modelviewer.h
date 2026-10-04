@@ -179,6 +179,10 @@ public:
   void OnSysColourChanged(wxSysColourChangedEvent & event);
   void OnThemeRecheck(wxTimerEvent & event);
   WXLRESULT MSWWindowProc(WXUINT message, WXWPARAM wParam, WXLPARAM lParam) wxOVERRIDE;
+protected:
+  // A model command (needsModelViewer) in the Textures viewer is refused before any handler sees it.
+  bool TryBefore(wxEvent & event) wxOVERRIDE;
+public:
   // The palette resolved again (in a light run: high contrast on or off) and, when it changed, applied to
   // every window. Light and dark themselves are fixed for the run (UiStyle.h).
   void ApplyTheme();
@@ -270,6 +274,11 @@ public:
   void SetViewerMode(ViewerMode mode, bool openBrowse = false, bool paintNow = false);
   ViewerMode viewerMode() const { return m_viewerMode; }
   bool isTextureMode() const { return m_viewerMode == ViewerMode::Textures; }
+  // The commands that act on a model -- the Animation, Model and Attachments panels, View NPC, View
+  // Item, Load Character, the Armory and NPC imports and every export of the model -- are the Models
+  // viewer's. In Textures their menu items and command-bar tools are greyed (OnUpdateCommandUI, answered
+  // again at every switch) and the commands are refused however they arrive (TryBefore).
+  bool needsModelViewer(int id) const;
   // Select a texture picked in Browse (Textures mode): the texture view reads and shows it.
   void ShowTexture(const TextureEntry & entry, bool lookup);
   // The texture view's selection changed, or its facts arrived: the command bar's label, the status bar
@@ -341,18 +350,22 @@ public:
   bool m_helpInStatus = false;   // DoGiveHelp has help text in the status bar, to take away
   wxTimer m_themeRecheck;          // the theme checked once more after a burst of Windows' colour messages
   std::unique_ptr<UiMenuBarTitles> m_menuBarTitles;  // the menu bar's titles in the dark run (UiControls.h)
+  int m_exportMenuFirst = 0;     // the exporters' ids in File > Export Model: [first, end) (needsModelViewer)
+  int m_exportMenuEnd = 0;
   bool m_frameActive = true;     // the window is the active one (its last activate event): a pane's caption
                                  // reads as active only then (UpdateActivePaneCaption)
   // THE TEXTURE WORKSPACE. While a texture is on screen, the panels that only act on a model are put
   // away so the texture gets the room: the ones in modelOnlyPanes() that are shown. Each is recorded
   // and given back as it was -- shown, at the size it had -- when the texture goes (both decided with
-  // the viewport, in UpdateUnityViewportState, and laid out at once). Browse stays. A panel the user
-  // shows or closes meanwhile is theirs again and is left as they put it. The layout saved on exit is
-  // the user's: SaveLayout writes the panels given back. 'commit' false: the caller lays out.
+  // the viewport, in UpdateUnityViewportState, and laid out at once). Browse stays. The panels put away
+  // cannot be shown meanwhile (their toggles are the Models viewer's: needsModelViewer), so they come
+  // back as they were. The layout saved on exit is the user's: SaveLayout writes the panels given back.
+  // 'commit' false: the caller lays out.
   static const wxChar * const * modelOnlyPanes();
   void enterTextureWorkspace(bool commit = true);
   void leaveTextureWorkspace();
-  // Drop a panel from the record (the user shows or closes it); the record is handed back when asked.
+  // Drop a panel from the record (the user shows or closes it -- in the Textures viewer the panels put
+  // away cannot be shown); the record is handed back when asked.
   struct TextureWorkspacePane;
   bool forgetTextureWorkspacePane(const wxString & name, TextureWorkspacePane * taken = nullptr);
   // Lay the panes out with docks made again at the size their panels' best size says, larger than the
