@@ -52,6 +52,7 @@
 #include "RaceInfos.h"
 #include "SettingsControl.h"
 #include "BackgroundColorDialog.h"
+#include "ModelIdLookup.h"
 #include "ViewportBackground.h"
 #include "UiArt.h"
 #include "UiControls.h"
@@ -434,7 +435,8 @@ void ModelViewer::InitMenu()
     charMenu = new wxMenu;
     charMenu->Append(ID_LOAD_CHAR, _("Load Character\tF8"));
     charMenu->Append(ID_IMPORT_CHAR, _("Import Armory Character"));
-    charMenu->Append(ID_IMPORT_NPC, _("Import NPC from URL..."));
+    // One entry point for an NPC from a Wowhead link and a model by ID (NPCimporterDialog).
+    charMenu->Append(ID_IMPORT_NPC, _("Load NPC / Model..."), _("Load an NPC from a Wowhead link, or a model by its ID"));
     charMenu->Append(ID_SAVE_CHAR, _("Save Character\tF7"));
     charMenu->AppendSeparator();
 
@@ -1260,61 +1262,10 @@ void ModelViewer::LoadNPC(unsigned int modelid)
 
   if (r.valid && !r.empty())
   {
-    int extraId = r.values[0][4].toInt();
-    // if npc is a simple one (no extra info CreatureDisplayInfoExtra)
-    if (extraId == 0)
+    if (!ShowCreatureDisplay(r.values[0][0].toInt(), r.values[0][4].toInt(), r.values[0][5].toInt()))
     {
-      LoadModel(GAMEDIRECTORY.getFile(r.values[0][0].toInt()));
-      WoWModel * m = const_cast<WoWModel *>(canvas->model());
-      if (!m)
-      {
-        bailNPCUnavailable();
-        return;
-      }
-      m->modelType = MT_NORMAL;
-      animControl->SetSkinByDisplayID(r.values[0][5].toInt());
-    }
-    else
-    {
-      LoadModel(GAMEDIRECTORY.getFile(RaceInfos::getHDModelForFileID(r.values[0][0].toInt())));
-      if (!canvas->model())
-      {
-        bailNPCUnavailable();
-        return;
-      }
-
-      query = QString("SELECT Skin, Face, HairStyle, HairColor, FacialHair FROM CreatureDisplayInfoExtra WHERE ID = %1").arg(extraId);
-
-      r = GAMEDATABASE.sqlQuery(query);
-
-      if (r.valid && !r.empty())
-      {
-        g_charControl->model->cd.set(CharDetails::SKIN_COLOR, r.values[0][0].toInt());
-        g_charControl->model->cd.set(CharDetails::FACE, r.values[0][1].toInt());
-        g_charControl->model->cd.set(CharDetails::FACIAL_CUSTOMIZATION_STYLE, r.values[0][2].toInt());
-        g_charControl->model->cd.set(CharDetails::FACIAL_CUSTOMIZATION_COLOR, r.values[0][3].toInt());
-        g_charControl->model->cd.set(CharDetails::ADDITIONAL_FACIAL_CUSTOMIZATION, r.values[0][4].toInt());
-      }
-
-      query = QString("SELECT ItemDisplayInfoID, ItemSlot FROM NpcModelItemSlotDisplayInfo WHERE NpcModelID = %1").arg(extraId);
-
-      r = GAMEDATABASE.sqlQuery(query);
-
-      if (r.valid && !r.empty())
-      {
-        static map<int, CharSlots> ItemTypeToInternal = { { 0, CS_HEAD }, { 1, CS_SHOULDER }, { 2, CS_SHIRT }, { 3, CS_CHEST }, { 4, CS_BELT }, { 5, CS_PANTS },
-        { 6, CS_BOOTS }, { 7, CS_BRACERS }, { 8, CS_GLOVES }, { 9, CS_TABARD }, { 10, CS_CAPE } };
-        for (uint i = 0; i < r.values.size(); i++)
-        {
-          WoWItem * item = g_charControl->model->getItem(ItemTypeToInternal[r.values[i][1].toInt()]);
-          if (item)
-            item->setDisplayId(r.values[i][0].toInt());
-        }
-      }
-
-      g_charControl->model->cd.isNPC = true;
-      g_charControl->RefreshModel();
-      g_charControl->RefreshEquipment();
+      bailNPCUnavailable();
+      return;
     }
   }
 
@@ -1327,6 +1278,105 @@ void ModelViewer::LoadNPC(unsigned int modelid)
   DisplayedContentChanged();
 
   CommitLayoutIfChanged();
+}
+
+// THE APPEARANCE OF A CREATURE DISPLAY, shared by an NPC (LoadNPC: View NPC, a Wowhead link) and Load NPC / Model by
+// Creature Display ID (LoadModelById). fileDataId is the display's CreatureModelData.FileDataID, extraId its
+// ExtendedDisplayInfoID, displayId its CreatureDisplayInfo.ID. A simple display is that model with the display's skin
+// -- texture variations, geosets, particle colours (AnimControl::SetSkinByDisplayID); a display with extended info is
+// a humanoid NPC, shown on its race's HD character model with the NPC's equipment (NpcModelItemSlotDisplayInfo).
+// False when the model did not load; nothing is applied then.
+bool ModelViewer::ShowCreatureDisplay(int fileDataId, int extraId, int displayId)
+{
+  // if npc is a simple one (no extra info CreatureDisplayInfoExtra)
+  if (extraId == 0)
+  {
+    LoadModel(GAMEDIRECTORY.getFile(fileDataId));
+    WoWModel * m = const_cast<WoWModel *>(canvas->model());
+    if (!m)
+      return false;
+    m->modelType = MT_NORMAL;
+    animControl->SetSkinByDisplayID(displayId);
+    return true;
+  }
+
+  LoadModel(GAMEDIRECTORY.getFile(RaceInfos::getHDModelForFileID(fileDataId)));
+  if (!canvas->model())
+    return false;
+
+  QString query = QString("SELECT Skin, Face, HairStyle, HairColor, FacialHair FROM CreatureDisplayInfoExtra WHERE ID = %1").arg(extraId);
+
+  sqlResult r = GAMEDATABASE.sqlQuery(query);
+
+  if (r.valid && !r.empty())
+  {
+    g_charControl->model->cd.set(CharDetails::SKIN_COLOR, r.values[0][0].toInt());
+    g_charControl->model->cd.set(CharDetails::FACE, r.values[0][1].toInt());
+    g_charControl->model->cd.set(CharDetails::FACIAL_CUSTOMIZATION_STYLE, r.values[0][2].toInt());
+    g_charControl->model->cd.set(CharDetails::FACIAL_CUSTOMIZATION_COLOR, r.values[0][3].toInt());
+    g_charControl->model->cd.set(CharDetails::ADDITIONAL_FACIAL_CUSTOMIZATION, r.values[0][4].toInt());
+  }
+
+  query = QString("SELECT ItemDisplayInfoID, ItemSlot FROM NpcModelItemSlotDisplayInfo WHERE NpcModelID = %1").arg(extraId);
+
+  r = GAMEDATABASE.sqlQuery(query);
+
+  if (r.valid && !r.empty())
+  {
+    static map<int, CharSlots> ItemTypeToInternal = { { 0, CS_HEAD }, { 1, CS_SHOULDER }, { 2, CS_SHIRT }, { 3, CS_CHEST }, { 4, CS_BELT }, { 5, CS_PANTS },
+    { 6, CS_BOOTS }, { 7, CS_BRACERS }, { 8, CS_GLOVES }, { 9, CS_TABARD }, { 10, CS_CAPE } };
+    for (uint i = 0; i < r.values.size(); i++)
+    {
+      WoWItem * item = g_charControl->model->getItem(ItemTypeToInternal[r.values[i][1].toInt()]);
+      if (item)
+        item->setDisplayId(r.values[i][0].toInt());
+    }
+  }
+
+  g_charControl->model->cd.isNPC = true;
+  g_charControl->RefreshModel();
+  g_charControl->RefreshEquipment();
+  return true;
+}
+
+bool ModelViewer::LoadModelById(const ModelIdLookup::Resolved & resolved, wxString & why)
+{
+  why.clear();
+  GameFile * file = GAMEDIRECTORY.getFile(resolved.loadFileDataId);
+  if (!file)
+  {
+    why = wxString::Format(_("FileDataID %d was not found in the loaded client."), resolved.loadFileDataId);
+    return false;
+  }
+  LOG_INFO << "Load NPC / Model by ID:" << resolved.describe();
+  {
+    // On a cleared canvas, as LoadNPC starts: the file is loaded afresh even when it is the one on show, so an ID
+    // always shows what it names -- not the skin or equipment the same file was last given.
+    SetViewerMode(ViewerMode::Models);
+    SceneHold sceneHold(this);
+    canvas->clearAttachments();
+    canvas->setModel(NULL);
+    isModel = true;
+    isChar = false;
+    isWMO = false;
+    if (resolved.kind == ModelIdLookup::Kind::CreatureDisplay)
+      ShowCreatureDisplay(resolved.fileDataId, resolved.extendedDisplayId, resolved.displayId);   // no Creature row read or written
+    else
+      LoadModel(file);   // the model file alone, by the loader Browse ends in (Browse finds files by name; this one may have none)
+    fileControl->UpdateInterface();
+    DisplayedContentChanged();
+    CommitLayoutIfChanged();
+  }
+  // What is on the canvas now has to be the file the ID resolved to.
+  WoWModel * shown = const_cast<WoWModel *>(canvas->model());
+  if (!shown || !shown->gamefile || shown->gamefile->fileDataId() != resolved.loadFileDataId)
+  {
+    LOG_ERROR << "Load NPC / Model by ID: the model did not load:" << resolved.describe();
+    why = wxString::Format(_("FileDataID %d could not be loaded as a model; File > View Log shows what the loader "
+                             "reported."), resolved.loadFileDataId);
+    return false;
+  }
+  return true;
 }
 
 void ModelViewer::LoadNPCByDisplay(int npcId, int displayId, int type, const QString & name)
@@ -2581,7 +2631,13 @@ void ModelViewer::SendLoadToUnity()
   const int fileDataID = gf->fileDataId() > 0 ? (int)gf->fileDataId() : 0;
   // Answers about any earlier load are told apart from answers about this one by this number.
   const int load = ++m_unityLoadSerial;
-  unityRendererHost->ipc()->sendLoadWoWModel(gf->fullname(), fileDataID, QStringLiteral("active"), character, load);
+  // A file opened by its FileDataID alone goes to the player by FileDataID alone: its made-up name ("FileXXXXXXXX.unk",
+  // for a file the listfile does not name, or one the client's file enumeration missed) is no path it could ask for.
+  QString path = gf->fullname();
+  if (fileDataID > 0 &&
+      static_cast<wow::WoWFolder &>(GAMEDIRECTORY).fileName(fileDataID).compare(path, Qt::CaseInsensitive) != 0)
+    path.clear();
+  unityRendererHost->ipc()->sendLoadWoWModel(path, fileDataID, QStringLiteral("active"), character, load);
   m_unityLoadedFileDataID = fileDataID;
   m_unityLoadedCharacter = character;
   // A new load is dressed from scratch: the next tick sends this character's scene even when its
@@ -3818,11 +3874,11 @@ void ModelViewer::OnCharToggle(wxCommandEvent &event)
     charControl->OnCheck(event);
 }
 
-// Direct "Import NPC from URL" entry: open the Wowhead NPC import dialog and load the model
-// straight away, so the user no longer has to go View -> View NPC -> Import URL -> Display.
+// Character > Load NPC / Model...: an NPC from a Wowhead link (loaded here, as before: LoadNPCByDisplay), or a model by
+// an ID of a type the user picks (loaded by the dialog itself, which stays open to say why when it cannot).
 void ModelViewer::OnImportNPCFromURL(wxCommandEvent &event)
 {
-  NPCimporterDialog * dlg = new NPCimporterDialog();
+  NPCimporterDialog * dlg = new NPCimporterDialog(this, NPCimporterDialog::Use::Load);
   if (dlg->ShowModal() == wxID_OK)
   {
     const int npcId = dlg->getImportedId();
