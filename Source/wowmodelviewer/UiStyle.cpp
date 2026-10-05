@@ -101,8 +101,8 @@ namespace UiStyle
       p.accentPressed = wxColour(15, 84, 140);
       p.textOnAccent = wxColour(255, 255, 255);
       p.warning = wxColour(170, 90, 0);
-      // The viewport's own dark, behind its notices. Under the player the host panel paints the Models
-      // viewport's background instead (UnityRendererHost::setBackdrop), so the handover is not a flash.
+      // The viewport's own dark, behind its notices and where the player has just gone. While the player starts, its
+      // frame paints the colour it will clear to instead (UnityRendererHost::setBackdrop), so the handover is not a flash.
       p.viewport = wxColour(35, 31, 32);
       p.viewportText = wxColour(226, 222, 218);
       p.viewportTextSecondary = wxColour(160, 154, 150);

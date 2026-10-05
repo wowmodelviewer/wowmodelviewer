@@ -44,10 +44,9 @@ namespace
   }
 }
 
-// What the viewport area shows while the player's own window is not covering it.
+// What the viewport area shows where the player's frame is not: a notice, or the notice's dark.
 //
-// With no notice: nothing but the player's background colour (the backdrop). Deliberately silent while the
-// player starts. The wait is about a second and the viewer is meant to look like a viewer, so a
+// While the player starts the frame paints nothing but the player's background colour (the backdrop): silent. The wait is about a second and the viewer is meant to look like a viewer, so a
 // caption explaining that a renderer is starting would be on screen for exactly as long as it takes
 // to read and would be the first thing the user ever sees. A dark rectangle that becomes the model
 // is better than a dark rectangle that announces itself first, and matching the player's background
@@ -59,8 +58,10 @@ void UnityRendererHost::OnPaint(wxPaintEvent & WXUNUSED(event))
 {
   wxPaintDC dc(this);
   const bool notice = m_notice && !m_noticeTitle.IsEmpty() && !m_contentShown;
-  // The player's background, or the dark the notice's text and button are made for.
-  dc.SetBackground(wxBrush(!notice && m_backdrop.IsOk() ? m_backdrop : UiStyle::palette().viewport));
+  // The dark the notice's text and button are made for, also with no notice: the player's frame covers this panel
+  // while the player is on screen (and paints the backdrop where the player does not), so what this paints is seen
+  // only where the player has just gone -- a notice's colour there, never the player's.
+  dc.SetBackground(wxBrush(UiStyle::palette().viewport));
   dc.Clear();
 
   if (!notice)
@@ -177,15 +178,14 @@ void UnityRendererHost::watchEmbeddedVisibility(bool wasCovered)
 {
   if (playerCovered() && !wasCovered)
   {
-    // The player's window may not exist yet (it is created some time after launch), so the hide is
-    // re-asserted from the timer for as long as it is covered.
-    m_noticeTicksLeft = -1;
-    m_noticeTimer.Start(100);
+    // Covered: the frame is parked (now, or at the hold's release), and stays so whatever the player does.
+    if (!m_keyboardReleaseDue)
+      m_noticeTimer.Stop();
   }
   else if (!playerCovered() && wasCovered)
   {
-    // Keep re-asserting for a moment after it is uncovered too: a hide queued to a busy player
-    // thread can still be pending, and must not be the last word.
+    // Uncovered: applied again for a moment -- the player's own window may still be due its show (it is made
+    // hidden, some time after launch), and the player has been seen to put back a size it was given while hidden.
     m_noticeTicksLeft = 20;
     m_noticeTimer.Start(100);
   }
@@ -260,8 +260,14 @@ void UnityRendererHost::releasePlayer()
 
 void UnityRendererHost::OnNoticeTimer(wxTimerEvent & WXUNUSED(event))
 {
+  // (A resize or a keyboard release skipped for a hung player keeps at least one tick left: resizeEmbeddedWindow,
+  // takeKeyboardFromParkedPlayer.)
+  if (m_noticeTicksLeft > 0)
+    --m_noticeTicksLeft;
+  if (m_keyboardReleaseDue)
+    takeKeyboardFromParkedPlayer();
   applyEmbeddedVisibility();
-  if (!playerCovered() && m_noticeTicksLeft > 0 && --m_noticeTicksLeft == 0)
+  if (m_noticeTicksLeft == 0)
     m_noticeTimer.Stop();
 }
 
@@ -282,6 +288,14 @@ void UnityRendererHost::setPlayerReady(bool ready)
     m_playerProblem.Clear();
   }
   Refresh(false);
+  // Its window exists by now, hidden by the "delayed" start: shown now, parked or not (applyEmbeddedVisibility), and
+  // again for a moment from the timer.
+  if (ready)
+  {
+    m_noticeTicksLeft = 20;
+    m_noticeTimer.Start(100);
+    applyEmbeddedVisibility();
+  }
 }
 
 void UnityRendererHost::setBackdrop(const wxColour & colour)
@@ -290,18 +304,48 @@ void UnityRendererHost::setBackdrop(const wxColour & colour)
     return;
   m_backdrop = colour;
   Refresh(false);
+  if (m_playerFrame)
+    m_playerFrame->Refresh(false);
 }
 
 UnityRendererHost::UnityRendererHost(wxWindow * parent, wxWindowID id)
 {
-  // A plain panel: the player reparents its own window into this one and paints it
-  // entirely, so no wx-side drawing is needed. The player's own dark background = unobtrusive while
-  // the player is still starting up (or after it exited), and what the notice button stands on.
+  // A plain panel: the player's window lives in a frame window of its own (m_playerFrame), which paints the
+  // backdrop while the player starts. The panel paints only the viewport's dark -- what the notice and its button
+  // stand on, and what shows where the player has just gone.
   Create(parent, id, wxDefaultPosition, wxSize(640, 480), wxNO_BORDER | wxCLIP_CHILDREN, wxT("UnityRendererHost"));
-  // OnPaint fills every pixel, with the backdrop or the notice's dark: no erase first, which would flash this colour.
+  // OnPaint fills every pixel with the notice's dark (and a notice): no erase first.
   SetBackgroundStyle(wxBG_STYLE_PAINT);
   // Still the panel's colour, not the backdrop's: the notice button's corners are drawn in it.
   SetBackgroundColour(UiStyle::palette().viewport);
+#ifdef _WINDOWS
+  // The player's frame (m_playerFrame): the backdrop wherever the player's window does not cover it (while it
+  // starts); the keyboard to the player, as this panel hands it on.
+  // Clipped by its siblings too: the texture view, raised above it, is not painted over.
+  m_playerFrame = new wxWindow(this, wxID_ANY, wxPoint(0, 0), GetClientSize(),
+                               wxBORDER_NONE | wxCLIP_CHILDREN | wxCLIP_SIBLINGS, wxT("unityPlayerFrame"));
+  m_playerFrame->SetBackgroundStyle(wxBG_STYLE_PAINT);
+  m_playerFrame->Bind(wxEVT_PAINT, [this](wxPaintEvent &) {
+    wxPaintDC dc(m_playerFrame);
+    if (m_contentShown)
+      return;   // the texture view is over it
+    dc.SetBackground(wxBrush(m_backdrop.IsOk() ? m_backdrop : UiStyle::palette().viewport));
+    dc.Clear();
+  });
+  // The keyboard as this panel hands it on (OnSetFocus): the panel gives it to its first child, this frame, and wx
+  // restores it here after another application had it. On to the texture view while it covers the player, to the
+  // player while it is on screen (and no switch holds it); parked behind a notice, it stays here (keys reach the
+  // viewer's shortcuts). Never reached by Tab.
+  m_playerFrame->DisableFocusFromKeyboard();
+  m_playerFrame->Bind(wxEVT_SET_FOCUS, [this](wxFocusEvent & event) {
+    if (m_contentShown && m_content)
+      m_content->SetFocus();
+    else if (!m_notice && m_playerOnScreen && m_playerHold == 0)
+      if (HWND wnd = findEmbeddedWindow())
+        ::SetFocus(wnd);
+    event.Skip();
+  });
+#endif
   m_ipc = new UnityIpcServer();
   m_noticeTimer.SetOwner(this);
 }
@@ -369,9 +413,11 @@ bool UnityRendererHost::launch(bool selfTest)
   // userSettings keeps player output next to WMV's own log.
   wxFileName exeFn(wxStandardPaths::Get().GetExecutablePath());
   const wxString logPath = exeFn.GetPath(wxPATH_GET_VOLUME) + SLASH + wxT("userSettings") + SLASH + wxT("unityRenderer.log");
+  // The parent is the player's frame (m_playerFrame), so parking the frame takes the player off screen at once.
+  // (Parked or not, the frame is the panel's size: OnSize.)
   wxString cmdLine = wxString::Format(wxT("\"%s\" -parentHWND %llu delayed -logFile \"%s\""),
                                       exePath.c_str(),
-                                      (unsigned long long)(uintptr_t)GetHandle(),
+                                      (unsigned long long)(uintptr_t)m_playerFrame->GetHandle(),
                                       logPath.c_str());
 
   // Runtime IPC: WMV is the server. Start listening BEFORE the player exists and hand it the
@@ -524,59 +570,145 @@ HWND UnityRendererHost::findEmbeddedWindow()
   return m_embeddedWnd;
 }
 
-void UnityRendererHost::resizeEmbeddedWindow()
+void UnityRendererHost::resizeEmbeddedWindow(bool puttingBack)
 {
   // Not while held, nor while the texture view covers it: back in Models it must have the Models
-  // viewport's size, and the player has been seen to put back a size it was given while hidden. Behind a
-  // notice it follows the viewport once its hide has landed (not before: it would grow into a larger
-  // viewport, and draw there, before a hide it has not handled yet -- the resize is sent, the hide only
-  // posted), so a model it frames behind the notice is framed for the viewport's shape. It is sized
-  // once more as it is uncovered.
-  if (!isRunning() || m_playerHold > 0 || m_contentShown)
+  // viewport's size, and the player has been seen to put back a size it was given while hidden. Nor while
+  // parked behind a notice (its frame is parked, so it draws nowhere meanwhile), except for a load
+  // (sizePlayerForLoad): it is sized as it is put back.
+  if (!isRunning() || m_playerHold > 0 || m_contentShown || (!m_playerOnScreen && !puttingBack))
     return;
   if (HWND wnd = findEmbeddedWindow())
   {
-    if (m_notice && (GetWindowLongPtr(wnd, GWL_STYLE) & WS_VISIBLE) != 0)
-      return;
     const wxSize size = GetClientSize();
     RECT rect;
     if (::GetWindowRect(wnd, &rect) && rect.right - rect.left == size.GetWidth() && rect.bottom - rect.top == size.GetHeight())
       return;
+    if (::IsHungAppWindow(wnd))
+    {
+      // Not waited for. Going on screen (or on it): again from the timer until it responds; parked, as it is put back.
+      if (m_playerOnScreen || puttingBack)
+      {
+        m_noticeTicksLeft = std::max(m_noticeTicksLeft, 1);
+        if (!m_noticeTimer.IsRunning())
+          m_noticeTimer.Start(100);
+      }
+      return;
+    }
     MoveWindow(wnd, 0, 0, size.GetWidth(), size.GetHeight(), TRUE);
   }
 }
 
+void UnityRendererHost::paintPlainNow()
+{
+  if (m_contentShown)
+    return;
+  // The children not clipped: a notice button made with the notice has not painted yet, and what is under it is
+  // what was under the player too (it paints itself with the notice). The frame is parked, outside the client area.
+  const HWND hwnd = (HWND)GetHandle();
+  if (HDC dc = ::GetDCEx(hwnd, NULL, DCX_CACHE | DCX_CLIPSIBLINGS))
+  {
+    RECT rect;
+    ::GetClientRect(hwnd, &rect);
+    const wxColour & dark = UiStyle::palette().viewport;
+    HBRUSH brush = ::CreateSolidBrush(RGB(dark.Red(), dark.Green(), dark.Blue()));
+    ::FillRect(dc, &rect, brush);
+    ::DeleteObject(brush);
+    ::ReleaseDC(hwnd, dc);
+  }
+}
+
+void UnityRendererHost::sizePlayerForLoad()
+{
+  if (!m_playerOnScreen)
+    resizeEmbeddedWindow(true);
+}
+
+bool UnityRendererHost::playerHasKeyboard()
+{
+  HWND wnd = findEmbeddedWindow();
+  const HWND focus = ::GetFocus();
+  return wnd && focus && (focus == wnd || ::IsChild(wnd, focus));
+}
+
+void UnityRendererHost::releaseKeyboardFromPlayer()
+{
+  // On the next turn of the event loop -- which comes before the paint that is pending (wx runs these first) -- so
+  // that paint is made here first: the move waits on the player's thread, and the notice is not left unpainted meanwhile.
+  CallAfter([this]() { takeKeyboardFromParkedPlayer(); });
+}
+
+void UnityRendererHost::takeKeyboardFromParkedPlayer()
+{
+  m_keyboardReleaseDue = false;
+  if (m_playerOnScreen || !playerHasKeyboard())
+    return;   // put back meanwhile, or it gave the keyboard up itself
+  if (::IsHungAppWindow(findEmbeddedWindow()))
+  {
+    // Not waited for: tried again from the timer until it responds.
+    m_keyboardReleaseDue = true;
+    m_noticeTicksLeft = std::max(m_noticeTicksLeft, 1);
+    if (!m_noticeTimer.IsRunning())
+      m_noticeTimer.Start(100);
+    return;
+  }
+  Update();
+  if (m_noticeButton && m_noticeButton->IsShown())
+    m_noticeButton->Update();
+  SetFocusIgnoringChildren();
+}
+
 void UnityRendererHost::applyEmbeddedVisibility()
 {
-  if (!m_process)
-    return;
-  if (HWND wnd = findEmbeddedWindow())
+  // The frame, once no hold is left (a hold's release applies what is due): covered, parked; uncovered, put back,
+  // the player given the viewport's size first (sent, so handled before it is on screen). Checked again on each
+  // re-assert: the player has been seen to put back a size it was given while hidden.
+  if (m_playerFrame && m_playerHold == 0)
   {
-    if (m_playerHold > 0)
-      return;
-    // The window's own visible flag, not IsWindowVisible (which also folds in the parents').
-    const bool visible = (GetWindowLongPtr(wnd, GWL_STYLE) & WS_VISIBLE) != 0;
-    if (playerCovered() && visible)
-      ShowWindowAsync(wnd, SW_HIDE);
-    else if (!playerCovered())
+    const bool onScreen = !playerCovered();
+    if (onScreen && !m_playerOnScreen)
     {
-      // Uncovered: its size first (sent, so handled before the posted show), then shown. Checked again
-      // on each re-assert: the player has been seen to put back a size it was given while hidden.
-      resizeEmbeddedWindow();
-      if (!visible)
-        ShowWindowAsync(wnd, SW_SHOWNA);
+      // Back: its size first; this panel painted plain under it first (a notice's pixels are still there, and are
+      // what shows until the player's window is composed again).
+      resizeEmbeddedWindow(true);
+      Refresh(false);
+      Update();
+      m_playerOnScreen = true;
+      placePlayerFrame();
     }
+    else if (!onScreen && m_playerOnScreen)
+    {
+      // Off (a notice or the content window put up outside a viewer switch -- a load's, a failure's, a lost player's;
+      // a switch's own is coverPlayerNow): this panel plain where it was at once, the notice with the next paint (the
+      // content window covers its own area). Not the notice itself here and now: what set it may change it again
+      // before that paint.
+      m_playerOnScreen = false;
+      placePlayerFrame();
+      paintPlainNow();
+      releaseKeyboardFromPlayer();
+      Refresh(false);
+    }
+    else if (onScreen)
+      resizeEmbeddedWindow();
   }
+  if (!m_process || m_playerHold > 0 || !m_playerReady)
+    return;
+  // The player's own window shown, asynchronously, once the player has announced itself (its "delayed" start makes it
+  // hidden; by then it has been sent the colour for what is loaded) -- parked too: shown when the frame comes back, the
+  // frame's paint (clipped by it) never fills in under it, so what is under it stays this panel's dark.
+  if (HWND wnd = findEmbeddedWindow())
+    if ((GetWindowLongPtr(wnd, GWL_STYLE) & WS_VISIBLE) == 0)
+      ShowWindowAsync(wnd, SW_SHOWNA);
 }
 
 void UnityRendererHost::OnSetFocus(wxFocusEvent & event)
 {
   // Hand keyboard focus straight to the embedded player so its input works when the
-  // pane is clicked/activated (not while it is hidden behind a notice or the content window; the
-  // content window takes it then).
+  // pane is clicked/activated (not while it is off screen behind a notice or the content window -- the
+  // content window takes it then -- nor while a switch holds it: the move waits on the player's thread).
   if (m_contentShown && m_content)
     m_content->SetFocus();
-  else if (!m_notice)
+  else if (!m_notice && m_playerOnScreen && m_playerHold == 0)
     if (HWND wnd = findEmbeddedWindow())
       ::SetFocus(wnd);
   event.Skip();
@@ -594,7 +726,12 @@ bool UnityRendererHost::launch(bool WXUNUSED(selfTest))
 
 bool UnityRendererHost::isRunning() { return false; }
 void UnityRendererHost::shutdown() { m_playerExpected = false; m_playerReady = false; }
-void UnityRendererHost::resizeEmbeddedWindow() {}
+void UnityRendererHost::resizeEmbeddedWindow(bool) {}
+void UnityRendererHost::releaseKeyboardFromPlayer() {}
+void UnityRendererHost::takeKeyboardFromParkedPlayer() {}
+void UnityRendererHost::sizePlayerForLoad() {}
+bool UnityRendererHost::playerHasKeyboard() { return false; }
+void UnityRendererHost::paintPlainNow() {}
 void UnityRendererHost::applyEmbeddedVisibility() {}
 void UnityRendererHost::OnSetFocus(wxFocusEvent & event) { event.Skip(); }
 
@@ -637,9 +774,33 @@ bool UnityRendererHost::checkPlayerHealth()
   return true;
 }
 
+bool UnityRendererHost::coverPlayerNow()
+{
+  if (!m_playerFrame || !playerCovered() || !m_playerOnScreen)
+    return false;
+  m_playerOnScreen = false;
+  placePlayerFrame();
+  releaseKeyboardFromPlayer();
+  return true;
+}
+
+void UnityRendererHost::placePlayerFrame()
+{
+  if (!m_playerFrame)
+    return;
+  // Parked: the same size, far off any screen (as a minimised window is), where the panel clips it away and no pointer
+  // can be over the player's window.
+  const wxRect area = GetClientRect();
+  m_playerFrame->SetSize(m_playerOnScreen ? area.x : -32000, m_playerOnScreen ? area.y : -32000, area.width, area.height);
+}
+
 void UnityRendererHost::OnSize(wxSizeEvent & event)
 {
-  resizeEmbeddedWindow();
+  placePlayerFrame();
+  // Parked too (not during a switch, which holds it): it follows the viewport, so what it builds behind a notice is
+  // framed for it, and it has presented at that size before it is put back (sized only then, its last frame would be
+  // shown scaled to the new size until it presents again).
+  resizeEmbeddedWindow(true);
   if (m_content)
     m_content->SetSize(GetClientRect());
   layoutNotice();

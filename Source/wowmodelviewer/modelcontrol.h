@@ -45,6 +45,9 @@ public:
   ~ModelControl();
 
   void UpdateModel(Attachment *a);
+  // The scene's model is gone (deleted with the canvas's, a world model loaded in its place): nothing here refers
+  // to it any more, until RefreshModel lists the next model's attachments.
+  void Forget();
   void Update();
   void UpdateGeosetSelection();
   void RefreshModel(Attachment *root);

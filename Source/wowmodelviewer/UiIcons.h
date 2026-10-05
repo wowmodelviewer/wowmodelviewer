@@ -21,6 +21,7 @@ enum class UiIcon
   None,
   Models,        // the Models viewer (a box)
   Textures,      // the Textures viewer (a picture)
+  Buildings,     // the Buildings viewer (a building)
   Fullscreen,
   Screenshot,
   Browse,        // the Browse panel (a tree)

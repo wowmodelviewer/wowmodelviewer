@@ -280,7 +280,7 @@ BackgroundColorDialog::BackgroundColorDialog(wxWindow * parent)
     if (m_openedWith.IsOk())
       apply(m_openedWith, true);
   });
-  // Hidden (Close, Escape, the title bar, the Textures viewer) with a drag or a held key going on: it ends here, kept,
+  // Hidden (Close, Escape, the title bar, another viewer) with a drag or a held key going on: it ends here, kept,
   // so the viewport and Config.ini agree and nothing goes on moving in a window no one can see.
   Bind(wxEVT_SHOW, [this](wxShowEvent & e) {
     if (!e.IsShown())

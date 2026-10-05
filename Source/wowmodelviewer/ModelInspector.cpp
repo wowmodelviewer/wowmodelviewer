@@ -83,8 +83,12 @@ namespace
     return owned.empty() ? merged : owned;
   }
 
+  // The model the panel is about: the canvas's -- not in the Buildings viewer, where a model left on the canvas
+  // is not on screen (ModelViewer::canvasHoldsModesContent).
   WoWModel * canvasModel()
   {
+    if (g_modelViewer && g_modelViewer->isBuildingsMode())
+      return nullptr;
     return g_canvas ? const_cast<WoWModel *>(g_canvas->model()) : nullptr;
   }
 
@@ -92,7 +96,7 @@ namespace
   void collectModels(std::vector<WoWModel *> & out)
   {
     out.clear();
-    if (!g_canvas)
+    if (!g_canvas || (g_modelViewer && g_modelViewer->isBuildingsMode()))
       return;
     std::function<void(Attachment *)> walk = [&](Attachment * a) {
       if (!a)
@@ -179,8 +183,12 @@ ModelInspector::Context ModelInspector::currentContext() const
   // A texture picked in Browse is on screen (a model may be loaded behind it, and is back when picked).
   if (g_modelViewer->isTextureMode())
     return CONTEXT_TEXTURE;
+  // Each of the Models and Buildings viewers shows only its own kind of content: a world model in Buildings, and
+  // in Models whatever else the canvas holds (a world model left on it is the Buildings viewer's).
+  if (g_modelViewer->isBuildingsMode())
+    return g_modelViewer->canvasHasWorldModel() ? CONTEXT_WMO : CONTEXT_NONE;
   if (g_modelViewer->isWMO && g_canvas->wmo)
-    return CONTEXT_WMO;
+    return CONTEXT_NONE;
   if (g_modelViewer->isADT && g_canvas->adt)
     return CONTEXT_OTHER;
   if (g_canvas->model())
@@ -283,7 +291,9 @@ void ModelInspector::RefreshAppearance()
 
   switch (ctx)
   {
-    case CONTEXT_NONE:  m_contextNote->SetLabel(_("No model loaded. Pick one in Browse.")); break;
+    case CONTEXT_NONE:  m_contextNote->SetLabel(g_modelViewer && g_modelViewer->isBuildingsMode()
+                                                  ? _("No building loaded. Pick one in Browse.")
+                                                  : _("No model loaded. Pick one in Browse.")); break;
     case CONTEXT_OTHER: m_contextNote->SetLabel(_("Nothing to adjust for a map tile.")); break;
     case CONTEXT_TEXTURE: m_contextNote->SetLabel(_("Nothing to adjust for a texture.")); break;
     default: break;
@@ -561,7 +571,8 @@ void ModelInspector::UpdateGeosetSummary()
   if (!m)
   {
     m_geosetSummary->SetLabel(currentContext() == CONTEXT_WMO ? _("WMOs have no geosets.")
-                                                             : _("No model loaded."));
+                              : g_modelViewer && g_modelViewer->isBuildingsMode() ? _("No building loaded.")
+                                                                                  : _("No model loaded."));
     return;
   }
   if (m->geosets.empty())
@@ -1014,14 +1025,21 @@ void ModelInspector::RebuildInfo()
     AddInfoRow(_("Name"), baseName(path));
     AddInfoRow(_("Type"), _("World model (WMO)"));
     AddInfoRow(_("Path"), wxString(path.toStdWString()));
+    if (w->fileDataID > 0)
+      AddInfoRow(_("FileDataID"), wxString::Format(wxT("%u"), (unsigned)w->fileDataID));
     if (w->nGroups > 0)
       AddInfoRow(_("Groups"), number((long)w->nGroups));
     if (!w->doodadsets.empty())
       AddInfoRow(_("Doodad sets"), number((long)w->doodadsets.size()));
-    if (w->nDoodads > 0)
-      AddInfoRow(_("Doodads"), number((long)w->nDoodads));
+    // The doodads placed (MODD), not the header's count of doodad definitions, which can be larger.
+    if (!w->modelis.empty())
+      AddInfoRow(_("Doodads"), number((long)w->modelis.size()));
     if (!w->lights.empty())
       AddInfoRow(_("Lights"), number((long)w->lights.size()));
+    // The root header's bounding box (MOHD), what the viewport frames.
+    const glm::vec3 size = glm::abs(w->v2 - w->v1);
+    if (w->ok && (size.x > 0.0f || size.y > 0.0f || size.z > 0.0f))
+      AddInfoRow(_("Bounds"), wxString::Format(wxT("%.2f \u00D7 %.2f \u00D7 %.2f"), size.x, size.y, size.z));
   }
   else if (ctx == CONTEXT_OTHER)
   {
@@ -1052,6 +1070,8 @@ void ModelInspector::RebuildInfo()
     }
   }
 
+  if (ctx == CONTEXT_NONE)
+    m_infoEmpty->SetLabel(g_modelViewer && g_modelViewer->isBuildingsMode() ? _("No building loaded.") : _("No model loaded."));
   m_infoEmpty->Show(ctx == CONTEXT_NONE);
   m_info->Layout();
   m_info->FitInside();
@@ -1167,7 +1187,8 @@ void ModelInspector::OnWatchTimer(wxTimerEvent & WXUNUSED(event))
       const void * shown = (ctx == CONTEXT_WMO) ? (const void *)g_canvas->wmo
                          : (ctx == CONTEXT_OTHER) ? (const void *)g_canvas->adt
                          : (ctx == CONTEXT_TEXTURE) ? (const void *)g_modelViewer->textureView
-                         : (const void *)(g_canvas ? g_canvas->model() : nullptr);
+                         : (ctx == CONTEXT_MODEL || ctx == CONTEXT_CHARACTER) ? (const void *)canvasModel()
+                         : nullptr;
       if (ctx != m_infoContext || shown != m_infoFor)
         RebuildInfo();
       break;

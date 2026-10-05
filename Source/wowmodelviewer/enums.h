@@ -235,6 +235,7 @@ enum ObjectID {
   // Command bar and Help menu
   ID_UI_MODELS,            // the viewer selector's "Models" (and the empty viewer's button): Models mode
   ID_UI_TEXTURES,          // its "Textures": Textures mode
+  ID_UI_BUILDINGS,         // its "Buildings" (and the empty Buildings viewer's button): Buildings mode
   ID_UI_SCREENSHOT,        // "Screenshot": a 3840 x 2160 transparent PNG of the Unity viewport, saved where Save As says
   ID_UI_MODEL_LABEL,
   ID_KEYBOARD_SHORTCUTS,

@@ -11,8 +11,8 @@
  *
  * Mechanics: hosts a SEPARATELY BUILT Unity standalone player inside a plain wxPanel by
  * launching it with the player's documented embedding arguments ("-parentHWND <hwnd>
- * delayed"): the player reparents itself into this panel's native window and renders there
- * with its own graphics device, in its own process. Because it is out-of-process and draws
+ * delayed"): the player reparents itself into a frame window of this panel's own and renders
+ * there with its own graphics device, in its own process. Because it is out-of-process and draws
  * into ITS OWN child window, the app's single WGL context stays bound to the hidden ModelCanvas
  * HWND and nothing here calls into GL at all.
  *
@@ -90,17 +90,17 @@ public:
   bool checkPlayerHealth();
   static const unsigned long PLAYER_READY_TIMEOUT_MS = 30000;
 
-  // The player has connected and announced itself, so its window is up and this panel's own
-  // painting is no longer what the user sees. Until then the panel paints only the player's
-  // background colour underneath (or a notice, when one is up). Announcing itself also clears a
+  // The player has connected and announced itself, so its window is up (and is shown now) and the
+  // frame's painting is no longer what the user sees. Until then the frame paints only the player's
+  // background colour (or the panel a notice, when one is up). Announcing itself also clears a
   // "did not respond" problem left by a player that was slower to start than checkPlayerHealth
   // allows.
   void setPlayerReady(bool ready);
   bool isPlayerReady() const { return m_playerReady; }
 
-  // THE BACKDROP: the Models viewport's background (ModelViewer::viewportBackground). The panel paints it wherever
-  // the player's window does not cover it and no notice is up -- while the player starts, so its first frame is not a
-  // change of colour -- and a player launched after this is given it on its command line ("-wmvBackground RRGGBB").
+  // THE BACKDROP: the colour the player clears to (ModelViewer::viewportBackgroundShown). The player's frame paints it
+  // wherever the player's window does not cover it -- while the player starts, so its first frame is not a change of
+  // colour -- and a player launched after this is given it on its command line ("-wmvBackground RRGGBB").
   // A notice keeps the palette's viewport colour, which its text and button are made for. Invalid: that colour too,
   // and nothing on the command line.
   void setBackdrop(const wxColour & colour);
@@ -112,9 +112,11 @@ public:
   //     character, a WMO on an older player...): what it is and that it cannot be shown, no button;
   //   - the player is missing, could not start, exited or disconnected: why, with a button that
   //     restarts it.
-  // This is the host panel's own painting. The player's window is only HIDDEN meanwhile -- the
-  // process keeps running with whatever it last built -- and is shown again the moment the notice
-  // is cleared. Nothing is sent to the player and nothing in it changes.
+  // This is the host panel's own painting. The player is only taken OFF SCREEN meanwhile -- the process
+  // keeps running with whatever it last built -- and put back when the notice is cleared, both at once:
+  // its window lives in a frame window of this panel's own, which is what is moved out of the panel's
+  // client area and back (see applyEmbeddedVisibility). Nothing is sent to the player and nothing in it
+  // changes.
   //
   // actionId is the menu command the button posts to the frame (for example ID_UI_MODELS);
   // 0 or an empty label means no button. Setting the same notice again is cheap and repaints
@@ -127,20 +129,40 @@ public:
 
   // THE CONTENT WINDOW. A window of the app's own that takes the viewport's place -- the texture view,
   // for a texture picked in Browse -- covering the panel, the player and any notice. As with a notice,
-  // the player's window is only hidden meanwhile and nothing is sent to it. The window is a child of
+  // the player is only taken off screen meanwhile (its frame) and nothing is sent to it. The window is a child of
   // this panel, sized with it; showContent(false) gives the viewport back.
   void setContent(wxWindow * content);
   void showContent(bool show);
   bool isShowingContent() const { return m_contentShown; }
 
-  // THE HOLD (a viewer-mode switch). While held, the player's window is neither shown, hidden nor
-  // resized; releasing the last hold applies what is due -- its size, then shown; or hidden -- after the
-  // new workspace has been painted, so the switch is one change on screen. The player's window is not
-  // resized while the texture view covers it (it keeps the Models viewport's size), nor behind a notice
-  // until its hide has landed (it would draw at the new size first); it is sized to the viewport again
-  // just before it is shown.
+  // THE HOLD (a viewer-mode switch). While held, the player is neither taken off screen, put back nor
+  // resized; releasing the last hold applies what is due -- its size, then put back; or taken off screen
+  // with the panel painted where it was -- with the new workspace's repaint, so the switch is one change
+  // on screen (a switch ending on a notice takes it off at the very end of the freeze: coverPlayerNow;
+  // taken off earlier, the frozen panel could not paint there until the switch is over, and its old pixels
+  // would show). The player's window is not resized while the texture view covers it (it
+  // keeps the size of the viewer it was covered from); it is sized to the viewport again just before it is put back.
   void holdPlayer();
   void releasePlayer();
+  // The player's frame (see m_playerFrame), or null where there is no player (not Windows).
+  wxWindow * playerFrame() const { return m_playerFrame; }
+  // A load about to be sent to the player: while it is parked (behind a notice) since a switch -- which does not size
+  // it -- its window given the viewport's size, so what it builds is framed for the viewport's shape (it frames by its
+  // own aspect, once, when built). Sent and waited for -- one frame of the player's at most -- like every resize of it.
+  // On screen it has the viewport's size already.
+  void sizePlayerForLoad();
+  // The keyboard is in the player's window. Asked without asking that window anything: wxWindow::FindFocus sends it
+  // WM_GETDLGCODE to find a wx window for it, which waits on the player's thread (once per frame it draws).
+  bool playerHasKeyboard();
+  // A viewer switch ending on a notice (held): the player's frame off screen now, at the end of the freeze -- the
+  // old workspace stays whole until then, and the switch's repaint paints the notice where it was. Its release finds
+  // it done. True when it was on screen until now: paintPlainNow once the freeze is over.
+  bool coverPlayerNow();
+  // Where the player was, this panel plain (the notice's dark, no text) at once -- before any other work, a load's
+  // own (a building picked in Models loads after the switch, before the repaint) -- not the pixels that were under
+  // the player's window, which show from the moment it goes until this panel paints. The notice follows with the
+  // next paint. Not while the content window covers it (it is what shows there).
+  void paintPlainNow();
 
 private:
   void OnSize(wxSizeEvent & event);
@@ -151,22 +173,45 @@ private:
   // The detail text broken into lines that fit the panel, so a long path or reason stays readable
   // instead of running off both edges.
   wxArrayString noticeDetailLines(wxDC & dc) const;
-  // Hide the player's window while a notice is up, show it otherwise. Asynchronous, so a player
-  // that is busy starting up can never stall this thread.
+  // The player off screen while a notice or the content window is up, on screen otherwise, once no hold is left:
+  // its frame window moved, from this thread, which never waits for the player to do so. (Putting it back waits for a
+  // resize of the player's window when its size has to change.)
   void applyEmbeddedVisibility();
-  // The player's window is hidden while a notice or the content window is in front of it.
+  // The frame at the panel's client area, or parked far off any screen, as m_playerOnScreen says.
+  void placePlayerFrame();
+  // A player's window that has the keyboard as it is taken off screen gives it up on the next turn of the event loop,
+  // after this panel has painted (it takes the keyboard, and hands it on as OnSetFocus does): keys must not go to a
+  // window no one sees. The move waits for the player's thread, as a click elsewhere does -- not for one Windows
+  // considers hung (tried again from the timer until it responds: takeKeyboardFromParkedPlayer).
+  void releaseKeyboardFromPlayer();
+  void takeKeyboardFromParkedPlayer();
+  bool m_keyboardReleaseDue = false;
+  // The player is off screen (its frame) while a notice or the content window is in front of it.
   bool playerCovered() const { return m_notice || m_contentShown; }
-  // The hide is re-asserted for as long as the player is covered, and for a moment after.
+  // After the player is uncovered, and once it is ready, the visibility is applied again for a moment from the
+  // timer: the player makes its window some time after launch, hidden ("delayed"), and has been seen to put back a
+  // size it was given while hidden.
   void watchEmbeddedVisibility(bool wasCovered);
 
   wxWindow * m_content = nullptr;
   bool m_contentShown = false;
 
+  // THE PLAYER'S FRAME: a child window of this panel, its size, that the player's window is made a child of
+  // ("-parentHWND"). Parked far off any screen (x = -32000, where no pointer can be: the player tells whether the
+  // pointer is over it from position alone) and put back, it takes the player off screen and back synchronously: the player's own window handles messages on the player's thread, once per frame it draws, and
+  // a hide posted to it landed 50 ms and more later on a desktop where it is busy presenting -- the other viewer's
+  // model or building stayed on screen, in its colour, until then. Moved, not hidden: hiding an ancestor of the
+  // window with the keyboard (the player's, often) moves the keyboard, which waits on the player's thread. (The
+  // player's window does not clip itself against its siblings -- WS_CHILD | WS_VISIBLE only -- so a window raised
+  // above it is no cover while it is on screen.) Windows only.
+  wxWindow * m_playerFrame = nullptr;
+  bool m_playerOnScreen = true;
+
   bool m_notice = false;
   wxString m_noticeTitle, m_noticeDetail, m_noticeActionLabel;
   int m_noticeActionId = 0;
   wxButton * m_noticeButton = nullptr;
-  wxTimer m_noticeTimer;   // the player creates its window some time after launch: hide it when it appears
+  wxTimer m_noticeTimer;   // watchEmbeddedVisibility
   int m_noticeTicksLeft = -1;
   int m_playerHold = 0;     // holdPlayer() count
 
@@ -175,7 +220,7 @@ private:
   wxString m_playerProblem;
   bool m_playerExpected = false;
 
-  // False until the player reports in. Only affects what this panel paints underneath it.
+  // False until the player reports in: its window is shown from then on (applyEmbeddedVisibility).
   bool m_playerReady = false;
   wxColour m_backdrop;   // setBackdrop
   // When the process was started, so the log can say how long the user waited for it. That
@@ -184,7 +229,13 @@ private:
 
   // The player does not follow the parent's size on its own; the host must resize the
   // embedded child window whenever the panel resizes (it fills the whole client area).
-  void resizeEmbeddedWindow();
+  // Sent to the player's thread and waited for, never posted: a posted resize is handled after any sent later, and
+  // could land after the one sent as it is put back, leaving it at the old size. (The threads' input queues are
+  // attached -- a parent and child across processes -- so SWP_ASYNCWINDOWPOS would not post anyway.) Parked, only when
+  // asked (puttingBack: OnSize, sizePlayerForLoad, the put-back) -- not by the re-asserts. Never for a player Windows
+  // considers hung (no message taken for 5 s, e.g. a long build): this thread would hang with it. On screen it is then
+  // tried again from the timer until it responds; parked, as it is put back.
+  void resizeEmbeddedWindow(bool puttingBack = false);
 
   UnityIpcServer * m_ipc = nullptr; // owned
 

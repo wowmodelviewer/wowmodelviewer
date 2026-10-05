@@ -18,6 +18,7 @@
 // Our files
 #include "modelcanvas.h"
 #include "animcontrol.h"
+#include "ViewerMode.h"
 #include "charcontrol.h"
 #include "lightcontrol.h"
 #include "modelcontrol.h"
@@ -188,7 +189,7 @@ public:
   void OnThemeRecheck(wxTimerEvent & event);
   WXLRESULT MSWWindowProc(WXUINT message, WXWPARAM wParam, WXLPARAM lParam) wxOVERRIDE;
 protected:
-  // A model command (needsModelViewer) in the Textures viewer is refused before any handler sees it.
+  // A command of another viewer (needsModelViewer, needsUnityViewport) is refused before any handler sees it.
   bool TryBefore(wxEvent & event) wxOVERRIDE;
 public:
   // The palette resolved again (in a light run: high contrast on or off) and, when it changed, applied to
@@ -211,9 +212,9 @@ public:
   int m_layoutBatch = 0;
   bool m_layoutPending = false;          // an Update is due when the batch closes
   bool m_layoutUncapped = false;         // ... with the dock size cap lifted (docks made again)
-  bool m_finishLeavingPending = false;   // leaveTextureWorkspace's second half, after that Update
-  bool m_uncoverPending = false;         // the texture view put away once the layout is committed
-  void finishLeavingTextureWorkspace();
+  bool m_finishWorkspacePending = false;   // applyWorkspace's second half, after that Update
+  bool m_uncoverPending = false;          // the texture view put away once the layout is committed
+  void finishWorkspace();
   // Every shown window of the frame painted now, top to bottom (not the player's: another process).
   void PaintNow();
   void OnActivateFrame(wxActivateEvent & event);
@@ -274,21 +275,36 @@ public:
   // loads a client now -- File > "Load World of Warcraft" calls it, and nothing calls it at
   // startup. Loops so a failed legacy-MPQ pick returns to the dialog rather than giving up.
   void PromptAndLoadClient();
-  // THE VIEWER MODE: Models (the Unity viewport and the model panels) or Textures (the texture viewer in
-  // the viewport's place, the model panels put away). The command bar's Models | Textures selector,
-  // what Browse lists (FileControl::FollowViewerMode) and the centre all follow it, and SetViewerMode is
-  // the one way to change it: the selector, and a model loaded from a menu or a file (Models). A model
-  // stays loaded behind Textures mode and the texture selected stays selected behind
-  // Models mode, so going back shows each as it was, without loading anything again.
-  enum class ViewerMode { Models, Textures };
+  // THE VIEWER MODE (ViewerMode.h): Models (the Unity viewport and the model panels), Textures (the texture
+  // viewer in the viewport's place, the model panels put away) or Buildings (the Unity viewport with a world
+  // model, WMO, the panels that act on a model put away). The command bar's Models | Textures | Buildings
+  // selector, what Browse lists (FileControl::FollowViewerMode) and the centre all follow it, and SetViewerMode
+  // is the one way to change it: the selector, a model loaded from a menu or a file (Models), a texture picked
+  // (Textures), a world model picked or loaded (Buildings: FileControl::SelectWMOFile).
+  // The texture selected stays selected behind the other modes, and what the canvas holds stays behind
+  // Textures. The canvas holds one model OR one world model, never both, so Models and Buildings each show
+  // only their own kind: a world model on the canvas in Models, or a model in Buildings, is not shown -- the
+  // mode's empty viewer is -- and is shown again, without loading anything, when its mode comes back.
+  using ViewerMode = ::ViewerMode;
   void SetViewerMode(ViewerMode mode, bool openBrowse = false, bool paintNow = false);
   ViewerMode viewerMode() const { return m_viewerMode; }
   bool isTextureMode() const { return m_viewerMode == ViewerMode::Textures; }
-  // The commands that act on a model -- the Animation, Model and Attachments panels, View NPC, View
-  // Item, Load Character, the Armory and NPC imports, every export of the model, and Swap Background
-  // Color (the Models viewport's) -- are the Models viewer's. In Textures their menu items and command-bar tools are greyed (OnUpdateCommandUI, answered
-  // again at every switch) and the commands are refused however they arrive (TryBefore).
+  bool isModelsMode() const { return m_viewerMode == ViewerMode::Models; }
+  bool isBuildingsMode() const { return m_viewerMode == ViewerMode::Buildings; }
+  // What the canvas holds, by kind: a world model (with its flag: a pointer a load left behind does not
+  // count), or a model.
+  bool canvasHasWorldModel() const;
+  bool canvasHasModel() const;
+  // Whether the canvas holds what the viewer mode shows: a model in Models, a world model in Buildings.
+  bool canvasHoldsModesContent() const;
+  // The commands that act on a model -- the Animation and Attachments panels, View NPC, View Item, Load
+  // Character, the Armory and NPC imports, every export of the model, and Swap Background Color (the
+  // Models viewport's) -- are the Models viewer's: greyed in Textures and Buildings (OnUpdateCommandUI,
+  // answered again at every switch) and refused however they arrive (TryBefore).
   bool needsModelViewer(int id) const;
+  // The Model panel, which shows a world model's information too, is the Models and Buildings viewers':
+  // greyed and refused in Textures only.
+  bool needsUnityViewport(int id) const;
   // Select a texture picked in Browse (Textures mode): the texture view reads and shows it.
   void ShowTexture(const TextureEntry & entry, bool lookup);
   // The texture view's selection changed, or its facts arrived: the command bar's label, the status bar
@@ -321,12 +337,29 @@ public:
   void DoGiveHelp(const wxString & text, bool show) wxOVERRIDE;
 
   // THE MODELS VIEWPORT'S BACKGROUND (View > Swap Background Color; ViewportBackground.h): the colour the Unity player clears
-  // the Models viewport to, as the sRGB bytes it displays as. Loaded with the session; the host panel paints it under
-  // the player, a player started later is given it on its command line, and one that announces itself is sent it.
+  // the Models viewport to, as the sRGB bytes it displays as. Loaded with the session; behind a model the player's frame
+  // paints it while the player starts, a player started later is given it on its command line, and one that announces
+  // itself is sent it (viewportBackgroundShown).
   const wxColour & viewportBackground() const { return m_viewportBackground; }
   // Show colour now. Sent to the player only when it differs from the colour on show (and the player speaks protocol
   // 7); kept in Config.ini when persist and it differs from what is kept there. The background window follows.
   void setViewportBackground(const wxColour & colour, bool persist);
+  // The colour the player clears to, which follows what it is given to draw, never the viewer mode: a world model
+  // (the Buildings viewer's) on the viewport's default, anything else on the Models viewport's background. The player
+  // has one clear colour for everything it draws, and keeps drawing what it holds while it is covered, so a colour
+  // that changed with the viewer would show on the content of the other viewer -- the Models colour behind a
+  // building for a frame or more when Buildings uncovers it. Sent to the player on connect, when the Models colour
+  // changes (setViewportBackground; while a world model is on the canvas only if what the player was last sent differs
+  // -- it can, when that world model never reached the player, and what it keeps covered is then re-coloured, the next
+  // load fenced as any re-colouring load is), and with a load the player
+  // gets, before it (SendLoadToUnity) -- not because the canvas changed without the player getting it (a load that
+  // failed, a world model that cannot be read), which would re-colour what the player keeps -- and a load that
+  // changes it is not shown before it is built, as a load of the other kind is not.
+  wxColour viewportBackgroundShown() const;
+  // The host panel and the player given that colour, when it is not the one they have. True when the player was sent
+  // a new colour now (what it already draws is then drawn in it from its next frame).
+  bool pushViewportBackground();
+  wxColour m_viewportBackgroundSent;   // what the player was last sent (invalid: nothing sent to this player)
 
   // THE VIEWPORT SCREENSHOT. The command bar's Screenshot: a Save As dialog (PNG, overwrite confirmed, named after
   // the model and the time), then RequestUnityScreenshot. Cancelling does nothing.
@@ -372,34 +405,39 @@ public:
   int m_exportMenuEnd = 0;
   bool m_frameActive = true;     // the window is the active one (its last activate event): a pane's caption
                                  // reads as active only then (UpdateActivePaneCaption)
-  // THE TEXTURE WORKSPACE. While a texture is on screen, the panels that only act on a model are put
-  // away so the texture gets the room: the ones in modelOnlyPanes() that are shown. Each is recorded
-  // and given back as it was -- shown, at the size it had -- when the texture goes (both decided with
-  // the viewport, in UpdateUnityViewportState, and laid out at once). Browse stays. The panels put away
-  // cannot be shown meanwhile (their toggles are the Models viewer's: needsModelViewer), so they come
-  // back as they were. The layout saved on exit is the user's: SaveLayout writes the panels given back.
-  // 'commit' false: the caller lays out.
-  static const wxChar * const * modelOnlyPanes();
-  void enterTextureWorkspace(bool commit = true);
-  void leaveTextureWorkspace();
-  // Drop a panel from the record (the user shows or closes it -- in the Textures viewer the panels put
-  // away cannot be shown); the record is handed back when asked.
-  struct TextureWorkspacePane;
-  bool forgetTextureWorkspacePane(const wxString & name, TextureWorkspacePane * taken = nullptr);
+  // THE WORKSPACE OF A VIEWER MODE. The panels a mode cannot use are put away while it is on screen, so its
+  // content gets the room: in Textures the Animation and Model panels and the Attachments window, in Buildings
+  // the Animation panel and the Attachments window (the Model panel shows a world model's information), in
+  // Models none (workspacePanes). Each panel put away is recorded and given back as it was -- shown, at the
+  // size it had -- when a mode that uses it comes back; a switch between two modes puts away or gives back
+  // only the difference (decided with the viewport, in UpdateUnityViewportState, and laid out at once).
+  // Browse stays. The panels put away cannot be shown meanwhile (their toggles are another viewer's:
+  // needsModelViewer, needsUnityViewport), so they come back as they were. The layout saved on exit is the
+  // user's: SaveLayout writes the panels given back. 'commit' false: the caller lays out.
+  enum WorkspacePane { PaneAnimation = 1, PaneModel = 2, PaneAttachments = 4 };
+  static int workspacePanes(ViewerMode mode);
+  static const wxChar * workspacePaneName(int pane);
+  void applyWorkspace(int panes, bool commit = true);
+  // Drop a panel from the record (the user shows or closes it -- the panels put away cannot be shown);
+  // the record is handed back when asked.
+  struct WorkspacePaneRecord;
+  bool forgetWorkspacePane(const wxString & name, WorkspacePaneRecord * taken = nullptr);
   // Lay the panes out with docks made again at the size their panels' best size says, larger than the
   // 30% of the window a new dock is otherwise capped at (a sash may have made them larger than that).
   void commitDocksAtTheirSize();
-  // The layout as the user has it: SavePerspective, with the panels a texture put away given back.
+  // The layout as the user has it: SavePerspective, with the panels a mode put away given back.
   wxString userPerspective();
-  struct TextureWorkspacePane
+  struct WorkspacePaneRecord
   {
     wxString name;
     wxSize bestSize;    // the pane's own best size, put back once it is shown again
     wxSize shownSize;   // its window's size when it went (a dock made again is sized from it)
   };
-  bool m_textureWorkspace = false;
-  std::vector<TextureWorkspacePane> m_textureWorkspacePanes;
-  wxString m_textureWorkspaceLayout;   // SavePerspective when they went: the sizes of the docks they took
+  int m_workspace = 0;                                // the panels put away now (WorkspacePane bits)
+  std::vector<WorkspacePaneRecord> m_workspaceRecord;  // those of them that were shown
+  std::vector<WorkspacePaneRecord> m_workspaceGivenBack;   // given back by the last switch: their own best size
+                                                           // goes back once the dock has its size (finishWorkspace)
+  wxString m_workspaceLayout;   // SavePerspective when the first went: the sizes of the docks they took
   // A client load is starting or has ended: the texture view and Browse's texture tree follow
   // (Textures mode stays: its selection and cache go with the old client).
   void TexturesClientLoadStarting();
@@ -514,6 +552,41 @@ public:
   QString m_unityWmoFailReason;
   // Every mapObjectLoaded: logged, and a failure of the WMO on display becomes the notice above.
   void OnMapObjectLoaded(const UnityIpcServer::MapObjectReport & report);
+  // WHAT THE PLAYER SHOWS WHILE A LOAD BUILDS. A load replaces the player's content only once it is built, so
+  // until then it shows what it had: across Models and Buildings, the other viewer's kind -- a model in the
+  // Buildings viewer, a world model in the Models viewer -- which must never pass for this mode's content. So
+  // while a world model builds after something that is not one, or a model after a world model, the viewport
+  // shows a notice ("Loading ..."); the player's mapObjectLoaded report ends a world model's wait, its
+  // runtimeState (asked for every POLL_MS while a model is awaited) a model's. A model the player could not
+  // build after a world model gets a notice, as a world model does.
+  // Unknown: a load of the other kind is in flight or was dropped -- the player may show either until it answers.
+  enum class PlayerContent { Nothing, Model, MapObject, Unknown };
+  PlayerContent m_playerContent = PlayerContent::Nothing;   // what the player was last known to show
+  int m_mapObjectAwaited = 0;   // the load serial of a world model built after another kind, until reported
+  int m_modelAwaited = 0;       // the FileDataID of a model built after a world model, until the player has it
+  int m_modelAwaitedFailed = 0; // that model, when the player finished without it (it still shows the world model)
+  wxStopWatch m_modelAwaitedClock;   // since the wait began (monotonic)
+  wxTimer m_playerContentPoll;
+  static const int POLL_MS = 100;
+  static const long MODEL_AWAIT_TIMEOUT_MS = 60000;
+  void OnPlayerContentPoll(wxTimerEvent & event);
+  void OnPlayerRuntimeState(const UnityIpcServer::RuntimeState & state);
+  int m_playerContentQuery = 0;   // the runtimeState question the poll is waiting on
+  // THE UNCOVER FENCE. The player answers a load (mapObjectLoaded, a runtimeState that has the model) from the frame
+  // that adopts it, before that frame is presented: uncovered on that answer, the viewport could show the frame before
+  // it -- the previous model or building -- for one frame of the player's. So the "Loading ..." notice stays until the
+  // player answers a question asked then, which it does in a later frame, after the one that draws the new content.
+  int m_uncoverFence = 0;
+  // Two questions in turn: the player renders on a render thread of its own, so the answer to the first can come
+  // from a frame whose rendering still waits for the adopting frame's Present; the second's frame began rendering
+  // after it. Asked again when unanswered for FENCE_RETRY_MS, given up after MODEL_AWAIT_TIMEOUT_MS.
+  int m_uncoverFenceRounds = 0;
+  wxStopWatch m_uncoverFenceClock, m_uncoverFenceAsked;
+  static const long FENCE_RETRY_MS = 500;
+  bool startUncoverFence();
+  void endUncoverFence();
+  // The title bar names what the viewer mode shows (Models, Buildings); Textures keeps it.
+  void UpdateTitle();
   struct SceneHold
   {
     explicit SceneHold(ModelViewer * v) : viewer(v) { viewer->m_sceneHold++; }
@@ -584,7 +657,7 @@ public:
   wxColour m_viewportBackgroundKept;
   // Its window (View > Swap Background Color), made when first asked for; hidden, not destroyed, when closed.
   BackgroundColorDialog * m_backgroundDialog = nullptr;
-  // The window was open when the Textures viewer put it away: Models gives it back.
+  // The window was open when another viewer put it away: Models gives it back.
   bool m_backgroundDialogPutAway = false;
 
 };

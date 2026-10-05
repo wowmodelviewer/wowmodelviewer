@@ -11,8 +11,9 @@
  * -- there is no Apply -- and only a different colour is sent to the viewport.
  *
  * Modeless, so the model can be turned while colours are tried; Close, Escape or the title bar hide it, and the menu
- * shows it again as it was. A Models command: greyed in the Textures viewer; the window is put away on entering it and
- * given back in Models, as the model panels are (ModelViewer::needsModelViewer, SetViewerMode).
+ * shows it again as it was. A Models command: greyed in the Textures and Buildings viewers; the window is put away on
+ * entering them and given back in Models, as the model panels are (ModelViewer::needsModelViewer, SetViewerMode). The
+ * Buildings viewer keeps the viewport's default colour (ModelViewer::viewportBackgroundShown).
  *
  * The colour itself is ModelViewer's (viewportBackground / setViewportBackground), which shows it, sends it to the
  * player and keeps it; this window edits it and keeps the user's presets. Built from the design system (UiStyle,

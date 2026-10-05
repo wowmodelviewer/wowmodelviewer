@@ -4,6 +4,7 @@
 #include <wx/msgdlg.h>
 #include <wx/srchctrl.h>
 
+#include <algorithm>
 #include <functional>
 
 #include <QDirIterator>
@@ -15,6 +16,7 @@
 #include "Game.h"
 #include "globalvars.h"
 #include "logger/Logger.h"
+#include "modelcontrol.h"
 #include "modelviewer.h"
 #include "RaceInfos.h"
 #include "TextureBrowse.h"
@@ -40,32 +42,33 @@ BEGIN_EVENT_TABLE(FileControl, wxWindow)
 END_EVENT_TABLE()
 
 // WHAT BROWSE LISTS is what the viewer mode shows (ModelViewer::SetViewerMode -> FollowViewerMode),
-// with no choice of its own: in Models mode what the viewport draws -- models (*.m2) and world models
-// (root *.wmo) -- and in Textures mode the client's textures (TextureBrowse). Other kinds of file are not
-// listed: the viewer has nothing to show them with.
-static QString content;
+// with no choice of its own: in Models mode the models (*.m2), in Textures mode the client's textures
+// (TextureBrowse), in Buildings mode the world model roots (*.wmo; see isWmoGroupFile). Other kinds of file
+// are not listed: the viewer has nothing to show them with.
 
-// A WMO group or LOD file by its name: "_NNN_" anywhere in the path, or a name ending "_NNN.wmo" or
-// "lodN.wmo" (the reference implementation's group/LOD pattern, (_\d\d\d_)|(_\d\d\d\.wmo$)|(lod\d\.wmo$)
-// on the lower-cased path; written out, it costs a fraction of the regular expression on the 86,000 .wmo
-// names of a 12.1 client). A name rule only: the few roots named like a group (11xt_rockbridge_003.wmo,
-// see SelectWMOFile) are hidden with the groups, as Browse's WMO list always hid them.
-static bool isWmoGroupOrLod(const QString & path)
+// A Buildings search lists at most this many buildings (the rest are counted): every building of a client
+// matches a short enough term, and its rows are all made at once.
+static const size_t BuildingsShown = 1000;
+
+bool FileControl::isWmoGroupFile(const QString & path, const std::map<QString, GameFile *> & index)
 {
-  const int n = path.size();
-  auto digit = [&path](int i) { return path[i] >= QLatin1Char('0') && path[i] <= QLatin1Char('9'); };
-  auto is = [&path](int i, char c) { return path[i].toLower() == QLatin1Char(c); };
-  if (n >= 8 && path.endsWith(QLatin1String(".wmo"), Qt::CaseInsensitive))
-  {
-    if (is(n - 8, '_') && digit(n - 7) && digit(n - 6) && digit(n - 5))
-      return true;
-    if (is(n - 8, 'l') && is(n - 7, 'o') && is(n - 6, 'd') && digit(n - 5))
-      return true;
-  }
-  for (int i = 0; i + 4 < n; ++i)
-    if (path[i] == QLatin1Char('_') && digit(i + 1) && digit(i + 2) && digit(i + 3) && path[i + 4] == QLatin1Char('_'))
-      return true;
-  return false;
+  const int slash = (std::max)(path.lastIndexOf(QLatin1Char('/')), path.lastIndexOf(QLatin1Char('\\')));
+  QString stem = path.mid(slash + 1);
+  if (!stem.endsWith(QLatin1String(".wmo"), Qt::CaseInsensitive))
+    return false;
+  stem.chop(4);
+  auto digit = [](QChar c) { return c >= QLatin1Char('0') && c <= QLatin1Char('9'); };
+  // "..._lodN" (a level of detail of a group: "<root>_NNN_lodN"), then "..._NNN".
+  int n = stem.size();
+  if (n >= 5 && stem[n - 5] == QLatin1Char('_') && stem.mid(n - 4, 3).compare(QLatin1String("lod"), Qt::CaseInsensitive) == 0 &&
+      digit(stem[n - 1]))
+    stem.chop(5);
+  n = stem.size();
+  if (n < 5 || stem[n - 4] != QLatin1Char('_') || !digit(stem[n - 3]) || !digit(stem[n - 2]) || !digit(stem[n - 1]))
+    return false;
+  // A group only when its root is there beside it.
+  const QString root = path.left(slash + 1) + stem.left(n - 4) + path.right(4);
+  return index.count(root) != 0;
 }
 
 void beautifyFileName(QString & file)
@@ -86,7 +89,6 @@ void beautifyFileName(QString & file)
 FileControl::FileControl(wxWindow* parent, wxWindowID id)
 {
   modelviewer = NULL;
-  m_treeRoot = NULL;
   fileTree = NULL;
   m_searchTimer.SetOwner(this, ID_FILELIST_SEARCHTIMER);
 
@@ -170,18 +172,24 @@ void FileControl::SetSearchStatus(const wxString & text)
 
 void FileControl::UpdateSearchHint()
 {
-  if (m_showsTextures)
+  if (m_mode == ViewerMode::Textures)
   {
     txtContent->SetDescriptiveText(_("Search textures"));
     txtContent->SetToolTip(_("Textures by name or path -- or FileDataID, on a client that has them -- as you type "
                              "from 3 characters; press Enter to search a shorter term, or to open the texture with "
                              "that FileDataID"));
   }
+  else if (m_mode == ViewerMode::Buildings)
+  {
+    txtContent->SetDescriptiveText(_("Search buildings"));
+    txtContent->SetToolTip(_("World Model Objects (WMO) by name or path -- or FileDataID, on a client that has them -- "
+                             "as you type from 3 characters; press Enter to search a shorter term, or to open the "
+                             "building with that FileDataID"));
+  }
   else
   {
     txtContent->SetDescriptiveText(_("Search models"));
-    txtContent->SetToolTip(_("Models and world models by file name, as you type from 3 characters; press Enter "
-                             "to search a shorter term"));
+    txtContent->SetToolTip(_("Models by file name, as you type from 3 characters; press Enter to search a shorter term"));
   }
 }
 
@@ -221,7 +229,7 @@ void FileControl::Init(ModelViewer* mv)
   // funnel through here -- this stops a queued timer from re-searching the same text).
   m_searchTimer.Stop();
 
-  if (m_showsTextures)
+  if (m_mode == ViewerMode::Textures)
   {
     InitTextures();
     return;
@@ -231,37 +239,39 @@ void FileControl::Init(ModelViewer* mv)
   if (!core::Game::instance().initDone())
   {
     fileTree->DeleteAllItems();
-    m_modelsApplied.Clear();
+    m_applied[slot(m_mode)].Clear();
     SetSearchStatus(_("Load a World of Warcraft client to browse its files."));
     return;
   }
-  m_modelsApplied = txtContent->GetValue();
-  content = QString(QString::fromWCharArray(txtContent->GetValue().c_str()).toLower().trimmed());
-  if (reuseModelTree())
+  m_applied[slot(m_mode)] = txtContent->GetValue();
+  const QString content = QString::fromWCharArray(txtContent->GetValue().c_str()).toLower().trimmed();
+  if (reuseTree(treeState(), content))
     return;
-  m_modelTreeKept = false;
+  treeState().kept = false;
+  if (m_mode == ViewerMode::Buildings)
+    InitBuildings(content);
+  else
+    InitModels(content);
+}
 
+void FileControl::InitModels(const QString & content)
+{
   LOG_INFO << "Initializing File Controls - Start";
 
-  // The models and world models whose name holds the search text, in one pass over the file index: the
-  // test GameFolder::getFilteredFiles makes for one extension -- the ending first, then the search (none
-  // to make while browsing: every name passes it) -- for both. WMO group and LOD files ("<name>_000.wmo",
-  // "..._000_lod1.wmo", etc.) are not standalone world models -- the root references its groups -- so
-  // only roots are listed.
+  // The models whose name holds the search text, in one pass over the file index: the test
+  // GameFolder::getFilteredFiles makes -- the ending first, then the search (none to make while browsing:
+  // every name passes it). World models are the Buildings viewer's.
   std::set<GameFile *> files;
-  const QRegularExpression m2Search("^.*" + content + ".*\\.m2"), wmoSearch("^.*" + content + ".*\\.wmo");
+  const QRegularExpression m2Search("^.*" + content + ".*\\.m2");
   if (!m2Search.isValid())
     LOG_ERROR << m2Search.errorString();
   else
     for (auto it = GAMEDIRECTORY.begin(); it != GAMEDIRECTORY.end(); ++it)
     {
       const QString name = (*it)->name();
-      const bool model = name.endsWith(QLatin1String(".m2")), worldModel = !model && name.endsWith(QLatin1String(".wmo"));
-      if (!model && !worldModel)
+      if (!name.endsWith(QLatin1String(".m2")))
         continue;
-      if (!content.isEmpty() && !name.contains(model ? m2Search : wmoSearch))
-        continue;
-      if (worldModel && isWmoGroupOrLod((*it)->fullname()))
+      if (!content.isEmpty() && !name.contains(m2Search))
         continue;
       files.insert(*it);
     }
@@ -278,8 +288,8 @@ void FileControl::Init(ModelViewer* mv)
   // Build a fresh hierarchy and keep it on the control (the previous one is left to
   // leak -- the Component ref-counting underflows on unref, so the tree always has;
   // this matches the prior behaviour while letting branches be filled in on expand).
-  m_treeRoot = new TreeStackItem();
-  TreeStackItem & root = *m_treeRoot;
+  m_modelsTree.root = new TreeStackItem();
+  TreeStackItem & root = *m_modelsTree.root;
   size_t listed = 0;
   for (std::set<GameFile *>::iterator it = files.begin(); it != files.end(); ++it)
   {
@@ -396,11 +406,273 @@ void FileControl::Init(ModelViewer* mv)
     SetSearchStatus(_("No files match."));
   else
     SetSearchStatus(wxString::Format(listed == 1 ? _("%u file found") : _("%u files found"), (unsigned)listed));
-  m_treeRootValid = true;
-  m_treeRootContent = content;
-  m_treeRootStatus = searchStatus->GetLabel();
+  m_modelsTree.rootValid = true;
+  m_modelsTree.rootContent = content;
+  m_modelsTree.rootStatus = searchStatus->GetLabel();
 
   LOG_INFO << "Initializing File Controls - END";
+}
+
+// ---------------------------------------------------------------------------------------- Buildings mode
+bool FileControl::ensureBuildings()
+{
+  if (m_buildings.built)
+    return true;
+  if (!core::Game::instance().initDone())
+    return false;
+  QElapsedTimer timer;
+  timer.start();
+  m_buildings = BuildingIndex();
+  // The file index in path order: roots and groups by the rule in isWmoGroupFile, each group then tied to its
+  // root (for a group's FileDataID typed in the search).
+  const std::map<QString, GameFile *> & index = GAMEDIRECTORY.filesByPath();
+  std::vector<std::pair<QString, GameFile *>> groups;
+  std::map<QString, int> rootIndex;
+  for (auto it = index.begin(); it != index.end(); ++it)
+  {
+    if (!it->first.endsWith(QLatin1String(".wmo"), Qt::CaseInsensitive))
+      continue;
+    m_buildings.wmoFiles++;
+    if (isWmoGroupFile(it->first, index))
+    {
+      m_buildings.groupFiles++;
+      groups.push_back(*it);
+      continue;
+    }
+    rootIndex[it->first] = (int)m_buildings.roots.size();
+    m_buildings.roots.push_back(it->second);
+  }
+  for (size_t i = 0; i < m_buildings.roots.size(); i++)
+    if (m_buildings.roots[i]->fileDataId() > 0)
+      m_buildings.byId.push_back(std::make_pair((int)m_buildings.roots[i]->fileDataId(), (int)i));
+  std::sort(m_buildings.byId.begin(), m_buildings.byId.end());
+  for (const auto & g : groups)
+  {
+    if (g.second->fileDataId() <= 0)
+      continue;
+    // "<root>_NNN[_lodN].wmo" -> "<root>.wmo" (the rule just matched it).
+    QString stem = g.first.left(g.first.size() - 4);
+    const int n = stem.size();
+    if (n >= 5 && stem[n - 5] == QLatin1Char('_') && stem.mid(n - 4, 3).compare(QLatin1String("lod"), Qt::CaseInsensitive) == 0)
+      stem.chop(5);
+    stem.chop(4);
+    auto root = rootIndex.find(stem + g.first.right(4));
+    if (root != rootIndex.end())
+      m_buildings.groupsById.push_back(std::make_pair((int)g.second->fileDataId(), root->second));
+  }
+  std::sort(m_buildings.groupsById.begin(), m_buildings.groupsById.end());
+  m_buildings.built = true;
+  LOG_INFO << "Buildings:" << (int)m_buildings.wmoFiles << ".wmo files," << (int)m_buildings.roots.size() << "roots,"
+           << (int)m_buildings.groupFiles << "group files, listed in" << timer.elapsed() << "ms";
+  return true;
+}
+
+QString FileControl::buildingLabel(GameFile * file)
+{
+  QString name = file->fullname();
+  if (file->fileDataId() > 0)
+    name += QString(" [%1]").arg(file->fileDataId());
+  beautifyFileName(name);
+  return name;
+}
+
+void FileControl::InitBuildings(const QString & content)
+{
+  if (!ensureBuildings())
+  {
+    fileTree->DeleteAllItems();
+    SetSearchStatus(_("Load a World of Warcraft client to browse its files."));
+    return;
+  }
+  QElapsedTimer timer;
+  timer.start();
+  // The rows of a hierarchy made from a list of roots, labelled and nested as the Models tree's.
+  auto hierarchyOf = [](const std::vector<GameFile *> & files) {
+    TreeStackItem * root = new TreeStackItem();
+    for (GameFile * file : files)
+    {
+      const QStringList items = buildingLabel(file).split("\\");
+      TreeStackItem * parent = root;
+      for (int i = 0; i < items.size() - 1; i++)
+      {
+        TreeStackItem * child = parent->getChildByName(items[i]);
+        if (!child)
+        {
+          child = new TreeStackItem();
+          child->setName(items[i]);
+          parent->addChild(child);
+        }
+        parent = child;
+      }
+      TreeStackItem * leaf = new TreeStackItem();
+      leaf->file = file;
+      leaf->setName(items.last());
+      parent->addChild(leaf);
+    }
+    return root;
+  };
+
+  fileTree->Freeze();
+  fileTree->DeleteAllItems();
+  if (content.isEmpty())
+  {
+    // Browsing: the hierarchy of every root, made once per client and kept.
+    if (!m_buildingsTree.browseRoot)
+      m_buildingsTree.browseRoot = hierarchyOf(m_buildings.roots);
+    m_buildingsTree.root = m_buildingsTree.browseRoot;
+    m_buildingsTree.root->resetLoaded();
+    m_buildingsTree.root->id = fileTree->AddRoot(wxT("Root"));
+    m_buildingsTree.root->appendChildren(fileTree);
+    fileTree->Thaw();
+    SetSearchStatus(m_buildings.roots.empty() ? wxString(_("This client has no buildings.")) : wxString());
+  }
+  else
+  {
+    // Searching: every word of the search in the path (a name is part of its path), and a number is also the
+    // FileDataID of a building, or of a group file -- found as its building -- or one to look up.
+    QString term = content;
+    term.replace(QLatin1Char('\\'), QLatin1Char('/'));
+    const QStringList words = term.split(QLatin1Char(' '), QString::SkipEmptyParts);
+    std::vector<GameFile *> found;
+    size_t matched = 0;
+    for (GameFile * file : m_buildings.roots)
+    {
+      const QString path = file->fullname().toLower().replace(QLatin1Char('\\'), QLatin1Char('/'));
+      bool all = true;
+      for (const QString & word : words)
+        all = all && path.contains(word);
+      if (!all)
+        continue;
+      if (matched++ < BuildingsShown)
+        found.push_back(file);
+    }
+    m_buildingsTree.root = hierarchyOf(found);
+    TreeStackItem & root = *m_buildingsTree.root;
+    root.id = fileTree->AddRoot(wxT("Root"));
+    root.createTreeItems(fileTree);
+    fileTree->ExpandAll();
+    // The FileDataID first, as Textures has it.
+    wxString idNote;
+    const bool pinned = pinFileDataIdRow(term, idNote);
+    fileTree->Thaw();
+    wxString status;
+    if (matched == 0)
+      status = pinned ? wxString() : wxString(_("No buildings match."));
+    else if (matched > found.size())
+      status = wxString::Format(_("%u of %u buildings shown -- type more to narrow the search"), (unsigned)found.size(),
+                                (unsigned)matched);
+    else
+      status = wxString::Format(matched == 1 ? _("%u building found") : _("%u buildings found"), (unsigned)matched);
+    if (!idNote.IsEmpty())
+      status = status.IsEmpty() ? idNote : idNote + wxT("\n") + status;
+    SetSearchStatus(status);
+  }
+  m_buildingsTree.rootValid = true;
+  m_buildingsTree.rootContent = content;
+  m_buildingsTree.rootStatus = searchStatus->GetLabel();
+  LOG_INFO << "Buildings: tree made in" << timer.elapsed() << "ms";
+}
+
+bool FileControl::pinFileDataIdRow(const QString & term, wxString & note)
+{
+  note.Clear();
+  // A number: ASCII digits only, in range, not 0.
+  bool digits = !term.isEmpty();
+  for (const QChar c : term)
+    digits = digits && c >= QLatin1Char('0') && c <= QLatin1Char('9');
+  bool ok = false;
+  const int id = digits ? term.toInt(&ok) : 0;
+  if (!ok || id <= 0 || !core::Game::instance().folder().clientProfile().hasFileDataId || !fileTree->GetRootItem().IsOk())
+    return false;
+  const wxTreeItemId root = fileTree->GetRootItem();
+  auto byId = std::lower_bound(m_buildings.byId.begin(), m_buildings.byId.end(), std::make_pair(id, -1));
+  auto group = std::lower_bound(m_buildings.groupsById.begin(), m_buildings.groupsById.end(), std::make_pair(id, -1));
+  if (byId != m_buildings.byId.end() && byId->first == id)
+  {
+    GameFile * file = m_buildings.roots[byId->second];
+    fileTree->PrependItem(root, buildingLabel(file).toStdWString(), -1, -1, new FileTreeData(file, nullptr));
+  }
+  else if (group != m_buildings.groupsById.end() && group->first == id)
+  {
+    GameFile * file = m_buildings.roots[group->second];
+    fileTree->PrependItem(root, buildingLabel(file).toStdWString(), -1, -1, new FileTreeData(file, nullptr));
+    note = wxString::Format(_("FileDataID %d is a group file of this building."), id);
+  }
+  else
+  {
+    FileTreeData * lookup = new FileTreeData(nullptr, nullptr);
+    lookup->lookupFileDataId = id;
+    fileTree->PrependItem(root, wxString::Format(_("Look up FileDataID %d"), id), -1, -1, lookup);
+  }
+  return true;
+}
+
+void FileControl::SelectBuildingRow(wxTreeItemId item)
+{
+  FileTreeData * data = item.IsOk() ? dynamic_cast<FileTreeData *>(fileTree->GetItemData(item)) : nullptr;
+  if (!data || !modelviewer)
+    return;
+  if (data->lookupFileDataId > 0)
+  {
+    // The building on screen looked up again (the click's double-click, Enter again): nothing to load.
+    if (modelviewer->canvasHasWorldModel() && modelviewer->canvas->wmo->ok &&
+        (int)modelviewer->canvas->wmo->fileDataID == data->lookupFileDataId)
+      return;
+    LookUpBuilding(data->lookupFileDataId);
+    return;
+  }
+  if (!data->file)
+    return;   // a folder
+  // The building on screen picked again (Enter on its row): nothing to load.
+  if (isLoaded(data->file) && modelviewer->canvas->wmo->ok)
+    return;
+  SelectWMOFile(data->file);
+}
+
+void FileControl::LookUpBuilding(int fileDataId)
+{
+  // The file by its FileDataID (the index opens one the listfile does not name), then its first chunks: a root
+  // is MVER then MOHD, a group file MVER then MOGP.
+  GameFile * file = GAMEDIRECTORY.getFile(fileDataId);
+  if (!file)
+  {
+    SetSearchStatus(wxString::Format(_("FileDataID %d is not in the loaded client."), fileDataId));
+    return;
+  }
+  QString kind;
+  if (!file->isCurrentlyOpen() && file->open(false))
+  {
+    unsigned char head[20] = { 0 };
+    const size_t got = file->read(head, sizeof(head));
+    file->close();
+    auto tag = [&head](int at) { return QString::fromLatin1((const char *)head + at, 4); };
+    if (got == 0)
+      kind = "unread";   // an encrypted file with no key in the client opens, but reads nothing
+    else if (got < sizeof(head))
+      kind = "short";
+    else if (tag(0) == "REVM" && tag(12) == "DHOM")
+      kind = "root";
+    else if (tag(0) == "REVM" && tag(12) == "PGOM")
+      kind = "group";
+    else
+      kind = "other";
+  }
+  else
+    kind = "unread";
+  LOG_INFO << "Buildings: FileDataID" << fileDataId << "looked up as" << file->fullname() << "--" << kind;
+  if (kind == "root")
+  {
+    SelectWMOFile(file);
+    return;
+  }
+  if (kind == "group")
+    SetSearchStatus(wxString::Format(_("FileDataID %d is a world model group file; it is loaded with its building."),
+                                     fileDataId));
+  else if (kind == "unread")
+    SetSearchStatus(wxString::Format(_("FileDataID %d could not be read (it may be encrypted, or not downloaded yet)."),
+                                     fileDataId));
+  else
+    SetSearchStatus(wxString::Format(_("FileDataID %d is not a world model."), fileDataId));
 }
 
 // Lazy tree fill-in: when a collapsed branch is expanded, add its direct children
@@ -410,7 +682,7 @@ void FileControl::OnTreeItemExpanding(wxTreeEvent &event)
   const wxTreeItemId item = event.GetItem();
   if (!item.IsOk())
     return;
-  if (m_showsTextures)
+  if (m_mode == ViewerMode::Textures)
   {
     m_textures->expanding(item);
     return;
@@ -421,17 +693,12 @@ void FileControl::OnTreeItemExpanding(wxTreeEvent &event)
 }
 
 // copy from ModelOpened::Export
-void FileControl::Export(wxString val, int select)
+void FileControl::Export(GameFile * f, int select)
 {
-  if (val.IsEmpty())
+  // The row's own file (not looked up again by its name, which a file known only by its FileDataID cannot be).
+  if (!f)
     return;
-
-  GameFile * f = GAMEDIRECTORY.getFile(QString::fromWCharArray(val.c_str()));
-  if(!f)
-  {
-    LOG_ERROR << "Could not extract" << QString::fromWCharArray(val.c_str());
-    return;
-  }
+  const wxString val(f->fullname().toStdWString());
 
   f->open();
 
@@ -482,10 +749,9 @@ void FileControl::OnPopupClick(wxCommandEvent &evt)
   FileTreeData *data = (FileTreeData*)(static_cast<wxMenu *>(evt.GetEventObject())->GetClientData());
   if (!data || !data->file)
     return;
-  wxString val(data->file->fullname().toStdWString());
 
   if (evt.GetId() == ID_FILELIST_SAVE)
-    Export(val, 1);
+    Export(data->file, 1);
 }
 
 void FileControl::OnTreeMenu(wxTreeEvent &event)
@@ -495,7 +761,7 @@ void FileControl::OnTreeMenu(wxTreeEvent &event)
   if (!item.IsOk() || !modelviewer->canvas) // make sure that a valid Tree Item was actually selected.
     return;
 
-  if (m_showsTextures)
+  if (m_mode == ViewerMode::Textures)
   {
     ShowTextureMenu(item);
     return;
@@ -545,11 +811,15 @@ void FileControl::ClearCanvas()
       }
     }
 */
-    if (modelviewer->isChar) {
-      modelviewer->charControl->charAtt = NULL;
-    }
     //wxDELETE(modelviewer->canvas->model); // may memory leak
     modelviewer->canvas->setModel(NULL);
+    // Nothing goes on pointing at the model just deleted -- the character controls, the Attachments window, the
+    // Animation panel -- whatever is loaded next (a world model sets none of them again).
+    modelviewer->charControl->charAtt = NULL;
+    modelviewer->charControl->model = NULL;
+    if (modelviewer->modelControl)
+      modelviewer->modelControl->Forget();
+    g_selModel = NULL;
   } else if (modelviewer->isADT) {
     wxDELETE(modelviewer->canvas->adt);
     modelviewer->canvas->adt = NULL;
@@ -586,8 +856,8 @@ void FileControl::UpdateInterface()
 
   // You MUST put true in one if the other is false! Otherwise, if they open the other model type and go back,
   // your function will still be disabled!!
-  // A model kept loaded behind a texture is not on screen: its character commands wait until it is.
-  if (modelviewer->isModel == true && !modelviewer->isTextureMode()){
+  // A model kept loaded behind another viewer is not on screen: its character commands wait until it is.
+  if (modelviewer->isModel == true && modelviewer->isModelsMode()){
     // If it's an M2 file...
     // Enable Controls for Characters
     modelviewer->charMenu->Enable(ID_SAVE_CHAR, true);
@@ -653,8 +923,8 @@ void FileControl::UpdateInterface()
     modelviewer->charMenu->Enable(ID_MOUNT_CHARACTER, false);
     modelviewer->charMenu->Enable(ID_AUTOHIDE_GEOSETS_FOR_HEAD_ITEMS, false);
   }
-  // Randomise and eye glow (LoadModel enables them for a character) wait in Textures mode too.
-  if (modelviewer->isTextureMode())
+  // Randomise and eye glow (LoadModel enables them for a character) wait in the other viewers too.
+  if (!modelviewer->isModelsMode())
   {
     modelviewer->charMenu->Enable(ID_CHAR_RANDOMISE, false);
     modelviewer->charMenu->Enable(ID_CHAREYEGLOW, false);
@@ -684,9 +954,20 @@ void FileControl::OnTreeSelect(wxTreeEvent &event)
     return;
   }
 
-  if (m_showsTextures)
+  if (m_mode == ViewerMode::Textures)
   {
     SelectTextureRow(item);
+    return;
+  }
+  if (m_mode == ViewerMode::Buildings)
+  {
+    // Rows passed with an arrow key held down are not loaded: the one it stops on is, when it is let go.
+    if (m_keysRepeating)
+    {
+      m_buildingPickPending = true;
+      return;
+    }
+    SelectBuildingRow(item);
     return;
   }
 
@@ -699,29 +980,22 @@ void FileControl::OnTreeSelect(wxTreeEvent &event)
 
   CurrentItem = item;
 
-  // A world model row loads the world model; a model row the model (a race-browser leaf names the race and
-  // sex it stands for; an ordinary file row does not).
-  if (isWorldModel(data->file))
-    SelectWMOFile(data->file);
-  else
-    SelectModelFile(data->file,
-                    data->node ? data->node->raceID : -1,
-                    data->node ? data->node->sexID : -1);
-}
-
-bool FileControl::isWorldModel(GameFile * file)
-{
-  return file && file->fullname().endsWith(QLatin1String(".wmo"), Qt::CaseInsensitive);
+  // A model row loads the model (a race-browser leaf names the race and sex it stands for; an ordinary file
+  // row does not).
+  SelectModelFile(data->file,
+                  data->node ? data->node->raceID : -1,
+                  data->node ? data->node->sexID : -1);
 }
 
 bool FileControl::isLoaded(GameFile * file) const
 {
   if (!file || !modelviewer || !modelviewer->canvas)
     return false;
-  if (isWorldModel(file))
-    return modelviewer->isWMO && modelviewer->canvas->wmo &&
-           modelviewer->canvas->wmo->itemName().compare(file->fullname(), Qt::CaseInsensitive) == 0;
-  const WoWModel * model = modelviewer->canvas->model();
+  if (m_mode == ViewerMode::Buildings)
+    return modelviewer->canvasHasWorldModel() &&
+           (modelviewer->canvas->wmo->itemName().compare(file->fullname(), Qt::CaseInsensitive) == 0 ||
+            (file->fileDataId() > 0 && (int)modelviewer->canvas->wmo->fileDataID == file->fileDataId()));
+  const WoWModel * model = modelviewer->canvasHasModel() ? modelviewer->canvas->model() : nullptr;
   return model && model->gamefile == file;
 }
 
@@ -759,6 +1033,10 @@ void FileControl::SelectWMOFile(GameFile * file)
 {
   if (!file || !modelviewer || !modelviewer->canvas)
     return;
+  // A world model is the Buildings viewer's: one loaded from anywhere else (the command line, the self-test)
+  // switches to it first, so the switch and the load are one change on screen. (From the Buildings tree it
+  // already is.)
+  modelviewer->SetViewerMode(ViewerMode::Buildings);
   ClearCanvas();
 
   modelviewer->isWMO = true;
@@ -811,6 +1089,26 @@ void FileControl::OnButton(wxCommandEvent &event)
   if (event.GetEventType() == wxEVT_SEARCH_CANCEL)
     txtContent->SetValue(wxEmptyString);
   Init();
+  // Buildings: Enter on a FileDataID opens that building (its row, the row of the building a group file belongs
+  // to, or the row that looks it up), picked first.
+  if (ShowsBuildings() && event.GetEventType() == wxEVT_SEARCH)
+  {
+    const QString term = QString::fromWCharArray(txtContent->GetValue().c_str()).trimmed();
+    bool digits = !term.isEmpty();
+    for (const QChar c : term)
+      digits = digits && c.isDigit();
+    wxTreeItemIdValue cookie;
+    const wxTreeItemId first = fileTree->GetRootItem().IsOk() ? fileTree->GetFirstChild(fileTree->GetRootItem(), cookie)
+                                                               : wxTreeItemId();
+    FileTreeData * data = first.IsOk() ? dynamic_cast<FileTreeData *>(fileTree->GetItemData(first)) : nullptr;
+    if (digits && data && !data->node && (data->file || data->lookupFileDataId > 0))
+    {
+      if (fileTree->GetSelection() == first)
+        SelectBuildingRow(first);
+      else
+        fileTree->SelectItem(first);
+    }
+  }
   // Textures: Enter on a FileDataID opens that file (its texture row, or the row that looks it up).
   if (ShowsTextures() && event.GetEventType() == wxEVT_SEARCH)
   {
@@ -857,21 +1155,23 @@ void FileControl::OnSearchTimer(wxTimerEvent &event)
 }
 
 // ------------------------------------------------------------------------------- the viewer mode
-void FileControl::FollowViewerMode(bool textures)
+void FileControl::FollowViewerMode(ViewerMode mode)
 {
-  if (textures == m_showsTextures)
+  if (mode == m_mode)
     return;
   // The tree left is kept for its return: the texture tree's open folders, top row and picked row; the
-  // model tree itself (keepModelTree).
-  if (m_showsTextures)
+  // model or building tree itself (keepTree).
+  if (m_mode == ViewerMode::Textures)
     m_textures->rememberOpenFolders();
   else
-    keepModelTree();
-  // Each side's search is what its tree shows, not text typed and not run: that one could be a
+    keepTree(treeState());
+  // Each mode's search is what its tree shows, not text typed and not run: that one could be a
   // 1-character search over every model, which takes seconds.
-  (m_showsTextures ? m_texturesSearch : m_modelsSearch) = m_showsTextures ? m_texturesApplied : m_modelsApplied;
-  txtContent->ChangeValue(textures ? m_texturesSearch : m_modelsSearch);
-  m_showsTextures = textures;
+  m_search[slot(m_mode)] = m_applied[slot(m_mode)];
+  txtContent->ChangeValue(m_search[slot(mode)]);
+  m_mode = mode;
+  m_keysRepeating = false;
+  m_buildingPickPending = false;
   UpdateSearchHint();
   Init();
 }
@@ -880,7 +1180,7 @@ void FileControl::PickedRowFollowsLoad()
 {
   // A model loaded from a menu, a saved character or an import has no row here, and the row picked before
   // would claim it -- and a click on that row would do nothing, being picked already.
-  if (m_showsTextures || !fileTree)
+  if (m_mode == ViewerMode::Textures || !fileTree)
     return;
   const wxTreeItemId picked = fileTree->GetSelection();
   FileTreeData * data = picked.IsOk() ? dynamic_cast<FileTreeData *>(fileTree->GetItemData(picked)) : nullptr;
@@ -894,17 +1194,26 @@ void FileControl::PickedRowFollowsLoad()
 void FileControl::KeysRepeating(bool repeating)
 {
   if (modelviewer && modelviewer->textureView)
-    modelviewer->textureView->setKeysRepeating(repeating && m_showsTextures);
+    modelviewer->textureView->setKeysRepeating(repeating && m_mode == ViewerMode::Textures);
+  m_keysRepeating = repeating && m_mode == ViewerMode::Buildings;
+  // Let go: the row the key stopped on is loaded.
+  if (!m_keysRepeating && m_buildingPickPending)
+  {
+    m_buildingPickPending = false;
+    if (m_mode == ViewerMode::Buildings)
+      SelectBuildingRow(fileTree->GetSelection());
+  }
 }
 
-void FileControl::keepModelTree()
+void FileControl::keepTree(TreeState & state)
 {
   // Only the tree built for this search, and only while that hierarchy is the client's.
-  m_modelTreeKept = false;
-  m_modelOpenNodes.clear();
-  m_modelTopNode = nullptr;
-  m_modelPickedNode = nullptr;
-  if (!m_treeRoot || !m_treeRootValid || !fileTree->GetRootItem().IsOk())
+  state.kept = false;
+  state.openNodes.clear();
+  state.topNode = nullptr;
+  state.pickedNode = nullptr;
+  state.pickedPinned = false;
+  if (!state.root || !state.rootValid || !fileTree->GetRootItem().IsOk())
     return;
   std::function<void(wxTreeItemId)> collect = [&](wxTreeItemId parent) {
     wxTreeItemIdValue cookie;
@@ -913,21 +1222,22 @@ void FileControl::keepModelTree()
       FileTreeData * data = dynamic_cast<FileTreeData *>(fileTree->GetItemData(c));
       if (!data || !data->node || !fileTree->IsExpanded(c))
         continue;
-      m_modelOpenNodes.insert(data->node);
+      state.openNodes.insert(data->node);
       collect(c);
     }
   };
   collect(fileTree->GetRootItem());
   const wxTreeItemId top = fileTree->GetFirstVisibleItem();
   FileTreeData * topData = top.IsOk() ? dynamic_cast<FileTreeData *>(fileTree->GetItemData(top)) : nullptr;
-  m_modelTopNode = topData ? topData->node : nullptr;
+  state.topNode = topData ? topData->node : nullptr;
   const wxTreeItemId picked = fileTree->GetSelection();
   FileTreeData * pickedData = picked.IsOk() ? dynamic_cast<FileTreeData *>(fileTree->GetItemData(picked)) : nullptr;
-  m_modelPickedNode = pickedData ? pickedData->node : nullptr;
-  m_modelTreeKept = true;
+  state.pickedNode = pickedData ? pickedData->node : nullptr;
+  state.pickedPinned = pickedData && !pickedData->node && pickedData->file;
+  state.kept = true;
 }
 
-void FileControl::reopenModelRows(wxTreeItemId parent, wxTreeItemId & top, wxTreeItemId & picked)
+void FileControl::reopenRows(TreeState & state, wxTreeItemId parent, wxTreeItemId & top, wxTreeItemId & picked)
 {
   wxTreeItemIdValue cookie;
   for (wxTreeItemId c = fileTree->GetFirstChild(parent, cookie); c.IsOk(); c = fileTree->GetNextChild(parent, cookie))
@@ -935,26 +1245,26 @@ void FileControl::reopenModelRows(wxTreeItemId parent, wxTreeItemId & top, wxTre
     FileTreeData * data = dynamic_cast<FileTreeData *>(fileTree->GetItemData(c));
     if (!data || !data->node)
       continue;
-    if (data->node == m_modelTopNode)
+    if (data->node == state.topNode)
       top = c;
-    if (data->node == m_modelPickedNode)
+    if (data->node == state.pickedNode)
       picked = c;
-    if (m_modelOpenNodes.count(data->node))
+    if (state.openNodes.count(data->node))
     {
       fileTree->Expand(c);   // filled by OnTreeItemExpanding
-      reopenModelRows(c, top, picked);
+      reopenRows(state, c, top, picked);
     }
   }
 }
 
-bool FileControl::reuseModelTree()
+bool FileControl::reuseTree(TreeState & state, const QString & content)
 {
-  if (!m_modelTreeKept || !m_treeRoot || !m_treeRootValid || m_treeRootContent != content)
+  if (!state.kept || !state.root || !state.rootValid || state.rootContent != content)
     return false;
-  m_modelTreeKept = false;
+  state.kept = false;
   QElapsedTimer timer;
   timer.start();
-  TreeStackItem & root = *m_treeRoot;
+  TreeStackItem & root = *state.root;
   root.resetLoaded();
   fileTree->Freeze();
   fileTree->DeleteAllItems();
@@ -965,7 +1275,19 @@ bool FileControl::reuseModelTree()
     root.appendChildren(fileTree);
   else
     root.createTreeItems(fileTree);
-  reopenModelRows(root.id, top, picked);
+  reopenRows(state, root.id, top, picked);
+  // A Buildings search of a FileDataID: its pinned row again, first (it is no part of the hierarchy).
+  if (&state == &m_buildingsTree && !content.isEmpty())
+  {
+    wxString note;
+    QString term = content;
+    term.replace(QLatin1Char('\\'), QLatin1Char('/'));
+    if (pinFileDataIdRow(term, note) && state.pickedPinned)
+    {
+      wxTreeItemIdValue cookie;
+      picked = fileTree->GetFirstChild(root.id, cookie);
+    }
+  }
   // The row picked, picked again -- while its model is still the one loaded (a model loaded from a menu
   // meanwhile has no row here) -- without loading it again; then the same row at the top.
   if (picked.IsOk() && isLoaded(static_cast<FileTreeData *>(fileTree->GetItemData(picked))->file))
@@ -977,10 +1299,24 @@ bool FileControl::reuseModelTree()
   if (top.IsOk())
     fileTree->ScrollTo(top);
   fileTree->Thaw();
-  SetSearchStatus(m_treeRootStatus);
+  SetSearchStatus(state.rootStatus);
   LOG_INFO << "Initializing File Controls - the tree kept, rows again in" << timer.elapsed() << "ms,"
-           << (int)m_modelOpenNodes.size() << "folders opened again";
+           << (int)state.openNodes.size() << "folders opened again";
   return true;
+}
+
+void FileControl::forgetTrees()
+{
+  for (TreeState * state : { &m_modelsTree, &m_buildingsTree })
+  {
+    state->kept = false;
+    state->openNodes.clear();
+    state->topNode = nullptr;
+    state->pickedNode = nullptr;
+    state->rootValid = false;
+    state->browseRoot = nullptr;   // the old client's files (left behind, as every old hierarchy is)
+  }
+  m_buildings = BuildingIndex();
 }
 
 // ---------------------------------------------------------------------------------------- Textures mode
@@ -989,7 +1325,12 @@ bool FileControl::reuseModelTree()
 
 bool FileControl::ShowsTextures() const
 {
-  return m_showsTextures;
+  return m_mode == ViewerMode::Textures;
+}
+
+bool FileControl::ShowsBuildings() const
+{
+  return m_mode == ViewerMode::Buildings;
 }
 
 void FileControl::InitTextures()
@@ -998,13 +1339,13 @@ void FileControl::InitTextures()
   if (!m_textures->ensureCatalog())
   {
     m_textures->clear();
-    m_texturesApplied.Clear();
+    m_applied[slot(ViewerMode::Textures)].Clear();
     SetSearchStatus(UnityAssetAccess::isClientLoading() ? _("Loading the game client...")
                                                          : _("Load a World of Warcraft client to browse its files."));
     return;
   }
   const bool fromSearch = m_textures->showsSearch();
-  m_texturesApplied = txtContent->GetValue();
+  m_applied[slot(ViewerMode::Textures)] = txtContent->GetValue();
   SetSearchStatus(m_textures->populate(term));
 
   // Browsing again after a search: open the folders down to the texture on screen, so a texture found by
@@ -1072,12 +1413,8 @@ void FileControl::ShowTextureMenu(wxTreeItemId item)
 
 void FileControl::TexturesClientLoadStarting()
 {
-  // The kept model tree points into the old client's files.
-  m_modelTreeKept = false;
-  m_modelOpenNodes.clear();
-  m_modelTopNode = nullptr;
-  m_modelPickedNode = nullptr;
-  m_treeRootValid = false;
+  // The kept model and building trees, and the buildings listed, point into the old client's files.
+  forgetTrees();
   m_textures->clientLoadStarting();
   if (ShowsTextures())
     m_textures->clear();
@@ -1102,9 +1439,12 @@ void FileControl::TexturesClientLoaded()
 void FileControl::OnTreeActivated(wxTreeEvent &event)
 {
   // Enter or a double-click on a texture row selects it (a click on the row that is already selected is
-  // no selection change; the view keeps a texture already selected as it is).
-  if (m_showsTextures)
+  // no selection change; the view keeps a texture already selected as it is); on a building row, it loads it
+  // (the building already on screen stays as it is).
+  if (m_mode == ViewerMode::Textures)
     SelectTextureRow(event.GetItem());
+  else if (m_mode == ViewerMode::Buildings)
+    SelectBuildingRow(event.GetItem());
   event.Skip();
 }
 
