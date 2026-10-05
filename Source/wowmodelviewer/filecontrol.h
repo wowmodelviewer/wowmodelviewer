@@ -2,12 +2,17 @@
 #define FILECONTROL_H
 
 #include "FileTreeItem.h"
+#include "ViewerMode.h"
 
 class ModelViewer;
 
 #include <wx/string.h>
 #include <wx/treectrl.h> // wxTreeItemId
 #include <wx/timer.h>    // wxTimer for debounced as-you-type search
+
+#include <set>
+#include <utility>
+#include <vector>
 
 class wxSearchCtrl;
 class wxStaticText;
@@ -22,6 +27,8 @@ class FileTreeData:public wxTreeItemData
 public:
   GameFile * file;
   TreeStackItem * node; // owning hierarchy node, for lazily filling in children on expand
+  // A Buildings search's "Look up FileDataID N" row (no file, no node): the number to look up when picked.
+  int lookupFileDataId = 0;
   FileTreeData(GameFile * f, TreeStackItem * n = 0): file(f), node(n) {}
 };
 
@@ -116,33 +123,56 @@ public:
   void OnTreeMenu(wxTreeEvent &event);
   void OnTreeActivated(wxTreeEvent &event);
   void OnPopupClick(wxCommandEvent &evt);
-  void Export(wxString val, int select);
+  void Export(GameFile * file, int select);
   void UpdateInterface();
 
   // What picking a model row / a world model row does, callable without a tree event so the
   // headless self-test (-unityipctest with -wmo, and its lifecycle sequence) selects exactly as Browse.
   // raceID/sexID come from a race-browser leaf and say which race the model is to be read as;
-  // -1 leaves that to the model (every ordinary file row).
+  // -1 leaves that to the model (every ordinary file row). A world model is the Buildings viewer's: picking
+  // or loading one switches to it (ModelViewer::SetViewerMode).
   void SelectModelFile(GameFile * file, int raceID = -1, int sexID = -1);
   void SelectWMOFile(GameFile * file);
 
-  // Browse follows the viewer mode (ModelViewer::SetViewerMode, its only caller): the models and world
-  // models in Models mode, the textures in Textures mode. Each side keeps its own search, and its tree
-  // comes back as it was left -- the same folders open, the same row at the top, the same row picked --
-  // without listing its files again (the model tree is kept whole while the textures are shown).
-  void FollowViewerMode(bool textures);
-  // An arrow key repeating in the tree (true), or let go: told to the texture view.
+  // Browse follows the viewer mode (ModelViewer::SetViewerMode, its only caller): the models in Models mode,
+  // the textures in Textures mode, the world model roots in Buildings mode. Each mode keeps its own search, and
+  // its tree comes back as it was left -- the same folders open, the same row at the top, the same row picked --
+  // without listing its files again (the model and building trees are kept whole while another is shown).
+  void FollowViewerMode(ViewerMode mode);
+  // An arrow key repeating in the tree (true), or let go: the texture view waits to decode, and the
+  // Buildings tree waits to load the row picked until the key is let go.
   void KeysRepeating(bool repeating);
-  // Something new is on screen (ModelViewer::DisplayedContentChanged): the model tree's picked row stays
-  // picked only while its file is what is loaded.
+  // Something new is on screen (ModelViewer::DisplayedContentChanged): the model or building tree's picked
+  // row stays picked only while its file is what is loaded.
   void PickedRowFollowsLoad();
   // Textures mode's tree (TextureBrowse): told when a client load starts and ends, and when a
-  // FileDataID looked up from its search has been read.
+  // FileDataID looked up from its search has been read. (The building and model trees are told too.)
   bool ShowsTextures() const;
+  bool ShowsBuildings() const;
   TextureBrowse * textureBrowse() const { return m_textures; }
   void TexturesClientLoadStarting();
   void TexturesClientLoaded();
   void TextureLookupResolved(int fileDataId, const QString & indexName);
+
+  // THE BUILDINGS: the client's world model ROOTS, the files a world model is loaded from. A root holds MOHD
+  // (the header) and names its group files -- the geometry, loaded with it -- by FileDataID in GFID; a group
+  // file holds one MOGP and is no world model by itself. On the current client every group file is named after
+  // its root: "<root>_NNN.wmo", or "<root>_NNN_lodN.wmo" for a lower level of detail, in the root's folder.
+  // So a ".wmo" is a group file when its name has that form AND that root exists beside it; every other ".wmo"
+  // is a root. (Roots can look like groups -- 11xt_rockbridge_003.wmo has no "11xt_rockbridge.wmo" -- and
+  // "<name>_lod1.wmo" is a root of its own with its own groups: the name alone would hide both.) Checked
+  // against the files' own first chunks on 12.1.0.69933. Made once per client (it walks the file index).
+  static bool isWmoGroupFile(const QString & path, const std::map<QString, GameFile *> & index);
+  struct BuildingIndex
+  {
+    std::vector<GameFile *> roots;               // in path order
+    std::vector<std::pair<int, int>> byId;       // (FileDataID, index into roots), sorted; a client with FileDataIDs
+    std::vector<std::pair<int, int>> groupsById; // (group FileDataID, index of its root), sorted
+    size_t wmoFiles = 0;                         // every .wmo of the index
+    size_t groupFiles = 0;
+    bool built = false;
+  };
+  const BuildingIndex & buildingIndex() const { return m_buildings; }
 
   wxTreeCtrl *fileTree;
   wxSearchCtrl *txtContent;
@@ -153,52 +183,76 @@ public:
 
 private:
   void ClearCanvas();
-  // The model tree left for the textures is kept, and comes back as it was -- rows rebuilt from the same
-  // hierarchy, the same folders open, the same row at the top and picked -- without listing the files
-  // again (which also left the old hierarchy behind, never freed).
-  void keepModelTree();
-  bool reuseModelTree();
-  void reopenModelRows(wxTreeItemId parent, wxTreeItemId & top, wxTreeItemId & picked);
-  // A world model (*.wmo) rather than a model (*.m2); whether a row's file is what is loaded now.
-  static bool isWorldModel(GameFile * file);
+  // ONE KEPT TREE PER TREE MODE (Models, Buildings): the hierarchy last built, the search it was built with,
+  // and -- while another mode has the tree -- the folders open, the row at the top and the row picked, so it
+  // comes back as it was without listing the files again. Old hierarchies are left behind, never freed: the
+  // nodes kept here point into them.
+  struct TreeState
+  {
+    TreeStackItem * root = nullptr;
+    bool rootValid = false;   // root is the loaded client's, built with rootContent
+    QString rootContent;
+    wxString rootStatus;
+    bool kept = false;
+    std::set<TreeStackItem *> openNodes;
+    TreeStackItem * topNode = nullptr;
+    TreeStackItem * pickedNode = nullptr;
+    // The browsing tree of the mode (no search), built once per client and kept across searches.
+    TreeStackItem * browseRoot = nullptr;
+    // A Buildings search of a FileDataID: its pinned row (no part of the hierarchy) was the row picked.
+    bool pickedPinned = false;
+  };
+  TreeState & treeState() { return m_mode == ViewerMode::Buildings ? m_buildingsTree : m_modelsTree; }
+  void keepTree(TreeState & state);
+  bool reuseTree(TreeState & state, const QString & content);
+  void reopenRows(TreeState & state, wxTreeItemId parent, wxTreeItemId & top, wxTreeItemId & picked);
+  void forgetTrees();
+  // Whether a row's file is what is loaded now (a world model in Buildings, a model in Models).
   bool isLoaded(GameFile * file) const;
   // The search box's hint and tooltip: what the viewer mode's search finds.
   void UpdateSearchHint();
-  // Textures mode's Init, row picks and right-click menu.
+  // Each mode's Init, row picks and right-click menu.
+  void InitModels(const QString & content);
+  void InitBuildings(const QString & content);
   void InitTextures();
   void SelectTextureRow(wxTreeItemId item);
   void ShowTextureMenu(wxTreeItemId item);
+  // A Buildings row picked: its root loaded, or a FileDataID looked up.
+  void SelectBuildingRow(wxTreeItemId item);
+  void LookUpBuilding(int fileDataId);
+  // The world model roots, once per client (m_buildings).
+  bool ensureBuildings();
+  // A tree row for a building: its path, as the Models tree labels files, with its FileDataID.
+  static QString buildingLabel(GameFile * file);
+  // A Buildings search of a FileDataID: its row first -- the building with it, the building a group file with it
+  // belongs to, or a row that looks it up -- with the note for the status line. Made with the tree, and again when
+  // the tree comes back (reuseTree). False when the search is no FileDataID (or the client has none).
+  bool pinFileDataIdRow(const QString & term, wxString & note);
   // The line under the tree: the minimum-length hint, the result count, or why nothing is listed.
   void SetSearchStatus(const wxString & text);
-
-  // Persistent file-tree hierarchy (rebuilt each Init/search). It must outlive
-  // Init() so collapsed branches can be filled in lazily on expand.
-  TreeStackItem * m_treeRoot;
 
   // One-shot debounce for the as-you-type search: each keystroke restarts it, and the
   // expensive filter + tree rebuild (Init) runs only when it fires after a brief pause.
   wxTimer m_searchTimer;
 
-  // What the tree lists: the textures (Textures mode) or the models (Models mode). Set only by
-  // FollowViewerMode, so it is always the viewer mode's.
-  bool m_showsTextures = false;
+  // What the tree lists: the viewer mode's files. Set only by FollowViewerMode.
+  ViewerMode m_mode = ViewerMode::Models;
   // Textures mode's tree source, and a check from a client load's start until it has ended
   // (the load's own notice can come while it is still finishing, and a failed load sends none).
   TextureBrowse * m_textures = nullptr;
   wxTimer m_texturesLoadWatch;
-  wxString m_texturesSearch;   // the textures' search text while the models are shown
-  wxString m_modelsSearch;     // the models' while the textures are
-  wxString m_texturesApplied;  // the search each tree was last built with (a short text typed but never
-  wxString m_modelsApplied;    // run -- the search waits for 3 characters -- is not what it shows)
-  // The model tree as it was when the textures took the tree (keepModelTree).
-  bool m_treeRootValid = false;   // m_treeRoot is the loaded client's, built with this search
-  QString m_treeRootContent;
-  wxString m_treeRootStatus;
-  bool m_modelTreeKept = false;
-  std::set<TreeStackItem *> m_modelOpenNodes;
-  TreeStackItem * m_modelTopNode = nullptr;
-  TreeStackItem * m_modelPickedNode = nullptr;
-  bool m_restoringTree = false;   // reuseModelTree picking its row again: not a pick
+  // Each mode's search: the text while another mode has the box, and the text its tree was last built with
+  // (a short text typed but never run -- the search waits for 3 characters -- is not what it shows).
+  wxString m_search[3];
+  wxString m_applied[3];
+  static int slot(ViewerMode mode) { return (int)mode; }
+  TreeState m_modelsTree;
+  TreeState m_buildingsTree;
+  BuildingIndex m_buildings;
+  bool m_restoringTree = false;   // reuseTree picking its row again: not a pick
+  // An arrow key repeating in the Buildings tree: the rows it passes are not loaded until it is let go.
+  bool m_keysRepeating = false;
+  bool m_buildingPickPending = false;
 };
 
 #endif

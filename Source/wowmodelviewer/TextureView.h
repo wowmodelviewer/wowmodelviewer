@@ -3,8 +3,8 @@
  *
  * The texture viewer: what the centre of the main window shows in Textures mode (ModelViewer::
  * SetViewerMode). It is the viewport host's content window (UnityRendererHost::showContent), so it
- * takes the Unity player's place without a second window or pane; the player's window is only hidden
- * meanwhile, and whatever model is loaded stays loaded behind it.
+ * takes the Unity player's place without a second window or pane; the player is only taken off screen
+ * meanwhile (its frame parked), and whatever model is loaded stays loaded behind it.
  *
  * Top to bottom: the view controls (alpha on / off / only; checkerboard, dark or light background),
  * the texture (TexturePreview: centred, sized for it, never zoomed), what the file is -- name, folder,

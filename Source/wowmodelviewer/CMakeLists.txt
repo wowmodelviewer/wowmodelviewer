@@ -129,6 +129,7 @@ set(headers AnimationExportChoiceDialog.h
             UserSkins.h
             util.h
             BackgroundColorDialog.h
+            ViewerMode.h
             ViewportBackground.h
             WinTheme.h)
 

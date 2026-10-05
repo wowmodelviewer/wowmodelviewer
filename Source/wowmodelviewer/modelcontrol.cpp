@@ -176,6 +176,16 @@ void ModelControl::RefreshModel(Attachment *root)
 
 }
 
+void ModelControl::Forget()
+{
+  attachments.clear();
+  model = NULL;
+  att = NULL;
+  init = false;
+  if (modelname)
+    modelname->Clear();
+}
+
 void ModelControl::UpdateModel(Attachment *a)
 {
   if (!a)

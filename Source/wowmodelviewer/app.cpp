@@ -2060,7 +2060,12 @@ static bool doIpcTestLifecycleSequence(ModelViewer * frame, UnityIpcServer * ipc
         }
         else
           LOG_INFO << "[unityipc-test]   step" << (s + 1) << "runtime state:" << st.describe();
-        pumpIpc(ipc, 10);   // the notice decision that follows a report
+        // The notice decision that follows a report: the viewport is uncovered once the player has answered the
+        // uncover fence (ModelViewer::m_uncoverFence), so up to 5 s.
+        wxStopWatch fence;
+        do
+          pumpIpc(ipc, 10);
+        while (frame->unityRendererHost->hasNotice() && frame->m_uncoverFence != 0 && fence.Time() < 5000);
         ModelViewer::ViewportNotice notice;
         if (!frame->unityCanDrawCurrentModel(&notice) || frame->unityRendererHost->hasNotice())
         {
@@ -2329,7 +2334,12 @@ static void doHeadlessUnityIpcTest(ModelViewer * frame)
     {
       LOG_INFO << "[unityipc-test]   mapObjectLoaded:" << report.describe();
       checkMapObjectReport(frame, report, load, why);
-      pumpIpc(ipc, 20);   // the notice decision a report may cause
+      // The notice decision a report may cause: the viewport is uncovered once the player has answered the uncover
+      // fence (ModelViewer::m_uncoverFence: two runtimeState questions in turn), so up to 5 s.
+      wxStopWatch fence;
+      do
+        pumpIpc(ipc, 20);
+      while (frame->unityRendererHost->hasNotice() && frame->m_uncoverFence != 0 && fence.Time() < 5000);
     }
     if (!groupsEmpty)
       why += QString(why.isEmpty() ? "" : "; ") + "the host built group geometry (metadata-only expected)";
@@ -3078,8 +3088,9 @@ static void doHeadlessUnityIpcTest(ModelViewer * frame)
     LOG_INFO << "[unityipc-test] character check:" << (characterOk ? "(OK)" : "(FAIL)");
   }
 
-  // THE BACKGROUND (protocol 7): the player was sent the Models viewport's background when it announced itself, and
-  // holds exactly that colour. An older player keeps its own default and is not asked.
+  // THE BACKGROUND (protocol 7): the player was sent the colour for what is loaded (viewportBackgroundShown) when it
+  // announced itself and with its loads, and holds exactly that colour. An older player keeps its own default and is
+  // not asked.
   bool backgroundOk = true;
   if (ipc->playerPaintsBackground())
   {
@@ -3090,7 +3101,8 @@ static void doHeadlessUnityIpcTest(ModelViewer * frame)
       if (previousRuntime)
         previousRuntime(x);
     };
-    const wxColour want = frame->viewportBackground();
+    // The colour for what is loaded (a world model keeps the viewport's default; viewportBackgroundShown).
+    const wxColour want = frame->viewportBackgroundShown();
     UnityIpcServer::RuntimeState held;
     bool answered = false;
     backgroundOk = ipc->stats().backgroundPushes >= 1 &&
@@ -3444,8 +3456,8 @@ bool WowModelViewApp::OnInit()
     }
     else if (cmd == "-wmo") {
       // Headless world-model selection: "-wmo <root listfile path or FileDataID>" selects the WMO through
-      // FileControl::SelectWMOFile, the same code picking a world model in Browse (Models mode) runs. Composes with
-      // -unityipctest (the world-model check); see doHeadlessUnityIpcTest.
+      // FileControl::SelectWMOFile, the same code picking a building in Browse runs (it switches to the Buildings
+      // viewer). Composes with -unityipctest (the world-model check); see doHeadlessUnityIpcTest.
       if (i + 1 < argc) { i++; snapWmoArg = QString::fromWCharArray(argv[i]); }
     }
     else if (cmd == "-mpq") {

@@ -6,6 +6,43 @@ Format loosely based on [Keep a Changelog](https://keepachangelog.com/).
 ## [Unreleased]
 
 ### Added
+- **Buildings: a third viewer mode, for World Model Objects (WMO) -- buildings, dungeons, cities.** The selector
+  reads "VIEWER Models | Textures | Buildings" (Lucide's building-2 icon; the tooltip names World Model Objects
+  (WMO)). Buildings switches at once, before anything is picked: Browse shows (opening it if it was closed) listing
+  the loaded client's world model roots in the same tree and search box, the viewport says "No building selected"
+  with a Browse buildings button, and nothing of the Models viewer stays on screen. The Model panel stays (Appearance
+  has the doodad set; Info the file, FileDataID, groups, doodads and bounds); the Animation panel and the Attachments
+  window, which only act on a model, are put away and given back in Models as they were, shown or closed and at
+  their size. A building picked in Browse is loaded by the existing world-model path (`FileControl::SelectWMOFile`:
+  the root read on the host, the geometry built by the Unity player) and drawn in the viewport; the command bar
+  names it (its path and FileDataID in the tooltip), the title gives its path and the status bar its groups, doodads
+  and doodad sets. Every world-model load -- Browse, `-wmo` on the command line, a FileDataID -- shows it in
+  Buildings, and a model, NPC, item or character loaded from a menu shows in Models. Browse lists roots only: a
+  `.wmo` is a group file when its name is `<root>_NNN.wmo` or `<root>_NNN_lodN.wmo` and `<root>.wmo` is in the same
+  folder. Checked against every file's own first chunks on 12.1.0.69933: of 86,178 `.wmo`, 12,930 roots are listed
+  and 73,248 group files hidden, none the wrong way (20 are encrypted with no key in the client: 4 named as roots, 16
+  as groups). The rule lists 101 roots the old name filter hid -- 99 `_lod1` roots with groups of their own, and 2
+  roots named like groups (`11xt_rockbridge_003.wmo`). The list is made once per client, in about 0.4 s. The search
+  matches path and file name (every word must occur), and a number is also a FileDataID: the building with it, the
+  building a group file belongs to, or a row that looks it up (its first chunks are read: a root loads, anything else
+  is said); Enter on a FileDataID opens it. Each viewer keeps its own search and tree: the same folders open, the
+  same row at the top, the same row picked. The Models background colour is not applied to buildings: the player's
+  clear colour follows what it draws, not the viewer -- a world model always on the viewport's default `#19191E`, a
+  model on the Models colour -- so switching viewers never re-colours anything (the colour is sent with a load the
+  player gets, before it). The commands that only act on a model -- the Animation panel, Attachments, View
+  NPC, View Item, Load Character, Import Armory Character, Load NPC / Model, Export Model and its exporters, Swap
+  Background Color -- are greyed and refused in Buildings as in Textures (they now require Models, not "not
+  Textures"); Fullscreen and Screenshot work in Buildings. The canvas and the player still hold one model or one
+  world model at a time: a building loaded replaces the model, and the other viewer then says "No model loaded" or
+  "No building selected" rather than showing what is not its own. The player's window now lives in a frame window of
+  the viewport's own, which the viewer moves off screen and back itself: the player goes with the switch's repaint
+  however long it takes to handle window messages (on a desktop where it is busy presenting frames, a hide posted to it
+  landed 50 ms and more later, and the model or building of the viewer left stayed on screen meanwhile -- over the
+  texture view too: the player's window does not clip itself against windows above it), and comes back with the
+  repaint (its resize waited for when its size has to change). Where it has gone the viewport is painted plain dark at
+  once -- also when a building picked in Models loads before the repaint -- and its own window stays shown while it is
+  away, so nothing is filled in under it in the Models colour. A load of the other kind is not shown until the player
+  has presented it. WMO rendering is unchanged.
 - **Character > Load NPC / Model...: a model by its ID, looked up in the loaded client, beside the Wowhead NPC link.**
   The command was "Import NPC from URL"; it keeps its place in the Character menu and is still a Models command
   (greyed in the Textures viewer). One compact window with two ways in under a tab strip: **URL**, a Wowhead NPC link,
@@ -52,7 +89,8 @@ Format loosely based on [Keep a Changelog](https://keepachangelog.com/).
   now paints the same `#19191E` (it was `#231F20`). The player speaks protocol 7 (`viewportBackground`); an older
   player keeps its own default.
 - **Textures: a second viewer mode beside Models, for the client's BLP textures, shown in the viewport.**
-  The command bar starts with the viewer selector, "Viewer: Models | Textures", one of the two always pressed.
+  The command bar starts with the viewer selector, "Viewer: Models | Textures", one of the two always pressed (a
+  third, Buildings, came later; see above).
   Textures switches at once, before anything is picked: Browse shows (opening it if it was closed) listing the
   loaded client's textures in the same tree and search box as the models, the texture view takes the viewport's
   place saying "Select a texture in Browse", and the panels that only act on a model (Animation, Model, the
@@ -428,9 +466,8 @@ Format loosely based on [Keep a Changelog](https://keepachangelog.com/).
 
 ### Removed
 - **Browse's Show list.** Browse lists what the viewer mode shows, with no category of its own to choose: in
-  Models mode the models and the world models the viewport draws -- the WMO roots "WMOs (*.wmo)" listed are now in
-  the same tree as the models, in their folders (group and LOD files stay hidden) -- and in Textures mode the
-  textures. Viewer = Textures with Browse listing models can no longer happen. The other categories are gone:
+  Models mode the models, in Textures mode the textures, and in Buildings mode the WMO roots "WMOs (*.wmo)" listed
+  (see the Buildings entry above; they were briefly in the models' tree). Viewer = Textures with Browse listing models can no longer happen. The other categories are gone:
   ADTs, WAVs, OGGs, MP3s, Shaders (*.bls), DBCs, DB2s, LUAs, XMLs and SKINs had no viewer -- picking one of their
   rows only unloaded the model on screen, and a map tile's reader has long been commented out (the Unity viewport
   cannot draw one either) -- and their only working action was the row's right-click Save... of the raw file. On

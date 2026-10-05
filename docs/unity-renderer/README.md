@@ -396,8 +396,9 @@ viewport, but it still loads the model, still owns the animation clock, and is s
 **What the Unity viewport cannot show yet gets a notice, not another viewport.** Content the player
 cannot draw stays loaded -- the panels, the Info tab and the exporters keep working on it -- and the
 host panel paints a notice over the viewport area instead: a title, a line saying what is loaded and
-why it cannot be shown, and a button where there is something to do. Behind a notice the player's
-window is only hidden, never closed, so the next drawable model is on screen as soon as it is built.
+why it cannot be shown, and a button where there is something to do. Behind a notice the player is
+only taken off screen (its frame parked), never closed, so the next drawable model is on screen as soon
+as it is built.
 
 The decision is `ModelViewer::unityViewportNotice` (the content cases come from
 `unityCanDrawCurrentModel`, which also gates the geoset pushes), applied by
@@ -406,15 +407,71 @@ character loads and their failures, Browse selections, clearing -- on mount and 
 canvas tick notices those), when the player announces itself or reports a character or a world model
 it could not build, and when a stopped player is noticed. The first case that applies wins:
 
-The Textures viewer mode (`ModelViewer::SetViewerMode`, the command bar's "Viewer: Models | Textures")
-is decided before all of these and is not a notice: the texture view (`TextureView`) takes the
+The Textures viewer mode (`ModelViewer::SetViewerMode`, the command bar's "Viewer: Models | Textures |
+Buildings") is decided before all of these and is not a notice: the texture view (`TextureView`) takes the
 viewport's place as the host panel's content window (`UnityRendererHost::showContent`) as soon as the
-mode is entered, with or without a texture picked, the player's window hidden behind it as behind a
+mode is entered, with or without a texture picked, the player taken off screen behind it as behind a
 notice. It needs no player, so nothing about the player is said over it. The panels that only act on
 a model are put away meanwhile and given back as they were when the mode is left
-(`ModelViewer::enterTextureWorkspace` / `leaveTextureWorkspace`, laid out while the texture view still
-covers the player, so the player is never seen at the other size). Any model loaded before stays
-loaded behind it, and Models, or picking that model again, shows it again without reloading it.
+(`ModelViewer::applyWorkspace`, laid out while the texture view still covers the player, so the player
+is never seen at the other size). Any model loaded before stays loaded behind it, and Models, or
+picking that model again, shows it again without reloading it.
+
+The Models and Buildings viewer modes each show only their own kind of content
+(`ModelViewer::canvasHoldsModesContent`): a model in Models, a world model in Buildings. The canvas and
+the player hold one or the other, so whatever the other mode loaded last is not on screen: Models then
+says "No model loaded" and Buildings "No building selected", whatever the canvas holds. Buildings puts the
+Animation panel and the Attachments window away (`ModelViewer::workspacePanes`) and keeps the Model
+panel. The player's window is a child of a frame window of the host's own (`unityPlayerFrame`, its
+`-parentHWND`), and the frame is what is taken off screen -- moved out of the panel's client area, where
+the panel clips it away -- and put back (`UnityRendererHost::applyEmbeddedVisibility`), synchronously from
+the host's thread. Covering the player (a notice, the texture view) parks it far off any screen
+(x = -32000, so no pointer is over it: the player tells that from position alone); behind a notice the
+panel is painted plain dark where it was at once (`paintPlainNow`; a load that made the switch goes on
+before the repaint), the notice following with the next paint (the texture view covers its own area). Uncovering sizes the player (a resize sent to the player's
+thread and waited for), paints the panel plain under it and puts it back. Parked, the player still follows
+the viewport outside a switch (`OnSize`), and is sized for a load sent to it after a switch
+(`sizePlayerForLoad`), so what it builds behind a notice is framed for the viewport (it frames by its own
+aspect, once, when built) and it has presented at the viewport's size before it is put back; a switch
+itself does not size it, so a switch back to where it was parked from waits for nothing. No resize waits
+on a player Windows considers hung (no message taken for 5 s, as in a long build): on screen it is tried
+again from the timer until the player responds. Every resize is sent, never
+posted: the two threads' input queues are attached (a cross-process parent and child), so
+`SWP_ASYNCWINDOWPOS` would not post anyway, and a posted resize would land after one sent later. A player's window that has the keyboard as
+it goes gives it up to the panel on the next turn of the event loop, after the panel has painted (that
+waits for the player's thread, as a click elsewhere does; not for a hung player), and the keyboard is handed on to the player only while it is
+on screen and no switch holds it; a switch asks whether the player has the keyboard without asking its
+window (`wxWindow::FindFocus` would send it `WM_GETDLGCODE` and wait). During a viewer switch the old
+workspace stays whole until its one repaint: a switch to a notice takes the player off at the end of the
+freeze, and the viewport panel is painted plain where it was as soon as the freeze is over (taken off
+earlier, the frozen panel could not paint where it was until the switch is over); a switch to Textures takes it off once the texture view
+is painted; a switch that shows it puts it back as the repaint starts (the hold's release). Moved rather
+than hidden: hiding an ancestor of the window with the keyboard, which is often the player's, moves the
+keyboard, and that waits on the player's thread. A hide posted to the player's own window was handled on
+its thread, once per frame it draws -- 50 ms and more on a desktop where it is busy presenting -- and the
+other mode's model or building stayed on screen until then. The player's own window is now only ever
+shown: hidden by its "delayed" start, it is shown when the player announces itself, parked or not, so the
+frame's paint (clipped by it) does not fill in under it. What lies under it can still be anything -- the
+frame's backdrop while a player that started with nothing covering it came up, other panels' pixels where
+the viewport grew under it -- which is why every park paints the panel plain over it at once (a switch's
+as soon as its freeze is over: a few milliseconds while the windows are let go of). The keyboard routing goes through the frame too (the panel gives the keyboard to its first
+child, and wx gives it back there after another application had it): to the texture view while it covers
+the player, to the player while it is on screen, otherwise it stays on the frame; Tab skips it. A load answer --
+mapObjectLoaded, a runtimeState that has the model -- is sent from the frame that adopts the content,
+before that frame is presented, so the "Loading ..." notice stays until the player has answered two more
+runtimeState questions in turn (`m_uncoverFence`; the player renders on a render thread of its own, so the
+second answer's frame began rendering after the adopting frame was presented), asked again after 500 ms
+without an answer and given up after 60 s. The player's window does not clip itself
+against its siblings (`WS_CHILD | WS_VISIBLE` only), so a window raised above it is no cover while it is
+shown. The player's clear colour follows what it draws, not the viewer mode
+(`ModelViewer::viewportBackgroundShown`): a world model on the viewport default, a model on the Models
+background. Besides on a change of the Models colour and to a player that connects, it is sent with a load
+the player gets, before it -- not when the canvas changes without the player getting it (a load that
+failed, a world model that cannot be read) -- and a viewer switch sends none, so a switch never re-colours
+the content the player keeps drawing behind a notice, which it would show, in the other viewer's colour,
+for a frame or more when it is uncovered; a load that changes it is kept behind "Loading ..." until it is
+built, as a load of the other kind is. The frame's backdrop (where the player does not cover it, while it
+starts) and the command line of a player started later follow what is loaded.
 
 | what is loaded, or what is wrong | notice | button |
 |---|---|---|
@@ -425,13 +482,17 @@ loaded behind it, and Models, or picking that model again, shows it again withou
 | a WMO with no FileDataID (a legacy client; the player fetches the root and its groups by FileDataID) | "Legacy client world model" | -- |
 | a WMO the player reported it could not build, while that load is the one on display (until the next load or a player restart) | "World model could not be built", with the player's reason | -- |
 | a WMO, with a connected player older than protocol 4 | "Unity renderer out of date" | -- |
+| (Buildings) a world model sent while the player shows, or may show, anything but a world model, until the player answers about that load: the model is not shown under the Buildings viewer meanwhile | "Loading building" | -- |
+| (Models) a model sent while the player shows, or may show, a world model, until the player reports holding it (`runtimeState`, asked every 100 ms) | "Loading model" | -- |
+| (Models) that model, when the player finished without it or did not have it within 60 s | "Model could not be built" | -- |
 | a map tile (ADT) -- nothing loads one any more: Browse lists no map tiles | "Map tile loaded" | -- |
 | a model with no game file behind it | "Model cannot be shown" | -- |
 | a character riding a mount, with a connected player older than protocol 5, or whose rider is not a character model with a FileDataID (the canvas model is then the mount) | "Mounted character" | -- |
 | a model with no FileDataID (a legacy MPQ client; the player addresses every asset by one) | "Legacy client model" | -- |
 | a character the player reported it could not build, until the next load or a player restart | "Character could not be built", with the player's reason | -- |
 | a character, with a connected player older than protocol 3 | "Unity renderer out of date" | -- |
-| nothing loaded | "No model loaded" | Browse models (Load World of Warcraft... while no client is loaded) |
+| (Models) no model loaded -- nothing, or a world model, which is the Buildings viewer's | "No model loaded" | Browse models (Load World of Warcraft... while no client is loaded) |
+| (Buildings) no world model loaded -- nothing, or a model, which is the Models viewer's | "No building selected" | Browse buildings (Load World of Warcraft... while no client is loaded) |
 
 A player that has not connected yet is assumed to be the current build; one that then announces an
 older protocol gets the out-of-date notice when it does.
@@ -954,10 +1015,10 @@ over the IPC channel, and WMV serves it from its existing file providers and dat
 +----------------------------- WMV (wxWidgets) ------------------------------+
 |  UnityRendererHost (wxPanel) -- THE VIEWPORT, always the centre pane       |
 |  - launches UnityRenderer.exe with "-parentHWND <hwnd> delayed             |
-|    -wmvPort <n>" (the player reparents itself INTO this panel; own         |
-|    process + device)                                                       |
+|    -wmvPort <n>" (the player reparents itself INTO a frame window of      |
+|    this panel, unityPlayerFrame; own process + device)                     |
 |  - resizes the embedded child window                                       |
-|  - paints a notice (and hides the player's window) when it cannot show     |
+|  - paints a notice (and parks the player's frame) when it cannot show     |
 |    what is loaded; notices a player that exited or disconnected            |
 |  - WM_CLOSE (+terminate fallback) on app shutdown and on a restart         |
 |                                                                            |

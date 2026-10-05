@@ -6,7 +6,7 @@ their own licence files).
 ## Icons: Lucide (and Feather)
 
 The command bar, transport and export icons (`Source/wowmodelviewer/UiIcons.cpp`) are drawings from
-[Lucide](https://lucide.dev) (`lucide-static` 1.51.0): box, image, maximize, camera, list-tree,
+[Lucide](https://lucide.dev) (`lucide-static` 1.51.0): box, image, building-2, maximize, camera, list-tree,
 sliders-horizontal, clapperboard, download, copy, play, pause, square, chevron-left, chevron-right,
 rotate-ccw and x. They are kept as the elements of their SVG files and recoloured at run time; the stroke
 width is changed from 2 to 1.5 (1.75 at 20 px and up), and the solid transport shapes are drawn at three
