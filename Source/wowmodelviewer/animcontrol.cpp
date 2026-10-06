@@ -624,6 +624,30 @@ void AnimControl::UpdateModel(WoWModel *m)
   RelayoutAppearance();
 }
 
+// The model is gone -- another model, a building or another client replaces it: its clips and skins are not listed
+// any more (and its texture groups are freed: UpdateModel only frees them while a model is selected, which it no
+// longer is). The next UpdateModel fills the lists again.
+void AnimControl::Forget()
+{
+  for (size_t i = 0; i < skinList->GetCount(); i++)
+  {
+    TextureGroup *grp = (TextureGroup *)skinList->GetClientData((unsigned int)i);
+    wxDELETE(grp);
+  }
+  skinList->Clear();
+  animCList2->Clear();
+  animCList3->Clear();
+  PCRList.clear();
+  CDIToTexGp.clear();
+  singleSkinOverrides.clear();
+  m_clips.clear();
+  m_visibleClips.clear();
+  m_listedAnim = -1;
+  clipList->SetItemCount(0);
+  ApplyClipFilter();
+  UpdateFrameSlider(10, 2); // the scrubber back at the start, as for a building
+}
+
 void AnimControl::UpdateWMO(WMO *w, int group)
 {
   if (!w || w->itemName().size()==0)

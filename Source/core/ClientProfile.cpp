@@ -31,11 +31,59 @@ namespace core
     }
   }
 
+  ProductFamily ClientProfile::familyFromProduct(const QString & product)
+  {
+    const QString p = product.toLower();
+    if (p == "wow") return ProductFamily::Retail;
+    if (p == "wowt" || p == "wowxptr") return ProductFamily::RetailPTR;
+    if (p == "wow_beta") return ProductFamily::RetailBeta;
+    if (p == "wow_alpha") return ProductFamily::RetailAlpha;
+    if (p == "wow_classic") return ProductFamily::Classic;
+    if (p == "wow_classic_ptr") return ProductFamily::ClassicPTR;
+    if (p == "wow_classic_beta") return ProductFamily::ClassicBeta;
+    if (p == "wow_classic_era") return ProductFamily::ClassicEra;
+    if (p == "wow_classic_era_ptr") return ProductFamily::ClassicEraPTR;
+    if (p == "mpq") return ProductFamily::LegacyMpq;
+    return ProductFamily::Unknown;
+  }
+
+  ClientEra ClientProfile::expansionFor(ProductFamily family, int major, int minor)
+  {
+    switch (family)
+    {
+      case ProductFamily::Retail:
+      case ProductFamily::RetailPTR:
+      case ProductFamily::RetailBeta:
+      case ProductFamily::RetailAlpha:
+        // Retail's major version is its expansion; nothing before Warlords is a Battle.net Retail client.
+        return major >= 6 ? eraFromMajorVersion(major) : ClientEra::Unknown;
+      case ProductFamily::Classic:
+      case ProductFamily::ClassicPTR:
+      case ProductFamily::ClassicBeta:
+      case ProductFamily::ClassicEra:
+      case ProductFamily::ClassicEraPTR:
+        // The Classic re-release lines, by major.minor: Classic Era 1.13-1.15 (tested: 1.15.9.70003), Burning
+        // Crusade Classic 2.5, Wrath Classic 3.4, Cataclysm Classic 4.4, Mists of Pandaria Classic 5.5 (5.5.4.70032
+        // is listed on this machine). Any other Classic version (e.g. the 1.60.1 Classic Beta) claims no expansion.
+        if (major == 1 && minor >= 13 && minor <= 15) return ClientEra::Vanilla;
+        if (major == 2 && minor == 5) return ClientEra::TBC;
+        if (major == 3 && minor == 4) return ClientEra::WotLK;
+        if (major == 4 && minor == 4) return ClientEra::Cataclysm;
+        if (major == 5 && minor == 5) return ClientEra::MoP;
+        return ClientEra::Unknown;
+      case ProductFamily::LegacyMpq:
+        return eraFromMajorVersion(major);
+      default:
+        return ClientEra::Unknown;
+    }
+  }
+
   ClientProfile ClientProfile::fromGameConfig(const GameConfig & config)
   {
     ClientProfile p;
     p.versionString = config.version;
     p.product = config.product;
+    p.family = familyFromProduct(config.product);
 
     // Version strings look like "12.0.7.68235" (major.minor.patch.build). Be tolerant of
     // shorter/empty strings -- unparsed fields stay 0.
@@ -45,51 +93,85 @@ namespace core
     if (parts.size() > 2) p.patch = parts.at(2).toInt();
     if (parts.size() > 3) p.build = parts.at(parts.size() - 1).toInt();
 
-    p.era = eraFromMajorVersion(p.major);
+    p.era = expansionFor(p.family, p.major, p.minor);
 
-    // CASC was introduced in Warlords of Draenor (6.0). Everything before ships as MPQ.
-    // Only CASC clients actually reach this code today; the MPQ branch is here so a truthful
-    // profile can be built once an old client can be opened (later milestone).
-    if (p.major >= 6)
-      p.storage = StorageType::CASC;
-    else if (p.major >= 1)
-      p.storage = StorageType::MPQ;
-    else
-      p.storage = StorageType::Unknown;
-
-    p.lookupMode = (p.storage == StorageType::CASC) ? FileLookupMode::FileDataID
-                 : (p.storage == StorageType::MPQ)  ? FileLookupMode::Name
-                                                    : FileLookupMode::Unknown;
-
-    // Coarse, version-keyed capability heuristics (informational for now).
-    p.hasFileDataId        = (p.storage == StorageType::CASC);
-    p.chunkedM2            = (p.major >= 7); // MD21 chunked container, Legion+
-    p.externalAnimFiles    = (p.major >= 7);
-    p.hasComponentFileData = (p.major >= 4); // ModelFileData/ComponentModelFileData indirection
-    p.hasChrCustomization  = (p.major >= 9); // modern ChrCustomization* customization system
-
+    // A Battle.net product (a .build.info row) is a CASC client whatever its version: the Classic clients are the
+    // modern engine on CASC storage, addressed by FileDataID, like Retail. (Deciding storage from the major version
+    // classified them as MPQ, and every file of theirs then went to an empty MPQ provider.)
+    p.storage = StorageType::CASC;
+    p.lookupMode = FileLookupMode::FileDataID;
+    p.hasFileDataId = true;
     return p;
+  }
+
+  bool ClientProfile::isClassicFamily() const
+  {
+    return family == ProductFamily::Classic || family == ProductFamily::ClassicPTR || family == ProductFamily::ClassicBeta ||
+           family == ProductFamily::ClassicEra || family == ProductFamily::ClassicEraPTR;
+  }
+
+  bool ClientProfile::isRetailFamily() const
+  {
+    return family == ProductFamily::Retail || family == ProductFamily::RetailPTR || family == ProductFamily::RetailBeta ||
+           family == ProductFamily::RetailAlpha;
+  }
+
+  QString ClientProfile::familyName(ProductFamily family)
+  {
+    switch (family)
+    {
+      case ProductFamily::Retail:        return "Retail";
+      case ProductFamily::RetailPTR:     return "PTR";
+      case ProductFamily::RetailBeta:    return "Beta";
+      case ProductFamily::RetailAlpha:   return "Alpha";
+      case ProductFamily::Classic:       return "Classic";
+      case ProductFamily::ClassicPTR:    return "Classic PTR";
+      case ProductFamily::ClassicBeta:   return "Classic Beta";
+      case ProductFamily::ClassicEra:    return "Classic Era";
+      case ProductFamily::ClassicEraPTR: return "Classic Era PTR";
+      case ProductFamily::LegacyMpq:     return "Legacy";
+      default:                           return QString();
+    }
+  }
+
+  QString ClientProfile::expansionName(ClientEra era)
+  {
+    switch (era)
+    {
+      case ClientEra::Vanilla:      return "Vanilla";
+      case ClientEra::TBC:          return "The Burning Crusade";
+      case ClientEra::WotLK:        return "Wrath of the Lich King";
+      case ClientEra::Cataclysm:    return "Cataclysm";
+      case ClientEra::MoP:          return "Mists of Pandaria";
+      case ClientEra::WoD:          return "Warlords of Draenor";
+      case ClientEra::Legion:       return "Legion";
+      case ClientEra::BfA:          return "Battle for Azeroth";
+      case ClientEra::Shadowlands:  return "Shadowlands";
+      case ClientEra::Dragonflight: return "Dragonflight";
+      case ClientEra::WarWithin:    return "The War Within";
+      case ClientEra::Midnight:     return "Midnight";
+      default:                      return QString();
+    }
+  }
+
+  QString ClientProfile::friendlyName() const
+  {
+    const QString name = familyName(family);
+    return name.isEmpty() ? product : name;
+  }
+
+  QString ClientProfile::versionLabel() const
+  {
+    const QString version = QString("%1.%2.%3").arg(major).arg(minor).arg(patch);
+    const QString expansion = expansionName(era);
+    return expansion.isEmpty() ? QString("Version %1").arg(version)
+                               : expansion + QString(" ") + QChar(0x00B7) + QString(" ") + version;
   }
 
   QString ClientProfile::eraName() const
   {
-    switch (era)
-    {
-      case ClientEra::Vanilla:      return "Vanilla (1.x)";
-      case ClientEra::TBC:          return "The Burning Crusade (2.x)";
-      case ClientEra::WotLK:        return "Wrath of the Lich King (3.x)";
-      case ClientEra::Cataclysm:    return "Cataclysm (4.x)";
-      case ClientEra::MoP:          return "Mists of Pandaria (5.x)";
-      case ClientEra::WoD:          return "Warlords of Draenor (6.x)";
-      case ClientEra::Legion:       return "Legion (7.x)";
-      case ClientEra::BfA:          return "Battle for Azeroth (8.x)";
-      case ClientEra::Shadowlands:  return "Shadowlands (9.x)";
-      case ClientEra::Dragonflight: return "Dragonflight (10.x)";
-      case ClientEra::WarWithin:    return "The War Within (11.x)";
-      case ClientEra::Midnight:     return "Midnight (12.x)";
-      case ClientEra::Modern:       return "Modern";
-      default:                      return "Unknown";
-    }
+    const QString name = expansionName(era);
+    return name.isEmpty() ? (era == ClientEra::Modern ? QString("Modern") : QString("Unknown")) : name;
   }
 
   QString ClientProfile::storageName() const
@@ -115,11 +197,12 @@ namespace core
 
   QString ClientProfile::describe() const
   {
-    return QString("era=%1 version=%2 build=%3 product=%4 storage=%5 lookup=%6")
-        .arg(eraName())
+    return QString("family=%1 product=%2 version=%3 build=%4 expansion=%5 storage=%6 lookup=%7")
+        .arg(friendlyName().isEmpty() ? QString("?") : friendlyName())
+        .arg(product.isEmpty() ? QString("?") : product)
         .arg(versionString.isEmpty() ? QString("?") : versionString)
         .arg(build)
-        .arg(product.isEmpty() ? QString("?") : product)
+        .arg(eraName())
         .arg(storageName())
         .arg(lookupModeName());
   }

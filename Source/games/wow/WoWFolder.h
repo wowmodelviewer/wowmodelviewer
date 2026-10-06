@@ -59,6 +59,13 @@ namespace wow
       std::vector<core::GameConfig> configsFound() override;
 
       int lastError() override;
+      // Let go of the CASC storage: this folder's client was replaced by one in another folder object.
+      void closeStorage() { m_CASCFolder.closeStorage(); }
+      // Files in the opened build that are not on this computer (a partly downloaded install).
+      size_t remoteFileCount() const { return m_CASCFolder.remoteFileCount(); }
+      // Of those, the ones this viewer uses (models, skins, animations, skeletons, textures, world models, tables),
+      // counted from the file list: optional videos and the like do not make an install "not fully downloaded".
+      size_t remoteViewerFileCount() const { return m_remoteViewerFiles; }
 
       void onChildAdded(GameFile *) override;
       void onChildRemoved(GameFile *) override;
@@ -74,6 +81,7 @@ namespace wow
       QString m_mpqLocale; // detected/selected locale when in MPQ mode (for locale())
       std::map<int, GameFile *> m_idMap;
       std::map<int, QString> m_idNameMap;
+      size_t m_remoteViewerFiles = 0;
       std::map<QString, int> m_nameIdMap;
   };
 }

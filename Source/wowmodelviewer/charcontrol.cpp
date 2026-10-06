@@ -560,6 +560,12 @@ void CharControl::RefreshModel()
     g_modelViewer->charGlowMenu->Check(ID_CHAREYEGLOW_DEFAULT, true);
 }
 
+void CharControl::ClientChanged()
+{
+  creaturemodels.Clear();
+  m_mountChoicesRead = false;
+}
+
 void CharControl::ClearItemDialog()
 {
   if (itemDialog) {

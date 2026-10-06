@@ -3563,6 +3563,10 @@ bool WowModelViewApp::OnInit()
       // LoadWoW's auto-pick could load a different one, e.g. retail vs a pinned PTR).
       if (i + 1 < argc) { i++; qputenv("WMV_FORCE_BUILD", QString::fromWCharArray(argv[i]).toUtf8()); }
     }
+    else if (cmd == "-product")  {
+      // ...and to the same product: two products can list the same version (a PTR and its Retail).
+      if (i + 1 < argc) { i++; qputenv("WMV_FORCE_PRODUCT", QString::fromWCharArray(argv[i]).toUtf8()); }
+    }
     else if (cmd == "-dbfromfile") {
       LOG_INFO << "Read database from file";
       core::Game::instance().init(new wow::WoWFolder(QString::fromWCharArray(gamePath.c_str())), new wow::WoWDatabase());
@@ -3653,7 +3657,16 @@ bool WowModelViewApp::OnInit()
     if (!mpqDataFolder.isEmpty())
       frame->LoadWoWFromMpq(mpqDataFolder, mpqLocale); // legacy MPQ client (Vanilla/TBC/WotLK)
     else
-      frame->LoadWoW(); // auto-pick config + profile, no prompt
+      {
+        // auto-pick config, no prompt. A client that cannot be opened ends the run (it was opened for this run).
+        if (!frame->LoadWoW())
+        {
+          LOG_ERROR << "Headless run: the World of Warcraft client could not be opened - nothing to do.";
+          std::printf("WMV: client could not be opened\n");
+          std::fflush(stdout);
+          return false;
+        }
+      }
 
     if (matResTest)
     {

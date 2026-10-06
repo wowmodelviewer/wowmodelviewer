@@ -18,6 +18,7 @@ set(src  AnimationExportChoiceDialog.cpp
          CharDetailsCustomizationChoice.cpp
          CharDetailsFrame.cpp
          ClientChoiceDialog.cpp
+         ClientInstallations.cpp
          ColorPickerDialog.cpp
          DisplaySettings.cpp
          effects.cpp
@@ -80,6 +81,7 @@ set(headers AnimationExportChoiceDialog.h
             CharDetailsCustomizationChoice.h
             CharDetailsFrame.h
             ClientChoiceDialog.h
+            ClientInstallations.h
             ColorPickerDialog.h
             DisplaySettings.h
             effects.h
@@ -295,3 +297,7 @@ install(FILES ${wow9_2_files} DESTINATION ${CMAKE_SOURCE_DIR}/bin/games/wow/9.2)
 install(FILES ${wow10_0_files} DESTINATION ${CMAKE_SOURCE_DIR}/bin/games/wow/10.0)
 install(FILES ${wow10_1_files} DESTINATION ${CMAKE_SOURCE_DIR}/bin/games/wow/10.1)
 install(FILES ${wow12_0_files} DESTINATION ${CMAKE_SOURCE_DIR}/bin/games/wow/12.0)
+# The WoWDBDefs table definitions: every table is checked against the loaded client's own layout through them
+# (WoWDatabase::refreshStructures), so they ship next to the executable (dbd/).
+file(GLOB wow_dbd_files ${CMAKE_SOURCE_DIR}/bin_support/dbd/*.dbd)
+install(FILES ${wow_dbd_files} DESTINATION ${CMAKE_SOURCE_DIR}/bin/dbd)

@@ -217,6 +217,26 @@ bool WDC3File::open()
   // - nb sections is 1, then it's filesize - section 1 beginning
   size_t sectionSize = 0;
 
+  // A table with no rows has no section at all (Classic Era's Mount: 0 records, 0 sections): it is read as empty.
+  // Reading section 0 of it took an offset from past the header array and crashed.
+  if (m_header.section_count == 0 || m_header.record_count == 0)
+  {
+    recordCount = 0;
+    return true;
+  }
+
+  // A section must lie inside the file (a damaged or partially downloaded table does not take the viewer down).
+  const size_t fileSize = size;
+  if (m_sectionHeader[0].file_offset >= fileSize ||
+      (m_header.section_count > 1 && (m_sectionHeader[1].file_offset <= m_sectionHeader[0].file_offset ||
+                                      m_sectionHeader[1].file_offset > fileSize)))
+  {
+    LOG_ERROR << "Table" << fullname() << "has a section outside the file (offset" << m_sectionHeader[0].file_offset
+              << "of" << fileSize << "bytes) - not read";
+    recordCount = 0;
+    return false;
+  }
+
   if (m_header.section_count == 1)
     sectionSize = size - m_sectionHeader[0].file_offset;
   else

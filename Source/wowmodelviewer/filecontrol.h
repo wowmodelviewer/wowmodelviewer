@@ -181,8 +181,10 @@ public:
 
   ModelViewer* modelviewer; // point to parent
 
-private:
+public:
+  // Unload the model or building on the canvas (and the textures it held). Also a newly loaded client's first step.
   void ClearCanvas();
+private:
   // ONE KEPT TREE PER TREE MODE (Models, Buildings): the hierarchy last built, the search it was built with,
   // and -- while another mode has the tree -- the folders open, the row at the top and the row picked, so it
   // comes back as it was without listing the files again. Old hierarchies are left behind, never freed: the

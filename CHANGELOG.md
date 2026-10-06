@@ -6,6 +6,30 @@ Format loosely based on [Keep a Changelog](https://keepachangelog.com/).
 ## [Unreleased]
 
 ### Added
+- **Classic clients: Classic Era, Classic Beta and the other Classic lines open as themselves.** A Battle.net
+  install lists several products in its `.build.info` (on the test machine: `wow` 12.1.0, `wowt` 12.1.0,
+  `wow_classic_era` 1.15.9, `wow_classic` 5.5.4, `wow_classic_beta` 1.60.1). Each is now read as what it is: a
+  client profile with a product family (Retail, PTR, Beta, Alpha, Classic, Classic PTR, Classic Beta, Classic Era,
+  Classic Era PTR, legacy MPQ) and an expansion from its own version line -- Retail by major version, Classic by
+  major.minor (1.13-1.15 Vanilla, 2.5 Burning Crusade, 3.4 Wrath, 4.4 Cataclysm, 5.5 Mists of Pandaria). A version
+  no line claims (the 1.60.1 Classic Beta) names no expansion rather than a guessed one. Every Battle.net product
+  is CASC storage addressed by FileDataID, whatever its version (Classic files used to go to an empty MPQ
+  provider). The database schema follows from the client (`ClientInstallations::resolveSchema`: its own version's
+  schema if one ships, else the newest of its major version, else the newest), and every table is checked against
+  the client's own file before it is read: a layout the WoWDBDefs definitions know is remapped to it, a layout the
+  schema records itself (`layoutHash` on the table, which is now actually read) is read as is, a Retail patch of the
+  schema's own generation keeps the schema's positions, and anything else is not read rather than read wrong (the
+  log's `[schema]` line counts each kind). The 45 definitions in `bin_support/dbd` are now installed next to the
+  executable (there was no install rule for them), and `Item.SheatheType` is named as they name it. Retail 12.1
+  verifies all 46 tables; Classic Era 1.15.9.70003 verifies 45 and leaves one unread (CharHairGeoSets, a layout no
+  definition has). Classic Era's Browse lists its 10,433 models, Textures its 101,251 textures and
+  Buildings its 6,751 world models; Characters lists its playable races, which load their own models (Human Male
+  is `character/human/male/humanmale.m2`) with its own customization tables. Files the client lists but has not
+  downloaded are left out of Browse (they used to be listed and fail to open). What a client can do is worked out
+  when it loads (`[clientcaps]` in the log) and the commands it cannot do are greyed and refused with the reason in
+  the status bar: Armory imports Retail characters only; NPCs, items and characters need their tables. The status
+  bar names the loaded client ("Classic Era · Vanilla · 1.15.9 (build 70003)"). `-product <code>` picks the
+  product on the command line (export jobs pass theirs on).
 - **Buildings: a third viewer mode, for World Model Objects (WMO) -- buildings, dungeons, cities.** The selector
   reads "VIEWER Models | Textures | Buildings" (Lucide's building-2 icon; the tooltip names World Model Objects
   (WMO)). Buildings switches at once, before anything is picked: Browse shows (opening it if it was closed) listing
@@ -308,6 +332,21 @@ Format loosely based on [Keep a Changelog](https://keepachangelog.com/).
   follow aliases yet.)
 
 ### Changed
+- **File > Load World of Warcraft asks one plain question: "Choose World of Warcraft".** Each installed product is
+  a card -- "Classic Era", "Vanilla · 1.15.9", Installed or Not downloaded, "Last used" on the one opened last --
+  and a click, Enter or Space on a card opens it (Up and Down move between cards, Tab leaves them). Installations
+  are found from the configured folder, the last one used and the Battle.net registry entries, so a second
+  install (a PTR in its own folder) is listed too, with its folder named on its card. A product whose game data is
+  not on the computer (its encoding manifest is not in the local archive index) is listed but cannot be opened, and
+  says why ("Start it once from Battle.net to download its game data"). There is no product code and no profile to
+  pick: the old chooser's Profile list offered the one shipped schema, "Midnight - 12.0", and forced it on every
+  product, Classic included. The technical facts -- product, version, build, region, language, folder, storage,
+  whether the data is local, the schema it will use -- are under "Advanced ▸" for the card in focus. "Browse for
+  another installation..." and "Open legacy installation..." (an MPQ install) are the quieter ways in. While a
+  client opens, its card says "Opening..." and a window "Opening Classic Era...", then "Reading the file list...",
+  "Reading game data...", "Building Browse...". A client that cannot be opened is said in plain words, the
+  technical details apart, and the chooser comes back; the client loaded before stays loaded meanwhile. The chooser
+  is drawn with the design system's palette in Light and Dark.
 - **A modern, flat look for the main window, from one design system (`UiStyle.h`).** Spacing, control heights,
   type roles and colour roles live in one place, and the shell takes them from there instead of picking its own
   pixels and RGB values; the colours are roles (`palette().text`, `.separator`, `.accent`...), with one set of
@@ -495,6 +534,18 @@ Format loosely based on [Keep a Changelog](https://keepachangelog.com/).
   `-imgseq` smoke test is gone. `-unityipctest` and `-fbxexport` still run.
 
 ### Fixed
+- **Opening another client replaces everything of the one before.** Loading a second client (or the same one
+  again) kept the previous one's database connection, table structures, file name index, races, character
+  texture caches, mount and creature lists and the model on the canvas, and could crash or hang. Each load now
+  opens the new client first (a client that fails to open leaves the loaded one untouched), then lets go of the
+  old storage and database and clears what was on screen and cached from it (the Animation panel no longer lists
+  the animations of a model that is gone); Retail -> Classic Era -> Retail in one
+  session ends with Retail exactly as at start. A legacy MPQ load goes through the same reset. Only one client is
+  opened at a time: while one opens, Load World of Warcraft and Load Legacy MPQ Client are greyed and refused.
+- **Classic Era opens.** Its install has no DOWNLOAD manifest, which CascLib treated as a broken storage (error
+  1392); the manifest only lists what is left to download and is now optional.
+- **An empty table no longer crashes the database load** (Classic Era's `Mount.db2` has no records) or logs an
+  SQL error; a section that points outside its file is refused with an error instead of read.
 - **Switching between Models and Textures happens in one step.** The switch hid and showed the panes, the texture
   view and the Unity player's window one at a time and laid the window out more than once, so the viewport
   briefly grew into the space a closed pane left, the panes folded away one after another, and on the way back

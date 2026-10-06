@@ -10,6 +10,8 @@
 
 #include "GameDatabase.h"
 
+#include <QStringList>
+
 class DBFile;
 class GameFile;
 
@@ -69,16 +71,32 @@ namespace wow
       void readSpecificTableAttributes(QDomElement &, core::TableStructure *);
       void readSpecificFieldAttributes(QDomElement &, core::FieldStructure *);
 
+      // THE SCHEMA CHECK of the last load (refreshStructures): how each table's columns were placed for this client.
+      struct SchemaCheck
+      {
+        int verified = 0;      // a WoWDBDefs definition matched this client's own file (layout hash or build)
+        int trusted = 0;       // no definition matched, kept at the schema's positions: a client of its generation
+        int notRead = 0;       // no definition matched, and the client is of another generation: not read
+        int notInstalled = 0;  // the table's file is not on this computer (or not in this client)
+        int absentFields = 0;  // fields the client's layout does not have (read as empty)
+        QStringList notes;     // one line per table that was not verified
+      };
+      const SchemaCheck & schemaCheck() const { return m_schemaCheck; }
+
     protected:
       // Refresh each table's DB2 field positions from its WoWDBDefs (.dbd)
       // definition for the loaded build, so the curated XML names/types stay
       // but positions track the current game version.
       void refreshStructures(std::vector<core::TableStructure *> &) override;
+      bool cacheComplete() const override { return m_schemaCheck.notInstalled == 0; }
 
       // Secondary indexes on the hot foreign-key / join columns the per-load
       // customization/equipment/creature queries filter on (database.xml declares
       // only PRIMARY KEYs, so these were full table scans of 30k-220k-row tables).
       void createIndices() override;
+
+    private:
+      SchemaCheck m_schemaCheck;
   };
 
 }

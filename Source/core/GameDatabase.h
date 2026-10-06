@@ -76,6 +76,10 @@ namespace core
     QString name;
     QString file;
     std::vector<FieldStructure *> fields;
+    // Set by the game database's schema check (refreshStructures): this client's file of the table has a layout the
+    // schema cannot be matched to (or is not installed), so it is created empty rather than read at wrong positions.
+    bool skipFill = false;
+    QString skipReason;
 
     bool create();
     bool fill();
@@ -116,6 +120,10 @@ namespace core
     // Issued idempotently (CREATE INDEX IF NOT EXISTS) so an existing on-disk cache picks
     // them up on the next launch without a full rebuild. Default no-op.
     virtual void createIndices() {}
+
+    // Whether the database just built holds everything its client will ever have: a table whose file is not on
+    // this computer yet (a client still downloading) leaves the cache unstamped, so it is built again next time.
+    virtual bool cacheComplete() const { return true; }
 
   private:
     static int treatQuery(void *NotUsed, int nbcols, char ** values, char ** cols);

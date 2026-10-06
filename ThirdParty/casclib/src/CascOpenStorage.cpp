@@ -1274,6 +1274,12 @@ static DWORD LoadCascStorage(TCascStorage * hs, PCASC_OPEN_STORAGE_ARGS pArgs, L
     if(dwErrCode == ERROR_SUCCESS)
     {
         dwErrCode = LoadDownloadManifest(hs);
+
+        // WMV: DOWNLOAD only adds download priorities and tags; files are found through ENCODING and ROOT. A
+        // multi-product install can lack it locally (the Battle.net agent fetches it on demand), which made the
+        // whole storage unopenable (WoW Classic Era 1.15.9.70003: ERROR_FILE_CORRUPT). Go on without it.
+        if(dwErrCode == ERROR_FILE_NOT_FOUND || dwErrCode == ERROR_FILE_CORRUPT)
+            dwErrCode = ERROR_SUCCESS;
     }
 
     // Load the build manifest ("ROOT" file)

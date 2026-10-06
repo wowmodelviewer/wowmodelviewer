@@ -226,6 +226,8 @@ public:
 
   void UpdateModel(WoWModel *m);
   void UpdateWMO(WMO *w, int group);
+  // The model was deleted (FileControl::ClearCanvas): stop listing its animations and skins.
+  void Forget();
 
   void OnButton(wxCommandEvent &event);
   void OnCheck(wxCommandEvent &event);

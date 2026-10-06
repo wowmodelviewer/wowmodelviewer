@@ -22,6 +22,14 @@ void core::Game::init(core::GameFolder * folder, core::GameDatabase * db)
     m_folder->init();
 }
 
+void core::Game::replace(core::GameFolder * folder, core::GameDatabase * db)
+{
+  if (m_db && m_db != db)
+    delete m_db;
+  m_db = db;
+  m_folder = folder;
+}
+
 void core::Game::addCustomFiles(const QString & path, bool bypassOriginalFiles)
 {
   if (m_folder)

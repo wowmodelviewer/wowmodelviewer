@@ -1,5 +1,6 @@
 #include "modelviewer.h"
 #include "ClientChoiceDialog.h"   // File > Load World of Warcraft opens it
+#include "ClientInstallations.h"
 
 #include "AnimationExportChoiceDialog.h"
 #include "ArmoryImportDialog.h"
@@ -44,6 +45,12 @@
 #include "ImporterPlugin.h"
 #include "KeyboardShortcutsDialog.h"
 #include "LoadingDialog.h"
+#include "CharTexture.h"
+#include "WotlkDbc.h"
+#include <wx/richmsgdlg.h>
+#include <QDir>
+#include <QSettings>
+#include <memory>
 #include "MemoryUtils.h"
 #include "ModelInspector.h"
 #include "ModelRenderPass.h"
@@ -141,6 +148,8 @@ EVT_CLOSE(ModelViewer::OnClose)
 // File menu
 EVT_MENU(ID_LOAD_WOW, ModelViewer::OnGameToggle)
 EVT_MENU(ID_LOAD_MPQ, ModelViewer::OnLoadLegacyMpq)
+EVT_UPDATE_UI(ID_LOAD_WOW, ModelViewer::OnUpdateCommandUI)
+EVT_UPDATE_UI(ID_LOAD_MPQ, ModelViewer::OnUpdateCommandUI)
 EVT_MENU(ID_FILE_VIEWLOG, ModelViewer::OnViewLog)
 EVT_MENU(ID_VIEW_NPC, ModelViewer::OnCharToggle)
 EVT_MENU(ID_VIEW_ITEM, ModelViewer::OnCharToggle)
@@ -595,6 +604,11 @@ void ModelViewer::InitDatabase()
   wxWindowDisabler disableAll;
   wxBusyInfo info(_T("Please wait during game database analysis..."), this);
 
+  // Loading a client again fills these from its own database instead of adding to the lists the
+  // previous load made. (The item list keeps the "None" entry its constructor puts first.)
+  npcs.clear();
+  items = ItemDatabase();
+
   if (!GAMEDATABASE.initFromXML("database.xml"))
   {
     initDB = false;
@@ -632,15 +646,15 @@ void ModelViewer::InitDatabase()
     }
     else
     {
-      initDB = false;
+      // Not fatal: this client has no NPC data the viewer could read (see clientCapabilities); the items below
+      // are independent of it.
       LOG_ERROR << "Error during NPC detection from database.";
-      return;
     }
 
   }
   
   {
-    sqlResult item = GAMEDATABASE.sqlQuery("SELECT Item.ID, ItemSparse.Display_Lang, Item.InventoryType, Item.ClassID, Item.SubclassID, Item.SheathType FROM Item LEFT JOIN ItemSparse ON Item.ID = ItemSparse.ID WHERE Item.InventoryType !=0 AND ItemSparse.Display_Lang != \"\"");
+    sqlResult item = GAMEDATABASE.sqlQuery("SELECT Item.ID, ItemSparse.Display_Lang, Item.InventoryType, Item.ClassID, Item.SubclassID, Item.SheatheType FROM Item LEFT JOIN ItemSparse ON Item.ID = ItemSparse.ID WHERE Item.InventoryType !=0 AND ItemSparse.Display_Lang != \"\"");
 
     if (item.valid && !item.empty())
     {
@@ -653,9 +667,7 @@ void ModelViewer::InitDatabase()
     }
     else
     {
-      initDB = false;
       LOG_ERROR << "Error during Item detection from database.";
-      return;
     }
   }
 
@@ -3431,13 +3443,13 @@ void ModelViewer::OnGameToggle(wxCommandEvent &event)
 // picker belongs where the user asks for it, on the File menu, and this is the only path that
 // loads one.
 //
-// The load goes through the dialog's own commitDetectedSelection(), which is what settles the
-// data path: reading dataPath() without it returns an empty string, and CASC given an empty game
-// folder takes the application down with it. Nothing here second-guesses whether the load worked
-// afterwards -- LoadWoW reports its own failures, and the flag that looks like a success signal
-// (isWoWLoaded) is never actually assigned.
+// The chooser ("Choose World of Warcraft") only says which installation; LoadWoW opens it, resolves its schema
+// and tells the user, in plain words, when it cannot. A client that could not be opened brings the chooser back,
+// so another can be picked; the client loaded before (if any) is still loaded meanwhile.
 void ModelViewer::PromptAndLoadClient()
 {
+  if (m_clientLoading) // the loading window yields to the event loop: no second load inside the first
+    return;
   for (;;)
   {
     ClientChoiceDialog clientDlg(this);
@@ -3457,10 +3469,13 @@ void ModelViewer::PromptAndLoadClient()
       return;
     }
 
+    const wxString previousPath = gamePath;
     gamePath = clientDlg.dataPath();
     core::GameConfig chosen = clientDlg.selectedConfig();
-    LoadWoW(&chosen, clientDlg.selectedProfile(), true /* show loading progress */);
-    return;
+    if (LoadWoW(&chosen, true /* show loading progress */))
+      return;
+    gamePath = previousPath; // not opened: the client loaded before (if any) is still the one in use
+    continue;
   }
 }
 
@@ -3573,8 +3588,8 @@ static void refreshCommunityListfile(const QString & localPath, LoadingDialog * 
 // Any failure (e.g. offline, or GitHub down) keeps the existing on-disk keys untouched.
 static void refreshTactKeys(const QString & localPath, LoadingDialog * progress)
 {
-  if (progress)
-    progress->step(_("Updating encryption keys..."), 6);
+  // The loading window keeps saying which client is being opened: the keys are a detail of opening it.
+  Q_UNUSED(progress);
 
   QNetworkAccessManager manager;
   QNetworkRequest request(QUrl("https://raw.githubusercontent.com/wowdev/TACTKeys/master/WoW.txt"));
@@ -3638,16 +3653,41 @@ static void refreshTactKeys(const QString & localPath, LoadingDialog * progress)
     QFile::remove(tmpPath);
 }
 
+namespace
+{
+  // Set while a client is being opened: the loading window yields to the event loop, and nothing may start a
+  // second load (or a legacy one) inside it.
+  struct ClientLoadingFlag
+  {
+    bool & flag;
+    explicit ClientLoadingFlag(bool & f) : flag(f) { flag = true; }
+    ~ClientLoadingFlag() { flag = false; }
+  };
+}
+
 int ModelViewer::LoadWoWFromMpq(const QString & dataFolder, const QString & locale)
 {
+  if (m_clientLoading)
+    return 0;
+  ClientLoadingFlag loadingFlag(m_clientLoading);
   UnityAssetAccess::ClientLoadGuard unityAssetGuard; // refuse Unity asset requests while the folder is rebuilt
   fileControl->Disable();
   TexturesClientLoadStarting();
 
   // Always install a FRESH folder for the legacy client -- never reuse an already-loaded Retail
   // (or previous MPQ) folder. Reusing the Retail folder would mix CASC + MPQ entries in one tree
-  // and leave its CASC storage pointing at the wrong path. Game::init replaces the previous folder.
-  core::Game::instance().init(new wow::WoWFolder(dataFolder), new wow::WoWDatabase());
+  // and leave its CASC storage pointing at the wrong path. As for any change of client (LoadWoW),
+  // the previous client's storage and database are let go of, and what is on screen and cached
+  // from it is cleared.
+  if (core::Game::instance().initDone())
+    if (wow::WoWFolder * old = dynamic_cast<wow::WoWFolder *>(&GAMEDIRECTORY))
+      old->closeStorage();
+  ResetClientState();
+  wow::WoWFolder * folder = new wow::WoWFolder(dataFolder);
+  core::Game::instance().replace(folder, new wow::WoWDatabase());
+  folder->init();
+  m_loadedProduct = "mpq";
+  m_clientSchema.clear();
 
   // Open the legacy MPQ archive chain, build the MPQ client profile and populate the file tree.
   // GAMEDIRECTORY is a WoWFolder in this mode.
@@ -3678,6 +3718,7 @@ int ModelViewer::LoadWoWFromMpq(const QString & dataFolder, const QString & loca
 
   SetStatusText(wxString(GAMEDIRECTORY.version().toStdWString()), 1);
   SetStatusText(wxT("Legacy MPQ"), 2);
+  ComputeClientCapabilities();
   LOG_INFO << "[mpq] legacy client ready: storage=MPQ, provider ready, archives=" << archives
            << " -- load models from the file browser (no DBC/customization/equipment yet).";
   return archives;
@@ -3746,29 +3787,87 @@ int ModelViewer::PromptAndLoadLegacyMpqClient()
 
 void ModelViewer::OnLoadLegacyMpq(wxCommandEvent & WXUNUSED(event))
 {
+  if (m_clientLoading)
+    return;
   PromptAndLoadLegacyMpqClient();
 }
 
-void ModelViewer::LoadWoW(const core::GameConfig * chosenConfig, const QString & profileOverride, bool showProgress)
+// What a CASC open error means for the person who asked for it.
+static wxString clientOpenProblem(int error)
 {
+  switch (error)
+  {
+    case ERROR_FILE_NOT_FOUND:
+    case ERROR_PATH_NOT_FOUND:
+      return _("Its game data is not on this computer. The Battle.net app may not have downloaded it yet: start "
+               "the game once from Battle.net, or let its installation finish, and try again.");
+    case ERROR_FILE_CORRUPT:
+      return _("Its game data could not be read: it is incomplete or damaged. Battle.net's Scan and Repair "
+               "can restore it.");
+    case ERROR_INVALID_PARAMETER:
+      return _("It has no language this viewer can open.");
+    default:
+      return _("The installation could not be opened.");
+  }
+}
+
+// The client-derived state a newly opened client replaces: what is on screen, and every cache filled from the previous
+// client's files or database. (The file tree, database, races, NPC and item lists are refilled by the load itself.)
+void ModelViewer::ResetClientState()
+{
+  // What is on screen: the model or building, its textures, the choosers that list the old client's records.
+  if (fileControl)
+    fileControl->ClearCanvas();
+  if (charControl)
+  {
+    charControl->ClearItemDialog();
+    charControl->ClientChanged();
+  }
+  // Decoded images and texture layouts of the previous client.
+  CharTexture::clearClientCaches();
+  // A legacy MPQ client's DBC tables (read only for an MPQ client).
+  wow::WotlkDbc::instance().reset();
+  m_clientCaps = ClientCapabilities();
+}
+
+bool ModelViewer::LoadWoW(const core::GameConfig * chosenConfig, bool showProgress)
+{
+  // One load at a time: the loading window yields to the event loop, where File > Load World of Warcraft (or the
+  // empty viewer's button) could otherwise start a second one inside this one.
+  if (m_clientLoading)
+    return false;
+  ClientLoadingFlag loadingFlag(m_clientLoading);
+
+  wxStopWatch total, step;
   UnityAssetAccess::ClientLoadGuard unityAssetGuard; // refuse Unity asset requests while the folder is rebuilt
-  fileControl->Disable();
-  TexturesClientLoadStarting();
-  if (gamePath.IsEmpty() || !wxDirExists(gamePath)) {
+  if (gamePath.IsEmpty() || !wxDirExists(gamePath))
     getGamePath();
+  const QString dataPath = QString::fromWCharArray(gamePath.c_str());
+
+  // THE FOLDER. The loaded one when it is this same installation's CASC folder (opening another of its products
+  // reuses its file objects); otherwise a new one -- first load, another installation, or after a legacy MPQ
+  // client. Nothing replaces the loaded client until the new one has opened.
+  auto normalized = [](QString p) {
+    p = QDir::cleanPath(QDir::fromNativeSeparators(p)).toLower();
+    while (p.endsWith('/'))
+      p.chop(1);
+    return p;
+  };
+  const bool reuse = core::Game::instance().initDone() &&
+                     GAMEDIRECTORY.clientProfile().storage == core::StorageType::CASC &&
+                     normalized(GAMEDIRECTORY.path()) == normalized(dataPath);
+  std::unique_ptr<wow::WoWFolder> fresh;
+  core::GameFolder * folder = nullptr;
+  if (reuse)
+    folder = &GAMEDIRECTORY;
+  else
+  {
+    fresh.reset(new wow::WoWFolder(dataPath));
+    fresh->init(); // reads the installation's .build.info
+    folder = fresh.get();
   }
 
-  // Create a fresh CASC folder on first load. Also recreate it when switching back from a legacy
-  // MPQ client -- otherwise the current folder is the MPQ folder (wrong path, MPQ provider), and
-  // reusing it would fail. Retail->Retail reuse is unchanged (initDone && storage==CASC -> skip).
-  if (!core::Game::instance().initDone()
-      || GAMEDIRECTORY.clientProfile().storage == core::StorageType::MPQ)
-    core::Game::instance().init(new wow::WoWFolder(QString::fromWCharArray(gamePath.c_str())), new wow::WoWDatabase());
-
   core::GameConfig config;
-
-  // The startup Client Choice launcher resolves the product/locale itself and hands it in;
-  // when it isn't used (headless/CLI loads), fall back to detecting + auto/prompt-picking.
   if (chosenConfig)
   {
     config = *chosenConfig;
@@ -3776,278 +3875,311 @@ void ModelViewer::LoadWoW(const core::GameConfig * chosenConfig, const QString &
   }
   else
   {
-  // init game config
-  std::vector<core::GameConfig> configsFound = GAMEDIRECTORY.configsFound();
-
-  if (configsFound.empty())
-  {
-    wxString message = wxString::Format(wxT("Fatal Error: Could not find any locale from your World of Warcraft folder"));
-    wxMessageDialog *dial = new wxMessageDialog(NULL, message, wxT("World of Warcraft No locale found"), wxOK | wxICON_ERROR);
-    dial->ShowModal();
-    return;
-  }
-
-  config = configsFound[0];
-
-  // Diagnostic override (env-only, nothing in the UI): WMV_FORCE_BUILD=<version> pins the load to
-  // a specific build present in the install -- e.g. a PTR build that the retail-preferring
-  // auto-pick would otherwise skip. Used to exercise a new client's table layouts.
-  const QString forceBuild = qEnvironmentVariable("WMV_FORCE_BUILD");
-  bool configForced = false;
-  if (!forceBuild.isEmpty())
-  {
-    for (size_t i = 0; i < configsFound.size(); i++)
-      if (configsFound[i].version == forceBuild)
-      {
-        config = configsFound[i];
-        configForced = true;
-        LOG_INFO << "WMV_FORCE_BUILD selected config:" << config.locale << config.product << config.version;
-        break;
-      }
-    if (!configForced)
-      LOG_WARNING << "WMV_FORCE_BUILD" << forceBuild << "not found among detected configs";
-  }
-
-  unsigned int nbConfigs = configsFound.size();
-
-  if (!configForced && nbConfigs > 1)
-  {
-    // Decide whether we actually need to ask the user. If every config is for the
-    // same locale (e.g. .build.info lists several builds of one install, like
-    // 12.0.5 and 12.0.1 enUS), there is no real choice to make -- auto-pick the
-    // newest build (preferring the retail "wow" product) and skip the prompt. This
-    // avoids a locale dialog on every (now automatic) startup, and lets the
-    // headless snapshot CLI load without blocking on a modal dialog.
-    bool singleLocale = true;
-    for (size_t i = 1; i < nbConfigs; i++)
-      if (configsFound[i].locale != configsFound[0].locale)
-      {
-        singleLocale = false;
-        break;
-      }
-
-    if (singleLocale)
+    // Headless / CLI: the build (and product) asked for with -build / -product, or the newest Retail.
+    std::vector<core::GameConfig> configsFound = folder->configsFound();
+    if (configsFound.empty())
     {
-      // numeric, component-wise "is a newer than b" on dotted versions ("12.0.5.67823")
+      LOG_ERROR << "No World of Warcraft installation found in" << dataPath;
+      if (!batchMode)
+        wxMessageBox(_("No World of Warcraft installation was found in that folder."), _("World of Warcraft"),
+                     wxOK | wxICON_ERROR, this);
+      return false;
+    }
+    const QString forceBuild = qEnvironmentVariable("WMV_FORCE_BUILD");
+    const QString forceProduct = qEnvironmentVariable("WMV_FORCE_PRODUCT");
+    int picked = -1;
+    if (!forceBuild.isEmpty() || !forceProduct.isEmpty())
+    {
+      for (size_t i = 0; i < configsFound.size() && picked < 0; i++)
+        if ((forceBuild.isEmpty() || configsFound[i].version == forceBuild) &&
+            (forceProduct.isEmpty() || configsFound[i].product == forceProduct))
+          picked = (int)i;
+      if (picked < 0)
+        LOG_WARNING << "WMV_FORCE_BUILD/PRODUCT" << forceBuild << forceProduct << "not found among detected configs";
+      else
+        LOG_INFO << "WMV_FORCE_BUILD/PRODUCT selected config:" << configsFound[picked].locale
+                 << configsFound[picked].product << configsFound[picked].version;
+    }
+    if (picked < 0)
+    {
+      // Prefer Retail ("wow"), then the newest version.
       auto isNewer = [](const QString & a, const QString & b) {
-        const QStringList va = a.split('.');
-        const QStringList vb = b.split('.');
-        const int n = (va.size() > vb.size()) ? va.size() : vb.size();
-        for (int i = 0; i < n; i++)
+        const QStringList va = a.split('.'), vb = b.split('.');
+        for (int i = 0; i < qMax(va.size(), vb.size()); i++)
         {
-          const long long na = (i < va.size()) ? va[i].toLongLong() : 0;
-          const long long nb = (i < vb.size()) ? vb[i].toLongLong() : 0;
+          const long long na = va.value(i).toLongLong(), nb = vb.value(i).toLongLong();
           if (na != nb)
             return na > nb;
         }
         return false;
       };
-
-      size_t best = 0;
-      for (size_t i = 1; i < nbConfigs; i++)
+      picked = 0;
+      for (size_t i = 1; i < configsFound.size(); i++)
       {
-        const bool bestIsRetail = (configsFound[best].product == "wow");
-        const bool iIsRetail = (configsFound[i].product == "wow");
-        if (iIsRetail != bestIsRetail)
-        {
-          if (iIsRetail)
-            best = i;                       // prefer the retail "wow" product
-        }
-        else if (isNewer(configsFound[i].version, configsFound[best].version))
-        {
-          best = i;                         // otherwise prefer the newest build
-        }
+        const bool bestRetail = configsFound[picked].product == "wow", iRetail = configsFound[i].product == "wow";
+        if (iRetail != bestRetail ? iRetail : isNewer(configsFound[i].version, configsFound[picked].version))
+          picked = (int)i;
       }
-      config = configsFound[best];
-      LOG_INFO << "Auto-selected WoW config:" << config.locale << config.product << config.version;
+      LOG_INFO << "Auto-selected WoW config:" << configsFound[picked].locale << configsFound[picked].product
+               << configsFound[picked].version;
     }
-    else
-    {
-      wxString * availableConfigs = new wxString[nbConfigs];
-      for (size_t i = 0; i < nbConfigs; i++)
-      {
-        QString label = configsFound[i].locale + " - " + configsFound[i].product;
-        if (configsFound[i].version != "")
-          label = label + " (" + configsFound[i].version + ")";
-        availableConfigs[i] = wxString(label.toStdWString().c_str());
-      }
-
-      long id = wxGetSingleChoiceIndex(_("Please select a locale:"), _("Locale"), nbConfigs, availableConfigs);
-      delete[] availableConfigs;
-      if (id != -1)
-        config = configsFound[id];
-      else
-        return;
-    }
+    config = configsFound[picked];
   }
-  } // end else: auto-detect / prompt for the config
 
-  // Startup progress window (Client Choice -> Load). Shown across the heavy, synchronous load
-  // steps below; left null (and thus a no-op) for headless/CLI loads.
+  const core::ClientProfile requested = core::ClientProfile::fromGameConfig(config);
+  const wxString friendly = wxString(requested.friendlyName().toStdWString());
+
+  // Loading window: plain words, the steps the user can relate to.
   LoadingDialog * progress = 0;
   if (showProgress)
   {
     progress = new LoadingDialog(this);
+    progress->SetTitle(_("World of Warcraft"));
     progress->Show();
-    progress->step(_("Opening game data..."), 10);
-    LoadingDialog * pd = progress;
-    GAMEDIRECTORY.setLoadProgressCallback([pd](float frac) {
-      pd->step(_("Opening game data..."), 10 + (int)(frac * 34.0f)); // advance 10 -> 44 during file enumeration
-    });
+    progress->step(wxString::Format(_("Opening %s..."), friendly), 5);
   }
+  auto closeProgress = [&progress]() {
+    if (progress)
+      progress->Destroy();
+    progress = 0;
+  };
 
-  // Refresh the TACT keys before opening the storage -- setConfig() hands them to CASC, so a
-  // newer key list lets it decrypt encrypted db2 sections + files for recently-added content.
-  // The keys file is read from the working directory (see CASCFolder::addExtraEncryptionKeys).
+  // Refresh the TACT keys before opening the storage -- setConfig() hands them to CASC, so a newer key list lets it
+  // decrypt encrypted db2 sections + files for recently-added content.
   refreshTactKeys("extraEncryptionKeys.csv", progress);
 
-  if (!GAMEDIRECTORY.setConfig(config))
+  if (progress)
   {
-    GAMEDIRECTORY.setLoadProgressCallback(std::function<void(float)>());
-    if (progress) progress->Destroy();
-    wxString message = wxString::Format(wxT("Fatal Error: Could not load your World of Warcraft Data folder (error %d)."), GAMEDIRECTORY.lastError());
-    wxMessageDialog *dial = new wxMessageDialog(NULL, message, wxT("World of Warcraft Not Found"), wxOK | wxICON_ERROR);
-    dial->ShowModal();
-    return;
+    LoadingDialog * pd = progress;
+    const wxString text = wxString::Format(_("Opening %s..."), friendly);
+    folder->setLoadProgressCallback([pd, text](float frac) { pd->step(text, 10 + (int)(frac * 34.0f)); });
   }
-  GAMEDIRECTORY.setLoadProgressCallback(std::function<void(float)>()); // done enumerating
-
-  // Remember which build we settled on so out-of-process FBX exports can pin their child to
-  // the same game data (-build), instead of letting the child's auto-pick choose a different one.
-  m_loadedBuild = config.version;
-
-  LOG_INFO << "Major version:" << GAMEDIRECTORY.majorVersion();
-  // check if we are loading a 9.x version of WoW
-  if(~GAMEDIRECTORY.majorVersion() >= 9)
+  step.Start();
+  const bool opened = folder->setConfig(config);
+  folder->setLoadProgressCallback(std::function<void(float)>());
+  const long openMs = step.Time();
+  if (!opened)
   {
-    wxString message = wxString::Format(wxT("This version of WoW Model Viewer is intended to be used with WoW Shadowlands(9.x.x) or above only\n"
-                                            "For older WoW versions support, please refer to this page to pick the right WoW Model Viewer version:\n"
-                                            "https://download.wowmodelviewer.net"));
-    if (progress) progress->Destroy();
-    wxMessageDialog *dial = new wxMessageDialog(NULL, message, wxT("Wrong World of Warcraft version"), wxOK | wxICON_ERROR);
-    dial->ShowModal();
-    return;
-  }
-
-  // init game version
-  SetStatusText(wxString(GAMEDIRECTORY.version().toStdWString()), 1);
-
-  langName = GAMEDIRECTORY.locale().toStdWString();
-
-  SetStatusText(wxString(GAMEDIRECTORY.locale().toStdWString()), 2);
-
-  // Pick the data profile (schema directory). The Client Choice launcher can override it;
-  // otherwise derive "games/wow/<major>.<minor>/" from the detected client version.
-  QString baseConfigFolder;
-  if (!profileOverride.isEmpty())
-  {
-    baseConfigFolder = "games/wow/" + profileOverride + "/";
-  }
-  else
-  {
-    QStringList ver = GAMEDIRECTORY.version().split('.');
-    baseConfigFolder = "games/wow/" + ver[0] + "." + ver[1] + "/";
-
-    // A client newer than the shipped schema (e.g. a PTR like 12.1 when only the 12.0 profile
-    // ships) has no exact games/wow/<major>.<minor>/ folder, which would leave the database empty.
-    // Fall back to the newest available profile for the same major version. The per-file layout
-    // matching in WoWDatabase::refreshStructures then corrects any columns that moved in the newer
-    // build, so a new patch works without shipping a dedicated profile folder for it.
-    if (!QDir(baseConfigFolder).exists())
+    const int err = folder->lastError();
+    closeProgress();
+    LOG_ERROR << "[clientload] could not open" << requested.describe() << "error" << err << "after" << openMs << "ms";
+    if (!batchMode)
     {
-      const QStringList profiles =
-        QDir("games/wow").entryList(QStringList() << (ver[0] + ".*"), QDir::Dirs | QDir::NoDotAndDotDot);
-      int bestMinor = -1;
-      QString best;
-      for (const QString & p : profiles)
-      {
-        const QStringList pp = p.split('.');
-        bool ok = false;
-        const int minor = (pp.size() >= 2) ? pp[1].toInt(&ok) : 0;
-        if (ok && minor > bestMinor)
-        {
-          bestMinor = minor;
-          best = p;
-        }
-      }
-      if (!best.isEmpty())
-      {
-        LOG_INFO << "No data profile for build" << GAMEDIRECTORY.version()
-                 << "- falling back to newest available profile" << best;
-        baseConfigFolder = "games/wow/" + best + "/";
-      }
-      else
-      {
-        LOG_WARNING << "No data profile found for major version" << ver[0]
-                    << "(expected games/wow/" << (ver[0] + ".x") << ") - database will be empty";
-      }
+      wxRichMessageDialog dlg(this, wxString::Format(_("%s could not be opened."), friendly),
+                              _("World of Warcraft"), wxOK | wxICON_ERROR);
+      dlg.SetExtendedMessage(clientOpenProblem(err));
+      dlg.ShowDetailedText(wxString::Format(_("Product: %s\nVersion: %s\nInstallation: %s\nStorage: CASC, error %d"),
+                                            wxString(config.product.toStdWString()),
+                                            wxString(config.version.toStdWString()), gamePath, err));
+      dlg.ShowModal();
+    }
+    // The client loaded before (if any) is untouched and still usable.
+    return false;
+  }
+
+  // Opened: from here on this client replaces the previous one.
+  if (fresh)
+  {
+    // The previous folder's storage is let go of; its file objects stay alive (the canvas, Browse and textures may
+    // still point at them until they are rebuilt below), as they always have. Its database (and its connection to
+    // the on-disk cache, which would keep the cache from being rebuilt) goes with it.
+    if (core::Game::instance().initDone())
+      if (wow::WoWFolder * old = dynamic_cast<wow::WoWFolder *>(&GAMEDIRECTORY))
+        old->closeStorage();
+    core::Game::instance().replace(fresh.release(), new wow::WoWDatabase());
+  }
+  fileControl->Disable();
+  TexturesClientLoadStarting();
+  ResetClientState();
+
+  const core::ClientProfile & profile = GAMEDIRECTORY.clientProfile();
+  m_loadedBuild = config.version;
+  m_loadedProduct = config.product;
+  LOG_INFO << "[clientload] opened" << profile.describe() << "in" << openMs << "ms";
+
+  // The loaded client in plain words ("Classic Era - Vanilla - 1.15.9"), its build beside it.
+  const wxString clientLine =
+    wxString(loadedClientSummary().toStdWString()) + wxString::Format(wxT(" (build %d)"), profile.build);
+  SetStatusText(clientLine, 1);
+  // The field was sized for a bare version number; it now fits the line it shows.
+  if (wxStatusBar * bar = GetStatusBar())
+  {
+    std::vector<int> widths(bar->GetFieldsCount());
+    for (size_t i = 0; i < widths.size(); i++)
+      widths[i] = bar->GetStatusWidth((int)i);
+    if (widths.size() > 1)
+    {
+      widths[1] = bar->GetTextExtent(clientLine).x + FromDIP(16);
+      SetStatusWidths((int)widths.size(), widths.data());
     }
   }
+  langName = GAMEDIRECTORY.locale().toStdWString();
+  SetStatusText(wxString(GAMEDIRECTORY.locale().toStdWString()), 2);
 
-  LOG_INFO << "Using following folder to read game info" << baseConfigFolder;
-  core::Game::instance().setConfigFolder(baseConfigFolder);
+  // THE SCHEMA, resolved from the opened client (never from a choice in the chooser).
+  QString schemaHow;
+  const QString schema = ClientInstallations::resolveSchema(profile, &schemaHow);
+  m_clientSchema = schema;
+  LOG_INFO << "[clientload] schema:" << schemaHow;
+  core::Game::instance().setConfigFolder(schema.isEmpty() ? QString("games/wow/none/") : "games/wow/" + schema + "/");
 
-  if (progress) progress->step(_("Loading file list..."), 45);
-  // Hidden weekly refresh of the file list before it is parsed (no setting, falls back to the
-  // on-disk copy on any failure). Advances the gauge 45 -> 60 while downloading.
+  if (progress) progress->step(_("Reading the file list..."), 45);
+  step.Start();
   refreshCommunityListfile(core::Game::instance().configFolder() + "../../../listfile.csv", progress);
   if (progress)
   {
     LoadingDialog * pd = progress;
     GAMEDIRECTORY.setLoadProgressCallback([pd](float frac) {
-      pd->step(_("Loading file list..."), 60 + (int)(frac * 12.0f)); // advance 60 -> 72 during the parse
+      pd->step(_("Reading the file list..."), 60 + (int)(frac * 12.0f)); // 60 -> 72 during the parse
     });
   }
   GAMEDIRECTORY.initFromListfile("../../../listfile.csv");
-  GAMEDIRECTORY.setLoadProgressCallback(std::function<void(float)>()); // clear
+  GAMEDIRECTORY.setLoadProgressCallback(std::function<void(float)>());
+  const long listfileMs = step.Time();
 
   if (!customDirectoryPath.IsEmpty())
     core::Game::instance().addCustomFiles(QString::fromWCharArray(customDirectoryPath.c_str()), customFilesConflictPolicy);
 
-  // init database
-  if (progress) progress->step(_("Opening database..."), 80);
+  if (progress) progress->step(_("Reading game data..."), 75);
+  step.Start();
   InitDatabase();
- 
-  /*
-  // Error check
-  if (!initDB)
-  {
-  wxMessageBox(wxT("Some DBC files could not be loaded.  These files are vital to being able to render models correctly.\nFile list has been disabled until you are able to correct this problem."), wxT("DBC Error"));
-  fileControl->Disable();
-  SetStatusText(wxT("Some DBC files could not be loaded."));
-  }
-  else
-  {
-  isWoWLoaded = true;
-  SetStatusText(wxT("Initializing WoW Done."));
-  fileMenu->Enable(ID_LOAD_WOW, false);
-  }
-  */
-  //wxMessageBox(wxT("Database loading is not yet supported. Available functionalities are quite restricted in this alpha release."), wxT("No database support yet"));
+  const long databaseMs = step.Time();
 
-
-  if (progress) progress->step(_("Building file list..."), 92);
+  if (progress) progress->step(_("Building Browse..."), 92);
   SetStatusText(wxT("Initializing File Control..."));
+  step.Start();
   fileControl->Init(this);
-
+  const long browseMs = step.Time();
+  step.Start();
   if (charControl->Init() == false)
-  {
     SetStatusText(wxT("Error Initializing the Character Controls."));
-  };
+  const long charactersMs = step.Time();
   fileControl->Enable();
+
+  ComputeClientCapabilities();
+  RememberLoadedClient(config);
+
+  LOG_INFO << "[clientload] timing: open" << openMs << "ms, file list" << listfileMs << "ms, database" << databaseMs
+           << "ms, Browse" << browseMs << "ms, characters" << charactersMs << "ms, total" << total.Time() << "ms";
   // The empty viewport points at Browse now rather than at loading a client -- once the load has
   // returned, since the client does not count as active while it is still inside it.
   CallAfter([this]() {
     UpdateUnityViewportState();
     TexturesClientLoaded();
+    DisplayedContentChanged();
   });
-  SetStatusText(wxT("File Control Initialized."));
-
+  SetStatusText(wxString::Format(_("%s loaded."), friendly));
   if (progress)
-  {
     progress->step(_("Ready"), 100);
-    progress->Destroy();
+  closeProgress();
+  return true;
+}
+
+// CAPABILITIES from what loaded (see ClientCapabilities).
+void ModelViewer::ComputeClientCapabilities()
+{
+  ClientCapabilities caps;
+  caps.loaded = core::Game::instance().initDone();
+  if (!caps.loaded)
+  {
+    m_clientCaps = caps;
+    return;
   }
+  wxStopWatch clock;
+  for (const auto & entry : GAMEDIRECTORY.filesByPath())
+  {
+    const QString & name = entry.first;
+    if (name.endsWith(".m2", Qt::CaseInsensitive))
+      caps.modelFiles++;
+    else if (name.endsWith(".blp", Qt::CaseInsensitive))
+      caps.textureFiles++;
+    else if (name.endsWith(".wmo", Qt::CaseInsensitive))
+      caps.buildingFiles++;
+  }
+  // A legacy MPQ client is opened for its models only: no database is read for it (LoadWoWFromMpq).
+  const bool database = GAMEDIRECTORY.clientProfile().storage != core::StorageType::MPQ;
+  auto rows = [database](const char * table) {
+    if (!database)
+      return 0;
+    sqlResult r = GAMEDATABASE.sqlQuery(QString("SELECT COUNT(*) FROM %1").arg(table));
+    return (r.valid && !r.empty()) ? r.values[0][0].toInt() : 0;
+  };
+  const core::ClientProfile & profile = GAMEDIRECTORY.clientProfile();
+  if (wow::WoWFolder * folder = dynamic_cast<wow::WoWFolder *>(&GAMEDIRECTORY))
+    caps.filesNotInstalled = (int)folder->remoteViewerFileCount();
+  QStringList notInstalledTables;
+  if (wow::WoWDatabase * db = dynamic_cast<wow::WoWDatabase *>(&GAMEDATABASE))
+  {
+    caps.tablesNotInstalled = db->schemaCheck().notInstalled;
+    caps.tablesNotRead = db->schemaCheck().notRead;
+    for (const QString & note : db->schemaCheck().notes)
+      if (note.endsWith(": not installed"))
+        notInstalledTables << note.section(':', 0, 0);
+  }
+  auto missing = [&notInstalledTables](const char * table) { return notInstalledTables.contains(QString(table)); };
+  caps.models = caps.modelFiles > 0;
+  caps.textures = caps.textureFiles > 0;
+  caps.buildings = caps.buildingFiles > 0;
+  caps.races = database ? (int)RaceInfos::count() : 0;
+  caps.characters = caps.races > 0;
+  caps.modernCustomization = caps.characters && rows("ChrCustomizationOption") > 0 && rows("ChrCustomizationChoice") > 0;
+  caps.npcCount = database ? (int)npcs.size() : 0;
+  caps.npcDisplayInfo = caps.npcCount > 0 && rows("CreatureDisplayInfo") > 0;
+  caps.itemCount = database ? (int)items.items.size() - 1 : 0; // "None" is always first
+  caps.items = caps.itemCount > 0;
+  caps.armory = caps.characters && profile.isRetailFamily();
+  caps.schema = m_clientSchema.isEmpty() ? QString("none") : m_clientSchema;
+
+  if (!caps.models)
+    caps.unavailable << "Models: no model files are indexed";
+  if (caps.filesNotInstalled > 0)
+    caps.unavailable << QString("%1 models, textures or other viewer files of this build are not on this computer "
+                                "(it is not fully downloaded)")
+                          .arg(caps.filesNotInstalled);
+  if (!database)
+    caps.unavailable << "Characters, NPCs and items: a legacy MPQ client is opened for its models only";
+  else if (!caps.characters)
+    caps.unavailable << (missing("ChrRaces") || missing("ChrModel") || missing("ChrRaceXChrModel")
+                           ? QString("Characters: this client's race tables are not installed on this computer")
+                           : QString("Characters: no playable race could be resolved from this client's game data"));
+  else if (!caps.modernCustomization)
+    caps.unavailable << "Character customization: this client's customization tables could not be read";
+  if (database && !caps.npcDisplayInfo)
+    caps.unavailable << "NPCs: this client's creature tables could not be read";
+  if (database && !caps.items)
+    caps.unavailable << "Items: this client's item tables could not be read";
+  if (!caps.armory)
+    caps.unavailable << (profile.isRetailFamily() ? "Armory: needs characters" : "Armory: imports Retail characters only");
+  if (!caps.textures)
+    caps.unavailable << "Textures: no texture files are indexed";
+  if (!caps.buildings)
+    caps.unavailable << "Buildings: no world model files are indexed";
+
+  LOG_INFO << "[clientcaps]" << profile.friendlyName() << profile.versionString << "| models" << caps.modelFiles
+           << "| textures" << caps.textureFiles << "| buildings" << caps.buildingFiles << "| races" << caps.races
+           << "| customization" << (caps.modernCustomization ? "yes" : "no") << "| npcs" << caps.npcCount
+           << "| items" << caps.itemCount << "| armory" << (caps.armory ? "yes" : "no") << "| schema" << caps.schema
+           << "| files not installed" << caps.filesNotInstalled << "| tables not installed" << caps.tablesNotInstalled
+           << "| tables not read" << caps.tablesNotRead
+           << "|" << clock.Time() << "ms";
+  for (const QString & u : caps.unavailable)
+    LOG_INFO << "[clientcaps] unavailable:" << u;
+  m_clientCaps = caps;
+}
+
+void ModelViewer::RememberLoadedClient(const core::GameConfig & config)
+{
+  QSettings settings(QString::fromWCharArray(cfgPath.c_str()), QSettings::IniFormat);
+  settings.setValue("Client/LastPath", QString::fromWCharArray(gamePath.c_str()));
+  settings.setValue("Client/LastProduct", config.product);
+}
+
+QString ModelViewer::loadedClientSummary() const
+{
+  if (!core::Game::instance().initDone())
+    return QString();
+  const core::ClientProfile & profile = GAMEDIRECTORY.clientProfile();
+  return profile.friendlyName() + " " + QChar(0x00B7) + " " + profile.versionLabel();
 }
 
 void ModelViewer::OnCharToggle(wxCommandEvent &event)
@@ -4957,9 +5089,11 @@ void ModelViewer::OnUpdateCommandUI(wxUpdateUIEvent & event)
   // Buildings. None of these has a condition of its own to keep (Export Model checks for a model when
   // chosen), so this is their whole state; a command given one later combines it with this.
   if (needsModelViewer(event.GetId()))
-    event.Enable(isModelsMode());
+    event.Enable(isModelsMode() && capabilityRefusal(event.GetId()).isEmpty());
   else if (needsUnityViewport(event.GetId()))
     event.Enable(!isTextureMode());
+  else if (!capabilityRefusal(event.GetId()).isEmpty())
+    event.Enable(false);
   switch (event.GetId())
   {
     case ID_SHOW_FILE_LIST:
@@ -5017,6 +5151,33 @@ bool ModelViewer::needsModelViewer(int id) const
   return id >= m_exportMenuFirst && id < m_exportMenuEnd;
 }
 
+QString ModelViewer::capabilityRefusal(int id) const
+{
+  if (m_clientLoading && (id == ID_LOAD_WOW || id == ID_LOAD_MPQ))
+    return QString("A World of Warcraft client is being opened.");
+  const ClientCapabilities & caps = m_clientCaps;
+  if (!caps.loaded)
+    return QString();
+  const QString client = loadedClientSummary();
+  switch (id)
+  {
+    case ID_LOAD_CHAR:
+      return caps.characters ? QString() : QString("%1 has no characters this viewer can load.").arg(client);
+    case ID_IMPORT_CHAR:
+      return caps.armory ? QString()
+                         : QString("The Armory importer loads Retail characters; %1 is loaded.").arg(client);
+    case ID_VIEW_NPC:
+      return caps.npcDisplayInfo ? QString() : QString("%1 has no NPC data this viewer can read.").arg(client);
+    case ID_VIEW_ITEM:
+      return caps.items ? QString() : QString("%1 has no item data this viewer can read.").arg(client);
+    case ID_UI_TEXTURES:
+      return caps.textures ? QString() : QString("%1 has no textures on this computer.").arg(client);
+    case ID_UI_BUILDINGS:
+      return caps.buildings ? QString() : QString("%1 has no world models on this computer.").arg(client);
+  }
+  return QString();
+}
+
 bool ModelViewer::needsUnityViewport(int id) const
 {
   // The Model panel: a model's appearance and information, or a world model's.
@@ -5029,6 +5190,16 @@ bool ModelViewer::needsUnityViewport(int id) const
 // Nothing switches back to Models.
 bool ModelViewer::TryBefore(wxEvent & event)
 {
+  if (event.GetEventType() == wxEVT_MENU)
+  {
+    const QString refusal = capabilityRefusal(event.GetId());
+    if (!refusal.isEmpty())
+    {
+      LOG_INFO << "[clientcaps] command refused, id" << event.GetId() << "-" << refusal;
+      SetStatusText(wxString(refusal.toStdWString()), 0);
+      return true;
+    }
+  }
   if (event.GetEventType() == wxEVT_MENU &&
       ((!isModelsMode() && needsModelViewer(event.GetId())) || (isTextureMode() && needsUnityViewport(event.GetId()))))
   {
@@ -5752,6 +5923,7 @@ void ModelViewer::OnExport(wxCommandEvent &event)
           req.assetLabel   = assetLabel;
           req.outPath      = outPath;
           req.build        = wxString(m_loadedBuild.toStdWString().c_str());
+          req.product      = wxString(m_loadedProduct.toStdWString().c_str());
           req.mesh         = optMesh;
           req.skeleton     = optSkel;
           req.skinning     = optSkin;

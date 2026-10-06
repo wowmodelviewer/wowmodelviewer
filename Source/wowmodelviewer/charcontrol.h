@@ -83,6 +83,8 @@ class CharControl : public wxScrolledWindow, public Observer
   wxString customSkin;
 
   void ClearItemDialog();
+  // A newly loaded client: forget the creature model list and mount choices read from the previous one.
+  void ClientChanged();
 
   // Only the two hand slots, for a creature or item on the Model panel. See the definition.
   void SetHandsOnly(bool handsOnly);

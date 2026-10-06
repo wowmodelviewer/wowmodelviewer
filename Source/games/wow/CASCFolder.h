@@ -59,6 +59,13 @@ class _CASCFOLDER_API_ CASCFolder
     void initBuildInfo();
     void addExtraEncryptionKeys();
     void buildPresentIdIndex();  // one-shot enumeration of present FileDataIDs -> fast fileExists()
+  public:
+    // Let go of the storage (a client replaced by one in another folder object).
+    void closeStorage();
+    // Files in the opened build that are not on this computer (a partly downloaded install).
+    size_t remoteFileCount() const { return m_remoteIds.size(); }
+    bool isRemote(int id) const { return m_remoteIds.count(id) != 0; }
+  private:
 
     int m_currentCascLocale;
     core::GameConfig m_currentConfig;
@@ -68,7 +75,8 @@ class _CASCFOLDER_API_ CASCFolder
     HANDLE hStorage;
 
     std::vector<core::GameConfig> m_configs;
-    std::unordered_set<int> m_presentIds;  // every present FileDataID (filled by buildPresentIdIndex)
+    std::unordered_set<int> m_presentIds;  // every FileDataID with a local copy (filled by buildPresentIdIndex)
+    std::unordered_set<int> m_remoteIds;   // in the build, but with no copy on this computer
     std::function<void(float)> m_progressCb; // optional load-progress reporter (see setProgressCallback)
 };
 

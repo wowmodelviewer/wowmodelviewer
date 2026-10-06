@@ -37,6 +37,10 @@ namespace core
       }
 
       void init(core::GameFolder * folder, core::GameDatabase * db);
+      // A newly opened client's folder (already initialised and opened) and database. The previous database is
+      // deleted, which closes its connection to the on-disk cache (open, it keeps the cache from being rebuilt).
+      // The previous folder is not: file objects of it can still be referenced until everything is rebuilt.
+      void replace(core::GameFolder * folder, core::GameDatabase * db);
       bool initDone() { return ((m_db != 0) && (m_folder != 0)); }
       void addCustomFiles(const QString &path, bool bypassOriginalFiles);
 

@@ -59,6 +59,8 @@ class _RACEINFOS_API_ RaceInfos
     // The row for one race and sex, including the races that share a model file with another
     // race and so cannot be found by that file id.
     static bool getRaceInfosForRaceSex(int race, int sex, RaceInfos & out);
+    // How many (race, sex) pairs the loaded client resolved to a model.
+    static size_t count() { return RACES.size(); }
 
   private:
     // Every race and sex, one entry each, preferring the HD model where a race has more than

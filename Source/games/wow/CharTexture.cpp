@@ -240,6 +240,20 @@ void imageCleanUpHandler(void * ptr)
   free(ptr);
 }
 
+namespace
+{
+  // gameFileToQImage's decoded images (see there), per loaded client: CharTexture::clearClientCaches.
+  std::map<QString, QImage> s_imageCache;
+  std::list<QString> s_imageLru;
+}
+
+void CharTexture::clearClientCaches()
+{
+  LAYOUTS.clear();
+  s_imageCache.clear();
+  s_imageLru.clear();
+}
+
 QImage * CharTexture::gameFileToQImage(GameFile * file)
 {
   // A character composition decodes the same source BLP many times: each layer is
@@ -250,8 +264,8 @@ QImage * CharTexture::gameFileToQImage(GameFile * file)
   // Cache the decoded image per source file instead. Keying by name is safe: a name
   // resolves to fixed content, and different customization choices are different files.
   // Bounded with simple LRU eviction so memory can't grow without limit.
-  static std::map<QString, QImage> s_cache;
-  static std::list<QString> s_lru;
+  std::map<QString, QImage> & s_cache = s_imageCache;
+  std::list<QString> & s_lru = s_imageLru;
   const size_t CACHE_MAX = 64;
 
   const QString name = file->fullname();

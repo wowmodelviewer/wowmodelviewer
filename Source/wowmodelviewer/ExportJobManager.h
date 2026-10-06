@@ -100,6 +100,7 @@ class ExportJobManager : public wxEvtHandler
       wxString assetLabel;  // shown in the progress dialog
       wxString outPath;     // target .fbx chosen by the user
       wxString build;       // current loaded build version (-build); may be empty
+      wxString product;     // current loaded product (-product); may be empty
       bool     mesh;
       bool     skeleton;
       bool     skinning;

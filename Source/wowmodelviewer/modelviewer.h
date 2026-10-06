@@ -31,6 +31,7 @@
 #include <memory>
 
 #include <QString>
+#include <QStringList>
 #include <QVariantMap>
 
 class SettingsControl;
@@ -122,6 +123,14 @@ public:
   //     re-loading the raw model with its DEFAULT skin; 0 when no item skin is active.
   // Characters are reconstructed by serialising the live customisation to a temp .chr.
   QString m_loadedBuild;
+  QString m_loadedProduct;   // the product LoadWoW loaded (-product for the export child)
+  QString m_clientSchema;    // the games/wow/<dir> the database was read with ("" = none)
+  bool m_clientLoading = false;
+  // A newly opened client replaces what is on screen and every cache filled from the previous one.
+  void ResetClientState();
+  void ComputeClientCapabilities();
+  // Config.ini: the installation and product loaded last (the chooser marks it "Last used").
+  void RememberLoadedClient(const core::GameConfig & config);
   int m_exportNpcId = -1;
   int m_exportNpcDisplayId = 0;
   int m_exportItemSkinFileId = 0;
@@ -305,6 +314,9 @@ public:
   // The Model panel, which shows a world model's information too, is the Models and Buildings viewers':
   // greyed and refused in Textures only.
   bool needsUnityViewport(int id) const;
+  // A command the loaded client cannot do (ClientCapabilities): why, in plain words; empty when it can (or when no
+  // client is loaded -- the viewer selector then offers to load one). Greyed and refused like the above.
+  QString capabilityRefusal(int id) const;
   // Select a texture picked in Browse (Textures mode): the texture view reads and shows it.
   void ShowTexture(const TextureEntry & entry, bool lookup);
   // The texture view's selection changed, or its facts arrived: the command bar's label, the status bar
@@ -629,11 +641,36 @@ public:
 
   void OnGameToggle(wxCommandEvent &event);
   void OnViewLog(wxCommandEvent &event);
-  // chosenConfig/profileOverride come from the startup Client Choice launcher; both null/empty
-  // means "auto" (detect configs + derive the profile from the version), the headless default.
-  // showProgress displays the "Loading Client" progress dialog during the (synchronous) load.
-  void LoadWoW(const core::GameConfig * chosenConfig = 0, const QString & profileOverride = QString(),
-               bool showProgress = false);
+  // Load a Battle.net (CASC) client: chosenConfig from the client chooser; null means auto (the -build/-product
+  // asked for, otherwise the newest Retail), the headless default. showProgress shows the loading window. The schema
+  // is resolved from the opened client itself, never chosen. Atomic: a client that cannot be opened leaves the one
+  // already loaded (if any) as it was, and the user is told why in plain words. True when the client loaded.
+  bool LoadWoW(const core::GameConfig * chosenConfig = 0, bool showProgress = false);
+
+  // WHAT THE LOADED CLIENT CAN DO, established from what actually loaded (files indexed, tables read, races
+  // resolved) rather than from its product or version. Commands that need something the client lacks are greyed
+  // and refused with the reason.
+  struct ClientCapabilities
+  {
+    bool loaded = false;
+    bool models = false;              // M2 files indexed
+    bool characters = false;          // playable races resolved to their models (RaceInfos)
+    bool modernCustomization = false; // ChrCustomizationOption/Choice rows read
+    bool npcDisplayInfo = false;      // Creature + CreatureDisplayInfo rows read (View NPC, Load NPC / Model by ID)
+    bool items = false;               // the item list (View Item, equipment)
+    bool armory = false;              // a Retail-family client with characters (Armory imports Retail characters)
+    bool textures = false;            // BLP files indexed
+    bool buildings = false;           // WMO files indexed
+    int modelFiles = 0, textureFiles = 0, buildingFiles = 0, races = 0, npcCount = 0, itemCount = 0;
+    int filesNotInstalled = 0;        // in the build but not on this computer (a partly downloaded install)
+    int tablesNotInstalled = 0, tablesNotRead = 0; // the schema check (WoWDatabase::schemaCheck)
+    QString schema;                   // the schema the database was read with, and how it was checked
+    QStringList unavailable;          // what is not available, and why
+  };
+  ClientCapabilities m_clientCaps;
+  const ClientCapabilities & clientCapabilities() const { return m_clientCaps; }
+  // The loaded client in a line, for the status bar and Advanced details: "Classic Era · Vanilla · 1.15.9".
+  QString loadedClientSummary() const;
 
   // Load a legacy (pre-CASC) client from its MPQ archives instead of CASC. Model loading by path
   // only -- no DBC/database, customization or equipment. locale may be empty to auto-detect.

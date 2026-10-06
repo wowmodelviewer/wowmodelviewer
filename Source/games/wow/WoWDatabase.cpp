@@ -7,6 +7,8 @@
 
 #include "WoWDatabase.h"
 
+#include <QDir>
+
 #include <QDomNamedNodeMap>
 #include <QFile>
 
@@ -49,7 +51,7 @@ void wow::WoWDatabase::readSpecificTableAttributes(QDomElement & e, core::TableS
   QDomNode hash = attributes.namedItem("layoutHash");
 
   if (!hash.isNull())
-    tbl->hash = hash.nodeValue().toUInt();
+    tbl->hash = hash.nodeValue().toUInt(nullptr, 0); // "0x5B2ACAEF" or decimal: the layout these positions are for
 }
 
 void wow::WoWDatabase::readSpecificFieldAttributes(QDomElement & e, core::FieldStructure * fieldStruct)
@@ -118,16 +120,31 @@ static uint32 readDB2LayoutHash(const QString & file)
 
 void wow::WoWDatabase::refreshStructures(std::vector<core::TableStructure *> & tables)
 {
-  // The shipped database.xml carries WMV's curated column NAMES/types (which the
-  // hardcoded SQL queries depend on) but version-specific field POSITIONS. For a
-  // build newer than the shipped schema, refresh each field's DB2 field index
-  // from its WoWDBDefs (.dbd) definition, matching fields by name. Tables/fields
-  // without a matching .dbd entry simply keep their base positions.
+  // The shipped database.xml carries WMV's curated column NAMES/types (which the hardcoded SQL queries depend on)
+  // and the field POSITIONS of its own generation of the game. Every table is checked against the loaded client's
+  // own file before anything is read from it:
+  //   - a WoWDBDefs (.dbd) definition that matches the file (its layout hash, or the build) places each column by
+  //     name -- authoritative; a column that layout does not have is read as empty;
+  //   - no definition, but the schema records its own layout for the table (database.xml layoutHash) and the file
+  //     has exactly it: the positions are verified;
+  //   - no definition matches: the base positions are kept only for a client of the schema's own generation (a
+  //     Retail-family client with the schema's major version -- a new patch whose layout is not in the definitions
+  //     yet). For any other client the table is not read at all: positions curated for another generation would
+  //     read the wrong columns silently;
+  //   - the file is not installed: the table stays empty.
+  m_schemaCheck = SchemaCheck();
   const QString build = GAMEDIRECTORY.version();
   if (build.isEmpty())
     return;
 
-  LOG_INFO << "Refreshing database structures from WoWDBDefs for build" << build;
+  const core::ClientProfile & profile = GAMEDIRECTORY.clientProfile();
+  const QString schemaDir = QDir(core::Game::instance().configFolder()).dirName(); // "12.0"
+  const int schemaMajor = schemaDir.section('.', 0, 0).toInt();
+  const bool sameGeneration = profile.isRetailFamily() && profile.major == schemaMajor;
+  static const int ABSENT_POS = 0x7FFF; // past any field: WDC3File reads it as empty
+
+  LOG_INFO << "Refreshing database structures from WoWDBDefs for build" << build << "- schema" << schemaDir
+           << (sameGeneration ? "(the client's own generation)" : "(another generation: only verified tables are read)");
 
   for (core::TableStructure * t : tables)
   {
@@ -140,26 +157,54 @@ void wow::WoWDatabase::refreshStructures(std::vector<core::TableStructure *> & t
     if (tbl->file.endsWith(".csv", Qt::CaseInsensitive))
       continue;
 
-    const QString dbdPath = "dbd/" + tbl->name + ".dbd";
-    if (!QFile::exists(dbdPath))
-      continue; // no definition available -> keep base XML positions
-
-    wow::DBDFile dbd;
-    if (!dbd.parseFile(dbdPath))
+    const uint32 fileHash = readDB2LayoutHash(tbl->file);
+    if (fileHash == 0)
     {
-      LOG_WARNING << "DBD: failed to parse" << dbdPath;
+      // Not on this computer (a partially downloaded client), not in this client, or not a WDC table.
+      m_schemaCheck.notInstalled++;
+      m_schemaCheck.notes << QString("%1: not installed").arg(tbl->name);
+      tbl->skipFill = true;
+      tbl->skipReason = "its file is not installed";
       continue;
     }
 
-    // Match by the file's actual structure fingerprint first, then by build. Exact layout-hash
-    // matching means the chosen definition IS this file's real layout, so its field order is
-    // authoritative -- this is what lets a new client build self-correct without curated edits.
-    const uint32 fileHash = readDB2LayoutHash(tbl->file);
-    const wow::DBDDefinition * def = dbd.getStructure(build, fileHash);
+    const QString dbdPath = "dbd/" + tbl->name + ".dbd";
+    wow::DBDFile dbd;
+    const wow::DBDDefinition * def = nullptr;
+    if (QFile::exists(dbdPath))
+    {
+      if (dbd.parseFile(dbdPath))
+        def = dbd.getStructure(build, fileHash);
+      else
+        LOG_WARNING << "DBD: failed to parse" << dbdPath;
+    }
+    if (!def && tbl->hash != 0 && fileHash == tbl->hash)
+    {
+      // No definition ships for this table, but the schema records the layout its positions are for, and this
+      // client's file has exactly that layout: the positions are right for it.
+      m_schemaCheck.verified++;
+      LOG_INFO << "DBD:" << tbl->name << "layoutHash" << fileHash << "is the schema's own layout - positions verified";
+      continue;
+    }
     if (!def)
     {
-      LOG_WARNING << "DBD: no definition for table" << tbl->name << "build" << build
-                  << "layoutHash" << fileHash << "- keeping base positions";
+      const QString layout = QString("%1").arg(fileHash, 8, 16, QChar('0')).toUpper();
+      if (sameGeneration)
+      {
+        m_schemaCheck.trusted++;
+        m_schemaCheck.notes << QString("%1: layout %2 not in the definitions, schema positions kept").arg(tbl->name, layout);
+        LOG_WARNING << "DBD: no definition for table" << tbl->name << "build" << build << "layoutHash" << layout
+                    << "- keeping base positions (same generation as the schema)";
+      }
+      else
+      {
+        m_schemaCheck.notRead++;
+        m_schemaCheck.notes << QString("%1: layout %2 not known for this client, not read").arg(tbl->name, layout);
+        tbl->skipFill = true;
+        tbl->skipReason = QString("layout %1 of build %2 is not in the definitions").arg(layout, build);
+        LOG_WARNING << "DBD: no definition for table" << tbl->name << "build" << build << "layoutHash" << layout
+                    << "- not read (another generation than the schema)";
+      }
       continue;
     }
 
@@ -197,13 +242,20 @@ void wow::WoWDatabase::refreshStructures(std::vector<core::TableStructure *> & t
       }
       else
       {
+        // This client's layout has no such column: read it as empty rather than whatever sits at the old position.
         missing++;
-        LOG_WARNING << "DBD:" << tbl->name << "field" << field->name << "absent in build" << build << "- keeping pos" << field->pos;
+        LOG_WARNING << "DBD:" << tbl->name << "field" << field->name << "absent in build" << build << "- read as empty";
+        field->pos = ABSENT_POS;
       }
     }
+    m_schemaCheck.verified++;
+    m_schemaCheck.absentFields += missing;
     LOG_INFO << "DBD refreshed" << tbl->name << "layoutHash" << fileHash << "-" << refreshed << "fields updated,"
-             << changed << "changed," << missing << "unmatched";
+             << changed << "changed," << missing << "absent";
   }
+  LOG_INFO << "[schema]" << schemaDir << "for" << build << ":" << m_schemaCheck.verified << "tables verified,"
+           << m_schemaCheck.trusted << "kept at schema positions," << m_schemaCheck.notRead << "not read,"
+           << m_schemaCheck.notInstalled << "not installed," << m_schemaCheck.absentFields << "absent fields";
 }
 
 DBFile * wow::TableStructure::createDBFile()

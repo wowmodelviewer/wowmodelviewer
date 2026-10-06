@@ -219,7 +219,7 @@
     <field type="byte" name="ClassID" pos="0" />
     <field type="byte" name="SubclassID" pos="1" />
     <field type="byte" name="InventoryType" pos="3" />
-    <field type="byte" name="SheathType" pos="4" />
+    <field type="byte" name="SheatheType" pos="4" />
   </table>
   <table name="ItemClass">
     <field type="uint" name="ID" primary="yes"/>

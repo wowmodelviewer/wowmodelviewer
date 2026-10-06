@@ -70,6 +70,8 @@ class _CHARTEXTURE_API_ CharTexture
     void reset(unsigned int _layoutSizeId);
 
     static void initRegions();
+    // A newly loaded client: drop the texture layouts and the decoded images read from the previous one.
+    static void clearClientCaches();
 
     // Decode + layer a stack of full-image textures into ONE new GL texture, returning its id
     // (0 on failure). Used for a slot the model samples as a single texture but that

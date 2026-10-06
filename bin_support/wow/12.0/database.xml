@@ -28,7 +28,7 @@
     <field type="int32" name="Width" pos="4" />
     <field type="int32" name="Height" pos="5" />
   </table>
-  <table name="CharHairGeoSets">
+  <table name="CharHairGeoSets" layoutHash="0x5B2ACAEF">
     <field type="int32" name="ID" primary="yes" />
     <field type="uint8" name="RaceID" pos="0" relationshipData="yes" />
     <field type="uint8" name="SexID" pos="1" />
@@ -135,7 +135,7 @@
        current choice of its option. No field definition exists for this table in the bundled set;
        the relationship value is always a ChrCustomizationReq ID and the one record field always a
        ChrCustomizationChoice ID (every row of 12.1.0 resolves both ways). -->
-  <table name="ChrCustomizationReqChoice">
+  <table name="ChrCustomizationReqChoice" layoutHash="0xF925BC6F">
     <field type="int32" name="ID" primary="yes" />
     <field type="int32" name="ChrCustomizationChoiceID" pos="0" />
     <field type="int32" name="ChrCustomizationReqID" relationshipData="yes" />
@@ -235,7 +235,7 @@
     <field type="uint8" name="GeosetValue" pos="1" />
     <field type="int32" name="CreatureDisplayInfoID" relationshipData="yes" />
   </table>
-  <table name="NpcModelItemSlotDisplayInfo">
+  <table name="NpcModelItemSlotDisplayInfo" layoutHash="0xC2057F5B">
     <field type="int32" name="ID" primary="yes" />
     <field type="int32" name="ItemDisplayInfoID" pos="0" />
     <field type="int8" name="ItemSlot" pos="1" />
@@ -255,7 +255,7 @@
     <field type="uint8" name="ClassID" pos="0" />
     <field type="uint8" name="SubclassID" pos="1" />
     <field type="int8"  name="InventoryType" pos="3" />
-    <field type="uint8" name="SheathType" pos="4" />
+    <field type="uint8" name="SheatheType" pos="4" />
   </table>
   <table name="ItemClass">
     <field type="int32" name="ID" primary="yes"/>
