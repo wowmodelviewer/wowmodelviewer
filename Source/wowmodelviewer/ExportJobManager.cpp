@@ -165,6 +165,8 @@ bool ExportJobManager::startExport(const Request & req)
     cmd << wxT(" -fbxclips ") << req.clipsCsv;
   if (!req.build.IsEmpty())
     cmd << wxT(" -build \"") << req.build << wxT("\"");
+  if (!req.product.IsEmpty())
+    cmd << wxT(" -product \"") << req.product << wxT("\"");
 
   // 5) Prepare the job + detailed log.
   ExportJob * job = new ExportJob();

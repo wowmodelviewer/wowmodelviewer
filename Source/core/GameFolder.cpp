@@ -102,6 +102,9 @@ void core::GameFolder::onChildAdded(GameFile * child)
 
 void core::GameFolder::onChildRemoved(GameFile * child)
 {
-  m_nameMap.erase(child->fullname());
+  // Only when the name still leads to this file: a reload can have listed its replacement already.
+  auto it = m_nameMap.find(child->fullname());
+  if (it != m_nameMap.end() && it->second == child)
+    m_nameMap.erase(it);
 }
 

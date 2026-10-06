@@ -40,6 +40,9 @@ void CASCFolder::init(const QString &path)
 
 bool CASCFolder::setConfig(core::GameConfig config)
 {
+  // The requested config only becomes the current one once its storage has opened: a client that fails to open
+  // (its game data not installed, say) leaves the one already loaded as it was, rather than half replaced.
+  const core::GameConfig previousConfig = m_currentConfig;
   m_currentConfig = config;
 
   // init map based on CASCLib
@@ -75,13 +78,21 @@ bool CASCFolder::setConfig(core::GameConfig config)
       // requested one (e.g. the PTR "wowt" root), which hid PTR-only files like new creatures.
       QString cascParams = m_folder + "*" + m_currentConfig.product;
       LOG_INFO << "Loading Game Folder:" << cascParams;
-      // locale found => try to open it
-      if (!CascOpenStorage(cascParams.toStdWString().c_str(), it->second, &hStorage))
+      // locale found => try to open it, into a handle of its own: the previous storage stays in use if it fails.
+      HANDLE opened = nullptr;
+      if (!CascOpenStorage(cascParams.toStdWString().c_str(), it->second, &opened))
       {
         m_openError = GetLastError();
         LOG_ERROR << "CASCFolder: Opening" << cascParams << "failed." << "Error" << m_openError;
+        m_currentConfig = previousConfig;
         return false;
       }
+      m_openError = ERROR_SUCCESS;
+      // Loading a client again opens its storage afresh, so let go of the previous one instead of
+      // keeping both in memory. A file still open on it keeps it alive until that file is closed.
+      if (hStorage)
+        CascCloseStorage(hStorage);
+      hStorage = opened;
 
       addExtraEncryptionKeys();
 
@@ -106,14 +117,30 @@ bool CASCFolder::setConfig(core::GameConfig config)
       // parsing the listfile -- is an O(1) set lookup instead of a per-id CascOpenFile +
       // CascCloseFile round-trip (that probing was ~6.5s of the startup freeze).
       buildPresentIdIndex();
+      return true;
     }
   }
 
-  return true;
+  // No locale to open it with (none in .build.info for this product, or one CascLib does not know).
+  LOG_ERROR << "CASCFolder: no usable locale for" << m_currentConfig.product << m_currentConfig.version
+            << "(locale" << m_currentConfig.locale << ") - not opened";
+  m_currentConfig = previousConfig;
+  m_openError = ERROR_INVALID_PARAMETER;
+  return false;
+}
+
+void CASCFolder::closeStorage()
+{
+  if (hStorage)
+    CascCloseStorage(hStorage);
+  hStorage = nullptr;
+  m_presentIds.clear();
+  m_remoteIds.clear();
 }
 
 void CASCFolder::initBuildInfo()
 {
+  m_configs.clear();
   QString buildinfofile = m_folder + "\\..\\.build.info";
   LOG_INFO << "buildinfofile : " << buildinfofile;
 
@@ -203,6 +230,7 @@ void CASCFolder::buildPresentIdIndex()
   }
 
   m_presentIds.reserve(1u << 21); // ~2M files in a modern retail build
+  m_remoteIds.clear();
 
   // Progress reporting: the enumeration count isn't known up front, so report a soft fraction
   // against a rough expected total (~4M files in a current retail build) capped below 1.0, just
@@ -218,18 +246,28 @@ void CASCFolder::buildPresentIdIndex()
       m_progressCb(frac < 0.99f ? frac : 0.99f);
       nextReport = seen + 50000; // ~80 updates over a full enumeration
     }
-    // Index EVERY enumerated FileDataID, NOT just fd.bFileAvailable ones. bFileAvailable is set
-    // only for files cached locally on disk; on a streaming / partial install many valid files
-    // (e.g. creature skin textures) are remote-only. CascLib still opens those on demand via
-    // CascOpenFile(CASC_OPEN_BY_FILEID), exactly as the old per-id probe this replaced did --
-    // so filtering by bFileAvailable wrongly dropped them from the file tree, which broke the
-    // creature skin folder-scan and left those creatures rendering untextured (white).
+    // Index the FileDataIDs that have a copy on this computer (any of their locale entries). A file
+    // with none cannot be read from a local storage -- CascLib opens it as an empty file -- so listing
+    // it would offer models that never load. Measured 2026-10-06: Retail 12.1 has 586 such ids
+    // (cinematics, shader packs; every named model, texture, skin and table is local), Classic Era
+    // 1.15.9 40,811 (3,989 models, 25,678 textures: a partly downloaded install), Classic Beta 1.60.1
+    // 97,968 (mostly textures). Those are counted (remoteFileCount) rather than indexed.
     if (fd.dwFileDataId != CASC_INVALID_ID)
-      m_presentIds.insert(static_cast<int>(fd.dwFileDataId));
+    {
+      const int id = static_cast<int>(fd.dwFileDataId);
+      if (fd.bFileAvailable)
+      {
+        m_presentIds.insert(id);
+        m_remoteIds.erase(id);
+      }
+      else if (!m_presentIds.count(id))
+        m_remoteIds.insert(id);
+    }
   } while (CascFindNextFile(hFind, &fd));
   CascFindClose(hFind);
 
-  LOG_INFO << "CASCFolder: indexed" << (unsigned int)m_presentIds.size() << "present FileDataIDs (single enumeration).";
+  LOG_INFO << "CASCFolder: indexed" << (unsigned int)m_presentIds.size() << "present FileDataIDs (single enumeration);"
+           << (unsigned int)m_remoteIds.size() << "more are in the build but not on this computer.";
 }
 
 bool CASCFolder::fileExists(int id)

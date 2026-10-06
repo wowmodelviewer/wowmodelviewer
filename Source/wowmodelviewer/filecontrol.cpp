@@ -819,6 +819,8 @@ void FileControl::ClearCanvas()
     modelviewer->charControl->model = NULL;
     if (modelviewer->modelControl)
       modelviewer->modelControl->Forget();
+    if (modelviewer->animControl)
+      modelviewer->animControl->Forget();
     g_selModel = NULL;
   } else if (modelviewer->isADT) {
     wxDELETE(modelviewer->canvas->adt);

@@ -1,9 +1,13 @@
 /*
  * ClientChoiceDialog.h
  *
- * Startup launcher ("Client Choice"): pick the World of Warcraft folder, the detected
- * product (from .build.info) and the data profile (schema directory), then Load. Shown
- * at startup instead of silently auto-loading the game.
+ * "Choose World of Warcraft": the question File > Load World of Warcraft asks. One card per installed client, in
+ * plain words -- "Classic Era", "Vanilla · 1.15.9", installed or not, the one used last -- and a click (or Enter)
+ * on a card opens that client. Nothing technical is asked: no product codes, no builds, no schema to pick (the
+ * schema follows from the client itself: ClientInstallations::resolveSchema). The technical facts stay one click
+ * away, under Advanced, for the card in focus. Secondary: another installation folder, and a legacy (MPQ) install.
+ *
+ * It only chooses; ModelViewer::LoadWoW opens. Not a launcher: no news, art, accounts or patch notes.
  */
 #ifndef CLIENTCHOICEDIALOG_H
 #define CLIENTCHOICEDIALOG_H
@@ -14,65 +18,97 @@
 
 #include <QString>
 
-#include "GameFolder.h" // core::GameConfig
+#include "ClientInstallations.h"
 
-class wxTextCtrl;
-class wxChoice;
+class wxBoxSizer;
+class wxFlexGridSizer;
+class wxPanel;
 class wxStaticText;
-class wxButton;
+class UiButton;
+class ClientChoiceDialog;
+
+// A card: one installation, the whole card the button. Painted with the palette of the theme in use.
+class InstallCard : public wxWindow
+{
+public:
+  InstallCard(wxWindow * parent, ClientChoiceDialog * owner, const InstalledClient & client, bool lastUsed,
+              const QString & folderNote);
+
+  const InstalledClient & client() const { return m_client; }
+  bool openable() const { return m_client.data != InstalledClient::Data::NotDownloaded; }
+  bool lastUsed() const { return m_lastUsed; }
+  void setOpening(bool opening);
+  // For the tests: the pointer over it, held down.
+  void setHot(bool hot);
+
+  bool AcceptsFocus() const override { return true; }
+
+protected:
+  wxSize DoGetBestSize() const override;
+
+private:
+  void OnPaint(wxPaintEvent &);
+  void OnMouse(wxMouseEvent &);
+  void OnKey(wxKeyEvent &);
+  void OnFocus(wxFocusEvent &);
+  wxString title() const;
+  wxString detail() const;
+  wxString status() const;
+  wxString reason() const;
+
+  ClientChoiceDialog * m_owner;
+  InstalledClient m_client;
+  bool m_lastUsed;
+  QString m_folderNote;
+  bool m_hot = false;
+  bool m_pressed = false;
+  bool m_opening = false;
+};
 
 class ClientChoiceDialog : public wxDialog
 {
 public:
   explicit ClientChoiceDialog(wxWindow * parent);
 
-  // Valid after ShowModal() returns wxID_OK:
-  wxString dataPath() const { return m_dataPath; }  // "<root>\Data\" for WoWFolder/gamePath
-  core::GameConfig selectedConfig() const;          // chosen product / locale / version
-  QString selectedProfile() const;                  // schema dir name, e.g. "12.0" ("" = auto)
-
-  // Legacy MPQ path: when true, the user chose "Legacy MPQ client" instead of a modern CASC
-  // product. The caller then runs ModelViewer::PromptAndLoadLegacyMpqClient() (folder picker +
-  // load), the same code path as File -> Load Legacy MPQ Client... The CASC fields above are unused.
+  // After ShowModal() returns wxID_OK:
+  wxString dataPath() const { return m_dataPath; }   // "<root>\Data\" for gamePath
+  core::GameConfig selectedConfig() const { return m_chosen.config(); }
+  const InstalledClient & selectedClient() const { return m_chosen; }
+  // The user chose "Open legacy installation..." instead of a card: the caller asks for its folder and loads it
+  // (ModelViewer::PromptAndLoadLegacyMpqClient).
   bool isLegacyMpq() const { return m_legacyMpq; }
 
-  // Commit the current selection exactly as pressing Load does, but without any UI: settles
-  // m_dataPath from the chosen folder so dataPath()/selectedConfig()/selectedProfile() are all
-  // answerable. False when there is nothing usable to commit, which is when the dialog has to be
-  // shown after all.
-  //
-  // onLoad() is implemented in terms of this, so the button and the silent path cannot drift:
-  // whatever "pressing Load" means, this is it. Reading dataPath() WITHOUT calling it returns an
-  // empty string, which is how a startup auto-load once handed CASC an empty game folder.
-  bool commitDetectedSelection();
+  // Used by the cards.
+  void openCard(InstallCard * card);
+  void focusNeighbour(InstallCard * from, int step);
+  void showDetails(InstallCard * card);
+
+  // For the tests: the cards, the Advanced disclosure.
+  const std::vector<InstallCard *> & cards() const { return m_cards; }
+  void setAdvancedShown(bool shown);
+  bool advancedShown() const { return m_advancedShown; }
 
 private:
-  void buildUI(const wxString & initialRoot);
-  void detect(const wxString & rootFolder);         // parse .build.info -> populate fields
-  void populateProfiles();                          // scan games/wow/* schema dirs
-  void selectProfileForVersion(const QString & version);
-
+  void buildUI();
+  void populate(const QStringList & roots);
   void onBrowse(wxCommandEvent &);
-  void onProductChanged(wxCommandEvent &);
-  void onLoad(wxCommandEvent &);
-  void onLegacyMpq(wxCommandEvent &);               // choose a pre-CASC (MoPaQ) client instead
+  void onLegacy(wxCommandEvent &);
+  void onAdvanced(wxCommandEvent &);
+  void relayout();
 
-  static wxString rootOf(const wxString & anyPath);  // strip a trailing "Data" segment
-  static wxString dataPathOf(const wxString & root); // root + "\Data\"
+  wxPanel * m_cardsPanel = nullptr;
+  wxBoxSizer * m_cardsSizer = nullptr;
+  std::vector<InstallCard *> m_cards;
+  wxStaticText * m_message = nullptr;        // nothing found / a folder without an installation
+  UiButton * m_advancedToggle = nullptr;
+  wxPanel * m_advancedPanel = nullptr;
+  wxFlexGridSizer * m_advancedGrid = nullptr;
+  bool m_advancedShown = false;
+  InstallCard * m_detailsFor = nullptr;
 
-  wxTextCtrl  * m_folder;
-  wxStaticText* m_detected;
-  wxChoice    * m_product;
-  wxChoice    * m_profile;
-  wxButton    * m_load;
-
-  std::vector<core::GameConfig> m_configs;     // detected from .build.info
-  std::vector<QString>          m_profileDirs; // available schema dirs under games/wow/
-  wxString                      m_dataPath;
-
-  bool                          m_legacyMpq;   // user picked the Legacy MPQ option
-
-  DECLARE_EVENT_TABLE()
+  InstalledClient m_chosen;
+  wxString m_dataPath;
+  bool m_legacyMpq = false;
 };
 
 #endif /* CLIENTCHOICEDIALOG_H */

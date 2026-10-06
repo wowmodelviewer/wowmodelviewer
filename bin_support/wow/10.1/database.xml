@@ -227,7 +227,7 @@
     <field type="uint8" name="ClassID" pos="0" />
     <field type="uint8" name="SubclassID" pos="1" />
     <field type="int8"  name="InventoryType" pos="3" />
-    <field type="uint8" name="SheathType" pos="4" />
+    <field type="uint8" name="SheatheType" pos="4" />
   </table>
   <table name="ItemClass">
     <field type="int32" name="ID" primary="yes"/>

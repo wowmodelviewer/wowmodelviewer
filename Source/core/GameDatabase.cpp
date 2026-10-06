@@ -35,6 +35,16 @@ bool core::GameDatabase::initFromXML(const QString & file)
 {
    int rc = 1;
 
+   // Loading a client again (File > Load World of Warcraft once one is loaded) comes back to this
+   // same database. Close the connection the previous load left open before the cache is checked:
+   // while it is open Windows will not delete the cache file, so loading a different build kept
+   // the old build's tables and recorded them as the new build's.
+   if (m_db)
+   {
+     sqlite3_close_v2(m_db);
+     m_db = NULL;
+   }
+
    // Fast mode keeps a persistent on-disk copy of the database (wowdb.sqlite) so
    // we can skip the ~20s DB2 -> SQLite rebuild on every launch. createDatabaseFromXML
    // only fill()s a table when create() succeeds, and create() ("CREATE TABLE")
@@ -44,15 +54,22 @@ bool core::GameDatabase::initFromXML(const QString & file)
    static const char * DB_PATH  = "./wowdb.sqlite";
    static const char * VER_PATH = "./wowdb.sqlite.build";
    QString buildVersion;
+   bool inMemory = false; // the cache file could not be replaced: this client's tables are built in memory
 
    if(m_fastMode)
    {
      // Cache key = WoW build + our schema version. Bump SCHEMA_VERSION whenever the
      // table layout in database.xml (or how we read it) changes, so an old cache
      // built with a different schema is rebuilt rather than queried and failing.
-     static const int SCHEMA_VERSION = 13; // 13: ChrCustomizationReq RaceMasks as its two uint32 (plus ReqType/RegionGroupMask/OverrideArchive), ChrCustomizationOption.Requirement, ChrRaces.PlayableRaceBit, ChrCustomizationReqChoice; bitpacked signed values sign-extended, pallet arrays read at the file's stride, short ids/values read without over-reading their bytes. 12: ItemDisplayInfoModelMatRes (retail's per-slot replaceable-material table, the authoritative source for M2 texture types beyond the type-2 skin). 11: ChrCustomizationReq adds ReqAchievementID/ReqQuestID/ReqItemModifiedAppearanceID (unlock-gate filter for customization choices). 10: corrected ItemSparse name-field positions (sparse-record string walk) for 12.0.7. 9: ChrCustomizationReq/ChrRaces/CreatureDisplayInfo/CreatureModelData. Bump forces a cache rebuild so the fix reaches installs upgraded over a prior build
+     static const int SCHEMA_VERSION = 14; // 14: the key also names the product and the schema folder (a Classic
+                                           // product could share a build number with nothing, but a cache built
+                                           // with one schema must never be read as another's); tables whose layout
+                                           // the definitions cannot place are no longer read at base positions; a table's own layoutHash in database.xml is read (it never was). // 13: ChrCustomizationReq RaceMasks as its two uint32 (plus ReqType/RegionGroupMask/OverrideArchive), ChrCustomizationOption.Requirement, ChrRaces.PlayableRaceBit, ChrCustomizationReqChoice; bitpacked signed values sign-extended, pallet arrays read at the file's stride, short ids/values read without over-reading their bytes. 12: ItemDisplayInfoModelMatRes (retail's per-slot replaceable-material table, the authoritative source for M2 texture types beyond the type-2 skin). 11: ChrCustomizationReq adds ReqAchievementID/ReqQuestID/ReqItemModifiedAppearanceID (unlock-gate filter for customization choices). 10: corrected ItemSparse name-field positions (sparse-record string walk) for 12.0.7. 9: ChrCustomizationReq/ChrRaces/CreatureDisplayInfo/CreatureModelData. Bump forces a cache rebuild so the fix reaches installs upgraded over a prior build
      const QString build = GAMEDIRECTORY.version(); // current WoW build, e.g. "12.0.1.66220"
-     buildVersion = build.isEmpty() ? QString() : (build + "|schema" + QString::number(SCHEMA_VERSION));
+     const QString product = GAMEDIRECTORY.clientProfile().product;
+     const QString schemaFolder = core::Game::instance().configFolder();
+     buildVersion = build.isEmpty() ? QString()
+                                    : (build + "|" + product + "|" + schemaFolder + "|schema" + QString::number(SCHEMA_VERSION));
 
      QString cachedVersion;
      {
@@ -68,15 +85,24 @@ bool core::GameDatabase::initFromXML(const QString & file)
      {
        LOG_INFO << "Database cache stale or missing (cached:" << cachedVersion
                 << "/ current:" << buildVersion << ") - rebuilding from DB2";
-       QFile::remove(DB_PATH);
-       QFile::remove(VER_PATH);
+       if (QFile::exists(DB_PATH) && !QFile::remove(DB_PATH))
+       {
+         // Another process has it open (an export this viewer started, a second viewer): it holds another
+         // client's or build's tables, which must not be reused as this one's. Build this client's tables in
+         // memory; the file and its stamp stay as they are.
+         LOG_WARNING << "Database cache" << DB_PATH << "is in use by another process and cannot be replaced -"
+                     << "building this client's database in memory";
+         inMemory = true;
+       }
+       else
+         QFile::remove(VER_PATH);
      }
      else
      {
        LOG_INFO << "Reusing cached database for" << buildVersion << "(skipping DB2 rebuild)";
      }
 
-     rc = sqlite3_open(DB_PATH, &m_db);
+     rc = sqlite3_open(inMemory ? ":memory:" : DB_PATH, &m_db);
    }
    else
     rc = sqlite3_open(":memory:", &m_db);
@@ -115,7 +141,16 @@ bool core::GameDatabase::initFromXML(const QString & file)
 
    // Record the build the cache was produced for, so it can be validated next time.
    // (Skip when the build version is unknown -- we don't want to trust a blind cache.)
-   if (m_fastMode && ok && !buildVersion.isEmpty())
+   if (inMemory)
+   {
+     // nothing to stamp: the file on disk is not this client's
+   }
+   else if (m_fastMode && ok && !buildVersion.isEmpty() && !cacheComplete())
+   {
+     QFile::remove(VER_PATH);
+     LOG_INFO << "Database cache not stamped: tables of this client are not on this computer yet (rebuilt next time)";
+   }
+   else if (m_fastMode && ok && !buildVersion.isEmpty())
    {
      QFile vf(VER_PATH);
      if (vf.open(QIODevice::WriteOnly | QIODevice::Truncate | QIODevice::Text))
@@ -197,7 +232,9 @@ bool core::GameDatabase::createDatabaseFromXML(const QString & file)
     {
       if ((*it)->create())
       {
-        if (!(*it)->fill() && !m_fastMode)
+        if ((*it)->skipFill)
+          LOG_WARNING << "Table" << (*it)->name << "not read:" << (*it)->skipReason;
+        else if (!(*it)->fill() && !m_fastMode)
         {
           LOG_ERROR << "Error during table filling" << (*it)->name;
           result = false;
@@ -222,8 +259,11 @@ bool core::GameDatabase::createDatabaseFromXML(const QString & file)
     }
   }
 
+  // Empty the list as well as freeing it: loading a client again reads the structures into this
+  // same list, and the pointers left behind were the first thing the WoWDBDefs refresh touched.
   for (auto it : m_dbStruct)
     delete it;
+  m_dbStruct.clear();
 
   // All tables are populated (or reused from cache) -- create the secondary indexes on
   // the hot join/lookup columns. Idempotent, so this is cheap on an already-indexed cache.
@@ -272,7 +312,7 @@ bool core::GameDatabase::readStructureFromXML(const QString & file)
     else
       tblStruct->file = tblStruct->name;
 
-    readSpecificTableAttributes(child, tblStruct);
+    readSpecificTableAttributes(e, tblStruct); // the table's own attributes (it was given its first field's)
 
     int fieldId = 0;
     while (!child.isNull())
@@ -433,6 +473,13 @@ bool core::TableStructure::fill()
   QString queryBase = query;
   int record = 0;
   int nbRecord = dbc->getRecordCount();
+  if (nbRecord == 0)
+  {
+    // An empty table (Classic Era's Mount.db2 has no records): nothing to insert.
+    LOG_INFO << "table" << name << "is empty";
+    delete dbc;
+    return true;
+  }
 
   for (DBFile::Iterator it = dbc->begin(), itEnd = dbc->end(); it != itEnd; ++it, record++)
   {

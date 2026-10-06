@@ -624,6 +624,44 @@ void AnimControl::UpdateModel(WoWModel *m)
   RelayoutAppearance();
 }
 
+// The model is gone -- another model, a building or another client replaces it: its clips and skins are not listed
+// any more (and its texture groups are freed: UpdateModel only frees them while a model is selected, which it no
+// longer is). The next UpdateModel fills the lists again.
+void AnimControl::Forget()
+{
+  for (size_t i = 0; i < skinList->GetCount(); i++)
+  {
+    TextureGroup *grp = (TextureGroup *)skinList->GetClientData((unsigned int)i);
+    wxDELETE(grp);
+  }
+  skinList->Clear();
+  animCList2->Clear();
+  animCList3->Clear();
+  PCRList.clear();
+  CDIToTexGp.clear();
+  singleSkinOverrides.clear();
+  m_clips.clear();
+  m_visibleClips.clear();
+  m_listedAnim = -1;
+  clipList->SetItemCount(0);
+  ApplyClipFilter();
+  UpdateFrameSlider(10, 2); // the scrubber back at the start, as for a building
+  // The BLP skin choices: textures of the previous model's folder (another client's files after a switch). List 1
+  // holds every group (lists 2 and 3 point at the same ones); the next UpdateModel fills them again.
+  for (size_t i = 0; i < BLPSkinList1->GetCount(); i++)
+  {
+    TextureGroup *grp = (TextureGroup *)BLPSkinList1->GetClientData((unsigned int)i);
+    wxDELETE(grp);
+  }
+  BLPSkinList1->Clear();
+  BLPSkinList2->Clear();
+  BLPSkinList3->Clear();
+  BLPskins.clear();
+  modelFolder.clear();
+  BLPListFilled = false;
+  modelFolderChanged = false;
+}
+
 void AnimControl::UpdateWMO(WMO *w, int group)
 {
   if (!w || w->itemName().size()==0)

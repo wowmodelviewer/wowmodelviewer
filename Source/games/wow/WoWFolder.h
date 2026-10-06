@@ -45,6 +45,8 @@ namespace wow
       // listfile, and log the banner. Returns the number of archives opened (0 = no MPQ client
       // found). Independent of the CASC path.
       int initMpq(const QString & dataFolder, const QString & locale, const QString & version);
+      // How many MPQ archives a legacy install folder has (opened and closed again; nothing else is touched).
+      static int countMpqArchives(const QString & dataFolder, const QString & locale);
 
       GameFile * getFile(int id) override;
       GameFile * getFile(QString filename) override; // adds MPQ create-on-demand
@@ -59,6 +61,20 @@ namespace wow
       std::vector<core::GameConfig> configsFound() override;
 
       int lastError() override;
+      // Let go of the CASC storage: this folder's client was replaced by one in another folder object.
+      void closeStorage() { m_CASCFolder.closeStorage(); }
+      // Files in the opened build that are not on this computer (a partly downloaded install).
+      size_t remoteFileCount() const { return m_CASCFolder.remoteFileCount(); }
+      // Of those, the ones this viewer uses (models, skins, animations, skeletons, textures, world models, tables),
+      // counted from the file list: optional videos and the like do not make an install "not fully downloaded".
+      size_t remoteViewerFileCount() const { return m_remoteViewerFiles; }
+      // Is this file listed for the opened build but not on this computer (a partly downloaded install)?
+      bool isRemoteFile(const QString & name) const;
+      // Frees the files the last reload detached (initFromListfile). Called once the load that detached them has
+      // rebuilt everything that could point at them (Browse, the character controls; the canvas was cleared
+      // before): ModelViewer::LoadWoW, at its end. Also run by the next reload, for a load that never got there.
+      void freeDetachedFiles();
+      size_t detachedFileCount() const { return m_detached.size(); }
 
       void onChildAdded(GameFile *) override;
       void onChildRemoved(GameFile *) override;
@@ -74,7 +90,9 @@ namespace wow
       QString m_mpqLocale; // detected/selected locale when in MPQ mode (for locale())
       std::map<int, GameFile *> m_idMap;
       std::map<int, QString> m_idNameMap;
+      size_t m_remoteViewerFiles = 0;
       std::map<QString, int> m_nameIdMap;
+      std::vector<GameFile *> m_detached; // each holds one reference of its own (freeDetachedFiles drops it)
   };
 }
 

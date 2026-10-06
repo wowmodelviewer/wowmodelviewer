@@ -51,7 +51,17 @@ void wow::WoWFolder::initFromListfile(const QString & filename)
   qint64 nextReport = 0;
   const qint64 reportEvery = (totalBytes > 0) ? (totalBytes / 60) : 1; // ~60 updates
 
+  // Loading a client again runs this on the folder the previous load filled. The files that load
+  // listed are kept instead of being added a second time (every reload added ~1.9 million more),
+  // and once the list is read, whatever this pass did not list is dropped, so the folder ends up
+  // listing what a first load would.
+  const bool reloading = nbChildren() > 0;
+  freeDetachedFiles(); // a load that did not get as far as freeing its own
+  std::vector<bool> listedNow; // reload only: which file ids this pass lists
+
   LOG_INFO << "WoWFolder - Starting to build object hierarchy";
+  m_remoteViewerFiles = 0;
+  static const char * VIEWER_EXT[] = {".m2", ".skin", ".anim", ".skel", ".blp", ".wmo", ".db2"};
   while (!in.atEnd())
   {
     QString line = in.readLine().toLower();
@@ -69,17 +79,85 @@ void wow::WoWFolder::initFromListfile(const QString & filename)
     int id = lineData.at(0).toInt();
     QString fileName = lineData.at(1);
     // Add the file to the name-ID mappings even if it can't be found in CASC,
-    // as it could be a custom file added by the user:
-    m_idNameMap[id] = fileName;
+    // as it could be a custom file added by the user. (The name is assigned only when it changed,
+    // so a reload keeps sharing the copy the previous load stored instead of adding another.)
+    QString & knownName = m_idNameMap[id];
+    if (knownName != fileName)
+      knownName = fileName;
     m_nameIdMap[fileName] = id;
+    if (m_CASCFolder.isRemote(id))
+      for (const char * ext : VIEWER_EXT)
+        if (fileName.endsWith(QLatin1String(ext)))
+        {
+          m_remoteViewerFiles++;
+          break;
+        }
     if (m_CASCFolder.fileExists(id))
     {
+      if (reloading)
+      {
+        if (id >= 0)
+        {
+          if ((size_t)id >= listedNow.size())
+            listedNow.resize((size_t)id + 1);
+          listedNow[id] = true;
+        }
+        auto known = m_idMap.find(id);
+        if (known != m_idMap.end() && dynamic_cast<CASCFile *>(known->second) && known->second->fullname() == fileName)
+          continue; // already listed by the previous load
+      }
       CASCFile * File = new CASCFile(fileName, id);
       File->setName(line.mid(line.lastIndexOf('/') + 1));
       addChild(File);
     }
   }
+
+  if (reloading)
+  {
+    // Drop what the previous load listed and this one did not: files the new client does not have
+    // or the listfile no longer names, files whose entry now names another path (replaced above),
+    // files opened by id alone, and the custom-folder files, which addCustomFiles adds again. They
+    // are detached now and freed at the end of the load (freeDetachedFiles), once Browse and the
+    // character controls are rebuilt: until then a Browse row of the previous load still points at
+    // one. The count: addChild takes no reference, so a child is at 0 and removeChild's unref would
+    // wrap it; m_detached holds a reference of its own (ref) and one balances that unref (ref).
+    std::vector<GameFile *> stale;
+    for (GameFile * f : *this)
+    {
+      const int id = f->fileDataId();
+      auto known = m_idMap.find(id);
+      const bool listed = dynamic_cast<CASCFile *>(f) && id >= 0 && (size_t)id < listedNow.size() && listedNow[id]
+                          && known != m_idMap.end() && known->second == f;
+      if (!listed)
+        stale.push_back(f);
+    }
+    for (GameFile * f : stale)
+    {
+      f->ref();
+      f->ref();
+      removeChild(f);
+      m_detached.push_back(f);
+    }
+    LOG_INFO << "WoWFolder - Reload dropped" << (unsigned int)stale.size() << "files the previous load listed";
+  }
   LOG_INFO << "WoWFolder - Hierarchy creation done";
+}
+
+void wow::WoWFolder::freeDetachedFiles()
+{
+  if (m_detached.empty())
+    return;
+  LOG_INFO << "WoWFolder - Freeing" << (unsigned int)m_detached.size() << "files the last reload detached";
+  for (GameFile * f : m_detached)
+    f->unref(); // the reference m_detached held: the last one, so the file is deleted
+  m_detached.clear();
+  m_detached.shrink_to_fit();
+}
+
+bool wow::WoWFolder::isRemoteFile(const QString & name) const
+{
+  auto it = m_nameIdMap.find(name.toLower());
+  return it != m_nameIdMap.end() && m_CASCFolder.isRemote(it->second);
 }
 
 void wow::WoWFolder::addCustomFiles(const QString & path, bool bypassOriginalFiles)
@@ -256,16 +334,19 @@ bool wow::WoWFolder::setConfig(core::GameConfig config)
   m_CASCFolder.setProgressCallback(m_loadProgressCb);
   const bool ok = m_CASCFolder.setConfig(config);
 
-  // Derive the client profile from the detected config and select the matching storage
-  // provider. Modern clients (CASC) resolve to a CascFileProvider that forwards to
-  // m_CASCFolder -- identical behaviour to before. Old MoPaQ clients resolve to the
-  // placeholder MpqFileProvider (not implemented yet). Done regardless of ok so the profile
-  // reflects what was requested even on a failed open.
+  // A client that did not open changes nothing: the one already loaded (if any) stays as it was, profile and
+  // provider included (CASCFolder::setConfig keeps its storage and config too).
+  if (!ok)
+  {
+    LOG_ERROR << "[clientprofile] not opened:" << core::ClientProfile::fromGameConfig(config).describe();
+    return false;
+  }
+
+  // The client profile for the opened config, and its storage provider: every Battle.net product is CASC
+  // (ClientProfile::fromGameConfig), so a CascFileProvider forwarding to m_CASCFolder. The legacy MPQ client
+  // installs its own provider (initMpq).
   m_clientProfile = core::ClientProfile::fromGameConfig(config);
-  if (m_clientProfile.storage == core::StorageType::MPQ)
-    m_provider.reset(new MpqFileProvider());
-  else
-    m_provider.reset(new CascFileProvider(&m_CASCFolder));
+  m_provider.reset(new CascFileProvider(&m_CASCFolder));
 
   LOG_INFO << "[clientprofile] active client ->" << m_clientProfile.describe();
   LOG_INFO << "[fileprovider] storage backend:" << m_provider->name()
@@ -274,6 +355,12 @@ bool wow::WoWFolder::setConfig(core::GameConfig config)
            << "| lookup by name:" << (m_provider->supportsNameLookup() ? "yes" : "no");
 
   return ok;
+}
+
+int wow::WoWFolder::countMpqArchives(const QString & dataFolder, const QString & locale)
+{
+  MpqFileProvider probe;
+  return probe.init(dataFolder, locale);
 }
 
 int wow::WoWFolder::initMpq(const QString & dataFolder, const QString & locale, const QString & version)
@@ -346,7 +433,10 @@ void wow::WoWFolder::onChildAdded(GameFile * child)
 void wow::WoWFolder::onChildRemoved(GameFile * child)
 {
   GameFolder::onChildRemoved(child);
-  m_idMap.erase(child->fileDataId());
+  // Only when the id still leads to this file: a reload can have listed its replacement already.
+  auto it = m_idMap.find(child->fileDataId());
+  if (it != m_idMap.end() && it->second == child)
+    m_idMap.erase(it);
 }
 
 QString wow::WoWFolder::fileName(int id)

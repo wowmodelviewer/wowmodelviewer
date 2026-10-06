@@ -1273,7 +1273,23 @@ static DWORD LoadCascStorage(TCascStorage * hs, PCASC_OPEN_STORAGE_ARGS pArgs, L
     // We need to load the DOWNLOAD manifest
     if(dwErrCode == ERROR_SUCCESS)
     {
+        // WMV: is this build's DOWNLOAD manifest in local storage at all? (A CKey entry that the index files
+        // flagged local; taken before loading it.)
+        PCASC_CKEY_ENTRY pDownloadEntry = FindCKeyEntry_CKey(hs, hs->DownloadCKey.CKey);
+        bool bDownloadIsLocal = (pDownloadEntry != NULL) && (pDownloadEntry->Flags & CASC_CE_FILE_IS_LOCAL);
+
         dwErrCode = LoadDownloadManifest(hs);
+
+        // WMV: DOWNLOAD only adds download priorities and tags; files are found through ENCODING and ROOT. A
+        // multi-product install can lack it locally (the Battle.net agent fetches it on demand), which made the
+        // whole storage unopenable (WoW Classic Era 1.15.9.70003: no local copy, so the read came back short and
+        // the load failed with ERROR_FILE_CORRUPT). Only that is let through: a local storage whose DOWNLOAD
+        // manifest is not in local storage (no entry: ERROR_FILE_NOT_FOUND; an entry not local: the short read,
+        // ERROR_FILE_CORRUPT). A manifest that IS local but cannot be read or parsed is a damaged storage and
+        // still fails the open, as does any other error (cancelled, out of memory, a malformed header).
+        if((dwErrCode == ERROR_FILE_NOT_FOUND || dwErrCode == ERROR_FILE_CORRUPT) && !bDownloadIsLocal &&
+           (hs->dwFeatures & CASC_FEATURE_ONLINE) == 0)
+            dwErrCode = ERROR_SUCCESS;
     }
 
     // Load the build manifest ("ROOT" file)

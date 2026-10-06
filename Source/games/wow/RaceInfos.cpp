@@ -25,6 +25,10 @@ namespace
 
 void RaceInfos::init()
 {
+  // Loading a client again describes the races of that client only.
+  RACES.clear();
+  RACES_BY_FILEID.clear();
+
   auto races =
     GAMEDATABASE.sqlQuery("SELECT ChrRaces.ClientPrefix, ChrRaces.ID, ChrRaces.Flags, ChrModel.Sex, CreatureModelData.FileDataID, ChrModel.CharComponentTextureLayoutID, "
                           "ChrRaces.MaleModelFallbackRaceID, ChrRaces.MaleModelFallbackSex, ChrRaces.MaleTextureFallbackRaceID, ChrRaces.MaleTextureFallbackSex, "
@@ -47,6 +51,10 @@ void RaceInfos::init()
     RaceInfos infos;
     infos.prefix = race[0].toStdString();
     infos.raceID = race[1].toInt();
+    // A model of a race this client has no ChrRaces row for (its race table not installed, as on a partly
+    // downloaded Classic Era) is no character the viewer can name, file or dress.
+    if (infos.raceID <= 0)
+      continue;
     infos.barefeet = (race[2].toInt() & 0x2);
     infos.sexID = race[3].toInt();
     auto modelfileid = race[4].toInt();
