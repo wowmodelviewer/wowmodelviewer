@@ -70,6 +70,9 @@ class TreeStackItem : public Container<TreeStackItem>
     void onChildAdded(TreeStackItem * child)
     {
       m_childrenMap[child->name()] = child;
+      // The node owns its children: Container's destructor drops this reference, so deleting a node deletes the
+      // subtree below it. (addChild takes none; without it the drop wrapped the count and nothing was ever freed.)
+      child->ref();
     }
 
     // LAZY: add only this node's direct children to the tree, marking branches as
@@ -187,8 +190,8 @@ public:
 private:
   // ONE KEPT TREE PER TREE MODE (Models, Buildings): the hierarchy last built, the search it was built with,
   // and -- while another mode has the tree -- the folders open, the row at the top and the row picked, so it
-  // comes back as it was without listing the files again. Old hierarchies are left behind, never freed: the
-  // nodes kept here point into them.
+  // comes back as it was without listing the files again. A hierarchy that is replaced (another search, another
+  // client) is retired and freed once no row of the tree points into it (clearRows).
   struct TreeState
   {
     TreeStackItem * root = nullptr;
@@ -209,6 +212,16 @@ private:
   bool reuseTree(TreeState & state, const QString & content);
   void reopenRows(TreeState & state, wxTreeItemId parent, wxTreeItemId & top, wxTreeItemId & picked);
   void forgetTrees();
+  // A hierarchy no TreeState keeps any more: freed once no row points into it (its rows may still be on screen).
+  void retireTree(TreeStackItem * root);
+  // Every row of the tree goes; the hierarchies retired until now are then unreachable and are freed right after
+  // the rebuild has shown its rows (a whole client's tree takes about 0.1 s to free). Every rebuild of the model
+  // and building trees clears its rows through this.
+  void clearRows();
+  // Frees the hierarchies retired until now -- only when no row points into any of them -- after the current event.
+  void freeRetiredLater();
+  void freeTrees(const std::vector<TreeStackItem *> & roots);
+  std::vector<TreeStackItem *> m_retired;
   // Whether a row's file is what is loaded now (a world model in Buildings, a model in Models).
   bool isLoaded(GameFile * file) const;
   // The search box's hint and tooltip: what the viewer mode's search finds.

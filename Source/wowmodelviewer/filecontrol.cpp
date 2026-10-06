@@ -238,7 +238,7 @@ void FileControl::Init(ModelViewer* mv)
   // No client yet: there is no file index to list.
   if (!core::Game::instance().initDone())
   {
-    fileTree->DeleteAllItems();
+    clearRows();
     m_applied[slot(m_mode)].Clear();
     SetSearchStatus(_("Load a World of Warcraft client to browse its files."));
     return;
@@ -285,9 +285,12 @@ void FileControl::InitModels(const QString & content)
   // visible or character searches would return nothing.
   const bool buildRaceTree = content.isEmpty();
 
-  // Build a fresh hierarchy and keep it on the control (the previous one is left to
-  // leak -- the Component ref-counting underflows on unref, so the tree always has;
-  // this matches the prior behaviour while letting branches be filled in on expand).
+  // Build a fresh hierarchy and keep it on the control; the previous one is freed once its rows are gone
+  // (clearRows, below).
+  retireTree(m_modelsTree.root);
+  m_modelsTree.openNodes.clear();
+  m_modelsTree.topNode = nullptr;
+  m_modelsTree.pickedNode = nullptr;
   m_modelsTree.root = new TreeStackItem();
   TreeStackItem & root = *m_modelsTree.root;
   size_t listed = 0;
@@ -387,7 +390,7 @@ void FileControl::InitModels(const QString & content)
   // Building all ~130k rows up front took ~9s and dominated startup. When a search
   // is active the result set is small, so populate eagerly and expand it.
   fileTree->Freeze();
-  fileTree->DeleteAllItems();
+  clearRows();
   root.id = fileTree->AddRoot(wxT("Root"));
   if (content.isEmpty())
   {
@@ -480,7 +483,7 @@ void FileControl::InitBuildings(const QString & content)
 {
   if (!ensureBuildings())
   {
-    fileTree->DeleteAllItems();
+    clearRows();
     SetSearchStatus(_("Load a World of Warcraft client to browse its files."));
     return;
   }
@@ -513,7 +516,14 @@ void FileControl::InitBuildings(const QString & content)
   };
 
   fileTree->Freeze();
-  fileTree->DeleteAllItems();
+  // The hierarchy of the last search goes with its rows (the browsing one is kept).
+  m_buildingsTree.openNodes.clear();
+  m_buildingsTree.topNode = nullptr;
+  m_buildingsTree.pickedNode = nullptr;
+  if (m_buildingsTree.root != m_buildingsTree.browseRoot)
+    retireTree(m_buildingsTree.root);
+  m_buildingsTree.root = nullptr;
+  clearRows();
   if (content.isEmpty())
   {
     // Browsing: the hierarchy of every root, made once per client and kept.
@@ -1269,7 +1279,7 @@ bool FileControl::reuseTree(TreeState & state, const QString & content)
   TreeStackItem & root = *state.root;
   root.resetLoaded();
   fileTree->Freeze();
-  fileTree->DeleteAllItems();
+  clearRows();
   root.id = fileTree->AddRoot(wxT("Root"));
   wxTreeItemId top, picked;
   // (A search's rows are all made at once; the folders open again are the ones that were open.)
@@ -1316,9 +1326,58 @@ void FileControl::forgetTrees()
     state->topNode = nullptr;
     state->pickedNode = nullptr;
     state->rootValid = false;
-    state->browseRoot = nullptr;   // the old client's files (left behind, as every old hierarchy is)
+    // The old client's files: retired, and freed by the next rebuild of the tree (the rows on screen may still
+    // point into them until then).
+    retireTree(state->root);
+    if (state->browseRoot != state->root)
+      retireTree(state->browseRoot);
+    state->root = nullptr;
+    state->browseRoot = nullptr;
   }
   m_buildings = BuildingIndex();
+  // Textures mode's rows point into no hierarchy: nothing needs to wait for the next rebuild of a tree.
+  if (m_mode == ViewerMode::Textures)
+    freeRetiredLater();
+}
+
+void FileControl::retireTree(TreeStackItem * root)
+{
+  if (root && std::find(m_retired.begin(), m_retired.end(), root) == m_retired.end())
+    m_retired.push_back(root);
+}
+
+void FileControl::clearRows()
+{
+  fileTree->DeleteAllItems();
+  freeRetiredLater();
+}
+
+void FileControl::freeRetiredLater()
+{
+  if (m_retired.empty())
+    return;
+  // Exactly the hierarchies retired until now: no row points into them any more. One retired after this call (a
+  // client change while the old rows are still on screen) waits for its own rows to go.
+  std::vector<TreeStackItem *> batch;
+  batch.swap(m_retired);
+  CallAfter([this, batch]() { freeTrees(batch); });
+}
+
+void FileControl::freeTrees(const std::vector<TreeStackItem *> & roots)
+{
+  QElapsedTimer timer;
+  timer.start();
+  size_t freed = 0;
+  for (TreeStackItem * root : roots)
+  {
+    // Never one a tree still keeps (a defence: retireTree is only given hierarchies that were let go of).
+    if (root == m_modelsTree.root || root == m_buildingsTree.root || root == m_modelsTree.browseRoot ||
+        root == m_buildingsTree.browseRoot)
+      continue;
+    delete root; // the whole subtree: each node owns its children
+    freed++;
+  }
+  LOG_INFO << "Browse: freed" << (unsigned int)freed << "tree hierarchies the tree no longer shows in" << timer.elapsed() << "ms";
 }
 
 // ---------------------------------------------------------------------------------------- Textures mode
