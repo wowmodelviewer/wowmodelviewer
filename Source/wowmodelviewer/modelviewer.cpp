@@ -3669,6 +3669,12 @@ int ModelViewer::LoadWoWFromMpq(const QString & dataFolder, const QString & loca
 {
   if (m_clientLoading)
     return 0;
+  // A folder without MPQ archives changes nothing: the client loaded before stays loaded.
+  if (wow::WoWFolder::countMpqArchives(dataFolder, locale) <= 0)
+  {
+    LOG_ERROR << "[mpq] No MPQ archives found under" << dataFolder << "-- legacy client not loaded; the loaded client is kept.";
+    return 0;
+  }
   ClientLoadingFlag loadingFlag(m_clientLoading);
   UnityAssetAccess::ClientLoadGuard unityAssetGuard; // refuse Unity asset requests while the folder is rebuilt
   fileControl->Disable();
@@ -3827,6 +3833,11 @@ void ModelViewer::ResetClientState()
   CharTexture::clearClientCaches();
   // A legacy MPQ client's DBC tables (read only for an MPQ client).
   wow::WotlkDbc::instance().reset();
+  // The previous client's races, NPCs and items: a CASC load reads them again (InitDatabase), a legacy MPQ load
+  // reads no database, so it must not go on offering the previous client's.
+  RaceInfos::clear();
+  npcs.clear();
+  items = ItemDatabase();
   m_clientCaps = ClientCapabilities();
 }
 
@@ -3931,14 +3942,20 @@ bool ModelViewer::LoadWoW(const core::GameConfig * chosenConfig, bool showProgre
 
   // Loading window: plain words, the steps the user can relate to.
   LoadingDialog * progress = 0;
+  std::unique_ptr<wxWindowDisabler> disabler;
   if (showProgress)
   {
     progress = new LoadingDialog(this);
     progress->SetTitle(_("World of Warcraft"));
     progress->Show();
+    // The loading window yields to the event loop at every step. Everything else is disabled meanwhile: no menu,
+    // shortcut, Browse row or panel can act on a client that is being replaced (the storage is swapped and the
+    // file index rebuilt in place on the reuse path).
+    disabler.reset(new wxWindowDisabler(progress));
     progress->step(wxString::Format(_("Opening %s..."), friendly), 5);
   }
-  auto closeProgress = [&progress]() {
+  auto closeProgress = [&progress, &disabler]() {
+    disabler.reset();
     if (progress)
       progress->Destroy();
     progress = 0;
@@ -4055,6 +4072,10 @@ bool ModelViewer::LoadWoW(const core::GameConfig * chosenConfig, bool showProgre
     SetStatusText(wxT("Error Initializing the Character Controls."));
   const long charactersMs = step.Time();
   fileControl->Enable();
+  // Browse and the character controls now point at this client's files only (the canvas was cleared before the
+  // file list was read): the files the reload detached can go.
+  if (wow::WoWFolder * live = dynamic_cast<wow::WoWFolder *>(&GAMEDIRECTORY))
+    live->freeDetachedFiles();
 
   ComputeClientCapabilities();
   RememberLoadedClient(config);
@@ -5092,8 +5113,8 @@ void ModelViewer::OnUpdateCommandUI(wxUpdateUIEvent & event)
     event.Enable(isModelsMode() && capabilityRefusal(event.GetId()).isEmpty());
   else if (needsUnityViewport(event.GetId()))
     event.Enable(!isTextureMode());
-  else if (!capabilityRefusal(event.GetId()).isEmpty())
-    event.Enable(false);
+  else if (isCapabilityGated(event.GetId()))
+    event.Enable(capabilityRefusal(event.GetId()).isEmpty()); // both ways: a refusal ends (a load finishes)
   switch (event.GetId())
   {
     case ID_SHOW_FILE_LIST:
@@ -5149,6 +5170,24 @@ bool ModelViewer::needsModelViewer(int id) const
       return true;
   }
   return id >= m_exportMenuFirst && id < m_exportMenuEnd;
+}
+
+bool ModelViewer::isCapabilityGated(int id) const
+{
+  switch (id)
+  {
+    case ID_LOAD_WOW:
+    case ID_LOAD_MPQ:
+    case ID_LOAD_CHAR:
+    case ID_IMPORT_CHAR:
+    case ID_VIEW_NPC:
+    case ID_VIEW_ITEM:
+    case ID_UI_TEXTURES:
+    case ID_UI_BUILDINGS:
+      return true;
+    default:
+      return false;
+  }
 }
 
 QString ModelViewer::capabilityRefusal(int id) const

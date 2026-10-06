@@ -129,7 +129,7 @@
     <field type="int32" name="ReqItemModifiedAppearanceID" pos="7" />
     <!-- RaceMasks is two uint32 in the file (a pallet array of 2): RaceMasks1 is the low and
          RaceMasks2 the high half of the 64-bit race mask, indexed by ChrRaces.PlayableRaceBit. -->
-    <field type="uint32" name="RaceMasks" arraySize="2" pos="8" />
+    <field type="uint32" name="RaceMasks" arraySize="2" pos="8" absentValue="4294967295" />
   </table>
   <!-- A requirement's prerequisite choices: the requirement holds only while one of them is the
        current choice of its option. No field definition exists for this table in the bundled set;

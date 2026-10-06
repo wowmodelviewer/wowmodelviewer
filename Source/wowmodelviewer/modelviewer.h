@@ -317,6 +317,8 @@ public:
   // A command the loaded client cannot do (ClientCapabilities): why, in plain words; empty when it can (or when no
   // client is loaded -- the viewer selector then offers to load one). Greyed and refused like the above.
   QString capabilityRefusal(int id) const;
+  // The commands capabilityRefusal answers for (their menu items and tools follow it both ways).
+  bool isCapabilityGated(int id) const;
   // Select a texture picked in Browse (Textures mode): the texture view reads and shows it.
   void ShowTexture(const TextureEntry & entry, bool lookup);
   // The texture view's selection changed, or its facts arrived: the command bar's label, the status bar

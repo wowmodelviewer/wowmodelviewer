@@ -21,6 +21,7 @@
 #include "wdc1file.h"
 #include "wdc2file.h"
 #include "wdc3file.h"
+#include "WoWFolder.h"
 
 const std::vector<QString> POSSIBLE_DB_EXT = {".db2", ".dbc"};
 
@@ -66,6 +67,7 @@ void wow::WoWDatabase::readSpecificFieldAttributes(QDomElement & e, core::FieldS
   QDomNode pos = attributes.namedItem("pos");
   QDomNode commonData = attributes.namedItem("commonData");
   QDomNode relationshipData = attributes.namedItem("relationshipData");
+  QDomNode absentValue = attributes.namedItem("absentValue");
 
   if (!pos.isNull())
     field->pos = pos.nodeValue().toInt();
@@ -75,6 +77,9 @@ void wow::WoWDatabase::readSpecificFieldAttributes(QDomElement & e, core::FieldS
 
   if (!relationshipData.isNull())
     field->isRelationshipData = true;
+
+  if (!absentValue.isNull())
+    field->absentValue = absentValue.nodeValue().toStdString();
 }
 
 // Read a DB2's layout_hash (the fingerprint of its record structure) straight from the file
@@ -160,11 +165,23 @@ void wow::WoWDatabase::refreshStructures(std::vector<core::TableStructure *> & t
     const uint32 fileHash = readDB2LayoutHash(tbl->file);
     if (fileHash == 0)
     {
-      // Not on this computer (a partially downloaded client), not in this client, or not a WDC table.
-      m_schemaCheck.notInstalled++;
-      m_schemaCheck.notes << QString("%1: not installed").arg(tbl->name);
+      // Not on this computer (a partially downloaded client: the database cache is then left unstamped, so it is
+      // built again once the file is there), or not in this client at all / not a WDC table (nothing will change).
+      wow::WoWFolder * folder = dynamic_cast<wow::WoWFolder *>(&GAMEDIRECTORY);
+      const bool remote = folder && folder->isRemoteFile("dbfilesclient/" + tbl->file.toLower() + ".db2");
+      if (remote)
+      {
+        m_schemaCheck.notInstalled++;
+        m_schemaCheck.notes << QString("%1: not installed").arg(tbl->name);
+        tbl->skipReason = "its file is not on this computer yet";
+      }
+      else
+      {
+        m_schemaCheck.notInClient++;
+        m_schemaCheck.notes << QString("%1: not in this client").arg(tbl->name);
+        tbl->skipReason = "this client has no such table";
+      }
       tbl->skipFill = true;
-      tbl->skipReason = "its file is not installed";
       continue;
     }
 
@@ -255,7 +272,8 @@ void wow::WoWDatabase::refreshStructures(std::vector<core::TableStructure *> & t
   }
   LOG_INFO << "[schema]" << schemaDir << "for" << build << ":" << m_schemaCheck.verified << "tables verified,"
            << m_schemaCheck.trusted << "kept at schema positions," << m_schemaCheck.notRead << "not read,"
-           << m_schemaCheck.notInstalled << "not installed," << m_schemaCheck.absentFields << "absent fields";
+           << m_schemaCheck.notInstalled << "not installed," << m_schemaCheck.notInClient << "not in this client,"
+           << m_schemaCheck.absentFields << "absent fields";
 }
 
 DBFile * wow::TableStructure::createDBFile()

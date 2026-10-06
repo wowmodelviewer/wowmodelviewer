@@ -490,7 +490,11 @@ std::vector<std::string> WDC1File::get(unsigned int recordIndex, const core::Tab
     {
       unsigned int val = 0;
       if (!readFieldValue(recordIndex, field->pos, i, field->arraySize, val))
+      {
+        // One value per column, or the INSERT is short and the whole table fails to fill.
+        result.push_back(field->type == "text" ? "" : (field->absentValue.empty() ? "0" : field->absentValue));
         continue;
+      }
 
       if (field->type == "text")
       {
@@ -614,6 +618,13 @@ WDC1File::~WDC1File()
 
 bool WDC1File::readFieldValue(unsigned int recordIndex, unsigned int fieldIndex, uint arrayIndex, uint arraySize, unsigned int & result) const
 {
+  // A position past the file's fields (a column this client's layout does not have: refreshStructures places it
+  // at 0x7FFF) or a record past its records is read as nothing, as WDC3File does -- never indexed.
+  if (recordIndex >= m_recordOffsets.size() || fieldIndex >= m_fieldStorageInfo.size())
+  {
+    result = 0;
+    return false;
+  }
   unsigned char * recordOffset = m_recordOffsets[recordIndex];
   field_storage_info info = m_fieldStorageInfo[fieldIndex];
   switch (info.storage_type)

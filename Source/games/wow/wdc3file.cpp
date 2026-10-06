@@ -686,7 +686,7 @@ std::vector<std::string> WDC3File::get(unsigned int recordIndex, const core::Tab
         // value per column -- otherwise the INSERT gets fewer values than columns and the ENTIRE
         // table fails to fill, which then cascades (e.g. an empty CreatureDisplayInfo left a bad
         // model id that crashed RaceInfos::init on startup).
-        result.push_back(field->type == "text" ? "" : "0");
+        result.push_back(field->type == "text" ? "" : (field->absentValue.empty() ? "0" : field->absentValue));
         continue;
       }
 

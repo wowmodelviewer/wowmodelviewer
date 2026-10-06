@@ -55,6 +55,9 @@ namespace wow
     int pos;
     bool isCommonData;
     bool isRelationshipData;
+    // What the column reads as when the client's layout does not have it (database.xml absentValue; default "0",
+    // or empty text). For a mask, "no restriction" is the safe reading, not "nothing allowed".
+    std::string absentValue;
   };
 
   class _WOWDATABASE_API_ WoWDatabase : public core::GameDatabase
@@ -77,7 +80,8 @@ namespace wow
         int verified = 0;      // a WoWDBDefs definition matched this client's own file (layout hash or build)
         int trusted = 0;       // no definition matched, kept at the schema's positions: a client of its generation
         int notRead = 0;       // no definition matched, and the client is of another generation: not read
-        int notInstalled = 0;  // the table's file is not on this computer (or not in this client)
+        int notInstalled = 0;  // the table's file is listed for this build but not on this computer (yet)
+        int notInClient = 0;   // the table's file is not in this client at all (or not a DB2 table)
         int absentFields = 0;  // fields the client's layout does not have (read as empty)
         QStringList notes;     // one line per table that was not verified
       };

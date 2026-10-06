@@ -646,6 +646,20 @@ void AnimControl::Forget()
   clipList->SetItemCount(0);
   ApplyClipFilter();
   UpdateFrameSlider(10, 2); // the scrubber back at the start, as for a building
+  // The BLP skin choices: textures of the previous model's folder (another client's files after a switch). List 1
+  // holds every group (lists 2 and 3 point at the same ones); the next UpdateModel fills them again.
+  for (size_t i = 0; i < BLPSkinList1->GetCount(); i++)
+  {
+    TextureGroup *grp = (TextureGroup *)BLPSkinList1->GetClientData((unsigned int)i);
+    wxDELETE(grp);
+  }
+  BLPSkinList1->Clear();
+  BLPSkinList2->Clear();
+  BLPSkinList3->Clear();
+  BLPskins.clear();
+  modelFolder.clear();
+  BLPListFilled = false;
+  modelFolderChanged = false;
 }
 
 void AnimControl::UpdateWMO(WMO *w, int group)

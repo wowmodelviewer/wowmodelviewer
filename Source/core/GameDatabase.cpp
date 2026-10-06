@@ -54,6 +54,7 @@ bool core::GameDatabase::initFromXML(const QString & file)
    static const char * DB_PATH  = "./wowdb.sqlite";
    static const char * VER_PATH = "./wowdb.sqlite.build";
    QString buildVersion;
+   bool inMemory = false; // the cache file could not be replaced: this client's tables are built in memory
 
    if(m_fastMode)
    {
@@ -84,15 +85,24 @@ bool core::GameDatabase::initFromXML(const QString & file)
      {
        LOG_INFO << "Database cache stale or missing (cached:" << cachedVersion
                 << "/ current:" << buildVersion << ") - rebuilding from DB2";
-       QFile::remove(DB_PATH);
-       QFile::remove(VER_PATH);
+       if (QFile::exists(DB_PATH) && !QFile::remove(DB_PATH))
+       {
+         // Another process has it open (an export this viewer started, a second viewer): it holds another
+         // client's or build's tables, which must not be reused as this one's. Build this client's tables in
+         // memory; the file and its stamp stay as they are.
+         LOG_WARNING << "Database cache" << DB_PATH << "is in use by another process and cannot be replaced -"
+                     << "building this client's database in memory";
+         inMemory = true;
+       }
+       else
+         QFile::remove(VER_PATH);
      }
      else
      {
        LOG_INFO << "Reusing cached database for" << buildVersion << "(skipping DB2 rebuild)";
      }
 
-     rc = sqlite3_open(DB_PATH, &m_db);
+     rc = sqlite3_open(inMemory ? ":memory:" : DB_PATH, &m_db);
    }
    else
     rc = sqlite3_open(":memory:", &m_db);
@@ -131,7 +141,11 @@ bool core::GameDatabase::initFromXML(const QString & file)
 
    // Record the build the cache was produced for, so it can be validated next time.
    // (Skip when the build version is unknown -- we don't want to trust a blind cache.)
-   if (m_fastMode && ok && !buildVersion.isEmpty() && !cacheComplete())
+   if (inMemory)
+   {
+     // nothing to stamp: the file on disk is not this client's
+   }
+   else if (m_fastMode && ok && !buildVersion.isEmpty() && !cacheComplete())
    {
      QFile::remove(VER_PATH);
      LOG_INFO << "Database cache not stamped: tables of this client are not on this computer yet (rebuilt next time)";

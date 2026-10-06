@@ -56,6 +56,7 @@ void wow::WoWFolder::initFromListfile(const QString & filename)
   // and once the list is read, whatever this pass did not list is dropped, so the folder ends up
   // listing what a first load would.
   const bool reloading = nbChildren() > 0;
+  freeDetachedFiles(); // a load that did not get as far as freeing its own
   std::vector<bool> listedNow; // reload only: which file ids this pass lists
 
   LOG_INFO << "WoWFolder - Starting to build object hierarchy";
@@ -116,9 +117,10 @@ void wow::WoWFolder::initFromListfile(const QString & filename)
     // Drop what the previous load listed and this one did not: files the new client does not have
     // or the listfile no longer names, files whose entry now names another path (replaced above),
     // files opened by id alone, and the custom-folder files, which addCustomFiles adds again. They
-    // are detached, not freed: removeChild drops the folder's reference, which would delete them,
-    // so each is given one of its own first -- a tree row, a texture or a model of the previous
-    // load may still hold one.
+    // are detached now and freed at the end of the load (freeDetachedFiles), once Browse and the
+    // character controls are rebuilt: until then a Browse row of the previous load still points at
+    // one. The count: addChild takes no reference, so a child is at 0 and removeChild's unref would
+    // wrap it; m_detached holds a reference of its own (ref) and one balances that unref (ref).
     std::vector<GameFile *> stale;
     for (GameFile * f : *this)
     {
@@ -132,11 +134,30 @@ void wow::WoWFolder::initFromListfile(const QString & filename)
     for (GameFile * f : stale)
     {
       f->ref();
+      f->ref();
       removeChild(f);
+      m_detached.push_back(f);
     }
     LOG_INFO << "WoWFolder - Reload dropped" << (unsigned int)stale.size() << "files the previous load listed";
   }
   LOG_INFO << "WoWFolder - Hierarchy creation done";
+}
+
+void wow::WoWFolder::freeDetachedFiles()
+{
+  if (m_detached.empty())
+    return;
+  LOG_INFO << "WoWFolder - Freeing" << (unsigned int)m_detached.size() << "files the last reload detached";
+  for (GameFile * f : m_detached)
+    f->unref(); // the reference m_detached held: the last one, so the file is deleted
+  m_detached.clear();
+  m_detached.shrink_to_fit();
+}
+
+bool wow::WoWFolder::isRemoteFile(const QString & name) const
+{
+  auto it = m_nameIdMap.find(name.toLower());
+  return it != m_nameIdMap.end() && m_CASCFolder.isRemote(it->second);
 }
 
 void wow::WoWFolder::addCustomFiles(const QString & path, bool bypassOriginalFiles)
@@ -334,6 +355,12 @@ bool wow::WoWFolder::setConfig(core::GameConfig config)
            << "| lookup by name:" << (m_provider->supportsNameLookup() ? "yes" : "no");
 
   return ok;
+}
+
+int wow::WoWFolder::countMpqArchives(const QString & dataFolder, const QString & locale)
+{
+  MpqFileProvider probe;
+  return probe.init(dataFolder, locale);
 }
 
 int wow::WoWFolder::initMpq(const QString & dataFolder, const QString & locale, const QString & version)

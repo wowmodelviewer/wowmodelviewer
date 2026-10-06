@@ -19,7 +19,9 @@ Format loosely based on [Keep a Changelog](https://keepachangelog.com/).
   the client's own file before it is read: a layout the WoWDBDefs definitions know is remapped to it, a layout the
   schema records itself (`layoutHash` on the table, which is now actually read) is read as is, a Retail patch of the
   schema's own generation keeps the schema's positions, and anything else is not read rather than read wrong (the
-  log's `[schema]` line counts each kind). The 45 definitions in `bin_support/dbd` are now installed next to the
+  log's `[schema]` line counts each kind). A column a matched layout does not have reads as empty, or as the
+  schema's `absentValue` where empty would mean something (ChrCustomizationReq.RaceMasks: no race restriction,
+  rather than no race allowed). The 45 definitions in `bin_support/dbd` are now installed next to the
   executable (there was no install rule for them), and `Item.SheatheType` is named as they name it. Retail 12.1
   verifies all 46 tables; Classic Era 1.15.9.70003 verifies 45 and leaves one unread (CharHairGeoSets, a layout no
   definition has). Classic Era's Browse lists its 10,433 models, Textures its 101,251 textures and
@@ -539,11 +541,18 @@ Format loosely based on [Keep a Changelog](https://keepachangelog.com/).
   texture caches, mount and creature lists and the model on the canvas, and could crash or hang. Each load now
   opens the new client first (a client that fails to open leaves the loaded one untouched), then lets go of the
   old storage and database and clears what was on screen and cached from it (the Animation panel no longer lists
-  the animations of a model that is gone); Retail -> Classic Era -> Retail in one
-  session ends with Retail exactly as at start. A legacy MPQ load goes through the same reset. Only one client is
-  opened at a time: while one opens, Load World of Warcraft and Load Legacy MPQ Client are greyed and refused.
-- **Classic Era opens.** Its install has no DOWNLOAD manifest, which CascLib treated as a broken storage (error
-  1392); the manifest only lists what is left to download and is now optional.
+  the animations or the BLP skins of a model that is gone; races, NPCs and items are emptied too). The files of
+  the previous product that another product of the same installation does not list are freed once Browse and
+  the character controls are rebuilt, so switching back and forth does not keep them. Retail -> Classic Era ->
+  Retail in one session ends with Retail exactly as at start. While a client opens, the rest of the viewer is
+  disabled (its loading window lets the event loop run), so nothing can act on a client that is being replaced.
+  A legacy MPQ load goes through the same reset, and a folder without MPQ archives leaves the loaded client as
+  it is. A database cache another process holds (an export the viewer started, a second viewer) is no longer
+  reused for another client: that client's tables are built in memory instead.
+- **Classic Era opens.** Its install had no local DOWNLOAD manifest, which CascLib treated as a broken storage
+  (error 1392). The manifest only lists download priorities and tags; when it is not in local storage the storage
+  now opens without it. A DOWNLOAD manifest that is in local storage but cannot be read or parsed still fails the
+  open.
 - **An empty table no longer crashes the database load** (Classic Era's `Mount.db2` has no records) or logs an
   SQL error; a section that points outside its file is refused with an error instead of read.
 - **Switching between Models and Textures happens in one step.** The switch hid and showed the panes, the texture
