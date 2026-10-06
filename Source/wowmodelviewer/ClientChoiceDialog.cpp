@@ -208,9 +208,11 @@ void InstallCard::OnKey(wxKeyEvent & event)
       m_owner->openCard(this);
       return;
     case WXK_UP:
+    case WXK_NUMPAD_UP:     // the keypad's arrows (NumLock off) come as their own codes
       m_owner->focusNeighbour(this, -1);
       return;
     case WXK_DOWN:
+    case WXK_NUMPAD_DOWN:
       m_owner->focusNeighbour(this, +1);
       return;
     case WXK_TAB:
