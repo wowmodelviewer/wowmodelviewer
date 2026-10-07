@@ -191,16 +191,29 @@
 	<field type="uint16" name="ParticleColorID" pos="9" />
     <field type="int32" name="TextureVariationFileDataID" arraySize="4" pos="24" />
   </table>
-  <!--
+  <!-- A humanoid NPC's own appearance: CreatureDisplayInfo.ExtendedDisplayInfoID is this ID. The race, sex and class
+       it is shown as; the bake ids name its pre-baked body textures (TextureFileData.MaterialResourcesID). Positions are
+       the 12.x layout (ID inline at field 0); each client's own layout is placed by name from the table's definition
+       (MoP Classic 5.5.4: Flags 9, BakeMaterialResourcesID 10, HDBakeMaterialResourcesID 11). -->
   <table name="CreatureDisplayInfoExtra">
-    <field type="uint" name="ID" primary="yes" />
-    <field type="byte" name="Skin" pos="3" />
-    <field type="byte" name="Face" pos="4" />
-    <field type="byte" name="HairStyle" pos="5" />
-    <field type="byte" name="HairColor" pos="6" />
-    <field type="byte" name="FacialHair" pos="7" />
+    <field type="int32" name="ID" primary="yes" />
+    <field type="int32" name="DisplayRaceID" pos="1" />
+    <field type="int32" name="DisplaySexID" pos="2" />
+    <field type="int32" name="DisplayClassID" pos="3" />
+    <field type="int32" name="Flags" pos="4" />
+    <field type="int32" name="BakeMaterialResourcesID" pos="5" />
+    <field type="int32" name="HDBakeMaterialResourcesID" pos="6" />
   </table>
-  -->
+  <!-- A humanoid NPC's stored customization: one row per option, naming the choice the NPC shows. The ID is not inline;
+       field 0 is the ChrCustomizationOption, field 1 the ChrCustomizationChoice, and the relationship value the
+       CreatureDisplayInfoExtra. No definition ships for this table; its layout is the same in Retail 12.1, MoP Classic
+       5.5.4, Classic Beta 1.60.1 and Classic Era 1.15.9, so layoutHash verifies the positions for each of them. -->
+  <table name="CreatureDisplayInfoOption" layoutHash="0x2F331C33">
+    <field type="int32" name="ID" primary="yes" />
+    <field type="int32" name="ChrCustomizationOptionID" pos="0" />
+    <field type="int32" name="ChrCustomizationChoiceID" pos="1" />
+    <field type="int32" name="CreatureDisplayInfoExtraID" relationshipData="yes" />
+  </table>
   <table name="CreatureDisplayInfoGeosetData">
     <field type="int32" name="ID" primary="yes" />
     <field type="uint8" name="GeosetIndex" pos="0" />

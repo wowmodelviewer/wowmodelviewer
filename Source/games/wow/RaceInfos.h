@@ -59,6 +59,9 @@ class _RACEINFOS_API_ RaceInfos
     // The row for one race and sex, including the races that share a model file with another
     // race and so cannot be found by that file id.
     static bool getRaceInfosForRaceSex(int race, int sex, RaceInfos & out);
+    // The row of a race on a model file, in whatever sex that model has: a dragon form's ChrModel has a sex of its own
+    // (neither male nor female), so a race worn on it is not found by the sex an NPC's display names.
+    static bool getRaceInfosForRaceAndFile(int race, int fileid, RaceInfos & out);
     // How many (race, sex) pairs the loaded client resolved to a model.
     static size_t count() { return RACES.size(); }
     static void clear() { RACES.clear(); RACES_BY_FILEID.clear(); }

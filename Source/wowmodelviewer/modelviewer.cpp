@@ -1037,7 +1037,10 @@ void ModelViewer::LoadModel(GameFile * file, int raceID, int sexID)
 
   LOG_INFO << "Loading model:" << file->fullname();
 
-  if (canvas->model() && canvas->model()->gamefile && (canvas->model()->gamefile->fullname() == file->fullname())) // don't reload same model
+  // don't reload same model -- unless it is an NPC: its stored appearance, class context and equipment are the NPC's,
+  // and a character asked for on the same file (an Armory import, a saved character) starts afresh
+  if (canvas->model() && canvas->model()->gamefile && (canvas->model()->gamefile->fullname() == file->fullname()) &&
+      !canvas->model()->cd.isNPC)
   {
     // One model file can carry more than one race (a Mag'har Orc wears the Orc model), so the
     // same file may still be a different character: switch the race on the loaded model rather
@@ -1306,11 +1309,11 @@ void ModelViewer::LoadNPC(unsigned int modelid)
   CommitLayoutIfChanged();
 }
 
-// THE APPEARANCE OF A CREATURE DISPLAY, shared by an NPC (LoadNPC: View NPC, a Wowhead link) and Load NPC / Model by
+// THE APPEARANCE OF A CREATURE DISPLAY, shared by an NPC (LoadNPC: View NPC, an NPC link) and Load NPC / Model by
 // Creature Display ID (LoadModelById). fileDataId is the display's CreatureModelData.FileDataID, extraId its
 // ExtendedDisplayInfoID, displayId its CreatureDisplayInfo.ID. A simple display is that model with the display's skin
 // -- texture variations, geosets, particle colours (AnimControl::SetSkinByDisplayID); a display with extended info is
-// a humanoid NPC, shown on its race's HD character model with the NPC's equipment (NpcModelItemSlotDisplayInfo).
+// a humanoid NPC, shown on its race's HD character model as the NPC it is (see below).
 // False when the model did not load; nothing is applied then.
 bool ModelViewer::ShowCreatureDisplay(int fileDataId, int extraId, int displayId)
 {
@@ -1326,40 +1329,72 @@ bool ModelViewer::ShowCreatureDisplay(int fileDataId, int extraId, int displayId
     return true;
   }
 
-  LoadModel(GAMEDIRECTORY.getFile(RaceInfos::getHDModelForFileID(fileDataId)));
-  if (!canvas->model())
+  // A HUMANOID NPC, from its extended display (CreatureDisplayInfoExtra):
+  //  - the race and sex it is shown as. One model file can carry several races -- MoP Classic's Human files list
+  //    Gilnean first, Classic Beta's Skyborne files two races -- and the race decides which options the model has
+  //    and which race-specific item parts it wears. A race that does not wear the file is not applied (the file's
+  //    first race stays, and the stored choices of the other race's model are skipped);
+  //  - its own stored appearance (CreatureDisplayInfoOption), NPC-only choices included, applied internally: the
+  //    player's lists still offer only player choices (CharDetails::applyStoredAppearance);
+  //  - its class context (DisplayClassID: a Demon Hunter wears the class's own choices and item parts);
+  //  - its equipment (NpcModelItemSlotDisplayInfo).
+  // A client whose extended display table is not installed shows the file's first race with its stored choices.
+  int race = -1, sex = -1, classID = 0;
+  sqlResult extra = GAMEDATABASE.sqlQuery(QString("SELECT DisplayRaceID, DisplaySexID, DisplayClassID FROM CreatureDisplayInfoExtra "
+                                                   "WHERE ID = %1").arg(extraId));
+  if (extra.valid && !extra.empty())
+  {
+    race = extra.values[0][0].toInt();
+    sex = extra.values[0][1].toInt();
+    classID = extra.values[0][2].toInt();
+  }
+  GameFile * modelFile = GAMEDIRECTORY.getFile(RaceInfos::getHDModelForFileID(fileDataId));
+  // The race on its model in the model's own sex: a dragon form's model (a Dracthyr's, a drake's) has its own, not the
+  // male or female its display names.
+  RaceInfos wearer;
+  if (race > 0 && modelFile && RaceInfos::getRaceInfosForRaceAndFile(race, modelFile->fileDataId(), wearer))
+    sex = wearer.sexID;
+  LoadModel(modelFile, race > 0 ? race : -1, sex);
+  WoWModel * m = const_cast<WoWModel *>(canvas->model());
+  if (!m)
     return false;
-
-  QString query = QString("SELECT Skin, Face, HairStyle, HairColor, FacialHair FROM CreatureDisplayInfoExtra WHERE ID = %1").arg(extraId);
-
-  sqlResult r = GAMEDATABASE.sqlQuery(query);
-
-  if (r.valid && !r.empty())
+  if (!m->charModelDetails.isChar)
   {
-    g_charControl->model->cd.set(CharDetails::SKIN_COLOR, r.values[0][0].toInt());
-    g_charControl->model->cd.set(CharDetails::FACE, r.values[0][1].toInt());
-    g_charControl->model->cd.set(CharDetails::FACIAL_CUSTOMIZATION_STYLE, r.values[0][2].toInt());
-    g_charControl->model->cd.set(CharDetails::FACIAL_CUSTOMIZATION_COLOR, r.values[0][3].toInt());
-    g_charControl->model->cd.set(CharDetails::ADDITIONAL_FACIAL_CUSTOMIZATION, r.values[0][4].toInt());
+    // A few displays carry extended info on a model no race uses (a treasure chest): it is shown as that model.
+    LOG_WARNING << "Creature display" << displayId << "has extended display" << extraId << "on a model that is not a character -- "
+                   "shown as the model";
+    return true;
+  }
+  if (race > 0 && (m->infos.raceID != race || m->infos.sexID != sex))
+    LOG_WARNING << "Creature display" << displayId << ": race" << race << "sex" << sex << "of extended display" << extraId
+                << "does not wear" << m->gamefile->fullname() << "-- shown as race" << m->infos.raceID;
+
+  // The stored appearance first, in the NPC's class context: the equipment's parts are chosen by it as they load.
+  std::vector<std::pair<uint, uint> > stored;
+  sqlResult r = GAMEDATABASE.sqlQuery(QString("SELECT ChrCustomizationOptionID, ChrCustomizationChoiceID FROM CreatureDisplayInfoOption "
+                                              "WHERE CreatureDisplayInfoExtraID = %1 ORDER BY ID").arg(extraId));
+  for (size_t i = 0; r.valid && i < r.values.size(); i++)
+    stored.emplace_back(r.values[i][0].toUInt(), r.values[i][1].toUInt());
+  m->cd.applyStoredAppearance(stored, classID == CLASS_DEMONHUNTER && m->cd.clientHasDemonHunters());
+
+  // NpcModelItemSlotDisplayInfo.ItemSlot, as the data's items show it (their inventory types and the texture sections
+  // they paint): 0 head, 1 shoulder, 2 shirt, 3 chest, 4 waist, 5 legs, 6 feet, 7 wrist, 8 hands, 9 tabard, 10 back.
+  // A slot outside these is no equipment slot (Retail's 11 always names an empty display): it is skipped, where it
+  // used to land on the head and take the helmet off.
+  static const std::map<int, CharSlots> npcItemSlots = { { 0, CS_HEAD }, { 1, CS_SHOULDER }, { 2, CS_SHIRT }, { 3, CS_CHEST },
+    { 4, CS_BELT }, { 5, CS_PANTS }, { 6, CS_BOOTS }, { 7, CS_BRACERS }, { 8, CS_GLOVES }, { 9, CS_TABARD }, { 10, CS_CAPE } };
+  r = GAMEDATABASE.sqlQuery(QString("SELECT ItemDisplayInfoID, ItemSlot FROM NpcModelItemSlotDisplayInfo "
+                                    "WHERE NpcModelID = %1 ORDER BY ID").arg(extraId));
+  for (size_t i = 0; r.valid && i < r.values.size(); i++)
+  {
+    const auto slot = npcItemSlots.find(r.values[i][1].toInt());
+    if (slot == npcItemSlots.end())
+      continue;
+    if (WoWItem * item = m->getItem(slot->second))
+      item->setDisplayId(r.values[i][0].toInt());
   }
 
-  query = QString("SELECT ItemDisplayInfoID, ItemSlot FROM NpcModelItemSlotDisplayInfo WHERE NpcModelID = %1").arg(extraId);
-
-  r = GAMEDATABASE.sqlQuery(query);
-
-  if (r.valid && !r.empty())
-  {
-    static map<int, CharSlots> ItemTypeToInternal = { { 0, CS_HEAD }, { 1, CS_SHOULDER }, { 2, CS_SHIRT }, { 3, CS_CHEST }, { 4, CS_BELT }, { 5, CS_PANTS },
-    { 6, CS_BOOTS }, { 7, CS_BRACERS }, { 8, CS_GLOVES }, { 9, CS_TABARD }, { 10, CS_CAPE } };
-    for (uint i = 0; i < r.values.size(); i++)
-    {
-      WoWItem * item = g_charControl->model->getItem(ItemTypeToInternal[r.values[i][1].toInt()]);
-      if (item)
-        item->setDisplayId(r.values[i][0].toInt());
-    }
-  }
-
-  g_charControl->model->cd.isNPC = true;
+  m->cd.isNPC = true;
   g_charControl->RefreshModel();
   g_charControl->RefreshEquipment();
   return true;
@@ -4487,7 +4522,14 @@ void ModelViewer::LoadChar(QString fn, bool equipmentOnly /* = false */)
         if (reader.name() == "file")
         {
           QString modelname = reader.attributes().value("name").toString();
-          LoadModel(GAMEDIRECTORY.getFile(modelname));
+          // The race and sex the character was saved as, when the file names them: one model file can carry several
+          // races (MoP Classic's Human files list Gilnean first, Classic Beta's Skyborne files two races), and the
+          // saved choices are options of the saved race's model. A file saved before it named them loads as it did.
+          bool raceRead = false, sexRead = false;
+          const int race = reader.attributes().value("race").toString().toInt(&raceRead);
+          const int sex = reader.attributes().value("sex").toString().toInt(&sexRead);
+          const bool raceSaved = raceRead && sexRead && race > 0;
+          LoadModel(GAMEDIRECTORY.getFile(modelname), raceSaved ? race : -1, raceSaved ? sex : -1);
           WoWModel * m = const_cast<WoWModel *>(canvas->model());
           if(loadCharDetails)
             m->load(fn);

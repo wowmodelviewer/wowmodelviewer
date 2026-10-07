@@ -47,11 +47,20 @@ void CharDetails::save(QXmlStreamWriter & stream)
 {
   stream.writeStartElement("CharDetails");
 
+  // A saved NPC marks itself and the choices its stored appearance set, so loading it back (Load Character, and the
+  // out-of-process export, which goes through a saved character) keeps them; load() honours the marks only in a file
+  // that marks itself an NPC. A player character's file is unchanged.
+  const bool npcAppearance = !storedChoices_.empty();
+  if (npcAppearance)
+    stream.writeAttribute("npc", "1");
+
   for (auto & opt : currentCustomization_)
   {
     stream.writeStartElement("customization");
     stream.writeAttribute("id", QString::number(opt.first));
     stream.writeAttribute("value", QString::number(opt.second));
+    if (npcAppearance && isStoredChoice(opt.first))
+      stream.writeAttribute("stored", "1");
     stream.writeEndElement();
   }
 
@@ -102,13 +111,25 @@ void CharDetails::load(QString & f)
   // arrival would test it against prerequisite choices that come later in the file.
   const SelectionState before = captureSelectionState();
   batchUpdate_ = true;
+  storedChoices_.clear();
+  bool npcFile = false;
 
   while (!reader.atEnd())
   {
     if (reader.isStartElement())
     {
+      if (reader.name() == "CharDetails")
+        npcFile = reader.attributes().value("npc").toString() == "1";
+
       if (reader.name() == "customization")
-        set(reader.attributes().value("id").toString().toUInt(), reader.attributes().value("value").toString().toUInt());
+      {
+        const uint option = reader.attributes().value("id").toString().toUInt();
+        const uint choice = reader.attributes().value("value").toString().toUInt();
+        set(option, choice);
+        // A saved NPC's stored choice is kept as stored (see save()), when the model has it.
+        if (npcFile && reader.attributes().value("stored").toString() == "1" && get(option) == choice)
+          storedChoices_[option] = choice;
+      }
 
       if (reader.name() == "eyeGlowType")
         eyeGlowType = (EyeGlowTypes)reader.attributes().value("value").toString().toUInt();
@@ -141,11 +162,14 @@ void CharDetails::load(QString & f)
   }
 
   batchUpdate_ = false;
+  if (npcFile && !storedChoices_.empty())
+    isNPC = true;
   if (!model_ || model_->infos.raceID == -1)
     return;
 
   // A saved choice that is not valid with the loaded choices as a whole (e.g. a skin colour saved
-  // with a skin type it does not belong to) gives way to the first valid one.
+  // with a skin type it does not belong to) gives way to the first valid one; a saved NPC's stored
+  // choices stay.
   resolveSelection(nullptr);
   const std::map<uint, uint> loaded = currentCustomization_;
   for (const auto & c : loaded)
@@ -163,6 +187,7 @@ void CharDetails::reset(WoWModel * model, bool refillCustomizations)
 
   const SelectionState before = captureSelectionState();
   currentCustomization_.clear();
+  storedChoices_.clear();
 
   showUnderwear = true;
   showHair = true;
@@ -210,6 +235,7 @@ void CharDetails::randomise()
     return;
 
   const SelectionState before = captureSelectionState();
+  storedChoices_.clear(); // a random look is the player's, wholly
   for (const uint optionID : optionResolveOrder_)
   {
     const std::vector<uint> valid = validChoices(optionID, currentCustomization_);
@@ -240,6 +266,7 @@ void CharDetails::setDemonHunterMode(bool val)
   // attaches (on) or detaches (off) the DH horns/blindfold collection models.
   const SelectionState before = captureSelectionState();
   isDemonHunter_ = val;
+  storedChoices_.clear(); // on an NPC, the user's class context takes the character back to the player's rules
   resolveSelection(nullptr);
   const std::map<uint, uint> resolved = currentCustomization_;
   for (const auto & c : resolved)
@@ -254,6 +281,7 @@ void CharDetails::fillCustomizationMap()
 
   // clear any previous value found
   choicesPerOptionMap_.clear();
+  storedChoices_.clear();
   optionFlags_.clear();
   optionClientOrder_.clear();
   optionResolveOrder_.clear();
@@ -681,6 +709,8 @@ void CharDetails::resolveSelection(const std::set<uint> * scope)
   {
     if (scope && scope->count(optionID) == 0)
       continue;
+    if (isStoredChoice(optionID)) // an NPC's own choice is not judged by the player's rules
+      continue;
 
     const std::vector<uint> valid = validChoices(optionID, currentCustomization_);
     const auto current = currentCustomization_.find(optionID);
@@ -764,6 +794,72 @@ bool CharDetails::hasOption(uint chrCustomizationOptionID) const
   return choicesPerOptionMap_.find(chrCustomizationOptionID) != choicesPerOptionMap_.end();
 }
 
+bool CharDetails::isStoredChoice(uint chrCustomizationOptionID) const
+{
+  const auto stored = storedChoices_.find(chrCustomizationOptionID);
+  if (stored == storedChoices_.end())
+    return false;
+  const auto current = currentCustomization_.find(chrCustomizationOptionID);
+  return current != currentCustomization_.end() && current->second == stored->second;
+}
+
+size_t CharDetails::applyStoredAppearance(const std::vector<std::pair<uint, uint> > & optionChoices, bool demonHunter)
+{
+  if (!model_ || model_->infos.raceID == -1)
+    return 0;
+
+  // From no choice at all, so nothing of the look the character had before (a random one, with Random Looks on)
+  // survives in an option the NPC stores nothing for; in the NPC's class context.
+  const SelectionState before = captureSelectionState();
+  currentCustomization_.clear();
+  storedChoices_.clear();
+  const bool classContextChanged = isDemonHunter_ != demonHunter;
+  isDemonHunter_ = demonHunter;
+
+  size_t otherModel = 0, notAChoice = 0, repeated = 0;
+  for (const auto & pair : optionChoices)
+  {
+    const auto listIt = choicesPerOptionMap_.find(pair.first);
+    if (listIt == choicesPerOptionMap_.end())
+    {
+      otherModel++; // an option of another model: an alternate form's
+      continue;
+    }
+    if (std::find(listIt->second.begin(), listIt->second.end(), pair.second) == listIt->second.end())
+    {
+      notAChoice++;
+      LOG_WARNING << __FUNCTION__ << "choice" << pair.second << "is not a choice of option" << pair.first << "-- skipped";
+      continue;
+    }
+    // An option stored twice keeps its first row.
+    if (!storedChoices_.emplace(pair.first, pair.second).second)
+    {
+      repeated++;
+      continue;
+    }
+    currentCustomization_[pair.first] = pair.second;
+  }
+
+  // The options the NPC stores nothing for (often Ears, Eyesight, Eye Style: options added after the NPC was made)
+  // take their first valid choice against the stored ones, as reset() defaults them; the stored ones are kept.
+  resolveSelection(nullptr);
+  const std::map<uint, uint> resolved = currentCustomization_;
+  for (const auto & c : resolved)
+    autoSelectTextureGating(c.second);
+  isNPC = true;
+  LOG_INFO << __FUNCTION__ << storedChoices_.size() << "stored choice(s) applied of" << optionChoices.size()
+           << "| another model's option:" << otherModel << "| not a choice of its option:" << notAChoice
+           << "| option repeated:" << repeated << "| options defaulted:"
+           << (currentCustomization_.size() - storedChoices_.size()) << "| Demon Hunter:" << demonHunter;
+  applySelection(before, 0);
+  if (classContextChanged)
+  {
+    CharDetailsEvent event(this, CharDetailsEvent::DH_MODE_CHANGED); // the character panel's Demon Hunter box follows
+    notify(event);
+  }
+  return storedChoices_.size();
+}
+
 void CharDetails::set(uint chrCustomizationOptionID, uint chrCustomizationChoiceID) // wow version >= 9.x
 {
   if (!model_ || model_->infos.raceID == -1)
@@ -804,21 +900,26 @@ void CharDetails::set(uint chrCustomizationOptionID, uint chrCustomizationChoice
   // Record the choice as requested, then re-validate only the options whose requirements depend on
   // this one (Skin Color on Skin Type, Face Features on Jaw Features, Eyesight on Eye Color): each
   // keeps its current choice while it stays valid and otherwise takes its first valid choice. What
-  // the character wears is then rebuilt from the resulting choices and refreshed once.
+  // the character wears is then rebuilt from the resulting choices and refreshed once. On an NPC, the
+  // pick takes this option and the options depending on it back to the player's rules.
   const SelectionState before = captureSelectionState();
   currentCustomization_[chrCustomizationOptionID] = chrCustomizationChoiceID;
   const std::set<uint> dependents = dependentOptions(chrCustomizationOptionID);
+  storedChoices_.erase(chrCustomizationOptionID);
+  for (const uint dependent : dependents)
+    storedChoices_.erase(dependent);
   resolveSelection(&dependents);
 
   // If this choice adds a skinned model whose texture is gated by another option (e.g. a DH
   // blindfold needs a DH eye-glow colour), make sure that option holds a compatible value,
-  // otherwise the model merges untextured and renders white.
-  autoSelectTextureGating(chrCustomizationChoiceID);
+  // otherwise the model merges untextured and renders white -- on an NPC too, whose gating
+  // option may hold a stored choice.
+  autoSelectTextureGating(chrCustomizationChoiceID, false);
 
   applySelection(before, chrCustomizationOptionID);
 }
 
-void CharDetails::autoSelectTextureGating(uint chrCustomizationChoiceID)
+void CharDetails::autoSelectTextureGating(uint chrCustomizationChoiceID, bool keepStored)
 {
   if (!model_)
     return;
@@ -873,6 +974,8 @@ void CharDetails::autoSelectTextureGating(uint chrCustomizationChoiceID)
     const uint optID = g.first;
     if (choicesPerOptionMap_.count(optID) == 0)
       continue; // gating option not present on this model
+    if (keepStored && isStoredChoice(optID))
+      continue; // an NPC's own choice: its stored appearance names what it wears
     const uint cur = get(optID);
     if (std::find(g.second.begin(), g.second.end(), cur) != g.second.end())
       continue; // already a compatible value, nothing to do
@@ -887,8 +990,14 @@ void CharDetails::autoSelectTextureGating(uint chrCustomizationChoiceID)
       }
     LOG_INFO << "autoSelectTextureGating: choice" << chrCustomizationChoiceID
              << "needs option" << optID << "-> switching it to compatible choice" << pick;
-    currentCustomization_[optID] = pick;
+    // An NPC's stored choice the user's pick needs changed: it, and the options depending on it, go back to the
+    // player's rules (as for the pick itself, in set()).
     const std::set<uint> dependents = dependentOptions(optID);
+    storedChoices_.erase(optID);
+    if (!keepStored)
+      for (const uint dependent : dependents)
+        storedChoices_.erase(dependent);
+    currentCustomization_[optID] = pick;
     resolveSelection(&dependents);
   }
 }

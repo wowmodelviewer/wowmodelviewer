@@ -559,6 +559,20 @@ Format loosely based on [Keep a Changelog](https://keepachangelog.com/).
   Order), no customization, no equipment, and an untextured white model, although their skin had been composed. A
   model a race's ChrModel uses is now a character whatever its file is called; the folder rule still covers files
   the client's tables do not name. Only those two files change (none in Retail, MoP Classic or Classic Era).
+- **Humanoid NPCs wear their own appearance.** An NPC whose display has extended info (Bolvar, Garrosh, a city
+  guard) was shown on its race's model with the race's default -- or, with Random Looks on, a random -- face, skin,
+  hair and beard; only its equipment was its own (Bolvar came up bald and beardless). The NPC's stored appearance
+  (CreatureDisplayInfoOption: one choice per option) and its race, sex and class (CreatureDisplayInfoExtra) are now
+  read in every client and applied: NPC-only choices and options no player is offered (Eye Style) included, without
+  any of them becoming selectable in the character panel, and the options an NPC stores nothing for defaulted as a
+  new character's are. The race decides which options the model has, so it is applied too: MoP Classic's Human
+  NPCs no longer come up as Gilnean (the race listed first on the Human files), Classic Beta's Windshaper Skyborne no
+  longer as High Order. A Demon Hunter NPC is shown in the Demon Hunter context. NPC equipment: a helmet now hides
+  what it hides on a player (hair, ears), and Retail's empty equipment slot 11 no longer replaces the helmet (about
+  1,340 NPCs lost theirs). The body textures now match the client's own baked NPC textures closely (Bolvar's face:
+  mean difference 39 -> 10 of 255; Garrosh's 25 -> 4). A saved character names its race and sex, so a race that
+  shares its model file with another (Mag'har, MoP Classic Humans, Skyborne) loads back as itself; a saved NPC keeps
+  its NPC choices.
 - **Browse no longer keeps every tree it ever built.** Each rebuild of the Models or Buildings tree -- a search,
   clearing it, another client -- left the previous hierarchy of folders and files behind, never freed (about
   90 MB for Retail's models each time: eight searches for "bear", each cleared again, grew the viewer from 2.35 to

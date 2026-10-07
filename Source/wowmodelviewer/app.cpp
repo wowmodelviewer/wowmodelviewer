@@ -52,6 +52,7 @@
 #include <QImage>
 
 #include "TextureManager.h"
+#include "ModelIdLookup.h"
 #include "UnityAssetAccess.h"
 #include "UnityCharacterScene.h"
 #include "UnityIpcServer.h"
@@ -328,10 +329,384 @@ static int doHeadlessMatResTest()
   return failures;
 }
 
+// -customizationtest, every client: a humanoid NPC wears its own stored appearance (CreatureDisplayInfoExtra,
+// CreatureDisplayInfoOption) without the player's lists ever offering what only NPCs wear. The cases are found in the
+// loaded client's own tables, in Creature order -- no NPC is named:
+//   - the first humanoid NPC whose race wears its display's model: race, sex, every stored choice of the model current
+//     and kept as stored, every other option given a valid choice (an option the NPC stores nothing for, often Ears,
+//     must not be left without one), and a pick of the user's taking that option back to the player's rules;
+//   - the first that stores an NPC-only choice of a player option: current, and not among the player's choices;
+//   - the first that stores a choice of an option no player is offered (Eye Style): current, and not offered;
+//   - the first whose race wears its model but is not the first race on the file (MoP Classic's Human NPCs on the
+//     files Gilnean is listed on first, Classic Beta's Windshaper Skyborne): that race;
+//   - the first Demon Hunter NPC (its display's class is 12, in a client that has the class): in that class context,
+//     and a player character loaded on the same model file afterwards (as an Armory import is) is not;
+//   - a saved NPC loads back as it was saved, a player character afterwards carries nothing of the NPC, and a saved
+//     player character loads back as its race, with nothing marked stored.
+template <class Check, class Skip>
+static void checkNpcAppearance(ModelViewer * frame, const Check & check, const Skip & skip)
+{
+  const auto canvasModel = [frame]() { return frame->canvas ? const_cast<WoWModel *>(frame->canvas->model()) : nullptr; };
+  const auto settle = []() {
+    for (int i = 0; i < 20; i++)
+      wxTheApp->Yield(true);
+  };
+  const auto rows = [](const QString & table) {
+    sqlResult r = GAMEDATABASE.sqlQuery(QString("SELECT COUNT(*) FROM %1").arg(table));
+    return (r.valid && !r.values.empty()) ? r.values[0][0].toInt() : 0;
+  };
+  const auto notInstalled = [](const QString & table) {
+    wow::WoWFolder * folder = dynamic_cast<wow::WoWFolder *>(&GAMEDIRECTORY);
+    return folder && folder->isRemoteFile(QString("dbfilesclient/%1.db2").arg(table.toLower()));
+  };
+  for (const QString table : { QString("CreatureDisplayInfoExtra"), QString("CreatureDisplayInfoOption") })
+    if (rows(table) == 0)
+    {
+      if (notInstalled(table))
+        skip("NPC appearance", QString("the client's %1 is not installed on this computer").arg(table));
+      else
+        check(QString("NPC appearance: %1 was read").arg(table), false, "the table holds no row");
+      return;
+    }
+
+  struct Stored { uint option; uint choice; bool npcOnlyChoice; bool npcOnlyOption; };
+  // A case is an NPC (a Creature row, loaded with View NPC) or, in a client whose Creature table lists no humanoid NPC
+  // (Classic Era's lists one creature), a creature display with extended info (loaded with Load NPC / Model by
+  // Creature Display ID): creature is then the display's ID.
+  struct Case { uint creature = 0; bool byDisplay = false; QString who; uint extra = 0; int race = -1; int sex = -1; int classID = 0;
+                std::vector<Stored> stored; };
+  const auto storedOf = [](uint extra) {
+    std::vector<Stored> stored;
+    sqlResult r = GAMEDATABASE.sqlQuery(QString(
+      "SELECT o.ChrCustomizationOptionID, o.ChrCustomizationChoiceID, IFNULL(cq.ReqType, -1), IFNULL(oq.ReqType, -1) "
+      "FROM CreatureDisplayInfoOption o "
+      "LEFT JOIN ChrCustomizationChoice c ON c.ID = o.ChrCustomizationChoiceID "
+      "LEFT JOIN ChrCustomizationReq cq ON cq.ID = c.ChrCustomizationReqID "
+      "LEFT JOIN ChrCustomizationOption op ON op.ID = o.ChrCustomizationOptionID "
+      "LEFT JOIN ChrCustomizationReq oq ON oq.ID = op.Requirement "
+      "WHERE o.CreatureDisplayInfoExtraID = %1 ORDER BY o.ID").arg(extra));
+    std::set<uint> seen;
+    for (size_t i = 0; r.valid && i < r.values.size(); i++)
+    {
+      const uint option = r.values[i][0].toUInt();
+      if (!seen.insert(option).second)
+        continue; // an option stored twice keeps its first row
+      const int choiceType = r.values[i][2].toInt(), optionType = r.values[i][3].toInt();
+      const bool optionNpcOnly = optionType >= 0 && !CharDetails::isPlayerRequirement(optionType);
+      stored.push_back(Stored{ option, r.values[i][1].toUInt(),
+                               !optionNpcOnly && choiceType >= 0 && !CharDetails::isPlayerRequirement(choiceType), optionNpcOnly });
+    }
+    return stored;
+  };
+
+  // Find the cases.
+  Case plain, npcChoice, npcOption, sharedFile, demonHunter;
+  const bool clientHasDH = (CharDetails::clientClassMask() & (1u << (CLASS_DEMONHUNTER - 1))) != 0;
+  const auto findCases = [&](const sqlResult & npcs, bool byDisplay) {
+  for (size_t i = 0; npcs.valid && i < npcs.values.size(); i++)
+  {
+    if (plain.creature && npcChoice.creature && npcOption.creature && sharedFile.creature && (demonHunter.creature || !clientHasDH))
+      break;
+    Case c;
+    c.creature = npcs.values[i][0].toUInt();
+    c.byDisplay = byDisplay;
+    c.who = QString(byDisplay ? "creature display %1" : "NPC %1").arg(c.creature);
+    c.extra = npcs.values[i][2].toUInt();
+    c.race = npcs.values[i][3].toInt();
+    c.sex = npcs.values[i][4].toInt();
+    c.classID = npcs.values[i][5].toInt();
+    const int file = RaceInfos::getHDModelForFileID(npcs.values[i][1].toInt());
+    RaceInfos wearer, first;
+    if (!GAMEDIRECTORY.getFile(file) || !RaceInfos::getRaceInfosForRaceSex(c.race, c.sex, wearer) || wearer.modelFileID != file ||
+        !RaceInfos::getRaceInfosForFileID(file, first))
+      continue; // the display's race does not wear its model, or the model is not installed
+    c.stored = storedOf(c.extra);
+    if (c.stored.empty())
+      continue;
+    if (!plain.creature)
+      plain = c;
+    if (!npcChoice.creature && std::any_of(c.stored.begin(), c.stored.end(), [](const Stored & s) { return s.npcOnlyChoice; }))
+      npcChoice = c;
+    if (!npcOption.creature && std::any_of(c.stored.begin(), c.stored.end(), [](const Stored & s) { return s.npcOnlyOption; }))
+      npcOption = c;
+    if (!sharedFile.creature && first.raceID != c.race)
+      sharedFile = c;
+    if (!demonHunter.creature && clientHasDH && c.classID == CLASS_DEMONHUNTER)
+      demonHunter = c;
+  }
+  };
+  const QString joins = "JOIN CreatureModelData ON CreatureDisplayInfo.ModelID = CreatureModelData.ID "
+                        "JOIN CreatureDisplayInfoExtra ON CreatureDisplayInfo.ExtendedDisplayInfoID = CreatureDisplayInfoExtra.ID ";
+  const QString columns = "CreatureModelData.FileDataID, CreatureDisplayInfoExtra.ID, CreatureDisplayInfoExtra.DisplayRaceID, "
+                          "CreatureDisplayInfoExtra.DisplaySexID, CreatureDisplayInfoExtra.DisplayClassID ";
+  findCases(GAMEDATABASE.sqlQuery("SELECT Creature.ID, " + columns + "FROM Creature "
+                                  "JOIN CreatureDisplayInfo ON Creature.DisplayID1 = CreatureDisplayInfo.ID " + joins + "ORDER BY Creature.ID"),
+            false);
+  if (!plain.creature)
+  {
+    LOG_INFO << QString("[customization-test] no humanoid NPC in this client's Creature table (%1 row(s)): the cases are its creature "
+                        "displays with extended info").arg(rows("Creature"));
+    findCases(GAMEDATABASE.sqlQuery("SELECT CreatureDisplayInfo.ID, " + columns + "FROM CreatureDisplayInfo " + joins +
+                                    "ORDER BY CreatureDisplayInfo.ID"), true);
+  }
+  if (!plain.creature)
+  {
+    check("NPC appearance: a humanoid NPC or creature display whose race wears its model, with stored choices", false, "none found");
+    return;
+  }
+
+  // Loads the NPC; the model when it loaded as that race's character NPC, else null (and a failed check).
+  const auto loadNpc = [&](const Case & c, const QString & what) -> WoWModel * {
+    if (c.byDisplay)
+    {
+      ModelIdLookup::Resolved resolved;
+      wxString why;
+      if (ModelIdLookup::resolve(ModelIdLookup::Kind::CreatureDisplay, (int)c.creature, resolved, why))
+        frame->LoadModelById(resolved, why);
+    }
+    else
+      frame->LoadNPC(c.creature);
+    settle();
+    WoWModel * m = canvasModel();
+    const bool ok = m && m->charModelDetails.isChar && m->cd.isNPC && m->infos.raceID == c.race && m->infos.sexID == c.sex;
+    check(QString("NPC appearance, %1: %2 (extended display %3) loads as a character NPC of race %4 sex %5")
+            .arg(what).arg(c.who).arg(c.extra).arg(c.race).arg(c.sex), ok,
+          m ? QString("isChar %1, NPC %2, race %3 sex %4").arg(m->charModelDetails.isChar ? 1 : 0).arg(m->cd.isNPC ? 1 : 0)
+                .arg(m->infos.raceID).arg(m->infos.sexID) : QString("no model"));
+    return ok ? m : nullptr;
+  };
+  const auto storedState = [](WoWModel * m, const Case & c, int * applied, QStringList * wrong) {
+    for (const Stored & s : c.stored)
+    {
+      if (!m->cd.hasOption(s.option))
+        continue; // another model's option (an alternate form)
+      (*applied)++;
+      if (m->cd.get(s.option) != s.choice || !m->cd.isStoredChoice(s.option))
+        *wrong << QString("%1=%2 (current %3, stored %4)").arg(s.option).arg(s.choice).arg(m->cd.get(s.option))
+                    .arg(m->cd.isStoredChoice(s.option) ? 1 : 0);
+    }
+  };
+
+  // ---- The first humanoid NPC ----
+  if (WoWModel * m = loadNpc(plain, "first humanoid NPC"))
+  {
+    int applied = 0;
+    QStringList wrong;
+    storedState(m, plain, &applied, &wrong);
+    check(QString("NPC appearance: %1 wears every stored choice of its model (%2), kept as stored").arg(plain.who).arg(applied),
+          applied > 0 && wrong.isEmpty(), wrong.join(", "));
+    QStringList bare;
+    for (const uint option : m->cd.getCustomizationOptions())
+    {
+      const std::vector<uint> offered = m->cd.getCustomizationChoices(option);
+      if (!m->cd.isStoredChoice(option) && std::find(offered.begin(), offered.end(), m->cd.get(option)) == offered.end())
+        bare << QString("%1 (current %2)").arg(option).arg(m->cd.get(option));
+    }
+    check(QString("NPC appearance: %1's options it stores nothing for hold a valid choice").arg(plain.who),
+          bare.isEmpty(), bare.join(", "));
+
+    // A user's pick of a stored option's other valid choice takes it back to the player's rules; the rest stay stored.
+    uint picked = 0, pick = 0;
+    for (const Stored & s : plain.stored)
+    {
+      if (!m->cd.isStoredChoice(s.option))
+        continue;
+      for (const uint c : m->cd.getCustomizationChoices(s.option))
+        if (c != s.choice)
+        {
+          picked = s.option;
+          pick = c;
+          break;
+        }
+      if (picked)
+        break;
+    }
+    if (picked)
+    {
+      m->cd.set(picked, pick);
+      settle();
+      size_t stillStored = 0;
+      for (const Stored & s : plain.stored)
+        if (s.option != picked && m->cd.isStoredChoice(s.option))
+          stillStored++;
+      check(QString("NPC appearance: a pick (option %1 -> %2) takes the option back to the player's rules, the others stay stored")
+              .arg(picked).arg(pick),
+            m->cd.get(picked) == pick && !m->cd.isStoredChoice(picked) && stillStored > 0,
+            QString("current %1, stored %2, other stored options %3").arg(m->cd.get(picked)).arg(m->cd.isStoredChoice(picked) ? 1 : 0)
+              .arg(stillStored));
+    }
+  }
+
+  // ---- NPC-only choices and options are worn, never offered ----
+  if (!npcChoice.creature)
+    skip("NPC appearance: an NPC-only choice of a player option", "no humanoid NPC of this client stores one");
+  else if (WoWModel * m = loadNpc(npcChoice, "NPC-only choice"))
+  {
+    QStringList wrong;
+    int n = 0;
+    for (const Stored & s : npcChoice.stored)
+      if (s.npcOnlyChoice && m->cd.hasOption(s.option))
+      {
+        n++;
+        const std::vector<uint> offered = m->cd.getCustomizationChoices(s.option);
+        if (m->cd.get(s.option) != s.choice || std::find(offered.begin(), offered.end(), s.choice) != offered.end())
+          wrong << QString("%1=%2 (current %3)").arg(s.option).arg(s.choice).arg(m->cd.get(s.option));
+      }
+    check(QString("NPC appearance: %1 wears its %2 NPC-only choice(s), and the player's lists do not offer them").arg(npcChoice.who).arg(n),
+          n > 0 && wrong.isEmpty(), wrong.join(", "));
+  }
+  if (!npcOption.creature)
+    skip("NPC appearance: an option no player is offered", "no humanoid NPC of this client stores one");
+  else if (WoWModel * m = loadNpc(npcOption, "option no player is offered"))
+  {
+    QStringList wrong;
+    int n = 0;
+    const std::vector<uint> offered = m->cd.getCustomizationOptions();
+    for (const Stored & s : npcOption.stored)
+      if (s.npcOnlyOption && m->cd.hasOption(s.option))
+      {
+        n++;
+        if (m->cd.get(s.option) != s.choice || std::find(offered.begin(), offered.end(), s.option) != offered.end())
+          wrong << QString("%1=%2 (current %3)").arg(s.option).arg(s.choice).arg(m->cd.get(s.option));
+      }
+    check(QString("NPC appearance: %1 wears its choice of %2 option(s) no player is offered, and the options are not offered")
+            .arg(npcOption.who).arg(n),
+          n > 0 && wrong.isEmpty(), wrong.join(", "));
+  }
+
+  // ---- A race that is not the first race on its file ----
+  if (!sharedFile.creature)
+    skip("NPC appearance: a race that is not the first race on its model file", "no humanoid NPC of this client is one");
+  else if (WoWModel * m = loadNpc(sharedFile, "a race not first on its model file"))
+  {
+    int applied = 0;
+    QStringList wrong;
+    storedState(m, sharedFile, &applied, &wrong);
+    check(QString("NPC appearance: %1 (race %2) wears its stored choices (%3)").arg(sharedFile.who).arg(sharedFile.race).arg(applied),
+          applied > 0 && wrong.isEmpty(), wrong.join(", "));
+  }
+
+  // ---- A Demon Hunter NPC, and a player character on its model file afterwards ----
+  if (!demonHunter.creature)
+    skip("NPC appearance: a Demon Hunter NPC", clientHasDH ? "no humanoid NPC of this client is one" : "this client has no Demon Hunters");
+  else if (WoWModel * m = loadNpc(demonHunter, "Demon Hunter"))
+  {
+    check(QString("NPC appearance: %1 (class 12) is in the Demon Hunter context").arg(demonHunter.who), m->cd.isDemonHunter(),
+          QString("Demon Hunter %1").arg(m->cd.isDemonHunter() ? 1 : 0));
+    // The user unticks Demon Hunter: the character is the player's now -- nothing stays stored, every choice is one
+    // the player is offered.
+    m->cd.setDemonHunterMode(false);
+    settle();
+    QStringList kept;
+    for (const Stored & s : demonHunter.stored)
+      if (m->cd.isStoredChoice(s.option))
+        kept << QString("%1 stored").arg(s.option);
+    for (const uint option : m->cd.getCustomizationOptions())
+    {
+      const std::vector<uint> offered = m->cd.getCustomizationChoices(option);
+      if (std::find(offered.begin(), offered.end(), m->cd.get(option)) == offered.end())
+        kept << QString("%1=%2 not offered").arg(option).arg(m->cd.get(option));
+    }
+    check(QString("NPC appearance: unticking Demon Hunter on %1 leaves no stored choice and only choices the player is offered")
+            .arg(demonHunter.who), !m->cd.isDemonHunter() && kept.isEmpty(), kept.join(", "));
+    // As ApplyArmoryCharacter loads a character of that race and sex: on the file on screen.
+    frame->LoadModel(m->gamefile, demonHunter.race, demonHunter.sex);
+    settle();
+    WoWModel * p = canvasModel();
+    bool anyStored = false;
+    for (const Stored & s : demonHunter.stored)
+      anyStored = anyStored || (p && p->cd.isStoredChoice(s.option));
+    QStringList equipped;
+    for (int slot = CS_HEAD; p && slot < NUM_CHAR_SLOTS; slot++)
+      if (WoWItem * item = p->getItem((CharSlots)slot))
+        if (item->displayId() > 0)
+          equipped << QString::number(slot);
+    check(QString("NPC appearance: a character loaded on %1's model file afterwards is not a Demon Hunter, wears no NPC equipment and no "
+                  "stored choice").arg(demonHunter.who),
+          p && !p->cd.isDemonHunter() && !p->cd.isNPC && !anyStored && equipped.isEmpty(),
+          p ? QString("Demon Hunter %1, NPC %2, stored %3, NPC equipment in slots [%4]").arg(p->cd.isDemonHunter() ? 1 : 0)
+                .arg(p->cd.isNPC ? 1 : 0).arg(anyStored ? 1 : 0).arg(equipped.join(','))
+            : QString("no model"));
+  }
+
+  // ---- Saved and loaded back ----
+  const Case & saved = npcChoice.creature ? npcChoice : plain;
+  const QString npcFile = QDir::temp().filePath("wmv_customizationtest_npc.chr");
+  if (WoWModel * m = loadNpc(saved, "saved"))
+  {
+    const std::map<uint, uint> before = [m]() {
+      std::map<uint, uint> s;
+      for (const uint o : m->cd.getCustomizationOptions())
+        s[o] = m->cd.get(o);
+      return s;
+    }();
+    std::vector<uint> storedBefore;
+    for (const Stored & s : saved.stored)
+      if (m->cd.isStoredChoice(s.option))
+        storedBefore.push_back(s.option);
+    frame->SaveChar(npcFile);
+    frame->LoadChar(npcFile);
+    settle();
+    WoWModel * l = canvasModel();
+    QStringList wrong;
+    if (l)
+    {
+      for (const auto & o : before)
+        if (l->cd.get(o.first) != o.second)
+          wrong << QString("%1: %2 -> %3").arg(o.first).arg(o.second).arg(l->cd.get(o.first));
+      for (const uint o : storedBefore)
+        if (!l->cd.isStoredChoice(o))
+          wrong << QString("%1 no longer stored").arg(o);
+    }
+    check(QString("NPC appearance: %1 saved and loaded back: race %2 sex %3, the same choices, %4 stored")
+            .arg(saved.who).arg(saved.race).arg(saved.sex).arg(storedBefore.size()),
+          l && l->infos.raceID == saved.race && l->infos.sexID == saved.sex && l->cd.isNPC && wrong.isEmpty(),
+          l ? QString("race %1 sex %2 NPC %3 %4").arg(l->infos.raceID).arg(l->infos.sexID).arg(l->cd.isNPC ? 1 : 0).arg(wrong.join(", "))
+            : QString("no model"));
+  }
+  QFile::remove(npcFile);
+
+  // ---- A player character afterwards, saved and loaded back ----
+  const int playerFile = RaceInfos::getFileIDForRaceSex(plain.race, plain.sex);
+  GameFile * player = playerFile > 0 ? GAMEDIRECTORY.getFile(playerFile) : nullptr;
+  if (player)
+  {
+    frame->LoadModel(player, plain.race, plain.sex);
+    settle();
+    WoWModel * m = canvasModel();
+    bool anyStored = false;
+    for (const Stored & s : plain.stored)
+      anyStored = anyStored || (m && m->cd.isStoredChoice(s.option));
+    check(QString("NPC appearance: a player character (race %1 sex %2) loaded afterwards carries nothing of the NPC").arg(plain.race).arg(plain.sex),
+          m && !m->cd.isNPC && !anyStored, m ? QString("NPC %1, stored %2").arg(m->cd.isNPC ? 1 : 0).arg(anyStored ? 1 : 0) : QString("no model"));
+    const QString playerChr = QDir::temp().filePath("wmv_customizationtest_player.chr");
+    std::map<uint, uint> before;
+    if (m)
+      for (const uint o : m->cd.getCustomizationOptions())
+        before[o] = m->cd.get(o);
+    frame->SaveChar(playerChr);
+    QFile f(playerChr);
+    const QString text = f.open(QIODevice::ReadOnly | QIODevice::Text) ? QString::fromUtf8(f.readAll()) : QString();
+    f.close();
+    frame->LoadChar(playerChr);
+    settle();
+    WoWModel * l = canvasModel();
+    QStringList wrong;
+    for (const auto & o : before)
+      if (!l || l->cd.get(o.first) != o.second)
+        wrong << QString("%1: %2 -> %3").arg(o.first).arg(o.second).arg(l ? l->cd.get(o.first) : 0);
+    check(QString("NPC appearance: a saved player character names its race, carries no NPC mark, and loads back unchanged"),
+          !text.contains("npc=") && !text.contains("stored=") && text.contains(QString("race=\"%1\"").arg(plain.race)) &&
+            l && l->infos.raceID == plain.race && !l->cd.isNPC && wrong.isEmpty(),
+          l ? QString("race %1 NPC %2 %3").arg(l->infos.raceID).arg(l->cd.isNPC ? 1 : 0).arg(wrong.join(", ")) : QString("no model"));
+    QFile::remove(playerChr);
+  }
+}
+
 // -customizationtest on a Classic client (Classic Era, MoP Classic, Classic Beta): the same idea against the
 // client's own data. Every expected value was read from the named build's DB2 files by a reader independent of
-// this loader (MoP Classic 5.5.4.70032, Classic Beta 1.60.1.70235, Classic Era 1.15.9.70003): a failure on a later
-// build means "the data moved, go look". A check whose data is not installed on this computer (a client Battle.net
+// this loader (MoP Classic 5.5.4.70032, Classic Beta 1.60.1.70235 -- unchanged in 1.60.1.70245 --, Classic Era
+// 1.15.9.70003, whose ChrClasses was read once installed): a failure on a later build means "the data moved, go look". A check whose data is not installed on this computer (a client Battle.net
 // has not finished installing) is reported as skipped, not failed: it is not the code's to pass. A table that is on
 // disk and still not read fails.
 static int doHeadlessClassicCustomizationTest(ModelViewer * frame)
@@ -416,7 +791,7 @@ static int doHeadlessClassicCustomizationTest(ModelViewer * frame)
         { 124154, "ff83ec974773b9674f0c6dadb5813309", "both versions installed: the first listed (the high-resolution one) stays" },
         { 5446713, "9ab7ecad2dc460efc3b963c80d850335", "first installed, the later one not: the first stays" },
         { 895912, "", "neither installed: the first stays, and it cannot be read" } } },
-    { "wow_classic_era", 0, 0,
+    { "wow_classic_era", 0x5DF, 0x5DF,
       { { 141, -1, MET, MET, MET, "every class" }, { 144, 0x7DF, MET, CLASS, UNKNOWN, "all but Death Knight and Demon Hunter" },
         { 146, 0xFDF, MET, MET, UNKNOWN, "all but Death Knight" }, { 12, 0, MET, MET, MET, "no class limit (an NPC row)" } },
       { { 1, 0, 1, 119940, 1 }, { 1, 1, 2, 119563, 1 } },
@@ -725,6 +1100,9 @@ static int doHeadlessClassicCustomizationTest(ModelViewer * frame)
     detail += ", content key " + (contentKey.isEmpty() ? QString("(nothing read)") : contentKey);
     check(QString("storage: %1 -- %2").arg(s.fileID).arg(QString::fromLatin1(s.what)), contentKey == QLatin1String(s.contentKey), detail);
   }
+
+  // ---- 6. Humanoid NPCs wear their own stored appearance ----------------------------------------------
+  checkNpcAppearance(frame, check, skip);
 
   LOG_INFO << QString("[customization-test] RESULT: %1 (%2 passed, %3 failed, %4 skipped)").arg(failed == 0 ? "PASS" : "FAIL").arg(passed).arg(failed).arg(skipped);
   return failed;
@@ -1350,6 +1728,11 @@ static int doHeadlessCustomizationTest(ModelViewer * frame)
   }
   else
     check("dark iron dwarf: model loaded (race 34, sex 0)", false, QString());
+
+  // ---- 9. Humanoid NPCs wear their own stored appearance ----------------------------------------------
+  checkNpcAppearance(frame, check, [](const QString & what, const QString & why) {
+    LOG_INFO << QString("[customization-test] SKIP %1 -- %2").arg(what, why);
+  });
 
   LOG_INFO << QString("[customization-test] RESULT: %1 (%2 passed, %3 failed)").arg(failed == 0 ? "PASS" : "FAIL").arg(passed).arg(failed);
   return failed;

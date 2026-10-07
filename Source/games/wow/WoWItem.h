@@ -60,6 +60,8 @@ class _WOWITEM_API_ WoWItem : public Component
     int id() const { return id_; }
 
     void setDisplayId(int id);
+    // The ItemDisplayInfo an NPC's equipment shows (setDisplayId; the item ID is then -1); -1 when none was set.
+    int displayId() const { return displayId_; }
     void setLevel(int level);
     void setModifierId(int id);
 
