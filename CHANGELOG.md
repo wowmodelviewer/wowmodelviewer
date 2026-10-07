@@ -536,6 +536,13 @@ Format loosely based on [Keep a Changelog](https://keepachangelog.com/).
   `-imgseq` smoke test is gone. `-unityipctest` and `-fbxexport` still run.
 
 ### Fixed
+- **Browse no longer keeps every tree it ever built.** Each rebuild of the Models or Buildings tree -- a search,
+  clearing it, another client -- left the previous hierarchy of folders and files behind, never freed (about
+  90 MB for Retail's models each time: eight searches for "bear", each cleared again, grew the viewer from 2.35 to
+  3.08 GB). A node now owns the nodes below it, and a hierarchy that is replaced is freed once no row of the tree
+  points into it: right after the rebuild has shown its rows, so a search is as quick as before (freeing Retail's
+  model tree takes about 0.1 s). The same eight searches now leave the viewer where it was, and switching Retail
+  <-> Classic Era no longer adds about 110 MB per round trip.
 - **Opening another client replaces everything of the one before.** Loading a second client (or the same one
   again) kept the previous one's database connection, table structures, file name index, races, character
   texture caches, mount and creature lists and the model on the canvas, and could crash or hang. Each load now
