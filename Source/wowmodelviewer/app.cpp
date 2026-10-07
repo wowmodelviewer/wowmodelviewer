@@ -30,6 +30,8 @@
 #include "util.h"
 #include "WoWDatabase.h"
 #include "WoWFolder.h"
+#include "CascLib.h"
+#include <QCryptographicHash>
 #include "animcontrol.h"
 #include "AnimManager.h"
 #include "Attachment.h"
@@ -329,8 +331,9 @@ static int doHeadlessMatResTest()
 // -customizationtest on a Classic client (Classic Era, MoP Classic, Classic Beta): the same idea against the
 // client's own data. Every expected value was read from the named build's DB2 files by a reader independent of
 // this loader (MoP Classic 5.5.4.70032, Classic Beta 1.60.1.70235, Classic Era 1.15.9.70003): a failure on a later
-// build means "the data moved, go look". A check whose data is not on this computer (a client Battle.net has not
-// finished installing) is reported as skipped, not failed: it is not the code's to pass.
+// build means "the data moved, go look". A check whose data is not installed on this computer (a client Battle.net
+// has not finished installing) is reported as skipped, not failed: it is not the code's to pass. A table that is on
+// disk and still not read fails.
 static int doHeadlessClassicCustomizationTest(ModelViewer * frame)
 {
   int passed = 0, failed = 0, skipped = 0;
@@ -353,35 +356,73 @@ static int doHeadlessClassicCustomizationTest(ModelViewer * frame)
     wow::WoWFolder * folder = dynamic_cast<wow::WoWFolder *>(&GAMEDIRECTORY);
     return folder && folder->isRemoteFile(QString("dbfilesclient/%1.db2").arg(QString::fromLatin1(table).toLower()));
   };
+  const auto resultName = [](CharDetails::RequirementResult r) {
+    switch (r)
+    {
+      case CharDetails::REQUIREMENT_MET: return QString("met");
+      case CharDetails::REQUIREMENT_NOT_PLAYER: return QString("not player");
+      case CharDetails::REQUIREMENT_RACE: return QString("race");
+      case CharDetails::REQUIREMENT_CLASS: return QString("class");
+      case CharDetails::REQUIREMENT_UNLOCK: return QString("unlock");
+      case CharDetails::REQUIREMENT_PREREQUISITE: return QString("prerequisite");
+      case CharDetails::REQUIREMENT_CLASS_UNKNOWN: return QString("class unknown");
+    }
+    return QString("?");
+  };
   const core::ClientProfile & profile = GAMEDIRECTORY.clientProfile();
   LOG_INFO << "[customization-test]" << profile.describe();
 
   struct ModelExpect { int race; int sex; int chrModel; int fileID; int layout; };
   struct OptionExpect { const char * name; int valid; int total; };
+  // A requirement and what the rule must answer for it: ordinary character, Demon Hunter, and unknown classes.
+  struct ClassExpect { int req; int mask; CharDetails::RequirementResult ordinary, demonHunter, unknown; const char * what; };
+  // A FileDataID listed twice in the build's ROOT, and the content key of the version that must be read (empty: none
+  // is installed, nothing can be read).
+  struct StorageExpect { int fileID; const char * contentKey; const char * what; };
   struct ClientExpect
   {
     const char * product;
     unsigned int classes;          // ChrClasses as a ClassMask
     unsigned int ordinary;         // every class but Death Knight and Demon Hunter
-    int req144, req146;            // their "everyone but Death Knight (and Demon Hunter)" masks
+    std::vector<ClassExpect> classRules;
     std::vector<ModelExpect> models;
     std::vector<OptionExpect> humanMale; // the Human male's options, in client order
-    int standardTexture;           // a texture listed as a high-resolution and a standard version (0: none)
+    std::vector<OptionExpect> humanMaleWithoutClasses; // the same with ChrClasses empty
+    std::vector<StorageExpect> storage;
   };
+  using R = CharDetails::RequirementResult;
+  const R MET = CharDetails::REQUIREMENT_MET, CLASS = CharDetails::REQUIREMENT_CLASS, UNKNOWN = CharDetails::REQUIREMENT_CLASS_UNKNOWN;
   static const ClientExpect expectations[] = {
-    { "wow_classic", 0x7FF, 0x7DF, 0x7DF, 0xFDF,
+    { "wow_classic", 0x7FF, 0x7DF,
+      { { 141, -1, MET, MET, MET, "every class" }, { 144, 0x7DF, MET, CLASS, UNKNOWN, "all but Death Knight and Demon Hunter" },
+        { 146, 0xFDF, MET, MET, UNKNOWN, "all but Death Knight" }, { 142, 0x20, CLASS, CLASS, UNKNOWN, "Death Knight only" },
+        { 12, 0, MET, MET, MET, "no class limit (an NPC row)" } },
       { { 1, 0, 1, 119940, 1 }, { 1, 1, 2, 119563, 1 }, { 2, 0, 3, 121287, 1 }, { 2, 1, 4, 121087, 1 }, { 24, 0, 47, 535052, 2 } },
       { { "Skin Color", 10, 16 }, { "Face", 12, 24 }, { "Hair Style", 17, 17 }, { "Hair Color", 10, 14 }, { "Facial Hair", 9, 9 } },
-      120191 /* character/human/male/humanmaleskin00_00.blp */ },
-    { "wow_classic_beta", 0x5DF, 0x5DF, 0x37DF, 0x3FDF,
+      { { "Skin Color", 10, 16 }, { "Hair Style", 17, 17 }, { "Hair Color", 10, 14 }, { "Facial Hair", 9, 9 } },
+      { { 120191, "c5f43d0d7cab4f843b801b15e394009a", "high-resolution version first and not installed, standard version installed: the standard one" },
+        { 119463, "9fec72bee8335dad5319d78549da972f", "both versions installed: the first listed (the high-resolution one) stays" },
+        { 5446713, "8f3475633d8dd17b4128aab465c13d86", "first installed, the later one not: the first stays" } } },
+    { "wow_classic_beta", 0x5DF, 0x5DF,
+      { { 141, -1, MET, MET, MET, "every class" }, { 144, 0x37DF, MET, CLASS, UNKNOWN, "all but Death Knight and Demon Hunter" },
+        { 146, 0x3FDF, MET, MET, UNKNOWN, "all but Death Knight" }, { 53, 0x20, CLASS, CLASS, UNKNOWN, "Death Knight only" },
+        { 143, 0x800, CLASS, MET, UNKNOWN, "Demon Hunter only" }, { 12, 0, MET, MET, MET, "no class limit (an NPC row)" } },
       { { 1, 0, 1, 1011653, 103 }, { 1, 1, 2, 1000764, 104 }, { 2, 0, 3, 917116, 105 }, { 2, 1, 4, 949470, 106 } },
       { { "Skin Color", 13, 19 }, { "Face", 12, 12 }, { "Hair Style", 17, 17 }, { "Hair Color", 10, 14 }, { "Facial Hair", 9, 9 },
         { "Face Shape", 3, 3 }, { "Eyebrows", 12, 12 }, { "Eye Color", 19, 41 }, { "Ears", 1, 1 } },
-      121288 /* character/orc/male/orcmalefacelower00_00.blp */ },
-    { "wow_classic_era", 0x5DF, 0x5DF, 0x7DF, 0xFDF,
+      { { "Skin Color", 13, 19 }, { "Face", 12, 12 }, { "Hair Style", 17, 17 }, { "Hair Color", 10, 14 }, { "Facial Hair", 9, 9 },
+        { "Face Shape", 3, 3 }, { "Eyebrows", 12, 12 }, { "Ears", 1, 1 } },
+      { { 121288, "392685753a3e76d2f08a0b95c8610f0e", "high-resolution version first and not installed, standard version installed: the standard one" },
+        { 124154, "ff83ec974773b9674f0c6dadb5813309", "both versions installed: the first listed (the high-resolution one) stays" },
+        { 5446713, "9ab7ecad2dc460efc3b963c80d850335", "first installed, the later one not: the first stays" },
+        { 895912, "", "neither installed: the first stays, and it cannot be read" } } },
+    { "wow_classic_era", 0, 0,
+      { { 141, -1, MET, MET, MET, "every class" }, { 144, 0x7DF, MET, CLASS, UNKNOWN, "all but Death Knight and Demon Hunter" },
+        { 146, 0xFDF, MET, MET, UNKNOWN, "all but Death Knight" }, { 12, 0, MET, MET, MET, "no class limit (an NPC row)" } },
       { { 1, 0, 1, 119940, 1 }, { 1, 1, 2, 119563, 1 } },
       { { "Skin Color", 10, 12 }, { "Face", 12, 12 }, { "Hair Style", 12, 12 }, { "Hair Color", 10, 10 }, { "Facial Hair", 9, 9 } },
-      0 },
+      { { "Skin Color", 10, 12 }, { "Hair Style", 12, 12 }, { "Hair Color", 10, 10 }, { "Facial Hair", 9, 9 } },
+      {} },
   };
   const ClientExpect * e = nullptr;
   for (const ClientExpect & c : expectations)
@@ -393,28 +434,44 @@ static int doHeadlessClassicCustomizationTest(ModelViewer * frame)
     return 1;
   }
 
-  // ---- 1. The class context comes from the client's ChrClasses ----------------------------------------
+  // ---- 1. The class context comes from the client's own ChrClasses, and from nothing else -----------------
   const unsigned int classes = CharDetails::clientClassMask();
-  const auto classMaskOf = [](int reqID) {
+  const auto classMaskOf = [](int reqID, bool * found) {
     sqlResult r = GAMEDATABASE.sqlQuery(QString("SELECT ClassMask FROM ChrCustomizationReq WHERE ID = %1").arg(reqID));
-    return (r.valid && !r.values.empty()) ? r.values[0][0].toInt() : 0;
+    *found = r.valid && !r.values.empty();
+    return *found ? r.values[0][0].toInt() : 0;
   };
   if (classes == 0 && notInstalled("ChrClasses"))
-    skip("class context: ChrClasses", "the client's ChrClasses is not on this computer");
+    skip("class context: ChrClasses", "the client's ChrClasses is not installed on this computer");
   else if (classes == 0)
     check("class context: ChrClasses was read", false, "the table is on this computer but holds no class: it was not read");
   else
-  {
-    const unsigned int ordinary = CharDetails::ordinaryClassMask(classes);
     check("class context: ChrClasses as a mask, and the ordinary classes (all but Death Knight and Demon Hunter)",
-          classes == e->classes && ordinary == e->ordinary, QString("classes 0x%1, ordinary 0x%2").arg(classes, 0, 16).arg(ordinary, 0, 16));
-    const int m144 = classMaskOf(144), m146 = classMaskOf(146);
-    check("class context: Req 144 and 146 (everyone but Death Knight, and Demon Hunter) admit the ordinary classes",
-          m144 == e->req144 && m146 == e->req146 && CharDetails::classMaskAllows(m144, false, ordinary) &&
-            CharDetails::classMaskAllows(m146, false, ordinary) && !CharDetails::classMaskAllows(m144, false, CharDetails::ordinaryClassMask(0)),
-          QString("Req 144 0x%1, Req 146 0x%2 (against Retail's classes 1-15 Req 144 would fail)").arg(m144, 0, 16).arg(m146, 0, 16));
-    check("class context: a Death Knight-only mask is not offered to an ordinary character",
-          !CharDetails::classMaskAllows(0x20, false, ordinary), QString());
+          classes == e->classes && CharDetails::ordinaryClassMask(classes) == e->ordinary,
+          QString("classes 0x%1, ordinary 0x%2").arg(classes, 0, 16).arg(CharDetails::ordinaryClassMask(classes), 0, 16));
+  // The rule against this client's own masks, in each class context: the client's (when its ChrClasses is here),
+  // and no class context at all -- what a client whose ChrClasses is not installed gets, never Retail's classes.
+  for (const ClassExpect & c : e->classRules)
+  {
+    bool found = false;
+    const int mask = classMaskOf(c.req, &found);
+    if (!found)
+    {
+      check(QString("class rule: Req %1 is in this client's ChrCustomizationReq").arg(c.req), false, QString());
+      continue;
+    }
+    const R unknown = CharDetails::classRequirement(mask, false, 0);
+    const R unknownDH = CharDetails::classRequirement(mask, true, 0);
+    QString detail = QString("ClassMask 0x%1: no class context -> %2 / %3").arg((unsigned int)mask, 0, 16).arg(resultName(unknown), resultName(unknownDH));
+    bool ok = mask == c.mask && unknown == c.unknown && unknownDH == c.unknown;
+    if (classes != 0)
+    {
+      const R ordinary = CharDetails::classRequirement(mask, false, classes);
+      const R demonHunter = CharDetails::classRequirement(mask, true, classes);
+      detail += QString(", ordinary -> %1, Demon Hunter -> %2").arg(resultName(ordinary), resultName(demonHunter));
+      ok = ok && ordinary == c.ordinary && demonHunter == c.demonHunter;
+    }
+    check(QString("class rule: Req %1 (%2)").arg(c.req).arg(QString::fromLatin1(c.what)), ok, detail);
   }
 
   // ---- 2. Race and sex -> ChrModel -> the client's own model -----------------------------------------
@@ -424,7 +481,7 @@ static int doHeadlessClassicCustomizationTest(ModelViewer * frame)
     if (!RaceInfos::getRaceInfosForRaceSex(m.race, m.sex, ri))
     {
       if (notInstalled("ChrRaces") || notInstalled("ChrRaceXChrModel") || notInstalled("ChrModel"))
-        skip(QString("model of race %1 sex %2").arg(m.race).arg(m.sex), "no race row: ChrRaces, ChrRaceXChrModel or ChrModel is not on this computer");
+        skip(QString("model of race %1 sex %2").arg(m.race).arg(m.sex), "no race row: ChrRaces, ChrRaceXChrModel or ChrModel is not installed on this computer");
       else
         check(QString("model: race %1 sex %2 has a race row").arg(m.race).arg(m.sex), false, "its tables are on this computer");
       continue;
@@ -437,26 +494,20 @@ static int doHeadlessClassicCustomizationTest(ModelViewer * frame)
   // ---- 3. The Human male's options and choices ---------------------------------------------------------
   const int humanFile = RaceInfos::getFileIDForRaceSex(1, 0);
   GameFile * humanModel = humanFile > 0 ? GAMEDIRECTORY.getFile(humanFile) : nullptr;
-  WoWModel * human = nullptr;
-  if (humanModel)
-  {
+  const auto loadHuman = [frame, humanModel]() -> WoWModel * {
+    if (!humanModel)
+      return nullptr;
     frame->LoadModel(humanModel, 1, 0);
     for (int i = 0; i < 20; i++)
       wxTheApp->Yield(true);
-    human = frame->canvas ? const_cast<WoWModel *>(frame->canvas->model()) : nullptr;
-    if (human && human->infos.raceID != 1)
-      human = nullptr;
-  }
-  if (!human && !humanModel)
-    skip("Human male", "its model or race row is not on this computer");
-  else if (!human)
-    check("Human male: its model loads as race 1", false, humanModel->fullname());
-  else
-  {
-    CharDetails & cd = human->cd;
+    WoWModel * m = frame->canvas ? const_cast<WoWModel *>(frame->canvas->model()) : nullptr;
+    return (m && m->infos.raceID == 1) ? m : nullptr;
+  };
+  // The options shown, in order, as "name valid/total".
+  const auto describeOptions = [](CharDetails & cd, const std::vector<OptionExpect> & expected, bool * same) {
     const std::vector<uint> options = cd.getCustomizationOptions();
-    QStringList got, want;
-    bool same = options.size() == e->humanMale.size();
+    QStringList got;
+    *same = options.size() == expected.size();
     for (size_t i = 0; i < options.size(); i++)
     {
       sqlResult n = GAMEDATABASE.sqlQuery(QString("SELECT Name_Lang FROM ChrCustomizationOption WHERE ID = %1").arg(options[i]));
@@ -465,27 +516,44 @@ static int doHeadlessClassicCustomizationTest(ModelViewer * frame)
       const int valid = (int)cd.getCustomizationChoices(options[i]).size();
       const int total = (t.valid && !t.values.empty()) ? t.values[0][0].toInt() : -1;
       got << QString("%1 %2/%3").arg(name).arg(valid).arg(total);
-      if (i < e->humanMale.size())
-        same = same && name == QLatin1String(e->humanMale[i].name) && valid == e->humanMale[i].valid && total == e->humanMale[i].total;
+      if (i < expected.size())
+        *same = *same && name == QLatin1String(expected[i].name) && valid == expected[i].valid && total == expected[i].total;
     }
-    for (const OptionExpect & o : e->humanMale)
+    return got.join(", ");
+  };
+  const auto describeExpected = [](const std::vector<OptionExpect> & expected) {
+    QStringList want;
+    for (const OptionExpect & o : expected)
       want << QString("%1 %2/%3").arg(o.name).arg(o.valid).arg(o.total);
+    return want.join(", ");
+  };
+  WoWModel * human = loadHuman();
+  if (!human && !humanModel)
+    skip("Human male", "its model or race row is not installed on this computer");
+  else if (!human)
+    check("Human male: its model loads as race 1", false, humanModel->fullname());
+  else
+  {
+    CharDetails & cd = human->cd;
+    bool same = false;
+    const QString got = describeOptions(cd, e->humanMale, &same);
     if (classes == 0 && notInstalled("ChrClasses"))
-      skip("Human male: options and valid choices", "the class context needs ChrClasses: " + got.join(", "));
+      skip("Human male: options and valid choices", "the class context needs ChrClasses: " + got);
     else
-      check("Human male: options in client order, valid choices of each", same, "got " + got.join(", ") + " | expected " + want.join(", "));
+      check("Human male: options in client order, valid choices of each", same, "got " + got + " | expected " + describeExpected(e->humanMale));
 
     // The face carries a classic model's eyes; the eye texture slot carries a high-resolution model's.
     if (profile.product == QLatin1String("wow_classic"))
     {
-      bool lower = false, upper = false;
+      bool lower = false, upper = false, base = false;
       for (const auto & t : cd.textures)
       {
+        base = base || (t.fileId == 120191 && t.type == 1);
         lower = lower || (t.fileId == 119941 && t.type == 1 && t.region == 10);
         upper = upper || (t.fileId == 120061 && t.type == 1 && t.region == 9);
       }
-      check("Human male: the default Face (17172) composes facelower00_00 into section 10 and faceupper00_00 into 9", cd.get(10) == 17172 && lower && upper,
-            QString("Face choice %1").arg(cd.get(10)));
+      check("Human male: base skin humanmaleskin00_00 (120191), and the default Face (17172) composes facelower00_00 (119941) into section 10 and faceupper00_00 (120061) into 9",
+            cd.get(10) == 17172 && base && lower && upper, QString("Face choice %1").arg(cd.get(10)));
       const QImage & body = human->tex.lastImage();
       check("Human male: the body composite is the layout's 1024x1024", body.width() == 1024 && body.height() == 1024,
             QString("%1x%2").arg(body.width()).arg(body.height()));
@@ -505,25 +573,70 @@ static int doHeadlessClassicCustomizationTest(ModelViewer * frame)
     if (profile.product == QLatin1String("wow_classic_beta"))
     {
       const QImage & eyes = human->eyeCompositeImage();
-      check("Human male: an Eye Color is current and the eye texture is composed", cd.get(463) == 4126 && !eyes.isNull(),
+      bool eyeLayer = false;
+      for (const auto & t : cd.textures)
+        eyeLayer = eyeLayer || t.type == 19;
+      check("Human male: an Eye Color is current, its type-19 layer is composed into the 256x128 eye texture",
+            cd.get(463) == 4126 && eyeLayer && eyes.width() == 256 && eyes.height() == 128,
             QString("Eye Color %1, eyes %2x%3").arg(cd.get(463)).arg(eyes.width()).arg(eyes.height()));
       check("Human male: no Demon Hunter class context in a client without Demon Hunters", !cd.clientHasDemonHunters(), QString());
     }
+
+    // ---- 4. A client whose ChrClasses is not installed (simulated: its rows removed inside a transaction that is
+    // rolled back, so nothing on disk changes). The class-limited choices must be left out as "class unknown" --
+    // not judged against Retail's classes 1-15, and not shown as if every class had them.
+    if (classes != 0 && GAMEDATABASE.sqlQuery("BEGIN").valid)
+    {
+      GAMEDATABASE.sqlQuery("DELETE FROM ChrClasses");
+      human->cd.reset(human, true); // read the options again, as a load of this client would
+      for (int i = 0; i < 20; i++)
+        wxTheApp->Yield(true);
+      WoWModel * without = human;
+      {
+        CharDetails & cdw = without->cd;
+        const std::map<uint, uint> none;
+        bool same2 = false;
+        const QString got2 = describeOptions(cdw, e->humanMaleWithoutClasses, &same2);
+        check("without ChrClasses: the class context is unknown (no class, no Demon Hunter)",
+              CharDetails::clientClassMask() == 0 && !cdw.clientHasDemonHunters(), QString());
+        check("without ChrClasses: Req 144 is 'class unknown' -- not 'class' (Retail's 0x77DF) and not met",
+              cdw.requirement(144) == nullptr || cdw.evaluateRequirement(144, none) == UNKNOWN,
+              cdw.requirement(144) ? resultName(cdw.evaluateRequirement(144, none)) : QString("Req 144 unused by this model"));
+        check("without ChrClasses: the options left are those no class limit hides, choices limited only by 'every class' stay",
+              same2, "got " + got2 + " | expected " + describeExpected(e->humanMaleWithoutClasses));
+      }
+      GAMEDATABASE.sqlQuery("ROLLBACK");
+      human->cd.reset(human, true);
+      for (int i = 0; i < 20; i++)
+        wxTheApp->Yield(true);
+      WoWModel * again = human;
+      bool same3 = false;
+      const QString got3 = again ? describeOptions(again->cd, e->humanMale, &same3) : QString("(no model)");
+      check("after the rollback: ChrClasses and the Human male's options are back", CharDetails::clientClassMask() == classes && same3, got3);
+    }
   }
 
-  // ---- 4. A texture the build lists as a high-resolution and a standard version ----------------------
-  if (e->standardTexture)
+  // ---- 5. Storage: a FileDataID listed twice in the build's ROOT ---------------------------------------
+  // The rule on its own, every combination, then real files: each one's content read through the viewer and
+  // its MD5 (the content key) compared with the version that must be selected.
+  check("storage rule: kept installed, later installed -> keep", !CascWowRootReplacesKeptEntry(true, true), QString());
+  check("storage rule: kept installed, later not installed -> keep", !CascWowRootReplacesKeptEntry(true, false), QString());
+  check("storage rule: kept not installed, later installed -> replace", CascWowRootReplacesKeptEntry(false, true), QString());
+  check("storage rule: kept not installed, later not installed -> keep (the first, as before)", !CascWowRootReplacesKeptEntry(false, false), QString());
+  for (const StorageExpect & s : e->storage)
   {
-    GameFile * f = GAMEDIRECTORY.getFile(e->standardTexture);
-    bool read = false;
+    GameFile * f = GAMEDIRECTORY.getFile(s.fileID);
     QString detail = f ? f->fullname() : QString("(not listed)");
+    QString contentKey;
     if (f && f->open())
     {
-      read = f->readComplete() && f->getSize() > 4 && memcmp(f->getBuffer(), "BLP2", 4) == 0;
+      if (f->readComplete() && f->getSize() > 0)
+        contentKey = QString::fromLatin1(QCryptographicHash::hash(QByteArray((const char *)f->getBuffer(), (int)f->getSize()), QCryptographicHash::Md5).toHex());
       detail += QString(", %1 bytes").arg(f->getSize());
       f->close();
     }
-    check(QString("storage: FileDataID %1 opens as the version that is installed").arg(e->standardTexture), read, detail);
+    detail += ", content key " + (contentKey.isEmpty() ? QString("(nothing read)") : contentKey);
+    check(QString("storage: %1 -- %2").arg(s.fileID).arg(QString::fromLatin1(s.what)), contentKey == QLatin1String(s.contentKey), detail);
   }
 
   LOG_INFO << QString("[customization-test] RESULT: %1 (%2 passed, %3 failed, %4 skipped)").arg(failed == 0 ? "PASS" : "FAIL").arg(passed).arg(failed).arg(skipped);
@@ -819,19 +932,29 @@ static int doHeadlessCustomizationTest(ModelViewer * frame)
     const struct { uint id; bool ordinary; bool demonHunter; } classes[] = {
       { 141, true, true }, { 4103, true, true }, { 146, true, true }, { 144, true, false }, { 142, false, false }, { 143, false, true },
     };
-    const unsigned int ordinaryClasses = CharDetails::ordinaryClassMask(CharDetails::clientClassMask());
-    check("rule: the ordinary classes are 12.1.0's ChrClasses 1-15 but Death Knight and Demon Hunter", ordinaryClasses == 0x77DF,
-          QString("0x%1").arg(ordinaryClasses, 0, 16));
+    const unsigned int clientClasses = CharDetails::clientClassMask();
+    check("rule: the ordinary classes are 12.1.0's ChrClasses 1-15 but Death Knight and Demon Hunter",
+          clientClasses == 0x7FFF && CharDetails::ordinaryClassMask(clientClasses) == 0x77DF,
+          QString("classes 0x%1, ordinary 0x%2").arg(clientClasses, 0, 16).arg(CharDetails::ordinaryClassMask(clientClasses), 0, 16));
     QString classDetail;
     bool classesOk = true;
     for (const auto & c : classes)
     {
-      const bool ordinary = CharDetails::classMaskAllows(classMask(c.id), false, ordinaryClasses);
-      const bool demonHunter = CharDetails::classMaskAllows(classMask(c.id), true, ordinaryClasses);
+      const bool ordinary = CharDetails::classRequirement(classMask(c.id), false, clientClasses) == CharDetails::REQUIREMENT_MET;
+      const bool demonHunter = CharDetails::classRequirement(classMask(c.id), true, clientClasses) == CharDetails::REQUIREMENT_MET;
       classesOk = classesOk && ordinary == c.ordinary && demonHunter == c.demonHunter;
       classDetail += QString(" Req %1 ClassMask %2: ordinary %3 DH %4").arg(c.id).arg(classMask(c.id)).arg(ordinary ? 1 : 0).arg(demonHunter ? 1 : 0);
     }
     check("rule: ClassMask bit classID-1 against the class context (ordinary = every class but DK and DH; DH checkbox)", classesOk, classDetail.trimmed());
+    // Without ChrClasses there is no class context: a class-limited requirement is "class unknown", never judged
+    // against an assumed class list; no limit, or every class, is met whatever the classes are.
+    const bool unknownOk = CharDetails::classRequirement(classMask(144), false, 0) == CharDetails::REQUIREMENT_CLASS_UNKNOWN &&
+                           CharDetails::classRequirement(classMask(143), true, 0) == CharDetails::REQUIREMENT_CLASS_UNKNOWN &&
+                           CharDetails::classRequirement(classMask(142), false, 0) == CharDetails::REQUIREMENT_CLASS_UNKNOWN &&
+                           CharDetails::classRequirement(classMask(141), false, 0) == CharDetails::REQUIREMENT_MET &&
+                           CharDetails::classRequirement(classMask(4103), false, 0) == CharDetails::REQUIREMENT_MET;
+    check("rule: no class context (ChrClasses not available): Req 144, 143, 142 unknown; Req 141 (every class) and 4103 (no limit) met",
+          unknownOk, QString());
   }
 
   // ---- 5. Undead male ---------------------------------------------------------------------------------

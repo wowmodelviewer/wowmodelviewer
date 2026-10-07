@@ -543,7 +543,9 @@ Format loosely based on [Keep a Changelog](https://keepachangelog.com/).
   Classic Era or MoP Classic character, and the Eye Color option of a Classic Beta one, whose eyes then rendered
   blank white. The classes now come from the client's own ChrClasses (Retail's are still 1-15, so nothing changes
   there): MoP Classic's Human male gets 58 of its 80 choices instead of 46, Classic Beta's 96 of 131 instead of 77,
-  and the Demon Hunter checkbox is offered only by a client that has Demon Hunters.
+  and the Demon Hunter checkbox is offered only by a client that has Demon Hunters. A client whose ChrClasses is
+  not installed has no class context: the choices a class mask limits are left out and counted in the log, never
+  judged against another client's classes; choices for every class stay.
 - **MoP Classic and Classic Beta characters are no longer untextured white.** Both builds list their textures twice,
   a high-resolution version first and the standard one after it, and Battle.net installs the high-resolution ones
   only with an optional package. The first version listed always won, so without that package every such texture --

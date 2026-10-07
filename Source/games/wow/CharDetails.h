@@ -208,20 +208,24 @@ public:
     REQUIREMENT_RACE,         // the race's PlayableRaceBit is not set in RaceMasks
     REQUIREMENT_CLASS,        // ClassMask does not admit the class context
     REQUIREMENT_UNLOCK,       // an achievement, quest or item appearance unlocks it
-    REQUIREMENT_PREREQUISITE  // none of its prerequisite choices is current
+    REQUIREMENT_PREREQUISITE, // none of its prerequisite choices is current
+    REQUIREMENT_CLASS_UNKNOWN // ClassMask limits it, and the client's ChrClasses is not available to judge it
   };
 
   // The rules, one function each (see their definitions for the evidence behind them).
   static bool isPlayerRequirement(int reqType);
   static bool raceMaskAllows(unsigned long long raceMask, int playableRaceBit);
-  static bool classMaskAllows(int classMask, bool demonHunter, unsigned int ordinaryClassMask);
+  // ClassMask against the class context: the Demon Hunter switch, or the client's ordinary classes. clientClasses
+  // is clientClassMask(); 0 (no ChrClasses) makes every class-limited requirement REQUIREMENT_CLASS_UNKNOWN.
+  static RequirementResult classRequirement(int classMask, bool demonHunter, unsigned int clientClasses);
 
   // The loaded client's classes (ChrClasses) as a ClassMask: class N is bit N - 1. 0 when the table holds none.
   static unsigned int clientClassMask();
   // The class context of a character viewed without a class: every class of the client but Death Knight and
-  // Demon Hunter (see classMaskAllows).
+  // Demon Hunter (see classRequirement). 0 when the client's classes are not known.
   static unsigned int ordinaryClassMask(unsigned int clientClasses);
-  // Whether the loaded client has Demon Hunters, i.e. whether the Demon Hunter class context exists at all.
+  // Whether the loaded client has Demon Hunters, i.e. whether the Demon Hunter class context exists at all
+  // (false when its classes are not known).
   bool clientHasDemonHunters() const;
 
   // A requirement of this character's options or choices, evaluated against a selection
@@ -310,8 +314,7 @@ private:
   std::map<uint, uint> choiceOption_;       // ChrCustomizationChoice::ID -> ChrCustomizationOption::ID
   std::map<uint, Requirement> requirements_;
   int playableRaceBit_ = -1;
-  unsigned int clientClasses_ = 0;      // clientClassMask() when the options were read
-  unsigned int ordinaryClasses_ = 0;    // ordinaryClassMask(clientClasses_)
+  unsigned int clientClasses_ = 0;      // clientClassMask() when the options were read (0: not known)
   mutable std::set<uint> unresolvedRequirementsLogged_;
 
   // Geoset GROUPS (GeosetType) that any customization option for this model drives.

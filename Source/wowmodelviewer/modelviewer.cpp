@@ -4165,6 +4165,10 @@ void ModelViewer::ComputeClientCapabilities()
                            : QString("Characters: no playable race could be resolved from this client's game data"));
   else if (!caps.modernCustomization)
     caps.unavailable << "Character customization: this client's customization tables could not be read";
+  else if (rows("ChrClasses") == 0)
+    caps.unavailable << (missing("ChrClasses")
+                           ? QString("Character customization: this client's ChrClasses is not installed on this computer, so choices limited by class are not offered")
+                           : QString("Character customization: this client's ChrClasses could not be read, so choices limited by class are not offered"));
   if (database && !caps.npcDisplayInfo)
     caps.unavailable << "NPCs: this client's creature tables could not be read";
   if (database && !caps.items)

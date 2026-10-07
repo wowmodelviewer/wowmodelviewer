@@ -433,6 +433,14 @@ void    WINAPI CascCdnFree(void * buffer);
 void SetCascError(DWORD dwErrCode);
 DWORD GetCascError();
 
+//-----------------------------------------------------------------------------
+// WMV: the rule the WoW ROOT handler applies when a build lists one FileDataId more than once (e.g. a
+// high-resolution and a standard version of a texture): the entry kept so far is replaced by a later one only
+// when the kept entry's data is not on this computer and the later entry's is. Nothing else -- the file's name,
+// type or product -- takes part. Declared here so the rule can be tested on its own.
+
+bool   WINAPI CascWowRootReplacesKeptEntry(bool bKeptIsLocal, bool bLaterIsLocal);
+
 #ifdef __cplusplus
 }   // extern "C"
 #endif

@@ -344,7 +344,8 @@ struct TRootHandler_WoW : public TFileTreeRoot
 
         if(pFileNode == NULL || pFileNode->pCKeyEntry == NULL || pFileNode->pCKeyEntry == pCKeyEntry)
             return;
-        if((pFileNode->pCKeyEntry->Flags & CASC_CE_FILE_IS_LOCAL) || !(pCKeyEntry->Flags & CASC_CE_FILE_IS_LOCAL))
+        if(!CascWowRootReplacesKeptEntry((pFileNode->pCKeyEntry->Flags & CASC_CE_FILE_IS_LOCAL) != 0,
+                                         (pCKeyEntry->Flags & CASC_CE_FILE_IS_LOCAL) != 0))
             return;
 
         pFileNode->pCKeyEntry->RefCount--;
@@ -669,6 +670,13 @@ struct TRootHandler_WoW : public TFileTreeRoot
 
 //-----------------------------------------------------------------------------
 // Public functions
+
+// WMV: kept entry not local and later entry local -> the later one; any other pair (both local, both not local,
+// kept local and later not) -> the kept one, the first listed, as before.
+bool WINAPI CascWowRootReplacesKeptEntry(bool bKeptIsLocal, bool bLaterIsLocal)
+{
+    return !bKeptIsLocal && bLaterIsLocal;
+}
 
 DWORD RootHandler_CreateWoW(TCascStorage * hs, CASC_BLOB & RootFile, DWORD dwLocaleMask)
 {

@@ -10,6 +10,7 @@
 #include "animated.h" // randint
 #include "CharDetailsEvent.h"
 #include "Game.h"
+#include "WoWFolder.h"
 #include "WoWModel.h"
 #include "logger/Logger.h"
 
@@ -24,9 +25,6 @@ namespace
 {
   // ChrCustomizationReq.ClassMask names class N with bit N - 1.
   constexpr unsigned int classBit(unsigned int classID) { return 1u << (classID - 1); }
-  // Only for a client whose ChrClasses could not be read: the classes of 12.1.0, 1 (Warrior) to 15 (Traveler).
-  constexpr unsigned int CLASS_ID_LAST_RETAIL = 15;
-  constexpr unsigned int CLASS_BITS_RETAIL = (1u << CLASS_ID_LAST_RETAIL) - 1;
 
   QString idList(const std::set<uint> & ids)
   {
@@ -236,7 +234,7 @@ void CharDetails::setDemonHunterMode(bool val)
     return;
   }
 
-  // The class context decides which choices are valid (see classMaskAllows), and the elements the
+  // The class context decides which choices are valid (see classRequirement), and the elements the
   // character wears follow its choices: re-validate every option -- keeping the current choice when
   // it is still valid, otherwise the first valid one -- and apply the result once, which also
   // attaches (on) or detaches (off) the DH horns/blindfold collection models.
@@ -267,7 +265,6 @@ void CharDetails::fillCustomizationMap()
   unresolvedRequirementsLogged_.clear();
   playableRaceBit_ = -1;
   clientClasses_ = 0;
-  ordinaryClasses_ = 0;
   choiceGeosetElements_.clear();
   choiceElementRows_.clear();
   resolvedElements_.clear();
@@ -393,10 +390,25 @@ void CharDetails::fillCustomizationMap()
     playableRaceBit_ = race.values[0][0].toInt();
 
   clientClasses_ = clientClassMask();
-  ordinaryClasses_ = ordinaryClassMask(clientClasses_);
   if (clientClasses_ == 0)
-    LOG_WARNING << "ChrClasses holds no class: class-limited choices are judged against every class through"
-                << CLASS_ID_LAST_RETAIL << "but Death Knight and Demon Hunter";
+  {
+    // No class context: the classes are this client's own data, and no other client's stand in for them. Every
+    // option or choice a ClassMask limits is left out (REQUIREMENT_CLASS_UNKNOWN) and named here.
+    size_t limitedOptions = 0, limitedChoices = 0;
+    const auto limited = [this](uint reqID) {
+      const auto it = requirements_.find(reqID);
+      return it != requirements_.end() && classRequirement(it->second.classMask, false, 0) == REQUIREMENT_CLASS_UNKNOWN;
+    };
+    for (const auto & o : optionRequirement_)
+      limitedOptions += limited(o.second) ? 1 : 0;
+    for (const auto & c : choiceRequirement_)
+      limitedChoices += limited(c.second) ? 1 : 0;
+    wow::WoWFolder * folder = dynamic_cast<wow::WoWFolder *>(&GAMEDIRECTORY);
+    const bool notInstalled = folder && folder->isRemoteFile("dbfilesclient/chrclasses.db2");
+    LOG_WARNING << "Customization: this client's ChrClasses" << (notInstalled ? "is not installed on this computer" : "could not be read")
+                << "- its classes are unknown, so" << (unsigned int)limitedOptions << "option(s) and" << (unsigned int)limitedChoices
+                << "choice(s) of ChrModel" << infos.ChrModelID[0] << "that a ClassMask limits cannot be judged and are not offered";
+  }
 
   // Dependencies: an option depends on another when its own requirement, or one of its choices',
   // names choices of that other option (Skin Color on Skin Type, Face Features on Jaw Features,
@@ -489,15 +501,21 @@ bool CharDetails::raceMaskAllows(unsigned long long raceMask, int playableRaceBi
 // offered. The viewer's class context is the Demon Hunter checkbox or, without it, the ordinary
 // classes (see ordinaryClassMask): a Demon Hunter passes a mask that names class 12; an ordinary
 // character passes only a mask that names every ordinary class, so a choice limited to some classes
-// (Death Knight only, Demon Hunter only, a druid form) is not offered as if every class had it.
-bool CharDetails::classMaskAllows(int classMask, bool demonHunter, unsigned int ordinaryClassMask)
+// (Death Knight only, Demon Hunter only, a druid form) is not offered as if every class had it. Which
+// classes are ordinary is the client's own ChrClasses; without it (a client Battle.net has not finished
+// installing) a class-limited requirement cannot be judged, and it is not judged against another client's
+// classes either: REQUIREMENT_CLASS_UNKNOWN.
+CharDetails::RequirementResult CharDetails::classRequirement(int classMask, bool demonHunter, unsigned int clientClasses)
 {
-  if (classMask == 0)
-    return true;
   const unsigned int mask = static_cast<unsigned int>(classMask);
+  if (mask == 0 || mask == ~0u) // no limit, or every class there can be: met whatever the client's classes are
+    return REQUIREMENT_MET;
+  if (clientClasses == 0)
+    return REQUIREMENT_CLASS_UNKNOWN;
   if (demonHunter)
-    return (mask & classBit(CLASS_DEMONHUNTER)) != 0;
-  return (mask & ordinaryClassMask) == ordinaryClassMask;
+    return (mask & classBit(CLASS_DEMONHUNTER)) != 0 ? REQUIREMENT_MET : REQUIREMENT_CLASS;
+  const unsigned int ordinary = ordinaryClassMask(clientClasses);
+  return (mask & ordinary) == ordinary ? REQUIREMENT_MET : REQUIREMENT_CLASS;
 }
 
 unsigned int CharDetails::clientClassMask()
@@ -523,17 +541,16 @@ unsigned int CharDetails::clientClassMask()
 // 1.60.1 -- so "every ordinary class" is every class in the client's ChrClasses but those two: 0x77DF
 // for 12.1.0, 0x7DF for MoP Classic (classes 1-11), 0x5DF for Classic Beta (1-5, 7-9, 11). Against
 // classes 1-15, which no Classic mask names, every Face choice of a Classic Era or MoP Classic character
-// failed, and with it the face texture that carries a classic model's eyes.
+// failed, and Classic Beta's Eye Color with it.
 unsigned int CharDetails::ordinaryClassMask(unsigned int clientClasses)
 {
-  const unsigned int classes = clientClasses ? clientClasses : CLASS_BITS_RETAIL;
-  return classes & ~classBit(CLASS_DEATHKNIGHT) & ~classBit(CLASS_DEMONHUNTER);
+  return clientClasses & ~classBit(CLASS_DEATHKNIGHT) & ~classBit(CLASS_DEMONHUNTER);
 }
 
 bool CharDetails::clientHasDemonHunters() const
 {
   const unsigned int classes = clientClasses_ ? clientClasses_ : clientClassMask();
-  return classes == 0 || (classes & classBit(CLASS_DEMONHUNTER)) != 0;
+  return (classes & classBit(CLASS_DEMONHUNTER)) != 0;
 }
 
 const CharDetails::Requirement * CharDetails::requirement(uint requirementID) const
@@ -567,8 +584,9 @@ CharDetails::RequirementResult CharDetails::evaluateRequirement(uint requirement
   if (!raceMaskAllows(req.raceMask, playableRaceBit_))
     return REQUIREMENT_RACE;
 
-  if (!classMaskAllows(req.classMask, isDemonHunter_, ordinaryClasses_))
-    return REQUIREMENT_CLASS;
+  const RequirementResult byClass = classRequirement(req.classMask, isDemonHunter_, clientClasses_);
+  if (byClass != REQUIREMENT_MET)
+    return byClass;
 
   // Achievement, quest and item-appearance gates: a collectible look the account has to earn. The
   // in-game appearance editor hides those by default and the viewer cannot evaluate the condition,
