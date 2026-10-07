@@ -1062,8 +1062,15 @@ void ModelViewer::LoadModel(GameFile * file, int raceID, int sexID)
   m_exportNpcDisplayId = 0;
   m_exportItemSkinFileId = 0;
 
-  // check if this is a character model
-  isChar = (file->fullname().startsWith("char", Qt::CaseInsensitive) || file->fullname().startsWith("alternate\\char", Qt::CaseInsensitive));
+  // check if this is a character model: one this client's character tables name (a race's ChrModel shows it, see
+  // RaceInfos), or one in the character folders (a file those tables do not name, such as a legacy model
+  // WoWModel::initRaceInfos resolves by its path). The folder alone is not enough: a character model the listfile has
+  // no real name for is listed under a generated one -- Classic Beta's Skyborne models are
+  // models/creature/unk_exp00_<id>/<id>.m2 -- and was loaded as a creature: no race, no customization, no composed
+  // skin, a white model.
+  RaceInfos chrModelRace;
+  isChar = RaceInfos::getRaceInfosForFileID(file->fileDataId(), chrModelRace) ||
+           file->fullname().startsWith("char", Qt::CaseInsensitive) || file->fullname().startsWith("alternate\\char", Qt::CaseInsensitive);
   Attachment *modelAtt = NULL;
 
   if (isChar)

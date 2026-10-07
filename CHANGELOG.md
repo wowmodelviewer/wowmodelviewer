@@ -552,6 +552,13 @@ Format loosely based on [Keep a Changelog](https://keepachangelog.com/).
   skins, faces, hair, and most creature and item textures -- failed to open although its standard version is on
   disk. When only a later version of a file is installed, that one is now used (120,209 files in MoP Classic 5.5.4,
   96,634 in Classic Beta 1.60.1; none in Retail or Classic Era, which list one version).
+- **Classic Beta's Skyborne characters are no longer white.** A model was treated as a character only when the
+  listfile put it in the character folders, and the listfile has no real name for the two Skyborne models: it lists
+  them as models/creature/unk_exp00_7478487 and _7478494. Picked from Characters (High Order or Windshaper
+  Skyborne), or shown as one of the Skyborne NPCs, they loaded as creatures -- no race (Windshaper came up as High
+  Order), no customization, no equipment, and an untextured white model, although their skin had been composed. A
+  model a race's ChrModel uses is now a character whatever its file is called; the folder rule still covers files
+  the client's tables do not name. Only those two files change (none in Retail, MoP Classic or Classic Era).
 - **Browse no longer keeps every tree it ever built.** Each rebuild of the Models or Buildings tree -- a search,
   clearing it, another client -- left the previous hierarchy of folders and files behind, never freed (about
   90 MB for Retail's models each time: eight searches for "bear", each cleared again, grew the viewer from 2.35 to

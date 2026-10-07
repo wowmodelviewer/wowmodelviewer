@@ -491,6 +491,93 @@ static int doHeadlessClassicCustomizationTest(ModelViewer * frame)
           QString("ChrModel %1, file %2, layout %3").arg(ri.ChrModelID.empty() ? -1 : ri.ChrModelID[0]).arg(ri.modelFileID).arg(ri.textureLayoutID));
   }
 
+  // ---- 2b. A race's model is a character, whatever the listfile calls it --------------------------------
+  // The Characters list and an NPC reach a race's model by FileDataID, and a model the listfile has no real name for
+  // is listed under a generated one outside the character folders (Classic Beta's Skyborne models). Each must load as
+  // its race's character -- as a creature it had no race, no customization and no composed skin, and drew white --
+  // and a model no race uses must still load as a creature.
+  {
+    const auto canvasModel = [frame]() { return frame->canvas ? const_cast<WoWModel *>(frame->canvas->model()) : nullptr; };
+    const auto settle = []() {
+      for (int i = 0; i < 20; i++)
+        wxTheApp->Yield(true);
+    };
+    const auto outsideCharacterFolders = [](GameFile * f) {
+      return !f->fullname().startsWith("char", Qt::CaseInsensitive) && !f->fullname().startsWith("alternate\\char", Qt::CaseInsensitive);
+    };
+    const auto describe = [](WoWModel * m) {
+      return m ? QString("modelType %1, isChar %2, race %3 sex %4, NPC %5").arg((int)m->modelType).arg(m->charModelDetails.isChar ? 1 : 0)
+                   .arg(m->infos.raceID).arg(m->infos.sexID).arg(m->cd.isNPC ? 1 : 0)
+               : QString("no model");
+    };
+    int raceModels = 0;
+    for (const auto & entry : RaceInfos::getRaceMenu())
+      for (int sex = 0; sex <= 1; sex++)
+      {
+        const int fileID = sex == 1 ? entry.femaleFileID : entry.maleFileID;
+        GameFile * file = fileID > 0 ? GAMEDIRECTORY.getFile(fileID) : nullptr;
+        if (!file || !outsideCharacterFolders(file))
+          continue;
+        raceModels++;
+        frame->LoadModel(file, entry.raceID, sex);
+        settle();
+        WoWModel * m = canvasModel();
+        check(QString("race model outside the character folders: race %1 (%2) sex %3, %4 [%5], loads as that race's character")
+                .arg(entry.raceID).arg(QString::fromStdString(entry.name)).arg(sex).arg(file->fullname()).arg(fileID),
+              m && m->gamefile == file && m->modelType == MT_CHAR && m->charModelDetails.isChar && m->infos.raceID == entry.raceID &&
+                m->infos.sexID == sex,
+              describe(m));
+      }
+    // A humanoid NPC (a display with extended info) on such a model.
+    int npcs = 0;
+    sqlResult humanoid = GAMEDATABASE.sqlQuery(
+        "SELECT Creature.ID, CreatureModelData.FileDataID FROM Creature "
+        "JOIN CreatureDisplayInfo ON Creature.DisplayID1 = CreatureDisplayInfo.ID "
+        "JOIN CreatureModelData ON CreatureDisplayInfo.ModelID = CreatureModelData.ID "
+        "WHERE CreatureDisplayInfo.ExtendedDisplayInfoID != 0 ORDER BY Creature.ID");
+    for (size_t i = 0; humanoid.valid && i < humanoid.values.size(); i++)
+    {
+      RaceInfos ri;
+      const int fileID = humanoid.values[i][1].toInt();
+      GameFile * file = GAMEDIRECTORY.getFile(RaceInfos::getHDModelForFileID(fileID));
+      if (!file || !outsideCharacterFolders(file) || !RaceInfos::getRaceInfosForFileID(file->fileDataId(), ri))
+        continue;
+      npcs++;
+      frame->LoadNPC(humanoid.values[i][0].toUInt());
+      settle();
+      WoWModel * m = canvasModel();
+      check(QString("humanoid NPC %1 on a race model outside the character folders (%2) loads as a character NPC")
+              .arg(humanoid.values[i][0]).arg(file->fullname()),
+            m && m->gamefile == file && m->modelType == MT_CHAR && m->charModelDetails.isChar && m->cd.isNPC, describe(m));
+    }
+    LOG_INFO << QString("[customization-test] race models outside the character folders: %1 race/sex model(s), %2 humanoid NPC(s)")
+                  .arg(raceModels).arg(npcs);
+    // A model no race uses, outside the character folders: a creature, as before.
+    sqlResult plain = GAMEDATABASE.sqlQuery(
+        "SELECT CreatureModelData.FileDataID FROM Creature "
+        "JOIN CreatureDisplayInfo ON Creature.DisplayID1 = CreatureDisplayInfo.ID "
+        "JOIN CreatureModelData ON CreatureDisplayInfo.ModelID = CreatureModelData.ID "
+        "WHERE CreatureDisplayInfo.ExtendedDisplayInfoID = 0 ORDER BY Creature.ID");
+    GameFile * creature = nullptr;
+    for (size_t i = 0; plain.valid && i < plain.values.size() && !creature; i++)
+    {
+      RaceInfos ri;
+      GameFile * file = GAMEDIRECTORY.getFile(plain.values[i][0].toInt());
+      if (file && outsideCharacterFolders(file) && !RaceInfos::getRaceInfosForFileID(file->fileDataId(), ri))
+        creature = file;
+    }
+    if (!creature)
+      skip("a model no race uses loads as a creature", "no such creature model is installed on this computer");
+    else
+    {
+      frame->LoadModel(creature);
+      settle();
+      WoWModel * m = canvasModel();
+      check(QString("a model no race uses (%1) loads as a creature").arg(creature->fullname()),
+            m && m->gamefile == creature && m->modelType != MT_CHAR && !m->charModelDetails.isChar, describe(m));
+    }
+  }
+
   // ---- 3. The Human male's options and choices ---------------------------------------------------------
   const int humanFile = RaceInfos::getFileIDForRaceSex(1, 0);
   GameFile * humanModel = humanFile > 0 ? GAMEDIRECTORY.getFile(humanFile) : nullptr;
