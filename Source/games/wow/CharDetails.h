@@ -214,7 +214,15 @@ public:
   // The rules, one function each (see their definitions for the evidence behind them).
   static bool isPlayerRequirement(int reqType);
   static bool raceMaskAllows(unsigned long long raceMask, int playableRaceBit);
-  static bool classMaskAllows(int classMask, bool demonHunter);
+  static bool classMaskAllows(int classMask, bool demonHunter, unsigned int ordinaryClassMask);
+
+  // The loaded client's classes (ChrClasses) as a ClassMask: class N is bit N - 1. 0 when the table holds none.
+  static unsigned int clientClassMask();
+  // The class context of a character viewed without a class: every class of the client but Death Knight and
+  // Demon Hunter (see classMaskAllows).
+  static unsigned int ordinaryClassMask(unsigned int clientClasses);
+  // Whether the loaded client has Demon Hunters, i.e. whether the Demon Hunter class context exists at all.
+  bool clientHasDemonHunters() const;
 
   // A requirement of this character's options or choices, evaluated against a selection
   // (ChrCustomizationOption::ID -> ChrCustomizationChoice::ID). 0 is no requirement and is met.
@@ -302,6 +310,8 @@ private:
   std::map<uint, uint> choiceOption_;       // ChrCustomizationChoice::ID -> ChrCustomizationOption::ID
   std::map<uint, Requirement> requirements_;
   int playableRaceBit_ = -1;
+  unsigned int clientClasses_ = 0;      // clientClassMask() when the options were read
+  unsigned int ordinaryClasses_ = 0;    // ordinaryClassMask(clientClasses_)
   mutable std::set<uint> unresolvedRequirementsLogged_;
 
   // Geoset GROUPS (GeosetType) that any customization option for this model drives.

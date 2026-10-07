@@ -22,19 +22,11 @@
 
 namespace
 {
-  // ChrCustomizationReq.ClassMask names class N with bit N - 1. The client's ChrClasses run from 1
-  // (Warrior) to 15 (Traveler) in 12.1.0, and the masks in the data use exactly bits 0-14.
-  constexpr unsigned int CLASS_ID_LAST = 15;
+  // ChrCustomizationReq.ClassMask names class N with bit N - 1.
   constexpr unsigned int classBit(unsigned int classID) { return 1u << (classID - 1); }
-  constexpr unsigned int CLASS_BITS_ALL = (1u << CLASS_ID_LAST) - 1;
-
-  // The class context of a character viewed without a class. The viewer has one class switch, the
-  // Demon Hunter checkbox; otherwise the character is taken as an ordinary class: one whose looks
-  // the data does not single out. Death Knight and Demon Hunter are the classes it does (Death
-  // Knight eye glow and skin colours, Demon Hunter tattoos, horns and blindfolds), and the data's own
-  // "everyone but them" masks show it: Req 146 0x7FDF (all but Death Knight), Req 144 0x77DF (all
-  // but Death Knight and Demon Hunter).
-  constexpr unsigned int CLASS_BITS_ORDINARY = CLASS_BITS_ALL & ~classBit(CLASS_DEATHKNIGHT) & ~classBit(CLASS_DEMONHUNTER);
+  // Only for a client whose ChrClasses could not be read: the classes of 12.1.0, 1 (Warrior) to 15 (Traveler).
+  constexpr unsigned int CLASS_ID_LAST_RETAIL = 15;
+  constexpr unsigned int CLASS_BITS_RETAIL = (1u << CLASS_ID_LAST_RETAIL) - 1;
 
   QString idList(const std::set<uint> & ids)
   {
@@ -141,7 +133,10 @@ void CharDetails::load(QString & f)
       if (reader.name() == "isDemonHunter")
       {
         LOG_INFO << __FILE__ << __LINE__ << "reading demonHunter mode value";
-        setDemonHunterMode(reader.attributes().value("value").toString().toUInt());
+        // A Demon Hunter saved on a client that has the class stays an ordinary character on one that has not
+        // (no Classic client does): its choices would all be judged as a Demon Hunter's, and the checkbox that
+        // could undo it is not offered there.
+        setDemonHunterMode(reader.attributes().value("value").toString().toUInt() && clientHasDemonHunters());
       }
     }
     reader.readNext();
@@ -271,6 +266,8 @@ void CharDetails::fillCustomizationMap()
   requirements_.clear();
   unresolvedRequirementsLogged_.clear();
   playableRaceBit_ = -1;
+  clientClasses_ = 0;
+  ordinaryClasses_ = 0;
   choiceGeosetElements_.clear();
   choiceElementRows_.clear();
   resolvedElements_.clear();
@@ -395,6 +392,12 @@ void CharDetails::fillCustomizationMap()
   if (race.valid && !race.values.empty())
     playableRaceBit_ = race.values[0][0].toInt();
 
+  clientClasses_ = clientClassMask();
+  ordinaryClasses_ = ordinaryClassMask(clientClasses_);
+  if (clientClasses_ == 0)
+    LOG_WARNING << "ChrClasses holds no class: class-limited choices are judged against every class through"
+                << CLASS_ID_LAST_RETAIL << "but Death Knight and Demon Hunter";
+
   // Dependencies: an option depends on another when its own requirement, or one of its choices',
   // names choices of that other option (Skin Color on Skin Type, Face Features on Jaw Features,
   // Eyesight on Eye Color).
@@ -484,17 +487,53 @@ bool CharDetails::raceMaskAllows(unsigned long long raceMask, int playableRaceBi
 // + Req 142 0x20 = 0x7FFF, Death Knight being class 6). 0 restricts nothing: Req 4103, the
 // Requirement of the Eyesight option, has ClassMask 0 on a player requirement and the option is
 // offered. The viewer's class context is the Demon Hunter checkbox or, without it, the ordinary
-// classes (see CLASS_BITS_ORDINARY): a Demon Hunter passes a mask that names class 12; an ordinary
+// classes (see ordinaryClassMask): a Demon Hunter passes a mask that names class 12; an ordinary
 // character passes only a mask that names every ordinary class, so a choice limited to some classes
 // (Death Knight only, Demon Hunter only, a druid form) is not offered as if every class had it.
-bool CharDetails::classMaskAllows(int classMask, bool demonHunter)
+bool CharDetails::classMaskAllows(int classMask, bool demonHunter, unsigned int ordinaryClassMask)
 {
   if (classMask == 0)
     return true;
   const unsigned int mask = static_cast<unsigned int>(classMask);
   if (demonHunter)
     return (mask & classBit(CLASS_DEMONHUNTER)) != 0;
-  return (mask & CLASS_BITS_ORDINARY) == CLASS_BITS_ORDINARY;
+  return (mask & ordinaryClassMask) == ordinaryClassMask;
+}
+
+unsigned int CharDetails::clientClassMask()
+{
+  unsigned int classes = 0;
+  sqlResult r = GAMEDATABASE.sqlQuery("SELECT ID FROM ChrClasses");
+  for (size_t i = 0; r.valid && i < r.values.size(); i++)
+  {
+    const uint id = r.values[i][0].toUInt();
+    if (id >= 1 && id <= 32)
+      classes |= classBit(id);
+  }
+  return classes;
+}
+
+// The class context of a character viewed without a class. The viewer has one class switch, the
+// Demon Hunter checkbox; otherwise the character is taken as an ordinary class: one whose looks the
+// data does not single out. Death Knight and Demon Hunter are the classes it does (Death Knight eye
+// glow and skin colours, Demon Hunter tattoos, horns and blindfolds), and the data's own "everyone but
+// them" masks show it: in 12.1.0, Req 146 0x7FDF (all but Death Knight) and Req 144 0x77DF (all but
+// Death Knight and Demon Hunter). Each client writes those masks over its own classes -- Req 146 and
+// 144 are 0xFDF and 0x7DF in Classic Era 1.15.9 and MoP Classic 5.5.4, 0x3FDF and 0x37DF in Classic Beta
+// 1.60.1 -- so "every ordinary class" is every class in the client's ChrClasses but those two: 0x77DF
+// for 12.1.0, 0x7DF for MoP Classic (classes 1-11), 0x5DF for Classic Beta (1-5, 7-9, 11). Against
+// classes 1-15, which no Classic mask names, every Face choice of a Classic Era or MoP Classic character
+// failed, and with it the face texture that carries a classic model's eyes.
+unsigned int CharDetails::ordinaryClassMask(unsigned int clientClasses)
+{
+  const unsigned int classes = clientClasses ? clientClasses : CLASS_BITS_RETAIL;
+  return classes & ~classBit(CLASS_DEATHKNIGHT) & ~classBit(CLASS_DEMONHUNTER);
+}
+
+bool CharDetails::clientHasDemonHunters() const
+{
+  const unsigned int classes = clientClasses_ ? clientClasses_ : clientClassMask();
+  return classes == 0 || (classes & classBit(CLASS_DEMONHUNTER)) != 0;
 }
 
 const CharDetails::Requirement * CharDetails::requirement(uint requirementID) const
@@ -528,7 +567,7 @@ CharDetails::RequirementResult CharDetails::evaluateRequirement(uint requirement
   if (!raceMaskAllows(req.raceMask, playableRaceBit_))
     return REQUIREMENT_RACE;
 
-  if (!classMaskAllows(req.classMask, isDemonHunter_))
+  if (!classMaskAllows(req.classMask, isDemonHunter_, ordinaryClasses_))
     return REQUIREMENT_CLASS;
 
   // Achievement, quest and item-appearance gates: a collectible look the account has to earn. The

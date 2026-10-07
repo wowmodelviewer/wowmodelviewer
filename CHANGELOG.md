@@ -536,6 +536,20 @@ Format loosely based on [Keep a Changelog](https://keepachangelog.com/).
   `-imgseq` smoke test is gone. `-unityipctest` and `-fbxexport` still run.
 
 ### Fixed
+- **Classic characters get their whole appearance.** Whether a customization choice is offered depends on the
+  classes its requirement names, and the viewer judged that against Retail's 15 classes: a choice for "every class
+  but Death Knight" had to name classes 1-15. Each Classic client writes those masks over its own classes (Classic
+  Era and MoP Classic 0x7DF, Classic Beta 0x37DF), so every such choice was dropped -- the whole Face option of a
+  Classic Era or MoP Classic character, and the Eye Color option of a Classic Beta one, whose eyes then rendered
+  blank white. The classes now come from the client's own ChrClasses (Retail's are still 1-15, so nothing changes
+  there): MoP Classic's Human male gets 58 of its 80 choices instead of 46, Classic Beta's 96 of 131 instead of 77,
+  and the Demon Hunter checkbox is offered only by a client that has Demon Hunters.
+- **MoP Classic and Classic Beta characters are no longer untextured white.** Both builds list their textures twice,
+  a high-resolution version first and the standard one after it, and Battle.net installs the high-resolution ones
+  only with an optional package. The first version listed always won, so without that package every such texture --
+  skins, faces, hair, and most creature and item textures -- failed to open although its standard version is on
+  disk. When only a later version of a file is installed, that one is now used (120,209 files in MoP Classic 5.5.4,
+  96,634 in Classic Beta 1.60.1; none in Retail or Classic Era, which list one version).
 - **Browse no longer keeps every tree it ever built.** Each rebuild of the Models or Buildings tree -- a search,
   clearing it, another client -- left the previous hierarchy of folders and files behind, never freed (about
   90 MB for Retail's models each time: eight searches for "bear", each cleared again, grew the viewer from 2.35 to

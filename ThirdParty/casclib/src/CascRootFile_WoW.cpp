@@ -332,6 +332,27 @@ struct TRootHandler_WoW : public TFileTreeRoot
     }
 
     // Since WoW build 30080 (8.2.0)
+    // WMV: a build can list one FileDataId twice with different content -- WoW Classic 5.5.4 and 1.60.1 list their
+    // character textures as a high-resolution version (content flag 0x1, first) and the standard one, and Battle.net
+    // installs the high-resolution versions only with its optional package. The first entry kept for a FileDataId
+    // used to win whatever was on disk, so without that package every such texture failed to open although its
+    // standard version is local. A later entry replaces the kept one when only the later one is local; otherwise the
+    // first entry stays, as before.
+    void PreferLocalEntry(PCASC_CKEY_ENTRY pCKeyEntry, DWORD FileDataId, DWORD LocaleFlags, DWORD ContentFlags)
+    {
+        PCASC_FILE_NODE pFileNode = FileTree.FindById(FileDataId);
+
+        if(pFileNode == NULL || pFileNode->pCKeyEntry == NULL || pFileNode->pCKeyEntry == pCKeyEntry)
+            return;
+        if((pFileNode->pCKeyEntry->Flags & CASC_CE_FILE_IS_LOCAL) || !(pCKeyEntry->Flags & CASC_CE_FILE_IS_LOCAL))
+            return;
+
+        pFileNode->pCKeyEntry->RefCount--;
+        pFileNode->pCKeyEntry = pCKeyEntry;
+        pCKeyEntry->RefCount++;
+        FileTree.SetExtras(pFileNode, FileDataId, LocaleFlags, ContentFlags);
+    }
+
     DWORD ParseWowRootFile_AddFiles_v2(TCascStorage * hs, FILE_ROOT_GROUP & RootGroup)
     {
         PCASC_CKEY_ENTRY pCKeyEntry;
@@ -350,6 +371,8 @@ struct TRootHandler_WoW : public TFileTreeRoot
             // Find the item in the central storage. Insert it to the tree
             if((pCKeyEntry = FindCKeyEntry_CKey(hs, pCKey->Value)) != NULL)
             {
+                PreferLocalEntry(pCKeyEntry, FileDataId, RootGroup.Header.LocaleFlags, RootGroup.Header.ContentFlags);
+
                 // If we know the file name hash, we're gonna insert it by hash AND file data id.
                 // If we don't know the hash, we're gonna insert it just by file data id.
                 if(RootGroup.pHashes != NULL && RootGroup.pHashes[i] != 0)
@@ -390,6 +413,8 @@ struct TRootHandler_WoW : public TFileTreeRoot
             // Find the item in the central storage. Insert it to the tree
             if((pCKeyEntry = FindCKeyEntry_CKey(hs, pRootEntry->CKey.Value)) != NULL)
             {
+                PreferLocalEntry(pCKeyEntry, FileDataId, RootGroup.Header.LocaleFlags, RootGroup.Header.ContentFlags);
+
                 if(pRootEntry->FileNameHash != 0)
                 {
                     FileTree.InsertByHash(pCKeyEntry, pRootEntry->FileNameHash, FileDataId, RootGroup.Header.LocaleFlags, RootGroup.Header.ContentFlags);
