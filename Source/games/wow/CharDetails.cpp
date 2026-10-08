@@ -1271,7 +1271,7 @@ void CharDetails::refreshGeosets()
   if (model_)
   {
     // only show underwear bottoms if the character isn't wearing pants or chest 
-    if (showUnderwear && model_->getItemId(CS_PANTS) < 1 && !model_->isWearingARobe())
+    if (showUnderwear && model_->getItemId(CS_PANTS) < 1 && !model_->isWearingNpcEquipment(CS_PANTS) && !model_->isWearingARobe())
     {
       // demon hunters and female pandaren use the TABARD2 geoset for part of their underwear:
       if (isDemonHunter_ || ((model_->infos.raceID == RACE_PANDAREN) && (model_->infos.sexID == GENDER_FEMALE)))
@@ -1379,13 +1379,14 @@ void CharDetails::refreshTextures()
         // don't apply underwear tops/bras if show underwear is off or if the character is wearing a shirt or chest
         if (t.region == CR_TORSO_UPPER &&
           (!showUnderwear ||
-            model_->getItemId(CS_CHEST) > 1 || model_->getItemId(CS_SHIRT) > 1))
+            model_->getItemId(CS_CHEST) > 1 || model_->getItemId(CS_SHIRT) > 1 ||
+            model_->isWearingNpcEquipment(CS_CHEST) || model_->isWearingNpcEquipment(CS_SHIRT)))
           continue;
 
         // don't apply underwear bottoms if show underwear is off or if the character is wearing pants
         if (t.region == CR_LEG_UPPER &&
           (!showUnderwear ||
-            model_->getItemId(CS_PANTS) > 1))
+            model_->getItemId(CS_PANTS) > 1 || model_->isWearingNpcEquipment(CS_PANTS)))
           continue;
       }
 

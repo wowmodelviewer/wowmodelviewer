@@ -703,6 +703,166 @@ static void checkNpcAppearance(ModelViewer * frame, const Check & check, const S
   }
 }
 
+// -customizationtest, every client: a geoset group an NPC's shirt, chest and legs all set goes to the item that declares
+// it (its GeosetGroup is not 0), and to the outer one where two do -- whatever order the viewer holds the items in. The
+// cases are found in the loaded client's own tables, in Creature order (then creature display order, for a case no
+// Creature row gives), among NPCs whose race wears their display's model and whose gloves leave the sleeves alone --
+// no NPC is named:
+//   - legs declaring the robe skirt (the trousers group) under a shirt or chest that leaves it at its default: the legs'
+//     skirt, and no underwear bottoms under the legs;
+//   - a chest declaring the skirt over legs that leave it at their default, and no gloves: the chest's skirt, the NPC
+//     robed, no underwear top under the chest, and the bare hands still drawn;
+//   - a shirt declaring the sleeves under a chest that leaves them at their default: the shirt's sleeves;
+//   - a shirt and a chest declaring different sleeves: the chest's.
+template <class Check, class Skip>
+static void checkEquipmentGeosets(ModelViewer * frame, const Check & check, const Skip & skip)
+{
+  for (const QString table : { QString("CreatureDisplayInfoExtra"), QString("NpcModelItemSlotDisplayInfo"), QString("ItemDisplayInfo") })
+  {
+    sqlResult n = GAMEDATABASE.sqlQuery(QString("SELECT COUNT(*) FROM %1").arg(table));
+    if (n.valid && !n.values.empty() && n.values[0][0].toInt() > 0)
+      continue;
+    wow::WoWFolder * folder = dynamic_cast<wow::WoWFolder *>(&GAMEDIRECTORY);
+    if (folder && folder->isRemoteFile(QString("dbfilesclient/%1.db2").arg(table.toLower())))
+      skip("equipment geosets", QString("the client's %1 is not installed on this computer").arg(table));
+    else
+      check(QString("equipment geosets: %1 was read").arg(table), false, "the table holds no row");
+    return;
+  }
+
+  // NpcModelItemSlotDisplayInfo.ItemSlot 2 shirt, 3 chest, 5 legs, 8 hands; a slot named twice keeps its last row, as
+  // ModelViewer::ShowCreatureDisplay puts them on. GeoSetGroup1 is the sleeves (gloves: the gloves group, which hides
+  // the sleeves when declared), GeoSetGroup3 the skirt.
+  struct Worn { bool worn = false; int sleeves = 0; int skirt = 0; };
+  std::map<uint, std::map<int, Worn> > equipment;
+  sqlResult rows = GAMEDATABASE.sqlQuery("SELECT n.NpcModelID, n.ItemSlot, i.ID, IFNULL(i.GeoSetGroup1, 0), IFNULL(i.GeoSetGroup3, 0) "
+                                         "FROM NpcModelItemSlotDisplayInfo n LEFT JOIN ItemDisplayInfo i ON i.ID = n.ItemDisplayInfoID "
+                                         "WHERE n.ItemSlot IN (2, 3, 5, 8) ORDER BY n.ID");
+  for (size_t i = 0; rows.valid && i < rows.values.size(); i++)
+    equipment[rows.values[i][0].toUInt()][rows.values[i][1].toInt()] =
+      Worn{ !rows.values[i][2].isEmpty() && rows.values[i][2].toInt() != 0, rows.values[i][3].toInt(), rows.values[i][4].toInt() };
+  if (equipment.empty())
+  {
+    skip("equipment geosets", "the client's NPCs wear no shirt, chest, legs or gloves");
+    return;
+  }
+
+  struct Case { uint creature = 0; bool byDisplay = false; QString who; uint extra = 0; int race = -1; int sex = -1; Worn shirt, chest, legs; };
+  Case legsSkirt, chestSkirt, shirtSleeves, bothSleeves;
+  const auto findCases = [&](const sqlResult & npcs, bool byDisplay) {
+    for (size_t i = 0; npcs.valid && i < npcs.values.size(); i++)
+    {
+      if (legsSkirt.creature && chestSkirt.creature && shirtSleeves.creature && bothSleeves.creature)
+        break;
+      const auto e = equipment.find(npcs.values[i][2].toUInt());
+      if (e == equipment.end())
+        continue;
+      Case c;
+      c.creature = npcs.values[i][0].toUInt();
+      c.byDisplay = byDisplay;
+      c.who = QString(byDisplay ? "creature display %1" : "NPC %1").arg(c.creature);
+      c.extra = e->first;
+      c.race = npcs.values[i][3].toInt();
+      c.sex = npcs.values[i][4].toInt();
+      c.shirt = e->second[2];
+      c.chest = e->second[3];
+      c.legs = e->second[5];
+      const Worn gloves = e->second[8];
+      if (gloves.worn && gloves.sleeves > 0)
+        continue; // the gloves hide the sleeves
+      const int file = RaceInfos::getHDModelForFileID(npcs.values[i][1].toInt());
+      RaceInfos wearer;
+      if (!GAMEDIRECTORY.getFile(file) || !RaceInfos::getRaceInfosForRaceSex(c.race, c.sex, wearer) || wearer.modelFileID != file)
+        continue; // the display's race does not wear its model, or the model is not installed
+      const bool shirtDefaultSkirt = !c.shirt.worn || c.shirt.skirt == 0, chestDefaultSkirt = !c.chest.worn || c.chest.skirt == 0;
+      if (!legsSkirt.creature && c.legs.worn && c.legs.skirt != 0 && (c.shirt.worn || c.chest.worn) && shirtDefaultSkirt && chestDefaultSkirt)
+        legsSkirt = c;
+      if (!chestSkirt.creature && c.chest.worn && c.chest.skirt != 0 && c.legs.worn && c.legs.skirt == 0 && !gloves.worn)
+        chestSkirt = c;
+      if (!shirtSleeves.creature && c.shirt.worn && c.shirt.sleeves != 0 && c.chest.worn && c.chest.sleeves == 0)
+        shirtSleeves = c;
+      if (!bothSleeves.creature && c.shirt.worn && c.chest.worn && c.shirt.sleeves != 0 && c.chest.sleeves != 0 && c.shirt.sleeves != c.chest.sleeves)
+        bothSleeves = c;
+    }
+  };
+  const QString columns = "CreatureModelData.FileDataID, CreatureDisplayInfoExtra.ID, CreatureDisplayInfoExtra.DisplayRaceID, "
+                          "CreatureDisplayInfoExtra.DisplaySexID ";
+  const QString joins = "JOIN CreatureModelData ON CreatureDisplayInfo.ModelID = CreatureModelData.ID "
+                        "JOIN CreatureDisplayInfoExtra ON CreatureDisplayInfo.ExtendedDisplayInfoID = CreatureDisplayInfoExtra.ID ";
+  findCases(GAMEDATABASE.sqlQuery("SELECT Creature.ID, " + columns + "FROM Creature "
+                                  "JOIN CreatureDisplayInfo ON Creature.DisplayID1 = CreatureDisplayInfo.ID " + joins + "ORDER BY Creature.ID"),
+            false);
+  if (!legsSkirt.creature || !chestSkirt.creature || !shirtSleeves.creature || !bothSleeves.creature)
+    findCases(GAMEDATABASE.sqlQuery("SELECT CreatureDisplayInfo.ID, " + columns + "FROM CreatureDisplayInfo " + joins +
+                                    "ORDER BY CreatureDisplayInfo.ID"), true);
+
+  // Loads the NPC; the model when it loaded as that race's character NPC, else null (and a failed check).
+  const auto loadNpc = [&](const Case & c, const QString & what) -> WoWModel * {
+    if (c.byDisplay)
+    {
+      ModelIdLookup::Resolved resolved;
+      wxString why;
+      if (ModelIdLookup::resolve(ModelIdLookup::Kind::CreatureDisplay, (int)c.creature, resolved, why))
+        frame->LoadModelById(resolved, why);
+    }
+    else
+      frame->LoadNPC(c.creature);
+    for (int i = 0; i < 20; i++)
+      wxTheApp->Yield(true);
+    WoWModel * m = frame->canvas ? const_cast<WoWModel *>(frame->canvas->model()) : nullptr;
+    const bool ok = m && m->charModelDetails.isChar && m->cd.isNPC && m->infos.raceID == c.race && m->infos.sexID == c.sex;
+    check(QString("equipment geosets, %1: %2 (extended display %3) loads as a character NPC of race %4 sex %5")
+            .arg(what).arg(c.who).arg(c.extra).arg(c.race).arg(c.sex), ok,
+          m ? QString("isChar %1, NPC %2, race %3 sex %4").arg(m->charModelDetails.isChar ? 1 : 0).arg(m->cd.isNPC ? 1 : 0)
+                .arg(m->infos.raceID).arg(m->infos.sexID) : QString("no model"));
+    return ok ? m : nullptr;
+  };
+  const auto group = [](WoWModel * m, CharGeosets g) {
+    const auto it = m->cd.geosets.find(g);
+    return it == m->cd.geosets.end() ? -1 : (int)it->second;
+  };
+  const auto drawn = [](WoWModel * m, CharGeosets g) {
+    for (size_t i = 0; i < m->ownGeosetCount() && i < m->geosets.size(); i++)
+      if (m->geosets[i] && m->geosets[i]->display && m->geosets[i]->id / 100 == (int)g)
+        return true;
+    return false;
+  };
+  const auto underwear = [](WoWModel * m, int region) {
+    return std::any_of(m->cd.textures.begin(), m->cd.textures.end(), [region](const CharDetails::TextureCustomization & t) { return t.region == region; });
+  };
+
+  if (!legsSkirt.creature)
+    skip("equipment geosets: legs declaring the robe skirt under a shirt or chest that does not", "no NPC of this client wears one");
+  else if (WoWModel * m = loadNpc(legsSkirt, "legs declaring the skirt"))
+    check(QString("equipment geosets: %1's legs declare the skirt (%2), its shirt and chest do not: the legs' skirt, no underwear bottoms")
+            .arg(legsSkirt.who).arg(1 + legsSkirt.legs.skirt),
+          group(m, CG_TROUSERS) == 1 + legsSkirt.legs.skirt && !underwear(m, CR_LEG_UPPER),
+          QString("trousers group %1, underwear bottoms %2").arg(group(m, CG_TROUSERS)).arg(underwear(m, CR_LEG_UPPER) ? 1 : 0));
+
+  if (!chestSkirt.creature)
+    skip("equipment geosets: a chest declaring the robe skirt over legs that do not, no gloves", "no NPC of this client wears one");
+  else if (WoWModel * m = loadNpc(chestSkirt, "chest declaring the skirt"))
+    check(QString("equipment geosets: %1's chest declares the skirt (%2), its legs do not, no gloves: the chest's skirt, robed, no "
+                  "underwear top, bare hands drawn").arg(chestSkirt.who).arg(1 + chestSkirt.chest.skirt),
+          group(m, CG_TROUSERS) == 1 + chestSkirt.chest.skirt && m->isWearingARobe() && !underwear(m, CR_TORSO_UPPER) && drawn(m, CG_GLOVES),
+          QString("trousers group %1, robe %2, underwear top %3, hands drawn %4").arg(group(m, CG_TROUSERS)).arg(m->isWearingARobe() ? 1 : 0)
+            .arg(underwear(m, CR_TORSO_UPPER) ? 1 : 0).arg(drawn(m, CG_GLOVES) ? 1 : 0));
+
+  if (!shirtSleeves.creature)
+    skip("equipment geosets: a shirt declaring the sleeves under a chest that does not", "no NPC of this client wears one");
+  else if (WoWModel * m = loadNpc(shirtSleeves, "shirt declaring the sleeves"))
+    check(QString("equipment geosets: %1's shirt declares the sleeves (%2), its chest does not: the shirt's sleeves")
+            .arg(shirtSleeves.who).arg(1 + shirtSleeves.shirt.sleeves),
+          group(m, CG_SLEEVES) == 1 + shirtSleeves.shirt.sleeves, QString("sleeves group %1").arg(group(m, CG_SLEEVES)));
+
+  if (!bothSleeves.creature)
+    skip("equipment geosets: a shirt and a chest declaring different sleeves", "no NPC of this client wears them");
+  else if (WoWModel * m = loadNpc(bothSleeves, "shirt and chest declaring the sleeves"))
+    check(QString("equipment geosets: %1's shirt (%2) and chest (%3) declare the sleeves: the chest's")
+            .arg(bothSleeves.who).arg(1 + bothSleeves.shirt.sleeves).arg(1 + bothSleeves.chest.sleeves),
+          group(m, CG_SLEEVES) == 1 + bothSleeves.chest.sleeves, QString("sleeves group %1").arg(group(m, CG_SLEEVES)));
+}
+
 // -customizationtest on a Classic client (Classic Era, MoP Classic, Classic Beta): the same idea against the
 // client's own data. Every expected value was read from the named build's DB2 files by a reader independent of
 // this loader (MoP Classic 5.5.4.70032, Classic Beta 1.60.1.70235 -- unchanged in 1.60.1.70245 --, Classic Era
@@ -1103,6 +1263,9 @@ static int doHeadlessClassicCustomizationTest(ModelViewer * frame)
 
   // ---- 6. Humanoid NPCs wear their own stored appearance ----------------------------------------------
   checkNpcAppearance(frame, check, skip);
+
+  // ---- 7. The geoset groups an NPC's shirt, chest and legs share ---------------------------------------
+  checkEquipmentGeosets(frame, check, skip);
 
   LOG_INFO << QString("[customization-test] RESULT: %1 (%2 passed, %3 failed, %4 skipped)").arg(failed == 0 ? "PASS" : "FAIL").arg(passed).arg(failed).arg(skipped);
   return failed;
@@ -1730,9 +1893,13 @@ static int doHeadlessCustomizationTest(ModelViewer * frame)
     check("dark iron dwarf: model loaded (race 34, sex 0)", false, QString());
 
   // ---- 9. Humanoid NPCs wear their own stored appearance ----------------------------------------------
-  checkNpcAppearance(frame, check, [](const QString & what, const QString & why) {
+  const auto skip = [](const QString & what, const QString & why) {
     LOG_INFO << QString("[customization-test] SKIP %1 -- %2").arg(what, why);
-  });
+  };
+  checkNpcAppearance(frame, check, skip);
+
+  // ---- 10. The geoset groups an NPC's shirt, chest and legs share --------------------------------------
+  checkEquipmentGeosets(frame, check, skip);
 
   LOG_INFO << QString("[customization-test] RESULT: %1 (%2 passed, %3 failed)").arg(failed == 0 ? "PASS" : "FAIL").arg(passed).arg(failed);
   return failed;

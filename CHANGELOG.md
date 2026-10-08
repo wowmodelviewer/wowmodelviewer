@@ -546,12 +546,13 @@ Format loosely based on [Keep a Changelog](https://keepachangelog.com/).
   and the Demon Hunter checkbox is offered only by a client that has Demon Hunters. A client whose ChrClasses is
   not installed has no class context: the choices a class mask limits are left out and counted in the log, never
   judged against another client's classes; choices for every class stay.
-- **MoP Classic and Classic Beta characters are no longer untextured white.** Both builds list their textures twice,
-  a high-resolution version first and the standard one after it, and Battle.net installs the high-resolution ones
-  only with an optional package. The first version listed always won, so without that package every such texture --
-  skins, faces, hair, and most creature and item textures -- failed to open although its standard version is on
-  disk. When only a later version of a file is installed, that one is now used (120,209 files in MoP Classic 5.5.4,
-  96,634 in Classic Beta 1.60.1; none in Retail or Classic Era, which list one version).
+- **Classic textures listed twice open: MoP Classic characters are no longer untextured white.** MoP Classic and
+  Classic Beta list their textures twice, a high-resolution version first and the standard one after it, and
+  Battle.net installs the high-resolution ones only with an optional package. The first version listed always won,
+  so without that package every such texture -- skins, faces, hair, and most creature and item textures -- failed
+  to open although its standard version is on disk. When only a later version of a file is installed, that one is
+  now used (120,209 files in MoP Classic 5.5.4, 96,634 in Classic Beta 1.60.1; none in Retail or Classic Era, which
+  list one version).
 - **Classic Beta's Skyborne characters are no longer white.** A model was treated as a character only when the
   listfile put it in the character folders, and the listfile has no real name for the two Skyborne models: it lists
   them as models/creature/unk_exp00_7478487 and _7478494. Picked from Characters (High Order or Windshaper
@@ -573,6 +574,17 @@ Format loosely based on [Keep a Changelog](https://keepachangelog.com/).
   mean difference 39 -> 10 of 255; Garrosh's 25 -> 4). A saved character names its race and sex, so a race that
   shares its model file with another (Mag'har, MoP Classic Humans, Skyborne) loads back as itself; a saved NPC keeps
   its NPC choices.
+- **Equipment looks the same every time it is loaded.** A shirt, a chest piece and legs share geoset groups (the
+  sleeves, the robe skirt and three more), and which item's look a shared group got depended on the order of an
+  unordered set: it could change from one load to the next. Archmage Arugal and Grand Magister Rommath came up in a
+  robe or in trousers, Lorlien sometimes without legs at all, and a player's long-sleeved shirt under a vest, or a
+  plain shirt under a robe, came and went the same way (9 of 12 Retail NPCs with such a collision changed over six
+  loads). The items are now applied shirt, legs, chest, then the rest; a group an item leaves at its default no longer
+  replaces one an earlier item sets, and where two items set it the outer one wins. An NPC's chest counts as a robe
+  when its display sets the robe skirt, and an NPC's clothes cover the underwear, as a player's do. Two robe faults
+  are fixed for everyone: a robe no longer takes the forearms and hands off a character whose gloves slot was never
+  set (a freshly loaded character, an NPC without gloves), and under a robe the boots now keep their own feet instead
+  of the bare toes painted with the boots.
 - **Browse no longer keeps every tree it ever built.** Each rebuild of the Models or Buildings tree -- a search,
   clearing it, another client -- left the previous hierarchy of folders and files behind, never freed (about
   90 MB for Retail's models each time: eight searches for "bear", each cleared again, grew the viewer from 2.35 to

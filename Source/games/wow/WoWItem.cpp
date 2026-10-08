@@ -588,13 +588,13 @@ void WoWItem::refresh()
   if (mergedModel_ != nullptr)
     charModel_->mergeModel(mergedModel_, -1);
 
-  // update geoset values
+  // update geoset values (see setCharacterGeoset)
   for (const auto it : itemGeosets_)
   {
     if ((slot_ != CS_BOOTS) && // treat boots geoset in a special case - cf CS_BOOTS
         (slot_ != CS_PANTS)) // treat trousers geoset in a special case - cf CS_PANTS
     {
-      charModel_->cd.geosets[it.first] = it.second;
+      setCharacterGeoset(it.first, it.second);
       /*
       if (mergedModel_ != 0)
         mergedModel_->setGeosetGroupDisplay(it.first, 1);
@@ -706,9 +706,11 @@ void WoWItem::refresh()
     }
     case CS_BOOTS:
     {
+      // A robe hides the boots' shaft (CG_BOOTS), not the feet they give (CG_FEET): dropping both left the bare-toed
+      // feet painted with the boots under every robe.
       for (const auto it : itemGeosets_)
       {
-        if (it.first != CG_BOOTS && !charModel_->isWearingARobe())
+        if (it.first != CG_BOOTS)
         {
           charModel_->cd.geosets[it.first] = it.second;
           /*
@@ -748,7 +750,7 @@ void WoWItem::refresh()
       {
         if (it.first != CG_TROUSERS)
         {
-          charModel_->cd.geosets[it.first] = it.second;
+          setCharacterGeoset(it.first, it.second);
           /*
           if (mergedModel_ != 0)
             mergedModel_->setGeosetGroupDisplay(it.first, 1);
@@ -763,7 +765,7 @@ void WoWItem::refresh()
         // apply trousers geosets only if character is not already wearing a robe
         if(!charModel_->isWearingARobe())
         {
-          charModel_->cd.geosets[CG_TROUSERS] = geoIt->second;
+          setCharacterGeoset(CG_TROUSERS, geoIt->second);
           /*
           if (mergedModel_)
             mergedModel_->setGeosetGroupDisplay(CG_TROUSERS, 1);
@@ -792,7 +794,10 @@ void WoWItem::refresh()
 
       // if we are wearing a robe, render gloves first in texture compositing
       // only if GeoSetGroup1 is 0 (from item displayInfo db) which corresponds to stored geoset equals to 1
-      if (charModel_->isWearingARobe() && (charModel_->cd.geosets[CG_GLOVES] == 1))
+      // (find(), not operator[]: an empty gloves slot must not leave {CG_GLOVES, 0}, which hides the bare hands -- see
+      // WoWModel::refresh)
+      const auto gloves = charModel_->cd.geosets.find(CG_GLOVES);
+      if (charModel_->isWearingARobe() && gloves != charModel_->cd.geosets.end() && gloves->second == 1)
         layer = SLOT_LAYERS_[CS_CHEST] - 1;
 
       if (texIt != itemTextures_.end())
@@ -854,6 +859,41 @@ void WoWItem::refresh()
     default:
       break;
   }
+}
+
+// THE GEOSET GROUPS SEVERAL ITEMS SET. A shirt and a chest piece both set the sleeves, chest, trousers, torso and 28xx
+// groups, and the legs the trousers (robe skirt) group too. A group an item's display leaves at its default variant
+// (GeosetGroup 0: variant 1) does not replace a variant an item refreshed before it declared there -- a vest's default
+// sleeves leave a shirt's long ones, a shirt's default trousers leave a kilt's skirt. WoWModel::refresh refreshes the
+// items in a fixed order -- shirt, legs, chest, then the slots that share no group -- so a group two items both declare
+// ends as the outer one's. Only an item's declaration is kept: the default still replaces what the customization set
+// there (a skinned part hiding the group), as it always did. (The items used to be refreshed in the order of an
+// unordered set, and which one won changed from one load to the next: of the Retail NPCs' equipment, 5,967 sets have
+// legs declaring the robe skirt under a shirt or chest that leaves it at its default, 2,794 a chest declaring it over
+// legs that do not, about 3,000 one of shirt and chest declaring the sleeves.)
+void WoWItem::setCharacterGeoset(CharGeosets group, int value)
+{
+  if (value == 1 && charModel_->equipmentDeclaredGeosets.count(group) != 0)
+    return;
+  charModel_->cd.geosets[group] = value;
+  if (value != 1)
+    charModel_->equipmentDeclaredGeosets.insert(group);
+}
+
+bool WoWItem::declaresGeosetGroup(CharGeosets group) const
+{
+  const auto it = itemGeosets_.find(group);
+  return it != itemGeosets_.end() && it->second != 1;
+}
+
+bool WoWItem::showsAnything() const
+{
+  if (!itemTextures_.empty() || !itemModels_.empty() || mergedModel_ != nullptr)
+    return true;
+  for (const auto & g : itemGeosets_)
+    if (g.second != 1)
+      return true;
+  return false;
 }
 
 bool WoWItem::isCustomizableTabard() const
