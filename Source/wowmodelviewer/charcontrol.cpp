@@ -241,6 +241,33 @@ void CharControl::RefreshMountCard()
 {
   if (m_mountCard)
     m_mountCard->Sync(!m_handsOnly);
+  SyncModelVariant();
+}
+
+void CharControl::SyncModelVariant()
+{
+  if (cdFrame)
+    cdFrame->syncModelVariant();
+}
+
+void CharControl::SyncTabardSpins()
+{
+  if (!model)
+    return;
+  // The ranges first, from the tabard itself: a value above a range left from another tabard would be clamped by
+  // the control, and the next click would write the clamped value back.
+  tabardSpins[SPIN_TABARD_ICON]->SetRange(0, model->td.GetMaxIcon());
+  tabardSpins[SPIN_TABARD_ICONCOLOR]->SetRange(0, model->td.GetMaxIconColor(model->td.getIcon()));
+  tabardSpins[SPIN_TABARD_BORDER]->SetRange(0, model->td.GetMaxBorder());
+  tabardSpins[SPIN_TABARD_BORDERCOLOR]->SetRange(0, model->td.GetMaxBorderColor(model->td.getBorder()));
+  tabardSpins[SPIN_TABARD_BACKGROUND]->SetRange(0, model->td.GetMaxBackground());
+  tabardSpins[SPIN_TABARD_ICON]->SetValue(model->td.getIcon());
+  tabardSpins[SPIN_TABARD_ICONCOLOR]->SetValue(model->td.getIconColor());
+  tabardSpins[SPIN_TABARD_BORDER]->SetValue(model->td.getBorder());
+  tabardSpins[SPIN_TABARD_BORDERCOLOR]->SetValue(model->td.getBorderColor());
+  tabardSpins[SPIN_TABARD_BACKGROUND]->SetValue(model->td.getBackground());
+  for (size_t i = 0; i < NUM_TABARD_BTNS; i++)
+    spinTbLabels[i]->SetLabel(wxString::Format(wxT("%i / %i"), tabardSpins[i]->GetValue(), tabardSpins[i]->GetMax()));
 }
 
 CharControl::~CharControl()
@@ -558,6 +585,9 @@ void CharControl::RefreshModel()
     g_modelViewer->charGlowMenu->Check(ID_CHAREYEGLOW_DEATHKNIGHT, true);
   else
     g_modelViewer->charGlowMenu->Check(ID_CHAREYEGLOW_DEFAULT, true);
+
+  // An NPC is known as one only after its load (ShowCreatureDisplay, Load Character of a saved NPC refresh here).
+  SyncModelVariant();
 }
 
 void CharControl::ClientChanged()

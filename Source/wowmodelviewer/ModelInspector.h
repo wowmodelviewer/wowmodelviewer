@@ -174,6 +174,7 @@ private:
   wxFlexGridSizer * m_infoGrid = nullptr;
   wxStaticText * m_infoEmpty = nullptr;
   const void * m_infoFor = nullptr;
+  int m_infoChrModel = 0;   // the character's ChrModel the page shows (a same-file race change changes it)
   Context m_infoContext = CONTEXT_NONE;
 
   wxTimer m_watch;

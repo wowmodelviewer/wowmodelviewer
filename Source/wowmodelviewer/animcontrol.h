@@ -188,7 +188,8 @@ class AnimControl: public wxWindow
   bool m_syncingClipSelection = false;
   bool m_scrubbing = false;
   int m_sliderAnim = -1;
-  int m_listedAnim = -1;   // the clip whose row is highlighted (the last one picked or loaded)
+  int m_listedAnim = -1;
+  unsigned int m_secondaryFill = 0;   // the secondary and mouth lists' deferred fill that is still wanted   // the clip whose row is highlighted (the last one picked or loaded)
   wxTimer m_uiTimer;
 
   bool UpdateCreatureModel(WoWModel *m);
@@ -268,6 +269,11 @@ public:
   // index is a position in the model's animation table (WoWModel::anims), which is what the
   // dropdown's "[n]" suffix carries and what the animation manager takes.
   void SelectAnimation(int index, int loops);
+  // A character rebuilt on its other model (ModelViewer::SwitchCharacterVariant) goes on with the animation it played:
+  // found by its animation ID and variation -- never by its index, which another model numbers differently -- else
+  // the first with that animation ID, else Stand; at that time (within its length), speed and paused state. Plays it
+  // whatever Auto Animate says. The index chosen, or -1 when the model has no animation.
+  int RestoreAnimation(int animID, int subAnimID, size_t frame, float speed, bool paused);
 
   // Tell the embedded Unity viewport the current play/pause, speed and time. Called by every
   // control that changes any of them; see ModelViewer::SendAnimationStateToUnity.

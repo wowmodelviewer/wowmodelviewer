@@ -21,6 +21,9 @@
 #include <algorithm>
 #include <set>
 
+#include <algorithm>
+#include <set>
+
 namespace
 {
   // ChrCustomizationReq.ClassMask names class N with bit N - 1.
@@ -113,6 +116,8 @@ void CharDetails::load(QString & f)
   batchUpdate_ = true;
   storedChoices_.clear();
   bool npcFile = false;
+  std::map<uint, uint> saved;   // every saved choice, for a file saved on the other model of a variant pair (below)
+  std::set<uint> savedStored;
 
   while (!reader.atEnd())
   {
@@ -126,9 +131,14 @@ void CharDetails::load(QString & f)
         const uint option = reader.attributes().value("id").toString().toUInt();
         const uint choice = reader.attributes().value("value").toString().toUInt();
         set(option, choice);
+        saved[option] = choice;
         // A saved NPC's stored choice is kept as stored (see save()), when the model has it.
-        if (npcFile && reader.attributes().value("stored").toString() == "1" && get(option) == choice)
-          storedChoices_[option] = choice;
+        if (npcFile && reader.attributes().value("stored").toString() == "1")
+        {
+          savedStored.insert(option);
+          if (get(option) == choice)
+            storedChoices_[option] = choice;
+        }
       }
 
       if (reader.name() == "eyeGlowType")
@@ -159,6 +169,34 @@ void CharDetails::load(QString & f)
       }
     }
     reader.readNext();
+  }
+
+  // A character saved on the other model of its variant pair has none of its options on this one: Classic Beta's classic
+  // model files were dressed with the High Definition model's options before the pairs were read. Its choices are
+  // translated by the pair's tables, as a model switch translates them.
+  RaceInfos::VariantPair pair;
+  if (!saved.empty() && model_ && !model_->infos.ChrModelID.empty() &&
+      std::none_of(saved.begin(), saved.end(), [this](const std::pair<const uint, uint> & oc) { return choicesPerOptionMap_.count(oc.first) != 0; }) &&
+      RaceInfos::getVariantPair(model_->infos.ChrModelID[0], pair))
+  {
+    const bool toAlternate = !pair.isPrimary(model_->infos.ChrModelID[0]);
+    const auto & partnerOptions = toAlternate ? pair.optionToAlternate : pair.optionToPrimary;
+    if (std::any_of(saved.begin(), saved.end(), [&partnerOptions](const std::pair<const uint, uint> & oc) { return partnerOptions.count(oc.first) != 0; }))
+    {
+      const RaceInfos::Translation t = RaceInfos::translateSelection(pair, saved, toAlternate);
+      LOG_INFO << __FUNCTION__ << "saved on the other model of its pair, ChrModel"
+               << (toAlternate ? pair.primaryChrModelID : pair.alternateChrModelID) << "--" << t.carried.size() << "of"
+               << saved.size() << "option(s) translated to ChrModel" << model_->infos.ChrModelID[0];
+      for (const auto & carried : t.carried)
+      {
+        const auto choice = t.selection.find(carried.second);
+        if (choice == t.selection.end())
+          continue;
+        set(choice->first, choice->second);
+        if (savedStored.count(carried.first) != 0 && get(choice->first) == choice->second)
+          storedChoices_[choice->first] = choice->second;
+      }
+    }
   }
 
   batchUpdate_ = false;
@@ -858,6 +896,60 @@ size_t CharDetails::applyStoredAppearance(const std::vector<std::pair<uint, uint
     notify(event);
   }
   return storedChoices_.size();
+}
+
+CharDetails::Appearance CharDetails::captureAppearance() const
+{
+  Appearance appearance;
+  if (model_ && !model_->infos.ChrModelID.empty())
+    appearance.chrModelID = model_->infos.ChrModelID[0];
+  appearance.selection = currentCustomization_;
+  return appearance;
+}
+
+void CharDetails::applyAppearance(const std::map<uint, uint> & wanted, bool demonHunter, bool exact)
+{
+  if (!model_ || model_->infos.raceID == -1)
+    return;
+
+  // From no choice at all, as load() and applyStoredAppearance() do, and with one refresh.
+  const SelectionState before = captureSelectionState();
+  currentCustomization_.clear();
+  storedChoices_.clear();
+  const bool inDemonHunterContext = demonHunter && clientHasDemonHunters();
+  const bool classContextChanged = isDemonHunter_ != inDemonHunterContext;
+  isDemonHunter_ = inDemonHunterContext;
+
+  size_t notThisModels = 0;
+  for (const auto & pair : wanted)
+  {
+    const auto listIt = choicesPerOptionMap_.find(pair.first);
+    if (listIt == choicesPerOptionMap_.end() ||
+        std::find(listIt->second.begin(), listIt->second.end(), pair.second) == listIt->second.end())
+    {
+      notThisModels++;
+      continue;
+    }
+    currentCustomization_[pair.first] = pair.second;
+  }
+
+  // A selection captured on this model goes back exactly as it was; any other is judged by the player's rules as a
+  // whole, and the options it says nothing about take their first valid choice, as a new character's do.
+  if (!exact)
+  {
+    resolveSelection(nullptr);
+    const std::map<uint, uint> resolved = currentCustomization_;
+    for (const auto & c : resolved)
+      autoSelectTextureGating(c.second);
+  }
+  LOG_INFO << __FUNCTION__ << (exact ? "exact:" : "judged:") << wanted.size() << "choice(s) asked," << notThisModels
+           << "not this model's," << currentCustomization_.size() << "option(s) set";
+  applySelection(before, 0);
+  if (classContextChanged)
+  {
+    CharDetailsEvent event(this, CharDetailsEvent::DH_MODE_CHANGED); // the character panel's Demon Hunter box follows
+    notify(event);
+  }
 }
 
 void CharDetails::set(uint chrCustomizationOptionID, uint chrCustomizationChoiceID) // wow version >= 9.x

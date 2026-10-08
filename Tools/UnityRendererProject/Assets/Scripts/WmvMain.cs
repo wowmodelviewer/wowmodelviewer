@@ -146,6 +146,12 @@ public partial class WmvMain : MonoBehaviour
         // A playable character: textures come from the host's scene, and the body is dressed before it
         // replaces the model on screen.
         public bool Character;
+        // Protocol 8: the model replaces the one on screen keeping the view (a character rebuilt on its other model
+        // generation), and is put on screen already playing the animation the host restored: the keys of a selection
+        // held in a .anim (WaitAnimFile) are fetched while it is dressed, and its scene waits for them.
+        public bool KeepView;
+        public int WaitAnimFile;
+        public bool WaitAnimFailed;
         public WmvIpcClient.CharacterScene Scene;
         public WmvIpcClient.CharacterScene TexturesScene;   // the scene the body's textures were taken from
         public bool SceneTexturesRequested;
@@ -282,7 +288,7 @@ public partial class WmvMain : MonoBehaviour
 
     // ---------------------------------------------------------------- load pipeline
 
-    void HandleLoadWoWModel(string path, int fileDataID, string client, bool character, int load, string kind)
+    void HandleLoadWoWModel(string path, int fileDataID, string client, bool character, int load, string kind, bool keepView)
     {
         status.Set("Active client received (" + client + ")");
         if (string.IsNullOrEmpty(path) && fileDataID <= 0)
@@ -339,6 +345,11 @@ public partial class WmvMain : MonoBehaviour
         haveLoadSubmeshVisible = false;
         loadGeosetRevision = 0;
 
+        // A load that fits the view to what it shows, until it is on screen: what is on screen meanwhile is not the
+        // character a keep-view load after it rebuilds, so that one frames instead (AdoptBuilt).
+        if (!keepView)
+            framingOwed = true;
+
         if (mapObject)
         {
             // Everything above -- an M2 load in flight, a character being dressed, the previous model's
@@ -349,7 +360,7 @@ public partial class WmvMain : MonoBehaviour
             return;
         }
 
-        job = new LoadJob { Path = path, FileDataID = fileDataID, Character = character, Load = load };
+        job = new LoadJob { Path = path, FileDataID = fileDataID, Character = character, Load = load, KeepView = keepView };
         status.Set("Requested " + (string.IsNullOrEmpty(path) ? ("fileDataID " + fileDataID) : path));
         job.PendingM2 = string.IsNullOrEmpty(path)
             ? ipc.RequestAssetByFileDataID(fileDataID)
@@ -396,6 +407,14 @@ public partial class WmvMain : MonoBehaviour
         if (currentSlot.PendingAnimFetch.TryGetValue(r.requestId, out waitingSequence))
         {
             anim.OnAnimFileBytes(currentSlot, r, waitingSequence);
+            // A keep-view load whose scene waits for this file (KeptAnimationReady) looks again; a file that could not
+            // be read is not waited for any longer.
+            if (job != null && job.WaitAnimFile != 0 && job.Dresser != null)
+            {
+                if ((!r.ok || r.data == null || r.data.Length == 0) && r.fileDataID == job.WaitAnimFile)
+                    job.WaitAnimFailed = true;
+                job.Dresser.Repump();
+            }
             return;
         }
         if (mounted != null && mounted.Mount.PendingAnimFetch.TryGetValue(r.requestId, out waitingSequence))
@@ -1141,7 +1160,19 @@ public partial class WmvMain : MonoBehaviour
                 job.Dresser = new WmvCharacterDresser(ipc, job.Load, ImageByHash, s => Debug.Log("WMV: " + s));
                 // Before BeginStaged, which may apply the scene at once: a scene with a mount waits for it.
                 WmvCharacterDresser dressedBy = job.Dresser;
-                dressedBy.CommitGate = scene => MountReady(dressedBy, scene);
+                LoadJob gated = job;
+                if (job.KeepView && !WmvModelBuilder.Debug_.NoAnim && currentSlot.SelectedSequence >= 0)
+                {
+                    int file = M2Parser.ExternalAnimFileId(job.Model, currentSlot.SelectedSequence);
+                    if (file != 0 && !currentSlot.AnimFileCache.ContainsKey(file))
+                    {
+                        job.WaitAnimFile = file;
+                        currentSlot.PendingAnimFetch[ipc.RequestAssetByFileDataID(file)] = -1;   // fills the cache
+                        Debug.Log("WMV: keep-view load: sequence " + currentSlot.SelectedSequence + " is in .anim " + file +
+                                  " -- the character goes on screen once it is here");
+                    }
+                }
+                dressedBy.CommitGate = scene => MountReady(dressedBy, scene) && KeptAnimationReady(gated);
                 dressedBy.OnCommitted = scene => CommitMount(dressedBy, scene);
                 LoadJob staged = job;
                 staging = true;
@@ -1215,8 +1246,35 @@ public partial class WmvMain : MonoBehaviour
     }
 
     /// <summary>Replace the model on screen with a freshly built one, and bring it up to the app's state.</summary>
+    /// <summary>
+    /// The CommitGate's second half for a keep-view load (protocol 8): the keys of the animation the host restored are
+    /// here (or could not be read), so the character goes on screen already playing it, not in its idle pose first.
+    /// </summary>
+    bool KeptAnimationReady(LoadJob gated)
+    {
+        return gated == null || gated.WaitAnimFile == 0 || gated.WaitAnimFailed ||
+               currentSlot.AnimFileCache.ContainsKey(gated.WaitAnimFile);
+    }
+
+    /// <summary>
+    /// Models put on screen keeping the view (protocol 8 keepView), for runtimeState: a lifecycle test tells a kept
+    /// view (this up, ViewFramings not) from a framed one.
+    /// </summary>
+    public int KeptViews { get; private set; }
+
+    /// <summary>
+    /// A load that frames the view (any but a keep-view load) was asked for and has not been put on screen: it was
+    /// superseded while it was dressed, or it failed. The model on screen is then not the character a keep-view load
+    /// rebuilds -- the view on it was never that character's -- so a keep-view load frames as any load does.
+    /// </summary>
+    bool framingOwed;
+
     void AdoptBuilt(WmvRuntimeModel built)
     {
+        bool keepView = job != null && job.KeepView && currentSlot.Runtime != null && !framingOwed;
+        if (job != null && job.KeepView && !keepView)
+            Debug.Log("WMV: keep-view load: nothing on screen is this character's yet -- the view is fitted to it");
+        framingOwed = false;
         {
             // A mount the previous character rode goes first, and it takes the character off before its root is
             // destroyed (WmvMountedScene.Dispose); a mount built for THIS load is not it (LoadJob.Mount).
@@ -1311,10 +1369,21 @@ public partial class WmvMain : MonoBehaviour
                                         built.Bounds.center, built.Bounds.extents));
                 built.Bounds = WmvModelBuilder.Debug_.FrameBounds;
             }
-            ViewFramings++;
-            orbit.Frame(built.Bounds);
-            KeepFramed(built.Bounds);
-            ApplyViewportOrbitOverride("");
+            if (keepView)
+            {
+                // A character rebuilt on its other model generation: the user's view stays.
+                KeptViews++;
+                orbit.KeepViewFor(built.Bounds);
+                KeepFramed(built.Bounds, true);
+                Debug.Log("WMV: keep-view load: the view is kept (" + KeptViews + " kept so far)");
+            }
+            else
+            {
+                ViewFramings++;
+                orbit.Frame(built.Bounds);
+                KeepFramed(built.Bounds);
+                ApplyViewportOrbitOverride("");
+            }
             if (shadowRig != null)
                 shadowRig.SetBounds(built.Bounds);
 
@@ -2471,6 +2540,7 @@ public partial class WmvMain : MonoBehaviour
     Bounds lastFramed;                         // the box the camera was last framed on, and the aspect it was framed at
     float lastFramedAspect;
     bool haveLastFramed;
+    bool lastFramedKept;                       // the camera kept its view on it (a keep-view load), not framed it
 
     /// <summary>
     /// SCRATCH: capture the viewport (WMV_VIEWPORT_SHOT) once what is on screen has settled: 40 frames after the last
@@ -2549,11 +2619,7 @@ public partial class WmvMain : MonoBehaviour
                                         name, fromW, fromH, want, Screen.width, Screen.height));
                 Camera cam = Camera.main;
                 if (haveLastFramed && cam != null && Mathf.Abs(cam.aspect - lastFramedAspect) > 1e-3f)
-                {
-                    orbit.Frame(lastFramed);
-                    lastFramedAspect = cam.aspect;
-                    ApplyViewportOrbitOverride("shot: ");
-                }
+                    RefitLastFramed(cam, "shot: ");
                 for (int i = 0; i < 5; i++)
                     yield return new WaitForEndOfFrame();
             }
@@ -2567,12 +2633,27 @@ public partial class WmvMain : MonoBehaviour
 
     /// <summary>SCRATCH: the box a model or a mounted character was just framed on, and the camera's aspect then, for a
     /// capture that has to ask for its size again (CaptureViewportWhenSettled). Nothing else reads it.</summary>
-    void KeepFramed(Bounds framed)
+    void KeepFramed(Bounds framed, bool kept = false)
     {
         Camera cam = Camera.main;
         lastFramed = framed;
         lastFramedAspect = cam != null ? cam.aspect : 1f;
         haveLastFramed = true;
+        lastFramedKept = kept;
+    }
+
+    /// <summary>SCRATCH: the camera fitted again to the box it was last placed on, for a capture whose size changed the
+    /// aspect: framed again, or -- a view a keep-view load kept -- kept again (the pivot, the angle and the zoom stay).</summary>
+    void RefitLastFramed(Camera cam, string what)
+    {
+        lastFramedAspect = cam.aspect;
+        if (lastFramedKept)
+        {
+            orbit.KeepViewFor(lastFramed);
+            return;
+        }
+        orbit.Frame(lastFramed);
+        ApplyViewportOrbitOverride(what);
     }
 
     /// <summary>The n x n size a capture asks for: WMV_VIEWPORT_SIZE, 1024 by default (as Awake), 0 when out of range.</summary>

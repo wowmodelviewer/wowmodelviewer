@@ -70,6 +70,8 @@ namespace wow
       size_t remoteViewerFileCount() const { return m_remoteViewerFiles; }
       // Is this file listed for the opened build but not on this computer (a partly downloaded install)?
       bool isRemoteFile(const QString & name) const;
+      // The same by FileDataID (a file the listfile does not name has only a generated name).
+      bool isRemoteFileId(int fileDataId) const { return m_CASCFolder.isRemote(fileDataId); }
       // Frees the files the last reload detached (initFromListfile). Called once the load that detached them has
       // rebuilt everything that could point at them (Browse, the character controls; the canvas was cleared
       // before): ModelViewer::LoadWoW, at its end. Also run by the next reload, for a load that never got there.

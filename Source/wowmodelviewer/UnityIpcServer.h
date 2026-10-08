@@ -1,7 +1,7 @@
 /*
  * UnityIpcServer.h
  *
- * Localhost IPC server for the embedded Unity renderer (protocol v6). WMV is the SERVER:
+ * Localhost IPC server for the embedded Unity renderer (protocol v8). WMV is the SERVER:
  * UnityRendererHost starts this listener BEFORE launching the player and passes the port on
  * the player's command line (-wmvPort <n>); the player connects back, announces itself with
  * unityReady and then asks WMV for the raw WoW assets/metadata it renders from. This is the
@@ -245,7 +245,7 @@
 class UnityIpcServer : public wxEvtHandler
 {
 public:
-  static const int PROTOCOL_VERSION = 7;
+  static const int PROTOCOL_VERSION = 8;
 
   UnityIpcServer();
   ~UnityIpcServer();
@@ -274,6 +274,8 @@ public:
   bool playerTakesScreenshots() const { return m_client && m_unityReady && m_playerProtocol >= 6; }
   // The player clears the Models viewport to the colour the host sends: it takes viewportBackground (protocol 7).
   bool playerPaintsBackground() const { return m_client && m_unityReady && m_playerProtocol >= 7; }
+  // Protocol 8: loadWoWModel can ask the player to keep its view (a character rebuilt on its other model generation).
+  bool playerKeepsView() const { return m_client && m_unityReady && m_playerProtocol >= 8; }
 
   // Runtime command: tell the player which model is active. Either path or fileDataID may be
   // empty/0. Queued if the player is connected; dropped (logged) otherwise.
@@ -282,8 +284,11 @@ public:
   // mapObjectLoaded echo.
   // kind: "m2" (a model) or "wmo" (a world model ROOT, fileDataID required; see WORLD MODELS above).
   // Callers send "wmo" only when playerDrawsMapObjects().
+  // keepView (protocol 8): the model replaces the one on screen without moving the view -- a character rebuilt on
+  // its other model generation. Sent only when true; callers set it only when playerKeepsView().
   void sendLoadWoWModel(const QString & path, int fileDataID, const QString & client = QStringLiteral("active"),
-                        bool character = false, int load = 0, const QString & kind = QStringLiteral("m2"));
+                        bool character = false, int load = 0, const QString & kind = QStringLiteral("m2"),
+                        bool keepView = false);
 
   // Runtime command: the resolved state of the character on display (UnityCharacterScene::build).
   // False when the player cannot dress characters or nothing was sent.
@@ -436,6 +441,7 @@ public:
     int bodyRebinds = -1;          // times the character on screen's body textures were bound again by its scenes
     int viewFramings = -1;         // times the player fitted the view to what is on screen (a model, a world model or
                                    // a mount change); an appearance change on a riding character must not raise it
+    int keptViews = -1;            // models put on screen keeping the view (protocol 8 keepView)
     int backgroundR = -1;          // the viewport background the player holds, as displayed (protocol 7)
     int backgroundG = -1;
     int backgroundB = -1;

@@ -555,6 +555,7 @@ public partial class WmvMain
         }
         ViewFramings++;
         orbit.FrameMapObject(frame);
+        framingOwed = false;
         haveLastFramed = false;              // a model capture waiting does not frame the model's box again
         ApplyViewportOrbitOverride("wmo: ");
         if (shadowRig != null)
@@ -739,6 +740,7 @@ public partial class WmvMain
             MountSequence = -1,
             BodyRebinds = dresser != null ? dresser.BodyRebinds : 0,
             ViewFramings = ViewFramings,
+            KeptViews = KeptViews,
             Background = ViewportBackground,
         };
         WmvRuntimeModel mount = r.MountFileDataID != 0 ? mounted.Mount.Runtime : null;

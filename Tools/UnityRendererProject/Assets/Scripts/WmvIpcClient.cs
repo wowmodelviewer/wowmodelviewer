@@ -4,11 +4,11 @@
 // localhost TCP listener before launching the player and passes the port on the player
 // command line ("-wmvPort <n>"); the player connects back, announces itself and then asks
 // WMV for whatever it needs. Transport: newline-delimited JSON (one object per line),
-// protocol version 7 (4 added world models: loadWoWModel "kind", mapObjectLoaded and runtimeState;
+// protocol version 8 (4 added world models: loadWoWModel "kind", mapObjectLoaded and runtimeState;
 // 5 added mounted characters: characterScene "mount", its answer's mount fields, runtimeState's
 // mountFileDataID, modelAnimation "role" and "load", and modelAnimationState "load", "hasRider" and
 // "rider"; 6 added captureScreenshot and its answer screenshotSaved; 7 added viewportBackground and
-// runtimeState's background fields).
+// runtimeState's background fields; 8 added loadWoWModel "keepView" and runtimeState's keptViews).
 //
 // The player is WMV's new renderer foundation and renders directly from WoW data: it
 // requests raw assets and metadata from WMV -- which owns the app UI, the active
@@ -61,7 +61,8 @@
 //     the mount runtimes alive and built so far, how the model hangs from it (RuntimeReport), what
 //     each animator plays, the mount's emitters and live particles, how often the character's
 //     body textures were bound again, how often the view was fitted to what is on screen, and the
-//     viewport background as displayed (protocol 7). A test's question, answered from the main thread in
+//     viewport background as displayed (protocol 7), and the models put on screen keeping the view (keptViews,
+//     protocol 8). A test's question, answered from the main thread in
 //     message order
 //   screenshotSaved       { request, ok, error, path, width, height, bytes, renderMs, encodeMs, writeMs, totalMs }
 //     the answer to captureScreenshot (protocol 6): the PNG was written to path (ok, with its size in bytes and
@@ -69,10 +70,12 @@
 //     in milliseconds), or why not (error). request echoes the question's number
 //
 // WMV -> player
-//   loadWoWModel  { path, fileDataID, client, character, load, kind }
+//   loadWoWModel  { path, fileDataID, client, character, load, kind, keepView }
 //     character: a playable character, dressed by the characterScene that follows
 //     load: the host's serial for this load (> 0), echoed in every characterSceneApplied about it
 //     kind: "m2" (also when absent) or "wmo" -- a world model: path/fileDataID name the ROOT file
+//     keepView (protocol 8, sent only when true): the character replaces the one on screen without moving the view
+//     (its other model generation); a load before it that is not on screen yet makes it frame as any load
 //   runtimeState  { query }                                                        (protocol 4)
 //     asks for a runtimeState answer carrying the same query number
 //   captureScreenshot { request, path, width, height }                             (protocol 6)
@@ -141,13 +144,13 @@ using UnityEngine;
 
 public class WmvIpcClient : MonoBehaviour
 {
-    public const int ProtocolVersion = 7;
+    public const int ProtocolVersion = 8;
 
     /// <summary>The loadWoWModel kind of a world model; anything else is an M2.</summary>
     public const string KindMapObject = "wmo";
 
     // Raised on the main thread.
-    public Action<string, int, string, bool, int, string> OnLoadWoWModel;  // (path, fileDataID, client, character, load, kind)
+    public Action<string, int, string, bool, int, string, bool> OnLoadWoWModel;  // (path, fileDataID, client, character, load, kind, keepView)
     public Action<AssetResponse> OnAssetResponse;
     public Action<ModelTexturesResponse> OnModelTextures;
     public Action<ModelTexturesResponse> OnModelSkin;          // pushed when the displayed skin changes
@@ -507,6 +510,7 @@ public class WmvIpcClient : MonoBehaviour
         public int submeshCount;
         public int[] submeshVisible;
         public bool character;
+        public bool keepView;         // loadWoWModel (protocol 8): the model replaces the one on screen without moving the view
         public int load;              // also a ridden mount's animation pushes (protocol 5)
         public int query;             // runtimeState
         public int request;           // captureScreenshot (protocol 6); its path, width and height are the fields above and below
@@ -879,7 +883,7 @@ public class WmvIpcClient : MonoBehaviour
             case "loadWoWModel":
                 // An absent kind is an M2: that is what every host before protocol 4 meant.
                 OnLoadWoWModel?.Invoke(msg.path ?? "", msg.fileDataID, msg.client ?? "active", msg.character, msg.load,
-                                       string.IsNullOrEmpty(msg.kind) ? "m2" : msg.kind);
+                                       string.IsNullOrEmpty(msg.kind) ? "m2" : msg.kind, msg.keepView);
                 break;
 
             case "characterImage":
@@ -1146,6 +1150,7 @@ public class WmvIpcClient : MonoBehaviour
         public int MountEmitters, MountRibbons, MountParticles;   // the mount's emitters as drawn, its live particles
         public int BodyRebinds;                  // WmvCharacterDresser.BodyRebinds of the character on screen, 0 for none
         public int ViewFramings;                 // WmvMain.ViewFramings: times the view was fitted to what is on screen
+        public int KeptViews;                    // WmvMain.KeptViews: models put on screen keeping the view (protocol 8)
         public Color32 Background;               // the viewport background the player holds, as displayed (protocol 7)
     }
 
@@ -1174,6 +1179,7 @@ public class WmvIpcClient : MonoBehaviour
              ",\"mountParticles\":" + r.MountParticles +
              ",\"bodyRebinds\":" + r.BodyRebinds +
              ",\"viewFramings\":" + r.ViewFramings +
+             ",\"keptViews\":" + r.KeptViews +
              ",\"backgroundR\":" + r.Background.r +
              ",\"backgroundG\":" + r.Background.g +
              ",\"backgroundB\":" + r.Background.b + "}");

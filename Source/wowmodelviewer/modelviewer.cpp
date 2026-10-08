@@ -7,6 +7,7 @@
 #include "TextureView.h"
 #include "AnimManager.h"
 
+#include <chrono>
 #include <functional>
 
 #include <wx/aboutdlg.h>
@@ -1047,9 +1048,20 @@ void ModelViewer::LoadModel(GameFile * file, int raceID, int sexID)
     // than reloading it, and rebuild the character panel around its customization options.
     WoWModel * loaded = const_cast<WoWModel *>(canvas->model());
     if (raceID >= 0 && loaded->setRaceSex(raceID, sexID) && charControl && charControl->charAtt)
+    {
+      // A character started afresh: what it looked like on its other model is no longer it.
+      if (m_variantSwitching == 0)
+        m_variantSession.clear();
       charControl->UpdateModel(charControl->charAtt);
+    }
     return;
   }
+
+  // Any load but a model variant switch is another character (or none): its appearance on the other model of a
+  // pair is no longer remembered, and it is no creature display until ShowCreatureDisplay says so.
+  if (m_variantSwitching == 0)
+    m_variantSession.clear();
+  m_shownAsCreatureDisplay = false;
 
   isModel = true;
   // A model replaces whatever WMO or map tile was shown (canvas->LoadModel below drops them). Only
@@ -1073,6 +1085,7 @@ void ModelViewer::LoadModel(GameFile * file, int raceID, int sexID)
   // skin, a white model.
   RaceInfos chrModelRace;
   isChar = RaceInfos::getRaceInfosForFileID(file->fileDataId(), chrModelRace) ||
+           RaceInfos::getRaceInfosForAlternateFileID(file->fileDataId(), chrModelRace) ||
            file->fullname().startsWith("char", Qt::CaseInsensitive) || file->fullname().startsWith("alternate\\char", Qt::CaseInsensitive);
   Attachment *modelAtt = NULL;
 
@@ -1324,6 +1337,7 @@ bool ModelViewer::ShowCreatureDisplay(int fileDataId, int extraId, int displayId
     WoWModel * m = const_cast<WoWModel *>(canvas->model());
     if (!m)
       return false;
+    m_shownAsCreatureDisplay = true;
     m->modelType = MT_NORMAL;
     animControl->SetSkinByDisplayID(displayId);
     return true;
@@ -1348,7 +1362,13 @@ bool ModelViewer::ShowCreatureDisplay(int fileDataId, int extraId, int displayId
     sex = extra.values[0][1].toInt();
     classID = extra.values[0][2].toInt();
   }
-  GameFile * modelFile = GAMEDIRECTORY.getFile(RaceInfos::getHDModelForFileID(fileDataId));
+  // A race's model of the other generation (Classic Beta's classic models) wears its own options: an NPC whose stored
+  // choices are the pair's playable model's is shown on that model, as that model's own NPC would be.
+  const int shownFileId = RaceInfos::getCreatureDisplayFileID(fileDataId, extraId);
+  if (shownFileId != RaceInfos::getHDModelForFileID(fileDataId))
+    LOG_INFO << "Creature display" << displayId << "names the other-generation model" << RaceInfos::getHDModelForFileID(fileDataId)
+             << "but stores choices of the model" << shownFileId << "-- shown on that model";
+  GameFile * modelFile = GAMEDIRECTORY.getFile(shownFileId);
   // The race on its model in the model's own sex: a dragon form's model (a Dracthyr's, a drake's) has its own, not the
   // male or female its display names.
   RaceInfos wearer;
@@ -1395,6 +1415,7 @@ bool ModelViewer::ShowCreatureDisplay(int fileDataId, int extraId, int displayId
   }
 
   m->cd.isNPC = true;
+  m_shownAsCreatureDisplay = true;
   g_charControl->RefreshModel();
   g_charControl->RefreshEquipment();
   return true;
@@ -2148,6 +2169,9 @@ void ModelViewer::CreateUnityViewport()
     // when the player is an older build that cannot dress it. With nothing loaded, the empty
     // viewer's prompt simply stays.
     UpdateUnityViewportState();
+    // The character panel's Model selector depends on the player too (characterVariantState).
+    if (charControl)
+      charControl->SyncModelVariant();
   };
   unityRendererHost->ipc()->onCharacterSceneApplied = [this](const UnityIpcServer::SceneAck & ack) {
     OnCharacterSceneApplied(ack);
@@ -2211,6 +2235,8 @@ void ModelViewer::RestartUnityRenderer()
   // The notice follows at once: the restart's own outcome (a missing build is reported again), or the
   // content state. The player, once connected, is sent the current model by onUnityReady.
   UpdateUnityViewportState();
+  if (charControl)
+    charControl->SyncModelVariant();
 }
 
 void ModelViewer::setViewportBackground(const wxColour & colour, bool persist)
@@ -2835,7 +2861,10 @@ void ModelViewer::SendLoadToUnity()
   if (fileDataID > 0 &&
       static_cast<wow::WoWFolder &>(GAMEDIRECTORY).fileName(fileDataID).compare(path, Qt::CaseInsensitive) != 0)
     path.clear();
-  unityRendererHost->ipc()->sendLoadWoWModel(path, fileDataID, QStringLiteral("active"), character, load);
+  // A character rebuilt on its other model generation keeps the view the user had (SwitchCharacterVariant).
+  const bool keepView = character && m_variantSwitching > 0 && unityRendererHost->ipc()->playerKeepsView();
+  unityRendererHost->ipc()->sendLoadWoWModel(path, fileDataID, QStringLiteral("active"), character, load,
+                                             QStringLiteral("m2"), keepView);
   m_unityLoadedFileDataID = fileDataID;
   m_unityLoadedCharacter = character;
   // A model built after a world model: awaited, the player asked what it shows until it has the model
@@ -3863,6 +3892,9 @@ static wxString clientOpenProblem(int error)
 // client's files or database. (The file tree, database, races, NPC and item lists are refilled by the load itself.)
 void ModelViewer::ResetClientState()
 {
+  // ChrModel IDs are one client's.
+  m_variantSession.clear();
+  m_shownAsCreatureDisplay = false;
   // What is on screen: the model or building, its textures, the choosers that list the old client's records.
   if (fileControl)
     fileControl->ClearCanvas();
@@ -4383,6 +4415,12 @@ void ModelViewer::LoadChar(QString fn, bool equipmentOnly /* = false */)
   {
     m_exportNpcId = -1;
     m_exportNpcDisplayId = 0;
+    // And it is another character, also when its file is the one on screen (LoadModel's same-file path, which a file
+    // without race and sex takes without starting anything afresh): what the last one looked like on its other model
+    // is not this one's, and it is no creature display.
+    if (m_variantSwitching == 0)
+      m_variantSession.clear();
+    m_shownAsCreatureDisplay = false;
     m_exportItemSkinFileId = 0;
   }
 
@@ -5901,6 +5939,295 @@ bool ModelViewer::ApplyArmoryCharacter(CharInfos & info, wxString & error)
   return true;
 }
 
+namespace
+{
+  wxString generationName(CharacterModelVariant v)
+  {
+    return v == CharacterModelVariant::HD ? _("High Definition") : _("Classic");
+  }
+
+  wxString characterName(const RaceInfos & infos)
+  {
+    return wxString::Format(infos.sexID == GENDER_FEMALE ? _("%s female") : _("%s male"), wxString(infos.nameLang.c_str(), wxConvUTF8));
+  }
+
+  QString optionNames(const std::vector<unsigned int> & options)
+  {
+    QStringList names;
+    for (const unsigned int o : options)
+    {
+      sqlResult r = GAMEDATABASE.sqlQuery(QString("SELECT Name_Lang FROM ChrCustomizationOption WHERE ID = %1").arg(o));
+      names << ((r.valid && !r.values.empty() && !r.values[0][0].isEmpty()) ? r.values[0][0] : QString::number(o));
+    }
+    return names.join(", ");
+  }
+}
+
+ModelViewer::CharacterVariantState ModelViewer::characterVariantState() const
+{
+  CharacterVariantState state;
+  if (RaceInfos::variantPairCount() == 0)
+    return state; // this client ships one generation of each character model
+  WoWModel * m = riderModel();
+  if (!m || !m->charModelDetails.isChar || m->modelType != MT_CHAR || m->infos.raceID == -1 || m->infos.ChrModelID.empty())
+    return state;
+  if (m->cd.isNPC || m_shownAsCreatureDisplay)
+    return state; // an NPC is shown as the display it is
+  state.shown = true;
+  state.current = m->modelGeneration();
+  state.other = state.current == CharacterModelVariant::HD ? CharacterModelVariant::Classic : CharacterModelVariant::HD;
+  if (m_variantSession.pairID != 0 && m_variantSession.raceID == m->infos.raceID && m_variantSession.sexID == m->infos.sexID)
+    state.note = m_variantSession.note;
+
+  RaceInfos::VariantPair pair;
+  if (!RaceInfos::getVariantPair(m->infos.ChrModelID[0], pair))
+  {
+    state.reason = wxString::Format(_("The %s has only a %s model in this client."), characterName(m->infos), generationName(state.current));
+    return state;
+  }
+  const int fileID = m->gamefile ? (int)m->gamefile->fileDataId() : 0;
+  if (fileID != pair.primaryFileID && fileID != pair.alternateFileID)
+  {
+    state.reason = _("This file is not one of this client's character models.");
+    return state;
+  }
+  RaceInfos partner;
+  GameFile * partnerFile = RaceInfos::getVariantPartner(m->infos, partner) ? GAMEDIRECTORY.getFile(partner.modelFileID) : nullptr;
+  wow::WoWFolder * folder = dynamic_cast<wow::WoWFolder *>(&GAMEDIRECTORY);
+  if (!partnerFile)
+    state.reason = wxString::Format(_("The %s model of the %s is not in this client."), generationName(state.other), characterName(m->infos));
+  else if (folder && folder->isRemoteFileId(partner.modelFileID))
+    state.reason = wxString::Format(_("The %s model of the %s is not on this computer yet."), generationName(state.other), characterName(m->infos));
+  else if (riderMount())
+    state.reason = _("Dismount to change the model.");
+  else if (unityRendererHost && unityRendererHost->ipc() && unityRendererHost->ipc()->isUnityReady() &&
+           !unityRendererHost->ipc()->playerKeepsView())
+    state.reason = _("The 3D viewport cannot keep its view while the model changes; update it to switch.");
+  else
+    state.enabled = true;
+  return state;
+}
+
+void ModelViewer::SyncCharacterMenuChecks(const WoWModel * m)
+{
+  if (!m || !charMenu)
+    return;
+  charMenu->Check(ID_SHOW_UNDERWEAR, m->cd.showUnderwear);
+  charMenu->Check(ID_SHOW_EARS, m->cd.showEars);
+  charMenu->Check(ID_SHOW_HAIR, m->cd.showHair);
+  charMenu->Check(ID_SHOW_FACIALHAIR, m->cd.showFacialHair);
+  charMenu->Check(ID_SHOW_FEET, m->cd.showFeet);
+  charMenu->Check(ID_AUTOHIDE_GEOSETS_FOR_HEAD_ITEMS, m->cd.autoHideGeosetsForHeadItems);
+  charMenu->Check(ID_SHEATHE, m->bSheathe);
+}
+
+bool ModelViewer::SwitchCharacterVariant(CharacterModelVariant target, wxString & why)
+{
+  why.clear();
+  const CharacterVariantState state = characterVariantState();
+  if (!state.shown)
+  {
+    why = _("This character has no other model to switch to.");
+    return false;
+  }
+  if (target == state.current)
+    return true; // and never through LoadModel: its same-file path starts the character afresh
+  if (!state.enabled || target != state.other)
+  {
+    why = state.reason.IsEmpty() ? _("That model is not available for this character.") : state.reason;
+    return false;
+  }
+  if (UnityAssetAccess::isClientLoading())
+  {
+    why = _("A client is loading; switch the model once it has loaded.");
+    return false;
+  }
+
+  WoWModel * m = riderModel();
+  RaceInfos partner;
+  RaceInfos::VariantPair pair;
+  if (!RaceInfos::getVariantPartner(m->infos, partner) || partner.ChrModelID.empty() || !RaceInfos::getVariantPair(m->infos.ChrModelID[0], pair))
+  {
+    why = _("That model is not available for this character.");
+    return false;
+  }
+  // Loading frees the character first: the other model has to be there, readable and an M2 before anything goes.
+  wxString fileWhy;
+  if (!ModelIdLookup::checkModelFile(partner.modelFileID, fileWhy))
+  {
+    why = wxString::Format(_("The %s model (FileDataID %d) %s."), generationName(target), partner.modelFileID, fileWhy);
+    return false;
+  }
+
+  // WHAT CARRIES OVER is the character, not its model: race and sex, appearance, class context, toggles, tabard,
+  // sheathe, equipment (and which item models are shown), the animation by its animation ID with its time.
+  struct CarriedItem
+  {
+    int slot = 0, id = -1, displayId = -1, level = 0;
+    std::vector<std::pair<int, bool> > shownModels; // POSITION_SLOTS -> showModel
+  };
+  const int raceID = m->infos.raceID, sexID = m->infos.sexID;
+  GameFile * originalFile = m->gamefile;
+  const CharDetails::Appearance before = m->cd.captureAppearance();
+  const bool demonHunter = m->cd.isDemonHunter();
+  const EyeGlowTypes eyeGlow = m->cd.eyeGlowType;
+  const bool showUnderwear = m->cd.showUnderwear, showEars = m->cd.showEars, showHair = m->cd.showHair,
+             showFacialHair = m->cd.showFacialHair, showFeet = m->cd.showFeet, autoHide = m->cd.autoHideGeosetsForHeadItems;
+  const TabardDetails tabard = m->td;
+  const bool sheathe = m->bSheathe;
+  std::vector<CarriedItem> items;
+  for (int slot = 0; slot < NUM_CHAR_SLOTS; slot++)
+    if (WoWItem * item = m->getItem((CharSlots)slot))
+      if (item->id() > 0 || (item->id() == -1 && item->displayId() > 0))
+      {
+        CarriedItem carried;
+        carried.slot = slot;
+        carried.id = item->id();
+        carried.displayId = item->displayId();
+        carried.level = item->level();
+        for (const auto & pm : item->models())
+          if (pm.second)
+            carried.shownModels.emplace_back((int)pm.first, pm.second->showModel);
+        items.push_back(carried);
+      }
+  int animID = -1, subAnimID = 0;
+  size_t frame = 0;
+  float speed = 1.0f;
+  bool paused = false;
+  if (m->animManager && !m->anims.empty())
+  {
+    const size_t index = m->animManager->GetAnim();
+    if (index < m->anims.size())
+    {
+      animID = m->anims[index].animID;
+      subAnimID = m->anims[index].subAnimID;
+    }
+    paused = m->animManager->IsPaused();
+    frame = m->animManager->GetFrameNow(!paused);
+    speed = m->animManager->GetSpeed();
+  }
+  const auto capturedAt = std::chrono::steady_clock::now();
+
+  // This character's memory of its pair's models.
+  if (m_variantSession.pairID != pair.id || m_variantSession.raceID != raceID || m_variantSession.sexID != sexID)
+  {
+    m_variantSession.clear();
+    m_variantSession.pairID = pair.id;
+    m_variantSession.raceID = raceID;
+    m_variantSession.sexID = sexID;
+  }
+  m_variantSession.byChrModel[before.chrModelID] = before;
+  const auto remembered = m_variantSession.byChrModel.find(partner.ChrModelID[0]);
+  const bool firstVisit = remembered == m_variantSession.byChrModel.end();
+  const RaceInfos::Translation translation =
+    firstVisit ? RaceInfos::translateSelection(pair, before.selection, pair.isPrimary(before.chrModelID)) : RaceInfos::Translation();
+  const std::map<unsigned int, unsigned int> targetSelection = firstVisit ? translation.selection : remembered->second.selection;
+
+  // Dresses the character just loaded, all before the scene goes out.
+  auto dress = [&](const std::map<unsigned int, unsigned int> & selection, bool exact) {
+    WoWModel * n = riderModel();
+    if (!n)
+      return;
+    n->td = tabard;
+    n->bSheathe = sheathe;
+    n->cd.eyeGlowType = eyeGlow;
+    n->cd.showUnderwear = showUnderwear;
+    n->cd.showEars = showEars;
+    n->cd.showHair = showHair;
+    n->cd.showFacialHair = showFacialHair;
+    n->cd.showFeet = showFeet;
+    n->cd.autoHideGeosetsForHeadItems = autoHide;
+    // The appearance first: an item's parts are chosen in the character's class context as it loads.
+    n->cd.applyAppearance(selection, demonHunter, exact);
+    for (const CarriedItem & carried : items)
+      if (WoWItem * item = n->getItem((CharSlots)carried.slot))
+      {
+        item->restore(carried.id, carried.displayId, carried.level);
+        const auto models = item->models();
+        for (const auto & shown : carried.shownModels)
+        {
+          const auto pm = models.find((POSITION_SLOTS)shown.first);
+          if (pm != models.end() && pm->second)
+            pm->second->showModel = shown.second;
+        }
+      }
+    charControl->RefreshModel();
+    charControl->RefreshEquipment();
+    charControl->SyncTabardSpins();
+    if (canvas && canvas->root)
+      modelControl->RefreshModel(canvas->root);
+    SyncCharacterMenuChecks(n);
+    if (animID >= 0)
+    {
+      size_t now = frame;
+      if (!paused)
+        now += (size_t)(std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - capturedAt).count() * speed);
+      animControl->RestoreAnimation(animID, subAnimID, now, speed, paused);
+    }
+  };
+
+  bool switched = false;
+  {
+    // The panels change once, and the Unity player is told once, about the dressed character.
+    wxWindowUpdateLocker lockCharacter(charControl), lockAnimation(animControl), lockInfo(modelInspector);
+    SceneHold hold(this);
+    VariantSwitchScope scope(this);
+    // The model's items are released with it, as Load Character does (a WoWItem frees nothing of its own).
+    for (int slot = 0; slot < NUM_CHAR_SLOTS; slot++)
+      if (WoWItem * item = m->getItem((CharSlots)slot))
+        item->setId(0);
+    LoadModel(GAMEDIRECTORY.getFile(partner.modelFileID), raceID, sexID);
+    WoWModel * n = riderModel();
+    switched = n && n->gamefile && (int)n->gamefile->fileDataId() == partner.modelFileID && !n->infos.ChrModelID.empty() &&
+               n->infos.ChrModelID[0] == partner.ChrModelID[0] && n->infos.raceID == raceID && n->infos.sexID == sexID &&
+               n->modelGeneration() == target;
+    if (switched)
+      dress(targetSelection, !firstVisit);
+    else
+    {
+      // Whatever went wrong, the character is put back as it was.
+      LOG_ERROR << "[variant] ChrModel" << partner.ChrModelID[0] << "(FileDataID" << partner.modelFileID << ") did not load as a"
+                << generationName(target).ToStdString().c_str() << "character -- the character is put back on its model";
+      LoadModel(originalFile, raceID, sexID);
+      dress(before.selection, true);
+      why = wxString::Format(_("The %s model could not be built; the character was kept as it was."), generationName(target));
+    }
+  }
+
+  if (switched)
+  {
+    WoWModel * n = riderModel();
+    if (firstVisit)
+    {
+      std::vector<unsigned int> replaced;
+      for (const auto & oc : translation.selection)
+        if (n->cd.get(oc.first) != oc.second)
+          replaced.push_back(oc.first);
+      LOG_INFO << "[variant]" << characterName(n->infos).ToStdString().c_str() << "ChrModel" << before.chrModelID << "->"
+               << n->infos.ChrModelID[0] << "(first visit):" << translation.carried.size() << "of" << before.selection.size()
+               << "option(s) carried | no counterpart:" << optionNames(translation.noCounterpart) << "| choice not paired:"
+               << optionNames(translation.notCovered) << "| replaced by the player's rules:" << optionNames(replaced)
+               << "| options of the new model set to their default:" << (n->cd.captureAppearance().selection.size() - translation.carried.size() + replaced.size());
+      std::vector<unsigned int> lost = translation.noCounterpart;
+      lost.insert(lost.end(), translation.notCovered.begin(), translation.notCovered.end());
+      m_variantSession.note = lost.empty() ? wxString()
+        : wxString::Format(_("Carried over %d of %d appearance options. Not on the %s model: %s."),
+                           (int)translation.carried.size(), (int)before.selection.size(), generationName(target),
+                           wxString(optionNames(lost).toStdWString()));
+    }
+    else
+    {
+      LOG_INFO << "[variant]" << characterName(n->infos).ToStdString().c_str() << "ChrModel" << before.chrModelID << "->"
+               << n->infos.ChrModelID[0] << ": its appearance on this model restored exactly (" << targetSelection.size() << "option(s))";
+      m_variantSession.note.clear();
+    }
+  }
+  DisplayedContentChanged();
+  if (charControl)
+    charControl->SyncModelVariant();
+  return switched;
+}
+
 void ModelViewer::OnExport(wxCommandEvent &event)
 {
   if (!g_charControl->model)
@@ -6099,7 +6426,11 @@ void ModelViewer::OnStatusBarRefreshTimer(wxTimerEvent& event)
   // existing two-second timer, rather than at the next model load: the viewport shows the restart
   // notice instead of a frozen or empty rectangle.
   if (unityRendererHost && unityRendererHost->checkPlayerHealth())
+  {
     UpdateUnityViewportState();
+    if (charControl)
+      charControl->SyncModelVariant();
+  }
 
   // A screenshot the player never answered: it went away, or it is stuck.
   if (m_screenshotRequest != 0)

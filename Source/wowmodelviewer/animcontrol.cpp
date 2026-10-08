@@ -571,10 +571,15 @@ void AnimControl::UpdateModel(WoWModel *m)
     // them AFTER the model is shown rather than blocking the load on two more native combos with
     // hundreds of items each (~1s). CallAfter runs them on the next event-loop turn; Freeze/Thaw
     // batches the appends (per-item Append re-measured the control every time).
+    // Only the last model's: two loads in one event-loop turn (a model switch that puts the character back) queue two
+    // fills, and the first one's names would index the second model's animations.
     wxComboBox * cb2 = animCList2;
     wxComboBox * cb3 = animCList3;
-    CallAfter([cb2, cb3, names]()
+    const unsigned int fill = ++m_secondaryFill;
+    CallAfter([this, cb2, cb3, names, fill]()
     {
+      if (fill != m_secondaryFill)
+        return;
       for (wxComboBox * cb : { cb2, cb3 })
       {
         cb->Freeze();
@@ -637,6 +642,7 @@ void AnimControl::Forget()
   skinList->Clear();
   animCList2->Clear();
   animCList3->Clear();
+  m_secondaryFill++;   // a fill still queued is for the model forgotten
   PCRList.clear();
   CDIToTexGp.clear();
   singleSkinOverrides.clear();
@@ -1667,6 +1673,58 @@ void AnimControl::ChooseAnimation(int animIndex)
     UpdateFrameSlider(g_selModel->anims[selectedAnim].length - 1, g_selModel->anims[selectedAnim].playSpeed);
   }
   RefreshPlaybackState();
+}
+
+int AnimControl::RestoreAnimation(int animID, int subAnimID, size_t frame, float speed, bool paused)
+{
+  if (!ModelInspector::IsLiveModel(g_selModel) || !g_selModel->animManager || g_selModel->anims.empty())
+    return -1;
+
+  int index = -1, sameID = -1, stand = -1;
+  for (size_t i = 0; i < g_selModel->anims.size(); i++)
+  {
+    const auto & a = g_selModel->anims[i];
+    if ((int)a.animID == animID && (int)a.subAnimID == subAnimID)
+    {
+      index = (int)i;
+      break;
+    }
+    if ((int)a.animID == animID && sameID < 0)
+      sameID = (int)i;
+    if (a.animID == ANIM_STAND && stand < 0)
+      stand = (int)i;
+  }
+  if (index < 0)
+    index = sameID >= 0 ? sameID : (stand >= 0 ? stand : 0);
+  if ((int)g_selModel->anims[index].animID != animID)
+    LOG_INFO << "[variant] animation" << animID << "is not on this model -- Stand instead";
+
+  selectedAnim = index;
+  m_listedAnim = index;
+  SelectClipRow(index);
+  g_selModel->animManager->Stop();
+  SelectAnimation(index, loopList->GetSelection());
+  if (bNextAnims)
+  {
+    int next = index;
+    for (size_t i = 1; i < 4; i++)
+    {
+      next = g_selModel->anims[next].NextAnimation;
+      if (next < 0)
+        break;
+      g_selModel->animManager->AddAnim(next, loopList->GetSelection());
+    }
+  }
+  g_selModel->animManager->Play();
+  UpdateFrameSlider(g_selModel->anims[index].length - 1, g_selModel->anims[index].playSpeed);
+  SetAnimSpeed(speed);
+  const size_t length = g_selModel->anims[index].length;
+  SetAnimFrame(length > 0 ? frame % length : 0);
+  if (paused)
+    g_selModel->animManager->Pause(true);
+  PushAnimationState();
+  RefreshPlaybackState();
+  return index;
 }
 
 void AnimControl::OnAnim(wxCommandEvent &event)

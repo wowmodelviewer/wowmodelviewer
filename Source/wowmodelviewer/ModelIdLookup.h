@@ -68,6 +68,10 @@ namespace ModelIdLookup
   // not otherwise, naming the step that failed. Nothing is loaded; a file the listfile does not name is added to the
   // client's file index on the way (GameFolder::getFile by FileDataID), as any load of it would be.
   bool resolve(Kind kind, int id, Resolved & out, wxString & why);
+
+  // Whether fileDataId is an M2 the loaded client can give -- found, readable, an M2 -- and why not otherwise (what
+  // follows "<subject>" in a sentence). Nothing is loaded.
+  bool checkModelFile(int fileDataId, wxString & why);
 }
 
 #endif // MODELIDLOOKUP_H

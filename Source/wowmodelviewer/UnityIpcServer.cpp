@@ -563,8 +563,8 @@ QString UnityIpcServer::RuntimeState::describe() const
          " mountKey=\"" + mountKey + "\"" +
          QString(" liveMounts=%1 mountsBuilt=%2 mountSeat=%3 mountSeatBone=%4 modelSequence=%5 mountSequence=%6")
            .arg(liveMounts).arg(mountsBuilt).arg(mountSeat).arg(mountSeatBone).arg(modelSequence).arg(mountSequence) +
-         QString(" mountEmitters=%1 mountRibbons=%2 mountParticles=%3 bodyRebinds=%4 viewFramings=%5")
-           .arg(mountEmitters).arg(mountRibbons).arg(mountParticles).arg(bodyRebinds).arg(viewFramings) +
+         QString(" mountEmitters=%1 mountRibbons=%2 mountParticles=%3 bodyRebinds=%4 viewFramings=%5 keptViews=%6")
+           .arg(mountEmitters).arg(mountRibbons).arg(mountParticles).arg(bodyRebinds).arg(viewFramings).arg(keptViews) +
          QString(" background=%1,%2,%3").arg(backgroundR).arg(backgroundG).arg(backgroundB);
 }
 
@@ -606,6 +606,7 @@ void UnityIpcServer::handleRuntimeState(const QJsonObject & msg)
   s.mountParticles = count("mountParticles");
   s.bodyRebinds = count("bodyRebinds");
   s.viewFramings = count("viewFramings");
+  s.keptViews = count("keptViews");
   s.backgroundR = count("backgroundR");
   s.backgroundG = count("backgroundG");
   s.backgroundB = count("backgroundB");
@@ -856,7 +857,7 @@ void UnityIpcServer::sendModelAnimationState(int m2FileDataID, int sequenceIndex
 }
 
 void UnityIpcServer::sendLoadWoWModel(const QString & path, int fileDataID, const QString & client,
-                                      bool character, int load, const QString & kind)
+                                      bool character, int load, const QString & kind, bool keepView)
 {
   QJsonObject msg;
   msg["type"] = "loadWoWModel";
@@ -868,10 +869,12 @@ void UnityIpcServer::sendLoadWoWModel(const QString & path, int fileDataID, cons
   // Always stated. A player older than protocol 4 ignores the field (its message reader skips names it
   // does not know), which is harmless for "m2": that is what it assumes. "wmo" never goes to one.
   msg["kind"] = kind;
+  if (keepView)
+    msg["keepView"] = true;
   if (kind == "wmo")
     m_stats.mapObjectLoads++;
   LOG_INFO << "[unityipc] -> loadWoWModel path=" << msg["path"].toString() << "fileDataID=" << fileDataID
-           << "load=" << load << "kind=" << kind << (character ? "(character)" : "");
+           << "load=" << load << "kind=" << kind << (character ? "(character)" : "") << (keepView ? "(keep view)" : "");
   queueJson(msg);
 }
 
@@ -996,8 +999,8 @@ void UnityIpcServer::handleLine(const std::string & line)
     if (version > 0 && version < PROTOCOL_VERSION)
       LOG_WARNING << "[unityipc] player speaks protocol v" << version << ", older than WMV's v" << PROTOCOL_VERSION
                   << "-- what it cannot do (mounted characters below v5, world models below v4, characters below v3)"
-                     " gets a notice, a screenshot (below v6) a status message, and the viewport background (below v7)"
-                     " stays the player's own default";
+                     " gets a notice, a screenshot (below v6) a status message, the viewport background (below v7)"
+                     " stays the player's own default, and a character's model generation (below v8) is not switched";
     else if (version != PROTOCOL_VERSION)
       LOG_ERROR << "[unityipc] player speaks protocol v" << version << "but WMV expects v" << PROTOCOL_VERSION;
     if (onUnityReady)

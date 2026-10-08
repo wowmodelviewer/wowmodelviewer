@@ -195,16 +195,30 @@ public class WmvOrbitCamera : MonoBehaviour
     /// <summary>Whether the clip planes currently follow a framed world model, for the self-test and the log.</summary>
     public bool MapObjectPlanes { get { return mapObjectPlanes; } }
 
-    void FrameWith(Bounds bounds, bool mapObject)
+    /// <summary>
+    /// Keep the view for a model that replaces the one framed (protocol 8 keepView: a character rebuilt on its other
+    /// model generation): pivot, yaw, pitch and zoom stay as the user left them; only what follows from the model's
+    /// size takes the new bounds -- the framing distance, the zoom range (the zoom is kept inside it) and the clip
+    /// planes.
+    /// </summary>
+    public void KeepViewFor(Bounds bounds)
     {
-        pivot = bounds.center;
-        mapObjectPlanes = mapObject;
-
+        mapObjectPlanes = false;
         float radius = bounds.extents.magnitude;
         if (radius <= 0.0001f) radius = 1f;
         framedRadius = radius;
         framedCenter = bounds.center;
+        framedDistance = DistanceToFit(radius);
+        minDistance = Mathf.Max(framedDistance * MinDistanceFactor, AbsoluteMinDistance);
+        maxDistance = framedDistance * MaxDistanceFactor;
+        distance = Mathf.Clamp(distance, minDistance, maxDistance);
+        targetDistance = Mathf.Clamp(targetDistance, minDistance, maxDistance);
+        Apply();
+    }
 
+    /// <summary>How far back a sphere of this radius fits the narrower of the camera's two field-of-view angles.</summary>
+    float DistanceToFit(float radius)
+    {
         var cam = GetComponent<Camera>();
         float fov = (cam != null ? cam.fieldOfView : 60f) * Mathf.Deg2Rad;
         // The narrower half-angle of the two: fieldOfView is the VERTICAL one, and a viewport
@@ -214,7 +228,19 @@ public class WmvOrbitCamera : MonoBehaviour
         float halfV = fov * 0.5f;
         float aspect = (cam != null && cam.aspect > 0.001f) ? cam.aspect : 1f;
         float halfH = Mathf.Atan(Mathf.Tan(halfV) * aspect);
-        framedDistance = radius / Mathf.Max(0.05f, Mathf.Sin(Mathf.Min(halfV, halfH))) * 1.25f;
+        return radius / Mathf.Max(0.05f, Mathf.Sin(Mathf.Min(halfV, halfH))) * 1.25f;
+    }
+
+    void FrameWith(Bounds bounds, bool mapObject)
+    {
+        pivot = bounds.center;
+        mapObjectPlanes = mapObject;
+
+        float radius = bounds.extents.magnitude;
+        if (radius <= 0.0001f) radius = 1f;
+        framedRadius = radius;
+        framedCenter = bounds.center;
+        framedDistance = DistanceToFit(radius);
 
         // THE ZOOM RANGE COMES FROM THE MODEL. See MinDistanceFactor.
         minDistance = Mathf.Max(framedDistance * (mapObject ? MapObjectMinDistanceFactor : MinDistanceFactor),

@@ -608,6 +608,31 @@ public:
     ModelViewer * viewer;
   };
 
+  // The character's appearance on each model of its variant pair, for as long as it is on screen: memory only (no
+  // setting, no file), cleared by any load that is not a variant switch and by loading another client.
+  struct CharacterVariantSession
+  {
+    int pairID = 0;
+    int raceID = -1;
+    int sexID = -1;
+    std::map<int, CharDetails::Appearance> byChrModel;
+    wxString note;
+    void clear() { *this = CharacterVariantSession(); }
+  };
+  CharacterVariantSession m_variantSession;
+  // > 0 while SwitchCharacterVariant rebuilds the character: LoadModel keeps the session, and the Unity player is
+  // asked to keep its view.
+  int m_variantSwitching = 0;
+  struct VariantSwitchScope
+  {
+    explicit VariantSwitchScope(ModelViewer * v) : viewer(v) { viewer->m_variantSwitching++; }
+    ~VariantSwitchScope() { viewer->m_variantSwitching--; }
+    ModelViewer * viewer;
+  };
+  // The character on screen is a creature display (View NPC, Load NPC / Model by Creature Display ID), whatever it
+  // looks like: it gets no Model selector.
+  bool m_shownAsCreatureDisplay = false;
+
   // How often the heartbeat above may push while an animation runs. One a second is far below
   // anything a viewer would notice and far above what clock drift needs.
   static const unsigned long ANIM_STATE_HEARTBEAT_MS = 1000;
@@ -635,6 +660,29 @@ public:
   // nobody to click a message box away in a headless run.
   CharInfos * FetchArmoryCharacter(const wxString & strURL, wxString & error, QVariantMap * summary = nullptr);
   bool ApplyArmoryCharacter(CharInfos & info, wxString & error);
+
+  // CHARACTER MODEL VARIANTS: a race's model of the other generation (Classic or High Definition), where the loaded
+  // client ships one (RaceInfos::VariantPair; Classic Beta). What the character panel's Model selector shows for the
+  // character on screen: shown only for a player character of a client with pairs; enabled when its other model can
+  // be switched to now, else the reason.
+  struct CharacterVariantState
+  {
+    bool shown = false;
+    bool enabled = false;
+    CharacterModelVariant current = CharacterModelVariant::Unknown;
+    CharacterModelVariant other = CharacterModelVariant::Unknown;
+    wxString reason;
+    wxString note; // what the first switch to this model could not carry over, until the character changes
+  };
+  CharacterVariantState characterVariantState() const;
+  // Rebuilds the character on screen on its model of the target generation: the same race, sex, equipment, sheathe,
+  // animation (by its animation ID, else Stand) and view, presented once. The appearance is remembered per model for
+  // as long as this character is on screen -- a model visited before comes back exactly as it was left; the first
+  // visit takes over what the client's tables pair, and the target model's defaults for the rest. False and why when
+  // refused; the character is then as it was.
+  bool SwitchCharacterVariant(CharacterModelVariant target, wxString & why);
+  // The Character menu's checks follow a character's toggles (a load sets them to a new character's).
+  void SyncCharacterMenuChecks(const WoWModel * m);
   bool ImportArmoury(wxString strURL);
   // A region's realm list as the importer plugin's proxy serves it (see ArmoryImporter::realmList);
   // { ok, unsupported, message, realms }, or ok false when no Armory importer is loaded.

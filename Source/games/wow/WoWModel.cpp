@@ -887,6 +887,16 @@ void WoWModel::initRaceInfos()
     return;
   }
 
+  // A race's model of the other generation, where the client ships one (RaceInfos::initVariants): its own ChrModel,
+  // texture layout and customization, the race's everything else. Before the path rule below, which would give Classic
+  // Beta's classic models (character/human/male/humanmale.m2 ...) the High Definition model's ChrModel and texture
+  // layout -- that model's skin painted on the classic mesh.
+  if (RaceInfos::getRaceInfosForAlternateFileID(fdid, infos))
+  {
+    cd.showFeet = infos.barefeet;
+    return;
+  }
+
   // The loaded file isn't the canonical race model in the map (e.g. a legacy
   // character/<race>/<sex>/*.m2 picked from the file tree, whose FileDataID is
   // not what modern CreatureModelData references). Resolve race + sex from the
@@ -912,6 +922,18 @@ void WoWModel::initRaceInfos()
   LOG_ERROR << "Unable to retrieve race infos for model" << gamefile->fullname() << gamefile->fileDataId();
 }
 
+CharacterModelVariant WoWModel::modelGeneration() const
+{
+  if (!charModelDetails.isChar || infos.raceID == -1)
+    return CharacterModelVariant::Unknown;
+  // The High Definition models carry the eyes as a texture of their own (type 19, composed from the eye layers in
+  // refresh()); a Classic model paints them in the face of its body texture.
+  for (const int type : specialTextures)
+    if (type == 19)
+      return CharacterModelVariant::HD;
+  return CharacterModelVariant::Classic;
+}
+
 bool WoWModel::setRaceSex(int raceID, int sexID)
 {
   if (infos.raceID == raceID && infos.sexID == sexID)
@@ -923,8 +945,15 @@ bool WoWModel::setRaceSex(int raceID, int sexID)
 
   // Only a race that actually wears this model can be applied on top of it. initRaceInfos()
   // resolves a model file to a single race, so for a shared file (Orc / Mag'har Orc, Pandaren /
-  // its two faction races) the first race wins and this puts the right one back.
-  if (!gamefile || wanted.modelFileID != static_cast<int>(gamefile->fileDataId()))
+  // its two faction races) the first race wins and this puts the right one back. The race's model of
+  // the other generation (RaceInfos::getRaceInfosForAlternateFileID) is one it wears too.
+  if (!gamefile)
+    return false;
+  RaceInfos alternate;
+  if (wanted.modelFileID != static_cast<int>(gamefile->fileDataId()) &&
+      RaceInfos::getRaceInfosForAlternateFileID(gamefile->fileDataId(), alternate) && alternate.raceID == raceID && alternate.sexID == sexID)
+    wanted = alternate;
+  if (wanted.modelFileID != static_cast<int>(gamefile->fileDataId()))
     return false;
 
   infos = wanted;

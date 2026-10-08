@@ -929,6 +929,21 @@ What the PNG cannot hold yet:
   transparent background gets alpha a² rather than a. Opaque surfaces are exact (alpha 255) and the empty
   background is exact (alpha 0, colour 0).
 
+### Keeping the view (protocol 8)
+
+A character can be switched to its model of the other generation where the client ships both (Classic Beta's
+classic models beside the High Definition ones; the character panel's **Model: Classic | HD**). The host rebuilds
+the character on the other model and sends its `loadWoWModel` with `"keepView": true`; the player then puts it on
+screen without fitting the view to it: the pivot, the angle and the zoom stay where the user left them, and only
+what follows from the model's size takes the new bounds (the framing distance, the zoom range -- the zoom is kept
+inside it -- and the clip planes; `WmvOrbitCamera.KeepViewFor`). A keep-view character goes on screen already
+playing the animation the host restored: when that animation's keys are in a `.anim`, the file is fetched while the
+character is dressed and its scene waits for it (or for its failure), so the model never shows its idle pose first.
+`runtimeState` counts such loads in `keptViews` (and not in `viewFramings`). A keep-view load that follows a framing
+load not yet on screen (superseded while it was dressed, or failed) frames as any load does: what is on screen then
+is not the character it rebuilds. While a player older than protocol 8 is connected the host refuses the switch and
+says why; a player not ready yet gets the rebuilt character framed when it connects.
+
 ### Background (protocol 7)
 
 **View > Swap Background Color...** sets the colour behind the model in the Models viewer, in a small window of its
@@ -1133,7 +1148,7 @@ to WMV's own log). The player is built locally from `Tools/UnityRendererProject/
 repository contains **no** Unity build output, and nothing in the installer or the CMake
 install rules ships one yet.
 
-## IPC (implemented; protocol 7)
+## IPC (implemented; protocol 8)
 
 **WMV is the server.** `UnityRendererHost` starts a TCP listener bound to `127.0.0.1` on an
 ephemeral port *before* launching the player and passes the port on the player's command
@@ -1148,7 +1163,7 @@ application uses). Player side: `Tools/UnityRendererProject/Assets/Scripts/WmvIp
 **Player -> WMV**
 
 ```json
-{ "type": "unityReady", "protocolVersion": 7 }
+{ "type": "unityReady", "protocolVersion": 8 }
 { "type": "getAsset", "requestId": "abc123", "path": "creature/chicken/chicken.m2" }
 { "type": "getAssetByFileDataID", "requestId": "abc124", "fileDataID": 123456 }
 { "type": "getModelTextures", "requestId": "abc125", "fileDataID": 123200 }
@@ -1163,7 +1178,7 @@ application uses). Player side: `Tools/UnityRendererProject/Assets/Scripts/WmvIp
   "mapObjectFileDataID": 115058, "loading": false, "mountFileDataID": 0, "mountKey": "", "liveMounts": 0,
   "mountsBuilt": 0, "mountSeat": -1, "mountSeatBone": -1, "modelSequence": -1, "mountSequence": -1,
   "mountEmitters": 0, "mountRibbons": 0, "mountParticles": 0, "bodyRebinds": 0, "viewFramings": 1,
-  "backgroundR": 25, "backgroundG": 25, "backgroundB": 30 }
+  "keptViews": 0, "backgroundR": 25, "backgroundG": 25, "backgroundB": 30 }
 { "type": "characterSceneApplied", "fileDataID": 1011653, "revision": 4, "load": 12, "status": "applied",
   "reason": "", "merged": 3, "attachments": 4, "missing": [], "ms": 212,
   "mountKey": "M3", "mountStatus": "applied", "mountReason": "" }
@@ -1206,7 +1221,8 @@ from it: 0 at the mount's origin, 1 under that bone, 2 on the mount's root at th
 `bodyRebinds` (how often a character's scenes bound its body textures again) and `viewFramings` (how
 often the player fitted the view to what is on screen -- once for each model and world model put up,
 once for each change of the mount under a character, and never for anything else, so a test can hold a
-step to "the camera did not move"). The mount fields of `characterSceneApplied` (protocol 5) are described under
+step to "the camera did not move"), and `keptViews` (protocol 8: the models put on screen keeping the view, see
+"Keeping the view"). The mount fields of `characterSceneApplied` (protocol 5) are described under
 "Mounted characters: the host side" above. The player answers in
 message order on its main thread, so a question sent after an answer about a build sees that build
 adopted. Only the headless self-test asks it (see the lifecycle sequence below), and only a player that
@@ -1287,7 +1303,8 @@ Semantics:
 
 - `unityReady` is answered by a `loadWoWModel` for whatever model is loaded (and every later
   model load pushes a new one). `client` is `"active"` -- the player never chooses a client;
-  WMV's active client/profile is the only data source.
+  WMV's active client/profile is the only data source. `keepView` (protocol 8, sent only when true): the
+  character replaces the one on screen without moving the view (see "Keeping the view").
 - `kind` says what `loadWoWModel` names: `"m2"` (a model; also what an absent field means) or
   `"wmo"` (a world-model ROOT, by FileDataID). A WMO load goes only to a player that announced
   protocol 4 or later; an older player gets the out-of-date notice instead, and ignores the field

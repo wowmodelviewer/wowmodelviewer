@@ -91,6 +91,10 @@ class CharControl : public wxScrolledWindow, public Observer
 
   // The Mount card at the top of the panel follows the host's mount state again (see MountCard::Sync).
   void RefreshMountCard();
+  // The character panel's Model selector follows the character on screen (ModelViewer::characterVariantState).
+  void SyncModelVariant();
+  // The tabard spin controls follow the model's tabard (ranges first, then values).
+  void SyncTabardSpins();
 
   // A player mount as the mount choice lists it: its name and the CreatureDisplayInfo id it is mounted by.
   struct MountChoice

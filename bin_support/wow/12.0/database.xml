@@ -242,6 +242,30 @@
     <field type="int32" name="ChrCustomizationChoiceID" pos="1" />
     <field type="int32" name="CreatureDisplayInfoExtraID" relationshipData="yes" />
   </table>
+  <!-- Classic Beta 1.60.1: a character model's other generation. ChrModelAltVariant pairs a playable ChrModel (one with a
+       ChrRaceXChrModel row) with the alternate ChrModel of the same race and sex, which no ChrRaceXChrModel row names;
+       ChrModelAltVariantOption pairs their options, ChrModelAltVariantChoice those options' choices (one to one). No
+       definition ships for these tables. The ID is inline in field 0 (the files carry no ID list); the other columns
+       were identified by their references: every primary a playable ChrModel and every alternate one without a race
+       row, every option pair an option of each model, every choice pair a choice of each option (18, 93 and 1,136
+       rows, all consistent). layoutHash verifies the positions; RaceInfos checks every row again as it reads them. -->
+  <table name="ChrModelAltVariant" layoutHash="0x3562BFF9">
+    <field type="int32" name="ID" primary="yes" pos="0" />
+    <field type="int32" name="PrimaryChrModelID" pos="1" />
+    <field type="int32" name="AlternateChrModelID" pos="2" />
+  </table>
+  <table name="ChrModelAltVariantOption" layoutHash="0x5BFA0E63">
+    <field type="int32" name="ID" primary="yes" pos="0" />
+    <field type="int32" name="ChrModelAltVariantID" pos="1" />
+    <field type="int32" name="PrimaryOptionID" pos="2" />
+    <field type="int32" name="AlternateOptionID" pos="3" />
+  </table>
+  <table name="ChrModelAltVariantChoice" layoutHash="0x4D3AC64B">
+    <field type="int32" name="ID" primary="yes" pos="0" />
+    <field type="int32" name="ChrModelAltVariantOptionID" pos="1" />
+    <field type="int32" name="PrimaryChoiceID" pos="2" />
+    <field type="int32" name="AlternateChoiceID" pos="3" />
+  </table>
   <table name="CreatureDisplayInfoGeosetData">
     <field type="int32" name="ID" primary="yes" />
     <field type="uint8" name="GeosetIndex" pos="0" />

@@ -389,6 +389,44 @@ public static class WmvLifecycleSelfTest
             UnityEngine.Object.DestroyImmediate(go);
         }
 
+        // ---- a character rebuilt on its other model keeps the view (protocol 8 keepView) --
+        {
+            GameObject go, refGo;
+            WmvOrbitCamera cam = NewCamera(out go);
+            cam.Frame(new Bounds(new Vector3(0f, 1f, 0f), new Vector3(1f, 2f, 0.6f)));
+            cam.yaw += 40f;                              // an orbit drag
+            cam.pitch = 25f;
+            cam.pivot += new Vector3(0.1f, 0.3f, 0f);    // a pan
+            cam.ZoomByNotches(3f);
+            for (int f = 0; f < 200; f++) cam.AdvanceZoom(1f / 60f);
+            float yaw0 = cam.yaw, pitch0 = cam.pitch, distance0 = cam.distance;
+            Vector3 pivot0 = cam.pivot;
+            var other = new Bounds(new Vector3(0f, 1.05f, 0f), new Vector3(1.1f, 2.1f, 0.7f));
+            cam.KeepViewFor(other);
+            WmvOrbitCamera reference = NewCamera(out refGo);
+            reference.Frame(other);
+            Check(cam.yaw == yaw0 && cam.pitch == pitch0 && cam.pivot == pivot0,
+                  "keep view: the angle and the orbit target stay where the user left them", log);
+            Check(cam.distance == distance0 && cam.TargetDistance == distance0,
+                  "keep view: the zoom stays, settled", log);
+            Check(Mathf.Abs(cam.FramedDistance - reference.FramedDistance) < 1e-5f &&
+                  Mathf.Abs(cam.MinDistance - reference.MinDistance) < 1e-5f &&
+                  Mathf.Abs(cam.MaxDistance - reference.MaxDistance) < 1e-4f,
+                  "keep view: the framing distance and the zoom range are the new model's", log);
+            // A zoom outside the new model's range is brought inside it, not kept.
+            cam.Frame(new Bounds(Vector3.zero, Vector3.one * 2f));
+            for (int n = 0; n < 800; n++) cam.ZoomByNotches(-1f);
+            for (int f = 0; f < 600; f++) cam.AdvanceZoom(1f / 60f);
+            cam.KeepViewFor(new Bounds(Vector3.zero, Vector3.one * 0.02f));
+            Check(cam.distance <= cam.MaxDistance + 1e-4f && cam.TargetDistance <= cam.MaxDistance + 1e-4f,
+                  "keep view: a zoom past the new model's range is brought inside it (" + cam.distance + " <= " + cam.MaxDistance + ")", log);
+            float kept = cam.TargetDistance;
+            cam.ZoomByNotches(1f);
+            Check(cam.TargetDistance < kept, "keep view: the wheel still works after it", log);
+            UnityEngine.Object.DestroyImmediate(go);
+            UnityEngine.Object.DestroyImmediate(refGo);
+        }
+
         // ---- zoom leaves orbit and pan alone ---------------------------------------------
         {
             GameObject go;

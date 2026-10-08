@@ -189,6 +189,12 @@ namespace ModelIdLookup
     return true;
   }
 
+  bool checkModelFile(int fileDataId, wxString & why)
+  {
+    QString path;
+    return checkM2(fileDataId, path, why);
+  }
+
   bool resolve(Kind kind, int id, Resolved & out, wxString & why)
   {
     why.clear();
@@ -269,9 +275,10 @@ namespace ModelIdLookup
                                    "(its FileDataID is 0)."), id, modelId);
           return false;
         }
-        // A display with extended display info is a humanoid NPC: shown on its race's HD character model, as View
-        // NPC shows it (ModelViewer::ShowCreatureDisplay).
-        out.loadFileDataId = out.extendedDisplayId ? RaceInfos::getHDModelForFileID(out.fileDataId) : out.fileDataId;
+        // A display with extended display info is a humanoid NPC: shown on its race's HD character model (or the
+        // model its stored choices belong to), as View NPC shows it (ModelViewer::ShowCreatureDisplay).
+        out.loadFileDataId = out.extendedDisplayId ? RaceInfos::getCreatureDisplayFileID(out.fileDataId, out.extendedDisplayId)
+                                                   : out.fileDataId;
         if (!checkM2(out.loadFileDataId, out.path, fileWhy))
         {
           why = out.loadFileDataId != out.fileDataId
