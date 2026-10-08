@@ -30,6 +30,8 @@
 #include "util.h"
 #include "WoWDatabase.h"
 #include "WoWFolder.h"
+#include "CascLib.h"
+#include <QCryptographicHash>
 #include "animcontrol.h"
 #include "AnimManager.h"
 #include "Attachment.h"
@@ -50,6 +52,7 @@
 #include <QImage>
 
 #include "TextureManager.h"
+#include "ModelIdLookup.h"
 #include "UnityAssetAccess.h"
 #include "UnityCharacterScene.h"
 #include "UnityIpcServer.h"
@@ -326,6 +329,948 @@ static int doHeadlessMatResTest()
   return failures;
 }
 
+// -customizationtest, every client: a humanoid NPC wears its own stored appearance (CreatureDisplayInfoExtra,
+// CreatureDisplayInfoOption) without the player's lists ever offering what only NPCs wear. The cases are found in the
+// loaded client's own tables, in Creature order -- no NPC is named:
+//   - the first humanoid NPC whose race wears its display's model: race, sex, every stored choice of the model current
+//     and kept as stored, every other option given a valid choice (an option the NPC stores nothing for, often Ears,
+//     must not be left without one), and a pick of the user's taking that option back to the player's rules;
+//   - the first that stores an NPC-only choice of a player option: current, and not among the player's choices;
+//   - the first that stores a choice of an option no player is offered (Eye Style): current, and not offered;
+//   - the first whose race wears its model but is not the first race on the file (MoP Classic's Human NPCs on the
+//     files Gilnean is listed on first, Classic Beta's Windshaper Skyborne): that race;
+//   - the first Demon Hunter NPC (its display's class is 12, in a client that has the class): in that class context,
+//     and a player character loaded on the same model file afterwards (as an Armory import is) is not;
+//   - a saved NPC loads back as it was saved, a player character afterwards carries nothing of the NPC, and a saved
+//     player character loads back as its race, with nothing marked stored.
+template <class Check, class Skip>
+static void checkNpcAppearance(ModelViewer * frame, const Check & check, const Skip & skip)
+{
+  const auto canvasModel = [frame]() { return frame->canvas ? const_cast<WoWModel *>(frame->canvas->model()) : nullptr; };
+  const auto settle = []() {
+    for (int i = 0; i < 20; i++)
+      wxTheApp->Yield(true);
+  };
+  const auto rows = [](const QString & table) {
+    sqlResult r = GAMEDATABASE.sqlQuery(QString("SELECT COUNT(*) FROM %1").arg(table));
+    return (r.valid && !r.values.empty()) ? r.values[0][0].toInt() : 0;
+  };
+  const auto notInstalled = [](const QString & table) {
+    wow::WoWFolder * folder = dynamic_cast<wow::WoWFolder *>(&GAMEDIRECTORY);
+    return folder && folder->isRemoteFile(QString("dbfilesclient/%1.db2").arg(table.toLower()));
+  };
+  for (const QString table : { QString("CreatureDisplayInfoExtra"), QString("CreatureDisplayInfoOption") })
+    if (rows(table) == 0)
+    {
+      if (notInstalled(table))
+        skip("NPC appearance", QString("the client's %1 is not installed on this computer").arg(table));
+      else
+        check(QString("NPC appearance: %1 was read").arg(table), false, "the table holds no row");
+      return;
+    }
+
+  struct Stored { uint option; uint choice; bool npcOnlyChoice; bool npcOnlyOption; };
+  // A case is an NPC (a Creature row, loaded with View NPC) or, in a client whose Creature table lists no humanoid NPC
+  // (Classic Era's lists one creature), a creature display with extended info (loaded with Load NPC / Model by
+  // Creature Display ID): creature is then the display's ID.
+  struct Case { uint creature = 0; bool byDisplay = false; QString who; uint extra = 0; int race = -1; int sex = -1; int classID = 0;
+                std::vector<Stored> stored; };
+  const auto storedOf = [](uint extra) {
+    std::vector<Stored> stored;
+    sqlResult r = GAMEDATABASE.sqlQuery(QString(
+      "SELECT o.ChrCustomizationOptionID, o.ChrCustomizationChoiceID, IFNULL(cq.ReqType, -1), IFNULL(oq.ReqType, -1) "
+      "FROM CreatureDisplayInfoOption o "
+      "LEFT JOIN ChrCustomizationChoice c ON c.ID = o.ChrCustomizationChoiceID "
+      "LEFT JOIN ChrCustomizationReq cq ON cq.ID = c.ChrCustomizationReqID "
+      "LEFT JOIN ChrCustomizationOption op ON op.ID = o.ChrCustomizationOptionID "
+      "LEFT JOIN ChrCustomizationReq oq ON oq.ID = op.Requirement "
+      "WHERE o.CreatureDisplayInfoExtraID = %1 ORDER BY o.ID").arg(extra));
+    std::set<uint> seen;
+    for (size_t i = 0; r.valid && i < r.values.size(); i++)
+    {
+      const uint option = r.values[i][0].toUInt();
+      if (!seen.insert(option).second)
+        continue; // an option stored twice keeps its first row
+      const int choiceType = r.values[i][2].toInt(), optionType = r.values[i][3].toInt();
+      const bool optionNpcOnly = optionType >= 0 && !CharDetails::isPlayerRequirement(optionType);
+      stored.push_back(Stored{ option, r.values[i][1].toUInt(),
+                               !optionNpcOnly && choiceType >= 0 && !CharDetails::isPlayerRequirement(choiceType), optionNpcOnly });
+    }
+    return stored;
+  };
+
+  // Find the cases.
+  Case plain, npcChoice, npcOption, sharedFile, demonHunter;
+  const bool clientHasDH = (CharDetails::clientClassMask() & (1u << (CLASS_DEMONHUNTER - 1))) != 0;
+  const auto findCases = [&](const sqlResult & npcs, bool byDisplay) {
+  for (size_t i = 0; npcs.valid && i < npcs.values.size(); i++)
+  {
+    if (plain.creature && npcChoice.creature && npcOption.creature && sharedFile.creature && (demonHunter.creature || !clientHasDH))
+      break;
+    Case c;
+    c.creature = npcs.values[i][0].toUInt();
+    c.byDisplay = byDisplay;
+    c.who = QString(byDisplay ? "creature display %1" : "NPC %1").arg(c.creature);
+    c.extra = npcs.values[i][2].toUInt();
+    c.race = npcs.values[i][3].toInt();
+    c.sex = npcs.values[i][4].toInt();
+    c.classID = npcs.values[i][5].toInt();
+    const int file = RaceInfos::getHDModelForFileID(npcs.values[i][1].toInt());
+    RaceInfos wearer, first;
+    if (!GAMEDIRECTORY.getFile(file) || !RaceInfos::getRaceInfosForRaceSex(c.race, c.sex, wearer) || wearer.modelFileID != file ||
+        !RaceInfos::getRaceInfosForFileID(file, first))
+      continue; // the display's race does not wear its model, or the model is not installed
+    c.stored = storedOf(c.extra);
+    if (c.stored.empty())
+      continue;
+    if (!plain.creature)
+      plain = c;
+    if (!npcChoice.creature && std::any_of(c.stored.begin(), c.stored.end(), [](const Stored & s) { return s.npcOnlyChoice; }))
+      npcChoice = c;
+    if (!npcOption.creature && std::any_of(c.stored.begin(), c.stored.end(), [](const Stored & s) { return s.npcOnlyOption; }))
+      npcOption = c;
+    if (!sharedFile.creature && first.raceID != c.race)
+      sharedFile = c;
+    if (!demonHunter.creature && clientHasDH && c.classID == CLASS_DEMONHUNTER)
+      demonHunter = c;
+  }
+  };
+  const QString joins = "JOIN CreatureModelData ON CreatureDisplayInfo.ModelID = CreatureModelData.ID "
+                        "JOIN CreatureDisplayInfoExtra ON CreatureDisplayInfo.ExtendedDisplayInfoID = CreatureDisplayInfoExtra.ID ";
+  const QString columns = "CreatureModelData.FileDataID, CreatureDisplayInfoExtra.ID, CreatureDisplayInfoExtra.DisplayRaceID, "
+                          "CreatureDisplayInfoExtra.DisplaySexID, CreatureDisplayInfoExtra.DisplayClassID ";
+  findCases(GAMEDATABASE.sqlQuery("SELECT Creature.ID, " + columns + "FROM Creature "
+                                  "JOIN CreatureDisplayInfo ON Creature.DisplayID1 = CreatureDisplayInfo.ID " + joins + "ORDER BY Creature.ID"),
+            false);
+  if (!plain.creature)
+  {
+    LOG_INFO << QString("[customization-test] no humanoid NPC in this client's Creature table (%1 row(s)): the cases are its creature "
+                        "displays with extended info").arg(rows("Creature"));
+    findCases(GAMEDATABASE.sqlQuery("SELECT CreatureDisplayInfo.ID, " + columns + "FROM CreatureDisplayInfo " + joins +
+                                    "ORDER BY CreatureDisplayInfo.ID"), true);
+  }
+  if (!plain.creature)
+  {
+    check("NPC appearance: a humanoid NPC or creature display whose race wears its model, with stored choices", false, "none found");
+    return;
+  }
+
+  // Loads the NPC; the model when it loaded as that race's character NPC, else null (and a failed check).
+  const auto loadNpc = [&](const Case & c, const QString & what) -> WoWModel * {
+    if (c.byDisplay)
+    {
+      ModelIdLookup::Resolved resolved;
+      wxString why;
+      if (ModelIdLookup::resolve(ModelIdLookup::Kind::CreatureDisplay, (int)c.creature, resolved, why))
+        frame->LoadModelById(resolved, why);
+    }
+    else
+      frame->LoadNPC(c.creature);
+    settle();
+    WoWModel * m = canvasModel();
+    const bool ok = m && m->charModelDetails.isChar && m->cd.isNPC && m->infos.raceID == c.race && m->infos.sexID == c.sex;
+    check(QString("NPC appearance, %1: %2 (extended display %3) loads as a character NPC of race %4 sex %5")
+            .arg(what).arg(c.who).arg(c.extra).arg(c.race).arg(c.sex), ok,
+          m ? QString("isChar %1, NPC %2, race %3 sex %4").arg(m->charModelDetails.isChar ? 1 : 0).arg(m->cd.isNPC ? 1 : 0)
+                .arg(m->infos.raceID).arg(m->infos.sexID) : QString("no model"));
+    return ok ? m : nullptr;
+  };
+  const auto storedState = [](WoWModel * m, const Case & c, int * applied, QStringList * wrong) {
+    for (const Stored & s : c.stored)
+    {
+      if (!m->cd.hasOption(s.option))
+        continue; // another model's option (an alternate form)
+      (*applied)++;
+      if (m->cd.get(s.option) != s.choice || !m->cd.isStoredChoice(s.option))
+        *wrong << QString("%1=%2 (current %3, stored %4)").arg(s.option).arg(s.choice).arg(m->cd.get(s.option))
+                    .arg(m->cd.isStoredChoice(s.option) ? 1 : 0);
+    }
+  };
+
+  // ---- The first humanoid NPC ----
+  if (WoWModel * m = loadNpc(plain, "first humanoid NPC"))
+  {
+    int applied = 0;
+    QStringList wrong;
+    storedState(m, plain, &applied, &wrong);
+    check(QString("NPC appearance: %1 wears every stored choice of its model (%2), kept as stored").arg(plain.who).arg(applied),
+          applied > 0 && wrong.isEmpty(), wrong.join(", "));
+    QStringList bare;
+    for (const uint option : m->cd.getCustomizationOptions())
+    {
+      const std::vector<uint> offered = m->cd.getCustomizationChoices(option);
+      if (!m->cd.isStoredChoice(option) && std::find(offered.begin(), offered.end(), m->cd.get(option)) == offered.end())
+        bare << QString("%1 (current %2)").arg(option).arg(m->cd.get(option));
+    }
+    check(QString("NPC appearance: %1's options it stores nothing for hold a valid choice").arg(plain.who),
+          bare.isEmpty(), bare.join(", "));
+
+    // A user's pick of a stored option's other valid choice takes it back to the player's rules; the rest stay stored.
+    uint picked = 0, pick = 0;
+    for (const Stored & s : plain.stored)
+    {
+      if (!m->cd.isStoredChoice(s.option))
+        continue;
+      for (const uint c : m->cd.getCustomizationChoices(s.option))
+        if (c != s.choice)
+        {
+          picked = s.option;
+          pick = c;
+          break;
+        }
+      if (picked)
+        break;
+    }
+    if (picked)
+    {
+      m->cd.set(picked, pick);
+      settle();
+      size_t stillStored = 0;
+      for (const Stored & s : plain.stored)
+        if (s.option != picked && m->cd.isStoredChoice(s.option))
+          stillStored++;
+      check(QString("NPC appearance: a pick (option %1 -> %2) takes the option back to the player's rules, the others stay stored")
+              .arg(picked).arg(pick),
+            m->cd.get(picked) == pick && !m->cd.isStoredChoice(picked) && stillStored > 0,
+            QString("current %1, stored %2, other stored options %3").arg(m->cd.get(picked)).arg(m->cd.isStoredChoice(picked) ? 1 : 0)
+              .arg(stillStored));
+    }
+  }
+
+  // ---- NPC-only choices and options are worn, never offered ----
+  if (!npcChoice.creature)
+    skip("NPC appearance: an NPC-only choice of a player option", "no humanoid NPC of this client stores one");
+  else if (WoWModel * m = loadNpc(npcChoice, "NPC-only choice"))
+  {
+    QStringList wrong;
+    int n = 0;
+    for (const Stored & s : npcChoice.stored)
+      if (s.npcOnlyChoice && m->cd.hasOption(s.option))
+      {
+        n++;
+        const std::vector<uint> offered = m->cd.getCustomizationChoices(s.option);
+        if (m->cd.get(s.option) != s.choice || std::find(offered.begin(), offered.end(), s.choice) != offered.end())
+          wrong << QString("%1=%2 (current %3)").arg(s.option).arg(s.choice).arg(m->cd.get(s.option));
+      }
+    check(QString("NPC appearance: %1 wears its %2 NPC-only choice(s), and the player's lists do not offer them").arg(npcChoice.who).arg(n),
+          n > 0 && wrong.isEmpty(), wrong.join(", "));
+  }
+  if (!npcOption.creature)
+    skip("NPC appearance: an option no player is offered", "no humanoid NPC of this client stores one");
+  else if (WoWModel * m = loadNpc(npcOption, "option no player is offered"))
+  {
+    QStringList wrong;
+    int n = 0;
+    const std::vector<uint> offered = m->cd.getCustomizationOptions();
+    for (const Stored & s : npcOption.stored)
+      if (s.npcOnlyOption && m->cd.hasOption(s.option))
+      {
+        n++;
+        if (m->cd.get(s.option) != s.choice || std::find(offered.begin(), offered.end(), s.option) != offered.end())
+          wrong << QString("%1=%2 (current %3)").arg(s.option).arg(s.choice).arg(m->cd.get(s.option));
+      }
+    check(QString("NPC appearance: %1 wears its choice of %2 option(s) no player is offered, and the options are not offered")
+            .arg(npcOption.who).arg(n),
+          n > 0 && wrong.isEmpty(), wrong.join(", "));
+  }
+
+  // ---- A race that is not the first race on its file ----
+  if (!sharedFile.creature)
+    skip("NPC appearance: a race that is not the first race on its model file", "no humanoid NPC of this client is one");
+  else if (WoWModel * m = loadNpc(sharedFile, "a race not first on its model file"))
+  {
+    int applied = 0;
+    QStringList wrong;
+    storedState(m, sharedFile, &applied, &wrong);
+    check(QString("NPC appearance: %1 (race %2) wears its stored choices (%3)").arg(sharedFile.who).arg(sharedFile.race).arg(applied),
+          applied > 0 && wrong.isEmpty(), wrong.join(", "));
+  }
+
+  // ---- A Demon Hunter NPC, and a player character on its model file afterwards ----
+  if (!demonHunter.creature)
+    skip("NPC appearance: a Demon Hunter NPC", clientHasDH ? "no humanoid NPC of this client is one" : "this client has no Demon Hunters");
+  else if (WoWModel * m = loadNpc(demonHunter, "Demon Hunter"))
+  {
+    check(QString("NPC appearance: %1 (class 12) is in the Demon Hunter context").arg(demonHunter.who), m->cd.isDemonHunter(),
+          QString("Demon Hunter %1").arg(m->cd.isDemonHunter() ? 1 : 0));
+    // The user unticks Demon Hunter: the character is the player's now -- nothing stays stored, every choice is one
+    // the player is offered.
+    m->cd.setDemonHunterMode(false);
+    settle();
+    QStringList kept;
+    for (const Stored & s : demonHunter.stored)
+      if (m->cd.isStoredChoice(s.option))
+        kept << QString("%1 stored").arg(s.option);
+    for (const uint option : m->cd.getCustomizationOptions())
+    {
+      const std::vector<uint> offered = m->cd.getCustomizationChoices(option);
+      if (std::find(offered.begin(), offered.end(), m->cd.get(option)) == offered.end())
+        kept << QString("%1=%2 not offered").arg(option).arg(m->cd.get(option));
+    }
+    check(QString("NPC appearance: unticking Demon Hunter on %1 leaves no stored choice and only choices the player is offered")
+            .arg(demonHunter.who), !m->cd.isDemonHunter() && kept.isEmpty(), kept.join(", "));
+    // As ApplyArmoryCharacter loads a character of that race and sex: on the file on screen.
+    frame->LoadModel(m->gamefile, demonHunter.race, demonHunter.sex);
+    settle();
+    WoWModel * p = canvasModel();
+    bool anyStored = false;
+    for (const Stored & s : demonHunter.stored)
+      anyStored = anyStored || (p && p->cd.isStoredChoice(s.option));
+    QStringList equipped;
+    for (int slot = CS_HEAD; p && slot < NUM_CHAR_SLOTS; slot++)
+      if (WoWItem * item = p->getItem((CharSlots)slot))
+        if (item->displayId() > 0)
+          equipped << QString::number(slot);
+    check(QString("NPC appearance: a character loaded on %1's model file afterwards is not a Demon Hunter, wears no NPC equipment and no "
+                  "stored choice").arg(demonHunter.who),
+          p && !p->cd.isDemonHunter() && !p->cd.isNPC && !anyStored && equipped.isEmpty(),
+          p ? QString("Demon Hunter %1, NPC %2, stored %3, NPC equipment in slots [%4]").arg(p->cd.isDemonHunter() ? 1 : 0)
+                .arg(p->cd.isNPC ? 1 : 0).arg(anyStored ? 1 : 0).arg(equipped.join(','))
+            : QString("no model"));
+  }
+
+  // ---- Saved and loaded back ----
+  const Case & saved = npcChoice.creature ? npcChoice : plain;
+  const QString npcFile = QDir::temp().filePath("wmv_customizationtest_npc.chr");
+  if (WoWModel * m = loadNpc(saved, "saved"))
+  {
+    const std::map<uint, uint> before = [m]() {
+      std::map<uint, uint> s;
+      for (const uint o : m->cd.getCustomizationOptions())
+        s[o] = m->cd.get(o);
+      return s;
+    }();
+    std::vector<uint> storedBefore;
+    for (const Stored & s : saved.stored)
+      if (m->cd.isStoredChoice(s.option))
+        storedBefore.push_back(s.option);
+    frame->SaveChar(npcFile);
+    frame->LoadChar(npcFile);
+    settle();
+    WoWModel * l = canvasModel();
+    QStringList wrong;
+    if (l)
+    {
+      for (const auto & o : before)
+        if (l->cd.get(o.first) != o.second)
+          wrong << QString("%1: %2 -> %3").arg(o.first).arg(o.second).arg(l->cd.get(o.first));
+      for (const uint o : storedBefore)
+        if (!l->cd.isStoredChoice(o))
+          wrong << QString("%1 no longer stored").arg(o);
+    }
+    check(QString("NPC appearance: %1 saved and loaded back: race %2 sex %3, the same choices, %4 stored")
+            .arg(saved.who).arg(saved.race).arg(saved.sex).arg(storedBefore.size()),
+          l && l->infos.raceID == saved.race && l->infos.sexID == saved.sex && l->cd.isNPC && wrong.isEmpty(),
+          l ? QString("race %1 sex %2 NPC %3 %4").arg(l->infos.raceID).arg(l->infos.sexID).arg(l->cd.isNPC ? 1 : 0).arg(wrong.join(", "))
+            : QString("no model"));
+  }
+  QFile::remove(npcFile);
+
+  // ---- A player character afterwards, saved and loaded back ----
+  const int playerFile = RaceInfos::getFileIDForRaceSex(plain.race, plain.sex);
+  GameFile * player = playerFile > 0 ? GAMEDIRECTORY.getFile(playerFile) : nullptr;
+  if (player)
+  {
+    frame->LoadModel(player, plain.race, plain.sex);
+    settle();
+    WoWModel * m = canvasModel();
+    bool anyStored = false;
+    for (const Stored & s : plain.stored)
+      anyStored = anyStored || (m && m->cd.isStoredChoice(s.option));
+    check(QString("NPC appearance: a player character (race %1 sex %2) loaded afterwards carries nothing of the NPC").arg(plain.race).arg(plain.sex),
+          m && !m->cd.isNPC && !anyStored, m ? QString("NPC %1, stored %2").arg(m->cd.isNPC ? 1 : 0).arg(anyStored ? 1 : 0) : QString("no model"));
+    const QString playerChr = QDir::temp().filePath("wmv_customizationtest_player.chr");
+    std::map<uint, uint> before;
+    if (m)
+      for (const uint o : m->cd.getCustomizationOptions())
+        before[o] = m->cd.get(o);
+    frame->SaveChar(playerChr);
+    QFile f(playerChr);
+    const QString text = f.open(QIODevice::ReadOnly | QIODevice::Text) ? QString::fromUtf8(f.readAll()) : QString();
+    f.close();
+    frame->LoadChar(playerChr);
+    settle();
+    WoWModel * l = canvasModel();
+    QStringList wrong;
+    for (const auto & o : before)
+      if (!l || l->cd.get(o.first) != o.second)
+        wrong << QString("%1: %2 -> %3").arg(o.first).arg(o.second).arg(l ? l->cd.get(o.first) : 0);
+    check(QString("NPC appearance: a saved player character names its race, carries no NPC mark, and loads back unchanged"),
+          !text.contains("npc=") && !text.contains("stored=") && text.contains(QString("race=\"%1\"").arg(plain.race)) &&
+            l && l->infos.raceID == plain.race && !l->cd.isNPC && wrong.isEmpty(),
+          l ? QString("race %1 NPC %2 %3").arg(l->infos.raceID).arg(l->cd.isNPC ? 1 : 0).arg(wrong.join(", ")) : QString("no model"));
+    QFile::remove(playerChr);
+  }
+}
+
+// -customizationtest, every client: a geoset group an NPC's shirt, chest and legs all set goes to the item that declares
+// it (its GeosetGroup is not 0), and to the outer one where two do -- whatever order the viewer holds the items in. The
+// cases are found in the loaded client's own tables, in Creature order (then creature display order, for a case no
+// Creature row gives), among NPCs whose race wears their display's model and whose gloves leave the sleeves alone --
+// no NPC is named:
+//   - legs declaring the robe skirt (the trousers group) under a shirt or chest that leaves it at its default: the legs'
+//     skirt, and no underwear bottoms under the legs;
+//   - a chest declaring the skirt over legs that leave it at their default, and no gloves: the chest's skirt, the NPC
+//     robed, no underwear top under the chest, and the bare hands still drawn;
+//   - a shirt declaring the sleeves under a chest that leaves them at their default: the shirt's sleeves;
+//   - a shirt and a chest declaring different sleeves: the chest's.
+template <class Check, class Skip>
+static void checkEquipmentGeosets(ModelViewer * frame, const Check & check, const Skip & skip)
+{
+  for (const QString table : { QString("CreatureDisplayInfoExtra"), QString("NpcModelItemSlotDisplayInfo"), QString("ItemDisplayInfo") })
+  {
+    sqlResult n = GAMEDATABASE.sqlQuery(QString("SELECT COUNT(*) FROM %1").arg(table));
+    if (n.valid && !n.values.empty() && n.values[0][0].toInt() > 0)
+      continue;
+    wow::WoWFolder * folder = dynamic_cast<wow::WoWFolder *>(&GAMEDIRECTORY);
+    if (folder && folder->isRemoteFile(QString("dbfilesclient/%1.db2").arg(table.toLower())))
+      skip("equipment geosets", QString("the client's %1 is not installed on this computer").arg(table));
+    else
+      check(QString("equipment geosets: %1 was read").arg(table), false, "the table holds no row");
+    return;
+  }
+
+  // NpcModelItemSlotDisplayInfo.ItemSlot 2 shirt, 3 chest, 5 legs, 8 hands; a slot named twice keeps its last row, as
+  // ModelViewer::ShowCreatureDisplay puts them on. GeoSetGroup1 is the sleeves (gloves: the gloves group, which hides
+  // the sleeves when declared), GeoSetGroup3 the skirt.
+  struct Worn { bool worn = false; int sleeves = 0; int skirt = 0; };
+  std::map<uint, std::map<int, Worn> > equipment;
+  sqlResult rows = GAMEDATABASE.sqlQuery("SELECT n.NpcModelID, n.ItemSlot, i.ID, IFNULL(i.GeoSetGroup1, 0), IFNULL(i.GeoSetGroup3, 0) "
+                                         "FROM NpcModelItemSlotDisplayInfo n LEFT JOIN ItemDisplayInfo i ON i.ID = n.ItemDisplayInfoID "
+                                         "WHERE n.ItemSlot IN (2, 3, 5, 8) ORDER BY n.ID");
+  for (size_t i = 0; rows.valid && i < rows.values.size(); i++)
+    equipment[rows.values[i][0].toUInt()][rows.values[i][1].toInt()] =
+      Worn{ !rows.values[i][2].isEmpty() && rows.values[i][2].toInt() != 0, rows.values[i][3].toInt(), rows.values[i][4].toInt() };
+  if (equipment.empty())
+  {
+    skip("equipment geosets", "the client's NPCs wear no shirt, chest, legs or gloves");
+    return;
+  }
+
+  struct Case { uint creature = 0; bool byDisplay = false; QString who; uint extra = 0; int race = -1; int sex = -1; Worn shirt, chest, legs; };
+  Case legsSkirt, chestSkirt, shirtSleeves, bothSleeves;
+  const auto findCases = [&](const sqlResult & npcs, bool byDisplay) {
+    for (size_t i = 0; npcs.valid && i < npcs.values.size(); i++)
+    {
+      if (legsSkirt.creature && chestSkirt.creature && shirtSleeves.creature && bothSleeves.creature)
+        break;
+      const auto e = equipment.find(npcs.values[i][2].toUInt());
+      if (e == equipment.end())
+        continue;
+      Case c;
+      c.creature = npcs.values[i][0].toUInt();
+      c.byDisplay = byDisplay;
+      c.who = QString(byDisplay ? "creature display %1" : "NPC %1").arg(c.creature);
+      c.extra = e->first;
+      c.race = npcs.values[i][3].toInt();
+      c.sex = npcs.values[i][4].toInt();
+      c.shirt = e->second[2];
+      c.chest = e->second[3];
+      c.legs = e->second[5];
+      const Worn gloves = e->second[8];
+      if (gloves.worn && gloves.sleeves > 0)
+        continue; // the gloves hide the sleeves
+      const int file = RaceInfos::getHDModelForFileID(npcs.values[i][1].toInt());
+      RaceInfos wearer;
+      if (!GAMEDIRECTORY.getFile(file) || !RaceInfos::getRaceInfosForRaceSex(c.race, c.sex, wearer) || wearer.modelFileID != file)
+        continue; // the display's race does not wear its model, or the model is not installed
+      const bool shirtDefaultSkirt = !c.shirt.worn || c.shirt.skirt == 0, chestDefaultSkirt = !c.chest.worn || c.chest.skirt == 0;
+      if (!legsSkirt.creature && c.legs.worn && c.legs.skirt != 0 && (c.shirt.worn || c.chest.worn) && shirtDefaultSkirt && chestDefaultSkirt)
+        legsSkirt = c;
+      if (!chestSkirt.creature && c.chest.worn && c.chest.skirt != 0 && c.legs.worn && c.legs.skirt == 0 && !gloves.worn)
+        chestSkirt = c;
+      if (!shirtSleeves.creature && c.shirt.worn && c.shirt.sleeves != 0 && c.chest.worn && c.chest.sleeves == 0)
+        shirtSleeves = c;
+      if (!bothSleeves.creature && c.shirt.worn && c.chest.worn && c.shirt.sleeves != 0 && c.chest.sleeves != 0 && c.shirt.sleeves != c.chest.sleeves)
+        bothSleeves = c;
+    }
+  };
+  const QString columns = "CreatureModelData.FileDataID, CreatureDisplayInfoExtra.ID, CreatureDisplayInfoExtra.DisplayRaceID, "
+                          "CreatureDisplayInfoExtra.DisplaySexID ";
+  const QString joins = "JOIN CreatureModelData ON CreatureDisplayInfo.ModelID = CreatureModelData.ID "
+                        "JOIN CreatureDisplayInfoExtra ON CreatureDisplayInfo.ExtendedDisplayInfoID = CreatureDisplayInfoExtra.ID ";
+  findCases(GAMEDATABASE.sqlQuery("SELECT Creature.ID, " + columns + "FROM Creature "
+                                  "JOIN CreatureDisplayInfo ON Creature.DisplayID1 = CreatureDisplayInfo.ID " + joins + "ORDER BY Creature.ID"),
+            false);
+  if (!legsSkirt.creature || !chestSkirt.creature || !shirtSleeves.creature || !bothSleeves.creature)
+    findCases(GAMEDATABASE.sqlQuery("SELECT CreatureDisplayInfo.ID, " + columns + "FROM CreatureDisplayInfo " + joins +
+                                    "ORDER BY CreatureDisplayInfo.ID"), true);
+
+  // Loads the NPC; the model when it loaded as that race's character NPC, else null (and a failed check).
+  const auto loadNpc = [&](const Case & c, const QString & what) -> WoWModel * {
+    if (c.byDisplay)
+    {
+      ModelIdLookup::Resolved resolved;
+      wxString why;
+      if (ModelIdLookup::resolve(ModelIdLookup::Kind::CreatureDisplay, (int)c.creature, resolved, why))
+        frame->LoadModelById(resolved, why);
+    }
+    else
+      frame->LoadNPC(c.creature);
+    for (int i = 0; i < 20; i++)
+      wxTheApp->Yield(true);
+    WoWModel * m = frame->canvas ? const_cast<WoWModel *>(frame->canvas->model()) : nullptr;
+    const bool ok = m && m->charModelDetails.isChar && m->cd.isNPC && m->infos.raceID == c.race && m->infos.sexID == c.sex;
+    check(QString("equipment geosets, %1: %2 (extended display %3) loads as a character NPC of race %4 sex %5")
+            .arg(what).arg(c.who).arg(c.extra).arg(c.race).arg(c.sex), ok,
+          m ? QString("isChar %1, NPC %2, race %3 sex %4").arg(m->charModelDetails.isChar ? 1 : 0).arg(m->cd.isNPC ? 1 : 0)
+                .arg(m->infos.raceID).arg(m->infos.sexID) : QString("no model"));
+    return ok ? m : nullptr;
+  };
+  const auto group = [](WoWModel * m, CharGeosets g) {
+    const auto it = m->cd.geosets.find(g);
+    return it == m->cd.geosets.end() ? -1 : (int)it->second;
+  };
+  const auto drawn = [](WoWModel * m, CharGeosets g) {
+    for (size_t i = 0; i < m->ownGeosetCount() && i < m->geosets.size(); i++)
+      if (m->geosets[i] && m->geosets[i]->display && m->geosets[i]->id / 100 == (int)g)
+        return true;
+    return false;
+  };
+  const auto underwear = [](WoWModel * m, int region) {
+    return std::any_of(m->cd.textures.begin(), m->cd.textures.end(), [region](const CharDetails::TextureCustomization & t) { return t.region == region; });
+  };
+
+  if (!legsSkirt.creature)
+    skip("equipment geosets: legs declaring the robe skirt under a shirt or chest that does not", "no NPC of this client wears one");
+  else if (WoWModel * m = loadNpc(legsSkirt, "legs declaring the skirt"))
+    check(QString("equipment geosets: %1's legs declare the skirt (%2), its shirt and chest do not: the legs' skirt, no underwear bottoms")
+            .arg(legsSkirt.who).arg(1 + legsSkirt.legs.skirt),
+          group(m, CG_TROUSERS) == 1 + legsSkirt.legs.skirt && !underwear(m, CR_LEG_UPPER),
+          QString("trousers group %1, underwear bottoms %2").arg(group(m, CG_TROUSERS)).arg(underwear(m, CR_LEG_UPPER) ? 1 : 0));
+
+  if (!chestSkirt.creature)
+    skip("equipment geosets: a chest declaring the robe skirt over legs that do not, no gloves", "no NPC of this client wears one");
+  else if (WoWModel * m = loadNpc(chestSkirt, "chest declaring the skirt"))
+    check(QString("equipment geosets: %1's chest declares the skirt (%2), its legs do not, no gloves: the chest's skirt, robed, no "
+                  "underwear top, bare hands drawn").arg(chestSkirt.who).arg(1 + chestSkirt.chest.skirt),
+          group(m, CG_TROUSERS) == 1 + chestSkirt.chest.skirt && m->isWearingARobe() && !underwear(m, CR_TORSO_UPPER) && drawn(m, CG_GLOVES),
+          QString("trousers group %1, robe %2, underwear top %3, hands drawn %4").arg(group(m, CG_TROUSERS)).arg(m->isWearingARobe() ? 1 : 0)
+            .arg(underwear(m, CR_TORSO_UPPER) ? 1 : 0).arg(drawn(m, CG_GLOVES) ? 1 : 0));
+
+  if (!shirtSleeves.creature)
+    skip("equipment geosets: a shirt declaring the sleeves under a chest that does not", "no NPC of this client wears one");
+  else if (WoWModel * m = loadNpc(shirtSleeves, "shirt declaring the sleeves"))
+    check(QString("equipment geosets: %1's shirt declares the sleeves (%2), its chest does not: the shirt's sleeves")
+            .arg(shirtSleeves.who).arg(1 + shirtSleeves.shirt.sleeves),
+          group(m, CG_SLEEVES) == 1 + shirtSleeves.shirt.sleeves, QString("sleeves group %1").arg(group(m, CG_SLEEVES)));
+
+  if (!bothSleeves.creature)
+    skip("equipment geosets: a shirt and a chest declaring different sleeves", "no NPC of this client wears them");
+  else if (WoWModel * m = loadNpc(bothSleeves, "shirt and chest declaring the sleeves"))
+    check(QString("equipment geosets: %1's shirt (%2) and chest (%3) declare the sleeves: the chest's")
+            .arg(bothSleeves.who).arg(1 + bothSleeves.shirt.sleeves).arg(1 + bothSleeves.chest.sleeves),
+          group(m, CG_SLEEVES) == 1 + bothSleeves.chest.sleeves, QString("sleeves group %1").arg(group(m, CG_SLEEVES)));
+}
+
+// -customizationtest on a Classic client (Classic Era, MoP Classic, Classic Beta): the same idea against the
+// client's own data. Every expected value was read from the named build's DB2 files by a reader independent of
+// this loader (MoP Classic 5.5.4.70032, Classic Beta 1.60.1.70235 -- unchanged in 1.60.1.70245 --, Classic Era
+// 1.15.9.70003, whose ChrClasses was read once installed): a failure on a later build means "the data moved, go look". A check whose data is not installed on this computer (a client Battle.net
+// has not finished installing) is reported as skipped, not failed: it is not the code's to pass. A table that is on
+// disk and still not read fails.
+static int doHeadlessClassicCustomizationTest(ModelViewer * frame)
+{
+  int passed = 0, failed = 0, skipped = 0;
+  const auto check = [&passed, &failed](const QString & what, bool ok, const QString & detail) {
+    ok ? passed++ : failed++;
+    const QString line = QString("[customization-test] %1 %2%3").arg(ok ? "PASS" : "FAIL").arg(what)
+                           .arg(detail.isEmpty() ? QString() : QString(" -- ") + detail);
+    if (ok)
+      LOG_INFO << line;
+    else
+      LOG_ERROR << line;
+  };
+  const auto skip = [&skipped](const QString & what, const QString & why) {
+    skipped++;
+    LOG_INFO << QString("[customization-test] SKIP %1 -- %2").arg(what, why);
+  };
+  // Whether a table's file is in the build but not on this computer (Battle.net has not installed it). A table
+  // that IS on disk and still came back empty was refused (e.g. a layout no definition knows): that fails.
+  const auto notInstalled = [](const char * table) {
+    wow::WoWFolder * folder = dynamic_cast<wow::WoWFolder *>(&GAMEDIRECTORY);
+    return folder && folder->isRemoteFile(QString("dbfilesclient/%1.db2").arg(QString::fromLatin1(table).toLower()));
+  };
+  const auto resultName = [](CharDetails::RequirementResult r) {
+    switch (r)
+    {
+      case CharDetails::REQUIREMENT_MET: return QString("met");
+      case CharDetails::REQUIREMENT_NOT_PLAYER: return QString("not player");
+      case CharDetails::REQUIREMENT_RACE: return QString("race");
+      case CharDetails::REQUIREMENT_CLASS: return QString("class");
+      case CharDetails::REQUIREMENT_UNLOCK: return QString("unlock");
+      case CharDetails::REQUIREMENT_PREREQUISITE: return QString("prerequisite");
+      case CharDetails::REQUIREMENT_CLASS_UNKNOWN: return QString("class unknown");
+    }
+    return QString("?");
+  };
+  const core::ClientProfile & profile = GAMEDIRECTORY.clientProfile();
+  LOG_INFO << "[customization-test]" << profile.describe();
+
+  struct ModelExpect { int race; int sex; int chrModel; int fileID; int layout; };
+  struct OptionExpect { const char * name; int valid; int total; };
+  // A requirement and what the rule must answer for it: ordinary character, Demon Hunter, and unknown classes.
+  struct ClassExpect { int req; int mask; CharDetails::RequirementResult ordinary, demonHunter, unknown; const char * what; };
+  // A FileDataID listed twice in the build's ROOT, and the content key of the version that must be read (empty: none
+  // is installed, nothing can be read).
+  struct StorageExpect { int fileID; const char * contentKey; const char * what; };
+  struct ClientExpect
+  {
+    const char * product;
+    unsigned int classes;          // ChrClasses as a ClassMask
+    unsigned int ordinary;         // every class but Death Knight and Demon Hunter
+    std::vector<ClassExpect> classRules;
+    std::vector<ModelExpect> models;
+    std::vector<OptionExpect> humanMale; // the Human male's options, in client order
+    std::vector<OptionExpect> humanMaleWithoutClasses; // the same with ChrClasses empty
+    std::vector<StorageExpect> storage;
+  };
+  using R = CharDetails::RequirementResult;
+  const R MET = CharDetails::REQUIREMENT_MET, CLASS = CharDetails::REQUIREMENT_CLASS, UNKNOWN = CharDetails::REQUIREMENT_CLASS_UNKNOWN;
+  static const ClientExpect expectations[] = {
+    { "wow_classic", 0x7FF, 0x7DF,
+      { { 141, -1, MET, MET, MET, "every class" }, { 144, 0x7DF, MET, CLASS, UNKNOWN, "all but Death Knight and Demon Hunter" },
+        { 146, 0xFDF, MET, MET, UNKNOWN, "all but Death Knight" }, { 142, 0x20, CLASS, CLASS, UNKNOWN, "Death Knight only" },
+        { 12, 0, MET, MET, MET, "no class limit (an NPC row)" } },
+      { { 1, 0, 1, 119940, 1 }, { 1, 1, 2, 119563, 1 }, { 2, 0, 3, 121287, 1 }, { 2, 1, 4, 121087, 1 }, { 24, 0, 47, 535052, 2 } },
+      { { "Skin Color", 10, 16 }, { "Face", 12, 24 }, { "Hair Style", 17, 17 }, { "Hair Color", 10, 14 }, { "Facial Hair", 9, 9 } },
+      { { "Skin Color", 10, 16 }, { "Hair Style", 17, 17 }, { "Hair Color", 10, 14 }, { "Facial Hair", 9, 9 } },
+      { { 120191, "c5f43d0d7cab4f843b801b15e394009a", "high-resolution version first and not installed, standard version installed: the standard one" },
+        { 119463, "9fec72bee8335dad5319d78549da972f", "both versions installed: the first listed (the high-resolution one) stays" },
+        { 5446713, "8f3475633d8dd17b4128aab465c13d86", "first installed, the later one not: the first stays" } } },
+    { "wow_classic_beta", 0x5DF, 0x5DF,
+      { { 141, -1, MET, MET, MET, "every class" }, { 144, 0x37DF, MET, CLASS, UNKNOWN, "all but Death Knight and Demon Hunter" },
+        { 146, 0x3FDF, MET, MET, UNKNOWN, "all but Death Knight" }, { 53, 0x20, CLASS, CLASS, UNKNOWN, "Death Knight only" },
+        { 143, 0x800, CLASS, MET, UNKNOWN, "Demon Hunter only" }, { 12, 0, MET, MET, MET, "no class limit (an NPC row)" } },
+      { { 1, 0, 1, 1011653, 103 }, { 1, 1, 2, 1000764, 104 }, { 2, 0, 3, 917116, 105 }, { 2, 1, 4, 949470, 106 } },
+      { { "Skin Color", 13, 19 }, { "Face", 12, 12 }, { "Hair Style", 17, 17 }, { "Hair Color", 10, 14 }, { "Facial Hair", 9, 9 },
+        { "Face Shape", 3, 3 }, { "Eyebrows", 12, 12 }, { "Eye Color", 19, 41 }, { "Ears", 1, 1 } },
+      { { "Skin Color", 13, 19 }, { "Face", 12, 12 }, { "Hair Style", 17, 17 }, { "Hair Color", 10, 14 }, { "Facial Hair", 9, 9 },
+        { "Face Shape", 3, 3 }, { "Eyebrows", 12, 12 }, { "Ears", 1, 1 } },
+      { { 121288, "392685753a3e76d2f08a0b95c8610f0e", "high-resolution version first and not installed, standard version installed: the standard one" },
+        { 124154, "ff83ec974773b9674f0c6dadb5813309", "both versions installed: the first listed (the high-resolution one) stays" },
+        { 5446713, "9ab7ecad2dc460efc3b963c80d850335", "first installed, the later one not: the first stays" },
+        { 895912, "", "neither installed: the first stays, and it cannot be read" } } },
+    { "wow_classic_era", 0x5DF, 0x5DF,
+      { { 141, -1, MET, MET, MET, "every class" }, { 144, 0x7DF, MET, CLASS, UNKNOWN, "all but Death Knight and Demon Hunter" },
+        { 146, 0xFDF, MET, MET, UNKNOWN, "all but Death Knight" }, { 12, 0, MET, MET, MET, "no class limit (an NPC row)" } },
+      { { 1, 0, 1, 119940, 1 }, { 1, 1, 2, 119563, 1 } },
+      { { "Skin Color", 10, 12 }, { "Face", 12, 12 }, { "Hair Style", 12, 12 }, { "Hair Color", 10, 10 }, { "Facial Hair", 9, 9 } },
+      { { "Skin Color", 10, 12 }, { "Hair Style", 12, 12 }, { "Hair Color", 10, 10 }, { "Facial Hair", 9, 9 } },
+      {} },
+  };
+  const ClientExpect * e = nullptr;
+  for (const ClientExpect & c : expectations)
+    if (profile.product == QLatin1String(c.product))
+      e = &c;
+  if (!e)
+  {
+    LOG_ERROR << "[customization-test] RESULT: FAIL (no Classic expectations for" << profile.product << ")";
+    return 1;
+  }
+
+  // ---- 1. The class context comes from the client's own ChrClasses, and from nothing else -----------------
+  const unsigned int classes = CharDetails::clientClassMask();
+  const auto classMaskOf = [](int reqID, bool * found) {
+    sqlResult r = GAMEDATABASE.sqlQuery(QString("SELECT ClassMask FROM ChrCustomizationReq WHERE ID = %1").arg(reqID));
+    *found = r.valid && !r.values.empty();
+    return *found ? r.values[0][0].toInt() : 0;
+  };
+  if (classes == 0 && notInstalled("ChrClasses"))
+    skip("class context: ChrClasses", "the client's ChrClasses is not installed on this computer");
+  else if (classes == 0)
+    check("class context: ChrClasses was read", false, "the table is on this computer but holds no class: it was not read");
+  else
+    check("class context: ChrClasses as a mask, and the ordinary classes (all but Death Knight and Demon Hunter)",
+          classes == e->classes && CharDetails::ordinaryClassMask(classes) == e->ordinary,
+          QString("classes 0x%1, ordinary 0x%2").arg(classes, 0, 16).arg(CharDetails::ordinaryClassMask(classes), 0, 16));
+  // The rule against this client's own masks, in each class context: the client's (when its ChrClasses is here),
+  // and no class context at all -- what a client whose ChrClasses is not installed gets, never Retail's classes.
+  for (const ClassExpect & c : e->classRules)
+  {
+    bool found = false;
+    const int mask = classMaskOf(c.req, &found);
+    if (!found)
+    {
+      check(QString("class rule: Req %1 is in this client's ChrCustomizationReq").arg(c.req), false, QString());
+      continue;
+    }
+    const R unknown = CharDetails::classRequirement(mask, false, 0);
+    const R unknownDH = CharDetails::classRequirement(mask, true, 0);
+    QString detail = QString("ClassMask 0x%1: no class context -> %2 / %3").arg((unsigned int)mask, 0, 16).arg(resultName(unknown), resultName(unknownDH));
+    bool ok = mask == c.mask && unknown == c.unknown && unknownDH == c.unknown;
+    if (classes != 0)
+    {
+      const R ordinary = CharDetails::classRequirement(mask, false, classes);
+      const R demonHunter = CharDetails::classRequirement(mask, true, classes);
+      detail += QString(", ordinary -> %1, Demon Hunter -> %2").arg(resultName(ordinary), resultName(demonHunter));
+      ok = ok && ordinary == c.ordinary && demonHunter == c.demonHunter;
+    }
+    check(QString("class rule: Req %1 (%2)").arg(c.req).arg(QString::fromLatin1(c.what)), ok, detail);
+  }
+
+  // ---- 2. Race and sex -> ChrModel -> the client's own model -----------------------------------------
+  for (const ModelExpect & m : e->models)
+  {
+    RaceInfos ri;
+    if (!RaceInfos::getRaceInfosForRaceSex(m.race, m.sex, ri))
+    {
+      if (notInstalled("ChrRaces") || notInstalled("ChrRaceXChrModel") || notInstalled("ChrModel"))
+        skip(QString("model of race %1 sex %2").arg(m.race).arg(m.sex), "no race row: ChrRaces, ChrRaceXChrModel or ChrModel is not installed on this computer");
+      else
+        check(QString("model: race %1 sex %2 has a race row").arg(m.race).arg(m.sex), false, "its tables are on this computer");
+      continue;
+    }
+    check(QString("model: race %1 sex %2 -> ChrModel %3, FileDataID %4, texture layout %5").arg(m.race).arg(m.sex).arg(m.chrModel).arg(m.fileID).arg(m.layout),
+          !ri.ChrModelID.empty() && ri.ChrModelID[0] == m.chrModel && ri.modelFileID == m.fileID && ri.textureLayoutID == m.layout,
+          QString("ChrModel %1, file %2, layout %3").arg(ri.ChrModelID.empty() ? -1 : ri.ChrModelID[0]).arg(ri.modelFileID).arg(ri.textureLayoutID));
+  }
+
+  // ---- 2b. A race's model is a character, whatever the listfile calls it --------------------------------
+  // The Characters list and an NPC reach a race's model by FileDataID, and a model the listfile has no real name for
+  // is listed under a generated one outside the character folders (Classic Beta's Skyborne models). Each must load as
+  // its race's character -- as a creature it had no race, no customization and no composed skin, and drew white --
+  // and a model no race uses must still load as a creature.
+  {
+    const auto canvasModel = [frame]() { return frame->canvas ? const_cast<WoWModel *>(frame->canvas->model()) : nullptr; };
+    const auto settle = []() {
+      for (int i = 0; i < 20; i++)
+        wxTheApp->Yield(true);
+    };
+    const auto outsideCharacterFolders = [](GameFile * f) {
+      return !f->fullname().startsWith("char", Qt::CaseInsensitive) && !f->fullname().startsWith("alternate\\char", Qt::CaseInsensitive);
+    };
+    const auto describe = [](WoWModel * m) {
+      return m ? QString("modelType %1, isChar %2, race %3 sex %4, NPC %5").arg((int)m->modelType).arg(m->charModelDetails.isChar ? 1 : 0)
+                   .arg(m->infos.raceID).arg(m->infos.sexID).arg(m->cd.isNPC ? 1 : 0)
+               : QString("no model");
+    };
+    int raceModels = 0;
+    for (const auto & entry : RaceInfos::getRaceMenu())
+      for (int sex = 0; sex <= 1; sex++)
+      {
+        const int fileID = sex == 1 ? entry.femaleFileID : entry.maleFileID;
+        GameFile * file = fileID > 0 ? GAMEDIRECTORY.getFile(fileID) : nullptr;
+        if (!file || !outsideCharacterFolders(file))
+          continue;
+        raceModels++;
+        frame->LoadModel(file, entry.raceID, sex);
+        settle();
+        WoWModel * m = canvasModel();
+        check(QString("race model outside the character folders: race %1 (%2) sex %3, %4 [%5], loads as that race's character")
+                .arg(entry.raceID).arg(QString::fromStdString(entry.name)).arg(sex).arg(file->fullname()).arg(fileID),
+              m && m->gamefile == file && m->modelType == MT_CHAR && m->charModelDetails.isChar && m->infos.raceID == entry.raceID &&
+                m->infos.sexID == sex,
+              describe(m));
+      }
+    // A humanoid NPC (a display with extended info) on such a model.
+    int npcs = 0;
+    sqlResult humanoid = GAMEDATABASE.sqlQuery(
+        "SELECT Creature.ID, CreatureModelData.FileDataID FROM Creature "
+        "JOIN CreatureDisplayInfo ON Creature.DisplayID1 = CreatureDisplayInfo.ID "
+        "JOIN CreatureModelData ON CreatureDisplayInfo.ModelID = CreatureModelData.ID "
+        "WHERE CreatureDisplayInfo.ExtendedDisplayInfoID != 0 ORDER BY Creature.ID");
+    for (size_t i = 0; humanoid.valid && i < humanoid.values.size(); i++)
+    {
+      RaceInfos ri;
+      const int fileID = humanoid.values[i][1].toInt();
+      GameFile * file = GAMEDIRECTORY.getFile(RaceInfos::getHDModelForFileID(fileID));
+      if (!file || !outsideCharacterFolders(file) || !RaceInfos::getRaceInfosForFileID(file->fileDataId(), ri))
+        continue;
+      npcs++;
+      frame->LoadNPC(humanoid.values[i][0].toUInt());
+      settle();
+      WoWModel * m = canvasModel();
+      check(QString("humanoid NPC %1 on a race model outside the character folders (%2) loads as a character NPC")
+              .arg(humanoid.values[i][0]).arg(file->fullname()),
+            m && m->gamefile == file && m->modelType == MT_CHAR && m->charModelDetails.isChar && m->cd.isNPC, describe(m));
+    }
+    LOG_INFO << QString("[customization-test] race models outside the character folders: %1 race/sex model(s), %2 humanoid NPC(s)")
+                  .arg(raceModels).arg(npcs);
+    // A model no race uses, outside the character folders: a creature, as before.
+    sqlResult plain = GAMEDATABASE.sqlQuery(
+        "SELECT CreatureModelData.FileDataID FROM Creature "
+        "JOIN CreatureDisplayInfo ON Creature.DisplayID1 = CreatureDisplayInfo.ID "
+        "JOIN CreatureModelData ON CreatureDisplayInfo.ModelID = CreatureModelData.ID "
+        "WHERE CreatureDisplayInfo.ExtendedDisplayInfoID = 0 ORDER BY Creature.ID");
+    GameFile * creature = nullptr;
+    for (size_t i = 0; plain.valid && i < plain.values.size() && !creature; i++)
+    {
+      RaceInfos ri;
+      GameFile * file = GAMEDIRECTORY.getFile(plain.values[i][0].toInt());
+      if (file && outsideCharacterFolders(file) && !RaceInfos::getRaceInfosForFileID(file->fileDataId(), ri))
+        creature = file;
+    }
+    if (!creature)
+      skip("a model no race uses loads as a creature", "no such creature model is installed on this computer");
+    else
+    {
+      frame->LoadModel(creature);
+      settle();
+      WoWModel * m = canvasModel();
+      check(QString("a model no race uses (%1) loads as a creature").arg(creature->fullname()),
+            m && m->gamefile == creature && m->modelType != MT_CHAR && !m->charModelDetails.isChar, describe(m));
+    }
+  }
+
+  // ---- 3. The Human male's options and choices ---------------------------------------------------------
+  const int humanFile = RaceInfos::getFileIDForRaceSex(1, 0);
+  GameFile * humanModel = humanFile > 0 ? GAMEDIRECTORY.getFile(humanFile) : nullptr;
+  const auto loadHuman = [frame, humanModel]() -> WoWModel * {
+    if (!humanModel)
+      return nullptr;
+    frame->LoadModel(humanModel, 1, 0);
+    for (int i = 0; i < 20; i++)
+      wxTheApp->Yield(true);
+    WoWModel * m = frame->canvas ? const_cast<WoWModel *>(frame->canvas->model()) : nullptr;
+    return (m && m->infos.raceID == 1) ? m : nullptr;
+  };
+  // The options shown, in order, as "name valid/total".
+  const auto describeOptions = [](CharDetails & cd, const std::vector<OptionExpect> & expected, bool * same) {
+    const std::vector<uint> options = cd.getCustomizationOptions();
+    QStringList got;
+    *same = options.size() == expected.size();
+    for (size_t i = 0; i < options.size(); i++)
+    {
+      sqlResult n = GAMEDATABASE.sqlQuery(QString("SELECT Name_Lang FROM ChrCustomizationOption WHERE ID = %1").arg(options[i]));
+      sqlResult t = GAMEDATABASE.sqlQuery(QString("SELECT COUNT(*) FROM ChrCustomizationChoice WHERE ChrCustomizationOptionID = %1").arg(options[i]));
+      const QString name = (n.valid && !n.values.empty()) ? n.values[0][0] : QString("?");
+      const int valid = (int)cd.getCustomizationChoices(options[i]).size();
+      const int total = (t.valid && !t.values.empty()) ? t.values[0][0].toInt() : -1;
+      got << QString("%1 %2/%3").arg(name).arg(valid).arg(total);
+      if (i < expected.size())
+        *same = *same && name == QLatin1String(expected[i].name) && valid == expected[i].valid && total == expected[i].total;
+    }
+    return got.join(", ");
+  };
+  const auto describeExpected = [](const std::vector<OptionExpect> & expected) {
+    QStringList want;
+    for (const OptionExpect & o : expected)
+      want << QString("%1 %2/%3").arg(o.name).arg(o.valid).arg(o.total);
+    return want.join(", ");
+  };
+  WoWModel * human = loadHuman();
+  if (!human && !humanModel)
+    skip("Human male", "its model or race row is not installed on this computer");
+  else if (!human)
+    check("Human male: its model loads as race 1", false, humanModel->fullname());
+  else
+  {
+    CharDetails & cd = human->cd;
+    bool same = false;
+    const QString got = describeOptions(cd, e->humanMale, &same);
+    if (classes == 0 && notInstalled("ChrClasses"))
+      skip("Human male: options and valid choices", "the class context needs ChrClasses: " + got);
+    else
+      check("Human male: options in client order, valid choices of each", same, "got " + got + " | expected " + describeExpected(e->humanMale));
+
+    // The face carries a classic model's eyes; the eye texture slot carries a high-resolution model's.
+    if (profile.product == QLatin1String("wow_classic"))
+    {
+      bool lower = false, upper = false, base = false;
+      for (const auto & t : cd.textures)
+      {
+        base = base || (t.fileId == 120191 && t.type == 1);
+        lower = lower || (t.fileId == 119941 && t.type == 1 && t.region == 10);
+        upper = upper || (t.fileId == 120061 && t.type == 1 && t.region == 9);
+      }
+      check("Human male: base skin humanmaleskin00_00 (120191), and the default Face (17172) composes facelower00_00 (119941) into section 10 and faceupper00_00 (120061) into 9",
+            cd.get(10) == 17172 && base && lower && upper, QString("Face choice %1").arg(cd.get(10)));
+      const QImage & body = human->tex.lastImage();
+      check("Human male: the body composite is the layout's 1024x1024", body.width() == 1024 && body.height() == 1024,
+            QString("%1x%2").arg(body.width()).arg(body.height()));
+      cd.set(13, 17206); // Facial Hair "Bearded": geosets 101, 201, 301
+      for (int i = 0; i < 20; i++)
+        wxTheApp->Yield(true);
+      QStringList shown;
+      int beard = 0;
+      for (size_t i = 0; i < (std::min)(human->ownGeosetCount(), human->geosets.size()); i++)
+        if (human->geosets[i] && human->geosets[i]->display)
+        {
+          shown << QString::number(human->geosets[i]->id);
+          beard += (human->geosets[i]->id == 101 || human->geosets[i]->id == 201 || human->geosets[i]->id == 301) ? 1 : 0;
+        }
+      check("Human male: Facial Hair Bearded shows geosets 101, 201 and 301", beard == 3, "visible " + shown.join(' '));
+    }
+    if (profile.product == QLatin1String("wow_classic_beta"))
+    {
+      const QImage & eyes = human->eyeCompositeImage();
+      bool eyeLayer = false;
+      for (const auto & t : cd.textures)
+        eyeLayer = eyeLayer || t.type == 19;
+      check("Human male: an Eye Color is current, its type-19 layer is composed into the 256x128 eye texture",
+            cd.get(463) == 4126 && eyeLayer && eyes.width() == 256 && eyes.height() == 128,
+            QString("Eye Color %1, eyes %2x%3").arg(cd.get(463)).arg(eyes.width()).arg(eyes.height()));
+      check("Human male: no Demon Hunter class context in a client without Demon Hunters", !cd.clientHasDemonHunters(), QString());
+    }
+
+    // ---- 4. A client whose ChrClasses is not installed (simulated: its rows removed inside a transaction that is
+    // rolled back, so nothing on disk changes). The class-limited choices must be left out as "class unknown" --
+    // not judged against Retail's classes 1-15, and not shown as if every class had them.
+    if (classes != 0 && GAMEDATABASE.sqlQuery("BEGIN").valid)
+    {
+      GAMEDATABASE.sqlQuery("DELETE FROM ChrClasses");
+      human->cd.reset(human, true); // read the options again, as a load of this client would
+      for (int i = 0; i < 20; i++)
+        wxTheApp->Yield(true);
+      WoWModel * without = human;
+      {
+        CharDetails & cdw = without->cd;
+        const std::map<uint, uint> none;
+        bool same2 = false;
+        const QString got2 = describeOptions(cdw, e->humanMaleWithoutClasses, &same2);
+        check("without ChrClasses: the class context is unknown (no class, no Demon Hunter)",
+              CharDetails::clientClassMask() == 0 && !cdw.clientHasDemonHunters(), QString());
+        check("without ChrClasses: Req 144 is 'class unknown' -- not 'class' (Retail's 0x77DF) and not met",
+              cdw.requirement(144) == nullptr || cdw.evaluateRequirement(144, none) == UNKNOWN,
+              cdw.requirement(144) ? resultName(cdw.evaluateRequirement(144, none)) : QString("Req 144 unused by this model"));
+        check("without ChrClasses: the options left are those no class limit hides, choices limited only by 'every class' stay",
+              same2, "got " + got2 + " | expected " + describeExpected(e->humanMaleWithoutClasses));
+      }
+      GAMEDATABASE.sqlQuery("ROLLBACK");
+      human->cd.reset(human, true);
+      for (int i = 0; i < 20; i++)
+        wxTheApp->Yield(true);
+      WoWModel * again = human;
+      bool same3 = false;
+      const QString got3 = again ? describeOptions(again->cd, e->humanMale, &same3) : QString("(no model)");
+      check("after the rollback: ChrClasses and the Human male's options are back", CharDetails::clientClassMask() == classes && same3, got3);
+    }
+  }
+
+  // ---- 5. Storage: a FileDataID listed twice in the build's ROOT ---------------------------------------
+  // The rule on its own, every combination, then real files: each one's content read through the viewer and
+  // its MD5 (the content key) compared with the version that must be selected.
+  check("storage rule: kept installed, later installed -> keep", !CascWowRootReplacesKeptEntry(true, true), QString());
+  check("storage rule: kept installed, later not installed -> keep", !CascWowRootReplacesKeptEntry(true, false), QString());
+  check("storage rule: kept not installed, later installed -> replace", CascWowRootReplacesKeptEntry(false, true), QString());
+  check("storage rule: kept not installed, later not installed -> keep (the first, as before)", !CascWowRootReplacesKeptEntry(false, false), QString());
+  for (const StorageExpect & s : e->storage)
+  {
+    GameFile * f = GAMEDIRECTORY.getFile(s.fileID);
+    QString detail = f ? f->fullname() : QString("(not listed)");
+    QString contentKey;
+    if (f && f->open())
+    {
+      if (f->readComplete() && f->getSize() > 0)
+        contentKey = QString::fromLatin1(QCryptographicHash::hash(QByteArray((const char *)f->getBuffer(), (int)f->getSize()), QCryptographicHash::Md5).toHex());
+      detail += QString(", %1 bytes").arg(f->getSize());
+      f->close();
+    }
+    detail += ", content key " + (contentKey.isEmpty() ? QString("(nothing read)") : contentKey);
+    check(QString("storage: %1 -- %2").arg(s.fileID).arg(QString::fromLatin1(s.what)), contentKey == QLatin1String(s.contentKey), detail);
+  }
+
+  // ---- 6. Humanoid NPCs wear their own stored appearance ----------------------------------------------
+  checkNpcAppearance(frame, check, skip);
+
+  // ---- 7. The geoset groups an NPC's shirt, chest and legs share ---------------------------------------
+  checkEquipmentGeosets(frame, check, skip);
+
+  LOG_INFO << QString("[customization-test] RESULT: %1 (%2 passed, %3 failed, %4 skipped)").arg(failed == 0 ? "PASS" : "FAIL").arg(passed).arg(failed).arg(skipped);
+  return failed;
+}
+
 // -customizationtest: regression checks for modern character customization, in the idiom of
 // -matrestest: checks against the installed client's data, one [customization-test] PASS or FAIL line
 // each, then "RESULT: PASS|FAIL (<passed> passed, <failed> failed)" (the return value is the failure
@@ -343,6 +1288,9 @@ static int doHeadlessMatResTest()
 // not necessarily "the code broke".
 static int doHeadlessCustomizationTest(ModelViewer * frame)
 {
+  if (GAMEDIRECTORY.clientProfile().isClassicFamily())
+    return doHeadlessClassicCustomizationTest(frame);
+
   int passed = 0, failed = 0;
   const auto check = [&passed, &failed](const QString & what, bool ok, const QString & detail) {
     ok ? passed++ : failed++;
@@ -612,16 +1560,29 @@ static int doHeadlessCustomizationTest(ModelViewer * frame)
     const struct { uint id; bool ordinary; bool demonHunter; } classes[] = {
       { 141, true, true }, { 4103, true, true }, { 146, true, true }, { 144, true, false }, { 142, false, false }, { 143, false, true },
     };
+    const unsigned int clientClasses = CharDetails::clientClassMask();
+    check("rule: the ordinary classes are 12.1.0's ChrClasses 1-15 but Death Knight and Demon Hunter",
+          clientClasses == 0x7FFF && CharDetails::ordinaryClassMask(clientClasses) == 0x77DF,
+          QString("classes 0x%1, ordinary 0x%2").arg(clientClasses, 0, 16).arg(CharDetails::ordinaryClassMask(clientClasses), 0, 16));
     QString classDetail;
     bool classesOk = true;
     for (const auto & c : classes)
     {
-      const bool ordinary = CharDetails::classMaskAllows(classMask(c.id), false);
-      const bool demonHunter = CharDetails::classMaskAllows(classMask(c.id), true);
+      const bool ordinary = CharDetails::classRequirement(classMask(c.id), false, clientClasses) == CharDetails::REQUIREMENT_MET;
+      const bool demonHunter = CharDetails::classRequirement(classMask(c.id), true, clientClasses) == CharDetails::REQUIREMENT_MET;
       classesOk = classesOk && ordinary == c.ordinary && demonHunter == c.demonHunter;
       classDetail += QString(" Req %1 ClassMask %2: ordinary %3 DH %4").arg(c.id).arg(classMask(c.id)).arg(ordinary ? 1 : 0).arg(demonHunter ? 1 : 0);
     }
     check("rule: ClassMask bit classID-1 against the class context (ordinary = every class but DK and DH; DH checkbox)", classesOk, classDetail.trimmed());
+    // Without ChrClasses there is no class context: a class-limited requirement is "class unknown", never judged
+    // against an assumed class list; no limit, or every class, is met whatever the classes are.
+    const bool unknownOk = CharDetails::classRequirement(classMask(144), false, 0) == CharDetails::REQUIREMENT_CLASS_UNKNOWN &&
+                           CharDetails::classRequirement(classMask(143), true, 0) == CharDetails::REQUIREMENT_CLASS_UNKNOWN &&
+                           CharDetails::classRequirement(classMask(142), false, 0) == CharDetails::REQUIREMENT_CLASS_UNKNOWN &&
+                           CharDetails::classRequirement(classMask(141), false, 0) == CharDetails::REQUIREMENT_MET &&
+                           CharDetails::classRequirement(classMask(4103), false, 0) == CharDetails::REQUIREMENT_MET;
+    check("rule: no class context (ChrClasses not available): Req 144, 143, 142 unknown; Req 141 (every class) and 4103 (no limit) met",
+          unknownOk, QString());
   }
 
   // ---- 5. Undead male ---------------------------------------------------------------------------------
@@ -930,6 +1891,15 @@ static int doHeadlessCustomizationTest(ModelViewer * frame)
   }
   else
     check("dark iron dwarf: model loaded (race 34, sex 0)", false, QString());
+
+  // ---- 9. Humanoid NPCs wear their own stored appearance ----------------------------------------------
+  const auto skip = [](const QString & what, const QString & why) {
+    LOG_INFO << QString("[customization-test] SKIP %1 -- %2").arg(what, why);
+  };
+  checkNpcAppearance(frame, check, skip);
+
+  // ---- 10. The geoset groups an NPC's shirt, chest and legs share --------------------------------------
+  checkEquipmentGeosets(frame, check, skip);
 
   LOG_INFO << QString("[customization-test] RESULT: %1 (%2 passed, %3 failed)").arg(failed == 0 ? "PASS" : "FAIL").arg(passed).arg(failed);
   return failed;

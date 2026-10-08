@@ -214,6 +214,17 @@ bool RaceInfos::getRaceInfosForRaceSex(int race, int sex, RaceInfos & out)
   return true;
 }
 
+bool RaceInfos::getRaceInfosForRaceAndFile(int race, int fileid, RaceInfos & out)
+{
+  for (const auto & r : RACES)
+    if (r.first.first == race && r.second.modelFileID == fileid)
+    {
+      out = r.second;
+      return true;
+    }
+  return false;
+}
+
 std::vector<RaceInfos::RaceMenuEntry> RaceInfos::getRaceMenu()
 {
   // collapse the per-(race,sex,model) RACES map into one entry per race, keeping

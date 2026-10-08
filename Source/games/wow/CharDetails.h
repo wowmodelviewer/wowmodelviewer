@@ -159,7 +159,23 @@ public:
   // and applying a drake "Skin Color" to a humanoid paints the drake's scale texture
   // over the body. Valid only after the model is set (reset()/fillCustomizationMap()).
   bool hasOption(uint chrCustomizationOptionID) const;
- 
+
+  // A humanoid NPC's own appearance (CreatureDisplayInfoOption: option -> choice, in table order): starts from no
+  // choice at all, makes each pair whose option is one of this model's options current WHATEVER the player rules say
+  // (an NPC wears NPC-only, class-limited and locked choices, and options no player is offered, such as Eye Style),
+  // then gives the options the NPC stores nothing for their first valid choice against the stored ones, and
+  // refreshes once. The stored choices stay current until the user picks a choice of that option (or of an option it
+  // depends on) or changes the class context, or the selection is reset, randomised or loaded; the player's lists
+  // (getCustomizationChoices /
+  // getCustomizationOptions) are unchanged, so nothing NPC-only becomes selectable. A pair of another model's option
+  // (an alternate form: a Worgen's human form, a druid form) or with a choice its option does not have is skipped.
+  // demonHunter is the NPC's class context (its display's class is Demon Hunter, in a client that has the class): it
+  // is set first, so the options the NPC stores nothing for are defaulted in it, and the character panel is told.
+  // Returns the number of pairs applied.
+  size_t applyStoredAppearance(const std::vector<std::pair<uint, uint> > & optionChoices, bool demonHunter = false);
+  // Whether the option's current choice is one an NPC's stored appearance set (see applyStoredAppearance).
+  bool isStoredChoice(uint chrCustomizationOptionID) const;
+
   void setDemonHunterMode(bool val);
   bool isDemonHunter() const { return isDemonHunter_; }
 
@@ -208,13 +224,25 @@ public:
     REQUIREMENT_RACE,         // the race's PlayableRaceBit is not set in RaceMasks
     REQUIREMENT_CLASS,        // ClassMask does not admit the class context
     REQUIREMENT_UNLOCK,       // an achievement, quest or item appearance unlocks it
-    REQUIREMENT_PREREQUISITE  // none of its prerequisite choices is current
+    REQUIREMENT_PREREQUISITE, // none of its prerequisite choices is current
+    REQUIREMENT_CLASS_UNKNOWN // ClassMask limits it, and the client's ChrClasses is not available to judge it
   };
 
   // The rules, one function each (see their definitions for the evidence behind them).
   static bool isPlayerRequirement(int reqType);
   static bool raceMaskAllows(unsigned long long raceMask, int playableRaceBit);
-  static bool classMaskAllows(int classMask, bool demonHunter);
+  // ClassMask against the class context: the Demon Hunter switch, or the client's ordinary classes. clientClasses
+  // is clientClassMask(); 0 (no ChrClasses) makes every class-limited requirement REQUIREMENT_CLASS_UNKNOWN.
+  static RequirementResult classRequirement(int classMask, bool demonHunter, unsigned int clientClasses);
+
+  // The loaded client's classes (ChrClasses) as a ClassMask: class N is bit N - 1. 0 when the table holds none.
+  static unsigned int clientClassMask();
+  // The class context of a character viewed without a class: every class of the client but Death Knight and
+  // Demon Hunter (see classRequirement). 0 when the client's classes are not known.
+  static unsigned int ordinaryClassMask(unsigned int clientClasses);
+  // Whether the loaded client has Demon Hunters, i.e. whether the Demon Hunter class context exists at all
+  // (false when its classes are not known).
+  bool clientHasDemonHunters() const;
 
   // A requirement of this character's options or choices, evaluated against a selection
   // (ChrCustomizationOption::ID -> ChrCustomizationChoice::ID). 0 is no requirement and is met.
@@ -233,6 +261,9 @@ private:
   bool isDemonHunter_;
 
   std::map<uint, uint> currentCustomization_; // map <ChrCustomizationOption::ID, ChrCustomizationChoice::ID>
+  // The choices an NPC's stored appearance set (applyStoredAppearance, or a saved NPC loaded back): re-validation
+  // (resolveSelection, autoSelectTextureGating) keeps them. Empty for every player character.
+  std::map<uint, uint> storedChoices_;
 
   class CustomizationElements
   {
@@ -302,6 +333,7 @@ private:
   std::map<uint, uint> choiceOption_;       // ChrCustomizationChoice::ID -> ChrCustomizationOption::ID
   std::map<uint, Requirement> requirements_;
   int playableRaceBit_ = -1;
+  unsigned int clientClasses_ = 0;      // clientClassMask() when the options were read (0: not known)
   mutable std::set<uint> unresolvedRequirementsLogged_;
 
   // Geoset GROUPS (GeosetType) that any customization option for this model drives.
@@ -320,8 +352,10 @@ private:
   // gated by another option (e.g. the DH blindfold texture is gated by the DH eye-glow
   // colour), switch that gating option to a compatible value so the model isn't merged
   // untextured (white). Mirrors the in-game texture-gating behaviour. Records the choice
-  // (and re-validates the options depending on it); the caller applies.
-  void autoSelectTextureGating(uint chrCustomizationChoiceID);
+  // (and re-validates the options depending on it); the caller applies. An NPC's stored choice of the
+  // gating option is kept (keepStored: the NPC's own appearance names what it wears), except for a
+  // choice the user picked, which takes the gating option back to the player's rules.
+  void autoSelectTextureGating(uint chrCustomizationChoiceID, bool keepStored = true);
 
   // True while load() records the saved choices: set() only records them, and load() resolves
   // and applies the whole selection once at the end.

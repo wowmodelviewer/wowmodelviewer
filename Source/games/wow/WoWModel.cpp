@@ -2753,9 +2753,20 @@ bool WoWModel::isWearingARobe()
   if (chest == nullptr)
     return false;
 
+  // An NPC's chest piece has no item, so no inventory type: its display declaring the robe skirt (the trousers geoset
+  // group) is the robe. (Retail: 1,457 of the 1,514 robe displays declare it, 79 of the 3,871 other chest displays.)
+  if (chest->id() == -1 && chest->displayId() > 0)
+    return chest->declaresGeosetGroup(CG_TROUSERS);
+
   const auto &item = items.getById(chest->id());
 
   return item.type == IT_ROBE;
+}
+
+bool WoWModel::isWearingNpcEquipment(CharSlots slot)
+{
+  const WoWItem * item = getItem(slot);
+  return item && item->id() == -1 && item->displayId() > 0 && item->showsAnything();
 }
 
 
@@ -2921,6 +2932,13 @@ void WoWModel::save(QXmlStreamWriter &stream)
   stream.writeStartElement("model");
   stream.writeStartElement("file");
   stream.writeAttribute("name", QString::fromStdString(modelname));
+  // The race and sex: one model file can carry several races, and the race decides the model's options (see
+  // ModelViewer::LoadChar).
+  if (infos.raceID > 0)
+  {
+    stream.writeAttribute("race", QString::number(infos.raceID));
+    stream.writeAttribute("sex", QString::number(infos.sexID));
+  }
   stream.writeEndElement();
   cd.save(stream);
   stream.writeEndElement(); // model
@@ -3573,9 +3591,24 @@ void WoWModel::refresh()
     }
   }
 
-  //refresh equipment
-  for (auto* it : *this)
-    it->refresh();
+  // refresh equipment, in a fixed order: the items share geoset groups, and the one refreshed later wins a group both
+  // set (see WoWItem::setCharacterGeoset) -- shirt, legs, chest (worn over both), then the slots that share no group.
+  {
+    std::vector<WoWItem *> equipment(begin(), end());
+    const auto rank = [](CharSlots slot) {
+      switch (slot)
+      {
+        case CS_SHIRT: return 0;
+        case CS_PANTS: return 1;
+        case CS_CHEST: return 2;
+        default: return 3 + (int)slot;
+      }
+    };
+    std::sort(equipment.begin(), equipment.end(), [&rank](const WoWItem * a, const WoWItem * b) { return rank(a->slot()) < rank(b->slot()); });
+    equipmentDeclaredGeosets.clear();
+    for (WoWItem * item : equipment)
+      item->refresh();
+  }
 
   LOG_INFO << "Current Equipment :"
     << "Head" << getItemId(CS_HEAD)
@@ -3701,14 +3734,21 @@ void WoWModel::refresh()
         if (hm.second && hm.second->showModel) { helmDrawn = true; break; }
     }
   }
-  if (headItemId != -1 && cd.autoHideGeosetsForHeadItems && helmDrawn)
+  // The helm's display: an item's, through its appearance; an NPC's equipment names its display itself (it has no
+  // item: ID -1), and hides what that display hides.
+  const WoWItem * const shownHead = getItem(CS_HEAD);
+  const int headDisplayId = (headItemId == -1 && shownHead) ? shownHead->displayId() : -1;
+  if ((headItemId != -1 || headDisplayId > 0) && cd.autoHideGeosetsForHeadItems && helmDrawn)
   {
+    const QString headDisplay = (headItemId != -1)
+      ? QString("(SELECT ItemDisplayInfoID FROM ItemAppearance WHERE ID = (SELECT ItemAppearanceID FROM ItemModifiedAppearance WHERE ItemID = %1))")
+          .arg(headItemId)
+      : QString::number(headDisplayId);
     const auto query = QString("SELECT HideGeosetGroup FROM HelmetGeosetData WHERE HelmetGeosetData.RaceID = %1 "
-      "AND HelmetGeosetData.HelmetGeosetVisDataID = (SELECT %2 FROM ItemDisplayInfo WHERE ItemDisplayInfo.ID = "
-      "(SELECT ItemDisplayInfoID FROM ItemAppearance WHERE ID = (SELECT ItemAppearanceID FROM ItemModifiedAppearance WHERE ItemID = %3)))")
+      "AND HelmetGeosetData.HelmetGeosetVisDataID = (SELECT %2 FROM ItemDisplayInfo WHERE ItemDisplayInfo.ID = %3)")
       .arg(infos.raceID)
       .arg((infos.sexID == 0) ? "HelmetGeosetVis1" : "HelmetGeosetVis2")
-      .arg(headItemId);
+      .arg(headDisplay);
 
     auto helmetInfos = GAMEDATABASE.sqlQuery(query);
 

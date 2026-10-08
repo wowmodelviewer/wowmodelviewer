@@ -352,6 +352,8 @@ void wow::WoWDatabase::createIndices()
     "CREATE INDEX IF NOT EXISTS idx_cdigd_cdi       ON CreatureDisplayInfoGeosetData(CreatureDisplayInfoID)",
     "CREATE INDEX IF NOT EXISTS idx_cmd_fdid        ON CreatureModelData(FileDataID)",
     "CREATE INDEX IF NOT EXISTS idx_cdi_model       ON CreatureDisplayInfo(ModelID)",
+    "CREATE INDEX IF NOT EXISTS idx_cdio_extra      ON CreatureDisplayInfoOption(CreatureDisplayInfoExtraID)",
+    "CREATE INDEX IF NOT EXISTS idx_nmisdi_npc      ON NpcModelItemSlotDisplayInfo(NpcModelID)",
   };
   for (const char * const sql : indices)
     sqlQuery(QString::fromLatin1(sql));

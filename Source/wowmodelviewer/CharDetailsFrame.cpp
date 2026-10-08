@@ -63,7 +63,8 @@ void CharDetailsFrame::setModel(WoWModel * model)
 
   buildRows();
 
-  if (model_->infos.raceID == RACE_NIGHTELF || model_->infos.raceID == RACE_BLOODELF)
+  // Night Elf and Blood Elf Demon Hunters -- in a client that has the class (no Classic client does).
+  if ((model_->infos.raceID == RACE_NIGHTELF || model_->infos.raceID == RACE_BLOODELF) && model_->cd.clientHasDemonHunters())
     dhMode_->Enable(true);
   else
     dhMode_->Enable(false);

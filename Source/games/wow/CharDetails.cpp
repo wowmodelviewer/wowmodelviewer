@@ -10,6 +10,7 @@
 #include "animated.h" // randint
 #include "CharDetailsEvent.h"
 #include "Game.h"
+#include "WoWFolder.h"
 #include "WoWModel.h"
 #include "logger/Logger.h"
 
@@ -22,19 +23,8 @@
 
 namespace
 {
-  // ChrCustomizationReq.ClassMask names class N with bit N - 1. The client's ChrClasses run from 1
-  // (Warrior) to 15 (Traveler) in 12.1.0, and the masks in the data use exactly bits 0-14.
-  constexpr unsigned int CLASS_ID_LAST = 15;
+  // ChrCustomizationReq.ClassMask names class N with bit N - 1.
   constexpr unsigned int classBit(unsigned int classID) { return 1u << (classID - 1); }
-  constexpr unsigned int CLASS_BITS_ALL = (1u << CLASS_ID_LAST) - 1;
-
-  // The class context of a character viewed without a class. The viewer has one class switch, the
-  // Demon Hunter checkbox; otherwise the character is taken as an ordinary class: one whose looks
-  // the data does not single out. Death Knight and Demon Hunter are the classes it does (Death
-  // Knight eye glow and skin colours, Demon Hunter tattoos, horns and blindfolds), and the data's own
-  // "everyone but them" masks show it: Req 146 0x7FDF (all but Death Knight), Req 144 0x77DF (all
-  // but Death Knight and Demon Hunter).
-  constexpr unsigned int CLASS_BITS_ORDINARY = CLASS_BITS_ALL & ~classBit(CLASS_DEATHKNIGHT) & ~classBit(CLASS_DEMONHUNTER);
 
   QString idList(const std::set<uint> & ids)
   {
@@ -57,11 +47,20 @@ void CharDetails::save(QXmlStreamWriter & stream)
 {
   stream.writeStartElement("CharDetails");
 
+  // A saved NPC marks itself and the choices its stored appearance set, so loading it back (Load Character, and the
+  // out-of-process export, which goes through a saved character) keeps them; load() honours the marks only in a file
+  // that marks itself an NPC. A player character's file is unchanged.
+  const bool npcAppearance = !storedChoices_.empty();
+  if (npcAppearance)
+    stream.writeAttribute("npc", "1");
+
   for (auto & opt : currentCustomization_)
   {
     stream.writeStartElement("customization");
     stream.writeAttribute("id", QString::number(opt.first));
     stream.writeAttribute("value", QString::number(opt.second));
+    if (npcAppearance && isStoredChoice(opt.first))
+      stream.writeAttribute("stored", "1");
     stream.writeEndElement();
   }
 
@@ -112,13 +111,25 @@ void CharDetails::load(QString & f)
   // arrival would test it against prerequisite choices that come later in the file.
   const SelectionState before = captureSelectionState();
   batchUpdate_ = true;
+  storedChoices_.clear();
+  bool npcFile = false;
 
   while (!reader.atEnd())
   {
     if (reader.isStartElement())
     {
+      if (reader.name() == "CharDetails")
+        npcFile = reader.attributes().value("npc").toString() == "1";
+
       if (reader.name() == "customization")
-        set(reader.attributes().value("id").toString().toUInt(), reader.attributes().value("value").toString().toUInt());
+      {
+        const uint option = reader.attributes().value("id").toString().toUInt();
+        const uint choice = reader.attributes().value("value").toString().toUInt();
+        set(option, choice);
+        // A saved NPC's stored choice is kept as stored (see save()), when the model has it.
+        if (npcFile && reader.attributes().value("stored").toString() == "1" && get(option) == choice)
+          storedChoices_[option] = choice;
+      }
 
       if (reader.name() == "eyeGlowType")
         eyeGlowType = (EyeGlowTypes)reader.attributes().value("value").toString().toUInt();
@@ -141,18 +152,24 @@ void CharDetails::load(QString & f)
       if (reader.name() == "isDemonHunter")
       {
         LOG_INFO << __FILE__ << __LINE__ << "reading demonHunter mode value";
-        setDemonHunterMode(reader.attributes().value("value").toString().toUInt());
+        // A Demon Hunter saved on a client that has the class stays an ordinary character on one that has not
+        // (no Classic client does): its choices would all be judged as a Demon Hunter's, and the checkbox that
+        // could undo it is not offered there.
+        setDemonHunterMode(reader.attributes().value("value").toString().toUInt() && clientHasDemonHunters());
       }
     }
     reader.readNext();
   }
 
   batchUpdate_ = false;
+  if (npcFile && !storedChoices_.empty())
+    isNPC = true;
   if (!model_ || model_->infos.raceID == -1)
     return;
 
   // A saved choice that is not valid with the loaded choices as a whole (e.g. a skin colour saved
-  // with a skin type it does not belong to) gives way to the first valid one.
+  // with a skin type it does not belong to) gives way to the first valid one; a saved NPC's stored
+  // choices stay.
   resolveSelection(nullptr);
   const std::map<uint, uint> loaded = currentCustomization_;
   for (const auto & c : loaded)
@@ -170,6 +187,7 @@ void CharDetails::reset(WoWModel * model, bool refillCustomizations)
 
   const SelectionState before = captureSelectionState();
   currentCustomization_.clear();
+  storedChoices_.clear();
 
   showUnderwear = true;
   showHair = true;
@@ -217,6 +235,7 @@ void CharDetails::randomise()
     return;
 
   const SelectionState before = captureSelectionState();
+  storedChoices_.clear(); // a random look is the player's, wholly
   for (const uint optionID : optionResolveOrder_)
   {
     const std::vector<uint> valid = validChoices(optionID, currentCustomization_);
@@ -241,12 +260,13 @@ void CharDetails::setDemonHunterMode(bool val)
     return;
   }
 
-  // The class context decides which choices are valid (see classMaskAllows), and the elements the
+  // The class context decides which choices are valid (see classRequirement), and the elements the
   // character wears follow its choices: re-validate every option -- keeping the current choice when
   // it is still valid, otherwise the first valid one -- and apply the result once, which also
   // attaches (on) or detaches (off) the DH horns/blindfold collection models.
   const SelectionState before = captureSelectionState();
   isDemonHunter_ = val;
+  storedChoices_.clear(); // on an NPC, the user's class context takes the character back to the player's rules
   resolveSelection(nullptr);
   const std::map<uint, uint> resolved = currentCustomization_;
   for (const auto & c : resolved)
@@ -261,6 +281,7 @@ void CharDetails::fillCustomizationMap()
 
   // clear any previous value found
   choicesPerOptionMap_.clear();
+  storedChoices_.clear();
   optionFlags_.clear();
   optionClientOrder_.clear();
   optionResolveOrder_.clear();
@@ -271,6 +292,7 @@ void CharDetails::fillCustomizationMap()
   requirements_.clear();
   unresolvedRequirementsLogged_.clear();
   playableRaceBit_ = -1;
+  clientClasses_ = 0;
   choiceGeosetElements_.clear();
   choiceElementRows_.clear();
   resolvedElements_.clear();
@@ -395,6 +417,27 @@ void CharDetails::fillCustomizationMap()
   if (race.valid && !race.values.empty())
     playableRaceBit_ = race.values[0][0].toInt();
 
+  clientClasses_ = clientClassMask();
+  if (clientClasses_ == 0)
+  {
+    // No class context: the classes are this client's own data, and no other client's stand in for them. Every
+    // option or choice a ClassMask limits is left out (REQUIREMENT_CLASS_UNKNOWN) and named here.
+    size_t limitedOptions = 0, limitedChoices = 0;
+    const auto limited = [this](uint reqID) {
+      const auto it = requirements_.find(reqID);
+      return it != requirements_.end() && classRequirement(it->second.classMask, false, 0) == REQUIREMENT_CLASS_UNKNOWN;
+    };
+    for (const auto & o : optionRequirement_)
+      limitedOptions += limited(o.second) ? 1 : 0;
+    for (const auto & c : choiceRequirement_)
+      limitedChoices += limited(c.second) ? 1 : 0;
+    wow::WoWFolder * folder = dynamic_cast<wow::WoWFolder *>(&GAMEDIRECTORY);
+    const bool notInstalled = folder && folder->isRemoteFile("dbfilesclient/chrclasses.db2");
+    LOG_WARNING << "Customization: this client's ChrClasses" << (notInstalled ? "is not installed on this computer" : "could not be read")
+                << "- its classes are unknown, so" << (unsigned int)limitedOptions << "option(s) and" << (unsigned int)limitedChoices
+                << "choice(s) of ChrModel" << infos.ChrModelID[0] << "that a ClassMask limits cannot be judged and are not offered";
+  }
+
   // Dependencies: an option depends on another when its own requirement, or one of its choices',
   // names choices of that other option (Skin Color on Skin Type, Face Features on Jaw Features,
   // Eyesight on Eye Color).
@@ -484,17 +527,58 @@ bool CharDetails::raceMaskAllows(unsigned long long raceMask, int playableRaceBi
 // + Req 142 0x20 = 0x7FFF, Death Knight being class 6). 0 restricts nothing: Req 4103, the
 // Requirement of the Eyesight option, has ClassMask 0 on a player requirement and the option is
 // offered. The viewer's class context is the Demon Hunter checkbox or, without it, the ordinary
-// classes (see CLASS_BITS_ORDINARY): a Demon Hunter passes a mask that names class 12; an ordinary
+// classes (see ordinaryClassMask): a Demon Hunter passes a mask that names class 12; an ordinary
 // character passes only a mask that names every ordinary class, so a choice limited to some classes
-// (Death Knight only, Demon Hunter only, a druid form) is not offered as if every class had it.
-bool CharDetails::classMaskAllows(int classMask, bool demonHunter)
+// (Death Knight only, Demon Hunter only, a druid form) is not offered as if every class had it. Which
+// classes are ordinary is the client's own ChrClasses; without it (a client Battle.net has not finished
+// installing) a class-limited requirement cannot be judged, and it is not judged against another client's
+// classes either: REQUIREMENT_CLASS_UNKNOWN.
+CharDetails::RequirementResult CharDetails::classRequirement(int classMask, bool demonHunter, unsigned int clientClasses)
 {
-  if (classMask == 0)
-    return true;
   const unsigned int mask = static_cast<unsigned int>(classMask);
+  if (mask == 0 || mask == ~0u) // no limit, or every class there can be: met whatever the client's classes are
+    return REQUIREMENT_MET;
+  if (clientClasses == 0)
+    return REQUIREMENT_CLASS_UNKNOWN;
   if (demonHunter)
-    return (mask & classBit(CLASS_DEMONHUNTER)) != 0;
-  return (mask & CLASS_BITS_ORDINARY) == CLASS_BITS_ORDINARY;
+    return (mask & classBit(CLASS_DEMONHUNTER)) != 0 ? REQUIREMENT_MET : REQUIREMENT_CLASS;
+  const unsigned int ordinary = ordinaryClassMask(clientClasses);
+  return (mask & ordinary) == ordinary ? REQUIREMENT_MET : REQUIREMENT_CLASS;
+}
+
+unsigned int CharDetails::clientClassMask()
+{
+  unsigned int classes = 0;
+  sqlResult r = GAMEDATABASE.sqlQuery("SELECT ID FROM ChrClasses");
+  for (size_t i = 0; r.valid && i < r.values.size(); i++)
+  {
+    const uint id = r.values[i][0].toUInt();
+    if (id >= 1 && id <= 32)
+      classes |= classBit(id);
+  }
+  return classes;
+}
+
+// The class context of a character viewed without a class. The viewer has one class switch, the
+// Demon Hunter checkbox; otherwise the character is taken as an ordinary class: one whose looks the
+// data does not single out. Death Knight and Demon Hunter are the classes it does (Death Knight eye
+// glow and skin colours, Demon Hunter tattoos, horns and blindfolds), and the data's own "everyone but
+// them" masks show it: in 12.1.0, Req 146 0x7FDF (all but Death Knight) and Req 144 0x77DF (all but
+// Death Knight and Demon Hunter). Each client writes those masks over its own classes -- Req 146 and
+// 144 are 0xFDF and 0x7DF in Classic Era 1.15.9 and MoP Classic 5.5.4, 0x3FDF and 0x37DF in Classic Beta
+// 1.60.1 -- so "every ordinary class" is every class in the client's ChrClasses but those two: 0x77DF
+// for 12.1.0, 0x7DF for MoP Classic (classes 1-11), 0x5DF for Classic Beta (1-5, 7-9, 11). Against
+// classes 1-15, which no Classic mask names, every Face choice of a Classic Era or MoP Classic character
+// failed, and Classic Beta's Eye Color with it.
+unsigned int CharDetails::ordinaryClassMask(unsigned int clientClasses)
+{
+  return clientClasses & ~classBit(CLASS_DEATHKNIGHT) & ~classBit(CLASS_DEMONHUNTER);
+}
+
+bool CharDetails::clientHasDemonHunters() const
+{
+  const unsigned int classes = clientClasses_ ? clientClasses_ : clientClassMask();
+  return (classes & classBit(CLASS_DEMONHUNTER)) != 0;
 }
 
 const CharDetails::Requirement * CharDetails::requirement(uint requirementID) const
@@ -528,8 +612,9 @@ CharDetails::RequirementResult CharDetails::evaluateRequirement(uint requirement
   if (!raceMaskAllows(req.raceMask, playableRaceBit_))
     return REQUIREMENT_RACE;
 
-  if (!classMaskAllows(req.classMask, isDemonHunter_))
-    return REQUIREMENT_CLASS;
+  const RequirementResult byClass = classRequirement(req.classMask, isDemonHunter_, clientClasses_);
+  if (byClass != REQUIREMENT_MET)
+    return byClass;
 
   // Achievement, quest and item-appearance gates: a collectible look the account has to earn. The
   // in-game appearance editor hides those by default and the viewer cannot evaluate the condition,
@@ -624,6 +709,8 @@ void CharDetails::resolveSelection(const std::set<uint> * scope)
   {
     if (scope && scope->count(optionID) == 0)
       continue;
+    if (isStoredChoice(optionID)) // an NPC's own choice is not judged by the player's rules
+      continue;
 
     const std::vector<uint> valid = validChoices(optionID, currentCustomization_);
     const auto current = currentCustomization_.find(optionID);
@@ -707,6 +794,72 @@ bool CharDetails::hasOption(uint chrCustomizationOptionID) const
   return choicesPerOptionMap_.find(chrCustomizationOptionID) != choicesPerOptionMap_.end();
 }
 
+bool CharDetails::isStoredChoice(uint chrCustomizationOptionID) const
+{
+  const auto stored = storedChoices_.find(chrCustomizationOptionID);
+  if (stored == storedChoices_.end())
+    return false;
+  const auto current = currentCustomization_.find(chrCustomizationOptionID);
+  return current != currentCustomization_.end() && current->second == stored->second;
+}
+
+size_t CharDetails::applyStoredAppearance(const std::vector<std::pair<uint, uint> > & optionChoices, bool demonHunter)
+{
+  if (!model_ || model_->infos.raceID == -1)
+    return 0;
+
+  // From no choice at all, so nothing of the look the character had before (a random one, with Random Looks on)
+  // survives in an option the NPC stores nothing for; in the NPC's class context.
+  const SelectionState before = captureSelectionState();
+  currentCustomization_.clear();
+  storedChoices_.clear();
+  const bool classContextChanged = isDemonHunter_ != demonHunter;
+  isDemonHunter_ = demonHunter;
+
+  size_t otherModel = 0, notAChoice = 0, repeated = 0;
+  for (const auto & pair : optionChoices)
+  {
+    const auto listIt = choicesPerOptionMap_.find(pair.first);
+    if (listIt == choicesPerOptionMap_.end())
+    {
+      otherModel++; // an option of another model: an alternate form's
+      continue;
+    }
+    if (std::find(listIt->second.begin(), listIt->second.end(), pair.second) == listIt->second.end())
+    {
+      notAChoice++;
+      LOG_WARNING << __FUNCTION__ << "choice" << pair.second << "is not a choice of option" << pair.first << "-- skipped";
+      continue;
+    }
+    // An option stored twice keeps its first row.
+    if (!storedChoices_.emplace(pair.first, pair.second).second)
+    {
+      repeated++;
+      continue;
+    }
+    currentCustomization_[pair.first] = pair.second;
+  }
+
+  // The options the NPC stores nothing for (often Ears, Eyesight, Eye Style: options added after the NPC was made)
+  // take their first valid choice against the stored ones, as reset() defaults them; the stored ones are kept.
+  resolveSelection(nullptr);
+  const std::map<uint, uint> resolved = currentCustomization_;
+  for (const auto & c : resolved)
+    autoSelectTextureGating(c.second);
+  isNPC = true;
+  LOG_INFO << __FUNCTION__ << storedChoices_.size() << "stored choice(s) applied of" << optionChoices.size()
+           << "| another model's option:" << otherModel << "| not a choice of its option:" << notAChoice
+           << "| option repeated:" << repeated << "| options defaulted:"
+           << (currentCustomization_.size() - storedChoices_.size()) << "| Demon Hunter:" << demonHunter;
+  applySelection(before, 0);
+  if (classContextChanged)
+  {
+    CharDetailsEvent event(this, CharDetailsEvent::DH_MODE_CHANGED); // the character panel's Demon Hunter box follows
+    notify(event);
+  }
+  return storedChoices_.size();
+}
+
 void CharDetails::set(uint chrCustomizationOptionID, uint chrCustomizationChoiceID) // wow version >= 9.x
 {
   if (!model_ || model_->infos.raceID == -1)
@@ -747,21 +900,26 @@ void CharDetails::set(uint chrCustomizationOptionID, uint chrCustomizationChoice
   // Record the choice as requested, then re-validate only the options whose requirements depend on
   // this one (Skin Color on Skin Type, Face Features on Jaw Features, Eyesight on Eye Color): each
   // keeps its current choice while it stays valid and otherwise takes its first valid choice. What
-  // the character wears is then rebuilt from the resulting choices and refreshed once.
+  // the character wears is then rebuilt from the resulting choices and refreshed once. On an NPC, the
+  // pick takes this option and the options depending on it back to the player's rules.
   const SelectionState before = captureSelectionState();
   currentCustomization_[chrCustomizationOptionID] = chrCustomizationChoiceID;
   const std::set<uint> dependents = dependentOptions(chrCustomizationOptionID);
+  storedChoices_.erase(chrCustomizationOptionID);
+  for (const uint dependent : dependents)
+    storedChoices_.erase(dependent);
   resolveSelection(&dependents);
 
   // If this choice adds a skinned model whose texture is gated by another option (e.g. a DH
   // blindfold needs a DH eye-glow colour), make sure that option holds a compatible value,
-  // otherwise the model merges untextured and renders white.
-  autoSelectTextureGating(chrCustomizationChoiceID);
+  // otherwise the model merges untextured and renders white -- on an NPC too, whose gating
+  // option may hold a stored choice.
+  autoSelectTextureGating(chrCustomizationChoiceID, false);
 
   applySelection(before, chrCustomizationOptionID);
 }
 
-void CharDetails::autoSelectTextureGating(uint chrCustomizationChoiceID)
+void CharDetails::autoSelectTextureGating(uint chrCustomizationChoiceID, bool keepStored)
 {
   if (!model_)
     return;
@@ -816,6 +974,8 @@ void CharDetails::autoSelectTextureGating(uint chrCustomizationChoiceID)
     const uint optID = g.first;
     if (choicesPerOptionMap_.count(optID) == 0)
       continue; // gating option not present on this model
+    if (keepStored && isStoredChoice(optID))
+      continue; // an NPC's own choice: its stored appearance names what it wears
     const uint cur = get(optID);
     if (std::find(g.second.begin(), g.second.end(), cur) != g.second.end())
       continue; // already a compatible value, nothing to do
@@ -830,8 +990,14 @@ void CharDetails::autoSelectTextureGating(uint chrCustomizationChoiceID)
       }
     LOG_INFO << "autoSelectTextureGating: choice" << chrCustomizationChoiceID
              << "needs option" << optID << "-> switching it to compatible choice" << pick;
-    currentCustomization_[optID] = pick;
+    // An NPC's stored choice the user's pick needs changed: it, and the options depending on it, go back to the
+    // player's rules (as for the pick itself, in set()).
     const std::set<uint> dependents = dependentOptions(optID);
+    storedChoices_.erase(optID);
+    if (!keepStored)
+      for (const uint dependent : dependents)
+        storedChoices_.erase(dependent);
+    currentCustomization_[optID] = pick;
     resolveSelection(&dependents);
   }
 }
@@ -1105,7 +1271,7 @@ void CharDetails::refreshGeosets()
   if (model_)
   {
     // only show underwear bottoms if the character isn't wearing pants or chest 
-    if (showUnderwear && model_->getItemId(CS_PANTS) < 1 && !model_->isWearingARobe())
+    if (showUnderwear && model_->getItemId(CS_PANTS) < 1 && !model_->isWearingNpcEquipment(CS_PANTS) && !model_->isWearingARobe())
     {
       // demon hunters and female pandaren use the TABARD2 geoset for part of their underwear:
       if (isDemonHunter_ || ((model_->infos.raceID == RACE_PANDAREN) && (model_->infos.sexID == GENDER_FEMALE)))
@@ -1213,13 +1379,14 @@ void CharDetails::refreshTextures()
         // don't apply underwear tops/bras if show underwear is off or if the character is wearing a shirt or chest
         if (t.region == CR_TORSO_UPPER &&
           (!showUnderwear ||
-            model_->getItemId(CS_CHEST) > 1 || model_->getItemId(CS_SHIRT) > 1))
+            model_->getItemId(CS_CHEST) > 1 || model_->getItemId(CS_SHIRT) > 1 ||
+            model_->isWearingNpcEquipment(CS_CHEST) || model_->isWearingNpcEquipment(CS_SHIRT)))
           continue;
 
         // don't apply underwear bottoms if show underwear is off or if the character is wearing pants
         if (t.region == CR_LEG_UPPER &&
           (!showUnderwear ||
-            model_->getItemId(CS_PANTS) > 1))
+            model_->getItemId(CS_PANTS) > 1 || model_->isWearingNpcEquipment(CS_PANTS)))
           continue;
       }
 

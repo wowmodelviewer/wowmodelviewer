@@ -60,6 +60,8 @@ class _WOWITEM_API_ WoWItem : public Component
     int id() const { return id_; }
 
     void setDisplayId(int id);
+    // The ItemDisplayInfo an NPC's equipment shows (setDisplayId; the item ID is then -1); -1 when none was set.
+    int displayId() const { return displayId_; }
     void setLevel(int level);
     void setModifierId(int id);
 
@@ -77,6 +79,13 @@ class _WOWITEM_API_ WoWItem : public Component
 
     std::map<POSITION_SLOTS, WoWModel *> models() const { return itemModels_; }
 
+    // Whether the item's display sets this geoset group itself (its GeosetGroup is not 0), rather than leaving the
+    // group at its default variant (see refresh()).
+    bool declaresGeosetGroup(CharGeosets group) const;
+    // Whether the item shows anything at all -- a texture, a model or a geoset group of its own. An NPC's equipment
+    // can name an empty display, which is no garment.
+    bool showsAnything() const;
+
     void save(QXmlStreamWriter &) const ;
     void load(QString &);
 
@@ -84,6 +93,8 @@ class _WOWITEM_API_ WoWItem : public Component
     void unload();
 
     bool isCustomizableTabard() const;
+    // Records a geoset group variant the item wants on the character (see refresh()).
+    void setCharacterGeoset(CharGeosets group, int value);
 
     WoWModel * charModel_ = nullptr;
 

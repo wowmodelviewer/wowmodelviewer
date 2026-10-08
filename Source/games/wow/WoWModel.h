@@ -305,6 +305,8 @@ public:
   ModelType modelType;
   CharModelDetails charModelDetails;
   CharDetails cd;
+  // The geoset groups an item refreshed so far in this refresh declared (see WoWItem::setCharacterGeoset).
+  std::set<CharGeosets> equipmentDeclaredGeosets;
   RaceInfos infos;
   TabardDetails td;
   ModelHeader header;
@@ -322,6 +324,9 @@ public:
   // (hiding hair/ears under the helm) must follow whether the helm is actually drawn.
   bool isEquippedHeadModel(WoWModel * m);
   bool isWearingARobe();
+  // Whether an NPC's equipment (no item: only a display, see WoWItem::setDisplayId) shows a garment in the slot -- an
+  // NPC's equipment can name an empty display.
+  bool isWearingNpcEquipment(CharSlots slot);
 
   void updateTextureList(GameFile * tex, int special);
 
