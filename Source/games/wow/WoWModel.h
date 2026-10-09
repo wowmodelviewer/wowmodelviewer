@@ -128,11 +128,6 @@ public:
     size_t geosetStart = 0;
     size_t geosetCount = 0;
     std::vector<int16> boneMap;
-    // The passes refreshMerging re-pointed at this model's hand texture instead of the merged
-    // model's own (the "hands" rule, see refreshMerging): their geoset index in the MERGED model, and
-    // the texture index they bind in this model.
-    std::vector<int> handSubmeshes;
-    uint16 handTexIndex = 0xFFFF;
   };
 private:
   std::vector<MergedPart> mergedParts_;
