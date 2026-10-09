@@ -89,8 +89,11 @@ class _WOWITEM_API_ WoWItem : public Component
     void save(QXmlStreamWriter &) const ;
     void load(QString &);
 
-  private:
+    // Frees the models and textures load() created, and unmerges the item's merged model from its character. The
+    // character's destructor calls it before deleting the item.
     void unload();
+
+  private:
 
     bool isCustomizableTabard() const;
     // Records a geoset group variant the item wants on the character (see refresh()).

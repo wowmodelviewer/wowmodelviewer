@@ -1085,6 +1085,10 @@ void ModelViewer::LoadModel(GameFile * file, int raceID, int sexID)
     // the viewport state a failed load goes on to refresh (DisplayedContentChanged) -- would read freed memory.
     charControl->charAtt = nullptr;
     charControl->model = nullptr;
+    // The Attachments window may have pointed at one of the old model's items (a helm, a weapon): those are freed
+    // with it now, so it forgets them until UpdateModel below re-points it -- a failed load never gets that far.
+    if (modelControl)
+      modelControl->Forget();
     // error check
     if (!modelAtt)
     {
@@ -1124,6 +1128,8 @@ void ModelViewer::LoadModel(GameFile * file, int raceID, int sexID)
     modelAtt = canvas->LoadModel(file); //  change it from LoadModel, don't sure it's right or not.
     charControl->charAtt = nullptr;   // freed with the model they pointed at: see the character branch above
     charControl->model = nullptr;
+    if (modelControl)
+      modelControl->Forget();
 
     // error check
     if (!modelAtt)
@@ -1253,6 +1259,8 @@ void ModelViewer::LoadNPC(unsigned int modelid)
 
   canvas->clearAttachments();
   canvas->setModel(NULL);
+  if (modelControl)
+    modelControl->Forget();   // it may point at an item of the model just freed: see LoadModel
   canvas->ClearWMO();   // a world model left on the canvas goes with the flag (a failed load must not keep it)
 
   isModel = true;
@@ -1417,6 +1425,8 @@ bool ModelViewer::LoadModelById(const ModelIdLookup::Resolved & resolved, wxStri
     SceneHold sceneHold(this);
     canvas->clearAttachments();
     canvas->setModel(NULL);
+    if (modelControl)
+      modelControl->Forget();   // as LoadNPC
     canvas->ClearWMO();   // as LoadNPC
     isModel = true;
     isChar = false;
@@ -1520,6 +1530,8 @@ void ModelViewer::LoadItem(unsigned int id)
   SetViewerMode(ViewerMode::Models);
   canvas->clearAttachments();
   canvas->setModel(NULL);
+  if (modelControl)
+    modelControl->Forget();   // as LoadNPC
   canvas->ClearWMO();   // as LoadNPC
 
   isModel = true;

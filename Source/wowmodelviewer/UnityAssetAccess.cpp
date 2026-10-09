@@ -14,6 +14,7 @@
 #include "animcontrol.h"    // the skin selector: what the viewport is actually showing
 #include "globalvars.h"
 #include "modelviewer.h"
+#include "ModelInspector.h"   // IsLiveModel: g_selModel can outlive its model after a failed load
 #include "wow_enums.h"      // TEXTURE_GAMEOBJECT1
 #include "logger/Logger.h"
 
@@ -253,7 +254,8 @@ bool UnityAssetAccess::selectedModelGeosets(int m2FileDataID, std::vector<int> &
   out.clear();
   if (m2FileDataID <= 0 || !hasActiveClient())
     return false;
-  if (!g_selModel || !g_selModel->gamefile)
+  // Only while it is still on the canvas: a load that failed after freeing the model leaves g_selModel at it.
+  if (!g_selModel || !ModelInspector::IsLiveModel(g_selModel) || !g_selModel->gamefile)
     return false;
   if ((int)g_selModel->gamefile->fileDataId() != m2FileDataID)
     return false;   // a question about some other model; we only know about the displayed one
@@ -309,7 +311,8 @@ bool UnityAssetAccess::resolveModelTextures(int m2FileDataID, std::vector<ModelT
   //    -- and which one is on screen is a UI fact the database cannot answer: it only knows the
   //    default. Guarded on the model actually being the displayed one, so a request about some
   //    other model still falls through to the database below.
-  if (g_modelViewer && g_modelViewer->animControl && g_selModel && g_selModel->gamefile &&
+  if (g_modelViewer && g_modelViewer->animControl && g_selModel && ModelInspector::IsLiveModel(g_selModel) &&
+      g_selModel->gamefile &&
       (int)g_selModel->gamefile->fileDataId() == m2FileDataID)
   {
     std::vector<std::pair<int, int> > selected;

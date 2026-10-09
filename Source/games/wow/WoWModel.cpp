@@ -187,6 +187,25 @@ gamefile(file)
 
 WoWModel::~WoWModel()
 {
+  // This model owns its equipment and what is merged into it, and nothing freed either: Container::addChild takes no
+  // reference, so the unref() in the Container destructor never reached zero, and every item -- with the helm,
+  // shoulder, weapon and merged armour models it loaded -- outlived the model, as did the customization parts still
+  // merged in. Each NPC load leaked its whole outfit (8 MB for a robed NPC, ~50 MB in collection armour). unload()
+  // frees an item's models and unmerges its merged one, so it runs first, while this model and its attachment are
+  // whole; the reference taken before removeChild() lets that call's unref() delete the item.
+  {
+    const std::vector<WoWItem *> items(begin(), end());
+    for (WoWItem * item : items)
+    {
+      item->unload();
+      item->ref();
+      removeChild(item);
+    }
+  }
+  for (WoWModel * m : mergedModels) // what the items left: customization parts, owned here
+    delete m;
+  mergedModels.clear();
+
   if (eyeCompositeTex_ != 0)
     glDeleteTextures(1, &eyeCompositeTex_);
 
@@ -206,8 +225,12 @@ WoWModel::~WoWModel()
     // No matter what I try though I can't find the memory to unload.
     if (header.nTextures)
     {
-      // For character models, the texture isn't loaded into the texture manager, manually remove it
-      glDeleteTextures(1, &replaceTextures[1]);
+      // For character models, the texture isn't loaded into the texture manager, manually remove it. (A character's
+      // slot 1 is name 0, the composite; an item model's or merged part's is INVALID_TEX -- a legal GL name another
+      // texture can hold in a long session -- or a texture the manager owns. Delete only what is neither.)
+      const GLuint skin = replaceTextures[1];
+      if (skin != 0 && skin != ModelRenderPass::INVALID_TEX && TEXTUREMANAGER.items.find(skin) == TEXTUREMANAGER.items.end())
+        glDeleteTextures(1, &skin);
       delete animManager; animManager = 0;
 
       if (animated)
@@ -3114,7 +3137,7 @@ WoWModel* WoWModel::mergeModel(QString & name, int type, bool noRefresh)
   
   LOG_INFO << __FUNCTION__ << name;
   auto it = std::find_if(std::begin(mergedModels), std::end(mergedModels),
-                         [&](const WoWModel * m) { return m->gamefile->fullname() == name; });
+                         [&](const WoWModel * m) { return m->mergedModelType != -1 && m->gamefile->fullname() == name; });
                          
   if(it != mergedModels.end())
     return *it;
@@ -3132,7 +3155,7 @@ WoWModel* WoWModel::mergeModel(uint fileID, int type, bool noRefresh)
 {
   LOG_INFO << __FUNCTION__ << fileID;
   auto it = std::find_if(std::begin(mergedModels), std::end(mergedModels),
-                         [&](const WoWModel * m){ return m->gamefile->fileDataId() == fileID; });
+                         [&](const WoWModel * m){ return m->mergedModelType != -1 && m->gamefile->fileDataId() == fileID; });
   if(it != mergedModels.end())
     return *it;
 
@@ -3169,11 +3192,14 @@ WoWModel* WoWModel::mergeModel(WoWModel * m, int type, bool noRefresh)
   return m;
 }
 
+// The lookups by file (getMergedModel, mergeModel and unmergeModel by FileDataID or name) find customization parts only.
+// An item's merged collection model (mergedModelType -1) belongs to its WoWItem, which frees it: matching one here let
+// customization adopt, pool or free a model an item still owned, and both would free it.
 WoWModel* WoWModel::getMergedModel(uint fileID)
 {
   for (auto it : mergedModels)
   {
-    if (it->gamefile->fileDataId() == fileID)
+    if (it->mergedModelType != -1 && it->gamefile->fileDataId() == fileID)
       return it;
   }
   return nullptr;
@@ -3451,7 +3477,7 @@ void WoWModel::unmergeModel(QString & name, bool noRefresh)
   LOG_INFO << __FUNCTION__ << name;
   auto it = std::find_if(std::begin(mergedModels),
                          std::end(mergedModels),
-                         [&](const WoWModel * m){ return m->gamefile->fullname() == name.replace("\\", "/"); });
+                         [&](const WoWModel * m){ return m->mergedModelType != -1 && m->gamefile->fullname() == name.replace("\\", "/"); });
 
   if (it != mergedModels.end())
   {
@@ -3466,7 +3492,7 @@ void WoWModel::unmergeModel(uint fileID, bool noRefresh)
   LOG_INFO << __FUNCTION__ << fileID;
   auto it = std::find_if(std::begin(mergedModels),
                          std::end(mergedModels),
-                         [&](const WoWModel * m){ return m->gamefile->fileDataId() == fileID; });
+                         [&](const WoWModel * m){ return m->mergedModelType != -1 && m->gamefile->fileDataId() == fileID; });
 
   if (it != mergedModels.end())
   {
