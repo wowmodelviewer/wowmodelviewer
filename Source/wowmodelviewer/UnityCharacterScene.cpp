@@ -268,8 +268,8 @@ QJsonObject UnityCharacterScene::build(WoWModel * character, const ImageRef & im
       o["fileDataID"] = fdid;
       o["mergeIndex"] = (int)part.mergeIndex;
       // Its slots as the CHARACTER binds them: refreshMerging appended this model's texture tables at
-      // mergeIndex * TEXTURE_MAX, and redirected its skin-extra slot to the body composite when it has
-      // none of its own. Reading the character's combined table at that stride gives exactly what the
+      // mergeIndex * TEXTURE_MAX, and redirected its skin and skin-extra slots to the body composite when
+      // it has none of its own. Reading the character's combined table at that stride gives exactly what the
       // merged render passes sample.
       QJsonArray textures;
       for (int slot = 0; slot < ownTextureCount(part.model); slot++)

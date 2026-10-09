@@ -3315,8 +3315,8 @@ void WoWModel::refreshMerging()
     // Hunter model merged then, whose hand slot could not resolve to the body skin, but later that year it started
     // testing whatever geoset sat at the pass's LOCAL index in the combined list, not the pass's own. From then on it
     // fired only where indices happened to line up, followed the merge order, and painted Earthen wrist crystals with
-    // a glove's leather. A skin-extra slot with no texture of its own now binds the body composite below, by texture
-    // type, on any geoset.)
+    // a glove's leather. A skin or skin-extra slot with no texture of its own now binds the body composite below, by
+    // texture type, on any geoset.)
     for (auto it : modelsIt->passes)
     {
       ModelRenderPass * p = new ModelRenderPass(*it);
@@ -3374,7 +3374,7 @@ void WoWModel::refreshMerging()
     {
       if (it == -1)
         specialTextures.push_back(it);
-      else if (it == TEXTURE_SKIN_EXTRA)
+      else if (it == TEXTURE_SKIN_EXTRA || it == TEXTURE_SKIN)
       {
         // Skin-extra (component-model) texture. If THIS merged model resolved its OWN
         // skin-extra texture, bind that via the per-merge offset slot. The Mechagnome
@@ -3385,6 +3385,11 @@ void WoWModel::refreshMerging()
         // skin, which discarded the paint and left every mech part wearing the bare gnome
         // skin. Fall back to the composed body skin only when the part has no skin-extra
         // texture of its own (e.g. the DH blindfold), which is the slot it expects.
+        // The character-skin slot (type 1) of a merged part is the same case: nothing fills a
+        // part's own copy of it (refresh() composites type-1 customization into the body), so at
+        // its offset it bound nothing and the part drew white -- the Dracthyr dragon form's
+        // forehead crest, the stone under Earthen wrist crystals. It is the body skin the part was made
+        // to wear.
         if (it < static_cast<int>(modelsIt->replaceTextures.size()) &&
             modelsIt->replaceTextures[it] != ModelRenderPass::INVALID_TEX)
           specialTextures.push_back(it + (mergeIndex * TEXTURE_MAX));
