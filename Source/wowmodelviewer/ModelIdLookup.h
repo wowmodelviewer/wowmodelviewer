@@ -32,6 +32,8 @@
 
 #include <QString>
 
+class GameFile;
+
 namespace ModelIdLookup
 {
   enum class Kind
@@ -71,7 +73,10 @@ namespace ModelIdLookup
 
   // Whether fileDataId is an M2 the loaded client can give -- found, readable, an M2 -- and why not otherwise (what
   // follows "<subject>" in a sentence). Nothing is loaded.
-  bool checkModelFile(int fileDataId, wxString & why);
+  // keptOpen (may be null): a file this check opened and read whole is left open there, its buffer ready for the
+  // load that follows (GameFile::open returns at once for an open file, and WoWModel closes it once it has read it);
+  // the caller closes it if no load does. Null there when nothing was left open.
+  bool checkModelFile(int fileDataId, wxString & why, GameFile ** keptOpen = nullptr);
 }
 
 #endif // MODELIDLOOKUP_H

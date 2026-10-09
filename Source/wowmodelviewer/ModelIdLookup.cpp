@@ -28,8 +28,10 @@ namespace
   // Whether fileDataId is an M2 the loaded client can give: found, named .m2 by the listfile (or, unnamed, starting
   // with an M2's magic), and readable. why: what follows "<subject>" (or "..., which") when it is not -- never the
   // listfile path, which can be wider than the dialog (the log has it: ModelIdLookup::Resolved::path).
-  bool checkM2(int fileDataId, QString & path, wxString & why)
+  bool checkM2(int fileDataId, QString & path, wxString & why, GameFile ** keptOpen = nullptr)
   {
+    if (keptOpen)
+      *keptOpen = nullptr;
     path = listfilePath(fileDataId);
     GameFile * file = GAMEDIRECTORY.getFile(fileDataId);
     if (!file)
@@ -60,7 +62,10 @@ namespace
     if (longEnough)
       for (int i = 0; i < 4; i++)
         magic[i] = file->rawBuffer()[i];
-    if (!wasOpen)
+    const bool m2Magic = longEnough && magic[0] == 'M' && magic[1] == 'D' && magic[2] == '2' && (magic[3] == '1' || magic[3] == '0');
+    if (!wasOpen && keptOpen && readable && m2Magic)
+      *keptOpen = file;   // read whole and checked: the load that follows takes this buffer
+    else if (!wasOpen)
       file->close();
     if (!readable)
     {
@@ -189,10 +194,10 @@ namespace ModelIdLookup
     return true;
   }
 
-  bool checkModelFile(int fileDataId, wxString & why)
+  bool checkModelFile(int fileDataId, wxString & why, GameFile ** keptOpen)
   {
     QString path;
-    return checkM2(fileDataId, path, why);
+    return checkM2(fileDataId, path, why, keptOpen);
   }
 
   bool resolve(Kind kind, int id, Resolved & out, wxString & why)

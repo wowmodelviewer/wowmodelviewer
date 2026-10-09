@@ -250,6 +250,12 @@ void CharControl::SyncModelVariant()
     cdFrame->syncModelVariant();
 }
 
+void CharControl::BuildDeferredRows()
+{
+  if (cdFrame)
+    cdFrame->buildDeferredRows(model);
+}
+
 void CharControl::SyncTabardSpins()
 {
   if (!model)

@@ -98,7 +98,12 @@ void CharDetailsFrame::setModel(WoWModel * model)
   model_ = model;
   model_->cd.attach(this);
 
-  buildRows();
+  // A character rebuilt on its other model generation gets its rows once, dressed (buildDeferredRows at the end of
+  // the switch), not here for the undressed model and again when its appearance is applied.
+  if (g_modelViewer && g_modelViewer->variantSwitching())
+    rowsDeferred_ = true;
+  else
+    buildRows();
 
   // Night Elf and Blood Elf Demon Hunters -- in a client that has the class (no Classic client does).
   if ((model_->infos.raceID == RACE_NIGHTELF || model_->infos.raceID == RACE_BLOODELF) && model_->cd.clientHasDemonHunters())
@@ -202,8 +207,23 @@ void CharDetailsFrame::onModelVariant(wxCommandEvent & event)
   });
 }
 
+void CharDetailsFrame::buildDeferredRows(const WoWModel * live)
+{
+  if (!rowsDeferred_)
+    return;
+  if (model_ && model_ == live)
+    buildRows();
+  else
+  {
+    rowsDeferred_ = false;
+    if (!live)
+      model_ = nullptr;
+  }
+}
+
 void CharDetailsFrame::buildRows()
 {
+  rowsDeferred_ = false;
   charCustomizationGS_->Clear(true);
 
   if (model_ && !model_->infos.ChrModelID.empty())
@@ -265,6 +285,11 @@ void CharDetailsFrame::onEvent(Event * event)
   }
   else if (event->type() == CharDetailsEvent::OPTION_LIST_CHANGED && model_)
   {
+    if (g_modelViewer && g_modelViewer->variantSwitching())
+    {
+      rowsDeferred_ = true;   // built once the switch has dressed the character
+      return;
+    }
     // The options the character can use changed (e.g. Eyesight after Eye Color "Sockets"). The rows
     // are rebuilt after the current event has been handled: the change usually comes from one of
     // these rows' own dropdown, whose control must not be destroyed while its handler runs.

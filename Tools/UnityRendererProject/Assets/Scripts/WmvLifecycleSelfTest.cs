@@ -2510,7 +2510,148 @@ public static class WmvLifecycleSelfTest
         ZoomTests(log);
         MapObjectTests(log);
         BackgroundTests(log);
+        AssetCacheTests(log);
         log(string.Format("lifecycle-test: {0} passed, {1} failed", passed, failed));
+    }
+
+    // ---------------------------------------------------------------- the session asset cache (protocol 9)
+
+    /// <summary>
+    /// WmvAssetCache on its own: nothing kept without an epoch; a file by FileDataID and by path; a request joining one
+    /// already out; what the last three loads used kept and nothing older; the budget; a new epoch empties it and an
+    /// answer asked under the old one is not kept.
+    /// </summary>
+    static void AssetCacheTests(Action<string> log)
+    {
+        var c = new WmvAssetCache();
+        byte[] model = new byte[1000], skin = new byte[200], other = new byte[50];
+
+        WmvAssetCache.Flight early = c.BeginFlight(100, "a.m2", "u1", WmvAssetCache.FileKind.Model, false);
+        c.Store(c.EndFlight("u1") ?? early, 100, "a.m2", model);
+        Check(!c.Enabled && c.Count == 0 && c.Take(100, null) == null && !c.Join(100, null, "u0"),
+              "asset cache: a host that states no epoch gets nothing kept and nothing joined", log);
+
+        c.SetEpoch(1);
+        c.BeginGeneration(100);                                // generation 1
+        WmvAssetCache.Flight f = c.BeginFlight(0, "a.m2", "u2", WmvAssetCache.FileKind.Other, false);
+        Check(c.Join(0, "a.m2", "u3") && !c.Join(100, null, "u4"),
+              "asset cache: a request for a file already asked for (by the same key) joins it", log);
+        WmvAssetCache.Flight ended = c.EndFlight("u2");
+        Check(ended == f && ended.Waiters.Count == 1 && ended.Waiters[0] == "u3" && !c.Join(0, "a.m2", "u5"),
+              "asset cache: the answer ends the flight with the request that joined it, and nothing joins it after", log);
+        c.Store(ended, 100, "character/a.m2", model);
+        WmvAssetCache.Entry byId = c.Take(100, null), byAsked = c.Take(0, "a.m2"), byAnswered = c.Take(0, "character/a.m2");
+        Check(byId != null && byAsked == byId && byAnswered == byId && byId.Data == model && c.Hits == 3 && c.Bytes == 1000,
+              "asset cache: a kept file is found by its FileDataID, the path asked for and the path answered", log);
+
+        // A load by path that knows its FileDataID joins a prefetch of the same file still out.
+        c.BeginFlight(250, null, "u10", WmvAssetCache.FileKind.Model, true);
+        Check(c.Join(250, "b.m2", "u11"), "asset cache: a load by path with its FileDataID joins the prefetch of that file", log);
+        c.Store(c.EndFlight("u10"), 250, "", other);
+        Check(c.Take(0, "b.m2") != null, "asset cache: and the path it named finds the file the prefetch brought", log);
+
+        WmvAssetCache.Flight s = c.BeginFlight(200, null, "u6", WmvAssetCache.FileKind.Other, true);
+        c.Store(c.EndFlight("u6"), 200, "", skin);
+        c.BeginGeneration(0);                                  // generation 2
+        c.Take(100, null);                                     // 100 used again in generation 2; 200 last in 1
+        c.BeginGeneration(0);                                  // generation 3: the two loads before it stay
+        Check(c.Holds(200) && c.Holds(100), "asset cache: the files of the two loads before stay (A -> B -> A)", log);
+        c.BeginGeneration(0);                                  // generation 4: 200 was last used in 1
+        Check(!c.Holds(200) && c.Holds(100), "asset cache: a file none of the last three loads used goes", log);
+        c.BeginGeneration(0);                                  // generation 5: 100 was last used in 2
+        Check(!c.Holds(100) && c.Take(0, "a.m2") == null && c.Take(0, "character/a.m2") == null,
+              "asset cache: and with it its paths", log);
+
+        WmvAssetCache.Flight p = c.BeginFlight(300, null, "u7", WmvAssetCache.FileKind.Model, true);
+        c.Store(c.EndFlight("u7"), 300, "", other);
+        c.BeginGeneration(0);
+        c.BeginGeneration(0);
+        Check(c.Touch(300) == other, "asset cache: a prefetched file is kept for the loads that follow", log);
+
+        // The budget: the least recently used unprotected file goes first; the model on screen and a prefetched
+        // model stay; a file just stored stays even alone over the budget.
+        var b = new WmvAssetCache { Budget = 2500 };
+        b.SetEpoch(1);
+        b.BeginGeneration(10);                                 // model 10 on screen
+        b.Store(b.BeginFlight(10, null, "b1", WmvAssetCache.FileKind.Other, false), 10, "", new byte[1000]);
+        b.Store(b.BeginFlight(11, null, "b2", WmvAssetCache.FileKind.Other, false), 11, "", new byte[1000]);
+        b.Protect(12);                                         // the prefetched partner
+        b.Store(b.BeginFlight(12, null, "b3", WmvAssetCache.FileKind.Model, true), 12, "", new byte[1000]);
+        Check(b.Holds(10) && !b.Holds(11) && b.Holds(12) && b.Bytes == 2000 && b.Evictions == 1,
+              "asset cache: past the budget the least recently used file goes, not the model on screen or the prefetched one", log);
+        b.Store(b.BeginFlight(13, null, "b4", WmvAssetCache.FileKind.Other, false), 13, "", new byte[3000]);
+        Check(b.Holds(13) && b.Holds(10) && b.Holds(12),
+              "asset cache: a file larger than the budget is still kept for the load that asked for it", log);
+
+        WmvAssetCache.Flight old = c.BeginFlight(400, null, "u8", WmvAssetCache.FileKind.Other, false);
+        c.SetEpoch(2);
+        Check(c.Count == 0 && c.Bytes == 0 && c.Touch(300) == null && !c.Join(400, null, "u9"),
+              "asset cache: another client's epoch empties it, and a request out under the old one is not joined", log);
+        c.Store(c.EndFlight("u8"), 400, "", other);
+        Check(c.Count == 0, "asset cache: an answer to a request asked under the old epoch is not kept", log);
+
+        AssetCacheWiringTests(log);
+    }
+
+    /// <summary>
+    /// The cache as WmvIpcClient uses it, with no connection (FeedForTest / PumpForTest / SentForTest): the epoch from
+    /// loadWoWModel; a request sent once and a second one joining it, both answered; a cached answer handed out by
+    /// Update, never inside the request; a prefetch fetching a model, then its skin and skeleton, and not raised to the
+    /// player; a load joining a prefetch; a world model's request kept out of it.
+    /// </summary>
+    static void AssetCacheWiringTests(Action<string> log)
+    {
+        var go = new GameObject("AssetCacheWiringTest");
+        var ipc = go.AddComponent<WmvIpcClient>();
+        var sent = new List<string>();
+        var answered = new List<WmvIpcClient.AssetResponse>();
+        ipc.SentForTest = s => sent.Add(s);
+        ipc.OnAssetResponse = r => answered.Add(r);
+        byte[] model = M2Synthetic.SkeletonModel(5002, 5001), skin = new byte[64], skel = new byte[32], file = new byte[100];
+
+        ipc.FeedForTest("loadWoWModel", null, false, 900, "x.m2", null, false, 7, null);
+        Check(ipc.Cache.Enabled && ipc.Cache.Epoch == 7, "asset cache wiring: loadWoWModel states the epoch", log);
+
+        string a = ipc.RequestAssetByFileDataID(900);
+        string b = ipc.RequestAssetByFileDataID(900);
+        Check(sent.Count == 1 && a != b, "asset cache wiring: a second request for a file out joins it (one request sent)", log);
+        ipc.FeedForTest("assetResponse", a, true, 900, "x.m2", file, true, 0, null);
+        Check(answered.Count == 2 && answered[0].requestId == a && answered[1].requestId == b && answered[1].data == file,
+              "asset cache wiring: the answer goes to both requests", log);
+
+        string c = ipc.RequestAssetByFileDataID(900);
+        bool notInline = answered.Count == 2;
+        ipc.PumpForTest();
+        Check(notInline && sent.Count == 1 && answered.Count == 3 && answered[2].requestId == c && answered[2].fromCache &&
+              answered[2].data == file,
+              "asset cache wiring: a kept file is answered by Update, after the request returned, with nothing sent", log);
+
+        string w = ipc.RequestAssetByFileDataID(901, false);
+        ipc.FeedForTest("assetResponse", w, true, 901, "", file, true, 0, null);
+        string w2 = ipc.RequestAssetByFileDataID(901, false);
+        Check(sent.Count == 3 && !ipc.Cache.Holds(901) && w2 != w,
+              "asset cache wiring: a request kept out of the cache (a world model's) is neither kept nor answered from it", log);
+
+        int before = answered.Count, sentBefore = sent.Count;
+        ipc.FeedForTest("prefetchAssets", null, false, 0, null, null, false, 7, new[] { 5000 });
+        Check(sent.Count == sentBefore + 1 && sent[sent.Count - 1].Contains("5000"),
+              "asset cache wiring: prefetchAssets asks for the model", log);
+        string load = ipc.RequestAsset("y.m2", 5000, true);
+        Check(sent.Count == sentBefore + 1, "asset cache wiring: a load of the model being prefetched joins the prefetch", log);
+        string pre = sent[sent.Count - 1];
+        string preId = pre.Substring(pre.IndexOf("\"requestId\":\"") + 13);
+        preId = preId.Substring(0, preId.IndexOf('"'));
+        ipc.FeedForTest("assetResponse", preId, true, 5000, "y.m2", model, true, 0, null);
+        Check(answered.Count == before + 1 && answered[answered.Count - 1].requestId == load,
+              "asset cache wiring: the prefetch's answer goes to the load that joined it, and to nobody else", log);
+        Check(sent.Count == sentBefore + 3 && sent[sent.Count - 2].Contains("5001") && sent[sent.Count - 1].Contains("5002"),
+              "asset cache wiring: the prefetched model's skin and skeleton are asked for next", log);
+
+        ipc.FeedForTest("loadWoWModel", null, false, 900, "x.m2", null, false, 8, null);
+        ipc.RequestAssetByFileDataID(900);
+        Check(ipc.Cache.Epoch == 8 && ipc.Cache.Count == 0 && sent.Count == sentBefore + 4,
+              "asset cache wiring: another epoch asks the host again", log);
+        UnityEngine.Object.DestroyImmediate(go);
     }
 
     // ---------------------------------------------------------------- the Models viewport's background

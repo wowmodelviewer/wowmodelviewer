@@ -4,11 +4,13 @@
 // localhost TCP listener before launching the player and passes the port on the player
 // command line ("-wmvPort <n>"); the player connects back, announces itself and then asks
 // WMV for whatever it needs. Transport: newline-delimited JSON (one object per line),
-// protocol version 8 (4 added world models: loadWoWModel "kind", mapObjectLoaded and runtimeState;
+// protocol version 9 (4 added world models: loadWoWModel "kind", mapObjectLoaded and runtimeState;
 // 5 added mounted characters: characterScene "mount", its answer's mount fields, runtimeState's
 // mountFileDataID, modelAnimation "role" and "load", and modelAnimationState "load", "hasRider" and
 // "rider"; 6 added captureScreenshot and its answer screenshotSaved; 7 added viewportBackground and
-// runtimeState's background fields; 8 added loadWoWModel "keepView" and runtimeState's keptViews).
+// runtimeState's background fields; 8 added loadWoWModel "keepView" and runtimeState's keptViews; 9 added the asset
+// cache: loadWoWModel and prefetchAssets "assetEpoch", assetResponse "cacheable", prefetchAssets, and runtimeState's
+// assetCache fields -- see WmvAssetCache).
 //
 // The player is WMV's new renderer foundation and renders directly from WoW data: it
 // requests raw assets and metadata from WMV -- which owns the app UI, the active
@@ -54,7 +56,9 @@
 //   runtimeState          { query, liveMapObjects, liveModels, modelFileDataID, mapObjectFileDataID, loading,
 //                           mountFileDataID, mountKey, liveMounts, mountsBuilt, mountSeat, mountSeatBone,
 //                           modelSequence, mountSequence, mountEmitters, mountRibbons, mountParticles,
-//                           bodyRebinds, viewFramings, backgroundR, backgroundG, backgroundB }
+//                           bodyRebinds, viewFramings, keptViews, backgroundR, backgroundG, backgroundB,
+//                           assetCacheEntries, assetCacheBytes, assetCacheHits, assetCacheJoins, assetCacheEvictions,
+//                           assetEpoch }
 //     the answer to runtimeState: what the player holds right now -- the runtimes alive, the
 //     fileDataID of the model and of the world model on screen (0 for none), whether a load of
 //     either kind is in flight, and the mount the model on screen rides (0 for none) with its key,
@@ -87,8 +91,14 @@
 //     line with a channel outside that is refused). The player keeps it until the next one, a model load
 //     does not reset it; the host sends it at every unityReady, and also passes it on the command line
 //     ("-wmvBackground RRGGBB") so the first frame already shows it (WmvMain.ApplyViewportBackground)
-//   assetResponse { requestId, ok, path, fileDataID, byteLength, sha1, encoding:"base64", data }
+//   assetResponse { requestId, ok, path, fileDataID, byteLength, sha1, encoding:"base64", data, cacheable }
 //   assetResponse { requestId, ok:false, error }
+//     cacheable (protocol 9, sent only when true): a file of the client's own storage, the same for as long as the
+//     client is -- kept by the asset cache under the epoch of the request that asked for it. An answer the cache
+//     gives is handed out in Update after the host's messages, within a time budget a frame
+//   prefetchAssets { assetEpoch, fileDataIDs:[...] }                              (protocol 9)
+//     the models the host expects next (the other model generation of the character on screen): fetched into the
+//     asset cache, each with its skin and skeleton files, and kept with what the model on screen uses
 //   modelTextures { requestId, ok, fileDataID, textures:[{ index, type, fileDataID, source }] }
 //   modelSkin     { fileDataID, textures:[...], geosets:[...], hasGeosets,
 //                   hasSubmeshVisible, submeshCount, submeshVisible:[0|1,...] }  (pushed, no request)
@@ -141,10 +151,11 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Threading;
 using UnityEngine;
+using Wmv.Wow;
 
 public class WmvIpcClient : MonoBehaviour
 {
-    public const int ProtocolVersion = 8;
+    public const int ProtocolVersion = 9;
 
     /// <summary>The loadWoWModel kind of a world model; anything else is an M2.</summary>
     public const string KindMapObject = "wmo";
@@ -174,11 +185,19 @@ public class WmvIpcClient : MonoBehaviour
         public string path;
         public int fileDataID;
         public int byteLength;
-        public string sha1;        // as reported by WMV
+        public string sha1;        // as reported by WMV (empty for an answer from the asset cache)
         public string error;
-        public byte[] data;        // decoded bytes (null on error)
-        public string localSha1;   // computed here over the decoded bytes
-        public bool hashMatches { get { return ok && data != null && localSha1 == (sha1 ?? "").ToLowerInvariant(); } }
+        public byte[] data;        // decoded bytes (null on error); shared with the asset cache: read, never written
+        public bool fromCache;     // answered by the asset cache, or by joining the same request already out
+
+        /// <summary>The same answer for another request (one that joined this one while it was out).</summary>
+        public AssetResponse For(string otherRequestId)
+        {
+            var copy = (AssetResponse)MemberwiseClone();
+            copy.requestId = otherRequestId;
+            copy.fromCache = true;
+            return copy;
+        }
     }
 
     public class ModelTextureRef
@@ -530,7 +549,14 @@ public class WmvIpcClient : MonoBehaviour
         public SceneMerged[] merged;
         public SceneAttachment[] attachments;
         public SceneMount mount;
+        // protocol 9: the asset cache
+        public int assetEpoch;        // loadWoWModel, prefetchAssets: the host's client epoch (0 from an older host)
+        public bool cacheable;        // assetResponse: a file of the client's own storage
+        public int[] fileDataIDs;     // prefetchAssets
         [NonSerialized] public CharacterImage decodedImage;
+        [NonSerialized] public byte[] assetBytes;     // assetResponse: decoded on the reader thread, or the cache's bytes
+        [NonSerialized] public string decodeError;    // assetResponse: why the base64 did not decode
+        [NonSerialized] public bool fromCache;        // assetResponse: made here, from the asset cache
     }
 
     int port = -1;
@@ -541,6 +567,16 @@ public class WmvIpcClient : MonoBehaviour
     volatile bool connected;
     readonly object sendLock = new object();
     readonly Queue<Msg> inbox = new Queue<Msg>();
+    // The session asset cache (protocol 9): main thread only, like everything but the socket read.
+    readonly WmvAssetCache cache = new WmvAssetCache();
+    // Its answers, handed out in Update after the host's messages, within LocalAnswerBudgetMs a frame (at least one):
+    // a load the cache answers whole would otherwise parse its model, skin and textures and build the body in one
+    // frame, and the model on screen would stand still for all of it.
+    readonly Queue<Msg> localAnswers = new Queue<Msg>();
+    const double LocalAnswerBudgetMs = 8.0;
+
+    /// <summary>The asset cache, for the self-test and the log.</summary>
+    public WmvAssetCache Cache { get { return cache; } }
 
     /// <summary>
     /// One clock for "when did this message arrive" and "what time is it now", readable from
@@ -644,6 +680,10 @@ public class WmvIpcClient : MonoBehaviour
                             msg.decodedImage = DecodeCharacterImage(msg);
                             msg.data = null;
                         }
+                        // So is an asset: tens of megabytes of base64 for a character model, which decoded in
+                        // Dispatch held the frame it landed in.
+                        else if (msg.type == "assetResponse")
+                            DecodeAsset(msg);
                         lock (inbox) inbox.Enqueue(msg);
                     }
                 }
@@ -679,12 +719,39 @@ public class WmvIpcClient : MonoBehaviour
             Msg msg;
             lock (inbox)
             {
-                if (inbox.Count == 0) return;
+                if (inbox.Count == 0) break;
                 msg = inbox.Dequeue();
             }
             try { Dispatch(msg); }
             catch (Exception e) { Debug.LogWarning("WMV IPC: handler failed: " + e.Message); }
         }
+
+        // The asset cache's answers, after the host's messages of this frame: at least one, then as many as fit the
+        // budget (an answer that asks for another cached file queues it here, for this frame or the next).
+        var clock = System.Diagnostics.Stopwatch.StartNew();
+        while (localAnswers.Count > 0)
+        {
+            Msg answer = localAnswers.Dequeue();
+            try { Dispatch(answer); }
+            catch (Exception e) { Debug.LogWarning("WMV IPC: handler failed: " + e.Message); }
+            if (clock.Elapsed.TotalMilliseconds >= LocalAnswerBudgetMs)
+                break;
+        }
+    }
+
+    /// <summary>An assetResponse's base64 payload as bytes (reader thread); the text is dropped either way.</summary>
+    static void DecodeAsset(Msg msg)
+    {
+        if (msg.ok && msg.encoding == "base64" && !string.IsNullOrEmpty(msg.data))
+        {
+            try { msg.assetBytes = Convert.FromBase64String(msg.data); }
+            catch (Exception e)   // a bad payload or no memory for it: this answer fails, the connection stays
+            {
+                msg.assetBytes = null;
+                msg.decodeError = e.GetType().Name + ": " + e.Message;
+            }
+        }
+        msg.data = null;
     }
 
     /// <summary>
@@ -881,6 +948,10 @@ public class WmvIpcClient : MonoBehaviour
         switch (msg.type)
         {
             case "loadWoWModel":
+                // The files of the two loads before this one stay (a character switched back and forth); older ones go.
+                // A host before protocol 9 states no epoch, and nothing is kept.
+                cache.SetEpoch(msg.assetEpoch);
+                cache.BeginGeneration(msg.fileDataID);
                 // An absent kind is an M2: that is what every host before protocol 4 meant.
                 OnLoadWoWModel?.Invoke(msg.path ?? "", msg.fileDataID, msg.client ?? "active", msg.character, msg.load,
                                        string.IsNullOrEmpty(msg.kind) ? "m2" : msg.kind, msg.keepView);
@@ -948,38 +1019,34 @@ public class WmvIpcClient : MonoBehaviour
                 var r = new AssetResponse
                 {
                     requestId = msg.requestId, ok = msg.ok, path = msg.path, fileDataID = msg.fileDataID,
-                    byteLength = msg.byteLength, sha1 = msg.sha1, error = msg.error,
+                    byteLength = msg.byteLength, sha1 = msg.sha1, error = msg.error, fromCache = msg.fromCache,
                 };
                 if (msg.ok)
                 {
-                    // JsonUtility materialises absent string fields as "" (never null).
-                    if (msg.encoding == "base64" && !string.IsNullOrEmpty(msg.data))
-                    {
-                        try
-                        {
-                            r.data = Convert.FromBase64String(msg.data);
-                            using (var sha = SHA1.Create())
-                                r.localSha1 = BitConverter.ToString(sha.ComputeHash(r.data)).Replace("-", "").ToLowerInvariant();
-                        }
-                        catch (FormatException e)
-                        {
-                            // Attribute the failure to this request instead of orphaning it.
-                            r.ok = false;
-                            r.data = null;
-                            r.error = "base64 decode failed: " + e.Message;
-                        }
-                    }
+                    // Decoded on the reader thread, or the cache's own bytes. JsonUtility materialises absent string
+                    // fields as "" (never null).
+                    if (msg.assetBytes != null)
+                        r.data = msg.assetBytes;
                     else
                     {
+                        // Attributed to this request instead of orphaning it.
                         r.ok = false;
-                        r.error = string.IsNullOrEmpty(msg.encoding)
-                            ? "assetResponse without encoding/data"
-                            : "unsupported encoding: " + msg.encoding;
+                        r.error = !string.IsNullOrEmpty(msg.decodeError) ? "base64 decode failed: " + msg.decodeError
+                                : string.IsNullOrEmpty(msg.encoding) ? "assetResponse without encoding/data"
+                                : "unsupported encoding: " + msg.encoding;
                     }
                 }
-                OnAssetResponse?.Invoke(r);
+                AnswerAsset(r, msg.fromCache ? null : cache.EndFlight(msg.requestId), msg.cacheable);
                 break;
             }
+
+            // The models the host expects next (protocol 9): fetched now, while nothing waits for them.
+            case "prefetchAssets":
+                cache.SetEpoch(msg.assetEpoch);
+                if (msg.fileDataIDs != null)
+                    foreach (int id in msg.fileDataIDs)
+                        Prefetch(id, WmvAssetCache.FileKind.Model);
+                break;
 
             default:
                 Debug.LogWarning("WMV IPC: unknown message type '" + msg.type + "'");
@@ -989,18 +1056,136 @@ public class WmvIpcClient : MonoBehaviour
 
     // ---- requests to WMV ----
 
-    public string RequestAsset(string path)
+    // Every asset request goes through these. An answer comes back through OnAssetResponse with the id returned, never
+    // before the call has returned: one the asset cache gives is queued for Update like an answer from the host.
+    // cacheable false keeps a request out of the cache (a world model's files: hundreds of megabytes, loaded once).
+
+    public string RequestAsset(string path) { return RequestAsset(path, 0, true); }
+
+    public string RequestAsset(string path, bool cacheable) { return RequestAsset(path, 0, cacheable); }
+
+    /// <summary>A file by its path, asked for by path; knownFileDataID (0 for none) is the FileDataID the host stated
+    /// for it, so the cache finds it -- and a prefetch of it still arriving -- by that.</summary>
+    public string RequestAsset(string path, int knownFileDataID, bool cacheable)
     {
         var id = NewRequestId();
+        if (cacheable && AnsweredHere(id, knownFileDataID > 0 ? knownFileDataID : 0, path))
+            return id;
         Send("{\"type\":\"getAsset\",\"requestId\":\"" + id + "\",\"path\":\"" + Escape(path) + "\"}");
         return id;
     }
 
-    public string RequestAssetByFileDataID(int fileDataID)
+    public string RequestAssetByFileDataID(int fileDataID) { return RequestAssetByFileDataID(fileDataID, true); }
+
+    public string RequestAssetByFileDataID(int fileDataID, bool cacheable)
     {
         var id = NewRequestId();
-        Send("{\"type\":\"getAssetByFileDataID\",\"requestId\":\"" + id + "\",\"fileDataID\":" + fileDataID + "}");
+        if (cacheable && AnsweredHere(id, fileDataID, null))
+            return id;
+        SendAssetRequest(id, fileDataID);
         return id;
+    }
+
+    void SendAssetRequest(string id, int fileDataID)
+    {
+        Send("{\"type\":\"getAssetByFileDataID\",\"requestId\":\"" + id + "\",\"fileDataID\":" + fileDataID + "}");
+    }
+
+    /// <summary>
+    /// A request the asset cache answers -- from the files it keeps (queued for Update) or by joining the same request
+    /// already out -- returns true and sends nothing. Otherwise the request goes out as a flight others can join.
+    /// </summary>
+    bool AnsweredHere(string id, int fileDataID, string path)
+    {
+        if (!cache.Enabled)
+            return false;
+        WmvAssetCache.Entry held = cache.Take(fileDataID, path);
+        if (held != null)
+        {
+            var msg = new Msg
+            {
+                type = "assetResponse", requestId = id, ok = true, fileDataID = held.FileDataID, path = held.Path ?? "",
+                byteLength = held.Data.Length, assetBytes = held.Data, fromCache = true,
+            };
+            localAnswers.Enqueue(msg);
+            return true;
+        }
+        if (cache.Join(fileDataID, path, id))
+            return true;
+        cache.BeginFlight(fileDataID, path, id, WmvAssetCache.FileKind.Other, false);
+        return false;
+    }
+
+    /// <summary>
+    /// An asset answer to whoever asked: the request it answers and every request that joined it while it was out. A
+    /// prefetch's answer goes to nobody but the requests that joined it: it fills the cache and fetches the files its
+    /// model needs with it. A prefetch that failed is asked again for the first request that joined it.
+    /// </summary>
+    void AnswerAsset(AssetResponse r, WmvAssetCache.Flight flight, bool cacheable)
+    {
+        if (flight != null && r.ok && cacheable)
+            cache.Store(flight, r.fileDataID, r.path, r.data);
+        if (flight != null && flight.Prefetch && !r.ok && flight.Waiters.Count > 0)
+        {
+            Debug.Log("WMV: asset cache: prefetch of " + flight.FileDataID + " failed (" + r.error + ") -- asked again for the load that joined it");
+            string first = flight.Waiters[0];
+            WmvAssetCache.Flight again = cache.BeginFlight(flight.FileDataID, flight.Path, first, flight.Kind, false);
+            for (int i = 1; i < flight.Waiters.Count; i++)
+                again.Waiters.Add(flight.Waiters[i]);
+            SendAssetRequest(first, flight.FileDataID);
+            return;
+        }
+        if (flight == null || !flight.Prefetch)
+            OnAssetResponse?.Invoke(r);
+        if (flight == null)
+            return;
+        foreach (string waiter in flight.Waiters)
+            OnAssetResponse?.Invoke(r.For(waiter));
+        if (flight.Prefetch && r.ok)
+            ContinuePrefetch(flight.Kind, r.data);
+    }
+
+    /// <summary>
+    /// Fetch a file into the asset cache (protocol 9 prefetchAssets), and what it needs with it: a model's first skin
+    /// profile and its skeleton, a skeleton's parent. A file the cache already holds is kept for one more load instead.
+    /// </summary>
+    void Prefetch(int fileDataID, WmvAssetCache.FileKind kind)
+    {
+        if (!cache.Enabled || fileDataID <= 0)
+            return;
+        cache.Protect(fileDataID);
+        byte[] held = cache.Touch(fileDataID);
+        if (held != null)
+        {
+            ContinuePrefetch(kind, held);
+            return;
+        }
+        if (cache.InFlight(fileDataID))
+            return;
+        var id = NewRequestId();
+        cache.BeginFlight(fileDataID, null, id, kind, true);
+        Debug.Log("WMV: asset cache: prefetching " + fileDataID + " (" + kind + ")");
+        SendAssetRequest(id, fileDataID);
+    }
+
+    void ContinuePrefetch(WmvAssetCache.FileKind kind, byte[] data)
+    {
+        if (kind == WmvAssetCache.FileKind.Model)
+        {
+            int[] skins;
+            int skeleton;
+            M2Parser.ReadRelatedFileIds(data, out skins, out skeleton);
+            if (skins.Length > 0)
+                Prefetch(skins[0], WmvAssetCache.FileKind.Other);
+            if (skeleton > 0)
+                Prefetch(skeleton, WmvAssetCache.FileKind.Skeleton);
+        }
+        else if (kind == WmvAssetCache.FileKind.Skeleton)
+        {
+            int parent = M2Parser.ReadSkeletonParentId(data);
+            if (parent > 0)
+                Prefetch(parent, WmvAssetCache.FileKind.Other);   // the loaders read one parent level: never walk on
+        }
     }
 
     /// <summary>Ask WMV which textures a model needs (it resolves them from the client DB).</summary>
@@ -1182,7 +1367,13 @@ public class WmvIpcClient : MonoBehaviour
              ",\"keptViews\":" + r.KeptViews +
              ",\"backgroundR\":" + r.Background.r +
              ",\"backgroundG\":" + r.Background.g +
-             ",\"backgroundB\":" + r.Background.b + "}");
+             ",\"backgroundB\":" + r.Background.b +
+             ",\"assetCacheEntries\":" + cache.Count +
+             ",\"assetCacheBytes\":" + cache.Bytes +
+             ",\"assetCacheHits\":" + cache.Hits +
+             ",\"assetCacheJoins\":" + cache.Joins +
+             ",\"assetCacheEvictions\":" + cache.Evictions +
+             ",\"assetEpoch\":" + cache.Epoch + "}");
     }
 
     /// <summary>What a screenshotSaved answer carries (ReportScreenshotSaved). Times in milliseconds.</summary>
@@ -1235,8 +1426,30 @@ public class WmvIpcClient : MonoBehaviour
         return sb.ToString();
     }
 
+    // ---- self-test seams (WmvLifecycleSelfTest.AssetCacheWiringTests): no connection needed ----
+
+    /// <summary>Every line the client would send, before it checks for a connection.</summary>
+    internal Action<string> SentForTest;
+
+    /// <summary>A message from the host, as the reader thread would hand it over (assetResponse bytes already
+    /// decoded), dispatched now.</summary>
+    internal void FeedForTest(string type, string requestId, bool ok, int fileDataID, string path, byte[] bytes,
+                              bool cacheable, int assetEpoch, int[] fileDataIDs)
+    {
+        Dispatch(new Msg
+        {
+            type = type, requestId = requestId, ok = ok, fileDataID = fileDataID, path = path ?? "", assetBytes = bytes,
+            byteLength = bytes != null ? bytes.Length : 0, encoding = "base64", cacheable = cacheable,
+            assetEpoch = assetEpoch, fileDataIDs = fileDataIDs,
+        });
+    }
+
+    /// <summary>One frame's Update: the host's messages, then the asset cache's answers within the budget.</summary>
+    internal void PumpForTest() { Update(); }
+
     void Send(string json)
     {
+        SentForTest?.Invoke(json);
         lock (sendLock)
         {
             if (stream == null) return;
@@ -1264,5 +1477,282 @@ public class WmvIpcClient : MonoBehaviour
         stopping = true;
         try { stream?.Close(); } catch { }
         try { client?.Close(); } catch { }
+    }
+}
+
+/// <summary>
+/// THE SESSION ASSET CACHE (protocol 9). The asset files the player was given for its last three model loads, and the
+/// ones the host asked to prefetch, kept so a request for one of them is answered here instead of by the host. A
+/// character switched to its other model generation and back asks the host for nothing it already sent; the host
+/// prefetches the other generation of the character on screen (prefetchAssets), so the first switch does not either.
+///
+/// What is kept: files of the client's own storage (the host marks them "cacheable"; a custom-folder override is not),
+/// keyed by FileDataID and by the paths requests named, under the host's client epoch (assetEpoch): the same
+/// FileDataID is another file in another client, so a new epoch empties the cache, and an answer to a request sent
+/// under an older epoch is not kept. A host that states no epoch (before protocol 9) gets no caching at all.
+///
+/// For how long: each model load starts a generation (BeginGeneration); a file is kept while the load that used it is
+/// the current one or one of the two before it. Switching A -> B -> A, the third load finds everything A used the
+/// first time (its animation files too), and B's files for the switch after that. A prefetched file counts as used by
+/// the current load.
+///
+/// How much: at most Budget bytes. Item, mount and texture browsing on one character starts no new load, so past the
+/// budget the least recently used files go -- files of earlier loads first -- but never the model on screen or the
+/// model the host prefetched for the next switch, nor the skin and skeleton files fetched with it (Protected).
+///
+/// Requests already out are flights: a second request for the same file joins the first and is answered with it,
+/// so a switch made while its prefetch is still arriving waits for that transfer instead of starting another.
+/// Main thread only. The bytes are shared with every consumer, which read them and never write them.
+/// </summary>
+public class WmvAssetCache
+{
+    public enum FileKind { Model, Skeleton, Other }
+
+    public class Entry
+    {
+        public int FileDataID;
+        public string Path;
+        public byte[] Data;
+        public int UsedInGeneration;
+        public long LastUse;
+        public readonly List<string> Paths = new List<string>();   // the path-index keys that name this entry
+    }
+
+    public class Flight
+    {
+        public string RequestId;
+        public int FileDataID;
+        public string Path;
+        public int Epoch;
+        public FileKind Kind;
+        public bool Prefetch;
+        public readonly List<string> Waiters = new List<string>();
+        public string Key;
+    }
+
+    /// <summary>
+    /// The byte budget. Measured on Classic Beta: a dressed Human male switched HD -> Classic -> HD -> Classic keeps
+    /// 150 files, 67 MB (both models, their skins, the item models and textures, the animation files used); this is
+    /// about four such working sets. Settable for the self-test.
+    /// </summary>
+    public long Budget = 256L * 1024 * 1024;
+
+    readonly Dictionary<int, Entry> byId = new Dictionary<int, Entry>();
+    readonly Dictionary<string, int> idByPath = new Dictionary<string, int>();
+    readonly Dictionary<string, Flight> flightByKey = new Dictionary<string, Flight>();   // what a request can join
+    readonly Dictionary<string, Flight> flightById = new Dictionary<string, Flight>();    // what an answer ends
+    readonly HashSet<int> protectedIds = new HashSet<int>();   // never evicted for the budget (see Protect)
+    long useClock;
+
+    /// <summary>The host's client epoch; 0 (a host before protocol 9) keeps nothing.</summary>
+    public int Epoch { get; private set; }
+    public int Generation { get; private set; }
+    public int Hits { get; private set; }        // requests answered from the files kept
+    public int Joins { get; private set; }       // requests that joined one already out
+    public int Evictions { get; private set; }   // files dropped for the budget
+    public long Bytes { get; private set; }
+    public int Count { get { return byId.Count; } }
+    public bool Enabled { get { return Epoch > 0; } }
+
+    static string KeyOf(int fileDataID, string path)
+    {
+        return fileDataID > 0 ? "f:" + fileDataID : "p:" + (path ?? "");
+    }
+
+    /// <summary>The epoch the host states. A different one empties the cache; flights already out are still answered,
+    /// but nothing joins them and their answers are not kept.</summary>
+    public void SetEpoch(int epoch)
+    {
+        if (epoch == Epoch)
+            return;
+        byId.Clear();
+        idByPath.Clear();
+        flightByKey.Clear();
+        protectedIds.Clear();
+        Bytes = 0;
+        Epoch = epoch;
+    }
+
+    /// <summary>A model load begins (modelFileDataID, 0 when unknown): the files none of it and the two loads before it
+    /// used go. The model it loads is protected from the budget; what the last load protected for its switch is not.</summary>
+    public void BeginGeneration(int modelFileDataID)
+    {
+        Generation++;
+        protectedIds.Clear();
+        if (modelFileDataID > 0)
+            protectedIds.Add(modelFileDataID);
+        var gone = new List<int>();
+        foreach (Entry e in byId.Values)
+            if (e.UsedInGeneration < Generation - 2)
+                gone.Add(e.FileDataID);
+        foreach (int id in gone)
+            Remove(id);
+    }
+
+    /// <summary>Keep a file through the budget until the next load (the model prefetched for a switch, and its skin and
+    /// skeleton files).</summary>
+    public void Protect(int fileDataID)
+    {
+        if (fileDataID > 0)
+            protectedIds.Add(fileDataID);
+    }
+
+    void Remove(int fileDataID)
+    {
+        Entry e;
+        if (!byId.TryGetValue(fileDataID, out e))
+            return;
+        byId.Remove(fileDataID);
+        Bytes -= e.Data.Length;
+        foreach (string p in e.Paths)
+        {
+            int id;
+            if (idByPath.TryGetValue(p, out id) && id == fileDataID)
+                idByPath.Remove(p);
+        }
+    }
+
+    Entry Find(int fileDataID, string path)
+    {
+        if (!Enabled)
+            return null;
+        int id = fileDataID;
+        if (id <= 0 && !string.IsNullOrEmpty(path) && !idByPath.TryGetValue(path, out id))
+            return null;
+        Entry e;
+        return byId.TryGetValue(id, out e) ? e : null;
+    }
+
+    /// <summary>Whether the file is kept, without using it (no hit, no new stamp).</summary>
+    public bool Holds(int fileDataID)
+    {
+        return Find(fileDataID, null) != null;
+    }
+
+    /// <summary>The file for a request, kept for this load too; null when it is not here.</summary>
+    public Entry Take(int fileDataID, string path)
+    {
+        Entry e = Find(fileDataID, path);
+        if (e == null)
+            return null;
+        e.UsedInGeneration = Generation;
+        e.LastUse = ++useClock;
+        Hits++;
+        return e;
+    }
+
+    /// <summary>The bytes of a file kept for this load too (a prefetch of a file already here); null when not here.</summary>
+    public byte[] Touch(int fileDataID)
+    {
+        Entry e = Find(fileDataID, null);
+        if (e == null)
+            return null;
+        e.UsedInGeneration = Generation;
+        e.LastUse = ++useClock;
+        return e.Data;
+    }
+
+    public bool InFlight(int fileDataID)
+    {
+        return flightByKey.ContainsKey(KeyOf(fileDataID, null));
+    }
+
+    /// <summary>A request out for the file: requestId will be answered with it. A path the joining request named is
+    /// kept with the flight, so the answer is found by it too.</summary>
+    public bool Join(int fileDataID, string path, string requestId)
+    {
+        Flight f;
+        if (!Enabled || !flightByKey.TryGetValue(KeyOf(fileDataID, path), out f))
+            return false;
+        f.Waiters.Add(requestId);
+        if (string.IsNullOrEmpty(f.Path) && !string.IsNullOrEmpty(path))
+            f.Path = path;
+        Joins++;
+        return true;
+    }
+
+    public Flight BeginFlight(int fileDataID, string path, string requestId, FileKind kind, bool prefetch)
+    {
+        var f = new Flight
+        {
+            RequestId = requestId, FileDataID = fileDataID, Path = path, Epoch = Epoch, Kind = kind, Prefetch = prefetch,
+            Key = KeyOf(fileDataID, path),
+        };
+        flightById[requestId] = f;
+        if (Enabled)
+            flightByKey[f.Key] = f;
+        return f;
+    }
+
+    /// <summary>The flight an answer ends, or null for an answer to a request the cache never saw.</summary>
+    public Flight EndFlight(string requestId)
+    {
+        Flight f;
+        if (requestId == null || !flightById.TryGetValue(requestId, out f))
+            return null;
+        flightById.Remove(requestId);
+        Flight current;
+        if (flightByKey.TryGetValue(f.Key, out current) && current == f)
+            flightByKey.Remove(f.Key);
+        return f;
+    }
+
+    void Index(Entry e, string path)
+    {
+        if (string.IsNullOrEmpty(path))
+            return;
+        int other;
+        if (idByPath.TryGetValue(path, out other) && other != e.FileDataID)
+        {
+            Entry o;
+            if (byId.TryGetValue(other, out o))
+                o.Paths.Remove(path);
+        }
+        idByPath[path] = e.FileDataID;
+        if (!e.Paths.Contains(path))
+            e.Paths.Add(path);
+    }
+
+    /// <summary>Keep a file a flight brought: by its FileDataID, and by the path asked for and the path answered.
+    /// Not when the flight was asked under another epoch, nor a file with no FileDataID. Past the budget, the least
+    /// recently used files that are not protected go, earlier loads' first.</summary>
+    public void Store(Flight f, int fileDataID, string answeredPath, byte[] data)
+    {
+        if (!Enabled || f == null || f.Epoch != Epoch || fileDataID <= 0 || data == null)
+            return;
+        Entry old;
+        if (byId.TryGetValue(fileDataID, out old))
+            Remove(fileDataID);
+        var e = new Entry
+        {
+            FileDataID = fileDataID, Path = string.IsNullOrEmpty(answeredPath) ? f.Path : answeredPath, Data = data,
+            UsedInGeneration = Generation, LastUse = ++useClock,
+        };
+        byId[fileDataID] = e;
+        Bytes += data.Length;
+        Index(e, f.Path);
+        Index(e, answeredPath);
+        KeepWithinBudget(fileDataID);
+    }
+
+    void KeepWithinBudget(int justStored)
+    {
+        while (Bytes > Budget)
+        {
+            Entry victim = null;
+            foreach (Entry e in byId.Values)
+            {
+                if (e.FileDataID == justStored || protectedIds.Contains(e.FileDataID))
+                    continue;
+                bool older = e.UsedInGeneration < Generation;
+                if (victim == null || (older && victim.UsedInGeneration >= Generation) ||
+                    (older == (victim.UsedInGeneration < Generation) && e.LastUse < victim.LastUse))
+                    victim = e;
+            }
+            if (victim == null)
+                return;   // nothing that may go: what is protected and just stored stays, over the budget
+            Remove(victim.FileDataID);
+            Evictions++;
+        }
     }
 }

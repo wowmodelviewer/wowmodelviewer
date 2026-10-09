@@ -33,6 +33,11 @@ public:
   // ModelViewer::characterVariantState says, with the reason or the last switch's note under it.
   void syncModelVariant();
 
+  // The rows put off while a character was rebuilt on its other model generation (ModelViewer::variantSwitching),
+  // built now -- once, for the dressed character, when it is the live one (CharControl's model). A switch whose loads
+  // all failed left a model that is gone: then nothing is built and the panel lets go of it.
+  void buildDeferredRows(const WoWModel * live);
+
   void onEvent(Event *) override;
 
 protected:
@@ -65,6 +70,7 @@ private:
 
   WoWModel * model_;
   bool rebuildPending_ = false;
+  bool rowsDeferred_ = false;
 };
 
 

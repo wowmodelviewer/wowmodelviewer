@@ -23,7 +23,13 @@ namespace
   // load yields to the event loop (loading dialog), so an IPC poll can land mid-load; requests
   // are refused cleanly instead of querying a half-built folder.
   int g_clientLoadDepth = 0;
+
+  // See clientEpoch(). Starts at 1: 0 is what a player hears from a host that keeps no epoch.
+  int g_clientEpoch = 1;
 }
+
+int UnityAssetAccess::clientEpoch() { return g_clientEpoch; }
+void UnityAssetAccess::noteClientReplaced() { g_clientEpoch++; }
 
 UnityAssetAccess::ClientLoadGuard::ClientLoadGuard() { g_clientLoadDepth++; }
 UnityAssetAccess::ClientLoadGuard::~ClientLoadGuard() { g_clientLoadDepth--; }
@@ -121,6 +127,7 @@ namespace
         if (got == size)
         {
           r.data = bytes;
+          r.fromClientStorage = true;   // a stream read is a storage read (overrides took the memory path above)
           return true;
         }
         // Nothing read from a storage file, which does have a stream read, is a failed read too (an
@@ -170,6 +177,7 @@ namespace
     }
     r.data = QByteArray(reinterpret_cast<const char *>(raw), (int)rawSize);
     file->close();
+    r.fromClientStorage = dynamic_cast<HardDriveFile *>(file) == nullptr;
     return true;
   }
 }

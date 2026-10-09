@@ -1248,8 +1248,10 @@ void ModelViewer::LoadModel(GameFile * file, int raceID, int sexID)
   SendCurrentSkinToUnity();
 
   // The Model panel, the command bar, the status bar and the viewport (the model, or a notice when
-  // the Unity viewport cannot draw it yet) follow the new model.
-  DisplayedContentChanged();
+  // the Unity viewport cannot draw it yet) follow the new model -- a character rebuilt on its other model generation
+  // once it is dressed, at the end of SwitchCharacterVariant, not here as well.
+  if (m_variantSwitching == 0)
+    DisplayedContentChanged();
 
   // Lay out ONLY if a pane's shown state actually changed. An unconditional Update() here erased and
   // repainted the whole window, player included, on every load: see CommitLayoutIfChanged.
@@ -2150,8 +2152,10 @@ void ModelViewer::CreateUnityViewport()
     // ... nor a world model (it is loaded again below, and the new player answers for it).
     m_unityWmoFailed = 0;
     m_unityWmoFailReason.clear();
-    // A new player shows nothing yet, and no answer from the one before it is awaited any more.
+    // A new player shows nothing yet, and no answer from the one before it is awaited any more. Nor does it hold any
+    // asset file: the character's other model is hinted again once it is on screen.
     m_playerContent = PlayerContent::Nothing;
+    m_assetHintLoad = 0;
     m_mapObjectAwaited = 0;
     m_uncoverFence = 0;
     m_modelAwaited = 0;
@@ -3170,6 +3174,10 @@ void ModelViewer::OnCharacterSceneApplied(const UnityIpcServer::SceneAck & ack)
   // The character the player is loaded with: the canvas model, or the rider of a mount the player seats.
   const WoWModel * character = unityCharacter();
   const bool current = character && (int)character->gamefile->fileDataId() == ack.fileDataID;
+  // On screen now: its other model generation is fetched by the player while nothing waits for it, so a switch to it
+  // finds its files there. Decided here, not at the load: an NPC is known as one only once its load returned.
+  if (current && ack.status == "applied" && m_assetHintLoad != m_unityLoadSerial)
+    HintVariantPartner();
   // THE MOUNT (protocol 5) is answered in the same ack but is not the character: a mount the player could not
   // build leaves the character built and on screen, so it is logged here and changes no notice.
   if (current && ack.mountStatus == "failed")
@@ -3892,6 +3900,8 @@ static wxString clientOpenProblem(int error)
 // client's files or database. (The file tree, database, races, NPC and item lists are refilled by the load itself.)
 void ModelViewer::ResetClientState()
 {
+  // The same FileDataID is another file in the next client: the Unity player's asset cache starts over (protocol 9).
+  UnityAssetAccess::noteClientReplaced();
   // ChrModel IDs are one client's.
   m_variantSession.clear();
   m_shownAsCreatureDisplay = false;
@@ -6008,6 +6018,21 @@ ModelViewer::CharacterVariantState ModelViewer::characterVariantState() const
   return state;
 }
 
+void ModelViewer::HintVariantPartner()
+{
+  if (!unityRendererHost || !unityRendererHost->ipc() || !unityRendererHost->ipc()->playerCachesAssets())
+    return;
+  // What the Model selector offers: a player character (no NPC), not mounted, whose other model is in the client and
+  // on this computer.
+  const CharacterVariantState state = characterVariantState();
+  WoWModel * m = riderModel();
+  RaceInfos partner;
+  if (!state.shown || !state.enabled || !m || !RaceInfos::getVariantPartner(m->infos, partner) || partner.modelFileID <= 0)
+    return;
+  if (unityRendererHost->ipc()->sendPrefetchAssets({ partner.modelFileID }))
+    m_assetHintLoad = m_unityLoadSerial;
+}
+
 void ModelViewer::SyncCharacterMenuChecks(const WoWModel * m)
 {
   if (!m || !charMenu)
@@ -6052,8 +6077,10 @@ bool ModelViewer::SwitchCharacterVariant(CharacterModelVariant target, wxString 
     return false;
   }
   // Loading frees the character first: the other model has to be there, readable and an M2 before anything goes.
+  // The check reads it whole and leaves it open, so the load below takes that buffer instead of reading it again.
   wxString fileWhy;
-  if (!ModelIdLookup::checkModelFile(partner.modelFileID, fileWhy))
+  GameFile * partnerRead = nullptr;
+  if (!ModelIdLookup::checkModelFile(partner.modelFileID, fileWhy, &partnerRead))
   {
     why = wxString::Format(_("The %s model (FileDataID %d) %s."), generationName(target), partner.modelFileID, fileWhy);
     return false;
@@ -6154,6 +6181,7 @@ bool ModelViewer::SwitchCharacterVariant(CharacterModelVariant target, wxString 
     charControl->RefreshModel();
     charControl->RefreshEquipment();
     charControl->SyncTabardSpins();
+    charControl->BuildDeferredRows();   // the appearance rows, once, for the dressed character
     if (canvas && canvas->root)
       modelControl->RefreshModel(canvas->root);
     SyncCharacterMenuChecks(n);
@@ -6177,6 +6205,9 @@ bool ModelViewer::SwitchCharacterVariant(CharacterModelVariant target, wxString 
       if (WoWItem * item = m->getItem((CharSlots)slot))
         item->setId(0);
     LoadModel(GAMEDIRECTORY.getFile(partner.modelFileID), raceID, sexID);
+    // The model's load reads and closes the file the check left open; one it never reached is closed here.
+    if (partnerRead && partnerRead->isCurrentlyOpen())
+      partnerRead->close();
     WoWModel * n = riderModel();
     switched = n && n->gamefile && (int)n->gamefile->fileDataId() == partner.modelFileID && !n->infos.ChrModelID.empty() &&
                n->infos.ChrModelID[0] == partner.ChrModelID[0] && n->infos.raceID == raceID && n->infos.sexID == sexID &&
@@ -6224,7 +6255,10 @@ bool ModelViewer::SwitchCharacterVariant(CharacterModelVariant target, wxString 
   }
   DisplayedContentChanged();
   if (charControl)
+  {
+    charControl->BuildDeferredRows();   // a switch that ended before dressing anything
     charControl->SyncModelVariant();
+  }
   return switched;
 }
 

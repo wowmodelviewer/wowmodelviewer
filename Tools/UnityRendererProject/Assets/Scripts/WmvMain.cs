@@ -362,9 +362,12 @@ public partial class WmvMain : MonoBehaviour
 
         job = new LoadJob { Path = path, FileDataID = fileDataID, Character = character, Load = load, KeepView = keepView };
         status.Set("Requested " + (string.IsNullOrEmpty(path) ? ("fileDataID " + fileDataID) : path));
+        // A character's model may come from the asset cache, or join the prefetch of it still arriving (protocol 9): its
+        // scene, sent after the pushes, decides when it goes on screen. Any other model is asked of the host as before:
+        // its skin and geoset pushes then arrive before it does (the order this method's comment above relies on).
         job.PendingM2 = string.IsNullOrEmpty(path)
-            ? ipc.RequestAssetByFileDataID(fileDataID)
-            : ipc.RequestAsset(path);
+            ? ipc.RequestAssetByFileDataID(fileDataID, character)
+            : ipc.RequestAsset(path, fileDataID, character);
     }
 
     void HandleAssetResponse(WmvIpcClient.AssetResponse r)
@@ -1252,8 +1255,27 @@ public partial class WmvMain : MonoBehaviour
     /// </summary>
     bool KeptAnimationReady(LoadJob gated)
     {
-        return gated == null || gated.WaitAnimFile == 0 || gated.WaitAnimFailed ||
-               currentSlot.AnimFileCache.ContainsKey(gated.WaitAnimFile);
+        // Only for the load it was set for, until that load is on screen: the dresser keeps its gate for the scenes
+        // that follow (an appearance change), and those must never wait on it.
+        if (gated == null || gated != job || !gated.KeepView || WmvModelBuilder.Debug_.NoAnim)
+            return true;
+        // The selection AS IT IS NOW: a load the asset cache answers is built before the host has pushed the animation
+        // it restored, so a file asked for at staging can be the previous selection's. The scene this gate opens for is
+        // sent after that push, so by then the selection is the restored one.
+        int sequence = currentSlot.SelectedSequence;
+        if (sequence < 0 || gated.Model == null)
+            return true;
+        int file = M2Parser.ExternalAnimFileId(gated.Model, sequence);
+        if (file == 0 || currentSlot.AnimFileCache.ContainsKey(file))
+            return true;
+        if (file == gated.WaitAnimFile)
+            return gated.WaitAnimFailed;
+        gated.WaitAnimFile = file;
+        gated.WaitAnimFailed = false;
+        currentSlot.PendingAnimFetch[ipc.RequestAssetByFileDataID(file)] = -1;   // fills the cache
+        Debug.Log("WMV: keep-view load: sequence " + sequence + " is in .anim " + file +
+                  " -- the character goes on screen once it is here");
+        return false;
     }
 
     /// <summary>

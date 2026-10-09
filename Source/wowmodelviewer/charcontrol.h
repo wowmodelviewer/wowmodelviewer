@@ -95,6 +95,8 @@ class CharControl : public wxScrolledWindow, public Observer
   void SyncModelVariant();
   // The tabard spin controls follow the model's tabard (ranges first, then values).
   void SyncTabardSpins();
+  // The appearance rows a model variant switch put off (CharDetailsFrame::buildDeferredRows).
+  void BuildDeferredRows();
 
   // A player mount as the mount choice lists it: its name and the CreatureDisplayInfo id it is mounted by.
   struct MountChoice

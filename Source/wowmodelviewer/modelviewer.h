@@ -632,6 +632,11 @@ public:
   // The character on screen is a creature display (View NPC, Load NPC / Model by Creature Display ID), whatever it
   // looks like: it gets no Model selector.
   bool m_shownAsCreatureDisplay = false;
+  // The load whose character's other model generation the player was asked to prefetch (protocol 9), so it is asked
+  // once per load: an answer comes for every scene. 0 for none.
+  int m_assetHintLoad = 0;
+  // Ask the player to prefetch the other model generation of the character on screen, when it has one to switch to.
+  void HintVariantPartner();
 
   // How often the heartbeat above may push while an animation runs. One a second is far below
   // anything a viewer would notice and far above what clock drift needs.
@@ -681,6 +686,8 @@ public:
   // visit takes over what the client's tables pair, and the target model's defaults for the rest. False and why when
   // refused; the character is then as it was.
   bool SwitchCharacterVariant(CharacterModelVariant target, wxString & why);
+  // True while SwitchCharacterVariant rebuilds the character: the character panel builds its rows once, dressed.
+  bool variantSwitching() const { return m_variantSwitching > 0; }
   // The Character menu's checks follow a character's toggles (a load sets them to a new character's).
   void SyncCharacterMenuChecks(const WoWModel * m);
   bool ImportArmoury(wxString strURL);

@@ -98,7 +98,8 @@ public partial class WmvMain
         Debug.Log(string.Format("WMV: wmo: load {0} of root {1} ({2}) begins", load, fileDataID, path));
         // By FileDataID when the host named one: the root's identity is its id, and the path is only the
         // listfile's name for it.
-        wmoJob.PendingRoot = fileDataID > 0 ? ipc.RequestAssetByFileDataID(fileDataID) : ipc.RequestAsset(path);
+        // Not kept by the asset cache: a world model is hundreds of megabytes of files, loaded once.
+        wmoJob.PendingRoot = fileDataID > 0 ? ipc.RequestAssetByFileDataID(fileDataID, false) : ipc.RequestAsset(path, false);
     }
 
     /// <summary>A world-model load in flight will never be shown: say so once, and forget it.</summary>
@@ -267,7 +268,7 @@ public partial class WmvMain
                 j.GroupErrors[i] = "GFID entry is 0";
                 continue;
             }
-            j.PendingGroups[ipc.RequestAssetByFileDataID((int)j.GroupIds[i])] = i;
+            j.PendingGroups[ipc.RequestAssetByFileDataID((int)j.GroupIds[i], false)] = i;
             j.GroupsOutstanding++;
             j.GroupFilesRequested++;
         }
@@ -322,7 +323,7 @@ public partial class WmvMain
         j.TexturesStartMs = j.Clock.Elapsed.TotalMilliseconds;
         foreach (uint id in textureIds)
         {
-            j.PendingTextures[ipc.RequestAssetByFileDataID((int)id)] = id;
+            j.PendingTextures[ipc.RequestAssetByFileDataID((int)id, false)] = id;
             j.TexturesOutstanding++;
         }
         if (j.TexturesOutstanding == 0) j.TexturesDoneMs = j.TexturesStartMs;
