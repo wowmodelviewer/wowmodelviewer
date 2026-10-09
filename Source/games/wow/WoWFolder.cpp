@@ -229,7 +229,22 @@ GameFile * wow::WoWFolder::getFile(int id)
   {
     // Build File########.unk filename needed for CASC lib to open file based on id
     QString filename = QString("File%1.unk").arg(id, 8, 16, QLatin1Char('0'));
-    LOG_INFO << "File with id" << id << "not found in listfile. Trying to open" << filename;
+    // A file of this build that is not on this computer -- one the client never downloads, or one it has not yet (a
+    // Battle.net update under way) -- is left out of the folder even when the listfile names it, so it lands here too.
+    // The probe below still "opens" it (the build knows the file), but its data cannot be read: say so, rather than
+    // blame the listfile.
+    const bool remote = m_CASCFolder.isRemote(id);
+    if (remote)
+    {
+      const char * notHere = "is in this build but not on this computer (not downloaded): it cannot be read";
+      const QString knownName = fileName(id);
+      if (knownName.isEmpty())
+        LOG_WARNING << "File" << id << "(not in listfile)" << notHere;
+      else
+        LOG_WARNING << "File" << id << knownName << notHere;
+    }
+    else
+      LOG_INFO << "File with id" << id << "not found in listfile. Trying to open" << filename;
 
     // Force-open-by-id probe for a file that isn't in the listfile. Route through the active
     // provider so storage stays abstracted (identical to the old direct call for modern CASC);
@@ -239,7 +254,8 @@ GameFile * wow::WoWFolder::getFile(int id)
                                    : m_CASCFolder.openFile(id, &newfile);
     if(opened)
     {
-      LOG_INFO << "Succesfully opened";
+      if (!remote)
+        LOG_INFO << "Succesfully opened";
       if (m_provider)
         m_provider->closeFile(newfile);
       else
