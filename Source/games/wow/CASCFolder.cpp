@@ -218,6 +218,7 @@ void CASCFolder::initBuildInfo()
 void CASCFolder::buildPresentIdIndex()
 {
   m_presentIds.clear();
+  m_remoteIds.clear(); // before any early return: a reused folder must not keep the previous product's answers
   if (!hStorage)
     return;
 
@@ -230,7 +231,6 @@ void CASCFolder::buildPresentIdIndex()
   }
 
   m_presentIds.reserve(1u << 21); // ~2M files in a modern retail build
-  m_remoteIds.clear();
 
   // Progress reporting: the enumeration count isn't known up front, so report a soft fraction
   // against a rough expected total (~4M files in a current retail build) capped below 1.0, just
