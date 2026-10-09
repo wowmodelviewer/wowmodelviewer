@@ -62,10 +62,11 @@ QString UnityAssetAccess::activeProviderName()
 
 namespace
 {
-  // V1 transport ceiling. The response is base64 inside one JSON line, which transiently costs
-  // several times the file size on both ends -- and Qt 5.13's JSON backing silently drops
-  // strings past ~128 MB, which would ship ok:true with no data. Real model assets are a few
-  // MB; refuse anything larger with a clean error until the binary frame lands.
+  // The largest file served. To a player before protocol 10 a file goes base64 inside one JSON line, which
+  // transiently costs several times its size on both ends -- and Qt 5.13's JSON backing silently drops strings past
+  // ~128 MB, which would ship ok:true with no data. To a protocol 10 player it goes as a binary payload, and two
+  // values are sized from this one: UnityIpcServer's SO_SNDBUF and the player's WmvStreamReader.MaxPayloadBytes
+  // (128 MB: a larger payload ends its connection). Change them together; keep this at or below the latter.
   const qint64 MAX_ASSET_SIZE = 64 * 1024 * 1024;
 
   // Copy the whole, RAW file out of a folder-owned GameFile (never ours to delete).
@@ -109,7 +110,7 @@ namespace
       if ((qint64)size > MAX_ASSET_SIZE)
       {
         file->close();
-        r.error = QString("file too large for the V1 base64 transport (%1 bytes)").arg((qulonglong)size);
+        r.error = QString("file too large to serve (%1 bytes, the limit is 64 MB)").arg((qulonglong)size);
         return false;
       }
       if (size > 0)
@@ -172,7 +173,7 @@ namespace
     if ((qint64)rawSize > MAX_ASSET_SIZE)
     {
       file->close();
-      r.error = QString("file too large for the V1 base64 transport (%1 bytes)").arg((qulonglong)rawSize);
+      r.error = QString("file too large to serve (%1 bytes, the limit is 64 MB)").arg((qulonglong)rawSize);
       return false;
     }
     r.data = QByteArray(reinterpret_cast<const char *>(raw), (int)rawSize);

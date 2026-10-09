@@ -1,7 +1,7 @@
 /*
  * UnityIpcServer.h
  *
- * Localhost IPC server for the embedded Unity renderer (protocol v9). WMV is the SERVER:
+ * Localhost IPC server for the embedded Unity renderer (protocol v10). WMV is the SERVER:
  * UnityRendererHost starts this listener BEFORE launching the player and passes the port on
  * the player's command line (-wmvPort <n>); the player connects back, announces itself with
  * unityReady and then asks WMV for the raw WoW assets/metadata it renders from. This is the
@@ -10,9 +10,11 @@
  * only ever sees bytes served here. No files are written to disk; there is no export workflow.
  *
  * Transport: TCP bound to 127.0.0.1 only (ephemeral port), newline-delimited JSON (one
- * object per line, UTF-8). Asset bytes travel base64-encoded inside the assetResponse line in
- * V1 -- simple and debuggable; a binary frame (JSON header + length-prefixed payload) can
- * replace it later without changing the request side.
+ * object per line, UTF-8). BINARY PAYLOADS (protocol 10): to a player that announced protocol 10, an assetResponse's
+ * file and a characterImage's pixels follow their line as raw bytes -- the line states "encoding":"binary" and
+ * "payloadBytes": N, and is followed by exactly N bytes and one newline (queueFrame). The player goes by payloadBytes
+ * alone, and a payload not followed by its newline ends the connection (out of step). An older player gets them
+ * base64-encoded inside the line ("encoding":"base64"), as before.
  *
  * ASSET CACHE (protocol 9). The player keeps the asset files of its last three model loads (and prefetched ones) and
  * answers repeat requests itself: every loadWoWModel states "assetEpoch" (UnityAssetAccess::clientEpoch, changed by
@@ -22,7 +24,7 @@
  * docs/unity-renderer/README.md, "The asset cache".
  *
  *   player -> WMV
- *     { "type":"unityReady", "protocolVersion":9 }
+ *     { "type":"unityReady", "protocolVersion":10 }
  *     { "type":"getAsset",             "requestId":"abc123", "path":"creature/chicken/chicken.m2" }
  *     { "type":"getAssetByFileDataID", "requestId":"abc124", "fileDataID":123456 }
  *     { "type":"getModelTextures",     "requestId":"abc125", "fileDataID":123200 }
@@ -52,7 +54,10 @@
  *     { "type":"runtimeState", "query":3 }
  *     { "type":"captureScreenshot", "request":1, "path":"C:/Shots/bear.png", "width":3840, "height":2160 }
  *     { "type":"assetResponse", "requestId":"abc123", "ok":true, "path":"...", "fileDataID":n,
- *       "byteLength":123456, "sha1":"...", "encoding":"base64", "data":"..." }
+ *       "byteLength":123456, "encoding":"binary", "payloadBytes":123456, "cacheable":true }
+ *       <123456 raw bytes><newline>                                             (protocol 10)
+ *     { "type":"assetResponse", "requestId":"abc123", "ok":true, "path":"...", "fileDataID":n,
+ *       "byteLength":123456, "sha1":"...", "encoding":"base64", "data":"..." }   (a player before protocol 10)
  *     { "type":"assetResponse", "requestId":"abc123", "ok":false, "error":"not found" }
  *     { "type":"modelTextures", "requestId":"abc125", "ok":true, "fileDataID":123200,
  *       "textures":[ { "index":0, "type":11, "fileDataID":123199, "source":"selection" } ] }
@@ -72,8 +77,11 @@
  *       "timeMs":1840, "speed":1.0, "loop":true, "explicitState":false, "sampledAtMs":3629698.6,
  *       "load":12, "hasRider":true,
  *       "rider":{ "sequenceIndex":145, "playing":true, "timeMs":840, "speed":1.0, "loop":true } }
- *     { "type":"characterImage", "hash":"body-3", "width":2048, "height":1024, "format":"bgra8",
- *       "encoding":"base64", "data":"..." }
+ *     { "type":"characterImage", "hash":"body-3", "kind":"body", "width":2048, "height":1024, "format":"bgra8",
+ *       "encoding":"binary", "payloadBytes":8388608 }
+ *       <8388608 raw BGRA bytes><newline>                                       (protocol 10)
+ *     { "type":"characterImage", "hash":"body-3", "kind":"body", "width":2048, "height":1024, "format":"bgra8",
+ *       "encoding":"base64", "data":"..." }                                     (a player before protocol 10)
  *     { "type":"characterScene", "fileDataID":1011653, "revision":4,
  *       "body":{ "textures":[ {"slot":0,"type":1,"image":"body-3"}, {"slot":1,"type":6,"fileDataID":1234} ],
  *                "submeshCount":120, "submeshVisible":[1,0,...], "closeRightHand":true, "closeLeftHand":false },
@@ -252,7 +260,7 @@
 class UnityIpcServer : public wxEvtHandler
 {
 public:
-  static const int PROTOCOL_VERSION = 9;
+  static const int PROTOCOL_VERSION = 10;
 
   UnityIpcServer();
   ~UnityIpcServer();
@@ -286,6 +294,8 @@ public:
   // Protocol 9: the player keeps the asset files of its last two loads (and prefetched ones) under the client epoch
   // loadWoWModel states, and takes prefetchAssets.
   bool playerCachesAssets() const { return m_client && m_unityReady && m_playerProtocol >= 9; }
+  // Protocol 10: the player reads binary payloads (TRANSPORT above), so files and images go raw, not as base64.
+  bool playerTakesBinaryFrames() const { return m_client && m_unityReady && m_playerProtocol >= 10; }
 
   // Runtime command: tell the player which model is active. Either path or fileDataID may be
   // empty/0. Queued if the player is connected; dropped (logged) otherwise.
@@ -530,7 +540,7 @@ public:
     QString lastGeosetAck;  // "rev <n> <status> <reason>" of the last answer
     int scenePushes = 0;    // characterScene messages sent
     int imagePushes = 0;    // characterImage messages sent
-    long long imageBytes = 0;
+    long long imageBytes = 0;   // pixel bytes of the characterImage messages sent (before any base64)
     int sceneAcks = 0;      // characterSceneApplied received, any status
     int sceneApplied = 0;   // ... of which "applied"
     QString lastScene;      // "rev <n>: <merged> merged, <attachments> attached"
@@ -577,6 +587,9 @@ private:
   // One line assembled from pieces straight in the send buffer: a characterImage line is ~11 MB, and
   // joining it into one QByteArray first would copy all of it once more.
   void queueLineParts(std::initializer_list<QByteArray> parts);
+  // A line and the binary payload it announces (protocol 10): header (one JSON object, no newline, stating
+  // "payloadBytes": payload.size()), a newline, the payload, a newline. Only to a player that takes binary frames.
+  void queueFrame(const QByteArray & header, const QByteArray & payload);
   static QJsonArray textureArray(const std::vector<UnityAssetAccess::ModelTexture> & textures);
   // Adds "geosets"/"hasGeosets" to a message about one model, when a selection is known.
   static void addGeosets(QJsonObject & msg, int m2FileDataID);
