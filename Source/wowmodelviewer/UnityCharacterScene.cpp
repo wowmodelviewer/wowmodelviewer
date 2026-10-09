@@ -281,18 +281,6 @@ QJsonObject UnityCharacterScene::build(WoWModel * character, const ImageRef & im
                    character, imageRef, summary);
       }
       o["textures"] = textures;
-      // The passes refreshMerging pointed at the character's hand texture instead of their own.
-      if (!part.handSubmeshes.empty())
-      {
-        QJsonArray hands;
-        for (int s : part.handSubmeshes)
-          hands.append(s);
-        o["handSubmeshes"] = hands;
-        QJsonObject hand;
-        hand["slot"] = -1;
-        if (binding(hand, character->getGLTexture(part.handTexIndex), character, imageRef, summary))
-          o["handTexture"] = hand;
-      }
       o["submeshCount"] = (int)part.geosetCount;
       o["submeshVisible"] = bits(character->geosets, part.geosetStart, part.geosetCount);
       QJsonArray boneMap;

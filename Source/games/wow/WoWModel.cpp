@@ -3310,14 +3310,13 @@ void WoWModel::refreshMerging()
     for (auto & it : modelsIt->indices)
       indices.push_back(it + nbVertices);
 
-    // retrieve tex id associated to model hands (needed for DH)
-    uint16 handTex = ModelRenderPass::INVALID_TEX;
-    for (auto it : passes)
-    {
-      if (geosets[it->geoIndex]->id / 100 == 23)
-        handTex = it->tex;
-    }
-
+    // Every pass of the merged model samples its own textures, at its per-merge offset. (A "hands" rule used to send
+    // some passes to the texture of the last hand-geoset pass merged so far. It was written in 2017 for the one Demon
+    // Hunter model merged then, whose hand slot could not resolve to the body skin, but later that year it started
+    // testing whatever geoset sat at the pass's LOCAL index in the combined list, not the pass's own. From then on it
+    // fired only where indices happened to line up, followed the merge order, and painted Earthen wrist crystals with
+    // a glove's leather. A skin-extra slot with no texture of its own now binds the body composite below, by texture
+    // type, on any geoset.)
     for (auto it : modelsIt->passes)
     {
       ModelRenderPass * p = new ModelRenderPass(*it);
@@ -3340,25 +3339,16 @@ void WoWModel::refreshMerging()
       p->color = -1;
       p->opacity = -1;
 
-      if (geosets[it->geoIndex]->id / 100 != 23) // don't copy texture for hands
-      {
-        p->tex += (mergeIndex * TEXTURE_MAX);
-        // Multi-texture combiner passes carry up to three EXTRA texture units (env-map /
-        // glow / detail). They index the MERGED model's own texture array, so they need the
-        // same per-merge offset as the primary tex. Without this, a combiner unit binds the
-        // PARENT character's texture at that raw index -- e.g. the Mechagnome mech-metal's
-        // unit-1 environment/sphere map (pixelShader 12) sampled the character's body texture
-        // and smeared it across the armor as a wrong "reflection" that moved with the camera.
-        if (p->tex2 != ModelRenderPass::INVALID_TEX) p->tex2 += (mergeIndex * TEXTURE_MAX);
-        if (p->tex3 != ModelRenderPass::INVALID_TEX) p->tex3 += (mergeIndex * TEXTURE_MAX);
-        if (p->tex4 != ModelRenderPass::INVALID_TEX) p->tex4 += (mergeIndex * TEXTURE_MAX);
-      }
-      else
-      {
-        p->tex = handTex; // use regular model texture instead
-        mergedParts_.back().handSubmeshes.push_back(it->geoIndex);
-        mergedParts_.back().handTexIndex = handTex;
-      }
+      p->tex += (mergeIndex * TEXTURE_MAX);
+      // Multi-texture combiner passes carry up to three EXTRA texture units (env-map /
+      // glow / detail). They index the MERGED model's own texture array, so they need the
+      // same per-merge offset as the primary tex. Without this, a combiner unit binds the
+      // PARENT character's texture at that raw index -- e.g. the Mechagnome mech-metal's
+      // unit-1 environment/sphere map (pixelShader 12) sampled the character's body texture
+      // and smeared it across the armor as a wrong "reflection" that moved with the camera.
+      if (p->tex2 != ModelRenderPass::INVALID_TEX) p->tex2 += (mergeIndex * TEXTURE_MAX);
+      if (p->tex3 != ModelRenderPass::INVALID_TEX) p->tex3 += (mergeIndex * TEXTURE_MAX);
+      if (p->tex4 != ModelRenderPass::INVALID_TEX) p->tex4 += (mergeIndex * TEXTURE_MAX);
 
       passes.push_back(p);
     }
