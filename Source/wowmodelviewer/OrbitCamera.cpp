@@ -10,7 +10,7 @@ const float CAMERA_DEFAULT_YAW = 0.0f;
 const float CAMERA_DEFAULT_PITCH = 90.0f;
 const float CAMERA_DEFAULT_RADIUS = 5.0f;
 const float CAMERA_MIN_RADIUS = 0.5f;
-// Large enough to frame whole WMOs/ADTs (buildings, zone pieces span hundreds-thousands of
+// Large enough to frame whole WMOs (buildings, zone pieces span hundreds-thousands of
 // units) while staying inside the projection's far plane (~6400). The old 150 cap meant big
 // WMOs could never be zoomed out far enough to see.
 const float CAMERA_MAX_RADIUS = 5000.0f;

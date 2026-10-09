@@ -19,7 +19,6 @@
 #include "GlobalSettings.h"
 #include "globalvars.h"
 #include "modelviewer.h"
-#include "shaders.h"
 #include "video.h"
 
 #include "glm/glm.hpp"
@@ -139,7 +138,6 @@ ModelCanvas::ModelCanvas(wxWindow *parent, VideoCaps *caps)
   // Set all our pointers to null
   skyModel = nullptr;    // SkyBox Model
   wmo = nullptr;      // world map object model
-  adt = nullptr;      // ADT
   animControl = nullptr;
   gifExporter = nullptr;
   rt = nullptr;        // RenderToTexture class
@@ -366,11 +364,6 @@ Attachment* ModelCanvas::LoadModel(GameFile * file)
   clearAttachments();
   root->setModel(nullptr);
   ClearWMO();
-  // A model replaces a map tile the same way it replaces a WMO. Only FileControl::ClearCanvas used to
-  // drop one, so a model loaded from a menu (an NPC, an item, a character file, an import) left the
-  // tile behind -- and the viewport, which shows a notice for a map tile, kept showing that notice in
-  // front of the model. The root was detached above, so nothing still points at it.
-  wxDELETE(adt);
 
   // Free the previously displayed model. clearAttachments()/setModel(nullptr) only
   // detach it and delete the Attachment wrappers -- the WoWModel itself was never
@@ -401,27 +394,6 @@ Attachment* ModelCanvas::LoadModel(GameFile * file)
   restartClock = true;
 
   return att;
-}
-
-void ModelCanvas::LoadADT(wxString fn)
-{
-  OldinitShaders();
-
-  root->setModel(0);
-  wxDELETE (adt);
-
-  if (!adt) {
-    adt = new MapTile(fn);
-    if (adt->ok) {
-      glm::vec3 vc = adt->topnode.vmax;
-      if (vc.y < 0) vc.y = 0;
-      adt->viewpos.y = vc.y + 50.0f;
-      adt->viewpos.x = adt->xbase;
-      adt->viewpos.z = adt->zbase;
-      root->setModel(adt);
-    } else
-      wxDELETE(adt);
-  }
 }
 
 void ModelCanvas::LoadWMO(wxString fn, int fileDataID)
@@ -565,8 +537,6 @@ void ModelCanvas::OnPaint(wxPaintEvent& WXUNUSED(event))
       RenderWMO();
     else if (model_)
       RenderModel();
-    else if (adt)
-      RenderADT();
   }
 }
 
@@ -1245,61 +1215,6 @@ inline void ModelCanvas::RenderWMO()
   //glFlush();
   //glFinish();
   SwapBuffers();
-}
-
-inline void ModelCanvas::RenderADT()
-{
-  if (!init)
-    InitGL();
-
-  glClearColor(vecBGColor.x, vecBGColor.y, vecBGColor.z, 0.0f);
-  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-  InitView();
-
-  // Lighting
-  glm::vec4 la;
-  // From what I can tell, WoW OpenGL only uses 4 g_modelViewer->lightControl->lights
-  for (size_t i=0; i<4; i++) {
-    GLuint light = GL_LIGHT0 + (GLuint)i;
-    glLightf(light, GL_CONSTANT_ATTENUATION, 0.0f);
-    glLightf(light, GL_LINEAR_ATTENUATION, 0.7f);
-    glLightf(light, GL_QUADRATIC_ATTENUATION, 0.03f);
-    glDisable(light);
-  }
-  la = glm::vec4(0.35f, 0.35f, 0.35f, 1.0f);
-
-  glLightModelfv(GL_LIGHT_MODEL_AMBIENT, glm::value_ptr(la));
-  glColor3f(1.0f, 1.0f, 1.0f);
-  // --==--
-
-  /*
-  // TODO: Possibly move this into the Model/Attachment/Displayable::draw() routine?
-  // View
-  if (model) {
-    glTranslatef(model->pos.x, model->pos.y, -model->pos.z);
-    glRotatef(model->rot.x, 1.0f, 0.0f, 0.0f);
-    glRotatef(model->rot.y, 0.0f, 1.0f, 0.0f);
-    glRotatef(model->rot.z, 0.0f, 0.0f, 1.0f);
-    // --==--
-  }
-  */
-
-  // camera.Setup();
-
-
-  glEnable(GL_TEXTURE_2D);
-  glEnable(GL_DEPTH_TEST);
-  glDisable(GL_CULL_FACE);
-  root->draw();
-  //root->drawParticles(true);
-
-  //glFlush();
-  //glFinish();
-  SwapBuffers();
-
-  // cleanup
-  glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 }
 
 

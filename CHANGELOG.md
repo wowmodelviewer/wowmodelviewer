@@ -492,8 +492,8 @@ Format loosely based on [Keep a Changelog](https://keepachangelog.com/).
   and scrubbing updates the pose without drawing anything.
 - **What the Unity viewport cannot show yet gets a notice, not another viewport.** The content still
   loads -- the panels, Info and the exporters keep working on it -- and the viewport says what is
-  loaded and that it cannot be shown yet: an image picked in Browse, a map tile, a mounted
-  character, a model with no FileDataID (legacy clients), a character the player could not build
+  loaded and that it cannot be shown yet: an image picked in Browse, a mounted character,
+  a model with no FileDataID (legacy clients), a character the player could not build
   (with its reason), and a character on a player build too old to dress one. A missing player build,
   one that will not start, one that crashes or loses its connection, and one that is still running
   but has not answered 30 seconds after launch -- caught by a two-second check, not at the next
@@ -516,6 +516,10 @@ Format loosely based on [Keep a Changelog](https://keepachangelog.com/).
   pick the "Look up FileDataID" row it gets, Export original file. Browse's search box says what it searches
   ("Search models" / "Search textures"), its status line is under the tree, and the room the Show row and the
   "Search" label took goes to the tree.
+- **The map tile code.** With Browse's ADT category gone nothing loads a map tile any more, and nothing
+  ever drew one: the tile reader had long been commented out and the Unity viewport
+  cannot draw terrain. The tile and liquid readers, the old ARB shader programs only they used, the
+  viewport's "Map tile loaded" notice and the Model panel's map tile note and Info rows are removed.
 - **The main-viewport toggle.** View > "Unity as main viewport" and its `Tools/UnityPrimaryViewport`
   setting, and the View > "Unity Renderer" item, which is now View > "Restart Unity Renderer".
 - **Screenshots and image sequences, until the Unity viewport has a capture of its own.** File >
@@ -823,8 +827,6 @@ Format loosely based on [Keep a Changelog](https://keepachangelog.com/).
   list the selection is matched against, so every later entry was one out: "MP3s" ran the image
   handling and "Images (*.blp)" did nothing. Picking an image now names it in the viewport's notice
   (saving one stays the right-click menu's job).
-- **A model loaded from a menu replaces a map tile.** Loading an NPC, an item, a character file or
-  an import after picking an ADT in Browse left the map tile loaded behind the new model.
 - **Embedded Unity renderer: bone keyframes stored in `.anim` files are read again.** The emitter
   work had routed bone tracks through the model-buffer-only reader meant for emitters, so every
   sequence whose keys live in an external `.anim` file posed its bones from the wrong buffer. The

@@ -24,7 +24,6 @@
 #include "charcontrol.h"
 #include "enums.h"
 #include "globalvars.h"
-#include "maptile.h"
 #include "modelviewer.h"
 #include "TextureView.h"
 #include "UiControls.h"
@@ -195,8 +194,6 @@ ModelInspector::Context ModelInspector::currentContext() const
     return g_modelViewer->canvasHasWorldModel() ? CONTEXT_WMO : CONTEXT_NONE;
   if (g_modelViewer->isWMO && g_canvas->wmo)
     return CONTEXT_NONE;
-  if (g_modelViewer->isADT && g_canvas->adt)
-    return CONTEXT_OTHER;
   if (g_canvas->model())
     return g_modelViewer->isChar ? CONTEXT_CHARACTER : CONTEXT_MODEL;
   return CONTEXT_NONE;
@@ -300,11 +297,10 @@ void ModelInspector::RefreshAppearance()
     case CONTEXT_NONE:  m_contextNote->SetLabel(g_modelViewer && g_modelViewer->isBuildingsMode()
                                                   ? _("No building loaded. Pick one in Browse.")
                                                   : _("No model loaded. Pick one in Browse.")); break;
-    case CONTEXT_OTHER: m_contextNote->SetLabel(_("Nothing to adjust for a map tile.")); break;
     case CONTEXT_TEXTURE: m_contextNote->SetLabel(_("Nothing to adjust for a texture.")); break;
     default: break;
   }
-  m_contextNote->Show(ctx == CONTEXT_NONE || ctx == CONTEXT_OTHER || ctx == CONTEXT_TEXTURE);
+  m_contextNote->Show(ctx == CONTEXT_NONE || ctx == CONTEXT_TEXTURE);
 
   m_modelBox->Show(ctx == CONTEXT_MODEL);
   m_wmoBox->Show(ctx == CONTEXT_WMO);
@@ -1058,14 +1054,6 @@ void ModelInspector::RebuildInfo()
     if (w->ok && (size.x > 0.0f || size.y > 0.0f || size.z > 0.0f))
       AddInfoRow(_("Bounds"), wxString::Format(wxT("%.2f \u00D7 %.2f \u00D7 %.2f"), size.x, size.y, size.z));
   }
-  else if (ctx == CONTEXT_OTHER)
-  {
-    MapTile * t = g_canvas->adt;
-    m_infoFor = t;
-    AddInfoRow(_("Name"), t->name.AfterLast('\\').AfterLast('/'));
-    AddInfoRow(_("Type"), _("Map tile (ADT)"));
-    AddInfoRow(_("Path"), t->name);
-  }
   else if (ctx == CONTEXT_TEXTURE && g_modelViewer->textureView)
   {
     // What the file is; its pixels' facts are under the texture itself.
@@ -1202,7 +1190,6 @@ void ModelInspector::OnWatchTimer(wxTimerEvent & WXUNUSED(event))
     {
       const Context ctx = currentContext();
       const void * shown = (ctx == CONTEXT_WMO) ? (const void *)g_canvas->wmo
-                         : (ctx == CONTEXT_OTHER) ? (const void *)g_canvas->adt
                          : (ctx == CONTEXT_TEXTURE) ? (const void *)g_modelViewer->textureView
                          : (ctx == CONTEXT_MODEL || ctx == CONTEXT_CHARACTER) ? (const void *)canvasModel()
                          : nullptr;
