@@ -106,7 +106,6 @@ public:
   bool isModel;
   bool isChar;
   bool isWMO;
-  bool isADT;
   bool initDB;
   // Set for non-interactive CLI / headless test runs (-mo/-armory/-npc). Suppresses modal
   // dialogs that would otherwise block a headless run.
@@ -338,7 +337,7 @@ public:
   // UpdateUnityViewportState. True when there is no viewport at all.
   bool unityViewportHasNotice() const;
 
-  // Something new is on screen (a model, character, WMO or map tile): the Model panel, the
+  // Something new is on screen (a model, character or WMO): the Model panel, the
   // command bar's model name, the status bar facts and the viewport (model or notice) follow it. The one
   // place every load path reports to.
   void DisplayedContentChanged();

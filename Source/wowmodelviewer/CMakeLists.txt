@@ -36,10 +36,8 @@ set(src  AnimationExportChoiceDialog.cpp
          KeyboardShortcutsDialog.cpp
          lightcontrol.cpp
          LoadingDialog.cpp
-         liquid.cpp
          LogStackWalker.cpp
          main.cpp
-         maptile.cpp
          modelcanvas.cpp
          modelcontrol.cpp
          ModelIdLookup.cpp
@@ -50,7 +48,6 @@ set(src  AnimationExportChoiceDialog.cpp
          OrbitCamera.cpp
          Quantize.cpp
          SettingsControl.cpp
-         shaders.cpp
          TextureBrowse.cpp
          TextureCatalog.cpp
          TextureDecode.cpp
@@ -101,9 +98,7 @@ set(headers AnimationExportChoiceDialog.h
             KeyboardShortcutsDialog.h
             lightcontrol.h
             LoadingDialog.h
-            liquid.h
             LogStackWalker.h
-            maptile.h
             modelcanvas.h
             modelcontrol.h
             ModelIdLookup.h
@@ -115,7 +110,6 @@ set(headers AnimationExportChoiceDialog.h
             Quantize.h
             resource1.h
             SettingsControl.h
-            shaders.h
             TextureBrowse.h
             TextureCatalog.h
             TextureDecode.h

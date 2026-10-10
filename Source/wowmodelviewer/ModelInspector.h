@@ -55,7 +55,6 @@ public:
     CONTEXT_MODEL,       // a creature, item or other plain M2
     CONTEXT_CHARACTER,
     CONTEXT_WMO,
-    CONTEXT_OTHER,       // a map tile
     CONTEXT_TEXTURE      // a texture picked in Browse, shown in the viewport's place
   };
 
@@ -77,7 +76,7 @@ public:
   // after both exist.
   void AttachAppearance(AnimControl * anim, CharControl * chr);
 
-  // What is on screen changed (a model, character, WMO or map tile was loaded). Re-picks the
+  // What is on screen changed (a model, character or WMO was loaded). Re-picks the
   // Appearance sections and rebuilds the Geosets and Info tabs.
   void ContentChanged();
 

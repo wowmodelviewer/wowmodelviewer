@@ -14,7 +14,7 @@ public:
 
   void reset(const WoWModel * m = nullptr);
 
-  // Frame an arbitrary bounding sphere (center + radius, in render space). Used for WMOs/ADTs,
+  // Frame an arbitrary bounding sphere (center + radius, in render space). Used for WMOs,
   // which aren't WoWModels and span far more than the default view, so the camera distance is
   // set so the whole sphere fits the vertical field of view.
   void frameBounds(const glm::vec3 & center, float boundingRadius);

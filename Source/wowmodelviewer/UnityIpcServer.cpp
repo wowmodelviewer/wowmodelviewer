@@ -190,7 +190,11 @@ void UnityIpcServer::pollAccept()
   // The send buffer decides how much of a queued line leaves per poll: once it is full the rest waits
   // for the next timer tick (POLL_INTERVAL_MS). With the default, a 16 MB .skel response or an 11 MB
   // body image spent most of its transfer waiting on ticks -- over half a second per character load.
-  int sendBuffer = 4 * 1024 * 1024;
+  // 64 MB is the largest asset served (MAX_ASSET_SIZE in UnityAssetAccess), so one binary payload (protocol 10) fits
+  // an empty send buffer and usually leaves in the poll that queued it. Answers the player has not read yet share the
+  // buffer; what does not fit goes out on the next ticks. The kernel takes only what is sent: a limit, not an
+  // allocation.
+  int sendBuffer = 64 * 1024 * 1024;
   setsockopt(c, SOL_SOCKET, SO_SNDBUF, reinterpret_cast<const char *>(&sendBuffer), sizeof(sendBuffer));
   m_client = (unsigned long long)c;
   m_unityReady = false;
@@ -332,6 +336,19 @@ void UnityIpcServer::queueLineParts(std::initializer_list<QByteArray> parts)
   m_outBuf.push_back('\n');
 #ifdef _WINDOWS
   pollSend(); // try to push it out right away; leftovers go on the next poll
+#endif
+}
+
+void UnityIpcServer::queueFrame(const QByteArray & header, const QByteArray & payload)
+{
+  if (!m_client)
+    return;
+  m_outBuf.append(header.constData(), (size_t)header.size());
+  m_outBuf.push_back('\n');
+  m_outBuf.append(payload.constData(), (size_t)payload.size());
+  m_outBuf.push_back('\n');   // the player checks it: a payload not followed by its newline means out of step
+#ifdef _WINDOWS
+  pollSend();
 #endif
 }
 
@@ -946,8 +963,32 @@ QString UnityIpcServer::shareCharacterImage(const QString & kind, const QImage &
     pixels = pixels.convertToFormat(QImage::Format_ARGB32);
 
   const QString id = QString("%1-%2").arg(kind).arg(++m_imageSerial);
-  const QByteArray data = QByteArray::fromRawData((const char *)pixels.constBits(),
-                                                  pixels.width() * pixels.height() * 4).toBase64();
+  const QByteArray raw = QByteArray::fromRawData((const char *)pixels.constBits(), pixels.width() * pixels.height() * 4);
+  if (playerTakesBinaryFrames())
+  {
+    // Protocol 10: the pixels follow the line as they are (queueFrame copies them into the send buffer at once).
+    QByteArray frameHead;
+    frameHead.append("{\"type\":\"characterImage\",\"hash\":\"");
+    frameHead.append(id.toLatin1());
+    frameHead.append("\",\"kind\":\"");
+    frameHead.append(kind.toLatin1());
+    frameHead.append("\",\"width\":");
+    frameHead.append(QByteArray::number(pixels.width()));
+    frameHead.append(",\"height\":");
+    frameHead.append(QByteArray::number(pixels.height()));
+    frameHead.append(",\"format\":\"bgra8\",\"encoding\":\"binary\",\"payloadBytes\":");
+    frameHead.append(QByteArray::number(raw.size()));
+    frameHead.append("}");
+    queueFrame(frameHead, raw);
+    m_sentImages[kind] = image;
+    m_sentImageIds[kind] = id;
+    m_stats.imagePushes++;
+    m_stats.imageBytes += raw.size();
+    LOG_INFO << "[unityipc] -> characterImage" << id << pixels.width() << "x" << pixels.height()
+             << "format" << (int)image.format() << "binary bytes" << raw.size();
+    return id;
+  }
+  const QByteArray data = raw.toBase64();
   // Written out by hand rather than through QJsonDocument: the payload is a single ~11 MB string,
   // and a JSON document would copy it twice more for nothing. The base64 goes into the send buffer as
   // its own piece, not joined into a line first, for the same reason.
@@ -966,7 +1007,7 @@ QString UnityIpcServer::shareCharacterImage(const QString & kind, const QImage &
   m_sentImages[kind] = image;
   m_sentImageIds[kind] = id;
   m_stats.imagePushes++;
-  m_stats.imageBytes += data.size();
+  m_stats.imageBytes += raw.size();
   LOG_INFO << "[unityipc] -> characterImage" << id << pixels.width() << "x" << pixels.height()
            << "format" << (int)image.format() << "base64 bytes" << data.size();
   return id;
@@ -1036,7 +1077,7 @@ void UnityIpcServer::handleLine(const std::string & line)
                   << "-- what it cannot do (mounted characters below v5, world models below v4, characters below v3)"
                      " gets a notice, a screenshot (below v6) a status message, the viewport background (below v7)"
                      " stays the player's own default, a character's model generation (below v8) is not switched,"
-                     " and every load (below v9) fetches its files again";
+                     " every load (below v9) fetches its files again, and files travel as base64 text (below v10)";
     else if (version != PROTOCOL_VERSION)
       LOG_ERROR << "[unityipc] player speaks protocol v" << version << "but WMV expects v" << PROTOCOL_VERSION;
     if (onUnityReady)
@@ -1157,12 +1198,29 @@ void UnityIpcServer::handleGetAsset(const QJsonObject & msg, bool byFileDataID)
   if (result.fileDataID > 0)
     resp["fileDataID"] = result.fileDataID;
 
+  if (result.ok && playerTakesBinaryFrames())
+  {
+    // Protocol 10: the file follows the line as it is -- no base64, no copy into a JSON document, and no SHA-1 (only
+    // a log ever read it, and it cost more than the rest of the answer).
+    resp["byteLength"] = result.data.size();
+    resp["encoding"] = "binary";
+    resp["payloadBytes"] = result.data.size();
+    if (result.fromClientStorage)
+      resp["cacheable"] = true;
+    m_stats.responsesOk++;
+    m_stats.bytesServed += result.data.size();
+    m_stats.lastError.clear();
+    LOG_INFO << "[unityipc] -> assetResponse" << requestId << "ok provider=" << result.provider
+             << "bytes=" << result.data.size() << "(binary)";
+    queueFrame(QJsonDocument(resp).toJson(QJsonDocument::Compact), result.data);
+    return;
+  }
   if (result.ok)
   {
     const QByteArray sha1 = QCryptographicHash::hash(result.data, QCryptographicHash::Sha1).toHex();
     resp["byteLength"] = result.data.size();
     resp["sha1"] = QString::fromLatin1(sha1);
-    resp["encoding"] = "base64";   // V1: base64 in the JSON line; a binary frame can replace this later
+    resp["encoding"] = "base64";   // a player before protocol 10: base64 in the JSON line, with a SHA-1 for the log
     resp["data"] = QString::fromLatin1(result.data.toBase64());
     // A file of the client's own storage (protocol 9): the player may keep it for as long as the epoch it asked under.
     if (result.fromClientStorage)

@@ -1632,8 +1632,8 @@ void AnimControl::OnCheck(wxCommandEvent &event)
 // double-click and the -unityipctest "pick like the user" path all run the same code.
 void AnimControl::ChooseAnimation(int animIndex)
 {
-  // g_selModel outlives the model it points at (an image or map tile selected in Browse deletes
-  // the model and leaves this list up), so a pick is only acted on for a model still on the canvas.
+  // g_selModel outlives the model it points at (a WMO picked in Browse unloads the model and
+  // leaves this list up), so a pick is only acted on for a model still on the canvas.
   if (!ModelInspector::IsLiveModel(g_selModel) || animIndex < 0 || animIndex >= (int)g_selModel->anims.size())
     return;
 

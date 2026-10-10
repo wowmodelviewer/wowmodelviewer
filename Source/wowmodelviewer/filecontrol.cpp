@@ -795,7 +795,7 @@ void FileControl::OnTreeMenu(wxTreeEvent &event)
 
 void FileControl::ClearCanvas()
 {
-  if (!modelviewer->isModel && !modelviewer->isWMO && !modelviewer->isADT)
+  if (!modelviewer->isModel && !modelviewer->isWMO)
     return;
 
   // Delete any previous models that were loaded.
@@ -833,9 +833,6 @@ void FileControl::ClearCanvas()
     if (modelviewer->animControl)
       modelviewer->animControl->Forget();
     g_selModel = NULL;
-  } else if (modelviewer->isADT) {
-    wxDELETE(modelviewer->canvas->adt);
-    modelviewer->canvas->adt = NULL;
   }
 
 #ifdef _DEBUG
@@ -856,7 +853,6 @@ void FileControl::ClearCanvas()
   modelviewer->isModel = false;
   modelviewer->isChar = false;
   modelviewer->isWMO = false;
-  modelviewer->isADT = false;
 }
 
 void FileControl::UpdateInterface()
@@ -887,22 +883,6 @@ void FileControl::UpdateInterface()
     modelviewer->charMenu->Enable(ID_LOAD_START, true);
     modelviewer->charMenu->Enable(ID_MOUNT_CHARACTER, true);
     modelviewer->charMenu->Enable(ID_AUTOHIDE_GEOSETS_FOR_HEAD_ITEMS, true);
-  }else if (modelviewer->isADT == true){
-    // If it's an ADT file...
-    modelviewer->charMenu->Enable(ID_SAVE_CHAR, false);
-    modelviewer->charMenu->Enable(ID_SHOW_UNDERWEAR, false);
-    modelviewer->charMenu->Enable(ID_SHOW_EARS, false);
-    modelviewer->charMenu->Enable(ID_SHOW_HAIR, false);
-    modelviewer->charMenu->Enable(ID_SHOW_FACIALHAIR, false);
-    modelviewer->charMenu->Enable(ID_SHOW_FEET, false);
-    modelviewer->charMenu->Enable(ID_SHEATHE, false);
-    modelviewer->charMenu->Enable(ID_SAVE_EQUIPMENT, false);
-    modelviewer->charMenu->Enable(ID_LOAD_EQUIPMENT, false);
-    modelviewer->charMenu->Enable(ID_CLEAR_EQUIPMENT, false);
-    modelviewer->charMenu->Enable(ID_LOAD_SET, false);
-    modelviewer->charMenu->Enable(ID_LOAD_START, false);
-    modelviewer->charMenu->Enable(ID_MOUNT_CHARACTER, false);
-    modelviewer->charMenu->Enable(ID_AUTOHIDE_GEOSETS_FOR_HEAD_ITEMS, false);
   }else if (modelviewer->isWMO == true){
     // If the object is a WMO file...
     modelviewer->charMenu->Enable(ID_SAVE_CHAR, false);
@@ -948,7 +928,7 @@ void FileControl::UpdateInterface()
     modelviewer->charMenu->Enable(ID_CHAREYEGLOW, true);
   }
 
-  // The Model panel follows whatever was just opened (a model, a WMO, a map tile, nothing).
+  // The Model panel follows whatever was just opened (a model, a WMO, nothing).
   modelviewer->DisplayedContentChanged();
 
   // Update the layout -- only if a pane's shown state changed. This runs after every selection

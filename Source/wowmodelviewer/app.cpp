@@ -4362,7 +4362,7 @@ static void doHeadlessUnityIpcTest(ModelViewer * frame)
     const long first = waitApplied(0, 60000);
     LOG_INFO << "[unityipc-test] character: first scene" << (first >= 0 ? "applied" : "NOT applied") << "after"
              << first << "ms; scenes sent" << ipc->stats().scenePushes << "images" << ipc->stats().imagePushes
-             << "(" << ipc->stats().imageBytes << "base64 bytes); last" << ipc->stats().lastScene << "| ack"
+             << "(" << ipc->stats().imageBytes << "pixel bytes); last" << ipc->stats().lastScene << "| ack"
              << ipc->stats().lastSceneAck;
     // The body the player dresses is the host's composite, made in the hidden canvas's GL context: no
     // characterImage sent means the composite was not produced.
