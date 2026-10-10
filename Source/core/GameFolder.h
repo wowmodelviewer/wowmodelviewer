@@ -10,6 +10,8 @@
 
 #include <map>
 #include <set>
+#include <unordered_set>
+#include <vector>
 #include <functional>
 
 #include "GameFile.h"
@@ -62,6 +64,18 @@ namespace core
       // one entry per path (the newest object when a path was added twice). Read-only.
       const std::map<QString, GameFile *> & filesByPath() const { return m_nameMap; }
 
+      // How many paths of that index are models (.m2), textures (.blp) and world models (.wmo): kept as the index
+      // changes, so the client's capabilities need no walk over its ~2 million paths.
+      struct TypeCounts
+      {
+        size_t models = 0, textures = 0, buildings = 0;
+      };
+      const TypeCounts & indexedTypeCounts() const { return m_typeCounts; }
+
+      // The files that are models (.m2), kept as files come and go: Browse lists the models without a walk over every
+      // file of the client.
+      const std::unordered_set<GameFile *> & modelFiles() const { return m_modelFiles; }
+
       virtual bool openFile(std::string file, void ** result) = 0;
       virtual bool openFile(int id, void ** result) = 0;
       
@@ -85,14 +99,27 @@ namespace core
 
       // Optional progress callback (fraction 0..1), invoked while building the file list from
       // the listfile -- the longest startup step -- so the loading UI can advance during it.
-      void setLoadProgressCallback(const std::function<void(float)> & cb) { m_loadProgressCb = cb; }
+      // Which step reports: opening the storage, reading the listfile, indexing this client's files. The fraction
+      // is 0..1, or below 0 while the step does not know its amount of work.
+      enum class LoadPhase { OpeningStorage, ReadingListfile, IndexingFiles };
+      using LoadReport = std::function<void(LoadPhase phase, float fraction)>;
+      void setLoadProgressCallback(const LoadReport & cb) { m_loadProgressCb = cb; }
 
     protected:
-      std::function<void(float)> m_loadProgressCb;
+      LoadReport m_loadProgressCb;
       ClientProfile m_clientProfile;
 
+      // A bulk reload's name index, built at once (in path order, so every insertion is at its end): replaces the
+      // index onChildAdded and onChildRemoved keep, and counts its file types again.
+      void replaceNameIndex(std::map<QString, GameFile *> && index);
+      // ... and the models among the children (after Container::replaceChildren).
+      void replaceModelFiles(const std::vector<GameFile *> & models);
+
     private:
+      void countType(const QString & path, int delta);
       std::map<QString, GameFile *> m_nameMap;
+      TypeCounts m_typeCounts;
+      std::unordered_set<GameFile *> m_modelFiles;
       QString m_path;
   };
 }

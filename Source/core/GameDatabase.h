@@ -8,6 +8,7 @@
 #ifndef _GAMEDATABASE_H_
 #define _GAMEDATABASE_H_
 
+#include <functional>
 #include <vector>
 #include "sqlite3.h"
 
@@ -99,6 +100,14 @@ namespace core
     sqlResult sqlQuery(const QString &query);
 
     void setFastMode() { m_fastMode = true; }
+    // Closes the database (the application is ending): a database kept for this session only is deleted with it.
+    void close() { closeDatabase(); }
+
+    // Called while a database is built from its tables (never when a cached one is used): how far, 0..1 -- the
+    // tables built so far plus the share of the one being filled.
+    void setBuildProgressCallback(const std::function<void(float)> & cb) { m_buildProgress = cb; }
+    // From a table being filled: the share of its records written so far.
+    void reportTableFill(double share);
 
     virtual ~GameDatabase();
 
@@ -125,14 +134,30 @@ namespace core
     // this computer yet (a client still downloading) leaves the cache unstamped, so it is built again next time.
     virtual bool cacheComplete() const { return true; }
 
+    // What else the tables are built from besides the schema folder (the game's table definitions): hashed into the
+    // cache key, so a change to it builds the database again.
+    virtual QByteArray cacheInputs() const { return QByteArray(); }
+    // The state a build leaves besides the tables (the schema check), kept with a cached database and restored when
+    // the database is used instead of built.
+    virtual QByteArray saveCacheState() const { return QByteArray(); }
+    virtual bool restoreCacheState(const QByteArray &) { return true; }
+
   private:
     static int treatQuery(void *NotUsed, int nbcols, char ** values, char ** cols);
     static void logQueryTime(void* aDb, const char* aQueryStr, sqlite3_uint64 aTimeInNs);
 
     bool createDatabaseFromXML(const QString & file);
     bool readStructureFromXML(const QString & file);
+    // Everything that identifies this client's database (see initFromXML); empty when the build is unknown.
+    QString cacheKey() const;
+    bool openDatabase(const QString & path, bool building);
+    void closeDatabase();
 
     sqlite3 *m_db;
+    QString m_sessionFile;   // a database built for this session only, deleted when it is closed
+    std::function<void(float)> m_buildProgress;
+    size_t m_buildTable = 0, m_buildTables = 0;
+    int m_failedTables = 0;  // tables of the build that could not be filled (the build is then not kept)
 
     std::vector<TableStructure * > m_dbStruct;
 

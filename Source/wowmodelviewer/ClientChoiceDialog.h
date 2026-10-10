@@ -12,6 +12,7 @@
 #ifndef CLIENTCHOICEDIALOG_H
 #define CLIENTCHOICEDIALOG_H
 
+#include <functional>
 #include <wx/dialog.h>
 
 #include <vector>
@@ -26,6 +27,8 @@ class wxPanel;
 class wxStaticText;
 class UiButton;
 class ClientChoiceDialog;
+class ClientLoadingPanel;
+class ClientLoadProgress;
 
 // A card: one installation, the whole card the button. Painted with the palette of the theme in use.
 class InstallCard : public wxWindow
@@ -78,6 +81,16 @@ public:
   // (ModelViewer::PromptAndLoadLegacyMpqClient).
   bool isLegacyMpq() const { return m_legacyMpq; }
 
+  // THE LOAD A CARD STARTS, run by the chooser itself: the chooser turns into its loading page (ClientLoadingPanel)
+  // and calls it, reporting to that page. True: the client is open, and the chooser closes. False: the page says
+  // why, and Back returns to the cards (the client loaded before, if any, is still the one in use). Without a
+  // loader, a card closes the chooser and the caller loads.
+  using Loader = std::function<bool(const InstalledClient &, ClientLoadProgress *)>;
+  void setLoader(Loader loader) { m_loader = std::move(loader); }
+  // For the tests: the loading page, and whether a load is running in it.
+  ClientLoadingPanel * loadingPage() const { return m_loadingPage; }
+  bool loading() const { return m_busy; }
+
   // Used by the cards.
   void openCard(InstallCard * card);
   void focusNeighbour(InstallCard * from, int step);
@@ -90,6 +103,11 @@ public:
 
 private:
   void buildUI();
+  void runLoad();
+  void showLoadingPage(bool shown);
+  // The window fitted to the page it shows, about the same centre (it shrinks or grows in place, on screen).
+  void fitInPlace();
+  void backToCards();
   void populate(const QStringList & roots);
   void onBrowse(wxCommandEvent &);
   void onLegacy(wxCommandEvent &);
@@ -109,6 +127,11 @@ private:
   InstalledClient m_chosen;
   wxString m_dataPath;
   bool m_legacyMpq = false;
+
+  wxPanel * m_choosePage = nullptr;               // the cards and the ways in
+  ClientLoadingPanel * m_loadingPage = nullptr;   // what the chooser turns into while a card's client loads
+  Loader m_loader;
+  bool m_busy = false;                            // a load runs: the chooser cannot be closed
 };
 
 #endif /* CLIENTCHOICEDIALOG_H */

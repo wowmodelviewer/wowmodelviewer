@@ -14,6 +14,7 @@ set(src CharInfos.cpp
     ExporterPlugin.cpp
     FileDownloader.cpp
     Game.cpp
+    LoadTimeline.cpp
     GameDatabase.cpp
     GameFile.cpp
     GameFolder.cpp
@@ -40,6 +41,7 @@ set(headers CharInfos.h
       ExporterPlugin.h
       FileDownloader.h
       Game.h
+      LoadTimeline.h
       GameDatabase.h
       GameFile.h
       GameFolder.h

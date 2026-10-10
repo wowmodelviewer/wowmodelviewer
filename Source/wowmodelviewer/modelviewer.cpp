@@ -46,7 +46,8 @@
 #include "globalvars.h"
 #include "ImporterPlugin.h"
 #include "KeyboardShortcutsDialog.h"
-#include "LoadingDialog.h"
+#include "ClientLoadProgress.h"
+#include "LoadTimeline.h"
 #include "CharTexture.h"
 #include "WotlkDbc.h"
 #include <wx/richmsgdlg.h>
@@ -602,16 +603,35 @@ void ModelViewer::InitDatabase()
 {
   LOG_INFO << "Initializing Databases...";
   SetStatusText(wxT("Initializing Databases..."));
-  wxBusyCursor busyCursor;
-  wxWindowDisabler disableAll;
-  wxBusyInfo info(_T("Please wait during game database analysis..."), this);
+  // No window of its own: a client load shows its progress on the chooser's loading page (m_loadProgress), which
+  // learns here whether the database is built (the first time for a version of the game) or comes from the cache.
+  ClientLoadProgress * const progress = m_loadProgress;
+  bool building = false;
+  GAMEDATABASE.setBuildProgressCallback([progress, building](float fraction) mutable {
+    if (!progress)
+      return;
+    if (!building)
+    {
+      building = true;
+      progress->stage(_("Building the game database..."), fraction);
+      progress->detail(_("First time with this version of the game: this is done once, later loads reuse it."));
+    }
+    else
+      progress->progress(fraction);
+  });
 
   // Loading a client again fills these from its own database instead of adding to the lists the
   // previous load made. (The item list keeps the "None" entry its constructor puts first.)
   npcs.clear();
   items = ItemDatabase();
 
-  if (!GAMEDATABASE.initFromXML("database.xml"))
+  core::LoadTimeline::instance().begin("game database");
+  const bool databaseOk = GAMEDATABASE.initFromXML("database.xml");
+  GAMEDATABASE.setBuildProgressCallback(std::function<void(float)>());
+  core::LoadTimeline::instance().end("game database", databaseOk ? QString() : QString("failed"));
+  if (progress)
+    progress->stage(_("Preparing characters..."));
+  if (!databaseOk)
   {
     initDB = false;
     LOG_ERROR << "Initializing failed!";
@@ -624,16 +644,21 @@ void ModelViewer::InitDatabase()
   }
 
   // init texture regions
+  core::LoadTimeline::instance().begin("texture regions");
   CharTexture::initRegions();
+  core::LoadTimeline::instance().end("texture regions");
   
   // init Race informations
+  core::LoadTimeline::instance().begin("races");
   RaceInfos::init();
+  core::LoadTimeline::instance().end("races", QString("%1 races").arg(RaceInfos::count()));
   
   LOG_INFO << "Initializing Databases...";
   SetStatusText(wxT("Initializing Databases..."));
   initDB = true;
 
   {
+    core::LoadTimeline::Stage stage("npc list");
     sqlResult npc = GAMEDATABASE.sqlQuery("SELECT ID, DisplayID1, CreatureType, Name_Lang From Creature;");
 
     if (npc.valid && !npc.empty())
@@ -656,6 +681,7 @@ void ModelViewer::InitDatabase()
   }
   
   {
+    core::LoadTimeline::Stage stage("item list");
     // Keep the existing named catalog, and admit unnamed equipment only when an
     // appearance resolves to a real display record. IN avoids duplicate items
     // when several modifiers share the same appearance.
@@ -3606,9 +3632,10 @@ void ModelViewer::OnGameToggle(wxCommandEvent &event)
 // picker belongs where the user asks for it, on the File menu, and this is the only path that
 // loads one.
 //
-// The chooser ("Choose World of Warcraft") only says which installation; LoadWoW opens it, resolves its schema
-// and tells the user, in plain words, when it cannot. A client that could not be opened brings the chooser back,
-// so another can be picked; the client loaded before (if any) is still loaded meanwhile.
+// The chooser ("Choose World of Warcraft") says which installation, and the client opens in it: a click on a card
+// turns it into its loading page, where LoadWoW reports what it is doing and, in plain words, why it cannot. A client
+// that could not be opened leaves the page on that, with Back to the cards, so another can be picked; the client
+// loaded before (if any) is still loaded meanwhile.
 void ModelViewer::PromptAndLoadClient()
 {
   if (m_clientLoading) // the loading window yields to the event loop: no second load inside the first
@@ -3616,6 +3643,17 @@ void ModelViewer::PromptAndLoadClient()
   for (;;)
   {
     ClientChoiceDialog clientDlg(this);
+    // A card's client opens in the chooser itself, on its loading page: one window from the click to the loaded
+    // client. One that could not be opened says why there, and Back returns to the cards.
+    clientDlg.setLoader([this](const InstalledClient & client, ClientLoadProgress * progress) {
+      const wxString previousPath = gamePath;
+      gamePath = wxString(client.dataPath().toStdWString());
+      const core::GameConfig chosen = client.config();
+      if (LoadWoW(&chosen, progress))
+        return true;
+      gamePath = previousPath; // not opened: the client loaded before (if any) is still the one in use
+      return false;
+    });
     if (clientDlg.ShowModal() != wxID_OK)
     {
       LOG_INFO << "Client Choice dialog dismissed without loading a client.";
@@ -3632,13 +3670,7 @@ void ModelViewer::PromptAndLoadClient()
       return;
     }
 
-    const wxString previousPath = gamePath;
-    gamePath = clientDlg.dataPath();
-    core::GameConfig chosen = clientDlg.selectedConfig();
-    if (LoadWoW(&chosen, true /* show loading progress */))
-      return;
-    gamePath = previousPath; // not opened: the client loaded before (if any) is still the one in use
-    continue;
+    return; // the chooser closes on a client that opened
   }
 }
 
@@ -3649,7 +3681,7 @@ void ModelViewer::PromptAndLoadClient()
 // server error, short payload) leaves the existing list in place, so a failed refresh can never
 // break startup. Streams to a temp file to keep memory flat, then swaps it in atomically. Reuses
 // the generic "Loading file list..." step so nothing about a network fetch surfaces in the UI.
-static void refreshCommunityListfile(const QString & localPath, LoadingDialog * progress)
+static bool refreshCommunityListfile(const QString & localPath, ClientLoadProgress * progress)
 {
   // Check on EVERY launch, but avoid re-pulling the ~147 MB list when it hasn't changed: send the
   // ETag saved from last time as If-None-Match and let the server answer "304 Not Modified" for an
@@ -3667,7 +3699,7 @@ static void refreshCommunityListfile(const QString & localPath, LoadingDialog * 
   const QString tmpPath = localPath + ".new";
   QFile out(tmpPath);
   if (!out.open(QIODevice::WriteOnly))
-    return; // can't stage a download here; keep what's on disk
+    return false; // can't stage a download here; keep what's on disk
 
   QNetworkAccessManager manager;
   QNetworkRequest request(QUrl("https://github.com/wowdev/wow-listfile/releases/latest/download/community-listfile.csv"));
@@ -3687,12 +3719,21 @@ static void refreshCommunityListfile(const QString & localPath, LoadingDialog * 
   QObject::connect(reply, SIGNAL(error(QNetworkReply::NetworkError)), &loop, SLOT(quit()));
   if (progress)
   {
-    LoadingDialog * pd = progress;
-    QObject::connect(reply, &QNetworkReply::downloadProgress, [pd](qint64 received, qint64 total) {
-      // Pumps the wx loading dialog (step() yields) during the otherwise-blocking download and
-      // inches the gauge 45 -> 60.
-      const float frac = (total > 0) ? (float)received / (float)total : 0.0f;
-      pd->step(_("Loading file list..."), 45 + (int)(frac * 15.0f));
+    ClientLoadProgress * pd = progress;
+    bool downloading = false;
+    QObject::connect(reply, &QNetworkReply::downloadProgress, [pd, downloading](qint64 received, qint64 total) mutable {
+      // Keeps the loading page moving during the request. Only a real download (a changed list: ~150 MB) is shown
+      // as one, with how much of it arrived; an unchanged list answers in a few bytes and shows nothing new.
+      if (total > 1024 * 1024)
+      {
+        if (!downloading)
+          pd->stage(_("Downloading the latest file list..."), (double)received / (double)total);
+        else
+          pd->progress((double)received / (double)total);
+        downloading = true;
+      }
+      else
+        pd->progress(-1.0);
     });
   }
   loop.exec();
@@ -3706,8 +3747,9 @@ static void refreshCommunityListfile(const QString & localPath, LoadingDialog * 
   if (ok && status == 304)
   {
     LOG_INFO << "File list unchanged (304 Not Modified); keeping existing list.";
+    core::LoadTimeline::instance().cache("listfile download", "HIT", "304 not modified");
     QFile::remove(tmpPath);
-    return;
+    return true;
   }
 
   const qint64 size = QFileInfo(tmpPath).size();
@@ -3721,6 +3763,7 @@ static void refreshCommunityListfile(const QString & localPath, LoadingDialog * 
     if (QFile::rename(tmpPath, localPath))
     {
       LOG_INFO << "File list refreshed (" << size << "bytes).";
+      core::LoadTimeline::instance().cache("listfile download", "MISS", QString("downloaded %1 bytes").arg(size));
       if (!newEtag.isEmpty())
       {
         QFile ef(etagPath);
@@ -3730,16 +3773,19 @@ static void refreshCommunityListfile(const QString & localPath, LoadingDialog * 
           ef.close();
         }
       }
-      return;
+      return true;
     }
     LOG_ERROR << "File list refresh: could not replace" << localPath;
   }
   else
   {
     LOG_INFO << "File list refresh skipped; keeping existing list.";
+    core::LoadTimeline::instance().cache("listfile download", "SKIPPED", "kept the existing list");
   }
   QFile::remove(tmpPath); // discard the partial/unused temp file
+  return false; // no answer, or a list that could not be put in place: asked again next load
 }
+
 
 // Refresh the TACT encryption keys on EVERY launch. CASC needs these to decrypt encrypted content
 // -- both whole encrypted files and the encrypted DB2 sections that hold brand-new / unreleased
@@ -3749,7 +3795,7 @@ static void refreshCommunityListfile(const QString & localPath, LoadingDialog * 
 // "<keyname> <key>"; we convert it to the "<keyname>;<key>" form CASCFolder::addExtraEncryptionKeys()
 // reads. Must run BEFORE setConfig() opens the storage (that is when the keys are handed to CASC).
 // Any failure (e.g. offline, or GitHub down) keeps the existing on-disk keys untouched.
-static void refreshTactKeys(const QString & localPath, LoadingDialog * progress)
+static bool refreshTactKeys(const QString & localPath, ClientLoadProgress * progress)
 {
   // The loading window keeps saying which client is being opened: the keys are a detail of opening it.
   Q_UNUSED(progress);
@@ -3773,7 +3819,8 @@ static void refreshTactKeys(const QString & localPath, LoadingDialog * progress)
   if (!ok || body.size() < (100 * 1024))
   {
     LOG_INFO << "TACT key refresh skipped; keeping existing keys.";
-    return;
+    core::LoadTimeline::instance().cache("tact keys download", "SKIPPED", "kept the existing keys");
+    return false;
   }
 
   // Convert to the "<keyname>;<key>" CSV, validating the hex lengths.
@@ -3798,26 +3845,40 @@ static void refreshTactKeys(const QString & localPath, LoadingDialog * progress)
   if (count < 1000) // a real list has many thousands of keys; refuse a suspicious result
   {
     LOG_INFO << "TACT key refresh produced too few keys (" << count << "); keeping existing.";
-    return;
+    return false;
   }
 
   const QString tmpPath = localPath + ".new";
   QFile out(tmpPath);
   if (!out.open(QIODevice::WriteOnly))
-    return;
+    return false;
   out.write(outData);
   out.close();
 
   if (QFile::exists(localPath))
     QFile::remove(localPath);
   if (QFile::rename(tmpPath, localPath))
+  {
     LOG_INFO << "TACT keys refreshed (" << count << "keys).";
-  else
-    QFile::remove(tmpPath);
+    core::LoadTimeline::instance().cache("tact keys download", "MISS", QString("downloaded %1 keys").arg(count));
+    return true;
+  }
+  QFile::remove(tmpPath);
+  return false;
 }
+
 
 namespace
 {
+  // The loading page of the load under way (ModelViewer::m_loadProgress), for the steps that report from outside
+  // LoadWoW (InitDatabase); cleared when the load returns, whichever way.
+  struct LoadProgressScope
+  {
+    LoadProgressScope(ClientLoadProgress *& slot, ClientLoadProgress * progress) : m_slot(slot) { m_slot = progress; }
+    ~LoadProgressScope() { m_slot = nullptr; }
+    ClientLoadProgress *& m_slot;
+  };
+
   // Set while a client is being opened: the loading window yields to the event loop, and nothing may start a
   // second load (or a legacy one) inside it.
   struct ClientLoadingFlag
@@ -4009,13 +4070,19 @@ void ModelViewer::ResetClientState()
   m_clientCaps = ClientCapabilities();
 }
 
-bool ModelViewer::LoadWoW(const core::GameConfig * chosenConfig, bool showProgress)
+bool ModelViewer::LoadWoW(const core::GameConfig * chosenConfig, ClientLoadProgress * progress)
 {
   // One load at a time: the loading window yields to the event loop, where File > Load World of Warcraft (or the
   // empty viewer's button) could otherwise start a second one inside this one.
   if (m_clientLoading)
     return false;
   ClientLoadingFlag loadingFlag(m_clientLoading);
+
+  // Every stage of the load is timed (LoadTimeline). A load started from the chooser's card was started there.
+  core::LoadTimeline & timeline = core::LoadTimeline::instance();
+  timeline.startIfIdle(chosenConfig ? chosenConfig->product + " " + chosenConfig->version : QString("client load"));
+  timeline.mark("load starts");
+  timeline.begin("installation");
 
   wxStopWatch total, step;
   UnityAssetAccess::ClientLoadGuard unityAssetGuard; // refuse Unity asset requests while the folder is rebuilt
@@ -4058,8 +4125,12 @@ bool ModelViewer::LoadWoW(const core::GameConfig * chosenConfig, bool showProgre
     std::vector<core::GameConfig> configsFound = folder->configsFound();
     if (configsFound.empty())
     {
+      timeline.finish("failed: no installation");
       LOG_ERROR << "No World of Warcraft installation found in" << dataPath;
-      if (!batchMode)
+      if (progress)
+        progress->failed(_("World of Warcraft could not be opened."),
+                         _("No World of Warcraft installation was found in that folder."), gamePath);
+      else if (!batchMode)
         wxMessageBox(_("No World of Warcraft installation was found in that folder."), _("World of Warcraft"),
                      wxOK | wxICON_ERROR, this);
       return false;
@@ -4107,55 +4178,67 @@ bool ModelViewer::LoadWoW(const core::GameConfig * chosenConfig, bool showProgre
 
   const core::ClientProfile requested = core::ClientProfile::fromGameConfig(config);
   const wxString friendly = wxString(requested.friendlyName().toStdWString());
+  timeline.end("installation", (reuse ? QString("same installation, ") : QString("new folder, ")) + requested.describe());
+  timeline.begin("loading window");
 
-  // Loading window: plain words, the steps the user can relate to.
-  LoadingDialog * progress = 0;
+  // THE LOADING PAGE (the chooser's: ClientLoadProgress), told a few stages in plain words. It pumps the event loop
+  // as it repaints; everything but its window is disabled meanwhile: no menu, shortcut, Browse row or panel can act
+  // on a client that is being replaced (the storage is swapped and the file index rebuilt in place on the reuse path).
   std::unique_ptr<wxWindowDisabler> disabler;
-  if (showProgress)
-  {
-    progress = new LoadingDialog(this);
-    progress->SetTitle(_("World of Warcraft"));
-    progress->Show();
-    // The loading window yields to the event loop at every step. Everything else is disabled meanwhile: no menu,
-    // shortcut, Browse row or panel can act on a client that is being replaced (the storage is swapped and the
-    // file index rebuilt in place on the reuse path).
-    disabler.reset(new wxWindowDisabler(progress));
-    progress->step(wxString::Format(_("Opening %s..."), friendly), 5);
-  }
-  auto closeProgress = [&progress, &disabler]() {
-    disabler.reset();
-    if (progress)
-      progress->Destroy();
-    progress = 0;
-  };
-
-  // Refresh the TACT keys before opening the storage -- setConfig() hands them to CASC, so a newer key list lets it
-  // decrypt encrypted db2 sections + files for recently-added content.
-  refreshTactKeys("extraEncryptionKeys.csv", progress);
-
+  LoadProgressScope progressScope(m_loadProgress, progress);
   if (progress)
   {
-    LoadingDialog * pd = progress;
-    const wxString text = wxString::Format(_("Opening %s..."), friendly);
-    folder->setLoadProgressCallback([pd, text](float frac) { pd->step(text, 10 + (int)(frac * 34.0f)); });
+    wxWindow * surface = dynamic_cast<wxWindow *>(progress);
+    disabler.reset(new wxWindowDisabler(surface ? wxGetTopLevelParent(surface) : nullptr));
+    progress->stage(_("Opening game data..."));
   }
+  auto closeProgress = [&disabler]() { disabler.reset(); };
+
+  timeline.end("loading window");
+  // The TACT keys and the community listfile are asked for once per session, and again after an hour: a client
+  // opened minutes after another gains nothing from asking again, and each request holds the load for a round trip.
+  static QElapsedTimer s_networkAsked;
+  const bool askNetwork = !s_networkAsked.isValid() || s_networkAsked.elapsed() > 60 * 60 * 1000;
+  const QString askedAgo = s_networkAsked.isValid()
+                             ? QString("asked %1 s ago in this session").arg(s_networkAsked.elapsed() / 1000)
+                             : QString();
+  // Refresh the TACT keys before opening the storage -- setConfig() hands them to CASC, so a newer key list lets it
+  // decrypt encrypted db2 sections + files for recently-added content.
+  timeline.begin("tact keys");
+  bool keysAnswered = false;
+  if (askNetwork)
+    keysAnswered = refreshTactKeys("extraEncryptionKeys.csv", progress);
+  else
+    timeline.cache("tact keys download", "SKIPPED", askedAgo);
+  timeline.end("tact keys");
+
+  if (progress)
+    folder->setLoadProgressCallback([progress](core::GameFolder::LoadPhase, float fraction) {
+      progress->progress(fraction);
+    });
   step.Start();
+  timeline.begin("storage");
   const bool opened = folder->setConfig(config);
-  folder->setLoadProgressCallback(std::function<void(float)>());
+  timeline.end("storage", opened ? QString() : QString("failed"));
+  folder->setLoadProgressCallback(core::GameFolder::LoadReport());
   const long openMs = step.Time();
   if (!opened)
   {
     const int err = folder->lastError();
+    timeline.finish("failed: the storage could not be opened");
     closeProgress();
     LOG_ERROR << "[clientload] could not open" << requested.describe() << "error" << err << "after" << openMs << "ms";
-    if (!batchMode)
+    const wxString details =
+      wxString::Format(_("Product: %s\nVersion: %s\nInstallation: %s\nStorage: CASC, error %d"),
+                       wxString(config.product.toStdWString()), wxString(config.version.toStdWString()), gamePath, err);
+    if (progress)
+      progress->failed(wxString::Format(_("%s could not be opened."), friendly), clientOpenProblem(err), details);
+    else if (!batchMode)
     {
       wxRichMessageDialog dlg(this, wxString::Format(_("%s could not be opened."), friendly),
                               _("World of Warcraft"), wxOK | wxICON_ERROR);
       dlg.SetExtendedMessage(clientOpenProblem(err));
-      dlg.ShowDetailedText(wxString::Format(_("Product: %s\nVersion: %s\nInstallation: %s\nStorage: CASC, error %d"),
-                                            wxString(config.product.toStdWString()),
-                                            wxString(config.version.toStdWString()), gamePath, err));
+      dlg.ShowDetailedText(details);
       dlg.ShowModal();
     }
     // The client loaded before (if any) is untouched and still usable.
@@ -4163,6 +4246,7 @@ bool ModelViewer::LoadWoW(const core::GameConfig * chosenConfig, bool showProgre
   }
 
   // Opened: from here on this client replaces the previous one.
+  timeline.begin("teardown");
   if (fresh)
   {
     // The previous folder's storage is let go of; its file objects stay alive (the canvas, Browse and textures may
@@ -4176,7 +4260,9 @@ bool ModelViewer::LoadWoW(const core::GameConfig * chosenConfig, bool showProgre
   fileControl->Disable();
   TexturesClientLoadStarting();
   ResetClientState();
+  timeline.end("teardown");
 
+  timeline.begin("schema");
   const core::ClientProfile & profile = GAMEDIRECTORY.clientProfile();
   m_loadedBuild = config.version;
   m_loadedProduct = config.product;
@@ -4207,61 +4293,157 @@ bool ModelViewer::LoadWoW(const core::GameConfig * chosenConfig, bool showProgre
   m_clientSchema = schema;
   LOG_INFO << "[clientload] schema:" << schemaHow;
   core::Game::instance().setConfigFolder(schema.isEmpty() ? QString("games/wow/none/") : "games/wow/" + schema + "/");
+  timeline.end("schema", schemaHow);
 
-  if (progress) progress->step(_("Reading the file list..."), 45);
   step.Start();
-  refreshCommunityListfile(core::Game::instance().configFolder() + "../../../listfile.csv", progress);
+  timeline.begin("listfile check");
+  if (askNetwork)
+  {
+    const bool listAnswered =
+      refreshCommunityListfile(core::Game::instance().configFolder() + "../../../listfile.csv", progress);
+    // Only real answers spare the next hour's loads from asking: offline, or after a failed request, every load asks
+    // again, as it always did.
+    if (keysAnswered && listAnswered)
+      s_networkAsked.start();
+  }
+  else
+    timeline.cache("listfile download", "SKIPPED", askedAgo);
+  timeline.end("listfile check");
   if (progress)
   {
-    LoadingDialog * pd = progress;
-    GAMEDIRECTORY.setLoadProgressCallback([pd](float frac) {
-      pd->step(_("Reading the file list..."), 60 + (int)(frac * 12.0f)); // 60 -> 72 during the parse
+    // The listfile is read once per session ("Reading the file list..."); this client's files are indexed every
+    // load ("Reading game files..."). Both know how far they are.
+    core::GameFolder::LoadPhase shown = core::GameFolder::LoadPhase::OpeningStorage;
+    GAMEDIRECTORY.setLoadProgressCallback([progress, shown](core::GameFolder::LoadPhase phase, float fraction) mutable {
+      if (phase != shown)
+      {
+        shown = phase;
+        progress->stage(phase == core::GameFolder::LoadPhase::ReadingListfile ? _("Reading the file list...")
+                                                                              : _("Reading game files..."),
+                        fraction);
+      }
+      else
+        progress->progress(fraction);
     });
   }
+  timeline.begin("file index");
   GAMEDIRECTORY.initFromListfile("../../../listfile.csv");
-  GAMEDIRECTORY.setLoadProgressCallback(std::function<void(float)>());
+  timeline.end("file index");
+  GAMEDIRECTORY.setLoadProgressCallback(core::GameFolder::LoadReport());
   const long listfileMs = step.Time();
 
   if (!customDirectoryPath.IsEmpty())
+  {
+    core::LoadTimeline::Stage customStage("custom files");
     core::Game::instance().addCustomFiles(QString::fromWCharArray(customDirectoryPath.c_str()), customFilesConflictPolicy);
+  }
 
-  if (progress) progress->step(_("Reading game data..."), 75);
+  if (progress)
+    progress->stage(_("Loading game database..."));
   step.Start();
+  timeline.begin("database");
   InitDatabase();
+  timeline.end("database");
   const long databaseMs = step.Time();
 
-  if (progress) progress->step(_("Building Browse..."), 92);
+  if (progress)
+    progress->stage(_("Preparing Browse..."));
   SetStatusText(wxT("Initializing File Control..."));
   step.Start();
+  timeline.begin("browse");
   fileControl->Init(this);
+  timeline.end("browse");
   const long browseMs = step.Time();
   step.Start();
+  timeline.begin("characters");
   if (charControl->Init() == false)
     SetStatusText(wxT("Error Initializing the Character Controls."));
+  timeline.end("characters");
   const long charactersMs = step.Time();
   fileControl->Enable();
   // Browse and the character controls now point at this client's files only (the canvas was cleared before the
-  // file list was read): the files the reload detached can go.
-  if (wow::WoWFolder * live = dynamic_cast<wow::WoWFolder *>(&GAMEDIRECTORY))
-    live->freeDetachedFiles();
+  // file list was read): the files the reload detached can go -- while the viewer is idle, after the load, a share at
+  // a time (freeing ~1.8 million files takes ~0.5 s that the user would otherwise wait for).
+  FreeDetachedWhenIdle();
 
+  if (progress)
+    progress->stage(_("Almost ready..."));
+  timeline.begin("capabilities");
   ComputeClientCapabilities();
+  timeline.end("capabilities");
+  timeline.begin("remember client");
   RememberLoadedClient(config);
+  timeline.end("remember client");
 
   LOG_INFO << "[clientload] timing: open" << openMs << "ms, file list" << listfileMs << "ms, database" << databaseMs
            << "ms, Browse" << browseMs << "ms, characters" << charactersMs << "ms, total" << total.Time() << "ms";
   // The empty viewport points at Browse now rather than at loading a client -- once the load has
   // returned, since the client does not count as active while it is still inside it.
   CallAfter([this]() {
+    core::LoadTimeline::Stage stage("final ui (deferred)");
     UpdateUnityViewportState();
     TexturesClientLoaded();
     DisplayedContentChanged();
   });
   SetStatusText(wxString::Format(_("%s loaded."), friendly));
-  if (progress)
-    progress->step(_("Ready"), 100);
+  timeline.begin("close loading window");
   closeProgress();
+  timeline.end("close loading window");
+  timeline.mark("load returned");
   return true;
+}
+
+// THE FILES A LOAD DETACHED (the previous client's that this one does not list) are freed while the viewer is idle, a
+// share per idle event, so the user never waits for it. Never during a load: until a load has rebuilt Browse, rows of
+// the client before still point at its files (and a load frees whatever is left first, WoWFolder::initFromListfile).
+void ModelViewer::FreeDetachedWhenIdle()
+{
+  wow::WoWFolder * live = dynamic_cast<wow::WoWFolder *>(&GAMEDIRECTORY);
+  if (m_freeingDetached || !live || live->detachedFileCount() == 0)
+    return;
+  m_freeingDetached = true;
+  LOG_INFO << "WoWFolder - Freeing" << (unsigned int)live->detachedFileCount()
+           << "files the last reload detached, while the viewer is idle";
+  Bind(wxEVT_IDLE, &ModelViewer::OnIdleFreeDetached, this);
+}
+
+void ModelViewer::OnIdleFreeDetached(wxIdleEvent & event)
+{
+  event.Skip();
+  if (m_clientLoading || UnityAssetAccess::isClientLoading())
+    return; // a load is under way (a yield inside it): wait for it to finish
+  wow::WoWFolder * live = dynamic_cast<wow::WoWFolder *>(&GAMEDIRECTORY);
+  wxStopWatch clock;
+  const size_t left = live ? live->freeDetachedFiles(100000) : 0; // ~25 ms a share
+  if (left > 0)
+  {
+    event.RequestMore();
+    return;
+  }
+  Unbind(wxEVT_IDLE, &ModelViewer::OnIdleFreeDetached, this);
+  m_freeingDetached = false;
+  LOG_INFO << "WoWFolder - Freed the files the last reload detached (the last share in" << clock.Time() << "ms)";
+}
+
+// The first idle after a load's interface refresh: the viewer answers the user from here on, which is what the
+// load's timeline measures as "interactive".
+void ModelViewer::NoteInteractiveWhenIdle()
+{
+  if (m_interactivePending || !core::LoadTimeline::instance().running())
+    return;
+  m_interactivePending = true;
+  Bind(wxEVT_IDLE, &ModelViewer::OnIdleAfterLoad, this);
+}
+
+void ModelViewer::OnIdleAfterLoad(wxIdleEvent & event)
+{
+  event.Skip();
+  Unbind(wxEVT_IDLE, &ModelViewer::OnIdleAfterLoad, this);
+  m_interactivePending = false;
+  if (m_clientLoading || UnityAssetAccess::isClientLoading())
+    return; // a load is still under way (a yield inside it): the refresh after it notes the moment
+  core::LoadTimeline::instance().mark("interactive");
+  core::LoadTimeline::instance().finish("interactive");
 }
 
 // CAPABILITIES from what loaded (see ClientCapabilities).
@@ -4275,16 +4457,11 @@ void ModelViewer::ComputeClientCapabilities()
     return;
   }
   wxStopWatch clock;
-  for (const auto & entry : GAMEDIRECTORY.filesByPath())
-  {
-    const QString & name = entry.first;
-    if (name.endsWith(".m2", Qt::CaseInsensitive))
-      caps.modelFiles++;
-    else if (name.endsWith(".blp", Qt::CaseInsensitive))
-      caps.textureFiles++;
-    else if (name.endsWith(".wmo", Qt::CaseInsensitive))
-      caps.buildingFiles++;
-  }
+  // The file index keeps these counts as it changes (GameFolder::indexedTypeCounts): no walk over its paths.
+  const core::GameFolder::TypeCounts & types = GAMEDIRECTORY.indexedTypeCounts();
+  caps.modelFiles = (int)types.models;
+  caps.textureFiles = (int)types.textures;
+  caps.buildingFiles = (int)types.buildings;
   // A legacy MPQ client is opened for its models only: no database is read for it (LoadWoWFromMpq).
   const bool database = GAMEDIRECTORY.clientProfile().storage != core::StorageType::MPQ;
   auto rows = [database](const char * table) {

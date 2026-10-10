@@ -1579,3 +1579,142 @@ bool UiMenuBarTitles::handle(WXUINT message, WXWPARAM wParam, WXLPARAM lParam, W
   }
   return false;
 }
+
+// ---- UiProgressBar -------------------------------------------------------------------------------------------------
+
+UiProgressBar::UiProgressBar(wxWindow * parent, wxWindowID id)
+  : wxWindow(parent, id, wxDefaultPosition, wxDefaultSize, wxFULL_REPAINT_ON_RESIZE | wxBORDER_NONE),
+    m_timer(this)
+{
+  SetBackgroundStyle(wxBG_STYLE_PAINT);
+  m_slideStart = wxGetLocalTimeMillis();
+  Bind(wxEVT_PAINT, &UiProgressBar::OnPaint, this);
+  // Repainted only while it is on screen (a bar on a page put away ticks without painting).
+  Bind(wxEVT_TIMER, [this](wxTimerEvent &) {
+    if (IsShownOnScreen())
+      Refresh(false);
+  }, m_timer.GetId());
+  syncTimer();
+}
+
+UiProgressBar::~UiProgressBar()
+{
+  m_timer.Stop();
+}
+
+bool UiProgressBar::Show(bool show)
+{
+  const bool changed = wxWindow::Show(show);
+  syncTimer();
+  return changed;
+}
+
+void UiProgressBar::SetValue(double fraction)
+{
+  fraction = std::max(0.0, std::min(1.0, fraction));
+  if (!m_indeterminate && fraction == m_value)
+    return;
+  m_indeterminate = false;
+  m_value = fraction;
+  syncTimer();
+  Refresh(false);
+}
+
+void UiProgressBar::SetIndeterminate()
+{
+  if (m_indeterminate)
+    return;
+  m_indeterminate = true;
+  m_slideStart = wxGetLocalTimeMillis();
+  syncTimer();
+  Refresh(false);
+}
+
+void UiProgressBar::syncTimer()
+{
+  const bool run = m_indeterminate && IsShown();
+  if (run && !m_timer.IsRunning())
+    m_timer.Start(16);
+  else if (!run && m_timer.IsRunning())
+    m_timer.Stop();
+}
+
+wxSize UiProgressBar::DoGetBestSize() const
+{
+  return wxSize(FromDIP(240), FromDIP(6));
+}
+
+void UiProgressBar::OnPaint(wxPaintEvent & WXUNUSED(event))
+{
+  wxAutoBufferedPaintDC dc(this);
+  const UiStyle::Palette & p = palette();
+  const wxSize size = GetClientSize();
+  dc.SetBackground(wxBrush(GetParent() ? GetParent()->GetBackgroundColour() : p.panelBackground));
+  dc.Clear();
+  std::unique_ptr<wxGraphicsContext> gc = graphicsFor(dc);
+  if (!gc || size.x < 2 || size.y < 2)
+    return;
+  // The track: a solid pill in the outline colour, which reads on the panel in both themes. The fill is the same pill
+  // over the stretch it covers, so its ends always sit on the track's curve. In Windows' high-contrast colours the
+  // outline colour is the text colour, which the highlight does not stand out from: there the track is the window
+  // colour inside a text-coloured outline, and the fill keeps inside the outline.
+  const bool contrast = UiStyle::highContrastOn() && !UiStyle::darkActive(); // the palette in use is the system's
+  if (contrast)
+  {
+    gc->SetPen(wxPen(p.border));
+    gc->SetBrush(wxBrush(p.controlBackground));
+    gc->DrawRoundedRectangle(0.5, 0.5, size.x - 1.0, size.y - 1.0, size.y / 2.0 - 0.5);
+  }
+  else
+  {
+    gc->SetPen(*wxTRANSPARENT_PEN);
+    gc->SetBrush(wxBrush(p.border));
+    gc->DrawRoundedRectangle(0.0, 0.0, size.x, size.y, size.y / 2.0);
+  }
+  gc->SetPen(*wxTRANSPARENT_PEN);
+  // Where the fill can go: the track, or inside its outline.
+  const double inset = contrast ? 1.0 : 0.0;
+  const double left = inset, top = inset, w = size.x - 2.0 * inset, h = size.y - 2.0 * inset, radius = h / 2.0;
+  if (w < 1.0 || h < 1.0)
+    return;
+  // The fill: from the start to the value, or a segment sliding along the track.
+  double from = 0.0, to = 0.0;
+  if (m_indeterminate)
+  {
+    const double period = 1600.0; // ms for one pass
+    const double segment = std::max(h * 2.0, w * 0.28);
+    // The first pass starts with the segment already on the track, at its start: an empty track would read as "nothing
+    // done yet" for as long as the work keeps the bar from moving. (t0: where the eased pass puts the segment there.)
+    const double enter = segment / (w + segment);
+    const double t0 = enter < 0.5 ? std::sqrt(enter / 2.0) : 1.0 - std::sqrt(2.0 * (1.0 - enter)) / 2.0;
+    const double t = std::fmod((wxGetLocalTimeMillis() - m_slideStart).ToDouble() / period + t0, 1.0);
+    const double eased = t < 0.5 ? 2.0 * t * t : 1.0 - std::pow(-2.0 * t + 2.0, 2.0) / 2.0; // ease in and out
+    from = -segment + (w + segment) * eased;
+    to = from + segment;
+  }
+  else
+    to = w * m_value;
+  // A pill as high as the track, cut to it: where the fill runs past an end of the track, the track's end is its end.
+  from = std::max(0.0, from);
+  to = std::min(w, to);
+  const double length = to - from;
+  if (length < 0.5)
+    return;
+  gc->SetBrush(wxBrush(p.accent));
+  wxGraphicsPath fill = gc->CreatePath();
+  if (length >= h)
+    fill.AddRoundedRectangle(left + from, top, length, h, radius);
+  else
+  {
+    // Shorter than the track is high (a small value, a segment coming in): its two rounded ends overlap, and the fill
+    // is where they do -- a lens that stays inside the track's curve. Its right edge is the right end's circle, its
+    // left edge the left end's.
+    const double pi = std::acos(-1.0);
+    const double leftCentre = left + from + radius, rightCentre = left + to - radius; // rightCentre < leftCentre
+    const double a = std::acos((leftCentre - rightCentre) / 2.0 / radius);
+    fill.AddArc(rightCentre, top + radius, radius, -a, a, true);
+    fill.AddArc(leftCentre, top + radius, radius, pi - a, pi + a, true);
+    fill.CloseSubpath();
+  }
+  gc->FillPath(fill);
+}

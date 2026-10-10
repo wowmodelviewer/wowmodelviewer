@@ -41,6 +41,7 @@ class _CASCFOLDER_API_ CASCFolder
     // Optional progress callback (fraction 0..1) invoked while enumerating present files in
     // setConfig() -- the "opening game data" step -- so the loading UI can advance during it.
     void setProgressCallback(const std::function<void(float)> & cb) { m_progressCb = cb; }
+    void reportProgress(float fraction) { if (m_progressCb) m_progressCb(fraction); }
 
     int lastError() { return m_openError; }
 
@@ -59,12 +60,13 @@ class _CASCFOLDER_API_ CASCFolder
     void initBuildInfo();
     void addExtraEncryptionKeys();
     void buildPresentIdIndex();  // one-shot enumeration of present FileDataIDs -> fast fileExists()
+
   public:
     // Let go of the storage (a client replaced by one in another folder object).
     void closeStorage();
     // Files in the opened build that are not on this computer (a partly downloaded install).
-    size_t remoteFileCount() const { return m_remoteIds.size(); }
-    bool isRemote(int id) const { return m_remoteIds.count(id) != 0; }
+    size_t remoteFileCount() const { return m_remoteCount; }
+    bool isRemote(int id) const { return id >= 0 && (size_t)id < m_remoteIds.size() && m_remoteIds[id]; }
   private:
 
     int m_currentCascLocale;
@@ -75,8 +77,13 @@ class _CASCFOLDER_API_ CASCFolder
     HANDLE hStorage;
 
     std::vector<core::GameConfig> m_configs;
-    std::unordered_set<int> m_presentIds;  // every FileDataID with a local copy (filled by buildPresentIdIndex)
-    std::unordered_set<int> m_remoteIds;   // in the build, but with no copy on this computer
+    // Every FileDataID with a local copy, and those in the build with none on this computer (buildPresentIdIndex): one
+    // bit per id (ids reach ~8.5 million, so 1 MB each), which the ~2.3 million listfile lookups of a load read
+    // without hashing.
+    std::vector<bool> m_presentIds;
+    std::vector<bool> m_remoteIds;
+    size_t m_presentCount = 0;
+    size_t m_remoteCount = 0;
     std::function<void(float)> m_progressCb; // optional load-progress reporter (see setProgressCallback)
 };
 

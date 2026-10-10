@@ -4667,6 +4667,18 @@ static void doHeadlessUnityIpcTest(ModelViewer * frame)
 // A batch run that loads something and has no other job ends here. It used to write an ss_*.png
 // screenshot of the OpenGL viewport; that viewport is archived and the Unity viewport has no capture
 // yet, so the run says so once instead of writing a picture of a renderer nobody sees.
+// Milliseconds since this process was created (its creation time, as Windows keeps it).
+static long long processUptimeMs()
+{
+  FILETIME created, exited, kernel, user;
+  if (!GetProcessTimes(GetCurrentProcess(), &created, &exited, &kernel, &user))
+    return -1;
+  FILETIME now;
+  GetSystemTimeAsFileTime(&now);
+  const auto ticks = [](const FILETIME & t) { return ((long long)t.dwHighDateTime << 32) | t.dwLowDateTime; };
+  return (ticks(now) - ticks(created)) / 10000; // 100 ns units
+}
+
 static void logNoHeadlessScreenshot()
 {
   LOG_INFO << "Headless run done: screenshots are not available in the Unity-only viewer, so no ss_*.png was written.";
@@ -5321,6 +5333,10 @@ bool WowModelViewApp::OnInit()
     // than to the client, so it can sit connected and idle until there is something to show.
     frame->ApplyViewerStartupLayout();
     frame->WarmStartUnityViewport();
+    // How long the start took, from the process's creation: the viewer is usable (its window up, the renderer
+    // starting beside it) without any game data read.
+    LOG_INFO << "[startup] the viewer is up" << processUptimeMs() << "ms after the process started (no client read;"
+             << "the renderer is starting)";
   }
 
   return true;
@@ -5335,6 +5351,13 @@ void WowModelViewApp::OnFatalException()
     frame->Destroy();
     frame = NULL;
   }
+}
+
+void WowModelViewApp::CleanUp()
+{
+  wxApp::CleanUp(); // the windows (and what queries the database) first
+  if (core::Game::instance().initDone())
+    GAMEDATABASE.close();
 }
 
 int WowModelViewApp::OnExit()

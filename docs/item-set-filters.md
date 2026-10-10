@@ -30,7 +30,7 @@ All four shipped database profiles include the two new tables. Their bundled WoW
 cmake -S scripts/tests/item-set-filters -B <test-build> -A x64 -DWMV_ROOT=<checkout> -DQT_ROOT=<Qt-installation>
 cmake --build <test-build> --config Release
 <test-build>/Release/item-set-filters.exe
-<test-build>/Release/item-set-integration.exe <runtime>/wowdb.sqlite
+<test-build>/Release/item-set-integration.exe <runtime>/dbcache/wowdb-wow-<build>-<hash>.sqlite
 ```
 
 The first compiles the production dialog methods and classifier, replacing only application dependencies and unused network importer callbacks. It tests the seven categories, relevant slots, accessories, incomplete and empty sets, combinations, search, zero matches, restoration, selection preservation, no equipment callbacks during filtering, filtered ID mapping, and individual-item picker behavior.
