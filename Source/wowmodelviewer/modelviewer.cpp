@@ -286,7 +286,6 @@ ModelViewer::ModelViewer()
   isModel = false;
   isWMO = false;
   isChar = false;
-  isADT = false;
   initDB = false;
 
   //wxCAPTION|wxRESIZE_BORDER|wxSYSTEM_MENU
@@ -1064,11 +1063,10 @@ void ModelViewer::LoadModel(GameFile * file, int raceID, int sexID)
   m_shownAsCreatureDisplay = false;
 
   isModel = true;
-  // A model replaces whatever WMO or map tile was shown (canvas->LoadModel below drops them). Only
-  // FileControl::ClearCanvas used to reset these, and the menu loads -- an NPC, an item, a character file,
+  // A model replaces whatever WMO was shown (canvas->LoadModel below drops it). Only
+  // FileControl::ClearCanvas used to reset this, and the menu loads -- an NPC, an item, a character file,
   // an import -- do not go through it.
   isWMO = false;
-  isADT = false;
 
   // A direct model load is not an NPC; clear any NPC export descriptor. (LoadNPC calls us and
   // then re-sets it afterwards, so the NPC case is unaffected.) Same for the item skin: a raw
@@ -2391,7 +2389,7 @@ void ModelViewer::OnCharHook(wxKeyEvent & event)
 // the canvas model is then the mount, with the character hung from one of its attachments, and the player
 // is still loaded with the character and seats it on the mount its scene describes (protocol 5). What it
 // cannot draw yet, each with the notice the viewport shows instead:
-//   - an image picked in Browse or a map tile (ADT);
+//   - an image picked in Browse;
 //   - a WMO whose root the host could not read, one with no FileDataID (a legacy client), one the player
 //     reported it could not build (while that load is on display), and any WMO when the connected
 //     player is an older build that cannot draw world models;
@@ -2460,13 +2458,6 @@ bool ModelViewer::unityCanDrawCurrentModel(ViewportNotice * notice) const
       return false;
     }
     return true;
-  }
-  if (isADT && canvas->adt)
-  {
-    out.title = _("Map tile loaded");
-    out.detail = wxString::Format(_("%s is a map tile (ADT). The Unity viewport cannot show map tiles yet."),
-                                  fileName(canvas->adt->name));
-    return false;
   }
   if (!canvas->model())
     return false;   // nothing loaded: the empty viewer, not a notice about content
@@ -4809,8 +4800,6 @@ void ModelViewer::DisplayedContentChanged()
       if (canvas->wmo->fileDataID > 0)
         tip = path + wxString::Format(wxT("  [%u]"), (unsigned)canvas->wmo->fileDataID);
     }
-    else if (isModelsMode() && isADT && canvas->adt)
-      path = canvas->adt->name;
     else if (isModelsMode() && canvasHasModel())
       path = canvas->model()->gamefile ? canvas->model()->gamefile->fullname().toStdWString()
                                        : const_cast<WoWModel *>(canvas->model())->name().toStdWString();
@@ -5365,7 +5354,7 @@ bool ModelViewer::canvasHoldsModesContent() const
   if (m_viewerMode == ViewerMode::Buildings)
     return canvasHasWorldModel();
   if (m_viewerMode == ViewerMode::Models)
-    return canvasHasModel() || (isADT && canvas && canvas->adt);
+    return canvasHasModel();
   return false;
 }
 

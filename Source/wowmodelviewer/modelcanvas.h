@@ -19,7 +19,6 @@
 #include "AVIGenerator.h"
 #endif
 #include "lightcontrol.h"
-#include "maptile.h"
 #include "OrbitCamera.h"
 #include "RenderTexture.h"
 #include "util.h"
@@ -109,7 +108,6 @@ public:
   void RenderToTexture();
   void RenderModel();
   void RenderWMO();
-  void RenderADT();
   void RenderToBuffer();
   void RenderWMOToBuffer();
   void RenderLight(Light *l);
@@ -150,7 +148,6 @@ public:
   // destructor writes into the model it holds) and g_selWMO (the doodad-set list's target). The only
   // way a WMO may be deleted.
   void ClearWMO();
-  void LoadADT(wxString fn);
   //void TogglePause();
   
   // Various toggles
@@ -165,7 +162,6 @@ public:
   // Models / Attachments
   WoWModel *skyModel;
   WMO *wmo;
-  MapTile *adt;
 
   Attachment *root;
   Attachment *sky;

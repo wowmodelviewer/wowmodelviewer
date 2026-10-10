@@ -64,7 +64,7 @@ CharDetailsCustomizationChoice::CharDetailsCustomizationChoice(wxWindow* parent,
 : wxWindow(parent, wxID_ANY), ID_(chrCustomizationChoiceID), details_(details)
 {
   auto top = new wxFlexGridSizer(2, 0, 5);
-  top->AddGrowableCol(2);
+  top->AddGrowableCol(1);
 
   details_.attach(this);
 
@@ -77,7 +77,9 @@ CharDetailsCustomizationChoice::CharDetailsCustomizationChoice(wxWindow* parent,
 
     choice_ = new wxBitmapComboBox(this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0, NULL, wxCB_READONLY);
 
-    top->Add(choice_, wxSizerFlags().Align(wxALIGN_CENTER | wxALIGN_CENTER_VERTICAL).Border(wxRIGHT, 5));
+    // The row keeps the width it has here, with the list still empty; once filled, a dropdown is often
+    // narrower, and the growable column 1 takes the rest. Left-aligned, every row's dropdown starts at the same x.
+    top->Add(choice_, wxSizerFlags().Align(wxALIGN_LEFT | wxALIGN_CENTER_VERTICAL).Border(wxRIGHT, 5));
 
     SetAutoLayout(true);
     top->SetSizeHints(this);

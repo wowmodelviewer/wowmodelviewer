@@ -485,7 +485,6 @@ starts) and the command line of a player started later follow what is loaded.
 | (Buildings) a world model sent while the player shows, or may show, anything but a world model, until the player answers about that load: the model is not shown under the Buildings viewer meanwhile | "Loading building" | -- |
 | (Models) a model sent while the player shows, or may show, a world model, until the player reports holding it (`runtimeState`, asked every 100 ms) | "Loading model" | -- |
 | (Models) that model, when the player finished without it or did not have it within 60 s | "Model could not be built" | -- |
-| a map tile (ADT) -- nothing loads one any more: Browse lists no map tiles | "Map tile loaded" | -- |
 | a model with no game file behind it | "Model cannot be shown" | -- |
 | a character riding a mount, with a connected player older than protocol 5, or whose rider is not a character model with a FileDataID (the canvas model is then the mount) | "Mounted character" | -- |
 | a model with no FileDataID (a legacy MPQ client; the player addresses every asset by one) | "Legacy client model" | -- |
@@ -1695,7 +1694,7 @@ are not available in the Unity-only viewer, and write no image; the `-imgseq` sm
   armour are drawn (see "Characters").
 - For characters: secondary (upper-body) and mouth animations. A mounted character rides its mount
   in a player of protocol 5 or later (see "Mounted characters"); an older player gets a notice.
-- Maps, terrain, fog. Browse lists no map tiles, so none is loaded. (A texture picked in Browse is shown
+- Maps, terrain, fog. The viewer has no map tile reader, and Browse lists no map tiles. (A texture picked in Browse is shown
   by the texture view in the viewport's place; see the notices above.)
 - For WMOs: doodads and doodad sets, liquids, WMO lights, fog, portal culling, LOD switching, the
   skybox, and the rest of the WMO material system (shader ids other than 0/4/5/7/13/16/23, the env-map
