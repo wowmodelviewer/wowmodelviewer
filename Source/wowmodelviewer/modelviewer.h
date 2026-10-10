@@ -168,6 +168,9 @@ public:
   // The component-geoset state an item's own model should be shown with. See the definition.
   void applyItemComponentGeosets(unsigned int itemId);
   void LoadNPC(unsigned int modelid);
+  // Frees the character riding the mount on the canvas, if one is: the canvas frees only its own model, the mount.
+  // Called where a model is replaced or cleared, before the canvas model goes.
+  void ReleaseRider();
   // Register an NPC in the in-memory DB (if not already present) and load it. Shared by the
   // Load NPC / Model dialog's link flow and the -npc headless test harness.
   void LoadNPCByDisplay(int npcId, int displayId, int type = 0, const QString & name = QString("npc"));

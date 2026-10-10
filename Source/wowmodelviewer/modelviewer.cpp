@@ -1,4 +1,5 @@
 #include "modelviewer.h"
+#include <algorithm>
 #include "ClientChoiceDialog.h"   // File > Load World of Warcraft opens it
 #include "ClientInstallations.h"
 
@@ -1078,6 +1079,7 @@ void ModelViewer::LoadModel(GameFile * file, int raceID, int sexID)
 
   if (isChar)
   {
+    ReleaseRider();   // the canvas below frees only its own model: a mount, if the character was riding one
     modelAtt = canvas->LoadModel(file);
     // THE MODEL THAT WAS ON THE CANVAS IS FREED BY THAT CALL (ModelCanvas::LoadModel clears the attachments,
     // which deletes charAtt, and then deletes the model itself), so the character control's two pointers into
@@ -1125,6 +1127,7 @@ void ModelViewer::LoadModel(GameFile * file, int raceID, int sexID)
   }
   else
   {
+    ReleaseRider();
     modelAtt = canvas->LoadModel(file); //  change it from LoadModel, don't sure it's right or not.
     charControl->charAtt = nullptr;   // freed with the model they pointed at: see the character branch above
     charControl->model = nullptr;
@@ -1249,6 +1252,38 @@ void ModelViewer::LoadModel(GameFile * file, int raceID, int sexID)
   CommitLayoutIfChanged();
 }
 
+// A mounted character is not the canvas model -- the mount is, and the character hangs on the root's attachment --
+// so replacing or clearing the canvas freed the mount and left the rider, with all its equipment, to leak (about
+// 144 MB for a robed NPC, on every load made while mounted). It is freed here, with its attachment already gone.
+// Only while a mount is up: otherwise the character IS the canvas model, and charControl->model may point at a
+// model already freed.
+void ModelViewer::ReleaseRider()
+{
+  const WoWModel * mount = canvas ? canvas->model() : nullptr;
+  WoWModel * rider = charControl ? charControl->model : nullptr;
+  Attachment * node = charControl ? charControl->charAtt : nullptr;
+  if (!mount || !mount->isMount || !rider || rider == mount || !node || !canvas->root)
+    return;
+  // The rider is alive only while its node still hangs on the root and holds it -- compared as pointers, nothing read
+  // through them (after a failed load charControl->model can be a model the canvas freed).
+  const std::vector<Attachment *> & nodes = canvas->root->children;
+  if (std::find(nodes.begin(), nodes.end(), node) == nodes.end() || node->model() != rider)
+    return;
+  canvas->clearAttachments();
+  canvas->root->setModel(nullptr); // the mount goes next, and one that did not load would not detach itself
+  charControl->charAtt = nullptr;
+  charControl->model = nullptr;
+  if (modelControl)
+    modelControl->Forget();
+  if (g_selModel == rider) // the Animation panel was on the rider (View > Attachments)
+  {
+    if (animControl)
+      animControl->Forget();
+    g_selModel = nullptr;
+  }
+  delete rider;
+}
+
 // Load an NPC model
 void ModelViewer::LoadNPC(unsigned int modelid)
 {
@@ -1257,8 +1292,11 @@ void ModelViewer::LoadNPC(unsigned int modelid)
   // Described to the Unity viewport once, dressed, when this returns: see SceneHold.
   SceneHold sceneHold(this);
 
+  ReleaseRider();
   canvas->clearAttachments();
   canvas->setModel(NULL);
+  charControl->charAtt = nullptr;   // freed with the model, as in LoadModel: nothing may read them until re-pointed
+  charControl->model = nullptr;
   if (modelControl)
     modelControl->Forget();   // it may point at an item of the model just freed: see LoadModel
   canvas->ClearWMO();   // a world model left on the canvas goes with the flag (a failed load must not keep it)
@@ -1423,8 +1461,11 @@ bool ModelViewer::LoadModelById(const ModelIdLookup::Resolved & resolved, wxStri
     // always shows what it names -- not the skin or equipment the same file was last given.
     SetViewerMode(ViewerMode::Models);
     SceneHold sceneHold(this);
+    ReleaseRider();
     canvas->clearAttachments();
     canvas->setModel(NULL);
+    charControl->charAtt = nullptr;   // as LoadNPC
+    charControl->model = nullptr;
     if (modelControl)
       modelControl->Forget();   // as LoadNPC
     canvas->ClearWMO();   // as LoadNPC
@@ -1528,8 +1569,11 @@ void ModelViewer::applyItemComponentGeosets(unsigned int itemId)
 void ModelViewer::LoadItem(unsigned int id)
 {
   SetViewerMode(ViewerMode::Models);
+  ReleaseRider();
   canvas->clearAttachments();
   canvas->setModel(NULL);
+  charControl->charAtt = nullptr;   // as LoadNPC
+  charControl->model = nullptr;
   if (modelControl)
     modelControl->Forget();   // as LoadNPC
   canvas->ClearWMO();   // as LoadNPC

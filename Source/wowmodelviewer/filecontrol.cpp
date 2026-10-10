@@ -803,6 +803,7 @@ void FileControl::ClearCanvas()
     // Detaches canvas->root and clears g_selWMO before the delete (it used to leave both dangling).
     modelviewer->canvas->ClearWMO();
   } else if (modelviewer->isModel) {
+    modelviewer->ReleaseRider();
     modelviewer->canvas->clearAttachments();
 
     // If it was a character model, no need to delete canvas->model, 
