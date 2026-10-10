@@ -188,6 +188,7 @@ void ItemSetChoiceDialog::chooseSet(wxListEvent&)
   m_title->SetLabel(set.name.toStdWString()); m_title->SetToolTip(set.name.toStdWString());
   m_notice->SetLabel(set.incomplete ? _("Some pieces could not be resolved from the game data.") :
     (set.equipmentSlots.empty() && set.id ? _("This set has no pieces in supported equipment slots.") : _("Choose an item or appearance where alternatives are available.")));
+  m_notice->Wrap(-1); // wxWidgets 3.3 skips a Wrap at the width it last wrapped at, whatever the text
   m_notice->Wrap(m_detailWidth);
   std::vector<ItemSets::Equipped> pieces;
   for (const auto& slot : set.equipmentSlots) {
@@ -234,6 +235,7 @@ void ItemSetChoiceDialog::DoFilter()
     m_active = -1; clearDetails();
     m_title->SetLabel(_("Set pieces"));
     m_notice->SetLabel(_("Select a set to see its pieces and alternatives."));
+    m_notice->Wrap(-1);
     m_notice->Wrap(m_detailWidth); Layout();
   }
 }

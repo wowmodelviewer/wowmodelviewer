@@ -20,7 +20,7 @@ Missing item metadata, missing appearance/display records or unnamed items that 
 
 Opening runs at most four queries (three bulk reads and one schema-column check) and builds all categories/options in memory. There are no SQL queries when typing or changing checkboxes. Filtering restores the same selection and slot choices if still visible; otherwise it clears the details panel and selection without changing equipment or selecting a replacement. Explicitly selecting a set clears previous equipment and applies one initial option per supported slot, examining all 17 legacy positions. Changing an item or appearance affects only that slot. The individual-item picker and main equipment UI are unchanged.
 
-All four shipped database profiles include the two new tables. Their bundled WoWDBDefs layouts resolve fields by the actual client layout hash; schema version 15 invalidates older caches. A database without transmog tables still supplies traditional sets. No class filter or character-class restriction is applied.
+All four shipped database profiles include the two new tables. Their bundled WoWDBDefs layouts resolve fields by the actual client layout hash; schema version 17 invalidates older caches. A database without transmog tables still supplies traditional sets. No class filter or character-class restriction is applied.
 
 ## Automated verification
 
@@ -44,7 +44,7 @@ The integration harness compiles the production catalog and two-column dialog. I
 Validation on 2026-10-03: Release x64 build passed; 194 synthetic/dialog checks passed; all 1,008 sets in the local read-only database passed ID and piece-request checks. Categories were Cloth 231, Leather 240, Mail 202, Plate 236, Mixed 0, Other 63, Unknown 36. Mixed was exercised with synthetic data. There were 36 nonzero piece references after position eight. Opening took approximately 183 ms on this machine. All four shipped schemas were checked. The local installation was updated and all seven copied C++ binaries verified by SHA-256, with a backup retained outside the repository. Visual verification and actual game-asset loading remain pending.
 
 
-### Transmog panel validation — 2026-10-03
+### Transmog panel validation â€” 2026-10-03
 
 - Both the isolated PR branch and daily checkout built successfully in Release x64.
 - The new XML/DBD definitions extracted 5,141 TransmogSet records and 74,760 TransmogSetItem records directly from local client 12.1.0.69933, with Hateful Chain membership checked.
@@ -62,21 +62,21 @@ Picker layout follow-up: Select all / Select none below the categories use the e
 User visual verification: Mauricio confirmed Sabellian's Battlegear alternatives work in Unity. Southsea Cruise exposes an existing chest/legs shared-geoset override; that renderer issue remains unresolved and is separate from these layout changes.
 
 
-### Redundant transmog fragments — 2026-10-04
+### Redundant transmog fragments â€” 2026-10-04
 
 `TransmogSetGroupID` and `ClassMask` are now imported in all client profiles. An ungrouped record is omitted only if it lacks at least one of head/shoulder/chest/legs/feet, has complete resolvable data, and all its exact ItemModifiedAppearance source IDs occur among complete variants in one catalog group with the same localized name and class mask. Every donor must itself have all five core slots and complete data. Coverage may span variants of that one group; sources from different groups are never combined. ClassMask is used only to establish the family relationship, not to filter by the current character's class. No guessed flag values or name-only merging are used.
 
 Grouped records, full outfits, fragments with exclusive sources, incomplete records, and records with different class/name relationships remain available. Appearance IDs alone do not establish redundancy: all original source IDs are compared before per-item appearance deduplication. When metadata columns are unavailable in an older standalone database, the catalog falls back to retaining its fragments. Filtering/search still perform no database work.
 
-The local Astral Gladiator's Chain Armor case keeps complete records 4102/4103/4109/4115/4116/4122 and omits fragments 4069–4083. Cosmic Dreadplate keeps 2352/2353 and omits 2420–2424. The real-data catalog contains 4,360 named transmog records, down from 5,095, plus all 1,008 traditional sets. Synthetic coverage fixtures verify same-group union, exclusive sources, different class/name/group relationships, incomplete sources and full ungrouped variants. Schema 15 requires a one-time cache rebuild after installation.
+The local Astral Gladiator's Chain Armor case keeps complete records 4102/4103/4109/4115/4116/4122 and omits fragments 4069â€“4083. Cosmic Dreadplate keeps 2352/2353 and omits 2420â€“2424. The real-data catalog contains 4,360 named transmog records, down from 5,095, plus all 1,008 traditional sets. Synthetic coverage fixtures verify same-group union, exclusive sources, different class/name/group relationships, incomplete sources and full ungrouped variants. Schema 17 requires a one-time cache rebuild after installation.
 
 Full hidden validation after fragment filtering passed 233,795 assertions: 5,103 usable filtered selections, 17,597 item changes and 1,089 appearance changes. Both Release x64 builds passed. Shipped XML/DBD extraction from client 12.1.0.69933 confirmed Astral fragment 4074 has class mask 4/group 0 and variants 4103/4116 have class mask 4/group 284. Eleven installed files were backed up and SHA-256 verified. No application was reopened and no commit or push was made.
 
 
-### Differently named reward fragments — 2026-10-04
+### Differently named reward fragments â€” 2026-10-04
 
 The redundancy guard no longer requires matching localized names. Draconic Plate
-fragments 3608–3622 reuse exact sources from complete Verdant Plate variants
+fragments 3608â€“3622 reuse exact sources from complete Verdant Plate variants
 3216/3218/3220; Dread Vestment fragments 1706/1708/1709/1726/1728/1729 reuse
 complete Dread Plate variants 1731/1735. Names alone are not reliable family keys.
 Every source must still be covered by complete, resolvable variants in one real
