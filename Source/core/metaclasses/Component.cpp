@@ -53,7 +53,8 @@
 //--------------------------------------------------------------------
 Component::Component() : m_p_parent(0), m_refCounter(0)
 {
-    m_name = "Component";
+    // No default name: every component is named by its maker, and a client's file index makes ~2 million of them
+    // (a "Component" string each was ~2 million allocations nobody read).
 }
 
 // Destructor

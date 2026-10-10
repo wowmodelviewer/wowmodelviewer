@@ -54,6 +54,7 @@ namespace WMVLog
 
 class UiMenuBarTitles;
 
+class ClientLoadProgress;
 class ModelViewer: public wxFrame
 {    
     DECLARE_CLASS(ModelViewer)
@@ -125,6 +126,15 @@ public:
   QString m_loadedProduct;   // the product LoadWoW loaded (-product for the export child)
   QString m_clientSchema;    // the games/wow/<dir> the database was read with ("" = none)
   bool m_clientLoading = false;
+  ClientLoadProgress * m_loadProgress = nullptr; // the load under way's loading page (LoadWoW sets it)
+  // The load's timeline notes "interactive" at the first idle after the interface follows the loaded client.
+  void NoteInteractiveWhenIdle();
+  void OnIdleAfterLoad(wxIdleEvent & event);
+  bool m_interactivePending = false;
+  // The previous client's files a load detached, freed while the viewer is idle after it.
+  void FreeDetachedWhenIdle();
+  void OnIdleFreeDetached(wxIdleEvent & event);
+  bool m_freeingDetached = false;
   // A newly opened client replaces what is on screen and every cache filled from the previous one.
   void ResetClientState();
   void ComputeClientCapabilities();
@@ -709,7 +719,8 @@ public:
   // asked for, otherwise the newest Retail), the headless default. showProgress shows the loading window. The schema
   // is resolved from the opened client itself, never chosen. Atomic: a client that cannot be opened leaves the one
   // already loaded (if any) as it was, and the user is told why in plain words. True when the client loaded.
-  bool LoadWoW(const core::GameConfig * chosenConfig = 0, bool showProgress = false);
+  // progress: the loading page to report to (the chooser's); none for a load without a window (headless).
+  bool LoadWoW(const core::GameConfig * chosenConfig = 0, ClientLoadProgress * progress = nullptr);
 
   // WHAT THE LOADED CLIENT CAN DO, established from what actually loaded (files indexed, tables read, races
   // resolved) rather than from its product or version. Commands that need something the client lacks are greyed

@@ -7,6 +7,8 @@
 
 #include "WoWFolder.h"
 
+#include <algorithm>
+
 #include <QDir>
 #include <QDirIterator>
 #include <QFile>
@@ -16,6 +18,8 @@
 #include "CascFileProvider.h"
 #include "Game.h"
 #include "HardDriveFile.h"
+#include "Listfile.h"
+#include "LoadTimeline.h"
 #include "MpqFile.h"
 #include "MpqFileProvider.h"
 #include "WotlkDbc.h"
@@ -35,111 +39,150 @@ void wow::WoWFolder::init()
 
 void wow::WoWFolder::initFromListfile(const QString & filename)
 {
-  QFile file(core::Game::instance().configFolder() + filename);
-  if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
+  // The listfile is read once per session (Listfile): it names the files of every client alike. Which of them this
+  // client has is decided here, from its own storage.
+  bool reused = false;
+  std::shared_ptr<const Listfile> list =
+    Listfile::get(core::Game::instance().configFolder() + filename, [this](float fraction) {
+      if (m_loadProgressCb)
+        m_loadProgressCb(LoadPhase::ReadingListfile, fraction);
+    }, reused);
+  if (!list)
   {
     LOG_ERROR << "Failed to open" << filename;
     return;
   }
+  core::LoadTimeline::instance().cache("listfile index", reused ? "HIT" : "MISS",
+                                       reused ? QString("read earlier in this session")
+                                              : QString("%1 entries read").arg(list->size()));
 
-  QTextStream in(&file);
-
-  // For the optional load-progress callback: estimate completion from bytes consumed so the
-  // loading UI advances during this (longest) startup step instead of sitting at one value.
-  const qint64 totalBytes = file.size();
-  qint64 bytesRead = 0;
-  qint64 nextReport = 0;
-  const qint64 reportEvery = (totalBytes > 0) ? (totalBytes / 60) : 1; // ~60 updates
-
-  // Loading a client again runs this on the folder the previous load filled. The files that load
-  // listed are kept instead of being added a second time (every reload added ~1.9 million more),
-  // and once the list is read, whatever this pass did not list is dropped, so the folder ends up
-  // listing what a first load would.
+  // Loading a client again runs this on the folder the previous load filled. The files that load listed under the
+  // same FileDataID and path are kept instead of being made again (every reload added ~1.9 million more before), and
+  // whatever this pass does not list is dropped, so the folder ends up listing what a first load would.
   const bool reloading = nbChildren() > 0;
   freeDetachedFiles(); // a load that did not get as far as freeing its own
-  std::vector<bool> listedNow; // reload only: which file ids this pass lists
 
   LOG_INFO << "WoWFolder - Starting to build object hierarchy";
+  core::LoadTimeline::instance().begin("file index build");
   m_remoteViewerFiles = 0;
   static const char * VIEWER_EXT[] = {".m2", ".skin", ".anim", ".skel", ".blp", ".wmo", ".db2"};
-  while (!in.atEnd())
+  const size_t n = list->size();
+  // The previous pass's file of each line, when it read this same listfile: found again without a search.
+  const bool sameList = reloading && m_listfile == list && m_entryFiles.size() == n;
+  core::LoadTimeline::instance().begin("this client's files");
+  std::vector<GameFile *> entryFile(n, nullptr);
+  std::vector<GameFile *> models;
+  std::vector<GameFile *> files;
+  files.reserve(reloading ? nbChildren() : n);
+  size_t kept = 0, created = 0;
+  const size_t reportEvery = std::max<size_t>(1, n / 100);
+  for (size_t i = 0; i < n; i++)
   {
-    QString line = in.readLine().toLower();
-
-    bytesRead += (qint64)line.length() + 1; // approx (ASCII listfile + newline)
-    if (m_loadProgressCb && bytesRead >= nextReport)
-    {
-      m_loadProgressCb((totalBytes > 0) ? (float)bytesRead / (float)totalBytes : 0.0f);
-      nextReport = bytesRead + reportEvery;
-    }
-
-    QStringList lineData = line.split(';');
-    if (lineData.size() < 2)
-      continue;
-    int id = lineData.at(0).toInt();
-    QString fileName = lineData.at(1);
-    // Add the file to the name-ID mappings even if it can't be found in CASC,
-    // as it could be a custom file added by the user. (The name is assigned only when it changed,
-    // so a reload keeps sharing the copy the previous load stored instead of adding another.)
-    QString & knownName = m_idNameMap[id];
-    if (knownName != fileName)
-      knownName = fileName;
-    m_nameIdMap[fileName] = id;
+    if (m_loadProgressCb && i % reportEvery == 0)
+      m_loadProgressCb(LoadPhase::IndexingFiles, (float)i / (float)n);
+    const int id = list->id(i);
+    const QString & name = list->path(i);
     if (m_CASCFolder.isRemote(id))
       for (const char * ext : VIEWER_EXT)
-        if (fileName.endsWith(QLatin1String(ext)))
+        if (name.endsWith(QLatin1String(ext)))
         {
           m_remoteViewerFiles++;
           break;
         }
-    if (m_CASCFolder.fileExists(id))
+    if (!m_CASCFolder.fileExists(id))
+      continue;
+    GameFile * file = nullptr;
+    if (reloading)
     {
-      if (reloading)
+      GameFile * previous = nullptr;
+      if (sameList)
+        previous = m_entryFiles[i];
+      else
       {
-        if (id >= 0)
-        {
-          if ((size_t)id >= listedNow.size())
-            listedNow.resize((size_t)id + 1);
-          listedNow[id] = true;
-        }
         auto known = m_idMap.find(id);
-        if (known != m_idMap.end() && dynamic_cast<CASCFile *>(known->second) && known->second->fullname() == fileName)
-          continue; // already listed by the previous load
+        if (known != m_idMap.end())
+          previous = known->second;
       }
-      CASCFile * File = new CASCFile(fileName, id);
-      File->setName(line.mid(line.lastIndexOf('/') + 1));
-      addChild(File);
+      // Still one of this folder's files (checked before it is touched: a file of the last pass can have been freed
+      // since), and the same file: listed under this id and path.
+      if (previous && hasChild(previous) && previous->fileDataId() == id && dynamic_cast<CASCFile *>(previous) &&
+          (previous->fullname().constData() == name.constData() || previous->fullname() == name))
+        file = previous;
     }
+    if (file)
+      kept++;
+    else
+    {
+      CASCFile * made = new CASCFile(name, id);
+      made->setName(name.mid(name.lastIndexOf('/') + 1));
+      file = made;
+      created++;
+    }
+    entryFile[i] = file;
+    files.push_back(file);
+    if (name.endsWith(QLatin1String(".m2"), Qt::CaseInsensitive))
+      models.push_back(file);
   }
 
-  if (reloading)
+  core::LoadTimeline::instance().end("this client's files");
+  // The folder's files and indexes, each built at once. What the previous load listed and this one does not -- files
+  // the new client does not have or the listfile no longer names, files whose entry now names another path, files
+  // opened by id alone, and the custom-folder files, which addCustomFiles adds again -- is let go of below.
+  core::LoadTimeline::instance().begin("children");
+  std::vector<GameFile *> stale = replaceChildren(files);
+  replaceModelFiles(models);
+  core::LoadTimeline::instance().end("children");
+  core::LoadTimeline::instance().begin("index by id");
   {
-    // Drop what the previous load listed and this one did not: files the new client does not have
-    // or the listfile no longer names, files whose entry now names another path (replaced above),
-    // files opened by id alone, and the custom-folder files, which addCustomFiles adds again. They
-    // are detached now and freed at the end of the load (freeDetachedFiles), once Browse and the
-    // character controls are rebuilt: until then a Browse row of the previous load still points at
-    // one. The count: addChild takes no reference, so a child is at 0 and removeChild's unref would
-    // wrap it; m_detached holds a reference of its own (ref) and one balances that unref (ref).
-    std::vector<GameFile *> stale;
-    for (GameFile * f : *this)
+    // By FileDataID, in line order (the last line of an id wins, as it did when each file was added on its own). The
+    // community listfile is sorted by id, so every insertion is at the end.
+    std::map<int, GameFile *> byId;
+    for (GameFile * f : files)
     {
       const int id = f->fileDataId();
-      auto known = m_idMap.find(id);
-      const bool listed = dynamic_cast<CASCFile *>(f) && id >= 0 && (size_t)id < listedNow.size() && listedNow[id]
-                          && known != m_idMap.end() && known->second == f;
-      if (!listed)
-        stale.push_back(f);
+      if (byId.empty() || byId.rbegin()->first < id)
+        byId.emplace_hint(byId.end(), id, f);
+      else
+        byId[id] = f;
     }
-    for (GameFile * f : stale)
-    {
-      f->ref();
-      f->ref();
-      removeChild(f);
-      m_detached.push_back(f);
-    }
-    LOG_INFO << "WoWFolder - Reload dropped" << (unsigned int)stale.size() << "files the previous load listed";
+    m_idMap.swap(byId);
   }
+  core::LoadTimeline::instance().end("index by id");
+  core::LoadTimeline::instance().begin("index by path");
+  {
+    // By path, in path order: every insertion at the end. (The same path twice: the later line wins, as before.)
+    std::map<QString, GameFile *> byPath;
+    const QString * last = nullptr;
+    for (quint32 e : list->pathOrder())
+    {
+      GameFile * f = entryFile[e];
+      if (!f)
+        continue;
+      const QString & name = list->path(e);
+      if (last && *last == name)
+        byPath.rbegin()->second = f;
+      else
+        byPath.emplace_hint(byPath.end(), name, f);
+      last = &name;
+    }
+    replaceNameIndex(std::move(byPath));
+  }
+  core::LoadTimeline::instance().end("index by path");
+  // Those let go of are detached now and freed after the load (freeDetachedFiles, while the viewer is idle), once
+  // Browse and the character controls are rebuilt: until then a Browse row of the previous load still points at one. The count:
+  // addChild takes no reference, so a child is at 0; m_detached holds one of its own, and freeing drops it.
+  for (GameFile * f : stale)
+  {
+    f->ref();
+    m_detached.push_back(f);
+  }
+  m_listfile = list;
+  m_entryFiles.swap(entryFile);
+  core::LoadTimeline::instance().end("file index build", QString("%1 files: %2 kept, %3 new, %4 let go%5")
+                                                           .arg(files.size()).arg(kept).arg(created).arg(stale.size())
+                                                           .arg(sameList ? "" : (reloading ? " (searched by id)" : "")));
+  if (reloading)
+    LOG_INFO << "WoWFolder - Reload dropped" << (unsigned int)stale.size() << "files the previous load listed";
   LOG_INFO << "WoWFolder - Hierarchy creation done";
 }
 
@@ -148,16 +191,26 @@ void wow::WoWFolder::freeDetachedFiles()
   if (m_detached.empty())
     return;
   LOG_INFO << "WoWFolder - Freeing" << (unsigned int)m_detached.size() << "files the last reload detached";
-  for (GameFile * f : m_detached)
-    f->unref(); // the reference m_detached held: the last one, so the file is deleted
-  m_detached.clear();
-  m_detached.shrink_to_fit();
+  freeDetachedFiles(m_detached.size());
+}
+
+size_t wow::WoWFolder::freeDetachedFiles(size_t limit)
+{
+  const size_t count = std::min(limit, m_detached.size());
+  for (size_t i = 0; i < count; i++)
+  {
+    m_detached.back()->unref(); // the reference m_detached held: the last one, so the file is deleted
+    m_detached.pop_back();
+  }
+  if (m_detached.empty())
+    m_detached.shrink_to_fit();
+  return m_detached.size();
 }
 
 bool wow::WoWFolder::isRemoteFile(const QString & name) const
 {
-  auto it = m_nameIdMap.find(name.toLower());
-  return it != m_nameIdMap.end() && m_CASCFolder.isRemote(it->second);
+  const int id = m_listfile ? m_listfile->idOf(name.toLower()) : -1;
+  return id != -1 && m_CASCFolder.isRemote(id);
 }
 
 void wow::WoWFolder::addCustomFiles(const QString & path, bool bypassOriginalFiles)
@@ -198,9 +251,9 @@ void wow::WoWFolder::addCustomFiles(const QString & path, bool bypassOriginalFil
       {
         // Even though the file wasn't found in the game database, it's possible to assign it
         // a specific ID in the listfile (useful in some situations) :
-        auto it = m_nameIdMap.find(filePath);
-        if (it != m_nameIdMap.end())
-          originalId = it->second;
+        const int listed = m_listfile ? m_listfile->idOf(filePath) : -1;
+        if (listed != -1)
+          originalId = listed;
       }
       if(addnewfile)
       {
@@ -314,12 +367,12 @@ bool wow::WoWFolder::openFile(std::string file, HANDLE * result)
 
   // CASC: resolve the name to a FileDataID via the listfile (as before), then open by id
   // through the provider.
-  auto it = m_nameIdMap.find(QString::fromStdString(file));
-  if (it == m_nameIdMap.end())
+  const int id = m_listfile ? m_listfile->idOf(QString::fromStdString(file)) : -1;
+  if (id == -1)
     return false;
   if (m_provider)
-    return m_provider->openById(it->second, result);
-  return m_CASCFolder.openFile(it->second, result);
+    return m_provider->openById(id, result);
+  return m_CASCFolder.openFile(id, result);
 }
 
 QString wow::WoWFolder::version()
@@ -347,7 +400,11 @@ QString wow::WoWFolder::locale()
 bool wow::WoWFolder::setConfig(core::GameConfig config)
 {
   // Forward the load-progress callback so the (long) present-file enumeration can report.
-  m_CASCFolder.setProgressCallback(m_loadProgressCb);
+  // Through the folder's current callback, not a copy of it: the loading page that set it is gone after the load.
+  m_CASCFolder.setProgressCallback([this](float fraction) {
+    if (m_loadProgressCb)
+      m_loadProgressCb(LoadPhase::OpeningStorage, fraction);
+  });
   const bool ok = m_CASCFolder.setConfig(config);
 
   // A client that did not open changes nothing: the one already loaded (if any) stays as it was, profile and
@@ -457,17 +514,11 @@ void wow::WoWFolder::onChildRemoved(GameFile * child)
 
 QString wow::WoWFolder::fileName(int id)
 {
-  auto it = m_idNameMap.find(id);
-  if (it == m_idNameMap.end())
-    return QString();
-  return it->second;
+  return m_listfile ? m_listfile->pathOf(id) : QString();
 }
 
 int wow::WoWFolder::fileID(QString fileName)
 {
-  auto it = m_nameIdMap.find(fileName);
-  if (it == m_nameIdMap.end())
-    return -1;
-  return it->second;
+  return m_listfile ? m_listfile->idOf(fileName) : -1;
 }
    

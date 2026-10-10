@@ -25,7 +25,7 @@ wxWidgets and Qt installations used by WMV:
 ```text
 cmake -S scripts/tests/settings-item-id -B <test-build> -A x64 -DWMV_ROOT=<checkout> -DQT_ROOT=<Qt-installation>
 cmake --build <test-build> --config Release
-<test-build>/Release/settings-item-id.exe <runtime>/wowdb.sqlite
+<test-build>/Release/settings-item-id.exe <runtime>/dbcache/wowdb-wow-<build>-<hash>.sqlite
 ```
 
 Place wxWidgets and Qt DLLs on the test process's PATH. The SQLite database is

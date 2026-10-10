@@ -57,7 +57,7 @@ Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{
 Source: "{#Rel}\{#MyAppExeName}"; DestDir: "{app}"; Flags: ignoreversion
 ; all runtime DLLs in the Release root: core, wow, Qt5*, OpenSSL, and the app-local
 ; VC++ CRT (vcruntime140/msvcp140/concrt140). The explicit file list below avoids
-; shipping dev artifacts (wowdb.sqlite*, userSettings\, screenshots, log.txt).
+; shipping dev artifacts (dbcache\, wowdb.sqlite*, listfile.csv.order, userSettings\, screenshots, log.txt).
 Source: "{#Rel}\*.dll"; DestDir: "{app}"; Flags: ignoreversion
 ; support data the loader reads relative to the exe
 Source: "{#Rel}\listfile.csv"; DestDir: "{app}"; Flags: ignoreversion
@@ -84,5 +84,8 @@ Filename: "{app}\{#MyAppExeName}"; Description: "{cm:LaunchProgram,{#StringChang
 [UninstallDelete]
 ; remove runtime-generated files so uninstall leaves nothing behind
 Type: filesandordirs; Name: "{app}\userSettings"
+Type: filesandordirs; Name: "{app}\dbcache"
+Type: files; Name: "{app}\listfile.csv.order"
+; the single database cache of earlier versions
 Type: files; Name: "{app}\wowdb.sqlite"
 Type: files; Name: "{app}\wowdb.sqlite.build"

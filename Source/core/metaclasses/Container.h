@@ -31,6 +31,7 @@
 //--------------------------------------------------------------------
 // STL
 #include <unordered_set>
+#include <vector>
 
 // Qt 
 
@@ -72,6 +73,12 @@ class Container : public Component
       int removeAllChildrenOfType();
 
     unsigned int nbChildren() const {return (unsigned int)m_children.size(); }
+    bool hasChild(DataType * child) const { return m_children.count(child) != 0; }
+
+    // A bulk reload: children becomes the whole set of children at once, and the previous children not among it
+    // are returned, their parent cleared. Neither onChildAdded nor onChildRemoved is called -- the caller rebuilds
+    // what they maintain -- and no reference count changes (as for addChild; removeChild's unref is the caller's).
+    std::vector<DataType *> replaceChildren(const std::vector<DataType *> & children);
 
     bool findChildComponent(Component * child, bool recursive = false);
     Component * getChild(unsigned int index);
@@ -141,6 +148,27 @@ bool Container<DataType>::addChild(DataType * child)
   onChildAdded(child);
 
   return true;
+}
+
+template<class DataType>
+std::vector<DataType *> Container<DataType>::replaceChildren(const std::vector<DataType *> & children)
+{
+  std::unordered_set<DataType *> next;
+  next.reserve(children.size());
+  for (DataType * child : children)
+  {
+    next.insert(child);
+    child->setParentComponent(this);
+  }
+  std::vector<DataType *> removed;
+  for (DataType * child : m_children)
+    if (next.count(child) == 0)
+    {
+      removed.push_back(child);
+      child->setParentComponent(0);
+    }
+  m_children.swap(next);
+  return removed;
 }
 
 template<class DataType>

@@ -26,6 +26,7 @@
 
 #include <commctrl.h>
 #include "UnityAssetAccess.h"
+#include "LoadTimeline.h"
 
 IMPLEMENT_CLASS(FileControl, wxWindow)
 
@@ -266,14 +267,14 @@ void FileControl::InitModels(const QString & content)
   if (!m2Search.isValid())
     LOG_ERROR << m2Search.errorString();
   else
-    for (auto it = GAMEDIRECTORY.begin(); it != GAMEDIRECTORY.end(); ++it)
+    for (GameFile * file : GAMEDIRECTORY.modelFiles()) // the folder keeps its models: no walk over every file
     {
-      const QString name = (*it)->name();
+      const QString & name = file->name();
       if (!name.endsWith(QLatin1String(".m2")))
         continue;
       if (!content.isEmpty() && !name.contains(m2Search))
         continue;
-      files.insert(*it);
+      files.insert(file);
     }
 
   LOG_INFO << "Initializing File Controls - Filtering done - files found" << files.size();
@@ -1468,6 +1469,7 @@ void FileControl::TexturesClientLoaded()
   if (UnityAssetAccess::isClientLoading())
     return;
   m_texturesLoadWatch.Stop();
+  core::LoadTimeline::Stage stage("ui refresh");
   if (ShowsTextures())
     Init();
   // The load is over, whether it succeeded or not: the texture view leaves its "loading" state, and the
@@ -1476,6 +1478,8 @@ void FileControl::TexturesClientLoaded()
   if (modelviewer && modelviewer->textureView)
     modelviewer->textureView->clientLoaded();
   UpdateInterface();
+  if (modelviewer)
+    modelviewer->NoteInteractiveWhenIdle();
 }
 
 void FileControl::OnTreeActivated(wxTreeEvent &event)

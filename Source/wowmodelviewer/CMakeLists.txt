@@ -37,7 +37,7 @@ set(src  AnimationExportChoiceDialog.cpp
          itemselection.cpp
          KeyboardShortcutsDialog.cpp
          lightcontrol.cpp
-         LoadingDialog.cpp
+         ClientLoadingPanel.cpp
          LogStackWalker.cpp
          main.cpp
          modelcanvas.cpp
@@ -101,7 +101,8 @@ set(headers AnimationExportChoiceDialog.h
             itemselection.h
             KeyboardShortcutsDialog.h
             lightcontrol.h
-            LoadingDialog.h
+            ClientLoadingPanel.h
+            ClientLoadProgress.h
             LogStackWalker.h
             modelcanvas.h
             modelcontrol.h

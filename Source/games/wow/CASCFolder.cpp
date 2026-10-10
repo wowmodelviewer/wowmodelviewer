@@ -12,6 +12,7 @@
 #endif
 #include "CascLib.h"
 
+#include <algorithm>
 #include <locale>
 #include <map>
 #include <utility>
@@ -21,6 +22,7 @@
 
 #include "CASCFile.h"
 #include "logger/Logger.h"
+#include "LoadTimeline.h"
 
 CASCFolder::CASCFolder()
  : m_currentCascLocale(CASC_LOCALE_NONE), m_folder(""), m_openError(ERROR_SUCCESS), hStorage(nullptr)
@@ -36,6 +38,16 @@ void CASCFolder::init(const QString &path)
     m_folder.remove(m_folder.size()-1,1);
 
   initBuildInfo();
+}
+
+namespace
+{
+  // CascLib's progress during an open, passed on as an amount not known. Never cancels.
+  bool WINAPI onCascOpenProgress(void * folder, CASC_PROGRESS_MSG, LPCSTR, DWORD, DWORD)
+  {
+    static_cast<CASCFolder *>(folder)->reportProgress(-1.0f);
+    return false;
+  }
 }
 
 bool CASCFolder::setConfig(core::GameConfig config)
@@ -80,9 +92,20 @@ bool CASCFolder::setConfig(core::GameConfig config)
       LOG_INFO << "Loading Game Folder:" << cascParams;
       // locale found => try to open it, into a handle of its own: the previous storage stays in use if it fails.
       HANDLE opened = nullptr;
-      if (!CascOpenStorage(cascParams.toStdWString().c_str(), it->second, &opened))
+      core::LoadTimeline::instance().begin("casc open");
+      // As CascOpenStorage does, with CascLib's progress reports passed on (an amount it does not know: the loading
+      // page keeps moving through the open).
+      CASC_OPEN_STORAGE_ARGS openArgs = {sizeof(CASC_OPEN_STORAGE_ARGS)};
+      openArgs.dwLocaleMask = it->second;
+      openArgs.PfnProgressCallback = &onCascOpenProgress;
+      openArgs.PtrProgressParam = this;
+      const std::wstring cascPath = cascParams.toStdWString();
+      const bool cascOpened = CascOpenStorageEx(cascPath.c_str(), &openArgs, false, &opened);
+      const DWORD openError = cascOpened ? ERROR_SUCCESS : GetLastError(); // before anything logs (that can reset it)
+      core::LoadTimeline::instance().end("casc open", cascOpened ? QString() : QString("failed"));
+      if (!cascOpened)
       {
-        m_openError = GetLastError();
+        m_openError = openError;
         LOG_ERROR << "CASCFolder: Opening" << cascParams << "failed." << "Error" << m_openError;
         m_currentConfig = previousConfig;
         return false;
@@ -90,11 +113,15 @@ bool CASCFolder::setConfig(core::GameConfig config)
       m_openError = ERROR_SUCCESS;
       // Loading a client again opens its storage afresh, so let go of the previous one instead of
       // keeping both in memory. A file still open on it keeps it alive until that file is closed.
+      core::LoadTimeline::instance().begin("close previous storage");
       if (hStorage)
         CascCloseStorage(hStorage);
       hStorage = opened;
+      core::LoadTimeline::instance().end("close previous storage");
 
+      core::LoadTimeline::instance().begin("encryption keys");
       addExtraEncryptionKeys();
+      core::LoadTimeline::instance().end("encryption keys");
 
       // Trust the locale chosen from .build.info and resolve files by FileDataID
       // (see fileExists()/openFile(), which use CASC_OPEN_BY_FILEID with this
@@ -116,7 +143,10 @@ bool CASCFolder::setConfig(core::GameConfig config)
       // Index every present FileDataID up front so fileExists() -- called ~2.17M times while
       // parsing the listfile -- is an O(1) set lookup instead of a per-id CascOpenFile +
       // CascCloseFile round-trip (that probing was ~6.5s of the startup freeze).
+      core::LoadTimeline::instance().begin("present file index");
       buildPresentIdIndex();
+      core::LoadTimeline::instance().end("present file index", QString("%1 present, %2 not on this computer")
+                                                                .arg(m_presentCount).arg(m_remoteCount));
       return true;
     }
   }
@@ -136,6 +166,7 @@ void CASCFolder::closeStorage()
   hStorage = nullptr;
   m_presentIds.clear();
   m_remoteIds.clear();
+  m_presentCount = m_remoteCount = 0;
 }
 
 void CASCFolder::initBuildInfo()
@@ -219,6 +250,7 @@ void CASCFolder::buildPresentIdIndex()
 {
   m_presentIds.clear();
   m_remoteIds.clear(); // before any early return: a reused folder must not keep the previous product's answers
+  m_presentCount = m_remoteCount = 0;
   if (!hStorage)
     return;
 
@@ -230,21 +262,27 @@ void CASCFolder::buildPresentIdIndex()
     return; // leave m_presentIds empty -> fileExists() falls back to the per-id probe
   }
 
-  m_presentIds.reserve(1u << 21); // ~2M files in a modern retail build
+  // Ids reach ~8.5 million in a current build: one allocation for the bits of all of them.
+  m_presentIds.reserve(1u << 24);
+  m_remoteIds.reserve(1u << 24);
+  auto mark = [](std::vector<bool> & bits, size_t id) {
+    if (id >= bits.size())
+      bits.resize(std::max(id + 1, bits.size() + bits.size() / 2));
+    const bool was = bits[id];
+    bits[id] = true;
+    return !was;
+  };
 
-  // Progress reporting: the enumeration count isn't known up front, so report a soft fraction
-  // against a rough expected total (~4M files in a current retail build) capped below 1.0, just
-  // so the loading bar visibly advances during this multi-second step instead of sitting still.
+  // Progress: the enumeration does not know how many entries it will walk, so it says so (an amount below 0)
+  // every 50,000 entries, which keeps the loading page moving without inventing a percentage.
   size_t seen = 0, nextReport = 0;
-  const float EXPECTED = 4000000.0f;
 
   do
   {
     if (m_progressCb && ++seen >= nextReport)
     {
-      const float frac = (float)seen / EXPECTED;
-      m_progressCb(frac < 0.99f ? frac : 0.99f);
-      nextReport = seen + 50000; // ~80 updates over a full enumeration
+      m_progressCb(-1.0f);
+      nextReport = seen + 50000;
     }
     // Index the FileDataIDs that have a copy on this computer (any of their locale entries). A file
     // with none cannot be read from a local storage -- CascLib opens it as an empty file -- so listing
@@ -254,20 +292,28 @@ void CASCFolder::buildPresentIdIndex()
     // 97,968 (mostly textures). Those are counted (remoteFileCount) rather than indexed.
     if (fd.dwFileDataId != CASC_INVALID_ID)
     {
-      const int id = static_cast<int>(fd.dwFileDataId);
+      const size_t id = fd.dwFileDataId;
       if (fd.bFileAvailable)
       {
-        m_presentIds.insert(id);
-        m_remoteIds.erase(id);
+        if (mark(m_presentIds, id))
+          m_presentCount++;
+        if (isRemote((int)id))
+        {
+          m_remoteIds[id] = false;
+          m_remoteCount--;
+        }
       }
-      else if (!m_presentIds.count(id))
-        m_remoteIds.insert(id);
+      else if (!(id < m_presentIds.size() && m_presentIds[id]))
+      {
+        if (mark(m_remoteIds, id))
+          m_remoteCount++;
+      }
     }
   } while (CascFindNextFile(hFind, &fd));
   CascFindClose(hFind);
 
-  LOG_INFO << "CASCFolder: indexed" << (unsigned int)m_presentIds.size() << "present FileDataIDs (single enumeration);"
-           << (unsigned int)m_remoteIds.size() << "more are in the build but not on this computer.";
+  LOG_INFO << "CASCFolder: indexed" << (unsigned int)m_presentCount << "present FileDataIDs (single enumeration);"
+           << (unsigned int)m_remoteCount << "more are in the build but not on this computer.";
 }
 
 bool CASCFolder::fileExists(int id)
@@ -278,8 +324,8 @@ bool CASCFolder::fileExists(int id)
   // Fast path: O(1) lookup in the enumerated id set (buildPresentIdIndex). A real model
   // load still force-opens by id (WoWFolder::getFile), so any id missed by enumeration is
   // still loadable -- it just won't appear in the browse tree.
-  if (!m_presentIds.empty())
-    return m_presentIds.count(id) != 0;
+  if (m_presentCount != 0)
+    return id >= 0 && (size_t)id < m_presentIds.size() && m_presentIds[id];
 
   // Fallback (enumeration unavailable): the original per-id open/close probe.
   HANDLE dummy;

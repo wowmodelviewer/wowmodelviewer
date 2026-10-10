@@ -23,6 +23,7 @@
 #ifndef UICONTROLS_H
 #define UICONTROLS_H
 
+#include <wx/timer.h>
 #include <wx/wxprec.h>
 #ifndef WX_PRECOMP
     #include <wx/wx.h>
@@ -211,6 +212,39 @@ private:
 
   wxBookCtrlBase * m_book;
   int m_hot = -1;
+};
+
+// A PROGRESS BAR in the palette's colours (the native gauge is a white channel in either theme): a quiet solid
+// track and an accent fill of the same rounded shape, cut to the track. Determinate (SetValue, 0..1) while the amount
+// of work is known; otherwise indeterminate (SetIndeterminate): a short accent segment that slides along the track and
+// starts over, so the bar never shows a number nobody measured. The slide is timed by the clock, not by the timer's
+// ticks, so a bar repainted late (a load that pumps its events now and then) shows where the segment is now.
+class UiProgressBar : public wxWindow
+{
+public:
+  explicit UiProgressBar(wxWindow * parent, wxWindowID id = wxID_ANY);
+  ~UiProgressBar();
+
+  void SetValue(double fraction);
+  void SetIndeterminate();
+  bool IsIndeterminate() const { return m_indeterminate; }
+  double GetValue() const { return m_value; }
+
+  bool AcceptsFocus() const wxOVERRIDE { return false; }
+  // A hidden bar stops its timer (no wxEVT_SHOW handler: that one also fires while the window is destroyed).
+  bool Show(bool show = true) wxOVERRIDE;
+
+protected:
+  wxSize DoGetBestSize() const wxOVERRIDE;
+
+private:
+  void OnPaint(wxPaintEvent & event);
+  void syncTimer();
+
+  double m_value = 0.0;
+  bool m_indeterminate = true;
+  wxTimer m_timer;
+  wxLongLong m_slideStart;
 };
 
 // THREE NATIVE PARTS IN THE DARK RUN that wxWidgets' dark mode leaves as they are (see UiStyle.cpp): a

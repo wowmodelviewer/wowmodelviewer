@@ -30,6 +30,11 @@
 
 namespace wow
 {
+  class Listfile;
+}
+
+namespace wow
+{
   class _WOWFOLDER_API_ WoWFolder : public core::GameFolder
   {
     public:
@@ -76,6 +81,9 @@ namespace wow
       // rebuilt everything that could point at them (Browse, the character controls; the canvas was cleared
       // before): ModelViewer::LoadWoW, at its end. Also run by the next reload, for a load that never got there.
       void freeDetachedFiles();
+      // At most limit of them (the last detached first); how many are left. The viewer frees them a share at a time
+      // while it is idle, after the load (ModelViewer::FreeDetachedWhenIdle): ~1.8 million files take ~0.5 s.
+      size_t freeDetachedFiles(size_t limit);
       size_t detachedFileCount() const { return m_detached.size(); }
 
       void onChildAdded(GameFile *) override;
@@ -91,9 +99,12 @@ namespace wow
       std::unique_ptr<core::IFileProvider> m_provider;
       QString m_mpqLocale; // detected/selected locale when in MPQ mode (for locale())
       std::map<int, GameFile *> m_idMap;
-      std::map<int, QString> m_idNameMap;
       size_t m_remoteViewerFiles = 0;
-      std::map<QString, int> m_nameIdMap;
+      // The listfile this folder's files were listed from (read once per session, shared by every folder), and the
+      // file each of its lines gave in the last pass (null when this client does not have it): a reload finds the
+      // files it keeps there without searching.
+      std::shared_ptr<const Listfile> m_listfile;
+      std::vector<GameFile *> m_entryFiles;
       std::vector<GameFile *> m_detached; // each holds one reference of its own (freeDetachedFiles drops it)
   };
 }

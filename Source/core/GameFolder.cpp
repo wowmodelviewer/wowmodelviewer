@@ -97,14 +97,54 @@ GameFile * core::GameFolder::getFile(QString filename)
 
 void core::GameFolder::onChildAdded(GameFile * child)
 {
-  m_nameMap[child->fullname()] = child;
+  if (child->fullname().endsWith(QLatin1String(".m2"), Qt::CaseInsensitive))
+    m_modelFiles.insert(child);
+  auto it = m_nameMap.find(child->fullname());
+  if (it == m_nameMap.end())
+  {
+    m_nameMap.emplace(child->fullname(), child);
+    countType(child->fullname(), +1);
+  }
+  else
+    it->second = child;
 }
 
 void core::GameFolder::onChildRemoved(GameFile * child)
 {
+  m_modelFiles.erase(child);
   // Only when the name still leads to this file: a reload can have listed its replacement already.
   auto it = m_nameMap.find(child->fullname());
   if (it != m_nameMap.end() && it->second == child)
+  {
+    countType(it->first, -1);
     m_nameMap.erase(it);
+  }
+}
+
+void core::GameFolder::replaceNameIndex(std::map<QString, GameFile *> && index)
+{
+  m_nameMap.swap(index);
+  m_typeCounts = TypeCounts();
+  for (const auto & entry : m_nameMap)
+    countType(entry.first, +1);
+  index.clear(); // the previous index, freed here rather than by the caller
+}
+
+void core::GameFolder::replaceModelFiles(const std::vector<GameFile *> & models)
+{
+  std::unordered_set<GameFile *> next;
+  next.reserve(models.size());
+  next.insert(models.begin(), models.end());
+  m_modelFiles.swap(next);
+}
+
+void core::GameFolder::countType(const QString & path, int delta)
+{
+  if (path.endsWith(QLatin1String(".m2"), Qt::CaseInsensitive))
+    m_typeCounts.models += delta;
+  else if (path.endsWith(QLatin1String(".blp"), Qt::CaseInsensitive))
+    m_typeCounts.textures += delta;
+  else if (path.endsWith(QLatin1String(".wmo"), Qt::CaseInsensitive))
+    m_typeCounts.buildings += delta;
 }
 

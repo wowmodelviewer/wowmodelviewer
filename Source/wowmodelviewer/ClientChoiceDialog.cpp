@@ -3,18 +3,23 @@
  */
 #include "ClientChoiceDialog.h"
 
+#include <algorithm>
+
 #include <wx/dcbuffer.h>
 #include <wx/dcgraph.h>
 #include <wx/dirdlg.h>
+#include <wx/display.h>
 #include <wx/sizer.h>
 #include <wx/stattext.h>
 
 #include <QSettings>
 
+#include "ClientLoadingPanel.h"
 #include "UiControls.h"
 #include "UiStyle.h"
 #include "util.h"             // gamePath, cfgPath
 #include "logger/Logger.h"
+#include "LoadTimeline.h"
 
 namespace
 {
@@ -245,44 +250,48 @@ ClientChoiceDialog::ClientChoiceDialog(wxWindow * parent)
 void ClientChoiceDialog::buildUI()
 {
   const int L = FromDIP(UiStyle::L), M = FromDIP(UiStyle::M), S = FromDIP(UiStyle::S);
+  // Two pages in one window: the cards (this page), and the loading page a card's client opens in.
+  m_choosePage = new wxPanel(this);
+  UiStyle::setRole(m_choosePage, UiStyle::Role::Panel);
+  wxWindow * page = m_choosePage;
   wxBoxSizer * top = new wxBoxSizer(wxVERTICAL);
 
-  wxStaticText * heading = new wxStaticText(this, wxID_ANY, _("Choose World of Warcraft"));
+  wxStaticText * heading = new wxStaticText(page, wxID_ANY, _("Choose World of Warcraft"));
   heading->SetName(wxT("chooserHeading"));
   heading->SetFont(UiStyle::font(UiStyle::Type::Title));
   UiStyle::setRole(heading, UiStyle::Role::Text);
   top->Add(heading, 0, wxLEFT | wxRIGHT | wxTOP, L);
   top->AddSpacer(FromDIP(UiStyle::XS));
-  top->Add(UiStyle::secondaryLabel(this, _("Select the installation to open.")), 0, wxLEFT | wxRIGHT, L);
+  top->Add(UiStyle::secondaryLabel(page, _("Select the installation to open.")), 0, wxLEFT | wxRIGHT, L);
   top->AddSpacer(M);
 
-  m_cardsPanel = new wxPanel(this);
+  m_cardsPanel = new wxPanel(page);
   UiStyle::setRole(m_cardsPanel, UiStyle::Role::Panel);
   m_cardsSizer = new wxBoxSizer(wxVERTICAL);
   m_cardsPanel->SetSizer(m_cardsSizer);
   top->Add(m_cardsPanel, 0, wxLEFT | wxRIGHT | wxEXPAND, L);
 
-  m_message = UiStyle::secondaryLabel(this, wxEmptyString);
+  m_message = UiStyle::secondaryLabel(page, wxEmptyString);
   m_message->Hide();
   top->Add(m_message, 0, wxLEFT | wxRIGHT | wxTOP, L);
 
   // The less common ways in, quieter than the cards.
   top->AddSpacer(M);
-  UiButton * browse = new UiButton(this, wxID_ANY, _("Browse for another installation..."), UiButton::Kind::Subtle);
+  UiButton * browse = new UiButton(page, wxID_ANY, _("Browse for another installation..."), UiButton::Kind::Subtle);
   browse->Bind(wxEVT_BUTTON, &ClientChoiceDialog::onBrowse, this);
   top->Add(browse, 0, wxLEFT | wxRIGHT, L - S);
-  UiButton * legacy = new UiButton(this, wxID_ANY, _("Open legacy installation..."), UiButton::Kind::Subtle);
+  UiButton * legacy = new UiButton(page, wxID_ANY, _("Open legacy installation..."), UiButton::Kind::Subtle);
   legacy->Bind(wxEVT_BUTTON, &ClientChoiceDialog::onLegacy, this);
   top->Add(legacy, 0, wxLEFT | wxRIGHT | wxTOP, L - S);
-  top->Add(UiStyle::secondaryLabel(this, _("An older World of Warcraft installation that uses MPQ archives.")), 0,
+  top->Add(UiStyle::secondaryLabel(page, _("An older World of Warcraft installation that uses MPQ archives.")), 0,
            wxLEFT | wxRIGHT, L);
 
   // Advanced: the technical facts of the card in focus.
   top->AddSpacer(S);
-  m_advancedToggle = new UiButton(this, wxID_ANY, advancedLabel(false), UiButton::Kind::Subtle);
+  m_advancedToggle = new UiButton(page, wxID_ANY, advancedLabel(false), UiButton::Kind::Subtle);
   m_advancedToggle->Bind(wxEVT_BUTTON, &ClientChoiceDialog::onAdvanced, this);
   top->Add(m_advancedToggle, 0, wxLEFT | wxRIGHT, L - S);
-  m_advancedPanel = new wxPanel(this);
+  m_advancedPanel = new wxPanel(page);
   UiStyle::setRole(m_advancedPanel, UiStyle::Role::Panel);
   m_advancedGrid = new wxFlexGridSizer(2, FromDIP(UiStyle::XS), M);
   m_advancedGrid->AddGrowableCol(1, 1);
@@ -291,13 +300,32 @@ void ClientChoiceDialog::buildUI()
   top->Add(m_advancedPanel, 0, wxLEFT | wxRIGHT | wxTOP | wxEXPAND, L);
 
   top->AddSpacer(M);
-  top->Add(UiStyle::separator(this), 0, wxEXPAND);
+  top->Add(UiStyle::separator(page), 0, wxEXPAND);
   wxBoxSizer * buttons = new wxBoxSizer(wxHORIZONTAL);
   buttons->AddStretchSpacer();
-  buttons->Add(new UiButton(this, wxID_CANCEL, _("Cancel"), UiButton::Kind::Secondary));
+  buttons->Add(new UiButton(page, wxID_CANCEL, _("Cancel"), UiButton::Kind::Secondary));
   top->Add(buttons, 0, wxALL | wxEXPAND, M);
   SetEscapeId(wxID_CANCEL);
-  SetSizer(top);
+  page->SetSizer(top);
+
+  m_loadingPage = new ClientLoadingPanel(this);
+  // Not while the load that failed is still returning (the page pumps the event loop as it shows the failure).
+  m_loadingPage->onBack = [this]() { if (!m_busy) backToCards(); };
+  m_loadingPage->onClose = [this]() { if (!m_busy) EndModal(wxID_CANCEL); };
+  m_loadingPage->onResize = [this]() { if (m_loadingPage->IsShown()) fitInPlace(); };
+  m_loadingPage->Hide();
+  wxBoxSizer * pages = new wxBoxSizer(wxVERTICAL);
+  pages->Add(m_choosePage, 1, wxEXPAND);
+  pages->Add(m_loadingPage, 1, wxEXPAND);
+  SetSizer(pages);
+
+  // While a client loads, the chooser stays: no Escape, no close box (the load cannot be abandoned halfway).
+  Bind(wxEVT_CLOSE_WINDOW, [this](wxCloseEvent & e) {
+    if (m_busy && e.CanVeto())
+      e.Veto();
+    else
+      e.Skip();
+  });
 }
 
 void ClientChoiceDialog::populate(const QStringList & roots)
@@ -359,6 +387,7 @@ void ClientChoiceDialog::populate(const QStringList & roots)
 void ClientChoiceDialog::relayout()
 {
   m_cardsPanel->Layout();
+  m_choosePage->Layout();
   Layout();
   GetSizer()->SetSizeHints(this);
   Fit();
@@ -381,7 +410,106 @@ void ClientChoiceDialog::openCard(InstallCard * card)
     c->Enable(c == card);
   card->setOpening(true);
   LOG_INFO << "[clientchooser] opening" << m_chosen.profile.describe() << "from" << m_chosen.root;
-  CallAfter([this]() { EndModal(wxID_OK); });
+  // The click is where the load's timeline starts: the user waits from here.
+  core::LoadTimeline::instance().start(m_chosen.profile.describe());
+  core::LoadTimeline::instance().mark("installation selected");
+  // Once the click is handled: the chooser turns into its loading page and opens the client (or, without a loader,
+  // closes for the caller to open it).
+  if (m_loader)
+    CallAfter([this]() { runLoad(); });
+  else
+    CallAfter([this]() { EndModal(wxID_OK); });
+}
+
+void ClientChoiceDialog::runLoad()
+{
+  m_busy = true;
+  SetEscapeId(wxID_NONE);
+  SetTitle(_("Opening World of Warcraft"));
+  m_loadingPage->begin(m_chosen); // what the page says, before it is shown (never what an earlier load left on it)
+  showLoadingPage(true);
+  const bool opened = m_loader(m_chosen, m_loadingPage);
+  m_busy = false;
+  if (opened)
+  {
+    EndModal(wxID_OK);
+    return;
+  }
+  // Not opened: the page says why (a load that stopped without saying so gets a plain line), and the client loaded
+  // before, if any, is still the one in use.
+  if (!m_loadingPage->hasFailed())
+    m_loadingPage->failed(wxString::Format(_("%s could not be opened."), wx(m_chosen.profile.friendlyName())),
+                          _("The client could not be opened. Choose it again, or another installation."), wxString());
+  SetTitle(_("Choose World of Warcraft"));
+  SetEscapeId(wxID_CANCEL);
+}
+
+void ClientChoiceDialog::showLoadingPage(bool shown)
+{
+  Freeze();
+  if (shown)
+  {
+    // The loading page takes the cards' place, as wide as they were and as tall as what it says: the window shrinks
+    // around it, in place.
+    m_loadingPage->SetMinSize(wxSize(m_choosePage->GetSize().x, -1));
+    m_choosePage->Hide();
+    m_loadingPage->Show();
+  }
+  else
+  {
+    // The cards come back at their own size, where the window is.
+    m_loadingPage->Hide();
+    m_choosePage->Show();
+  }
+  fitInPlace();
+  Thaw();
+  Update();
+}
+
+void ClientChoiceDialog::fitInPlace()
+{
+  Freeze();
+  // What the pages need now (a label, a section shown or hidden since they were last measured).
+  m_choosePage->InvalidateBestSize();
+  m_loadingPage->InvalidateBestSize();
+  const wxSize client = GetSizer()->ComputeFittingClientSize(this);
+  const wxSize size = ClientToWindowSize(client);
+  const wxRect was = GetRect();
+  wxRect now(wxPoint(was.x + was.width / 2 - size.x / 2, was.y + was.height / 2 - size.y / 2), size);
+  // Kept on the screen it is on.
+  const int display = wxDisplay::GetFromWindow(this);
+  if (display != wxNOT_FOUND)
+  {
+    const wxRect area = wxDisplay((unsigned)display).GetClientArea();
+    now.x = std::max(area.x, std::min(now.x, area.GetRight() + 1 - now.width));
+    now.y = std::max(area.y, std::min(now.y, area.GetBottom() + 1 - now.height));
+  }
+  // The new lower bound first (a window does not shrink below the one it has), then size and place in one move (-1 is
+  // a place like any other: on a screen above or left of the main one it can be).
+  SetMinClientSize(client);
+  SetSize(now, wxSIZE_ALLOW_MINUS_ONE);
+  Layout();
+  Thaw();
+}
+
+void ClientChoiceDialog::backToCards()
+{
+  SetTitle(_("Choose World of Warcraft"));
+  // The cards as they were before the click, then shown (the window fits them as they are).
+  for (InstallCard * c : m_cards)
+  {
+    c->setOpening(false);
+    c->Enable(true);
+  }
+  showLoadingPage(false);
+  InstallCard * last = nullptr;
+  for (InstallCard * c : m_cards)
+    if (c->client().product == m_chosen.product && c->client().root == m_chosen.root)
+      last = c;
+  m_dataPath.Clear();
+  m_chosen = InstalledClient();
+  if (last)
+    last->SetFocus();
 }
 
 void ClientChoiceDialog::focusNeighbour(InstallCard * from, int step)

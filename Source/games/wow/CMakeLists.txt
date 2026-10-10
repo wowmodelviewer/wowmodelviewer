@@ -17,6 +17,7 @@ set(src animated.cpp
       ddslib.cpp
       globalvars.cpp
       HardDriveFile.cpp
+      Listfile.cpp
       ModelAttachment.cpp
       ModelCamera.cpp
       ModelColor.cpp
@@ -70,6 +71,7 @@ set(headers animated.h
       FileTreeItem.h
       globalvars.h
       HardDriveFile.h
+      Listfile.h
       manager.h
       ModelAttachment.h
       ModelCamera.h

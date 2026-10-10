@@ -49,6 +49,9 @@ class WowModelViewApp : public wxApp
 public:
     virtual bool OnInit();
   virtual int OnExit();
+  // Also on a headless run's exit (OnInit returned false): the game database is closed, so a database built for the
+  // session only (a client still downloading) is deleted rather than left in dbcache/.
+  void CleanUp() override;
   virtual void OnUnhandledException();
   virtual void OnFatalException();
   // wx 3.x keeps asserts on in release and pops a modal dialog by default; log + continue instead.

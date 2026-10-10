@@ -93,6 +93,11 @@ namespace wow
       // but positions track the current game version.
       void refreshStructures(std::vector<core::TableStructure *> &) override;
       bool cacheComplete() const override { return m_schemaCheck.notInstalled == 0; }
+      // The game's table definitions (dbd/*.dbd) the field positions come from.
+      QByteArray cacheInputs() const override;
+      // The schema check, kept with a cached database (Model > Info and the client's capabilities read it).
+      QByteArray saveCacheState() const override;
+      bool restoreCacheState(const QByteArray & state) override;
 
       // Secondary indexes on the hot foreign-key / join columns the per-load
       // customization/equipment/creature queries filter on (database.xml declares

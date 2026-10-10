@@ -7,6 +7,10 @@
 
 #include "WoWDatabase.h"
 
+#include <QJsonObject>
+#include <QJsonDocument>
+#include <QJsonArray>
+#include <QCryptographicHash>
 #include <QDir>
 
 #include <QDomNamedNodeMap>
@@ -357,4 +361,55 @@ void wow::WoWDatabase::createIndices()
   };
   for (const char * const sql : indices)
     sqlQuery(QString::fromLatin1(sql));
+}
+
+QByteArray wow::WoWDatabase::cacheInputs() const
+{
+  QCryptographicHash hash(QCryptographicHash::Sha1);
+  QDir dir("dbd");
+  for (const QString & name : dir.entryList(QStringList() << "*.dbd", QDir::Files, QDir::Name))
+  {
+    QFile f(dir.filePath(name));
+    if (!f.open(QIODevice::ReadOnly))
+      continue;
+    hash.addData(name.toUtf8());
+    hash.addData(f.readAll());
+  }
+  return hash.result();
+}
+
+QByteArray wow::WoWDatabase::saveCacheState() const
+{
+  QJsonObject o;
+  o["verified"] = m_schemaCheck.verified;
+  o["trusted"] = m_schemaCheck.trusted;
+  o["notRead"] = m_schemaCheck.notRead;
+  o["notInstalled"] = m_schemaCheck.notInstalled;
+  o["notInClient"] = m_schemaCheck.notInClient;
+  o["absentFields"] = m_schemaCheck.absentFields;
+  o["notes"] = QJsonArray::fromStringList(m_schemaCheck.notes);
+  return QJsonDocument(o).toJson(QJsonDocument::Compact);
+}
+
+bool wow::WoWDatabase::restoreCacheState(const QByteArray & state)
+{
+  const QJsonDocument doc = QJsonDocument::fromJson(state);
+  if (!doc.isObject())
+    return false;
+  const QJsonObject o = doc.object();
+  SchemaCheck check;
+  check.verified = o["verified"].toInt();
+  check.trusted = o["trusted"].toInt();
+  check.notRead = o["notRead"].toInt();
+  check.notInstalled = o["notInstalled"].toInt();
+  check.notInClient = o["notInClient"].toInt();
+  check.absentFields = o["absentFields"].toInt();
+  for (const QJsonValue & v : o["notes"].toArray())
+    check.notes << v.toString();
+  m_schemaCheck = check;
+  LOG_INFO << "[schema]" << QDir(core::Game::instance().configFolder()).dirName() << "for" << GAMEDIRECTORY.version()
+           << "(kept with the cached database):" << check.verified << "tables verified," << check.trusted
+           << "kept at schema positions," << check.notRead << "not read," << check.notInstalled << "not installed,"
+           << check.notInClient << "not in this client," << check.absentFields << "absent fields";
+  return true;
 }
