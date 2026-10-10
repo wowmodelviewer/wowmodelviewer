@@ -11,6 +11,7 @@
 #include "UiControls.h"
 #include "UiStyle.h"
 #include "itemselection.h"
+#include "ItemSetCategory.h"
 #include "ModelInspector.h"
 #include "modelviewer.h"
 #include "MountCard.h"
@@ -675,7 +676,18 @@ void CharControl::selectSet()
   n.name = wxT("---- None ----");
   Items.push_back(n);
 
-  sqlResult itemSet = GAMEDATABASE.sqlQuery("SELECT ID, Name_Lang FROM ItemSet");
+  // One indexed bulk query: do not use the displayable-items cache (it omits
+  // unnamed items), or query individual pieces while opening/filtering.
+  QString query = "SELECT S.ID, S.Name_Lang";
+  QString joins;
+  for (int slot = 1; slot <= ItemSetCategory::ItemCount; ++slot)
+  {
+    query += QString(", S.ItemID%1, COALESCE(I%1.ClassID,-1), "
+                     "COALESCE(I%1.SubclassID,-1), COALESCE(I%1.InventoryType,-1)").arg(slot);
+    joins += QString(" LEFT JOIN Item I%1 ON I%1.ID = S.ItemID%1").arg(slot);
+  }
+  sqlResult itemSet = GAMEDATABASE.sqlQuery(query + " FROM ItemSet S" + joins);
+  std::map<int, int> categories;
 
   if (itemSet.valid && !itemSet.empty())
   {
@@ -685,18 +697,33 @@ void CharControl::selectSet()
       p.id = itemSet.values[i][0].toInt();
       p.name = itemSet.values[i][1].toStdWString();
       Items.push_back(p);
+      ItemSetCategory::Classifier classifier;
+      for (int slot = 0; slot < ItemSetCategory::ItemCount; ++slot)
+      {
+        const auto& row = itemSet.values[i];
+        const int offset = 2 + slot * 4;
+        classifier.add(row[offset].toInt(), row[offset + 1].toInt(),
+                       row[offset + 2].toInt(), row[offset + 3].toInt());
+      }
+      categories[p.id] = classifier.category();
     }
   }
 
-  std::sort(Items.begin(), Items.end());
+  // Keep the synthetic None entry at index zero, independently of localized names.
+  std::sort(Items.begin() + 1, Items.end());
   numbers.clear();
   choices.Clear();
+  cats.clear();
+  catnames.clear();
+  for (const auto* name : {"Cloth", "Leather", "Mail", "Plate", "Mixed", "Other", "Unknown"})
+    catnames.Add(wxString::FromUTF8(name));
   for (std::vector<NumStringPair>::iterator it = Items.begin(); it != Items.end(); ++it) {
     choices.Add(it->name);
     numbers.push_back(it->id);
+    cats.push_back(it->id == -1 ? ItemSetCategory::Unknown : categories.at(it->id));
   }
 
-  itemDialog = new FilteredChoiceDialog(this, UPDATE_SET, g_modelViewer, wxT("Choose an item set"), wxT("Item sets"), choices, NULL);
+  itemDialog = new CategoryChoiceDialog(this, UPDATE_SET, g_modelViewer, wxT("Choose an item set"), wxT("Item sets"), choices, cats, catnames, NULL);
   itemDialog->Move(itemDialog->GetParent()->GetScreenPosition() + wxPoint(4, 64));
   itemDialog->Show();
 }
@@ -985,8 +1012,10 @@ void CharControl::OnUpdateItem(int type, int id)
 
       if (id && model)
       {
-        QString query = QString("SELECT itemID1, itemID2, itemID3, itemID4, itemID5, "
-                                "itemID6, itemID7,  itemID8 FROM ItemSet WHERE ID = %1").arg(id);
+        QString query = "SELECT ItemID1";
+        for (int slot = 2; slot <= ItemSetCategory::ItemCount; ++slot)
+          query += QString(", ItemID%1").arg(slot);
+        query += QString(" FROM ItemSet WHERE ID = %1").arg(id);
 
         sqlResult itemSet = GAMEDATABASE.sqlQuery(query);
 
@@ -999,7 +1028,7 @@ void CharControl::OnUpdateItem(int type, int id)
                ++it)
                (*it)->setId(0);
 
-          for (unsigned i = 0; i < 8; i++)
+          for (unsigned i = 0; i < ItemSetCategory::ItemCount; i++)
             tryToEquipItem(itemSet.values[0][i].toInt());
 
           RefreshEquipment();

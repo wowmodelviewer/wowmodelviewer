@@ -96,6 +96,7 @@ set(headers AnimationExportChoiceDialog.h
             ImageSequenceExporter.h
             MiniExr.h
             ItemImporterDialog.h
+            ItemSetCategory.h
             itemselection.h
             KeyboardShortcutsDialog.h
             lightcontrol.h
