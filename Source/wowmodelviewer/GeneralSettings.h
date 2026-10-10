@@ -11,6 +11,7 @@
 // WX Headers
 #include <wx/wxprec.h>
 #include <wx/filepicker.h>
+#include <wx/scrolwin.h>
 #ifndef WX_PRECOMP
     #include <wx/wx.h>
 #endif
@@ -32,7 +33,7 @@ enum {
   NUM_SETTINGS1_CHECK
 };
 
-class GeneralSettings: public wxWindow
+class GeneralSettings: public wxScrolledWindow
 {
   DECLARE_CLASS(GeneralSettings)
     DECLARE_EVENT_TABLE()

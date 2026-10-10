@@ -181,10 +181,11 @@ FilteredChoiceDialog::FilteredChoiceDialog(CharControl *dest, int type, wxWindow
                             const wxString& caption,
                             const wxArrayString& choices,
               const std::vector<int> *,
-              bool keepfirst)
+              bool keepfirst, const std::vector<int>& searchIds)
     :ChoiceDialog(dest, type, parent, message, caption, choices)
 {
   keepFirst = keepfirst;
+  m_searchIds = searchIds;
     m_choices = &choices;
     m_indices.resize(m_choices->GetCount());
     for(size_t i=0; i<m_choices->GetCount(); ++i) 
@@ -322,7 +323,10 @@ bool FilteredChoiceDialog::FilterFunc(int index)
   if (index==0 && keepFirst) 
     return true;
 
-  return m_choices->Item(index).Lower().Matches(_T("*") + m_pattern->GetValue().Lower() + _T("*"));
+  const wxString pattern = _T("*") + m_pattern->GetValue().Lower() + _T("*");
+  return m_choices->Item(index).Lower().Matches(pattern) ||
+    (static_cast<size_t>(index) < m_searchIds.size() && m_searchIds[index] > 0 &&
+     wxString::Format("%d", m_searchIds[index]).Matches(pattern));
 }
 
 void FilteredChoiceDialog::SelectChoiceRow(int index)
@@ -363,8 +367,8 @@ CategoryChoiceDialog::CategoryChoiceDialog(CharControl *dest, int type,
             const wxArrayString& catnames,
             const std::vector<int> *quality,
             bool keepfirst,
-            bool helpmsg):
-  FilteredChoiceDialog(dest, type, parent, message, caption, choices, quality, keepfirst), m_cats(cats)
+            bool helpmsg, const std::vector<int>& searchIds):
+  FilteredChoiceDialog(dest, type, parent, message, caption, choices, quality, keepfirst, searchIds), m_cats(cats)
 {
   wxArrayString realcatnames;
   // filter catnames based on cats
