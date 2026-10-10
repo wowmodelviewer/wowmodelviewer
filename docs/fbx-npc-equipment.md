@@ -23,7 +23,7 @@ Invalid snapshots or unresolved hand models produce an error status rather than 
 successful export with missing equipment. The manager removes the snapshot when the
 job finishes/cancels; the caller also removes it when a job cannot start.
 
-This is independent of Unity's protocol-7 `attachmentsOnly` correction. No Unity code
+This is independent of Unity's protocol-11 `attachmentsOnly` correction. No Unity code
 or protocol changes are part of this FBX fix.
 
 ## Repeatable regression
@@ -32,7 +32,7 @@ Build `scripts/tests/fbx-equipment` with CMake, passing `FBX_SDK_ROOT` pointing 
 an SDK tree with `include/`, `lib/libfbxsdk.lib` and `lib/libfbxsdk.dll`. Run
 `Test-FbxEquipment.ps1` with `-Runtime`, `-Inspector` and a new `-OutputDirectory`.
 The runtime must already have access to the WoW client and its database/listfile.
-Use `-Build` to pin the client and `-Clips` to supply the comma-separated animation
+Use `-Build` and `-Product` to pin the client and `-Clips` to supply the comma-separated animation
 array indices from an existing export command. These are indices, not WoW animation IDs.
 
 The test first restores a live model, then uses `WMV_FBX_DESCRIBE` to call the same

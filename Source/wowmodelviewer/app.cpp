@@ -189,6 +189,7 @@ static void doHeadlessFbxExport(ModelViewer * frame, const QString & outPath,
     descriptor["assetArgs"] = QString::fromStdWString(args.ToStdWstring());
     descriptor["snapshot"] = QString::fromStdWString(snapshot.ToStdWstring());
     descriptor["build"] = frame->m_loadedBuild;
+    descriptor["product"] = frame->m_loadedProduct;
     QFile output(descriptorPath);
     const QByteArray json = QJsonDocument(descriptor).toJson();
     const bool written = prepared && output.open(QIODevice::WriteOnly) &&

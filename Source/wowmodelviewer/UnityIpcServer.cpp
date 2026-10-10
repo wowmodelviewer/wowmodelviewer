@@ -1077,7 +1077,8 @@ void UnityIpcServer::handleLine(const std::string & line)
                   << "-- what it cannot do (mounted characters below v5, world models below v4, characters below v3)"
                      " gets a notice, a screenshot (below v6) a status message, the viewport background (below v7)"
                      " stays the player's own default, a character's model generation (below v8) is not switched,"
-                     " every load (below v9) fetches its files again, and files travel as base64 text (below v10)";
+                     " every load (below v9) fetches its files again, files travel as base64 text (below v10), and an NPC on its"
+                     " own model is shown without its weapons (below v11)";
     else if (version != PROTOCOL_VERSION)
       LOG_ERROR << "[unityipc] player speaks protocol v" << version << "but WMV expects v" << PROTOCOL_VERSION;
     if (onUnityReady)

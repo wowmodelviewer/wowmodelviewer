@@ -91,6 +91,19 @@ namespace
     return g_canvas ? const_cast<WoWModel *>(g_canvas->model()) : nullptr;
   }
 
+  // The Unity viewport draws the canvas model's attachments: a character's items in the scene that dresses it, a
+  // mounted character's too, and the weapons of an NPC on its own model (protocol 11,
+  // ModelViewer::unityEquipmentOwner). Merged parts are a character's alone.
+  bool attachmentsDrawn()
+  {
+    if (!g_modelViewer)
+      return false;
+    if (g_modelViewer->canvasShowsCharacter() || g_modelViewer->canvasShowsMountedCharacter())
+      return true;
+    WoWModel * root = canvasModel();
+    return root && g_modelViewer->unityEquipmentOwner() == root;
+  }
+
   // A character's ChrModel as Model > Info shows it, 0 for none.
   int shownChrModel(const WoWModel * m)
   {
@@ -603,7 +616,7 @@ wxString ModelInspector::standingGeosetNote() const
     return _("The Unity viewport is not showing this model, so geoset changes here are not visible.");
   // No notice: the player draws this model, or is about to (one still starting is assumed to be the
   // current build, which dresses a character with its items and seats a mounted one on its mount).
-  if (m != canvasModel() && !g_modelViewer->canvasShowsCharacter() && !g_modelViewer->canvasShowsMountedCharacter())
+  if (m != canvasModel() && !attachmentsDrawn())
     return _("The Unity viewport does not draw attachments yet, so changes here are not visible.");
   return wxEmptyString;
 }
@@ -634,7 +647,8 @@ void ModelInspector::SetGeosetNotice(const wxString & text)
 // Ownership: the state sent is the canvas model's OWN submeshes by index, so an attachment or a
 // merged part that happens to use the same geoset number is never part of it. An attachment's own
 // checkboxes change only that attachment -- which the Unity viewport draws only as part of a character
-// it dresses, so on any other model it shows they are refused. So is every click while the viewport
+// it dresses, or as an NPC's weapon on its own model (protocol 11), so on any other model it shows they
+// are refused. So is every click while the viewport
 // shows a player that is an older build that cannot switch submeshes (protocol 1). Behind a notice,
 // nothing is refused (see below).
 void ModelInspector::OnGeosetChecked(wxTreeListEvent & event)
@@ -671,14 +685,15 @@ void ModelInspector::OnGeosetChecked(wxTreeListEvent & event)
   // notice, a character is dressed by the player -- its items' and merged parts' flags reach it in the
   // character's scene (ModelViewer::SendCharacterSceneToUnity), sent on the next tick or, for a player
   // still starting, when it announces itself -- so only a model that is not a character has attachments
-  // and merged parts the player does not draw. A character riding a mount is one too: with no notice the
+  // and merged parts the player does not draw. An NPC on its own model is the exception for attachments:
+  // a protocol 11 player draws its weapons from the same scene (attachmentsOnly), flags included. A character riding a mount is one too: with no notice the
   // player seats it (protocol 5), and the scene carries the rider's flags and the mount's own.
   const bool viewportShowsContent = g_modelViewer && !g_modelViewer->unityViewportHasNotice();
   const bool partsNotDrawn = viewportShowsContent && !g_modelViewer->canvasShowsCharacter() &&
                              !g_modelViewer->canvasShowsMountedCharacter();
   if (m != canvasModel())
   {
-    if (partsNotDrawn)
+    if (viewportShowsContent && !attachmentsDrawn())
       problem = _("The Unity viewport does not draw attachments yet, so this change would not be visible. "
                   "Nothing was changed.");
   }

@@ -1224,7 +1224,7 @@ application uses). Player side: `Tools/UnityRendererProject/Assets/Scripts/WmvIp
 **Player -> WMV**
 
 ```json
-{ "type": "unityReady", "protocolVersion": 10 }
+{ "type": "unityReady", "protocolVersion": 11 }
 { "type": "getAsset", "requestId": "abc123", "path": "creature/chicken/chicken.m2" }
 { "type": "getAssetByFileDataID", "requestId": "abc124", "fileDataID": 123456 }
 { "type": "getModelTextures", "requestId": "abc125", "fileDataID": 123200 }

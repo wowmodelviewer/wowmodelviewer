@@ -3,6 +3,7 @@ param(
   [Parameter(Mandatory=$true)][string]$Inspector,
   [Parameter(Mandatory=$true)][string]$OutputDirectory,
   [string]$Build = '12.1.0.69933',
+  [string]$Product = 'wow',
   [string]$Clips = '0,1',
   [string]$Case = 'all'
 )
@@ -82,7 +83,7 @@ foreach ($test in $cases) {
   $producerOutput = Join-Path $dir 'producer.fbx'
   $asset = '-mo "'+$test.Model+'" -fbxequipment "'+$inputFile+'"'
   if ($test.Racial) { $asset = '"'+$inputFile+'"' }
-  Run-Wmv ($asset+' -fbxexport "'+$producerOutput+'" -build "'+$Build+'"') (Join-Path $dir 'producer.log') $descriptorFile
+  Run-Wmv ($asset+' -fbxexport "'+$producerOutput+'" -build "'+$Build+'" -product "'+$Product+'"') (Join-Path $dir 'producer.log') $descriptorFile
   if ((Get-Content -LiteralPath ($producerOutput+'.status') -Raw) -ne 'OK') { throw "Producer failed: $($test.Name)" }
   $descriptor = Get-Content -LiteralPath $descriptorFile -Raw | ConvertFrom-Json
   try {
@@ -100,7 +101,7 @@ foreach ($test in $cases) {
     $output = Join-Path $dir 'model.fbx'
     $anim = 0
     if ($test.Animated) { $anim = 1 }
-    Run-Wmv ($descriptor.assetArgs+' -fbxexport "'+$output+'" -fbxcomponent -fbxanim '+$anim+' -fbxclips '+$Clips+' -build "'+$Build+'"') (Join-Path $dir 'export.log')
+    Run-Wmv ($descriptor.assetArgs+' -fbxexport "'+$output+'" -fbxcomponent -fbxanim '+$anim+' -fbxclips '+$Clips+' -build "'+$Build+'" -product "'+$Product+'"') (Join-Path $dir 'export.log')
     if ((Get-Content -LiteralPath ($output+'.status') -Raw) -ne 'OK') { throw "Export failed: $($test.Name)" }
     $json = & $Inspector $output
     if ($LASTEXITCODE -ne 0) { throw 'Independent FBX import failed' }
@@ -148,7 +149,7 @@ if ($Case -eq 'invalid-snapshots') {
     $path = Join-Path $dir ($name+'.chr')
     $invalid[$name] | Set-Content -LiteralPath $path -Encoding UTF8
     $output = Join-Path $dir ($name+'.fbx')
-    Run-Wmv ('-mo "'+$npc+'" -fbxequipment "'+$path+'" -fbxexport "'+$output+'" -build "'+$Build+'"') (Join-Path $dir ($name+'.log'))
+    Run-Wmv ('-mo "'+$npc+'" -fbxequipment "'+$path+'" -fbxexport "'+$output+'" -build "'+$Build+'" -product "'+$Product+'"') (Join-Path $dir ($name+'.log'))
     $status = Get-Content -LiteralPath ($output+'.status') -Raw
     if (-not $status.StartsWith('ERROR') -or (Test-Path -LiteralPath $output)) { throw "Invalid snapshot accepted: $name" }
     Write-Output "PASS rejected $name without writing an FBX"
