@@ -975,9 +975,10 @@ longer holds the player back.
   transfer instead of starting another. A failed prefetch is asked again for the load that joined it.
 - An answer from the cache never arrives inside the request call. It goes on the player's own queue, which Update
   empties after the host's messages of that frame: at least one answer a frame, then more while 8 ms last, so a load
-  the cache answers whole spreads its parsing over frames instead of holding one. The base64 of every host answer is
-  decoded on the socket's reader thread, no longer in the frame the answer lands in; a payload that does not decode
-  fails that answer, not the connection.
+  the cache answers whole spreads its parsing over frames instead of holding one. A host answer is read whole on the
+  socket's reader thread -- its binary payload (protocol 10), or its base64 decoded -- never in the frame it lands
+  in; base64 that does not decode fails that answer, not the connection (a binary payload out of step does end
+  the connection: see "Binary payloads").
 - The keep-view `.anim` gate (see "Keeping the view") holds only the load it was set for, until that load is on
   screen; later scenes for the same character never wait on it.
 - `runtimeState` reports `assetCacheEntries`, `assetCacheBytes`, `assetCacheHits`, `assetCacheJoins`,
@@ -1187,12 +1188,13 @@ to WMV's own log). The player is built locally from `Tools/UnityRendererProject/
 repository contains **no** Unity build output, and nothing in the installer or the CMake
 install rules ships one yet.
 
-## IPC (implemented; protocol 9)
+## IPC (implemented; protocol 10)
 
 **WMV is the server.** `UnityRendererHost` starts a TCP listener bound to `127.0.0.1` on an
 ephemeral port *before* launching the player and passes the port on the player's command
 line (`-wmvPort <n>`); the player connects back. Localhost only, one client (the embedded
-player). Transport: newline-delimited JSON, one object per line, UTF-8. Implemented by
+player). Transport: newline-delimited JSON, one object per line, UTF-8, and binary payloads (protocol 10, below).
+Implemented by
 `Source/wowmodelviewer/UnityIpcServer.*` (plain Winsock, polled from the GUI thread by a
 wxTimer -- the app has no Qt event loop, and the game-file providers must be used from the
 GUI thread anyway) on top of `UnityAssetAccess.*` (the narrow "raw bytes from the active
@@ -1202,7 +1204,7 @@ application uses). Player side: `Tools/UnityRendererProject/Assets/Scripts/WmvIp
 **Player -> WMV**
 
 ```json
-{ "type": "unityReady", "protocolVersion": 9 }
+{ "type": "unityReady", "protocolVersion": 10 }
 { "type": "getAsset", "requestId": "abc123", "path": "creature/chicken/chicken.m2" }
 { "type": "getAssetByFileDataID", "requestId": "abc124", "fileDataID": 123456 }
 { "type": "getModelTextures", "requestId": "abc125", "fileDataID": 123200 }
@@ -1320,6 +1322,9 @@ The response carries metadata only; bytes are still fetched with `getAssetByFile
 { "type": "runtimeState", "query": 3 }
 { "type": "captureScreenshot", "request": 1, "path": "C:\\Shots\\humanmale_hd.png", "width": 3840, "height": 2160 }
 { "type": "viewportBackground", "r": 74, "g": 111, "b": 165 }
+{ "type": "assetResponse", "requestId": "abc123", "ok": true, "path": "creature/chicken/chicken.m2",
+  "fileDataID": 123200, "byteLength": 101840, "encoding": "binary", "payloadBytes": 101840, "cacheable": true }
+<101840 raw bytes><newline>
 { "type": "assetResponse", "requestId": "abc123", "ok": true, "path": "creature/chicken/chicken.m2",
   "fileDataID": 123200, "byteLength": 101840, "sha1": "1dc88a19...", "encoding": "base64", "data": "TUQyMb..." }
 { "type": "assetResponse", "requestId": "abc123", "ok": false, "error": "not found" }
@@ -1473,11 +1478,20 @@ Semantics:
   client (MPQ, name lookup only)"`. Other errors: `"not found"`, `"no game client loaded"`,
   `"game client is still loading"`, `"could not open file in the active client"`,
   `"short read ... file may be encrypted or damaged"`.
-- `sha1` is the hex SHA-1 of the raw bytes, computed by the host for its log; the player does not check it (since
-  protocol 9). A cached answer carries none.
-- **V1 carries the bytes as base64 inside the JSON line.** Simple and debuggable (~33 %
-  overhead). A binary frame -- the same JSON header followed by a length-prefixed payload --
-  can replace the `encoding`/`data` pair later without touching the request side.
+- **Binary payloads (protocol 10).** To a player that announced protocol 10, an `assetResponse`'s file and a
+  `characterImage`'s pixels follow their line as raw bytes: the line states `"encoding": "binary"` and
+  `"payloadBytes": N`, and is followed by exactly N bytes and one newline (the first example above). The player
+  goes by `payloadBytes` alone, never by a message's type, and reads a payload even when its line did not parse,
+  so the stream stays in step. A payload not followed by its newline ends the connection (the viewport then shows
+  its restart notice) rather than raw bytes being read as messages; a line longer than 192 MB or a payload larger
+  than 128 MB does too (`WmvStreamReader`). Binary answers carry no `sha1`: the host no longer hashes, base64-encodes
+  and copies a file into a JSON document, and the player no longer reads it as text and decodes it. The host's send
+  buffer is 64 MB, the largest asset it serves, so one payload fits an empty send buffer and usually leaves in the
+  poll that queued it; answers the player has not read yet share the buffer, and what does not fit goes out on the
+  next ticks.
+- An older player gets the bytes base64-encoded inside the JSON line (`"encoding": "base64"`, the second example),
+  with `sha1`, the hex SHA-1 of the raw bytes, computed by the host for its log; no player checks it since
+  protocol 9. A cached answer carries none.
 - Nothing is written to disk on either side; this is runtime access, not an export workflow.
 
 WMV logs every step with the `[unityipc]` prefix: listening port, player connected,

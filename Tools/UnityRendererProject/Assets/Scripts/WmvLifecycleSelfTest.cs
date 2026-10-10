@@ -2511,7 +2511,172 @@ public static class WmvLifecycleSelfTest
         MapObjectTests(log);
         BackgroundTests(log);
         AssetCacheTests(log);
+        StreamReaderTests(log);
         log(string.Format("lifecycle-test: {0} passed, {1} failed", passed, failed));
+    }
+
+    // ---------------------------------------------------------------- the host's stream (protocol 10)
+
+    /// <summary>A stream that hands out at most Chunk bytes per Read, as a socket may.</summary>
+    class ChunkedStream : System.IO.Stream
+    {
+        readonly byte[] data;
+        int at;
+        public int Chunk = 1;
+        public ChunkedStream(byte[] data) { this.data = data; }
+        public override int Read(byte[] buffer, int offset, int count)
+        {
+            int n = Math.Min(Math.Min(count, Chunk), data.Length - at);
+            if (n <= 0) return 0;
+            Buffer.BlockCopy(data, at, buffer, offset, n);
+            at += n;
+            return n;
+        }
+        public override bool CanRead { get { return true; } }
+        public override bool CanSeek { get { return false; } }
+        public override bool CanWrite { get { return false; } }
+        public override long Length { get { return data.Length; } }
+        public override long Position { get { return at; } set { throw new NotSupportedException(); } }
+        public override void Flush() { }
+        public override long Seek(long o, System.IO.SeekOrigin s) { throw new NotSupportedException(); }
+        public override void SetLength(long v) { throw new NotSupportedException(); }
+        public override void Write(byte[] b, int o, int c) { throw new NotSupportedException(); }
+    }
+
+    static byte[] Bytes(params object[] parts)
+    {
+        var ms = new System.IO.MemoryStream();
+        foreach (object p in parts)
+        {
+            byte[] b = p as byte[] ?? System.Text.Encoding.UTF8.GetBytes((string)p);
+            ms.Write(b, 0, b.Length);
+        }
+        return ms.ToArray();
+    }
+
+    /// <summary>
+    /// WmvStreamReader: lines and payloads come out as they went in, whatever chunks the socket hands over and however
+    /// small the buffer -- a payload holding newlines, one longer than the buffer, a carriage return before a newline,
+    /// a line longer than the buffer, a last line with no newline; a payload not followed by its newline, one cut
+    /// short and one too large are refused.
+    /// </summary>
+    static void StreamReaderTests(Action<string> log)
+    {
+        var small = new byte[300];
+        var large = new byte[5000];
+        for (int i = 0; i < small.Length; i++) small[i] = (byte)(i * 7);       // includes '\n' (10) and '\r' (13)
+        for (int i = 0; i < large.Length; i++) large[i] = (byte)(i * 13 + 1);
+        string longLine = "{\"type\":\"x\",\"data\":\"" + new string('A', 1000) + "\"}";
+        byte[] wire = Bytes("{\"type\":\"a\"}\n",
+                            "{\"type\":\"assetResponse\",\"payloadBytes\":300}\n", small, "\n",
+                            "{\"type\":\"b\"}\r\n",
+                            longLine + "\n",
+                            "{\"type\":\"characterImage\",\"payloadBytes\":5000}\n", large, "\n",
+                            "tail");
+        foreach (int chunk in new[] { 1, 7, 64, 1000 })
+        {
+            var r = new WmvStreamReader(new ChunkedStream(wire) { Chunk = chunk }, 64);
+            bool ok = r.ReadLine() == "{\"type\":\"a\"}";
+            string h1 = r.ReadLine();
+            ok &= WmvStreamReader.PayloadBytesOf(h1) == 300;
+            byte[] p1 = r.ReadPayload(300);
+            ok &= p1.Length == 300 && System.Linq.Enumerable.SequenceEqual(p1, small);
+            ok &= r.ReadLine() == "{\"type\":\"b\"}";
+            ok &= r.ReadLine() == longLine;
+            string h2 = r.ReadLine();
+            byte[] p2 = r.ReadPayload(WmvStreamReader.PayloadBytesOf(h2));
+            ok &= p2.Length == 5000 && System.Linq.Enumerable.SequenceEqual(p2, large);
+            ok &= r.ReadLine() == "tail" && r.ReadLine() == null;
+            Check(ok, "host stream: lines and payloads read back exactly, " + chunk + " byte(s) per socket read, 64-byte buffer", log);
+        }
+
+        // As the real player reads: a 1 MB buffer, so a whole frame -- header, payload and its newline -- sits in it;
+        // and a payload that ends exactly at the end of a 64-byte buffer, its newline in the next read.
+        {
+            var r = new WmvStreamReader(new ChunkedStream(wire) { Chunk = wire.Length }, 1 << 20);
+            bool ok = r.ReadLine() == "{\"type\":\"a\"}";
+            ok &= System.Linq.Enumerable.SequenceEqual(r.ReadPayload(WmvStreamReader.PayloadBytesOf(r.ReadLine())), small);
+            ok &= r.ReadLine() == "{\"type\":\"b\"}" && r.ReadLine() == longLine;
+            ok &= System.Linq.Enumerable.SequenceEqual(r.ReadPayload(WmvStreamReader.PayloadBytesOf(r.ReadLine())), large);
+            ok &= r.ReadLine() == "tail" && r.ReadLine() == null;
+            Check(ok, "host stream: whole frames inside the buffer (the real player's 1 MB) read back exactly", log);
+
+            string head = "{\"payloadBytes\":";
+            int k = 64 - (head.Length + 4);                     // header "{"payloadBytes":NN}\n" (two digits) + k bytes = 64
+            byte[] exact = new byte[k];
+            for (int i = 0; i < k; i++) exact[i] = (byte)'\n';
+            var e = new WmvStreamReader(new ChunkedStream(Bytes(head + k + "}\n", exact, "\nnext\n")) { Chunk = 64 }, 64);
+            bool okExact = System.Linq.Enumerable.SequenceEqual(e.ReadPayload(WmvStreamReader.PayloadBytesOf(e.ReadLine())), exact) &&
+                           e.ReadLine() == "next";
+            Check(okExact, "host stream: a payload (all newline bytes) ending exactly at the buffer's end, its newline in the next read", log);
+        }
+
+        bool threw = false;
+        try
+        {
+            var r = new WmvStreamReader(new ChunkedStream(Bytes("{\"payloadBytes\":4}\n", "abcdX{}\n")) { Chunk = 3 }, 64);
+            r.ReadPayload(WmvStreamReader.PayloadBytesOf(r.ReadLine()));
+        }
+        catch (System.IO.EndOfStreamException) { }
+        catch (System.IO.IOException) { threw = true; }
+        Check(threw, "host stream: a payload not followed by its newline ends the connection (out of step)", log);
+
+        threw = false;
+        try
+        {
+            var r = new WmvStreamReader(new ChunkedStream(Bytes("{\"payloadBytes\":100}\n", new byte[50])) { Chunk = 16 }, 64);
+            r.ReadPayload(WmvStreamReader.PayloadBytesOf(r.ReadLine()));
+        }
+        catch (System.IO.EndOfStreamException) { threw = true; }
+        Check(threw, "host stream: a payload cut short ends the connection", log);
+
+        threw = false;
+        try { new WmvStreamReader(new ChunkedStream(new byte[0]), 64).ReadPayload(WmvStreamReader.MaxPayloadBytes + 1); }
+        catch (System.IO.EndOfStreamException) { }          // the limit is gone: the payload was allocated and read
+        catch (System.IO.IOException) { threw = true; }     // the limit refused it
+        Check(threw, "host stream: a payload larger than the limit is refused before anything is allocated", log);
+
+        Check(WmvStreamReader.PayloadBytesOf("{\"type\":\"a\",\"payloadBytes\": 42}") == 42 &&
+              WmvStreamReader.PayloadBytesOf("{\"type\":\"a\"}") == 0,
+              "host stream: a line's payloadBytes is found without parsing it", log);
+
+        ReadLoopTests(log);
+    }
+
+    /// <summary>
+    /// The player's read loop itself (WmvIpcClient.NextMessage): payloadBytes taken from the parsed line; a binary
+    /// asset's bytes and a binary image's pixels (swizzled to RGBA) made ready; a base64 asset still decoded; a line
+    /// whose JSON does not parse skipped together with its payload, so the next message is read whole.
+    /// </summary>
+    static void ReadLoopTests(Action<string> log)
+    {
+        var go = new GameObject("ReadLoopTest");
+        var ipc = go.AddComponent<WmvIpcClient>();
+        byte[] file = { 1, 2, 10, 13, 255 };
+        byte[] bgra = { 10, 20, 30, 40, 50, 60, 70, 255 };                 // two pixels, B G R A
+        byte[] wire = Bytes(
+            "{\"type\":\"assetResponse\",\"requestId\":\"u1\",\"ok\":true,\"fileDataID\":7,\"byteLength\":5,",
+            "\"encoding\":\"binary\",\"payloadBytes\":5}\n", file, "\n",
+            "{\"type\":\"characterImage\",\"hash\":\"body-1\",\"kind\":\"body\",\"width\":2,\"height\":1,",
+            "\"format\":\"bgra8\",\"encoding\":\"binary\",\"payloadBytes\":8}\n", bgra, "\n",
+            "{\"type\":\"assetResponse\",\"payloadBytes\":4, this is not JSON\n", new byte[] { 9, 10, 11, 12 }, "\n",
+            "{\"type\":\"assetResponse\",\"requestId\":\"u2\",\"ok\":true,\"encoding\":\"base64\",\"data\":\"AQIK\"}\n");
+        var r = new WmvStreamReader(new ChunkedStream(wire) { Chunk = 5 }, 32);
+        WmvIpcClient.ReadForTest a = ipc.NextMessageForTest(r);
+        Check(a != null && a.Type == "assetResponse" && a.Encoding == "binary" && a.PayloadBytes == 5 && a.AssetBytes != null &&
+              System.Linq.Enumerable.SequenceEqual(a.AssetBytes, file),
+              "read loop: a binary asset's bytes are its payload, its size taken from the parsed line", log);
+        WmvIpcClient.ReadForTest img = ipc.NextMessageForTest(r);
+        byte[] rgba = img != null && img.Image != null && img.Image.image != null ? img.Image.image.Rgba : null;
+        Check(rgba != null && System.Linq.Enumerable.SequenceEqual(rgba, new byte[] { 30, 20, 10, 40, 70, 60, 50, 255 }) &&
+              img.Image.image.Width == 2 && img.Image.image.HasAlpha,
+              "read loop: a binary image's pixels come out as RGBA, with its alpha seen", log);
+        WmvIpcClient.ReadForTest b = ipc.NextMessageForTest(r);
+        Check(b != null && b.Type == "assetResponse" && b.Encoding == "base64" && b.AssetBytes != null &&
+              System.Linq.Enumerable.SequenceEqual(b.AssetBytes, new byte[] { 1, 2, 10 }),
+              "read loop: a line that does not parse is skipped with its payload, and the next (base64) message read whole", log);
+        Check(ipc.NextMessageForTest(r) == null, "read loop: the end of the stream ends it", log);
+        UnityEngine.Object.DestroyImmediate(go);
     }
 
     // ---------------------------------------------------------------- the session asset cache (protocol 9)

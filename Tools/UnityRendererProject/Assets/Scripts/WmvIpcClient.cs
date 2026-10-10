@@ -4,13 +4,14 @@
 // localhost TCP listener before launching the player and passes the port on the player
 // command line ("-wmvPort <n>"); the player connects back, announces itself and then asks
 // WMV for whatever it needs. Transport: newline-delimited JSON (one object per line),
-// protocol version 9 (4 added world models: loadWoWModel "kind", mapObjectLoaded and runtimeState;
+// protocol version 10 (4 added world models: loadWoWModel "kind", mapObjectLoaded and runtimeState;
 // 5 added mounted characters: characterScene "mount", its answer's mount fields, runtimeState's
 // mountFileDataID, modelAnimation "role" and "load", and modelAnimationState "load", "hasRider" and
 // "rider"; 6 added captureScreenshot and its answer screenshotSaved; 7 added viewportBackground and
 // runtimeState's background fields; 8 added loadWoWModel "keepView" and runtimeState's keptViews; 9 added the asset
 // cache: loadWoWModel and prefetchAssets "assetEpoch", assetResponse "cacheable", prefetchAssets, and runtimeState's
-// assetCache fields -- see WmvAssetCache).
+// assetCache fields -- see WmvAssetCache; 10 added binary payloads: an assetResponse's file and a characterImage's
+// pixels follow their line as raw bytes, "payloadBytes" long -- see WmvStreamReader).
 //
 // The player is WMV's new renderer foundation and renders directly from WoW data: it
 // requests raw assets and metadata from WMV -- which owns the app UI, the active
@@ -91,7 +92,10 @@
 //     line with a channel outside that is refused). The player keeps it until the next one, a model load
 //     does not reset it; the host sends it at every unityReady, and also passes it on the command line
 //     ("-wmvBackground RRGGBB") so the first frame already shows it (WmvMain.ApplyViewportBackground)
+//   assetResponse { requestId, ok, path, fileDataID, byteLength, encoding:"binary", payloadBytes, cacheable }
+//                 <payloadBytes raw bytes><newline>                                (protocol 10)
 //   assetResponse { requestId, ok, path, fileDataID, byteLength, sha1, encoding:"base64", data, cacheable }
+//                                                                         (to a player before protocol 10)
 //   assetResponse { requestId, ok:false, error }
 //     cacheable (protocol 9, sent only when true): a file of the client's own storage, the same for as long as the
 //     client is -- kept by the asset cache under the epoch of the request that asked for it. An answer the cache
@@ -117,7 +121,10 @@
 //     nested beside it, "playing" there being the mount's pause (see WmvSlotAnimation). sampledAtMs is
 //     when the host sampled the state, on the system's performance counter, which this process reads
 //     too (ProjectFromSample)
+//   characterImage { hash, kind, width, height, format:"bgra8", encoding:"binary", payloadBytes }
+//                  <width * height * 4 raw BGRA bytes><newline>                    (protocol 10)
 //   characterImage { hash, kind, width, height, format:"bgra8", encoding:"base64", data }
+//                                                                         (to a player before protocol 10)
 //     a host-composited texture (the body, the eyes), rows top first, bytes B,G,R,A; named by
 //     hash in the scenes that follow. The player keeps the newest image of each kind for the
 //     life of the connection -- the host sends a kind again only when its pixels change -- and
@@ -136,9 +143,10 @@
 // creature skin's TXID entry is 0 and its texture array carries no filename) -- the skin comes
 // from the client database, which only WMV can read.
 //
-// V1 carries asset bytes as base64 inside the JSON line (simple, debuggable). A binary
-// frame (JSON header + length-prefixed payload) can replace it later without changing
-// the request side.
+// Asset bytes and composited images travel as binary payloads (protocol 10): a JSON line that states
+// "payloadBytes": N, then N raw bytes and a newline (WmvStreamReader). The host sends them so only to a player that
+// announced protocol 10; to an older one, as base64 inside the JSON line ("encoding":"base64"), which this player
+// still reads from an older host.
 //
 // The socket read loop runs on a background thread; everything else runs on the main
 // thread (Unity API is main-thread-only) via a queue drained in Update().
@@ -155,7 +163,7 @@ using Wmv.Wow;
 
 public class WmvIpcClient : MonoBehaviour
 {
-    public const int ProtocolVersion = 9;
+    public const int ProtocolVersion = 10;
 
     /// <summary>The loadWoWModel kind of a world model; anything else is an M2.</summary>
     public const string KindMapObject = "wmo";
@@ -185,7 +193,8 @@ public class WmvIpcClient : MonoBehaviour
         public string path;
         public int fileDataID;
         public int byteLength;
-        public string sha1;        // as reported by WMV (empty for an answer from the asset cache)
+        public string sha1;        // as reported by WMV for a base64 answer; empty for a binary one (protocol 10) and
+                                   // for an answer from the asset cache
         public string error;
         public byte[] data;        // decoded bytes (null on error); shared with the asset cache: read, never written
         public bool fromCache;     // answered by the asset cache, or by joining the same request already out
@@ -553,9 +562,13 @@ public class WmvIpcClient : MonoBehaviour
         public int assetEpoch;        // loadWoWModel, prefetchAssets: the host's client epoch (0 from an older host)
         public bool cacheable;        // assetResponse: a file of the client's own storage
         public int[] fileDataIDs;     // prefetchAssets
+        // protocol 10: the raw bytes that follow this line (an assetResponse's file, a characterImage's pixels)
+        public int payloadBytes;
+        [NonSerialized] public byte[] payload;
         [NonSerialized] public CharacterImage decodedImage;
         [NonSerialized] public byte[] assetBytes;     // assetResponse: decoded on the reader thread, or the cache's bytes
-        [NonSerialized] public string decodeError;    // assetResponse: why the base64 did not decode
+        [NonSerialized] public string decodeError;    // assetResponse: why there are no bytes (a base64 that did not
+                                                      // decode, a binary answer without its payload)
         [NonSerialized] public bool fromCache;        // assetResponse: made here, from the asset cache
     }
 
@@ -660,40 +673,19 @@ public class WmvIpcClient : MonoBehaviour
 
             Send("{\"type\":\"unityReady\",\"protocolVersion\":" + ProtocolVersion + "}");
 
-            using (var reader = new StreamReader(stream, Encoding.UTF8))
+            using (Stream readStream = stream)
             {
-                string line;
-                while (!stopping && (line = reader.ReadLine()) != null)
-                {
-                    if (line.Trim().Length == 0) continue;
-                    Msg msg = null;
-                    try { msg = JsonUtility.FromJson<Msg>(line); }
-                    catch (Exception e) { Debug.LogWarning("WMV IPC: bad JSON line: " + e.Message); }
-                    if (msg != null)
-                    {
-                        msg.receivedSeconds = NowSeconds;
-                        ProjectFromSample(msg);
-                        // A composited image is megabytes of base64. Decoded HERE, on the reader
-                        // thread, so the frame it lands in only swaps a reference.
-                        if (msg.type == "characterImage")
-                        {
-                            msg.decodedImage = DecodeCharacterImage(msg);
-                            msg.data = null;
-                        }
-                        // So is an asset: tens of megabytes of base64 for a character model, which decoded in
-                        // Dispatch held the frame it landed in.
-                        else if (msg.type == "assetResponse")
-                            DecodeAsset(msg);
-                        lock (inbox) inbox.Enqueue(msg);
-                    }
-                }
+                var reader = new WmvStreamReader(readStream);
+                Msg msg;
+                while (!stopping && (msg = NextMessage(reader)) != null)
+                    lock (inbox) inbox.Enqueue(msg);
             }
         }
         catch (Exception e)
         {
             Status("WMV connection failed/closed: " + e.Message);
         }
-        // The using(StreamReader) above disposed the NetworkStream -- stop Send from touching it.
+        // The using above disposed the NetworkStream -- stop Send from touching it.
         lock (sendLock) stream = null;
         connected = false;
         Status("Disconnected from WMV");
@@ -739,16 +731,76 @@ public class WmvIpcClient : MonoBehaviour
         }
     }
 
-    /// <summary>An assetResponse's base64 payload as bytes (reader thread); the text is dropped either way.</summary>
+    /// <summary>
+    /// The next message from the host (reader thread), or null at the end of the stream: a line parsed, then the
+    /// payload it announced read -- also after a line whose JSON did not parse, which is then skipped, so the stream
+    /// stays in step -- and a characterImage's pixels or an assetResponse's bytes made ready here, so the frame the
+    /// message lands in only swaps a reference (a composited image is 8 MB, a character model tens of megabytes).
+    /// </summary>
+    Msg NextMessage(WmvStreamReader reader)
+    {
+        string line;
+        while ((line = reader.ReadLine()) != null)
+        {
+            if (line.Trim().Length == 0) continue;
+            Msg msg = null;
+            try { msg = JsonUtility.FromJson<Msg>(line); }
+            catch (Exception e) { Debug.LogWarning("WMV IPC: bad JSON line: " + e.Message); }
+            int payloadBytes = msg != null ? msg.payloadBytes : WmvStreamReader.PayloadBytesOf(line);
+            byte[] payload = payloadBytes > 0 ? reader.ReadPayload(payloadBytes) : null;
+            if (msg == null)
+                continue;
+            msg.payload = payload;
+            msg.receivedSeconds = NowSeconds;
+            ProjectFromSample(msg);
+            if (msg.type == "characterImage")
+            {
+                msg.decodedImage = DecodeCharacterImage(msg);
+                msg.data = null;
+            }
+            else if (msg.type == "assetResponse")
+                DecodeAsset(msg);
+            return msg;
+        }
+        return null;
+    }
+
+    /// <summary>What NextMessage made of a message, for the self-test (Msg itself stays private).</summary>
+    internal class ReadForTest
+    {
+        public string Type, DecodeError, Encoding;
+        public int PayloadBytes;
+        public byte[] AssetBytes;
+        public CharacterImage Image;
+    }
+
+    internal ReadForTest NextMessageForTest(WmvStreamReader reader)
+    {
+        Msg m = NextMessage(reader);
+        return m == null ? null : new ReadForTest
+        {
+            Type = m.type, DecodeError = m.decodeError, Encoding = m.encoding, PayloadBytes = m.payloadBytes,
+            AssetBytes = m.assetBytes, Image = m.decodedImage,
+        };
+    }
+
+    /// <summary>An assetResponse's file as bytes (reader thread): its binary payload (protocol 10), or its base64
+    /// decoded; the text is dropped either way. decodeError is the whole reason when there are no bytes.</summary>
     static void DecodeAsset(Msg msg)
     {
-        if (msg.ok && msg.encoding == "base64" && !string.IsNullOrEmpty(msg.data))
+        if (msg.ok && msg.encoding == "binary")
+        {
+            msg.assetBytes = msg.payload;
+            if (msg.assetBytes == null)
+                msg.decodeError = "binary assetResponse without its payload";
+        }
+        else if (msg.ok && msg.encoding == "base64" && !string.IsNullOrEmpty(msg.data))
         {
             try { msg.assetBytes = Convert.FromBase64String(msg.data); }
             catch (Exception e)   // a bad payload or no memory for it: this answer fails, the connection stays
             {
                 msg.assetBytes = null;
-                msg.decodeError = e.GetType().Name + ": " + e.Message;
+                msg.decodeError = "base64 decode failed: " + e.GetType().Name + ": " + e.Message;
             }
         }
         msg.data = null;
@@ -764,12 +816,14 @@ public class WmvIpcClient : MonoBehaviour
         var result = new CharacterImage { hash = msg.hash ?? "", kind = msg.kind ?? "" };
         try
         {
-            if (msg.encoding != "base64" || msg.format != "bgra8" || string.IsNullOrEmpty(msg.data))
+            bool binary = msg.encoding == "binary" && msg.payload != null;
+            if (msg.format != "bgra8" || (!binary && (msg.encoding != "base64" || string.IsNullOrEmpty(msg.data))))
             {
                 result.error = "unsupported characterImage (" + msg.encoding + ", " + msg.format + ")";
                 return result;
             }
-            byte[] bytes = Convert.FromBase64String(msg.data);
+            // Its pixels: the payload (protocol 10, swizzled in place: this message owns it) or the base64 decoded.
+            byte[] bytes = binary ? msg.payload : Convert.FromBase64String(msg.data);
             if (msg.width <= 0 || msg.height <= 0 || bytes.Length != msg.width * msg.height * 4)
             {
                 result.error = string.Format("characterImage {0}x{1} carries {2} bytes", msg.width, msg.height, bytes.Length);
@@ -1031,7 +1085,7 @@ public class WmvIpcClient : MonoBehaviour
                     {
                         // Attributed to this request instead of orphaning it.
                         r.ok = false;
-                        r.error = !string.IsNullOrEmpty(msg.decodeError) ? "base64 decode failed: " + msg.decodeError
+                        r.error = !string.IsNullOrEmpty(msg.decodeError) ? msg.decodeError
                                 : string.IsNullOrEmpty(msg.encoding) ? "assetResponse without encoding/data"
                                 : "unsupported encoding: " + msg.encoding;
                     }
@@ -1477,6 +1531,126 @@ public class WmvIpcClient : MonoBehaviour
         stopping = true;
         try { stream?.Close(); } catch { }
         try { client?.Close(); } catch { }
+    }
+}
+
+/// <summary>
+/// THE HOST'S STREAM AS THE PLAYER READS IT (protocol 10). Newline-ended UTF-8 JSON lines, and after a line whose JSON
+/// states "payloadBytes": N > 0, exactly N raw bytes and one newline. The reader goes by payloadBytes alone, never by a
+/// message's type. A payload not followed by its newline means the stream is out of step: it throws, and the
+/// connection ends -- the host then shows the viewport's restart notice -- rather than reading raw bytes as messages.
+/// A host before protocol 10 sends lines only, a base64 asset among them tens of megabytes long; they read the same.
+/// Reader thread only.
+/// </summary>
+public class WmvStreamReader
+{
+    /// <summary>A line longer than this ends the connection. The longest a host writes is a pre-10 base64 answer for
+    /// its largest asset (64 MB, so about 86 MB of base64 and its JSON).</summary>
+    public const int MaxLineBytes = 192 * 1024 * 1024;
+    /// <summary>A payload larger than this ends the connection: twice the host's largest asset (64 MB).</summary>
+    public const int MaxPayloadBytes = 128 * 1024 * 1024;
+
+    readonly Stream stream;
+    readonly byte[] buffer;
+    int pos, len;
+    MemoryStream longLine;   // a line that did not fit the buffer, while it is read
+
+    public WmvStreamReader(Stream stream, int bufferSize = 1 << 20)
+    {
+        this.stream = stream;
+        buffer = new byte[Math.Max(16, bufferSize)];
+    }
+
+    bool Fill()
+    {
+        pos = 0;
+        len = stream.Read(buffer, 0, buffer.Length);
+        if (len < 0) len = 0;
+        return len > 0;
+    }
+
+    static string Decode(byte[] bytes, int start, int count)
+    {
+        if (count > 0 && bytes[start + count - 1] == (byte)'\r')
+            count--;
+        return Encoding.UTF8.GetString(bytes, start, count);
+    }
+
+    /// <summary>The next line, without its newline (or a carriage return before it); null at the end of the stream,
+    /// where a last line with no newline is still returned.</summary>
+    public string ReadLine()
+    {
+        while (true)
+        {
+            if (pos >= len && !Fill())
+            {
+                if (longLine == null)
+                    return null;
+                string last = Decode(longLine.GetBuffer(), 0, (int)longLine.Length);
+                longLine = null;
+                return last;
+            }
+            int newline = Array.IndexOf(buffer, (byte)'\n', pos, len - pos);
+            if (newline >= 0)
+            {
+                string line;
+                if (longLine == null)
+                    line = Decode(buffer, pos, newline - pos);
+                else
+                {
+                    longLine.Write(buffer, pos, newline - pos);
+                    line = Decode(longLine.GetBuffer(), 0, (int)longLine.Length);
+                    longLine = null;   // its memory goes with it: one long line does not keep tens of megabytes
+                }
+                pos = newline + 1;
+                return line;
+            }
+            if (longLine == null)
+                longLine = new MemoryStream();
+            longLine.Write(buffer, pos, len - pos);
+            pos = len;
+            if (longLine.Length > MaxLineBytes)
+                throw new IOException("a line longer than " + MaxLineBytes + " bytes");
+        }
+    }
+
+    /// <summary>The payload a line announced: exactly count bytes, then the newline that ends it.</summary>
+    public byte[] ReadPayload(int count)
+    {
+        if (count < 0 || count > MaxPayloadBytes)
+            throw new IOException("a payload of " + count + " bytes is refused");
+        var data = new byte[count];
+        int filled = Math.Min(len - pos, count);
+        if (filled > 0)
+        {
+            Buffer.BlockCopy(buffer, pos, data, 0, filled);
+            pos += filled;
+        }
+        while (filled < count)
+        {
+            int n = stream.Read(data, filled, count - filled);
+            if (n <= 0)
+                throw new EndOfStreamException("the stream ended " + (count - filled) + " bytes short of a payload");
+            filled += n;
+        }
+        if (pos >= len && !Fill())
+            throw new EndOfStreamException("the stream ended before a payload's newline");
+        if (buffer[pos] != (byte)'\n')
+            throw new IOException("a payload not followed by its newline: the stream is out of step");
+        pos++;
+        return data;
+    }
+
+    static readonly System.Text.RegularExpressions.Regex PayloadField =
+        new System.Text.RegularExpressions.Regex("\"payloadBytes\"\\s*:\\s*(\\d+)");
+
+    /// <summary>The payloadBytes a line states, read without parsing it (a line whose JSON did not parse still has its
+    /// payload read, so the stream stays in step); 0 for none.</summary>
+    public static int PayloadBytesOf(string line)
+    {
+        var m = PayloadField.Match(line ?? "");
+        int n;
+        return m.Success && int.TryParse(m.Groups[1].Value, out n) ? n : 0;
     }
 }
 
