@@ -334,6 +334,13 @@ Format loosely based on [Keep a Changelog](https://keepachangelog.com/).
   follow aliases yet.)
 
 ### Changed
+- **Version 1.0, and the viewer opens as a window.** The window title reads "WoW Model Viewer version 1.0" (it was
+  "WoW Model Viewer Midnight v0.11.0 64 bits"). The viewer opens maximised with its title bar -- minimise,
+  maximise/restore and close -- instead of borderless fullscreen; View > Fullscreen (F11, Esc leaves it) still
+  gives the borderless mode, and the command bar's Fullscreen button is gone. A window closed while maximised keeps
+  its restore position, not the maximised corner past the screen's edge. Help > About carries the new text (heading
+  "WoW Model Viewer 1.0", the description and credits, License, Developers, the trademark notice); the translators
+  list is gone.
 - **File > Load World of Warcraft asks one plain question: "Choose World of Warcraft".** Each installed product is
   a card -- "Classic Era", "Vanilla · 1.15.9", Installed or Not downloaded, "Last used" on the one opened last --
   and a click, Enter or Space on a card opens it (Up and Down move between cards, Tab leaves them). Installations

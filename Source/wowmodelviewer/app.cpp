@@ -5324,7 +5324,7 @@ bool WowModelViewApp::OnInit()
   }
   else
   {
-    // THE APPLICATION COMES UP AND WAITS. It opens as an empty fullscreen viewer -- no client
+    // THE APPLICATION COMES UP AND WAITS. It opens as an empty, maximised viewer -- no client
     // read, no dialog asked, no question put to the user before they have even seen the program.
     // Loading a client is something they do when they want to, through
     // File > "Load World of Warcraft", which is the only thing that loads one now.

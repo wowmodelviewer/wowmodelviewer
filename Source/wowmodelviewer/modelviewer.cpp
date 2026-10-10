@@ -13,6 +13,7 @@
 
 #include <wx/aboutdlg.h>
 #include <wx/aui/auibar.h>
+#include <wx/generic/aboutdlgg.h>
 #include <wx/choice.h>
 #include <wx/combobox.h>
 #include <wx/listctrl.h>
@@ -790,7 +791,6 @@ void ModelViewer::InitCommandBar()
   art->SetToolIcon(ID_UI_MODELS, UiIcon::Models);
   art->SetToolIcon(ID_UI_TEXTURES, UiIcon::Textures);
   art->SetToolIcon(ID_UI_BUILDINGS, UiIcon::Buildings);
-  art->SetToolIcon(ID_VIEW_FULLSCREEN, UiIcon::Fullscreen);
   art->SetToolIcon(ID_UI_SCREENSHOT, UiIcon::Screenshot);
   art->SetToolIcon(ID_SHOW_FILE_LIST, UiIcon::Browse);
   art->SetToolIcon(ID_SHOW_CHAR, UiIcon::ModelPanel);
@@ -817,9 +817,8 @@ void ModelViewer::InitCommandBar()
                       _("The building viewer: World Model Objects (WMO) -- buildings, dungeons, cities -- in Browse, "
                         "the selected one in the viewport"), wxITEM_RADIO);
   commandBar->AddSeparator();
-  // (No Reset camera: it acted on the archived OpenGL viewport; the Unity viewport frames each model itself.)
-  commandBar->AddTool(ID_VIEW_FULLSCREEN, _("Fullscreen"), wxNullBitmap, _("Fullscreen (F11; Esc leaves)"));
-  commandBar->AddSpacer(FromDIP(2));
+  // (No Reset camera: it acted on the archived OpenGL viewport; the Unity viewport frames each model itself. No
+  // Fullscreen either: the viewer opens maximised, and View > Fullscreen (F11) is there for the borderless mode.)
   // The Unity viewport's own capture (SaveUnityScreenshot).
   commandBar->AddTool(ID_UI_SCREENSHOT, _("Screenshot"), wxNullBitmap,
                       _("Save the viewport as a 3840 x 2160 PNG with a transparent background"));
@@ -985,6 +984,11 @@ void ModelViewer::LoadLayout()
     if (g.Contains(posx + 20, posy + 10)) // a few px into the window must be visible
     {
       onScreen = true;
+      // Its corner on that display too: a position saved past the edge (a maximised window's -8,-8, which was
+      // saved before SaveLayout kept the restore position) would leave the top of the title bar off the screen.
+      const wxRect area = wxDisplay(d).GetClientArea();
+      posx = std::max(posx, area.x);
+      posy = std::max(posy, area.y);
       break;
     }
   }
@@ -1061,7 +1065,21 @@ void ModelViewer::SaveLayout()
   config.setValue("Session/Layout", QString::fromWCharArray(userPerspective().c_str()));
   config.setValue("Session/LayoutVersion", LAYOUT_VERSION);
 
+  // Where the window goes when it is restored. A maximised (or fullscreen) window's own corner lies past the screen's
+  // edge (-8,-8 for a maximised one), which a restored window would take as its place: its restore position instead,
+  // which Windows gives in workspace coordinates (moved to the screen's the way wx does for a minimised window).
   wxPoint pos = GetPosition();
+  if (IsMaximized() || IsFullScreen())
+  {
+    WINDOWPLACEMENT placement = {};
+    placement.length = sizeof(placement);
+    if (::GetWindowPlacement((HWND)GetHWND(), &placement))
+    {
+      const wxDisplay display(this);
+      const wxPoint offset = display.GetClientArea().GetPosition() - display.GetGeometry().GetPosition();
+      pos = wxPoint(placement.rcNormalPosition.left + offset.x, placement.rcNormalPosition.top + offset.y);
+    }
+  }
   config.setValue("Session/PositionX", pos.x);
   config.setValue("Session/PositionY", pos.y);
 
@@ -2397,8 +2415,8 @@ bool ModelViewer::StartUnityRenderer(bool selfTest)
 }
 
 // The half of the viewer-first startup that touches NO player and NO IPC: take the screen. Runs
-// BEFORE the client is loaded, which is what makes the first thing on screen a clean fullscreen
-// viewer instead of a small window behind a dialog.
+// BEFORE the client is loaded, which is what makes the first thing on screen the whole viewer
+// instead of a small window behind a dialog.
 void ModelViewer::ApplyViewerStartupLayout()
 {
   if (batchMode || !canvas)
@@ -2409,8 +2427,9 @@ void ModelViewer::ApplyViewerStartupLayout()
   // do next itself (the Unity viewport's notice), so hiding the panels that do it is no longer the
   // way to make an empty application look tidy.
 
-  // Take the screen. A viewer that opens in a small window in the corner is not one.
-  EnterViewerFullScreen(true);
+  // Take the screen, as a window: maximised, with its title bar, so it can be minimised, restored
+  // and moved like any other (View > Fullscreen still gives the borderless mode).
+  Maximize(true);
 }
 
 // Start the player, at launch, before any client is loaded.
@@ -5031,16 +5050,24 @@ void ModelViewer::OnLanguage(wxCommandEvent &event)
   }
 }
 
-void ModelViewer::OnAbout(wxCommandEvent &event)
+void ModelViewer::OnAbout(wxCommandEvent & WXUNUSED(event))
 {
   wxAboutDialogInfo info;
-  info.SetName(GLOBALSETTINGS.appName());
-  wxString l_version = L"\n" + GLOBALSETTINGS.appVersion() + L" (" + GLOBALSETTINGS.buildName() + L")\n";
-
+  // The heading: "WoW Model Viewer 1.0".
+  info.SetName(GLOBALSETTINGS.productName());
+  wxString version = GLOBALSETTINGS.appVersion();
   if (GLOBALSETTINGS.isBeta())
-    l_version += L"BETA VERSION";
+    version += wxT(" BETA VERSION");
+  info.SetVersion(version);
 
-  info.SetVersion(l_version);
+  info.SetDescription(L"WoW Model Viewer is a 3D model viewer for World of Warcraft.\n"
+                      L"It uses the game\u2019s data files to display creatures, characters,\n"
+                      L"spell effects, objects, and other models.\n"
+                      L"\n"
+                      L"Credits to: Linghuye, nSzAbolcs, Sailesh, Terran and Cryect\n"
+                      L"for their direct and indirect contributions.");
+  info.SetWebSite(wxT("https://wowmodelviewer.net"));
+  info.SetLicence(wxT("WoW Model Viewer is released under the GNU General Public License v3, Non-Commercial Use."));
 
   info.AddDeveloper(wxT("Ufo_Z"));
   info.AddDeveloper(wxT("Darjk"));
@@ -5049,34 +5076,24 @@ void ModelViewer::OnAbout(wxCommandEvent &event)
   info.AddDeveloper(wxT("Tob.Franke"));
   info.AddDeveloper(wxT("Jeromnimo"));
   info.AddDeveloper(wxT("Wain"));
-  info.AddTranslator(wxT("MadSquirrel (French)"));
-  info.AddTranslator(wxT("Tigurius (Deutsch)"));
-  info.AddTranslator(wxT("Kurax (Chinese)"));
+  info.AddDeveloper(wxT("Rasmuslnd"));
 
-  info.SetWebSite(wxT("https://wowmodelviewer.net"));
-  info.SetCopyright(
-    wxString(wxT("World of Warcraft(R) is a Registered trademark of\n\
-                 Blizzard Entertainment(R). All game assets and content\n\
-                 is (C)2004-2016 Blizzard Entertainment(R). All rights reserved.")));
+  info.SetCopyright(L"World of Warcraft\u00AE is a registered trademark of Blizzard Entertainment\u00AE.\n"
+                    L"All game assets and content are \u00A92004\u20132026 Blizzard Entertainment\u00AE.\n"
+                    L"All rights reserved.");
 
-  info.SetLicence(wxT("WoW Model Viewer is released under the GNU General Public License v3, Non-Commercial Use."));
+  std::unique_ptr<wxBitmap> bitmap(createBitmapFromResource(L"ABOUTICON", wxBITMAP_TYPE_XPM, 128, 128));
+  if (bitmap && bitmap->IsOk())
+  {
+    wxIcon icon;
+    icon.CopyFromBitmap(*bitmap);
+    info.SetIcon(icon);
+  }
 
-  info.SetDescription(wxT("WoW Model Viewer is a 3D model viewer for World of Warcraft.\nIt uses the data files included with the game to display\nthe 3D models from the game: creatures, characters, spell\neffects, objects and so forth.\n\nCredits To: Linghuye,  nSzAbolcs,  Sailesh, Terran and Cryect\nfor their contributions either directly or indirectly."));
-
-  wxBitmap * bitmap = createBitmapFromResource(L"ABOUTICON", wxBITMAP_TYPE_XPM, 128, 128);
-  wxIcon icon;
-  icon.CopyFromBitmap(*bitmap);
-
-#if defined (_LINUX)
-  //icon.LoadFile(wxT("../bin_support/icon/wmv_xpm"));
-#elif defined (_MAC)
-  //icon.LoadFile(wxT("../bin_support/icon/wmv.icns"));
-#endif
-
-  info.SetIcon(icon);
-
-  // FIXME: Doesn't link on OSX
-  wxAboutBox(info);
+  // The dialog wxAboutBox would show, with the build's name kept in its title: "About WoW Model Viewer Midnight".
+  wxGenericAboutDialog dialog(info, this);
+  dialog.SetTitle(wxString::Format(_("About %s"), wxString(GLOBALSETTINGS.appName())));
+  dialog.ShowModal();
 }
 
 bool ModelViewer::isUnityViewportCentre()

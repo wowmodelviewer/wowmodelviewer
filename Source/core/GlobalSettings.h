@@ -79,9 +79,13 @@ namespace core
         return *m_instance;
       }
 
+      // "1.0" (a revision is added when it is not 0: "1.0.2")
       std::wstring appVersion(std::wstring a_prefix = std::wstring(L""));
       std::wstring appName();
+      // The program's name without the build's: "WoW Model Viewer" (the window title, the About heading).
+      std::wstring productName();
       std::wstring buildName();
+      // The window title: "WoW Model Viewer version 1.0".
       std::wstring appTitle();
 
       bool isBeta() { return m_isBetaVersion; }
