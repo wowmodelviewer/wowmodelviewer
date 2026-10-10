@@ -68,7 +68,6 @@
 void FBXAnimExporter::run()
 {
   QMutexLocker locker(&m_mutex);
-  ModelAnimation curAnimation = l_model->anims[animID];
   if (srcfileName.isNull() || srcfileName.isEmpty())
   {
     LOG_ERROR << "Unable to get FBX Animation Source Filename.";
@@ -79,11 +78,11 @@ void FBXAnimExporter::run()
   srcfileName = srcfileName.mid(0, srcfileName.lastIndexOf(".fbx"));
   QString srcPath = srcfileName.mid(0, srcfileName.lastIndexOf(SLASH));
   QString justfileName = srcfileName.mid(srcfileName.lastIndexOf(SLASH) + 1);
-  QString anim_name = QString("%1 [%2]").arg(animationName).arg(curAnimation.Index);
-  QString file_name = QString("%1_%5/%2_%3_%4.fbx").arg(srcfileName).arg(justfileName).arg(animationName).arg(curAnimation.Index).arg(wxT("Animations"));
+  QString anim_name = QString("%1 [%2]").arg(animationName).arg(animID);
+  QString file_name = QString("%1_%5/%2_%3_%4.fbx").arg(srcfileName).arg(justfileName).arg(animationName).arg(animID).arg(wxT("Animations"));
   if (useAltNaming)
   {
-    file_name = QString("%1_%5/%2_%4_%3.fbx").arg(srcfileName).arg(justfileName).arg(animationName).arg(curAnimation.Index).arg(wxT("Animations"));
+    file_name = QString("%1_%5/%2_%4_%3.fbx").arg(srcfileName).arg(justfileName).arg(animationName).arg(animID).arg(wxT("Animations"));
   }
   LOG_INFO << "FBX Animation Filename: " << qPrintable(file_name);
   QDir dir(file_name.mid(0, file_name.lastIndexOf('/')));
@@ -142,7 +141,7 @@ void FBXAnimExporter::run()
   //LOG_INFO << "Skeleton successfully bound...";
 
   // Add this animation to our new FBX file.
-  FBXHeaders::createAnimation(l_model, l_animscene, anim_name, curAnimation, l_boneNodes);
+  FBXHeaders::createAnimation(l_model, l_animscene, anim_name, animID, l_boneNodes);
   //LOG_INFO << "Animation successfully created...";
 
   if (!exporter->Export(l_animscene))

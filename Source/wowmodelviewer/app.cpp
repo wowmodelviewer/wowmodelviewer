@@ -3104,14 +3104,14 @@ static bool doIpcTestMountStep(ModelViewer * frame, UnityIpcServer * ipc, const 
     }, after);
     what = "off \"" + was.key + QString("\", the character on sequence %1: ").arg(now.characterSequence) + answered;
   }
-  else if (kind == "manim" || kind == "ranim")
+  else if (kind == "manim" || kind == "ranim" || kind == "anim")
   {
     // THE ANIMATION PANEL, on the mount (manim) or on the character (ranim). When it is on the other model it is moved
     // first, as View > Attachments moves it (AnimControl::UpdateModel), then the clip is picked as a user picks it.
     const bool onMount = kind == "manim";
     WoWModel * model = onMount ? frame->riderMount() : rider;
     WoWModel * other = onMount ? rider : frame->riderMount();
-    if (!model || !other)
+    if (!model || (kind != "anim" && !other))
     {
       why = "the character rides no mount";
       return false;
@@ -3129,7 +3129,7 @@ static bool doIpcTestMountStep(ModelViewer * frame, UnityIpcServer * ipc, const 
       frame->animControl->UpdateModel(model);
       pumpTicking(ipc, 300);
     }
-    const int otherSequence = hostSequence(other);
+    const int otherSequence = other ? hostSequence(other) : -1;
     const QString suffix = QString("[%1]").arg(sequence);
     int clip = -1;
     for (int i = 0; i < frame->animControl->animationCount() && clip < 0; i++)
@@ -3140,17 +3140,18 @@ static bool doIpcTestMountStep(ModelViewer * frame, UnityIpcServer * ipc, const 
       why = "the Animation panel lists no clip for sequence " + QString::number(sequence);
       return false;
     }
-    const int roles = ipc->stats().rolePushes;
+    const bool usesRole = other != nullptr;
+    const int pushes = usesRole ? ipc->stats().rolePushes : ipc->stats().animPushes;
     frame->animControl->pickAnimationLikeUser(clip);
     pumpTicking(ipc, 200);
     now = riddenHost(frame);
     if (hostSequence(model) != sequence)
       bad << QString("the host's %1 plays %2").arg(onMount ? "mount" : "character").arg(hostSequence(model));
-    if (hostSequence(other) != otherSequence)
+    if (other && hostSequence(other) != otherSequence)
       bad << QString("the host's %1 went from sequence %2 to %3").arg(onMount ? "character" : "mount")
                .arg(otherSequence).arg(hostSequence(other));
-    if (ipc->stats().rolePushes <= roles)
-      bad << "no animation push with a role";
+    if ((usesRole ? ipc->stats().rolePushes : ipc->stats().animPushes) <= pushes)
+      bad << "no animation push on the expected channel";
     settle([&](const UnityIpcServer::RuntimeState & x) {
       QStringList d = riddenMismatches(x, now) + sameCharacter(x);
       if (x.mountsBuilt != before.mountsBuilt)
@@ -3351,6 +3352,7 @@ static bool doIpcTestMountStep(ModelViewer * frame, UnityIpcServer * ipc, const 
 //   dismount              the dialog's "---- None ----" row: the scene answered with mount "none", no mount runtime
 //                         alive, no mount built, the character unchanged, and the view fitted once to the character
 //                         alone (not at all when there was nothing to come off);
+//   anim:<animId>         same character animation selection without requiring a mount; #<n> selects a sequence.
 //   manim:<animId>        the mount's first sequence with that animation id picked in the Animation panel (moved to
 //   ranim:<animId>        the mount first, as View > Attachments moves it, when it is on the character); ranim the
 //                         same for the character. "#<n>" names sequence n instead. The other model's sequence stays
@@ -3417,7 +3419,7 @@ static bool doIpcTestLifecycleSequence(ModelViewer * frame, UnityIpcServer * ipc
     const QString kind = quick ? rawKind.left(rawKind.size() - 1) : rawKind;
     const QString target = colon > 0 ? step.mid(colon + 1).trimmed() : QString();
     const bool mountKind = !quick && (kind == "chr" || kind == "mount" || kind == "dismount" || kind == "manim" ||
-                                      kind == "ranim" || kind == "equip" || kind == "custom" || kind == "sheath" ||
+                                      kind == "ranim" || kind == "anim" || kind == "equip" || kind == "custom" || kind == "sheath" ||
                                       kind == "reconnect" || kind == "wait" || kind == "screenshot" ||
                                       kind == "background");
     GameFile * file = (kind == "m2" || kind == "wmo") && !target.isEmpty() ? resolveGameFileArg(target) : nullptr;

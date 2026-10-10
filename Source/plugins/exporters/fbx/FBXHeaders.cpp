@@ -425,8 +425,11 @@ void FBXHeaders::storeRestPose(FbxScene* &l_scene, std::map<int, FbxNode*>& l_bo
   l_scene->AddPose(pose);
 }
 
-void FBXHeaders::createAnimation(WoWModel * l_model, FbxScene *& l_scene, QString animName, ModelAnimation cur_anim, std::map<int, FbxNode*>& skeleton)
+void FBXHeaders::createAnimation(WoWModel * l_model, FbxScene *& l_scene, QString animName, size_t sequenceIndex, std::map<int, FbxNode*>& skeleton)
 {
+  if (sequenceIndex >= l_model->anims.size()) return;
+  const ModelAnimation &cur_anim = l_model->anims[sequenceIndex];
+
   if (skeleton.empty())
   {
     LOG_ERROR << "No bones in skeleton, so animation will not be exported";
@@ -439,11 +442,8 @@ void FBXHeaders::createAnimation(WoWModel * l_model, FbxScene *& l_scene, QStrin
   FbxAnimLayer* anim_layer = FbxAnimLayer::Create(l_scene, qPrintable(animName));
   anim_stack->AddMember(anim_layer);
 
-  // Looping: FBX has no standard "loop" flag on a take, and the SDK data-type globals used to
-  // author a custom bool property are not exported by this SDK build. WoW sequences loop by
-  // default (and the source flag bit 0x20 marks looped ones); since there is no portable field
-  // to carry it, the clip's full [0, length] range is written and the importing DCC/engine sets
-  // looping per its own clip settings. (Documented as a known limitation.)
+  // The importing DCC/engine controls looping; export the full [0, length] range.
+  // Sequence flag 0x20 describes internal key storage, not looping.
 
   // Bake at a fixed, real frame rate. WoW stores per-bone keys at arbitrary millisecond times
   // with mixed interpolation (linear/hermite/bezier); sampling onto a uniform 30 fps grid and
@@ -474,9 +474,9 @@ void FBXHeaders::createAnimation(WoWModel * l_model, FbxScene *& l_scene, QStrin
     int b = it.first;
     Bone& bone = l_model->bones[b];
 
-    const bool hasRot = bone.rot.uses(cur_anim.Index);
-    const bool hasScale = bone.scale.uses(cur_anim.Index);
-    const bool hasTrans = bone.trans.uses(cur_anim.Index);
+    const bool hasRot = bone.rot.uses(sequenceIndex);
+    const bool hasScale = bone.scale.uses(sequenceIndex);
+    const bool hasTrans = bone.trans.uses(sequenceIndex);
 
     if (!hasRot && !hasScale && !hasTrans) // bone is static for this clip -> keeps its rest transform
       continue;
@@ -501,11 +501,9 @@ void FBXHeaders::createAnimation(WoWModel * l_model, FbxScene *& l_scene, QStrin
     {
       FbxTime time;
       time.SetSecondDouble(ms / 1000.0);
-      // The final sample sits at exactly `length`, which is the loop WRAP point: getValue(length)
-      // returns the START pose, not the end-of-clip pose. Writing that as the last keyframe snaps
-      // the whole skeleton back to the start on the last frame (a severe 1-frame distortion at the
-      // end of every take). Clamp the sampled time just below the wrap so the final key holds the
-      // true end pose; the importing DCC handles the loop back to frame 0 on its own.
+      // Preserve the exporter's final-frame convention: place the key at the exact
+      // duration, sampling the last millisecond before it. Global tracks use their
+      // own period; ordinary tracks do not wrap in getValue().
       uint32 wowT = (uint32)(ms + 0.5);
       if (length > 1 && wowT >= length)
         wowT = length - 1;
@@ -514,7 +512,7 @@ void FBXHeaders::createAnimation(WoWModel * l_model, FbxScene *& l_scene, QStrin
       {
         // Local translation relative to the parent bone = rest pivot offset + animated track,
         // matching Bone::calcMatrix's T(pivot)*T(animTrans)*...*T(-pivot) composition.
-        glm::vec3 v = bone.trans.getValue(cur_anim.Index, wowT);
+        glm::vec3 v = bone.trans.getValueAtGlobalTime(sequenceIndex, wowT, wowT);
         if (bone.parent != -1)
           v += (bone.pivot - l_model->bones[bone.parent].pivot);
         int k;
@@ -528,7 +526,7 @@ void FBXHeaders::createAnimation(WoWModel * l_model, FbxScene *& l_scene, QStrin
         // Convert the WoW local quaternion to Euler degrees in the SAME order FBX nodes use by
         // default (eEulerXYZ) by round-tripping through an FbxAMatrix. This is exact and avoids
         // glm::eulerAngles' order/range ambiguity that produced flipped bones.
-        glm::fquat gq = bone.rot.getValue(cur_anim.Index, wowT);
+        glm::fquat gq = bone.rot.getValueAtGlobalTime(sequenceIndex, wowT, wowT);
         FbxQuaternion fq(gq.x, gq.y, gq.z, gq.w);
         FbxAMatrix rm; rm.SetQ(fq);
         FbxVector4 e = rm.GetR();
@@ -540,7 +538,7 @@ void FBXHeaders::createAnimation(WoWModel * l_model, FbxScene *& l_scene, QStrin
 
       if (hasScale)
       {
-        glm::vec3 v = bone.scale.getValue(cur_anim.Index, wowT);
+        glm::vec3 v = bone.scale.getValueAtGlobalTime(sequenceIndex, wowT, wowT);
         int k;
         k = sx->KeyAdd(time); sx->KeySetValue(k, v.x); sx->KeySetInterpolation(k, FbxAnimCurveDef::eInterpolationLinear);
         k = sy->KeyAdd(time); sy->KeySetValue(k, v.y); sy->KeySetInterpolation(k, FbxAnimCurveDef::eInterpolationLinear);
