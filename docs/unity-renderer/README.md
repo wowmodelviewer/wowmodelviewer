@@ -27,6 +27,26 @@ Concretely:
   again. Nothing ships the player yet -- neither the installer nor the CMake install rules
   include it -- so it is built locally (see "Locating the player").
 
+## Equipment on exclusive NPC models (protocol 11)
+
+An exclusive NPC remains an ordinary `loadWoWModel` (`character: false`). Its equipment travels
+in `characterScene` with `attachmentsOnly: true` and the matching `load` serial. Unity queues
+this scene during the ordinary load, or updates the equipment on that same completed load.
+It does not apply racial body textures, merged geometry, fist poses or mounts to this model.
+The NPC's existing appearance and animation selection stay intact.
+
+Equipment uses the host's resolved attachment bone and position, with the position converted
+relative to that bone's pivot. Missing or invalid bones/positions are reported in the scene
+answer's `missing` list; any previous part at that key is removed, without a root fallback.
+Players older than protocol 11 retain their ordinary NPC rendering but receive no NPC equipment
+scenes. Racial character and mounted-character scenes retain their existing route.
+
+The runtime lifecycle suite (`-wmvLifecycleTest`) checks both hands, replacement, removal,
+invalid points, bone following and preservation of the body. The hidden host integration suite
+also accepts `npc-equip:<slot>=<item id>` in `WMV_IPCTEST_SEQUENCE`, for example
+`npc-equip:10=213160;npc-equip:10=0` with `-mo creature/tyrande3/tyrande3.m2 -unityipctest`.
+It checks the scene acknowledgement, live model count and unchanged body texture bindings.
+
 ## Lighting
 
 The viewport lights models with a **fixed preview rig in the renderer's own shader**, not with the
@@ -1188,7 +1208,7 @@ to WMV's own log). The player is built locally from `Tools/UnityRendererProject/
 repository contains **no** Unity build output, and nothing in the installer or the CMake
 install rules ships one yet.
 
-## IPC (implemented; protocol 10)
+## IPC (implemented; protocol 11)
 
 **WMV is the server.** `UnityRendererHost` starts a TCP listener bound to `127.0.0.1` on an
 ephemeral port *before* launching the player and passes the port on the player's command
@@ -1204,7 +1224,7 @@ application uses). Player side: `Tools/UnityRendererProject/Assets/Scripts/WmvIp
 **Player -> WMV**
 
 ```json
-{ "type": "unityReady", "protocolVersion": 10 }
+{ "type": "unityReady", "protocolVersion": 11 }
 { "type": "getAsset", "requestId": "abc123", "path": "creature/chicken/chicken.m2" }
 { "type": "getAssetByFileDataID", "requestId": "abc124", "fileDataID": 123456 }
 { "type": "getModelTextures", "requestId": "abc125", "fileDataID": 123200 }
@@ -1492,6 +1512,9 @@ Semantics:
 - An older player gets the bytes base64-encoded inside the JSON line (`"encoding": "base64"`, the second example),
   with `sha1`, the hex SHA-1 of the raw bytes, computed by the host for its log; no player checks it since
   protocol 9. A cached answer carries none.
+- **NPC equipment (protocol 11).** An NPC on its own model gets its weapons in a `characterScene` with
+  `"attachmentsOnly": true` and its load's `load` serial; see "Equipment on exclusive NPC models" above. An older
+  player gets no such scene.
 - Nothing is written to disk on either side; this is runtime access, not an export workflow.
 
 WMV logs every step with the `[unityipc]` prefix: listening port, player connected,

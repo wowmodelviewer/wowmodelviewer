@@ -63,7 +63,7 @@ public:
   };
   // mount: the mount the character rides, described as the scene's "mount"; null for none.
   static QJsonObject build(WoWModel * character, const ImageRef & imageRef, Summary & summary,
-                           const Mount * mount = nullptr);
+                           const Mount * mount = nullptr, bool attachmentsOnly = false);
 
   // The scene's "mount" on its own: build() adds exactly this. Also what the host logs about a mount a player
   // older than protocol 5 is not sent.
