@@ -929,6 +929,61 @@ What the PNG cannot hold yet:
   transparent background gets alpha a² rather than a. Opaque surfaces are exact (alpha 255) and the empty
   background is exact (alpha 0, colour 0).
 
+### Keeping the view (protocol 8)
+
+A character can be switched to its model of the other generation where the client ships both (Classic Beta's
+classic models beside the High Definition ones; the character panel's **Model: Classic | HD**). The host rebuilds
+the character on the other model and sends its `loadWoWModel` with `"keepView": true`; the player then puts it on
+screen without fitting the view to it: the pivot, the angle and the zoom stay where the user left them, and only
+what follows from the model's size takes the new bounds (the framing distance, the zoom range -- the zoom is kept
+inside it -- and the clip planes; `WmvOrbitCamera.KeepViewFor`). A keep-view character goes on screen already
+playing the animation the host restored: when that animation's keys are in a `.anim`, the file is fetched while the
+character is dressed and its scene waits for it (or for its failure), so the model never shows its idle pose first.
+`runtimeState` counts such loads in `keptViews` (and not in `viewFramings`). A keep-view load that follows a framing
+load not yet on screen (superseded while it was dressed, or failed) frames as any load does: what is on screen then
+is not the character it rebuilds. While a player older than protocol 8 is connected the host refuses the switch and
+says why; a player not ready yet gets the rebuilt character framed when it connects. The `.anim` the scene waits for is
+decided when the scene is there, from the selection the host pushed before it, not when the body was built: a load
+the asset cache answers is built before the host has said which animation it restored.
+
+### The asset cache (protocol 9)
+
+The player keeps the asset files of its last three model loads -- the character on screen and the models it was
+switched from, with the item models, textures and animation files they used -- and answers a request for one of them
+itself instead of asking the host (`WmvAssetCache` in `WmvIpcClient.cs`). After a character on a variant pair is on
+screen, the host sends `prefetchAssets` with its other model generation, and the player fetches that model, its first
+skin profile and its skeleton files while nothing waits for them. So a switch, the first one included, asks the host
+for none of the tens of megabytes of model data it needs, and the host's busy main thread (the switch itself) no
+longer holds the player back.
+
+- Only files of the client's own storage are kept: the host marks them `"cacheable": true` in `assetResponse`; a
+  custom-folder override is not marked, and is fetched every time.
+- They are kept under the host's client epoch, stated on every `loadWoWModel` and `prefetchAssets` as `assetEpoch`
+  (it changes when another client is loaded: the same FileDataID is another file there). A new epoch empties the
+  cache, and an answer to a request asked under an older epoch is not kept. A host that states no epoch (before
+  protocol 9) gets nothing kept.
+- Every model load starts a generation; a file is kept while the load that used it is the current one or one of the
+  two before it (so A -> B -> A finds everything A used), and a prefetched file counts as used by the current load.
+  A world model's files are never kept.
+- At most 256 MB is kept (about four times the measured working set of a dressed character switched back and forth,
+  67 MB). Item, mount and texture browsing on one character starts no new load, so past the budget the least recently
+  used files go, earlier loads' first -- never the model on screen, nor the prefetched model and its skin and
+  skeleton files.
+- Only a character's model file is answered from the cache. Any other model is asked of the host as before, so its
+  skin and geoset pushes, which the host sends after `loadWoWModel`, still arrive before it does.
+- A request for a file already being fetched joins that request and is answered with it (a load asks for its model by
+  path but names its FileDataID to the cache), so a switch made while its prefetch is still arriving waits for that
+  transfer instead of starting another. A failed prefetch is asked again for the load that joined it.
+- An answer from the cache never arrives inside the request call. It goes on the player's own queue, which Update
+  empties after the host's messages of that frame: at least one answer a frame, then more while 8 ms last, so a load
+  the cache answers whole spreads its parsing over frames instead of holding one. The base64 of every host answer is
+  decoded on the socket's reader thread, no longer in the frame the answer lands in; a payload that does not decode
+  fails that answer, not the connection.
+- The keep-view `.anim` gate (see "Keeping the view") holds only the load it was set for, until that load is on
+  screen; later scenes for the same character never wait on it.
+- `runtimeState` reports `assetCacheEntries`, `assetCacheBytes`, `assetCacheHits`, `assetCacheJoins`,
+  `assetCacheEvictions` and `assetEpoch`.
+
 ### Background (protocol 7)
 
 **View > Swap Background Color...** sets the colour behind the model in the Models viewer, in a small window of its
@@ -1133,7 +1188,7 @@ to WMV's own log). The player is built locally from `Tools/UnityRendererProject/
 repository contains **no** Unity build output, and nothing in the installer or the CMake
 install rules ships one yet.
 
-## IPC (implemented; protocol 7)
+## IPC (implemented; protocol 9)
 
 **WMV is the server.** `UnityRendererHost` starts a TCP listener bound to `127.0.0.1` on an
 ephemeral port *before* launching the player and passes the port on the player's command
@@ -1148,7 +1203,7 @@ application uses). Player side: `Tools/UnityRendererProject/Assets/Scripts/WmvIp
 **Player -> WMV**
 
 ```json
-{ "type": "unityReady", "protocolVersion": 7 }
+{ "type": "unityReady", "protocolVersion": 9 }
 { "type": "getAsset", "requestId": "abc123", "path": "creature/chicken/chicken.m2" }
 { "type": "getAssetByFileDataID", "requestId": "abc124", "fileDataID": 123456 }
 { "type": "getModelTextures", "requestId": "abc125", "fileDataID": 123200 }
@@ -1163,7 +1218,8 @@ application uses). Player side: `Tools/UnityRendererProject/Assets/Scripts/WmvIp
   "mapObjectFileDataID": 115058, "loading": false, "mountFileDataID": 0, "mountKey": "", "liveMounts": 0,
   "mountsBuilt": 0, "mountSeat": -1, "mountSeatBone": -1, "modelSequence": -1, "mountSequence": -1,
   "mountEmitters": 0, "mountRibbons": 0, "mountParticles": 0, "bodyRebinds": 0, "viewFramings": 1,
-  "backgroundR": 25, "backgroundG": 25, "backgroundB": 30 }
+  "keptViews": 0, "backgroundR": 25, "backgroundG": 25, "backgroundB": 30, "assetCacheEntries": 0,
+  "assetCacheBytes": 0, "assetCacheHits": 0, "assetCacheJoins": 0, "assetCacheEvictions": 0, "assetEpoch": 1 }
 { "type": "characterSceneApplied", "fileDataID": 1011653, "revision": 4, "load": 12, "status": "applied",
   "reason": "", "merged": 3, "attachments": 4, "missing": [], "ms": 212,
   "mountKey": "M3", "mountStatus": "applied", "mountReason": "" }
@@ -1206,7 +1262,8 @@ from it: 0 at the mount's origin, 1 under that bone, 2 on the mount's root at th
 `bodyRebinds` (how often a character's scenes bound its body textures again) and `viewFramings` (how
 often the player fitted the view to what is on screen -- once for each model and world model put up,
 once for each change of the mount under a character, and never for anything else, so a test can hold a
-step to "the camera did not move"). The mount fields of `characterSceneApplied` (protocol 5) are described under
+step to "the camera did not move"), and `keptViews` (protocol 8: the models put on screen keeping the view, see
+"Keeping the view"). The mount fields of `characterSceneApplied` (protocol 5) are described under
 "Mounted characters: the host side" above. The player answers in
 message order on its main thread, so a question sent after an answer about a build sees that build
 adopted. Only the headless self-test asks it (see the lifecycle sequence below), and only a player that
@@ -1287,7 +1344,11 @@ Semantics:
 
 - `unityReady` is answered by a `loadWoWModel` for whatever model is loaded (and every later
   model load pushes a new one). `client` is `"active"` -- the player never chooses a client;
-  WMV's active client/profile is the only data source.
+  WMV's active client/profile is the only data source. `keepView` (protocol 8, sent only when true): the
+  character replaces the one on screen without moving the view (see "Keeping the view"). `assetEpoch`
+  (protocol 9, always stated): the client epoch the player keeps asset files under (see "The asset cache").
+- `prefetchAssets { assetEpoch, fileDataIDs }` (protocol 9): models the player is likely to load next, fetched into
+  its asset cache with their skin and skeleton files.
 - `kind` says what `loadWoWModel` names: `"m2"` (a model; also what an absent field means) or
   `"wmo"` (a world-model ROOT, by FileDataID). A WMO load goes only to a player that announced
   protocol 4 or later; an older player gets the out-of-date notice instead, and ignores the field
@@ -1413,7 +1474,8 @@ Semantics:
   client (MPQ, name lookup only)"`. Other errors: `"not found"`, `"no game client loaded"`,
   `"game client is still loading"`, `"could not open file in the active client"`,
   `"short read ... file may be encrypted or damaged"`.
-- `sha1` is the hex SHA-1 of the raw bytes; the Unity client recomputes it after decoding.
+- `sha1` is the hex SHA-1 of the raw bytes, computed by the host for its log; the player does not check it (since
+  protocol 9). A cached answer carries none.
 - **V1 carries the bytes as base64 inside the JSON line.** Simple and debuggable (~33 %
   overhead). A binary frame -- the same JSON header followed by a length-prefixed payload --
   can replace the `encoding`/`data` pair later without touching the request side.

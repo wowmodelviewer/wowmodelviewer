@@ -1,7 +1,7 @@
 /*
  * UnityIpcServer.h
  *
- * Localhost IPC server for the embedded Unity renderer (protocol v6). WMV is the SERVER:
+ * Localhost IPC server for the embedded Unity renderer (protocol v9). WMV is the SERVER:
  * UnityRendererHost starts this listener BEFORE launching the player and passes the port on
  * the player's command line (-wmvPort <n>); the player connects back, announces itself with
  * unityReady and then asks WMV for the raw WoW assets/metadata it renders from. This is the
@@ -14,8 +14,15 @@
  * V1 -- simple and debuggable; a binary frame (JSON header + length-prefixed payload) can
  * replace it later without changing the request side.
  *
+ * ASSET CACHE (protocol 9). The player keeps the asset files of its last three model loads (and prefetched ones) and
+ * answers repeat requests itself: every loadWoWModel states "assetEpoch" (UnityAssetAccess::clientEpoch, changed by
+ * ResetClientState), an assetResponse for a file of the client's own storage says "cacheable":true, and
+ * prefetchAssets { assetEpoch, fileDataIDs } names the models it is likely to load next -- sent once per load, after a
+ * paired character's scene is applied, with its other model generation (ModelViewer::HintVariantPartner). See
+ * docs/unity-renderer/README.md, "The asset cache".
+ *
  *   player -> WMV
- *     { "type":"unityReady", "protocolVersion":6 }
+ *     { "type":"unityReady", "protocolVersion":9 }
  *     { "type":"getAsset",             "requestId":"abc123", "path":"creature/chicken/chicken.m2" }
  *     { "type":"getAssetByFileDataID", "requestId":"abc124", "fileDataID":123456 }
  *     { "type":"getModelTextures",     "requestId":"abc125", "fileDataID":123200 }
@@ -245,7 +252,7 @@
 class UnityIpcServer : public wxEvtHandler
 {
 public:
-  static const int PROTOCOL_VERSION = 7;
+  static const int PROTOCOL_VERSION = 9;
 
   UnityIpcServer();
   ~UnityIpcServer();
@@ -274,6 +281,11 @@ public:
   bool playerTakesScreenshots() const { return m_client && m_unityReady && m_playerProtocol >= 6; }
   // The player clears the Models viewport to the colour the host sends: it takes viewportBackground (protocol 7).
   bool playerPaintsBackground() const { return m_client && m_unityReady && m_playerProtocol >= 7; }
+  // Protocol 8: loadWoWModel can ask the player to keep its view (a character rebuilt on its other model generation).
+  bool playerKeepsView() const { return m_client && m_unityReady && m_playerProtocol >= 8; }
+  // Protocol 9: the player keeps the asset files of its last two loads (and prefetched ones) under the client epoch
+  // loadWoWModel states, and takes prefetchAssets.
+  bool playerCachesAssets() const { return m_client && m_unityReady && m_playerProtocol >= 9; }
 
   // Runtime command: tell the player which model is active. Either path or fileDataID may be
   // empty/0. Queued if the player is connected; dropped (logged) otherwise.
@@ -282,8 +294,13 @@ public:
   // mapObjectLoaded echo.
   // kind: "m2" (a model) or "wmo" (a world model ROOT, fileDataID required; see WORLD MODELS above).
   // Callers send "wmo" only when playerDrawsMapObjects().
+  // keepView (protocol 8): the model replaces the one on screen without moving the view -- a character rebuilt on
+  // its other model generation. Sent only when true; callers set it only when playerKeepsView().
+  // Every loadWoWModel also states "assetEpoch" (protocol 9, UnityAssetAccess::clientEpoch()): the player keeps asset
+  // files under it and empties its cache when it changes; an older player skips the name.
   void sendLoadWoWModel(const QString & path, int fileDataID, const QString & client = QStringLiteral("active"),
-                        bool character = false, int load = 0, const QString & kind = QStringLiteral("m2"));
+                        bool character = false, int load = 0, const QString & kind = QStringLiteral("m2"),
+                        bool keepView = false);
 
   // Runtime command: the resolved state of the character on display (UnityCharacterScene::build).
   // False when the player cannot dress characters or nothing was sent.
@@ -436,6 +453,14 @@ public:
     int bodyRebinds = -1;          // times the character on screen's body textures were bound again by its scenes
     int viewFramings = -1;         // times the player fitted the view to what is on screen (a model, a world model or
                                    // a mount change); an appearance change on a riding character must not raise it
+    int keptViews = -1;            // models put on screen keeping the view (protocol 8 keepView)
+    // Protocol 9: the player's asset cache.
+    int assetCacheEntries = -1;    // files kept
+    int assetCacheBytes = -1;      // their size in bytes
+    int assetCacheHits = -1;       // requests answered from the files kept, since the player started
+    int assetCacheJoins = -1;      // requests that joined one already out
+    int assetCacheEvictions = -1;  // files dropped for the cache's byte budget
+    int assetEpoch = -1;           // the client epoch the files are kept under
     int backgroundR = -1;          // the viewport background the player holds, as displayed (protocol 7)
     int backgroundG = -1;
     int backgroundB = -1;
@@ -455,6 +480,11 @@ public:
   // Runtime command: the Models viewport's background, as the sRGB bytes it is to display as (VIEWPORT BACKGROUND
   // above). False (nothing sent) when the player is not connected and ready, or speaks a protocol older than 7.
   bool sendViewportBackground(int r, int g, int b);
+
+  // Runtime command: the models the player is likely to load next (the other model generation of the character on
+  // screen), to fetch into its asset cache while nothing waits for them (protocol 9 prefetchAssets). False (nothing
+  // sent) when the player is not connected and ready, or speaks a protocol older than 9.
+  bool sendPrefetchAssets(const std::vector<int> & fileDataIDs);
   // The player's answer to captureScreenshot. A number the player did not send reads -1.
   struct ScreenshotResult
   {

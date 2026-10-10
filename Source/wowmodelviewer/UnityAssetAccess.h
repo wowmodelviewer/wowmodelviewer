@@ -31,7 +31,15 @@ public:
     int fileDataID = 0;   // FileDataID (when known / applicable)
     QString provider;     // "CASC" / "MPQ" / "Unknown" -- the active client's storage backend
     QByteArray data;      // raw file bytes when ok
+    // The file came from the client's own storage (not a custom-folder override): its bytes are the same for as long
+    // as this client is loaded, so the player may keep them (protocol 9 asset cache, under clientEpoch()).
+    bool fromClientStorage = false;
   };
+
+  // A number that changes whenever the loaded client is replaced (ModelViewer::ResetClientState): the same FileDataID
+  // is another file in another client, so the player's asset cache keeps files under it (protocol 9).
+  static int clientEpoch();
+  static void noteClientReplaced();
 
   // Normalize a WoW internal path the way the file providers expect it: lower-case,
   // forward slashes, no leading "./" or "/", trimmed.

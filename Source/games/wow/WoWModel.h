@@ -101,6 +101,10 @@ public:
   // customization options. Returns false if the race is unknown or does not use this model.
   bool setRaceSex(int raceID, int sexID);
 
+  // Which generation of character model this is, read from the model (see CharacterModelVariant); Unknown for anything
+  // that is not a character of a known race.
+  CharacterModelVariant modelGeneration() const;
+
 private:
 
 

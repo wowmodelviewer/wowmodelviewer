@@ -12,6 +12,9 @@
 
 std::map<std::pair<int, int>, RaceInfos> RaceInfos::RACES;
 std::map<int, RaceInfos> RaceInfos::RACES_BY_FILEID;
+std::map<int, RaceInfos::VariantPair> RaceInfos::VARIANT_PAIRS;
+std::map<int, int> RaceInfos::VARIANT_PAIR_BY_CHRMODEL;
+std::map<int, RaceInfos> RaceInfos::ALTERNATES_BY_FILEID;
 
 namespace
 {
@@ -23,11 +26,19 @@ namespace
   }
 }
 
+void RaceInfos::clear()
+{
+  RACES.clear();
+  RACES_BY_FILEID.clear();
+  VARIANT_PAIRS.clear();
+  VARIANT_PAIR_BY_CHRMODEL.clear();
+  ALTERNATES_BY_FILEID.clear();
+}
+
 void RaceInfos::init()
 {
   // Loading a client again describes the races of that client only.
-  RACES.clear();
-  RACES_BY_FILEID.clear();
+  clear();
 
   auto races =
     GAMEDATABASE.sqlQuery("SELECT ChrRaces.ClientPrefix, ChrRaces.ID, ChrRaces.Flags, ChrModel.Sex, CreatureModelData.FileDataID, ChrModel.CharComponentTextureLayoutID, "
@@ -131,6 +142,8 @@ void RaceInfos::init()
       addChrModelID(byFile->second, chrModelID);
   }
 
+  initVariants();
+
 #if DEBUG_RACEINFOS > 0
   for (const auto & r : RACES)
   {
@@ -150,6 +163,204 @@ void RaceInfos::init()
     LOG_INFO << "---------------------------";
   }
 #endif
+}
+
+void RaceInfos::initVariants()
+{
+  sqlResult pairs = GAMEDATABASE.sqlQuery(
+    "SELECT ChrModelAltVariant.ID, ChrModelAltVariant.PrimaryChrModelID, ChrModelAltVariant.AlternateChrModelID, ChrModel.ID, ChrModel.Sex, "
+    "ChrModel.CharComponentTextureLayoutID, CreatureModelData.FileDataID FROM ChrModelAltVariant "
+    "LEFT JOIN ChrModel ON ChrModel.ID = ChrModelAltVariant.AlternateChrModelID "
+    "LEFT JOIN CreatureDisplayInfo ON CreatureDisplayInfo.ID = ChrModel.DisplayID "
+    "LEFT JOIN CreatureModelData ON CreatureModelData.ID = CreatureDisplayInfo.ModelID ORDER BY ChrModelAltVariant.ID");
+  if (!pairs.valid || pairs.values.empty())
+  {
+    LOG_INFO << "[variants] none in this client";
+    return;
+  }
+
+  // Every row is checked against what it names before it is used: the columns of these tables were identified from
+  // one client's data, and a client of another layout would be read at the same positions.
+  int droppedPairs = 0;
+  for (const auto & row : pairs.values)
+  {
+    VariantPair pair;
+    pair.id = row[0].toInt();
+    pair.primaryChrModelID = row[1].toInt();
+    pair.alternateChrModelID = row[2].toInt();
+    pair.alternateFileID = row[6].toInt();
+    const RaceInfos * primary = nullptr;
+    int primaryRaces = 0;
+    for (const auto & race : RACES)
+      if (!race.second.ChrModelID.empty() && race.second.ChrModelID[0] == pair.primaryChrModelID)
+      {
+        if (!primary)
+          primary = &race.second;
+        primaryRaces++;
+      }
+    QString why;
+    if (!primary)
+      why = "its primary ChrModel is no race's model";
+    else if (primaryRaces > 1)
+      why = "its primary ChrModel is the model of more than one race";   // a switch could not keep the race
+    else if (row[3].toInt() != pair.alternateChrModelID)
+      why = "its alternate ChrModel is not in ChrModel";
+    else if (row[4].toInt() != primary->sexID)
+      why = "its alternate ChrModel is of another sex";
+    else if (pair.alternateFileID <= 0)
+      why = "its alternate ChrModel has no model file";
+    else if (RACES_BY_FILEID.count(pair.alternateFileID) != 0)
+      why = "its alternate model is a playable model";
+    else if (ALTERNATES_BY_FILEID.count(pair.alternateFileID) != 0)
+      why = "its alternate model is another pair's";
+    else if (VARIANT_PAIR_BY_CHRMODEL.count(pair.primaryChrModelID) != 0 || VARIANT_PAIR_BY_CHRMODEL.count(pair.alternateChrModelID) != 0)
+      why = "one of its ChrModels is already paired";
+    if (!why.isEmpty())
+    {
+      LOG_WARNING << "[variants] pair" << pair.id << "(" << pair.primaryChrModelID << "->" << pair.alternateChrModelID << ") left out:" << why;
+      droppedPairs++;
+      continue;
+    }
+    pair.raceID = primary->raceID;
+    pair.sexID = primary->sexID;
+    pair.primaryFileID = primary->modelFileID;
+
+    // The alternate's row is the race's, on the alternate's ChrModel, model file and texture layout. A file the client
+    // does not list keeps its pair: the character panel then says it is not in this client.
+    RaceInfos alternate = *primary;
+    alternate.ChrModelID = { pair.alternateChrModelID };
+    alternate.modelFileID = pair.alternateFileID;
+    alternate.textureLayoutID = row[5].toInt();
+    GameFile * file = GAMEDIRECTORY.getFile(pair.alternateFileID);
+    alternate.isHD = file && file->fullname().contains("_hd");
+    ALTERNATES_BY_FILEID[pair.alternateFileID] = alternate;
+
+    VARIANT_PAIRS[pair.id] = pair;
+    VARIANT_PAIR_BY_CHRMODEL[pair.primaryChrModelID] = pair.id;
+    VARIANT_PAIR_BY_CHRMODEL[pair.alternateChrModelID] = pair.id;
+  }
+
+  // Option pairs: each an option of the pair's primary model and one of its alternate model, one to one.
+  struct OptionRow { int pairID; unsigned int primary; unsigned int alternate; };
+  std::map<int, OptionRow> optionRows;
+  int droppedOptions = 0;
+  sqlResult options = GAMEDATABASE.sqlQuery(
+    "SELECT o.ID, o.ChrModelAltVariantID, o.PrimaryOptionID, o.AlternateOptionID, po.ChrModelID, ao.ChrModelID "
+    "FROM ChrModelAltVariantOption o LEFT JOIN ChrCustomizationOption po ON po.ID = o.PrimaryOptionID "
+    "LEFT JOIN ChrCustomizationOption ao ON ao.ID = o.AlternateOptionID ORDER BY o.ID");
+  for (size_t i = 0; options.valid && i < options.values.size(); i++)
+  {
+    const auto & row = options.values[i];
+    const auto pair = VARIANT_PAIRS.find(row[1].toInt());
+    const unsigned int primary = row[2].toUInt(), alternate = row[3].toUInt();
+    if (pair == VARIANT_PAIRS.end() || row[4].toInt() != pair->second.primaryChrModelID || row[5].toInt() != pair->second.alternateChrModelID ||
+        pair->second.optionToAlternate.count(primary) != 0 || pair->second.optionToPrimary.count(alternate) != 0)
+    {
+      droppedOptions++;
+      continue;
+    }
+    pair->second.optionToAlternate[primary] = alternate;
+    pair->second.optionToPrimary[alternate] = primary;
+    optionRows[row[0].toInt()] = OptionRow{ pair->first, primary, alternate };
+  }
+
+  // Choice pairs: each a choice of its option pair's primary option and one of its alternate option, one to one.
+  int choicePairs = 0, droppedChoices = 0;
+  sqlResult choices = GAMEDATABASE.sqlQuery(
+    "SELECT c.ChrModelAltVariantOptionID, c.PrimaryChoiceID, c.AlternateChoiceID, pc.ChrCustomizationOptionID, ac.ChrCustomizationOptionID "
+    "FROM ChrModelAltVariantChoice c LEFT JOIN ChrCustomizationChoice pc ON pc.ID = c.PrimaryChoiceID "
+    "LEFT JOIN ChrCustomizationChoice ac ON ac.ID = c.AlternateChoiceID ORDER BY c.ID");
+  for (size_t i = 0; choices.valid && i < choices.values.size(); i++)
+  {
+    const auto & row = choices.values[i];
+    const auto option = optionRows.find(row[0].toInt());
+    const unsigned int primary = row[1].toUInt(), alternate = row[2].toUInt();
+    if (option == optionRows.end() || row[3].toUInt() != option->second.primary || row[4].toUInt() != option->second.alternate)
+    {
+      droppedChoices++;
+      continue;
+    }
+    VariantPair & pair = VARIANT_PAIRS[option->second.pairID];
+    if (pair.choiceToAlternate.count(primary) != 0 || pair.choiceToPrimary.count(alternate) != 0)
+    {
+      droppedChoices++;
+      continue;
+    }
+    pair.choiceToAlternate[primary] = alternate;
+    pair.choiceToPrimary[alternate] = primary;
+    choicePairs++;
+  }
+  LOG_INFO << "[variants]" << VARIANT_PAIRS.size() << "pairs," << optionRows.size() << "option pairs," << choicePairs
+           << "choice pairs; rows left out:" << droppedPairs << "pairs," << droppedOptions << "options," << droppedChoices << "choices";
+}
+
+bool RaceInfos::getVariantPair(int chrModelID, VariantPair & out)
+{
+  const auto id = VARIANT_PAIR_BY_CHRMODEL.find(chrModelID);
+  if (id == VARIANT_PAIR_BY_CHRMODEL.end())
+    return false;
+  out = VARIANT_PAIRS[id->second];
+  return true;
+}
+
+bool RaceInfos::getRaceInfosForAlternateFileID(int fileid, RaceInfos & out)
+{
+  const auto it = ALTERNATES_BY_FILEID.find(fileid);
+  if (it == ALTERNATES_BY_FILEID.end())
+    return false;
+  out = it->second;
+  return true;
+}
+
+bool RaceInfos::getVariantPartner(const RaceInfos & current, RaceInfos & partner)
+{
+  VariantPair pair;
+  if (current.ChrModelID.empty() || !getVariantPair(current.ChrModelID[0], pair))
+    return false;
+  if (pair.isPrimary(current.ChrModelID[0]))
+    return getRaceInfosForAlternateFileID(pair.alternateFileID, partner);
+  return getRaceInfosForRaceSex(pair.raceID, pair.sexID, partner) && !partner.ChrModelID.empty() &&
+         partner.ChrModelID[0] == pair.primaryChrModelID;
+}
+
+RaceInfos::Translation RaceInfos::translateSelection(const VariantPair & pair, const std::map<unsigned int, unsigned int> & from, bool toAlternate)
+{
+  const auto & options = toAlternate ? pair.optionToAlternate : pair.optionToPrimary;
+  const auto & choices = toAlternate ? pair.choiceToAlternate : pair.choiceToPrimary;
+  Translation t;
+  for (const auto & oc : from)
+  {
+    const auto option = options.find(oc.first);
+    if (option == options.end())
+    {
+      t.noCounterpart.push_back(oc.first);
+      continue;
+    }
+    const auto choice = choices.find(oc.second);
+    if (choice == choices.end())
+    {
+      t.notCovered.push_back(oc.first);
+      continue;
+    }
+    t.selection[option->second] = choice->second;
+    t.carried.emplace_back(oc.first, option->second);
+  }
+  return t;
+}
+
+int RaceInfos::getCreatureDisplayFileID(int fileDataId, int extraId)
+{
+  const int shown = getHDModelForFileID(fileDataId);
+  RaceInfos alternate;
+  VariantPair pair;
+  if (extraId <= 0 || !getRaceInfosForAlternateFileID(shown, alternate) || !getVariantPair(alternate.ChrModelID[0], pair) ||
+      !GAMEDIRECTORY.getFile(pair.primaryFileID))
+    return shown;
+  sqlResult owned = GAMEDATABASE.sqlQuery(QString("SELECT COUNT(*) FROM CreatureDisplayInfoOption JOIN ChrCustomizationOption "
+                                                  "ON ChrCustomizationOption.ID = CreatureDisplayInfoOption.ChrCustomizationOptionID "
+                                                  "WHERE CreatureDisplayInfoOption.CreatureDisplayInfoExtraID = %1 AND "
+                                                  "ChrCustomizationOption.ChrModelID = %2").arg(extraId).arg(pair.primaryChrModelID));
+  return (owned.valid && !owned.values.empty() && owned.values[0][0].toInt() > 0) ? pair.primaryFileID : shown;
 }
 
 int RaceInfos::getHDModelForFileID(int fileid)

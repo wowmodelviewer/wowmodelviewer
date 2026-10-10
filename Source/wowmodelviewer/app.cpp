@@ -5,6 +5,7 @@
 #include <cstdio>
 #include <cstdlib>
 #include <fstream>
+#include <functional>
 
 #include <wx/app.h>
 #include <wx/filename.h>
@@ -63,6 +64,7 @@
 
 #include <QBuffer>
 #include <QDir>
+#include <QRegularExpression>
 #include <QXmlStreamWriter>
 #include "CharDetailsCustomizationChoice.h"
 #include "CharDetailsFrame.h"
@@ -863,6 +865,463 @@ static void checkEquipmentGeosets(ModelViewer * frame, const Check & check, cons
           group(m, CG_SLEEVES) == 1 + bothSleeves.chest.sleeves, QString("sleeves group %1").arg(group(m, CG_SLEEVES)));
 }
 
+// -customizationtest, every client: a character's model of the other generation (RaceInfos::VariantPair), where the
+// client ships one (Classic Beta). Independent expectations per client, read from its DB2 files by a reader apart from
+// this loader: how many pairs, option pairs and choice pairs, and one pair's models; a client without the tables
+// offers no switch. Then, for EVERY pair the client has (no ID named): the primary character with its appearance set
+// away from the defaults, dressed (the display items of the extended display that wears the most slots), sheathed and
+// playing an animation other than Stand, switched to its other model and back:
+//   - the other model is the pair's: its file, ChrModel and texture layout, the generation the client's data gives it
+//     (Classic Beta: every primary High Definition, every alternate Classic), the same race and sex;
+//   - every choice carries through the client's option and choice tables, as read here by SQL; the equipment (a weapon
+//     in hand too), sheathe, the animation (by its animation ID), the viewport background and the panes are kept;
+//   - back on the primary, its whole appearance is exactly as it was; on the other model again, exactly as it was left
+//     there; an edit on one model does not reach the other.
+// And: an NPC on a pair's model gets no switch, and one whose display names an alternate model but stores the
+// primary's choices is shown on the primary, by View NPC and by Load NPC / Model by ID alike; a character loaded afresh
+// after a switch -- by a full load, or by Load Character on the file on screen from a file without race and sex -- has
+// no memory of it; a character saved on its other model loads back on it; and one saved on the alternate file with
+// the primary's choices (as builds before the pairs saved them) loads with them translated.
+template <class Check, class Skip>
+static void checkModelVariants(ModelViewer * frame, const Check & check, const Skip & skip)
+{
+  const auto settle = []() {
+    for (int i = 0; i < 20; i++)
+      wxTheApp->Yield(true);
+  };
+  const QString product = GAMEDIRECTORY.clientProfile().product;
+  struct VariantExpect
+  {
+    const char * product;
+    size_t pairs, optionPairs, choicePairs;
+    int primary, alternate, alternateFile, alternateLayout;
+    CharacterModelVariant primaryGeneration, alternateGeneration;   // of every pair
+  };
+  static const VariantExpect expectations[] = {
+    { "wow", 0, 0, 0, 0, 0, 0, 0, CharacterModelVariant::Unknown, CharacterModelVariant::Unknown },
+    { "wow_classic", 0, 0, 0, 0, 0, 0, 0, CharacterModelVariant::Unknown, CharacterModelVariant::Unknown },
+    { "wow_classic_era", 0, 0, 0, 0, 0, 0, 0, CharacterModelVariant::Unknown, CharacterModelVariant::Unknown },
+    { "wow_classic_beta", 18, 93, 1136, 1, 257, 119940, 203, CharacterModelVariant::HD, CharacterModelVariant::Classic },
+  };
+  const VariantExpect * expect = nullptr;
+  for (const auto & e : expectations)
+    if (product == e.product)
+      expect = &e;
+
+  std::vector<RaceInfos::VariantPair> pairs;
+  size_t optionPairs = 0, choicePairs = 0;
+  sqlResult rows = GAMEDATABASE.sqlQuery("SELECT PrimaryChrModelID FROM ChrModelAltVariant ORDER BY ID");
+  for (size_t i = 0; rows.valid && i < rows.values.size(); i++)
+  {
+    RaceInfos::VariantPair pair;
+    if (RaceInfos::getVariantPair(rows.values[i][0].toInt(), pair))
+    {
+      pairs.push_back(pair);
+      optionPairs += pair.optionToAlternate.size();
+      choicePairs += pair.choiceToAlternate.size();
+    }
+  }
+  if (!expect)
+    skip("model variants: the client's pairs", QString("no expectation for %1").arg(product));
+  else
+  {
+    check(QString("model variants: %1 has %2 pairs, %3 option pairs and %4 choice pairs").arg(product).arg(expect->pairs)
+            .arg(expect->optionPairs).arg(expect->choicePairs),
+          RaceInfos::variantPairCount() == expect->pairs && optionPairs == expect->optionPairs && choicePairs == expect->choicePairs,
+          QString("%1 pairs, %2 option pairs, %3 choice pairs").arg(RaceInfos::variantPairCount()).arg(optionPairs).arg(choicePairs));
+    if (expect->pairs > 0)
+    {
+      RaceInfos::VariantPair pair;
+      RaceInfos alternate;
+      const bool ok = RaceInfos::getVariantPair(expect->primary, pair) && pair.alternateChrModelID == expect->alternate &&
+                      pair.alternateFileID == expect->alternateFile &&
+                      RaceInfos::getRaceInfosForAlternateFileID(expect->alternateFile, alternate) &&
+                      alternate.textureLayoutID == expect->alternateLayout && alternate.ChrModelID.size() == 1 &&
+                      alternate.ChrModelID[0] == expect->alternate && alternate.raceID == pair.raceID && alternate.sexID == pair.sexID;
+      check(QString("model variants: ChrModel %1's other model is ChrModel %2, FileDataID %3, texture layout %4")
+              .arg(expect->primary).arg(expect->alternate).arg(expect->alternateFile).arg(expect->alternateLayout),
+            ok, QString("alternate %1 file %2 layout %3").arg(pair.alternateChrModelID).arg(pair.alternateFileID).arg(alternate.textureLayoutID));
+    }
+  }
+
+  if (pairs.empty())
+  {
+    // No switch is offered: a character of the first race on the menu has no Model selector.
+    const auto menu = RaceInfos::getRaceMenu();
+    for (const auto & e : menu)
+    {
+      GameFile * file = e.maleFileID > 0 ? GAMEDIRECTORY.getFile(e.maleFileID) : nullptr;
+      if (!file)
+        continue;
+      frame->LoadModel(file, e.raceID, 0);
+      settle();
+      const ModelViewer::CharacterVariantState state = frame->characterVariantState();
+      check(QString("model variants: none in this client, and a character (race %1) gets no Model selector").arg(e.raceID),
+            !state.shown, QString("shown %1").arg(state.shown ? 1 : 0));
+      break;
+    }
+    return;
+  }
+
+  // The display items of the extended display that wears the most equipment slots, slots as ShowCreatureDisplay
+  // maps them; put on every pair's character by display.
+  static const std::map<int, CharSlots> npcItemSlots = { { 0, CS_HEAD }, { 1, CS_SHOULDER }, { 2, CS_SHIRT }, { 3, CS_CHEST },
+    { 4, CS_BELT }, { 5, CS_PANTS }, { 6, CS_BOOTS }, { 7, CS_BRACERS }, { 8, CS_GLOVES }, { 9, CS_TABARD }, { 10, CS_CAPE } };
+  std::vector<std::pair<CharSlots, int> > equipment;
+  sqlResult dressed = GAMEDATABASE.sqlQuery("SELECT NpcModelID FROM NpcModelItemSlotDisplayInfo WHERE ItemSlot <= 10 GROUP BY NpcModelID "
+                                            "ORDER BY COUNT(DISTINCT ItemSlot) DESC, NpcModelID LIMIT 1");
+  if (dressed.valid && !dressed.values.empty())
+  {
+    sqlResult items = GAMEDATABASE.sqlQuery(QString("SELECT ItemDisplayInfoID, ItemSlot FROM NpcModelItemSlotDisplayInfo WHERE NpcModelID = %1 "
+                                                    "ORDER BY ID").arg(dressed.values[0][0]));
+    for (size_t i = 0; items.valid && i < items.values.size(); i++)
+    {
+      const auto slot = npcItemSlots.find(items.values[i][1].toInt());
+      if (slot != npcItemSlots.end())
+        equipment.emplace_back(slot->second, items.values[i][0].toInt());
+    }
+  }
+  // A one-handed sword in the right hand, by display (Classic Beta reads no Item rows: what a character wears there is
+  // put on by display).
+  int weaponDisplay = 0;
+  sqlResult weapons = GAMEDATABASE.sqlQuery("SELECT ItemDisplayInfo.ID, ModelFileData.FileDataID FROM ItemDisplayInfo JOIN ModelFileData "
+                                            "ON ItemDisplayInfo.ModelResourcesID1 = ModelFileData.ModelResourcesID ORDER BY ItemDisplayInfo.ID");
+  for (size_t i = 0; weapons.valid && i < weapons.values.size() && weaponDisplay == 0; i++)
+  {
+    GameFile * f = GAMEDIRECTORY.getFile(weapons.values[i][1].toInt());
+    wxString why;
+    if (f && f->fullname().toLower().contains("sword_1h") && ModelIdLookup::checkModelFile(weapons.values[i][1].toInt(), why))
+      weaponDisplay = weapons.values[i][0].toInt();
+  }
+  if (weaponDisplay > 0)
+    equipment.emplace_back(CS_HAND_RIGHT, weaponDisplay);
+  else
+    skip("model variants: a weapon in hand", "no one-handed sword display whose model is on this computer");
+  const auto weaponShown = [](WoWModel * m) {
+    WoWItem * item = m ? m->getItem(CS_HAND_RIGHT) : nullptr;
+    return !item || item->displayId() <= 0 || !item->models().empty();
+  };
+  const auto itemsOf = [](WoWModel * m) {
+    QStringList list;
+    for (int slot = 0; m && slot < NUM_CHAR_SLOTS; slot++)
+      if (WoWItem * item = m->getItem((CharSlots)slot))
+        if (item->id() > 0 || item->displayId() > 0)
+          list << QString("%1:%2/%3").arg(slot).arg(item->id()).arg(item->displayId());
+    return list.join(' ');
+  };
+  const auto playing = [](WoWModel * m) {
+    if (!m || !m->animManager || m->anims.empty() || m->animManager->GetAnim() >= m->anims.size())
+      return -1;
+    return (int)m->anims[m->animManager->GetAnim()].animID;
+  };
+  const auto generationName = [](CharacterModelVariant v) { return v == CharacterModelVariant::HD ? QString("High Definition") : QString("Classic"); };
+
+  const wxColour background = frame->viewportBackground();
+  int savedLoaded = 0;
+  for (const RaceInfos::VariantPair & pair : pairs)
+  {
+    const QString who = QString("model variants, pair %1 (ChrModel %2 -> %3, race %4 sex %5)").arg(pair.id)
+                          .arg(pair.primaryChrModelID).arg(pair.alternateChrModelID).arg(pair.raceID).arg(pair.sexID);
+    GameFile * primaryFile = GAMEDIRECTORY.getFile(pair.primaryFileID);
+    if (!primaryFile)
+    {
+      check(who + ": its primary model is in the client", false, QString("FileDataID %1").arg(pair.primaryFileID));
+      continue;
+    }
+    frame->LoadModel(primaryFile, pair.raceID, pair.sexID);
+    settle();
+    WoWModel * m = frame->riderModel();
+    if (!m || m->infos.ChrModelID.empty() || m->infos.ChrModelID[0] != pair.primaryChrModelID)
+    {
+      check(who + ": loads on its primary ChrModel", false, m ? QString("ChrModel %1").arg(m->infos.ChrModelID.empty() ? 0 : m->infos.ChrModelID[0]) : QString("no model"));
+      continue;
+    }
+    // Away from the defaults: every option its second valid choice, where it has one.
+    for (const uint option : m->cd.getCustomizationOptions())
+    {
+      const std::vector<uint> offered = m->cd.getCustomizationChoices(option);
+      if (offered.size() > 1)
+        m->cd.set(option, offered[1]);
+    }
+    for (const auto & e : equipment)
+      if (WoWItem * item = m->getItem(e.first))
+        item->setDisplayId(e.second);
+    g_charControl->RefreshModel();
+    g_charControl->RefreshEquipment();
+    frame->charMenu->Check(ID_SHEATHE, true);
+    wxCommandEvent toggle(wxEVT_MENU, ID_SHEATHE);
+    toggle.SetInt(1);
+    frame->OnCharToggle(toggle);
+    int animID = -1;
+    for (const auto & a : m->anims)
+      if (a.animID != ANIM_STAND)
+      {
+        animID = a.animID;
+        break;
+      }
+    if (animID >= 0)
+      frame->animControl->RestoreAnimation(animID, 0, 0, 1.0f, false);
+    settle();
+    const CharDetails::Appearance before = m->cd.captureAppearance();
+    const QString itemsBefore = itemsOf(m);
+    const wxString panes = frame->interfaceManager.SavePerspective();
+    const CharacterModelVariant primaryGeneration = m->modelGeneration();
+    const CharacterModelVariant other = primaryGeneration == CharacterModelVariant::HD ? CharacterModelVariant::Classic : CharacterModelVariant::HD;
+    if (expect && expect->primaryGeneration != CharacterModelVariant::Unknown)
+      check(who + QString(": its primary model is %1").arg(generationName(expect->primaryGeneration)),
+            primaryGeneration == expect->primaryGeneration, generationName(primaryGeneration));
+    const RaceInfos::Translation translation = RaceInfos::translateSelection(pair, before.selection, true);
+    // What the switch has to carry, read from the client's tables here: each choice of the character's through its
+    // option row and choice row, or no counterpart (no option row) or not covered (no choice row under it).
+    std::map<uint, uint> expected;
+    size_t expectedNoCounterpart = 0, expectedNotCovered = 0;
+    for (const auto & oc : before.selection)
+    {
+      sqlResult rowsOf = GAMEDATABASE.sqlQuery(QString("SELECT o.AlternateOptionID, c.AlternateChoiceID FROM ChrModelAltVariantOption o "
+                                                       "LEFT JOIN ChrModelAltVariantChoice c ON c.ChrModelAltVariantOptionID = o.ID AND "
+                                                       "c.PrimaryChoiceID = %1 WHERE o.ChrModelAltVariantID = %2 AND o.PrimaryOptionID = %3")
+                                                 .arg(oc.second).arg(pair.id).arg(oc.first));
+      if (!rowsOf.valid || rowsOf.values.empty())
+        expectedNoCounterpart++;
+      else if (rowsOf.values[0][1].isEmpty() || rowsOf.values[0][1].toUInt() == 0)
+        expectedNotCovered++;
+      else
+        expected[rowsOf.values[0][0].toUInt()] = rowsOf.values[0][1].toUInt();
+    }
+
+    wxString why;
+    const bool switched = frame->SwitchCharacterVariant(other, why);
+    settle();
+    WoWModel * n = frame->riderModel();
+    RaceInfos alternate;
+    RaceInfos::getRaceInfosForAlternateFileID(pair.alternateFileID, alternate);
+    const bool identity = switched && n && n->gamefile && (int)n->gamefile->fileDataId() == pair.alternateFileID &&
+                          !n->infos.ChrModelID.empty() && n->infos.ChrModelID[0] == pair.alternateChrModelID &&
+                          n->infos.textureLayoutID == alternate.textureLayoutID && n->modelGeneration() == other &&
+                          n->infos.raceID == pair.raceID && n->infos.sexID == pair.sexID;
+    check(who + QString(": switched from %1 to %2 -- the pair's file, ChrModel and texture layout, same race and sex")
+                  .arg(generationName(primaryGeneration)).arg(generationName(other)), identity,
+          n ? QString("ok %1 why %2 | file %3 ChrModel %4 layout %5 generation %6 race %7 sex %8").arg(switched).arg(QString::fromWCharArray(why.wc_str()))
+                .arg(n->gamefile ? n->gamefile->fileDataId() : 0).arg(n->infos.ChrModelID.empty() ? 0 : n->infos.ChrModelID[0])
+                .arg(n->infos.textureLayoutID).arg(generationName(n->modelGeneration())).arg(n->infos.raceID).arg(n->infos.sexID)
+            : QString("no model"));
+    if (!identity)
+      continue;
+    if (expect && expect->alternateGeneration != CharacterModelVariant::Unknown)
+      check(who + QString(": its other model is %1").arg(generationName(expect->alternateGeneration)),
+            n->modelGeneration() == expect->alternateGeneration, generationName(n->modelGeneration()));
+    QStringList wrong;
+    for (const auto & oc : expected)
+      if (n->cd.get(oc.first) != oc.second)
+        wrong << QString("%1: %2, holds %3").arg(oc.first).arg(oc.second).arg(n->cd.get(oc.first));
+    check(who + QString(": %1 of %2 choice(s) carried as the client's tables pair them (%3 option(s) without a counterpart, "
+                        "%4 choice(s) not paired)").arg(expected.size()).arg(before.selection.size()).arg(expectedNoCounterpart).arg(expectedNotCovered),
+          !expected.empty() && wrong.isEmpty() && translation.selection == expected &&
+            translation.noCounterpart.size() == expectedNoCounterpart && translation.notCovered.size() == expectedNotCovered &&
+            expected.size() + expectedNoCounterpart + expectedNotCovered == before.selection.size(),
+          QString("wrong: %1 | the switch's translation %2 carried, %3 without, %4 not paired")
+            .arg(wrong.join(", ")).arg(translation.selection.size()).arg(translation.noCounterpart.size()).arg(translation.notCovered.size()));
+    const int animAfter = playing(n);
+    bool animationHere = false;
+    for (const auto & a : n->anims)
+      animationHere = animationHere || (int)a.animID == animID;
+    check(who + ": equipment (the weapon's model in hand too), sheathe, animation, viewport background and panes kept",
+          itemsOf(n) == itemsBefore && weaponShown(n) && n->bSheathe && (animID < 0 || animAfter == (animationHere ? animID : (int)ANIM_STAND)) &&
+            frame->viewportBackground() == background && frame->interfaceManager.SavePerspective() == panes,
+          QString("items %1 (before %2) | weapon model %3 | sheathe %4 | animation %5 (before %6) | background %7 | panes %8")
+            .arg(itemsOf(n)).arg(itemsBefore).arg(weaponShown(n) ? "shown" : "missing").arg(n->bSheathe ? 1 : 0).arg(animAfter).arg(animID)
+            .arg(frame->viewportBackground() == background ? "kept" : "changed").arg(frame->interfaceManager.SavePerspective() == panes ? "kept" : "changed"));
+    const std::map<uint, uint> firstVisit = n->cd.captureAppearance().selection;
+
+    frame->SwitchCharacterVariant(primaryGeneration, why);
+    settle();
+    WoWModel * back = frame->riderModel();
+    check(who + ": back on the primary, its whole appearance exactly as it was",
+          back && !back->infos.ChrModelID.empty() && back->infos.ChrModelID[0] == pair.primaryChrModelID &&
+            back->cd.captureAppearance().selection == before.selection,
+          back ? QString("ChrModel %1, %2 of %3 option(s)").arg(back->infos.ChrModelID.empty() ? 0 : back->infos.ChrModelID[0])
+                   .arg(back->cd.captureAppearance().selection.size()).arg(before.selection.size()) : QString("no model"));
+
+    frame->SwitchCharacterVariant(other, why);
+    settle();
+    WoWModel * again = frame->riderModel();
+    const bool sameAsLeft = again && again->cd.captureAppearance().selection == firstVisit;
+    // An edit on the other model stays there.
+    std::map<uint, uint> edited;
+    if (again)
+      for (const uint option : again->cd.getCustomizationOptions())
+      {
+        const std::vector<uint> offered = again->cd.getCustomizationChoices(option);
+        if (offered.size() > 2)
+        {
+          again->cd.set(option, offered.back() != again->cd.get(option) ? offered.back() : offered.front());
+          break;
+        }
+      }
+    if (again)
+      edited = again->cd.captureAppearance().selection;
+    frame->SwitchCharacterVariant(primaryGeneration, why);
+    settle();
+    WoWModel * primaryAgain = frame->riderModel();
+    const bool primaryUntouched = primaryAgain && primaryAgain->cd.captureAppearance().selection == before.selection;
+    frame->SwitchCharacterVariant(other, why);
+    settle();
+    WoWModel * otherAgain = frame->riderModel();
+    check(who + ": the other model comes back as it was left, an edit there stays there and does not reach the primary",
+          sameAsLeft && primaryUntouched && otherAgain && otherAgain->cd.captureAppearance().selection == edited && edited != firstVisit,
+          QString("as left %1 | primary untouched %2 | edit kept %3 | edit made %4").arg(sameAsLeft).arg(primaryUntouched)
+            .arg(otherAgain && otherAgain->cd.captureAppearance().selection == edited).arg(edited != firstVisit));
+
+    // The first pair only (a .chr round trip per pair adds nothing):
+    if (savedLoaded++ == 0 && otherAgain)
+    {
+      const auto remembered = [frame]() { return frame->m_variantSession.byChrModel.size(); };
+      const auto loadedAs = [](WoWModel * l) {
+        return l ? QString("file %1 ChrModel %2").arg(l->gamefile ? l->gamefile->fileDataId() : 0).arg(l->infos.ChrModelID.empty() ? 0 : l->infos.ChrModelID[0])
+                 : QString("no model");
+      };
+      const auto rewrite = [](const QString & path, const std::function<QString(QString)> & change) {
+        QFile f(path);
+        if (!f.open(QIODevice::ReadOnly | QIODevice::Text))
+          return false;
+        const QString text = change(QString::fromUtf8(f.readAll()));
+        f.close();
+        if (!f.open(QIODevice::WriteOnly | QIODevice::Truncate | QIODevice::Text))
+          return false;
+        f.write(text.toUtf8());
+        return true;
+      };
+      const QString chr = QDir::temp().filePath("wmv_customizationtest_variant.chr");
+
+      // Saved on the other model, it loads back on it -- a full load, from the primary on screen -- with the same
+      // choices, and nothing of the switches before it is remembered.
+      const size_t heldBefore = remembered();
+      const std::map<uint, uint> saved = otherAgain->cd.captureAppearance().selection;
+      frame->SaveChar(chr);
+      frame->SwitchCharacterVariant(primaryGeneration, why);
+      settle();
+      frame->LoadChar(chr);
+      settle();
+      WoWModel * l = frame->riderModel();
+      check(who + ": saved on its other model, it loads back on it with the same choices, remembering nothing before it",
+            heldBefore == 2 && l && l->gamefile && (int)l->gamefile->fileDataId() == pair.alternateFileID && !l->infos.ChrModelID.empty() &&
+              l->infos.ChrModelID[0] == pair.alternateChrModelID && l->cd.captureAppearance().selection == saved && remembered() == 0,
+            QString("%1 | %2 model(s) remembered before, %3 after").arg(loadedAs(l)).arg(heldBefore).arg(remembered()));
+
+      // Load Character on the file on screen from a file that names no race and sex (saved before files named them):
+      // the same-file load starts the character afresh too. (One switch after a fresh load remembers the model it left.)
+      frame->SwitchCharacterVariant(primaryGeneration, why);
+      settle();
+      const size_t heldSameFile = remembered();
+      frame->SaveChar(chr);
+      const bool stripped = rewrite(chr, [](QString text) {
+        return text.remove(QRegularExpression(QStringLiteral(" (race|sex)=\"[0-9-]*\"")));
+      });
+      frame->LoadChar(chr);
+      settle();
+      l = frame->riderModel();
+      check(who + ": Load Character of a file without race and sex, on the file on screen, remembers nothing of the switches before it",
+            stripped && heldSameFile == 1 && l && l->gamefile && (int)l->gamefile->fileDataId() == pair.primaryFileID && remembered() == 0 &&
+              frame->characterVariantState().note.IsEmpty(),
+            QString("%1 | %2 model(s) remembered before, %3 after").arg(loadedAs(l)).arg(heldSameFile).arg(remembered()));
+
+      // Saved on the alternate file with the primary's choices -- as builds before the pairs saved a classic model --,
+      // it loads on the alternate with the choices translated through the pair's tables.
+      const std::map<uint, uint> primarySelection = l ? l->cd.captureAppearance().selection : std::map<uint, uint>();
+      frame->SaveChar(chr);
+      GameFile * alternateFile = GAMEDIRECTORY.getFile(pair.alternateFileID);
+      const bool renamed = alternateFile && rewrite(chr, [primaryFile, alternateFile](QString text) {
+        return text.replace(primaryFile->fullname(), alternateFile->fullname(), Qt::CaseInsensitive);
+      });
+      frame->LoadChar(chr);
+      settle();
+      l = frame->riderModel();
+      const RaceInfos::Translation old = RaceInfos::translateSelection(pair, primarySelection, true);
+      QStringList oldWrong;
+      for (const auto & oc : old.selection)
+        if (!l || l->cd.get(oc.first) != oc.second)
+          oldWrong << QString("%1: %2, holds %3").arg(oc.first).arg(oc.second).arg(l ? l->cd.get(oc.first) : 0);
+      check(who + QString(": saved on its alternate file with the primary's choices, it loads with %1 translated").arg(old.selection.size()),
+            renamed && l && l->gamefile && (int)l->gamefile->fileDataId() == pair.alternateFileID && !old.selection.empty() && oldWrong.isEmpty(),
+            QString("%1 | %2").arg(loadedAs(l)).arg(oldWrong.join(", ")));
+      QFile::remove(chr);
+
+      // A full load after switches: nothing remembered.
+      frame->LoadModel(primaryFile, pair.raceID, pair.sexID);
+      settle();
+      frame->SwitchCharacterVariant(other, why);
+      settle();
+      const size_t heldFull = remembered();
+      frame->LoadModel(primaryFile, pair.raceID, pair.sexID);
+      settle();
+      check(who + ": a character loaded afresh has no memory of the switches before it",
+            heldFull == 1 && remembered() == 0 && frame->characterVariantState().note.IsEmpty(),
+            QString("%1 model(s) remembered before, %2 after").arg(heldFull).arg(remembered()));
+    }
+  }
+
+  // An NPC whose display is on a pair's model gets no switch.
+  QStringList files;
+  for (const auto & pair : pairs)
+    files << QString::number(pair.primaryFileID) << QString::number(pair.alternateFileID);
+  sqlResult npc = GAMEDATABASE.sqlQuery("SELECT Creature.ID FROM Creature JOIN CreatureDisplayInfo ON Creature.DisplayID1 = CreatureDisplayInfo.ID "
+                                        "JOIN CreatureModelData ON CreatureDisplayInfo.ModelID = CreatureModelData.ID "
+                                        "WHERE CreatureModelData.FileDataID IN (" + files.join(',') + ") ORDER BY Creature.ID LIMIT 1");
+  if (!npc.valid || npc.values.empty())
+    skip("model variants: an NPC on a pair's model", "no NPC of this client is one");
+  else
+  {
+    frame->LoadNPC(npc.values[0][0].toUInt());
+    settle();
+    const ModelViewer::CharacterVariantState state = frame->characterVariantState();
+    check(QString("model variants: NPC %1, on a pair's model, gets no Model selector").arg(npc.values[0][0]), !state.shown,
+          QString("shown %1").arg(state.shown ? 1 : 0));
+  }
+
+  // A display that names a pair's alternate model and stores choices of its primary ChrModel is shown on the primary,
+  // and Load NPC / Model by ID says it loaded.
+  int routedDisplay = 0;
+  const RaceInfos::VariantPair * routedPair = nullptr;
+  for (const auto & pair : pairs)
+  {
+    sqlResult routed = GAMEDATABASE.sqlQuery(QString("SELECT CreatureDisplayInfo.ID FROM CreatureDisplayInfo JOIN CreatureModelData "
+                                                     "ON CreatureDisplayInfo.ModelID = CreatureModelData.ID JOIN CreatureDisplayInfoOption "
+                                                     "ON CreatureDisplayInfoOption.CreatureDisplayInfoExtraID = CreatureDisplayInfo.ExtendedDisplayInfoID "
+                                                     "JOIN ChrCustomizationOption ON ChrCustomizationOption.ID = CreatureDisplayInfoOption.ChrCustomizationOptionID "
+                                                     "WHERE CreatureModelData.FileDataID = %1 AND ChrCustomizationOption.ChrModelID = %2 "
+                                                     "ORDER BY CreatureDisplayInfo.ID LIMIT 1").arg(pair.alternateFileID).arg(pair.primaryChrModelID));
+    if (routed.valid && !routed.values.empty())
+    {
+      routedDisplay = routed.values[0][0].toInt();
+      routedPair = &pair;
+      break;
+    }
+  }
+  if (!routedPair)
+    skip("model variants: a display on an alternate model with the primary's choices", "no display of this client is one");
+  else
+  {
+    ModelIdLookup::Resolved resolved;
+    wxString why;
+    const bool resolvedOk = ModelIdLookup::resolve(ModelIdLookup::Kind::CreatureDisplay, routedDisplay, resolved, why);
+    const bool loaded = resolvedOk && frame->LoadModelById(resolved, why);
+    settle();
+    WoWModel * shown = frame->riderModel();
+    size_t stored = 0;
+    if (shown)
+      for (const auto & oc : shown->cd.captureAppearance().selection)
+        stored += shown->cd.isStoredChoice(oc.first) ? 1 : 0;
+    check(QString("model variants: creature display %1 (alternate model %2, ChrModel %3's choices) is shown on the primary model %4, "
+                  "and Load NPC / Model by ID says it loaded").arg(routedDisplay).arg(routedPair->alternateFileID)
+            .arg(routedPair->primaryChrModelID).arg(routedPair->primaryFileID),
+          loaded && resolved.loadFileDataId == routedPair->primaryFileID && shown && shown->gamefile &&
+            (int)shown->gamefile->fileDataId() == routedPair->primaryFileID && stored > 0 &&
+            !frame->characterVariantState().shown,
+          QString("resolved %1 loaded %2 why %3 | %4 stored choice(s)").arg(resolved.loadFileDataId).arg(loaded)
+            .arg(QString::fromWCharArray(why.wc_str())).arg(stored));
+  }
+}
+
 // -customizationtest on a Classic client (Classic Era, MoP Classic, Classic Beta): the same idea against the
 // client's own data. Every expected value was read from the named build's DB2 files by a reader independent of
 // this loader (MoP Classic 5.5.4.70032, Classic Beta 1.60.1.70235 -- unchanged in 1.60.1.70245 --, Classic Era
@@ -1266,6 +1725,9 @@ static int doHeadlessClassicCustomizationTest(ModelViewer * frame)
 
   // ---- 7. The geoset groups an NPC's shirt, chest and legs share ---------------------------------------
   checkEquipmentGeosets(frame, check, skip);
+
+  // ---- 8. A character's model of the other generation (Classic | HD) -----------------------------------
+  checkModelVariants(frame, check, skip);
 
   LOG_INFO << QString("[customization-test] RESULT: %1 (%2 passed, %3 failed, %4 skipped)").arg(failed == 0 ? "PASS" : "FAIL").arg(passed).arg(failed).arg(skipped);
   return failed;
@@ -1900,6 +2362,9 @@ static int doHeadlessCustomizationTest(ModelViewer * frame)
 
   // ---- 10. The geoset groups an NPC's shirt, chest and legs share --------------------------------------
   checkEquipmentGeosets(frame, check, skip);
+
+  // ---- 11. A character's model of the other generation (Classic | HD) ----------------------------------
+  checkModelVariants(frame, check, skip);
 
   LOG_INFO << QString("[customization-test] RESULT: %1 (%2 passed, %3 failed)").arg(failed == 0 ? "PASS" : "FAIL").arg(passed).arg(failed);
   return failed;

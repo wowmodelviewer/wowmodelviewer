@@ -1211,6 +1211,31 @@ namespace Wmv.Wow
             return chunks;
         }
 
+        /// <summary>
+        /// The skin profiles (SFID) and the skeleton file (SKID, 0 for none) an M2 names, read from its chunk table
+        /// alone: what a prefetch of the model fetches with it (WmvIpcClient.Prefetch). Nothing for a bare MD20 or a
+        /// table that does not read.
+        /// </summary>
+        public static void ReadRelatedFileIds(byte[] file, out int[] skins, out int skeleton)
+        {
+            skins = new int[0];
+            skeleton = 0;
+            if (file == null)
+                return;
+            try
+            {
+                Dictionary<string, M2Array> chunks = ReadChunks(file);
+                skins = ReadIdChunk(file, chunks, "SFID");
+                int[] skel = ReadIdChunk(file, chunks, "SKID");
+                skeleton = skel.Length > 0 ? skel[0] : 0;
+            }
+            catch (WowParseException)
+            {
+                skins = new int[0];
+                skeleton = 0;
+            }
+        }
+
         static int[] ReadIdChunk(byte[] file, Dictionary<string, M2Array> chunks, string magic)
         {
             M2Array chunk;

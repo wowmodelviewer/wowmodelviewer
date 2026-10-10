@@ -252,6 +252,22 @@ public:
   // ChrRaces.PlayableRaceBit of the character's race (-1: none).
   int playableRaceBit() const { return playableRaceBit_; }
 
+  // A character's whole appearance on this model, for switching between a race's two generations of model
+  // (ModelViewer::SwitchCharacterVariant): the ChrModel it belongs to and every option's current choice.
+  struct Appearance
+  {
+    int chrModelID = 0;
+    std::map<uint, uint> selection;
+  };
+  Appearance captureAppearance() const;
+  // Makes `wanted` the whole selection, with one refresh, as load() does. exact: a selection captured on this same
+  // model (captureAppearance), applied as it was -- a round trip comes back exactly. Otherwise its choices are judged
+  // together by the player's rules (resolveSelection), each option it says nothing about takes its first valid choice
+  // as reset() gives it, then texture gating. A pair whose option or choice this model does not have is left out.
+  // demonHunter: the class context, where the client has the class. An NPC's stored choices are cleared: switching
+  // model generation is for player characters, which have none.
+  void applyAppearance(const std::map<uint, uint> & wanted, bool demonHunter, bool exact);
+
 private:
 
   void fillCustomizationMap();

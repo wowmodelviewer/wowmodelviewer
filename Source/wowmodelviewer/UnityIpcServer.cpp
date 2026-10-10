@@ -563,9 +563,13 @@ QString UnityIpcServer::RuntimeState::describe() const
          " mountKey=\"" + mountKey + "\"" +
          QString(" liveMounts=%1 mountsBuilt=%2 mountSeat=%3 mountSeatBone=%4 modelSequence=%5 mountSequence=%6")
            .arg(liveMounts).arg(mountsBuilt).arg(mountSeat).arg(mountSeatBone).arg(modelSequence).arg(mountSequence) +
-         QString(" mountEmitters=%1 mountRibbons=%2 mountParticles=%3 bodyRebinds=%4 viewFramings=%5")
-           .arg(mountEmitters).arg(mountRibbons).arg(mountParticles).arg(bodyRebinds).arg(viewFramings) +
-         QString(" background=%1,%2,%3").arg(backgroundR).arg(backgroundG).arg(backgroundB);
+         QString(" mountEmitters=%1 mountRibbons=%2 mountParticles=%3 bodyRebinds=%4 viewFramings=%5 keptViews=%6")
+           .arg(mountEmitters).arg(mountRibbons).arg(mountParticles).arg(bodyRebinds).arg(viewFramings).arg(keptViews) +
+         QString(" background=%1,%2,%3").arg(backgroundR).arg(backgroundG).arg(backgroundB) +
+         QString(" assetCacheEntries=%1 assetCacheBytes=%2 assetCacheHits=%3 assetCacheJoins=%4 assetCacheEvictions=%5"
+                 " assetEpoch=%6")
+           .arg(assetCacheEntries).arg(assetCacheBytes).arg(assetCacheHits).arg(assetCacheJoins).arg(assetCacheEvictions)
+           .arg(assetEpoch);
 }
 
 int UnityIpcServer::requestRuntimeState()
@@ -606,9 +610,16 @@ void UnityIpcServer::handleRuntimeState(const QJsonObject & msg)
   s.mountParticles = count("mountParticles");
   s.bodyRebinds = count("bodyRebinds");
   s.viewFramings = count("viewFramings");
+  s.keptViews = count("keptViews");
   s.backgroundR = count("backgroundR");
   s.backgroundG = count("backgroundG");
   s.backgroundB = count("backgroundB");
+  s.assetCacheEntries = count("assetCacheEntries");
+  s.assetCacheBytes = count("assetCacheBytes");
+  s.assetCacheHits = count("assetCacheHits");
+  s.assetCacheJoins = count("assetCacheJoins");
+  s.assetCacheEvictions = count("assetCacheEvictions");
+  s.assetEpoch = count("assetEpoch");
   LOG_INFO << "[unityipc] <- runtimeState" << s.describe();
   if (onRuntimeState)
     onRuntimeState(s);
@@ -636,6 +647,29 @@ int UnityIpcServer::requestScreenshot(const QString & path, int width, int heigh
   LOG_INFO << "[unityipc] -> captureScreenshot request=" << m_screenshotRequest << width << "x" << height << "path" << path;
   queueJson(msg);
   return m_screenshotRequest;
+}
+
+bool UnityIpcServer::sendPrefetchAssets(const std::vector<int> & fileDataIDs)
+{
+  if (!playerCachesAssets() || fileDataIDs.empty())
+    return false;
+  QJsonArray ids;
+  QStringList names;
+  for (int id : fileDataIDs)
+    if (id > 0)
+    {
+      ids.append(id);
+      names << QString::number(id);
+    }
+  if (ids.isEmpty())
+    return false;
+  QJsonObject msg;
+  msg["type"] = "prefetchAssets";
+  msg["assetEpoch"] = UnityAssetAccess::clientEpoch();
+  msg["fileDataIDs"] = ids;
+  LOG_INFO << "[unityipc] -> prefetchAssets" << names.join(' ') << "epoch" << UnityAssetAccess::clientEpoch();
+  queueJson(msg);
+  return true;
 }
 
 bool UnityIpcServer::sendViewportBackground(int r, int g, int b)
@@ -856,7 +890,7 @@ void UnityIpcServer::sendModelAnimationState(int m2FileDataID, int sequenceIndex
 }
 
 void UnityIpcServer::sendLoadWoWModel(const QString & path, int fileDataID, const QString & client,
-                                      bool character, int load, const QString & kind)
+                                      bool character, int load, const QString & kind, bool keepView)
 {
   QJsonObject msg;
   msg["type"] = "loadWoWModel";
@@ -868,10 +902,14 @@ void UnityIpcServer::sendLoadWoWModel(const QString & path, int fileDataID, cons
   // Always stated. A player older than protocol 4 ignores the field (its message reader skips names it
   // does not know), which is harmless for "m2": that is what it assumes. "wmo" never goes to one.
   msg["kind"] = kind;
+  if (keepView)
+    msg["keepView"] = true;
+  // Always stated (protocol 9): the player keeps asset files under it. An older player skips the name.
+  msg["assetEpoch"] = UnityAssetAccess::clientEpoch();
   if (kind == "wmo")
     m_stats.mapObjectLoads++;
   LOG_INFO << "[unityipc] -> loadWoWModel path=" << msg["path"].toString() << "fileDataID=" << fileDataID
-           << "load=" << load << "kind=" << kind << (character ? "(character)" : "");
+           << "load=" << load << "kind=" << kind << (character ? "(character)" : "") << (keepView ? "(keep view)" : "");
   queueJson(msg);
 }
 
@@ -996,8 +1034,9 @@ void UnityIpcServer::handleLine(const std::string & line)
     if (version > 0 && version < PROTOCOL_VERSION)
       LOG_WARNING << "[unityipc] player speaks protocol v" << version << ", older than WMV's v" << PROTOCOL_VERSION
                   << "-- what it cannot do (mounted characters below v5, world models below v4, characters below v3)"
-                     " gets a notice, a screenshot (below v6) a status message, and the viewport background (below v7)"
-                     " stays the player's own default";
+                     " gets a notice, a screenshot (below v6) a status message, the viewport background (below v7)"
+                     " stays the player's own default, a character's model generation (below v8) is not switched,"
+                     " and every load (below v9) fetches its files again";
     else if (version != PROTOCOL_VERSION)
       LOG_ERROR << "[unityipc] player speaks protocol v" << version << "but WMV expects v" << PROTOCOL_VERSION;
     if (onUnityReady)
@@ -1125,6 +1164,9 @@ void UnityIpcServer::handleGetAsset(const QJsonObject & msg, bool byFileDataID)
     resp["sha1"] = QString::fromLatin1(sha1);
     resp["encoding"] = "base64";   // V1: base64 in the JSON line; a binary frame can replace this later
     resp["data"] = QString::fromLatin1(result.data.toBase64());
+    // A file of the client's own storage (protocol 9): the player may keep it for as long as the epoch it asked under.
+    if (result.fromClientStorage)
+      resp["cacheable"] = true;
     m_stats.responsesOk++;
     m_stats.bytesServed += result.data.size();
     m_stats.lastError.clear();

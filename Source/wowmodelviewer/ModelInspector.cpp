@@ -92,6 +92,12 @@ namespace
     return g_canvas ? const_cast<WoWModel *>(g_canvas->model()) : nullptr;
   }
 
+  // A character's ChrModel as Model > Info shows it, 0 for none.
+  int shownChrModel(const WoWModel * m)
+  {
+    return (m && m->infos.raceID != -1 && !m->infos.ChrModelID.empty()) ? m->infos.ChrModelID[0] : 0;
+  }
+
   // Every model on the canvas: the root and its attachments, depth first.
   void collectModels(std::vector<WoWModel *> & out)
   {
@@ -982,6 +988,7 @@ void ModelInspector::RebuildInfo()
   const Context ctx = currentContext();
   m_infoContext = ctx;
   m_infoFor = nullptr;
+  m_infoChrModel = 0;
 
   if (ctx == CONTEXT_MODEL || ctx == CONTEXT_CHARACTER)
   {
@@ -994,6 +1001,16 @@ void ModelInspector::RebuildInfo()
     AddInfoRow(_("Type"), ctx == CONTEXT_CHARACTER ? _("Character")
                         : lowerPath.StartsWith(wxT("creature")) ? _("Creature")
                         : lowerPath.StartsWith(wxT("item")) ? _("Item") : _("Model"));
+    // The character's model generation and ChrModel; not while it rides a mount, whose file the rows below name.
+    const WoWModel * character = ctx == CONTEXT_CHARACTER && g_modelViewer ? g_modelViewer->riderModel() : nullptr;
+    m_infoChrModel = shownChrModel(character == m ? m : nullptr);
+    if (character == m && m_infoChrModel != 0)
+    {
+      const CharacterModelVariant generation = character->modelGeneration();
+      if (generation != CharacterModelVariant::Unknown)
+        AddInfoRow(_("Character model"), generation == CharacterModelVariant::HD ? _("High Definition") : _("Classic"));
+      AddInfoRow(_("ChrModel"), wxString::Format(wxT("%d"), character->infos.ChrModelID[0]));
+    }
     AddInfoRow(_("Path"), wxString(path.toStdWString()));
     if (m->gamefile && m->gamefile->fileDataId() > 0)
       AddInfoRow(_("FileDataID"), wxString::Format(wxT("%u"), (unsigned)m->gamefile->fileDataId()));
@@ -1189,7 +1206,10 @@ void ModelInspector::OnWatchTimer(wxTimerEvent & WXUNUSED(event))
                          : (ctx == CONTEXT_TEXTURE) ? (const void *)g_modelViewer->textureView
                          : (ctx == CONTEXT_MODEL || ctx == CONTEXT_CHARACTER) ? (const void *)canvasModel()
                          : nullptr;
-      if (ctx != m_infoContext || shown != m_infoFor)
+      // A race changed on the model on screen (an Armory import on the same file) changes its ChrModel row.
+      const WoWModel * character = ctx == CONTEXT_CHARACTER && g_modelViewer ? g_modelViewer->riderModel() : nullptr;
+      const int chrModel = shownChrModel(character && character == canvasModel() ? character : nullptr);
+      if (ctx != m_infoContext || shown != m_infoFor || chrModel != m_infoChrModel)
         RebuildInfo();
       break;
     }

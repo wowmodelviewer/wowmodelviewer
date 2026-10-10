@@ -68,6 +68,11 @@ class _WOWITEM_API_ WoWItem : public Component
     CharSlots slot() const { return slot_; }
 
     int quality() const { return quality_; }
+    int level() const { return level_; }
+    // Puts an item back as it was captured, the way a saved character's item is loaded back (load(QString &)): the
+    // item, its level where it has several, then the display that was shown, which wins. An NPC's item (no item ID,
+    // only a display) is put back by its display.
+    void restore(int id, int displayId, int level);
 
     void refresh();
 

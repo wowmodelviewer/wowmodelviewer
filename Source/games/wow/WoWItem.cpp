@@ -137,6 +137,24 @@ void WoWItem::setDisplayId(int id)
   }
 }
 
+void WoWItem::restore(int id, int displayId, int level)
+{
+  if (id == -1)
+  {
+    if (displayId > 0)
+      setDisplayId(displayId);
+    return;
+  }
+  setId(id);
+  if (nbLevels_ > 1)
+    setLevel(level);
+  if (displayId != -1 && displayId_ != displayId)
+  {
+    displayId_ = displayId;
+    load();
+  }
+}
+
 void WoWItem::setLevel(int level)
 {
   if ((nbLevels_ > 1) && (level_ != level))

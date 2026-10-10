@@ -119,11 +119,7 @@ public partial class WmvMain
                                     n, fromW, fromH, want, Screen.width, Screen.height));
             Camera cam = Camera.main;
             if (haveLastFramed && cam != null && Mathf.Abs(cam.aspect - lastFramedAspect) > 1e-3f)
-            {
-                orbit.Frame(lastFramed);
-                lastFramedAspect = cam.aspect;
-                ApplyViewportOrbitOverride("screenshot: ");
-            }
+                RefitLastFramed(cam, "screenshot: ");
             for (int i = 0; i < 5; i++)
                 yield return new WaitForEndOfFrame();
         }
