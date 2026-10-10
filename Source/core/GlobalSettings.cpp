@@ -61,8 +61,8 @@ core::GlobalSettings * core::GlobalSettings::m_instance = 0;
 //--------------------------------------------------------------------
 core::GlobalSettings::GlobalSettings()
 {
-  m_versionMajorNumber = 0;
-  m_versionMinorNumber = 11;
+  m_versionMajorNumber = 1;
+  m_versionMinorNumber = 0;
   m_versionRevNumber = 0;
 
   m_appName = L"WoW Model Viewer Midnight";
@@ -146,8 +146,9 @@ std::wstring core::GlobalSettings::appVersion(std::wstring a_prefix)
   std::wstringstream l_oss;
   l_oss.precision(0);
 
-  l_oss << m_versionMajorNumber << "." << m_versionMinorNumber << "."
-    << m_versionRevNumber;
+  l_oss << m_versionMajorNumber << "." << m_versionMinorNumber;
+  if (m_versionRevNumber != 0)
+    l_oss << "." << m_versionRevNumber;
   l_result += l_oss.str();
 
   return l_result;
@@ -158,6 +159,11 @@ std::wstring core::GlobalSettings::appName()
   return m_appName;
 }
 
+std::wstring core::GlobalSettings::productName()
+{
+  return L"WoW Model Viewer";
+}
+
 std::wstring core::GlobalSettings::buildName()
 {
   return m_buildName;
@@ -165,7 +171,7 @@ std::wstring core::GlobalSettings::buildName()
 
 std::wstring core::GlobalSettings::appTitle()
 {
-  std::wstring title = appName() + appVersion(std::wstring(L" v")) + L" " + m_platform;
+  std::wstring title = productName() + appVersion(std::wstring(L" version "));
   if(m_isBetaVersion)
     title += L" - BETA VERSION";
   if(m_isAlphaVersion)

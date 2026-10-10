@@ -378,26 +378,27 @@ reported in gets no "starting" caption: the area stays the player's own backgrou
 model is built, so the handover is not a visible flash and a caption is never on screen for exactly
 as long as it takes to read.
 
-**Nothing is loaded until you ask.** The application opens as an empty fullscreen viewer: no
+**Nothing is loaded until you ask.** The application opens as an empty, maximised viewer: no
 client is read and no dialog is put in front of you before you have seen the program. Choosing a
 client is File > "Load World of Warcraft", which opens the Client Choice dialog — and that is now
 the only thing in the application that loads one.
 
 **The application window comes up before anything else.** The client picker used to be the first
 thing on screen: the frame existed but was small and unremarkable, a modal dialog sat on top of it,
-and the viewer only took the screen after the user had answered. Now the window goes fullscreen and
+and the viewer only took the screen after the user had answered. Now the window is maximised and
 the renderer starts warming first, and the picker is not shown at all when there is nothing to ask
 — it seeds itself from the saved folder and detects the client in its constructor, so if that
 worked, loading it is exactly what pressing Load would have done. It still appears for a real
 question (first run, a moved install, a folder with no client in it), now centred over a running
 application, and File > Client Choice is unchanged.
 
-**Startup is viewer-first.** An interactive launch goes straight to borderless fullscreen on the
-viewport. The Browse, Model and Animation panels come up as they were left (all three on a first
-run): the empty viewport's prompt already says what to do next, so hiding the panels that do it is
-not needed to make an empty application look tidy. There is no logo and no placeholder object. F11
-or Esc leaves fullscreen, and the menu bar survives it deliberately — without the caption there
-would otherwise be no visible way out, or to View > "Restart Unity Renderer".
+**Startup is viewer-first.** An interactive launch opens the main window maximised, with its title
+bar, so it can be minimised, restored and moved like any other. The Browse, Model and Animation
+panels come up as they were left (all three on a first run): the empty viewport's prompt already says
+what to do next, so hiding the panels that do it is not needed to make an empty application look
+tidy. There is no logo and no placeholder object. View > Fullscreen (F11) gives borderless fullscreen
+on the viewport; F11 or Esc leaves it, and the menu bar survives it deliberately — without the caption
+there would otherwise be no visible way out, or to View > "Restart Unity Renderer".
 
 **No test objects in a normal run.** The spinning cube that used to fill the viewport before a
 model was chosen is off unless `-wmvPlaceholder` is passed. It answered "is the embedded player

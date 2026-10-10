@@ -355,7 +355,7 @@ public:
   // place every load path reports to.
   void DisplayedContentChanged();
 
-  // The command bar along the top: open, fullscreen, the current model and the three panel toggles.
+  // The command bar along the top: the viewer selector, the screenshot, the current model and the three panel toggles.
   void InitCommandBar();
   void OnCommandBar(wxCommandEvent & event);
   void OnUpdateCommandUI(wxUpdateUIEvent & event);
