@@ -41,6 +41,7 @@ public:
   
   void Open();
   void Close();
+  wxSize InitialFloatingSize() const;
 };
 
 #endif

@@ -1,0 +1,78 @@
+cmake_minimum_required(VERSION 3.20)
+project(SettingsItemID LANGUAGES C CXX)
+set(CMAKE_CXX_STANDARD 14)
+set(WMV_ROOT "" CACHE PATH "WMV checkout")
+set(QT_ROOT "" CACHE PATH "Qt installation")
+set(wxWidgets_ROOT_DIR "${WMV_ROOT}/ThirdParty/wxWidgets33" CACHE PATH "wxWidgets installation")
+set(wxWidgets_LIB_DIR "${wxWidgets_ROOT_DIR}/lib/vc14x_x64_dll" CACHE PATH "wxWidgets libraries")
+set(wxWidgets_USE_STATIC OFF)
+find_package(wxWidgets REQUIRED COMPONENTS core base aui)
+include(${wxWidgets_USE_FILE})
+find_package(Qt5Core REQUIRED PATHS "${QT_ROOT}/lib/cmake/Qt5Core")
+
+function(slice text begin end out)
+  string(FIND "${text}" "${begin}" first)
+  string(FIND "${text}" "${end}" last)
+  if(first LESS 0 OR last LESS first)
+    message(FATAL_ERROR "Cannot extract ${begin}")
+  endif()
+  math(EXPR length "${last}-${first}")
+  string(SUBSTRING "${text}" ${first} ${length} body)
+  set(${out} "${body}" PARENT_SCOPE)
+endfunction()
+
+# Real filtering/selection implementations; only network import callbacks and
+# the final application receiver are replaced. The picker's Show is suppressed.
+file(READ "${WMV_ROOT}/Source/wowmodelviewer/itemselection.cpp" dialog)
+foreach(header QString globalvars.h Game.h charcontrol.h ItemImporterDialog.h modelviewer.h NPCImporterDialog.h)
+  string(REGEX REPLACE "#include [<\"]${header}[>\"]" "" dialog "${dialog}")
+endforeach()
+slice("${dialog}" "void FilteredChoiceDialog::OnImportNPC" "void FilteredChoiceDialog::DoFilter" imports)
+string(REPLACE "${imports}" "void FilteredChoiceDialog::OnImportNPC(wxCommandEvent&) {}\nvoid FilteredChoiceDialog::OnImportItem(wxCommandEvent&) {}\n" dialog "${dialog}")
+file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/dialog.cpp" "#include \"receiver.h\"\n${dialog}")
+file(APPEND "${CMAKE_CURRENT_BINARY_DIR}/dialog.cpp" "\nnamespace UiStyle { bool darkActive() { return false; } const Palette& palette() { static Palette p; return p; } }\n")
+
+file(READ "${WMV_ROOT}/Source/wowmodelviewer/charcontrol.cpp" control)
+slice("${control}" "void CharControl::selectItem(" "void CharControl::selectSet()" select)
+string(REPLACE "itemDialog->Show();" "itemDialog->Show(false);" select "${select}")
+# wxMSW gives a dialog no owner when its parent is hidden. Positioning belongs
+# to the visible application shell, so omit only that final Move in this harness.
+string(REPLACE "itemDialog->Move(itemDialog->GetParent()->GetScreenPosition() + wxPoint(4, 64));" "" select "${select}")
+string(FIND "${control}" "QString CharControl::getItemName(" start)
+string(SUBSTRING "${control}" ${start} -1 label)
+file(READ "${WMV_ROOT}/Source/wowmodelviewer/util.cpp" util)
+string(FIND "${util}" "bool correctType(" start)
+string(SUBSTRING "${util}" ${start} -1 slots)
+file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/selection.inc" "${slots}\n${label}\n${select}")
+
+file(READ "${WMV_ROOT}/Source/wowmodelviewer/modelviewer.cpp" viewer)
+slice("${viewer}" "    sqlResult item = GAMEDATABASE.sqlQuery(" "    if (item.valid && !item.empty())" query)
+file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/catalog.inc" "${query}\nreturn item;")
+string(FIND "${viewer}" "interfaceManager.AddPane(settingsControl," start)
+string(SUBSTRING "${viewer}" ${start} -1 pane)
+string(FIND "${pane}" "));" end)
+math(EXPR length "${end}+3")
+string(SUBSTRING "${pane}" 0 ${length} pane)
+file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/pane.inc" "${pane}")
+
+# Compile the real settings layout, stubbing persistence and folder dialogs.
+foreach(name GeneralSettings ExportSettings SettingsControl)
+  file(READ "${WMV_ROOT}/Source/wowmodelviewer/${name}.cpp" source)
+  foreach(header GlobalSettings.h globalvars.h modelviewer.h util.h logger/Logger.h)
+    string(REPLACE "#include \"${header}\"" "" source "${source}")
+  endforeach()
+  if(NOT name STREQUAL "SettingsControl")
+    string(FIND "${source}" "void ${name}::" first)
+    string(SUBSTRING "${source}" 0 ${first} source)
+    string(APPEND source "\nvoid ${name}::OnCheck(wxCommandEvent&) {}\nvoid ${name}::OnButton(wxCommandEvent&) {}\nvoid ${name}::Update() {}\n")
+  endif()
+  file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/${name}.cpp" "#include \"receiver.h\"\n${source}")
+endforeach()
+add_executable(settings-item-id regression.cpp "${CMAKE_CURRENT_BINARY_DIR}/dialog.cpp"
+  "${CMAKE_CURRENT_BINARY_DIR}/GeneralSettings.cpp" "${CMAKE_CURRENT_BINARY_DIR}/ExportSettings.cpp"
+  "${CMAKE_CURRENT_BINARY_DIR}/SettingsControl.cpp" "${WMV_ROOT}/Source/games/wow/database.cpp"
+  "${WMV_ROOT}/Source/core/sqlite3.c")
+target_compile_definitions(settings-item-id PRIVATE BUILDING_WOW_DLL)
+target_include_directories(settings-item-id PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}" "${CMAKE_CURRENT_BINARY_DIR}"
+  "${WMV_ROOT}/Source/wowmodelviewer" "${WMV_ROOT}/Source/games/wow" "${WMV_ROOT}/Source/core")
+target_link_libraries(settings-item-id PRIVATE ${wxWidgets_LIBRARIES} Qt5::Core)

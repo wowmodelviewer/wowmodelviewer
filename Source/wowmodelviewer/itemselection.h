@@ -52,6 +52,7 @@ protected:
     wxTextCtrl* m_pattern;
     const wxArrayString* m_choices;
     std::vector<int> m_indices; // filtered index -> orig inndex
+    std::vector<int> m_searchIds; // Stable identity, independent of displayed labels.
     
     DECLARE_EVENT_TABLE()
 
@@ -72,7 +73,8 @@ public:
       const wxString& caption,
       const wxArrayString& choices,
       const std::vector<int> *quality,
-      bool keepfirst = true);
+      bool keepfirst = true,
+      const std::vector<int>& searchIds = {});
 
   virtual void OnFilter(wxCommandEvent& event);
   virtual void OnImportNPC(wxCommandEvent& event);
@@ -109,7 +111,8 @@ public:
                const wxArrayString& catnames,
                const std::vector<int> *quality,
                bool keepfirst = true,
-               bool helpmsg = true);
+               bool helpmsg = true,
+               const std::vector<int>& searchIds = {});
 
   virtual void Check(int index, bool state = true);
   virtual void OnCheck(wxCommandEvent &e);

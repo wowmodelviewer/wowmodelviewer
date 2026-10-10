@@ -655,7 +655,15 @@ void ModelViewer::InitDatabase()
   }
   
   {
-    sqlResult item = GAMEDATABASE.sqlQuery("SELECT Item.ID, ItemSparse.Display_Lang, Item.InventoryType, Item.ClassID, Item.SubclassID, Item.SheatheType FROM Item LEFT JOIN ItemSparse ON Item.ID = ItemSparse.ID WHERE Item.InventoryType !=0 AND ItemSparse.Display_Lang != \"\"");
+    // Keep the existing named catalog, and admit unnamed equipment only when an
+    // appearance resolves to a real display record. IN avoids duplicate items
+    // when several modifiers share the same appearance.
+    sqlResult item = GAMEDATABASE.sqlQuery(
+      "SELECT Item.ID, ItemSparse.Display_Lang, Item.InventoryType, Item.ClassID, Item.SubclassID, Item.SheatheType "
+      "FROM Item LEFT JOIN ItemSparse ON Item.ID = ItemSparse.ID WHERE Item.InventoryType != 0 AND "
+      "(TRIM(COALESCE(ItemSparse.Display_Lang, '')) != '' OR Item.ID IN "
+      "(SELECT M.ItemID FROM ItemModifiedAppearance M JOIN ItemAppearance A ON A.ID = M.ItemAppearanceID "
+      "JOIN ItemDisplayInfo D ON D.ID = A.ItemDisplayInfoID WHERE A.ItemDisplayInfoID > 0))");
 
     if (item.valid && !item.empty())
     {
@@ -663,6 +671,8 @@ void ModelViewer::InitDatabase()
       for (int i = 0, imax = item.values.size(); i < imax; i++)
       {
         ItemRecord rec(item.values[i]);
+        if (rec.name.trimmed().isEmpty())
+          rec.name = QString::fromStdWString(_("Unnamed item").ToStdWstring());
         items.items.push_back(rec);
       }
     }
@@ -841,8 +851,8 @@ void ModelViewer::InitDocking()
   // settings frame
   interfaceManager.AddPane(settingsControl, wxAuiPaneInfo().
                            Name(wxT("Settings")).Caption(wxT("Settings")).
-                           FloatingSize(wxSize(400, 550)).Float().TopDockable(false).LeftDockable(false).
-                           RightDockable(false).BottomDockable(false).Fixed().Show(false));
+                           FloatingSize(settingsControl->InitialFloatingSize()).Float().TopDockable(false).LeftDockable(false).
+                           RightDockable(false).BottomDockable(false).Resizable().Show(false));
 
   // tell the manager to "commit" all the changes just made
   //interfaceManager.Update();
@@ -876,8 +886,8 @@ void ModelViewer::ResetLayout()
 
   interfaceManager.AddPane(settingsControl, wxAuiPaneInfo().
                            Name(wxT("Settings")).Caption(wxT("Settings")).
-                           FloatingSize(wxSize(400, 550)).Float().TopDockable(false).LeftDockable(false).
-                           RightDockable(false).BottomDockable(false).Show(false));
+                           FloatingSize(settingsControl->InitialFloatingSize()).Float().TopDockable(false).LeftDockable(false).
+                           RightDockable(false).BottomDockable(false).Resizable().Show(false));
 
   applyWorkspace(workspacePanes(m_viewerMode), false);
 
@@ -986,7 +996,11 @@ void ModelViewer::LoadLayout()
       // No need to display these windows on startup. A perspective stores captions too, and one saved
       // before the Attachments window was renamed would bring back its old OpenGL caption.
       interfaceManager.GetPane(modelControl).Show(false).Caption(wxT("Attachments"));
-      interfaceManager.GetPane(settingsControl).Show(false);
+      auto &settingsPane = interfaceManager.GetPane(settingsControl);
+      // Migrate the old fixed-size pane even when restored from a saved layout.
+      if (!settingsPane.IsResizable())
+        settingsPane.FloatingSize(settingsControl->InitialFloatingSize());
+      settingsPane.Resizable().Show(false);
 
       // The command bar is not something a saved layout can take away. Browse, Model and
       // Animation keep whatever shown state the layout saved: that is how the panels a user
@@ -1595,7 +1609,10 @@ void ModelViewer::LoadItem(unsigned int id)
 
     if (itemInfos.valid && !itemInfos.empty())
     {
-      if (itemInfos.values[0][0] != "" && itemInfos.values[0][1] != "")
+      // Some weapons (e.g. Jaina's staff) use textures embedded in the M2's
+      // material definitions and have no replacement skin in ItemDisplayInfo.
+      // Their model is still valid; apply an external skin only if one exists.
+      if (itemInfos.values[0][0].toUInt() != 0)
       {
         LoadModel(GAMEDIRECTORY.getFile(itemInfos.values[0][0].toInt()));
         applyItemComponentGeosets(id);

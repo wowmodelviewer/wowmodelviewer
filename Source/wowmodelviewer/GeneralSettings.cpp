@@ -18,9 +18,9 @@
 #include <wx/statline.h>
 
 
-IMPLEMENT_CLASS(GeneralSettings, wxWindow)
+IMPLEMENT_CLASS(GeneralSettings, wxScrolledWindow)
 
-BEGIN_EVENT_TABLE(GeneralSettings, wxWindow)
+BEGIN_EVENT_TABLE(GeneralSettings, wxScrolledWindow)
   EVT_CHECKBOX(ID_SETTINGS_RANDOMSKIN, GeneralSettings::OnCheck)
   EVT_CHECKBOX(ID_SETTINGS_DISPLAYIDINLIST, GeneralSettings::OnCheck)
   EVT_BUTTON(ID_GENERAL_SETTINGS_APPLY, GeneralSettings::OnButton)
@@ -31,14 +31,15 @@ END_EVENT_TABLE()
 
 GeneralSettings::GeneralSettings(wxWindow* parent, wxWindowID id)
 {
-  if (Create(parent, id, wxPoint(0,0), wxSize(400,720), 0, wxT("GeneralSettings")) == false)
+  if (Create(parent, id, wxDefaultPosition, wxDefaultSize, wxVSCROLL | wxTAB_TRAVERSAL, wxT("GeneralSettings")) == false)
   {
     LOG_ERROR << "GeneralSettings";
     return;
   }
   wxFlexGridSizer *top = new wxFlexGridSizer(1);
+  top->AddGrowableCol(0);
 
-  wxGridSizer *sizer = new wxGridSizer(2, 2, 5, 5);
+  wxBoxSizer *sizer = new wxBoxSizer(wxVERTICAL);
 
   // No "Show Particle" / "Zero Particle": they only changed the particles the archived OpenGL viewport
   // simulated and drew. The Unity viewport runs its own emitters and is told nothing of either.
@@ -58,13 +59,13 @@ GeneralSettings::GeneralSettings(wxWindow* parent, wxWindowID id)
   customDirectoryPathDisplay =  new wxTextCtrl(this, wxID_ANY, customMsg, wxDefaultPosition, wxSize(300,-1), wxTE_READONLY);
   top->AddSpacer(2);
   top->Add(new wxStaticText(this, wxID_ANY, _("Game Folder"),  wxDefaultPosition, wxDefaultSize, 0), 0, wxALL, 5);
-  top->Add(gamePathDisplay, 0, wxALL, 5);
+  top->Add(gamePathDisplay, 0, wxEXPAND | wxALL, 5);
   top->Add(new wxButton(this, ID_FIND_GAME_FOLDER, _("Change Game Folder"), wxDefaultPosition, wxDefaultSize, 0), 0, wxALL, 5);
   top->AddSpacer(2);
   top->Add(new wxStaticLine(this, wxID_ANY), 1, wxEXPAND);
   top->AddSpacer(2);
   top->Add(new wxStaticText(this, wxID_ANY, _("Custom / Imported Files"),  wxDefaultPosition, wxDefaultSize, 0), 0, wxALL, 5);
-  top->Add(customDirectoryPathDisplay, 0, wxALL, 5);
+  top->Add(customDirectoryPathDisplay, 0, wxEXPAND | wxALL, 5);
   wxFlexGridSizer * gbox = new wxFlexGridSizer(2, 5, 5);
   gbox->Add(new wxButton(this, ID_FIND_CUSTOM_FOLDER, _("Select Custom Folder"), wxDefaultPosition, wxDefaultSize, 0));
   gbox->Add(new wxButton(this, ID_ERASE_CUSTOM_FOLDER, _("No Custom Folder"), wxDefaultPosition, wxDefaultSize, 0));
@@ -73,7 +74,7 @@ GeneralSettings::GeneralSettings(wxWindow* parent, wxWindowID id)
                                                  _("Custom files should be placed in a folder hierarchy that mirrors "
                                                    L"the game database (e.g. <Custom Folder>/Creature/Dragon/Dragon.m2)"),
                                                  wxDefaultPosition, wxDefaultSize, 0);
-  customFileMsg->Wrap(350);
+  customFileMsg->Wrap(FromDIP(350));
 
   top->Add(customFileMsg, 0, wxALL, 5);
   top->AddSpacer(2);
@@ -84,13 +85,13 @@ GeneralSettings::GeneralSettings(wxWindow* parent, wxWindowID id)
   top->Add(new wxStaticText(this, wxID_ANY, _("Armory Importer"), wxDefaultPosition, wxDefaultSize, 0), 0, wxALL, 5);
   armoryProxyURLCtrl = new wxTextCtrl(this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxSize(300, -1));
   top->Add(new wxStaticText(this, wxID_ANY, _("Proxy URL (optional)"), wxDefaultPosition, wxDefaultSize, 0), 0, wxLEFT | wxRIGHT, 5);
-  top->Add(armoryProxyURLCtrl, 0, wxALL, 5);
+  top->Add(armoryProxyURLCtrl, 0, wxEXPAND | wxALL, 5);
   wxStaticText *armoryMsg = new wxStaticText(this, wxID_ANY,
                                              _("Character import works out of the box via a built-in proxy, so you don't need "
                                                L"any setup or credentials. Leave this blank unless you want to point it at a "
                                                L"different proxy (Advanced) -- then paste the URL here and click Apply."),
                                              wxDefaultPosition, wxDefaultSize, 0);
-  armoryMsg->Wrap(350);
+  armoryMsg->Wrap(FromDIP(350));
   top->Add(armoryMsg, 0, wxALL, 5);
   top->AddSpacer(2);
   top->Add(new wxStaticLine(this, wxID_ANY), 1, wxEXPAND);
@@ -99,10 +100,9 @@ GeneralSettings::GeneralSettings(wxWindow* parent, wxWindowID id)
   top->Add(sizer, 0, wxEXPAND | wxALL, 5);
   top->AddSpacer(2);
   top->Add(new wxButton(this, ID_GENERAL_SETTINGS_APPLY, _("Apply"), wxDefaultPosition, wxDefaultSize, 0), 0, wxALL, 5);
-  top->SetMinSize(350, 720);
   SetSizer(top);
-  SetAutoLayout(true);
-  Layout();
+  SetScrollRate(0, FromDIP(10));
+  FitInside();
 }
 
 

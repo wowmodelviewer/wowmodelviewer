@@ -647,9 +647,9 @@ void CharControl::selectItem(ssize_t type, ssize_t slot, const wxChar *caption)
   }
 
   if (subclassesFound.size() > 1)
-    itemDialog = new CategoryChoiceDialog(this, type, g_modelViewer, wxT("Choose an item"), caption, choices, cats, catnames, &quality, false);
+    itemDialog = new CategoryChoiceDialog(this, type, g_modelViewer, wxT("Choose an item"), caption, choices, cats, catnames, &quality, false, true, numbers);
   else
-    itemDialog = new FilteredChoiceDialog(this, type, g_modelViewer, wxT("Choose an item"), caption, choices, &quality);
+    itemDialog = new FilteredChoiceDialog(this, type, g_modelViewer, wxT("Choose an item"), caption, choices, &quality, true, numbers);
 
   wxSize s = itemDialog->GetSize();
   const int w = 250;
@@ -1341,7 +1341,8 @@ void CharControl::tryToEquipItem(int id)
 
 QString CharControl::getItemName(ItemRecord & item)
 {
-  QString result = item.name;
+  QString result = item.name.trimmed().isEmpty()
+    ? QString::fromStdWString(_("Unnamed item").ToStdWstring()) : item.name;
 
   if (displayItemAndNPCId != 0)
   {
