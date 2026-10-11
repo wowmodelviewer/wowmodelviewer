@@ -437,6 +437,12 @@ it can be compiled and unit-tested outside the editor -- see `Tests/WowParserTes
 framework-free (`WowParserTests.RunAll()` returns a failure count) and covers valid/truncated/
 out-of-range M2 and skin data, the BLP encodings and the coordinate conversion.
 
+`Assets/Scripts/Wow/World/` holds the world-file parsers (WDT and split ADT: terrain chunks, holes,
+alpha storage, placements), built on `docs/world-viewer/00-audit.md` and documented in
+`docs/world-viewer/01-parsers.md`. Nothing in the player calls them yet. Their tests (`Tests/WorldParserTests.cs`,
+and `Tests/WorldCorpusValidation.cs` on the real client bytes) and the console runner are described in
+`Tests/README.md`.
+
 ## How embedding works
 
 WMV launches the player with the standard standalone-player embedding arguments:

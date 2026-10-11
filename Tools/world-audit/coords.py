@@ -13,7 +13,9 @@ bytes and reporting how well each fits, so the winner is measured, not assumed.
 4. High-resolution hole bits: all 8 symmetries of the 8x8 grid and the whole-word MSB-first order, scored (a) by hole
    cells inside a WMO's stored world box (MODF extents, which reproduce the placed model exactly: rotation.py), over
    all cells and over the cells that can discriminate (chunks not wholly inside a box), and (b) without WMOs, by how
-   many hole cells continue into the neighbouring chunk across a chunk or tile border.
+   many hole cells continue into the neighbouring chunk across a chunk or tile border. The whole-word MSB-first order
+   reads bit 63-(r*8+c), which is the same cell as 'rotate 180' (bit (7-r)*8+(7-c)), so the list holds 8 distinct
+   orders, not 9; the two score identically by construction.
 5. MCAL orientation: the alpha of the same texture along both kinds of chunk edge (all 8 symmetries); 4-bit nibble
    order tested where it can show: across the column edge and across byte boundaries inside a row.
 """

@@ -130,6 +130,15 @@ class Alpha(unittest.TestCase):
         vals, used = A.rle_alpha(bytes([0x80 | 100, 7]), 0, 2)
         self.assertIsNone(vals)
 
+    def test_rle_copy_stops_at_end(self):
+        # 4095 filled values, then a copy run of 5 whose bytes lie past `end`: they belong to the next chunk
+        stream = bytes([0x80 | 127, 9]) * 32 + bytes([0x80 | 31, 9]) + bytes([5]) + bytes(8)
+        end = len(stream) - 8
+        vals, used = A.rle_alpha(stream, 0, end)
+        self.assertIsNone(vals)
+        self.assertLessEqual(used, end)
+        self.assertIsNotNone(A.rle_alpha(stream, 0, len(stream))[0])
+
 
 class Adt(unittest.TestCase):
     def test_root_mcnk_smaller_than_header(self):
