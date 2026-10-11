@@ -4708,6 +4708,23 @@ bool WowModelViewApp::OnInit()
       break;
     }
 
+  // Held while the viewer runs, so its installer and uninstaller ask to close it first (AppMutex in
+  // installer/WoWModelViewer.iss). Never closed: Windows lets go of it when the process ends.
+  ::CreateMutexW(nullptr, FALSE, L"WoWModelViewer-B7E9F3A2-1C4D-4E8A-9F6B-2A3C5D7E9F10");
+
+  // What the viewer reads and writes beside itself (plugins\, games\, dbd\, the listfile and keys, dbcache\, the log)
+  // is found relative to the working directory: the folder of the exe, however it was started (a shortcut with
+  // another "Start in", a console in another folder). A file named on the command line is still found from the folder
+  // it was started in (launchPath).
+  const wxString launchDir = wxGetCwd();
+  wxSetWorkingDirectory(wxFileName(wxStandardPaths::Get().GetExecutablePath()).GetPath());
+  auto launchPath = [&launchDir](const wxString & arg) {
+    wxFileName fn(arg);
+    if (fn.IsRelative())
+      fn.MakeAbsolute(launchDir);
+    return QString::fromWCharArray(fn.GetFullPath().wc_str());
+  };
+
   bool displayConsole = false;
 
   // init next-gen stuff
@@ -4983,7 +5000,7 @@ bool WowModelViewApp::OnInit()
       // right after the folder that does not start with '-'.
       if (i + 1 < argc) {
         i++;
-        mpqDataFolder = QString::fromWCharArray(argv[i]);
+        mpqDataFolder = launchPath(argv[i]);
         if (i + 1 < argc) {
           const QString nxt = QString::fromWCharArray(argv[i + 1]);
           if (!nxt.startsWith('-')) { i++; mpqLocale = nxt; }
@@ -5003,10 +5020,10 @@ bool WowModelViewApp::OnInit()
       // reports what visual systems it carries, and exits. See doHeadlessM2Inspect.
       if (i + 1 < argc) {
         i++;
-        m2InspectList = QString::fromWCharArray(argv[i]);
+        m2InspectList = launchPath(argv[i]);
         if (i + 1 < argc) {
           const QString nxt = QString::fromWCharArray(argv[i + 1]);
-          if (!nxt.startsWith('-')) { i++; m2InspectOut = nxt; }
+          if (!nxt.startsWith('-')) { i++; m2InspectOut = launchPath(argv[i]); }
         }
       }
     }
@@ -5015,7 +5032,7 @@ bool WowModelViewApp::OnInit()
       // standalone (no item/equip/combiner context), and exits. See doHeadlessDumpTexture.
       if (i + 2 < argc) {
         dumpTexFileDataId = QString::fromWCharArray(argv[i + 1]).toInt();
-        dumpTexOutPath = QString::fromWCharArray(argv[i + 2]);
+        dumpTexOutPath = launchPath(argv[i + 2]);
         i += 2;
       }
     }
@@ -5042,11 +5059,11 @@ bool WowModelViewApp::OnInit()
       // Pair with the WMV_FBX_SELFTEST environment variable to log a PASS/FAIL re-import check.
       if (i + 1 < argc) {
         i++;
-        fbxExportPath = QString::fromWCharArray(argv[i]);
+        fbxExportPath = launchPath(argv[i]);
       }
     }
     else if (cmd == "-fbxequipment") {
-      if (i + 1 < argc) { i++; fbxEquipmentPath = QString::fromWCharArray(argv[i]); }
+      if (i + 1 < argc) { i++; fbxEquipmentPath = launchPath(argv[i]); }
     }
     else if (cmd == "-animdump") {
       // "-mo <model.m2> -animdump <animName>": pose the source skeleton vs the exported animation
@@ -5061,7 +5078,7 @@ bool WowModelViewApp::OnInit()
       // and logs per-mesh verts/weights/clusters/bones/parent/bind-pose. Needs NO game data.
       if (i + 1 < argc) {
         i++;
-        fbxInspectPath = QString::fromWCharArray(argv[i]);
+        fbxInspectPath = launchPath(argv[i]);
       }
     }
     else if (cmd == "-fbxmesh")  { if (i + 1 < argc) { i++; optMesh = QString::fromWCharArray(argv[i]).toInt(); } }
@@ -5097,7 +5114,7 @@ bool WowModelViewApp::OnInit()
     }
     else if (cmd.endsWith(".chr")) {
         // Defer until after LoadWoW (game data must be loaded before a character composes).
-        snapCharPath = cmd;
+        snapCharPath = launchPath(argv[i]);
     }
   }
 

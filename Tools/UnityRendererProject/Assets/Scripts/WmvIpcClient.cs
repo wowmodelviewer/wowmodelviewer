@@ -582,6 +582,7 @@ public class WmvIpcClient : MonoBehaviour
     Thread thread;
     volatile bool stopping;
     volatile bool connected;
+    volatile bool viewerGone;   // the connection to the viewer ended (or never came): Update quits
     readonly object sendLock = new object();
     readonly Queue<Msg> inbox = new Queue<Msg>();
     // The session asset cache (protocol 9): main thread only, like everything but the socket read.
@@ -693,6 +694,7 @@ public class WmvIpcClient : MonoBehaviour
         lock (sendLock) stream = null;
         connected = false;
         Status("Disconnected from WMV");
+        viewerGone = !stopping;
     }
 
     void Update()
@@ -708,6 +710,16 @@ public class WmvIpcClient : MonoBehaviour
             }
             Debug.Log("WMV IPC: " + s);
             OnStatus?.Invoke(s);
+        }
+
+        // The player draws only for the viewer that started it and never connects again: once that connection has
+        // ended (the viewer exited, crashed or was ended), quit instead of rendering on for no one.
+        if (viewerGone)
+        {
+            viewerGone = false;
+            Debug.Log("WMV IPC: the viewer's connection ended -- quitting");
+            Application.Quit();
+            return;
         }
 
         while (true)

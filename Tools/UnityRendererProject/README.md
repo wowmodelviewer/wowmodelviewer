@@ -37,6 +37,14 @@ is still the reference for rules such as geoset visibility and the M2 combiners.
    - **Active Input Handling: any of Old / New / Both.** The camera compiles against whichever
      backend is active (`ENABLE_LEGACY_INPUT_MANAGER` / `ENABLE_INPUT_SYSTEM`); with *Both* it
      uses the legacy path. No project setting needs changing just to avoid input exceptions.
+   - For a release build: **Company Name** `WoW Model Viewer`, **Product Name** `WoW Model Viewer
+     Renderer`, **Version** the viewer's (`1.0`), and **Splash Image → Show Splash Screen: off**. The
+     player keeps its window settings under `HKEY_CURRENT_USER\Software\<Company>\<Product>`, which the
+     installer removes on uninstall.
+   - For a release build, nothing reported to Unity: **Edit → Project Settings → Services**: Analytics
+     off; **Engine Diagnostics** (Insights) off; Cloud Diagnostics and crash reporting off; Player
+     Settings → **Submit Analytics** (Other Settings) off. The released player writes no analytics
+     events and nothing under `%USERPROFILE%\AppData\LocalLow`.
 6. **File → Build Settings → Windows x86_64 → Build**, and build **into**
    `tools\unity-renderer\` next to `wowmodelviewer.exe`, with the executable named
    `UnityRenderer.exe`.

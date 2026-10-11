@@ -92,6 +92,7 @@
 #include <QNetworkRequest>
 #include <QNetworkReply>
 #include <QEventLoop>
+#include <QTimer>
 #include <QUrl>
 
 #include <fstream>
@@ -1772,15 +1773,18 @@ void ModelViewer::Relaunch()
   // Development build: a "_relaunch.bat" sits a few folders above the exe (next to _run.bat). It
   // waits for THIS instance to exit so its DLLs unlock, then redeploys the freshly-built DLLs and
   // launches a new instance -- so a rebuild is picked up and a new exe never runs against stale
-  // DLLs. Installed builds don't ship that script, so we relaunch the exe directly (DLLs are
-  // colocated, no redeploy needed).
+  // DLLs. Only inside a CMake build tree (a CMakeCache.txt on the way up): an installed copy relaunches
+  // the exe directly (DLLs are colocated, no redeploy needed) and never runs a script it happens to
+  // find in a folder above it.
   wxString relaunchBat;
   wxFileName probe(exe);
+  bool inBuildTree = false;
   for (int up = 0; up < 6 && probe.GetDirCount() > 0; ++up)
   {
     probe.RemoveLastDir();
+    inBuildTree = inBuildTree || wxFileName(probe.GetPath(), wxT("CMakeCache.txt")).FileExists();
     const wxFileName cand(probe.GetPath(), wxT("_relaunch.bat"));
-    if (cand.FileExists()) { relaunchBat = cand.GetFullPath(); break; }
+    if (inBuildTree && cand.FileExists()) { relaunchBat = cand.GetFullPath(); break; }
   }
 
   if (!relaunchBat.IsEmpty())
@@ -3700,6 +3704,31 @@ void ModelViewer::PromptAndLoadClient()
 // server error, short payload) leaves the existing list in place, so a failed refresh can never
 // break startup. Streams to a temp file to keep memory flat, then swaps it in atomically. Reuses
 // the generic "Loading file list..." step so nothing about a network fetch surfaces in the UI.
+// A request that stops answering is given up after this long without data -- Qt 5.15's default transfer timeout
+// (QNetworkRequest::DefaultTransferTimeoutConstant); this Qt has none of its own -- and the load goes on with what is
+// on disk instead of waiting for ever.
+static const int NETWORK_STALL_MS = 30000;
+
+// Runs the event loop until the reply has finished: aborted when no data has arrived for NETWORK_STALL_MS (the
+// caller sees an error and keeps what it has).
+static void waitForReply(QNetworkReply * reply)
+{
+  QEventLoop loop;
+  QTimer stall;
+  stall.setSingleShot(true);
+  QObject::connect(&stall, &QTimer::timeout, reply, [reply]() {
+    LOG_WARNING << "Download stalled (no data for" << NETWORK_STALL_MS / 1000 << "s):" << reply->url().toString()
+                << "- giving up";
+    reply->abort();
+  });
+  QObject::connect(reply, &QNetworkReply::downloadProgress, &stall, [&stall]() { stall.start(NETWORK_STALL_MS); });
+  QObject::connect(reply, SIGNAL(finished()), &loop, SLOT(quit()));
+  QObject::connect(reply, SIGNAL(error(QNetworkReply::NetworkError)), &loop, SLOT(quit()));
+  stall.start(NETWORK_STALL_MS);
+  if (!reply->isFinished())
+    loop.exec();
+}
+
 static bool refreshCommunityListfile(const QString & localPath, ClientLoadProgress * progress)
 {
   // Check on EVERY launch, but avoid re-pulling the ~147 MB list when it hasn't changed: send the
@@ -3733,9 +3762,6 @@ static bool refreshCommunityListfile(const QString & localPath, ClientLoadProgre
     out.write(reply->readAll());
   });
 
-  QEventLoop loop;
-  QObject::connect(reply, SIGNAL(finished()), &loop, SLOT(quit()));
-  QObject::connect(reply, SIGNAL(error(QNetworkReply::NetworkError)), &loop, SLOT(quit()));
   if (progress)
   {
     ClientLoadProgress * pd = progress;
@@ -3755,7 +3781,7 @@ static bool refreshCommunityListfile(const QString & localPath, ClientLoadProgre
         pd->progress(-1.0);
     });
   }
-  loop.exec();
+  waitForReply(reply);
 
   const bool ok = (reply->error() == QNetworkReply::NoError);
   const int status = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
@@ -3824,11 +3850,7 @@ static bool refreshTactKeys(const QString & localPath, ClientLoadProgress * prog
   request.setRawHeader("User-Agent", "WoWModelViewer");
   request.setAttribute(QNetworkRequest::RedirectPolicyAttribute, QNetworkRequest::NoLessSafeRedirectPolicy);
   QNetworkReply * reply = manager.get(request);
-
-  QEventLoop loop;
-  QObject::connect(reply, SIGNAL(finished()), &loop, SLOT(quit()));
-  QObject::connect(reply, SIGNAL(error(QNetworkReply::NetworkError)), &loop, SLOT(quit()));
-  loop.exec();
+  waitForReply(reply);
 
   const bool ok = (reply->error() == QNetworkReply::NoError);
   const QByteArray body = reply->readAll();
@@ -4231,6 +4253,36 @@ bool ModelViewer::LoadWoW(const core::GameConfig * chosenConfig, ClientLoadProgr
     timeline.cache("tact keys download", "SKIPPED", askedAgo);
   timeline.end("tact keys");
 
+  // A first start has no file list yet (the installer does not carry one): it is fetched now, before anything of the
+  // client loaded before is let go of, so a start without a connection says so instead of opening a client with
+  // nothing in Browse. (The path is the one the refresh below uses: beside the exe, the working directory.)
+  bool listAnsweredEarly = false;
+  if (!QFile::exists(QStringLiteral("listfile.csv")))
+  {
+    timeline.begin("listfile first download");
+    listAnsweredEarly = refreshCommunityListfile(QStringLiteral("listfile.csv"), progress);
+    timeline.end("listfile first download");
+    if (!QFile::exists(QStringLiteral("listfile.csv")))
+    {
+      timeline.finish("failed: no file list");
+      closeProgress();
+      LOG_ERROR << "[clientload] no file list, and it could not be downloaded";
+      const wxString title = _("The file list could not be downloaded.");
+      const wxString message =
+        _("WoW Model Viewer needs the community file list (about 150 MB) to find the game's files. It is downloaded "
+          "the first time a client is opened. Check the internet connection and open the client again.");
+      if (progress)
+        progress->failed(title, message, wxString());
+      else if (!batchMode)
+        wxMessageBox(message, title, wxOK | wxICON_ERROR, this);
+      // The client loaded before (if any) is untouched and still usable.
+      return false;
+    }
+    // The download put up its own label: back to what comes next.
+    if (progress)
+      progress->stage(_("Opening game data..."));
+  }
+
   if (progress)
     folder->setLoadProgressCallback([progress](core::GameFolder::LoadPhase, float fraction) {
       progress->progress(fraction);
@@ -4318,7 +4370,9 @@ bool ModelViewer::LoadWoW(const core::GameConfig * chosenConfig, ClientLoadProgr
   timeline.begin("listfile check");
   if (askNetwork)
   {
+    // (Not asked twice: a first start has just downloaded it.)
     const bool listAnswered =
+      listAnsweredEarly ||
       refreshCommunityListfile(core::Game::instance().configFolder() + "../../../listfile.csv", progress);
     // Only real answers spare the next hour's loads from asking: offline, or after a failed request, every load asks
     // again, as it always did.
@@ -5066,8 +5120,13 @@ void ModelViewer::OnAbout(wxCommandEvent & WXUNUSED(event))
                       L"\n"
                       L"Credits to: Linghuye, nSzAbolcs, Sailesh, Terran and Cryect\n"
                       L"for their direct and indirect contributions.");
-  info.SetWebSite(wxT("https://wowmodelviewer.net"));
-  info.SetLicence(wxT("WoW Model Viewer is released under the GNU General Public License v3, Non-Commercial Use."));
+  info.SetWebSite(wxT("https://github.com/wowmodelviewer/wowmodelviewer"));
+  info.SetLicence(wxT("WoW Model Viewer is free software, released under the GNU General Public License,\n"
+                      "version 3 or (at your option) any later version. It comes with ABSOLUTELY NO WARRANTY.\n"
+                      "See LICENSE.txt and THIRD-PARTY-NOTICES.txt in the program folder.\n"
+                      "\n"
+                      "It uses Qt 5.13.2, Copyright (C) 2019 The Qt Company Ltd., under the GNU Lesser General\n"
+                      "Public License, version 3 (its text is in THIRD-PARTY-NOTICES.txt)."));
 
   info.AddDeveloper(wxT("Ufo_Z"));
   info.AddDeveloper(wxT("Darjk"));
@@ -5090,7 +5149,7 @@ void ModelViewer::OnAbout(wxCommandEvent & WXUNUSED(event))
     info.SetIcon(icon);
   }
 
-  // The dialog wxAboutBox would show, with the build's name kept in its title: "About WoW Model Viewer Midnight".
+  // The dialog wxAboutBox would show, over this window: "About WoW Model Viewer".
   wxGenericAboutDialog dialog(info, this);
   dialog.SetTitle(wxString::Format(_("About %s"), wxString(GLOBALSETTINGS.appName())));
   dialog.ShowModal();
