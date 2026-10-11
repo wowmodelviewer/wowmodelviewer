@@ -76,7 +76,8 @@ def mcly(buf, chunk):
 
 def rle_alpha(buf, start, end):
     """WoW's compressed alpha: a byte n; top bit set = fill (the next byte, n&0x7f times), clear = copy n&0x7f bytes.
-    Returns (4096 values, bytes consumed) or (None, consumed) when it does not reach 4096 inside [start, end)."""
+    Returns (4096 values, bytes consumed) or (None, consumed) when it does not reach 4096 inside [start, end)
+    (a copy run that would pass `end` also gives None)."""
     out = bytearray()
     p = start
     while len(out) < 4096 and p < end:
@@ -89,6 +90,8 @@ def rle_alpha(buf, start, end):
             out.extend(bytes([buf[p]]) * count)
             p += 1
         else:
+            if p + count > end:
+                return None, p - start      # a copy run may not read past MCAL into the next chunk
             out.extend(buf[p:p + count])
             p += count
     return (bytes(out[:4096]) if len(out) >= 4096 else None), p - start

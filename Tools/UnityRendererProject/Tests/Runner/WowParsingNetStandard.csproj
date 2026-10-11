@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!--
+    Compile-only check: the pure parsing layer (Assets/Scripts/Wow, World/ included) as a
+    .NET Standard 2.1 library at C# 9: the API profile and language level of the Unity player.
+    It catches APIs or language features Unity would reject without opening the editor; the
+    editor compile itself is still the authoritative check.
+
+      dotnet build, Release configuration, with this project file (see Tests/README.md)
+  -->
+  <PropertyGroup>
+    <TargetFramework>netstandard2.1</TargetFramework>
+    <LangVersion>9.0</LangVersion>
+    <Nullable>disable</Nullable>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="..\..\Assets\Scripts\Wow\**\*.cs" />
+  </ItemGroup>
+</Project>

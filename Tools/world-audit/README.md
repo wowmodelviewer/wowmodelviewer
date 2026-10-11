@@ -21,7 +21,10 @@ its installer, and never write to a game folder.
   - placements: `rotation.py` (MODF against stored extents), `mldx.py` (MDDF against obj1 MLDX boxes);
   - WDL and side files: `audit_side.py`;
   - renderer and load: `terrain_needs.py`, `load_pressure.py`, `read_timing.py`;
-  - report: `report_tables.py` (the report's appendix), `pin_corpus.py` (hashes every cited file and file set).
+  - report: `report_tables.py` (the report's appendix), `pin_corpus.py` (hashes every cited file and file set);
+  - C# parsers: `compare_csharp.py` compares the C# world parsers' corpus results
+    (`Tools/UnityRendererProject/Tests/WorldCorpusValidation.cs`) with these scripts' results, key by key
+    (`docs/world-viewer/01-parsers.md`).
 - `tests/` -- `python -I -m unittest discover -s Tools/world-audit/tests`:
   - `test_wowfmt.py`: the parsers on malformed and synthetic input, and the pinned hashes;
   - `test_corpus_rules.py`: the report's rules asserted on the extracted bytes, each against its competing readings.

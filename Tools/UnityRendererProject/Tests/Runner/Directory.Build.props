@@ -1,0 +1,6 @@
+<Project>
+  <!-- Build output and intermediates go to the repository's git-ignored build folder, never next to the sources. -->
+  <PropertyGroup>
+    <ArtifactsPath>$(MSBuildThisFileDirectory)..\..\..\..\build\unity-parser-tests</ArtifactsPath>
+  </PropertyGroup>
+</Project>

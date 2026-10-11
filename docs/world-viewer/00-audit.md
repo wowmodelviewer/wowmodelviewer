@@ -280,15 +280,27 @@ Cavern phase maps (1509, 1510) and Stormheim prescenarios (1517, 1518) (risk R6)
   | Word | 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 |
   |---|---|---|---|---|---|---|---|---|
   | File | root | obj0 | obj1 | tex0 | lod | map texture | map texture `_n` | minimap |
-  | Identified by | MHDR | MDDF | MLDD | MAMP | MLHD | BLP2 512² | BLP2 256² | BLP2 512² (256² in Era and MoP) |
+  | Identified by | MHDR | MDDF | MLDD | MAMP | MLHD | BLP2 512², 10 mips | BLP2 256², mips | BLP2 512², 1 level (256² in Era and MoP) |
+
+  Evidence per word and client (corrected in `01-parsers.md` 13):
+  - Words 0-3: chunk tags in all four clients.
+  - Word 4: MLHD in Retail and Beta. Era and MoP name no lod in the window and no such file is pinned, so there it rests
+    on the listfile.
+  - Words 5 and 6: Retail and Beta only, by BLP2 size and mip count, plus decoded images: word 5 shows terrain only and
+    word 6 a normal-like field. Era and MoP: listfile only.
+  - Word 7: 512² without mips in Retail and Beta, where the decoded image is the minimap with buildings and water.
+    256² in Era and MoP. Size alone cannot separate words 5 and 7; the mip count and the image do.
 
   - The tile index: every root's MCNK 0 sits at the position of MAID index `y*64 + x` (asserted by
     `test_maid_index_is_y_times_64_plus_x`).
   - Over all WDTs the listfile names agree in all four clients (T3, first table). That is a consistency check only.
   - Words 4-6 are optional: zero on 21% (Retail) to 93% (Era) of tiles.
 - **MPHD** has 8 words. Word 0 holds the flags; words 1-6 hold the FileDataIDs of `_lgt.wdt`, `_occ.wdt`, `_fogs.wdt`,
-  `_mpv.wdt`, `.tex` and `.wdl`, in that order, in all clients. The audit read `_lgt/_occ/_fogs/_mpv/.tex/.wdl`, so
-  their chunk ids confirm each word (T8). Word 7 is non-zero exactly on modern-form WMO-only WDTs (Retail 35, Beta 21,
+  `_mpv.wdt`, `.tex` and `.wdl`, in that order, in all clients. Only Azeroth's side files are pinned: the same six
+  FileDataIDs, in the same positions, in all four clients. Retail identifies all six by their chunk ids (T8). In Beta
+  (`_mpv`), MoP (`_fogs`, `_mpv`) and Era (`_lgt`, `_fogs`, `_mpv`) the file is a 12-byte MVER-only file, identified only
+  by its MVER version (`_lgt` 20, `_fogs` 2, `_mpv` 3) and by having Retail's FileDataID. For other maps the order rests
+  on listfile names. Word 7 is non-zero exactly on modern-form WMO-only WDTs (Retail 35, Beta 21,
   Era 21, MoP 33). Where the listfile names it (all of Retail's 35 and MoP's 33; Beta 16 of 21, Era 19 of 21), the name
   is the WMO's `.pd4`. The file was not read (listfile name only).
 - **MPHD flag bits.** Ten bits are seen (0x1-0x200, T2).
@@ -420,8 +432,8 @@ audit (U9).
 **Holes.**
 - Every root MCNK of all four clients has flag 0x10000 and uses the 64-bit mask at offset 20; the 16-bit field is
   always 0. Chunks with holes: Retail 81, Era 80, MoP 16, Beta 11.
-- Bit order: `bit = row*8 + col`, least significant first, rows along the vertex rows. This is the only one of nine
-  candidate orders that passes both independent tests (6.5).
+- Bit order: `bit = row*8 + col`, least significant first, rows along the vertex rows. This is the only one of the 8
+  distinct candidate orders that passes both independent tests (6.5).
 - Most masks are whole 2x2 blocks (Retail 78 of 81), i.e. a low-resolution 4x4 hole written at high resolution.
 - No local client has pre-split ADTs: every local WDT with tiles has MAID.
 
@@ -486,8 +498,9 @@ only one of 8 symmetries that is continuous across both chunk edges (6.5).
 - **obj1.**
   - `MLDD` repeats obj0's MDDF: each of the 32,848 Retail records matches the MDDF record with the same uniqueId in
     name, position, rotation and scale. The flags gain bits 0x20/0x08/0x10, except on the 7 records that already had
-    0x20.
-  - `MLDX` is each placed doodad's world-space box (6.4).
+    0x20. The match is by uniqueId, not by position: on Retail tiles 29_48 and 30_48 the MLDD order is a permutation of
+    MDDF (212 of 229 and 1,676 of 1,703 positions differ).
+  - `MLDX` is each placed doodad's world-space box (6.4); box i belongs to MLDD record i.
   - These give exact per-doodad bounds for culling.
 - **Scale.**
   - MDDF: `u16/1024`, proven by the MLDX boxes (6.4).
@@ -538,7 +551,7 @@ The rules of 6.1-6.5 are asserted on the pinned bytes by `tests/test_corpus_rule
 where noted:
 - the MCNK position and index; the outer vertex order (against all 8 symmetries) and the inner vertex index;
 - the seam x/y finding; the doodad placement height;
-- the hole bit order (both the discriminating-chunk and continuity tests, against 8 other orders);
+- the hole bit order (both the discriminating-chunk and continuity tests, against the 7 other distinct orders);
 - the alpha orientation (against the 7 other symmetries);
 - the WMO and MLDX rotation verdicts (Retail).
 
@@ -551,7 +564,8 @@ test (gate G4).
 MCNK.position.x = (32 - ty)*T - index_y*C        MCNK.position.z = base height of the chunk
 MCNK.position.y = (32 - tx)*T - index_x*C
 ```
-Every stored x/y is within 0.0013 yd of the formula. tx/ty come from the MAID index, index_x/y from the header, and the
+Every stored x/y is within 1/768 yd (0.0013021 yd, a bound that is reached) of the formula; every deviation is 0,
+1/3072, 1/1536 or 1/768 yd. tx/ty come from the MAID index, index_x/y from the header, and the
 position from the bytes, so the test is not circular. The world origin is the map centre (the corner of tile 32,32).
 World x falls as ty grows, world y falls as tx grows, and z is up.
 
@@ -629,8 +643,10 @@ scale: MDDF u16/1024; MODF u16/1024 (seen only at 1024)
 
 ### 6.5 Holes and alpha orientation (PROVEN_BYTES)
 
-Hole cell (row, col) of a chunk lies at `(X0 - (row+½)U, Y0 - (col+½)U)`, bit `row*8 + col`. Nine candidate bit orders
-were tested (the 8 symmetries of the cell grid, plus MSB-first), with two independent tests:
+Hole cell (row, col) of a chunk lies at `(X0 - (row+½)U, Y0 - (col+½)U)`, bit `row*8 + col`. The 8 symmetries of the
+cell grid were tested. The list also held whole-word MSB-first, but that reads bit 63-(8r+c) = 8(7-r)+(7-c), the same
+cell as "rotate 180", so there are 8 distinct orders, not 9. The 01-parsers validation adds four non-symmetric
+readings (u32 halves swapped, nibbles swapped, the u64 at +16 and at +24), which also lose. Two independent tests:
 
 - **Discriminating chunks**: chunks where WMO boxes cover some cells but not all, so the order decides which cells fall
   inside. All 132 discriminating cells (Retail and Era) and all 28 (MoP and Beta) lie inside a WMO's box. The next-best
@@ -673,7 +689,7 @@ Bounding boxes:
 
 A floating origin is **recommended**, not proven necessary. File positions can range up to 34,133 yd (64 tiles),
 where float32 steps by 0.004 yd. The corpus windows reach 27,797 yd, and world coordinates span ±17,067 yd, both with
-a 0.002 yd step. The source data are float32 already (stored MCNK positions are off by up to 0.0013 yd). The reason is
+a 0.002 yd step. The source data are float32 already (stored MCNK positions are off by up to 1/768 yd). The reason is
 camera-relative jitter at close range; W4 records the pixel error at the minimum camera distance with and without it.
 
 ---
@@ -742,7 +758,7 @@ not tested here, so those cells are INFERRED.
 |---|---|---|
 | 145 vertices per chunk: 64 inner vertices at cell centres. 20% of 917,504 inner vertices are >0.5 yd off the mean of their corners, 3.2% >2 yd, max 53 yd (Retail) / 140 yd (Era) | A heightmap is a regular (2ⁿ+1)² grid. At 129² per tile the inner vertices are lost. At 257² (the smallest that holds all 145) each quarter-cell is split by one fixed diagonal while the game fans every cell from its centre, so in two of each cell's four quarter-cells the diagonal disagrees. Measured at those quarter-cell centres: median 0.074 yd, p95 0.95 yd, max 27-41 yd; >0.25 yd in 24.8% of cells, i.e. 12.4% of all quarter-cells (Retail; Era 17.5% / 8.8%) | Exact: the same 145 vertices, 4 triangles per cell |
 | 64-bit holes per chunk, one bit per cell | Holes per heightmap cell: representable at 129² | Exact: drop the cell's 4 triangles |
-| Per-chunk texture sets of up to 4 layers. 3-23 textures per tile, 1,529 distinct layer lists in 56 tiles; 64x64 alpha per layer per chunk | One global layer list per terrain; each 4 layers add a control map and a pass (23 layers = 6 passes) | Per-chunk layer indices into a texture array; one pass |
+| Per-chunk texture sets of up to 4 layers (5 in 11 Beta chunks). 3-23 textures per tile, 1,529 distinct layer lists in 56 tiles; 64x64 alpha per layer per chunk | One global layer list per terrain; each 4 layers add a control map and a pass (23 layers = 6 passes) | Per-chunk layer indices into a texture array; one pass |
 | Vertex colours (MCCV) on 2,412 Retail chunks, 299 MoP chunks and all 2,304 Beta chunks, none neutral | Not supported | Vertex attribute |
 | Supplied normals (MCNR) | Computed by Unity | Used as given |
 | Exact seams (heights equal; x/y from indices, 6.2) | Needs `SetNeighbors` and equal edge samples | Automatic: the same vertices |
@@ -904,7 +920,7 @@ probes out of the viewer entirely.
 | WDT forms; no WDT with both tiles and MODF | PROVEN_BYTES | 4.2 |
 | MAIN flag 1 ⇔ MAID names files; flag 2 ⇒ none | PROVEN_BYTES (test) | 4.2 |
 | MAID word roles (by content) and index `y*64+x` | PROVEN_BYTES (test for the index) | 4.2 |
-| MPHD words 1-6 order (side files read) | PROVEN_BYTES | 4.2, T8 |
+| MPHD words 1-6 order (Azeroth's side files read; MVER-only files identified by version) | PROVEN_BYTES | 4.2, T8 |
 | MPHD word 7 = `.pd4`; MAI2 word 0 = liquid-flow image | listfile name only | 4.2 |
 | MPHD bit 0x1 ⇔ WMO-only | PROVEN_BYTES | 4.2 |
 | MPHD bits → alpha encoding | three-point correlation only (U1) | 4.2 |
