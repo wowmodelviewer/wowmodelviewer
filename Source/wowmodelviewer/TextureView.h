@@ -15,8 +15,9 @@
  * EXPORTING. Every way to ask for an export -- the buttons, Ctrl+S / Ctrl+Shift+S, Browse's menu -- comes to
  * exportRequested. Without Quick export it asks where with Save As (starting in the folder last saved to);
  * with it the file goes straight into the texture export folder, under the texture's own folder in the game
- * (TextureExport). Either way the same writer saves it, and a notice in the preview's corner says where it
- * went, with Open folder (TextureExportNotice), or why it was not saved.
+ * (TextureExport). Either way the same writer saves it, and a notice just above the export buttons (the
+ * preview's bottom-left corner) says where it went, with Open folder (TextureExportNotice), or why it was not
+ * saved.
  *
  * THE SELECTION. Textures mode exists without one: with nothing picked the view says "Select a texture
  * in Browse". A pick (show) is the selection at once -- its name, folder and FileDataID are shown, its

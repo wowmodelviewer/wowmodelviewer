@@ -25,7 +25,9 @@ namespace
   const int TickMs = 200;
   const int WidthDip = 360;   // fits "Could not save texture" and a folder of a usual depth
   const int MinWidthDip = 220;
-  const int InsetDip = 12;    // from the preview's edges, as the preview's own note
+  // From the preview's left and bottom edges: the export buttons' margin (TextureView's info strip), so the card
+  // lines up with them, just above.
+  const int InsetDip = UiStyle::M;
 
   wxString wx(const QString & s) { return wxString(s.toStdWString()); }
 }
@@ -101,7 +103,7 @@ TextureExportNotice::TextureExportNotice(wxWindow * parent, const wxColour & aro
       onChangeFolder();
   });
   m_close->Bind(wxEVT_BUTTON, [this](wxCommandEvent &) { dismiss(); });
-  // Kept in its corner as the preview changes size.
+  // Kept over the export buttons as the preview changes size.
   parent->Bind(wxEVT_SIZE, [this](wxSizeEvent & event) {
     if (IsShown())
       place();
@@ -169,7 +171,9 @@ void TextureExportNotice::place()
   const int width = std::max(FromDIP(MinWidthDip), std::min(FromDIP(WidthDip), area.x - 2 * inset));
   GetSizer()->Layout();
   const int height = GetSizer()->CalcMin().y;
-  SetSize(area.x - inset - width, area.y - inset - height, width, height);
+  // In a preview too narrow for it, it keeps to the right edge instead: what does not fit is the start of its
+  // text, not its buttons (Close, Open folder) on the right.
+  SetSize(std::min(inset, area.x - inset - width), area.y - inset - height, width, height);
   Layout();
 }
 

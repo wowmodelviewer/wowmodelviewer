@@ -380,13 +380,23 @@ void TexturePreview::OnPaint(wxPaintEvent &)
     }
   }
 
-  // The note: small, in the bottom-left corner, over whatever is shown.
+  // The note: small, in the bottom-left corner, over whatever is shown -- above the export notice (a child
+  // window in that corner, TextureExportNotice) while one is up, not hidden under it.
   if (!m_note.IsEmpty())
   {
     dc.SetFont(GetFont());
     const wxSize text = dc.GetTextExtent(m_note);
     const int pad = FromDIP(6), inset = FromDIP(12);
-    const wxRect box(inset, size.y - inset - text.y - 2 * pad, text.x + 2 * pad, text.y + 2 * pad);
+    wxRect box(inset, size.y - inset - text.y - 2 * pad, text.x + 2 * pad, text.y + 2 * pad);
+    for (const wxWindow * child : GetChildren())
+      if (child->IsShown() && child->GetRect().Intersects(box))
+      {
+        const wxRect card = child->GetRect();
+        if (card.y - inset - box.height >= 0)
+          box.y = card.y - inset - box.height;
+        else
+          box.x = card.GetRight() + 1 + inset;   // no room above it in a short preview: beside it
+      }
     dc.SetPen(*wxTRANSPARENT_PEN);
     dc.SetBrush(wxBrush(wxColour(40, 40, 40)));
     dc.DrawRoundedRectangle(box, FromDIP(4));

@@ -1,8 +1,9 @@
 /*
  * TextureExportNotice.h
  *
- * The Textures viewer's word on an export: a small card in the bottom-right corner of the texture preview that
- * says where the file went -- "Texture saved", its name, its folder, Open folder -- or why it was not saved.
+ * The Textures viewer's word on an export: a small card in the bottom-left corner of the texture preview, just
+ * above the export buttons and lined up with them, that says where the file went -- "Texture saved", its name, its
+ * folder, Open folder -- or why it was not saved.
  *
  * It is a child of the preview, so showing it never activates a window or takes the keyboard: browsing and
  * exporting carry on under it. One card at a time: the next export replaces it (the latest file is the one
@@ -34,8 +35,8 @@ public:
   static const int SavedMs;
   static const int FailedMs;
 
-  // parent: the window it sits in, in the bottom-right corner; around: the colour around it there (its
-  // rounded corners are painted in it).
+  // parent: the window it sits in, in the bottom-left corner; around: the colour around it there (its rounded
+  // corners are painted in it).
   TextureExportNotice(wxWindow * parent, const wxColour & around);
 
   // A file was saved: its name, its folder and Open folder.

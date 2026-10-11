@@ -14,8 +14,8 @@ Format loosely based on [Keep a Changelog](https://keepachangelog.com/).
 - **The texture export folder** in Options > Settings... > Export: `Exports\Textures` in the viewer's folder at
   first, with Browse..., Reset to default and Open folder. A folder that cannot be written to is refused, with the
   reason.
-- **A saved-file notice** in the corner of the texture preview after every texture export, Save As included,
-  with **Open folder** (Explorer, the file selected). It goes by itself after a few seconds, stays while the mouse
+- **A saved-file notice** just above the export buttons after every texture export, Save As included, with
+  **Open folder** (Explorer, the file selected). It goes by itself after a few seconds, stays while the mouse
   is on it, and never takes the keyboard. When a Quick export cannot be saved it says why, and when the export
   folder itself cannot be used it offers **Change folder...**.
 
