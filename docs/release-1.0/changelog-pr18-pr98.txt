@@ -1,0 +1,849 @@
+WoW Model Viewer - changes from pull request #18 to #98
+=======================================================
+
+Every pull request merged between #18 (19 August 2026) and #98 (10 October 2026), in order. Pull
+requests that were closed without being merged are left out: #60, #61, #64, #65, #69 and #74. The
+work of #61, #64, #65, #69 and #74 arrived later through #93 to #96. (#48, #49 and #80 are not pull
+requests.) The FBX export features below (#63, #95, #96) are in the source code; the 1.0 installer
+ships without the FBX exporter.
+
+HIGHLIGHTS
+----------
+
+- A new viewport built on the Unity engine. It arrived step by step (#18 to #28), became the main viewport for
+  creatures (#29) and then the only viewport, retiring the OpenGL one (#47).
+- Models that look like they do in the game: new lighting and shadows (#30, #42, #58); transparent, glowing,
+  animated and layered materials (#24, #33, #34, #37, #38, #41); particles and ribbon trails (#39); glowing eyes
+  (#67); the game's own rules for world-model materials (#51).
+- More than creatures: playable characters (#46), characters on mounts (#54, #56) and world models such as
+  buildings (#50) in the viewport.
+- New viewers next to Models: Textures, to browse, preview and export the game's textures (#71), and Buildings
+  (#79). Browse lists what the current viewer shows (#72), and commands that only act on a model are greyed out
+  elsewhere (#76).
+- Classic clients open as themselves, with their own models, database and customization (#81, #83), and
+  in Classic Beta characters can switch between their Classic and HD models (#84).
+- Importing: Armory import works again and asks for region, realm and character name (#66, #68); NPCs and models
+  load by ID (#78); NPCs on their own model show their weapons (#96).
+- Equipment and animation: item sets by armor type (#73) and transmog sets with per-slot choices (#94), a working
+  remove button on each slot (#93), sorting the animation list (#62), and choosing FBX export clips (#63, #95).
+- Pictures: a one-click 4K screenshot with a transparent background (#59) and a choice of background colour (#77).
+- A redesigned interface with a Dark appearance across the whole window (#44, #75), opening as a normal maximised
+  window, now version 1.0 (#98).
+- Faster and steadier: much faster client loading (#97) and model transfer to the viewport (#86), memory leaks
+  fixed (#82, #91), and crashes fixed (#52, #70).
+
+ALL MERGED PULL REQUESTS
+------------------------
+
+#18  2026-08-19  [Added]  New Unity viewport available from View > Unity Renderer
+      - View > Unity Renderer opens a dockable pane with the new Unity-based viewport, the start of
+        a new rendering pipeline that will replace the OpenGL viewport.
+      - The Unity viewport draws straight from World of Warcraft game data. Nothing is exported, and
+        no OBJ or FBX conversion step is needed.
+      - At this stage the pane only shows a test cube with an orbit camera. The OpenGL viewport
+        stays the main viewport while the migration continues.
+      - The Unity viewport is optional. If no Unity renderer is installed next to the program (or at
+        the path given in the settings), a clear message appears and the program carries on with the
+        OpenGL viewport.
+
+#19  2026-08-21  [Added]  The Unity viewport can read game files from the loaded client
+      - While running, the Unity viewport asks the program for raw game files from the active
+        client, on both modern (CASC) and older MPQ-based installs.
+      - Whenever a model is loaded, the Unity viewport is told which model is on screen, and it
+        shows the connection status in its pane. Models are not drawn yet.
+      - Files travel directly between the program and the viewport and are never written to disk.
+      - Damaged or truncated game files are now checked more strictly while being read, so they are
+        less likely to cause crashes.
+
+#20  2026-08-22  [Added]  The Unity viewport draws textured models
+      - Models (M2) now appear in the Unity viewport as textured, unanimated meshes, with their
+        textures decoded directly from the game's BLP files.
+      - Creature skins are looked up in the game database. Older models with no database entry use a
+        clearly marked fallback.
+      - Parts the OpenGL viewport hides stay hidden, and reflective environment textures are
+        applied, so the two viewports match on the first test models.
+      - Animation, particles, characters, equipment and maps are not supported in the Unity viewport
+        yet.
+
+#21  2026-08-22  [Fixed]  The Unity viewport shows the skin you picked
+      - Before, the Unity viewport used whichever creature skin the database listed first, so it
+        could show a different skin from the one picked in the skin dropdown.
+      - It now follows the dropdown, the skin chosen by the Random Skins option at load time, and
+        the look applied by NPC import.
+      - Textures picked one slot at a time from the folder skin lists are reflected too.
+      - Changing the skin swaps only the textures that changed. The model stays in place and does
+        not reload.
+
+#22  2026-08-22  [Fixed]  Retail creature looks, geometry variants and particle colours load
+      correctly
+      - On current retail clients, creature display data was read from the wrong database columns.
+        This affected both viewports.
+      - Because of it, NPC and Armory import could not apply a specific creature look. The model
+        kept whatever skin it already had, and the log reported that the display was not associated
+        with the model.
+      - Many creature looks also lost their geometry variants or picked up another look's geometry.
+        Creature particle colour replacement never took effect.
+      - Creatures whose looks differ only in geometry now list each variant separately in the skin
+        dropdown, and particle colours apply where the creature defines them.
+      - Older clients were not affected and behave as before.
+
+#23  2026-08-22  [Added]  The Unity viewport shows the right geometry for each creature variant
+      - Some creature variants differ in which parts of the model are shown rather than in their
+        skin, for example a horse with a long flowing mane and tail versus a cropped mane and docked
+        tail.
+      - Before, the Unity viewport drew all such variants the same. It now shows and hides model
+        parts exactly as the OpenGL viewport does.
+      - Switching variants takes effect at once without reloading the model, and the camera does not
+        jump.
+      - Models without per-variant geometry look the same as before. Geometry driven by character
+        customization or equipment is not covered yet.
+
+#24  2026-08-22  [Added]  The Unity viewport draws transparent, glowing and layered materials
+      - Before, the Unity viewport drew nearly every surface as opaque with a single texture. That
+        was wrong for a large share of creatures.
+      - Every M2 blend mode now works, including transparency, additive glow and cut-out edges,
+        using the same rules as the OpenGL viewport.
+      - Materials with a second texture layer now combine both layers, including
+        environment-reflection layers. The few rare combinations still unsupported fall back to the
+        first layer, as before.
+
+#25  2026-08-22  [Added]  Models in the Unity viewport are now deformed by their bones
+      - The Unity viewport now rebuilds each model's skeleton and deforms the mesh with it. This
+        lays the groundwork for animation.
+      - No animation plays yet. At rest, a model looks exactly the same as before.
+      - Models whose bones are kept in a separate skeleton file are still drawn as a static mesh.
+
+#26  2026-08-22  [Added]  Creatures play their idle animation in the Unity viewport
+      - Creatures in the Unity viewport now loop their default standing idle. This is the same
+        animation the OpenGL viewport picks, which is not always the model's first animation.
+      - Parts that loop on their own timer, independent of the main animation, also move.
+      - Rotations are interpolated smoothly, and models whose bones are kept in a separate skeleton
+        file still stay static.
+
+#27  2026-08-22  [Added]  The Unity viewport plays the animation you pick
+      - Picking an animation such as Run, Death or an emote in the animation dropdown now switches
+        the Unity viewport too. Before, it always played its own default idle.
+      - The animation chosen while a model loads and the loop control also reach the Unity viewport,
+        so it starts on the same animation as the app.
+      - Some animations keep their keyframes outside the model file. For those, the viewport falls
+        back to the model's idle and says why in the log, where before the model could break apart
+        or fail to load.
+      - Switching animation leaves the mesh, textures, materials and geoset selection as they were.
+
+#28  2026-08-23  [Added]  The Unity viewport follows play, pause, speed and the frame slider, and
+      plays animations from .anim files
+      - Pause holds the Unity viewport on the same frame and resume carries on from there. The speed
+        slider changes its speed and dragging the frame slider scrubs it.
+      - Animations whose keyframes are stored in separate .anim files now play in the Unity
+        viewport, as they already did in the OpenGL viewport. One example is Agronn's SitGroundDown,
+        which did nothing before.
+      - A new animation starts at once. The viewport no longer freezes for about a second after each
+        change, and switching between animations no longer stutters.
+      - As in the OpenGL viewport, looping effects such as a flickering torch keep running while the
+        animation is paused.
+
+#29  2026-08-23  [Changed]  Unity becomes the main viewport for creature models, and the program
+      starts as an empty fullscreen viewer
+      - Creature M2 models now show in the Unity viewport by default. Characters, WMOs and other
+        files still use the OpenGL viewport. To switch back, untick View > "Unity as main viewport";
+        the choice is remembered between sessions.
+      - At startup the program opens fullscreen and loads nothing. It no longer asks for a client
+        first: use File > "Load World of Warcraft" to open the client choice dialog.
+      - The file tree, animation controls and character panel start hidden and can be shown from the
+        View menu. Fullscreen keeps the menu bar, and F11 or Esc leaves it.
+      - The viewport no longer shows a "Made with Unity" splash, status text or a spinning
+        placeholder cube while it waits.
+      (Screenshots and image sequences still render through the OpenGL viewport.)
+
+#30  2026-09-03  [Changed]  New lighting for models in the Unity viewport, with cast shadows and
+      contact shadows
+      - Models are lit by a fixed, tuned light setup: a strong main light over a low ambient level,
+        a soft fill and a narrow highlight that lands on bright painted details such as gold trim
+        and gems.
+      - The main light stays fixed to the world, so the lit side does not flip when you orbit the
+        camera, and the underside stays dark when you look from below.
+      - Models cast shadows on themselves, for example hoods on faces and reins on bodies. Cut-out
+        parts cast shadows in their actual shape, and glowing or transparent parts cast none.
+      - Glowing parts such as lanterns are no longer dimmed by the lighting.
+
+#31  2026-09-04  [Internal]  Research report on how M2 models look in the Unity viewport compared
+      with the OpenGL viewport
+      - Adds a written audit of every visual system that affects how an M2 model looks, such as
+        particles, texture animation and transparency. For each one it records what the old and new
+        viewports do and how often it occurs across the game's models.
+      - Adds a read-only command-line option that reports what a model file contains, which was used
+        to survey the game's models. The viewport looks the same as before.
+
+#32  2026-09-04  [Fixed]  Large models no longer draw the wrong triangles, and models without a
+      selected variant no longer show every variant at once
+      - On large high-detail models, parts of the mesh could draw triangles that belonged to other
+        parts. The Unity viewport now reads those models correctly.
+      - When no creature variant is selected, the Unity viewport now shows only the default geoset,
+        as the OpenGL viewport does. Before, it drew every variant at the same time.
+
+#33  2026-09-05  [Fixed]  Cut-out transparency, self-lit surfaces, texture tiling, reflections and
+      see-through parts now render correctly in the Unity viewport
+      - Cut-out parts such as leaves, hair and fringes are now transparent where their texture is.
+        On the most common kind of cut-out surface they were drawn solid before.
+      - Surfaces the model marks as unlit are no longer darkened or shaded by the viewport lighting.
+      - Textures now tile or stretch at their edges as each texture specifies, instead of using one
+        setting for all of them.
+      - Reflective surfaces that use the first texture layer for their reflection now show it moving
+        with the view, instead of fixed to the surface.
+      - See-through parts now draw in a consistent order, the same order the OpenGL viewport uses.
+
+#34  2026-09-06  [Added]  Animated materials play in the Unity viewport
+      - Material animations stored in the model now play. Scrolling and scaling textures move on
+        every surface; colour tints, fading opacity and texture blend weights apply to self-lit
+        surfaces only for now (#38 adds tints on lit materials).
+      - Parts that an animation fades out to nothing are hidden, the same way the OpenGL viewport
+        hides them.
+      - Material animation uses the same clock as the skeleton, so pause, scrubbing, speed and
+        looping apply to it too.
+      - Animated texture rotation is not applied yet.
+
+#35  2026-09-06  [Internal]  Diagnostic options for checking the effect on Drakestalker's Trophy
+      Pauldrons
+      - Adds opt-in diagnostic options and extra log output that were used to check how the effect
+        on Drakestalker's Trophy Pauldrons renders: drawing only chosen parts of a model, fixing a
+        texture slot to a specific file, and listing the textures each part uses.
+      - Rendering is unchanged when these options are not used.
+
+#36  2026-09-06  [Fixed]  Head, shoulder, belt and hand-held items opened on their own show every
+      part of their model
+      - Opening a head, shoulder, belt or hand-held item now shows all of its model parts, as when a
+        character wears it. For example, the upper flame plumes on Drakestalker's Trophy Pauldrons
+        were missing before.
+      - Items whose model is merged into the character (chest, legs, shirt, gloves, boots, cape) are
+        unchanged and still open with only their base parts.
+      - Loading a model with no skin choices now clears the previous model's part selection instead
+        of carrying it over.
+      - A new command-line option opens an item directly by its item ID, the same way the item
+        dialog does.
+
+#37  2026-09-07  [Fixed]  Glowing and unlit effects keep their full brightness in the Unity viewport
+      - Glowing, additive and unlit material layers were being dimmed by a brightness curve that was
+        only meant for the preview light. They now show the colour the model asks for.
+      - Effects such as the eye glow and flame wisps on Drakestalker's Trophy Pauldrons are a little
+        brighter. Ordinary lit surfaces look exactly as they did before.
+
+#38  2026-09-09  [Fixed]  Glowing materials render as brightly as in the game
+      - The Unity viewport's tone mapping and vignette are removed because they capped brightness so
+        that nothing could reach full white. Bloom stays, and highlights and glows now look as hot
+        as in the OpenGL viewport.
+      - Textures are now blended the way the art was painted. The lighting was rebalanced to match,
+        so models keep their shadow side.
+      - Armour reflection textures now come from the game's own item material data. Before, they
+        were guessed.
+      - Glow layers that several material types had been dropping are back, with their authored
+        pulsing, so embers and similar effects animate as intended.
+      - Model colour tints now apply to lit materials as well as unlit ones.
+
+#39  2026-09-10  [Added]  Particles and ribbon trails now appear in the Unity viewport
+      - Before this change the Unity viewport drew no particle emitters or ribbon trails at all.
+        They now appear, for example the Lich King's effects, phoenix trails and the glowing motes
+        on raid weapons.
+      - Particles follow the animation: they speed up or slow down with playback speed and stop when
+        the animation is paused.
+      - Gravity, colour, fading over a particle's life, and particle size are read the way the game
+        stores them. Effects that came out broken or hugely oversized now look right.
+      - Items that set their own particle colour now show that colour. The program had never applied
+        it before.
+      - Each emitter is drawn in one pass however many particles it has, so models with many effects
+        stay smooth.
+
+#40  2026-09-10  [Added]  The mouse wheel now zooms the Unity viewport
+      - Scrolling the mouse wheel now zooms the Unity viewport. Before, the wheel did nothing there.
+      - Each notch zooms by the same amount as in the OpenGL viewport, with a smooth glide. Zooming
+        in and back out by the same number of notches returns exactly to where you started.
+      - The zoom range follows the model's size, so you can zoom in close on small items and far out
+        on very large models.
+      - The camera can no longer pass through or flip around the model's centre, and zooming in
+        close no longer cuts the model away.
+      - The wheel only zooms while the pointer is over the viewport, and the first scroll is no
+        longer ignored.
+
+#41  2026-09-11  [Fixed]  Layered, see-through effect models look like they do in the game
+      - Layered, translucent effect models look much closer to the game: brighter, more saturated
+        and properly see-through. Algalon the Observer was the main test case.
+      - Parts built as flat cards that always face the camera, such as Algalon's star flares and
+        haloes, were invisible before and now appear.
+      - Particles appear at their full density, tail-style particles draw as streaks along their
+        path, and changing the animation no longer wipes existing particles.
+      - See-through layers are drawn in the game's order, and particles and ribbons are drawn after
+        the model so they no longer vanish under translucent bodies.
+      - Stacked additive glow layers now reach full brightness instead of stopping short.
+      (The contact-shadow changes merged into this branch are listed under #42.)
+
+#42  2026-09-12  [Fixed]  Contact shadows in the Unity viewport are stable and soft
+      - Contact shadows stay stable while zooming. Before, they switched themselves off as the
+        camera came close.
+      - Black wedges, striping and shadows cast across the model from far away are gone, and only
+        surfaces that really touch are darkened.
+      - Shadow edges are soft instead of hard straight lines.
+      - Shadows are lighter, so the deepest contact areas no longer turn completely black.
+
+#43  2026-09-12  [Fixed]  Model loading, animation switching and creature parts fixed in the
+      embedded viewport
+      - The whole window no longer blinks each time a model loads.
+      - The camera now starts in front of the model and slightly above it, instead of behind it.
+        Framing allows for the idle animation, so hovering creatures are no longer cut off at the
+        top.
+      - The animation no longer jumps or restarts about a second after a model appears.
+      - Choosing another animation no longer freezes the model in its previous pose.
+      - Creatures opened from the file list on current clients no longer lose parts such as Akama's
+        hair and beard, in both viewports. Without a creature look to follow, they show the base
+        mesh plus the first variant of each part group, not every variant at once.
+
+#44  2026-09-13  [Changed]  Redesigned main window built around the viewport
+      - The main window is rebuilt around the viewport. A command bar holds Open model, Reset
+        camera, Screenshot, Fullscreen, the model's name and toggles for the Browse, Model and
+        Animation panels. The status bar shows model counts.
+      - File List is now Browse. It has a labelled search box with a clear button, a hint about the
+        three-character minimum, result counts, and the file-type filter above the tree.
+      - A new Model panel replaces the Character pane. It has Appearance (skins, texture overrides,
+        character controls, WMO doodad sets), Geosets (a checkbox tree that also updates the Unity
+        viewport) and Info tabs.
+      - The Animation panel has a filterable clip list, Play/Pause, Stop, frame stepping, a scrubber
+        and speed reset, with queue options in a collapsible section. The About menu is now Help,
+        with a Keyboard Shortcuts list.
+      - The OpenGL debug toggle no longer also saves view slot 1, F11 only toggles Fullscreen, and
+        Open model is ignored while a client is still loading. Saved layouts from the old panes are
+        reset once.
+
+#45  2026-09-13  [Fixed]  Geoset checkboxes show and hide model parts in the Unity viewport straight
+      away
+      - Ticking or unticking a submesh in the Geosets panel updates the Unity viewport at once. The
+        model is not reloaded, and the camera, animation, particles and ribbons are not reset.
+      - Before this fix, base-mesh parts (geoset 0) and single parts that share an id with others
+        could not be hidden, and the panel quietly reverted those clicks.
+      - If the viewport refuses a change, the checkbox returns to its last confirmed state and the
+        reason is shown. A waiting notice appears if the renderer does not answer.
+      - The Unity renderer has to be updated along with the program. An older renderer refuses
+        geoset clicks with a notice instead of ignoring them silently.
+
+#46  2026-09-14  [Added]  Playable characters render in the Unity viewport
+      - Characters no longer fall back to the OpenGL viewport. The Unity viewport shows them with
+        their skin and eye textures, customization geosets, merged armour and attached items such as
+        weapons and shoulders.
+      - Characters animate in Unity, including the HD races, whose bones and animations are stored
+        in separate skeleton files. Unity also plays alias animations such as EmoteTalkNoSheathe,
+        which the OpenGL viewport did not.
+      - Changes to appearance, equipment or geosets update the character in place. The body is not
+        reloaded, the camera is not re-framed and the animation does not restart.
+      - A character appears about one second after loading starts, and large model transfers to the
+        renderer are faster for every model.
+      - Not yet shown in Unity: mounted characters, secondary and mouth animations, and the
+        per-model transform and transparency settings from Model Control.
+
+#47  2026-09-14  [Changed]  Unity is the only viewport and the OpenGL viewport is retired
+      - The Unity viewport is the centre pane from startup, and File > Reset Layout keeps it there.
+        The "Unity as main viewport" toggle is gone, View > Restart Unity Renderer replaces View >
+        Unity Renderer, and old saved layouts are reset once.
+      - Content Unity cannot draw yet, such as images, world models and mounted characters, shows a
+        notice in the viewport instead of switching to OpenGL. Renderer crashes and lost connections
+        show a notice with a Restart button.
+      - Removed OpenGL-only features: Save Screenshot (F12), Export Image Sequence, background
+        colour and image, the Camera submenu, Set Canvas Size, lighting options, the Display
+        settings page, Show/Zero Particle, and the matching shortcuts and command bar buttons.
+      - Model Control is now View > Attachments... It keeps only the model/attachment choice and the
+        Render and Scale settings for items attached to a character.
+      - The Browse filter "Images (*.blp)" works again, and picking an image no longer opens a Save
+        PNG dialog. OBJ and FBX exports still use the model's current animation pose.
+
+#50  2026-09-14  [Added]  World models (WMO) render in the Unity viewport
+      - Selecting a WMO keeps the Unity viewport active and draws the building's geometry and
+        textures. The "cannot show world models" notice no longer appears.
+      - This first step covers static geometry only: doodads, liquids, lights, fog, vertex-colour
+        shading and sky are not drawn yet. Some modern WMOs draw white or with the wrong texture
+        until the material update in #51.
+      - Camera zoom and clipping scale with the size of the world model, and M2 framing comes back
+        when a model is loaded again.
+      - A WMO root whose name ends in a number (for example 11xt_rockbridge_003.wmo) now loads as
+        itself when opened by path or FileDataID, instead of being mistaken for a group file; Browse
+        did not list such roots until #79. A possible crash when closing the program after viewing a
+        WMO is fixed.
+
+#51  2026-09-15  [Changed]  World model (WMO) materials follow the game's own shader rules
+      - Each WMO material is drawn by the rules of its shader type. Before this change, one texture
+        was drawn on every surface.
+      - Modern multi-layer surfaces show their real blended textures, such as rock with sandy paths
+        or marble with gold trim. Before this change, they rendered white or were covered by an
+        effect texture.
+      - Vertex-colour two-layer blends, alpha-cutout materials, double-sided materials and texture
+        clamping are handled.
+      - Glow and environment-map effects, blend modes 2 and higher, and vertex-colour lighting are
+        not drawn yet; these materials keep a simple fallback.
+      - Heavily layered world models take a little longer to load and use more video memory, because
+        their real layer textures are now loaded.
+
+#52  2026-09-15  [Fixed]  Choosing "None" in the mount list no longer crashes the viewer
+      - Choosing "None" in the mount list used to crash the viewer, whether or not a mount was up.
+      - Dismounting hands the character back to the viewport without deleting it, and the Unity
+        viewport shows the character again.
+
+#53  2026-09-15  [Internal]  Research on remaining WMO material effects recorded, with no change to
+      rendering
+      - This change records what was learned about the game's blended WMO materials and
+        glow/environment effects. How world models are drawn is unchanged.
+      - It adds an opt-in diagnostic view that shows where glow effects would appear, plus more
+        detailed per-material log lines for checking WMO materials.
+
+#54  2026-09-16  [Added]  Characters can ride mounts in the Unity viewport
+      - Choosing a mount no longer replaces the viewport with the "Mounted character" notice. The
+        dressed character sits on the mount and keeps their equipment.
+      - Rider and mount animate independently with their own animation choices, and the camera
+        frames both of them.
+      - Mounting, dismounting and switching mounts happen without reloading the character. A mount
+        that cannot be built leaves the character on screen.
+      - The mount uses its own textures, geosets and particle colours. A mount with no seat point
+        carries the rider at its centre.
+      - Changing equipment while mounted now updates the rider. Before this fix, it refreshed the
+        mount.
+
+#55  2026-09-16  [Fixed]  Model > Appearance offers the correct customization options for modern
+      characters
+      - Options and choices follow the game's requirements for race, class and earlier choices. For
+        example, an Undead male lists all 11 Jaw Features and the Skin Type "Bony".
+      - Skin Color, Face Features and Eyesight follow the choices they depend on. Dependent rows
+        update after each change, and a choice that becomes invalid switches to the first valid one.
+      - NPC-only options such as Eye Style no longer appear for player characters, and Death
+        Knight-only choices are no longer offered to every class.
+      - Changing a customization no longer leaves the previous face, scalp or eye texture on the
+        character.
+      - The cached game database is rebuilt once after the update. Known gaps: the default lower jaw
+        stays visible under Jaw Features, and "Sockets" still shows the eye.
+
+#56  2026-09-16  [Added]  Characters can be mounted, swapped and dismounted from a Mount card on
+      Model > Appearance
+      - A playable character's Model > Appearance page now starts with a Mount card: "Add a mount to
+        this character" with Choose Mount, or the current mount's name with Change Mount and
+        Dismount. It is hidden for creatures and world models.
+      - Choose Mount and Change Mount open a floating, searchable mount list. Typing any part of a
+        name filters it at once, and Up/Down with Enter or a click mounts right away with no OK
+        step. Escape or a click outside closes it without changing anything.
+      - The Appearance tab reads "Appearance · Mounted" while the character rides, and Character >
+        Mount / Dismount stays in step with the card in both directions.
+      - The section below the card is now titled "Character Appearance". The card replaces the old
+        Mount / dismount button at the bottom of the page.
+      - Fixed: long equipment item names no longer widen the Appearance panel past its edge. They
+        now end in an ellipsis.
+
+#57  2026-09-21  [Fixed]  Unity viewport fixes for white mounts, black item effects, jumping
+      animations and flat particles
+      - Some mounts and creatures, such as Primeval Skyfriend, drew white because their skin
+        textures were lost on the way to the viewport. Their body, wings and saddle are now
+        textured.
+      - An item's blended effect, such as on Chosen Bloodslayer's Fanged Grips, no longer turns into
+        a solid black rectangle after the item level is changed.
+      - Equipping an item, changing a customization, opening View NPC, or picking, swapping or
+        dismounting a mount no longer makes the animation jump back or restart. Swapping mounts
+        keeps the rider's current riding animation.
+      - Stretched particles, such as dripping effects, now hang along their direction of fall
+        instead of lying as flat horizontal bars. Other camera-facing particles each get their own
+        starting rotation.
+      - The NPC list behind View NPC opens about four times faster.
+
+#58  2026-09-21  [Changed]  Faces are lit, and shadows cast from a distance are softer in the Unity
+      viewport
+      - A soft front light from the camera now brightens faces and other surfaces that face the
+        viewer. Before, faces looked grey and unlit next to bright shoulders.
+      - Shadows cast from further away, such as a head's shadow on the neck and chest, are now soft
+        and lighter instead of hard and stair-stepped. Close contact shadows stay crisp.
+      - This is a deliberate look change. Models read somewhat flatter than before, and shadows on
+        world-model platforms are paler.
+
+#59  2026-09-21  [Added]  One-click 4K screenshot with a transparent background from the Unity
+      viewport
+      - A new Screenshot button on the command bar saves the current view as a 3840x2160 PNG with a
+        transparent background. The Save As dialog suggests a name made from the model and the date
+        and time.
+      - The image is rendered at full resolution off-screen. It is not an upscaled grab of the
+        window, so the result does not depend on the window size.
+      - The capture uses the same camera, animation moment and particle state as the live view, and
+        the live view continues without restarting. The status bar reports where the file was saved
+        or why saving failed.
+      - Known limits: exported images have no bloom, and additive glows and faint additive particles
+        are not yet correct in the transparency. For example, a weapon glow can come out as a solid
+        disk over other backgrounds.
+
+#62  2026-10-10  [Added]  The animation list can be sorted by name, ID or length
+      - Clicking the Animation, ID or Length header sorts the animation list, and clicking the same
+        header again reverses the order. An arrow in the header shows the direction, and the list
+        still starts in alphabetical order.
+      - The ID column now shows the game's animation ID instead of the model's internal index, and
+        searching by number uses that ID.
+      - IDs and lengths sort by number, and equal entries always come out in the same order.
+      - Sorting or filtering keeps the selected animation selected and playing without restarting
+        it.
+
+#63  2026-10-10  [Added]  Pick FBX export animations by name or game animation ID, and the chosen
+      clips are the ones exported
+      - The animation choice for FBX export is now a checkbox grid showing each animation's name and
+        game animation ID. It has a search field, a count of the selected animations, and sorting by
+        Name or ID (it starts at ID ascending).
+      - An ID range, including both ends, selects every matching animation and its variants and
+        clears the rest, so the same choice can be repeated on other models.
+      - Ticks are kept while searching and sorting. Select all, Unselect all and the range apply to
+        the whole model, including animations the search currently hides.
+      - Fixed: the export could write different clips than the ones ticked. For Rehgar, choosing IDs
+        0 to 225 used to swap in 11 animations from above 225. The ticked clips are now exported.
+
+#66  2026-09-29  [Fixed]  Armory import works again with current Armory links, and failed imports
+      say why
+      - Current Armory character links are read correctly again, as are older link forms, Classic
+        realms, Battle.net links, links with a trailing slash or extra parameters, links pasted
+        without "https://", and accented names. Before, such a link could be misread and the import
+        silently did nothing.
+      - An error reply is no longer imported as an empty character. Each failure names its cause: a
+        search-page link instead of a character page, a character not found or a hidden profile,
+        refused access, too many requests, an unreachable import service, or a reply that is not a
+        character. A stalled request gives up after 20 seconds instead of hanging the viewer.
+      - Mag'har Orc, both faction Pandaren and ten other races that share a body model with another
+        race now import with their own customizations. They also appear in the Browse race tree, and
+        picking them there loads them as that race with their own Model > Appearance options.
+      - If a character's race model cannot be found or loaded, the import stops with a message
+        naming the race. Before, it dressed whatever model was already on screen.
+      - The import service's access key is now hidden in the log.
+
+#67  2026-10-01  [Fixed]  Glowing eye colours now glow in the Unity viewport
+      - Eye colours that glow in the game, including every blood elf, night elf, void elf and
+        vulpera eye colour and orc clan eyes, used to draw as a flat orange iris with a dark pupil.
+        They now glow, close to the game's own look.
+      - Eye colours without a glow, and all other models, look exactly as they did before.
+      - The glow follows a live eye-colour change without reloading the model.
+
+#68  2026-10-01  [Changed]  Armory import asks for region, realm and character name instead of a
+      link
+      - Character > Import Armory Character now asks for a region (Europe, Americas & Oceania,
+        Korea, Taiwan), a realm chosen from that region's realm list, and a character name, and
+        Enter imports. Pasting an Armory link still works underneath and accepts every link it did
+        before.
+      - The dialog shows progress, then the result with the character's name, race, class, realm and
+        region, or the reason the import failed. No pop-up message boxes appear, and a second import
+        cannot start while one is running.
+      - The last region and realm that imported, and up to eight recent characters, are remembered
+        in userSettings\Config.ini.
+      - Realms with accented letters, such as Pozzo dell'Eternità and Festung der Stürme, can now be
+        imported. Seven EU realms could not be imported at all before.
+      - When no realm list is available, a typed realm name is converted automatically, and a hint
+        shows what will be sent.
+      (Korea and Taiwan are supported, but no character from those regions has been imported end to
+      end yet.)
+
+#70  2026-10-02  [Fixed]  Models whose game files cannot be read now load instead of crashing the
+      viewer
+      - Loading a character could crash the viewer when the game storage briefly failed to read one
+        of its animation files. The model now loads.
+      - An animation whose file cannot be read stays empty, so playing it no longer distorts the
+        model.
+      - Allied races whose shared skeleton cannot be read now load without bones, animations or
+        attachment points instead of crashing.
+      - A model left without bones skips its particle and ribbon effects instead of crashing.
+      - The log now names the file that could not be read.
+
+#71  2026-10-03  [Added]  New Textures viewer: browse, preview and export the game's BLP textures
+      - A Models | Textures selector at the start of the command bar switches the viewer. In
+        Textures, Browse lists the loaded client's textures and the selected texture takes the
+        viewport's place.
+      - Search by name, path or FileDataID as you type. Enter on a FileDataID opens it, even for
+        textures the file list does not name.
+      - The preview fits each texture to the view on a checkerboard, dark or light background, with
+        Alpha On, Off or Only. It lists name, folder, FileDataID, size, format, mip levels, alpha
+        and file size, with copy buttons.
+      - Export PNG (Ctrl+S) saves the full-size image with alpha, and Export BLP (Ctrl+Shift+S)
+        saves the original file. Textures the viewer cannot decode correctly are refused with a
+        reason but can still be exported as BLP.
+      - Switching between textures is quick and recently viewed textures show at once. Going back to
+        Models restores the model and its panels exactly as they were.
+
+#72  2026-10-03  [Changed]  Browse lists what the current viewer shows, and its Show dropdown is
+      gone
+      - Browse no longer has a Show dropdown. In Models it lists models, and in Textures it lists
+        textures, so the two can no longer disagree.
+      - World models (WMO) appear in the Models tree in their folders. Their group and LOD files
+        stay hidden.
+      - The search box says what it searches, and the tree gets the freed space. Each mode keeps its
+        own search, open folders and selected row, including search results.
+      - Browsing sound, shader, database, script, map tile (ADT) and other file types has been
+        removed, because none of them could be viewed. On clients with FileDataIDs you can still
+        save such a file from Textures by searching its FileDataID and choosing Export original
+        file.
+      - Loading a model from a menu while in Textures no longer leaves the previous model's row
+        highlighted.
+
+#73  2026-10-10  [Added]  Item sets can be filtered by armor type
+      - Character > Load Item Set has a category checklist: Cloth, Leather, Mail, Plate, Mixed,
+        Other and Unknown. It can be combined with the name search.
+      - Double-click a category to show only that category.
+      - Filtering keeps the selected set visible and does not equip a different set.
+      - Item sets load all their pieces. Before, any piece after the eighth was dropped.
+
+#75  2026-10-04  [Added]  Refreshed interface with a Dark appearance that covers the whole window
+      - View > Appearance offers System, Light or Dark. Dark now covers the whole window, including
+        the menu bar and menus, dialogs, Settings, message boxes and the Open and Save windows.
+      - The appearance applies when the viewer starts. Changing it, or changing Windows' own light
+        or dark setting while System is chosen, offers to restart the viewer. Windows' high-contrast
+        mode is followed.
+      - The main window has a flatter, consistent look across pane headers, the command bar, the
+        Browse tree, Model panel tabs, buttons, search fields and icons.
+      - Switching between Models and Textures happens in one step without flicker. Refilling
+        Browse's tree no longer takes the keyboard away from its search box.
+      - The interface toolkit is now wxWidgets 3.3.3. The appearance is saved in Config.ini. Older
+        versions cannot read a window layout saved by this version and start once with the default
+        layout.
+
+#76  2026-10-04  [Changed]  Model-only commands are greyed out in the Textures viewer
+      - While Textures is shown, commands that act on a model are greyed out and do nothing, whether
+        chosen from a menu, a shortcut such as F8 or the command bar.
+      - This covers the Animation, Model and Attachments panels, View NPC, View Item, Load
+        Character, Import Armory Character, Import NPC from URL and Export Model with all its
+        exporters.
+      - These commands come back as soon as Models is shown again. The viewer never switches back to
+        Models by itself.
+      - Entering Textures closes any NPC, item, equipment, item set, start outfit or mount chooser
+        that was left open, so it cannot change the model behind the texture.
+      - Greyed-out command bar tools look clearly different from tools that are simply switched off.
+
+#77  2026-10-04  [Added]  Choose the background colour behind models (View > Swap Background Color)
+      - View > Swap Background Color... opens a small window that can stay open while you turn the
+        model.
+      - Pick a colour with the colour square and hue strip, by mouse or keyboard, or type a #RRGGBB
+        value. The viewport follows as you drag.
+      - Built-in presets are Default, Dark, Slate, Neutral Grey and Light. You can save your own
+        presets and remove them by right-click or with Remove. Undo returns to the colour the window
+        opened with, and Reset returns to the default.
+      - The colour shows exactly as chosen and the model itself does not change. Very light colours
+        come out slightly lighter because of the glow effect, and the window warns about this.
+      - The colour and your presets are saved in Config.ini. The option works in the Models viewer
+        only.
+
+#78  2026-10-05  [Added]  Load NPCs and models by ID (Character > Load NPC / Model)
+      - Character > Load NPC / Model... replaces Import NPC from URL... and has two pages: URL, for
+        a Wowhead NPC link as before, and ID.
+      - The ID page loads an M2 FileDataID, a Creature Display ID or a Creature Model ID, looked up
+        offline in the loaded client. You choose the ID type because one number can be valid for
+        several types. NPC (creature) IDs are not offered.
+      - A Creature Display ID shows that display's skin, geosets and particle colours, as View NPC
+        does. Humanoid NPC displays come with their equipment.
+      - When an ID cannot be loaded, a message explains why and the model on screen is left
+        untouched. Reasons include not found, no model, not an M2, unreadable or encrypted, or no
+        client loaded.
+      - Cancel works while a Wowhead link is being read, and nothing loads afterwards. The window
+        remembers the last page and ID type until the viewer closes.
+
+#79  2026-10-05  [Added]  New Buildings viewer for world models (WMO)
+      - A third viewer mode, Buildings, sits beside Models and Textures and covers buildings,
+        dungeons and cities. Loading a building switches to it, and loading a model switches back to
+        Models.
+      - World models leave the Models tree, where #72 had put them, and are listed only in
+        Buildings. Browse lists each building once, in its real folder and labelled with its
+        FileDataID. The separate group files are hidden, and a few buildings the old list wrongly
+        hid now appear.
+      - Search by name, path or FileDataID. A group file's FileDataID finds the building it belongs
+        to, and Enter opens it.
+      - The command bar, title bar, status bar and the Model panel's Info page show the building's
+        path, FileDataID, groups, doodads, doodad sets and bounds. Fullscreen and Screenshot work,
+        and model-only commands are greyed out.
+      - Switching between viewers no longer briefly shows the other viewer's model or building.
+        Buildings are drawn on the default dark background, and models keep your chosen background
+        colour.
+      (Only one model or one building is held at a time, so after a building is loaded, Models shows
+      "No model loaded".)
+
+#81  2026-10-06  [Added]  Classic clients open with their own data, and a new client chooser
+      replaces the Profile list
+      - Classic Era, Classic Beta and MoP Classic installs open with their own data. Browse, models,
+        characters, textures and world models come from the chosen client, and Browse no longer
+        lists files that are not downloaded.
+      - File > Load World of Warcraft now asks you to Choose World of Warcraft. Each installed
+        client gets a card showing its name, expansion, version, whether it is installed and when it
+        was last used. Mouse, keyboard and keypad arrows all work.
+      - The old Profile list, which forced the Midnight 12.0 profile on every client, is gone. Less
+        common ways in are "Browse for another installation..." and "Open legacy installation...".
+      - Switching clients fully replaces the previous one instead of reusing or crashing on it. If a
+        client fails to open, the loaded client stays in place.
+      - Commands a client cannot do are greyed out, with the reason shown in the status bar. For
+        example, Armory import works with Retail characters only.
+
+#82  2026-10-07  [Fixed]  Browse no longer uses more memory every time its tree is rebuilt
+      - Each search, cleared search or client change rebuilt the Models or Buildings tree and kept
+        the old tree in memory, about 90 MB each time for Retail models.
+      - Old trees are now freed just after the new one appears, so memory stays flat and searches
+        are no slower.
+      - Switching back and forth between Retail and Classic Era now levels off instead of growing
+        with every switch.
+
+#83  2026-10-08  [Fixed]  Classic characters and NPCs look right, and equipment looks the same on
+      every load
+      - MoP Classic characters no longer load untextured white. Classic Era and MoP Classic get
+        their Face option back, MoP Classic's NPC races get their choices, and Classic Beta gets Eye
+        Color with real irises instead of white eyes.
+      - Classic Beta's Skyborne races (High Order and Windshaper) load as characters with
+        customization, equipment and a textured skin, not as white creatures. The Demon Hunter
+        checkbox is greyed out in clients without Demon Hunters.
+      - Humanoid NPCs such as Bolvar, Garrosh and city guards now wear their own face, skin, hair,
+        beard and other choices, as their own race and sex. Retail NPCs keep their helmets, which
+        hide hair and ears as on a player.
+      - When a shirt, chest and legs cover the same area (sleeves, robe skirt), the outer item now
+        always wins, so equipment looks the same on every load. NPC robes and clothes behave like a
+        player's.
+      - A robe no longer hides the forearms, hands or the boots' feet. Saved characters remember
+        their race and sex, so a Mag'har loads back as Mag'har.
+
+#84  2026-10-10  [Added]  Characters can switch between their Classic and HD model
+      - A new Model: Classic | HD selector in the character panel's Appearance section switches
+        models where the client has both. Today that is Classic Beta, for the eight original races
+        and partly for Goblins.
+      - Switching keeps race, sex, appearance, equipment, sheathe, the current animation, the camera
+        angle and zoom, and the background. Switching back restores each model exactly as you left
+        it, and a note names options the other model does not have.
+      - The selector is disabled, with the reason shown, when the race has only one model, the other
+        model is missing or not downloaded, or the character is mounted. It is hidden for NPCs and
+        in clients without both models.
+      - A switch takes under a second and never shows an undressed or idle frame in between. Model >
+        Info now shows whether the character model is High Definition or Classic.
+      - NPCs whose stored choices belong to the HD model are now shown on the HD model, even when
+        their display names the Classic one.
+      (Switching needs the viewer and its Unity viewport from the same update. An older viewport
+      refuses the switch and shows the reason.)
+
+#85  2026-10-10  [Fixed]  Appearance rows no longer log errors, and the unused map tile code is
+      removed
+      - Each appearance row in the character panel logged an "invalid column index" error on every
+        load. That error is gone, and the rows look exactly as before.
+      - Unused map tile (ADT) support was removed, because nothing could load or draw map tiles any
+        more. The viewport's "Map tile loaded" notice and the Model panel's map tile note went with
+        it.
+      (Merged into a stacked branch and reached develop through #92.)
+
+#86  2026-10-10  [Changed]  Models and characters reach the 3D viewport faster
+      - Model files and character body images are now sent to the Unity viewport as raw data.
+        Before, they were sent as text that was a third larger and slower to prepare.
+      - An HD character's first load takes about half as long as before, and switches between
+        Classic and HD are faster too.
+      - An older viewport still works with the new viewer, and the new viewport still works with an
+        older viewer, using the previous, slower transfer.
+      (Merged into a stacked branch and reached develop through #92.)
+
+#87  2026-10-09  [Fixed]  The log now says when a file is not downloaded, instead of blaming the
+      listfile
+      - When a file belongs to the game build but is not on this computer, for example during a
+        Battle.net update, the log now shows one warning that names the file and says it is not
+        downloaded.
+      - Before, the log claimed the file was missing from the listfile and then said it had opened.
+        That made a missing texture, such as an NPC drawn without his belt, look like a listfile
+        problem.
+      - Files that really are missing from the listfile are still reported as before. The check also
+        stays correct after switching to another client of the same installation.
+
+#88  2026-10-09  [Fixed]  Merged character parts keep their own textures instead of borrowing a
+      glove texture
+      - An old rule repainted some merged character parts with whichever hand texture had been
+        merged last, and that could change from one load to the next.
+      - Some Earthen NPCs had wrist crystals drawn in glove leather on one load and in amber on the
+        next. They now show their own amber every time.
+      - Characters made of several merged parts, such as the Demon Hunter Champion, Taelia Fordragon
+        and the Dracthyr dragon form, look exactly as before.
+
+#89  2026-10-09  [Fixed]  Dracthyr crests and Earthen wrist stones show the body skin instead of
+      white
+      - Some merged character parts that use the character's skin were drawn plain white. These were
+        the forehead crest of every Dracthyr dragon form, players included, and the stone under
+        Earthen wrist crystals.
+      - These surfaces now use the character's body skin. The Dracthyr crest shows the body's scales
+        without a seam, and Earthen wrists show grey stone.
+      - Changing a Dracthyr's Primary Color now recolors the crest along with the rest of the head.
+
+#90  2026-10-10  [Fixed]  General settings are no longer cut off, and equipment search finds items
+      by their ID
+      - The General settings window now sizes itself to its contents and your screen, can be resized
+        and scrolls, so the options below "Other" are no longer clipped. Settings windows saved at
+        the old fixed size are updated too.
+      - Equipment search matches item IDs whether or not "Display Items/NPCs' IDs in lists" is
+        turned on. Name and wildcard searches and the slot and category filters work as before.
+      - Items that have no name but do have a valid appearance, such as Jaina's staff (item 153575),
+        now appear in the list as "Unnamed item".
+      - Loading a single item now works for models that carry their own textures without a separate
+        skin.
+
+#91  2026-10-10  [Fixed]  Loading NPCs and characters one after another no longer eats memory
+      - Each character or NPC load used to keep the previous outfit in memory, including its items,
+        helm, shoulders, weapons and merged armour pieces. That was about 7.7 MB per load for a
+        robed NPC and about 50 MB when cycling armoured NPCs.
+      - Loading another model while a character rode a mount used to leak the rider and all its
+        equipment, about 144 MB each time. The rider is now freed.
+      - After a failed load, the Attachments window and the character controls no longer point at a
+        model that was already freed.
+      - A small growth of about 0.25 to 2.6 MB per load remains and is still unexplained.
+
+#92  2026-10-10  [Internal]  Brought two already-approved changes into the main branch
+      - This carries the appearance-row fix, the removal of the unused map tile code and the faster
+        binary transfer of files and character images to the viewport. It adds no new changes of its
+        own.
+      (Carries #85 and #86, which were merged into stacked branches and reached develop only through
+      this PR.)
+
+#93  2026-10-10  [Fixed]  The remove button (X) on each equipment slot works again
+      - After you picked an item for a slot, its remove button (X) stayed greyed out, so that item
+        could not be removed on its own. The X is now enabled.
+      - Empty slots on an NPC no longer show an active X. The X and the level box stay disabled
+        until the slot holds an item.
+      - After you load an item set, the X is enabled on exactly the slots the set filled.
+      (Redo of #61, which was closed without merging.)
+
+#94  2026-10-10  [Added]  Load Item Set includes transmog sets, with a choice of item and appearance
+      in each slot
+      - Load Item Set now lists transmog sets as well as the regular item sets.
+      - A second column shows the pieces for each slot, with a dropdown wherever an item or
+        appearance has alternatives.
+      - Redundant, ungrouped set fragments are hidden from the list.
+      - The viewer now reads the transmog tables, so its game database cache is rebuilt once.
+        Classic clients have no transmog sets and still load as before.
+      (Redo of #74, which was closed without merging.)
+
+#95  2026-10-10  [Fixed]  Animation variants play their own animation, and FBX export uses the right
+      sequence
+      - When a model had several variants of the same animation, such as the two SitGround variants,
+        all of them used the last animation file loaded. Each variant now plays its own.
+      - FBX export now resolves animation aliases before it reads the motion, and exports the
+        sequence you selected.
+      - Loading these models no longer logs warnings about replaced animation files, and the
+        viewport no longer reports files as busy.
+      (Redo of #69, which was closed without merging.)
+
+#96  2026-10-10  [Fixed]  NPCs built on their own model now show and export their weapons
+      - Some NPCs, such as Tyrande, use their own model rather than a playable race's body. Their
+        equipped weapons are now drawn in the Unity viewport. Before, the weapons were equipped but
+        never shown.
+      - An FBX export of such an NPC now keeps its weapons. If the equipment cannot be restored for
+        the export, the export stops with a clear message.
+      - With these weapons, Model > Geosets no longer says the viewport cannot draw them, and their
+        parts can be shown or hidden.
+      - The viewer and its Unity viewport must be updated together. An older viewport still works
+        but shows these NPCs without weapons.
+      (Redo of #64 and #65, which were closed without merging.)
+
+#97  2026-10-10  [Changed]  Opening a World of Warcraft client is much faster, and its progress
+      shows in the client chooser
+      - Switching between clients is up to about 80% faster. For example, Classic Era to Retail went
+        from about 35 seconds to under 7, and reopening Retail takes about half as long.
+      - Each client version builds its own game database cache once (about 20 seconds for Retail)
+        and reuses it. It is rebuilt automatically after a game update or if it is damaged.
+      - Clicking a client card turns the chooser into a loading page with the current stage, a
+        progress bar and a detail line. This replaces the old loading dialog and the "Please wait
+        during game database analysis..." box.
+      - If a load fails, the page shows the reason, with Back and Close buttons, and the client that
+        was already loaded stays loaded.
+      - Encryption keys and the online file list are downloaded once per session instead of on every
+        load. Memory use after switching between clients is lower.
+
+#98  2026-10-10  [Changed]  The viewer opens as a maximised window and is now version 1.0
+      - The viewer now starts maximised with its title bar instead of in borderless fullscreen, so
+        it can be minimised, restored and moved. View > Fullscreen (F11, Esc to leave) is still
+        available.
+      - The Fullscreen button has been removed from the command bar.
+      - The window title reads "WoW Model Viewer version 1.0", and Help > About has new text and
+        credits.
+      - If you close the viewer while it is maximised, the next start no longer restores the window
+        partly off screen. Settings already saved with this fault are corrected.
