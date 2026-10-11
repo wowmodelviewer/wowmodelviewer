@@ -10,7 +10,13 @@
  * the texture (TexturePreview: centred, sized for it, never zoomed), what the file is -- name, folder,
  * FileDataID, size, format, mip levels, alpha, file size, with Copy path and Copy FileDataID beside
  * them -- and the two exports as buttons: Export PNG (full resolution, with alpha; not for a texture
- * that is not decoded) and Export BLP (the original file byte for byte).
+ * that is not decoded) and Export BLP (the original file byte for byte), with Quick export beside them.
+ *
+ * EXPORTING. Every way to ask for an export -- the buttons, Ctrl+S / Ctrl+Shift+S, Browse's menu -- comes to
+ * exportRequested. Without Quick export it asks where with Save As (starting in the folder last saved to);
+ * with it the file goes straight into the texture export folder, under the texture's own folder in the game
+ * (TextureExport). Either way the same writer saves it, and a notice in the preview's corner says where it
+ * went, with Open folder (TextureExportNotice), or why it was not saved.
  *
  * THE SELECTION. Textures mode exists without one: with nothing picked the view says "Select a texture
  * in Browse". A pick (show) is the selection at once -- its name, folder and FileDataID are shown, its
@@ -53,10 +59,13 @@
 #include "BlpInfo.h"
 #include "TextureCatalog.h"
 #include "TextureDecode.h"
+#include "TextureExport.h"
 #include "TexturePreview.h"
 
 class ModelViewer;
+class TextureExportNotice;
 class wxAuiToolBar;
+class wxCheckBox;
 
 class TextureView : public wxPanel
 {
@@ -137,11 +146,15 @@ public:
   // Before the app's GL context goes: nothing decodes after this.
   void shutdown();
 
-  // Export and copy; the dialogs call the first two. Messages go to the main window's status bar.
+  // Export the texture shown, the way the Quick export setting says (see EXPORTING): every button, key and
+  // menu item that exports comes here.
+  void exportRequested(TextureExport::Format format);
+  // The texture export folder changed (Options > Settings > Export): Quick export's tooltip names it.
+  void quickExportFolderChanged();
+  // The writers both workflows use: the PNG or the original file saved to this path. The message says what
+  // happened (it goes to the main window's status bar).
   bool exportPng(const wxString & target, wxString & message);
   bool exportBlp(const wxString & target, wxString & message);
-  void exportPngInteractive();
-  void exportBlpInteractive();
   void copyPath();
   void copyFileDataId();
   // The suggested file name: the texture's own name with this extension, or "<FileDataID>.<ext>"
@@ -150,6 +163,9 @@ public:
   static wxString exportFileName(const TextureEntry & entry, const wxString & extension, bool blpContent = true);
   // Whether a file read is a BLP: by its header, or (too short for one) by being a named .blp.
   static bool isBlp(const Current & c);
+
+  // The notice of the last export (none before the first), for the tests.
+  TextureExportNotice * exportNotice() const { return m_notice; }
 
   // The cache, for the log and the tests.
   qint64 cacheBytes() const { return m_cacheBytes; }
@@ -176,7 +192,16 @@ private:
   wxString factsLine() const;
   void setAlphaView(TexturePreview::AlphaView view);
   bool currentIsBlp() const;
+  // Save As's starting folder: the folder last saved to with it, else Documents.
   wxString exportFolder() const;
+  // Where the export goes: asked with Save As (empty: cancelled), or the file in the texture export folder
+  // (false: it cannot go there, and the notice says why).
+  wxString askTarget(TextureExport::Format format);
+  bool quickTarget(TextureExport::Format format, wxString & target);
+  void rememberSaveAsFolder(const wxString & file);
+  void updateQuickExportUi();
+  void noticeSaved(const wxString & file);
+  void noticeFailed(const wxString & reason, const QString & path, bool folderProblem);
   void status(const wxString & text);
   void selectionChanged();
   void OnCharHook(wxKeyEvent & event);
@@ -206,6 +231,8 @@ private:
   wxButton * m_copyId = nullptr;
   wxButton * m_exportPng = nullptr;
   wxButton * m_exportBlp = nullptr;
+  wxCheckBox * m_quickExport = nullptr;
+  TextureExportNotice * m_notice = nullptr;   // made by the first export
 
   Current m_current;
   Timing m_timing;

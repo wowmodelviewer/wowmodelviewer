@@ -69,10 +69,13 @@ Everything the viewer writes stays in this folder:
 * dbcache\        one database cache per client build (at most six); it can
                   be deleted and is built again on the next load
 * listfile.csv and extraEncryptionKeys.csv, with their download bookkeeping
+* Exports\Textures\  the textures the Texture Viewer's Quick export saves
+                  (Options > Settings... > Export chooses another folder)
 
 The viewport player also keeps its window settings in the registry, under
 HKEY_CURRENT_USER\Software\WoW Model Viewer. Uninstalling (in Windows
-Settings, under Apps) removes all of these too.
+Settings, under Apps) removes all of these too, except Exports\: the
+textures you exported stay.
 
 
 WHAT IT CONNECTS TO

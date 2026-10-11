@@ -88,6 +88,11 @@ namespace
   }
 }
 
+wxColour TexturePreview::surroundColour()
+{
+  return Surround;
+}
+
 TexturePreview::TexturePreview(wxWindow * parent)
   : wxWindow(parent, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxFULL_REPAINT_ON_RESIZE, wxT("texturePreview"))
 {

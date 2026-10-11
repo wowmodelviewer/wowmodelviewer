@@ -2483,6 +2483,16 @@ void ModelViewer::OnToggleFullScreen(wxCommandEvent & WXUNUSED(event))
   EnterViewerFullScreen(!IsFullScreen());
 }
 
+// Options > Settings, on its Export page: the texture export folder (a Quick export that cannot save asks
+// for another one here).
+void ModelViewer::ShowExportSettings()
+{
+  interfaceManager.GetPane(settingsControl).Show(true);
+  settingsControl->Open();
+  settingsControl->ShowExportPage();
+  interfaceManager.Update();
+}
+
 // Esc leaves fullscreen. Only that -- it is a way out, not a shortcut for anything else, and it
 // does nothing at all when the window is not fullscreen.
 void ModelViewer::OnCharHook(wxKeyEvent & event)
@@ -2496,10 +2506,7 @@ void ModelViewer::OnCharHook(wxKeyEvent & event)
   // view takes the same keys itself when it has the keyboard).
   if (isTextureMode() && textureView && event.ControlDown() && !event.AltDown() && event.GetKeyCode() == 'S')
   {
-    if (event.ShiftDown())
-      textureView->exportBlpInteractive();
-    else
-      textureView->exportPngInteractive();
+    textureView->exportRequested(event.ShiftDown() ? TextureExport::Format::Original : TextureExport::Format::Png);
     return;
   }
   event.Skip();

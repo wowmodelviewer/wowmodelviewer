@@ -1424,8 +1424,10 @@ void FileControl::ShowTextureMenu(wxTreeItemId item)
     return;
   enum { ID_TEX_PNG = wxID_HIGHEST + 6400, ID_TEX_BLP, ID_TEX_COPY_PATH, ID_TEX_COPY_ID };
   wxMenu menu;
-  menu.Append(ID_TEX_PNG, _("Export PNG..."));
-  menu.Append(ID_TEX_BLP, _("Export original BLP..."));
+  // With Quick export they save at once into the texture export folder: no "...", no dialog follows.
+  const bool quick = TextureExport::quickExport();
+  menu.Append(ID_TEX_PNG, quick ? _("Export PNG") : _("Export PNG..."));
+  menu.Append(ID_TEX_BLP, quick ? _("Export original BLP") : _("Export original BLP..."));
   menu.AppendSeparator();
   menu.Append(ID_TEX_COPY_PATH, _("Copy path"));
   menu.Append(ID_TEX_COPY_ID, _("Copy FileDataID"));
@@ -1446,8 +1448,8 @@ void FileControl::ShowTextureMenu(wxTreeItemId item)
   view->showNow(entry, lookup);
   switch (id)
   {
-    case ID_TEX_PNG: view->exportPngInteractive(); break;
-    case ID_TEX_BLP: view->exportBlpInteractive(); break;
+    case ID_TEX_PNG: view->exportRequested(TextureExport::Format::Png); break;
+    case ID_TEX_BLP: view->exportRequested(TextureExport::Format::Original); break;
     case ID_TEX_COPY_PATH: view->copyPath(); break;
     case ID_TEX_COPY_ID: view->copyFileDataId(); break;
     default: break;

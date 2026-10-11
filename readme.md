@@ -77,9 +77,12 @@ The viewer keeps everything it writes in its program folder, next to `wowmodelvi
   load.
 - `listfile.csv` (with `listfile.csv.etag` and `listfile.csv.order`) and `extraEncryptionKeys.csv`: the
   downloaded file list and encryption keys.
+- `Exports\Textures\`: the textures the Texture Viewer's **Quick export** saves, each in its folder from the game
+  (`creature\bear\bearskinblack.png`). **Options > Settings... > Export** chooses another folder.
 
 The viewport player also keeps its window settings (and the Unity engine's own session counters) in the registry,
-under `HKEY_CURRENT_USER\Software\WoW Model Viewer`. Uninstalling removes all of these too.
+under `HKEY_CURRENT_USER\Software\WoW Model Viewer`. Uninstalling removes all of these too, except `Exports\`:
+the textures you exported stay.
 
 ## Known issues in 1.0
 

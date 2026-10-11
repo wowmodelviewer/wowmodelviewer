@@ -3,6 +3,22 @@
 All notable changes to **WoW Model Viewer** are recorded here.
 Format loosely based on [Keep a Changelog](https://keepachangelog.com/).
 
+## [Unreleased]
+
+### Added
+- **Quick export in the Texture Viewer.** A **Quick export** box beside Export PNG and Export BLP saves the
+  texture at once, with no Save As dialog, into the texture export folder, in the texture's own folder from the
+  game (`creature\bear\bearskinblack.png`; a texture known only by its FileDataID goes to
+  `FileDataID\FileDataID_<id>.png`). Exporting the same texture again replaces its file. The box is kept between
+  sessions, and Ctrl+S, Ctrl+Shift+S and Browse's texture menu follow it.
+- **The texture export folder** in Options > Settings... > Export: `Exports\Textures` in the viewer's folder at
+  first, with Browse..., Reset to default and Open folder. A folder that cannot be written to is refused, with the
+  reason.
+- **A saved-file notice** in the corner of the texture preview after every texture export, Save As included,
+  with **Open folder** (Explorer, the file selected). It goes by itself after a few seconds, stays while the mouse
+  is on it, and never takes the keyboard. When a Quick export cannot be saved it says why, and when the export
+  folder itself cannot be used it offers **Change folder...**.
+
 ## [1.0] — 2026-10-10
 
 Version 1.0 replaces the OpenGL viewport with an embedded renderer built on the Unity engine, opens Classic

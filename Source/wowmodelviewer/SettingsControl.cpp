@@ -67,6 +67,14 @@ void SettingsControl::Open()
 
   page1->Update();
   page3->Update();
+  page3->Opened();
+}
+
+void SettingsControl::ShowExportPage()
+{
+  const int page = notebook->FindPage(page3);
+  if (page != wxNOT_FOUND)
+    notebook->SetSelection(page);
 }
 
 void SettingsControl::Close()
