@@ -41,6 +41,8 @@ public:
   
   void Open();
   void Close();
+  // The Export page (the texture export folder) in front.
+  void ShowExportPage();
   wxSize InitialFloatingSize() const;
 };
 

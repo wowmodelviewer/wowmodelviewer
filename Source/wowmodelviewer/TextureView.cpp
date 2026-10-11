@@ -8,6 +8,7 @@
 #include <chrono>
 #include <memory>
 
+#include <QDir>
 #include <QElapsedTimer>
 #include <QFileInfo>
 #include <QSettings>
@@ -21,6 +22,7 @@
 
 #include "modelcanvas.h"
 #include "modelviewer.h"
+#include "TextureExportNotice.h"
 #include "UiArt.h"
 #include "UiControls.h"
 #include "UiStyle.h"
@@ -185,9 +187,13 @@ void TextureView::buildLayout()
   const wxSize exportSize((std::max)(FromDIP(132), widest), FromDIP(UiStyle::ButtonHeight));
   m_exportPng->SetMinSize(exportSize);
   m_exportBlp->SetMinSize(exportSize);
+  // Quick export beside them: the exports save at once into the texture export folder, without Save As.
+  m_quickExport = new wxCheckBox(this, wxID_ANY, _("Quick export"));
+  m_quickExport->SetName(wxT("textureQuickExport"));
   wxBoxSizer * exportRow = new wxBoxSizer(wxHORIZONTAL);
   exportRow->Add(m_exportPng, 0, wxRIGHT, s);
   exportRow->Add(m_exportBlp, 0);
+  exportRow->Add(m_quickExport, 0, wxALIGN_CENTER_VERTICAL | wxLEFT, m);
 
   wxBoxSizer * info = new wxBoxSizer(wxVERTICAL);
   info->Add(m_name, 0, wxEXPAND | wxBOTTOM, xs);
@@ -217,8 +223,12 @@ void TextureView::buildLayout()
   });
   m_copyPath->Bind(wxEVT_BUTTON, [this](wxCommandEvent &) { copyPath(); });
   m_copyId->Bind(wxEVT_BUTTON, [this](wxCommandEvent &) { copyFileDataId(); });
-  m_exportPng->Bind(wxEVT_BUTTON, [this](wxCommandEvent &) { exportPngInteractive(); });
-  m_exportBlp->Bind(wxEVT_BUTTON, [this](wxCommandEvent &) { exportBlpInteractive(); });
+  m_exportPng->Bind(wxEVT_BUTTON, [this](wxCommandEvent &) { exportRequested(TextureExport::Format::Png); });
+  m_exportBlp->Bind(wxEVT_BUTTON, [this](wxCommandEvent &) { exportRequested(TextureExport::Format::Original); });
+  m_quickExport->Bind(wxEVT_CHECKBOX, [this](wxCommandEvent & e) {
+    TextureExport::setQuickExport(e.IsChecked());
+    updateQuickExportUi();
+  });
 
   showInfo();
 }
@@ -233,6 +243,8 @@ void TextureView::loadSettings()
 
   const int alpha = std::max(0, std::min(2, config.value("TextureViewer/AlphaView", 0).toInt()));
   setAlphaView((TexturePreview::AlphaView)alpha);
+  m_quickExport->SetValue(TextureExport::quickExport());
+  updateQuickExportUi();
   m_loadingSettings = false;
 
   // What earlier versions kept and nothing reads now goes: the zoom (the texture is sized by itself)
@@ -616,6 +628,8 @@ void TextureView::left()
   m_active = false;
   m_keysRepeating = false;
   m_preview->setNote(wxEmptyString);
+  if (m_notice)
+    m_notice->dismiss();
   m_preview->releaseCaches();
 }
 
@@ -625,6 +639,8 @@ void TextureView::clientLoadStarting()
   m_current = Current();
   m_pending = TextureEntry();
   cacheClear();
+  if (m_notice)
+    m_notice->dismiss();
   m_preview->setMessage(_("Loading the game client") + Ellipsis);
   showInfo();
 }
@@ -870,6 +886,14 @@ wxString TextureView::exportFolder() const
   return wxStandardPaths::Get().GetDocumentsDir();
 }
 
+void TextureView::rememberSaveAsFolder(const wxString & file)
+{
+  // Save As starts in the folder it saved to last (Quick export has its own folder and does not move it).
+  QSettings config(qs(cfgPath), QSettings::IniFormat);
+  config.setValue("TextureViewer/ExportFolder", QFileInfo(qs(file)).absolutePath());
+  config.sync();
+}
+
 wxString TextureView::exportFileName(const TextureEntry & entry, const wxString & extension, bool blpContent)
 {
   const bool original = extension == wxT("blp");
@@ -883,39 +907,142 @@ wxString TextureView::exportFileName(const TextureEntry & entry, const wxString 
   return wx(base) + wxT(".") + extension;
 }
 
-void TextureView::exportPngInteractive()
+void TextureView::updateQuickExportUi()
 {
-  if (!m_current.decoded)
-  {
-    status(m_current.valid ? _("This texture has no decoded image to save as PNG.") : _("Select a texture to export."));
-    return;
-  }
-  wxFileDialog dialog(this, _("Export PNG"), exportFolder(), exportFileName(m_current.entry, wxT("png")),
-                      _("PNG image (*.png)|*.png"), wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
-  // The dialog is modal: the selection cannot change under it.
-  if (dialog.ShowModal() != wxID_OK)
-    return;
-  wxString message;
-  exportPng(dialog.GetPath(), message);
-  status(message);
+  const bool quick = m_quickExport->GetValue();
+  m_quickExport->SetToolTip(wxString::Format(_("Save exports straight into the texture export folder, without Save As:\n%s\n"
+                                               "(Options > Settings > Export changes the folder.)"),
+                                             wx(TextureExport::display(TextureExport::folder()))));
+  m_exportPng->SetToolTip(quick ? _("Save the texture as a PNG at its full resolution, with its alpha, into the texture export folder (Ctrl+S)")
+                                : _("Save the texture as a PNG at its full resolution, with its alpha (Ctrl+S)"));
+  m_exportBlp->SetToolTip(quick ? _("Save the original file from the game client, byte for byte, into the texture export folder (Ctrl+Shift+S)")
+                                : _("Save the original file from the game client, byte for byte (Ctrl+Shift+S)"));
 }
 
-void TextureView::exportBlpInteractive()
+void TextureView::quickExportFolderChanged()
 {
-  if (!m_current.valid)
+  updateQuickExportUi();
+}
+
+void TextureView::exportRequested(TextureExport::Format format)
+{
+  const bool png = format == TextureExport::Format::Png;
+  if (png ? !m_current.decoded : !m_current.valid)
   {
-    status(_("Select a texture to export."));
+    status(png && m_current.valid ? _("This texture has no decoded image to save as PNG.") : _("Select a texture to export."));
     return;
+  }
+  // Where it goes is all the two workflows differ in: the same writer saves it.
+  const bool quick = m_quickExport->GetValue();
+  wxString target;
+  if (quick)
+  {
+    if (!quickTarget(format, target))
+      return;
+  }
+  else
+  {
+    target = askTarget(format);
+    if (target.IsEmpty())
+      return;   // cancelled
+  }
+  wxString message;
+  const bool saved = png ? exportPng(target, message) : exportBlp(target, message);
+  status(message);
+  if (!saved)
+  {
+    // A Quick export whose folder has become unusable says so, with Change folder; anything else as it is.
+    const QString root = TextureExport::folder();
+    const TextureExport::FolderCheck check = quick ? TextureExport::checkFolder(root) : TextureExport::FolderCheck();
+    if (quick && !check.ok)
+      noticeFailed(check.exists ? _("The texture export folder is not writable.") : _("The texture export folder could not be created."),
+                   root, true);
+    else
+      noticeFailed(message, qs(target), false);
+    return;
+  }
+  if (!quick)
+    rememberSaveAsFolder(target);
+  noticeSaved(target);
+}
+
+wxString TextureView::askTarget(TextureExport::Format format)
+{
+  // The dialogs are modal: the selection cannot change under them.
+  if (format == TextureExport::Format::Png)
+  {
+    wxFileDialog dialog(this, _("Export PNG"), exportFolder(), exportFileName(m_current.entry, wxT("png")),
+                        _("PNG image (*.png)|*.png"), wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
+    return dialog.ShowModal() == wxID_OK ? dialog.GetPath() : wxString();
   }
   const bool blp = currentIsBlp();
   wxFileDialog dialog(this, blp ? _("Export original BLP") : _("Export original file"), exportFolder(),
                       exportFileName(m_current.entry, wxT("blp"), blp),
                       blp ? _("BLP texture (*.blp)|*.blp") : _("All files (*.*)|*.*"), wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
-  if (dialog.ShowModal() != wxID_OK)
-    return;
-  wxString message;
-  exportBlp(dialog.GetPath(), message);
-  status(message);
+  return dialog.ShowModal() == wxID_OK ? dialog.GetPath() : wxString();
+}
+
+bool TextureView::quickTarget(TextureExport::Format format, wxString & target)
+{
+  // The texture's own path in the game below the export folder (or FileDataID\FileDataID_<id>), checked to
+  // stay inside it. The same texture in the same format is always the same file: saving it again replaces it.
+  const QString root = TextureExport::folder();
+  const QString relative = TextureExport::relativePath(m_current.entry, format, currentIsBlp());
+  QString file, error;
+  if (!TextureExport::resolveInside(root, relative, file, error))
+  {
+    LOG_ERROR << "[texexport] no file in the export folder for" << m_current.entry.path << m_current.entry.fileDataId << "--" << error;
+    status(wx(error));
+    noticeFailed(wx(error), root, false);
+    return false;
+  }
+  // The folders are made as they are needed: the export folder itself the first time, the texture's below it.
+  const QString folder = QFileInfo(file).absolutePath();
+  if (!QDir().mkpath(folder))
+  {
+    const TextureExport::FolderCheck check = TextureExport::checkFolder(root);
+    LOG_ERROR << "[texexport] could not create" << folder << (check.ok ? QString() : check.error);
+    if (!check.ok)
+    {
+      const wxString reason = check.exists ? _("The texture export folder is not writable.") : _("The texture export folder could not be created.");
+      status(reason + wxT(" ") + wx(TextureExport::display(root)));
+      noticeFailed(reason, root, true);
+    }
+    else
+    {
+      status(wxString::Format(_("Could not create %s"), wx(TextureExport::display(folder))));
+      noticeFailed(_("Its folder could not be created."), folder, false);
+    }
+    return false;
+  }
+  target = wx(TextureExport::display(file));
+  return true;
+}
+
+void TextureView::noticeSaved(const wxString & file)
+{
+  if (!m_notice)
+  {
+    m_notice = new TextureExportNotice(m_preview, TexturePreview::surroundColour());
+    m_notice->onChangeFolder = [this]() {
+      if (m_viewer)
+        m_viewer->ShowExportSettings();
+    };
+  }
+  m_notice->showSaved(qs(file));
+}
+
+void TextureView::noticeFailed(const wxString & reason, const QString & path, bool folderProblem)
+{
+  if (!m_notice)
+  {
+    m_notice = new TextureExportNotice(m_preview, TexturePreview::surroundColour());
+    m_notice->onChangeFolder = [this]() {
+      if (m_viewer)
+        m_viewer->ShowExportSettings();
+    };
+  }
+  m_notice->showFailed(reason, path, folderProblem);
 }
 
 bool TextureView::exportPng(const wxString & target, wxString & message)
@@ -957,9 +1084,6 @@ bool TextureView::exportPng(const wxString & target, wxString & message)
   }
   message = wxString::Format(_("Saved %s (%d x %d PNG)"), target, full.width(), full.height());
   LOG_INFO << "[texview] exported PNG" << qs(target) << full.width() << "x" << full.height();
-  QSettings config(qs(cfgPath), QSettings::IniFormat);
-  config.setValue("TextureViewer/ExportFolder", QFileInfo(qs(target)).absolutePath());
-  config.sync();
   return true;
 }
 
@@ -989,9 +1113,6 @@ bool TextureView::exportBlp(const wxString & target, wxString & message)
   message = wxString::Format(_("Saved %s (the original file, %s bytes)"), target,
                              thousands((long long)source.bytes.size()));
   LOG_INFO << "[texview] exported BLP" << qs(target) << (qulonglong)source.bytes.size() << "bytes";
-  QSettings config(qs(cfgPath), QSettings::IniFormat);
-  config.setValue("TextureViewer/ExportFolder", QFileInfo(qs(target)).absolutePath());
-  config.sync();
   return true;
 }
 
@@ -1010,10 +1131,7 @@ void TextureView::OnCharHook(wxKeyEvent & event)
   const bool ctrl = event.ControlDown(), shift = event.ShiftDown(), alt = event.AltDown();
   if (ctrl && !alt && key == 'S')
   {
-    if (shift)
-      exportBlpInteractive();
-    else
-      exportPngInteractive();
+    exportRequested(shift ? TextureExport::Format::Original : TextureExport::Format::Png);
     return;
   }
   const wxWindow * focus = wxWindow::FindFocus();

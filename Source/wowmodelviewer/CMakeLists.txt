@@ -53,6 +53,8 @@ set(src  AnimationExportChoiceDialog.cpp
          TextureBrowse.cpp
          TextureCatalog.cpp
          TextureDecode.cpp
+         TextureExport.cpp
+         TextureExportNotice.cpp
          TexturePreview.cpp
          TextureView.cpp
          UiArt.cpp
@@ -118,6 +120,8 @@ set(headers AnimationExportChoiceDialog.h
             TextureBrowse.h
             TextureCatalog.h
             TextureDecode.h
+            TextureExport.h
+            TextureExportNotice.h
             TexturePreview.h
             TextureView.h
             UiArt.h

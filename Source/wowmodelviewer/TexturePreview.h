@@ -55,6 +55,9 @@ public:
 
   explicit TexturePreview(wxWindow * parent);
 
+  // The fixed neutral colour around the image (what a window laid over the preview's edge stands on).
+  static wxColour surroundColour();
+
   // The image to show: Format_ARGB32, straight alpha. 'textureSize' is the texture's own size (its level
   // 0) when the image is a smaller level of it; empty when the image is the texture itself. Replaces what
   // is shown at the next paint, sized and centred anew.

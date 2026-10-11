@@ -339,6 +339,8 @@ public:
   // The texture view's selection changed, or its facts arrived: the command bar's label, the status bar
   // and the Model panel follow (not the whole interface: nothing else depends on it).
   void TextureSelectionChanged();
+  // Options > Settings on its Export page (the texture export folder).
+  void ShowExportSettings();
 
   // Whether the Unity viewport is the shown centre pane (it always should be; the self-test checks).
   bool isUnityViewportCentre();
