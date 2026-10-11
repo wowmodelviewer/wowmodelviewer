@@ -61,11 +61,13 @@ core::GlobalSettings * core::GlobalSettings::m_instance = 0;
 //--------------------------------------------------------------------
 core::GlobalSettings::GlobalSettings()
 {
+  // Keep in step with the version resource (Source/wowmodelviewer/wmv.rc) and the installer
+  // (installer/WoWModelViewer.iss, MyAppVersion).
   m_versionMajorNumber = 1;
   m_versionMinorNumber = 0;
   m_versionRevNumber = 0;
 
-  m_appName = L"WoW Model Viewer Midnight";
+  m_appName = L"WoW Model Viewer";
   m_buildName = L"Midnight";
 
  

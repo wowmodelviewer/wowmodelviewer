@@ -1,4 +1,4 @@
-// WoW Model Viewer Midnight resources. Icons are BMP-format .ico (small entries
+// WoW Model Viewer resources. Icons are BMP-format .ico (small entries
 // must be BMP, not PNG, or wxICON/LoadIcon return a blank taskbar icon).
 MAINICON         ICON            "..\\..\\bin_support\\icons\\WMW-Midnight.ico"
 IDI_ICON1        ICON            "..\\..\\bin_support\\icons\\WMW-Midnight.ico"
@@ -7,3 +7,35 @@ ICON3            RCDATA          "..\\..\\bin_support\\icons\\WMW-Midnight-26-25
 ABOUTICON        RCDATA          "..\\..\\bin_support\\icons\\wmv.xpm"
 SPLASH           RCDATA          "..\\..\\bin_support\\Splash\\Splash-006-Midnight.png"
 SPLASH2          RCDATA          "..\\..\\bin_support\\Splash\\Splash-006-Midnight.png"
+
+// The program's version, as Windows shows it (file Properties, the installer): keep it in step with
+// core::GlobalSettings (m_versionMajorNumber ...).
+#include <winver.h>
+VS_VERSION_INFO VERSIONINFO
+ FILEVERSION 1,0,0,0
+ PRODUCTVERSION 1,0,0,0
+ FILEFLAGSMASK 0x3fL
+ FILEFLAGS 0x0L
+ FILEOS VOS_NT_WINDOWS32
+ FILETYPE VFT_APP
+ FILESUBTYPE VFT2_UNKNOWN
+BEGIN
+  BLOCK "StringFileInfo"
+  BEGIN
+    BLOCK "040904b0"
+    BEGIN
+      VALUE "CompanyName", "WoW Model Viewer"
+      VALUE "FileDescription", "WoW Model Viewer"
+      VALUE "FileVersion", "1.0.0.0"
+      VALUE "InternalName", "wowmodelviewer"
+      VALUE "LegalCopyright", "GNU General Public License v3 or later"
+      VALUE "OriginalFilename", "wowmodelviewer.exe"
+      VALUE "ProductName", "WoW Model Viewer"
+      VALUE "ProductVersion", "1.0"
+    END
+  END
+  BLOCK "VarFileInfo"
+  BEGIN
+    VALUE "Translation", 0x409, 1200
+  END
+END

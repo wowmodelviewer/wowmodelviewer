@@ -1,9 +1,51 @@
 # Changelog
 
-All notable changes to **WoW Model Viewer: Midnight** are recorded here.
+All notable changes to **WoW Model Viewer** are recorded here.
 Format loosely based on [Keep a Changelog](https://keepachangelog.com/).
 
-## [Unreleased]
+## [1.0] — 2026-10-10
+
+Version 1.0 replaces the OpenGL viewport with an embedded renderer built on the Unity engine, opens Classic
+clients, adds viewers for textures and buildings, and gives the window a new look. It is the first release with an
+installer that ships the renderer, and it is released under the plain GNU General Public License, version 3 or
+later. The detailed entries follow this summary.
+
+### Highlights
+- **A new viewport.** Creatures with their skins and variants, items, NPCs, and playable characters with their
+  customization, equipment and attached items are drawn by the Unity player, with their animations (including
+  those kept in separate `.anim` and `.skel` files), particles and glowing eyes. If the renderer stops, the
+  viewport offers a restart button; View > Restart Unity Renderer does the same.
+- **Characters on mounts**, from the Mount card at the top of Model > Appearance.
+- **Classic clients.** Classic Era, Mists of Pandaria Classic, Classic Beta and the other Classic lines open as
+  themselves, with their own models, database tables and character customization; a command a client cannot
+  support is greyed out with the reason.
+- **A client chooser** (File > Load World of Warcraft): each installed product as a card, with the loading
+  progress shown in the same window.
+- **Faster loading.** A database cache per client build in `dbcache\`, the file list read once per session, and
+  the file list and encryption keys checked for updates once per session. Downloads give up after 30 seconds
+  without data and keep the copies on disk.
+- **Textures and Buildings viewers** next to Models.
+- **Load NPC / Model** by Wowhead link or by M2 FileDataID, Creature Display ID or Creature Model ID; **Armory
+  import by region, realm and name**; **item sets** with transmog sets.
+- **Screenshot** (3840 x 2160 PNG with a transparent background) and **View > Swap Background Color**.
+- **A new look** with System, Light and Dark appearances, on wxWidgets 3.3.3. The window opens maximised with its
+  title bar; the title reads "WoW Model Viewer version 1.0".
+- **An installer** (`installer\WoWModelViewer.iss`, built by `installer\build-installer.ps1`): per-user, no
+  administrator rights, an exact file list including the Unity player, the licence texts and a README; it
+  upgrades 0.11.0 in place, removing its FBX exporter and the libraries 1.0 no longer uses. The folder can be
+  chosen, on an update too (Setup refuses one the user cannot write to, and asks before an update goes to a
+  different folder than the installed one). Setup and Uninstall
+  ask to close a running viewer first (the viewer holds a named mutex), and uninstalling also removes what the
+  viewer wrote beside itself and the player's window settings in the registry.
+- **The viewer works in its own folder**, however it is started (a shortcut with another "Start in", a console in
+  another folder), so it always finds its plugins and data; a file named on its command line is still found from
+  the folder it was started in.
+
+### Known issues
+- The Models button of the viewer selector in the command bar sometimes shows no icon. Only the icon is affected.
+- Models from a legacy MPQ client cannot be shown in the viewport: they have no FileDataID, which the viewport
+  needs.
+- The installer is not code-signed, so Windows SmartScreen may warn before it runs.
 
 ### Added
 - **Classic clients: Classic Era, Classic Beta and the other Classic lines open as themselves.** A Battle.net
@@ -513,6 +555,10 @@ Format loosely based on [Keep a Changelog](https://keepachangelog.com/).
   Scale, enabled for items attached directly to a character (the only ones the viewport is sent).
 
 ### Removed
+- **FBX export**, and the Install Blender Add-on command that went with it. The exporter needs the Autodesk FBX SDK,
+  which is not in the repository; the plugin is now built only where the SDK is (`WMV_BUILD_FBX_EXPORTER`, on when
+  `ThirdParty/fbx_x64/lib/libfbxsdk.lib` exists), so a build without it completes, and 1.0 ships without it. OBJ
+  export (File > Export Model) remains.
 - **Browse's Show list.** Browse lists what the viewer mode shows, with no category of its own to choose: in
   Models mode the models, in Textures mode the textures, and in Buildings mode the WMO roots "WMOs (*.wmo)" listed
   (see the Buildings entry above; they were briefly in the models' tree). Viewer = Textures with Browse listing models can no longer happen. The other categories are gone:
@@ -547,6 +593,10 @@ Format loosely based on [Keep a Changelog](https://keepachangelog.com/).
   `-imgseq` smoke test is gone. `-unityipctest` and `-fbxexport` still run.
 
 ### Fixed
+- **The viewport player no longer outlives the viewer.** When its connection to the viewer ended -- the viewer
+  crashed or was ended rather than closed -- the Unity player stayed running in the background, rendering for no one
+  (about two CPU cores each, until the computer restarted). It never connects again, so it now quits as soon as that
+  connection ends (`WmvIpcClient`).
 - **Classic characters get their whole appearance.** Whether a customization choice is offered depends on the
   classes its requirement names, and the viewer judged that against Retail's 15 classes: a choice for "every class
   but Death Knight" had to name classes 1-15. Each Classic client writes those masks over its own classes (Classic
