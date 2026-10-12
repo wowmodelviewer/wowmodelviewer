@@ -155,7 +155,11 @@ public class WmvShadowRig : MonoBehaviour
     /// </summary>
     public void RenderFor(Camera view)
     {
-        if (!hasBounds)
+        // A terrain tile is never drawn into either map (its own diagnostic shader reads neither), and the window is
+        // never fitted to it: both rig cameras see what the view sees less the terrain layer, and a view that sees
+        // nothing else -- the terrain view (WmvMainTerrain) -- costs no rig render at all, whatever was framed before.
+        int mask = WmvTerrainBuilder.WithoutTerrain(view.cullingMask);
+        if (!hasBounds || mask == 0)
         {
             Shader.SetGlobalFloat("_WmvShadowValid", 0f);
             Shader.SetGlobalFloat("_WmvContactValid", 0f);
@@ -181,7 +185,7 @@ public class WmvShadowRig : MonoBehaviour
         shadowCam.orthographicSize = r;
         shadowCam.nearClipPlane = dist - r;
         shadowCam.farClipPlane = dist + r;
-        shadowCam.cullingMask = view.cullingMask;
+        shadowCam.cullingMask = mask;
 
         // The depth pass draws the model with its NORMAL materials, whose shader samples
         // _WmvShadowMap -- the very texture this render writes. Reading and writing one
@@ -268,7 +272,7 @@ public class WmvShadowRig : MonoBehaviour
         // leave far at or below near, which produces a singular projection and a buffer full of
         // NaN. Cheap to rule out; impossible to diagnose from the picture if it ever happens.
         depthCam.farClipPlane = Mathf.Max(depthFar, depthCam.nearClipPlane * 1.001f);
-        depthCam.cullingMask = view.cullingMask;
+        depthCam.cullingMask = mask;
 
         Shader.SetGlobalFloat("_WmvContactValid", 0f);   // same read-write hazard as the map
         Shader.SetGlobalTexture("_WmvViewDepth", Texture2D.whiteTexture);

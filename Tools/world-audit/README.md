@@ -28,12 +28,25 @@ its installer, and never write to a game folder.
   - map catalogue: `compare_map_catalog.py` compares the viewer's world map catalogue (its headless test,
     `wowmodelviewer -mapcatalogtest`) with `catalog/maps_<client>.json` and `catalog/wdt_<client>.json`, map by map
     (`docs/world-viewer/02-map-catalog.md`).
+  - terrain mesh (stage 03): `terrain_reference.py` builds one root ADT tile as Unity mesh data by the design's pinned
+    rules from the `wowfmt` reading (parser-independent, design-dependent) and reads/writes the terrain mesh dump format
+    (`Tools/UnityRendererProject/Assets/Scripts/Wow/World/TerrainDump.cs`); `compare_terrain_mesh.py` compares a C#
+    runner dump (`WMV_TERRAIN_DUMP_DIR`) or a player dump (`-wmvTerrainDump`) with it: positions within 1e-5, normals
+    within 1e-6, indices, counts and bounds exactly, plus the player's layer, matrix and mesh format;
+    `minimap_orientation.py` proves the orientation against the game's minimap tile (MAID word 7): mode `dump` fits it
+    against a dump's cell normals, mode `capture` against a top-down `normals` capture, mode `render` writes the
+    capture a dump implies -- the identity symmetry must explain the minimap at least twice as well as the other 7.
 - `tests/` -- `python -I -m unittest discover -s Tools/world-audit/tests`:
   - `test_wowfmt.py`: the parsers on malformed and synthetic input, and the pinned hashes;
-  - `test_corpus_rules.py`: the report's rules asserted on the extracted bytes, each against its competing readings.
+  - `test_corpus_rules.py`: the report's rules asserted on the extracted bytes, each against its competing readings;
+  - `test_terrain_tools.py`: the terrain reference, the dump format, the comparison (with planted mutations), PNG
+    reading and the minimap fit on synthetic tiles; on the corpus the pinned tiles' counts and ids, and the
+    orientation of 32_50 and 34_46.
 
   The data-dependent tests run when `WMV_WORLD_AUDIT_CORPUS` names the extracted data folder (here
-  `F:/wowmodelviewer/build/world-audit-data`, git-ignored); otherwise they are skipped with a message.
+  `F:/wowmodelviewer/build/world-audit-data`, git-ignored); otherwise they are skipped with a message. With
+  `WMV_TERRAIN_DUMP_DIR` also set to the folder the C# runner dumped into, the runner's dumps of the pinned tiles are
+  compared with the reference too.
 
 The full reproduce sequence is in section 10 of the report. Python 3.10+, standard library only. Run scripts with
 `python -I`.

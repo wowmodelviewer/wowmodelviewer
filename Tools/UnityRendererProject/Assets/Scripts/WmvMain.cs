@@ -45,6 +45,11 @@
 //
 // A WORLD MODEL (loadWoWModel kind "wmo") takes its own pipeline -- root, GFID LOD0 groups, material
 // textures, WmvWmoBuilder -- which lives in WmvMainMapObject.cs. The two jobs supersede each other.
+//
+// A TERRAIN TILE (protocol 12 loadTerrainTile) is drawn on its own layer (30) by WmvTerrainSession and
+// WmvTerrainBuilder, wired in WmvMainTerrain.cs: the main camera shows that layer only while a tile is on screen
+// (the terrain view) and every other layer otherwise; the model on screen stays, hidden, until a model load takes
+// the terrain away.
 
 using System.Collections.Generic;
 using UnityEngine;
@@ -81,6 +86,10 @@ public partial class WmvMain : MonoBehaviour
     double riderPickAt = -1.0;        // when the newest role "rider" selection arrived (WmvIpcClient.NowSeconds)
     bool riderSelectionHeld;          // a selection with no role for the riding character: the host dismounted it
     Bounds riddenFrame;               // what FrameRiddenScene last fitted the camera to
+    // A fit FrameRiddenScene could not do while the terrain view held the camera: done (and counted) when the view is
+    // left for the model view, dropped when a model load leaves it or a new model is adopted (SetViewMode, AdoptBuilt).
+    Bounds riddenFitPending;
+    bool haveRiddenFitPending;
     WmvMountProbe mountProbe;         // -wmvMountCheck, while it measures
 
     /// <summary>
@@ -286,12 +295,17 @@ public partial class WmvMain : MonoBehaviour
         ipc.OnRuntimeState = HandleRuntimeState;
         ipc.OnCaptureScreenshot = HandleCaptureScreenshot;
         ipc.OnViewportBackground = c => ApplyViewportBackground(c, "host");
+        // The terrain tile (protocol 12): the model view's mask on the main camera, the session, its two messages.
+        SetUpTerrain(cam);
     }
 
     // ---------------------------------------------------------------- load pipeline
 
     void HandleLoadWoWModel(string path, int fileDataID, string client, bool character, int load, string kind, bool keepView)
     {
+        // The latest command wins: a terrain load in flight is answered "superseded", a tile on screen goes and the
+        // terrain view is left -- before anything below can adopt, measure or capture.
+        LeaveTerrainForModelLoad();
         status.Set("Active client received (" + client + ")");
         if (string.IsNullOrEmpty(path) && fileDataID <= 0)
         {
@@ -374,6 +388,9 @@ public partial class WmvMain : MonoBehaviour
 
     void HandleAssetResponse(WmvIpcClient.AssetResponse r)
     {
+        // The terrain load's map files (getMapAsset), and late answers of terrain loads that have ended.
+        if (terrain != null && terrain.ClaimAssetResponse(r))
+            return;
         // The world-model job's root, group files and textures.
         if (HandleMapObjectAsset(r))
             return;
@@ -835,7 +852,8 @@ public partial class WmvMain : MonoBehaviour
     /// of the mount under a character (FrameRiddenScene). runtimeState reports it, which is how a lifecycle test tells
     /// a mount change -- which fits the view exactly once -- from an appearance change on a riding character, which must
     /// not move the camera at all. A capture that has to ask for its size again re-fits the SAME box
-    /// (CaptureViewportWhenSettled) and is deliberately not counted: it follows the display, not what is on screen.
+    /// (CaptureViewportWhenSettled) and is deliberately not counted: it follows the display, not what is on screen. A
+    /// mount change while the terrain view holds the camera is counted only when its fit is done, as the view is left.
     /// </summary>
     public int ViewFramings { get; private set; }
 
@@ -847,14 +865,15 @@ public partial class WmvMain : MonoBehaviour
     /// same mount -- an appearance change must not move the view -- and never per frame: an animation that later carries
     /// either model past the box is not followed. -wmvFrameBounds still pins the box; WMV_VIEWPORT_ORBIT re-aims the
     /// camera after it; -wmvLightCheck measures (in the next frame), -wmvAllocCheck counts and WMV_VIEWPORT_SHOT captures
-    /// what is now on screen, and -wmvMountCheck measures the frames that follow while the character rides.
+    /// what is now on screen, and -wmvMountCheck measures the frames that follow while the character rides. In the
+    /// terrain view (the character hidden) the camera stays on the tile: the fit is kept, not counted, and done -- and
+    /// counted once -- when the view is left for the model view (SetViewMode); a model load that leaves it drops it.
     /// </summary>
     void FrameRiddenScene(string what)
     {
         WmvRuntimeModel body = dresser != null ? dresser.Body : null;
         if (body == null || body.Root == null)
             return;
-        ViewFramings++;
         Bounds own;
         bool riding = false;
         if (mounted != null)
@@ -868,15 +887,30 @@ public partial class WmvMain : MonoBehaviour
                                     riding ? "the mount and the character together" : "the character's own", own.center, own.extents));
             frame = WmvModelBuilder.Debug_.FrameBounds;
         }
-        orbit.Frame(frame);
-        KeepFramed(frame);
-        ApplyViewportOrbitOverride("mount: ");
+        if (TerrainViewActive)
+        {
+            // The camera stays on the tile. The fit is kept, not counted, and done when the terrain view is left
+            // (SetViewMode) -- unless a model load leaves it: that load frames what it shows (framingOwed).
+            riddenFitPending = frame;
+            haveRiddenFitPending = true;
+            Debug.Log(string.Format("WMV: mount: {0} -- the terrain view is on: the camera stays on the tile; the fit to {1} " +
+                                    "(centre {2} extents {3}) is kept for when the view is left", what,
+                                    riding ? "the mount and the character together" : "the character alone", frame.center,
+                                    frame.extents));
+        }
+        else
+        {
+            ViewFramings++;
+            orbit.Frame(frame);
+            KeepFramed(frame);
+            ApplyViewportOrbitOverride("mount: ");
+            Debug.Log(string.Format("WMV: mount: {0} -- the view is fitted to {1}: centre {2} extents {3}, distance {4:F2}, yaw {5} pitch {6}",
+                                    what, riding ? "the mount and the character together" : "the character alone", frame.center,
+                                    frame.extents, orbit.distance, orbit.yaw, orbit.pitch));
+        }
         if (shadowRig != null)
             shadowRig.SetBounds(frame);
         riddenFrame = frame;
-        Debug.Log(string.Format("WMV: mount: {0} -- the view is fitted to {1}: centre {2} extents {3}, distance {4:F2}, yaw {5} pitch {6}",
-                                what, riding ? "the mount and the character together" : "the character alone", frame.center,
-                                frame.extents, orbit.distance, orbit.yaw, orbit.pitch));
 
         if (WmvModelBuilder.Debug_.AllocCheck)
             allocProbe = new AllocProbe { StartFrame = Time.frameCount + 10 };
@@ -1332,6 +1366,8 @@ public partial class WmvMain : MonoBehaviour
         if (job != null && job.KeepView && !keepView)
             Debug.Log("WMV: keep-view load: nothing on screen is this character's yet -- the view is fitted to it");
         framingOwed = false;
+        // A fit kept for the character this replaces (FrameRiddenScene in the terrain view) is not this one's.
+        haveRiddenFitPending = false;
         {
             // A mount the previous character rode goes first, and it takes the character off before its root is
             // destroyed (WmvMountedScene.Dispose); a mount built for THIS load is not it (LoadJob.Mount).
@@ -1677,6 +1713,13 @@ public partial class WmvMain : MonoBehaviour
             Debug.Log("WMV: lightcheck: no camera or no model -- nothing measured");
             return;
         }
+        // The models only, never a terrain tile; the terrain view shows nothing else.
+        int checkMask = WmvTerrainBuilder.WithoutTerrain(src.cullingMask);
+        if (checkMask == 0)
+        {
+            Debug.Log("WMV: lightcheck: the viewport shows only the terrain layer -- nothing measured");
+            return;
+        }
         riding = riding && mounted != null && mounted.Mount.Runtime != null;
 
         const int W = 512, H = 512;
@@ -1707,7 +1750,7 @@ public partial class WmvMain : MonoBehaviour
         cam.enabled = false;                         // only ever rendered by hand, below
         cam.clearFlags = CameraClearFlags.SolidColor;
         cam.fieldOfView = Fov;
-        cam.cullingMask = src.cullingMask;
+        cam.cullingMask = checkMask;
         cam.allowHDR = false;
         cam.allowMSAA = false;
         cam.transform.rotation = rot;
@@ -2622,6 +2665,8 @@ public partial class WmvMain : MonoBehaviour
     /// <summary>What the viewport is still waiting on before a capture shows a settled state, or null.</summary>
     string ViewportBusy()
     {
+        if (terrain != null && terrain.Loading)
+            return "a terrain tile is loading";
         if (job != null || wmoJob != null)
             return "a load is in flight";
         if (dresser != null && dresser.Busy)
@@ -2694,6 +2739,10 @@ public partial class WmvMain : MonoBehaviour
     /// capture that has to ask for its size again (CaptureViewportWhenSettled). Nothing else reads it.</summary>
     void KeepFramed(Bounds framed, bool kept = false)
     {
+        // The terrain view's framing record is the tile's (WmvMainTerrain); the model view's is kept with the orbit state
+        // and comes back when the view is left.
+        if (TerrainViewActive)
+            return;
         Camera cam = Camera.main;
         lastFramed = framed;
         lastFramedAspect = cam != null ? cam.aspect : 1f;
@@ -2705,6 +2754,11 @@ public partial class WmvMain : MonoBehaviour
     /// aspect: framed again, or -- a view a keep-view load kept -- kept again (the pivot, the angle and the zoom stay).</summary>
     void RefitLastFramed(Camera cam, string what)
     {
+        if (TerrainViewActive)
+        {
+            RefitTerrain(cam, what);
+            return;
+        }
         lastFramedAspect = cam.aspect;
         if (lastFramedKept)
         {
@@ -2744,6 +2798,12 @@ public partial class WmvMain : MonoBehaviour
             string path = System.IO.Path.Combine(Application.dataPath, "../" + name + ".png");
             System.IO.File.WriteAllBytes(path, ImageConversion.EncodeToPNG(tex));
             viewportShots++;
+            if (TerrainViewActive)
+            {
+                LogTerrainShot(name, tex, busy);
+                Destroy(tex);
+                return;
+            }
             var rt = currentSlot.Runtime != null ? currentSlot.Runtime.Emitters : null;
             WmvRuntimeModel ridden = currentSlot.Runtime != null && mounted != null && mounted.RiddenFileDataID != 0
                                      ? mounted.Mount.Runtime : null;
@@ -2812,6 +2872,9 @@ public partial class WmvMain : MonoBehaviour
     {
         string v = System.Environment.GetEnvironmentVariable("WMV_VIEWPORT_ORBIT");
         if (string.IsNullOrEmpty(v))
+            return;
+        // In the terrain view only the tile's framing re-aims the camera; nothing of the hidden model does.
+        if (TerrainHoldsCamera(what))
             return;
         string[] p = v.Split(':');
         var inv = System.Globalization.CultureInfo.InvariantCulture;
@@ -3279,6 +3342,7 @@ public partial class WmvMain : MonoBehaviour
         if (currentSlot.Runtime != null) currentSlot.Runtime.Dispose();
         if (wmoJob != null) wmoJob.Dead = true;
         DisposeMapObject();
+        DisposeTerrain();                                // the terrain load stops, its tiles go
     }
 
     // ---------------------------------------------------------------- -wmvAllocCheck
@@ -3311,6 +3375,7 @@ public partial class WmvMain : MonoBehaviour
     void Update()
     {
         PumpMapObjectWork();
+        PumpTerrain();
         if (dresser != null)
             dresser.Tick();
         // A world model on screen is measured too (AdoptMapObject starts the probe): it has no animator,

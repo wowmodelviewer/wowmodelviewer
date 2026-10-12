@@ -5,7 +5,18 @@ Framework-free tests of the Unity project's pure parsing layer (`Assets/Scripts/
 - `WowParserTests.cs`: M2, skin, BLP, WMO and the model-space coordinate conversion.
 - `WorldParserTests.cs`: the world parsers (`Assets/Scripts/Wow/World`) on hand-built bytes: WDT, split ADT,
   terrain coordinates and vertex layout, holes, alpha storage, placements, tile assembly, and truncated or
-  randomly corrupted input.
+  randomly corrupted input. Its byte builders live in `Assets/Scripts/Wow/World/AdtSynthetic.cs`, shared with the
+  terrain tests and the player's self-test.
+- `TerrainMeshTests.cs`: the terrain mesh builder (`Assets/Scripts/Wow/World/TerrainMesh.cs`) and the mesh dump writer
+  (`TerrainDump.cs`) on synthetic roots: the pinned coordinate expressions and the world-to-Unity map, counts, every
+  single hole bit, cell structure and winding, asymmetric ramps (orientation), normals against an independent
+  recomputation, referenced-vertex bounds, the tile-identity tolerance, every rejection path, thread safety.
+- `TerrainCorpusTests.cs`: the same builder on the pinned tiles of the real client bytes (stage 03 design, section 7):
+  inputs checked against the pins, root and minimap FileDataIDs taken from the WDT, exact counts and hole masks, the
+  structural checks on real heights, and parse/build times. It runs when `WMV_WORLD_AUDIT_CORPUS` is set (otherwise
+  SKIPPED). With `WMV_TERRAIN_DUMP_DIR` set it writes each pinned tile's mesh there (`runner_<client>_<x>_<y>.txt`)
+  for `Tools/world-audit/compare_terrain_mesh.py` and `minimap_orientation.py`; with `WMV_TERRAIN_ALL_TILES=1` it
+  also builds, checks (and dumps) every root tile of every client's corpus window.
 - `WorldCorpusValidation.cs`: the world parsers on the real client bytes of the world-format audit
   (`docs/world-viewer/00-audit.md`). It first checks every input against
   `Tools/world-audit/tests/corpus_hashes.json` (243 files, 19 file sets). It then recomputes the audit's tables and
@@ -42,3 +53,13 @@ python -I Tools/world-audit/compare_csharp.py <corpus>/results/csharp_parsers.js
 ```
 
 The Python results come from the audit scripts run on the same pinned bytes; see `Tools/world-audit/README.md`.
+
+Compare the terrain mesh dumps with the independent Python reference, and check their orientation against the game's
+minimap tiles:
+
+```
+set WMV_TERRAIN_DUMP_DIR=<folder>
+dotnet run -c Release --project Tools/UnityRendererProject/Tests/Runner/WowParserTestRunner.csproj
+python -I Tools/world-audit/compare_terrain_mesh.py <folder>/runner_wow_32_50.txt --corpus <corpus>
+python -I Tools/world-audit/minimap_orientation.py dump <folder>/runner_wow_32_50.txt --corpus <corpus>
+```

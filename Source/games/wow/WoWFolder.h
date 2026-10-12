@@ -79,13 +79,15 @@ namespace wow
       bool isRemoteFileId(int fileDataId) const { return m_CASCFolder.isRemote(fileDataId); }
       // The CASC storage's own answer for one file, and a whole-file read, both without this folder's file index (no
       // file object is created or added; see CASCFolder). A client of another storage kind (legacy MPQ) has none:
-      // nothing is listed and a read reports NoStorage.
+      // nothing is listed and a read reports NoStorage. A file larger than maxBytes is not read (TooLarge, with its size
+      // in sizeOut when given).
       CASCFolder::RootEntry storageRootEntry(int fileDataId) const { return m_CASCFolder.rootEntry(fileDataId); }
       CASCFolder::RootEntry storageRootEntryByPath(const QString & path) const { return m_CASCFolder.rootEntryByPath(path); }
       CASCFolder::ReadOutcome readStorageFile(int fileDataId, const QString & path, QByteArray & out,
-                                              unsigned int * errorCode = nullptr) const
+                                              unsigned int * errorCode = nullptr, qint64 maxBytes = 64 * 1024 * 1024,
+                                              qint64 * sizeOut = nullptr) const
       {
-        return m_CASCFolder.readWholeFile(fileDataId, path, out, errorCode);
+        return m_CASCFolder.readWholeFile(fileDataId, path, out, errorCode, maxBytes, sizeOut);
       }
       // Which storage the folder holds right now (CASCFolder::storageGeneration): changes with every client opened.
       quint64 storageGeneration() const { return m_CASCFolder.storageGeneration(); }

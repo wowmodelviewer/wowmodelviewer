@@ -1,6 +1,8 @@
 #include "app.h"
 
+#include <algorithm>
 #include <cctype>
+#include <cmath>
 #include <cstddef>
 #include <cstdio>
 #include <cstdlib>
@@ -4973,6 +4975,1055 @@ static void doHeadlessUnityIpcTest(ModelViewer * frame)
   LOG_INFO << "[unityipc-test] player shut down; still running=" << (frame->unityRendererHost->isRunning() ? 1 : 0);
 }
 
+// -terraintile <map id> <tile x> <tile y> [<out.json>] (with -product / -build to pin the client): THE TERRAIN TILE TEST
+// (protocol 12; ModelViewer::RequestTerrainTile, UnityIpcServer.h TERRAIN). After the client is loaded, and before any
+// player is started -- so they run with any player, or none -- the in-process checks: the getMapAsset decision on
+// made-up requests (ModelViewer::decideMapAssetRequest: every refusal and staleness, and the two that go on to the
+// read), the map's WDT inspected with a 1000-byte limit (Unreadable, the detail naming its size and the limit, no
+// bytes) and with the map-file limit (read whole), and the WDT a load would name as this client's family resolves it
+// (ModelViewer::ResolveTerrainTile, with its refusals), and the host's bookkeeping of a failed load while an earlier tile
+// is alive (ModelViewer::OnTerrainTileLoaded). Then the player is started (StartUnityRenderer(true)); one older than
+// protocol 12 ends the run "FAIL player too old". Otherwise the player's object counts are taken with no terrain (every
+// count reported, the terrain's own all 0), the tile is requested and its terrainTileLoaded awaited (60 s) -- the Mesh
+// count must rise with it -- and WMV_TERRAINTEST_SEQUENCE runs, comma-separated:
+//   tile:<map>:<x>:<y>        another tile, built;
+//   repeat:<n>                the last tile n more times, each built, and the player's Mesh and Material counts after
+//                             them those after its first build (nothing piles up);
+//   wait:<ms>                 pumps with the canvas ticking (lets a WMV_VIEWPORT_SHOT capture land);
+//   clear                     clearTerrain: a tile on show is taken away unanswered;
+//   clear:<map>:<x>:<y>       that tile requested and cleared before anything is polled: the load, still building, is
+//                             answered "cleared", once; after either form no terrain tile, view, load or terrain object,
+//                             and the player's Mesh and Material counts those of the reference with no terrain (taken
+//                             before the first tile; after a model or switch step, the counts it left, once its terrain
+//                             objects were 0) -- the check names which;
+//   expectfail:<map>:<x>:<y>:<text>   refused by the host, or answered "failed", with <text> in the reason;
+//   notlocal:<map>:<x>:<y>:<root>     when the root ADT is still listed but not downloaded (inspected first; otherwise
+//                             SKIP "precondition changed"), the load fails with host state "not installed locally";
+//   switch:<product>          the last tile requested, then that client loaded before anything is polled: no
+//                             getMapAsset may be answered while it loads (else "test invalid"), the WDT request is
+//                             then answered "stale" (its epoch, and the next), the load answered "cleared", no tile left;
+//   staleepoch                the last tile, the client epoch moved on before polling: failed, host state "stale";
+//   staleload                 the last tile, the load serial raised without sending: failed, host state "stale";
+//   supersede:<m>:<x>:<y>|<m>:<x>:<y>  two loads back to back: the first "superseded", the second built;
+//   model:<path>              a model selected as Browse does after the terrain: no terrain tile, view or terrain
+//                             object left, the model on screen;
+//   model:<path>|<m>:<x>:<y>  the same with that tile requested first and the model selected before anything is polled:
+//                             the load, still building, is answered "superseded", once;
+//   modelthentile:<path>|<m>:<x>:<y>  a model other than the one on screen selected, and (once the player says it is
+//                             still building it -- else "test invalid") the tile requested: the tile built, and a
+//                             report window later the player builds nothing, shows the tile in the terrain view and still
+//                             has the model of before (the dropped one never adopted); the host puts the canvas model's
+//                             "could not be built" notice up while the tile builds, none while it is shown, and again
+//                             after a later clear or failed load that leaves no tile.
+// Every built load: the report names the tile, the WDT and root it parsed are those served (FileDataID and MD5), one
+// terrain tile is alive and the terrain's Meshes, Materials and GameObjects are counted. Every load sent is answered
+// exactly once, and no terrain load is building at the end. Lines
+// "[terrain-test] PASS|FAIL|SKIP <check> -- <detail>" go to the log, then "[terrain-test] RESULT: PASS|FAIL"; every
+// report, every getMapAsset served and every check go to <out.json>, which Tools/world-audit/check_terrain_run.py checks
+// against the pinned values.
+namespace
+{
+  struct TerrainTestLog
+  {
+    int passed = 0;
+    int failed = 0;
+    int skipped = 0;
+    QJsonArray checks;
+
+    void check(const QString & what, bool ok, const QString & detail)
+    {
+      ok ? passed++ : failed++;
+      const QString line = QString("[terrain-test] %1 ").arg(ok ? "PASS" : "FAIL") + what +
+                           (detail.isEmpty() ? QString() : " -- " + detail);
+      if (ok)
+        LOG_INFO << line;
+      else
+        LOG_ERROR << line;
+      QJsonObject c;
+      c["check"] = what;
+      c["result"] = ok ? "PASS" : "FAIL";
+      c["detail"] = detail;
+      checks.append(c);
+    }
+
+    void skip(const QString & what, const QString & detail)
+    {
+      skipped++;
+      LOG_WARNING << "[terrain-test] SKIP " + what + " -- " + detail;
+      QJsonObject c;
+      c["check"] = what;
+      c["result"] = "SKIP";
+      c["detail"] = detail;
+      checks.append(c);
+    }
+  };
+
+  QJsonObject servedJson(const UnityIpcServer::MapAssetServed & s)
+  {
+    QJsonObject o;
+    o["requestId"] = s.requestId;
+    o["load"] = s.load;
+    o["assetEpoch"] = s.assetEpoch;
+    o["epochNow"] = s.epochNow;
+    o["role"] = s.role;
+    o["fileDataID"] = s.fileDataID;
+    o["bytes"] = (double)s.bytes;
+    o["state"] = s.state;
+    o["detail"] = s.detail;
+    o["md5"] = s.md5;
+    o["readMs"] = s.readMs;
+    o["handlerMs"] = s.handlerMs;
+    o["first"] = s.first;
+    return o;
+  }
+
+  QJsonObject runtimeJson(const QString & label, const UnityIpcServer::RuntimeState & s)
+  {
+    QJsonObject o;
+    o["label"] = label;
+    o["query"] = s.query;
+    o["liveTerrainTiles"] = s.liveTerrainTiles;
+    o["terrainLoad"] = s.terrainLoad;
+    o["terrainLoading"] = s.terrainLoading;
+    o["terrainView"] = s.terrainView;
+    o["cameraMask"] = s.hasCameraMask ? QJsonValue((double)s.cameraMask) : QJsonValue();
+    o["meshObjects"] = s.meshObjects;
+    o["materialObjects"] = s.materialObjects;
+    o["terrainMeshes"] = s.terrainMeshes;
+    o["terrainMaterials"] = s.terrainMaterials;
+    o["terrainGameObjects"] = s.terrainGameObjects;
+    o["liveModels"] = s.liveModels;
+    o["liveMapObjects"] = s.liveMapObjects;
+    o["modelFileDataID"] = s.modelFileDataID;
+    o["mapObjectFileDataID"] = s.mapObjectFileDataID;
+    o["loading"] = s.loading;
+    o["assetEpoch"] = s.assetEpoch;
+    return o;
+  }
+
+  // Median and 95th percentile (nearest rank) of a list, for the timing summary.
+  void percentiles(std::vector<double> v, double & median, double & p95, double & max)
+  {
+    median = p95 = max = -1.0;
+    if (v.empty())
+      return;
+    std::sort(v.begin(), v.end());
+    median = v.size() % 2 ? v[v.size() / 2] : (v[v.size() / 2 - 1] + v[v.size() / 2]) / 2.0;
+    p95 = v[std::min(v.size() - 1, (size_t)std::ceil(0.95 * v.size()) - 1)];
+    max = v.back();
+  }
+}
+
+// The getMapAsset decision on made-up requests: every way a request is refused or stale, which reason wins when
+// several hold, and the requests that go on to the read. Nothing is read and no player is involved.
+static void checkMapAssetDecisions(TerrainTestLog & tally)
+{
+  ModelViewer::TerrainRequest current;
+  current.load = 5;
+  current.epoch = 7;
+  current.mapId = 0;
+  current.tileX = 32;
+  current.tileY = 50;
+  current.wdtFileDataID = 775971;
+  current.catalogueGeneration = 1;
+  ModelViewer::TerrainRequest served = current;   // the load's WDT answered "available"
+  served.wdtServed = true;
+  ModelViewer::TerrainRequest rooted = served;    // ... and its root ADT asked for
+  rooted.rootFileDataID = 778037;
+  const int epochNow = 7;
+  // load -1000 leaves "load" out of the request.
+  const auto request = [](int load, int epoch, const QString & role, int fileDataID) {
+    QJsonObject r;
+    r["type"] = "getMapAsset";
+    r["requestId"] = "u1";
+    if (load != -1000)
+      r["load"] = load;
+    r["assetEpoch"] = epoch;
+    r["role"] = role;
+    r["fileDataID"] = fileDataID;
+    return r;
+  };
+  struct Case
+  {
+    const char * name;
+    QJsonObject request;
+    const ModelViewer::TerrainRequest * current;
+    bool belongs;
+    bool loading;
+    const char * state;
+    QString detail;   // a part the decision's detail must contain
+  };
+  const Case cases[] = {
+    {"the current load's WDT goes on to the read", request(5, 7, "wdt", 775971), &current, true, false, "", ""},
+    {"role \"x\" is refused", request(5, 7, "x", 775971), &current, true, false, "refused", "unknown role \"x\""},
+    {"another WDT is refused", request(5, 7, "wdt", 775972), &current, true, false, "refused",
+     "WDT is FileDataID 775971, not 775972"},
+    {"FileDataID 0 is refused", request(5, 7, "wdt", 0), &current, true, false, "refused", "FileDataID 0 names no file"},
+    {"FileDataID -1 is refused", request(5, 7, "wdt", -1), &current, true, false, "refused", "FileDataID -1 names no file"},
+    {"a request without a load is refused", request(-1000, 7, "wdt", 775971), &current, true, false, "refused",
+     "names no terrain load"},
+    {"load 0 is refused", request(0, 7, "wdt", 775971), &current, true, false, "refused", "names no terrain load"},
+    {"the load before the current one is stale", request(4, 7, "wdt", 775971), &current, true, false, "stale",
+     "request load 4, current 5"},
+    {"the client epoch before the current one is stale", request(5, 6, "wdt", 775971), &current, true, false, "stale",
+     "request epoch 6, current 7"},
+    {"a map catalogue that is not the loaded client's is stale", request(5, 7, "wdt", 775971), &current, false, false,
+     "stale", "map catalogue"},
+    {"no current terrain load is stale", request(5, 7, "wdt", 775971), nullptr, true, false, "stale",
+     "no terrain load is current"},
+    {"every staleness that holds is named", request(4, 6, "wdt", 775971), &current, false, false, "stale",
+     "request load 4, current 5; request epoch 6, current 7; the map catalogue"},
+    {"staleness is decided before the role", request(4, 7, "x", 775971), &current, true, false, "stale",
+     "request load 4, current 5"},
+    {"a client being loaded is refused before anything else", request(4, 6, "x", 0), &current, false, true, "refused",
+     "a client is being loaded"},
+    {"a root ADT before the load's WDT was served is refused", request(5, 7, "rootAdt", 778037), &current, true, false,
+     "refused", "WDT has not been served"},
+    {"a root ADT after the WDT goes on to the read", request(5, 7, "rootAdt", 778037), &served, true, false, "", ""},
+    {"the same root ADT again goes on to the read", request(5, 7, "rootAdt", 778037), &rooted, true, false, "", ""},
+    {"a second root ADT for the load is refused", request(5, 7, "rootAdt", 778038), &rooted, true, false, "refused",
+     "one root ADT per load, not 778038"},
+    {"the WDT again after its root goes on to the read", request(5, 7, "wdt", 775971), &rooted, true, false, "", ""},
+  };
+  for (const Case & c : cases)
+  {
+    const ModelViewer::MapAssetDecision d =
+      ModelViewer::decideMapAssetRequest(c.request, c.current, epochNow, c.belongs, c.loading);
+    const bool ok = d.state == QLatin1String(c.state) && d.detail.contains(c.detail);
+    tally.check(QString("decision: ") + c.name, ok,
+              "state \"" + d.state + "\" detail \"" + d.detail + "\"; expected \"" + c.state + "\" with \"" + c.detail + "\"");
+  }
+}
+
+// What the host takes as shown after a failed load (ModelViewer::OnTerrainTileLoaded), on made-up reports: a tile still
+// alive is on show -- it may be one the host never heard was built (adopted, then answered "superseded" by the failed
+// load) --, a failure that leaves no tile tells nothing, and a report about another load changes nothing. No player is
+// involved; the host's terrain request and player content are put back afterwards.
+static void checkFailedLoadBookkeeping(ModelViewer * frame, TerrainTestLog & tally)
+{
+  const ModelViewer::TerrainRequest savedRequest = frame->m_terrainRequest;
+  const ModelViewer::PlayerContent savedContent = frame->m_playerContent;
+  ModelViewer::TerrainRequest current;
+  current.load = 1000000;
+  struct Case
+  {
+    const char * name;
+    int load;
+    int liveTerrainTiles;
+    ModelViewer::PlayerContent expected;
+  };
+  const Case cases[] = {
+    {"a failed load while an earlier tile is alive leaves the host taking that tile as shown", current.load, 1,
+     ModelViewer::PlayerContent::Terrain},
+    {"a failed load that leaves no tile leaves what is shown unknown", current.load, 0, ModelViewer::PlayerContent::Unknown},
+    {"a failed report about another load changes nothing", current.load - 1, 1, ModelViewer::PlayerContent::Unknown},
+  };
+  for (const Case & c : cases)
+  {
+    frame->m_terrainRequest = current;
+    frame->m_playerContent = ModelViewer::PlayerContent::Unknown;
+    UnityIpcServer::TerrainTileReport report;
+    report.load = c.load;
+    report.status = "failed";
+    report.reason = "terrain test: a made-up failure";
+    report.liveTerrainTiles = c.liveTerrainTiles;
+    frame->OnTerrainTileLoaded(report);
+    tally.check(QString("host: ") + c.name, frame->m_playerContent == c.expected,
+                QString("load %1 (current %2), liveTerrainTiles %3: the host takes %4 as shown")
+                  .arg(c.load).arg(current.load).arg(c.liveTerrainTiles)
+                  .arg(frame->m_playerContent == ModelViewer::PlayerContent::Terrain ? "the terrain tile" : "nothing known"));
+  }
+  frame->m_terrainRequest = savedRequest;
+  frame->m_playerContent = savedContent;
+  frame->UpdateUnityViewportState();
+}
+
+static int doHeadlessTerrainTileTest(ModelViewer * frame, int mapId, int tileX, int tileY, const QString & outPath)
+{
+  TerrainTestLog tally;
+  QJsonObject out;
+  const QString sequenceSpec = qEnvironmentVariable("WMV_TERRAINTEST_SEQUENCE").trimmed();
+  out["map"] = mapId;
+  out["tileX"] = tileX;
+  out["tileY"] = tileY;
+  out["sequence"] = sequenceSpec;
+  const std::shared_ptr<wow::WorldMapCatalog> startCatalog = frame->mapCatalog();
+  {
+    QJsonObject client;
+    client["product"] = startCatalog ? startCatalog->client().product : QString();
+    client["build"] = startCatalog ? startCatalog->client().build : QString();
+    out["client"] = client;
+  }
+  LOG_INFO << "[terrain-test] map" << mapId << "tile" << QString("%1_%2").arg(tileX).arg(tileY) << "client"
+           << (startCatalog ? startCatalog->client().product + " " + startCatalog->client().build : QString("none"))
+           << "sequence:" << (sequenceSpec.isEmpty() ? QString("none") : sequenceSpec);
+
+  std::vector<UnityIpcServer::TerrainTileReport> reports;
+  std::vector<UnityIpcServer::RuntimeState> states;
+  QJsonArray loadsJson, samplesJson;
+  std::vector<int> loadsSent;
+  UnityIpcServer * ipc = nullptr;
+  std::function<void(const UnityIpcServer::TerrainTileReport &)> previousTerrain;
+  std::function<void(const UnityIpcServer::RuntimeState &)> previousRuntime;
+
+  // THE IN-PROCESS CHECKS, before any player: the decision, the host's bookkeeping of a failed load, and the size limit
+  // of the catalogue's read. (That a refused file is never read is shown where the reads can be counted:
+  // scripts/tests/casc-whole-read, case 9.)
+  checkMapAssetDecisions(tally);
+  checkFailedLoadBookkeeping(frame, tally);
+  {
+    const QString tooLargeCheck = "inspectFile with a 1000-byte limit refuses the WDT, size and limit named, no bytes handed back";
+    const wow::MapEntry * entry = startCatalog ? startCatalog->find(mapId) : nullptr;
+    if (!entry || !startCatalog->inspect(mapId) || entry->inspection.state != wow::WdtAvailability::Available)
+      tally.check("the map's WDT can be read", false,
+                !entry ? QString("map %1 is not in the catalogue").arg(mapId)
+                       : wow::WorldMapCatalog::availabilityName(entry->inspection.state) + ": " + entry->inspection.detail +
+                           startCatalog->lastRefusal());
+    else if (entry->inspection.bytes <= 1000)
+      tally.skip(tooLargeCheck, QString("the WDT is %1 bytes").arg(entry->inspection.bytes));
+    else
+    {
+      const qint64 size = entry->inspection.bytes;
+      QByteArray bytes("left from before");
+      const wow::WdtInspection tooLarge = startCatalog->inspectFile(entry->wdt, &bytes, 1000);
+      const QString expected = QString("is larger than this read allows (%1 bytes, the limit is 1000)").arg(size);
+      tally.check(tooLargeCheck, tooLarge.state == wow::WdtAvailability::Unreadable &&
+                  tooLarge.detail.contains(expected) && bytes.isEmpty() && tooLarge.bytes < 0,
+                wow::WorldMapCatalog::availabilityName(tooLarge.state) + ": " + tooLarge.detail +
+                  QString(" (%1 bytes handed back)").arg(bytes.size()));
+      const wow::WdtInspection whole = startCatalog->inspectFile(entry->wdt, &bytes, UnityIpcServer::MAX_MAP_ASSET_BYTES);
+      tally.check("inspectFile at the map-file limit reads the WDT whole", whole.state == wow::WdtAvailability::Available &&
+                  bytes.size() == size, wow::WorldMapCatalog::availabilityName(whole.state) +
+                  QString(", %1 of %2 bytes").arg(bytes.size()).arg(size));
+      const wow::WdtInspection unchanged = startCatalog->inspectFile(entry->wdt, &bytes);
+      tally.check("inspectFile at its default limit reads the WDT whole", unchanged.state == wow::WdtAvailability::Available &&
+                  bytes.size() == size, wow::WorldMapCatalog::availabilityName(unchanged.state) +
+                  QString(", %1 of %2 bytes").arg(bytes.size()).arg(size));
+    }
+  }
+
+  // The tile and WDT a load would name (ModelViewer::ResolveTerrainTile, the checks RequestTerrainTile makes after the
+  // player's), for this client's family: Map.db2's FileDataID, or the storage root's FileDataID for the directory path.
+  {
+    UnityIpcServer::TerrainTileCommand command;
+    QString why;
+    const wow::MapEntry * entry = startCatalog ? startCatalog->find(mapId) : nullptr;
+    const bool resolved = frame->ResolveTerrainTile(mapId, tileX, tileY, command, why);
+    QStringList bad;
+    if (!resolved)
+      bad << why;
+    else if (!entry)
+      bad << "the map is not in the catalogue";
+    else if (entry->wdt.kind == wow::WdtReference::Kind::FileDataId)
+    {
+      if (command.wdtResolvedBy != "fileDataID" || command.wdtFileDataID != entry->wdt.fileDataId || !command.wdtPath.isEmpty())
+        bad << "not Map.db2's FileDataID";
+    }
+    else if (command.wdtResolvedBy != "path" || command.wdtFileDataID <= 0 ||
+             command.wdtFileDataID != entry->inspection.storageFileDataId || command.wdtPath != entry->wdt.path)
+      bad << "not the storage root's FileDataID for the path";
+    tally.check("the load names the map's WDT as this client resolves it", bad.isEmpty(),
+                QString("WDT %1 resolved by %2").arg(command.wdtFileDataID).arg(command.wdtResolvedBy) +
+                  (command.wdtPath.isEmpty() ? QString() : " " + command.wdtPath) +
+                  (startCatalog ? QString(" (catalogue rule: %1)").arg(startCatalog->wdtRule() == wow::WorldMapCatalog::WdtRule::ByFileDataId
+                                                                         ? "by FileDataID" : "by directory path")
+                                : QString()) +
+                  (bad.isEmpty() ? QString() : "; " + bad.join("; ")));
+    tally.check("a tile outside the grid is refused", !frame->ResolveTerrainTile(mapId, 64, tileY, command, why) &&
+                  why.contains("outside"), why);
+    tally.check("a map not in Map.db2 is refused", !frame->ResolveTerrainTile(-12345, tileX, tileY, command, why) &&
+                  why.contains("not in this client's Map.db2"), why);
+    const wow::MapEntry * noWdt = nullptr;
+    if (startCatalog)
+      for (const wow::MapEntry & e : startCatalog->maps())
+        if (!noWdt && e.wdt.kind == wow::WdtReference::Kind::Unresolved)
+          noWdt = &e;
+    if (noWdt)
+      tally.check(QString("map %1, which has no WDT, is refused").arg(noWdt->id),
+                  !frame->ResolveTerrainTile(noWdt->id, tileX, tileY, command, why) && why.contains("has no WDT"), why);
+    else
+      tally.skip("a map without a WDT is refused", "every map of this client has a WDT reference");
+  }
+
+  // Everything from the player on; the results are written and the player shut down however it ends.
+  [&]() {
+    LOG_INFO << "[terrain-test] starting the player:" << QString::fromWCharArray(UnityRendererHost::resolveUnityExePath().c_str());
+    if (!frame->unityRendererHost || !frame->StartUnityRenderer(/* selfTest */ true))
+    {
+      tally.check("the player starts", false,
+                QString::fromWCharArray(frame->unityRendererHost ? frame->unityRendererHost->playerProblem().c_str() : L"no viewport"));
+      return;
+    }
+    ipc = frame->unityRendererHost->ipc();
+    if (!ipc || !ipc->isListening())
+    {
+      tally.check("the IPC server listens", false, QString());
+      ipc = nullptr;
+      return;
+    }
+    previousTerrain = ipc->onTerrainTileLoaded;
+    previousRuntime = ipc->onRuntimeState;
+    ipc->onTerrainTileLoaded = [&reports, previousTerrain](const UnityIpcServer::TerrainTileReport & r) {
+      reports.push_back(r);
+      if (previousTerrain)
+        previousTerrain(r);
+    };
+    ipc->onRuntimeState = [&states, previousRuntime](const UnityIpcServer::RuntimeState & s) {
+      states.push_back(s);
+      if (previousRuntime)
+        previousRuntime(s);
+    };
+    wxStopWatch ready;
+    while (!ipc->isUnityReady() && ready.Time() < 60000 && frame->unityRendererHost->isRunning())
+      pumpIpc(ipc, 1);
+    tally.check("the player announces itself", ipc->isUnityReady(),
+              QString("protocol %1 after %2 ms").arg(ipc->playerProtocolVersion()).arg(ready.Time()));
+    out["playerProtocol"] = ipc->playerProtocolVersion();
+    if (!ipc->isUnityReady())
+      return;
+    if (!ipc->playerDrawsTerrain())
+    {
+      tally.check("player too old", false, QString("the player speaks protocol %1; drawing terrain needs protocol 12")
+                                           .arg(ipc->playerProtocolVersion()));
+      return;
+    }
+
+    // What the player holds, two questions in turn: the second is answered in a frame after the one the first was.
+    const auto sample = [&](const QString & label, UnityIpcServer::RuntimeState & s) {
+      bool answered = false;
+      const bool got = waitRuntimeState(ipc, states, [](const UnityIpcServer::RuntimeState &) { return true; }, 5000, s, answered) &&
+                       waitRuntimeState(ipc, states, [](const UnityIpcServer::RuntimeState &) { return true; }, 5000, s, answered);
+      samplesJson.append(runtimeJson(label, s));
+      return got;
+    };
+    const auto reportsFor = [&reports](int load) {
+      int n = 0;
+      for (const UnityIpcServer::TerrainTileReport & r : reports)
+        n += r.load == load ? 1 : 0;
+      return n;
+    };
+    const auto waitReport = [&](int load, long limitMs, UnityIpcServer::TerrainTileReport & outReport) {
+      wxStopWatch w;
+      while (true)
+      {
+        for (const UnityIpcServer::TerrainTileReport & r : reports)
+          if (r.load == load)
+          {
+            outReport = r;
+            return true;
+          }
+        if (w.Time() >= limitMs || !ipc->isUnityReady())
+          return false;
+        pumpIpc(ipc, 1);
+      }
+    };
+    const auto lastServed = [&ipc](int load, const QString & role) -> const UnityIpcServer::MapAssetServed * {
+      const UnityIpcServer::MapAssetServed * found = nullptr;
+      for (const UnityIpcServer::MapAssetServed & s : ipc->mapAssetsServed())
+        if (s.load == load && s.role == role)
+          found = &s;
+      return found;
+    };
+    const auto request = [&](int m, int x, int y, const QString & step, QString & why) {
+      const int load = frame->RequestTerrainTile(m, x, y, why);
+      if (load > 0)
+      {
+        loadsSent.push_back(load);
+        QJsonObject l;
+        l["load"] = load;
+        l["mapId"] = m;
+        l["tileX"] = x;
+        l["tileY"] = y;
+        l["step"] = step;
+        l["assetEpoch"] = UnityAssetAccess::clientEpoch();
+        l["product"] = frame->mapCatalog() ? frame->mapCatalog()->client().product : QString();
+        l["build"] = frame->mapCatalog() ? frame->mapCatalog()->client().build : QString();
+        loadsJson.append(l);
+      }
+      return load;
+    };
+    // A built load: its report names the tile, the files it parsed are those served, one tile is alive.
+    const auto checkBuilt = [&](const QString & label, int load, int m, int x, int y) {
+      UnityIpcServer::TerrainTileReport r;
+      if (!waitReport(load, 60000, r))
+      {
+        tally.check(label + QString(": load %1 built").arg(load), false, "no terrainTileLoaded within 60 s");
+        return false;
+      }
+      QStringList bad;
+      if (r.status != "built")
+        bad << "status " + r.status + " (" + r.reason + (r.hostState.isEmpty() ? QString() : "; host " + r.hostState + ": " + r.hostDetail) + ")";
+      if (r.mapId != m || r.tileX != x || r.tileY != y)
+        bad << QString("the report names map %1 tile %2_%3").arg(r.mapId).arg(r.tileX).arg(r.tileY);
+      const UnityIpcServer::MapAssetServed * wdt = lastServed(load, "wdt");
+      const UnityIpcServer::MapAssetServed * root = lastServed(load, "rootAdt");
+      if (!wdt || wdt->state != "available")
+        bad << "no WDT was served for the load";
+      else if (wdt->fileDataID != r.wdtFileDataID || wdt->md5.compare(r.wdtMd5, Qt::CaseInsensitive) != 0)
+        bad << QString("WDT served %1 md5 %2, parsed %3 md5 %4").arg(wdt->fileDataID).arg(wdt->md5).arg(r.wdtFileDataID).arg(r.wdtMd5);
+      if (!root || root->state != "available")
+        bad << "no root ADT was served for the load";
+      else if (root->fileDataID != r.rootFileDataID || root->md5.compare(r.rootMd5, Qt::CaseInsensitive) != 0)
+        bad << QString("root served %1 md5 %2, parsed %3 md5 %4").arg(root->fileDataID).arg(root->md5).arg(r.rootFileDataID).arg(r.rootMd5);
+      if (r.liveTerrainTiles != 1)
+        bad << QString("liveTerrainTiles %1, expected 1").arg(r.liveTerrainTiles);
+      tally.check(label + QString(": load %1 map %2 tile %3_%4 built").arg(load).arg(m).arg(x).arg(y), bad.isEmpty(),
+                bad.isEmpty() ? QString("root %1, %2/%3 chunks, %4 vertices, %5 triangles, %6 hole cells, totalMs %7")
+                                  .arg(r.rootFileDataID).arg(r.chunksBuilt).arg(r.chunks).arg(r.vertices).arg(r.triangles)
+                                  .arg(r.holeCells).arg(r.totalMs, 0, 'f', 1)
+                              : bad.join("; "));
+      return bad.isEmpty();
+    };
+    const auto expectFailed = [&](const QString & label, int load, const QString & hostState, const QString & text) {
+      UnityIpcServer::TerrainTileReport r;
+      if (!waitReport(load, 60000, r))
+      {
+        tally.check(label, false, QString("no terrainTileLoaded for load %1 within 60 s").arg(load));
+        return r;
+      }
+      const QString all = r.reason + " | " + r.hostState + " | " + r.hostDetail;
+      tally.check(label, r.status == "failed" && (hostState.isEmpty() || r.hostState == hostState) && all.contains(text),
+                QString("load %1 status %2: ").arg(load).arg(r.status) + all);
+      return r;
+    };
+    // The player's object counts: every one reported (an absent one reads -1 and must not pass for a count), and what the
+    // terrain itself holds -- nothing with no tile, the tile's own Meshes, Materials and GameObjects while it is shown.
+    const auto counted = [](const UnityIpcServer::RuntimeState & s) {
+      return s.meshObjects >= 0 && s.materialObjects >= 0 && s.liveTerrainTiles >= 0 && s.terrainMeshes >= 0 &&
+             s.terrainMaterials >= 0 && s.terrainGameObjects >= 0;
+    };
+    const auto noTerrainObjects = [&counted](const UnityIpcServer::RuntimeState & s) {
+      return counted(s) && s.terrainMeshes == 0 && s.terrainMaterials == 0 && s.terrainGameObjects == 0;
+    };
+    const auto tileObjects = [&counted](const UnityIpcServer::RuntimeState & s) {
+      return counted(s) && s.terrainMeshes > 0 && s.terrainMaterials > 0 && s.terrainGameObjects > 0;
+    };
+    // A tile on show, a report window after its build: one tile alive, and its objects counted.
+    const auto sampleShown = [&](const QString & label, UnityIpcServer::RuntimeState & s) {
+      const bool got = sample(label, s);
+      tally.check(label + ": the player counts the tile's own Meshes, Materials and GameObjects",
+                  got && s.liveTerrainTiles == 1 && tileObjects(s), got ? s.describe() : QString("no answer"));
+      return got;
+    };
+    // The viewport notice the host puts up (none: "").
+    const auto noticeTitle = [frame]() {
+      ModelViewer::ViewportNotice notice;
+      return frame->unityViewportNotice(notice) ? QString::fromStdWString(notice.title.ToStdWstring()) : QString();
+    };
+    const QString cannotBuild = QString::fromStdWString(wxString(_("Model could not be built")).ToStdWstring());
+
+    // THE COUNTS WITH NO TERRAIN. The baseline, taken before the first tile, is kept as it is; a clear compares the
+    // player's Mesh and Material counts with the latest reference: the baseline, or the counts a model or switch step
+    // left (the model's own meshes count), taken only once that step's terrain objects were 0.
+    UnityIpcServer::RuntimeState baseline;
+    const bool baselineAnswered = sample("baseline", baseline);
+    tally.check("the player holds no terrain before the first tile, and reports every object count",
+                baselineAnswered && baseline.liveTerrainTiles == 0 && baseline.terrainView == 0 && noTerrainObjects(baseline),
+                baselineAnswered ? baseline.describe() : QString("no answer"));
+    UnityIpcServer::RuntimeState countsReference = baseline;
+    QString countsReferenceLabel = "taken before the first tile";
+    const auto adoptReference = [&](const QString & label, const UnityIpcServer::RuntimeState & s) {
+      const bool ok = noTerrainObjects(s);
+      tally.check(label + ": no terrain Mesh, Material or GameObject left, every count reported (the reference for a "
+                          "later clear)", ok, s.describe());
+      if (ok)
+      {
+        countsReference = s;
+        countsReferenceLabel = "taken after " + label;
+      }
+    };
+
+    // THE TILE asked for on the command line.
+    struct Tile { int map, x, y; };
+    Tile last = {mapId, tileX, tileY};
+    UnityIpcServer::RuntimeState afterTile = baseline;
+    {
+      QString why;
+      const int load = request(mapId, tileX, tileY, "main", why);
+      tally.check("the tile is requested", load > 0, load > 0 ? QString("load %1").arg(load) : why);
+      if (load > 0 && checkBuilt("main tile", load, mapId, tileX, tileY) && sampleShown("after the main tile", afterTile))
+        tally.check("the player's Mesh count rises with the tile (the counter measures)",
+                    counted(baseline) && afterTile.meshObjects > baseline.meshObjects,
+                    QString("meshObjects %1 with the tile, %2 before it").arg(afterTile.meshObjects).arg(baseline.meshObjects));
+    }
+    // A model the modelthentile step dropped for its tile, while the canvas still holds it: no tile shown, its notice is up.
+    int droppedModel = 0;
+    const auto checkDroppedNotice = [&](const QString & label) {
+      if (droppedModel == 0)
+        return;
+      const QString title = noticeTitle();
+      tally.check(label + QString(": with no tile shown, the notice for the dropped model %1 is up again").arg(droppedModel),
+                  title == cannotBuild, "notice \"" + title + "\"");
+    };
+
+    // THE SEQUENCE.
+    const QStringList steps = sequenceSpec.split(',', QString::SkipEmptyParts);
+    const auto parseTile = [](const QString & text, Tile & t) {
+      const QStringList p = text.split(':');
+      bool a = false, b = false, c = false;
+      if (p.size() < 3)
+        return false;
+      t.map = p[0].trimmed().toInt(&a);
+      t.x = p[1].trimmed().toInt(&b);
+      t.y = p[2].trimmed().toInt(&c);
+      return a && b && c;
+    };
+    for (int s = 0; s < steps.size(); s++)
+    {
+      const QString step = steps[s].trimmed();
+      const QString kind = step.section(':', 0, 0).trimmed().toLower();
+      const QString arg = step.section(':', 1).trimmed();
+      const QString label = QString("step %1 %2").arg(s + 1).arg(step);
+      LOG_INFO << "[terrain-test]" << label;
+      Tile t = {0, 0, 0};
+      QString why;
+      if (kind == "tile")
+      {
+        if (!parseTile(arg, t))
+        {
+          tally.check(label, false, "expected tile:<map>:<x>:<y>");
+          continue;
+        }
+        const int load = request(t.map, t.x, t.y, step, why);
+        if (load <= 0)
+          tally.check(label + ": requested", false, why);
+        else if (checkBuilt(label, load, t.map, t.x, t.y))
+          sampleShown(label, afterTile);
+        last = t;
+      }
+      else if (kind == "repeat")
+      {
+        const int n = arg.toInt();
+        bool all = n > 0;
+        for (int i = 0; i < n; i++)
+        {
+          const int load = request(last.map, last.x, last.y, step, why);
+          all = load > 0 && checkBuilt(label + QString(" #%1").arg(i + 1), load, last.map, last.x, last.y) && all;
+          if (load <= 0)
+            tally.check(label + QString(" #%1: requested").arg(i + 1), false, why);
+        }
+        UnityIpcServer::RuntimeState now;
+        const bool got = sampleShown(label, now);
+        tally.check(label + ": the player's Mesh and Material counts are those after the tile's first build",
+                  all && got && now.liveTerrainTiles == 1 && counted(now) && counted(afterTile) &&
+                    now.meshObjects == afterTile.meshObjects && now.materialObjects == afterTile.materialObjects,
+                  QString("meshObjects %1 (after the first build %2), materialObjects %3 (%4), liveTerrainTiles %5")
+                    .arg(now.meshObjects).arg(afterTile.meshObjects).arg(now.materialObjects).arg(afterTile.materialObjects)
+                    .arg(now.liveTerrainTiles));
+      }
+      else if (kind == "wait")
+        pumpTicking(ipc, arg.toLong());
+      else if (kind == "clear")
+      {
+        // clear:<map>:<x>:<y>: that tile is requested and cleared before anything is polled -- the player cannot build
+        // it before the host answers its getMapAsset -- so the clear meets a load still building.
+        int inFlight = 0;
+        if (!arg.isEmpty())
+        {
+          if (!parseTile(arg, t))
+          {
+            tally.check(label, false, "expected clear or clear:<map>:<x>:<y>");
+            continue;
+          }
+          inFlight = request(t.map, t.x, t.y, step, why);
+          if (inFlight <= 0)
+          {
+            tally.check(label + ": requested", false, why);
+            continue;
+          }
+        }
+        const size_t before = reports.size();
+        const bool sent = frame->ClearTerrain("terrain test: clear");
+        if (inFlight)
+        {
+          UnityIpcServer::TerrainTileReport r;
+          const bool got = waitReport(inFlight, 60000, r);
+          pumpIpc(ipc, 100);
+          tally.check(label + QString(": the load building (%1) is answered \"cleared\", once").arg(inFlight),
+                    sent && got && r.status == "cleared" && reportsFor(inFlight) == 1,
+                    got ? QString("%1 answer(s), the first: ").arg(reportsFor(inFlight)) + r.status + " " + r.reason
+                        : QString("no answer"));
+        }
+        else
+        {
+          pumpIpc(ipc, 100);
+          tally.check(label + ": a tile on show is taken away unanswered", sent && reports.size() == before,
+                    QString("%1 report(s) after the clear").arg(reports.size() - before));
+        }
+        UnityIpcServer::RuntimeState now;
+        const bool got = sample(label, now);
+        tally.check(label + ": no terrain tile, view, load or terrain object left, and the player's Mesh and Material "
+                            "counts those " + countsReferenceLabel,
+                    got && now.liveTerrainTiles == 0 && now.terrainView == 0 && now.terrainLoading == 0 &&
+                      noTerrainObjects(now) && counted(countsReference) && now.meshObjects == countsReference.meshObjects &&
+                      now.materialObjects == countsReference.materialObjects,
+                    got ? QString("meshObjects %1 materialObjects %2, those %3: %4 and %5; ")
+                            .arg(now.meshObjects).arg(now.materialObjects).arg(countsReferenceLabel)
+                            .arg(countsReference.meshObjects).arg(countsReference.materialObjects) + now.describe()
+                        : QString("no answer"));
+        checkDroppedNotice(label);
+      }
+      else if (kind == "expectfail")
+      {
+        if (!parseTile(arg, t) || arg.section(':', 3).isEmpty())
+        {
+          tally.check(label, false, "expected expectfail:<map>:<x>:<y>:<reason text>");
+          continue;
+        }
+        const QString text = arg.section(':', 3);
+        const int load = request(t.map, t.x, t.y, step, why);
+        if (load <= 0)
+          tally.check(label + ": refused by the host", why.contains(text), why);
+        else if (expectFailed(label + ": failed", load, QString(), text).liveTerrainTiles == 0)
+          checkDroppedNotice(label);
+      }
+      else if (kind == "notlocal")
+      {
+        bool numeric = false;
+        const int root = arg.section(':', 3).toInt(&numeric);
+        if (!parseTile(arg, t) || !numeric)
+        {
+          tally.check(label, false, "expected notlocal:<map>:<x>:<y>:<root FileDataID>");
+          continue;
+        }
+        // The install state is Battle.net's, which can change in the background: checked first, a precondition.
+        wow::WdtReference reference;
+        reference.kind = wow::WdtReference::Kind::FileDataId;
+        reference.fileDataId = root;
+        const wow::WdtInspection now = frame->mapCatalog()->inspectFile(reference);
+        if (now.state != wow::WdtAvailability::NotInstalledLocally)
+        {
+          LOG_INFO << "[clientcaps] files not installed" << frame->clientCapabilities().filesNotInstalled
+                   << "| root" << root << wow::WorldMapCatalog::availabilityName(now.state) << now.detail;
+          tally.skip(label, "precondition changed (now " + wow::WorldMapCatalog::availabilityName(now.state) + ")");
+          continue;
+        }
+        const int load = request(t.map, t.x, t.y, step, why);
+        if (load <= 0)
+          tally.check(label + ": requested", false, why);
+        else
+          expectFailed(label + ": failed, the root not installed locally", load, "not installed locally", QString());
+      }
+      else if (kind == "switch")
+      {
+        const std::vector<core::GameConfig> configs = GAMEDIRECTORY.configsFound();
+        const core::GameConfig * config = nullptr;
+        for (const core::GameConfig & c : configs)
+          if (c.product == arg)
+            config = &c;
+        if (!config)
+        {
+          tally.check(label, false, "no such product in the installation");
+          continue;
+        }
+        const core::GameConfig chosen = *config;
+        const int epoch = UnityAssetAccess::clientEpoch();
+        const int load = request(last.map, last.x, last.y, step, why);
+        if (load <= 0)
+        {
+          tally.check(label + ": requested", false, why);
+          continue;
+        }
+        // The client is loaded before anything is polled: the player's WDT request waits for it.
+        const size_t servedBefore = ipc->mapAssetsServed().size();
+        const bool loaded = frame->LoadWoW(&chosen);
+        droppedModel = 0;   // the canvas was emptied with the client
+        const size_t servedDuring = ipc->mapAssetsServed().size() - servedBefore;
+        tally.check(label + ": the client loads", loaded, chosen.product + " " + chosen.version);
+        if (servedDuring != 0)
+        {
+          tally.check(label + ": test invalid", false,
+                    QString("%1 getMapAsset answered before the load returned").arg(servedDuring));
+          continue;
+        }
+        UnityIpcServer::TerrainTileReport r;
+        const bool got = waitReport(load, 60000, r);
+        tally.check(label + QString(": load %1 is answered \"cleared\"").arg(load), got && r.status == "cleared",
+                  got ? r.status + " " + r.reason : QString("no answer within 60 s"));
+        wxStopWatch w;
+        while (!lastServed(load, "wdt") && w.Time() < 10000)
+          pumpIpc(ipc, 1);
+        const UnityIpcServer::MapAssetServed * wdt = lastServed(load, "wdt");
+        tally.check(label + ": the load's WDT request is answered stale, under the epoch before and the one after",
+                  wdt && wdt->state == "stale" && wdt->assetEpoch == epoch && wdt->epochNow == epoch + 1,
+                  wdt ? wdt->describe() : QString("no WDT request for the load was answered"));
+        UnityIpcServer::RuntimeState now;
+        const bool answered = sample(label, now);
+        tally.check(label + ": no terrain tile is left", answered && now.liveTerrainTiles == 0 && now.terrainView == 0,
+                    answered ? now.describe() : QString("no answer"));
+        adoptReference(label, now);   // the next client's own state is the reference from here on
+      }
+      else if (kind == "staleepoch" || kind == "staleload")
+      {
+        const int load = request(last.map, last.x, last.y, step, why);
+        if (load <= 0)
+        {
+          tally.check(label + ": requested", false, why);
+          continue;
+        }
+        if (kind == "staleepoch")
+          UnityAssetAccess::noteClientReplaced();
+        else
+          frame->TerrainTestRaiseLoadWithoutSending();
+        expectFailed(label + ": failed, the host answering stale", load, "stale", QString());
+      }
+      else if (kind == "supersede")
+      {
+        Tile a = t, b = t;
+        if (!parseTile(arg.section('|', 0, 0), a) || !parseTile(arg.section('|', 1), b))
+        {
+          tally.check(label, false, "expected supersede:<map>:<x>:<y>|<map>:<x>:<y>");
+          continue;
+        }
+        QString whyB;
+        const int first = request(a.map, a.x, a.y, step, why);
+        const int second = request(b.map, b.x, b.y, step, whyB);
+        if (first <= 0 || second <= 0)
+        {
+          tally.check(label + ": both requested", false, why + " " + whyB);
+          continue;
+        }
+        UnityIpcServer::TerrainTileReport r;
+        const bool got = waitReport(first, 60000, r);
+        tally.check(label + QString(": the first load (%1) is answered \"superseded\"").arg(first), got && r.status == "superseded",
+                  got ? r.status + " " + r.reason : QString("no answer within 60 s"));
+        if (checkBuilt(label + ": the second", second, b.map, b.x, b.y))
+          sampleShown(label, afterTile);
+        last = b;
+      }
+      else if (kind == "model" || kind == "modelthentile")
+      {
+        const QString path = arg.section('|', 0, 0).trimmed();
+        const QString tileSpec = arg.section('|', 1).trimmed();
+        GameFile * file = path.isEmpty() ? nullptr : resolveGameFileArg(path);
+        if (!file || ((kind == "modelthentile" || !tileSpec.isEmpty()) && !parseTile(tileSpec, t)))
+        {
+          tally.check(label, false, !file ? QString("no such model file")
+                                          : kind == "model" ? QString("expected model:<path> or model:<path>|<map>:<x>:<y>")
+                                                            : QString("expected modelthentile:<path>|<map>:<x>:<y>"));
+          continue;
+        }
+        const int fileDataID = (int)file->fileDataId();
+        if (kind == "model")
+        {
+          // model:<path>|<map>:<x>:<y>: that tile is requested and the model selected before anything is polled -- the
+          // player cannot build the tile before the host answers its getMapAsset -- so the model load meets a terrain
+          // load still building.
+          int inFlight = 0;
+          if (!tileSpec.isEmpty())
+          {
+            inFlight = request(t.map, t.x, t.y, step, why);
+            if (inFlight <= 0)
+            {
+              tally.check(label + ": requested", false, why);
+              continue;
+            }
+          }
+          const size_t servedBefore = ipc->mapAssetsServed().size();
+          frame->fileControl->SelectModelFile(file);
+          droppedModel = 0;   // the canvas holds another model
+          const size_t servedDuring = ipc->mapAssetsServed().size() - servedBefore;
+          if (inFlight && servedDuring != 0)
+          {
+            tally.check(label + ": test invalid", false,
+                        QString("%1 getMapAsset answered before the model was selected").arg(servedDuring));
+            continue;
+          }
+          tally.check(label + ": the host holds no terrain request", frame->m_terrainRequest.load == 0 &&
+                      frame->m_playerContent != ModelViewer::PlayerContent::Terrain,
+                    QString("terrain request load %1").arg(frame->m_terrainRequest.load));
+          UnityIpcServer::TerrainTileReport r;
+          const bool gotReport = inFlight && waitReport(inFlight, 60000, r);
+          UnityIpcServer::RuntimeState now;
+          bool answered = false;
+          const bool holds = waitRuntimeState(ipc, states, [fileDataID](const UnityIpcServer::RuntimeState & x) {
+            return x.modelFileDataID == fileDataID && !x.loading && x.liveTerrainTiles == 0 && x.terrainView == 0;
+          }, 60000, now, answered);
+          samplesJson.append(runtimeJson(label, now));
+          tally.check(label + ": the model on screen, no terrain tile or view left", holds, now.describe());
+          if (inFlight)
+            tally.check(label + QString(": the terrain load building (%1) is answered \"superseded\", once").arg(inFlight),
+                        gotReport && r.status == "superseded" && reportsFor(inFlight) == 1,
+                        gotReport ? QString("%1 answer(s), the first: ").arg(reportsFor(inFlight)) + r.status + " " + r.reason
+                                  : QString("no answer"));
+          // The player's counts with no terrain now include the model: the reference for a later clear.
+          adoptReference(label, now);
+        }
+        else
+        {
+          // The model on screen first: the step's model must be another, or a dropped build could not be told from one
+          // adopted.
+          UnityIpcServer::RuntimeState before;
+          const bool told = sample(label + " (before)", before) && before.modelFileDataID >= 0;
+          const bool another = told && before.modelFileDataID != fileDataID;
+          tally.check(label + (another ? ": the model on screen is another one" : ": test invalid"), another,
+                      !told ? QString("the player did not say which model it shows")
+                            : another ? QString("model on screen %1, the step's %2").arg(before.modelFileDataID).arg(fileDataID)
+                                      : QString("the model on screen is already %1: the step needs another").arg(fileDataID));
+          if (!another)
+            continue;
+          frame->fileControl->SelectModelFile(file);
+          const int awaited = frame->m_modelAwaited;
+          // The precondition: the player is still building the model when the tile goes out (one question; the tile
+          // follows its answer with nothing else polled).
+          UnityIpcServer::RuntimeState building;
+          bool answered = false;
+          waitRuntimeState(ipc, states, [](const UnityIpcServer::RuntimeState &) { return true; }, 5000, building, answered);
+          samplesJson.append(runtimeJson(label + " (model sent)", building));
+          const bool stillBuilding = answered && building.loading;
+          tally.check(label + (stillBuilding ? ": the player is still building the model when the tile is sent"
+                                             : ": test invalid"), stillBuilding,
+                      (stillBuilding ? QString() : QString("the model was built before the tile was sent; ")) +
+                        (answered ? building.describe() : QString("no answer")));
+          if (!stillBuilding)
+            continue;
+          const int load = request(t.map, t.x, t.y, step, why);
+          if (load <= 0)
+          {
+            tally.check(label + ": requested", false, why);
+            continue;
+          }
+          last = t;
+          // The host: the build the player drops is recorded, so its notice stays up while the tile builds.
+          droppedModel = 0;
+          if (awaited != fileDataID)
+            tally.skip(label + ": the notice for the dropped model",
+                       QString("the host was not waiting for model %1 (waiting for %2)").arg(fileDataID).arg(awaited));
+          else
+          {
+            droppedModel = fileDataID;
+            const QString title = noticeTitle();
+            tally.check(label + ": while the tile builds, the host keeps the dropped model's \"could not be built\" notice up",
+                        frame->m_modelAwaitedFailed == fileDataID && title == cannotBuild,
+                        QString("model recorded as dropped %1; notice \"").arg(frame->m_modelAwaitedFailed) + title + "\"");
+          }
+          if (!checkBuilt(label, load, t.map, t.x, t.y))
+            continue;
+          sampleShown(label, afterTile);
+          const QString shownTitle = noticeTitle();
+          tally.check(label + ": with the tile shown, the host puts no notice up", shownTitle.isEmpty(),
+                      "notice \"" + shownTitle + "\"");
+          // A report window later the dropped model is still not adopted, and nothing is building.
+          pumpIpc(ipc, 200);
+          UnityIpcServer::RuntimeState now;
+          const bool got = sample(label + " (model load)", now);
+          tally.check(label + ": the dropped model never adopted: nothing building, the tile in the terrain view, the model of "
+                              "before on screen",
+                      got && !now.loading && now.liveTerrainTiles == 1 && now.terrainView == 1 &&
+                        now.modelFileDataID == before.modelFileDataID,
+                      got ? QString("model of before %1; ").arg(before.modelFileDataID) + now.describe() : QString("no answer"));
+        }
+      }
+      else
+        tally.check(label, false, "unknown step (tile, repeat, wait, clear, expectfail, notlocal, switch, staleepoch, staleload, "
+                                "supersede, model, modelthentile)");
+    }
+
+    // EVERY LOAD ANSWERED EXACTLY ONCE, and nothing building at the end.
+    pumpIpc(ipc, 100);
+    for (int load : loadsSent)
+    {
+      QStringList statuses;
+      for (const UnityIpcServer::TerrainTileReport & r : reports)
+        if (r.load == load)
+          statuses << r.status;
+      tally.check(QString("load %1 is answered exactly once").arg(load), statuses.size() == 1,
+                statuses.isEmpty() ? QString("no answer") : statuses.join(", "));
+    }
+    UnityIpcServer::RuntimeState end;
+    sample("end", end);
+    tally.check("no terrain load is building at the end", end.terrainLoading == 0 && !end.loading, end.describe());
+  }();
+
+  // How long the GUI thread spent on each map file served (validation, read, hash, queueing). The first read of each
+  // FileDataID in this process (MapAssetServed::first) is set aside: a root ADT's, the cold-read candidate, and a WDT's,
+  // which is not cold (the load's own request read that WDT whole just before) but is the file's first serve all the same.
+  if (ipc)
+  {
+    std::vector<double> handler, read, firstRoot, firstWdt;
+    size_t notServed = 0;
+    for (const UnityIpcServer::MapAssetServed & s : ipc->mapAssetsServed())
+    {
+      if (s.state != "available")
+        notServed++;   // refused, stale or not available: no file was served, so no serving time to summarise
+      else if (s.first)
+        (s.role == "rootAdt" ? firstRoot : firstWdt).push_back(s.handlerMs);
+      else
+      {
+        handler.push_back(s.handlerMs);
+        if (s.readMs >= 0.0)
+          read.push_back(s.readMs);
+      }
+    }
+    double median, p95, max, readMedian, readP95, readMax, rootMedian, rootP95, rootMax, wdtMedian, wdtP95, wdtMax;
+    percentiles(handler, median, p95, max);
+    percentiles(read, readMedian, readP95, readMax);
+    percentiles(firstRoot, rootMedian, rootP95, rootMax);
+    percentiles(firstWdt, wdtMedian, wdtP95, wdtMax);
+    // "none" where a group is empty (no repeated read in this run, say): percentiles() leaves -1 there, not a time.
+    auto ms = [](double v) { return v < 0.0 ? QString("none") : QString::number(v, 'f', 3); };
+    LOG_INFO << QString("[terrain-test] getMapAsset served %1 file(s), %2 answer(s) without a file: repeated reads "
+                        "handlerMs median %3 p95 %4 max %5, readMs median %6 p95 %7 max %8 (the first read of each file "
+                        "apart: %9 root ADTs, handlerMs median %10 max %11; %12 WDTs, read whole by their loads' requests "
+                        "just before, max %13)")
+                  .arg(ipc->mapAssetsServed().size() - notServed).arg(notServed).arg(ms(median)).arg(ms(p95)).arg(ms(max))
+                  .arg(ms(readMedian)).arg(ms(readP95)).arg(ms(readMax))
+                  .arg(firstRoot.size()).arg(ms(rootMedian)).arg(ms(rootMax))
+                  .arg(firstWdt.size()).arg(ms(wdtMax));
+  }
+
+  QJsonArray reportsJson, servedJsonArray;
+  for (const UnityIpcServer::TerrainTileReport & r : reports)
+    reportsJson.append(r.message);
+  if (ipc)
+    for (const UnityIpcServer::MapAssetServed & s : ipc->mapAssetsServed())
+      servedJsonArray.append(servedJson(s));
+  out["loads"] = loadsJson;
+  out["reports"] = reportsJson;
+  out["served"] = servedJsonArray;
+  out["samples"] = samplesJson;
+  out["checks"] = tally.checks;
+  QJsonObject binaries;
+  for (const QString & file : {QCoreApplication::applicationFilePath(), QCoreApplication::applicationDirPath() + "/wow.dll",
+                               QCoreApplication::applicationDirPath() + "/core.dll"})
+  {
+    QFile bin(file);
+    if (bin.open(QIODevice::ReadOnly))
+      binaries[QFileInfo(file).fileName()] =
+        QString::fromLatin1(QCryptographicHash::hash(bin.readAll(), QCryptographicHash::Sha256).toHex());
+  }
+  out["binaries"] = binaries;
+  if (!outPath.isEmpty())
+  {
+    out["passed"] = tally.passed;
+    out["failed"] = tally.failed;
+    out["skipped"] = tally.skipped;
+    QFile f(outPath);
+    const bool written = f.open(QIODevice::WriteOnly | QIODevice::Truncate) &&
+                         f.write(QJsonDocument(out).toJson(QJsonDocument::Indented)) > 0;
+    f.close();
+    tally.check("the results are written", written, outPath);
+  }
+  const bool pass = tally.failed == 0;
+  LOG_INFO << QString("[terrain-test] RESULT: %1 (%2 passed, %3 failed, %4 skipped)").arg(pass ? "PASS" : "FAIL")
+                .arg(tally.passed).arg(tally.failed).arg(tally.skipped);
+  std::printf("WMV: terrain test %s (%d passed, %d failed, %d skipped)\n", pass ? "PASS" : "FAIL", tally.passed, tally.failed,
+              tally.skipped);
+  std::fflush(stdout);
+
+  if (ipc)
+  {
+    ipc->onTerrainTileLoaded = previousTerrain;
+    ipc->onRuntimeState = previousRuntime;
+  }
+  if (frame->unityRendererHost && frame->unityRendererHost->isRunning())
+  {
+    frame->unityRendererHost->shutdown();
+    LOG_INFO << "[terrain-test] player shut down; still running=" << (frame->unityRendererHost->isRunning() ? 1 : 0);
+  }
+  return tally.failed;
+}
+
 // A batch run that loads something and has no other job ends here. It used to write an ss_*.png
 // screenshot of the OpenGL viewport; that viewport is archived and the Unity viewport has no capture
 // yet, so the run says so once instead of writing a picture of a renderer nobody sees.
@@ -5056,7 +6107,7 @@ bool WowModelViewApp::OnInit()
     if (a == "-m" || a == "-mo" || a == "-armory" || a == "-npc" || a == "-fbxexport" ||
         a == "-animdump" || a == "-fbxinspect" || a == "-dbfromfile" || a == "-dumptex" ||
         a == "-m2inspect" || a == "-matrestest" || a == "-customizationtest" || a == "-mpq" || a == "-item" || a == "-wmo" ||
-        a == "-mapcatalogtest" || a.endsWith(".chr"))
+        a == "-mapcatalogtest" || a == "-terraintile" || a.endsWith(".chr"))
     {
       earlyHeadless = true;
       break;
@@ -5254,6 +6305,8 @@ bool WowModelViewApp::OnInit()
   QString mapCatalogTestOut;                         // -mapcatalogtest <out.json>: the world map catalogue test
   QStringList mapCatalogClients, mapCatalogProbes;   // -mapcatalogclients p,p,... / -mapcatalogprobe id|path,...
   QString mapCatalogWdtFolder; QStringList mapCatalogWdtMaps; // -mapcatalogwdt <folder> <map id,...>
+  bool terrainTest = false;                          // -terraintile <map id> <x> <y> [<out.json>]: the terrain tile test
+  int terrainMap = -1, terrainX = -1, terrainY = -1; QString terrainOut;
   QString m2InspectList, m2InspectOut;               // -m2inspect <list.txt> [out.csv]: forensic-only
   // Export content selection + clip list for the headless FBX export (the parent process passes
   // these so the child reproduces the user's exact options). Defaults: full content, no explicit
@@ -5351,6 +6404,18 @@ bool WowModelViewApp::OnInit()
         }
         else
           mapCatalogProbes = arg.split(',', QString::SkipEmptyParts);
+      }
+    }
+    else if (cmd == "-terraintile") {
+      // One terrain tile drawn by the player, and the protocol around it; see doHeadlessTerrainTileTest.
+      if (i + 3 < argc)
+      {
+        terrainTest = true;
+        terrainMap = QString::fromWCharArray(argv[++i]).toInt();
+        terrainX = QString::fromWCharArray(argv[++i]).toInt();
+        terrainY = QString::fromWCharArray(argv[++i]).toInt();
+        if (i + 1 < argc && !QString::fromWCharArray(argv[i + 1]).startsWith('-'))
+          terrainOut = launchPath(argv[++i]);
       }
     }
     else if (cmd == "-mapcatalogwdt") {
@@ -5499,7 +6564,7 @@ bool WowModelViewApp::OnInit()
   for (int i = 1; i < argc; i++)
   {
     QString a = QString::fromWCharArray(argv[i]);
-    if (a == "-m" || a == "-mo" || a == "-armory" || a == "-npc" || a == "-fbxexport" || a == "-animdump" || a == "-fbxinspect" || a == "-dbfromfile" || a == "-dumptex" || a == "-m2inspect" || a == "-matrestest" || a == "-customizationtest" || a == "-mpq" || a == "-item" || a == "-wmo" || a == "-mapcatalogtest" || a.endsWith(".chr"))
+    if (a == "-m" || a == "-mo" || a == "-armory" || a == "-npc" || a == "-fbxexport" || a == "-animdump" || a == "-fbxinspect" || a == "-dbfromfile" || a == "-dumptex" || a == "-m2inspect" || a == "-matrestest" || a == "-customizationtest" || a == "-mpq" || a == "-item" || a == "-wmo" || a == "-mapcatalogtest" || a == "-terraintile" || a.endsWith(".chr"))
     {
       headlessLoad = true;
       break;
@@ -5565,6 +6630,12 @@ bool WowModelViewApp::OnInit()
     {
       doHeadlessMapCatalogTest(frame, mapCatalogTestOut, mapCatalogClients, mapCatalogProbes, catalogBeforeLoad,
                                firstLoad.nsecsElapsed() / 1e6, mapCatalogWdtFolder, mapCatalogWdtMaps);
+      return false; // checks done -> exit
+    }
+
+    if (terrainTest)
+    {
+      doHeadlessTerrainTileTest(frame, terrainMap, terrainX, terrainY, terrainOut);
       return false; // checks done -> exit
     }
 

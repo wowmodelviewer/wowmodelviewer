@@ -60,6 +60,7 @@ namespace
   // be closed exactly once.
   bool fileOpen = false;
   int fileOpens = 0, fileCloses = 0;
+  int readCalls = 0;  // CascReadFile calls through an open handle (a file refused by its size is never read)
 
   bool fileHandleOk(HANDLE h)
   {
@@ -139,6 +140,7 @@ extern "C"
       *pdwRead = 0;
     if (!fileHandleOk(hFile))
       return false;
+    ++readCalls;
     if (script.failAt >= 0 && readPos >= script.failAt)
     {
       lastError = script.readError;
@@ -227,23 +229,31 @@ namespace
     QByteArray out;
     unsigned int error = 0;
     bool handleClosed = false; // every file handle the read opened was closed exactly once, and none is left open
+    qint64 size = -2;          // what the read reported in sizeOut (-2: never written)
+    int reads = 0;             // CascReadFile calls it made
   };
 
   // One whole read with the given script, by FileDataID or (fileDataId -1) by path. The caller's buffer starts
-  // non-empty, so "hands back no bytes" is the function's doing.
-  Result read(const CASCFolder & folder, const Script & s, bool byPath = false)
+  // non-empty, so "hands back no bytes" is the function's doing. maxBytes -1: the default limit (not passed).
+  Result read(const CASCFolder & folder, const Script & s, bool byPath = false, qint64 maxBytes = -1)
   {
     script = s;
     lastError = ERROR_SUCCESS;
     readPos = 0;
     fileOpen = false;
     fileOpens = fileCloses = 0;
+    readCalls = 0;
     Result r;
     r.out = "bytes left from an earlier read";
     r.error = 0xFFFFFFFFu;
-    r.outcome = byPath ? folder.readWholeFile(-1, kPath, r.out, &r.error)
-                       : folder.readWholeFile(kFileDataId, QString(), r.out, &r.error);
+    if (maxBytes >= 0)
+      r.outcome = byPath ? folder.readWholeFile(-1, kPath, r.out, &r.error, maxBytes, &r.size)
+                         : folder.readWholeFile(kFileDataId, QString(), r.out, &r.error, maxBytes, &r.size);
+    else
+      r.outcome = byPath ? folder.readWholeFile(-1, kPath, r.out, &r.error)
+                         : folder.readWholeFile(kFileDataId, QString(), r.out, &r.error);
     r.handleClosed = !fileOpen && fileCloses == fileOpens;
+    r.reads = readCalls;
     return r;
   }
 
@@ -405,6 +415,25 @@ int main()
     // 8. An empty file: its content key is the MD5 of nothing.
     expectRead(folder, "8-empty-file-key-of-nothing", whole(kEmpty, kEmptyKey));
     expectRefused(folder, "8-empty-file-other-key", whole(kEmpty, kAbcKey), Outcome::Corrupt, ERROR_FILE_CORRUPT);
+
+    // 9. The caller's size limit (maxBytes): a file larger than it is TooLarge, decided from the size the storage
+    //    gives before any byte is read (no CascReadFile call), with no bytes, error code 0 and the size reported in
+    //    sizeOut; a file exactly at the limit is read as usual, its size reported too. The key matches throughout,
+    //    so only the limit can refuse the file.
+    for (const qint64 limit : {(qint64)79, (qint64)0})
+    {
+      const Result r = read(folder, whole(kDigits, kDigitsKey), false, limit);
+      report("9-larger-than-limit-" + std::to_string(limit),
+             r.outcome == Outcome::TooLarge && r.out.isEmpty() && r.error == ERROR_SUCCESS && r.size == 80 && r.reads == 0,
+             r, "TooLarge (" + std::to_string((int)Outcome::TooLarge) + "), no bytes, error code 0, size 80 reported, " +
+                  "no read call (got size " + std::to_string(r.size) + ", " + std::to_string(r.reads) + " read call(s))");
+    }
+    {
+      const Result r = read(folder, whole(kDigits, kDigitsKey), true, 80);
+      report("9-exactly-the-limit-by-path",
+             r.outcome == Outcome::Read && r.out == kDigits && r.error == ERROR_SUCCESS && r.size == 80 && r.reads > 0, r,
+             "Read, all 80 bytes, error code 0, size 80 reported (got size " + std::to_string(r.size) + ")");
+    }
   }
   catch (const std::exception & e)
   {

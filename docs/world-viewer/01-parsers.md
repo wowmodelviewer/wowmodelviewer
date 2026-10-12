@@ -427,7 +427,9 @@ that buffer.
   - MCNK flag bits other than 0x1/0x40/0x10000 (U7);
   - MCLY bits other than 0x100/0x200, and MCLY word 12 (U10);
   - MDDF/MODF flag bits beyond 0x40/0x8 (U13); the MODF scale for flag 0x4 clear (INFERRED 1.0).
-- **Holes:** the low-resolution hole layout; the meaning of +20..27 when flag 0x10000 is clear (never seen).
+- **Holes:** the low-resolution hole layout; the meaning of +20..27 when flag 0x10000 is clear (never seen in the
+  audited corpus; stage 03 met it on a real tile: every chunk of Retail map 1051 tile 31_29 has flag 0x10000 clear,
+  five with a non-zero low-resolution mask -- `03-terrain-geometry.md`).
 - **Raw per-chunk data:**
   - MCNR decoding (U9);
   - MCCV channel order;

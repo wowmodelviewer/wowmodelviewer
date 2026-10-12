@@ -718,7 +718,8 @@ public partial class WmvMain
     /// ends on a model has no mapObjectLoaded to carry live counts, and only these can show a world model
     /// left alive under that model -- the next world-model adoption would dispose it before counting.
     /// Answered in message order on the main thread, so a question sent after an answer about a build sees
-    /// that build adopted.
+    /// that build adopted. Protocol 12 adds the terrain (WmvMainTerrain.FillTerrainRuntimeState); a terrain load is
+    /// not folded into Loading, which the host's model await waits on.
     /// </summary>
     void HandleRuntimeState(int query)
     {
@@ -744,6 +745,7 @@ public partial class WmvMain
             KeptViews = KeptViews,
             Background = ViewportBackground,
         };
+        FillTerrainRuntimeState(ref r);
         WmvRuntimeModel mount = r.MountFileDataID != 0 ? mounted.Mount.Runtime : null;
         if (mount != null)
         {
@@ -764,7 +766,12 @@ public partial class WmvMain
                       r.MountsBuilt, r.MountSeat, r.MountSeatBone, r.ModelSequence, r.MountSequence, r.MountEmitters,
                       r.MountRibbons, r.MountParticles)) +
                   string.Format("; the view has been fitted {0} time(s); background #{1:X2}{2:X2}{3:X2}", r.ViewFramings,
-                                r.Background.r, r.Background.g, r.Background.b));
+                                r.Background.r, r.Background.g, r.Background.b) +
+                  string.Format("; terrain: {0} tile(s) alive, load {1} shown{2}, view {3}, camera mask {4}; {5} Mesh and {6} Material " +
+                                "object(s); the terrain tiles hold {7} Mesh(es), {8} Material(s), {9} GameObject(s)", r.LiveTerrainTiles,
+                                r.TerrainLoad, r.TerrainLoading ? ", a load in flight" : "", r.TerrainView ? "terrain" : "model",
+                                r.CameraMask, r.MeshObjects, r.MaterialObjects, r.TerrainMeshes, r.TerrainMaterials,
+                                r.TerrainGameObjects));
         ipc.ReportRuntimeState(query, r);
     }
 }

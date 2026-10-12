@@ -108,15 +108,16 @@ class _CASCFOLDER_API_ CASCFolder
       NotListed,  // the root does not list it
       NotLocal,   // listed, but its data is not on this computer
       Encrypted,  // listed and local, encrypted with a key this computer does not have
-      TooLarge,   // larger than the caller allows
+      TooLarge,   // larger than the caller allows (maxBytes), decided from its size before anything is read
       Damaged,    // opened, but its size or data could not be read (errorCode says why)
       Corrupt,    // read, but the data does not match a frame hash or its content key (damaged on disk)
       Unverified, // every byte read, but the file's content key could not be obtained, so they were not checked
                   // (errorCode: the content-key query's error; ERROR_NOT_SUPPORTED for a key of the wrong size, or
                   // a failed query that left no error)
     };
+    // sizeOut, when given, receives the file's size once the storage has told it (TooLarge says how large), else -1.
     ReadOutcome readWholeFile(int fileDataId, const QString & path, QByteArray & out, unsigned int * errorCode = nullptr,
-                              qint64 maxBytes = 64 * 1024 * 1024) const;
+                              qint64 maxBytes = 64 * 1024 * 1024, qint64 * sizeOut = nullptr) const;
   private:
 
     int m_currentCascLocale;

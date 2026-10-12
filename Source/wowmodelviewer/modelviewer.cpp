@@ -81,6 +81,7 @@
 
 #include "logger/Logger.h"
 
+#include <QCryptographicHash>
 #include <QFile>
 #include <QFileInfo>
 #include <QDir>
@@ -2284,6 +2285,8 @@ void ModelViewer::CreateUnityViewport()
     m_modelAwaited = 0;
     m_modelAwaitedFailed = 0;
     m_playerContentPoll.Stop();
+    // ... nor a terrain tile: no load of the player before it is answered or served any more.
+    m_terrainRequest = TerrainRequest();
     // The background before the model: a player started before the colour last changed has an older one from its
     // command line, and a restarted one may have been started by another run's settings.
     m_viewportBackgroundSent = wxColour();
@@ -2318,6 +2321,11 @@ void ModelViewer::CreateUnityViewport()
   // ... and what became of a screenshot, for the status bar.
   unityRendererHost->ipc()->onScreenshotSaved = [this](const UnityIpcServer::ScreenshotResult & result) {
     OnUnityScreenshotSaved(result);
+  };
+  // THE TERRAIN TILE: the map files it asks for, and what became of each load.
+  unityRendererHost->ipc()->onGetMapAsset = [this](const QJsonObject & request) { return ServeMapAsset(request); };
+  unityRendererHost->ipc()->onTerrainTileLoaded = [this](const UnityIpcServer::TerrainTileReport & report) {
+    OnTerrainTileLoaded(report);
   };
 }
 
@@ -2678,6 +2686,10 @@ bool ModelViewer::unityViewportNotice(ViewportNotice & notice) const
     notice.actionId = ID_VIEW_UNITY_RESTART;
     return true;
   }
+  // A terrain tile on show (THE TERRAIN TILE): the player shows it in front of whatever the canvas holds, and nothing
+  // is put over it -- a notice would park the player's frame.
+  if (m_playerContent == PlayerContent::Terrain)
+    return false;
   // The viewer's own kind of content only: a model in Models, a world model in Buildings. What the canvas holds
   // of the other kind stays loaded but is not shown -- the mode's empty viewer is.
   const bool buildings = m_viewerMode == ViewerMode::Buildings;
@@ -2983,6 +2995,8 @@ void ModelViewer::SendLoadToUnity()
     m_lastSceneSignature = 0;
     m_sceneAwaitingRevision = 0;
     m_unityCharacterFailed = 0;
+    // The player leaves the terrain view for it (a terrain load in flight is superseded): no terrain request is current.
+    m_terrainRequest = TerrainRequest();
     return;
   }
   if (!canvas || !canvas->model() || !canvas->model()->gamefile)
@@ -3018,9 +3032,12 @@ void ModelViewer::SendLoadToUnity()
   m_mapObjectAwaited = 0;
   m_modelAwaitedFailed = 0;
   // (And a model whose colour has just changed under what the player shows, or sent while an earlier answer's fence
-  // is pending: neither is on screen before it is built.)
+  // is pending: neither is on screen before it is built. Nor after a terrain tile: the player leaves the terrain view
+  // for this load, and shows the model it had until this one is built.)
   const bool mayShowOther = m_playerContent == PlayerContent::MapObject || m_playerContent == PlayerContent::Unknown ||
-                            recoloured || m_uncoverFence != 0;
+                            m_playerContent == PlayerContent::Terrain || recoloured || m_uncoverFence != 0;
+  // ... and no terrain request is current any more (a terrain load in flight is superseded).
+  m_terrainRequest = TerrainRequest();
   m_uncoverFence = 0;
   if (mayShowOther && fileDataID > 0 && unityRendererHost->ipc()->playerDrawsMapObjects())
   {
@@ -3421,6 +3438,272 @@ void ModelViewer::OnMapObjectLoaded(const UnityIpcServer::MapObjectReport & repo
   }
   if (update)
     UpdateUnityViewportState();
+}
+
+// THE TERRAIN TILE (protocol 12). The host names the tile and the map's WDT; the player asks for the WDT and the tile's
+// root ADT (getMapAsset), parses both and builds the tile; ServeMapAsset answers for the current load only.
+
+bool ModelViewer::terrainCatalogueBelongs() const
+{
+  if (!m_mapCatalog || m_mapCatalog->status() != wow::WorldMapCatalog::Status::Ready || !m_mapCatalog->belongsToActiveClient())
+    return false;
+  // A catalogue of the same client built again (the client loaded again) is another storage: not the one the load named.
+  return m_terrainRequest.load == 0 || m_mapCatalog->client().storageGeneration == m_terrainRequest.catalogueGeneration;
+}
+
+ModelViewer::MapAssetDecision ModelViewer::decideMapAssetRequest(const QJsonObject & request, const TerrainRequest * current,
+                                                                 int epochNow, bool catalogueBelongs, bool clientLoading)
+{
+  MapAssetDecision d;
+  const auto refused = [&d](const QString & detail) {
+    d.state = "refused";
+    d.detail = detail;
+    return d;
+  };
+  // Nothing is read while a client is being loaded: its storage and its catalogue are being replaced.
+  if (clientLoading)
+    return refused("a client is being loaded");
+  const int load = request.value("load").toInt(0);
+  if (load <= 0)
+    return refused("the request names no terrain load (load must be > 0)");
+  // A request about anything the host has moved on from -- no terrain load, another one, another client, a catalogue
+  // that is not the loaded client's -- is stale, every reason that holds named.
+  QStringList stale;
+  const int epoch = request.value("assetEpoch").toInt(0);
+  if (!current || current->load <= 0)
+    stale << QString("no terrain load is current (request load %1)").arg(load);
+  else if (load != current->load)
+    stale << QString("request load %1, current %2").arg(load).arg(current->load);
+  if (epoch != epochNow)
+    stale << QString("request epoch %1, current %2").arg(epoch).arg(epochNow);
+  if (!catalogueBelongs)
+    stale << "the map catalogue the load was sent under is not the loaded client's";
+  if (!stale.isEmpty())
+  {
+    d.state = "stale";
+    d.detail = stale.join("; ");
+    return d;
+  }
+  // The current load's own two files, and only them: its WDT, then the one root ADT it asks for once the WDT was served.
+  // (The host parses no WDT, so it cannot tell whether that root is one the WDT names: the player checks the tile.)
+  const QString role = request.value("role").toString();
+  const int fileDataID = request.value("fileDataID").toInt(0);
+  if (role != "wdt" && role != "rootAdt")
+    return refused("unknown role \"" + role + "\" (wdt or rootAdt)");
+  if (fileDataID <= 0)
+    return refused(QString("FileDataID %1 names no file").arg(fileDataID));
+  if (role == "wdt" && fileDataID != current->wdtFileDataID)
+    return refused(QString("load %1's WDT is FileDataID %2, not %3").arg(load).arg(current->wdtFileDataID).arg(fileDataID));
+  if (role == "rootAdt" && !current->wdtServed)
+    return refused(QString("load %1's WDT has not been served, so no root ADT is").arg(load));
+  if (role == "rootAdt" && current->rootFileDataID > 0 && fileDataID != current->rootFileDataID)
+    return refused(QString("load %1 has asked for root ADT %2: one root ADT per load, not %3")
+                     .arg(load).arg(current->rootFileDataID).arg(fileDataID));
+  return d;
+}
+
+bool ModelViewer::ResolveTerrainTile(int mapId, int tileX, int tileY, UnityIpcServer::TerrainTileCommand & command,
+                                     QString & why)
+{
+  why.clear();
+  command = UnityIpcServer::TerrainTileCommand();
+  const QString tile = QString("%1_%2").arg(tileX).arg(tileY);
+  const auto refuse = [&why](const QString & reason) {
+    why = reason;
+    return false;
+  };
+  const std::shared_ptr<wow::WorldMapCatalog> catalog = m_mapCatalog;
+  if (m_clientLoading || UnityAssetAccess::isClientLoading())
+    return refuse("a client is being loaded");
+  if (!UnityAssetAccess::hasActiveClient())
+    return refuse("no client is loaded");
+  if (!catalog || catalog->status() != wow::WorldMapCatalog::Status::Ready)
+    return refuse(catalog ? "the map catalogue is not ready (" + wow::WorldMapCatalog::statusName(catalog->status()) +
+                              (catalog->statusDetail().isEmpty() ? QString() : ": " + catalog->statusDetail()) + ")"
+                          : QString("there is no map catalogue"));
+  if (!catalog->belongsToActiveClient())
+    return refuse("the map catalogue is not the loaded client's");
+  if (tileX < 0 || tileX > 63 || tileY < 0 || tileY > 63)
+    return refuse("tile " + tile + " is outside a map's 64 x 64 tile grid");
+  const wow::MapEntry * entry = catalog->find(mapId);
+  if (!entry)
+    return refuse(QString("map %1 is not in this client's Map.db2").arg(mapId));
+  if (entry->wdt.kind == wow::WdtReference::Kind::Unresolved)
+    return refuse(QString("map %1 has no WDT: ").arg(mapId) + entry->wdt.why);
+  // The WDT is read through the storage now, whichever way the client names it: one that cannot be read is refused here,
+  // with the inspection's reason, rather than sent to fail in the player. A path client's FileDataID comes from it too.
+  if (!catalog->inspect(mapId))
+    return refuse(catalog->lastRefusal());
+  if (entry->inspection.state != wow::WdtAvailability::Available)
+    return refuse(QString("map %1's WDT is %2: ").arg(mapId).arg(wow::WorldMapCatalog::availabilityName(entry->inspection.state)) +
+                  entry->inspection.detail);
+  const bool byId = entry->wdt.kind == wow::WdtReference::Kind::FileDataId;
+  // A path client's WDT goes by the FileDataID its storage root gives that path (never one made up).
+  const int wdtFileDataID = byId ? entry->wdt.fileDataId : entry->inspection.storageFileDataId;
+  if (wdtFileDataID <= 0)
+    return refuse("the storage lists the WDT path but gives it no FileDataID");
+  command.mapId = mapId;
+  command.mapDirectory = entry->directory;
+  command.product = catalog->client().product;
+  command.build = catalog->client().build;
+  command.wdtFileDataID = wdtFileDataID;
+  command.wdtResolvedBy = byId ? "fileDataID" : "path";
+  if (!byId)
+    command.wdtPath = entry->wdt.path;
+  command.tileX = tileX;
+  command.tileY = tileY;
+  command.maxAssetBytes = UnityIpcServer::MAX_MAP_ASSET_BYTES;
+  return true;
+}
+
+int ModelViewer::RequestTerrainTile(int mapId, int tileX, int tileY, QString & why)
+{
+  why.clear();
+  const QString tile = QString("%1_%2").arg(tileX).arg(tileY);
+  const auto refuse = [&why, mapId, &tile](const QString & reason) {
+    why = reason;
+    LOG_WARNING << "[unity-terrain] map" << mapId << "tile" << tile << "not requested:" << reason;
+    return 0;
+  };
+  UnityIpcServer * ipc = unityRendererHost ? unityRendererHost->ipc() : nullptr;
+  if (!ipc || !ipc->isUnityReady())
+    return refuse("the Unity player is not connected");
+  if (!ipc->playerDrawsTerrain())
+    return refuse(QString("the Unity player speaks protocol %1, and drawing terrain needs protocol 12")
+                    .arg(ipc->playerProtocolVersion()));
+  UnityIpcServer::TerrainTileCommand command;
+  QString unresolved;
+  if (!ResolveTerrainTile(mapId, tileX, tileY, command, unresolved))
+    return refuse(unresolved);
+  command.load = m_terrainLoadSerial + 1;
+  command.assetEpoch = UnityAssetAccess::clientEpoch();
+  if (!ipc->sendLoadTerrainTile(command))
+    return refuse("the load could not be sent to the player");
+  // Raised only now that the load is out: the serial counts the loads the player was sent.
+  m_terrainLoadSerial = command.load;
+  TerrainRequest request;
+  request.load = command.load;
+  request.epoch = command.assetEpoch;
+  request.mapId = mapId;
+  request.tileX = tileX;
+  request.tileY = tileY;
+  request.wdtFileDataID = command.wdtFileDataID;
+  request.catalogueGeneration = m_mapCatalog->client().storageGeneration;
+  m_terrainRequest = request;
+  // The player drops the model or world model it was building for this (the latest command wins; the one it shows stays,
+  // hidden), so the waits for either end here. A model dropped so is one the player finished without, and what it shows
+  // instead must not pass for it (m_modelAwaitedFailed; a tile on show needs no notice): a record kept, as one already
+  // made is, until the next model or world-model load.
+  m_mapObjectAwaited = 0;
+  if (m_modelAwaited != 0)
+    m_modelAwaitedFailed = m_modelAwaited;
+  m_modelAwaited = 0;
+  m_uncoverFence = 0;
+  m_uncoverFenceRounds = 0;
+  m_playerContentPoll.Stop();
+  // Until the tile is built the player shows what it had: still terrain after a tile, otherwise not known here.
+  if (m_playerContent != PlayerContent::Terrain)
+    m_playerContent = PlayerContent::Unknown;
+  // With the time this thread spent reading the WDT whole before the load went out (ResolveTerrainTile's inspection).
+  const wow::MapEntry * entry = m_mapCatalog->find(mapId);
+  LOG_INFO << "[unity-terrain] load" << command.load << ": map" << mapId << command.mapDirectory << "tile" << tile << "WDT"
+           << command.wdtFileDataID
+           << (command.wdtResolvedBy == "path" ? "(the storage root's FileDataID for " + command.wdtPath + ")"
+                                               : QString("(Map.db2's FileDataID)"))
+           << "; the WDT read whole on this thread first, in" << (entry ? entry->inspection.milliseconds : -1.0) << "ms";
+  UpdateUnityViewportState();
+  return command.load;
+}
+
+bool ModelViewer::ClearTerrain(const QString & reason)
+{
+  UnityIpcServer * ipc = unityRendererHost ? unityRendererHost->ipc() : nullptr;
+  if (!ipc || !ipc->sendClearTerrain(reason))
+    return false;
+  m_terrainRequest = TerrainRequest();
+  if (m_playerContent == PlayerContent::Terrain)
+  {
+    // The player leaves the terrain view for whatever it held under it.
+    m_playerContent = PlayerContent::Unknown;
+    UpdateUnityViewportState();
+  }
+  return true;
+}
+
+UnityIpcServer::MapAssetAnswer ModelViewer::ServeMapAsset(const QJsonObject & request)
+{
+  UnityIpcServer::MapAssetAnswer answer;
+  const bool loading = m_clientLoading || UnityAssetAccess::isClientLoading();
+  const TerrainRequest * current = m_terrainRequest.load > 0 ? &m_terrainRequest : nullptr;
+  // (Not asked while a client loads: the decision refuses first, and the client is half replaced.)
+  const bool belongs = !loading && terrainCatalogueBelongs();
+  const MapAssetDecision decision =
+    decideMapAssetRequest(request, current, UnityAssetAccess::clientEpoch(), belongs, loading);
+  if (!decision.state.isEmpty())
+  {
+    answer.state = decision.state;
+    answer.detail = decision.detail;
+    return answer;
+  }
+  const QString role = request.value("role").toString();
+  const int fileDataID = request.value("fileDataID").toInt(0);
+  // The first root ADT the load asks for is the only one it may have.
+  if (role == "rootAdt")
+    m_terrainRequest.rootFileDataID = fileDataID;
+  // Read through the client's own storage, as the catalogue reads a WDT: listed, on this computer, every byte checked
+  // against its content key, and nothing larger than a map file is read.
+  wow::WdtReference reference;
+  reference.kind = wow::WdtReference::Kind::FileDataId;
+  reference.fileDataId = fileDataID;
+  QByteArray bytes;
+  QElapsedTimer read;
+  read.start();
+  const wow::WdtInspection inspection = m_mapCatalog->inspectFile(reference, &bytes, UnityIpcServer::MAX_MAP_ASSET_BYTES);
+  answer.readMs = read.nsecsElapsed() / 1e6;
+  answer.state = wow::WorldMapCatalog::availabilityName(inspection.state);
+  answer.detail = inspection.detail;
+  if (inspection.state == wow::WdtAvailability::Available)
+  {
+    answer.bytes = bytes;
+    answer.md5 = QString::fromLatin1(QCryptographicHash::hash(bytes, QCryptographicHash::Md5).toHex());
+    if (role == "wdt")
+      m_terrainRequest.wdtServed = true;
+  }
+  return answer;
+}
+
+void ModelViewer::OnTerrainTileLoaded(const UnityIpcServer::TerrainTileReport & report)
+{
+  // Only an answer about the current load says what the player shows: an earlier load was superseded or cleared.
+  if (report.load == 0 || report.load != m_terrainRequest.load)
+    return;
+  const QString tile = QString("%1_%2").arg(report.tileX).arg(report.tileY);
+  if (report.status == "built")
+  {
+    LOG_INFO << "[unity-terrain] the Unity viewport built map" << report.mapId << "tile" << tile << ":" << report.chunksBuilt
+             << "of" << report.chunks << "chunks," << report.triangles << "triangles," << report.holeCells << "hole cells in"
+             << report.totalMs << "ms; geometry only (no textures, liquids, doodads or buildings)";
+    m_playerContent = PlayerContent::Terrain;
+    UpdateUnityViewportState();
+  }
+  else if (report.status == "failed")
+  {
+    LOG_ERROR << "[unity-terrain] the Unity viewport could not build map" << report.mapId << "tile" << tile << "("
+              << report.reason << ") -- it shows what it showed before";
+    // What it showed before may be an earlier tile the host never heard was built (adopted, then answered "superseded"
+    // by this load): a tile still alive is on show, in the terrain view (only that view holds one).
+    if (report.liveTerrainTiles > 0 && m_playerContent != PlayerContent::Terrain)
+    {
+      m_playerContent = PlayerContent::Terrain;
+      UpdateUnityViewportState();
+    }
+  }
+}
+
+void ModelViewer::TerrainTestRaiseLoadWithoutSending()
+{
+  m_terrainRequest.load = ++m_terrainLoadSerial;
+  LOG_INFO << "[unity-terrain] test: load serial raised to" << m_terrainLoadSerial << "without sending a load";
 }
 
 // The animation on display changed (the dropdown, or the default picked on model load). Same
@@ -4100,6 +4383,17 @@ void ModelViewer::ResetClientState()
 {
   // The same FileDataID is another file in the next client: the Unity player's asset cache starts over (protocol 9).
   UnityAssetAccess::noteClientReplaced();
+  // A terrain tile of the previous client, being built or on show, is taken away (THE TERRAIN TILE): its map files are
+  // that client's, and the requests still out for them are answered stale.
+  if (m_terrainRequest.load != 0 || m_playerContent == PlayerContent::Terrain)
+  {
+    UnityIpcServer * ipc = unityRendererHost ? unityRendererHost->ipc() : nullptr;
+    if (ipc && ipc->playerDrawsTerrain())
+      ipc->sendClearTerrain("the client was replaced");
+    m_terrainRequest = TerrainRequest();
+    if (m_playerContent == PlayerContent::Terrain)
+      m_playerContent = PlayerContent::Unknown;
+  }
   // ChrModel IDs are one client's.
   m_variantSession.clear();
   m_shownAsCreatureDisplay = false;
@@ -5189,6 +5483,9 @@ bool ModelViewer::isUnityViewportCentre()
 bool ModelViewer::isUnityViewportShowingModel()
 {
   if (!unityRendererHost || !canvas || !unityRendererHost->ipc() || !unityRendererHost->ipc()->isConnected())
+    return false;
+  // A terrain tile in front of it is not the model (and the screenshot, which renders the model, is refused).
+  if (m_playerContent == PlayerContent::Terrain)
     return false;
   return !unityRendererHost->hasNotice() && !unityRendererHost->isShowingContent() && unityCanDrawCurrentModel();
 }
