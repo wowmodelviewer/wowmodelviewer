@@ -20,6 +20,7 @@
 
 #define CFN_FLAG_FOLDER               0x0001        // This item is a folder
 #define CFN_FLAG_MOUNT_POINT          0x0002        // This item is a mount point
+#define CFN_FLAG_WMV_NOT_IN_ROOT      0x8000        // WMV: made up by Insert() (a storage file CascLib names itself), not listed by the ROOT
 
 // Common structure for holding a single folder/file node
 typedef struct _CASC_FILE_NODE
@@ -61,6 +62,21 @@ class CASC_FILE_TREE
     PCASC_FILE_NODE Find(PCASC_CKEY_ENTRY pCKeyEntry);
     PCASC_FILE_NODE Find(ULONGLONG FileNameHash);
     PCASC_FILE_NODE FindById(DWORD FileDataId);
+
+    // WMV: how many nodes the tree knows by a file name hash (0 for a root that lists its files by FileDataId only)
+    size_t NameCount() { return NameMap.ItemCount(); }
+    // WMV: how many file nodes have no name hash (listed by FileDataId only: a lookup by name cannot find them)
+    size_t NamelessCount()
+    {
+        size_t Count = 0;
+        for(size_t i = 0; i < NodeTable.ItemCount(); i++)
+        {
+            PCASC_FILE_NODE pFileNode = (PCASC_FILE_NODE)NodeTable.ItemAt(i);
+            if(pFileNode != NULL && pFileNode->FileNameHash == 0 && (pFileNode->Flags & CFN_FLAG_FOLDER) == 0)
+                Count++;
+        }
+        return Count;
+    }
 
     // Assigns a file name to the node
     bool SetNodeFileName(PCASC_FILE_NODE pFileNode, const char * szFileName);

@@ -57,6 +57,10 @@ void wow::WoWDatabase::readSpecificTableAttributes(QDomElement & e, core::TableS
 
   if (!hash.isNull())
     tbl->hash = hash.nodeValue().toUInt(nullptr, 0); // "0x5B2ACAEF" or decimal: the layout these positions are for
+
+  QDomNode verifiedOnly = attributes.namedItem("verifiedLayoutOnly");
+  if (!verifiedOnly.isNull())
+    tbl->verifiedLayoutOnly = verifiedOnly.nodeValue().compare("yes", Qt::CaseInsensitive) == 0;
 }
 
 void wow::WoWDatabase::readSpecificFieldAttributes(QDomElement & e, core::FieldStructure * fieldStruct)
@@ -127,6 +131,12 @@ static uint32 readDB2LayoutHash(const QString & file)
   return layoutHash;
 }
 
+QString wow::WoWDatabase::fileLayoutHash(const QString & tableFile)
+{
+  const uint32 hash = readDB2LayoutHash(tableFile);
+  return hash == 0 ? QString() : QString("%1").arg(hash, 8, 16, QChar('0')).toUpper();
+}
+
 void wow::WoWDatabase::refreshStructures(std::vector<core::TableStructure *> & tables)
 {
   // The shipped database.xml carries WMV's curated column NAMES/types (which the hardcoded SQL queries depend on)
@@ -145,6 +155,8 @@ void wow::WoWDatabase::refreshStructures(std::vector<core::TableStructure *> & t
   const QString build = GAMEDIRECTORY.version();
   if (build.isEmpty())
     return;
+  m_schemaCheck.build = build;
+  m_schemaCheck.product = GAMEDIRECTORY.clientProfile().product;
 
   const core::ClientProfile & profile = GAMEDIRECTORY.clientProfile();
   const QString schemaDir = QDir(core::Game::instance().configFolder()).dirName(); // "12.0"
@@ -173,18 +185,22 @@ void wow::WoWDatabase::refreshStructures(std::vector<core::TableStructure *> & t
       // built again once the file is there), or not in this client at all / not a WDC table (nothing will change).
       wow::WoWFolder * folder = dynamic_cast<wow::WoWFolder *>(&GAMEDIRECTORY);
       const bool remote = folder && folder->isRemoteFile("dbfilesclient/" + tbl->file.toLower() + ".db2");
+      SchemaCheck::TableReading & reading = m_schemaCheck.tables[tbl->name];
       if (remote)
       {
         m_schemaCheck.notInstalled++;
         m_schemaCheck.notes << QString("%1: not installed").arg(tbl->name);
         tbl->skipReason = "its file is not on this computer yet";
+        reading.state = SchemaCheck::TableReading::State::NotInstalled;
       }
       else
       {
         m_schemaCheck.notInClient++;
         m_schemaCheck.notes << QString("%1: not in this client").arg(tbl->name);
         tbl->skipReason = "this client has no such table";
+        reading.state = SchemaCheck::TableReading::State::NotInClient;
       }
+      reading.reason = tbl->skipReason;
       tbl->skipFill = true;
       continue;
     }
@@ -195,23 +211,32 @@ void wow::WoWDatabase::refreshStructures(std::vector<core::TableStructure *> & t
     if (QFile::exists(dbdPath))
     {
       if (dbd.parseFile(dbdPath))
-        def = dbd.getStructure(build, fileHash);
+        // A table read only from a verified layout takes the definition of the file's own layout hash, never one a
+        // BUILD line selects: a build listed for another layout must not place this file's columns.
+        def = tbl->verifiedLayoutOnly ? dbd.getStructureByLayout(fileHash) : dbd.getStructure(build, fileHash);
       else
         LOG_WARNING << "DBD: failed to parse" << dbdPath;
     }
-    if (!def && tbl->hash != 0 && fileHash == tbl->hash)
+    SchemaCheck::TableReading & reading = m_schemaCheck.tables[tbl->name];
+    reading.layout = QString("%1").arg(fileHash, 8, 16, QChar('0')).toUpper();
+    // (Not for a table read only from a verified layout: its definitions are its only verification, so that the
+    // columns its layout lacks are always known -- the schema's positions are one layout's and name no absent column.)
+    if (!def && tbl->hash != 0 && fileHash == tbl->hash && !tbl->verifiedLayoutOnly)
     {
       // No definition ships for this table, but the schema records the layout its positions are for, and this
       // client's file has exactly that layout: the positions are right for it.
       m_schemaCheck.verified++;
+      reading.state = SchemaCheck::TableReading::State::VerifiedBySchemaLayout;
       LOG_INFO << "DBD:" << tbl->name << "layoutHash" << fileHash << "is the schema's own layout - positions verified";
       continue;
     }
     if (!def)
     {
-      const QString layout = QString("%1").arg(fileHash, 8, 16, QChar('0')).toUpper();
-      if (sameGeneration)
+      const QString layout = reading.layout;
+      // A table read only from a verified layout is not trusted at the schema's positions either.
+      if (sameGeneration && !tbl->verifiedLayoutOnly)
       {
+        reading.state = SchemaCheck::TableReading::State::KeptAtSchemaPositions;
         m_schemaCheck.trusted++;
         m_schemaCheck.notes << QString("%1: layout %2 not in the definitions, schema positions kept").arg(tbl->name, layout);
         LOG_WARNING << "DBD: no definition for table" << tbl->name << "build" << build << "layoutHash" << layout
@@ -223,8 +248,11 @@ void wow::WoWDatabase::refreshStructures(std::vector<core::TableStructure *> & t
         m_schemaCheck.notes << QString("%1: layout %2 not known for this client, not read").arg(tbl->name, layout);
         tbl->skipFill = true;
         tbl->skipReason = QString("layout %1 of build %2 is not in the definitions").arg(layout, build);
+        reading.state = SchemaCheck::TableReading::State::NotRead;
+        reading.reason = tbl->skipReason;
         LOG_WARNING << "DBD: no definition for table" << tbl->name << "build" << build << "layoutHash" << layout
-                    << "- not read (another generation than the schema)";
+                    << (tbl->verifiedLayoutOnly ? "- not read (read only from a verified layout)"
+                                                : "- not read (another generation than the schema)");
       }
       continue;
     }
@@ -265,12 +293,14 @@ void wow::WoWDatabase::refreshStructures(std::vector<core::TableStructure *> & t
       {
         // This client's layout has no such column: read it as empty rather than whatever sits at the old position.
         missing++;
+        reading.absentFields << field->name;
         LOG_WARNING << "DBD:" << tbl->name << "field" << field->name << "absent in build" << build << "- read as empty";
         field->pos = ABSENT_POS;
       }
     }
     m_schemaCheck.verified++;
     m_schemaCheck.absentFields += missing;
+    reading.state = SchemaCheck::TableReading::State::Verified;
     LOG_INFO << "DBD refreshed" << tbl->name << "layoutHash" << fileHash << "-" << refreshed << "fields updated,"
              << changed << "changed," << missing << "absent";
   }
@@ -378,6 +408,25 @@ QByteArray wow::WoWDatabase::cacheInputs() const
   return hash.result();
 }
 
+void wow::WoWDatabase::tableBuilt(const core::TableStructure & table)
+{
+  auto it = m_schemaCheck.tables.find(table.name);
+  if (it == m_schemaCheck.tables.end())
+    return; // a CSV table, which the schema check does not cover
+  it->rows = table.skipFill ? -1 : (qint64)table.rowsRead;
+  it->lockedRows = (qint64)table.lockedRows;
+  it->missingKeys.clear();
+  for (unsigned long long key : table.lockedKeys)
+    it->missingKeys << QString("%1").arg(key, 16, 16, QChar('0')).toUpper();
+}
+
+namespace
+{
+  // The kept names of TableReading::State (the cached database's state is text: readable, and stable across builds).
+  const char * const kTableStates[] = {"verified", "verified by the schema's layout", "kept at schema positions",
+                                       "not read", "not installed", "not in this client"};
+}
+
 QByteArray wow::WoWDatabase::saveCacheState() const
 {
   QJsonObject o;
@@ -388,6 +437,23 @@ QByteArray wow::WoWDatabase::saveCacheState() const
   o["notInClient"] = m_schemaCheck.notInClient;
   o["absentFields"] = m_schemaCheck.absentFields;
   o["notes"] = QJsonArray::fromStringList(m_schemaCheck.notes);
+  QJsonObject tables;
+  for (auto it = m_schemaCheck.tables.constBegin(); it != m_schemaCheck.tables.constEnd(); ++it)
+  {
+    const SchemaCheck::TableReading & r = it.value();
+    QJsonObject t;
+    t["state"] = QString::fromLatin1(kTableStates[(int)r.state]);
+    t["layout"] = r.layout;
+    t["absent"] = QJsonArray::fromStringList(r.absentFields);
+    t["reason"] = r.reason;
+    t["rows"] = (double)r.rows;
+    t["locked"] = (double)r.lockedRows;
+    t["missingKeys"] = QJsonArray::fromStringList(r.missingKeys);
+    tables[it.key()] = t;
+  }
+  o["tables"] = tables;
+  o["build"] = m_schemaCheck.build;
+  o["product"] = m_schemaCheck.product;
   return QJsonDocument(o).toJson(QJsonDocument::Compact);
 }
 
@@ -406,6 +472,66 @@ bool wow::WoWDatabase::restoreCacheState(const QByteArray & state)
   check.absentFields = o["absentFields"].toInt();
   for (const QJsonValue & v : o["notes"].toArray())
     check.notes << v.toString();
+  // A cache from before per-table readings were kept has none, and is not reused (its key's schema version is older):
+  // a state without them, or with readings that do not add up to its own counts, was not written by this build.
+  if (!o["tables"].isObject() || o["tables"].toObject().isEmpty())
+    return false;
+  const QJsonObject tables = o["tables"].toObject();
+  for (auto it = tables.constBegin(); it != tables.constEnd(); ++it)
+  {
+    const QJsonObject t = it.value().toObject();
+    SchemaCheck::TableReading r;
+    const QString state = t["state"].toString();
+    bool known = false;
+    for (int i = 0; i < (int)(sizeof(kTableStates) / sizeof(kTableStates[0])); i++)
+      if (state == QLatin1String(kTableStates[i]))
+      {
+        r.state = (SchemaCheck::TableReading::State)i;
+        known = true;
+      }
+    if (!known)
+      return false; // not a state this build wrote: build the database again rather than guess
+    r.layout = t["layout"].toString();
+    for (const QJsonValue & v : t["absent"].toArray())
+      r.absentFields << v.toString();
+    r.reason = t["reason"].toString();
+    r.rows = (qint64)t["rows"].toDouble(-1);
+    r.lockedRows = (qint64)t["locked"].toDouble(0);
+    for (const QJsonValue & v : t["missingKeys"].toArray())
+      r.missingKeys << v.toString();
+    check.tables.insert(it.key(), r);
+  }
+  int verified = 0, trusted = 0, notRead = 0, notInstalled = 0, notInClient = 0;
+  for (const SchemaCheck::TableReading & r : check.tables)
+    switch (r.state)
+    {
+      case SchemaCheck::TableReading::State::Verified:
+      case SchemaCheck::TableReading::State::VerifiedBySchemaLayout: verified++; break;
+      case SchemaCheck::TableReading::State::KeptAtSchemaPositions: trusted++; break;
+      case SchemaCheck::TableReading::State::NotRead: notRead++; break;
+      case SchemaCheck::TableReading::State::NotInstalled: notInstalled++; break;
+      case SchemaCheck::TableReading::State::NotInClient: notInClient++; break;
+    }
+  if (verified != check.verified || trusted != check.trusted || notRead != check.notRead ||
+      notInstalled != check.notInstalled || notInClient != check.notInClient)
+    return false;
+  // Rows the build could not read because their key was missing: once this computer has the key (a newer key list),
+  // the database is built again, so they appear (the key list is not in the cache key).
+  wow::WoWFolder * folder = dynamic_cast<wow::WoWFolder *>(&GAMEDIRECTORY);
+  for (auto it = check.tables.constBegin(); it != check.tables.constEnd(); ++it)
+    for (const QString & key : it.value().missingKeys)
+    {
+      bool ok = false;
+      const quint64 name = key.toULongLong(&ok, 16);
+      if (ok && folder && folder->storageKnowsEncryptionKey(name))
+      {
+        LOG_INFO << "[schema]" << it.key() << "has rows under key" << key
+                 << "which this computer now has: the cached database is built again";
+        return false;
+      }
+    }
+  check.build = GAMEDIRECTORY.version();
+  check.product = GAMEDIRECTORY.clientProfile().product;
   m_schemaCheck = check;
   LOG_INFO << "[schema]" << QDir(core::Game::instance().configFolder()).dirName() << "for" << GAMEDIRECTORY.version()
            << "(kept with the cached database):" << check.verified << "tables verified," << check.trusted

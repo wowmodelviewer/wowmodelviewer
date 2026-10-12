@@ -11,6 +11,11 @@ Framework-free tests of the Unity project's pure parsing layer (`Assets/Scripts/
   `Tools/world-audit/tests/corpus_hashes.json` (243 files, 19 file sets). It then recomputes the audit's tables and
   verdicts from the C# parse results and writes them to `<corpus>/results/csharp_parsers.json`. It runs only when
   `WMV_WORLD_AUDIT_CORPUS` names the extracted audit data; otherwise it reports SKIPPED, which is not a pass.
+- `MapContractCheck.cs`: the world-map runtime contract at the data level (`docs/world-viewer/02-map-catalog.md`). The
+  viewer's map catalogue test writes chosen maps' WDTs, read through the catalogue
+  (`wowmodelviewer -mapcatalogtest <out.json> -mapcatalogwdt <folder> <map ids>`), and this step parses them with the
+  verified WDT parser into `<folder>/manifest.json` (kind, tiles with their MAID FileDataIDs, global world model
+  references), for the viewer to resolve next. It runs only when `WMV_MAP_CONTRACT_DIR` names that folder.
 
 ## Run
 

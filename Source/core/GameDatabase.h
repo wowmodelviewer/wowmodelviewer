@@ -81,6 +81,11 @@ namespace core
     // schema cannot be matched to (or is not installed), so it is created empty rather than read at wrong positions.
     bool skipFill = false;
     QString skipReason;
+    // Set by fill(): the records written, and the records the file holds in sections encrypted with a key this computer
+    // does not have (left out, never read as data).
+    size_t rowsRead = 0;
+    size_t lockedRows = 0;
+    std::vector<unsigned long long> lockedKeys;  // the names of the keys those rows wait for
 
     bool create();
     bool fill();
@@ -124,6 +129,13 @@ namespace core
     // they have been read from the base XML (e.g. refresh DB2 field positions
     // from WoWDBDefs for a build newer than the shipped schema). Default no-op.
     virtual void refreshStructures(std::vector<TableStructure *> &) {}
+
+    // Told about each table once it has been created and filled (or left empty) in a build: what a schema check wants
+    // to keep about it (rows read, rows in encrypted sections). Never called when a cached database is used.
+    virtual void tableBuilt(const TableStructure &) {}
+    // Called first thing when a client's database is read (initFromXML): whatever was kept about the previous client's
+    // database must go now, even when this one then fails to open.
+    virtual void clientDatabaseStarting() {}
 
     // Create secondary indexes on hot join/lookup columns, after all tables are populated.
     // Issued idempotently (CREATE INDEX IF NOT EXISTS) so an existing on-disk cache picks

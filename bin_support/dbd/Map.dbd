@@ -1,0 +1,128 @@
+COLUMNS
+int ID
+string Directory // the map's folder under world/maps: proven from the bytes (docs/world-viewer/00-audit.md 3.1)
+locstring MapName_lang // the map's name as the client stores it: supported in every client; not always the exact label the game shows
+locstring Text2_lang // string columns whose meaning is not established; Text2-Text5 sit in the same slots in every layout
+locstring Text3_lang
+locstring Text4_lang
+locstring Text5_lang
+float Point // a world (X, Y) point on the map LocationMapID names (Retail, Beta): supported
+int MapType // the form of the map's WDT: 1 a tile grid with no global world model, 2 a world model only (named by FileDataID), 4 a world model only (named by path; Retail), 3 no WDT this client can read: holds for every readable WDT of the four audited clients
+int InstanceType // the code Difficulty.db2 gives the map's difficulties: supported (codes 1, 2 and 5 exercised)
+int Code9 // not established
+int AreaTableID // an AreaTable row standing for the map: supported
+int LoadingScreenID // a LoadingScreens.db2 row
+int Code12 // not established
+int ParentMapID // when set, a map whose world space this map shares: supported (-1 is "not set", which does not mean "no parent")
+int WorldCopyOfMapID // Retail, Classic Era, MoP Classic: when set, a map part of whose world this map copies: supported (-1: not set)
+int BetaCode14 // Classic Beta: the WorldCopyOfMapID slot holds 2-bit codes there; their meaning is not established
+int Code15 // not established (1 bit, 0 in every client)
+float Float16 // not established
+int EraMoPCode16 // not established (Classic Era and MoP Classic only)
+int LocationMapID // when set, the map an instance is located on (its Point lies there): proven in Classic Beta, supported elsewhere; -1 is "not set", and Classic Era and Beta also store 0 with no point
+int Code18 // not established
+int Code19 // not established
+int ZoneMapFileDataID // a 128x128 grid of AreaTable IDs for the map
+int WdtFileDataID // the map's WDT (Retail, Classic Beta): proven (00-audit.md 3.1); Classic Era and MoP Classic have no such column
+int BetaCode22 // not established (Classic Beta only)
+int Code22 // not established (Retail)
+int Code23 // not established (Retail)
+int BetaCode23 // not established (Classic Beta; the slot of Retail's Code22, its meaning not shown to be the same)
+int BetaCode24 // not established (Classic Beta; the slot of Retail's Code23, its meaning not shown to be the same)
+int EraMoPCode21 // not established (Classic Era and MoP Classic; the slot of Retail's Code22, its meaning not shown to be the same)
+int Flags // three words of flags: four bits of the first two are copies of WDT header (MPHD) bits (supported); the rest are not established
+
+COMMENT Written for WoW Model Viewer's world map catalogue from the clients' own bytes; no outside definition was used.
+COMMENT Every column of each layout is listed in file order, so the positions are right for the layouts below; only
+COMMENT the named columns the catalogue reads (database.xml, table Map) carry established meanings. A neutral name that
+COMMENT two layouts share means the same slot in the column order, not an established equal meaning. The evidence, and
+COMMENT how far it goes per client, is in docs/world-viewer/02-map-catalog.md. A layout not listed here is not read.
+
+LAYOUT 75863E23
+BUILD 12.1.0.69933
+COMMENT Retail: 25 fields.
+$noninline,id$ID
+Directory
+MapName_lang
+Text2_lang
+Text3_lang
+Text4_lang
+Text5_lang
+Point[2]
+MapType
+InstanceType
+Code9
+AreaTableID
+LoadingScreenID
+Code12
+ParentMapID
+WorldCopyOfMapID
+Code15
+Float16
+LocationMapID
+Code18
+Code19
+ZoneMapFileDataID
+WdtFileDataID
+Code22
+Code23
+Flags[3]
+
+LAYOUT D43AFAC3
+BUILD 1.60.1.70338
+COMMENT Classic Beta: 26 fields (one more after WdtFileDataID).
+$noninline,id$ID
+Directory
+MapName_lang
+Text2_lang
+Text3_lang
+Text4_lang
+Text5_lang
+Point[2]
+MapType
+InstanceType
+Code9
+AreaTableID
+LoadingScreenID
+Code12
+ParentMapID
+BetaCode14
+Code15
+Float16
+LocationMapID
+Code18
+Code19
+ZoneMapFileDataID
+WdtFileDataID
+BetaCode22
+BetaCode23
+BetaCode24
+Flags[3]
+
+LAYOUT B47C6F05
+BUILD 1.15.9.70003, 5.5.4.70268
+COMMENT Classic Era and MoP Classic: 23 fields (Retail's 25 without Point, WdtFileDataID, Code22 and Code23; with EraMoPCode16 and EraMoPCode21).
+$noninline,id$ID
+Directory
+MapName_lang
+Text2_lang
+Text3_lang
+Text4_lang
+Text5_lang
+MapType
+InstanceType
+Code9
+AreaTableID
+LoadingScreenID
+Code12
+ParentMapID
+WorldCopyOfMapID
+Code15
+Float16
+EraMoPCode16
+LocationMapID
+Code18
+Code19
+ZoneMapFileDataID
+EraMoPCode21
+Flags[3]

@@ -11,6 +11,8 @@
 #include <vector>
 #include <unordered_set>
 
+#include <QByteArray>
+
 typedef void* HANDLE;
 
 #include "GameFolder.h" // GameConfig
@@ -60,6 +62,7 @@ class _CASCFOLDER_API_ CASCFolder
     void initBuildInfo();
     void addExtraEncryptionKeys();
     void buildPresentIdIndex();  // one-shot enumeration of present FileDataIDs -> fast fileExists()
+    static quint64 nextStorageGeneration();
 
   public:
     // Let go of the storage (a client replaced by one in another folder object).
@@ -67,6 +70,48 @@ class _CASCFOLDER_API_ CASCFolder
     // Files in the opened build that are not on this computer (a partly downloaded install).
     size_t remoteFileCount() const { return m_remoteCount; }
     bool isRemote(int id) const { return id >= 0 && (size_t)id < m_remoteIds.size() && m_remoteIds[id]; }
+
+    // Which storage this folder holds right now: a number no other storage of this session has had. It changes
+    // whenever setConfig opens a storage and when the storage is closed, so something built from one client can
+    // tell the client it was built from is gone (a reused folder becomes another client in place).
+    quint64 storageGeneration() const { return m_storageGeneration; }
+    // How many files the storage's root knows by name, and how many it lists by FileDataID only (CascWowRootNameCount).
+    // A path the root has no name for is absent from the client only when the root lists no file without a name.
+    size_t rootNameCount() const { return m_rootNameCount; }
+    size_t rootNamelessCount() const { return m_rootNamelessCount; }
+    // Does the open storage know this decryption key now (its own list, plus extraEncryptionKeys.csv)?
+    bool knowsEncryptionKey(quint64 keyName) const;
+    bool storageOpen() const { return hStorage != nullptr; }
+
+    // One file as the storage's ROOT lists it, looked up without opening it and without the folder's file index
+    // (CascWowFindRootEntry): by FileDataID, or by path through the root's own name hashes. Only some roots carry
+    // names: Classic Era and MoP Classic list their map files by name, Retail and Classic Beta list none
+    // (docs/world-viewer/00-audit.md 4.1), so a path lookup there finds nothing.
+    struct RootEntry
+    {
+      bool listed = false;   // the root lists the file (and ENCODING has its content key)
+      bool local = false;    // its data is on this computer (the local index lists it)
+      int fileDataId = -1;   // the FileDataID the root gives the file; -1 when it gives none
+    };
+    RootEntry rootEntry(int fileDataId) const;
+    RootEntry rootEntryByPath(const QString & path) const;
+
+    // Reads one whole file of the storage -- by FileDataID when fileDataId > 0, else by path through the root's names
+    // -- without the folder's file index, and says what happened, so a caller can tell a file the root does not list
+    // from one that is not on this computer, one that is encrypted with a key this computer lacks, and a damaged one.
+    enum class ReadOutcome
+    {
+      Read,       // every byte read (out holds them)
+      NoStorage,  // no storage is open
+      NotListed,  // the root does not list it
+      NotLocal,   // listed, but its data is not on this computer
+      Encrypted,  // listed and local, encrypted with a key this computer does not have
+      TooLarge,   // larger than the caller allows
+      Damaged,    // opened, but its size or data could not be read (errorCode says why)
+      Corrupt,    // read, but the data does not match its frame hashes or its content key (damaged on disk)
+    };
+    ReadOutcome readWholeFile(int fileDataId, const QString & path, QByteArray & out, unsigned int * errorCode = nullptr,
+                              qint64 maxBytes = 64 * 1024 * 1024) const;
   private:
 
     int m_currentCascLocale;
@@ -84,6 +129,9 @@ class _CASCFOLDER_API_ CASCFolder
     std::vector<bool> m_remoteIds;
     size_t m_presentCount = 0;
     size_t m_remoteCount = 0;
+    quint64 m_storageGeneration;     // see storageGeneration(); set in the constructor, renewed by every open and close
+    size_t m_rootNameCount = 0;      // see rootNameCount()
+    size_t m_rootNamelessCount = 0;  // see rootNamelessCount()
     std::function<void(float)> m_progressCb; // optional load-progress reporter (see setProgressCallback)
 };
 

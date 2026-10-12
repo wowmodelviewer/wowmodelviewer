@@ -134,6 +134,11 @@ private:
   // Buffers for sections beyond section 0 (WDC3 is multi-section). m_recordOffsets points
   // directly into these, so they must outlive parsing; freed in the destructor.
   std::vector<unsigned char *> m_extraSectionData;
+  // Every section's buffer and its size, by section index (section 0's is m_sectionData; null where a section was not
+  // read). A non-sparse record's text offset counts across every section's records and string blocks, so a string of a
+  // record in a later section is found in whichever section's block the offset reaches.
+  std::vector<const unsigned char *> m_sectionBuffers;
+  std::vector<size_t> m_sectionBufferSizes;
 };
 
 #endif

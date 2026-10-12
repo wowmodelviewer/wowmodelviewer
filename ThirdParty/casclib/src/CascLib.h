@@ -441,6 +441,17 @@ DWORD GetCascError();
 
 bool   WINAPI CascWowRootReplacesKeptEntry(bool bKeptIsLocal, bool bLaterIsLocal);
 
+// WMV: what the storage's ROOT says about one file, without opening or reading it: whether the root lists it (by its
+// name -- the root's own name hashes -- or, when szFileName is NULL, by dwFileDataId), the FileDataId the root gives
+// it, and whether its data is on this computer (the local index lists it: the flag a storage enumeration reports as
+// bFileAvailable). Returns false with ERROR_FILE_NOT_FOUND when the root does not list the file.
+bool   WINAPI CascWowFindRootEntry(HANDLE hStorage, const char * szFileName, DWORD dwFileDataId, PDWORD PtrFileDataId, bool * PtrIsLocal);
+
+// WMV: how many files the storage's ROOT knows by name (a name hash), and how many it lists without one (by FileDataId
+// only; PtrNamelessCount may be NULL). A lookup by name cannot find a nameless file: when the root has any, a name it
+// does not know is not proof that the file is absent.
+bool   WINAPI CascWowRootNameCount(HANDLE hStorage, size_t * PtrNameCount, size_t * PtrNamelessCount);
+
 #ifdef __cplusplus
 }   // extern "C"
 #endif

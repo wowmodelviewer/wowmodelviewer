@@ -36,8 +36,26 @@ int TFileTreeRoot::Insert(
     PCASC_CKEY_ENTRY pCKeyEntry)
 {
     PCASC_FILE_NODE pFileNode;
+    DWORD FileDataId = FileTree.GetNextFileDataId();
 
-    pFileNode = FileTree.InsertByName(pCKeyEntry, szFileName, FileTree.GetNextFileDataId());
+    pFileNode = FileTree.InsertByName(pCKeyEntry, szFileName, FileDataId);
+
+    // WMV: a node this call made (ENCODING, ROOT and the other storage files CascLib names itself, with a FileDataId
+    // past every id the ROOT lists) is not a ROOT entry: FindEntry must not answer for it, nor GetNameCount count it.
+    // (Copy() also inserts through here, but only when a non-WoW root is parsed again, which WMV never opens.)
+    if(pFileNode != NULL)
+    {
+        DWORD NodeFileDataId = CASC_INVALID_ID;
+        DWORD LocaleFlags = CASC_INVALID_ID;
+        DWORD ContentFlags = CASC_INVALID_ID;
+
+        FileTree.GetExtras(pFileNode, &NodeFileDataId, &LocaleFlags, &ContentFlags);
+        if(NodeFileDataId == FileDataId && (pFileNode->Flags & CFN_FLAG_WMV_NOT_IN_ROOT) == 0)
+        {
+            pFileNode->Flags |= CFN_FLAG_WMV_NOT_IN_ROOT;
+            WmvNotInRootNames++;
+        }
+    }
     return (pFileNode != NULL) ? ERROR_SUCCESS : ERROR_CAN_NOT_COMPLETE;
 }
 
@@ -120,6 +138,26 @@ bool TFileTreeRoot::GetInfo(PCASC_CKEY_ENTRY pCKeyEntry, PCASC_FILE_FULL_INFO pF
     }
 
     return false;
+}
+
+// WMV: the node a name hash or a FileDataId leads to -- the same node CascOpenFile would open -- with the FileDataId
+// the root gives it. A name and a FileDataId of one file share one node (InsertByHash inserts by id too).
+bool TFileTreeRoot::FindEntry(const char * szFileName, DWORD FileDataId, PDWORD PtrFileDataId, PCASC_CKEY_ENTRY * PtrCKeyEntry)
+{
+    PCASC_FILE_NODE pFileNode = (szFileName != NULL) ? FileTree.Find(CalcFileNameHash(szFileName)) : FileTree.FindById(FileDataId);
+    DWORD NodeFileDataId = CASC_INVALID_ID;
+    DWORD LocaleFlags = CASC_INVALID_ID;
+    DWORD ContentFlags = CASC_INVALID_ID;
+
+    if(pFileNode == NULL || pFileNode->pCKeyEntry == NULL || (pFileNode->Flags & CFN_FLAG_WMV_NOT_IN_ROOT))
+        return false;
+
+    FileTree.GetExtras(pFileNode, &NodeFileDataId, &LocaleFlags, &ContentFlags);
+    if(PtrFileDataId != NULL)
+        PtrFileDataId[0] = NodeFileDataId;
+    if(PtrCKeyEntry != NULL)
+        PtrCKeyEntry[0] = pFileNode->pCKeyEntry;
+    return true;
 }
 
 size_t TFileTreeRoot::Copy(TRootHandler * pRoot)

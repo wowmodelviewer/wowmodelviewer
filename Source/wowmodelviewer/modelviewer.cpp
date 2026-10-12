@@ -77,6 +77,7 @@
 #include "util.h"
 #include "WoWDatabase.h"
 #include "WoWFolder.h"
+#include "WorldMapCatalog.h"
 
 #include "logger/Logger.h"
 
@@ -265,6 +266,8 @@ ModelViewer::ModelViewer()
   m_themeRecheck.SetOwner(this, ID_THEME_RECHECK_TIMER);
   m_playerContentPoll.Bind(wxEVT_TIMER, &ModelViewer::OnPlayerContentPoll, this);
   PLUGINMANAGER.init("./plugins");
+  // Until a client loads, the map catalogue says there is none (mapCatalog() is never null).
+  m_mapCatalog = wow::WorldMapCatalog::noClient("no client is loaded");
   // our main class objects
   animControl = nullptr;
   canvas = NULL;
@@ -3996,6 +3999,8 @@ int ModelViewer::LoadWoWFromMpq(const QString & dataFolder, const QString & loca
 
   SetStatusText(wxString(GAMEDIRECTORY.version().toStdWString()), 1);
   SetStatusText(wxT("Legacy MPQ"), 2);
+  // A legacy client has no Map.db2 this viewer reads: its catalogue says so (Unsupported) rather than being absent.
+  m_mapCatalog = wow::WorldMapCatalog::build();
   ComputeClientCapabilities();
   LOG_INFO << "[mpq] legacy client ready: storage=MPQ, provider ready, archives=" << archives
            << " -- load models from the file browser (no DBC/customization/equipment yet).";
@@ -4116,6 +4121,10 @@ void ModelViewer::ResetClientState()
   npcs.clear();
   items = ItemDatabase();
   m_clientCaps = ClientCapabilities();
+  // The previous client's map catalogue: dropped, never handed to the next client (a holder keeps it alive, but it
+  // then no longer belongs to the loaded client and refuses to read its storage). Until the load builds the next one,
+  // the viewer's says a client is being loaded.
+  m_mapCatalog = wow::WorldMapCatalog::noClient("a client is being loaded");
 }
 
 bool ModelViewer::LoadWoW(const core::GameConfig * chosenConfig, ClientLoadProgress * progress)
@@ -4445,6 +4454,12 @@ bool ModelViewer::LoadWoW(const core::GameConfig * chosenConfig, ClientLoadProgr
   // file list was read): the files the reload detached can go -- while the viewer is idle, after the load, a share at
   // a time (freeing ~1.8 million files takes ~0.5 s that the user would otherwise wait for).
   FreeDetachedWhenIdle();
+  // The client's maps: one query of Map.db2 and a WDT reference per map, no file opened (whether each WDT can be read
+  // is inspected per map, on request).
+  timeline.begin("map catalogue");
+  m_mapCatalog = wow::WorldMapCatalog::build();
+  timeline.end("map catalogue", QString("%1 maps, %2").arg(m_mapCatalog->maps().size())
+                                  .arg(wow::WorldMapCatalog::statusName(m_mapCatalog->status())));
 
   if (progress)
     progress->stage(_("Almost ready..."));

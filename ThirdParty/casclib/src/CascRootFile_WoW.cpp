@@ -678,6 +678,52 @@ bool WINAPI CascWowRootReplacesKeptEntry(bool bKeptIsLocal, bool bLaterIsLocal)
     return !bKeptIsLocal && bLaterIsLocal;
 }
 
+// WMV: see CascLib.h.
+bool WINAPI CascWowRootNameCount(HANDLE hStorage, size_t * PtrNameCount, size_t * PtrNamelessCount)
+{
+    TCascStorage * hs = TCascStorage::IsValid(hStorage);
+
+    if(hs == NULL || hs->pRootHandler == NULL || PtrNameCount == NULL)
+    {
+        SetCascError(ERROR_INVALID_PARAMETER);
+        return false;
+    }
+    PtrNameCount[0] = hs->pRootHandler->GetNameCount();
+    if(PtrNamelessCount != NULL)
+        PtrNamelessCount[0] = hs->pRootHandler->GetNamelessCount();
+    return true;
+}
+
+// WMV: see CascLib.h. Reads the in-memory root and the CKey entry's flags only; no file is opened.
+bool WINAPI CascWowFindRootEntry(HANDLE hStorage, const char * szFileName, DWORD dwFileDataId, PDWORD PtrFileDataId, bool * PtrIsLocal)
+{
+    PCASC_CKEY_ENTRY pCKeyEntry = NULL;
+    TCascStorage * hs;
+    DWORD FileDataId = CASC_INVALID_ID;
+
+    hs = TCascStorage::IsValid(hStorage);
+    if(hs == NULL || hs->pRootHandler == NULL)
+    {
+        SetCascError(ERROR_INVALID_HANDLE);
+        return false;
+    }
+    if(szFileName != NULL && szFileName[0] == 0)
+    {
+        SetCascError(ERROR_INVALID_PARAMETER);
+        return false;
+    }
+    if(!hs->pRootHandler->FindEntry(szFileName, dwFileDataId, &FileDataId, &pCKeyEntry))
+    {
+        SetCascError(ERROR_FILE_NOT_FOUND);
+        return false;
+    }
+    if(PtrFileDataId != NULL)
+        PtrFileDataId[0] = FileDataId;
+    if(PtrIsLocal != NULL)
+        PtrIsLocal[0] = (pCKeyEntry->Flags & CASC_CE_FILE_IS_LOCAL) != 0;
+    return true;
+}
+
 DWORD RootHandler_CreateWoW(TCascStorage * hs, CASC_BLOB & RootFile, DWORD dwLocaleMask)
 {
     TRootHandler_WoW * pRootHandler = NULL;

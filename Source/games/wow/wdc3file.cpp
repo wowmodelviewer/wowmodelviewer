@@ -246,6 +246,10 @@ bool WDC3File::open()
   m_sectionData = new unsigned char[sectionSize];
   m_sectionDataSize = sectionSize;
   read(m_sectionData, sectionSize);
+  m_sectionBuffers.assign(m_header.section_count, nullptr);
+  m_sectionBufferSizes.assign(m_header.section_count, 0);
+  m_sectionBuffers[0] = m_sectionData;
+  m_sectionBufferSizes[0] = sectionSize;
 
   // maintain curPtr to location of the block along section reading
   unsigned char * curPtr = m_sectionData;
@@ -472,9 +476,8 @@ bool WDC3File::open()
   // they resolve too. Encrypted sections you have no key for come back all-zeroed (CASC zeroes
   // what it cannot decrypt) and are skipped; sections whose key is present decrypt to plain data
   // and read like section 0. Per-section copy tables / sparse offset maps are not merged here
-  // (uncommon for this extra content); string fields of these extra records read back empty
-  // because get()'s bounds check rejects pointers outside section 0's buffer -- harmless, since
-  // the resolved numeric ids (display -> model -> FileDataID) are what callers need.
+  // (uncommon for this extra content). Their text fields are found through m_sectionBuffers (get()):
+  // a string offset counts across every section.
   if ((m_header.flags & 0x01) == 0) // non-sparse tables only
   {
     field_storage_info idInfo = m_fieldStorageInfo.empty()
@@ -501,13 +504,23 @@ bool WDC3File::open()
       seek(sh.file_offset);
       read(buf, secSize);
       m_extraSectionData.push_back(buf);
+      m_sectionBuffers[s] = buf;
+      m_sectionBufferSizes[s] = secSize;
 
-      // Sections we have no key for end up all-zeroed -> nothing to recover.
+      // Sections we have no key for end up all-zeroed -> nothing to recover (counted, with the key's name: a table can
+      // say how many of its records this computer cannot read, and which key would make them readable).
       bool zeroed = true;
       for (size_t i = 0; i < recBytes; i++)
         if (buf[i] != 0) { zeroed = false; break; }
       if (zeroed)
+      {
+        if (sh.tact_key_hash != 0)
+        {
+          lockedRecordCount += sh.record_count;
+          lockedKeyNames.push_back(sh.tact_key_hash);
+        }
         continue;
+      }
 
       const size_t firstNewRecord = m_recordOffsets.size();
       for (uint i = 0; i < sh.record_count; i++)
@@ -732,7 +745,44 @@ std::vector<std::string> WDC3File::get(unsigned int recordIndex, const core::Tab
         }
         else
         {
-          stringPtr = reinterpret_cast<char *>(recordOffset + m_fieldStorageInfo[field->pos].field_offset_bits / 8 + val - ((m_header.record_count - m_sectionHeader[0].record_count) * m_header.record_size));
+          // The offset counts from the field's place in every section's records laid end to end, into every
+          // section's string block laid end to end after them: find the record's section, then the string's.
+          size_t section = 0, local = 0;
+          bool found = false;
+          for (size_t s = 0; s < m_sectionBuffers.size() && !found; s++)
+            if (m_sectionBuffers[s] && recordOffset >= m_sectionBuffers[s] &&
+                recordOffset < m_sectionBuffers[s] + m_sectionBufferSizes[s])
+            {
+              section = s;
+              local = static_cast<size_t>(recordOffset - m_sectionBuffers[s]) / recordSize;
+              found = true;
+            }
+          if (found)
+          {
+            long long before = 0;
+            for (size_t s = 0; s < section; s++)
+              before += m_sectionHeader[s].record_count;
+            long long offset = (before + static_cast<long long>(local)) * m_header.record_size +
+                               m_fieldStorageInfo[field->pos].field_offset_bits / 8 + static_cast<long long>(val) -
+                               static_cast<long long>(m_header.record_count) * m_header.record_size;
+            for (size_t s = 0; s < m_sectionBuffers.size() && offset >= 0; s++)
+            {
+              const long long blockSize = m_sectionHeader[s].string_table_size;
+              if (offset < blockSize)
+              {
+                if (m_sectionBuffers[s])
+                {
+                  // Section 0 keeps its bounds as before: its string block to the end of its buffer.
+                  bufStart = reinterpret_cast<const char *>(m_sectionBuffers[s]);
+                  bufEnd = bufStart + m_sectionBufferSizes[s];
+                  strStart = bufStart + static_cast<size_t>(recordSize) * m_sectionHeader[s].record_count;
+                  stringPtr = const_cast<char *>(strStart + offset);
+                }
+                break;
+              }
+              offset -= blockSize;
+            }
+          }
         }
 
         const char * sp = reinterpret_cast<const char *>(stringPtr);
