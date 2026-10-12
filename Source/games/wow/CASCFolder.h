@@ -99,16 +99,21 @@ class _CASCFOLDER_API_ CASCFolder
     // Reads one whole file of the storage -- by FileDataID when fileDataId > 0, else by path through the root's names
     // -- without the folder's file index, and says what happened, so a caller can tell a file the root does not list
     // from one that is not on this computer, one that is encrypted with a key this computer lacks, and a damaged one.
+    // Read is the only outcome that hands back bytes, and only bytes whose MD5 equals the file's content key: CascLib
+    // checks a frame's hash only where the data carries one, so the content key is what vouches for every byte.
     enum class ReadOutcome
     {
-      Read,       // every byte read (out holds them)
+      Read,       // every byte read, and their MD5 equals the file's content key (out holds them)
       NoStorage,  // no storage is open
       NotListed,  // the root does not list it
       NotLocal,   // listed, but its data is not on this computer
       Encrypted,  // listed and local, encrypted with a key this computer does not have
       TooLarge,   // larger than the caller allows
       Damaged,    // opened, but its size or data could not be read (errorCode says why)
-      Corrupt,    // read, but the data does not match its frame hashes or its content key (damaged on disk)
+      Corrupt,    // read, but the data does not match a frame hash or its content key (damaged on disk)
+      Unverified, // every byte read, but the file's content key could not be obtained, so they were not checked
+                  // (errorCode: the content-key query's error; ERROR_NOT_SUPPORTED for a key of the wrong size, or
+                  // a failed query that left no error)
     };
     ReadOutcome readWholeFile(int fileDataId, const QString & path, QByteArray & out, unsigned int * errorCode = nullptr,
                               qint64 maxBytes = 64 * 1024 * 1024) const;

@@ -228,8 +228,8 @@ CASCFolder::ReadOutcome CASCFolder::readWholeFile(int fileDataId, const QString 
 
   HANDLE file = nullptr;
   const QByteArray name = path.toUtf8();
-  // Every frame's hash is checked as it is read (CASC_STRICT_DATA_CHECK), and the whole content against its content
-  // key below: data damaged on disk is refused, not handed on as the file.
+  // A frame that carries a hash is checked as it is read (CASC_STRICT_DATA_CHECK), and the whole content against its
+  // content key below: data damaged on disk is refused, not handed on as the file.
   const bool opened = fileDataId > 0
                         ? CascOpenFile(hStorage, CASC_FILE_DATA_ID(fileDataId), m_currentCascLocale,
                                        CASC_OPEN_BY_FILEID | CASC_STRICT_DATA_CHECK, &file)
@@ -274,17 +274,20 @@ CASCFolder::ReadOutcome CASCFolder::readWholeFile(int fileDataId, const QString 
     }
     done += got;
   }
-  // The content key is the MD5 of the whole content: bytes that differ from it are not the file's.
+  // The content key is the MD5 of the whole content, and the only check that covers every byte (CascLib checks a
+  // frame's hash only where the frame carries one). Asked for while the file is open; a whole read is Read only once
+  // the key was obtained and matched.
   unsigned char contentKey[16] = {};
   size_t keySize = 0;
-  const bool hasKey = done == (qint64)size &&
-                      CascGetFileInfo(file, CascFileContentKey, contentKey, sizeof(contentKey), &keySize) && keySize == 16;
-  CascCloseFile(file);
-  if (hasKey && QCryptographicHash::hash(out, QCryptographicHash::Md5) != QByteArray((const char *)contentKey, 16))
+  bool keyKnown = false;
+  DWORD keyError = ERROR_SUCCESS;
+  if (done == (qint64)size)
   {
-    out.clear();
-    return outcome(ReadOutcome::Corrupt, ERROR_FILE_CORRUPT);
+    keyKnown = CascGetFileInfo(file, CascFileContentKey, contentKey, sizeof(contentKey), &keySize);
+    if (!keyKnown)
+      keyError = GetCascError();
   }
+  CascCloseFile(file);
   if (done != (qint64)size)
   {
     out.clear();
@@ -295,6 +298,18 @@ CASCFolder::ReadOutcome CASCFolder::readWholeFile(int fileDataId, const QString 
     if (error == ERROR_FILE_CORRUPT)
       return outcome(ReadOutcome::Corrupt, error);
     return outcome(error == ERROR_FILE_NOT_FOUND ? ReadOutcome::NotLocal : ReadOutcome::Damaged, error);
+  }
+  if (!keyKnown || keySize != sizeof(contentKey))
+  {
+    // Every byte was read, but nothing vouches for them: not handed on as the file.
+    out.clear();
+    return outcome(ReadOutcome::Unverified,
+                   !keyKnown && keyError != ERROR_SUCCESS ? keyError : (DWORD)ERROR_NOT_SUPPORTED);
+  }
+  if (QCryptographicHash::hash(out, QCryptographicHash::Md5) != QByteArray((const char *)contentKey, sizeof(contentKey)))
+  {
+    out.clear();
+    return outcome(ReadOutcome::Corrupt, ERROR_FILE_CORRUPT);
   }
   return outcome(ReadOutcome::Read, ERROR_SUCCESS);
 }

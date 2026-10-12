@@ -500,6 +500,12 @@ wow::WdtInspection wow::WorldMapCatalog::inspectReference(const WdtReference & r
         r.state = WdtAvailability::Unreadable;
         r.detail = QString("%1 is damaged on this computer: its data does not match its checksums").arg(what);
         break;
+      case CASCFolder::ReadOutcome::Unverified:
+        // Read whole, but with no content key nothing vouches for the bytes: not handed on as the WDT.
+        r.state = WdtAvailability::Unreadable;
+        r.detail = QString("%1 was read, but its content key could not be obtained, so its bytes could not be checked "
+                           "(error %2)").arg(what).arg(error);
+        break;
     }
   }
   r.milliseconds = timer.nsecsElapsed() / 1e6;

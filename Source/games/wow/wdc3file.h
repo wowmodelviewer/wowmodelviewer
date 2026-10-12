@@ -139,6 +139,16 @@ private:
   // record in a later section is found in whichever section's block the offset reaches.
   std::vector<const unsigned char *> m_sectionBuffers;
   std::vector<size_t> m_sectionBufferSizes;
+  // Where each entry of m_recordOffsets lives, as integers: the section whose buffer holds its bytes and its index
+  // among that section's records (a copy-table row: its source row's). Text offsets are resolved from these, never by
+  // comparing a record pointer with the section buffers (pointers into separate allocations have no defined order).
+  struct RecordLocation
+  {
+    uint32 section;
+    uint32 index;
+  };
+  static const uint32 NO_SECTION = 0xFFFFFFFF; // a record no text offset can be resolved for (sparse tables, a copy of a missing row)
+  std::vector<RecordLocation> m_recordLocations;
 };
 
 #endif

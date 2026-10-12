@@ -9,9 +9,10 @@ no terrain, no ADT streaming, no global-WMO rendering, no IPC message and no pro
 
 ## 0. Result in brief
 
-Every figure below comes from the final binaries (`wowmodelviewer.exe` SHA-256 `375c4a3a...`, `wow.dll` `5ea18ea8...`,
-`core.dll` `e46f3b2a...`; each test JSON records the three hashes it was produced by), in one final pass of every test
-(`F:\wmv-build-fix\mapcat\run_all.ps1 -Tag d`; test rigs outside the repository).
+Every figure below comes from the final binaries (`wowmodelviewer.exe` SHA-256 `a789e2d7...`, `wow.dll` `bf4a3ea7...`,
+`core.dll` `667ca7ee...`; each test JSON records the three hashes it was produced by), in one final pass of every test
+(`F:\wmv-build-fix\mapcat\run_all.ps1 -Tag g`; test rigs outside the repository). They include the follow-up of section 20
+(section-pointer safety and content-key verification); every figure is the same as before it.
 
 | Check | Result |
 |---|---|
@@ -43,7 +44,7 @@ all four.
 | `Source/games/wow/WoWDatabase.{h,cpp}` | Per-table readings in the schema check (state, layout, absent columns, rows, encrypted rows and their keys, the client), kept with the cache and checked when it is restored; `verifiedLayoutOnly`; `fileLayoutHash` |
 | `Source/core/GameDatabase.{h,cpp}`, `Source/core/dbfile.h` | Rows read and rows in encrypted sections per table; `clientDatabaseStarting`, `tableBuilt`; `SCHEMA_VERSION` 18 |
 | `Source/games/wow/wdc3file.{h,cpp}` | Records in encrypted sections counted with their key names; **text fields of records in sections after the first are now read** (they read as empty before, section 17) |
-| `Source/games/wow/CASCFolder.{h,cpp}`, `WoWFolder.h` | The storage root's entry for a file (by FileDataID or by path), the root's named and nameless counts, a whole-file read with its outcome (frame hashes and content key checked), the storage generation, `knowsEncryptionKey` |
+| `Source/games/wow/CASCFolder.{h,cpp}`, `WoWFolder.h` | The storage root's entry for a file (by FileDataID or by path), the root's named and nameless counts, a whole-file read with its outcome (the frame hashes the data carries and the content key checked; no key, no read: section 20), the storage generation, `knowsEncryptionKey` |
 | `ThirdParty/casclib/src/{CascLib.h, CascRootFile_WoW.cpp, common/RootHandler.{h,cpp}, common/FileTree.h}` | `CascWowFindRootEntry`, `CascWowRootNameCount`; CascLib's own storage files kept out of root lookups. Marked `WMV:` like the existing patches |
 | `Source/wowmodelviewer/modelviewer.{h,cpp}` | The catalogue built in the load (stage "map catalogue"), replaced in `ResetClientState` |
 | `Source/wowmodelviewer/app.cpp` | `-mapcatalogtest`: the headless catalogue test |
@@ -79,7 +80,7 @@ all four.
   controls (`LoadWoW`, stage "map catalogue", `modelviewer.cpp:4459-4462`). A legacy MPQ load builds an `Unsupported`
   one (`modelviewer.cpp:4003`).
 - **Identity.** A catalogue records the client's product, build, locale, data path and schema, the storage generation,
-  and its storage root's named and nameless counts. The generation (`CASCFolder.cpp:30, 122, 177, 307`) comes from a
+  and its storage root's named and nameless counts. The generation (`CASCFolder.cpp:30, 122, 177, 322`) comes from a
   process-wide counter: every folder object gets its own at construction and a new one whenever a storage opens or
   closes. `belongsToActiveClient()` (`WorldMapCatalog.cpp:264`) compares generation, product, build and data path.
   Every read (`inspect`, `inspectAll`, `readWdt`, `inspectFile`) goes through `canRead()` (`WorldMapCatalog.cpp:301`):
@@ -110,8 +111,8 @@ all four.
 **Added by this branch** (beyond the catalogue itself): `GameDatabase.cpp:253` (`clientDatabaseStarting` first thing
 in `initFromXML`), `:499` (`tableBuilt` per table); `WoWDatabase.cpp:134` (`fileLayoutHash`), `:411-421` (rows,
 locked rows and key names per table), `:426-530` (the readings saved and restored, with the checks of section 12);
-`wdc3file.cpp:507-521` (sections under a missing key counted with the key's name), `:748` (text across sections);
-`CASCFolder.cpp:217-300` (`readWholeFile`), `:302` (`knowsEncryptionKey`); `RootHandler.cpp:53-56, 152` (CascLib's own
+`wdc3file.cpp:520-534` (sections under a missing key counted with the key's name), `:767` (text across sections);
+`CASCFolder.cpp:217-315` (`readWholeFile`), `:317` (`knowsEncryptionKey`); `RootHandler.cpp:53-56, 152` (CascLib's own
 storage files flagged and excluded).
 
 Legacy MPQ clients have no database; their catalogue is `Unsupported`.
@@ -212,10 +213,10 @@ distinction matters for probes and for Retail's old-form global world models (se
 | State | Decided by | Real example | Shown on real data? |
 |---|---|---|---|
 | NotChecked | nothing inspected yet (inspection is lazy); also a read refused, or no storage open | every map with a reference right after a load (checked: "loading inspected no WDT") | yes |
-| Available | the root lists it, its data is local, every byte read, every frame's hash and the whole content's MD5 (its content key) checked | Retail Azeroth 775971, 294,988 bytes | yes |
+| Available | the root lists it, its data is local, every byte read, each frame hash the data carries and the whole content's MD5 (its content key) checked; without a content key nothing is Available | Retail Azeroth 775971, 294,988 bytes | yes |
 | NotInClientStorage | the root does not list the FileDataID, or (Era/MoP) has no such name | Retail map 1534's WDT 2449139; MoP's 51 MapType-3 rows by path | yes |
 | NotInstalledLocally | the root lists it, the local index has no copy (`CASC_CE_FILE_IS_LOCAL` clear) | Beta Kalimdor tile 44_24 root ADT 787450; a Retail shader 2976775 | yes (no WDT is missing locally in these four clients) |
-| Unreadable | local, but: encrypted with a key this computer lacks / larger than a WDT read allows / damaged (checksums do not match) / data missing although indexed / an empty read / not a WDT (no MVER tag) | Beta Map.db2 1349477 and Retail 546628 (encrypted); Retail 1467245 (178 MB, too large) | encrypted and too large yes; the others are code paths only (no such file found on this computer) |
+| Unreadable | local, but: encrypted with a key this computer lacks / larger than a WDT read allows / damaged (checksums do not match) / its content key could not be obtained (the bytes could not be checked) / data missing although indexed / an empty read / not a WDT (no MVER tag) | Beta Map.db2 1349477 and Retail 546628 (encrypted); Retail 1467245 (178 MB, too large) | encrypted and too large yes; the others are code paths only (no such file found on this computer) |
 | Unsupported | no WDT reference; not a valid reference; a path the root cannot answer for | Retail's 105 maps with WdtFileDataID 0; `world/maps/azeroth/azeroth.wdt` asked of Retail | yes |
 
 Map.db2 rows never disappear because their WDT is unavailable: every readable row is listed, whatever its state. Rows
@@ -449,7 +450,7 @@ run per client, five viewer processes in all):
 | WDT not in the root | NotInClientStorage + what was looked up | Retail 110, Beta 2, Era 1, MoP 58 |
 | A path the root cannot answer for | Unsupported "cannot be told by path" | probes in Retail and Beta |
 | WDT not installed | NotInstalledLocally | Beta 787450 and others (a tile part; no WDT is missing locally in these clients) |
-| WDT open/read fails | Unreadable + the reason: encrypted, too large, damaged (checksums), data missing, empty, not a WDT | encrypted and too large on real files; the rest code paths |
+| WDT open/read fails | Unreadable + the reason: encrypted, too large, damaged (checksums), no content key, data missing, empty, not a WDT | encrypted and too large on real files; no content key in an isolated test (section 20); the rest code paths |
 | Client changes while a catalogue is in use | belongsToActiveClient false; every read refused | every switch step, every earlier catalogue |
 | A catalogue asked for before any load, or kept from an MPQ client | refused: not Ready | before-load check; code path |
 
@@ -508,7 +509,7 @@ finding, and what was done:
 | | Only the previous catalogue was re-checked after a switch (REAL) | Fixed: every earlier one, and a Retail -> Retail run |
 | 5 States | CascLib's own files (as claim 2) (REAL) | Fixed |
 | | Rows in encrypted DB2 sections whose key IS known had empty text: a Map row there would lose its directory (REAL) | **Fixed in the DB2 reader**: text offsets now count across every section. All four databases rebuilt and compared with the old reader's: only previously empty strings changed (Retail 116 rows in ChrCustomizationChoice, ChrCustomizationOption, ChrRaces, Creature, Mount, TransmogSet; MoP 37; Beta 1; Era none), and all 156 recovered values equal the audit's independent decoder |
-| | Damaged data could be "Available" (CascLib pads short reads) (REAL) | Fixed: reads check every frame's hash and the content key (MD5); a mismatch is Unreadable "damaged" |
+| | Damaged data could be "Available" (CascLib pads short reads) (REAL) | Fixed: reads check the frame hashes the data carries and the content key (MD5); a mismatch is Unreadable "damaged" (and a read whose key cannot be obtained is not Available either: section 20) |
 | | Edge states mislabelled: no storage, invalid FileDataID, a path in a root without names (REAL) | Fixed: NotChecked / Unsupported, and the nameless-root rule (section 6) |
 | | Evidence came from a build older than the final source (PARTLY) | Every figure regenerated with the final binaries, whose hashes each JSON records; code-path-only states marked (section 7) |
 | 6 Cache | The key leaves out the encryption-key list (REAL) | Fixed: missing keys recorded per table; a cache is rebuilt when one becomes known (tested) |
@@ -553,4 +554,177 @@ finding, and what was done:
 
 ## 19. Status
 
-Branch `world/02-map-catalog`, base `develop` `bedc74cc`. Local commit only. **PUSH STATUS: NOT PUSHED.**
+Branch `world/02-map-catalog`, base `develop` `bedc74cc`: the catalogue (`f7eab99d`) and the follow-up of section 20,
+local commits only. **PUSH STATUS: NOT PUSHED.**
+
+## 20. Follow-up: section-pointer safety and content-key verification
+
+Two concerns were raised about the committed catalogue (`f7eab99d`) and examined on the same branch: how
+`WDC3File::get()` finds a record's section and its string, and whether `CASCFolder::readWholeFile()` can report
+`Read` without checking the content key. Both were confirmed and corrected. Nothing else changed: the Map.db2 column
+mappings, `Map.dbd`, the classifications, the WDT rules, client selection, the Unity parsers, IPC and UI are untouched.
+Method: three independent readers of the code first, the regression tests written and run against the unfixed build
+before any fix, then the fix, then an adversarial review of the fix and the tests (section 20.4).
+
+### 20.1 WDC3: which section a record lives in, and where its string is
+
+**Original behaviour** (`f7eab99d` `wdc3file.cpp:748-799`).
+- The record's section was found by testing `recordOffset >= m_sectionBuffers[s] && recordOffset <
+  m_sectionBuffers[s] + size` for each section in turn (`:753`). Each section's buffer is its own `new[]`, so for a
+  record of section *k* >= 1 the tests against sections 0 to *k*-1 compare pointers into unrelated allocations. C++
+  leaves that result unspecified. The subtraction `recordOffset - m_sectionBuffers[s]` that followed is defined only if
+  the test happened to pick the right buffer, and it was divided by the record size.
+- The string pointer `strStart + offset` was formed (`:779`) before it was checked against the buffer, and nothing
+  checked a section's declared string block against the bytes its buffer holds. A malformed or truncated file could
+  therefore make the code form a pointer past its allocation (undefined behaviour), even though the check after it then
+  returned an empty string.
+- A string was read up to the end of its section's whole buffer (`:795`), not the end of its own string block.
+
+**Reproducible?**
+- The cross-allocation comparison runs on real data, for every text field of a record in a section after the first:
+  Retail 116 rows, MoP 37, Beta 1, the rows that regained their text. It cannot be shown as a wrong value: on this
+  platform (MSVC, x64) the comparison compiles to a plain address comparison and the separate buffers do not overlap,
+  so it gave the right strings (all 156 matched the independent decoder). It is a reliance on unspecified behaviour,
+  not an observed failure.
+- The out-of-bounds pointer needs a malformed file. In the real tables no section's string block extends past its
+  buffer, and every non-empty block ends with a NUL (the review scanned 1,361 unique WDC3/4/5 files of the four clients).
+- Reading past a block's end is reproducible on synthetic files: a string with no NUL before its block ends read on
+  into the next bytes (`tail` at the end of a file; `cd` plus the copy table's first byte).
+
+**Correction** (`wdc3file.h`, `wdc3file.cpp`).
+- When the record offsets are listed, each record's location is kept as integers, `(section, index within the
+  section)`: section 0's records (`:268`), a copy-table row takes its source row's location, a later section's records
+  (`:543`), and sparse rows (and a copy of a missing row) get none. `m_recordLocations` always has one entry per record.
+- `get()` computes the string's offset from the location in unsigned 64-bit arithmetic, from the header's record count
+  as before (`:775-807`). It forms a pointer only after checking that the string starts inside its section's string
+  block **and** inside the bytes that section's buffer holds, and it reads to the first NUL inside both (`:797`). A
+  string without one reads empty. No pointer is compared with another allocation's and nothing is divided.
+- The shared text preamble no longer computes section 0's string-block pointer (the sparse path, unchanged, never used
+  it).
+
+**Regression test:** `scripts/tests/wdc3-strings`. It runs the production `WDC3File::open()` and `get()` from wow.dll
+over seven synthetic tables held in memory: three sections with a copy table, a zero-filled section under a missing
+key, a section with no records, a string block declared longer than the file, unterminated strings at the end of a file
+and before a copy table, and a header record count that differs from the sections' sum. Each expected string is worked
+out by hand in the source.
+
+| Build | Result |
+|---|---|
+| `f7eab99d` (deployed build, same harness) | FAIL, 52 passed, 2 failed: the two unterminated strings read `tail` and `cd` + byte 0x07 |
+| fixed | PASS, 54 passed, 0 failed |
+
+No runtime test can tell the old pointer search from the integer lookup, because on this platform the unspecified
+comparison happens to give the right answer. That part is protected by review and by the comment at
+`WDC3File::m_recordLocations` (the test's README says so).
+
+**Measured on the four clients.**
+- The four clients' databases were rebuilt with the fixed reader and compared table by table, row by row, with those
+  of `f7eab99d`'s reader: identical in every table, with the same cache key and the same per-table readings.
+- Against develop's reader (before `f7eab99d`): the same 154 rows / 156 values regain their text as before (Retail
+  116 rows, MoP 37, Beta 1, Era 0). All 156 values equal the audit's independent decoder; they come from records in
+  sections 1 to 22.
+
+### 20.2 Content key: Read only when the bytes were checked
+
+**Original behaviour** (`f7eab99d` `CASCFolder.cpp:277-299`): `hasKey = done == size && CascGetFileInfo(...,
+CascFileContentKey, ...) && keySize == 16`. When `hasKey` was false the MD5 comparison was skipped and the function
+returned `Read`.
+
+| Scenario | `f7eab99d` | now |
+|---|---|---|
+| content key unavailable (`ERROR_NOT_SUPPORTED`) | Read, bytes unchecked | Unverified, no bytes, error 50 |
+| `CascGetFileInfo` fails for another reason | Read, bytes unchecked | Unverified, no bytes, its error |
+| the query fails but leaves no error | Read, bytes unchecked | Unverified, no bytes, error 50 |
+| the query succeeds with a length other than 16 (or none) | Read, bytes unchecked | Unverified, no bytes, error 50 |
+| MD5 of the bytes differs from the content key | Corrupt, no bytes | Corrupt, no bytes (unchanged) |
+| the read fails part way | Encrypted / Corrupt / NotLocal / Damaged, no bytes | the same (unchanged) |
+| every byte read, key obtained and equal | Read | Read |
+
+**Reproducible?** Yes, deterministically. An isolated test compiles the production `CASCFolder.cpp` into a test
+program in which every CascLib call is a scripted stub. `f7eab99d` returned `Read`, with the unchecked bytes, in every
+key-unavailable, failed-query and wrong-length case. With the bundled CascLib, a key of the wrong length cannot occur
+(it writes 16 or fails). Through the catalogue the other cases cannot occur either today: every file the WoW root lists
+comes with a content key. The public function could still report unchecked bytes as `Read`.
+
+**What the real clients do.** For every WDT the catalogue reads (Retail 969, MoP 227, Beta 69, Era 58), plus three probe
+files per client, a separate census opened each file as the viewer does:
+- the content key was obtained, 16 bytes, for every file;
+- the MD5 of the bytes equalled it for every map WDT;
+- every map WDT is stored with a frame table whose frames all carry a hash, so CascLib checked the frame hashes of
+  every one as well.
+
+**Contract and correction** (`CASCFolder.h`, `CASCFolder.cpp`, `WorldMapCatalog.cpp`).
+- `Read` now requires all three: every byte read, the content key obtained (16 bytes), and the MD5 of the bytes equal
+  to it.
+- Frame hashes are checked where the data carries them (`CASC_STRICT_DATA_CHECK`), but they are not a separate
+  requirement. CascLib cannot report whether a frame was checked. A file stored as a single chunk without a frame table,
+  or as plain data, carries none, so requiring frame hashes would refuse such files. The content key covers every
+  decoded byte; a frame hash covers only encoded bytes.
+- A whole read whose content key cannot be obtained returns the new `ReadOutcome::Unverified`
+  (`CASCFolder.cpp:302-308`), with no bytes. It carries the query's error, or `ERROR_NOT_SUPPORTED` for a key of the
+  wrong length or a failed query that left no error, so the error is never 0.
+- The key is asked for while the file is still open (`:286`). Partial reads keep their previous outcomes.
+- The catalogue maps `Unverified` to Unreadable: "... was read, but its content key could not be obtained, so its
+  bytes could not be checked (error N)" (`WorldMapCatalog.cpp:503`). `readWholeFile` has no other caller.
+
+**Regression test:** `scripts/tests/casc-whole-read`, 21 cases.
+- Read with a matching key, by FileDataID and by path.
+- No content key, by FileDataID and by path; a failed query; a query that fails without an error.
+- Key lengths 0, 15, 32, and no length written.
+- Three wrong keys.
+- Content delivered in 7-byte and in 1-byte pieces.
+- Reads failing part way with four different errors.
+- An empty file.
+
+Every case also requires the file handle to be closed exactly once. The stubs answer nothing through a handle that is
+not open, so a key query made after closing the file fails the case.
+
+| Build | Result |
+|---|---|
+| `f7eab99d` (the harness's first version, which asserted "not Read, no bytes") | FAIL, 13 passed, 7 failed |
+| the final harness, `f7eab99d`'s `readWholeFile` compiled with the fixed header | FAIL, 13 passed, 8 failed (the same cases plus the no-error one) |
+| fixed | PASS, 21 passed, 0 failed |
+| a mutant that queries the key after closing the file | FAIL, 5 passed, 16 failed |
+
+**Measured on the four clients:** no change. In all four switch sequences, every map's and every probe's state, size,
+SHA-256, storage FileDataID and reason is identical to `f7eab99d`'s run.
+
+### 20.3 Validation (final binaries; test pass `-Tag g`)
+
+| Test | Result |
+|---|---|
+| Switch sequences: Retail -> MoP -> Retail, Retail -> Beta -> Retail, Era -> Retail, Retail -> Retail | PASS 44/44, 44/44, 27/27, 27/27 |
+| Comparison with the audit (`compare_map_catalog.py`) | 104,333 checks, 0 differences; without the listfile's map paths 44,125, 0; decoy definition 14,930, 0; contract, probe and cache runs 67,152, 0; 19 of 19 planted errors caught |
+| WDT contract (catalogue -> C# parser) | 36 WDTs, SHA-256 and stated form checked, 0 failures; 497 parts resolved, the same states as before |
+| DB2 multi-section strings | the four clients' databases identical to `f7eab99d`'s; 156 of 156 recovered values equal the independent decoder |
+| Database cache | 8 of 8 cases as designed (reuse; tampered state, contradictory counts, missing readings and a newly known key rebuild; an unknown key reuses; an old schema is never selected; a changed definition gives a new key) |
+| Negative definitions and schema | refused with the reason where they must be; the decoy block is ignored |
+| Regression against develop | customization Retail 92/0, Era 37/0, MoP 49/0, Beta 192/0; Models and Buildings through the Unity player PASS; texture PNG identical; capability lines identical |
+| C# parser tests | WowParserTests and WorldParserTests 0 failures; MapContractCheck 0 failures |
+| The two new regression tests | 54/54 and 21/21 |
+
+### 20.4 Adversarial review, and what stays as it was
+
+Three reviewers tried to break the fix and the tests (`wf_8bdd12f0-1a9`):
+- **WDC3 fix:** HOLDS.
+- **Content-key fix:** HOLDS.
+- **The tests:** WEAKENED. Acted on:
+  - the stubs now track the file handle;
+  - the refused outcomes' error codes are asserted;
+  - the case of a failed query that leaves no error was added;
+  - the WDC3 test copies the DLLs it tests beside it;
+  - the two expectations that pin this reader's choices rather than the format are labelled as such (the header's
+    record count governs; a section with no records is not read);
+  - the README states what no test can show.
+- **This report:** stale wording on frame hashes and three line references were corrected.
+
+Older problems the reviewers and readers found, all in code before this branch and not changed here (no general
+rework was asked for). None occurs in the real tables checked:
+- Section 0's records are not checked against section 0's buffer. A malformed section 0 that declares more records than
+  its bytes hold gets record pointers past the buffer, and the field read (`readFieldValue`) reads through them. Later
+  sections have that check.
+- Section 0's buffer is not zero-filled before it is read. After a short read, text in the unread tail would be built
+  from leftover memory, though always inside the buffer.
+- A copy-table row whose source id is missing gets a null record pointer and crashes in `readFieldValue`.
+- The sparse-table text path walks inline strings with pointer steps that are not bounds-checked first.
+- Text arrays resolve every element from the field's first position, as before.
