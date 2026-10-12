@@ -70,6 +70,11 @@ public:
 
   /// Trivial
   size_t getRecordCount() const { return recordCount; }
+  // Records the file holds in sections encrypted with a key this computer does not have: the storage reads them as
+  // zeros, so they are left out of the records above (never read as data). 0 for formats without sections.
+  size_t getLockedRecordCount() const { return lockedRecordCount; }
+  // The names of the keys those sections are encrypted with (a key this computer gains later makes them readable).
+  const std::vector<unsigned long long> & getLockedKeyNames() const { return lockedKeyNames; }
 
   // to be implemented in inherited classes to get actual record values (specified by recordOffset), following "structure" format
   virtual std::vector<std::string> get(unsigned int recordIndex, const core::TableStructure * structure) const = 0;
@@ -79,6 +84,8 @@ protected:
   size_t recordCount;
   size_t fieldCount;
   size_t stringSize;
+  size_t lockedRecordCount = 0;
+  std::vector<unsigned long long> lockedKeyNames;
   unsigned char *data;
   unsigned char *stringTable;
 

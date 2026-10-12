@@ -17,6 +17,7 @@
 #include <map>
 #include <utility>
 
+#include <QCryptographicHash>
 #include <QFile>
 #include <QRegularExpression>
 
@@ -25,7 +26,8 @@
 #include "LoadTimeline.h"
 
 CASCFolder::CASCFolder()
- : m_currentCascLocale(CASC_LOCALE_NONE), m_folder(""), m_openError(ERROR_SUCCESS), hStorage(nullptr)
+ : m_currentCascLocale(CASC_LOCALE_NONE), m_folder(""), m_openError(ERROR_SUCCESS), hStorage(nullptr),
+   m_storageGeneration(nextStorageGeneration()) // its own from the start: two folders never share one
 {
 
 }
@@ -117,6 +119,14 @@ bool CASCFolder::setConfig(core::GameConfig config)
       if (hStorage)
         CascCloseStorage(hStorage);
       hStorage = opened;
+      m_storageGeneration = nextStorageGeneration();
+      // How many files the root knows by name, and how many it lists by FileDataID only: a path it has no name for is
+      // absent from the client only when it lists none of the latter.
+      m_rootNameCount = 0;
+      m_rootNamelessCount = 0;
+      CascWowRootNameCount(hStorage, &m_rootNameCount, &m_rootNamelessCount);
+      LOG_INFO << "CASCFolder: the storage root knows" << (unsigned int)m_rootNameCount << "files by name and"
+               << (unsigned int)m_rootNamelessCount << "by FileDataID only";
       core::LoadTimeline::instance().end("close previous storage");
 
       core::LoadTimeline::instance().begin("encryption keys");
@@ -164,9 +174,157 @@ void CASCFolder::closeStorage()
   if (hStorage)
     CascCloseStorage(hStorage);
   hStorage = nullptr;
+  m_storageGeneration = nextStorageGeneration();
+  m_rootNameCount = 0;
+  m_rootNamelessCount = 0;
   m_presentIds.clear();
   m_remoteIds.clear();
   m_presentCount = m_remoteCount = 0;
+}
+
+CASCFolder::RootEntry CASCFolder::rootEntry(int fileDataId) const
+{
+  RootEntry e;
+  DWORD id = CASC_INVALID_ID;
+  bool local = false;
+  if (hStorage && fileDataId > 0 && CascWowFindRootEntry(hStorage, nullptr, (DWORD)fileDataId, &id, &local))
+  {
+    e.listed = true;
+    e.local = local;
+    e.fileDataId = (id == CASC_INVALID_ID) ? -1 : (int)id;
+  }
+  return e;
+}
+
+CASCFolder::RootEntry CASCFolder::rootEntryByPath(const QString & path) const
+{
+  RootEntry e;
+  // The root hashes the name upper-cased with backslashes (CascLib's CalcFileNameHash): case and slash style of the
+  // caller's path do not matter. Map directories are ASCII in every audited client but one Retail row (whose WDT is
+  // found by FileDataID, never by path); UTF-8 is what the root's names were hashed from.
+  const QByteArray name = path.toUtf8();
+  DWORD id = CASC_INVALID_ID;
+  bool local = false;
+  if (hStorage && !name.isEmpty() && CascWowFindRootEntry(hStorage, name.constData(), CASC_INVALID_ID, &id, &local))
+  {
+    e.listed = true;
+    e.local = local;
+    e.fileDataId = (id == CASC_INVALID_ID) ? -1 : (int)id;
+  }
+  return e;
+}
+
+CASCFolder::ReadOutcome CASCFolder::readWholeFile(int fileDataId, const QString & path, QByteArray & out,
+                                                  unsigned int * errorCode, qint64 maxBytes) const
+{
+  out.clear();
+  auto outcome = [errorCode](ReadOutcome o, DWORD code) {
+    if (errorCode)
+      *errorCode = (unsigned int)code;
+    return o;
+  };
+  if (!hStorage)
+    return outcome(ReadOutcome::NoStorage, ERROR_INVALID_HANDLE);
+
+  HANDLE file = nullptr;
+  const QByteArray name = path.toUtf8();
+  // A frame that carries a hash is checked as it is read (CASC_STRICT_DATA_CHECK), and the whole content against its
+  // content key below: data damaged on disk is refused, not handed on as the file.
+  const bool opened = fileDataId > 0
+                        ? CascOpenFile(hStorage, CASC_FILE_DATA_ID(fileDataId), m_currentCascLocale,
+                                       CASC_OPEN_BY_FILEID | CASC_STRICT_DATA_CHECK, &file)
+                        : (!name.isEmpty() && CascOpenFile(hStorage, name.constData(), m_currentCascLocale,
+                                                           CASC_OPEN_BY_NAME | CASC_STRICT_DATA_CHECK, &file));
+  if (!opened)
+  {
+    const DWORD error = name.isEmpty() && fileDataId <= 0 ? ERROR_INVALID_PARAMETER : GetCascError();
+    return outcome(error == ERROR_FILE_NOT_FOUND ? ReadOutcome::NotListed : ReadOutcome::Damaged, error);
+  }
+
+  // A file the root lists but whose data is not on this computer opens (CascLib does not look at the local index
+  // then) and fails here: the size comes from the data's header, which is not here.
+  ULONGLONG size = 0;
+  if (!CascGetFileSize64(file, &size))
+  {
+    const DWORD error = GetCascError();
+    CascCloseFile(file);
+    return outcome(error == ERROR_FILE_NOT_FOUND ? ReadOutcome::NotLocal : ReadOutcome::Damaged, error);
+  }
+  if ((qint64)size > maxBytes || size > 0x7FFFFFF0ull)
+  {
+    CascCloseFile(file);
+    return outcome(ReadOutcome::TooLarge, ERROR_SUCCESS);
+  }
+
+  out.resize((int)size);
+  qint64 done = 0;
+  DWORD error = ERROR_SUCCESS;
+  while (done < (qint64)size)
+  {
+    DWORD got = 0;
+    if (!CascReadFile(file, out.data() + done, (DWORD)((qint64)size - done), &got))
+    {
+      error = GetCascError();
+      break;
+    }
+    if (got == 0)
+    {
+      error = ERROR_HANDLE_EOF;
+      break;
+    }
+    done += got;
+  }
+  // The content key is the MD5 of the whole content, and the only check that covers every byte (CascLib checks a
+  // frame's hash only where the frame carries one). Asked for while the file is open; a whole read is Read only once
+  // the key was obtained and matched.
+  unsigned char contentKey[16] = {};
+  size_t keySize = 0;
+  bool keyKnown = false;
+  DWORD keyError = ERROR_SUCCESS;
+  if (done == (qint64)size)
+  {
+    keyKnown = CascGetFileInfo(file, CascFileContentKey, contentKey, sizeof(contentKey), &keySize);
+    if (!keyKnown)
+      keyError = GetCascError();
+  }
+  CascCloseFile(file);
+  if (done != (qint64)size)
+  {
+    out.clear();
+    // Encrypted data whose key this computer lacks is refused, never read as zeros (CASC_OVERCOME_ENCRYPTED is not
+    // used): such bytes are not the file's.
+    if (error == ERROR_FILE_ENCRYPTED)
+      return outcome(ReadOutcome::Encrypted, error);
+    if (error == ERROR_FILE_CORRUPT)
+      return outcome(ReadOutcome::Corrupt, error);
+    return outcome(error == ERROR_FILE_NOT_FOUND ? ReadOutcome::NotLocal : ReadOutcome::Damaged, error);
+  }
+  if (!keyKnown || keySize != sizeof(contentKey))
+  {
+    // Every byte was read, but nothing vouches for them: not handed on as the file.
+    out.clear();
+    return outcome(ReadOutcome::Unverified,
+                   !keyKnown && keyError != ERROR_SUCCESS ? keyError : (DWORD)ERROR_NOT_SUPPORTED);
+  }
+  if (QCryptographicHash::hash(out, QCryptographicHash::Md5) != QByteArray((const char *)contentKey, sizeof(contentKey)))
+  {
+    out.clear();
+    return outcome(ReadOutcome::Corrupt, ERROR_FILE_CORRUPT);
+  }
+  return outcome(ReadOutcome::Read, ERROR_SUCCESS);
+}
+
+bool CASCFolder::knowsEncryptionKey(quint64 keyName) const
+{
+  return hStorage && CascFindEncryptionKey(hStorage, keyName) != nullptr;
+}
+
+quint64 CASCFolder::nextStorageGeneration()
+{
+  // Process-wide, so two folder objects never hand out the same number (a fresh folder replaces an old one, which
+  // is kept for the session: its number must not come back).
+  static quint64 s_generation = 0;
+  return ++s_generation;
 }
 
 void CASCFolder::initBuildInfo()

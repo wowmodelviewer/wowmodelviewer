@@ -31,6 +31,7 @@
 #include "util.h"
 #include "WoWDatabase.h"
 #include "WoWFolder.h"
+#include "WorldMapCatalog.h"
 #include "CascLib.h"
 #include <QCryptographicHash>
 #include "animcontrol.h"
@@ -49,8 +50,10 @@
 
 #include <QCoreApplication>
 #include <QFile>
+#include <QSet>
 #include <QSettings>
 #include <QImage>
+#include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
 
@@ -66,6 +69,7 @@
 
 #include <QBuffer>
 #include <QDir>
+#include <QFileInfo>
 #include <QRegularExpression>
 #include <QXmlStreamWriter>
 #include "CharDetailsCustomizationChoice.h"
@@ -2478,6 +2482,311 @@ static void doHeadlessM2Inspect(const QString & listPath, const QString & outPat
   std::fflush(stdout);
 }
 
+// -mapcatalogtest <out.json> [-mapcatalogclients <product,product,...>] [-mapcatalogprobe <id|path,...>]
+//                [-mapcatalogwdt <folder> <map id,map id,...>]
+// THE WORLD MAP CATALOGUE TEST (docs/world-viewer/02-map-catalog.md), on the real clients of this computer. The clients
+// listed are loaded in turn in this one process -- the first by the usual headless pick (the first product listed,
+// unless -product names one), each next one as a switch of client -- and for each: the catalogue the load built,
+// every map's WDT inspected through the client's storage, the probe files inspected the same way, and the checks
+// below. With -mapcatalogwdt, the WDTs of the maps listed are read through each client's catalogue (readWdt) and
+// written to <folder>/<product>_<map id>.wdt, with <product>_<map id>.json (the SHA-256 read and the form Map.db2
+// states), for the player's WDT parser to take over in a test of the runtime contract (Tools/UnityRendererProject/
+// Tests/MapContractCheck.cs, docs/world-viewer/02-map-catalog.md section 14). Lines
+// "[mapcatalog-test] PASS|FAIL <what> -- <detail>" go to the log, ending with
+// "[mapcatalog-test] RESULT: PASS|FAIL (<passed> passed, <failed> failed)"; everything goes into <out.json>, which
+// Tools/world-audit/compare_map_catalog.py compares with the world audit's results.
+static int doHeadlessMapCatalogTest(ModelViewer * frame, const QString & outPath, QStringList clients,
+                                    const QStringList & probes, const std::shared_ptr<wow::WorldMapCatalog> & beforeLoad,
+                                    double firstLoadMs, const QString & wdtFolder, const QStringList & wdtMaps)
+{
+  int passed = 0, failed = 0;
+  const auto check = [&passed, &failed](const QString & what, bool ok, const QString & detail) {
+    ok ? passed++ : failed++;
+    const QString line = QString("[mapcatalog-test] %1 %2%3").arg(ok ? "PASS" : "FAIL").arg(what)
+                           .arg(detail.isEmpty() ? QString() : QString(" -- ") + detail);
+    if (ok)
+      LOG_INFO << line;
+    else
+      LOG_ERROR << line;
+  };
+
+  QJsonObject out;
+  // Asked for before any client was loaded: a catalogue that says so, and refuses to read anything.
+  {
+    const bool noClient = beforeLoad && beforeLoad->status() == wow::WorldMapCatalog::Status::NoClient;
+    check("before any client: the catalogue reports no client", noClient,
+          beforeLoad ? wow::WorldMapCatalog::statusName(beforeLoad->status()) : QString("none built"));
+    QByteArray bytes;
+    QString why;
+    wow::WdtReference azeroth;
+    azeroth.kind = wow::WdtReference::Kind::FileDataId;
+    azeroth.fileDataId = 775971;
+    const bool refused = beforeLoad && !beforeLoad->inspect(0) && beforeLoad->inspectAll() == 0 &&
+                         !beforeLoad->readWdt(0, bytes, why) && bytes.isEmpty() &&
+                         beforeLoad->inspectFile(azeroth).state == wow::WdtAvailability::NotChecked;
+    check("before any client: every read is refused", refused, beforeLoad ? beforeLoad->lastRefusal() : QString());
+    out["beforeLoad"] = beforeLoad ? beforeLoad->toJson() : QJsonObject();
+  }
+
+  if (clients.isEmpty())
+    clients << GAMEDIRECTORY.clientProfile().product;
+  QJsonArray steps;
+  std::vector<std::shared_ptr<wow::WorldMapCatalog>> earlier; // every step's catalogue, kept past every later switch
+  QSet<int> wdtMapsFound;
+  for (int i = 0; i < clients.size(); i++)
+  {
+    const QString product = clients[i];
+    QJsonObject step;
+    step["product"] = product;
+    double loadMs = firstLoadMs;
+    if (i > 0)
+    {
+      // A switch of client, as the chooser makes it: the next product's config of the same installation.
+      const std::vector<core::GameConfig> configs = GAMEDIRECTORY.configsFound();
+      const core::GameConfig * config = nullptr;
+      for (const core::GameConfig & c : configs)
+        if (c.product == product)
+          config = &c;
+      if (!config)
+      {
+        check(QString("%1: the installation has the client").arg(product), false, "no such product in .build.info");
+        steps.append(step);
+        continue;
+      }
+      QElapsedTimer t;
+      t.start();
+      const bool loaded = frame->LoadWoW(config);
+      loadMs = t.nsecsElapsed() / 1e6;
+      check(QString("%1: loads after %2").arg(product, clients[i - 1]), loaded, QString("%1 ms").arg(loadMs, 0, 'f', 0));
+      if (!loaded)
+      {
+        steps.append(step);
+        continue;
+      }
+    }
+    step["loadMs"] = loadMs;
+
+    const std::shared_ptr<wow::WorldMapCatalog> catalog = frame->mapCatalog();
+    check(QString("%1: the load built a catalogue").arg(product), catalog != nullptr, QString());
+    if (!catalog)
+    {
+      steps.append(step);
+      continue;
+    }
+    const wow::MapCatalogClient & who = catalog->client();
+    check(QString("%1: the catalogue is the loaded client's").arg(product),
+          who.product == product && who.product == GAMEDIRECTORY.clientProfile().product && who.build == GAMEDIRECTORY.version() &&
+            catalog->belongsToActiveClient(),
+          QString("%1 %2, storage %3").arg(who.product, who.build).arg(who.storageGeneration));
+    check(QString("%1: the catalogue is ready").arg(product), catalog->status() == wow::WorldMapCatalog::Status::Ready,
+          QString("%1%2").arg(wow::WorldMapCatalog::statusName(catalog->status()),
+                              catalog->statusDetail().isEmpty() ? QString() : QString(": ") + catalog->statusDetail()));
+    check(QString("%1: Map.db2 lists maps").arg(product), !catalog->maps().empty(),
+          QString("%1 maps").arg(catalog->maps().size()));
+    // The layout the catalogue was read with is the one in the client's own Map.db2 header, read again here.
+    const QString fileLayout = wow::WoWDatabase::fileLayoutHash("Map");
+    check(QString("%1: the catalogue's Map.db2 layout is the file's").arg(product),
+          !fileLayout.isEmpty() && catalog->mapLayout() == fileLayout,
+          QString("catalogue %1, file %2").arg(catalog->mapLayout(), fileLayout));
+
+    // As the load left it: nothing read from storage yet (inspection is lazy), only maps without a reference settled.
+    int readAtLoad = 0;
+    for (const wow::MapEntry & e : catalog->maps())
+      if (e.inspection.state != (e.wdt.kind == wow::WdtReference::Kind::Unresolved ? wow::WdtAvailability::Unsupported
+                                                                                   : wow::WdtAvailability::NotChecked))
+        readAtLoad++;
+    check(QString("%1: loading inspected no WDT").arg(product), readAtLoad == 0,
+          QString("%1 maps not as the load leaves them").arg(readAtLoad));
+    step["retainedBytesAtLoad"] = (double)catalog->approximateBytes();
+
+    // Every map a map refers to (ParentMapID, WorldCopyOfMapID, LocationMapID) is -1 or a map of this catalogue.
+    QSet<int> ids;
+    for (const wow::MapEntry & e : catalog->maps())
+      ids.insert(e.id);
+    QStringList dangling;
+    for (const wow::MapEntry & e : catalog->maps())
+      for (const wow::MapCode * c : {&e.parentMapId, &e.worldCopyOfMapId, &e.locationMapId})
+        if (c->present && c->value != -1 && !ids.contains(c->value))
+          dangling << QString("%1->%2").arg(e.id).arg(c->value);
+    check(QString("%1: every map reference is -1 or a listed map").arg(product), dangling.isEmpty(), dangling.join(", "));
+
+    // One WDT mechanism per client, from its own layout: never a path in a FileDataID client, never a FileDataID in a
+    // path client, and every map without a reference says why.
+    const bool byId = catalog->wdtRule() == wow::WorldMapCatalog::WdtRule::ByFileDataId;
+    int wrongKind = 0, unexplained = 0;
+    for (const wow::MapEntry & e : catalog->maps())
+    {
+      if ((byId && e.wdt.kind == wow::WdtReference::Kind::Path) || (!byId && e.wdt.kind == wow::WdtReference::Kind::FileDataId))
+        wrongKind++;
+      if (e.wdt.kind == wow::WdtReference::Kind::Unresolved && e.wdt.why.isEmpty())
+        unexplained++;
+    }
+    check(QString("%1: every reference follows the client's rule (%2)").arg(product, byId ? "by FileDataID" : "by directory path"),
+          wrongKind == 0 && unexplained == 0,
+          QString("%1 of another kind, %2 unresolved without a reason").arg(wrongKind).arg(unexplained));
+
+    // Every earlier step's catalogue, kept past the switches: none belongs to the loaded client, and none reads anything
+    // (the same product loaded again included: a new storage is a new client).
+    for (size_t k = 0; k < earlier.size(); k++)
+    {
+      const std::shared_ptr<wow::WorldMapCatalog> & old = earlier[k];
+      const QString which = QString("step %1's catalogue (%2)").arg(k + 1).arg(old->client().product);
+      check(QString("%1: %2 no longer belongs to the loaded client").arg(product, which), !old->belongsToActiveClient(), QString());
+      const QJsonValue before = old->toJson()["maps"];
+      const int someId = old->maps().empty() ? 0 : old->maps().front().id;
+      const bool refused = !old->inspect(someId) && old->inspectAll() == 0;
+      QByteArray staleBytes;
+      QString staleWhy;
+      const bool readRefused = !old->readWdt(someId, staleBytes, staleWhy) && staleBytes.isEmpty();
+      wow::WdtReference anyFile;
+      anyFile.kind = wow::WdtReference::Kind::FileDataId;
+      anyFile.fileDataId = 1349477; // Map.db2 in every audited client
+      const bool fileRefused = old->inspectFile(anyFile).state == wow::WdtAvailability::NotChecked;
+      check(QString("%1: %2 refuses to read the storage").arg(product, which),
+            refused && readRefused && fileRefused && old->toJson()["maps"] == before, old->lastRefusal());
+      check(QString("%1: %2 is not the new catalogue").arg(product, which),
+            old.get() != catalog.get() && old->client().storageGeneration != who.storageGeneration, QString());
+    }
+
+    // Every map's WDT through the client's storage: whether it is listed, on this computer, and readable. Timed
+    // without hashing (the viewer's own use), then again with it (what the comparison needs).
+    QElapsedTimer t;
+    t.start();
+    const size_t inspectedPlain = catalog->inspectAll();
+    const double inspectPlainMs = t.nsecsElapsed() / 1e6;
+    step["inspectAllNoHashMs"] = inspectPlainMs;
+    catalog->setHashing(true);
+    t.restart();
+    const size_t inspected = catalog->inspectAll();
+    const double inspectMs = t.nsecsElapsed() / 1e6;
+    check(QString("%1: inspection without hashing covered every map").arg(product), inspectedPlain == catalog->maps().size(),
+          QString("%1 maps in %2 ms").arg(inspectedPlain).arg(inspectPlainMs, 0, 'f', 1));
+    QJsonObject counts;
+    for (const wow::MapEntry & e : catalog->maps())
+    {
+      const QString s = wow::WorldMapCatalog::availabilityName(e.inspection.state);
+      counts[s] = counts.value(s).toInt() + 1;
+    }
+    const int notChecked = counts.value(wow::WorldMapCatalog::availabilityName(wow::WdtAvailability::NotChecked)).toInt();
+    check(QString("%1: every map's WDT was inspected").arg(product), inspected == catalog->maps().size() && notChecked == 0,
+          QString("%1 maps in %2 ms: %3").arg(inspected).arg(inspectMs, 0, 'f', 1)
+            .arg(QString::fromUtf8(QJsonDocument(counts).toJson(QJsonDocument::Compact))));
+    step["inspectAllMs"] = inspectMs;
+    step["availability"] = counts;
+
+    // Probe files: the same storage inspection on files named here (a tile part known not to be local, a table with
+    // encrypted sections...), by FileDataID or by path.
+    QJsonArray probeResults;
+    for (const QString & probe : probes)
+    {
+      wow::WdtReference ref;
+      bool numeric = false;
+      const int id = probe.toInt(&numeric);
+      if (numeric)
+      {
+        ref.kind = wow::WdtReference::Kind::FileDataId;
+        ref.fileDataId = id;
+      }
+      else
+      {
+        ref.kind = wow::WdtReference::Kind::Path;
+        ref.path = probe;
+      }
+      const wow::WdtInspection r = catalog->inspectFile(ref);
+      QJsonObject p;
+      p["probe"] = probe;
+      p["state"] = wow::WorldMapCatalog::availabilityName(r.state);
+      p["detail"] = r.detail;
+      p["storageFileDataId"] = r.storageFileDataId;
+      p["bytes"] = (double)r.bytes;
+      p["sha256"] = r.sha256;
+      probeResults.append(p);
+      LOG_INFO << QString("[mapcatalog-test] probe %1 %2: %3%4").arg(product, probe, wow::WorldMapCatalog::availabilityName(r.state),
+                                                                   r.detail.isEmpty() ? QString() : QString(" (") + r.detail + ")");
+    }
+    step["probes"] = probeResults;
+
+    // The WDTs the runtime-contract test parses next, read the way a runtime reads them: through the catalogue.
+    if (!wdtFolder.isEmpty())
+    {
+      QJsonArray written;
+      QDir().mkpath(wdtFolder);
+      for (const QString & idText : wdtMaps)
+      {
+        const int mapId = idText.toInt();
+        const wow::MapEntry * entry = catalog->find(mapId);
+        if (!entry)
+          continue; // not a map of this client
+        wdtMapsFound.insert(mapId);
+        QJsonObject w;
+        w["id"] = mapId;
+        QByteArray bytes;
+        QString why;
+        if (catalog->readWdt(mapId, bytes, why))
+        {
+          const QString file = QString("%1/%2_%3.wdt").arg(wdtFolder, product).arg(mapId);
+          QFile f(file);
+          const bool ok = f.open(QIODevice::WriteOnly | QIODevice::Truncate) && f.write(bytes) == bytes.size();
+          f.close();
+          w["file"] = file;
+          w["bytes"] = bytes.size();
+          w["sha256"] = QString::fromLatin1(QCryptographicHash::hash(bytes, QCryptographicHash::Sha256).toHex());
+          // What the player-side check compares its parse with: the bytes it was given, and the form Map.db2 states.
+          static const char * const forms[] = {"unknown", "tile grid", "WMO only", "no WDT"};
+          QJsonObject side;
+          side["id"] = mapId;
+          side["product"] = product;
+          side["sha256"] = w["sha256"];
+          side["statedWdtForm"] = forms[(int)entry->statedWdtForm()];
+          QFile sf(QString("%1/%2_%3.json").arg(wdtFolder, product).arg(mapId));
+          const bool sideOk = sf.open(QIODevice::WriteOnly | QIODevice::Truncate) &&
+                              sf.write(QJsonDocument(side).toJson(QJsonDocument::Compact)) > 0;
+          sf.close();
+          check(QString("%1: map %2's WDT read through the catalogue").arg(product).arg(mapId), ok && sideOk,
+                QString("%1 bytes").arg(bytes.size()));
+        }
+        else
+        {
+          w["why"] = why;
+          check(QString("%1: map %2's WDT read through the catalogue").arg(product).arg(mapId), false, why);
+        }
+        written.append(w);
+      }
+      step["wdtWritten"] = written;
+    }
+    step["catalog"] = catalog->toJson();
+    steps.append(step);
+    earlier.push_back(catalog);
+  }
+  out["steps"] = steps;
+  // The binaries that produced these results, so a comparison can name the build it checked.
+  QJsonObject binaries;
+  for (const QString & file : {QCoreApplication::applicationFilePath(), QCoreApplication::applicationDirPath() + "/wow.dll",
+                               QCoreApplication::applicationDirPath() + "/core.dll"})
+  {
+    QFile bin(file);
+    if (bin.open(QIODevice::ReadOnly))
+      binaries[QFileInfo(file).fileName()] =
+        QString::fromLatin1(QCryptographicHash::hash(bin.readAll(), QCryptographicHash::Sha256).toHex());
+  }
+  out["binaries"] = binaries;
+  if (!wdtFolder.isEmpty())
+    for (const QString & idText : wdtMaps)
+      check(QString("map %1 is in one of the clients loaded").arg(idText), wdtMapsFound.contains(idText.toInt()), QString());
+  out["passed"] = passed;
+  out["failed"] = failed;
+
+  QFile f(outPath);
+  const bool written = f.open(QIODevice::WriteOnly | QIODevice::Truncate) &&
+                       f.write(QJsonDocument(out).toJson(QJsonDocument::Indented)) > 0;
+  f.close();
+  check("the results were written", written, outPath);
+  LOG_INFO << QString("[mapcatalog-test] RESULT: %1 (%2 passed, %3 failed)").arg(failed == 0 ? "PASS" : "FAIL").arg(passed).arg(failed);
+  std::printf("WMV: mapcatalog test %s (%d passed, %d failed)\n", failed == 0 ? "PASS" : "FAIL", passed, failed);
+  std::fflush(stdout);
+  return failed;
+}
+
 // item/equip/combiner logic -- lets you look at exactly what a "type 1" replaceable texture (or
 // any other raw asset) actually contains, independent of whether the normal resolution pipeline
 // binds it correctly. -dumptex <fileDataID> <out.png>
@@ -4747,7 +5056,7 @@ bool WowModelViewApp::OnInit()
     if (a == "-m" || a == "-mo" || a == "-armory" || a == "-npc" || a == "-fbxexport" ||
         a == "-animdump" || a == "-fbxinspect" || a == "-dbfromfile" || a == "-dumptex" ||
         a == "-m2inspect" || a == "-matrestest" || a == "-customizationtest" || a == "-mpq" || a == "-item" || a == "-wmo" ||
-        a.endsWith(".chr"))
+        a == "-mapcatalogtest" || a.endsWith(".chr"))
     {
       earlyHeadless = true;
       break;
@@ -4942,6 +5251,9 @@ bool WowModelViewApp::OnInit()
   int dumpTexFileDataId = 0; QString dumpTexOutPath; // -dumptex <fileDataID> <out.png>: forensic-only
   bool matResTest = false;                           // -matrestest: replaceable-material checks
   bool customizationTest = false;                    // -customizationtest: character customization checks
+  QString mapCatalogTestOut;                         // -mapcatalogtest <out.json>: the world map catalogue test
+  QStringList mapCatalogClients, mapCatalogProbes;   // -mapcatalogclients p,p,... / -mapcatalogprobe id|path,...
+  QString mapCatalogWdtFolder; QStringList mapCatalogWdtMaps; // -mapcatalogwdt <folder> <map id,...>
   QString m2InspectList, m2InspectOut;               // -m2inspect <list.txt> [out.csv]: forensic-only
   // Export content selection + clip list for the headless FBX export (the parent process passes
   // these so the child reproduces the user's exact options). Defaults: full content, no explicit
@@ -5014,6 +5326,40 @@ bool WowModelViewApp::OnInit()
     else if (cmd == "-customizationtest") {
       // Regression checks for character customization requirements; see doHeadlessCustomizationTest.
       customizationTest = true;
+    }
+    else if (cmd == "-mapcatalogtest") {
+      // The world map catalogue on this computer's clients; see doHeadlessMapCatalogTest.
+      if (i + 1 < argc) { i++; mapCatalogTestOut = launchPath(argv[i]); }
+    }
+    else if (cmd == "-mapcatalogclients") {
+      // The clients the map catalogue test loads in turn, e.g. "wow,wow_classic,wow" (switches of client).
+      if (i + 1 < argc) { i++; mapCatalogClients = QString::fromWCharArray(argv[i]).split(',', QString::SkipEmptyParts); }
+    }
+    else if (cmd == "-mapcatalogprobe") {
+      // Files the map catalogue test inspects through each client's storage, by FileDataID or by path: a list, or
+      // "@<file>" with one per line.
+      if (i + 1 < argc)
+      {
+        const QString arg = QString::fromWCharArray(argv[++i]);
+        if (arg.startsWith('@'))
+        {
+          QFile list(launchPath(wxString(arg.mid(1).toStdWString())));
+          if (list.open(QIODevice::ReadOnly | QIODevice::Text))
+            for (const QString & line : QString::fromUtf8(list.readAll()).split('\n'))
+              if (!line.trimmed().isEmpty())
+                mapCatalogProbes << line.trimmed();
+        }
+        else
+          mapCatalogProbes = arg.split(',', QString::SkipEmptyParts);
+      }
+    }
+    else if (cmd == "-mapcatalogwdt") {
+      // Where the map catalogue test writes the WDTs of the maps listed, read through the catalogue (contract test).
+      if (i + 2 < argc)
+      {
+        mapCatalogWdtFolder = launchPath(argv[++i]);
+        mapCatalogWdtMaps = QString::fromWCharArray(argv[++i]).split(',', QString::SkipEmptyParts);
+      }
     }
     else if (cmd == "-m2inspect") {
       // Forensic-only: "-m2inspect <list.txt> [out.csv]" reads each listed model's M2 header,
@@ -5153,7 +5499,7 @@ bool WowModelViewApp::OnInit()
   for (int i = 1; i < argc; i++)
   {
     QString a = QString::fromWCharArray(argv[i]);
-    if (a == "-m" || a == "-mo" || a == "-armory" || a == "-npc" || a == "-fbxexport" || a == "-animdump" || a == "-fbxinspect" || a == "-dbfromfile" || a == "-dumptex" || a == "-m2inspect" || a == "-matrestest" || a == "-customizationtest" || a == "-mpq" || a == "-item" || a == "-wmo" || a.endsWith(".chr"))
+    if (a == "-m" || a == "-mo" || a == "-armory" || a == "-npc" || a == "-fbxexport" || a == "-animdump" || a == "-fbxinspect" || a == "-dbfromfile" || a == "-dumptex" || a == "-m2inspect" || a == "-matrestest" || a == "-customizationtest" || a == "-mpq" || a == "-item" || a == "-wmo" || a == "-mapcatalogtest" || a.endsWith(".chr"))
     {
       headlessLoad = true;
       break;
@@ -5190,6 +5536,17 @@ bool WowModelViewApp::OnInit()
       return false; // read-only inspect done -> exit
     }
 
+    // The map catalogue test takes the viewer's catalogue before any client is loaded (it must say there is none), and
+    // loads the first client it lists unless -product names one.
+    std::shared_ptr<wow::WorldMapCatalog> catalogBeforeLoad;
+    if (!mapCatalogTestOut.isEmpty())
+    {
+      catalogBeforeLoad = frame->mapCatalog();
+      if (!mapCatalogClients.isEmpty() && !qEnvironmentVariableIsSet("WMV_FORCE_PRODUCT"))
+        qputenv("WMV_FORCE_PRODUCT", mapCatalogClients.first().toUtf8());
+    }
+    QElapsedTimer firstLoad;
+    firstLoad.start();
     if (!mpqDataFolder.isEmpty())
       frame->LoadWoWFromMpq(mpqDataFolder, mpqLocale); // legacy MPQ client (Vanilla/TBC/WotLK)
     else
@@ -5203,6 +5560,13 @@ bool WowModelViewApp::OnInit()
           return false;
         }
       }
+
+    if (!mapCatalogTestOut.isEmpty())
+    {
+      doHeadlessMapCatalogTest(frame, mapCatalogTestOut, mapCatalogClients, mapCatalogProbes, catalogBeforeLoad,
+                               firstLoad.nsecsElapsed() / 1e6, mapCatalogWdtFolder, mapCatalogWdtMaps);
+      return false; // checks done -> exit
+    }
 
     if (matResTest)
     {

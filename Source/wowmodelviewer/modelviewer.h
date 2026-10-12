@@ -42,6 +42,7 @@ class UnityRendererHost;
 class TextureView;
 class BackgroundColorDialog;
 namespace ModelIdLookup { struct Resolved; }
+namespace wow { class WorldMapCatalog; }
 struct TextureEntry;
 class CharInfos;
 
@@ -746,6 +747,12 @@ public:
   };
   ClientCapabilities m_clientCaps;
   const ClientCapabilities & clientCapabilities() const { return m_clientCaps; }
+  // The loaded client's world map catalogue (Map.db2's maps and their WDT references, docs/world-viewer/02-map-catalog.md):
+  // built as the client loads, dropped when another client loads (ResetClientState). Never null: before a client is
+  // loaded and while one loads it is a catalogue of no client (status NoClient, with the reason). Shared: a holder that
+  // outlives the client finds it no longer belongs to the loaded one.
+  std::shared_ptr<wow::WorldMapCatalog> mapCatalog() const { return m_mapCatalog; }
+  std::shared_ptr<wow::WorldMapCatalog> m_mapCatalog;
   // The loaded client in a line, for the status bar and Advanced details: "Classic Era · Vanilla · 1.15.9".
   QString loadedClientSummary() const;
 

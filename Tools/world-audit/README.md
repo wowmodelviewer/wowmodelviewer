@@ -25,6 +25,9 @@ its installer, and never write to a game folder.
   - C# parsers: `compare_csharp.py` compares the C# world parsers' corpus results
     (`Tools/UnityRendererProject/Tests/WorldCorpusValidation.cs`) with these scripts' results, key by key
     (`docs/world-viewer/01-parsers.md`).
+  - map catalogue: `compare_map_catalog.py` compares the viewer's world map catalogue (its headless test,
+    `wowmodelviewer -mapcatalogtest`) with `catalog/maps_<client>.json` and `catalog/wdt_<client>.json`, map by map
+    (`docs/world-viewer/02-map-catalog.md`).
 - `tests/` -- `python -I -m unittest discover -s Tools/world-audit/tests`:
   - `test_wowfmt.py`: the parsers on malformed and synthetic input, and the pinned hashes;
   - `test_corpus_rules.py`: the report's rules asserted on the extracted bytes, each against its competing readings.

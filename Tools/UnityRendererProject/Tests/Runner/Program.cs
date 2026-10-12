@@ -3,7 +3,8 @@
 // Exit code: the number of failures (0 = everything that ran passed). The corpus validation runs
 // only when WMV_WORLD_AUDIT_CORPUS names the extracted audit data; otherwise it reports SKIPPED,
 // which is not a pass. Optional argument: the path of the corpus results JSON
-// (default: <corpus>/results/csharp_parsers.json).
+// (default: <corpus>/results/csharp_parsers.json). The world-map contract check runs only when WMV_MAP_CONTRACT_DIR
+// names a folder of WDTs the viewer's map catalogue wrote (MapContractCheck.cs).
 
 using System;
 using System.Globalization;
@@ -30,6 +31,14 @@ static class Program
             Console.WriteLine("SKIPPED: WMV_WORLD_AUDIT_CORPUS is not set (the audit data is extracted locally, not committed)");
         else
             failures += WorldCorpusValidation.Run(corpus, args.Length > 0 ? args[0] : null, Console.WriteLine);
+
+        string contract = Environment.GetEnvironmentVariable("WMV_MAP_CONTRACT_DIR");
+        if (!string.IsNullOrEmpty(contract))
+        {
+            // The world-map runtime contract at the data level: WDTs the viewer read through its map catalogue.
+            Console.WriteLine("== MapContractCheck (WDTs read by the viewer's map catalogue)");
+            failures += MapContractCheck.Run(contract, Console.WriteLine);
+        }
 
         Console.WriteLine(failures == 0 ? "ALL RUN TESTS PASSED" : "FAILURES: " + failures);
         return failures;

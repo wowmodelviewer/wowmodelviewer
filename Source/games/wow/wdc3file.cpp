@@ -246,6 +246,10 @@ bool WDC3File::open()
   m_sectionData = new unsigned char[sectionSize];
   m_sectionDataSize = sectionSize;
   read(m_sectionData, sectionSize);
+  m_sectionBuffers.assign(m_header.section_count, nullptr);
+  m_sectionBufferSizes.assign(m_header.section_count, 0);
+  m_sectionBuffers[0] = m_sectionData;
+  m_sectionBufferSizes[0] = sectionSize;
 
   // maintain curPtr to location of the block along section reading
   unsigned char * curPtr = m_sectionData;
@@ -256,9 +260,13 @@ bool WDC3File::open()
   { 
     recordCount = m_sectionHeader[0].record_count;
     m_recordOffsets.reserve(recordCount);
+    m_recordLocations.reserve(recordCount);
     // store offsets
     for (uint i = 0; i < recordCount; i++)
+    {
       m_recordOffsets.push_back(m_sectionData + (i*recordSize));
+      m_recordLocations.push_back({0, i});
+    }
 
     curPtr += (recordSize * recordCount);
   }
@@ -437,10 +445,14 @@ bool WDC3File::open()
   if (offsetMap.size() > 0)
   {
     m_recordOffsets.clear();
+    m_recordLocations.clear();
     m_isSparseTable = true;
 
     for (auto it : offsetMap)
+    {
       m_recordOffsets.push_back(m_sectionData - m_sectionHeader[0].file_offset + it.offset);
+      m_recordLocations.push_back({NO_SECTION, 0}); // sparse text is read inline, not through the string blocks
+    }
   }
 
   if (copyTable.size() > 0)
@@ -450,18 +462,23 @@ bool WDC3File::open()
     m_IDs.reserve(m_recordOffsets.size() + nbEntries);
     m_recordOffsets.reserve(m_recordOffsets.size() + nbEntries);
 
-    // create a id->offset map
+    // create a id->offset map (and id->location: a copy row's text offsets count from its source row's place)
     std::map<uint32, unsigned char*> IDToOffsetMap;
+    std::map<uint32, RecordLocation> IDToLocationMap;
 
     for (uint i = 0; i < m_recordOffsets.size(); i++)
     {
       IDToOffsetMap[m_IDs[i]] = m_recordOffsets[i];
+      if (i < m_recordLocations.size())
+        IDToLocationMap[m_IDs[i]] = m_recordLocations[i];
     }
 
     for (auto it : copyTable)
     {
       m_IDs.push_back(it.newRowId);
       m_recordOffsets.push_back(IDToOffsetMap[it.copiedRowId]);
+      auto source = IDToLocationMap.find(it.copiedRowId);
+      m_recordLocations.push_back(source != IDToLocationMap.end() ? source->second : RecordLocation{NO_SECTION, 0});
     }
   }
 
@@ -472,9 +489,8 @@ bool WDC3File::open()
   // they resolve too. Encrypted sections you have no key for come back all-zeroed (CASC zeroes
   // what it cannot decrypt) and are skipped; sections whose key is present decrypt to plain data
   // and read like section 0. Per-section copy tables / sparse offset maps are not merged here
-  // (uncommon for this extra content); string fields of these extra records read back empty
-  // because get()'s bounds check rejects pointers outside section 0's buffer -- harmless, since
-  // the resolved numeric ids (display -> model -> FileDataID) are what callers need.
+  // (uncommon for this extra content). Their text fields are found through m_sectionBuffers (get()):
+  // a string offset counts across every section.
   if ((m_header.flags & 0x01) == 0) // non-sparse tables only
   {
     field_storage_info idInfo = m_fieldStorageInfo.empty()
@@ -501,17 +517,31 @@ bool WDC3File::open()
       seek(sh.file_offset);
       read(buf, secSize);
       m_extraSectionData.push_back(buf);
+      m_sectionBuffers[s] = buf;
+      m_sectionBufferSizes[s] = secSize;
 
-      // Sections we have no key for end up all-zeroed -> nothing to recover.
+      // Sections we have no key for end up all-zeroed -> nothing to recover (counted, with the key's name: a table can
+      // say how many of its records this computer cannot read, and which key would make them readable).
       bool zeroed = true;
       for (size_t i = 0; i < recBytes; i++)
         if (buf[i] != 0) { zeroed = false; break; }
       if (zeroed)
+      {
+        if (sh.tact_key_hash != 0)
+        {
+          lockedRecordCount += sh.record_count;
+          lockedKeyNames.push_back(sh.tact_key_hash);
+        }
         continue;
+      }
 
       const size_t firstNewRecord = m_recordOffsets.size();
+      m_recordLocations.resize(firstNewRecord, {NO_SECTION, 0});
       for (uint i = 0; i < sh.record_count; i++)
+      {
         m_recordOffsets.push_back(buf + static_cast<size_t>(i) * recordSize);
+        m_recordLocations.push_back({s, i});
+      }
 
       // ids: explicit id list (after records + string block) or inline in the record
       if (sh.id_list_size > 0)
@@ -520,6 +550,7 @@ bool WDC3File::open()
         if (idOfs + sh.id_list_size > secSize)
         {
           m_recordOffsets.resize(firstNewRecord); // can't locate ids -> drop these records
+          m_recordLocations.resize(firstNewRecord);
           continue;
         }
         const uint32 * ids = reinterpret_cast<const uint32 *>(buf + idOfs);
@@ -569,6 +600,8 @@ bool WDC3File::open()
   }
 
   recordCount = m_recordOffsets.size();
+  // One location per record offset, whatever path filled them.
+  m_recordLocations.resize(m_recordOffsets.size(), {NO_SECTION, 0});
 
   /*
    // For reverse engineering purpose only
@@ -694,17 +727,16 @@ std::vector<std::string> WDC3File::get(unsigned int recordIndex, const core::Tab
       {
         // All strings live inside the section buffer; keep every read bounded to
         // it so a stale/garbage offset (e.g. a field position that shifted on a
-        // newer build) cannot walk off the heap and crash.
+        // newer build) cannot walk off the heap and crash. (These bounds are the
+        // sparse path's, whose strings are inline in section 0's buffer. For
+        // non-sparse tables the real strings live in the string blocks that
+        // follow each section's records, and a computed offset that lands in the
+        // record region instead -- e.g. an unnamed choice whose Name_Lang offset
+        // resolves back into record data -- reads as empty, not as garbage bytes:
+        // see below.)
         const char * bufStart = reinterpret_cast<const char *>(m_sectionData);
         const char * bufEnd = bufStart + m_sectionDataSize;
-        // For non-sparse tables the real strings live in the string block that
-        // follows the records (see parse: curPtr += recordSize * recordCount).
-        // A computed pointer that lands in the record region instead means a bad
-        // offset -- e.g. an unnamed choice whose Name_Lang offset resolves back
-        // into record data -- and must read as empty, not as garbage bytes.
         const char * strStart = bufStart;
-        if (!m_isSparseTable)
-          strStart = bufStart + static_cast<size_t>(recordSize) * m_sectionHeader[0].record_count;
         char * stringPtr = nullptr;
 
         if (m_isSparseTable)
@@ -732,7 +764,52 @@ std::vector<std::string> WDC3File::get(unsigned int recordIndex, const core::Tab
         }
         else
         {
-          stringPtr = reinterpret_cast<char *>(recordOffset + m_fieldStorageInfo[field->pos].field_offset_bits / 8 + val - ((m_header.record_count - m_sectionHeader[0].record_count) * m_header.record_size));
+          // The offset counts from the field's place in every section's records laid end to end (the header's record
+          // count), into every section's string block laid end to end after them. All of it in integers, from the
+          // record's own location: no record pointer is compared with another section's buffer, and no pointer is
+          // formed until the string is known to start inside its block, and that block inside its section's buffer.
+          // A string ends at the first NUL in its block; one without is not read (empty), like any unreadable text.
+          std::string text;
+          const RecordLocation loc = recordIndex < m_recordLocations.size() ? m_recordLocations[recordIndex]
+                                                                            : RecordLocation{NO_SECTION, 0};
+          if (loc.section < m_sectionBuffers.size() && loc.index < m_sectionHeader[loc.section].record_count)
+          {
+            const unsigned long long rs = m_header.record_size;
+            unsigned long long before = 0;
+            for (uint32 s = 0; s < loc.section; s++)
+              before += m_sectionHeader[s].record_count;
+            const unsigned long long pos = (before + loc.index) * rs + m_fieldStorageInfo[field->pos].field_offset_bits / 8 + val;
+            const unsigned long long recordsEnd = static_cast<unsigned long long>(m_header.record_count) * rs;
+            if (pos >= recordsEnd) // else it points back into the records: not a string
+            {
+              unsigned long long offset = pos - recordsEnd;
+              for (size_t s = 0; s < m_sectionBuffers.size(); s++)
+              {
+                const unsigned long long block = m_sectionHeader[s].string_table_size;
+                if (offset < block)
+                {
+                  // The block as far as its section's buffer holds it (a truncated file holds less than it declares):
+                  // the string must start, and find its NUL, inside both.
+                  const unsigned long long bufSize = m_sectionBufferSizes[s];
+                  const unsigned long long recBytes = rs * m_sectionHeader[s].record_count;
+                  if (m_sectionBuffers[s] && recBytes <= bufSize && offset < bufSize - recBytes)
+                  {
+                    const unsigned long long end = std::min(block, bufSize - recBytes);
+                    const char * blockStart = reinterpret_cast<const char *>(m_sectionBuffers[s]) + recBytes;
+                    const size_t room = static_cast<size_t>(end - offset);
+                    const size_t len = strnlen(blockStart + offset, room);
+                    if (len < room)
+                      text.assign(blockStart + offset, len);
+                  }
+                  break;
+                }
+                offset -= block;
+              }
+            }
+          }
+          std::replace(text.begin(), text.end(), '"', '\'');
+          result.push_back(text);
+          continue;
         }
 
         const char * sp = reinterpret_cast<const char *>(stringPtr);

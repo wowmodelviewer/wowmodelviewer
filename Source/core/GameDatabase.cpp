@@ -186,7 +186,7 @@ namespace
 QString core::GameDatabase::cacheKey() const
 {
   // Bump SCHEMA_VERSION whenever the table layout in database.xml (or how we read it) changes.
-  static const int SCHEMA_VERSION = 17; // 17: TransmogSet and TransmogSetItem (the transmog sets of the set picker, with their catalog group and class mask). 16: ChrModelAltVariant, ChrModelAltVariantOption, ChrModelAltVariantChoice (Classic Beta's two generations of a character model). 15: CreatureDisplayInfoExtra and CreatureDisplayInfoOption (a humanoid NPC's own race, sex, class, bakes and stored customization choices). 14: the key also names the product and the schema folder (a Classic
+  static const int SCHEMA_VERSION = 18; // 18: Map (the world map catalogue, read only from a verified layout), and the per-table readings kept with the database. 17: TransmogSet and TransmogSetItem (the transmog sets of the set picker, with their catalog group and class mask). 16: ChrModelAltVariant, ChrModelAltVariantOption, ChrModelAltVariantChoice (Classic Beta's two generations of a character model). 15: CreatureDisplayInfoExtra and CreatureDisplayInfoOption (a humanoid NPC's own race, sex, class, bakes and stored customization choices). 14: the key also names the product and the schema folder (a Classic
                                         // product could share a build number with nothing, but a cache built
                                         // with one schema must never be read as another's); tables whose layout
                                         // the definitions cannot place are no longer read at base positions; a table's own layoutHash in database.xml is read (it never was). // 13: ChrCustomizationReq RaceMasks as its two uint32 (plus ReqType/RegionGroupMask/OverrideArchive), ChrCustomizationOption.Requirement, ChrRaces.PlayableRaceBit, ChrCustomizationReqChoice; bitpacked signed values sign-extended, pallet arrays read at the file's stride, short ids/values read without over-reading their bytes. 12: ItemDisplayInfoModelMatRes (retail's per-slot replaceable-material table, the authoritative source for M2 texture types beyond the type-2 skin). 11: ChrCustomizationReq adds ReqAchievementID/ReqQuestID/ReqItemModifiedAppearanceID (unlock-gate filter for customization choices). 10: corrected ItemSparse name-field positions (sparse-record string walk) for 12.0.7. 9: ChrCustomizationReq/ChrRaces/CreatureDisplayInfo/CreatureModelData. Bump forces a cache rebuild so the fix reaches installs upgraded over a prior build
@@ -250,6 +250,7 @@ bool core::GameDatabase::openDatabase(const QString & path, bool building)
 
 bool core::GameDatabase::initFromXML(const QString & file)
 {
+  clientDatabaseStarting();
   // Loading a client again comes back to this same database: the previous client's connection is closed first.
   closeDatabase();
 
@@ -495,6 +496,7 @@ bool core::GameDatabase::createDatabaseFromXML(const QString & file)
       m_failedTables++;
       LOG_ERROR << "Unknown exception while building table" << (*it)->name << "- skipping table";
     }
+    tableBuilt(**it);
   }
 
   // Empty the list as well as freeing it: loading a client again reads the structures into this
@@ -720,6 +722,9 @@ bool core::TableStructure::fill()
   QString queryBase = query;
   int record = 0;
   int nbRecord = dbc->getRecordCount();
+  lockedRows = dbc->getLockedRecordCount();
+  lockedKeys = dbc->getLockedKeyNames();
+  rowsRead = 0;
   if (nbRecord == 0)
   {
     // An empty table (Classic Era's Mount.db2 has no records): nothing to insert.
@@ -767,7 +772,10 @@ bool core::TableStructure::fill()
   sqlResult r = GAMEDATABASE.sqlQuery(query);
 
   if (r.valid)
+  {
+    rowsRead = (size_t)nbRecord;
     LOG_INFO << "table" << name << "successfuly filled";
+  }
 
   delete dbc;
 

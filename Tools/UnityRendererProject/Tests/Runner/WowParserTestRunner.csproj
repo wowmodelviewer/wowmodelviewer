@@ -2,8 +2,9 @@
   <!--
     Console runner for the framework-free parser tests (WowParserTests, WorldParserTests) and the
     real-corpus validation (WorldCorpusValidation, runs only when WMV_WORLD_AUDIT_CORPUS names the
-    extracted audit data). Compiles the Unity project's pure parsing layer (Assets/Scripts/Wow) as
-    plain C#; it is not part of the Unity project or the viewer build.
+    extracted audit data), and the world-map contract check (MapContractCheck, only when
+    WMV_MAP_CONTRACT_DIR names a folder of WDTs the viewer wrote). Compiles the Unity project's pure
+    parsing layer (Assets/Scripts/Wow) as plain C#; it is not part of the Unity project or the viewer build.
 
       dotnet run, Release configuration, with this project file (see Tests/README.md)
   -->
@@ -21,6 +22,7 @@
     <Compile Include="..\WowParserTests.cs" />
     <Compile Include="..\WorldParserTests.cs" />
     <Compile Include="..\WorldCorpusValidation.cs" />
+    <Compile Include="..\MapContractCheck.cs" />
     <Compile Include="Program.cs" />
   </ItemGroup>
 </Project>

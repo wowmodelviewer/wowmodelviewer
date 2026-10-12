@@ -51,6 +51,7 @@ set(src animated.cpp
       WoWFolder.cpp
       WoWItem.cpp
       WoWModel.cpp
+      WorldMapCatalog.cpp
       WotlkDbc.cpp)
 
 set(headers animated.h
@@ -107,6 +108,7 @@ set(headers animated.h
       WoWFolder.h
       WoWItem.h
       WoWModel.h
+      WorldMapCatalog.h
       WotlkDbc.h)
 
 source_group("Header Files" FILES ${headers})

@@ -445,6 +445,22 @@
   
   <!-- Guild tabard tables - END -->  
 
+  <!-- The world map catalogue (wow::WorldMapCatalog, docs/world-viewer/02-map-catalog.md). Read only from a verified
+       layout: dbd/Map.dbd places every column for each layout it lists, and a layout it does not list is not read,
+       whatever the client (verifiedLayoutOnly). The positions below are Retail 12.1's and are never used on their own.
+       A column a layout lacks reads as absent (Classic Era and MoP Classic have no WdtFileDataID). -->
+  <table name="Map" verifiedLayoutOnly="yes">
+    <field type="int32" name="ID" primary="yes" />
+    <field type="text" name="Directory" pos="0" />
+    <field type="text" name="MapName_lang" pos="1" />
+    <field type="int8" name="MapType" pos="7" />
+    <field type="int8" name="InstanceType" pos="8" />
+    <field type="int16" name="ParentMapID" pos="13" absentValue="-1" />
+    <field type="int16" name="WorldCopyOfMapID" pos="14" absentValue="-1" />
+    <field type="int16" name="LocationMapID" pos="17" absentValue="-1" />
+    <field type="int32" name="WdtFileDataID" pos="21" />
+  </table>
+
   <!-- BEBUG PURPOSE -->
   <!--
   <table name="FileNames" dbfile="filenames.csv">

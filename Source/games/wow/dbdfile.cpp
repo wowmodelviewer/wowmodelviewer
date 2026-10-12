@@ -253,6 +253,15 @@ void wow::DBDFile::parseDefinition(const QStringList & lines)
     m_defs.push_back(def);
 }
 
+const wow::DBDDefinition * wow::DBDFile::getStructureByLayout(uint32 layoutHash) const
+{
+  for (const DBDDefinition & def : m_defs)
+    for (uint32 h : def.layoutHashes)
+      if (h == layoutHash)
+        return &def;
+  return nullptr;
+}
+
 const wow::DBDDefinition * wow::DBDFile::getStructure(const QString & build, uint32 layoutHash) const
 {
   // Exact match only -- listed layout hash, build, or build range. When the build isn't

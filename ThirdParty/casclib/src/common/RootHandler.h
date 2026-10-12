@@ -86,6 +86,25 @@ struct TRootHandler
         return false;
     }
 
+    // WMV: the root's own entry for one file, found by name (szFileName != NULL) or else by FileDataId, without
+    // opening the file. False when the root does not list it.
+    virtual bool FindEntry(const char * /* szFileName */, DWORD /* FileDataId */, PDWORD /* PtrFileDataId */, PCASC_CKEY_ENTRY * /* PtrCKeyEntry */)
+    {
+        return false;
+    }
+
+    // WMV: how many files the root knows by name (a name hash): 0 when it lists them by FileDataId only.
+    virtual size_t GetNameCount()
+    {
+        return 0;
+    }
+
+    // WMV: how many files the root lists without a name (by FileDataId only).
+    virtual size_t GetNamelessCount()
+    {
+        return 0;
+    }
+
     // Copies all items from the given root handler to the new one
     virtual size_t Copy(TRootHandler * /* pRoot */)
     {
@@ -124,12 +143,17 @@ struct TFileTreeRoot : public TRootHandler
     PCASC_CKEY_ENTRY GetFile(size_t nFileIndex, char * /* szFileName */, size_t /* ccFileName */);
     PCASC_CKEY_ENTRY Search(struct TCascSearch * pSearch, struct _CASC_FIND_DATA * pFindData);
     bool GetInfo(PCASC_CKEY_ENTRY pCKeyEntry, struct _CASC_FILE_FULL_INFO * pFileInfo);
+    bool FindEntry(const char * szFileName, DWORD FileDataId, PDWORD PtrFileDataId, PCASC_CKEY_ENTRY * PtrCKeyEntry);
+    // WMV: the names the root itself gives (the storage files CascLib names itself are not counted).
+    size_t GetNameCount() { return FileTree.NameCount() - WmvNotInRootNames; }
+    size_t GetNamelessCount() { return FileTree.NamelessCount(); }
     size_t Copy(TRootHandler * pRoot);
     size_t GetMaxFileIndex();
 
     protected:
 
     CASC_FILE_TREE FileTree;
+    size_t WmvNotInRootNames = 0;   // WMV: names of nodes Insert() made (flagged CFN_FLAG_WMV_NOT_IN_ROOT)
 };
 
 #endif  // __ROOT_HANDLER_H__

@@ -77,6 +77,23 @@ namespace wow
       bool isRemoteFile(const QString & name) const;
       // The same by FileDataID (a file the listfile does not name has only a generated name).
       bool isRemoteFileId(int fileDataId) const { return m_CASCFolder.isRemote(fileDataId); }
+      // The CASC storage's own answer for one file, and a whole-file read, both without this folder's file index (no
+      // file object is created or added; see CASCFolder). A client of another storage kind (legacy MPQ) has none:
+      // nothing is listed and a read reports NoStorage.
+      CASCFolder::RootEntry storageRootEntry(int fileDataId) const { return m_CASCFolder.rootEntry(fileDataId); }
+      CASCFolder::RootEntry storageRootEntryByPath(const QString & path) const { return m_CASCFolder.rootEntryByPath(path); }
+      CASCFolder::ReadOutcome readStorageFile(int fileDataId, const QString & path, QByteArray & out,
+                                              unsigned int * errorCode = nullptr) const
+      {
+        return m_CASCFolder.readWholeFile(fileDataId, path, out, errorCode);
+      }
+      // Which storage the folder holds right now (CASCFolder::storageGeneration): changes with every client opened.
+      quint64 storageGeneration() const { return m_CASCFolder.storageGeneration(); }
+      // How many files the storage root knows by name, and by FileDataID only (CASCFolder::rootNameCount).
+      size_t storageRootNameCount() const { return m_CASCFolder.rootNameCount(); }
+      size_t storageRootNamelessCount() const { return m_CASCFolder.rootNamelessCount(); }
+      bool storageKnowsEncryptionKey(quint64 keyName) const { return m_CASCFolder.knowsEncryptionKey(keyName); }
+      bool storageOpen() const { return m_CASCFolder.storageOpen(); }
       // Frees the files the last reload detached (initFromListfile). Called once the load that detached them has
       // rebuilt everything that could point at them (Browse, the character controls; the canvas was cleared
       // before): ModelViewer::LoadWoW, at its end. Also run by the next reload, for a load that never got there.

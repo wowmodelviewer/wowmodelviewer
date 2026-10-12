@@ -68,6 +68,9 @@ namespace wow
     // First definition matching the given build/layoutHash (layout takes
     // priority), or nullptr if none.
     const DBDDefinition * getStructure(const QString & build, uint32 layoutHash) const;
+    // The first definition whose LAYOUT list holds this exact hash -- never one chosen by its BUILD lines (a table read
+    // only from a verified layout, WoWDatabase verifiedLayoutOnly), or nullptr.
+    const DBDDefinition * getStructureByLayout(uint32 layoutHash) const;
 
     bool isValid() const { return !m_defs.empty(); }
 
