@@ -626,6 +626,8 @@ public:
   // THE TERRAIN TILE (protocol 12; UnityIpcServer.h, TERRAIN). One ADT tile of a map of the loaded client, drawn by the
   // player from the map's WDT and the tile's root ADT, which it asks for (getMapAsset) and parses itself. The host
   // names the WDT from its map catalogue and serves the two files through it, for the current terrain load only.
+  // Protocol 13 (TERRAIN TEXTURES) adds the tile's tex0 ADT and its textures, accounted per load here: the request is
+  // replaced with the load, so nothing of it outlives the load.
   struct TerrainRequest
   {
     int load = 0;                       // the load serial sent (0: no terrain request)
@@ -637,20 +639,51 @@ public:
     bool wdtServed = false;             // that WDT was answered "available"
     int rootFileDataID = 0;             // the first root ADT this load asked for (0: none yet): the only one it may fetch
     quint64 catalogueGeneration = 0;    // the storage the map catalogue was built from (MapCatalogClient)
+    // The limits the load was sent with: maxAssetBytes for the WDT, the root and the tex0; the texture limits only to a
+    // player that draws terrain textures (0: the load offers no textures, and no tex0 or texture is served for it).
+    qint64 maxAssetBytes = UnityIpcServer::MAX_MAP_ASSET_BYTES;
+    qint64 maxTextureBytes = 0;
+    qint64 maxTextureBytesPerLoad = 0;
+    int maxTexturesPerLoad = 0;
+    // What the load has had (accounted when a request goes on to the read, noteMapAssetRead, and after it,
+    // noteMapAssetResult).
+    int reads = 0;                      // requests that went on to the storage read, every role: at most
+                                        // 3 + maxTexturesPerLoad
+    bool tex0Asked = false;             // a tex0 ADT went on to the read: the only one this load may have
+    int tex0FileDataID = 0;             // ... its FileDataID
+    bool tex0Served = false;            // ... and it was answered "available" (its kind checked)
+    std::vector<int> textureIds;        // the texture ids that went on to the read, each once: at most maxTexturesPerLoad
+    qint64 textureBytesRead = 0;        // the bytes read for them, kind failures included: at most maxTextureBytesPerLoad
+    bool ended = false;                 // the player reported the load (terrainTileLoaded): nothing more is read for it
+    QString endedStatus;                // ... the status it reported
   };
-  // What getMapAsset decided before anything is read: state "" goes on to the read, "refused" or "stale" is the answer.
+  // What getMapAsset decided before anything is read: state "" goes on to the read (at most maxBytes), "refused" or
+  // "stale" is the answer.
   struct MapAssetDecision
   {
     QString state;
     QString detail;
+    qint64 maxBytes = -1;               // the read's limit, when it goes on to the read
   };
   // The decision, from nothing but its arguments (a test calls it with made-up requests), in this order: a client being
-  // loaded is refused; a request without a load (> 0) is refused; one with no current terrain request, another load,
-  // another client epoch, or under a map catalogue that is not the loaded client's any more is stale (the detail names
-  // every reason that holds); a role other than "wdt" or "rootAdt", a fileDataID <= 0, a WDT other than the load's, a
-  // root ADT before the load's WDT was served, or a second root ADT id for the load is refused.
+  // loaded is refused; a request without a load (> 0) is refused; one with no current terrain request, another load, a
+  // load the player has reported, another client epoch, or under a map catalogue that is not the loaded client's any
+  // more is stale (the detail names every reason that holds); a role other than "wdt", "rootAdt", "tex0Adt" or
+  // "texture", a fileDataID <= 0 is refused; then by role: a WDT other than the load's; a root ADT before the load's WDT
+  // was served, or a second root ADT id for the load; a tex0 ADT or a texture for a load that offers no textures, a tex0
+  // ADT before the WDT was served or after one was asked for; a texture before the tex0 was served, one asked for
+  // before, or past maxTexturesPerLoad ids; and for every role a read past 3 + maxTexturesPerLoad for the load, and for a
+  // texture once maxTextureBytesPerLoad bytes were read -- all refused. The read's limit: maxAssetBytes, for a texture the
+  // smaller of maxTextureBytes and what is left of maxTextureBytesPerLoad.
   static MapAssetDecision decideMapAssetRequest(const QJsonObject & request, const TerrainRequest * current, int epochNow,
                                                 bool catalogueBelongs, bool clientLoading);
+  // The accounting of a request the decision let through, before its read (the read counted, the tex0 or texture id
+  // taken), and after it (bytesRead: what the read read, kind failures included; available: the answer, its kind checked).
+  static void noteMapAssetRead(TerrainRequest & current, const QJsonObject & request);
+  static void noteMapAssetResult(TerrainRequest & current, const QString & role, qint64 bytesRead, bool available);
+  // The kind of a file read for role (TERRAIN TEXTURES: "tex0Adt" MVER then MAMP, "texture" BLP2; nothing for the other
+  // roles): "" when it is that kind, else what was found, the answer's detail.
+  static QString mapAssetKindProblem(const QString & role, const QByteArray & bytes);
   // Show one terrain tile: refused, 0 with why, unless a client is loaded (and none is loading), the player draws terrain,
   // the map catalogue is ready and the loaded client's, the tile is in the 64 x 64 grid, the map has a WDT and that WDT
   // can be read now (inspected through the storage, for every client family). Otherwise the load serial sent. The model
@@ -662,8 +695,9 @@ public:
   bool ResolveTerrainTile(int mapId, int tileX, int tileY, UnityIpcServer::TerrainTileCommand & command, QString & why);
   // Take the terrain away (clearTerrain): false when there is no player that draws terrain.
   bool ClearTerrain(const QString & reason);
-  // The getMapAsset handler (UnityIpcServer::onGetMapAsset): the decision above, then the file read through the map
-  // catalogue (content key checked, at most UnityIpcServer::MAX_MAP_ASSET_BYTES) and its MD5.
+  // The getMapAsset handler (UnityIpcServer::onGetMapAsset, called when the queue serves the request): the decision
+  // above, the accounting, then the file read through the map catalogue (content key checked, at most the decision's
+  // limit), its kind checked; the answer's md5 is the content key the read checked the bytes against.
   UnityIpcServer::MapAssetAnswer ServeMapAsset(const QJsonObject & request);
   void OnTerrainTileLoaded(const UnityIpcServer::TerrainTileReport & report);
   // The headless terrain test's "staleload" step: a newer load the player never gets (the serial raised, the request

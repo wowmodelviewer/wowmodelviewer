@@ -379,6 +379,7 @@ void wow::WorldMapCatalog::inspectEntry(MapEntry & e, QByteArray * bytes) const
     e.inspection.state = WdtAvailability::Unreadable;
     e.inspection.detail = QString("the file read is not a WDT: it starts with the bytes %1, not the MVER chunk")
                             .arg(QString::fromLatin1(read.left(4).toHex(' ')));
+    e.inspection.contentKey.clear();
     read.clear();
   }
   if (bytes)
@@ -450,10 +451,18 @@ wow::WdtInspection wow::WorldMapCatalog::inspectReference(const WdtReference & r
   else
   {
     QByteArray bytes;
+    QByteArray contentKey;
     unsigned int error = 0;
     qint64 size = -1;
     const CASCFolder::ReadOutcome read = folder->readStorageFile(byId ? ref.fileDataId : -1, byId ? QString() : ref.path,
-                                                                 bytes, &error, maxBytes, &size);
+                                                                 bytes, &error, maxBytes, &size, &contentKey);
+    // What a caller that budgets reads counts. The size is known only once the storage has told it, and every outcome
+    // after that but TooLarge (decided from the size, nothing read) entered the read loop: Read and Unverified read the
+    // whole file; Corrupt, Encrypted, and Damaged or NotLocal from the loop failed on a frame after reading the ones
+    // before it, so their count is the file's size, an upper bound. NotLocal or Damaged from the size query leave the
+    // size unknown, and nothing was read.
+    if (size > 0 && read != CASCFolder::ReadOutcome::TooLarge)
+      r.readBytes = size;
     switch (read)
     {
       case CASCFolder::ReadOutcome::Read:
@@ -467,6 +476,8 @@ wow::WdtInspection wow::WorldMapCatalog::inspectReference(const WdtReference & r
         {
           r.state = WdtAvailability::Available;
           r.bytes = bytes.size();
+          // The key the read checked every byte against; a Read never comes without it (readWholeFile).
+          r.contentKey = QString::fromLatin1(contentKey.toHex());
           if (hash)
             r.sha256 = QString::fromLatin1(QCryptographicHash::hash(bytes, QCryptographicHash::Sha256).toHex());
           if (keep)

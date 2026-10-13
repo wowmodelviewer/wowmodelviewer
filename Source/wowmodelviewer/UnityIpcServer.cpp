@@ -14,6 +14,7 @@
 
 #include "UnityIpcServer.h"
 
+#include <algorithm>
 #include <cstring>
 
 #include <QCryptographicHash>
@@ -75,6 +76,7 @@ UnityIpcServer::UnityIpcServer()
 {
   m_timer.SetOwner(this);
   Bind(wxEVT_TIMER, &UnityIpcServer::onPoll, this);
+  m_clock.start();
 }
 
 UnityIpcServer::~UnityIpcServer()
@@ -157,6 +159,11 @@ bool UnityIpcServer::start()
   m_mapAssetsServedTotal = 0;
   m_mapAssetRecordsDropped = 0;
   dropHeldMapAssets("the server started");
+  m_mapAssetPolls.clear();
+  m_mapAssetPollsTotal = 0;
+  m_mapAssetsQueued = 0;
+  m_mapAssetsRefusedQueueFull = 0;
+  m_mapAssetQueueDepthMax = 0;
   m_timer.Start(POLL_INTERVAL_MS);
   LOG_INFO << "[unityipc] listening on 127.0.0.1:" << m_port << "(protocol v" << PROTOCOL_VERSION << ")";
   return true;
@@ -200,7 +207,11 @@ void UnityIpcServer::poll()
   if (m_client)
   {
     pollReceive();
-    pollSend();
+    // The map files asked for, in order, as far as this poll's budget goes (THE MAP ASSET QUEUE).
+    if (m_client)
+      serveMapAssetQueue();
+    if (m_client)
+      pollSend();
   }
 }
 
@@ -632,7 +643,9 @@ QString UnityIpcServer::RuntimeState::describe() const
                  " terrainTimeoutMs=%5 terrainRetiredTotal=%6 mapAnswersLate=%7 mapAnswersUnowned=%8")
            .arg(terrainPendingRequests).arg(terrainRetiredRequests).arg(mapAnswersRouted).arg(mapAnswersDropped)
            .arg(terrainTimeoutMs).arg(terrainRetiredTotal).arg(mapAnswersLate).arg(mapAnswersUnowned) +
-         " terrainLastRetiredRequest=" + (hasTerrainLastRetiredRequest ? "\"" + terrainLastRetiredRequest + "\"" : QString("-"));
+         " terrainLastRetiredRequest=" + (hasTerrainLastRetiredRequest ? "\"" + terrainLastRetiredRequest + "\"" : QString("-")) +
+         QString(" terrainTextures=%1 terrainTextureBytes=%2 terrainAlphaArrays=%3")
+           .arg(terrainTextures).arg(terrainTextureBytes).arg(terrainAlphaArrays);
 }
 
 int UnityIpcServer::requestRuntimeState()
@@ -711,6 +724,11 @@ void UnityIpcServer::handleRuntimeState(const QJsonObject & msg)
   // A text: "" (no request retired yet) is sent, not absent.
   s.hasTerrainLastRetiredRequest = msg.contains(QLatin1String("terrainLastRetiredRequest"));
   s.terrainLastRetiredRequest = msg.value(QLatin1String("terrainLastRetiredRequest")).toString();
+  // Protocol 13 (TERRAIN TEXTURES). toDouble keeps a byte count past 2^31 intact.
+  s.terrainTextures = count("terrainTextures");
+  const QJsonValue textureBytes = msg.value(QLatin1String("terrainTextureBytes"));
+  s.terrainTextureBytes = textureBytes.isDouble() ? (long long)textureBytes.toDouble() : -1LL;
+  s.terrainAlphaArrays = count("terrainAlphaArrays");
   LOG_INFO << "[unityipc] <- runtimeState" << s.describe();
   if (onRuntimeState)
     onRuntimeState(s);
@@ -1152,7 +1170,8 @@ void UnityIpcServer::handleLine(const std::string & line)
                      " gets a notice, a screenshot (below v6) a status message, the viewport background (below v7)"
                      " stays the player's own default, a character's model generation (below v8) is not switched,"
                      " every load (below v9) fetches its files again, files travel as base64 text (below v10), an NPC on its"
-                     " own model is shown without its weapons (below v11), and no terrain tile is drawn (below v12)";
+                     " own model is shown without its weapons (below v11), no terrain tile is drawn (below v12), and a"
+                     " terrain tile is drawn without its textures (below v13)";
     else if (version != PROTOCOL_VERSION)
       LOG_ERROR << "[unityipc] player speaks protocol v" << version << "but WMV expects v" << PROTOCOL_VERSION;
     if (onUnityReady)
@@ -1346,11 +1365,24 @@ bool UnityIpcServer::sendLoadTerrainTile(const TerrainTileCommand & c)
   msg["tileX"] = c.tileX;
   msg["tileY"] = c.tileY;
   msg["maxAssetBytes"] = c.maxAssetBytes;
+  // TERRAIN TEXTURES (protocol 13): only to a player that takes them, and only when the load offers them. A protocol-13
+  // player that finds no maxTextureBytes asks for no tex0 or texture (a protocol-12 host).
+  const bool textures = playerDrawsTerrainTextures() && c.maxTextureBytes > 0;
+  if (textures)
+  {
+    msg["maxTextureBytes"] = c.maxTextureBytes;
+    msg["maxTextureBytesPerLoad"] = c.maxTextureBytesPerLoad;
+    msg["maxTexturesPerLoad"] = c.maxTexturesPerLoad;
+  }
   m_stats.terrainLoads++;
   LOG_INFO << "[unityipc] -> loadTerrainTile load=" << c.load << "epoch=" << c.assetEpoch << "map=" << c.mapId
            << c.mapDirectory << "tile" << QString("%1_%2").arg(c.tileX).arg(c.tileY) << "wdtFileDataID=" << c.wdtFileDataID
            << "resolved by" << c.wdtResolvedBy << (c.wdtResolvedBy == "path" ? c.wdtPath : QString())
-           << "client" << c.product << c.build << "maxAssetBytes=" << c.maxAssetBytes;
+           << "client" << c.product << c.build << "maxAssetBytes=" << c.maxAssetBytes
+           << (textures ? QString("maxTextureBytes=%1 maxTextureBytesPerLoad=%2 maxTexturesPerLoad=%3")
+                            .arg(c.maxTextureBytes).arg(c.maxTextureBytesPerLoad).arg(c.maxTexturesPerLoad)
+                        : playerDrawsTerrainTextures() ? QString("no textures offered")
+                                                       : QString("no textures (a protocol %1 player)").arg(m_playerProtocol));
   queueJson(msg);
   return true;
 }
@@ -1375,7 +1407,9 @@ QString UnityIpcServer::MapAssetServed::describe() const
          QString(" load=%1 epoch=%2 (now %3) role=%4 fileDataID=%5 -> state=%6 bytes=%7 md5=%8 readMs=%9")
            .arg(load).arg(assetEpoch).arg(epochNow).arg(role).arg(fileDataID).arg(state).arg(bytes)
            .arg(md5.isEmpty() ? QString("-") : md5).arg(readMs < 0.0 ? QString("-") : QString::number(readMs, 'f', 3)) +
-         QString(" handlerMs=%1 first=%2").arg(handlerMs, 0, 'f', 3).arg(!firstTracked ? "untracked" : first ? "yes" : "no") +
+         QString(" handlerMs=%1 queuedMs=%2 bytesRead=%3 first=%4").arg(handlerMs, 0, 'f', 3)
+           .arg(queuedMs < 0.0 ? QString("-") : QString::number(queuedMs, 'f', 3)).arg(bytesRead)
+           .arg(!firstTracked ? "untracked" : first ? "yes" : "no") +
          (detail.isEmpty() ? QString() : " detail=\"" + detail + "\"");
 }
 
@@ -1422,6 +1456,16 @@ void UnityIpcServer::dropHeldMapAssets(const char * why)
 {
   m_holdNextMapAsset = false;
   m_holdMapAssetRole.clear();
+  // The queue goes with the connection too: its requests came over it, and no answer meant for one player may reach
+  // another (map request ids start again in every player).
+  if (!m_mapAssetQueue.empty())
+  {
+    LOG_INFO << "[unityipc]" << (int)m_mapAssetQueue.size() << "getMapAsset request(s) waiting dropped unanswered, the first"
+             << m_mapAssetQueue.front().request.value("requestId").toString() << "load"
+             << m_mapAssetQueue.front().request.value("load").toInt(0) << "(" << why << ")";
+    m_mapAssetsQueueDropped += (long long)m_mapAssetQueue.size();
+    m_mapAssetQueue.clear();
+  }
   if (m_mapAssetsHeld.empty())
     return;
   for (const QJsonObject & msg : m_mapAssetsHeld)
@@ -1431,7 +1475,9 @@ void UnityIpcServer::dropHeldMapAssets(const char * why)
   m_mapAssetsHeld.clear();
 }
 
-// One map file for the terrain load being built (TERRAIN above), answered at once -- unless the test hook holds it.
+// One map file for the terrain load being built (TERRAIN above): held when the test hook says so, refused at once when
+// MAP_ASSET_QUEUE_MAX wait already (nothing decided or read), otherwise queued to be served in its turn
+// (serveMapAssetQueue, the same poll when the budget allows).
 void UnityIpcServer::handleGetMapAsset(const QJsonObject & msg)
 {
   m_stats.mapAssetRequests++;
@@ -1445,13 +1491,67 @@ void UnityIpcServer::handleGetMapAsset(const QJsonObject & msg)
              << msg.value("load").toInt(0) << "held unanswered (" << (int)m_mapAssetsHeld.size() << "held)";
     return;
   }
-  answerMapAsset(msg);
+  if (m_mapAssetQueue.size() >= (size_t)MAP_ASSET_QUEUE_MAX)
+  {
+    m_mapAssetsRefusedQueueFull++;
+    MapAssetAnswer refused;
+    refused.state = "refused";
+    refused.detail = QString("too many map requests waiting (%1 wait, at most %2)").arg(m_mapAssetQueue.size())
+                       .arg(MAP_ASSET_QUEUE_MAX);
+    answerMapAsset(msg, 0.0, &refused);
+    return;
+  }
+  m_mapAssetQueue.push_back({msg, m_clock.nsecsElapsed()});
+  m_mapAssetsQueued++;
+  if ((int)m_mapAssetQueue.size() > m_mapAssetQueueDepthMax)
+    m_mapAssetQueueDepthMax = (int)m_mapAssetQueue.size();
 }
 
-// The viewer decides and reads (onGetMapAsset); the answer goes back as any asset does, as a binary frame, with what the
-// decision said. Timed from here to the answer queued (and, with room in the socket's buffer, sent): all of it is
-// GUI-thread time.
-void UnityIpcServer::answerMapAsset(const QJsonObject & msg)
+// THE MAP ASSET QUEUE: the requests waiting, first come first served, each decided, accounted and read only now
+// (answerMapAsset). The poll stops serving once MAP_ASSET_POLL_BUDGET_BYTES were read in it or a file over
+// MAP_ASSET_LARGE_FILE_BYTES was (a size is only known once the file is read: that file ends the poll's serving). Requests
+// that read nothing cost the budget nothing. One record per poll that served any.
+int UnityIpcServer::serveMapAssetQueue()
+{
+  if (m_mapAssetQueue.empty())
+    return 0;
+  QElapsedTimer timer;
+  timer.start();
+  MapAssetPoll poll;
+  while (!m_mapAssetQueue.empty())
+  {
+    if (poll.bytesRead >= MAP_ASSET_POLL_BUDGET_BYTES || poll.largeFiles > 0)
+    {
+      poll.stoppedForBudget = true;
+      break;
+    }
+    const QueuedMapAsset next = m_mapAssetQueue.front();
+    m_mapAssetQueue.pop_front();
+    const double queuedMs = (m_clock.nsecsElapsed() - next.arrivedNs) / 1e6;
+    const long long read = answerMapAsset(next.request, queuedMs);
+    poll.served++;
+    poll.bytesRead += read;
+    if (read > MAP_ASSET_LARGE_FILE_BYTES)
+      poll.largeFiles++;
+  }
+  poll.serveMs = timer.nsecsElapsed() / 1e6;
+  poll.waitingAfter = (int)m_mapAssetQueue.size();
+  m_mapAssetPollsTotal++;
+  m_mapAssetPolls.push_back(poll);
+  while (m_mapAssetPolls.size() > (size_t)MAP_ASSET_POLL_TIMINGS_KEPT)
+    m_mapAssetPolls.pop_front();
+  if (poll.stoppedForBudget)
+    LOG_INFO << "[unityipc] map requests: this poll served" << poll.served << "(" << poll.bytesRead << "bytes read in"
+             << QString::number(poll.serveMs, 'f', 3) << "ms);" << poll.waitingAfter << "wait for the next poll";
+  if (onMapAssetPoll)
+    onMapAssetPoll(poll);
+  return poll.served;
+}
+
+// The viewer decides and reads (onGetMapAsset), or the answer is given (refused on arrival); it goes back as any asset
+// does, as a binary frame, with what the decision said. Timed from here to the answer queued (and, with room in the
+// socket's buffer, sent): all of it is GUI-thread time.
+long long UnityIpcServer::answerMapAsset(const QJsonObject & msg, double queuedMs, const MapAssetAnswer * given)
 {
   QElapsedTimer handler;
   handler.start();
@@ -1462,15 +1562,19 @@ void UnityIpcServer::answerMapAsset(const QJsonObject & msg)
   served.epochNow = UnityAssetAccess::clientEpoch();
   served.role = msg.value("role").toString();
   served.fileDataID = msg.value("fileDataID").toInt(0);
+  served.queuedMs = queuedMs;
 
   MapAssetAnswer answer;
-  if (onGetMapAsset)
+  if (given)
+    answer = *given;
+  else if (onGetMapAsset)
     answer = onGetMapAsset(msg);
   else
   {
     answer.state = "refused";
     answer.detail = "this viewer serves no map files";
   }
+  served.bytesRead = answer.bytesRead;
   // Only a file served counts as the file's first read: a refused or stale request reads nothing, and an answer that
   // the file is not in the storage, not installed or unreadable serves nothing (its lookup is not a read to time).
   const bool ok = answer.state == "available";
@@ -1530,6 +1634,7 @@ void UnityIpcServer::answerMapAsset(const QJsonObject & msg)
   else
     LOG_WARNING << "[unityipc] <- getMapAsset" << served.describe();
   recordMapAssetServed(served);
+  return answer.bytesRead;
 }
 
 QString UnityIpcServer::TerrainTileReport::describe() const
@@ -1556,7 +1661,37 @@ QString UnityIpcServer::TerrainTileReport::describe() const
            .arg(meshBytes).arg(liveTerrainTiles).arg(liveModels).arg(liveMapObjects).arg(meshObjects).arg(materialObjects)
            .arg(terrainGameObjects).arg(managedHeapBytes).arg(nativeAllocatedBytes) +
          (hostState.isEmpty() ? QString() : " hostState=\"" + hostState + "\" hostDetail=\"" + hostDetail + "\"") +
-         " reason=\"" + reason + "\"";
+         " reason=\"" + reason + "\"" +
+         // Protocol 13: the requests the load retired, and its material in brief (each texture is logged on its own).
+         (requestsRetired < 0 ? QString() : QString(" requestsRetired=%1 [").arg(requestsRetired) +
+                                              retiredRequestIds.join(",") + "]") +
+         (!hasMaterial ? QString()
+                       : " material=" + materialState + " materialReason=\"" + materialReason + "\"" +
+                           QString(" tex0=%1 tex0Bytes=%2").arg(tex0FileDataID).arg(tex0Bytes) +
+                           " tex0Md5=" + (tex0Md5.isEmpty() ? QString("-") : tex0Md5) + " alphaFormat=" + alphaFormat +
+                           QString(" textures=%1 uniqueTextures=%2 layerReferences=%3 duplicateReferences=%4 materials=%5"
+                                   " textureSourceBytes=%6 textureGpuBytes=%7 alphaGpuBytes=%8 materialVertexBytes=%9")
+                             .arg(texturesSent).arg(uniqueTextures).arg(layerReferences).arg(duplicateReferences)
+                             .arg(materials).arg(textureSourceBytes).arg(textureGpuBytes).arg(alphaGpuBytes)
+                             .arg(materialVertexBytes) +
+                           QString(" tex0RoundTripMs=%1 tex0ParseMs=%2 textureFetchMs=%3 textureUploadMs=%4 alphaBuildMs=%5"
+                                   " materialBuildMs=%6")
+                             .arg(ms(tex0RoundTripMs)).arg(ms(tex0ParseMs)).arg(ms(textureFetchMs))
+                             .arg(ms(textureUploadMs)).arg(ms(alphaBuildMs)).arg(ms(materialBuildMs)) +
+                           " chunkStates={" + [this]() {
+                             QStringList s;
+                             for (const auto & c : chunkStates)
+                               s << c.first + "=" + QString::number(c.second);
+                             return s.join(",");
+                           }() + "}");
+}
+
+int UnityIpcServer::TerrainTileReport::chunkState(const QString & name) const
+{
+  for (const auto & c : chunkStates)
+    if (c.first == name)
+      return c.second;
+  return -1;
 }
 
 void UnityIpcServer::handleTerrainTileLoaded(const QJsonObject & msg)
@@ -1628,6 +1763,95 @@ void UnityIpcServer::handleTerrainTileLoaded(const QJsonObject & msg)
   r.managedHeapBytes = count64("managedHeapBytes");
   r.nativeAllocatedBytes = count64("nativeAllocatedBytes");
 
+  // Protocol 13 (TERRAIN TEXTURES): the requests the load retired (a count, the ids beside it; an array alone is taken as
+  // the ids) and the material. A player before it sends neither (-1, no material). Lists are read up to
+  // TERRAIN_REPORT_LIST_MAX entries (the retired ids, the chunk-state counters) or TERRAIN_REPORT_TEXTURES_MAX (the
+  // texture entries): the message is the player's, and what the host keeps of it is bounded.
+  {
+    const QJsonValue retired = msg.value("requestsRetired");
+    QJsonArray ids = msg.value("retiredRequestIds").toArray();
+    if (retired.isArray())
+    {
+      ids = retired.toArray();
+      r.requestsRetired = ids.size();
+    }
+    else if (retired.isDouble())
+      r.requestsRetired = (int)retired.toDouble();
+    for (int i = 0; i < ids.size() && i < TERRAIN_REPORT_LIST_MAX; i++)
+      r.retiredRequestIds << ids.at(i).toString();
+  }
+  const QJsonValue materialValue = msg.value("material");
+  if (materialValue.isObject())
+  {
+    const QJsonObject m = materialValue.toObject();
+    const auto mcount = [&m](const char * key) {
+      const QJsonValue v = m.value(QLatin1String(key));
+      return v.isDouble() ? (int)v.toDouble() : -1;
+    };
+    const auto mcount64 = [&m](const char * key) {
+      const QJsonValue v = m.value(QLatin1String(key));
+      return v.isDouble() ? (long long)v.toDouble() : -1LL;
+    };
+    r.hasMaterial = true;
+    r.materialState = m.value("state").toString();
+    r.materialReason = m.value("reason").toString();
+    r.tex0FileDataID = mcount("tex0FileDataID");
+    r.tex0Bytes = mcount64("tex0Bytes");
+    r.tex0Md5 = m.value("tex0Md5").toString();
+    r.alphaFormat = m.value("alphaFormat").toString();
+    const QJsonObject states = m.value("chunkStates").toObject();
+    for (auto it = states.begin(); it != states.end(); ++it)
+      if (r.chunkStates.size() < (size_t)TERRAIN_REPORT_LIST_MAX)
+        r.chunkStates.emplace_back(it.key(), it.value().isDouble() ? (int)it.value().toDouble() : -1);
+    const QJsonValue texturesValue = m.value("textures");
+    if (texturesValue.isArray())
+    {
+      const QJsonArray list = texturesValue.toArray();
+      r.texturesSent = list.size();
+      for (int i = 0; i < list.size() && i < TERRAIN_REPORT_TEXTURES_MAX; i++)
+      {
+        const QJsonObject t = list.at(i).toObject();
+        const auto tcount = [&t](const char * key) {
+          const QJsonValue v = t.value(QLatin1String(key));
+          return v.isDouble() ? (long long)v.toDouble() : -1LL;
+        };
+        TerrainTileReport::Texture x;
+        x.fileDataID = (int)tcount("fileDataID");
+        x.role = t.value("role").toString();
+        x.state = t.value("state").toString();
+        x.detail = t.value("detail").toString();
+        x.bytes = tcount("bytes");
+        x.md5 = t.value("md5").toString();
+        x.width = (int)tcount("width");
+        x.height = (int)tcount("height");
+        x.format = t.value("format").toString();
+        x.mips = (int)tcount("mips");
+        const QJsonValue upload = t.value("uploadMs");
+        x.uploadMs = upload.isDouble() ? upload.toDouble() : -1.0;
+        r.textures.push_back(x);
+      }
+    }
+    r.uniqueTextures = mcount("uniqueTextures");
+    r.layerReferences = mcount("layerReferences");
+    r.duplicateReferences = mcount("duplicateReferences");
+    r.textureSourceBytes = mcount64("textureSourceBytes");
+    r.textureGpuBytes = mcount64("textureGpuBytes");
+    r.alphaGpuBytes = mcount64("alphaGpuBytes");
+    r.materialVertexBytes = mcount64("materialVertexBytes");
+    r.materials = mcount("materials");
+    const QJsonObject mt = m.value("timings").toObject();
+    const auto mtiming = [&mt](const char * key) {
+      const QJsonValue v = mt.value(QLatin1String(key));
+      return v.isDouble() ? v.toDouble() : -1.0;
+    };
+    r.tex0RoundTripMs = mtiming("tex0RoundTripMs");
+    r.tex0ParseMs = mtiming("tex0ParseMs");
+    r.textureFetchMs = mtiming("textureFetchMs");
+    r.textureUploadMs = mtiming("textureUploadMs");
+    r.alphaBuildMs = mtiming("alphaBuildMs");
+    r.materialBuildMs = mtiming("materialBuildMs");
+  }
+
   m_stats.terrainReports++;
   if (r.status == "built")
     m_stats.terrainBuilt++;
@@ -1639,6 +1863,38 @@ void UnityIpcServer::handleTerrainTileLoaded(const QJsonObject & msg)
     LOG_ERROR << "[unityipc] <- terrainTileLoaded" << r.describe();
   else
     LOG_INFO << "[unityipc] <- terrainTileLoaded" << r.describe();
+  // Each texture of the material on a line of its own (the player's texts appended, never passed through arg()), the
+  // first TERRAIN_REPORT_LIST_MAX of them; the rest (a list that long is mostly "not requested") counted by state.
+  std::map<QString, int> notLogged;
+  int logged = 0;
+  for (const TerrainTileReport::Texture & t : r.textures)
+  {
+    if (logged >= TERRAIN_REPORT_LIST_MAX)
+    {
+      notLogged[t.role + " " + t.state]++;
+      continue;
+    }
+    logged++;
+    LOG_INFO << "[unityipc]    load" << r.load << "texture" << t.fileDataID << (t.role.isEmpty() ? QString("-") : t.role)
+             << t.state
+             << QString("bytes=%1 %2x%3 ").arg(t.bytes).arg(t.width).arg(t.height) +
+                  (t.format.isEmpty() ? QString("-") : t.format) +
+                  QString(" mips=%1 uploadMs=%2").arg(t.mips)
+                    .arg(t.uploadMs < 0.0 ? QString("-") : QString::number(t.uploadMs, 'f', 3)) +
+                  " md5=" + (t.md5.isEmpty() ? QString("-") : t.md5) +
+                  (t.detail.isEmpty() ? QString() : " detail=\"" + t.detail + "\"");
+  }
+  if (!notLogged.empty())
+  {
+    QStringList counts;
+    for (const auto & n : notLogged)
+      counts << n.first + QString(" %1").arg(n.second);
+    LOG_INFO << "[unityipc]    load" << r.load << ":" << (int)r.textures.size() - logged
+             << "more texture entries, by role and state: " + counts.join(", ");
+  }
+  if (r.texturesSent > (int)r.textures.size())
+    LOG_WARNING << "[unityipc]    load" << r.load << ":" << r.texturesSent << "texture entries sent," << (int)r.textures.size()
+                << "read (at most" << TERRAIN_REPORT_TEXTURES_MAX << ")";
   if (onTerrainTileLoaded)
     onTerrainTileLoaded(r);
 }

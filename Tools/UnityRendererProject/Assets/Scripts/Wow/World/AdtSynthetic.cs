@@ -11,6 +11,10 @@
 // spec says otherwise), MCCV (when asked), MCNR (448 bytes), MCSE (empty). By default the stored
 // position is the chunk's corner from TerrainCoordinates rounded to float32, the base height 50 and
 // the heights k * 0.25.
+//
+// tex0 written by Tex0 (terrain materials): MVER, MAMP (4 zero bytes), MDID, MHID, 256 MCNKs of MCLY,
+// MCSH and MCAL (alpha maps back to back: RLE row by row, raw 4096 bytes, or raw 2048 bytes low nibble
+// first), then MTXP (16 bytes per MDID entry) when asked, then any extra top-level chunks (repeats).
 
 using System;
 using System.Collections.Generic;
@@ -29,6 +33,11 @@ namespace Wmv.Wow.World
         public ushort LowResolutionHoles;
         /// <summary>Write an MCCV (and set flag 0x40).</summary>
         public bool VertexColors;
+        /// <summary>The MCCV payload to write (145 x B, G, R, A; implies an MCCV); null = 580 zero bytes
+        /// when VertexColors is set.</summary>
+        public byte[] VertexColorBytes;
+        /// <summary>Set flag 0x40 with the MCCV (every audited chunk does); false writes the MCCV without it.</summary>
+        public bool VertexColorFlag = true;
         /// <summary>Stored position z: the base the MCVT heights are relative to.</summary>
         public float BaseHeight = 50f;
         /// <summary>MCVT entry k -> height relative to BaseHeight; null = k * 0.25.</summary>
@@ -157,8 +166,9 @@ namespace Wmv.Wow.World
         public static byte[] RootMcnk(int index, int tileX, int tileY, RootChunkSpec spec)
         {
             spec = spec ?? new RootChunkSpec();
+            bool mccv = spec.VertexColors || spec.VertexColorBytes != null;
             var h = new byte[128];
-            PutU32(h, 0, spec.Flags | (spec.VertexColors ? 0x40u : 0u));
+            PutU32(h, 0, spec.Flags | (mccv && spec.VertexColorFlag ? 0x40u : 0u));
             PutU32(h, 4, (uint)(spec.HeaderIndexX >= 0 ? spec.HeaderIndexX : index % 16));
             PutU32(h, 8, (uint)(spec.HeaderIndexY >= 0 ? spec.HeaderIndexY : index / 16));
             PutU64(h, 20, spec.Holes);
@@ -180,7 +190,7 @@ namespace Wmv.Wow.World
             }
             var mcnr = new byte[448];
             for (int k = 0; k < 435; k++) mcnr[k] = (byte)(k % 127);
-            byte[] sub = Cat(mcvtChunk, spec.VertexColors ? Chunk("MCCV", new byte[580]) : new byte[0], Chunk("MCNR", mcnr), Chunk("MCSE", new byte[0]));
+            byte[] sub = Cat(mcvtChunk, mccv ? Chunk("MCCV", spec.VertexColorBytes ?? new byte[580]) : new byte[0], Chunk("MCNR", mcnr), Chunk("MCSE", new byte[0]));
             return Chunk("MCNK", Cat(h, sub));
         }
 
@@ -288,6 +298,184 @@ namespace Wmv.Wow.World
                 left -= n;
             }
             return b.ToArray();
+        }
+
+        // ------------------------------------------------------------------ tex0 with materials
+
+        /// <summary>RLE of 4096 alpha values, row by row (no run crosses a 64-texel row, as in every audited
+        /// map): a fill run (0x80 | n, value) for 2..64 equal values, copy runs (n, n bytes) for the rest.</summary>
+        public static byte[] RleEncode(byte[] values)
+        {
+            if (values == null || values.Length != 4096)
+                throw new ArgumentException("an alpha map has 4096 values");
+            var b = new List<byte>();
+            for (int row = 0; row < 64; row++)
+            {
+                int p = row * 64, end = p + 64;
+                var copy = new List<byte>();
+                while (p < end)
+                {
+                    int run = 1;
+                    while (p + run < end && values[p + run] == values[p])
+                        run++;
+                    if (run >= 2)
+                    {
+                        FlushCopy(b, copy);
+                        b.Add((byte)(0x80 | run));
+                        b.Add(values[p]);
+                    }
+                    else
+                        copy.Add(values[p]);
+                    p += run;
+                }
+                FlushCopy(b, copy);
+            }
+            return b.ToArray();
+        }
+
+        static void FlushCopy(List<byte> b, List<byte> copy)
+        {
+            if (copy.Count == 0)
+                return;
+            b.Add((byte)copy.Count);
+            b.AddRange(copy);
+            copy.Clear();
+        }
+
+        /// <summary>A 4-bit map of 4096 values 0..15 as stored: 2048 bytes, low nibble first.</summary>
+        public static byte[] Raw4(byte[] nibbles)
+        {
+            if (nibbles == null || nibbles.Length != 4096)
+                throw new ArgumentException("an alpha map has 4096 values");
+            var b = new byte[2048];
+            for (int i = 0; i < 2048; i++)
+                b[i] = (byte)((nibbles[2 * i] & 0x0F) | ((nibbles[2 * i + 1] & 0x0F) << 4));
+            return b;
+        }
+
+        /// <summary>A 4096-value alpha map from a function of (row, col).</summary>
+        public static byte[] AlphaMapOf(Func<int, int, int> value)
+        {
+            var v = new byte[4096];
+            for (int r = 0; r < 64; r++)
+                for (int c = 0; c < 64; c++)
+                    v[r * 64 + c] = (byte)value(r, c);
+            return v;
+        }
+
+        /// <summary>One MTXP entry (16 bytes): flags (bits 4-7 = texture-scale exponent), height scale,
+        /// height offset, word 3. The audited defaults are (0, 0.0, 1.0, 0).</summary>
+        public static byte[] MtxpEntry(uint flags, float heightScale = 0f, float heightOffset = 1f, uint word3 = 0)
+        {
+            var b = new byte[16];
+            PutU32(b, 0, flags);
+            PutF32(b, 4, heightScale);
+            PutF32(b, 8, heightOffset);
+            PutU32(b, 12, word3);
+            return b;
+        }
+
+        /// <summary>One MCLY layer and its alpha map for TexMcnkFrom.</summary>
+        public sealed class TexLayerSpec
+        {
+            public uint TextureIndex;
+            /// <summary>Flag bits added to the ones written for the layer's role: 0x100 on every layer after
+            /// the first, 0x200 on an RLE layer.</summary>
+            public uint ExtraFlags;
+            /// <summary>Write exactly these flags instead (null = role bits | ExtraFlags).</summary>
+            public uint? Flags;
+            public AlphaStorage Storage = AlphaStorage.Compressed;
+            /// <summary>4096 values (0..15 for Uncompressed4); null = all 0. Not written for the first layer.</summary>
+            public byte[] Alpha;
+            public uint Word12;
+            /// <summary>Write this MCAL offset instead of the running one.</summary>
+            public uint? AlphaOffset;
+        }
+
+        /// <summary>A tex0 MCNK: MCLY from the layers (none: an empty MCLY, unless OmitMcly), MCSH, then the
+        /// layers' alpha maps back to back in MCAL (none for a single layer, unless McalOverride).</summary>
+        public sealed class TexChunkSpec
+        {
+            public TexLayerSpec[] Layers = new TexLayerSpec[0];
+            public bool OmitMcly;
+            public byte[] Shadow;
+            public byte[] McalOverride;
+
+            public static TexChunkSpec Of(params TexLayerSpec[] layers) { return new TexChunkSpec { Layers = layers }; }
+        }
+
+        public static TexLayerSpec Layer(uint textureIndex, AlphaStorage storage = AlphaStorage.Compressed, byte[] alpha = null, uint extraFlags = 0)
+        {
+            return new TexLayerSpec { TextureIndex = textureIndex, Storage = storage, Alpha = alpha, ExtraFlags = extraFlags };
+        }
+
+        public static byte[] TexMcnkFrom(TexChunkSpec spec)
+        {
+            spec = spec ?? new TexChunkSpec();
+            TexLayerSpec[] layers = spec.Layers ?? new TexLayerSpec[0];
+            var mcly = new byte[16 * layers.Length];
+            var mcal = new List<byte>();
+            for (int k = 0; k < layers.Length; k++)
+            {
+                TexLayerSpec l = layers[k];
+                byte[] stored = new byte[0];
+                uint role = 0;
+                if (k >= 1)
+                {
+                    byte[] values = l.Alpha ?? new byte[4096];
+                    role = 0x100;
+                    if (l.Storage == AlphaStorage.Compressed) { role |= 0x200; stored = RleEncode(values); }
+                    else if (l.Storage == AlphaStorage.Uncompressed8) stored = (byte[])values.Clone();
+                    else stored = Raw4(values);
+                }
+                PutU32(mcly, 16 * k, l.TextureIndex);
+                PutU32(mcly, 16 * k + 4, l.Flags ?? (role | l.ExtraFlags));
+                PutU32(mcly, 16 * k + 8, l.AlphaOffset ?? (k >= 1 ? (uint)mcal.Count : 0u));
+                PutU32(mcly, 16 * k + 12, l.Word12);
+                mcal.AddRange(stored);
+            }
+            var parts = new List<byte[]>();
+            if (!spec.OmitMcly) parts.Add(Chunk("MCLY", mcly));
+            if (spec.Shadow != null) parts.Add(Chunk("MCSH", spec.Shadow));
+            if (spec.McalOverride != null) parts.Add(Chunk("MCAL", spec.McalOverride));
+            else if (layers.Length > 1) parts.Add(Chunk("MCAL", mcal.ToArray()));
+            return Chunk("MCNK", Cat(parts.ToArray()));
+        }
+
+        /// <summary>What Tex0 writes: MVER, MAMP (4 zero bytes), MDID, MHID (zeros of MDID's length when null),
+        /// the 256 MCNKs, then MTXP when given -- the order of the audited files with MTXP.</summary>
+        public sealed class Tex0Spec
+        {
+            public uint[] Mdid = { 1000, 1001, 1002, 1003 };
+            public uint[] Mhid;
+            /// <summary>The MHID payload as given (e.g. not whole u32s); overrides Mhid.</summary>
+            public byte[] MhidRaw;
+            public bool OmitMhid;
+            /// <summary>MTXP payload (e.g. MtxpEntry per MDID entry, concatenated); null = no MTXP.</summary>
+            public byte[] Mtxp;
+            /// <summary>MCNK n; a null spec (or a null function) = one base layer naming MDID entry 0.</summary>
+            public Func<int, TexChunkSpec> Chunk;
+            /// <summary>Whole chunks (Chunk(tag, payload)) written last, e.g. a second MDID, MHID or MTXP.</summary>
+            public byte[][] Extra;
+        }
+
+        public static byte[] Tex0(Tex0Spec spec)
+        {
+            spec = spec ?? new Tex0Spec();
+            uint[] mdid = spec.Mdid ?? new uint[0];
+            var parts = new List<byte[]> { Mver(), Chunk("MAMP", new byte[4]), Chunk("MDID", U32Payload(mdid)) };
+            if (!spec.OmitMhid)
+                parts.Add(Chunk("MHID", spec.MhidRaw ?? U32Payload(spec.Mhid ?? new uint[mdid.Length])));
+            for (int i = 0; i < 256; i++)
+            {
+                TexChunkSpec c = spec.Chunk != null ? spec.Chunk(i) : null;
+                parts.Add(TexMcnkFrom(c ?? TexChunkSpec.Of(Layer(0))));
+            }
+            if (spec.Mtxp != null)
+                parts.Add(Chunk("MTXP", spec.Mtxp));
+            if (spec.Extra != null)
+                parts.AddRange(spec.Extra);
+            return Cat(parts.ToArray());
         }
     }
 }

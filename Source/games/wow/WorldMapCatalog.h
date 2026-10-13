@@ -96,6 +96,13 @@ namespace wow
     int storageFileDataId = -1;  // the FileDataID the storage root gives the WDT; -1 when it is not listed
     qint64 bytes = -1;           // Available: the WDT's size
     QString sha256;              // Available, with hashing on: the SHA-256 of the bytes read (hex), to compare with a known copy
+    QString contentKey;          // Available: the content key every byte was checked against -- the MD5 of the bytes --
+                                 // as lowercase hex (CASCFolder::readWholeFile's contentKeyOut); empty otherwise
+    qint64 readBytes = 0;        // the bytes this inspection read from the storage, whatever came of them: the file's size
+                                 // once the read began (Available; a read that then failed its content key, a frame's
+                                 // hash, a missing key (encrypted) or the storage partway: at most that size, an upper
+                                 // bound), 0 when nothing was read (not listed, not local, too large, no storage, its size
+                                 // unreadable)
     double milliseconds = 0.0;   // how long the inspection took
   };
 
@@ -179,9 +186,10 @@ namespace wow
     void setHashing(bool on) { m_hashing = on; }
     // The same inspection for any file of this catalogue's client, by FileDataID or by path (a tile's parts, a global
     // world model): listed by the root, on this computer, and read in full; with bytes given, they receive the file
-    // when it is Available. Refused -- state NotChecked, the reason in detail and in lastRefusal() -- when the catalogue
-    // is not ready or no longer belongs to the loaded client. No check of what the file is: that is the caller's. A file
-    // larger than maxBytes is not read: Unreadable, the detail naming its size and the limit.
+    // when it is Available (and contentKey is their MD5, the key they were checked against; readBytes says how much
+    // was read whatever the outcome). Refused -- state NotChecked, the reason in detail and in lastRefusal() -- when the
+    // catalogue is not ready or no longer belongs to the loaded client. No check of what the file is: that is the
+    // caller's. A file larger than maxBytes is not read: Unreadable, the detail naming its size and the limit.
     WdtInspection inspectFile(const WdtReference & reference, QByteArray * bytes = nullptr,
                               qint64 maxBytes = 64 * 1024 * 1024);
     // A map's WDT bytes, read through the client's storage by the map's own reference -- what a runtime hands the

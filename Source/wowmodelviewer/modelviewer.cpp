@@ -81,7 +81,6 @@
 
 #include "logger/Logger.h"
 
-#include <QCryptographicHash>
 #include <QFile>
 #include <QFileInfo>
 #include <QDir>
@@ -3474,6 +3473,9 @@ ModelViewer::MapAssetDecision ModelViewer::decideMapAssetRequest(const QJsonObje
     stale << QString("no terrain load is current (request load %1)").arg(load);
   else if (load != current->load)
     stale << QString("request load %1, current %2").arg(load).arg(current->load);
+  else if (current->ended)
+    // The player has answered the load: whatever it still asks for is read for nobody.
+    stale << QString("load %1 was reported %2").arg(load).arg(current->endedStatus);
   if (epoch != epochNow)
     stale << QString("request epoch %1, current %2").arg(epoch).arg(epochNow);
   if (!catalogueBelongs)
@@ -3484,12 +3486,14 @@ ModelViewer::MapAssetDecision ModelViewer::decideMapAssetRequest(const QJsonObje
     d.detail = stale.join("; ");
     return d;
   }
-  // The current load's own two files, and only them: its WDT, then the one root ADT it asks for once the WDT was served.
-  // (The host parses no WDT, so it cannot tell whether that root is one the WDT names: the player checks the tile.)
+  // The current load's own files, and only them: its WDT, then the one root ADT it asks for once the WDT was served;
+  // with textures (protocol 13), the one tex0 ADT once the WDT was served, then textures once the tex0 was. (The host
+  // parses no WDT and no tex0, so it cannot tell whether that root, tex0 or texture is one they name: the player checks
+  // the tile; the host vouches for the client, the load, the order, the kind and the limits.)
   const QString role = request.value("role").toString();
   const int fileDataID = request.value("fileDataID").toInt(0);
-  if (role != "wdt" && role != "rootAdt")
-    return refused("unknown role \"" + role + "\" (wdt or rootAdt)");
+  if (role != "wdt" && role != "rootAdt" && role != "tex0Adt" && role != "texture")
+    return refused("unknown role \"" + role + "\" (wdt, rootAdt, tex0Adt or texture)");
   if (fileDataID <= 0)
     return refused(QString("FileDataID %1 names no file").arg(fileDataID));
   if (role == "wdt" && fileDataID != current->wdtFileDataID)
@@ -3499,7 +3503,105 @@ ModelViewer::MapAssetDecision ModelViewer::decideMapAssetRequest(const QJsonObje
   if (role == "rootAdt" && current->rootFileDataID > 0 && fileDataID != current->rootFileDataID)
     return refused(QString("load %1 has asked for root ADT %2: one root ADT per load, not %3")
                      .arg(load).arg(current->rootFileDataID).arg(fileDataID));
+  const bool textures = role == "tex0Adt" || role == "texture";
+  if (textures && current->maxTextureBytes <= 0)
+    return refused(QString("load %1 was sent without terrain textures (the player does not draw them), so no %2 is served")
+                     .arg(load).arg(role == "texture" ? "texture" : "tex0 ADT"));
+  if (role == "tex0Adt" && !current->wdtServed)
+    return refused(QString("load %1's WDT has not been served, so no tex0 ADT is").arg(load));
+  if (role == "tex0Adt" && current->tex0Asked)
+    return refused(QString("load %1 has asked for its tex0 ADT (%2) already: one tex0 ADT per load, asked once (this "
+                           "request: %3)").arg(load).arg(current->tex0FileDataID).arg(fileDataID));
+  if (role == "texture")
+  {
+    if (!current->tex0Served)
+      return refused(QString("load %1's tex0 ADT has not been served, so no texture is").arg(load));
+    if (std::find(current->textureIds.begin(), current->textureIds.end(), fileDataID) != current->textureIds.end())
+      return refused(QString("load %1 has asked for texture %2 before: each texture once per load").arg(load).arg(fileDataID));
+    if ((int)current->textureIds.size() >= current->maxTexturesPerLoad)
+      return refused(QString("load %1 has asked for %2 textures: at most %3 per load, not %4")
+                       .arg(load).arg(current->textureIds.size()).arg(current->maxTexturesPerLoad).arg(fileDataID));
+  }
+  // However the roles add up, a load reads at most its WDT, root and tex0 and one file per texture id.
+  const int readsAllowed = 3 + std::max(0, current->maxTexturesPerLoad);
+  if (current->reads >= readsAllowed)
+    return refused(QString("load %1 has read %2 files: at most %3 per load (3 + %4 textures)")
+                     .arg(load).arg(current->reads).arg(readsAllowed).arg(std::max(0, current->maxTexturesPerLoad)));
+  d.maxBytes = current->maxAssetBytes;
+  if (role == "texture")
+  {
+    // The texture bytes a load may read: refused once they are spent, otherwise a read that cannot overrun them (a file
+    // over the limit is not read; the answer names the limit applied).
+    if (current->textureBytesRead >= current->maxTextureBytesPerLoad)
+      return refused(QString("load %1 has read %2 bytes of textures: at most %3 per load")
+                       .arg(load).arg(current->textureBytesRead).arg(current->maxTextureBytesPerLoad));
+    d.maxBytes = std::min(current->maxTextureBytes, current->maxTextureBytesPerLoad - current->textureBytesRead);
+  }
   return d;
+}
+
+void ModelViewer::noteMapAssetRead(TerrainRequest & current, const QJsonObject & request)
+{
+  const QString role = request.value("role").toString();
+  const int fileDataID = request.value("fileDataID").toInt(0);
+  current.reads++;
+  // The first root ADT the load asks for is the only one it may have; the tex0 is asked for once, whatever comes of it;
+  // a texture id once.
+  if (role == "rootAdt")
+    current.rootFileDataID = fileDataID;
+  else if (role == "tex0Adt")
+  {
+    current.tex0Asked = true;
+    current.tex0FileDataID = fileDataID;
+  }
+  else if (role == "texture")
+    current.textureIds.push_back(fileDataID);
+}
+
+void ModelViewer::noteMapAssetResult(TerrainRequest & current, const QString & role, qint64 bytesRead, bool available)
+{
+  if (role == "texture")
+    current.textureBytesRead += std::max<qint64>(0, bytesRead);
+  else if (role == "wdt" && available)
+    current.wdtServed = true;
+  else if (role == "tex0Adt" && available)
+    current.tex0Served = true;
+}
+
+QString ModelViewer::mapAssetKindProblem(const QString & role, const QByteArray & bytes)
+{
+  // Four-character codes as they stand in the file, readable where they are printable, with their bytes in hex.
+  const auto code = [&bytes](int at) {
+    const QByteArray c = bytes.mid(at, 4);
+    QString text;
+    for (char ch : c)
+      text += (ch >= 0x20 && ch < 0x7f) ? QLatin1Char(ch) : QLatin1Char('?');
+    return text + " (hex " + QString::fromLatin1(c.toHex(' ')) + ")";
+  };
+  if (role == "tex0Adt")
+  {
+    // MVER ("REVM" in file byte order) at 0, its size at 4; MAMP ("PMAM") right after it. Every tex0 of Retail, Classic
+    // Era and Classic Beta read for the census (44,577) has that form, and no other kind of map file does.
+    if (bytes.size() < 8 || !bytes.startsWith("REVM"))
+      return "not a tex0 ADT: first chunk " + (bytes.size() < 4 ? QString("missing (%1 bytes)").arg(bytes.size()) : code(0)) +
+             ", not MVER (REVM)";
+    quint32 size = 0;
+    for (int i = 3; i >= 0; i--)
+      size = (size << 8) | (unsigned char)bytes[4 + i];
+    const qint64 second = 8 + (qint64)size;
+    if (second + 4 > bytes.size())
+      return QString("not a tex0 ADT: the MVER chunk (size %1) leaves no second chunk in %2 bytes").arg(size).arg(bytes.size());
+    if (bytes.mid((int)second, 4) != "PMAM")
+      return "not a tex0 ADT: second chunk " + code((int)second) + ", not MAMP (PMAM)";
+    return QString();
+  }
+  if (role == "texture")
+  {
+    if (!bytes.startsWith("BLP2"))
+      return "not a BLP2 texture: it starts with " + (bytes.size() < 4 ? QString("%1 bytes only").arg(bytes.size()) : code(0));
+    return QString();
+  }
+  return QString();
 }
 
 bool ModelViewer::ResolveTerrainTile(int mapId, int tileX, int tileY, UnityIpcServer::TerrainTileCommand & command,
@@ -3577,6 +3679,14 @@ int ModelViewer::RequestTerrainTile(int mapId, int tileX, int tileY, QString & w
     return refuse(unresolved);
   command.load = m_terrainLoadSerial + 1;
   command.assetEpoch = UnityAssetAccess::clientEpoch();
+  // TERRAIN TEXTURES (protocol 13): a player that draws them is offered the tile's tex0 and textures, within these limits;
+  // an older one is offered none, and its load is served the WDT and the root alone.
+  if (ipc->playerDrawsTerrainTextures())
+  {
+    command.maxTextureBytes = UnityIpcServer::MAX_TERRAIN_TEXTURE_BYTES;
+    command.maxTextureBytesPerLoad = UnityIpcServer::MAX_TERRAIN_TEXTURE_BYTES_PER_LOAD;
+    command.maxTexturesPerLoad = UnityIpcServer::MAX_TERRAIN_TEXTURES_PER_LOAD;
+  }
   if (!ipc->sendLoadTerrainTile(command))
     return refuse("the load could not be sent to the player");
   // Raised only now that the load is out: the serial counts the loads the player was sent.
@@ -3589,6 +3699,10 @@ int ModelViewer::RequestTerrainTile(int mapId, int tileX, int tileY, QString & w
   request.tileY = tileY;
   request.wdtFileDataID = command.wdtFileDataID;
   request.catalogueGeneration = m_mapCatalog->client().storageGeneration;
+  request.maxAssetBytes = command.maxAssetBytes;
+  request.maxTextureBytes = command.maxTextureBytes;
+  request.maxTextureBytesPerLoad = command.maxTextureBytesPerLoad;
+  request.maxTexturesPerLoad = command.maxTexturesPerLoad;
   m_terrainRequest = request;
   // The player drops the model or world model it was building for this (the latest command wins; the one it shows stays,
   // hidden), so the waits for either end here. A model dropped so is one the player finished without, and what it shows
@@ -3647,28 +3761,48 @@ UnityIpcServer::MapAssetAnswer ModelViewer::ServeMapAsset(const QJsonObject & re
   }
   const QString role = request.value("role").toString();
   const int fileDataID = request.value("fileDataID").toInt(0);
-  // The first root ADT the load asks for is the only one it may have.
-  if (role == "rootAdt")
-    m_terrainRequest.rootFileDataID = fileDataID;
+  // Accounted before the read, whatever comes of it: the read itself is what the load's limits count.
+  noteMapAssetRead(m_terrainRequest, request);
   // Read through the client's own storage, as the catalogue reads a WDT: listed, on this computer, every byte checked
-  // against its content key, and nothing larger than a map file is read.
+  // against its content key, and nothing larger than the decision's limit is read.
   wow::WdtReference reference;
   reference.kind = wow::WdtReference::Kind::FileDataId;
   reference.fileDataId = fileDataID;
   QByteArray bytes;
   QElapsedTimer read;
   read.start();
-  const wow::WdtInspection inspection = m_mapCatalog->inspectFile(reference, &bytes, UnityIpcServer::MAX_MAP_ASSET_BYTES);
+  const wow::WdtInspection inspection = m_mapCatalog->inspectFile(reference, &bytes, decision.maxBytes);
   answer.readMs = read.nsecsElapsed() / 1e6;
   answer.state = wow::WorldMapCatalog::availabilityName(inspection.state);
   answer.detail = inspection.detail;
-  if (inspection.state == wow::WdtAvailability::Available)
+  answer.bytesRead = inspection.readBytes;
+  bool available = inspection.state == wow::WdtAvailability::Available;
+  if (available)
   {
-    answer.bytes = bytes;
-    answer.md5 = QString::fromLatin1(QCryptographicHash::hash(bytes, QCryptographicHash::Md5).toHex());
-    if (role == "wdt")
-      m_terrainRequest.wdtServed = true;
+    // What the bytes are, for the roles that say (TERRAIN TEXTURES): four characters at known places, not a parse.
+    const QString kind = mapAssetKindProblem(role, bytes);
+    if (!kind.isEmpty())
+    {
+      available = false;
+      answer.state = wow::WorldMapCatalog::availabilityName(wow::WdtAvailability::Unreadable);
+      answer.detail = QString("FileDataID %1 was read, but it is ").arg(fileDataID) + kind;
+    }
+    else if (inspection.contentKey.size() != 32)
+    {
+      // An available read always carries the key it was checked against (CASCFolder::readWholeFile): its absence is a
+      // fault of this viewer, answered as one, never covered by hashing the bytes here.
+      available = false;
+      answer.state = wow::WorldMapCatalog::availabilityName(wow::WdtAvailability::Unreadable);
+      answer.detail = QString("internal error: FileDataID %1 was read as available without its content key").arg(fileDataID);
+      LOG_ERROR << "[unity-terrain]" << answer.detail;
+    }
+    else
+    {
+      answer.bytes = bytes;
+      answer.md5 = inspection.contentKey;
+    }
   }
+  noteMapAssetResult(m_terrainRequest, role, answer.bytesRead, available);
   return answer;
 }
 
@@ -3677,12 +3811,22 @@ void ModelViewer::OnTerrainTileLoaded(const UnityIpcServer::TerrainTileReport & 
   // Only an answer about the current load says what the player shows: an earlier load was superseded or cleared.
   if (report.load == 0 || report.load != m_terrainRequest.load)
     return;
+  // The player has answered the load: anything it still asks for this load is answered stale, unread (TERRAIN TEXTURES).
+  if (!m_terrainRequest.ended)
+  {
+    m_terrainRequest.ended = true;
+    m_terrainRequest.endedStatus = report.status;
+  }
   const QString tile = QString("%1_%2").arg(report.tileX).arg(report.tileY);
   if (report.status == "built")
   {
     LOG_INFO << "[unity-terrain] the Unity viewport built map" << report.mapId << "tile" << tile << ":" << report.chunksBuilt
              << "of" << report.chunks << "chunks," << report.triangles << "triangles," << report.holeCells << "hole cells in"
-             << report.totalMs << "ms; geometry only (no textures, liquids, doodads or buildings)";
+             << report.totalMs << "ms;"
+             << (report.hasMaterial ? "material " + report.materialState +
+                                        (report.materialReason.isEmpty() ? QString() : " (" + report.materialReason + ")")
+                                    : QString("geometry only (the player reports no material)"))
+             << "-- no liquids, doodads or buildings";
     m_playerContent = PlayerContent::Terrain;
     UpdateUnityViewportState();
   }
@@ -3703,6 +3847,8 @@ void ModelViewer::OnTerrainTileLoaded(const UnityIpcServer::TerrainTileReport & 
 void ModelViewer::TerrainTestRaiseLoadWithoutSending()
 {
   m_terrainRequest.load = ++m_terrainLoadSerial;
+  m_terrainRequest.ended = false;
+  m_terrainRequest.endedStatus.clear();
   LOG_INFO << "[unity-terrain] test: load serial raised to" << m_terrainLoadSerial << "without sending a load";
 }
 

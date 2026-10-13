@@ -116,8 +116,12 @@ class _CASCFOLDER_API_ CASCFolder
                   // a failed query that left no error)
     };
     // sizeOut, when given, receives the file's size once the storage has told it (TooLarge says how large), else -1.
+    // contentKeyOut, when given, receives the file's content key -- the 16-byte MD5 of its content that every byte was
+    // checked against -- with Read, and is emptied otherwise: a caller that needs the bytes' MD5 has it without hashing
+    // them again.
     ReadOutcome readWholeFile(int fileDataId, const QString & path, QByteArray & out, unsigned int * errorCode = nullptr,
-                              qint64 maxBytes = 64 * 1024 * 1024, qint64 * sizeOut = nullptr) const;
+                              qint64 maxBytes = 64 * 1024 * 1024, qint64 * sizeOut = nullptr,
+                              QByteArray * contentKeyOut = nullptr) const;
   private:
 
     int m_currentCascLocale;

@@ -4,7 +4,7 @@
 // localhost TCP listener before launching the player and passes the port on the player
 // command line ("-wmvPort <n>"); the player connects back, announces itself and then asks
 // WMV for whatever it needs. Transport: newline-delimited JSON (one object per line),
-// protocol version 12 (4 added world models: loadWoWModel "kind", mapObjectLoaded and runtimeState;
+// protocol version 13 (4 added world models: loadWoWModel "kind", mapObjectLoaded and runtimeState;
 // 5 added mounted characters: characterScene "mount", its answer's mount fields, runtimeState's
 // mountFileDataID, modelAnimation "role" and "load", and modelAnimationState "load", "hasRider" and
 // "rider"; 6 added captureScreenshot and its answer screenshotSaved; 7 added viewportBackground and
@@ -14,7 +14,10 @@
 // pixels follow their line as raw bytes, "payloadBytes" long -- see WmvStreamReader; 11 added characterScene
 // "attachmentsOnly" and "load" for the equipment of an ordinary NPC model; 12 added terrain tiles: loadTerrainTile,
 // clearTerrain, getMapAsset and its answer's role, load, assetEpoch, state, detail, readMs and md5, terrainTileLoaded,
-// and runtimeState's terrain fields -- see WmvTerrainSession).
+// and runtimeState's terrain fields -- see WmvTerrainSession; 13 added terrain textures: loadTerrainTile's
+// maxTextureBytes, maxTextureBytesPerLoad and maxTexturesPerLoad, getMapAsset's roles "tex0Adt" and "texture",
+// terrainTileLoaded's requestsRetired, retiredRequestIds and material, and runtimeState's terrainTextures,
+// terrainTextureBytes and terrainAlphaArrays).
 //
 // The player is WMV's new renderer foundation and renders directly from WoW data: it
 // requests raw assets and metadata from WMV -- which owns the app UI, the active
@@ -82,6 +85,12 @@
 //     assetResponse with the same requestId (never from the asset cache, never cacheable). Its requestId is
 //     "map" + n, a namespace of its own (every other request's is "u" + n): an answer with such an id, or with a
 //     role, goes to OnMapAssetResponse -- the terrain session -- and never to the asset cache or OnAssetResponse
+//   getMapAsset           { ..., role:"tex0Adt"|"texture", fileDataID }                          (protocol 13)
+//     the tile's tex0 ADT (MAID word 3), asked beside the root once the WDT is in, and the BLP textures its MDID names
+//     for the chunks drawn textured -- on an MPHD 0x80 map also the height textures its MHID names for them -- each
+//     distinct id once (both roles ask for role "texture"); at most WmvTerrainSession.MaxOutstanding requests of a load
+//     are out at once (a texture counts until its upload data are ready). Asked only when loadTerrainTile states a
+//     maxTextureBytes (a protocol-12 host states none)
 //   terrainTileLoaded     { load, status:"built"|"failed"|"superseded"|"cleared", reason, hostState, hostDetail,
 //                           mapId, tileX, tileY, wdtFileDataID, rootFileDataID, wdtBytes, rootBytes, wdtMd5, rootMd5,
 //                           chunks, chunksBuilt, chunksSkipped, chunksUnsupported, vertices, triangles, holeCells,
@@ -96,6 +105,22 @@
 //     space relative to the tile root (absent without a triangle), originWorld the world point (game frame, yards)
 //     the root stands for; a number the load did not reach is left out. The object counts and memory are sampled
 //     when the report is sent
+//   terrainTileLoaded (protocol 13 adds) { requestsRetired, retiredRequestIds:[...],
+//                           material:{ state:"textured"|"partial"|"unavailable"|"unsupported", reason, tex0FileDataID,
+//                                      tex0Bytes, tex0Md5, alphaFormat, chunkStates:{ counters },
+//                                      textures:[{ fileDataID, role:"diffuse"|"height", state, detail, bytes, md5,
+//                                                  width, height, format, mips, uploadMs }],
+//                                      uniqueTextures, layerReferences, duplicateReferences, textureSourceBytes,
+//                                      textureGpuBytes, alphaGpuBytes, materialVertexBytes, materials,
+//                                      timings:{ tex0RoundTripMs, tex0ParseMs, textureFetchMs, textureUploadMs,
+//                                                alphaBuildMs, materialBuildMs } } }
+//     requestsRetired: how many of the load's requests were still out when it ended (each retired, at most
+//     WmvTerrainSession.MaxOutstanding), their ids beside it. material: sent with every "built" report, and with any
+//     other once the load had built it -- its chunk states settled with the texture failures answered so far (a texture
+//     still "requested" or "queued" is no failure yet, and the reason then says how many are unanswered); a texture's
+//     state is the host's, quoted, or the player's own ("no texture id", "not requested", "md5 mismatch", "decode
+//     failed", "transport failure"); its role says whether a layer uses it as its diffuse texture (MDID) or its height
+//     texture (MHID, MPHD 0x80 maps), one entry per role an id has
 //   runtimeState (protocol 12 adds) { liveTerrainTiles, terrainLoad, terrainLoading, terrainView, cameraMask,
 //                                     meshObjects, materialObjects, terrainMeshes, terrainMaterials,
 //                                     terrainGameObjects, terrainPendingRequests, terrainRetiredRequests,
@@ -111,7 +136,10 @@
 //     with its request unanswered; never capped) and the id of the last ("" for none), the map answers routed to it
 //     and those it dropped (late plus unowned, then each apart: late = to a request of an ended load it still
 //     remembers, unowned = any other), and the load timeout in effect in milliseconds (-wmvTerrainTimeoutMs, 30000
-//     by default)
+//     by default). Protocol 13 changes the bounds (requests waiting at most WmvTerrainSession.MaxOutstanding, ended
+//     loads' requests remembered at most RetiredCapacity, 128) and adds terrainTextures (the layer textures the terrain
+//     tiles hold), terrainTextureBytes (their GPU size, estimated from the formats and mips uploaded) and
+//     terrainAlphaArrays (the tiles' alpha arrays)
 //
 // WMV -> player
 //   loadWoWModel  { path, fileDataID, client, character, load, kind, keepView }
@@ -153,6 +181,10 @@
 //     then the root ADT its MAID names for (tileX, tileY), asked for by getMapAsset under load and assetEpoch. The
 //     latest command wins: a model load in flight is dropped, the model on screen stays (hidden) until a loadWoWModel
 //     leaves the terrain view (WmvMainTerrain)
+//   loadTerrainTile (protocol 13 adds) { maxTextureBytes, maxTextureBytesPerLoad, maxTexturesPerLoad }
+//     the texture limits: one texture file, the texture bytes the host reads for one load, the texture ids one load
+//     may ask for. Absent (0) from a host before protocol 13: the player then asks for no tex0 and no texture, and
+//     the tile's material is "unavailable" (the geometry is built as before)
 //   clearTerrain  { reason }                                                         (protocol 12)
 //     a terrain load in flight is answered "cleared"; a tile on screen is taken away, without an answer
 //   modelTextures { requestId, ok, fileDataID, textures:[{ index, type, fileDataID, source }] }
@@ -215,7 +247,7 @@ using Wmv.Wow;
 
 public class WmvIpcClient : MonoBehaviour
 {
-    public const int ProtocolVersion = 12;
+    public const int ProtocolVersion = 13;
 
     /// <summary>The loadWoWModel kind of a world model; anything else is an M2.</summary>
     public const string KindMapObject = "wmo";
@@ -462,12 +494,22 @@ public class WmvIpcClient : MonoBehaviour
         public string WdtPath = "";         // path clients only
         public int TileX, TileY;
         public int MaxAssetBytes;       // the largest map file the host will serve; a larger answer is refused
+        // Protocol 13: the texture limits (0 from a host before it: no tex0 and no texture is asked for).
+        public int MaxTextureBytes;         // one texture file
+        public int MaxTextureBytesPerLoad;  // texture bytes the host reads for one load (the host enforces it)
+        public int MaxTexturesPerLoad;      // texture ids one load may ask for
+
+        /// <summary>The host serves terrain textures for this load (a protocol-13 host states maxTextureBytes).</summary>
+        public bool TexturesOffered { get { return MaxTextureBytes > 0; } }
 
         public override string ToString()
         {
-            return string.Format("load {0} epoch {1} map {2} ({3}) tile {4}_{5} wdt {6} (by {7}{8}) client {9} {10} maxAssetBytes {11}",
+            return string.Format("load {0} epoch {1} map {2} ({3}) tile {4}_{5} wdt {6} (by {7}{8}) client {9} {10} maxAssetBytes {11}{12}",
                                  Load, AssetEpoch, MapId, MapDirectory, TileX, TileY, WdtFileDataID, WdtResolvedBy,
-                                 string.IsNullOrEmpty(WdtPath) ? "" : " " + WdtPath, Product, Build, MaxAssetBytes);
+                                 string.IsNullOrEmpty(WdtPath) ? "" : " " + WdtPath, Product, Build, MaxAssetBytes,
+                                 TexturesOffered ? string.Format(" maxTextureBytes {0} maxTextureBytesPerLoad {1} maxTexturesPerLoad {2}",
+                                                                 MaxTextureBytes, MaxTextureBytesPerLoad, MaxTexturesPerLoad)
+                                                 : " (no textures offered)");
         }
     }
 
@@ -688,6 +730,9 @@ public class WmvIpcClient : MonoBehaviour
         public int tileX;
         public int tileY;
         public int maxAssetBytes;
+        public int maxTextureBytes;           // protocol 13: loadTerrainTile's texture limits (0 when absent)
+        public int maxTextureBytesPerLoad;
+        public int maxTexturesPerLoad;
         public string reason;         // clearTerrain
         public string state;          // assetResponse to getMapAsset: the host's decision
         public string detail;
@@ -1189,7 +1234,8 @@ public class WmvIpcClient : MonoBehaviour
                     Load = msg.load, AssetEpoch = msg.assetEpoch, MapId = msg.mapId, MapDirectory = msg.mapDirectory ?? "",
                     Product = msg.product ?? "", Build = msg.build ?? "", WdtFileDataID = msg.wdtFileDataID,
                     WdtResolvedBy = msg.wdtResolvedBy ?? "", WdtPath = msg.wdtPath ?? "", TileX = msg.tileX, TileY = msg.tileY,
-                    MaxAssetBytes = msg.maxAssetBytes,
+                    MaxAssetBytes = msg.maxAssetBytes, MaxTextureBytes = msg.maxTextureBytes,
+                    MaxTextureBytesPerLoad = msg.maxTextureBytesPerLoad, MaxTexturesPerLoad = msg.maxTexturesPerLoad,
                 });
                 break;
 
@@ -1439,8 +1485,8 @@ public class WmvIpcClient : MonoBehaviour
         return id;
     }
 
-    /// <summary>One map file for a terrain load (protocol 12 getMapAsset): role "wdt" or "rootAdt", under the load and
-    /// client epoch of the loadTerrainTile it serves. Never from or into the asset cache: the host's answer says what it
+    /// <summary>One map file for a terrain load (protocol 12 getMapAsset): role "wdt" or "rootAdt" -- protocol 13 adds
+    /// "tex0Adt" and "texture" --, under the load and client epoch of the loadTerrainTile it serves. Never from or into the asset cache: the host's answer says what it
     /// decided about this load (state), which a kept file could not. Its id is "map" + n, from a counter of its own, and
     /// its answer comes back through OnMapAssetResponse only.</summary>
     public string RequestMapAsset(string role, int fileDataID, int load, int assetEpoch)
@@ -1600,6 +1646,41 @@ public class WmvIpcClient : MonoBehaviour
         public int LiveTerrainTiles, LiveModels, LiveMapObjects;
         public int MeshObjects, MaterialObjects, TerrainGameObjects;   // sampled when the report is sent
         public long ManagedHeapBytes, NativeAllocatedBytes;
+        // Protocol 13: the load's requests still out when it ended, each retired (WmvTerrainSession), and the material.
+        public int RequestsRetired;
+        public List<string> RetiredRequestIds = new List<string>();
+        public TerrainMaterialReport Material;          // null: not sent (a load that ended before its material was built)
+    }
+
+    /// <summary>The tile's texture material as terrainTileLoaded carries it (protocol 13; WmvTerrainSession fills it). A
+    /// count is always written; a byte count, a size or a timing that was not reached (negative) is left out.</summary>
+    public class TerrainMaterialReport
+    {
+        public string State = "unavailable";            // "textured" | "partial" | "unavailable" | "unsupported"
+        public string Reason = "";
+        public int Tex0FileDataID;
+        public long Tex0Bytes = -1;
+        public string Tex0Md5 = "";
+        public string AlphaFormat = "";                 // "8-bit" | "4-bit" (the WDT's announcement)
+        public List<KeyValuePair<string, int>> ChunkStates = new List<KeyValuePair<string, int>>();
+        public List<TerrainTextureReport> Textures = new List<TerrainTextureReport>();
+        public int UniqueTextures, LayerReferences, DuplicateReferences, Materials;
+        public long TextureSourceBytes, TextureGpuBytes, AlphaGpuBytes, MaterialVertexBytes;
+        public double Tex0RoundTripMs = -1, Tex0ParseMs = -1, TextureFetchMs = -1, TextureUploadMs = -1, AlphaBuildMs = -1,
+                      MaterialBuildMs = -1;
+    }
+
+    /// <summary>One texture of a terrain material: the host's state quoted (or the player's own) and what was uploaded.</summary>
+    public class TerrainTextureReport
+    {
+        public int FileDataID;
+        public string Role = "diffuse";                 // "diffuse" (MDID) | "height" (MHID, MPHD 0x80 maps)
+        public string State = "", Detail = "";
+        public long Bytes = -1;
+        public string Md5 = "";
+        public int Width = -1, Height = -1, Mips = -1;
+        public string Format = "";
+        public double UploadMs = -1;
     }
 
     /// <summary>Tell WMV what became of a terrain load (see TerrainTileReport).</summary>
@@ -1671,9 +1752,67 @@ public class WmvIpcClient : MonoBehaviour
           .Append(",\"materialObjects\":").Append(r.MaterialObjects)
           .Append(",\"terrainGameObjects\":").Append(r.TerrainGameObjects)
           .Append(",\"managedHeapBytes\":").Append(r.ManagedHeapBytes)
-          .Append(",\"nativeAllocatedBytes\":").Append(r.NativeAllocatedBytes)
-          .Append('}');
+          .Append(",\"nativeAllocatedBytes\":").Append(r.NativeAllocatedBytes);
+        // Protocol 13.
+        sb.Append(",\"requestsRetired\":").Append(r.RequestsRetired).Append(",\"retiredRequestIds\":[");
+        for (int i = 0; r.RetiredRequestIds != null && i < r.RetiredRequestIds.Count; i++)
+            sb.Append(i > 0 ? "," : "").Append('"').Append(Escape(r.RetiredRequestIds[i])).Append('"');
+        sb.Append(']');
+        if (r.Material != null)
+            AppendMaterial(sb, r.Material);
+        sb.Append('}');
         return sb.ToString();
+    }
+
+    static void AppendMaterial(StringBuilder sb, TerrainMaterialReport m)
+    {
+        sb.Append(",\"material\":{\"state\":\"").Append(Escape(m.State)).Append('"')
+          .Append(",\"reason\":\"").Append(Escape(m.Reason ?? "")).Append('"')
+          .Append(",\"tex0FileDataID\":").Append(m.Tex0FileDataID);
+        if (m.Tex0Bytes >= 0)
+            sb.Append(",\"tex0Bytes\":").Append(m.Tex0Bytes);
+        if (!string.IsNullOrEmpty(m.Tex0Md5))
+            sb.Append(",\"tex0Md5\":\"").Append(Escape(m.Tex0Md5)).Append('"');
+        sb.Append(",\"alphaFormat\":\"").Append(Escape(m.AlphaFormat ?? "")).Append('"')
+          .Append(",\"chunkStates\":{");
+        for (int i = 0; m.ChunkStates != null && i < m.ChunkStates.Count; i++)
+            sb.Append(i > 0 ? "," : "").Append('"').Append(Escape(m.ChunkStates[i].Key)).Append("\":").Append(m.ChunkStates[i].Value);
+        sb.Append("},\"textures\":[");
+        var inv = System.Globalization.CultureInfo.InvariantCulture;
+        for (int i = 0; m.Textures != null && i < m.Textures.Count; i++)
+        {
+            TerrainTextureReport t = m.Textures[i];
+            sb.Append(i > 0 ? ",{" : "{").Append("\"fileDataID\":").Append(t.FileDataID)
+              .Append(",\"role\":\"").Append(Escape(string.IsNullOrEmpty(t.Role) ? "diffuse" : t.Role)).Append('"')
+              .Append(",\"state\":\"").Append(Escape(t.State ?? "")).Append('"')
+              .Append(",\"detail\":\"").Append(Escape(t.Detail ?? "")).Append('"');
+            if (t.Bytes >= 0) sb.Append(",\"bytes\":").Append(t.Bytes);
+            if (!string.IsNullOrEmpty(t.Md5)) sb.Append(",\"md5\":\"").Append(Escape(t.Md5)).Append('"');
+            if (t.Width >= 0) sb.Append(",\"width\":").Append(t.Width);
+            if (t.Height >= 0) sb.Append(",\"height\":").Append(t.Height);
+            if (!string.IsNullOrEmpty(t.Format)) sb.Append(",\"format\":\"").Append(Escape(t.Format)).Append('"');
+            if (t.Mips >= 0) sb.Append(",\"mips\":").Append(t.Mips);
+            if (t.UploadMs >= 0) sb.Append(",\"uploadMs\":").Append(t.UploadMs.ToString("0.###", inv));
+            sb.Append('}');
+        }
+        sb.Append(']')
+          .Append(",\"uniqueTextures\":").Append(m.UniqueTextures)
+          .Append(",\"layerReferences\":").Append(m.LayerReferences)
+          .Append(",\"duplicateReferences\":").Append(m.DuplicateReferences)
+          .Append(",\"textureSourceBytes\":").Append(m.TextureSourceBytes)
+          .Append(",\"textureGpuBytes\":").Append(m.TextureGpuBytes)
+          .Append(",\"alphaGpuBytes\":").Append(m.AlphaGpuBytes)
+          .Append(",\"materialVertexBytes\":").Append(m.MaterialVertexBytes)
+          .Append(",\"materials\":").Append(m.Materials)
+          .Append(",\"timings\":{");
+        int timings = 0;
+        AppendTiming(sb, ref timings, "tex0RoundTripMs", m.Tex0RoundTripMs);
+        AppendTiming(sb, ref timings, "tex0ParseMs", m.Tex0ParseMs);
+        AppendTiming(sb, ref timings, "textureFetchMs", m.TextureFetchMs);
+        AppendTiming(sb, ref timings, "textureUploadMs", m.TextureUploadMs);
+        AppendTiming(sb, ref timings, "alphaBuildMs", m.AlphaBuildMs);
+        AppendTiming(sb, ref timings, "materialBuildMs", m.MaterialBuildMs);
+        sb.Append("}}");
     }
 
     static void AppendTiming(StringBuilder sb, ref int written, string key, double ms)
@@ -1719,6 +1858,10 @@ public class WmvIpcClient : MonoBehaviour
         // MapAnswersDropped).
         public int TerrainRetiredTotal, MapAnswersLate, MapAnswersUnowned;
         public string TerrainLastRetiredRequest;
+        // Protocol 13: the layer textures the terrain tiles hold, their GPU size (estimated from the formats and mips
+        // uploaded) and the tiles' alpha arrays (WmvRuntimeTerrainTile.LiveTextures and friends; 0 with no tile).
+        public int TerrainTextures, TerrainAlphaArrays;
+        public long TerrainTextureBytes;
     }
 
     /// <summary>
@@ -1774,7 +1917,10 @@ public class WmvIpcClient : MonoBehaviour
              ",\"mapAnswersDropped\":" + r.MapAnswersDropped +
              ",\"mapAnswersLate\":" + r.MapAnswersLate +
              ",\"mapAnswersUnowned\":" + r.MapAnswersUnowned +
-             ",\"terrainTimeoutMs\":" + r.TerrainTimeoutMs + "}");
+             ",\"terrainTimeoutMs\":" + r.TerrainTimeoutMs +
+             ",\"terrainTextures\":" + r.TerrainTextures +
+             ",\"terrainTextureBytes\":" + r.TerrainTextureBytes +
+             ",\"terrainAlphaArrays\":" + r.TerrainAlphaArrays + "}");
     }
 
     /// <summary>What a screenshotSaved answer carries (ReportScreenshotSaved). Times in milliseconds.</summary>

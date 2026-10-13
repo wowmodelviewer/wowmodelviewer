@@ -26,20 +26,43 @@
 //   - SHADING (Resources/WmvTerrain.shader, "Wmv/Terrain") is a GEOMETRY DIAGNOSTIC, not WoW material
 //     or lighting: a neutral grey Lambert from a fixed key, per-chunk tints, the normals as colour, or a
 //     wireframe of each chunk's unique triangle edges. Every capture of it is labelled so.
+//   - TEXTURE MATERIALS (stage 04; Resources/WmvTerrainTextured.shader, "Wmv/TerrainTextured", built by
+//     WmvTerrainMaterials): in the textured views a chunk the material calls drawable (Textured, MissingTexture
+//     or LayerEffectStatic -- the last drawn with the static composite, its animation and overbright not
+//     applied) gets a material of its own -- its layer textures (up to 8), repeats, UV phases, alpha slice(s),
+//     missing flags and, on an MPHD 0x80 map, its layers' height textures and MTXP heights for the height mix -- and
+//     its mesh gains UV0 (cell coordinates) and, with MCCV, float vertex colours; positions, normals, indices and the
+//     mesh byte count stay exactly the stage 03 geometry (the material's vertex bytes are counted apart,
+//     MaterialVertexBytes). Every other chunk (Malformed, AlphaUnsupported, LayerCountUnsupported,
+//     LayerEffectUnresolved, HeightTextureMissing, NoLayers) is drawn NEUTRAL with Wmv/Terrain's shaded view, as
+//     in stage 03 (v3 delta section 2). The tile's textures (one per FileDataID, diffuse and height alike), its
+//     one alpha array (a second slice for each chunk of more than 5 layers) and its one sampler carrier (bound into
+//     the layer slots without a texture: WmvTerrainMaterials.CreateSamplerCarrier) are created here and tracked the
+//     moment they exist.
 //
 // Debug switches (WmvTerrainDebug; command line or the space-separated WMV_DEBUG, as the other -wmv*
-// switches): -wmvTerrainView=shaded|chunks|wire|shadedwire|normals, -wmvTerrainChunk=N (only chunk N is
-// shown), -wmvTerrainFocus=N (frame chunk N), -wmvTerrainTopDown (orthographic top-down camera, design
-// 2.3b), -wmvTerrainDump=<bare name> (the meshes read back into <player folder>/<name>.txt, the
-// TerrainDump format, for Tools/world-audit/compare_terrain_mesh.py) and -wmvTerrainTimeoutMs=<n> (the load
-// timeout, 1000..120000 ms, 30000 by default: the host's end-to-end timeout tests).
+// switches): -wmvTerrainView=shaded|chunks|wire|shadedwire|normals|textured|texturedlit|texturedplainweights|materials
+// (not given: textured when the tile's material is textured or partial, shaded otherwise), -wmvTerrainChunk=N
+// (only chunk N is shown), -wmvTerrainFocus=N (frame chunk N), -wmvTerrainTopDown (orthographic top-down
+// camera, design 2.3b), -wmvTerrainDump=<bare name> (the meshes read back into <player folder>/<name>.txt,
+// the TerrainDump format, for Tools/world-audit/compare_terrain_mesh.py), -wmvTerrainTimeoutMs=<n> (the load
+// timeout, 1000..120000 ms, 30000 by default: the host's end-to-end timeout tests), and the stage 04
+// VALIDATION FIXTURES (never production; WmvTerrainComposite): -wmvTerrainValidate (validation sampling:
+// texels by Load, the alpha by a manual bilinear), -wmvTerrainCompositeDump=<bare name>[:<size>] (the tile's
+// composite rendered top-down by a CommandBuffer into a float target, size 512 by default, written as
+// <name>.raw, <name>.json and, up to 2048 px, <name>.png), -wmvTerrainCompositeChunk=<n>[,<n>...] (each chunk
+// rendered alone at its validation size into <dump name>_c<n>.*) and -wmvTerrainTexelDump=<bare name> (each
+// texture's mip 0 as the GPU decodes it, by Load, with its role) -- the formats of
+// Tools/world-audit/compare_terrain_material.py. The composite dumps are taken in the textured view only (any other
+// view is refused: it is not the authored composite).
 
 using System;
 using System.Collections.Generic;
 using UnityEngine;
 using Wmv.Wow.World;
 
-/// <summary>How the terrain tile is drawn (-wmvTerrainView). Every view is a geometry diagnostic.</summary>
+/// <summary>How the terrain tile is drawn (-wmvTerrainView). The first five are the stage 03 geometry diagnostics; the
+/// textured views draw the chunks the material calls drawable with their textures and every other chunk neutral.</summary>
 public enum WmvTerrainView
 {
     /// <summary>Neutral grey Lambert from a fixed key plus ambient, from the diagnostic normals.</summary>
@@ -52,6 +75,16 @@ public enum WmvTerrainView
     ShadedWire = 3,
     /// <summary>The diagnostic normal as colour, n * 0.5 + 0.5 (the top-down orientation capture, design 2.3b).</summary>
     Normals = 4,
+    /// <summary>The texture composite (stage 04): the default when the tile's material is textured or partial.</summary>
+    Textured = 5,
+    /// <summary>The composite times the stage 03 diagnostic Lambert (a diagnostic light, not the game's).</summary>
+    TexturedLit = 6,
+    /// <summary>A labelled comparison: every chunk with layers (drawable, and the plain-diagnostic LayerEffectUnresolved and
+    /// HeightTextureMissing ones) in PLAIN WEIGHTS (w_0 = 1 - sum a_k, no cutoff, no heights) under a hatch -- never the
+    /// composite. A layer whose repeats are unresolved (an MTXP scale nibble above 4) is drawn as the checker.</summary>
+    TexturedPlainWeights = 7,
+    /// <summary>Every chunk in its material state's colour (the legend is logged).</summary>
+    Materials = 8,
 }
 
 /// <summary>
@@ -61,18 +94,37 @@ public enum WmvTerrainView
 /// </summary>
 public static class WmvTerrainDebug
 {
-    public static readonly string[] ViewNames = { "shaded", "chunks", "wire", "shadedwire", "normals" };
+    public static readonly string[] ViewNames = { "shaded", "chunks", "wire", "shadedwire", "normals", "textured", "texturedlit",
+                                                  "texturedplainweights", "materials" };
+    /// <summary>The largest composite or chunk render (pixels per side).</summary>
+    public const int MaxCompositeSize = 8192;
 
     static bool parsed;
     static WmvTerrainView view = WmvTerrainView.Shaded;
+    static bool viewGiven;
     static int onlyChunk = -1, focus = -1;
-    static bool topDown;
-    static string dumpName;
+    static bool topDown, validate;
+    static string dumpName, compositeName, texelName;
+    static int compositeSize = WmvTerrainComposite.DefaultTileSize;
+    static readonly List<int> compositeChunks = new List<int>();
     static double timeoutMs = WmvTerrainSession.DefaultTimeoutMs;
     static readonly List<string> notes = new List<string>();
 
+    /// <summary>-wmvTerrainView: the view asked for; Shaded when none was (see ViewGiven and EffectiveView).</summary>
     public static WmvTerrainView View { get { Parse(); return view; } }
-    public static string ViewName { get { return ViewNames[(int)View]; } }
+    /// <summary>-wmvTerrainView was given (and valid); without it the view follows the tile's material.</summary>
+    public static bool ViewGiven { get { Parse(); return viewGiven; } }
+    public static string ViewName { get { return ViewGiven ? ViewNames[(int)View] : "auto"; } }
+    /// <summary>The view a tile is drawn in: the one asked for, or -- none asked for -- textured when the tile's material is
+    /// textured or partial (design section 4) and the stage 03 shaded view otherwise.</summary>
+    public static WmvTerrainView EffectiveView(WmvTerrainTileContent content)
+    {
+        if (ViewGiven)
+            return View;
+        return content != null && content.HasDrawableChunks ? WmvTerrainView.Textured : WmvTerrainView.Shaded;
+    }
+    /// <summary>The view draws the plain-weights diagnostic, plain-diagnostic chunks included: their textures are fetched too.</summary>
+    public static bool DrawsPlainDiagnostic { get { return ViewGiven && View == WmvTerrainView.TexturedPlainWeights; } }
     /// <summary>-wmvTerrainChunk=N: only chunk N is shown (the others are built, and inactive); -1 = all.</summary>
     public static int OnlyChunk { get { Parse(); return onlyChunk; } }
     /// <summary>-wmvTerrainFocus=N: the camera frames chunk N instead of the tile; -1 = the tile.</summary>
@@ -81,6 +133,17 @@ public static class WmvTerrainDebug
     public static bool TopDown { get { Parse(); return topDown; } }
     /// <summary>-wmvTerrainDump=name: a bare file name (no folder), or null when not asked for.</summary>
     public static string DumpName { get { Parse(); return dumpName; } }
+    /// <summary>-wmvTerrainValidate: the textured shader samples by Load (validation sampling) in every frame and dump.</summary>
+    public static bool Validate { get { Parse(); return validate; } }
+    /// <summary>-wmvTerrainCompositeDump=name[:size]: the tile composite's bare name, or null; its size (512 by default).</summary>
+    public static string CompositeDumpName { get { Parse(); return compositeName; } }
+    public static int CompositeDumpSize { get { Parse(); return compositeSize; } }
+    /// <summary>-wmvTerrainCompositeChunk=n[,n...]: the chunks rendered alone (written under the composite dump's name).</summary>
+    public static IList<int> CompositeChunks { get { Parse(); return compositeChunks; } }
+    /// <summary>-wmvTerrainTexelDump=name: the texel dump's bare name, or null.</summary>
+    public static string TexelDumpName { get { Parse(); return texelName; } }
+    /// <summary>Any stage 04 validation fixture asked for (a dump written when a tile is built).</summary>
+    public static bool AnyMaterialDump { get { return CompositeDumpName != null || TexelDumpName != null || CompositeChunks.Count > 0; } }
     /// <summary>-wmvTerrainTimeoutMs=n: the session's load timeout, clamped to WmvTerrainSession.MinTimeoutMs..MaxTimeoutMs;
     /// WmvTerrainSession.DefaultTimeoutMs when not given. The timeout in effect is in the player's "[terrain] ready" line
     /// and in runtimeState (terrainTimeoutMs); a value refused or clamped is one of the Notes.</summary>
@@ -91,10 +154,17 @@ public static class WmvTerrainDebug
     public static string Describe()
     {
         Parse();
-        return string.Format("view {0}{1}{2}{3}{4}", ViewName, onlyChunk >= 0 ? ", only chunk " + onlyChunk : "",
-                             focus >= 0 ? ", focus chunk " + focus : "", topDown ? ", top-down" : "",
-                             dumpName != null ? ", dump " + dumpName : "");
+        return string.Format("view {0}{1}{2}{3}{4}{5}{6}{7}{8}",
+                             viewGiven ? ViewName : "auto (textured when the tile's material is textured or partial, else shaded)",
+                             onlyChunk >= 0 ? ", only chunk " + onlyChunk : "", focus >= 0 ? ", focus chunk " + focus : "",
+                             topDown ? ", top-down" : "", dumpName != null ? ", dump " + dumpName : "",
+                             validate ? ", VALIDATION sampling" : "",
+                             compositeName != null ? ", composite dump " + compositeName + " at " + compositeSize + " px" : "",
+                             compositeChunks.Count > 0 ? ", chunk renders " + string.Join(",", compositeChunks) : "",
+                             texelName != null ? ", texel dump " + texelName : "");
     }
+
+    static bool BareName(string v) { return v.Length > 0 && v.IndexOfAny(new[] { '/', '\\', ':' }) < 0 && v != "." && v != ".."; }
 
     static void Parse()
     {
@@ -104,14 +174,28 @@ public static class WmvTerrainDebug
         string fromEnv = Environment.GetEnvironmentVariable("WMV_DEBUG");
         if (!string.IsNullOrEmpty(fromEnv))
             args.AddRange(fromEnv.Split(new[] { ' ', '\t', ',', ';' }, StringSplitOptions.RemoveEmptyEntries));
+        // -wmvTerrainCompositeChunk takes a comma-separated list, which the WMV_DEBUG split cuts apart: the plain numbers
+        // that follow it belong to it.
+        bool inChunkList = false;
         foreach (string a in args)
         {
+            int listed;
+            if (inChunkList && int.TryParse(a, System.Globalization.NumberStyles.Integer, System.Globalization.CultureInfo.InvariantCulture, out listed))
+            {
+                AddChunk(a);
+                continue;
+            }
+            inChunkList = false;
             if (a.StartsWith("-wmvTerrainView=", StringComparison.Ordinal))
             {
                 string v = a.Substring("-wmvTerrainView=".Length);
                 int i = Array.IndexOf(ViewNames, v);
-                if (i >= 0) view = (WmvTerrainView)i;
-                else notes.Add("-wmvTerrainView=" + v + " is not one of " + string.Join("|", ViewNames) + " -- the shaded view is drawn");
+                if (i >= 0)
+                {
+                    view = (WmvTerrainView)i;
+                    viewGiven = true;
+                }
+                else notes.Add("-wmvTerrainView=" + v + " is not one of " + string.Join("|", ViewNames) + " -- the view follows the material");
             }
             else if (a.StartsWith("-wmvTerrainChunk=", StringComparison.Ordinal))
                 onlyChunk = ChunkIndex(a, "-wmvTerrainChunk=");
@@ -119,13 +203,55 @@ public static class WmvTerrainDebug
                 focus = ChunkIndex(a, "-wmvTerrainFocus=");
             else if (a == "-wmvTerrainTopDown")
                 topDown = true;
+            else if (a == "-wmvTerrainValidate")
+                validate = true;
             else if (a.StartsWith("-wmvTerrainDump=", StringComparison.Ordinal))
             {
                 string v = a.Substring("-wmvTerrainDump=".Length);
-                if (v.Length > 0 && v.IndexOfAny(new[] { '/', '\\', ':' }) < 0 && v != "." && v != "..")
+                if (BareName(v))
                     dumpName = v;
                 else
                     notes.Add("-wmvTerrainDump=" + v + " is not a bare file name -- no dump is written");
+            }
+            else if (a.StartsWith("-wmvTerrainCompositeDump=", StringComparison.Ordinal))
+            {
+                string v = a.Substring("-wmvTerrainCompositeDump=".Length);
+                string name = v;
+                int size = WmvTerrainComposite.DefaultTileSize;
+                int colon = v.LastIndexOf(':');
+                bool sizeOk = true;
+                if (colon >= 0)
+                {
+                    name = v.Substring(0, colon);
+                    sizeOk = int.TryParse(v.Substring(colon + 1), System.Globalization.NumberStyles.Integer,
+                                          System.Globalization.CultureInfo.InvariantCulture, out size) &&
+                             size >= 16 && size <= MaxCompositeSize && size % 16 == 0;
+                }
+                if (!BareName(name))
+                    notes.Add("-wmvTerrainCompositeDump=" + v + " is not a bare file name -- no composite is written");
+                else if (!sizeOk)
+                    notes.Add("-wmvTerrainCompositeDump=" + v + ": the size must be a multiple of 16 within 16.." + MaxCompositeSize +
+                              " -- no composite is written");
+                else
+                {
+                    compositeName = name;
+                    compositeSize = size;
+                }
+            }
+            else if (a.StartsWith("-wmvTerrainCompositeChunk=", StringComparison.Ordinal))
+            {
+                foreach (string part in a.Substring("-wmvTerrainCompositeChunk=".Length).Split(','))
+                    if (part.Length > 0)
+                        AddChunk(part);
+                inChunkList = true;
+            }
+            else if (a.StartsWith("-wmvTerrainTexelDump=", StringComparison.Ordinal))
+            {
+                string v = a.Substring("-wmvTerrainTexelDump=".Length);
+                if (BareName(v))
+                    texelName = v;
+                else
+                    notes.Add("-wmvTerrainTexelDump=" + v + " is not a bare file name -- no texel dump is written");
             }
             else if (a.StartsWith("-wmvTerrainTimeoutMs=", StringComparison.Ordinal))
             {
@@ -143,6 +269,21 @@ public static class WmvTerrainDebug
                               WmvTerrainSession.DefaultTimeoutMs + " ms is used");
             }
         }
+        if (compositeChunks.Count > 0 && compositeName == null)
+            notes.Add("-wmvTerrainCompositeChunk needs -wmvTerrainCompositeDump=<name> for its file names -- no chunk is rendered");
+    }
+
+    static void AddChunk(string part)
+    {
+        int n;
+        if (int.TryParse(part, System.Globalization.NumberStyles.Integer, System.Globalization.CultureInfo.InvariantCulture, out n) &&
+            n >= 0 && n < AdtParser.ChunksPerTile)
+        {
+            if (!compositeChunks.Contains(n))
+                compositeChunks.Add(n);
+        }
+        else
+            notes.Add("-wmvTerrainCompositeChunk entry " + part + " is not a chunk index 0..255 -- ignored");
     }
 
     static int ChunkIndex(string arg, string prefix)
@@ -167,8 +308,9 @@ public struct WmvTerrainBuildOptions
 
 /// <summary>
 /// One built terrain tile and everything it owns: its root, a GameObject, Mesh and MeshRenderer per chunk with
-/// triangles, the line objects of a wire view, and its materials. WmvTerrainBuilder adds each object the moment it
-/// creates it (Track), so Dispose releases exactly what exists whenever it is called.
+/// triangles, the line objects of a wire view, its materials, and (stage 04) its layer textures and alpha array.
+/// WmvTerrainBuilder adds each object the moment it creates it (Track), so Dispose releases exactly what exists
+/// whenever it is called.
 /// </summary>
 public class WmvRuntimeTerrainTile
 {
@@ -178,6 +320,10 @@ public class WmvRuntimeTerrainTile
     public readonly Mesh[] ChunkMeshes = new Mesh[AdtParser.ChunksPerTile];
     public readonly GameObject[] LineObjects = new GameObject[AdtParser.ChunksPerTile];   // wire views only
     public readonly Bounds[] ChunkBounds = new Bounds[AdtParser.ChunksPerTile];            // valid where ChunkMeshes is set
+    /// <summary>The material each chunk object draws with (null where there is no object).</summary>
+    public readonly Material[] ChunkMaterials = new Material[AdtParser.ChunksPerTile];
+    /// <summary>The chunk is drawn by Wmv/TerrainTextured (textured, plain-weights or state colour), not Wmv/Terrain.</summary>
+    public readonly bool[] ChunkTextured = new bool[AdtParser.ChunksPerTile];
     public Material SurfaceMaterial, LineMaterial;
     /// <summary>The tile's bounds (Unity, root-local) from the vertices its triangles reference; HasBounds false when
     /// it has no triangle.</summary>
@@ -186,16 +332,39 @@ public class WmvRuntimeTerrainTile
     public WmvTerrainView View;
     public bool Readable;
     public int ChunkObjectCount, LineObjectCount;
-    /// <summary>Bytes handed to the GPU: positions and normals (24 per vertex), 16-bit triangle and line indices.</summary>
+    /// <summary>Bytes handed to the GPU: positions and normals (24 per vertex), 16-bit triangle and line indices, and
+    /// the material's vertex data (MaterialVertexBytes).</summary>
     public long UploadedBytes;
+    // Stage 04: the material. (The load's content -- material, textures, alpha slices, vertex colours -- is not kept here:
+    // once built it is on the GPU, and the job that held it is dropped after its report.)
+    /// <summary>The textures by FileDataID (one per id, uploaded once, diffuse and height alike) and the alpha array (null
+    /// without one).</summary>
+    public readonly Dictionary<uint, Texture2D> Textures = new Dictionary<uint, Texture2D>();
+    public Texture2DArray AlphaArray;
+    /// <summary>The tile's sampler carrier (WmvTerrainMaterials.CreateSamplerCarrier: bound into every layer slot without a
+    /// texture, never drawn), null when no chunk is drawn textured. Not a layer texture: it is in none of the texture
+    /// tallies (TextureCount, TextureGpuBytes, LiveTextures); released with the tile.</summary>
+    public Texture2D SamplerCarrier;
+    /// <summary>-wmvTerrainChunk as built (WmvTerrainBuildOptions.OnlyChunk): only this chunk's object is active; -1 = all.</summary>
+    public int OnlyChunk = -1;
+    /// <summary>GPU bytes of the layer textures (every mip as uploaded) and of the alpha array; vertex bytes the material
+    /// added (UV0 and MCCV); the Wmv/TerrainTextured materials made; the times the alpha array and the materials took.</summary>
+    public long TextureGpuBytes, AlphaGpuBytes, MaterialVertexBytes;
+    public int TexturedMaterialCount;
+    public double AlphaBuildMs = -1, MaterialCreateMs = -1;
 
     readonly List<GameObject> objects = new List<GameObject>();
     readonly List<Mesh> meshes = new List<Mesh>();
     readonly List<Material> materials = new List<Material>();
+    readonly List<Texture2D> textures = new List<Texture2D>();
+    readonly List<long> textureBytes = new List<long>();
+    readonly List<Texture2DArray> alphaArrays = new List<Texture2DArray>();
 
     public int GameObjectCount { get { return objects.Count; } }
     public int MeshCount { get { return meshes.Count; } }
     public int MaterialCount { get { return materials.Count; } }
+    public int TextureCount { get { return textures.Count; } }
+    public int AlphaArrayCount { get { return alphaArrays.Count; } }
 
     /// <summary>Terrain tiles built and not yet disposed, across the player (see WmvRuntimeModel.Live for why a count:
     /// Object.Destroy is deferred to the end of the frame).</summary>
@@ -204,15 +373,20 @@ public class WmvRuntimeTerrainTile
 
     /// <summary>
     /// The Meshes, Materials and GameObjects every terrain tile not yet disposed holds, across the player: runtimeState's
-    /// terrainMeshes, terrainMaterials and terrainGameObjects. Each tile adds an object the moment it tracks it (so a
-    /// tile still being built, before the session commits it, is counted) and takes all of them off when it is
-    /// released (Dispose or DisposeImmediate), so the tallies never wait for a deferred Object.Destroy and are 0 when no
-    /// tile is held. The persistent scene root _WmvTerrain is no tile's, so it is never counted.
+    /// terrainMeshes, terrainMaterials and terrainGameObjects -- and (protocol 13) its layer textures, their GPU bytes
+    /// and its alpha arrays: terrainTextures, terrainTextureBytes, terrainAlphaArrays. Each tile adds an object the moment
+    /// it tracks it (so a tile still being built, before the session commits it, is counted) and takes all of them off
+    /// when it is released (Dispose or DisposeImmediate), so the tallies never wait for a deferred Object.Destroy and are
+    /// 0 when no tile is held. The persistent scene root _WmvTerrain is no tile's, so it is never counted.
     /// </summary>
     public static int LiveMeshes { get { return liveMeshes; } }
     public static int LiveMaterials { get { return liveMaterials; } }
     public static int LiveGameObjects { get { return liveGameObjects; } }
-    static int liveMeshes, liveMaterials, liveGameObjects;
+    public static int LiveTextures { get { return liveTextures; } }
+    public static long LiveTextureBytes { get { return liveTextureBytes; } }
+    public static int LiveAlphaArrays { get { return liveAlphaArrays; } }
+    static int liveMeshes, liveMaterials, liveGameObjects, liveTextures, liveAlphaArrays;
+    static long liveTextureBytes;
     bool disposed;
 
     public WmvRuntimeTerrainTile(int mapId, int tileX, int tileY, int load)
@@ -229,6 +403,53 @@ public class WmvRuntimeTerrainTile
     public void Track(GameObject go) { if (go != null) { objects.Add(go); liveGameObjects++; } }
     public void Track(Mesh m) { if (m != null) { meshes.Add(m); liveMeshes++; } }
     public void Track(Material m) { if (m != null) { materials.Add(m); liveMaterials++; } }
+    /// <summary>A layer texture and its GPU bytes (WmvTerrainTexture.GpuBytes).</summary>
+    public void Track(Texture2D t, long gpuBytes)
+    {
+        if (t == null) return;
+        textures.Add(t);
+        textureBytes.Add(gpuBytes);
+        liveTextures++;
+        liveTextureBytes += gpuBytes;
+        TextureGpuBytes += gpuBytes;
+    }
+    public void Track(Texture2DArray a, long gpuBytes)
+    {
+        if (a == null) return;
+        alphaArrays.Add(a);
+        liveAlphaArrays++;
+        AlphaGpuBytes += gpuBytes;
+    }
+
+    /// <summary>A layer texture taken off the tile (WmvTerrainBuilder.Build, after an upload failure: a texture no chunk
+    /// drawn textured binds any more): off its lists and every tally (TextureGpuBytes, LiveTextures, LiveTextureBytes) at
+    /// once, and destroyed now (it is bound by nothing). False when the tile does not hold it.</summary>
+    public bool Untrack(Texture2D t)
+    {
+        int i = t != null ? textures.IndexOf(t) : -1;
+        if (i < 0) return false;
+        long b = textureBytes[i];
+        textures.RemoveAt(i);
+        textureBytes.RemoveAt(i);
+        liveTextures--;
+        liveTextureBytes -= b;
+        TextureGpuBytes -= b;
+        UnityEngine.Object.DestroyImmediate(t);
+        return true;
+    }
+
+    /// <summary>Every Unity object the tile holds, newest last (the self-test's deferred disposal releases them itself).</summary>
+    public List<UnityEngine.Object> OwnedObjects()
+    {
+        var all = new List<UnityEngine.Object>();
+        foreach (GameObject g in objects) all.Add(g);
+        foreach (Mesh m in meshes) all.Add(m);
+        foreach (Material m in materials) all.Add(m);
+        foreach (Texture2D t in textures) all.Add(t);
+        foreach (Texture2DArray a in alphaArrays) all.Add(a);
+        if (SamplerCarrier != null) all.Add(SamplerCarrier);
+        return all;
+    }
 
     /// <summary>The bounds of chunk n's mesh, false when the chunk has no triangles (and so no mesh).</summary>
     public bool TryGetChunkBounds(int n, out Bounds b)
@@ -254,20 +475,33 @@ public class WmvRuntimeTerrainTile
         liveGameObjects -= objects.Count;
         liveMeshes -= meshes.Count;
         liveMaterials -= materials.Count;
+        liveTextures -= textures.Count;
+        foreach (long b in textureBytes) liveTextureBytes -= b;
+        liveAlphaArrays -= alphaArrays.Count;
         // Children were created after their parents: newest first, so DestroyImmediate never meets a child its parent
         // already took with it (a destroyed object compares equal to null and is skipped either way).
         for (int i = objects.Count - 1; i >= 0; i--)
             Destroy(objects[i], immediate);
         foreach (Mesh m in meshes) Destroy(m, immediate);
         foreach (Material m in materials) Destroy(m, immediate);
+        foreach (Texture2D t in textures) Destroy(t, immediate);
+        foreach (Texture2DArray a in alphaArrays) Destroy(a, immediate);
+        Destroy(SamplerCarrier, immediate);
+        SamplerCarrier = null;
         objects.Clear();
         meshes.Clear();
         materials.Clear();
+        textures.Clear();
+        textureBytes.Clear();
+        alphaArrays.Clear();
+        Textures.Clear();
+        AlphaArray = null;
         Root = null;
         SurfaceMaterial = LineMaterial = null;
         Array.Clear(ChunkObjects, 0, ChunkObjects.Length);
         Array.Clear(ChunkMeshes, 0, ChunkMeshes.Length);
         Array.Clear(LineObjects, 0, LineObjects.Length);
+        Array.Clear(ChunkMaterials, 0, ChunkMaterials.Length);
     }
 
     static void Destroy(UnityEngine.Object o, bool immediate)
@@ -342,10 +576,30 @@ public static class WmvTerrainBuilder
     /// <summary>
     /// Build the Unity objects of `mesh` into `rt`, under `parent` (null = the scene root), INACTIVE: the root is
     /// deactivated before anything is put under it. Every object is added to `rt` as it is created; on an exception the
-    /// caller disposes `rt` (WmvTerrainSession does), which releases exactly what was made.
+    /// caller disposes `rt` (WmvTerrainSession does), which releases exactly what was made. No material: every chunk is
+    /// drawn as stage 03 draws it.
     /// </summary>
     public static void Build(WmvRuntimeTerrainTile rt, TerrainTileMesh mesh, Transform parent, WmvTerrainBuildOptions o,
                              Action<string> log)
+    {
+        Build(rt, mesh, null, parent, o, log);
+    }
+
+    /// <summary>
+    /// As Build above, with the load's material and textures (`content`, null for none). In the textured views
+    /// (textured, texturedlit, texturedplainweights) every chunk the material calls drawable -- and in
+    /// texturedplainweights also every plain-diagnostic chunk -- is drawn by Wmv/TerrainTextured with a material of its
+    /// own, its textures uploaded once per FileDataID (in textured and texturedlit on an MPHD 0x80 map also its layers'
+    /// height textures) and its alpha slice (two for a chunk of more than 5 layers) in the tile's one alpha array, the
+    /// layer slots without a texture holding the tile's sampler carrier; every other chunk is drawn neutral
+    /// (Wmv/Terrain, shaded). In the materials view every chunk is drawn in its state's colour. A texture whose upload
+    /// throws is set "decode failed" and the material's chunk states are settled again (a failed diffuse texture's
+    /// layers draw the missing-texture checker; a failed height texture's chunks become HeightTextureMissing, neutral);
+    /// the chunks drawn textured are picked again, every texture none of them binds any more is released (destroyed,
+    /// untracked, its uploadMs reset), and the alpha array is made only when a chunk drawn textured is left.
+    /// </summary>
+    public static void Build(WmvRuntimeTerrainTile rt, TerrainTileMesh mesh, WmvTerrainTileContent content, Transform parent,
+                             WmvTerrainBuildOptions o, Action<string> log)
     {
         if (rt == null) throw new ArgumentNullException("rt");
         if (mesh == null) throw new ArgumentNullException("mesh");
@@ -356,9 +610,41 @@ public static class WmvTerrainBuilder
             throw new InvalidOperationException("Resources/" + ShaderResource + ".shader is missing from this player build -- " +
                                                 "copy Assets/Resources into the Unity project and rebuild the player");
         var clock = System.Diagnostics.Stopwatch.StartNew();
-        bool wire = o.View == WmvTerrainView.Wire || o.View == WmvTerrainView.ShadedWire;
-        rt.View = o.View;
+        WmvTerrainView view = o.View;
+        bool texturedView = view == WmvTerrainView.Textured || view == WmvTerrainView.TexturedLit || view == WmvTerrainView.TexturedPlainWeights;
+        bool materialsView = view == WmvTerrainView.Materials;
+        bool plainView = view == WmvTerrainView.TexturedPlainWeights;
+        bool wire = view == WmvTerrainView.Wire || view == WmvTerrainView.ShadedWire;
+        TerrainTileMaterial mat = content != null ? content.Material : null;
+        bool haveChunks = mat != null && mat.Chunks != null && mat.Chunks.Length == AdtParser.ChunksPerTile;
+        Shader ts = texturedView || materialsView ? WmvTerrainMaterials.ResolveShader(log) : null;
+        rt.View = view;
+        rt.OnlyChunk = o.OnlyChunk;
         rt.Readable = o.KeepReadable;
+
+        // The chunks Wmv/TerrainTextured draws with their textures (again after an upload failure: it can only shrink).
+        var textured = new bool[AdtParser.ChunksPerTile];
+        int texturedChunks = 0;
+        Action pickTextured = () =>
+        {
+            texturedChunks = 0;
+            for (int n = 0; n < AdtParser.ChunksPerTile; n++)
+            {
+                textured[n] = false;
+                if (ts == null || !texturedView || !haveChunks)
+                    continue;
+                TerrainChunkMaterial c = mat.Chunks[n];
+                TerrainChunkMesh cm = mesh.Chunks[n];
+                if (cm == null || cm.State != TerrainChunkState.Built || cm.Triangles == 0)
+                    continue;
+                if (c.Drawable || (plainView && c.PlainDiagnostic))
+                {
+                    textured[n] = true;
+                    texturedChunks++;
+                }
+            }
+        };
+        pickTextured();
 
         var root = new GameObject(string.Format("Terrain map {0} tile {1}_{2} (load {3})", rt.MapId, rt.TileX, rt.TileY, rt.Load));
         rt.Track(root);
@@ -368,14 +654,24 @@ public static class WmvTerrainBuilder
             root.transform.SetParent(parent, false);
         rt.Root = root;
 
-        var surface = new Material(s) { name = "WmvTerrain surface (" + WmvTerrainDebug.ViewNames[(int)o.View] + ")" };
-        rt.Track(surface);
-        rt.SurfaceMaterial = surface;
-        surface.SetFloat("_WmvTerrainView", o.View == WmvTerrainView.Chunks ? ViewChunks
-                                          : o.View == WmvTerrainView.Normals ? ViewNormals : ViewShaded);
-        // The wire view's surfaces write depth only: the background shows through them, the edges behind a ridge stay
-        // hidden.
-        surface.SetFloat("_ColorMask", o.View == WmvTerrainView.Wire ? 0f : 15f);
+        // The neutral surface: always in the stage 03 views, in the others only when a chunk is drawn neutral.
+        Material surface = null;
+        Func<Material> neutral = () =>
+        {
+            if (surface != null)
+                return surface;
+            surface = new Material(s) { name = "WmvTerrain surface (" + WmvTerrainDebug.ViewNames[(int)(texturedView || materialsView ? WmvTerrainView.Shaded : view)] + ")" };
+            rt.Track(surface);
+            rt.SurfaceMaterial = surface;
+            surface.SetFloat("_WmvTerrainView", view == WmvTerrainView.Chunks ? ViewChunks
+                                              : view == WmvTerrainView.Normals ? ViewNormals : ViewShaded);
+            // The wire view's surfaces write depth only: the background shows through them, the edges behind a ridge stay
+            // hidden.
+            surface.SetFloat("_ColorMask", view == WmvTerrainView.Wire ? 0f : 15f);
+            return surface;
+        };
+        if (!texturedView && !materialsView || (ts == null))
+            neutral();
         Material lines = null;
         if (wire)
         {
@@ -384,10 +680,124 @@ public static class WmvTerrainBuilder
             rt.LineMaterial = lines;
             lines.SetFloat("_WmvTerrainView", ViewLines);
             lines.SetFloat("_WmvLineNudge", LineDepthNudge);
-            lines.SetColor("_WmvLineColour", o.View == WmvTerrainView.Wire ? LineOnClear : LineOnShaded);
+            lines.SetColor("_WmvLineColour", view == WmvTerrainView.Wire ? LineOnClear : LineOnShaded);
             // After every opaque surface, so an edge is tested against the finished depth of the tile.
             lines.renderQueue = (int)UnityEngine.Rendering.RenderQueue.Geometry + 1;
         }
+
+        // The textures (one per FileDataID: the layers' diffuse textures and, where the height mix is drawn, their height
+        // textures) and the alpha array of the chunks drawn textured.
+        Texture2DArray alpha = null;
+        int uploadFailures = 0, heightTextures = 0, unbound = 0;
+        bool heightView = !plainView;
+        // The texture of a layer in its role: a height texture also needs an alpha channel (the height is its alpha).
+        Func<uint, Texture2D> uploaded = id =>
+        {
+            Texture2D x;
+            return rt.Textures.TryGetValue(id, out x) ? x : null;
+        };
+        Func<uint, Texture2D> uploadedHeight = id => content != null && content.UsableAsHeight(id) != null ? uploaded(id) : null;
+        if (texturedChunks > 0)
+        {
+            var asHeight = new HashSet<uint>();
+            Action<uint, bool> upload = (id, height) =>
+            {
+                if (id == 0 || rt.Textures.ContainsKey(id))
+                    return;
+                WmvTerrainTexture t = height ? content.UsableAsHeight(id) : content.Usable(id);
+                if (t == null || !t.Ready)
+                    return;
+                Texture2D made = null;
+                try
+                {
+                    long gpu = t.GpuBytes;
+                    rt.Textures[id] = t.Upload(x => { made = x; rt.Track(x, gpu); });
+                    if (height && asHeight.Add(id)) heightTextures++;
+                }
+                catch (Exception e)
+                {
+                    // A texture the upload made before it threw is bound by nothing: off the tile and its tallies now.
+                    if (made != null)
+                        rt.Untrack(made);
+                    t.Fail(WmvTerrainTexture.StateDecodeFailed, "upload failed: " + e.GetType().Name + ": " + e.Message);
+                    uploadFailures++;
+                }
+            };
+            for (int n = 0; n < AdtParser.ChunksPerTile; n++)
+            {
+                if (!textured[n])
+                    continue;
+                TerrainChunkMaterial c = mat.Chunks[n];
+                for (int k = 0; k < c.Layers.Length && k < TerrainMaterialBuilder.MaxDrawnLayers; k++)
+                {
+                    TerrainMaterialLayer l = c.Layers[k];
+                    if (!l.Missing && l.RepeatsPerChunk > 0)          // repeats 0 (unresolved): drawn as the checker
+                        upload(l.TextureFileDataID, false);
+                    if (heightView && c.UseHeightTextures && c.Drawable)
+                        upload(l.HeightTextureFileDataID, true);
+                }
+            }
+            if (uploadFailures > 0)
+            {
+                List<uint> failedDiffuse, failedHeight;
+                content.SettleFailures(out failedDiffuse, out failedHeight);
+                pickTextured();
+                // The re-pick dropped every chunk that reads the failed texture; a texture uploaded for those chunks alone is
+                // bound by no chunk drawn textured now. It goes -- destroyed, off the tile's lists and tallies, its upload time
+                // reset -- so the GPU contents and the report are those of the same failure seen at fetch time (nothing
+                // uploaded for those chunks: "available", no uploadMs).
+                var bound = new HashSet<uint>();
+                for (int n = 0; n < AdtParser.ChunksPerTile; n++)
+                {
+                    if (!textured[n])
+                        continue;
+                    TerrainChunkMaterial c = mat.Chunks[n];
+                    for (int k = 0; k < c.Layers.Length && k < TerrainMaterialBuilder.MaxDrawnLayers; k++)
+                    {
+                        TerrainMaterialLayer l = c.Layers[k];
+                        if (!l.Missing && l.RepeatsPerChunk > 0 && l.TextureFileDataID != 0)
+                            bound.Add(l.TextureFileDataID);
+                        if (heightView && c.UseHeightTextures && c.Drawable && l.HeightTextureFileDataID != 0)
+                            bound.Add(l.HeightTextureFileDataID);
+                    }
+                }
+                foreach (uint id in new List<uint>(rt.Textures.Keys))
+                {
+                    if (bound.Contains(id))
+                        continue;
+                    rt.Untrack(rt.Textures[id]);
+                    rt.Textures.Remove(id);
+                    WmvTerrainTexture t;
+                    if (content.Textures.TryGetValue(id, out t))
+                        t.UploadMs = -1;
+                    if (asHeight.Remove(id))
+                        heightTextures--;
+                    unbound++;
+                }
+            }
+            // The alpha array only for chunks drawn textured (none may be left after a re-pick).
+            if (texturedChunks > 0)
+            {
+                var alphaClock = System.Diagnostics.Stopwatch.StartNew();
+                int slices = mat.DrawableSlices + (plainView ? mat.PlainSlices : 0);
+                if (slices > 0)
+                {
+                    byte[] bytes = mat.BuildAlphaArray(plainView);
+                    long alphaBytes = (long)slices * TerrainChunkMaterial.AlphaSliceBytes;
+                    alpha = WmvTerrainMaterials.BuildAlphaArray(bytes, slices, a => rt.Track(a, alphaBytes));
+                    rt.AlphaArray = alpha;
+                }
+                rt.AlphaBuildMs = alphaClock.Elapsed.TotalMilliseconds;
+                // The layer slots without a texture hold the tile's sampler carrier (their height texture is sampled with
+                // the slot's sampler); held by the tile the moment it exists.
+                WmvTerrainMaterials.CreateSamplerCarrier(x => rt.SamplerCarrier = x);
+            }
+        }
+        float texturedViewValue = view == WmvTerrainView.TexturedLit ? WmvTerrainMaterials.ViewLit
+                                : plainView ? WmvTerrainMaterials.ViewPlainWeights : WmvTerrainMaterials.ViewTextured;
+        var stateMaterials = new Dictionary<int, Material>();
+        Vector2[] uv = texturedChunks > 0 ? WmvTerrainMaterials.ChunkUv() : null;
+        var materialClock = new System.Diagnostics.Stopwatch();
 
         var block = new MaterialPropertyBlock();
         var positions = new Vector3[TerrainMeshBuilder.VerticesPerChunk];
@@ -414,6 +824,17 @@ public static class WmvTerrainBuilder
             m.SetVertices(positions);
             m.SetNormals(normals);
             m.SetIndices(c.Indices, MeshTopology.Triangles, 0, false);
+            if (textured[n])
+            {
+                // The material's vertex data, apart from the geometry: UV0 in cells and, with MCCV, float colours.
+                Color[] colours = WmvTerrainMaterials.ChunkColors(mat.Chunks[n]);
+                m.SetUVs(0, uv);
+                if (colours != null)
+                    m.SetColors(colours);
+                long vb = WmvTerrainMaterials.VertexBytes(colours != null);
+                rt.MaterialVertexBytes += vb;
+                rt.UploadedBytes += vb;
+            }
             Bounds b = BoundsOf(c.BoundsMin, c.BoundsMax);
             m.bounds = b;
             rt.ChunkMeshes[n] = m;
@@ -423,9 +844,42 @@ public static class WmvTerrainBuilder
             go.AddComponent<MeshFilter>().sharedMesh = m;
             MeshRenderer mr = go.AddComponent<MeshRenderer>();
             Quiet(mr);
-            mr.sharedMaterial = surface;
-            block.SetFloat("_WmvChunkIndex", n);
-            mr.SetPropertyBlock(block);
+            if (textured[n])
+            {
+                // One material per chunk, every value in it (no MaterialPropertyBlock: the SRP Batcher's condition).
+                TerrainChunkMaterial cmat = mat.Chunks[n];
+                materialClock.Start();
+                Material cm = WmvTerrainMaterials.ChunkMaterial(ts, cmat, uploaded, alpha, rt.SamplerCarrier, texturedViewValue, plainView,
+                                                                uploadedHeight);
+                rt.Track(cm);
+                materialClock.Stop();
+                rt.TexturedMaterialCount++;
+                mr.sharedMaterial = cm;
+                rt.ChunkTextured[n] = true;
+            }
+            else if (materialsView && ts != null)
+            {
+                int key = haveChunks ? (int)mat.Chunks[n].State : -1;
+                Material sm;
+                if (!stateMaterials.TryGetValue(key, out sm))
+                {
+                    sm = WmvTerrainMaterials.StateMaterial(ts, key >= 0 ? TerrainTileMaterial.StateName((TerrainMaterialState)key) : "no material",
+                                                           key >= 0 ? WmvTerrainMaterials.StateColour((TerrainMaterialState)key)
+                                                                    : WmvTerrainMaterials.NoMaterialColour);
+                    rt.Track(sm);
+                    rt.TexturedMaterialCount++;
+                    stateMaterials[key] = sm;
+                }
+                mr.sharedMaterial = sm;
+                rt.ChunkTextured[n] = true;
+            }
+            else
+            {
+                mr.sharedMaterial = neutral();
+                block.SetFloat("_WmvChunkIndex", n);
+                mr.SetPropertyBlock(block);
+            }
+            rt.ChunkMaterials[n] = mr.sharedMaterial;
             rt.ChunkObjects[n] = go;
             rt.ChunkObjectCount++;
 
@@ -459,18 +913,42 @@ public static class WmvTerrainBuilder
             if (o.OnlyChunk >= 0 && n != o.OnlyChunk)
                 go.SetActive(false);
         }
+        rt.MaterialCreateMs = rt.TexturedMaterialCount > 0 ? materialClock.Elapsed.TotalMilliseconds : -1;
         rt.HasBounds = mesh.BoundsMin != null && mesh.BoundsMax != null;
         rt.Bounds = rt.HasBounds ? BoundsOf(mesh.BoundsMin, mesh.BoundsMax) : new Bounds();
         if (log != null)
+        {
             log(string.Format(System.Globalization.CultureInfo.InvariantCulture,
                 "built tile {0}_{1} of map {2} (load {3}) inactive in {4:F1} ms: {5} chunk object(s){6}, {7} mesh(es), {8} material(s), " +
                 "{9} game object(s) on layer {10}, {11} bytes uploaded{12}; view {13}{14}{15}",
                 rt.TileX, rt.TileY, rt.MapId, rt.Load, clock.Elapsed.TotalMilliseconds, rt.ChunkObjectCount,
                 wire ? " and " + rt.LineObjectCount + " edge object(s) (" + edges + " unique edges)" : "", rt.MeshCount,
                 rt.MaterialCount, rt.GameObjectCount, Layer, rt.UploadedBytes,
-                o.KeepReadable ? " (CPU copies kept for the dump)" : " (CPU copies released)", WmvTerrainDebug.ViewNames[(int)o.View],
+                o.KeepReadable ? " (CPU copies kept for the dump)" : " (CPU copies released)", WmvTerrainDebug.ViewNames[(int)view],
                 o.OnlyChunk >= 0 ? ", only chunk " + o.OnlyChunk + (rt.ChunkObjects[o.OnlyChunk] != null ? "" : " (it has no triangles: nothing is shown)") : "",
                 rt.HasBounds ? ", bounds " + rt.Bounds.min.ToString("F3") + " .. " + rt.Bounds.max.ToString("F3") : ", no triangle"));
+            if (texturedView || materialsView)
+                log(string.Format(System.Globalization.CultureInfo.InvariantCulture,
+                    "tile {0}_{1} (load {2}) material {3}: {4} chunk(s) drawn by Wmv/TerrainTextured{5}, {6} neutral; {7} texture(s) " +
+                    "uploaded ({8} GPU bytes{9}), alpha array {10} ({11} GPU bytes, {12:0.###} ms){17}, {13} material vertex bytes, {14} " +
+                    "textured material(s) made in {15:0.###} ms{16}",
+                    rt.TileX, rt.TileY, rt.Load, mat != null ? TerrainTileMaterial.TileStateName(mat.State) : "none",
+                    materialsView ? rt.ChunkObjectCount : texturedChunks,
+                    plainView ? " (PLAIN WEIGHTS, hatched: a comparison, not the composite)"
+                              : mat != null && mat.UseHeightTextures
+                                  ? string.Format(" (the height mix: MPHD 0x{0:X} has 0x80, {1} height texture(s))", mat.MphdFlags, heightTextures)
+                                  : string.Format(" (the height mix, H = 1: MPHD 0x{0:X} has no 0x80)", mat != null ? mat.MphdFlags : 0u),
+                    rt.ChunkObjectCount - (materialsView && ts != null ? rt.ChunkObjectCount : texturedChunks), rt.Textures.Count,
+                    rt.TextureGpuBytes, uploadFailures > 0 ? ", " + uploadFailures + " upload(s) FAILED, " + unbound +
+                                                             " texture(s) no chunk drawn textured binds any more released" : "",
+                    alpha != null ? alpha.depth + " slice(s)" : "none", rt.AlphaGpuBytes, rt.AlphaBuildMs, rt.MaterialVertexBytes,
+                    rt.TexturedMaterialCount, rt.MaterialCreateMs,
+                    ts == null ? " -- Resources/" + WmvTerrainMaterials.ShaderResource + ".shader is missing: every chunk drawn neutral" : "",
+                    rt.SamplerCarrier != null ? ", sampler carrier " + rt.SamplerCarrier.width + "x" + rt.SamplerCarrier.height +
+                                                " (the layer slots without a texture; never drawn)" : ""));
+            if (materialsView && ts != null)
+                log("materials view legend: " + WmvTerrainMaterials.Legend());
+        }
     }
 
     /// <summary>A geometry diagnostic casts and receives nothing and takes no probe.</summary>

@@ -1,7 +1,7 @@
 /*
  * UnityIpcServer.h
  *
- * Localhost IPC server for the embedded Unity renderer (protocol v12). WMV is the SERVER:
+ * Localhost IPC server for the embedded Unity renderer (protocol v13). WMV is the SERVER:
  * UnityRendererHost starts this listener BEFORE launching the player and passes the port on
  * the player's command line (-wmvPort <n>); the player connects back, announces itself with
  * unityReady and then asks WMV for the raw WoW assets/metadata it renders from. This is the
@@ -241,13 +241,59 @@
  * for none), "terrainLoading", "terrainView", "cameraMask", "meshObjects", "materialObjects", and what the terrain
  * itself holds: "terrainMeshes" and "terrainMaterials" (the Meshes and Materials of the live terrain runtimes) and
  * "terrainGameObjects" (the GameObjects under the terrain root), each 0 when no tile is shown; and what the player keeps
- * of its map-file requests: "terrainPendingRequests" (0 or 1), "terrainRetiredRequests" (requests of loads that ended
- * unanswered, at most 32), "terrainRetiredTotal" (every one retired since the player started, not capped),
+ * of its map-file requests: "terrainPendingRequests" (0 or 1; protocol 13: up to its outstanding limit),
+ * "terrainRetiredRequests" (requests of loads that ended unanswered, at most 32; protocol 13: 128), "terrainRetiredTotal"
+ * (every one retired since the player started, not capped),
  * "terrainLastRetiredRequest" (the id retired last, "" for none), "mapAnswersRouted", "mapAnswersDropped" (late or
  * unowned answers), its parts "mapAnswersLate" and "mapAnswersUnowned", and "terrainTimeoutMs". An older player is sent
  * none of it. The host keeps the most recent MAP_ASSET_RECORDS_KEPT getMapAsset records and counts the rest, and
  * remembers the files it read for the loaded client only (MapAssetReadTracker, emptied when the client is replaced):
  * nothing it keeps about map files grows with a player's life.
+ *
+ * TERRAIN TEXTURES (protocol 13). The tile's texture layers: the tile's tex0 ADT (MAID word 3 of the WDT, a FileDataID in
+ * every client) and the BLP textures its MDID names (and, on a map whose WDT sets MPHD flag 0x80, the height textures its
+ * MHID names, asked for with the same role "texture" within the same limits), fetched like the WDT and the root -- the
+ * host parses neither. To a player that announced protocol 13, loadTerrainTile adds "maxTextureBytes" (8 MiB, per
+ * texture file), "maxTextureBytesPerLoad" (128 MiB of texture bytes read for one load) and "maxTexturesPerLoad" (128
+ * texture ids);
+ * "maxAssetBytes" (4 MiB) stays the limit of the WDT, the root and the tex0. A player before protocol 13 is sent none of
+ * them and never asks for the new roles; a protocol-13 player that receives no maxTextureBytes (a protocol-12 host)
+ * builds the geometry alone. getMapAsset adds the roles "tex0Adt" and "texture", decided by the host when the request is
+ * served: a tex0 ADT only after this load's WDT was answered "available", at most once per load, read at most
+ * maxAssetBytes; a texture only after this load's tex0 was answered "available", each id once per load, at most
+ * maxTexturesPerLoad ids, and at most maxTextureBytesPerLoad bytes read for the load's textures -- a request is refused
+ * before reading once that many were read, and otherwise read with the smaller of maxTextureBytes and what is left (a
+ * file over it is "unreadable", the detail naming the limit applied). Every load reads at most 3 + maxTexturesPerLoad
+ * files, whatever their roles. After the read the host checks the KIND of the bytes, as it checks a WDT's first chunk:
+ * a tex0 ADT starts with the MVER chunk ("REVM" in file byte order) followed, at 8 + MVER's size, by MAMP ("PMAM"); a
+ * texture starts "BLP2". A file that fails is answered "unreadable" with what was found ("not a tex0 ADT: second chunk
+ * RDHM (hex 52 44 48 4d)", "not a BLP2 texture: ..."), and a tex0 that fails does not count as served. The host cannot
+ * tell whether a texture id is one the tex0 names (it parses no tex0): it vouches for the client, the epoch, the load,
+ * the order, the kind and the limits. "md5" is the content key the storage read checked every byte against (never a
+ * second hash). A terrainTileLoaded for the current load ends that load on the host: its later requests are answered
+ * "stale" ("load N was reported <status>") without a read.
+ *   terrainTileLoaded adds "requestsRetired" (how many of the load's requests were still out when it ended, each
+ *   remembered by the player as retired) and "retiredRequestIds" (their ids, at most the player's outstanding limit), and
+ *   "material": { "state" ("textured", "partial", "unavailable", "unsupported"), "reason", "tex0FileDataID", "tex0Bytes",
+ *   "tex0Md5", "alphaFormat", "chunkStates" { counters }, "textures" [ { "fileDataID", "role" ("diffuse" or "height":
+ *   a layer's texture or its height texture), "state" (the host's state quoted, or the player's own: "no texture id",
+ *   "not requested", "md5 mismatch", "decode failed", "transport failure"), "detail", "bytes", "md5", "width", "height",
+ *   "format", "mips", "uploadMs" } ] (every distinct texture of the chunks it draws, the ones past maxTexturesPerLoad
+ *   "not requested", and one "no texture id" entry for the layers whose MDID entry is 0: at most maxTexturesPerLoad
+ *   entries asked for, and at most TERRAIN_REPORT_TEXTURES_MAX in all), "uniqueTextures", "layerReferences",
+ *   "duplicateReferences", "textureSourceBytes", "textureGpuBytes", "alphaGpuBytes", "materialVertexBytes",
+ *   "materials", "timings" { "tex0RoundTripMs", "tex0ParseMs", "textureFetchMs", "textureUploadMs", "alphaBuildMs",
+ *   "materialBuildMs" } }. runtimeState adds "terrainTextures" (live terrain textures), "terrainTextureBytes" (their GPU
+ *   size, estimated) and "terrainAlphaArrays".
+ *
+ * THE MAP ASSET QUEUE (protocol 12 and 13, every role). getMapAsset requests are served in the order they came, from one
+ * queue, at most MAP_ASSET_QUEUE_MAX waiting (one beyond is answered "refused", "too many map requests waiting", without
+ * a read). A request is decided, accounted and read only when it is served, so one whose load ended while it waited is
+ * answered "stale" without a read. Each poll serves until MAP_ASSET_POLL_BUDGET_BYTES were read in it, or one file over
+ * MAP_ASSET_LARGE_FILE_BYTES was (the size is known only once a file is read, so that file is the poll's last); the rest
+ * waits for the next poll. The queue is dropped, never answered, wherever held requests are (a new connection, a dropped
+ * client, start, stop). Each answer's record states queuedMs (from its arrival to the start of its serving) apart from
+ * handlerMs, and the most recent MAP_ASSET_POLL_TIMINGS_KEPT polls that served any are kept with their GUI-thread time.
  *
  * modelAnimation is pushed the same way whenever the animation on display changes, and once after
  * loadWoWModel so the player starts on the animation the app is showing rather than on its own
@@ -290,6 +336,7 @@
 #include <vector>
 
 #include <QByteArray>
+#include <QElapsedTimer>
 #include <QImage>
 #include <QJsonArray>
 #include <QJsonObject>
@@ -332,12 +379,25 @@ private:
 class UnityIpcServer : public wxEvtHandler
 {
 public:
-  static const int PROTOCOL_VERSION = 12;
-  // The largest map file (a WDT or a root ADT) served to getMapAsset, and the limit loadTerrainTile states to the player
-  // (TERRAIN above): 4 MiB. The size census in docs/world-viewer/03-terrain-geometry.md ("Asset sizes") puts the largest
-  // root ADT of the four audited clients at 1,462,916 bytes (FileDataID 811303, map 1051 tile 31_29, Retail and MoP) and
-  // the largest WDT of the audited maps at 294,988 (Retail Azeroth, 775971).
+  static const int PROTOCOL_VERSION = 13;
+  // The largest map file (a WDT, a root ADT or a tex0 ADT) served to getMapAsset, and the limit loadTerrainTile states to
+  // the player (TERRAIN above): 4 MiB. The size census in docs/world-viewer/03-terrain-geometry.md ("Asset sizes") puts
+  // the largest root ADT of the four audited clients at 1,462,916 bytes (FileDataID 811303, map 1051 tile 31_29, Retail
+  // and MoP) and the largest WDT of the audited maps at 294,988 (Retail Azeroth, 775971); the largest tex0 ADT named by
+  // any MAID tile is 3,116,288 bytes (Retail 6387900, map 2736 tile 27_25).
   static const int MAX_MAP_ASSET_BYTES = 4 * 1024 * 1024;
+  // TERRAIN TEXTURES (protocol 13): one texture file at most 8 MiB (the largest terrain BLP of any client is 5,593,604
+  // bytes, 2048 x 2048 with all 12 mips, 62 Retail ids); a load at most 128 texture ids and 128 MiB of texture bytes read
+  // (no real tile names more than 29 diffuse textures or 45.5 MB of them; with height textures 58 and 90.9 MB).
+  static const int MAX_TERRAIN_TEXTURE_BYTES = 8 * 1024 * 1024;
+  static const int MAX_TERRAIN_TEXTURE_BYTES_PER_LOAD = 128 * 1024 * 1024;
+  static const int MAX_TERRAIN_TEXTURES_PER_LOAD = 128;
+  // THE MAP ASSET QUEUE: requests waiting at most; the bytes a poll reads before it stops serving; the size over which a
+  // file read ends its poll's serving; the polls whose timing is kept.
+  static const int MAP_ASSET_QUEUE_MAX = 16;
+  static const int MAP_ASSET_POLL_BUDGET_BYTES = 2 * 1024 * 1024;
+  static const int MAP_ASSET_LARGE_FILE_BYTES = 1024 * 1024;
+  static const int MAP_ASSET_POLL_TIMINGS_KEPT = 256;
   // The getMapAsset records kept (mapAssetsServed): the most recent 256; the rest are counted, not kept.
   static const int MAP_ASSET_RECORDS_KEPT = 256;
   // The FileDataIDs the read tracker holds for one client epoch (MapAssetReadTracker).
@@ -385,6 +445,9 @@ public:
   // Protocol 12: the player draws a terrain tile: it takes loadTerrainTile and clearTerrain, asks getMapAsset and answers
   // terrainTileLoaded (TERRAIN above).
   bool playerDrawsTerrain() const { return m_client && m_unityReady && m_playerProtocol >= 12; }
+  // Protocol 13: the player textures a terrain tile: loadTerrainTile states the texture limits, and it asks for the tile's
+  // tex0 ADT and textures (getMapAsset "tex0Adt", "texture") and reports its material (TERRAIN TEXTURES above).
+  bool playerDrawsTerrainTextures() const { return m_client && m_unityReady && m_playerProtocol >= 13; }
 
   // Runtime command: tell the player which model is active. Either path or fileDataID may be
   // empty/0. Queued if the player is connected; dropped (logged) otherwise.
@@ -576,8 +639,10 @@ public:
     int terrainMaterials = -1;     // Materials held by them
     int terrainGameObjects = -1;   // GameObjects under the terrain root
     // Protocol 12 too, added later (a player before them reads -1): what the player keeps of its map-file requests.
-    int terrainPendingRequests = -1;  // the current terrain load's request awaiting its answer: 0 or 1
-    int terrainRetiredRequests = -1;  // requests of loads that ended unanswered, kept to recognise a late answer (<= 32)
+    int terrainPendingRequests = -1;  // the current terrain load's requests awaiting their answers: 0 or 1 (protocol
+                                      // 12), at most the player's outstanding limit (protocol 13)
+    int terrainRetiredRequests = -1;  // requests of loads that ended unanswered, kept to recognise a late answer (<= 32
+                                      // in a protocol-12 player, <= 128 in a protocol-13 one)
     int mapAnswersRouted = -1;        // map-file answers routed to the terrain session since the player started
     int mapAnswersDropped = -1;       // ... of which dropped: late (their load had ended) or owned by no load
     int terrainTimeoutMs = -1;        // the time a terrain load may wait for its files before it fails
@@ -586,6 +651,10 @@ public:
     bool hasTerrainLastRetiredRequest = false;  // the player sent terrainLastRetiredRequest (a text: "" is no absence)
     int mapAnswersLate = -1;          // mapAnswersDropped's late part: answers to a request in the retired ring
     int mapAnswersUnowned = -1;       // ... and its unowned part: answers to a request no load waits for nor the ring holds
+    // Protocol 13 (TERRAIN TEXTURES above).
+    int terrainTextures = -1;              // terrain textures alive (the shown tile's), 0 with no tile
+    long long terrainTextureBytes = -1;    // their GPU size, as the player estimates it
+    int terrainAlphaArrays = -1;           // terrain alpha arrays alive
     QString describe() const;
   };
   // Ask the player what it holds (runtimeState). Returns the question's number, which the answer echoes,
@@ -643,6 +712,11 @@ public:
     int tileX = -1;
     int tileY = -1;
     int maxAssetBytes = MAX_MAP_ASSET_BYTES;
+    // TERRAIN TEXTURES (protocol 13): sent only when maxTextureBytes > 0 and the player draws terrain textures; 0 offers
+    // the load no textures (a player before protocol 13).
+    int maxTextureBytes = 0;
+    int maxTextureBytesPerLoad = 0;
+    int maxTexturesPerLoad = 0;
   };
   bool sendLoadTerrainTile(const TerrainTileCommand & command);
   // Runtime command: take the terrain away (a load being built is answered "cleared"; a tile shown is disposed and the
@@ -658,6 +732,10 @@ public:
     QByteArray bytes;
     double readMs = -1.0;          // the storage read (-1: nothing was read)
     QString md5;                   // hex MD5 of bytes (the file's content key); empty unless available
+    long long bytesRead = 0;       // bytes read from the storage for this answer, whatever came of them (a file that
+                                   // failed its kind check was read all the same; one whose read failed partway counts
+                                   // its size, an upper bound: WdtInspection::readBytes); what the queue's poll budget
+                                   // and the load's texture byte budget count
   };
   // Set by the viewer; without it every getMapAsset is refused.
   std::function<MapAssetAnswer(const QJsonObject & request)> onGetMapAsset;
@@ -671,11 +749,14 @@ public:
     QString role;
     int fileDataID = 0;
     long long bytes = -1;          // bytes served, -1 for none
+    long long bytesRead = 0;       // bytes read from the storage for it (MapAssetAnswer::bytesRead)
     QString state;
     QString detail;
     QString md5;
     double readMs = -1.0;
-    double handlerMs = -1.0;       // validation, read, hash and queueing the answer (what the GUI thread spent)
+    double handlerMs = -1.0;       // validation, read and queueing the answer (what the GUI thread spent on it)
+    double queuedMs = -1.0;        // from its arrival to the start of its serving (THE MAP ASSET QUEUE); -1: not queued
+                                   // (a held request released, a test's own)
     bool first = false;            // the first read of this FileDataID from this client's storage by a getMapAsset of
                                    // this process (MapAssetReadTracker: client epoch and id): for a root ADT
                                    // the cold-read candidate; for a WDT not one, ResolveTerrainTile's catalog->inspect()
@@ -700,6 +781,31 @@ public:
   // UnityAssetAccess::clientEpoch()): the read tracker forgets the files of the client before at once.
   void noteClientReplaced(int epoch) { m_mapAssetReads.reset(epoch); }
 
+  // THE MAP ASSET QUEUE (above). One poll that served map requests: how many, the bytes read, the GUI-thread time spent
+  // serving them, and what it stopped for.
+  struct MapAssetPoll
+  {
+    int served = 0;                // requests answered in the poll
+    long long bytesRead = 0;       // bytes read from the storage for them
+    int largeFiles = 0;            // files over MAP_ASSET_LARGE_FILE_BYTES among them (0 or 1)
+    double serveMs = -1.0;         // the serving, from the first request taken to the last answer queued
+    int waitingAfter = 0;          // requests still waiting when the poll stopped serving
+    bool stoppedForBudget = false; // it stopped with requests waiting: MAP_ASSET_POLL_BUDGET_BYTES read, or a large file
+  };
+  // The requests waiting now, in order of arrival.
+  size_t mapAssetsWaiting() const { return m_mapAssetQueue.size(); }
+  // The most recent MAP_ASSET_POLL_TIMINGS_KEPT polls that served any (oldest first), and how many there were since the
+  // server started; every one is also handed to onMapAssetPoll.
+  const std::deque<MapAssetPoll> & mapAssetPolls() const { return m_mapAssetPolls; }
+  long long mapAssetPollsTotal() const { return m_mapAssetPollsTotal; }
+  std::function<void(const MapAssetPoll &)> onMapAssetPoll;
+  // Requests received since the server started: queued, refused for a full queue, and dropped unanswered with the queue
+  // (its connection ended); the most that waited at once.
+  long long mapAssetsQueued() const { return m_mapAssetsQueued; }
+  long long mapAssetsRefusedQueueFull() const { return m_mapAssetsRefusedQueueFull; }
+  long long mapAssetsQueueDropped() const { return m_mapAssetsQueueDropped; }   // since the process began
+  int mapAssetQueueDepthMax() const { return m_mapAssetQueueDepthMax; }
+
   // TEST HOOKS (the -terraintile test only; inert unless it sets them). The next getMapAsset (of role, or of any role
   // when role is empty) is held unanswered; release answers every held one then, in order, through the same decision
   // and read as any (an answer the viewer now calls "stale", or a file sent long after its load ended: a late answer).
@@ -711,6 +817,15 @@ public:
   int testReleaseHeldMapAssets();          // returns how many were answered
   const std::vector<QJsonObject> & mapAssetsHeld() const { return m_mapAssetsHeld; }
   long long mapAssetsHeldDropped() const { return m_mapAssetsHeldDropped; }   // dropped unanswered, since the process began
+  // The queue without a player (the -terraintile in-process checks, on a server of their own): a request taken as if it
+  // had arrived (held, queued, or refused for a full queue), one poll's serving, and the queue dropped as when a
+  // connection ends. Answers go nowhere without a client; their records are kept as any.
+  void testReceiveMapAsset(const QJsonObject & request) { handleGetMapAsset(request); }
+  int testServeMapAssetQueue() { return serveMapAssetQueue(); }   // returns how many were answered
+  void testDropMapAssetQueue() { dropHeldMapAssets("the test dropped them"); }
+  // A terrainTileLoaded taken as if the player had sent it (the -terraintile in-process checks of what a report is read
+  // into, on a server of their own): read, counted, logged and handed to onTerrainTileLoaded as any.
+  void testReceiveTerrainTileLoaded(const QJsonObject & msg) { handleTerrainTileLoaded(msg); }
 
   // The player's report on a terrain load (terrainTileLoaded): every field of the message; a number the player did not
   // send reads -1, so a check can tell "absent" from zero.
@@ -761,9 +876,62 @@ public:
     int terrainGameObjects = -1;
     long long managedHeapBytes = -1;
     long long nativeAllocatedBytes = -1;
+    // Protocol 13 (TERRAIN TEXTURES above). A player before it sends none: requestsRetired -1, hasMaterial false.
+    int requestsRetired = -1;      // the load's requests still out when it ended, retired by the player
+    QStringList retiredRequestIds; // their ids, as sent (at most TERRAIN_REPORT_LIST_MAX kept)
+    struct Texture
+    {
+      int fileDataID = -1;
+      QString role;                // "diffuse" (a layer's texture) or "height" (its height texture); empty when not sent
+      QString state;               // the host's state quoted, or the player's own
+      QString detail;
+      long long bytes = -1;
+      QString md5;
+      int width = -1;
+      int height = -1;
+      QString format;
+      int mips = -1;
+      double uploadMs = -1.0;
+    };
+    bool hasMaterial = false;      // the report carries a "material" object
+    QString materialState;         // "textured" / "partial" / "unavailable" / "unsupported"
+    QString materialReason;
+    int tex0FileDataID = -1;
+    long long tex0Bytes = -1;
+    QString tex0Md5;
+    QString alphaFormat;
+    std::vector<std::pair<QString, int>> chunkStates;   // the counters as sent, in the message's (sorted) key order
+    std::vector<Texture> textures;                      // at most TERRAIN_REPORT_TEXTURES_MAX kept
+    int texturesSent = -1;         // the entries the message's textures array held (-1: no array)
+    int uniqueTextures = -1;
+    int layerReferences = -1;
+    int duplicateReferences = -1;
+    long long textureSourceBytes = -1;
+    long long textureGpuBytes = -1;
+    long long alphaGpuBytes = -1;
+    long long materialVertexBytes = -1;
+    int materials = -1;
+    double tex0RoundTripMs = -1.0;
+    double tex0ParseMs = -1.0;
+    double textureFetchMs = -1.0;
+    double textureUploadMs = -1.0;
+    double alphaBuildMs = -1.0;
+    double materialBuildMs = -1.0;
+    // A chunk-state counter by name (-1 when not sent).
+    int chunkState(const QString & name) const;
     QJsonObject message;           // the message as received
     QString describe() const;
   };
+  // What a report is read into at most; the rest is counted, not kept. The retired ids and the chunk-state counters:
+  // TERRAIN_REPORT_LIST_MAX (a protocol-13 player retires at most its outstanding limit of ids, and sends about a dozen
+  // counters). The texture entries: TERRAIN_REPORT_TEXTURES_MAX. The player lists every distinct texture of the chunks it
+  // draws, asked for or not ("not requested" past maxTexturesPerLoad), and one "no texture id" entry for the layers whose
+  // MDID entry is 0. A drawn chunk has at most 8 layers (AdtParser makes more than 8 MCLY entries Malformed; 8 is the
+  // most observed), each naming a diffuse texture and, on a map with height textures, a height texture: 256 chunks x 8
+  // layers x 2 roles. A layer naming id 0 adds no distinct id of its role, so the "no texture id" entry fits within
+  // that count.
+  static const int TERRAIN_REPORT_LIST_MAX = MAX_TERRAIN_TEXTURES_PER_LOAD;
+  static const int TERRAIN_REPORT_TEXTURES_MAX = 256 * 8 * 2;
   // Raised on the GUI thread for every terrainTileLoaded.
   std::function<void(const TerrainTileReport &)> onTerrainTileLoaded;
 
@@ -845,8 +1013,14 @@ private:
   void handleRuntimeState(const QJsonObject & msg);
   void handleScreenshotSaved(const QJsonObject & msg);
   void handleGetMapAsset(const QJsonObject & msg);
-  void answerMapAsset(const QJsonObject & msg);
-  // The held requests (TEST HOOKS) dropped unanswered, and the hold disarmed: the connection they came over has ended.
+  // Answers one request: through the viewer's decision and read (onGetMapAsset), or with the answer given (a request
+  // refused on arrival, nothing read). queuedMs goes into its record. Returns the bytes read for it.
+  long long answerMapAsset(const QJsonObject & msg, double queuedMs = -1.0, const MapAssetAnswer * given = nullptr);
+  // One poll's serving of the queue (THE MAP ASSET QUEUE): in order, until the poll's budget is spent. Returns how many
+  // were answered.
+  int serveMapAssetQueue();
+  // The held requests (TEST HOOKS) and the queue dropped unanswered, and the hold disarmed: the connection they came over
+  // has ended.
   void dropHeldMapAssets(const char * why);
   void handleTerrainTileLoaded(const QJsonObject & msg);
   void queueLine(const QByteArray & line);
@@ -894,6 +1068,20 @@ private:
   QString m_holdMapAssetRole;
   std::vector<QJsonObject> m_mapAssetsHeld;
   long long m_mapAssetsHeldDropped = 0;
+  // THE MAP ASSET QUEUE: each request with when it arrived (m_clock), at most MAP_ASSET_QUEUE_MAX.
+  struct QueuedMapAsset
+  {
+    QJsonObject request;
+    qint64 arrivedNs = 0;
+  };
+  std::deque<QueuedMapAsset> m_mapAssetQueue;
+  QElapsedTimer m_clock;                              // started with the server object: the queue's clock
+  std::deque<MapAssetPoll> m_mapAssetPolls;           // the most recent MAP_ASSET_POLL_TIMINGS_KEPT, emptied by start()
+  long long m_mapAssetPollsTotal = 0;
+  long long m_mapAssetsQueued = 0;
+  long long m_mapAssetsRefusedQueueFull = 0;
+  long long m_mapAssetsQueueDropped = 0;
+  int m_mapAssetQueueDepthMax = 0;
 };
 
 #endif // UNITYIPCSERVER_H
