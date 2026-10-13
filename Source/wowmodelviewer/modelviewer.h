@@ -594,11 +594,14 @@ public:
   // runtimeState (asked for every POLL_MS while a model is awaited) a model's. A model the player could not
   // build after a world model gets a notice, as a world model does.
   // Unknown: a load of the other kind is in flight or was dropped -- the player may show either until it answers.
-  enum class PlayerContent { Nothing, Model, MapObject, Unknown };
+  // Terrain: the player shows a terrain tile (THE TERRAIN TILE below), in front of whatever the canvas holds: no notice
+  // is put over it, and a load of either kind is awaited as after the other kind.
+  enum class PlayerContent { Nothing, Model, MapObject, Unknown, Terrain };
   PlayerContent m_playerContent = PlayerContent::Nothing;   // what the player was last known to show
   int m_mapObjectAwaited = 0;   // the load serial of a world model built after another kind, until reported
   int m_modelAwaited = 0;       // the FileDataID of a model built after a world model, until the player has it
-  int m_modelAwaitedFailed = 0; // that model, when the player finished without it (it still shows the world model)
+  int m_modelAwaitedFailed = 0; // that model, when the player finished without it (it still shows the world model) or
+                                // dropped it for a terrain tile
   wxStopWatch m_modelAwaitedClock;   // since the wait began (monotonic)
   wxTimer m_playerContentPoll;
   static const int POLL_MS = 100;
@@ -619,6 +622,57 @@ public:
   static const long FENCE_RETRY_MS = 500;
   bool startUncoverFence();
   void endUncoverFence();
+
+  // THE TERRAIN TILE (protocol 12; UnityIpcServer.h, TERRAIN). One ADT tile of a map of the loaded client, drawn by the
+  // player from the map's WDT and the tile's root ADT, which it asks for (getMapAsset) and parses itself. The host
+  // names the WDT from its map catalogue and serves the two files through it, for the current terrain load only.
+  struct TerrainRequest
+  {
+    int load = 0;                       // the load serial sent (0: no terrain request)
+    int epoch = 0;                      // UnityAssetAccess::clientEpoch() when sent
+    int mapId = -1;
+    int tileX = -1;
+    int tileY = -1;
+    int wdtFileDataID = 0;              // the one WDT this load may fetch
+    bool wdtServed = false;             // that WDT was answered "available"
+    int rootFileDataID = 0;             // the first root ADT this load asked for (0: none yet): the only one it may fetch
+    quint64 catalogueGeneration = 0;    // the storage the map catalogue was built from (MapCatalogClient)
+  };
+  // What getMapAsset decided before anything is read: state "" goes on to the read, "refused" or "stale" is the answer.
+  struct MapAssetDecision
+  {
+    QString state;
+    QString detail;
+  };
+  // The decision, from nothing but its arguments (a test calls it with made-up requests), in this order: a client being
+  // loaded is refused; a request without a load (> 0) is refused; one with no current terrain request, another load,
+  // another client epoch, or under a map catalogue that is not the loaded client's any more is stale (the detail names
+  // every reason that holds); a role other than "wdt" or "rootAdt", a fileDataID <= 0, a WDT other than the load's, a
+  // root ADT before the load's WDT was served, or a second root ADT id for the load is refused.
+  static MapAssetDecision decideMapAssetRequest(const QJsonObject & request, const TerrainRequest * current, int epochNow,
+                                                bool catalogueBelongs, bool clientLoading);
+  // Show one terrain tile: refused, 0 with why, unless a client is loaded (and none is loading), the player draws terrain,
+  // the map catalogue is ready and the loaded client's, the tile is in the 64 x 64 grid, the map has a WDT and that WDT
+  // can be read now (inspected through the storage, for every client family). Otherwise the load serial sent. The model
+  // or world model the player was building is dropped by it (the player's model session stays, hidden), so the waits
+  // for it end here.
+  int RequestTerrainTile(int mapId, int tileX, int tileY, QString & why);
+  // The tile and WDT a load would name, without the player (RequestTerrainTile's checks after the player's): false with
+  // why, or the command filled but for its load and epoch. Reads the map's WDT through the storage (inspect).
+  bool ResolveTerrainTile(int mapId, int tileX, int tileY, UnityIpcServer::TerrainTileCommand & command, QString & why);
+  // Take the terrain away (clearTerrain): false when there is no player that draws terrain.
+  bool ClearTerrain(const QString & reason);
+  // The getMapAsset handler (UnityIpcServer::onGetMapAsset): the decision above, then the file read through the map
+  // catalogue (content key checked, at most UnityIpcServer::MAX_MAP_ASSET_BYTES) and its MD5.
+  UnityIpcServer::MapAssetAnswer ServeMapAsset(const QJsonObject & request);
+  void OnTerrainTileLoaded(const UnityIpcServer::TerrainTileReport & report);
+  // The headless terrain test's "staleload" step: a newer load the player never gets (the serial raised, the request
+  // moved to it, nothing sent).
+  void TerrainTestRaiseLoadWithoutSending();
+  // The map catalogue is ready, the loaded client's, and the one the current terrain request was sent under.
+  bool terrainCatalogueBelongs() const;
+  int m_terrainLoadSerial = 0;          // raised for every loadTerrainTile sent, never otherwise (but the test above)
+  TerrainRequest m_terrainRequest;      // the latest load sent; cleared by clearTerrain, a model load, a player restart
   // The title bar names what the viewer mode shows (Models, Buildings); Textures keeps it.
   void UpdateTitle();
   struct SceneHold

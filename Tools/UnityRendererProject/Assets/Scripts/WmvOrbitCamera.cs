@@ -478,6 +478,66 @@ public class WmvOrbitCamera : MonoBehaviour
     public float FramedDistance { get { return framedDistance; } }
     public float TargetDistance { get { return targetDistance; } }
 
+    /// <summary>
+    /// Everything that places the camera and bounds its zoom: the pivot, the angles, the live and target distances, the
+    /// framing distance and zoom range, and the clip-plane rule (world-model planes, the framed radius and centre). The
+    /// terrain view (WmvMainTerrain) takes one on the way in and puts it back on the way out, so the model hidden under
+    /// a terrain tile is seen again exactly as it was left.
+    /// </summary>
+    public struct State
+    {
+        public Vector3 Pivot;
+        public float Distance, TargetDistance, FramedDistance, MinDistance, MaxDistance;
+        public bool MapObjectPlanes;
+        public float FramedRadius;
+        public Vector3 FramedCenter;
+        public float Yaw, Pitch;
+
+        /// <summary>Every field equal, exactly (the self-test's check that a round trip changed nothing).</summary>
+        public bool SameAs(State o)
+        {
+            return Pivot == o.Pivot && Distance == o.Distance && TargetDistance == o.TargetDistance &&
+                   FramedDistance == o.FramedDistance && MinDistance == o.MinDistance && MaxDistance == o.MaxDistance &&
+                   MapObjectPlanes == o.MapObjectPlanes && FramedRadius == o.FramedRadius && FramedCenter == o.FramedCenter &&
+                   Yaw == o.Yaw && Pitch == o.Pitch;
+        }
+
+        public override string ToString()
+        {
+            return string.Format(System.Globalization.CultureInfo.InvariantCulture,
+                                 "pivot {0} distance {1:R} (target {2:R}, framed {3:R}, range {4:R} .. {5:R}), {6}planes, radius {7:R} " +
+                                 "centre {8}, yaw {9:R} pitch {10:R}", Pivot, Distance, TargetDistance, FramedDistance, MinDistance,
+                                 MaxDistance, MapObjectPlanes ? "world-model " : "model ", FramedRadius, FramedCenter, Yaw, Pitch);
+        }
+    }
+
+    public State Snapshot()
+    {
+        return new State
+        {
+            Pivot = pivot, Distance = distance, TargetDistance = targetDistance, FramedDistance = framedDistance,
+            MinDistance = minDistance, MaxDistance = maxDistance, MapObjectPlanes = mapObjectPlanes,
+            FramedRadius = framedRadius, FramedCenter = framedCenter, Yaw = yaw, Pitch = pitch,
+        };
+    }
+
+    /// <summary>Put a Snapshot back and place the camera from it (position, rotation and clip planes).</summary>
+    public void Restore(State s)
+    {
+        pivot = s.Pivot;
+        distance = s.Distance;
+        targetDistance = s.TargetDistance;
+        framedDistance = s.FramedDistance;
+        minDistance = s.MinDistance;
+        maxDistance = s.MaxDistance;
+        mapObjectPlanes = s.MapObjectPlanes;
+        framedRadius = s.FramedRadius;
+        framedCenter = s.FramedCenter;
+        yaw = s.Yaw;
+        pitch = s.Pitch;
+        Apply();
+    }
+
     void Apply()
     {
         // The pivot and the angles are untouched by zoom: only the radius along the same look

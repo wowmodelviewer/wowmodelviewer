@@ -180,8 +180,10 @@ namespace wow
     // The same inspection for any file of this catalogue's client, by FileDataID or by path (a tile's parts, a global
     // world model): listed by the root, on this computer, and read in full; with bytes given, they receive the file
     // when it is Available. Refused -- state NotChecked, the reason in detail and in lastRefusal() -- when the catalogue
-    // is not ready or no longer belongs to the loaded client. No check of what the file is: that is the caller's.
-    WdtInspection inspectFile(const WdtReference & reference, QByteArray * bytes = nullptr);
+    // is not ready or no longer belongs to the loaded client. No check of what the file is: that is the caller's. A file
+    // larger than maxBytes is not read: Unreadable, the detail naming its size and the limit.
+    WdtInspection inspectFile(const WdtReference & reference, QByteArray * bytes = nullptr,
+                              qint64 maxBytes = 64 * 1024 * 1024);
     // A map's WDT bytes, read through the client's storage by the map's own reference -- what a runtime hands the
     // player's WDT parser. False, with why, when the catalogue no longer belongs to the loaded client, the map is not
     // in it, it has no WDT reference, or the WDT cannot be read (the inspection's reason). Updates the map's inspection.
@@ -205,7 +207,7 @@ namespace wow
     // May this catalogue read its client's storage now (ready, and still the loaded client's)? Else the reason.
     bool canRead();
     QString refusalReason() const;
-    static WdtInspection inspectReference(const WdtReference & reference, QByteArray * bytes, bool hash);
+    static WdtInspection inspectReference(const WdtReference & reference, QByteArray * bytes, bool hash, qint64 maxBytes);
 
     Status m_status = Status::NoClient;
     QString m_statusDetail;

@@ -370,7 +370,7 @@ bool wow::WorldMapCatalog::readWdt(int mapId, QByteArray & bytes, QString & why)
 void wow::WorldMapCatalog::inspectEntry(MapEntry & e, QByteArray * bytes) const
 {
   QByteArray read;
-  e.inspection = inspectReference(e.wdt, &read, m_hashing);
+  e.inspection = inspectReference(e.wdt, &read, m_hashing, 64 * 1024 * 1024);
   // A WDT is a chunked file whose first chunk is MVER, stored reversed ("REVM"). Four bytes, not a parse -- the WDT's
   // contents stay the player's parser's: it catches a reference that names another kind of file (a column read at the
   // wrong position would give one).
@@ -385,7 +385,7 @@ void wow::WorldMapCatalog::inspectEntry(MapEntry & e, QByteArray * bytes) const
     *bytes = read;
 }
 
-wow::WdtInspection wow::WorldMapCatalog::inspectFile(const WdtReference & reference, QByteArray * bytes)
+wow::WdtInspection wow::WorldMapCatalog::inspectFile(const WdtReference & reference, QByteArray * bytes, qint64 maxBytes)
 {
   if (bytes)
     bytes->clear();
@@ -395,10 +395,11 @@ wow::WdtInspection wow::WorldMapCatalog::inspectFile(const WdtReference & refere
     refused.detail = m_refusal;
     return refused;
   }
-  return inspectReference(reference, bytes, m_hashing);
+  return inspectReference(reference, bytes, m_hashing, maxBytes);
 }
 
-wow::WdtInspection wow::WorldMapCatalog::inspectReference(const WdtReference & ref, QByteArray * keep, bool hash)
+wow::WdtInspection wow::WorldMapCatalog::inspectReference(const WdtReference & ref, QByteArray * keep, bool hash,
+                                                          qint64 maxBytes)
 {
   if (keep)
     keep->clear();
@@ -450,7 +451,9 @@ wow::WdtInspection wow::WorldMapCatalog::inspectReference(const WdtReference & r
   {
     QByteArray bytes;
     unsigned int error = 0;
-    const CASCFolder::ReadOutcome read = folder->readStorageFile(byId ? ref.fileDataId : -1, byId ? QString() : ref.path, bytes, &error);
+    qint64 size = -1;
+    const CASCFolder::ReadOutcome read = folder->readStorageFile(byId ? ref.fileDataId : -1, byId ? QString() : ref.path,
+                                                                 bytes, &error, maxBytes, &size);
     switch (read)
     {
       case CASCFolder::ReadOutcome::Read:
@@ -485,8 +488,9 @@ wow::WdtInspection wow::WorldMapCatalog::inspectReference(const WdtReference & r
         r.detail = QString("%1 is encrypted with a key this computer does not have").arg(what);
         break;
       case CASCFolder::ReadOutcome::TooLarge:
+        // Decided from the size the storage gives, before any byte is read.
         r.state = WdtAvailability::Unreadable;
-        r.detail = QString("%1 is larger than a WDT read allows").arg(what);
+        r.detail = QString("%1 is larger than this read allows (%2 bytes, the limit is %3)").arg(what).arg(size).arg(maxBytes);
         break;
       case CASCFolder::ReadOutcome::NoStorage:
         r.state = WdtAvailability::Unreadable;

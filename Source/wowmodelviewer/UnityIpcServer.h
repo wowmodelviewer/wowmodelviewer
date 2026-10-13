@@ -1,7 +1,7 @@
 /*
  * UnityIpcServer.h
  *
- * Localhost IPC server for the embedded Unity renderer (protocol v11). WMV is the SERVER:
+ * Localhost IPC server for the embedded Unity renderer (protocol v12). WMV is the SERVER:
  * UnityRendererHost starts this listener BEFORE launching the player and passes the port on
  * the player's command line (-wmvPort <n>); the player connects back, announces itself with
  * unityReady and then asks WMV for the raw WoW assets/metadata it renders from. This is the
@@ -216,6 +216,39 @@
  * "missing" and nothing is left at its key. An older player gets no such scene and shows the NPC without its weapons,
  * as before. See docs/unity-renderer/README.md, "Equipment on exclusive NPC models".
  *
+ * TERRAIN (protocol 12). One ADT terrain tile of a map, drawn in a terrain view of its own beside the model session,
+ * which it leaves alone (the model on screen stays loaded, hidden). The host names the tile and the map's WDT; the
+ * player fetches the WDT and the tile's root ADT and parses them itself -- the host parses neither:
+ *   WMV -> player  { "type":"loadTerrainTile", "load":3, "assetEpoch":1, "mapId":0, "mapDirectory":"Azeroth",
+ *                    "product":"wow", "build":"12.1.0.69933", "wdtFileDataID":775971, "wdtResolvedBy":"fileDataID",
+ *                    "tileX":32, "tileY":50, "maxAssetBytes":4194304 }   ("wdtResolvedBy":"path" adds "wdtPath")
+ *                  { "type":"clearTerrain", "reason":"..." }
+ *   player -> WMV  { "type":"getMapAsset", "requestId":"u7", "load":3, "assetEpoch":1, "role":"wdt", "fileDataID":775971 }
+ *                  { "type":"terrainTileLoaded", "load":3, "status":"built", "reason":"", "mapId":0, "tileX":32, ...,
+ *                    "wdtMd5":"...", "rootMd5":"...", "chunks":256, "chunksBuilt":256, "vertices":37120, ...,
+ *                    "timings":{...}, "liveTerrainTiles":1, "meshObjects":..., "materialObjects":... }
+ * "load" is the host's terrain load serial (its own, not the model's), raised for every loadTerrainTile sent; in this
+ * protocol only the latest load is valid. getMapAsset is answered with an assetResponse as for any file (binary frame),
+ * plus "role", "load", "assetEpoch", "state" (the map catalogue's availability name, or "stale" / "refused"), "detail",
+ * "readMs" and "md5" (of the bytes served); "ok" is true only for "available", every other answer carries the detail
+ * as "error", and none is cacheable. The host serves only the current load's WDT, and its root ADT once that WDT was
+ * served, read through the client's own storage with the content key checked (WorldMapCatalog::inspectFile, at most
+ * maxAssetBytes); it cannot tell whether the root is one the WDT names (it parses no WDT). Every load is answered once:
+ * terrainTileLoaded "built" (once the frames after the one that adopted it have begun), "failed" (the reason, and the
+ * host's state and detail when an answer made it fail), "superseded" (a newer loadTerrainTile or a loadWoWModel
+ * replaced it) or "cleared" (clearTerrain while it was building). clearTerrain also takes a built tile away, unanswered.
+ * A loadWoWModel leaves the terrain view first. runtimeState adds "liveTerrainTiles", "terrainLoad" (the load shown, 0
+ * for none), "terrainLoading", "terrainView", "cameraMask", "meshObjects", "materialObjects", and what the terrain
+ * itself holds: "terrainMeshes" and "terrainMaterials" (the Meshes and Materials of the live terrain runtimes) and
+ * "terrainGameObjects" (the GameObjects under the terrain root), each 0 when no tile is shown; and what the player keeps
+ * of its map-file requests: "terrainPendingRequests" (0 or 1), "terrainRetiredRequests" (requests of loads that ended
+ * unanswered, at most 32), "terrainRetiredTotal" (every one retired since the player started, not capped),
+ * "terrainLastRetiredRequest" (the id retired last, "" for none), "mapAnswersRouted", "mapAnswersDropped" (late or
+ * unowned answers), its parts "mapAnswersLate" and "mapAnswersUnowned", and "terrainTimeoutMs". An older player is sent
+ * none of it. The host keeps the most recent MAP_ASSET_RECORDS_KEPT getMapAsset records and counts the rest, and
+ * remembers the files it read for the loaded client only (MapAssetReadTracker, emptied when the client is replaced):
+ * nothing it keeps about map files grows with a player's life.
+ *
  * modelAnimation is pushed the same way whenever the animation on display changes, and once after
  * loadWoWModel so the player starts on the animation the app is showing rather than on its own
  * idle. "sequenceIndex" is what the player must act on: it indexes the model's animation table,
@@ -248,11 +281,12 @@
     #include <wx/wx.h>
 #endif
 
+#include <deque>
 #include <functional>
 #include <initializer_list>
 #include <map>
 #include <string>
-
+#include <unordered_set>
 #include <vector>
 
 #include <QByteArray>
@@ -264,10 +298,52 @@
 
 #include "UnityAssetAccess.h"
 
+// The FileDataIDs getMapAsset has read from the loaded client's storage (UnityIpcServer::MapAssetServed::first): the
+// first read of each is measured apart from the rest. It holds the ids of ONE client epoch (another client's file of the
+// same id is other bytes in another storage). When the client is replaced the host empties it at once (reset, from
+// ModelViewer::ResetClientState through UnityIpcServer::noteClientReplaced), so nothing of a client that is gone is
+// kept. As a backstop a read under an epoch other than its own (one moved on without that call) empties it first too,
+// so first reads never mix clients. At most capacity ids: once it is full a new id is not tracked -- Untracked, never a
+// first read it may not be -- and counted.
+class MapAssetReadTracker
+{
+public:
+  enum class Read { First, Again, Untracked };
+  explicit MapAssetReadTracker(size_t capacity) : m_capacity(capacity) {}
+  // A file read under epoch: First the first time since the epoch began, Again after that, Untracked when it is not
+  // tracked and the tracker is full.
+  Read note(int epoch, int fileDataID);
+  // The client was replaced, the new one's epoch is epoch: every id is forgotten now, not at the next read. The count of
+  // untracked reads is kept.
+  void reset(int epoch);
+  int epoch() const { return m_epoch; }                   // the epoch of the last reset or read, whichever came later
+                                                          // (0: neither yet)
+  size_t size() const { return m_ids.size(); }
+  bool holds(int fileDataID) const { return m_ids.count(fileDataID) != 0; }
+  size_t capacity() const { return m_capacity; }
+  long long untracked() const { return m_untracked; }     // reads left untracked for the capacity, every epoch
+private:
+  size_t m_capacity;
+  int m_epoch = 0;
+  std::unordered_set<int> m_ids;
+  long long m_untracked = 0;
+};
+
 class UnityIpcServer : public wxEvtHandler
 {
 public:
-  static const int PROTOCOL_VERSION = 11;
+  static const int PROTOCOL_VERSION = 12;
+  // The largest map file (a WDT or a root ADT) served to getMapAsset, and the limit loadTerrainTile states to the player
+  // (TERRAIN above): 4 MiB. The size census in docs/world-viewer/03-terrain-geometry.md ("Asset sizes") puts the largest
+  // root ADT of the four audited clients at 1,462,916 bytes (FileDataID 811303, map 1051 tile 31_29, Retail and MoP) and
+  // the largest WDT of the audited maps at 294,988 (Retail Azeroth, 775971).
+  static const int MAX_MAP_ASSET_BYTES = 4 * 1024 * 1024;
+  // The getMapAsset records kept (mapAssetsServed): the most recent 256; the rest are counted, not kept.
+  static const int MAP_ASSET_RECORDS_KEPT = 256;
+  // The FileDataIDs the read tracker holds for one client epoch (MapAssetReadTracker).
+  static const int MAP_ASSET_READS_TRACKED = 8192;
+  // The getMapAsset requests the test hook holds unanswered at most (testHoldNextMapAsset).
+  static const int MAP_ASSETS_HELD_MAX = 8;
 
   UnityIpcServer();
   ~UnityIpcServer();
@@ -306,6 +382,9 @@ public:
   // Protocol 11: the player puts an ordinary NPC model's weapons on it from a characterScene "attachmentsOnly" (NPC
   // EQUIPMENT above).
   bool playerAttachesNpcEquipment() const { return m_client && m_unityReady && m_playerProtocol >= 11; }
+  // Protocol 12: the player draws a terrain tile: it takes loadTerrainTile and clearTerrain, asks getMapAsset and answers
+  // terrainTileLoaded (TERRAIN above).
+  bool playerDrawsTerrain() const { return m_client && m_unityReady && m_playerProtocol >= 12; }
 
   // Runtime command: tell the player which model is active. Either path or fileDataID may be
   // empty/0. Queued if the player is connected; dropped (logged) otherwise.
@@ -484,6 +563,29 @@ public:
     int backgroundR = -1;          // the viewport background the player holds, as displayed (protocol 7)
     int backgroundG = -1;
     int backgroundB = -1;
+    // Protocol 12 (TERRAIN above). Not part of "loading": a terrain load is answered by terrainTileLoaded.
+    int liveTerrainTiles = -1;     // terrain tile runtimes alive
+    int terrainLoad = -1;          // the terrain load shown, 0 for none
+    int terrainLoading = -1;       // 1 while a terrain load is being built, else 0
+    int terrainView = -1;          // 1 while the viewport shows the terrain view, else 0
+    bool hasCameraMask = false;    // the player sent cameraMask (every 32-bit value is a mask, so no number means absent)
+    long long cameraMask = 0;      // the viewport camera's culling mask, as the player sent it
+    int meshObjects = -1;          // Mesh objects alive in the player
+    int materialObjects = -1;      // Material objects alive in the player
+    int terrainMeshes = -1;        // Meshes held by the live terrain runtimes, 0 when no tile is shown
+    int terrainMaterials = -1;     // Materials held by them
+    int terrainGameObjects = -1;   // GameObjects under the terrain root
+    // Protocol 12 too, added later (a player before them reads -1): what the player keeps of its map-file requests.
+    int terrainPendingRequests = -1;  // the current terrain load's request awaiting its answer: 0 or 1
+    int terrainRetiredRequests = -1;  // requests of loads that ended unanswered, kept to recognise a late answer (<= 32)
+    int mapAnswersRouted = -1;        // map-file answers routed to the terrain session since the player started
+    int mapAnswersDropped = -1;       // ... of which dropped: late (their load had ended) or owned by no load
+    int terrainTimeoutMs = -1;        // the time a terrain load may wait for its files before it fails
+    int terrainRetiredTotal = -1;     // requests retired since the player started (not capped: it goes on past 32)
+    QString terrainLastRetiredRequest;          // the id of the request retired last ("" for none, or not sent)
+    bool hasTerrainLastRetiredRequest = false;  // the player sent terrainLastRetiredRequest (a text: "" is no absence)
+    int mapAnswersLate = -1;          // mapAnswersDropped's late part: answers to a request in the retired ring
+    int mapAnswersUnowned = -1;       // ... and its unowned part: answers to a request no load waits for nor the ring holds
     QString describe() const;
   };
   // Ask the player what it holds (runtimeState). Returns the question's number, which the answer echoes,
@@ -523,6 +625,147 @@ public:
   };
   // Raised on the GUI thread for every screenshotSaved.
   std::function<void(const ScreenshotResult &)> onScreenshotSaved;
+
+  // Runtime command (TERRAIN above): one terrain tile, and the map's WDT the player fetches first. False (nothing sent)
+  // when the player is not connected and ready, or speaks a protocol older than 12. The caller raises its terrain load
+  // serial only when this returns true.
+  struct TerrainTileCommand
+  {
+    int load = 0;                  // the host's terrain load serial (> 0)
+    int assetEpoch = 0;            // UnityAssetAccess::clientEpoch() when sent
+    int mapId = -1;
+    QString mapDirectory;
+    QString product;               // the client the map catalogue was built from
+    QString build;
+    int wdtFileDataID = 0;         // the WDT the player asks for (getMapAsset role "wdt")
+    QString wdtResolvedBy;         // "fileDataID" (Map.db2's) or "path" (the storage root's id for the directory path)
+    QString wdtPath;               // "path" only
+    int tileX = -1;
+    int tileY = -1;
+    int maxAssetBytes = MAX_MAP_ASSET_BYTES;
+  };
+  bool sendLoadTerrainTile(const TerrainTileCommand & command);
+  // Runtime command: take the terrain away (a load being built is answered "cleared"; a tile shown is disposed and the
+  // terrain view left, unanswered). False (nothing sent) as for sendLoadTerrainTile.
+  bool sendClearTerrain(const QString & reason);
+
+  // The host's answer to one getMapAsset, from onGetMapAsset (the server knows nothing of maps): state is the map
+  // catalogue's availability name, "stale" or "refused"; bytes only for "available".
+  struct MapAssetAnswer
+  {
+    QString state;
+    QString detail;
+    QByteArray bytes;
+    double readMs = -1.0;          // the storage read (-1: nothing was read)
+    QString md5;                   // hex MD5 of bytes (the file's content key); empty unless available
+  };
+  // Set by the viewer; without it every getMapAsset is refused.
+  std::function<MapAssetAnswer(const QJsonObject & request)> onGetMapAsset;
+  // One getMapAsset answered: what was asked and what went back.
+  struct MapAssetServed
+  {
+    QString requestId;
+    int load = 0;                  // as the request named them
+    int assetEpoch = 0;
+    int epochNow = 0;              // UnityAssetAccess::clientEpoch() when it was answered
+    QString role;
+    int fileDataID = 0;
+    long long bytes = -1;          // bytes served, -1 for none
+    QString state;
+    QString detail;
+    QString md5;
+    double readMs = -1.0;
+    double handlerMs = -1.0;       // validation, read, hash and queueing the answer (what the GUI thread spent)
+    bool first = false;            // the first read of this FileDataID from this client's storage by a getMapAsset of
+                                   // this process (MapAssetReadTracker: client epoch and id): for a root ADT
+                                   // the cold-read candidate; for a WDT not one, ResolveTerrainTile's catalog->inspect()
+                                   // having read that WDT whole on this thread just before the load was sent
+    bool firstTracked = true;      // false: a file served when the read tracker was full and did not hold its id, so
+                                   // whether this was its first read is not known (first is false then)
+    QString describe() const;
+  };
+  // The most recent getMapAsset answers, in order (at most MAP_ASSET_RECORDS_KEPT), and how many there were since the
+  // server started: a player's life answers without end, and only what is recent is worth keeping. Every answer is also
+  // handed to onMapAssetServed, for a test that wants all of them.
+  const std::deque<MapAssetServed> & mapAssetsServed() const { return m_mapAssetsServed; }
+  long long mapAssetsServedTotal() const { return m_mapAssetsServedTotal; }
+  long long mapAssetRecordsDropped() const { return m_mapAssetRecordsDropped; }
+  std::function<void(const MapAssetServed &)> onMapAssetServed;
+  // Keeps one answer's record (and calls onMapAssetServed): what every getMapAsset answer does; a test feeds made-up ones.
+  void recordMapAssetServed(const MapAssetServed & served);
+  // Which files getMapAsset has read from the loaded client's storage (MapAssetServed::first). Kept across player
+  // restarts -- the storage is the same -- and emptied when the client is replaced (noteClientReplaced).
+  const MapAssetReadTracker & mapAssetReads() const { return m_mapAssetReads; }
+  // The loaded client was replaced, the new one's epoch is epoch (UnityAssetAccess::noteClientReplaced, then
+  // UnityAssetAccess::clientEpoch()): the read tracker forgets the files of the client before at once.
+  void noteClientReplaced(int epoch) { m_mapAssetReads.reset(epoch); }
+
+  // TEST HOOKS (the -terraintile test only; inert unless it sets them). The next getMapAsset (of role, or of any role
+  // when role is empty) is held unanswered; release answers every held one then, in order, through the same decision
+  // and read as any (an answer the viewer now calls "stale", or a file sent long after its load ended: a late answer).
+  // At most MAP_ASSETS_HELD_MAX are held (a request beyond that is answered as usual), and held requests are dropped,
+  // never answered, when the player's connection ends: no answer meant for one player may reach another.
+  void testHoldNextMapAsset(const QString & role);
+  void testCancelMapAssetHold();
+  bool testMapAssetHoldArmed() const { return m_holdNextMapAsset; }
+  int testReleaseHeldMapAssets();          // returns how many were answered
+  const std::vector<QJsonObject> & mapAssetsHeld() const { return m_mapAssetsHeld; }
+  long long mapAssetsHeldDropped() const { return m_mapAssetsHeldDropped; }   // dropped unanswered, since the process began
+
+  // The player's report on a terrain load (terrainTileLoaded): every field of the message; a number the player did not
+  // send reads -1, so a check can tell "absent" from zero.
+  struct TerrainTileReport
+  {
+    int load = 0;                  // the loadTerrainTile serial this answers
+    QString status;                // "built" / "failed" / "superseded" / "cleared"
+    QString reason;
+    QString hostState;             // a failure caused by a getMapAsset answer: its state and detail
+    QString hostDetail;
+    int mapId = -1;
+    int tileX = -1;
+    int tileY = -1;
+    int wdtFileDataID = -1;
+    int rootFileDataID = -1;
+    long long wdtBytes = -1;
+    long long rootBytes = -1;
+    QString wdtMd5;                // hex MD5 of the bytes the player parsed
+    QString rootMd5;
+    int chunks = -1;
+    int chunksBuilt = -1;
+    int chunksSkipped = -1;
+    int chunksUnsupported = -1;
+    long long vertices = -1;
+    long long triangles = -1;
+    int holeCells = -1;
+    bool hasBounds = false;        // boundsMin/boundsMax present (Unity space, root-local)
+    double boundsMin[3] = { 0.0, 0.0, 0.0 };
+    double boundsMax[3] = { 0.0, 0.0, 0.0 };
+    bool hasRootOffset = false;
+    double rootOffset[3] = { 0.0, 0.0, 0.0 };
+    bool hasOriginWorld = false;   // world yards the vertices are relative to
+    double originWorld[3] = { 0.0, 0.0, 0.0 };
+    double wdtRoundTripMs = -1.0;
+    double wdtParseMs = -1.0;
+    double rootRoundTripMs = -1.0;
+    double parseMs = -1.0;
+    double buildMs = -1.0;
+    double uploadMs = -1.0;
+    double firstFrameMs = -1.0;
+    double totalMs = -1.0;
+    long long meshBytes = -1;
+    int liveTerrainTiles = -1;
+    int liveModels = -1;
+    int liveMapObjects = -1;
+    int meshObjects = -1;
+    int materialObjects = -1;
+    int terrainGameObjects = -1;
+    long long managedHeapBytes = -1;
+    long long nativeAllocatedBytes = -1;
+    QJsonObject message;           // the message as received
+    QString describe() const;
+  };
+  // Raised on the GUI thread for every terrainTileLoaded.
+  std::function<void(const TerrainTileReport &)> onTerrainTileLoaded;
 
   // Raised (on the GUI thread) when the player's unityReady arrives -- the host uses it to
   // push the currently displayed model.
@@ -571,6 +814,14 @@ public:
     QString lastMapObject;        // "<fileDataID> load <n> <status> <groups> groups <reason>" of the last report
     int backgroundPushes = 0;     // viewportBackground messages sent
     QString lastBackground;       // "#RRGGBB" of the last viewportBackground sent
+    int terrainLoads = 0;         // loadTerrainTile sent
+    int terrainClears = 0;        // clearTerrain sent
+    int mapAssetRequests = 0;     // getMapAsset received
+    int mapAssetsAvailable = 0;   // ... answered with the file ("available")
+    int terrainReports = 0;       // terrainTileLoaded received, any status
+    int terrainBuilt = 0;         // ... of which "built"
+    int terrainFailed = 0;        // ... of which "failed"
+    QString lastTerrain;          // "load <n> <status> map <m> tile <x>_<y> <reason>" of the last report
     QString lastRequest;    // "path" or "fileDataID n"
     QString lastProvider;   // "CASC" / "MPQ" / ""
     QString lastError;
@@ -593,6 +844,11 @@ private:
   void handleMapObjectLoaded(const QJsonObject & msg);
   void handleRuntimeState(const QJsonObject & msg);
   void handleScreenshotSaved(const QJsonObject & msg);
+  void handleGetMapAsset(const QJsonObject & msg);
+  void answerMapAsset(const QJsonObject & msg);
+  // The held requests (TEST HOOKS) dropped unanswered, and the hold disarmed: the connection they came over has ended.
+  void dropHeldMapAssets(const char * why);
+  void handleTerrainTileLoaded(const QJsonObject & msg);
   void queueLine(const QByteArray & line);
   // One line assembled from pieces straight in the send buffer: a characterImage line is ~11 MB, and
   // joining it into one QByteArray first would copy all of it once more.
@@ -630,6 +886,14 @@ private:
   // each time, which for an 11 MB image line sent 256 KB at a time was hundreds of MB of memmove.
   size_t m_outPos = 0;
   Stats m_stats;
+  std::deque<MapAssetServed> m_mapAssetsServed;       // the most recent MAP_ASSET_RECORDS_KEPT, emptied by start()
+  long long m_mapAssetsServedTotal = 0;               // answers since start()
+  long long m_mapAssetRecordsDropped = 0;             // ... no longer kept
+  MapAssetReadTracker m_mapAssetReads{MAP_ASSET_READS_TRACKED};
+  bool m_holdNextMapAsset = false;                    // TEST HOOKS
+  QString m_holdMapAssetRole;
+  std::vector<QJsonObject> m_mapAssetsHeld;
+  long long m_mapAssetsHeldDropped = 0;
 };
 
 #endif // UNITYIPCSERVER_H

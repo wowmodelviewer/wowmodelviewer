@@ -4,7 +4,7 @@
 // localhost TCP listener before launching the player and passes the port on the player
 // command line ("-wmvPort <n>"); the player connects back, announces itself and then asks
 // WMV for whatever it needs. Transport: newline-delimited JSON (one object per line),
-// protocol version 11 (4 added world models: loadWoWModel "kind", mapObjectLoaded and runtimeState;
+// protocol version 12 (4 added world models: loadWoWModel "kind", mapObjectLoaded and runtimeState;
 // 5 added mounted characters: characterScene "mount", its answer's mount fields, runtimeState's
 // mountFileDataID, modelAnimation "role" and "load", and modelAnimationState "load", "hasRider" and
 // "rider"; 6 added captureScreenshot and its answer screenshotSaved; 7 added viewportBackground and
@@ -12,7 +12,9 @@
 // cache: loadWoWModel and prefetchAssets "assetEpoch", assetResponse "cacheable", prefetchAssets, and runtimeState's
 // assetCache fields -- see WmvAssetCache; 10 added binary payloads: an assetResponse's file and a characterImage's
 // pixels follow their line as raw bytes, "payloadBytes" long -- see WmvStreamReader; 11 added characterScene
-// "attachmentsOnly" and "load" for the equipment of an ordinary NPC model).
+// "attachmentsOnly" and "load" for the equipment of an ordinary NPC model; 12 added terrain tiles: loadTerrainTile,
+// clearTerrain, getMapAsset and its answer's role, load, assetEpoch, state, detail, readMs and md5, terrainTileLoaded,
+// and runtimeState's terrain fields -- see WmvTerrainSession).
 //
 // The player is WMV's new renderer foundation and renders directly from WoW data: it
 // requests raw assets and metadata from WMV -- which owns the app UI, the active
@@ -74,6 +76,42 @@
 //     the answer to captureScreenshot (protocol 6): the PNG was written to path (ok, with its size in bytes and
 //     how long the off-screen render and readback, the PNG encode, the file write and the whole capture took,
 //     in milliseconds), or why not (error). request echoes the question's number
+//   getMapAsset           { requestId, load, assetEpoch, role:"wdt"|"rootAdt", fileDataID }       (protocol 12)
+//     one map file for the terrain load named by load, under the client epoch it was asked under: the map's WDT
+//     (the fileDataID loadTerrainTile named), then the root ADT the WDT's MAID names for the tile. Answered by an
+//     assetResponse with the same requestId (never from the asset cache, never cacheable). Its requestId is
+//     "map" + n, a namespace of its own (every other request's is "u" + n): an answer with such an id, or with a
+//     role, goes to OnMapAssetResponse -- the terrain session -- and never to the asset cache or OnAssetResponse
+//   terrainTileLoaded     { load, status:"built"|"failed"|"superseded"|"cleared", reason, hostState, hostDetail,
+//                           mapId, tileX, tileY, wdtFileDataID, rootFileDataID, wdtBytes, rootBytes, wdtMd5, rootMd5,
+//                           chunks, chunksBuilt, chunksSkipped, chunksUnsupported, vertices, triangles, holeCells,
+//                           boundsMin:[x,y,z], boundsMax:[x,y,z], rootOffset:[x,y,z], originWorld:[X,Y,Z],
+//                           timings:{ wdtRoundTripMs, wdtParseMs, rootRoundTripMs, parseMs, buildMs, uploadMs,
+//                                     firstFrameMs, totalMs },
+//                           meshBytes, liveTerrainTiles, liveModels, liveMapObjects, meshObjects, materialObjects,
+//                           terrainGameObjects, managedHeapBytes, nativeAllocatedBytes }                (protocol 12)
+//     exactly one per loadTerrainTile (WmvTerrainSession): "built" once the frame after the one the tile was put on
+//     screen in has been presented too, "failed" with the reason (hostState and hostDetail when a host answer
+//     refused a file), "superseded" by a newer load (terrain or model), "cleared" by clearTerrain. Bounds are Unity
+//     space relative to the tile root (absent without a triangle), originWorld the world point (game frame, yards)
+//     the root stands for; a number the load did not reach is left out. The object counts and memory are sampled
+//     when the report is sent
+//   runtimeState (protocol 12 adds) { liveTerrainTiles, terrainLoad, terrainLoading, terrainView, cameraMask,
+//                                     meshObjects, materialObjects, terrainMeshes, terrainMaterials,
+//                                     terrainGameObjects, terrainPendingRequests, terrainRetiredRequests,
+//                                     terrainRetiredTotal, terrainLastRetiredRequest, mapAnswersRouted,
+//                                     mapAnswersDropped, mapAnswersLate, mapAnswersUnowned, terrainTimeoutMs }
+//     the terrain tiles alive, the load of the tile on screen (0 for none), a terrain load in flight (not folded
+//     into loading: the host's model await does not wait on terrain), the terrain view on, the main camera's culling
+//     mask, the Unity Mesh and Material objects alive, and what the terrain tiles themselves hold: their Meshes,
+//     Materials and GameObjects (WmvRuntimeTerrainTile's tallies -- a tile still being built included, the scene root
+//     never, 0 with no tile, taken off the moment a tile is released rather than when Unity destroys its objects);
+//     then the session's request bookkeeping: getMapAsset requests waiting for their answer (0 or 1), the ended
+//     loads' unanswered requests it remembers (at most 32), the requests retired in all (one per load that ended
+//     with its request unanswered; never capped) and the id of the last ("" for none), the map answers routed to it
+//     and those it dropped (late plus unowned, then each apart: late = to a request of an ended load it still
+//     remembers, unowned = any other), and the load timeout in effect in milliseconds (-wmvTerrainTimeoutMs, 30000
+//     by default)
 //
 // WMV -> player
 //   loadWoWModel  { path, fileDataID, client, character, load, kind, keepView }
@@ -104,6 +142,19 @@
 //   prefetchAssets { assetEpoch, fileDataIDs:[...] }                              (protocol 9)
 //     the models the host expects next (the other model generation of the character on screen): fetched into the
 //     asset cache, each with its skin and skeleton files, and kept with what the model on screen uses
+//   assetResponse { requestId, ok, fileDataID, role, load, assetEpoch, state, detail, readMs, md5, byteLength,
+//                   encoding:"binary", payloadBytes } <payloadBytes raw bytes><newline>  (protocol 12, to getMapAsset)
+//     the host's decision and read: state is the catalogue's availability ("available", "not in client storage",
+//     "not installed locally", "unreadable", "unsupported", "not checked") or "stale" / "refused"; ok only for
+//     "available", which carries md5 (hex of the bytes served); every other state carries error = detail
+//   loadTerrainTile { load, assetEpoch, mapId, mapDirectory, product, build, wdtFileDataID, wdtResolvedBy, wdtPath,
+//                     tileX, tileY, maxAssetBytes }                                  (protocol 12)
+//     draw one terrain tile of the active client's map: its WDT (by FileDataID, resolved by "fileDataID" or "path"),
+//     then the root ADT its MAID names for (tileX, tileY), asked for by getMapAsset under load and assetEpoch. The
+//     latest command wins: a model load in flight is dropped, the model on screen stays (hidden) until a loadWoWModel
+//     leaves the terrain view (WmvMainTerrain)
+//   clearTerrain  { reason }                                                         (protocol 12)
+//     a terrain load in flight is answered "cleared"; a tile on screen is taken away, without an answer
 //   modelTextures { requestId, ok, fileDataID, textures:[{ index, type, fileDataID, source }] }
 //   modelSkin     { fileDataID, textures:[...], geosets:[...], hasGeosets,
 //                   hasSubmeshVisible, submeshCount, submeshVisible:[0|1,...] }  (pushed, no request)
@@ -164,7 +215,7 @@ using Wmv.Wow;
 
 public class WmvIpcClient : MonoBehaviour
 {
-    public const int ProtocolVersion = 11;
+    public const int ProtocolVersion = 12;
 
     /// <summary>The loadWoWModel kind of a world model; anything else is an M2.</summary>
     public const string KindMapObject = "wmo";
@@ -172,6 +223,7 @@ public class WmvIpcClient : MonoBehaviour
     // Raised on the main thread.
     public Action<string, int, string, bool, int, string, bool> OnLoadWoWModel;  // (path, fileDataID, client, character, load, kind, keepView)
     public Action<AssetResponse> OnAssetResponse;
+    public Action<AssetResponse> OnMapAssetResponse;           // every getMapAsset answer, and only those (protocol 12)
     public Action<ModelTexturesResponse> OnModelTextures;
     public Action<ModelTexturesResponse> OnModelSkin;          // pushed when the displayed skin changes
     public Action<AnimationSelection> OnModelAnimation;        // pushed when the displayed animation changes
@@ -182,10 +234,35 @@ public class WmvIpcClient : MonoBehaviour
     public Action<int> OnRuntimeState;                         // the host asks what is held (query number)
     public Action<ScreenshotRequest> OnCaptureScreenshot;      // the host asks for a transparent PNG (protocol 6)
     public Action<Color32> OnViewportBackground;               // the Models viewport's background, as displayed (protocol 7)
+    public Action<TerrainTileCommand> OnLoadTerrainTile;       // draw one terrain tile (protocol 12)
+    public Action<string> OnClearTerrain;                      // take the terrain away (protocol 12; the host's reason)
     public Action<string> OnStatus;                            // human-readable connection/state text
 
     public bool Connected { get { return connected; } }
     public int Port { get { return port; } }
+
+    /// <summary>Map answers routed to OnMapAssetResponse (or dropped there being no handler: MapAnswersUnhandled), never
+    /// to the asset cache or OnAssetResponse.</summary>
+    public int MapAnswersRouted { get; private set; }
+    public int MapAnswersUnhandled { get; private set; }
+
+    /// <summary>The prefix of getMapAsset request ids: their own namespace ("map" + n), apart from every other request's
+    /// ("u" + n), so a map answer is known by its id alone.</summary>
+    public const string MapRequestPrefix = "map";
+
+    public static bool IsMapRequestId(string requestId)
+    {
+        return requestId != null && requestId.StartsWith(MapRequestPrefix, StringComparison.Ordinal);
+    }
+
+    /// <summary>An answer to a getMapAsset: its id is in the map namespace, or it carries a role (only those answers
+    /// do). Such an answer belongs to the terrain session alone.</summary>
+    public static bool IsMapAnswer(string requestId, string role)
+    {
+        return IsMapRequestId(requestId) || !string.IsNullOrEmpty(role);
+    }
+
+    public static bool IsMapAnswer(AssetResponse r) { return r != null && IsMapAnswer(r.requestId, r.role); }
 
     public class AssetResponse
     {
@@ -199,6 +276,16 @@ public class WmvIpcClient : MonoBehaviour
         public string error;
         public byte[] data;        // decoded bytes (null on error); shared with the asset cache: read, never written
         public bool fromCache;     // answered by the asset cache, or by joining the same request already out
+        // Protocol 12, the answer to a getMapAsset: what the request named (role, load, assetEpoch) and what the host
+        // decided -- state ("available", a catalogue availability, "stale" or "refused"), its detail, how long the
+        // read took (readMs) and the md5 of the bytes served (hex, "available" only). "" / 0 on any other answer.
+        public string role;
+        public int load;
+        public int assetEpoch;
+        public string state;
+        public string detail;
+        public double readMs;
+        public string md5;
 
         /// <summary>The same answer for another request (one that joined this one while it was out).</summary>
         public AssetResponse For(string otherRequestId)
@@ -358,6 +445,30 @@ public class WmvIpcClient : MonoBehaviour
         public string path;
         public int width;
         public int height;
+    }
+
+    /// <summary>The host's loadTerrainTile (protocol 12): one tile of the active client's map, and the load and client
+    /// epoch every file request of it states (see WmvTerrainSession).</summary>
+    public class TerrainTileCommand
+    {
+        public int Load;                // the host's terrain serial (> 0), echoed in getMapAsset and terrainTileLoaded
+        public int AssetEpoch;          // the host's client epoch at send time
+        public int MapId;
+        public string MapDirectory = "";
+        public string Product = "";     // the active client (its product code), for the log and the dump
+        public string Build = "";
+        public int WdtFileDataID;
+        public string WdtResolvedBy = "";   // "fileDataID" or "path"
+        public string WdtPath = "";         // path clients only
+        public int TileX, TileY;
+        public int MaxAssetBytes;       // the largest map file the host will serve; a larger answer is refused
+
+        public override string ToString()
+        {
+            return string.Format("load {0} epoch {1} map {2} ({3}) tile {4}_{5} wdt {6} (by {7}{8}) client {9} {10} maxAssetBytes {11}",
+                                 Load, AssetEpoch, MapId, MapDirectory, TileX, TileY, WdtFileDataID, WdtResolvedBy,
+                                 string.IsNullOrEmpty(WdtPath) ? "" : " " + WdtPath, Product, Build, MaxAssetBytes);
+        }
     }
 
     // ---- characterScene -------------------------------------------------------------------------
@@ -566,6 +677,22 @@ public class WmvIpcClient : MonoBehaviour
         public int assetEpoch;        // loadWoWModel, prefetchAssets: the host's client epoch (0 from an older host)
         public bool cacheable;        // assetResponse: a file of the client's own storage
         public int[] fileDataIDs;     // prefetchAssets
+        // protocol 12: terrain tiles (loadTerrainTile, clearTerrain) and the map-file answer (assetResponse)
+        public int mapId;
+        public string mapDirectory;
+        public string product;
+        public string build;
+        public int wdtFileDataID;
+        public string wdtResolvedBy;
+        public string wdtPath;
+        public int tileX;
+        public int tileY;
+        public int maxAssetBytes;
+        public string reason;         // clearTerrain
+        public string state;          // assetResponse to getMapAsset: the host's decision
+        public string detail;
+        public double readMs;
+        public string md5;
         // protocol 10: the raw bytes that follow this line (an assetResponse's file, a characterImage's pixels)
         public int payloadBytes;
         [NonSerialized] public byte[] payload;
@@ -646,6 +773,7 @@ public class WmvIpcClient : MonoBehaviour
     }
     readonly Queue<string> statusQueue = new Queue<string>();
     int nextRequestId = 1;
+    int nextMapRequestId = 1;
 
     void Start()
     {
@@ -766,19 +894,26 @@ public class WmvIpcClient : MonoBehaviour
             byte[] payload = payloadBytes > 0 ? reader.ReadPayload(payloadBytes) : null;
             if (msg == null)
                 continue;
-            msg.payload = payload;
-            msg.receivedSeconds = NowSeconds;
-            ProjectFromSample(msg);
-            if (msg.type == "characterImage")
-            {
-                msg.decodedImage = DecodeCharacterImage(msg);
-                msg.data = null;
-            }
-            else if (msg.type == "assetResponse")
-                DecodeAsset(msg);
+            Prepare(msg, payload);
             return msg;
         }
         return null;
+    }
+
+    /// <summary>What the reader thread does with a parsed line and the payload it announced: stamped, projected, and a
+    /// characterImage's pixels or an assetResponse's bytes made ready (NextMessage and FeedLineForTest alike).</summary>
+    static void Prepare(Msg msg, byte[] payload)
+    {
+        msg.payload = payload;
+        msg.receivedSeconds = NowSeconds;
+        ProjectFromSample(msg);
+        if (msg.type == "characterImage")
+        {
+            msg.decodedImage = DecodeCharacterImage(msg);
+            msg.data = null;
+        }
+        else if (msg.type == "assetResponse")
+            DecodeAsset(msg);
     }
 
     /// <summary>What NextMessage made of a message, for the self-test (Msg itself stays private).</summary>
@@ -1045,6 +1180,23 @@ public class WmvIpcClient : MonoBehaviour
                 OnRuntimeState?.Invoke(msg.query);
                 break;
 
+            // A terrain tile (protocol 12). The epoch is the cache's, as a model load states it; no generation begins: the
+            // model on screen stays (hidden), and its files are not aged out by a load that is not a model's.
+            case "loadTerrainTile":
+                cache.SetEpoch(msg.assetEpoch);
+                OnLoadTerrainTile?.Invoke(new TerrainTileCommand
+                {
+                    Load = msg.load, AssetEpoch = msg.assetEpoch, MapId = msg.mapId, MapDirectory = msg.mapDirectory ?? "",
+                    Product = msg.product ?? "", Build = msg.build ?? "", WdtFileDataID = msg.wdtFileDataID,
+                    WdtResolvedBy = msg.wdtResolvedBy ?? "", WdtPath = msg.wdtPath ?? "", TileX = msg.tileX, TileY = msg.tileY,
+                    MaxAssetBytes = msg.maxAssetBytes,
+                });
+                break;
+
+            case "clearTerrain":
+                OnClearTerrain?.Invoke(msg.reason ?? "");
+                break;
+
             case "captureScreenshot":
                 OnCaptureScreenshot?.Invoke(new ScreenshotRequest
                 {
@@ -1092,6 +1244,8 @@ public class WmvIpcClient : MonoBehaviour
                 {
                     requestId = msg.requestId, ok = msg.ok, path = msg.path, fileDataID = msg.fileDataID,
                     byteLength = msg.byteLength, sha1 = msg.sha1, error = msg.error, fromCache = msg.fromCache,
+                    role = msg.role ?? "", load = msg.load, assetEpoch = msg.assetEpoch, state = msg.state ?? "",
+                    detail = msg.detail ?? "", readMs = msg.readMs, md5 = msg.md5 ?? "",
                 };
                 if (msg.ok)
                 {
@@ -1107,6 +1261,23 @@ public class WmvIpcClient : MonoBehaviour
                                 : string.IsNullOrEmpty(msg.encoding) ? "assetResponse without encoding/data"
                                 : "unsupported encoding: " + msg.encoding;
                     }
+                }
+                // A map file's answer (getMapAsset, protocol 12) goes to OnMapAssetResponse and nowhere else: not to the
+                // asset cache (no flight of it exists, and none of another request's may end by it) and not to
+                // OnAssetResponse -- so an answer arriving after its terrain load ended can never be read by a model,
+                // character or world-model handler. Without a handler it is dropped.
+                if (IsMapAnswer(msg.requestId, msg.role))
+                {
+                    MapAnswersRouted++;
+                    if (OnMapAssetResponse != null)
+                        OnMapAssetResponse(r);
+                    else
+                    {
+                        MapAnswersUnhandled++;
+                        Debug.LogWarning("WMV IPC: map answer " + r.requestId + " (" + (string.IsNullOrEmpty(r.role) ? "no role" : r.role) +
+                                         ", load " + r.load + ") has no handler -- dropped");
+                    }
+                    break;
                 }
                 AnswerAsset(r, msg.fromCache ? null : cache.EndFlight(msg.requestId), msg.cacheable);
                 break;
@@ -1268,6 +1439,18 @@ public class WmvIpcClient : MonoBehaviour
         return id;
     }
 
+    /// <summary>One map file for a terrain load (protocol 12 getMapAsset): role "wdt" or "rootAdt", under the load and
+    /// client epoch of the loadTerrainTile it serves. Never from or into the asset cache: the host's answer says what it
+    /// decided about this load (state), which a kept file could not. Its id is "map" + n, from a counter of its own, and
+    /// its answer comes back through OnMapAssetResponse only.</summary>
+    public string RequestMapAsset(string role, int fileDataID, int load, int assetEpoch)
+    {
+        var id = MapRequestPrefix + (nextMapRequestId++);
+        Send("{\"type\":\"getMapAsset\",\"requestId\":\"" + id + "\",\"load\":" + load + ",\"assetEpoch\":" + assetEpoch +
+             ",\"role\":\"" + Escape(role) + "\",\"fileDataID\":" + fileDataID + "}");
+        return id;
+    }
+
     /// <summary>
     /// Tell WMV what became of its per-submesh state: "applied" (and what is now drawn), "pending"
     /// (kept for the model still loading) or "rejected" (with the reason; nothing changed).
@@ -1391,6 +1574,116 @@ public class WmvIpcClient : MonoBehaviour
         Send(sb.ToString());
     }
 
+    /// <summary>
+    /// The outcome of one terrain load, as terrainTileLoaded carries it (protocol 12; WmvTerrainSession fills it). A
+    /// number the load did not reach is left out of the line: the byte counts while negative, the timings while
+    /// negative, the mesh figures without HasMesh, the bounds without HasBounds.
+    /// </summary>
+    public class TerrainTileReport
+    {
+        public int Load;
+        public string Status = "failed";     // "built" | "failed" | "superseded" | "cleared"
+        public string Reason = "";
+        public string HostState = "", HostDetail = "";   // the host's answer that failed the load, when one did
+        public int MapId, TileX, TileY, WdtFileDataID, RootFileDataID;
+        public long WdtBytes = -1, RootBytes = -1;
+        public string WdtMd5 = "", RootMd5 = "";         // hex of the bytes parsed
+        public bool HasMesh;
+        public int Chunks, ChunksBuilt, ChunksSkipped, ChunksUnsupported, HoleCells;
+        public long Vertices, Triangles, MeshBytes;
+        public bool HasBounds;
+        public Vector3 BoundsMin, BoundsMax;             // Unity space, relative to the tile root
+        public Vector3 RootOffset;                       // the tile root's Unity position
+        public double OriginX, OriginY, OriginZ;         // the world point (game frame, yards) the root stands for
+        public double WdtRoundTripMs = -1, WdtParseMs = -1, RootRoundTripMs = -1, ParseMs = -1, BuildMs = -1, UploadMs = -1;
+        public double FirstFrameMs = -1, TotalMs = -1;
+        public int LiveTerrainTiles, LiveModels, LiveMapObjects;
+        public int MeshObjects, MaterialObjects, TerrainGameObjects;   // sampled when the report is sent
+        public long ManagedHeapBytes, NativeAllocatedBytes;
+    }
+
+    /// <summary>Tell WMV what became of a terrain load (see TerrainTileReport).</summary>
+    public void ReportTerrainTileLoaded(TerrainTileReport r)
+    {
+        Send(TerrainTileLoadedLine(r));
+    }
+
+    /// <summary>The terrainTileLoaded line for a report, as ReportTerrainTileLoaded sends it (also for the self-test).</summary>
+    public static string TerrainTileLoadedLine(TerrainTileReport r)
+    {
+        var inv = System.Globalization.CultureInfo.InvariantCulture;
+        var sb = new StringBuilder();
+        sb.Append("{\"type\":\"terrainTileLoaded\",\"load\":").Append(r.Load)
+          .Append(",\"status\":\"").Append(Escape(r.Status)).Append('"')
+          .Append(",\"reason\":\"").Append(Escape(r.Reason ?? "")).Append('"');
+        if (!string.IsNullOrEmpty(r.HostState))
+            sb.Append(",\"hostState\":\"").Append(Escape(r.HostState)).Append('"')
+              .Append(",\"hostDetail\":\"").Append(Escape(r.HostDetail ?? "")).Append('"');
+        sb.Append(",\"mapId\":").Append(r.MapId)
+          .Append(",\"tileX\":").Append(r.TileX)
+          .Append(",\"tileY\":").Append(r.TileY)
+          .Append(",\"wdtFileDataID\":").Append(r.WdtFileDataID)
+          .Append(",\"rootFileDataID\":").Append(r.RootFileDataID);
+        if (r.WdtBytes >= 0)
+            sb.Append(",\"wdtBytes\":").Append(r.WdtBytes);
+        if (r.RootBytes >= 0)
+            sb.Append(",\"rootBytes\":").Append(r.RootBytes);
+        if (!string.IsNullOrEmpty(r.WdtMd5))
+            sb.Append(",\"wdtMd5\":\"").Append(Escape(r.WdtMd5)).Append('"');
+        if (!string.IsNullOrEmpty(r.RootMd5))
+            sb.Append(",\"rootMd5\":\"").Append(Escape(r.RootMd5)).Append('"');
+        if (r.HasMesh)
+        {
+            sb.Append(",\"chunks\":").Append(r.Chunks)
+              .Append(",\"chunksBuilt\":").Append(r.ChunksBuilt)
+              .Append(",\"chunksSkipped\":").Append(r.ChunksSkipped)
+              .Append(",\"chunksUnsupported\":").Append(r.ChunksUnsupported)
+              .Append(",\"vertices\":").Append(r.Vertices)
+              .Append(",\"triangles\":").Append(r.Triangles)
+              .Append(",\"holeCells\":").Append(r.HoleCells);
+            // "R" keeps a float exact through the text, as mapObjectLoaded's bounds.
+            if (r.HasBounds)
+                sb.Append(",\"boundsMin\":[").Append(r.BoundsMin.x.ToString("R", inv)).Append(',')
+                  .Append(r.BoundsMin.y.ToString("R", inv)).Append(',').Append(r.BoundsMin.z.ToString("R", inv)).Append(']')
+                  .Append(",\"boundsMax\":[").Append(r.BoundsMax.x.ToString("R", inv)).Append(',')
+                  .Append(r.BoundsMax.y.ToString("R", inv)).Append(',').Append(r.BoundsMax.z.ToString("R", inv)).Append(']');
+            sb.Append(",\"rootOffset\":[").Append(r.RootOffset.x.ToString("R", inv)).Append(',')
+              .Append(r.RootOffset.y.ToString("R", inv)).Append(',').Append(r.RootOffset.z.ToString("R", inv)).Append(']')
+              .Append(",\"originWorld\":[").Append(r.OriginX.ToString("R", inv)).Append(',')
+              .Append(r.OriginY.ToString("R", inv)).Append(',').Append(r.OriginZ.ToString("R", inv)).Append(']')
+              .Append(",\"meshBytes\":").Append(r.MeshBytes);
+        }
+        sb.Append(",\"timings\":{");
+        int timings = 0;
+        AppendTiming(sb, ref timings, "wdtRoundTripMs", r.WdtRoundTripMs);
+        AppendTiming(sb, ref timings, "wdtParseMs", r.WdtParseMs);
+        AppendTiming(sb, ref timings, "rootRoundTripMs", r.RootRoundTripMs);
+        AppendTiming(sb, ref timings, "parseMs", r.ParseMs);
+        AppendTiming(sb, ref timings, "buildMs", r.BuildMs);
+        AppendTiming(sb, ref timings, "uploadMs", r.UploadMs);
+        AppendTiming(sb, ref timings, "firstFrameMs", r.FirstFrameMs);
+        AppendTiming(sb, ref timings, "totalMs", r.TotalMs);
+        sb.Append('}')
+          .Append(",\"liveTerrainTiles\":").Append(r.LiveTerrainTiles)
+          .Append(",\"liveModels\":").Append(r.LiveModels)
+          .Append(",\"liveMapObjects\":").Append(r.LiveMapObjects)
+          .Append(",\"meshObjects\":").Append(r.MeshObjects)
+          .Append(",\"materialObjects\":").Append(r.MaterialObjects)
+          .Append(",\"terrainGameObjects\":").Append(r.TerrainGameObjects)
+          .Append(",\"managedHeapBytes\":").Append(r.ManagedHeapBytes)
+          .Append(",\"nativeAllocatedBytes\":").Append(r.NativeAllocatedBytes)
+          .Append('}');
+        return sb.ToString();
+    }
+
+    static void AppendTiming(StringBuilder sb, ref int written, string key, double ms)
+    {
+        if (ms < 0.0)
+            return;
+        sb.Append(written++ > 0 ? "," : "").Append('"').Append(key).Append("\":")
+          .Append(ms.ToString("0.###", System.Globalization.CultureInfo.InvariantCulture));
+    }
+
     /// <summary>What a runtimeState answer carries (ReportRuntimeState).</summary>
     public struct RuntimeReport
     {
@@ -1409,6 +1702,23 @@ public class WmvIpcClient : MonoBehaviour
         public int ViewFramings;                 // WmvMain.ViewFramings: times the view was fitted to what is on screen
         public int KeptViews;                    // WmvMain.KeptViews: models put on screen keeping the view (protocol 8)
         public Color32 Background;               // the viewport background the player holds, as displayed (protocol 7)
+        // Protocol 12: the terrain tiles alive, the load of the tile on screen (0 for none), a terrain load in flight,
+        // the terrain view on, the main camera's culling mask, the Unity Mesh and Material objects alive, and the Meshes,
+        // Materials and GameObjects the terrain tiles hold (WmvRuntimeTerrainTile.LiveMeshes and friends; 0 with no tile).
+        public int LiveTerrainTiles, TerrainLoad;
+        public bool TerrainLoading, TerrainView;
+        public int CameraMask;
+        public int MeshObjects, MaterialObjects;
+        public int TerrainMeshes, TerrainMaterials, TerrainGameObjects;
+        // Protocol 12 (additive): the terrain session's request bookkeeping -- the requests waiting for an answer (0 or
+        // 1), the ended loads' requests remembered (at most WmvTerrainSession.RetiredCapacity), the map answers it dropped
+        // (late and unowned) -- and the load timeout in effect. mapAnswersRouted is the client's own count.
+        public int TerrainPendingRequests, TerrainRetiredRequests, MapAnswersDropped, TerrainTimeoutMs;
+        // Then, so that each retirement and each drop can be told apart: the requests retired in all (never capped), the
+        // id of the one retired last ("" for none), and the dropped answers split into late and unowned (their sum is
+        // MapAnswersDropped).
+        public int TerrainRetiredTotal, MapAnswersLate, MapAnswersUnowned;
+        public string TerrainLastRetiredRequest;
     }
 
     /// <summary>
@@ -1445,7 +1755,26 @@ public class WmvIpcClient : MonoBehaviour
              ",\"assetCacheHits\":" + cache.Hits +
              ",\"assetCacheJoins\":" + cache.Joins +
              ",\"assetCacheEvictions\":" + cache.Evictions +
-             ",\"assetEpoch\":" + cache.Epoch + "}");
+             ",\"assetEpoch\":" + cache.Epoch +
+             ",\"liveTerrainTiles\":" + r.LiveTerrainTiles +
+             ",\"terrainLoad\":" + r.TerrainLoad +
+             ",\"terrainLoading\":" + (r.TerrainLoading ? "true" : "false") +
+             ",\"terrainView\":" + (r.TerrainView ? "true" : "false") +
+             ",\"cameraMask\":" + r.CameraMask +
+             ",\"meshObjects\":" + r.MeshObjects +
+             ",\"materialObjects\":" + r.MaterialObjects +
+             ",\"terrainMeshes\":" + r.TerrainMeshes +
+             ",\"terrainMaterials\":" + r.TerrainMaterials +
+             ",\"terrainGameObjects\":" + r.TerrainGameObjects +
+             ",\"terrainPendingRequests\":" + r.TerrainPendingRequests +
+             ",\"terrainRetiredRequests\":" + r.TerrainRetiredRequests +
+             ",\"terrainRetiredTotal\":" + r.TerrainRetiredTotal +
+             ",\"terrainLastRetiredRequest\":\"" + Escape(r.TerrainLastRetiredRequest) + "\"" +
+             ",\"mapAnswersRouted\":" + MapAnswersRouted +
+             ",\"mapAnswersDropped\":" + r.MapAnswersDropped +
+             ",\"mapAnswersLate\":" + r.MapAnswersLate +
+             ",\"mapAnswersUnowned\":" + r.MapAnswersUnowned +
+             ",\"terrainTimeoutMs\":" + r.TerrainTimeoutMs + "}");
     }
 
     /// <summary>What a screenshotSaved answer carries (ReportScreenshotSaved). Times in milliseconds.</summary>
@@ -1518,6 +1847,18 @@ public class WmvIpcClient : MonoBehaviour
 
     /// <summary>One frame's Update: the host's messages, then the asset cache's answers within the budget.</summary>
     internal void PumpForTest() { Update(); }
+
+    /// <summary>One host line exactly as the reader thread would parse it -- JSON through JsonUtility, then the payload it
+    /// announced (payloadBytes) made ready as NextMessage makes it -- dispatched now. For the protocol-12 messages
+    /// (loadTerrainTile, clearTerrain, an assetResponse with state, detail, readMs and md5) in the self-test.</summary>
+    internal void FeedLineForTest(string json, byte[] payload)
+    {
+        Msg msg = JsonUtility.FromJson<Msg>(json);
+        if (msg == null)
+            return;
+        Prepare(msg, payload);
+        Dispatch(msg);
+    }
 
     void Send(string json)
     {

@@ -423,10 +423,19 @@ public class WmvMountProbe : MonoBehaviour
             foreach (Material m in list)
                 original[m] = m.renderQueue;
 
+        // The models only: a terrain tile is never part of this measurement, and the terrain view (which shows nothing
+        // else) has nothing of either model to order.
+        int mask = WmvTerrainBuilder.WithoutTerrain(view.cullingMask);
+        if (mask == 0)
+        {
+            log("mount check " + label + ": blend order not measured -- the viewport shows only the terrain layer");
+            return;
+        }
         int w = Mathf.Clamp(view.pixelWidth, 64, 2048), h = Mathf.Clamp(view.pixelHeight, 64, 2048);
         var go = new GameObject("WmvMountProbeCamera");
         Camera cam = go.AddComponent<Camera>();
         cam.CopyFrom(view);
+        cam.cullingMask = mask;
         cam.enabled = false;                                 // rendered by hand, below
         cam.targetTexture = null;
         RenderTexture rt = RenderTexture.GetTemporary(w, h, 24, RenderTextureFormat.ARGB32, RenderTextureReadWrite.Default);

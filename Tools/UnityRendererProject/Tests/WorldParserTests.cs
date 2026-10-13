@@ -10,6 +10,7 @@ using System;
 using System.Collections.Generic;
 using Wmv.Wow;
 using Wmv.Wow.World;
+using static Wmv.Wow.World.AdtSynthetic;
 
 namespace Wmv.Wow.Tests
 {
@@ -51,159 +52,8 @@ namespace Wmv.Wow.Tests
 
         // ------------------------------------------------------------------------- fixture kit
 
-        static void PutU16(byte[] b, int o, ushort v) { b[o] = (byte)v; b[o + 1] = (byte)(v >> 8); }
-
-        static void PutU32(byte[] b, int o, uint v)
-        {
-            b[o] = (byte)v; b[o + 1] = (byte)(v >> 8); b[o + 2] = (byte)(v >> 16); b[o + 3] = (byte)(v >> 24);
-        }
-
-        static void PutU64(byte[] b, int o, ulong v) { PutU32(b, o, (uint)v); PutU32(b, o + 4, (uint)(v >> 32)); }
-
-        static void PutF32(byte[] b, int o, float f) { PutU32(b, o, BitConverter.ToUInt32(BitConverter.GetBytes(f), 0)); }
-
-        /// <summary>One chunk: the tag stored reversed, the u32 size, the payload.</summary>
-        static byte[] Chunk(string tag, byte[] payload)
-        {
-            var b = new byte[8 + payload.Length];
-            b[0] = (byte)tag[3]; b[1] = (byte)tag[2]; b[2] = (byte)tag[1]; b[3] = (byte)tag[0];
-            PutU32(b, 4, (uint)payload.Length);
-            Buffer.BlockCopy(payload, 0, b, 8, payload.Length);
-            return b;
-        }
-
-        static byte[] Cat(params byte[][] parts)
-        {
-            int n = 0;
-            foreach (byte[] p in parts) n += p.Length;
-            var r = new byte[n];
-            int o = 0;
-            foreach (byte[] p in parts) { Buffer.BlockCopy(p, 0, r, o, p.Length); o += p.Length; }
-            return r;
-        }
-
-        static byte[] U32Payload(params uint[] v)
-        {
-            var b = new byte[4 * v.Length];
-            for (int i = 0; i < v.Length; i++) PutU32(b, 4 * i, v[i]);
-            return b;
-        }
-
-        static byte[] Mver() { return Chunk("MVER", U32Payload(18)); }
-
-        static byte[] Mphd(uint flags, params uint[] words)
-        {
-            var w = new uint[8];
-            w[0] = flags;
-            for (int i = 0; i < words.Length && i < 7; i++) w[i + 1] = words[i];
-            return Chunk("MPHD", U32Payload(w));
-        }
-
-        static byte[] MainTable(params int[] tileIndices)
-        {
-            var b = new byte[4096 * 8];
-            foreach (int i in tileIndices) PutU32(b, 8 * i, 1);
-            return Chunk("MAIN", b);
-        }
-
-        static byte[] Maid(int tileIndex, params uint[] words)
-        {
-            var b = new byte[4096 * 32];
-            for (int k = 0; k < words.Length; k++) PutU32(b, tileIndex * 32 + 4 * k, words[k]);
-            return Chunk("MAID", b);
-        }
-
-        static byte[] ModfRecord(uint name, uint uid, ushort flags, ushort scale)
-        {
-            var r = new byte[64];
-            PutU32(r, 0, name);
-            PutU32(r, 4, uid);
-            for (int k = 0; k < 6; k++) PutF32(r, 8 + 4 * k, 100f + k);       // position, rotation
-            for (int k = 0; k < 6; k++) PutF32(r, 32 + 4 * k, 10f * (k + 1)); // extents
-            PutU16(r, 56, flags);
-            PutU16(r, 58, 3);
-            PutU16(r, 60, 4);
-            PutU16(r, 62, scale);
-            return r;
-        }
-
-        static byte[] MddfRecord(uint name, uint uid, float px, float py, float pz, float a0, float a1, float a2, ushort scale, ushort flags)
-        {
-            var r = new byte[36];
-            PutU32(r, 0, name);
-            PutU32(r, 4, uid);
-            PutF32(r, 8, px); PutF32(r, 12, py); PutF32(r, 16, pz);
-            PutF32(r, 20, a0); PutF32(r, 24, a1); PutF32(r, 28, a2);
-            PutU16(r, 32, scale);
-            PutU16(r, 34, flags);
-            return r;
-        }
-
-        /// <summary>A root MCNK: 128-byte header + MCVT (+ MCCV) + MCNR + MCSE.</summary>
-        static byte[] RootMcnk(int index, uint flags, ulong holes, bool mccv, int tileX, int tileY, Func<int, float> height = null)
-        {
-            var h = new byte[128];
-            PutU32(h, 0, flags | (mccv ? 0x40u : 0u));
-            PutU32(h, 4, (uint)(index % 16));
-            PutU32(h, 8, (uint)(index / 16));
-            PutU64(h, 20, holes);
-            PutU32(h, 52, 12);
-            double x, y;
-            TerrainCoordinates.ChunkOrigin(tileX, tileY, index % 16, index / 16, out x, out y);
-            PutF32(h, 104, (float)x);
-            PutF32(h, 108, (float)y);
-            PutF32(h, 112, 50f);
-            var mcvt = new byte[580];
-            for (int k = 0; k < 145; k++) PutF32(mcvt, 4 * k, height != null ? height(k) : k * 0.25f);
-            var mcnr = new byte[448];
-            for (int k = 0; k < 435; k++) mcnr[k] = (byte)(k % 127);
-            byte[] sub = Cat(Chunk("MCVT", mcvt), mccv ? Chunk("MCCV", new byte[580]) : new byte[0], Chunk("MCNR", mcnr), Chunk("MCSE", new byte[0]));
-            return Chunk("MCNK", Cat(h, sub));
-        }
-
-        static byte[] Root(int tileX, int tileY, Func<int, byte[]> mcnkOverride = null, byte[] extra = null)
-        {
-            var parts = new List<byte[]> { Mver() };
-            if (extra != null) parts.Add(extra);
-            for (int i = 0; i < 256; i++)
-                parts.Add(mcnkOverride != null && mcnkOverride(i) != null ? mcnkOverride(i) : RootMcnk(i, 0x10000, 0, false, tileX, tileY));
-            return Cat(parts.ToArray());
-        }
-
-        static byte[] Mcly(params uint[] layers) // texture, flags, offset, word12 per layer
-        {
-            return Chunk("MCLY", U32Payload(layers));
-        }
-
-        static byte[] TexMcnk(byte[] mcly, byte[] mcal) { return Chunk("MCNK", Cat(mcly ?? new byte[0], mcal ?? new byte[0])); }
-
-        static byte[] Tex(Func<int, byte[]> mcnk, int textures = 4)
-        {
-            var mdid = new uint[textures];
-            for (int i = 0; i < textures; i++) mdid[i] = 1000u + (uint)i;
-            var parts = new List<byte[]> { Mver(), Chunk("MAMP", new byte[4]), Chunk("MDID", U32Payload(mdid)), Chunk("MHID", U32Payload(new uint[textures])) };
-            for (int i = 0; i < 256; i++)
-                parts.Add(mcnk(i) ?? TexMcnk(Mcly(0, 0, 0, 0), null));
-            return Cat(parts.ToArray());
-        }
-
-        /// <summary>RLE: a whole 4096-value map filled with `value` (32 runs of 127 + one of 32).</summary>
-        static byte[] RleFill(byte value) { return RleFill(value, 4096); }
-
-        /// <summary>RLE fill runs covering exactly `count` values.</summary>
-        static byte[] RleFill(byte value, int count)
-        {
-            var b = new List<byte>();
-            int left = count;
-            while (left > 0)
-            {
-                int n = Math.Min(127, left);
-                b.Add((byte)(0x80 | n));
-                b.Add(value);
-                left -= n;
-            }
-            return b.ToArray();
-        }
+        // The byte builders (Chunk, Cat, Mver, MainTable, Maid, RootMcnk, Root, Tex, RleFill, ...) are
+        // Wmv.Wow.World.AdtSynthetic, shared with the terrain-mesh tests and the player self-test.
 
         // ------------------------------------------------------------------------- tests
 
@@ -710,15 +560,15 @@ namespace Wmv.Wow.Tests
                   "review: flag 0x10000 clear is flagged (set on every audited chunk)");
 
             // MCSE: non-empty or repeated is listed and flagged; MCNR/MCCV rejection marks the chunk.
-            byte[] mcse = RootMcnkOnly(5, Chunk("MCVT", new byte[580]), Chunk("MCNR", new byte[448]), Chunk("MCSE", new byte[28]));
+            byte[] mcse = RootMcnkOnly(5, 30, 47, Chunk("MCVT", new byte[580]), Chunk("MCNR", new byte[448]), Chunk("MCSE", new byte[28]));
             AdtRoot se = AdtParser.ParseRoot(Root(30, 47, i => i == 5 ? mcse : null), 30, 47);
             Check(se.Mcnk[5].McseSize == 28 && se.Mcnk[5].Unsupported.Length == 1 && se.Issues.Exists(i => i.Chunk == "MCNK 5 MCSE"),
                   "review: a non-empty MCSE is listed as unsupported and flagged");
-            byte[] mcse2 = RootMcnkWith(6, Chunk("MCSE", new byte[0]));
+            byte[] mcse2 = RootMcnkWith(6, 30, 47, Chunk("MCSE", new byte[0]));
             AdtRoot se2 = AdtParser.ParseRoot(Root(30, 47, i => i == 6 ? mcse2 : null), 30, 47);
             Check(se2.Mcnk[6].McseSize == 0 && se2.Mcnk[6].Unsupported.Length == 1 && se2.Issues.Exists(i => i.Reason.Contains("more than once")),
                   "review: a repeated MCSE keeps the first and is flagged");
-            byte[] badCv = RootMcnkWith(7, Chunk("MCCV", new byte[579]));
+            byte[] badCv = RootMcnkWith(7, 30, 47, Chunk("MCCV", new byte[579]));
             AdtRoot cv = AdtParser.ParseRoot(Root(30, 47, i => i == 7 ? badCv : null), 30, 47);
             Check(cv.Mcnk[7].Status == WorldDataStatus.Malformed && cv.Mcnk[8].Status == WorldDataStatus.Decoded, "review: a rejected MCCV marks its chunk Malformed");
 
@@ -809,24 +659,6 @@ namespace Wmv.Wow.Tests
             var a = new WmoPlacement { Flags = 0, ScaleRaw = 0 };
             var b = new WmoPlacement { Flags = 0x4, ScaleRaw = 512 };
             return a.Scale == 1.0 && b.Scale == 0.5;
-        }
-
-        /// <summary>A root MCNK like RootMcnk, with one extra sub-chunk appended.</summary>
-        static byte[] RootMcnkWith(int index, byte[] extra)
-        {
-            byte[] m = RootMcnk(index, 0x10000, 0, false, 30, 47);
-            var payload = new byte[m.Length - 8];
-            Buffer.BlockCopy(m, 8, payload, 0, payload.Length);
-            return Chunk("MCNK", Cat(payload, extra));
-        }
-
-        /// <summary>A root MCNK with the standard header and exactly the given sub-chunks.</summary>
-        static byte[] RootMcnkOnly(int index, params byte[][] subs)
-        {
-            byte[] m = RootMcnk(index, 0x10000, 0, false, 30, 47);
-            var header = new byte[128];
-            Buffer.BlockCopy(m, 8, header, 0, 128);
-            return Chunk("MCNK", Cat(header, Cat(subs)));
         }
 
         /// <summary>Header offset of the first chunk with `tag` (walking from 0, then into the first MCNK).</summary>

@@ -215,9 +215,11 @@ CASCFolder::RootEntry CASCFolder::rootEntryByPath(const QString & path) const
 }
 
 CASCFolder::ReadOutcome CASCFolder::readWholeFile(int fileDataId, const QString & path, QByteArray & out,
-                                                  unsigned int * errorCode, qint64 maxBytes) const
+                                                  unsigned int * errorCode, qint64 maxBytes, qint64 * sizeOut) const
 {
   out.clear();
+  if (sizeOut)
+    *sizeOut = -1;
   auto outcome = [errorCode](ReadOutcome o, DWORD code) {
     if (errorCode)
       *errorCode = (unsigned int)code;
@@ -250,6 +252,8 @@ CASCFolder::ReadOutcome CASCFolder::readWholeFile(int fileDataId, const QString 
     CascCloseFile(file);
     return outcome(error == ERROR_FILE_NOT_FOUND ? ReadOutcome::NotLocal : ReadOutcome::Damaged, error);
   }
+  if (sizeOut)
+    *sizeOut = (qint64)size;
   if ((qint64)size > maxBytes || size > 0x7FFFFFF0ull)
   {
     CascCloseFile(file);

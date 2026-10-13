@@ -20,6 +20,7 @@ using System.Collections.Generic;
 using System.Reflection;
 using UnityEngine;
 using Wmv.Wow;
+using Wmv.Wow.World;
 
 public static class WmvLifecycleSelfTest
 {
@@ -2594,6 +2595,9 @@ public static class WmvLifecycleSelfTest
         BackgroundTests(log);
         AssetCacheTests(log);
         StreamReaderTests(log);
+        TerrainTests(log);
+        TerrainHiddenModelTests(log);
+        TerrainLateAnswerMainTests(log);
         log(string.Format("lifecycle-test: {0} passed, {1} failed", passed, failed));
     }
 
@@ -4142,5 +4146,2661 @@ public static class WmvLifecycleSelfTest
         WmoMaterial m = r.Materials[0];
         m.Index = index;
         return m;
+    }
+
+    // ---------------------------------------------------------------- the terrain tile (protocol 12, stage 03)
+
+    const int TerrainTestTileX = 32, TerrainTestTileY = 50;
+    const uint TerrainTestRoot = 778037, TerrainTestRootNorth = 778038, TerrainTestRootSouth = 778039;
+    const int TerrainTestWdt = 775971;
+
+    /// <summary>
+    /// The terrain tile (stage 03 design 5.7): the mesh builder on synthetic roots (AdtSynthetic) inside the player's own
+    /// runtime, the Unity objects with the production layer and masks in a coverage render, holes as background in a
+    /// coverage render, the edge pass's depth nudge from below (a flat tile) and from above (a wall), the session's whole
+    /// load lifecycle against fake host answers (exactly one report per load, the exact reasons, the tiles' tallies,
+    /// nothing left behind), its request lifetime (one request pending at most, a bounded ring of ended loads' requests,
+    /// late answers dropped, nothing growing over 1200 failing loads), the camera's round trip through the terrain view,
+    /// and the protocol-12 lines as the IPC client reads, writes and routes them (map answers to the terrain session only). Every Unity object is released with DestroyImmediate, so the Mesh and Material counts can
+    /// be compared within this frame. (TerrainHiddenModelTests, run after these, goes through the player's own deferred
+    /// disposal.)
+    /// </summary>
+    static void TerrainTests(Action<string> log)
+    {
+        int meshesBefore = Resources.FindObjectsOfTypeAll<Mesh>().Length;
+        int materialsBefore = Resources.FindObjectsOfTypeAll<Material>().Length;
+        int liveBefore = WmvRuntimeTerrainTile.Live;
+        TerrainBuilderTests(log);
+        TerrainCoverageTests(log);
+        TerrainHoleRenderTests(log);
+        TerrainEdgeTests(log);
+        TerrainEdgeOccluderTests(log);
+        TerrainSessionTests(log);
+        TerrainRequestLifetimeTests(log);
+        TerrainCameraTests(log);
+        TerrainIpcTests(log);
+        TerrainMapRoutingTests(log);
+        int meshesAfter = Resources.FindObjectsOfTypeAll<Mesh>().Length;
+        int materialsAfter = Resources.FindObjectsOfTypeAll<Material>().Length;
+        Check(WmvRuntimeTerrainTile.Live == liveBefore && meshesAfter == meshesBefore && materialsAfter == materialsBefore,
+              string.Format("terrain: every tile, Mesh and Material these tests made is gone (live tiles {0} -> {1}, meshes {2} -> {3}, " +
+                            "materials {4} -> {5})", liveBefore, WmvRuntimeTerrainTile.Live, meshesBefore, meshesAfter, materialsBefore,
+                            materialsAfter), log);
+    }
+
+    static TerrainTileMesh TerrainFromRoot(byte[] root, int tileX, int tileY)
+    {
+        return TerrainMeshBuilder.Build(AdtParser.ParseRoot(root, tileX, tileY), tileX, tileY, WorldToUnity.TileOrigin(tileX, tileY));
+    }
+
+    static bool SameIndices(ushort[] a, List<ushort> b)
+    {
+        if (a == null || a.Length != b.Count) return false;
+        for (int i = 0; i < a.Length; i++)
+            if (a[i] != b[i]) return false;
+        return true;
+    }
+
+    static bool SameBits(float a, float b) { return BitConverter.SingleToInt32Bits(a) == BitConverter.SingleToInt32Bits(b); }
+
+    /// <summary>The mesh builder, run inside the player (Mono) on synthetic roots: counts, the exact triangles each single
+    /// hole bit removes, a full hole mask, the ramp orientation of design 2.3c, and chunk-border copies bit-equal.</summary>
+    static void TerrainBuilderTests(Action<string> log)
+    {
+        int tx = TerrainTestTileX, ty = TerrainTestTileY;
+        TerrainTileMesh flat = TerrainFromRoot(AdtSynthetic.FlatRoot(tx, ty), tx, ty);
+        Check(flat.ChunksBuilt == 256 && flat.ChunksSkipped == 0 && flat.Vertices == 37120 && flat.Triangles == 65536 && flat.HoleCells == 0 &&
+              flat.MeshBytes == 1284096,
+              string.Format("terrain builder: a flat tile is 256 chunks, 37,120 vertices, 65,536 triangles, 1,284,096 mesh bytes ({0}, {1}, {2}, {3})",
+                            flat.ChunksBuilt, flat.Vertices, flat.Triangles, flat.MeshBytes), log);
+        Check(flat.Chunks[0].Positions[0] == 0f && flat.Chunks[0].Positions[2] == 0f && flat.Chunks[0].Positions[1] == 50f,
+              "terrain builder: the tile's north-west vertex is the origin, at its height (" + flat.Chunks[0].Positions[0] + ", " +
+              flat.Chunks[0].Positions[1] + ", " + flat.Chunks[0].Positions[2] + ")", log);
+
+        // Chunk n < 64 has hole bit n, chunk 64 every bit, the rest none.
+        TerrainTileMesh holed = TerrainFromRoot(AdtSynthetic.RootWith(tx, ty, n => new RootChunkSpec
+        {
+            Holes = n < 64 ? 1UL << n : n == 64 ? ulong.MaxValue : 0UL,
+        }), tx, ty);
+        var cell = new int[12];
+        int exact = 0;
+        for (int b = 0; b < 64; b++)
+        {
+            var want = new List<ushort>(756);
+            for (int k = 0; k < 64; k++)
+            {
+                if (k == b) continue;
+                TerrainMeshBuilder.CellIndices(k / 8, k % 8, cell);
+                foreach (int i in cell) want.Add((ushort)i);
+            }
+            TerrainChunkMesh c = holed.Chunks[b];
+            if (c.State == TerrainChunkState.Built && c.Triangles == 252 && c.HoleCells == 1 && c.HoleMask == 1UL << b && SameIndices(c.Indices, want))
+                exact++;
+        }
+        Check(exact == 64, "terrain builder: each of the 64 single hole bits removes exactly its own cell's four triangles (" + exact + " of 64)", log);
+        TerrainChunkMesh full = holed.Chunks[64];
+        Check(full.State == TerrainChunkState.Built && full.Triangles == 0 && full.Indices.Length == 0 && full.HoleCells == 64 &&
+              full.BoundsMin == null && holed.Triangles == 65536 - 64 * 4 - 256 && holed.HoleCells == 128 && holed.Vertices == 255 * 145,
+              string.Format("terrain builder: a full mask leaves a built chunk with no triangle and no bounds; the tile has {0} triangles, " +
+                            "{1} hole cells, {2} vertices", holed.Triangles, holed.HoleCells, holed.Vertices), log);
+
+        // Design 2.3c: a height rising toward world +x rises toward Unity +Z; rising toward world -y rises toward Unity +X.
+        TerrainTileMesh north = TerrainFromRoot(AdtSynthetic.RampRoot(tx, ty, 0.1, 0.0), tx, ty);
+        TerrainTileMesh west = TerrainFromRoot(AdtSynthetic.RampRoot(tx, ty, 0.0, -0.1), tx, ty);
+        double worstNorth = 0, worstWest = 0;
+        bool upward = true;
+        for (int n = 0; n < 256; n++)
+            for (int k = 0; k < 145; k++)
+            {
+                float[] p = north.Chunks[n].Positions, q = west.Chunks[n].Positions;
+                worstNorth = Math.Max(worstNorth, Math.Abs(p[3 * k + 1] - (100.0 + 0.1 * p[3 * k + 2])));
+                worstWest = Math.Max(worstWest, Math.Abs(q[3 * k + 1] - (100.0 + 0.1 * q[3 * k])));
+                upward &= north.Chunks[n].Normals[3 * k + 1] > 0f && west.Chunks[n].Normals[3 * k + 1] > 0f;
+            }
+        float southEnd = north.Chunks[255].Positions[3 * 144 + 1], northEnd = north.Chunks[0].Positions[1];
+        float westEnd = west.Chunks[0].Positions[1], eastEnd = west.Chunks[15].Positions[3 * 8 + 1];
+        Check(worstNorth < 1e-3 && worstWest < 1e-3 && northEnd > southEnd && eastEnd > westEnd && upward,
+              string.Format(System.Globalization.CultureInfo.InvariantCulture,
+                            "terrain builder: ramps (2.3c) -- rising toward world +x rises toward Unity +Z (y - 0.1 z off by {0:G3}; north edge " +
+                            "{1}, south {2}), rising toward world -y rises toward Unity +X (y - 0.1 x off by {3:G3}; east edge {4}, west {5}); " +
+                            "every normal points up", worstNorth, northEnd, southEnd, worstWest, eastEnd, westEnd), log);
+
+        // A curved field, so the normals differ from vertex to vertex: the copies of a border vertex are bit-equal.
+        TerrainTileMesh hills = TerrainFromRoot(AdtSynthetic.RootWith(tx, ty, n => new RootChunkSpec
+        {
+            BaseHeight = 100f,
+            Height = AdtSynthetic.WorldHeights(tx, ty, n, (x, y) => 100.0 + 7.0 * Math.Sin(x / 31.0) * Math.Cos(y / 17.0), 100f),
+        }), tx, ty);
+        int pairs = 0, unequal = 0;
+        var distinct = new HashSet<int>();
+        for (int iy = 0; iy < 16; iy++)
+            for (int ix = 0; ix < 16; ix++)
+            {
+                TerrainChunkMesh a = hills.Chunks[iy * 16 + ix];
+                for (int k = 0; k < 145; k++)
+                    distinct.Add(BitConverter.SingleToInt32Bits(a.Normals[3 * k]) ^ BitConverter.SingleToInt32Bits(a.Normals[3 * k + 2]) * 31);
+                for (int r = 0; r <= 8; r++)
+                {
+                    if (ix < 15)
+                    {
+                        TerrainChunkMesh e = hills.Chunks[iy * 16 + ix + 1];
+                        unequal += BorderDiffers(a, TerrainVertexLayout.Outer(r, 8), e, TerrainVertexLayout.Outer(r, 0));
+                        pairs++;
+                    }
+                    if (iy < 15)
+                    {
+                        TerrainChunkMesh s = hills.Chunks[(iy + 1) * 16 + ix];
+                        unequal += BorderDiffers(a, TerrainVertexLayout.Outer(8, r), s, TerrainVertexLayout.Outer(0, r));
+                        pairs++;
+                    }
+                }
+            }
+        Check(pairs == 4320 && unequal == 0 && distinct.Count > 1000,
+              "terrain builder: chunk-border copies of a vertex are bit-equal in position and normal (" + (pairs - unequal) + " of " + pairs +
+              " shared points; " + distinct.Count + " distinct normals in the field)", log);
+    }
+
+    static int BorderDiffers(TerrainChunkMesh a, int ka, TerrainChunkMesh b, int kb)
+    {
+        for (int i = 0; i < 3; i++)
+            if (!SameBits(a.Positions[3 * ka + i], b.Positions[3 * kb + i]) || !SameBits(a.Normals[3 * ka + i], b.Normals[3 * kb + i]))
+                return 1;
+        return 0;
+    }
+
+    /// <summary>Render `cam` into `target` over black and over white; the pixels equal in both are covered by geometry
+    /// (the light check's rule). Returns the count, and the frame over black in `overBlack` when asked.</summary>
+    static int TerrainCovered(Camera cam, RenderTexture target, int size)
+    {
+        int covered = 0;
+        foreach (bool c in TerrainCoverageMap(cam, target, size))
+            if (c) covered++;
+        return covered;
+    }
+
+    /// <summary>The same rule pixel by pixel: true where the pixel is equal over black and over white. Rows run bottom
+    /// up (Texture2D.GetPixels32).</summary>
+    static bool[] TerrainCoverageMap(Camera cam, RenderTexture target, int size)
+    {
+        Color32[] black = TerrainGrab(cam, target, size, Color.black);
+        Color32[] white = TerrainGrab(cam, target, size, Color.white);
+        var map = new bool[black.Length];
+        for (int i = 0; i < black.Length; i++)
+            map[i] = black[i].r == white[i].r && black[i].g == white[i].g && black[i].b == white[i].b;
+        return map;
+    }
+
+    static Color32[] TerrainGrab(Camera cam, RenderTexture target, int size, Color clear)
+    {
+        cam.backgroundColor = clear;
+        cam.targetTexture = target;
+        cam.Render();
+        cam.targetTexture = null;
+        RenderTexture prev = RenderTexture.active;
+        RenderTexture.active = target;
+        var tex = new Texture2D(size, size, TextureFormat.RGBA32, false, true);
+        tex.ReadPixels(new Rect(0, 0, size, size), 0, 0);
+        tex.Apply(false);
+        RenderTexture.active = prev;
+        Color32[] px = tex.GetPixels32();
+        UnityEngine.Object.DestroyImmediate(tex);
+        return px;
+    }
+
+    static Camera TerrainTestCamera(out GameObject go)
+    {
+        go = new GameObject("WmvTerrainTestCamera");
+        Camera cam = go.AddComponent<Camera>();
+        cam.enabled = false;                 // rendered by hand only
+        cam.clearFlags = CameraClearFlags.SolidColor;
+        cam.allowHDR = false;
+        cam.allowMSAA = false;
+        cam.aspect = 1f;
+        return cam;
+    }
+
+    /// <summary>The Unity objects and the production layer and masks: every GameObject and Renderer on layer 30, the
+    /// mesh format, built inactive; a camera with TerrainViewMask covers the whole tile from above and nothing from below
+    /// (back faces culled, no edge meshes), and ModelViewMask -- the model view's -- shows none of it.</summary>
+    static void TerrainCoverageTests(Action<string> log)
+    {
+        Check(WmvTerrainBuilder.ResolveShader(null) != null, "terrain render: Resources/WmvTerrain.shader ships in the player", log);
+        if (WmvTerrainBuilder.ResolveShader(null) == null)
+            return;
+        Check(WmvTerrainBuilder.TerrainViewMask == 1 << 30 && WmvTerrainBuilder.ModelViewMask == ~(1 << 30) &&
+              WmvTerrainBuilder.WithoutTerrain(WmvTerrainBuilder.TerrainViewMask) == 0 &&
+              WmvTerrainBuilder.WithoutTerrain(-1) == WmvTerrainBuilder.ModelViewMask,
+              "terrain render: the two fixed masks (terrain view 1 << 30, model view everything else) and the rig's mask without terrain", log);
+        int tx = TerrainTestTileX, ty = TerrainTestTileY;
+        TerrainTileMesh mesh = TerrainFromRoot(AdtSynthetic.RampRoot(tx, ty, 0.05, -0.03), tx, ty);
+        var rt = new WmvRuntimeTerrainTile(0, tx, ty, 1);
+        GameObject camGo = null;
+        RenderTexture target = null;
+        RenderTexture prevActive = RenderTexture.active;
+        try
+        {
+            WmvTerrainBuilder.Build(rt, mesh, null, new WmvTerrainBuildOptions { View = WmvTerrainView.Shaded, OnlyChunk = -1 }, null);
+            Check(rt.Root != null && !rt.Root.activeSelf, "terrain render: the tile is built inactive", log);
+            bool layers = true;
+            int objects = 0, renderers = 0;
+            foreach (Transform t in rt.Root.GetComponentsInChildren<Transform>(true))
+            {
+                objects++;
+                layers &= t.gameObject.layer == WmvTerrainBuilder.Layer;
+            }
+            foreach (Renderer r in rt.Root.GetComponentsInChildren<Renderer>(true))
+            {
+                renderers++;
+                layers &= r.gameObject.layer == WmvTerrainBuilder.Layer;
+            }
+            Check(layers && objects == 257 && renderers == 256 && rt.MeshCount == 256 && rt.MaterialCount == 1 && rt.GameObjectCount == 257,
+                  string.Format("terrain render: every GameObject ({0}) and Renderer ({1}) under the root is on layer 30; 256 meshes, 1 material " +
+                                "({2}, {3})", objects, renderers, rt.MeshCount, rt.MaterialCount), log);
+            bool format = true;
+            double boundsOff = 0;
+            for (int n = 0; n < 256; n++)
+            {
+                Mesh m = rt.ChunkMeshes[n];
+                format &= m != null && m.subMeshCount == 1 && m.GetTopology(0) == MeshTopology.Triangles &&
+                          m.indexFormat == UnityEngine.Rendering.IndexFormat.UInt16 && m.vertexCount == 145 &&
+                          rt.ChunkObjects[n].transform.localToWorldMatrix == Matrix4x4.identity;
+                if (m == null) continue;
+                Bounds b = m.bounds;
+                TerrainChunkMesh c = mesh.Chunks[n];
+                for (int a = 0; a < 3; a++)
+                    boundsOff = Math.Max(boundsOff, Math.Max(Math.Abs(b.min[a] - c.BoundsMin[a]), Math.Abs(b.max[a] - c.BoundsMax[a])));
+            }
+            Check(format && boundsOff <= 1e-4 && rt.Root.transform.localToWorldMatrix == Matrix4x4.identity,
+                  "terrain render: one sub-mesh, Triangles, UInt16, 145 vertices per chunk, identity transforms, mesh bounds = the builder's " +
+                  "(within " + boundsOff.ToString("G3") + " yd)", log);
+
+            rt.Root.SetActive(true);
+            Camera cam = TerrainTestCamera(out camGo);
+            const int Size = 64;
+            target = RenderTexture.GetTemporary(Size, Size, 24, RenderTextureFormat.ARGB32, RenderTextureReadWrite.Linear);
+            float half = (float)(TerrainCoordinates.TileSize * 0.5);
+            cam.orthographic = true;
+            cam.orthographicSize = half;
+            cam.nearClipPlane = 1f;
+            cam.farClipPlane = 400f;
+            cam.cullingMask = WmvTerrainBuilder.TerrainViewMask;
+            cam.transform.SetPositionAndRotation(new Vector3(half, 200f, -half), Quaternion.Euler(90f, 0f, 0f));
+            int top = TerrainCovered(cam, target, Size);
+            cam.transform.SetPositionAndRotation(new Vector3(half, 0f, -half), Quaternion.Euler(-90f, 0f, 0f));
+            int below = TerrainCovered(cam, target, Size);
+            cam.cullingMask = WmvTerrainBuilder.ModelViewMask;
+            cam.transform.SetPositionAndRotation(new Vector3(half, 200f, -half), Quaternion.Euler(90f, 0f, 0f));
+            int modelView = TerrainCovered(cam, target, Size);
+            Check(top == Size * Size && below == 0 && modelView == 0,
+                  string.Format("terrain render: with the terrain view's mask the tile covers {0} of {1} pixels from above and {2} from below " +
+                                "(front faces up, back faces culled); the model view's mask shows {3}", top, Size * Size, below, modelView), log);
+        }
+        finally
+        {
+            RenderTexture.active = prevActive;
+            if (target != null) RenderTexture.ReleaseTemporary(target);
+            if (camGo != null) UnityEngine.Object.DestroyImmediate(camGo);
+            rt.DisposeImmediate();
+        }
+    }
+
+    /// <summary>
+    /// Holes in Unity (design 5.5), on the holed synthetic tile the builder test uses -- chunk n (0..63) with hole bit n
+    /// alone, chunk 64 with every bit -- built by the real builder: the fully holed chunk gets no GameObject, no Mesh and
+    /// no bounds to focus on, a single-bit chunk 252 triangles, and the object counts are exact. Two top-down coverage
+    /// renders with the terrain view's mask, over two clear colours (the light check's rule), show the holes as
+    /// background and nothing else: chunk 10's footprint is covered everywhere but its cell at row 1, column 2 (hole bit
+    /// 10), and chunks 64, 65, 80 and 81 everywhere but chunk 64's quarter. Released with DisposeImmediate: Unity's counts
+    /// and the tiles' tallies are back where they were.
+    /// </summary>
+    static void TerrainHoleRenderTests(Action<string> log)
+    {
+        if (WmvTerrainBuilder.ResolveShader(null) == null)
+            return;
+        int tx = TerrainTestTileX, ty = TerrainTestTileY;
+        const int SingleBitChunk = 10, FullChunk = 64;
+        TerrainTileMesh mesh = TerrainFromRoot(AdtSynthetic.RootWith(tx, ty, n => new RootChunkSpec
+        {
+            Holes = n < 64 ? 1UL << n : n == FullChunk ? ulong.MaxValue : 0UL,
+        }), tx, ty);
+        int meshes0 = Meshes(), materials0 = Materials(), live0 = WmvRuntimeTerrainTile.Live;
+        string tallies0 = TerrainTallies();
+        var rt = new WmvRuntimeTerrainTile(0, tx, ty, 3);
+        GameObject camGo = null;
+        RenderTexture target = null;
+        RenderTexture prevActive = RenderTexture.active;
+        try
+        {
+            WmvTerrainBuilder.Build(rt, mesh, null, new WmvTerrainBuildOptions { View = WmvTerrainView.Shaded, OnlyChunk = -1 }, null);
+            Bounds unused;
+            bool namedFull = false;
+            int transforms = 0;
+            foreach (Transform t in rt.Root.GetComponentsInChildren<Transform>(true))
+            {
+                transforms++;
+                namedFull |= t.name.StartsWith("MCNK " + FullChunk + " ", StringComparison.Ordinal);
+            }
+            Mesh single = rt.ChunkMeshes[SingleBitChunk];
+            int singleIndices = single != null ? (int)single.GetIndexCount(0) : -1;
+            Check(rt.ChunkObjects[FullChunk] == null && rt.ChunkMeshes[FullChunk] == null && !rt.TryGetChunkBounds(FullChunk, out unused) &&
+                  !namedFull && rt.TryGetChunkBounds(SingleBitChunk, out unused) && singleIndices == 252 * 3,
+                  "terrain holes: the fully holed chunk " + FullChunk + " has no GameObject, no Mesh and no bounds (-wmvTerrainFocus refuses it); " +
+                  "the single-bit chunk " + SingleBitChunk + " has " + singleIndices + " indices (252 triangles)", log);
+            Check(tallies0 == "0/0/0" && rt.ChunkObjectCount == 255 && rt.MeshCount == 255 && rt.MaterialCount == 1 && rt.GameObjectCount == 256 &&
+                  transforms == 256 && Meshes() == meshes0 + 255 && Materials() == materials0 + 1 && TerrainTallies() == "255/1/256" &&
+                  WmvRuntimeTerrainTile.Live == live0 + 1,
+                  string.Format("terrain holes: the objects are exact -- {0} chunk objects, {1} GameObjects under the root (the root and 255 " +
+                                "chunks), Unity's Mesh count +{2} and Material count +{3}, the tiles' tallies {4} (from {5})", rt.ChunkObjectCount,
+                                transforms, Meshes() - meshes0, Materials() - materials0, TerrainTallies(), tallies0), log);
+
+            rt.Root.SetActive(true);
+            Camera cam = TerrainTestCamera(out camGo);
+            const int Size = 64;
+            target = RenderTexture.GetTemporary(Size, Size, 24, RenderTextureFormat.ARGB32, RenderTextureReadWrite.Linear);
+            float c = (float)TerrainCoordinates.ChunkSize;
+            cam.orthographic = true;
+            cam.nearClipPlane = 1f;
+            cam.farClipPlane = 400f;
+            cam.cullingMask = WmvTerrainBuilder.TerrainViewMask;
+            // Straight down, screen up = north (Unity +Z), right = east (+X); a chunk's cell row r runs south, column c east.
+            // Chunk 10 (column 10, row 0) is x 10C..11C, z -C..0: 8 px per cell, its hole the cell at row 1, column 2.
+            cam.orthographicSize = c * 0.5f;
+            cam.transform.SetPositionAndRotation(new Vector3(10.5f * c, 200f, -0.5f * c), Quaternion.Euler(90f, 0f, 0f));
+            string cellBox;
+            int[] cell = HoleCoverage(TerrainCoverageMap(cam, target, Size), Size, (col, rowFromTop) => col / 8 == 2 && rowFromTop / 8 == 1, out cellBox);
+            Check(cell[0] == 64 && cell[1] == 0 && cell[2] == Size * Size - 64 && cell[3] == 0,
+                  string.Format("terrain holes: top down over chunk {0}, its hole cell (row 1, column 2) is background -- {1} of its 64 pixels " +
+                                "uncovered ({2} covered), the other {3} of {4} covered ({5} not); uncovered pixels at {6}", SingleBitChunk, cell[0],
+                                cell[1], cell[2], Size * Size - 64, cell[3], cellBox), log);
+            // Chunks 64, 65 (row 4) and 80, 81 (row 5), columns 0..1: x 0..2C, z -6C..-4C, 32 px per chunk; chunk 64 the
+            // north-west quarter.
+            cam.orthographicSize = c;
+            cam.transform.SetPositionAndRotation(new Vector3(c, 200f, -5f * c), Quaternion.Euler(90f, 0f, 0f));
+            string chunkBox;
+            int[] quarter = HoleCoverage(TerrainCoverageMap(cam, target, Size), Size, (col, rowFromTop) => col < 32 && rowFromTop < 32, out chunkBox);
+            Check(quarter[0] == 1024 && quarter[1] == 0 && quarter[2] == Size * Size - 1024 && quarter[3] == 0,
+                  string.Format("terrain holes: top down over chunks 64, 65, 80 and 81, the fully holed chunk 64 is background -- {0} of its " +
+                                "1024 pixels uncovered ({1} covered), the three chunks beside it covered ({2} of {3}, {4} not); uncovered " +
+                                "pixels at {5}", quarter[0], quarter[1], quarter[2], Size * Size - 1024, quarter[3], chunkBox), log);
+        }
+        finally
+        {
+            RenderTexture.active = prevActive;
+            if (target != null) RenderTexture.ReleaseTemporary(target);
+            if (camGo != null) UnityEngine.Object.DestroyImmediate(camGo);
+            rt.DisposeImmediate();
+        }
+        Check(Meshes() == meshes0 && Materials() == materials0 && WmvRuntimeTerrainTile.Live == live0 && TerrainTallies() == tallies0,
+              "terrain holes: DisposeImmediate takes the holed tile back to the counts before it (meshes " + (Meshes() - meshes0) + ", materials " +
+              (Materials() - materials0) + " over; tallies " + TerrainTallies() + ")", log);
+    }
+
+    /// <summary>Count a coverage map against an expected hole region: [uncovered in it, covered in it, covered outside it,
+    /// uncovered outside it]; `box` says where the uncovered pixels are (columns, rows from the top).</summary>
+    static int[] HoleCoverage(bool[] covered, int size, Func<int, int, bool> inHole, out string box)
+    {
+        var n = new int[4];
+        int c0 = int.MaxValue, c1 = -1, r0 = int.MaxValue, r1 = -1;
+        for (int py = 0; py < size; py++)
+            for (int px = 0; px < size; px++)
+            {
+                int rowFromTop = size - 1 - py;      // GetPixels32 rows run bottom up; screen up is north
+                bool cov = covered[py * size + px];
+                if (inHole(px, rowFromTop)) n[cov ? 1 : 0]++;
+                else n[cov ? 2 : 3]++;
+                if (!cov)
+                {
+                    c0 = Math.Min(c0, px); c1 = Math.Max(c1, px);
+                    r0 = Math.Min(r0, rowFromTop); r1 = Math.Max(r1, rowFromTop);
+                }
+            }
+        box = c1 < 0 ? "none" : string.Format("columns {0}..{1}, rows {2}..{3} from the top", c0, c1, r0, r1);
+        return n;
+    }
+
+    /// <summary>
+    /// The edge pass's depth nudge (WmvTerrainBuilder.LineDepthNudge), measured from both sides. From below: a flat tile --
+    /// every triangle coplanar, the hardest case for an edge lying on its own surface -- drawn shadedwire from the default
+    /// framing (the world-model view the terrain view frames with), a chunk focus and a grazing view: every pixel the
+    /// edges cover alone must show over their own surfaces (a nudge too small fails here). From above: a wall of raised
+    /// chunks in front of flat ones, its depth gap well beyond the nudge's documented price -- the flat chunks' edges
+    /// behind it must not show through it at the production nudge, and must at 100 times it (proving the check can fail:
+    /// a nudge too large fails here).
+    /// </summary>
+    static void TerrainEdgeTests(Action<string> log)
+    {
+        if (WmvTerrainBuilder.ResolveShader(null) == null)
+            return;
+        int tx = TerrainTestTileX, ty = TerrainTestTileY;
+        TerrainTileMesh mesh = TerrainFromRoot(AdtSynthetic.FlatRoot(tx, ty), tx, ty);
+        var rt = new WmvRuntimeTerrainTile(0, tx, ty, 2);
+        GameObject camGo = null;
+        RenderTexture target = null;
+        RenderTexture prevActive = RenderTexture.active;
+        try
+        {
+            WmvTerrainBuilder.Build(rt, mesh, null, new WmvTerrainBuildOptions { View = WmvTerrainView.ShadedWire, OnlyChunk = -1 }, null);
+            Mesh edges0 = rt.LineObjects[0] != null ? rt.LineObjects[0].GetComponent<MeshFilter>().sharedMesh : null;
+            // A full chunk's unique edges: 4 spokes per cell (256) and the 9 x 8 + 9 x 8 edges of the outer grid (144).
+            Check(rt.LineObjectCount == 256 && rt.MaterialCount == 2 && rt.MeshCount == 512 && edges0 != null &&
+                  rt.LineObjects[0].layer == WmvTerrainBuilder.Layer && edges0.GetTopology(0) == MeshTopology.Lines && edges0.GetIndexCount(0) == 2 * 400 &&
+                  WmvTerrainBuilder.UniqueEdges(mesh.Chunks[0].Indices).Length == 2 * 400,
+                  "terrain edges: one edge object per chunk on layer 30, Lines topology, each unique triangle edge once (400 per full chunk: " +
+                  (edges0 != null ? (edges0.GetIndexCount(0) / 2).ToString() : "none") + ")", log);
+            rt.Root.SetActive(true);
+            Camera cam;
+            WmvOrbitCamera orbit = EdgeTestCamera(out camGo, out cam);
+            const int Size = 512;
+            target = RenderTexture.GetTemporary(Size, Size, 24, RenderTextureFormat.ARGB32, RenderTextureReadWrite.Linear);
+            // The nudge measured over a range, in three framings: the terrain view's own two (the tile, a focused chunk; both
+            // from the world-model view, 30 degrees above the horizon) and a grazing one (10 degrees). The production value
+            // must show every edge pixel in all three; the table says where each framing starts to. Lines only ever change
+            // the pixels they cover (they draw after the surfaces), so this bounds the nudge from below only; the occluder
+            // test bounds it from above.
+            float[] candidates = { 0f, 1e-5f, 2e-5f, 5e-5f, 1e-4f, 2e-4f };
+            string[] framings = { "the tile framed as the terrain view frames it", "a chunk framed", "a chunk seen 10 degrees above the horizon" };
+            for (int v = 0; v < framings.Length; v++)
+            {
+                orbit.FrameMapObject(v == 0 ? rt.Bounds : rt.ChunkBounds[136]);
+                if (v == 2)
+                    orbit.SetView(orbit.yaw, 10f, 1f);
+                var table = new System.Text.StringBuilder();
+                int edgePixels = 0, shown = 0;
+                foreach (float k in candidates)
+                {
+                    rt.LineMaterial.SetFloat("_WmvLineNudge", k);
+                    EdgeVisibility(rt, cam, target, Size, out edgePixels, out shown);
+                    table.Append(table.Length > 0 ? ", " : "").Append(k.ToString("G2", System.Globalization.CultureInfo.InvariantCulture)).Append(": ")
+                         .Append(shown).Append('/').Append(edgePixels);
+                }
+                rt.LineMaterial.SetFloat("_WmvLineNudge", WmvTerrainBuilder.LineDepthNudge);
+                log("terrain edges: " + framings[v] + ", 512 px: edge pixels shown over their own surfaces by nudge -- " + table);
+                EdgeVisibility(rt, cam, target, Size, out edgePixels, out shown);
+                Check(edgePixels > 0 && shown == edgePixels,
+                      string.Format("terrain edges: {0} -- all {1} pixels the edges cover alone show over their own surfaces ({2}) with the " +
+                                    "nudge {3} of clip w (not too small)", framings[v], edgePixels, shown, WmvTerrainBuilder.LineDepthNudge), log);
+            }
+        }
+        finally
+        {
+            RenderTexture.active = prevActive;
+            if (target != null) RenderTexture.ReleaseTemporary(target);
+            if (camGo != null) UnityEngine.Object.DestroyImmediate(camGo);
+            rt.DisposeImmediate();
+        }
+    }
+
+    /// <summary>
+    /// The nudge from above: rows 6 and 7 of chunks raised 60 yd into a wall (flat on top), every other chunk flat, drawn
+    /// shadedwire with the tile framed as the terrain view frames it and seen from the north, 30 degrees above the
+    /// horizon, so the wall stands between the camera and the rows south of it. A ray over the wall meets the ground
+    /// 60 / sin 30 = 120 yd further on -- well beyond the documented price of the nudge (about k * D^2 / near) at the far
+    /// side of the tile, and above 5 % of the framing distance. The edges of the chunks behind the wall must not show
+    /// through it at WmvTerrainBuilder.LineDepthNudge, and must at 100 times it -- this check can fail.
+    /// </summary>
+    static void TerrainEdgeOccluderTests(Action<string> log)
+    {
+        if (WmvTerrainBuilder.ResolveShader(null) == null)
+            return;
+        int tx = TerrainTestTileX, ty = TerrainTestTileY;
+        const int WallFirstRow = 6, WallLastRow = 7;
+        const float Ground = 50f, WallHeight = 60f;
+        TerrainTileMesh mesh = TerrainFromRoot(AdtSynthetic.RootWith(tx, ty, n => new RootChunkSpec
+        {
+            BaseHeight = n / 16 >= WallFirstRow && n / 16 <= WallLastRow ? Ground + WallHeight : Ground, Height = k => 0f,
+        }), tx, ty);
+        var behind = new bool[AdtParser.ChunksPerTile];
+        var wall = new bool[AdtParser.ChunksPerTile];
+        for (int n = 0; n < AdtParser.ChunksPerTile; n++)
+        {
+            wall[n] = n / 16 >= WallFirstRow && n / 16 <= WallLastRow;
+            behind[n] = n / 16 > WallLastRow;
+        }
+        var rt = new WmvRuntimeTerrainTile(0, tx, ty, 5);
+        GameObject camGo = null;
+        RenderTexture target = null;
+        RenderTexture prevActive = RenderTexture.active;
+        try
+        {
+            WmvTerrainBuilder.Build(rt, mesh, null, new WmvTerrainBuildOptions { View = WmvTerrainView.ShadedWire, OnlyChunk = -1 }, null);
+            rt.Root.SetActive(true);
+            Camera cam;
+            WmvOrbitCamera orbit = EdgeTestCamera(out camGo, out cam);
+            const int Size = 512;
+            target = RenderTexture.GetTemporary(Size, Size, 24, RenderTextureFormat.ARGB32, RenderTextureReadWrite.Linear);
+            orbit.FrameMapObject(rt.Bounds);
+            orbit.SetView(WmvOrbitCamera.FrontYaw, WmvOrbitCamera.MapObjectPitch, 1f);   // from the north (+Z), looking south
+
+            // The documented price at the farthest edge (the middle of the tile's south side) against the wall's depth gap.
+            float t = (float)TerrainCoordinates.TileSize;
+            double farthest = (cam.transform.position - new Vector3(t * 0.5f, Ground, -t)).magnitude;
+            double price = WmvTerrainBuilder.LineDepthNudge * farthest * farthest / cam.nearClipPlane;
+            double gap = WallHeight / Math.Sin(WmvOrbitCamera.MapObjectPitch * Math.PI / 180.0);
+            Check(gap >= 5.0 * price && gap >= 0.05 * orbit.distance,
+                  string.Format(System.Globalization.CultureInfo.InvariantCulture,
+                                "terrain edges, occluder: (precondition) the wall's depth gap {0:F0} yd is well beyond the nudge's price at the far " +
+                                "side of the tile, k D^2 / near = {1:F1} yd (D {2:F0}, near {3:F2}), and above 5 % of the framing distance {4:F0}",
+                                gap, price, farthest, cam.nearClipPlane, orbit.distance), log);
+
+            int pixels, shown, pixels100, shown100;
+            OccludedEdges(rt, cam, target, Size, behind, wall, out pixels, out shown);
+            rt.LineMaterial.SetFloat("_WmvLineNudge", WmvTerrainBuilder.LineDepthNudge * 100f);
+            OccludedEdges(rt, cam, target, Size, behind, wall, out pixels100, out shown100);
+            rt.LineMaterial.SetFloat("_WmvLineNudge", WmvTerrainBuilder.LineDepthNudge);
+            Check(pixels > 0 && shown == 0,
+                  string.Format("terrain edges, occluder: none of the {0} edge pixels of the chunks behind the wall that fall inside its " +
+                                "footprint shows through it with the nudge {1} of clip w ({2} do)", pixels, WmvTerrainBuilder.LineDepthNudge, shown), log);
+            Check(pixels100 > 0 && shown100 > 0,
+                  string.Format("terrain edges, occluder: with 100 times the nudge ({0}) {1} of those {2} pixels show through the wall -- the check " +
+                                "above can fail", WmvTerrainBuilder.LineDepthNudge * 100f, shown100, pixels100), log);
+        }
+        finally
+        {
+            RenderTexture.active = prevActive;
+            if (target != null) RenderTexture.ReleaseTemporary(target);
+            if (camGo != null) UnityEngine.Object.DestroyImmediate(camGo);
+            rt.DisposeImmediate();
+        }
+    }
+
+    /// <summary>The orbit camera the edge tests render with by hand: 60 degree field of view, square, no HDR or MSAA, the
+    /// terrain view's mask.</summary>
+    static WmvOrbitCamera EdgeTestCamera(out GameObject go, out Camera cam)
+    {
+        WmvOrbitCamera orbit = NewCamera(out go);
+        cam = go.GetComponent<Camera>();
+        cam.enabled = false;
+        cam.clearFlags = CameraClearFlags.SolidColor;
+        cam.allowHDR = false;
+        cam.allowMSAA = false;
+        cam.aspect = 1f;
+        cam.cullingMask = WmvTerrainBuilder.TerrainViewMask;
+        return orbit;
+    }
+
+    /// <summary>Edges alone (surface renderers off) over white: the edge pixels. Surfaces alone, and both, over white:
+    /// how many edge pixels differ from the surfaces-alone frame (show).</summary>
+    static void EdgeVisibility(WmvRuntimeTerrainTile rt, Camera cam, RenderTexture target, int size, out int edgePixels, out int shown)
+    {
+        SetRenderers(rt.ChunkObjects, false);
+        SetRenderers(rt.LineObjects, true);
+        Color32[] edges = TerrainGrab(cam, target, size, Color.white);
+        SetRenderers(rt.LineObjects, false);
+        SetRenderers(rt.ChunkObjects, true);
+        Color32[] surfaces = TerrainGrab(cam, target, size, Color.white);
+        SetRenderers(rt.LineObjects, true);
+        Color32[] both = TerrainGrab(cam, target, size, Color.white);
+        edgePixels = shown = 0;
+        for (int i = 0; i < edges.Length; i++)
+            if (!IsWhite(edges[i]))
+            {
+                edgePixels++;
+                if (!SameRgb(both[i], surfaces[i])) shown++;
+            }
+    }
+
+    /// <summary>The edges of the `behind` chunks alone: where they are; the `wall` chunks' surfaces alone: the wall's
+    /// footprint. Every surface, then every surface and those edges: of the edge pixels inside the footprint (`pixels`),
+    /// how many differ -- show through the wall (`shown`). The renderers are left as built.</summary>
+    static void OccludedEdges(WmvRuntimeTerrainTile rt, Camera cam, RenderTexture target, int size, bool[] behind, bool[] wall,
+                              out int pixels, out int shown)
+    {
+        SetRenderers(rt.ChunkObjects, false);
+        SetRenderers(rt.LineObjects, false);
+        SetRenderersWhere(rt.LineObjects, behind, true);
+        Color32[] edges = TerrainGrab(cam, target, size, Color.white);
+        SetRenderers(rt.LineObjects, false);
+        SetRenderersWhere(rt.ChunkObjects, wall, true);
+        Color32[] footprint = TerrainGrab(cam, target, size, Color.white);
+        SetRenderers(rt.ChunkObjects, true);
+        Color32[] surfaces = TerrainGrab(cam, target, size, Color.white);
+        SetRenderersWhere(rt.LineObjects, behind, true);
+        Color32[] both = TerrainGrab(cam, target, size, Color.white);
+        SetRenderers(rt.LineObjects, true);
+        pixels = shown = 0;
+        for (int i = 0; i < edges.Length; i++)
+            if (!IsWhite(edges[i]) && !IsWhite(footprint[i]))
+            {
+                pixels++;
+                if (!SameRgb(both[i], surfaces[i])) shown++;
+            }
+    }
+
+    static bool IsWhite(Color32 c) { return c.r == 255 && c.g == 255 && c.b == 255; }
+    static bool SameRgb(Color32 a, Color32 b) { return a.r == b.r && a.g == b.g && a.b == b.b; }
+
+    static void SetRenderers(GameObject[] objects, bool on)
+    {
+        foreach (GameObject go in objects)
+        {
+            if (go == null) continue;
+            MeshRenderer r = go.GetComponent<MeshRenderer>();
+            if (r != null) r.enabled = on;
+        }
+    }
+
+    static void SetRenderersWhere(GameObject[] objects, bool[] which, bool on)
+    {
+        for (int n = 0; n < objects.Length; n++)
+        {
+            if (objects[n] == null || !which[n]) continue;
+            MeshRenderer r = objects[n].GetComponent<MeshRenderer>();
+            if (r != null) r.enabled = on;
+        }
+    }
+
+    // ---- the session against fake host answers
+
+    /// <summary>The session's Unity side in the self-test: the real builder, DisposeImmediate, roots left inactive (nothing
+    /// is ever drawn by the scene camera), the real counters; failures on demand.</summary>
+    sealed class TestTerrainView : IWmvTerrainView
+    {
+        public bool ViewOn, FailBuild, FailShow, LastLeaveForModelLoad;
+        public int Shown, Left, Disposed, BuiltHooks;
+        /// <summary>The terrain tallies the moment the last tile's objects existed, before the session committed it.</summary>
+        public string TalliesAtBuild = "";
+
+        public void BuildTile(WmvRuntimeTerrainTile tile, TerrainTileMesh mesh)
+        {
+            WmvTerrainBuilder.Build(tile, mesh, null, new WmvTerrainBuildOptions { View = WmvTerrainView.Shaded, OnlyChunk = -1 }, null);
+            TalliesAtBuild = TerrainTallies();
+            if (FailBuild)
+                throw new InvalidOperationException("test: the build fails after its objects exist");
+        }
+
+        public void ShowTile(WmvRuntimeTerrainTile tile)
+        {
+            Shown++;
+            ViewOn = true;
+            if (FailShow)
+                throw new InvalidOperationException("test: showing fails");
+        }
+
+        public void LeaveTerrainView(string why, bool forModelLoad) { Left++; ViewOn = false; LastLeaveForModelLoad = forModelLoad; }
+
+        /// <summary>Deferred: dispose as the player does (Dispose, Object.Destroy at the end of the frame), keeping what
+        /// it owned so the test can release it at once afterwards (DestroyPendingNow) and still count within this frame.</summary>
+        public bool Deferred;
+        readonly List<UnityEngine.Object> pendingDestroy = new List<UnityEngine.Object>();
+
+        public void DisposeTile(WmvRuntimeTerrainTile tile)
+        {
+            Disposed++;
+            if (!Deferred)
+            {
+                tile.DisposeImmediate();
+                return;
+            }
+            if (tile.Root != null) pendingDestroy.Add(tile.Root);
+            foreach (Mesh m in tile.ChunkMeshes) if (m != null) pendingDestroy.Add(m);
+            foreach (GameObject l in tile.LineObjects)
+            {
+                MeshFilter f = l != null ? l.GetComponent<MeshFilter>() : null;
+                if (f != null && f.sharedMesh != null) pendingDestroy.Add(f.sharedMesh);
+            }
+            if (tile.SurfaceMaterial != null) pendingDestroy.Add(tile.SurfaceMaterial);
+            if (tile.LineMaterial != null) pendingDestroy.Add(tile.LineMaterial);
+            tile.Dispose();
+        }
+
+        public void DestroyPendingNow()
+        {
+            foreach (UnityEngine.Object o in pendingDestroy)
+                if (o != null) UnityEngine.Object.DestroyImmediate(o);
+            pendingDestroy.Clear();
+        }
+        public void Sample(WmvIpcClient.TerrainTileReport report) { WmvTerrainBuilder.SampleCounters(report); }
+        public void TileBuilt(WmvRuntimeTerrainTile tile, TerrainTileMesh mesh, WmvIpcClient.TerrainTileCommand command, int rootFileDataID)
+        {
+            BuiltHooks++;
+        }
+    }
+
+    /// <summary>A session with a fake host: the requests it sends, the reports it makes, a clock and frames.</summary>
+    sealed class TerrainHarness
+    {
+        public readonly TestTerrainView View = new TestTerrainView();
+        public readonly List<WmvIpcClient.TerrainTileReport> Reports = new List<WmvIpcClient.TerrainTileReport>();
+        public readonly List<string[]> Sent = new List<string[]>();    // requestId, role, fileDataID, load, epoch
+        public readonly WmvTerrainSession Session;
+        public double Now = 1000.0;
+        int next;
+
+        public TerrainHarness(double timeoutMs = WmvTerrainSession.DefaultTimeoutMs)
+        {
+            Session = new WmvTerrainSession(View, (role, id, load, epoch) =>
+            {
+                string r = "t" + (++next);
+                Sent.Add(new[] { r, role, id.ToString(), load.ToString(), epoch.ToString() });
+                return r;
+            }, r => Reports.Add(r), null, a => a(), timeoutMs);
+        }
+
+        public string Last(string role)
+        {
+            for (int i = Sent.Count - 1; i >= 0; i--)
+                if (Sent[i][1] == role) return Sent[i][0];
+            return null;
+        }
+
+        public string[] LastSent(string role)
+        {
+            for (int i = Sent.Count - 1; i >= 0; i--)
+                if (Sent[i][1] == role) return Sent[i];
+            return null;
+        }
+
+        public void Pump(int frames)
+        {
+            for (int i = 0; i < frames; i++)
+                Session.Pump(Now += 16.0);
+        }
+
+        /// <summary>The host's answer to request `id`: ok with the bytes ("available", their md5 unless one is given), or
+        /// refused with a state and detail. True when the session applied it (false: dropped as late or unowned).
+        /// loadOverride (when > 0) is the load the answer names instead of the request's.</summary>
+        public bool Answer(string id, byte[] data, string state = "available", string detail = "", string md5 = null, int loadOverride = 0)
+        {
+            string[] req = null;
+            foreach (string[] s in Sent) if (s[0] == id) req = s;
+            bool ok = state == "available";
+            return Session.ClaimMapAssetResponse(new WmvIpcClient.AssetResponse
+            {
+                requestId = id, ok = ok, fileDataID = req != null ? int.Parse(req[2]) : 0, role = req != null ? req[1] : "",
+                load = loadOverride > 0 ? loadOverride : req != null ? int.Parse(req[3]) : 0, assetEpoch = req != null ? int.Parse(req[4]) : 0, state = state,
+                detail = detail, readMs = 0.5, md5 = ok ? (md5 ?? WmvTerrainSession.Md5Hex(data)) : "", data = ok ? data : null,
+                byteLength = ok ? data.Length : 0, error = ok ? "" : detail, path = "",
+            });
+        }
+
+        public int CountFor(int load)
+        {
+            int n = 0;
+            foreach (var r in Reports) if (r.Load == load) n++;
+            return n;
+        }
+
+        public WmvIpcClient.TerrainTileReport For(int load)
+        {
+            foreach (var r in Reports) if (r.Load == load) return r;
+            return null;
+        }
+    }
+
+    static WmvIpcClient.TerrainTileCommand TerrainCommand(int load, int tileX, int tileY, int maxBytes = 4194304, int wdt = TerrainTestWdt)
+    {
+        return new WmvIpcClient.TerrainTileCommand
+        {
+            Load = load, AssetEpoch = 7, MapId = 0, MapDirectory = "Azeroth", Product = "test", Build = "0", WdtFileDataID = wdt,
+            WdtResolvedBy = "fileDataID", TileX = tileX, TileY = tileY, MaxAssetBytes = maxBytes,
+        };
+    }
+
+    /// <summary>A WDT whose MAIN flags the given tiles (x, y pairs) with MAID word 0 = the paired root id (0 = none).</summary>
+    static byte[] TerrainWdt(bool withMaid, params int[] tileXYRoot)
+    {
+        var main = new List<int>();
+        var maid = new byte[4096 * 32];
+        for (int i = 0; i + 2 < tileXYRoot.Length; i += 3)
+        {
+            int idx = tileXYRoot[i + 1] * 64 + tileXYRoot[i];
+            main.Add(idx);
+            AdtSynthetic.PutU32(maid, idx * 32, (uint)tileXYRoot[i + 2]);
+        }
+        return withMaid ? AdtSynthetic.Cat(AdtSynthetic.Mver(), AdtSynthetic.Mphd(0), AdtSynthetic.MainTable(main.ToArray()), AdtSynthetic.Chunk("MAID", maid))
+                        : AdtSynthetic.Cat(AdtSynthetic.Mver(), AdtSynthetic.Mphd(0), AdtSynthetic.MainTable(main.ToArray()));
+    }
+
+    /// <summary>Load, both answers, three frames: the report of a load that builds.</summary>
+    static WmvIpcClient.TerrainTileReport TerrainBuild(TerrainHarness h, int load, int tileX, int tileY, byte[] wdt, byte[] root)
+    {
+        h.Session.Load(TerrainCommand(load, tileX, tileY));
+        h.Answer(h.Last(WmvTerrainSession.RoleWdt), wdt);
+        h.Answer(h.Last(WmvTerrainSession.RoleRootAdt), root);
+        h.Pump(3);
+        return h.For(load);
+    }
+
+    static int Meshes() { return Resources.FindObjectsOfTypeAll<Mesh>().Length; }
+    static int Materials() { return Resources.FindObjectsOfTypeAll<Material>().Length; }
+
+    /// <summary>runtimeState's terrainMeshes / terrainMaterials / terrainGameObjects, as "meshes/materials/gameObjects".</summary>
+    static string TerrainTallies()
+    {
+        return WmvRuntimeTerrainTile.LiveMeshes + "/" + WmvRuntimeTerrainTile.LiveMaterials + "/" + WmvRuntimeTerrainTile.LiveGameObjects;
+    }
+
+    /// <summary>The tallies of one shaded tile with every chunk built: 256 meshes, 1 material, the root and 256 chunk objects.</summary>
+    const string OneShadedTile = "256/1/257";
+
+    /// <summary>The message of the exception `a` throws, or null when it throws none.</summary>
+    static string ThrownMessage(Action a)
+    {
+        try { a(); return null; }
+        catch (Exception e) { return e.Message; }
+    }
+
+    /// <summary>prefix + message, or null (no reason can match) when there is no message.</summary>
+    static string Prefixed(string prefix, string message) { return message == null ? null : prefix + message; }
+
+    static void TerrainSessionTests(Action<string> log)
+    {
+        int tx = TerrainTestTileX, ty = TerrainTestTileY;
+        byte[] wdt = TerrainWdt(true, tx, ty, (int)TerrainTestRoot, tx, ty - 1, (int)TerrainTestRootNorth, tx, ty + 1, 0);
+        byte[] root = AdtSynthetic.FlatRoot(tx, ty);
+        byte[] rootNorth = AdtSynthetic.FlatRoot(tx, ty - 1);
+
+        // A world model on screen beside the terrain tests: nothing they do may touch it.
+        const uint wmoFirstGroup = 960000, wmoTexture = 961000;
+        WmoRoot wmoRoot = WmoParser.ParseRoot(WmoSynthetic.SquaresRoot(3, wmoFirstGroup, wmoTexture), "terrain-test squares root");
+        var wmoGroups = new WmoGroup[3];
+        for (int i = 0; i < 3; i++)
+            wmoGroups[i] = WmoParser.ParseGroup(WmoSynthetic.SquaresGroup(i), "terrain-test squares group " + i, i);
+        var wmoTextures = new Dictionary<uint, WmvWmoTexture>
+        {
+            { wmoTexture, new WmvWmoTexture { FileDataID = wmoTexture, Image = FlatTexture(), Decoded = true, Width = 2, Height = 2 } },
+        };
+        WmvRuntimeMapObject wmo = WmvWmoBuilder.Build(wmoRoot, wmoGroups, wmoTextures, "TerrainTestWmo", null);
+        int wmoLive = WmvRuntimeMapObject.Live, modelLive = WmvRuntimeModel.Live;
+
+        int meshes0 = Meshes(), materials0 = Materials(), live0 = WmvRuntimeTerrainTile.Live;
+        // Nothing of a tile left: Unity's own counts, the live runtimes, and the tiles' tallies runtimeState sends
+        // (terrainMeshes, terrainMaterials, terrainGameObjects: 0 with no tile).
+        Func<bool> clean = () => Meshes() == meshes0 && Materials() == materials0 && WmvRuntimeTerrainTile.Live == live0 &&
+                                 TerrainTallies() == "0/0/0";
+        Check(TerrainTallies() == "0/0/0" && live0 == 0,
+              "terrain session: no tile is held before the session tests -- the tiles' tallies are 0 (" + TerrainTallies() + "), live " + live0, log);
+        var loads = new List<KeyValuePair<TerrainHarness, int>>();
+        var harnesses = new List<TerrainHarness>();
+
+        // ---- a load that builds: the report waits for frames N+1 and N+2, and says what was built and served
+        var h = new TerrainHarness();
+        harnesses.Add(h);
+        h.Session.Load(TerrainCommand(1, tx, ty));
+        string[] wdtAsk = h.LastSent(WmvTerrainSession.RoleWdt);
+        Check(wdtAsk != null && wdtAsk[2] == TerrainTestWdt.ToString() && wdtAsk[3] == "1" && wdtAsk[4] == "7" && h.Session.Loading,
+              "terrain session: a load asks for the WDT by the command's FileDataID, load and epoch", log);
+        h.Answer(h.Last(WmvTerrainSession.RoleWdt), wdt);
+        string[] rootAsk = h.LastSent(WmvTerrainSession.RoleRootAdt);
+        Check(rootAsk != null && rootAsk[2] == TerrainTestRoot.ToString() && rootAsk[3] == "1",
+              "terrain session: then the root ADT MAID word 0 names for the tile (" + (rootAsk != null ? rootAsk[2] : "none") + ")", log);
+        h.Answer(h.Last(WmvTerrainSession.RoleRootAdt), root);
+        h.Pump(1);
+        bool adoptedQuiet = h.Reports.Count == 0 && h.View.Shown == 1 && WmvRuntimeTerrainTile.Live == live0 + 1;
+        h.Pump(1);
+        bool secondQuiet = h.Reports.Count == 0;
+        h.Pump(1);
+        WmvIpcClient.TerrainTileReport built = h.For(1);
+        Check(adoptedQuiet && secondQuiet && built != null && built.Status == "built",
+              "terrain session: adopted in frame N, reported \"built\" only once frames N+1 and N+2 have started", log);
+        if (built != null)
+            Check(built.HasMesh && built.ChunksBuilt == 256 && built.Vertices == 37120 && built.Triangles == 65536 && built.HoleCells == 0 &&
+                  built.HasBounds && built.WdtFileDataID == TerrainTestWdt && built.RootFileDataID == (int)TerrainTestRoot &&
+                  built.WdtBytes == wdt.Length && built.RootBytes == root.Length && built.WdtMd5 == WmvTerrainSession.Md5Hex(wdt) &&
+                  built.RootMd5 == WmvTerrainSession.Md5Hex(root) && built.LiveTerrainTiles == live0 + 1 && built.FirstFrameMs >= 0 &&
+                  built.ParseMs >= 0 && built.BuildMs >= 0 && built.UploadMs >= 0 && built.MeshObjects == meshes0 + 256 &&
+                  built.MaterialObjects == materials0 + 1 && built.OriginX == (32 - ty) * TerrainCoordinates.TileSize &&
+                  built.RootOffset == Vector3.zero && h.View.BuiltHooks == 1 && h.Session.ShownLoad == 1 && h.Session.ViewActive &&
+                  !h.Session.Loading,
+                  string.Format("terrain session: the built report carries the mesh, the files' sizes and md5s, the origin and the counters " +
+                                "(meshes {0} = {1} + 256, materials {2}, live {3})", built.MeshObjects, meshes0, built.MaterialObjects,
+                                built.LiveTerrainTiles), log);
+        Check(TerrainTallies() == OneShadedTile && h.View.TalliesAtBuild == OneShadedTile && built != null && built.TerrainGameObjects == 257,
+              "terrain session: while the tile is shown the tiles' tallies hold its own objects -- " + TerrainTallies() + " (meshes/materials/" +
+              "game objects; the scene root never counted), already at its build before the commit (" + h.View.TalliesAtBuild + "); the report's " +
+              "terrainGameObjects " + (built != null ? built.TerrainGameObjects.ToString() : "none"), log);
+
+        // ---- replace: another tile, then the same tile again -- one tile alive each time
+        WmvIpcClient.TerrainTileReport second = TerrainBuild(h, 2, tx, ty - 1, wdt, rootNorth);
+        bool replaced = second != null && second.Status == "built" && WmvRuntimeTerrainTile.Live == live0 + 1 && h.View.Disposed == 1 &&
+                        h.Session.ShownLoad == 2 && h.Session.SceneTiles == 1 && Meshes() == meshes0 + 256;
+        WmvIpcClient.TerrainTileReport again = TerrainBuild(h, 3, tx, ty - 1, wdt, rootNorth);
+        Check(replaced && again != null && again.Status == "built" && WmvRuntimeTerrainTile.Live == live0 + 1 && h.View.Disposed == 2 &&
+              Meshes() == meshes0 + 256 && Materials() == materials0 + 1,
+              "terrain session: a new tile replaces the shown one, and the same tile again replaces it too -- one tile alive (" +
+              (WmvRuntimeTerrainTile.Live - live0) + "), one tile's meshes", log);
+
+        // ---- clear after built: the tile goes, the view is left, no report
+        int reportsBefore = h.Reports.Count;
+        h.Session.Clear("test");
+        Check(h.Reports.Count == reportsBefore && clean() && h.View.Left == 1 && !h.View.ViewOn && !h.View.LastLeaveForModelLoad &&
+              !h.Session.ViewActive && h.Session.ShownLoad == 0,
+              "terrain session: clearTerrain after the build takes the tile away and leaves the view (not for a model load), without a " +
+              "report; the tiles' tallies are back to " + TerrainTallies(), log);
+        loads.Add(new KeyValuePair<TerrainHarness, int>(h, 1));
+        loads.Add(new KeyValuePair<TerrainHarness, int>(h, 2));
+        loads.Add(new KeyValuePair<TerrainHarness, int>(h, 3));
+
+        // ---- every host state a request can be refused with: exactly one "failed" each, the state passed on, nothing left
+        string[] states = { "stale", "not in client storage", "not installed locally", "unreadable", "unsupported", "refused" };
+        int load = 10;
+        foreach (bool onRoot in new[] { false, true })
+            foreach (string state in states)
+            {
+                var hs = new TerrainHarness();
+                harnesses.Add(hs);
+                hs.Session.Load(TerrainCommand(load, tx, ty));
+                string detail = "detail of " + state;
+                if (onRoot)
+                {
+                    hs.Answer(hs.Last(WmvTerrainSession.RoleWdt), wdt);
+                    hs.Answer(hs.Last(WmvTerrainSession.RoleRootAdt), null, state, detail);
+                }
+                else
+                    hs.Answer(hs.Last(WmvTerrainSession.RoleWdt), null, state, detail);
+                hs.Pump(3);
+                WmvIpcClient.TerrainTileReport r = hs.For(load);
+                string want = string.Format("the host answered the {0} request (FileDataID {1}) \"{2}\": {3}", onRoot ? "root ADT" : "WDT",
+                                            onRoot ? (int)TerrainTestRoot : TerrainTestWdt, state, detail);
+                Check(hs.CountFor(load) == 1 && r.Status == "failed" && r.HostState == state && r.HostDetail == detail &&
+                      r.Reason == want && clean() && !hs.Session.Loading && !hs.View.ViewOn,
+                      "terrain session: the " + (onRoot ? "root ADT" : "WDT") + " answered \"" + state + "\" fails the load once, with the host's " +
+                      "state and detail, reason exactly \"" + want + "\" (" + (r != null ? r.Reason : "no report") + ")", log);
+                loads.Add(new KeyValuePair<TerrainHarness, int>(hs, load));
+                load++;
+            }
+
+        // ---- the other failures: each one "failed" with EXACTLY its reason (no host state), nothing left behind. A reason
+        // another part words (a parser's exception, the mesh builder's) is taken from that part on the same bytes, so the
+        // session's own prefix -- or the lack of one -- is what is checked.
+        string wdtWhat = string.Format("wdt {0} (map {1})", TerrainTestWdt, 0);
+        string rootWhat = string.Format("root ADT {0} ({1}_{2})", TerrainTestRoot, tx, ty);
+        Action<string, int, Action<TerrainHarness>, string> fails = (what, cmdLoad, drive, reason) =>
+        {
+            var hf = new TerrainHarness();
+            harnesses.Add(hf);
+            drive(hf);
+            hf.Pump(3);
+            WmvIpcClient.TerrainTileReport r = hf.For(cmdLoad);
+            bool exact = r != null && reason != null && r.Reason == reason;
+            Check(hf.CountFor(cmdLoad) == 1 && r.Status == "failed" && exact && r.HostState == "" && r.HostDetail == "" && clean() &&
+                  !hf.Session.Loading,
+                  "terrain session: " + what + " -> one \"failed\", reason exactly \"" + reason + "\"" +
+                  (exact ? "" : " (got \"" + (r != null ? r.Reason : "no report") + "\")") + ", no host state, nothing left", log);
+            loads.Add(new KeyValuePair<TerrainHarness, int>(hf, cmdLoad));
+        };
+        fails("a WDT answer larger than maxAssetBytes", 30, x =>
+        {
+            x.Session.Load(TerrainCommand(30, tx, ty, 1000));
+            x.Answer(x.Last(WmvTerrainSession.RoleWdt), wdt);
+        }, "answer of " + wdt.Length + " bytes exceeds maxAssetBytes 1000 (WDT, FileDataID " + TerrainTestWdt + ")");
+        byte[] shortRoot = AdtSynthetic.Cat(AdtSynthetic.Mver(), AdtSynthetic.ShortMcnk());
+        fails("a malformed root", 31, x =>
+        {
+            x.Session.Load(TerrainCommand(31, tx, ty));
+            x.Answer(x.Last(WmvTerrainSession.RoleWdt), wdt);
+            x.Answer(x.Last(WmvTerrainSession.RoleRootAdt), shortRoot);
+        }, Prefixed("root ADT parse failed: ", ThrownMessage(() => AdtParser.ParseRoot(shortRoot, tx, ty, rootWhat))));
+        fails("a tile whose MAIN flag is clear", 32, x =>
+        {
+            x.Session.Load(TerrainCommand(32, tx + 5, ty));
+            x.Answer(x.Last(WmvTerrainSession.RoleWdt), wdt);
+        }, "no tile at " + (tx + 5) + "_" + ty + " (MAIN flag clear)");
+        fails("a tile MAID names no root for", 33, x =>
+        {
+            x.Session.Load(TerrainCommand(33, tx, ty + 1));
+            x.Answer(x.Last(WmvTerrainSession.RoleWdt), wdt);
+        }, "MAID names no root ADT for " + tx + "_" + (ty + 1));
+        fails("a WDT without MAID", 34, x =>
+        {
+            x.Session.Load(TerrainCommand(34, tx, ty));
+            x.Answer(x.Last(WmvTerrainSession.RoleWdt), TerrainWdt(false, tx, ty, 0));
+        }, "MAID names no root ADT for " + tx + "_" + ty + " (the WDT has no MAID)");
+        // The builder's own TerrainBuildException text, passed on as it is (no "terrain mesh build failed" prefix).
+        string mismatch = ThrownMessage(() => TerrainMeshBuilder.Build(AdtParser.ParseRoot(rootNorth, tx, ty, rootWhat), tx, ty,
+                                                                       WorldToUnity.TileOrigin(tx, ty)));
+        Check(mismatch != null && mismatch.StartsWith("root ADT does not belong to tile " + tx + "_" + ty, StringComparison.Ordinal),
+              "terrain session: (precondition) the builder refuses the root of another tile: " + mismatch, log);
+        fails("a root of another tile", 35, x =>
+        {
+            x.Session.Load(TerrainCommand(35, tx, ty));
+            x.Answer(x.Last(WmvTerrainSession.RoleWdt), wdt);
+            x.Answer(x.Last(WmvTerrainSession.RoleRootAdt), rootNorth);
+        }, mismatch);
+        fails("WDT bytes that differ from the host's md5", 36, x =>
+        {
+            x.Session.Load(TerrainCommand(36, tx, ty));
+            x.Answer(x.Last(WmvTerrainSession.RoleWdt), wdt, "available", "", "00000000000000000000000000000000");
+        }, "the WDT bytes received hash to " + WmvTerrainSession.Md5Hex(wdt) + ", the host served 00000000000000000000000000000000");
+        fails("a command naming no WDT", 37, x => x.Session.Load(TerrainCommand(37, tx, ty, 4194304, 0)),
+              "loadTerrainTile names no WDT FileDataID (0)");
+        fails("a tile outside the map", 38, x => x.Session.Load(TerrainCommand(38, 64, ty)), "tile 64_" + ty + " is outside 0..63");
+        fails("a build that fails after its Unity objects exist", 39, x =>
+        {
+            x.View.FailBuild = true;
+            x.Session.Load(TerrainCommand(39, tx, ty));
+            x.Answer(x.Last(WmvTerrainSession.RoleWdt), wdt);
+            x.Answer(x.Last(WmvTerrainSession.RoleRootAdt), root);
+        }, "building the tile's Unity objects failed: InvalidOperationException: test: the build fails after its objects exist");
+        // The root's md5 is checked apart from the WDT's, after the worker.
+        fails("root ADT bytes that differ from the host's md5", 42, x =>
+        {
+            x.Session.Load(TerrainCommand(42, tx, ty));
+            x.Answer(x.Last(WmvTerrainSession.RoleWdt), wdt);
+            x.Answer(x.Last(WmvTerrainSession.RoleRootAdt), root, "available", "", "00000000000000000000000000000000");
+        }, "the root ADT bytes received hash to " + WmvTerrainSession.Md5Hex(root) + ", the host served 00000000000000000000000000000000");
+        Check(root.Length > wdt.Length, "terrain session: (precondition) the synthetic root (" + root.Length + " bytes) is larger than the WDT (" +
+              wdt.Length + "), so a limit of the WDT's size passes the WDT and refuses the root", log);
+        fails("a root ADT answer larger than maxAssetBytes", 43, x =>
+        {
+            x.Session.Load(TerrainCommand(43, tx, ty, wdt.Length));
+            x.Answer(x.Last(WmvTerrainSession.RoleWdt), wdt);
+            x.Answer(x.Last(WmvTerrainSession.RoleRootAdt), root);
+        }, "answer of " + root.Length + " bytes exceeds maxAssetBytes " + wdt.Length + " (root ADT, FileDataID " + TerrainTestRoot + ")");
+        // Answers the fake host never makes, fed to the session as the client would hand them over.
+        Func<TerrainHarness, int, bool, int, byte[], string, string, bool> raw = (x, rawLoad, ok, fileDataID, data, state, error) =>
+            x.Session.ClaimMapAssetResponse(new WmvIpcClient.AssetResponse
+            {
+                requestId = x.Last(WmvTerrainSession.RoleWdt), ok = ok, fileDataID = fileDataID, role = WmvTerrainSession.RoleWdt,
+                load = rawLoad, assetEpoch = 7, state = state, detail = "", readMs = 0.5,
+                md5 = data != null ? WmvTerrainSession.Md5Hex(data) : "", data = data, byteLength = data != null ? data.Length : 0,
+                error = error, path = "",
+            });
+        fails("an answer naming another FileDataID", 44, x =>
+        {
+            x.Session.Load(TerrainCommand(44, tx, ty));
+            raw(x, 44, true, 999, wdt, "available", "");
+        }, "the WDT answer names FileDataID 999, the request " + TerrainTestWdt);
+        fails("an answer that carries no bytes", 45, x =>
+        {
+            x.Session.Load(TerrainCommand(45, tx, ty));
+            raw(x, 45, true, TerrainTestWdt, null, "available", "");
+        }, "the WDT answer (FileDataID " + TerrainTestWdt + ") carries no bytes");
+        fails("a transport failure (not ok, no host state)", 46, x =>
+        {
+            x.Session.Load(TerrainCommand(46, tx, ty));
+            raw(x, 46, false, TerrainTestWdt, null, "", "the connection closed");
+        }, "the WDT request (FileDataID " + TerrainTestWdt + ") failed: the connection closed");
+        byte[] badWdt = AdtSynthetic.Cat(AdtSynthetic.Mver());
+        fails("a WDT the parser refuses", 47, x =>
+        {
+            x.Session.Load(TerrainCommand(47, tx, ty));
+            x.Answer(x.Last(WmvTerrainSession.RoleWdt), badWdt);
+        }, Prefixed("WDT parse failed: ", ThrownMessage(() => WdtParser.Parse(badWdt, wdtWhat))));
+        // Every MCNK shorter than its header: the root parses, no chunk decodes, the builder refuses the tile.
+        byte[] undecodable = AdtSynthetic.Root(tx, ty, n => AdtSynthetic.ShortMcnk());
+        string parseProblem = ThrownMessage(() => AdtParser.ParseRoot(undecodable, tx, ty, rootWhat));
+        string noChunk = parseProblem != null ? null
+                         : ThrownMessage(() => TerrainMeshBuilder.Build(AdtParser.ParseRoot(undecodable, tx, ty, rootWhat), tx, ty,
+                                                                        WorldToUnity.TileOrigin(tx, ty)));
+        Check(parseProblem == null && noChunk != null && noChunk.StartsWith("no decodable chunk", StringComparison.Ordinal),
+              "terrain session: (precondition) a root of 256 short MCNKs parses, and the builder refuses it \"" + noChunk + "\"" +
+              (parseProblem != null ? " -- but the parse threw: " + parseProblem : ""), log);
+        fails("a root with no decodable chunk", 48, x =>
+        {
+            x.Session.Load(TerrainCommand(48, tx, ty));
+            x.Answer(x.Last(WmvTerrainSession.RoleWdt), wdt);
+            x.Answer(x.Last(WmvTerrainSession.RoleRootAdt), undecodable);
+        }, noChunk);
+        // A command with no load serial (the host never sends one): reported once, under load 0, nothing asked for.
+        fails("a command carrying no load serial", 0, x => x.Session.Load(TerrainCommand(0, tx, ty)), "loadTerrainTile carries no load serial (0)");
+
+        // ---- the timeout: 30 s after the first frame that saw the load, not a moment before; a late answer is dropped
+        {
+            var ht = new TerrainHarness();
+            harnesses.Add(ht);
+            ht.Session.Load(TerrainCommand(40, tx, ty));
+            string waited = "timed out after 30 s waiting for the WDT answer (request " + ht.Last(WmvTerrainSession.RoleWdt) + ")";
+            ht.Session.Pump(5000.0);
+            ht.Session.Pump(35000.0);
+            bool notYet = ht.Reports.Count == 0;
+            ht.Session.Pump(35000.5);
+            WmvIpcClient.TerrainTileReport r = ht.For(40);
+            bool applied = ht.Answer(ht.Last(WmvTerrainSession.RoleWdt), wdt);
+            ht.Pump(3);
+            Check(notYet && ht.CountFor(40) == 1 && r.Status == "failed" && r.Reason == waited && !applied && ht.Session.LateAnswersDropped == 1 &&
+                  ht.CountFor(40) == 1 && clean(),
+                  "terrain session: a load not answered within 30 s fails once, reason exactly \"" + waited + "\" (" +
+                  (r != null ? r.Reason : "no report") + "); its late answer is dropped as late", log);
+            loads.Add(new KeyValuePair<TerrainHarness, int>(ht, 40));
+            Check(!ht.Session.ClaimMapAssetResponse(new WmvIpcClient.AssetResponse { requestId = "u999", ok = true, data = new byte[1] }) &&
+                  ht.Session.UnownedAnswersDropped == 1 && ht.CountFor(40) == 1,
+                  "terrain session: an answer to a request no load of the session made is dropped as unowned", log);
+        }
+
+        // ---- supersede: a newer load answers the one in flight "superseded" once -- asking, on the worker, or adopted
+        {
+            var hp = new TerrainHarness();
+            harnesses.Add(hp);
+            hp.Session.Load(TerrainCommand(50, tx, ty));
+            string firstAsk = hp.Last(WmvTerrainSession.RoleWdt);
+            hp.Session.Load(TerrainCommand(51, tx, ty));
+            WmvIpcClient.TerrainTileReport r50 = hp.For(50);
+            bool late = !hp.Answer(firstAsk, wdt) && hp.Session.LateAnswersDropped == 1;
+            hp.Answer(hp.Last(WmvTerrainSession.RoleWdt), wdt);
+            hp.Answer(hp.Last(WmvTerrainSession.RoleRootAdt), root);
+            // 52 superseded with its worker result queued: the result is dropped when the frame applies it.
+            hp.Session.Load(TerrainCommand(52, tx, ty));
+            WmvIpcClient.TerrainTileReport r51 = hp.For(51);
+            string supersededNone = TerrainTallies();
+            hp.Answer(hp.Last(WmvTerrainSession.RoleWdt), wdt);
+            hp.Answer(hp.Last(WmvTerrainSession.RoleRootAdt), root);
+            hp.Pump(1);
+            bool oneAdopted = WmvRuntimeTerrainTile.Live == live0 + 1 && hp.View.Shown == 1 && TerrainTallies() == OneShadedTile;
+            // 53 supersedes 52 after its adoption, before its report: 52 is "superseded", its tile stays until 53's commit.
+            hp.Session.Load(TerrainCommand(53, tx, ty - 1));
+            WmvIpcClient.TerrainTileReport r52 = hp.For(52);
+            bool tileStays = WmvRuntimeTerrainTile.Live == live0 + 1 && hp.Session.ShownLoad == 52 && TerrainTallies() == OneShadedTile;
+            hp.Answer(hp.Last(WmvTerrainSession.RoleWdt), wdt);
+            hp.Answer(hp.Last(WmvTerrainSession.RoleRootAdt), rootNorth);
+            hp.Pump(3);
+            WmvIpcClient.TerrainTileReport r53 = hp.For(53);
+            Check(r50 != null && r50.Status == "superseded" && late && r51 != null && r51.Status == "superseded" && oneAdopted && r52 != null &&
+                  r52.Status == "superseded" && tileStays && r53 != null && r53.Status == "built" && hp.Session.ShownLoad == 53 &&
+                  WmvRuntimeTerrainTile.Live == live0 + 1 && hp.CountFor(50) == 1 && hp.CountFor(51) == 1 && hp.CountFor(52) == 1 &&
+                  hp.CountFor(53) == 1 && supersededNone == "0/0/0" && TerrainTallies() == OneShadedTile,
+                  "terrain session: a newer load answers the load in flight \"superseded\" once -- waiting for its WDT (a late answer dropped), " +
+                  "with its worker result queued (dropped), adopted but not yet reported (its tile stays until the newer commits); the tiles' " +
+                  "tallies " + supersededNone + " after the loads superseded before a build, one tile's while one is shown (" +
+                  TerrainTallies() + ")", log);
+            hp.Session.LeaveForModelLoad("test model load");
+            Check(clean() && !hp.View.ViewOn && hp.View.LastLeaveForModelLoad && hp.Reports.Count == 4,
+                  "terrain session: a model load after a build takes the tile away without a report, leaving the view for a model load; " +
+                  "the tiles' tallies " + TerrainTallies(), log);
+            for (int l = 50; l <= 53; l++) loads.Add(new KeyValuePair<TerrainHarness, int>(hp, l));
+        }
+
+        // ---- clear and a model load in flight: "cleared" / "superseded" once, nothing left, late answers dropped
+        {
+            var hc = new TerrainHarness();
+            harnesses.Add(hc);
+            hc.Session.Load(TerrainCommand(60, tx, ty));
+            hc.Answer(hc.Last(WmvTerrainSession.RoleWdt), wdt);
+            hc.Session.Clear("test");
+            bool lateRoot = !hc.Answer(hc.Last(WmvTerrainSession.RoleRootAdt), root) && hc.Session.LateAnswersDropped == 1;
+            hc.Pump(3);
+            WmvIpcClient.TerrainTileReport r60 = hc.For(60);
+            hc.Session.Load(TerrainCommand(61, tx, ty));
+            hc.Session.LeaveForModelLoad("test model load");
+            hc.Pump(3);
+            WmvIpcClient.TerrainTileReport r61 = hc.For(61);
+            hc.Session.Clear("nothing in flight");
+            Check(r60 != null && r60.Status == "cleared" && r60.Reason == "clearTerrain: test" && lateRoot && hc.CountFor(60) == 1 && r61 != null &&
+                  r61.Status == "superseded" && r61.Reason == "test model load" && hc.CountFor(61) == 1 && hc.Reports.Count == 2 && clean() &&
+                  hc.View.Left == 0,
+                  "terrain session: clearTerrain in flight answers \"cleared\" once, a model load \"superseded\" once, a clear with nothing " +
+                  "in flight answers nothing; the tiles' tallies " + TerrainTallies(), log);
+            loads.Add(new KeyValuePair<TerrainHarness, int>(hc, 60));
+            loads.Add(new KeyValuePair<TerrainHarness, int>(hc, 61));
+        }
+
+        // ---- after the commit: a failure finishing the adoption still reports "built", with what went wrong
+        {
+            var ha = new TerrainHarness();
+            harnesses.Add(ha);
+            ha.View.FailShow = true;
+            WmvIpcClient.TerrainTileReport r = TerrainBuild(ha, 70, tx, ty, wdt, root);
+            Check(r != null && r.Status == "built" && r.Reason.StartsWith("adopted, but finishing the adoption failed:") &&
+                  WmvRuntimeTerrainTile.Live == live0 + 1 && ha.Session.ViewActive,
+                  "terrain session: a failure after the commit reports \"built\" with \"adopted, but finishing the adoption failed\" (" +
+                  (r != null ? r.Reason : "no report") + ")", log);
+            ha.View.FailShow = false;
+            // A failure before the commit leaves the tile on screen and the view as they were.
+            ha.View.FailBuild = true;
+            ha.Session.Load(TerrainCommand(71, tx, ty - 1));
+            ha.Answer(ha.Last(WmvTerrainSession.RoleWdt), wdt);
+            ha.Answer(ha.Last(WmvTerrainSession.RoleRootAdt), rootNorth);
+            ha.Pump(3);
+            WmvIpcClient.TerrainTileReport r71 = ha.For(71);
+            Check(r71 != null && r71.Status == "failed" && WmvRuntimeTerrainTile.Live == live0 + 1 && ha.Session.ShownLoad == 70 &&
+                  ha.View.ViewOn && ha.View.Left == 0 && Meshes() == meshes0 + 256 && Materials() == materials0 + 1 &&
+                  r71.Reason == "building the tile's Unity objects failed: InvalidOperationException: test: the build fails after its objects exist",
+                  "terrain session: a failure before the commit releases the new tile and leaves the shown one and the view as they were (" +
+                  (r71 != null ? r71.Reason : "no report") + ")", log);
+            Check(ha.View.TalliesAtBuild == "512/2/514" && TerrainTallies() == OneShadedTile && r71 != null && r71.TerrainGameObjects == 257,
+                  "terrain session: the tiles' tallies count a tile built but not committed (" + ha.View.TalliesAtBuild + " with the shown one), " +
+                  "drop it with its release (" + TerrainTallies() + "), and the failed report is sampled after it (terrainGameObjects " +
+                  (r71 != null ? r71.TerrainGameObjects.ToString() : "none") + ")", log);
+            ha.View.FailBuild = false;
+            ha.Session.Clear("test");
+            loads.Add(new KeyValuePair<TerrainHarness, int>(ha, 70));
+            loads.Add(new KeyValuePair<TerrainHarness, int>(ha, 71));
+        }
+
+        // ---- the player's own disposal (Dispose: Object.Destroy, deferred to the end of the frame): the tallies drop at once
+        {
+            var hd = new TerrainHarness();
+            harnesses.Add(hd);
+            hd.View.Deferred = true;
+            WmvIpcClient.TerrainTileReport r = TerrainBuild(hd, 80, tx, ty, wdt, root);
+            bool shownTallies = TerrainTallies() == OneShadedTile;
+            hd.Session.Clear("test");
+            string afterClear = TerrainTallies();
+            int meshesPending = Meshes() - meshes0, materialsPending = Materials() - materials0;
+            Check(r != null && r.Status == "built" && shownTallies && afterClear == "0/0/0" && WmvRuntimeTerrainTile.Live == live0 &&
+                  meshesPending == 256 && materialsPending == 1,
+                  "terrain session: the player's own disposal (Object.Destroy, deferred to the end of the frame) takes the tile off the tallies " +
+                  "at once -- " + afterClear + " while Unity still counts its " + meshesPending + " Mesh(es) and " + materialsPending +
+                  " Material(s) until the frame ends", log);
+            hd.View.DestroyPendingNow();
+            Check(clean(), "terrain session: ... and what Unity still counted was that tile's: released now, the counts are back (" +
+                  (Meshes() - meshes0) + " Mesh(es), " + (Materials() - materials0) + " Material(s) over)", log);
+            loads.Add(new KeyValuePair<TerrainHarness, int>(hd, 80));
+        }
+
+        // ---- exactly one report per load, never a second; the world model untouched; nothing left
+        int wrong = 0, refused = 0;
+        foreach (var kv in loads)
+            if (kv.Key.CountFor(kv.Value) != 1) wrong++;
+        foreach (TerrainHarness x in harnesses)
+        {
+            refused += x.Session.SecondReportsRefused;
+            x.Session.Dispose();
+        }
+        Check(wrong == 0 && refused == 0,
+              "terrain session: every one of " + loads.Count + " loads was reported exactly once (" + wrong + " not; " + refused + " second report(s) refused)", log);
+        Check(wmo.Root != null && !wmo.Root.activeSelf && wmo.Meshes.Length == 3 && wmo.Meshes[0] != null && WmvRuntimeMapObject.Live == wmoLive && WmvRuntimeModel.Live == modelLive && clean(),
+              "terrain session: the world model beside it is untouched (live world models " + WmvRuntimeMapObject.Live + ", models " +
+              WmvRuntimeModel.Live + "), and every tile, Mesh and Material of the session tests is gone", log);
+        // Released at once: the counts these tests compare are taken within this frame.
+        UnityEngine.Object.DestroyImmediate(wmo.Root);
+        foreach (Mesh m in wmo.Meshes) if (m != null) UnityEngine.Object.DestroyImmediate(m);
+        foreach (Material m in wmo.Materials) if (m != null) UnityEngine.Object.DestroyImmediate(m);
+        if (wmo.FallbackMaterial != null) UnityEngine.Object.DestroyImmediate(wmo.FallbackMaterial);
+        foreach (Texture2D t in wmo.Textures) if (t != null) UnityEngine.Object.DestroyImmediate(t);
+        wmo.Dispose();
+    }
+
+    /// <summary>The camera through the terrain view (5.6): a model framed and zoomed, the view entered (TerrainViewMask), the
+    /// tile framed as a world model and the top-down camera applied (2.3b: screen up +Z, right +X, half-size T/2), then left
+    /// -- the orbit state, the transform, the projection, the input and the framing record exactly as before,
+    /// ModelViewMask back, and the next load owed a framing.</summary>
+    static void TerrainCameraTests(Action<string> log)
+    {
+        GameObject go;
+        WmvOrbitCamera orbit = NewCamera(out go);
+        try
+        {
+            Camera cam = go.GetComponent<Camera>();
+            cam.enabled = false;
+            cam.aspect = 1f;
+            cam.cullingMask = WmvTerrainBuilder.ModelViewMask;
+            orbit.Frame(new Bounds(new Vector3(1f, 2f, 3f), new Vector3(2f, 3f, 1f)));
+            orbit.ZoomByNotches(2f);
+            orbit.AdvanceZoom(0.05f);              // part of the way: the live and target distances differ
+            orbit.SetView(orbit.yaw, orbit.pitch, 0f);   // the transform placed from that state (the distance kept)
+            WmvOrbitCamera.State before = orbit.Snapshot();
+            Vector3 position = go.transform.position;
+            Quaternion rotation = go.transform.rotation;
+            float near = cam.nearClipPlane, far = cam.farClipPlane;
+            var framing = new WmvTerrainViewMode.Framing { Box = new Bounds(new Vector3(1f, 2f, 3f), Vector3.one), Aspect = 1.25f, Have = true, Kept = true };
+            var mode = new WmvTerrainViewMode(orbit, cam);
+            bool entered = mode.Enter(framing) && mode.Active && cam.cullingMask == WmvTerrainBuilder.TerrainViewMask;
+            bool once = !mode.Enter(new WmvTerrainViewMode.Framing());
+            float t = (float)TerrainCoordinates.TileSize;
+            orbit.FrameMapObject(new Bounds(new Vector3(t * 0.5f, 90f, -t * 0.5f), new Vector3(t, 40f, t)));
+            bool moved = !orbit.Snapshot().SameAs(before);
+            mode.ApplyTopDown(70f, 110f);
+            bool topDown = mode.TopDown && cam.orthographic && cam.orthographicSize == t * 0.5f && !orbit.enabled &&
+                           Vector3.Distance(go.transform.up, Vector3.forward) < 1e-6f && Vector3.Distance(go.transform.right, Vector3.right) < 1e-6f &&
+                           Vector3.Distance(go.transform.forward, Vector3.down) < 1e-6f && go.transform.position.x == t * 0.5f &&
+                           go.transform.position.z == -t * 0.5f && go.transform.position.y > 110f && cam.nearClipPlane > 0f &&
+                           go.transform.position.y - cam.farClipPlane < 70f;
+            WmvTerrainViewMode.Framing back;
+            bool owed = mode.Leave(out back);
+            Check(entered && once && moved && topDown,
+                  "terrain camera: entering takes TerrainViewMask once; the tile is framed; top-down looks straight down with north up, east right, " +
+                  "half-size T/2, the orbit's input off, the planes around the heights", log);
+            Check(owed && orbit.Snapshot().SameAs(before) && go.transform.position == position && go.transform.rotation == rotation &&
+                  cam.nearClipPlane == near && cam.farClipPlane == far && !cam.orthographic && orbit.enabled &&
+                  cam.cullingMask == WmvTerrainBuilder.ModelViewMask && back.Box == framing.Box && back.Aspect == framing.Aspect &&
+                  back.Have && back.Kept && !mode.Active,
+                  "terrain camera: leaving restores the orbit state (" + orbit.Snapshot() + "), the transform, the planes, the projection, the input and " +
+                  "the framing record exactly, puts ModelViewMask back, and owes the next load a framing", log);
+            WmvTerrainViewMode.Framing none;
+            Check(!mode.Leave(out none) && cam.cullingMask == WmvTerrainBuilder.ModelViewMask,
+                  "terrain camera: leaving again changes nothing", log);
+        }
+        finally
+        {
+            UnityEngine.Object.DestroyImmediate(go);
+        }
+    }
+
+    /// <summary>Protocol 12 as the IPC client reads and writes it: loadTerrainTile (the cache's epoch, no generation),
+    /// clearTerrain, getMapAsset, an assetResponse with state, detail, readMs and md5 (binary payload, never cached) and a
+    /// refused one, terrainTileLoaded and runtimeState's terrain fields -- and one session load end to end through the
+    /// client's own lines.</summary>
+    static void TerrainIpcTests(Action<string> log)
+    {
+        int liveBefore = WmvRuntimeTerrainTile.Live;
+        var go = new GameObject("TerrainIpcTest");
+        try
+        {
+            var ipc = go.AddComponent<WmvIpcClient>();
+            var sent = new List<string>();
+            var answers = new List<WmvIpcClient.AssetResponse>();
+            var modelAnswers = new List<WmvIpcClient.AssetResponse>();
+            WmvIpcClient.TerrainTileCommand got = null;
+            string cleared = null;
+            ipc.SentForTest = s => sent.Add(s);
+            ipc.OnMapAssetResponse = r => answers.Add(r);
+            ipc.OnAssetResponse = r => modelAnswers.Add(r);
+            ipc.OnLoadTerrainTile = c => got = c;
+            ipc.OnClearTerrain = r => cleared = r;
+            Check(WmvIpcClient.ProtocolVersion == 12, "terrain ipc: the player speaks protocol 12", log);
+
+            int generation = ipc.Cache.Generation;
+            ipc.FeedLineForTest("{\"type\":\"loadTerrainTile\",\"load\":3,\"assetEpoch\":5,\"mapId\":0,\"mapDirectory\":\"Azeroth\",\"product\":\"wow\"," +
+                                "\"build\":\"12.1.0.69933\",\"wdtFileDataID\":775971,\"wdtResolvedBy\":\"path\",\"wdtPath\":\"world/maps/azeroth/azeroth.wdt\"," +
+                                "\"tileX\":32,\"tileY\":50,\"maxAssetBytes\":4194304}", null);
+            Check(got != null && got.Load == 3 && got.AssetEpoch == 5 && got.MapId == 0 && got.MapDirectory == "Azeroth" && got.Product == "wow" &&
+                  got.Build == "12.1.0.69933" && got.WdtFileDataID == 775971 && got.WdtResolvedBy == "path" &&
+                  got.WdtPath == "world/maps/azeroth/azeroth.wdt" && got.TileX == 32 && got.TileY == 50 && got.MaxAssetBytes == 4194304,
+                  "terrain ipc: loadTerrainTile is read whole (" + got + ")", log);
+            Check(ipc.Cache.Epoch == 5 && ipc.Cache.Generation == generation,
+                  "terrain ipc: loadTerrainTile states the cache's epoch and begins no generation (the hidden model's files stay)", log);
+            ipc.FeedLineForTest("{\"type\":\"clearTerrain\",\"reason\":\"client replaced\"}", null);
+            Check(cleared == "client replaced", "terrain ipc: clearTerrain is read with its reason", log);
+
+            string id = ipc.RequestMapAsset("wdt", 775971, 3, 5);
+            Check(sent.Count == 1 && sent[0] == "{\"type\":\"getMapAsset\",\"requestId\":\"" + id + "\",\"load\":3,\"assetEpoch\":5,\"role\":\"wdt\",\"fileDataID\":775971}",
+                  "terrain ipc: getMapAsset names the load, the epoch, the role and the file (" + (sent.Count > 0 ? sent[0] : "nothing sent") + ")", log);
+            byte[] payload = { 1, 2, 3, 4, 5 };
+            string md5 = WmvTerrainSession.Md5Hex(payload);
+            ipc.FeedLineForTest("{\"type\":\"assetResponse\",\"requestId\":\"" + id + "\",\"ok\":true,\"fileDataID\":775971,\"role\":\"wdt\",\"load\":3," +
+                                "\"assetEpoch\":5,\"state\":\"available\",\"detail\":\"\",\"readMs\":1.25,\"md5\":\"" + md5 + "\",\"byteLength\":5," +
+                                "\"encoding\":\"binary\",\"payloadBytes\":5}", payload);
+            WmvIpcClient.AssetResponse a = answers.Count > 0 ? answers[0] : null;
+            Check(a != null && a.ok && a.requestId == id && a.data == payload && a.state == "available" && a.readMs == 1.25 && a.md5 == md5 &&
+                  a.role == "wdt" && a.load == 3 && a.assetEpoch == 5 && a.fileDataID == 775971 && !a.fromCache && !ipc.Cache.Holds(775971) &&
+                  modelAnswers.Count == 0 && id.StartsWith("map", StringComparison.Ordinal),
+                  "terrain ipc: the map file's answer (request " + id + ") carries its bytes, state, readMs, md5, role, load and epoch, comes " +
+                  "through OnMapAssetResponse only, and is never cached", log);
+            ipc.FeedLineForTest("{\"type\":\"assetResponse\",\"requestId\":\"u77\",\"ok\":false,\"fileDataID\":787450,\"role\":\"rootAdt\",\"load\":3," +
+                                "\"assetEpoch\":5,\"state\":\"not installed locally\",\"detail\":\"listed, not on this computer\",\"readMs\":0.5," +
+                                "\"error\":\"listed, not on this computer\"}", null);
+            WmvIpcClient.AssetResponse refused = answers.Count > 1 ? answers[1] : null;
+            Check(refused != null && !refused.ok && refused.data == null && refused.state == "not installed locally" &&
+                  refused.detail == "listed, not on this computer" && refused.error == "listed, not on this computer" && refused.readMs == 0.5 &&
+                  modelAnswers.Count == 0,
+                  "terrain ipc: a refused map file's answer carries the state, the detail and error (and, carrying a role, goes to the map " +
+                  "handler although its id is not a map id)", log);
+
+            var report = new WmvIpcClient.TerrainTileReport
+            {
+                Load = 3, Status = "built", MapId = 0, TileX = 32, TileY = 50, WdtFileDataID = 775971, RootFileDataID = 778037, WdtBytes = 294988,
+                RootBytes = 329922, WdtMd5 = "aa", RootMd5 = "bb", HasMesh = true, Chunks = 256, ChunksBuilt = 256, Vertices = 37120,
+                Triangles = 65536, HasBounds = true, BoundsMin = new Vector3(0f, -1.5f, -533.3333f), BoundsMax = new Vector3(533.3333f, 2f, 0f),
+                OriginX = 9600.0, OriginY = 0.0, MeshBytes = 1284096, WdtRoundTripMs = 30.5, TotalMs = 120.25, FirstFrameMs = 33,
+                LiveTerrainTiles = 1, MeshObjects = 300, MaterialObjects = 40, TerrainGameObjects = 257,
+            };
+            string line = WmvIpcClient.TerrainTileLoadedLine(report);
+            report.Status = "failed";
+            report.Reason = "the host answered \"stale\"";
+            report.HostState = "stale";
+            report.HostDetail = "request epoch 4, current 5";
+            report.HasMesh = false;
+            report.WdtRoundTripMs = -1;
+            report.FirstFrameMs = -1;
+            string failedLine = WmvIpcClient.TerrainTileLoadedLine(report);
+            Check(line.StartsWith("{\"type\":\"terrainTileLoaded\",\"load\":3,\"status\":\"built\",\"reason\":\"\"") && line.Contains("\"chunks\":256") &&
+                  line.Contains("\"vertices\":37120") && line.Contains("\"boundsMin\":[0,-1.5,-533.3333]") && line.Contains("\"rootOffset\":[0,0,0]") &&
+                  line.Contains("\"originWorld\":[9600,0,0]") && line.Contains("\"timings\":{\"wdtRoundTripMs\":30.5,\"firstFrameMs\":33,\"totalMs\":120.25}") &&
+                  line.Contains("\"wdtMd5\":\"aa\"") && line.Contains("\"terrainGameObjects\":257") && !line.Contains("hostState") &&
+                  failedLine.Contains("\"hostState\":\"stale\",\"hostDetail\":\"request epoch 4, current 5\"") && !failedLine.Contains("\"chunks\"") &&
+                  !failedLine.Contains("boundsMin") && failedLine.Contains("\"reason\":\"the host answered \\\"stale\\\"\"") &&
+                  failedLine.Contains("\"timings\":{\"totalMs\":120.25}") && JsonUtility.FromJson<TerrainLineProbe>(line).load == 3 &&
+                  JsonUtility.FromJson<TerrainLineProbe>(failedLine).status == "failed",
+                  "terrain ipc: terrainTileLoaded carries what the load reached and leaves out the rest (" + failedLine + ")", log);
+
+            sent.Clear();
+            ipc.ReportRuntimeState(9, new WmvIpcClient.RuntimeReport
+            {
+                MountKey = "", LiveTerrainTiles = 1, TerrainLoad = 3, TerrainLoading = false, TerrainView = true,
+                CameraMask = WmvTerrainBuilder.TerrainViewMask, MeshObjects = 300, MaterialObjects = 40,
+                TerrainMeshes = 256, TerrainMaterials = 1, TerrainGameObjects = 257,
+                TerrainPendingRequests = 1, TerrainRetiredRequests = 3, MapAnswersDropped = 4, TerrainTimeoutMs = 3000,
+                TerrainRetiredTotal = 37, TerrainLastRetiredRequest = "map41", MapAnswersLate = 3, MapAnswersUnowned = 1,
+            });
+            string stateLine = sent.Count == 1 ? sent[0] : "";
+            sent.Clear();
+            ipc.ReportRuntimeState(10, new WmvIpcClient.RuntimeReport { MountKey = "" });
+            string noneLine = sent.Count == 1 ? sent[0] : "";
+            Check(stateLine.Contains(",\"liveTerrainTiles\":1,\"terrainLoad\":3,\"terrainLoading\":false,\"terrainView\":true," +
+                                     "\"cameraMask\":1073741824,\"meshObjects\":300,\"materialObjects\":40," +
+                                     "\"terrainMeshes\":256,\"terrainMaterials\":1,\"terrainGameObjects\":257," +
+                                     "\"terrainPendingRequests\":1,\"terrainRetiredRequests\":3,\"terrainRetiredTotal\":37," +
+                                     "\"terrainLastRetiredRequest\":\"map41\",\"mapAnswersRouted\":" + ipc.MapAnswersRouted +
+                                     ",\"mapAnswersDropped\":4,\"mapAnswersLate\":3,\"mapAnswersUnowned\":1,\"terrainTimeoutMs\":3000}") &&
+                  ipc.MapAnswersRouted == 2 && noneLine.Contains(",\"terrainLastRetiredRequest\":\"\",") &&
+                  JsonUtility.FromJson<RuntimeStateProbe>(stateLine).terrainLastRetiredRequest == "map41" &&
+                  JsonUtility.FromJson<RuntimeStateProbe>(stateLine).terrainRetiredTotal == 37,
+                  "terrain ipc: runtimeState carries the terrain fields under the host's names (terrainMeshes, terrainMaterials, " +
+                  "terrainGameObjects, terrainPendingRequests, terrainRetiredRequests, terrainRetiredTotal, terrainLastRetiredRequest " +
+                  "-- a JSON string, \"\" for none --, mapAnswersRouted, mapAnswersDropped, mapAnswersLate, mapAnswersUnowned and " +
+                  "terrainTimeoutMs included), the flags as JSON booleans (" +
+                  (stateLine.Length > 0 ? stateLine.Substring(Math.Max(0, stateLine.Length - 260)) : "nothing sent") + ")", log);
+
+            // One load end to end through the client: the getMapAsset lines it sends, the answers as host lines, the report it sends.
+            sent.Clear();
+            var view = new TestTerrainView();
+            var session = new WmvTerrainSession(view, ipc.RequestMapAsset, ipc.ReportTerrainTileLoaded, null, x => x());
+            ipc.OnMapAssetResponse = r => { if (!session.ClaimMapAssetResponse(r)) answers.Add(r); };
+            int tx = TerrainTestTileX, ty = TerrainTestTileY;
+            byte[] wdt = TerrainWdt(true, tx, ty, (int)TerrainTestRoot);
+            byte[] root = AdtSynthetic.FlatRoot(tx, ty);
+            session.Load(TerrainCommand(4, tx, ty));
+            string wdtLine = sent.Count > 0 ? sent[sent.Count - 1] : "";
+            string wdtId = RequestIdOf(wdtLine);
+            ipc.FeedLineForTest(MapAnswerLine(wdtId, TerrainTestWdt, "wdt", 4, wdt), wdt);
+            string rootLine = sent.Count > 0 ? sent[sent.Count - 1] : "";
+            string rootId = RequestIdOf(rootLine);
+            ipc.FeedLineForTest(MapAnswerLine(rootId, (int)TerrainTestRoot, "rootAdt", 4, root), root);
+            for (int f = 0; f < 3; f++)
+                session.Pump(100.0 + f);
+            string reportLine = sent.Count > 0 ? sent[sent.Count - 1] : "";
+            Check(wdtLine.Contains("\"role\":\"wdt\",\"fileDataID\":775971") && wdtLine.Contains("\"load\":4,\"assetEpoch\":7") &&
+                  rootLine.Contains("\"role\":\"rootAdt\",\"fileDataID\":778037") && reportLine.StartsWith("{\"type\":\"terrainTileLoaded\",\"load\":4,\"status\":\"built\"") &&
+                  reportLine.Contains("\"chunks\":256") && reportLine.Contains("\"rootMd5\":\"" + WmvTerrainSession.Md5Hex(root) + "\"") &&
+                  answers.Count == 2 && sent.Count == 3 && modelAnswers.Count == 0 && session.PendingRequests == 0 && session.RetiredRequests == 0 &&
+                  session.AnswersDropped == 0,
+                  "terrain ipc: a load end to end through the client's own lines -- getMapAsset wdt, then rootAdt, then terrainTileLoaded built (" +
+                  (reportLine.Length > 120 ? reportLine.Substring(0, 120) + "..." : reportLine) + ")", log);
+            session.Clear("test");
+            Check(sent.Count == 3 && WmvRuntimeTerrainTile.Live == liveBefore && view.Disposed == 1,
+                  "terrain ipc: clearTerrain after the build sends nothing and releases the tile", log);
+            session.Dispose();
+        }
+        finally
+        {
+            UnityEngine.Object.DestroyImmediate(go);
+        }
+    }
+
+    /// <summary>
+    /// The terrain session's request lifetime (stage 03 follow-up). The load in flight waits for ONE request; when the
+    /// load ends by any path -- built, failed (the timeout included), superseded, cleared, a model load, shutdown -- that
+    /// request goes to the retired ring (RetiredCapacity), and an answer that comes afterwards is dropped as late: never
+    /// applied (no further request goes out, nothing is built), never a second report. An answer naming the request
+    /// waited for but another load is dropped and the request still waits. Whatever the host does, the bookkeeping stays
+    /// bounded and accounted for: through 1200 loads whose answers never come, come refused or come late, every load is
+    /// reported exactly once, every load that ends with its request unanswered retires exactly that request (RetiredTotal
+    /// one higher, the ring naming that load), every request sent is an answer applied, a retirement or the one pending,
+    /// at most 32 are retired, and no collection of the session or of the load in flight grows.
+    /// </summary>
+    static void TerrainRequestLifetimeTests(Action<string> log)
+    {
+        int tx = TerrainTestTileX, ty = TerrainTestTileY;
+        byte[] wdt = TerrainWdt(true, tx, ty, (int)TerrainTestRoot);
+        byte[] root = AdtSynthetic.FlatRoot(tx, ty);
+        int live0 = WmvRuntimeTerrainTile.Live;
+        string rw = WmvTerrainSession.RoleWdt, rr = WmvTerrainSession.RoleRootAdt;
+        var harnesses = new List<TerrainHarness>();
+        Func<TerrainHarness, string> state = x => string.Format("pending {0}, retired {1} ({2} in all, last \"{3}\"), late {4}, unowned {5}, " +
+            "reports {6}, requests sent {7}", x.Session.PendingRequests, x.Session.RetiredRequests, x.Session.RetiredTotal,
+            x.Session.LastRetiredRequest, x.Session.LateAnswersDropped, x.Session.UnownedAnswersDropped, x.Reports.Count, x.Sent.Count);
+
+        // The collection count SessionCollections relies on: every kind of collection, a string none.
+        int nHash, nReadOnly, nEnumerable, nQueue, nString;
+        bool countedHash = TryCountCollection(new HashSet<string> { "a", "b", "c" }, out nHash);
+        bool countedReadOnly = TryCountCollection(new CountOnlyCollection(), out nReadOnly);
+        bool countedEnumerable = TryCountCollection(Yield(4), out nEnumerable);
+        bool countedQueue = TryCountCollection(new Queue<int>(new[] { 1 }), out nQueue);
+        bool counted = countedHash && countedReadOnly && countedEnumerable && countedQueue && !TryCountCollection("text", out nString);
+        Check(counted && nHash == 3 && nReadOnly == 2 && nEnumerable == 4 && nQueue == 1,
+              "terrain requests: a collection is counted whatever it implements -- a HashSet<string> (generic ICollection<T> only) " + nHash +
+              ", an IReadOnlyCollection<T> alone by its Count " + nReadOnly + ", a bare IEnumerable by enumerating it " + nEnumerable +
+              ", a Queue " + nQueue + "; a string is not one", log);
+        int largestStart;
+        string collections = SessionCollections(new TerrainHarness().Session, out largestStart);
+        Check(typeof(WmvTerrainSession).GetField("requests", BindingFlags.Instance | BindingFlags.NonPublic) == null &&
+              WmvTerrainSession.RetiredCapacity == 32 && largestStart == 0,
+              "terrain requests: the session keeps no table of its requests -- its collections are " + collections, log);
+        var clampLow = new TerrainHarness(500.0);
+        var clampHigh = new TerrainHarness(500000.0);
+        var clampNaN = new TerrainHarness(double.NaN);
+        Check(clampLow.Session.TimeoutMs == 1000.0 && clampHigh.Session.TimeoutMs == 120000.0 && clampNaN.Session.TimeoutMs == 30000.0 &&
+              new TerrainHarness().Session.TimeoutMs == 30000.0,
+              "terrain requests: the timeout defaults to 30000 ms and is kept within 1000..120000 ms (" + clampLow.Session.TimeoutMs + ", " +
+              clampHigh.Session.TimeoutMs + ", " + clampNaN.Session.TimeoutMs + ")", log);
+
+        // ---- successful WDT and root answers: one pending at a time, built once, nothing retired or dropped
+        {
+            var h = new TerrainHarness();
+            harnesses.Add(h);
+            h.Session.Load(TerrainCommand(201, tx, ty));
+            int p1 = h.Session.PendingRequests;
+            bool wdtApplied = h.Answer(h.Last(rw), wdt);
+            int p2 = h.Session.PendingRequests;
+            bool rootApplied = h.Answer(h.Last(rr), root);
+            int p3 = h.Session.PendingRequests;
+            h.Pump(3);
+            WmvIpcClient.TerrainTileReport r = h.For(201);
+            Check(p1 == 1 && wdtApplied && p2 == 1 && rootApplied && p3 == 0 && r != null && r.Status == "built" && h.CountFor(201) == 1 &&
+                  h.Session.RetiredRequests == 0 && h.Session.AnswersDropped == 0 && h.Session.ShownLoad == 201,
+                  "terrain requests: the WDT and root answers are applied (pending " + p1 + " -> " + p2 + " -> " + p3 + "), the tile built and " +
+                  "reported once -- " + state(h), log);
+            h.Session.Clear("test");
+        }
+
+        // ---- an answer that never arrives: pending while in flight; the injected 2 s timeout fails the load once and
+        // retires its request; the answer that comes after it is dropped as late
+        {
+            var h = new TerrainHarness(2000.0);
+            harnesses.Add(h);
+            h.Session.Load(TerrainCommand(202, tx, ty));
+            string id = h.Last(rw);
+            h.Session.Pump(100.0);
+            h.Session.Pump(2100.0);
+            bool waiting = h.Reports.Count == 0 && h.Session.PendingRequests == 1 && h.Session.RetiredRequests == 0 && h.Session.Loading &&
+                           h.Session.RetiredTotal == 0 && h.Session.LastRetiredRequest == "";
+            h.Session.Pump(2100.5);
+            WmvIpcClient.TerrainTileReport r = h.For(202);
+            string want = "timed out after 2 s waiting for the WDT answer (request " + id + ")";
+            WmvTerrainSession.RetiredRequest ended;
+            bool inRing = h.Session.TryGetRetired(id, out ended) && ended.Load == 202 && ended.Role == rw && ended.Ended == "failed";
+            Check(h.Session.TimeoutMs == 2000.0 && waiting && r != null && r.Status == "failed" && r.Reason == want && h.CountFor(202) == 1 &&
+                  h.Session.PendingRequests == 0 && h.Session.RetiredRequests == 1 && inRing && !h.Session.Loading &&
+                  h.Session.RetiredTotal == 1 && h.Session.LastRetiredRequest == id,
+                  "terrain requests: an answer that never arrives keeps one request pending until the 2 s timeout, which reports \"" +
+                  (r != null ? r.Reason : "nothing") + "\" once and retires the request (load " + ended.Load + ", " + ended.Role + ", ended \"" +
+                  ended.Ended + "\") -- " + state(h), log);
+            bool applied = h.Answer(id, wdt);
+            h.Pump(3);
+            Check(!applied && h.Session.LateAnswersDropped == 1 && h.Session.UnownedAnswersDropped == 0 && h.CountFor(202) == 1 &&
+                  h.Session.SecondReportsRefused == 0 && h.Sent.Count == 1 && h.Session.ShownLoad == 0 && WmvRuntimeTerrainTile.Live == live0,
+                  "terrain requests: the answer after the timeout is dropped as late -- not applied (no root asked for, no tile), no second " +
+                  "report -- " + state(h), log);
+        }
+
+        // ---- the load ends before its answer by clearTerrain, a model load, or the host's clearTerrain for a new client: one
+        // report, nothing pending, the request retired as ended; its late answer (the host answers it "available" or, for the
+        // replaced client, "stale") dropped as late, no second report, nothing asked for
+        Action<string, int, Action<TerrainHarness>, string, string, string> endsFirst = (what, load, end, status, reason, lateState) =>
+        {
+            var h = new TerrainHarness();
+            harnesses.Add(h);
+            h.Session.Load(TerrainCommand(load, tx, ty));
+            string id = h.Last(rw);
+            end(h);
+            WmvIpcClient.TerrainTileReport r = h.For(load);
+            WmvTerrainSession.RetiredRequest ended;
+            bool retiredOk = h.Session.TryGetRetired(id, out ended) && ended.Load == load && ended.Ended == status;
+            bool once = r != null && r.Status == status && r.Reason == reason && h.CountFor(load) == 1 && h.Session.PendingRequests == 0 &&
+                        h.Session.RetiredRequests == 1 && retiredOk && !h.Session.Loading && h.Session.RetiredTotal == 1 &&
+                        h.Session.LastRetiredRequest == id;
+            bool applied = lateState == "available" ? h.Answer(id, wdt) : h.Answer(id, null, lateState, "request epoch 7, current 8");
+            h.Pump(3);
+            Check(once && !applied && h.Session.LateAnswersDropped == 1 && h.CountFor(load) == 1 && h.Session.SecondReportsRefused == 0 &&
+                  h.Sent.Count == 1,
+                  "terrain requests: " + what + " before the answer -> one \"" + status + "\" (" + (r != null ? r.Reason : "no report") +
+                  "), the request retired; its late \"" + lateState + "\" answer dropped as late -- " + state(h), log);
+        };
+        endsFirst("clearTerrain", 203, x => x.Session.Clear("test"), "cleared", "clearTerrain: test", "available");
+        endsFirst("a model load", 204, x => x.Session.LeaveForModelLoad("test model load"), "superseded", "test model load", "available");
+        endsFirst("the host's clearTerrain for a replaced client", 205, x => x.Session.Clear("the client was replaced"), "cleared",
+                  "clearTerrain: the client was replaced", "stale");
+
+        // ---- a new client epoch before the answer: the old load cleared, the new epoch's load built; the old load's "stale"
+        // answer arriving in the middle of the new load is dropped as late and leaves the new load's request waiting
+        {
+            var h = new TerrainHarness();
+            harnesses.Add(h);
+            h.Session.Load(TerrainCommand(206, tx, ty));
+            string oldId = h.Last(rw);
+            h.Session.Clear("the client was replaced");
+            WmvIpcClient.TerrainTileCommand next = TerrainCommand(207, tx, ty);
+            next.AssetEpoch = 8;
+            h.Session.Load(next);
+            string newId = h.Last(rw);
+            bool lateApplied = h.Answer(oldId, null, "stale", "request epoch 7, current 8");
+            bool newWaits = h.Session.PendingRequests == 1 && h.Session.LoadInFlight == 207 && h.Sent.Count == 2;
+            h.Answer(newId, wdt);
+            h.Answer(h.Last(rr), root);
+            h.Pump(3);
+            WmvIpcClient.TerrainTileReport r206 = h.For(206), r207 = h.For(207);
+            Check(r206 != null && r206.Status == "cleared" && !lateApplied && newWaits && r207 != null && r207.Status == "built" &&
+                  h.CountFor(206) == 1 && h.CountFor(207) == 1 && h.Session.LateAnswersDropped == 1 && h.Session.PendingRequests == 0 &&
+                  h.Session.RetiredRequests == 1 && h.LastSent(rw)[4] == "8",
+                  "terrain requests: a client switch before the answer -- the old load \"cleared\" once, its \"stale\" answer dropped as late " +
+                  "while the new epoch's load waits for its own, which builds -- " + state(h), log);
+            h.Session.Clear("test");
+        }
+
+        // ---- supersede before the answer: the superseded load's late answer (even "available") is dropped, the newer load
+        // still waits for its own request and builds
+        {
+            var h = new TerrainHarness();
+            harnesses.Add(h);
+            h.Session.Load(TerrainCommand(208, tx, ty));
+            string first = h.Last(rw);
+            h.Session.Load(TerrainCommand(209, tx, ty));
+            string second = h.Last(rw);
+            WmvIpcClient.TerrainTileReport r208 = h.For(208);
+            WmvTerrainSession.RetiredRequest ended, none;
+            bool afterSupersede = r208 != null && r208.Status == "superseded" && h.Session.PendingRequests == 1 && h.Session.RetiredRequests == 1 &&
+                                  h.Session.TryGetRetired(first, out ended) && ended.Ended == "superseded" && !h.Session.TryGetRetired(second, out none);
+            bool lateApplied = h.Answer(first, wdt);
+            bool stillWaits = h.Session.PendingRequests == 1 && h.Session.LoadInFlight == 209 && h.Sent.Count == 2;
+            h.Answer(second, wdt);
+            h.Answer(h.Last(rr), root);
+            h.Pump(3);
+            WmvIpcClient.TerrainTileReport r209 = h.For(209);
+            Check(afterSupersede && !lateApplied && h.Session.LateAnswersDropped == 1 && stillWaits && r209 != null && r209.Status == "built" &&
+                  h.CountFor(208) == 1 && h.CountFor(209) == 1 && h.Session.PendingRequests == 0,
+                  "terrain requests: a load superseded before its answer is reported once, its request retired; the late answer is dropped " +
+                  "and the newer load, still waiting for its own, builds -- " + state(h), log);
+            h.Session.Clear("test");
+        }
+
+        // ---- the right request id under another load: dropped (unowned), the request still waits; the real answer applies
+        {
+            var h = new TerrainHarness();
+            harnesses.Add(h);
+            h.Session.Load(TerrainCommand(210, tx, ty));
+            string id = h.Last(rw);
+            bool wrongApplied = h.Answer(id, wdt, "available", "", null, 999);
+            bool waits = h.Session.PendingRequests == 1 && h.Reports.Count == 0 && h.Sent.Count == 1 && h.Session.UnownedAnswersDropped == 1;
+            bool rightApplied = h.Answer(id, wdt);
+            h.Answer(h.Last(rr), root);
+            h.Pump(3);
+            WmvIpcClient.TerrainTileReport r = h.For(210);
+            Check(!wrongApplied && waits && rightApplied && r != null && r.Status == "built" && h.CountFor(210) == 1 &&
+                  h.Session.LateAnswersDropped == 0,
+                  "terrain requests: an answer naming the waited-for request but load 999 is dropped (unowned) and the request keeps waiting; " +
+                  "its real answer is applied and the tile built -- " + state(h), log);
+            h.Session.Clear("test");
+        }
+
+        // ---- shutdown with a request out (the player going away, as on a reconnect): no report, the request retired as
+        // "dropped at shutdown", its answer dropped as late; a new session (the next player) starts with nothing and builds
+        {
+            var h = new TerrainHarness();
+            harnesses.Add(h);
+            h.Session.Load(TerrainCommand(211, tx, ty));
+            string id = h.Last(rw);
+            h.Session.Dispose();
+            WmvTerrainSession.RetiredRequest ended;
+            bool retiredOk = h.Session.TryGetRetired(id, out ended) && ended.Ended == "dropped at shutdown" && ended.Load == 211;
+            bool applied = h.Answer(id, wdt);
+            var fresh = new TerrainHarness();
+            harnesses.Add(fresh);
+            bool freshEmpty = fresh.Session.PendingRequests == 0 && fresh.Session.RetiredRequests == 0;
+            WmvIpcClient.TerrainTileReport built = TerrainBuild(fresh, 212, tx, ty, wdt, root);
+            Check(h.Reports.Count == 0 && h.Session.PendingRequests == 0 && h.Session.RetiredRequests == 1 && retiredOk && !applied &&
+                  h.Session.LateAnswersDropped == 1 && h.Sent.Count == 1 && freshEmpty && built != null && built.Status == "built",
+                  "terrain requests: shutdown with a request out sends no report and retires it (\"" + ended.Ended + "\"); its answer is dropped " +
+                  "as late; the next session starts empty and builds -- " + state(h), log);
+            fresh.Session.Clear("test");
+        }
+
+        // ---- the ring is bounded: 40 loads superseded unanswered keep the newest 32 (while RetiredTotal counts all 40); the
+        // answer of one that fell out is still dropped (as unowned now), never applied
+        {
+            var h = new TerrainHarness();
+            harnesses.Add(h);
+            var ids = new List<string>();
+            for (int i = 0; i < 40; i++)
+            {
+                h.Session.Load(TerrainCommand(300 + i, tx, ty));
+                ids.Add(h.Last(rw));
+            }
+            h.Session.Clear("test");
+            WmvTerrainSession.RetiredRequest e;
+            bool oldestOut = !h.Session.TryGetRetired(ids[0], out e) && !h.Session.TryGetRetired(ids[7], out e);
+            bool newestIn = h.Session.TryGetRetired(ids[8], out e) && e.Load == 308 && h.Session.TryGetRetired(ids[39], out e) && e.Load == 339 &&
+                            e.Ended == "cleared";
+            bool appliedOld = h.Answer(ids[0], wdt);
+            bool appliedNew = h.Answer(ids[39], wdt);
+            Check(h.Session.RetiredRequests == 32 && oldestOut && newestIn && !appliedOld && !appliedNew && h.Session.UnownedAnswersDropped == 1 &&
+                  h.Session.LateAnswersDropped == 1 && h.Reports.Count == 40 && h.Sent.Count == 40 && h.Session.RetiredTotal == 40 &&
+                  h.Session.LastRetiredRequest == ids[39],
+                  "terrain requests: the retired ring keeps the newest 32 of 40 ended requests, RetiredTotal all 40; an answer to one that fell " +
+                  "out is dropped as unowned, one still held as late -- neither applied -- " + state(h), log);
+        }
+
+        // ---- 1200 loads whose answers never come or fail -- cleared, timed out, taken by a model load, refused by the host,
+        // the root never answered, superseded -- with late and unowned answers in between: every load reported exactly once;
+        // every load that ends with its request unanswered retires exactly that request -- the ring names it with its load,
+        // role and ending, RetiredTotal rises by exactly one, LastRetiredRequest is its id -- and a load that ends on its own
+        // answer, or starts with no load in flight, retires nothing; after every load each request sent is accounted for
+        // (answers applied + RetiredTotal + PendingRequests); no answer applied that was not waited for; at most 32 retired;
+        // and no collection of the session or of the load in flight larger after 1200 loads than after 102 (both samples
+        // taken with a load in flight, so its fields are walked too)
+        {
+            const int n = 1200;
+            var h = new TerrainHarness(1000.0);
+            harnesses.Add(h);
+            double now = 50000.0;
+            int maxRetired = 0, lateFed = 0, foreignFed = 0, lateApplied = 0, rootAnswers = 0, applied = 0, retiredExpected = 0;
+            int retireChecks = 0, retireWrong = 0, unbalanced = 0, largest = 0;
+            string sizesAt102 = null, sizesAtEnd = null, prevId = null, waiting = null, firstRetireWrong = null, firstUnbalanced = null;
+            Action<bool, string> retireCheck = (ok, what) =>
+            {
+                retireChecks++;
+                if (ok) return;
+                retireWrong++;
+                if (firstRetireWrong == null) firstRetireWrong = what;
+            };
+            // Request rid of load `load` was retired just now: the ring holds it under that load, role and ending, the total is
+            // one higher than `before`, and it is the last one retired.
+            Func<string, int, string, string, int, bool> retiredNow = (rid, load, role, how, before) =>
+            {
+                WmvTerrainSession.RetiredRequest e;
+                return h.Session.TryGetRetired(rid, out e) && e.Load == load && e.Role == role && e.Ended == how &&
+                       h.Session.RetiredTotal == before + 1 && h.Session.LastRetiredRequest == rid;
+            };
+            Func<string, int, string, string, int, string> retiredSays = (rid, load, role, how, before) =>
+            {
+                WmvTerrainSession.RetiredRequest e;
+                return string.Format("load {0}: request {1} ({2}) should be retired as \"{3}\" -- the ring {4}; total {5} -> {6}, last \"{7}\"",
+                                     load, rid, role, how,
+                                     h.Session.TryGetRetired(rid, out e) ? "has it under load " + e.Load + ", " + e.Role + ", \"" + e.Ended + "\""
+                                                                         : "does not hold it",
+                                     before, h.Session.RetiredTotal, h.Session.LastRetiredRequest);
+            };
+            for (int i = 0; i < n; i++)
+            {
+                int load = 1000 + i;
+                int before = h.Session.RetiredTotal;
+                h.Session.Load(TerrainCommand(load, tx, ty));
+                if (waiting != null)                                         // the load before was left waiting: superseded now
+                {
+                    retiredExpected++;
+                    retireCheck(retiredNow(waiting, load - 1, rw, "superseded", before), retiredSays(waiting, load - 1, rw, "superseded", before));
+                }
+                else
+                    retireCheck(h.Session.RetiredTotal == before, "load " + load + ": starting it with no load in flight retired a request (total " +
+                                before + " -> " + h.Session.RetiredTotal + ")");
+                waiting = null;
+                string id = h.Last(rw), endedId = null, endedRole = rw, endedHow = null;
+                before = h.Session.RetiredTotal;
+                switch (i % 6)
+                {
+                    case 0: h.Session.Clear("repeat"); endedId = id; endedHow = "cleared"; break;
+                    case 1: h.Session.Pump(now += 16.0); h.Session.Pump(now += 1000.5); endedId = id; endedHow = "failed"; break;
+                    case 2: h.Session.LeaveForModelLoad("repeat model load"); endedId = id; endedHow = "superseded"; break;
+                    case 3:                                                  // refused: the load ends on its own answer
+                        if (h.Answer(id, null, "stale", "request epoch 6, current 7")) applied++;
+                        break;
+                    case 4:                                                  // the WDT applied, the root never answered
+                        if (h.Answer(id, wdt)) applied++;
+                        rootAnswers++;
+                        endedId = h.Last(rr);
+                        endedRole = rr;
+                        endedHow = "cleared";
+                        h.Session.Clear("repeat: the root never answered");
+                        break;
+                    default: waiting = id; break;                            // superseded by the next load
+                }
+                if (endedId != null)
+                {
+                    retiredExpected++;
+                    retireCheck(retiredNow(endedId, load, endedRole, endedHow, before), retiredSays(endedId, load, endedRole, endedHow, before));
+                }
+                else
+                {
+                    WmvTerrainSession.RetiredRequest e;
+                    retireCheck(h.Session.RetiredTotal == before && !h.Session.TryGetRetired(id, out e),
+                                "load " + load + ": " + (waiting != null ? "still waiting" : "ended on its own answer") + ", yet a request was retired " +
+                                "(total " + before + " -> " + h.Session.RetiredTotal + ", last \"" + h.Session.LastRetiredRequest + "\")");
+                }
+                if (i % 5 == 1 && prevId != null)
+                {
+                    lateFed++;
+                    if (h.Answer(prevId, wdt))
+                    {
+                        lateApplied++;
+                        applied++;
+                    }
+                }
+                if (i % 11 == 7)
+                {
+                    foreignFed++;
+                    if (h.Session.ClaimMapAssetResponse(new WmvIpcClient.AssetResponse { requestId = "zz" + i, ok = false, state = "refused" }))
+                    {
+                        lateApplied++;
+                        applied++;
+                    }
+                }
+                if (h.Sent.Count != applied + h.Session.RetiredTotal + h.Session.PendingRequests)
+                {
+                    unbalanced++;
+                    if (firstUnbalanced == null)
+                        firstUnbalanced = string.Format("after load {0}: {1} sent, {2} applied + {3} retired + {4} pending", load, h.Sent.Count, applied,
+                                                        h.Session.RetiredTotal, h.Session.PendingRequests);
+                }
+                maxRetired = Math.Max(maxRetired, h.Session.RetiredRequests);
+                if (i == 101)
+                {
+                    int l;
+                    sizesAt102 = SessionCollections(h.Session, out l);
+                }
+                if (i == n - 1)
+                    sizesAtEnd = SessionCollections(h.Session, out largest);
+                prevId = id;
+            }
+            bool waitingAtEnd = waiting != null;
+            int beforeEnd = h.Session.RetiredTotal;
+            h.Session.Clear("repeat: end");
+            if (waitingAtEnd)
+            {
+                retiredExpected++;
+                retireCheck(retiredNow(waiting, 1000 + n - 1, rw, "cleared", beforeEnd), retiredSays(waiting, 1000 + n - 1, rw, "cleared", beforeEnd));
+            }
+            int wrong = 0;
+            var perLoad = new Dictionary<int, int>();
+            foreach (WmvIpcClient.TerrainTileReport r in h.Reports)
+            {
+                int c;
+                perLoad.TryGetValue(r.Load, out c);
+                perLoad[r.Load] = c + 1;
+            }
+            for (int i = 0; i < n; i++)
+            {
+                int c;
+                if (!perLoad.TryGetValue(1000 + i, out c) || c != 1) wrong++;
+            }
+            Check(wrong == 0 && h.Reports.Count == n && h.Session.ReportsSent == n && h.Session.SecondReportsRefused == 0,
+                  "terrain requests: " + n + " failing loads were reported exactly once each (" + wrong + " not; " + h.Session.ReportsSent +
+                  " reports sent, " + h.Session.SecondReportsRefused + " second report(s) refused)", log);
+            Check(retireWrong == 0 && retireChecks == 2 * n + (waitingAtEnd ? 1 : 0) && h.Session.RetiredTotal == retiredExpected &&
+                  retiredExpected > WmvTerrainSession.RetiredCapacity && h.Session.RetiredRequests == WmvTerrainSession.RetiredCapacity &&
+                  maxRetired <= WmvTerrainSession.RetiredCapacity,
+                  "terrain requests: through " + n + " failing loads each of the " + retiredExpected + " that ended with a request unanswered retired " +
+                  "exactly that request (the ring naming its load, role and ending, RetiredTotal one higher, LastRetiredRequest its id) and no " +
+                  "other load retired anything (" + retireChecks + " checks, " + retireWrong + " wrong" +
+                  (firstRetireWrong != null ? "; first: " + firstRetireWrong : "") + "); RetiredTotal " + h.Session.RetiredTotal + ", the ring " +
+                  "at most " + maxRetired + ", " + h.Session.RetiredRequests + " at the end", log);
+            Check(unbalanced == 0 && h.Sent.Count == applied + h.Session.RetiredTotal + h.Session.PendingRequests && h.Session.PendingRequests == 0 &&
+                  !h.Session.Loading && h.Sent.Count == n + rootAnswers,
+                  "terrain requests: after each of the " + n + " loads every request sent was an answer applied, a retirement or the one pending (" +
+                  unbalanced + " load(s) not" + (firstUnbalanced != null ? "; first: " + firstUnbalanced : "") + "); in all " + h.Sent.Count +
+                  " sent (one per load plus " + rootAnswers + " root requests) = " + applied + " applied + " + h.Session.RetiredTotal + " retired + " +
+                  h.Session.PendingRequests + " pending", log);
+            Check(lateFed > 0 && lateApplied == 0 && h.Session.LateAnswersDropped > 0 && h.Session.UnownedAnswersDropped > 0 &&
+                  WmvRuntimeTerrainTile.Live == live0,
+                  "terrain requests: none of the " + lateFed + " late and " + foreignFed + " foreign answers was applied (" + h.Session.LateAnswersDropped +
+                  " dropped as late, " + h.Session.UnownedAnswersDropped + " as unowned)", log);
+            Check(sizesAt102 != null && sizesAtEnd == sizesAt102 && sizesAt102.Contains("current{") && largest <= WmvTerrainSession.RetiredCapacity,
+                  "terrain requests: no collection of the session or of the load in flight grew -- after 102 loads " + sizesAt102 + ", after " + n +
+                  " " + sizesAtEnd, log);
+        }
+
+        int refused = 0;
+        foreach (TerrainHarness x in harnesses)
+        {
+            refused += x.Session.SecondReportsRefused;
+            x.Session.Dispose();
+        }
+        Check(refused == 0 && WmvRuntimeTerrainTile.Live == live0 && TerrainTallies() == "0/0/0",
+              "terrain requests: no second report was ever refused, and every tile these tests built is released (live " +
+              WmvRuntimeTerrainTile.Live + ", tallies " + TerrainTallies() + ")", log);
+    }
+
+    /// <summary>Every collection the session holds, found by reflection over its fields (so one added later is checked
+    /// too), and every collection of the load in flight: a field holding one of the session's own nested classes (the Job
+    /// in "current") is walked one level, as "name{...}". An array counts by its length ("name=n[]"), any other collection
+    /// by its count ("name=n", TryCountCollection: a HashSet&lt;T&gt; included); a string is not a collection here, and a
+    /// collection or load field that is null shows as "name=null". largest is the largest count of a non-array.</summary>
+    static string SessionCollections(WmvTerrainSession s, out int largest)
+    {
+        largest = 0;
+        var parts = new List<string>();
+        CollectionsOf(s, true, parts, ref largest);
+        return string.Join(" ", parts.ToArray());
+    }
+
+    static void CollectionsOf(object o, bool walkLoads, List<string> parts, ref int largest)
+    {
+        foreach (FieldInfo f in o.GetType().GetFields(BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public))
+        {
+            bool sessionClass = f.FieldType.DeclaringType == typeof(WmvTerrainSession) && f.FieldType.IsClass;
+            bool collectionType = typeof(System.Collections.IEnumerable).IsAssignableFrom(f.FieldType) && f.FieldType != typeof(string);
+            object v = f.GetValue(o);
+            if (v == null)
+            {
+                if (collectionType || (walkLoads && sessionClass))
+                    parts.Add(f.Name + "=null");
+                continue;
+            }
+            if (v is string)
+                continue;
+            var a = v as Array;
+            if (a != null)
+            {
+                parts.Add(f.Name + "=" + a.Length + "[]");
+                continue;
+            }
+            int count;
+            if (TryCountCollection(v, out count))
+            {
+                parts.Add(f.Name + "=" + count);
+                largest = Math.Max(largest, count);
+                continue;
+            }
+            if (walkLoads && sessionClass)
+            {
+                var inner = new List<string>();
+                CollectionsOf(v, false, inner, ref largest);
+                parts.Add(f.Name + "{" + string.Join(" ", inner.ToArray()) + "}");
+            }
+        }
+    }
+
+    /// <summary>How many items a collection holds, whatever it implements: a non-generic ICollection by its Count, a generic
+    /// ICollection&lt;T&gt; or IReadOnlyCollection&lt;T&gt; (a HashSet&lt;T&gt; is only these) by its Count, read by reflection,
+    /// and any other IEnumerable by enumerating it. False for a string and for what is not a collection.</summary>
+    static bool TryCountCollection(object v, out int count)
+    {
+        count = 0;
+        if (v == null || v is string)
+            return false;
+        var plain = v as System.Collections.ICollection;
+        if (plain != null)
+        {
+            count = plain.Count;
+            return true;
+        }
+        foreach (Type i in v.GetType().GetInterfaces())
+        {
+            if (!i.IsGenericType)
+                continue;
+            Type d = i.GetGenericTypeDefinition();
+            if (d == typeof(ICollection<>) || d == typeof(IReadOnlyCollection<>))
+            {
+                count = (int)i.GetProperty("Count").GetValue(v, null);
+                return true;
+            }
+        }
+        var items = v as System.Collections.IEnumerable;
+        if (items == null)
+            return false;
+        foreach (object item in items)
+            count++;
+        return true;
+    }
+
+    /// <summary>A collection that is an IReadOnlyCollection&lt;T&gt; and nothing more: its Count (2) is not what enumerating it
+    /// gives (nothing), so a count taken from Count shows.</summary>
+    sealed class CountOnlyCollection : IReadOnlyCollection<int>
+    {
+        public int Count { get { return 2; } }
+        public IEnumerator<int> GetEnumerator() { yield break; }
+        System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator() { return GetEnumerator(); }
+    }
+
+    /// <summary>A bare IEnumerable (an iterator: no collection interface) of n items.</summary>
+    static IEnumerable<int> Yield(int n)
+    {
+        for (int i = 0; i < n; i++)
+            yield return i;
+    }
+
+    /// <summary>
+    /// The map answers through WmvIpcClient's own dispatch (host lines fed as the reader thread hands them over): a map
+    /// answer -- an id in the "map" namespace, or any answer carrying a role, each half shown on its own (a role under an
+    /// ordinary id, a map id with no role) -- goes to OnMapAssetResponse only, never to OnAssetResponse or the asset
+    /// cache; an ordinary model answer still goes to OnAssetResponse and the cache as before,
+    /// even after a map answer named its request id; a map answer with no handler wired is dropped and counted. Late
+    /// answers after supersession and after the host's clearTerrain for a replaced client reach the session and are
+    /// dropped there; every load has exactly one terrainTileLoaded line.
+    /// </summary>
+    static void TerrainMapRoutingTests(Action<string> log)
+    {
+        int liveBefore = WmvRuntimeTerrainTile.Live;
+        int tx = TerrainTestTileX, ty = TerrainTestTileY;
+        byte[] wdt = TerrainWdt(true, tx, ty, (int)TerrainTestRoot);
+        byte[] root = AdtSynthetic.FlatRoot(tx, ty);
+        var go = new GameObject("TerrainMapRoutingTest");
+        WmvTerrainSession session = null;
+        try
+        {
+            var ipc = go.AddComponent<WmvIpcClient>();
+            var sent = new List<string>();
+            var modelAnswers = new List<WmvIpcClient.AssetResponse>();
+            var mapAnswers = new List<WmvIpcClient.AssetResponse>();
+            ipc.SentForTest = s => sent.Add(s);
+            ipc.OnAssetResponse = r => modelAnswers.Add(r);
+            var view = new TestTerrainView();
+            session = new WmvTerrainSession(view, ipc.RequestMapAsset, ipc.ReportTerrainTileLoaded, null, x => x());
+            WmvTerrainSession s = session;
+            ipc.OnMapAssetResponse = r => { mapAnswers.Add(r); s.ClaimMapAssetResponse(r); };
+            ipc.OnLoadTerrainTile = c => s.Load(c);
+            ipc.OnClearTerrain = reason => s.Clear(reason);
+            Func<int, int> reportsFor = load => CountSent(sent, "{\"type\":\"terrainTileLoaded\",\"load\":" + load + ",");
+
+            Check(WmvIpcClient.IsMapRequestId("map1") && !WmvIpcClient.IsMapRequestId("u1") && !WmvIpcClient.IsMapRequestId(null) &&
+                  WmvIpcClient.IsMapAnswer("u5", "wdt") && WmvIpcClient.IsMapAnswer("map5", "") && !WmvIpcClient.IsMapAnswer("u5", "") &&
+                  !WmvIpcClient.IsMapAnswer("u5", null),
+                  "terrain routing: a map answer is one whose id is in the map namespace or that carries a role, nothing else", log);
+
+            // ---- a load through the client's lines: both answers to the map handler only; the asset cache never sees them
+            int cacheCount = ipc.Cache.Count;
+            long cacheBytes = ipc.Cache.Bytes;
+            ipc.FeedLineForTest(TerrainLoadLine(501, 7), null);
+            string wdtId = RequestIdOf(LastSent(sent, "getMapAsset"));
+            ipc.FeedLineForTest(MapAnswerLine(wdtId, TerrainTestWdt, "wdt", 501, wdt), wdt);
+            string rootId = RequestIdOf(LastSent(sent, "getMapAsset"));
+            ipc.FeedLineForTest(MapAnswerLine(rootId, (int)TerrainTestRoot, "rootAdt", 501, root), root);
+            for (int f = 0; f < 3; f++)
+                session.Pump(100.0 + f);
+            Check(wdtId.StartsWith("map", StringComparison.Ordinal) && rootId.StartsWith("map", StringComparison.Ordinal) && wdtId != rootId &&
+                  reportsFor(501) == 1 && SentContains(sent, "{\"type\":\"terrainTileLoaded\",\"load\":501,\"status\":\"built\"") &&
+                  mapAnswers.Count == 2 && modelAnswers.Count == 0 && ipc.MapAnswersRouted == 2 && ipc.Cache.Count == cacheCount &&
+                  ipc.Cache.Bytes == cacheBytes && !ipc.Cache.Holds(TerrainTestWdt) && !ipc.Cache.Holds((int)TerrainTestRoot) &&
+                  session.PendingRequests == 0,
+                  "terrain routing: a load's WDT and root answers (" + wdtId + ", " + rootId + ") go to OnMapAssetResponse only (" +
+                  mapAnswers.Count + " there, " + modelAnswers.Count + " to OnAssetResponse), the asset cache untouched, built once", log);
+
+            // ---- a late answer after supersession, then the host's clearTerrain for a replaced client before the answer
+            ipc.FeedLineForTest(TerrainLoadLine(502, 7), null);
+            string id502 = RequestIdOf(LastSent(sent, "getMapAsset"));
+            ipc.FeedLineForTest(TerrainLoadLine(503, 7), null);
+            string id503 = RequestIdOf(LastSent(sent, "getMapAsset"));
+            int sentBefore = sent.Count;
+            ipc.FeedLineForTest(MapAnswerLine(id502, TerrainTestWdt, "wdt", 502, wdt), wdt);
+            bool lateDropped = session.LateAnswersDropped == 1 && sent.Count == sentBefore && session.LoadInFlight == 503 &&
+                               session.PendingRequests == 1 && modelAnswers.Count == 0;
+            ipc.FeedLineForTest("{\"type\":\"clearTerrain\",\"reason\":\"the client was replaced\"}", null);
+            ipc.FeedLineForTest(RefusedMapAnswerLine(id503, TerrainTestWdt, "wdt", 503, "stale", "request epoch 7, current 8"), null);
+            Check(lateDropped && session.LateAnswersDropped == 2 && reportsFor(502) == 1 && reportsFor(503) == 1 &&
+                  SentContains(sent, "{\"type\":\"terrainTileLoaded\",\"load\":502,\"status\":\"superseded\"") &&
+                  SentContains(sent, "{\"type\":\"terrainTileLoaded\",\"load\":503,\"status\":\"cleared\"") && modelAnswers.Count == 0 &&
+                  session.PendingRequests == 0 && session.RetiredRequests == 2 && WmvRuntimeTerrainTile.Live == liveBefore,
+                  "terrain routing: the superseded load's late answer and the cleared load's \"stale\" answer (after the host's clearTerrain " +
+                  "for a replaced client) reach the session and are dropped as late; one terrainTileLoaded each, nothing to OnAssetResponse", log);
+
+            // ---- a role-carrying answer under an ordinary request's id: the map handler's (unowned), and the model request it
+            // names is untouched -- its cache flight still out; the request's own answer then goes to OnAssetResponse and the cache
+            const int modelFile = 990302;
+            string modelId = ipc.RequestAssetByFileDataID(modelFile, true);
+            bool flying = ipc.Cache.InFlight(modelFile);
+            int unowned = session.UnownedAnswersDropped;
+            ipc.FeedLineForTest(RefusedMapAnswerLine(modelId, TerrainTestWdt, "wdt", 503, "stale", "a map answer under a model id"), null);
+            bool stillFlying = ipc.Cache.InFlight(modelFile) && modelAnswers.Count == 0 && session.UnownedAnswersDropped == unowned + 1;
+            byte[] modelBytes = { 9, 8, 7, 6, 5 };
+            ipc.FeedLineForTest(ModelAnswerLine(modelId, modelFile, modelBytes, true), modelBytes);
+            WmvIpcClient.AssetResponse got = modelAnswers.Count > 0 ? modelAnswers[0] : null;
+            Check(modelId.StartsWith("u", StringComparison.Ordinal) && flying && stillFlying && modelAnswers.Count == 1 && got.requestId == modelId &&
+                  got.ok && got.data == modelBytes && got.role == "" && ipc.Cache.Holds(modelFile) && !ipc.Cache.InFlight(modelFile),
+                  "terrain routing: a role-carrying answer under the model request " + modelId + " goes to the map handler (dropped as unowned) " +
+                  "and leaves that request's cache flight out; the request's own answer still reaches OnAssetResponse and the cache", log);
+
+            // ---- a map-namespace answer carrying NO role: the id alone makes it a map answer -- the map handler's (unowned), never
+            // OnAssetResponse or the cache
+            int mapBefore = mapAnswers.Count, routedBefore = ipc.MapAnswersRouted, modelBefore = modelAnswers.Count;
+            unowned = session.UnownedAnswersDropped;
+            ipc.FeedLineForTest("{\"type\":\"assetResponse\",\"requestId\":\"map77\",\"ok\":false,\"fileDataID\":" + TerrainTestWdt + ",\"load\":503," +
+                                "\"assetEpoch\":7,\"state\":\"stale\",\"detail\":\"x\",\"error\":\"x\"}", null);
+            WmvIpcClient.AssetResponse roleless = mapAnswers.Count > mapBefore ? mapAnswers[mapAnswers.Count - 1] : null;
+            Check(mapAnswers.Count == mapBefore + 1 && ipc.MapAnswersRouted == routedBefore + 1 && session.UnownedAnswersDropped == unowned + 1 &&
+                  modelAnswers.Count == modelBefore && roleless != null && roleless.requestId == "map77" && string.IsNullOrEmpty(roleless.role),
+                  "terrain routing: a map-namespace answer with no role (map77) goes by its id alone to OnMapAssetResponse (" +
+                  (mapAnswers.Count - mapBefore) + ", routed " + routedBefore + " -> " + ipc.MapAnswersRouted + ") and is dropped there as unowned; " +
+                  "OnAssetResponse gets nothing (" + (modelAnswers.Count - modelBefore) + ")", log);
+
+            // ---- an ordinary model answer (not cached) is unaffected
+            string plainId = ipc.RequestAssetByFileDataID(990303, false);
+            ipc.FeedLineForTest(ModelAnswerLine(plainId, 990303, modelBytes, false), modelBytes);
+            Check(modelAnswers.Count == 2 && modelAnswers[1].requestId == plainId && mapAnswers.Count == 6 && ipc.MapAnswersRouted == 6,
+                  "terrain routing: an ordinary model answer (" + plainId + ") still goes to OnAssetResponse; " + ipc.MapAnswersRouted +
+                  " map answers routed in all, all to the map handler", log);
+
+            // ---- no map handler wired: the answer is dropped and counted, never handed to OnAssetResponse
+            ipc.OnMapAssetResponse = null;
+            int routed = ipc.MapAnswersRouted;
+            ipc.FeedLineForTest(MapAnswerLine("map99", TerrainTestWdt, "wdt", 504, wdt), wdt);
+            Check(ipc.MapAnswersUnhandled == 1 && ipc.MapAnswersRouted == routed + 1 && modelAnswers.Count == 2 && mapAnswers.Count == 6,
+                  "terrain routing: a map answer with no OnMapAssetResponse wired is dropped (unhandled " + ipc.MapAnswersUnhandled +
+                  "), not handed to OnAssetResponse", log);
+        }
+        finally
+        {
+            if (session != null)
+                session.Dispose();
+            UnityEngine.Object.DestroyImmediate(go);
+        }
+        Check(WmvRuntimeTerrainTile.Live == liveBefore && TerrainTallies() == "0/0/0",
+              "terrain routing: every tile these tests built is released (live " + WmvRuntimeTerrainTile.Live + ")", log);
+    }
+
+    static string TerrainLoadLine(int load, int epoch)
+    {
+        return "{\"type\":\"loadTerrainTile\",\"load\":" + load + ",\"assetEpoch\":" + epoch + ",\"mapId\":0,\"mapDirectory\":\"Azeroth\"," +
+               "\"product\":\"test\",\"build\":\"0\",\"wdtFileDataID\":" + TerrainTestWdt + ",\"wdtResolvedBy\":\"fileDataID\",\"tileX\":" +
+               TerrainTestTileX + ",\"tileY\":" + TerrainTestTileY + ",\"maxAssetBytes\":4194304}";
+    }
+
+    static string RefusedMapAnswerLine(string requestId, int fileDataID, string role, int load, string state, string detail)
+    {
+        return "{\"type\":\"assetResponse\",\"requestId\":\"" + requestId + "\",\"ok\":false,\"fileDataID\":" + fileDataID + ",\"role\":\"" + role +
+               "\",\"load\":" + load + ",\"assetEpoch\":7,\"state\":\"" + state + "\",\"detail\":\"" + detail + "\",\"readMs\":0.25,\"error\":\"" +
+               detail + "\"}";
+    }
+
+    static string ModelAnswerLine(string requestId, int fileDataID, byte[] data, bool cacheable)
+    {
+        return "{\"type\":\"assetResponse\",\"requestId\":\"" + requestId + "\",\"ok\":true,\"path\":\"\",\"fileDataID\":" + fileDataID +
+               ",\"byteLength\":" + data.Length + ",\"encoding\":\"binary\",\"payloadBytes\":" + data.Length +
+               (cacheable ? ",\"cacheable\":true" : "") + "}";
+    }
+
+    /// <summary>The last line sent of a message type, or "".</summary>
+    static string LastSent(List<string> sent, string type)
+    {
+        string prefix = "{\"type\":\"" + type + "\"";
+        for (int i = sent.Count - 1; i >= 0; i--)
+            if (sent[i].StartsWith(prefix, StringComparison.Ordinal)) return sent[i];
+        return "";
+    }
+
+    static int CountSent(List<string> sent, string prefix)
+    {
+        int n = 0;
+        foreach (string line in sent)
+            if (line.StartsWith(prefix, StringComparison.Ordinal)) n++;
+        return n;
+    }
+
+    static bool SentContains(List<string> sent, string prefix) { return CountSent(sent, prefix) > 0; }
+
+    /// <summary>Why the tests that drive a WmvMain of their own cannot run now, or null: a capture or a debug switch is set,
+    /// and these paths would act on it (a coroutine, a dump, a camera override).</summary>
+    static string TerrainMainTestsBlocked()
+    {
+        if (!string.IsNullOrEmpty(Environment.GetEnvironmentVariable("WMV_VIEWPORT_SHOT")) ||
+            !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("WMV_VIEWPORT_ORBIT")) || WmvModelBuilder.Debug_.LightCheck ||
+            WmvModelBuilder.Debug_.AllocCheck || WmvModelBuilder.Debug_.HasFrameBounds || WmvTerrainDebug.View != WmvTerrainView.Shaded ||
+            WmvTerrainDebug.OnlyChunk >= 0 || WmvTerrainDebug.Focus >= 0 || WmvTerrainDebug.TopDown || WmvTerrainDebug.DumpName != null)
+            return "a capture or debug switch is set, and these tests drive a WmvMain that cannot start a coroutine";
+        return null;
+    }
+
+    /// <summary>
+    /// Late map answers through a WmvMain of the test's own (as TerrainHiddenModelTests: an inactive GameObject, so its
+    /// Awake never runs; the fields these paths read are set by hand), wired as the player wires it -- WireTerrainMessages
+    /// for loadTerrainTile, clearTerrain and the map answers, OnLoadWoWModel to HandleLoadWoWModel, OnAssetResponse to
+    /// HandleAssetResponse (counted) -- and fed host lines through the client's own dispatch:
+    ///   - a tile builds through that wiring with no answer on the model asset path;
+    ///   - a terrain load whose place a model load took: its late WDT answer goes to the session (dropped as late), never to
+    ///     HandleAssetResponse, and the model job waiting for its .m2 is exactly as it was -- also when a map answer names
+    ///     that job's own request id, and when a map answer is handed to HandleAssetResponse directly (dropped there by its
+    ///     guard, counted once for a role and once for a map id without one);
+    ///     the job's own .m2 answer then reaches it (parsed, its skin asked for);
+    ///   - the same for a world-model job waiting for its root, whose own answer then reaches it (its groups asked for);
+    ///   - a map id with no role goes through that wiring to the session too, and runtimeState then sends the session's
+    ///     request bookkeeping (retired, retired in all, the last retired, late and unowned apart) under the host's names.
+    /// </summary>
+    static void TerrainLateAnswerMainTests(Action<string> log)
+    {
+        string blocked = TerrainMainTestsBlocked();
+        if (blocked != null)
+        {
+            log("terrain late answers: not run -- " + blocked);
+            return;
+        }
+        int tx = TerrainTestTileX, ty = TerrainTestTileY;
+        const int modelFile = 990401, skinFile = 990402, wmoFile = 990501;
+        const uint wmoFirstGroup = 990510, wmoTexture = 990520;
+        int modelsLive = WmvRuntimeModel.Live, tilesLive = WmvRuntimeTerrainTile.Live, wmosLive = WmvRuntimeMapObject.Live;
+        byte[] wdt = TerrainWdt(true, tx, ty, (int)TerrainTestRoot);
+        byte[] root = AdtSynthetic.FlatRoot(tx, ty);
+        byte[] m2 = M2Synthetic.InFileSkeletonModel(skinFile);
+        byte[] wmoRootBytes = WmoSynthetic.SquaresRoot(3, wmoFirstGroup, wmoTexture);
+        var objects = new List<GameObject>();
+        var ipcGo = new GameObject("TerrainLateAnswerIpc");
+        objects.Add(ipcGo);
+        var ipc = ipcGo.AddComponent<WmvIpcClient>();
+        var sent = new List<string>();
+        ipc.SentForTest = s => sent.Add(s);
+        WmvMain main = null;
+        WmvTerrainSession session = null;
+        var reports = new List<WmvIpcClient.TerrainTileReport>();
+        int assetPathCalls = 0;
+        Func<int, int> reportsFor = load => reports.FindAll(r => r.Load == load).Count;
+        Func<object, string, object> field = (o, name) => o.GetType().GetField(name, BindingFlags.Instance | BindingFlags.Public).GetValue(o);
+        try
+        {
+            var mainGo = new GameObject("TerrainLateAnswerMain");
+            objects.Add(mainGo);
+            mainGo.SetActive(false);                                          // before AddComponent: no Awake
+            main = mainGo.AddComponent<WmvMain>();
+            GameObject camGo;
+            WmvOrbitCamera orbit = NewCamera(out camGo);
+            objects.Add(camGo);
+            Camera cam = camGo.GetComponent<Camera>();
+            cam.enabled = false;
+            cam.aspect = 1f;
+            cam.cullingMask = WmvTerrainBuilder.ModelViewMask;
+            var mode = new WmvTerrainViewMode(orbit, cam);
+            SetMainField(main, "ipc", ipc);
+            SetMainField(main, "status", mainGo.AddComponent<WmvStatusOverlay>());
+            SetMainField(main, "orbit", orbit);
+            SetMainField(main, "terrainViewMode", mode);
+            var view = (IWmvTerrainView)Activator.CreateInstance(typeof(WmvMain).GetNestedType("MainTerrainView", BindingFlags.NonPublic),
+                                                            new object[] { main });
+            session = new WmvTerrainSession(view, ipc.RequestMapAsset, r => reports.Add(r), null, a => a());
+            SetMainField(main, "terrain", session);
+            InvokeMain(main, "WireTerrainMessages");
+            WmvMain m = main;
+            ipc.OnAssetResponse = r => { assetPathCalls++; InvokeMain(m, "HandleAssetResponse", r); };
+            ipc.OnLoadWoWModel = (path, fileDataID, client, character, load, kind, keepView) =>
+                InvokeMain(m, "HandleLoadWoWModel", path, fileDataID, client, character, load, kind, keepView);
+            Func<int, string, string> modelLoadLine = (fileDataID, kind) =>
+                "{\"type\":\"loadWoWModel\",\"path\":\"\",\"fileDataID\":" + fileDataID + ",\"client\":\"test\",\"character\":false,\"load\":9," +
+                "\"kind\":\"" + kind + "\",\"assetEpoch\":7}";
+
+            // ---- a tile through the player's own wiring: both answers go to the session, none to the model asset path
+            ipc.FeedLineForTest(TerrainLoadLine(401, 7), null);
+            string wdtId = RequestIdOf(LastSent(sent, "getMapAsset"));
+            ipc.FeedLineForTest(MapAnswerLine(wdtId, TerrainTestWdt, "wdt", 401, wdt), wdt);
+            ipc.FeedLineForTest(MapAnswerLine(RequestIdOf(LastSent(sent, "getMapAsset")), (int)TerrainTestRoot, "rootAdt", 401, root), root);
+            for (int f = 0; f < 3; f++)
+                session.Pump(4000.0 + f);
+            WmvIpcClient.TerrainTileReport built = reports.Find(r => r.Load == 401);
+            Check(built != null && built.Status == "built" && reportsFor(401) == 1 && assetPathCalls == 0 && mode.Active,
+                  "terrain late answers: a tile builds through the player's wiring (WireTerrainMessages), its answers never on the model asset " +
+                  "path (" + assetPathCalls + " there; tile " + (built != null ? built.Status : "not reported") + ")", log);
+
+            // ---- a model load takes a terrain load's place; the terrain load's late answer is the session's alone
+            ipc.FeedLineForTest(TerrainLoadLine(402, 7), null);
+            string id402 = RequestIdOf(LastSent(sent, "getMapAsset"));
+            ipc.FeedLineForTest(modelLoadLine(modelFile, "m2"), null);
+            object job = GetMainField(main, "job");
+            string pendingM2 = job != null ? (string)field(job, "PendingM2") : null;
+            WmvIpcClient.TerrainTileReport r402 = reports.Find(r => r.Load == 402);
+            Func<bool> jobUntouched = () => GetMainField(m, "job") == job && job != null && (string)field(job, "PendingM2") == pendingM2 &&
+                                            field(job, "M2Bytes") == null && field(job, "Model") == null;
+            int late = session.LateAnswersDropped;
+            ipc.FeedLineForTest(MapAnswerLine(id402, TerrainTestWdt, "wdt", 402, wdt), wdt);
+            Check(r402 != null && r402.Status == "superseded" && reportsFor(402) == 1 && pendingM2 != null && session.LateAnswersDropped == late + 1 &&
+                  assetPathCalls == 0 && jobUntouched() && !mode.Active,
+                  "terrain late answers: a terrain load's WDT answer arriving after a model load took its place goes to the session (dropped as " +
+                  "late), never to HandleAssetResponse (" + assetPathCalls + " call(s)); the model job waiting for " + pendingM2 + " is as it was", log);
+
+            // ---- a map answer naming the model job's own request id: still the session's (unowned), the job untouched
+            int unowned = session.UnownedAnswersDropped;
+            ipc.FeedLineForTest(MapAnswerLine(pendingM2, (int)TerrainTestRoot, "rootAdt", 402, wdt), wdt);
+            Check(session.UnownedAnswersDropped == unowned + 1 && assetPathCalls == 0 && jobUntouched(),
+                  "terrain late answers: a map answer (role rootAdt) under the model job's own request id " + pendingM2 + " goes to the session, " +
+                  "not to the job, which is untouched", log);
+
+            // ---- defence in depth: HandleAssetResponse handed a map answer directly drops it before any model path, by each half
+            // of the rule -- its guard's own count says it acted on both (a map id with no role would otherwise reach the
+            // model paths unseen: no job waits for a "map" id)
+            int guardBefore = main.MapAnswersDroppedOnAssetPath;
+            InvokeMain(main, "HandleAssetResponse", HiddenMapAnswer(pendingM2, modelFile, "wdt", 402, wdt));
+            int guardByRole = main.MapAnswersDroppedOnAssetPath - guardBefore;
+            InvokeMain(main, "HandleAssetResponse", new WmvIpcClient.AssetResponse
+            {
+                requestId = id402, ok = false, error = "test: a map id with no role", role = "", path = "", state = "", detail = "", md5 = "",
+            });
+            int guardById = main.MapAnswersDroppedOnAssetPath - guardBefore - guardByRole;
+            Check(guardByRole == 1 && guardById == 1 && main.MapAnswersDroppedOnAssetPath == guardBefore + 2 && guardBefore == 0 && jobUntouched(),
+                  "terrain late answers: HandleAssetResponse itself drops a map answer handed to it -- by role under the job's own id (" +
+                  guardByRole + "), by a map id (" + id402 + ") without a role (" + guardById + "); its guard counted " + guardBefore + " -> " +
+                  main.MapAnswersDroppedOnAssetPath + " -- and the model job is untouched", log);
+
+            // ---- the job's own answer still reaches it
+            int requestsBefore = sent.Count;
+            ipc.FeedLineForTest(ModelAnswerLine(pendingM2, modelFile, m2, false), m2);
+            object jobAfter = GetMainField(main, "job");
+            string pendingSkin = jobAfter != null ? (string)field(jobAfter, "PendingSkin") : null;
+            Check(assetPathCalls == 1 && jobAfter == job && field(job, "M2Bytes") == m2 && field(job, "Model") != null && pendingSkin != null &&
+                  SentContains(sent.GetRange(requestsBefore, sent.Count - requestsBefore), "{\"type\":\"getAssetByFileDataID\",\"requestId\":\"" + pendingSkin + "\""),
+                  "terrain late answers: the model job's own .m2 answer reaches HandleAssetResponse (" + assetPathCalls + " call) and the job: " +
+                  "parsed, its skin asked for (" + (pendingSkin ?? "nothing") + ")", log);
+
+            // ---- the same for a world-model job waiting for its root
+            ipc.FeedLineForTest(TerrainLoadLine(403, 7), null);                // drops the model job
+            string id403 = RequestIdOf(LastSent(sent, "getMapAsset"));
+            ipc.FeedLineForTest(modelLoadLine(wmoFile, "wmo"), null);
+            object wmoJob = GetMainField(main, "wmoJob");
+            string pendingRoot = wmoJob != null ? (string)field(wmoJob, "PendingRoot") : null;
+            WmvIpcClient.TerrainTileReport r403 = reports.Find(r => r.Load == 403);
+            Func<bool> wmoUntouched = () => GetMainField(m, "wmoJob") == wmoJob && wmoJob != null && (string)field(wmoJob, "PendingRoot") == pendingRoot &&
+                                            field(wmoJob, "Root") == null;
+            int calls = assetPathCalls;
+            late = session.LateAnswersDropped;
+            ipc.FeedLineForTest(MapAnswerLine(id403, TerrainTestWdt, "wdt", 403, wdt), wdt);
+            ipc.FeedLineForTest(MapAnswerLine(pendingRoot, (int)TerrainTestRoot, "rootAdt", 403, wdt), wdt);
+            bool lateKept = r403 != null && r403.Status == "superseded" && reportsFor(403) == 1 && session.LateAnswersDropped == late + 1 &&
+                            assetPathCalls == calls && pendingRoot != null && wmoUntouched() && GetMainField(main, "job") == null;
+            requestsBefore = sent.Count;
+            ipc.FeedLineForTest(ModelAnswerLine(pendingRoot, wmoFile, wmoRootBytes, false), wmoRootBytes);
+            Check(lateKept && assetPathCalls == calls + 1 && GetMainField(main, "wmoJob") == wmoJob && field(wmoJob, "Root") != null &&
+                  field(wmoJob, "PendingRoot") == null &&
+                  SentContains(sent.GetRange(requestsBefore, sent.Count - requestsBefore), "{\"type\":\"getAssetByFileDataID\""),
+                  "terrain late answers: a world-model job waiting for its root (" + pendingRoot + ") sees neither the late terrain answer nor a " +
+                  "map answer under its own id; its root's answer reaches it (parsed, its groups asked for)", log);
+            Check(session.PendingRequests == 0 && session.RetiredRequests == 2 && session.ReportsSent == 3 && session.SecondReportsRefused == 0 &&
+                  session.RetiredTotal == 2 && session.LastRetiredRequest == id403,
+                  "terrain late answers: three terrain loads, three reports; nothing pending, the two ended loads' requests retired (" +
+                  session.RetiredTotal + " in all, the last " + session.LastRetiredRequest + ")", log);
+
+            // ---- a map id with no role through the player's own wiring: the session's (unowned), never the model asset path;
+            // then runtimeState (FillTerrainRuntimeState) sends the session's bookkeeping under the host's names, late and
+            // unowned apart -- here they differ (2 and 3), so a swap shows
+            int callsBefore = assetPathCalls, unownedBefore = session.UnownedAnswersDropped;
+            ipc.FeedLineForTest("{\"type\":\"assetResponse\",\"requestId\":\"map900\",\"ok\":false,\"fileDataID\":" + TerrainTestWdt + ",\"load\":403," +
+                                "\"assetEpoch\":7,\"state\":\"stale\",\"detail\":\"x\",\"error\":\"x\"}", null);
+            int stateFrom = sent.Count;
+            InvokeMain(main, "HandleRuntimeState", 31);
+            string stateLine = LastSent(sent.GetRange(stateFrom, sent.Count - stateFrom), "runtimeState");
+            int lateNow = session.LateAnswersDropped, unownedNow = session.UnownedAnswersDropped;
+            string bookkeeping = "\"terrainPendingRequests\":0,\"terrainRetiredRequests\":2,\"terrainRetiredTotal\":2,\"terrainLastRetiredRequest\":\"" +
+                                 id403 + "\",\"mapAnswersRouted\":" + ipc.MapAnswersRouted + ",\"mapAnswersDropped\":" + (lateNow + unownedNow) +
+                                 ",\"mapAnswersLate\":" + lateNow + ",\"mapAnswersUnowned\":" + unownedNow + ",";
+            Check(assetPathCalls == callsBefore && unownedNow == unownedBefore + 1 && lateNow == 2 && unownedNow == 3 &&
+                  stateLine.Contains(bookkeeping) && main.MapAnswersDroppedOnAssetPath == 2,
+                  "terrain late answers: a map id with no role (map900) fed through the player's wiring goes to the session (unowned " +
+                  unownedBefore + " -> " + unownedNow + "), not to the model asset path (" + (assetPathCalls - callsBefore) + "); runtimeState " +
+                  "then sends " + bookkeeping + " (" + (stateLine.Length > 0 ? "sent" : "nothing sent") + ")", log);
+            InvokeMain(main, "SupersedeMapObjectJob", "test end");
+        }
+        catch (Exception e)
+        {
+            // A path that threw (through reflection, the cause is the inner exception) fails here instead of ending the run.
+            Exception cause = e is TargetInvocationException && e.InnerException != null ? e.InnerException : e;
+            Check(false, "terrain late answers: the test threw " + cause.GetType().Name + ": " + cause.Message + " at " + cause.StackTrace, log);
+        }
+        finally
+        {
+            if (main != null)
+                InvokeMain(main, "DisposeTerrain");
+            foreach (GameObject go in objects)
+                if (go != null) UnityEngine.Object.DestroyImmediate(go);
+        }
+        Check(WmvRuntimeModel.Live == modelsLive && WmvRuntimeTerrainTile.Live == tilesLive && WmvRuntimeMapObject.Live == wmosLive &&
+              TerrainTallies() == "0/0/0",
+              "terrain late answers: every runtime these tests made is released (models " + WmvRuntimeModel.Live + ", tiles " +
+              WmvRuntimeTerrainTile.Live + ", world models " + WmvRuntimeMapObject.Live + ")", log);
+    }
+
+    /// <summary>
+    /// The character on screen through terrain tiles, in a WmvMain of the test's own, driving the player's terrain wiring
+    /// itself (HandleLoadTerrainTile, HandleAssetResponse, MainTerrainView, SetViewMode, FrameRiddenScene,
+    /// LeaveTerrainForModelLoad, HandleRuntimeState). That WmvMain is added to an INACTIVE GameObject, so its Awake (the
+    /// player's set-up, this self-test) never runs; the fields these paths read are set by hand.
+    ///   - Design 5.3: a terrain load drops the loads in flight, never the work of the character on screen -- a scene
+    ///     revision its dresser is still preparing and a mount being prepared for it survive the load, nothing is answered
+    ///     "superseded" for them, and the revision is applied when its file arrives while the tile is shown, the camera
+    ///     left on the tile.
+    ///   - A mount change while the terrain view holds the camera is neither fitted nor counted (viewFramings); leaving the
+    ///     view by clearTerrain does the fit and counts it once; leaving it for a model load drops it (that load frames).
+    ///   - runtimeState's terrainMeshes, terrainMaterials and terrainGameObjects under the host's names: the tile's own
+    ///     objects while it is shown, 0 at once after clearTerrain and after a model load -- while Unity, whose
+    ///     Object.Destroy waits for the end of the frame, still counts the tile's Meshes.
+    /// Runs after TerrainTests: the tiles go through the player's own deferred Dispose, so Unity's object counts are
+    /// not back within this frame.
+    /// </summary>
+    static void TerrainHiddenModelTests(Action<string> log)
+    {
+        string blocked = TerrainMainTestsBlocked();
+        if (blocked != null)
+        {
+            log("terrain hidden model: not run -- " + blocked);
+            return;
+        }
+        int tx = TerrainTestTileX, ty = TerrainTestTileY;
+        const int skinId = 990201, itemId = 990202, otherItemId = 990203, mountId = 990210;
+        int modelsLive = WmvRuntimeModel.Live, tilesLive = WmvRuntimeTerrainTile.Live;
+        byte[] wdt = TerrainWdt(true, tx, ty, (int)TerrainTestRoot);
+        byte[] root = AdtSynthetic.FlatRoot(tx, ty);
+        var objects = new List<GameObject>();
+        var ipcGo = new GameObject("TerrainHiddenModelIpc");
+        objects.Add(ipcGo);
+        var ipc = ipcGo.AddComponent<WmvIpcClient>();
+        var sent = new List<string>();
+        ipc.SentForTest = s => sent.Add(s);
+        byte[] itemBytes = M2Synthetic.InFileSkeletonModel(skinId);
+        M2ParsedModel bodyModel = M2Parser.Parse(itemBytes, 0);
+        WmvRuntimeModel body = WmvModelBuilder.Build(bodyModel, M2SkinParser.Parse(M2Synthetic.TransformSwitchSkin()),
+                                                     new Dictionary<int, BlpImage>(), "TerrainHiddenBody", s => { });
+        var dresser = new WmvCharacterDresser(ipc, 17, hash => null, s => { });
+        WmvMountedScene mounted = null;
+        WmvMain main = null;
+        var asked = new List<string[]>();                                  // requestId, role
+        var reports = new List<WmvIpcClient.TerrainTileReport>();
+        Func<int, string> runtimeState = query =>
+        {
+            int from = sent.Count;
+            InvokeMain(main, "HandleRuntimeState", query);
+            for (int i = sent.Count - 1; i >= from; i--)
+                if (sent[i].StartsWith("{\"type\":\"runtimeState\"", StringComparison.Ordinal)) return sent[i];
+            return "";
+        };
+        Func<string, string, string> tail = (line, key) =>
+        {
+            int at = line.IndexOf(",\"" + key + "\":", StringComparison.Ordinal);
+            return at < 0 ? "absent" : line.Substring(at + 1);
+        };
+        try
+        {
+            var files = (Dictionary<int, byte[]>)typeof(WmvCharacterDresser).GetField("files", BindingFlags.Instance | BindingFlags.NonPublic)
+                                                                            .GetValue(dresser);
+            files[skinId] = M2Synthetic.TransformSwitchSkin();
+            files[itemId] = itemBytes;
+            dresser.BeginAttachments(body, bodyModel, 4198151, HiddenModelScene(1, itemId));
+            dresser.Retarget(HiddenModelScene(2, otherItemId));               // its .m2 still on its way
+            bool revisionPending = dresser.Busy && dresser.AppliedRevision == 1;
+            mounted = new WmvMountedScene(ipc.RequestAssetByFileDataID, s => { }, () => { });
+            mounted.Retarget(new WmvIpcClient.SceneMount { key = "M1", fileDataID = mountId, sequenceIndex = 0, riderSequenceIndex = 0, bone = -1 }, 1.0);
+            bool mountPending = mounted.PreparingFileDataID == mountId;
+
+            var mainGo = new GameObject("TerrainHiddenModelMain");
+            objects.Add(mainGo);
+            mainGo.SetActive(false);                                          // before AddComponent: no Awake
+            main = mainGo.AddComponent<WmvMain>();
+            GameObject camGo;
+            WmvOrbitCamera orbit = NewCamera(out camGo);
+            objects.Add(camGo);
+            Camera cam = camGo.GetComponent<Camera>();
+            cam.enabled = false;
+            cam.aspect = 1f;
+            cam.cullingMask = WmvTerrainBuilder.ModelViewMask;
+            var mode = new WmvTerrainViewMode(orbit, cam);
+            SetMainField(main, "ipc", ipc);
+            SetMainField(main, "status", mainGo.AddComponent<WmvStatusOverlay>());
+            SetMainField(main, "orbit", orbit);
+            SetMainField(main, "dresser", dresser);
+            SetMainField(main, "mounted", mounted);
+            SetMainField(main, "terrainViewMode", mode);
+            var view = (IWmvTerrainView)Activator.CreateInstance(typeof(WmvMain).GetNestedType("MainTerrainView", BindingFlags.NonPublic),
+                                                            new object[] { main });
+            var session = new WmvTerrainSession(view, (role, id, load, epoch) =>
+            {
+                string r = "t" + (asked.Count + 1);
+                asked.Add(new[] { r, role });
+                return r;
+            }, r => reports.Add(r), null, a => a());
+            SetMainField(main, "terrain", session);
+            Action<int> buildTile = load =>
+            {
+                InvokeMain(main, "HandleLoadTerrainTile", TerrainCommand(load, tx, ty));
+                InvokeMain(main, "HandleMapAssetResponse", HiddenMapAnswer(asked[asked.Count - 1][0], TerrainTestWdt, "wdt", load, wdt));
+                InvokeMain(main, "HandleMapAssetResponse", HiddenMapAnswer(asked[asked.Count - 1][0], (int)TerrainTestRoot, "rootAdt", load, root));
+                for (int f = 0; f < 3; f++)
+                    session.Pump(1000.0 * load + f);
+            };
+            // The model view before any tile: framed on a box that is not the character's, so a fit to the character shows.
+            Bounds bodyBox = WmvMountedScene.WorldBounds(body.Bounds, body.Root.transform.localToWorldMatrix);
+            orbit.Frame(new Bounds(bodyBox.center + new Vector3(5f, 0f, 0f), bodyBox.size * 3f));
+
+            // ---- design 5.3: the terrain load keeps the work of the character on screen
+            int sentBefore = sent.Count;
+            InvokeMain(main, "HandleLoadTerrainTile", TerrainCommand(5, tx, ty));
+            bool nothingAnswered = !SentSince(sent, sentBefore, "\"type\":\"characterSceneApplied\"");
+            bool workKept = dresser.Busy && dresser.AppliedRevision == 1 && mounted.PreparingFileDataID == mountId && session.Loading;
+            InvokeMain(main, "HandleMapAssetResponse", HiddenMapAnswer(asked[asked.Count - 1][0], TerrainTestWdt, "wdt", 5, wdt));
+            InvokeMain(main, "HandleMapAssetResponse", HiddenMapAnswer(asked[asked.Count - 1][0], (int)TerrainTestRoot, "rootAdt", 5, root));
+            for (int f = 0; f < 3; f++)
+                session.Pump(5000.0 + f);
+            WmvIpcClient.TerrainTileReport built5 = reports.Find(r => r.Load == 5);
+            bool tileShown = built5 != null && built5.Status == "built" && mode.Active && cam.cullingMask == WmvTerrainBuilder.TerrainViewMask;
+            WmvOrbitCamera.State onTile = orbit.Snapshot();
+            string itemRequest = DresserRequestFor(dresser, otherItemId);
+            InvokeMain(main, "HandleAssetResponse", new WmvIpcClient.AssetResponse
+            {
+                requestId = itemRequest, ok = true, fileDataID = otherItemId, data = itemBytes, byteLength = itemBytes.Length, error = "", path = "",
+            });
+            bool applied = dresser.AppliedRevision == 2 && SentSince(sent, sentBefore, "\"revision\":2,\"status\":\"applied\"") &&
+                           !SentSince(sent, sentBefore, "\"status\":\"superseded\"") && orbit.Snapshot().SameAs(onTile);
+            Check(revisionPending && mountPending && nothingAnswered && workKept && tileShown && applied,
+                  "terrain hidden model: a terrain load keeps the work of the character on screen -- its scene revision 2 still being prepared " +
+                  "and the mount being prepared for it survive the load (" + (workKept ? "kept" : "dropped") + "), nothing is answered " +
+                  "\"superseded\" for them, and revision 2 is applied when its file arrives while the tile is shown, the camera left on the " +
+                  "tile (" + (applied ? "applied" : "not applied, revision " + dresser.AppliedRevision) + "; tile " +
+                  (built5 != null ? built5.Status : "not reported") + ")", log);
+
+            // ---- runtimeState with the tile shown: the tiles' own objects, under the host's names
+            string shownLine = runtimeState(21);
+            Check(shownLine.Contains("\"liveTerrainTiles\":1,") && shownLine.Contains("\"terrainView\":true,") &&
+                  shownLine.Contains(",\"terrainMeshes\":256,\"terrainMaterials\":1,\"terrainGameObjects\":257," + NoTerrainRequests),
+                  "terrain hidden model: runtimeState with the tile shown sends the tile's own objects -- " + tail(shownLine, "terrainMeshes"), log);
+
+            // ---- a mount change in the terrain view: kept, not counted; clearTerrain leaves the view and does it, once
+            mounted.Dispose();
+            mounted = null;
+            SetMainField(main, "mounted", null);                              // it rides nothing: framed on its own box
+            int framingsOnTile = main.ViewFramings;
+            InvokeMain(main, "FrameRiddenScene", "test: a mount went on");
+            bool held = main.ViewFramings == framingsOnTile && orbit.Snapshot().SameAs(onTile);
+            int meshesWithTile = Meshes();
+            session.Clear("test");                                            // the player's own Dispose: deferred
+            string clearedLine = runtimeState(22);
+            WmvOrbitCamera.State afterClear = orbit.Snapshot();
+            bool fitted = main.ViewFramings == framingsOnTile + 1 && afterClear.Pivot == bodyBox.center &&
+                          afterClear.Yaw == WmvOrbitCamera.FrontYaw && afterClear.Pitch == WmvOrbitCamera.DefaultPitch && !afterClear.MapObjectPlanes &&
+                          !mode.Active && cam.cullingMask == WmvTerrainBuilder.ModelViewMask &&
+                          (Bounds)GetMainField(main, "lastFramed") == bodyBox && !(bool)GetMainField(main, "haveRiddenFitPending");
+            Check(held && fitted,
+                  "terrain hidden model: a mount change while the terrain view holds the camera is not fitted or counted (" +
+                  (held ? "held" : "moved") + "); clearTerrain leaves the view and does that fit, counted once (viewFramings " +
+                  framingsOnTile + " -> " + main.ViewFramings + ", pivot " + afterClear.Pivot + ", the character's box centre " +
+                  bodyBox.center + ")", log);
+            Check(clearedLine.Contains("\"liveTerrainTiles\":0,") && clearedLine.Contains("\"terrainView\":false,") &&
+                  clearedLine.Contains("\"meshObjects\":" + meshesWithTile + ",") && Meshes() == meshesWithTile &&
+                  clearedLine.Contains(",\"terrainMeshes\":0,\"terrainMaterials\":0,\"terrainGameObjects\":0," + NoTerrainRequests),
+                  "terrain hidden model: runtimeState right after clearTerrain sends no terrain object -- " + tail(clearedLine, "terrainMeshes") +
+                  " -- while Unity, its Object.Destroy deferred to the end of the frame, still counts " + meshesWithTile + " Mesh objects", log);
+
+            // ---- a mount change in the terrain view, then a model load: the fit is dropped (that load frames what it shows)
+            buildTile(6);
+            WmvIpcClient.TerrainTileReport built6 = reports.Find(r => r.Load == 6);
+            WmvOrbitCamera.State modelView = mode.Saved;
+            int framingsBefore = main.ViewFramings;
+            InvokeMain(main, "FrameRiddenScene", "test: another mount went on");
+            InvokeMain(main, "LeaveTerrainForModelLoad");
+            string modelLine = runtimeState(23);
+            bool dropped = built6 != null && built6.Status == "built" && main.ViewFramings == framingsBefore && orbit.Snapshot().SameAs(modelView) &&
+                           (bool)GetMainField(main, "framingOwed") && !(bool)GetMainField(main, "haveRiddenFitPending") && !mode.Active &&
+                           cam.cullingMask == WmvTerrainBuilder.ModelViewMask;
+            Check(dropped && modelLine.Contains("\"liveTerrainTiles\":0,") &&
+                  modelLine.Contains(",\"terrainMeshes\":0,\"terrainMaterials\":0,\"terrainGameObjects\":0," + NoTerrainRequests),
+                  "terrain hidden model: leaving the terrain view for a model load drops the kept fit -- the model view as it was, viewFramings " +
+                  framingsBefore + " -> " + main.ViewFramings + ", the load owed a framing -- and runtimeState sends no terrain object (" +
+                  tail(modelLine, "terrainMeshes") + ")", log);
+
+            // ---- outside the terrain view a mount change is fitted and counted at once, as before
+            int framingsModel = main.ViewFramings;
+            InvokeMain(main, "FrameRiddenScene", "test: a mount went on in the model view");
+            Check(main.ViewFramings == framingsModel + 1 && orbit.Snapshot().Pivot == bodyBox.center,
+                  "terrain hidden model: in the model view a mount change is fitted and counted at once (viewFramings " + framingsModel + " -> " +
+                  main.ViewFramings + ")", log);
+        }
+        catch (Exception e)
+        {
+            // A path that threw (through reflection, the cause is the inner exception) fails here instead of ending the run.
+            Exception cause = e is TargetInvocationException && e.InnerException != null ? e.InnerException : e;
+            Check(false, "terrain hidden model: the test threw " + cause.GetType().Name + ": " + cause.Message + " at " + cause.StackTrace, log);
+        }
+        finally
+        {
+            if (main != null)
+                InvokeMain(main, "DisposeTerrain");                         // the session's tiles and the scene root
+            if (mounted != null) mounted.Dispose();
+            dresser.Dispose();
+            body.Dispose();
+            foreach (GameObject go in objects)
+                if (go != null) UnityEngine.Object.DestroyImmediate(go);
+        }
+        Check(WmvRuntimeModel.Live == modelsLive && WmvRuntimeTerrainTile.Live == tilesLive && TerrainTallies() == "0/0/0",
+              "terrain hidden model: every model runtime and terrain tile these tests made is released (models " + WmvRuntimeModel.Live +
+              ", tiles " + WmvRuntimeTerrainTile.Live + ", tallies " + TerrainTallies() + ")", log);
+    }
+
+    /// <summary>runtimeState's request bookkeeping with nothing pending or retired, ever.</summary>
+    const string NoTerrainRequests = "\"terrainPendingRequests\":0,\"terrainRetiredRequests\":0,\"terrainRetiredTotal\":0,\"terrainLastRetiredRequest\":\"\",";
+
+    static WmvIpcClient.CharacterScene HiddenModelScene(int revision, int itemFileDataID)
+    {
+        var item = new WmvIpcClient.SceneAttachment { key = "left", fileDataID = itemFileDataID, attachmentId = 2, bone = 2,
+                                                      position = new[] { 1f, 2f, 3f }, scale = 1f, visible = true };
+        return new WmvIpcClient.CharacterScene { attachmentsOnly = true, load = 17, fileDataID = 4198151, revision = revision,
+                                                 attachments = new[] { item } };
+    }
+
+    static WmvIpcClient.AssetResponse HiddenMapAnswer(string requestId, int fileDataID, string role, int load, byte[] data)
+    {
+        return new WmvIpcClient.AssetResponse
+        {
+            requestId = requestId, ok = true, fileDataID = fileDataID, role = role, load = load, assetEpoch = 7, state = "available", detail = "",
+            readMs = 0.25, md5 = WmvTerrainSession.Md5Hex(data), data = data, byteLength = data.Length, error = "", path = "",
+        };
+    }
+
+    /// <summary>The request id the dresser is waiting on for a file, or null.</summary>
+    static string DresserRequestFor(WmvCharacterDresser dresser, int fileDataID)
+    {
+        var pending = (Dictionary<string, int>)typeof(WmvCharacterDresser).GetField("pending", BindingFlags.Instance | BindingFlags.NonPublic)
+                                                                          .GetValue(dresser);
+        foreach (var kv in pending)
+            if (kv.Value == fileDataID) return kv.Key;
+        return null;
+    }
+
+    static bool SentSince(List<string> sent, int from, string fragment)
+    {
+        for (int i = from; i < sent.Count; i++)
+            if (sent[i].Contains(fragment)) return true;
+        return false;
+    }
+
+    static void SetMainField(WmvMain main, string name, object value)
+    {
+        typeof(WmvMain).GetField(name, BindingFlags.Instance | BindingFlags.NonPublic).SetValue(main, value);
+    }
+
+    static object GetMainField(WmvMain main, string name)
+    {
+        return typeof(WmvMain).GetField(name, BindingFlags.Instance | BindingFlags.NonPublic).GetValue(main);
+    }
+
+    static object InvokeMain(WmvMain main, string name, params object[] args)
+    {
+        return typeof(WmvMain).GetMethod(name, BindingFlags.Instance | BindingFlags.NonPublic).Invoke(main, args);
+    }
+
+    [Serializable] class TerrainLineProbe
+    {
+        public string type;
+        public int load;
+        public string status;
+    }
+
+    /// <summary>runtimeState read back as JSON: the request bookkeeping fields that are not plain counts in a row.</summary>
+    [Serializable] class RuntimeStateProbe
+    {
+        public int terrainRetiredTotal;
+        public string terrainLastRetiredRequest;
+    }
+
+    static string RequestIdOf(string line)
+    {
+        int at = line.IndexOf("\"requestId\":\"", StringComparison.Ordinal);
+        if (at < 0) return "";
+        at += "\"requestId\":\"".Length;
+        int end = line.IndexOf('"', at);
+        return end > at ? line.Substring(at, end - at) : "";
+    }
+
+    static string MapAnswerLine(string requestId, int fileDataID, string role, int load, byte[] data)
+    {
+        return "{\"type\":\"assetResponse\",\"requestId\":\"" + requestId + "\",\"ok\":true,\"fileDataID\":" + fileDataID + ",\"role\":\"" + role +
+               "\",\"load\":" + load + ",\"assetEpoch\":7,\"state\":\"available\",\"detail\":\"\",\"readMs\":0.25,\"md5\":\"" +
+               WmvTerrainSession.Md5Hex(data) + "\",\"byteLength\":" + data.Length + ",\"encoding\":\"binary\",\"payloadBytes\":" + data.Length + "}";
     }
 }

@@ -1209,7 +1209,7 @@ to WMV's own log). The player is built locally from `Tools/UnityRendererProject/
 repository contains **no** Unity build output, and nothing in the installer or the CMake
 install rules ships one yet.
 
-## IPC (implemented; protocol 11)
+## IPC (implemented; protocol 12)
 
 **WMV is the server.** `UnityRendererHost` starts a TCP listener bound to `127.0.0.1` on an
 ephemeral port *before* launching the player and passes the port on the player's command
@@ -1225,7 +1225,7 @@ application uses). Player side: `Tools/UnityRendererProject/Assets/Scripts/WmvIp
 **Player -> WMV**
 
 ```json
-{ "type": "unityReady", "protocolVersion": 11 }
+{ "type": "unityReady", "protocolVersion": 12 }
 { "type": "getAsset", "requestId": "abc123", "path": "creature/chicken/chicken.m2" }
 { "type": "getAssetByFileDataID", "requestId": "abc124", "fileDataID": 123456 }
 { "type": "getModelTextures", "requestId": "abc125", "fileDataID": 123200 }
@@ -1516,6 +1516,33 @@ Semantics:
 - **NPC equipment (protocol 11).** An NPC on its own model gets its weapons in a `characterScene` with
   `"attachmentsOnly": true` and its load's `load` serial; see "Equipment on exclusive NPC models" above. An older
   player gets no such scene.
+- **Terrain tiles (protocol 12; a developer test path, no viewer mode yet).** The host sends `loadTerrainTile`
+  (`load`, `assetEpoch`, `mapId`, `mapDirectory`, `product`, `build`, `wdtFileDataID`, `wdtResolvedBy`, `wdtPath`,
+  `tileX`, `tileY`, `maxAssetBytes`) and `clearTerrain` (`reason`). The player asks for the map's WDT and then the
+  tile's root ADT with `getMapAsset` (`requestId`, `load`, `assetEpoch`, `role` "wdt" or "rootAdt", `fileDataID`),
+  builds the tile's mesh off its main thread and answers each load exactly once with `terrainTileLoaded`: `built`,
+  `failed` (with `reason`, and `hostState`/`hostDetail` when a host answer caused it), `superseded` or `cleared`, with
+  counts, bounds, the MD5s of the bytes it parsed, timings and object counts. The host answers `getMapAsset` with an
+  ordinary `assetResponse` (a binary payload, never cacheable) that adds `role`, `load`, `assetEpoch`, `state`,
+  `detail`, `readMs` and `md5`. It reads through the map catalogue's verified reader (content key checked, 4 MiB
+  limit) and answers `stale` for a request of an earlier load, another client epoch or a catalogue that no longer
+  belongs to the loaded client, and `refused` while a client loads and for an unknown role, a WDT other than the
+  load's, a root before the WDT or a second root. `runtimeState` adds `liveTerrainTiles`, `terrainLoad`,
+  `terrainLoading`, `terrainView`, `cameraMask`, `meshObjects`, `materialObjects`, `terrainMeshes`,
+  `terrainMaterials` and `terrainGameObjects`, and the request bookkeeping below. An older player is never sent
+  terrain. The design, evidence and limits are in `docs/world-viewer/03-terrain-geometry.md`.
+- **Map answers are owned by routing, not by memory.** The player asks for map files under request ids of their own
+  (`map<n>`, never the `u<n>` ids of model, character and world-model requests). An `assetResponse` with such an id, or
+  with a `role` (only `getMapAsset` answers carry one), goes to the terrain session alone: never into the asset cache
+  and never to a model, character or world-model handler, whether it comes on time, late, failed or for a load that
+  has ended. The session waits for one request at a time; when a load ends without its answer, that request moves to a
+  ring of the last 32 ended requests, so a late answer is recognised, logged and dropped, and nothing grows however
+  many answers never come. `runtimeState` reports it: `terrainPendingRequests`, `terrainRetiredRequests` (at most 32),
+  `terrainRetiredTotal`, `terrainLastRetiredRequest`, `mapAnswersRouted`, `mapAnswersDropped` (= `mapAnswersLate` +
+  `mapAnswersUnowned`) and `terrainTimeoutMs`. A load not built 30 s after it started fails "timed out"
+  (`-wmvTerrainTimeoutMs=<n>`, 1000 to 120000, shortens it for tests). The host keeps the newest 256 served-request
+  records (with totals), and remembers which files of the current client it has read (at most 8192, emptied when the
+  client is replaced), so its diagnostics stay bounded too.
 - Nothing is written to disk on either side; this is runtime access, not an export workflow.
 
 WMV logs every step with the `[unityipc]` prefix: listening port, player connected,
@@ -1651,6 +1678,22 @@ the distance as a multiple of the framing distance), so a capture can be taken f
 audit's reference views are `135:30` and `315:30`, and the archived viewport's yaw Y and pitch P are
 `180-Y:90-P` (its mount references' iso view, yaw 315 at pitch 90, is `225:0`; only the angles map -- that
 camera looks at the mount's own box and has a different field of view).
+
+**Terrain test (protocol 12).** `wowmodelviewer.exe -terraintile <mapId> <x> <y> [<out.json>] -product <p>` loads
+the client, starts the player, runs in-process checks of the host's `getMapAsset` decisions, then asks for the tile
+through the production path and waits for its `terrainTileLoaded`. `WMV_TERRAINTEST_SEQUENCE` (comma-separated)
+adds steps: `tile:<m>:<x>:<y>`, `repeat:<n>`, `clear` and `clear:<m>:<x>:<y>`, `supersede:<a>|<b>`, `staleepoch`,
+`staleload`, `expectfail:<m>:<x>:<y>:<reason>`, `notlocal:<m>:<x>:<y>:<rootFileDataID>`, `switch:<product>`,
+`model:<path>` and `model:<path>|<m>:<x>:<y>`, `modelthentile:<path>|<m>:<x>:<y>`, `wait:<ms>`, and for late answers
+(the host holds a request unanswered and answers it after the load ended): `timeout:<m>:<x>:<y>:<wdt|rootAdt>`,
+`latesupersede:...`, `lateclear:...`, `lateswitch:<product>:<m>:<x>:<y>`, `reconnect` and `reconnect:<m>:<x>:<y>`,
+and `failrepeat:<n>`. Every load must be
+answered exactly once, the MD5s the player parsed must equal those the host served, and the player's terrain
+objects must be 0 after a clear, a model load and a client switch. Results go to `<out.json>` and
+`[terrain-test]` lines. Player switches (command line or `WMV_DEBUG`):
+`-wmvTerrainView=shaded|chunks|wire|shadedwire|normals`, `-wmvTerrainChunk=<n>`, `-wmvTerrainFocus=<n>`, `-wmvTerrainTopDown` and
+`-wmvTerrainDump=<name>` (a test fixture: the meshes read back from Unity, compared by
+`Tools/world-audit/compare_terrain_mesh.py`). The shading is a geometry diagnostic, not the game's terrain look.
 
 The canvas animation clock of the viewport check is measured inside an
 event loop activated for the measurement: the self-test runs inside `OnInit`, before the

@@ -415,7 +415,7 @@ Sub-chunk sizes (`subchunk_sizes.py`):
 | 4, 8 | index_x, index_y | = chunk order, 100% |
 | 20 | 64-bit high-resolution hole mask | 5.4, 6.5 |
 | 52 | area id | resolves through each client's own AreaTable.db2 to the expected zones (T4) |
-| 60 | 16-bit low-resolution holes | always 0 (bit 0x10000 is always set) |
+| 60 | 16-bit low-resolution holes | always 0 in the audited corpus (bit 0x10000 is always set there); not universal: stage 03 found flag 0x10000 clear in all 256 chunks of Retail map 1051 tile 31_29, five of them with a non-zero mask (`03-terrain-geometry.md`) |
 | 88 | MCSE offset | = the MCSE sub-chunk's position from the MCNK chunk start (100%) |
 | 96 | "liquid" offset | equals the MCSE offset (the MCSE sub-chunk's start: 1180, or 1768 with MCCV) in every chunk, with size 0, although no MCLQ exists anywhere (U8) |
 | 104 | position (x, y, z) | 6.1 |
