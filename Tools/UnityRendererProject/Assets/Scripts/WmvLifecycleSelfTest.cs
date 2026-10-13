@@ -22,7 +22,7 @@ using UnityEngine;
 using Wmv.Wow;
 using Wmv.Wow.World;
 
-public static class WmvLifecycleSelfTest
+public static partial class WmvLifecycleSelfTest
 {
     static int passed, failed;
 
@@ -4169,6 +4169,8 @@ public static class WmvLifecycleSelfTest
     {
         int meshesBefore = Resources.FindObjectsOfTypeAll<Mesh>().Length;
         int materialsBefore = Resources.FindObjectsOfTypeAll<Material>().Length;
+        int texturesBefore = Resources.FindObjectsOfTypeAll<Texture2D>().Length;
+        int arraysBefore = Resources.FindObjectsOfTypeAll<Texture2DArray>().Length;
         int liveBefore = WmvRuntimeTerrainTile.Live;
         TerrainBuilderTests(log);
         TerrainCoverageTests(log);
@@ -4180,12 +4182,19 @@ public static class WmvLifecycleSelfTest
         TerrainCameraTests(log);
         TerrainIpcTests(log);
         TerrainMapRoutingTests(log);
+        TerrainMaterialTests(log);
         int meshesAfter = Resources.FindObjectsOfTypeAll<Mesh>().Length;
         int materialsAfter = Resources.FindObjectsOfTypeAll<Material>().Length;
-        Check(WmvRuntimeTerrainTile.Live == liveBefore && meshesAfter == meshesBefore && materialsAfter == materialsBefore,
-              string.Format("terrain: every tile, Mesh and Material these tests made is gone (live tiles {0} -> {1}, meshes {2} -> {3}, " +
-                            "materials {4} -> {5})", liveBefore, WmvRuntimeTerrainTile.Live, meshesBefore, meshesAfter, materialsBefore,
-                            materialsAfter), log);
+        int texturesAfter = Resources.FindObjectsOfTypeAll<Texture2D>().Length;
+        int arraysAfter = Resources.FindObjectsOfTypeAll<Texture2DArray>().Length;
+        Check(WmvRuntimeTerrainTile.Live == liveBefore && meshesAfter == meshesBefore && materialsAfter == materialsBefore &&
+              texturesAfter == texturesBefore && arraysAfter == arraysBefore && WmvRuntimeTerrainTile.LiveTextures == 0 &&
+              WmvRuntimeTerrainTile.LiveTextureBytes == 0 && WmvRuntimeTerrainTile.LiveAlphaArrays == 0,
+              string.Format("terrain: every tile, Mesh, Material, Texture2D and Texture2DArray these tests made is gone (live tiles {0} -> {1}, " +
+                            "meshes {2} -> {3}, materials {4} -> {5}, textures {6} -> {7}, alpha arrays {8} -> {9}; terrain texture tallies " +
+                            "{10}/{11}/{12})", liveBefore, WmvRuntimeTerrainTile.Live, meshesBefore, meshesAfter, materialsBefore,
+                            materialsAfter, texturesBefore, texturesAfter, arraysBefore, arraysAfter, WmvRuntimeTerrainTile.LiveTextures,
+                            WmvRuntimeTerrainTile.LiveTextureBytes, WmvRuntimeTerrainTile.LiveAlphaArrays), log);
     }
 
     static TerrainTileMesh TerrainFromRoot(byte[] root, int tileX, int tileY)
@@ -4799,10 +4808,20 @@ public static class WmvLifecycleSelfTest
         public int Shown, Left, Disposed, BuiltHooks;
         /// <summary>The terrain tallies the moment the last tile's objects existed, before the session committed it.</summary>
         public string TalliesAtBuild = "";
+        /// <summary>The view to build in; null = as the player decides it without -wmvTerrainView (textured for a textured or
+        /// partial material, shaded otherwise).</summary>
+        public WmvTerrainView? View;
+        public bool PlainDiagnostic;
+        public WmvTerrainTileContent LastContent;
+        public WmvTerrainView LastView;
 
-        public void BuildTile(WmvRuntimeTerrainTile tile, TerrainTileMesh mesh)
+        public bool DrawsPlainDiagnostic { get { return PlainDiagnostic; } }
+
+        public void BuildTile(WmvRuntimeTerrainTile tile, TerrainTileMesh mesh, WmvTerrainTileContent content)
         {
-            WmvTerrainBuilder.Build(tile, mesh, null, new WmvTerrainBuildOptions { View = WmvTerrainView.Shaded, OnlyChunk = -1 }, null);
+            LastContent = content;
+            LastView = View ?? (content != null && content.HasDrawableChunks ? WmvTerrainView.Textured : WmvTerrainView.Shaded);
+            WmvTerrainBuilder.Build(tile, mesh, content, null, new WmvTerrainBuildOptions { View = LastView, OnlyChunk = -1 }, null);
             TalliesAtBuild = TerrainTallies();
             if (FailBuild)
                 throw new InvalidOperationException("test: the build fails after its objects exist");
@@ -4831,15 +4850,7 @@ public static class WmvLifecycleSelfTest
                 tile.DisposeImmediate();
                 return;
             }
-            if (tile.Root != null) pendingDestroy.Add(tile.Root);
-            foreach (Mesh m in tile.ChunkMeshes) if (m != null) pendingDestroy.Add(m);
-            foreach (GameObject l in tile.LineObjects)
-            {
-                MeshFilter f = l != null ? l.GetComponent<MeshFilter>() : null;
-                if (f != null && f.sharedMesh != null) pendingDestroy.Add(f.sharedMesh);
-            }
-            if (tile.SurfaceMaterial != null) pendingDestroy.Add(tile.SurfaceMaterial);
-            if (tile.LineMaterial != null) pendingDestroy.Add(tile.LineMaterial);
+            pendingDestroy.AddRange(tile.OwnedObjects());
             tile.Dispose();
         }
 
@@ -4850,7 +4861,8 @@ public static class WmvLifecycleSelfTest
             pendingDestroy.Clear();
         }
         public void Sample(WmvIpcClient.TerrainTileReport report) { WmvTerrainBuilder.SampleCounters(report); }
-        public void TileBuilt(WmvRuntimeTerrainTile tile, TerrainTileMesh mesh, WmvIpcClient.TerrainTileCommand command, int rootFileDataID)
+        public void TileBuilt(WmvRuntimeTerrainTile tile, TerrainTileMesh mesh, WmvTerrainTileContent content, WmvIpcClient.TerrainTileCommand command,
+                              int rootFileDataID)
         {
             BuiltHooks++;
         }
@@ -5478,7 +5490,7 @@ public static class WmvLifecycleSelfTest
             ipc.OnAssetResponse = r => modelAnswers.Add(r);
             ipc.OnLoadTerrainTile = c => got = c;
             ipc.OnClearTerrain = r => cleared = r;
-            Check(WmvIpcClient.ProtocolVersion == 12, "terrain ipc: the player speaks protocol 12", log);
+            Check(WmvIpcClient.ProtocolVersion == 13, "terrain ipc: the player speaks protocol 13", log);
 
             int generation = ipc.Cache.Generation;
             ipc.FeedLineForTest("{\"type\":\"loadTerrainTile\",\"load\":3,\"assetEpoch\":5,\"mapId\":0,\"mapDirectory\":\"Azeroth\",\"product\":\"wow\"," +
@@ -5562,7 +5574,8 @@ public static class WmvLifecycleSelfTest
                                      "\"terrainMeshes\":256,\"terrainMaterials\":1,\"terrainGameObjects\":257," +
                                      "\"terrainPendingRequests\":1,\"terrainRetiredRequests\":3,\"terrainRetiredTotal\":37," +
                                      "\"terrainLastRetiredRequest\":\"map41\",\"mapAnswersRouted\":" + ipc.MapAnswersRouted +
-                                     ",\"mapAnswersDropped\":4,\"mapAnswersLate\":3,\"mapAnswersUnowned\":1,\"terrainTimeoutMs\":3000}") &&
+                                     ",\"mapAnswersDropped\":4,\"mapAnswersLate\":3,\"mapAnswersUnowned\":1,\"terrainTimeoutMs\":3000," +
+                                     "\"terrainTextures\":0,\"terrainTextureBytes\":0,\"terrainAlphaArrays\":0}") &&
                   ipc.MapAnswersRouted == 2 && noneLine.Contains(",\"terrainLastRetiredRequest\":\"\",") &&
                   JsonUtility.FromJson<RuntimeStateProbe>(stateLine).terrainLastRetiredRequest == "map41" &&
                   JsonUtility.FromJson<RuntimeStateProbe>(stateLine).terrainRetiredTotal == 37,
@@ -5645,7 +5658,7 @@ public static class WmvLifecycleSelfTest
         int largestStart;
         string collections = SessionCollections(new TerrainHarness().Session, out largestStart);
         Check(typeof(WmvTerrainSession).GetField("requests", BindingFlags.Instance | BindingFlags.NonPublic) == null &&
-              WmvTerrainSession.RetiredCapacity == 32 && largestStart == 0,
+              WmvTerrainSession.RetiredCapacity == 128 && WmvTerrainSession.MaxOutstanding == 4 && largestStart == 0,
               "terrain requests: the session keeps no table of its requests -- its collections are " + collections, log);
         var clampLow = new TerrainHarness(500.0);
         var clampHigh = new TerrainHarness(500000.0);
@@ -5825,29 +5838,29 @@ public static class WmvLifecycleSelfTest
             fresh.Session.Clear("test");
         }
 
-        // ---- the ring is bounded: 40 loads superseded unanswered keep the newest 32 (while RetiredTotal counts all 40); the
-        // answer of one that fell out is still dropped (as unowned now), never applied
+        // ---- the ring is bounded: 140 loads superseded unanswered keep the newest 128 (while RetiredTotal counts all 140);
+        // the answer of one that fell out is still dropped (as unowned now), never applied
         {
             var h = new TerrainHarness();
             harnesses.Add(h);
             var ids = new List<string>();
-            for (int i = 0; i < 40; i++)
+            for (int i = 0; i < 140; i++)
             {
                 h.Session.Load(TerrainCommand(300 + i, tx, ty));
                 ids.Add(h.Last(rw));
             }
             h.Session.Clear("test");
             WmvTerrainSession.RetiredRequest e;
-            bool oldestOut = !h.Session.TryGetRetired(ids[0], out e) && !h.Session.TryGetRetired(ids[7], out e);
-            bool newestIn = h.Session.TryGetRetired(ids[8], out e) && e.Load == 308 && h.Session.TryGetRetired(ids[39], out e) && e.Load == 339 &&
+            bool oldestOut = !h.Session.TryGetRetired(ids[0], out e) && !h.Session.TryGetRetired(ids[11], out e);
+            bool newestIn = h.Session.TryGetRetired(ids[12], out e) && e.Load == 312 && h.Session.TryGetRetired(ids[139], out e) && e.Load == 439 &&
                             e.Ended == "cleared";
             bool appliedOld = h.Answer(ids[0], wdt);
-            bool appliedNew = h.Answer(ids[39], wdt);
-            Check(h.Session.RetiredRequests == 32 && oldestOut && newestIn && !appliedOld && !appliedNew && h.Session.UnownedAnswersDropped == 1 &&
-                  h.Session.LateAnswersDropped == 1 && h.Reports.Count == 40 && h.Sent.Count == 40 && h.Session.RetiredTotal == 40 &&
-                  h.Session.LastRetiredRequest == ids[39],
-                  "terrain requests: the retired ring keeps the newest 32 of 40 ended requests, RetiredTotal all 40; an answer to one that fell " +
-                  "out is dropped as unowned, one still held as late -- neither applied -- " + state(h), log);
+            bool appliedNew = h.Answer(ids[139], wdt);
+            Check(h.Session.RetiredRequests == 128 && oldestOut && newestIn && !appliedOld && !appliedNew && h.Session.UnownedAnswersDropped == 1 &&
+                  h.Session.LateAnswersDropped == 1 && h.Reports.Count == 140 && h.Sent.Count == 140 && h.Session.RetiredTotal == 140 &&
+                  h.Session.LastRetiredRequest == ids[139],
+                  "terrain requests: the retired ring keeps the newest 128 of 140 ended requests, RetiredTotal all 140; an answer to one that " +
+                  "fell out is dropped as unowned, one still held as late -- neither applied -- " + state(h), log);
         }
 
         // ---- 1200 loads whose answers never come or fail -- cleared, timed out, taken by a model load, refused by the host,
@@ -6303,7 +6316,8 @@ public static class WmvLifecycleSelfTest
         if (!string.IsNullOrEmpty(Environment.GetEnvironmentVariable("WMV_VIEWPORT_SHOT")) ||
             !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("WMV_VIEWPORT_ORBIT")) || WmvModelBuilder.Debug_.LightCheck ||
             WmvModelBuilder.Debug_.AllocCheck || WmvModelBuilder.Debug_.HasFrameBounds || WmvTerrainDebug.View != WmvTerrainView.Shaded ||
-            WmvTerrainDebug.OnlyChunk >= 0 || WmvTerrainDebug.Focus >= 0 || WmvTerrainDebug.TopDown || WmvTerrainDebug.DumpName != null)
+            WmvTerrainDebug.OnlyChunk >= 0 || WmvTerrainDebug.Focus >= 0 || WmvTerrainDebug.TopDown || WmvTerrainDebug.DumpName != null ||
+            WmvTerrainDebug.AnyMaterialDump)
             return "a capture or debug switch is set, and these tests drive a WmvMain that cannot start a coroutine";
         return null;
     }

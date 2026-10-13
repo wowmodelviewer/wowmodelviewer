@@ -1,9 +1,10 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <!--
     Console runner for the framework-free parser tests (WowParserTests, WorldParserTests), the terrain
-    mesh tests (TerrainMeshTests), the real-corpus validation (WorldCorpusValidation and
-    TerrainCorpusTests, run only when WMV_WORLD_AUDIT_CORPUS names the extracted audit data; the latter
-    also writes mesh dumps when WMV_TERRAIN_DUMP_DIR is set), and the world-map contract check (MapContractCheck, only when
+    mesh and material tests (TerrainMeshTests, TerrainMaterialTests), the real-corpus validation
+    (WorldCorpusValidation, TerrainCorpusTests and TerrainMaterialCorpusTests, run only when
+    WMV_WORLD_AUDIT_CORPUS names the extracted audit data; TerrainCorpusTests also writes mesh dumps when
+    WMV_TERRAIN_DUMP_DIR is set), and the world-map contract check (MapContractCheck, only when
     WMV_MAP_CONTRACT_DIR names a folder of WDTs the viewer wrote). Compiles the Unity project's pure
     parsing layer (Assets/Scripts/Wow) as plain C#; it is not part of the Unity project or the viewer build.
 
@@ -24,6 +25,8 @@
     <Compile Include="..\WorldParserTests.cs" />
     <Compile Include="..\TerrainMeshTests.cs" />
     <Compile Include="..\TerrainCorpusTests.cs" />
+    <Compile Include="..\TerrainMaterialTests.cs" />
+    <Compile Include="..\TerrainMaterialCorpusTests.cs" />
     <Compile Include="..\WorldCorpusValidation.cs" />
     <Compile Include="..\MapContractCheck.cs" />
     <Compile Include="Program.cs" />

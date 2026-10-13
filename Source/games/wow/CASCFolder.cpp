@@ -215,11 +215,14 @@ CASCFolder::RootEntry CASCFolder::rootEntryByPath(const QString & path) const
 }
 
 CASCFolder::ReadOutcome CASCFolder::readWholeFile(int fileDataId, const QString & path, QByteArray & out,
-                                                  unsigned int * errorCode, qint64 maxBytes, qint64 * sizeOut) const
+                                                  unsigned int * errorCode, qint64 maxBytes, qint64 * sizeOut,
+                                                  QByteArray * contentKeyOut) const
 {
   out.clear();
   if (sizeOut)
     *sizeOut = -1;
+  if (contentKeyOut)
+    contentKeyOut->clear();
   auto outcome = [errorCode](ReadOutcome o, DWORD code) {
     if (errorCode)
       *errorCode = (unsigned int)code;
@@ -310,11 +313,15 @@ CASCFolder::ReadOutcome CASCFolder::readWholeFile(int fileDataId, const QString 
     return outcome(ReadOutcome::Unverified,
                    !keyKnown && keyError != ERROR_SUCCESS ? keyError : (DWORD)ERROR_NOT_SUPPORTED);
   }
-  if (QCryptographicHash::hash(out, QCryptographicHash::Md5) != QByteArray((const char *)contentKey, sizeof(contentKey)))
+  const QByteArray key((const char *)contentKey, sizeof(contentKey));
+  if (QCryptographicHash::hash(out, QCryptographicHash::Md5) != key)
   {
     out.clear();
     return outcome(ReadOutcome::Corrupt, ERROR_FILE_CORRUPT);
   }
+  // The key the bytes were just checked against is their MD5: handed on, so nobody hashes them again.
+  if (contentKeyOut)
+    *contentKeyOut = key;
   return outcome(ReadOutcome::Read, ERROR_SUCCESS);
 }
 

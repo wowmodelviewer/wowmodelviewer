@@ -4979,18 +4979,29 @@ static void doHeadlessUnityIpcTest(ModelViewer * frame)
 }
 
 // -terraintile <map id> <tile x> <tile y> [<out.json>] (with -product / -build to pin the client): THE TERRAIN TILE TEST
-// (protocol 12; ModelViewer::RequestTerrainTile, UnityIpcServer.h TERRAIN). After the client is loaded, and before any
-// player is started -- so they run with any player, or none -- the in-process checks: the getMapAsset decision on
-// made-up requests (ModelViewer::decideMapAssetRequest: every refusal and staleness, and the two that go on to the
-// read), the host's read tracker (a reset for a replaced client empties it at once, a read under another epoch empties it
-// first, its capacity, no false first read past it) and record ring
-// (more records than it keeps), the map's WDT inspected with a 1000-byte limit (Unreadable, the detail naming its size and the limit, no
-// bytes) and with the map-file limit (read whole), and the WDT a load would name as this client's family resolves it
-// (ModelViewer::ResolveTerrainTile, with its refusals), and the host's bookkeeping of a failed load while an earlier tile
-// is alive (ModelViewer::OnTerrainTileLoaded). Then the player is started (StartUnityRenderer(true)); one older than
-// protocol 12 ends the run "FAIL player too old". Otherwise the player's object counts are taken with no terrain (every
-// count reported, the terrain's own all 0), the tile is requested and its terrainTileLoaded awaited (60 s) -- the Mesh
-// count must rise with it -- and WMV_TERRAINTEST_SEQUENCE runs, comma-separated:
+// (protocol 12 and 13; ModelViewer::RequestTerrainTile, UnityIpcServer.h TERRAIN and TERRAIN TEXTURES). After the client is
+// loaded, and before any player is started -- so they run with any player, or none -- the in-process checks: the
+// getMapAsset decision on made-up requests (ModelViewer::decideMapAssetRequest: every refusal and staleness, the texture
+// roles' order, once-only, id, read and byte caps, a reported load, and the read limit of those that go on to the read),
+// the per-load accounting driven through it (ModelViewer::noteMapAssetRead / noteMapAssetResult), the kind check on made-up
+// bytes (ModelViewer::mapAssetKindProblem), the map asset queue on a server of its own (order, the poll budget, a full
+// queue refused unread, dropped with the connection, bounded poll records), the host's read tracker (a reset for a
+// replaced client empties it at once, a read under another epoch empties it first, its capacity, no false first read past
+// it) and record ring (more records than it keeps), what the host reads of a report's lists on made-up reports (texture
+// entries up to TERRAIN_REPORT_TEXTURES_MAX, retired ids and chunk-state counters up to TERRAIN_REPORT_LIST_MAX, the rest
+// counted) and how the material check judges a texture list, real reads through the host's own handler
+// (ModelViewer::ServeMapAsset) under a made-up load -- a root asked for as a tex0 and a tex0 as a texture fail their kinds,
+// the tex0 and a texture are served with the content key as md5, a texture over what is left of the load's budget is not
+// read, a spent budget and a reported load read nothing --, the map's WDT inspected with a 1000-byte limit (Unreadable, the
+// detail naming its size and the limit, no bytes) and with the map-file limit (read whole), the WDT a load would name as
+// this client's family resolves it (ModelViewer::ResolveTerrainTile, with its refusals), and the host's bookkeeping of a
+// failed load while an earlier tile is alive (ModelViewer::OnTerrainTileLoaded). Then the player is started
+// (StartUnityRenderer(true)); one older than protocol 12 ends the run "FAIL player too old". A protocol-12 player draws
+// geometry alone: every textured check is skipped naming why, and each of its built loads must have no material and only
+// its two files served. Otherwise the player's object counts are taken with no terrain (every count reported, the
+// terrain's own all 0), the tile is requested and its terrainTileLoaded awaited (60 s) -- the Mesh count must rise with
+// it -- and WMV_TERRAINTEST_SEQUENCE runs,
+// comma-separated:
 //   tile:<map>:<x>:<y>        another tile, built;
 //   repeat:<n>                the last tile n more times, each built, and the player's Mesh and Material counts after
 //                             them those after its first build (nothing piles up); a run of 50 or more is also sampled
@@ -4998,13 +5009,20 @@ static void doHeadlessUnityIpcTest(ModelViewer * frame)
 //   wait:<ms>                 pumps with the canvas ticking (lets a WMV_VIEWPORT_SHOT capture land);
 //   clear                     clearTerrain: a tile on show is taken away unanswered;
 //   clear:<map>:<x>:<y>       that tile requested and cleared before anything is polled: the load, still building, is
-//                             answered "cleared", once; after either form no terrain tile, view, load or terrain object,
-//                             and the player's Mesh and Material counts those of the reference with no terrain (taken
-//                             before the first tile; after a model or switch step, the counts it left, once its terrain
-//                             objects were 0) -- the check names which;
+//                             answered "cleared", once; after either form no terrain tile, view, load, terrain object,
+//                             texture or alpha array, and the player's Mesh and Material counts those of the reference
+//                             with no terrain (taken before the first tile; after a model or switch step, the counts it
+//                             left, once its terrain objects were 0) -- the check names which;
 //   expectfail:<map>:<x>:<y>:<text>   refused by the host, or answered "failed", with <text> in the reason;
 //   notlocal:<map>:<x>:<y>:<root>     when the root ADT is still listed but not downloaded (inspected first; otherwise
 //                             SKIP "precondition changed"), the load fails with host state "not installed locally";
+//   notlocalpart:<map>:<x>:<y>:<id>   when that tex0 or texture of the tile is listed but not downloaded (a precondition
+//                             as above), the tile is built, the host answers the file "not installed locally", and the
+//                             material says so: "unavailable" for the tex0, the host's answer quoted for a texture;
+//   expectmaterial:<state>[:<map>:<x>:<y>]  that tile (or the last) built, its material <state> (textured, partial,
+//                             unavailable, unsupported);
+//   expectserved:<role>:<state>[:<text>]    the last load's requests of <role> answered <state>, <text> in the detail (a
+//                             stand-in player's deliberate requests: a root asked for as a tex0, a full queue);
 //   switch:<product>          the last tile requested, then that client loaded before anything is polled: no
 //                             getMapAsset may be answered while it loads (else "test invalid"), the WDT request is
 //                             then answered "stale" (its epoch, and the next), the load answered "cleared", no tile left;
@@ -5026,41 +5044,57 @@ static void doHeadlessUnityIpcTest(ModelViewer * frame)
 //                             terrainRetiredTotal is still the one sampled before the first (none retired) and no
 //                             terrain load is building (terrainLoading 0).
 // THE LATE ANSWERS, with the server's test hooks (UnityIpcServer::testHoldNextMapAsset): the player is sampled, a load's
-// getMapAsset of <role> (wdt or rootAdt) is held unanswered and the load ends with it held. The player must have retired
-// exactly that request: terrainRetiredTotal one above the sample, terrainRetiredRequests one above it up to the ring's 32,
-// terrainLastRetiredRequest the held request's id. The request is released, the host answers it through its usual
-// decision, and the player must drop it as late -- mapAnswersLate and mapAnswersDropped one higher, mapAnswersUnowned
-// unchanged -- with no second report for the load and nothing on screen changed:
+// getMapAsset of <role> (wdt, rootAdt; tex0Adt or texture for a protocol-13 player, skipped for an older one) is held
+// unanswered and the load ends with it held. The player must have retired what the reports of the loads ended since name
+// (protocol 13: requestsRetired with the ids, the held one among them; protocol 12: exactly the held one, retired last):
+// terrainRetiredTotal that much above the sample, terrainRetiredRequests that much fuller up to the ring's capacity (128
+// for a protocol-13 player, 32 for a protocol-12 one), terrainLastRetiredRequest one of those. The request is released,
+// the host answers it through its usual decision, and the player must drop as late every answer to a retired request --
+// mapAnswersLate and mapAnswersDropped that much higher than before the load, mapAnswersUnowned unchanged -- with no
+// second report for the load, nothing on screen changed, and every request it sent accounted for (the host received as
+// many as the player applied, retired and holds pending):
 //   timeout:<m>:<x>:<y>:<role>       the player's own timeout ends the load, "failed" with "timed out" (it states its
-//                             terrainTimeoutMs; a short one comes from WMV_DEBUG -wmvTerrainTimeoutMs=<ms>); released, the
-//                             file goes back "available", long after its load ended;
+//                             terrainTimeoutMs; a short one comes from WMV_DEBUG -wmvTerrainTimeoutMs=<ms>); released as the
+//                             report arrives, before the host takes the load as ended, the file goes back "available",
+//                             after its load ended; then the host answers the load's requests stale, "was reported failed";
 //   latesupersede:<m>:<x>:<y>:<role> the next load of the tile, not held, answers it "superseded" and is built; released, "stale";
 //   lateclear:<m>:<x>:<y>:<role>     clearTerrain answers it "cleared"; released, "stale";
-//   lateswitch:<product>:<m>:<x>:<y> its WDT held, that client is loaded: "cleared", and the host's read tracker holds no
-//                             file at once (emptied with the client it was of); released, "stale" under the epoch before
-//                             and the one after; then the tile under the new client is built from first reads, and the
-//                             tracker holds those two files alone;
-//   reconnect[:<m>:<x>:<y>]   the player closed and started again (with that tile's load in flight, its WDT request held:
-//                             dropped with the connection, never answered, and the load answered by no player): the host
-//                             holds no terrain request and keeps its read tracker, the new player nothing pending, retired
-//                             or dropped, and a tile (that one, or the last) is then built, its first reads only the files
-//                             not served before the restart.
-// terrainPendingRequests is checked 0 wherever no load is in flight, as an invariant only: the player counts the request
-// of the load in flight, so it reads 0 once a load has ended whether or not that load's request was retired. A player that
-// does not report terrainPendingRequests, terrainRetiredRequests, terrainRetiredTotal, terrainLastRetiredRequest,
-// mapAnswersDropped, mapAnswersLate, mapAnswersUnowned or terrainTimeoutMs fails the checks that need it, "player does
-// not report <field>".
+//   lateswitch:<product>:<m>:<x>:<y>[:<role>]  its WDT (or role) held, that client is loaded: "cleared", and the host's read
+//                             tracker holds no file at once (emptied with the client it was of); released, "stale" under the
+//                             epoch before and the one after; then the tile under the new client is built from first
+//                             reads, and the tracker holds those files alone (WDT, root, and a protocol-13 load's tex0
+//                             and textures). The player's timeout must be longer than loading that client (Retail took
+//                             6.9-7.9 s): a shorter one fails the held load, "timed out", before the host can answer it
+//                             "cleared" -- a fault of the run's settings, not of either side;
+//   reconnect[:<m>:<x>:<y>[:<role>]]  the player closed and started again (with that tile's load in flight, its WDT -- or
+//                             role -- request held: dropped with the connection, never answered, and the load answered by
+//                             no player; nothing left waiting): the host holds no terrain request and keeps its read
+//                             tracker, the new player nothing pending, retired or dropped, and a tile (that one, or the
+//                             last) is then built, its first reads only the files not served before the restart.
+// terrainPendingRequests is checked 0 wherever no load is in flight, as an invariant only: the player counts the requests
+// of the load in flight, so it reads 0 once a load has ended whether or not that load's requests were retired. A player
+// that does not report terrainPendingRequests, terrainRetiredRequests, terrainRetiredTotal, terrainLastRetiredRequest,
+// mapAnswersRouted, mapAnswersDropped, mapAnswersLate, mapAnswersUnowned or terrainTimeoutMs (or, at protocol 13,
+// terrainTextures, terrainTextureBytes and terrainAlphaArrays) fails the checks that need it, "player does not report
+// <field>".
 // Every built load: the report names the tile, the WDT and root it parsed are those served (FileDataID and MD5), one
-// terrain tile is alive and the terrain's Meshes, Materials and GameObjects are counted. Every load sent is answered
-// exactly once (one in flight when its player was restarted, never), and no terrain load is building at the end. The
-// test keeps its own copy of every getMapAsset answered (UnityIpcServer::onMapAssetServed: the server keeps only the most
-// recent); at the end the server's records are the most recent MAP_ASSET_RECORDS_KEPT with the rest counted, its read
-// tracker holds exactly the files served under its own epoch -- the last a file was read in, or a later one when a client
-// was loaded after that read -- and nothing is held. Every sample of the
-// player is logged and written with this process's private bytes and working set and that bookkeeping beside it. Lines
-// "[terrain-test] PASS|FAIL|SKIP <check> -- <detail>" go to the log, then "[terrain-test] RESULT: PASS|FAIL"; every
-// report, every getMapAsset served and every check go to <out.json>, which Tools/world-audit/check_terrain_run.py checks
-// against the pinned values.
+// terrain tile is alive and the terrain's Meshes, Materials and GameObjects are counted; a protocol-13 player's material
+// agrees with what the host served (the tex0 by FileDataID, bytes and MD5, or "unavailable" quoting the host; each texture
+// served with its MD5 and bytes, or the host's answer quoted verbatim, in every entry of its id; each entry a "diffuse" or
+// "height" texture, at most 128 of them asked for, at most TERRAIN_REPORT_TEXTURES_MAX in all; the host's limits kept; the
+// stage 04 chunk states summing to the chunks; nothing retired by a built load) and its textures and alpha arrays are
+// counted. Every load sent is answered exactly once (one in flight when its player was restarted, never), every report
+// names a load the run sent (one that does not is counted apart and fails), and no terrain load is building at the end.
+// The test keeps what it needs bounded -- the most recent reports and records, counts per load sent, the distinct files
+// served, timing samples up to a cap -- and writes every full report, record and load to <out.json>.records.jsonl as it
+// comes, read back into <out.json> at the end. At the end the server's records are the most recent MAP_ASSET_RECORDS_KEPT with the rest
+// counted, its read tracker holds exactly the files served under its own epoch -- the last a file was read in, or a later
+// one when a client was loaded after that read --, nothing is held or waiting, and its poll records are bounded; the
+// timing of the files served is summarised by role (handlerMs, readMs, queuedMs; first reads apart; files over 4 MiB
+// apart) with the GUI time of each poll that served map files. Every sample of the player is logged and written with this
+// process's private bytes and working set and that bookkeeping beside it. Lines "[terrain-test] PASS|FAIL|SKIP <check> --
+// <detail>" go to the log, then "[terrain-test] RESULT: PASS|FAIL"; every report, every getMapAsset served and every
+// check go to <out.json>, which Tools/world-audit/check_terrain_run.py checks against the pinned values.
 namespace
 {
   struct TerrainTestLog
@@ -5113,6 +5147,8 @@ namespace
     o["md5"] = s.md5;
     o["readMs"] = s.readMs;
     o["handlerMs"] = s.handlerMs;
+    o["queuedMs"] = s.queuedMs;
+    o["bytesRead"] = (double)s.bytesRead;
     o["first"] = s.first;
     o["firstTracked"] = s.firstTracked;
     return o;
@@ -5148,6 +5184,9 @@ namespace
     o["terrainLastRetiredRequest"] = s.hasTerrainLastRetiredRequest ? QJsonValue(s.terrainLastRetiredRequest) : QJsonValue();
     o["mapAnswersLate"] = s.mapAnswersLate;
     o["mapAnswersUnowned"] = s.mapAnswersUnowned;
+    o["terrainTextures"] = s.terrainTextures;
+    o["terrainTextureBytes"] = (double)s.terrainTextureBytes;
+    o["terrainAlphaArrays"] = s.terrainAlphaArrays;
     return o;
   }
 
@@ -5193,6 +5232,49 @@ static void checkMapAssetDecisions(TerrainTestLog & tally)
   served.wdtServed = true;
   ModelViewer::TerrainRequest rooted = served;    // ... and its root ADT asked for
   rooted.rootFileDataID = 778037;
+  // TERRAIN TEXTURES (protocol 13): a load sent with textures, its WDT not served yet, then served, then its tex0 too.
+  ModelViewer::TerrainRequest textures = current;
+  textures.maxTextureBytes = UnityIpcServer::MAX_TERRAIN_TEXTURE_BYTES;
+  textures.maxTextureBytesPerLoad = UnityIpcServer::MAX_TERRAIN_TEXTURE_BYTES_PER_LOAD;
+  textures.maxTexturesPerLoad = UnityIpcServer::MAX_TERRAIN_TEXTURES_PER_LOAD;
+  ModelViewer::TerrainRequest texWdt = textures;
+  texWdt.wdtServed = true;
+  texWdt.reads = 1;
+  ModelViewer::TerrainRequest texTex0 = texWdt;   // root and tex0 read, the tex0 answered "available"
+  texTex0.rootFileDataID = 778037;
+  texTex0.tex0Asked = true;
+  texTex0.tex0FileDataID = 778040;
+  texTex0.tex0Served = true;
+  texTex0.reads = 3;
+  ModelViewer::TerrainRequest tex0Failed = texTex0; // the tex0 asked for, but it failed (its kind, say): not served
+  tex0Failed.tex0Served = false;
+  ModelViewer::TerrainRequest texOne = texTex0;    // one texture read
+  texOne.textureIds = {187115};
+  texOne.textureBytesRead = 88580;
+  texOne.reads = 4;
+  ModelViewer::TerrainRequest tex127 = texTex0, tex128 = texTex0;   // 127 and 128 texture ids asked for
+  for (int i = 0; i < 128; i++)
+  {
+    if (i < 127)
+      tex127.textureIds.push_back(2000000 + i);
+    tex128.textureIds.push_back(2000000 + i);
+  }
+  tex127.reads = 3 + 127;
+  tex128.reads = 3 + 128;
+  ModelViewer::TerrainRequest texReads = texTex0;  // few ids, but 3 + 128 reads already (the WDT and root asked again)
+  texReads.textureIds = {187115, 187127};
+  texReads.reads = 3 + UnityIpcServer::MAX_TERRAIN_TEXTURES_PER_LOAD;
+  ModelViewer::TerrainRequest rootedReads = rooted; // a load without textures that read 3 files
+  rootedReads.reads = 3;
+  ModelViewer::TerrainRequest spent = texOne;       // 128 MiB of textures read
+  spent.textureBytesRead = UnityIpcServer::MAX_TERRAIN_TEXTURE_BYTES_PER_LOAD;
+  ModelViewer::TerrainRequest nearlySpent = texOne; // 1000 bytes of it left
+  nearlySpent.textureBytesRead = UnityIpcServer::MAX_TERRAIN_TEXTURE_BYTES_PER_LOAD - 1000;
+  ModelViewer::TerrainRequest ended = texTex0;      // the player reported the load
+  ended.ended = true;
+  ended.endedStatus = "failed";
+  ModelViewer::TerrainRequest plainTex0 = rooted;   // a load without textures whose tex0 somehow counts as served
+  plainTex0.tex0Served = true;
   const int epochNow = 7;
   // load -1000 leaves "load" out of the request.
   const auto request = [](int load, int epoch, const QString & role, int fileDataID) {
@@ -5215,10 +5297,14 @@ static void checkMapAssetDecisions(TerrainTestLog & tally)
     bool loading;
     const char * state;
     QString detail;   // a part the decision's detail must contain
+    qint64 maxBytes = -1;   // the read's limit a request that goes on to the read must have (-1: not checked)
   };
+  const qint64 mapLimit = UnityIpcServer::MAX_MAP_ASSET_BYTES, textureLimit = UnityIpcServer::MAX_TERRAIN_TEXTURE_BYTES;
   const Case cases[] = {
-    {"the current load's WDT goes on to the read", request(5, 7, "wdt", 775971), &current, true, false, "", ""},
-    {"role \"x\" is refused", request(5, 7, "x", 775971), &current, true, false, "refused", "unknown role \"x\""},
+    {"the current load's WDT goes on to the read, at most the map-file limit", request(5, 7, "wdt", 775971), &current, true,
+     false, "", "", mapLimit},
+    {"role \"x\" is refused", request(5, 7, "x", 775971), &current, true, false, "refused",
+     "unknown role \"x\" (wdt, rootAdt, tex0Adt or texture)"},
     {"another WDT is refused", request(5, 7, "wdt", 775972), &current, true, false, "refused",
      "WDT is FileDataID 775971, not 775972"},
     {"FileDataID 0 is refused", request(5, 7, "wdt", 0), &current, true, false, "refused", "FileDataID 0 names no file"},
@@ -5247,15 +5333,490 @@ static void checkMapAssetDecisions(TerrainTestLog & tally)
     {"a second root ADT for the load is refused", request(5, 7, "rootAdt", 778038), &rooted, true, false, "refused",
      "one root ADT per load, not 778038"},
     {"the WDT again after its root goes on to the read", request(5, 7, "wdt", 775971), &rooted, true, false, "", ""},
+    // TERRAIN TEXTURES (protocol 13).
+    {"a tex0 ADT before the load's WDT was served is refused", request(5, 7, "tex0Adt", 778040), &textures, true, false,
+     "refused", "load 5's WDT has not been served, so no tex0 ADT is"},
+    {"a tex0 ADT after the WDT goes on to the read, at most the map-file limit", request(5, 7, "tex0Adt", 778040), &texWdt,
+     true, false, "", "", mapLimit},
+    {"a second tex0 ADT request (the same id) is refused", request(5, 7, "tex0Adt", 778040), &texTex0, true, false,
+     "refused", "has asked for its tex0 ADT (778040) already: one tex0 ADT per load"},
+    {"a second tex0 ADT request (another id) is refused", request(5, 7, "tex0Adt", 778041), &texTex0, true, false,
+     "refused", "(this request: 778041)"},
+    {"a tex0 ADT again after the first one failed is refused (asked once, whatever came of it)",
+     request(5, 7, "tex0Adt", 778040), &tex0Failed, true, false, "refused", "one tex0 ADT per load"},
+    {"a texture before the load's tex0 was served is refused", request(5, 7, "texture", 187115), &texWdt, true, false,
+     "refused", "load 5's tex0 ADT has not been served, so no texture is"},
+    {"a texture after a tex0 that failed is refused", request(5, 7, "texture", 187115), &tex0Failed, true, false,
+     "refused", "tex0 ADT has not been served"},
+    {"a texture after the tex0 goes on to the read, at most the texture limit", request(5, 7, "texture", 187115), &texTex0,
+     true, false, "", "", textureLimit},
+    {"a texture asked for before is refused", request(5, 7, "texture", 187115), &texOne, true, false, "refused",
+     "load 5 has asked for texture 187115 before: each texture once per load"},
+    {"another texture goes on to the read", request(5, 7, "texture", 187127), &texOne, true, false, "", "", textureLimit},
+    {"the 128th texture id goes on to the read", request(5, 7, "texture", 187115), &tex127, true, false, "", "", textureLimit},
+    {"the 129th texture id is refused", request(5, 7, "texture", 187115), &tex128, true, false, "refused",
+     "load 5 has asked for 128 textures: at most 128 per load, not 187115"},
+    {"a read past 3 + 128 for the load is refused", request(5, 7, "texture", 187138), &texReads, true, false, "refused",
+     "load 5 has read 131 files: at most 131 per load (3 + 128 textures)"},
+    {"the WDT again past the read cap is refused too (every role counts)", request(5, 7, "wdt", 775971), &texReads, true,
+     false, "refused", "has read 131 files"},
+    {"a load without textures reads at most 3 files", request(5, 7, "rootAdt", 778037), &rootedReads, true, false,
+     "refused", "load 5 has read 3 files: at most 3 per load (3 + 0 textures)"},
+    {"a texture once 128 MiB of textures were read is refused (budget)", request(5, 7, "texture", 187127), &spent, true,
+     false, "refused", "load 5 has read 134217728 bytes of textures: at most 134217728 per load"},
+    {"a texture near the byte cap is read with what is left of it", request(5, 7, "texture", 187127), &nearlySpent, true,
+     false, "", "", 1000},
+    {"a tex0 ADT for a load sent without textures is refused", request(5, 7, "tex0Adt", 778040), &rooted, true, false,
+     "refused", "load 5 was sent without terrain textures (the player does not draw them), so no tex0 ADT is served"},
+    {"a texture for a load sent without textures is refused", request(5, 7, "texture", 187115), &plainTex0, true, false,
+     "refused", "so no texture is served"},
+    {"a request of a load the player has reported is stale", request(5, 7, "texture", 187115), &ended, true, false,
+     "stale", "load 5 was reported failed"},
+    {"the reported load's staleness is decided before the role", request(5, 7, "x", 0), &ended, true, false, "stale",
+     "load 5 was reported failed"},
+    {"an earlier load is stale as before, not \"reported\"", request(4, 7, "texture", 187115), &ended, true, false, "stale",
+     "request load 4, current 5"},
   };
   for (const Case & c : cases)
   {
     const ModelViewer::MapAssetDecision d =
       ModelViewer::decideMapAssetRequest(c.request, c.current, epochNow, c.belongs, c.loading);
-    const bool ok = d.state == QLatin1String(c.state) && d.detail.contains(c.detail);
+    const bool ok = d.state == QLatin1String(c.state) && d.detail.contains(c.detail) &&
+                    (c.maxBytes < 0 || (d.state.isEmpty() && d.maxBytes == c.maxBytes));
     tally.check(QString("decision: ") + c.name, ok,
-              "state \"" + d.state + "\" detail \"" + d.detail + "\"; expected \"" + c.state + "\" with \"" + c.detail + "\"");
+                "state \"" + d.state + "\" detail \"" + d.detail + QString("\" maxBytes %1; expected \"").arg(d.maxBytes) +
+                  c.state + "\" with \"" + c.detail + "\"" +
+                  (c.maxBytes < 0 ? QString() : QString(", maxBytes %1").arg(c.maxBytes)));
   }
+}
+
+// The per-load accounting (ModelViewer::noteMapAssetRead / noteMapAssetResult) driven through the decision as the host
+// serves requests, on made-up loads: the order WDT, root and tex0, textures; a tex0 that fails its kind leaves no texture
+// servable and is not asked again; 128 texture ids and no more; texture bytes up to 128 MiB, each read limited to what is
+// left, then refused; reads of every role capped at 3 + 128. Nothing is read: the reads' outcomes are made up.
+static void checkMapAssetAccounting(TerrainTestLog & tally)
+{
+  const auto request = [](const QString & role, int fileDataID) {
+    QJsonObject r;
+    r["type"] = "getMapAsset";
+    r["requestId"] = "map1";
+    r["load"] = 9;
+    r["assetEpoch"] = 3;
+    r["role"] = role;
+    r["fileDataID"] = fileDataID;
+    return r;
+  };
+  ModelViewer::TerrainRequest base;
+  base.load = 9;
+  base.epoch = 3;
+  base.wdtFileDataID = 775971;
+  base.maxTextureBytes = UnityIpcServer::MAX_TERRAIN_TEXTURE_BYTES;
+  base.maxTextureBytesPerLoad = UnityIpcServer::MAX_TERRAIN_TEXTURE_BYTES_PER_LOAD;
+  base.maxTexturesPerLoad = UnityIpcServer::MAX_TERRAIN_TEXTURES_PER_LOAD;
+  // One request served: decided, accounted before the read, the read's made-up outcome accounted after it. Returns the
+  // decision's state ("" when it went on to the read).
+  const auto serve = [&request](ModelViewer::TerrainRequest & t, const QString & role, int fileDataID, qint64 bytesRead,
+                                bool available, ModelViewer::MapAssetDecision * out = nullptr) {
+    const QJsonObject r = request(role, fileDataID);
+    const ModelViewer::MapAssetDecision d = ModelViewer::decideMapAssetRequest(r, &t, 3, true, false);
+    if (d.state.isEmpty())
+    {
+      ModelViewer::noteMapAssetRead(t, r);
+      // A read never exceeds its limit: a larger file is not read at all (TooLarge).
+      const bool fits = bytesRead <= d.maxBytes;
+      ModelViewer::noteMapAssetResult(t, role, fits ? bytesRead : 0, available && fits);
+    }
+    if (out)
+      *out = d;
+    return d.state;
+  };
+  {
+    // The order, and a tex0 that fails its kind.
+    ModelViewer::TerrainRequest t = base;
+    const QString textureFirst = serve(t, "texture", 187115, 88580, true);
+    const QString tex0First = serve(t, "tex0Adt", 778040, 1286682, true);
+    const QString wdt = serve(t, "wdt", 775971, 294988, true);
+    const QString root = serve(t, "rootAdt", 778037, 329922, true);
+    const QString tex0Bad = serve(t, "tex0Adt", 778037, 329922, false);   // a root read as a tex0: its kind fails
+    const QString textureAfterBad = serve(t, "texture", 187115, 88580, true);
+    const QString tex0Again = serve(t, "tex0Adt", 778040, 1286682, true);
+    tally.check("accounting: before the WDT neither a texture nor the tex0; after a tex0 that failed its kind, no texture "
+                "and no second tex0",
+                textureFirst == "refused" && tex0First == "refused" && wdt.isEmpty() && root.isEmpty() && tex0Bad.isEmpty() &&
+                  textureAfterBad == "refused" && tex0Again == "refused" && t.reads == 3 && t.tex0Asked && !t.tex0Served &&
+                  t.textureIds.empty() && t.textureBytesRead == 0,
+                QString("texture first \"%1\", tex0 first \"%2\", WDT \"%3\", root \"%4\", tex0 (a root) \"%5\", texture after "
+                        "it \"%6\", tex0 again \"%7\"; %8 reads, tex0 asked %9")
+                  .arg(textureFirst).arg(tex0First).arg(wdt).arg(root).arg(tex0Bad).arg(textureAfterBad).arg(tex0Again)
+                  .arg(t.reads).arg(t.tex0Asked ? "yes" : "no") +
+                  QString(", served %1, %2 texture id(s), %3 texture bytes").arg(t.tex0Served ? "yes" : "no")
+                    .arg(t.textureIds.size()).arg(t.textureBytesRead));
+  }
+  {
+    // 128 ids of 64 KiB, then the 129th: refused, nothing read.
+    ModelViewer::TerrainRequest t = base;
+    serve(t, "wdt", 775971, 294988, true);
+    serve(t, "tex0Adt", 778040, 1286682, true);
+    int read = 0;
+    for (int i = 0; i < 128; i++)
+      read += serve(t, "texture", 3000000 + i, 65536, true).isEmpty() ? 1 : 0;
+    const QString again = serve(t, "texture", 3000000, 65536, true);
+    const QString over = serve(t, "texture", 3000128, 65536, true);
+    tally.check("accounting: 128 distinct texture ids are read, one asked again and the 129th are refused",
+                read == 128 && again == "refused" && over == "refused" && (int)t.textureIds.size() == 128 &&
+                  t.textureBytesRead == 128LL * 65536 && t.reads == 2 + 128,
+                QString("%1 read; again \"%2\", 129th \"%3\"; %4 id(s), %5 bytes, %6 reads").arg(read).arg(again).arg(over)
+                  .arg(t.textureIds.size()).arg(t.textureBytesRead).arg(t.reads));
+  }
+  {
+    // Textures of 5,593,604 bytes (the largest real ones) until 128 MiB are read: each read limited to what is left; the
+    // one that would overrun it is not read (TooLarge, nothing counted), then once the bytes are spent no texture is read.
+    ModelViewer::TerrainRequest t = base;
+    serve(t, "wdt", 775971, 294988, true);
+    serve(t, "tex0Adt", 778040, 1286682, true);
+    const qint64 large = 5593604;
+    int read = 0, id = 4000000;
+    ModelViewer::MapAssetDecision d;
+    while (serve(t, "texture", id++, large, true, &d).isEmpty() && d.maxBytes >= large)
+      read++;
+    const qint64 left = UnityIpcServer::MAX_TERRAIN_TEXTURE_BYTES_PER_LOAD - t.textureBytesRead;
+    const bool overrun = d.state.isEmpty() && d.maxBytes == left && left < large;   // read with what is left: TooLarge
+    // A small one still fits what is left; then the bytes are spent exactly and the next is refused unread.
+    const QString fits = serve(t, "texture", id++, left, true, &d);
+    const QString spentNext = serve(t, "texture", id++, 1, true);
+    tally.check("accounting: texture bytes up to 128 MiB, each read limited to what is left, then refused",
+                read == (int)(UnityIpcServer::MAX_TERRAIN_TEXTURE_BYTES_PER_LOAD / large) && overrun && fits.isEmpty() &&
+                  d.maxBytes == left && spentNext == "refused" &&
+                  t.textureBytesRead == UnityIpcServer::MAX_TERRAIN_TEXTURE_BYTES_PER_LOAD,
+                QString("%1 read whole (%2 expected); then a read limited to %3 bytes; one of %4 bytes \"%5\" (limit %6); the "
+                        "next \"%7\"; %8 bytes read")
+                  .arg(read).arg(UnityIpcServer::MAX_TERRAIN_TEXTURE_BYTES_PER_LOAD / large).arg(left).arg(left).arg(fits)
+                  .arg(d.maxBytes).arg(spentNext).arg(t.textureBytesRead));
+  }
+  {
+    // Repeated WDT reads count too: the load's reads stop at 3 + 128 whatever the roles.
+    ModelViewer::TerrainRequest t = base;
+    int read = 0;
+    for (int i = 0; i < 200; i++)
+      read += serve(t, "wdt", 775971, 294988, true).isEmpty() ? 1 : 0;
+    tally.check("accounting: a load's reads of any role stop at 3 + 128", read == 131 && t.reads == 131,
+                QString("%1 WDT reads of 200 asked, %2 counted").arg(read).arg(t.reads));
+  }
+}
+
+// The kind check after a read (ModelViewer::mapAssetKindProblem) on made-up bytes: a tex0 head (MVER, MAMP), a root head
+// (MVER, MHDR), a BLP2 head, short and odd files; and the roles it does not apply to.
+static void checkMapAssetKinds(TerrainTestLog & tally)
+{
+  const QByteArray tex0("REVM\x04\x00\x00\x00\x12\x00\x00\x00PMAM\x04\x00\x00\x00\x00\x00\x00\x00", 24);
+  const QByteArray root("REVM\x04\x00\x00\x00\x12\x00\x00\x00RDHM\x40\x00\x00\x00", 20);
+  const QByteArray blp("BLP2\x01\x00\x00\x00\x02\x08\x07\x01", 12);
+  const QByteArray longMver("REVM\xff\x00\x00\x00\x12\x00\x00\x00PMAM", 16);
+  struct Case
+  {
+    const char * name;
+    const char * role;
+    QByteArray bytes;
+    QString expected;   // "" for no problem, else a part of the detail
+  };
+  const Case cases[] = {
+    {"a tex0 head passes as a tex0 ADT", "tex0Adt", tex0, ""},
+    {"a root head is not a tex0 ADT (its second chunk named)", "tex0Adt", root,
+     "not a tex0 ADT: second chunk RDHM (hex 52 44 48 4d), not MAMP (PMAM)"},
+    {"a BLP is not a tex0 ADT", "tex0Adt", blp, "not a tex0 ADT: first chunk BLP2 (hex 42 4c 50 32), not MVER (REVM)"},
+    {"an MVER whose size runs past the file is not a tex0 ADT", "tex0Adt", longMver, "leaves no second chunk in 16 bytes"},
+    {"three bytes are not a tex0 ADT", "tex0Adt", QByteArray("REV"), "first chunk missing (3 bytes)"},
+    {"a BLP2 head passes as a texture", "texture", blp, ""},
+    {"a tex0 is not a BLP2 texture", "texture", tex0, "not a BLP2 texture: it starts with REVM (hex 52 45 56 4d)"},
+    {"unprintable bytes are shown as ? with their hex", "texture", QByteArray("\x00\x01\x02\x03\x04", 5),
+     "it starts with ???? (hex 00 01 02 03)"},
+    {"two bytes are not a BLP2 texture", "texture", QByteArray("BL"), "it starts with 2 bytes only"},
+    {"no kind is checked for a WDT", "wdt", blp, ""},
+    {"no kind is checked for a root ADT", "rootAdt", tex0, ""},
+  };
+  for (const Case & c : cases)
+  {
+    const QString problem = ModelViewer::mapAssetKindProblem(c.role, c.bytes);
+    const bool ok = c.expected.isEmpty() ? problem.isEmpty() : problem.contains(c.expected);
+    tally.check(QString("kind: ") + c.name, ok, "\"" + problem + "\"; expected " +
+                (c.expected.isEmpty() ? QString("none") : "\"" + c.expected + "\""));
+  }
+}
+
+// THE MAP ASSET QUEUE (UnityIpcServer) on a server of its own with no player: a made-up viewer answers each request with
+// the bytes it names as read. First come first served; a poll serves until 2 MiB were read or a file over 1 MiB was;
+// requests that read nothing cost nothing; past 16 waiting a request is refused at once, never handed to the viewer;
+// queuedMs and the poll records; the queue dropped unanswered as when a connection ends; the poll records bounded.
+static void checkMapAssetQueue(TerrainTestLog & tally)
+{
+  UnityIpcServer q;
+  QStringList order;
+  q.onGetMapAsset = [&order](const QJsonObject & r) {
+    order << r.value("requestId").toString();
+    UnityIpcServer::MapAssetAnswer a;
+    a.state = r.value("fakeState").toString("not in client storage");
+    a.detail = "made up by the terrain test";
+    a.bytesRead = (long long)r.value("fakeBytes").toDouble(0);
+    return a;
+  };
+  std::vector<UnityIpcServer::MapAssetServed> records;
+  q.onMapAssetServed = [&records](const UnityIpcServer::MapAssetServed & s) { records.push_back(s); };
+  int serial = 0;
+  const auto receive = [&q, &serial](long long bytes) {
+    QJsonObject r;
+    r["type"] = "getMapAsset";
+    r["requestId"] = QString("q%1").arg(++serial);
+    r["load"] = 1;
+    r["assetEpoch"] = 1;
+    r["role"] = "texture";
+    r["fileDataID"] = serial;
+    r["fakeBytes"] = (double)bytes;
+    q.testReceiveMapAsset(r);
+  };
+  const qint64 KiB = 1024, MiB = 1024 * 1024;
+  {
+    order.clear();
+    records.clear();
+    receive(100 * KiB);
+    receive(100 * KiB);
+    receive(100 * KiB);
+    const size_t waiting = q.mapAssetsWaiting();
+    const int served = q.testServeMapAssetQueue();
+    bool queuedTimes = records.size() == 3;
+    for (const UnityIpcServer::MapAssetServed & s : records)
+      queuedTimes = queuedTimes && s.queuedMs >= 0.0 && s.bytesRead == 100 * KiB;
+    const UnityIpcServer::MapAssetPoll * poll = q.mapAssetPolls().empty() ? nullptr : &q.mapAssetPolls().back();
+    tally.check("queue: requests wait until served, then are answered in order, each with its queuedMs, one poll record",
+                waiting == 3 && served == 3 && order.join(",") == "q1,q2,q3" && queuedTimes && poll && poll->served == 3 &&
+                  poll->bytesRead == 300 * KiB && !poll->stoppedForBudget && poll->waitingAfter == 0 && poll->serveMs >= 0.0,
+                QString("%1 waiting, %2 served in the order %3; the poll: %4 served, %5 bytes, %6 ms, %7 waiting after")
+                  .arg(waiting).arg(served).arg(order.join(",")).arg(poll ? poll->served : -1).arg(poll ? poll->bytesRead : -1)
+                  .arg(poll ? poll->serveMs : -1.0).arg(poll ? poll->waitingAfter : -1));
+  }
+  {
+    // 600 KiB each: the fourth takes the poll past 2 MiB, the fifth waits.
+    order.clear();
+    for (int i = 0; i < 5; i++)
+      receive(600 * KiB);
+    const int first = q.testServeMapAssetQueue();
+    const UnityIpcServer::MapAssetPoll a = q.mapAssetPolls().back();
+    const int second = q.testServeMapAssetQueue();
+    tally.check("queue: a poll stops serving once 2 MiB were read in it; the rest is served by the next",
+                first == 4 && a.stoppedForBudget && a.waitingAfter == 1 && a.bytesRead == 2400 * KiB && second == 1 &&
+                  order.join(",") == "q4,q5,q6,q7,q8",
+                QString("first poll %1 (%2 bytes, stopped %3, %4 waiting), second %5; order %6").arg(first).arg(a.bytesRead)
+                  .arg(a.stoppedForBudget ? "yes" : "no").arg(a.waitingAfter).arg(second).arg(order.join(",")));
+  }
+  {
+    // A file over 1 MiB ends its poll's serving, wherever it comes.
+    order.clear();
+    receive(5593604);
+    receive(10 * KiB);
+    receive(10 * KiB);
+    receive(5593604);
+    const int a = q.testServeMapAssetQueue();
+    const int b = q.testServeMapAssetQueue();
+    const UnityIpcServer::MapAssetPoll pb = q.mapAssetPolls().back();
+    const int c = q.testServeMapAssetQueue();
+    tally.check("queue: a file over 1 MiB is the last its poll reads (the size is known only once it is read)",
+                a == 1 && b == 3 && pb.largeFiles == 1 && pb.bytesRead == 20 * KiB + 5593604 && c == 0 &&
+                  order.join(",") == "q9,q10,q11,q12",
+                QString("polls served %1, %2 (%3 large, %4 bytes), %5; order %6").arg(a).arg(b).arg(pb.largeFiles)
+                  .arg(pb.bytesRead).arg(c).arg(order.join(",")));
+  }
+  {
+    // Past 16 waiting a request is refused at once, nothing decided or read; the 16 that read nothing go in one poll.
+    order.clear();
+    records.clear();
+    const long long refusedBefore = q.mapAssetsRefusedQueueFull();
+    for (int i = 0; i < 18; i++)
+      receive(0);
+    const size_t waiting = q.mapAssetsWaiting();
+    const size_t answeredAtOnce = records.size();
+    const bool refusedRight = answeredAtOnce == 2 && records[0].state == "refused" &&
+                              records[0].detail.contains("too many map requests waiting (16 wait, at most 16)") &&
+                              records[1].requestId == QString("q%1").arg(serial) && order.isEmpty();
+    const int served = q.testServeMapAssetQueue();
+    tally.check("queue: past 16 waiting a request is refused at once without the viewer deciding or reading; requests "
+                "that read nothing are served in one poll",
+                waiting == 16 && refusedRight && q.mapAssetsRefusedQueueFull() == refusedBefore + 2 && served == 16 &&
+                  q.mapAssetQueueDepthMax() == 16,
+                QString("%1 waiting, %2 answered on arrival (the first: %3 \"%4\"), the viewer asked %5 time(s) then; %6 "
+                        "served in one poll; deepest %7")
+                  .arg(waiting).arg(answeredAtOnce).arg(answeredAtOnce ? records[0].state : QString("-"))
+                  .arg(answeredAtOnce ? records[0].detail : QString("-")).arg(order.size() - served).arg(served)
+                  .arg(q.mapAssetQueueDepthMax()));
+  }
+  {
+    // Dropped as when the connection ends: never answered, never handed to the viewer.
+    order.clear();
+    records.clear();
+    receive(1000);
+    receive(1000);
+    receive(1000);
+    const long long droppedBefore = q.mapAssetsQueueDropped();
+    q.testDropMapAssetQueue();
+    const int after = q.testServeMapAssetQueue();
+    tally.check("queue: dropped with its connection, its requests never answered nor read",
+                q.mapAssetsWaiting() == 0 && q.mapAssetsQueueDropped() == droppedBefore + 3 && after == 0 && order.isEmpty() &&
+                  records.empty(),
+                QString("%1 waiting, %2 dropped, %3 served after, the viewer asked %4 time(s), %5 record(s)")
+                  .arg(q.mapAssetsWaiting()).arg(q.mapAssetsQueueDropped() - droppedBefore).arg(after).arg(order.size())
+                  .arg(records.size()));
+  }
+  {
+    // The poll records are bounded.
+    const long long before = q.mapAssetPollsTotal();
+    const int polls = UnityIpcServer::MAP_ASSET_POLL_TIMINGS_KEPT + 4;
+    for (int i = 0; i < polls; i++)
+    {
+      receive(0);
+      q.testServeMapAssetQueue();
+    }
+    tally.check(QString("queue: the most recent %1 poll records are kept, every poll counted")
+                  .arg(UnityIpcServer::MAP_ASSET_POLL_TIMINGS_KEPT),
+                (int)q.mapAssetPolls().size() == UnityIpcServer::MAP_ASSET_POLL_TIMINGS_KEPT &&
+                  q.mapAssetPollsTotal() == before + polls,
+                QString("%1 kept, %2 counted").arg(q.mapAssetPolls().size()).arg(q.mapAssetPollsTotal() - before));
+  }
+}
+
+// Real reads through the host's own handler (ModelViewer::ServeMapAsset) with a made-up current load of the loaded client
+// (no player is involved, nothing is sent): a root ADT asked for as a tex0 ADT and a tex0 as a texture fail their kinds
+// ("unreadable", the bytes found named), the tex0 itself and a texture are served with the content key as their MD5 (the
+// test hashes the bytes once to show it), a texture read with only 1000 bytes of the load's budget left is not read
+// (the limit applied named), one with none left is refused unread, and a reported load is stale. The pinned files are
+// Azeroth 32_50's (root 778037, tex0 778040, texture 187115, in Retail, Classic Era and Classic Beta): a client that cannot
+// read one skips the checks that need it. The host's terrain request is put back afterwards.
+static void checkMapAssetReads(ModelViewer * frame, TerrainTestLog & tally)
+{
+  const std::shared_ptr<wow::WorldMapCatalog> catalog = frame->mapCatalog();
+  if (!catalog || catalog->status() != wow::WorldMapCatalog::Status::Ready)
+  {
+    tally.skip("reads: the host's own handler on real files", "the map catalogue is not ready");
+    return;
+  }
+  const int rootId = 778037, tex0Id = 778040, textureId = 187115;
+  const auto availableNow = [&catalog](int id) {
+    wow::WdtReference r;
+    r.kind = wow::WdtReference::Kind::FileDataId;
+    r.fileDataId = id;
+    QByteArray bytes;
+    const wow::WdtInspection i = catalog->inspectFile(r, &bytes, 64 * 1024 * 1024);
+    return i.state == wow::WdtAvailability::Available ? (qint64)bytes.size() : (qint64)-1;
+  };
+  const qint64 rootSize = availableNow(rootId), tex0Size = availableNow(tex0Id), textureSize = availableNow(textureId);
+  const ModelViewer::TerrainRequest saved = frame->m_terrainRequest;
+  ModelViewer::TerrainRequest base;
+  base.load = 999999;   // no load the player is ever sent (none is sent before these checks)
+  base.epoch = UnityAssetAccess::clientEpoch();
+  base.mapId = 0;
+  base.tileX = 32;
+  base.tileY = 50;
+  base.wdtFileDataID = 775971;
+  base.wdtServed = true;
+  base.reads = 1;
+  base.catalogueGeneration = catalog->client().storageGeneration;
+  base.maxTextureBytes = UnityIpcServer::MAX_TERRAIN_TEXTURE_BYTES;
+  base.maxTextureBytesPerLoad = UnityIpcServer::MAX_TERRAIN_TEXTURE_BYTES_PER_LOAD;
+  base.maxTexturesPerLoad = UnityIpcServer::MAX_TERRAIN_TEXTURES_PER_LOAD;
+  const auto ask = [&base](const QString & role, int id) {
+    QJsonObject r;
+    r["type"] = "getMapAsset";
+    r["requestId"] = "map0";
+    r["load"] = base.load;
+    r["assetEpoch"] = base.epoch;
+    r["role"] = role;
+    r["fileDataID"] = id;
+    return r;
+  };
+  const auto md5Of = [](const QByteArray & b) {
+    return QString::fromLatin1(QCryptographicHash::hash(b, QCryptographicHash::Md5).toHex());
+  };
+  const auto describe = [](const UnityIpcServer::MapAssetAnswer & a) {
+    return QString("\"%1\" \"%2\", %3 bytes served, %4 read, md5 %5").arg(a.state).arg(a.detail).arg(a.bytes.size())
+             .arg(a.bytesRead).arg(a.md5.isEmpty() ? QString("-") : a.md5);
+  };
+  if (rootSize <= 0)
+    tally.skip("reads: a root ADT asked for as a tex0 ADT fails its kind", QString("root %1 cannot be read here").arg(rootId));
+  else
+  {
+    frame->m_terrainRequest = base;
+    const UnityIpcServer::MapAssetAnswer a = frame->ServeMapAsset(ask("tex0Adt", rootId));
+    const ModelViewer::TerrainRequest & t = frame->m_terrainRequest;
+    tally.check(QString("reads: root %1 asked for as a tex0 ADT is \"unreadable\", its second chunk named; read and counted, "
+                        "the tex0 asked but not served").arg(rootId),
+                a.state == "unreadable" && a.detail.contains("not a tex0 ADT: second chunk RDHM (hex 52 44 48 4d)") &&
+                  a.bytes.isEmpty() && a.md5.isEmpty() && a.bytesRead == rootSize && t.tex0Asked && !t.tex0Served &&
+                  t.reads == 2,
+                describe(a) + QString("; reads %1, tex0 asked %2 served %3").arg(t.reads).arg(t.tex0Asked ? "yes" : "no")
+                  .arg(t.tex0Served ? "yes" : "no"));
+  }
+  if (tex0Size <= 0)
+    tally.skip("reads: the tex0 ADT is served, and asked for as a texture fails its kind",
+               QString("tex0 %1 cannot be read here").arg(tex0Id));
+  else
+  {
+    frame->m_terrainRequest = base;
+    const UnityIpcServer::MapAssetAnswer a = frame->ServeMapAsset(ask("tex0Adt", tex0Id));
+    const bool served = frame->m_terrainRequest.tex0Served;
+    tally.check(QString("reads: tex0 %1 is served whole, its md5 the content key (the MD5 of its bytes)").arg(tex0Id),
+                a.state == "available" && a.bytes.size() == tex0Size && a.md5.size() == 32 && a.md5 == md5Of(a.bytes) &&
+                  a.bytesRead == tex0Size && served,
+                describe(a) + QString("; the bytes' MD5 %1; tex0 served %2").arg(md5Of(a.bytes)).arg(served ? "yes" : "no"));
+    const UnityIpcServer::MapAssetAnswer b = frame->ServeMapAsset(ask("texture", tex0Id));
+    const ModelViewer::TerrainRequest & t = frame->m_terrainRequest;
+    tally.check(QString("reads: tex0 %1 asked for as a texture is \"unreadable\", not a BLP2; its bytes count against the "
+                        "load's texture budget").arg(tex0Id),
+                b.state == "unreadable" && b.detail.contains("not a BLP2 texture: it starts with REVM (hex 52 45 56 4d)") &&
+                  b.bytes.isEmpty() && b.bytesRead == tex0Size && t.textureBytesRead == tex0Size &&
+                  t.textureIds.size() == 1,
+                describe(b) + QString("; texture bytes read %1, %2 id(s)").arg(t.textureBytesRead).arg(t.textureIds.size()));
+  }
+  if (textureSize <= 0)
+    tally.skip("reads: a texture is served, and over what is left of the budget is not read",
+               QString("texture %1 cannot be read here").arg(textureId));
+  else
+  {
+    ModelViewer::TerrainRequest withTex0 = base;
+    withTex0.tex0Asked = true;
+    withTex0.tex0FileDataID = tex0Id;
+    withTex0.tex0Served = true;
+    withTex0.reads = 3;
+    frame->m_terrainRequest = withTex0;
+    const UnityIpcServer::MapAssetAnswer a = frame->ServeMapAsset(ask("texture", textureId));
+    tally.check(QString("reads: texture %1 is served whole, a BLP2, its md5 the content key").arg(textureId),
+                a.state == "available" && a.bytes.size() == textureSize && a.bytes.startsWith("BLP2") &&
+                  a.md5 == md5Of(a.bytes) && frame->m_terrainRequest.textureBytesRead == textureSize,
+                describe(a));
+    ModelViewer::TerrainRequest nearly = withTex0;
+    nearly.textureBytesRead = UnityIpcServer::MAX_TERRAIN_TEXTURE_BYTES_PER_LOAD - 1000;
+    frame->m_terrainRequest = nearly;
+    const UnityIpcServer::MapAssetAnswer b = frame->ServeMapAsset(ask("texture", textureId));
+    tally.check(QString("reads: with 1000 bytes of the load's texture budget left, texture %1 is not read: \"unreadable\", "
+                        "the limit applied named").arg(textureId),
+                b.state == "unreadable" &&
+                  b.detail.contains(QString("is larger than this read allows (%1 bytes, the limit is 1000)").arg(textureSize)) &&
+                  b.bytes.isEmpty() && b.bytesRead == 0 && b.readMs >= 0.0 &&
+                  frame->m_terrainRequest.textureBytesRead == nearly.textureBytesRead,
+                describe(b));
+    ModelViewer::TerrainRequest spent = withTex0;
+    spent.textureBytesRead = UnityIpcServer::MAX_TERRAIN_TEXTURE_BYTES_PER_LOAD;
+    frame->m_terrainRequest = spent;
+    const UnityIpcServer::MapAssetAnswer c = frame->ServeMapAsset(ask("texture", textureId));
+    tally.check("reads: with the load's texture budget spent, a texture is refused unread",
+                c.state == "refused" && c.detail.contains("bytes of textures: at most") && c.readMs < 0.0 && c.bytesRead == 0,
+                describe(c) + QString(", readMs %1").arg(c.readMs));
+    ModelViewer::TerrainRequest reported = withTex0;
+    reported.ended = true;
+    reported.endedStatus = "built";
+    frame->m_terrainRequest = reported;
+    const UnityIpcServer::MapAssetAnswer d = frame->ServeMapAsset(ask("texture", textureId));
+    tally.check("reads: a texture of a load the player has reported is stale, unread",
+                d.state == "stale" && d.detail.contains(QString("load %1 was reported built").arg(base.load)) && d.readMs < 0.0,
+                describe(d));
+  }
+  frame->m_terrainRequest = saved;
 }
 
 // What the host takes as shown after a failed load (ModelViewer::OnTerrainTileLoaded), on made-up reports: a tile still
@@ -5393,6 +5954,173 @@ static void checkMapAssetRecordRing(TerrainTestLog & tally)
                 .arg(handed).arg(lastHanded));
 }
 
+// THE TEXTURE LIST of a protocol-13 report's material, as far as it can be judged without what the host served
+// (UnityIpcServer.h TERRAIN TEXTURES): every entry a "diffuse" or a "height" texture, at most
+// MAX_TERRAIN_TEXTURES_PER_LOAD of them in a state of a request (asked for, answered, or failed by the player after its
+// answer) -- the rest "not requested", or the "no texture id" entry --, and at most TERRAIN_REPORT_TEXTURES_MAX entries
+// sent, every one read. Empty when the list holds.
+static QStringList terrainTextureListProblems(const UnityIpcServer::TerrainTileReport & r)
+{
+  QStringList bad;
+  int requested = 0, otherRoles = 0;
+  QStringList rolesNamed;   // the first few entries of another role, the player's text appended
+  for (const UnityIpcServer::TerrainTileReport::Texture & t : r.textures)
+  {
+    if (t.state != "not requested" && t.state != "no texture id")
+      requested++;
+    if (t.role != "diffuse" && t.role != "height")
+    {
+      otherRoles++;
+      if (rolesNamed.size() < 4)
+        rolesNamed << QString::number(t.fileDataID) + (t.role.isEmpty() ? QString(" (none)") : " \"" + t.role + "\"");
+    }
+  }
+  if (r.texturesSent > UnityIpcServer::TERRAIN_REPORT_TEXTURES_MAX || r.texturesSent > (int)r.textures.size())
+    bad << QString("%1 texture entries sent, %2 read (at most %3)").arg(r.texturesSent).arg(r.textures.size())
+             .arg(UnityIpcServer::TERRAIN_REPORT_TEXTURES_MAX);
+  if (requested > UnityIpcServer::MAX_TERRAIN_TEXTURES_PER_LOAD)
+    bad << QString("%1 texture entries asked for or answered (at most %2; the rest \"not requested\" or \"no texture "
+                   "id\")").arg(requested).arg(UnityIpcServer::MAX_TERRAIN_TEXTURES_PER_LOAD);
+  if (otherRoles > 0)
+    bad << QString("%1 texture entr%2 with a role other than \"diffuse\" or \"height\": ").arg(otherRoles)
+             .arg(otherRoles == 1 ? "y" : "ies") + rolesNamed.join(", ") +
+             (otherRoles > rolesNamed.size() ? ", ..." : "");
+  return bad;
+}
+
+// What the host reads of a report's lists (UnityIpcServer::handleTerrainTileLoaded), on made-up terrainTileLoaded
+// messages in a server of their own, and how the material check judges a texture list (terrainTextureListProblems):
+// up to TERRAIN_REPORT_TEXTURES_MAX texture entries are kept and accepted -- 200 (128 asked for, 71 "not requested", the
+// "no texture id" entry), and every diffuse and height texture 256 chunks of 8 layers can name --; one more is counted,
+// not kept, and fails, as do 129 entries asked for and an entry of another role or none. The retired ids and the
+// chunk-state counters are kept up to TERRAIN_REPORT_LIST_MAX. No player is involved.
+static void checkTerrainReportLists(TerrainTestLog & tally)
+{
+  UnityIpcServer server;
+  UnityIpcServer::TerrainTileReport got;
+  int handed = 0;
+  server.onTerrainTileLoaded = [&got, &handed](const UnityIpcServer::TerrainTileReport & r) {
+    got = r;
+    handed++;
+  };
+  const int asked = UnityIpcServer::MAX_TERRAIN_TEXTURES_PER_LOAD, most = UnityIpcServer::TERRAIN_REPORT_TEXTURES_MAX;
+  const int layers = 256 * 8;   // a tile's chunks x the layers of a drawn chunk: the entries of one role at most
+  const auto entry = [](int id, const QString & role, const QString & state) {
+    QJsonObject t;
+    t["fileDataID"] = id;
+    if (!role.isEmpty())
+      t["role"] = role;
+    t["state"] = state;
+    t["detail"] = state == "not requested" ? QString("this load may ask for at most 128 textures (maxTexturesPerLoad)")
+                                           : QString();
+    return t;
+  };
+  // n entries of a role from FileDataID `from`, the first `answered` of them "available", the rest "not requested".
+  const auto append = [&entry](QJsonArray & a, int n, const QString & role, int from, int answered) {
+    for (int i = 0; i < n; i++)
+      a.append(entry(from + i, role, i < answered ? "available" : "not requested"));
+  };
+  // A built report of a made-up load, its material listing these textures, with these retired ids and counters.
+  const auto feed = [&](const QJsonArray & textures, const QJsonArray & retired, const QJsonObject & counters) {
+    QJsonObject material;
+    material["state"] = "partial";
+    material["chunkStates"] = counters;
+    material["textures"] = textures;
+    QJsonObject m;
+    m["type"] = "terrainTileLoaded";
+    m["load"] = 1;
+    m["status"] = "built";
+    m["requestsRetired"] = retired.size();
+    m["retiredRequestIds"] = retired;
+    m["material"] = material;
+    got = UnityIpcServer::TerrainTileReport();
+    const int before = handed;
+    server.testReceiveTerrainTileLoaded(m);
+    return handed == before + 1;
+  };
+  const auto judged = [&got]() {
+    const QStringList p = terrainTextureListProblems(got);
+    return QString("%1 sent, %2 kept; ").arg(got.texturesSent).arg(got.textures.size()) +
+           (p.isEmpty() ? QString("accepted") : "judged: " + p.join("; "));
+  };
+  {
+    QJsonArray a;
+    append(a, 199, "diffuse", 9100000, asked);
+    a.append(entry(0, "diffuse", "no texture id"));
+    const bool fed = feed(a, QJsonArray(), QJsonObject());
+    tally.check(QString("report lists: 200 texture entries (%1 asked for, 71 \"not requested\", the \"no texture id\" "
+                        "entry) are all kept, in order, and accepted").arg(asked),
+                fed && got.texturesSent == 200 && got.textures.size() == 200 && got.textures.front().fileDataID == 9100000 &&
+                  got.textures.back().fileDataID == 0 && got.textures.back().state == "no texture id" &&
+                  got.textures.back().role == "diffuse" && terrainTextureListProblems(got).isEmpty(),
+                judged());
+  }
+  QJsonArray full;
+  append(full, layers - 1, "diffuse", 9100000, asked);
+  full.append(entry(0, "diffuse", "no texture id"));
+  append(full, layers, "height", 9200000, 0);
+  {
+    const bool fed = feed(full, QJsonArray(), QJsonObject());
+    tally.check(QString("report lists: %1 texture entries (%2 diffuse with the \"no texture id\" entry, %2 height; %3 asked "
+                        "for) are all kept and accepted").arg(most).arg(layers).arg(asked),
+                fed && most == 2 * layers && got.texturesSent == most && (int)got.textures.size() == most &&
+                  got.textures.back().fileDataID == 9200000 + layers - 1 && got.textures.back().role == "height" &&
+                  terrainTextureListProblems(got).isEmpty(),
+                judged());
+  }
+  {
+    QJsonArray over = full;
+    over.append(entry(9300000, "height", "not requested"));
+    const bool fed = feed(over, QJsonArray(), QJsonObject());
+    const QStringList p = terrainTextureListProblems(got);
+    tally.check(QString("report lists: %1 texture entries are counted, %2 kept, and the list fails").arg(most + 1).arg(most),
+                fed && got.texturesSent == most + 1 && (int)got.textures.size() == most && p.size() == 1 &&
+                  p.front().contains(QString("%1 texture entries sent, %2 read").arg(most + 1).arg(most)),
+                judged());
+  }
+  {
+    QJsonArray a;
+    append(a, asked + 1, "diffuse", 9100000, asked + 1);
+    QJsonObject other = a.at(1).toObject();
+    other["role"] = "specular";
+    a.replace(1, other);
+    QJsonObject none = a.at(2).toObject();
+    none.remove("role");
+    a.replace(2, none);
+    const bool fed = feed(a, QJsonArray(), QJsonObject());
+    const QStringList p = terrainTextureListProblems(got);
+    tally.check(QString("report lists: %1 entries asked for fail, and so do an entry of another role and one of none")
+                  .arg(asked + 1),
+                fed && (int)got.textures.size() == asked + 1 && got.textures[1].role == "specular" &&
+                  got.textures[2].role.isEmpty() && p.size() == 2 &&
+                  p.at(0).startsWith(QString("%1 texture entries asked for or answered").arg(asked + 1)) &&
+                  p.at(1).startsWith("2 texture entries with a role other than"),
+                judged());
+  }
+  {
+    const int n = UnityIpcServer::TERRAIN_REPORT_LIST_MAX + 72;
+    QJsonArray retired;
+    QJsonObject counters;
+    for (int i = 0; i < n; i++)
+    {
+      retired.append(QString("u%1").arg(i + 1));
+      counters[QString("c%1").arg(i, 3, 10, QChar('0'))] = i;
+    }
+    const int keep = UnityIpcServer::TERRAIN_REPORT_LIST_MAX;
+    const bool fed = feed(QJsonArray(), retired, counters);
+    tally.check(QString("report lists: %1 retired ids and %1 chunk-state counters are counted, the first %2 of each kept")
+                  .arg(n).arg(keep),
+                fed && got.requestsRetired == n && got.retiredRequestIds.size() == keep &&
+                  got.retiredRequestIds.back() == QString("u%1").arg(keep) && (int)got.chunkStates.size() == keep &&
+                  got.chunkStates.front().first == "c000" && got.texturesSent == 0 && got.textures.empty(),
+                QString("requestsRetired %1, %2 ids kept (the last %3), %4 counters kept (the first %5), %6 texture entries")
+                  .arg(got.requestsRetired).arg(got.retiredRequestIds.size())
+                  .arg(got.retiredRequestIds.isEmpty() ? QString("-") : got.retiredRequestIds.back())
+                  .arg(got.chunkStates.size()).arg(got.chunkStates.empty() ? QString("-") : got.chunkStates.front().first)
+                  .arg(got.texturesSent));
+  }
+}
+
 static int doHeadlessTerrainTileTest(ModelViewer * frame, int mapId, int tileX, int tileY, const QString & outPath)
 {
   TerrainTestLog tally;
@@ -5413,28 +6141,87 @@ static int doHeadlessTerrainTileTest(ModelViewer * frame, int mapId, int tileX, 
            << (startCatalog ? startCatalog->client().product + " " + startCatalog->client().build : QString("none"))
            << "sequence:" << (sequenceSpec.isEmpty() ? QString("none") : sequenceSpec);
 
-  std::vector<UnityIpcServer::TerrainTileReport> reports;
-  std::vector<UnityIpcServer::RuntimeState> states;
-  QJsonArray loadsJson, samplesJson;
+  // WHAT THE RUN KEEPS is bounded, since the memory it samples is its own process's: the most recent REPORTS_KEPT reports
+  // (their messages dropped; the server reads at most TERRAIN_REPORT_TEXTURES_MAX texture entries into each), the most
+  // recent SERVED_KEPT getMapAsset records, per load serial up to the highest one sent two bytes (how often it was
+  // answered, how first) -- a report naming a load never sent is counted apart, and fails a check --, the distinct files
+  // served per client epoch, and at most TIMING_SAMPLES_KEPT times per timing group (the rest counted). Every full
+  // report, record and load goes to <out.json>.records.jsonl as it arrives, and is read back into <out.json> once the
+  // last sample is taken.
+  // (A load has at most 3 + 128 reads and a few refusals: the records of the last loads fit SERVED_KEPT.)
+  const size_t REPORTS_KEPT = 64, SERVED_KEPT = 512, STATES_KEPT = 64;
+  const size_t TIMING_SAMPLES_KEPT = 65536;
+  std::deque<UnityIpcServer::TerrainTileReport> reports;   // the most recent, message cleared
+  long long reportsTotal = 0;
+  std::vector<unsigned char> answerCount;                   // by load serial: reports received, up to 255
+  std::vector<char> answerFirst;                            // ... the first one's status: b(uilt) f s c, ? other
+  long long reportsForUnsentLoads = 0;                      // reports naming a load this run never sent
+  QStringList unsentLoadsNamed;                             // ... the first few of those loads, for the check's detail
+  long long retiredReported = 0;                            // requestsRetired summed over every report
+  std::vector<UnityIpcServer::RuntimeState> states;         // the most recent STATES_KEPT answers (waitRuntimeState)
+  QJsonArray samplesJson;
   std::vector<int> loadsSent;
   std::vector<int> loadsOrphaned;   // in flight when the player was restarted: no player may answer them
-  // Every getMapAsset answered in this run, in order (the server keeps only the most recent; onMapAssetServed). A deque:
-  // a record looked up stays where it is while later ones arrive.
-  std::deque<UnityIpcServer::MapAssetServed> servedCopy;
+  // The getMapAsset records answered in this run, numbered in order (the server keeps only its own most recent).
+  struct ServedEntry
+  {
+    long long seq;
+    UnityIpcServer::MapAssetServed s;
+  };
+  std::deque<ServedEntry> servedRecent;
+  long long servedTotal = 0;
+  std::set<std::pair<int, int>> filesServed;   // (client epoch, FileDataID) of every file answered "available"
+  int lastAvailableEpoch = 0;
   long long servedBeforeRestarts = 0;   // the server's answer count of each player before a restart (start() zeroes it)
   std::vector<long long> privateSeries; // the host's private bytes at every sample
+  // Timing samples, by group (role, and first read apart).
+  struct Samples
+  {
+    std::vector<double> v;
+    long long n = 0;
+  };
+  std::map<QString, Samples> timing;
+  const auto addTiming = [&timing, TIMING_SAMPLES_KEPT](const QString & group, double value) {
+    if (value < 0.0)
+      return;
+    Samples & s = timing[group];
+    s.n++;
+    if (s.v.size() < TIMING_SAMPLES_KEPT)
+      s.v.push_back(value);
+  };
+  long long pollsStopped = 0, pollBytesMax = 0;
+  int pollWaitingMax = 0;
+  // The records file (none without <out.json>).
+  QFile recordsFile(outPath.isEmpty() ? QString() : outPath + ".records.jsonl");
+  const bool recording = !outPath.isEmpty() && recordsFile.open(QIODevice::WriteOnly | QIODevice::Truncate);
+  const auto record = [&recordsFile, recording](const char * kind, QJsonObject o) {
+    if (!recording)
+      return;
+    o["recordKind"] = QString::fromLatin1(kind);
+    recordsFile.write(QJsonDocument(o).toJson(QJsonDocument::Compact));
+    recordsFile.write("\n");
+  };
+  // The timeout step's genuine late answer: the held requests are released when the player's report of this load arrives,
+  // before the host takes the load as ended (TERRAIN TEXTURES), so the file goes back "available" to a load already over.
+  int releaseOnReportOf = 0, releasedOnReport = -1;
   UnityIpcServer * ipc = nullptr;
   std::function<void(const UnityIpcServer::TerrainTileReport &)> previousTerrain;
   std::function<void(const UnityIpcServer::RuntimeState &)> previousRuntime;
   std::function<void(const UnityIpcServer::MapAssetServed &)> previousServed;
+  std::function<void(const UnityIpcServer::MapAssetPoll &)> previousPoll;
 
   // THE IN-PROCESS CHECKS, before any player: the decision, the host's bookkeeping of a failed load, its read tracker and
   // record ring, and the size limit of the catalogue's read. (That a refused file is never read is shown where the reads
   // can be counted: scripts/tests/casc-whole-read, case 9.)
   checkMapAssetDecisions(tally);
+  checkMapAssetAccounting(tally);
+  checkMapAssetKinds(tally);
+  checkMapAssetQueue(tally);
   checkFailedLoadBookkeeping(frame, tally);
   checkMapAssetReadTracker(tally);
   checkMapAssetRecordRing(tally);
+  checkTerrainReportLists(tally);
+  checkMapAssetReads(frame, tally);
   {
     const QString tooLargeCheck = "inspectFile with a 1000-byte limit refuses the WDT, size and limit named, no bytes handed back";
     const wow::MapEntry * entry = startCatalog ? startCatalog->find(mapId) : nullptr;
@@ -5527,21 +6314,91 @@ static int doHeadlessTerrainTileTest(ModelViewer * frame, int mapId, int tileX, 
     }
     previousTerrain = ipc->onTerrainTileLoaded;
     previousRuntime = ipc->onRuntimeState;
-    ipc->onTerrainTileLoaded = [&reports, previousTerrain](const UnityIpcServer::TerrainTileReport & r) {
-      reports.push_back(r);
+    ipc->onTerrainTileLoaded = [&, previousTerrain](const UnityIpcServer::TerrainTileReport & r) {
+      if (releaseOnReportOf > 0 && r.load == releaseOnReportOf)
+      {
+        releaseOnReportOf = 0;
+        releasedOnReport = ipc->testReleaseHeldMapAssets();
+      }
+      reportsTotal++;
+      retiredReported += std::max(0, r.requestsRetired);
+      // The per-load tables go up to the highest serial sent, never further: serials are the host's, raised for every load
+      // sent, and request() records a load before any pump can deliver its report. A report naming a load never sent (a
+      // made-up or misrouted one) is counted apart.
+      const int highestSent = loadsSent.empty() ? 0 : loadsSent.back();
+      if (r.load > 0 && r.load <= highestSent && std::binary_search(loadsSent.begin(), loadsSent.end(), r.load))
+      {
+        if ((size_t)highestSent >= answerCount.size())
+        {
+          answerCount.resize((size_t)highestSent + 1, 0);
+          answerFirst.resize((size_t)highestSent + 1, 0);
+        }
+        if (answerCount[(size_t)r.load] == 0)
+          answerFirst[(size_t)r.load] = r.status == "built" ? 'b' : r.status == "failed" ? 'f' : r.status == "superseded" ? 's'
+                                        : r.status == "cleared" ? 'c' : '?';
+        if (answerCount[(size_t)r.load] < 255)
+          answerCount[(size_t)r.load]++;
+      }
+      else
+      {
+        reportsForUnsentLoads++;
+        if (unsentLoadsNamed.size() < 8)
+          unsentLoadsNamed << QString::number(r.load);
+        LOG_ERROR << "[terrain-test] a terrainTileLoaded names load" << r.load << "(status" << r.status
+                  << "), which this run never sent (the highest sent:" << highestSent << ")";
+      }
+      record("report", r.message);
+      UnityIpcServer::TerrainTileReport kept = r;
+      kept.message = QJsonObject();
+      reports.push_back(kept);
+      while (reports.size() > REPORTS_KEPT)
+        reports.pop_front();
       if (previousTerrain)
         previousTerrain(r);
     };
-    ipc->onRuntimeState = [&states, previousRuntime](const UnityIpcServer::RuntimeState & s) {
+    ipc->onRuntimeState = [&states, previousRuntime, STATES_KEPT](const UnityIpcServer::RuntimeState & s) {
       states.push_back(s);
+      if (states.size() > 2 * STATES_KEPT)
+        states.erase(states.begin(), states.end() - STATES_KEPT);
       if (previousRuntime)
         previousRuntime(s);
     };
     previousServed = ipc->onMapAssetServed;
-    ipc->onMapAssetServed = [&servedCopy, previousServed](const UnityIpcServer::MapAssetServed & s) {
-      servedCopy.push_back(s);
+    ipc->onMapAssetServed = [&, previousServed](const UnityIpcServer::MapAssetServed & s) {
+      record("served", servedJson(s));
+      servedRecent.push_back({servedTotal++, s});
+      while (servedRecent.size() > SERVED_KEPT)
+        servedRecent.pop_front();
+      if (s.state == "available")
+      {
+        filesServed.insert(std::make_pair(s.epochNow, s.fileDataID));
+        lastAvailableEpoch = s.epochNow;
+        // Timing by role, the first read of each file apart (MapAssetServed::first); the largest files (over 4 MiB, the
+        // 5,593,604-byte textures) also on their own.
+        const QString group = s.role + (s.first ? " first" : "");
+        addTiming(group + " handlerMs", s.handlerMs);
+        addTiming(group + " readMs", s.readMs);
+        addTiming(group + " queuedMs", s.queuedMs);
+        if (s.bytes > 4 * 1024 * 1024)
+        {
+          addTiming("over 4 MiB handlerMs", s.handlerMs);
+          addTiming("over 4 MiB readMs", s.readMs);
+          addTiming("over 4 MiB queuedMs", s.queuedMs);
+        }
+      }
+      else
+        addTiming("no file queuedMs", s.queuedMs);
       if (previousServed)
         previousServed(s);
+    };
+    previousPoll = ipc->onMapAssetPoll;
+    ipc->onMapAssetPoll = [&, previousPoll](const UnityIpcServer::MapAssetPoll & p) {
+      addTiming("poll serveMs", p.serveMs);
+      pollsStopped += p.stoppedForBudget ? 1 : 0;
+      pollBytesMax = std::max(pollBytesMax, p.bytesRead);
+      pollWaitingMax = std::max(pollWaitingMax, p.waitingAfter);
+      if (previousPoll)
+        previousPoll(p);
     };
     wxStopWatch ready;
     while (!ipc->isUnityReady() && ready.Time() < 60000 && frame->unityRendererHost->isRunning())
@@ -5557,6 +6414,13 @@ static int doHeadlessTerrainTileTest(ModelViewer * frame, int mapId, int tileX, 
                                            .arg(ipc->playerProtocolVersion()));
       return;
     }
+    // A protocol-12 player draws geometry alone: it is offered no textures, asks for none and reports no material, and
+    // every textured check is skipped with that reason. Its retired ring holds 32 requests, a protocol-13 player's 128
+    // (WmvTerrainSession.RetiredCapacity).
+    const bool texturedPlayer = ipc->playerDrawsTerrainTextures();
+    const QString noTexturesWhy = QString("the player speaks protocol %1: it draws no terrain textures (protocol 13)")
+                                    .arg(ipc->playerProtocolVersion());
+    LOG_INFO << "[terrain-test]" << (texturedPlayer ? QString("the player draws terrain textures") : noTexturesWhy);
 
     // Every sample of the player goes to <out.json> with the host's own memory and map-file bookkeeping beside it: its
     // private bytes and working set, the records kept and counted, the files tracked, the requests held.
@@ -5576,7 +6440,16 @@ static int doHeadlessTerrainTileTest(ModelViewer * frame, int mapId, int tileX, 
       o["mapAssetReadsUntracked"] = (double)reads.untracked();
       o["mapAssetsHeld"] = (int)ipc->mapAssetsHeld().size();
       o["mapAssetsHeldDropped"] = (double)ipc->mapAssetsHeldDropped();
-      o["servedCopy"] = (int)servedCopy.size();
+      o["mapAssetsWaiting"] = (int)ipc->mapAssetsWaiting();
+      o["mapAssetsQueued"] = (double)ipc->mapAssetsQueued();
+      o["mapAssetsRefusedQueueFull"] = (double)ipc->mapAssetsRefusedQueueFull();
+      o["mapAssetsQueueDropped"] = (double)ipc->mapAssetsQueueDropped();
+      o["mapAssetPollsKept"] = (int)ipc->mapAssetPolls().size();
+      o["mapAssetRequestsReceived"] = ipc->stats().mapAssetRequests;
+      o["servedCopy"] = (double)servedTotal;
+      o["servedKept"] = (int)servedRecent.size();
+      o["reportsKept"] = (int)reports.size();
+      o["statesKept"] = (int)states.size();
       samplesJson.append(o);
       // The label is appended, never passed through arg().
       LOG_INFO << "[terrain-test] memory " + label +
@@ -5585,7 +6458,10 @@ static int doHeadlessTerrainTileTest(ModelViewer * frame, int mapId, int tileX, 
                       .arg(privateBytes).arg(workingSet).arg(ipc->mapAssetsServed().size()).arg(ipc->mapAssetsServedTotal())
                       .arg(ipc->mapAssetRecordsDropped()).arg(reads.size()).arg(reads.epoch()).arg(reads.untracked())
                       .arg(ipc->mapAssetsHeld().size()) +
-                    QString(" (%1 dropped unanswered); the test's copy %2").arg(ipc->mapAssetsHeldDropped()).arg(servedCopy.size());
+                    QString(" (%1 dropped unanswered); waiting %2, poll records %3; the test keeps %4 of %5 records, %6 "
+                            "reports, %7 states")
+                      .arg(ipc->mapAssetsHeldDropped()).arg(ipc->mapAssetsWaiting()).arg(ipc->mapAssetPolls().size())
+                      .arg(servedRecent.size()).arg(servedTotal).arg(reports.size()).arg(states.size());
     };
     // What the player holds, two questions in turn: the second is answered in a frame after the one the first was.
     const auto sample = [&](const QString & label, UnityIpcServer::RuntimeState & s) {
@@ -5602,12 +6478,10 @@ static int doHeadlessTerrainTileTest(ModelViewer * frame, int mapId, int tileX, 
       appendSample(label, s);
       return answered;
     };
-    const auto reportsFor = [&reports](int load) {
-      int n = 0;
-      for (const UnityIpcServer::TerrainTileReport & r : reports)
-        n += r.load == load ? 1 : 0;
-      return n;
+    const auto reportsFor = [&answerCount](int load) {
+      return load > 0 && (size_t)load < answerCount.size() ? (int)answerCount[(size_t)load] : 0;
     };
+    // The report of a load: the first one received (an answer counted twice fails the "answered once" checks anyway).
     const auto waitReport = [&](int load, long limitMs, UnityIpcServer::TerrainTileReport & outReport) {
       wxStopWatch w;
       while (true)
@@ -5618,17 +6492,26 @@ static int doHeadlessTerrainTileTest(ModelViewer * frame, int mapId, int tileX, 
             outReport = r;
             return true;
           }
+        if (reportsFor(load) > 0)
+          return false;   // it came, but so long ago that it is no longer kept: a step waits for its own loads only
         if (w.Time() >= limitMs || !ipc->isUnityReady())
           return false;
         pumpIpc(ipc, 1);
       }
     };
-    const auto lastServed = [&servedCopy](int load, const QString & role) -> const UnityIpcServer::MapAssetServed * {
-      const UnityIpcServer::MapAssetServed * found = nullptr;
-      for (const UnityIpcServer::MapAssetServed & s : servedCopy)
-        if (s.load == load && s.role == role)
-          found = &s;
-      return found;
+    const auto lastServed = [&servedRecent](int load, const QString & role) -> const UnityIpcServer::MapAssetServed * {
+      for (auto it = servedRecent.rbegin(); it != servedRecent.rend(); ++it)
+        if (it->s.load == load && it->s.role == role)
+          return &it->s;
+      return nullptr;
+    };
+    // Every record kept of a load, in order (a load has at most 3 + 128 reads and a few refusals: far fewer than are kept).
+    const auto servedFor = [&servedRecent](int load) {
+      std::vector<UnityIpcServer::MapAssetServed> out;
+      for (const ServedEntry & e : servedRecent)
+        if (e.s.load == load)
+          out.push_back(e.s);
+      return out;
     };
     const auto request = [&](int m, int x, int y, const QString & step, QString & why) {
       const int load = frame->RequestTerrainTile(m, x, y, why);
@@ -5644,9 +6527,165 @@ static int doHeadlessTerrainTileTest(ModelViewer * frame, int mapId, int tileX, 
         l["assetEpoch"] = UnityAssetAccess::clientEpoch();
         l["product"] = frame->mapCatalog() ? frame->mapCatalog()->client().product : QString();
         l["build"] = frame->mapCatalog() ? frame->mapCatalog()->client().build : QString();
-        loadsJson.append(l);
+        l["textures"] = frame->m_terrainRequest.maxTextureBytes > 0;
+        record("load", l);
       }
       return load;
+    };
+    // THE MATERIAL of a built load (TERRAIN TEXTURES). A protocol-12 player: no material, and nothing but the WDT and the
+    // root served for the load. A protocol-13 player: the material reported, its state one of the four, no request retired
+    // by a load that was built, what the host served for the load within its limits (one tex0 read, each texture id read
+    // once, at most 128 of them and 128 MiB), the tex0 the report names the one served (FileDataID, bytes, md5) -- or the
+    // material "unavailable", its reason quoting the host's state, when none was --, every texture the host answered named
+    // in the report (a diffuse or a height texture: the host serves both as role "texture"), each entry of its id: a file
+    // served with its md5 and bytes (or a state of the player's own: md5 mismatch, decode failed), any other answer quoted
+    // verbatim, state and detail; the list itself sound (terrainTextureListProblems: roles, at most 128 entries asked for,
+    // at most TERRAIN_REPORT_TEXTURES_MAX in all); a "textured" material with no texture missing; the chunk-state counters
+    // (the stage 04 states, in precedence order) summing to the chunks.
+    const QStringList chunkStateNames = {"malformed", "alphaUnsupported", "layerCountUnsupported", "layerEffectUnresolved",
+                                         "heightTextureMissing", "noLayers", "layerEffectStatic", "missingTexture",
+                                         "textured"};
+    const QStringList materialStates = {"textured", "partial", "unavailable", "unsupported"};
+    const QStringList playerTextureStates = {"no texture id", "not requested", "md5 mismatch", "decode failed",
+                                             "transport failure"};
+    QString lastMaterialState;   // the material of the last load checked (protocol 13)
+    const auto checkMaterial = [&](const QString & label, int load, const UnityIpcServer::TerrainTileReport & r) {
+      lastMaterialState = r.hasMaterial ? r.materialState : QString();
+      const std::vector<UnityIpcServer::MapAssetServed> served = servedFor(load);
+      int tex0Reads = 0, textureRecords = 0;
+      long long textureBytesRead = 0;
+      std::map<int, int> textureReads;   // id -> requests that went on to the read
+      const UnityIpcServer::MapAssetServed * tex0Available = nullptr;
+      const UnityIpcServer::MapAssetServed * tex0Any = nullptr;
+      const auto wentToRead = [](const UnityIpcServer::MapAssetServed & s) { return s.state != "refused" && s.state != "stale"; };
+      for (const UnityIpcServer::MapAssetServed & s : served)
+        if (s.role == "tex0Adt")
+        {
+          tex0Any = &s;
+          tex0Reads += wentToRead(s) ? 1 : 0;
+          if (s.state == "available")
+            tex0Available = &s;
+        }
+        else if (s.role == "texture")
+        {
+          textureRecords++;
+          textureBytesRead += s.bytesRead;
+          if (wentToRead(s))
+            textureReads[s.fileDataID]++;
+        }
+      if (!texturedPlayer)
+      {
+        tally.check(label + QString(": load %1 has no material and was served its two files alone (a protocol-12 player)").arg(load),
+                    !r.hasMaterial && r.requestsRetired < 0 && tex0Any == nullptr && textureRecords == 0,
+                    QString("material %1, requestsRetired %2, %3 tex0 and %4 texture answer(s)").arg(r.hasMaterial ? "sent" : "none")
+                      .arg(r.requestsRetired).arg(tex0Any ? 1 : 0).arg(textureRecords));
+        return;
+      }
+      QStringList bad;
+      if (!r.hasMaterial)
+        bad << "no material in the report";
+      else if (!materialStates.contains(r.materialState))
+        bad << "material state \"" + r.materialState + "\"";
+      if (r.requestsRetired != 0)
+        bad << QString("requestsRetired %1 (a built load has nothing out)").arg(r.requestsRetired);
+      if (tex0Reads > 1)
+        bad << QString("%1 tex0 reads").arg(tex0Reads);
+      int repeats = 0;
+      for (const auto & t : textureReads)
+        repeats += t.second > 1 ? 1 : 0;
+      if (repeats || (int)textureReads.size() > UnityIpcServer::MAX_TERRAIN_TEXTURES_PER_LOAD ||
+          textureBytesRead > UnityIpcServer::MAX_TERRAIN_TEXTURE_BYTES_PER_LOAD)
+        bad << QString("host limits broken: %1 id(s) read more than once, %2 ids read, %3 texture bytes read").arg(repeats)
+                 .arg(textureReads.size()).arg(textureBytesRead);
+      if (r.hasMaterial)
+      {
+        if (tex0Available)
+        {
+          if (r.tex0FileDataID != tex0Available->fileDataID || r.tex0Bytes != tex0Available->bytes ||
+              r.tex0Md5.compare(tex0Available->md5, Qt::CaseInsensitive) != 0)
+            bad << QString("tex0 served %1 (%2 bytes, md5 %3), reported %4 (%5 bytes, md5 %6)").arg(tex0Available->fileDataID)
+                     .arg(tex0Available->bytes).arg(tex0Available->md5).arg(r.tex0FileDataID).arg(r.tex0Bytes).arg(r.tex0Md5);
+          if (r.materialState == "unavailable")
+            bad << "material \"unavailable\" although the tex0 was served";
+        }
+        else
+        {
+          if (r.materialState != "unavailable")
+            bad << "material \"" + r.materialState + "\" although no tex0 was served";
+          if (tex0Any && !r.materialReason.contains(tex0Any->state))
+            bad << "the reason \"" + r.materialReason + "\" does not quote the host's tex0 answer \"" + tex0Any->state + "\"";
+        }
+        // Every texture the host answered for the load, in the report as the host answered it -- each entry of its id, a
+        // diffuse and a height texture being one file to the host (both role "texture"). An id asked for more than once (a
+        // stand-in player's deliberate repeat, refused) is judged by its answer that went on to the read, else its last.
+        // (Texts are filled in one pass, so a player's text is never read for a placeholder.)
+        const bool complete = r.texturesSent == (int)r.textures.size();
+        int matched = 0, failures = 0;
+        std::map<int, const UnityIpcServer::MapAssetServed *> effective;
+        for (const UnityIpcServer::MapAssetServed & s : served)
+          if (s.role == "texture" && (!effective.count(s.fileDataID) || wentToRead(s) || !wentToRead(*effective[s.fileDataID])))
+            effective[s.fileDataID] = &s;
+        for (const auto & e : effective)
+        {
+          const UnityIpcServer::MapAssetServed & s = *e.second;
+          const QString id = QString::number(s.fileDataID);
+          int entries = 0;
+          for (const UnityIpcServer::TerrainTileReport::Texture & t : r.textures)
+          {
+            if (t.fileDataID != s.fileDataID)
+              continue;
+            entries++;
+            if (s.state == "available" && t.state == "available")
+            {
+              if (t.md5.compare(s.md5, Qt::CaseInsensitive) != 0 || t.bytes != s.bytes)
+                bad << QString("texture %1 (%2) served %3 bytes md5 %4, reported %5 bytes md5 %6")
+                         .arg(id, t.role, QString::number(s.bytes), s.md5, QString::number(t.bytes), t.md5);
+              else
+                matched++;
+            }
+            else if (s.state == "available" && playerTextureStates.contains(t.state))
+              failures++;   // served, but the player's own failure (decode, md5): its state, not the host's
+            else if (t.state != s.state || t.detail != s.detail)
+              bad << QString("texture %1 (%2): host \"%3\" \"%4\", reported \"%5\" \"%6\"")
+                       .arg(id, t.role, s.state, s.detail, t.state, t.detail);
+            else
+              failures++;
+          }
+          if (!entries && complete)
+            bad << QString("texture %1 (host: %2) is not in the report").arg(id, s.state);
+        }
+        for (const UnityIpcServer::TerrainTileReport::Texture & t : r.textures)
+          if (r.materialState == "textured" && t.state != "available")
+            bad << QString("material \"textured\" with texture %1 (%2) \"%3\"")
+                     .arg(QString::number(t.fileDataID), t.role, t.state);
+        bad << terrainTextureListProblems(r);
+        // The section 1 counters: each chunk in exactly one state.
+        int sum = 0;
+        QStringList missing;
+        for (const QString & name : chunkStateNames)
+        {
+          const int n = r.chunkState(name);
+          if (n < 0)
+            missing << name;
+          else
+            sum += n;
+        }
+        if (!missing.isEmpty())
+          bad << "chunk states not reported: " + missing.join(", ");
+        else if (r.chunks >= 0 && sum != r.chunks && r.materialState != "unavailable")
+          bad << QString("the chunk states sum to %1, the tile has %2 chunks").arg(sum).arg(r.chunks);
+        if (r.materialState == "textured" && r.chunkState("missingTexture") > 0)
+          bad << QString("material \"textured\" with %1 missingTexture chunk(s)").arg(r.chunkState("missingTexture"));
+        tally.check(label + QString(": load %1 material \"%2\" agrees with what the host served").arg(load).arg(r.materialState),
+                    bad.isEmpty(),
+                    bad.isEmpty() ? QString("tex0 %1 (%2 bytes); %3 texture(s) reported, %4 served and matched, %5 failed as "
+                                            "answered; %6 texture bytes read; reason \"%7\"")
+                                      .arg(r.tex0FileDataID).arg(r.tex0Bytes).arg(r.texturesSent).arg(matched).arg(failures)
+                                      .arg(textureBytesRead).arg(r.materialReason)
+                                  : bad.join("; "));
+        return;
+      }
+      tally.check(label + QString(": load %1 reports its material").arg(load), false, bad.join("; "));
     };
     // A built load: its report names the tile, the files it parsed are those served, one tile is alive.
     const auto checkBuilt = [&](const QString & label, int load, int m, int x, int y) {
@@ -5678,6 +6717,7 @@ static int doHeadlessTerrainTileTest(ModelViewer * frame, int mapId, int tileX, 
                                   .arg(r.rootFileDataID).arg(r.chunksBuilt).arg(r.chunks).arg(r.vertices).arg(r.triangles)
                                   .arg(r.holeCells).arg(r.totalMs, 0, 'f', 1)
                               : bad.join("; "));
+      checkMaterial(label, load, r);
       return bad.isEmpty();
     };
     const auto expectFailed = [&](const QString & label, int load, const QString & hostState, const QString & text) {
@@ -5704,12 +6744,47 @@ static int doHeadlessTerrainTileTest(ModelViewer * frame, int mapId, int tileX, 
     const auto tileObjects = [&counted](const UnityIpcServer::RuntimeState & s) {
       return counted(s) && s.terrainMeshes > 0 && s.terrainMaterials > 0 && s.terrainGameObjects > 0;
     };
-    // A tile on show, a report window after its build: one tile alive, and its objects counted.
+    // The view the player was asked for: -wmvTerrainView=<name> in WMV_DEBUG, which the player inherits and reads the same
+    // way (WmvTerrainDebug.Parse: an exact name, the last one given wins, an unknown one ignored). The stage 03 views and
+    // the materials view upload no texture or alpha array whatever the material; the textured views, and no view given
+    // (a textured or partial material is then drawn textured), upload the tile's textures.
+    const QString askedView = [] {
+      static const QStringList views = { "shaded", "chunks", "wire", "shadedwire", "normals", "textured", "texturedlit",
+                                         "texturedplainweights", "materials" };
+      QString v;
+      for (const QString & a : qEnvironmentVariable("WMV_DEBUG").split(QRegularExpression("[ \t,;]"), QString::SkipEmptyParts))
+        if (a.startsWith("-wmvTerrainView=") && views.contains(a.mid(16)))
+          v = a.mid(16);
+      return v;
+    }();
+    const bool viewUploadsTextures = askedView.isEmpty() || askedView.startsWith("textured");
+    // A tile on show, a report window after its build: one tile alive, and its objects counted. A protocol-13 player
+    // also counts the tile's textures and alpha arrays: some with a textured material, none with an unavailable one, and
+    // none in a view that draws no textures.
     const auto sampleShown = [&](const QString & label, UnityIpcServer::RuntimeState & s) {
       const bool got = sample(label, s);
       tally.check(label + ": the player counts the tile's own Meshes, Materials and GameObjects",
                   got && s.liveTerrainTiles == 1 && tileObjects(s), got ? s.describe() : QString("no answer"));
+      if (got && texturedPlayer)
+      {
+        const bool reported = s.terrainTextures >= 0 && s.terrainAlphaArrays >= 0 && s.terrainTextureBytes >= 0;
+        const bool none = s.terrainTextures == 0 && s.terrainAlphaArrays == 0 && s.terrainTextureBytes == 0;
+        const bool ok = reported && (!viewUploadsTextures ? none
+                                     : lastMaterialState == "textured" ? s.terrainTextures > 0 && s.terrainAlphaArrays > 0 &&
+                                                                           s.terrainTextureBytes > 0
+                                     : lastMaterialState == "unavailable" ? s.terrainTextures == 0 && s.terrainAlphaArrays == 0
+                                                                          : true);
+        tally.check(label + ": the player counts the tile's textures and alpha arrays (material \"" + lastMaterialState +
+                      "\", view " + (askedView.isEmpty() ? QString("as the material") : askedView) + ")",
+                    ok, !reported ? QString("player does not report terrainTextures, terrainTextureBytes or terrainAlphaArrays")
+                                  : QString("terrainTextures %1, terrainTextureBytes %2, terrainAlphaArrays %3")
+                                      .arg(s.terrainTextures).arg(s.terrainTextureBytes).arg(s.terrainAlphaArrays));
+      }
       return got;
+    };
+    // No terrain texture or alpha array left (a protocol-13 player; nothing to say about an older one).
+    const auto noTerrainTextures = [&](const UnityIpcServer::RuntimeState & s) {
+      return !texturedPlayer || (s.terrainTextures == 0 && s.terrainAlphaArrays == 0 && s.terrainTextureBytes == 0);
     };
     // The viewport notice the host puts up (none: "").
     const auto noticeTitle = [frame]() {
@@ -5765,8 +6840,10 @@ static int doHeadlessTerrainTileTest(ModelViewer * frame, int mapId, int tileX, 
     // THE LATE ANSWERS (the server's test hooks: a getMapAsset held unanswered, released once its load has ended). What the
     // player keeps of its requests is checked from the fields it reports; one it does not send reads -1 (a check comparing
     // two samples passes the lower of them), and the check then fails naming it rather than passing on a number that was
-    // never sent.
-    const int retiredCapacity = 32;   // the player's retired ring (WmvTerrainSession.RetiredCapacity)
+    // never sent. A protocol-13 player has several requests out at once: a load that ends retires every one still out and
+    // names them in its report (requestsRetired, retiredRequestIds), so the checks follow those; a protocol-12 player has
+    // one out, and retires exactly the held one.
+    const int retiredCapacity = texturedPlayer ? 128 : 32;   // the player's retired ring (WmvTerrainSession.RetiredCapacity)
     const auto checkField = [&](const QString & label, const char * field, int value, bool ok, const QString & what,
                                 const QString & detail) {
       if (value < 0)
@@ -5774,10 +6851,12 @@ static int doHeadlessTerrainTileTest(ModelViewer * frame, int mapId, int tileX, 
       else
         tally.check(label + ": " + what, ok, detail);
     };
-    // A sample before a held load: what its retirement and its late answer are measured from. Returns whether the player
-    // answered.
+    // A sample before a held load: what its retirements and its late answers are measured from (with the reports' count of
+    // retirements at that moment). Returns whether the player answered.
+    long long windowRetiredStart = 0;
     const auto sampleBefore = [&](const QString & label, UnityIpcServer::RuntimeState & before) {
       const bool answered = sampleOnce(label + " (before the held load)", before);
+      windowRetiredStart = retiredReported;
       if (!answered)
         tally.check(label + ": the player answers before the held load", false, "no answer");
       return answered;
@@ -5814,51 +6893,99 @@ static int doHeadlessTerrainTileTest(ModelViewer * frame, int mapId, int tileX, 
                                      .arg(held.value("load").toInt(0)).arg(held.value("role").toString()).arg(w.Time()));
       return load;
     };
-    // Once the load has ended with its request heldId still held: the player retired exactly that one request since
-    // before (the sample taken before the load) -- its total of retirements one higher, its ring one fuller up to its
-    // capacity, the id retired last the held one. Pending 0 is an invariant only (no load is in flight).
+    // Once the load has ended with its request heldId still held: the player retired, since before (the sample taken
+    // before the load), exactly the requests the reports of the loads ended since say they retired (protocol 13:
+    // requestsRetired, their ids named; protocol 12: the held one alone) -- its total of retirements that much higher, its
+    // ring that much fuller up to its capacity --, the held request among them (protocol 12: the one retired last), and
+    // the one retired last one of the load's. Pending 0 is an invariant only (no load is in flight). retiredIds receives
+    // the ids the load retired.
     const auto checkEnded = [&](const QString & label, const UnityIpcServer::RuntimeState & before, const QString & heldId,
-                                UnityIpcServer::RuntimeState & ended) {
+                                int heldLoad, UnityIpcServer::RuntimeState & ended, QStringList & retiredIds) {
+      retiredIds.clear();
       if (!sample(label + " (the load ended)", ended))
       {
         tally.check(label + ": the player answers once the load ended", false, "no answer");
         return false;
       }
+      UnityIpcServer::TerrainTileReport r;
+      for (const UnityIpcServer::TerrainTileReport & x : reports)
+        if (x.load == heldLoad && r.load == 0)
+          r = x;
+      const long long expected = texturedPlayer ? retiredReported - windowRetiredStart : 1;
+      if (texturedPlayer)
+      {
+        retiredIds = r.retiredRequestIds;
+        tally.check(label + QString(": load %1's report names the requests it retired, the held %2 among them").arg(heldLoad)
+                              .arg(heldId),
+                    r.load == heldLoad && r.requestsRetired >= 1 && r.requestsRetired == r.retiredRequestIds.size() &&
+                      r.retiredRequestIds.contains(heldId),
+                    r.load != heldLoad ? QString("no report of the load kept")
+                                       : QString("requestsRetired %1, ids [%2]").arg(r.requestsRetired)
+                                           .arg(r.retiredRequestIds.join(",")));
+      }
+      else
+        retiredIds << heldId;
       checkField(label, "terrainRetiredTotal", std::min(before.terrainRetiredTotal, ended.terrainRetiredTotal),
-                 ended.terrainRetiredTotal == before.terrainRetiredTotal + 1,
-                 "the ended load retires exactly one request (terrainRetiredTotal one higher than before the load)",
-                 QString("terrainRetiredTotal %1 before the load, %2 now").arg(before.terrainRetiredTotal).arg(ended.terrainRetiredTotal));
-      const int ringExpected = std::min(before.terrainRetiredRequests + 1, retiredCapacity);
+                 ended.terrainRetiredTotal == before.terrainRetiredTotal + expected,
+                 QString("the loads ended retire the requests their reports name (terrainRetiredTotal %1 higher than "
+                         "before the load)").arg(expected),
+                 QString("terrainRetiredTotal %1 before the load, %2 now; the reports since name %3")
+                   .arg(before.terrainRetiredTotal).arg(ended.terrainRetiredTotal).arg(expected));
+      const long long ringExpected = std::min<long long>(before.terrainRetiredRequests + expected, retiredCapacity);
       checkField(label, "terrainRetiredRequests", std::min(before.terrainRetiredRequests, ended.terrainRetiredRequests),
                  ended.terrainRetiredRequests == ringExpected,
-                 QString("the retired ring holds one more, up to %1 (terrainRetiredRequests %2)").arg(retiredCapacity).arg(ringExpected),
+                 QString("the retired ring holds %1 more, up to %2 (terrainRetiredRequests %3)").arg(expected)
+                   .arg(retiredCapacity).arg(ringExpected),
                  QString("terrainRetiredRequests %1 before the load, %2 now").arg(before.terrainRetiredRequests)
                    .arg(ended.terrainRetiredRequests));
+      const QString lastWhat = texturedPlayer ? QString("one the load retired") : "the held one, " + heldId;
       if (!ended.hasTerrainLastRetiredRequest)
-        tally.check(label + ": the request retired last is the held one, " + heldId, false,
-                    "player does not report terrainLastRetiredRequest");
+        tally.check(label + ": the request retired last is " + lastWhat, false, "player does not report terrainLastRetiredRequest");
       else
-        tally.check(label + ": the request retired last is the held one, " + heldId, ended.terrainLastRetiredRequest == heldId,
+        tally.check(label + ": the request retired last is " + lastWhat,
+                    texturedPlayer ? retiredIds.contains(ended.terrainLastRetiredRequest)
+                                   : ended.terrainLastRetiredRequest == heldId,
                     "terrainLastRetiredRequest \"" + ended.terrainLastRetiredRequest + "\"");
       checkField(label, "terrainPendingRequests", ended.terrainPendingRequests, ended.terrainPendingRequests == 0,
                  "invariant: no request pending with no load in flight",
                  QString("terrainPendingRequests %1").arg(ended.terrainPendingRequests));
       return true;
     };
+    // The requests the player sent all accounted for, with nothing in flight: the host received as many as the player
+    // applied (answers routed to it and not dropped), retired and has pending.
+    const auto checkConservation = [&](const QString & label, const UnityIpcServer::RuntimeState & s) {
+      const long long sent = ipc->stats().mapAssetRequests;
+      const long long applied = (long long)s.mapAnswersRouted - s.mapAnswersDropped;
+      const int lowest = std::min(std::min(s.mapAnswersRouted, s.mapAnswersDropped),
+                                  std::min(s.terrainRetiredTotal, s.terrainPendingRequests));
+      checkField(label, "mapAnswersRouted, mapAnswersDropped, terrainRetiredTotal or terrainPendingRequests", lowest,
+                 ipc->mapAssetsWaiting() == 0 && ipc->mapAssetsHeld().empty() &&
+                   sent == applied + s.terrainRetiredTotal + s.terrainPendingRequests,
+                 "conservation: the requests the host received from the player = applied + retired + pending",
+                 QString("%1 received; %2 routed - %3 dropped = %4 applied, %5 retired, %6 pending; %7 waiting, %8 held")
+                   .arg(sent).arg(s.mapAnswersRouted).arg(s.mapAnswersDropped).arg(applied).arg(s.terrainRetiredTotal)
+                   .arg(s.terrainPendingRequests).arg(ipc->mapAssetsWaiting()).arg(ipc->mapAssetsHeld().size()));
+    };
     // The held request released: the host answers it as any (expectState: "available" when nothing changed since -- the
-    // file, long after its load ended -- "stale" otherwise), and the player drops it as late -- mapAnswersLate and
-    // mapAnswersDropped one higher than when the load had ended, mapAnswersUnowned the same -- with no second report for
-    // the load and nothing on screen changed. after is the sample.
-    const auto releaseLate = [&](const QString & label, int load, const QString & heldId,
-                                 const UnityIpcServer::RuntimeState & ended, const QString & expectState,
-                                 UnityIpcServer::RuntimeState & after) {
-      const size_t copyBefore = servedCopy.size();
-      const int released = ipc->testReleaseHeldMapAssets();
+    // file, long after its load ended -- "stale" otherwise); alreadyReleased >= 0: it was released when the load's report
+    // arrived (the timeout step), that many. The player drops as late every answer to a request the load retired --
+    // mapAnswersLate and mapAnswersDropped higher than before the load by the answers the host sent to retiredIds of the
+    // load, mapAnswersUnowned the same --, with no second report for the load, nothing on screen changed, and every request
+    // accounted for (checkConservation). after is the sample.
+    const auto releaseLate = [&](const QString & label, int load, const QString & heldId, const QStringList & retiredIds,
+                                 const UnityIpcServer::RuntimeState & before, const UnityIpcServer::RuntimeState & ended,
+                                 const QString & expectState, int alreadyReleased, UnityIpcServer::RuntimeState & after) {
+      const int released = alreadyReleased >= 0 ? alreadyReleased : ipc->testReleaseHeldMapAssets();
       pumpIpc(ipc, 50);
       const UnityIpcServer::MapAssetServed * answer = nullptr;
-      for (size_t i = copyBefore; i < servedCopy.size(); i++)
-        if (servedCopy[i].requestId == heldId && servedCopy[i].load == load)
-          answer = &servedCopy[i];
+      int lateExpected = 0;
+      for (const ServedEntry & e : servedRecent)
+        if (e.s.load == load && retiredIds.contains(e.s.requestId))
+        {
+          lateExpected++;
+          if (e.s.requestId == heldId)
+            answer = &e.s;
+        }
       tally.check(label + QString(": the held request %1 is answered on release, \"%2\"").arg(heldId).arg(expectState),
                   released == 1 && answer && answer->state == expectState,
                   QString("%1 released; ").arg(released) + (answer ? answer->describe() : QString("no answer recorded")));
@@ -5867,18 +6994,21 @@ static int doHeadlessTerrainTileTest(ModelViewer * frame, int mapId, int tileX, 
         tally.check(label + ": the player answers after the late answer", false, "no answer");
         return;
       }
-      checkField(label, "mapAnswersDropped", std::min(ended.mapAnswersDropped, after.mapAnswersDropped),
-                 after.mapAnswersDropped == ended.mapAnswersDropped + 1,
-                 "the player drops the answer (mapAnswersDropped one higher)",
-                 QString("mapAnswersDropped %1 when the load had ended, %2 now").arg(ended.mapAnswersDropped).arg(after.mapAnswersDropped));
-      checkField(label, "mapAnswersLate", std::min(ended.mapAnswersLate, after.mapAnswersLate),
-                 after.mapAnswersLate == ended.mapAnswersLate + 1,
-                 "... as late, its request found among the retired (mapAnswersLate one higher)",
-                 QString("mapAnswersLate %1 when the load had ended, %2 now").arg(ended.mapAnswersLate).arg(after.mapAnswersLate));
-      checkField(label, "mapAnswersUnowned", std::min(ended.mapAnswersUnowned, after.mapAnswersUnowned),
-                 after.mapAnswersUnowned == ended.mapAnswersUnowned,
+      checkField(label, "mapAnswersDropped", std::min(before.mapAnswersDropped, after.mapAnswersDropped),
+                 after.mapAnswersDropped == before.mapAnswersDropped + lateExpected,
+                 QString("the player drops the %1 answer(s) to the retired requests (mapAnswersDropped %1 higher than "
+                         "before the load)").arg(lateExpected),
+                 QString("mapAnswersDropped %1 before the load, %2 when it had ended, %3 now").arg(before.mapAnswersDropped)
+                   .arg(ended.mapAnswersDropped).arg(after.mapAnswersDropped));
+      checkField(label, "mapAnswersLate", std::min(before.mapAnswersLate, after.mapAnswersLate),
+                 after.mapAnswersLate == before.mapAnswersLate + lateExpected,
+                 QString("... as late, their requests found among the retired (mapAnswersLate %1 higher)").arg(lateExpected),
+                 QString("mapAnswersLate %1 before the load, %2 when it had ended, %3 now").arg(before.mapAnswersLate)
+                   .arg(ended.mapAnswersLate).arg(after.mapAnswersLate));
+      checkField(label, "mapAnswersUnowned", std::min(before.mapAnswersUnowned, after.mapAnswersUnowned),
+                 after.mapAnswersUnowned == before.mapAnswersUnowned,
                  "... not as unowned (mapAnswersUnowned unchanged)",
-                 QString("mapAnswersUnowned %1 when the load had ended, %2 now").arg(ended.mapAnswersUnowned).arg(after.mapAnswersUnowned));
+                 QString("mapAnswersUnowned %1 before the load, %2 now").arg(before.mapAnswersUnowned).arg(after.mapAnswersUnowned));
       checkField(label, "terrainPendingRequests", after.terrainPendingRequests, after.terrainPendingRequests == 0,
                  "invariant: no request pending with no load in flight",
                  QString("terrainPendingRequests %1").arg(after.terrainPendingRequests));
@@ -5886,6 +7016,7 @@ static int doHeadlessTerrainTileTest(ModelViewer * frame, int mapId, int tileX, 
                  after.terrainRetiredRequests <= retiredCapacity,
                  QString("invariant: the retired ring holds at most %1").arg(retiredCapacity),
                  QString("terrainRetiredRequests %1").arg(after.terrainRetiredRequests));
+      checkConservation(label, after);
       tally.check(label + QString(": the late answer brings no second report for load %1").arg(load), reportsFor(load) == 1,
                   QString("%1 report(s)").arg(reportsFor(load)));
       tally.check(label + ": nothing on screen changes with it -- the same model, world model and terrain, nothing loading",
@@ -5899,6 +7030,16 @@ static int doHeadlessTerrainTileTest(ModelViewer * frame, int mapId, int tileX, 
                     .arg(ended.terrainLoad) +
                     QString(" -> %1, loading %2, terrain loading %3").arg(after.terrainLoad).arg(after.loading ? "true" : "false")
                       .arg(after.terrainLoading));
+    };
+    // The roles a late step may hold: the WDT and the root for any player, the tex0 and a texture for one that draws
+    // terrain textures (an older one never asks for them: skipped, the reason named).
+    const auto lateRoleUsable = [&](const QString & label, const QString & role) {
+      if ((role == "tex0Adt" || role == "texture") && !texturedPlayer)
+      {
+        tally.skip(label, noTexturesWhy + ", so it never asks for a " + role);
+        return false;
+      }
+      return true;
     };
 
     // THE SEQUENCE.
@@ -5983,7 +7124,7 @@ static int doHeadlessTerrainTileTest(ModelViewer * frame, int mapId, int tileX, 
             continue;
           }
         }
-        const size_t before = reports.size();
+        const long long before = reportsTotal;
         const bool sent = frame->ClearTerrain("terrain test: clear");
         if (inFlight)
         {
@@ -5998,15 +7139,16 @@ static int doHeadlessTerrainTileTest(ModelViewer * frame, int mapId, int tileX, 
         else
         {
           pumpIpc(ipc, 100);
-          tally.check(label + ": a tile on show is taken away unanswered", sent && reports.size() == before,
-                    QString("%1 report(s) after the clear").arg(reports.size() - before));
+          tally.check(label + ": a tile on show is taken away unanswered", sent && reportsTotal == before,
+                    QString("%1 report(s) after the clear").arg(reportsTotal - before));
         }
         UnityIpcServer::RuntimeState now;
         const bool got = sample(label, now);
-        tally.check(label + ": no terrain tile, view, load or terrain object left, and the player's Mesh and Material "
-                            "counts those " + countsReferenceLabel,
+        tally.check(label + ": no terrain tile, view, load, terrain object" + (texturedPlayer ? ", texture or alpha array" : "") +
+                            " left, and the player's Mesh and Material counts those " + countsReferenceLabel,
                     got && now.liveTerrainTiles == 0 && now.terrainView == 0 && now.terrainLoading == 0 &&
-                      noTerrainObjects(now) && counted(countsReference) && now.meshObjects == countsReference.meshObjects &&
+                      noTerrainObjects(now) && noTerrainTextures(now) && counted(countsReference) &&
+                      now.meshObjects == countsReference.meshObjects &&
                       now.materialObjects == countsReference.materialObjects,
                     got ? QString("meshObjects %1 materialObjects %2, those %3: %4 and %5; ")
                             .arg(now.meshObjects).arg(now.materialObjects).arg(countsReferenceLabel)
@@ -6076,10 +7218,10 @@ static int doHeadlessTerrainTileTest(ModelViewer * frame, int mapId, int tileX, 
           continue;
         }
         // The client is loaded before anything is polled: the player's WDT request waits for it.
-        const size_t servedBefore = servedCopy.size();
+        const long long servedBefore = servedTotal;
         const bool loaded = frame->LoadWoW(&chosen);
         droppedModel = 0;   // the canvas was emptied with the client
-        const size_t servedDuring = servedCopy.size() - servedBefore;
+        const long long servedDuring = servedTotal - servedBefore;
         tally.check(label + ": the client loads", loaded, chosen.product + " " + chosen.version);
         if (servedDuring != 0)
         {
@@ -6172,10 +7314,10 @@ static int doHeadlessTerrainTileTest(ModelViewer * frame, int mapId, int tileX, 
               continue;
             }
           }
-          const size_t servedBefore = servedCopy.size();
+          const long long servedBefore = servedTotal;
           frame->fileControl->SelectModelFile(file);
           droppedModel = 0;   // the canvas holds another model
-          const size_t servedDuring = servedCopy.size() - servedBefore;
+          const long long servedDuring = servedTotal - servedBefore;
           if (inFlight && servedDuring != 0)
           {
             tally.check(label + ": test invalid", false,
@@ -6270,12 +7412,14 @@ static int doHeadlessTerrainTileTest(ModelViewer * frame, int mapId, int tileX, 
       else if (kind == "timeout" || kind == "latesupersede" || kind == "lateclear")
       {
         const QString role = arg.section(':', 3).trimmed();
-        if (!parseTile(arg, t) || (role != "wdt" && role != "rootAdt"))
+        if (!parseTile(arg, t) || (role != "wdt" && role != "rootAdt" && role != "tex0Adt" && role != "texture"))
         {
-          tally.check(label, false, QString("expected %1:<map>:<x>:<y>:<wdt|rootAdt>").arg(kind));
+          tally.check(label, false, QString("expected %1:<map>:<x>:<y>:<wdt|rootAdt|tex0Adt|texture>").arg(kind));
           continue;
         }
-        // The player before the held load: what its retirement and late answer are measured from (and its timeout).
+        if (!lateRoleUsable(label, role))
+          continue;
+        // The player before the held load: what its retirements and late answers are measured from (and its timeout).
         UnityIpcServer::RuntimeState before;
         if (!sampleBefore(label, before))
           continue;
@@ -6295,10 +7439,16 @@ static int doHeadlessTerrainTileTest(ModelViewer * frame, int mapId, int tileX, 
           continue;
         UnityIpcServer::TerrainTileReport r;
         bool got = false;
+        int alreadyReleased = -1;
         if (kind == "timeout")
         {
-          // Nothing answers: the player's own timeout ends the load.
+          // Nothing answers: the player's own timeout ends the load. The held request is released as its report arrives,
+          // before the host takes the load as ended: the file goes back "available", to a load already over.
+          releaseOnReportOf = load;
+          releasedOnReport = -1;
           got = waitReport(load, timeoutMs + 15000, r);
+          releaseOnReportOf = 0;
+          alreadyReleased = std::max(0, releasedOnReport);
           tally.check(label + QString(": load %1 fails, timed out").arg(load),
                       got && r.status == "failed" && r.reason.contains("timed out"),
                       got ? r.status + " " + r.reason : QString("no answer within %1 ms").arg(timeoutMs + 15000));
@@ -6328,27 +7478,52 @@ static int doHeadlessTerrainTileTest(ModelViewer * frame, int mapId, int tileX, 
                       sent && got && r.status == "cleared", got ? r.status + " " + r.reason : QString("no answer within 60 s"));
         }
         UnityIpcServer::RuntimeState ended, after;
-        if (!checkEnded(label, before, heldId, ended))
+        QStringList retiredIds;
+        if (!checkEnded(label, before, heldId, load, ended, retiredIds))
         {
           ipc->testReleaseHeldMapAssets();
           continue;
         }
         if (kind == "lateclear")
-          tally.check(label + ": no terrain tile, view or load left", ended.liveTerrainTiles == 0 && ended.terrainView == 0 &&
-                        ended.terrainLoading == 0, ended.describe());
-        // After a timeout nothing has changed for the host, so the file goes back: a genuine late answer.
-        releaseLate(label, load, heldId, ended, kind == "timeout" ? "available" : "stale", after);
+          tally.check(label + ": no terrain tile, view, load" + (texturedPlayer ? ", texture or alpha array" : "") + " left",
+                      ended.liveTerrainTiles == 0 && ended.terrainView == 0 && ended.terrainLoading == 0 &&
+                        noTerrainTextures(ended), ended.describe());
+        // After a timeout nothing had changed for the host when the request was released, so the file goes back: a
+        // genuine late answer. Every other release meets a load the host has moved on from.
+        releaseLate(label, load, heldId, retiredIds, before, ended, kind == "timeout" ? "available" : "stale", alreadyReleased,
+                    after);
+        // Once the host knows the load ended, what the load still asks for is stale unread: asked here of the host's own
+        // handler, as the player would ask it.
+        if (kind == "timeout")
+        {
+          QJsonObject again;
+          again["type"] = "getMapAsset";
+          again["requestId"] = "terrain-test";
+          again["load"] = load;
+          again["assetEpoch"] = UnityAssetAccess::clientEpoch();
+          again["role"] = role;
+          again["fileDataID"] = lastServed(load, role) ? lastServed(load, role)->fileDataID : 1;
+          const UnityIpcServer::MapAssetAnswer a = frame->ServeMapAsset(again);
+          tally.check(label + QString(": once the player reported load %1, the host answers what it asks for stale, unread")
+                                .arg(load),
+                      a.state == "stale" && a.detail.contains(QString("load %1 was reported failed").arg(load)) && a.readMs < 0.0,
+                      QString("\"%1\" \"%2\" readMs %3").arg(a.state).arg(a.detail).arg(a.readMs));
+        }
         if (kind == "lateclear")
           checkDroppedNotice(label);
       }
       else if (kind == "lateswitch")
       {
+        // lateswitch:<product>:<map>:<x>:<y>[:<role>] (the WDT held when no role is named).
         const QString product = arg.section(':', 0, 0).trimmed();
-        if (!parseTile(arg.section(':', 1), t))
+        const QString role = arg.section(':', 4, 4).trimmed().isEmpty() ? QString("wdt") : arg.section(':', 4, 4).trimmed();
+        if (!parseTile(arg.section(':', 1), t) || (role != "wdt" && role != "rootAdt" && role != "tex0Adt" && role != "texture"))
         {
-          tally.check(label, false, "expected lateswitch:<product>:<map>:<x>:<y>");
+          tally.check(label, false, "expected lateswitch:<product>:<map>:<x>:<y>[:<wdt|rootAdt|tex0Adt|texture>]");
           continue;
         }
+        if (!lateRoleUsable(label, role))
+          continue;
         const std::vector<core::GameConfig> configs = GAMEDIRECTORY.configsFound();
         const core::GameConfig * config = nullptr;
         for (const core::GameConfig & c : configs)
@@ -6365,16 +7540,16 @@ static int doHeadlessTerrainTileTest(ModelViewer * frame, int mapId, int tileX, 
         if (!sampleBefore(label, before))
           continue;
         QString heldId;
-        const int load = requestHeld(label, "wdt", t, step, heldId);
+        const int load = requestHeld(label, role, t, step, heldId);
         if (load <= 0 || heldId.isEmpty())
           continue;
-        // The client is replaced with the load's WDT request held: it can only be answered after.
-        const size_t servedBefore = servedCopy.size();
+        // The client is replaced with the load's request held: it can only be answered after.
+        const long long servedBefore = servedTotal;
         const size_t readsBeforeSwitch = ipc->mapAssetReads().size();
         const int readsEpochBeforeSwitch = ipc->mapAssetReads().epoch();
         const bool loaded = frame->LoadWoW(&chosen);
         droppedModel = 0;   // the canvas was emptied with the client
-        const size_t servedDuring = servedCopy.size() - servedBefore;
+        const long long servedDuring = servedTotal - servedBefore;
         tally.check(label + ": the client loads", loaded, chosen.product + " " + chosen.version);
         if (servedDuring != 0)
         {
@@ -6396,20 +7571,23 @@ static int doHeadlessTerrainTileTest(ModelViewer * frame, int mapId, int tileX, 
         tally.check(label + QString(": the held load (%1) is answered \"cleared\"").arg(load), got && r.status == "cleared",
                     got ? r.status + " " + r.reason : QString("no answer within 60 s"));
         UnityIpcServer::RuntimeState ended, after;
-        if (!checkEnded(label, before, heldId, ended))
+        QStringList retiredIds;
+        if (!checkEnded(label, before, heldId, load, ended, retiredIds))
         {
           ipc->testReleaseHeldMapAssets();
           continue;
         }
-        tally.check(label + ": no terrain tile is left", ended.liveTerrainTiles == 0 && ended.terrainView == 0, ended.describe());
-        releaseLate(label, load, heldId, ended, "stale", after);
-        const UnityIpcServer::MapAssetServed * wdt = lastServed(load, "wdt");
-        tally.check(label + ": the released WDT request is answered stale, under the epoch before the switch and the one after",
-                    wdt && wdt->state == "stale" && wdt->assetEpoch == epoch && wdt->epochNow == UnityAssetAccess::clientEpoch() &&
-                      wdt->epochNow != epoch,
-                    wdt ? wdt->describe() : QString("no answer for the load's WDT request"));
+        tally.check(label + ": no terrain tile is left", ended.liveTerrainTiles == 0 && ended.terrainView == 0 &&
+                      noTerrainTextures(ended), ended.describe());
+        releaseLate(label, load, heldId, retiredIds, before, ended, "stale", -1, after);
+        const UnityIpcServer::MapAssetServed * held = lastServed(load, role);
+        tally.check(label + QString(": the released %1 request is answered stale, under the epoch before the switch and the one "
+                                    "after").arg(role),
+                    held && held->requestId == heldId && held->state == "stale" && held->assetEpoch == epoch &&
+                      held->epochNow == UnityAssetAccess::clientEpoch() && held->epochNow != epoch,
+                    held ? held->describe() : QString("no answer for the load's held request"));
         adoptReference(label, after);   // the next client's own state is the reference from here on
-        // The new client's tile: its files are first reads of the new epoch, and the read tracker holds nothing else.
+        // The new client's tile: its files are first reads of the new epoch, and the read tracker holds them alone.
         const int fresh = request(t.map, t.x, t.y, step, why);
         if (fresh <= 0)
         {
@@ -6419,39 +7597,53 @@ static int doHeadlessTerrainTileTest(ModelViewer * frame, int mapId, int tileX, 
         if (checkBuilt(label + ": the new client's tile", fresh, t.map, t.x, t.y))
         {
           sampleShown(label, afterTile);
-          const UnityIpcServer::MapAssetServed * w = lastServed(fresh, "wdt");
-          const UnityIpcServer::MapAssetServed * root = lastServed(fresh, "rootAdt");
+          std::set<int> files;
+          QStringList notFirst;
+          for (const UnityIpcServer::MapAssetServed & s : servedFor(fresh))
+            if (s.state == "available")
+            {
+              files.insert(s.fileDataID);
+              if (!s.first || !s.firstTracked)
+                notFirst << QString("%1 %2").arg(s.role).arg(s.fileDataID);
+            }
           const MapAssetReadTracker & reads = ipc->mapAssetReads();
-          tally.check(label + ": the new client's two files are first reads, and the read tracker holds them alone",
-                      w && root && w->first && w->firstTracked && root->first && root->firstTracked &&
-                        reads.epoch() == UnityAssetAccess::clientEpoch() && reads.size() == 2,
-                      QString("WDT %1 first %2, root %3 first %4; the tracker holds %5 file(s) of epoch %6 (the client's %7, "
-                              "the old %8)")
-                        .arg(w ? w->fileDataID : 0).arg(w && w->first ? "yes" : "no").arg(root ? root->fileDataID : 0)
-                        .arg(root && root->first ? "yes" : "no").arg(reads.size()).arg(reads.epoch())
-                        .arg(UnityAssetAccess::clientEpoch()).arg(epoch));
+          int held = 0;
+          for (int id : files)
+            held += reads.holds(id) ? 1 : 0;
+          tally.check(label + ": the new client's files (WDT, root" + (texturedPlayer ? ", tex0, textures" : "") +
+                                ") are first reads, and the read tracker holds them alone",
+                      !files.empty() && notFirst.isEmpty() && reads.epoch() == UnityAssetAccess::clientEpoch() &&
+                        reads.size() == files.size() && held == (int)files.size(),
+                      QString("%1 file(s) served, not first: [%2]; the tracker holds %3 file(s) of epoch %4 (the client's %5, "
+                              "the old %6), %7 of the load's")
+                        .arg(files.size()).arg(notFirst.join(", ")).arg(reads.size()).arg(reads.epoch())
+                        .arg(UnityAssetAccess::clientEpoch()).arg(epoch).arg(held));
         }
         last = t;
       }
       else if (kind == "reconnect")
       {
+        // reconnect, or reconnect:<map>:<x>:<y>[:<role>] with that load's request of role (the WDT unless named) held.
         const bool withLoad = !arg.isEmpty();
-        if (withLoad && !parseTile(arg, t))
+        const QString role = arg.section(':', 3, 3).trimmed().isEmpty() ? QString("wdt") : arg.section(':', 3, 3).trimmed();
+        if (withLoad && (!parseTile(arg, t) || (role != "wdt" && role != "rootAdt" && role != "tex0Adt" && role != "texture")))
         {
-          tally.check(label, false, "expected reconnect or reconnect:<map>:<x>:<y>");
+          tally.check(label, false, "expected reconnect or reconnect:<map>:<x>:<y>[:<wdt|rootAdt|tex0Adt|texture>]");
           continue;
         }
+        if (withLoad && !lateRoleUsable(label, role))
+          continue;
         int heldLoad = 0;
         QString heldId;
         if (withLoad)
         {
-          heldLoad = requestHeld(label, "wdt", t, step, heldId);
+          heldLoad = requestHeld(label, role, t, step, heldId);
           if (heldLoad <= 0 || heldId.isEmpty())
             continue;
         }
         // The player closed and started again, as a restart of the viewport does.
         const long long droppedBefore = ipc->mapAssetsHeldDropped();
-        const size_t copyBeforeRestart = servedCopy.size();
+        const std::set<std::pair<int, int>> filesBeforeRestart = filesServed;
         const size_t readsBefore = ipc->mapAssetReads().size();
         const int readsEpochBefore = ipc->mapAssetReads().epoch();
         servedBeforeRestarts += ipc->mapAssetsServedTotal();
@@ -6460,11 +7652,12 @@ static int doHeadlessTerrainTileTest(ModelViewer * frame, int mapId, int tileX, 
         if (withLoad)
         {
           loadsOrphaned.push_back(heldLoad);
-          tally.check(label + QString(": the held request %1 is dropped unanswered with its connection").arg(heldId),
+          tally.check(label + QString(": the held request %1 is dropped unanswered with its connection, and nothing waits")
+                                .arg(heldId),
                       ipc->mapAssetsHeld().empty() && !ipc->testMapAssetHoldArmed() &&
-                        ipc->mapAssetsHeldDropped() == droppedBefore + 1,
-                      QString("%1 held, %2 dropped unanswered (%3 before)").arg(ipc->mapAssetsHeld().size())
-                        .arg(ipc->mapAssetsHeldDropped()).arg(droppedBefore));
+                        ipc->mapAssetsHeldDropped() == droppedBefore + 1 && ipc->mapAssetsWaiting() == 0,
+                      QString("%1 held, %2 dropped unanswered (%3 before), %4 waiting").arg(ipc->mapAssetsHeld().size())
+                        .arg(ipc->mapAssetsHeldDropped()).arg(droppedBefore).arg(ipc->mapAssetsWaiting()));
         }
         if (!frame->StartUnityRenderer(/* selfTest */ true))
         {
@@ -6475,7 +7668,8 @@ static int doHeadlessTerrainTileTest(ModelViewer * frame, int mapId, int tileX, 
         wxStopWatch again;
         while (!ipc->isUnityReady() && again.Time() < 60000 && frame->unityRendererHost->isRunning())
           pumpIpc(ipc, 1);
-        tally.check(label + ": the new player announces itself", ipc->isUnityReady() && ipc->playerDrawsTerrain(),
+        tally.check(label + ": the new player announces itself", ipc->isUnityReady() && ipc->playerDrawsTerrain() &&
+                      ipc->playerDrawsTerrainTextures() == texturedPlayer,
                     QString("protocol %1 after %2 ms").arg(ipc->playerProtocolVersion()).arg(again.Time()));
         if (!ipc->isUnityReady() || !ipc->playerDrawsTerrain())
           return;
@@ -6493,7 +7687,8 @@ static int doHeadlessTerrainTileTest(ModelViewer * frame, int mapId, int tileX, 
         }, 60000, fresh, answered);
         appendSample(label + " (the new player)", fresh);
         tally.check(label + ": the new player holds no terrain, and nothing is loading",
-                    settled && fresh.liveTerrainTiles == 0 && fresh.terrainView == 0, fresh.describe());
+                    settled && fresh.liveTerrainTiles == 0 && fresh.terrainView == 0 && noTerrainTextures(fresh),
+                    fresh.describe());
         checkField(label, "terrainPendingRequests", fresh.terrainPendingRequests, fresh.terrainPendingRequests == 0,
                    "the new player has no terrain request pending", QString("terrainPendingRequests %1").arg(fresh.terrainPendingRequests));
         checkField(label, "terrainRetiredRequests", fresh.terrainRetiredRequests, fresh.terrainRetiredRequests == 0,
@@ -6510,31 +7705,151 @@ static int doHeadlessTerrainTileTest(ModelViewer * frame, int mapId, int tileX, 
           sampleShown(label, afterTile);
           // A file this client's storage had served before the restart is no first read now; one it had not, is.
           QStringList bad;
-          for (const char * role : {"wdt", "rootAdt"})
+          int files = 0;
+          for (const UnityIpcServer::MapAssetServed & s : servedFor(load))
           {
-            const UnityIpcServer::MapAssetServed * s = lastServed(load, role);
-            if (!s)
+            if (s.state != "available")
               continue;
-            bool before = false;
-            for (size_t i = 0; i < copyBeforeRestart; i++)
-              before = before || (servedCopy[i].state == "available" && servedCopy[i].epochNow == s->epochNow &&
-                                  servedCopy[i].fileDataID == s->fileDataID);
-            if (s->first == before || !s->firstTracked)
-              bad << QString("%1 %2 first %3, served before the restart %4").arg(role).arg(s->fileDataID)
-                       .arg(s->first ? "yes" : "no").arg(before ? "yes" : "no");
+            files++;
+            const bool before = filesBeforeRestart.count(std::make_pair(s.epochNow, s.fileDataID)) != 0;
+            if (s.first == before || !s.firstTracked)
+              bad << QString("%1 %2 first %3, served before the restart %4").arg(s.role).arg(s.fileDataID)
+                       .arg(s.first ? "yes" : "no").arg(before ? "yes" : "no");
           }
           tally.check(label + ": the tile's first reads are those the storage had not served before the restart",
-                      bad.isEmpty(), bad.isEmpty() ? QString("as expected") : bad.join("; "));
+                      files > 0 && bad.isEmpty(), bad.isEmpty() ? QString("as expected, %1 file(s)").arg(files) : bad.join("; "));
         }
         last = next;
         if (withLoad)
         {
           int answers = 0;
-          for (const UnityIpcServer::MapAssetServed & s : servedCopy)
-            answers += s.load == heldLoad ? 1 : 0;
-          tally.check(label + QString(": load %1's held request was never answered").arg(heldLoad), answers == 0,
-                      QString("%1 answer(s) for load %2").arg(answers).arg(heldLoad));
+          for (const ServedEntry & e : servedRecent)
+            answers += e.s.load == heldLoad ? 1 : 0;
+          // Only the files answered before the hold count: the held one, and anything the load asked after it.
+          int heldAnswers = 0;
+          for (const ServedEntry & e : servedRecent)
+            heldAnswers += e.s.load == heldLoad && e.s.requestId == heldId ? 1 : 0;
+          tally.check(label + QString(": load %1's held request %2 was never answered").arg(heldLoad).arg(heldId),
+                      heldAnswers == 0, QString("%1 answer(s) to it; %2 answer(s) for the load in all").arg(heldAnswers).arg(answers));
         }
+      }
+      else if (kind == "expectmaterial")
+      {
+        // expectmaterial:<state>[:<map>:<x>:<y>]: that tile (or the last) built, its material in that state, and agreeing
+        // with what the host served (checkMaterial).
+        const QString state = arg.section(':', 0, 0).trimmed();
+        Tile at = last;
+        if (!materialStates.contains(state) || (!arg.section(':', 1).isEmpty() && !parseTile(arg.section(':', 1), at)))
+        {
+          tally.check(label, false, "expected expectmaterial:<textured|partial|unavailable|unsupported>[:<map>:<x>:<y>]");
+          continue;
+        }
+        if (!texturedPlayer)
+        {
+          tally.skip(label, noTexturesWhy);
+          continue;
+        }
+        const int load = request(at.map, at.x, at.y, step, why);
+        if (load <= 0)
+        {
+          tally.check(label + ": requested", false, why);
+          continue;
+        }
+        UnityIpcServer::TerrainTileReport r;
+        if (checkBuilt(label, load, at.map, at.x, at.y))
+          sampleShown(label, afterTile);
+        waitReport(load, 1000, r);
+        tally.check(label + QString(": load %1's material is \"%2\"").arg(load).arg(state), r.hasMaterial && r.materialState == state,
+                    QString("material \"%1\", reason \"%2\"").arg(r.materialState).arg(r.materialReason));
+        last = at;
+      }
+      else if (kind == "expectserved")
+      {
+        // expectserved:<role>:<state>[:<text>]: the last load sent had a request of role answered with that state, its
+        // detail containing text (every answer of the role is listed).
+        const QString role = arg.section(':', 0, 0).trimmed();
+        const QString state = arg.section(':', 1, 1).trimmed();
+        const QString text = arg.section(':', 2);
+        if (role.isEmpty() || state.isEmpty())
+        {
+          tally.check(label, false, "expected expectserved:<role>:<state>[:<detail text>]");
+          continue;
+        }
+        if ((role == "tex0Adt" || role == "texture") && !texturedPlayer)
+        {
+          tally.skip(label, noTexturesWhy);
+          continue;
+        }
+        const int load = loadsSent.empty() ? 0 : loadsSent.back();
+        pumpIpc(ipc, 20);
+        int n = 0, matching = 0;
+        QStringList seen;
+        for (const UnityIpcServer::MapAssetServed & s : servedFor(load))
+          if (s.role == role)
+          {
+            n++;
+            matching += s.state == state && s.detail.contains(text) ? 1 : 0;
+            if (seen.size() < 24)
+              seen << QString("%1 %2: \"%3\" \"%4\"").arg(s.requestId).arg(s.fileDataID).arg(s.state).arg(s.detail);
+          }
+        tally.check(label + QString(": a %1 request of load %2 is answered \"%3\"").arg(role).arg(load).arg(state) +
+                      (text.isEmpty() ? QString() : " with \"" + text + "\""),
+                    matching > 0, QString("%1 of %2 answer(s) match; ").arg(matching).arg(n) + seen.join("; "));
+      }
+      else if (kind == "notlocalpart")
+      {
+        // notlocalpart:<map>:<x>:<y>:<FileDataID>: a tex0 or texture of the tile that is listed but not downloaded (checked
+        // first, a precondition): the tile is built, the host answers that file "not installed locally", and the material
+        // says so -- "unavailable" for the tex0, the texture's own state quoted for a texture.
+        bool numeric = false;
+        const int id = arg.section(':', 3).toInt(&numeric);
+        if (!parseTile(arg, t) || !numeric)
+        {
+          tally.check(label, false, "expected notlocalpart:<map>:<x>:<y>:<tex0 or texture FileDataID>");
+          continue;
+        }
+        if (!texturedPlayer)
+        {
+          tally.skip(label, noTexturesWhy);
+          continue;
+        }
+        wow::WdtReference reference;
+        reference.kind = wow::WdtReference::Kind::FileDataId;
+        reference.fileDataId = id;
+        const wow::WdtInspection now = frame->mapCatalog()->inspectFile(reference);
+        if (now.state != wow::WdtAvailability::NotInstalledLocally)
+        {
+          tally.skip(label, "precondition changed (now " + wow::WorldMapCatalog::availabilityName(now.state) + ")");
+          continue;
+        }
+        const int load = request(t.map, t.x, t.y, step, why);
+        if (load <= 0)
+        {
+          tally.check(label + ": requested", false, why);
+          continue;
+        }
+        if (checkBuilt(label, load, t.map, t.x, t.y))
+          sampleShown(label, afterTile);
+        UnityIpcServer::TerrainTileReport r;
+        waitReport(load, 1000, r);
+        const UnityIpcServer::MapAssetServed * asked = nullptr;
+        for (const ServedEntry & e : servedRecent)
+          if (e.s.load == load && e.s.fileDataID == id && (e.s.role == "tex0Adt" || e.s.role == "texture"))
+            asked = &e.s;
+        const UnityIpcServer::TerrainTileReport::Texture * entry = nullptr;
+        for (const UnityIpcServer::TerrainTileReport::Texture & x : r.textures)
+          if (x.fileDataID == id)
+            entry = &x;
+        const bool tex0 = asked && asked->role == "tex0Adt";
+        tally.check(label + QString(": %1 is answered \"not installed locally\" and the material says so").arg(id),
+                    asked && asked->fileDataID == id && asked->state == "not installed locally" &&
+                      (tex0 ? r.materialState == "unavailable" && r.materialReason.contains("not installed locally")
+                            : entry && entry->state == asked->state && entry->detail == asked->detail),
+                    !asked ? QString("the player never asked for %1").arg(id)
+                           : QString("asked as %1, answered \"%2\"; material \"%3\" (\"%4\")").arg(asked->role).arg(asked->state)
+                               .arg(r.materialState).arg(r.materialReason) +
+                               (entry ? QString("; its entry \"%1\" \"%2\"").arg(entry->state).arg(entry->detail) : QString()));
+        last = t;
       }
       else if (kind == "failrepeat")
       {
@@ -6609,7 +7924,7 @@ static int doHeadlessTerrainTileTest(ModelViewer * frame, int mapId, int tileX, 
       else
         tally.check(label, false, "unknown step (tile, repeat, wait, clear, expectfail, notlocal, switch, staleepoch, staleload, "
                                 "supersede, model, modelthentile, timeout, latesupersede, lateclear, lateswitch, reconnect, "
-                                "failrepeat)");
+                                "failrepeat, expectmaterial, expectserved, notlocalpart)");
     }
 
     // EVERY LOAD ANSWERED EXACTLY ONCE -- but one in flight when its player was restarted, which no player may answer --
@@ -6617,106 +7932,143 @@ static int doHeadlessTerrainTileTest(ModelViewer * frame, int mapId, int tileX, 
     pumpIpc(ipc, 100);
     for (int load : loadsSent)
     {
-      QStringList statuses;
-      for (const UnityIpcServer::TerrainTileReport & r : reports)
-        if (r.load == load)
-          statuses << r.status;
+      const int answers = reportsFor(load);
+      const char first = load > 0 && (size_t)load < answerFirst.size() ? answerFirst[(size_t)load] : 0;
+      const QString seen = answers == 0 ? QString("no answer")
+                                        : QString("%1 answer(s), the first %2").arg(answers)
+                                            .arg(first == 'b' ? "built" : first == 'f' ? "failed" : first == 's' ? "superseded"
+                                                 : first == 'c' ? "cleared" : "of another status");
       if (std::find(loadsOrphaned.begin(), loadsOrphaned.end(), load) != loadsOrphaned.end())
-        tally.check(QString("load %1, in flight when its player was restarted, is never answered").arg(load),
-                    statuses.isEmpty(), statuses.isEmpty() ? QString("no answer") : statuses.join(", "));
+        tally.check(QString("load %1, in flight when its player was restarted, is never answered").arg(load), answers == 0, seen);
       else
-        tally.check(QString("load %1 is answered exactly once").arg(load), statuses.size() == 1,
-                    statuses.isEmpty() ? QString("no answer") : statuses.join(", "));
+        tally.check(QString("load %1 is answered exactly once").arg(load), answers == 1, seen);
     }
+    tally.check("every terrainTileLoaded names a load this run sent", reportsForUnsentLoads == 0,
+                QString("%1 report(s) in all, %2 naming a load never sent%3; %4 load(s) sent, the highest %5")
+                  .arg(reportsTotal).arg(reportsForUnsentLoads)
+                  .arg(unsentLoadsNamed.isEmpty() ? QString() : " (" + unsentLoadsNamed.join(", ") + ")")
+                  .arg(loadsSent.size()).arg(loadsSent.empty() ? 0 : loadsSent.back()));
     UnityIpcServer::RuntimeState end;
     sample("end", end);
     tally.check("no terrain load is building at the end", end.terrainLoading == 0 && !end.loading, end.describe());
+    checkConservation("end", end);
 
-    // THE HOST'S BOOKKEEPING, bounded: the server keeps the most recent records and counts every one (the test's copy
-    // has them all), its read tracker holds exactly the files served under its own epoch -- the last a file was read in,
-    // or a later one when a client was loaded after that read (emptied then) -- and nothing is held.
+    // THE HOST'S BOOKKEEPING, bounded: the server keeps the most recent records and counts every one (the test counted
+    // them all as they came), its read tracker holds exactly the files served under its own epoch -- the last a file was
+    // read in, or a later one when a client was loaded after that read (emptied then) --, nothing is held or waits, and
+    // the poll records are the most recent ones.
     const long long total = servedBeforeRestarts + ipc->mapAssetsServedTotal();
-    tally.check("the test's own copy holds every getMapAsset answered", (long long)servedCopy.size() == total,
-                QString("%1 in the copy, %2 answered (%3 before the last player start)").arg(servedCopy.size()).arg(total)
-                  .arg(servedBeforeRestarts));
+    tally.check("the test counted every getMapAsset answered", servedTotal == total,
+                QString("%1 counted (%2 kept), %3 answered (%4 before the last player start)").arg(servedTotal)
+                  .arg(servedRecent.size()).arg(total).arg(servedBeforeRestarts));
     const long long keptNow = (long long)ipc->mapAssetsServed().size();
     const long long keptAtMost = (long long)UnityIpcServer::MAP_ASSET_RECORDS_KEPT;
     tally.check(QString("the server keeps the most recent %1 getMapAsset records at most, and counts the rest").arg(keptAtMost),
                 keptNow == std::min(ipc->mapAssetsServedTotal(), keptAtMost) &&
                   keptNow + ipc->mapAssetRecordsDropped() == ipc->mapAssetsServedTotal() &&
-                  (ipc->mapAssetsServed().empty() || ipc->mapAssetsServed().back().requestId == servedCopy.back().requestId),
+                  (ipc->mapAssetsServed().empty() ||
+                   (!servedRecent.empty() && ipc->mapAssetsServed().back().requestId == servedRecent.back().s.requestId)),
                 QString("%1 kept, %2 no longer kept, %3 since the player started").arg(keptNow)
                   .arg(ipc->mapAssetRecordsDropped()).arg(ipc->mapAssetsServedTotal()));
     {
-      int lastEpoch = 0;
-      for (const UnityIpcServer::MapAssetServed & s : servedCopy)
-        if (s.state == "available")
-          lastEpoch = s.epochNow;
       const MapAssetReadTracker & reads = ipc->mapAssetReads();
       std::set<int> files;   // served under the tracker's own epoch
-      for (const UnityIpcServer::MapAssetServed & s : servedCopy)
-        if (s.state == "available" && s.epochNow == reads.epoch())
-          files.insert(s.fileDataID);
+      for (const std::pair<int, int> & f : filesServed)
+        if (f.first == reads.epoch())
+          files.insert(f.second);
       int held = 0;
       for (int id : files)
         held += reads.holds(id) ? 1 : 0;
       tally.check("the read tracker holds exactly the files served under its epoch, the last a file was read in or a later "
                   "one (a client loaded since)",
-                  reads.size() <= reads.capacity() && reads.epoch() >= lastEpoch &&
+                  reads.size() <= reads.capacity() && reads.epoch() >= lastAvailableEpoch &&
                     reads.epoch() <= UnityAssetAccess::clientEpoch() && reads.size() == files.size() &&
                     held == (int)files.size(),
                   QString("%1 file(s) of epoch %2; %3 distinct file(s) served under it, %4 of them held; the last read under "
                           "epoch %5; the client's epoch %6")
-                    .arg(reads.size()).arg(reads.epoch()).arg(files.size()).arg(held).arg(lastEpoch)
+                    .arg(reads.size()).arg(reads.epoch()).arg(files.size()).arg(held).arg(lastAvailableEpoch)
                     .arg(UnityAssetAccess::clientEpoch()));
     }
-    tally.check("no getMapAsset is held at the end, and no hold is armed", ipc->mapAssetsHeld().empty() &&
-                  !ipc->testMapAssetHoldArmed(),
-                QString("%1 held, %2 dropped unanswered in the run").arg(ipc->mapAssetsHeld().size()).arg(ipc->mapAssetsHeldDropped()));
+    tally.check("no getMapAsset is held or waiting at the end, and no hold is armed", ipc->mapAssetsHeld().empty() &&
+                  !ipc->testMapAssetHoldArmed() && ipc->mapAssetsWaiting() == 0,
+                QString("%1 held, %2 dropped unanswered in the run; %3 waiting, %4 dropped with a connection; %5 refused for a "
+                        "full queue, at most %6 waited at once")
+                  .arg(ipc->mapAssetsHeld().size()).arg(ipc->mapAssetsHeldDropped()).arg(ipc->mapAssetsWaiting())
+                  .arg(ipc->mapAssetsQueueDropped()).arg(ipc->mapAssetsRefusedQueueFull()).arg(ipc->mapAssetQueueDepthMax()));
+    tally.check(QString("the server keeps the most recent %1 poll records at most").arg(UnityIpcServer::MAP_ASSET_POLL_TIMINGS_KEPT),
+                (long long)ipc->mapAssetPolls().size() ==
+                  std::min<long long>(ipc->mapAssetPollsTotal(), UnityIpcServer::MAP_ASSET_POLL_TIMINGS_KEPT),
+                QString("%1 kept, %2 polls served map requests since the player started").arg(ipc->mapAssetPolls().size())
+                  .arg(ipc->mapAssetPollsTotal()));
   }();
 
-  // How long the GUI thread spent on each map file served (validation, read, hash, queueing). The first read of each
-  // FileDataID in this process (MapAssetServed::first) is set aside: a root ADT's, the cold-read candidate, and a WDT's,
-  // which is not cold (the load's own request read that WDT whole just before) but is the file's first serve all the same.
+  // How long the GUI thread spent on the map files served, by role (validation, read and queueing the answer, handlerMs;
+  // the storage read alone, readMs; the wait in the queue before serving began, queuedMs), the first read of each FileDataID
+  // in this process (MapAssetServed::first) apart: a root ADT's, tex0's or texture's is the cold-read candidate; a WDT's is
+  // not cold (the load's own request read that WDT whole just before). Files over 4 MiB -- the largest terrain textures --
+  // are also summarised alone, and the GUI time each poll spent serving (THE MAP ASSET QUEUE) against the floor measured
+  // for one 5,593,604-byte texture read and checked against its content key: 19.7 to 29.9 ms (warm, outside the viewer).
+  QJsonObject timingJson;
   if (ipc)
   {
-    std::vector<double> handler, read, firstRoot, firstWdt;
-    size_t notServed = 0;
-    for (const UnityIpcServer::MapAssetServed & s : servedCopy)
+    const auto ms = [](double v) { return v < 0.0 ? QString("none") : QString::number(v, 'f', 3); };
+    for (const auto & group : timing)
     {
-      if (s.state != "available")
-        notServed++;   // refused, stale or not available: no file was served, so no serving time to summarise
-      else if (s.first)
-        (s.role == "rootAdt" ? firstRoot : firstWdt).push_back(s.handlerMs);
-      else
-      {
-        handler.push_back(s.handlerMs);
-        if (s.readMs >= 0.0)
-          read.push_back(s.readMs);
-      }
+      double median, p95, max;
+      percentiles(group.second.v, median, p95, max);
+      QJsonObject g;
+      g["count"] = (double)group.second.n;
+      g["kept"] = (int)group.second.v.size();
+      g["median"] = median;
+      g["p95"] = p95;
+      g["max"] = max;
+      timingJson[group.first] = g;
+      LOG_INFO << "[terrain-test] timing " + group.first +
+                    QString(": %1 value(s) (%2 kept), median %3 p95 %4 max %5").arg(group.second.n).arg(group.second.v.size())
+                      .arg(ms(median)).arg(ms(p95)).arg(ms(max));
     }
-    double median, p95, max, readMedian, readP95, readMax, rootMedian, rootP95, rootMax, wdtMedian, wdtP95, wdtMax;
-    percentiles(handler, median, p95, max);
-    percentiles(read, readMedian, readP95, readMax);
-    percentiles(firstRoot, rootMedian, rootP95, rootMax);
-    percentiles(firstWdt, wdtMedian, wdtP95, wdtMax);
-    // "none" where a group is empty (no repeated read in this run, say): percentiles() leaves -1 there, not a time.
-    auto ms = [](double v) { return v < 0.0 ? QString("none") : QString::number(v, 'f', 3); };
-    LOG_INFO << QString("[terrain-test] getMapAsset served %1 file(s), %2 answer(s) without a file: repeated reads "
-                        "handlerMs median %3 p95 %4 max %5, readMs median %6 p95 %7 max %8 (the first read of each file "
-                        "apart: %9 root ADTs, handlerMs median %10 max %11; %12 WDTs, read whole by their loads' requests "
-                        "just before, max %13)")
-                  .arg(servedCopy.size() - notServed).arg(notServed).arg(ms(median)).arg(ms(p95)).arg(ms(max))
-                  .arg(ms(readMedian)).arg(ms(readP95)).arg(ms(readMax))
-                  .arg(firstRoot.size()).arg(ms(rootMedian)).arg(ms(rootMax))
-                  .arg(firstWdt.size()).arg(ms(wdtMax));
+    QJsonObject polls;
+    polls["stoppedForBudget"] = (double)pollsStopped;
+    polls["bytesReadMax"] = (double)pollBytesMax;
+    polls["waitingAfterMax"] = pollWaitingMax;
+    polls["queueDepthMax"] = ipc->mapAssetQueueDepthMax();
+    polls["refusedQueueFull"] = (double)ipc->mapAssetsRefusedQueueFull();
+    polls["floorMs"] = "19.7-29.9 (one 5,593,604-byte texture read and checked against its content key, warm)";
+    timingJson["polls"] = polls;
+    LOG_INFO << QString("[terrain-test] polls that served map files: %1 stopped with requests waiting (the 2 MiB budget or a "
+                        "file over 1 MiB), the most bytes read in one %2, the most left waiting %3, the deepest queue %4, %5 "
+                        "refused for a full queue; the floor for one 5,593,604-byte texture read and checked: 19.7-29.9 ms")
+                  .arg(pollsStopped).arg(pollBytesMax).arg(pollWaitingMax).arg(ipc->mapAssetQueueDepthMax())
+                  .arg(ipc->mapAssetsRefusedQueueFull());
   }
+  out["timing"] = timingJson;
 
-  QJsonArray reportsJson, servedJsonArray;
-  for (const UnityIpcServer::TerrainTileReport & r : reports)
-    reportsJson.append(r.message);
-  for (const UnityIpcServer::MapAssetServed & s : servedCopy)
-    servedJsonArray.append(servedJson(s));
+  // The full reports, records and loads, back from the records file into <out.json> (Tools/world-audit/
+  // check_terrain_run.py reads them there); the file is removed once <out.json> is written.
+  QJsonArray reportsJson, servedJsonArray, loadsJson;
+  if (recording)
+  {
+    recordsFile.close();
+    if (recordsFile.open(QIODevice::ReadOnly))
+    {
+      while (!recordsFile.atEnd())
+      {
+        const QByteArray line = recordsFile.readLine().trimmed();
+        if (line.isEmpty())
+          continue;
+        QJsonObject o = QJsonDocument::fromJson(line).object();
+        const QString kind = o.value("recordKind").toString();
+        o.remove("recordKind");
+        if (kind == "report")
+          reportsJson.append(o);
+        else if (kind == "served")
+          servedJsonArray.append(o);
+        else if (kind == "load")
+          loadsJson.append(o);
+      }
+      recordsFile.close();
+    }
+  }
   out["loads"] = loadsJson;
   out["loadsOrphaned"] = [&loadsOrphaned]() {
     QJsonArray a;
@@ -6725,6 +8077,7 @@ static int doHeadlessTerrainTileTest(ModelViewer * frame, int mapId, int tileX, 
     return a;
   }();
   out["reports"] = reportsJson;
+  out["reportsForUnsentLoads"] = (double)reportsForUnsentLoads;
   out["served"] = servedJsonArray;
   out["samples"] = samplesJson;
   out["checks"] = tally.checks;
@@ -6758,8 +8111,18 @@ static int doHeadlessTerrainTileTest(ModelViewer * frame, int mapId, int tileX, 
     records["total"] = (double)ipc->mapAssetsServedTotal();
     records["dropped"] = (double)ipc->mapAssetRecordsDropped();
     records["totalBeforeRestarts"] = (double)servedBeforeRestarts;
-    records["copy"] = (int)servedCopy.size();
+    records["copy"] = (double)servedTotal;
+    records["copyKept"] = (int)servedRecent.size();
     out["mapAssetRecords"] = records;
+    QJsonObject queue;
+    queue["waiting"] = (int)ipc->mapAssetsWaiting();
+    queue["queued"] = (double)ipc->mapAssetsQueued();
+    queue["refusedQueueFull"] = (double)ipc->mapAssetsRefusedQueueFull();
+    queue["droppedWithConnection"] = (double)ipc->mapAssetsQueueDropped();
+    queue["depthMax"] = ipc->mapAssetQueueDepthMax();
+    queue["pollsKept"] = (int)ipc->mapAssetPolls().size();
+    queue["pollsTotal"] = (double)ipc->mapAssetPollsTotal();
+    out["mapAssetQueue"] = queue;
     QJsonObject reads;
     reads["tracked"] = (int)ipc->mapAssetReads().size();
     reads["capacity"] = (int)ipc->mapAssetReads().capacity();
@@ -6799,6 +8162,9 @@ static int doHeadlessTerrainTileTest(ModelViewer * frame, int mapId, int tileX, 
                          f.write(QJsonDocument(out).toJson(QJsonDocument::Indented)) > 0;
     f.close();
     tally.check("the results are written", written, outPath);
+    // Its records are in <out.json> now.
+    if (written && recording)
+      QFile::remove(recordsFile.fileName());
   }
   const bool pass = tally.failed == 0;
   LOG_INFO << QString("[terrain-test] RESULT: %1 (%2 passed, %3 failed, %4 skipped)").arg(pass ? "PASS" : "FAIL")
@@ -6812,6 +8178,7 @@ static int doHeadlessTerrainTileTest(ModelViewer * frame, int mapId, int tileX, 
     ipc->onTerrainTileLoaded = previousTerrain;
     ipc->onRuntimeState = previousRuntime;
     ipc->onMapAssetServed = previousServed;
+    ipc->onMapAssetPoll = previousPoll;
     ipc->testCancelMapAssetHold();
   }
   if (frame->unityRendererHost && frame->unityRendererHost->isRunning())

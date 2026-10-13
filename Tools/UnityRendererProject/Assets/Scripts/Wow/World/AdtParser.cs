@@ -375,8 +375,9 @@ namespace Wmv.Wow.World
             return new WorldSpan(data, c, what).U32Array();
         }
 
-        /// <summary>The most layers a chunk may have here. The audited chunks have at most 5 (Classic
-        /// Beta); a much larger count is rejected so a corrupt count cannot multiply the decoded maps.</summary>
+        /// <summary>The most layers a chunk may have here: 8, the most any audited chunk has (Retail map 2923;
+        /// the stage 01 audit saw at most 5, Classic Beta); a larger count is rejected so a corrupt count cannot multiply
+        /// the decoded maps.</summary>
         public const int MaxLayers = 8;
 
         static AdtTexChunk ParseTexChunk(byte[] data, WorldChunk c, int index, int textureCount, string what, List<WorldIssue> issues)
@@ -407,7 +408,7 @@ namespace Wmv.Wow.World
                         {
                             issues.Add(new WorldIssue(WorldIssueKind.Malformed, what, slabel, s.DataOffset, haveMcly ? "appears more than once"
                                 : s.Size % 16 != 0 ? string.Format("{0} byte(s) is not a whole number of 16-byte layers", s.Size)
-                                : string.Format("{0} layers (at most 5 in the audited chunks; more than {1} are rejected)", s.Size / 16, MaxLayers)));
+                                : string.Format("{0} layers (at most 8 in the audited chunks; more than {1} are rejected)", s.Size / 16, MaxLayers)));
                             ch.Status = WorldDataStatus.Malformed;
                             break;
                         }

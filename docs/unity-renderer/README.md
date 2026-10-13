@@ -1209,7 +1209,7 @@ to WMV's own log). The player is built locally from `Tools/UnityRendererProject/
 repository contains **no** Unity build output, and nothing in the installer or the CMake
 install rules ships one yet.
 
-## IPC (implemented; protocol 12)
+## IPC (implemented; protocol 13)
 
 **WMV is the server.** `UnityRendererHost` starts a TCP listener bound to `127.0.0.1` on an
 ephemeral port *before* launching the player and passes the port on the player's command
@@ -1225,7 +1225,7 @@ application uses). Player side: `Tools/UnityRendererProject/Assets/Scripts/WmvIp
 **Player -> WMV**
 
 ```json
-{ "type": "unityReady", "protocolVersion": 12 }
+{ "type": "unityReady", "protocolVersion": 13 }
 { "type": "getAsset", "requestId": "abc123", "path": "creature/chicken/chicken.m2" }
 { "type": "getAssetByFileDataID", "requestId": "abc124", "fileDataID": 123456 }
 { "type": "getModelTextures", "requestId": "abc125", "fileDataID": 123200 }
@@ -1531,6 +1531,25 @@ Semantics:
   `terrainLoading`, `terrainView`, `cameraMask`, `meshObjects`, `materialObjects`, `terrainMeshes`,
   `terrainMaterials` and `terrainGameObjects`, and the request bookkeeping below. An older player is never sent
   terrain. The design, evidence and limits are in `docs/world-viewer/03-terrain-geometry.md`.
+- **Terrain materials (protocol 13).** The tile's texture layers are fetched like its WDT and root: the tile's tex0 ADT
+  (MAID word 3 of the WDT, a FileDataID in every client) and the BLP textures its MDID names -- on a map whose WDT sets
+  MPHD flag 0x80 also the height textures its MHID names -- with `getMapAsset` roles `tex0Adt` and `texture` (a height
+  texture is asked for as a `texture`). To a protocol-13 player `loadTerrainTile` adds `maxTextureBytes` (8 MiB per
+  texture file), `maxTextureBytesPerLoad` (128 MiB) and `maxTexturesPerLoad` (128 ids); `maxAssetBytes` (4 MiB) stays
+  the limit of the WDT, the root and the tex0. The host decides each request when it serves it (a tex0 once, after this
+  load's WDT; a texture after this load's tex0, each id once, within the id and byte budgets), checks the kind of the
+  bytes it read (a tex0 starts `MVER` then `MAMP`, a texture `BLP2`; anything else is answered `unreadable`, naming
+  what was found) and sends the storage content key as `md5`. Requests wait in one queue (at most 16; one more is
+  refused unread) and each poll serves up to 2 MiB, or one file over 1 MiB, so a texture burst cannot hold the GUI
+  thread. A `terrainTileLoaded` for the current load ends it on the host: its later requests are answered `stale`
+  without a read. The report adds `requestsRetired` / `retiredRequestIds` (the player keeps at most 4 map requests
+  out and remembers the last 128 retired ones) and `material`: `state` (`textured`, `partial`, `unavailable`,
+  `unsupported`), `reason`, the tex0 id, bytes and MD5, `alphaFormat`, per-state chunk counters, every texture entry
+  with its `role` (`diffuse` or `height`) and state (the host's answer quoted, or the player's own: `no texture id`,
+  `not requested`, `md5 mismatch`, `decode failed`, `transport failure`), sizes and timings; `runtimeState` adds
+  `terrainTextures`, `terrainTextureBytes` and `terrainAlphaArrays`. A protocol-12 player is sent none of this and
+  never asks for the new roles; a protocol-13 player under a protocol-12 host draws geometry alone, its material
+  `unavailable`. The design, evidence, states and limits are in `docs/world-viewer/04-terrain-materials.md`.
 - **Map answers are owned by routing, not by memory.** The player asks for map files under request ids of their own
   (`map<n>`, never the `u<n>` ids of model, character and world-model requests). An `assetResponse` with such an id, or
   with a `role` (only `getMapAsset` answers carry one), goes to the terrain session alone: never into the asset cache
@@ -1679,21 +1698,34 @@ audit's reference views are `135:30` and `315:30`, and the archived viewport's y
 `180-Y:90-P` (its mount references' iso view, yaw 315 at pitch 90, is `225:0`; only the angles map -- that
 camera looks at the mount's own box and has a different field of view).
 
-**Terrain test (protocol 12).** `wowmodelviewer.exe -terraintile <mapId> <x> <y> [<out.json>] -product <p>` loads
+**Terrain test (protocols 12 and 13).** `wowmodelviewer.exe -terraintile <mapId> <x> <y> [<out.json>] -product <p>` loads
 the client, starts the player, runs in-process checks of the host's `getMapAsset` decisions, then asks for the tile
 through the production path and waits for its `terrainTileLoaded`. `WMV_TERRAINTEST_SEQUENCE` (comma-separated)
 adds steps: `tile:<m>:<x>:<y>`, `repeat:<n>`, `clear` and `clear:<m>:<x>:<y>`, `supersede:<a>|<b>`, `staleepoch`,
-`staleload`, `expectfail:<m>:<x>:<y>:<reason>`, `notlocal:<m>:<x>:<y>:<rootFileDataID>`, `switch:<product>`,
+`staleload`, `expectfail:<m>:<x>:<y>:<reason>`, `notlocal:<m>:<x>:<y>:<rootFileDataID>`,
+`notlocalpart:<m>:<x>:<y>:<tex0 or texture id>`, `expectmaterial:<state>[:<m>:<x>:<y>]`,
+`expectserved:<role>:<state>[:<text>]`, `switch:<product>`,
 `model:<path>` and `model:<path>|<m>:<x>:<y>`, `modelthentile:<path>|<m>:<x>:<y>`, `wait:<ms>`, and for late answers
 (the host holds a request unanswered and answers it after the load ended): `timeout:<m>:<x>:<y>:<wdt|rootAdt>`,
-`latesupersede:...`, `lateclear:...`, `lateswitch:<product>:<m>:<x>:<y>`, `reconnect` and `reconnect:<m>:<x>:<y>`,
-and `failrepeat:<n>`. Every load must be
+`latesupersede:...`, `lateclear:...`, `lateswitch:<product>:<m>:<x>:<y>`, `reconnect` and `reconnect:<m>:<x>:<y>` (each with an optional last
+`:<role>`; `tex0Adt` and `texture` need a protocol-13 player), and `failrepeat:<n>`. With a protocol-13 player the
+material must agree with what the host served (tex0 and every texture by id, bytes and MD5, or the host's answer
+quoted), its chunk states must sum to the chunks, and textures and alpha arrays must be 0 after a clear, a model
+load and a client switch; a protocol-12 player draws geometry alone and every textured check is skipped, naming why. Every load must be
 answered exactly once, the MD5s the player parsed must equal those the host served, and the player's terrain
 objects must be 0 after a clear, a model load and a client switch. Results go to `<out.json>` and
 `[terrain-test]` lines. Player switches (command line or `WMV_DEBUG`):
-`-wmvTerrainView=shaded|chunks|wire|shadedwire|normals`, `-wmvTerrainChunk=<n>`, `-wmvTerrainFocus=<n>`, `-wmvTerrainTopDown` and
+`-wmvTerrainView=textured|texturedlit|texturedplainweights|materials|shaded|chunks|wire|shadedwire|normals`,
+`-wmvTerrainChunk=<n>`, `-wmvTerrainFocus=<n>`, `-wmvTerrainTopDown` and
 `-wmvTerrainDump=<name>` (a test fixture: the meshes read back from Unity, compared by
 `Tools/world-audit/compare_terrain_mesh.py`). The shading is a geometry diagnostic, not the game's terrain look.
+Without the switch a tile whose material is textured or partial is drawn `textured`, any other `shaded`. `textured`
+draws the layers unlit, in their authored colours, by the composite rule verified against the game's baked map texture; `texturedlit` adds a labelled diagnostic light, `texturedplainweights` the plain-weights composite under a
+hatch (a comparison, not the game's rule) and `materials` colours each chunk by its material state. Test fixtures:
+`-wmvTerrainCompositeDump=<name>[:<size>]` (the tile composite read back as floats),
+`-wmvTerrainCompositeChunk=<n>[,<n>...]`, `-wmvTerrainValidate` (validation sampling) and
+`-wmvTerrainTexelDump=<name>` (every texture's mip 0 as the GPU decodes it), compared by
+`Tools/world-audit/compare_terrain_material.py`.
 
 The canvas animation clock of the viewport check is measured inside an
 event loop activated for the measurement: the self-test runs inside `OnInit`, before the
