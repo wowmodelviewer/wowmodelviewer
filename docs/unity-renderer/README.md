@@ -1529,8 +1529,20 @@ Semantics:
   belongs to the loaded client, and `refused` while a client loads and for an unknown role, a WDT other than the
   load's, a root before the WDT or a second root. `runtimeState` adds `liveTerrainTiles`, `terrainLoad`,
   `terrainLoading`, `terrainView`, `cameraMask`, `meshObjects`, `materialObjects`, `terrainMeshes`,
-  `terrainMaterials` and `terrainGameObjects`. An older player is never sent terrain. The design, evidence and limits
-  are in `docs/world-viewer/03-terrain-geometry.md`.
+  `terrainMaterials` and `terrainGameObjects`, and the request bookkeeping below. An older player is never sent
+  terrain. The design, evidence and limits are in `docs/world-viewer/03-terrain-geometry.md`.
+- **Map answers are owned by routing, not by memory.** The player asks for map files under request ids of their own
+  (`map<n>`, never the `u<n>` ids of model, character and world-model requests). An `assetResponse` with such an id, or
+  with a `role` (only `getMapAsset` answers carry one), goes to the terrain session alone: never into the asset cache
+  and never to a model, character or world-model handler, whether it comes on time, late, failed or for a load that
+  has ended. The session waits for one request at a time; when a load ends without its answer, that request moves to a
+  ring of the last 32 ended requests, so a late answer is recognised, logged and dropped, and nothing grows however
+  many answers never come. `runtimeState` reports it: `terrainPendingRequests`, `terrainRetiredRequests` (at most 32),
+  `terrainRetiredTotal`, `terrainLastRetiredRequest`, `mapAnswersRouted`, `mapAnswersDropped` (= `mapAnswersLate` +
+  `mapAnswersUnowned`) and `terrainTimeoutMs`. A load not built 30 s after it started fails "timed out"
+  (`-wmvTerrainTimeoutMs=<n>`, 1000 to 120000, shortens it for tests). The host keeps the newest 256 served-request
+  records (with totals), and remembers which files of the current client it has read (at most 8192, emptied when the
+  client is replaced), so its diagnostics stay bounded too.
 - Nothing is written to disk on either side; this is runtime access, not an export workflow.
 
 WMV logs every step with the `[unityipc]` prefix: listening port, player connected,
@@ -1672,7 +1684,10 @@ the client, starts the player, runs in-process checks of the host's `getMapAsset
 through the production path and waits for its `terrainTileLoaded`. `WMV_TERRAINTEST_SEQUENCE` (comma-separated)
 adds steps: `tile:<m>:<x>:<y>`, `repeat:<n>`, `clear` and `clear:<m>:<x>:<y>`, `supersede:<a>|<b>`, `staleepoch`,
 `staleload`, `expectfail:<m>:<x>:<y>:<reason>`, `notlocal:<m>:<x>:<y>:<rootFileDataID>`, `switch:<product>`,
-`model:<path>` and `model:<path>|<m>:<x>:<y>`, `modelthentile:<path>|<m>:<x>:<y>` and `wait:<ms>`. Every load must be
+`model:<path>` and `model:<path>|<m>:<x>:<y>`, `modelthentile:<path>|<m>:<x>:<y>`, `wait:<ms>`, and for late answers
+(the host holds a request unanswered and answers it after the load ended): `timeout:<m>:<x>:<y>:<wdt|rootAdt>`,
+`latesupersede:...`, `lateclear:...`, `lateswitch:<product>:<m>:<x>:<y>`, `reconnect` and `reconnect:<m>:<x>:<y>`,
+and `failrepeat:<n>`. Every load must be
 answered exactly once, the MD5s the player parsed must equal those the host served, and the player's terrain
 objects must be 0 after a clear, a model load and a client switch. Results go to `<out.json>` and
 `[terrain-test]` lines. Player switches (command line or `WMV_DEBUG`):

@@ -27,8 +27,19 @@
 //   - BEFORE THE COMMIT any failure releases what the new tile built (Live back) and reports "failed"; the previous
 //     tile and the view stay as they were. AFTER IT a failure (showing, framing) reports "built" with the reason
 //     "adopted, but finishing the adoption failed: ...". Either way the load takes no answer or worker result any more.
-//   - Late answers of a load that ended are claimed and dropped (ClaimAssetResponse), never read as another's.
-//   - 30 s after the first Pump that saw it, a load not yet adopted fails "timed out after 30 s".
+//   - OWNERSHIP OF THE MAP ANSWERS IS BY ROUTING, NOT BY MEMORY. getMapAsset ids are the client's own "map<n>"
+//     namespace, and WmvIpcClient hands every map answer (that id, or a role) to ClaimMapAssetResponse and to nothing
+//     else -- never the asset cache, never the model, character or world-model handlers. So the session keeps no table
+//     of its requests: the load in flight waits for ONE request (its PendingRequest), and an answer is applied only
+//     when it names that request (and that load, when it states one). When a load ends by any path (a report of any
+//     kind, the timeout included, or Dispose) its unanswered request moves to a ring of the last RetiredCapacity (32)
+//     ended requests, oldest dropped first, so that an answer coming after its load ended is dropped and said as
+//     "late" (or "unowned" when the ring no longer holds it, or never did). Whatever the host does -- never answer,
+//     answer late, answer twice -- the session holds at most one pending and 32 retired requests. Counters say what
+//     happened: RetiredTotal counts every retirement (it does not stop at the ring's 32), LastRetiredRequest names the
+//     newest, and the late and unowned drops are counted apart.
+//   - TimeoutMs (30 s; -wmvTerrainTimeoutMs, 1..120 s) after the first Pump that saw it, a load not yet adopted fails
+//     "timed out after N s".
 //   - Failure reasons are precise: the host's state and detail (hostState, hostDetail), the parser's exception text,
 //     "no tile at x_y (MAIN flag clear)", "MAID names no root ADT for x_y", "root ADT does not belong to tile x_y ...",
 //     "no decodable chunk ...", "answer of N bytes exceeds maxAssetBytes M", a hash that differs from the host's md5.
@@ -67,8 +78,11 @@ public interface IWmvTerrainView
 
 public sealed class WmvTerrainSession
 {
-    /// <summary>A load not adopted this long after the first Pump that saw it fails.</summary>
-    public const double TimeoutMs = 30000.0;
+    /// <summary>A load not adopted this long after the first Pump that saw it fails (the default; -wmvTerrainTimeoutMs
+    /// sets another within MinTimeoutMs..MaxTimeoutMs).</summary>
+    public const double DefaultTimeoutMs = 30000.0, MinTimeoutMs = 1000.0, MaxTimeoutMs = 120000.0;
+    /// <summary>How many ended loads' unanswered requests are remembered, to tell a late answer from an unowned one.</summary>
+    public const int RetiredCapacity = 32;
     /// <summary>The host's MAX_MAP_ASSET_BYTES (4 MiB), for a command that states no limit.</summary>
     public const int DefaultMaxAssetBytes = 4 * 1024 * 1024;
     public const string RoleWdt = "wdt", RoleRootAdt = "rootAdt";
@@ -81,7 +95,7 @@ public sealed class WmvTerrainSession
         public Phase Phase;
         public volatile bool Dead;            // no answer or worker result is applied any more
         public bool Reported;
-        public string PendingRequest;
+        public string PendingRequest, PendingRole;   // the one request the load waits for (null for none)
         public readonly Stopwatch Clock = Stopwatch.StartNew();
         public double StartedAtMs = double.NaN;   // the Pump clock when the timeout began
         public int MaxBytes;
@@ -100,14 +114,25 @@ public sealed class WmvTerrainSession
         public string Tile2 { get { return Cmd.TileX + "_" + Cmd.TileY; } }
     }
 
+    /// <summary>An unanswered request of a load that has ended: its id, its load and role, and how the load ended (the
+    /// status it was reported with, or "dropped at shutdown").</summary>
+    public struct RetiredRequest
+    {
+        public string RequestId, Role, Ended;
+        public int Load;
+    }
+
     readonly IWmvTerrainView view;
     readonly Func<string, int, int, int, string> requestMapAsset;   // (role, fileDataID, load, assetEpoch) -> requestId
     readonly Action<WmvIpcClient.TerrainTileReport> report;
     readonly Action<string> log;
     readonly Action<Action> runOffThread;
+    readonly double timeoutMs;
 
     Job current;                                                    // the load in flight (until it is reported)
-    readonly Dictionary<string, Job> requests = new Dictionary<string, Job>();
+    readonly RetiredRequest[] retired = new RetiredRequest[RetiredCapacity];   // a ring: the next slot is retiredNext
+    int retiredNext, retiredCount;
+    string lastRetired = "";                                        // the newest retired request's id, "" for none
     readonly Queue<Action> results = new Queue<Action>();          // worker continuations, applied in Pump
     readonly Dictionary<long, WmvRuntimeTerrainTile> tiles = new Dictionary<long, WmvRuntimeTerrainTile>();
     WmvRuntimeTerrainTile shown;
@@ -121,8 +146,10 @@ public sealed class WmvTerrainSession
     /// <param name="report">Send terrainTileLoaded.</param>
     /// <param name="runOffThread">Run an action on a worker thread (the ThreadPool in the player; synchronously in the
     /// self-test). The session queues the action's main-thread continuation for Pump.</param>
+    /// <param name="timeoutMs">The load timeout (ClampTimeout keeps it within MinTimeoutMs..MaxTimeoutMs).</param>
     public WmvTerrainSession(IWmvTerrainView view, Func<string, int, int, int, string> requestMapAsset,
-                             Action<WmvIpcClient.TerrainTileReport> report, Action<string> log, Action<Action> runOffThread)
+                             Action<WmvIpcClient.TerrainTileReport> report, Action<string> log, Action<Action> runOffThread,
+                             double timeoutMs = DefaultTimeoutMs)
     {
         if (view == null) throw new ArgumentNullException("view");
         if (requestMapAsset == null) throw new ArgumentNullException("requestMapAsset");
@@ -133,6 +160,14 @@ public sealed class WmvTerrainSession
         this.report = report;
         this.log = log ?? (s => { });
         this.runOffThread = runOffThread;
+        this.timeoutMs = ClampTimeout(timeoutMs);
+    }
+
+    /// <summary>A timeout within MinTimeoutMs..MaxTimeoutMs (DefaultTimeoutMs for a value that is not a number).</summary>
+    public static double ClampTimeout(double ms)
+    {
+        if (double.IsNaN(ms)) return DefaultTimeoutMs;
+        return Math.Max(MinTimeoutMs, Math.Min(MaxTimeoutMs, ms));
     }
 
     // ---------------------------------------------------------------- state (runtimeState, the self-test)
@@ -153,6 +188,22 @@ public sealed class WmvTerrainSession
     /// <summary>Reports sent, and reports refused because their load had already been reported.</summary>
     public int ReportsSent { get; private set; }
     public int SecondReportsRefused { get; private set; }
+    /// <summary>The load timeout in effect (milliseconds).</summary>
+    public double TimeoutMs { get { return timeoutMs; } }
+    /// <summary>Requests waiting for their answer: the load in flight's one, or none (0 or 1).</summary>
+    public int PendingRequests { get { return current != null && current.PendingRequest != null ? 1 : 0; } }
+    /// <summary>Ended loads' unanswered requests remembered (at most RetiredCapacity).</summary>
+    public int RetiredRequests { get { return retiredCount; } }
+    /// <summary>Requests retired since the session began: one per load that ended with its request unanswered. Unlike
+    /// RetiredRequests it never stops at RetiredCapacity, so every retirement shows as a step of one.</summary>
+    public int RetiredTotal { get; private set; }
+    /// <summary>The id of the request retired last, "" for none.</summary>
+    public string LastRetiredRequest { get { return lastRetired; } }
+    /// <summary>Map answers dropped: to a request of a load that had ended (the retired ring), and to any other request
+    /// (one the ring no longer holds or never held, or the pending one under another load).</summary>
+    public int LateAnswersDropped { get; private set; }
+    public int UnownedAnswersDropped { get; private set; }
+    public int AnswersDropped { get { return LateAnswersDropped + UnownedAnswersDropped; } }
 
     // ---------------------------------------------------------------- commands
 
@@ -220,8 +271,8 @@ public sealed class WmvTerrainSession
         }
     }
 
-    /// <summary>Shutdown: no report goes out (the connection is ending); the load in flight stops taking results and the
-    /// tiles are released.</summary>
+    /// <summary>Shutdown: no report goes out (the connection is ending); the load in flight stops taking results, its
+    /// request is retired, and the tiles are released.</summary>
     public void Dispose()
     {
         if (disposed)
@@ -231,6 +282,7 @@ public sealed class WmvTerrainSession
         {
             current.Dead = true;
             Log("load {0}: dropped at shutdown, not reported", current.Cmd.Load);
+            Retire(current, "dropped at shutdown");
             current = null;
         }
         int n = DisposeTiles(null);
@@ -242,22 +294,44 @@ public sealed class WmvTerrainSession
     // ---------------------------------------------------------------- answers and frames
 
     /// <summary>
-    /// Claim an asset answer when it answers one of this session's requests: the load's (applied) or a load that has
-    /// ended (dropped, said in the log). False for an answer to anyone else.
+    /// A map-file answer: WmvIpcClient routes every getMapAsset answer here (OnMapAssetResponse), and nowhere else, so
+    /// the session takes each one. It is applied only when it answers the one request the load in flight waits for --
+    /// that id, and that load when the answer states one (load > 0) -- and the load is alive. Anything else is dropped and
+    /// said: "late" when the request belonged to a load that has ended (the retired ring), "unowned" otherwise. Returns
+    /// whether the answer was applied.
     /// </summary>
-    public bool ClaimAssetResponse(WmvIpcClient.AssetResponse r)
+    public bool ClaimMapAssetResponse(WmvIpcClient.AssetResponse r)
     {
-        Job j;
-        if (r == null || r.requestId == null || !requests.TryGetValue(r.requestId, out j))
+        if (r == null)
             return false;
-        requests.Remove(r.requestId);
-        if (disposed || j.Dead || j != current || j.PendingRequest != r.requestId)
+        Job j = current;
+        string id = r.requestId ?? "";
+        bool waitedFor = !disposed && j != null && !j.Dead && j.PendingRequest != null && j.PendingRequest == id;
+        if (!waitedFor || (r.load > 0 && r.load != j.Cmd.Load))
         {
-            Log("load {0}: the answer to request {1} ({2}, {3}) came after the load ended -- dropped", j.Cmd.Load, r.requestId,
-                string.IsNullOrEmpty(r.role) ? "map file" : r.role, r.ok ? "available" : (string.IsNullOrEmpty(r.state) ? "failed" : r.state));
-            return true;
+            string what = string.Format("{0}, {1}, load {2}", string.IsNullOrEmpty(r.role) ? "map file" : r.role,
+                                        r.ok ? "available" : (string.IsNullOrEmpty(r.state) ? "failed" : r.state), r.load);
+            RetiredRequest ended;
+            if (TryGetRetired(id, out ended))
+            {
+                LateAnswersDropped++;
+                Log("load {0}: the answer to request {1} ({2}) is late -- the load ended \"{3}\" -- dropped", ended.Load, id, what,
+                    ended.Ended);
+            }
+            else
+            {
+                UnownedAnswersDropped++;
+                if (waitedFor)
+                    Log("load {0}: the answer to its request {1} ({2}) names another load -- dropped; the request still waits", j.Cmd.Load,
+                        id, what);
+                else
+                    Log("an answer to request {0} ({1}) that no load waits for, nor any of the last {2} ended -- dropped", id, what,
+                        RetiredCapacity);
+            }
+            return false;
         }
         j.PendingRequest = null;
+        j.PendingRole = null;
         try
         {
             if (j.Phase == Phase.Wdt) OnWdt(j, r);
@@ -300,8 +374,9 @@ public sealed class WmvTerrainSession
             j.StartedAtMs = nowMs;
         if (j.Phase != Phase.Adopted)
         {
-            if (nowMs - j.StartedAtMs > TimeoutMs)
-                Fail(j, "timed out after 30 s waiting for " + WaitingFor(j));
+            if (nowMs - j.StartedAtMs > timeoutMs)
+                Fail(j, "timed out after " + (timeoutMs / 1000.0).ToString("0.###", System.Globalization.CultureInfo.InvariantCulture) +
+                        " s waiting for " + WaitingFor(j));
             return;
         }
         if (frame >= j.AdoptFrame + 2)
@@ -339,8 +414,7 @@ public sealed class WmvTerrainSession
         else j.RootAskedMs = at;
         string id = requestMapAsset(role, fileDataID, j.Cmd.Load, j.Cmd.AssetEpoch);
         j.PendingRequest = id;
-        if (id != null)
-            requests[id] = j;
+        j.PendingRole = role;
         Log("load {0}: getMapAsset {1} {2} (FileDataID {3}, epoch {4})", j.Cmd.Load, id, role, fileDataID, j.Cmd.AssetEpoch);
     }
 
@@ -623,6 +697,7 @@ public sealed class WmvTerrainSession
     void Report(Job j, string status, string reason)
     {
         j.Dead = true;
+        Retire(j, status);
         if (j.Reported)
         {
             SecondReportsRefused++;
@@ -677,6 +752,40 @@ public sealed class WmvTerrainSession
             r.LiveTerrainTiles, r.LiveModels, r.LiveMapObjects, r.MeshObjects, r.MaterialObjects, r.TerrainGameObjects,
             r.ManagedHeapBytes, r.NativeAllocatedBytes);
         report(r);
+    }
+
+    /// <summary>The load ended: the request it still waits for, if any, goes to the retired ring (the oldest entry
+    /// dropped when the ring is full), so that its answer, should it come, is dropped as late.</summary>
+    void Retire(Job j, string ended)
+    {
+        if (j.PendingRequest == null)
+            return;
+        retired[retiredNext] = new RetiredRequest { RequestId = j.PendingRequest, Role = j.PendingRole ?? "", Load = j.Cmd.Load, Ended = ended };
+        retiredNext = (retiredNext + 1) % RetiredCapacity;
+        if (retiredCount < RetiredCapacity)
+            retiredCount++;
+        RetiredTotal++;
+        lastRetired = j.PendingRequest;
+        Log("load {0}: request {1} ({2}) retired unanswered (the load ended \"{3}\"); {4} retired request(s) remembered, {5} retired in all",
+            j.Cmd.Load, j.PendingRequest, j.PendingRole, ended, retiredCount, RetiredTotal);
+        j.PendingRequest = null;
+        j.PendingRole = null;
+    }
+
+    /// <summary>The retired request with this id, newest first; false when the ring does not hold it.</summary>
+    public bool TryGetRetired(string requestId, out RetiredRequest found)
+    {
+        for (int k = 1; k <= retiredCount; k++)
+        {
+            RetiredRequest e = retired[(retiredNext - k + RetiredCapacity) % RetiredCapacity];
+            if (e.RequestId == requestId)
+            {
+                found = e;
+                return true;
+            }
+        }
+        found = new RetiredRequest();
+        return false;
     }
 
     /// <summary>Dispose every tile of the scene except `keep`; returns how many went.</summary>

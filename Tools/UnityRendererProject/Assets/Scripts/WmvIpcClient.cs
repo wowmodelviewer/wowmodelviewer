@@ -79,7 +79,9 @@
 //   getMapAsset           { requestId, load, assetEpoch, role:"wdt"|"rootAdt", fileDataID }       (protocol 12)
 //     one map file for the terrain load named by load, under the client epoch it was asked under: the map's WDT
 //     (the fileDataID loadTerrainTile named), then the root ADT the WDT's MAID names for the tile. Answered by an
-//     assetResponse with the same requestId (never from the asset cache, never cacheable)
+//     assetResponse with the same requestId (never from the asset cache, never cacheable). Its requestId is
+//     "map" + n, a namespace of its own (every other request's is "u" + n): an answer with such an id, or with a
+//     role, goes to OnMapAssetResponse -- the terrain session -- and never to the asset cache or OnAssetResponse
 //   terrainTileLoaded     { load, status:"built"|"failed"|"superseded"|"cleared", reason, hostState, hostDetail,
 //                           mapId, tileX, tileY, wdtFileDataID, rootFileDataID, wdtBytes, rootBytes, wdtMd5, rootMd5,
 //                           chunks, chunksBuilt, chunksSkipped, chunksUnsupported, vertices, triangles, holeCells,
@@ -96,12 +98,20 @@
 //     when the report is sent
 //   runtimeState (protocol 12 adds) { liveTerrainTiles, terrainLoad, terrainLoading, terrainView, cameraMask,
 //                                     meshObjects, materialObjects, terrainMeshes, terrainMaterials,
-//                                     terrainGameObjects }
+//                                     terrainGameObjects, terrainPendingRequests, terrainRetiredRequests,
+//                                     terrainRetiredTotal, terrainLastRetiredRequest, mapAnswersRouted,
+//                                     mapAnswersDropped, mapAnswersLate, mapAnswersUnowned, terrainTimeoutMs }
 //     the terrain tiles alive, the load of the tile on screen (0 for none), a terrain load in flight (not folded
 //     into loading: the host's model await does not wait on terrain), the terrain view on, the main camera's culling
 //     mask, the Unity Mesh and Material objects alive, and what the terrain tiles themselves hold: their Meshes,
 //     Materials and GameObjects (WmvRuntimeTerrainTile's tallies -- a tile still being built included, the scene root
-//     never, 0 with no tile, taken off the moment a tile is released rather than when Unity destroys its objects)
+//     never, 0 with no tile, taken off the moment a tile is released rather than when Unity destroys its objects);
+//     then the session's request bookkeeping: getMapAsset requests waiting for their answer (0 or 1), the ended
+//     loads' unanswered requests it remembers (at most 32), the requests retired in all (one per load that ended
+//     with its request unanswered; never capped) and the id of the last ("" for none), the map answers routed to it
+//     and those it dropped (late plus unowned, then each apart: late = to a request of an ended load it still
+//     remembers, unowned = any other), and the load timeout in effect in milliseconds (-wmvTerrainTimeoutMs, 30000
+//     by default)
 //
 // WMV -> player
 //   loadWoWModel  { path, fileDataID, client, character, load, kind, keepView }
@@ -213,6 +223,7 @@ public class WmvIpcClient : MonoBehaviour
     // Raised on the main thread.
     public Action<string, int, string, bool, int, string, bool> OnLoadWoWModel;  // (path, fileDataID, client, character, load, kind, keepView)
     public Action<AssetResponse> OnAssetResponse;
+    public Action<AssetResponse> OnMapAssetResponse;           // every getMapAsset answer, and only those (protocol 12)
     public Action<ModelTexturesResponse> OnModelTextures;
     public Action<ModelTexturesResponse> OnModelSkin;          // pushed when the displayed skin changes
     public Action<AnimationSelection> OnModelAnimation;        // pushed when the displayed animation changes
@@ -229,6 +240,29 @@ public class WmvIpcClient : MonoBehaviour
 
     public bool Connected { get { return connected; } }
     public int Port { get { return port; } }
+
+    /// <summary>Map answers routed to OnMapAssetResponse (or dropped there being no handler: MapAnswersUnhandled), never
+    /// to the asset cache or OnAssetResponse.</summary>
+    public int MapAnswersRouted { get; private set; }
+    public int MapAnswersUnhandled { get; private set; }
+
+    /// <summary>The prefix of getMapAsset request ids: their own namespace ("map" + n), apart from every other request's
+    /// ("u" + n), so a map answer is known by its id alone.</summary>
+    public const string MapRequestPrefix = "map";
+
+    public static bool IsMapRequestId(string requestId)
+    {
+        return requestId != null && requestId.StartsWith(MapRequestPrefix, StringComparison.Ordinal);
+    }
+
+    /// <summary>An answer to a getMapAsset: its id is in the map namespace, or it carries a role (only those answers
+    /// do). Such an answer belongs to the terrain session alone.</summary>
+    public static bool IsMapAnswer(string requestId, string role)
+    {
+        return IsMapRequestId(requestId) || !string.IsNullOrEmpty(role);
+    }
+
+    public static bool IsMapAnswer(AssetResponse r) { return r != null && IsMapAnswer(r.requestId, r.role); }
 
     public class AssetResponse
     {
@@ -739,6 +773,7 @@ public class WmvIpcClient : MonoBehaviour
     }
     readonly Queue<string> statusQueue = new Queue<string>();
     int nextRequestId = 1;
+    int nextMapRequestId = 1;
 
     void Start()
     {
@@ -1227,6 +1262,23 @@ public class WmvIpcClient : MonoBehaviour
                                 : "unsupported encoding: " + msg.encoding;
                     }
                 }
+                // A map file's answer (getMapAsset, protocol 12) goes to OnMapAssetResponse and nowhere else: not to the
+                // asset cache (no flight of it exists, and none of another request's may end by it) and not to
+                // OnAssetResponse -- so an answer arriving after its terrain load ended can never be read by a model,
+                // character or world-model handler. Without a handler it is dropped.
+                if (IsMapAnswer(msg.requestId, msg.role))
+                {
+                    MapAnswersRouted++;
+                    if (OnMapAssetResponse != null)
+                        OnMapAssetResponse(r);
+                    else
+                    {
+                        MapAnswersUnhandled++;
+                        Debug.LogWarning("WMV IPC: map answer " + r.requestId + " (" + (string.IsNullOrEmpty(r.role) ? "no role" : r.role) +
+                                         ", load " + r.load + ") has no handler -- dropped");
+                    }
+                    break;
+                }
                 AnswerAsset(r, msg.fromCache ? null : cache.EndFlight(msg.requestId), msg.cacheable);
                 break;
             }
@@ -1389,10 +1441,11 @@ public class WmvIpcClient : MonoBehaviour
 
     /// <summary>One map file for a terrain load (protocol 12 getMapAsset): role "wdt" or "rootAdt", under the load and
     /// client epoch of the loadTerrainTile it serves. Never from or into the asset cache: the host's answer says what it
-    /// decided about this load (state), which a kept file could not.</summary>
+    /// decided about this load (state), which a kept file could not. Its id is "map" + n, from a counter of its own, and
+    /// its answer comes back through OnMapAssetResponse only.</summary>
     public string RequestMapAsset(string role, int fileDataID, int load, int assetEpoch)
     {
-        var id = NewRequestId();
+        var id = MapRequestPrefix + (nextMapRequestId++);
         Send("{\"type\":\"getMapAsset\",\"requestId\":\"" + id + "\",\"load\":" + load + ",\"assetEpoch\":" + assetEpoch +
              ",\"role\":\"" + Escape(role) + "\",\"fileDataID\":" + fileDataID + "}");
         return id;
@@ -1657,6 +1710,15 @@ public class WmvIpcClient : MonoBehaviour
         public int CameraMask;
         public int MeshObjects, MaterialObjects;
         public int TerrainMeshes, TerrainMaterials, TerrainGameObjects;
+        // Protocol 12 (additive): the terrain session's request bookkeeping -- the requests waiting for an answer (0 or
+        // 1), the ended loads' requests remembered (at most WmvTerrainSession.RetiredCapacity), the map answers it dropped
+        // (late and unowned) -- and the load timeout in effect. mapAnswersRouted is the client's own count.
+        public int TerrainPendingRequests, TerrainRetiredRequests, MapAnswersDropped, TerrainTimeoutMs;
+        // Then, so that each retirement and each drop can be told apart: the requests retired in all (never capped), the
+        // id of the one retired last ("" for none), and the dropped answers split into late and unowned (their sum is
+        // MapAnswersDropped).
+        public int TerrainRetiredTotal, MapAnswersLate, MapAnswersUnowned;
+        public string TerrainLastRetiredRequest;
     }
 
     /// <summary>
@@ -1703,7 +1765,16 @@ public class WmvIpcClient : MonoBehaviour
              ",\"materialObjects\":" + r.MaterialObjects +
              ",\"terrainMeshes\":" + r.TerrainMeshes +
              ",\"terrainMaterials\":" + r.TerrainMaterials +
-             ",\"terrainGameObjects\":" + r.TerrainGameObjects + "}");
+             ",\"terrainGameObjects\":" + r.TerrainGameObjects +
+             ",\"terrainPendingRequests\":" + r.TerrainPendingRequests +
+             ",\"terrainRetiredRequests\":" + r.TerrainRetiredRequests +
+             ",\"terrainRetiredTotal\":" + r.TerrainRetiredTotal +
+             ",\"terrainLastRetiredRequest\":\"" + Escape(r.TerrainLastRetiredRequest) + "\"" +
+             ",\"mapAnswersRouted\":" + MapAnswersRouted +
+             ",\"mapAnswersDropped\":" + r.MapAnswersDropped +
+             ",\"mapAnswersLate\":" + r.MapAnswersLate +
+             ",\"mapAnswersUnowned\":" + r.MapAnswersUnowned +
+             ",\"terrainTimeoutMs\":" + r.TerrainTimeoutMs + "}");
     }
 
     /// <summary>What a screenshotSaved answer carries (ReportScreenshotSaved). Times in milliseconds.</summary>

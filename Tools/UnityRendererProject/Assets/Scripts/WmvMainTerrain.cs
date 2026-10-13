@@ -14,8 +14,12 @@
 //   clearTerrain     -> WmvTerrainSession.Clear
 //   loadWoWModel     -> before anything else of HandleLoadWoWModel: the terrain load in flight is answered
 //                       "superseded", the tile disposed and the terrain view left
-//   assetResponse    -> the session claims its own requests first (and swallows late answers of ended loads)
-//   Update           -> the session's Pump (worker results, the 30 s timeout, the two-frame report)
+//   assetResponse    -> a map file's answer (id "map<n>", or a role) comes through WmvIpcClient.OnMapAssetResponse to
+//                       HandleMapAssetResponse, the session's alone: applied to its load, or dropped as late or
+//                       unowned; it never reaches HandleAssetResponse, which drops one that did before any model,
+//                       character or world-model path
+//   Update           -> the session's Pump (worker results, the timeout -- 30 s, or -wmvTerrainTimeoutMs -- and the
+//                       two-frame report)
 //
 // THE VIEW MODE (SetViewMode, the one owner of the main camera's culling mask). Model view: ModelViewMask (every
 // layer but 30), set in Awake. Terrain view: TerrainViewMask (30 only), entered when a tile is committed: the orbit
@@ -55,20 +59,46 @@ public partial class WmvMain
     /// <summary>The terrain view is on: the main camera shows the terrain layer only.</summary>
     bool TerrainViewActive { get { return terrainViewMode != null && terrainViewMode.Active; } }
 
-    /// <summary>Awake: the model view's mask on the main camera, the session, and the two host messages.</summary>
+    /// <summary>Awake: the model view's mask on the main camera, the session, and the host's terrain messages.</summary>
     void SetUpTerrain(Camera cam)
     {
         cam.cullingMask = WmvTerrainBuilder.ModelViewMask;
         terrainViewMode = new WmvTerrainViewMode(orbit, cam);
         terrain = new WmvTerrainSession(new MainTerrainView(this), ipc.RequestMapAsset, ipc.ReportTerrainTileLoaded,
                                         s => Debug.Log("WMV: " + s),
-                                        a => System.Threading.ThreadPool.QueueUserWorkItem(_ => a()));
-        ipc.OnLoadTerrainTile = HandleLoadTerrainTile;
-        ipc.OnClearTerrain = reason => terrain.Clear(reason);
+                                        a => System.Threading.ThreadPool.QueueUserWorkItem(_ => a()), WmvTerrainDebug.TimeoutMs);
+        WireTerrainMessages();
         foreach (string note in WmvTerrainDebug.Notes)
             Debug.LogWarning("WMV: [terrain] " + note);
         Debug.Log("WMV: [terrain] ready: layer " + WmvTerrainBuilder.Layer + ", model view mask " + WmvTerrainBuilder.ModelViewMask +
-                  ", terrain view mask " + WmvTerrainBuilder.TerrainViewMask + "; " + WmvTerrainDebug.Describe());
+                  ", terrain view mask " + WmvTerrainBuilder.TerrainViewMask + ", load timeout " + terrain.TimeoutMs + " ms; " +
+                  WmvTerrainDebug.Describe());
+    }
+
+    /// <summary>The host's terrain messages: loadTerrainTile, clearTerrain, and every map file's answer.</summary>
+    void WireTerrainMessages()
+    {
+        ipc.OnLoadTerrainTile = HandleLoadTerrainTile;
+        ipc.OnClearTerrain = HandleClearTerrain;
+        ipc.OnMapAssetResponse = HandleMapAssetResponse;
+    }
+
+    void HandleClearTerrain(string reason)
+    {
+        if (terrain != null)
+            terrain.Clear(reason);
+    }
+
+    /// <summary>A map file's answer (getMapAsset): the terrain session's, applied to its load or dropped there as late or
+    /// unowned; with no session (shut down) it is dropped and said. Never handed on to any model path.</summary>
+    void HandleMapAssetResponse(WmvIpcClient.AssetResponse r)
+    {
+        if (terrain != null)
+        {
+            terrain.ClaimMapAssetResponse(r);
+            return;
+        }
+        Debug.LogWarning("WMV: [terrain] a map answer (request " + (r != null ? r.requestId : "none") + ") with no terrain session -- dropped");
     }
 
     void HandleLoadTerrainTile(WmvIpcClient.TerrainTileCommand cmd)
@@ -286,7 +316,9 @@ public partial class WmvMain
     /// <summary>runtimeState's protocol-12 fields. What the terrain holds (terrainMeshes, terrainMaterials,
     /// terrainGameObjects) is the tiles' own tally, never a scan of the scene: it counts a tile still being built, never
     /// the persistent scene root _WmvTerrain, and drops the moment a tile is released, not when Unity's deferred
-    /// Object.Destroy lands -- so it is 0 with no tile, right after a clear, a model load or a failed build.</summary>
+    /// Object.Destroy lands -- so it is 0 with no tile, right after a clear, a model load or a failed build. Then the
+    /// session's request bookkeeping (pending 0 or 1, retired at most 32, retired in all and the last one retired, map
+    /// answers dropped -- late plus unowned, and each apart) and its timeout.</summary>
     void FillTerrainRuntimeState(ref WmvIpcClient.RuntimeReport r)
     {
         Camera cam = Camera.main;
@@ -300,6 +332,14 @@ public partial class WmvMain
         r.TerrainMeshes = WmvRuntimeTerrainTile.LiveMeshes;
         r.TerrainMaterials = WmvRuntimeTerrainTile.LiveMaterials;
         r.TerrainGameObjects = WmvRuntimeTerrainTile.LiveGameObjects;
+        r.TerrainPendingRequests = terrain != null ? terrain.PendingRequests : 0;
+        r.TerrainRetiredRequests = terrain != null ? terrain.RetiredRequests : 0;
+        r.MapAnswersDropped = terrain != null ? terrain.AnswersDropped : 0;
+        r.TerrainTimeoutMs = (int)(terrain != null ? terrain.TimeoutMs : WmvTerrainDebug.TimeoutMs);
+        r.TerrainRetiredTotal = terrain != null ? terrain.RetiredTotal : 0;
+        r.TerrainLastRetiredRequest = terrain != null ? terrain.LastRetiredRequest : "";
+        r.MapAnswersLate = terrain != null ? terrain.LateAnswersDropped : 0;
+        r.MapAnswersUnowned = terrain != null ? terrain.UnownedAnswersDropped : 0;
     }
 
     /// <summary>The capture's log line in the terrain view: the tile, not the hidden model.</summary>

@@ -6,8 +6,10 @@
 #include <cstddef>
 #include <cstdio>
 #include <cstdlib>
+#include <deque>
 #include <fstream>
 #include <functional>
+#include <set>
 
 #include <wx/app.h>
 #include <wx/filename.h>
@@ -19,6 +21,7 @@
 #include <wx/sysopt.h>
 
 #include <windows.h>
+#include <psapi.h>
 
 #include "ExporterPlugin.h"
 #include "Game.h"
@@ -4979,7 +4982,9 @@ static void doHeadlessUnityIpcTest(ModelViewer * frame)
 // (protocol 12; ModelViewer::RequestTerrainTile, UnityIpcServer.h TERRAIN). After the client is loaded, and before any
 // player is started -- so they run with any player, or none -- the in-process checks: the getMapAsset decision on
 // made-up requests (ModelViewer::decideMapAssetRequest: every refusal and staleness, and the two that go on to the
-// read), the map's WDT inspected with a 1000-byte limit (Unreadable, the detail naming its size and the limit, no
+// read), the host's read tracker (a reset for a replaced client empties it at once, a read under another epoch empties it
+// first, its capacity, no false first read past it) and record ring
+// (more records than it keeps), the map's WDT inspected with a 1000-byte limit (Unreadable, the detail naming its size and the limit, no
 // bytes) and with the map-file limit (read whole), and the WDT a load would name as this client's family resolves it
 // (ModelViewer::ResolveTerrainTile, with its refusals), and the host's bookkeeping of a failed load while an earlier tile
 // is alive (ModelViewer::OnTerrainTileLoaded). Then the player is started (StartUnityRenderer(true)); one older than
@@ -4988,7 +4993,8 @@ static void doHeadlessUnityIpcTest(ModelViewer * frame)
 // count must rise with it -- and WMV_TERRAINTEST_SEQUENCE runs, comma-separated:
 //   tile:<map>:<x>:<y>        another tile, built;
 //   repeat:<n>                the last tile n more times, each built, and the player's Mesh and Material counts after
-//                             them those after its first build (nothing piles up);
+//                             them those after its first build (nothing piles up); a run of 50 or more is also sampled
+//                             every 25 loads;
 //   wait:<ms>                 pumps with the canvas ticking (lets a WMV_VIEWPORT_SHOT capture land);
 //   clear                     clearTerrain: a tile on show is taken away unanswered;
 //   clear:<map>:<x>:<y>       that tile requested and cleared before anything is polled: the load, still building, is
@@ -5014,10 +5020,44 @@ static void doHeadlessUnityIpcTest(ModelViewer * frame)
 //                             report window later the player builds nothing, shows the tile in the terrain view and still
 //                             has the model of before (the dropped one never adopted); the host puts the canvas model's
 //                             "could not be built" notice up while the tile builds, none while it is shown, and again
-//                             after a later clear or failed load that leaves no tile.
+//                             after a later clear or failed load that leaves no tile;
+//   failrepeat:<n>[:<m>:<x>:<y>]  n loads of a tile that fails (default the Azeroth tile 0_0, MAIN flag clear): each fails
+//                             and is answered once, and each fails on its own answer, so after each the player's
+//                             terrainRetiredTotal is still the one sampled before the first (none retired) and no
+//                             terrain load is building (terrainLoading 0).
+// THE LATE ANSWERS, with the server's test hooks (UnityIpcServer::testHoldNextMapAsset): the player is sampled, a load's
+// getMapAsset of <role> (wdt or rootAdt) is held unanswered and the load ends with it held. The player must have retired
+// exactly that request: terrainRetiredTotal one above the sample, terrainRetiredRequests one above it up to the ring's 32,
+// terrainLastRetiredRequest the held request's id. The request is released, the host answers it through its usual
+// decision, and the player must drop it as late -- mapAnswersLate and mapAnswersDropped one higher, mapAnswersUnowned
+// unchanged -- with no second report for the load and nothing on screen changed:
+//   timeout:<m>:<x>:<y>:<role>       the player's own timeout ends the load, "failed" with "timed out" (it states its
+//                             terrainTimeoutMs; a short one comes from WMV_DEBUG -wmvTerrainTimeoutMs=<ms>); released, the
+//                             file goes back "available", long after its load ended;
+//   latesupersede:<m>:<x>:<y>:<role> the next load of the tile, not held, answers it "superseded" and is built; released, "stale";
+//   lateclear:<m>:<x>:<y>:<role>     clearTerrain answers it "cleared"; released, "stale";
+//   lateswitch:<product>:<m>:<x>:<y> its WDT held, that client is loaded: "cleared", and the host's read tracker holds no
+//                             file at once (emptied with the client it was of); released, "stale" under the epoch before
+//                             and the one after; then the tile under the new client is built from first reads, and the
+//                             tracker holds those two files alone;
+//   reconnect[:<m>:<x>:<y>]   the player closed and started again (with that tile's load in flight, its WDT request held:
+//                             dropped with the connection, never answered, and the load answered by no player): the host
+//                             holds no terrain request and keeps its read tracker, the new player nothing pending, retired
+//                             or dropped, and a tile (that one, or the last) is then built, its first reads only the files
+//                             not served before the restart.
+// terrainPendingRequests is checked 0 wherever no load is in flight, as an invariant only: the player counts the request
+// of the load in flight, so it reads 0 once a load has ended whether or not that load's request was retired. A player that
+// does not report terrainPendingRequests, terrainRetiredRequests, terrainRetiredTotal, terrainLastRetiredRequest,
+// mapAnswersDropped, mapAnswersLate, mapAnswersUnowned or terrainTimeoutMs fails the checks that need it, "player does
+// not report <field>".
 // Every built load: the report names the tile, the WDT and root it parsed are those served (FileDataID and MD5), one
 // terrain tile is alive and the terrain's Meshes, Materials and GameObjects are counted. Every load sent is answered
-// exactly once, and no terrain load is building at the end. Lines
+// exactly once (one in flight when its player was restarted, never), and no terrain load is building at the end. The
+// test keeps its own copy of every getMapAsset answered (UnityIpcServer::onMapAssetServed: the server keeps only the most
+// recent); at the end the server's records are the most recent MAP_ASSET_RECORDS_KEPT with the rest counted, its read
+// tracker holds exactly the files served under its own epoch -- the last a file was read in, or a later one when a client
+// was loaded after that read -- and nothing is held. Every sample of the
+// player is logged and written with this process's private bytes and working set and that bookkeeping beside it. Lines
 // "[terrain-test] PASS|FAIL|SKIP <check> -- <detail>" go to the log, then "[terrain-test] RESULT: PASS|FAIL"; every
 // report, every getMapAsset served and every check go to <out.json>, which Tools/world-audit/check_terrain_run.py checks
 // against the pinned values.
@@ -5074,6 +5114,7 @@ namespace
     o["readMs"] = s.readMs;
     o["handlerMs"] = s.handlerMs;
     o["first"] = s.first;
+    o["firstTracked"] = s.firstTracked;
     return o;
   }
 
@@ -5098,7 +5139,29 @@ namespace
     o["mapObjectFileDataID"] = s.mapObjectFileDataID;
     o["loading"] = s.loading;
     o["assetEpoch"] = s.assetEpoch;
+    o["terrainPendingRequests"] = s.terrainPendingRequests;
+    o["terrainRetiredRequests"] = s.terrainRetiredRequests;
+    o["mapAnswersRouted"] = s.mapAnswersRouted;
+    o["mapAnswersDropped"] = s.mapAnswersDropped;
+    o["terrainTimeoutMs"] = s.terrainTimeoutMs;
+    o["terrainRetiredTotal"] = s.terrainRetiredTotal;
+    o["terrainLastRetiredRequest"] = s.hasTerrainLastRetiredRequest ? QJsonValue(s.terrainLastRetiredRequest) : QJsonValue();
+    o["mapAnswersLate"] = s.mapAnswersLate;
+    o["mapAnswersUnowned"] = s.mapAnswersUnowned;
     return o;
+  }
+
+  // This process's private bytes and working set (-1 when Windows does not say).
+  void processMemory(long long & privateBytes, long long & workingSet)
+  {
+    privateBytes = workingSet = -1;
+    PROCESS_MEMORY_COUNTERS_EX pmc = {};
+    pmc.cb = sizeof(pmc);
+    if (K32GetProcessMemoryInfo(GetCurrentProcess(), reinterpret_cast<PROCESS_MEMORY_COUNTERS *>(&pmc), sizeof(pmc)))
+    {
+      privateBytes = (long long)pmc.PrivateUsage;
+      workingSet = (long long)pmc.WorkingSetSize;
+    }
   }
 
   // Median and 95th percentile (nearest rank) of a list, for the timing summary.
@@ -5238,6 +5301,98 @@ static void checkFailedLoadBookkeeping(ModelViewer * frame, TerrainTestLog & tal
   frame->UpdateUnityViewportState();
 }
 
+// The host's read tracker (MapAssetReadTracker, MapAssetServed::first) on made-up reads: a file's first read and the next,
+// a reset (the client replaced) emptying it at once, a read under another client epoch emptying it first (the backstop:
+// first reads never mix clients), and, at its real capacity, a new id untracked -- never a first read it may not be --
+// and counted. No storage or player is involved.
+static void checkMapAssetReadTracker(TerrainTestLog & tally)
+{
+  typedef MapAssetReadTracker::Read Read;
+  const auto name = [](Read r) { return r == Read::First ? QString("First") : r == Read::Again ? QString("Again") : QString("Untracked"); };
+  {
+    MapAssetReadTracker t(UnityIpcServer::MAP_ASSET_READS_TRACKED);
+    const Read a = t.note(5, 775971), b = t.note(5, 775971);
+    tally.check("read tracker: a file's first read is First, the next Again", a == Read::First && b == Read::Again &&
+                t.size() == 1 && t.epoch() == 5, name(a) + ", " + name(b) + QString(", %1 id(s) of epoch %2").arg(t.size()).arg(t.epoch()));
+    const Read c = t.note(6, 775971);
+    const size_t afterSwitch = t.size();
+    const Read d = t.note(6, 778037), e = t.note(5, 775971);
+    tally.check("read tracker: a read under another client epoch empties it first (no first read mixes epochs)",
+                c == Read::First && afterSwitch == 1 && d == Read::First && e == Read::First && t.size() == 1 && t.epoch() == 5,
+                QString("epoch 6: %1 (%2 id(s) then), another id %3; epoch 5 again: %4, %5 id(s) of epoch %6")
+                  .arg(name(c)).arg(afterSwitch).arg(name(d)).arg(name(e)).arg(t.size()).arg(t.epoch()));
+  }
+  {
+    MapAssetReadTracker t(UnityIpcServer::MAP_ASSET_READS_TRACKED);
+    t.note(5, 775971);
+    t.note(5, 778037);
+    const size_t before = t.size();
+    t.reset(6);
+    const size_t afterReset = t.size();
+    const int epochAfterReset = t.epoch();
+    const Read a = t.note(6, 775971), b = t.note(6, 775971);
+    tally.check("read tracker: a reset for a replaced client empties it at once, under the new epoch; that epoch's reads "
+                "are then First, then Again",
+                before == 2 && afterReset == 0 && epochAfterReset == 6 && a == Read::First && b == Read::Again &&
+                  t.size() == 1 && t.epoch() == 6,
+                QString("%1 id(s) of epoch 5, after reset(6) %2 id(s) of epoch %3; id 775971 under epoch 6: %4, %5; %6 id(s) "
+                        "of epoch %7")
+                  .arg(before).arg(afterReset).arg(epochAfterReset).arg(name(a)).arg(name(b)).arg(t.size()).arg(t.epoch()));
+  }
+  {
+    MapAssetReadTracker t(UnityIpcServer::MAP_ASSET_READS_TRACKED);
+    const int capacity = UnityIpcServer::MAP_ASSET_READS_TRACKED;
+    int firsts = 0;
+    for (int id = 1; id <= capacity; id++)
+      firsts += t.note(1, id) == Read::First ? 1 : 0;
+    const Read over = t.note(1, capacity + 1), overAgain = t.note(1, capacity + 1), kept = t.note(1, 1);
+    tally.check(QString("read tracker: at its capacity (%1 ids) a new id is Untracked, again and again, and counted; a "
+                        "tracked id stays Again").arg(capacity),
+                firsts == capacity && over == Read::Untracked && overAgain == Read::Untracked && kept == Read::Again &&
+                  t.size() == (size_t)capacity && t.untracked() == 2,
+                QString("%1 First of %2; id %3: %4 then %5; id 1: %6; %7 id(s) kept, %8 untracked read(s)")
+                  .arg(firsts).arg(capacity).arg(capacity + 1).arg(name(over)).arg(name(overAgain)).arg(name(kept))
+                  .arg(t.size()).arg(t.untracked()));
+    const Read fresh = t.note(2, capacity + 1);
+    tally.check("read tracker: a new client epoch frees its capacity", fresh == Read::First && t.size() == 1,
+                QString("id %1 under epoch 2: %2, %3 id(s) kept").arg(capacity + 1).arg(name(fresh)).arg(t.size()));
+  }
+}
+
+// The host's getMapAsset records (UnityIpcServer::recordMapAssetServed) on made-up answers, in a server of their own:
+// more than MAP_ASSET_RECORDS_KEPT go in, the most recent that many are kept in order, every one is counted and handed
+// to onMapAssetServed.
+static void checkMapAssetRecordRing(TerrainTestLog & tally)
+{
+  UnityIpcServer ring;
+  const int kept = UnityIpcServer::MAP_ASSET_RECORDS_KEPT;
+  const int fed = kept + 44;
+  int handed = 0;
+  QString lastHanded;
+  ring.onMapAssetServed = [&handed, &lastHanded](const UnityIpcServer::MapAssetServed & s) {
+    handed++;
+    lastHanded = s.requestId;
+  };
+  for (int i = 1; i <= fed; i++)
+  {
+    UnityIpcServer::MapAssetServed s;
+    s.requestId = QString("r%1").arg(i);
+    s.load = i;
+    s.role = i % 2 ? "wdt" : "rootAdt";
+    s.state = "available";
+    ring.recordMapAssetServed(s);
+  }
+  const std::deque<UnityIpcServer::MapAssetServed> & r = ring.mapAssetsServed();
+  const QString oldest = r.empty() ? QString("-") : r.front().requestId, newest = r.empty() ? QString("-") : r.back().requestId;
+  tally.check(QString("record ring: %1 answers keep the most recent %2, every one counted and handed on").arg(fed).arg(kept),
+              (int)r.size() == kept && ring.mapAssetsServedTotal() == fed && ring.mapAssetRecordsDropped() == fed - kept &&
+                oldest == QString("r%1").arg(fed - kept + 1) && newest == QString("r%1").arg(fed) && handed == fed &&
+                lastHanded == newest,
+              QString("%1 kept (%2 .. %3), total %4, dropped %5, %6 handed on (the last %7)")
+                .arg(r.size()).arg(oldest).arg(newest).arg(ring.mapAssetsServedTotal()).arg(ring.mapAssetRecordsDropped())
+                .arg(handed).arg(lastHanded));
+}
+
 static int doHeadlessTerrainTileTest(ModelViewer * frame, int mapId, int tileX, int tileY, const QString & outPath)
 {
   TerrainTestLog tally;
@@ -5262,15 +5417,24 @@ static int doHeadlessTerrainTileTest(ModelViewer * frame, int mapId, int tileX, 
   std::vector<UnityIpcServer::RuntimeState> states;
   QJsonArray loadsJson, samplesJson;
   std::vector<int> loadsSent;
+  std::vector<int> loadsOrphaned;   // in flight when the player was restarted: no player may answer them
+  // Every getMapAsset answered in this run, in order (the server keeps only the most recent; onMapAssetServed). A deque:
+  // a record looked up stays where it is while later ones arrive.
+  std::deque<UnityIpcServer::MapAssetServed> servedCopy;
+  long long servedBeforeRestarts = 0;   // the server's answer count of each player before a restart (start() zeroes it)
+  std::vector<long long> privateSeries; // the host's private bytes at every sample
   UnityIpcServer * ipc = nullptr;
   std::function<void(const UnityIpcServer::TerrainTileReport &)> previousTerrain;
   std::function<void(const UnityIpcServer::RuntimeState &)> previousRuntime;
+  std::function<void(const UnityIpcServer::MapAssetServed &)> previousServed;
 
-  // THE IN-PROCESS CHECKS, before any player: the decision, the host's bookkeeping of a failed load, and the size limit
-  // of the catalogue's read. (That a refused file is never read is shown where the reads can be counted:
-  // scripts/tests/casc-whole-read, case 9.)
+  // THE IN-PROCESS CHECKS, before any player: the decision, the host's bookkeeping of a failed load, its read tracker and
+  // record ring, and the size limit of the catalogue's read. (That a refused file is never read is shown where the reads
+  // can be counted: scripts/tests/casc-whole-read, case 9.)
   checkMapAssetDecisions(tally);
   checkFailedLoadBookkeeping(frame, tally);
+  checkMapAssetReadTracker(tally);
+  checkMapAssetRecordRing(tally);
   {
     const QString tooLargeCheck = "inspectFile with a 1000-byte limit refuses the WDT, size and limit named, no bytes handed back";
     const wow::MapEntry * entry = startCatalog ? startCatalog->find(mapId) : nullptr;
@@ -5373,6 +5537,12 @@ static int doHeadlessTerrainTileTest(ModelViewer * frame, int mapId, int tileX, 
       if (previousRuntime)
         previousRuntime(s);
     };
+    previousServed = ipc->onMapAssetServed;
+    ipc->onMapAssetServed = [&servedCopy, previousServed](const UnityIpcServer::MapAssetServed & s) {
+      servedCopy.push_back(s);
+      if (previousServed)
+        previousServed(s);
+    };
     wxStopWatch ready;
     while (!ipc->isUnityReady() && ready.Time() < 60000 && frame->unityRendererHost->isRunning())
       pumpIpc(ipc, 1);
@@ -5388,13 +5558,49 @@ static int doHeadlessTerrainTileTest(ModelViewer * frame, int mapId, int tileX, 
       return;
     }
 
+    // Every sample of the player goes to <out.json> with the host's own memory and map-file bookkeeping beside it: its
+    // private bytes and working set, the records kept and counted, the files tracked, the requests held.
+    const auto appendSample = [&](const QString & label, const UnityIpcServer::RuntimeState & s) {
+      QJsonObject o = runtimeJson(label, s);
+      long long privateBytes = -1, workingSet = -1;
+      processMemory(privateBytes, workingSet);
+      privateSeries.push_back(privateBytes);
+      const MapAssetReadTracker & reads = ipc->mapAssetReads();
+      o["hostPrivateBytes"] = (double)privateBytes;
+      o["hostWorkingSetBytes"] = (double)workingSet;
+      o["mapAssetRecordsKept"] = (int)ipc->mapAssetsServed().size();
+      o["mapAssetsServedTotal"] = (double)ipc->mapAssetsServedTotal();
+      o["mapAssetRecordsDropped"] = (double)ipc->mapAssetRecordsDropped();
+      o["mapAssetReadsTracked"] = (int)reads.size();
+      o["mapAssetReadsEpoch"] = reads.epoch();
+      o["mapAssetReadsUntracked"] = (double)reads.untracked();
+      o["mapAssetsHeld"] = (int)ipc->mapAssetsHeld().size();
+      o["mapAssetsHeldDropped"] = (double)ipc->mapAssetsHeldDropped();
+      o["servedCopy"] = (int)servedCopy.size();
+      samplesJson.append(o);
+      // The label is appended, never passed through arg().
+      LOG_INFO << "[terrain-test] memory " + label +
+                    QString(": host private %1 bytes, working set %2 bytes; map records kept %3, served %4 since the player "
+                            "started, %5 no longer kept; files tracked %6 (epoch %7, %8 untracked); held %9")
+                      .arg(privateBytes).arg(workingSet).arg(ipc->mapAssetsServed().size()).arg(ipc->mapAssetsServedTotal())
+                      .arg(ipc->mapAssetRecordsDropped()).arg(reads.size()).arg(reads.epoch()).arg(reads.untracked())
+                      .arg(ipc->mapAssetsHeld().size()) +
+                    QString(" (%1 dropped unanswered); the test's copy %2").arg(ipc->mapAssetsHeldDropped()).arg(servedCopy.size());
+    };
     // What the player holds, two questions in turn: the second is answered in a frame after the one the first was.
     const auto sample = [&](const QString & label, UnityIpcServer::RuntimeState & s) {
       bool answered = false;
       const bool got = waitRuntimeState(ipc, states, [](const UnityIpcServer::RuntimeState &) { return true; }, 5000, s, answered) &&
                        waitRuntimeState(ipc, states, [](const UnityIpcServer::RuntimeState &) { return true; }, 5000, s, answered);
-      samplesJson.append(runtimeJson(label, s));
+      appendSample(label, s);
       return got;
+    };
+    // One question only, for the steps that ask after every load.
+    const auto sampleOnce = [&](const QString & label, UnityIpcServer::RuntimeState & s) {
+      bool answered = false;
+      waitRuntimeState(ipc, states, [](const UnityIpcServer::RuntimeState &) { return true; }, 5000, s, answered);
+      appendSample(label, s);
+      return answered;
     };
     const auto reportsFor = [&reports](int load) {
       int n = 0;
@@ -5417,9 +5623,9 @@ static int doHeadlessTerrainTileTest(ModelViewer * frame, int mapId, int tileX, 
         pumpIpc(ipc, 1);
       }
     };
-    const auto lastServed = [&ipc](int load, const QString & role) -> const UnityIpcServer::MapAssetServed * {
+    const auto lastServed = [&servedCopy](int load, const QString & role) -> const UnityIpcServer::MapAssetServed * {
       const UnityIpcServer::MapAssetServed * found = nullptr;
-      for (const UnityIpcServer::MapAssetServed & s : ipc->mapAssetsServed())
+      for (const UnityIpcServer::MapAssetServed & s : servedCopy)
         if (s.load == load && s.role == role)
           found = &s;
       return found;
@@ -5556,6 +5762,145 @@ static int doHeadlessTerrainTileTest(ModelViewer * frame, int mapId, int tileX, 
                   title == cannotBuild, "notice \"" + title + "\"");
     };
 
+    // THE LATE ANSWERS (the server's test hooks: a getMapAsset held unanswered, released once its load has ended). What the
+    // player keeps of its requests is checked from the fields it reports; one it does not send reads -1 (a check comparing
+    // two samples passes the lower of them), and the check then fails naming it rather than passing on a number that was
+    // never sent.
+    const int retiredCapacity = 32;   // the player's retired ring (WmvTerrainSession.RetiredCapacity)
+    const auto checkField = [&](const QString & label, const char * field, int value, bool ok, const QString & what,
+                                const QString & detail) {
+      if (value < 0)
+        tally.check(label + ": " + what, false, QString("player does not report %1").arg(field));
+      else
+        tally.check(label + ": " + what, ok, detail);
+    };
+    // A sample before a held load: what its retirement and its late answer are measured from. Returns whether the player
+    // answered.
+    const auto sampleBefore = [&](const QString & label, UnityIpcServer::RuntimeState & before) {
+      const bool answered = sampleOnce(label + " (before the held load)", before);
+      if (!answered)
+        tally.check(label + ": the player answers before the held load", false, "no answer");
+      return answered;
+    };
+    // A load whose request of role is held: the hook armed, the load sent, its request awaited until the server holds it.
+    // Returns the load (0 when it was not sent); heldId stays empty when nothing was held.
+    const auto requestHeld = [&](const QString & label, const QString & role, const Tile & at, const QString & step,
+                                 QString & heldId) {
+      heldId.clear();
+      QString why;
+      ipc->testHoldNextMapAsset(role);
+      const int load = request(at.map, at.x, at.y, step, why);
+      if (load <= 0)
+      {
+        ipc->testCancelMapAssetHold();
+        tally.check(label + ": requested", false, why);
+        return 0;
+      }
+      wxStopWatch w;
+      while (ipc->mapAssetsHeld().empty() && w.Time() < 20000 && ipc->isUnityReady())
+        pumpIpc(ipc, 1);
+      const QJsonObject held = ipc->mapAssetsHeld().empty() ? QJsonObject() : ipc->mapAssetsHeld().back();
+      const bool ok = !held.isEmpty() && held.value("load").toInt(0) == load && held.value("role").toString() == role;
+      if (ok)
+        heldId = held.value("requestId").toString();
+      else
+      {
+        ipc->testCancelMapAssetHold();
+        ipc->testReleaseHeldMapAssets();
+      }
+      tally.check(label + QString(": load %1's %2 request is held unanswered").arg(load).arg(role), ok,
+                  held.isEmpty() ? QString("nothing held within 20 s")
+                                 : QString("request %1, load %2, role %3, held after %4 ms").arg(held.value("requestId").toString())
+                                     .arg(held.value("load").toInt(0)).arg(held.value("role").toString()).arg(w.Time()));
+      return load;
+    };
+    // Once the load has ended with its request heldId still held: the player retired exactly that one request since
+    // before (the sample taken before the load) -- its total of retirements one higher, its ring one fuller up to its
+    // capacity, the id retired last the held one. Pending 0 is an invariant only (no load is in flight).
+    const auto checkEnded = [&](const QString & label, const UnityIpcServer::RuntimeState & before, const QString & heldId,
+                                UnityIpcServer::RuntimeState & ended) {
+      if (!sample(label + " (the load ended)", ended))
+      {
+        tally.check(label + ": the player answers once the load ended", false, "no answer");
+        return false;
+      }
+      checkField(label, "terrainRetiredTotal", std::min(before.terrainRetiredTotal, ended.terrainRetiredTotal),
+                 ended.terrainRetiredTotal == before.terrainRetiredTotal + 1,
+                 "the ended load retires exactly one request (terrainRetiredTotal one higher than before the load)",
+                 QString("terrainRetiredTotal %1 before the load, %2 now").arg(before.terrainRetiredTotal).arg(ended.terrainRetiredTotal));
+      const int ringExpected = std::min(before.terrainRetiredRequests + 1, retiredCapacity);
+      checkField(label, "terrainRetiredRequests", std::min(before.terrainRetiredRequests, ended.terrainRetiredRequests),
+                 ended.terrainRetiredRequests == ringExpected,
+                 QString("the retired ring holds one more, up to %1 (terrainRetiredRequests %2)").arg(retiredCapacity).arg(ringExpected),
+                 QString("terrainRetiredRequests %1 before the load, %2 now").arg(before.terrainRetiredRequests)
+                   .arg(ended.terrainRetiredRequests));
+      if (!ended.hasTerrainLastRetiredRequest)
+        tally.check(label + ": the request retired last is the held one, " + heldId, false,
+                    "player does not report terrainLastRetiredRequest");
+      else
+        tally.check(label + ": the request retired last is the held one, " + heldId, ended.terrainLastRetiredRequest == heldId,
+                    "terrainLastRetiredRequest \"" + ended.terrainLastRetiredRequest + "\"");
+      checkField(label, "terrainPendingRequests", ended.terrainPendingRequests, ended.terrainPendingRequests == 0,
+                 "invariant: no request pending with no load in flight",
+                 QString("terrainPendingRequests %1").arg(ended.terrainPendingRequests));
+      return true;
+    };
+    // The held request released: the host answers it as any (expectState: "available" when nothing changed since -- the
+    // file, long after its load ended -- "stale" otherwise), and the player drops it as late -- mapAnswersLate and
+    // mapAnswersDropped one higher than when the load had ended, mapAnswersUnowned the same -- with no second report for
+    // the load and nothing on screen changed. after is the sample.
+    const auto releaseLate = [&](const QString & label, int load, const QString & heldId,
+                                 const UnityIpcServer::RuntimeState & ended, const QString & expectState,
+                                 UnityIpcServer::RuntimeState & after) {
+      const size_t copyBefore = servedCopy.size();
+      const int released = ipc->testReleaseHeldMapAssets();
+      pumpIpc(ipc, 50);
+      const UnityIpcServer::MapAssetServed * answer = nullptr;
+      for (size_t i = copyBefore; i < servedCopy.size(); i++)
+        if (servedCopy[i].requestId == heldId && servedCopy[i].load == load)
+          answer = &servedCopy[i];
+      tally.check(label + QString(": the held request %1 is answered on release, \"%2\"").arg(heldId).arg(expectState),
+                  released == 1 && answer && answer->state == expectState,
+                  QString("%1 released; ").arg(released) + (answer ? answer->describe() : QString("no answer recorded")));
+      if (!sample(label + " (after the late answer)", after))
+      {
+        tally.check(label + ": the player answers after the late answer", false, "no answer");
+        return;
+      }
+      checkField(label, "mapAnswersDropped", std::min(ended.mapAnswersDropped, after.mapAnswersDropped),
+                 after.mapAnswersDropped == ended.mapAnswersDropped + 1,
+                 "the player drops the answer (mapAnswersDropped one higher)",
+                 QString("mapAnswersDropped %1 when the load had ended, %2 now").arg(ended.mapAnswersDropped).arg(after.mapAnswersDropped));
+      checkField(label, "mapAnswersLate", std::min(ended.mapAnswersLate, after.mapAnswersLate),
+                 after.mapAnswersLate == ended.mapAnswersLate + 1,
+                 "... as late, its request found among the retired (mapAnswersLate one higher)",
+                 QString("mapAnswersLate %1 when the load had ended, %2 now").arg(ended.mapAnswersLate).arg(after.mapAnswersLate));
+      checkField(label, "mapAnswersUnowned", std::min(ended.mapAnswersUnowned, after.mapAnswersUnowned),
+                 after.mapAnswersUnowned == ended.mapAnswersUnowned,
+                 "... not as unowned (mapAnswersUnowned unchanged)",
+                 QString("mapAnswersUnowned %1 when the load had ended, %2 now").arg(ended.mapAnswersUnowned).arg(after.mapAnswersUnowned));
+      checkField(label, "terrainPendingRequests", after.terrainPendingRequests, after.terrainPendingRequests == 0,
+                 "invariant: no request pending with no load in flight",
+                 QString("terrainPendingRequests %1").arg(after.terrainPendingRequests));
+      checkField(label, "terrainRetiredRequests", after.terrainRetiredRequests,
+                 after.terrainRetiredRequests <= retiredCapacity,
+                 QString("invariant: the retired ring holds at most %1").arg(retiredCapacity),
+                 QString("terrainRetiredRequests %1").arg(after.terrainRetiredRequests));
+      tally.check(label + QString(": the late answer brings no second report for load %1").arg(load), reportsFor(load) == 1,
+                  QString("%1 report(s)").arg(reportsFor(load)));
+      tally.check(label + ": nothing on screen changes with it -- the same model, world model and terrain, nothing loading",
+                  after.modelFileDataID == ended.modelFileDataID && after.mapObjectFileDataID == ended.mapObjectFileDataID &&
+                    after.liveModels == ended.liveModels && after.liveMapObjects == ended.liveMapObjects &&
+                    after.liveTerrainTiles == ended.liveTerrainTiles && after.terrainLoad == ended.terrainLoad &&
+                    !after.loading && after.terrainLoading == 0,
+                  QString("model %1 -> %2, world model %3 -> %4, live models %5 -> %6, terrain tiles %7 -> %8, terrain load %9")
+                    .arg(ended.modelFileDataID).arg(after.modelFileDataID).arg(ended.mapObjectFileDataID).arg(after.mapObjectFileDataID)
+                    .arg(ended.liveModels).arg(after.liveModels).arg(ended.liveTerrainTiles).arg(after.liveTerrainTiles)
+                    .arg(ended.terrainLoad) +
+                    QString(" -> %1, loading %2, terrain loading %3").arg(after.terrainLoad).arg(after.loading ? "true" : "false")
+                      .arg(after.terrainLoading));
+    };
+
     // THE SEQUENCE.
     const QStringList steps = sequenceSpec.split(',', QString::SkipEmptyParts);
     const auto parseTile = [](const QString & text, Tile & t) {
@@ -5601,6 +5946,12 @@ static int doHeadlessTerrainTileTest(ModelViewer * frame, int mapId, int tileX, 
           all = load > 0 && checkBuilt(label + QString(" #%1").arg(i + 1), load, last.map, last.x, last.y) && all;
           if (load <= 0)
             tally.check(label + QString(" #%1: requested").arg(i + 1), false, why);
+          // A long run is sampled every 25 loads along the way, for the memory of both processes.
+          if (n >= 50 && (i + 1) % 25 == 0)
+          {
+            UnityIpcServer::RuntimeState along;
+            sampleOnce(label + QString(" #%1").arg(i + 1), along);
+          }
         }
         UnityIpcServer::RuntimeState now;
         const bool got = sampleShown(label, now);
@@ -5725,10 +6076,10 @@ static int doHeadlessTerrainTileTest(ModelViewer * frame, int mapId, int tileX, 
           continue;
         }
         // The client is loaded before anything is polled: the player's WDT request waits for it.
-        const size_t servedBefore = ipc->mapAssetsServed().size();
+        const size_t servedBefore = servedCopy.size();
         const bool loaded = frame->LoadWoW(&chosen);
         droppedModel = 0;   // the canvas was emptied with the client
-        const size_t servedDuring = ipc->mapAssetsServed().size() - servedBefore;
+        const size_t servedDuring = servedCopy.size() - servedBefore;
         tally.check(label + ": the client loads", loaded, chosen.product + " " + chosen.version);
         if (servedDuring != 0)
         {
@@ -5761,6 +6112,8 @@ static int doHeadlessTerrainTileTest(ModelViewer * frame, int mapId, int tileX, 
           tally.check(label + ": requested", false, why);
           continue;
         }
+        // The epoch moves on with no client replaced, so the host's read tracker is not reset: the next read under the new
+        // epoch empties it (its backstop).
         if (kind == "staleepoch")
           UnityAssetAccess::noteClientReplaced();
         else
@@ -5819,10 +6172,10 @@ static int doHeadlessTerrainTileTest(ModelViewer * frame, int mapId, int tileX, 
               continue;
             }
           }
-          const size_t servedBefore = ipc->mapAssetsServed().size();
+          const size_t servedBefore = servedCopy.size();
           frame->fileControl->SelectModelFile(file);
           droppedModel = 0;   // the canvas holds another model
-          const size_t servedDuring = ipc->mapAssetsServed().size() - servedBefore;
+          const size_t servedDuring = servedCopy.size() - servedBefore;
           if (inFlight && servedDuring != 0)
           {
             tally.check(label + ": test invalid", false,
@@ -5839,7 +6192,7 @@ static int doHeadlessTerrainTileTest(ModelViewer * frame, int mapId, int tileX, 
           const bool holds = waitRuntimeState(ipc, states, [fileDataID](const UnityIpcServer::RuntimeState & x) {
             return x.modelFileDataID == fileDataID && !x.loading && x.liveTerrainTiles == 0 && x.terrainView == 0;
           }, 60000, now, answered);
-          samplesJson.append(runtimeJson(label, now));
+          appendSample(label, now);
           tally.check(label + ": the model on screen, no terrain tile or view left", holds, now.describe());
           if (inFlight)
             tally.check(label + QString(": the terrain load building (%1) is answered \"superseded\", once").arg(inFlight),
@@ -5869,7 +6222,7 @@ static int doHeadlessTerrainTileTest(ModelViewer * frame, int mapId, int tileX, 
           UnityIpcServer::RuntimeState building;
           bool answered = false;
           waitRuntimeState(ipc, states, [](const UnityIpcServer::RuntimeState &) { return true; }, 5000, building, answered);
-          samplesJson.append(runtimeJson(label + " (model sent)", building));
+          appendSample(label + " (model sent)", building);
           const bool stillBuilding = answered && building.loading;
           tally.check(label + (stillBuilding ? ": the player is still building the model when the tile is sent"
                                              : ": test invalid"), stillBuilding,
@@ -5914,12 +6267,353 @@ static int doHeadlessTerrainTileTest(ModelViewer * frame, int mapId, int tileX, 
                       got ? QString("model of before %1; ").arg(before.modelFileDataID) + now.describe() : QString("no answer"));
         }
       }
+      else if (kind == "timeout" || kind == "latesupersede" || kind == "lateclear")
+      {
+        const QString role = arg.section(':', 3).trimmed();
+        if (!parseTile(arg, t) || (role != "wdt" && role != "rootAdt"))
+        {
+          tally.check(label, false, QString("expected %1:<map>:<x>:<y>:<wdt|rootAdt>").arg(kind));
+          continue;
+        }
+        // The player before the held load: what its retirement and late answer are measured from (and its timeout).
+        UnityIpcServer::RuntimeState before;
+        if (!sampleBefore(label, before))
+          continue;
+        long timeoutMs = 30000;   // the player's own, when it does not say (a player before terrainTimeoutMs)
+        if (kind == "timeout")
+        {
+          checkField(label, "terrainTimeoutMs", before.terrainTimeoutMs,
+                     before.terrainTimeoutMs >= 1000 && before.terrainTimeoutMs <= 120000,
+                     "the player states its terrain timeout (1000 to 120000 ms)",
+                     QString("terrainTimeoutMs %1").arg(before.terrainTimeoutMs));
+          if (before.terrainTimeoutMs > 0)
+            timeoutMs = before.terrainTimeoutMs;
+        }
+        QString heldId;
+        const int load = requestHeld(label, role, t, step, heldId);
+        if (load <= 0 || heldId.isEmpty())
+          continue;
+        UnityIpcServer::TerrainTileReport r;
+        bool got = false;
+        if (kind == "timeout")
+        {
+          // Nothing answers: the player's own timeout ends the load.
+          got = waitReport(load, timeoutMs + 15000, r);
+          tally.check(label + QString(": load %1 fails, timed out").arg(load),
+                      got && r.status == "failed" && r.reason.contains("timed out"),
+                      got ? r.status + " " + r.reason : QString("no answer within %1 ms").arg(timeoutMs + 15000));
+        }
+        else if (kind == "latesupersede")
+        {
+          // The next load, not held, replaces it and is built; the held request is answered after that.
+          const int second = request(t.map, t.x, t.y, step, why);
+          if (second <= 0)
+          {
+            tally.check(label + ": the second load is requested", false, why);
+            ipc->testReleaseHeldMapAssets();
+            continue;
+          }
+          got = waitReport(load, 60000, r);
+          tally.check(label + QString(": the held load (%1) is answered \"superseded\"").arg(load),
+                      got && r.status == "superseded", got ? r.status + " " + r.reason : QString("no answer within 60 s"));
+          if (checkBuilt(label + ": the second", second, t.map, t.x, t.y))
+            sampleShown(label, afterTile);
+          last = t;
+        }
+        else
+        {
+          const bool sent = frame->ClearTerrain("terrain test: clear while a map request is held");
+          got = waitReport(load, 60000, r);
+          tally.check(label + QString(": the held load (%1) is answered \"cleared\"").arg(load),
+                      sent && got && r.status == "cleared", got ? r.status + " " + r.reason : QString("no answer within 60 s"));
+        }
+        UnityIpcServer::RuntimeState ended, after;
+        if (!checkEnded(label, before, heldId, ended))
+        {
+          ipc->testReleaseHeldMapAssets();
+          continue;
+        }
+        if (kind == "lateclear")
+          tally.check(label + ": no terrain tile, view or load left", ended.liveTerrainTiles == 0 && ended.terrainView == 0 &&
+                        ended.terrainLoading == 0, ended.describe());
+        // After a timeout nothing has changed for the host, so the file goes back: a genuine late answer.
+        releaseLate(label, load, heldId, ended, kind == "timeout" ? "available" : "stale", after);
+        if (kind == "lateclear")
+          checkDroppedNotice(label);
+      }
+      else if (kind == "lateswitch")
+      {
+        const QString product = arg.section(':', 0, 0).trimmed();
+        if (!parseTile(arg.section(':', 1), t))
+        {
+          tally.check(label, false, "expected lateswitch:<product>:<map>:<x>:<y>");
+          continue;
+        }
+        const std::vector<core::GameConfig> configs = GAMEDIRECTORY.configsFound();
+        const core::GameConfig * config = nullptr;
+        for (const core::GameConfig & c : configs)
+          if (c.product == product)
+            config = &c;
+        if (!config)
+        {
+          tally.check(label, false, "no such product in the installation");
+          continue;
+        }
+        const core::GameConfig chosen = *config;
+        const int epoch = UnityAssetAccess::clientEpoch();
+        UnityIpcServer::RuntimeState before;
+        if (!sampleBefore(label, before))
+          continue;
+        QString heldId;
+        const int load = requestHeld(label, "wdt", t, step, heldId);
+        if (load <= 0 || heldId.isEmpty())
+          continue;
+        // The client is replaced with the load's WDT request held: it can only be answered after.
+        const size_t servedBefore = servedCopy.size();
+        const size_t readsBeforeSwitch = ipc->mapAssetReads().size();
+        const int readsEpochBeforeSwitch = ipc->mapAssetReads().epoch();
+        const bool loaded = frame->LoadWoW(&chosen);
+        droppedModel = 0;   // the canvas was emptied with the client
+        const size_t servedDuring = servedCopy.size() - servedBefore;
+        tally.check(label + ": the client loads", loaded, chosen.product + " " + chosen.version);
+        if (servedDuring != 0)
+        {
+          tally.check(label + ": test invalid", false, QString("%1 getMapAsset answered before the load returned").arg(servedDuring));
+          ipc->testReleaseHeldMapAssets();
+          continue;
+        }
+        // The host forgot the files read from the client before as it was replaced, not at the next read.
+        {
+          const MapAssetReadTracker & reads = ipc->mapAssetReads();
+          tally.check(label + ": right after the switch the host's read tracker holds no file, under the new client's epoch",
+                      reads.size() == 0 && reads.epoch() == UnityAssetAccess::clientEpoch() && reads.epoch() != epoch,
+                      QString("%1 file(s) of epoch %2 (the client's %3); before the switch %4 file(s) of epoch %5")
+                        .arg(reads.size()).arg(reads.epoch()).arg(UnityAssetAccess::clientEpoch()).arg(readsBeforeSwitch)
+                        .arg(readsEpochBeforeSwitch));
+        }
+        UnityIpcServer::TerrainTileReport r;
+        const bool got = waitReport(load, 60000, r);
+        tally.check(label + QString(": the held load (%1) is answered \"cleared\"").arg(load), got && r.status == "cleared",
+                    got ? r.status + " " + r.reason : QString("no answer within 60 s"));
+        UnityIpcServer::RuntimeState ended, after;
+        if (!checkEnded(label, before, heldId, ended))
+        {
+          ipc->testReleaseHeldMapAssets();
+          continue;
+        }
+        tally.check(label + ": no terrain tile is left", ended.liveTerrainTiles == 0 && ended.terrainView == 0, ended.describe());
+        releaseLate(label, load, heldId, ended, "stale", after);
+        const UnityIpcServer::MapAssetServed * wdt = lastServed(load, "wdt");
+        tally.check(label + ": the released WDT request is answered stale, under the epoch before the switch and the one after",
+                    wdt && wdt->state == "stale" && wdt->assetEpoch == epoch && wdt->epochNow == UnityAssetAccess::clientEpoch() &&
+                      wdt->epochNow != epoch,
+                    wdt ? wdt->describe() : QString("no answer for the load's WDT request"));
+        adoptReference(label, after);   // the next client's own state is the reference from here on
+        // The new client's tile: its files are first reads of the new epoch, and the read tracker holds nothing else.
+        const int fresh = request(t.map, t.x, t.y, step, why);
+        if (fresh <= 0)
+        {
+          tally.check(label + ": the new client's tile is requested", false, why);
+          continue;
+        }
+        if (checkBuilt(label + ": the new client's tile", fresh, t.map, t.x, t.y))
+        {
+          sampleShown(label, afterTile);
+          const UnityIpcServer::MapAssetServed * w = lastServed(fresh, "wdt");
+          const UnityIpcServer::MapAssetServed * root = lastServed(fresh, "rootAdt");
+          const MapAssetReadTracker & reads = ipc->mapAssetReads();
+          tally.check(label + ": the new client's two files are first reads, and the read tracker holds them alone",
+                      w && root && w->first && w->firstTracked && root->first && root->firstTracked &&
+                        reads.epoch() == UnityAssetAccess::clientEpoch() && reads.size() == 2,
+                      QString("WDT %1 first %2, root %3 first %4; the tracker holds %5 file(s) of epoch %6 (the client's %7, "
+                              "the old %8)")
+                        .arg(w ? w->fileDataID : 0).arg(w && w->first ? "yes" : "no").arg(root ? root->fileDataID : 0)
+                        .arg(root && root->first ? "yes" : "no").arg(reads.size()).arg(reads.epoch())
+                        .arg(UnityAssetAccess::clientEpoch()).arg(epoch));
+        }
+        last = t;
+      }
+      else if (kind == "reconnect")
+      {
+        const bool withLoad = !arg.isEmpty();
+        if (withLoad && !parseTile(arg, t))
+        {
+          tally.check(label, false, "expected reconnect or reconnect:<map>:<x>:<y>");
+          continue;
+        }
+        int heldLoad = 0;
+        QString heldId;
+        if (withLoad)
+        {
+          heldLoad = requestHeld(label, "wdt", t, step, heldId);
+          if (heldLoad <= 0 || heldId.isEmpty())
+            continue;
+        }
+        // The player closed and started again, as a restart of the viewport does.
+        const long long droppedBefore = ipc->mapAssetsHeldDropped();
+        const size_t copyBeforeRestart = servedCopy.size();
+        const size_t readsBefore = ipc->mapAssetReads().size();
+        const int readsEpochBefore = ipc->mapAssetReads().epoch();
+        servedBeforeRestarts += ipc->mapAssetsServedTotal();
+        frame->unityRendererHost->shutdown();
+        tally.check(label + ": the player is closed", !frame->unityRendererHost->isRunning(), QString());
+        if (withLoad)
+        {
+          loadsOrphaned.push_back(heldLoad);
+          tally.check(label + QString(": the held request %1 is dropped unanswered with its connection").arg(heldId),
+                      ipc->mapAssetsHeld().empty() && !ipc->testMapAssetHoldArmed() &&
+                        ipc->mapAssetsHeldDropped() == droppedBefore + 1,
+                      QString("%1 held, %2 dropped unanswered (%3 before)").arg(ipc->mapAssetsHeld().size())
+                        .arg(ipc->mapAssetsHeldDropped()).arg(droppedBefore));
+        }
+        if (!frame->StartUnityRenderer(/* selfTest */ true))
+        {
+          tally.check(label + ": the player starts again", false,
+                      QString::fromWCharArray(frame->unityRendererHost->playerProblem().c_str()));
+          return;
+        }
+        wxStopWatch again;
+        while (!ipc->isUnityReady() && again.Time() < 60000 && frame->unityRendererHost->isRunning())
+          pumpIpc(ipc, 1);
+        tally.check(label + ": the new player announces itself", ipc->isUnityReady() && ipc->playerDrawsTerrain(),
+                    QString("protocol %1 after %2 ms").arg(ipc->playerProtocolVersion()).arg(again.Time()));
+        if (!ipc->isUnityReady() || !ipc->playerDrawsTerrain())
+          return;
+        tally.check(label + ": the host holds no terrain request", frame->m_terrainRequest.load == 0,
+                    QString("terrain request load %1").arg(frame->m_terrainRequest.load));
+        tally.check(label + ": the host's read tracker outlives the player (the storage is the same)",
+                    ipc->mapAssetReads().size() == readsBefore && ipc->mapAssetReads().epoch() == readsEpochBefore,
+                    QString("%1 file(s) of epoch %2, before the restart %3 of epoch %4").arg(ipc->mapAssetReads().size())
+                      .arg(ipc->mapAssetReads().epoch()).arg(readsBefore).arg(readsEpochBefore));
+        // The new player is given the canvas's model at once: settled when nothing is loading.
+        UnityIpcServer::RuntimeState fresh;
+        bool answered = false;
+        const bool settled = waitRuntimeState(ipc, states, [](const UnityIpcServer::RuntimeState & x) {
+          return !x.loading && x.terrainLoading == 0;
+        }, 60000, fresh, answered);
+        appendSample(label + " (the new player)", fresh);
+        tally.check(label + ": the new player holds no terrain, and nothing is loading",
+                    settled && fresh.liveTerrainTiles == 0 && fresh.terrainView == 0, fresh.describe());
+        checkField(label, "terrainPendingRequests", fresh.terrainPendingRequests, fresh.terrainPendingRequests == 0,
+                   "the new player has no terrain request pending", QString("terrainPendingRequests %1").arg(fresh.terrainPendingRequests));
+        checkField(label, "terrainRetiredRequests", fresh.terrainRetiredRequests, fresh.terrainRetiredRequests == 0,
+                   "... none retired", QString("terrainRetiredRequests %1").arg(fresh.terrainRetiredRequests));
+        checkField(label, "mapAnswersDropped", fresh.mapAnswersDropped, fresh.mapAnswersDropped == 0,
+                   "... and no map answer reached it to drop", QString("mapAnswersDropped %1").arg(fresh.mapAnswersDropped));
+        adoptReference(label, fresh);   // the new player's own counts are the reference from here on
+        const Tile next = withLoad ? t : last;
+        const int load = request(next.map, next.x, next.y, step, why);
+        if (load <= 0)
+          tally.check(label + ": a tile is requested", false, why);
+        else if (checkBuilt(label + ": a tile then", load, next.map, next.x, next.y))
+        {
+          sampleShown(label, afterTile);
+          // A file this client's storage had served before the restart is no first read now; one it had not, is.
+          QStringList bad;
+          for (const char * role : {"wdt", "rootAdt"})
+          {
+            const UnityIpcServer::MapAssetServed * s = lastServed(load, role);
+            if (!s)
+              continue;
+            bool before = false;
+            for (size_t i = 0; i < copyBeforeRestart; i++)
+              before = before || (servedCopy[i].state == "available" && servedCopy[i].epochNow == s->epochNow &&
+                                  servedCopy[i].fileDataID == s->fileDataID);
+            if (s->first == before || !s->firstTracked)
+              bad << QString("%1 %2 first %3, served before the restart %4").arg(role).arg(s->fileDataID)
+                       .arg(s->first ? "yes" : "no").arg(before ? "yes" : "no");
+          }
+          tally.check(label + ": the tile's first reads are those the storage had not served before the restart",
+                      bad.isEmpty(), bad.isEmpty() ? QString("as expected") : bad.join("; "));
+        }
+        last = next;
+        if (withLoad)
+        {
+          int answers = 0;
+          for (const UnityIpcServer::MapAssetServed & s : servedCopy)
+            answers += s.load == heldLoad ? 1 : 0;
+          tally.check(label + QString(": load %1's held request was never answered").arg(heldLoad), answers == 0,
+                      QString("%1 answer(s) for load %2").arg(answers).arg(heldLoad));
+        }
+      }
+      else if (kind == "failrepeat")
+      {
+        // failrepeat:<n> (the Azeroth tile 0_0, whose MAIN flag is clear) or failrepeat:<n>:<map>:<x>:<y>.
+        bool numeric = false;
+        const int n = arg.section(':', 0, 0).toInt(&numeric);
+        Tile f = {0, 0, 0};
+        if (!numeric || n <= 0 || (!arg.section(':', 1).isEmpty() && !parseTile(arg.section(':', 1), f)))
+        {
+          tally.check(label, false, "expected failrepeat:<n> or failrepeat:<n>:<map>:<x>:<y> (a tile whose load fails)");
+          continue;
+        }
+        // Each load fails on its own answer, so none ends with a request out: the player's total of retirements stays the
+        // one sampled before the first, and no load is left building after any of them.
+        UnityIpcServer::RuntimeState before;
+        if (!sampleOnce(label + " (before)", before))
+        {
+          tally.check(label + ": the player answers before the loads", false, "no answer");
+          continue;
+        }
+        int sent = 0, failed = 0, once = 0, pendingZero = 0, retiredSame = 0, notLoading = 0, answers = 0;
+        int pendingField = -1, totalField = -1, loadingField = -1;   // the lowest reported (-1: one not reported)
+        QString firstBad, firstRetired, firstLoading;
+        for (int i = 0; i < n; i++)
+        {
+          const int load = request(f.map, f.x, f.y, step, why);
+          if (load <= 0)
+          {
+            if (firstBad.isEmpty())
+              firstBad = QString("#%1 not requested: ").arg(i + 1) + why;
+            continue;
+          }
+          sent++;
+          UnityIpcServer::TerrainTileReport r;
+          if (waitReport(load, 60000, r) && r.status == "failed")
+            failed++;
+          else if (firstBad.isEmpty())
+            firstBad = QString("#%1 load %2: %3 %4").arg(i + 1).arg(load).arg(r.status).arg(r.reason);
+          UnityIpcServer::RuntimeState now;
+          if (sampleOnce(label + QString(" #%1").arg(i + 1), now))
+          {
+            answers++;
+            pendingField = answers == 1 ? now.terrainPendingRequests : std::min(pendingField, now.terrainPendingRequests);
+            totalField = answers == 1 ? now.terrainRetiredTotal : std::min(totalField, now.terrainRetiredTotal);
+            loadingField = answers == 1 ? now.terrainLoading : std::min(loadingField, now.terrainLoading);
+            pendingZero += now.terrainPendingRequests == 0 ? 1 : 0;
+            if (now.terrainRetiredTotal == before.terrainRetiredTotal)
+              retiredSame++;
+            else if (firstRetired.isEmpty())
+              firstRetired = QString("; the first otherwise: #%1 load %2, terrainRetiredTotal %3 (ring %4)").arg(i + 1).arg(load)
+                               .arg(now.terrainRetiredTotal).arg(now.terrainRetiredRequests);
+            if (now.terrainLoading == 0)
+              notLoading++;
+            else if (firstLoading.isEmpty())
+              firstLoading = QString("; the first otherwise: #%1 load %2, terrainLoading %3").arg(i + 1).arg(load).arg(now.terrainLoading);
+          }
+          once += reportsFor(load) == 1 ? 1 : 0;
+        }
+        tally.check(label + QString(": all %1 loads fail, each answered once").arg(n), sent == n && failed == n && once == n,
+                    QString("%1 sent, %2 failed, %3 answered once").arg(sent).arg(failed).arg(once) +
+                      (firstBad.isEmpty() ? QString() : "; the first otherwise: " + firstBad));
+        checkField(label, "terrainRetiredTotal", std::min(before.terrainRetiredTotal, totalField), retiredSame == n,
+                   "each fails on its own answer, retiring no request (terrainRetiredTotal as before the first, after each)",
+                   QString("%1 of %2 load(s) followed by terrainRetiredTotal %3, the one before the first (its ring then %4)")
+                     .arg(retiredSame).arg(n).arg(before.terrainRetiredTotal).arg(before.terrainRetiredRequests) + firstRetired);
+        checkField(label, "terrainLoading", loadingField, notLoading == n, "no terrain load building after any of them",
+                   QString("%1 of %2 load(s) followed by terrainLoading 0").arg(notLoading).arg(n) + firstLoading);
+        checkField(label, "terrainPendingRequests", pendingField, pendingZero == n,
+                   "invariant: no request pending with no load in flight, after each",
+                   QString("%1 of %2 load(s) followed by an answer with none pending").arg(pendingZero).arg(n));
+      }
       else
         tally.check(label, false, "unknown step (tile, repeat, wait, clear, expectfail, notlocal, switch, staleepoch, staleload, "
-                                "supersede, model, modelthentile)");
+                                "supersede, model, modelthentile, timeout, latesupersede, lateclear, lateswitch, reconnect, "
+                                "failrepeat)");
     }
 
-    // EVERY LOAD ANSWERED EXACTLY ONCE, and nothing building at the end.
+    // EVERY LOAD ANSWERED EXACTLY ONCE -- but one in flight when its player was restarted, which no player may answer --
+    // and nothing building at the end.
     pumpIpc(ipc, 100);
     for (int load : loadsSent)
     {
@@ -5927,12 +6621,58 @@ static int doHeadlessTerrainTileTest(ModelViewer * frame, int mapId, int tileX, 
       for (const UnityIpcServer::TerrainTileReport & r : reports)
         if (r.load == load)
           statuses << r.status;
-      tally.check(QString("load %1 is answered exactly once").arg(load), statuses.size() == 1,
-                statuses.isEmpty() ? QString("no answer") : statuses.join(", "));
+      if (std::find(loadsOrphaned.begin(), loadsOrphaned.end(), load) != loadsOrphaned.end())
+        tally.check(QString("load %1, in flight when its player was restarted, is never answered").arg(load),
+                    statuses.isEmpty(), statuses.isEmpty() ? QString("no answer") : statuses.join(", "));
+      else
+        tally.check(QString("load %1 is answered exactly once").arg(load), statuses.size() == 1,
+                    statuses.isEmpty() ? QString("no answer") : statuses.join(", "));
     }
     UnityIpcServer::RuntimeState end;
     sample("end", end);
     tally.check("no terrain load is building at the end", end.terrainLoading == 0 && !end.loading, end.describe());
+
+    // THE HOST'S BOOKKEEPING, bounded: the server keeps the most recent records and counts every one (the test's copy
+    // has them all), its read tracker holds exactly the files served under its own epoch -- the last a file was read in,
+    // or a later one when a client was loaded after that read (emptied then) -- and nothing is held.
+    const long long total = servedBeforeRestarts + ipc->mapAssetsServedTotal();
+    tally.check("the test's own copy holds every getMapAsset answered", (long long)servedCopy.size() == total,
+                QString("%1 in the copy, %2 answered (%3 before the last player start)").arg(servedCopy.size()).arg(total)
+                  .arg(servedBeforeRestarts));
+    const long long keptNow = (long long)ipc->mapAssetsServed().size();
+    const long long keptAtMost = (long long)UnityIpcServer::MAP_ASSET_RECORDS_KEPT;
+    tally.check(QString("the server keeps the most recent %1 getMapAsset records at most, and counts the rest").arg(keptAtMost),
+                keptNow == std::min(ipc->mapAssetsServedTotal(), keptAtMost) &&
+                  keptNow + ipc->mapAssetRecordsDropped() == ipc->mapAssetsServedTotal() &&
+                  (ipc->mapAssetsServed().empty() || ipc->mapAssetsServed().back().requestId == servedCopy.back().requestId),
+                QString("%1 kept, %2 no longer kept, %3 since the player started").arg(keptNow)
+                  .arg(ipc->mapAssetRecordsDropped()).arg(ipc->mapAssetsServedTotal()));
+    {
+      int lastEpoch = 0;
+      for (const UnityIpcServer::MapAssetServed & s : servedCopy)
+        if (s.state == "available")
+          lastEpoch = s.epochNow;
+      const MapAssetReadTracker & reads = ipc->mapAssetReads();
+      std::set<int> files;   // served under the tracker's own epoch
+      for (const UnityIpcServer::MapAssetServed & s : servedCopy)
+        if (s.state == "available" && s.epochNow == reads.epoch())
+          files.insert(s.fileDataID);
+      int held = 0;
+      for (int id : files)
+        held += reads.holds(id) ? 1 : 0;
+      tally.check("the read tracker holds exactly the files served under its epoch, the last a file was read in or a later "
+                  "one (a client loaded since)",
+                  reads.size() <= reads.capacity() && reads.epoch() >= lastEpoch &&
+                    reads.epoch() <= UnityAssetAccess::clientEpoch() && reads.size() == files.size() &&
+                    held == (int)files.size(),
+                  QString("%1 file(s) of epoch %2; %3 distinct file(s) served under it, %4 of them held; the last read under "
+                          "epoch %5; the client's epoch %6")
+                    .arg(reads.size()).arg(reads.epoch()).arg(files.size()).arg(held).arg(lastEpoch)
+                    .arg(UnityAssetAccess::clientEpoch()));
+    }
+    tally.check("no getMapAsset is held at the end, and no hold is armed", ipc->mapAssetsHeld().empty() &&
+                  !ipc->testMapAssetHoldArmed(),
+                QString("%1 held, %2 dropped unanswered in the run").arg(ipc->mapAssetsHeld().size()).arg(ipc->mapAssetsHeldDropped()));
   }();
 
   // How long the GUI thread spent on each map file served (validation, read, hash, queueing). The first read of each
@@ -5942,7 +6682,7 @@ static int doHeadlessTerrainTileTest(ModelViewer * frame, int mapId, int tileX, 
   {
     std::vector<double> handler, read, firstRoot, firstWdt;
     size_t notServed = 0;
-    for (const UnityIpcServer::MapAssetServed & s : ipc->mapAssetsServed())
+    for (const UnityIpcServer::MapAssetServed & s : servedCopy)
     {
       if (s.state != "available")
         notServed++;   // refused, stale or not available: no file was served, so no serving time to summarise
@@ -5966,7 +6706,7 @@ static int doHeadlessTerrainTileTest(ModelViewer * frame, int mapId, int tileX, 
                         "handlerMs median %3 p95 %4 max %5, readMs median %6 p95 %7 max %8 (the first read of each file "
                         "apart: %9 root ADTs, handlerMs median %10 max %11; %12 WDTs, read whole by their loads' requests "
                         "just before, max %13)")
-                  .arg(ipc->mapAssetsServed().size() - notServed).arg(notServed).arg(ms(median)).arg(ms(p95)).arg(ms(max))
+                  .arg(servedCopy.size() - notServed).arg(notServed).arg(ms(median)).arg(ms(p95)).arg(ms(max))
                   .arg(ms(readMedian)).arg(ms(readP95)).arg(ms(readMax))
                   .arg(firstRoot.size()).arg(ms(rootMedian)).arg(ms(rootMax))
                   .arg(firstWdt.size()).arg(ms(wdtMax));
@@ -5975,10 +6715,15 @@ static int doHeadlessTerrainTileTest(ModelViewer * frame, int mapId, int tileX, 
   QJsonArray reportsJson, servedJsonArray;
   for (const UnityIpcServer::TerrainTileReport & r : reports)
     reportsJson.append(r.message);
-  if (ipc)
-    for (const UnityIpcServer::MapAssetServed & s : ipc->mapAssetsServed())
-      servedJsonArray.append(servedJson(s));
+  for (const UnityIpcServer::MapAssetServed & s : servedCopy)
+    servedJsonArray.append(servedJson(s));
   out["loads"] = loadsJson;
+  out["loadsOrphaned"] = [&loadsOrphaned]() {
+    QJsonArray a;
+    for (int load : loadsOrphaned)
+      a.append(load);
+    return a;
+  }();
   out["reports"] = reportsJson;
   out["served"] = servedJsonArray;
   out["samples"] = samplesJson;
@@ -5993,6 +6738,57 @@ static int doHeadlessTerrainTileTest(ModelViewer * frame, int mapId, int tileX, 
         QString::fromLatin1(QCryptographicHash::hash(bin.readAll(), QCryptographicHash::Sha256).toHex());
   }
   out["binaries"] = binaries;
+  {
+    // The player the run used, by its game code (the assembly the player's own build writes).
+    const QFileInfo exe(QString::fromWCharArray(UnityRendererHost::resolveUnityExePath().c_str()));
+    QFile assembly(exe.absolutePath() + "/" + exe.completeBaseName() + "_Data/Managed/Assembly-CSharp.dll");
+    QJsonObject player;
+    player["exe"] = exe.absoluteFilePath();
+    player["assemblyMd5"] = assembly.open(QIODevice::ReadOnly)
+                              ? QString::fromLatin1(QCryptographicHash::hash(assembly.readAll(), QCryptographicHash::Md5).toHex())
+                              : QString();
+    out["player"] = player;
+  }
+  if (ipc)
+  {
+    // The host's map-file bookkeeping at the end, and its private bytes over the run's samples.
+    QJsonObject records;
+    records["kept"] = (int)ipc->mapAssetsServed().size();
+    records["keptAtMost"] = UnityIpcServer::MAP_ASSET_RECORDS_KEPT;
+    records["total"] = (double)ipc->mapAssetsServedTotal();
+    records["dropped"] = (double)ipc->mapAssetRecordsDropped();
+    records["totalBeforeRestarts"] = (double)servedBeforeRestarts;
+    records["copy"] = (int)servedCopy.size();
+    out["mapAssetRecords"] = records;
+    QJsonObject reads;
+    reads["tracked"] = (int)ipc->mapAssetReads().size();
+    reads["capacity"] = (int)ipc->mapAssetReads().capacity();
+    reads["epoch"] = ipc->mapAssetReads().epoch();
+    reads["untracked"] = (double)ipc->mapAssetReads().untracked();
+    out["mapAssetReads"] = reads;
+    QJsonObject held;
+    held["held"] = (int)ipc->mapAssetsHeld().size();
+    held["droppedUnanswered"] = (double)ipc->mapAssetsHeldDropped();
+    out["mapAssetsHeld"] = held;
+  }
+  {
+    QJsonObject memory;
+    long long first = -1, last = -1, max = -1;
+    for (long long v : privateSeries)
+    {
+      if (v < 0)
+        continue;
+      if (first < 0)
+        first = v;
+      last = v;
+      max = std::max(max, v);
+    }
+    memory["samples"] = (int)privateSeries.size();
+    memory["firstPrivateBytes"] = (double)first;
+    memory["lastPrivateBytes"] = (double)last;
+    memory["maxPrivateBytes"] = (double)max;
+    out["hostMemory"] = memory;
+  }
   if (!outPath.isEmpty())
   {
     out["passed"] = tally.passed;
@@ -6015,6 +6811,8 @@ static int doHeadlessTerrainTileTest(ModelViewer * frame, int mapId, int tileX, 
   {
     ipc->onTerrainTileLoaded = previousTerrain;
     ipc->onRuntimeState = previousRuntime;
+    ipc->onMapAssetServed = previousServed;
+    ipc->testCancelMapAssetHold();
   }
   if (frame->unityRendererHost && frame->unityRendererHost->isRunning())
   {

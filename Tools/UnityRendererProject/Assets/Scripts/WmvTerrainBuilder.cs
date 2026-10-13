@@ -30,8 +30,9 @@
 // Debug switches (WmvTerrainDebug; command line or the space-separated WMV_DEBUG, as the other -wmv*
 // switches): -wmvTerrainView=shaded|chunks|wire|shadedwire|normals, -wmvTerrainChunk=N (only chunk N is
 // shown), -wmvTerrainFocus=N (frame chunk N), -wmvTerrainTopDown (orthographic top-down camera, design
-// 2.3b) and -wmvTerrainDump=<bare name> (the meshes read back into <player folder>/<name>.txt, the
-// TerrainDump format, for Tools/world-audit/compare_terrain_mesh.py).
+// 2.3b), -wmvTerrainDump=<bare name> (the meshes read back into <player folder>/<name>.txt, the
+// TerrainDump format, for Tools/world-audit/compare_terrain_mesh.py) and -wmvTerrainTimeoutMs=<n> (the load
+// timeout, 1000..120000 ms, 30000 by default: the host's end-to-end timeout tests).
 
 using System;
 using System.Collections.Generic;
@@ -67,6 +68,7 @@ public static class WmvTerrainDebug
     static int onlyChunk = -1, focus = -1;
     static bool topDown;
     static string dumpName;
+    static double timeoutMs = WmvTerrainSession.DefaultTimeoutMs;
     static readonly List<string> notes = new List<string>();
 
     public static WmvTerrainView View { get { Parse(); return view; } }
@@ -79,6 +81,10 @@ public static class WmvTerrainDebug
     public static bool TopDown { get { Parse(); return topDown; } }
     /// <summary>-wmvTerrainDump=name: a bare file name (no folder), or null when not asked for.</summary>
     public static string DumpName { get { Parse(); return dumpName; } }
+    /// <summary>-wmvTerrainTimeoutMs=n: the session's load timeout, clamped to WmvTerrainSession.MinTimeoutMs..MaxTimeoutMs;
+    /// WmvTerrainSession.DefaultTimeoutMs when not given. The timeout in effect is in the player's "[terrain] ready" line
+    /// and in runtimeState (terrainTimeoutMs); a value refused or clamped is one of the Notes.</summary>
+    public static double TimeoutMs { get { Parse(); return timeoutMs; } }
     /// <summary>What the parse refused (a bad value is said once in the log, never guessed at).</summary>
     public static IList<string> Notes { get { Parse(); return notes; } }
 
@@ -120,6 +126,21 @@ public static class WmvTerrainDebug
                     dumpName = v;
                 else
                     notes.Add("-wmvTerrainDump=" + v + " is not a bare file name -- no dump is written");
+            }
+            else if (a.StartsWith("-wmvTerrainTimeoutMs=", StringComparison.Ordinal))
+            {
+                string v = a.Substring("-wmvTerrainTimeoutMs=".Length);
+                int ms;
+                if (int.TryParse(v, System.Globalization.NumberStyles.Integer, System.Globalization.CultureInfo.InvariantCulture, out ms))
+                {
+                    timeoutMs = WmvTerrainSession.ClampTimeout(ms);
+                    if (timeoutMs != ms)
+                        notes.Add("-wmvTerrainTimeoutMs=" + v + " is outside " + WmvTerrainSession.MinTimeoutMs + ".." +
+                                  WmvTerrainSession.MaxTimeoutMs + " -- " + timeoutMs + " ms is used");
+                }
+                else
+                    notes.Add("-wmvTerrainTimeoutMs=" + v + " is not a whole number of milliseconds -- the default " +
+                              WmvTerrainSession.DefaultTimeoutMs + " ms is used");
             }
         }
     }

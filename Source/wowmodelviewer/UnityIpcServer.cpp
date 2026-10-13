@@ -15,7 +15,6 @@
 #include "UnityIpcServer.h"
 
 #include <cstring>
-#include <set>
 
 #include <QCryptographicHash>
 #include <QElapsedTimer>
@@ -43,13 +42,33 @@ namespace
   const int POLL_INTERVAL_MS = 20;
   const size_t RECV_CHUNK = 64 * 1024;
   const size_t MAX_LINE = 1024 * 1024;   // requests from the player are tiny; guard against junk
+}
 
-  // The files a getMapAsset of this process has read, as (client epoch, FileDataID) (MapAssetServed::first): the first
-  // read of each from a client's storage is measured apart from the rest. Keyed by the epoch too, because another
-  // client's file of the same id is other bytes in another storage. For a root ADT that is the read nothing in this
-  // process made before from that storage; a load's WDT never is one, RequestTerrainTile having read it whole
-  // (ResolveTerrainTile, catalog->inspect()) on this thread just before.
-  std::set<std::pair<int, int>> g_mapAssetsRead;
+// A root ADT's first read is the read nothing in this process made before from that client's storage: the cold-read
+// candidate. A WDT's is not cold, RequestTerrainTile having read it whole (ResolveTerrainTile, catalog->inspect()) on this
+// thread just before.
+MapAssetReadTracker::Read MapAssetReadTracker::note(int epoch, int fileDataID)
+{
+  if (epoch != m_epoch)
+  {
+    m_ids.clear();
+    m_epoch = epoch;
+  }
+  if (m_ids.count(fileDataID))
+    return Read::Again;
+  if (m_ids.size() >= m_capacity)
+  {
+    m_untracked++;
+    return Read::Untracked;
+  }
+  m_ids.insert(fileDataID);
+  return Read::First;
+}
+
+void MapAssetReadTracker::reset(int epoch)
+{
+  m_ids.clear();
+  m_epoch = epoch;
 }
 
 UnityIpcServer::UnityIpcServer()
@@ -135,6 +154,9 @@ bool UnityIpcServer::start()
   m_sentImageIds.clear();
   m_stats = Stats();
   m_mapAssetsServed.clear();
+  m_mapAssetsServedTotal = 0;
+  m_mapAssetRecordsDropped = 0;
+  dropHeldMapAssets("the server started");
   m_timer.Start(POLL_INTERVAL_MS);
   LOG_INFO << "[unityipc] listening on 127.0.0.1:" << m_port << "(protocol v" << PROTOCOL_VERSION << ")";
   return true;
@@ -162,6 +184,7 @@ void UnityIpcServer::stop()
   m_inBuf.clear();
   m_outBuf.clear();
   m_outPos = 0;
+  dropHeldMapAssets("the server stopped");
 }
 
 void UnityIpcServer::onPoll(wxTimerEvent & WXUNUSED(event))
@@ -214,6 +237,7 @@ void UnityIpcServer::pollAccept()
   m_inBuf.clear();
   m_outBuf.clear();
   m_outPos = 0;
+  dropHeldMapAssets("a new connection");
   m_stats.connections++;
   LOG_INFO << "[unityipc] Unity connected (connection #" << m_stats.connections << ")";
 }
@@ -232,6 +256,7 @@ void UnityIpcServer::dropClient(const char * why)
   m_inBuf.clear();
   m_outBuf.clear();
   m_outPos = 0;
+  dropHeldMapAssets(why);
 }
 
 void UnityIpcServer::pollReceive()
@@ -602,7 +627,12 @@ QString UnityIpcServer::RuntimeState::describe() const
            .arg(liveTerrainTiles).arg(terrainLoad).arg(terrainLoading).arg(terrainView)
            .arg(hasCameraMask ? QString::number(cameraMask) : QString("-")).arg(meshObjects).arg(materialObjects) +
          QString(" terrainMeshes=%1 terrainMaterials=%2 terrainGameObjects=%3")
-           .arg(terrainMeshes).arg(terrainMaterials).arg(terrainGameObjects);
+           .arg(terrainMeshes).arg(terrainMaterials).arg(terrainGameObjects) +
+         QString(" terrainPendingRequests=%1 terrainRetiredRequests=%2 mapAnswersRouted=%3 mapAnswersDropped=%4"
+                 " terrainTimeoutMs=%5 terrainRetiredTotal=%6 mapAnswersLate=%7 mapAnswersUnowned=%8")
+           .arg(terrainPendingRequests).arg(terrainRetiredRequests).arg(mapAnswersRouted).arg(mapAnswersDropped)
+           .arg(terrainTimeoutMs).arg(terrainRetiredTotal).arg(mapAnswersLate).arg(mapAnswersUnowned) +
+         " terrainLastRetiredRequest=" + (hasTerrainLastRetiredRequest ? "\"" + terrainLastRetiredRequest + "\"" : QString("-"));
 }
 
 int UnityIpcServer::requestRuntimeState()
@@ -670,6 +700,17 @@ void UnityIpcServer::handleRuntimeState(const QJsonObject & msg)
   s.terrainMeshes = count("terrainMeshes");
   s.terrainMaterials = count("terrainMaterials");
   s.terrainGameObjects = count("terrainGameObjects");
+  s.terrainPendingRequests = count("terrainPendingRequests");
+  s.terrainRetiredRequests = count("terrainRetiredRequests");
+  s.mapAnswersRouted = count("mapAnswersRouted");
+  s.mapAnswersDropped = count("mapAnswersDropped");
+  s.terrainTimeoutMs = count("terrainTimeoutMs");
+  s.terrainRetiredTotal = count("terrainRetiredTotal");
+  s.mapAnswersLate = count("mapAnswersLate");
+  s.mapAnswersUnowned = count("mapAnswersUnowned");
+  // A text: "" (no request retired yet) is sent, not absent.
+  s.hasTerrainLastRetiredRequest = msg.contains(QLatin1String("terrainLastRetiredRequest"));
+  s.terrainLastRetiredRequest = msg.value(QLatin1String("terrainLastRetiredRequest")).toString();
   LOG_INFO << "[unityipc] <- runtimeState" << s.describe();
   if (onRuntimeState)
     onRuntimeState(s);
@@ -1334,14 +1375,83 @@ QString UnityIpcServer::MapAssetServed::describe() const
          QString(" load=%1 epoch=%2 (now %3) role=%4 fileDataID=%5 -> state=%6 bytes=%7 md5=%8 readMs=%9")
            .arg(load).arg(assetEpoch).arg(epochNow).arg(role).arg(fileDataID).arg(state).arg(bytes)
            .arg(md5.isEmpty() ? QString("-") : md5).arg(readMs < 0.0 ? QString("-") : QString::number(readMs, 'f', 3)) +
-         QString(" handlerMs=%1 first=%2").arg(handlerMs, 0, 'f', 3).arg(first ? "yes" : "no") +
+         QString(" handlerMs=%1 first=%2").arg(handlerMs, 0, 'f', 3).arg(!firstTracked ? "untracked" : first ? "yes" : "no") +
          (detail.isEmpty() ? QString() : " detail=\"" + detail + "\"");
 }
 
-// One map file for the terrain load being built (TERRAIN above): the viewer decides and reads (onGetMapAsset); the
-// answer goes back as any asset does, as a binary frame, with what the decision said. Timed from here to the answer
-// queued (and, with room in the socket's buffer, sent): all of it is GUI-thread time.
+void UnityIpcServer::recordMapAssetServed(const MapAssetServed & served)
+{
+  m_mapAssetsServedTotal++;
+  m_mapAssetsServed.push_back(served);
+  while (m_mapAssetsServed.size() > (size_t)MAP_ASSET_RECORDS_KEPT)
+  {
+    m_mapAssetsServed.pop_front();
+    m_mapAssetRecordsDropped++;
+  }
+  if (onMapAssetServed)
+    onMapAssetServed(served);
+}
+
+void UnityIpcServer::testHoldNextMapAsset(const QString & role)
+{
+  m_holdNextMapAsset = true;
+  m_holdMapAssetRole = role;
+  LOG_INFO << "[unityipc] test: the next getMapAsset" << (role.isEmpty() ? QString("of any role") : "of role " + role)
+           << "is held unanswered";
+}
+
+void UnityIpcServer::testCancelMapAssetHold()
+{
+  m_holdNextMapAsset = false;
+  m_holdMapAssetRole.clear();
+}
+
+int UnityIpcServer::testReleaseHeldMapAssets()
+{
+  std::vector<QJsonObject> held;
+  held.swap(m_mapAssetsHeld);
+  for (const QJsonObject & msg : held)
+  {
+    LOG_INFO << "[unityipc] test: getMapAsset" << msg.value("requestId").toString() << "released";
+    answerMapAsset(msg);
+  }
+  return (int)held.size();
+}
+
+void UnityIpcServer::dropHeldMapAssets(const char * why)
+{
+  m_holdNextMapAsset = false;
+  m_holdMapAssetRole.clear();
+  if (m_mapAssetsHeld.empty())
+    return;
+  for (const QJsonObject & msg : m_mapAssetsHeld)
+    LOG_INFO << "[unityipc] test: held getMapAsset" << msg.value("requestId").toString() << "load"
+             << msg.value("load").toInt(0) << "dropped unanswered (" << why << ")";
+  m_mapAssetsHeldDropped += (long long)m_mapAssetsHeld.size();
+  m_mapAssetsHeld.clear();
+}
+
+// One map file for the terrain load being built (TERRAIN above), answered at once -- unless the test hook holds it.
 void UnityIpcServer::handleGetMapAsset(const QJsonObject & msg)
+{
+  m_stats.mapAssetRequests++;
+  const QString role = msg.value("role").toString();
+  if (m_holdNextMapAsset && (m_holdMapAssetRole.isEmpty() || m_holdMapAssetRole == role) &&
+      m_mapAssetsHeld.size() < (size_t)MAP_ASSETS_HELD_MAX)
+  {
+    m_holdNextMapAsset = false;
+    m_mapAssetsHeld.push_back(msg);
+    LOG_INFO << "[unityipc] test: getMapAsset" << msg.value("requestId").toString() << "role" << role << "load"
+             << msg.value("load").toInt(0) << "held unanswered (" << (int)m_mapAssetsHeld.size() << "held)";
+    return;
+  }
+  answerMapAsset(msg);
+}
+
+// The viewer decides and reads (onGetMapAsset); the answer goes back as any asset does, as a binary frame, with what the
+// decision said. Timed from here to the answer queued (and, with room in the socket's buffer, sent): all of it is
+// GUI-thread time.
+void UnityIpcServer::answerMapAsset(const QJsonObject & msg)
 {
   QElapsedTimer handler;
   handler.start();
@@ -1352,7 +1462,6 @@ void UnityIpcServer::handleGetMapAsset(const QJsonObject & msg)
   served.epochNow = UnityAssetAccess::clientEpoch();
   served.role = msg.value("role").toString();
   served.fileDataID = msg.value("fileDataID").toInt(0);
-  m_stats.mapAssetRequests++;
 
   MapAssetAnswer answer;
   if (onGetMapAsset)
@@ -1364,8 +1473,13 @@ void UnityIpcServer::handleGetMapAsset(const QJsonObject & msg)
   }
   // Only a file served counts as the file's first read: a refused or stale request reads nothing, and an answer that
   // the file is not in the storage, not installed or unreadable serves nothing (its lookup is not a read to time).
-  served.first = answer.state == "available" && g_mapAssetsRead.insert(std::make_pair(served.epochNow, served.fileDataID)).second;
   const bool ok = answer.state == "available";
+  if (ok)
+  {
+    const MapAssetReadTracker::Read read = m_mapAssetReads.note(served.epochNow, served.fileDataID);
+    served.first = read == MapAssetReadTracker::Read::First;
+    served.firstTracked = read != MapAssetReadTracker::Read::Untracked;
+  }
 
   // As every assetResponse, plus what the request named and what the host decided. Never cacheable: the player's
   // asset cache keeps the files of its model loads, and a map file is fetched for one terrain load.
@@ -1411,11 +1525,11 @@ void UnityIpcServer::handleGetMapAsset(const QJsonObject & msg)
   served.detail = answer.detail;
   served.readMs = answer.readMs;
   served.handlerMs = handler.nsecsElapsed() / 1e6;
-  m_mapAssetsServed.push_back(served);
   if (ok)
     LOG_INFO << "[unityipc] <- getMapAsset" << served.describe();
   else
     LOG_WARNING << "[unityipc] <- getMapAsset" << served.describe();
+  recordMapAssetServed(served);
 }
 
 QString UnityIpcServer::TerrainTileReport::describe() const

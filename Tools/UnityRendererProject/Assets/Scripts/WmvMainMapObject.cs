@@ -771,7 +771,13 @@ public partial class WmvMain
                                 "object(s); the terrain tiles hold {7} Mesh(es), {8} Material(s), {9} GameObject(s)", r.LiveTerrainTiles,
                                 r.TerrainLoad, r.TerrainLoading ? ", a load in flight" : "", r.TerrainView ? "terrain" : "model",
                                 r.CameraMask, r.MeshObjects, r.MaterialObjects, r.TerrainMeshes, r.TerrainMaterials,
-                                r.TerrainGameObjects));
+                                r.TerrainGameObjects) +
+                  string.Format("; terrain requests: {0} pending, {1} retired ({2} in all, last {3}); map answers: {4} routed, {5} dropped " +
+                                "({6} late, {7} unowned), {8} dropped on the model asset path; load timeout {9} ms",
+                                r.TerrainPendingRequests, r.TerrainRetiredRequests, r.TerrainRetiredTotal,
+                                string.IsNullOrEmpty(r.TerrainLastRetiredRequest) ? "none" : r.TerrainLastRetiredRequest,
+                                ipc.MapAnswersRouted, r.MapAnswersDropped, r.MapAnswersLate, r.MapAnswersUnowned,
+                                MapAnswersDroppedOnAssetPath, r.TerrainTimeoutMs));
         ipc.ReportRuntimeState(query, r);
     }
 }

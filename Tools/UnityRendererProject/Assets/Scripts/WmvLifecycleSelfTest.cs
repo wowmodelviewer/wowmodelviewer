@@ -2597,6 +2597,7 @@ public static class WmvLifecycleSelfTest
         StreamReaderTests(log);
         TerrainTests(log);
         TerrainHiddenModelTests(log);
+        TerrainLateAnswerMainTests(log);
         log(string.Format("lifecycle-test: {0} passed, {1} failed", passed, failed));
     }
 
@@ -4158,8 +4159,9 @@ public static class WmvLifecycleSelfTest
     /// runtime, the Unity objects with the production layer and masks in a coverage render, holes as background in a
     /// coverage render, the edge pass's depth nudge from below (a flat tile) and from above (a wall), the session's whole
     /// load lifecycle against fake host answers (exactly one report per load, the exact reasons, the tiles' tallies,
-    /// nothing left behind), the camera's round trip through the terrain view, and the protocol-12 lines as the IPC client
-    /// reads and writes them. Every Unity object is released with DestroyImmediate, so the Mesh and Material counts can
+    /// nothing left behind), its request lifetime (one request pending at most, a bounded ring of ended loads' requests,
+    /// late answers dropped, nothing growing over 1200 failing loads), the camera's round trip through the terrain view,
+    /// and the protocol-12 lines as the IPC client reads, writes and routes them (map answers to the terrain session only). Every Unity object is released with DestroyImmediate, so the Mesh and Material counts can
     /// be compared within this frame. (TerrainHiddenModelTests, run after these, goes through the player's own deferred
     /// disposal.)
     /// </summary>
@@ -4174,8 +4176,10 @@ public static class WmvLifecycleSelfTest
         TerrainEdgeTests(log);
         TerrainEdgeOccluderTests(log);
         TerrainSessionTests(log);
+        TerrainRequestLifetimeTests(log);
         TerrainCameraTests(log);
         TerrainIpcTests(log);
+        TerrainMapRoutingTests(log);
         int meshesAfter = Resources.FindObjectsOfTypeAll<Mesh>().Length;
         int materialsAfter = Resources.FindObjectsOfTypeAll<Material>().Length;
         Check(WmvRuntimeTerrainTile.Live == liveBefore && meshesAfter == meshesBefore && materialsAfter == materialsBefore,
@@ -4862,14 +4866,14 @@ public static class WmvLifecycleSelfTest
         public double Now = 1000.0;
         int next;
 
-        public TerrainHarness()
+        public TerrainHarness(double timeoutMs = WmvTerrainSession.DefaultTimeoutMs)
         {
             Session = new WmvTerrainSession(View, (role, id, load, epoch) =>
             {
                 string r = "t" + (++next);
                 Sent.Add(new[] { r, role, id.ToString(), load.ToString(), epoch.ToString() });
                 return r;
-            }, r => Reports.Add(r), null, a => a());
+            }, r => Reports.Add(r), null, a => a(), timeoutMs);
         }
 
         public string Last(string role)
@@ -4893,16 +4897,17 @@ public static class WmvLifecycleSelfTest
         }
 
         /// <summary>The host's answer to request `id`: ok with the bytes ("available", their md5 unless one is given), or
-        /// refused with a state and detail.</summary>
-        public bool Answer(string id, byte[] data, string state = "available", string detail = "", string md5 = null)
+        /// refused with a state and detail. True when the session applied it (false: dropped as late or unowned).
+        /// loadOverride (when > 0) is the load the answer names instead of the request's.</summary>
+        public bool Answer(string id, byte[] data, string state = "available", string detail = "", string md5 = null, int loadOverride = 0)
         {
             string[] req = null;
             foreach (string[] s in Sent) if (s[0] == id) req = s;
             bool ok = state == "available";
-            return Session.ClaimAssetResponse(new WmvIpcClient.AssetResponse
+            return Session.ClaimMapAssetResponse(new WmvIpcClient.AssetResponse
             {
                 requestId = id, ok = ok, fileDataID = req != null ? int.Parse(req[2]) : 0, role = req != null ? req[1] : "",
-                load = req != null ? int.Parse(req[3]) : 0, assetEpoch = req != null ? int.Parse(req[4]) : 0, state = state,
+                load = loadOverride > 0 ? loadOverride : req != null ? int.Parse(req[3]) : 0, assetEpoch = req != null ? int.Parse(req[4]) : 0, state = state,
                 detail = detail, readMs = 0.5, md5 = ok ? (md5 ?? WmvTerrainSession.Md5Hex(data)) : "", data = ok ? data : null,
                 byteLength = ok ? data.Length : 0, error = ok ? "" : detail, path = "",
             });
@@ -5184,7 +5189,7 @@ public static class WmvLifecycleSelfTest
         }, "answer of " + root.Length + " bytes exceeds maxAssetBytes " + wdt.Length + " (root ADT, FileDataID " + TerrainTestRoot + ")");
         // Answers the fake host never makes, fed to the session as the client would hand them over.
         Func<TerrainHarness, int, bool, int, byte[], string, string, bool> raw = (x, rawLoad, ok, fileDataID, data, state, error) =>
-            x.Session.ClaimAssetResponse(new WmvIpcClient.AssetResponse
+            x.Session.ClaimMapAssetResponse(new WmvIpcClient.AssetResponse
             {
                 requestId = x.Last(WmvTerrainSession.RoleWdt), ok = ok, fileDataID = fileDataID, role = WmvTerrainSession.RoleWdt,
                 load = rawLoad, assetEpoch = 7, state = state, detail = "", readMs = 0.5,
@@ -5241,15 +5246,16 @@ public static class WmvLifecycleSelfTest
             bool notYet = ht.Reports.Count == 0;
             ht.Session.Pump(35000.5);
             WmvIpcClient.TerrainTileReport r = ht.For(40);
-            bool claimed = ht.Answer(ht.Last(WmvTerrainSession.RoleWdt), wdt);
+            bool applied = ht.Answer(ht.Last(WmvTerrainSession.RoleWdt), wdt);
             ht.Pump(3);
-            Check(notYet && ht.CountFor(40) == 1 && r.Status == "failed" && r.Reason == waited && claimed && ht.CountFor(40) == 1 &&
-                  clean(),
+            Check(notYet && ht.CountFor(40) == 1 && r.Status == "failed" && r.Reason == waited && !applied && ht.Session.LateAnswersDropped == 1 &&
+                  ht.CountFor(40) == 1 && clean(),
                   "terrain session: a load not answered within 30 s fails once, reason exactly \"" + waited + "\" (" +
-                  (r != null ? r.Reason : "no report") + "); its late answer is claimed and dropped", log);
+                  (r != null ? r.Reason : "no report") + "); its late answer is dropped as late", log);
             loads.Add(new KeyValuePair<TerrainHarness, int>(ht, 40));
-            Check(!ht.Session.ClaimAssetResponse(new WmvIpcClient.AssetResponse { requestId = "u999", ok = true, data = new byte[1] }),
-                  "terrain session: an answer to a request that is not the session's is left to the others", log);
+            Check(!ht.Session.ClaimMapAssetResponse(new WmvIpcClient.AssetResponse { requestId = "u999", ok = true, data = new byte[1] }) &&
+                  ht.Session.UnownedAnswersDropped == 1 && ht.CountFor(40) == 1,
+                  "terrain session: an answer to a request no load of the session made is dropped as unowned", log);
         }
 
         // ---- supersede: a newer load answers the one in flight "superseded" once -- asking, on the worker, or adopted
@@ -5260,7 +5266,7 @@ public static class WmvLifecycleSelfTest
             string firstAsk = hp.Last(WmvTerrainSession.RoleWdt);
             hp.Session.Load(TerrainCommand(51, tx, ty));
             WmvIpcClient.TerrainTileReport r50 = hp.For(50);
-            bool late = hp.Answer(firstAsk, wdt);
+            bool late = !hp.Answer(firstAsk, wdt) && hp.Session.LateAnswersDropped == 1;
             hp.Answer(hp.Last(WmvTerrainSession.RoleWdt), wdt);
             hp.Answer(hp.Last(WmvTerrainSession.RoleRootAdt), root);
             // 52 superseded with its worker result queued: the result is dropped when the frame applies it.
@@ -5301,7 +5307,7 @@ public static class WmvLifecycleSelfTest
             hc.Session.Load(TerrainCommand(60, tx, ty));
             hc.Answer(hc.Last(WmvTerrainSession.RoleWdt), wdt);
             hc.Session.Clear("test");
-            bool lateRoot = hc.Answer(hc.Last(WmvTerrainSession.RoleRootAdt), root);
+            bool lateRoot = !hc.Answer(hc.Last(WmvTerrainSession.RoleRootAdt), root) && hc.Session.LateAnswersDropped == 1;
             hc.Pump(3);
             WmvIpcClient.TerrainTileReport r60 = hc.For(60);
             hc.Session.Load(TerrainCommand(61, tx, ty));
@@ -5464,10 +5470,12 @@ public static class WmvLifecycleSelfTest
             var ipc = go.AddComponent<WmvIpcClient>();
             var sent = new List<string>();
             var answers = new List<WmvIpcClient.AssetResponse>();
+            var modelAnswers = new List<WmvIpcClient.AssetResponse>();
             WmvIpcClient.TerrainTileCommand got = null;
             string cleared = null;
             ipc.SentForTest = s => sent.Add(s);
-            ipc.OnAssetResponse = r => answers.Add(r);
+            ipc.OnMapAssetResponse = r => answers.Add(r);
+            ipc.OnAssetResponse = r => modelAnswers.Add(r);
             ipc.OnLoadTerrainTile = c => got = c;
             ipc.OnClearTerrain = r => cleared = r;
             Check(WmvIpcClient.ProtocolVersion == 12, "terrain ipc: the player speaks protocol 12", log);
@@ -5495,15 +5503,19 @@ public static class WmvLifecycleSelfTest
                                 "\"encoding\":\"binary\",\"payloadBytes\":5}", payload);
             WmvIpcClient.AssetResponse a = answers.Count > 0 ? answers[0] : null;
             Check(a != null && a.ok && a.requestId == id && a.data == payload && a.state == "available" && a.readMs == 1.25 && a.md5 == md5 &&
-                  a.role == "wdt" && a.load == 3 && a.assetEpoch == 5 && a.fileDataID == 775971 && !a.fromCache && !ipc.Cache.Holds(775971),
-                  "terrain ipc: the map file's answer carries its bytes, state, readMs, md5, role, load and epoch, and is never cached", log);
+                  a.role == "wdt" && a.load == 3 && a.assetEpoch == 5 && a.fileDataID == 775971 && !a.fromCache && !ipc.Cache.Holds(775971) &&
+                  modelAnswers.Count == 0 && id.StartsWith("map", StringComparison.Ordinal),
+                  "terrain ipc: the map file's answer (request " + id + ") carries its bytes, state, readMs, md5, role, load and epoch, comes " +
+                  "through OnMapAssetResponse only, and is never cached", log);
             ipc.FeedLineForTest("{\"type\":\"assetResponse\",\"requestId\":\"u77\",\"ok\":false,\"fileDataID\":787450,\"role\":\"rootAdt\",\"load\":3," +
                                 "\"assetEpoch\":5,\"state\":\"not installed locally\",\"detail\":\"listed, not on this computer\",\"readMs\":0.5," +
                                 "\"error\":\"listed, not on this computer\"}", null);
             WmvIpcClient.AssetResponse refused = answers.Count > 1 ? answers[1] : null;
             Check(refused != null && !refused.ok && refused.data == null && refused.state == "not installed locally" &&
-                  refused.detail == "listed, not on this computer" && refused.error == "listed, not on this computer" && refused.readMs == 0.5,
-                  "terrain ipc: a refused map file's answer carries the state, the detail and error", log);
+                  refused.detail == "listed, not on this computer" && refused.error == "listed, not on this computer" && refused.readMs == 0.5 &&
+                  modelAnswers.Count == 0,
+                  "terrain ipc: a refused map file's answer carries the state, the detail and error (and, carrying a role, goes to the map " +
+                  "handler although its id is not a map id)", log);
 
             var report = new WmvIpcClient.TerrainTileReport
             {
@@ -5538,19 +5550,33 @@ public static class WmvLifecycleSelfTest
                 MountKey = "", LiveTerrainTiles = 1, TerrainLoad = 3, TerrainLoading = false, TerrainView = true,
                 CameraMask = WmvTerrainBuilder.TerrainViewMask, MeshObjects = 300, MaterialObjects = 40,
                 TerrainMeshes = 256, TerrainMaterials = 1, TerrainGameObjects = 257,
+                TerrainPendingRequests = 1, TerrainRetiredRequests = 3, MapAnswersDropped = 4, TerrainTimeoutMs = 3000,
+                TerrainRetiredTotal = 37, TerrainLastRetiredRequest = "map41", MapAnswersLate = 3, MapAnswersUnowned = 1,
             });
-            Check(sent.Count == 1 && sent[0].Contains(",\"liveTerrainTiles\":1,\"terrainLoad\":3,\"terrainLoading\":false,\"terrainView\":true," +
-                                                      "\"cameraMask\":1073741824,\"meshObjects\":300,\"materialObjects\":40," +
-                                                      "\"terrainMeshes\":256,\"terrainMaterials\":1,\"terrainGameObjects\":257}"),
+            string stateLine = sent.Count == 1 ? sent[0] : "";
+            sent.Clear();
+            ipc.ReportRuntimeState(10, new WmvIpcClient.RuntimeReport { MountKey = "" });
+            string noneLine = sent.Count == 1 ? sent[0] : "";
+            Check(stateLine.Contains(",\"liveTerrainTiles\":1,\"terrainLoad\":3,\"terrainLoading\":false,\"terrainView\":true," +
+                                     "\"cameraMask\":1073741824,\"meshObjects\":300,\"materialObjects\":40," +
+                                     "\"terrainMeshes\":256,\"terrainMaterials\":1,\"terrainGameObjects\":257," +
+                                     "\"terrainPendingRequests\":1,\"terrainRetiredRequests\":3,\"terrainRetiredTotal\":37," +
+                                     "\"terrainLastRetiredRequest\":\"map41\",\"mapAnswersRouted\":" + ipc.MapAnswersRouted +
+                                     ",\"mapAnswersDropped\":4,\"mapAnswersLate\":3,\"mapAnswersUnowned\":1,\"terrainTimeoutMs\":3000}") &&
+                  ipc.MapAnswersRouted == 2 && noneLine.Contains(",\"terrainLastRetiredRequest\":\"\",") &&
+                  JsonUtility.FromJson<RuntimeStateProbe>(stateLine).terrainLastRetiredRequest == "map41" &&
+                  JsonUtility.FromJson<RuntimeStateProbe>(stateLine).terrainRetiredTotal == 37,
                   "terrain ipc: runtimeState carries the terrain fields under the host's names (terrainMeshes, terrainMaterials, " +
-                  "terrainGameObjects included), the flags as JSON booleans (" +
-                  (sent.Count > 0 ? sent[0].Substring(Math.Max(0, sent[0].Length - 200)) : "nothing sent") + ")", log);
+                  "terrainGameObjects, terrainPendingRequests, terrainRetiredRequests, terrainRetiredTotal, terrainLastRetiredRequest " +
+                  "-- a JSON string, \"\" for none --, mapAnswersRouted, mapAnswersDropped, mapAnswersLate, mapAnswersUnowned and " +
+                  "terrainTimeoutMs included), the flags as JSON booleans (" +
+                  (stateLine.Length > 0 ? stateLine.Substring(Math.Max(0, stateLine.Length - 260)) : "nothing sent") + ")", log);
 
             // One load end to end through the client: the getMapAsset lines it sends, the answers as host lines, the report it sends.
             sent.Clear();
             var view = new TestTerrainView();
             var session = new WmvTerrainSession(view, ipc.RequestMapAsset, ipc.ReportTerrainTileLoaded, null, x => x());
-            ipc.OnAssetResponse = r => { if (!session.ClaimAssetResponse(r)) answers.Add(r); };
+            ipc.OnMapAssetResponse = r => { if (!session.ClaimMapAssetResponse(r)) answers.Add(r); };
             int tx = TerrainTestTileX, ty = TerrainTestTileY;
             byte[] wdt = TerrainWdt(true, tx, ty, (int)TerrainTestRoot);
             byte[] root = AdtSynthetic.FlatRoot(tx, ty);
@@ -5567,7 +5593,8 @@ public static class WmvLifecycleSelfTest
             Check(wdtLine.Contains("\"role\":\"wdt\",\"fileDataID\":775971") && wdtLine.Contains("\"load\":4,\"assetEpoch\":7") &&
                   rootLine.Contains("\"role\":\"rootAdt\",\"fileDataID\":778037") && reportLine.StartsWith("{\"type\":\"terrainTileLoaded\",\"load\":4,\"status\":\"built\"") &&
                   reportLine.Contains("\"chunks\":256") && reportLine.Contains("\"rootMd5\":\"" + WmvTerrainSession.Md5Hex(root) + "\"") &&
-                  answers.Count == 2 && sent.Count == 3,
+                  answers.Count == 2 && sent.Count == 3 && modelAnswers.Count == 0 && session.PendingRequests == 0 && session.RetiredRequests == 0 &&
+                  session.AnswersDropped == 0,
                   "terrain ipc: a load end to end through the client's own lines -- getMapAsset wdt, then rootAdt, then terrainTileLoaded built (" +
                   (reportLine.Length > 120 ? reportLine.Substring(0, 120) + "..." : reportLine) + ")", log);
             session.Clear("test");
@@ -5579,6 +5606,907 @@ public static class WmvLifecycleSelfTest
         {
             UnityEngine.Object.DestroyImmediate(go);
         }
+    }
+
+    /// <summary>
+    /// The terrain session's request lifetime (stage 03 follow-up). The load in flight waits for ONE request; when the
+    /// load ends by any path -- built, failed (the timeout included), superseded, cleared, a model load, shutdown -- that
+    /// request goes to the retired ring (RetiredCapacity), and an answer that comes afterwards is dropped as late: never
+    /// applied (no further request goes out, nothing is built), never a second report. An answer naming the request
+    /// waited for but another load is dropped and the request still waits. Whatever the host does, the bookkeeping stays
+    /// bounded and accounted for: through 1200 loads whose answers never come, come refused or come late, every load is
+    /// reported exactly once, every load that ends with its request unanswered retires exactly that request (RetiredTotal
+    /// one higher, the ring naming that load), every request sent is an answer applied, a retirement or the one pending,
+    /// at most 32 are retired, and no collection of the session or of the load in flight grows.
+    /// </summary>
+    static void TerrainRequestLifetimeTests(Action<string> log)
+    {
+        int tx = TerrainTestTileX, ty = TerrainTestTileY;
+        byte[] wdt = TerrainWdt(true, tx, ty, (int)TerrainTestRoot);
+        byte[] root = AdtSynthetic.FlatRoot(tx, ty);
+        int live0 = WmvRuntimeTerrainTile.Live;
+        string rw = WmvTerrainSession.RoleWdt, rr = WmvTerrainSession.RoleRootAdt;
+        var harnesses = new List<TerrainHarness>();
+        Func<TerrainHarness, string> state = x => string.Format("pending {0}, retired {1} ({2} in all, last \"{3}\"), late {4}, unowned {5}, " +
+            "reports {6}, requests sent {7}", x.Session.PendingRequests, x.Session.RetiredRequests, x.Session.RetiredTotal,
+            x.Session.LastRetiredRequest, x.Session.LateAnswersDropped, x.Session.UnownedAnswersDropped, x.Reports.Count, x.Sent.Count);
+
+        // The collection count SessionCollections relies on: every kind of collection, a string none.
+        int nHash, nReadOnly, nEnumerable, nQueue, nString;
+        bool countedHash = TryCountCollection(new HashSet<string> { "a", "b", "c" }, out nHash);
+        bool countedReadOnly = TryCountCollection(new CountOnlyCollection(), out nReadOnly);
+        bool countedEnumerable = TryCountCollection(Yield(4), out nEnumerable);
+        bool countedQueue = TryCountCollection(new Queue<int>(new[] { 1 }), out nQueue);
+        bool counted = countedHash && countedReadOnly && countedEnumerable && countedQueue && !TryCountCollection("text", out nString);
+        Check(counted && nHash == 3 && nReadOnly == 2 && nEnumerable == 4 && nQueue == 1,
+              "terrain requests: a collection is counted whatever it implements -- a HashSet<string> (generic ICollection<T> only) " + nHash +
+              ", an IReadOnlyCollection<T> alone by its Count " + nReadOnly + ", a bare IEnumerable by enumerating it " + nEnumerable +
+              ", a Queue " + nQueue + "; a string is not one", log);
+        int largestStart;
+        string collections = SessionCollections(new TerrainHarness().Session, out largestStart);
+        Check(typeof(WmvTerrainSession).GetField("requests", BindingFlags.Instance | BindingFlags.NonPublic) == null &&
+              WmvTerrainSession.RetiredCapacity == 32 && largestStart == 0,
+              "terrain requests: the session keeps no table of its requests -- its collections are " + collections, log);
+        var clampLow = new TerrainHarness(500.0);
+        var clampHigh = new TerrainHarness(500000.0);
+        var clampNaN = new TerrainHarness(double.NaN);
+        Check(clampLow.Session.TimeoutMs == 1000.0 && clampHigh.Session.TimeoutMs == 120000.0 && clampNaN.Session.TimeoutMs == 30000.0 &&
+              new TerrainHarness().Session.TimeoutMs == 30000.0,
+              "terrain requests: the timeout defaults to 30000 ms and is kept within 1000..120000 ms (" + clampLow.Session.TimeoutMs + ", " +
+              clampHigh.Session.TimeoutMs + ", " + clampNaN.Session.TimeoutMs + ")", log);
+
+        // ---- successful WDT and root answers: one pending at a time, built once, nothing retired or dropped
+        {
+            var h = new TerrainHarness();
+            harnesses.Add(h);
+            h.Session.Load(TerrainCommand(201, tx, ty));
+            int p1 = h.Session.PendingRequests;
+            bool wdtApplied = h.Answer(h.Last(rw), wdt);
+            int p2 = h.Session.PendingRequests;
+            bool rootApplied = h.Answer(h.Last(rr), root);
+            int p3 = h.Session.PendingRequests;
+            h.Pump(3);
+            WmvIpcClient.TerrainTileReport r = h.For(201);
+            Check(p1 == 1 && wdtApplied && p2 == 1 && rootApplied && p3 == 0 && r != null && r.Status == "built" && h.CountFor(201) == 1 &&
+                  h.Session.RetiredRequests == 0 && h.Session.AnswersDropped == 0 && h.Session.ShownLoad == 201,
+                  "terrain requests: the WDT and root answers are applied (pending " + p1 + " -> " + p2 + " -> " + p3 + "), the tile built and " +
+                  "reported once -- " + state(h), log);
+            h.Session.Clear("test");
+        }
+
+        // ---- an answer that never arrives: pending while in flight; the injected 2 s timeout fails the load once and
+        // retires its request; the answer that comes after it is dropped as late
+        {
+            var h = new TerrainHarness(2000.0);
+            harnesses.Add(h);
+            h.Session.Load(TerrainCommand(202, tx, ty));
+            string id = h.Last(rw);
+            h.Session.Pump(100.0);
+            h.Session.Pump(2100.0);
+            bool waiting = h.Reports.Count == 0 && h.Session.PendingRequests == 1 && h.Session.RetiredRequests == 0 && h.Session.Loading &&
+                           h.Session.RetiredTotal == 0 && h.Session.LastRetiredRequest == "";
+            h.Session.Pump(2100.5);
+            WmvIpcClient.TerrainTileReport r = h.For(202);
+            string want = "timed out after 2 s waiting for the WDT answer (request " + id + ")";
+            WmvTerrainSession.RetiredRequest ended;
+            bool inRing = h.Session.TryGetRetired(id, out ended) && ended.Load == 202 && ended.Role == rw && ended.Ended == "failed";
+            Check(h.Session.TimeoutMs == 2000.0 && waiting && r != null && r.Status == "failed" && r.Reason == want && h.CountFor(202) == 1 &&
+                  h.Session.PendingRequests == 0 && h.Session.RetiredRequests == 1 && inRing && !h.Session.Loading &&
+                  h.Session.RetiredTotal == 1 && h.Session.LastRetiredRequest == id,
+                  "terrain requests: an answer that never arrives keeps one request pending until the 2 s timeout, which reports \"" +
+                  (r != null ? r.Reason : "nothing") + "\" once and retires the request (load " + ended.Load + ", " + ended.Role + ", ended \"" +
+                  ended.Ended + "\") -- " + state(h), log);
+            bool applied = h.Answer(id, wdt);
+            h.Pump(3);
+            Check(!applied && h.Session.LateAnswersDropped == 1 && h.Session.UnownedAnswersDropped == 0 && h.CountFor(202) == 1 &&
+                  h.Session.SecondReportsRefused == 0 && h.Sent.Count == 1 && h.Session.ShownLoad == 0 && WmvRuntimeTerrainTile.Live == live0,
+                  "terrain requests: the answer after the timeout is dropped as late -- not applied (no root asked for, no tile), no second " +
+                  "report -- " + state(h), log);
+        }
+
+        // ---- the load ends before its answer by clearTerrain, a model load, or the host's clearTerrain for a new client: one
+        // report, nothing pending, the request retired as ended; its late answer (the host answers it "available" or, for the
+        // replaced client, "stale") dropped as late, no second report, nothing asked for
+        Action<string, int, Action<TerrainHarness>, string, string, string> endsFirst = (what, load, end, status, reason, lateState) =>
+        {
+            var h = new TerrainHarness();
+            harnesses.Add(h);
+            h.Session.Load(TerrainCommand(load, tx, ty));
+            string id = h.Last(rw);
+            end(h);
+            WmvIpcClient.TerrainTileReport r = h.For(load);
+            WmvTerrainSession.RetiredRequest ended;
+            bool retiredOk = h.Session.TryGetRetired(id, out ended) && ended.Load == load && ended.Ended == status;
+            bool once = r != null && r.Status == status && r.Reason == reason && h.CountFor(load) == 1 && h.Session.PendingRequests == 0 &&
+                        h.Session.RetiredRequests == 1 && retiredOk && !h.Session.Loading && h.Session.RetiredTotal == 1 &&
+                        h.Session.LastRetiredRequest == id;
+            bool applied = lateState == "available" ? h.Answer(id, wdt) : h.Answer(id, null, lateState, "request epoch 7, current 8");
+            h.Pump(3);
+            Check(once && !applied && h.Session.LateAnswersDropped == 1 && h.CountFor(load) == 1 && h.Session.SecondReportsRefused == 0 &&
+                  h.Sent.Count == 1,
+                  "terrain requests: " + what + " before the answer -> one \"" + status + "\" (" + (r != null ? r.Reason : "no report") +
+                  "), the request retired; its late \"" + lateState + "\" answer dropped as late -- " + state(h), log);
+        };
+        endsFirst("clearTerrain", 203, x => x.Session.Clear("test"), "cleared", "clearTerrain: test", "available");
+        endsFirst("a model load", 204, x => x.Session.LeaveForModelLoad("test model load"), "superseded", "test model load", "available");
+        endsFirst("the host's clearTerrain for a replaced client", 205, x => x.Session.Clear("the client was replaced"), "cleared",
+                  "clearTerrain: the client was replaced", "stale");
+
+        // ---- a new client epoch before the answer: the old load cleared, the new epoch's load built; the old load's "stale"
+        // answer arriving in the middle of the new load is dropped as late and leaves the new load's request waiting
+        {
+            var h = new TerrainHarness();
+            harnesses.Add(h);
+            h.Session.Load(TerrainCommand(206, tx, ty));
+            string oldId = h.Last(rw);
+            h.Session.Clear("the client was replaced");
+            WmvIpcClient.TerrainTileCommand next = TerrainCommand(207, tx, ty);
+            next.AssetEpoch = 8;
+            h.Session.Load(next);
+            string newId = h.Last(rw);
+            bool lateApplied = h.Answer(oldId, null, "stale", "request epoch 7, current 8");
+            bool newWaits = h.Session.PendingRequests == 1 && h.Session.LoadInFlight == 207 && h.Sent.Count == 2;
+            h.Answer(newId, wdt);
+            h.Answer(h.Last(rr), root);
+            h.Pump(3);
+            WmvIpcClient.TerrainTileReport r206 = h.For(206), r207 = h.For(207);
+            Check(r206 != null && r206.Status == "cleared" && !lateApplied && newWaits && r207 != null && r207.Status == "built" &&
+                  h.CountFor(206) == 1 && h.CountFor(207) == 1 && h.Session.LateAnswersDropped == 1 && h.Session.PendingRequests == 0 &&
+                  h.Session.RetiredRequests == 1 && h.LastSent(rw)[4] == "8",
+                  "terrain requests: a client switch before the answer -- the old load \"cleared\" once, its \"stale\" answer dropped as late " +
+                  "while the new epoch's load waits for its own, which builds -- " + state(h), log);
+            h.Session.Clear("test");
+        }
+
+        // ---- supersede before the answer: the superseded load's late answer (even "available") is dropped, the newer load
+        // still waits for its own request and builds
+        {
+            var h = new TerrainHarness();
+            harnesses.Add(h);
+            h.Session.Load(TerrainCommand(208, tx, ty));
+            string first = h.Last(rw);
+            h.Session.Load(TerrainCommand(209, tx, ty));
+            string second = h.Last(rw);
+            WmvIpcClient.TerrainTileReport r208 = h.For(208);
+            WmvTerrainSession.RetiredRequest ended, none;
+            bool afterSupersede = r208 != null && r208.Status == "superseded" && h.Session.PendingRequests == 1 && h.Session.RetiredRequests == 1 &&
+                                  h.Session.TryGetRetired(first, out ended) && ended.Ended == "superseded" && !h.Session.TryGetRetired(second, out none);
+            bool lateApplied = h.Answer(first, wdt);
+            bool stillWaits = h.Session.PendingRequests == 1 && h.Session.LoadInFlight == 209 && h.Sent.Count == 2;
+            h.Answer(second, wdt);
+            h.Answer(h.Last(rr), root);
+            h.Pump(3);
+            WmvIpcClient.TerrainTileReport r209 = h.For(209);
+            Check(afterSupersede && !lateApplied && h.Session.LateAnswersDropped == 1 && stillWaits && r209 != null && r209.Status == "built" &&
+                  h.CountFor(208) == 1 && h.CountFor(209) == 1 && h.Session.PendingRequests == 0,
+                  "terrain requests: a load superseded before its answer is reported once, its request retired; the late answer is dropped " +
+                  "and the newer load, still waiting for its own, builds -- " + state(h), log);
+            h.Session.Clear("test");
+        }
+
+        // ---- the right request id under another load: dropped (unowned), the request still waits; the real answer applies
+        {
+            var h = new TerrainHarness();
+            harnesses.Add(h);
+            h.Session.Load(TerrainCommand(210, tx, ty));
+            string id = h.Last(rw);
+            bool wrongApplied = h.Answer(id, wdt, "available", "", null, 999);
+            bool waits = h.Session.PendingRequests == 1 && h.Reports.Count == 0 && h.Sent.Count == 1 && h.Session.UnownedAnswersDropped == 1;
+            bool rightApplied = h.Answer(id, wdt);
+            h.Answer(h.Last(rr), root);
+            h.Pump(3);
+            WmvIpcClient.TerrainTileReport r = h.For(210);
+            Check(!wrongApplied && waits && rightApplied && r != null && r.Status == "built" && h.CountFor(210) == 1 &&
+                  h.Session.LateAnswersDropped == 0,
+                  "terrain requests: an answer naming the waited-for request but load 999 is dropped (unowned) and the request keeps waiting; " +
+                  "its real answer is applied and the tile built -- " + state(h), log);
+            h.Session.Clear("test");
+        }
+
+        // ---- shutdown with a request out (the player going away, as on a reconnect): no report, the request retired as
+        // "dropped at shutdown", its answer dropped as late; a new session (the next player) starts with nothing and builds
+        {
+            var h = new TerrainHarness();
+            harnesses.Add(h);
+            h.Session.Load(TerrainCommand(211, tx, ty));
+            string id = h.Last(rw);
+            h.Session.Dispose();
+            WmvTerrainSession.RetiredRequest ended;
+            bool retiredOk = h.Session.TryGetRetired(id, out ended) && ended.Ended == "dropped at shutdown" && ended.Load == 211;
+            bool applied = h.Answer(id, wdt);
+            var fresh = new TerrainHarness();
+            harnesses.Add(fresh);
+            bool freshEmpty = fresh.Session.PendingRequests == 0 && fresh.Session.RetiredRequests == 0;
+            WmvIpcClient.TerrainTileReport built = TerrainBuild(fresh, 212, tx, ty, wdt, root);
+            Check(h.Reports.Count == 0 && h.Session.PendingRequests == 0 && h.Session.RetiredRequests == 1 && retiredOk && !applied &&
+                  h.Session.LateAnswersDropped == 1 && h.Sent.Count == 1 && freshEmpty && built != null && built.Status == "built",
+                  "terrain requests: shutdown with a request out sends no report and retires it (\"" + ended.Ended + "\"); its answer is dropped " +
+                  "as late; the next session starts empty and builds -- " + state(h), log);
+            fresh.Session.Clear("test");
+        }
+
+        // ---- the ring is bounded: 40 loads superseded unanswered keep the newest 32 (while RetiredTotal counts all 40); the
+        // answer of one that fell out is still dropped (as unowned now), never applied
+        {
+            var h = new TerrainHarness();
+            harnesses.Add(h);
+            var ids = new List<string>();
+            for (int i = 0; i < 40; i++)
+            {
+                h.Session.Load(TerrainCommand(300 + i, tx, ty));
+                ids.Add(h.Last(rw));
+            }
+            h.Session.Clear("test");
+            WmvTerrainSession.RetiredRequest e;
+            bool oldestOut = !h.Session.TryGetRetired(ids[0], out e) && !h.Session.TryGetRetired(ids[7], out e);
+            bool newestIn = h.Session.TryGetRetired(ids[8], out e) && e.Load == 308 && h.Session.TryGetRetired(ids[39], out e) && e.Load == 339 &&
+                            e.Ended == "cleared";
+            bool appliedOld = h.Answer(ids[0], wdt);
+            bool appliedNew = h.Answer(ids[39], wdt);
+            Check(h.Session.RetiredRequests == 32 && oldestOut && newestIn && !appliedOld && !appliedNew && h.Session.UnownedAnswersDropped == 1 &&
+                  h.Session.LateAnswersDropped == 1 && h.Reports.Count == 40 && h.Sent.Count == 40 && h.Session.RetiredTotal == 40 &&
+                  h.Session.LastRetiredRequest == ids[39],
+                  "terrain requests: the retired ring keeps the newest 32 of 40 ended requests, RetiredTotal all 40; an answer to one that fell " +
+                  "out is dropped as unowned, one still held as late -- neither applied -- " + state(h), log);
+        }
+
+        // ---- 1200 loads whose answers never come or fail -- cleared, timed out, taken by a model load, refused by the host,
+        // the root never answered, superseded -- with late and unowned answers in between: every load reported exactly once;
+        // every load that ends with its request unanswered retires exactly that request -- the ring names it with its load,
+        // role and ending, RetiredTotal rises by exactly one, LastRetiredRequest is its id -- and a load that ends on its own
+        // answer, or starts with no load in flight, retires nothing; after every load each request sent is accounted for
+        // (answers applied + RetiredTotal + PendingRequests); no answer applied that was not waited for; at most 32 retired;
+        // and no collection of the session or of the load in flight larger after 1200 loads than after 102 (both samples
+        // taken with a load in flight, so its fields are walked too)
+        {
+            const int n = 1200;
+            var h = new TerrainHarness(1000.0);
+            harnesses.Add(h);
+            double now = 50000.0;
+            int maxRetired = 0, lateFed = 0, foreignFed = 0, lateApplied = 0, rootAnswers = 0, applied = 0, retiredExpected = 0;
+            int retireChecks = 0, retireWrong = 0, unbalanced = 0, largest = 0;
+            string sizesAt102 = null, sizesAtEnd = null, prevId = null, waiting = null, firstRetireWrong = null, firstUnbalanced = null;
+            Action<bool, string> retireCheck = (ok, what) =>
+            {
+                retireChecks++;
+                if (ok) return;
+                retireWrong++;
+                if (firstRetireWrong == null) firstRetireWrong = what;
+            };
+            // Request rid of load `load` was retired just now: the ring holds it under that load, role and ending, the total is
+            // one higher than `before`, and it is the last one retired.
+            Func<string, int, string, string, int, bool> retiredNow = (rid, load, role, how, before) =>
+            {
+                WmvTerrainSession.RetiredRequest e;
+                return h.Session.TryGetRetired(rid, out e) && e.Load == load && e.Role == role && e.Ended == how &&
+                       h.Session.RetiredTotal == before + 1 && h.Session.LastRetiredRequest == rid;
+            };
+            Func<string, int, string, string, int, string> retiredSays = (rid, load, role, how, before) =>
+            {
+                WmvTerrainSession.RetiredRequest e;
+                return string.Format("load {0}: request {1} ({2}) should be retired as \"{3}\" -- the ring {4}; total {5} -> {6}, last \"{7}\"",
+                                     load, rid, role, how,
+                                     h.Session.TryGetRetired(rid, out e) ? "has it under load " + e.Load + ", " + e.Role + ", \"" + e.Ended + "\""
+                                                                         : "does not hold it",
+                                     before, h.Session.RetiredTotal, h.Session.LastRetiredRequest);
+            };
+            for (int i = 0; i < n; i++)
+            {
+                int load = 1000 + i;
+                int before = h.Session.RetiredTotal;
+                h.Session.Load(TerrainCommand(load, tx, ty));
+                if (waiting != null)                                         // the load before was left waiting: superseded now
+                {
+                    retiredExpected++;
+                    retireCheck(retiredNow(waiting, load - 1, rw, "superseded", before), retiredSays(waiting, load - 1, rw, "superseded", before));
+                }
+                else
+                    retireCheck(h.Session.RetiredTotal == before, "load " + load + ": starting it with no load in flight retired a request (total " +
+                                before + " -> " + h.Session.RetiredTotal + ")");
+                waiting = null;
+                string id = h.Last(rw), endedId = null, endedRole = rw, endedHow = null;
+                before = h.Session.RetiredTotal;
+                switch (i % 6)
+                {
+                    case 0: h.Session.Clear("repeat"); endedId = id; endedHow = "cleared"; break;
+                    case 1: h.Session.Pump(now += 16.0); h.Session.Pump(now += 1000.5); endedId = id; endedHow = "failed"; break;
+                    case 2: h.Session.LeaveForModelLoad("repeat model load"); endedId = id; endedHow = "superseded"; break;
+                    case 3:                                                  // refused: the load ends on its own answer
+                        if (h.Answer(id, null, "stale", "request epoch 6, current 7")) applied++;
+                        break;
+                    case 4:                                                  // the WDT applied, the root never answered
+                        if (h.Answer(id, wdt)) applied++;
+                        rootAnswers++;
+                        endedId = h.Last(rr);
+                        endedRole = rr;
+                        endedHow = "cleared";
+                        h.Session.Clear("repeat: the root never answered");
+                        break;
+                    default: waiting = id; break;                            // superseded by the next load
+                }
+                if (endedId != null)
+                {
+                    retiredExpected++;
+                    retireCheck(retiredNow(endedId, load, endedRole, endedHow, before), retiredSays(endedId, load, endedRole, endedHow, before));
+                }
+                else
+                {
+                    WmvTerrainSession.RetiredRequest e;
+                    retireCheck(h.Session.RetiredTotal == before && !h.Session.TryGetRetired(id, out e),
+                                "load " + load + ": " + (waiting != null ? "still waiting" : "ended on its own answer") + ", yet a request was retired " +
+                                "(total " + before + " -> " + h.Session.RetiredTotal + ", last \"" + h.Session.LastRetiredRequest + "\")");
+                }
+                if (i % 5 == 1 && prevId != null)
+                {
+                    lateFed++;
+                    if (h.Answer(prevId, wdt))
+                    {
+                        lateApplied++;
+                        applied++;
+                    }
+                }
+                if (i % 11 == 7)
+                {
+                    foreignFed++;
+                    if (h.Session.ClaimMapAssetResponse(new WmvIpcClient.AssetResponse { requestId = "zz" + i, ok = false, state = "refused" }))
+                    {
+                        lateApplied++;
+                        applied++;
+                    }
+                }
+                if (h.Sent.Count != applied + h.Session.RetiredTotal + h.Session.PendingRequests)
+                {
+                    unbalanced++;
+                    if (firstUnbalanced == null)
+                        firstUnbalanced = string.Format("after load {0}: {1} sent, {2} applied + {3} retired + {4} pending", load, h.Sent.Count, applied,
+                                                        h.Session.RetiredTotal, h.Session.PendingRequests);
+                }
+                maxRetired = Math.Max(maxRetired, h.Session.RetiredRequests);
+                if (i == 101)
+                {
+                    int l;
+                    sizesAt102 = SessionCollections(h.Session, out l);
+                }
+                if (i == n - 1)
+                    sizesAtEnd = SessionCollections(h.Session, out largest);
+                prevId = id;
+            }
+            bool waitingAtEnd = waiting != null;
+            int beforeEnd = h.Session.RetiredTotal;
+            h.Session.Clear("repeat: end");
+            if (waitingAtEnd)
+            {
+                retiredExpected++;
+                retireCheck(retiredNow(waiting, 1000 + n - 1, rw, "cleared", beforeEnd), retiredSays(waiting, 1000 + n - 1, rw, "cleared", beforeEnd));
+            }
+            int wrong = 0;
+            var perLoad = new Dictionary<int, int>();
+            foreach (WmvIpcClient.TerrainTileReport r in h.Reports)
+            {
+                int c;
+                perLoad.TryGetValue(r.Load, out c);
+                perLoad[r.Load] = c + 1;
+            }
+            for (int i = 0; i < n; i++)
+            {
+                int c;
+                if (!perLoad.TryGetValue(1000 + i, out c) || c != 1) wrong++;
+            }
+            Check(wrong == 0 && h.Reports.Count == n && h.Session.ReportsSent == n && h.Session.SecondReportsRefused == 0,
+                  "terrain requests: " + n + " failing loads were reported exactly once each (" + wrong + " not; " + h.Session.ReportsSent +
+                  " reports sent, " + h.Session.SecondReportsRefused + " second report(s) refused)", log);
+            Check(retireWrong == 0 && retireChecks == 2 * n + (waitingAtEnd ? 1 : 0) && h.Session.RetiredTotal == retiredExpected &&
+                  retiredExpected > WmvTerrainSession.RetiredCapacity && h.Session.RetiredRequests == WmvTerrainSession.RetiredCapacity &&
+                  maxRetired <= WmvTerrainSession.RetiredCapacity,
+                  "terrain requests: through " + n + " failing loads each of the " + retiredExpected + " that ended with a request unanswered retired " +
+                  "exactly that request (the ring naming its load, role and ending, RetiredTotal one higher, LastRetiredRequest its id) and no " +
+                  "other load retired anything (" + retireChecks + " checks, " + retireWrong + " wrong" +
+                  (firstRetireWrong != null ? "; first: " + firstRetireWrong : "") + "); RetiredTotal " + h.Session.RetiredTotal + ", the ring " +
+                  "at most " + maxRetired + ", " + h.Session.RetiredRequests + " at the end", log);
+            Check(unbalanced == 0 && h.Sent.Count == applied + h.Session.RetiredTotal + h.Session.PendingRequests && h.Session.PendingRequests == 0 &&
+                  !h.Session.Loading && h.Sent.Count == n + rootAnswers,
+                  "terrain requests: after each of the " + n + " loads every request sent was an answer applied, a retirement or the one pending (" +
+                  unbalanced + " load(s) not" + (firstUnbalanced != null ? "; first: " + firstUnbalanced : "") + "); in all " + h.Sent.Count +
+                  " sent (one per load plus " + rootAnswers + " root requests) = " + applied + " applied + " + h.Session.RetiredTotal + " retired + " +
+                  h.Session.PendingRequests + " pending", log);
+            Check(lateFed > 0 && lateApplied == 0 && h.Session.LateAnswersDropped > 0 && h.Session.UnownedAnswersDropped > 0 &&
+                  WmvRuntimeTerrainTile.Live == live0,
+                  "terrain requests: none of the " + lateFed + " late and " + foreignFed + " foreign answers was applied (" + h.Session.LateAnswersDropped +
+                  " dropped as late, " + h.Session.UnownedAnswersDropped + " as unowned)", log);
+            Check(sizesAt102 != null && sizesAtEnd == sizesAt102 && sizesAt102.Contains("current{") && largest <= WmvTerrainSession.RetiredCapacity,
+                  "terrain requests: no collection of the session or of the load in flight grew -- after 102 loads " + sizesAt102 + ", after " + n +
+                  " " + sizesAtEnd, log);
+        }
+
+        int refused = 0;
+        foreach (TerrainHarness x in harnesses)
+        {
+            refused += x.Session.SecondReportsRefused;
+            x.Session.Dispose();
+        }
+        Check(refused == 0 && WmvRuntimeTerrainTile.Live == live0 && TerrainTallies() == "0/0/0",
+              "terrain requests: no second report was ever refused, and every tile these tests built is released (live " +
+              WmvRuntimeTerrainTile.Live + ", tallies " + TerrainTallies() + ")", log);
+    }
+
+    /// <summary>Every collection the session holds, found by reflection over its fields (so one added later is checked
+    /// too), and every collection of the load in flight: a field holding one of the session's own nested classes (the Job
+    /// in "current") is walked one level, as "name{...}". An array counts by its length ("name=n[]"), any other collection
+    /// by its count ("name=n", TryCountCollection: a HashSet&lt;T&gt; included); a string is not a collection here, and a
+    /// collection or load field that is null shows as "name=null". largest is the largest count of a non-array.</summary>
+    static string SessionCollections(WmvTerrainSession s, out int largest)
+    {
+        largest = 0;
+        var parts = new List<string>();
+        CollectionsOf(s, true, parts, ref largest);
+        return string.Join(" ", parts.ToArray());
+    }
+
+    static void CollectionsOf(object o, bool walkLoads, List<string> parts, ref int largest)
+    {
+        foreach (FieldInfo f in o.GetType().GetFields(BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public))
+        {
+            bool sessionClass = f.FieldType.DeclaringType == typeof(WmvTerrainSession) && f.FieldType.IsClass;
+            bool collectionType = typeof(System.Collections.IEnumerable).IsAssignableFrom(f.FieldType) && f.FieldType != typeof(string);
+            object v = f.GetValue(o);
+            if (v == null)
+            {
+                if (collectionType || (walkLoads && sessionClass))
+                    parts.Add(f.Name + "=null");
+                continue;
+            }
+            if (v is string)
+                continue;
+            var a = v as Array;
+            if (a != null)
+            {
+                parts.Add(f.Name + "=" + a.Length + "[]");
+                continue;
+            }
+            int count;
+            if (TryCountCollection(v, out count))
+            {
+                parts.Add(f.Name + "=" + count);
+                largest = Math.Max(largest, count);
+                continue;
+            }
+            if (walkLoads && sessionClass)
+            {
+                var inner = new List<string>();
+                CollectionsOf(v, false, inner, ref largest);
+                parts.Add(f.Name + "{" + string.Join(" ", inner.ToArray()) + "}");
+            }
+        }
+    }
+
+    /// <summary>How many items a collection holds, whatever it implements: a non-generic ICollection by its Count, a generic
+    /// ICollection&lt;T&gt; or IReadOnlyCollection&lt;T&gt; (a HashSet&lt;T&gt; is only these) by its Count, read by reflection,
+    /// and any other IEnumerable by enumerating it. False for a string and for what is not a collection.</summary>
+    static bool TryCountCollection(object v, out int count)
+    {
+        count = 0;
+        if (v == null || v is string)
+            return false;
+        var plain = v as System.Collections.ICollection;
+        if (plain != null)
+        {
+            count = plain.Count;
+            return true;
+        }
+        foreach (Type i in v.GetType().GetInterfaces())
+        {
+            if (!i.IsGenericType)
+                continue;
+            Type d = i.GetGenericTypeDefinition();
+            if (d == typeof(ICollection<>) || d == typeof(IReadOnlyCollection<>))
+            {
+                count = (int)i.GetProperty("Count").GetValue(v, null);
+                return true;
+            }
+        }
+        var items = v as System.Collections.IEnumerable;
+        if (items == null)
+            return false;
+        foreach (object item in items)
+            count++;
+        return true;
+    }
+
+    /// <summary>A collection that is an IReadOnlyCollection&lt;T&gt; and nothing more: its Count (2) is not what enumerating it
+    /// gives (nothing), so a count taken from Count shows.</summary>
+    sealed class CountOnlyCollection : IReadOnlyCollection<int>
+    {
+        public int Count { get { return 2; } }
+        public IEnumerator<int> GetEnumerator() { yield break; }
+        System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator() { return GetEnumerator(); }
+    }
+
+    /// <summary>A bare IEnumerable (an iterator: no collection interface) of n items.</summary>
+    static IEnumerable<int> Yield(int n)
+    {
+        for (int i = 0; i < n; i++)
+            yield return i;
+    }
+
+    /// <summary>
+    /// The map answers through WmvIpcClient's own dispatch (host lines fed as the reader thread hands them over): a map
+    /// answer -- an id in the "map" namespace, or any answer carrying a role, each half shown on its own (a role under an
+    /// ordinary id, a map id with no role) -- goes to OnMapAssetResponse only, never to OnAssetResponse or the asset
+    /// cache; an ordinary model answer still goes to OnAssetResponse and the cache as before,
+    /// even after a map answer named its request id; a map answer with no handler wired is dropped and counted. Late
+    /// answers after supersession and after the host's clearTerrain for a replaced client reach the session and are
+    /// dropped there; every load has exactly one terrainTileLoaded line.
+    /// </summary>
+    static void TerrainMapRoutingTests(Action<string> log)
+    {
+        int liveBefore = WmvRuntimeTerrainTile.Live;
+        int tx = TerrainTestTileX, ty = TerrainTestTileY;
+        byte[] wdt = TerrainWdt(true, tx, ty, (int)TerrainTestRoot);
+        byte[] root = AdtSynthetic.FlatRoot(tx, ty);
+        var go = new GameObject("TerrainMapRoutingTest");
+        WmvTerrainSession session = null;
+        try
+        {
+            var ipc = go.AddComponent<WmvIpcClient>();
+            var sent = new List<string>();
+            var modelAnswers = new List<WmvIpcClient.AssetResponse>();
+            var mapAnswers = new List<WmvIpcClient.AssetResponse>();
+            ipc.SentForTest = s => sent.Add(s);
+            ipc.OnAssetResponse = r => modelAnswers.Add(r);
+            var view = new TestTerrainView();
+            session = new WmvTerrainSession(view, ipc.RequestMapAsset, ipc.ReportTerrainTileLoaded, null, x => x());
+            WmvTerrainSession s = session;
+            ipc.OnMapAssetResponse = r => { mapAnswers.Add(r); s.ClaimMapAssetResponse(r); };
+            ipc.OnLoadTerrainTile = c => s.Load(c);
+            ipc.OnClearTerrain = reason => s.Clear(reason);
+            Func<int, int> reportsFor = load => CountSent(sent, "{\"type\":\"terrainTileLoaded\",\"load\":" + load + ",");
+
+            Check(WmvIpcClient.IsMapRequestId("map1") && !WmvIpcClient.IsMapRequestId("u1") && !WmvIpcClient.IsMapRequestId(null) &&
+                  WmvIpcClient.IsMapAnswer("u5", "wdt") && WmvIpcClient.IsMapAnswer("map5", "") && !WmvIpcClient.IsMapAnswer("u5", "") &&
+                  !WmvIpcClient.IsMapAnswer("u5", null),
+                  "terrain routing: a map answer is one whose id is in the map namespace or that carries a role, nothing else", log);
+
+            // ---- a load through the client's lines: both answers to the map handler only; the asset cache never sees them
+            int cacheCount = ipc.Cache.Count;
+            long cacheBytes = ipc.Cache.Bytes;
+            ipc.FeedLineForTest(TerrainLoadLine(501, 7), null);
+            string wdtId = RequestIdOf(LastSent(sent, "getMapAsset"));
+            ipc.FeedLineForTest(MapAnswerLine(wdtId, TerrainTestWdt, "wdt", 501, wdt), wdt);
+            string rootId = RequestIdOf(LastSent(sent, "getMapAsset"));
+            ipc.FeedLineForTest(MapAnswerLine(rootId, (int)TerrainTestRoot, "rootAdt", 501, root), root);
+            for (int f = 0; f < 3; f++)
+                session.Pump(100.0 + f);
+            Check(wdtId.StartsWith("map", StringComparison.Ordinal) && rootId.StartsWith("map", StringComparison.Ordinal) && wdtId != rootId &&
+                  reportsFor(501) == 1 && SentContains(sent, "{\"type\":\"terrainTileLoaded\",\"load\":501,\"status\":\"built\"") &&
+                  mapAnswers.Count == 2 && modelAnswers.Count == 0 && ipc.MapAnswersRouted == 2 && ipc.Cache.Count == cacheCount &&
+                  ipc.Cache.Bytes == cacheBytes && !ipc.Cache.Holds(TerrainTestWdt) && !ipc.Cache.Holds((int)TerrainTestRoot) &&
+                  session.PendingRequests == 0,
+                  "terrain routing: a load's WDT and root answers (" + wdtId + ", " + rootId + ") go to OnMapAssetResponse only (" +
+                  mapAnswers.Count + " there, " + modelAnswers.Count + " to OnAssetResponse), the asset cache untouched, built once", log);
+
+            // ---- a late answer after supersession, then the host's clearTerrain for a replaced client before the answer
+            ipc.FeedLineForTest(TerrainLoadLine(502, 7), null);
+            string id502 = RequestIdOf(LastSent(sent, "getMapAsset"));
+            ipc.FeedLineForTest(TerrainLoadLine(503, 7), null);
+            string id503 = RequestIdOf(LastSent(sent, "getMapAsset"));
+            int sentBefore = sent.Count;
+            ipc.FeedLineForTest(MapAnswerLine(id502, TerrainTestWdt, "wdt", 502, wdt), wdt);
+            bool lateDropped = session.LateAnswersDropped == 1 && sent.Count == sentBefore && session.LoadInFlight == 503 &&
+                               session.PendingRequests == 1 && modelAnswers.Count == 0;
+            ipc.FeedLineForTest("{\"type\":\"clearTerrain\",\"reason\":\"the client was replaced\"}", null);
+            ipc.FeedLineForTest(RefusedMapAnswerLine(id503, TerrainTestWdt, "wdt", 503, "stale", "request epoch 7, current 8"), null);
+            Check(lateDropped && session.LateAnswersDropped == 2 && reportsFor(502) == 1 && reportsFor(503) == 1 &&
+                  SentContains(sent, "{\"type\":\"terrainTileLoaded\",\"load\":502,\"status\":\"superseded\"") &&
+                  SentContains(sent, "{\"type\":\"terrainTileLoaded\",\"load\":503,\"status\":\"cleared\"") && modelAnswers.Count == 0 &&
+                  session.PendingRequests == 0 && session.RetiredRequests == 2 && WmvRuntimeTerrainTile.Live == liveBefore,
+                  "terrain routing: the superseded load's late answer and the cleared load's \"stale\" answer (after the host's clearTerrain " +
+                  "for a replaced client) reach the session and are dropped as late; one terrainTileLoaded each, nothing to OnAssetResponse", log);
+
+            // ---- a role-carrying answer under an ordinary request's id: the map handler's (unowned), and the model request it
+            // names is untouched -- its cache flight still out; the request's own answer then goes to OnAssetResponse and the cache
+            const int modelFile = 990302;
+            string modelId = ipc.RequestAssetByFileDataID(modelFile, true);
+            bool flying = ipc.Cache.InFlight(modelFile);
+            int unowned = session.UnownedAnswersDropped;
+            ipc.FeedLineForTest(RefusedMapAnswerLine(modelId, TerrainTestWdt, "wdt", 503, "stale", "a map answer under a model id"), null);
+            bool stillFlying = ipc.Cache.InFlight(modelFile) && modelAnswers.Count == 0 && session.UnownedAnswersDropped == unowned + 1;
+            byte[] modelBytes = { 9, 8, 7, 6, 5 };
+            ipc.FeedLineForTest(ModelAnswerLine(modelId, modelFile, modelBytes, true), modelBytes);
+            WmvIpcClient.AssetResponse got = modelAnswers.Count > 0 ? modelAnswers[0] : null;
+            Check(modelId.StartsWith("u", StringComparison.Ordinal) && flying && stillFlying && modelAnswers.Count == 1 && got.requestId == modelId &&
+                  got.ok && got.data == modelBytes && got.role == "" && ipc.Cache.Holds(modelFile) && !ipc.Cache.InFlight(modelFile),
+                  "terrain routing: a role-carrying answer under the model request " + modelId + " goes to the map handler (dropped as unowned) " +
+                  "and leaves that request's cache flight out; the request's own answer still reaches OnAssetResponse and the cache", log);
+
+            // ---- a map-namespace answer carrying NO role: the id alone makes it a map answer -- the map handler's (unowned), never
+            // OnAssetResponse or the cache
+            int mapBefore = mapAnswers.Count, routedBefore = ipc.MapAnswersRouted, modelBefore = modelAnswers.Count;
+            unowned = session.UnownedAnswersDropped;
+            ipc.FeedLineForTest("{\"type\":\"assetResponse\",\"requestId\":\"map77\",\"ok\":false,\"fileDataID\":" + TerrainTestWdt + ",\"load\":503," +
+                                "\"assetEpoch\":7,\"state\":\"stale\",\"detail\":\"x\",\"error\":\"x\"}", null);
+            WmvIpcClient.AssetResponse roleless = mapAnswers.Count > mapBefore ? mapAnswers[mapAnswers.Count - 1] : null;
+            Check(mapAnswers.Count == mapBefore + 1 && ipc.MapAnswersRouted == routedBefore + 1 && session.UnownedAnswersDropped == unowned + 1 &&
+                  modelAnswers.Count == modelBefore && roleless != null && roleless.requestId == "map77" && string.IsNullOrEmpty(roleless.role),
+                  "terrain routing: a map-namespace answer with no role (map77) goes by its id alone to OnMapAssetResponse (" +
+                  (mapAnswers.Count - mapBefore) + ", routed " + routedBefore + " -> " + ipc.MapAnswersRouted + ") and is dropped there as unowned; " +
+                  "OnAssetResponse gets nothing (" + (modelAnswers.Count - modelBefore) + ")", log);
+
+            // ---- an ordinary model answer (not cached) is unaffected
+            string plainId = ipc.RequestAssetByFileDataID(990303, false);
+            ipc.FeedLineForTest(ModelAnswerLine(plainId, 990303, modelBytes, false), modelBytes);
+            Check(modelAnswers.Count == 2 && modelAnswers[1].requestId == plainId && mapAnswers.Count == 6 && ipc.MapAnswersRouted == 6,
+                  "terrain routing: an ordinary model answer (" + plainId + ") still goes to OnAssetResponse; " + ipc.MapAnswersRouted +
+                  " map answers routed in all, all to the map handler", log);
+
+            // ---- no map handler wired: the answer is dropped and counted, never handed to OnAssetResponse
+            ipc.OnMapAssetResponse = null;
+            int routed = ipc.MapAnswersRouted;
+            ipc.FeedLineForTest(MapAnswerLine("map99", TerrainTestWdt, "wdt", 504, wdt), wdt);
+            Check(ipc.MapAnswersUnhandled == 1 && ipc.MapAnswersRouted == routed + 1 && modelAnswers.Count == 2 && mapAnswers.Count == 6,
+                  "terrain routing: a map answer with no OnMapAssetResponse wired is dropped (unhandled " + ipc.MapAnswersUnhandled +
+                  "), not handed to OnAssetResponse", log);
+        }
+        finally
+        {
+            if (session != null)
+                session.Dispose();
+            UnityEngine.Object.DestroyImmediate(go);
+        }
+        Check(WmvRuntimeTerrainTile.Live == liveBefore && TerrainTallies() == "0/0/0",
+              "terrain routing: every tile these tests built is released (live " + WmvRuntimeTerrainTile.Live + ")", log);
+    }
+
+    static string TerrainLoadLine(int load, int epoch)
+    {
+        return "{\"type\":\"loadTerrainTile\",\"load\":" + load + ",\"assetEpoch\":" + epoch + ",\"mapId\":0,\"mapDirectory\":\"Azeroth\"," +
+               "\"product\":\"test\",\"build\":\"0\",\"wdtFileDataID\":" + TerrainTestWdt + ",\"wdtResolvedBy\":\"fileDataID\",\"tileX\":" +
+               TerrainTestTileX + ",\"tileY\":" + TerrainTestTileY + ",\"maxAssetBytes\":4194304}";
+    }
+
+    static string RefusedMapAnswerLine(string requestId, int fileDataID, string role, int load, string state, string detail)
+    {
+        return "{\"type\":\"assetResponse\",\"requestId\":\"" + requestId + "\",\"ok\":false,\"fileDataID\":" + fileDataID + ",\"role\":\"" + role +
+               "\",\"load\":" + load + ",\"assetEpoch\":7,\"state\":\"" + state + "\",\"detail\":\"" + detail + "\",\"readMs\":0.25,\"error\":\"" +
+               detail + "\"}";
+    }
+
+    static string ModelAnswerLine(string requestId, int fileDataID, byte[] data, bool cacheable)
+    {
+        return "{\"type\":\"assetResponse\",\"requestId\":\"" + requestId + "\",\"ok\":true,\"path\":\"\",\"fileDataID\":" + fileDataID +
+               ",\"byteLength\":" + data.Length + ",\"encoding\":\"binary\",\"payloadBytes\":" + data.Length +
+               (cacheable ? ",\"cacheable\":true" : "") + "}";
+    }
+
+    /// <summary>The last line sent of a message type, or "".</summary>
+    static string LastSent(List<string> sent, string type)
+    {
+        string prefix = "{\"type\":\"" + type + "\"";
+        for (int i = sent.Count - 1; i >= 0; i--)
+            if (sent[i].StartsWith(prefix, StringComparison.Ordinal)) return sent[i];
+        return "";
+    }
+
+    static int CountSent(List<string> sent, string prefix)
+    {
+        int n = 0;
+        foreach (string line in sent)
+            if (line.StartsWith(prefix, StringComparison.Ordinal)) n++;
+        return n;
+    }
+
+    static bool SentContains(List<string> sent, string prefix) { return CountSent(sent, prefix) > 0; }
+
+    /// <summary>Why the tests that drive a WmvMain of their own cannot run now, or null: a capture or a debug switch is set,
+    /// and these paths would act on it (a coroutine, a dump, a camera override).</summary>
+    static string TerrainMainTestsBlocked()
+    {
+        if (!string.IsNullOrEmpty(Environment.GetEnvironmentVariable("WMV_VIEWPORT_SHOT")) ||
+            !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("WMV_VIEWPORT_ORBIT")) || WmvModelBuilder.Debug_.LightCheck ||
+            WmvModelBuilder.Debug_.AllocCheck || WmvModelBuilder.Debug_.HasFrameBounds || WmvTerrainDebug.View != WmvTerrainView.Shaded ||
+            WmvTerrainDebug.OnlyChunk >= 0 || WmvTerrainDebug.Focus >= 0 || WmvTerrainDebug.TopDown || WmvTerrainDebug.DumpName != null)
+            return "a capture or debug switch is set, and these tests drive a WmvMain that cannot start a coroutine";
+        return null;
+    }
+
+    /// <summary>
+    /// Late map answers through a WmvMain of the test's own (as TerrainHiddenModelTests: an inactive GameObject, so its
+    /// Awake never runs; the fields these paths read are set by hand), wired as the player wires it -- WireTerrainMessages
+    /// for loadTerrainTile, clearTerrain and the map answers, OnLoadWoWModel to HandleLoadWoWModel, OnAssetResponse to
+    /// HandleAssetResponse (counted) -- and fed host lines through the client's own dispatch:
+    ///   - a tile builds through that wiring with no answer on the model asset path;
+    ///   - a terrain load whose place a model load took: its late WDT answer goes to the session (dropped as late), never to
+    ///     HandleAssetResponse, and the model job waiting for its .m2 is exactly as it was -- also when a map answer names
+    ///     that job's own request id, and when a map answer is handed to HandleAssetResponse directly (dropped there by its
+    ///     guard, counted once for a role and once for a map id without one);
+    ///     the job's own .m2 answer then reaches it (parsed, its skin asked for);
+    ///   - the same for a world-model job waiting for its root, whose own answer then reaches it (its groups asked for);
+    ///   - a map id with no role goes through that wiring to the session too, and runtimeState then sends the session's
+    ///     request bookkeeping (retired, retired in all, the last retired, late and unowned apart) under the host's names.
+    /// </summary>
+    static void TerrainLateAnswerMainTests(Action<string> log)
+    {
+        string blocked = TerrainMainTestsBlocked();
+        if (blocked != null)
+        {
+            log("terrain late answers: not run -- " + blocked);
+            return;
+        }
+        int tx = TerrainTestTileX, ty = TerrainTestTileY;
+        const int modelFile = 990401, skinFile = 990402, wmoFile = 990501;
+        const uint wmoFirstGroup = 990510, wmoTexture = 990520;
+        int modelsLive = WmvRuntimeModel.Live, tilesLive = WmvRuntimeTerrainTile.Live, wmosLive = WmvRuntimeMapObject.Live;
+        byte[] wdt = TerrainWdt(true, tx, ty, (int)TerrainTestRoot);
+        byte[] root = AdtSynthetic.FlatRoot(tx, ty);
+        byte[] m2 = M2Synthetic.InFileSkeletonModel(skinFile);
+        byte[] wmoRootBytes = WmoSynthetic.SquaresRoot(3, wmoFirstGroup, wmoTexture);
+        var objects = new List<GameObject>();
+        var ipcGo = new GameObject("TerrainLateAnswerIpc");
+        objects.Add(ipcGo);
+        var ipc = ipcGo.AddComponent<WmvIpcClient>();
+        var sent = new List<string>();
+        ipc.SentForTest = s => sent.Add(s);
+        WmvMain main = null;
+        WmvTerrainSession session = null;
+        var reports = new List<WmvIpcClient.TerrainTileReport>();
+        int assetPathCalls = 0;
+        Func<int, int> reportsFor = load => reports.FindAll(r => r.Load == load).Count;
+        Func<object, string, object> field = (o, name) => o.GetType().GetField(name, BindingFlags.Instance | BindingFlags.Public).GetValue(o);
+        try
+        {
+            var mainGo = new GameObject("TerrainLateAnswerMain");
+            objects.Add(mainGo);
+            mainGo.SetActive(false);                                          // before AddComponent: no Awake
+            main = mainGo.AddComponent<WmvMain>();
+            GameObject camGo;
+            WmvOrbitCamera orbit = NewCamera(out camGo);
+            objects.Add(camGo);
+            Camera cam = camGo.GetComponent<Camera>();
+            cam.enabled = false;
+            cam.aspect = 1f;
+            cam.cullingMask = WmvTerrainBuilder.ModelViewMask;
+            var mode = new WmvTerrainViewMode(orbit, cam);
+            SetMainField(main, "ipc", ipc);
+            SetMainField(main, "status", mainGo.AddComponent<WmvStatusOverlay>());
+            SetMainField(main, "orbit", orbit);
+            SetMainField(main, "terrainViewMode", mode);
+            var view = (IWmvTerrainView)Activator.CreateInstance(typeof(WmvMain).GetNestedType("MainTerrainView", BindingFlags.NonPublic),
+                                                            new object[] { main });
+            session = new WmvTerrainSession(view, ipc.RequestMapAsset, r => reports.Add(r), null, a => a());
+            SetMainField(main, "terrain", session);
+            InvokeMain(main, "WireTerrainMessages");
+            WmvMain m = main;
+            ipc.OnAssetResponse = r => { assetPathCalls++; InvokeMain(m, "HandleAssetResponse", r); };
+            ipc.OnLoadWoWModel = (path, fileDataID, client, character, load, kind, keepView) =>
+                InvokeMain(m, "HandleLoadWoWModel", path, fileDataID, client, character, load, kind, keepView);
+            Func<int, string, string> modelLoadLine = (fileDataID, kind) =>
+                "{\"type\":\"loadWoWModel\",\"path\":\"\",\"fileDataID\":" + fileDataID + ",\"client\":\"test\",\"character\":false,\"load\":9," +
+                "\"kind\":\"" + kind + "\",\"assetEpoch\":7}";
+
+            // ---- a tile through the player's own wiring: both answers go to the session, none to the model asset path
+            ipc.FeedLineForTest(TerrainLoadLine(401, 7), null);
+            string wdtId = RequestIdOf(LastSent(sent, "getMapAsset"));
+            ipc.FeedLineForTest(MapAnswerLine(wdtId, TerrainTestWdt, "wdt", 401, wdt), wdt);
+            ipc.FeedLineForTest(MapAnswerLine(RequestIdOf(LastSent(sent, "getMapAsset")), (int)TerrainTestRoot, "rootAdt", 401, root), root);
+            for (int f = 0; f < 3; f++)
+                session.Pump(4000.0 + f);
+            WmvIpcClient.TerrainTileReport built = reports.Find(r => r.Load == 401);
+            Check(built != null && built.Status == "built" && reportsFor(401) == 1 && assetPathCalls == 0 && mode.Active,
+                  "terrain late answers: a tile builds through the player's wiring (WireTerrainMessages), its answers never on the model asset " +
+                  "path (" + assetPathCalls + " there; tile " + (built != null ? built.Status : "not reported") + ")", log);
+
+            // ---- a model load takes a terrain load's place; the terrain load's late answer is the session's alone
+            ipc.FeedLineForTest(TerrainLoadLine(402, 7), null);
+            string id402 = RequestIdOf(LastSent(sent, "getMapAsset"));
+            ipc.FeedLineForTest(modelLoadLine(modelFile, "m2"), null);
+            object job = GetMainField(main, "job");
+            string pendingM2 = job != null ? (string)field(job, "PendingM2") : null;
+            WmvIpcClient.TerrainTileReport r402 = reports.Find(r => r.Load == 402);
+            Func<bool> jobUntouched = () => GetMainField(m, "job") == job && job != null && (string)field(job, "PendingM2") == pendingM2 &&
+                                            field(job, "M2Bytes") == null && field(job, "Model") == null;
+            int late = session.LateAnswersDropped;
+            ipc.FeedLineForTest(MapAnswerLine(id402, TerrainTestWdt, "wdt", 402, wdt), wdt);
+            Check(r402 != null && r402.Status == "superseded" && reportsFor(402) == 1 && pendingM2 != null && session.LateAnswersDropped == late + 1 &&
+                  assetPathCalls == 0 && jobUntouched() && !mode.Active,
+                  "terrain late answers: a terrain load's WDT answer arriving after a model load took its place goes to the session (dropped as " +
+                  "late), never to HandleAssetResponse (" + assetPathCalls + " call(s)); the model job waiting for " + pendingM2 + " is as it was", log);
+
+            // ---- a map answer naming the model job's own request id: still the session's (unowned), the job untouched
+            int unowned = session.UnownedAnswersDropped;
+            ipc.FeedLineForTest(MapAnswerLine(pendingM2, (int)TerrainTestRoot, "rootAdt", 402, wdt), wdt);
+            Check(session.UnownedAnswersDropped == unowned + 1 && assetPathCalls == 0 && jobUntouched(),
+                  "terrain late answers: a map answer (role rootAdt) under the model job's own request id " + pendingM2 + " goes to the session, " +
+                  "not to the job, which is untouched", log);
+
+            // ---- defence in depth: HandleAssetResponse handed a map answer directly drops it before any model path, by each half
+            // of the rule -- its guard's own count says it acted on both (a map id with no role would otherwise reach the
+            // model paths unseen: no job waits for a "map" id)
+            int guardBefore = main.MapAnswersDroppedOnAssetPath;
+            InvokeMain(main, "HandleAssetResponse", HiddenMapAnswer(pendingM2, modelFile, "wdt", 402, wdt));
+            int guardByRole = main.MapAnswersDroppedOnAssetPath - guardBefore;
+            InvokeMain(main, "HandleAssetResponse", new WmvIpcClient.AssetResponse
+            {
+                requestId = id402, ok = false, error = "test: a map id with no role", role = "", path = "", state = "", detail = "", md5 = "",
+            });
+            int guardById = main.MapAnswersDroppedOnAssetPath - guardBefore - guardByRole;
+            Check(guardByRole == 1 && guardById == 1 && main.MapAnswersDroppedOnAssetPath == guardBefore + 2 && guardBefore == 0 && jobUntouched(),
+                  "terrain late answers: HandleAssetResponse itself drops a map answer handed to it -- by role under the job's own id (" +
+                  guardByRole + "), by a map id (" + id402 + ") without a role (" + guardById + "); its guard counted " + guardBefore + " -> " +
+                  main.MapAnswersDroppedOnAssetPath + " -- and the model job is untouched", log);
+
+            // ---- the job's own answer still reaches it
+            int requestsBefore = sent.Count;
+            ipc.FeedLineForTest(ModelAnswerLine(pendingM2, modelFile, m2, false), m2);
+            object jobAfter = GetMainField(main, "job");
+            string pendingSkin = jobAfter != null ? (string)field(jobAfter, "PendingSkin") : null;
+            Check(assetPathCalls == 1 && jobAfter == job && field(job, "M2Bytes") == m2 && field(job, "Model") != null && pendingSkin != null &&
+                  SentContains(sent.GetRange(requestsBefore, sent.Count - requestsBefore), "{\"type\":\"getAssetByFileDataID\",\"requestId\":\"" + pendingSkin + "\""),
+                  "terrain late answers: the model job's own .m2 answer reaches HandleAssetResponse (" + assetPathCalls + " call) and the job: " +
+                  "parsed, its skin asked for (" + (pendingSkin ?? "nothing") + ")", log);
+
+            // ---- the same for a world-model job waiting for its root
+            ipc.FeedLineForTest(TerrainLoadLine(403, 7), null);                // drops the model job
+            string id403 = RequestIdOf(LastSent(sent, "getMapAsset"));
+            ipc.FeedLineForTest(modelLoadLine(wmoFile, "wmo"), null);
+            object wmoJob = GetMainField(main, "wmoJob");
+            string pendingRoot = wmoJob != null ? (string)field(wmoJob, "PendingRoot") : null;
+            WmvIpcClient.TerrainTileReport r403 = reports.Find(r => r.Load == 403);
+            Func<bool> wmoUntouched = () => GetMainField(m, "wmoJob") == wmoJob && wmoJob != null && (string)field(wmoJob, "PendingRoot") == pendingRoot &&
+                                            field(wmoJob, "Root") == null;
+            int calls = assetPathCalls;
+            late = session.LateAnswersDropped;
+            ipc.FeedLineForTest(MapAnswerLine(id403, TerrainTestWdt, "wdt", 403, wdt), wdt);
+            ipc.FeedLineForTest(MapAnswerLine(pendingRoot, (int)TerrainTestRoot, "rootAdt", 403, wdt), wdt);
+            bool lateKept = r403 != null && r403.Status == "superseded" && reportsFor(403) == 1 && session.LateAnswersDropped == late + 1 &&
+                            assetPathCalls == calls && pendingRoot != null && wmoUntouched() && GetMainField(main, "job") == null;
+            requestsBefore = sent.Count;
+            ipc.FeedLineForTest(ModelAnswerLine(pendingRoot, wmoFile, wmoRootBytes, false), wmoRootBytes);
+            Check(lateKept && assetPathCalls == calls + 1 && GetMainField(main, "wmoJob") == wmoJob && field(wmoJob, "Root") != null &&
+                  field(wmoJob, "PendingRoot") == null &&
+                  SentContains(sent.GetRange(requestsBefore, sent.Count - requestsBefore), "{\"type\":\"getAssetByFileDataID\""),
+                  "terrain late answers: a world-model job waiting for its root (" + pendingRoot + ") sees neither the late terrain answer nor a " +
+                  "map answer under its own id; its root's answer reaches it (parsed, its groups asked for)", log);
+            Check(session.PendingRequests == 0 && session.RetiredRequests == 2 && session.ReportsSent == 3 && session.SecondReportsRefused == 0 &&
+                  session.RetiredTotal == 2 && session.LastRetiredRequest == id403,
+                  "terrain late answers: three terrain loads, three reports; nothing pending, the two ended loads' requests retired (" +
+                  session.RetiredTotal + " in all, the last " + session.LastRetiredRequest + ")", log);
+
+            // ---- a map id with no role through the player's own wiring: the session's (unowned), never the model asset path;
+            // then runtimeState (FillTerrainRuntimeState) sends the session's bookkeeping under the host's names, late and
+            // unowned apart -- here they differ (2 and 3), so a swap shows
+            int callsBefore = assetPathCalls, unownedBefore = session.UnownedAnswersDropped;
+            ipc.FeedLineForTest("{\"type\":\"assetResponse\",\"requestId\":\"map900\",\"ok\":false,\"fileDataID\":" + TerrainTestWdt + ",\"load\":403," +
+                                "\"assetEpoch\":7,\"state\":\"stale\",\"detail\":\"x\",\"error\":\"x\"}", null);
+            int stateFrom = sent.Count;
+            InvokeMain(main, "HandleRuntimeState", 31);
+            string stateLine = LastSent(sent.GetRange(stateFrom, sent.Count - stateFrom), "runtimeState");
+            int lateNow = session.LateAnswersDropped, unownedNow = session.UnownedAnswersDropped;
+            string bookkeeping = "\"terrainPendingRequests\":0,\"terrainRetiredRequests\":2,\"terrainRetiredTotal\":2,\"terrainLastRetiredRequest\":\"" +
+                                 id403 + "\",\"mapAnswersRouted\":" + ipc.MapAnswersRouted + ",\"mapAnswersDropped\":" + (lateNow + unownedNow) +
+                                 ",\"mapAnswersLate\":" + lateNow + ",\"mapAnswersUnowned\":" + unownedNow + ",";
+            Check(assetPathCalls == callsBefore && unownedNow == unownedBefore + 1 && lateNow == 2 && unownedNow == 3 &&
+                  stateLine.Contains(bookkeeping) && main.MapAnswersDroppedOnAssetPath == 2,
+                  "terrain late answers: a map id with no role (map900) fed through the player's wiring goes to the session (unowned " +
+                  unownedBefore + " -> " + unownedNow + "), not to the model asset path (" + (assetPathCalls - callsBefore) + "); runtimeState " +
+                  "then sends " + bookkeeping + " (" + (stateLine.Length > 0 ? "sent" : "nothing sent") + ")", log);
+            InvokeMain(main, "SupersedeMapObjectJob", "test end");
+        }
+        catch (Exception e)
+        {
+            // A path that threw (through reflection, the cause is the inner exception) fails here instead of ending the run.
+            Exception cause = e is TargetInvocationException && e.InnerException != null ? e.InnerException : e;
+            Check(false, "terrain late answers: the test threw " + cause.GetType().Name + ": " + cause.Message + " at " + cause.StackTrace, log);
+        }
+        finally
+        {
+            if (main != null)
+                InvokeMain(main, "DisposeTerrain");
+            foreach (GameObject go in objects)
+                if (go != null) UnityEngine.Object.DestroyImmediate(go);
+        }
+        Check(WmvRuntimeModel.Live == modelsLive && WmvRuntimeTerrainTile.Live == tilesLive && WmvRuntimeMapObject.Live == wmosLive &&
+              TerrainTallies() == "0/0/0",
+              "terrain late answers: every runtime these tests made is released (models " + WmvRuntimeModel.Live + ", tiles " +
+              WmvRuntimeTerrainTile.Live + ", world models " + WmvRuntimeMapObject.Live + ")", log);
     }
 
     /// <summary>
@@ -5600,12 +6528,10 @@ public static class WmvLifecycleSelfTest
     /// </summary>
     static void TerrainHiddenModelTests(Action<string> log)
     {
-        if (!string.IsNullOrEmpty(Environment.GetEnvironmentVariable("WMV_VIEWPORT_SHOT")) ||
-            !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("WMV_VIEWPORT_ORBIT")) || WmvModelBuilder.Debug_.LightCheck ||
-            WmvModelBuilder.Debug_.AllocCheck || WmvModelBuilder.Debug_.HasFrameBounds || WmvTerrainDebug.View != WmvTerrainView.Shaded ||
-            WmvTerrainDebug.OnlyChunk >= 0 || WmvTerrainDebug.Focus >= 0 || WmvTerrainDebug.TopDown || WmvTerrainDebug.DumpName != null)
+        string blocked = TerrainMainTestsBlocked();
+        if (blocked != null)
         {
-            log("terrain hidden model: not run -- a capture or debug switch is set, and these tests drive a WmvMain that cannot start a coroutine");
+            log("terrain hidden model: not run -- " + blocked);
             return;
         }
         int tx = TerrainTestTileX, ty = TerrainTestTileY;
@@ -5684,8 +6610,8 @@ public static class WmvLifecycleSelfTest
             Action<int> buildTile = load =>
             {
                 InvokeMain(main, "HandleLoadTerrainTile", TerrainCommand(load, tx, ty));
-                InvokeMain(main, "HandleAssetResponse", HiddenMapAnswer(asked[asked.Count - 1][0], TerrainTestWdt, "wdt", load, wdt));
-                InvokeMain(main, "HandleAssetResponse", HiddenMapAnswer(asked[asked.Count - 1][0], (int)TerrainTestRoot, "rootAdt", load, root));
+                InvokeMain(main, "HandleMapAssetResponse", HiddenMapAnswer(asked[asked.Count - 1][0], TerrainTestWdt, "wdt", load, wdt));
+                InvokeMain(main, "HandleMapAssetResponse", HiddenMapAnswer(asked[asked.Count - 1][0], (int)TerrainTestRoot, "rootAdt", load, root));
                 for (int f = 0; f < 3; f++)
                     session.Pump(1000.0 * load + f);
             };
@@ -5698,8 +6624,8 @@ public static class WmvLifecycleSelfTest
             InvokeMain(main, "HandleLoadTerrainTile", TerrainCommand(5, tx, ty));
             bool nothingAnswered = !SentSince(sent, sentBefore, "\"type\":\"characterSceneApplied\"");
             bool workKept = dresser.Busy && dresser.AppliedRevision == 1 && mounted.PreparingFileDataID == mountId && session.Loading;
-            InvokeMain(main, "HandleAssetResponse", HiddenMapAnswer(asked[asked.Count - 1][0], TerrainTestWdt, "wdt", 5, wdt));
-            InvokeMain(main, "HandleAssetResponse", HiddenMapAnswer(asked[asked.Count - 1][0], (int)TerrainTestRoot, "rootAdt", 5, root));
+            InvokeMain(main, "HandleMapAssetResponse", HiddenMapAnswer(asked[asked.Count - 1][0], TerrainTestWdt, "wdt", 5, wdt));
+            InvokeMain(main, "HandleMapAssetResponse", HiddenMapAnswer(asked[asked.Count - 1][0], (int)TerrainTestRoot, "rootAdt", 5, root));
             for (int f = 0; f < 3; f++)
                 session.Pump(5000.0 + f);
             WmvIpcClient.TerrainTileReport built5 = reports.Find(r => r.Load == 5);
@@ -5722,7 +6648,7 @@ public static class WmvLifecycleSelfTest
             // ---- runtimeState with the tile shown: the tiles' own objects, under the host's names
             string shownLine = runtimeState(21);
             Check(shownLine.Contains("\"liveTerrainTiles\":1,") && shownLine.Contains("\"terrainView\":true,") &&
-                  shownLine.EndsWith(",\"terrainMeshes\":256,\"terrainMaterials\":1,\"terrainGameObjects\":257}", StringComparison.Ordinal),
+                  shownLine.Contains(",\"terrainMeshes\":256,\"terrainMaterials\":1,\"terrainGameObjects\":257," + NoTerrainRequests),
                   "terrain hidden model: runtimeState with the tile shown sends the tile's own objects -- " + tail(shownLine, "terrainMeshes"), log);
 
             // ---- a mount change in the terrain view: kept, not counted; clearTerrain leaves the view and does it, once
@@ -5747,7 +6673,7 @@ public static class WmvLifecycleSelfTest
                   bodyBox.center + ")", log);
             Check(clearedLine.Contains("\"liveTerrainTiles\":0,") && clearedLine.Contains("\"terrainView\":false,") &&
                   clearedLine.Contains("\"meshObjects\":" + meshesWithTile + ",") && Meshes() == meshesWithTile &&
-                  clearedLine.EndsWith(",\"terrainMeshes\":0,\"terrainMaterials\":0,\"terrainGameObjects\":0}", StringComparison.Ordinal),
+                  clearedLine.Contains(",\"terrainMeshes\":0,\"terrainMaterials\":0,\"terrainGameObjects\":0," + NoTerrainRequests),
                   "terrain hidden model: runtimeState right after clearTerrain sends no terrain object -- " + tail(clearedLine, "terrainMeshes") +
                   " -- while Unity, its Object.Destroy deferred to the end of the frame, still counts " + meshesWithTile + " Mesh objects", log);
 
@@ -5763,7 +6689,7 @@ public static class WmvLifecycleSelfTest
                            (bool)GetMainField(main, "framingOwed") && !(bool)GetMainField(main, "haveRiddenFitPending") && !mode.Active &&
                            cam.cullingMask == WmvTerrainBuilder.ModelViewMask;
             Check(dropped && modelLine.Contains("\"liveTerrainTiles\":0,") &&
-                  modelLine.EndsWith(",\"terrainMeshes\":0,\"terrainMaterials\":0,\"terrainGameObjects\":0}", StringComparison.Ordinal),
+                  modelLine.Contains(",\"terrainMeshes\":0,\"terrainMaterials\":0,\"terrainGameObjects\":0," + NoTerrainRequests),
                   "terrain hidden model: leaving the terrain view for a model load drops the kept fit -- the model view as it was, viewFramings " +
                   framingsBefore + " -> " + main.ViewFramings + ", the load owed a framing -- and runtimeState sends no terrain object (" +
                   tail(modelLine, "terrainMeshes") + ")", log);
@@ -5795,6 +6721,9 @@ public static class WmvLifecycleSelfTest
               "terrain hidden model: every model runtime and terrain tile these tests made is released (models " + WmvRuntimeModel.Live +
               ", tiles " + WmvRuntimeTerrainTile.Live + ", tallies " + TerrainTallies() + ")", log);
     }
+
+    /// <summary>runtimeState's request bookkeeping with nothing pending or retired, ever.</summary>
+    const string NoTerrainRequests = "\"terrainPendingRequests\":0,\"terrainRetiredRequests\":0,\"terrainRetiredTotal\":0,\"terrainLastRetiredRequest\":\"\",";
 
     static WmvIpcClient.CharacterScene HiddenModelScene(int revision, int itemFileDataID)
     {
@@ -5850,6 +6779,13 @@ public static class WmvLifecycleSelfTest
         public string type;
         public int load;
         public string status;
+    }
+
+    /// <summary>runtimeState read back as JSON: the request bookkeeping fields that are not plain counts in a row.</summary>
+    [Serializable] class RuntimeStateProbe
+    {
+        public int terrainRetiredTotal;
+        public string terrainLastRetiredRequest;
     }
 
     static string RequestIdOf(string line)

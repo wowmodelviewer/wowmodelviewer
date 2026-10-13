@@ -386,11 +386,23 @@ public partial class WmvMain : MonoBehaviour
             : ipc.RequestAsset(path, fileDataID, character);
     }
 
+    /// <summary>Map answers that reached HandleAssetResponse and were dropped there by its guard. The client routes every
+    /// map answer to the terrain session, so this stays 0 unless that routing is bypassed; the self-test counts it to see
+    /// the guard act on each half of the rule (a map id, a role).</summary>
+    public int MapAnswersDroppedOnAssetPath { get; private set; }
+
     void HandleAssetResponse(WmvIpcClient.AssetResponse r)
     {
-        // The terrain load's map files (getMapAsset), and late answers of terrain loads that have ended.
-        if (terrain != null && terrain.ClaimAssetResponse(r))
+        // A map file's answer (getMapAsset) is never a model's, a character's or a world model's: the client routes every
+        // one to HandleMapAssetResponse (the terrain session). One that reaches this path anyway is dropped here, before
+        // any of their handlers can read it.
+        if (WmvIpcClient.IsMapAnswer(r))
+        {
+            MapAnswersDroppedOnAssetPath++;
+            Debug.LogWarning("WMV: [terrain] a map answer reached the model asset path (request " + r.requestId + ", role " +
+                             (string.IsNullOrEmpty(r.role) ? "none" : r.role) + ", load " + r.load + ") -- dropped");
             return;
+        }
         // The world-model job's root, group files and textures.
         if (HandleMapObjectAsset(r))
             return;

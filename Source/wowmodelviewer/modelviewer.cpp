@@ -4383,6 +4383,9 @@ void ModelViewer::ResetClientState()
 {
   // The same FileDataID is another file in the next client: the Unity player's asset cache starts over (protocol 9).
   UnityAssetAccess::noteClientReplaced();
+  // ... and the host's record of which map files it has read is the previous client's: forgotten now.
+  if (unityRendererHost && unityRendererHost->ipc())
+    unityRendererHost->ipc()->noteClientReplaced(UnityAssetAccess::clientEpoch());
   // A terrain tile of the previous client, being built or on show, is taken away (THE TERRAIN TILE): its map files are
   // that client's, and the requests still out for them are answered stale.
   if (m_terrainRequest.load != 0 || m_playerContent == PlayerContent::Terrain)

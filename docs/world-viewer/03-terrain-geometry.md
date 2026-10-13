@@ -29,8 +29,9 @@ player `Assembly-CSharp.dll` MD5 `67c0d3e67449...` (protocol 12). Every run belo
 | Client switching | **PASS**: every in-flight load across Retail -> Era -> MoP -> Beta -> Retail answered "cleared", its WDT request answered "stale" (epochs E / E+1), no terrain left; each later tile built from that client's own bytes (MD5 = corpus) |
 | Resource lifetime | **PASS**: terrain Meshes / Materials / GameObjects 256/1/257 while a tile is shown, 0/0/0 after clear, model load, client switch and every failed load; global Mesh/Material counts back to their references; no per-load growth over 10 repeated loads |
 | Host responsiveness (GUI-thread time per request) | **PASS**: worst file (1,462,916-byte root) median 9.45 ms, p95 9.74 ms over 30 warm requests; budget 20 ms; no transport change needed |
-| Player self-test (`-wmvLifecycleTest`) | **PASS**: 730 passed, 0 failed (631 before this branch) |
+| Player self-test (`-wmvLifecycleTest`) | **PASS**: 767 passed, 0 failed (631 before this branch; 730 at the first stage 03 commit) |
 | Regression (C# parsers, Python audit, map catalogue, customization x4 clients, Models, Buildings, texture decode, old-host and old-player compatibility, casc-whole-read, wdc3-strings) | **PASS**: identical to `develop` where comparable (section 14) |
+| Bounded terrain IPC and diagnostic bookkeeping (follow-up, section 17) | **PASS**: no request or record table grows however many answers never come; a late map answer can only reach the terrain session, which drops it; host records and first-read tracking bounded and scoped to one client; memory flat over 553-load runs |
 | Adversarial review (design, core + host, player, end to end) | design review by 3 reviewers, then two code rounds: 38 findings each checked by an independent verifier, 26 distinct ones confirmed and fixed, 10 refuted; end-to-end findings fixed or recorded (section 15) |
 
 ## 1. Files
@@ -100,7 +101,7 @@ sends it in answer to a protocol-12 host.
 | `getMapAsset` | player -> host | `requestId`, `load`, `assetEpoch`, `role` (`wdt` or `rootAdt`), `fileDataID` |
 | `assetResponse` (to `getMapAsset`) | host -> player | the usual fields and binary payload, plus `role`, `load`, `assetEpoch`, `state`, `detail`, `readMs`, `md5`; `error` = `detail` when not ok; never cacheable |
 | `terrainTileLoaded` | player -> host | `load`, `status` (`built`, `failed`, `superseded`, `cleared`), `reason`, `hostState`, `hostDetail`, map/tile, WDT and root ids, bytes and MD5s of the bytes parsed, chunk counts, vertices, triangles, hole cells, bounds (Unity, root-local), `rootOffset`, `originWorld`, timings, `meshBytes`, live and object counts, managed and native memory |
-| `runtimeState` additions | player -> host | `liveTerrainTiles`, `terrainLoad`, `terrainLoading`, `terrainView`, `cameraMask`, `meshObjects`, `materialObjects`, `terrainMeshes`, `terrainMaterials`, `terrainGameObjects` |
+| `runtimeState` additions | player -> host | `liveTerrainTiles`, `terrainLoad`, `terrainLoading`, `terrainView`, `cameraMask`, `meshObjects`, `materialObjects`, `terrainMeshes`, `terrainMaterials`, `terrainGameObjects`; request bookkeeping (section 17): `terrainPendingRequests`, `terrainRetiredRequests`, `terrainRetiredTotal`, `terrainLastRetiredRequest`, `mapAnswersRouted`, `mapAnswersDropped`, `mapAnswersLate`, `mapAnswersUnowned`, `terrainTimeoutMs` |
 
 **Host validation, before any read** (`decideMapAssetRequest`): a client being loaded -> `refused`; no `load` or
 `load` <= 0 -> `refused`; no current request, another load, another client epoch, or a catalogue that no longer
@@ -317,7 +318,8 @@ limit; the WDT the load names; refusals of a tile outside the grid, an unknown m
 failed-load bookkeeping cases), starts the player, requires protocol
 12, requests the tile through the production path and waits for its report. `WMV_TERRAINTEST_SEQUENCE` adds steps:
 `tile`, `repeat`, `clear` (also in flight), `supersede`, `staleepoch`, `staleload`, `expectfail`, `notlocal`
-(precondition-checked), `switch`, `model` (also superseding a building tile), `modelthentile`, `wait`. Invariants:
+(precondition-checked), `switch`, `model` (also superseding a building tile), `modelthentile`, `wait`, and the late-answer
+steps of section 17 (`timeout`, `latesupersede`, `lateclear`, `lateswitch`, `reconnect`, `failrepeat`). Invariants:
 every load answered exactly once, MD5 parsed = MD5 served, terrain objects 0 after clear / model / switch, counts back
 to the named reference, no load in flight at the end. Player switches: `-wmvTerrainView=shaded|chunks|wire|
 shadedwire|normals`, `-wmvTerrainChunk=N`, `-wmvTerrainFocus=N`, `-wmvTerrainTopDown`, `-wmvTerrainDump=<name>`. There is
@@ -358,7 +360,7 @@ was correct).
 | Python audit tests | 54 tests OK (20 new; 18 skip without the corpus) |
 | `compare_terrain_mesh.py` (player dumps, 6 tiles) | 15/15 checks each, bit-exact |
 | `check_terrain_run.py` over every terrain run (57 runs) | PASS: 2,379 passed, 0 failed, 58 skipped (10 harness precondition skips, 48 map-1051 corpus comparisons: the corpus holds map 0 only) |
-| Player self-test | 730 passed, 0 failed |
+| Player self-test | 767 passed, 0 failed (final follow-up player) |
 | `-terraintile` lifecycle (34 loads), client switch (4 switches), Beta not-local, worst case x 11, not-in-root x 2 | PASS (131/0, 74/0, 39/0/1, 60/0, 39/0 and 38/0/1) |
 | Old player (protocol 11) + new host | in-process checks PASS, then "player too old" (expected) |
 | Old host + new player, `-mo bear -unityipctest` | PASS |
@@ -430,3 +432,93 @@ against MODF extents and MLDX in Unity space -> the placement stages (W7/W8).
 - Serving many files needs the audit's storage-owning thread (W3) before any multi-tile view.
 - The Maps viewer mode (W11) is the first user-facing entry point; `PlayerContent::Terrain` and the viewport notice
   rules already exist for it.
+
+## 17. Follow-up: bounded terrain IPC and diagnostic bookkeeping
+
+On top of the first stage 03 commit (`73cb7efd`), the terrain request and diagnostic bookkeeping was made bounded and
+late answers were proven isolated. Terrain geometry did not change: the player's dumps of Retail 32_50 and 34_46, Era
+32_50 and Beta 32_48 are byte-identical to the stage 03 dumps and bit-exact against the reference.
+
+### 17.1 What was wrong (shown on `73cb7efd` before any fix)
+
+| Finding | Where | Measured on the old code |
+|---|---|---|
+| **P.** The player's terrain session kept a `requests` table entry per request until its answer arrived; no load end (built, failed, timed out, superseded, cleared, model load, shutdown) removed it | `WmvTerrainSession.cs` (old :110, :253, :343) | 1,000 loads whose answers never arrive leave 1,000 entries in every ending; 438,120 B retained after 1,000 timed-out loads, 43.5 MB after 100,000 |
+| Removing entries at load end alone would be wrong: map requests shared the ordinary request-id counter (`u<n>`) and the one answer callback, so an unclaimed late map answer would fall through to the world-model, dresser, mount, skin, anim and M2 paths | `WmvIpcClient.cs` (old :1744, `AnswerAsset`), `WmvMain.cs` `HandleAssetResponse` | an unknown map answer (role `wdt`, id `u999`) is not claimed and reaches those handlers |
+| **H1.** The host kept a full record of every served map file for a player's whole life | `UnityIpcServer` (old `m_mapAssetsServed`, emptied only in `start()`) | 302 records after 150 loads, 2 per load |
+| **H2.** The host's "first read" set was process-global and never emptied, keeping files of client epochs that were gone | `UnityIpcServer.cpp` (old :52 `g_mapAssetsRead`) | after two client switches it held 6 entries over epochs 2, 3 and 4 |
+
+### 17.2 Design
+
+- **Ownership by routing, not by memory.** Map requests use ids of their own, `map<n>` (`WmvIpcClient.cs:251`). An
+  answer with such an id, or with a `role` (only `getMapAsset` answers carry one; `IsMapAnswer`, `:260`), goes only to
+  `OnMapAssetResponse` (`:1269`): never into the asset cache, `AnswerAsset` or `OnAssetResponse`. `HandleAssetResponse`
+  drops and counts any map answer that still reaches it, before every model path (`WmvMain.cs:399`).
+- **One pending request, a bounded memory of ended ones.** The session has no request table. A load waits for one
+  request at a time; when a load ends by any path, its unanswered request moves to a ring of the last 32 (`Retire`,
+  `WmvTerrainSession.cs:759`; `RetiredCapacity`, `:85`). `ClaimMapAssetResponse` (`:303`) applies an answer only to the
+  live load whose pending id it names and whose load serial it states; anything else is dropped and counted as late
+  (its request is in the ring) or unowned. Exactly one `terrainTileLoaded` per load is unchanged. The 30 s timeout is
+  unchanged (`-wmvTerrainTimeoutMs`, clamped to 1000-120000, shortens it for tests).
+- **Host records.** The newest 256 records are kept (`MAP_ASSET_RECORDS_KEPT`, `UnityIpcServer.h:342`;
+  `recordMapAssetServed`, `.cpp:1382`) with totals of all and of those no longer kept; the `-terraintile` harness keeps
+  its own complete copy through `onMapAssetServed`.
+- **First reads.** `MapAssetReadTracker` (`UnityIpcServer.h:308`) holds the FileDataIDs read under one client epoch, at
+  most 8,192 (past that a read is reported untracked, never as a false first read). It is emptied when the client is
+  replaced (`modelviewer.cpp:4388`), and a read under a newer epoch empties it as a backstop, so first reads never mix
+  clients. It survives player restarts (the host's storage is the same).
+- **Test hooks** (harness only, inert unless armed): the host can hold a request unanswered (at most 8) and answer it
+  later through the normal decision and read; held requests are dropped, never sent, when the player connection ends.
+
+### 17.3 Tests
+
+- **Player self-test, 767 passed** (37 new): successful answers; an answer that never arrives (timeout); clear,
+  supersede, model load, client replaced and shutdown before the answer; late answers after each; an answer naming the
+  right request but another load; 1,200 failing loads with, after every load, the ended load's request in the ring and
+  the retired total exactly one higher, conservation (requests sent = answers applied + retired + pending: 1,400 = 400 +
+  1,000 + 0), and no collection of the session or of the load in flight growing (every collection type counted);
+  routing through the real IPC client (with and without a role, with and without a handler) and through a real
+  `WmvMain`, where a late map answer never reaches a model job even when it carries that job's own request id. Seven
+  deliberate mutants (role-only routing, a guard without its id half, a `HashSet` request table, a cleared load not
+  retired, a saturating total, no last-retired id, late and unowned swapped) each fail.
+- **End to end** (final binaries, hidden desktop): every late step (`timeout`, `latesupersede`, `lateclear` for the WDT
+  and the root ADT, with and without a model on screen; `lateswitch` for all six ordered pairs of Retail, Classic Era
+  and Classic Beta) requires, against a sample taken before the held request: the retired total +1, the ring
+  min(before + 1, 32), the last retired id = the held request, the late count +1, the unowned count unchanged, no second
+  report, the model on screen unchanged: PASS 325/0 and 194/0. 34 timeouts in one player take the ring past its cap (32
+  kept, 34 in all): PASS 595/0. `reconnect` with a held load: the held request is dropped unanswered, the tracker
+  survives, the new player starts at 0. `failrepeat:40`: every load answered once, nothing retired. Host-side mutants
+  (no reset on a client switch; late answers under a foreign id; no clear on a switch) each fail.
+- **Stage sequences, final binaries**: the main lifecycle sequence PASS 141/0, all six client-switch pairs PASS 104/0,
+  map 1051 31_29 x11 PASS 70/0; `check_terrain_run.py` over all 16 final runs PASS (17,298 passed, 0 failed, 15 skipped:
+  11 map-1051 corpus comparisons, 4 Era/Beta precondition skips).
+- **Regression**: `-mo bear` and `-wmo 108631 -unityipctest` PASS; the C# runner (1,179 checks) and the Python tests
+  (54) pass.
+
+### 17.4 Real memory
+
+Three runs, each a fresh viewer and player: 200 successful loads, 200 failing loads, 20 timeouts, three Classic Beta and
+three Classic Era round trips, four reconnects, then 100 more loads (553 loads per run). MB = 10^6 bytes.
+
+| Phase | Host private bytes change (3 runs) | Player |
+|---|---|---|
+| 200 successful loads | +0.00 / +0.00 / +0.00 MB; +0.00 over the last 50 loads | native 142.6-143.3 MB, last 25 vs first 25 loads within 0.03 MB; managed median about 8.0 MB |
+| 200 failing loads | +0.30 / +0.79 / +0.79 MB; +0.00 over the last 50 | native within 0.002 MB |
+| 20 timeouts | +0.89 / -0.69 / +0.48 MB | retired 20, late 20 |
+| 12 client switches | +51.1 / +89.4 / +60.1 MB (see below) | |
+| 4 reconnects | +0.00 MB | each new player starts at 0 pending, 0 retired |
+| 100 more loads | +0.00 / +0.30 / +0.18 MB; +0.00 over the last 50 | native within 0.03 MB |
+
+The bookkeeping stayed bounded throughout: host records at most 256 (672 served to the first player), tracker at most
+2 files, held at most 1, player ring at most 32; Mesh / Material counts 257 / 63 and terrain meshes / materials /
+GameObjects 256 / 1 / 257 at the end of every phase, 1 / 62 and 0 / 0 / 0 after the final clear. The growth at client
+switches is the clients' own load memory (the first Beta round trip +105 to +108 MB, later trips smaller, the Era trips
+within 2.5 MB after a drop); it is not this bookkeeping, and it is not explained here.
+
+### 17.5 Remaining
+
+- MoP Classic could not be exercised: its storage does not open on this machine ("Opening ... failed. Error 2").
+- The memory a client switch leaves (17.4) is outside this follow-up and unexplained.
+- `MapAnswersDroppedOnAssetPath` (the model-path guard's count) is in the player log only, not in `runtimeState`; no
+  end-to-end run can reach that guard (routing sends map answers elsewhere first); the self-test covers it.
+- The harness's ring constant (32) must follow the player's `RetiredCapacity`.
