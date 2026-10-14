@@ -25,6 +25,7 @@
 #include <windows.h>
 #include <psapi.h>
 
+#include "CustomizationGeosetTest.h"
 #include "ExporterPlugin.h"
 #include "Game.h"
 #include "GameFolder.h" // core::GameConfig
@@ -2390,6 +2391,9 @@ static int doHeadlessClassicCustomizationTest(ModelViewer * frame)
   // ---- 10. Playable Races and NPC Races ---------------------------------------------------------------
   checkRaceCategories(frame, check, skip);
 
+  // ---- 11. The geosets customization choices show ----------------------------------------------------
+  checkCustomizationGeosets(frame, check, skip);
+
   LOG_INFO << QString("[customization-test] RESULT: %1 (%2 passed, %3 failed, %4 skipped)").arg(failed == 0 ? "PASS" : "FAIL").arg(passed).arg(failed).arg(skipped);
   return failed;
 }
@@ -3035,6 +3039,9 @@ static int doHeadlessCustomizationTest(ModelViewer * frame)
 
   // ---- 13. Playable Races and NPC Races --------------------------------------------------------------
   checkRaceCategories(frame, check, skip);
+
+  // ---- 14. The geosets customization choices show ----------------------------------------------------
+  checkCustomizationGeosets(frame, check, skip);
 
   LOG_INFO << QString("[customization-test] RESULT: %1 (%2 passed, %3 failed, %4 skipped)").arg(failed == 0 ? "PASS" : "FAIL").arg(passed)
                   .arg(failed).arg(skipped);

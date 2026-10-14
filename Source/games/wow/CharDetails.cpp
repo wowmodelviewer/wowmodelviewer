@@ -19,6 +19,7 @@
 #include <QXmlStreamReader>
 
 #include <algorithm>
+#include <bitset>
 #include <set>
 
 #include <algorithm>
@@ -1354,11 +1355,11 @@ void CharDetails::refreshGeosets()
   if (!showHair)
     geosets[CG_SKIN_OR_HAIR] = 0;
 
-  // NOTE: customization-choice geosets are applied selectively in
-  // applyCustomizationGeosets() -- it toggles only the specific choice geosets
-  // (show the active choice's geoset, hide the other choices' geosets). The old
-  // group-narrowing here (setGeosetGroupDisplay) wrongly hid body geosets such
-  // as the bare arms when they shared a group with a customization option.
+  // NOTE: customization-choice geosets are applied in applyCustomizationGeosets(): the
+  // active choices' geosets, and in each group an active choice sets, none of that group's
+  // other variants. The old group-narrowing here (setGeosetGroupDisplay for every group an
+  // option could touch) wrongly hid body geosets such as the bare arms when they shared a
+  // group with a customization option; a group no active choice sets is left alone.
 
   if (model_)
   {
@@ -1379,7 +1380,7 @@ void CharDetails::refreshGeosets()
 
 }
 
-const std::vector<std::pair<int, uint> > & CharDetails::getChoiceGeosetElements(uint chrCustomizationChoiceID)
+const std::vector<CharDetails::GeosetElement> & CharDetails::getChoiceGeosetElements(uint chrCustomizationChoiceID)
 {
   const auto it = choiceGeosetElements_.find(chrCustomizationChoiceID);
   if (it != choiceGeosetElements_.end())
@@ -1392,7 +1393,7 @@ const std::vector<std::pair<int, uint> > & CharDetails::getChoiceGeosetElements(
   // 4211). The related gate is what makes those variants mutually exclusive; ignoring
   // it (and just taking the last row) left two variants of the same group visible at
   // once -> z-fighting / spikes poking through. model geoset id = GeosetType*100 + GeosetID.
-  std::vector<std::pair<int, uint> > elems;
+  std::vector<GeosetElement> elems;
   auto r = GAMEDATABASE.sqlQuery(QString(
     "SELECT ChrCustomizationGeoset.GeosetType, ChrCustomizationGeoset.GeosetID, ChrCustomizationElement.RelatedChrCustomizationChoiceID "
     "FROM ChrCustomizationElement "
@@ -1403,7 +1404,7 @@ const std::vector<std::pair<int, uint> > & CharDetails::getChoiceGeosetElements(
 
   if (r.valid)
     for (const auto & row : r.values)
-      elems.emplace_back(row[0].toInt() * 100 + row[1].toInt(), row[2].toUInt());
+      elems.push_back(GeosetElement{ row[0].toInt() * 100 + row[1].toInt(), row[0].toInt(), row[2].toUInt() });
 
   return choiceGeosetElements_.emplace(chrCustomizationChoiceID, std::move(elems)).first->second;
 }
@@ -1416,8 +1417,8 @@ void CharDetails::applyCustomizationGeosets()
   // Apply customization-choice geosets. Each customization OPTION is mutually
   // exclusive within the set of geosets ITS choices control: the active choice's
   // applicable geosets are shown and every other geoset that any of the option's
-  // choices could touch is hidden. This both shows the right variant AND suppresses
-  // the group's default-on *01 geoset when a different/None variant is selected.
+  // choices could touch is hidden; then, in every group an active choice sets, so is
+  // every other variant of the group (below).
   //
   // An element only APPLIES when its RelatedChrCustomizationChoiceID is 0
   // (unconditional) or is itself an active choice -- that gate is what makes the
@@ -1425,15 +1426,16 @@ void CharDetails::applyCustomizationGeosets()
   // mutually exclusive instead of overlapping (z-fighting).
   //
   // We collect the show-set and the controlled-set across ALL active options FIRST,
-  // then apply once, so a geoset shared by two options (e.g. the undead jaw geoset
-  // 202 used by several styles) is shown if ANY active choice wants it -- "active
-  // wins" -- and is never clobbered back off by a sibling option.
+  // then apply once, so a geoset shared by two options (e.g. the MoP Classic Undead's
+  // 200 and 300, which both Hair Color and Features set) is shown if ANY active choice
+  // wants it -- "active wins" -- and is never clobbered back off by a sibling option.
   std::set<uint> activeChoices;
   for (const auto & a : currentCustomization_)
     activeChoices.insert(a.second);
 
   std::set<int> controlled;  // geosets any active option controls
   std::set<int> show;        // geosets the active choices want shown
+  std::bitset<100> setGroups; // geoset groups (GeosetType) the active choices set
   for (const auto & active : currentCustomization_) // option id -> active choice id
   {
     const auto choicesIt = choicesPerOptionMap_.find(active.first);
@@ -1443,18 +1445,40 @@ void CharDetails::applyCustomizationGeosets()
     for (const uint choiceID : choicesIt->second)
     {
       const bool isActive = (choiceID == active.second);
-      for (const auto & ge : getChoiceGeosetElements(choiceID))
+      for (const GeosetElement & ge : getChoiceGeosetElements(choiceID))
       {
-        controlled.insert(ge.first);
-        const bool gateOk = (ge.second == 0) || (activeChoices.count(ge.second) != 0);
+        controlled.insert(ge.geoset);
+        const bool gateOk = (ge.related == 0) || (activeChoices.count(ge.related) != 0);
         if (isActive && gateOk)
-          show.insert(ge.first);
+        {
+          show.insert(ge.geoset);
+          if (ge.group >= 0 && ge.group < (int)setGroups.size())
+            setGroups.set(ge.group);
+        }
       }
     }
   }
 
   for (const int id : controlled)
     model_->setGeosetDisplayById(id, show.count(id) != 0);
+
+  // A customization geoset element sets the VALUE of its geoset group (GeosetType; a GeosetID
+  // of 0 is "none") and the game draws one variant per group, so a group an active choice sets
+  // shows only what the active choices set there: every other variant of it in the model is
+  // hidden too, not only the ones some choice of the option names. Above all the group's
+  // default variant (*01), which the default rule in WoWModel::refresh() turns on and which no
+  // choice may name: the Undead male's jaw 101, a copy of the Intact jaw 102 that no Jaw
+  // Features choice names, stayed on under every other jaw (Slackjawed 103, Drooler 104) and
+  // under the bone jaws, whose choices set group 1 to none (100) and show a group 2 jaw. A group
+  // no active choice sets keeps the default rule's result. Geoset 0, the body, is no variant.
+  // The group is the element's GeosetType, not its id / 100: a GeosetID of -1 (the Dracthyr
+  // drake's Breechcloth None, type 14) is "none" for its own group, not a variant of the one below.
+  for (size_t i = 0; i < model_->ownGeosetCount() && i < model_->geosets.size(); i++)
+  {
+    const int id = model_->geosets[i]->id;
+    if (id > 0 && id / 100 < (int)setGroups.size() && setGroups.test(id / 100) && show.count(id) == 0)
+      model_->showGeoset((uint)i, false);
+  }
 }
 
 void CharDetails::refreshTextures()

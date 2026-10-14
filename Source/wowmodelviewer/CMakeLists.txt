@@ -20,6 +20,7 @@ set(src  AnimationExportChoiceDialog.cpp
          ClientChoiceDialog.cpp
          ClientInstallations.cpp
          ColorPickerDialog.cpp
+         CustomizationGeosetTest.cpp
          DisplaySettings.cpp
          effects.cpp
          ExportJobManager.cpp
@@ -84,6 +85,7 @@ set(headers AnimationExportChoiceDialog.h
             ClientChoiceDialog.h
             ClientInstallations.h
             ColorPickerDialog.h
+            CustomizationGeosetTest.h
             DisplaySettings.h
             effects.h
             enums.h
