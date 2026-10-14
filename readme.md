@@ -16,8 +16,8 @@ run it.
   Battle.net.
 - **Per-user install, no administrator rights.** The installer installs for your Windows account only, under
   `%LOCALAPPDATA%\Programs` by default; you can choose another folder, as long as you can write to it (the viewer
-  keeps its settings and downloads next to itself, so Program Files will not work). Running it over version 0.11.0
-  upgrades that install in place, in its folder, and keeps your settings.
+  keeps its settings and downloads next to itself, so Program Files will not work). Running it over version 1.0
+  or 0.11.0 upgrades that install in place, in its folder, and keeps your settings.
 - **Not code-signed.** Windows SmartScreen may show "Windows protected your PC". Choose **More info**, then
   **Run anyway**. Only download the installer from the Releases page above; each release lists the installer's
   SHA-256.
@@ -84,12 +84,17 @@ The viewport player also keeps its window settings (and the Unity engine's own s
 under `HKEY_CURRENT_USER\Software\WoW Model Viewer`. Uninstalling removes all of these too, except `Exports\`:
 the textures you exported stay.
 
-## Known issues in 1.0
+## Known issues in 1.1
 
 - The **Models** button of the viewer selector in the command bar sometimes shows no icon. Only the icon is
   affected.
-- FBX export is not in 1.0 (0.11.0 had it), and neither is the Blender add-on installer that went with it. OBJ
+- FBX export is not included (0.11.0 had it), and neither is the Blender add-on installer that went with it. OBJ
   export (**File > Export Model**) remains.
+- Classic Beta: many of its items have no name in the client's own data and are listed as "Unnamed item" (the item
+  filter finds them by ID), and **Character > Load Item Set** equips only the pieces that have a name.
+- A character or equipment file saved with 1.0 while a replaced item still showed the previous item's look may keep
+  that look: remove the item from its slot, choose it again and save the file again.
+- **Character > Load Start Outfit** lists no outfits in any client.
 - Models from a legacy MPQ client cannot be shown in the viewport: they have no FileDataID, which the viewport
   needs.
 - The installer is not code-signed, so SmartScreen may warn before it runs (see Download and install).
@@ -120,11 +125,12 @@ cmake --build build64 --config Release
 
 If configuring stops on `bin_support\wow\listfile.csv`, which is not in git, put a copy of the community file
 list there first. The FBX exporter in `Source\plugins\exporters\fbx` needs the Autodesk FBX SDK, which is not in
-the repository; it is built only when the SDK is there (`WMV_BUILD_FBX_EXPORTER`) and is not part of 1.0.
+the repository; it is built only when the SDK is there (`WMV_BUILD_FBX_EXPORTER`) and is not part of the release.
 
 The viewport player's scripts and shaders are in `Tools\UnityRendererProject`, whose README describes how to
-build them into `tools\unity-renderer\UnityRenderer.exe` next to `wowmodelviewer.exe`. The 1.0 player is built
-with Unity 6000.5.9f1 and the Universal Render Pipeline.
+build them into `tools\unity-renderer\UnityRenderer.exe` next to `wowmodelviewer.exe`. The 1.1 player is built
+with Unity 6000.5.9f1 and the Universal Render Pipeline; like 1.0's, it takes its screenshot code
+(`WmvScreenshot.cs` and `Resources\WmvScreenshotMatte.shader`) from branch `feature/unity-screenshot-glow-alpha`.
 
 To make the installer, install Inno Setup 6.7 or later and run `installer\build-installer.ps1` with the build
 folder, the built player and the OpenSSL 1.1.1 x64 DLLs. It stages the release folder file by file (the list in

@@ -1,4 +1,4 @@
-WoW Model Viewer 1.0
+WoW Model Viewer 1.1
 ====================
 
 WoW Model Viewer shows the 3D models of World of Warcraft from your own game
@@ -29,20 +29,25 @@ FIRST STEPS
    command bar's Screenshot saves a PNG of the viewport.
 
 
-NEW IN 1.0
+NEW IN 1.1
 ----------
 
-* A new viewport, drawn by an embedded renderer built on the Unity engine.
-* Classic clients (Classic Era, Mists of Pandaria Classic, Classic Beta and
-  the other Classic lines) open as themselves.
-* A client chooser, faster loading with a database cache per client build,
-  and the loading progress shown in the chooser.
-* Textures and Buildings viewers next to Models.
-* Load NPC / Model by Wowhead link or by ID, Armory import by region, realm
-  and name, characters on mounts, item sets with transmog sets.
-* A new look with System, Light and Dark appearances.
+* Quick export in the Texture Viewer: with the Quick export box ticked,
+  Export PNG and Export BLP save the texture at once into the texture export
+  folder (Options > Settings... > Export), and a notice offers Open folder.
+* Classic Beta: the equipment windows list the client's items, and View >
+  View Item and Character > Load Item Set work there.
+* Replacing an item with one that has no appearance in the loaded client no
+  longer keeps the previous item's look.
+* Some mounts and NPCs whose names were blank now show them.
+* Undead male: each jaw choice shows only its own jaw; the default jaw no
+  longer shows through Slackjawed, Drooler or the bone jaws.
+* The first load of each client after the update builds its database cache
+  again, once.
 
-The full list of changes is in the release notes on the project page.
+Version 1.0 brought the new viewport built on the Unity engine, Classic
+clients, the client chooser, the Textures and Buildings viewers and the new
+look. The full list of changes is in the release notes on the project page.
 
 
 KNOWN ISSUES
@@ -50,8 +55,16 @@ KNOWN ISSUES
 
 * The Models button of the viewer selector sometimes shows no icon. Only the
   icon is affected.
-* FBX export is not in 1.0 (0.11.0 had it), and neither is the Blender add-on
-  installer that went with it. OBJ export (File > Export Model) remains.
+* FBX export is not included (0.11.0 had it), and neither is the Blender
+  add-on installer that went with it. OBJ export (File > Export Model)
+  remains.
+* Classic Beta: many of its items have no name in the client's own data and
+  are listed as "Unnamed item" (the item filter finds them by ID), and Load
+  Item Set equips only the pieces that have a name.
+* A character or equipment file saved with 1.0 while a replaced item still
+  showed the previous item's look may keep that look: remove the item from
+  its slot, choose it again and save the file again.
+* Character > Load Start Outfit lists no outfits in any client.
 * Models from a legacy MPQ client (File > Load Legacy MPQ Client...) cannot be
   shown in the viewport: they have no FileDataID, which the viewport needs.
 
@@ -63,7 +76,9 @@ userSettings\unityRenderer.log from this folder.
 WHERE FILES ARE KEPT
 --------------------
 
-Everything the viewer writes stays in this folder:
+Everything the viewer writes stays in this folder, apart from a graphics
+cache that the viewport player keeps in Windows' temporary folder
+(%TEMP%\WoW Model Viewer); it can be deleted at any time:
 
 * userSettings\   settings, the window layout and the logs
 * dbcache\        one database cache per client build (at most six); it can

@@ -5573,7 +5573,7 @@ void ModelViewer::OnLanguage(wxCommandEvent &event)
 void ModelViewer::OnAbout(wxCommandEvent & WXUNUSED(event))
 {
   wxAboutDialogInfo info;
-  // The heading: "WoW Model Viewer 1.0".
+  // The heading: "WoW Model Viewer 1.1".
   info.SetName(GLOBALSETTINGS.productName());
   wxString version = GLOBALSETTINGS.appVersion();
   if (GLOBALSETTINGS.isBeta())

@@ -1,4 +1,4 @@
-WoW Model Viewer 1.0 - Third-party notices
+WoW Model Viewer 1.1 - Third-party notices
 ==========================================
 
 WoW Model Viewer is free software, released under the GNU General Public License, version 3
@@ -55,7 +55,7 @@ Contents
 
 Files      wowmodelviewer.exe, core.dll, wow.dll, plugins\armory.dll, plugins\wowhead.dll,
            plugins\objexporter.dll, games\wow\12.0\database.xml,
-           games\wow\12.0\ChrRacesCustomization.csv
+           games\wow\12.0\ChrRacesCustomization.csv, dbd\Map.dbd
 Licence    GNU General Public License, version 3 or (at your option) any later version (SPDX:
            GPL-3.0-or-later). Full text: LICENSE.txt.
 Source     https://github.com/wowmodelviewer/wowmodelviewer
@@ -4001,7 +4001,7 @@ Licence    BSD 2-clause licence (SPDX: BSD-2-Clause)
 
 4.1  WoWDBDefs table definitions
 --------------------------------------------------------------------------------------------
-Files      dbd\*.dbd (47 files)
+Files      dbd\*.dbd except dbd\Map.dbd (47 files)
 Source     WoWDBDefs, https://github.com/wowdev/WoWDBDefs
 Credit     WoWDBDefs contributors
 Licence    Creative Commons Attribution-ShareAlike 4.0 International (SPDX: CC-BY-SA-4.0)
@@ -4010,7 +4010,8 @@ Licence    Creative Commons Attribution-ShareAlike 4.0 International (SPDX: CC-B
 The database table definitions in the dbd folder are from the WoWDBDefs project and are used
 under the CC BY-SA 4.0 licence. Some of them were updated or extended for WoW Model Viewer;
 those changes are also available under CC BY-SA 4.0. They are provided as is, without
-warranties of any kind; see the licence.
+warranties of any kind; see the licence. dbd\Map.dbd is not from WoWDBDefs: it was written for
+WoW Model Viewer from the clients' own data, in the same format (see section 1).
 
 
 4.2  Animation names

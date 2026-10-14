@@ -5,19 +5,101 @@ Format loosely based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [1.1] — 2026-10-14
+
+Version 1.1 adds Quick export to the Texture Viewer, makes Classic Beta's equipment browsable, fixes item
+replacement, blank names in some database rows and the Undead male's overlapping jaws, and lays the groundwork for
+a map viewer that is not in the window yet. The detailed entries follow this summary.
+
+### Highlights
+- **Quick export in the Texture Viewer**: with the Quick export box ticked, a texture is exported at once into a
+  texture export folder, and a notice offers Open folder.
+- **Classic Beta equipment**: the equipment windows of a Classic Beta character list the client's items (18,082
+  on builds 1.60.1.70338 and 1.60.1.70374), and View > View Item and Character > Load Item Set work there.
+- **Replacing an item** with one that has no appearance in the loaded client no longer keeps the previous item's
+  look.
+- **Blank names**: some mounts and NPCs whose names read as empty now show them.
+- **Undead male jaws**: each jaw choice shows only its own jaw; the model's default jaw no longer shows through the
+  others.
+
+### Known issues
+- The Models button of the viewer selector in the command bar sometimes shows no icon. Only the icon is affected.
+- FBX export is not included (0.11.0 had it). OBJ export (File > Export Model) remains.
+- Models from a legacy MPQ client cannot be shown in the viewport: they have no FileDataID, which the viewport
+  needs.
+- Classic Beta: 10,038 of its 18,082 listed items have no name in the client's own data and are listed as
+  "Unnamed item" (the item filter finds them by ID). Load Item Set equips only pieces that have a name, so 121 of
+  its 536 item sets resolve fully, 32 partly and 383 not at all.
+- Classic Beta lists Gilnean and Visage under Playable Races, although its data marks them not playable. Blood
+  Elf is under NPC Races and has only its High Definition model there: that is what Classic Beta's own data says.
+- A character or equipment file saved with 1.0 while an item without an appearance showed the previous item's
+  look (see Fixed) may still have that look saved in it: remove the item from its slot, choose it again and save
+  the file anew.
+- Character > Load Start Outfit lists no outfits in any client.
+- Undead: with Character > Show Facial Hair off, the jaw and the face features are hidden too.
+- The installer is not code-signed, so Windows SmartScreen may warn before it runs.
+
 ### Added
-- **Quick export in the Texture Viewer.** A **Quick export** box beside Export PNG and Export BLP saves the
-  texture at once, with no Save As dialog, into the texture export folder, in the texture's own folder from the
-  game (`creature\bear\bearskinblack.png`; a texture known only by its FileDataID goes to
-  `FileDataID\FileDataID_<id>.png`). Exporting the same texture again replaces its file. The box is kept between
-  sessions, and Ctrl+S, Ctrl+Shift+S and Browse's texture menu follow it.
+- **Quick export in the Texture Viewer.** A **Quick export** box beside Export PNG and Export BLP (off at first,
+  and kept between sessions) saves the texture at once, with no Save As dialog, into the texture export folder,
+  in the texture's own folder from the game (`creature\bear\bearskinblack.png`; a texture known only by its
+  FileDataID goes to `FileDataID\FileDataID_<id>.png`). Exporting the same texture again replaces its file.
+  Names Windows would refuse are made safe, and the FileDataID (or, without one, a short hash of the game path)
+  is then added to the name, so two textures cannot end up as one file. Ctrl+S, Ctrl+Shift+S and Browse's
+  texture menu follow the box.
 - **The texture export folder** in Options > Settings... > Export: `Exports\Textures` in the viewer's folder at
   first, with Browse..., Reset to default and Open folder. A folder that cannot be written to is refused, with the
-  reason.
-- **A saved-file notice** just above the export buttons after every texture export, Save As included, with
-  **Open folder** (Explorer, the file selected). It goes by itself after a few seconds, stays while the mouse
-  is on it, and never takes the keyboard. When a Quick export cannot be saved it says why, and when the export
-  folder itself cannot be used it offers **Change folder...**.
+  reason. Uninstalling leaves the textures you exported in `Exports\`.
+- **A notice after every texture export**, Save As included, in the bottom-left corner of the texture preview,
+  with **Open folder** (Explorer, the file selected). It goes by itself after a few seconds, stays while the mouse
+  is on it, and never takes the keyboard. When an export cannot be saved it says why, and when the export folder
+  itself cannot be used it offers **Change folder...**.
+
+### Changed
+- **Options > Settings... > Export** is laid out in sections (Models, Texture Viewer) and scrolls when the
+  Settings pane is short.
+- **The first load of each client after the update builds its database cache again** (the database layout and
+  the table definitions changed), then reuses it as before: on the test machine about 15-20 seconds for Retail
+  and a few seconds for a Classic client.
+- **Rows the computer cannot decrypt yet.** The database cache records which encryption key such rows need; when a
+  later load knows the key (for example from an updated key list), the cache is built again so those rows are
+  read.
+- **Loading a character or equipment file in another client than the one it was saved in** (Character > Load
+  Character, Load Equipment): an item saved with no appearance now gets its own appearance in the client that
+  loads it, instead of being forced to show nothing.
+
+### Fixed
+- **Classic Beta's equipment windows listed only "None".** The viewer had no definition for the layouts of Classic
+  Beta's Item and ItemSparse tables and read neither. It now reads them, so every slot lists the client's items
+  (Chest: 1,730 rows), View > View Item opens, and Character > Load Item Set equips the sets whose pieces have
+  names. No data from another client is used.
+- **Replacing an item with one that has no appearance in the loaded client** kept the previous item's look under
+  the new item's name (for example the Wolfshead Helm stayed on the head after item 1020 was chosen). Such an item
+  now shows no look, and a hand emptied that way opens again. Every client is affected by this fix.
+- **Blank names in some database rows.** Text in rows stored after a game table's first section read as empty.
+  It is now read: on the test machine 116 rows in Retail, 37 in Mists of Pandaria Classic and 1 in Classic Beta
+  got their text back. Some NPCs (View NPC) and mounts (the mount list) now show their names, though these mounts
+  still have no model the viewer can show; Load Item Set lists 8 more Retail transmog sets that were left out (on
+  the test machine most of them have no pieces the viewer can put on).
+- **The Undead male's default jaw showed through the other jaws** (Retail, Mists of Pandaria Classic and Classic
+  Beta, HD and Classic models). Slackjawed showed closed lips over the open jaw and Drooler a flesh jaw over the
+  drool (Mists of Pandaria Classic: Strapped Slackjaw, Strapped Drooler and the like); on the HD model the bone
+  jaws were also drawn under a flesh jaw. The jaws of Classic Era's Undead and of every Undead female were not
+  affected. A customization choice that picks one variant of a part (a jaw, ears, horns, a snout, sideburns) now
+  hides that part's other variants in the model, as the client's own data describes. This also shows elsewhere:
+  on the Undead, male and female, Eye Color *Sockets* (Classic Beta: Eye Glow *None*) now shows empty sockets;
+  Mag'har Orc Sideburns *None* now shows no sideburns; and a stray second hairstyle is gone on the Gilnean female
+  (and on the Classic Beta Human female).
+
+### Internal
+- **Groundwork for a map viewer** (#101-#105): an audit of the world map formats, parsers for WDT and ADT files, a
+  catalogue of each client's maps, and the viewport's drawing of one map tile with its ground textures. None of it
+  can be reached from the window yet. Apart from reading each client's list of maps as it loads (a few
+  milliseconds), it runs only in headless test modes. The program and the viewport player were updated together
+  for it; the installer installs both.
+- **Customization geoset tests** (#107): a standalone test that runs the customization geoset code over real
+  client records of 22 character models, and checks in `-customizationtest` on every client (every jaw, switching
+  jaws, reset, saving and loading, the Classic | HD switch, every playable race).
 
 ## [1.0] — 2026-10-10
 

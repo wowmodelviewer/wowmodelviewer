@@ -6,7 +6,7 @@ add_subdirectory(importers/wowhead)
 add_subdirectory(exporters/obj)
 
 # The FBX exporter needs the Autodesk FBX SDK, which is not part of the 64-bit build's tree (ThirdParty/fbx_x64): it is
-# built only where the SDK is (or when asked for), so a build without it still completes. 1.0 ships without it.
+# built only where the SDK is (or when asked for), so a build without it still completes. The release ships without it.
 if(WMV_X64)
   set(WMV_FBX_SDK_LIB ${CMAKE_SOURCE_DIR}/ThirdParty/fbx_x64/lib/libfbxsdk.lib)
 else()
