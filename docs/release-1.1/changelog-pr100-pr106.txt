@@ -1,0 +1,114 @@
+WoW Model Viewer - changes from pull request #100 to #106
+========================================================
+
+Every pull request merged after version 1.0 (develop 67447d40, which includes #99, the 1.0 release itself) up to
+version 1.1, in order. None was closed without being merged. #101, #102, #104 and #105, and the map list of #103,
+are groundwork for a map viewer that is not in the window yet.
+
+HIGHLIGHTS
+----------
+
+- Quick export in the Texture Viewer, with a texture export folder in the settings and a notice after every
+  texture export (#100).
+- Classic Beta's equipment windows list its items, and View > View Item and Load Item Set work there (#106).
+- Choosing an item that has no appearance in the loaded client no longer keeps the previous item's look (#106).
+- Some mounts and NPCs whose names read as empty now show them (#103).
+- Groundwork for a map viewer: an audit of the map formats (#101), readers for them (#102), each client's list of
+  maps (#103), and one map tile drawn with its ground textures in a test mode (#104, #105).
+
+ALL MERGED PULL REQUESTS
+------------------------
+
+#100  2026-10-11  [Added]  Quick export in the Texture Viewer, a texture export folder in the settings,
+      and a notice after every texture export
+      - A Quick export box beside Export PNG and Export BLP saves the texture at once, without the
+        Save As dialog, into the texture export folder, in the texture's own folder from the game
+        (for example creature\bear\bearskinblack.png). Textures known only by their FileDataID go
+        to FileDataID\FileDataID_<id>.png. Saving the same texture again replaces its file.
+      - Ctrl+S, Ctrl+Shift+S and Export in Browse's texture menu follow the box. It is off at first
+        and is remembered between sessions. With it off, exports use Save As as before.
+      - File names that Windows cannot use are made safe, and the FileDataID (or, without one, a
+        short hash of the game path) is then added to the name, so two textures never end up in the
+        same file.
+      - Options > Settings... > Export has a new Texture Viewer section: the folder (Exports\Textures
+        in the viewer's own folder by default) with Browse..., Reset to default and Open folder. A
+        change applies at once. A folder that cannot be written to is refused, with the reason.
+      - After every texture export, Save As included, a notice in the bottom-left corner of the
+        texture preview shows the file name and folder, with Open folder (Explorer, with the file
+        selected). It closes after a few seconds, stays while the mouse is over it and does not take
+        the keyboard. A failed export says why, and offers Change folder... when the export folder
+        itself cannot be used.
+      - The Export settings page now scrolls in a short Settings pane. Uninstalling keeps Exports\
+        and the textures in it.
+
+#101  2026-10-11  [Internal]  Research report on the game's world map files, with no change to the
+      viewer
+      - Adds a written audit of how the game stores its world maps (terrain tiles, the texture
+        layers painted on them, and the buildings and objects placed on them) in Retail, Classic
+        Beta, Classic Era and Mists of Pandaria Classic, checked against the game's own files. It
+        also sets out the plan for the world map work that follows.
+      - Adds the read-only tools and tests used for the audit. They are not built with the viewer
+        and are not part of the installer.
+      - The viewer, its build and its installer are unchanged.
+
+#102  2026-10-11  [Internal]  Readers for the game's map files, with no visible change to the viewer
+      - Adds code to the viewport's renderer that reads World of Warcraft map files: the map
+        definition (WDT) and the terrain tile files (ADT) with their heights, holes, texture layers
+        and object placements. It was checked against Retail, Classic Beta, Classic Era and Mists of
+        Pandaria Classic game data.
+      - It ships inside the viewport player, but nothing in the window uses it, so the viewer looks
+        and behaves as before. The world viewer work that follows builds on it.
+      - Also adds tests, a written report on the readers and corrections to the map-format audit.
+
+#103  2026-10-12  [Fixed]  Some mounts and NPCs that had blank names now show them; Load Item Set
+      lists 8 more Retail transmog sets
+      - Text in database rows stored after a game table's first section was read as empty. It is now
+        read: on the test machine 116 rows in Retail, 37 in Mists of Pandaria Classic and 1 in Classic
+        Beta got their text back (none in Classic Era). Some NPCs (View NPC) and mounts (the mount
+        list) now show their names, though these mounts still have no model the viewer can show;
+        Load Item Set lists 8 Retail transmog sets that were left out because their names read as
+        empty (on the test machine most of them have no pieces the viewer can put on).
+      - Each client builds its game database cache again once after this update, on its first load.
+      - A cached database is built again when the viewer gains an encryption key that some of its rows
+        were waiting for, so those rows appear.
+      - The viewer now reads each client's list of world maps as it loads (a few milliseconds). Nothing
+        in the window shows it yet. It is groundwork for later world-map work.
+
+#104  2026-10-13  [Internal]  Groundwork for a map viewer: one map tile's ground shape, in a test mode
+      only
+      - The viewer can now read a map's files from the loaded client and hand them to the Unity
+        viewport, which builds one map tile's ground shape from them (holes included, except chunks
+        that use a rare low-resolution hole format), with no textures, water or placed objects such
+        as trees and buildings.
+      - Nothing in the window shows terrain: only a headless command-line test mode asks for a tile.
+        A later stage adds a viewer for maps.
+      - Models, characters, buildings and textures look and behave as before. The viewer and the
+        Unity viewport were updated together for this; the installer installs both.
+
+#105  2026-10-13  [Internal]  Map terrain drawn with its ground textures, in a test mode only
+      - Continues the groundwork for a future map viewer. One map tile, which the previous stage drew as
+        bare shaded ground, is now drawn with the game's ground textures and the way they blend into each
+        other. The result was checked against the game's own baked map textures on 9 test tiles. Some
+        blend maps (most of Classic Era's Azeroth) are drawn neutral, and lava animation, shadows,
+        lighting and water are not applied.
+      - This can only be reached through a headless command-line test mode. The program has no map
+        viewer yet, so nothing changes in the window, and models, buildings and textures look as before.
+      - The program and the viewport's renderer were updated together (protocol 13); the installer
+        installs both, so they always match.
+
+#106  2026-10-14  [Fixed]  Classic Beta's equipment windows list its items, and an item with no
+      appearance no longer shows the item it replaced
+      - Every equipment window of a Classic Beta character listed only "None". Classic Beta now
+        lists 18,082 items. Search by name or ID, categories, equip, replace and remove all work.
+      - View > View Item now opens in Classic Beta, and Character > Load Item Set equips the sets
+        whose pieces have names (121 of 536 fully, 32 partly). Items without a name in Classic
+        Beta's own data show as "Unnamed item" and can be found by ID.
+      - In every client, choosing an item that has no appearance no longer keeps the previous
+        item's look under the new name; the slot then shows nothing, and a hand is left open.
+      - Character > Load Character and Load Equipment, in another client than the one the file was
+        saved in: an item saved with no appearance now gets its own appearance there, instead of being
+        forced to show nothing.
+      - After the update, each client rebuilds its game database cache once, on its first load
+        (about 15-20 seconds for Retail on the test machine).
+      (Blood Elf stays under NPC Races in Classic Beta with only its HD model, which is what the
+      client's own data says.)

@@ -3,7 +3,7 @@
 ; Build it with installer\build-installer.ps1: that script stages the exact release folder (the program, its
 ; runtime DLLs, the Unity player, the data files, the licence texts) and compiles this script against it:
 ;
-;   ISCC.exe /DStage=<staged folder> /DMyAppVersion=1.0 WoWModelViewer.iss
+;   ISCC.exe /DStage=<staged folder> /DMyAppVersion=1.1 WoWModelViewer.iss
 ;
 ; The installer is per-user (no administrator rights): the viewer keeps its settings, caches and the file list
 ; next to the program, so it must be installed where the user can write. {autopf} is then
@@ -13,7 +13,7 @@
   #error Define Stage (/DStage=<folder>): the staged release folder made by build-installer.ps1
 #endif
 #ifndef MyAppVersion
-  #define MyAppVersion "1.0"
+  #define MyAppVersion "1.1"
 #endif
 ; Test builds pass their own AppId so they never touch a real installation.
 #ifndef MyAppId

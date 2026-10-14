@@ -12,8 +12,8 @@ SPLASH2          RCDATA          "..\\..\\bin_support\\Splash\\Splash-006-Midnig
 // core::GlobalSettings (m_versionMajorNumber ...).
 #include <winver.h>
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 1,0,0,0
- PRODUCTVERSION 1,0,0,0
+ FILEVERSION 1,1,0,0
+ PRODUCTVERSION 1,1,0,0
  FILEFLAGSMASK 0x3fL
  FILEFLAGS 0x0L
  FILEOS VOS_NT_WINDOWS32
@@ -26,12 +26,12 @@ BEGIN
     BEGIN
       VALUE "CompanyName", "WoW Model Viewer"
       VALUE "FileDescription", "WoW Model Viewer"
-      VALUE "FileVersion", "1.0.0.0"
+      VALUE "FileVersion", "1.1.0.0"
       VALUE "InternalName", "wowmodelviewer"
       VALUE "LegalCopyright", "GNU General Public License v3 or later"
       VALUE "OriginalFilename", "wowmodelviewer.exe"
       VALUE "ProductName", "WoW Model Viewer"
-      VALUE "ProductVersion", "1.0"
+      VALUE "ProductVersion", "1.1"
     END
   END
   BLOCK "VarFileInfo"

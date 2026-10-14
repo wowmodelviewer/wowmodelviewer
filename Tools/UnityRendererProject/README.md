@@ -38,7 +38,7 @@ is still the reference for rules such as geoset visibility and the M2 combiners.
      backend is active (`ENABLE_LEGACY_INPUT_MANAGER` / `ENABLE_INPUT_SYSTEM`); with *Both* it
      uses the legacy path. No project setting needs changing just to avoid input exceptions.
    - For a release build: **Company Name** `WoW Model Viewer`, **Product Name** `WoW Model Viewer
-     Renderer`, **Version** the viewer's (`1.0`), and **Splash Image → Show Splash Screen: off**. The
+     Renderer`, **Version** the viewer's version (for example `1.1`), and **Splash Image → Show Splash Screen: off**. The
      player keeps its window settings under `HKEY_CURRENT_USER\Software\<Company>\<Product>`, which the
      installer removes on uninstall.
    - For a release build, nothing reported to Unity: **Edit → Project Settings → Services**: Analytics

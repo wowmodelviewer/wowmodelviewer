@@ -27,7 +27,7 @@ param(
   [string]$WxDllDir = '',
   # The Visual C++ runtime (x64 Microsoft.VC14x.CRT). Default: the newest one under the Visual Studio installations.
   [string]$VcRedistDir = '',
-  [string]$Version = '1.0',
+  [string]$Version = '1.1',
   [string]$Stage = '',
   # Test builds only: another AppId and output name, so a test never touches a real installation.
   [string]$AppId = '',
