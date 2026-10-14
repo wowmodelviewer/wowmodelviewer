@@ -5265,8 +5265,9 @@ bool ModelViewer::LoadFbxEquipment(QString fn)
       }
       item->load(fn);
       item->refresh();
+      // A hand item this client gives no appearance (display 0) holds no model, as in the viewport.
       if (!item->isEquipped() ||
-          ((entry.first == CS_HAND_LEFT || entry.first == CS_HAND_RIGHT) && item->models().empty()))
+          ((entry.first == CS_HAND_LEFT || entry.first == CS_HAND_RIGHT) && item->displayId() > 0 && item->models().empty()))
       {
         LOG_ERROR << "[fbxequipment] could not restore slot" << entry.first;
         return false;

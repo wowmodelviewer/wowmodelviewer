@@ -12,8 +12,10 @@
 #include <set>
 
 #include <wx/app.h>
+#include <wx/checklst.h>
 #include <wx/filename.h>
 #include <wx/image.h>
+#include <wx/listctrl.h>
 #include <wx/mstream.h>
 #include <wx/splash.h>
 #include <wx/stdpaths.h>
@@ -43,6 +45,7 @@
 #include "AnimManager.h"
 #include "Attachment.h"
 #include "filecontrol.h"
+#include "itemselection.h"
 #include "wmo.h"
 #include "WMOGroup.h"
 #include "WoWModel.h"
@@ -1360,6 +1363,620 @@ static void checkModelVariants(ModelViewer * frame, const Check & check, const S
   }
 }
 
+// -customizationtest, every client: the item list the equipment dialogs choose from, and the dialogs on a character.
+// The list comes from the client's own Item and ItemSparse, and a client whose item tables are on this computer and
+// come back empty fails: Classic Beta's did (their layouts were in no definition), and every equipment dialog listed
+// only "None". Independent expectations per client, read from its DB2 files by a reader apart from this loader: the
+// list's size and each slot's (for the build named; another build is reported, not judged: its data may have moved),
+// and representative items with their name, inventory type, class, sheathe and display. Then, on the client's Human
+// male, through the dialogs as a click reaches them: each slot's dialog lists "None" and that slot's items; the filter
+// finds an item by its name and by its ID; one category alone lists that category's items; choosing a row equips the
+// item (its display resolved, a model item's models loaded), choosing another row replaces it and "None" takes it
+// off, the other slots keeping theirs. Classic Beta also dresses its Blood Elf male and female (the helm takes each
+// one's own model) and the Human male's Classic model.
+template <class Check, class Skip>
+static void checkItemCatalogue(ModelViewer * frame, const Check & check, const Skip & skip)
+{
+  const auto settle = []() {
+    for (int i = 0; i < 20; i++)
+      wxTheApp->Yield(true);
+  };
+  const core::ClientProfile & profile = GAMEDIRECTORY.clientProfile();
+  for (const QString table : { QString("Item"), QString("ItemSparse") })
+  {
+    sqlResult n = GAMEDATABASE.sqlQuery(QString("SELECT COUNT(*) FROM %1").arg(table));
+    const int rows = (n.valid && !n.values.empty()) ? n.values[0][0].toInt() : 0;
+    wow::WoWFolder * folder = dynamic_cast<wow::WoWFolder *>(&GAMEDIRECTORY);
+    if (rows == 0 && folder && folder->isRemoteFile(QString("dbfilesclient/%1.db2").arg(table.toLower())))
+    {
+      skip("item list", QString("the client's %1 is not installed on this computer").arg(table));
+      return;
+    }
+    check(QString("item list: the client's %1 was read").arg(table), rows > 0, QString("%1 rows").arg(rows));
+    if (rows == 0)
+      return;
+  }
+
+  struct SlotExpect { CharSlots slot; const char * caption; };
+  struct ItemExpect { int id; const char * name; int inventoryType, itemClass, subclass, sheathe, display; CharSlots slot; };
+  struct CatalogueExpect { const char * product; const char * build; int items; std::vector<int> slotItems; std::vector<ItemExpect> pieces; };
+  // slotItems: each slot's items, "None" apart, in the order of equipmentSlots
+  static const SlotExpect equipmentSlots[] = {
+    { CS_HEAD, "Head" }, { CS_SHOULDER, "Shoulder" }, { CS_SHIRT, "Shirt" }, { CS_CHEST, "Chest" }, { CS_BELT, "Belt" },
+    { CS_PANTS, "Legs" }, { CS_BOOTS, "Boots" }, { CS_BRACERS, "Bracers" }, { CS_GLOVES, "Gloves" },
+    { CS_HAND_RIGHT, "Right hand" }, { CS_HAND_LEFT, "Left hand" }, { CS_CAPE, "Cape" }, { CS_TABARD, "Tabard" },
+    { CS_QUIVER, "Quiver" },
+  };
+  static const CatalogueExpect expectations[] = {
+    { "wow_classic_beta", "1.60.1.70338", 18082,
+      { 1311, 1285, 83, 1729, 1345, 1531, 1569, 1238, 1523, 3569, 3575, 731, 53, 155 },
+      { { 8345, "Wolfshead Helm", 1, 4, 2, 0, 28987, CS_HEAD }, { 12625, "Dawnbringer Shoulders", 3, 4, 4, 0, 25827, CS_SHOULDER },
+        { 2870, "Shining Silver Breastplate", 5, 4, 3, 0, 9695, CS_CHEST }, { 7938, "Truesilver Gauntlets", 10, 4, 4, 0, 13172, CS_GLOVES },
+        { 12619, "Enchanted Thorium Leggings", 7, 4, 4, 0, 22882, CS_PANTS }, { 12021, "Shieldplate Sabatons", 8, 4, 4, 0, 17814, CS_BOOTS },
+        { 810, "Hammer of the Northern Wind", 21, 2, 4, 3, 19726, CS_HAND_RIGHT }, { 6898, "Orb of Soran'ruk", 23, 4, 0, 3, 21597, CS_HAND_LEFT } } },
+    { "wow_classic_era", "1.15.9.70003", 15433,
+      { 1053, 1038, 72, 1426, 1043, 1217, 1225, 983, 1183, 2933, 2969, 610, 32, 143 },
+      { { 8345, "Wolfshead Helm", 1, 4, 2, 0, 28987, CS_HEAD }, { 12625, "Dawnbringer Shoulders", 3, 4, 4, 0, 25827, CS_SHOULDER },
+        { 2870, "Shining Silver Breastplate", 5, 4, 3, 0, 9695, CS_CHEST }, { 7938, "Truesilver Gauntlets", 10, 4, 4, 0, 13172, CS_GLOVES },
+        { 12619, "Enchanted Thorium Leggings", 7, 4, 4, 0, 22882, CS_PANTS }, { 12021, "Shieldplate Sabatons", 8, 4, 4, 0, 17814, CS_BOOTS },
+        { 810, "Hammer of the Northern Wind", 21, 2, 4, 3, 19726, CS_HAND_RIGHT }, { 6898, "Orb of Soran'ruk", 23, 4, 0, 7, 21597, CS_HAND_LEFT } } },
+    { "wow_classic", "5.5.4.70268", 65083,
+      { 5319, 5125, 161, 6384, 4474, 5625, 4742, 4221, 5511, 11482, 12325, 2160, 130, 243 },
+      { { 8345, "Wolfshead Helm", 1, 4, 2, 0, 18392, CS_HEAD }, { 12625, "Dawnbringer Shoulders", 3, 4, 4, 0, 25827, CS_SHOULDER },
+        { 2870, "Shining Silver Breastplate", 5, 4, 3, 0, 9695, CS_CHEST }, { 7938, "Truesilver Gauntlets", 10, 4, 4, 0, 13172, CS_GLOVES },
+        { 12619, "Enchanted Thorium Leggings", 7, 4, 4, 0, 22882, CS_PANTS }, { 12021, "Shieldplate Sabatons", 8, 4, 4, 0, 17814, CS_BOOTS },
+        { 810, "Hammer of the Northern Wind", 13, 2, 4, 3, 19726, CS_HAND_RIGHT }, { 6898, "Orb of Soran'ruk", 23, 4, 0, 7, 21597, CS_HAND_LEFT } } },
+    { "wow", "12.1.0.69933", 137501,
+      { 11493, 10572, 932, 12284, 9692, 11296, 10056, 8962, 10923, 25689, 28116, 6170, 1008, 297 },
+      { { 8345, "Wolfshead Helm", 1, 4, 2, 0, 18392, CS_HEAD }, { 12625, "Dawnbringer Shoulders", 3, 4, 4, 0, 25827, CS_SHOULDER },
+        { 2870, "Shining Silver Breastplate", 5, 4, 3, 0, 9695, CS_CHEST }, { 7938, "Truesilver Gauntlets", 10, 4, 4, 0, 13172, CS_GLOVES },
+        { 12619, "Enchanted Thorium Leggings", 7, 4, 4, 0, 13382, CS_PANTS }, { 12021, "Shieldplate Sabatons", 8, 4, 4, 0, 17814, CS_BOOTS },
+        { 810, "Hammer of the Northern Wind", 13, 2, 4, 3, 19726, CS_HAND_RIGHT }, { 6898, "Orb of Soran'ruk", 23, 4, 0, 7, 179728, CS_HAND_LEFT } } },
+  };
+  const CatalogueExpect * e = nullptr;
+  for (const CatalogueExpect & c : expectations)
+    if (profile.product == QLatin1String(c.product))
+      e = &c;
+  if (!e)
+  {
+    skip("item list", QString("no expectation for %1").arg(profile.product));
+    return;
+  }
+  const bool sameBuild = GAMEDIRECTORY.version() == QLatin1String(e->build);
+
+  // ---- the list ----
+  std::map<int, int> perSlot;
+  std::set<int> ids;
+  int typeless = 0, duplicates = 0;
+  for (size_t i = 1; i < items.items.size(); i++)
+  {
+    const ItemRecord & r = items.items[i];
+    typeless += r.type == 0 ? 1 : 0;
+    duplicates += ids.insert(r.id).second ? 0 : 1;
+    for (const SlotExpect & s : equipmentSlots)
+      perSlot[s.slot] += correctType((ssize_t)r.type, s.slot) ? 1 : 0;
+  }
+  const int listed = (int)items.items.size() - 1;
+  check("item list: \"None\" first, then items each listed once, every one with an inventory type",
+        !items.items.empty() && items.items[0].id == 0 && typeless == 0 && duplicates == 0 && listed > 0,
+        QString("%1 items, %2 without an inventory type, %3 listed twice").arg(listed).arg(typeless).arg(duplicates));
+  QStringList slotCounts, slotWanted;
+  bool slotsSame = true;
+  for (size_t i = 0; i < sizeof(equipmentSlots) / sizeof(equipmentSlots[0]); i++)
+  {
+    slotCounts << QString("%1 %2").arg(equipmentSlots[i].caption).arg(perSlot[equipmentSlots[i].slot]);
+    slotWanted << QString("%1 %2").arg(equipmentSlots[i].caption).arg(e->slotItems[i]);
+    slotsSame = slotsSame && perSlot[equipmentSlots[i].slot] == e->slotItems[i];
+  }
+  const QString countWhat = QString("item list: %1 items, and each slot's (build %2)").arg(e->items).arg(e->build);
+  const QString countDetail = QString("%1 items; %2 | expected %3").arg(listed).arg(slotCounts.join(", ")).arg(slotWanted.join(", "));
+  if (sameBuild)
+    check(countWhat, listed == e->items && slotsSame, countDetail);
+  else
+    skip(countWhat, QString("this is build %1: %2").arg(GAMEDIRECTORY.version(), countDetail));
+  for (const ItemExpect & p : e->pieces)
+  {
+    const ItemRecord & r = items.getById(p.id);
+    sqlResult sheathe = GAMEDATABASE.sqlQuery(QString("SELECT SheatheType FROM Item WHERE ID = %1").arg(p.id));
+    const int rawSheathe = (sheathe.valid && !sheathe.values.empty()) ? sheathe.values[0][0].toInt() : -1;
+    check(QString("item list: %1 \"%2\": inventory type %3, class %4/%5, sheathe %6").arg(p.id).arg(QString::fromLatin1(p.name))
+            .arg(p.inventoryType).arg(p.itemClass).arg(p.subclass).arg(p.sheathe),
+          r.id == p.id && r.name == QString::fromLatin1(p.name) && r.type == p.inventoryType && r.itemclass == p.itemClass &&
+            r.subclass == p.subclass && rawSheathe == p.sheathe,
+          QString("%1 \"%2\": inventory type %3, class %4/%5, sheathe %6").arg(r.id).arg(r.name).arg(r.type).arg(r.itemclass)
+            .arg(r.subclass).arg(rawSheathe));
+  }
+
+  // ---- the dialogs, on a character ----
+  CharControl * cc = g_charControl;
+  const int humanFileId = RaceInfos::getFileIDForRaceSex(1, 0);
+  GameFile * humanFile = humanFileId > 0 ? GAMEDIRECTORY.getFile(humanFileId) : nullptr;
+  wow::WoWFolder * storage = dynamic_cast<wow::WoWFolder *>(&GAMEDIRECTORY);
+  if (!cc || !humanFile || (storage && storage->isRemoteFileId(humanFileId)))
+  {
+    if (cc && humanFileId > 0 && storage && storage->isRemoteFileId(humanFileId))
+      skip("equipment dialogs", "the Human male's model is not installed on this computer");
+    else
+      check("equipment dialogs: the Human male has a race row and a model", false,
+            QString("FileDataID %1").arg(humanFileId));
+    return;
+  }
+  frame->LoadModel(humanFile, 1, 0);
+  settle();
+  WoWModel * m = frame->riderModel();
+  if (!m || m->infos.raceID != 1)
+  {
+    check("equipment dialogs: the Human male loads", false, humanFile->fullname());
+    return;
+  }
+  // A slot's dialog, as its button opens it.
+  const auto open = [cc, settle](CharSlots slot, const char * caption) {
+    cc->selectItem(UPDATE_ITEM, slot, wxString::FromAscii(caption).wc_str());
+    settle();
+    return dynamic_cast<FilteredChoiceDialog *>(cc->itemDialog);
+  };
+  const auto filterTo = [settle](FilteredChoiceDialog * dlg, const QString & text) {
+    if (wxTextCtrl * box = dynamic_cast<wxTextCtrl *>(dlg->FindWindow(FilteredChoiceDialog::ID_FILTER_TEXT)))
+      box->SetValue(text.toStdWString());   // EVT_TEXT, as typing does
+    settle();
+  };
+  // Whether the item's row is among the rows the dialog shows.
+  const auto shows = [](FilteredChoiceDialog * dlg, int id, const std::vector<int> & numbers) {
+    for (size_t k = 0; k < numbers.size(); k++)
+      if (numbers[k] == id)
+      {
+        dlg->SelectChoiceRow((int)k);
+        const bool shown = dlg->m_listctrl->GetFirstSelected() >= 0;
+        dlg->SelectChoiceRow(-1);
+        return shown;
+      }
+    return false;
+  };
+  // Chooses the item's row as a click does: the list's own selection event.
+  const auto choose = [settle](FilteredChoiceDialog * dlg, int index) {
+    dlg->SelectChoiceRow(index);
+    const long row = dlg->m_listctrl->GetFirstSelected();
+    if (row < 0)
+      return false;
+    dlg->m_listctrl->Select(row, false);
+    dlg->m_listctrl->Select(row, true);
+    settle();
+    return true;
+  };
+  const auto indexOf = [](const std::vector<int> & numbers, int id) {
+    for (size_t k = 0; k < numbers.size(); k++)
+      if (numbers[k] == id)
+        return (int)k;
+    return -1;
+  };
+  const auto worn = [](WoWModel * model) {
+    QStringList list;
+    for (int slot = 0; model && slot < NUM_CHAR_SLOTS; slot++)
+      if (WoWItem * item = model->getItem((CharSlots)slot))
+        if (item->isEquipped())
+          list << QString("%1:%2/%3").arg(slot).arg(item->id()).arg(item->displayId());
+    return list.join(' ');
+  };
+
+  for (size_t i = 0; i < sizeof(equipmentSlots) / sizeof(equipmentSlots[0]); i++)
+  {
+    FilteredChoiceDialog * dlg = open(equipmentSlots[i].slot, equipmentSlots[i].caption);
+    const int rows = dlg ? dlg->m_listctrl->GetItemCount() : -1;
+    check(QString("equipment dialog %1: lists \"None\" and the slot's items").arg(equipmentSlots[i].caption),
+          dlg && rows == 1 + perSlot[equipmentSlots[i].slot] && (int)cc->numbers.size() == rows && rows > 1 && cc->numbers[0] == 0,
+          QString("%1 rows for %2 items").arg(rows).arg(perSlot[equipmentSlots[i].slot]));
+    cc->ClearItemDialog();
+  }
+
+  // Each representative item: found by name and by ID, alone in its category, then worn.
+  std::map<CharSlots, int> wearing;
+  for (const ItemExpect & p : e->pieces)
+  {
+    const SlotExpect * s = nullptr;
+    for (const SlotExpect & candidate : equipmentSlots)
+      if (candidate.slot == p.slot)
+        s = &candidate;
+    FilteredChoiceDialog * dlg = open(p.slot, s->caption);
+    const int index = dlg ? indexOf(cc->numbers, p.id) : -1;
+    if (!dlg || index < 0)
+    {
+      check(QString("equipment dialog %1: lists %2").arg(s->caption).arg(p.id), false, QString());
+      cc->ClearItemDialog();
+      continue;
+    }
+    const int all = dlg->m_listctrl->GetItemCount();
+    filterTo(dlg, QString::fromLatin1(p.name));
+    const int byName = dlg->m_listctrl->GetItemCount();
+    const bool foundByName = shows(dlg, p.id, cc->numbers);
+    filterTo(dlg, QString::number(p.id));
+    const int byId = dlg->m_listctrl->GetItemCount();
+    const bool foundById = shows(dlg, p.id, cc->numbers);
+    check(QString("equipment dialog %1: the filter finds %2 by its name and by its ID").arg(s->caption).arg(p.id),
+          foundByName && foundById && byName < all && byId < all,
+          QString("%1 rows unfiltered, %2 by name, %3 by ID").arg(all).arg(byName).arg(byId));
+    filterTo(dlg, QString());
+    if (CategoryChoiceDialog * cat = dynamic_cast<CategoryChoiceDialog *>(dlg))
+    {
+      // The category checklist lists each category the dialog's rows fall in once, in the order of CharControl's
+      // category names -- "None"'s too: this dialog keeps no row out of the categories (CharControl::selectItem), so
+      // "None" is shown only while the category CharControl gave it is checked.
+      const int category = cc->cats[index];
+      std::set<int> listedCategories;
+      int inCategory = 0;
+      for (size_t k = 0; k < cc->cats.size(); k++)
+      {
+        listedCategories.insert(cc->cats[k]);
+        inCategory += cc->cats[k] == category ? 1 : 0;
+      }
+      const int position = (int)std::distance(listedCategories.begin(), listedCategories.find(category));
+      // Each representative item's category, read from the clients' ItemSubClass by the independent reader (the same
+      // in every client).
+      static const std::map<int, const char *> categoryOf = {
+        { 8345, "Leather" }, { 12625, "Plate" }, { 7938, "Plate" }, { 12619, "Plate" }, { 12021, "Plate" },
+        { 2870, "Mail" }, { 810, "One-Handed Maces" }, { 6898, "Miscellaneous" },
+      };
+      const auto named = categoryOf.find(p.id);
+      wxCheckListBox * boxes = dynamic_cast<wxCheckListBox *>(cat->FindWindow(CategoryChoiceDialog::ID_CAT_LIST));
+      const int count = boxes ? (int)boxes->GetCount() : 0;
+      for (int c = 0; c < count; c++)
+        cat->Check(c, c == position);
+      cat->DoFilter();
+      settle();
+      const int alone = cat->m_listctrl->GetItemCount();
+      const bool stillThere = shows(cat, p.id, cc->numbers);
+      check(QString("equipment dialog %1: %2's category alone (\"%3\") lists its %4 items").arg(s->caption).arg(p.id)
+              .arg(boxes && position < count ? QString::fromStdWString(boxes->GetString(position).ToStdWstring()) : QString("?")).arg(inCategory),
+            count == (int)listedCategories.size() && alone == inCategory && stillThere && boxes && position < count &&
+              (named == categoryOf.end() || boxes->GetString(position) == wxString::FromAscii(named->second)),
+            QString("%1 categories, %2 rows").arg(count).arg(alone));
+      for (int c = 0; c < count; c++)
+        cat->Check(c, true);
+      cat->DoFilter();
+      settle();
+    }
+    const bool chosen = choose(dlg, index);
+    m = frame->riderModel();
+    WoWItem * item = m ? m->getItem(p.slot) : nullptr;
+    const bool modelItem = p.slot == CS_HEAD || p.slot == CS_SHOULDER || p.slot == CS_HAND_RIGHT || p.slot == CS_HAND_LEFT;
+    check(QString("equipment dialog %1: choosing %2 wears it, display %3%4").arg(s->caption).arg(p.id).arg(p.display)
+            .arg(modelItem ? QString(", its models loaded") : QString()),
+          chosen && item && item->id() == p.id && item->displayId() == p.display && (!modelItem || !item->models().empty()),
+          item ? QString("item %1, display %2, %3 models; wearing %4").arg(item->id()).arg(item->displayId()).arg(item->models().size()).arg(worn(m))
+               : QString("no item slot"));
+    wearing[p.slot] = p.id;
+    cc->ClearItemDialog();
+  }
+  // Every piece still worn together.
+  m = frame->riderModel();
+  bool all = m != nullptr;
+  for (const auto & w : wearing)
+    all = all && m->getItem(w.first) && m->getItem(w.first)->id() == w.second;
+  check("equipment: every chosen item is worn together", all, worn(m));
+
+  // Replace, then take off: the other slots keep theirs. The replacement shows its own look: another item with one
+  // appearance (its display read here by SQL) takes the place of the first one's models; an item this client gives
+  // no appearance shows none -- not the look of the item it replaced.
+  if (!e->pieces.empty())
+  {
+    const ItemExpect & p = e->pieces[0];
+    const SlotExpect * s = nullptr;
+    for (const SlotExpect & candidate : equipmentSlots)
+      if (candidate.slot == p.slot)
+        s = &candidate;
+    FilteredChoiceDialog * dlg = open(p.slot, s->caption);
+    int other = -1, otherDisplay = 0, plain = -1;
+    for (size_t k = 1; dlg && k < cc->numbers.size() && (other < 0 || plain < 0); k++)
+    {
+      if (cc->numbers[k] == p.id)
+        continue;
+      sqlResult looks = GAMEDATABASE.sqlQuery(QString("SELECT COUNT(*), MAX(COALESCE(P.ItemDisplayInfoID, 0)) FROM ItemModifiedAppearance A "
+                                                      "LEFT JOIN ItemAppearance P ON P.ID = A.ItemAppearanceID WHERE A.ItemID = %1").arg(cc->numbers[k]));
+      const int appearances = (looks.valid && !looks.values.empty()) ? looks.values[0][0].toInt() : -1;
+      const int display = appearances > 0 ? looks.values[0][1].toInt() : 0;
+      if (other < 0 && appearances == 1 && display > 0 && display != p.display)
+      {
+        other = (int)k;
+        otherDisplay = display;
+      }
+      else if (plain < 0 && appearances == 0)
+        plain = (int)k;
+    }
+    const auto othersKept = [&](WoWModel * model) {
+      bool kept = model != nullptr;
+      for (const auto & w : wearing)
+        if (w.first != p.slot)
+          kept = kept && model->getItem(w.first) && model->getItem(w.first)->id() == w.second;
+      return kept;
+    };
+    const auto shownModels = [](WoWItem * item) {
+      QStringList files;
+      for (const auto & entry : item ? item->models() : std::map<POSITION_SLOTS, WoWModel *>())
+        if (entry.second && entry.second->gamefile)
+          files << QString::number(entry.second->gamefile->fileDataId());
+      return files;
+    };
+    m = frame->riderModel();
+    const QStringList before = shownModels(m ? m->getItem(p.slot) : nullptr);
+    const int otherId = other > 0 ? cc->numbers[other] : -1;
+    const bool replaced = other > 0 && choose(dlg, other);
+    m = frame->riderModel();
+    WoWItem * item = m ? m->getItem(p.slot) : nullptr;
+    const QStringList after = shownModels(item);
+    check(QString("equipment dialog %1: choosing another row (%2, display %3) replaces %4 and its look, the other slots keep theirs")
+            .arg(s->caption).arg(otherId).arg(otherDisplay).arg(p.id),
+          replaced && othersKept(m) && item && item->id() == otherId && item->displayId() == otherDisplay && !after.isEmpty() && after != before,
+          QString("models %1 -> %2; wearing %3").arg(before.join(' ')).arg(after.join(' ')).arg(worn(m)));
+    if (plain < 0)
+      skip(QString("equipment dialog %1: an item with no appearance").arg(s->caption), "the slot lists none in this client");
+    else
+    {
+      const int plainId = cc->numbers[plain];
+      const bool chosen = choose(dlg, plain);
+      m = frame->riderModel();
+      item = m ? m->getItem(p.slot) : nullptr;
+      check(QString("equipment dialog %1: choosing an item this client gives no appearance (%2) shows no look, not the one it replaced")
+              .arg(s->caption).arg(plainId),
+            chosen && othersKept(m) && item && item->id() == plainId && item->displayId() <= 0 && item->models().empty(),
+            item ? QString("item %1, display %2, %3 models; wearing %4").arg(item->id()).arg(item->displayId()).arg(item->models().size()).arg(worn(m))
+                 : QString("no item slot"));
+    }
+    const bool none = dlg && choose(dlg, 0);
+    m = frame->riderModel();
+    check(QString("equipment dialog %1: choosing \"None\" takes the item off, the other slots keep theirs").arg(s->caption),
+          none && othersKept(m) && m->getItem(p.slot) && !m->getItem(p.slot)->isEquipped(), worn(m));
+    cc->ClearItemDialog();
+  }
+
+  // A weapon replaced by a hand item this client gives no appearance: nothing in the hand, and the hand no longer closed
+  // around the weapon that is gone.
+  {
+    FilteredChoiceDialog * dlg = open(CS_HAND_RIGHT, "Right hand");
+    int plain = -1;
+    for (size_t k = 1; dlg && k < cc->numbers.size() && plain < 0; k++)
+    {
+      sqlResult looks = GAMEDATABASE.sqlQuery(QString("SELECT COUNT(*) FROM ItemModifiedAppearance WHERE ItemID = %1").arg(cc->numbers[k]));
+      if (looks.valid && !looks.values.empty() && looks.values[0][0].toInt() == 0)
+        plain = (int)k;
+    }
+    m = frame->riderModel();
+    WoWItem * hand = m ? m->getItem(CS_HAND_RIGHT) : nullptr;
+    const bool weaponBefore = hand && !hand->models().empty() && m->charModelDetails.closeRHand;
+    if (plain < 0)
+      skip("equipment dialog Right hand: an item with no appearance", "the slot lists none in this client");
+    else
+    {
+      const int plainId = cc->numbers[plain];
+      const bool chosen = choose(dlg, plain);
+      m = frame->riderModel();
+      hand = m ? m->getItem(CS_HAND_RIGHT) : nullptr;
+      check(QString("equipment dialog Right hand: a weapon replaced by an item this client gives no appearance (%1) leaves the "
+                    "hand empty and open").arg(plainId),
+            weaponBefore && chosen && hand && hand->id() == plainId && hand->displayId() <= 0 && hand->models().empty() &&
+              !m->charModelDetails.closeRHand,
+            hand ? QString("weapon held before %1; item %2, display %3, %4 models, hand closed %5").arg(weaponBefore ? 1 : 0)
+                     .arg(hand->id()).arg(hand->displayId()).arg(hand->models().size()).arg(m->charModelDetails.closeRHand ? 1 : 0)
+                 : QString("no item slot"));
+    }
+    cc->ClearItemDialog();
+  }
+
+  // ---- Classic Beta: its Blood Elves and the Human male's Classic model wear them too ----
+  if (profile.product != QLatin1String("wow_classic_beta"))
+    return;
+  // The helm's model for each race and sex, from ComponentModelFileData (independent reading): ModelResources 17256.
+  struct Wearer { int race; int sex; int helmFile; const char * who; };
+  static const Wearer wearers[] = { { 10, 0, 141711, "Blood Elf male" }, { 10, 1, 141710, "Blood Elf female" } };
+  const auto helmFileOf = [](WoWModel * model) {
+    WoWItem * item = model ? model->getItem(CS_HEAD) : nullptr;
+    if (!item)
+      return -1;
+    for (const auto & entry : item->models())
+      if (entry.second && entry.second->gamefile)
+        return (int)entry.second->gamefile->fileDataId();
+    return -1;
+  };
+  const auto dress = [&]() {
+    for (const ItemExpect & p : e->pieces)
+    {
+      const SlotExpect * s = nullptr;
+      for (const SlotExpect & candidate : equipmentSlots)
+        if (candidate.slot == p.slot)
+          s = &candidate;
+      FilteredChoiceDialog * dlg = open(p.slot, s->caption);
+      const int index = dlg ? indexOf(cc->numbers, p.id) : -1;
+      if (index > 0)
+        choose(dlg, index);
+      cc->ClearItemDialog();
+    }
+  };
+  for (const Wearer & w : wearers)
+  {
+    GameFile * file = GAMEDIRECTORY.getFile(RaceInfos::getFileIDForRaceSex(w.race, w.sex));
+    if (!file)
+    {
+      check(QString("equipment on the %1: its model is in the client").arg(w.who), false, QString());
+      continue;
+    }
+    frame->LoadModel(file, w.race, w.sex);
+    settle();
+    dress();
+    m = frame->riderModel();
+    bool allWorn = m && m->infos.raceID == w.race && m->infos.sexID == w.sex;
+    for (const ItemExpect & p : e->pieces)
+      allWorn = allWorn && m->getItem(p.slot) && m->getItem(p.slot)->id() == p.id && m->getItem(p.slot)->displayId() == p.display;
+    check(QString("equipment on the %1 (%2): every piece worn, the helm on its own model %3").arg(w.who).arg(file->fullname()).arg(w.helmFile),
+          allWorn && helmFileOf(m) == w.helmFile, QString("helm model %1; wearing %2").arg(helmFileOf(m)).arg(worn(m)));
+  }
+  frame->LoadModel(humanFile, 1, 0);
+  settle();
+  dress();
+  wxString why;
+  const bool switched = frame->SwitchCharacterVariant(CharacterModelVariant::Classic, why);
+  settle();
+  m = frame->riderModel();
+  bool allWorn = switched && m && m->modelGeneration() == CharacterModelVariant::Classic;
+  for (const ItemExpect & p : e->pieces)
+    allWorn = allWorn && m->getItem(p.slot) && m->getItem(p.slot)->id() == p.id && m->getItem(p.slot)->displayId() == p.display;
+  check("equipment on the Human male's Classic model: every piece kept across the switch, the helm on its model 141721",
+        allWorn && helmFileOf(m) == 141721,
+        QString("%1; helm model %2; wearing %3").arg(m && m->gamefile ? m->gamefile->fullname() : QString("no model")).arg(helmFileOf(m)).arg(worn(m)));
+}
+
+// -customizationtest, every client: the Characters list's Playable Races and NPC Races. A race goes under one of the
+// two as its ChrRaces row's not-playable flag (bit 0 of Flags) says, except the two form races 23 and 75, which the
+// viewer always lists as playable (RaceInfos::init). Independent expectations, read from each client's DB2 files by a
+// reader apart from this loader: the Blood Elf's place and models, listed once by name (the Browse tree's nodes are
+// names). Retail and MoP Classic make it playable. Classic Beta does not: its ChrRaces row carries the flag, and the
+// client's own race and class pairs (CharBaseInfo), starting outfits (CharacterLoadout), racial abilities and
+// character-creation icons all leave race 10 out; and its only Blood Elf character models are the High Definition
+// ones, with no Classic model to switch to (no ChrModelAltVariant pair; the classic files in its storage are no
+// ChrModel's). Classic Era has no Blood Elf. And Classic Beta's whole Playable list: the races its data makes playable,
+// 1-8 and the two Skyborne (95, 96) -- checked apart from the forms 23 and 75, which are listed there only by the
+// viewer's rule although Classic Beta's data marks them (and their base races) not playable: a known limitation of that
+// rule, reported on a line of its own so a change to it is seen; and its Blood Elf male's and female's options as the
+// Appearance panel lists them, with the choices a player is offered of each (Retail's High Definition option set: the
+// four Demon Hunter options offer only their first choice, and Eye Style is no player's option).
+template <class Check, class Skip>
+static void checkRaceCategories(ModelViewer * frame, const Check & check, const Skip & skip)
+{
+  const QString product = GAMEDIRECTORY.clientProfile().product;
+  const std::vector<RaceInfos::RaceMenuEntry> menu = RaceInfos::getRaceMenu();
+  std::vector<int> playable;
+  const RaceInfos::RaceMenuEntry * bloodElf = nullptr;
+  QStringList bloodElfNames;   // every entry the tree would show under the Blood Elf's name, with its category
+  for (const RaceInfos::RaceMenuEntry & entry : menu)
+  {
+    if (!entry.isNPC)
+      playable.push_back(entry.raceID);
+    if (entry.raceID == 10)
+      bloodElf = &entry;
+  }
+  for (const RaceInfos::RaceMenuEntry & entry : menu)
+    if (bloodElf && entry.name == bloodElf->name)
+      bloodElfNames << QString("%1 (race %2)").arg(entry.isNPC ? "NPC Races" : "Playable Races").arg(entry.raceID);
+  std::sort(playable.begin(), playable.end());
+  QStringList playableText;
+  for (int race : playable)
+    playableText << QString::number(race);
+
+  struct AppearanceExpect { const char * name; int valid, total; };
+  struct RaceExpect
+  {
+    const char * product;
+    bool present, playable;
+    int male, female, maleLayout, femaleLayout;
+    std::vector<int> playableRaces;   // by the client's data (the form races 23 and 75 apart); empty: not checked
+    std::vector<AppearanceExpect> maleOptions, femaleOptions;   // empty: not checked for this client
+  };
+  static const RaceExpect expectations[] = {
+    { "wow", true, true, 1100087, 1100258, 121, 122, {}, {}, {} },
+    { "wow_classic", true, true, 117170, 116921, 1, 1, {}, {}, {} },
+    { "wow_classic_era", false, false, -1, -1, 0, 0, {}, {}, {} },
+    { "wow_classic_beta", true, false, 1100087, 1100258, 121, 122, { 1, 2, 3, 4, 5, 6, 7, 8, 95, 96 },
+      { { "Face", 10, 20 }, { "Skin Color", 14, 31 }, { "Hair Style", 21, 21 }, { "Hair Color", 20, 21 }, { "Facial Hair", 13, 13 },
+        { "Ears", 3, 3 }, { "Horns", 1, 7 }, { "Blindfold", 1, 12 }, { "Tattoo", 1, 7 }, { "Tattoo Color", 1, 6 }, { "Eye Color", 11, 34 },
+        { "Eyesight", 4, 4 } },
+      { { "Face", 10, 20 }, { "Skin Color", 14, 30 }, { "Hair Style", 25, 25 }, { "Hair Color", 20, 22 }, { "Horns", 1, 7 },
+        { "Eye Color", 11, 34 }, { "Blindfold", 1, 12 }, { "Ears", 3, 3 }, { "Earrings", 14, 14 }, { "Necklace", 4, 4 }, { "Tattoo", 1, 7 },
+        { "Tattoo Color", 1, 7 }, { "Armbands", 4, 4 }, { "Jewelry Color", 2, 2 }, { "Bracelets", 7, 7 }, { "Eyesight", 4, 4 } } },
+  };
+  const RaceExpect * e = nullptr;
+  for (const RaceExpect & c : expectations)
+    if (product == QLatin1String(c.product))
+      e = &c;
+  if (!e)
+  {
+    skip("race categories: the Blood Elf", QString("no expectation for %1").arg(product));
+    return;
+  }
+  if (!e->present)
+  {
+    check("race categories: the client has no Blood Elf", bloodElf == nullptr, QString());
+    return;
+  }
+  bool noPair = true, layouts = true;
+  QString chrModels;
+  for (int sex = 0; sex <= 1; sex++)
+  {
+    RaceInfos ri;
+    RaceInfos::VariantPair pair;
+    if (RaceInfos::getRaceInfosForRaceSex(10, sex, ri) && !ri.ChrModelID.empty())
+    {
+      noPair = noPair && !RaceInfos::getVariantPair(ri.ChrModelID[0], pair);
+      layouts = layouts && ri.textureLayoutID == (sex == 1 ? e->femaleLayout : e->maleLayout);
+      chrModels += QString(" %1 (layout %2)").arg(ri.ChrModelID[0]).arg(ri.textureLayoutID);
+    }
+    else
+      layouts = false;
+  }
+  check(QString("race categories: the Blood Elf is listed once, under %1, on FileDataIDs %2 / %3 (texture layouts %4 / %5), with no model "
+                "of the other generation").arg(e->playable ? "Playable Races" : "NPC Races").arg(e->male).arg(e->female)
+          .arg(e->maleLayout).arg(e->femaleLayout),
+        bloodElf && bloodElfNames.size() == 1 && bloodElf->isNPC == !e->playable && bloodElf->maleFileID == e->male &&
+          bloodElf->femaleFileID == e->female && noPair && layouts,
+        bloodElf ? QString("%1, files %2 / %3, ChrModel%4%5; by its name: %6").arg(bloodElf->isNPC ? "NPC Races" : "Playable Races")
+                     .arg(bloodElf->maleFileID).arg(bloodElf->femaleFileID).arg(chrModels).arg(noPair ? QString() : QString(", a pair"))
+                     .arg(bloodElfNames.join(", "))
+                 : QString("not listed"));
+  if (!e->playableRaces.empty())
+  {
+    std::vector<int> byData, forms;
+    for (int race : playable)
+      (race == 23 || race == 75 ? forms : byData).push_back(race);
+    QStringList wanted;
+    for (int race : e->playableRaces)
+      wanted << QString::number(race);
+    check(QString("race categories: Playable Races of %1 are the races its data makes playable (%2), the form races 23 and 75 "
+                  "apart").arg(product).arg(wanted.join(' ')),
+          byData == e->playableRaces, playableText.join(' '));
+    check(QString("race categories: %1 lists the form races 23 and 75 as playable by the viewer's rule (RaceInfos::init), "
+                  "although its data marks them not playable").arg(product),
+          forms == std::vector<int>({ 23, 75 }), playableText.join(' '));
+  }
+
+  // The Blood Elf's options, as the Appearance panel lists them: "name valid/total".
+  for (int sex = 0; sex <= 1; sex++)
+  {
+    const std::vector<AppearanceExpect> & expected = sex == 1 ? e->femaleOptions : e->maleOptions;
+    if (expected.empty())
+      continue;
+    const QString who = sex == 1 ? QString("female") : QString("male");
+    GameFile * file = GAMEDIRECTORY.getFile(sex == 1 ? e->female : e->male);
+    if (!file)
+    {
+      check(QString("Blood Elf %1: its model is in the client").arg(who), false, QString());
+      continue;
+    }
+    frame->LoadModel(file, 10, sex);
+    for (int i = 0; i < 20; i++)
+      wxTheApp->Yield(true);
+    WoWModel * m = frame->riderModel();
+    if (!m || m->infos.raceID != 10 || m->infos.sexID != sex)
+    {
+      check(QString("Blood Elf %1: loads as race 10").arg(who), false, file->fullname());
+      continue;
+    }
+    const std::vector<uint> options = m->cd.getCustomizationOptions();
+    QStringList got, want;
+    bool same = options.size() == expected.size();
+    for (size_t i = 0; i < options.size(); i++)
+    {
+      sqlResult n = GAMEDATABASE.sqlQuery(QString("SELECT Name_Lang FROM ChrCustomizationOption WHERE ID = %1").arg(options[i]));
+      sqlResult c = GAMEDATABASE.sqlQuery(QString("SELECT COUNT(*) FROM ChrCustomizationChoice WHERE ChrCustomizationOptionID = %1").arg(options[i]));
+      const QString name = (n.valid && !n.values.empty()) ? n.values[0][0] : QString("?");
+      const int valid = (int)m->cd.getCustomizationChoices(options[i]).size();
+      const int total = (c.valid && !c.values.empty()) ? c.values[0][0].toInt() : -1;
+      got << QString("%1 %2/%3").arg(name).arg(valid).arg(total);
+      if (i < expected.size())
+        same = same && name == QLatin1String(expected[i].name) && valid == expected[i].valid && total == expected[i].total;
+    }
+    for (const AppearanceExpect & o : expected)
+      want << QString("%1 %2/%3").arg(o.name).arg(o.valid).arg(o.total);
+    check(QString("Blood Elf %1 (%2): options in client order, valid choices of each").arg(who).arg(file->fullname()), same,
+          "got " + got.join(", ") + " | expected " + want.join(", "));
+  }
+}
+
 // -customizationtest on a Classic client (Classic Era, MoP Classic, Classic Beta): the same idea against the
 // client's own data. Every expected value was read from the named build's DB2 files by a reader independent of
 // this loader (MoP Classic 5.5.4.70032, Classic Beta 1.60.1.70235 -- unchanged in 1.60.1.70245 --, Classic Era
@@ -1767,6 +2384,12 @@ static int doHeadlessClassicCustomizationTest(ModelViewer * frame)
   // ---- 8. A character's model of the other generation (Classic | HD) -----------------------------------
   checkModelVariants(frame, check, skip);
 
+  // ---- 9. The item list and the equipment dialogs ------------------------------------------------------
+  checkItemCatalogue(frame, check, skip);
+
+  // ---- 10. Playable Races and NPC Races ---------------------------------------------------------------
+  checkRaceCategories(frame, check, skip);
+
   LOG_INFO << QString("[customization-test] RESULT: %1 (%2 passed, %3 failed, %4 skipped)").arg(failed == 0 ? "PASS" : "FAIL").arg(passed).arg(failed).arg(skipped);
   return failed;
 }
@@ -1790,6 +2413,7 @@ static int doHeadlessCustomizationTest(ModelViewer * frame)
 {
   if (GAMEDIRECTORY.clientProfile().isClassicFamily())
     return doHeadlessClassicCustomizationTest(frame);
+  LOG_INFO << "[customization-test]" << GAMEDIRECTORY.clientProfile().describe();
 
   int passed = 0, failed = 0;
   const auto check = [&passed, &failed](const QString & what, bool ok, const QString & detail) {
@@ -2393,7 +3017,9 @@ static int doHeadlessCustomizationTest(ModelViewer * frame)
     check("dark iron dwarf: model loaded (race 34, sex 0)", false, QString());
 
   // ---- 9. Humanoid NPCs wear their own stored appearance ----------------------------------------------
-  const auto skip = [](const QString & what, const QString & why) {
+  int skipped = 0;
+  const auto skip = [&skipped](const QString & what, const QString & why) {
+    skipped++;
     LOG_INFO << QString("[customization-test] SKIP %1 -- %2").arg(what, why);
   };
   checkNpcAppearance(frame, check, skip);
@@ -2404,7 +3030,14 @@ static int doHeadlessCustomizationTest(ModelViewer * frame)
   // ---- 11. A character's model of the other generation (Classic | HD) ----------------------------------
   checkModelVariants(frame, check, skip);
 
-  LOG_INFO << QString("[customization-test] RESULT: %1 (%2 passed, %3 failed)").arg(failed == 0 ? "PASS" : "FAIL").arg(passed).arg(failed);
+  // ---- 12. The item list and the equipment dialogs -----------------------------------------------------
+  checkItemCatalogue(frame, check, skip);
+
+  // ---- 13. Playable Races and NPC Races --------------------------------------------------------------
+  checkRaceCategories(frame, check, skip);
+
+  LOG_INFO << QString("[customization-test] RESULT: %1 (%2 passed, %3 failed, %4 skipped)").arg(failed == 0 ? "PASS" : "FAIL").arg(passed)
+                  .arg(failed).arg(skipped);
   return failed;
 }
 

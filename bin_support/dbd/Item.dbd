@@ -28,6 +28,16 @@ float RecraftReagentCountPercentage?
 int OrderSource?
 int<ItemSquishEra::ID> ItemSquishEraID?
 int Field_5_5_4_67090_015?
+int BetaCode5? // Classic Beta: the column between SheatheType and BetaCode6; meaning not established
+int BetaCode6? // Classic Beta: a signed column, -1 in almost every row; meaning not established
+int BetaCode8? // Classic Beta: meaning not established (often the same value as Retail's ItemGroupSoundsID)
+int BetaCode9? // Classic Beta: BetaCode9-BetaCode15: meaning not established
+int BetaCode10?
+int BetaCode11?
+int BetaCode12?
+int BetaCode13?
+int BetaCode14?
+int BetaCode15?
 
 LAYOUT 92F85B98
 BUILD 1.13.0.28211
@@ -633,3 +643,26 @@ CraftingQualityID<32>
 ItemSquishEraID<32>
 RecraftReagentCountPercentage
 OrderSource<u8>
+
+LAYOUT 9A2A4834
+COMMENT Classic Beta: 16 fields, read from the client's own bytes; no outside definition was used. ClassID and
+COMMENT SubclassID are pairs of the client's ItemSubClass (31,842 of 31,844 rows); Material, InventoryType and SheatheType equal the same
+COMMENT columns of the client's ItemSparse on every item both tables hold; IconFileDataID equals Classic Era's on
+COMMENT 24,859 of the 24,960 items both clients hold. The BetaCode columns are placed by order only.
+$noninline,id$ID<32>
+ClassID<32>
+SubclassID<u8>
+Material<u8>
+InventoryType<8>
+SheatheType<u8>
+BetaCode5<32>
+BetaCode6<32>
+IconFileDataID<32>
+BetaCode8<32>
+BetaCode9<32>
+BetaCode10<32>
+BetaCode11<32>
+BetaCode12<32>
+BetaCode13<32>
+BetaCode14<32>
+BetaCode15<32>
