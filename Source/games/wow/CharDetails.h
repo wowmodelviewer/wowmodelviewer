@@ -357,12 +357,17 @@ private:
   // customization-owned geometry. See isGeosetGroupCustomized().
   std::set<int> customizationControlledGroups_;
 
-  // ChrCustomizationChoice::ID -> its geoset elements: each is
-  // { geosetId (GeosetType*100 + GeosetID), RelatedChrCustomizationChoiceID }.
-  // A choice can carry several geoset elements, each gated by a related choice
-  // (0 = unconditional). Resolved + cached from ChrCustomizationElement.
-  std::map<uint, std::vector<std::pair<int, uint> > > choiceGeosetElements_;
-  const std::vector<std::pair<int, uint> > & getChoiceGeosetElements(uint chrCustomizationChoiceID);
+  // ChrCustomizationChoice::ID -> its geoset elements. A choice can carry several geoset
+  // elements, each gated by a related choice (0 = unconditional). Resolved + cached from
+  // ChrCustomizationElement.
+  struct GeosetElement
+  {
+    int geoset;   // model geoset id: GeosetType * 100 + GeosetID
+    int group;    // GeosetType, the geoset group the element sets
+    uint related; // RelatedChrCustomizationChoiceID
+  };
+  std::map<uint, std::vector<GeosetElement> > choiceGeosetElements_;
+  const std::vector<GeosetElement> & getChoiceGeosetElements(uint chrCustomizationChoiceID);
 
   // When a choice adds a skinned model whose texture comes from a direct-bind material
   // gated by another option (e.g. the DH blindfold texture is gated by the DH eye-glow

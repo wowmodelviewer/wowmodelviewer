@@ -3696,9 +3696,9 @@ void WoWModel::refresh()
     g->display = isDefault && !isHiddenDefault && !isEquipmentOnly;
   }
 
-  // Apply customization-choice geosets selectively: toggle only the exact
-  // geoset ids each active choice references (never narrowing a whole group), so
-  // shared body geometry such as the bare arms survives the default rule above.
+  // Apply customization-choice geosets: the active choices' geosets, and in each group an
+  // active choice sets, none of that group's other variants (CharDetails). A group no active
+  // choice sets -- the bare arms, hands and feet -- keeps the default rule above.
   cd.applyCustomizationGeosets();
 
   // Apply equipment + special (ears/facial-hair/underwear) geoset groups. These
