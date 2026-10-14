@@ -40,6 +40,8 @@ NEW IN 1.1
 * Replacing an item with one that has no appearance in the loaded client no
   longer keeps the previous item's look.
 * Some mounts and NPCs whose names were blank now show them.
+* Undead male: each jaw choice shows only its own jaw; the default jaw no
+  longer shows through Slackjawed, Drooler or the bone jaws.
 * The first load of each client after the update builds its database cache
   again, once.
 

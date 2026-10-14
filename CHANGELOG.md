@@ -8,8 +8,8 @@ Format loosely based on [Keep a Changelog](https://keepachangelog.com/).
 ## [1.1] — 2026-10-14
 
 Version 1.1 adds Quick export to the Texture Viewer, makes Classic Beta's equipment browsable, fixes item
-replacement and blank names in some database rows, and lays the groundwork for a map viewer that is not in the
-window yet. The detailed entries follow this summary.
+replacement, blank names in some database rows and the Undead male's overlapping jaws, and lays the groundwork for
+a map viewer that is not in the window yet. The detailed entries follow this summary.
 
 ### Highlights
 - **Quick export in the Texture Viewer**: with the Quick export box ticked, a texture is exported at once into a
@@ -19,6 +19,8 @@ window yet. The detailed entries follow this summary.
 - **Replacing an item** with one that has no appearance in the loaded client no longer keeps the previous item's
   look.
 - **Blank names**: some mounts and NPCs whose names read as empty now show them.
+- **Undead male jaws**: each jaw choice shows only its own jaw; the model's default jaw no longer shows through the
+  others.
 
 ### Known issues
 - The Models button of the viewer selector in the command bar sometimes shows no icon. Only the icon is affected.
@@ -34,6 +36,7 @@ window yet. The detailed entries follow this summary.
   look (see Fixed) may still have that look saved in it: remove the item from its slot, choose it again and save
   the file anew.
 - Character > Load Start Outfit lists no outfits in any client.
+- Undead: with Character > Show Facial Hair off, the jaw and the face features are hidden too.
 - The installer is not code-signed, so Windows SmartScreen may warn before it runs.
 
 ### Added
@@ -78,6 +81,15 @@ window yet. The detailed entries follow this summary.
   got their text back. Some NPCs (View NPC) and mounts (the mount list) now show their names, though these mounts
   still have no model the viewer can show; Load Item Set lists 8 more Retail transmog sets that were left out (on
   the test machine most of them have no pieces the viewer can put on).
+- **The Undead male's default jaw showed through the other jaws** (Retail, Mists of Pandaria Classic and Classic
+  Beta, HD and Classic models). Slackjawed showed closed lips over the open jaw and Drooler a flesh jaw over the
+  drool (Mists of Pandaria Classic: Strapped Slackjaw, Strapped Drooler and the like); on the HD model the bone
+  jaws were also drawn under a flesh jaw. The jaws of Classic Era's Undead and of every Undead female were not
+  affected. A customization choice that picks one variant of a part (a jaw, ears, horns, a snout, sideburns) now
+  hides that part's other variants in the model, as the client's own data describes. This also shows elsewhere:
+  on the Undead, male and female, Eye Color *Sockets* (Classic Beta: Eye Glow *None*) now shows empty sockets;
+  Mag'har Orc Sideburns *None* now shows no sideburns; and a stray second hairstyle is gone on the Gilnean female
+  (and on the Classic Beta Human female).
 
 ### Internal
 - **Groundwork for a map viewer** (#101-#105): an audit of the world map formats, parsers for WDT and ADT files, a
@@ -85,6 +97,9 @@ window yet. The detailed entries follow this summary.
   can be reached from the window yet. Apart from reading each client's list of maps as it loads (a few
   milliseconds), it runs only in headless test modes. The program and the viewport player were updated together
   for it; the installer installs both.
+- **Customization geoset tests** (#107): a standalone test that runs the customization geoset code over real
+  client records of 22 character models, and checks in `-customizationtest` on every client (every jaw, switching
+  jaws, reset, saving and loading, the Classic | HD switch, every playable race).
 
 ## [1.0] — 2026-10-10
 

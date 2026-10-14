@@ -1,5 +1,5 @@
-WoW Model Viewer - changes from pull request #100 to #106
-========================================================
+WoW Model Viewer - changes from pull request #100 to #107
+=========================================================
 
 Every pull request merged after version 1.0 (develop 67447d40, which includes #99, the 1.0 release itself) up to
 version 1.1, in order. None was closed without being merged. #101, #102, #104 and #105, and the map list of #103,
@@ -13,6 +13,7 @@ HIGHLIGHTS
 - Classic Beta's equipment windows list its items, and View > View Item and Load Item Set work there (#106).
 - Choosing an item that has no appearance in the loaded client no longer keeps the previous item's look (#106).
 - Some mounts and NPCs whose names read as empty now show them (#103).
+- The Undead male's default jaw no longer shows through the other jaws (#107).
 - Groundwork for a map viewer: an audit of the map formats (#101), readers for them (#102), each client's list of
   maps (#103), and one map tile drawn with its ground textures in a test mode (#104, #105).
 
@@ -112,3 +113,19 @@ ALL MERGED PULL REQUESTS
         (about 15-20 seconds for Retail on the test machine).
       (Blood Elf stays under NPC Races in Classic Beta with only its HD model, which is what the
       client's own data says.)
+
+#107  2026-10-14  [Fixed]  The Undead male's default jaw no longer shows through the other jaws
+      - The Undead male model has a default jaw that no jaw choice names. It stayed visible beside
+        the jaw chosen: Slackjawed showed closed lips over the open jaw and Drooler a flesh jaw over
+        the drool (Mists of Pandaria Classic: Strapped Slackjaw, Strapped Drooler and the like), and
+        on the HD model the bone jaws were drawn under a flesh jaw. Affected: Retail, Mists of
+        Pandaria Classic and Classic Beta (HD and Classic models). The jaws of Classic Era's Undead
+        and of every Undead female were not affected.
+      - A customization choice that picks one variant of a part now hides that part's other
+        variants in the model, as the client's own data describes. A few other choices change the
+        same way: on the Undead, male and female, Eye Color Sockets (Classic Beta: Eye Glow None) now
+        shows empty sockets; Mag'har Orc Sideburns None now shows no sideburns; and a stray second
+        hairstyle is gone on the Gilnean female (and the Classic Beta Human female). For ears, faces,
+        horns and a snout that were checked, the hidden part was covered and nothing visible changes.
+      - New tests: a standalone test over real client records of 22 character models, and checks in
+        -customizationtest on every client.

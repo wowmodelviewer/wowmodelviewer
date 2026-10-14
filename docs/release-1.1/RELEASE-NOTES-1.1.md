@@ -1,8 +1,8 @@
 # WoW Model Viewer 1.1
 
 Version 1.1 adds Quick export to the Texture Viewer, makes Classic Beta's equipment browsable, and fixes item
-replacement and blank names in some database rows. These notes list the changes since 1.0; every merged pull
-request is in `changelog-pr100-pr106.txt` next to this file.
+replacement, blank names in some database rows and the Undead male's overlapping jaws. These notes list the
+changes since 1.0; every merged pull request is in `changelog-pr100-pr107.txt` next to this file.
 
 ## Highlights
 
@@ -27,6 +27,14 @@ request is in `changelog-pr100-pr106.txt` next to this file.
   NPC) and mounts (the mount list) now show their names, though these mounts still have no model the viewer can
   show; Load Item Set lists 8 more Retail transmog sets that were left out (on the test machine most of them have
   no pieces the viewer can put on).
+- **The Undead male's jaws.** The model's default jaw showed through the other jaws (Retail, Mists of Pandaria
+  Classic and Classic Beta, HD and Classic models): Slackjawed showed closed lips over the open jaw and Drooler a
+  flesh jaw over the drool (Mists of Pandaria Classic: Strapped Slackjaw, Strapped Drooler and the like), and on
+  the HD model the bone jaws were drawn under a flesh jaw. Each jaw choice now shows only its own jaw. A
+  customization choice that picks one variant of a part now hides that part's other variants, as the client's own
+  data describes, so a few other choices change too: on the Undead, male and female, Eye Color *Sockets* (Classic
+  Beta: Eye Glow *None*) now shows empty sockets; Mag'har Orc Sideburns *None* now shows no sideburns; and a stray
+  second hairstyle is gone on the Gilnean female (and on the Classic Beta Human female).
 
 ## Changed
 
@@ -63,6 +71,7 @@ both.
   look may still have that look saved in it: remove the item from its slot, choose it again and save the file
   anew.
 - Character > Load Start Outfit lists no outfits in any client.
+- Undead: with Character > Show Facial Hair off, the jaw and the face features are hidden too.
 - The viewport player keeps a graphics cache in Windows' temporary folder (`%TEMP%\WoW Model Viewer`), which
   uninstalling does not remove; it can be deleted at any time.
 - The installer is not code-signed. Windows SmartScreen may show "Windows protected your PC": choose More info,
@@ -99,7 +108,7 @@ viewer, on this computer.
 ## Download
 
 `WoWModelViewer-Setup-1.1.exe` (41.1 MB). SHA-256:
-`da82002c9406d22dbe713755cb0b833989cdf094ec78b6c93c3b25a903b7029b`
+`cb29777babf293bbe8e160437ed929ac11dff1b9a31c2a36b13a5b188cbd7edf`
 
 ## Source
 
