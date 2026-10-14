@@ -83,6 +83,7 @@ int<Curve::ID> ItemLevelOffsetCurveID?
 int ItemLevelOffsetItemLevel? // same purpose as ItemScalingConfig::ItemLevel (curve parameter for ItemLevelOffsetCurveID)
 int<ItemSquishEra::ID> ItemSquishEraID?
 int AllowableRaces?
+int BetaCode67? // Classic Beta: a trailing 1-byte column after OverallQualityID; meaning not established
 
 LAYOUT 5272360F
 BUILD 1.13.0.28211
@@ -2753,3 +2754,80 @@ RequiredPVPRank<8>
 RequiredLevel<8>
 InventoryType<8>
 OverallQualityID<8>
+
+LAYOUT 6FCC3191
+COMMENT table is sparse
+COMMENT Classic Beta: the client's own file header gives 68 fields whose first 67 storage entries are those of
+COMMENT Retail's layout 1C17D17F, plus one trailing 1-byte column; so this is Retail's field list plus that column.
+COMMENT Checked on the client's own rows: Display_lang holds the item names; Material, InventoryType and SheatheType
+COMMENT equal the same columns of the client's Item on every item both tables hold. The other columns are named after
+COMMENT Retail's by position only.
+$noninline,id$ID<32>
+Description_lang
+Display3_lang
+Display2_lang
+Display1_lang
+Display_lang
+ExpansionID<32>
+DmgVariance
+LimitCategory<32>
+DurationInInventory<u32>
+QualityModifier
+BagFamily<u32>
+StartQuestID<32>
+LanguageID<32>
+ItemRange
+StatPercentageOfSocket[10]
+StatPercentEditor<32>[10]
+StatModifier_bonusStat<32>[10]
+Stackable<32>
+MaxCount<32>
+MinReputation<32>
+RequiredAbility<u32>
+AllowableRaces<32>[2]
+SellPrice<u32>
+BuyPrice<u32>
+VendorStackCount<u32>
+PriceVariance
+PriceRandomValue
+Flags<32>[5]
+OppositeFactionItemID<32>
+ModifiedCraftingReagentItemID<32>
+ContentTuningID<32>
+PlayerLevelToItemLevelCurveID<32>
+ItemLevelOffsetCurveID<32>
+ItemLevelOffsetItemLevel<32>
+ItemSquishEraID<32>
+ItemNameDescriptionID<u16>
+RequiredTransmogHoliday<u16>
+RequiredHoliday<u16>
+Gem_properties<u16>
+Socket_match_enchantment_ID<u16>
+TotemCategoryID<u16>
+InstanceBound<u16>
+ZoneBound<u16>[2]
+ItemSet<u16>
+LockID<u16>
+PageID<u16>
+ItemDelay<u16>
+MinFactionID<u16>
+RequiredSkillRank<u16>
+RequiredSkill<u16>
+ItemLevel<u16>
+AllowableClass<16>
+ArtifactID<u8>
+SpellWeight<u8>
+SpellWeightCategory<u8>
+SocketType<u8>[3]
+SheatheType<u8>
+Material<u8>
+PageMaterialID<u8>
+Bonding<u8>
+DamageType<u8>
+ContainerSlots<u8>
+RequiredPVPMedal<u8>
+RequiredPVPRank<8>
+RequiredLevel<8>
+InventoryType<8>
+OverallQualityID<8>
+BetaCode67<u8>

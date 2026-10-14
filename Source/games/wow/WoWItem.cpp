@@ -78,13 +78,18 @@ void WoWItem::setId(int id)
       return;
     }
 
+    // Only the new item's own appearances: an item with none in this client shows nothing, not the look of the
+    // item it replaces.
+    nbLevels_ = 0;
+    level_ = 0;
+    levelDisplayMap_.clear();
+    modifierIdDisplayMap_.clear();
+    displayId_ = 0;
+
     auto itemlevels = GAMEDATABASE.sqlQuery(QString("SELECT OrderIndex, ItemAppearanceID, ItemAppearanceModifierID FROM ItemModifiedAppearance WHERE ItemID = %1").arg(id));
 
     if (itemlevels.valid && !itemlevels.values.empty())
     {
-      nbLevels_ = 0;
-      level_ = 0;
-      levelDisplayMap_.clear();
       for (auto& value : itemlevels.values)
       {
         const auto curid = value[1].toInt();
@@ -148,7 +153,7 @@ void WoWItem::restore(int id, int displayId, int level)
   setId(id);
   if (nbLevels_ > 1)
     setLevel(level);
-  if (displayId != -1 && displayId_ != displayId)
+  if (displayId > 0 && displayId_ != displayId)   // a saved "no look" (0) leaves the item's own appearance
   {
     displayId_ = displayId;
     load();
@@ -674,6 +679,7 @@ void WoWItem::refresh()
     }
     case CS_HAND_RIGHT:
     {
+      charModel_->charModelDetails.closeRHand = false;   // closed again below only around a model in the hand
       if (charModel_->attachment)
       {
         charModel_->attachment->delSlot(CS_HAND_RIGHT);
@@ -706,6 +712,7 @@ void WoWItem::refresh()
     }
     case CS_HAND_LEFT:
     {
+      charModel_->charModelDetails.closeLHand = false;   // closed again below only around a model in the hand
       if (charModel_->attachment)
       {
         charModel_->attachment->delSlot(CS_HAND_LEFT);
@@ -1030,7 +1037,8 @@ void WoWItem::load(QString & f)
             setId(savedId);
           if (nbLevels_ > 1)
             setLevel(savedLevel);
-          const bool forcedDisplayId = (savedDisplayId != -1 && displayId_ != savedDisplayId);
+          // (A saved 0 is an item with no appearance where it was saved: the item's own look here stays.)
+          const bool forcedDisplayId = (savedDisplayId > 0 && displayId_ != savedDisplayId);
           if (forcedDisplayId)
           {
             displayId_ = savedDisplayId;
