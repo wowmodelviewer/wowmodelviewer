@@ -8,6 +8,7 @@
 #ifndef _CASCFOLDER_H_
 #define _CASCFOLDER_H_
 
+#include <functional>
 #include <vector>
 #include <unordered_set>
 
@@ -96,6 +97,30 @@ class _CASCFOLDER_API_ CASCFolder
     RootEntry rootEntry(int fileDataId) const;
     RootEntry rootEntryByPath(const QString & path) const;
 
+    // THE STORAGE, SHARED (docs/world-viewer/04b-asset-serving.md section C). CascLib's lookups, reads and storage
+    // reference count are made for several threads, each reading through file handles of its own; a file handle is not.
+    // Storage names one storage for such a reader: the handle, the locale files are opened with (CascOpenFile ignores
+    // it; passed as the folder's own reads pass it), and how many files the root lists without a name. storage() is the
+    // folder's own, borrowed: valid while the folder holds it, for this thread's use (the GUI thread). shareStorage()
+    // takes one more reference for another thread (CascWowShareStorage): it stays valid whatever the folder does next,
+    // until releaseStorage() drops that reference -- once, by its holder, on any thread. From the first share on, the
+    // folder adds no decryption key to that storage (adding one races another thread's decryption); keys are added
+    // when it opens, before anything reads it.
+    struct Storage
+    {
+      HANDLE handle = nullptr;
+      int locale = 0;
+      size_t rootNamelessCount = 0;
+      bool open() const { return handle != nullptr; }
+    };
+    Storage storage() const;
+    Storage shareStorage();
+    static void releaseStorage(Storage & held);
+    bool storageShared() const { return m_storageShared; }
+    // rootEntry and readWholeFile on a storage named by handle: the same code the folder's own calls run.
+    static RootEntry rootEntryIn(const Storage & from, int fileDataId);
+    static RootEntry rootEntryByPathIn(const Storage & from, const QString & path);
+
     // Reads one whole file of the storage -- by FileDataID when fileDataId > 0, else by path through the root's names
     // -- without the folder's file index, and says what happened, so a caller can tell a file the root does not list
     // from one that is not on this computer, one that is encrypted with a key this computer lacks, and a damaged one.
@@ -115,13 +140,36 @@ class _CASCFOLDER_API_ CASCFolder
                   // (errorCode: the content-key query's error; ERROR_NOT_SUPPORTED for a key of the wrong size, or
                   // a failed query that left no error)
     };
+    // Where one readWholeFile spent its time, in milliseconds (-1: the step was not reached).
+    struct ReadTimings
+    {
+      double openMs = -1.0;    // CascOpenFile
+      double sizeMs = -1.0;    // CascGetFileSize64
+      double allocMs = -1.0;   // the output buffer sized to the file
+      double readMs = -1.0;    // the CascReadFile loop: storage reads, decoding, decompression, frame hash checks
+      double keyMs = -1.0;     // CascGetFileInfo for the content key
+      double closeMs = -1.0;   // CascCloseFile
+      double md5Ms = -1.0;     // the MD5 of the bytes, compared with the content key
+    };
     // sizeOut, when given, receives the file's size once the storage has told it (TooLarge says how large), else -1.
     // contentKeyOut, when given, receives the file's content key -- the 16-byte MD5 of its content that every byte was
     // checked against -- with Read, and is emptied otherwise: a caller that needs the bytes' MD5 has it without hashing
-    // them again.
+    // them again. timingsOut, when given, receives the time of each step.
     ReadOutcome readWholeFile(int fileDataId, const QString & path, QByteArray & out, unsigned int * errorCode = nullptr,
                               qint64 maxBytes = 64 * 1024 * 1024, qint64 * sizeOut = nullptr,
-                              QByteArray * contentKeyOut = nullptr) const;
+                              QByteArray * contentKeyOut = nullptr, ReadTimings * timingsOut = nullptr) const;
+    // TEST HOOKS of readWholeFileFrom (the -terraintile harness, through the map asset reads; null in every other call):
+    // afterOpen runs with the file open, before its size is asked (a read held there keeps the file and its storage
+    // referenced); beforeVerify may change the bytes read before their MD5 is compared with the content key.
+    struct ReadHooks
+    {
+      std::function<void()> afterOpen;
+      std::function<void(QByteArray &)> beforeVerify;
+    };
+    static ReadOutcome readWholeFileFrom(const Storage & from, int fileDataId, const QString & path, QByteArray & out,
+                                         unsigned int * errorCode = nullptr, qint64 maxBytes = 64 * 1024 * 1024,
+                                         qint64 * sizeOut = nullptr, QByteArray * contentKeyOut = nullptr,
+                                         ReadTimings * timingsOut = nullptr, const ReadHooks * hooks = nullptr);
   private:
 
     int m_currentCascLocale;
@@ -142,6 +190,7 @@ class _CASCFOLDER_API_ CASCFolder
     quint64 m_storageGeneration;     // see storageGeneration(); set in the constructor, renewed by every open and close
     size_t m_rootNameCount = 0;      // see rootNameCount()
     size_t m_rootNamelessCount = 0;  // see rootNamelessCount()
+    bool m_storageShared = false;    // shareStorage() was called for the storage held now (no key is added to it)
     std::function<void(float)> m_progressCb; // optional load-progress reporter (see setProgressCallback)
 };
 

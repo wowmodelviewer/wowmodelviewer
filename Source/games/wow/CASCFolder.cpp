@@ -18,6 +18,7 @@
 #include <utility>
 
 #include <QCryptographicHash>
+#include <QElapsedTimer>
 #include <QFile>
 #include <QRegularExpression>
 
@@ -119,6 +120,7 @@ bool CASCFolder::setConfig(core::GameConfig config)
       if (hStorage)
         CascCloseStorage(hStorage);
       hStorage = opened;
+      m_storageShared = false;   // a storage nobody else holds yet: its keys are added below
       m_storageGeneration = nextStorageGeneration();
       // How many files the root knows by name, and how many it lists by FileDataID only: a path it has no name for is
       // absent from the client only when it lists none of the latter.
@@ -174,6 +176,7 @@ void CASCFolder::closeStorage()
   if (hStorage)
     CascCloseStorage(hStorage);
   hStorage = nullptr;
+  m_storageShared = false;
   m_storageGeneration = nextStorageGeneration();
   m_rootNameCount = 0;
   m_rootNamelessCount = 0;
@@ -182,12 +185,53 @@ void CASCFolder::closeStorage()
   m_presentCount = m_remoteCount = 0;
 }
 
+CASCFolder::Storage CASCFolder::storage() const
+{
+  Storage s;
+  s.handle = hStorage;
+  s.locale = m_currentCascLocale;
+  s.rootNamelessCount = m_rootNamelessCount;
+  return s;
+}
+
+CASCFolder::Storage CASCFolder::shareStorage()
+{
+  Storage s;
+  if (!hStorage)
+    return s;
+  // The folder holds its own reference while this one is taken: the count never rises from zero.
+  s.handle = CascWowShareStorage(hStorage);
+  if (!s.handle)
+    return s;
+  s.locale = m_currentCascLocale;
+  s.rootNamelessCount = m_rootNamelessCount;
+  m_storageShared = true;
+  return s;
+}
+
+void CASCFolder::releaseStorage(Storage & held)
+{
+  if (held.handle)
+    CascCloseStorage(held.handle);
+  held = Storage();
+}
+
 CASCFolder::RootEntry CASCFolder::rootEntry(int fileDataId) const
+{
+  return rootEntryIn(storage(), fileDataId);
+}
+
+CASCFolder::RootEntry CASCFolder::rootEntryByPath(const QString & path) const
+{
+  return rootEntryByPathIn(storage(), path);
+}
+
+CASCFolder::RootEntry CASCFolder::rootEntryIn(const Storage & from, int fileDataId)
 {
   RootEntry e;
   DWORD id = CASC_INVALID_ID;
   bool local = false;
-  if (hStorage && fileDataId > 0 && CascWowFindRootEntry(hStorage, nullptr, (DWORD)fileDataId, &id, &local))
+  if (from.handle && fileDataId > 0 && CascWowFindRootEntry(from.handle, nullptr, (DWORD)fileDataId, &id, &local))
   {
     e.listed = true;
     e.local = local;
@@ -196,7 +240,7 @@ CASCFolder::RootEntry CASCFolder::rootEntry(int fileDataId) const
   return e;
 }
 
-CASCFolder::RootEntry CASCFolder::rootEntryByPath(const QString & path) const
+CASCFolder::RootEntry CASCFolder::rootEntryByPathIn(const Storage & from, const QString & path)
 {
   RootEntry e;
   // The root hashes the name upper-cased with backslashes (CascLib's CalcFileNameHash): case and slash style of the
@@ -205,7 +249,7 @@ CASCFolder::RootEntry CASCFolder::rootEntryByPath(const QString & path) const
   const QByteArray name = path.toUtf8();
   DWORD id = CASC_INVALID_ID;
   bool local = false;
-  if (hStorage && !name.isEmpty() && CascWowFindRootEntry(hStorage, name.constData(), CASC_INVALID_ID, &id, &local))
+  if (from.handle && !name.isEmpty() && CascWowFindRootEntry(from.handle, name.constData(), CASC_INVALID_ID, &id, &local))
   {
     e.listed = true;
     e.local = local;
@@ -216,60 +260,103 @@ CASCFolder::RootEntry CASCFolder::rootEntryByPath(const QString & path) const
 
 CASCFolder::ReadOutcome CASCFolder::readWholeFile(int fileDataId, const QString & path, QByteArray & out,
                                                   unsigned int * errorCode, qint64 maxBytes, qint64 * sizeOut,
-                                                  QByteArray * contentKeyOut) const
+                                                  QByteArray * contentKeyOut, ReadTimings * timingsOut) const
+{
+  return readWholeFileFrom(storage(), fileDataId, path, out, errorCode, maxBytes, sizeOut, contentKeyOut, timingsOut);
+}
+
+CASCFolder::ReadOutcome CASCFolder::readWholeFileFrom(const Storage & from, int fileDataId, const QString & path,
+                                                      QByteArray & out, unsigned int * errorCode, qint64 maxBytes,
+                                                      qint64 * sizeOut, QByteArray * contentKeyOut, ReadTimings * timingsOut,
+                                                      const ReadHooks * hooks)
 {
   out.clear();
   if (sizeOut)
     *sizeOut = -1;
   if (contentKeyOut)
     contentKeyOut->clear();
+  ReadTimings unused;
+  ReadTimings & timings = timingsOut ? *timingsOut : unused;
+  timings = ReadTimings();
+  // Each step's time is taken after its error code was read: CascLib's error is the thread's last Win32 error, which
+  // anything called in between may change.
+  QElapsedTimer step;
+  const auto lap = [&step]() {
+    const double ms = step.nsecsElapsed() / 1e6;
+    step.restart();
+    return ms;
+  };
+  step.start();
   auto outcome = [errorCode](ReadOutcome o, DWORD code) {
     if (errorCode)
       *errorCode = (unsigned int)code;
     return o;
   };
-  if (!hStorage)
+  if (!from.handle)
     return outcome(ReadOutcome::NoStorage, ERROR_INVALID_HANDLE);
 
-  HANDLE file = nullptr;
+  // The file handle, closed on every way out -- an exception included: an allocation that fails below must not leave the
+  // handle, and the storage reference it holds, behind.
+  struct FileHandle
+  {
+    HANDLE h = nullptr;
+    ~FileHandle() { close(); }
+    void close()
+    {
+      if (h)
+        CascCloseFile(h);
+      h = nullptr;
+    }
+  } file;
   const QByteArray name = path.toUtf8();
   // A frame that carries a hash is checked as it is read (CASC_STRICT_DATA_CHECK), and the whole content against its
-  // content key below: data damaged on disk is refused, not handed on as the file.
+  // content key below: data damaged on disk is refused, not handed on as the file. The file handle is opened, read and
+  // closed here, on the calling thread: a CascLib file handle is never shared.
   const bool opened = fileDataId > 0
-                        ? CascOpenFile(hStorage, CASC_FILE_DATA_ID(fileDataId), m_currentCascLocale,
-                                       CASC_OPEN_BY_FILEID | CASC_STRICT_DATA_CHECK, &file)
-                        : (!name.isEmpty() && CascOpenFile(hStorage, name.constData(), m_currentCascLocale,
-                                                           CASC_OPEN_BY_NAME | CASC_STRICT_DATA_CHECK, &file));
+                        ? CascOpenFile(from.handle, CASC_FILE_DATA_ID(fileDataId), from.locale,
+                                       CASC_OPEN_BY_FILEID | CASC_STRICT_DATA_CHECK, &file.h)
+                        : (!name.isEmpty() && CascOpenFile(from.handle, name.constData(), from.locale,
+                                                           CASC_OPEN_BY_NAME | CASC_STRICT_DATA_CHECK, &file.h));
+  const DWORD openError = opened ? ERROR_SUCCESS : (name.isEmpty() && fileDataId <= 0 ? ERROR_INVALID_PARAMETER : GetCascError());
+  timings.openMs = lap();
   if (!opened)
+    return outcome(openError == ERROR_FILE_NOT_FOUND ? ReadOutcome::NotListed : ReadOutcome::Damaged, openError);
+  if (hooks && hooks->afterOpen)
   {
-    const DWORD error = name.isEmpty() && fileDataId <= 0 ? ERROR_INVALID_PARAMETER : GetCascError();
-    return outcome(error == ERROR_FILE_NOT_FOUND ? ReadOutcome::NotListed : ReadOutcome::Damaged, error);
+    hooks->afterOpen();
+    step.restart();
   }
 
   // A file the root lists but whose data is not on this computer opens (CascLib does not look at the local index
   // then) and fails here: the size comes from the data's header, which is not here.
   ULONGLONG size = 0;
-  if (!CascGetFileSize64(file, &size))
+  const bool sized = CascGetFileSize64(file.h, &size);
+  const DWORD sizeError = sized ? ERROR_SUCCESS : GetCascError();
+  timings.sizeMs = lap();
+  if (!sized)
   {
-    const DWORD error = GetCascError();
-    CascCloseFile(file);
-    return outcome(error == ERROR_FILE_NOT_FOUND ? ReadOutcome::NotLocal : ReadOutcome::Damaged, error);
+    file.close();
+    return outcome(sizeError == ERROR_FILE_NOT_FOUND ? ReadOutcome::NotLocal : ReadOutcome::Damaged, sizeError);
   }
   if (sizeOut)
     *sizeOut = (qint64)size;
   if ((qint64)size > maxBytes || size > 0x7FFFFFF0ull)
   {
-    CascCloseFile(file);
+    file.close();
     return outcome(ReadOutcome::TooLarge, ERROR_SUCCESS);
   }
 
   out.resize((int)size);
+  timings.allocMs = lap();
+  // The whole file in one request, as it always was: CascLib then decodes every frame straight into out, and a request
+  // that ends before the file's last frame is never made (a partial request whose disk read fails can leave CascLib's
+  // frame cache pointing into the caller's buffer: docs/world-viewer/04b-asset-serving.md section B).
   qint64 done = 0;
   DWORD error = ERROR_SUCCESS;
   while (done < (qint64)size)
   {
     DWORD got = 0;
-    if (!CascReadFile(file, out.data() + done, (DWORD)((qint64)size - done), &got))
+    if (!CascReadFile(file.h, out.data() + done, (DWORD)((qint64)size - done), &got))
     {
       error = GetCascError();
       break;
@@ -281,6 +368,7 @@ CASCFolder::ReadOutcome CASCFolder::readWholeFile(int fileDataId, const QString 
     }
     done += got;
   }
+  timings.readMs = lap();
   // The content key is the MD5 of the whole content, and the only check that covers every byte (CascLib checks a
   // frame's hash only where the frame carries one). Asked for while the file is open; a whole read is Read only once
   // the key was obtained and matched.
@@ -290,11 +378,13 @@ CASCFolder::ReadOutcome CASCFolder::readWholeFile(int fileDataId, const QString 
   DWORD keyError = ERROR_SUCCESS;
   if (done == (qint64)size)
   {
-    keyKnown = CascGetFileInfo(file, CascFileContentKey, contentKey, sizeof(contentKey), &keySize);
+    keyKnown = CascGetFileInfo(file.h, CascFileContentKey, contentKey, sizeof(contentKey), &keySize);
     if (!keyKnown)
       keyError = GetCascError();
+    timings.keyMs = lap();
   }
-  CascCloseFile(file);
+  file.close();
+  timings.closeMs = lap();
   if (done != (qint64)size)
   {
     out.clear();
@@ -313,8 +403,15 @@ CASCFolder::ReadOutcome CASCFolder::readWholeFile(int fileDataId, const QString 
     return outcome(ReadOutcome::Unverified,
                    !keyKnown && keyError != ERROR_SUCCESS ? keyError : (DWORD)ERROR_NOT_SUPPORTED);
   }
+  if (hooks && hooks->beforeVerify)
+  {
+    hooks->beforeVerify(out);
+    step.restart();
+  }
   const QByteArray key((const char *)contentKey, sizeof(contentKey));
-  if (QCryptographicHash::hash(out, QCryptographicHash::Md5) != key)
+  const bool matches = QCryptographicHash::hash(out, QCryptographicHash::Md5) == key;
+  timings.md5Ms = lap();
+  if (!matches)
   {
     out.clear();
     return outcome(ReadOutcome::Corrupt, ERROR_FILE_CORRUPT);
@@ -518,6 +615,13 @@ bool CASCFolder::closeFile(HANDLE file)
 
 void CASCFolder::addExtraEncryptionKeys()
 {
+  // CascLib adds a key to a list another thread's decryption walks without a lock: a storage shared with another
+  // thread (shareStorage) gets no key. Keys are added as the storage opens, before anything shares or reads it.
+  if (m_storageShared)
+  {
+    LOG_ERROR << "CASCFolder: no decryption key is added to a storage shared with another thread";
+    return;
+  }
   QFile tactKeys("extraEncryptionKeys.csv");
 
   if (tactKeys.open(QIODevice::ReadOnly | QIODevice::Text))

@@ -724,6 +724,19 @@ bool WINAPI CascWowFindRootEntry(HANDLE hStorage, const char * szFileName, DWORD
     return true;
 }
 
+// WMV: see CascLib.h. AddRef is interlocked (CascOpenStorage.cpp), as for the reference every open file takes.
+HANDLE WINAPI CascWowShareStorage(HANDLE hStorage)
+{
+    TCascStorage * hs = TCascStorage::IsValid(hStorage);
+
+    if(hs == NULL)
+    {
+        SetCascError(ERROR_INVALID_HANDLE);
+        return NULL;
+    }
+    return (HANDLE)hs->AddRef();
+}
+
 DWORD RootHandler_CreateWoW(TCascStorage * hs, CASC_BLOB & RootFile, DWORD dwLocaleMask)
 {
     TRootHandler_WoW * pRootHandler = NULL;

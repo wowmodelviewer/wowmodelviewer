@@ -85,9 +85,10 @@ namespace wow
       CASCFolder::RootEntry storageRootEntryByPath(const QString & path) const { return m_CASCFolder.rootEntryByPath(path); }
       CASCFolder::ReadOutcome readStorageFile(int fileDataId, const QString & path, QByteArray & out,
                                               unsigned int * errorCode = nullptr, qint64 maxBytes = 64 * 1024 * 1024,
-                                              qint64 * sizeOut = nullptr, QByteArray * contentKeyOut = nullptr) const
+                                              qint64 * sizeOut = nullptr, QByteArray * contentKeyOut = nullptr,
+                                              CASCFolder::ReadTimings * timingsOut = nullptr) const
       {
-        return m_CASCFolder.readWholeFile(fileDataId, path, out, errorCode, maxBytes, sizeOut, contentKeyOut);
+        return m_CASCFolder.readWholeFile(fileDataId, path, out, errorCode, maxBytes, sizeOut, contentKeyOut, timingsOut);
       }
       // Which storage the folder holds right now (CASCFolder::storageGeneration): changes with every client opened.
       quint64 storageGeneration() const { return m_CASCFolder.storageGeneration(); }
@@ -96,6 +97,10 @@ namespace wow
       size_t storageRootNamelessCount() const { return m_CASCFolder.rootNamelessCount(); }
       bool storageKnowsEncryptionKey(quint64 keyName) const { return m_CASCFolder.knowsEncryptionKey(keyName); }
       bool storageOpen() const { return m_CASCFolder.storageOpen(); }
+      // The storage named for a reader (CASCFolder::Storage): borrowed (this thread's use while the folder holds it), or
+      // shared with another thread through a reference of its own (released with CASCFolder::releaseStorage).
+      CASCFolder::Storage storage() const { return m_CASCFolder.storage(); }
+      CASCFolder::Storage shareStorage() { return m_CASCFolder.shareStorage(); }
       // Frees the files the last reload detached (initFromListfile). Called once the load that detached them has
       // rebuilt everything that could point at them (Browse, the character controls; the canvas was cleared
       // before): ModelViewer::LoadWoW, at its end. Also run by the next reload, for a load that never got there.

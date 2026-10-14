@@ -402,12 +402,20 @@ wow::WdtInspection wow::WorldMapCatalog::inspectFile(const WdtReference & refere
 wow::WdtInspection wow::WorldMapCatalog::inspectReference(const WdtReference & ref, QByteArray * keep, bool hash,
                                                           qint64 maxBytes)
 {
+  // The loaded client's storage, borrowed for this call on this thread (the GUI thread, as every catalogue call).
+  WoWFolder * folder = activeWowFolder();
+  return inspectInStorage(folder ? folder->storage() : CASCFolder::Storage(), ref, keep, hash, maxBytes);
+}
+
+wow::WdtInspection wow::WorldMapCatalog::inspectInStorage(const CASCFolder::Storage & from, const WdtReference & ref,
+                                                          QByteArray * keep, bool hash, qint64 maxBytes,
+                                                          const CASCFolder::ReadHooks * hooks)
+{
   if (keep)
     keep->clear();
   QElapsedTimer timer;
   timer.start();
   WdtInspection r;
-  WoWFolder * folder = activeWowFolder();
   if (ref.kind == WdtReference::Kind::Unresolved || (ref.kind == WdtReference::Kind::FileDataId && ref.fileDataId <= 0) ||
       (ref.kind == WdtReference::Kind::Path && ref.path.isEmpty()))
   {
@@ -417,7 +425,7 @@ wow::WdtInspection wow::WorldMapCatalog::inspectReference(const WdtReference & r
     r.milliseconds = timer.nsecsElapsed() / 1e6;
     return r;
   }
-  if (!folder || !folder->storageOpen())
+  if (!from.open())
   {
     // Nothing was asked of a storage, so nothing is known about the file.
     r.detail = "the client's storage is not open: nothing was checked";
@@ -428,14 +436,18 @@ wow::WdtInspection wow::WorldMapCatalog::inspectReference(const WdtReference & r
   const bool byId = ref.kind == WdtReference::Kind::FileDataId;
   const QString what = byId ? QString("FileDataID %1").arg(ref.fileDataId) : ref.path;
   // What the storage's root says, without opening the file: listed at all, and on this computer?
-  const CASCFolder::RootEntry root = byId ? folder->storageRootEntry(ref.fileDataId) : folder->storageRootEntryByPath(ref.path);
+  QElapsedTimer rootTimer;
+  rootTimer.start();
+  const CASCFolder::RootEntry root = byId ? CASCFolder::rootEntryIn(from, ref.fileDataId)
+                                           : CASCFolder::rootEntryByPathIn(from, ref.path);
+  r.rootMs = rootTimer.nsecsElapsed() / 1e6;
   r.storageFileDataId = root.listed ? root.fileDataId : -1;
-  if (!root.listed && !byId && folder->storageRootNamelessCount() > 0)
+  if (!root.listed && !byId && from.rootNamelessCount > 0)
   {
     // Not "absent": the root lists files it gives no name, and this could be one of them. Only a FileDataID could tell.
     r.state = WdtAvailability::Unsupported;
     r.detail = QString("the client's storage root has no name for %1, and lists %2 files by FileDataID only: whether the "
-                       "client has it cannot be told by path").arg(what).arg(folder->storageRootNamelessCount());
+                       "client has it cannot be told by path").arg(what).arg(from.rootNamelessCount);
   }
   else if (!root.listed)
   {
@@ -454,8 +466,9 @@ wow::WdtInspection wow::WorldMapCatalog::inspectReference(const WdtReference & r
     QByteArray contentKey;
     unsigned int error = 0;
     qint64 size = -1;
-    const CASCFolder::ReadOutcome read = folder->readStorageFile(byId ? ref.fileDataId : -1, byId ? QString() : ref.path,
-                                                                 bytes, &error, maxBytes, &size, &contentKey);
+    const CASCFolder::ReadOutcome read =
+      CASCFolder::readWholeFileFrom(from, byId ? ref.fileDataId : -1, byId ? QString() : ref.path, bytes, &error, maxBytes,
+                                    &size, &contentKey, &r.read, hooks);
     // What a caller that budgets reads counts. The size is known only once the storage has told it, and every outcome
     // after that but TooLarge (decided from the size, nothing read) entered the read loop: Read and Unverified read the
     // whole file; Corrupt, Encrypted, and Damaged or NotLocal from the loop failed on a frame after reading the ones

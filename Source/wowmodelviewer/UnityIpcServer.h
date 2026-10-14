@@ -288,12 +288,20 @@
  *
  * THE MAP ASSET QUEUE (protocol 12 and 13, every role). getMapAsset requests are served in the order they came, from one
  * queue, at most MAP_ASSET_QUEUE_MAX waiting (one beyond is answered "refused", "too many map requests waiting", without
- * a read). A request is decided, accounted and read only when it is served, so one whose load ended while it waited is
- * answered "stale" without a read. Each poll serves until MAP_ASSET_POLL_BUDGET_BYTES were read in it, or one file over
- * MAP_ASSET_LARGE_FILE_BYTES was (the size is known only once a file is read, so that file is the poll's last); the rest
- * waits for the next poll. The queue is dropped, never answered, wherever held requests are (a new connection, a dropped
- * client, start, stop). Each answer's record states queuedMs (from its arrival to the start of its serving) apart from
- * handlerMs, and the most recent MAP_ASSET_POLL_TIMINGS_KEPT polls that served any are kept with their GUI-thread time.
+ * a read). A request is decided and accounted only when it is served, so one whose load ended while it waited is
+ * answered "stale" without a read. THE MAP ASSET WORKER (docs/world-viewer/04b-asset-serving.md) reads the files: no
+ * storage read runs on this thread. A request the viewer lets through to a read goes to the worker, at most
+ * MAP_ASSET_READS_IN_FLIGHT at a time and none while more than MAP_ASSET_SEND_HIGH_WATER bytes wait to be sent; its
+ * result is taken back in a later poll (the one its result wakes: wakeOnMapResults), checked again by the viewer (the
+ * client, the load: a read whose load or client has gone is answered "stale", never sent), and answered. Each poll
+ * takes results back until MAP_ASSET_POLL_BUDGET_BYTES were read for them, or one file over MAP_ASSET_LARGE_FILE_BYTES
+ * was; the rest waits for the next poll, which another wake brings at once. Answers can leave in another order than
+ * the requests came (a refusal decided while reads are in flight): the player matches them
+ * by requestId. The queue is dropped, never answered, wherever held requests are (a new connection, a dropped client,
+ * start, stop), and so are the reads in flight of that connection (their results are dropped when taken back). Each
+ * answer's record states queuedMs (from its arrival to its dispatch), handlerMs (the GUI thread's time on it: its
+ * dispatch and its answer), readMs (the worker's read), the worker's outcome and the timings of every step; the most
+ * recent MAP_ASSET_POLL_TIMINGS_KEPT polls that served any are kept with their GUI-thread time.
  *
  * modelAnimation is pushed the same way whenever the animation on display changes, and once after
  * loadWoWModel so the player starts on the animation the app is showing rather than on its own
@@ -316,7 +324,10 @@
  * Implementation: plain Winsock2, non-blocking, polled from the GUI thread by a wxTimer (the
  * app has no Qt event loop, so QTcpServer signals would never fire; and GAMEDIRECTORY must be
  * used from the GUI thread anyway). One client at a time (the embedded player). Windows only,
- * like the host itself.
+ * like the host itself. The map asset worker is the one other thread: it reads map files through
+ * its own reference to the client's storage and hands results back; it touches nothing here but
+ * the wake it posts (wakeOnMapResults: a wxThreadEvent, so a result is answered at once, not at
+ * the next tick).
  */
 
 #ifndef UNITYIPCSERVER_H
@@ -327,10 +338,12 @@
     #include <wx/wx.h>
 #endif
 
+#include <atomic>
 #include <deque>
 #include <functional>
 #include <initializer_list>
 #include <map>
+#include <memory>
 #include <string>
 #include <unordered_set>
 #include <vector>
@@ -343,6 +356,7 @@
 #include <QString>
 #include <QStringList>
 
+#include "MapAssetWorker.h"
 #include "UnityAssetAccess.h"
 
 // The FileDataIDs getMapAsset has read from the loaded client's storage (UnityIpcServer::MapAssetServed::first): the
@@ -404,6 +418,17 @@ public:
   static const int MAP_ASSET_READS_TRACKED = 8192;
   // The getMapAsset requests the test hook holds unanswered at most (testHoldNextMapAsset).
   static const int MAP_ASSETS_HELD_MAX = 8;
+  // THE MAP ASSET WORKER (docs/world-viewer/04b-asset-serving.md): reads dispatched to it and not yet answered, at most
+  // (the worker reads one while the next waits, so it is not idle between polls; the bytes they hold are at most this
+  // many times a read's limit); and the bytes waiting to be sent above which no read is dispatched (a player that does
+  // not read stops the reads).
+  static const int MAP_ASSET_READS_IN_FLIGHT = 2;
+  static const int MAP_ASSET_SEND_HIGH_WATER = 16 * 1024 * 1024;
+  // THE WAKE: wake polls that follow one another (each starting within MAP_ASSET_WAKE_BURST_GAP_US of the last one's
+  // end: one pass of the event queue) spend at most about MAP_ASSET_WAKE_BURST_MS of the GUI thread; the wakes after
+  // that leave their results to the timer's poll, so the window gets its turn.
+  static const int MAP_ASSET_WAKE_BURST_MS = 8;
+  static const int MAP_ASSET_WAKE_BURST_GAP_US = 1000;
 
   UnityIpcServer();
   ~UnityIpcServer();
@@ -723,8 +748,8 @@ public:
   // terrain view left, unanswered). False (nothing sent) as for sendLoadTerrainTile.
   bool sendClearTerrain(const QString & reason);
 
-  // The host's answer to one getMapAsset, from onGetMapAsset (the server knows nothing of maps): state is the map
-  // catalogue's availability name, "stale" or "refused"; bytes only for "available".
+  // The host's answer to one getMapAsset, from the viewer (onDispatchMapAsset, onCompleteMapAsset: the server knows
+  // nothing of maps): state is the map catalogue's availability name, "stale" or "refused"; bytes only for "available".
   struct MapAssetAnswer
   {
     QString state;
@@ -736,9 +761,66 @@ public:
                                    // failed its kind check was read all the same; one whose read failed partway counts
                                    // its size, an upper bound: WdtInspection::readBytes); what the queue's poll budget
                                    // and the load's texture byte budget count
+    QJsonObject timings;           // where the answer's time went, by step, in ms (the decision, the storage root, each
+                                   // step of the read, the kind check): reported in the record beside handlerMs
   };
-  // Set by the viewer; without it every getMapAsset is refused.
-  std::function<MapAssetAnswer(const QJsonObject & request)> onGetMapAsset;
+  // THE MAP ASSET WORKER. A request is decided by the viewer when the queue serves it (onDispatchMapAsset, GUI thread):
+  // either the answer now (refused, stale: nothing to read), or a read -- the file, its limit, and the client epoch and
+  // storage generation it was decided under -- which the worker carries out on its own thread. Its result comes back to
+  // the viewer (onCompleteMapAsset, GUI thread), which checks it again (the client, the load) and makes the answer.
+  // onMapAssetStale is asked every poll for every read in flight: "" while it is still wanted, else why not (the read is
+  // cancelled: skipped when not begun; finished, whole, and answered stale otherwise). Without the dispatch handler
+  // every getMapAsset is refused.
+  struct MapAssetDispatch
+  {
+    bool read = false;             // false: answer is the answer, now
+    MapAssetAnswer answer;         // the answer; with a read, only its timings (the decision's)
+    int fileDataID = 0;
+    qint64 maxBytes = 0;
+    int epoch = 0;
+    quint64 generation = 0;
+  };
+  std::function<MapAssetDispatch(const QJsonObject & request)> onDispatchMapAsset;
+  std::function<MapAssetAnswer(const QJsonObject & request, MapAssetWorker::Result & result)> onCompleteMapAsset;
+  std::function<QString(const QJsonObject & request)> onMapAssetStale;
+  // While this says so (a client is being loaded: its storage and catalogue are being replaced), reads in flight are
+  // neither checked nor answered: their results wait with the worker, to be checked once the load is over -- answered
+  // stale when it replaced the client, as read when it failed and the client stayed.
+  std::function<bool()> onMapAssetWait;
+  // The worker the reads go to (the viewer's; shared, it outlives a stop and start of the server).
+  void setMapAssetWorker(const std::shared_ptr<MapAssetWorker> & worker);
+  // THE WAKE: every result the worker makes posts this server a wake (a wxThreadEvent, at most one waiting), and the GUI
+  // thread polls at once instead of at the next tick -- a read's answer leaves as soon as it is read. The viewer's
+  // server only; the in-process checks drive their servers' polls themselves. Undone by setMapAssetWorker and the
+  // destructor, before anything it would wake goes.
+  void wakeOnMapResults();
+  // The harness's pump: waits up to ms, less as soon as the worker has made a result since the last poll looked (the
+  // wake, for a pump that polls by itself). Without a worker, sleeps ms.
+  void waitForMapResult(int ms);
+  const std::shared_ptr<MapAssetWorker> & mapAssetWorker() const { return m_mapAssetWorker; }
+  // Every read in flight is not wanted any more (the client was replaced): cancelled as onMapAssetStale would.
+  void cancelMapReads(const QString & reason);
+  size_t mapReadsInFlight() const { return m_mapReadsInFlight.size(); }
+  // The server's accounting of the reads, since the process began.
+  struct MapReadStats
+  {
+    long long dispatched = 0;       // reads handed to the worker
+    long long answered = 0;         // ... answered from their result
+    long long answeredStale = 0;    // ... of which "stale" (the viewer's check at completion)
+    long long cancelled = 0;        // cancelled by the viewer while in flight
+    long long orphaned = 0;         // their connection ended: dropped unanswered
+    long long droppedUnanswered = 0;// ... their results taken back and dropped (dispatched = answered + dropped + in flight)
+    long long refusedNoWorker = 0;  // refused for want of a running worker (shutting down)
+    long long dispatchHeldBack = 0; // polls whose dispatch stopped at MAP_ASSET_SEND_HIGH_WATER
+    int inFlightMax = 0;            // the most reads in flight at once
+    long long unsentBytesMax = 0;   // the most bytes waiting to be sent, seen at the end of a serving poll
+    long long wakes = 0;            // wakes handled (THE WAKE)
+    long long wakesDeferred = 0;    // ... left to the timer: their run of wakes had spent MAP_ASSET_WAKE_BURST_MS
+    double wakeBurstMsMax = 0.0;    // the most GUI time one run of wakes spent
+    long long takenOnWake = 0;      // ... the results their polls took back
+  };
+  const MapReadStats & mapReadStats() const { return m_mapReadStats; }
+  long long unsentBytes() const;
   // One getMapAsset answered: what was asked and what went back.
   struct MapAssetServed
   {
@@ -763,6 +845,13 @@ public:
                                    // having read that WDT whole on this thread just before the load was sent
     bool firstTracked = true;      // false: a file served when the read tracker was full and did not hold its id, so
                                    // whether this was its first read is not known (first is false then)
+    QString readOutcome;           // the worker's outcome for a request that went to it (MapAssetWorker::outcomeName),
+                                   // "" for one answered at its dispatch
+    QString readState;             // ... and, when it was read, what the read found (an availability name): a read
+                                   // answered "stale" afterwards says here what it had read
+    QJsonObject timings;           // MapAssetAnswer::timings, plus the answer's own steps: serializeMs (its header line),
+                                   // appendMs (header and payload into the send buffer), sendMs (what the socket took at
+                                   // once), logMs (its log line, written after handlerMs ends)
     QString describe() const;
   };
   // The most recent getMapAsset answers, in order (at most MAP_ASSET_RECORDS_KEPT), and how many there were since the
@@ -790,7 +879,12 @@ public:
     int largeFiles = 0;            // files over MAP_ASSET_LARGE_FILE_BYTES among them (0 or 1)
     double serveMs = -1.0;         // the serving, from the first request taken to the last answer queued
     int waitingAfter = 0;          // requests still waiting when the poll stopped serving
-    bool stoppedForBudget = false; // it stopped with requests waiting: MAP_ASSET_POLL_BUDGET_BYTES read, or a large file
+    bool stoppedForBudget = false; // it stopped taking results back: MAP_ASSET_POLL_BUDGET_BYTES read for them, or a
+                                   // large file
+    int completed = 0;             // of served, the reads answered from the worker's results
+    int dispatched = 0;            // reads handed to the worker in the poll
+    int inFlightAfter = 0;         // reads in flight when the poll ended
+    double recordMs = 0.0;         // of serveMs, the time spent in onMapAssetServed (a test's record keeping)
   };
   // The requests waiting now, in order of arrival.
   size_t mapAssetsWaiting() const { return m_mapAssetQueue.size(); }
@@ -799,6 +893,19 @@ public:
   const std::deque<MapAssetPoll> & mapAssetPolls() const { return m_mapAssetPolls; }
   long long mapAssetPollsTotal() const { return m_mapAssetPollsTotal; }
   std::function<void(const MapAssetPoll &)> onMapAssetPoll;
+  // Every poll: how long it ran on this thread, accept to send, the time since the one before began, and how many map
+  // requests it answered.
+  struct PollTiming
+  {
+    double pollMs = 0.0;
+    double receiveMs = 0.0;        // ... of it, reading and handling the player's messages (their handlers included)
+    double serveMs = 0.0;          // ... the map asset queue and worker (serveMapAssetQueue)
+    double recordMs = 0.0;         // ... of serveMs, onMapAssetServed (a test's record keeping)
+    double sendMs = 0.0;           // ... what the socket took of the send buffer at the end
+    double sincePreviousMs = -1.0; // -1 for the first poll
+    int mapAnswered = 0;
+  };
+  std::function<void(const PollTiming &)> onPollTiming;
   // Requests received since the server started: queued, refused for a full queue, and dropped unanswered with the queue
   // (its connection ended); the most that waited at once.
   long long mapAssetsQueued() const { return m_mapAssetsQueued; }
@@ -807,8 +914,8 @@ public:
   int mapAssetQueueDepthMax() const { return m_mapAssetQueueDepthMax; }
 
   // TEST HOOKS (the -terraintile test only; inert unless it sets them). The next getMapAsset (of role, or of any role
-  // when role is empty) is held unanswered; release answers every held one then, in order, through the same decision
-  // and read as any (an answer the viewer now calls "stale", or a file sent long after its load ended: a late answer).
+  // when role is empty) is held unanswered; release puts every held one back at the front of the queue, in order, to be
+  // decided and read as any -- by then the viewer usually calls it "stale": a late answer.
   // At most MAP_ASSETS_HELD_MAX are held (a request beyond that is answered as usual), and held requests are dropped,
   // never answered, when the player's connection ends: no answer meant for one player may reach another.
   void testHoldNextMapAsset(const QString & role);
@@ -823,6 +930,26 @@ public:
   void testReceiveMapAsset(const QJsonObject & request) { handleGetMapAsset(request); }
   int testServeMapAssetQueue() { return serveMapAssetQueue(); }   // returns how many were answered
   void testDropMapAssetQueue() { dropHeldMapAssets("the test dropped them"); }
+  // TEST HOOKS of the worker's reads: the next read dispatched of role (any when empty) is held in the worker with its
+  // file open (MapAssetWorker::Job::testHold) until testReleaseMapRead, or has one byte changed before its content key
+  // is checked; every read from now on waits ms before it begins (0: none). testMapReadHeld: a read held now, and its
+  // request. testWaitMapReads: every read dispatched has its result ready (the in-process queue check).
+  void testHoldNextMapRead(const QString & role, bool beforeOpen = false);
+  void testCancelMapReadHold();
+  void testCorruptNextMapRead(const QString & role);
+  void testDelayMapReads(int ms);
+  bool testMapReadHeld(QJsonObject * request = nullptr) const;
+  bool testMapReadHookArmed() const { return m_holdNextMapRead || m_corruptNextMapRead; }
+  // TEST HOOK: the next terrainTileLoaded of load is held, not handled -- the host still takes the load as current --
+  // until testReleaseTerrainReport handles it (dropped with the connection): with it a read finished after the player
+  // gave the load up is answered as the file, a genuine late file answer. testFakeUnsentBytes: the send buffer counts
+  // that many more bytes waiting than it holds (the in-process queue check of MAP_ASSET_SEND_HIGH_WATER).
+  void testHoldTerrainReport(int load) { m_holdReportLoad = load; }
+  bool testTerrainReportHeld() const { return !m_heldReport.isEmpty(); }
+  void testReleaseTerrainReport();
+  void testFakeUnsentBytes(long long bytes) { m_fakeUnsentBytes = bytes; }
+  void testReleaseMapRead();
+  bool testWaitMapReads(int ms);
   // A terrainTileLoaded taken as if the player had sent it (the -terraintile in-process checks of what a report is read
   // into, on a server of their own): read, counted, logged and handed to onTerrainTileLoaded as any.
   void testReceiveTerrainTileLoaded(const QJsonObject & msg) { handleTerrainTileLoaded(msg); }
@@ -1001,6 +1128,7 @@ public:
 
 private:
   void onPoll(wxTimerEvent & event);
+  void onMapResultWake(wxThreadEvent & event);
   void pollAccept();
   void pollReceive();
   void pollSend();
@@ -1013,11 +1141,30 @@ private:
   void handleRuntimeState(const QJsonObject & msg);
   void handleScreenshotSaved(const QJsonObject & msg);
   void handleGetMapAsset(const QJsonObject & msg);
-  // Answers one request: through the viewer's decision and read (onGetMapAsset), or with the answer given (a request
-  // refused on arrival, nothing read). queuedMs goes into its record. Returns the bytes read for it.
-  long long answerMapAsset(const QJsonObject & msg, double queuedMs = -1.0, const MapAssetAnswer * given = nullptr);
-  // One poll's serving of the queue (THE MAP ASSET QUEUE): in order, until the poll's budget is spent. Returns how many
-  // were answered.
+  // A read dispatched to the worker, until its result is taken back.
+  struct MapReadInFlight
+  {
+    quint64 ticket = 0;
+    QJsonObject request;
+    qint64 arrivedNs = 0;
+    qint64 dispatchedNs = 0;
+    double queuedMs = -1.0;        // from its arrival to its dispatch
+    double dispatchMs = 0.0;       // the GUI thread's time on its dispatch (the viewer's decision and the submit)
+    QJsonObject timings;           // the dispatch's (the decision's)
+    unsigned long long connection = 0;   // m_connectionSerial when dispatched
+    std::shared_ptr<std::atomic<bool>> cancelled;   // shared with the worker's job
+    QString cancelReason;          // why the viewer no longer wanted it ("" while wanted)
+    bool orphaned = false;         // its connection ended: dropped unanswered when its result comes
+    bool testHold = false;
+    bool testCorrupt = false;
+  };
+  // Answers one request with the answer given -- decided at its dispatch (read null), or at the completion of read
+  // (result its worker's result) -- and records it. guiTimer: running since the GUI work on it began in this poll.
+  // Returns the bytes read for it.
+  long long answerMapAsset(const QJsonObject & msg, double queuedMs, const MapAssetAnswer & answer,
+                           const MapReadInFlight * read = nullptr, const MapAssetWorker::Result * result = nullptr,
+                           const QElapsedTimer & guiTimer = QElapsedTimer());
+  // One poll's serving (THE MAP ASSET QUEUE AND WORKER, in UnityIpcServer.cpp). Returns how many were answered.
   int serveMapAssetQueue();
   // The held requests (TEST HOOKS) and the queue dropped unanswered, and the hold disarmed: the connection they came over
   // has ended.
@@ -1029,7 +1176,8 @@ private:
   void queueLineParts(std::initializer_list<QByteArray> parts);
   // A line and the binary payload it announces (protocol 10): header (one JSON object, no newline, stating
   // "payloadBytes": payload.size()), a newline, the payload, a newline. Only to a player that takes binary frames.
-  void queueFrame(const QByteArray & header, const QByteArray & payload);
+  void queueFrame(const QByteArray & header, const QByteArray & payload, double * appendMs = nullptr,
+                  double * sendMs = nullptr);
   static QJsonArray textureArray(const std::vector<UnityAssetAccess::ModelTexture> & textures);
   // Adds "geosets"/"hasGeosets" to a message about one model, when a selection is known.
   static void addGeosets(QJsonObject & msg, int m2FileDataID);
@@ -1075,7 +1223,30 @@ private:
     qint64 arrivedNs = 0;
   };
   std::deque<QueuedMapAsset> m_mapAssetQueue;
+  // THE MAP ASSET WORKER: the viewer's worker, the reads in flight (at most MAP_ASSET_READS_IN_FLIGHT), their accounting,
+  // the connection count that tells one connection's reads from the next's, and the test hooks of the reads.
+  std::shared_ptr<MapAssetWorker> m_mapAssetWorker;
+  std::deque<MapReadInFlight> m_mapReadsInFlight;
+  MapReadStats m_mapReadStats;
+  bool m_wakeOnResults = false;
+  std::atomic<bool> m_wakePosted{false};   // a wake waits in the event queue (set by the worker, lowered by the GUI)
+  quint64 m_resultsSeen = 0;               // the worker's results made, as the last serving poll saw them
+  qint64 m_wakeBurstEndNs = -1;            // when the last wake poll ended (m_clock)
+  double m_wakeBurstMs = 0.0;              // GUI time of the run of wakes it belongs to
+  unsigned long long m_connectionSerial = 0;
+  bool m_holdNextMapRead = false;
+  bool m_holdMapReadBeforeOpen = false;
+  QString m_holdMapReadRole;
+  bool m_corruptNextMapRead = false;
+  QString m_corruptMapReadRole;
+  int m_mapReadDelayMs = 0;
+  int m_holdReportLoad = 0;                           // TEST HOOKS: testHoldTerrainReport
+  QJsonObject m_heldReport;
+  long long m_fakeUnsentBytes = 0;                    // TEST HOOKS: testFakeUnsentBytes
   QElapsedTimer m_clock;                              // started with the server object: the queue's clock
+  qint64 m_lastPollNs = -1;                           // m_clock when the last poll began (onPollTiming)
+  int m_pollMapAnswered = 0;                          // map requests answered in the poll running now
+  double m_pollRecordMs = 0.0;                        // time in onMapAssetServed in the poll running now
   std::deque<MapAssetPoll> m_mapAssetPolls;           // the most recent MAP_ASSET_POLL_TIMINGS_KEPT, emptied by start()
   long long m_mapAssetPollsTotal = 0;
   long long m_mapAssetsQueued = 0;
