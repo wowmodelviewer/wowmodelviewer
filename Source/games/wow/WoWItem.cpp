@@ -48,6 +48,43 @@ std::map<CharSlots, int> WoWItem::SLOT_LAYERS_ = { { CS_SHIRT, 10 }, { CS_HEAD, 
                                               { CS_GLOVES, 20 }, { CS_HAND_RIGHT, 21 }, { CS_HAND_LEFT, 22 },
                                               { CS_CAPE, 23 }, { CS_QUIVER, 24 } };
 
+// THE BODY REGIONS A SLOT PAINTS. A display can list a texture for any body region (ItemDisplayInfoMaterialRes); the
+// viewer draws only the regions of the slot the item is worn in. Retail (12.1.5) keeps to that in its data: no head,
+// shoulder or back display lists a body texture, a wrist display lists the lower arm alone, and the other slots list
+// only the regions below (plus the upper arm on 70 of 4,335 glove displays and the upper leg on 120 of 321 tabard
+// displays, which the viewer never painted). The Classic clients do not: in MoP Classic (5.5.4) 168 of 1,809 head
+// displays, 164 of 1,637 shoulder displays and 107 of 1,488 wrist displays also list a chest texture -- whole plate or
+// cloth outfits, the Lightbringer helm, shoulders and bracers among them -- and Classic Era (1.15.9) has the same on 30
+// head and 26 shoulder displays. Painted, a helm alone dressed the character in a full suit, and over other armour it
+// covered the sleeves, chest and legs worn with it. Regions outside the body (the cape, a texture whose name gives no
+// region) are kept as before.
+static bool slotPaintsRegion(CharSlots slot, CharRegions region)
+{
+  if (region > CR_FOOT)
+    return true;
+
+  switch (slot)
+  {
+    case CS_SHIRT: // as a chest piece: a few Classic shirts share a robe's display, skirt included
+    case CS_CHEST:
+      return region != CR_HAND && region != CR_FOOT;
+    case CS_BELT:
+      return region == CR_TORSO_LOWER || region == CR_LEG_UPPER;
+    case CS_PANTS:
+      return region == CR_LEG_UPPER || region == CR_LEG_LOWER;
+    case CS_BOOTS:
+      return region == CR_LEG_LOWER || region == CR_FOOT;
+    case CS_BRACERS:
+      return region == CR_ARM_LOWER;
+    case CS_GLOVES:
+      return region == CR_ARM_LOWER || region == CR_HAND;
+    case CS_TABARD:
+      return region == CR_TORSO_UPPER || region == CR_TORSO_LOWER;
+    default: // head, shoulders, cape, weapons, quiver
+      return false;
+  }
+}
+
 
 WoWItem::WoWItem(CharSlots slot)
   : slot_(slot)
@@ -318,12 +355,20 @@ void WoWItem::load()
                               .arg(GENDER_ANY).arg(itemSex).arg(displayId_).arg(classFilter),
                       iteminfos))
     {
+      QStringList skipped;
       for (auto& value : iteminfos.values)
       {
         const auto tex = GAMEDIRECTORY.getFile(value[0].toInt());
         if (tex)
         {
           auto texRegion = getRegionForTexture(tex);
+          // Only a region the slot paints (slotPaintsRegion):
+          if (!slotPaintsRegion(slot_, texRegion))
+          {
+            if (!skipped.contains(QString::number(texRegion)))
+              skipped << QString::number(texRegion);
+            continue;
+          }
           // Only add one texture per region (first one in sort order):
           if (itemTextures_.count(texRegion) < 1)
           {
@@ -332,6 +377,9 @@ void WoWItem::load()
           }
         }
       }
+      if (!skipped.isEmpty())
+        LOG_INFO << "Item" << id_ << "display" << displayId_ << "slot" << slot_ << ": not painting body region(s)"
+                 << skipped.join(",") << "(not drawn for this slot)";
     }
   }
 
