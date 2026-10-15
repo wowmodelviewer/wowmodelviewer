@@ -981,6 +981,7 @@ bool WoWModel::setRaceSex(int raceID, int sexID)
     return false;
 
   infos = wanted;
+  bodySex_ = GENDER_MALE;       // another race: its body sex is told again (itemSexID)
   cd.showFeet = infos.barefeet; // race default, as in initRaceInfos()
 
   // Rebuild the customization options: they come from this race's ChrModel, and the model
@@ -990,6 +991,23 @@ bool WoWModel::setRaceSex(int raceID, int sexID)
   LOG_INFO << "Model" << gamefile->fullname() << "read as race" << raceID << "sex" << sexID
            << "(ChrModel" << (infos.ChrModelID.empty() ? -1 : infos.ChrModelID[0]) << ")";
   return true;
+}
+
+void WoWModel::setBodySex(int sex)
+{
+  const int bodySex = (sex == GENDER_FEMALE) ? GENDER_FEMALE : GENDER_MALE;
+  if (bodySex == bodySex_)
+    return;
+  bodySex_ = bodySex;
+
+  // Items already worn (a character loaded onto the model on screen keeps the items it shares with the last one)
+  // were chosen for the other body: their parts are chosen again.
+  if (infos.sexID == GENDER_ANY)
+  {
+    const std::vector<WoWItem *> items(begin(), end());
+    for (WoWItem * item : items)
+      item->load();
+  }
 }
 
 
@@ -2973,6 +2991,9 @@ void WoWModel::save(QXmlStreamWriter &stream)
   {
     stream.writeAttribute("race", QString::number(infos.raceID));
     stream.writeAttribute("sex", QString::number(infos.sexID));
+    // A model that serves both sexes says no body sex of its own; its items are chosen by the character's (itemSexID).
+    if (infos.sexID == GENDER_ANY)
+      stream.writeAttribute("bodySex", QString::number(bodySex_));
   }
   stream.writeEndElement();
   cd.save(stream);
@@ -3780,7 +3801,7 @@ void WoWModel::refresh()
     const auto query = QString("SELECT HideGeosetGroup FROM HelmetGeosetData WHERE HelmetGeosetData.RaceID = %1 "
       "AND HelmetGeosetData.HelmetGeosetVisDataID = (SELECT %2 FROM ItemDisplayInfo WHERE ItemDisplayInfo.ID = %3)")
       .arg(infos.raceID)
-      .arg((infos.sexID == 0) ? "HelmetGeosetVis1" : "HelmetGeosetVis2")
+      .arg((itemSexID() == GENDER_MALE) ? "HelmetGeosetVis1" : "HelmetGeosetVis2") // the body's: the helm is chosen by it
       .arg(headDisplay);
 
     auto helmetInfos = GAMEDATABASE.sqlQuery(query);

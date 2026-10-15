@@ -1481,7 +1481,8 @@ bool ModelViewer::ShowCreatureDisplay(int fileDataId, int extraId, int displayId
              << "but stores choices of the model" << shownFileId << "-- shown on that model";
   GameFile * modelFile = GAMEDIRECTORY.getFile(shownFileId);
   // The race on its model in the model's own sex: a dragon form's model (a Dracthyr's, a drake's) has its own, not the
-  // male or female its display names.
+  // male or female its display names. The display's sex stays the body sex its items are chosen for (itemSexID).
+  const int displaySex = sex;
   RaceInfos wearer;
   if (race > 0 && modelFile && RaceInfos::getRaceInfosForRaceAndFile(race, modelFile->fileDataId(), wearer))
     sex = wearer.sexID;
@@ -1499,6 +1500,7 @@ bool ModelViewer::ShowCreatureDisplay(int fileDataId, int extraId, int displayId
   if (race > 0 && (m->infos.raceID != race || m->infos.sexID != sex))
     LOG_WARNING << "Creature display" << displayId << ": race" << race << "sex" << sex << "of extended display" << extraId
                 << "does not wear" << m->gamefile->fullname() << "-- shown as race" << m->infos.raceID;
+  m->setBodySex(displaySex);
 
   // The stored appearance first, in the NPC's class context: the equipment's parts are chosen by it as they load.
   std::vector<std::pair<uint, uint> > stored;
@@ -5737,8 +5739,14 @@ void ModelViewer::LoadChar(QString fn, bool equipmentOnly /* = false */)
           const int race = reader.attributes().value("race").toString().toInt(&raceRead);
           const int sex = reader.attributes().value("sex").toString().toInt(&sexRead);
           const bool raceSaved = raceRead && sexRead && race > 0;
+          // On a model that serves both sexes (the Dracthyr's dragon form), the body sex its items are chosen for
+          // (WoWModel::itemSexID); a file saved without one is male, as such a model loads anywhere else.
+          bool bodySexRead = false;
+          const int bodySex = reader.attributes().value("bodySex").toString().toInt(&bodySexRead);
           LoadModel(GAMEDIRECTORY.getFile(modelname), raceSaved ? race : -1, raceSaved ? sex : -1);
           WoWModel * m = const_cast<WoWModel *>(canvas->model());
+          if (m)
+            m->setBodySex(bodySexRead ? bodySex : GENDER_MALE);
           if(loadCharDetails)
             m->load(fn);
         }
@@ -7053,6 +7061,10 @@ bool ModelViewer::ApplyArmoryCharacter(CharInfos & info, wxString & error)
       error = _("The character's model could not be loaded, so nothing was imported.");
       return false;
     }
+
+    // A model that serves both sexes (the Dracthyr's dragon form) wears items made per body sex: the character's own,
+    // told before anything is equipped (WoWModel::itemSexID). Other models' item sex is their race's.
+    g_charControl->model->setBodySex((result->gender == "Male") ? GENDER_MALE : GENDER_FEMALE);
 
     if (g_charControl->model->infos.raceID != result->raceId)
       LOG_INFO << "Armory import: the model is race" << g_charControl->model->infos.raceID

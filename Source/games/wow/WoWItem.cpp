@@ -271,6 +271,7 @@ void WoWItem::load()
     return;
 
   const auto charInfos = charModel_->infos;
+  const int itemSex = charModel_->itemSexID();   // the body sex on a model that serves both sexes (WoWModel::itemSexID)
 
   sqlResult iteminfos;
 
@@ -314,7 +315,7 @@ void WoWItem::load()
                               "AND ItemDisplayInfoID = %3 AND %4 "
                               "ORDER BY ComponentTextureFileData.GenderIndex, ComponentTextureFileData.ClassID DESC")
 
-                              .arg(GENDER_ANY).arg(charInfos.sexID).arg(displayId_).arg(classFilter),
+                              .arg(GENDER_ANY).arg(itemSex).arg(displayId_).arg(classFilter),
                       iteminfos))
     {
       for (auto& value : iteminfos.values)
@@ -1224,6 +1225,10 @@ int WoWItem::getCustomModelId(size_t index) const
   idListStr = "(" + idListStr + ")";
   
   const auto charInfos = charModel_->infos;
+  // The race and sex the components are stored under: the character's own, but for a model that serves both sexes
+  // (the Dracthyr's dragon form) its body sex and the race that keeps that model's items (RaceInfos::itemRaceID).
+  const int itemRace = RaceInfos::itemRaceID(charInfos);
+  const int itemSex = charModel_->itemSexID();
 
   auto classFilter = QString("ClassID = %1").arg(CLASS_ANY);
   if (charModel_ && charModel_->cd.isDemonHunter())
@@ -1242,7 +1247,7 @@ int WoWItem::getCustomModelId(size_t index) const
                           "WHERE RaceID = %1 AND (GenderIndex = %2 OR GenderIndex = %3) "
                           "AND ID IN %4 AND %5 "
                           "ORDER BY GenderIndex, ClassID DESC, PositionIndex %6")
-                          .arg(charInfos.raceID).arg(charInfos.sexID).arg(GENDER_ANY).arg(idListStr).arg(classFilter).arg(positionSort);
+                          .arg(itemRace).arg(itemSex).arg(GENDER_ANY).arg(idListStr).arg(classFilter).arg(positionSort);
   if (queryItemInfo(query, iteminfos))
     return iteminfos.values[0][0].toInt();
 
@@ -1295,6 +1300,9 @@ int WoWItem::getCustomTextureId(size_t index) const
   idListStr = "(" + idListStr + ")";
   
   const auto charInfos = charModel_->infos;
+  // As getCustomModelId: the body sex and the item race on a model that serves both sexes.
+  const int itemRace = RaceInfos::itemRaceID(charInfos);
+  const int itemSex = charModel_->itemSexID();
   
   QString classFilter = QString("ClassID = %1").arg(CLASS_ANY);
 
@@ -1308,7 +1316,7 @@ int WoWItem::getCustomTextureId(size_t index) const
                           "WHERE RaceID = %1 AND (GenderIndex = %2 OR GenderIndex = %3) "
                           "AND ID IN %4 AND %5 "
                           "ORDER BY GenderIndex, ClassID DESC")
-                          .arg(charInfos.raceID).arg(charInfos.sexID).arg(GENDER_ANY).arg(idListStr).arg(classFilter);
+                          .arg(itemRace).arg(itemSex).arg(GENDER_ANY).arg(idListStr).arg(classFilter);
   if (queryItemInfo(query, iteminfos))
     return iteminfos.values[0][0].toInt();
 
@@ -1330,7 +1338,7 @@ int WoWItem::getCustomTextureId(size_t index) const
                   "WHERE RaceID = %1 AND (GenderIndex = %2 OR GenderIndex = %3) "
                   "AND ID IN %4 AND %5 "
                   "ORDER BY GenderIndex, ClassID DESC")
-                  .arg(RACE_ANY).arg(charInfos.sexID).arg(GENDER_ANY).arg(idListStr).arg(classFilter);
+                  .arg(RACE_ANY).arg(itemSex).arg(GENDER_ANY).arg(idListStr).arg(classFilter);
 
   if (queryItemInfo(query, iteminfos))
     return iteminfos.values[0][0].toInt();
