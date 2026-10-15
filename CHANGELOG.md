@@ -13,6 +13,9 @@ Format loosely based on [Keep a Changelog](https://keepachangelog.com/).
   lower arm, a belt the lower torso and upper leg, pants the legs, a helm or shoulders none). On the test machine
   this changes 646 displays in Mists of Pandaria Classic, 151 in Classic Era, 133 in Classic Beta and none in
   Retail.
+- **A tabard's lower flaps stuck out over a robe's skirt (#48).** With a robe, or legs with a skirt (a kilt), the
+  tabard's flaps were still drawn, and their edges poked out over the skirt at the hips. As in the game, a skirt
+  now hides the flaps, and the tabard shows on the chest only. A robe whose display has no skirt keeps them.
 
 ## [1.1] — 2026-10-14
 
