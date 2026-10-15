@@ -22,6 +22,7 @@ enum class UiIcon
   Models,        // the Models viewer (a box)
   Textures,      // the Textures viewer (a picture)
   Buildings,     // the Buildings viewer (a building)
+  Maps,          // the Maps viewer (a folded map)
   Fullscreen,
   Screenshot,
   Browse,        // the Browse panel (a tree)

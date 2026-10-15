@@ -187,6 +187,15 @@
 //     the tile's material is "unavailable" (the geometry is built as before)
 //   clearTerrain  { reason }                                                         (protocol 12)
 //     a terrain load in flight is answered "cleared"; a tile on screen is taken away, without an answer
+//   inspectMapTiles { inspection, mapId, wdtFileDataID, assetEpoch, md5, encoding:"binary", payloadBytes }
+//                   <payloadBytes raw WDT bytes><newline>                          (protocol 14, the Maps viewer)
+//     what a map's WDT says of its 64 x 64 tiles, read by the verified parser (Wow/World/WdtParser.cs): answered by
+//     mapTilesInspected with the same inspection number (WmvMapTiles.cs). The host read the bytes and checked them
+//     against their content key; md5 is that key, checked again here before anything is parsed
+//   setTerrainView { view }                                                         (protocol 14)
+//     the view every terrain tile is drawn in from now on (WmvTerrainDebug.SetRuntimeView: one of its names but
+//     texturedplainweights, or "auto"); the tile on screen is built again in it from what the player holds, nothing
+//     asked of the host (WmvTerrainSession.RebuildShown), the camera left where it is; answered by terrainViewApplied
 //   modelTextures { requestId, ok, fileDataID, textures:[{ index, type, fileDataID, source }] }
 //   modelSkin     { fileDataID, textures:[...], geosets:[...], hasGeosets,
 //                   hasSubmeshVisible, submeshCount, submeshVisible:[0|1,...] }  (pushed, no request)
@@ -247,7 +256,7 @@ using Wmv.Wow;
 
 public class WmvIpcClient : MonoBehaviour
 {
-    public const int ProtocolVersion = 13;
+    public const int ProtocolVersion = 14;
 
     /// <summary>The loadWoWModel kind of a world model; anything else is an M2.</summary>
     public const string KindMapObject = "wmo";
@@ -268,6 +277,8 @@ public class WmvIpcClient : MonoBehaviour
     public Action<Color32> OnViewportBackground;               // the Models viewport's background, as displayed (protocol 7)
     public Action<TerrainTileCommand> OnLoadTerrainTile;       // draw one terrain tile (protocol 12)
     public Action<string> OnClearTerrain;                      // take the terrain away (protocol 12; the host's reason)
+    public Action<MapTilesRequest> OnInspectMapTiles;          // what a WDT says of its tiles (protocol 14)
+    public Action<string> OnSetTerrainView;                    // the view terrain is drawn in (protocol 14)
     public Action<string> OnStatus;                            // human-readable connection/state text
 
     public bool Connected { get { return connected; } }
@@ -734,6 +745,8 @@ public class WmvIpcClient : MonoBehaviour
         public int maxTextureBytesPerLoad;
         public int maxTexturesPerLoad;
         public string reason;         // clearTerrain
+        public int inspection;        // inspectMapTiles (protocol 14)
+        public string view;           // setTerrainView (protocol 14)
         public string state;          // assetResponse to getMapAsset: the host's decision
         public string detail;
         public double readMs;
@@ -1243,6 +1256,19 @@ public class WmvIpcClient : MonoBehaviour
                 OnClearTerrain?.Invoke(msg.reason ?? "");
                 break;
 
+            // The Maps viewer (protocol 14): a WDT's tiles, and the view terrain is drawn in.
+            case "inspectMapTiles":
+                OnInspectMapTiles?.Invoke(new MapTilesRequest
+                {
+                    Inspection = msg.inspection, MapId = msg.mapId, WdtFileDataID = msg.wdtFileDataID, AssetEpoch = msg.assetEpoch,
+                    Md5 = msg.md5 ?? "", Bytes = msg.payload, Encoding = msg.encoding ?? "",
+                });
+                break;
+
+            case "setTerrainView":
+                OnSetTerrainView?.Invoke(msg.view ?? "");
+                break;
+
             case "captureScreenshot":
                 OnCaptureScreenshot?.Invoke(new ScreenshotRequest
                 {
@@ -1650,6 +1676,109 @@ public class WmvIpcClient : MonoBehaviour
         public int RequestsRetired;
         public List<string> RetiredRequestIds = new List<string>();
         public TerrainMaterialReport Material;          // null: not sent (a load that ended before its material was built)
+        // Protocol 14: the view the tile was drawn in (WmvTerrainDebug.ViewNames), "" when no tile was built.
+        public string View = "";
+    }
+
+    /// <summary>inspectMapTiles (protocol 14): a map's WDT bytes and the content key the host checked them against.</summary>
+    public class MapTilesRequest
+    {
+        public int Inspection, MapId, WdtFileDataID, AssetEpoch;
+        public string Md5 = "", Encoding = "";
+        public byte[] Bytes;
+    }
+
+    /// <summary>mapTilesInspected (protocol 14): what the WDT says of its tiles (WmvMapTiles.Inspect). Per tile, index y * 64
+    /// + x (x the column, east; y the row, south -- the root ADT is named &lt;map&gt;_x_y): its MAIN flag and its MAID root ADT
+    /// and tex0 ADT FileDataIDs (0: the WDT names none).</summary>
+    public class MapTilesReport
+    {
+        public int Inspection, MapId, WdtFileDataID, AssetEpoch;
+        public string Status = "failed";                // "inspected" | "failed"
+        public string Reason = "";
+        public string Md5 = "", Kind = "";
+        public long Bytes = -1;
+        public uint MphdFlags;
+        public bool HasMain, HasMaid;
+        public int TilesInMain, TilesWithRoot;
+        public byte[] TileFlags;                        // 4096: bit 0 the MAIN flag, bit 1 MAID names a root ADT
+        public uint[] RootIds, Tex0Ids;                 // 4096 each, or null without MAID
+        public double ParseMs = -1;
+    }
+
+    /// <summary>terrainViewApplied (protocol 14): what setTerrainView did.</summary>
+    public class TerrainViewReport
+    {
+        public string View = "", Status = "refused", Reason = "";   // "applied" | "noTile" | "failed" | "refused"
+        public int Load;                                // the tile rebuilt, 0 for none
+        public double RebuildMs = -1;
+        public int TexturedChunks = -1, NeutralChunks = -1, Textures = -1;
+        public long RetainedTextureBytes = -1;
+    }
+
+    public void ReportMapTilesInspected(MapTilesReport r) { Send(MapTilesInspectedLine(r)); }
+
+    /// <summary>The mapTilesInspected line (also for the self-test). The tile table travels as base64: 4,096 flag bytes,
+    /// and 4,096 little-endian u32 each for the root and tex0 ids.</summary>
+    public static string MapTilesInspectedLine(MapTilesReport r)
+    {
+        var inv = System.Globalization.CultureInfo.InvariantCulture;
+        var sb = new StringBuilder();
+        sb.Append("{\"type\":\"mapTilesInspected\",\"inspection\":").Append(r.Inspection)
+          .Append(",\"status\":\"").Append(Escape(r.Status)).Append('"')
+          .Append(",\"reason\":\"").Append(Escape(r.Reason ?? "")).Append('"')
+          .Append(",\"mapId\":").Append(r.MapId)
+          .Append(",\"wdtFileDataID\":").Append(r.WdtFileDataID)
+          .Append(",\"assetEpoch\":").Append(r.AssetEpoch)
+          .Append(",\"wdtBytes\":").Append(r.Bytes)
+          .Append(",\"md5\":\"").Append(Escape(r.Md5 ?? "")).Append('"')
+          .Append(",\"kind\":\"").Append(Escape(r.Kind ?? "")).Append('"')
+          .Append(",\"mphdFlags\":").Append(r.MphdFlags)
+          .Append(",\"hasMain\":").Append(r.HasMain ? "true" : "false")
+          .Append(",\"hasMaid\":").Append(r.HasMaid ? "true" : "false")
+          .Append(",\"tilesInMain\":").Append(r.TilesInMain)
+          .Append(",\"tilesWithRoot\":").Append(r.TilesWithRoot)
+          .Append(",\"parseMs\":").Append(r.ParseMs.ToString("0.###", inv));
+        if (r.TileFlags != null)
+            sb.Append(",\"tileFlags\":\"").Append(Convert.ToBase64String(r.TileFlags)).Append('"');
+        if (r.RootIds != null)
+            sb.Append(",\"rootIds\":\"").Append(Convert.ToBase64String(U32Bytes(r.RootIds))).Append('"');
+        if (r.Tex0Ids != null)
+            sb.Append(",\"tex0Ids\":\"").Append(Convert.ToBase64String(U32Bytes(r.Tex0Ids))).Append('"');
+        sb.Append('}');
+        return sb.ToString();
+    }
+
+    static byte[] U32Bytes(uint[] v)
+    {
+        var b = new byte[v.Length * 4];
+        for (int i = 0; i < v.Length; i++)
+        {
+            b[4 * i] = (byte)v[i];
+            b[4 * i + 1] = (byte)(v[i] >> 8);
+            b[4 * i + 2] = (byte)(v[i] >> 16);
+            b[4 * i + 3] = (byte)(v[i] >> 24);
+        }
+        return b;
+    }
+
+    public void ReportTerrainViewApplied(TerrainViewReport r) { Send(TerrainViewAppliedLine(r)); }
+
+    public static string TerrainViewAppliedLine(TerrainViewReport r)
+    {
+        var inv = System.Globalization.CultureInfo.InvariantCulture;
+        var sb = new StringBuilder();
+        sb.Append("{\"type\":\"terrainViewApplied\",\"view\":\"").Append(Escape(r.View ?? "")).Append('"')
+          .Append(",\"status\":\"").Append(Escape(r.Status)).Append('"')
+          .Append(",\"reason\":\"").Append(Escape(r.Reason ?? "")).Append('"')
+          .Append(",\"load\":").Append(r.Load)
+          .Append(",\"rebuildMs\":").Append(r.RebuildMs.ToString("0.###", inv))
+          .Append(",\"texturedChunks\":").Append(r.TexturedChunks)
+          .Append(",\"neutralChunks\":").Append(r.NeutralChunks)
+          .Append(",\"textures\":").Append(r.Textures)
+          .Append(",\"retainedTextureBytes\":").Append(r.RetainedTextureBytes)
+          .Append('}');
+        return sb.ToString();
     }
 
     /// <summary>The tile's texture material as terrainTileLoaded carries it (protocol 13; WmvTerrainSession fills it). A
@@ -1760,6 +1889,9 @@ public class WmvIpcClient : MonoBehaviour
         sb.Append(']');
         if (r.Material != null)
             AppendMaterial(sb, r.Material);
+        // Protocol 14.
+        if (!string.IsNullOrEmpty(r.View))
+            sb.Append(",\"view\":\"").Append(Escape(r.View)).Append('"');
         sb.Append('}');
         return sb.ToString();
     }

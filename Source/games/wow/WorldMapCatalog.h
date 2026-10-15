@@ -185,6 +185,12 @@ namespace wow
     // Every map's; how many were inspected (0 when refused). Reads every WDT: for tests and on-demand use, never as
     // part of loading a client.
     size_t inspectAll();
+    // An inspection of a map's WDT made elsewhere -- the Maps viewer's, read by the map asset worker off the GUI thread
+    // through inspectInStorage on this client's storage (docs/world-viewer/05-maps-viewer-ui.md) -- kept as the map's
+    // inspection, as inspect() keeps its own: the same states and details, from the same code. False (nothing kept, the
+    // reason in lastRefusal()) when the catalogue is not ready or no longer belongs to the loaded client, or there is
+    // no such map.
+    bool noteInspection(int mapId, const WdtInspection & inspection);
     QString lastRefusal() const { return m_refusal; }
     // Inspections also hash what they read (WdtInspection::sha256): off by default, for tests that compare the bytes.
     void setHashing(bool on) { m_hashing = on; }

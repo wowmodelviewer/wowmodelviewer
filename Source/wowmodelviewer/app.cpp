@@ -35,6 +35,11 @@
 #include "LogStackWalker.h"
 #include "PluginManager.h"
 #include "UiStyle.h"
+#include "UiControls.h"
+#include "MapsViewer.h"
+#include "MapTilePanel.h"
+#include <wx/checkbox.h>
+#include <wx/choice.h>
 #include "UserSkins.h"
 #include "util.h"
 #include "WoWDatabase.h"
@@ -5730,6 +5735,10 @@ static void doHeadlessUnityIpcTest(ModelViewer * frame)
 //   readcorrupt:<m>:<x>:<y>:<role>   that read's bytes changed before their content-key check: "unreadable", damaged;
 //   readslow:<ms>                     every read from now on waits that long in the worker before it begins;
 //   readshutdown[:<fileDataID>]      a read held in the worker, left so for the viewer's shutdown (the last step);
+//   readshutdownserved:<m>:<x>:<y>[:<role>]  the last step: that tile's <role> request (wdt unless named) dispatched through
+//                             the server's queue and its read held in the worker, the load cleared, the read left in flight
+//                             and the player left running for the viewer's shutdown, which is then watched (THE SHUTDOWN
+//                             CHECK, docs/world-viewer/04b-asset-serving.md 18.1): "[terrain-test] SHUTDOWN RESULT" in the log;
 //   latesupersede:<m>:<x>:<y>:<role> the next load of the tile, not held, answers it "superseded" and is built; released, "stale";
 //   lateclear:<m>:<x>:<y>:<role>     clearTerrain answers it "cleared"; released, "stale";
 //   lateswitch:<product>:<m>:<x>:<y>[:<role>]  its WDT (or role) held, that client is loaded: "cleared", and the host's read
@@ -5770,17 +5779,154 @@ static void doHeadlessUnityIpcTest(ModelViewer * frame)
 // check go to <out.json>, which Tools/world-audit/check_terrain_run.py checks against the pinned values.
 namespace
 {
+  // THE SHUTDOWN CHECK of the readshutdownserved step (docs/world-viewer/04b-asset-serving.md 18.1), run by ~ModelViewer
+  // through ModelViewer::testShutdownProbe once the run's results are written: its lines go to the log only, ending with
+  // "[terrain-test] SHUTDOWN RESULT: PASS|FAIL". From the destructor's first statement no IPC poll may get past its check
+  // (accept, receive, serve the map queue, send), no player message be handled and no map callback run -- tried by the
+  // timer's route (a poll made directly, just before the map asset worker is stopped) and by the wake's route (a wake
+  // queued as the close begins, then -- after the worker's last result, made inside stop() -- the server's pending events
+  // run, that wake and any the worker posted, and a window of this thread invalidated, so that the shutdown's message
+  // pump retrieves a paint: wx's message hook runs the events waiting then). A wake handler that returns without serving
+  // is allowed.
+  struct ShutdownCheck
+  {
+    bool armed = false;
+    quint64 heldTicket = 0;
+    size_t inFlight = 1;   // the server's reads in flight when the close begins (the held one, and any queued behind it)
+    UnityIpcServer::Activity atBegin;
+    MapAssetWorker::Stats workerAtBegin;
+    HWND paintWindow = nullptr;
+    int passed = 0;
+    int failed = 0;
+
+    void check(const QString & what, bool ok, const QString & detail)
+    {
+      ok ? passed++ : failed++;
+      const QString line = QString("[terrain-test] %1 shutdown: ").arg(ok ? "PASS" : "FAIL") + what + " -- " + detail;
+      if (ok)
+        LOG_INFO << line;
+      else
+        LOG_ERROR << line;
+    }
+  };
+  ShutdownCheck g_shutdownCheck;
+
+  QString describeActivity(const UnityIpcServer::Activity & a, const UnityIpcServer::Activity & from)
+  {
+    return QString("%1 poll(s) past their check, %2 player message(s) handled, %3 map callback(s), %4 wake(s) handled")
+      .arg(a.pollsServed - from.pollsServed).arg(a.messagesHandled - from.messagesHandled)
+      .arg(a.mapCallbacks - from.mapCallbacks).arg(a.wakesHandled - from.wakesHandled);
+  }
+
+  void runShutdownCheck(ModelViewer & mv, ModelViewer::ShutdownPoint point)
+  {
+    ShutdownCheck & c = g_shutdownCheck;
+    if (!c.armed)
+      return;
+    UnityIpcServer * ipc = mv.unityRendererHost ? mv.unityRendererHost->ipc() : nullptr;
+    const std::shared_ptr<MapAssetWorker> worker = mv.m_mapAssetWorker;
+    if (!ipc || !worker)
+    {
+      c.check("the viewer has its IPC server and map asset worker at its close", false, "missing");
+      return;
+    }
+    switch (point)
+    {
+      case ModelViewer::ShutdownPoint::Begin:
+      {
+        c.atBegin = ipc->activity();
+        c.workerAtBegin = worker->stats();
+        // A wake queued before the close, as one the worker posted just before the destructor began would be (run below,
+        // with any the worker posts meanwhile).
+        ipc->QueueEvent(new wxThreadEvent(wxEVT_THREAD));
+        const bool running = mv.unityRendererHost->isRunning();
+        c.check("the close begins with the player running, the server listening and connected, and the read in flight "
+                "held in the worker",
+                running && ipc->isListening() && ipc->isConnected() && ipc->mapReadsInFlight() == c.inFlight &&
+                  worker->testHolding() && worker->testHeldTicket() == c.heldTicket,
+                QString("player running %1, listening %2, connected %3, %4 read(s) in flight, worker holding %5 (ticket %6, "
+                        "the step's %7)")
+                  .arg(running ? 1 : 0).arg(ipc->isListening() ? 1 : 0).arg(ipc->isConnected() ? 1 : 0)
+                  .arg(ipc->mapReadsInFlight()).arg(worker->testHolding() ? 1 : 0).arg(worker->testHeldTicket())
+                  .arg(c.heldTicket));
+        break;
+      }
+      case ModelViewer::ShutdownPoint::BeforeWorkerStop:
+        // The timer's route, which the shutdown's pump never takes: one poll, made directly.
+        ipc->poll();
+        LOG_INFO << "[terrain-test] shutdown: one poll made directly before the worker is stopped;"
+                 << describeActivity(ipc->activity(), c.atBegin);
+        break;
+      case ModelViewer::ShutdownPoint::BeforePlayerShutdown:
+      {
+        const MapAssetWorker::Stats w = worker->stats();
+        c.check("the worker was stopped, its held read let go and read inside stop()",
+                worker->stopped() && !worker->testHolding() && w.read == c.workerAtBegin.read + 1,
+                QString("stopped %1, holding %2, reads %3 -> %4").arg(worker->stopped() ? 1 : 0)
+                  .arg(worker->testHolding() ? 1 : 0).arg(c.workerAtBegin.read).arg(w.read));
+        // The wake's route: a paint for the shutdown's pump to retrieve, after the worker's last result.
+        c.paintWindow = CreateWindowExW(WS_EX_TOOLWINDOW | WS_EX_NOACTIVATE, L"STATIC", L"", WS_POPUP | WS_VISIBLE, 0, 0,
+                                        1, 1, nullptr, nullptr, GetModuleHandleW(nullptr), nullptr);
+        if (c.paintWindow)
+          InvalidateRect(c.paintWindow, nullptr, TRUE);
+        LOG_INFO << "[terrain-test] shutdown: a window of this thread invalidated before the player is shut down:"
+                 << (c.paintWindow ? "yes" : "no (CreateWindowEx failed)") << "; a wake posted by the worker waits:"
+                 << (ipc->wakeWaiting() ? "yes" : "no") << ";" << describeActivity(ipc->activity(), c.atBegin);
+        // The server's wakes waiting -- the one queued at the close's start, and any the worker posted since (its last
+        // result) -- run now, as wx's message hook runs pending events when a pump retrieves a message.
+        ipc->ProcessPendingEvents();
+        LOG_INFO << "[terrain-test] shutdown: the server's pending events run;" << describeActivity(ipc->activity(), c.atBegin);
+        break;
+      }
+      case ModelViewer::ShutdownPoint::AfterPlayerShutdown:
+      {
+        const UnityIpcServer::Activity now = ipc->activity();
+        const int pumped = mv.unityRendererHost->shutdownMessagesPumped();
+        const int paints = mv.unityRendererHost->shutdownPaintsPumped();
+        c.check("the shutdown's pump retrieved a paint after the worker's last result (else the wake's route was not tried)",
+                paints > 0, QString("%1 message(s) retrieved, %2 of them paint; a wake still waits: %3").arg(pumped).arg(paints)
+                              .arg(ipc->wakeWaiting() ? "yes" : "no"));
+        c.check("the wakes queued were handled during the close (the wake's route was tried)",
+                now.wakesHandled > c.atBegin.wakesHandled, describeActivity(now, c.atBegin));
+        c.check("no IPC poll got past its check from the first statement of ~ModelViewer on (nothing accepted, received, "
+                "dispatched, completed or sent)",
+                now.pollsServed == c.atBegin.pollsServed, describeActivity(now, c.atBegin));
+        c.check("no player message was handled from the first statement of ~ModelViewer on",
+                now.messagesHandled == c.atBegin.messagesHandled, describeActivity(now, c.atBegin));
+        c.check("no map callback ran from the first statement of ~ModelViewer on", now.mapCallbacks == c.atBegin.mapCallbacks,
+                describeActivity(now, c.atBegin));
+        const MapAssetWorker::Stats w = worker->stats();
+        c.check("the worker's storage references balance", w.leasesGranted == w.leasesReleased,
+                QString("taken %1, released %2").arg(w.leasesGranted).arg(w.leasesReleased));
+        const bool running = mv.unityRendererHost->isRunning();
+        c.check("the player is not left running and the server is stopped", !running && !ipc->isListening(),
+                QString("player running %1, listening %2").arg(running ? 1 : 0).arg(ipc->isListening() ? 1 : 0));
+        if (c.paintWindow)
+          DestroyWindow(c.paintWindow);
+        c.paintWindow = nullptr;
+        c.armed = false;
+        const bool pass = c.failed == 0;
+        LOG_INFO << QString("[terrain-test] SHUTDOWN RESULT: %1 (%2 passed, %3 failed)").arg(pass ? "PASS" : "FAIL")
+                      .arg(c.passed).arg(c.failed);
+        std::printf("WMV: shutdown check %s (%d passed, %d failed)\n", pass ? "PASS" : "FAIL", c.passed, c.failed);
+        std::fflush(stdout);
+        break;
+      }
+    }
+  }
+
   struct TerrainTestLog
   {
     int passed = 0;
     int failed = 0;
     int skipped = 0;
     QJsonArray checks;
+    QString prefix = "[terrain-test]";   // the log's tag (the Maps viewer GUI test: "[maps-test]")
 
     void check(const QString & what, bool ok, const QString & detail)
     {
       ok ? passed++ : failed++;
-      const QString line = QString("[terrain-test] %1 ").arg(ok ? "PASS" : "FAIL") + what +
+      const QString line = prefix + QString(" %1 ").arg(ok ? "PASS" : "FAIL") + what +
                            (detail.isEmpty() ? QString() : " -- " + detail);
       if (ok)
         LOG_INFO << line;
@@ -5796,7 +5942,7 @@ namespace
     void skip(const QString & what, const QString & detail)
     {
       skipped++;
-      LOG_WARNING << "[terrain-test] SKIP " + what + " -- " + detail;
+      LOG_WARNING << prefix + " SKIP " + what + " -- " + detail;
       QJsonObject c;
       c["check"] = what;
       c["result"] = "SKIP";
@@ -7215,6 +7361,7 @@ static int doHeadlessTerrainTileTest(ModelViewer * frame, int mapId, int tileX, 
   int releaseOnReportOf = 0, releasedOnReport = -1;
   bool releaseOnReportInWorker = false;   // the held request is a read held in the map asset worker
   bool shutdownReadHeld = false;          // readshutdown: a read is left held in the worker for the end of the run
+  bool shutdownServedHeld = false;        // readshutdownserved: a server-tracked read is left so, and the player running
   UnityIpcServer * ipc = nullptr;
   std::function<void(const UnityIpcServer::TerrainTileReport &)> previousTerrain;
   std::function<void(const UnityIpcServer::RuntimeState &)> previousRuntime;
@@ -9088,6 +9235,53 @@ static int doHeadlessTerrainTileTest(ModelViewer * frame, int mapId, int tileX, 
           out["readShutdownHeld"] = (double)ticket;
         }
       }
+      else if (kind == "readshutdownserved")
+      {
+        // readshutdownserved:<m>:<x>:<y>[:<role>] (docs/world-viewer/04b-asset-serving.md 18.1; the last step): the tile
+        // requested with its <role> request (wdt unless named) decided and dispatched through the server's queue as any,
+        // and its read held in the map asset worker, its file open; the load then cleared (answered "cleared"), so that
+        // the read stays in flight -- tracked by the server, no longer wanted -- and the run ends with it held and the
+        // player running (the harness's own player shutdown is skipped). The viewer's destructor is then watched
+        // (runShutdownCheck): its verdict is logged after the shutdown's message pump.
+        const QString role = arg.section(':', 3).trimmed().isEmpty() ? QString("wdt") : arg.section(':', 3).trimmed();
+        if (s != steps.size() - 1 || !parseTile(arg, t) ||
+            (role != "wdt" && role != "rootAdt" && role != "tex0Adt" && role != "texture"))
+        {
+          tally.check(label, false, "expected readshutdownserved:<map>:<x>:<y>[:<wdt|rootAdt|tex0Adt|texture>], as the last step");
+          continue;
+        }
+        if (!lateRoleUsable(label, role))
+          continue;
+        QString heldId;
+        const int load = requestHeld(label, role, t, step, heldId, true);
+        if (load <= 0 || heldId.isEmpty())
+          continue;
+        const bool sent = frame->ClearTerrain("terrain test: cleared while a read is held for the shutdown");
+        UnityIpcServer::TerrainTileReport r;
+        const bool got = waitReport(load, 60000, r);
+        tally.check(label + QString(": the held load (%1) is answered \"cleared\"").arg(load),
+                    sent && got && r.status == "cleared", got ? r.status + " " + r.reason : QString("no answer within 60 s"));
+        pumpIpc(ipc, 200);
+        // The held read, and for a role after the WDT the tile's other ADT read dispatched beside it (queued in the
+        // worker behind the held one): one or two in flight, all tracked by the server.
+        const quint64 ticket = frame->m_mapAssetWorker->testHeldTicket();
+        const size_t inFlight = ipc->mapReadsInFlight();
+        const bool held = inFlight >= 1 && inFlight <= UnityIpcServer::MAP_ASSET_READS_IN_FLIGHT &&
+                          (role != "wdt" || inFlight == 1) && frame->m_mapAssetWorker->testHolding() && ticket != 0;
+        tally.check(label + ": its read is still in flight, tracked by the server and held in the worker, for the shutdown",
+                    held, QString("%1 read(s) in flight, worker holding %2, ticket %3").arg(ipc->mapReadsInFlight())
+                            .arg(frame->m_mapAssetWorker->testHolding() ? 1 : 0).arg(ticket));
+        if (held)
+        {
+          shutdownServedHeld = true;
+          out["readShutdownServedHeld"] = (double)ticket;
+          g_shutdownCheck = ShutdownCheck();
+          g_shutdownCheck.armed = true;
+          g_shutdownCheck.heldTicket = ticket;
+          g_shutdownCheck.inFlight = inFlight;
+          ModelViewer::testShutdownProbe = &runShutdownCheck;
+        }
+      }
       else if (kind == "expectmaterial")
       {
         // expectmaterial:<state>[:<map>:<x>:<y>]: that tile (or the last) built, its material in that state, and agreeing
@@ -9356,9 +9550,12 @@ static int doHeadlessTerrainTileTest(ModelViewer * frame, int mapId, int tileX, 
       // answered or dropped with its connection.
       const UnityIpcServer::MapReadStats & m = ipc->mapReadStats();
       const MapAssetWorker::Stats w = ipc->mapAssetWorker() ? ipc->mapAssetWorker()->stats() : MapAssetWorker::Stats();
-      tally.check("no map read is in flight at the end", ipc->mapReadsInFlight() == 0,
+      tally.check(shutdownServedHeld ? QString("no map read is in flight at the end but those left for the shutdown")
+                                     : QString("no map read is in flight at the end"),
+                  ipc->mapReadsInFlight() == (shutdownServedHeld ? g_shutdownCheck.inFlight : 0u),
                   QString("%1 in flight%2").arg(ipc->mapReadsInFlight())
-                    .arg(shutdownReadHeld ? QString("; the worker holds the read left for the shutdown") : QString()));
+                    .arg(shutdownReadHeld || shutdownServedHeld ? QString("; the worker holds the read left for the shutdown")
+                                                                : QString()));
       tally.check(QString("at most %1 map reads were in flight at once, their results holding at most %2 bytes")
                     .arg(UnityIpcServer::MAP_ASSET_READS_IN_FLIGHT)
                     .arg((long long)UnityIpcServer::MAP_ASSET_READS_IN_FLIGHT * UnityIpcServer::MAX_TERRAIN_TEXTURE_BYTES),
@@ -9602,11 +9799,993 @@ static int doHeadlessTerrainTileTest(ModelViewer * frame, int mapId, int tileX, 
     ipc->testCancelMapAssetHold();
   }
   g_pumpBusy = nullptr;
-  if (frame->unityRendererHost && frame->unityRendererHost->isRunning())
+  if (shutdownServedHeld)
+    LOG_INFO << "[terrain-test] the player is left running, and a read held, for the viewer's shutdown (readshutdownserved)";
+  else if (frame->unityRendererHost && frame->unityRendererHost->isRunning())
   {
     frame->unityRendererHost->shutdown();
     LOG_INFO << "[terrain-test] player shut down; still running=" << (frame->unityRendererHost->isRunning() ? 1 : 0);
   }
+  return tally.failed;
+}
+
+// -mapsuitest [<out.json>] (with -product to pin the client): THE MAPS VIEWER GUI TEST (docs/world-viewer/05-maps-viewer-ui.md,
+// sections 14-16). The viewer's own window, laid out as an interactive start (the command bar shown, the default panels),
+// at 1920 x 1080 at the desktop's corner -- the rigs run it on a desktop of its own, never the user's -- and the player
+// started as the viewer starts it. Then WMV_MAPSUITEST_SEQUENCE (comma-separated) drives the interface as a user does,
+// through window messages to the controls themselves (never SendInput: nothing reaches another window):
+//   mode:<models|textures|buildings|maps>   a click on that command bar tool (the toolbar's own window)
+//   search:<text>                            the text typed into Browse's search box, then Enter
+//   pick:<mapId>                             a click on that map's row in Browse (made visible first)
+//   waitgrid[:<ms>]                          until the map's tile grid is known (or why not)
+//   click:<x>:<y> | clickfirst | clickmid    a click on that tile of the grid (first available in row order; the
+//                                            available one nearest the middle of the map's tiles)
+//   waittile[:<ms>]                          until the tile picked is no longer loading
+//   view:<index> | waitview                  a pick in the Display choice (MapsViewer::displayModes order)
+//   clear                                    the Clear terrain button
+//   whole:<0|1>                              the "whole grid" box
+//   key:<left|right|up|down|enter>           a key on the grid
+//   drag:<l|r>:<dx>:<dy> | wheel:<clicks>    a mouse drag or wheel on the Unity player's window (orbit, pan, zoom)
+//   switch:<product>                         another client loaded (ModelViewer::LoadWoW, what File > Load World of
+//                                            Warcraft's dialog runs)
+//   model:<path> | wmo:<path or FileDataID>  a pick in the Models or Buildings Browse (FileControl::SelectModelFile /
+//                                            SelectWMOFile: what a row click runs)
+//   holdroot | holdwdt | release             the server's read hook: the next terrain load's root ADT / WDT read held in
+//                                            the map asset worker (UnityIpcServer::testHoldNextMapRead), or let go
+//   holdclose                                the last step: the read held, the player left running, the window closed
+//                                            with the read in flight (THE SHUTDOWN CHECK of the terrain test)
+//   expect:<what>[:<args>]                   map:<phase> | grid:<x>:<y>:<state> | tile:<phase> | mode:<mode> |
+//                                            notice:<words> | terrain:<0|1> | listed:<n> | shownview:<view>
+//   wait:<ms> | shot:<name> | state          pump; a picture of the window (PrintWindow, <out>_<name>.png); the
+//                                            player's runtimeState and this process's memory
+//   orient                                   THE ORIENTATION CHECK: every tile of the grid whose MAID names a root ADT,
+//                                            that file's own name (the client's or the listfile's, by FileDataID) must
+//                                            be <directory>_<x>_<y>.adt for the cell it is drawn in -- a transposed or
+//                                            shifted grid fails on every tile off the diagonal
+//   scan[:<max>]                             every map of the catalogue picked in turn (MapsViewer::SelectMap) and its
+//                                            grid awaited: the census of states, the orientation check of each, the
+//                                            times; nothing loaded
+// Every step's time, the longest single GUI round in it (g_pumpBusy: what one poll and one pass of the wx queue kept this
+// thread), the Maps viewer's timings and the samples go to <out.json>; "[maps-test] PASS|FAIL|SKIP <check>" to the log,
+// then "[maps-test] RESULT".
+namespace
+{
+  typedef HRESULT(WINAPI * DwmFlushFn)();
+  typedef HRESULT(WINAPI * DwmGetWindowAttributeFn)(HWND, DWORD, PVOID, DWORD);
+
+  void dwmFlushNow()
+  {
+    static DwmFlushFn flush = nullptr;
+    static bool looked = false;
+    if (!looked)
+    {
+      looked = true;
+      if (HMODULE m = LoadLibraryW(L"dwmapi.dll"))
+        flush = (DwmFlushFn)GetProcAddress(m, "DwmFlush");
+    }
+    if (flush)
+      flush();
+  }
+
+  // A picture of a top-level window as it is drawn (PrintWindow with PW_RENDERFULLCONTENT, its children included), cut to
+  // what is visible of it (DWMWA_EXTENDED_FRAME_BOUNDS). Never a copy of a screen: nothing of another window can be in it.
+  bool printWindowPng(HWND hwnd, const QString & path, QSize & size, double & viewportMean, const wxRect & viewport)
+  {
+    RedrawWindow(hwnd, nullptr, nullptr, RDW_INVALIDATE | RDW_UPDATENOW | RDW_ALLCHILDREN | RDW_FRAME);
+    dwmFlushNow();
+    Sleep(80);
+    dwmFlushNow();
+    RECT wr;
+    if (!GetWindowRect(hwnd, &wr))
+      return false;
+    RECT fr = wr;
+    if (HMODULE m = LoadLibraryW(L"dwmapi.dll"))
+      if (DwmGetWindowAttributeFn get = (DwmGetWindowAttributeFn)GetProcAddress(m, "DwmGetWindowAttribute"))
+        get(hwnd, 9 /* DWMWA_EXTENDED_FRAME_BOUNDS */, &fr, sizeof(fr));
+    const int w = wr.right - wr.left, h = wr.bottom - wr.top;
+    if (w <= 0 || h <= 0)
+      return false;
+    BITMAPINFO bi = {};
+    bi.bmiHeader.biSize = sizeof(bi.bmiHeader);
+    bi.bmiHeader.biWidth = w;
+    bi.bmiHeader.biHeight = -h;
+    bi.bmiHeader.biPlanes = 1;
+    bi.bmiHeader.biBitCount = 32;
+    bi.bmiHeader.biCompression = BI_RGB;
+    void * bits = nullptr;
+    HDC mem = CreateCompatibleDC(nullptr);
+    HBITMAP bmp = CreateDIBSection(mem, &bi, DIB_RGB_COLORS, &bits, nullptr, 0);
+    if (!bmp || !bits)
+    {
+      DeleteDC(mem);
+      return false;
+    }
+    HGDIOBJ old = SelectObject(mem, bmp);
+    const BOOL printed = PrintWindow(hwnd, mem, 2 /* PW_RENDERFULLCONTENT */);
+    GdiFlush();
+    QImage image(static_cast<const uchar *>(bits), w, h, w * 4, QImage::Format_RGB32);
+    const QRect visible(fr.left - wr.left, fr.top - wr.top, fr.right - fr.left, fr.bottom - fr.top);
+    QImage cut = image.copy(visible);
+    SelectObject(mem, old);
+    DeleteObject(bmp);
+    DeleteDC(mem);
+    if (!printed)
+      return false;
+    size = cut.size();
+    // How bright the viewport's part is: a black one means the player's picture was not drawn into the window's.
+    double sum = 0.0;
+    long long n = 0;
+    const QRect vp = QRect(viewport.x, viewport.y, viewport.width, viewport.height).intersected(cut.rect());
+    for (int y = vp.top(); y <= vp.bottom(); y += 4)
+      for (int x = vp.left(); x <= vp.right(); x += 4)
+      {
+        const QRgb c = cut.pixel(x, y);
+        sum += (qRed(c) + qGreen(c) + qBlue(c)) / 3.0;
+        n++;
+      }
+    viewportMean = n > 0 ? sum / n : -1.0;
+    return cut.save(path, "PNG");
+  }
+
+  // A click at a point of a window, as the mouse makes it (posted to the window itself).
+  void postClick(HWND hwnd, const wxPoint & p, bool right = false)
+  {
+    const LPARAM at = MAKELPARAM(p.x, p.y);
+    PostMessage(hwnd, WM_MOUSEMOVE, 0, at);
+    PostMessage(hwnd, right ? WM_RBUTTONDOWN : WM_LBUTTONDOWN, right ? MK_RBUTTON : MK_LBUTTON, at);
+    PostMessage(hwnd, right ? WM_RBUTTONUP : WM_LBUTTONUP, 0, at);
+  }
+
+  HWND playerWindowOf(UnityRendererHost * host)
+  {
+    if (!host || !host->playerFrame())
+      return nullptr;
+    struct Find
+    {
+      static BOOL CALLBACK child(HWND h, LPARAM out)
+      {
+        DWORD pid = 0;
+        GetWindowThreadProcessId(h, &pid);
+        if (pid != GetCurrentProcessId())
+        {
+          *reinterpret_cast<HWND *>(out) = h;
+          return FALSE;
+        }
+        return TRUE;
+      }
+    };
+    HWND found = nullptr;
+    EnumChildWindows((HWND)host->playerFrame()->GetHWND(), &Find::child, reinterpret_cast<LPARAM>(&found));
+    return found;
+  }
+
+  long long privateBytesNow()
+  {
+    PROCESS_MEMORY_COUNTERS_EX pmc = {};
+    pmc.cb = sizeof(pmc);
+    if (K32GetProcessMemoryInfo(GetCurrentProcess(), reinterpret_cast<PROCESS_MEMORY_COUNTERS *>(&pmc), sizeof(pmc)))
+      return (long long)pmc.PrivateUsage;
+    return -1;
+  }
+
+  QString mapPhaseName(MapsViewer::MapPhase p)
+  {
+    switch (p)
+    {
+      case MapsViewer::MapPhase::None:          return "none";
+      case MapsViewer::MapPhase::NoWdt:         return "nowdt";
+      case MapsViewer::MapPhase::WaitingPlayer: return "waitingplayer";
+      case MapsViewer::MapPhase::Reading:       return "reading";
+      case MapsViewer::MapPhase::Inspecting:    return "inspecting";
+      case MapsViewer::MapPhase::Failed:        return "failed";
+      case MapsViewer::MapPhase::Ready:         return "ready";
+    }
+    return "?";
+  }
+
+  QString tilePhaseName(MapsViewer::TilePhase p)
+  {
+    switch (p)
+    {
+      case MapsViewer::TilePhase::None:        return "none";
+      case MapsViewer::TilePhase::Unavailable: return "unavailable";
+      case MapsViewer::TilePhase::Loading:     return "loading";
+      case MapsViewer::TilePhase::Loaded:      return "loaded";
+      case MapsViewer::TilePhase::Failed:      return "failed";
+      case MapsViewer::TilePhase::Superseded:  return "superseded";
+      case MapsViewer::TilePhase::Cleared:     return "cleared";
+    }
+    return "?";
+  }
+
+  QString tileStateKey(MapsViewer::TileState s)
+  {
+    switch (s)
+    {
+      case MapsViewer::TileState::NotInWdt:     return "notinwdt";
+      case MapsViewer::TileState::NoRoot:       return "noroot";
+      case MapsViewer::TileState::NotInStorage: return "notinstorage";
+      case MapsViewer::TileState::NotLocal:     return "notlocal";
+      case MapsViewer::TileState::Available:    return "available";
+    }
+    return "?";
+  }
+
+  QJsonObject timingsJson(const MapsViewer::Timings & t)
+  {
+    QJsonObject o;
+    o["selectMs"] = t.selectMs;
+    o["wdtWaitMs"] = t.wdtWaitMs;
+    o["wdtReadMs"] = t.wdtReadMs;
+    o["wdtResultMs"] = t.wdtResultMs;
+    o["inspectRoundTripMs"] = t.inspectRoundTripMs;
+    o["inspectParseMs"] = t.inspectParseMs;
+    o["gridMs"] = t.gridMs;
+    o["pickToGridMs"] = t.pickToGridMs;
+    o["requestMs"] = t.requestMs;
+    o["loadMs"] = t.loadMs;
+    o["playerTotalMs"] = t.playerTotalMs;
+    o["viewMs"] = t.viewMs;
+    o["rebuildMs"] = t.rebuildMs;
+    o["uiUpdateMs"] = t.uiUpdateMs;
+    o["uiUpdateMaxMs"] = t.uiUpdateMaxMs;
+    return o;
+  }
+}
+
+static int doHeadlessMapsUiTest(ModelViewer * frame, const QString & outPath)
+{
+  TerrainTestLog tally;
+  tally.prefix = "[maps-test]";
+  QJsonObject out;
+  QJsonArray steps, shots, samples;
+  const QString outBase = outPath.isEmpty() ? QString() : (outPath.endsWith(".json") ? outPath.left(outPath.size() - 5) : outPath);
+  MapsViewer * maps = frame->maps();
+  FileControl * fc = frame->fileControl;
+  // THE WINDOW as an interactive start lays it out (a headless run hides the command bar and the Model panel and parks
+  // the frame): the default panels, the command bar, 1920 x 1080 at the corner of this desktop.
+  frame->interfaceManager.GetPane(wxT("commandBar")).Show(true);
+  frame->ResetLayout();
+  frame->SetSize(wxRect(0, 0, 1920, 1080));
+  frame->Layout();
+  frame->interfaceManager.Update();
+  wxGUIEventLoop loop;
+  wxEventLoopActivator activate(&loop);
+  if (!frame->StartUnityRenderer(false))
+  {
+    tally.check("the Unity player starts", false, "StartUnityRenderer failed");
+    return 1;
+  }
+  UnityIpcServer * ipc = frame->unityRendererHost->ipc();
+  // Every GUI round: the longest of the run and of the step.
+  double roundMax = 0.0, stepRoundMax = 0.0;
+  long long rounds = 0, roundsOver16 = 0, roundsOver50 = 0;
+  g_pumpBusy = [&](double ms) {
+    rounds++;
+    roundMax = std::max(roundMax, ms);
+    stepRoundMax = std::max(stepRoundMax, ms);
+    if (ms > 16.7)
+      roundsOver16++;
+    if (ms > 50.0)
+      roundsOver50++;
+  };
+  const auto pump = [&](long ms) {
+    wxStopWatch w;
+    do
+      pumpIpc(ipc, 1);
+    while (w.Time() < ms);
+  };
+  const auto pumpUntil = [&](const std::function<bool()> & done, long ms) {
+    wxStopWatch w;
+    while (!done() && w.Time() < ms)
+      pumpIpc(ipc, 1);
+    return done();
+  };
+  // The player's state, asked and awaited.
+  UnityIpcServer::RuntimeState lastState;
+  int stateAnswered = 0;
+  std::function<void(const UnityIpcServer::RuntimeState &)> previousRuntime = ipc->onRuntimeState;
+  ipc->onRuntimeState = [&](const UnityIpcServer::RuntimeState & s) {
+    lastState = s;
+    stateAnswered = s.query;
+    if (previousRuntime)
+      previousRuntime(s);
+  };
+  const auto sample = [&](const QString & label) {
+    QJsonObject o;
+    o["label"] = label;
+    o["privateBytes"] = (double)privateBytesNow();
+    const int q = ipc->requestRuntimeState();
+    if (q > 0 && pumpUntil([&]() { return stateAnswered == q; }, 5000))
+    {
+      o["liveTerrainTiles"] = lastState.liveTerrainTiles;
+      o["terrainView"] = lastState.terrainView;
+      o["terrainMeshes"] = lastState.terrainMeshes;
+      o["terrainMaterials"] = lastState.terrainMaterials;
+      o["terrainGameObjects"] = lastState.terrainGameObjects;
+      o["terrainTextures"] = lastState.terrainTextures;
+      o["terrainTextureBytes"] = (double)lastState.terrainTextureBytes;
+      o["terrainAlphaArrays"] = lastState.terrainAlphaArrays;
+      o["liveModels"] = lastState.liveModels;
+      o["liveMapObjects"] = lastState.liveMapObjects;
+      o["meshObjects"] = lastState.meshObjects;
+      o["materialObjects"] = lastState.materialObjects;
+      o["modelFileDataID"] = lastState.modelFileDataID;
+      o["mapObjectFileDataID"] = lastState.mapObjectFileDataID;
+    }
+    samples.append(o);
+    LOG_INFO << "[maps-test] sample" << label << QJsonDocument(o).toJson(QJsonDocument::Compact);
+    return o;
+  };
+
+  // The player, connected.
+  if (!pumpUntil([&]() { return ipc->isUnityReady(); }, 60000))
+  {
+    tally.check("the Unity player announces itself", false, "no unityReady within 60 s");
+    return 1;
+  }
+  tally.check("the player is connected and speaks protocol 14 (the Maps viewer)", ipc->playerInspectsMapTiles(),
+              QString("protocol %1").arg(ipc->playerProtocolVersion()));
+  pump(1500);
+  sample("start");
+
+  const QString spec = qEnvironmentVariable("WMV_MAPSUITEST_SEQUENCE");
+  const QStringList seq = spec.split(',', QString::SkipEmptyParts);
+  LOG_INFO << "[maps-test] client" << frame->mapCatalog()->client().product << frame->mapCatalog()->client().build
+           << "sequence:" << spec;
+  bool holdClose = false;
+  for (int s = 0; s < seq.size(); s++)
+  {
+    const QString step = seq[s].trimmed();
+    const QString kind = step.section(':', 0, 0).trimmed().toLower();
+    const QString arg = step.section(':', 1).trimmed();
+    const QString label = QString("step %1 %2").arg(s + 1).arg(step);
+    LOG_INFO << "[maps-test]" << label;
+    wxStopWatch stepClock;
+    stepRoundMax = 0.0;
+    QJsonObject rec;
+    rec["step"] = step;
+    if (kind == "mode")
+    {
+      const int id = arg == "maps" ? ID_UI_MAPS : arg == "buildings" ? ID_UI_BUILDINGS : arg == "textures" ? ID_UI_TEXTURES
+                                                                                                           : ID_UI_MODELS;
+      const ViewerMode want = arg == "maps" ? ViewerMode::Maps : arg == "buildings" ? ViewerMode::Buildings
+                            : arg == "textures" ? ViewerMode::Textures : ViewerMode::Models;
+      const wxRect r = frame->commandBar->GetToolRect(id);
+      postClick((HWND)frame->commandBar->GetHWND(), wxPoint(r.x + r.width / 2, r.y + r.height / 2));
+      const bool switched = pumpUntil([&]() { return frame->viewerMode() == want; }, 5000);
+      pump(300);
+      tally.check(label + ": the command bar's tool switches the viewer", switched,
+                  QString("tool rect %1,%2 %3x%4").arg(r.x).arg(r.y).arg(r.width).arg(r.height));
+    }
+    else if (kind == "search")
+    {
+      // Typed into the search box's own edit window (the native search control's, or the edit inside it).
+      HWND box = (HWND)fc->txtContent->GetHWND();
+      HWND edit = FindWindowExW(box, nullptr, L"Edit", nullptr);
+      if (!edit)
+        edit = box;
+      fc->txtContent->SetFocus();
+      SendMessage(edit, EM_SETSEL, 0, -1);
+      SendMessage(edit, EM_REPLACESEL, TRUE, (LPARAM)L"");
+      for (const QChar c : arg)
+        PostMessage(edit, WM_CHAR, c.unicode(), 0);
+      pump(100);
+      PostMessage(edit, WM_KEYDOWN, VK_RETURN, 0);
+      PostMessage(edit, WM_CHAR, VK_RETURN, 0);
+      PostMessage(edit, WM_KEYUP, VK_RETURN, 0xC0000000);
+      pump(600);
+      rec["listed"] = fc->mapsListed();
+      rec["listMs"] = fc->mapsListMs();
+      tally.check(label + ": the search ran", QString::fromWCharArray(fc->txtContent->GetValue().c_str()) == arg,
+                  QString("box \"%1\", %2 map(s) listed in %3 ms").arg(QString::fromWCharArray(fc->txtContent->GetValue().c_str()))
+                    .arg(fc->mapsListed()).arg(fc->mapsListMs()));
+    }
+    else if (kind == "pick")
+    {
+      const int id = arg.toInt();
+      wxTreeItemId row;
+      std::function<void(wxTreeItemId)> find = [&](wxTreeItemId parent) {
+        wxTreeItemIdValue cookie;
+        for (wxTreeItemId c = fc->fileTree->GetFirstChild(parent, cookie); c.IsOk() && !row.IsOk();
+             c = fc->fileTree->GetNextChild(parent, cookie))
+        {
+          FileTreeData * d = dynamic_cast<FileTreeData *>(fc->fileTree->GetItemData(c));
+          if (d && d->mapId == id)
+            row = c;
+          else if (fc->fileTree->ItemHasChildren(c))
+            find(c);
+        }
+      };
+      if (fc->fileTree->GetRootItem().IsOk())
+        find(fc->fileTree->GetRootItem());
+      if (!row.IsOk())
+      {
+        tally.check(label + ": the map's row is listed", false, QString("no row for MapID %1").arg(id));
+        continue;
+      }
+      fc->fileTree->EnsureVisible(row);
+      pump(100);
+      wxRect r;
+      fc->fileTree->GetBoundingRect(row, r, true);
+      postClick((HWND)fc->fileTree->GetHWND(), wxPoint(r.x + std::min(r.width / 2, 40), r.y + r.height / 2));
+      const bool picked = pumpUntil([&]() { return maps->mapId() == id; }, 5000);
+      tally.check(label + ": a click on its row picks the map", picked, QString("picked %1, row at %2,%3").arg(maps->mapId())
+                                                                         .arg(r.x).arg(r.y));
+    }
+    else if (kind == "waitgrid")
+    {
+      const long ms = arg.isEmpty() ? 20000 : arg.toLong();
+      pumpUntil([&]() {
+        const MapsViewer::MapPhase p = maps->mapPhase();
+        return p == MapsViewer::MapPhase::Ready || p == MapsViewer::MapPhase::Failed || p == MapsViewer::MapPhase::NoWdt;
+      }, ms);
+      pump(200);
+      rec["mapPhase"] = mapPhaseName(maps->mapPhase());
+      rec["tilesInWdt"] = maps->tilesInWdt();
+      rec["tilesAvailable"] = maps->tilesAvailable();
+      rec["noRoot"] = maps->tilesCount(MapsViewer::TileState::NoRoot);
+      rec["notInStorage"] = maps->tilesCount(MapsViewer::TileState::NotInStorage);
+      rec["notLocal"] = maps->tilesCount(MapsViewer::TileState::NotLocal);
+      rec["detail"] = maps->mapDetail();
+      tally.check(label + ": the map's grid is known, or why not", maps->mapPhase() != MapsViewer::MapPhase::Reading &&
+                                                                     maps->mapPhase() != MapsViewer::MapPhase::Inspecting,
+                  QString("%1: %2 tile(s) in the WDT, %3 available -- %4").arg(mapPhaseName(maps->mapPhase()))
+                    .arg(maps->tilesInWdt()).arg(maps->tilesAvailable()).arg(maps->statusLine()));
+    }
+    else if (kind == "click" || kind == "clickfirst" || kind == "clickmid")
+    {
+      int x = -1, y = -1;
+      if (kind == "click")
+      {
+        x = arg.section(':', 0, 0).toInt();
+        y = arg.section(':', 1, 1).toInt();
+      }
+      else
+      {
+        int x0, y0, x1, y1;
+        double best = 1e9;
+        if (maps->tileExtent(x0, y0, x1, y1))
+          for (int ty = 0; ty < 64; ty++)
+            for (int tx = 0; tx < 64; tx++)
+              if (maps->tileState(tx, ty) == MapsViewer::TileState::Available)
+              {
+                const double d = kind == "clickfirst" ? ty * 64 + tx
+                                                       : std::hypot(tx - (x0 + x1) / 2.0, ty - (y0 + y1) / 2.0);
+                if (d < best)
+                {
+                  best = d;
+                  x = tx;
+                  y = ty;
+                }
+              }
+      }
+      if (x < 0)
+      {
+        tally.check(label + ": a tile to click", false, "no available tile");
+        continue;
+      }
+      MapTileGrid * grid = fc->mapPanel()->grid();
+      int gx0, gy0, gx1, gy1;
+      grid->Extent(gx0, gy0, gx1, gy1);
+      if (x < gx0 || x > gx1 || y < gy0 || y > gy1)
+      {
+        grid->SetWholeGrid(true);
+        pump(100);
+      }
+      const wxRect r = grid->TileRect(x, y);
+      postClick((HWND)grid->GetHWND(), wxPoint(r.x + r.width / 2, r.y + r.height / 2));
+      const bool picked = pumpUntil([&]() { return maps->tileX() == x && maps->tileY() == y; }, 5000);
+      rec["tileX"] = x;
+      rec["tileY"] = y;
+      rec["cell"] = grid->cellSize();
+      tally.check(label + QString(": a click on cell %1_%2 of the grid picks that tile").arg(x).arg(y), picked,
+                  QString("picked %1_%2 (cell %3 px at %4,%5), %6").arg(maps->tileX()).arg(maps->tileY()).arg(grid->cellSize())
+                    .arg(r.x).arg(r.y).arg(tilePhaseName(maps->tilePhase())));
+    }
+    else if (kind == "clickrapid")
+    {
+      // clickrapid:<x1>:<y1>:<x2>:<y2>: two tiles clicked back to back (no pump between): the first load is superseded by
+      // the second, which alone may come to the screen.
+      MapTileGrid * grid = fc->mapPanel()->grid();
+      grid->SetWholeGrid(true);
+      pump(100);
+      const wxRect r1 = grid->TileRect(arg.section(':', 0, 0).toInt(), arg.section(':', 1, 1).toInt());
+      const wxRect r2 = grid->TileRect(arg.section(':', 2, 2).toInt(), arg.section(':', 3, 3).toInt());
+      postClick((HWND)grid->GetHWND(), wxPoint(r1.x + r1.width / 2, r1.y + r1.height / 2));
+      postClick((HWND)grid->GetHWND(), wxPoint(r2.x + r2.width / 2, r2.y + r2.height / 2));
+      const bool second = pumpUntil([&]() { return maps->tileX() == arg.section(':', 2, 2).toInt() &&
+                                                   maps->tileY() == arg.section(':', 3, 3).toInt(); }, 5000);
+      tally.check(label + ": the second click picks its tile", second, QString("picked %1_%2, load %3").arg(maps->tileX())
+                                                                       .arg(maps->tileY()).arg(maps->load()));
+    }
+    else if (kind == "waittile")
+    {
+      const long ms = arg.isEmpty() ? 90000 : arg.toLong();
+      pumpUntil([&]() { return maps->tilePhase() != MapsViewer::TilePhase::Loading; }, ms);
+      pump(300);
+      rec["tilePhase"] = tilePhaseName(maps->tilePhase());
+      rec["tileDetail"] = maps->tileDetail();
+      rec["shownView"] = maps->shownView();
+      tally.check(label + ": the tile's load ended", maps->tilePhase() != MapsViewer::TilePhase::Loading,
+                  tilePhaseName(maps->tilePhase()) + " -- " + maps->tileDetail());
+    }
+    else if (kind == "view")
+    {
+      // The pick as the control reports it (wxEVT_CHOICE from the choice itself, its selection set first).
+      wxChoice * choice = fc->mapPanel()->viewChoice();
+      choice->SetSelection(arg.toInt());
+      wxCommandEvent picked(wxEVT_CHOICE, choice->GetId());
+      picked.SetEventObject(choice);
+      picked.SetInt(arg.toInt());
+      picked.SetString(choice->GetString(arg.toInt()));
+      choice->ProcessWindowEvent(picked);
+      const bool chosen = pumpUntil([&]() { return maps->displayMode() == arg.toInt(); }, 3000);
+      tally.check(label + ": the Display choice picks the mode", chosen,
+                  QString("mode %1 (%2)").arg(maps->displayMode()).arg(MapsViewer::displayModes()[maps->displayMode()].label));
+    }
+    else if (kind == "waitview")
+    {
+      const MapsViewer::Timings before = maps->timings();
+      pump(arg.isEmpty() ? 3000 : arg.toLong());
+      rec["viewDetail"] = maps->viewDetail();
+      rec["shownView"] = maps->shownView();
+      tally.check(label + ": the player answered the view", !maps->viewDetail().startsWith("Drawing as"),
+                  maps->viewDetail());
+      (void)before;
+    }
+    else if (kind == "clear")
+    {
+      UiButton * b = fc->mapPanel()->clearButton();
+      wxCommandEvent clicked(wxEVT_BUTTON, b->GetId());
+      clicked.SetEventObject(b);
+      b->ProcessWindowEvent(clicked);
+      pump(800);
+      tally.check(label + ": Clear terrain takes the tile away", maps->tilePhase() == MapsViewer::TilePhase::Cleared &&
+                                                                    maps->shownTileX() < 0,
+                  tilePhaseName(maps->tilePhase()));
+    }
+    else if (kind == "whole")
+    {
+      wxCheckBox * box = fc->mapPanel()->wholeGridBox();
+      box->SetValue(arg.toInt() != 0);
+      wxCommandEvent ticked(wxEVT_CHECKBOX, box->GetId());
+      ticked.SetEventObject(box);
+      ticked.SetInt(arg.toInt() != 0);
+      box->ProcessWindowEvent(ticked);
+      pump(300);
+      tally.check(label + ": the whole-grid box", fc->mapPanel()->grid()->wholeGrid() == (arg.toInt() != 0),
+                  fc->mapPanel()->grid()->wholeGrid() ? "whole grid" : "the map's tiles");
+    }
+    else if (kind == "key")
+    {
+      MapTileGrid * grid = fc->mapPanel()->grid();
+      grid->SetFocus();
+      const int vk = arg == "left" ? VK_LEFT : arg == "right" ? VK_RIGHT : arg == "up" ? VK_UP : arg == "down" ? VK_DOWN
+                                                                                                             : VK_RETURN;
+      PostMessage((HWND)grid->GetHWND(), WM_KEYDOWN, vk, 0);
+      PostMessage((HWND)grid->GetHWND(), WM_KEYUP, vk, 0xC0000000);
+      pump(300);
+    }
+    else if (kind == "drag" || (kind == "wheel" && !arg.startsWith("grid")))
+    {
+      HWND player = playerWindowOf(frame->unityRendererHost);
+      if (!player)
+      {
+        tally.check(label, false, "no player window");
+        continue;
+      }
+      RECT pr;
+      GetClientRect(player, &pr);
+      const int cx = (pr.right - pr.left) / 2, cy = (pr.bottom - pr.top) / 2;
+      if (kind == "wheel")
+      {
+        POINT sp = { cx, cy };
+        ClientToScreen(player, &sp);
+        PostMessage(player, WM_MOUSEMOVE, 0, MAKELPARAM(cx, cy));
+        for (int i = 0; i < std::abs(arg.toInt()); i++)
+          PostMessage(player, WM_MOUSEWHEEL, MAKEWPARAM(0, (arg.toInt() > 0 ? 1 : -1) * WHEEL_DELTA), MAKELPARAM(sp.x, sp.y));
+      }
+      else
+      {
+        const bool right = arg.section(':', 0, 0) == "r";
+        const int dx = arg.section(':', 1, 1).toInt(), dy = arg.section(':', 2, 2).toInt();
+        const WPARAM down = right ? MK_RBUTTON : MK_LBUTTON;
+        PostMessage(player, WM_MOUSEMOVE, 0, MAKELPARAM(cx, cy));
+        PostMessage(player, right ? WM_RBUTTONDOWN : WM_LBUTTONDOWN, down, MAKELPARAM(cx, cy));
+        for (int i = 1; i <= 20; i++)
+        {
+          PostMessage(player, WM_MOUSEMOVE, down, MAKELPARAM(cx + dx * i / 20, cy + dy * i / 20));
+          pump(20);
+        }
+        PostMessage(player, right ? WM_RBUTTONUP : WM_LBUTTONUP, 0, MAKELPARAM(cx + dx, cy + dy));
+      }
+      pump(700);
+    }
+    else if (kind == "switch")
+    {
+      const std::vector<core::GameConfig> configs = GAMEDIRECTORY.configsFound();
+      const core::GameConfig * config = nullptr;
+      for (const core::GameConfig & c : configs)
+        if (c.product == arg)
+          config = &c;
+      if (!config)
+      {
+        tally.skip(label, "no such product in the installation");
+        continue;
+      }
+      const core::GameConfig chosen = *config;
+      const int epochBefore = UnityAssetAccess::clientEpoch();
+      const bool loaded = frame->LoadWoW(&chosen);
+      pump(1500);
+      rec["epochBefore"] = epochBefore;
+      rec["epochAfter"] = UnityAssetAccess::clientEpoch();
+      tally.check(label + ": the client loads, and the Maps viewer forgets the old one's map, tiles and terrain",
+                  loaded && maps->mapId() < 0 && !maps->hasGrid() && maps->shownTileX() < 0 &&
+                    UnityAssetAccess::clientEpoch() != epochBefore,
+                  QString("%1 %2; map %3, grid %4, shown tile %5; epoch %6 -> %7").arg(chosen.product, chosen.version)
+                    .arg(maps->mapId()).arg(maps->hasGrid() ? 1 : 0).arg(maps->shownTileX()).arg(epochBefore)
+                    .arg(UnityAssetAccess::clientEpoch()));
+    }
+    else if (kind == "model" || kind == "wmo")
+    {
+      bool numeric = false;
+      const int id = arg.toInt(&numeric);
+      GameFile * file = numeric ? GAMEDIRECTORY.getFile(id) : GAMEDIRECTORY.getFile(arg);
+      if (!file)
+      {
+        tally.check(label, false, "no such file");
+        continue;
+      }
+      if (kind == "model")
+        fc->SelectModelFile(file);
+      else
+        fc->SelectWMOFile(file);
+      pump(6000);
+    }
+    else if (kind == "holdroot" || kind == "holdwdt")
+      ipc->testHoldNextMapRead(kind == "holdroot" ? "rootAdt" : "wdt");
+    else if (kind == "waitheld")
+    {
+      QJsonObject held;
+      const bool ok = pumpUntil([&]() { return ipc->testMapReadHeld(&held); }, 20000);
+      tally.check(label + ": the read is held in the map asset worker", ok,
+                  ok ? QString("request %1, load %2, role %3").arg(held.value("requestId").toString()).arg(held.value("load").toInt())
+                         .arg(held.value("role").toString())
+                     : QString("nothing held within 20 s"));
+    }
+    else if (kind == "release")
+    {
+      // Once the read is held (a release before it would be lost), let go.
+      const bool held = pumpUntil([&]() { return ipc->testMapReadHeld(); }, 10000);
+      ipc->testReleaseMapRead();
+      pump(500);
+      tally.check(label + ": the held read is let go", held, held ? QString("held, released") : QString("nothing held within 10 s"));
+    }
+    else if (kind == "holdclose")
+    {
+      // The last step: a tile's root read held in the worker (dispatched as any), the window then closed with it in
+      // flight and the player running. The shutdown check is THE SHUTDOWN CHECK of the terrain test.
+      if (s != seq.size() - 1)
+      {
+        tally.check(label, false, "holdclose must be the last step");
+        continue;
+      }
+      holdClose = true;
+    }
+    else if (kind == "expect")
+    {
+      const QString what = arg.section(':', 0, 0);
+      const QString a1 = arg.section(':', 1, 1), a2 = arg.section(':', 2, 2), a3 = arg.section(':', 3, 3);
+      if (what == "map")
+        tally.check(label, mapPhaseName(maps->mapPhase()) == a1, mapPhaseName(maps->mapPhase()) + " -- " + maps->statusLine());
+      else if (what == "tile")
+        tally.check(label, tilePhaseName(maps->tilePhase()) == a1, tilePhaseName(maps->tilePhase()) + " -- " + maps->tileDetail());
+      else if (what == "grid")
+        tally.check(label, tileStateKey(maps->tileState(a1.toInt(), a2.toInt())) == a3,
+                    tileStateKey(maps->tileState(a1.toInt(), a2.toInt())) + " -- " + maps->tileReason(a1.toInt(), a2.toInt()));
+      else if (what == "mode")
+        tally.check(label, (a1 == "maps") == frame->isMapsMode() && (a1 == "models") == frame->isModelsMode() &&
+                             (a1 == "buildings") == frame->isBuildingsMode(),
+                    frame->isMapsMode() ? "maps" : frame->isModelsMode() ? "models" : frame->isBuildingsMode() ? "buildings"
+                                                                                                             : "textures");
+      else if (what == "notice")
+      {
+        const QString title = QString::fromWCharArray(frame->unityRendererHost->noticeTitle().c_str());
+        const bool shown = frame->unityRendererHost->hasNotice();
+        tally.check(label, a1 == "none" ? !shown : shown && title.contains(a1, Qt::CaseInsensitive),
+                    shown ? "notice \"" + title + "\"" : QString("no notice"));
+      }
+      else if (what == "terrain")
+      {
+        const UnityIpcServer::RuntimeState before = lastState;
+        const QJsonObject o = sample(label);
+        (void)before;
+        tally.check(label, o.value("liveTerrainTiles").toInt(-1) == a1.toInt() && o.value("terrainView").toInt(-1) == a1.toInt(),
+                    QString("live terrain tiles %1, terrain view %2, models %3, world models %4, terrain textures %5")
+                      .arg(o.value("liveTerrainTiles").toInt(-1)).arg(o.value("terrainView").toInt(-1))
+                      .arg(o.value("liveModels").toInt(-1)).arg(o.value("liveMapObjects").toInt(-1))
+                      .arg(o.value("terrainTextures").toInt(-1)));
+      }
+      else if (what == "listed")
+        tally.check(label, a1 == "any" ? fc->mapsListed() > 0 : fc->mapsListed() == a1.toInt(),
+                    QString("%1 listed").arg(fc->mapsListed()));
+      else if (what == "shownload")
+      {
+        // The player shows the load the viewer last asked for, and that tile.
+        const QJsonObject o = sample(label);
+        (void)o;
+        tally.check(label, lastState.terrainLoad == maps->load() && maps->load() > 0 && maps->shownTileX() == a1.toInt() &&
+                             maps->shownTileY() == a2.toInt(),
+                    QString("player shows load %1, the viewer's load %2, its tile %3_%4").arg(lastState.terrainLoad).arg(maps->load())
+                      .arg(maps->shownTileX()).arg(maps->shownTileY()));
+      }
+      else if (what == "shownview")
+        tally.check(label, maps->shownView() == a1, maps->shownView());
+      else
+        tally.check(label, false, "unknown expectation");
+    }
+    else if (kind == "zoom")
+    {
+      // zoom:<cell>:<x>:<y>: the grid zoomed so cells are that big about tile (x, y) (what the wheel does), 0 the fit.
+      fc->mapPanel()->grid()->ZoomTo(arg.section(':', 0, 0).toInt(), arg.section(':', 1, 1).toDouble() + 0.5,
+                                     arg.section(':', 2, 2).toDouble() + 0.5);
+      pump(200);
+      rec["cell"] = fc->mapPanel()->grid()->cellSize();
+    }
+    else if (kind == "wheel" && arg.startsWith("grid"))
+    {
+      // wheel:grid:<x>:<y>:<clicks>: the wheel turned over that tile of the grid (posted to the grid's window).
+      MapTileGrid * grid = fc->mapPanel()->grid();
+      const wxRect r = grid->TileRect(arg.section(':', 1, 1).toInt(), arg.section(':', 2, 2).toInt());
+      POINT sp = { r.x + r.width / 2, r.y + r.height / 2 };
+      ClientToScreen((HWND)grid->GetHWND(), &sp);
+      const int clicks = arg.section(':', 3, 3).toInt();
+      for (int i = 0; i < std::abs(clicks); i++)
+        PostMessage((HWND)grid->GetHWND(), WM_MOUSEWHEEL, MAKEWPARAM(0, (clicks > 0 ? 1 : -1) * WHEEL_DELTA), MAKELPARAM(sp.x, sp.y));
+      pump(300);
+      rec["cell"] = grid->cellSize();
+      tally.check(label + ": the wheel zooms the grid", (clicks > 0) == (grid->zoomCell() > 0),
+                  QString("cell %1 px, zoom %2").arg(grid->cellSize()).arg(grid->zoomCell()));
+    }
+    else if (kind == "orient" || kind == "scan")
+    {
+      // The file name of each tile's root ADT, against the cell: (named, matching, mismatching).
+      const auto orient = [&](int & named, int & matched, QStringList & bad) {
+        named = matched = 0;
+        if (!maps->hasGrid())
+          return;
+        const QString dir = maps->mapDirectory().toLower();
+        for (int ty = 0; ty < 64; ty++)
+          for (int tx = 0; tx < 64; tx++)
+          {
+            const quint32 root = maps->tileRoot(tx, ty);
+            if (root == 0 || maps->tileState(tx, ty) == MapsViewer::TileState::NotInWdt)
+              continue;
+            GameFile * f = GAMEDIRECTORY.getFile((int)root);
+            if (!f)
+              continue;
+            QString name = f->fullname().toLower();
+            name.replace('\\', '/');
+            if (name.isEmpty() || name.startsWith("file_") || !name.endsWith(".adt"))
+              continue;
+            named++;
+            const QString want = "/" + dir + "_" + QString::number(tx) + "_" + QString::number(ty) + ".adt";
+            if (name.endsWith(want))
+              matched++;
+            else if (bad.size() < 5)
+              bad << QString("%1_%2 -> %3").arg(tx).arg(ty).arg(name);
+          }
+      };
+      if (kind == "orient")
+      {
+        int named = 0, matched = 0;
+        QStringList bad;
+        orient(named, matched, bad);
+        rec["named"] = named;
+        rec["matched"] = matched;
+        tally.check(label + ": every named root ADT is the file of the cell it is drawn in", named > 0 && matched == named,
+                    QString("map %1: %2 of %3 named root ADTs match their cell's <directory>_<x>_<y>.adt%4").arg(maps->mapId())
+                      .arg(matched).arg(named).arg(bad.isEmpty() ? QString() : "; " + bad.join("; ")));
+      }
+      else
+      {
+        const int max = arg.isEmpty() ? 100000 : arg.toInt();
+        QJsonArray scan;
+        int picked = 0, ready = 0, failed = 0, nowdt = 0, stalled = 0, withTiles = 0, mismatched = 0, namedAll = 0;
+        long long tilesAll = 0, availableAll = 0, noRootAll = 0, notInStorageAll = 0, notLocalAll = 0;
+        std::vector<double> pickToGrid;
+        const double roundBefore = stepRoundMax;
+        for (const wow::MapEntry & e : frame->mapCatalog()->maps())
+        {
+          if (picked >= max)
+            break;
+          picked++;
+          maps->SelectMap(e.id);
+          const bool done = pumpUntil([&]() {
+            const MapsViewer::MapPhase p = maps->mapPhase();
+            return p == MapsViewer::MapPhase::Ready || p == MapsViewer::MapPhase::Failed || p == MapsViewer::MapPhase::NoWdt;
+          }, 8000);
+          QJsonObject m;
+          m["id"] = e.id;
+          m["phase"] = mapPhaseName(maps->mapPhase());
+          if (!done)
+            stalled++;
+          if (maps->mapPhase() == MapsViewer::MapPhase::Ready)
+          {
+            ready++;
+            int named = 0, matched = 0;
+            QStringList bad;
+            orient(named, matched, bad);
+            namedAll += named;
+            mismatched += named - matched;
+            m["tiles"] = maps->tilesInWdt();
+            m["available"] = maps->tilesAvailable();
+            m["noRoot"] = maps->tilesCount(MapsViewer::TileState::NoRoot);
+            m["notInStorage"] = maps->tilesCount(MapsViewer::TileState::NotInStorage);
+            m["notLocal"] = maps->tilesCount(MapsViewer::TileState::NotLocal);
+            m["named"] = named;
+            m["matched"] = matched;
+            if (!bad.isEmpty())
+              m["mismatches"] = bad.join("; ");
+            m["pickToGridMs"] = maps->timings().pickToGridMs;
+            m["gridMs"] = maps->timings().gridMs;
+            m["wdtReadMs"] = maps->timings().wdtReadMs;
+            m["inspectRoundTripMs"] = maps->timings().inspectRoundTripMs;
+            pickToGrid.push_back(maps->timings().pickToGridMs);
+            tilesAll += maps->tilesInWdt();
+            availableAll += maps->tilesAvailable();
+            noRootAll += maps->tilesCount(MapsViewer::TileState::NoRoot);
+            notInStorageAll += maps->tilesCount(MapsViewer::TileState::NotInStorage);
+            notLocalAll += maps->tilesCount(MapsViewer::TileState::NotLocal);
+            if (maps->tilesInWdt() > 0)
+              withTiles++;
+          }
+          else if (maps->mapPhase() == MapsViewer::MapPhase::NoWdt)
+            nowdt++;
+          else
+          {
+            failed++;
+            m["detail"] = maps->mapDetail();
+          }
+          scan.append(m);
+        }
+        std::sort(pickToGrid.begin(), pickToGrid.end());
+        const auto pct = [&](double q) { return pickToGrid.empty() ? -1.0 : pickToGrid[std::min(pickToGrid.size() - 1, (size_t)(q * pickToGrid.size()))]; };
+        out["scan"] = scan;
+        rec["maps"] = picked;
+        rec["ready"] = ready;
+        rec["withTiles"] = withTiles;
+        rec["noWdt"] = nowdt;
+        rec["failed"] = failed;
+        rec["stalled"] = stalled;
+        rec["tiles"] = (double)tilesAll;
+        rec["available"] = (double)availableAll;
+        rec["noRoot"] = (double)noRootAll;
+        rec["notInStorage"] = (double)notInStorageAll;
+        rec["notLocal"] = (double)notLocalAll;
+        rec["named"] = namedAll;
+        rec["mismatched"] = mismatched;
+        rec["pickToGridMedianMs"] = pct(0.5);
+        rec["pickToGridP95Ms"] = pct(0.95);
+        rec["pickToGridMaxMs"] = pickToGrid.empty() ? -1.0 : pickToGrid.back();
+        tally.check(label + ": every map of the catalogue answers (a grid, no WDT, or why not), none stalls", stalled == 0,
+                    QString("%1 map(s): %2 with a grid (%3 with tiles), %4 without a WDT, %5 refused with a reason, %6 stalled")
+                      .arg(picked).arg(ready).arg(withTiles).arg(nowdt).arg(failed).arg(stalled));
+        tally.check(label + ": every named root ADT of every grid is the file of its cell (orientation)", mismatched == 0 && namedAll > 0,
+                    QString("%1 named root ADTs, %2 mismatched; tiles %3: %4 available, %5 without a root ADT, %6 not in the "
+                            "client's storage, %7 not on this computer; pick to grid median %8 ms, p95 %9 ms, max %10 ms")
+                      .arg(namedAll).arg(mismatched).arg(tilesAll).arg(availableAll).arg(noRootAll).arg(notInStorageAll)
+                      .arg(notLocalAll).arg(pct(0.5), 0, 'f', 1).arg(pct(0.95), 0, 'f', 1)
+                      .arg(pickToGrid.empty() ? -1.0 : pickToGrid.back(), 0, 'f', 1));
+        (void)roundBefore;
+      }
+    }
+    else if (kind == "wait")
+      pump(arg.toLong());
+    else if (kind == "state")
+      sample(arg.isEmpty() ? label : arg);
+    else if (kind == "shot" || kind == "shotnow")
+    {
+      if (kind == "shot")
+        pump(400);
+      const QString path = outBase + "_" + arg + ".png";
+      QSize size;
+      double mean = -1.0;
+      const wxRect vp = frame->unityRendererHost->GetScreenRect();
+      const wxRect fr = frame->GetScreenRect();
+      const wxRect vpInFrame(vp.x - fr.x, vp.y - fr.y, vp.width, vp.height);
+      const bool ok = printWindowPng((HWND)frame->GetHWND(), path, size, mean, vpInFrame);
+      QJsonObject o;
+      o["name"] = arg;
+      o["path"] = path;
+      o["width"] = size.width();
+      o["height"] = size.height();
+      o["viewportMean"] = mean;
+      o["mode"] = frame->isMapsMode() ? "maps" : frame->isModelsMode() ? "models" : frame->isBuildingsMode() ? "buildings" : "textures";
+      o["map"] = maps->mapId();
+      o["tile"] = maps->shownTileX() >= 0 ? QString("%1_%2").arg(maps->shownTileX()).arg(maps->shownTileY()) : QString();
+      o["view"] = maps->shownView();
+      shots.append(o);
+      tally.check(label + ": the picture is written", ok, QString("%1 (%2 x %3, viewport mean %4)").arg(path).arg(size.width())
+                                                            .arg(size.height()).arg(mean, 0, 'f', 1));
+    }
+    else
+      tally.check(label, false, "unknown step");
+    rec["ms"] = (double)stepClock.Time();
+    rec["guiRoundMaxMs"] = stepRoundMax;
+    rec["timings"] = timingsJson(maps->timings());
+    rec["mapPhase"] = mapPhaseName(maps->mapPhase());
+    rec["tilePhase"] = tilePhaseName(maps->tilePhase());
+    rec["privateBytes"] = (double)privateBytesNow();
+    steps.append(rec);
+    LOG_INFO << "[maps-test]" << label << "done in" << stepClock.Time() << "ms; the longest GUI round" << stepRoundMax << "ms";
+  }
+
+  out["steps"] = steps;
+  out["shots"] = shots;
+  out["samples"] = samples;
+  out["checks"] = tally.checks;
+  out["guiRounds"] = (double)rounds;
+  out["guiRoundMaxMs"] = roundMax;
+  out["guiRoundsOver16ms"] = (double)roundsOver16;
+  out["guiRoundsOver50ms"] = (double)roundsOver50;
+  out["client"] = frame->mapCatalog()->client().product + " " + frame->mapCatalog()->client().build;
+  out["passed"] = tally.passed;
+  out["failed"] = tally.failed;
+  out["skipped"] = tally.skipped;
+  if (!outPath.isEmpty())
+  {
+    QFile f(outPath);
+    if (f.open(QIODevice::WriteOnly | QIODevice::Truncate))
+      f.write(QJsonDocument(out).toJson(QJsonDocument::Indented));
+  }
+  LOG_INFO << QString("[maps-test] RESULT: %1 (%2 passed, %3 failed, %4 skipped); GUI rounds %5, the longest %6 ms, %7 over 16.7 ms, "
+                      "%8 over 50 ms").arg(tally.failed == 0 ? "PASS" : "FAIL").arg(tally.passed).arg(tally.failed)
+                .arg(tally.skipped).arg(rounds).arg(roundMax, 0, 'f', 2).arg(roundsOver16).arg(roundsOver50);
+  std::printf("WMV: maps ui test %s (%d passed, %d failed, %d skipped)\n", tally.failed == 0 ? "PASS" : "FAIL", tally.passed,
+              tally.failed, tally.skipped);
+  std::fflush(stdout);
+  ipc->onRuntimeState = previousRuntime;
+  g_pumpBusy = nullptr;
+  if (holdClose)
+  {
+    // A tile requested with its root ADT read held in the worker, then the window closed (the frame's destructor) with
+    // the read in flight and the player running: THE SHUTDOWN CHECK watches the destructor.
+    ipc->testHoldNextMapRead("rootAdt");
+    int x0 = -1, y0 = -1;
+    for (int ty = 0; ty < 64 && x0 < 0; ty++)
+      for (int tx = 0; tx < 64 && x0 < 0; tx++)
+        if (maps->tileState(tx, ty) == MapsViewer::TileState::Available && !(tx == maps->shownTileX() && ty == maps->shownTileY()))
+        {
+          x0 = tx;
+          y0 = ty;
+        }
+    if (x0 >= 0)
+    {
+      MapTileGrid * grid = fc->mapPanel()->grid();
+      grid->SetWholeGrid(true);
+      pump(100);
+      const wxRect r = grid->TileRect(x0, y0);
+      postClick((HWND)grid->GetHWND(), wxPoint(r.x + r.width / 2, r.y + r.height / 2));
+      wxStopWatch w;
+      while (!ipc->testMapReadHeld() && w.Time() < 20000)
+        pumpIpc(ipc, 1);
+    }
+    const bool held = ipc->testMapReadHeld() && ipc->mapReadsInFlight() >= 1;
+    LOG_INFO << "[maps-test] holdclose: tile" << x0 << y0 << "requested, its root ADT read held in the worker:" << (held ? "yes" : "no");
+    if (held)
+    {
+      g_shutdownCheck = ShutdownCheck();
+      g_shutdownCheck.armed = true;
+      g_shutdownCheck.heldTicket = frame->m_mapAssetWorker->testHeldTicket();
+      g_shutdownCheck.inFlight = ipc->mapReadsInFlight();
+      ModelViewer::testShutdownProbe = &runShutdownCheck;
+    }
+    return tally.failed;
+  }
+  if (frame->unityRendererHost && frame->unityRendererHost->isRunning())
+    frame->unityRendererHost->shutdown();
   return tally.failed;
 }
 
@@ -9693,7 +10872,7 @@ bool WowModelViewApp::OnInit()
     if (a == "-m" || a == "-mo" || a == "-armory" || a == "-npc" || a == "-fbxexport" ||
         a == "-animdump" || a == "-fbxinspect" || a == "-dbfromfile" || a == "-dumptex" ||
         a == "-m2inspect" || a == "-matrestest" || a == "-customizationtest" || a == "-mpq" || a == "-item" || a == "-wmo" ||
-        a == "-mapcatalogtest" || a == "-terraintile" || a.endsWith(".chr"))
+        a == "-mapcatalogtest" || a == "-terraintile" || a == "-mapsuitest" || a.endsWith(".chr"))
     {
       earlyHeadless = true;
       break;
@@ -9892,6 +11071,8 @@ bool WowModelViewApp::OnInit()
   QStringList mapCatalogClients, mapCatalogProbes;   // -mapcatalogclients p,p,... / -mapcatalogprobe id|path,...
   QString mapCatalogWdtFolder; QStringList mapCatalogWdtMaps; // -mapcatalogwdt <folder> <map id,...>
   bool terrainTest = false;                          // -terraintile <map id> <x> <y> [<out.json>]: the terrain tile test
+  bool mapsUiTest = false;                           // -mapsuitest [<out.json>]: the Maps viewer GUI test
+  QString mapsUiOut;
   int terrainMap = -1, terrainX = -1, terrainY = -1; QString terrainOut;
   QString m2InspectList, m2InspectOut;               // -m2inspect <list.txt> [out.csv]: forensic-only
   // Export content selection + clip list for the headless FBX export (the parent process passes
@@ -9991,6 +11172,12 @@ bool WowModelViewApp::OnInit()
         else
           mapCatalogProbes = arg.split(',', QString::SkipEmptyParts);
       }
+    }
+    else if (cmd == "-mapsuitest") {
+      // The Maps viewer driven through its interface; see doHeadlessMapsUiTest.
+      mapsUiTest = true;
+      if (i + 1 < argc && !QString::fromWCharArray(argv[i + 1]).startsWith('-'))
+        mapsUiOut = launchPath(argv[++i]);
     }
     else if (cmd == "-terraintile") {
       // One terrain tile drawn by the player, and the protocol around it; see doHeadlessTerrainTileTest.
@@ -10150,7 +11337,7 @@ bool WowModelViewApp::OnInit()
   for (int i = 1; i < argc; i++)
   {
     QString a = QString::fromWCharArray(argv[i]);
-    if (a == "-m" || a == "-mo" || a == "-armory" || a == "-npc" || a == "-fbxexport" || a == "-animdump" || a == "-fbxinspect" || a == "-dbfromfile" || a == "-dumptex" || a == "-m2inspect" || a == "-matrestest" || a == "-customizationtest" || a == "-mpq" || a == "-item" || a == "-wmo" || a == "-mapcatalogtest" || a == "-terraintile" || a.endsWith(".chr"))
+    if (a == "-m" || a == "-mo" || a == "-armory" || a == "-npc" || a == "-fbxexport" || a == "-animdump" || a == "-fbxinspect" || a == "-dbfromfile" || a == "-dumptex" || a == "-m2inspect" || a == "-matrestest" || a == "-customizationtest" || a == "-mpq" || a == "-item" || a == "-wmo" || a == "-mapcatalogtest" || a == "-terraintile" || a == "-mapsuitest" || a.endsWith(".chr"))
     {
       headlessLoad = true;
       break;
@@ -10222,6 +11409,12 @@ bool WowModelViewApp::OnInit()
     if (terrainTest)
     {
       doHeadlessTerrainTileTest(frame, terrainMap, terrainX, terrainY, terrainOut);
+      return false; // checks done -> exit
+    }
+
+    if (mapsUiTest)
+    {
+      doHeadlessMapsUiTest(frame, mapsUiOut);
       return false; // checks done -> exit
     }
 

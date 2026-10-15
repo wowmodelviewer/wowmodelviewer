@@ -329,6 +329,20 @@ bool wow::WorldMapCatalog::inspect(int mapId)
   return false;
 }
 
+bool wow::WorldMapCatalog::noteInspection(int mapId, const WdtInspection & inspection)
+{
+  if (!canRead())
+    return false;
+  for (MapEntry & e : m_maps)
+    if (e.id == mapId)
+    {
+      e.inspection = inspection;
+      return true;
+    }
+  m_refusal = QString("map %1 is not in this catalogue").arg(mapId);
+  return false;
+}
+
 size_t wow::WorldMapCatalog::inspectAll()
 {
   if (!canRead())

@@ -76,6 +76,10 @@ public:
   // fallback. Called from the host frame's OnClose, from a restart and from the destructor. A
   // player closed here was meant to stop, so it is not reported as a problem.
   void shutdown();
+  // What the last shutdown() that waited for a player retrieved from this thread's queue while it waited (sent messages
+  // and paints only), and how many of them were paints (the -terraintile harness's shutdown check).
+  int shutdownMessagesPumped() const { return m_shutdownPumped; }
+  int shutdownPaintsPumped() const { return m_shutdownPaints; }
 
   // WHY THE PLAYER IS NOT THERE, in words for the viewport notice: the build is missing, it could
   // not be started, it exited, it never responded, or it stopped talking to WMV. Empty while the
@@ -219,6 +223,8 @@ private:
   // exit in between is told apart from a player that was closed on purpose.
   wxString m_playerProblem;
   bool m_playerExpected = false;
+  int m_shutdownPumped = 0;   // shutdownMessagesPumped()
+  int m_shutdownPaints = 0;
 
   // False until the player reports in: its window is shown from then on (applyEmbeddedVisibility).
   bool m_playerReady = false;

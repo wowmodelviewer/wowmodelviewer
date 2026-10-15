@@ -397,8 +397,16 @@ MapAssetWorker::Result MapAssetWorker::readJob(const Job & job)
     else
     {
       wow::WdtReference ref;
-      ref.kind = wow::WdtReference::Kind::FileDataId;
-      ref.fileDataId = job.fileDataID;
+      if (job.fileDataID <= 0 && !job.path.isEmpty())
+      {
+        ref.kind = wow::WdtReference::Kind::Path;
+        ref.path = job.path;
+      }
+      else
+      {
+        ref.kind = wow::WdtReference::Kind::FileDataId;
+        ref.fileDataId = job.fileDataID;
+      }
       r.inspection = wow::WorldMapCatalog::inspectInStorage(m_lease.storage, ref, &r.bytes, false, job.maxBytes,
                                                             hooked ? &hooks : nullptr);
       r.outcome = Result::Outcome::Read;

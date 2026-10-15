@@ -200,6 +200,12 @@ public sealed class WmvTerrainSession
     readonly Dictionary<long, WmvRuntimeTerrainTile> tiles = new Dictionary<long, WmvRuntimeTerrainTile>();
     WmvRuntimeTerrainTile shown;
     int shownLoad;
+    // THE SHOWN TILE'S INPUTS (protocol 14, setTerrainView): what its load parsed and settled -- the mesh, the material
+    // and the textures (WmvTerrainTileContent; the prepared data of a texture the view did not upload stay with it) --
+    // kept while the tile is on screen, so another view rebuilds it here, from what the player holds, without asking the
+    // host for anything (RebuildShown). Dropped with the tile.
+    TerrainTileMesh shownMesh;
+    WmvTerrainTileContent shownContent;
     int sceneEpoch = int.MinValue, sceneMapId = int.MinValue;
     bool viewActive;
     long frame;
@@ -345,11 +351,115 @@ public sealed class WmvTerrainSession
             Log("{0} tile(s) disposed ({1}); live terrain tiles {2}", n, why, WmvRuntimeTerrainTile.Live);
         shown = null;
         shownLoad = 0;
+        ForgetShownInputs();
         if (viewActive)
         {
             viewActive = false;
             view.LeaveTerrainView(why, forModelLoad);
         }
+    }
+
+    /// <summary>The shown tile's inputs go (with the tile): their prepared texture data are dropped now.</summary>
+    void ForgetShownInputs()
+    {
+        if (shownContent != null)
+            foreach (WmvTerrainTexture t in shownContent.Textures.Values)
+                t.ReleaseUploadData();
+        shownMesh = null;
+        shownContent = null;
+    }
+
+    /// <summary>A tile built in a textured view (textured, texturedlit) uploaded every texture any view setTerrainView can
+    /// choose binds: the prepared data of the rest (a texture only a chunk drawn neutral uses) are dropped. In any other
+    /// view nothing was uploaded, and every texture's data stay for a textured rebuild.</summary>
+    static void KeepOnlyWhatAViewMayUpload(WmvRuntimeTerrainTile tile, WmvTerrainTileContent content)
+    {
+        // Kept only when the host chose the view (setTerrainView: it may choose another): a view set on the command line,
+        // or the material's own choice, is the tile's for good, and its data go at once, as before protocol 14.
+        if (tile == null || content == null ||
+            (WmvTerrainDebug.RuntimeViewName != "auto" && tile.View != WmvTerrainView.Textured && tile.View != WmvTerrainView.TexturedLit))
+            return;
+        foreach (WmvTerrainTexture t in content.Textures.Values)
+            t.ReleaseUploadData();
+    }
+
+    /// <summary>The prepared texture bytes the shown tile's inputs still hold (textures its view did not upload).</summary>
+    public long RetainedTextureBytes
+    {
+        get
+        {
+            long n = 0;
+            if (shownContent != null)
+                foreach (WmvTerrainTexture t in shownContent.Textures.Values)
+                    n += t.PreparedBytes;
+            return n;
+        }
+    }
+
+    /// <summary>
+    /// setTerrainView (protocol 14): the tile on screen built again in the view now in effect (WmvTerrainDebug.EffectiveView),
+    /// from its own inputs -- the mesh, the material and the textures its load settled -- and nothing asked of the host.
+    /// The new tile is built inactive beside the old one, which it shares the uploaded textures with (they are handed over
+    /// at the commit, never uploaded twice); a texture the old view did not upload is uploaded from the data kept for it.
+    /// Then the commit: the old tile disposed, the new one shown, the camera where the user left it (no framing). A build
+    /// that throws disposes the new tile only: the old one stays on screen, as it was, its textures with it. A load in
+    /// flight is not touched: it is built in the new view when it is adopted. Returns "applied" (rebuilt), "noTile"
+    /// (nothing on screen: the view is for the next load) or "failed" (with the reason).
+    /// </summary>
+    public string RebuildShown(string why, out string reason, out double ms, out int load)
+    {
+        reason = "";
+        ms = 0;
+        load = 0;
+        var clock = Stopwatch.StartNew();
+        WmvRuntimeTerrainTile old = shown;
+        if (disposed || old == null || old.Disposed || shownMesh == null || shownContent == null)
+        {
+            reason = "no terrain tile is on screen: the view applies to the next one";
+            return "noTile";
+        }
+        load = old.Load;
+        var tile = new WmvRuntimeTerrainTile(old.MapId, old.TileX, old.TileY, old.Load);
+        foreach (KeyValuePair<uint, UnityEngine.Texture2D> kv in old.Textures)
+            tile.Textures[kv.Key] = kv.Value;        // shared, not tracked: the new tile's build binds them
+        try
+        {
+            view.BuildTile(tile, shownMesh, shownContent);
+        }
+        catch (Exception e)
+        {
+            reason = "building the tile in the view failed: " + e.GetType().Name + ": " + e.Message;
+            tile.Textures.Clear();                   // the old tile's: never destroyed with the new one
+            try { view.DisposeTile(tile); }
+            catch (Exception e2) { Log("rebuild of load {0}: disposing the unfinished tile failed: {1}", load, e2.Message); }
+            ms = clock.Elapsed.TotalMilliseconds;
+            Log("rebuild of load {0} ({1}): {2}; the tile on screen stays as it was", load, why, reason);
+            return "failed";
+        }
+        // THE COMMIT. The textures the new tile still binds change hands (off the old tile's lists, onto the new one's,
+        // never destroyed); the old tile goes with what it alone holds.
+        int handed = 0;
+        foreach (KeyValuePair<uint, UnityEngine.Texture2D> kv in new List<KeyValuePair<uint, UnityEngine.Texture2D>>(tile.Textures))
+        {
+            long gpu;
+            if (old.Hand(kv.Value, out gpu))
+            {
+                tile.Track(kv.Value, gpu);
+                handed++;
+            }
+        }
+        long key = KeyOf(old.MapId, old.TileX, old.TileY);
+        view.DisposeTile(old);
+        tiles.Remove(key);
+        tiles[key] = tile;
+        shown = tile;
+        tile.Root.SetActive(true);
+        KeepOnlyWhatAViewMayUpload(tile, shownContent);
+        ms = clock.Elapsed.TotalMilliseconds;
+        Log("rebuild of load {0} ({1}): tile {2}_{3} drawn {4} in {5:0.###} ms, {6} texture(s) handed over, {7} uploaded; live terrain tiles {8}",
+            load, why, tile.TileX, tile.TileY, WmvTerrainDebug.ViewNames[(int)tile.View], ms, handed, tile.Textures.Count - handed,
+            WmvRuntimeTerrainTile.Live);
+        return "applied";
     }
 
     /// <summary>Shutdown: no report goes out (the connection is ending); the load in flight stops taking results, its
@@ -370,6 +480,7 @@ public sealed class WmvTerrainSession
         Log("session disposed: {0} tile(s) released", n);
         shown = null;
         shownLoad = 0;
+        ForgetShownInputs();
     }
 
     // ---------------------------------------------------------------- answers and frames
@@ -1040,6 +1151,9 @@ public sealed class WmvTerrainSession
             sceneEpoch = cmd.AssetEpoch;
             sceneMapId = cmd.MapId;
             j.Tile = tile;
+            ForgetShownInputs();
+            shownMesh = j.Mesh;
+            shownContent = j.Content;
             committed = true;
             Log("load {0}: committed tile {1} of map {2} ({3} replaced{4}); Unity objects built in {5:0.###} ms; live terrain tiles {6}",
                 cmd.Load, j.Tile2, cmd.MapId, replaced,
@@ -1068,7 +1182,12 @@ public sealed class WmvTerrainSession
         {
             j.Dead = true;    // the load takes no answer or worker result any more
         }
-        ReleasePrepared(j);
+        // The textures the build uploaded dropped their prepared data as they went up (WmvTerrainTexture.Upload); the
+        // others' stay with the shown tile's inputs while a view may still draw them (RebuildShown), and go with the tile.
+        if (!committed)
+            ReleasePrepared(j);
+        else
+            KeepOnlyWhatAViewMayUpload(j.Tile, j.Content);
         j.Phase = Phase.Adopted;
         j.AdoptFrame = frame;
         j.AdoptedMs = j.Clock.Elapsed.TotalMilliseconds;
@@ -1086,6 +1205,11 @@ public sealed class WmvTerrainSession
     {
         j.FirstFrameMs = j.Clock.Elapsed.TotalMilliseconds - j.AdoptedMs;
         current = null;
+        // A view switch in the two frames before the report built the tile again (RebuildShown): the tile on screen is
+        // still this load's, under the same load number -- its rebuild, not a replacement.
+        if (shown != null && !shown.Disposed && shown != j.Tile && shownLoad == j.Cmd.Load && j.Tile != null && j.Tile.Disposed &&
+            shown.MapId == j.Cmd.MapId && shown.TileX == j.Cmd.TileX && shown.TileY == j.Cmd.TileY)
+            j.Tile = shown;
         if (shown != j.Tile || j.Tile == null || j.Tile.Disposed)
         {
             Report(j, "superseded", "the tile was replaced before its second frame");
@@ -1140,6 +1264,7 @@ public sealed class WmvTerrainSession
             BuildMs = j.BuildMs, UploadMs = j.UploadMs, FirstFrameMs = status == "built" ? j.FirstFrameMs : -1,
             TotalMs = j.Clock.Elapsed.TotalMilliseconds,
             RequestsRetired = j.RetiredIds.Count, RetiredRequestIds = new List<string>(j.RetiredIds),
+            View = j.Tile != null ? WmvTerrainDebug.ViewNames[(int)j.Tile.View] : "",
         };
         TerrainTileMesh m = j.Mesh;
         if (m != null)

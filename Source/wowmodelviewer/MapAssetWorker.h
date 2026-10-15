@@ -7,8 +7,11 @@
  *
  * Ownership. The worker reads through its LEASE: a reference of its own to the client's CASC storage
  * (CASCFolder::shareStorage, taken on the GUI thread, which holds its own), with the client epoch and storage generation
- * it was taken for. Only the worker releases it, on its own thread, between reads, so no close by anyone else can free
- * the storage while a read uses it. Every file handle is opened, read and closed inside one read, on this thread.
+ * it was taken for. A lease the worker has taken over is released only by the worker, on its own thread, between reads,
+ * so no close by anyone else can free the storage while a read uses it. A grant the worker never took over -- still
+ * queued when stop() runs, or given after a stop -- is released by stop() or grantLease() on the calling (GUI) thread
+ * instead; either way exactly once, and never while a read uses it (no read was ever made through it). Every file
+ * handle is opened, read and closed inside one read, on this thread.
  * CascLib's lookups and reads are made for several readers with handles of their own (section B of the document).
  *
  * Confinement. The worker touches nothing of the GUI's: no catalogue, no GAMEDIRECTORY, no epoch global, no wx or Qt
@@ -59,6 +62,8 @@ public:
   {
     quint64 ticket = 0;           // given by submit()
     int fileDataID = 0;
+    QString path;                 // when set (and fileDataID 0): read by this path, through the storage root's own names
+                                  // (a path client's WDT, as WorldMapCatalog::inspectFile reads a Path reference)
     qint64 maxBytes = 0;          // the read's limit (a larger file is not read: the inspection's TooLarge)
     int epoch = 0;                // the client epoch and storage generation the read was decided under: read only
     quint64 generation = 0;       // when the lease is that storage's

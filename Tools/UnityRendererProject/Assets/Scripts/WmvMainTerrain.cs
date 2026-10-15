@@ -20,6 +20,11 @@
 //                       character or world-model path
 //   Update           -> the session's Pump (worker results, the timeout -- 30 s, or -wmvTerrainTimeoutMs -- and the
 //                       two-frame report)
+//   inspectMapTiles  -> (protocol 14, the Maps viewer) WmvMapTiles.Inspect: the WDT the host read, its tile table by the
+//                       verified parser, answered mapTilesInspected; nothing of the terrain session is touched
+//   setTerrainView   -> (protocol 14) the view every tile is drawn in from now on, and the tile on screen built again in
+//                       it from what the player holds (WmvTerrainSession.RebuildShown; no framing), answered
+//                       terrainViewApplied
 //
 // THE VIEW MODE (SetViewMode, the one owner of the main camera's culling mask). Model view: ModelViewMask (every
 // layer but 30), set in Awake. Terrain view: TerrainViewMask (30 only), entered when a tile is committed: the orbit
@@ -98,6 +103,66 @@ public partial class WmvMain
         ipc.OnLoadTerrainTile = HandleLoadTerrainTile;
         ipc.OnClearTerrain = HandleClearTerrain;
         ipc.OnMapAssetResponse = HandleMapAssetResponse;
+        ipc.OnInspectMapTiles = HandleInspectMapTiles;
+        ipc.OnSetTerrainView = HandleSetTerrainView;
+    }
+
+    /// <summary>inspectMapTiles: the tile table of the WDT the host read (WmvMapTiles), answered at once.</summary>
+    void HandleInspectMapTiles(WmvIpcClient.MapTilesRequest request)
+    {
+        WmvIpcClient.MapTilesReport r = WmvMapTiles.Inspect(request);
+        Debug.Log(string.Format("WMV: [terrain] inspectMapTiles {0}: map {1}, WDT {2} ({3} bytes): {4}{5}; {6} tile(s) in MAIN, {7} with a root " +
+                                "ADT; {8:0.###} ms", r.Inspection, r.MapId, r.WdtFileDataID, r.Bytes, r.Status,
+                                string.IsNullOrEmpty(r.Reason) ? "" : " (" + r.Reason + ")", r.TilesInMain, r.TilesWithRoot, r.ParseMs));
+        ipc.ReportMapTilesInspected(r);
+    }
+
+    /// <summary>setTerrainView: the view from now on, and the tile on screen built again in it (no framing: the camera stays
+    /// where the user left it).</summary>
+    void HandleSetTerrainView(string name)
+    {
+        var r = new WmvIpcClient.TerrainViewReport { View = name ?? "" };
+        if (!WmvTerrainDebug.SetRuntimeView(r.View))
+        {
+            r.Status = "refused";
+            r.Reason = "\"" + r.View + "\" is not a view the host can choose (auto, or one of " +
+                       string.Join("|", WmvTerrainDebug.ViewNames) + " but texturedplainweights)";
+        }
+        else if (terrain == null)
+        {
+            r.Status = "noTile";
+            r.Reason = "no terrain session";
+        }
+        else
+        {
+            string reason;
+            double ms;
+            int load;
+            r.Status = terrain.RebuildShown("setTerrainView " + r.View, out reason, out ms, out load);
+            r.Reason = reason;
+            r.RebuildMs = ms;
+            r.Load = load;
+            WmvRuntimeTerrainTile t = terrain.ShownTile;
+            if (r.Status == "applied" && t != null)
+            {
+                int textured = 0, objects = 0;
+                for (int n = 0; n < t.ChunkObjects.Length; n++)
+                {
+                    if (t.ChunkObjects[n] == null) continue;
+                    objects++;
+                    if (t.ChunkTextured[n]) textured++;
+                }
+                r.TexturedChunks = textured;
+                r.NeutralChunks = objects - textured;
+                r.Textures = t.Textures.Count;
+                if (r.Reason.Length == 0)
+                    r.Reason = "drawn " + WmvTerrainDebug.ViewNames[(int)t.View];
+            }
+            r.RetainedTextureBytes = terrain.RetainedTextureBytes;
+        }
+        Debug.Log(string.Format("WMV: [terrain] setTerrainView {0} (in effect: {1}): {2}{3}", r.View, WmvTerrainDebug.RuntimeViewName, r.Status,
+                                string.IsNullOrEmpty(r.Reason) ? "" : " -- " + r.Reason));
+        ipc.ReportTerrainViewApplied(r);
     }
 
     void HandleClearTerrain(string reason)

@@ -519,6 +519,8 @@ void UnityRendererHost::shutdown()
   // until the timeout fired and needlessly hard-terminate it every time.
   const DWORD start = GetTickCount();
   bool exited = false;
+  m_shutdownPumped = 0;
+  m_shutdownPaints = 0;
   for (;;)
   {
     const DWORD elapsed = GetTickCount() - start;
@@ -534,6 +536,9 @@ void UnityRendererHost::shutdown()
     MSG msg;
     while (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE | PM_QS_SENDMESSAGE | PM_QS_PAINT))
     {
+      m_shutdownPumped++;
+      if (msg.message == WM_PAINT)
+        m_shutdownPaints++;
       TranslateMessage(&msg);
       DispatchMessage(&msg);
     }
@@ -545,6 +550,8 @@ void UnityRendererHost::shutdown()
     TerminateProcess(m_process, 0);
     WaitForSingleObject(m_process, 1000);
   }
+  LOG_INFO << "Unity renderer player" << (exited ? "exited" : "terminated") << "after" << (int)(GetTickCount() - start)
+           << "ms;" << m_shutdownPumped << "message(s) retrieved while waiting," << m_shutdownPaints << "of them paint";
 
   CloseHandle(m_process);
   m_process = nullptr;

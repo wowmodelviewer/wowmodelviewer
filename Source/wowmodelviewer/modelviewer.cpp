@@ -6,6 +6,7 @@
 #include "AnimationExportChoiceDialog.h"
 #include "ArmoryImportDialog.h"
 #include "TextureView.h"
+#include "MapsViewer.h"
 #include "AnimManager.h"
 
 #include <chrono>
@@ -186,6 +187,8 @@ EVT_UPDATE_UI(ID_UI_TEXTURES, ModelViewer::OnUpdateCommandUI)
 EVT_MENU(ID_UI_TEXTURES, ModelViewer::OnCommandBar)
 EVT_UPDATE_UI(ID_UI_BUILDINGS, ModelViewer::OnUpdateCommandUI)
 EVT_MENU(ID_UI_BUILDINGS, ModelViewer::OnCommandBar)
+EVT_UPDATE_UI(ID_UI_MAPS, ModelViewer::OnUpdateCommandUI)
+EVT_MENU(ID_UI_MAPS, ModelViewer::OnCommandBar)
 EVT_AUI_PANE_CLOSE(ModelViewer::OnPaneClose)
 EVT_MENU(ID_UI_SCREENSHOT, ModelViewer::OnCommandBar)
 EVT_UPDATE_UI(ID_UI_SCREENSHOT, ModelViewer::OnUpdateCommandUI)
@@ -270,6 +273,26 @@ ModelViewer::ModelViewer()
   m_mapCatalog = wow::WorldMapCatalog::noClient("no client is loaded");
   // THE MAP ASSET WORKER: made now, its thread started by its first read (docs/world-viewer/04b-asset-serving.md).
   m_mapAssetWorker = std::make_shared<MapAssetWorker>();
+  // THE MAPS VIEWER: what it shows changes the tile grid, the viewport's notice and the title.
+  m_maps.reset(new MapsViewer(this));
+  m_maps->onChanged = [this]() {
+    QElapsedTimer t;
+    t.start();
+    if (fileControl)
+      fileControl->MapsChanged();
+    const double panelMs = t.nsecsElapsed() / 1e6;
+    if (isMapsMode())
+    {
+      UpdateUnityViewportState();
+      UpdateCommandLabel();
+      UpdateTitle();
+    }
+    const double ms = t.nsecsElapsed() / 1e6;
+    m_maps->noteUiUpdate(ms);
+    if (ms > 8.0)
+      LOG_INFO << "[maps] a GUI update took" << ms << "ms (the tile grid panel" << panelMs << "ms, the viewport, its notice and the "
+                  "labels" << ms - panelMs << "ms)";
+  };
   // our main class objects
   animControl = nullptr;
   canvas = NULL;
@@ -797,6 +820,7 @@ void ModelViewer::InitCommandBar()
   art->SetToolIcon(ID_UI_MODELS, UiIcon::Models);
   art->SetToolIcon(ID_UI_TEXTURES, UiIcon::Textures);
   art->SetToolIcon(ID_UI_BUILDINGS, UiIcon::Buildings);
+  art->SetToolIcon(ID_UI_MAPS, UiIcon::Maps);
   art->SetToolIcon(ID_UI_SCREENSHOT, UiIcon::Screenshot);
   art->SetToolIcon(ID_SHOW_FILE_LIST, UiIcon::Browse);
   art->SetToolIcon(ID_SHOW_CHAR, UiIcon::ModelPanel);
@@ -810,7 +834,7 @@ void ModelViewer::InitCommandBar()
   const int margin = (FromDIP(UiStyle::ToolbarHeight) - FromDIP(UiStyle::ToolHeight)) / 2;
   commandBar->SetMargins(FromDIP(UiStyle::M), FromDIP(UiStyle::S), margin, margin);
 
-  // The viewer selector: three radio tools, the active one pressed (OnUpdateCommandUI keeps them on the
+  // The viewer selector: four radio tools, the active one pressed (OnUpdateCommandUI keeps them on the
   // viewer mode). Nothing may stand between them: that would split them into separate groups.
   commandBar->AddLabel(wxID_ANY, _("Viewer"));
   commandBar->AddTool(ID_UI_MODELS, _("Models"), wxNullBitmap,
@@ -822,6 +846,9 @@ void ModelViewer::InitCommandBar()
   commandBar->AddTool(ID_UI_BUILDINGS, _("Buildings"), wxNullBitmap,
                       _("The building viewer: World Model Objects (WMO) -- buildings, dungeons, cities -- in Browse, "
                         "the selected one in the viewport"), wxITEM_RADIO);
+  commandBar->AddTool(ID_UI_MAPS, _("Maps"), wxNullBitmap,
+                      _("The map viewer: the client's maps in Browse, a map's terrain tiles in the grid under them, "
+                        "the tile picked in the viewport"), wxITEM_RADIO);
   commandBar->AddSeparator();
   // (No Reset camera: it acted on the archived OpenGL viewport; the Unity viewport frames each model itself. No
   // Fullscreen either: the viewer opens maximised, and View > Fullscreen (F11) is there for the borderless mode.)
@@ -1857,8 +1884,21 @@ void ModelViewer::OnSize(wxSizeEvent &event)
 
 ModelViewer::~ModelViewer()
 {
+  if (testShutdownProbe)
+    testShutdownProbe(*this, ShutdownPoint::Begin);
+  // THE IPC SERVER DETACHED FIRST (docs/world-viewer/04b-asset-serving.md 18.1): from here on no poll serves -- no player
+  // message handled, no map callback into this half-destroyed viewer, nothing sent -- whatever runs it (the server's
+  // timer, a wake the worker queued, wx's message hook during the player's shutdown pump below), and no result the worker
+  // makes from now on (the read stop() lets finish) posts a wake. The player is still closed by shutdown() below.
+  if (unityRendererHost && unityRendererHost->ipc())
+    unityRendererHost->ipc()->detachForShutdown();
+  // The Maps viewer tells nothing any more: the windows it would repaint go below.
+  if (m_maps)
+    m_maps->onChanged = nullptr;
   LOG_INFO << "Shutting down the program...";
 
+  if (testShutdownProbe)
+    testShutdownProbe(*this, ShutdownPoint::BeforeWorkerStop);
   // THE MAP ASSET WORKER first: what waits is cancelled, a read under way finishes (reads are whole), the worker lets go
   // of its storage reference and its thread is joined -- before anything it could have read from goes.
   if (m_mapAssetWorker)
@@ -1904,8 +1944,12 @@ ModelViewer::~ModelViewer()
   // Shut the embedded Unity player down (if one was ever opened) BEFORE the AUI teardown
   // destroys its host panel, so the child process never outlives -- or paints into -- a
   // dead window.
+  if (testShutdownProbe)
+    testShutdownProbe(*this, ShutdownPoint::BeforePlayerShutdown);
   if (unityRendererHost)
     unityRendererHost->shutdown();
+  if (testShutdownProbe)
+    testShutdownProbe(*this, ShutdownPoint::AfterPlayerShutdown);
 
   // wxAUI stuff (teardown, always run)
   interfaceManager.UnInit();
@@ -2090,6 +2134,7 @@ int ModelViewer::workspacePanes(ViewerMode mode)
   {
     case ViewerMode::Textures:  return PaneAnimation | PaneModel | PaneAttachments;
     case ViewerMode::Buildings: return PaneAnimation | PaneAttachments;
+    case ViewerMode::Maps:      return PaneAnimation | PaneModel | PaneAttachments;   // the tile grid is in Browse
     case ViewerMode::Models:    break;
   }
   return 0;
@@ -2310,6 +2355,9 @@ void ModelViewer::CreateUnityViewport()
     if (unityRendererHost)
       unityRendererHost->setPlayerReady(true);
     SendCurrentModelToUnity();
+    // The Maps viewer's view and tile table, again, to a player that did not have them.
+    if (m_maps)
+      m_maps->OnPlayerReady();
     // What the player announced may change what the viewport can show: a character gets a notice
     // when the player is an older build that cannot dress it. With nothing loaded, the empty
     // viewer's prompt simply stays.
@@ -2349,6 +2397,19 @@ void ModelViewer::CreateUnityViewport()
   unityRendererHost->ipc()->onMapAssetWait = [this]() { return MapAssetWait(); };
   unityRendererHost->ipc()->onTerrainTileLoaded = [this](const UnityIpcServer::TerrainTileReport & report) {
     OnTerrainTileLoaded(report);
+  };
+  // THE MAPS VIEWER: its WDT reads (the worker's, taken back by the server's polls), the player's tile tables and views.
+  unityRendererHost->ipc()->onViewerMapRead = [this](MapAssetWorker::Result & result) {
+    if (m_maps)
+      m_maps->OnWdtRead(result);
+  };
+  unityRendererHost->ipc()->onMapTilesInspected = [this](const UnityIpcServer::MapTilesInspection & inspection) {
+    if (m_maps)
+      m_maps->OnTilesInspected(inspection);
+  };
+  unityRendererHost->ipc()->onTerrainViewApplied = [this](const UnityIpcServer::TerrainViewApplied & applied) {
+    if (m_maps)
+      m_maps->OnTerrainViewApplied(applied);
   };
 }
 
@@ -2713,6 +2774,17 @@ bool ModelViewer::unityViewportNotice(ViewportNotice & notice) const
   // is put over it -- a notice would park the player's frame.
   if (m_playerContent == PlayerContent::Terrain)
     return false;
+  // THE MAPS VIEWER: until a tile is on show, what its state says (no map, the tile grid being read, a tile that cannot
+  // be loaded, one being loaded) -- never what the canvas holds, which is the other viewers'.
+  if (isMapsMode())
+  {
+    QString title, detail;
+    if (!m_maps || !m_maps->viewportNotice(title, detail))
+      return false;
+    notice.title = wxString(title.toStdWString());
+    notice.detail = wxString(detail.toStdWString());
+    return true;
+  }
   // The viewer's own kind of content only: a model in Models, a world model in Buildings. What the canvas holds
   // of the other kind stays loaded but is not shown -- the mode's empty viewer is.
   const bool buildings = m_viewerMode == ViewerMode::Buildings;
@@ -3637,7 +3709,7 @@ QString ModelViewer::mapAssetKindProblem(const QString & role, const QByteArray 
 }
 
 bool ModelViewer::ResolveTerrainTile(int mapId, int tileX, int tileY, UnityIpcServer::TerrainTileCommand & command,
-                                     QString & why)
+                                     QString & why, bool wdtInspected)
 {
   why.clear();
   command = UnityIpcServer::TerrainTileCommand();
@@ -3666,7 +3738,9 @@ bool ModelViewer::ResolveTerrainTile(int mapId, int tileX, int tileY, UnityIpcSe
     return refuse(QString("map %1 has no WDT: ").arg(mapId) + entry->wdt.why);
   // The WDT is read through the storage now, whichever way the client names it: one that cannot be read is refused here,
   // with the inspection's reason, rather than sent to fail in the player. A path client's FileDataID comes from it too.
-  if (!catalog->inspect(mapId))
+  // The Maps viewer's own inspection -- the same read, made by the map asset worker for this client -- stands for it.
+  const bool known = wdtInspected && entry->inspection.state == wow::WdtAvailability::Available;
+  if (!known && !catalog->inspect(mapId))
     return refuse(catalog->lastRefusal());
   if (entry->inspection.state != wow::WdtAvailability::Available)
     return refuse(QString("map %1's WDT is %2: ").arg(mapId).arg(wow::WorldMapCatalog::availabilityName(entry->inspection.state)) +
@@ -3690,7 +3764,7 @@ bool ModelViewer::ResolveTerrainTile(int mapId, int tileX, int tileY, UnityIpcSe
   return true;
 }
 
-int ModelViewer::RequestTerrainTile(int mapId, int tileX, int tileY, QString & why)
+int ModelViewer::RequestTerrainTile(int mapId, int tileX, int tileY, QString & why, bool wdtInspected)
 {
   why.clear();
   const QString tile = QString("%1_%2").arg(tileX).arg(tileY);
@@ -3707,7 +3781,7 @@ int ModelViewer::RequestTerrainTile(int mapId, int tileX, int tileY, QString & w
                     .arg(ipc->playerProtocolVersion()));
   UnityIpcServer::TerrainTileCommand command;
   QString unresolved;
-  if (!ResolveTerrainTile(mapId, tileX, tileY, command, unresolved))
+  if (!ResolveTerrainTile(mapId, tileX, tileY, command, unresolved, wdtInspected))
     return refuse(unresolved);
   command.load = m_terrainLoadSerial + 1;
   command.assetEpoch = UnityAssetAccess::clientEpoch();
@@ -3756,7 +3830,10 @@ int ModelViewer::RequestTerrainTile(int mapId, int tileX, int tileY, QString & w
            << command.wdtFileDataID
            << (command.wdtResolvedBy == "path" ? "(the storage root's FileDataID for " + command.wdtPath + ")"
                                                : QString("(Map.db2's FileDataID)"))
-           << "; the WDT read whole on this thread first, in" << (entry ? entry->inspection.milliseconds : -1.0) << "ms";
+           << (wdtInspected ? QString("; the WDT read whole by the map asset worker for the tile grid (%1 ms), none on this "
+                                      "thread").arg(entry ? entry->inspection.milliseconds : -1.0)
+                            : QString("; the WDT read whole on this thread first, in %1 ms")
+                                .arg(entry ? entry->inspection.milliseconds : -1.0));
   UpdateUnityViewportState();
   return command.load;
 }
@@ -3905,6 +3982,8 @@ MapAssetWorker::Result ModelViewer::TestReadThroughWorker(int fileDataID, qint64
   return result;
 }
 
+std::function<void(ModelViewer &, ModelViewer::ShutdownPoint)> ModelViewer::testShutdownProbe;
+
 quint64 ModelViewer::TestHoldReadForShutdown(int fileDataID)
 {
   const int epochNow = UnityAssetAccess::clientEpoch();
@@ -4034,6 +4113,17 @@ UnityIpcServer::MapAssetAnswer ModelViewer::ServeMapAssetAndWait(const QJsonObje
 
 void ModelViewer::OnTerrainTileLoaded(const UnityIpcServer::TerrainTileReport & report)
 {
+  // The Maps viewer follows its own loads, after this has taken the report (below).
+  struct TellMaps
+  {
+    ModelViewer * mv;
+    const UnityIpcServer::TerrainTileReport & r;
+    ~TellMaps()
+    {
+      if (mv->m_maps)
+        mv->m_maps->OnTerrainTileLoaded(r);
+    }
+  } tellMaps{ this, report };
   // Only an answer about the current load says what the player shows: an earlier load was superseded or cleared.
   if (report.load == 0 || report.load != m_terrainRequest.load)
     return;
@@ -4650,6 +4740,8 @@ int ModelViewer::LoadWoWFromMpq(const QString & dataFolder, const QString & loca
   CallAfter([this]() {
     UpdateUnityViewportState();
     TexturesClientLoaded();
+    if (isMapsMode() && fileControl)
+      fileControl->Init(this);
   });
 
   SetStatusText(wxString(GAMEDIRECTORY.version().toStdWString()), 1);
@@ -4657,6 +4749,8 @@ int ModelViewer::LoadWoWFromMpq(const QString & dataFolder, const QString & loca
   // A legacy client has no Map.db2 this viewer reads: its catalogue says so (Unsupported) rather than being absent.
   m_mapCatalog = wow::WorldMapCatalog::build();
   ComputeClientCapabilities();
+  if (m_maps)
+    m_maps->ClientLoaded();
   LOG_INFO << "[mpq] legacy client ready: storage=MPQ, provider ready, archives=" << archives
            << " -- load models from the file browser (no DBC/customization/equipment yet).";
   return archives;
@@ -4803,6 +4897,9 @@ void ModelViewer::ResetClientState()
   // then no longer belongs to the loaded client and refuses to read its storage). Until the load builds the next one,
   // the viewer's says a client is being loaded.
   m_mapCatalog = wow::WorldMapCatalog::noClient("a client is being loaded");
+  // The Maps viewer forgets the old client's map, tiles and terrain (its read cancelled above with the server's).
+  if (m_maps)
+    m_maps->ClientReplaced();
 }
 
 bool ModelViewer::LoadWoW(const core::GameConfig * chosenConfig, ClientLoadProgress * progress)
@@ -5144,6 +5241,8 @@ bool ModelViewer::LoadWoW(const core::GameConfig * chosenConfig, ClientLoadProgr
   timeline.begin("capabilities");
   ComputeClientCapabilities();
   timeline.end("capabilities");
+  if (m_maps)
+    m_maps->ClientLoaded();
   timeline.begin("remember client");
   RememberLoadedClient(config);
   timeline.end("remember client");
@@ -5156,6 +5255,10 @@ bool ModelViewer::LoadWoW(const core::GameConfig * chosenConfig, ClientLoadProgr
     core::LoadTimeline::Stage stage("final ui (deferred)");
     UpdateUnityViewportState();
     TexturesClientLoaded();
+    // The Maps viewer's list of the new catalogue (built after Browse was listed; listed only once the client counts
+    // as active, which it does not inside the load).
+    if (isMapsMode() && fileControl)
+      fileControl->Init(this);
     DisplayedContentChanged();
   });
   SetStatusText(wxString::Format(_("%s loaded."), friendly));
@@ -5259,6 +5362,8 @@ void ModelViewer::ComputeClientCapabilities()
   caps.models = caps.modelFiles > 0;
   caps.textures = caps.textureFiles > 0;
   caps.buildings = caps.buildingFiles > 0;
+  caps.maps = m_mapCatalog && m_mapCatalog->status() == wow::WorldMapCatalog::Status::Ready &&
+              m_mapCatalog->belongsToActiveClient();
   caps.races = database ? (int)RaceInfos::count() : 0;
   caps.characters = caps.races > 0;
   caps.modernCustomization = caps.characters && rows("ChrCustomizationOption") > 0 && rows("ChrCustomizationChoice") > 0;
@@ -5954,6 +6059,50 @@ void ModelViewer::DoGiveHelp(const wxString & text, bool show)
   wxFrame::DoGiveHelp(text, show);
 }
 
+// The command bar's name of what the viewer mode shows (and its tooltip): the texture, the world model, the model, or
+// the map and its tile on screen.
+void ModelViewer::UpdateCommandLabel()
+{
+  if (commandModelLabel)
+  {
+    // What the viewer mode shows: the texture, the world model (Buildings) or the model (Models).
+    wxString path, tip;
+    if (isTextureMode() && textureView)
+      path = textureView->displayPath().IsEmpty() ? textureView->displayName() : textureView->displayPath();
+    else if (isBuildingsMode() && canvasHasWorldModel())
+    {
+      path = canvas->wmo->itemName().toStdWString();
+      if (canvas->wmo->fileDataID > 0)
+        tip = path + wxString::Format(wxT("  [%u]"), (unsigned)canvas->wmo->fileDataID);
+    }
+    else if (isModelsMode() && canvasHasModel())
+      path = canvas->model()->gamefile ? canvas->model()->gamefile->fullname().toStdWString()
+                                       : const_cast<WoWModel *>(canvas->model())->name().toStdWString();
+    else if (isMapsMode() && m_maps && m_maps->mapId() >= 0)
+    {
+      // The map, and the tile on screen of it.
+      const QString name = m_maps->mapName().isEmpty() ? m_maps->mapDirectory() : m_maps->mapName();
+      path = wxString((name + QString(" [%1]").arg(m_maps->mapId()) +
+                       (m_maps->shownTileX() >= 0 && m_maps->shownMap() == m_maps->mapId()
+                          ? QString("  tile %1_%2").arg(m_maps->shownTileX()).arg(m_maps->shownTileY()) : QString()))
+                        .toStdWString());
+      tip = wxString((m_maps->mapDirectory() + " -- " + m_maps->wdtDescription()).toStdWString());
+    }
+    wxString name = path;
+    if (!isMapsMode())
+    {
+      name.Replace(wxT("/"), wxT("\\"));
+      name = name.AfterLast('\\');
+    }
+    const wxString empty = isTextureMode() ? _("No texture selected") : isBuildingsMode() ? _("No building selected")
+                         : isMapsMode() ? _("No map selected") : _("No model loaded");
+    commandModelLabel->SetLabel(name.IsEmpty() ? empty : name);
+    UiStyle::setRole(commandModelLabel, name.IsEmpty() ? UiStyle::Role::SecondaryText : UiStyle::Role::Text);
+    commandModelLabel->SetToolTip(tip.IsEmpty() ? path : tip);
+    commandModelLabel->Refresh();
+  }
+}
+
 void ModelViewer::DisplayedContentChanged()
 {
   if (!canvas)
@@ -5971,31 +6120,7 @@ void ModelViewer::DisplayedContentChanged()
   if (animControl)
     animControl->Enable(isModelsMode());
 
-  if (commandModelLabel)
-  {
-    // What the viewer mode shows: the texture, the world model (Buildings) or the model (Models).
-    wxString path, tip;
-    if (isTextureMode() && textureView)
-      path = textureView->displayPath().IsEmpty() ? textureView->displayName() : textureView->displayPath();
-    else if (isBuildingsMode() && canvasHasWorldModel())
-    {
-      path = canvas->wmo->itemName().toStdWString();
-      if (canvas->wmo->fileDataID > 0)
-        tip = path + wxString::Format(wxT("  [%u]"), (unsigned)canvas->wmo->fileDataID);
-    }
-    else if (isModelsMode() && canvasHasModel())
-      path = canvas->model()->gamefile ? canvas->model()->gamefile->fullname().toStdWString()
-                                       : const_cast<WoWModel *>(canvas->model())->name().toStdWString();
-    wxString name = path;
-    name.Replace(wxT("/"), wxT("\\"));
-    name = name.AfterLast('\\');
-    const wxString empty = isTextureMode() ? _("No texture selected") : isBuildingsMode() ? _("No building selected")
-                                                                                          : _("No model loaded");
-    commandModelLabel->SetLabel(name.IsEmpty() ? empty : name);
-    UiStyle::setRole(commandModelLabel, name.IsEmpty() ? UiStyle::Role::SecondaryText : UiStyle::Role::Text);
-    commandModelLabel->SetToolTip(tip.IsEmpty() ? path : tip);
-    commandModelLabel->Refresh();
-  }
+  UpdateCommandLabel();
   UpdateTitle();
 
   if (modelInspector)
@@ -6062,7 +6187,8 @@ void ModelViewer::SetViewerMode(ViewerMode mode, bool openBrowse, bool paintNow)
   const ViewerMode previous = m_viewerMode;
   m_viewerMode = mode;
   LOG_INFO << "[viewport] viewer mode:"
-           << (mode == ViewerMode::Textures ? "Textures" : mode == ViewerMode::Buildings ? "Buildings" : "Models");
+           << (mode == ViewerMode::Textures ? "Textures" : mode == ViewerMode::Buildings ? "Buildings"
+               : mode == ViewerMode::Maps ? "Maps" : "Models");
   const bool textures = mode == ViewerMode::Textures;
   struct PlayerHold
   {
@@ -6083,8 +6209,15 @@ void ModelViewer::SetViewerMode(ViewerMode mode, bool openBrowse, bool paintNow)
     beginLayoutBatch();
     // The selector: a switch made by a load from a menu does not come through the toolbar.
     if (commandBar)
-      commandBar->ToggleTool(textures ? ID_UI_TEXTURES : mode == ViewerMode::Buildings ? ID_UI_BUILDINGS : ID_UI_MODELS,
+      commandBar->ToggleTool(textures ? ID_UI_TEXTURES : mode == ViewerMode::Buildings ? ID_UI_BUILDINGS
+                             : mode == ViewerMode::Maps ? ID_UI_MAPS : ID_UI_MODELS,
                              true);
+    // THE MAPS VIEWER: its terrain goes when it is left (the player's model view comes back as it was); entered, the
+    // tile grid comes back as it was left.
+    if (m_maps && previous == ViewerMode::Maps)
+      m_maps->Left();
+    if (m_maps && mode == ViewerMode::Maps)
+      m_maps->Entered();
     if (textureView)
     {
       if (textures)
@@ -6239,6 +6372,7 @@ void ModelViewer::OnCommandBar(wxCommandEvent & event)
     case ID_UI_MODELS:
     case ID_UI_TEXTURES:
     case ID_UI_BUILDINGS:
+    case ID_UI_MAPS:
     {
       // A client load yields to the event loop (its progress dialog), so this can be clicked in the middle
       // of one; switching Browse's lists then, or starting another load, is not safe. The selector goes
@@ -6249,6 +6383,7 @@ void ModelViewer::OnCommandBar(wxCommandEvent & event)
       // and the empty viewer's posted command all arrive unchecked.
       const ViewerMode mode = event.GetId() == ID_UI_TEXTURES    ? ViewerMode::Textures
                             : event.GetId() == ID_UI_BUILDINGS   ? ViewerMode::Buildings
+                            : event.GetId() == ID_UI_MAPS        ? ViewerMode::Maps
                                                                  : ViewerMode::Models;
       // Browse (closed) opens in the same layout as the switch, when there is a client to list in it.
       const bool openBrowse = UnityAssetAccess::hasActiveClient() && !interfaceManager.GetPane(fileControl).IsShown();
@@ -6385,7 +6520,7 @@ void ModelViewer::OnUpdateCommandUI(wxUpdateUIEvent & event)
   if (needsModelViewer(event.GetId()))
     event.Enable(isModelsMode() && capabilityRefusal(event.GetId()).isEmpty());
   else if (needsUnityViewport(event.GetId()))
-    event.Enable(!isTextureMode());
+    event.Enable(!isTextureMode() && !isMapsMode());
   else if (isCapabilityGated(event.GetId()))
     event.Enable(capabilityRefusal(event.GetId()).isEmpty()); // both ways: a refusal ends (a load finishes)
   switch (event.GetId())
@@ -6413,6 +6548,9 @@ void ModelViewer::OnUpdateCommandUI(wxUpdateUIEvent & event)
       break;
     case ID_UI_BUILDINGS:
       event.Check(m_viewerMode == ViewerMode::Buildings);
+      break;
+    case ID_UI_MAPS:
+      event.Check(m_viewerMode == ViewerMode::Maps);
       break;
     case ID_VIEW_APPEARANCE_SYSTEM:
       event.Check(UiStyle::themePreference() == UiStyle::Theme::System);
@@ -6457,6 +6595,7 @@ bool ModelViewer::isCapabilityGated(int id) const
     case ID_VIEW_ITEM:
     case ID_UI_TEXTURES:
     case ID_UI_BUILDINGS:
+    case ID_UI_MAPS:
       return true;
     default:
       return false;
@@ -6486,6 +6625,13 @@ QString ModelViewer::capabilityRefusal(int id) const
       return caps.textures ? QString() : QString("%1 has no textures on this computer.").arg(client);
     case ID_UI_BUILDINGS:
       return caps.buildings ? QString() : QString("%1 has no world models on this computer.").arg(client);
+    case ID_UI_MAPS:
+      return caps.maps ? QString()
+                       : QString("%1 has no map table this viewer reads (%2).")
+                           .arg(client, m_mapCatalog ? m_mapCatalog->statusDetail().isEmpty()
+                                                         ? wow::WorldMapCatalog::statusName(m_mapCatalog->status())
+                                                         : m_mapCatalog->statusDetail()
+                                                     : QString("no catalogue"));
   }
   return QString();
 }
@@ -6513,10 +6659,12 @@ bool ModelViewer::TryBefore(wxEvent & event)
     }
   }
   if (event.GetEventType() == wxEVT_MENU &&
-      ((!isModelsMode() && needsModelViewer(event.GetId())) || (isTextureMode() && needsUnityViewport(event.GetId()))))
+      ((!isModelsMode() && needsModelViewer(event.GetId())) ||
+       ((isTextureMode() || isMapsMode()) && needsUnityViewport(event.GetId()))))
   {
     LOG_INFO << "[viewport] a command refused in the"
-             << (isTextureMode() ? "Textures" : isBuildingsMode() ? "Buildings" : "Models") << "viewer, id" << event.GetId();
+             << (isTextureMode() ? "Textures" : isBuildingsMode() ? "Buildings" : isMapsMode() ? "Maps" : "Models") << "viewer, id"
+             << event.GetId();
     return true;
   }
   return wxFrame::TryBefore(event);
@@ -6546,7 +6694,10 @@ void ModelViewer::UpdateTitle()
   if (isTextureMode())
     return;   // the Textures viewer leaves the title as it was
   wxString name;
-  if (isBuildingsMode() && canvasHasWorldModel())
+  if (isMapsMode() && m_maps && m_maps->mapId() >= 0)
+    name = wxString(((m_maps->mapName().isEmpty() ? m_maps->mapDirectory() : m_maps->mapName()) +
+                     QString(" [%1]").arg(m_maps->mapId())).toStdWString());
+  else if (isBuildingsMode() && canvasHasWorldModel())
     name = wxString(canvas->wmo->itemName().toStdWString());
   else if (isModelsMode() && canvasHasModel())
     name = wxString(const_cast<WoWModel *>(canvas->model())->name().toStdWString());
