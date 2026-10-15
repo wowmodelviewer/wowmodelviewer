@@ -101,6 +101,16 @@ public:
   // customization options. Returns false if the race is unknown or does not use this model.
   bool setRaceSex(int raceID, int sexID);
 
+  // The sex this character's items are chosen for (ComponentModelFileData / ComponentTextureFileData GenderIndex): its
+  // race's, except on a model that serves both sexes (infos.sexID GENDER_ANY: the Dracthyr's dragon form), whose items
+  // come per body sex (_dt_m GenderIndex 0, _dt_f 1) beside unisex ones (3). The body sex is male unless set (as the
+  // race menu offers such a race, as male); an Armory import, an NPC's display and a saved character set their own.
+  // Reset with the race.
+  int itemSexID() const { return (infos.sexID == GENDER_ANY) ? bodySex_ : infos.sexID; }
+  // Sets the body sex (anything but female is male). Items already worn on such a model were chosen for the other body
+  // and are loaded again; the caller refreshes the model.
+  void setBodySex(int sex);
+
   // Which generation of character model this is, read from the model (see CharacterModelVariant); Unknown for anything
   // that is not a character of a known race.
   CharacterModelVariant modelGeneration() const;
@@ -313,6 +323,7 @@ public:
   uint creatureGeosetDataID;
   bool bSheathe;
   bool mirrored_;
+  int bodySex_ = GENDER_MALE;   // see itemSexID(); last, so the members before it keep their place in the class
 
   friend class ModelRenderPass;
 

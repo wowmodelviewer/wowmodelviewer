@@ -67,6 +67,12 @@ class _RACEINFOS_API_ RaceInfos
     // The row of a race on a model file, in whatever sex that model has: a dragon form's ChrModel has a sex of its own
     // (neither male nor female), so a race worn on it is not found by the sex an NPC's display names.
     static bool getRaceInfosForRaceAndFile(int race, int fileid, RaceInfos & out);
+    // The race a character of this race finds its item components under (ComponentModelFileData,
+    // ComponentTextureFileData RaceID). Its own, except for a race whose one model serves both sexes (ChrModel.Sex
+    // GENDER_ANY) and that names no model fallback race: the client keeps the items of a model several races wear under
+    // the lowest of them (Orc 2 for Mag'har 36, Pandaren 24 for 25/26, Earthen 84 for 85, Haranir 86 for 91, where the
+    // fallback races say so too), and Horde Dracthyr (70), naming none, wear Alliance Dracthyr's (52).
+    static int itemRaceID(const RaceInfos & race);
     // How many (race, sex) pairs the loaded client resolved to a model.
     static size_t count() { return RACES.size(); }
     static void clear();

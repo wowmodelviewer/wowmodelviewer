@@ -425,6 +425,18 @@ bool RaceInfos::getRaceInfosForRaceSex(int race, int sex, RaceInfos & out)
   return true;
 }
 
+int RaceInfos::itemRaceID(const RaceInfos & race)
+{
+  if (race.sexID != GENDER_ANY || race.modelFallbackRaceID > 0)
+    return race.raceID;
+
+  int lowest = race.raceID;
+  for (const auto & r : RACES)
+    if (r.second.modelFileID == race.modelFileID && r.second.raceID > 0 && r.second.raceID < lowest)
+      lowest = r.second.raceID;
+  return lowest;
+}
+
 bool RaceInfos::getRaceInfosForRaceAndFile(int race, int fileid, RaceInfos & out)
 {
   for (const auto & r : RACES)
