@@ -5,6 +5,15 @@ Format loosely based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+### Fixed
+- **Some Classic helms, shoulders, bracers, belts and pants painted a whole outfit on the body (#110).** In the
+  Classic clients' data, some of these displays also list a full set's chest, sleeve and leg textures, and the
+  viewer painted them all: the Lightbringer helm alone dressed a character in a plate suit, and the Lightbringer
+  bracers covered the chest and legs worn with them. Each slot now paints only its own body regions (bracers the
+  lower arm, a belt the lower torso and upper leg, pants the legs, a helm or shoulders none). On the test machine
+  this changes 646 displays in Mists of Pandaria Classic, 151 in Classic Era, 133 in Classic Beta and none in
+  Retail.
+
 ## [1.1] — 2026-10-14
 
 Version 1.1 adds Quick export to the Texture Viewer, makes Classic Beta's equipment browsable, fixes item
