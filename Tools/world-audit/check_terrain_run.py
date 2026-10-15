@@ -17,7 +17,13 @@ Across all runs given: the same tile built by two clients whose corpus roots dif
 Host serving: handler and read times per (role, FileDataID), median / p95 / max, the first request of each process
 apart (the host flags the first read of each FileDataID in its process: the cold read; a WDT's first serve is warm,
 the host read it whole just before sending the load); median and p95 must be <= 20 ms for every group of >= 10
-requests (the design's blocking budget).
+requests (the design's blocking budget). handlerMs is the time the GUI thread spent on the request; since the map asset
+worker (docs/world-viewer/04b-asset-serving.md) the read and its content-key check run on the worker, so the worker's
+own time (timings.workerMs) is reported beside it, and a host that has the worker must say for every file it served that
+the worker read it (readOutcome "read") -- the budget is not passed by moving the time somewhere unreported. With the
+worker's per-poll records (timing "gui poll mapServingMs": each poll's map serving, without the harness's own record
+keeping), no poll may spend over 20 ms of the GUI thread on map serving. Every request is answered once: no (load,
+requestId) pair may have two answers.
 Prints "[check] PASS|FAIL|SKIP <name>: <detail>" lines and "RESULT: PASS|FAIL (p passed, f failed, s skipped)";
 the exit code is the number of failures. A SKIP is never counted as a pass.
 """
@@ -192,6 +198,10 @@ def check_serving(ck, paths):
         rd = [r['readMs'] for r in recs]
         detail = 'n=%d bytes=%s handler median %.2f p95 %.2f max %.2f ms; read median %.2f p95 %.2f max %.2f ms' % (
             len(h), size, statistics.median(h), pct(h, 95), max(h), statistics.median(rd), pct(rd, 95), max(rd))
+        wk = [(r.get('timings') or {}).get('workerMs') for r in recs]
+        wk = [w for w in wk if isinstance(w, (int, float)) and w >= 0]
+        if wk:
+            detail += '; on the worker median %.2f p95 %.2f max %.2f ms' % (statistics.median(wk), pct(wk, 95), max(wk))
         if len(h) >= 10:
             ck.result(statistics.median(h) <= BUDGET_MS and pct(h, 95) <= BUDGET_MS,
                       'serving %s %s %s within %g ms' % (client, role, fdid, BUDGET_MS), detail)
@@ -200,6 +210,38 @@ def check_serving(ck, paths):
     for name, s in first:
         print('[info] first read in its process (%s): %s %s %s bytes handler %.2f ms read %.2f ms' % (
             name, s['role'], s['fileDataID'], s.get('bytes'), s['handlerMs'], s['readMs']))
+    # A host with the map asset worker records where each read ran: every file it served was read by the worker.
+    for p in paths:
+        with open(p, encoding='utf-8') as f:
+            run = json.load(f)
+        if not isinstance(run, dict) or 'mapAssetWorker' not in run:
+            continue
+        served = [s for s in run.get('served', []) if s.get('state') == 'available']
+        off = [s for s in served if s.get('readOutcome') != 'read']
+        ck.result(bool(served) and not off,
+                  '%s: every file served was read by the map asset worker' % os.path.basename(p),
+                  '%d served, %d not read by the worker%s' % (
+                      len(served), len(off), (' (first: %s %s)' % (off[0].get('role'), off[0].get('fileDataID'))) if off else ''))
+        g = (run.get('timing') or {}).get('gui poll mapServingMs')
+        if g and g.get('count', 0) > 0:
+            ck.result(g['max'] <= BUDGET_MS, '%s: no poll spent over %g ms of the GUI thread on map serving' % (
+                os.path.basename(p), BUDGET_MS), 'polls %d, median %.3f p95 %.3f max %.3f ms' % (
+                g['count'], g['median'], g['p95'], g['max']))
+    # Every request answered once, whatever the host: a (load, requestId) pair answered twice is a double answer (request
+    # ids start again in a restarted player, load serials never repeat in one host run).
+    for p in paths:
+        with open(p, encoding='utf-8') as f:
+            run = json.load(f)
+        if not isinstance(run, dict) or not run.get('served'):
+            continue
+        seen = {}
+        for s in run['served']:
+            key = (s.get('load'), s.get('requestId'))
+            seen[key] = seen.get(key, 0) + 1
+        twice = [k for k, n in seen.items() if n > 1]
+        ck.result(not twice, '%s: every request answered once' % os.path.basename(p),
+                  '%d answers to %d requests%s' % (len(run['served']), len(seen),
+                                                    ('; twice: %s' % twice[:5]) if twice else ''))
 
 
 def main(argv):

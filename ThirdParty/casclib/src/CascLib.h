@@ -452,6 +452,13 @@ bool   WINAPI CascWowFindRootEntry(HANDLE hStorage, const char * szFileName, DWO
 // does not know is not proof that the file is absent.
 bool   WINAPI CascWowRootNameCount(HANDLE hStorage, size_t * PtrNameCount, size_t * PtrNamelessCount);
 
+// WMV: one more reference to an open storage, for another thread to read it through its own file handles (CascLib's
+// reads, lookups and file handles are made for several threads; a TCascFile is not). Returns hStorage, or NULL with
+// ERROR_INVALID_HANDLE. The reference is released with CascCloseStorage, once, by its holder; the storage is destroyed
+// with its last reference. Only call it on a storage the calling thread holds a reference to itself, so the count never
+// rises from zero.
+HANDLE WINAPI CascWowShareStorage(HANDLE hStorage);
+
 #ifdef __cplusplus
 }   // extern "C"
 #endif

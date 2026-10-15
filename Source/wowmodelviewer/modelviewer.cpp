@@ -268,6 +268,8 @@ ModelViewer::ModelViewer()
   PLUGINMANAGER.init("./plugins");
   // Until a client loads, the map catalogue says there is none (mapCatalog() is never null).
   m_mapCatalog = wow::WorldMapCatalog::noClient("no client is loaded");
+  // THE MAP ASSET WORKER: made now, its thread started by its first read (docs/world-viewer/04b-asset-serving.md).
+  m_mapAssetWorker = std::make_shared<MapAssetWorker>();
   // our main class objects
   animControl = nullptr;
   canvas = NULL;
@@ -1855,6 +1857,18 @@ ModelViewer::~ModelViewer()
 {
   LOG_INFO << "Shutting down the program...";
 
+  // THE MAP ASSET WORKER first: what waits is cancelled, a read under way finishes (reads are whole), the worker lets go
+  // of its storage reference and its thread is joined -- before anything it could have read from goes.
+  if (m_mapAssetWorker)
+  {
+    const MapAssetWorker::Stats before = m_mapAssetWorker->stats();
+    m_mapAssetWorker->stop();
+    const MapAssetWorker::Stats after = m_mapAssetWorker->stats();
+    LOG_INFO << "[unity-terrain] map asset worker stopped:" << after.submitted << "read(s) given," << after.read << "read,"
+             << (after.stopped - before.stopped) << "left unread at the stop; storage references taken"
+             << after.leasesGranted << ", released" << after.leasesReleased;
+  }
+
   // Not closed through OnClose: the background window still goes before anything it reads.
   if (m_backgroundDialog)
   {
@@ -2321,8 +2335,16 @@ void ModelViewer::CreateUnityViewport()
   unityRendererHost->ipc()->onScreenshotSaved = [this](const UnityIpcServer::ScreenshotResult & result) {
     OnUnityScreenshotSaved(result);
   };
-  // THE TERRAIN TILE: the map files it asks for, and what became of each load.
-  unityRendererHost->ipc()->onGetMapAsset = [this](const QJsonObject & request) { return ServeMapAsset(request); };
+  // THE TERRAIN TILE: the map files it asks for -- decided here, read by the map asset worker, checked again here when
+  // read --, and what became of each load.
+  unityRendererHost->ipc()->setMapAssetWorker(m_mapAssetWorker);
+  unityRendererHost->ipc()->wakeOnMapResults();
+  unityRendererHost->ipc()->onDispatchMapAsset = [this](const QJsonObject & request) { return DispatchMapAsset(request); };
+  unityRendererHost->ipc()->onCompleteMapAsset = [this](const QJsonObject & request, MapAssetWorker::Result & result) {
+    return CompleteMapAsset(request, result);
+  };
+  unityRendererHost->ipc()->onMapAssetStale = [this](const QJsonObject & request) { return MapAssetStaleReason(request); };
+  unityRendererHost->ipc()->onMapAssetWait = [this]() { return MapAssetWait(); };
   unityRendererHost->ipc()->onTerrainTileLoaded = [this](const UnityIpcServer::TerrainTileReport & report) {
     OnTerrainTileLoaded(report);
   };
@@ -3440,7 +3462,8 @@ void ModelViewer::OnMapObjectLoaded(const UnityIpcServer::MapObjectReport & repo
 }
 
 // THE TERRAIN TILE (protocol 12). The host names the tile and the map's WDT; the player asks for the WDT and the tile's
-// root ADT (getMapAsset), parses both and builds the tile; ServeMapAsset answers for the current load only.
+// root ADT (getMapAsset), parses both and builds the tile; DispatchMapAsset and CompleteMapAsset answer for the current
+// load only.
 
 bool ModelViewer::terrainCatalogueBelongs() const
 {
@@ -3531,11 +3554,18 @@ ModelViewer::MapAssetDecision ModelViewer::decideMapAssetRequest(const QJsonObje
   if (role == "texture")
   {
     // The texture bytes a load may read: refused once they are spent, otherwise a read that cannot overrun them (a file
-    // over the limit is not read; the answer names the limit applied).
-    if (current->textureBytesRead >= current->maxTextureBytesPerLoad)
-      return refused(QString("load %1 has read %2 bytes of textures: at most %3 per load")
-                       .arg(load).arg(current->textureBytesRead).arg(current->maxTextureBytesPerLoad));
-    d.maxBytes = std::min(current->maxTextureBytes, current->maxTextureBytesPerLoad - current->textureBytesRead);
+    // over the limit is not read; the answer names the limit applied). The reads still in flight count with what they
+    // may read (their limits, reserved until their results come: THE MAP ASSET WORKER), so the reads together never
+    // overrun the load's budget.
+    const qint64 spent = current->textureBytesRead + current->textureBytesReserved;
+    if (spent >= current->maxTextureBytesPerLoad)
+      return refused(current->textureBytesReserved > 0
+                       ? QString("load %1 has read %2 bytes of textures and reserved %3 for reads in flight: at most %4 per "
+                                 "load").arg(load).arg(current->textureBytesRead).arg(current->textureBytesReserved)
+                           .arg(current->maxTextureBytesPerLoad)
+                       : QString("load %1 has read %2 bytes of textures: at most %3 per load")
+                           .arg(load).arg(current->textureBytesRead).arg(current->maxTextureBytesPerLoad));
+    d.maxBytes = std::min(current->maxTextureBytes, current->maxTextureBytesPerLoad - spent);
   }
   return d;
 }
@@ -3744,43 +3774,209 @@ bool ModelViewer::ClearTerrain(const QString & reason)
   return true;
 }
 
-UnityIpcServer::MapAssetAnswer ModelViewer::ServeMapAsset(const QJsonObject & request)
+bool ModelViewer::MapAssetWait() const
 {
-  UnityIpcServer::MapAssetAnswer answer;
+  return m_clientLoading || UnityAssetAccess::isClientLoading();
+}
+
+QString ModelViewer::MapAssetStaleReason(const QJsonObject & request) const
+{
+  // decideMapAssetRequest's staleness, asked again of a read in flight (and of its result): every reason that holds. A
+  // client being loaded is not one: the IPC server does not ask while it lasts (MapAssetWait) -- the load replaces the
+  // client (the epoch moves on: stale then) or fails (the client stays: the read stands).
+  QStringList stale;
+  const bool loading = MapAssetWait();
+  const int load = request.value("load").toInt(0);
+  const int epoch = request.value("assetEpoch").toInt(0);
+  if (m_terrainRequest.load <= 0)
+    stale << QString("no terrain load is current (request load %1)").arg(load);
+  else if (load != m_terrainRequest.load)
+    stale << QString("request load %1, current %2").arg(load).arg(m_terrainRequest.load);
+  else if (m_terrainRequest.ended)
+    stale << QString("load %1 was reported %2").arg(load).arg(m_terrainRequest.endedStatus);
+  const int epochNow = UnityAssetAccess::clientEpoch();
+  if (epoch != epochNow)
+    stale << QString("request epoch %1, current %2").arg(epoch).arg(epochNow);
+  // (Not asked while a client loads: the client is half replaced.)
+  if (!loading && !terrainCatalogueBelongs())
+    stale << "the map catalogue the load was sent under is not the loaded client's";
+  return stale.join("; ");
+}
+
+UnityIpcServer::MapAssetDispatch ModelViewer::DispatchMapAsset(const QJsonObject & request)
+{
+  UnityIpcServer::MapAssetDispatch d;
+  QElapsedTimer step;
+  step.start();
   const bool loading = m_clientLoading || UnityAssetAccess::isClientLoading();
   const TerrainRequest * current = m_terrainRequest.load > 0 ? &m_terrainRequest : nullptr;
   // (Not asked while a client loads: the decision refuses first, and the client is half replaced.)
   const bool belongs = !loading && terrainCatalogueBelongs();
-  const MapAssetDecision decision =
-    decideMapAssetRequest(request, current, UnityAssetAccess::clientEpoch(), belongs, loading);
+  const int epochNow = UnityAssetAccess::clientEpoch();
+  const MapAssetDecision decision = decideMapAssetRequest(request, current, epochNow, belongs, loading);
+  d.answer.timings["decideMs"] = step.nsecsElapsed() / 1e6;
   if (!decision.state.isEmpty())
   {
-    answer.state = decision.state;
-    answer.detail = decision.detail;
-    return answer;
+    d.answer.state = decision.state;
+    d.answer.detail = decision.detail;
+    return d;
   }
+  if (!m_mapAssetWorker || m_mapAssetWorker->stopped())
+  {
+    d.answer.state = "refused";
+    d.answer.detail = "the map asset worker is not running";
+    return d;
+  }
+  // The worker reads under a reference of its own to the storage the load was sent under (EnsureMapAssetLease).
+  const quint64 generation = m_mapCatalog->client().storageGeneration;
+  if (!EnsureMapAssetLease(epochNow, generation))
+  {
+    // As the catalogue's own read answers a storage that is not open: nothing was checked.
+    d.answer.state = wow::WorldMapCatalog::availabilityName(wow::WdtAvailability::NotChecked);
+    d.answer.detail = "the client's storage is not open: nothing was checked";
+    return d;
+  }
+  // Accounted before the read, whatever comes of it: the read itself is what the load's limits count. A texture's
+  // limit is held against the load's budget until its result comes (decideMapAssetRequest).
+  noteMapAssetRead(m_terrainRequest, request);
+  if (request.value("role").toString() == "texture")
+    m_terrainRequest.textureBytesReserved += decision.maxBytes;
+  d.read = true;
+  d.fileDataID = request.value("fileDataID").toInt(0);
+  d.maxBytes = decision.maxBytes;
+  d.epoch = epochNow;
+  d.generation = generation;
+  return d;
+}
+
+bool ModelViewer::EnsureMapAssetLease(int epochNow, quint64 generation)
+{
+  // Granted once per client epoch and storage; dropped when the client is replaced (ResetClientState). Asked only after
+  // the decision found no client loading and the map catalogue the loaded client's and the load's: the folder holds
+  // that storage now, and this thread holds the folder's reference while the worker's is taken (CASCFolder::shareStorage).
+  if (m_mapAssetLeaseEpoch == epochNow && m_mapAssetLeaseGeneration == generation)
+    return true;
+  wow::WoWFolder & folder = static_cast<wow::WoWFolder &>(GAMEDIRECTORY);
+  MapAssetWorker::Lease lease;
+  lease.epoch = epochNow;
+  lease.generation = generation;
+  if (folder.storageGeneration() == generation)
+    lease.storage = folder.shareStorage();
+  if (!lease.storage.open())
+    return false;
+  m_mapAssetWorker->grantLease(lease);
+  m_mapAssetLeaseEpoch = epochNow;
+  m_mapAssetLeaseGeneration = generation;
+  LOG_INFO << "[unity-terrain] map asset worker: reads the storage of client epoch" << epochNow << "(storage"
+           << (qulonglong)generation << ") through a reference of its own";
+  return true;
+}
+
+MapAssetWorker::Result ModelViewer::TestReadThroughWorker(int fileDataID, qint64 maxBytes, bool corrupt,
+                                                         bool cancelledBefore, bool otherStorage)
+{
+  MapAssetWorker::Result result;
+  result.outcome = MapAssetWorker::Result::Outcome::Stopped;
+  const int epochNow = UnityAssetAccess::clientEpoch();
+  const quint64 generation = m_mapCatalog->client().storageGeneration;
+  if (m_clientLoading || UnityAssetAccess::isClientLoading() || !m_mapCatalog->belongsToActiveClient() ||
+      !m_mapAssetWorker || m_mapAssetWorker->stopped() || !EnsureMapAssetLease(epochNow, generation))
+  {
+    result.detail = "no worker read: no client loaded, its catalogue not its own, or no storage";
+    return result;
+  }
+  MapAssetWorker::Job job;
+  job.fileDataID = fileDataID;
+  job.maxBytes = maxBytes;
+  job.epoch = epochNow;
+  job.generation = otherStorage ? generation + 1000000 : generation;
+  job.role = "test";
+  job.cancelled = std::make_shared<std::atomic<bool>>(cancelledBefore);
+  job.testCorrupt = corrupt;
+  const quint64 ticket = m_mapAssetWorker->submit(job);
+  if (ticket == 0 || !m_mapAssetWorker->waitResult(ticket, 120000, result))
+  {
+    result = MapAssetWorker::Result();
+    result.outcome = MapAssetWorker::Result::Outcome::Stopped;
+    result.detail = "no result from the map asset worker within 120 s";
+  }
+  return result;
+}
+
+quint64 ModelViewer::TestHoldReadForShutdown(int fileDataID)
+{
+  const int epochNow = UnityAssetAccess::clientEpoch();
+  const quint64 generation = m_mapCatalog->client().storageGeneration;
+  if (m_clientLoading || UnityAssetAccess::isClientLoading() || !m_mapCatalog->belongsToActiveClient() ||
+      !m_mapAssetWorker || m_mapAssetWorker->stopped() || !EnsureMapAssetLease(epochNow, generation))
+    return 0;
+  MapAssetWorker::Job job;
+  job.fileDataID = fileDataID;
+  job.maxBytes = 64 * 1024 * 1024;
+  job.epoch = epochNow;
+  job.generation = generation;
+  job.role = "test";
+  job.cancelled = std::make_shared<std::atomic<bool>>(false);
+  job.testHold = true;
+  return m_mapAssetWorker->submit(job);
+}
+
+UnityIpcServer::MapAssetAnswer ModelViewer::CompleteMapAsset(const QJsonObject & request, MapAssetWorker::Result & result)
+{
+  UnityIpcServer::MapAssetAnswer answer;
   const QString role = request.value("role").toString();
   const int fileDataID = request.value("fileDataID").toInt(0);
-  // Accounted before the read, whatever comes of it: the read itself is what the load's limits count.
-  noteMapAssetRead(m_terrainRequest, request);
-  // Read through the client's own storage, as the catalogue reads a WDT: listed, on this computer, every byte checked
-  // against its content key, and nothing larger than the decision's limit is read.
-  wow::WdtReference reference;
-  reference.kind = wow::WdtReference::Kind::FileDataId;
-  reference.fileDataId = fileDataID;
-  QByteArray bytes;
-  QElapsedTimer read;
-  read.start();
-  const wow::WdtInspection inspection = m_mapCatalog->inspectFile(reference, &bytes, decision.maxBytes);
-  answer.readMs = read.nsecsElapsed() / 1e6;
+  // A texture's reservation is released by its own load, whatever came of the read (a load replaced since took its
+  // accounting with it).
+  const bool currentLoad = m_terrainRequest.load > 0 && request.value("load").toInt(0) == m_terrainRequest.load;
+  if (currentLoad && role == "texture")
+    m_terrainRequest.textureBytesReserved = std::max<qint64>(0, m_terrainRequest.textureBytesReserved - result.maxBytes);
+  const bool wasRead = result.outcome == MapAssetWorker::Result::Outcome::Read;
+  const wow::WdtInspection & inspection = result.inspection;
+  if (wasRead)
+  {
+    answer.readMs = inspection.milliseconds;
+    answer.bytesRead = inspection.readBytes;
+    answer.timings["rootMs"] = inspection.rootMs;
+    answer.timings["openMs"] = inspection.read.openMs;
+    answer.timings["sizeMs"] = inspection.read.sizeMs;
+    answer.timings["allocMs"] = inspection.read.allocMs;
+    answer.timings["cascReadMs"] = inspection.read.readMs;
+    answer.timings["keyMs"] = inspection.read.keyMs;
+    answer.timings["closeMs"] = inspection.read.closeMs;
+    answer.timings["md5Ms"] = inspection.read.md5Ms;
+  }
+  // Checked again, here, before any byte is queued: a read whose load, client or catalogue has gone since its dispatch
+  // is answered stale -- the bytes of another client's storage never reach the stream (section D of the document).
+  const QString stale = MapAssetStaleReason(request);
+  if (!stale.isEmpty())
+  {
+    answer.state = "stale";
+    answer.detail = stale;
+    return answer;
+  }
+  if (!wasRead)
+  {
+    // Nothing read: out of memory is the file's read failing; the rest (cancelled, stopped, another storage) means the
+    // host has moved on from the request.
+    answer.state = result.outcome == MapAssetWorker::Result::Outcome::Failed
+                     ? wow::WorldMapCatalog::availabilityName(wow::WdtAvailability::Unreadable)
+                     : QString("stale");
+    answer.detail = QString("FileDataID %1 was not read: ").arg(fileDataID) + result.detail;
+    if (currentLoad)
+      noteMapAssetResult(m_terrainRequest, role, 0, false);
+    return answer;
+  }
   answer.state = wow::WorldMapCatalog::availabilityName(inspection.state);
   answer.detail = inspection.detail;
-  answer.bytesRead = inspection.readBytes;
   bool available = inspection.state == wow::WdtAvailability::Available;
   if (available)
   {
     // What the bytes are, for the roles that say (TERRAIN TEXTURES): four characters at known places, not a parse.
-    const QString kind = mapAssetKindProblem(role, bytes);
+    QElapsedTimer step;
+    step.start();
+    const QString kind = mapAssetKindProblem(role, result.bytes);
+    answer.timings["kindMs"] = step.nsecsElapsed() / 1e6;
     if (!kind.isEmpty())
     {
       available = false;
@@ -3798,11 +3994,39 @@ UnityIpcServer::MapAssetAnswer ModelViewer::ServeMapAsset(const QJsonObject & re
     }
     else
     {
-      answer.bytes = bytes;
+      answer.bytes = std::move(result.bytes);
       answer.md5 = inspection.contentKey;
     }
   }
+  result.bytes = QByteArray();   // a file not served is freed here
   noteMapAssetResult(m_terrainRequest, role, answer.bytesRead, available);
+  return answer;
+}
+
+UnityIpcServer::MapAssetAnswer ModelViewer::ServeMapAssetAndWait(const QJsonObject & request)
+{
+  const UnityIpcServer::MapAssetDispatch d = DispatchMapAsset(request);
+  if (!d.read)
+    return d.answer;
+  MapAssetWorker::Job job;
+  job.fileDataID = d.fileDataID;
+  job.maxBytes = d.maxBytes;
+  job.epoch = d.epoch;
+  job.generation = d.generation;
+  job.role = request.value("role").toString();
+  job.cancelled = std::make_shared<std::atomic<bool>>(false);
+  const quint64 ticket = m_mapAssetWorker->submit(job);
+  MapAssetWorker::Result result;
+  if (ticket == 0 || !m_mapAssetWorker->waitResult(ticket, 120000, result))
+  {
+    result = MapAssetWorker::Result();
+    result.outcome = MapAssetWorker::Result::Outcome::Stopped;
+    result.detail = "no result from the map asset worker within 120 s";
+    result.maxBytes = d.maxBytes;
+  }
+  UnityIpcServer::MapAssetAnswer answer = CompleteMapAsset(request, result);
+  for (auto it = d.answer.timings.begin(); it != d.answer.timings.end(); ++it)
+    answer.timings[it.key()] = it.value();
   return answer;
 }
 
@@ -4527,6 +4751,15 @@ static wxString clientOpenProblem(int error)
 // client's files or database. (The file tree, database, races, NPC and item lists are refilled by the load itself.)
 void ModelViewer::ResetClientState()
 {
+  // THE MAP ASSET WORKER: its reads in flight are the previous client's (cancelled; one under way finishes on that
+  // client's storage, which its own reference keeps alive, and is answered stale), and it lets go of that storage, on
+  // its own thread, after the read it is on. The next read of the new client grants it the new one.
+  if (unityRendererHost && unityRendererHost->ipc())
+    unityRendererHost->ipc()->cancelMapReads("the client was replaced");
+  if (m_mapAssetWorker)
+    m_mapAssetWorker->dropLease();
+  m_mapAssetLeaseEpoch = 0;
+  m_mapAssetLeaseGeneration = 0;
   // The same FileDataID is another file in the next client: the Unity player's asset cache starts over (protocol 9).
   UnityAssetAccess::noteClientReplaced();
   // ... and the host's record of which map files it has read is the previous client's: forgotten now.

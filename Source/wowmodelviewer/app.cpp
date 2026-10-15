@@ -3488,9 +3488,31 @@ static GameFile * resolveGameFileArg(const QString & arg)
 }
 
 // Pump the IPC server and the wx queue for n * 10 ms (no event loop runs inside OnInit).
+// g_pumpBusy, when set, is handed how long each round kept this thread busy: the poll and the wx queue, everything this
+// thread ran between two sleeps.
+static std::function<void(double)> g_pumpBusy;
 static void pumpIpc(UnityIpcServer * ipc, int n)
 {
-  for (int i = 0; i < n; i++) { ipc->poll(); wxTheApp->Yield(true); wxMilliSleep(10); }
+  for (int i = 0; i < n; i++)
+  {
+    wxStopWatch busy;
+    ipc->poll();
+    wxTheApp->Yield(true);
+    if (g_pumpBusy)
+      g_pumpBusy(busy.TimeInMicro().ToDouble() / 1000.0);
+    // The 10 ms between polls (n of them last at least n * 10 ms). A map read's result is answered as soon as it is
+    // made: its wake, a wxThreadEvent the worker posted, is handled in a Yield, as the viewer's event loop would -- a
+    // poll that answers the read --, and the slot goes on.
+    wxStopWatch slot;
+    for (long left = 10; left > 0; left = 10 - slot.Time())
+    {
+      ipc->waitForMapResult((int)left);
+      wxStopWatch woken;
+      wxTheApp->Yield(true);
+      if (g_pumpBusy)
+        g_pumpBusy(woken.TimeInMicro().ToDouble() / 1000.0);
+    }
+  }
 }
 
 // The player's report on the world-model load with this serial, from the reports gathered so far, pumping
@@ -5695,8 +5717,19 @@ static void doHeadlessUnityIpcTest(ModelViewer * frame)
 // many as the player applied, retired and holds pending):
 //   timeout:<m>:<x>:<y>:<role>       the player's own timeout ends the load, "failed" with "timed out" (it states its
 //                             terrainTimeoutMs; a short one comes from WMV_DEBUG -wmvTerrainTimeoutMs=<ms>); released as the
-//                             report arrives, before the host takes the load as ended, the file goes back "available",
-//                             after its load ended; then the host answers the load's requests stale, "was reported failed";
+//                             report arrives, it is decided only in a later poll, once the host has taken the load as ended
+//                             (THE MAP ASSET WORKER): "stale", a late answer the player drops; then the host answers the
+//                             load's requests stale, "was reported failed";
+//   readtimeout, readsupersede, readclear:<m>:<x>:<y>:<role>, readswitch:<product>:<m>:<x>:<y>[:<role>],
+//   readreconnect:<m>:<x>:<y>[:<role>]  the same, with the request decided and dispatched as any and its READ held in the
+//                             map asset worker, its file open (the storage referenced by the worker and the open file), let
+//                             go when the step says; the read is then finished and checked and answered "stale"
+//                             (checkReadThenStale), or dropped with its connection (readreconnect); a superseding load
+//                             waits behind the held read (one worker, reads in order), which is let go once the old load is
+//                             over;
+//   readcorrupt:<m>:<x>:<y>:<role>   that read's bytes changed before their content-key check: "unreadable", damaged;
+//   readslow:<ms>                     every read from now on waits that long in the worker before it begins;
+//   readshutdown[:<fileDataID>]      a read held in the worker, left so for the viewer's shutdown (the last step);
 //   latesupersede:<m>:<x>:<y>:<role> the next load of the tile, not held, answers it "superseded" and is built; released, "stale";
 //   lateclear:<m>:<x>:<y>:<role>     clearTerrain answers it "cleared"; released, "stale";
 //   lateswitch:<product>:<m>:<x>:<y>[:<role>]  its WDT (or role) held, that client is loaded: "cleared", and the host's read
@@ -5791,6 +5824,9 @@ namespace
     o["bytesRead"] = (double)s.bytesRead;
     o["first"] = s.first;
     o["firstTracked"] = s.firstTracked;
+    o["readOutcome"] = s.readOutcome;
+    o["readState"] = s.readState;
+    o["timings"] = s.timings;
     return o;
   }
 
@@ -5910,6 +5946,17 @@ static void checkMapAssetDecisions(TerrainTestLog & tally)
   spent.textureBytesRead = UnityIpcServer::MAX_TERRAIN_TEXTURE_BYTES_PER_LOAD;
   ModelViewer::TerrainRequest nearlySpent = texOne; // 1000 bytes of it left
   nearlySpent.textureBytesRead = UnityIpcServer::MAX_TERRAIN_TEXTURE_BYTES_PER_LOAD - 1000;
+  // THE MAP ASSET WORKER: texture reads in flight hold their limits against the budget (textureBytesReserved). One read
+  // of 8 MiB in flight leaves the next a full limit; 120 MiB read and 8 MiB - 1000 reserved leave 1000; 120 MiB read and
+  // 8 MiB reserved leave nothing.
+  ModelViewer::TerrainRequest reservedOne = texOne;
+  reservedOne.textureBytesReserved = UnityIpcServer::MAX_TERRAIN_TEXTURE_BYTES;
+  ModelViewer::TerrainRequest reservedNear = texOne;
+  reservedNear.textureBytesRead = 120 * 1024 * 1024;
+  reservedNear.textureBytesReserved = UnityIpcServer::MAX_TERRAIN_TEXTURE_BYTES - 1000;
+  ModelViewer::TerrainRequest reservedSpent = texOne;
+  reservedSpent.textureBytesRead = 120 * 1024 * 1024;
+  reservedSpent.textureBytesReserved = UnityIpcServer::MAX_TERRAIN_TEXTURE_BYTES;
   ModelViewer::TerrainRequest ended = texTex0;      // the player reported the load
   ended.ended = true;
   ended.endedStatus = "failed";
@@ -6006,6 +6053,13 @@ static void checkMapAssetDecisions(TerrainTestLog & tally)
      false, "refused", "load 5 has read 134217728 bytes of textures: at most 134217728 per load"},
     {"a texture near the byte cap is read with what is left of it", request(5, 7, "texture", 187127), &nearlySpent, true,
      false, "", "", 1000},
+    {"with one texture read of 8 MiB in flight the next still gets a full limit", request(5, 7, "texture", 187127),
+     &reservedOne, true, false, "", "", textureLimit},
+    {"the reads in flight count with what they may read: 120 MiB read and 8 MiB - 1000 reserved leave 1000",
+     request(5, 7, "texture", 187127), &reservedNear, true, false, "", "", 1000},
+    {"120 MiB read and 8 MiB reserved by reads in flight spend the budget: refused, both named",
+     request(5, 7, "texture", 187127), &reservedSpent, true, false, "refused",
+     "load 5 has read 125829120 bytes of textures and reserved 8388608 for reads in flight: at most 134217728 per load"},
     {"a tex0 ADT for a load sent without textures is refused", request(5, 7, "tex0Adt", 778040), &rooted, true, false,
      "refused", "load 5 was sent without terrain textures (the player does not draw them), so no tex0 ADT is served"},
     {"a texture for a load sent without textures is refused", request(5, 7, "texture", 187115), &plainTex0, true, false,
@@ -6183,21 +6237,55 @@ static void checkMapAssetKinds(TerrainTestLog & tally)
   }
 }
 
-// THE MAP ASSET QUEUE (UnityIpcServer) on a server of its own with no player: a made-up viewer answers each request with
-// the bytes it names as read. First come first served; a poll serves until 2 MiB were read or a file over 1 MiB was;
-// requests that read nothing cost nothing; past 16 waiting a request is refused at once, never handed to the viewer;
-// queuedMs and the poll records; the queue dropped unanswered as when a connection ends; the poll records bounded.
+// THE MAP ASSET QUEUE AND WORKER (UnityIpcServer) on a server of its own with no player: a worker whose made-up reads
+// read the bytes each request names (fakeBytes, carried in the read's limit), a made-up viewer that answers at once
+// every request naming no bytes. Requests are dispatched first come first served, at most MAP_ASSET_READS_IN_FLIGHT
+// reads in flight; results are taken back in order and answered until 2 MiB were read for them in a poll, or a file over
+// 1 MiB was; requests that read nothing are answered at their dispatch, costing nothing; past 16 waiting a request is
+// refused at once, nothing decided; a read the viewer no longer wants is cancelled -- not read when it had not begun --
+// and answered stale; the queue and the reads in flight are dropped unanswered as when a connection ends; queuedMs, the
+// poll records and the worker's accounting; the poll records bounded.
 static void checkMapAssetQueue(TerrainTestLog & tally)
 {
+  auto worker = std::make_shared<MapAssetWorker>([](const MapAssetWorker::Job & job, const MapAssetWorker::Lease &,
+                                                    const CASCFolder::ReadHooks *) {
+    MapAssetWorker::Result r;
+    r.outcome = MapAssetWorker::Result::Outcome::Read;
+    r.inspection.state = wow::WdtAvailability::NotInClientStorage;
+    r.inspection.detail = "made up by the terrain test";
+    r.inspection.readBytes = job.maxBytes;
+    r.inspection.milliseconds = 0.0;
+    return r;
+  });
   UnityIpcServer q;
-  QStringList order;
-  q.onGetMapAsset = [&order](const QJsonObject & r) {
+  q.setMapAssetWorker(worker);
+  QStringList order;   // the order the made-up viewer decided requests in
+  QStringList unwanted;
+  q.onDispatchMapAsset = [&order](const QJsonObject & r) {
     order << r.value("requestId").toString();
+    UnityIpcServer::MapAssetDispatch d;
+    const long long bytes = (long long)r.value("fakeBytes").toDouble(0);
+    if (bytes <= 0)
+    {
+      d.answer.state = "not in client storage";
+      d.answer.detail = "made up by the terrain test";
+      return d;
+    }
+    d.read = true;
+    d.fileDataID = r.value("fileDataID").toInt(0);
+    d.maxBytes = bytes;
+    return d;
+  };
+  q.onCompleteMapAsset = [](const QJsonObject &, MapAssetWorker::Result & res) {
     UnityIpcServer::MapAssetAnswer a;
-    a.state = r.value("fakeState").toString("not in client storage");
-    a.detail = "made up by the terrain test";
-    a.bytesRead = (long long)r.value("fakeBytes").toDouble(0);
+    const bool read = res.outcome == MapAssetWorker::Result::Outcome::Read;
+    a.state = read ? wow::WorldMapCatalog::availabilityName(res.inspection.state) : QString("stale");
+    a.detail = read ? res.inspection.detail : res.detail;
+    a.bytesRead = read ? res.inspection.readBytes : 0;
     return a;
+  };
+  q.onMapAssetStale = [&unwanted](const QJsonObject & r) {
+    return unwanted.contains(r.value("requestId").toString()) ? QString("made up: no longer wanted") : QString();
   };
   std::vector<UnityIpcServer::MapAssetServed> records;
   q.onMapAssetServed = [&records](const UnityIpcServer::MapAssetServed & s) { records.push_back(s); };
@@ -6213,6 +6301,17 @@ static void checkMapAssetQueue(TerrainTestLog & tally)
     r["fakeBytes"] = (double)bytes;
     q.testReceiveMapAsset(r);
   };
+  // One poll, once every read dispatched before it has its result ready.
+  const auto poll = [&q]() {
+    q.testWaitMapReads(10000);
+    return q.testServeMapAssetQueue();
+  };
+  const auto ids = [&records]() {
+    QStringList l;
+    for (const UnityIpcServer::MapAssetServed & s : records)
+      l << s.requestId;
+    return l.join(",");
+  };
   const qint64 KiB = 1024, MiB = 1024 * 1024;
   {
     order.clear();
@@ -6221,48 +6320,48 @@ static void checkMapAssetQueue(TerrainTestLog & tally)
     receive(100 * KiB);
     receive(100 * KiB);
     const size_t waiting = q.mapAssetsWaiting();
-    const int served = q.testServeMapAssetQueue();
-    bool queuedTimes = records.size() == 3;
+    const int first = poll();   // two dispatched, none answered
+    const size_t inFlight = q.mapReadsInFlight();
+    const UnityIpcServer::MapAssetPoll p1 = q.mapAssetPolls().back();
+    const int second = poll();  // their results answered, the third dispatched
+    const UnityIpcServer::MapAssetPoll p2 = q.mapAssetPolls().back();
+    const int third = poll();   // the third answered
+    bool fields = records.size() == 3;
     for (const UnityIpcServer::MapAssetServed & s : records)
-      queuedTimes = queuedTimes && s.queuedMs >= 0.0 && s.bytesRead == 100 * KiB;
-    const UnityIpcServer::MapAssetPoll * poll = q.mapAssetPolls().empty() ? nullptr : &q.mapAssetPolls().back();
-    tally.check("queue: requests wait until served, then are answered in order, each with its queuedMs, one poll record",
-                waiting == 3 && served == 3 && order.join(",") == "q1,q2,q3" && queuedTimes && poll && poll->served == 3 &&
-                  poll->bytesRead == 300 * KiB && !poll->stoppedForBudget && poll->waitingAfter == 0 && poll->serveMs >= 0.0,
-                QString("%1 waiting, %2 served in the order %3; the poll: %4 served, %5 bytes, %6 ms, %7 waiting after")
-                  .arg(waiting).arg(served).arg(order.join(",")).arg(poll ? poll->served : -1).arg(poll ? poll->bytesRead : -1)
-                  .arg(poll ? poll->serveMs : -1.0).arg(poll ? poll->waitingAfter : -1));
+      fields = fields && s.queuedMs >= 0.0 && s.bytesRead == 100 * KiB && s.readOutcome == "read" &&
+               s.readState == "not in client storage" && s.handlerMs >= 0.0;
+    tally.check(QString("queue: requests wait, are dispatched in order -- at most %1 reads in flight -- and answered in "
+                        "order once read, each with its queuedMs, the worker's outcome and its GUI time")
+                  .arg(UnityIpcServer::MAP_ASSET_READS_IN_FLIGHT),
+                waiting == 3 && first == 0 && inFlight == 2 && p1.dispatched == 2 && p1.completed == 0 && second == 2 &&
+                  p2.completed == 2 && p2.dispatched == 1 && p2.bytesRead == 200 * KiB && !p2.stoppedForBudget &&
+                  third == 1 && order.join(",") == "q1,q2,q3" && ids() == "q1,q2,q3" && fields &&
+                  q.mapReadsInFlight() == 0,
+                QString("%1 waiting; polls answered %2, %3, %4 (in flight after the first %5; the second took back %6 "
+                        "and dispatched %7, %8 bytes); decided in the order %9; answered in the order ")
+                  .arg(waiting).arg(first).arg(second).arg(third).arg(inFlight).arg(p2.completed).arg(p2.dispatched)
+                  .arg(p2.bytesRead).arg(order.join(",")) + ids());
   }
   {
-    // 600 KiB each: the fourth takes the poll past 2 MiB, the fifth waits.
+    // A file over 1 MiB is the last result a poll takes back; small ones before it go in the same poll.
     order.clear();
-    for (int i = 0; i < 5; i++)
-      receive(600 * KiB);
-    const int first = q.testServeMapAssetQueue();
-    const UnityIpcServer::MapAssetPoll a = q.mapAssetPolls().back();
-    const int second = q.testServeMapAssetQueue();
-    tally.check("queue: a poll stops serving once 2 MiB were read in it; the rest is served by the next",
-                first == 4 && a.stoppedForBudget && a.waitingAfter == 1 && a.bytesRead == 2400 * KiB && second == 1 &&
-                  order.join(",") == "q4,q5,q6,q7,q8",
-                QString("first poll %1 (%2 bytes, stopped %3, %4 waiting), second %5; order %6").arg(first).arg(a.bytesRead)
-                  .arg(a.stoppedForBudget ? "yes" : "no").arg(a.waitingAfter).arg(second).arg(order.join(",")));
-  }
-  {
-    // A file over 1 MiB ends its poll's serving, wherever it comes.
-    order.clear();
-    receive(5593604);
-    receive(10 * KiB);
+    records.clear();
     receive(10 * KiB);
     receive(5593604);
-    const int a = q.testServeMapAssetQueue();
-    const int b = q.testServeMapAssetQueue();
+    receive(5593604);
+    receive(10 * KiB);
+    poll();                     // q4 and q5 dispatched
+    const int a = poll();       // q4 (small) and q5 (large) answered; q6, q7 dispatched
+    const UnityIpcServer::MapAssetPoll pa = q.mapAssetPolls().back();
+    const int b = poll();       // q6 (large) answered, the poll stops there; q7 waits
     const UnityIpcServer::MapAssetPoll pb = q.mapAssetPolls().back();
-    const int c = q.testServeMapAssetQueue();
-    tally.check("queue: a file over 1 MiB is the last its poll reads (the size is known only once it is read)",
-                a == 1 && b == 3 && pb.largeFiles == 1 && pb.bytesRead == 20 * KiB + 5593604 && c == 0 &&
-                  order.join(",") == "q9,q10,q11,q12",
-                QString("polls served %1, %2 (%3 large, %4 bytes), %5; order %6").arg(a).arg(b).arg(pb.largeFiles)
-                  .arg(pb.bytesRead).arg(c).arg(order.join(",")));
+    const int c = poll();       // q7
+    tally.check("queue: a file over 1 MiB is the last result its poll takes back; the rest is taken by the next poll",
+                a == 2 && pa.largeFiles == 1 && pa.bytesRead == 10 * KiB + 5593604 && b == 1 && pb.largeFiles == 1 &&
+                  pb.stoppedForBudget && c == 1 && ids() == "q4,q5,q6,q7",
+                QString("polls answered %1 (%2 large, %3 bytes), %4 (%5 large, stopped %6), %7; order ").arg(a)
+                  .arg(pa.largeFiles).arg(pa.bytesRead).arg(b).arg(pb.largeFiles).arg(pb.stoppedForBudget ? "yes" : "no")
+                  .arg(c) + ids());
   }
   {
     // Past 16 waiting a request is refused at once, nothing decided or read; the 16 that read nothing go in one poll.
@@ -6275,12 +6374,13 @@ static void checkMapAssetQueue(TerrainTestLog & tally)
     const size_t answeredAtOnce = records.size();
     const bool refusedRight = answeredAtOnce == 2 && records[0].state == "refused" &&
                               records[0].detail.contains("too many map requests waiting (16 wait, at most 16)") &&
-                              records[1].requestId == QString("q%1").arg(serial) && order.isEmpty();
-    const int served = q.testServeMapAssetQueue();
+                              records[1].requestId == QString("q%1").arg(serial) && order.isEmpty() &&
+                              records[0].readOutcome.isEmpty();
+    const int served = poll();
     tally.check("queue: past 16 waiting a request is refused at once without the viewer deciding or reading; requests "
-                "that read nothing are served in one poll",
+                "that read nothing are answered at their dispatch, all in one poll",
                 waiting == 16 && refusedRight && q.mapAssetsRefusedQueueFull() == refusedBefore + 2 && served == 16 &&
-                  q.mapAssetQueueDepthMax() == 16,
+                  q.mapAssetQueueDepthMax() == 16 && q.mapReadsInFlight() == 0,
                 QString("%1 waiting, %2 answered on arrival (the first: %3 \"%4\"), the viewer asked %5 time(s) then; %6 "
                         "served in one poll; deepest %7")
                   .arg(waiting).arg(answeredAtOnce).arg(answeredAtOnce ? records[0].state : QString("-"))
@@ -6288,21 +6388,51 @@ static void checkMapAssetQueue(TerrainTestLog & tally)
                   .arg(q.mapAssetQueueDepthMax()));
   }
   {
-    // Dropped as when the connection ends: never answered, never handed to the viewer.
+    // A read the viewer no longer wants: cancelled; not read when it had not begun, answered stale either way.
+    order.clear();
+    records.clear();
+    const long long cancelledBefore = q.mapReadStats().cancelled;
+    const long long workerCancelledBefore = worker->stats().cancelled;
+    q.testDelayMapReads(300);   // the first read waits, so the second has not begun when it is cancelled
+    receive(1000);
+    receive(1000);
+    q.testServeMapAssetQueue();          // both dispatched, the first waiting in its delay
+    unwanted << QString("q%1").arg(serial);
+    q.testServeMapAssetQueue();          // the second cancelled by the viewer's check
+    q.testDelayMapReads(0);
+    poll();
+    const UnityIpcServer::MapAssetServed * second = records.size() == 2 ? &records[1] : nullptr;
+    tally.check("queue: a read the viewer no longer wants is cancelled -- not read, as it had not begun -- and answered "
+                "stale, once; the other is answered as read",
+                records.size() == 2 && records[0].readOutcome == "read" && second && second->state == "stale" &&
+                  second->readOutcome == "cancelled" && q.mapReadStats().cancelled == cancelledBefore + 1 &&
+                  worker->stats().cancelled == workerCancelledBefore + 1 && q.mapReadsInFlight() == 0,
+                QString("%1 answer(s): ").arg(records.size()) + ids() +
+                  (second ? "; the second " + second->describe() : QString()));
+    unwanted.clear();
+  }
+  {
+    // Dropped as when the connection ends: the waiting request and the reads in flight never answered.
     order.clear();
     records.clear();
     receive(1000);
     receive(1000);
     receive(1000);
+    q.testServeMapAssetQueue();   // two dispatched, one waiting
     const long long droppedBefore = q.mapAssetsQueueDropped();
+    const long long orphanedBefore = q.mapReadStats().orphaned;
     q.testDropMapAssetQueue();
-    const int after = q.testServeMapAssetQueue();
-    tally.check("queue: dropped with its connection, its requests never answered nor read",
-                q.mapAssetsWaiting() == 0 && q.mapAssetsQueueDropped() == droppedBefore + 3 && after == 0 && order.isEmpty() &&
-                  records.empty(),
-                QString("%1 waiting, %2 dropped, %3 served after, the viewer asked %4 time(s), %5 record(s)")
-                  .arg(q.mapAssetsWaiting()).arg(q.mapAssetsQueueDropped() - droppedBefore).arg(after).arg(order.size())
-                  .arg(records.size()));
+    const int after = poll();     // the two results taken back and dropped
+    tally.check("queue: dropped with its connection -- the request waiting never decided, the reads in flight never "
+                "answered, their results taken back and freed",
+                q.mapAssetsWaiting() == 0 && q.mapAssetsQueueDropped() == droppedBefore + 1 &&
+                  q.mapReadStats().orphaned == orphanedBefore + 2 && after == 0 && records.empty() &&
+                  q.mapReadsInFlight() == 0 && order.size() == 2 && worker->outstanding() == 0,
+                QString("%1 waiting, %2 dropped waiting, %3 reads dropped in flight, %4 answered after, %5 decided, %6 "
+                        "record(s), the worker holds %7 result(s)")
+                  .arg(q.mapAssetsWaiting()).arg(q.mapAssetsQueueDropped() - droppedBefore)
+                  .arg(q.mapReadStats().orphaned - orphanedBefore).arg(after).arg(order.size()).arg(records.size())
+                  .arg(worker->outstanding()));
   }
   {
     // The poll records are bounded.
@@ -6319,6 +6449,143 @@ static void checkMapAssetQueue(TerrainTestLog & tally)
                   q.mapAssetPollsTotal() == before + polls,
                 QString("%1 kept, %2 counted").arg(q.mapAssetPolls().size()).arg(q.mapAssetPollsTotal() - before));
   }
+  {
+    // No read is dispatched while more than MAP_ASSET_SEND_HIGH_WATER bytes wait to be sent (a player that does not read
+    // stops the reads); the requests wait, in order; with the bytes gone the dispatch goes on.
+    order.clear();
+    records.clear();
+    const long long heldBackBefore = q.mapReadStats().dispatchHeldBack;
+    q.testFakeUnsentBytes((long long)UnityIpcServer::MAP_ASSET_SEND_HIGH_WATER + 1);
+    receive(1000);
+    receive(1000);
+    const int first = q.testServeMapAssetQueue();
+    const size_t waitingHeld = q.mapAssetsWaiting(), inFlightHeld = q.mapReadsInFlight();
+    q.testFakeUnsentBytes(0);
+    poll();
+    const int answered = poll();
+    tally.check("queue: with more than the send high water waiting to be sent no read is dispatched; once it is sent, the "
+                "requests go on in order",
+                first == 0 && waitingHeld == 2 && inFlightHeld == 0 && q.mapReadStats().dispatchHeldBack > heldBackBefore &&
+                  answered == 2 && ids() == QString("q%1,q%2").arg(serial - 1).arg(serial),
+                QString("held back: %1 answered, %2 waiting, %3 in flight (held back %4 time(s)); after: %5 answered (%6)")
+                  .arg(first).arg(waitingHeld).arg(inFlightHeld).arg(q.mapReadStats().dispatchHeldBack - heldBackBefore)
+                  .arg(answered).arg(ids()));
+  }
+  {
+    // With reads in flight the queue still holds at most 16 waiting: past that a request is refused at once.
+    order.clear();
+    records.clear();
+    q.testDelayMapReads(400);
+    receive(1000);
+    receive(1000);
+    q.testServeMapAssetQueue();   // two dispatched, their reads waiting 400 ms in the worker
+    q.testDelayMapReads(0);
+    const long long refusedBefore = q.mapAssetsRefusedQueueFull();
+    for (int i = 0; i < 18; i++)
+      receive(1000);
+    const size_t waiting = q.mapAssetsWaiting(), inFlight = q.mapReadsInFlight();
+    for (int i = 0; i < 40 && (q.mapAssetsWaiting() > 0 || q.mapReadsInFlight() > 0); i++)
+      poll();
+    int refusedNow = 0;
+    for (const UnityIpcServer::MapAssetServed & r : records)
+      refusedNow += r.state == "refused" ? 1 : 0;
+    tally.check("queue: with 2 reads in flight 16 requests wait and the 17th and 18th are refused at once; every one is "
+                "answered once",
+                inFlight == 2 && waiting == 16 && q.mapAssetsRefusedQueueFull() == refusedBefore + 2 && refusedNow == 2 &&
+                  records.size() == 20 && q.mapReadsInFlight() == 0 && q.mapReadStats().inFlightMax <= 2,
+                QString("%1 in flight, %2 waiting, %3 refused; %4 answered in all").arg(inFlight).arg(waiting)
+                  .arg(q.mapAssetsRefusedQueueFull() - refusedBefore).arg(records.size()));
+  }
+  {
+    // stop() while a read is held (its file open) and another waits behind it: the hold lets go, the read finishes, the
+    // waiting job gets its "stopped" result unread, and the worker is joined at once.
+    auto held = std::make_shared<MapAssetWorker>([](const MapAssetWorker::Job & job, const MapAssetWorker::Lease &,
+                                                    const CASCFolder::ReadHooks * hooks) {
+      if (hooks && hooks->afterOpen)
+        hooks->afterOpen();
+      MapAssetWorker::Result r;
+      r.outcome = MapAssetWorker::Result::Outcome::Read;
+      r.inspection.readBytes = job.maxBytes;
+      return r;
+    });
+    MapAssetWorker::Job j;
+    j.maxBytes = 10;
+    j.cancelled = std::make_shared<std::atomic<bool>>(false);
+    j.testHold = true;
+    const quint64 t1 = held->submit(j);
+    MapAssetWorker::Job j2 = j;
+    j2.testHold = false;
+    const quint64 t2 = held->submit(j2);
+    wxStopWatch w;
+    while (!held->testHolding() && w.Time() < 5000)
+      wxMilliSleep(5);
+    const bool holding = held->testHolding();
+    wxStopWatch s;
+    held->stop();
+    const long stopMs = s.Time();
+    MapAssetWorker::Result r1, r2;
+    const bool got1 = held->takeResult(r1), got2 = held->takeResult(r2);
+    tally.check("worker: stop() during a held read lets it go, finishes it, answers the job waiting behind it \"stopped\", "
+                "and joins at once",
+                holding && stopMs < 2000 && got1 && got2 && r1.ticket == t1 && r1.outcome == MapAssetWorker::Result::Outcome::Read &&
+                  r2.ticket == t2 && r2.outcome == MapAssetWorker::Result::Outcome::Stopped && held->outstanding() == 0,
+                QString("held %1; stop() took %2 ms; first %3 (%4), second %5 (%6); %7 outstanding").arg(holding ? "yes" : "no")
+                  .arg(stopMs).arg(got1 ? MapAssetWorker::outcomeName(r1.outcome) : QString("none")).arg(r1.ticket)
+                  .arg(got2 ? MapAssetWorker::outcomeName(r2.outcome) : QString("none")).arg(r2.ticket).arg(held->outstanding()));
+  }
+  {
+    // THE WAKE: the results a worker makes before the event queue runs wake its server once (one wake waits at most),
+    // handled on this thread when the queue runs (here, a Yield); the server clears its notifier when it goes, so a
+    // result made afterwards posts nothing to it.
+    auto w2 = std::make_shared<MapAssetWorker>([](const MapAssetWorker::Job & job, const MapAssetWorker::Lease &,
+                                                  const CASCFolder::ReadHooks *) {
+      MapAssetWorker::Result r;
+      r.outcome = MapAssetWorker::Result::Outcome::Read;
+      r.inspection.readBytes = job.maxBytes;
+      return r;
+    });
+    MapAssetWorker::Job j;
+    j.maxBytes = 10;
+    j.cancelled = std::make_shared<std::atomic<bool>>(false);
+    long long wakes = -1;
+    bool notifierWhile = false;
+    {
+      UnityIpcServer s2;
+      s2.setMapAssetWorker(w2);
+      s2.wakeOnMapResults();
+      notifierWhile = w2->hasResultNotifier();
+      for (int i = 0; i < 3; i++)
+        w2->submit(j);
+      w2->waitIdle(5000);
+      const long long before = s2.mapReadStats().wakes;
+      wxTheApp->Yield(true);
+      wakes = s2.mapReadStats().wakes - before;
+    }
+    const bool notifierAfter = w2->hasResultNotifier();
+    w2->submit(j);
+    const bool idle = w2->waitIdle(5000);
+    tally.check("wake: 3 results made before the event queue ran wake their server once, handled on the GUI thread; the "
+                "server clears its notifier when it goes, and a result made after posts nothing",
+                notifierWhile && wakes == 1 && !notifierAfter && idle,
+                QString("notifier set: %1; %2 wake(s) handled for 3 results; notifier after the server went: %3; a "
+                        "result after it: %4").arg(notifierWhile ? "yes" : "no").arg(wakes)
+                  .arg(notifierAfter ? "still set" : "cleared").arg(idle ? "made" : "not made"));
+    w2->stop();
+  }
+  {
+    const MapAssetWorker::Stats s = worker->stats();
+    const UnityIpcServer::MapReadStats & m = q.mapReadStats();
+    tally.check("queue: the worker's accounting closes -- every read given has its result, none is held, at most 2 were "
+                "ever in flight",
+                worker->outstanding() == 0 && s.heldBytes == 0 && s.submitted == m.dispatched &&
+                  s.submitted == s.read + s.cancelled + s.storageChanged + s.noStorage + s.stopped + s.failed &&
+                  m.inFlightMax <= UnityIpcServer::MAP_ASSET_READS_IN_FLIGHT,
+                QString("%1 given, %2 read, %3 cancelled; %4 outstanding, %5 bytes held; %6 dispatched, %7 answered, %8 "
+                        "dropped, the most in flight %9")
+                  .arg(s.submitted).arg(s.read).arg(s.cancelled).arg(worker->outstanding()).arg(s.heldBytes)
+                  .arg(m.dispatched).arg(m.answered).arg(m.orphaned).arg(m.inFlightMax));
+  }
+  worker->stop();
 }
 
 // Real reads through the host's own handler (ModelViewer::ServeMapAsset) with a made-up current load of the loaded client
@@ -6382,7 +6649,7 @@ static void checkMapAssetReads(ModelViewer * frame, TerrainTestLog & tally)
   else
   {
     frame->m_terrainRequest = base;
-    const UnityIpcServer::MapAssetAnswer a = frame->ServeMapAsset(ask("tex0Adt", rootId));
+    const UnityIpcServer::MapAssetAnswer a = frame->ServeMapAssetAndWait(ask("tex0Adt", rootId));
     const ModelViewer::TerrainRequest & t = frame->m_terrainRequest;
     tally.check(QString("reads: root %1 asked for as a tex0 ADT is \"unreadable\", its second chunk named; read and counted, "
                         "the tex0 asked but not served").arg(rootId),
@@ -6398,13 +6665,13 @@ static void checkMapAssetReads(ModelViewer * frame, TerrainTestLog & tally)
   else
   {
     frame->m_terrainRequest = base;
-    const UnityIpcServer::MapAssetAnswer a = frame->ServeMapAsset(ask("tex0Adt", tex0Id));
+    const UnityIpcServer::MapAssetAnswer a = frame->ServeMapAssetAndWait(ask("tex0Adt", tex0Id));
     const bool served = frame->m_terrainRequest.tex0Served;
     tally.check(QString("reads: tex0 %1 is served whole, its md5 the content key (the MD5 of its bytes)").arg(tex0Id),
                 a.state == "available" && a.bytes.size() == tex0Size && a.md5.size() == 32 && a.md5 == md5Of(a.bytes) &&
                   a.bytesRead == tex0Size && served,
                 describe(a) + QString("; the bytes' MD5 %1; tex0 served %2").arg(md5Of(a.bytes)).arg(served ? "yes" : "no"));
-    const UnityIpcServer::MapAssetAnswer b = frame->ServeMapAsset(ask("texture", tex0Id));
+    const UnityIpcServer::MapAssetAnswer b = frame->ServeMapAssetAndWait(ask("texture", tex0Id));
     const ModelViewer::TerrainRequest & t = frame->m_terrainRequest;
     tally.check(QString("reads: tex0 %1 asked for as a texture is \"unreadable\", not a BLP2; its bytes count against the "
                         "load's texture budget").arg(tex0Id),
@@ -6424,7 +6691,7 @@ static void checkMapAssetReads(ModelViewer * frame, TerrainTestLog & tally)
     withTex0.tex0Served = true;
     withTex0.reads = 3;
     frame->m_terrainRequest = withTex0;
-    const UnityIpcServer::MapAssetAnswer a = frame->ServeMapAsset(ask("texture", textureId));
+    const UnityIpcServer::MapAssetAnswer a = frame->ServeMapAssetAndWait(ask("texture", textureId));
     tally.check(QString("reads: texture %1 is served whole, a BLP2, its md5 the content key").arg(textureId),
                 a.state == "available" && a.bytes.size() == textureSize && a.bytes.startsWith("BLP2") &&
                   a.md5 == md5Of(a.bytes) && frame->m_terrainRequest.textureBytesRead == textureSize,
@@ -6432,7 +6699,7 @@ static void checkMapAssetReads(ModelViewer * frame, TerrainTestLog & tally)
     ModelViewer::TerrainRequest nearly = withTex0;
     nearly.textureBytesRead = UnityIpcServer::MAX_TERRAIN_TEXTURE_BYTES_PER_LOAD - 1000;
     frame->m_terrainRequest = nearly;
-    const UnityIpcServer::MapAssetAnswer b = frame->ServeMapAsset(ask("texture", textureId));
+    const UnityIpcServer::MapAssetAnswer b = frame->ServeMapAssetAndWait(ask("texture", textureId));
     tally.check(QString("reads: with 1000 bytes of the load's texture budget left, texture %1 is not read: \"unreadable\", "
                         "the limit applied named").arg(textureId),
                 b.state == "unreadable" &&
@@ -6443,7 +6710,7 @@ static void checkMapAssetReads(ModelViewer * frame, TerrainTestLog & tally)
     ModelViewer::TerrainRequest spent = withTex0;
     spent.textureBytesRead = UnityIpcServer::MAX_TERRAIN_TEXTURE_BYTES_PER_LOAD;
     frame->m_terrainRequest = spent;
-    const UnityIpcServer::MapAssetAnswer c = frame->ServeMapAsset(ask("texture", textureId));
+    const UnityIpcServer::MapAssetAnswer c = frame->ServeMapAssetAndWait(ask("texture", textureId));
     tally.check("reads: with the load's texture budget spent, a texture is refused unread",
                 c.state == "refused" && c.detail.contains("bytes of textures: at most") && c.readMs < 0.0 && c.bytesRead == 0,
                 describe(c) + QString(", readMs %1").arg(c.readMs));
@@ -6451,12 +6718,113 @@ static void checkMapAssetReads(ModelViewer * frame, TerrainTestLog & tally)
     reported.ended = true;
     reported.endedStatus = "built";
     frame->m_terrainRequest = reported;
-    const UnityIpcServer::MapAssetAnswer d = frame->ServeMapAsset(ask("texture", textureId));
+    const UnityIpcServer::MapAssetAnswer d = frame->ServeMapAssetAndWait(ask("texture", textureId));
     tally.check("reads: a texture of a load the player has reported is stale, unread",
                 d.state == "stale" && d.detail.contains(QString("load %1 was reported built").arg(base.load)) && d.readMs < 0.0,
                 describe(d));
   }
   frame->m_terrainRequest = saved;
+}
+
+// THE MAP ASSET WORKER on real files of the loaded client (no player involved, nothing sent): a read through the worker
+// is the catalogue's own read -- the same bytes, their content key their MD5 --; a file over the read's limit is not
+// read (size and limit named); a read whose bytes change before their check fails it ("damaged"); a read cancelled before
+// it began is not read; a read decided under another storage than the worker's is not read; and, on the client that has
+// one (Classic Beta's Map.db2, whose sections under keys this computer lacks were found by docs/world-viewer/00-audit.md
+// 3.1), a file encrypted with a key this computer does not have is "encrypted", nothing handed back.
+static void checkMapAssetWorkerReads(ModelViewer * frame, TerrainTestLog & tally)
+{
+  const std::shared_ptr<wow::WorldMapCatalog> catalog = frame->mapCatalog();
+  if (!catalog || catalog->status() != wow::WorldMapCatalog::Status::Ready)
+  {
+    tally.skip("worker: reads of real files", "the map catalogue is not ready");
+    return;
+  }
+  using Outcome = MapAssetWorker::Result::Outcome;
+  const qint64 MiB = 1024 * 1024;
+  const int wdtId = 775971;   // Azeroth's WDT: the same FileDataID in every audited client
+  wow::WdtReference ref;
+  ref.kind = wow::WdtReference::Kind::FileDataId;
+  ref.fileDataId = wdtId;
+  QByteArray direct;
+  const wow::WdtInspection own = catalog->inspectFile(ref, &direct, 64 * MiB);
+  if (own.state != wow::WdtAvailability::Available)
+  {
+    tally.skip("worker: reads of real files", QString("WDT %1 cannot be read here: ").arg(wdtId) + own.detail);
+    return;
+  }
+  const QString md5 = QString::fromLatin1(QCryptographicHash::hash(direct, QCryptographicHash::Md5).toHex());
+  const auto describe = [](const MapAssetWorker::Result & r) {
+    return MapAssetWorker::outcomeName(r.outcome) + ": " + wow::WorldMapCatalog::availabilityName(r.inspection.state) +
+           " \"" + (r.outcome == MapAssetWorker::Result::Outcome::Read ? r.inspection.detail : r.detail) + "\"" +
+           QString(", %1 bytes handed back, %2 read").arg(r.bytes.size()).arg(r.inspection.readBytes);
+  };
+  {
+    const MapAssetWorker::Result r = frame->TestReadThroughWorker(wdtId, 64 * MiB, false, false, false);
+    tally.check(QString("worker: WDT %1 read through the worker is the catalogue's own read -- the same bytes, the content "
+                        "key their MD5").arg(wdtId),
+                r.outcome == Outcome::Read && r.inspection.state == wow::WdtAvailability::Available && r.bytes == direct &&
+                  r.inspection.contentKey == md5 && r.inspection.contentKey == own.contentKey,
+                describe(r) + QString("; the catalogue read %1 bytes, MD5 %2; the worker's key %3").arg(direct.size()).arg(md5)
+                                .arg(r.inspection.contentKey));
+  }
+  {
+    const MapAssetWorker::Result r = frame->TestReadThroughWorker(wdtId, 1000, false, false, false);
+    tally.check("worker: with a 1000-byte limit the WDT is not read -- unreadable, its size and the limit named, nothing "
+                "handed back",
+                r.outcome == Outcome::Read && r.inspection.state == wow::WdtAvailability::Unreadable &&
+                  r.inspection.detail.contains(QString("is larger than this read allows (%1 bytes, the limit is 1000)")
+                                                 .arg(direct.size())) &&
+                  r.bytes.isEmpty() && r.inspection.readBytes == 0,
+                describe(r));
+  }
+  {
+    const MapAssetWorker::Result r = frame->TestReadThroughWorker(wdtId, 64 * MiB, true, false, false);
+    tally.check("worker: a read whose bytes are changed before their content-key check fails it -- unreadable, damaged, "
+                "nothing handed back",
+                r.outcome == Outcome::Read && r.inspection.state == wow::WdtAvailability::Unreadable &&
+                  r.inspection.detail.contains("is damaged on this computer: its data does not match its checksums") &&
+                  r.bytes.isEmpty() && r.inspection.contentKey.isEmpty() && r.inspection.readBytes == direct.size(),
+                describe(r));
+  }
+  {
+    const MapAssetWorker::Result r = frame->TestReadThroughWorker(wdtId, 64 * MiB, false, true, false);
+    tally.check("worker: a read cancelled before it began is not read",
+                r.outcome == Outcome::Cancelled && r.bytes.isEmpty() && r.inspection.readBytes == 0 &&
+                  r.inspection.state == wow::WdtAvailability::NotChecked,
+                describe(r));
+  }
+  {
+    const MapAssetWorker::Result r = frame->TestReadThroughWorker(wdtId, 64 * MiB, false, false, true);
+    tally.check("worker: a read decided under another storage than the one the worker holds is not read",
+                r.outcome == Outcome::StorageChanged && r.detail.contains("the client's storage changed while the request waited") &&
+                  r.bytes.isEmpty() && r.inspection.readBytes == 0,
+                describe(r));
+  }
+  {
+    const int mapDb2 = 1349477;
+    const QString product = catalog->client().product;
+    if (product != "wow_classic_beta")
+      tally.skip("worker: a file encrypted with a key this computer lacks is \"encrypted\"",
+                 QString("the case is Classic Beta's Map.db2 (FileDataID %1); this client is ").arg(mapDb2) + product);
+    else
+    {
+      const MapAssetWorker::Result r = frame->TestReadThroughWorker(mapDb2, 64 * MiB, false, false, false);
+      if (r.outcome == Outcome::Read && r.inspection.state == wow::WdtAvailability::Available)
+        tally.skip("worker: a file encrypted with a key this computer lacks is \"encrypted\"",
+                   QString("Map.db2 (%1) now reads whole: this computer has its keys").arg(mapDb2));
+      else
+        tally.check(QString("worker: Classic Beta's Map.db2 (%1), partly encrypted with keys this computer lacks, is "
+                            "unreadable, \"encrypted\", nothing handed back").arg(mapDb2),
+                    r.outcome == Outcome::Read && r.inspection.state == wow::WdtAvailability::Unreadable &&
+                      r.inspection.detail.contains("is encrypted with a key this computer does not have") && r.bytes.isEmpty(),
+                    describe(r));
+    }
+  }
+  tally.check("worker: nothing of these reads is left with the worker",
+              frame->m_mapAssetWorker->outstanding() == 0 && frame->m_mapAssetWorker->stats().heldBytes == 0,
+              QString("%1 outstanding, %2 bytes held").arg(frame->m_mapAssetWorker->outstanding())
+                .arg(frame->m_mapAssetWorker->stats().heldBytes));
 }
 
 // What the host takes as shown after a failed load (ModelViewer::OnTerrainTileLoaded), on made-up reports: a tile still
@@ -6841,14 +7209,22 @@ static int doHeadlessTerrainTileTest(ModelViewer * frame, int mapId, int tileX, 
     recordsFile.write(QJsonDocument(o).toJson(QJsonDocument::Compact));
     recordsFile.write("\n");
   };
-  // The timeout step's genuine late answer: the held requests are released when the player's report of this load arrives,
-  // before the host takes the load as ended (TERRAIN TEXTURES), so the file goes back "available" to a load already over.
+  // The timeout step's late answer: the held requests are released when the player's report of this load arrives; they
+  // are decided (held before the queue) or their reads finished (held in the worker) only in a later poll, once the host
+  // has taken the load as ended -- answered "stale", late, to requests the player retired.
   int releaseOnReportOf = 0, releasedOnReport = -1;
+  bool releaseOnReportInWorker = false;   // the held request is a read held in the map asset worker
+  bool shutdownReadHeld = false;          // readshutdown: a read is left held in the worker for the end of the run
   UnityIpcServer * ipc = nullptr;
   std::function<void(const UnityIpcServer::TerrainTileReport &)> previousTerrain;
   std::function<void(const UnityIpcServer::RuntimeState &)> previousRuntime;
   std::function<void(const UnityIpcServer::MapAssetServed &)> previousServed;
   std::function<void(const UnityIpcServer::MapAssetPoll &)> previousPoll;
+  std::function<void(const UnityIpcServer::PollTiming &)> previousPollTiming;
+  UnityIpcServer::PollTiming lastPoll;   // the last poll's parts (a long GUI round's log line names them)
+  double servingMax = 0.0;               // the most map serving in one poll since a step reset it (readslow)
+  bool readHoldBeforeOpen = false;       // readswitch ...:start: the worker's read held before its file is opened
+  QString currentStep = "start";         // the step running (a long poll's or GUI round's log line names it)
 
   // THE IN-PROCESS CHECKS, before any player: the decision, the host's bookkeeping of a failed load, its read tracker and
   // record ring, and the size limit of the catalogue's read. (That a refused file is never read is shown where the reads
@@ -6862,6 +7238,7 @@ static int doHeadlessTerrainTileTest(ModelViewer * frame, int mapId, int tileX, 
   checkMapAssetRecordRing(tally);
   checkTerrainReportLists(tally);
   checkMapAssetReads(frame, tally);
+  checkMapAssetWorkerReads(frame, tally);
   {
     const QString tooLargeCheck = "inspectFile with a 1000-byte limit refuses the WDT, size and limit named, no bytes handed back";
     const wow::MapEntry * entry = startCatalog ? startCatalog->find(mapId) : nullptr;
@@ -6958,7 +7335,13 @@ static int doHeadlessTerrainTileTest(ModelViewer * frame, int mapId, int tileX, 
       if (releaseOnReportOf > 0 && r.load == releaseOnReportOf)
       {
         releaseOnReportOf = 0;
-        releasedOnReport = ipc->testReleaseHeldMapAssets();
+        if (!releaseOnReportInWorker)
+          releasedOnReport = ipc->testReleaseHeldMapAssets();
+        else
+        {
+          releasedOnReport = ipc->testMapReadHeld() ? 1 : 0;
+          ipc->testReleaseMapRead();
+        }
       }
       reportsTotal++;
       retiredReported += std::max(0, r.requestsRetired);
@@ -7019,11 +7402,16 @@ static int doHeadlessTerrainTileTest(ModelViewer * frame, int mapId, int tileX, 
         addTiming(group + " handlerMs", s.handlerMs);
         addTiming(group + " readMs", s.readMs);
         addTiming(group + " queuedMs", s.queuedMs);
+        // THE MAP ASSET WORKER: the read on the worker, and the time from the dispatch to the result taken back.
+        addTiming(group + " workerMs", s.timings.value("workerMs").toDouble(-1.0));
+        addTiming(group + " inFlightMs", s.timings.value("inFlightMs").toDouble(-1.0));
         if (s.bytes > 4 * 1024 * 1024)
         {
           addTiming("over 4 MiB handlerMs", s.handlerMs);
           addTiming("over 4 MiB readMs", s.readMs);
           addTiming("over 4 MiB queuedMs", s.queuedMs);
+          addTiming("over 4 MiB workerMs", s.timings.value("workerMs").toDouble(-1.0));
+          addTiming("over 4 MiB inFlightMs", s.timings.value("inFlightMs").toDouble(-1.0));
         }
       }
       else
@@ -7039,6 +7427,38 @@ static int doHeadlessTerrainTileTest(ModelViewer * frame, int mapId, int tileX, 
       pollWaitingMax = std::max(pollWaitingMax, p.waitingAfter);
       if (previousPoll)
         previousPoll(p);
+    };
+    // Every poll's time on this thread, and every round of this test's pumping (the poll and the wx queue): the GUI
+    // thread's longest uninterrupted work while map files are served.
+    previousPollTiming = ipc->onPollTiming;
+    ipc->onPollTiming = [&, previousPollTiming](const UnityIpcServer::PollTiming & p) {
+      addTiming("gui pollMs", p.pollMs);
+      if (p.mapAnswered > 0)
+        addTiming("gui pollMs answering", p.pollMs);
+      addTiming("gui poll intervalMs", p.sincePreviousMs);
+      // The poll's parts: the player's messages (their handlers -- this test's included), the map serving without this
+      // test's record keeping (what the viewer itself spends), that record keeping, the send.
+      addTiming("gui poll receiveMs", p.receiveMs);
+      addTiming("gui poll mapServingMs", p.serveMs - p.recordMs);
+      servingMax = std::max(servingMax, p.serveMs - p.recordMs);
+      addTiming("gui poll testRecordMs", p.recordMs);
+      addTiming("gui poll sendMs", p.sendMs);
+      lastPoll = p;
+      if (p.pollMs > 20.0)
+        LOG_INFO << "[terrain-test] a poll of" << QString::number(p.pollMs, 'f', 3) << "ms at" << currentStep
+                 << QString(": receive %1, map serving %2 (this test's records %3), send %4 ms, %5 map answer(s)")
+                      .arg(p.receiveMs, 0, 'f', 3).arg(p.serveMs - p.recordMs, 0, 'f', 3).arg(p.recordMs, 0, 'f', 3)
+                      .arg(p.sendMs, 0, 'f', 3).arg(p.mapAnswered);
+      if (previousPollTiming)
+        previousPollTiming(p);
+    };
+    g_pumpBusy = [&](double ms) {
+      addTiming("gui pump busyMs", ms);
+      if (ms > 20.0)
+        LOG_INFO << "[terrain-test] a GUI round of" << QString::number(ms, 'f', 3) << "ms at" << currentStep
+                 << QString("(its last poll %1 ms: receive %2, map serving %3, send %4)").arg(lastPoll.pollMs, 0, 'f', 3)
+                      .arg(lastPoll.receiveMs, 0, 'f', 3).arg(lastPoll.serveMs - lastPoll.recordMs, 0, 'f', 3)
+                      .arg(lastPoll.sendMs, 0, 'f', 3);
     };
     wxStopWatch ready;
     while (!ipc->isUnityReady() && ready.Time() < 60000 && frame->unityRendererHost->isRunning())
@@ -7503,31 +7923,57 @@ static int doHeadlessTerrainTileTest(ModelViewer * frame, int mapId, int tileX, 
     };
     // A load whose request of role is held: the hook armed, the load sent, its request awaited until the server holds it.
     // Returns the load (0 when it was not sent); heldId stays empty when nothing was held.
+    // The held request let go: back to the front of the queue (held before it), or the worker's read let go (held in
+    // the worker, its file open). How many were let go.
+    const auto releaseHeld = [&](bool inWorker) {
+      if (!inWorker)
+        return ipc->testReleaseHeldMapAssets();
+      const int held = ipc->testMapReadHeld() ? 1 : 0;
+      ipc->testReleaseMapRead();
+      return held;
+    };
+    // inWorker: the request is not held before the queue but decided and dispatched as any, and its read held in the map
+    // asset worker with the file open (the storage referenced by the worker and by the open file).
     const auto requestHeld = [&](const QString & label, const QString & role, const Tile & at, const QString & step,
-                                 QString & heldId) {
+                                 QString & heldId, bool inWorker) {
       heldId.clear();
       QString why;
-      ipc->testHoldNextMapAsset(role);
+      if (inWorker)
+        ipc->testHoldNextMapRead(role, readHoldBeforeOpen);
+      else
+        ipc->testHoldNextMapAsset(role);
       const int load = request(at.map, at.x, at.y, step, why);
       if (load <= 0)
       {
         ipc->testCancelMapAssetHold();
+        ipc->testCancelMapReadHold();
         tally.check(label + ": requested", false, why);
         return 0;
       }
       wxStopWatch w;
-      while (ipc->mapAssetsHeld().empty() && w.Time() < 20000 && ipc->isUnityReady())
-        pumpIpc(ipc, 1);
-      const QJsonObject held = ipc->mapAssetsHeld().empty() ? QJsonObject() : ipc->mapAssetsHeld().back();
+      QJsonObject held;
+      if (inWorker)
+        while (!ipc->testMapReadHeld(&held) && w.Time() < 20000 && ipc->isUnityReady())
+          pumpIpc(ipc, 1);
+      else
+      {
+        while (ipc->mapAssetsHeld().empty() && w.Time() < 20000 && ipc->isUnityReady())
+          pumpIpc(ipc, 1);
+        held = ipc->mapAssetsHeld().empty() ? QJsonObject() : ipc->mapAssetsHeld().back();
+      }
       const bool ok = !held.isEmpty() && held.value("load").toInt(0) == load && held.value("role").toString() == role;
       if (ok)
         heldId = held.value("requestId").toString();
       else
       {
         ipc->testCancelMapAssetHold();
-        ipc->testReleaseHeldMapAssets();
+        ipc->testCancelMapReadHold();
+        releaseHeld(inWorker);
       }
-      tally.check(label + QString(": load %1's %2 request is held unanswered").arg(load).arg(role), ok,
+      tally.check(label + QString(": load %1's %2 request is held %3").arg(load).arg(role)
+                            .arg(!inWorker ? "unanswered" : readHoldBeforeOpen ? "in the map asset worker, before its file is "
+                                                                                 "opened"
+                                                                               : "in the map asset worker, its file open"), ok,
                   held.isEmpty() ? QString("nothing held within 20 s")
                                  : QString("request %1, load %2, role %3, held after %4 ms").arg(held.value("requestId").toString())
                                      .arg(held.value("load").toInt(0)).arg(held.value("role").toString()).arg(w.Time()));
@@ -7671,6 +8117,24 @@ static int doHeadlessTerrainTileTest(ModelViewer * frame, int mapId, int tileX, 
                     QString(" -> %1, loading %2, terrain loading %3").arg(after.terrainLoad).arg(after.loading ? "true" : "false")
                       .arg(after.terrainLoading));
     };
+    // A read held in the worker and let go after its load (or its client) had moved on: it was read -- whole, its file
+    // open all along, every byte checked against the content key -- and then answered stale, its bytes never sent.
+    const auto checkReadThenStale = [&](const QString & label, int load, const QString & heldId, const QString & role) {
+      UnityIpcServer::MapAssetServed a;
+      bool found = false;
+      for (const UnityIpcServer::MapAssetServed & x : servedFor(load))
+        if (x.requestId == heldId)
+        {
+          a = x;
+          found = true;
+        }
+      tally.check(label + QString(": the held %1 read was finished and its every byte checked against the content key -- "
+                                  "\"available\": the storage it began on was intact to its end -- then answered stale, nothing "
+                                  "sent").arg(role),
+                  found && a.state == "stale" && a.readOutcome == "read" && a.readState == "available" && a.bytes < 0 &&
+                    a.timings.value("testHeld").toBool(),
+                  found ? a.describe() : QString("no answer for the held request recorded"));
+    };
     // The roles a late step may hold: the WDT and the root for any player, the tex0 and a texture for one that draws
     // terrain textures (an older one never asks for them: skipped, the reason named).
     const auto lateRoleUsable = [&](const QString & label, const QString & role) {
@@ -7701,6 +8165,7 @@ static int doHeadlessTerrainTileTest(ModelViewer * frame, int mapId, int tileX, 
       const QString arg = step.section(':', 1).trimmed();
       const QString label = QString("step %1 %2").arg(s + 1).arg(step);
       LOG_INFO << "[terrain-test]" << label;
+      currentStep = label;
       Tile t = {0, 0, 0};
       QString why;
       if (kind == "tile")
@@ -8049,8 +8514,14 @@ static int doHeadlessTerrainTileTest(ModelViewer * frame, int mapId, int tileX, 
                       got ? QString("model of before %1; ").arg(before.modelFileDataID) + now.describe() : QString("no answer"));
         }
       }
-      else if (kind == "timeout" || kind == "latesupersede" || kind == "lateclear")
+      else if (kind == "timeout" || kind == "latesupersede" || kind == "lateclear" || kind == "readtimeout" ||
+               kind == "readsupersede" || kind == "readclear")
       {
+        // read...: the same, with the request's read held in the map asset worker (its file open) instead of the request
+        // held before the queue.
+        const bool inWorker = kind.startsWith("read");
+        const QString base = !inWorker ? kind : kind == "readtimeout" ? QString("timeout")
+                                              : kind == "readsupersede" ? QString("latesupersede") : QString("lateclear");
         const QString role = arg.section(':', 3).trimmed();
         if (!parseTile(arg, t) || (role != "wdt" && role != "rootAdt" && role != "tex0Adt" && role != "texture"))
         {
@@ -8064,7 +8535,7 @@ static int doHeadlessTerrainTileTest(ModelViewer * frame, int mapId, int tileX, 
         if (!sampleBefore(label, before))
           continue;
         long timeoutMs = 30000;   // the player's own, when it does not say (a player before terrainTimeoutMs)
-        if (kind == "timeout")
+        if (base == "timeout")
         {
           checkField(label, "terrainTimeoutMs", before.terrainTimeoutMs,
                      before.terrainTimeoutMs >= 1000 && before.terrainTimeoutMs <= 120000,
@@ -8074,17 +8545,18 @@ static int doHeadlessTerrainTileTest(ModelViewer * frame, int mapId, int tileX, 
             timeoutMs = before.terrainTimeoutMs;
         }
         QString heldId;
-        const int load = requestHeld(label, role, t, step, heldId);
+        const int load = requestHeld(label, role, t, step, heldId, inWorker);
         if (load <= 0 || heldId.isEmpty())
           continue;
         UnityIpcServer::TerrainTileReport r;
         bool got = false;
         int alreadyReleased = -1;
-        if (kind == "timeout")
+        if (base == "timeout")
         {
           // Nothing answers: the player's own timeout ends the load. The held request is released as its report arrives,
-          // before the host takes the load as ended: the file goes back "available", to a load already over.
+          // and answered once the host has taken the load as ended: stale, a late answer.
           releaseOnReportOf = load;
+          releaseOnReportInWorker = inWorker;
           releasedOnReport = -1;
           got = waitReport(load, timeoutMs + 15000, r);
           releaseOnReportOf = 0;
@@ -8093,19 +8565,23 @@ static int doHeadlessTerrainTileTest(ModelViewer * frame, int mapId, int tileX, 
                       got && r.status == "failed" && r.reason.contains("timed out"),
                       got ? r.status + " " + r.reason : QString("no answer within %1 ms").arg(timeoutMs + 15000));
         }
-        else if (kind == "latesupersede")
+        else if (base == "latesupersede")
         {
           // The next load, not held, replaces it and is built; the held request is answered after that.
           const int second = request(t.map, t.x, t.y, step, why);
           if (second <= 0)
           {
             tally.check(label + ": the second load is requested", false, why);
-            ipc->testReleaseHeldMapAssets();
+            releaseHeld(inWorker);
             continue;
           }
           got = waitReport(load, 60000, r);
           tally.check(label + QString(": the held load (%1) is answered \"superseded\"").arg(load),
                       got && r.status == "superseded", got ? r.status + " " + r.reason : QString("no answer within 60 s"));
+          // A read held in the worker holds the worker: the reads of the next load wait behind it (one worker, reads in
+          // the order given). Let go once the old load is over, it is answered stale, and the next load is read.
+          if (inWorker)
+            alreadyReleased = releaseHeld(true);
           if (checkBuilt(label + ": the second", second, t.map, t.x, t.y))
             sampleShown(label, afterTile);
           last = t;
@@ -8121,20 +8597,24 @@ static int doHeadlessTerrainTileTest(ModelViewer * frame, int mapId, int tileX, 
         QStringList retiredIds;
         if (!checkEnded(label, before, heldId, load, ended, retiredIds))
         {
-          ipc->testReleaseHeldMapAssets();
+          releaseHeld(inWorker);
           continue;
         }
-        if (kind == "lateclear")
+        if (base == "lateclear")
           tally.check(label + ": no terrain tile, view, load" + (texturedPlayer ? ", texture or alpha array" : "") + " left",
                       ended.liveTerrainTiles == 0 && ended.terrainView == 0 && ended.terrainLoading == 0 &&
                         noTerrainTextures(ended), ended.describe());
-        // After a timeout nothing had changed for the host when the request was released, so the file goes back: a
-        // genuine late answer. Every other release meets a load the host has moved on from.
-        releaseLate(label, load, heldId, retiredIds, before, ended, kind == "timeout" ? "available" : "stale", alreadyReleased,
-                    after);
+        // Every release meets a load the host has moved on from by the time it is answered: after a timeout the held request
+        // is let go as the load's report arrives, and is decided (held before the queue) or its read finished (held in the
+        // worker) only once the host has taken the load as ended -- answered stale.
+        if (inWorker && alreadyReleased < 0)
+          alreadyReleased = releaseHeld(true);
+        releaseLate(label, load, heldId, retiredIds, before, ended, "stale", alreadyReleased, after);
+        if (inWorker)
+          checkReadThenStale(label, load, heldId, role);
         // Once the host knows the load ended, what the load still asks for is stale unread: asked here of the host's own
         // handler, as the player would ask it.
-        if (kind == "timeout")
+        if (base == "timeout")
         {
           QJsonObject again;
           again["type"] = "getMapAsset";
@@ -8143,17 +8623,23 @@ static int doHeadlessTerrainTileTest(ModelViewer * frame, int mapId, int tileX, 
           again["assetEpoch"] = UnityAssetAccess::clientEpoch();
           again["role"] = role;
           again["fileDataID"] = lastServed(load, role) ? lastServed(load, role)->fileDataID : 1;
-          const UnityIpcServer::MapAssetAnswer a = frame->ServeMapAsset(again);
+          const UnityIpcServer::MapAssetAnswer a = frame->ServeMapAssetAndWait(again);
           tally.check(label + QString(": once the player reported load %1, the host answers what it asks for stale, unread")
                                 .arg(load),
                       a.state == "stale" && a.detail.contains(QString("load %1 was reported failed").arg(load)) && a.readMs < 0.0,
                       QString("\"%1\" \"%2\" readMs %3").arg(a.state).arg(a.detail).arg(a.readMs));
         }
-        if (kind == "lateclear")
+        if (base == "lateclear")
           checkDroppedNotice(label);
       }
-      else if (kind == "lateswitch")
+      else if (kind == "lateswitch" || kind == "readswitch")
       {
+        // readswitch: the same, with the request's read held in the map asset worker, its file open on the storage of the
+        // client being replaced, while the GUI lets go of that storage; readswitch:...:<role>:start holds it before its file
+        // is opened, so that only the worker's own reference keeps that storage: the read opens and reads its file on it
+        // after the switch.
+        const bool inWorker = kind == "readswitch";
+        readHoldBeforeOpen = inWorker && arg.section(':', 5, 5).trimmed() == "start";
         // lateswitch:<product>:<map>:<x>:<y>[:<role>] (the WDT held when no role is named).
         const QString product = arg.section(':', 0, 0).trimmed();
         const QString role = arg.section(':', 4, 4).trimmed().isEmpty() ? QString("wdt") : arg.section(':', 4, 4).trimmed();
@@ -8180,13 +8666,14 @@ static int doHeadlessTerrainTileTest(ModelViewer * frame, int mapId, int tileX, 
         if (!sampleBefore(label, before))
           continue;
         QString heldId;
-        const int load = requestHeld(label, role, t, step, heldId);
+        const int load = requestHeld(label, role, t, step, heldId, inWorker);
         if (load <= 0 || heldId.isEmpty())
           continue;
         // The client is replaced with the load's request held: it can only be answered after.
         const long long servedBefore = servedTotal;
         const size_t readsBeforeSwitch = ipc->mapAssetReads().size();
         const int readsEpochBeforeSwitch = ipc->mapAssetReads().epoch();
+        readHoldBeforeOpen = false;
         const bool loaded = frame->LoadWoW(&chosen);
         droppedModel = 0;   // the canvas was emptied with the client
         const long long servedDuring = servedTotal - servedBefore;
@@ -8194,7 +8681,7 @@ static int doHeadlessTerrainTileTest(ModelViewer * frame, int mapId, int tileX, 
         if (servedDuring != 0)
         {
           tally.check(label + ": test invalid", false, QString("%1 getMapAsset answered before the load returned").arg(servedDuring));
-          ipc->testReleaseHeldMapAssets();
+          releaseHeld(inWorker);
           continue;
         }
         // The host forgot the files read from the client before as it was replaced, not at the next read.
@@ -8214,13 +8701,38 @@ static int doHeadlessTerrainTileTest(ModelViewer * frame, int mapId, int tileX, 
         QStringList retiredIds;
         if (!checkEnded(label, before, heldId, load, ended, retiredIds))
         {
-          ipc->testReleaseHeldMapAssets();
+          releaseHeld(inWorker);
           continue;
         }
         tally.check(label + ": no terrain tile is left", ended.liveTerrainTiles == 0 && ended.terrainView == 0 &&
                       noTerrainTextures(ended), ended.describe());
-        releaseLate(label, load, heldId, retiredIds, before, ended, "stale", -1, after);
-        const UnityIpcServer::MapAssetServed * held = lastServed(load, role);
+        const MapAssetWorker::Stats workerBefore = ipc->mapAssetWorker()->stats();
+        releaseLate(label, load, heldId, retiredIds, before, ended, "stale", inWorker ? releaseHeld(true) : -1, after);
+        if (inWorker)
+        {
+          checkReadThenStale(label, load, heldId, role);
+          // ... after which the worker let go of the previous client's storage: its own reference released, on the worker
+          // (the storage destroyed then when it was the last).
+          wxStopWatch w;
+          while (ipc->mapAssetWorker()->stats().leasesReleased <= workerBefore.leasesReleased && w.Time() < 5000)
+            pumpIpc(ipc, 1);
+          const MapAssetWorker::Stats now = ipc->mapAssetWorker()->stats();
+          tally.check(label + ": once its held read was done, the worker let go of the previous client's storage",
+                      now.leasesReleased > workerBefore.leasesReleased && !ipc->mapAssetWorker()->holdsLease(),
+                      QString("storage references released %1 -> %2; it holds one now: %3").arg(workerBefore.leasesReleased)
+                        .arg(now.leasesReleased).arg(ipc->mapAssetWorker()->holdsLease() ? "yes" : "no"));
+        }
+        // The held request's own answer (other requests of the load of that role -- the textures waiting behind a read
+        // held in the worker -- may have been answered after it).
+        UnityIpcServer::MapAssetServed heldAnswer;
+        bool heldFound = false;
+        for (const UnityIpcServer::MapAssetServed & x : servedFor(load))
+          if (x.requestId == heldId)
+          {
+            heldAnswer = x;
+            heldFound = true;
+          }
+        const UnityIpcServer::MapAssetServed * held = heldFound ? &heldAnswer : nullptr;
         tally.check(label + QString(": the released %1 request is answered stale, under the epoch before the switch and the one "
                                     "after").arg(role),
                     held && held->requestId == heldId && held->state == "stale" && held->assetEpoch == epoch &&
@@ -8236,6 +8748,12 @@ static int doHeadlessTerrainTileTest(ModelViewer * frame, int mapId, int tileX, 
         }
         if (checkBuilt(label + ": the new client's tile", fresh, t.map, t.x, t.y))
         {
+          if (inWorker)
+            tally.check(label + ": the worker reads the new client's storage through a reference of its own",
+                        ipc->mapAssetWorker()->holdsLease() &&
+                          ipc->mapAssetWorker()->stats().leasesGranted > workerBefore.leasesGranted,
+                        QString("storage references taken %1 -> %2").arg(workerBefore.leasesGranted)
+                          .arg(ipc->mapAssetWorker()->stats().leasesGranted));
           sampleShown(label, afterTile);
           std::set<int> files;
           QStringList notFirst;
@@ -8261,8 +8779,10 @@ static int doHeadlessTerrainTileTest(ModelViewer * frame, int mapId, int tileX, 
         }
         last = t;
       }
-      else if (kind == "reconnect")
+      else if (kind == "reconnect" || kind == "readreconnect")
       {
+        // readreconnect:<map>:<x>:<y>[:<role>]: the same, with the request's read held in the map asset worker.
+        const bool inWorker = kind == "readreconnect";
         // reconnect, or reconnect:<map>:<x>:<y>[:<role>] with that load's request of role (the WDT unless named) held.
         const bool withLoad = !arg.isEmpty();
         const QString role = arg.section(':', 3, 3).trimmed().isEmpty() ? QString("wdt") : arg.section(':', 3, 3).trimmed();
@@ -8277,12 +8797,14 @@ static int doHeadlessTerrainTileTest(ModelViewer * frame, int mapId, int tileX, 
         QString heldId;
         if (withLoad)
         {
-          heldLoad = requestHeld(label, role, t, step, heldId);
+          heldLoad = requestHeld(label, role, t, step, heldId, inWorker);
           if (heldLoad <= 0 || heldId.isEmpty())
             continue;
         }
         // The player closed and started again, as a restart of the viewport does.
         const long long droppedBefore = ipc->mapAssetsHeldDropped();
+        const long long orphanedBefore = ipc->mapReadStats().orphaned;
+        const size_t readsInFlightBefore = ipc->mapReadsInFlight();
         const std::set<std::pair<int, int>> filesBeforeRestart = filesServed;
         const size_t readsBefore = ipc->mapAssetReads().size();
         const int readsEpochBefore = ipc->mapAssetReads().epoch();
@@ -8292,6 +8814,15 @@ static int doHeadlessTerrainTileTest(ModelViewer * frame, int mapId, int tileX, 
         if (withLoad)
         {
           loadsOrphaned.push_back(heldLoad);
+          if (inWorker)
+            tally.check(label + QString(": the held read of %1 and every other read in flight are dropped with their connection, "
+                                        "never to be answered, and nothing waits").arg(heldId),
+                        readsInFlightBefore >= 1 && ipc->mapReadStats().orphaned == orphanedBefore + (long long)readsInFlightBefore &&
+                          ipc->mapAssetsWaiting() == 0,
+                        QString("%1 read(s) in flight before the restart, %2 dropped with the connection; %3 waiting")
+                          .arg(readsInFlightBefore).arg(ipc->mapReadStats().orphaned - orphanedBefore)
+                          .arg(ipc->mapAssetsWaiting()));
+          else
           tally.check(label + QString(": the held request %1 is dropped unanswered with its connection, and nothing waits")
                                 .arg(heldId),
                       ipc->mapAssetsHeld().empty() && !ipc->testMapAssetHoldArmed() &&
@@ -8299,6 +8830,9 @@ static int doHeadlessTerrainTileTest(ModelViewer * frame, int mapId, int tileX, 
                       QString("%1 held, %2 dropped unanswered (%3 before), %4 waiting").arg(ipc->mapAssetsHeld().size())
                         .arg(ipc->mapAssetsHeldDropped()).arg(droppedBefore).arg(ipc->mapAssetsWaiting()));
         }
+        // The worker's held read let go: it finishes, and its result is dropped when taken back (its connection is gone).
+        if (inWorker && withLoad)
+          releaseHeld(true);
         if (!frame->StartUnityRenderer(/* selfTest */ true))
         {
           tally.check(label + ": the player starts again", false,
@@ -8371,6 +8905,187 @@ static int doHeadlessTerrainTileTest(ModelViewer * frame, int mapId, int tileX, 
             heldAnswers += e.s.load == heldLoad && e.s.requestId == heldId ? 1 : 0;
           tally.check(label + QString(": load %1's held request %2 was never answered").arg(heldLoad).arg(heldId),
                       heldAnswers == 0, QString("%1 answer(s) to it; %2 answer(s) for the load in all").arg(heldAnswers).arg(answers));
+        }
+      }
+      else if (kind == "readcorrupt")
+      {
+        // readcorrupt:<map>:<x>:<y>:<role>: that load's read of role has one byte changed in the worker before its content
+        // key is checked -- the check must catch it: "unreadable", damaged, nothing sent -- and the load goes on as for any
+        // unreadable file of that role.
+        const QString role = arg.section(':', 3).trimmed();
+        if (!parseTile(arg, t) || (role != "wdt" && role != "rootAdt" && role != "tex0Adt" && role != "texture"))
+        {
+          tally.check(label, false, "expected readcorrupt:<map>:<x>:<y>:<wdt|rootAdt|tex0Adt|texture>");
+          continue;
+        }
+        if (!lateRoleUsable(label, role))
+          continue;
+        ipc->testCorruptNextMapRead(role);
+        const int load = request(t.map, t.x, t.y, step, why);
+        if (load <= 0)
+        {
+          tally.check(label + ": requested", false, why);
+          continue;
+        }
+        UnityIpcServer::TerrainTileReport r;
+        const bool got = waitReport(load, 60000, r);
+        UnityIpcServer::MapAssetServed bad;
+        bool found = false;
+        for (const UnityIpcServer::MapAssetServed & x : servedFor(load))
+          if (x.timings.value("testCorrupted").toBool())
+          {
+            bad = x;
+            found = true;
+          }
+        tally.check(label + QString(": the changed %1 read fails its content key -- \"unreadable\", damaged -- nothing sent")
+                              .arg(role),
+                    found && bad.role == role && bad.state == "unreadable" &&
+                      bad.detail.contains("is damaged on this computer: its data does not match its checksums") &&
+                      bad.bytes < 0 && bad.md5.isEmpty() && bad.readOutcome == "read" && bad.readState == "unreadable",
+                    found ? bad.describe() : QString("no answer to the changed read recorded"));
+        if (role == "wdt" || role == "rootAdt")
+          tally.check(label + QString(": load %1 fails, the host's state named").arg(load),
+                      got && r.status == "failed" && r.hostState == "unreadable",
+                      got ? r.status + " " + r.reason + " (host " + r.hostState + ")" : QString("no answer within 60 s"));
+        else
+          tally.check(label + QString(": load %1 is built, the file's failure in its material").arg(load),
+                      got && r.status == "built" && r.hasMaterial &&
+                        r.materialState == (role == "tex0Adt" ? QString("unavailable") : QString("partial")),
+                      got ? r.status + ", material " + r.materialState + " (" + r.materialReason + ")"
+                          : QString("no answer within 60 s"));
+        last = t;
+      }
+      else if (kind == "readslow")
+      {
+        // readslow:<ms>:<m>:<x>:<y>: that tile loaded with every map read waiting that long in the worker before it begins
+        // -- slow reads, made deterministic: the tile is built, every read of it took that long on the worker, and no poll
+        // of the GUI thread spent over 20 ms on map serving meanwhile.
+        bool ok = false;
+        const int ms = arg.section(':', 0, 0).toInt(&ok);
+        if (!ok || ms <= 0 || !parseTile(arg.section(':', 1), t))
+        {
+          tally.check(label, false, "expected readslow:<ms>:<map>:<x>:<y>");
+          continue;
+        }
+        ipc->testDelayMapReads(ms);
+        servingMax = 0.0;
+        const int load = request(t.map, t.x, t.y, step, why);
+        if (load <= 0)
+        {
+          ipc->testDelayMapReads(0);
+          tally.check(label + ": requested", false, why);
+          continue;
+        }
+        const bool built = checkBuilt(label, load, t.map, t.x, t.y);
+        ipc->testDelayMapReads(0);
+        if (built)
+          sampleShown(label, afterTile);
+        int reads = 0, fast = 0;
+        double slowest = 0.0;
+        for (const UnityIpcServer::MapAssetServed & x : servedFor(load))
+          if (x.readOutcome == "read")
+          {
+            reads++;
+            const double w = x.timings.value("workerMs").toDouble(-1.0);
+            slowest = std::max(slowest, w);
+            fast += w < ms ? 1 : 0;
+          }
+        tally.check(label + QString(": every read of load %1 took at least %2 ms on the worker, and no poll of the GUI thread "
+                                    "spent over 20 ms on map serving meanwhile").arg(load).arg(ms),
+                    reads > 0 && fast == 0 && servingMax <= 20.0,
+                    QString("%1 read(s), %2 under %3 ms, the slowest %4 ms; the longest map serving in a poll %5 ms")
+                      .arg(reads).arg(fast).arg(ms).arg(slowest, 0, 'f', 1).arg(servingMax, 0, 'f', 3));
+        last = t;
+      }
+      else if (kind == "readlate")
+      {
+        // readlate:<m>:<x>:<y>:<role>: a GENUINE LATE FILE ANSWER. The request's read is held in the worker; the player's
+        // own timeout ends the load, and its report is held at the host, which therefore still takes the load as current;
+        // the read is let go and answered "available" -- the file, a binary frame -- to a request the player has retired: it
+        // must read past the payload and count it late. Then the report is handled, and the load ends as any timed-out one.
+        const QString role = arg.section(':', 3).trimmed();
+        if (!parseTile(arg, t) || (role != "wdt" && role != "rootAdt" && role != "tex0Adt" && role != "texture"))
+        {
+          tally.check(label, false, "expected readlate:<map>:<x>:<y>:<wdt|rootAdt|tex0Adt|texture>");
+          continue;
+        }
+        if (!lateRoleUsable(label, role))
+          continue;
+        UnityIpcServer::RuntimeState before;
+        if (!sampleBefore(label, before))
+          continue;
+        const long timeoutMs = before.terrainTimeoutMs > 0 ? before.terrainTimeoutMs : 30000;
+        QString heldId;
+        const int load = requestHeld(label, role, t, step, heldId, true);
+        if (load <= 0 || heldId.isEmpty())
+          continue;
+        ipc->testHoldTerrainReport(load);
+        wxStopWatch w;
+        while (!ipc->testTerrainReportHeld() && w.Time() < timeoutMs + 15000)
+          pumpIpc(ipc, 1);
+        const bool reportHeld = ipc->testTerrainReportHeld();
+        tally.check(label + QString(": the player gives load %1 up (its own timeout); its report is held at the host").arg(load),
+                    reportHeld, QString("held after %1 ms (the player's timeout %2 ms)").arg(w.Time()).arg(timeoutMs));
+        const int released = releaseHeld(true);
+        UnityIpcServer::MapAssetServed late;
+        bool answered = false;
+        wxStopWatch a;
+        while (!answered && a.Time() < 10000)
+        {
+          pumpIpc(ipc, 1);
+          for (const UnityIpcServer::MapAssetServed & x : servedFor(load))
+            if (x.requestId == heldId)
+            {
+              late = x;
+              answered = true;
+            }
+        }
+        tally.check(label + QString(": the held %1 read, let go after the player gave the load up, is answered with the file "
+                                    "-- \"available\", a binary frame -- the host still taking the load as current").arg(role),
+                    answered && late.state == "available" && late.bytes > 0 && late.md5.size() == 32 &&
+                      late.readOutcome == "read" && late.timings.value("testHeld").toBool(),
+                    answered ? late.describe() : QString("no answer within 10 s"));
+        // Whatever else the load still had out is answered the same way before the report: let the queue settle.
+        pumpIpc(ipc, 50);
+        ipc->testReleaseTerrainReport();
+        UnityIpcServer::TerrainTileReport r;
+        const bool got = waitReport(load, 10000, r);
+        tally.check(label + QString(": load %1's report, handled now, says it timed out").arg(load),
+                    got && r.status == "failed" && r.reason.contains("timed out"),
+                    got ? r.status + " " + r.reason : QString("no report"));
+        UnityIpcServer::RuntimeState ended, after;
+        QStringList retiredIds;
+        if (!checkEnded(label, before, heldId, load, ended, retiredIds))
+          continue;
+        // The player dropped the file answer (and every other answer to the load's retired requests) as late, with its
+        // stream intact: releaseLate's checks, the held request's answer "available".
+        releaseLate(label, load, heldId, retiredIds, before, ended, "available", released, after);
+      }
+      else if (kind == "readshutdown")
+      {
+        // readshutdown[:<fileDataID>]: a read of that file (Azeroth's WDT, 775971, unless named) given to the worker and
+        // held there, its file open on the client's storage, and left so: the run ends with it (the last step). The
+        // viewer's shutdown must let it go, join the worker and release its storage reference -- the log's "map asset
+        // worker stopped" line after this run's results, and the process's own exit, are the rig's to check.
+        bool numeric = true;
+        const int id = arg.isEmpty() ? 775971 : arg.toInt(&numeric);
+        if (!numeric || id <= 0)
+        {
+          tally.check(label, false, "expected readshutdown or readshutdown:<fileDataID>");
+          continue;
+        }
+        const quint64 ticket = frame->TestHoldReadForShutdown(id);
+        wxStopWatch w;
+        while (ticket && !frame->m_mapAssetWorker->testHolding() && w.Time() < 10000)
+          pumpIpc(ipc, 1);
+        const bool holding = ticket && frame->m_mapAssetWorker->testHolding() &&
+                             frame->m_mapAssetWorker->testHeldTicket() == ticket;
+        tally.check(label + QString(": a read of %1 is held in the worker, its file open, for the shutdown").arg(id), holding,
+                    QString("ticket %1, held %2 after %3 ms").arg(ticket).arg(holding ? "yes" : "no").arg(w.Time()));
+        if (holding)
+        {
+          shutdownReadHeld = true;
+          out["readShutdownHeld"] = (double)ticket;
         }
       }
       else if (kind == "expectmaterial")
@@ -8630,11 +9345,32 @@ static int doHeadlessTerrainTileTest(ModelViewer * frame, int mapId, int tileX, 
                     .arg(UnityAssetAccess::clientEpoch()));
     }
     tally.check("no getMapAsset is held or waiting at the end, and no hold is armed", ipc->mapAssetsHeld().empty() &&
-                  !ipc->testMapAssetHoldArmed() && ipc->mapAssetsWaiting() == 0,
+                  !ipc->testMapAssetHoldArmed() && !ipc->testMapReadHookArmed() && ipc->mapAssetsWaiting() == 0,
                 QString("%1 held, %2 dropped unanswered in the run; %3 waiting, %4 dropped with a connection; %5 refused for a "
                         "full queue, at most %6 waited at once")
                   .arg(ipc->mapAssetsHeld().size()).arg(ipc->mapAssetsHeldDropped()).arg(ipc->mapAssetsWaiting())
                   .arg(ipc->mapAssetsQueueDropped()).arg(ipc->mapAssetsRefusedQueueFull()).arg(ipc->mapAssetQueueDepthMax()));
+    {
+      // THE MAP ASSET WORKER: nothing left in flight (but a read the run left held for the shutdown), never more than
+      // MAP_ASSET_READS_IN_FLIGHT at once nor more bytes held than that many texture limits, and every read dispatched
+      // answered or dropped with its connection.
+      const UnityIpcServer::MapReadStats & m = ipc->mapReadStats();
+      const MapAssetWorker::Stats w = ipc->mapAssetWorker() ? ipc->mapAssetWorker()->stats() : MapAssetWorker::Stats();
+      tally.check("no map read is in flight at the end", ipc->mapReadsInFlight() == 0,
+                  QString("%1 in flight%2").arg(ipc->mapReadsInFlight())
+                    .arg(shutdownReadHeld ? QString("; the worker holds the read left for the shutdown") : QString()));
+      tally.check(QString("at most %1 map reads were in flight at once, their results holding at most %2 bytes")
+                    .arg(UnityIpcServer::MAP_ASSET_READS_IN_FLIGHT)
+                    .arg((long long)UnityIpcServer::MAP_ASSET_READS_IN_FLIGHT * UnityIpcServer::MAX_TERRAIN_TEXTURE_BYTES),
+                  m.inFlightMax <= UnityIpcServer::MAP_ASSET_READS_IN_FLIGHT &&
+                    w.heldBytesMax <= (long long)UnityIpcServer::MAP_ASSET_READS_IN_FLIGHT * UnityIpcServer::MAX_TERRAIN_TEXTURE_BYTES,
+                  QString("the most in flight %1, the most bytes held %2").arg(m.inFlightMax).arg(w.heldBytesMax));
+      tally.check("every map read dispatched is answered, dropped with its connection, or still in flight",
+                  m.dispatched == m.answered + m.droppedUnanswered + (long long)ipc->mapReadsInFlight(),
+                  QString("%1 dispatched = %2 answered (%3 of them stale) + %4 dropped unanswered + %5 in flight; %6 cancelled")
+                    .arg(m.dispatched).arg(m.answered).arg(m.answeredStale).arg(m.droppedUnanswered)
+                    .arg(ipc->mapReadsInFlight()).arg(m.cancelled));
+    }
     tally.check(QString("the server keeps the most recent %1 poll records at most").arg(UnityIpcServer::MAP_ASSET_POLL_TIMINGS_KEPT),
                 (long long)ipc->mapAssetPolls().size() ==
                   std::min<long long>(ipc->mapAssetPollsTotal(), UnityIpcServer::MAP_ASSET_POLL_TIMINGS_KEPT),
@@ -8763,6 +9499,49 @@ static int doHeadlessTerrainTileTest(ModelViewer * frame, int mapId, int tileX, 
     queue["pollsKept"] = (int)ipc->mapAssetPolls().size();
     queue["pollsTotal"] = (double)ipc->mapAssetPollsTotal();
     out["mapAssetQueue"] = queue;
+    // THE MAP ASSET WORKER's accounting: the server's and the worker's.
+    QJsonObject mapReads;
+    const UnityIpcServer::MapReadStats & m = ipc->mapReadStats();
+    mapReads["dispatched"] = (double)m.dispatched;
+    mapReads["answered"] = (double)m.answered;
+    mapReads["answeredStale"] = (double)m.answeredStale;
+    mapReads["cancelled"] = (double)m.cancelled;
+    mapReads["orphaned"] = (double)m.orphaned;
+    mapReads["droppedUnanswered"] = (double)m.droppedUnanswered;
+    mapReads["refusedNoWorker"] = (double)m.refusedNoWorker;
+    mapReads["dispatchHeldBack"] = (double)m.dispatchHeldBack;
+    mapReads["inFlightMax"] = m.inFlightMax;
+    mapReads["inFlightAtMost"] = UnityIpcServer::MAP_ASSET_READS_IN_FLIGHT;
+    mapReads["unsentBytesMax"] = (double)m.unsentBytesMax;
+    mapReads["wakes"] = (double)m.wakes;
+    mapReads["wakesDeferred"] = (double)m.wakesDeferred;
+    mapReads["wakeBurstMsMax"] = m.wakeBurstMsMax;
+    mapReads["wakeBurstMs"] = UnityIpcServer::MAP_ASSET_WAKE_BURST_MS;
+    mapReads["takenOnWake"] = (double)m.takenOnWake;
+    mapReads["sendHighWater"] = UnityIpcServer::MAP_ASSET_SEND_HIGH_WATER;
+    mapReads["inFlightAtEnd"] = (int)ipc->mapReadsInFlight();
+    if (ipc->mapAssetWorker())
+    {
+      const MapAssetWorker::Stats w = ipc->mapAssetWorker()->stats();
+      QJsonObject wj;
+      wj["submitted"] = (double)w.submitted;
+      wj["read"] = (double)w.read;
+      wj["cancelled"] = (double)w.cancelled;
+      wj["storageChanged"] = (double)w.storageChanged;
+      wj["noStorage"] = (double)w.noStorage;
+      wj["stopped"] = (double)w.stopped;
+      wj["failed"] = (double)w.failed;
+      wj["leasesGranted"] = (double)w.leasesGranted;
+      wj["leasesReleased"] = (double)w.leasesReleased;
+      wj["jobsWaitingMax"] = w.jobsWaitingMax;
+      wj["heldBytes"] = (double)w.heldBytes;
+      wj["heldBytesMax"] = (double)w.heldBytesMax;
+      wj["busyMs"] = w.busyMs;
+      wj["outstanding"] = (double)ipc->mapAssetWorker()->outstanding();
+      wj["holdsLease"] = ipc->mapAssetWorker()->holdsLease();
+      mapReads["worker"] = wj;
+    }
+    out["mapAssetWorker"] = mapReads;
     QJsonObject reads;
     reads["tracked"] = (int)ipc->mapAssetReads().size();
     reads["capacity"] = (int)ipc->mapAssetReads().capacity();
@@ -8819,8 +9598,10 @@ static int doHeadlessTerrainTileTest(ModelViewer * frame, int mapId, int tileX, 
     ipc->onRuntimeState = previousRuntime;
     ipc->onMapAssetServed = previousServed;
     ipc->onMapAssetPoll = previousPoll;
+    ipc->onPollTiming = previousPollTiming;
     ipc->testCancelMapAssetHold();
   }
+  g_pumpBusy = nullptr;
   if (frame->unityRendererHost && frame->unityRendererHost->isRunning())
   {
     frame->unityRendererHost->shutdown();

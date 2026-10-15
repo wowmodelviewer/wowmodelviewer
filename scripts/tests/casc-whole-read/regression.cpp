@@ -92,6 +92,8 @@ extern "C"
     return true;
   }
   LPBYTE WINAPI CascFindEncryptionKey(HANDLE, ULONGLONG) { return nullptr; }
+  // CASCFolder::shareStorage (the map asset worker's reference): never called by these cases.
+  HANDLE WINAPI CascWowShareStorage(HANDLE hStorage) { return hStorage; }
   bool WINAPI CascWowFindRootEntry(HANDLE, const char *, DWORD, PDWORD, bool *)
   {
     lastError = ERROR_FILE_NOT_FOUND;

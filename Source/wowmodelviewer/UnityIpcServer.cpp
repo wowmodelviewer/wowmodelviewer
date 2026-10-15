@@ -76,12 +76,24 @@ UnityIpcServer::UnityIpcServer()
 {
   m_timer.SetOwner(this);
   Bind(wxEVT_TIMER, &UnityIpcServer::onPoll, this);
+  Bind(wxEVT_THREAD, &UnityIpcServer::onMapResultWake, this);
   m_clock.start();
 }
 
 UnityIpcServer::~UnityIpcServer()
 {
+  // No wake may be posted to this server once it goes: the notifier is cleared under the worker's lock, so none is
+  // running when this returns (the wakes already queued go with the wxEvtHandler).
+  if (m_mapAssetWorker && m_wakeOnResults)
+    m_mapAssetWorker->setResultNotifier(nullptr);
   stop();
+  // Results the worker made for this server's reads: nobody answers them any more (stop() dropped them).
+  if (m_mapAssetWorker)
+  {
+    MapAssetWorker::Result r;
+    while (m_mapAssetWorker->takeResult(r))
+      ;
+  }
 }
 
 #ifdef _WINDOWS
@@ -203,16 +215,31 @@ void UnityIpcServer::poll()
 {
   if (!m_listen)
     return;
+  const qint64 startNs = m_clock.nsecsElapsed();
+  m_pollMapAnswered = 0;
+  m_pollRecordMs = 0.0;
+  PollTiming timing;
   pollAccept();
   if (m_client)
-  {
     pollReceive();
-    // The map files asked for, in order, as far as this poll's budget goes (THE MAP ASSET QUEUE).
-    if (m_client)
-      serveMapAssetQueue();
-    if (m_client)
-      pollSend();
-  }
+  const qint64 receivedNs = m_clock.nsecsElapsed();
+  const double recordMsBefore = m_pollRecordMs;
+  // The map files asked for, in order, as far as this poll's budget goes (THE MAP ASSET QUEUE), and the worker's
+  // results -- with or without a client: the results of reads whose connection ended are taken back and dropped.
+  serveMapAssetQueue();
+  const qint64 servedNs = m_clock.nsecsElapsed();
+  if (m_client)
+    pollSend();
+  timing.receiveMs = (receivedNs - startNs) / 1e6;
+  timing.serveMs = (servedNs - receivedNs) / 1e6;
+  timing.recordMs = m_pollRecordMs - recordMsBefore;
+  timing.sendMs = (m_clock.nsecsElapsed() - servedNs) / 1e6;
+  timing.pollMs = (m_clock.nsecsElapsed() - startNs) / 1e6;
+  timing.sincePreviousMs = m_lastPollNs < 0 ? -1.0 : (startNs - m_lastPollNs) / 1e6;
+  timing.mapAnswered = m_pollMapAnswered;
+  m_lastPollNs = startNs;
+  if (onPollTiming)
+    onPollTiming(timing);
 }
 
 void UnityIpcServer::pollAccept()
@@ -249,6 +276,7 @@ void UnityIpcServer::pollAccept()
   m_outBuf.clear();
   m_outPos = 0;
   dropHeldMapAssets("a new connection");
+  m_connectionSerial++;   // a read in flight of the connection before is never answered on this one
   m_stats.connections++;
   LOG_INFO << "[unityipc] Unity connected (connection #" << m_stats.connections << ")";
 }
@@ -385,17 +413,24 @@ void UnityIpcServer::queueLineParts(std::initializer_list<QByteArray> parts)
 #endif
 }
 
-void UnityIpcServer::queueFrame(const QByteArray & header, const QByteArray & payload)
+void UnityIpcServer::queueFrame(const QByteArray & header, const QByteArray & payload, double * appendMs, double * sendMs)
 {
   if (!m_client)
     return;
+  QElapsedTimer step;
+  step.start();
   m_outBuf.append(header.constData(), (size_t)header.size());
   m_outBuf.push_back('\n');
   m_outBuf.append(payload.constData(), (size_t)payload.size());
   m_outBuf.push_back('\n');   // the player checks it: a payload not followed by its newline means out of step
+  if (appendMs)
+    *appendMs = step.nsecsElapsed() / 1e6;
+  step.restart();
 #ifdef _WINDOWS
   pollSend();
 #endif
+  if (sendMs)
+    *sendMs = step.nsecsElapsed() / 1e6;
 }
 
 QJsonArray UnityIpcServer::textureArray(const std::vector<UnityAssetAccess::ModelTexture> & textures)
@@ -1410,6 +1445,8 @@ QString UnityIpcServer::MapAssetServed::describe() const
          QString(" handlerMs=%1 queuedMs=%2 bytesRead=%3 first=%4").arg(handlerMs, 0, 'f', 3)
            .arg(queuedMs < 0.0 ? QString("-") : QString::number(queuedMs, 'f', 3)).arg(bytesRead)
            .arg(!firstTracked ? "untracked" : first ? "yes" : "no") +
+         (readOutcome.isEmpty() ? QString(" read=none")
+                                : " read=" + readOutcome + (readState.isEmpty() ? QString() : " (" + readState + ")")) +
          (detail.isEmpty() ? QString() : " detail=\"" + detail + "\"");
 }
 
@@ -1423,7 +1460,12 @@ void UnityIpcServer::recordMapAssetServed(const MapAssetServed & served)
     m_mapAssetRecordsDropped++;
   }
   if (onMapAssetServed)
+  {
+    QElapsedTimer hook;
+    hook.start();
     onMapAssetServed(served);
+    m_pollRecordMs += hook.nsecsElapsed() / 1e6;
+  }
 }
 
 void UnityIpcServer::testHoldNextMapAsset(const QString & role)
@@ -1442,20 +1484,88 @@ void UnityIpcServer::testCancelMapAssetHold()
 
 int UnityIpcServer::testReleaseHeldMapAssets()
 {
+  // Back to the front of the queue, in the order they were held, to be served from the next poll on as any request is:
+  // decided then, read by the worker, answered once read.
   std::vector<QJsonObject> held;
   held.swap(m_mapAssetsHeld);
-  for (const QJsonObject & msg : held)
+  // (At most MAP_ASSETS_HELD_MAX: the queue may then hold that many more than MAP_ASSET_QUEUE_MAX for a while.)
+  for (auto it = held.rbegin(); it != held.rend(); ++it)
   {
-    LOG_INFO << "[unityipc] test: getMapAsset" << msg.value("requestId").toString() << "released";
-    answerMapAsset(msg);
+    LOG_INFO << "[unityipc] test: getMapAsset" << it->value("requestId").toString() << "released";
+    m_mapAssetQueue.push_front({*it, m_clock.nsecsElapsed()});
+    m_mapAssetsQueued++;
   }
+  if ((int)m_mapAssetQueue.size() > m_mapAssetQueueDepthMax)
+    m_mapAssetQueueDepthMax = (int)m_mapAssetQueue.size();
   return (int)held.size();
+}
+
+void UnityIpcServer::testHoldNextMapRead(const QString & role, bool beforeOpen)
+{
+  m_holdNextMapRead = true;
+  m_holdMapReadRole = role;
+  m_holdMapReadBeforeOpen = beforeOpen;
+  LOG_INFO << "[unityipc] test: the next map read" << (role.isEmpty() ? QString("of any role") : "of role " + role)
+           << "is held in the worker" << (beforeOpen ? "before its file is opened" : "with its file open");
+}
+
+void UnityIpcServer::testCancelMapReadHold()
+{
+  m_holdNextMapRead = false;
+  m_holdMapReadRole.clear();
+}
+
+void UnityIpcServer::testCorruptNextMapRead(const QString & role)
+{
+  m_corruptNextMapRead = true;
+  m_corruptMapReadRole = role;
+  LOG_INFO << "[unityipc] test: the next map read" << (role.isEmpty() ? QString("of any role") : "of role " + role)
+           << "has one byte changed before its content key is checked";
+}
+
+void UnityIpcServer::testDelayMapReads(int ms)
+{
+  m_mapReadDelayMs = ms < 0 ? 0 : ms;
+  LOG_INFO << "[unityipc] test: every map read waits" << m_mapReadDelayMs << "ms before it begins";
+}
+
+bool UnityIpcServer::testMapReadHeld(QJsonObject * request) const
+{
+  if (!m_mapAssetWorker || !m_mapAssetWorker->testHolding())
+    return false;
+  const quint64 ticket = m_mapAssetWorker->testHeldTicket();
+  for (const MapReadInFlight & f : m_mapReadsInFlight)
+    if (f.ticket == ticket)
+    {
+      if (request)
+        *request = f.request;
+      return true;
+    }
+  return false;
+}
+
+void UnityIpcServer::testReleaseMapRead()
+{
+  if (m_mapAssetWorker)
+    m_mapAssetWorker->testReleaseHold();
+  LOG_INFO << "[unityipc] test: the held map read is released";
+}
+
+bool UnityIpcServer::testWaitMapReads(int ms)
+{
+  return !m_mapAssetWorker || m_mapAssetWorker->waitIdle(ms);
 }
 
 void UnityIpcServer::dropHeldMapAssets(const char * why)
 {
   m_holdNextMapAsset = false;
   m_holdMapAssetRole.clear();
+  m_holdNextMapRead = false;
+  m_holdMapReadRole.clear();
+  m_corruptNextMapRead = false;
+  m_corruptMapReadRole.clear();
+  m_holdReportLoad = 0;
+  m_heldReport = QJsonObject();
   // The queue goes with the connection too: its requests came over it, and no answer meant for one player may reach
   // another (map request ids start again in every player).
   if (!m_mapAssetQueue.empty())
@@ -1466,6 +1576,24 @@ void UnityIpcServer::dropHeldMapAssets(const char * why)
     m_mapAssetsQueueDropped += (long long)m_mapAssetQueue.size();
     m_mapAssetQueue.clear();
   }
+  // ... and so do the reads in flight: the worker skips those it has not begun, and what it hands back is dropped
+  // unanswered when it is taken (THE MAP ASSET WORKER).
+  int orphaned = 0;
+  for (MapReadInFlight & f : m_mapReadsInFlight)
+    if (!f.orphaned)
+    {
+      f.orphaned = true;
+      if (f.cancelled)
+        f.cancelled->store(true);
+      orphaned++;
+    }
+  if (orphaned > 0)
+  {
+    m_mapReadStats.orphaned += orphaned;
+    if (m_mapAssetWorker)
+      m_mapAssetWorker->wake();
+    LOG_INFO << "[unityipc]" << orphaned << "map read(s) in flight will be dropped unanswered (" << why << ")";
+  }
   if (m_mapAssetsHeld.empty())
     return;
   for (const QJsonObject & msg : m_mapAssetsHeld)
@@ -1475,9 +1603,23 @@ void UnityIpcServer::dropHeldMapAssets(const char * why)
   m_mapAssetsHeld.clear();
 }
 
+void UnityIpcServer::cancelMapReads(const QString & reason)
+{
+  for (MapReadInFlight & f : m_mapReadsInFlight)
+    if (!f.orphaned && f.cancelReason.isEmpty())
+    {
+      f.cancelReason = reason;
+      if (f.cancelled)
+        f.cancelled->store(true);
+      m_mapReadStats.cancelled++;
+    }
+  if (m_mapAssetWorker)
+    m_mapAssetWorker->wake();
+}
+
 // One map file for the terrain load being built (TERRAIN above): held when the test hook says so, refused at once when
 // MAP_ASSET_QUEUE_MAX wait already (nothing decided or read), otherwise queued to be served in its turn
-// (serveMapAssetQueue, the same poll when the budget allows).
+// (serveMapAssetQueue, the same poll when the worker has room).
 void UnityIpcServer::handleGetMapAsset(const QJsonObject & msg)
 {
   m_stats.mapAssetRequests++;
@@ -1493,12 +1635,14 @@ void UnityIpcServer::handleGetMapAsset(const QJsonObject & msg)
   }
   if (m_mapAssetQueue.size() >= (size_t)MAP_ASSET_QUEUE_MAX)
   {
+    QElapsedTimer handler;
+    handler.start();
     m_mapAssetsRefusedQueueFull++;
     MapAssetAnswer refused;
     refused.state = "refused";
     refused.detail = QString("too many map requests waiting (%1 wait, at most %2)").arg(m_mapAssetQueue.size())
                        .arg(MAP_ASSET_QUEUE_MAX);
-    answerMapAsset(msg, 0.0, &refused);
+    answerMapAsset(msg, 0.0, refused, nullptr, nullptr, handler);
     return;
   }
   m_mapAssetQueue.push_back({msg, m_clock.nsecsElapsed()});
@@ -1507,54 +1651,266 @@ void UnityIpcServer::handleGetMapAsset(const QJsonObject & msg)
     m_mapAssetQueueDepthMax = (int)m_mapAssetQueue.size();
 }
 
-// THE MAP ASSET QUEUE: the requests waiting, first come first served, each decided, accounted and read only now
-// (answerMapAsset). The poll stops serving once MAP_ASSET_POLL_BUDGET_BYTES were read in it or a file over
-// MAP_ASSET_LARGE_FILE_BYTES was (a size is only known once the file is read: that file ends the poll's serving). Requests
-// that read nothing cost the budget nothing. One record per poll that served any.
+long long UnityIpcServer::unsentBytes() const
+{
+  return (long long)(m_outBuf.size() - m_outPos) + m_fakeUnsentBytes;
+}
+
+void UnityIpcServer::setMapAssetWorker(const std::shared_ptr<MapAssetWorker> & worker)
+{
+  if (m_mapAssetWorker && m_wakeOnResults)
+    m_mapAssetWorker->setResultNotifier(nullptr);
+  m_wakeOnResults = false;
+  m_mapAssetWorker = worker;
+}
+
+void UnityIpcServer::wakeOnMapResults()
+{
+  if (!m_mapAssetWorker)
+    return;
+  m_wakeOnResults = true;
+  // On the worker thread, under its lock: QueueEvent is wx's way for another thread to post to a handler, and the
+  // flag keeps at most one wake waiting.
+  m_mapAssetWorker->setResultNotifier([this]() {
+    if (!m_wakePosted.exchange(true))
+      QueueEvent(new wxThreadEvent(wxEVT_THREAD));
+  });
+}
+
+void UnityIpcServer::onMapResultWake(wxThreadEvent & WXUNUSED(event))
+{
+  // A result was made: a poll now. The flag is lowered first, so a result made during the poll posts another wake.
+  m_wakePosted.store(false);
+  m_mapReadStats.wakes++;
+  // Wakes can follow one another in one pass of the event queue (a poll's answers bring the next results). A run of
+  // them spends at most about MAP_ASSET_WAKE_BURST_MS of this thread; then the window gets its turn, and the results
+  // wait for the timer's poll (at most POLL_INTERVAL_MS) or a wake after the run.
+  const qint64 startNs = m_clock.nsecsElapsed();
+  if (m_wakeBurstEndNs < 0 || startNs - m_wakeBurstEndNs > (qint64)MAP_ASSET_WAKE_BURST_GAP_US * 1000)
+    m_wakeBurstMs = 0.0;   // a new run
+  if (m_wakeBurstMs >= MAP_ASSET_WAKE_BURST_MS)
+  {
+    m_mapReadStats.wakesDeferred++;
+    m_wakeBurstEndNs = startNs;
+    return;
+  }
+  const long long takenBefore = m_mapReadStats.answered + m_mapReadStats.droppedUnanswered;
+  poll();
+  const long long taken = m_mapReadStats.answered + m_mapReadStats.droppedUnanswered - takenBefore;
+  m_mapReadStats.takenOnWake += taken;
+  m_wakeBurstEndNs = m_clock.nsecsElapsed();
+  m_wakeBurstMs += (m_wakeBurstEndNs - startNs) / 1e6;
+  if (m_wakeBurstMs > m_mapReadStats.wakeBurstMsMax)
+    m_mapReadStats.wakeBurstMsMax = m_wakeBurstMs;
+  // A poll takes results only as far as its budget goes: when it took some and more are ready (at most
+  // MAP_ASSET_READS_IN_FLIGHT), one more wake. A poll that took none (results waiting for a client load) posts none.
+  if (taken > 0 && m_mapAssetWorker && m_mapAssetWorker->resultReady() && !m_wakePosted.exchange(true))
+    QueueEvent(new wxThreadEvent(wxEVT_THREAD));
+}
+
+void UnityIpcServer::waitForMapResult(int ms)
+{
+  // A server not listening serves nothing (its polls end at once): a plain wait.
+  if (!m_mapAssetWorker || m_mapReadsInFlight.empty() || !isListening())
+  {
+    wxMilliSleep(ms);
+    return;
+  }
+  // Results made since the last serving poll looked end the wait; once seen here they do not end the next one (a pump
+  // that waits twice without a serving poll between must not spin).
+  if (m_mapAssetWorker->waitResultsAfter(m_resultsSeen, ms))
+    m_resultsSeen = m_mapAssetWorker->resultsMade();
+}
+
+// THE MAP ASSET QUEUE AND WORKER, once per poll, on this (the GUI) thread: (1) the reads in flight the viewer no
+// longer wants are cancelled; (2) the worker's results are taken, in order, each checked again by the viewer and
+// answered, until MAP_ASSET_POLL_BUDGET_BYTES were read for them or one file over MAP_ASSET_LARGE_FILE_BYTES was; (3)
+// requests waiting are decided, first come first served, while fewer than MAP_ASSET_READS_IN_FLIGHT reads are in flight
+// and no more than MAP_ASSET_SEND_HIGH_WATER bytes wait to be sent: a request that reads nothing is answered at once, a
+// read goes to the worker. One record per poll that answered or dispatched any.
 int UnityIpcServer::serveMapAssetQueue()
 {
-  if (m_mapAssetQueue.empty())
+  if (m_mapAssetWorker)
+    m_resultsSeen = m_mapAssetWorker->resultsMade();   // (before taking any: a result made from now on is new)
+  if (m_mapAssetQueue.empty() && m_mapReadsInFlight.empty())
     return 0;
   QElapsedTimer timer;
   timer.start();
   MapAssetPoll poll;
-  while (!m_mapAssetQueue.empty())
+  const double recordMsBefore = m_pollRecordMs;
+  // While a client is being loaded the reads in flight wait: neither checked nor answered (onMapAssetWait).
+  const bool waiting = onMapAssetWait && onMapAssetWait();
+
+  // (1) The viewer's check, again, for every read still in flight: a read not begun is skipped, one under way finishes
+  // (reads are whole) and is answered stale.
+  bool cancelledAny = false;
+  if (onMapAssetStale && !waiting)
+    for (MapReadInFlight & f : m_mapReadsInFlight)
+      if (!f.orphaned && f.cancelReason.isEmpty())
+      {
+        const QString why = onMapAssetStale(f.request);
+        if (!why.isEmpty())
+        {
+          f.cancelReason = why;
+          if (f.cancelled)
+            f.cancelled->store(true);
+          m_mapReadStats.cancelled++;
+          cancelledAny = true;
+        }
+      }
+  if (cancelledAny && m_mapAssetWorker)
+    m_mapAssetWorker->wake();
+
+  // (2) Results, in order, as far as the poll's budget goes.
+  MapAssetWorker::Result result;
+  while (m_mapAssetWorker && !m_mapReadsInFlight.empty() && !waiting)
   {
     if (poll.bytesRead >= MAP_ASSET_POLL_BUDGET_BYTES || poll.largeFiles > 0)
     {
-      poll.stoppedForBudget = true;
+      poll.stoppedForBudget = m_mapAssetWorker->resultReady();
+      break;
+    }
+    if (!m_mapAssetWorker->takeResult(result))
+      break;
+    auto it = std::find_if(m_mapReadsInFlight.begin(), m_mapReadsInFlight.end(),
+                           [&result](const MapReadInFlight & f) { return f.ticket == result.ticket; });
+    if (it == m_mapReadsInFlight.end())
+      continue;   // not one of this server's (another server's, before a restart of it): nobody to answer
+    MapReadInFlight read = *it;
+    m_mapReadsInFlight.erase(it);
+    if (read.orphaned || read.connection != m_connectionSerial)
+    {
+      m_mapReadStats.droppedUnanswered++;
+      continue;   // its connection ended (dropHeldMapAssets): dropped unanswered, its bytes freed here
+    }
+    QElapsedTimer complete;
+    complete.start();
+    MapAssetAnswer answer;
+    if (onCompleteMapAsset)
+      answer = onCompleteMapAsset(read.request, result);
+    else
+    {
+      answer.state = "stale";
+      answer.detail = "this viewer finishes no map read";
+    }
+    const long long bytesRead = answerMapAsset(read.request, read.queuedMs, answer, &read, &result, complete);
+    m_mapReadStats.answered++;
+    if (answer.state == "stale")
+      m_mapReadStats.answeredStale++;
+    poll.served++;
+    poll.completed++;
+    poll.bytesRead += bytesRead;
+    if (bytesRead > MAP_ASSET_LARGE_FILE_BYTES)
+      poll.largeFiles++;
+  }
+
+  // (3) Requests waiting: decided and dispatched while the worker has room and the player keeps reading.
+  while (!m_mapAssetQueue.empty())
+  {
+    if ((int)m_mapReadsInFlight.size() >= MAP_ASSET_READS_IN_FLIGHT)
+      break;
+    if (unsentBytes() > MAP_ASSET_SEND_HIGH_WATER)
+    {
+      m_mapReadStats.dispatchHeldBack++;
       break;
     }
     const QueuedMapAsset next = m_mapAssetQueue.front();
     m_mapAssetQueue.pop_front();
-    const double queuedMs = (m_clock.nsecsElapsed() - next.arrivedNs) / 1e6;
-    const long long read = answerMapAsset(next.request, queuedMs);
-    poll.served++;
-    poll.bytesRead += read;
-    if (read > MAP_ASSET_LARGE_FILE_BYTES)
-      poll.largeFiles++;
+    const qint64 dispatchedNs = m_clock.nsecsElapsed();
+    const double queuedMs = (dispatchedNs - next.arrivedNs) / 1e6;
+    QElapsedTimer dispatchTimer;
+    dispatchTimer.start();
+    MapAssetDispatch d;
+    if (onDispatchMapAsset)
+      d = onDispatchMapAsset(next.request);
+    else
+    {
+      d.answer.state = "refused";
+      d.answer.detail = "this viewer serves no map files";
+    }
+    if (d.read && (!m_mapAssetWorker || m_mapAssetWorker->stopped()))
+    {
+      // Only while the viewer shuts down: nothing reads any more.
+      d.read = false;
+      d.answer = MapAssetAnswer();
+      d.answer.state = "refused";
+      d.answer.detail = "the map asset worker is not running";
+      m_mapReadStats.refusedNoWorker++;
+    }
+    if (!d.read)
+    {
+      answerMapAsset(next.request, queuedMs, d.answer, nullptr, nullptr, dispatchTimer);
+      poll.served++;
+      continue;
+    }
+    const QString role = next.request.value("role").toString();
+    MapAssetWorker::Job job;
+    job.fileDataID = d.fileDataID;
+    job.maxBytes = d.maxBytes;
+    job.epoch = d.epoch;
+    job.generation = d.generation;
+    job.role = role;
+    job.cancelled = std::make_shared<std::atomic<bool>>(false);
+    if (m_holdNextMapRead && (m_holdMapReadRole.isEmpty() || m_holdMapReadRole == role))
+    {
+      m_holdNextMapRead = false;
+      job.testHold = true;
+      job.testHoldBeforeOpen = m_holdMapReadBeforeOpen;
+    }
+    if (m_corruptNextMapRead && (m_corruptMapReadRole.isEmpty() || m_corruptMapReadRole == role))
+    {
+      m_corruptNextMapRead = false;
+      job.testCorrupt = true;
+    }
+    job.testDelayMs = m_mapReadDelayMs;
+    MapReadInFlight read;
+    read.request = next.request;
+    read.arrivedNs = next.arrivedNs;
+    read.dispatchedNs = dispatchedNs;
+    read.queuedMs = queuedMs;
+    read.timings = d.answer.timings;
+    read.connection = m_connectionSerial;
+    read.cancelled = job.cancelled;
+    read.testHold = job.testHold;
+    read.testCorrupt = job.testCorrupt;
+    read.ticket = m_mapAssetWorker->submit(job);
+    read.dispatchMs = dispatchTimer.nsecsElapsed() / 1e6;
+    m_mapReadsInFlight.push_back(read);
+    m_mapReadStats.dispatched++;
+    if ((int)m_mapReadsInFlight.size() > m_mapReadStats.inFlightMax)
+      m_mapReadStats.inFlightMax = (int)m_mapReadsInFlight.size();
+    poll.dispatched++;
   }
+
+  if (poll.served == 0 && poll.dispatched == 0)
+    return 0;
   poll.serveMs = timer.nsecsElapsed() / 1e6;
+  poll.recordMs = m_pollRecordMs - recordMsBefore;
   poll.waitingAfter = (int)m_mapAssetQueue.size();
+  poll.inFlightAfter = (int)m_mapReadsInFlight.size();
+  if (unsentBytes() > m_mapReadStats.unsentBytesMax)
+    m_mapReadStats.unsentBytesMax = unsentBytes();
   m_mapAssetPollsTotal++;
   m_mapAssetPolls.push_back(poll);
   while (m_mapAssetPolls.size() > (size_t)MAP_ASSET_POLL_TIMINGS_KEPT)
     m_mapAssetPolls.pop_front();
   if (poll.stoppedForBudget)
-    LOG_INFO << "[unityipc] map requests: this poll served" << poll.served << "(" << poll.bytesRead << "bytes read in"
-             << QString::number(poll.serveMs, 'f', 3) << "ms);" << poll.waitingAfter << "wait for the next poll";
+    LOG_INFO << "[unityipc] map requests: this poll answered" << poll.served << "(" << poll.bytesRead << "bytes read for them, in"
+             << QString::number(poll.serveMs, 'f', 3) << "ms);" << poll.waitingAfter << "wait," << poll.inFlightAfter
+             << "in flight";
   if (onMapAssetPoll)
     onMapAssetPoll(poll);
   return poll.served;
 }
 
-// The viewer decides and reads (onGetMapAsset), or the answer is given (refused on arrival); it goes back as any asset
-// does, as a binary frame, with what the decision said. Timed from here to the answer queued (and, with room in the
-// socket's buffer, sent): all of it is GUI-thread time.
-long long UnityIpcServer::answerMapAsset(const QJsonObject & msg, double queuedMs, const MapAssetAnswer * given)
+// One answer: what the viewer decided at dispatch (nothing to read) or at completion (read is the read in flight and
+// result its worker's result), as any asset goes back, a binary frame with what the decision said, and its record.
+// guiTimer has run since this request's GUI work began in this poll (the dispatch, or the taking of its result): with a
+// read's dispatch time, handlerMs is all the time the GUI thread spent on the request.
+long long UnityIpcServer::answerMapAsset(const QJsonObject & msg, double queuedMs, const MapAssetAnswer & answer,
+                                         const MapReadInFlight * read, const MapAssetWorker::Result * result,
+                                         const QElapsedTimer & guiTimer)
 {
-  QElapsedTimer handler;
-  handler.start();
   MapAssetServed served;
   served.requestId = msg.value("requestId").toString();
   served.load = msg.value("load").toInt(0);
@@ -1563,26 +1919,39 @@ long long UnityIpcServer::answerMapAsset(const QJsonObject & msg, double queuedM
   served.role = msg.value("role").toString();
   served.fileDataID = msg.value("fileDataID").toInt(0);
   served.queuedMs = queuedMs;
-
-  MapAssetAnswer answer;
-  if (given)
-    answer = *given;
-  else if (onGetMapAsset)
-    answer = onGetMapAsset(msg);
-  else
-  {
-    answer.state = "refused";
-    answer.detail = "this viewer serves no map files";
-  }
   served.bytesRead = answer.bytesRead;
+  served.timings = answer.timings;
+  if (read)
+  {
+    // The dispatch's own timings first (the decision), then the read's and the completion's (answer.timings).
+    for (auto it = read->timings.begin(); it != read->timings.end(); ++it)
+      if (!served.timings.contains(it.key()))
+        served.timings[it.key()] = it.value();
+    served.timings["dispatchMs"] = read->dispatchMs;
+    served.timings["inFlightMs"] = (m_clock.nsecsElapsed() - read->dispatchedNs) / 1e6 - guiTimer.nsecsElapsed() / 1e6;
+    if (read->testHold)
+      served.timings["testHeld"] = true;
+    if (read->testCorrupt)
+      served.timings["testCorrupted"] = true;
+    if (!read->cancelReason.isEmpty())
+      served.timings["cancelled"] = read->cancelReason;
+  }
+  if (result)
+  {
+    served.readOutcome = MapAssetWorker::outcomeName(result->outcome);
+    if (result->outcome == MapAssetWorker::Result::Outcome::Read)
+      served.readState = wow::WorldMapCatalog::availabilityName(result->inspection.state);
+    served.timings["workerWaitMs"] = result->waitMs;
+    served.timings["workerMs"] = result->workMs;
+  }
   // Only a file served counts as the file's first read: a refused or stale request reads nothing, and an answer that
   // the file is not in the storage, not installed or unreadable serves nothing (its lookup is not a read to time).
   const bool ok = answer.state == "available";
   if (ok)
   {
-    const MapAssetReadTracker::Read read = m_mapAssetReads.note(served.epochNow, served.fileDataID);
-    served.first = read == MapAssetReadTracker::Read::First;
-    served.firstTracked = read != MapAssetReadTracker::Read::Untracked;
+    const MapAssetReadTracker::Read tracked = m_mapAssetReads.note(served.epochNow, served.fileDataID);
+    served.first = tracked == MapAssetReadTracker::Read::First;
+    served.firstTracked = tracked != MapAssetReadTracker::Read::Untracked;
   }
 
   // As every assetResponse, plus what the request named and what the host decided. Never cacheable: the player's
@@ -1610,7 +1979,14 @@ long long UnityIpcServer::answerMapAsset(const QJsonObject & msg, double queuedM
     {
       resp["encoding"] = "binary";
       resp["payloadBytes"] = answer.bytes.size();
-      queueFrame(QJsonDocument(resp).toJson(QJsonDocument::Compact), answer.bytes);
+      QElapsedTimer serialize;
+      serialize.start();
+      const QByteArray header = QJsonDocument(resp).toJson(QJsonDocument::Compact);
+      served.timings["serializeMs"] = serialize.nsecsElapsed() / 1e6;
+      double appendMs = -1.0, sendMs = -1.0;
+      queueFrame(header, answer.bytes, &appendMs, &sendMs);
+      served.timings["appendMs"] = appendMs;
+      served.timings["sendMs"] = sendMs;
     }
     else
     {
@@ -1628,11 +2004,19 @@ long long UnityIpcServer::answerMapAsset(const QJsonObject & msg, double queuedM
   served.state = answer.state;
   served.detail = answer.detail;
   served.readMs = answer.readMs;
-  served.handlerMs = handler.nsecsElapsed() / 1e6;
+  // What the GUI thread spent on this request: its dispatch (a read's, kept with it) and this answer.
+  const double guiMs = guiTimer.nsecsElapsed() / 1e6;
+  served.handlerMs = guiMs + (read ? read->dispatchMs : 0.0);
+  if (read)
+    served.timings["completeMs"] = guiMs;
+  QElapsedTimer logTimer;
+  logTimer.start();
   if (ok)
     LOG_INFO << "[unityipc] <- getMapAsset" << served.describe();
   else
     LOG_WARNING << "[unityipc] <- getMapAsset" << served.describe();
+  served.timings["logMs"] = logTimer.nsecsElapsed() / 1e6;
+  m_pollMapAnswered++;
   recordMapAssetServed(served);
   return answer.bytesRead;
 }
@@ -1694,8 +2078,26 @@ int UnityIpcServer::TerrainTileReport::chunkState(const QString & name) const
   return -1;
 }
 
+void UnityIpcServer::testReleaseTerrainReport()
+{
+  if (m_heldReport.isEmpty())
+    return;
+  const QJsonObject held = m_heldReport;
+  m_heldReport = QJsonObject();
+  LOG_INFO << "[unityipc] test: the held terrainTileLoaded of load" << held.value("load").toInt(0) << "is handled now";
+  handleTerrainTileLoaded(held);
+}
+
 void UnityIpcServer::handleTerrainTileLoaded(const QJsonObject & msg)
 {
+  if (m_holdReportLoad > 0 && msg.value("load").toInt(0) == m_holdReportLoad && m_heldReport.isEmpty())
+  {
+    m_holdReportLoad = 0;
+    m_heldReport = msg;
+    LOG_INFO << "[unityipc] test: the terrainTileLoaded of load" << msg.value("load").toInt(0) << "("
+             << msg.value("status").toString() << ") is held, not handled";
+    return;
+  }
   // Numbers the player did not send stay -1 (see TerrainTileReport); toDouble keeps 64-bit sizes intact.
   const auto count = [&msg](const char * key) {
     const QJsonValue v = msg.value(QLatin1String(key));

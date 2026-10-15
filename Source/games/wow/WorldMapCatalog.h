@@ -25,6 +25,8 @@
 #include <QString>
 #include <QStringList>
 
+#include "CASCFolder.h"
+
 #ifdef _WIN32
 #    ifdef BUILDING_WOW_DLL
 #        define _WORLDMAPCATALOG_API_ __declspec(dllexport)
@@ -104,6 +106,8 @@ namespace wow
                                  // bound), 0 when nothing was read (not listed, not local, too large, no storage, its size
                                  // unreadable)
     double milliseconds = 0.0;   // how long the inspection took
+    double rootMs = -1.0;        // of it, the storage root's answer (listed, local); -1 when not asked
+    CASCFolder::ReadTimings read; // of it, the read's steps (CASCFolder::readWholeFile); all -1 when nothing was read
   };
 
   // The form of a map's WDT as Map.db2 states it (its MapType code), before the WDT is read. The WDT itself is the
@@ -196,6 +200,13 @@ namespace wow
     // player's WDT parser. False, with why, when the catalogue no longer belongs to the loaded client, the map is not
     // in it, it has no WDT reference, or the WDT cannot be read (the inspection's reason). Updates the map's inspection.
     bool readWdt(int mapId, QByteArray & bytes, QString & why);
+    // inspectFile's inspection itself, on a storage named by the caller (CASCFolder::Storage) instead of the loaded
+    // client's: what the map asset worker runs on its own thread, through its own reference to the storage
+    // (docs/world-viewer/04b-asset-serving.md). Reads nothing of the catalogue, the active client or any other shared
+    // state; the same states, details and checks as inspectFile, from the same code. hooks: test only.
+    static WdtInspection inspectInStorage(const CASCFolder::Storage & storage, const WdtReference & reference,
+                                          QByteArray * bytes, bool hash, qint64 maxBytes,
+                                          const CASCFolder::ReadHooks * hooks = nullptr);
 
     // Costs, for the load log and the tests.
     double queryMilliseconds() const { return m_queryMs; }

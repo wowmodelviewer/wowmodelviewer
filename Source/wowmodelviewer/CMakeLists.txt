@@ -41,6 +41,7 @@ set(src  AnimationExportChoiceDialog.cpp
          ClientLoadingPanel.cpp
          LogStackWalker.cpp
          main.cpp
+         MapAssetWorker.cpp
          modelcanvas.cpp
          modelcontrol.cpp
          ModelIdLookup.cpp
@@ -108,6 +109,7 @@ set(headers AnimationExportChoiceDialog.h
             ClientLoadingPanel.h
             ClientLoadProgress.h
             LogStackWalker.h
+            MapAssetWorker.h
             modelcanvas.h
             modelcontrol.h
             ModelIdLookup.h

@@ -654,6 +654,8 @@ public:
     bool tex0Served = false;            // ... and it was answered "available" (its kind checked)
     std::vector<int> textureIds;        // the texture ids that went on to the read, each once: at most maxTexturesPerLoad
     qint64 textureBytesRead = 0;        // the bytes read for them, kind failures included: at most maxTextureBytesPerLoad
+    qint64 textureBytesReserved = 0;    // the limits of the texture reads in flight (THE MAP ASSET WORKER): what they may
+                                        // still read, counted against maxTextureBytesPerLoad until their results come
     bool ended = false;                 // the player reported the load (terrainTileLoaded): nothing more is read for it
     QString endedStatus;                // ... the status it reported
   };
@@ -695,10 +697,39 @@ public:
   bool ResolveTerrainTile(int mapId, int tileX, int tileY, UnityIpcServer::TerrainTileCommand & command, QString & why);
   // Take the terrain away (clearTerrain): false when there is no player that draws terrain.
   bool ClearTerrain(const QString & reason);
-  // The getMapAsset handler (UnityIpcServer::onGetMapAsset, called when the queue serves the request): the decision
-  // above, the accounting, then the file read through the map catalogue (content key checked, at most the decision's
-  // limit), its kind checked; the answer's md5 is the content key the read checked the bytes against.
-  UnityIpcServer::MapAssetAnswer ServeMapAsset(const QJsonObject & request);
+  // THE MAP ASSET WORKER (docs/world-viewer/04b-asset-serving.md), the viewer's side, all on the GUI thread.
+  // DispatchMapAsset (UnityIpcServer::onDispatchMapAsset, when the queue serves the request): the decision above; a
+  // request let through is accounted (noteMapAssetRead; a texture's limit reserved) and handed to the worker as a read
+  // of the loaded client's storage -- the worker granted its own reference to that storage first, when it holds none
+  // for this client epoch and storage. CompleteMapAsset (onCompleteMapAsset, when its result is taken back): checked
+  // again (MapAssetStaleReason: a read whose client, load or catalogue has gone is answered "stale", its bytes never
+  // sent); otherwise the read's own answer -- the inspection's state and detail, the kind of the bytes checked, the
+  // answer's md5 the content key the read checked them against -- and its accounting (noteMapAssetResult, the
+  // reservation released). MapAssetStaleReason (onMapAssetStale, every poll for every read in flight, and at
+  // completion): "" while the request is still the current load's, of the loaded client, else every reason that holds.
+  UnityIpcServer::MapAssetDispatch DispatchMapAsset(const QJsonObject & request);
+  UnityIpcServer::MapAssetAnswer CompleteMapAsset(const QJsonObject & request, MapAssetWorker::Result & result);
+  QString MapAssetStaleReason(const QJsonObject & request) const;
+  // A client is being loaded: the reads in flight wait (UnityIpcServer::onMapAssetWait).
+  bool MapAssetWait() const;
+  // TEST: one request decided, read by the worker and answered as above, waiting here for its result (the
+  // -terraintile in-process checks; no player involved, nothing sent).
+  UnityIpcServer::MapAssetAnswer ServeMapAssetAndWait(const QJsonObject & request);
+  // The worker holds a reference to the loaded client's storage for this client epoch and storage generation, granted now
+  // when it did not (false: the folder holds no such storage open).
+  bool EnsureMapAssetLease(int epochNow, quint64 generation);
+  // TEST: one read through the worker of any file of the loaded client, as a dispatched read is made (the -terraintile
+  // in-process checks: too large, encrypted, corrupt, cancelled before its read began, decided under another storage).
+  MapAssetWorker::Result TestReadThroughWorker(int fileDataID, qint64 maxBytes, bool corrupt, bool cancelledBefore,
+                                               bool otherStorage);
+  // TEST: a read of fileDataID given to the worker and held there with its file open (MapAssetWorker::Job::testHold),
+  // not waited for: the -terraintile "readshutdown" step leaves it so for the viewer's shutdown. Its ticket, 0 when no
+  // read could be given.
+  quint64 TestHoldReadForShutdown(int fileDataID);
+  // The worker (shared with the IPC server), and the lease it was last granted: client epoch and storage generation.
+  std::shared_ptr<MapAssetWorker> m_mapAssetWorker;
+  int m_mapAssetLeaseEpoch = 0;
+  quint64 m_mapAssetLeaseGeneration = 0;
   void OnTerrainTileLoaded(const UnityIpcServer::TerrainTileReport & report);
   // The headless terrain test's "staleload" step: a newer load the player never gets (the serial raised, the request
   // moved to it, nothing sent).
