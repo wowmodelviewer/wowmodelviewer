@@ -6907,11 +6907,22 @@ void ModelViewer::UpdateControls()
 
 namespace
 {
-  // The character model for an imported race and sex, or null when this build has none.
+  // The character model for an imported race and sex, or null when this build has none. A race with one model for both
+  // sexes has it under GENDER_ANY (ChrModel.Sex 3: the Dracthyr's dragon form, races 52 and 70), and sex is then
+  // GENDER_ANY too -- the key the race is read under when the model is loaded (WoWModel::setRaceSex).
   GameFile * armoryRaceModel(const CharInfos & info, int & sex)
   {
-    sex = (info.gender == "Male") ? 0 : 1;
-    const int raceModelFileID = RaceInfos::getFileIDForRaceSex(info.raceId, sex);
+    sex = (info.gender == "Male") ? GENDER_MALE : GENDER_FEMALE;
+    int raceModelFileID = RaceInfos::getFileIDForRaceSex(info.raceId, sex);
+    if (raceModelFileID <= 0)
+    {
+      const int anySexFileID = RaceInfos::getFileIDForRaceSex(info.raceId, GENDER_ANY);
+      if (anySexFileID > 0)
+      {
+        sex = GENDER_ANY;
+        raceModelFileID = anySexFileID;
+      }
+    }
     return (raceModelFileID > 0) ? GAMEDIRECTORY.getFile(raceModelFileID) : nullptr;
   }
 
