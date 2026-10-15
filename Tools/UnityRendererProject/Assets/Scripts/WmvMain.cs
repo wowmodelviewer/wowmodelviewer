@@ -190,6 +190,9 @@ public partial class WmvMain : MonoBehaviour
         // actually gone wrong and the trace is the point.
         Application.SetStackTraceLogType(LogType.Log, StackTraceLogType.None);
 
+        // No faster than the display can show (see ApplyFrameRate).
+        ApplyFrameRate();
+
         if (WmvModelBuilder.Debug_.LifecycleTest)
             WmvLifecycleSelfTest.RunAll(s => Debug.Log("WMV: " + s));
 
@@ -297,6 +300,38 @@ public partial class WmvMain : MonoBehaviour
         ipc.OnViewportBackground = c => ApplyViewportBackground(c, "host");
         // The terrain tile (protocol 12): the model view's mask on the main camera, the session, its two messages.
         SetUpTerrain(cam);
+    }
+
+    /// <summary>
+    /// THE FRAME RATE. With VSync off, Unity on the desktop draws as fast as it can, and VSync is off in the project's
+    /// quality settings -- which whoever builds the player makes locally (README), so they are not kept here. One bear
+    /// on screen was drawn every 0.3-0.5 ms, 2,000 to 3,300 frames a second, and kept a third of the GPU and five to six
+    /// CPU cores busy without pause, loud enough to hear. A frame drawn faster than the display refreshes is never
+    /// seen, so the player draws at the refresh rate of its display at start-up (60 when that cannot be read),
+    /// whatever the project says. VSync is turned off, as the project has it: frames are presented as before, only
+    /// fewer of them.
+    ///
+    /// Animation keeps its speed (WmvM2Animator advances by real elapsed time, not by frames). What waits for the next
+    /// frame is work handed out once a frame: the host's messages, the asset cache's answers, the terrain session's and
+    /// the world-model worker's results. Measured, model, character and world-model loads take as long as before; a
+    /// terrain tile about 0.1 s longer, each of its steps waiting for a frame. Anything counted in frames -- the
+    /// harness capture 40 frames after a change -- lasts longer in real time. -wmvFrameRate=N draws at N frames a
+    /// second instead; -wmvFrameRate=0 as fast as it can, as before.
+    /// </summary>
+    static void ApplyFrameRate()
+    {
+#if UNITY_2022_2_OR_NEWER
+        double hz = Screen.currentResolution.refreshRateRatio.value;
+#else
+        double hz = Screen.currentResolution.refreshRate;
+#endif
+        int asked = WmvModelBuilder.Debug_.FrameRate;
+        int rate = asked >= 0 ? asked : (hz >= 23.0 && hz <= 1000.0 ? Mathf.RoundToInt((float)hz) : 60);
+        QualitySettings.vSyncCount = 0;    // with VSync on, Unity ignores targetFrameRate
+        Application.targetFrameRate = rate > 0 ? rate : -1;
+        Debug.Log(string.Format("WMV: frame rate: {0} (display {1:0.##} Hz{2}), VSync off",
+                                rate > 0 ? "at most " + rate + " a second" : "as fast as it can", hz,
+                                asked >= 0 ? ", -wmvFrameRate=" + asked : ""));
     }
 
     // ---------------------------------------------------------------- load pipeline
