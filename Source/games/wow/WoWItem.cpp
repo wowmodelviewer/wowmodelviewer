@@ -908,6 +908,14 @@ void WoWItem::refresh()
     }
     case CS_TABARD:
     {
+      // A dress hides the tabard's geosets, whose flaps would hang over its skirt; the tabard's torso textures stay.
+      // The client shows no tabard geoset while the chest's or the legs' display shows the robe skirt
+      // (CCharacterComponent::GeosRenderPrep, wowdev.wiki DB/ItemDisplayInfo/GeosRenderPrep). The skirt is the trousers
+      // group an item declared: the shirt, legs and chest are refreshed before the tabard (WoWModel::refresh). This is
+      // not isWearingARobe(): a kilt's skirt is a dress too, and a robe whose display has no skirt is not one.
+      if (charModel_->equipmentDeclaredGeosets.count(CG_TROUSERS) != 0)
+        charModel_->cd.geosets[CG_TABARD] = 0;
+
       if (isCustomizableTabard())
       {
         auto it = itemTextures_.find(CR_TABARD_1);
