@@ -6,21 +6,33 @@ it serves: no shader, terrain material formula, geometry, protocol message or pl
 
 **Push status: NOT PUSHED.**
 
-**Summary.** `getMapAsset` files are now read, decoded and checked against their content keys by one worker thread
-that holds its own reference to the client's CASC storage (a lease taken on the GUI thread, released only by the
-worker); the GUI thread decides, checks again and sends. On the final build, across 51 runs: GUI time per answer at
-most 3.62 ms (was 38.21), no poll over 20 ms of map serving (was 37 ms in every run), every file served read by the
-worker, no answer crossing a client in 8 switches with reads held across them, at most one 5.6 MB file held, and
-whole tiles loading faster than the 1.1 release build on all four tiles measured (map 2923 32_24: 1,238.9 -> 725.9 ms
-cold). Terrain pixels, geometry, M2 and WMO captures are identical to the release build's; protocol 13 and the player
-are unchanged. Section 19 lists PASS / FAIL / SKIP / UNSUPPORTED.
+**Summary.** `getMapAsset` files are now read, decoded and checked against their content keys by one worker thread that
+holds its own reference to the client's CASC storage (a lease taken on the GUI thread while the GUI holds its own; once
+the worker has taken it over, released only by the worker); the GUI thread decides, checks again and sends. On the final
+build, across 51 runs: GUI time per answer at most 3.62 ms (was 38.21), no poll over 20 ms of map serving (was 37 ms in
+every run), every file served read by the worker, no answer crossing a client in 8 switches with reads held across them,
+at most one 5.6 MB file held, and whole tiles loading faster than the 1.1 release build on all four tiles measured (map
+2923 32_24: 1,238.9 -> 725.9 ms cold). Terrain pixels, geometry, M2 and WMO captures are identical to the release
+build's; protocol 13 and the player are unchanged. Section 19 lists PASS / FAIL / SKIP / UNSUPPORTED.
+
+**Before Stage 05.** Two findings of the post-commit review (2026-10-15) bound what the next stage may rely on: a
+shutdown event re-entrancy hazard that **must be removed before Stage 05 enables interactive terrain loading** (18.1),
+and outgoing IPC buffering that is bounded for the shipped Unity player's requests but **not against arbitrary local
+clients**, nor for the viewer's own pushed messages to a player that has stopped reading (15, 18.2). The first cannot
+happen at this commit: only the `-terraintile` harness starts terrain loads, and at its end the server is stopped
+before `~ModelViewer` could pump with it listening. The second is reachable now by any local process that connects to
+the server's port, exactly as at `42977505`; with the shipped player only the viewer's own messages can pile up, and
+only while it is connected and not reading.
 
 Sections A-H are the implementation gate the specification requires: they were written, from measurements and a
 source audit, before any serving code was changed. Section 9 onwards records the implementation and its validation.
 
 Evidence levels as in `00-audit.md`: `PROVEN_SOURCE` (read at the cited path:line and checked by an independent
 verifier), `PROVEN_RUNTIME` (measured here, with the run named), `INFERRED`, `UNKNOWN`. Citations without a commit are
-to `42977505` unless a section says otherwise.
+to `42977505` in sections A-H and to the branch's commit `81f79982` from section 9 on. In A-H, citations of
+`MapAssetWorker.*` and those added by the amendments and the post-commit corrections (the wake and lease citations in
+B.2, B.3, C.2-C.4 and D, such as `UnityIpcServer.cpp:87-88` and `:1659-1709`, `MapAssetWorker.cpp:61`-`:335`,
+`modelviewer.cpp:1865` and `:1962`) are to `81f79982` too.
 
 ## A. The reproduced bottleneck
 
@@ -153,7 +165,7 @@ evidence; the three safety-critical areas then each re-read by an independent ve
 | Two `CascOpenStorageEx` overlapping in one process (`.build.info` and config files opened with write access, share-read only) | `CascFiles.cpp:1527-1533, 1133-1146` | the worker opens no storage |
 | A **partial** read whose disk read fails: `ReadFile_FrameCached` leaves the caller's buffer as the handle's frame cache, which `CascCloseFile` then frees (found by the lifetime verifier; not thread-related) | `CascReadFile.cpp:872-876, 887, 919-930`; `CascOpenFile.cpp:68` | the worker never asks for part of a file: one request for the whole file, as `readWholeFile` always made (a request that ends at the file's end never takes that path). Cancellation is therefore between reads, not inside one |
 | wx: `wxTimer`, `Bind`, `ProcessEvent`, sockets are GUI-thread only; a handler destroyed while another thread queues to it is a use-after-free | `timer.h:41`; `event.h:3795-3798, 3820-3826`; `UnityRendererHost.cpp:353-357` | the worker posts nothing to wx but the wake of C.3's amendment (`QueueEvent` of a `wxThreadEvent`, the call wx makes for other threads, to a server that outlives the worker's notifier); the GUI thread collects results in its poll (C.4) |
-| Plain GUI-thread state the current path reads: `g_clientEpoch` and `g_clientLoadDepth` (plain ints), `GAMEDIRECTORY` (`Game::replace` swaps it), `WorldMapCatalog::inspectFile` (writes `m_refusal`), `m_terrainRequest`, every `UnityIpcServer` member | `UnityAssetAccess.cpp:26-37`; `Game.cpp:25-31`; `WorldMapCatalog.cpp:301-308, 389-400`; `modelviewer.cpp:3543-3569`; `UnityIpcServer.cpp:1514-1638` | none of it is read or written by the worker: decisions, accounting, revalidation and answers stay on the GUI thread; the worker gets a job of plain values |
+| Plain GUI-thread state the current path reads: `g_clientEpoch` and `g_clientLoadDepth` (plain ints), `GAMEDIRECTORY` (`Game::replace` swaps it), `WorldMapCatalog::inspectFile` (writes `m_refusal`), `m_terrainRequest`, every `UnityIpcServer` member | `UnityAssetAccess.cpp:26-37`; `Game.cpp:25-31`; `WorldMapCatalog.cpp:301-308, 389-400`; `modelviewer.cpp:3543-3569`; `UnityIpcServer.cpp:1514-1638` | none of it is read or written by the worker -- except, amended with the wake (C.3), the server's atomic wake flag `m_wakePosted` and its thread-safe `QueueEvent`, which the server's notifier uses on the worker thread (`UnityIpcServer.cpp:1674-1677`): decisions, accounting, revalidation and answers stay on the GUI thread; the worker gets a job of plain values |
 
 ### B.3 What must stay thread-confined
 
@@ -163,7 +175,8 @@ evidence; the three safety-critical areas then each re-read by an independent ve
 - **Worker:** the file handles it opens, the buffer of the read in progress, its own reference to the storage.
 - **Handed over, never shared:** a job (plain values: ticket, FileDataID, byte limit, epoch, storage generation) to the
   worker; a result (the inspection, the bytes, timings) back. Each is touched by one thread at a time, through one
-  mutex-protected exchange.
+  mutex-protected exchange -- except the job's cancel flag, a shared atomic the GUI sets and the worker reads
+  (`MapAssetWorker.h:66`; 9.2).
 
 ### B.4 The host today
 
@@ -187,8 +200,8 @@ evidence; the three safety-critical areas then each re-read by an independent ve
 
 1. **The worker opens a storage of its own** (complete confinement). Cost (A.4): about **600 MB** more private memory
    while it is open (894 MB peak during the open), **2.4 s** to open per client, and every `CascOpenStorageEx` in the
-   process must then be serialized with the GUI's (B.2, last row but one), which can make the GUI's client load wait
-   for the worker's open.
+   process must then be serialized with the GUI's (B.2, the row on two `CascOpenStorageEx` overlapping), which can make
+   the GUI's client load wait for the worker's open.
 2. **The worker reads the client's storage through its own reference** (shared storage, confined handles). Cost: none
    in memory or open time. Its safety rests on B.1: concurrent reads with separate handles are CascLib's tested design;
    the lifetime hazard of B.2's first row is closed by the worker's own reference; every other hazard is kept out by
@@ -205,7 +218,10 @@ reference and the confinement rules do not give. No lock is added around CascLib
   one: its **lease**, a second reference to the client's storage plus the identity it was granted under (client epoch,
   storage generation). A new project addition to the vendored CascLib, `CascWowShareStorage(hStorage)`, takes the
   reference (`AddRef`, next to the other WMV additions in `CascRootFile_WoW.cpp`); it is released with
-  `CascCloseStorage`, exactly once, by the worker.
+  `CascCloseStorage`, exactly once: by the worker once it has taken the lease over (on a later grant, a drop, or when
+  its thread ends). *(Corrected after the post-commit review, 2026-10-15:)* a grant the worker never took over -- still
+  queued when the worker stops, or given after it stopped -- is released by `stop()` or `grantLease` on the calling
+  (GUI) thread instead (`MapAssetWorker.cpp:171`, `:61`); either way once.
 - **Granting.** On the GUI thread, when the first read of a client epoch is dispatched, from the storage the load was
   sent under (the decision has already checked: no client loading, the catalogue is the loaded client's, its storage
   generation is the load's). The GUI thread holds its own reference then, so the storage is alive while the second is
@@ -213,16 +229,20 @@ reference and the confinement rules do not give. No lock is added around CascLib
 - **Keys and enumeration.** `CASCFolder` remembers that its storage was shared and refuses (logs and skips) a key add
   after that; keys are added only in `setConfig`, before any read (B.2).
 - **Revoking.** When the client is replaced (`ResetClientState`), and when the viewer shuts down, the GUI tells the
-  worker to drop the lease; the worker releases its reference **on its own thread** after the read in progress ends or
-  is cancelled. The GUI never waits for it. If the GUI's close was the earlier one, the storage is destroyed then, on the
-  worker (CascLib has no thread affinity, B.1).
-- **What this guarantees.** A storage cannot be destroyed while the worker uses it: the worker's reference is dropped
-  only by the worker, between reads. A read in progress when the client is replaced finishes (or stops at its next
-  chunk, C.4) on the storage it started on -- the old one, still alive -- and its result is then discarded (D).
+  worker to drop the lease (at shutdown: `stop()`); the worker releases the reference it took over **on its own
+  thread** once the read in progress has ended (a read under way always finishes, C.3) and the jobs queued before the
+  drop are done or skipped as cancelled -- a grant still queued at `stop()` is released by `stop()` on the GUI thread
+  (above). On a client replacement the GUI never waits for it; at shutdown it joins the worker (D). If the GUI's close
+  was the earlier one, the storage is destroyed then, on the worker -- or, for a grant the worker never took over, in
+  `stop()` on the GUI thread (CascLib has no thread affinity, B.1).
+- **What this guarantees.** A storage cannot be destroyed while the worker uses it: the reference it reads through is
+  dropped only by the worker, between reads. A read in progress when the client is replaced finishes (reads are whole,
+  B.2) on the storage it started on -- the old one, still alive -- and its result is then discarded (D).
 
 ### C.3 The worker
 
-- One thread (`MapAssetWorker`), started on first use (after `OnInit`, B.1), owned by `ModelViewer` and shared with the
+- One thread (`MapAssetWorker`), started on first use (after `OnInit` has added the logger's outputs, B.1; in the
+  `-terraintile` harness, still inside `OnInit`), owned by `ModelViewer` and shared with the
   server; jobs are served one at a time in the order they were dispatched (FIFO): no concurrent map reads.
 - A job carries plain values: ticket, FileDataID, byte limit, the epoch and storage generation it was decided under,
   and test hooks. The worker reads it with the same verified read as today -- root lookup (listed, local), open with
@@ -232,16 +252,18 @@ reference and the confinement rules do not give. No lock is added around CascLib
   and error text stays the one code path produces today.
 - Before reading, the worker compares the job's epoch and generation with its lease: a job for another storage is not
   read ("the client's storage changed while the request waited").
-- A read is whole, exactly as today's: one `CascReadFile` request for the whole file (B.2, last row: a partial request is
-  exposed to a CascLib defect). A job is cancellable until its read begins; a read under way finishes -- at most one file's
-  read, about 35 ms for the largest terrain texture (A.3) -- and its result is then discarded (D).
-- Results go back through a mutex-protected list; the worker calls nothing of the GUI's, posts no wx event and touches
-  no GUI-owned object.
+- A read is whole, exactly as today's: one `CascReadFile` request for the whole file (B.2, the partial-read row: a
+  partial request is exposed to a CascLib defect). A job is cancellable until its read begins; a read under way finishes
+  -- at most one file's read, about 35 ms for the largest terrain texture (A.3) -- and its result is then discarded (D).
+- Results go back through a mutex-protected list; the worker calls nothing of the GUI's and touches no GUI-owned
+  object (as first designed it also posted no wx event; the amendment below adds one, the wake).
 - **Amendment after the first measurement (section 13.3):** results collected only at the next poll added one poll
   interval to every request, which made ordinary tiles slower than before. The worker now has one call out: a result
   notifier, run on the worker under its own lock after each result. The IPC server's notifier posts the server a
   `wxThreadEvent` with `wxEvtHandler::QueueEvent` (wx's mechanism for other threads; at most one wake waiting, an
-  atomic flag); the GUI thread handles it with a `poll()`. The worker still touches no GUI-owned object. Wakes can
+  atomic flag); the GUI thread handles it with a `poll()`. The worker touches no GUI-owned object except through this
+  notifier, which runs on the worker thread and touches the server only through its atomic wake flag and its
+  thread-safe `QueueEvent` (`UnityIpcServer.cpp:1674-1677`; D). Wakes can
   follow one another within one pass of the event queue (a poll's answers bring the next results): a run of wake polls
   (each starting within 1 ms of the previous one's end) spends at most about 8 ms of the GUI thread
   (`MAP_ASSET_WAKE_BURST_MS`); the wakes after that leave their results to the timer's poll, so the window gets its turn.
@@ -258,11 +280,15 @@ reference and the confinement rules do not give. No lock is added around CascLib
   content-key presence, `noteMapAssetResult`, the answer frame, the record. A result that fails the check is answered
   "stale" with the reasons (or dropped unanswered when its connection is gone), and its bytes are freed.
 - Completions are collected in `poll()`, so the harness (which calls `poll()` itself) and the GUI's 20 ms timer both
-  drive them; no wx event or `CallAfter` is involved.
-- **Amendment (C.3):** a poll also runs when a result wakes it -- the wake is the only wx event involved, posted by the
-  worker, handled on the GUI thread like the timer's. The harness's pump waits for a result (up to its 10 ms) and
-  handles the wake in its `Yield`, as the viewer's event loop would. The server clears the notifier, under the worker's
-  lock, before it is destroyed; the viewer stops the worker before it destroys the server.
+  drive them; no `CallAfter` is involved, and the only wx event besides the timer's is the wake of the amendment
+  below.
+- **Amendment (C.3):** a poll also runs when a result wakes it -- the wake is the only wx event involved besides the
+  timer's. The worker's notifier runs after each result the worker makes and posts a wake unless one is already waiting
+  (the results `stop()` makes run no notifier); the handler posts one more only when its poll took results and more are
+  ready (`UnityIpcServer.cpp:1707-1708`). It is handled on the GUI thread like the timer's. The harness's pump waits for
+  a result (up to its 10 ms) and handles the wake in its `Yield`, as the viewer's event loop would. The server clears
+  the notifier, under the worker's lock, before it is destroyed; the viewer stops the worker before it destroys the
+  server.
 
 ## D. Client-switch cancellation plan
 
@@ -287,9 +313,15 @@ reference and the confinement rules do not give. No lock is added around CascLib
   (An open CascLib file holds a reference of its own too; the lease is what keeps the storage alive between reads -- a
   job dequeued, no file open yet -- and the test of section 11 holds a read exactly there across a client switch.)
 - **Shutdown.** `ModelViewer`'s destructor (before any storage or folder is torn down) stops the worker: every job not
-  begun gets a "stopped" result unread, the read under way finishes, the worker releases its lease and exits, and the
-  destructor joins it. The server's `stop()` drops its connection's reads in flight. The worker holds no pointer to the
-  server or the viewer.
+  begun gets a "stopped" result unread, the read under way finishes, the worker releases the lease it took over and
+  exits (a grant still queued is released by `stop()`, `MapAssetWorker.cpp:171`), and the destructor joins it. The
+  server's `stop()` drops its connection's reads in flight. *(Corrected after the post-commit review, 2026-10-15:)* the
+  worker holds one pointer into the server and none into the viewer: the result notifier of C.3's amendment captures the
+  server's `this` (`UnityIpcServer.cpp:1674-1677`). That is safe because the notifier runs only under the worker's lock
+  (`MapAssetWorker.cpp:317`, `:334-335`), the server clears it under the same lock as the first statement of its
+  destructor (`UnityIpcServer.cpp:87-88`; `MapAssetWorker.cpp:188-192`), and the viewer stops and joins the worker
+  before it destroys the server (`modelviewer.cpp:1865`, `:1962`); wakes already queued go with the server's
+  `wxEvtHandler`. The wake can, however, re-enter the viewer during its destructor: 18.1, a prerequisite for Stage 05.
 - **The read tracker** (`MapAssetReadTracker`) and the per-load bookkeeping stay GUI-only and unchanged: noted at dispatch
   (the read is accounted before it happens, as today) and at completion.
 
@@ -301,7 +333,7 @@ reference and the confinement rules do not give. No lock is added around CascLib
 | Jobs in flight (dispatched, not yet completed on the GUI) | **2** (`MAP_ASSET_READS_IN_FLIGHT`): the worker reads one while the next waits, so it is not idle between polls | per job at most its byte limit: 4 MiB (map files) or 8 MiB (textures) |
 | Bytes read and held by the worker side (buffers of jobs in flight, results not yet taken) | at most 2 x 8 MiB = **16 MiB** | |
 | Results taken per poll (GUI time) | the existing per-poll budget, now on the completion side: until 2 MiB of map payload were queued, or one file over 1 MiB | |
-| Unsent bytes in the send buffer | no new job is dispatched while more than **16 MiB** are unsent (`MAP_ASSET_SEND_HIGH_WATER`): the player not reading stops the reads | |
+| Unsent bytes in the send buffer | no new job is dispatched while more than **16 MiB** are unsent (`MAP_ASSET_SEND_HIGH_WATER`): the player not reading stops the reads. *(Qualified after the post-commit review:)* this gates every dispatched map request, whatever the client: map serving adds at most about 32 MiB (16 MiB plus the two reads in flight, 15; about 37 MiB to a client that has not announced protocol 10 or later, whose answers are base64). A `getMapAsset` refused on arrival (only with 16 already waiting, which the shipped player reaches only if map reads stall across many superseding loads) and the inherited non-map messages -- asset answers, the viewer's own pushed messages -- are not gated (15, 18.2) | |
 | Per load | unchanged: 4 MiB per map file, 8 MiB per texture, 128 MiB of texture bytes, 128 texture ids, 3 + 128 files | |
 
 - **The per-load texture byte budget stays exact with two reads in flight.** Today a texture's limit is
@@ -381,8 +413,9 @@ Citations in this and the following sections are to the branch's commit.
 | `ThirdParty/casclib/src/CascRootFile_WoW.cpp:728`, `CascLib.h:460` | `CascWowShareStorage`: one more reference to an open storage (`AddRef`), released with `CascCloseStorage`; beside the project's other CascLib additions |
 | `Source/games/wow/CASCFolder.h/.cpp` | `Storage` (handle, locale, nameless count), `storage()` (borrowed), `shareStorage()` (an owned reference, `:197`), `releaseStorage()` (`:212`); `rootEntryIn`/`rootEntryByPathIn` and `readWholeFileFrom` (`:268`), the read on a named storage that the folder's own `rootEntry`/`readWholeFile` now call; `ReadTimings` (each step timed, after its error code was read); a file-handle guard (`:300`) that closes the CascLib handle on every way out; `ReadHooks` for the test holds and the corrupt byte; no key added to a shared storage (`:620`; `m_storageShared` reset whenever another storage is held, `:123`, `:179`) |
 | `Source/games/wow/WoWFolder.h` | pass-throughs: `storage()`, `shareStorage()`, the timings |
+| `Source/wowmodelviewer/CMakeLists.txt` | `MapAssetWorker.cpp` and `MapAssetWorker.h` added to the viewer's sources |
 | `Source/games/wow/WorldMapCatalog.h/.cpp` | `inspectInStorage` (`:410`): `inspectFile`'s inspection on a named storage; `inspectReference` (`:402`) now calls it with the active folder's storage: one code path, the same states, details and checks; the inspection carries the root lookup's and the read's timings |
-| `Source/wowmodelviewer/MapAssetWorker.h/.cpp` (new) | the worker: one thread (`run`, `:280`), a FIFO of jobs and lease changes, results back through one mutex; the lease released only on the worker (`releaseLease`, `:267`); `stop()` (`:153`); every job one result; accounting (`Stats`); test hooks (hold with the file open or before it is opened, a byte changed before the MD5, a delay); a `std::bad_alloc` in the read is answered, never thrown out of the thread (`:407`); the result notifier, run under the worker's lock after each result (`setResultNotifier`, `:188`; called at `:335`), and the count of results made |
+| `Source/wowmodelviewer/MapAssetWorker.h/.cpp` (new) | the worker: one thread (`run`, `:280`), a FIFO of jobs and lease changes, results back through one mutex; a lease the worker took over released only on the worker (`releaseLease`, `:267`), a grant it never took over by `stop()` (`:171`) or, after a stop, by `grantLease` (`:61`); `stop()` (`:153`); every job one result; accounting (`Stats`); test hooks (hold with the file open or before it is opened, a byte changed before the MD5, a delay); a `std::bad_alloc` in the read is answered, never thrown out of the thread (`:407`); the result notifier, run under the worker's lock after each result (`setResultNotifier`, `:188`; called at `:335`), and the count of results made |
 | `Source/wowmodelviewer/UnityIpcServer.h/.cpp` | `serveMapAssetQueue` (`:1731`): (1) the viewer's check of every read in flight (`:1744`), (2) results within the poll budget (`:1764`), (3) dispatch within `MAP_ASSET_READS_IN_FLIGHT` and `MAP_ASSET_SEND_HIGH_WATER` (`:1807`); waits while a client loads (`:1742`); `answerMapAsset` (`:1910`) records `handlerMs` as the GUI thread's time (dispatch + answer, `:2009`), the worker's outcome and every step's time; reads of an ended connection orphaned (`dropHeldMapAssets`, `:1559`) and dropped when taken back (`:1781`); a connection serial (`:279`); `cancelMapReads` (`:1606`); THE WAKE: `wakeOnMapResults` (`:1667`) installs the notifier that posts the server a `wxThreadEvent`, `onMapResultWake` polls -- unless its run of wakes has already spent `MAP_ASSET_WAKE_BURST_MS` (8 ms): then the timer's poll takes the results -- and posts once more while results it could not take are ready; the destructor (`:88`) and `setMapAssetWorker` (`:1659`) clear the notifier first, `waitForMapResult` (`:1711`) for the harness's pump; `MapReadStats` (with `wakes`, `wakesDeferred`, `takenOnWake`, `wakeBurstMsMax`); `poll()` (`:214`) serves with or without a client and times its parts; test hooks (`testHoldNextMapRead`, `testCorruptNextMapRead`, `testDelayMapReads`, `testHoldTerrainReport`, `testFakeUnsentBytes`) |
 | `Source/wowmodelviewer/modelviewer.h/.cpp` | `DispatchMapAsset` (`:3806`): the unchanged decision and accounting, a texture's limit reserved (`:3843`), the lease granted (`EnsureMapAssetLease`, `:3852`); `CompleteMapAsset` (`:3924`): checked again (`MapAssetStaleReason`, `:3782`), the reservation released (`:3933`), the old completion (kind check, content key, `noteMapAssetResult`); `MapAssetWait` (`:3777`); `decideMapAssetRequest` counts reserved bytes (`:3560`); `ResetClientState` cancels the reads and drops the lease (`:4758-4760`); the worker made with the viewer (`:272`), its results waking the viewer's server (`wakeOnMapResults`, `:2341`), and stopped first in its destructor (`:1865`); test helpers `ServeMapAssetAndWait`, `TestReadThroughWorker`, `TestHoldReadForShutdown` |
 | `Source/wowmodelviewer/app.cpp` | the `-terraintile` harness: the queue check on the worker (`checkMapAssetQueue`, `:6248`), the worker's in-process reads (`checkMapAssetWorkerReads`, `:6735`), new steps `readtimeout`/`readsupersede`/`readclear` (`:8517`), `readswitch` (`:8635`, `:start` holds before the open), `readreconnect` (`:8782`), `readcorrupt` (`:8910`), `readslow` (`:8958`), `readlate` (`:9000`), `readshutdown` (`:9064`); end-of-run worker checks (`:9354`); poll and pump timing (`:3493`, `:7434`); the pump's 10 ms between polls ends early for each result, whose wake it handles in a `Yield`, and then goes on (n slots still last at least n x 10 ms); an in-process check of the wake (coalescing, handling on the GUI thread, the notifier cleared with its server); out.json `mapAssetWorker`, record `readOutcome`/`readState`/`timings` |
@@ -398,13 +431,13 @@ No shader, terrain material, geometry, protocol message, player script or player
 | sockets, `m_outBuf`, wx timer, server queue, records, read tracker, `MapReadStats`, in-flight table | GUI thread (server) | never |
 | `m_terrainRequest`, decisions, reservations, epoch, catalogue, `GAMEDIRECTORY`, every `GameFile` | GUI thread (viewer) | never |
 | the GUI's storage reference (`CASCFolder::hStorage`), key adds, enumeration, storage open/close | GUI thread | never |
-| the worker's lease (its own storage reference) | worker | granted by value through the mutex (taken on the GUI thread while the GUI holds its own); released only by the worker |
+| the worker's lease (its own storage reference) | worker | granted by value through the mutex (taken on the GUI thread while the GUI holds its own); once taken over, released only by the worker; a grant still queued at `stop()` is released by `stop()`, and one given after a stop by `grantLease`, both on the GUI thread (`MapAssetWorker.cpp:171`, `:61`) |
 | every CascLib file handle | the thread that opened it | never: opened, read and closed inside one read |
 | a job (ticket, FileDataID, limit, epoch, generation, role, cancel flag, test flags) | GUI, then worker | handed over under the worker's mutex; the cancel flag is a shared atomic |
 | a result (inspection, bytes, timings) | worker, then GUI | handed back under the mutex; the bytes are a `QByteArray` moved, not copied |
 | the storage's lookup structures | shared, read only after open | the GUI's and the worker's reads (B.1) |
 | the result notifier | set and cleared by the GUI (under the worker's lock); run by the worker (under the same lock) | the server's notifier only posts a `wxThreadEvent` to the server (`QueueEvent`, made for other threads) |
-| the wake flag (`m_wakePosted`) | shared atomic | raised by the worker's notifier when it posts, lowered by the GUI's handler before it polls |
+| the wake flag (`m_wakePosted`) | shared atomic | raised by the worker's notifier when it posts or by the GUI's handler when it re-posts, lowered by the GUI's handler before it polls |
 
 ### 9.3 One request, step by step
 
@@ -464,10 +497,12 @@ All 25 findings were fixed before the final battery (section 11); none was in Ca
 Section 13.3 shows why it was added. One independent reviewer, told to refute it, read the change (worker notifier,
 server wake, harness pump) and the wx headers it relies on (`wx/event.h:3820-3826`: `QueueEvent` may be called from
 another thread). No blocker or major finding; locking (the notifier runs under the worker's lock, wx releases its
-pending-event locks before calling a handler), lifetime (the notifier is cleared under that lock before the server
-goes; the viewer stops the worker before it destroys the server; queued wakes go with the `wxEvtHandler`), re-entrancy,
-lost wakes and event storms (one wake waiting at most; a re-post only after a poll that took results) were confirmed.
-Three minor findings, all fixed before the final battery:
+pending-event locks before calling a handler), lifetime (the notifier is cleared under that lock before the server goes;
+the viewer stops the worker before it destroys the server; queued wakes go with the `wxEvtHandler`), re-entrancy, lost
+wakes and event storms (one wake waiting at most; a re-post only after a poll that took results) were confirmed, and
+re-entrancy was judged safe while the viewer runs. *(Corrected after the post-commit review, 2026-10-15:)* this review
+missed one re-entrancy: a wake handled inside `~ModelViewer`, during `UnityRendererHost::shutdown`'s message pump
+(18.1). Three minor findings, all fixed before the final battery:
 
 | Finding | Fix |
 |---|---|
@@ -696,11 +731,54 @@ timings), against the instrumented before (A.3, map 2923).
 
 - **Worker side** (all 51 final runs): bytes read and not yet taken back at most **5,593,604** (one 5.6 MB texture;
   bound 16 MiB); at most 2 jobs waiting in the worker and 2 reads in flight (bound 2); unsent bytes at most **0** (the
-  player always read promptly; the 16 MiB high water is tested in process, 11.2).
+  player always read promptly; the 16 MiB high water is tested in process, 11.2, never on a real socket that stopped
+  being read).
+- **Outgoing IPC buffering: bounded for the shipped Unity player's requests, not universally.** *(Corrected after the
+  post-commit review, 2026-10-15:)*
+  - *Map serving, any client.* Once a client stops reading, map serving adds at most about 32 MiB to the server's send
+    buffer: nothing leaves the queue while more than 16 MiB are unsent (`MAP_ASSET_SEND_HIGH_WATER`,
+    `UnityIpcServer.cpp:1812-1816`), and the two reads already in flight are still answered, 2 x (8 MiB + header)
+    (`:1766-1805`) -- base64, about 2 x 10.7 MiB, to a client that has not announced protocol 10 or later
+    (`:1978-1996`, `UnityIpcServer.h:466`), so about 37 MiB then. The kernel's 64 MB `SO_SNDBUF` comes on top
+    (`:268-269`, inherited). This gate holds whatever the client.
+  - *The shipped player.* Its map requests stay within the gate: it keeps at most 4 map requests out per load, one
+    load at a time (`MaxOutstanding`, `Tools/UnityRendererProject/Assets/Scripts/WmvTerrainSession.cs:117`), and asks
+    only in reply to the host (its `loadTerrainTile`, or an answer of the same load once applied), so none arrives
+    while it is not reading. (Requests of a load that ended still wait at the host until dispatched, so 4 is a limit per
+    load, not on the queue: the 16-deep queue can fill, and a request be refused on arrival, only if map reads stall
+    across many superseding loads; such a refusal is a small answer to a player that is reading.) It does use other
+    ungated paths: every model and world-model load asks with `getAsset`, `getAssetByFileDataID` and `getModelTextures`
+    (`WmvIpcClient.cs:1363`, `:1380`, `:1484`), each answer up to 64 MB (`UnityAssetAccess.cpp:71`), a world model's
+    groups and then its textures each requested all at once (`WmvMainMapObject.cs:9`, `:14`). Those requests too follow
+    only from messages it has read. So with the shipped player the send buffer holds at most the map answers bounded
+    above plus the answers to the asset requests it has sent -- hundreds of MB for a large world model, as at
+    `42977505` -- apart from the viewer's own messages (next point).
+  - *Not gated for any client.* Messages the viewer sends on its own are appended whether or not the client reads,
+    the shipped player included: the playback-state heartbeat (at most one small message a second while a model
+    animates, `modelviewer.cpp:4155-4164`, `modelviewer.h:782`, `UnityIpcServer.cpp:1033`), a character's scene sent
+    again every 8 s while it goes unanswered (`modelviewer.cpp:3245-3287`, `modelviewer.h:552`), and the commands that
+    follow user actions -- some of them large: a changed character's composited texture goes out as a `characterImage`
+    of several MB (`UnityIpcServer.cpp:1060-1141`). A player that has stopped reading lets these pile up at the rate the
+    viewer produces them: slowly while nothing changes, by megabytes per character change.
+  - *Arbitrary local clients: not bounded.* The server accepts any connection on its 127.0.0.1 port and drops the
+    player's (`pollAccept`, `UnityIpcServer.cpp:245-282`). A client that keeps writing requests without reading grows
+    the send buffer without limit: a `getMapAsset` refused on arrival while 16 wait is answered at once without the
+    high-water check (`UnityIpcServer.cpp:1636-1646`, about 0.3 KB each), and `getAsset` / `getAssetByFileDataID` (up to
+    64 MB each), `getModelTextures` (`:1223-1226`) and answers to unknown messages (`:1255-1266`) are appended with no
+    check either (`queueLineParts` / `queueFrame`, `:404-434`).
+  - All of these paths are inherited unchanged from `42977505`; a transport-wide cap is a separate change (18.2). The
+    high-water path has been tested only in process (`testFakeUnsentBytes`); no run had a real socket that stopped
+    being read.
 - **No second storage:** the worker reads through a reference to the GUI's own storage (C.2), so the 600 MB steady /
   894 MB peak and 2.4 s of a second open storage (A.4) are not spent.
-- **Storage references:** taken and released the same number of times in every run (51 of 51; 9 and 9 in `W_switch`
-  across eight client switches).
+- **Storage references:** the shutdown log line balanced in every run (51 of 51; 9 and 9 in `W_switch` across eight
+  client switches). *(Corrected after the post-commit review, 2026-10-15:)* that line, "storage references taken N ,
+  released N" (as logged: Qt's stream puts a space before the comma), is the worker's `leasesGranted` / `leasesReleased`
+  read after `stop()` has joined it (`modelviewer.cpp:1864-1869`). out.json's counters of the same names are read before
+  the shutdown, while the worker still holds its current lease, and show one fewer released (`W_switch`: 9 / 8,
+  `holdsLease` true). Both count only leases the worker took over: a grant still queued when the worker stops (released
+  by `stop()`, `MapAssetWorker.cpp:171`) or given after it stopped (released at once by `grantLease`, `:61`) is released
+  but counted in neither; that it is released exactly once rests on the source (C.2, 9.1), not on these counters.
 - **Host private bytes over many loads:** map 2923, 31 loads: 2,343 -> 2,348 MB (peak 2,349); map 0 30_49, 101 loads:
   2,342 -> 2,344 MB. Before (A.2): 2.34 GB, flat over five loads (+5.6 MB after the first) -- the same profile.
   Client switches raise it while another client's storage is open (up to 2.96 GB in `W_switch`, 2.39 GB after it).
@@ -748,6 +826,100 @@ and against stage 04's own validation outputs (`F:\wmv-build-fix\terrain04\r4v`,
 
 ## 18. Limitations and open points
 
+### 18.1 Mandatory before Stage 05 enables interactive terrain loading: shutdown event re-entrancy
+
+Found by the post-commit review (2026-10-15). It cannot happen at this commit; **it must be removed before any UI path
+starts terrain loads** (calls `RequestTerrainTile`).
+
+- **Mechanism.** `~ModelViewer` stops the worker first (`modelviewer.cpp:1865`). `stop()` lets the read under way
+  finish, and that result's notifier posts a wake (`MapAssetWorker.cpp:334-335` -> `UnityIpcServer.cpp:1674-1677`) to a
+  server that is still listening. `UnityRendererHost::shutdown` (`UnityRendererHost.cpp:498-556`, unchanged from
+  `42977505`) runs later in the destructor (`modelviewer.cpp:1906`). With the player process still running -- with none,
+  it stops the server at once (`:503-509`) -- it waits for the player, dispatching sent messages and removing paint
+  messages (`MsgWaitForMultipleObjects(... QS_SENDMESSAGE | QS_PAINT)`, `PeekMessage(... PM_REMOVE | PM_QS_SENDMESSAGE |
+  PM_QS_PAINT)`, `:530-539`), **before** it stops the server (`:554-555`). In wxWidgets 3.3.3 every message retrieved
+  with `PM_REMOVE` runs wx's `WH_GETMESSAGE` hook (`wxIdleWakeUpModule::MsgHookProc`, upstream `src/msw/window.cpp`):
+  here a `WM_PAINT`, since sent messages are dispatched inside `PeekMessage` and do not reach the hook. The hook calls
+  `wxApp::MSWProcessPendingEventsIfNeeded` (upstream `src/msw/app.cpp`), which runs `ProcessPendingEvents` when the
+  event loop's wake-up event is signalled (`QueueEvent` signals it through `wxWakeUpIdle`) or no loop is active. The
+  wake then runs `onMapResultWake` -> `poll()` (`UnityIpcServer.cpp:1680-1709`, `:214`) on the listening server: its
+  `pollAccept` / `pollReceive` (the player-message handlers), `serveMapAssetQueue` with the map callbacks
+  (`MapAssetWait`, `MapAssetStaleReason`, `CompleteMapAsset`, `DispatchMapAsset`) and `pollSend` -- **while
+  `~ModelViewer` is in progress** (its background window, menu-bar titles and export job manager already gone,
+  `modelviewer.cpp:1873-1889`). A wake posted after the main loop last processed pending events but before
+  `~ModelViewer` began re-enters the same way. No freed member is reached on the paths read (the freed ones are
+  null-checked; dispatch refuses with the worker stopped, `modelviewer.cpp:3824-3828`), but nothing guarantees that for
+  the player-message handlers. Base `42977505` had no wake (no `wxEVT_THREAD`; the pump does not retrieve `WM_TIMER`),
+  so this re-entry comes with the wake.
+- **Not this prerequisite.** The same hook runs every handler's pending events, so other queued events (`CallAfter`s,
+  e.g. `modelviewer.cpp:4648`, `UnityRendererHost.cpp:638`) can also run inside `~ModelViewer`. That re-entry predates
+  this branch.
+- **Why it cannot happen at this commit.** The worker gets jobs only from the `-terraintile` harness: through the
+  terrain loads it starts (`RequestTerrainTile`, `modelviewer.cpp:3691`, current at `:3736`, called from `app.cpp:7577`;
+  `TerrainTestRaiseLoadWithoutSending`, `modelviewer.cpp:4071-4077`, from `app.cpp:8367`; requests it sets itself,
+  `app.cpp:6651-6720`) and through its direct test reads (`TestReadThroughWorker`, `TestHoldReadForShutdown`,
+  `ServeMapAssetAndWait`, `modelviewer.cpp:3875-3922`, `:4006-4031`). In the interactive viewer no terrain load is ever
+  current, so every `getMapAsset` is refused or answered stale without a read (`modelviewer.cpp:3486-3511`); the worker
+  thread never starts and no wake is posted. The harness does not reach the hazard either: a `-terraintile` run
+  whose player still runs at its end shuts the player down, which stops the server (`app.cpp:9605-9609` ->
+  `UnityRendererHost.cpp:554-555`), before `OnInit` returns (`app.cpp:10224-10225`) and the frame is destroyed;
+  `~ModelViewer`'s `shutdown()` then finds no process and pumps nothing (`UnityRendererHost.cpp:503-509`). If the player
+  had already exited, the harness skips that shutdown (`isRunning()` is false and has reaped the process handle,
+  `UnityRendererHost.cpp:482-495`), so the server is still listening when `~ModelViewer` begins and `stop()` can queue
+  a wake to it; but that `shutdown()` also finds no process and stops the server without pumping, and at this commit
+  nothing between `modelviewer.cpp:1865` and `:1906` retrieves a message. Either way a wake handled later finds the
+  server not listening (`UnityIpcServer.cpp:216-217`). The `W_switch` log shows "[unityipc] stopped" and "player shut
+  down" before "Shutting down the program...". A wake still queued when the server is destroyed
+  (`UnityRendererHost.cpp:356`, reached from `modelviewer.cpp:1962`) is discarded with it: `wxEvtHandler`'s destructor
+  removes the handler from the application's pending list and deletes its pending events (D).
+- **Required change (Stage 05 prerequisite).** Once `~ModelViewer` has begun, no IPC poll may get past its listening
+  check (`UnityIpcServer.cpp:216-217`): nothing accepted, received (so no player-message handler run), dispatched,
+  completed or sent. As its first statement, before `m_mapAssetWorker->stop()`, the destructor must (1) clear the
+  worker's result notifier under the worker's lock, as `setMapAssetWorker(nullptr)` does
+  (`UnityIpcServer.cpp:1659-1665`, `MapAssetWorker.cpp:188-192`), so that no result made while `stop()` joins posts a
+  wake; and (2) make every later poll a no-op -- either a detached state checked at the top of `poll()` itself, which
+  covers wakes already queued, the server's timer (`UnityIpcServer.cpp:179`, `:209-212`) and any pump later in the
+  destructor, or stopping the server there (the player quits when its connection ends,
+  `Tools/UnityRendererProject/Assets/Scripts/WmvIpcClient.cs:888-895`). Clearing `onDispatchMapAsset`,
+  `onCompleteMapAsset`, `onMapAssetStale` and `onMapAssetWait` is a useful second guard. Not sufficient on their own: a
+  check only in `onMapResultWake` (it leaves the timer's route), and a server stop or
+  `wxTheApp->SuspendProcessingOfPendingEvents()` placed only around the shutdown pump -- `stop()` posts its wake at
+  `modelviewer.cpp:1865` with the server listening, so that holds only while nothing up to `:1906` retrieves a message,
+  which is true at this commit but not guaranteed.
+- **Required test.** It must fail at `81f79982` and pass after the change, and its verdict must not rest on a paint
+  alone. A `-terraintile` step that (1) leaves a **server-tracked** read under way in the worker at shutdown
+  (dispatched through `serveMapAssetQueue` and held by the server's read hook, so its result is made inside `stop()`);
+  (2) skips the harness's own player shutdown (`app.cpp:9605-9609`), so that the player is running and the server
+  listening when `~ModelViewer` begins -- otherwise `~ModelViewer`'s `shutdown()` never pumps; (3) from a test hook in
+  `~ModelViewer` placed immediately before `m_mapAssetWorker->stop()` (after the change's statements), calls the
+  server's `poll()` once -- the timer's route, which the shutdown pump never takes, checked without needing any message
+  retrieved; (4) makes the shutdown pump retrieve a message after the wake is queued, e.g. by invalidating a window of
+  the GUI thread when the close begins, and logs how many messages the pump retrieved -- a paint is not guaranteed with
+  the harness's window parked off-screen (`modelviewer.cpp:1895-1898`), and a run whose pump retrieved none has not
+  exercised the wake route; and (5) counts, from the first statement of `~ModelViewer`, every `poll()` that goes on to
+  accept, receive, serve or send, every player message handled and every map callback, logging the counts after the
+  pump (out.json is already written by then, `app.cpp:9578-9583`): all must be 0. A wake handler that returns without
+  serving is allowed. Part (3) fails at `81f79982` on every run, and so does a change that only clears the notifier or
+  guards only `onMapResultWake` (both named insufficient above). The end check "no map read is in flight at the end"
+  (`app.cpp:9359`) must allow this read, and the shutdown line "storage references taken N , released N" must still
+  balance.
+
+### 18.2 Outgoing IPC buffering against arbitrary local clients
+
+Bounded for the shipped Unity player's requests, not universally (15). Reachable at this commit by any local process,
+exactly as at `42977505`: a process can connect to the server's 127.0.0.1 port (which drops the player's connection)
+and write requests without reading. It then grows the send buffer without limit through paths not gated by
+`MAP_ASSET_SEND_HIGH_WATER`: `getMapAsset` refusals on arrival (`UnityIpcServer.cpp:1636-1646`), `getAsset` /
+`getAssetByFileDataID` responses (up to 64 MB each), `getModelTextures` answers and answers to unknown messages. The
+viewer's own messages (the animation heartbeat, at most one a second while a model animates; a character's scene
+sent again every 8 s while unanswered; the commands that follow user actions, some of them multi-MB `characterImage`
+frames) are appended for any connected client that does not read, the shipped player included. All are
+inherited unchanged from `42977505`. A fix is transport-wide -- a hard cap on unsent bytes that stops reading from, or
+drops, a client that does not read -- and is not part of this branch. The high-water path itself has been tested only
+in process (`testFakeUnsentBytes`); no run had a real socket that stopped being read.
+
+### 18.3 Other limitations
+
 - **The WDT read of `ResolveTerrainTile` stays on the GUI thread** (out of scope, F): 0.5 ms for map 2923's 163,908-byte
   WDT, at most about 1 ms for the largest WDT (294,988 bytes).
 - **Model and world-model assets** (`getAsset`, `getAssetByFileDataID`) are still read on the GUI thread: they go through
@@ -778,8 +950,10 @@ and against stage 04's own validation outputs (`F:\wmv-build-fix\terrain04\r4v`,
 **PASS**
 
 - Thread-safe ownership established before any code (sections B, C, 10.1): one worker, its own storage reference
-  taken on the GUI thread while the GUI holds one, released only by the worker; every handle opened, read and closed
-  inside one read; no GUI-owned state touched by the worker.
+  taken on the GUI thread while the GUI holds one, released only by the worker once taken over (a grant never taken
+  over: by `stop()`, or after a stop by `grantLease`, on the GUI thread); every handle opened, read and closed inside
+  one read; no GUI-owned state touched by the worker but the server's atomic wake flag and `QueueEvent`, through the
+  result notifier (C.3, D).
 - 2923 32_24 reproduced and explained before implementation (A): 33 ms of GUI time per 5.6 MB texture, of which CASC
   decode and frame checks 74 %, MD5 21 %.
 - No storage read, decode or content-key check on the GUI thread: every file served in the final runs was read by the
@@ -792,7 +966,8 @@ and against stage 04's own validation outputs (`F:\wmv-build-fix\terrain04\r4v`,
   sent); every state and detail unchanged.
 - Protocol 13 unchanged; protocol-12 player served; player unchanged.
 - Bounded memory: at most 5.6 MB held by the worker side (bound 16 MiB), 2 reads in flight, backpressure at 16 MiB
-  unsent tested.
+  unsent tested in process; the outgoing IPC buffer is bounded for the shipped player's requests only -- not against
+  arbitrary local clients, nor for the viewer's own pushed messages to a player that stops reading (15, 18.2).
 - Failure tests: timeouts, a genuine late file answer, supersede, clear, corrupt, slow reads, reconnect, shutdown during
   a read, too large, encrypted (Classic Beta), queue full, send high water, texture budget with reads in flight,
   repeated loads (31 and 101).
@@ -814,6 +989,10 @@ and against stage 04's own validation outputs (`F:\wmv-build-fix\terrain04\r4v`,
 
 - Cancelling a read under way (CascLib's partial-read defect; reads are whole, cancellation is between reads).
 - Interactive measurement (no Maps UI at this commit).
+- The shutdown event re-entrancy hazard (18.1): not reachable at this commit; its removal is a mandatory prerequisite
+  before Stage 05 enables interactive terrain loading.
+- A bound on outgoing IPC buffering against arbitrary local clients, and for the viewer's own pushed messages to a
+  client that stops reading (18.2): inherited, transport-wide, not this branch.
 - The cause of the occasional 7-16 ms log-line write (UNKNOWN; under the 20 ms budget).
 - Out of scope, untouched: the WDT read before a load is sent (about 0.5-1 ms on the GUI thread), model and WMO asset
   serving, Maps UI, multi-tile streaming, cross-tile texture caching, LOD, WMO and M2 placement, liquids, sky, fog,
