@@ -33,6 +33,8 @@ is still the reference for rules such as geoset visibility and the M2 combiners.
 5. **Player Settings** (Edit → Project Settings → Player):
    - **Resolution and Presentation → Run In Background: ON** (required — otherwise the
      player pauses whenever the WMV window has focus, which is always).
+   - **VSync** (Quality settings): any. The player turns VSync off and draws at most at the refresh rate of
+     its display, whatever the project says — unlimited, it drew thousands of frames a second of one model.
    - Fullscreen Mode: *Windowed*.
    - **Active Input Handling: any of Old / New / Both.** The camera compiles against whichever
      backend is active (`ENABLE_LEGACY_INPUT_MANAGER` / `ENABLE_INPUT_SYSTEM`); with *Both* it
@@ -404,6 +406,7 @@ process inherits the environment:
 | `-wmvNoAnim` | do not play anything. The model is still skinned, and still sits in the rest pose the bind poses describe |
 | `-wmvAnimCheck` | sample the idle across its length and report how far the skinned mesh moves from its rest pose, next to the model's own size. Zero everywhere means nothing animates; a number far larger than the model means the rig is being applied wrongly — both look like an ordinary still frame otherwise. Also logs every playback-state message the app sends, which is how to see what the transport controls actually pushed |
 | `-wmvMountCheck[=frames[:mountfirst]]` | a character riding a mount, over the frames (60 unless given, 3600 at most) after a mount goes on or its clip is switched: per frame, where the mount's, the character's and its items' LateUpdates fell, how far behind the drawn frame the character's animator and the shadow map saw the mount's attachment bone and the character's farthest bone, and the mount bone's turn; per window, the same as rates and as one frame at 60 frames a second, how far the animation carries both models past the framed box, and whether drawing the two models' blended batches (and emitters) one after the other or the other way round changes a pixel of the view, with controls that show the check sees the queues. `:mountfirst` poses the mount before every other LateUpdate for the window, for comparison (`WmvMountProbe.cs`) |
+| `-wmvFrameRate=N` | draw at most N frames a second instead of the display's refresh rate; `0` draws as fast as the machine can, as every player did before the cap — the *before* of a GPU/CPU-load pair from the same player, and the old real-time length of anything counted in frames (the `WMV_VIEWPORT_SHOT` capture 40 frames after a change, `-wmvAllocCheck`, `-wmvMountCheck`) (`WmvMain.ApplyFrameRate`) |
 
 Each model load also logs its UV sample, per-batch material/blend/texture-slot mapping, the alpha
 treatment per texture, which batches are hidden at rest and why, the resolved combiner and per-unit

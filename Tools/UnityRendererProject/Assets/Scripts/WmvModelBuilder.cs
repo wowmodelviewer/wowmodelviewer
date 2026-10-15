@@ -406,6 +406,7 @@ public static class WmvModelBuilder
         static float lightPitch = 15f;
         static int mountCheckFrames;                     // -wmvMountCheck: 0 off
         static bool mountCheckMountFirst;
+        static int frameRate = -1;                       // -wmvFrameRate: -1 = the display's refresh rate
 
         static void Parse()
         {
@@ -555,6 +556,11 @@ public static class WmvModelBuilder
                     int f;
                     mountCheckFrames = int.TryParse(p[0], out f) && f > 0 ? Math.Min(f, 3600) : 60;
                     mountCheckMountFirst = Array.IndexOf(p, "mountfirst") > 0;
+                }
+                else if (a.StartsWith("-wmvFrameRate="))
+                {
+                    int r;
+                    if (int.TryParse(a.Substring("-wmvFrameRate=".Length), out r) && r >= 0) frameRate = r;
                 }
                 else if (a == "-wmvNoSkin") noSkin = true;
                 else if (a == "-wmvSkinCheck") skinCheck = true;
@@ -749,6 +755,13 @@ public static class WmvModelBuilder
         /// The numeric comparison is -wmvLightCheck, which measures both in one run.
         /// </summary>
         public static int Rig { get { Parse(); return rig; } }
+
+        /// <summary>
+        /// The frame rate the player draws at (-wmvFrameRate=N): N frames a second, or 0 for as fast as it can -- what
+        /// every player drew at before the cap, for a comparison. -1 when not passed: the display's refresh rate (see
+        /// WmvMain.ApplyFrameRate).
+        /// </summary>
+        public static int FrameRate { get { Parse(); return frameRate; } }
 
         /// <summary>
         /// Save the light check's frames as PNGs next to the player (-wmvLightDump), so a
